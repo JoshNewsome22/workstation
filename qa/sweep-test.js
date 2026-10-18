@@ -768,13 +768,15 @@ async function lookThrough(fr) {
   for (const v of await views(fr)) { await fr.evaluate(v => { const b = document.querySelector('#viewSeg button[data-view="' + CSS.escape(v) + '"]'); if (b) b.click(); }, v.v).catch(() => {}); await sleep(300); }
   if (was) { await fr.evaluate(v => { const b = document.querySelector('#viewSeg button[data-view="' + CSS.escape(v) + '"]'); if (b) b.click(); }, was).catch(() => {}); await sleep(300); }
 }
-function snapDiff(A, B) {
+/* skip: the keys of the entry boxes the form fills with the date or time now each time it opens (data-now), which a save and
+   reopen across a minute boundary would otherwise read as a changed field */
+function snapDiff(A, B, skip) {
   const out = {fields: [], own: []};
   if (!A || !B) return {missing: !A ? 'first' : 'second'};
   out.total = A.total === B.total ? A.total : A.total + ' -> ' + B.total;
   for (const k of new Set([...Object.keys(A.data || {}), ...Object.keys(B.data || {})])) {
     const x = (A.data || {})[k], y = (B.data || {})[k];
-    if (J(x) === J(y)) continue;
+    if (J(x) === J(y) || (skip && skip.includes(k))) continue;
     out.fields.push({key: k, before: x === undefined ? '(no such field)' : J(x).slice(0, 100), after: y === undefined ? '(no such field)' : J(y).slice(0, 100)});
   }
   if ((A.own || '') !== (B.own || '')) out.own = A.own && B.own ? fileDiff(A.own, B.own) : [{path: '(own file)', kind: 'value', a: A.own ? 'present' : '(none)', b: B.own ? 'present' : '(none)'}];
@@ -821,10 +823,11 @@ async function shellPart(sh, f, log, where) {
     const B0 = await snapOf(sh, f.id);
     if (fr) await lookThrough(fr);
     const B = await snapOf(sh, f.id);
-    R.diff = snapDiff(A, B);
-    const d0 = snapDiff(A, B0); R.diffBeforeLooking = d0.fields ? d0.fields.slice(0, 20) : d0;   /* as it opened, before its views were shown */
-    R.diffFile = C ? snapDiff(C, B) : 'no snapshot in the case file';
-    R.diffSaved = C ? snapDiff(A, C) : null;
+    const NOWK = fr ? await fr.evaluate(() => Array.prototype.filter.call(document.querySelectorAll('[data-now]'), e => e.id).map(e => '#' + e.id)).catch(() => []) : [];
+    R.diff = snapDiff(A, B, NOWK);
+    const d0 = snapDiff(A, B0, NOWK); R.diffBeforeLooking = d0.fields ? d0.fields.slice(0, 20) : d0;   /* as it opened, before its views were shown */
+    R.diffFile = C ? snapDiff(C, B, NOWK) : 'no snapshot in the case file';
+    R.diffSaved = C ? snapDiff(A, C, NOWK) : null;
     R.frameErrorsB = fr ? await fr.evaluate(() => __sw.errs.slice()).catch(() => []) : [];
     R.asked = await sh.evaluate(() => __sw.asks.slice(-6).map(x => x.k + ' "' + x.t.slice(0, 80) + '" -> ' + x.a)).catch(() => []);
   } catch (e) { R.stopped = firstLine(e); }

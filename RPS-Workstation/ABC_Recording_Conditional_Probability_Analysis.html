@@ -645,6 +645,9 @@ a{color:var(--nbh-slate)}
 .nbh-mast h1{font-family:var(--nbh-serif);font-weight:600;font-size:26px;line-height:1.15;letter-spacing:0;margin:0 0 5px;color:var(--nbh-navy);max-width:none}
 .nbh-mast .nbh-sub{margin:0;color:var(--nbh-muted);font-size:14px;line-height:1.5;max-width:76ch}
 .nbh-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:0 1 auto}
+.abc-consent{margin-top:8px}.abc-consent.bad{color:var(--flag,#9b2c1f);font-weight:600}
+.abc-tb{display:inline-block;margin-left:5px;font-size:10.5px;font-weight:700;letter-spacing:.02em;color:#1f5b7a;border:1px solid #9cc0d2;border-radius:3px;padding:0 4px;vertical-align:1px}
+.abc-fa-from{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:3px;max-width:42ch}
 .nbh-savenote{font-size:12px;color:var(--nbh-muted);margin:10px 0 0;max-width:80ch}
 
 /* ---- tabs ---- */
@@ -1199,8 +1202,11 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
           <option value="fixed:5">Every 5 minutes</option><option value="fixed:10">Every 10 minutes</option><option value="fixed:15">Every 15 minutes</option>
           <option value="rand:5">Random, about every 5 minutes</option><option value="rand:10">Random, about every 10 minutes</option><option value="off">No background checks</option>
         </select></label>
+        <!-- v22.51 (F80) the time observed: the Observation Timer adds each session's minutes when it ends -->
+        <label class="field">Minutes observed (all sessions)<input id="h-minutes" type="number" min="0" step="1" placeholder="Added by the timer"></label>
       </div>
-      <p class="note">Header fields travel with exported data and print at the top of the record. They do not affect any calculation. The consequence window and the check interval are the ones fixed before the first observation: the Observation Timer takes the check interval as its setting whenever it is ready to start, and names the window when an incident starts.</p>
+      <p class="note">Header fields travel with exported data and print at the top of the record. Two of them are used by the analysis: the consequence window is also the span each background check scores, and the minutes observed weight the unconditional probability (Camp et al., 2009); the Observation Timer adds each session’s minutes when it ends. The consequence window and the check interval are the ones fixed before the first observation: the Observation Timer takes the check interval as its setting whenever it is ready to start, and names the window when an incident starts.</p>
+      <p class="note abc-consent" id="abcConsent" hidden></p>
     </div>
   </div>
 
@@ -1243,7 +1249,7 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
         <button type="button" id="obsTest">Test alert</button>
       </div>
       <div class="obs-msg" id="obsMsg" aria-live="polite"></div>
-      <p class="note">At each check the timer alerts you. If the target behavior occurred in the window since the last check, the check is skipped: that window is already an incident, and the timer skips it by itself when an incident was logged in it. Otherwise press <b>Record the window</b>; Background samples opens with the date, time and window length filled in. Checks run on the clock, not on what the student is doing, which is what keeps the samples response-independent. Random checks are spread from half to one and a half times the average gap; for a session with a second observer, use a fixed schedule so both of you check at the same moments.</p>
+      <p class="note">At each check the timer alerts you. If the target behavior occurred in the window since the last check, the check is skipped: that window is already an incident, and the timer skips it by itself when an incident was logged in it. Otherwise press <b>Record the window</b>; Background samples opens with the date, time and the seconds scored filled in: the conditions in place now, and the events in the last few seconds, the consequence window. Checks run on the clock, not on what the student is doing, which is what keeps the samples response-independent. Random checks are spread from half to one and a half times the average gap; for a session with a second observer, use a fixed schedule so both of you check at the same moments.</p>
       <table class="obs-log" id="obsLog" hidden><thead><tr><th>Check</th><th>Window</th><th>Minutes</th><th>Result</th></tr></thead><tbody></tbody></table>
     </div>
   </div>
@@ -1360,11 +1366,12 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
     <header class="nbh-band"><h2>Background (response-independent) samples</h2><span class="hint">Optional, but required for contingency strength</span></header>
     <div class="body">
       <p class="note lead">A conditional probability on its own cannot tell you whether a consequence is <i>contingent</i> on behavior, only that it followed behavior. If staff attention follows 80% of incidents but is also delivered continuously all day, there is no differential contingency. To estimate one you need a base rate: how often the same consequence occurs when the target behavior has <i>not</i> just occurred.</p>
-      <p class="note lead">Take a sample on a timer &mdash; every 5 or 10 minutes, or at a fixed number of momentary checks per period. The Observation timer on the Record tab runs this schedule for you: it alerts you at each check, skips a check when an incident was logged in its window, and fills in the date, time and window length below. At each check, if the target behavior has <b>not</b> occurred in the preceding window, record which of these events happened in that window. Skip the check if the behavior did occur; that window is already captured as an incident.</p>
+      <p class="note lead">Take a sample on a timer &mdash; every 5 or 10 minutes, or at a fixed number of momentary checks per period. The Observation timer on the Record tab runs this schedule for you: it alerts you at each check, skips a check when an incident was logged in its window, and fills in the date, time and the seconds scored below. At each check, if the target behavior has <b>not</b> occurred since the last check, record the antecedent conditions in place at that moment and the events in the <b>last few seconds</b>, the same span as the consequence window in the header (10 seconds if it is not set). An incident’s consequence is scored over that span after the behavior, so a check has to score the same span: an event delivered now and then shows up in a 10-minute window most of the time but in a 10-second one rarely, and comparing the two would make anything staff do often look less likely after the behavior (Camp et al., 2009, scored both sides in the same 10-second intervals). Skip the check if the behavior did occur; that time is already captured as an incident.</p>
       <div class="session-grid" style="margin-top:14px">
-        <label class="field">Date<input id="bg-date" type="date"></label>
-        <label class="field">Time<input id="bg-time" type="time"></label>
-        <label class="field">Window length (min)<input id="bg-window" type="number" min="1" step="1" value="10"></label>
+        <label class="field">Date<input id="bg-date" type="date" data-now></label>
+        <label class="field">Time<input id="bg-time" type="time" data-now></label>
+        <label class="field">Seconds scored<input id="bg-window" type="number" min="1" max="600" step="1" value="10"></label>
+        <label class="field">Activity now<input id="bg-activity" type="text" placeholder="e.g. group math, transition"></label>
         <label class="field">Adult within view
           <select id="bg-staffpresent">
             <option value="">Not recorded</option>
@@ -1373,11 +1380,11 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
           </select>
         </label>
       </div>
-      <h4>Antecedent conditions in place during this window</h4>
+      <h4>Antecedent conditions in place at the check</h4>
       <div id="bg-a-opts" style="columns:2;column-gap:28px"></div>
-      <h4>Events that occurred during this window</h4>
+      <h4>Events in the seconds scored (whatever they followed)</h4>
       <div id="bg-c-opts" style="columns:2;column-gap:28px"></div>
-      <h4>Lower-intensity responses seen during this window</h4>
+      <h4>Lower-intensity responses seen in the seconds scored</h4>
       <div id="bg-p-opts" style="columns:2;column-gap:28px"></div>
       <h4>Setting events in effect today</h4>
       <div id="bg-se-opts" style="columns:2;column-gap:28px"></div>
@@ -1406,7 +1413,7 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
       </label>
       <label class="field">From<input id="a-from" type="date"></label>
       <label class="field">To<input id="a-to" type="date"></label>
-      <label class="field">Setting contains<input id="a-activity" type="text" placeholder="Any activity"></label>
+      <label class="field">Activity contains<input id="a-activity" type="text" placeholder="Any activity"></label>
       <label class="field">Function established by FA
         <select id="a-function">
           <option value="">Not yet determined</option>
@@ -1414,7 +1421,7 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
           <option value="tangible">Tangible / access</option>
           <option value="escape">Escape / avoidance</option>
           <option value="automatic">Automatic</option>
-        </select>
+        </select><small class="abc-fa-from" id="abcFaFrom">Only an experimental analysis (Form EA-1) establishes a function; Form FS-1’s conclusion is descriptive and is not used here.</small>
       </label>
       <button class="btn quiet" id="a-reset">Reset</button>
       <span class="spacer"></span>
@@ -1434,7 +1441,7 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
   <div class="card">
     <header class="nbh-band"><h2>Save, reopen, and export</h2><span class="hint">Nothing leaves this file unless you export it</span></header>
     <div class="body">
-      <p class="note lead">All records live in this page. Download the data file at the end of every observation session and keep it with the rest of the assessment record; opening this page fresh starts an empty file unless you load one back in. Handle exports as protected student records.</p>
+      <p class="note lead">The record is the file you save. Download the data file at the end of every observation session and keep it with the rest of the assessment record; opening this page fresh starts an empty file unless you load one back in. Autosave keeps a safety copy in this browser, on this device, for up to 14 days: on a shared iPad, delete it from the Autosave box before you hand the device on. Handle exports as protected student records.</p>
       <p class="note" id="data-status" aria-live="polite"></p>
     </div>
   </div>
@@ -1498,8 +1505,8 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
     <div class="steps"><h4>B. At the Check, Step by Step</h4><ol class="storysteps"></ol><div class="ctl"><button type="button" data-act="back">Back</button><button type="button" class="primary" data-act="next">Next step</button><button type="button" data-act="play">Play all</button></div></div>
   </div>
   <div class="script">
-    <div><h4>What You Say and Do</h4><ul><li>Nothing. The check is yours alone; with flash and vibration the room need not know it happened.</li><li>Take the check when the alert comes, and look back over the window that just ended.</li><li>If the target behavior occurred in the window, skip the check; if that incident is not logged yet, log it first.</li></ul></div>
-    <div><h4>What Goes on the Sheet</h4><ul><li>Date, Time and Window length (min), filled by the timer.</li><li>Antecedent conditions in place during this window, and Events that occurred during this window, whatever they followed.</li><li>Lower-intensity responses seen during this window, Adult within view, and Setting events in effect today.</li><li>Save sample, even when every box is empty: an empty sample is still data.</li></ul></div>
+    <div><h4>What You Say and Do</h4><ul><li>Nothing. The check is yours alone; with flash and vibration the room need not know it happened.</li><li>Take the check when the alert comes. Note what is in place at that moment, and what happened in the last few seconds (the consequence window, 10 seconds if not set).</li><li>If the target behavior occurred in the window, skip the check; if that incident is not logged yet, log it first.</li></ul></div>
+    <div><h4>What Goes on the Sheet</h4><ul><li>Date, Time and Seconds scored, filled by the timer.</li><li>Antecedent conditions in place at the check, and Events in the seconds scored, whatever they followed.</li><li>Lower-intensity responses seen in those seconds, Adult within view, and Setting events in effect today.</li><li>Save sample, even when every box is empty: an empty sample is still data.</li></ul></div>
   </div>
   <div class="decide"><b>Why.</b> A conditional probability on its own cannot tell you whether a consequence is contingent on behavior, only that it followed behavior. If staff attention follows 80% of incidents but is also delivered continuously all day, there is no differential contingency. The background samples supply the base rate, and the analysis holds out for at least 10 of them before it reports contingency strength.</div>
 </section>
@@ -1565,11 +1572,11 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
   <dl class="terms">
     <div><dt>Antecedent</dt><dd>What was in place immediately before the behavior, scored from what was there rather than from what you believe the student wanted.</dd></div>
     <div><dt>Consequence window</dt><dd>The short, consistent window after the behavior in which consequences are recorded: a few seconds, held constant. Several published descriptive analyses used 10 s; others examined longer lags.</dd></div>
-    <div><dt>Background (response-independent) sample</dt><dd>A window taken on the timer in which the target behavior did not occur: the conditions in place, the events that occurred, the lower-intensity responses seen. A window that held the behavior is skipped; it is already an incident.</dd></div>
+    <div><dt>Background (response-independent) sample</dt><dd>A check taken on the timer when the target behavior has not occurred since the last check: the conditions in place at that moment, and the events and lower-intensity responses in the last few seconds, the same span as the consequence window. A check whose interval held the behavior is skipped; it is already an incident.</dd></div>
     <div><dt>Base rate, p(C|noB)</dt><dd>c / M: of the M sampled windows without the behavior, the proportion in which the event occurred anyway. Without it the conditional probability cannot be interpreted.</dd></div>
     <div><dt>p(C|B)</dt><dd>a / N: of the N recorded occurrences of the target behavior, the proportion followed by consequence C. The core measure of published descriptive analyses.</dd></div>
-    <div><dt>p(B|C)</dt><dd>a / (a + c): of all the occasions on which the event occurred, the proportion that involved the behavior. It separates an event that tracks the behavior from one staff deliver constantly for their own reasons.</dd></div>
-    <div><dt>CP:UP</dt><dd>p(C|B) divided by the unconditional probability p(C) = (a + c) / (N + M), the share of every sampled unit that held the event. In Camp et al. (2009) a retrospective review of a panel of behavior analysts’ consensus decisions showed they agreed a descriptive record showed a relation only where p(C|B) exceeded .20 and CP:UP was at least 1.23; the consequence table applies both.</dd></div>
+    <div><dt>p(B|C)</dt><dd>Of all the spans observed in which the event occurred, the proportion that involved the behavior: a over a plus the event’s share of the background checks times the spans without the behavior (see CP:UP). It separates an event that tracks the behavior from one staff deliver constantly for their own reasons.</dd></div>
+    <div><dt>CP:UP</dt><dd>p(C|B) divided by the unconditional probability p(C): the share of every consequence-window span in the minutes observed that held the event, the N incidents’ spans counted as recorded and the rest at the event’s share of the background checks, so the figure does not move with how many checks were taken. In Camp et al. (2009) a retrospective review of a panel of behavior analysts’ consensus decisions showed they agreed a descriptive record showed a relation only where p(C|B) exceeded .20 and CP:UP was at least 1.23; the consequence table applies both.</dd></div>
     <div><dt>Contingency space</dt><dd>p(C|B) plotted against p(C|noB), the diagonal marking independence. Distance above the diagonal is the visual form of &Delta;p; below it, the event occurs mostly without the behavior.</dd></div>
     <div><dt>&Delta;p (contingency difference)</dt><dd>p(C|B) &minus; p(C|noB): how much more often the consequence follows the behavior than it occurs without it. Zero means independence.</dd></div>
     <div><dt>Yule’s Q</dt><dd>(ad &minus; bc) / (ad + bc), bounded at &plusmn;1. It uses all four cells, so a consequence with a high base rate cannot inflate it. The strength words apply |Q| thresholds of .20, .43 and .60 (Rosenthal, 1996; Yoder, Lloyd, &amp; Symons, 2018): negligible, weak, moderate, strong.</dd></div>
@@ -2104,7 +2111,7 @@ function renderSamples(){
   $("#bg-table").innerHTML = `<table>
     <thead><tr><th style="width:100px">Date</th><th style="width:70px">Time</th><th style="width:70px" class="num">Window</th><th>Antecedent conditions</th><th>Events observed</th><th class="noprint" style="width:80px">&nbsp;</th></tr></thead>
     <tbody>${state.samples.map(s => `<tr>
-      <td>${esc(s.date)}</td><td>${esc(s.time||"")}</td><td class="num">${esc(s.window||"")} min</td>
+      <td>${esc(s.date)}${s.activity?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(s.activity)}</div>`:""}</td><td>${esc(s.time||"")}</td><td class="num">${esc(s.window||"")} ${s.unit==="s"?"s":"min"}</td>
       <td>${(s.antecedents||[]).length ? labelsFor(s.antecedents, A_BY_ID, {}, "auto") : '<span style="color:var(--ink-faint)">none</span>'}</td>
       <td>${s.events.length ? labelsFor(s.events, C_BY_ID, {}, "auto") : '<span style="color:var(--ink-faint)">none</span>'}</td>
       <td class="noprint"><button class="btn danger" data-delsample="${esc(s.id)}" style="padding:4px 10px;font-size:12px;min-height:28px">Delete</button></td>
@@ -2150,7 +2157,7 @@ function readHeader(){
     client:$("#h-client").value.trim(), observer:$("#h-observer").value.trim(),
     location:$("#h-location").value.trim(), start:$("#h-start").value,
     end:$("#h-end").value, target:$("#h-target").value.trim(),
-    window:$("#h-window").value.trim(), checks:$("#h-checks").value
+    window:$("#h-window").value.trim(), checks:$("#h-checks").value, minutes:$("#h-minutes").value.trim()
   };
   return state.header;
 }
@@ -2161,6 +2168,7 @@ function writeHeader(h){
   $("#h-end").value=h.end||""; $("#h-target").value=h.target||"";
   $("#h-window").value=(h.window==null||h.window==="")?"":String(h.window);
   $("#h-checks").value=h.checks||""; if($("#h-checks").value!==(h.checks||""))$("#h-checks").value="";
+  $("#h-minutes").value=(h.minutes==null||h.minutes==="")?"":String(h.minutes);
   state.header = h;
   /* v21.37: the timer takes the header's check interval as its setting while it is ready */
   $("#h-checks").dispatchEvent(new Event("change",{bubbles:true}));
@@ -2182,7 +2190,9 @@ function exportJSON(){
     format:"abc-conditional-probability", version:1, exported:new Date().toISOString(),
     header:state.header, entries:state.entries, samples:state.samples,
     /* v21.21 cross-form (X2): "Function established by FA" belongs to the record; it was not saved */
-    faFunction:state.faFunction
+    faFunction:state.faFunction,
+    /* v22.51 the agreement check (F85) and the case's target behaviors used as rows (F84) */
+    ioa:state.ioa || {}, caseTargets: BEHAVIORS.filter(b => b.caseT).map(b => ({ id:b.id, label:b.label, def:b.def || "" }))
   }, null, 2), "application/json");
   if(!window.__nbhQuiet) $("#data-status").textContent = "Data file downloaded. Store it with the assessment record.";
 }
@@ -2265,7 +2275,7 @@ function importJSON(file){
     const problem = parsed ? abcFileProblem(d) : "wrong";
     if(problem){ tell(problem === "damaged" ? damaged : notAbcFile(d, parsed, fr.result)); return; }
     /* what is on screen, so that a file that still fails part-way through leaves the record as it was */
-    const HEAD = ["h-client","h-observer","h-location","h-start","h-end","h-target","h-window","h-checks"];
+    const HEAD = ["h-client","h-observer","h-location","h-start","h-end","h-target","h-window","h-checks","h-minutes"];
     const FILTERS = ["f-behavior","a-behavior"], timer = document.getElementById("obsChecks");
     const kept = { entries: state.entries, samples: state.samples, faFunction: state.faFunction, header: state.header,
       head: HEAD.map(id => $("#"+id).value), fn: $("#a-function").value, filters: FILTERS.map(id => $("#"+id).value),
@@ -2278,7 +2288,9 @@ function importJSON(file){
       if(typeof d.faFunction === "string" && Array.from($("#a-function").options).some(o => o.value === d.faFunction)){
         state.faFunction = d.faFunction; $("#a-function").value = d.faFunction;
       }
+      if(Array.isArray(d.caseTargets) && window.abcAddTargets) abcAddTargets(d.caseTargets);
       writeHeader(d.header); sortEntries(); refreshAll();
+      if(window.abcIoaSet) abcIoaSet(d.ioa || {});
       $("#data-status").textContent = "Loaded " + state.entries.length + " incidents and " + state.samples.length + " background samples.";
     }catch(err){
       state.entries = kept.entries; state.samples = kept.samples; state.faFunction = kept.faFunction;
@@ -2368,17 +2380,25 @@ function analysisSet(){
   const f = { behavior:$("#a-behavior").value, from:$("#a-from").value, to:$("#a-to").value, activity:$("#a-activity").value.trim() };
   const all = filteredEntries(f);
   const coded = all.filter(e => e.mode !== "open");
+  /* v22.51 (F86, I43) the activity narrows the background samples too; a sample with no activity (an older one) is left out */
+  let noAct = 0;
   const samples = state.samples.filter(s => {
     if(f.from && s.date < f.from) return false;
     if(f.to   && s.date > f.to)   return false;
+    if(f.activity){ if(!s.activity){ noAct++; return false; } if(!s.activity.toLowerCase().includes(f.activity.toLowerCase())) return false; }
     return true;
   });
-  return { f, all, coded, narrativeOnly: all.length - coded.length, samples };
+  window.__abcFiltered = !!(f.activity || f.from || f.to);
+  return { f, all, coded, narrativeOnly: all.length - coded.length, samples, noAct };
 }
 
+/* v22.51 (F80) the number of consequence-window spans in the minutes observed, or null when either is not known (or the
+   incidents fill it): the unconditional probability counts every span, the incidents' and the rest, so it no longer moves
+   with how many background checks were taken */
+function obsSpans(N){if(window.__abcFiltered)return null;const w=+$("#h-window").value,mins=+$("#h-minutes").value;if(!(w>0&&mins>0))return null;const K=mins*60/w;return K>N?K:null;}
 /* ---- consequence-side analysis: one row per consequence item ---- */
 function consequenceStats(coded, samples){
-  const N = coded.length, M = samples.length;
+  const N = coded.length, M = samples.length, K = obsSpans(N);
   return C_ITEMS.filter(i => !i.other).map(item => {
     const a = coded.filter(e => (e.consequences||[]).includes(item.id)).length;
     const b = N - a;
@@ -2391,29 +2411,31 @@ function consequenceStats(coded, samples){
        proportion of ALL sampled units in which the event occurred, whether or
        not the behavior did. Distinct from p(C|noB), which is the base rate used
        for the contingency space. */
-    const up   = usable && (N+M) ? (a+c)/(N+M) : null;
+    /* v22.51 over every span observed: the incidents' N spans, and the event's share of the checks for the rest */
+    const cRest = usable && K && M ? (c/M)*(K-N) : null;
+    const up   = cRest != null ? (a+cRest)/K : null;
     const cpup = (up && up > 0 && pGiven != null) ? pGiven/up : null;
     /* Dual criterion the behavior analysts in Camp et al. (2009) actually met
        before they would call a relation: CP > .20 AND CP:UP >= 1.23. */
     const camp = (pGiven != null && pGiven > 0.20 && cpup != null && cpup >= 1.23);
     /* Second conditional probability of the Lerman & Iwata (1993) method:
        of all the times this event occurred, how often was the behavior there. */
-    const pBgivenC = usable && (a+c) > 0 ? a/(a+c) : null;
+    const pBgivenC = cRest != null && (a+cRest) > 0 ? a/(a+cRest) : null;
     return { item, n:a, pGiven, pBase: usable ? (M ? c/M : null) : null,
-             up, cpup, camp, pBgivenC, stats: t, usable };
+             up, cpup, camp, pBgivenC, stats: t, usable, noTime: usable && M > 0 && !K };
   });
 }
 
 /* ---- consequence CLASS analysis, delivered events only ---- */
 function classStats(coded, samples){
-  const N = coded.length, M = samples.length;
+  const N = coded.length, M = samples.length, K = obsSpans(N);
   const classes = ["attention","tangible","escape"];
   const out = classes.map(cl => {
     const ids = C_ITEMS.filter(i => i.cls === cl && i.delivered && !i.other).map(i => i.id);
     const a = coded.filter(e => (e.consequences||[]).some(id => ids.includes(id))).length;
     const c = samples.filter(s => (s.events||[]).some(id => ids.includes(id))).length;
     const pGiven = N ? a/N : null;
-    const up   = (N+M) ? (a+c)/(N+M) : null;
+    const up   = K && M ? (a+(c/M)*(K-N))/K : null;   /* v22.51 weighted by time observed */
     const cpup = (up && up > 0 && pGiven != null) ? pGiven/up : null;
     const camp = (pGiven != null && pGiven > 0.20 && cpup != null && cpup >= 1.23);
     return { cls:cl, label:CLASS_LABEL[cl], n:a, pGiven,
@@ -2517,12 +2539,13 @@ function opportunityStats(coded){
    background probability comparison used to identify precursors
    (Borrero & Borrero, 2008; Schmidt, Kranak, Goetzel, Kaur, & Rooker, 2020). */
 function precursorStats(coded, samples){
-  const N = coded.length, M = samples.length;
+  const N = coded.length, M = samples.length, K = obsSpans(N);
   return PRECURSORS.filter(i => !i.other).map(item => {
     const a = coded.filter(e => (e.precursors||[]).includes(item.id)).length;
     const c = samples.filter(s => (s.precursors||[]).includes(item.id)).length;
     const pCond = N ? a/N : null;
-    const pBg   = (N+M) ? (a+c)/(N+M) : null;
+    /* v22.51 (as F80) over every span observed when the minutes are known, else the share of the background checks */
+    const pBg   = M ? (K ? (a+(c/M)*(K-N))/K : c/M) : null;
     return { item, n:a, cBg:c, pCond, pBg,
              likely: (pCond != null && pBg != null && M > 0 && pCond > pBg),
              stats: M ? twoByTwo(a, N-a, c, M-c) : null };
@@ -2920,6 +2943,12 @@ function renderAnalysis(){
     (S.f.behavior ? gate(`<b>A single topography is selected.</b> N counts only incidents that included ${esc(B_BY_ID[S.f.behavior].label.toLowerCase())}, while the ${M} background samples are unchanged &mdash; a base rate describes the environment, not one response form. That is the right comparison, but it does mean the two sides of every 2&times;2 table below were collected at different densities.`) : ""),
     caveat(`<b>Read this before the graphs.</b> Everything below describes what was observed to follow or precede the behavior. A descriptive analysis cannot demonstrate a reinforcement effect, because nothing was manipulated. Agreement between descriptive-analysis outcomes and functional-analysis outcomes has been shown to be partial at best, and a consequence can be frequent without being contingent (Thompson &amp; Iwata, 2007; Vollmer et al., 2001). Use these results to rank hypotheses and design a functional analysis, not to replace one.`));
 
+  /* v22.51 (F79) checks from an older file scored a whole window of minutes, against a consequence window of seconds */
+  const oldW = S.samples.filter(s => s.unit !== "s" && s.window);
+  if(oldW.length) html += card("Background checks from an older file", `${oldW.length} of ${M}`, gate(`<b>${oldW.length === M ? "Every background check" : oldW.length + " of the " + M + " background checks"} on file scored a whole window of several minutes</b>, while an incident’s consequence is scored over the ${esc(String(+$("#h-window").value||10))}-second consequence window. An event that occurs now and then turns up in a long window most of the time and in a short one rarely, so for these checks the base rates run high and a consequence staff deliver often can read as less likely after the behavior. Read the contingency figures with that in mind, and take new checks: since v22.51 each scores the last few seconds, the same span as the consequence window.`));
+
+  if(S.f.activity) html += card("Activity contains “" + esc(S.f.activity) + "”", `${N} incidents, ${M} background samples`, gate(`<b>Both sides are narrowed.</b> The incidents and the background samples are the ones whose activity contains “${esc(S.f.activity)}”, so the base rates describe the same activity as the incidents.${S.noAct ? ` ${S.noAct} background sample${S.noAct===1?" has":"s have"} no activity recorded (taken before v22.51, or left blank) and ${S.noAct===1?"is":"are"} left out.` : ""}${M < 10 ? " Fewer than 10 samples are left, so the contingency figures are not computed for this activity." : ""}`));
+
   /* ---------- 1b. therapeutic contingency check ---------- */
   if(thera) html += therapeuticSection(thera, N, M);
 
@@ -2962,8 +2991,9 @@ function renderAnalysis(){
         <td class="num">${r.pBgivenC==null?"\u2014":pct(r.pBgivenC,0)}</td>
         <td class="num">${r.up==null?"\u2014":pct(r.up,0)}</td>
         <td class="num">${r.cpup==null?"\u2014":num(r.cpup,2)}</td>
-        <td style="font-weight:600;color:${r.camp?"var(--flag)":"var(--ink-faint)"}">${r.usable ? (r.camp?"met":"not met") : "no base rate"}</td>
+        <td style="font-weight:600;color:${r.camp?"var(--flag)":"var(--ink-faint)"}">${!r.usable ? "no base rate" : r.noTime ? (window.__abcFiltered ? "not with a date or activity filter" : "needs the minutes observed") : r.cpup==null ? "\u2014" : (r.camp?"met":"not met")}</td>
       </tr>`).join("")}</tbody></table></div>` +
+    gate(`<b>Weighted by time observed.</b> The unconditional probability and p(B|C) count every ${esc(String(+$("#h-window").value||10))}-second span of the ${esc($("#h-minutes").value||"(not recorded)")} minutes observed: the incidents’ spans, and the rest at the event’s share of the background checks. Camp et al. (2009) took them over a continuous record, where how often the behavior occurred set the split; counting the checks instead made the figure move with how many checks were taken, so that with few checks no consequence could meet the criterion.${cStats.some(r=>r.noTime) ? (window.__abcFiltered ? " The minutes observed cover the whole record, so with a date or activity filter these columns are left empty." : " <b>Add the minutes observed in the header</b> (the Observation Timer adds them as each session ends) and these columns fill.") : ""}`) +
     gate(`<b>The three extra columns.</b> p(B|C) is the reverse direction added by the conditional probability method: of all the times this event occurred, the share that involved the behavior (Lerman &amp; Iwata, 1993). An event can follow the behavior often and still be something staff do constantly for other reasons, and this column catches that. CP:UP is the conditional probability divided by the unconditional probability of the event across every sampled unit. In Camp et al. (2009) a retrospective review of the consensus decisions of a panel of twelve behavior analysts showed that they agreed a descriptive record showed a relation only when the conditional probability exceeded .20 <i>and</i> CP:UP was at least 1.23; the last column applies that dual criterion.`) +
     caveat(`<b>Treat the criterion as a floor for discussion, not a verdict.</b> The .20 and 1.23 values were reverse-engineered from what a panel of behavior analysts agreed on when reading graphs, in a study where those readings matched the functional analysis for only 2 of 7 participants on antecedent events and 3 of 7 on consequent events, and for 4 of 7 with the two combined (the figure in its abstract). A consequence can fail the criterion and still matter &mdash; an escape contingency delivered on a thin schedule, or one split across several codes on this sheet, will show a low conditional probability either way.`) +
     gate(`<b>What this is.</b> Each bar is the proportion of behavior occurrences that were followed by that event &mdash; the standard conditional probability computed in descriptive analyses (Vollmer et al., 2001; Camp et al., 2009; Pence et al., 2009). <b>What it is not.</b> A high value alone does not establish a contingency; that comparison is the next section. Items marked <i>withheld</i> on the form describe the same reinforcer class <i>not</i> being delivered and are scored separately, because folding them into a class total would reverse the relation they describe.`));
@@ -2986,7 +3016,7 @@ function renderAnalysis(){
       `<div class="legend"><span>Dashed guides mark |Q| = .20, .43, and .60</span><span>Faded bars have an empty cell or fewer than five observations on one side</span></div>` +
       `<div class="matrix-wrap"><table>
         <thead><tr><th>Consequence</th><th class="num">a</th><th class="num">b</th><th class="num">c</th><th class="num">d</th>
-        <th class="num">p(C|B)</th><th class="num">p(C|noB)</th><th class="num">&Delta;p</th><th class="num">Yule's Q</th><th class="num">&phi;</th><th class="num">&chi;&sup2;(1)</th><th class="num">p</th><th>Strength</th></tr></thead>
+        <th class="num">p(C|B)</th><th class="num">p(C|noB)</th><th class="num">&Delta;p</th><th class="num">Yule's Q</th><th class="num">&phi;</th><th>Strength</th></tr></thead>
         <tbody>${usable.sort((a,b)=>(b.stats.q??-2)-(a.stats.q??-2)).map(r => {
           const t = r.stats, st = qStrength(t.q);
           return `<tr>
@@ -2996,11 +3026,9 @@ function renderAnalysis(){
             <td class="num">${t.dp==null?"\u2014":(t.dp>=0?"+":"")+pct(t.dp,0)}</td>
             <td class="num" style="font-weight:700">${num(t.q,2)}</td>
             <td class="num">${num(t.phi,2)}</td>
-            <td class="num">${num(t.chi,1)}</td>
-            <td class="num">${t.p==null?"\u2014":(t.p<0.001?"&lt;.001":t.p.toFixed(3))}</td>
             <td style="color:${st.color};font-weight:600">${st.word}${qDir(t.q)}${t.sparse?' <span class="withheld">thin</span>':""}</td>
           </tr>`;}).join("")}</tbody></table></div>`,
-      caveat(`<b>Cells.</b> a = incidents followed by the consequence, b = incidents not followed by it, c = no-behavior windows containing it, d = no-behavior windows without it. <b>Two cautions.</b> First, the rows and columns come from different units of observation &mdash; behavior-anchored events and time-sampled windows &mdash; so these values estimate contingency rather than measure it exactly; event-based and interval-based methods do not always agree (Lloyd, Yoder, Tapp, &amp; Staubitz, 2016). Second, &chi;&sup2; here is a rough flag on a small hand-collected sample, not a hypothesis test you should report as one; any cell under about 5 makes it unstable.`));
+      caveat(`<b>Cells.</b> a = incidents followed by the consequence, b = incidents not followed by it, c = no-behavior windows containing it, d = no-behavior windows without it. <b>Two cautions.</b> First, the rows and columns come from different units of observation &mdash; behavior-anchored events and time-sampled windows &mdash; so these values estimate contingency rather than measure it exactly; event-based and interval-based methods do not always agree (Lloyd, Yoder, Tapp, &amp; Staubitz, 2016). Second, a cell under about 5 makes every one of these figures unstable; the faded bars and the word thin mark them. No significance test is shown: on a small hand-collected sample a p value is not something to report, so the record gives the strength of the association instead.`));
   } else {
     html += card("Contingency space and contingency strength", "not computed",
       gate(`<b>This section needs background samples.</b> There are ${M} on file and the analysis holds out for at least 10. Without a base rate there is no way to distinguish a consequence that is <i>contingent</i> on the behavior from one that is simply common in the room all day, and reporting Yule's Q, &phi;, or a contingency space plot from behavior-anchored data alone would put a number on something that was never measured. Collect no-behavior windows on the Background samples tab and this section fills in.`));
@@ -3239,7 +3267,7 @@ function acSection(coded, N){
 
   const table = top.length ? `<div class="matrix-wrap"><table>
     <thead><tr><th>When this preceded the behavior</th><th>this followed it</th>
-      <th class="num">p(C|A)</th><th class="num">p(C|not A)</th><th class="num">Risk ratio</th><th class="num">Yule's Q</th><th class="num">p</th></tr></thead>
+      <th class="num">p(C|A)</th><th class="num">p(C|not A)</th><th class="num">Risk ratio</th><th class="num">Yule's Q</th></tr></thead>
     <tbody>${top.map(r => {
       const st = qStrength(r.t.q);
       return `<tr>
@@ -3249,7 +3277,6 @@ function acSection(coded, N){
         <td class="num">${pct(r.t.pNot,0)}</td>
         <td class="num">${r.t.rr==null?"\u2014":num(r.t.rr,2)}</td>
         <td class="num" style="font-weight:700;color:${st.color}">${num(r.t.q,2)}</td>
-        <td class="num">${r.t.p==null?"\u2014":(r.t.p<0.001?"&lt;.001":r.t.p.toFixed(3))}</td>
       </tr>`;}).join("")}</tbody></table></div>` : gate("No antecedent-consequence pair reached three shared incidents yet, which is the floor this table uses before ranking anything.");
 
   return card("Antecedent to consequence", "how the response depended on the situation",
@@ -3277,14 +3304,17 @@ function eoSection(eo, N){
 /* ---------- ranked summary ---------- */
 function summarySection(kStats, cStats, eo, N, M){
   const ranked = kStats.filter(r => r.cls !== "none" && r.n > 0)
-                       .sort((a,b) => (M && a.stats && b.stats) ? ((b.stats.q??-2)-(a.stats.q??-2)) : (b.pGiven-a.pGiven));
+                       .sort((a,b) => (M >= 10 && a.stats && b.stats) ? ((b.stats.q??-2)-(a.stats.q??-2)) : (b.pGiven-a.pGiven));
   const noneRow = kStats.find(r => r.cls === "none");
   const lines = ranked.map((r,i) => {
     const q = r.stats && r.stats.q != null ? ` Yule's Q against the no-behavior base rate of ${pct(r.pBase,0)} is ${num(r.stats.q,2)} (${qStrength(r.stats.q).word}).` : "";
     return `<li style="margin-bottom:9px"><b style="color:${CLASS_COLOR[r.cls]}">${esc(r.label)}</b> followed ${pct(r.pGiven,0)} of incidents (${r.n} of ${N}).${q}</li>`;
   }).join("");
   const strongest = ranked[0];
-  const topEO = eo.slice().sort((a,b) => (b.p??0)-(a.p??0))[0];
+  /* v22.51 (F81) the class that followed the most incidents, named when it is not the one ranked first */
+  const mostCP = ranked.slice().sort((a,b) => b.pGiven-a.pGiven)[0];
+  /* v22.51 (F87) a correspondence is named only on five incidents or more */
+  const topEO = eo.filter(r => r.n >= 5).sort((a,b) => (b.p??0)-(a.p??0))[0];
 
   return card("Reading the record as a whole", "a ranking of hypotheses, not a conclusion",
     `<div class="body">
@@ -3292,11 +3322,15 @@ function summarySection(kStats, cStats, eo, N, M){
       <ol style="margin:6px 0 0;padding-left:20px;font-size:14px">${lines}
         ${noneRow && noneRow.n ? `<li style="margin-bottom:9px"><b style="color:#67727f">No socially mediated consequence</b> was recorded after ${pct(noneRow.pGiven,0)} of incidents (${noneRow.n} of ${N}).</li>` : ""}
       </ol>
-      ${topEO ? `<p class="note">The tightest antecedent-to-consequence correspondence in this record is ${esc(topEO.label.toLowerCase())} conditions producing ${esc(topEO.matchLabel)}, at ${pct(topEO.p,0)} of the ${topEO.n} incidents in which that condition was in place.</p>` : ""}
+      ${topEO ? `<p class="note">The tightest antecedent-to-consequence correspondence in this record is ${esc(topEO.label.toLowerCase())} conditions producing ${esc(topEO.matchLabel)}, at ${pct(topEO.p,0)} of the ${topEO.n} incidents in which that condition was in place.</p>` : (eo.length ? `<p class="note">No antecedent condition was in place at five or more incidents yet, so no antecedent-to-consequence correspondence is named.</p>` : "")}
 
       <h3 style="margin-top:20px">What follows from it</h3>
       <p class="note">${strongest
-        ? `The record supports taking <b>${esc(strongest.label.toLowerCase())}</b> forward as the first hypothesis to test${M >= 10 ? " — it carries both the highest conditional probability and the strongest separation from its base rate" : ", though without background samples the ranking rests on conditional probabilities alone and cannot rule out a consequence that is simply frequent"}.`
+        ? `The record supports taking <b>${esc(strongest.label.toLowerCase())}</b> forward as the first hypothesis to test${M >= 10 && strongest.stats
+            ? (mostCP && mostCP !== strongest
+              ? `. It is ranked on its separation from the no-behavior base rate (Yule’s Q), not on how often it followed: ${esc(mostCP.label.toLowerCase())} followed more incidents, ${pct(mostCP.pGiven,0)}, but it also occurs in ${pct(mostCP.pBase,0)} of no-behavior checks`
+              : ` — it followed the most incidents and has the strongest separation from its base rate (Yule’s Q)`)
+            : `, though ${M ? "with fewer than 10 background samples" : "without background samples"} the ranking rests on conditional probabilities alone and cannot rule out a consequence that is simply frequent`}.`
         : ""} A descriptive record of this kind is designed to narrow what you test next: which conditions to arrange in a functional analysis, which reinforcer to program in the test condition, and which contexts to sample. It does not license writing a function statement into a plan on its own.</p>
       <p class="note">Three things this record cannot tell you, no matter how many incidents accumulate. It cannot separate a consequence that maintains the behavior from one that merely follows it, because nothing was manipulated. It cannot detect a contingency the observers did not have a code for. And it cannot see a thin schedule: Camp et al. (2009) point out that the probability of escape following problem behavior need never exceed .2 if escape is delivered on a variable-ratio 5 schedule, and can be lower still on a thin interval schedule, while the behavior is maintained perfectly well. A low number in this record is not evidence of no relation.</p>
       <p class="note">One result here is more trustworthy than the rest. In two of the comparison studies, the descriptive outcome that most often matched the functional analysis was automatic reinforcement &mdash; three of the four matches in Camp et al. (2009), and the single match in Lerman and Iwata (1993). A record showing no correlation between the behavior and any social event is the one descriptive pattern that carries real weight, because there is nothing to be spuriously correlated with.</p>
@@ -3308,14 +3342,13 @@ function summarySection(kStats, cStats, eo, N, M){
 function exportMatrix(){
   if(!LAST_MATRIX || !LAST_MATRIX.aItems.length){ $("#data-status").textContent = "Open the Analysis tab first so there is a table to export."; return; }
   const m = LAST_MATRIX;
-  const lines = [["antecedent","consequence","a_both","b_antecedent_only","c_consequence_only","d_neither","p_C_given_A","p_C_given_notA","risk_ratio","yules_q","phi","chi2","p"].join(",")];
+  const lines = [["antecedent","consequence","a_both","b_antecedent_only","c_consequence_only","d_neither","p_C_given_A","p_C_given_notA","risk_ratio","yules_q","phi"].join(",")];
   m.aItems.forEach((a,i) => m.cItems.forEach((c,j) => {
     const t = m.cells[i][j];
     lines.push([a.label,c.label,t.a,t.b,t.c,t.d,
       t.pRow==null?"":t.pRow.toFixed(4), t.pNot==null?"":t.pNot.toFixed(4),
       t.rr==null?"":t.rr.toFixed(4), t.q==null?"":t.q.toFixed(4),
-      t.phi==null?"":t.phi.toFixed(4), t.chi==null?"":t.chi.toFixed(4),
-      t.p==null?"":t.p.toFixed(5)].map(csvCell).join(","));
+      t.phi==null?"":t.phi.toFixed(4)].map(csvCell).join(","));
   }));
   download("ABC_antecedent_consequence_" + stamp() + ".csv", "\uFEFF" + lines.join("\r\n"), "text/csv;charset=utf-8");
 }
@@ -3359,7 +3392,12 @@ function renderMethods(){
         <label class="field">Occurrence disagreements<input id="ioa-od" type="number" min="0" step="1" placeholder="0"></label>
         <label class="field">Nonoccurrence agreements<input id="ioa-na" type="number" min="0" step="1" placeholder="0"></label>
         <label class="field">Nonoccurrence disagreements<input id="ioa-nd" type="number" min="0" step="1" placeholder="0"></label>
+        <label class="field">Second observer<input id="ioa-who" type="text" placeholder="Name and role"></label>
+        <label class="field">Date of the agreement check<input id="ioa-date" type="date"></label>
+        <label class="field">Sessions with a second observer<input id="ioa-s2" type="number" min="0" step="1" placeholder="0"></label>
+        <label class="field">Sessions observed in all<input id="ioa-sn" type="number" min="0" step="1" placeholder="0"></label>
       </div>
+      <p class="note">Kept with the data file, printed with the record, and handed to Form FS-1’s Limitations.</p>
       <div class="metrics" id="ioa-out" style="margin-top:14px">
         <div class="metric"><div class="v">\u2014</div><div class="k">occurrence agreement</div></div>
         <div class="metric"><div class="v">\u2014</div><div class="k">nonoccurrence agreement</div></div>
@@ -3374,13 +3412,13 @@ function renderMethods(){
       <dd><code class="f">a / N</code>. Of the N recorded occurrences of the target behavior, the proportion followed by consequence C. This is the core measure in published descriptive analyses (Vollmer et al., 2001; Camp et al., 2009; Pence et al., 2009).</dd>
 
       <dt>Unconditional probability &mdash; p(C)</dt>
-      <dd><code class="f">(a + c) / (N + M)</code>. The proportion of every sampled unit in which the event occurred, whether or not the behavior did. It stands in for the unconditional probability used by Camp et al. (2009), who computed it across all of their 10-s observation intervals, and it is not the same quantity as p(C|noB) below.</dd>
+      <dd><code class="f">(a + (c / M) &times; (K &minus; N)) / K</code>, where K is the number of consequence-window spans in the minutes observed (minutes &times; 60 / window). The proportion of every span observed in which the event occurred, whether or not the behavior did: the N incidents’ spans as recorded, and the rest at the share of background checks that held the event. Camp et al. (2009) computed it across all of their 10-s observation intervals; counting the checks instead, as this form did before v22.51, made it move with how many checks were taken. It needs the minutes observed in the header, is not computed with a date or activity filter (the minutes cover the whole record), and is not the same quantity as p(C|noB) below.</dd>
 
       <dt>CP:UP ratio and the Camp criteria</dt>
       <dd><code class="f">p(C|B) / p(C)</code>. In Camp et al. (2009) a panel of twelve behavior analysts viewed the descriptive and functional analysis graphs separately, with identifying information removed, and reached a consensus on each; a retrospective review of their decisions showed that they agreed a descriptive record showed a relation only where the conditional probability exceeded .20 <i>and</i> the CP:UP ratio was at least 1.23. It appeared that both conditions had to hold. The consequence tables apply that dual criterion.</dd>
 
       <dt>Reverse conditional probability &mdash; p(B|C)</dt>
-      <dd><code class="f">a / (a + c)</code>. Of all the occasions on which the event occurred, the proportion that involved the behavior. This is the second half of the conditional probability method (Lerman &amp; Iwata, 1993; Pence et al., 2009), and it separates an event that tracks the behavior from one staff deliver constantly for their own reasons.</dd>
+      <dd><code class="f">a / (a + (c / M) &times; (K &minus; N))</code>. Of all the spans observed in which the event occurred, the proportion that involved the behavior, weighted by time as the unconditional probability is. This is the second half of the conditional probability method (Lerman &amp; Iwata, 1993; Pence et al., 2009), and it separates an event that tracks the behavior from one staff deliver constantly for their own reasons.</dd>
 
       <dt>Opportunity-adjusted conditional probability</dt>
       <dd>The same conditional probability computed only across incidents in which the matching establishing operation was in place. Thompson and Iwata (2001) restricted the escape calculation to intervals preceded by a demand; Pence et al. (2009) restricted every consequent calculation to periods in which a putative EO was present, defining the consequence as the stimulus change in which the EO ceased and the putative reinforcer began.</dd>
@@ -3407,7 +3445,7 @@ function renderMethods(){
       <dd><code class="f">p(C|A) / p(C|not A)</code>. How many times more likely the consequence was when a given antecedent was in place.</dd>
 
       <dt>&chi;&sup2; with Yates' correction</dt>
-      <dd>A rough independence flag on the 2&times;2 table, with the p value from the &chi;&sup2; distribution at one degree of freedom. Treat it as a warning light on small hand-collected data, not as a reportable test.</dd>
+      <dd>Not shown since v22.51. On small hand-collected data the &chi;&sup2; test and its p value are not reportable, and printed beside the other figures they read as a significance test; the record gives Yule’s Q, &phi; and &Delta;p, which describe the strength of the association.</dd>
     </dl></div>`) +
 
   card("Where each code maps", "the class assignments the analysis uses",
@@ -3537,7 +3575,7 @@ async function loadDemo(){
   if(!(await nbhUI.confirm("Load the simulated record?\nEvery tab is filled with a worked example: 46 incidents and 60 background samples, with the analysis set to compare against an escape function. Anything already entered will be replaced.", {ok:"Load"}))) return;
   clearForm();
   $$('#bg-a-opts input, #bg-c-opts input, #bg-p-opts input, #bg-se-opts input').forEach(cb => { cb.checked = false; cb.closest(".opt").classList.remove("checked"); });
-  $("#bg-date").value = todayISO(); $("#bg-time").value = nowHM(); $("#bg-window").value = "10"; $("#bg-staffpresent").value = "";
+  $("#bg-date").value = todayISO(); $("#bg-time").value = nowHM(); $("#bg-window").value = String(+$("#h-window").value || 10); $("#bg-staffpresent").value = "";
   ["oa","od","na","nd"].forEach(k => { const el = $("#ioa-"+k); if(el){ el.value = ""; el.dispatchEvent(new Event("input", {bubbles:true})); } });
   const rnd = mulberry(20260913);
   const pick = arr => arr[Math.floor(rnd()*arr.length)];
@@ -3646,7 +3684,7 @@ async function loadDemo(){
       ...(chance(0.08) ? ["se_staff"] : [])
     ];
     samples.push({ id:uid(), date, time:String(hour).padStart(2,"0")+":"+pick(["05","15","25","35","45","55"]),
-                   window:10, antecedents:ante, events:ev, precursors:pre, settingEvents:se,
+                   window:10, unit:"s", activity:pick(activities), antecedents:ante, events:ev, precursors:pre, settingEvents:se,
                    staffPresent: chance(0.70) ? "yes" : "no" });
   }
 
@@ -3654,12 +3692,15 @@ async function loadDemo(){
   sortEntries();
   writeHeader({ client:"SIMULATED \u2014 not a student record", observer:"Training data",
                 location:"Example classroom", start:days[0], end:days[days.length-1],
-                target:"Screaming/yelling, aggression to staff", window:"10", checks:"fixed:10" });
+                target:"Screaming/yelling, aggression to staff", window:"10", checks:"fixed:10",
+                /* v22.51 the 60 checks and the 46 incidents' checks skipped, every 10 minutes */
+                minutes:"1060" });
   /* set the analysis up the way the dataset is meant to be read, rather than
      leaving the reader to find the right comparison themselves */
   $("#a-function").value = "escape";
   state.faFunction = "escape";
   refreshAll();
+  if(window.abcIoaSet) abcIoaSet({ oa:"9", od:"1", na:"21", nd:"1", who:"Iris Calloway (simulated)", date:days[2], s2:"3", sn:"10" });
   $("#data-status").textContent = "Simulated dataset loaded: 46 incidents, 60 background samples, with the analysis set to compare against an escape function. Every tab is populated \u2014 open Analysis for the conditional probabilities and Incidents for the underlying records.";
   switchTab("analysis");
 }
@@ -3678,11 +3719,27 @@ function wireIOA(){
     const occ = (oa+od) > 0 ? oa/(oa+od) : null;
     cells[0].style.color = occ == null ? "" : (occ < 0.80 ? "var(--flag)" : "var(--ok)");
   };
-  ["oa","od","na","nd"].forEach(k => {
+  /* v22.51 (F85) the counts, who and when are kept in the record (saved with the file, printed, handed to FS-1) */
+  const keep = () => { state.ioa = {}; IOA_F.forEach(k => { const el = $("#ioa-"+k); if(el && el.value.trim()) state.ioa[k] = el.value.trim(); }); calc(); };
+  IOA_F.forEach(k => {
     const el = $("#ioa-"+k);
-    if(el) el.addEventListener("input", calc);
+    if(el){ el.addEventListener("input", keep); el.addEventListener("change", keep); }
   });
+  window.abcIoaSet = o => { o = o && typeof o === "object" ? o : {}; IOA_F.forEach(k => { const el = $("#ioa-"+k); if(el) el.value = o[k] == null ? "" : String(o[k]); }); keep(); };
+  calc();
 }
+const IOA_F = ["oa","od","na","nd","who","date","s2","sn"];
+/* the agreement in one line, for the print and for Form FS-1; null when no count is entered */
+window.abcIoaSum = function(){
+  const o = state.ioa || {}, v = k => Math.max(0, Number(o[k]) || 0), oa = v("oa"), od = v("od"), na = v("na"), nd = v("nd"), u = oa+od+na+nd;
+  if(!u) return null;
+  const P = (a,d) => (a+d) ? Math.round(a/(a+d)*100)+"%" : "\u2014", s2 = v("s2"), sn = v("sn");
+  const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(o.date||""), day = d ? (+d[2])+"/"+(+d[3])+"/"+d[1] : "";
+  const text = (s2 ? "a second observer on " + s2 + (sn ? " of " + sn : "") + " session" + ((sn||s2) === 1 ? "" : "s") + "; " : "") +
+    "occurrence agreement " + P(oa,od) + ", nonoccurrence " + P(na,nd) + ", overall " + P(oa+na,od+nd) + " over " + u + " unit" + (u === 1 ? "" : "s") +
+    (day ? " (" + day + ")" : "") + (o.who ? ", second observer " + o.who : "");
+  return { occ: oa+od ? oa/(oa+od) : null, non: na+nd ? na/(na+nd) : null, overall: (oa+na)/u, units: u, sessions2: s2 || null, sessions: sn || null, date: o.date || "", text };
+};
 
 /* In the workstation's packet this form contributes the record itself: who and
    when, the incident log, the background samples and the analysis - not the
@@ -3708,7 +3765,8 @@ function fillPrintHeader(){
     `<dl>${row("Student / client", h.client)}${row("Observer", h.observer)}${row("Setting", h.location)}
      ${row("Observation period", period)}${row("Target behavior", h.target)}
      ${row("Printed", new Date().toLocaleDateString())}
-     ${row("Consequence window", h.window ? h.window+" s" : "")}${row("Background check interval", checksLabel(h.checks))}</dl>
+     ${row("Consequence window", h.window ? h.window+" s" : "")}${row("Background check interval", checksLabel(h.checks))}${row("Minutes observed", h.minutes ? h.minutes+" min" : "")}
+     ${row("Interobserver agreement", (window.abcIoaSum && abcIoaSum() || {}).text || "")}${state.consentLine ? row("Consent and assent", state.consentLine) : ""}</dl>
      <div style="font-size:9.5pt;color:#4b5765;margin-top:4px">${state.entries.length} incidents, ${state.samples.length} background samples on file.</div>`;
 }
 
@@ -3740,7 +3798,7 @@ function init(){
     const pr = PRECURSORS.filter(i => !i.other && $("#bgp-"+i.id)?.checked).map(i => i.id);
     const se = SETTING_EVENTS.filter(i => !i.other && $("#bgse-"+i.id)?.checked).map(i => i.id);
     state.samples.push({ id:uid(), date, time:$("#bg-time").value,
-      window:Number($("#bg-window").value)||null, antecedents:an, events:ev,
+      window:Number($("#bg-window").value)||null, unit:"s", activity:$("#bg-activity").value.trim(), antecedents:an, events:ev,
       precursors:pr, settingEvents:se, staffPresent:$("#bg-staffpresent").value });
     $$('#bg-a-opts input, #bg-c-opts input, #bg-p-opts input, #bg-se-opts input').forEach(cb => { cb.checked = false; cb.closest(".opt").classList.remove("checked"); });
     $("#bg-time").value = nowHM();
@@ -3800,8 +3858,10 @@ function init(){
       $("#data-status").textContent = "Everything cleared.";
     }
   });
-  ["#h-client","#h-observer","#h-location","#h-start","#h-end","#h-target","#h-window","#h-checks"].forEach(s =>
+  ["#h-client","#h-observer","#h-location","#h-start","#h-end","#h-target","#h-window","#h-checks","#h-minutes"].forEach(s =>
     $(s).addEventListener("change", readHeader));
+  /* v22.51 the window and the minutes observed enter the analysis */
+  ["#h-window","#h-minutes"].forEach(s => $(s).addEventListener("change", () => { try{ renderAnalysis(); }catch(e){} }));
 
   window.addEventListener("beforeunload", e => {
     if(state.entries.length || state.samples.length){ e.preventDefault(); e.returnValue = ""; }
@@ -3851,6 +3911,8 @@ document.addEventListener("DOMContentLoaded", init);
   const hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
   const clock=ms=>new Date(ms).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   const setText=(id,v)=>{const n=byId(id);if(n&&n.textContent!==v)n.textContent=v;};
+  /* v22.51 (F79) a check scores the consequence window, as an incident does */
+  const winSec=()=>{const v=+((byId('h-window')||{}).value);return v>0?v:10;};
   function setVal(id,v){const f=byId(id);if(!f)return;f.value=v;f.dispatchEvent(new Event('input',{bubbles:true}));f.dispatchEvent(new Event('change',{bubbles:true}));}
   function note(t,warn){T.msg=t;T.warn=!!warn;T.msgAt=now();paint();clearTimeout(T.mt);T.mt=setTimeout(paint,6100);}
 
@@ -3871,17 +3933,18 @@ document.addEventListener("DOMContentLoaded", init);
     const inc=SW.on?'an incident was being timed':incidentIn(c.from,c.to);
     if(inc){c.outcome='skipped';c.why=inc;}
     T.checks.push(c);T.prevWall=wall;T.lastAt=T.nextAt;T.nextAt=nextFrom(T.lastAt);
-    if(c.outcome==='open'){T.open=c;alertNow(false);note('Background check '+c.k+' is due: record the '+c.mins+'-minute window, or skip it if the target behavior occurred.');}
+    if(c.outcome==='open'){T.open=c;alertNow(false);note('Background check '+c.k+' is due: record what is in place now and what happened in the last '+winSec()+' seconds, or skip it if the target behavior occurred since the last check.');}
     else note('Background check '+c.k+' skipped: '+c.why+'.');
     sched();renderLog();
   }
   function recordWindow(){
     const c=T.open;if(!c)return;const d=new Date(c.to);
-    setVal('bg-date',iso(d));setVal('bg-time',hm(d));setVal('bg-window',String(c.mins));
+    setVal('bg-date',iso(d));setVal('bg-time',hm(d));setVal('bg-window',String(winSec()));
+    const ba=byId('bg-activity');if(ba&&!ba.value){const ls=(state.samples||[]).slice(-1)[0]||{},le=(state.entries||[]).slice(-1)[0]||{};ba.value=ls.activity||le.activity||'';}
     T.pend={c,n:(state.samples||[]).length};
     if(typeof switchTab==='function')switchTab('background');
     const f=q('#bg-a-opts input');if(f){try{f.focus({preventScroll:true});}catch(e){}f.scrollIntoView({block:'center'});}
-    note('Check '+c.k+': mark what was in place and what happened during the window, then Save sample.');
+    note('Check '+c.k+': mark what is in place now and what happened in the last '+winSec()+' seconds, then Save sample.');
   }
   function skipOpen(){const c=T.open;if(!c)return;c.outcome='skipped';c.why='the target behavior occurred in its window';T.open=null;if(T.pend&&T.pend.c===c)T.pend=null;
     note('Check '+c.k+' skipped. Log the incident if you have not already.');renderLog();}
@@ -3938,9 +4001,11 @@ document.addEventListener("DOMContentLoaded", init);
     T.acc=auto&&T.plan?T.plan:elapsed();T.state='ended';stopLoops();unsched();wakeOff();
     if(T.open&&!(T.pend&&T.pend.c===T.open)){T.open.outcome='missed';T.open=null;}
     if(!byId('h-end').value)setVal('h-end',iso(new Date()));
+    /* v22.51 (F80) the session's minutes go into Minutes observed, for the unconditional probability */
+    const mins=Math.round(T.acc/60000),hmn=byId('h-minutes');if(mins>0&&hmn)setVal('h-minutes',String((+hmn.value||0)+mins));
     if(auto)alertNow(true);
     const c=count();
-    note('Observation ended at '+fmt(T.acc)+'. Background checks: '+c.recorded+' recorded, '+c.skipped+' skipped, '+c.missed+' missed.');
+    note('Observation ended at '+fmt(T.acc)+'. Background checks: '+c.recorded+' recorded, '+c.skipped+' skipped, '+c.missed+' missed.'+(mins>0&&hmn?' '+mins+' min added to Minutes observed.':''));
     renderLog();
   }
   async function reset(){
@@ -5991,17 +6056,17 @@ S.incident=[
 S.check=[
  F(ROOM,{cap:'9:20: the timer skips this check on its own. An incident was logged in its window, and that window is already captured as an incident.',
   s:'work',ap:'peer',a:'help',clock:'9:20',obs:O('Check 9:20','Skipped','incident logged at 9:15','skip'),does:'Working',rec:[]}),
- F(ROOM,{cap:'9:30: the alert comes, here as flash and vibration. Look back over the window that just ended, 9:20 to 9:30.',
+ F(ROOM,{cap:'9:30: the alert comes, here as flash and vibration. The student has been working since the last check at 9:20.',
   s:'work',ap:'peer',a:'help',clock:'9:30',obs:O('Background check','CHECK 9:30','window 9:20 to 9:30','alert',{vib:true}),does:'Working',rec:[]}),
- F(ROOM,{cap:'Did the target behavior occur in that window? If it did, skip the check: that window is an incident (log it first if it is not logged yet). It did not, so take the sample.',
+ F(ROOM,{cap:'Did the target behavior occur since 9:20? If it did, skip the check: that time is an incident (log it first if it is not logged yet). It did not, so take the sample: what is in place now, and what happened in the last 10 seconds, the consequence window.',
   s:'work',ap:'peer',a:'help',clock:'9:30',obs:O('Target behavior?','None','9:20 to 9:30: sample it','rec'),does:'Working',rec:[]}),
- F(ROOM,{cap:'The timer opens Background samples with the date, time and window length filled. Check the antecedent conditions in place during the window: the math sheet was in front of the student, and the teacher was mostly with a peer.',
-  s:'work',ap:'peer',a:'help',clock:'9:30',obs:O('Background samples','9:30 · 10 min','filled in by the timer','rec'),say:'Show me your second answer.',does:'Working',rec:[['Antecedent conditions','Presented with academic demand','Adult attention directed to a peer or another adult']]}),
- F(ROOM,{cap:'Check every event that occurred in the window, whatever it followed. At 9:24 the teacher praised the student’s work: Given staff attention. It counts toward the base rate.',
-  s:'work',ap:'student',a:'talk',clock:'9:24',obs:O('Background samples','9:30 · 10 min','events in the window','rec'),say:'Nice work on that row.',does:'Keeps working',rec:[['Events that occurred','Given staff attention']]}),
+ F(ROOM,{cap:'The timer opens Background samples with the date, time and the 10 seconds scored filled. Check the antecedent conditions in place at the check: the math sheet was in front of the student, and the teacher was mostly with a peer.',
+  s:'work',ap:'peer',a:'help',clock:'9:30',obs:O('Background samples','9:30 · 10 s','filled in by the timer','rec'),say:'Show me your second answer.',does:'Working',rec:[['Antecedent conditions','Presented with academic demand','Adult attention directed to a peer or another adult']]}),
+ F(ROOM,{cap:'Check every event in those 10 seconds, whatever it followed. Just before the alert the teacher praised the student’s work: Given staff attention. It counts toward the base rate. Praise at 9:24 would not: it is outside the seconds scored.',
+  s:'work',ap:'student',a:'talk',clock:'9:30',obs:O('Background samples','9:30 · 10 s','events in the last 10 s','rec'),say:'Nice work on that row.',does:'Keeps working',rec:[['Events that occurred','Given staff attention']]}),
  F(ROOM,{cap:'Then the lower-intensity responses seen, Adult within view, and the setting events in effect today. Leave a box unchecked when it did not apply: an empty sample is still data.',
   s:'work',ap:'peer',a:'help',clock:'9:30',obs:O('Adult within view','Yes','nothing else seen','rec'),does:'Working',rec:[['Lower-intensity responses','left unchecked: none seen'],['Adult within view','Yes'],['Setting events in effect today','left unchecked: none reported']]}),
- F(ROOM,{cap:'Save sample. The timer schedules the next check, and every sample adds a window to the base rate the analysis compares against.',
+ F(ROOM,{cap:'Save sample. The timer schedules the next check, and every sample adds a 10-second span to the base rate the analysis compares against, the same span as an incident’s consequence window.',
   s:'work',ap:'peer',a:'help',clock:'9:31',obs:O('Sample saved','Next check 9:40','','ok'),does:'Working',rec:[['Save sample']]})
 ];
 
@@ -6141,10 +6206,10 @@ PANEL.querySelectorAll('.story[data-story]').forEach(root=>{
       q:'The check alert comes at 10:40. At 10:39 the student hit a peer, and you have not logged it yet. What do you do with the check?',o:[
       ['Skip it: that window is an incident. Log the incident; once an incident is logged in a window, the timer skips that check on its own',1],
       ['Take the sample: the student is calm now',0],['Take the sample and note the hit under Events that occurred',0]],
-      why:'<b>A background sample is a window without the behavior.</b> At each check, record the window only if the target behavior did not occur in it; skip the check if it did, because that window is already captured as an incident. Sampling it would put the behavior’s own consequences into the base rate.'},
-    {w:'Story B · At the check',f:F(S.check[4],{say:'Great job. That’s right.',clock:'10:48',obs:O('Background check','CHECK 10:50','window 10:40 to 10:50','alert')}),
-      q:'At the 10:50 check there was no target behavior in the window. The aide praised the student’s work twice. What goes on the sample?',o:[
-      ['Given staff attention, under Events that occurred during this window',1],['Nothing: praise for work is not a consequence of the target behavior',0],['Given staff help/prompts',0]],
+      why:'<b>A background sample is a check without the behavior.</b> At each check, record it only if the target behavior did not occur since the last check; skip it if it did, because that time is already captured as an incident. Sampling it would put the behavior’s own consequences into the base rate.'},
+    {w:'Story B · At the check',f:F(S.check[4],{say:'Great job. That’s right.',clock:'10:50',obs:O('Background check','CHECK 10:50','last 10 s scored','alert')}),
+      q:'At the 10:50 check there was no target behavior since 10:40. In the last 10 seconds the aide praised the student’s work. What goes on the sample?',o:[
+      ['Given staff attention, under Events in the seconds scored',1],['Nothing: praise for work is not a consequence of the target behavior',0],['Given staff help/prompts',0]],
       why:'<b>Count the event, whatever it followed.</b> The base rate is how often the consequence occurs when the target behavior has not just occurred. If staff attention follows 80% of incidents but is also delivered continuously all day, there is no differential contingency, and only these samples can show it.'},
     {w:'Story A · Consequence',f:F(S.incident[2],{a:'talk',s:'agit',sheetAt:'floor',clock:'10:05',say:'That’s not okay.',does:'Throws the worksheet to the floor',obs:O('Incident starting','10:05','','alert')}),
       q:'The student throws the worksheet to the floor. The teacher says, “That’s not okay.” Which consequence?',o:[
@@ -6219,7 +6284,7 @@ PANEL.querySelectorAll('.story[data-story]').forEach(root=>{
   const FIDEL={
     setup:['Seated with a clear view of the student and every adult','No interaction with the student or staff during the observation','Definition written before the session and unchanged','Observation header complete','Observation timer started at the start and run to the end','Recording format as the protocol states','Data file saved at the end of the session'],
     incident:['Incident starting pressed as the behavior began','Antecedent scored from what was in place immediately before','Lower-intensity responses recorded under Preceded by…','Behavior code matches the written definition','Consequences scored only within the consequence window','Immediately after the consequence recorded','Narrative: exact words, positions and sequence; no inferred states','Incident over pressed when the behavior ended','Adult within view and Activity / routine recorded','Incident saved before the next one began'],
-    check:['Check taken at the alert','Window with the target behavior skipped (or skipped by the timer)','Antecedent conditions in place during the window checked','Every event in the window checked, including praise and help for work','Lower-intensity responses recorded','Adult within view recorded','Setting events in effect today recorded','Sample saved, including an empty one'],
+    check:['Check taken at the alert','Window with the target behavior skipped (or skipped by the timer)','Antecedent conditions in place at the check checked','Every event in the seconds scored checked, including praise and help for work','Lower-intensity responses recorded','Adult within view recorded','Setting events in effect today recorded','Sample saved, including an empty one'],
     calls:['A delay coded Told to wait; access delayed; a refusal coded Denied access to something','Attention to someone else coded Adult attention directed to a peer or another adult','Each transition component in place checked, with Presented with transition demand','Behavior before the instruction coded Signal that a demand or transition is coming','A specific noise coded Aversive noise or sensory stimulation','Setting events recorded in their own sections, never as antecedents','Guidance coded Prompted or guided through the task; a reprimand coded Reprimand or correction delivered'],
     ioa:['Both observers used the same written definition and codes','Timers on the same fixed interval, started together','No talking or looking at the other’s record','Each observer saved a separate data file','Records compared incident by incident and window by window','Four counts entered under Interobserver agreement','Occurrence figure read before the overall figure','Agreement collected on at least a third of sessions']};
   const GUIDE=[
@@ -6342,7 +6407,7 @@ const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function()
    since a frequent consequence is not shown to be contingent. */
 OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)return null;
   const k=classStats(A.coded,A.samples);
-  const ranked=k.filter(r=>r.cls!=='none'&&r.n>0).sort((a,b)=>(M&&a.stats&&b.stats)?((b.stats.q??-2)-(a.stats.q??-2)):(b.pGiven-a.pGiven));
+  const ranked=k.filter(r=>r.cls!=='none'&&r.n>0).sort((a,b)=>(M>=10&&a.stats&&b.stats)?((b.stats.q??-2)-(a.stats.q??-2)):(b.pGiven-a.pGiven));
   const top=ranked[0],none=k.find(r=>r.cls==='none'),P=x=>Math.round((x||0)*100)+'%';
   let fn='',key='',st='',strength='Weak';
   if(top){fn=top.label;key=top.cls;const q=top.stats&&top.stats.q;
@@ -6352,7 +6417,79 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
   else st='No consequence class followed the behavior often enough to rank.';
   const h=state.header||{};
   return EV(Object.assign({form:'ABC-1',method:M?'ABC recording with conditional probabilities against '+M+' background samples (descriptive)':'ABC recording with conditional probabilities (descriptive)'},
-    SPAN(A.coded.map(e=>e.date)),{n:N,fn,fnKey:K(key)||key,strength:fn?strength:'',by:T(h.observer),statement:st}));});
+    SPAN(A.coded.map(e=>e.date)),{n:N,fn,fnKey:K(key)||key,strength:fn?strength:'',by:T(h.observer),statement:st,
+      /* v22.51 the agreement check (F85) and the case's target behaviors recorded (F84) */
+      ioa:(window.abcIoaSum&&abcIoaSum())||undefined,
+      targets:(()=>{const L=BEHAVIORS.filter(b=>b.caseT&&A.coded.some(e=>(e.behaviors||[]).includes(b.id))).map(b=>b.label);return L.length?L:undefined;})()}));});
+})();
+</script>
+<script id="v2251-case">
+/* v22.51 ABC-1 and the case.
+   F84 the case's target behaviors (Form TB-1) are the first rows of the Behavior column, marked TB-1 with the definition as
+   the tooltip, kept in the data file, and their names go out with the evidence: the record can be analyzed per defined target.
+   I44 consent for the FBA (Form IC-1) and the student's assent (Form SI-1) on the Observation header, printed with the record;
+   with the case open and no consent covering ABC recording, Start observation asks first.
+   I45 "Function established by FA" fills from Form EA-1's result when it is empty, never from FS-1's conclusion. */
+(function(){
+  const byId = id => document.getElementById(id), T = s => String(s == null ? "" : s).trim();
+  let CASE = null;
+  function paintTargets(){
+    const g = Array.from(document.querySelectorAll("#abc-grid .group")).find(x => /^Target behavior/.test((x.querySelector(".glabel") || {}).textContent || ""));
+    if(!g) return;
+    const keep = {}; g.querySelectorAll("input").forEach(i => { keep[i.id] = i.type === "checkbox" ? i.checked : i.value; });
+    g.innerHTML = '<div class="glabel"><span>Target behavior</span></div>' + BEHAVIORS.map(i => optRow(i, "b", null)).join("");
+    g.querySelectorAll("input").forEach(i => { if(!(i.id in keep)) return; if(i.type === "checkbox"){ i.checked = keep[i.id]; i.closest(".opt").classList.toggle("checked", i.checked); } else i.value = keep[i.id]; });
+    BEHAVIORS.filter(b => b.caseT).forEach(b => { const o = g.querySelector('[data-opt="b-' + b.id + '"]'); if(!o) return; if(b.def) o.title = b.def;
+      const l = o.querySelector("label"); if(l) l.insertAdjacentHTML("beforeend", ' <span class="abc-tb" title="A target behavior defined on Form TB-1">TB-1</span>'); });
+  }
+  window.abcAddTargets = function(list){
+    let added = 0;
+    (list || []).forEach(t => { const label = T(t && (t.label || t.name)); if(!label) return;
+      const id = T(t.id) || ("tb_" + label.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 28));
+      if(B_BY_ID[id]){ if(t.def && !B_BY_ID[id].def) B_BY_ID[id].def = T(t.def); return; }
+      const it = { id, label, caseT: true, def: T(t.def) };
+      BEHAVIORS.splice(BEHAVIORS.filter(b => b.caseT).length, 0, it); B_BY_ID[id] = it; added++; });
+    if(added){ paintTargets(); try{ fillBehaviorFilters(); }catch(e){} }
+    return added;
+  };
+  function consentOf(f){ if(!f || !window.nbhCase || !nbhCase.consent) return null; const k = nbhCase.consent(f); return { k, ok: k.on && nbhCase.covers("abc", f) }; }
+  function paintConsent(){
+    const el = byId("abcConsent"); if(!el) return;
+    const f = CASE; if(!f){ el.hidden = true; el.textContent = ""; state.consentLine = ""; return; }
+    const c = consentOf(f), st = f.student || {}, a = T(st.assent), sig = T(st.stop && st.stop.signs), L = [];
+    if(c) L.push(c.ok ? c.k.word : (c.k.on ? "Form IC-1 does not cover ABC recording" : c.k.word) + ": direct observation for an individual FBA needs the parent’s consent first");
+    if(a || sig) L.push("Assent (Form SI-1): " + (a || "not recorded") + (sig ? "; the student says stop by: " + sig : ""));
+    el.textContent = L.join(" · "); el.hidden = !L.length; el.classList.toggle("bad", !!c && !c.ok);
+    state.consentLine = L.join(" · ");
+  }
+  document.addEventListener("click", async e => {
+    const b = e.target.closest && e.target.closest("#obsStart"); if(!b || b.__ok || !CASE) return;
+    if(!(window.abcTimer && abcTimer.state() === "ready")) return;
+    const c = consentOf(CASE); if(!c || c.ok) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    const ask = (c.k.on ? "Form IC-1 does not cover ABC recording" : c.k.word) + ".\nDirect observation for an individual FBA needs the parent’s consent first. Start the observation anyway?";
+    if(await nbhUI.confirm(ask, { ok: "Start anyway", danger: true })){ b.__ok = 1; try{ b.click(); } finally { b.__ok = 0; } }
+  }, true);
+  const FA = { attention: "attention", escape: "escape", tangible: "tangible", automatic: "automatic" }, FA_W = { attention: "Attention", escape: "Escape / avoidance", tangible: "Tangible / access", automatic: "Automatic" };
+  function paintFA(f){
+    const ev = f && f.evidence && f.evidence["EA-1"], key = ev ? T(ev.fnKey) : "", sel = byId("a-function"), note = byId("abcFaFrom");
+    if(!sel || !note) return;
+    if(FA[key]){
+      if(!sel.value){ sel.value = FA[key]; state.faFunction = FA[key]; try{ renderAnalysis(); }catch(e){} }
+      note.textContent = "Form EA-1’s experimental analysis" + (ev.dates ? " (" + ev.dates + ")" : "") + ": " + FA_W[key] + (sel.value !== FA[key] ? ". The choice above differs from it." : ".");
+    } else if(key === "multiple") note.textContent = "Form EA-1 found more than one function: choose the one to check against.";
+    else note.textContent = "Only an experimental analysis (Form EA-1) establishes a function; Form FS-1’s conclusion is descriptive and is not used here.";
+  }
+  const was = window.__nbhFactsIn;
+  window.__nbhFactsIn = function(f){
+    const r = was ? was.apply(this, arguments) : null;
+    CASE = f || null;
+    try{ const L = (f && Array.isArray(f.behaviors) ? f.behaviors : []).map(b => ({ name: b && (b.name || b.label), def: b && b.def })).filter(b => T(b.name));
+      if(L.length) abcAddTargets(L); }catch(e){}
+    try{ paintConsent(); }catch(e){}
+    try{ paintFA(f); }catch(e){}
+    return r;
+  };
 })();
 </script>
 <script id="v2241-holds">

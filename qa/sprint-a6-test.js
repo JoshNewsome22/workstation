@@ -470,8 +470,9 @@ async function abcSim(br){
   const loaded=await look(),today=await p.evaluate(()=>todayISO()),bgf=loaded.bgFields.split(' ');
   ok(tag+': Load replaces them: 46 incidents, 60 samples, the simulated header, the entry form cleared, the function set to escape',
     loaded.n===46&&loaded.samples===60&&/^SIMULATED/.test(loaded.client)&&loaded.narr===''&&!loaded.scream&&loaded.fn==='escape',loaded);
-  ok(tag+': Load also clears the sample being entered (no ticks; today, now, 10 minutes, adult not recorded, as a fresh page has them) and the IOA counts',
-    loaded.bg==='false/false false/false'&&bgf[0]===today&&/^\d\d:\d\d$/.test(bgf[1])&&bgf[2]==='10'&&bgf[3]===''&&/^\s*= \u2014$/.test(loaded.ioa),{bg:loaded.bg,bgFields:loaded.bgFields,ioa:loaded.ioa,today});
+  /* v22.51 (F85) the IOA counts typed before give way to the worked example's own agreement check */
+  ok(tag+': Load also clears the sample being entered (no ticks; today, now, 10 seconds, adult not recorded, as a fresh page has them) and the IOA counts typed before (the worked example brings its own)',
+    loaded.bg==='false/false false/false'&&bgf[0]===today&&/^\d\d:\d\d$/.test(bgf[1])&&bgf[2]==='10'&&bgf[3]===''&&loaded.ioa==='9 1 21 1 = 90.0%',{bg:loaded.bg,bgFields:loaded.bgFields,ioa:loaded.ioa,today});
   ok(tag+': no browser dialog',!p.__native.length,p.__native);
   await ctx.close();
   /* a test that stubs window.confirm gets the simulation at once */

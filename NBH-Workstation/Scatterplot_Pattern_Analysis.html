@@ -576,6 +576,11 @@ html.sp-one .lg-slash{display:none}
   #spPrint > .sheet + .sheet{page-break-before:always;break-before:page}
   /* the legend is one line on paper, so the grid gets the height */
   .legend .lgrows{display:flex;flex-wrap:wrap;gap:4px 18px}
+  /* v22.51 two lines at most, as the sheet's measure allows */
+  .legend .lgrow{font-size:10px;white-space:nowrap}
+  table.scatter td.mark span.count{display:block;height:var(--rowh);line-height:var(--rowh);text-align:center;font-family:var(--sans);font-size:min(11px,calc(var(--rowh) - 2px));font-variant-numeric:tabular-nums}
+  table.scatter td.mark.lvl2 span.count{color:#fff}
+  html.sp-codes table.scatter td.mark span.count{padding-right:22px}
   .legend .lgrow{margin:0}
   .footer{display:block}
   .footer .codes{margin-top:8px}
@@ -688,6 +693,11 @@ table.rank td.n{text-align:center;width:46px}
 
 /* ---------------------------------------------------------- print */
 @page{size:letter portrait;margin:.5in}
+/* v22.51 Safari on an iPad lays a printed page out at the paper's width in points (about 547 px between the margins) and
+   shrinks anything wider to fit: the sheet printed about a fifth larger than on a computer, and its grid, sized for a
+   computer's page, went to a second page. Laid out at a computer's width (7.6 in at 96 px between these margins), the page
+   is scaled the same way on both, and the sheet's measure of a page holds. */
+@media print{html{width:729px;min-width:729px;max-width:729px}}
 @media print{
   body{background:#fff}
   .toolbar,.noprint{display:none !important}
@@ -2108,6 +2118,13 @@ function staticClone(node){
     }else b.setAttribute("value", a.value);
   }
   clone.querySelectorAll(".noprint,.readout").forEach(e => e.remove());
+  /* v22.51 on paper the grid's mark buttons and count boxes are plain text, which every browser prints at the row's height */
+  clone.querySelectorAll("table.scatter button.cell").forEach(b => {
+    const sp = document.createElement("span"); sp.className = b.className;
+    ["data-state","data-r","data-c"].forEach(a => { if(b.hasAttribute(a)) sp.setAttribute(a, b.getAttribute(a)); });
+    sp.innerHTML = b.innerHTML; b.replaceWith(sp); });
+  clone.querySelectorAll("table.scatter input.count").forEach(i => {
+    const sp = document.createElement("span"); sp.className = "count"; sp.textContent = i.getAttribute("value") || ""; i.replaceWith(sp); });
   /* v22.31 the definition, examples and non-examples print whole: a text box prints at the height it has on screen, so on
      the narrower paper a long one was cut off after a line or two; on paper each is its text, a size smaller */
   clone.querySelectorAll(".defs textarea").forEach(t => {

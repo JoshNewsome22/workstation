@@ -9903,6 +9903,53 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.51: the ABC record (ABC-1) checked against its sources and the case
+
+Form ABC-1, from the review (F79 to F88, I43 to I45):
+
+- **A background check scores the consequence window** (F79). An incident's consequence is scored over the few seconds
+  after the behavior, and a check used to score the whole 5 to 15 minutes since the last one: an event delivered now and then
+  turns up in a long window most of the time and in a short one rarely, so anything staff do often read as less likely after
+  the behavior. A check now records the conditions in place at that moment and the events in the last few seconds, the same
+  span as the header's consequence window (10 seconds when it is not set), as Camp et al. (2009) scored both sides. The
+  timer fills **Seconds scored**, the Background tab, the walkthrough and the practice questions say so, and checks from an
+  older file (whole windows of minutes) are flagged on the Analysis tab.
+- **Camp et al.'s criterion no longer depends on the number of checks** (F80). The unconditional probability and p(B|C) count
+  every consequence-window span of the **Minutes observed** (a new header field; the Observation Timer adds each session's
+  minutes when it ends): the incidents' spans as recorded, the rest at the event's share of the checks. Before, with 10
+  checks no consequence could meet CP:UP 1.23. Without the minutes the columns say so; with a date or activity filter they
+  are left empty, since the minutes cover the whole record. The precursor table's background probability is weighted the
+  same way.
+- **The summary says what it ranked on** (F81): the class taken forward is ranked on its separation from the no-behavior base
+  rate (Yule's Q), and the class that followed more incidents is named beside it with its base rate. The ranking by Q needs
+  10 or more checks, as the sentence and the evidence for FS-1 now agree.
+- **The Data file tab** (F82) says the record is the file you save and that Autosave keeps a copy on the device for 14 days.
+- **A correspondence on five incidents or more** (F87); fewer, and none is named.
+- **No chi-square or p value** in the tables, the print or the exported CSV (F88); the record gives Q, phi and delta-p.
+- **Interobserver agreement is kept** (F85): the four counts, the second observer, the date and the sessions with a second
+  observer are saved with the data file, printed with the record, and go to Form FS-1, which puts them under Limitations
+  (Interobserver agreement) when that box is empty.
+- **The case's target behaviors** (F84) from Form TB-1 are the first rows of the Behavior column, marked TB-1 with the
+  definition as the tooltip, kept in the file, and named in the evidence.
+- **The Activity filter narrows both sides** (F86, I43). Each background sample carries **Activity now** (the timer fills it
+  from the last sample or incident), and "Activity contains" (it was labelled Setting) narrows the samples with the incidents;
+  samples with no activity are left out, and the Analysis tab says how many.
+- **Consent and assent on the header** (I44): the consent on file for ABC recording (Form IC-1) and the student's assent and
+  stop signal (Form SI-1), printed with the record. With the case open and no consent covering ABC recording, Start
+  observation asks first.
+- **The FA function from EA-1 only** (I45): "Function established by FA" fills from Form EA-1's result when it is empty and
+  says so; Form FS-1's descriptive conclusion is never used.
+
+Form SP-1, from a report from the iPad:
+
+- **The data sheet prints on one page from an iPad.** Safari on an iPad lays a printed page out at the paper's width and
+  shrinks anything wider to fit, so the sheet printed about a fifth larger than on a computer, and its grid, sized for a
+  computer's page, went whole to a second page. The printed page is now laid out at a computer's width, so Safari scales it
+  the same way a computer does. On paper the grid's marks and typed counts are plain text, and the legend keeps to two lines.
+  If a sheet still runs onto a second page from the iPad, set **Scaling** in the print options to about 80% for now.
+
+Checked by `qa/v2251-test.js` (27) and the tests that load ABC-1, FS-1 and SP-1.
+
 ### v22.50: the staff directory: Member of, select many or everyone, and a paste that updates
 
 At the user's request, in the workstation's **Staff directory**:
