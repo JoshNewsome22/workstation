@@ -1007,6 +1007,8 @@ td input,td select{max-width:100%}
     <div><label class="f" for="decStop">Safety stop rule (what ends a session or probe at once)</label><textarea id="decStop" name="dec_stop" class="vi-x" data-x="dec_stop" rows="2"></textarea></div>
   </div>
   <div class="caution" id="decWarn" hidden></div>
+  <div class="grid g3"><div><label class="f" for="hFn">Function hypothesized</label><select id="hFn" name="h_fn" class="vi-x" data-x="h_fn"><option value=""></option><option value="attention">Attention</option><option value="escape">Escape / avoidance</option><option value="tangible">Tangible / activity</option><option value="automatic">Automatic</option><option value="multiple">More than one</option><option value="unclear">Unclear</option></select></div>
+    <p class="small" style="grid-column:span 2;align-self:end">The function the case and Form FS-1 take from this form. With more than one, FS-1 lists the row without counting it until each function has a row of its own.</p></div>
   <div><label class="f">Hypothesis statement (When [antecedent/MO], the student engages in [behavior], which produces [consequence]; therefore the behavior is hypothesized to be maintained by &hellip;)</label><textarea name="h_statement"></textarea></div>
   <div><label class="f">Conditions the next assessment must compare, and conditions that can be dropped</label><textarea name="h_conditions"></textarea></div>
   <div><label class="f">Confounds still unresolved</label><textarea name="h_confounds"></textarea></div>
@@ -1605,7 +1607,7 @@ td input,td select{max-width:100%}
     setN('r_explained','About 86% of recorded episodes occurred within an independent demand');
     setN('r_residual','5 episodes (14%) occurred at transitions with no demand present');
     setN('r_account','The residual episodes cluster at the return from lunch and may reflect a separate transition-related variable. They are not explained by the escape hypothesis and are flagged for separate observation rather than folded into the same function.');
-    radio('decision','1');
+    radio('decision','1');setN('h_fn','escape');
 
     recalcAll();
     show('p1');
@@ -2943,9 +2945,19 @@ const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function()
 OUT(function(){const v=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};const st=v('h_statement');if(!st)return null;
   const mb=/maintained by\s+(.*?)(?:\s*\(|[.;]|$)/i.exec(st),fnw=mb?T(mb[1]):'';
   const band=T((document.getElementById('hillBand')||{}).textContent),b=/high/i.test(band)?'Strong':/moderate/i.test(band)?'Moderate':/low/i.test(band)?'Weak':'';
-  const key=K(fnw||st);
-  return EV(Object.assign({form:'VI-1',method:'Variable isolation from the descriptive record (non-experimental)'},SPAN([v('s_start'),v('s_end')]),{n:null,fn:fnw?fnw.charAt(0).toUpperCase()+fnw.slice(1):'',fnKey:key,
-    strength:key&&key!=='unclear'?b:'',by:v('s_bcba'),statement:st}));});
+  /* v22.68 (review F162) the function is the one chosen beside the statement; the words are read only when none is chosen,
+     and a function the sentence rules out ("not attention", "rather than", "ruled out") is not counted */
+  const NEG=s=>String(s||'').replace(/[^.;]*\bruled out\b[^.;]*/gi,' ').replace(/\b(?:not|rather than|instead of|other than)\b(?:\s+by)?\s+[^.;,]*/gi,' ');
+  const LAB={attention:'Attention',escape:'Escape / avoidance',tangible:'Tangible / activity',automatic:'Automatic',multiple:'More than one function',unclear:'Unclear'};
+  const pick=v('h_fn'),key=pick||K(NEG(fnw||st)),fnTxt=pick?(LAB[pick]||''):T(NEG(fnw)).replace(/[,\s]+$/,'');
+  /* v22.68 (review F161) what the next assessment needs: the conditions to compare, the confounds, what was set aside, the
+     step chosen, and the number of occurrences coded */
+  const occN=[...document.querySelectorAll('#agreeTbl tbody tr')].filter(r=>[...r.querySelectorAll('select')].some(s=>s.value==='P'||s.value==='A')).length;
+  const elimJ=[...document.querySelectorAll('#jointTbl tbody tr')].map(tr=>{const f=tr.querySelectorAll('input,select');return f[4]&&f[4].value==='Eliminated'?T(f[0].value):'';}).filter(Boolean);
+  const elim=[v('ag_elim'),elimJ.length?'Eliminated in the joint method summary: '+elimJ.join(', ')+'.':''].filter(Boolean).join(' ');
+  const dk=document.querySelector('input[name="decision"]:checked'),dl=dk?T((document.querySelector('label[for="'+dk.id+'"] b')||{}).textContent).replace(/\.$/,''):'';
+  return EV(Object.assign({form:'VI-1',method:'Variable isolation from the descriptive record (non-experimental)'},SPAN([v('s_start'),v('s_end')]),{n:occN||null,fn:fnTxt?fnTxt.charAt(0).toUpperCase()+fnTxt.slice(1):'',fnKey:key,
+    strength:key&&key!=='unclear'?b:'',by:v('s_bcba'),statement:st,conditions:v('h_conditions'),confounds:[v('df_confounds'),v('h_confounds')].filter(Boolean).join(' '),eliminated:elim,decision:dl}));});
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>

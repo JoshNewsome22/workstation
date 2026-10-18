@@ -1190,11 +1190,13 @@ function convergence(){
       tier:set.length?Math.min(...set):null,weak:sup.length?Math.min(...sup.map(r=>tierOf(r.method))):null,
       con:used.filter(r=>r.fn===f&&r.str==='Contradicts').length,srcs:sup.map(r=>rowForm(r)||'?')};
   }).filter(r=>r.n||r.con).sort(rankFn);
-  return {rec,fa,used,rows,noFn:fa.filter(r=>r.fn===UNK),notFn:rec.filter(r=>!tierOf(r.method))};
+  /* v22.68 (review F162) a source with a strength but no single function is named under the table, not dropped silently */
+  return {rec,fa,used,rows,noFn:fa.filter(r=>r.fn===UNK),notFn:rec.filter(r=>!tierOf(r.method)),noName:rec.filter(r=>tierOf(r.method)>0&&!r.fn&&r.str)};
 }
 function renderConv(){
-  const {rows,noFn,notFn}=convergence(),E=evidence();
+  const {rows,noFn,notFn,noName}=convergence(),E=evidence();
   let foot='';
+  if(noName&&noName.length)foot+=`<p class="hint">Not counted, no single function named: ${formsOf(noName)}. Choose the function in its row; when the source names more than one, give each its own row.</p>`;
   if(noFn.length)foot+=`<p class="hint">Recorded as Unknown, so not counted as support for any function: ${formsOf(noFn)}.</p>`;
   if(notFn.length)foot+=`<p class="hint">Listed with the methods but not counted: ${formsOf(notFn)}. Preference assessments, reinforcer assessments and treatment integrity observations do not test what maintains the behavior.</p>`;
   if(!rows.length){$('#convTbl').innerHTML='<tbody><tr><td class="hint">Enter at least one source with a function and a strength.</td></tr></tbody>';$('#convNote').innerHTML=foot;return;}
@@ -3037,9 +3039,15 @@ function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
     const contrib=nm+' ('+(g.codes||[]).join(', ')+'): '+fsEvT(g.label)+(inst?'. '+inst:'')+'.';
     const row={form:'IA-1',method:fsEvMethod('IA-1',E['IA-1']),dates:fsEvT(E['IA-1'].dates),who:fsEvT(E['IA-1'].by),contrib,fn:fsEvFn({fnKey:g.fnKey}),str:STR.indexOf(g.strength)>0?g.strength:''};
     const slot=S.src.find(r=>!rowHas(r));if(slot)Object.assign(slot,row);else S.src.push(row);put.push('IA-1 ('+nm+')');n++;});
-  ['IA-1','OB-1','EA-1'].forEach(id=>{const e=E[id];if(!e||!fsEvT(e.statement))return;if(S.hyp.some(r=>fsEvNames(r,id)))return;
-    const slot=S.hyp.find(r=>!rowHas(r));if(!slot)return;
+  /* v22.68 while the table still had an empty row (it is not finished), a row is added when the empty ones run out, so a
+     fourth source is not dropped; a table the BCBA has filled is left as it is (nothing offered) */
+  const hypOpen=S.hyp.some(r=>!rowHas(r)),hypSlot=()=>S.hyp.find(r=>!rowHas(r))||(hypOpen?(S.hyp.push({h:'',how:'',out:'',what:''}),S.hyp[S.hyp.length-1]):null);
+  ['IA-1','OB-1','VI-1','EA-1'].forEach(id=>{const e=E[id];if(!e||!fsEvT(e.statement))return;if(S.hyp.some(r=>fsEvNames(r,id)))return;
+    const slot=hypSlot();if(!slot)return;
     Object.assign(slot,{h:(fsEvT(e.fn)||'What the record suggests')+' (Form '+id+')',how:fsEvT(e.method)+(e.dates?', '+fsEvT(e.dates):''),out:'',what:fsEvT(e.statement)});hyp.push(id);n++;});
+  /* v22.68 (review F161) what variable isolation set aside, the one thing it produces that no other form does: a row of its own */
+  {const e=E['VI-1'];if(e&&fsEvT(e.eliminated)&&!S.hyp.some(r=>/^Candidates set aside/.test(fsEvT(r.h))&&fsEvNames(r,'VI-1'))){const slot=hypSlot();
+    if(slot){Object.assign(slot,{h:'Candidates set aside by variable isolation (Form VI-1)',how:fsEvT(e.method)+(e.dates?', '+fsEvT(e.dates):''),out:'Set aside',what:fsEvT(e.eliminated)});hyp.push('VI-1, set aside');n++;}}}
   let consent=false;const c=f&&f.consent;
   if(c&&fsEvT(c.date)&&!fsEvT(S.meta.consent)){const md=x=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(fsEvT(x));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:fsEvT(x);};
     const p=fsEvT(c.parent)&&fsEvT(c.parent)!==fsEvT(c.date)?md(c.parent):'';S.meta.consent=md(c.date)+(p?'; parent signed '+p:'')+' (Form IC-1)';consent=true;n++;}

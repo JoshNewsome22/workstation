@@ -1327,6 +1327,8 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
     <div class="drow"><div class="dlab">Operational definition</div><div class="dval"><textarea name="m.def"></textarea></div></div>
     <div class="drow"><div class="dlab">Precursor (if analyzed)</div><div class="dval"><textarea name="m.prec" placeholder="TB-1 precursor label and definition; from ABC-1 conditional probabilities" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Hypothesis carried in</div><div class="dval"><textarea name="m.hyp" placeholder="From IA-1 convergence and ABC-1; state function, EO, and idiosyncratic variables" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Conditions to compare</div><div class="dval"><textarea name="m.vicond" placeholder="From Form VI-1: the conditions the analysis must compare, and those it can drop" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Confounds to separate</div><div class="dval"><textarea name="m.viconf" placeholder="From Form VI-1: variables that occurred together in the descriptive record" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">TB-1 urgency level</div><div class="dval"><textarea name="m.urg" placeholder="1–4" class="nbh-line" rows="1"></textarea></div></div>
   </div>
 
@@ -5746,7 +5748,10 @@ OUT(function(){const val=n=>{const e=document.querySelector('[name="'+n+'"]');re
 window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;if(!f)return g;let n=0;const got=[];
   const put=(name,v,what)=>{const el=document.querySelector('[name="'+name+'"]');v=T(v);if(!el||!v||T(el.value))return;
     if(el.tagName==='SELECT'){if(![...el.options].some(o=>o.value===v))return;}el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));n++;if(what)got.push(what);};
-  const E=f.evidence||{},src=['IA-1','IN-1','ABC-1','OB-1'].map(id=>E[id]&&Object.assign({id},E[id])).filter(e=>e&&T(e.fn));
+  /* v22.68 (review F161) Form VI-1 is read too: its function joins the hypothesis carried in, and its conditions to compare and
+     confounds fill the two lines beside it when they are empty */
+  const E=f.evidence||{},src=['IA-1','IN-1','ABC-1','OB-1','VI-1'].map(id=>E[id]&&Object.assign({id},E[id])).filter(e=>e&&T(e.fn));
+  {const vi=E['VI-1'];if(vi){put('m.vicond',vi.conditions,'the conditions to compare (Form VI-1)');put('m.viconf',vi.confounds,'the confounds (Form VI-1)');}}
   if(src.length){put('m.hyp',src.map(e=>e.id+': '+T(e.fn)+(e.strength?' ('+e.strength.toLowerCase()+')':'')).join('; '),'the hypothesis carried in');
     const keys=[...new Set(src.map(e=>e.fnKey||K(e.fn)).filter(Boolean))],firm=src.some(e=>/Strong|Moderate/.test(e.strength||''));
     const one=keys.length===1?{attention:'social',tangible:'social',escape:'escape',automatic:'auto'}[keys[0]]:'';

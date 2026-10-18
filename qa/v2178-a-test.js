@@ -60,7 +60,9 @@ const errs=[];
     ok('FS-1: dates, conducted by and what it contributed',row('OB-1').dates===EVID['OB-1'].dates&&row('OB-1').who&&row('OB-1').contrib.indexOf(EVID['OB-1'].statement.slice(0,40))>=0,row('OB-1'));
     ok('FS-1: the Form column shows the row\'s own form',st.col.includes('IN-1')&&st.col.includes('OB-1'),st.col);
     ok('FS-1: consent from Form IC-1',/9\/1\/2026/.test(st.consent||'')&&/IC-1/.test(st.consent),st.consent);
-    ok('FS-1: IA-1, OB-1 and EA-1 offered as hypotheses, the outcome left blank',['IA-1','OB-1','EA-1'].every(id=>st.hyp.filter(h=>h.h.indexOf('Form '+id)>=0).length===1)&&st.hyp.every(h=>!h.out),st.hyp);
+    /* v22.68: VI-1's row for the candidates it ruled out is marked Set aside by design; the offered hypotheses stay blank */
+    const offered=st.hyp.filter(h=>!/^Candidates set aside/.test(h.h));
+    ok('FS-1: IA-1, OB-1 and EA-1 offered as hypotheses, the outcome left blank',['IA-1','OB-1','EA-1'].every(id=>offered.filter(h=>h.h.indexOf('Form '+id)>=0).length===1)&&offered.every(h=>!h.out)&&st.hyp.filter(h=>/^Candidates set aside/.test(h.h)).every(h=>h.out==='Set aside'),st.hyp);
     ok('FS-1: the answer counts what was placed, with a message',r1&&r1.filled>=11&&st.toast,[r1,st.toast]);
     const r2=await p.evaluate(f=>window.__nbhFactsIn(f),F);
     const st2=await p.evaluate(()=>({n:S.src.length,h:S.hyp.length,forms:S.src.map(r=>r.form).filter(Boolean)}));

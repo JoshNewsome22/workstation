@@ -9903,6 +9903,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.68: VI-1's results reach EA-1 and FS-1 (review Wave 3, part 2)
+
+- **What VI-1 found goes on to the next assessment (F161).** VI-1's part of the case now carries the conditions the next
+  assessment must compare, the confounds (from the Difference and Synthesis tabs), the candidates it set aside (the
+  Agreement tab's list and the joint summary's eliminated antecedents), the next step chosen, and how many occurrences
+  were coded. **Form EA-1** reads VI-1 with the other descriptive forms: its function joins the hypothesis carried in
+  (and the prior hypothesis), and two new lines under it, **Conditions to compare** and **Confounds to separate**, fill
+  from VI-1 when empty. **Form FS-1** offers VI-1's hypothesis under Hypotheses Tested and Set Aside, and a row of its
+  own, marked Set aside, for the candidates VI-1 ruled out; its evidence row counts the occurrences. The workstation
+  lists VI-1 before EA-1 under "Test what you think".
+- **The function is chosen, not guessed (F162).** A **Function hypothesized** menu beside the hypothesis statement
+  (attention, escape, tangible, automatic, more than one, unclear) is what the case and FS-1 take. With none chosen the
+  statement's words are read as before, but a function the sentence rules out ("not attention", "rather than",
+  "ruled out") is no longer counted. FS-1 now names a source it cannot count because no single function is named,
+  under the convergence table, instead of leaving it out silently.
+- **FS-1 keeps room for a fourth source.** Hypotheses Tested and Set Aside adds a row when its table still had an empty
+  one, so a hypothesis from a fourth form is not dropped for lack of a row; a table the BCBA has filled stays as it is.
+
+Checked by `qa/v2268-test.js` (13).
+
 ### v22.67: VI-1's clinical findings from the independent review (Wave 3, part 1)
 
 - **A setting event or MO is not eliminated by agreement (F158).** Mill's method of agreement tests a necessary
