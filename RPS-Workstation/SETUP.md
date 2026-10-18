@@ -9905,6 +9905,63 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.48: the Staff Quick Start (QS-1) checked against the plan and the record
+
+Form QS-1, from the review (F389 to F397, I197 to I200):
+
+- **Health and safety from the health record** (F389). Form DM-1's conditions and allergies, an emergency medicine by name
+  (never a dose: the nurse keeps it and gives it), and the precautions on file. When the record lists seizures, a line says
+  that staring, going still or falling can be a seizure, not refusal, and to call the nurse at once. The **school nurse** is
+  added to Who to call.
+- **A draft until it is reviewed** (F390). A field still holding the plan's words is marked on the pages, and every page
+  prints **Draft** across it and in its foot until each is rewritten or kept. Beside each mark is **Keep as is**, and the
+  review has **Keep them all as they are**, after a question. Rules and tiers still in draft go out marked so: Form TI-1
+  does not take them as checklist steps, and Form TV-1 does not script or quiz on them. The wording check knows twenty more
+  words it used to pass ("setting event", "pairing", "escape extinction" and others). A plan's "staff do not" that lists
+  No-s reads "Any of these: ..." in the Don't column, not "Don't: No break".
+- **The crisis call** (F391). Who to call starts with **Administrator or front office**: someone on site who runs the
+  school's crisis response; the school writes the name. That card is the crisis call (you can choose another under Rules
+  and calls), marked **Crisis call** on page four. The flow sheet's Call box uses it, never simply the first card and never
+  the consulting BCBA. With no crisis card the flow sheet prints a line to write a name, and the review says so. The
+  parent's card comes from Form DM-1, without a phone number.
+- **The tiers say what they are** (F392). Each row has a kind (the earliest sign, a tier, the handover to the crisis plan,
+  the recovery) and can be marked **Trained staff only**, which prints as a badge. The flow sheet follows the kinds; an
+  older table's recovery is found only by its name, never by its place or by the word "after". The request branch names
+  the request and what honoring it gives, from Form TD-1's request card (what it earns, and the wait the plan builds in),
+  with an optional "Then" line.
+- **The issue and the handling** (F393, I198). Each copy prints its issue number and date. Under page one's title: the plan
+  governs where the two differ; keep it out of students' sight; do not copy it or pass it on; return it when you no longer
+  work with the student. **Start a new issue** (Setup) raises the number, dates it today and starts an empty **What
+  changed**, which prints on page one. Record who holds a copy under **Who holds a copy**. The ID, grade and school are
+  marked "for the file; not printed".
+- **Where things stand reads the current phase** (F394). The tiles give the level since the current phase began on Form
+  DD-1, with the level before it in brackets. The record table is the data sheet staff hold: DD-1's rows, in its words for
+  how to record. A row placed from Form TB-1 and never touched goes when DD-1 does not count it.
+- **The skills he has, apart from the ones being taught** (F395). The replacement and the skill goals are **being taught**
+  (prompt and praise them) unless DD-1 shows one at its aim; a goal's annual objective is no longer printed as something
+  the student can do. **When** comes from Form FS-1's summary statements (the setting event and the trigger). The goal's
+  criterion is no longer placed as a first-weeks step.
+- **The consequence box** (F396) prints only when you confirm it is in the plan the parent consented to, and then says so.
+- **The Who box follows the plan** (F397) like every other field: never rewritten, it takes the plan's new words;
+  rewritten here, it keeps yours and is offered the new ones.
+- **When the student says stop** (I197). Page three says how the student says stop and what every adult does, from the
+  assent plan (Form SI-1) or the plan's own lines. When the plan uses escape extinction and has no rule for when the
+  student's stop is also the behavior, the review asks you to settle it in Form TD-1 first.
+- **Each adult's part** (I199): who does what, and whether each is trained on this plan (from Form ST-1), on page four. IDEA
+  asks that each person who carries out the IEP be told their specific responsibilities (34 CFR §300.323(d)(2)).
+- **A reading check** (I200, Flow sheet view): an optional last page of up to six questions from these pages, answered in
+  each adult's own words after reading and before training. The answers show on screen only. It shows the handout was
+  read; it is not a competency check, so training with practice and feedback follows (Form ST-1).
+
+Also: Form TD-1 sends its request card to the case, Form SI-1 how the student says stop, and Form FS-1 each summary
+statement's setting event and trigger with the function (the part of FS-1's output the workstation passes on).
+
+Also: on the iPad, the toolbar folding on a long form no longer moves the page by 2 px (the space it gives up is now
+matched in up to four passes, not two).
+
+Checked by `qa/v2248-test.js` (38) and `qa/qs1-test.js` (the worked example now has six pages: four, the flow sheet and the
+reading check; seven sheets on paper, `qa/v2224-qs1-print-test.js`).
+
 ### v22.47: what Google Drive holds, what each sync did, and one calendar
 
 - **What Drive holds** (Caseload, Google Drive section; review I253). Read from Drive itself, by the workstation's own

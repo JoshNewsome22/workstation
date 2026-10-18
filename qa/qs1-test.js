@@ -1,8 +1,8 @@
 /* v21.69 Form QS-1, the Staff Quick Start (NBH-Workstation/QS-1_Staff-Quick-Start_v2026-10.html; parts in tools/forms/QS-1):
-   1. the form opens on its own without a script error; the simulation fills every page and the four pages and the flow
-      sheet build; every page fits one letter page by the form's own measure, and the PDF has six pages (v22.26: the
-      handout's body at about 10 pt runs to five, then the flow sheet);
-   2. the review: a technical word typed on a page is listed back; the flow sheet off makes four pages;
+   1. the form opens on its own without a script error; the simulation fills every page and the four pages, the flow
+      sheet and (v22.48) the reading check build; every page fits one letter page by the form's own measure, and the PDF
+      has seven pages (v22.26: the handout's body at about 10 pt runs on, then the flow sheet; v22.48: then the reading check);
+   2. the review: a technical word typed on a page is listed back; the flow sheet off makes five pages (four and the check);
    3. Save data and Open data give the same quick start back, the plan's words it still holds included;
    4. inside the workstation: with Forms DM-1, TB-1, FS-1, TD-1, CR-1 and GB-1 holding their simulations, QS-1 takes the case
       into its empty fields (the who box, the chain, the five things, the tiers, the record table, the skills, the tiles),
@@ -20,14 +20,14 @@ const FORM='QS-1_Staff-Quick-Start_v2026-10.html';
   await page.evaluate(()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m);};try{nbhUI.confirm=async()=>true;}catch(e){}});
   const e0=log.filter(l=>l.type==='pageerror').length;
   await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(1200);
-  const s1=await page.evaluate(()=>({view:document.body.className,pages:document.querySelectorAll('#out .qs-page').length,flow:document.querySelectorAll('#out .qs-flow').length,
+  const s1=await page.evaluate(()=>({view:document.body.className,pages:document.querySelectorAll('#out .qs-page').length,flow:document.querySelectorAll('#out .qs-flow').length,check:document.querySelectorAll('#out .qs-check').length,
     five:document.querySelectorAll('#out .qs-five li').length,tiers:document.querySelectorAll('#out [data-page="3"] .qs-t tbody tr').length,review:document.querySelector('#outReview').innerText,
     title:document.querySelector('#out .qs-band h1').textContent}));
-  ok('1a the simulation builds four pages and the flow sheet on the Print view',/view-out/.test(s1.view)&&s1.pages===5&&s1.flow===1&&s1.five===5&&s1.tiers===5&&/Working with Sam/.test(s1.title),s1);
+  ok('1a the simulation builds four pages, the flow sheet and the reading check on the Print view',/view-out/.test(s1.view)&&s1.pages===6&&s1.flow===1&&s1.check===1&&s1.five===5&&s1.tiers===5&&/Working with Sam/.test(s1.title),s1);
   ok('1b by the form’s own measure every page fits one letter page, nothing from the plan is left and no technical wording is found',/Every page fits/.test(s1.review)&&/Nothing placed/.test(s1.review)&&/No technical wording/.test(s1.review),s1.review);
   await page.pdf({path:OUT+'sim.pdf',format:'Letter',printBackground:true,preferCSSPageSize:true});
   const pdf=fs.readFileSync(OUT+'sim.pdf');const nPages=(pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).length;
-  ok('1c the PDF has six pages (the handout on five at its larger body, then the flow sheet)',nPages===6,{nPages});
+  ok('1c the PDF has seven pages (the handout on five at its larger body, then the flow sheet, then the reading check)',nPages===7,{nPages});
   /* 2 the review */
   await page.evaluate(()=>setView('day'));await sleep(200);
   await page.fill('[data-k="newline"]','Offer two choices; this is an antecedent change on a VR schedule.');await sleep(500);
@@ -36,7 +36,7 @@ const FORM='QS-1_Staff-Quick-Start_v2026-10.html';
   await page.fill('[data-k="newline"]','Offer two choices, then praise the try.');await sleep(500);
   await page.evaluate(()=>setView('flow'));await sleep(200);await page.selectOption('[data-k="flowOn"]','no');await sleep(500);
   const r2b=await page.evaluate(()=>({pages:document.querySelectorAll('#out .qs-page').length,foot:document.querySelector('#out .qs-foot span').textContent,prev:document.querySelectorAll('#flowPrev .qs-flow').length}));
-  ok('2b with the flow sheet off the handout is four pages (the Flow view still shows it)',r2b.pages===4&&/Page 1 of 4/.test(r2b.foot)&&r2b.prev===1,r2b);
+  ok('2b with the flow sheet off the handout is five pages, the reading check last (the Flow view still shows the sheet)',r2b.pages===5&&/Page 1 of 5/.test(r2b.foot)&&r2b.prev===1,r2b);
   await page.selectOption('[data-k="flowOn"]','yes');await sleep(300);
   /* 3 save and open */
   await page.evaluate(()=>{S.pulled['who']=S.who;renderMarks();});

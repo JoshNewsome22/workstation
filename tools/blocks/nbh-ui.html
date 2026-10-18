@@ -378,7 +378,8 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
            and corrected for a margin the next block shared with the bar */
         var keep = shortP ? Math.max(0, Math.min(D, y + S - T)) : D, want = n0 - (D - keep), g = mb0 + keep;
         R.style.setProperty('--nbh-fold-gap', g + 'px');
-        for (var i = 0; nx && i < 2; i++) { var d = nx.getBoundingClientRect().top + (window.scrollY || 0) - want; if (Math.abs(d) < 0.5) break; g = Math.max(0, g - d); R.style.setProperty('--nbh-fold-gap', g + 'px'); }
+        /* v22.48 four passes, not two: on a long form (QS-1's Setup) two left the page 2 px off; each pass stops once it holds */
+        for (var i = 0; nx && i < 4; i++) { var d = nx.getBoundingClientRect().top + (window.scrollY || 0) - want; if (Math.abs(d) < 0.5) break; g = Math.max(0, g - d); R.style.setProperty('--nbh-fold-gap', g + 'px'); }
       }
       moved = bars.map(function(e){ var w = e.style.getPropertyValue('top'), p = e.style.getPropertyPriority('top'); e.style.setProperty('top', (S + h) + 'px', 'important'); return [e, w, p]; });
       R.style.setProperty('--nbh-fold-d', D + 'px');

@@ -2199,13 +2199,14 @@ function tvDraftData(f,add,seg,fam){const L=tvDataList(f);if(!L.length)return;co
 
 /* ---- Form QS-1: the non-negotiables as a card of do and don't, and the tiers, one a card, a point a click ---- */
 const tvDont=x=>cap1(str(x).replace(/^(don[’']?t|do not|never)\s+/i,''));
-function tvDraftEveryday(f,add,seg,fam){const q=f&&f.quick,R=q&&Array.isArray(q.rules)?q.rules.filter(r=>r&&(str(r.do)||str(r.dont))):[];if(!R.length)return;const N=firstName();
+/* v22.48 (review F390) a QS-1 row still holding the plan's words unreviewed (draft) is not scripted or quizzed */
+function tvDraftEveryday(f,add,seg,fam){const q=f&&f.quick,R=q&&Array.isArray(q.rules)?q.rules.filter(r=>r&&!r.draft&&(str(r.do)||str(r.dont))):[];if(!R.length)return;const N=firstName();
   for(let k=0;k<R.length;k+=5){const part=R.slice(k,k+5),first=!k;
     const open=fam?'A few things matter every day, at school and at home.':'These are the non-negotiables: what every adult does, and never does, with '+N+', every day.',all=part.map(r=>[str(r.do)?sent(cap1(str(r.do))):'',str(r.dont)?sent('Don’t '+lc1(tvDont(r.dont))):''].filter(Boolean).join(' ')).join(' ');
     /* the card shows the two columns; the teleprompter says each line */
     add(seg,{say:first?open:'',tp:first?open+' '+all:'',cont:!first,
       title:'Do and Don’t',body:part.map(r=>[str(r.do)?'Do: '+short(cap1(r.do),54):'',str(r.dont)?'Don’t: '+short(tvDont(r.dont),54):''].filter(Boolean).join('\n')).join('\n'),lay:'dodont'});}}
-function tvDraftTiers(f,add,seg,fam){const q=f&&f.quick;let T=q&&Array.isArray(q.tiers)?q.tiers.filter(t=>t&&(str(t.see)||str(t.do))):[];if(!T.length)return;
+function tvDraftTiers(f,add,seg,fam){const q=f&&f.quick;let T=q&&Array.isArray(q.tiers)?q.tiers.filter(t=>t&&!t.draft&&(str(t.see)||str(t.do))):[];if(!T.length)return;
   /* a family: the first signs and the behavior, and the recovery; not the crisis detail */
   if(fam)T=T.filter((t,j)=>(j<2||/recover|after|calm|return/i.test(str(t.name)))&&!/crisis|danger|unsafe|emergenc|restrain|hold|911/i.test(str(t.name)+' '+str(t.do)));if(!T.length)return;
   add(seg,{say:fam?'At school, staff respond the same way each time, by what they see. ':'The plan in tiers: for each one, what you see, what you do, and what you say. Every adult responds the same way.',title:'What You See, What You Do',body:bullets(T.map(t=>short(str(t.name)||'Tier',40))),build:true});
@@ -2318,9 +2319,9 @@ function tvQuiz(){const f=CASE||{},N=firstName(),Q=[],pl=f.plan&&typeof f.plan==
   if(rep)mc('When '+N+' uses the replacement behavior ('+lc1(short(rep,60))+'), what do you do?','Honor it right away, every time',['Ask '+N+' to wait until the work is done','Ignore it, so it is not used too often','Give a warning first']);
   if(str(rsp.prec))mc('At the first sign'+(str(pl.prec)?' ('+lc1(short(pl.prec,60))+')':'')+', what do you do first?',short(rsp.prec,90),[rsp.target,rsp.after].map(x=>short(x,90)).filter(Boolean).concat(['Wait to see if it passes on its own','Send '+N+' to the office']));
   const ant=arr(pl.ant);if(str(rsp.not)&&ant.length>=2)mc('Which of these should staff not do?',short(rsp.not,90),ant.map(x=>short(x,90)));
-  const R=(q.rules||[]).filter(r=>r&&str(r.do)&&str(r.dont));
+  const R=(q.rules||[]).filter(r=>r&&!r.draft&&str(r.do)&&str(r.dont));
   if(R.length>=3){mc('Which of these is on the do list?',short(R[0].do,90),R.slice(1).map(r=>tvDont(short(r.dont,90))));mc('Which of these is on the don’t list?',tvDont(short(R[1].dont,90)),R.filter((r,j)=>j!==1).map(r=>short(r.do,90)),2);}
-  const T=(q.tiers||[]).filter(t=>t&&str(t.see)&&str(t.do));if(T.length>=3)mc('When you see this: “'+short(T[0].see,80)+'”, what do you do?',short(T[0].do,90),T.slice(1).map(x=>short(x.do,90)));
+  const T=(q.tiers||[]).filter(t=>t&&!t.draft&&str(t.see)&&str(t.do));if(T.length>=3)mc('When you see this: “'+short(T[0].see,80)+'”, what do you do?',short(T[0].do,90),T.slice(1).map(x=>short(x.do,90)));
   tvDataList(f).filter(x=>x.bv!=null).slice(0,1).forEach(x=>{const a=x.cv<x.bv*0.9?'It has gone down':x.cv>x.bv*1.1?'It has gone up':'It has stayed about the same';Q.push({q:'Since the plan started, what has happened to '+lc1(x.name)+'?',type:'mc',a,ch:['It has gone down','It has stayed about the same','It has gone up']});});
   /* a short case: the takeaways and the strategies of the script, each true */
   if(Q.length<5)S.rows.filter(r=>/^(takeaways|proactive|everyday)$/.test(tvSegKey(r))).forEach(r=>String(r.body||'').split('\n').map(l=>l.trim().replace(/^[•\-*–]\s*/,'').replace(/^\d+[.)]\s+/,'').replace(/^do\s*:\s*/i,'')).filter(l=>l&&!todo(l)&&!/^(don[’']?t|do not|never)\s*:/i.test(l)).forEach(l=>{if(Q.length<5)tf(sent(cap1(l)),true);}));

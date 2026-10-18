@@ -5233,6 +5233,16 @@ const wasOut=window.__nbhFactsOut;
 window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,arguments):null;}catch(e){o=null;}
   try{const L=window.__td46Steps?window.__td46Steps():[];if(!L.length)return o;o=o||{};o.plan=o.plan||{src:'TD-1'};
     o.plan.steps=L.slice(0,150).map(x=>{const y={n:x.n,d:x.d.slice(0,1500),grp:x.grp,comp:x.comp,cmp:x.cmp,crit:x.crit};if(x.ns)y.ns=x.ns;return y;});o.plan.stepsRev=window.__td46Rev(L);}catch(e){}
+  /* v22.48 (review F392) the request card for Form QS-1's flow sheet: the replacement, what it earns, and how the plan thins it
+     (the first FCT, DRA or DNRA card; a delay-tolerance card's steps when the request card names no thinning) */
+  try{const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';};
+    const card=c=>document.querySelector('#compWrap .card[data-code="'+c+'"]'),pv=(c,k)=>{const d=card(c);return d?g('cp['+d.dataset.i+'].p'+k):'';};
+    let rq=null;
+    if(card('FCT'))rq={form:pv('FCT',0),reinf:pv('FCT',2),thin:[pv('FCT',4),pv('FCT',5)].filter(Boolean).join('; ')};
+    else if(card('DRA'))rq={form:pv('DRA',0),reinf:pv('DRA',1),thin:pv('DRA',2)};
+    else if(card('DNRA'))rq={form:pv('DNRA',0),reinf:pv('DNRA',1)?'a break of '+pv('DNRA',1):'',thin:pv('DNRA',2)};
+    if(rq){if(!rq.thin&&card('DT_PROG')&&pv('DT_PROG',0))rq.thin='delay steps '+pv('DT_PROG',0);rq.name=g('m.repdesc')||rq.form;
+      Object.keys(rq).forEach(k=>{if(!rq[k])delete rq[k];});if(Object.keys(rq).length){o=o||{};o.plan=o.plan||{src:'TD-1'};o.plan.request=rq;}}}catch(e){}
   return o;};
 })();
 </script>

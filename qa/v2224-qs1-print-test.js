@@ -1,7 +1,8 @@
 /* v22.24 QS-1's staff quick start on paper (review F482): no word under 7.5 pt (its labels, notes and figure words printed
    at 6-6.8 pt). v22.26 the body larger, as approved from the preview: about 10 pt on paper (it was 7.9), the handout's
    sections running on over five pages, then the flow sheet as it was; each page's last line clear of its foot, and one
-   footer a page (the confidentiality line and "Page N of 6"), not the handout's own as well. Simulated student only.
+   footer a page (the confidentiality line and "Page N of 6"), not the handout's own as well; v22.48 the reading check is a
+   seventh page. Simulated student only.
    usage: node qa/v2224-qs1-print-test.js */
 const L = require(__dirname + '/lib.js'); const { execFileSync } = require('child_process');
 const OUT = __dirname + '/out/v2224'; L.fs.mkdirSync(OUT, { recursive: true });
@@ -23,10 +24,10 @@ print(json.dumps(out))`, file], { encoding: 'utf8' }));
     await p.evaluate(() => window.dispatchEvent(new Event('beforeprint'))); await p.emulateMedia({ media: 'print' });
     const file = OUT + '/qs1.pdf'; L.fs.writeFileSync(file, await p.pdf({ preferCSSPageSize: true, printBackground: true }));
     const P = info(file), small = Math.min(...P.map(x => x[0])), body = P.map(x => Math.round(x[1] * 10) / 10);
-    ok('1 the staff quick start prints on six pages (five for the handout, then the flow sheet)', P.length === 6, P.length);
+    ok('1 the staff quick start prints on seven pages (five for the handout, then the flow sheet, then the reading check)', P.length === 7, P.length);
     ok('2 no word on them under 7.5 pt (smallest ' + small.toFixed(1) + ' pt)', small >= 7.45, P.map(x => x[0].toFixed(1)));
     ok('3 the handout\'s body prints at about 10 pt (' + body.slice(0, 5).join(', ') + ' pt) and each page\'s last line stays clear of its foot', body.slice(0, 5).every(b => b >= 9.2 && b <= 10.4) && P.every(x => x[2] < x[3] - 36), { body, low: P.map(x => Math.round(x[2])) });
-    ok('3b one footer a page: the confidentiality line once and "Page N of 6"', P.every((x, i) => x[4] === 1 && x[5] === 'Page ' + (i + 1) + ' of 6'), P.map(x => [x[4], x[5]]));
+    ok('3b one footer a page: the confidentiality line once and "Page N of 7"', P.every((x, i) => x[4] === 1 && x[5] === 'Page ' + (i + 1) + ' of 7'), P.map(x => [x[4], x[5]]));
     await p.emulateMedia({ media: 'screen' });
     const scr = await p.evaluate(() => { const e = document.querySelector('.qs-kick,.qs-lab'); return e ? getComputedStyle(e).fontSize : ''; });
     ok('4 on screen the labels keep their screen size (' + scr + ', the screen polish\'s; the rule is for paper)', scr === '11px', scr);

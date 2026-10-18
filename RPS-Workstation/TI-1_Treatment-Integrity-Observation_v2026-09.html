@@ -1753,7 +1753,7 @@ renderAll();
    non-negotiables" adds any not yet on the list. The rest of the case goes where it did before (the generic fill). */
 "use strict";
 let tiQuick=null;
-function tiQuickSteps(){return ((tiQuick&&tiQuick.rules)||[]).map(r=>{const d=String(r.do||'').trim(),n=String(r.dont||'').trim();
+function tiQuickSteps(){return ((tiQuick&&tiQuick.rules)||[]).filter(r=>r&&!r.draft).map(r=>{   /* v22.48 (review F390) a row QS-1 marks draft is not a step */const d=String(r.do||'').trim(),n=String(r.dont||'').trim();
   return d?d+(n?' (not: '+n.charAt(0).toLowerCase()+n.slice(1)+')':''):(n?'Does not: '+n.charAt(0).toLowerCase()+n.slice(1):'');}).filter(Boolean);}   /* v22.39 (review F461) a rule with no Do is scored as what the adult does not do */
 const tiK=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
 function tiQuickAdd(){const L=tiQuickSteps(),have=new Set(S.steps.map(st=>tiK(st.d)));let n=0;

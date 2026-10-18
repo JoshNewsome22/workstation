@@ -1638,7 +1638,9 @@ window.__nbhFactsOut=function(){
   const fnTxt=S.meta.fn||(behs[0]&&behs[0].fn)||'';
   const out={};
   if(fnTxt)out.fn={key:key(fnTxt),label:fnTxt,statements:behs.map(b=>b.statement).filter(Boolean),
-    perBehavior:behs.map(b=>({label:b.label,fn:b.fn,fnKey:b.fnKey,statement:b.statement,alt:b.alt}))};
+    perBehavior:behs.map(b=>({label:b.label,fn:b.fn,fnKey:b.fnKey,statement:b.statement,alt:b.alt,se:b.se,ant:b.ant}))};
+  /* v22.48 (review F395) each summary statement's setting event and trigger ride on fn.perBehavior, which the workstation passes on
+     (behaviorsFS stands in for the target behaviors only when Form TB-1 has none), for Form QS-1's When */
   if(behs.length)out.behaviorsFS=behs;
   return Object.keys(out).length?out:null;
 };

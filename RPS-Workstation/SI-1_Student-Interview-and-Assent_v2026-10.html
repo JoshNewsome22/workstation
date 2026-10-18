@@ -1522,6 +1522,8 @@ function assentStatus(){const m=S.meta.a_status;if(m)return m;const a=assentStat
   try{const m=S.meta,p=prefStats(),o={};const hyp=plain(hypLine()),st=assentStatus(),likes=unq(S.iv.like&&S.iv.like.a).trim();
    const pref=unq(m.p_want).trim()||(p.top?'Chose '+p.top.name+' most ('+p.top.ch+' of '+p.top.off+' offers)':'')||unq(m.p_say).trim();
    if(hyp)o.hypothesis=hyp;if(st)o.assent=st;if(pref)o.preference=pref;if(likes)o.likes=likes;
+   /* v22.48 (review I197) how the student says stop (the withdrawal behaviors) and what staff do then, for Form QS-1 */
+   const sg=(S.wb||[]).map(r=>unq(r&&r.beh).trim()).filter(Boolean),ws=unq(m.w_steps).trim();if(sg.length||ws){o.stop={};if(sg.length)o.stop.signs=sg.join('; ');if(ws)o.stop.steps=ws;}
    if(!Object.keys(o).length)return r;const d=iso(m.date);if(d)o.date=d;
    return Object.assign({},r||{},{student:o});}catch(e){return r;}};}
 </script>

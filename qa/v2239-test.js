@@ -13,7 +13,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const r=await q.evaluate(()=>{nbhCase.apply({profile:{client:'Mateo Rivera',avoid:'Being called out in front of peers (simulated)',helps:'A heads-up before changes (simulated)'},
     plan:{respond:{target:'Block, keep the task in place, prompt the break card (simulated)',not:'No removal of the task after hitting; no lecture (simulated)'}}});
     return {r0:S.rules[0],rules:S.rules.filter(x=>(x.do||'').trim()||(x.dont||'').trim()).length,day:(S.day||[]).map(x=>x.text)};});
-  ok('1 QS-1 rule 1 pairs the plan’s response with the plan’s "staff do not"',/Block, keep the task/.test(r.r0.do)&&/No removal of the task/.test(r.r0.dont)&&r.rules===1,r);
+  ok('1 QS-1 rule 1 pairs the plan’s response with the plan’s "staff do not"',/Block, keep the task/.test(r.r0.do)&&/^Any of these: removal of the task/.test(r.r0.dont)&&r.rules===1,r);
   ok('2 DM-1’s "what to avoid" goes with the day, beside What helps, not into the non-negotiables',r.day.some(t=>/^Avoid: Being called out/.test(t))&&!/called out/.test(JSON.stringify(r.r0)),r.day);
   const t=await ctx.newPage();t.on('pageerror',e=>errs.push('TI-1: '+e.message));await t.goto(L.BASE+'/NBH-Workstation/TI-1_Treatment-Integrity-Observation_v2026-09.html');await sleep(900);
   const st=await t.evaluate(()=>{tiQuick={rules:[{do:'',dont:'No lecture (simulated)'},{do:'Prompt the break card (simulated)',dont:'Removing the task (simulated)'}]};return tiQuickSteps();});
