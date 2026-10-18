@@ -530,18 +530,34 @@ function design(){
     }
   }
   if(sel==='vi'){
-    const kind=m.vi_kind||'vi',T=num(m.vi_mean),N=Math.max(2,Math.min(40,Math.round(num(m.vi_n)??10))),method=m.vi_method||'fh',R=rng(Math.round(num(m.vi_seed)??7)*7919);
+    /* v22.60 (Bancroft & Bourret, 2008): variable time as a kind, for NCR; up to 60 values; the random method prints its
+       list with its actual mean and longest value; Lists for sessions gives each session an order (or draws) of its own;
+       with a session length, the times from the start for a time-based schedule; the two-timer rule for an interval one */
+    const kind=m.vi_kind||'vi',T=num(m.vi_mean),N=Math.max(2,Math.min(60,Math.round(num(m.vi_n)??10))),method=m.vi_method||'fh',R=rng(Math.round(num(m.vi_seed)??7)*7919);
+    const timed=kind!=='vr',sess=num(m.vi_sess),lists=Math.max(1,Math.min(5,Math.round(num(m.vi_lists)??1)));
+    const L0=kind==='vi'?'VI ':kind==='vt'?'VT ':'VR ',L1=kind==='vi'?'RI ':kind==='vt'?'RT ':'RR ';
     o.title='A series for a variable schedule';
     if(T==null||T<=0)o.warn.push('Enter the mean.');
-    else{let ser;if(method==='fh')ser=shuffle(fhSeries(T,N),R);else if(method==='arith'){ser=[];for(let n=1;n<=N;n++)ser.push(Math.max(1,Math.round(2*T*n/(N+1))));ser=shuffle(ser,R);}else ser=null;
-      const unit=kind==='vi'?' s':' responses';o.nota=(kind==='vi'?'VI ':'VR ')+Math.round(T)+(kind==='vi'?' s':'');
-      if(ser){const mean=ser.reduce((a,b)=>a+b,0)/ser.length;o.params.push(['Series ('+(method==='fh'?'Fleshler–Hoffman':'arithmetic, shuffled')+')','<div class="series">'+ser.join(', ')+'</div>'],['Mean of the series',r1(mean)+unit],['Shortest / longest',Math.min(...ser)+' / '+Math.max(...ser)+unit]);
-        o.rule=kind==='vi'?'Work through the series in order, one value per reinforcer: set the timer to the value; when it rings, the next instance of '+B+' earns '+R_+'; then set the next value. Start again at the top when the list is used up.':'Work through the series in order: count instances of '+B+'; the one that completes the current value earns '+R_+'; then take the next value.';
-        o.data=['Reinforcers delivered per session and the obtained mean (reinforcers against time or responses)'];}
-      else{const p=kind==='vi'?'each second, with probability '+(1/T).toFixed(3):'each response, with probability '+(1/T).toFixed(3);o.nota=(kind==='vi'?'RI ':'RR ')+Math.round(T);o.params.push(['Random procedure','Sample '+p+'. A spinner, a die or a random-number app does it. The mean is '+Math.round(T)+unit+'; there is no longest value.']);
-        o.rule=kind==='vi'?'Every second, draw (a random-number app set to the probability): if the draw hits, the next instance of '+B+' earns '+R_+'. Otherwise nothing changes.':'After each instance of '+B+', draw: a hit means that instance earns '+R_+'.';
-        o.warn.push('Random schedules produce long unpaid stretches by chance; while the student is learning, cap them (pay the next response after '+Math.round(3*T)+(kind==='vi'?' s':' unpaid responses')+').');}
-      o.notes='The Fleshler–Hoffman series keeps the chance of reinforcement nearly constant through the interval (Catania &amp; Reynolds, 1968); the arithmetic series makes reinforcement more likely late in the interval (Bancroft &amp; Bourret, 2008, make the same point about an evenly spread list, and draw random schedules by a fixed probability per response or per second). Keep the shortest value short, which prevents a pause after reinforcement (Ferster &amp; Skinner, 1957, Chapter 6).';}
+    else{const unit=timed?' s':' responses',rnd=method==='rand';
+      /* a drawn value: the seconds (or responses) up to and including the draw that hits, at probability 1/T each */
+      const draw=()=>{let v=1;while(R()>=1/T&&v<T*20)v++;return v;};
+      const one=()=>{if(method==='fh')return shuffle(fhSeries(T,N),R);if(method==='arith'){const a=[];for(let n=1;n<=N;n++)a.push(Math.max(1,Math.round(2*T*n/(N+1))));return shuffle(a,R);}const a=[];for(let n=0;n<N;n++)a.push(draw());return a;};
+      const sets=[];for(let i=0;i<lists;i++)sets.push(one());
+      const ser=sets[0],mean=ser.reduce((a,b)=>a+b,0)/ser.length,mmss=t=>Math.floor(t/60)+':'+String(Math.round(t%60)).padStart(2,'0');
+      o.nota=(rnd?L1:L0)+Math.round(T)+(timed?' s':'');
+      const lab=rnd?'List (drawn at '+(timed?'each second':'each response')+', probability '+(1/T).toFixed(3)+')':'Series ('+(method==='fh'?'Fleshler–Hoffman':'arithmetic, shuffled')+')';
+      sets.forEach((s,i)=>o.params.push([lists>1?lab+', session '+(i+1):lab,'<div class="series">'+s.join(', ')+'</div>']));
+      o.params.push(['Mean of the '+(rnd?'list':'series')+(lists>1?' for session 1':''),r1(mean)+unit+(rnd?' (the probability sets a mean of '+Math.round(T)+unit+'; a drawn list comes close, not exactly)':'')],['Shortest / longest',Math.min(...ser)+' / '+Math.max(...ser)+unit]);
+      if(kind==='vt'&&sess>0){let t=0;const at=[],src=[].concat(...sets);for(let i=0;i<400;i++){t+=src[i%src.length];if(t>sess*60)break;at.push(mmss(t));}
+        o.params.push(['Times from the start of a '+sess+'-minute session','<div class="series">'+at.join(', ')+'</div>']);}
+      const next=lists>1?' Use the list for session 1 in session 1, the next in session 2, and so on; if a list runs out within a session, go on with the next one.':' When the list is used up, start again at the top, or set Lists for sessions so that each session has an order of its own (Bancroft & Bourret, 2008, make a new list for each session).';
+      if(kind==='vi')o.rule=(rnd?'Draw every second (a random-number app set to the probability), or work through the list as timer values: ':'Work through the series in order, one value per reinforcer: ')+'set the schedule timer to the value; when it rings, the next instance of '+B+' earns '+R_+'; then set the next value. Run two timers: the schedule timer stops when a reinforcer is set up, waits for the next instance of '+B+', and then restarts; a second timer keeps the session length (Bancroft & Bourret, 2008).'+next;
+      else if(kind==='vt')o.rule='Work through the '+(rnd?'list':'series')+' in order: set the timer to the value; when it rings, deliver '+R_+' whatever the student is doing; then set the next value. One timer is enough'+(sess>0?' (the times from the start are printed above)':'')+'.'+next;
+      else o.rule='Work through the '+(rnd?'list':'series')+' in order: count instances of '+B+'; the one that completes the current value earns '+R_+'; then take the next value.'+next;
+      o.data=['Reinforcers delivered per session and the obtained mean (reinforcers against time or responses)'];
+      if(rnd){o.params.push(['Random procedure','Sample '+(timed?'each second, with probability '+(1/T).toFixed(3):'each response, with probability '+(1/T).toFixed(3))+'. The list above is one such draw; a spinner, a die or a random-number app does the same at the table.']);
+        o.warn.push('Random schedules produce long unpaid stretches by chance, and several short or several long values can come in a row: you cannot control the values (Bancroft & Bourret, 2008). While the student is learning, cap them (pay the next response after '+Math.round(3*T)+(timed?' s':' unpaid responses')+'); a capped schedule is no longer constant-probability at the cap.');}
+      o.notes='The Fleshler–Hoffman series keeps the chance of reinforcement nearly constant through the interval (Catania &amp; Reynolds, 1968); the arithmetic series makes reinforcement more likely late in the interval (Bancroft &amp; Bourret, 2008, make the same point about an evenly spread list, and draw random schedules by a fixed probability per response or per second). Keep the shortest value short, which prevents a pause after reinforcement (Ferster &amp; Skinner, 1957, Chapter 6). SR-1&rsquo;s series are shuffled without replacement, so each pass has exactly the stated mean; a drawn random list does not. A random ratio can fade a schedule from FR 1 toward a leaner VR (Bancroft &amp; Bourret, 2008).';}
   }
   if(sel==='ncr'){
     const b=base('ncr_n','ncr_min'),kind=m.ncr_kind||'ft',dur=num(m.ncr_dur)??20,term=(num(m.ncr_term)??5)*60,omit=num(m.ncr_omit)??10;
@@ -549,8 +565,9 @@ function design(){
     if(!b)o.warn.push('Enter the baseline count and minutes.');
     else{let iv=Math.max(5,Math.floor(b.irt/5)*5);o.nota=(kind==='ft'?'FT ':'VT ')+fmtS(iv)+' ('+dur+' s access) + EXT';
       o.params.push(['Baseline mean IRT',fmtS(b.irt)],['Starting interval',fmtS(iv)+' (the baseline mean IRT, after Vollmer et al., 1993)'],['Each delivery',dur+' s of '+R_],['Omission rule','If '+B+' occurred in the last '+omit+' s, wait '+omit+' s of its absence before delivering'],['Thinning',m.ncr_thin==='perf'?'Performance-based: one step after each session at or under criterion; one step back after a session above it':'Fixed increments: one step each day the criterion holds']);
+      if(kind==='vt'){const L=shuffle(fhSeries(iv,10),rng(Math.round(num(m.vi_seed)??7)*7919));o.params.push(['Intervals at the starting interval (Fleshler–Hoffman, shuffled)','<div class="series">'+L.map(fmtS).join(', ')+'</div>']);}   /* v22.60 (Bancroft & Bourret, 2008) */
       const rows=[];let k=1,cur=iv;while(cur<term&&k<=12){rows.push([k,fmtS(cur),esc(m.ncr_crit||'')]);cur=Math.round(cur*2/5)*5;k++;}rows.push([k,fmtS(term)+' (terminal)','hold']);o.stepsHead=['Step','Interval','Criterion to step'];o.steps=rows;
-      o.rule='Set the timer to '+fmtS(iv)+(kind==='vt'?' on average':'')+'. When it rings, deliver '+dur+' seconds of '+R_+' whatever the student is doing, unless '+B+' happened in the last '+omit+' seconds, in which case wait for '+omit+' seconds without it, then deliver. '+B+' itself never produces '+R_+'.';
+      o.rule='Set the timer to '+(kind==='vt'?'the next interval on the list ('+fmtS(iv)+' on average; at each later step, multiply every value by that step\'s interval over '+fmtS(iv)+')':fmtS(iv))+'. When it rings, deliver '+dur+' seconds of '+R_+' whatever the student is doing, unless '+B+' happened in the last '+omit+' seconds, in which case wait for '+omit+' seconds without it, then deliver. '+B+' itself never produces '+R_+'.';
       o.data=['Rate of '+B+' per session against baseline '+r1(b.rate)+' per minute','Deliveries per session and the interval in force'];
       o.notes='NCR teaches no replacement; run FCT or DRA alongside, and expect the free reinforcer to lower the value of the same reinforcer earned by the alternative (satiation). Dense schedules worked where lean ones did not (Hagopian et al., 1994).';}
   }

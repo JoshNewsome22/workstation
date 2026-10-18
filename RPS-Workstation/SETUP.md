@@ -9903,6 +9903,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.60: SR-1's variable and random schedules, from Bancroft and Bourret (2008)
+
+- **Variable time** joins Variable interval and Variable ratio as a kind of series on Form SR-1's Design sheet, for
+  noncontingent reinforcement, and a series can have up to **60** values (Bancroft and Bourret write 52 a run).
+- **The random method prints its list.** RI, RR and RT values are drawn by the constant probability (each second, or each
+  response, at 1 in the mean), and the sheet shows the list with its own mean and its longest value, so staff work from
+  printed values instead of rolling dice at the table. A drawn list's mean comes close to the set mean, not exactly.
+- **Lists for sessions** (1 to 5): each session gets an order of its own (a fresh shuffle of the series, or fresh draws), so
+  one short order is not reused day after day.
+- **Session length**: a time schedule (VT, RT) prints the times from the start of the session (":15, :53, 1:23 ...").
+- **The rules**: an interval schedule runs two timers (the schedule timer stops when a reinforcer is set up and restarts
+  after the response; a second timer keeps the session length); a time schedule needs one. The random caution adds that
+  several short or several long values can come in a row and cannot be controlled, and that a capped random schedule is
+  no longer constant-probability at the cap; the notes add that SR-1's series are exact each pass and that a random ratio
+  can fade a schedule from FR 1 toward a leaner VR.
+- **NCR on a variable time** prints its intervals at the starting interval (Fleshler-Hoffman, shuffled), and says to scale
+  them at each later step.
+
+Checked by `qa/v2260-test.js` (9) and the SR-1 tests.
+
 ### v22.59: the reinforcer menu keeps what the reinforcer assessment confirmed
 
 - **One rule for the menu the forms take from the case.** Forms AD-1, CT-1, TD-1, VS-1 and the Delay Tolerance toolkit
