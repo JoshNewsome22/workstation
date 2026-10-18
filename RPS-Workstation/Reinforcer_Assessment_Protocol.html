@@ -739,6 +739,7 @@ td input,td select{max-width:100%}
 .ra-run-rec .ra-run-k{display:block;font-size:11px;font-weight:600;opacity:.85;margin-top:1px}
 .ra-run-rec .ra-run-pb{border-color:#9b4e15;color:#7a3c0f}
 .ra-run-rec .ra-run-undo{flex:0 1 84px;font-size:15px}
+.ra-run-rec .ra-run-eat{border-color:#8a6d00;background:#fff7d6;color:#4d3c00;flex-grow:2}.ra-run-rec .ra-run-eat[hidden]{display:none}   /* v22.58 Consumed */
 .ra-run-rec button:disabled{opacity:.42;cursor:default}
 .ra-run-rec button.ra-run-hit{transform:scale(.97);filter:brightness(1.18)}
 .ra-run-keys{font-size:11.5px;color:var(--nbh-muted,#54676f);margin:6px 0 0}
@@ -1556,6 +1557,10 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
         <option value="g2">&times;2 (FR1, 2, 4, 8 &hellip;)</option>
         <option value="std">1, 2, 5, 10, 20, 30, 40 &hellip;</option>
       </select>
+      <select id="prRep" aria-label="Presentations of each ratio" title="Roane et al. (2001) presented each ratio twice for 3 of 4 participants, to prevent rapid ratio strain">
+        <option value="1">Each ratio once</option>
+        <option value="2">Each ratio twice</option>
+      </select>
       <input type="number" id="prStart" min="1" max="20" value="1">
       <input type="number" id="prStop" min="30" max="600" step="30" value="120">
     </div>
@@ -1634,12 +1639,12 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   <h3 class="sub">Running Sessions at the Table</h3>
   <ul class="rules">
     <li><b>The runners.</b> The Single operant, Concurrent operants, and Progressive ratio sheets each open with a <b>Run This Session</b> panel. It uses the sheet's own parameters: the session length from the toolbar; the progression, starting ratio, and stop interval from the toolbar; the progressive-ratio session cap and each stimulus's magnitude from Setup. It times the session, cues each reinforcer and times its access, and when you press <b>Save to the sheet</b> it writes the session into the next empty row, so the sheet, its graph, and the summary update. The runner is for the person collecting data and does not print.</li>
-    <li><b>Before you start.</b> Check the condition and the <b>Access (s)</b> the runner has read from Setup, from the stimulus's magnitude or, failing that, from Consequence magnitude and timing. An edible, a token, or a portion with no stated time (one piece, a praise statement) gets 0 s: the runner cues the delivery and times nothing. A stimulus with no access time anywhere in Setup gets 20 s, and the panel says it is a default. The panel repeats the response definition and the MO control from Setup, and when a stimulus has no session on that sheet yet it reminds you to prompt the response once and deliver the stimulus first. If the next empty row already names a condition (or, on the concurrent-operants sheet, a position), the runner takes it as the plan for that session.</li>
-    <li><b>Access periods.</b> When a reinforcer is due, the runner cues it; for a timed item it counts the access down and cues the end, when you remove the item. A response during an access period is counted, but it does not count toward the next reinforcer or ratio.</li>
+    <li><b>Before you start.</b> Check the condition and the <b>Access (s)</b> the runner has read from Setup, from the stimulus's magnitude or, failing that, from Consequence magnitude and timing. An edible, a token, or a portion with no stated time (one piece, a praise statement) gets 0 s: the runner cues the delivery and times nothing. For an edible, <b>Access ends</b> can be set to <b>When it is consumed</b>: the runner then waits until you tap <b>Consumed</b> (or press E), up to 10 minutes, with the task out of reach meanwhile, and the progressive ratio&rsquo;s stop interval starts again from that tap, so eating time is not counted as a pause in responding (Francisco, Borrero, &amp; Sy, 2008, delivered each edible until it was consumed). A stimulus with no access time anywhere in Setup gets 20 s, and the panel says it is a default. The panel repeats the response definition and the MO control from Setup, and when a stimulus has no session on that sheet yet it reminds you to prompt the response once and deliver the stimulus first. If the next empty row already names a condition (or, on the concurrent-operants sheet, a position), the runner takes it as the plan for that session.</li>
+    <li><b>Access periods.</b> When a reinforcer is due, the runner cues it; for a timed item it counts the access down and cues the end, when you remove the item; for an item that lasts until consumed it waits for <b>Consumed</b>. With <b>Clock during access</b> on Pauses (the default) the task materials are out of reach during access, so a response then is recorded apart and is not counted; with the clock running it is counted, but not toward the next reinforcer or ratio.</li>
     <li><b>Single operant.</b> Tap <b>Response</b> for every response. In a stimulus condition the runner counts toward the schedule (FR 1 unless you set another <b>Schedule (FR)</b> to test a plan schedule) and cues the reinforcer each time the requirement is met; in Control the response produces nothing. <b>Clock during access</b> decides the minutes: by default the session clock waits while the student has the item, so the session is minutes with the response available and the Minutes column gets those (the convention where a study states one: Glover et al., 2008, took access time out of the session time; DeLeon et al., 2014, stopped the clock); or the clock runs, and the sheet takes minutes run less access, or minutes run. With the clock waiting, the task materials stay out of reach during access, and a response made then is recorded apart and not counted, as in the studies that remove the task during access (DeLeon et al., 2009; Francisco et al., 2008). In a reversal design the runner ticks Phase start when the condition differs from the session before.</li>
     <li><b>Concurrent operants.</b> Set <b>Option A position</b> (the runner suggests the next position in the rotation), then prompt one response at each station and deliver its consequence before pressing <b>Start session</b>; those responses are not counted. Tap the button for the station the student responds at (keys 1, 2, 3, in the order of the sheet's columns). Each stimulus option runs its own schedule and access time; the control option produces nothing; the clock waits during an option's access, as on the other sheets. The summary also shows changeovers for reference; the sheet has no column for them.</li>
     <li><b>Condition comparison (COA).</b> With <b>Arrangement</b> on the Concurrent operants sheet set to Condition comparison, the sheet opens a different runner. Choose the pairing and the side of Condition 1 (the runner suggests the side opposite the pairing&rsquo;s last session), place the student at the neutral spot, give the contingency overview, then press <b>Start session</b> and tap <b>Side 1</b>, <b>Neither</b> or <b>Side 2</b> as the student moves (keys 1, 0, 2); each is a stopwatch and only one runs at a time. <b>Refusing to choose</b> (R) is a sub-timer under Neither, <b>Problem behavior</b> (P) counts instances, and <b>Prompt to choose</b> (C) logs each prompt with its time. The session ends at the toolbar length or with <b>End session</b>, and <b>Save to the sheet</b> writes the durations, problem behavior, prompts and the side of Condition 1 to the next empty row of the session grid; a session ended early is marked Other in the Ended early column (change it to Problem behavior when the stop rule applied).</li>
-    <li><b>Progressive ratio.</b> The runner shows the ratio in effect and the responses toward it. When the ratio is met it cues the reinforcer, times the access, and moves to the next ratio in the progression. The stop-interval clock restarts with each response and at the end of each access period, and it waits while an item is being accessed, as does the session cap, so the cap is on time with the response available whatever the magnitude (Trosclair-Lasserre et al., 2008, capped response time for that reason); the session ends when the stop interval runs out or at the cap. <b>Save to the sheet</b> ticks the completed ratios, and the sheet computes the break point, responses, and ratios completed from the ticks. In a control session the same progression runs and completing a ratio produces nothing. If Setup has no session cap, the runner uses 20 min and enters it in Setup when you save, so the printed parameters show the cap that was used.</li>
+    <li><b>Progressive ratio.</b> The runner shows the ratio in effect and the responses toward it. When the ratio is met it cues the reinforcer, times the access, and moves to the next ratio in the progression. The stop-interval clock restarts with each response and at the end of each access period, and it waits while an item is being accessed, as does the session cap, so the cap is on time with the response available whatever the magnitude (Trosclair-Lasserre et al., 2008, capped response time for that reason); the session ends when the stop interval runs out or at the cap. <b>Save to the sheet</b> ticks the completed ratios and enters the session&rsquo;s minutes and all its responses (the ratio in progress included), and the sheet computes the break point, responses, and ratios completed from the ticks. With <b>Each ratio twice</b> on the toolbar, each ratio is presented twice before the next (Roane et al., 2001, did so for 3 of 4 participants, to prevent rapid ratio strain). In a control session the same progression runs and completing a ratio produces nothing. If Setup has no session cap, the runner uses 20 min and enters it in Setup when you save, so the printed parameters show the cap that was used.</li>
     <li><b>Problem behavior.</b> Tap <b>Problem behavior</b> for each instance. The sheet records whether problem behavior occurred in the session; the runner shows Setup's stop rule, and <b>End session</b> ends the session early when the rule applies.</li>
     <li><b>Mistakes and interruptions.</b> <b>Undo</b> removes the last tap and cancels the access period that tap started; once that access period is over, the tap can no longer be undone in the runner, so correct the row on the sheet after saving. <b>Pause</b> stops the clock, the stop interval, and any access time; <b>Resume</b> goes on. <b>Discard</b> throws the session away without writing anything. One session runs at a time; on the other views a pill in the corner shows it and returns to it.</li>
     <li><b>Alerts and keys.</b> A rising tone, an amber flash around the screen edge, and a vibration on a phone or tablet mean deliver the reinforcer now; a falling tone means access is over; a longer tone and a green flash mean the session is over; a soft tone marks a completed ratio in a progressive-ratio control session. <b>Alerts on</b>, <b>Sound</b>, <b>Flash</b>, and <b>Vibrate</b> turn them on or off, and <b>Test alert</b> plays one. Keys while a session runs: Space or R for a response (1, 2, 3 on the concurrent-operants sheet), P for problem behavior, Z to undo. Keep the form in front during a session; the screen is kept awake where the browser allows it.</li>
@@ -1730,6 +1735,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
       <div class="ra-run-f"><label for="ra-run-so-cond">Condition</label><select id="ra-run-so-cond"></select></div>
       <div class="ra-run-f"><label for="ra-run-so-fr">Schedule (FR)</label><input id="ra-run-so-fr" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"><span class="ra-run-src" id="ra-run-so-frsrc">Every response: FR 1</span></div>
       <div class="ra-run-f"><label for="ra-run-so-acc">Access (s)</label><input id="ra-run-so-acc" type="number" min="0" max="600" step="1" value="0" inputmode="decimal"><span class="ra-run-src" id="ra-run-so-accsrc"></span></div>
+      <div class="ra-run-f"><label for="ra-run-so-amode">Access ends</label><select id="ra-run-so-amode"><option value="time">At the access time</option><option value="eat">When it is consumed (tap Consumed)</option></select></div>
       <div class="ra-run-f"><label for="ra-run-so-clock">Clock during access</label><select id="ra-run-so-clock"><option value="pause">Pauses (minutes the response was available)</option><option value="avail">Runs; the sheet takes minutes run less access</option><option value="run">Runs; the sheet takes minutes run</option></select></div>
     </div>
     <p class="ra-run-info" id="ra-run-so-info"></p>
@@ -1746,9 +1752,10 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="ra-run-rec">
       <button type="button" class="ra-run-resp" id="ra-run-so-resp" disabled>Response<span class="ra-run-n" id="ra-run-so-n">0</span></button>
       <button type="button" class="ra-run-pb" id="ra-run-so-pb" disabled>Problem behavior<span class="ra-run-n" id="ra-run-so-pbn">0</span></button>
+      <button type="button" class="ra-run-eat" id="ra-run-so-eat" hidden>Consumed</button>
       <button type="button" class="ra-run-undo" id="ra-run-so-undo" disabled>Undo</button>
     </div>
-    <p class="ra-run-keys">Keys while the session runs: <b>Space</b> or <b>R</b> response, <b>P</b> problem behavior, <b>Z</b> undo.</p>
+    <p class="ra-run-keys">Keys while the session runs: <b>Space</b> or <b>R</b> response, <b>P</b> problem behavior, <b>Z</b> undo, <b>E</b> consumed (when access ends on it).</p>
     <div class="ra-run-ctl">
       <button type="button" class="ra-run-go" id="ra-run-so-start">Start session</button>
       <button type="button" id="ra-run-so-end" disabled>End session</button>
@@ -1951,6 +1958,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="ra-run-set">
       <div class="ra-run-f"><label for="ra-run-pr-cond">Condition</label><select id="ra-run-pr-cond"></select></div>
       <div class="ra-run-f"><label for="ra-run-pr-acc">Access (s)</label><input id="ra-run-pr-acc" type="number" min="0" max="600" step="1" value="0" inputmode="decimal"><span class="ra-run-src" id="ra-run-pr-accsrc"></span></div>
+      <div class="ra-run-f"><label for="ra-run-pr-amode">Access ends</label><select id="ra-run-pr-amode"><option value="time">At the access time</option><option value="eat">When it is consumed (tap Consumed)</option></select></div>
       <div class="ra-run-f"><label for="ra-run-pr-clock">Clock during access</label><select id="ra-run-pr-clock"><option value="pause">Pauses (minutes the response was available)</option><option value="avail">Runs; the sheet takes minutes run less access</option><option value="run">Runs; the sheet takes minutes run</option></select></div>
     </div>
     <p class="ra-run-info" id="ra-run-pr-info"></p>
@@ -1968,9 +1976,10 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="ra-run-rec">
       <button type="button" class="ra-run-resp" id="ra-run-pr-resp" disabled>Response<span class="ra-run-n" id="ra-run-pr-n">0</span></button>
       <button type="button" class="ra-run-pb" id="ra-run-pr-pb" disabled>Problem behavior<span class="ra-run-n" id="ra-run-pr-pbn">0</span></button>
+      <button type="button" class="ra-run-eat" id="ra-run-pr-eat" hidden>Consumed</button>
       <button type="button" class="ra-run-undo" id="ra-run-pr-undo" disabled>Undo</button>
     </div>
-    <p class="ra-run-keys">Keys while the session runs: <b>Space</b> or <b>R</b> response, <b>P</b> problem behavior, <b>Z</b> undo.</p>
+    <p class="ra-run-keys">Keys while the session runs: <b>Space</b> or <b>R</b> response, <b>P</b> problem behavior, <b>Z</b> undo, <b>E</b> consumed (when access ends on it).</p>
     <div class="ra-run-ctl">
       <button type="button" class="ra-run-go" id="ra-run-pr-start">Start session</button>
       <button type="button" id="ra-run-pr-end" disabled>End session</button>
@@ -1998,10 +2007,11 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   <div class="readout" id="prReadout"></div>
   <div class="gridwrap"><table class="grid" id="prTbl"></table></div>
   <div class="figure"><h3>Break Point by Session</h3><p class="cap">Bars show the last completed ratio in each session, grouped by stimulus; the control sessions are hatched.</p><svg id="prPlot" viewBox="0 0 640 220"></svg></div>
+  <div class="figure"><h3>Cumulative Responses Across Sessions</h3><p class="cap">Every response recorded, added up session by session for each condition; the control is dashed. Break points can match while the responding they took differs (Penrod et al., 2008).</p><svg id="prCum" viewBox="0 0 640 220"></svg></div>
   <h3 class="sub">Break-Point Summary</h3>
-  <table class="rank" id="prRank"><thead><tr><th class="n">Rank</th><th>Condition</th><th class="n">Sessions</th><th class="n">Mean break point</th><th class="n">Range</th><th class="n">Mean responses</th><th class="n">Mean ratios completed</th><th class="n">PB sessions</th><th>Potency</th></tr></thead><tbody></tbody></table>
-  <p class="method">Potency labels are working conventions and are only meaningful within one set of parameters. Steps are counted along the sheet&rsquo;s progression, with each mean placed at the first ratio at or above it. <b>High</b> = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; <b>Moderate</b> = at least 1 step above the control mean but not High; <b>Low</b> = less than 1 step above the control mean. The control carries no label, and a stimulus has none until it and the control each have a scored session. <b>Responses</b> counts the responses in the completed ratios; <b>Ratios completed</b> counts the ticked ratios: in a stimulus session each one produced a reinforcer, and a control session delivers none.</p>
-  <div class="cite">Progressive-ratio reinforcer assessment after Roane, Lerman, and Vorndran (2001, <em>JABA, 34</em>, 145&ndash;167), who found that, for all 4 participants, one of two stimuli chosen equally often in a paired-stimulus preference assessment supported more responding than the other as the ratio requirement increased, and after DeLeon, Frank, Gregory, and Allman (2009, <em>JABA, 42</em>, 729&ndash;733), who found that higher-preference stimuli from a paired-choice assessment produced larger break points in 10 of 12 comparisons. Penrod, Wallace, and Dyer (2008, <em>JABA, 41</em>, 177&ndash;188) found that high-preference stimuli maintained responding under higher schedule requirements than low-preference stimuli for 3 of 4 participants and were equally effective for the fourth; Trosclair-Lasserre et al. (2008, <em>JABA, 41</em>, 203&ndash;220) found that differences between reinforcer magnitudes did not appear at the lowest schedule requirements in three of four evaluations, suggesting that magnitude effects may be mediated by the schedule requirement. Poling (2010, <em>JABA, 43</em>, 347&ndash;349) notes that PR schedules are not an especially quick way to scale reinforcer potency and that long ratios are aversive, argues that members of protected populations should not be exposed to them unless there are clear offsetting benefits, and lists the influence of initial ratio and step size on applied findings among uninvestigated questions. In basic research a longer stop criterion increased the number of ratios completed (Stafford &amp; Branch, 1998, <em>JEAB, 70</em>, 123&ndash;138), so parameters are fixed here and printed with every result.</div>
+  <div class="gridwrap"><table class="rank" id="prRank"><thead><tr><th class="n">Rank</th><th>Condition</th><th class="n">Sessions</th><th class="n">Mean break point</th><th class="n">Range</th><th class="n">Median break point</th><th class="n">Mean responses</th><th class="n">Mean ratios completed</th><th class="n">Mean minutes</th><th class="n">Responses per minute</th><th class="n">PB sessions</th><th>Potency</th></tr></thead><tbody></tbody></table></div>
+  <p class="method">Potency labels are working conventions and are only meaningful within one set of parameters. Steps are counted along the sheet&rsquo;s progression, with each mean placed at the first ratio at or above it. <b>High</b> = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; <b>Moderate</b> = at least 1 step above the control mean but not High; <b>Low</b> = less than 1 step above the control mean. The control carries no label, and a stimulus has none until it and the control each have a scored session. <b>Responses</b> counts the responses in the completed ratios; <b>Ratios completed</b> counts the ticked ratios: in a stimulus session each one produced a reinforcer, and a control session delivers none. <b>Minutes</b> and <b>All responses</b> (every response recorded, the ratio in progress included) are entered by the runner when it saves the session, or by hand; <b>Responses per minute</b> is all responses over all minutes for the sessions that have both. With <b>Each ratio twice</b>, each ratio has two columns and the steps are counted over the distinct ratios. A break point that moves a lot from session to session is better read by the median than the mean.</p>
+  <div class="cite">Progressive-ratio reinforcer assessment after Roane, Lerman, and Vorndran (2001, <em>JABA, 34</em>, 145&ndash;167), who found that, for all 4 participants, one of two stimuli chosen equally often in a paired-stimulus preference assessment supported more responding than the other as the ratio requirement increased, and after DeLeon, Frank, Gregory, and Allman (2009, <em>JABA, 42</em>, 729&ndash;733), who found that higher-preference stimuli from a paired-choice assessment produced larger break points in 10 of 12 comparisons. Penrod, Wallace, and Dyer (2008, <em>JABA, 41</em>, 177&ndash;188) found that high-preference stimuli maintained responding under higher schedule requirements than low-preference stimuli for 3 of 4 participants and were equally effective for the fourth; Trosclair-Lasserre et al. (2008, <em>JABA, 41</em>, 203&ndash;220) found that differences between reinforcer magnitudes did not appear at the lowest schedule requirements in three of four evaluations, suggesting that magnitude effects may be mediated by the schedule requirement. Penrod et al. also found break points that matched while the number of responses and the session time differed widely, so the sheet keeps both for each session and plots the cumulative responses. Francisco, Borrero, and Sy (2008, <em>JABA, 41</em>, 189&ndash;202) delivered each edible until it was consumed, with the task unavailable meanwhile. Poling (2010, <em>JABA, 43</em>, 347&ndash;349) notes that PR schedules are not an especially quick way to scale reinforcer potency and that long ratios are aversive, argues that members of protected populations should not be exposed to them unless there are clear offsetting benefits, and lists the influence of initial ratio and step size on applied findings among uninvestigated questions. In basic research a longer stop criterion increased the number of ratios completed (Stafford &amp; Branch, 1998, <em>JEAB, 70</em>, 123&ndash;138), so parameters are fixed here and printed with every result.</div>
 </div>
 
 <!-- ================================================================ SUMMARY -->
@@ -2275,14 +2285,14 @@ const f1=v=>v==null?'&mdash;':(+v).toFixed(1);
 const TYPES=['','Edible','Leisure item','Activity','Social / attention','Token','Escape / break','Other'];
 
 let S=blank();
-function blank(){return {form:'RA-1',n:3,sessMin:5,nSess:16,nCoSess:10,prStep:'a1',prStart:1,prStop:120,
+function blank(){return {form:'RA-1',n:3,sessMin:5,nSess:16,nCoSess:10,prStep:'a1',prRep:1,prStart:1,prStop:120,
   meta:{},stim:[],so:[],co:[],pr:[],coa:blankCoa()};}
 function ensure(){
   const n=S.n;
   while(S.stim.length<n)S.stim.push({name:'',type:'',pa:'',mag:''});S.stim.length=n;
   while(S.so.length<S.nSess)S.so.push({date:'',cond:'',resp:'',min:'',pb:false,phase:false});S.so.length=S.nSess;
   while(S.co.length<S.nCoSess)S.co.push({date:'',pos:'',r:['','',''],pb:false});S.co.length=S.nCoSess;
-  const prN=Math.max(3,n*3+3);while(S.pr.length<prN)S.pr.push({date:'',cond:'',done:[],pb:false,resp:''});S.pr.length=prN;
+  const prN=Math.max(3,n*3+3);while(S.pr.length<prN)S.pr.push({date:'',cond:'',done:[],pb:false,resp:'',min:'',all:''});S.pr.length=prN;
   ensureCoa();
 }
 const name=i=>S.stim[i]&&S.stim[i].name.trim()?S.stim[i].name.trim():'Stimulus '+CODES[i];
@@ -2294,7 +2304,7 @@ const planRatio=()=>{const m=/^\s*(?:(?:FR|VR)\s*)?(\d+(?:\.\d+)?)/i.exec(S.meta
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 function bindNum(id,key,after){const e=$('#'+id);e.addEventListener('change',()=>{const v=+e.value;if(!isFinite(v)||v<+e.min||v>+e.max){e.value=S[key];return;}S[key]=v;ensure();after();renderSummary();});}
-function syncToolbar(){['nStim:n','sessMin:sessMin','nSess:nSess','nCoSess:nCoSess','prStart:prStart','prStop:prStop'].forEach(p=>{const [id,k]=p.split(':');$('#'+id).value=S[k];});$('#prStep').value=S.prStep;}
+function syncToolbar(){['nStim:n','sessMin:sessMin','nSess:nSess','nCoSess:nCoSess','prStart:prStart','prStop:prStop'].forEach(p=>{const [id,k]=p.split(':');$('#'+id).value=S[k];});$('#prStep').value=S.prStep;$('#prRep').value=String(S.prRep===2?2:1);}
 
 /* meta */
 function bindMeta(){$$('[data-meta]').forEach(el=>{const k=el.dataset.meta;if(el.type==='checkbox')el.checked=!!S.meta[k];else el.value=S.meta[k]||'';
@@ -2719,29 +2729,34 @@ let coaRunnerSync=null;
 })();
 
 /* ---------- progressive ratio ---------- */
-function prLadder(k=14){const out=[];let v=S.prStart;const std=[1,2,5,10,20,30,40,50,60,70,80,90,100,120,140,160,180,200];
+function prLadder(k=14){if(S.prRep!==2)return prBase(k);const out=[];prBase(Math.ceil(Math.max(k,20)/2)).forEach(v=>out.push(v,v));return out;}   /* v22.58 each ratio twice (Roane et al., 2001) */
+function prBase(k){const out=[];let v=S.prStart;const std=[1,2,5,10,20,30,40,50,60,70,80,90,100,120,140,160,180,200];
   for(let i=0;i<k;i++){if(S.prStep==='std'){out.push(std[i]!=null?std[i]:std[std.length-1]+20*(i-std.length+1));continue;}
     out.push(v);if(S.prStep==='a1')v+=1;else if(S.prStep==='a2')v+=2;else if(S.prStep==='a5')v+=5;else v*=2;}
   if(S.prStep==='std'&&S.prStart>1)return out.filter(x=>x>=S.prStart);return out;}
 function renderPR(){
-  const lad=prLadder();const stepName={a1:'+1',a2:'+2',a5:'+5',g2:'×2',std:'1, 2, 5, 10, 20 …'}[S.prStep];
+  const lad=prLadder();const stepName={a1:'+1',a2:'+2',a5:'+5',g2:'×2',std:'1, 2, 5, 10, 20 …'}[S.prStep]+(S.prRep===2?', each ratio twice':'');
   $('#prParams').innerHTML=`Progression ${stepName}; start FR ${esc(lad[0])}${lad[0]!==S.prStart?' (the first ratio of the progression at or above FR '+esc(S.prStart)+')':''}; stop after ${esc(S.prStop)} s without a response${S.meta.prcap?'; cap '+esc(S.meta.prcap)+' min':''}.`;
-  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c">Condition</th>${lad.map(v=>`<th class="c">FR ${esc(v)}</th>`).join('')}<th class="c">Break point</th><th class="c">Responses</th><th class="c" title="Ratios completed. In a stimulus session each one produced a reinforcer; a control session delivers none.">Ratios completed</th><th class="c">PB</th></tr></thead><tbody>`;
-  S.pr.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select class="condsel" data-k="${k}" data-f="cond">${condOptions(s.cond)}</select></td>${lad.map((v,j)=>`<td class="c"><input type="checkbox" data-k="${k}" data-j="${j}" data-f="done"${s.done[j]?' checked':''}></td>`).join('')}<td class="c calc" id="prB${k}"></td><td class="c calc" id="prN${k}"></td><td class="c calc" id="prK${k}"></td><td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td></tr>`;});
+  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c">Condition</th>${lad.map(v=>`<th class="c">FR ${esc(v)}</th>`).join('')}<th class="c">Break point</th><th class="c">Responses</th><th class="c" title="Ratios completed. In a stimulus session each one produced a reinforcer; a control session delivers none.">Ratios completed</th><th class="c" title="The session's minutes: with the response available when the runner's clock waited during access, else minutes run">Minutes</th><th class="c" title="Every response recorded in the session, the ratio in progress included">All responses</th><th class="c">PB</th></tr></thead><tbody>`;
+  S.pr.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select class="condsel" data-k="${k}" data-f="cond">${condOptions(s.cond)}</select></td>${lad.map((v,j)=>`<td class="c"><input type="checkbox" data-k="${k}" data-j="${j}" data-f="done"${s.done[j]?' checked':''}></td>`).join('')}<td class="c calc" id="prB${k}"></td><td class="c calc" id="prN${k}"></td><td class="c calc" id="prK${k}"></td><td class="c"><input type="number" min="0" step="0.1" data-k="${k}" data-f="min" value="${esc(s.min||'')}" aria-label="Minutes, session ${k+1}"></td><td class="c"><input type="number" min="0" step="1" data-k="${k}" data-f="all" value="${esc(s.all||'')}" aria-label="All responses, session ${k+1}"></td><td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td></tr>`;});
   $('#prTbl').innerHTML=h+'</tbody>';computePR();
 }
 $('#prTbl').addEventListener('input',e=>{const el=e.target,k=+el.dataset.k;if(isNaN(k))return;if(el.dataset.f==='done'){S.pr[k].done[+el.dataset.j]=el.checked;}else S.pr[k][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;computePR();renderSummary();});
 function prRows(){const lad=prLadder();return S.pr.map((s,k)=>{if(s.cond==='')return {k,cond:'',bp:null};let last=-1;for(let j=0;j<lad.length;j++){if(s.done[j])last=j;else break;}
-  const bp=last>=0?lad[last]:0;const resp=lad.slice(0,last+1).reduce((a,b)=>a+b,0);return {k,cond:s.cond,bp,resp,reinf:last+1,pb:s.pb,scored:last>=0||s.done.some(Boolean)||s.date!==''};});}
+  const bp=last>=0?lad[last]:0;const resp=lad.slice(0,last+1).reduce((a,b)=>a+b,0);const nv=v=>v===''||v==null||!isFinite(+v)?null:+v;
+  return {k,cond:s.cond,bp,resp,reinf:last+1,pb:s.pb,min:nv(s.min),all:nv(s.all),scored:last>=0||s.done.some(Boolean)||s.date!==''};});}
+const median=a=>{if(!a.length)return null;const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2;};
 function prStats(){
-  const rows=prRows().filter(r=>r.cond!==''&&r.scored);const lad=prLadder();const step=i=>lad[Math.min(i,lad.length-1)];
+  const rows=prRows().filter(r=>r.cond!==''&&r.scored);const lad=[...new Set(prLadder())];const step=i=>lad[Math.min(i,lad.length-1)];   /* v22.58 steps over the distinct ratios */
   const ctl=rows.filter(r=>r.cond==='ctl');const cbp=ctl.map(r=>r.bp);const cm=mean(cbp);
   const plan=planRatio();
   const conds=[{key:'ctl',label:'Control',rows:ctl}].concat(S.stim.map((_,i)=>({key:String(i),label:name(i),rows:rows.filter(r=>String(r.cond)===String(i))})));
   const st=conds.map(c=>{const b=c.rows.map(r=>r.bp);const m=mean(b);let pot='';
     if(c.key!=='ctl'&&m!=null&&cm!=null){const idxM=lad.findIndex(v=>v>=m),idxC=lad.findIndex(v=>v>=cm);const stepsAbove=(idxM<0?lad.length:idxM)-(idxC<0?lad.length:idxC);
       if(stepsAbove>=3&&(plan==null||m>plan))pot='high';else if(m>cm&&stepsAbove>=1)pot='moderate';else pot='low';}
-    return {key:c.key,label:c.label,n:b.length,mean:m,min:b.length?Math.min(...b):null,max:b.length?Math.max(...b):null,resp:mean(c.rows.map(r=>r.resp)),reinf:mean(c.rows.map(r=>r.reinf)),pb:c.rows.filter(r=>r.pb).length,pot,rows:c.rows};});
+    const tm=c.rows.filter(r=>r.min!=null&&r.min>0&&r.all!=null),mins=c.rows.filter(r=>r.min!=null).map(r=>r.min);
+    return {key:c.key,label:c.label,n:b.length,mean:m,med:median(b),min:b.length?Math.min(...b):null,max:b.length?Math.max(...b):null,resp:mean(c.rows.map(r=>r.resp)),reinf:mean(c.rows.map(r=>r.reinf)),pb:c.rows.filter(r=>r.pb).length,pot,rows:c.rows,
+      mmin:mins.length?mean(mins):null,rate:tm.length?tm.reduce((a,r)=>a+r.all,0)/tm.reduce((a,r)=>a+r.min,0):null};});
   return {st,cm,rows};
 }
 function computePR(){
@@ -2750,8 +2765,8 @@ function computePR(){
   $('#prReadout').textContent=rows.length?`${rows.length} sessions scored; ${st[0].n} control.`:'No sessions scored yet.';
   const tagP=p=>p==='high'?'<span class="tag ok">High</span>':p==='moderate'?'<span class="tag mid">Moderate</span>':p==='low'?'<span class="tag no">Low</span>':'';
   const ranked=st.slice().sort((a,b)=>(b.mean??-1)-(a.mean??-1));
-  $('#prRank tbody').innerHTML=ranked.map((s,r)=>`<tr><td class="n">${s.n?r+1:''}</td><td>${esc(s.label)}</td><td class="n">${s.n||''}</td><td class="n">${f1(s.mean)}</td><td class="n">${s.n?s.min+'&ndash;'+s.max:'&mdash;'}</td><td class="n">${f1(s.resp)}</td><td class="n">${f1(s.reinf)}</td><td class="n">${s.pb||''}</td><td>${tagP(s.pot)}</td></tr>`).join('');
-  plotPR(st);return st;
+  $('#prRank tbody').innerHTML=ranked.map((s,r)=>`<tr><td class="n">${s.n?r+1:''}</td><td>${esc(s.label)}</td><td class="n">${s.n||''}</td><td class="n">${f1(s.mean)}</td><td class="n">${s.n?s.min+'&ndash;'+s.max:'&mdash;'}</td><td class="n">${f1(s.med)}</td><td class="n">${f1(s.resp)}</td><td class="n">${f1(s.reinf)}</td><td class="n">${f1(s.mmin)}</td><td class="n">${f1(s.rate)}</td><td class="n">${s.pb||''}</td><td>${tagP(s.pot)}</td></tr>`).join('');
+  plotPR(st);plotCum(st);return st;
 }
 function plotPR(st){
   const bars=[];st.forEach(s=>s.rows.forEach((r,i)=>bars.push({label:s.label,ctl:s.key==='ctl',bp:r.bp,grp:s.key,i})));
@@ -2764,6 +2779,22 @@ function plotPR(st){
   g+=`<defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="#24313C" stroke-width="1"/></pattern></defs>`;
   $('#prPlot').innerHTML=g;
 }
+/* v22.58 every response recorded, added up session by session for each condition (Penrod et al., 2008): break points can
+   match while the work they took does not */
+function plotCum(st){const box=$('#prCum');if(!box)return;const C=['#24313C','#2f6f86','#a3521c','#6d4e9e','#2e7d32','#8a6d00'];
+  const ser=st.map((s,i)=>{let t=0;const pts=s.rows.filter(r=>r.all!=null).map(r=>(t+=r.all));return {label:s.label,ctl:s.key==='ctl',pts,col:C[i%C.length]};}).filter(x=>x.pts.length);
+  const fig=box.closest('.figure');
+  if(!ser.length){box.innerHTML='';box.style.display='none';if(fig){fig.classList.add('noprint');let n=fig.querySelector('.cum-none');if(!n){n=document.createElement('p');n.className='cap cum-none';fig.appendChild(n);}
+    n.textContent='No session has All responses recorded yet: the runner enters them when it saves a session, or type them on the sheet.';}return;}
+  box.style.display='';if(fig){fig.classList.remove('noprint');const n=fig.querySelector('.cum-none');if(n)n.remove();}
+  const top=Math.max(...ser.map(x=>x.pts[x.pts.length-1]))*1.1,u=Math.pow(10,Math.floor(Math.log10(Math.max(top,1))))/2;
+  const xn=Math.max(...ser.map(x=>x.pts.length)),ymax=Math.max(5,Math.ceil(top/u)*u);   /* a round top: five even steps */
+  const A=axes(null,ymax,'Cumulative responses',xn,'Session of the condition');let g=A.g;
+  for(let i=0;i<xn;i++)g+=`<text x="${A.x(i)}" y="${A.T+A.H+13}" text-anchor="middle" class="tick">${i+1}</text>`;
+  ser.forEach((x,j)=>{const P=x.pts.map((v,i)=>A.x(i)+','+A.y(v)).join(' ');
+    g+=`<polyline points="${P}" fill="none" stroke="${x.col}" stroke-width="2"${x.ctl?' stroke-dasharray="5 4"':''}/>`+x.pts.map((v,i)=>`<circle cx="${A.x(i)}" cy="${A.y(v)}" r="3" fill="${x.ctl?'#fff':x.col}" stroke="${x.col}" stroke-width="1.5"/>`).join('');
+    const lx=A.x(x.pts.length-1)+6,ly=A.y(x.pts[x.pts.length-1])+3+((j%2)?9:0);g+=`<text x="${Math.min(lx,560)}" y="${ly}" class="tick" fill="${x.col}">${esc(x.label)}</text>`;});
+  box.innerHTML=g;}
 
 /* ---------- summary ---------- */
 function renderSummary(){
@@ -2793,6 +2824,7 @@ bindNum('nSess','nSess',renderSO);
 bindNum('nCoSess','nCoSess',renderCO);
 bindNum('prStart','prStart',renderPR);
 bindNum('prStop','prStop',renderPR);
+$('#prRep').addEventListener('change',async e=>{if(S.pr.some(s=>s.done.some(Boolean))&&!(await nbhUI.confirm('Change how often each ratio is presented?\nThe ratio columns change, and the ticks already entered will map to the new columns.',{ok:'Change'}))){e.target.value=String(S.prRep===2?2:1);return;}S.prRep=e.target.value==='2'?2:1;renderPR();renderSummary();});
 $('#prStep').addEventListener('change',async e=>{if(S.pr.some(s=>s.done.some(Boolean))&&!(await nbhUI.confirm('Change the progression?\nThe ratio columns change, and the ticks already entered will map to the new ratios.',{ok:'Change'}))){e.target.value=S.prStep;return;}S.prStep=e.target.value;renderPR();renderSummary();});
 
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download=`RA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
@@ -2890,7 +2922,8 @@ async function loadSim(){
     const stop=Math.max(1,Math.min(lad.length, stops[c][Math.floor((k%prOrder.length)/4)%3]));
     const done=lad.map((_,j)=>j<stop);
     const resp=lad.slice(0,stop).reduce((a,b)=>a+b,0);
-    S.pr[k]={date:D(12-Math.floor(k/4)*2), cond:c, done, resp:String(resp), pb:false};
+    const part=Math.min((lad[stop]||1)-1,1+k%3);   /* v22.58 the ratio in progress when the session ended, and the minutes it took */
+    S.pr[k]={date:D(12-Math.floor(k/4)*2), cond:c, done, resp:String(resp), min:(2+resp*0.07).toFixed(1), all:String(resp+part), pb:false};
   }
 
 
@@ -3105,7 +3138,7 @@ function exampleState(){const X=blank();X.n=3;X.sessMin=5;X.nSess=16;X.nCoSess=1
   X.so=EXSO.map(([c,r],k)=>({date:D(18-Math.floor(k/4)*3),cond:c,resp:String(r),min:'5',pb:false,phase:false}));
   X.co=EXCO.map(([p,a,b,c],k)=>({date:D(14-k),pos:p,r:[String(a),String(b),String(c)],pb:false}));
   const lad=[];for(let i=0,v=1;i<14;i++,v+=2)lad.push(v);const order=['0','1','2','ctl'];X.pr=[];
-  for(let k=0;k<12;k++){const c=order[k%4],stop=EXPR[c][Math.floor(k/4)];const done=lad.map((_,j)=>j<stop);X.pr.push({date:D(12-Math.floor(k/4)*2),cond:c,done,resp:String(lad.slice(0,stop).reduce((a,b)=>a+b,0)),pb:false});}
+  for(let k=0;k<12;k++){const c=order[k%4],stop=EXPR[c][Math.floor(k/4)];const done=lad.map((_,j)=>j<stop);const r0=lad.slice(0,stop).reduce((a,b)=>a+b,0),part=Math.min((lad[stop]||1)-1,1+k%3);X.pr.push({date:D(12-Math.floor(k/4)*2),cond:c,done,resp:String(r0),min:(2+r0*0.07).toFixed(1),all:String(r0+part),pb:false});}
   return X;}
 /* runs fn with the example in the form (its sheets rendered from it), then puts the form back as it was, all in one turn */
 function withExample(fn){const prev=S;S=exampleState();
@@ -3877,7 +3910,7 @@ window.__nbhFactsOut=function(){try{
   /* past the sheet's last column the progression continues by the same rule as the sheet's own */
   function nextRatio(p,code){if(code==='a1')return p+1;if(code==='a2')return p+2;if(code==='a5')return p+5;if(code==='g2')return p*2;
     const i=STD.indexOf(p);return i>=0&&i<STD.length-1?STD[i+1]:p+20;}
-  function ratioAt(R,i){const L=R.cfg.lad;while(L.length<=i)L.push(nextRatio(L[L.length-1],R.cfg.code));return L[i];}
+  function ratioAt(R,i){const L=R.cfg.lad,two=L.length>1&&L[0]===L[1];while(L.length<=i){const p=L[L.length-1];L.push(two&&L[L.length-2]!==p?p:nextRatio(p,R.cfg.code));}return L[i];}   /* v22.58 each ratio twice, past the sheet too */
 
   /* the next session's row: the first one with nothing recorded in it */
   function target(v,nOpt){const n=nRows(v);if(v==='co'&&nOpt==null)nOpt=qa('#coTbl [data-k="0"][data-f="r"]').length;
@@ -4000,7 +4033,8 @@ window.__nbhFactsOut=function(){try{
       if(e>=end){finish(R,R.v!=='pr'?'time':stopAt(R)<=capAt(R)?'stop':'cap',end);return;}
       paint(R);}
     paintPill();}
-  function accessOver(R){const at=R.accUntil,lab=R.accLabel;R.accUntil=0;if(R.v==='pr')R.quiet=at;
+  function accessOver(R){const at=R.accUntil,lab=R.accLabel,eat=!!(R.cfg&&R.cfg.eat&&R.v!=='co'),tap=!!R.eatTap;R.accUntil=0;R.eatTap=false;if(R.v==='pr')R.quiet=at;
+    if(eat){if(!tap)cue('acc','acc@'+at);note(R,(tap?'Consumed.':'10 minutes and not consumed: the access ends; remove what is left.')+' The task is back.'+(R.v==='pr'?' Now FR '+ratioAt(R,R.idx)+'.':''));return;}
     cue('acc','acc@'+at);
     note(R,'Access over: remove '+lab+'.'+(R.v==='pr'?' Now FR '+ratioAt(R,R.idx)+'.':''));}
 
@@ -4014,10 +4048,11 @@ window.__nbhFactsOut=function(){try{
       return{opts,pos:val($(R,'pos')),dur:sessMs(),clock:clockOf(R)};}
     const cond=$(R,'cond').value,ctl=cond==='ctl',acc=num($(R,'acc'),0),label=condLabel(cond),mag=ctl?'':stim(+cond).mag;
     if(!ctl&&!(acc>=0)){note(R,'Set an access time of 0 s or more.',true);return null;}
+    const eat=!ctl&&!!$(R,'amode')&&$(R,'amode').value==='eat',accMs=ctl?0:eat?EAT_MS:acc*1000;   /* v22.58 until consumed: up to 10 min */
     if(R.v==='so'){const fr=Math.round(num($(R,'fr'),1));if(!ctl&&!(fr>=1)){note(R,'Set a schedule of FR 1 or more.',true);return null;}
-      return{cond,label,ctl,fr:ctl?0:fr,accMs:ctl?0:acc*1000,mag,clock:clockOf(R),dur:sessMs()};}
+      return{cond,label,ctl,fr:ctl?0:fr,accMs,eat,mag,clock:clockOf(R),dur:sessMs()};}
     const P=prNow();
-    return{cond,label,ctl,accMs:ctl?0:acc*1000,mag,lad:P.lad.slice(),sheetN:P.lad.length,code:P.code,step:P.step,stop:P.stop,stopMs:P.stop*1000,
+    return{cond,label,ctl,accMs,eat,mag,lad:P.lad.slice(),sheetN:P.lad.length,code:P.code,step:P.step,stop:P.stop,stopMs:P.stop*1000,
       cap:P.cap,capSet:P.capSet,capMs:P.cap*60000,clock:clockOf(R)};}
 
   /* ---------- start, pause, end ---------- */
@@ -4071,9 +4106,15 @@ window.__nbhFactsOut=function(){try{
   function refuse(R){note(R,R.state==='pause'?'Paused: press Resume to record.':R.state==='done'?'The session is over.':'Press Start session first.',true);}
   function hit(b){if(!b)return;b.classList.add('ra-run-hit');setTimeout(()=>b.classList.remove('ra-run-hit'),140);}
   /* the reinforcer is due: cue it and, for a timed item, start the access period */
+  /* v22.58 access until consumed (Francisco et al., 2008, delivered an edible until it was consumed, the task unavailable meanwhile):
+     the access lasts until the assessor taps Consumed, up to 10 minutes; the stop interval starts again then */
+  const EAT_MS=600000;
+  function eatDone(R){if(R.state!=='run'||!R.cfg||!R.cfg.eat||!R.accUntil)return;const e=el(R),p=R.accs[R.accs.length-1];
+    if(p&&p.to>e)p.to=e;R.accUntil=e;R.eatTap=true;hit($(R,'eat'));step();sched();paint(R);}
   function deliver(R,e,label,mag,accMs,after){cue('sr');
     const lim=window.raFoodLimit?window.raFoodLimit(label):'';if(lim)after=(after?after+' ':'')+lim;   /* v22.37 (review F135): the parent's limits with an edible */
     if(accMs>0){R.accUntil=e+accMs;R.accLabel=label;R.accs.push({from:e,to:e+accMs});
+      if(R.cfg&&R.cfg.eat&&R.v!=='co'){note(R,'Deliver '+label+' now, then tap Consumed when it is eaten (the runner waits up to 10 minutes).'+(after?' '+after:''));return true;}
       note(R,'Deliver '+label+' now: '+secTxt(accMs)+' of access.'+(after?' '+after:''));return true;}
     note(R,'Deliver '+label+' now'+(mag?' ('+mag+')':'')+'.'+(after?' '+after:''));return false;}
   function tapResp(R,j){
@@ -4121,7 +4162,7 @@ window.__nbhFactsOut=function(){try{
     if(R.v==='so'){const m=c.clock==='run'?run:avail,min=r2(m/60000);return{run,accMs,avail,min,n:R.n,rate:min>0?R.n/min:0,sr:R.sr,during:R.during,pb:R.pb};}
     if(R.v==='co'){const tot=R.cnt.reduce((a,b)=>a+b,0);return{run,accMs,avail,tot,cnt:R.cnt.slice(),pct:R.cnt.map(x=>tot?100*x/tot:0),srs:R.srs.slice(),chg:R.chg,during:R.during,pb:R.pb};}
     let resp=0;for(let i=0;i<R.idx;i++)resp+=ratioAt(R,i);
-    return{run,accMs,avail,bp:R.idx?ratioAt(R,R.idx-1):0,done:R.idx,resp,cur:ratioAt(R,R.idx),prog:R.prog,n:R.n,during:R.during,pb:R.pb,why:R.why,
+    return{run,accMs,avail,min:r2((c.clock==='run'?run:avail)/60000),bp:R.idx?ratioAt(R,R.idx-1):0,done:R.idx,resp,cur:ratioAt(R,R.idx),prog:R.prog,n:R.n,during:R.during,pb:R.pb,why:R.why,
       ticks:Math.min(R.idx,c.sheetN),over:R.idx>c.sheetN};}
   function summary(R){const r=results(R),c=R.cfg,k=target(R.v,R.v==='co'?c.opts.length:null),rows=[];
     const to=k>=0?'Session '+(k+1)+' on the sheet':R.v==='pr'?'No empty row: the sheet is full':'A new row the sheet adds when you save';
@@ -4129,7 +4170,7 @@ window.__nbhFactsOut=function(){try{
     const clockTxt=!r.accMs?'':c.clock==='run'?'; '+up(r.accMs)+' of access counted as time run':c.clock==='avail'?'; '+up(r.accMs)+' of access is taken out of the minutes':'; the clock waited during '+up(r.accMs)+' of access, so '+up(r.avail)+' with the response available';
     const durTxt=c.clock==='run'?'counted, not toward the schedule':'materials away: recorded apart, not counted';
     if(R.v==='so'){
-      rows.push(['Condition',c.ctl?'Control (no consequence)':c.label+', FR '+c.fr+(c.accMs?', '+secTxt(c.accMs)+' of access':'')]);
+      rows.push(['Condition',c.ctl?'Control (no consequence)':c.label+', FR '+c.fr+(c.eat?', access until consumed':c.accMs?', '+secTxt(c.accMs)+' of access':'')]);
       rows.push(['Time run',up(r.run)+(R.why==='ended'?' (ended early)':'')+clockTxt],['Responses',String(r.n)]);
       rows.push(['Minutes on the sheet',r.min+(c.clock==='run'?' (minutes run)':' (minutes the response was available)')],['Rate',r1(r.rate)+' per minute']);
       if(!c.ctl)rows.push(['Reinforcers',String(r.sr)]);
@@ -4145,11 +4186,12 @@ window.__nbhFactsOut=function(){try{
       if(r.during)rows.push(['Responses during access',r.during+' ('+durTxt+')']);
       rows.push(['Problem behavior',pbTxt],['Goes to',to]);}
     else{
-      rows.push(['Condition',c.ctl?'Control (same progression, no consequence)':c.label+(c.accMs?', '+secTxt(c.accMs)+' of access':'')]);
+      rows.push(['Condition',c.ctl?'Control (same progression, no consequence)':c.label+(c.eat?', access until consumed':c.accMs?', '+secTxt(c.accMs)+' of access':'')]);
       rows.push(['Ended',(r.why==='stop'?'No response for '+c.stop+' s':r.why==='cap'?'Session cap ('+c.cap+' min) reached':'Ended by the assessor')+' at '+up(r.run)+clockTxt]);
       rows.push(['Break point',r.bp?'FR '+r.bp+' (last completed ratio)':'0 (FR '+ratioAt(R,0)+' not completed)']);
       rows.push(['Ratios completed',r.done+' (the sheet\u2019s Ratios completed column)'],['Responses in completed ratios',r.resp+' (as the sheet counts responses)']);
       rows.push(['Ratio in progress','FR '+r.cur+': '+r.prog+' of '+r.cur]);
+      rows.push(['Minutes on the sheet',r.min+(c.clock==='run'?' (minutes run)':' (minutes the response was available)')]);
       rows.push(['All responses recorded',r.n+(r.during?' ('+r.during+' during access, '+(c.clock==='run'?'not toward a ratio':'recorded apart, not counted')+')':'')],['Problem behavior',pbTxt]);
       rows.push(['Goes to',to+(k>=0?(r.ticks?': ticks FR '+ratioAt(R,0)+(r.ticks>1?' to FR '+ratioAt(R,r.ticks-1):''):': no ratio ticked'):'')]);
       if(r.over)rows.push(['Note','The sheet’s columns stop at FR '+c.lad[c.sheetN-1]+'. The sheet will show that as the break point; record FR '+r.bp+' in the recommendations.']);}
@@ -4174,6 +4216,7 @@ window.__nbhFactsOut=function(){try{
     const k=ensureRow(R);if(k<0)return -1;const sel=fld('pr',k,'cond');if(!condOK(R,sel))return -1;const r=results(R);let extra='';
     put(fld('pr',k,'date'),dstr(R.date));put(sel,c.cond);
     for(let j=0;j<c.sheetN;j++)put(fld('pr',k,'done',j),j<r.ticks);
+    put(fld('pr',k,'min'),String(r.min));put(fld('pr',k,'all'),String(r.n));   /* v22.58 the session's minutes and all its responses */
     put(fld('pr',k,'pb'),r.pb>0);
     const capEl=q('[data-meta="prcap"]');
     if(!c.capSet&&capEl&&!val(capEl)){put(capEl,String(c.cap));fire(byId('prStop'));   /* the sheet redraws its printed parameters line */
@@ -4263,6 +4306,7 @@ window.__nbhFactsOut=function(){try{
   function cueFor(R,e){const c=R.cfg,st=R.state;
     if(st==='done')return[R.why==='ended'?'Ended':'Session over','Check the summary, then Save to the sheet or Discard.',''];
     if(st==='pause')return['Paused','Press Resume to go on.',''];
+    if(st==='run'&&R.accUntil&&c&&c.eat&&R.v!=='co'){const p=R.accs[R.accs.length-1];return['Access until consumed',R.accLabel+': tap Consumed when it is eaten ('+up(Math.max(0,e-(p?p.from:e)))+' so far).'+(c.clock!=='run'?' The task materials stay out of reach'+(paused(R)?'; the clock waits.':'.'):'')+(R.v==='pr'?' Then FR '+ratioAt(R,R.idx)+'.':''),'now'];}
     if(st==='run'&&R.accUntil)return['Access '+down(R.accUntil-e),R.accLabel+': remove it at 0:00.'+(c&&c.clock!=='run'?' The task materials stay out of reach'+(paused(R)?'; the clock waits.':'.'):'')+(R.v==='pr'?' Then FR '+ratioAt(R,R.idx)+'.':''),'now'];
     if(R.v==='co'){
       if(st!=='run')return['Ready','Prompt one response at each station and deliver its consequence (not counted), then press Start session.',''];
@@ -4292,7 +4336,7 @@ window.__nbhFactsOut=function(){try{
     if(R.v==='co'){(c?c.opts:[]).forEach((o,j)=>setText(byId('ra-run-co-n'+j),String(R.cnt[j]||0)));
       if(!c)qa('.ra-run-opt .ra-run-n',R.box).forEach(x=>setText(x,'0'));
       qa('.ra-run-opt',R.box).forEach(b=>dis(b,!run));}
-    else{setText($(R,'n'),String(R.n));dis($(R,'resp'),!run);}
+    else{setText($(R,'n'),String(R.n));dis($(R,'resp'),!run);const eb=$(R,'eat');if(eb){const on=!!(c&&c.eat&&st==='run'&&R.accUntil);if(eb.hidden===on)eb.hidden=!on;}}
     setText($(R,'pbn'),String(R.pb));
     const A=active(),other=!!(A&&A!==R);
     dis($(R,'pb'),!run);dis($(R,'undo'),!run||!R.undo.length);
@@ -4311,7 +4355,7 @@ window.__nbhFactsOut=function(){try{
   function paintPill(){const A=pillRunner(),show=!!A&&!shown(A);if(pill.hidden===show)pill.hidden=!show;if(!show)return;
     const e=el(A);let d;
     if(A.state==='done')d='session over, not saved yet';else if(A.state==='pause')d='session paused';
-    else if(A.accUntil)d='access '+down(A.accUntil-e);else if(A.v==='pr')d='FR '+ratioAt(A,A.idx)+', stop in '+down(stopAt(A)-e);else d=down(A.cfg.dur-e)+' left';
+    else if(A.accUntil)d=A.cfg&&A.cfg.eat&&A.v!=='co'?'access until consumed':'access '+down(A.accUntil-e);else if(A.v==='pr')d='FR '+ratioAt(A,A.idx)+', stop in '+down(stopAt(A)-e);else d=down(A.cfg.dur-e)+' left';
     setText(byId('ra-run-pill-t'),SHEET[A.v]+': '+d+' · back to the session');}
   pill.addEventListener('click',()=>{const A=pillRunner();if(!A)return;const b=q('#viewSeg [data-view="'+A.v+'"]');if(b)b.click();
     setTimeout(()=>{const tb=q('.toolbar'),h=tb&&getComputedStyle(tb).position==='sticky'?tb.offsetHeight:0;
@@ -4331,6 +4375,7 @@ window.__nbhFactsOut=function(){try{
     $(R,'discard').addEventListener('click',()=>discard(R));
     $(R,'pb').addEventListener('click',()=>tapPB(R));
     $(R,'undo').addEventListener('click',()=>undo(R));
+    if($(R,'eat'))$(R,'eat').addEventListener('click',()=>eatDone(R));
     if(v==='co')$(R,'btns').addEventListener('click',e=>{const b=e.target.closest('[data-ra-j]');if(b)tapResp(R,+b.getAttribute('data-ra-j'));});
     else{$(R,'resp').addEventListener('click',()=>tapResp(R));
       $(R,'cond').addEventListener('change',()=>{R.accEdited=false;R.planned=false;defaults(R);script(R);paint(R);if(v==='pr')renderLadder(R,true);});
@@ -4356,7 +4401,8 @@ window.__nbhFactsOut=function(){try{
     else if((k==='r'||k==='R')&&R.v!=='co'){e.preventDefault();tapResp(R);}
     else if(R.v==='co'&&/^[1-9]$/.test(k)&&+k<=((R.cfg&&R.cfg.opts.length)||0)){e.preventDefault();tapResp(R,+k-1);}
     else if(k==='p'||k==='P'){e.preventDefault();tapPB(R);}
-    else if(k==='z'||k==='Z'){e.preventDefault();undo(R);}});
+    else if(k==='z'||k==='Z'){e.preventDefault();undo(R);}
+    else if((k==='e'||k==='E')&&R.v!=='co'){e.preventDefault();eatDone(R);}});
   /* keep the idle runners in step with the sheet: stimuli, options, progression, the next empty row */
   let rt=0;
   function refreshSoon(){clearTimeout(rt);rt=setTimeout(()=>{VIEWS.forEach(v=>sync(RS[v],false));paintPill();},60);}

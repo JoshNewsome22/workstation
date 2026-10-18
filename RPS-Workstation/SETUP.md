@@ -9903,6 +9903,29 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.58: the reinforcer assessment's progressive ratio, from the articles: each ratio twice, the work each session took, access until consumed
+
+- **Each ratio twice.** Form RA-1's toolbar now has **Each ratio once / Each ratio twice** beside the progression. Twice
+  presents every ratio two times before the next, as Roane, Lerman, and Vorndran (2001) did for 3 of 4 participants to
+  prevent rapid ratio strain; the sheet then has two columns per ratio (20 in all), the runner follows it, and the potency
+  steps are counted over the distinct ratios.
+- **What each session took.** The progressive-ratio sheet has two new columns, **Minutes** and **All responses** (every
+  response recorded, the ratio in progress included), which the runner fills when it saves a session. The Break-Point
+  Summary adds the **median break point**, the **mean minutes** and the **responses per minute**, and a new graph,
+  **Cumulative Responses Across Sessions**, adds up each condition's responses session by session. Penrod, Wallace, and
+  Dyer (2008) found break points that matched while the responding and the session time differed widely; the sheet now
+  shows both. An empty graph is left out of the print.
+- **Access until consumed.** The single-operant and progressive-ratio runners have **Access ends: At the access time / When
+  it is consumed**. For an edible, the runner then waits until you tap **Consumed** (or press E), up to 10 minutes, with the
+  task out of reach, and the progressive ratio's stop interval starts again from that tap, so eating time does not count as a
+  pause in responding (Francisco, Borrero, & Sy, 2008, delivered each edible until it was consumed). The summary says
+  "access until consumed" and gives the time it took.
+- The Guide's line on access periods now says what v22.54 made true: with the clock waiting, a response during access is
+  recorded apart and not counted. The simulation's progressive-ratio sessions carry minutes and all responses.
+- The Break-Point Summary, wider now, scrolls inside its box on a narrow screen (iPad portrait), as the sheet does.
+
+Checked by `qa/v2258-test.js` (11) and the reinforcer-assessment tests.
+
 ### v22.57: the media store, part 2: every form's pictures and the student photo kept once on the device
 
 - **What changes.** v22.56 kept Form TV-1's sound tracks and pictures once on the device. Now the pictures every other form
