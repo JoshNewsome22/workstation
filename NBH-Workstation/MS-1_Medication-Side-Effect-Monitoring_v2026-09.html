@@ -923,7 +923,7 @@ td input,td select{max-width:100%}
     <div class="f"><label for="mId">Student ID</label><input id="mId" name="m.sid"></div>
     <div class="f"><label for="mDob">Date of birth</label><input id="mDob" name="m.dob"></div>
     <div class="f"><label for="mSetting">School / classroom</label><input id="mSetting" name="m.setting"></div>
-    <div class="f"><label for="mBcba">BCBA</label><input id="mBcba" name="m.bcba" placeholder="Joshua Newsome, M.A., BCBA"></div>
+    <div class="f"><label for="mBcba">BCBA</label><input id="mBcba" name="m.bcba" placeholder="e.g. Jordan Ellis, M.A., BCBA"></div>
     <div class="f"><label for="mNurse">School nurse</label><input id="mNurse" name="m.nurse"></div>
     <div class="f"><label for="mDoc">Prescriber</label><input id="mDoc" name="m.doc"></div>
     <div class="f"><label for="mDocFax">Prescriber phone / fax / portal</label><input id="mDocFax" name="m.docfax"></div>
@@ -1419,7 +1419,7 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated monitoring
  const SD=k=>{const d=new Date(T);for(let j=k;j>0;){d.setDate(d.getDate()-1);if(!off(d))j--;}return d;};
  const MD=d=>(d.getMonth()+1)+'/'+d.getDate(),MDY=d=>MD(d)+'/'+d.getFullYear();
  const n=14,G=c=>MD(SD(n-1-c)),fill=x=>String(x).replace(/\{D(\d+)\}/g,(m,c)=>G(+c-1));
- setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.bcba',val('m.bcba')||'Joshua Newsome, M.A., BCBA');setv('m.nurse','School nurse (simulated)');setv('m.doc','Dr. Sample, child psychiatry (simulated)');setv('m.docfax','fax (000) 000-0000 (simulated)');setv('m.roi',MDY(SD(n+1)));setv('m.sched','Weekly for 4 weeks, then monthly');setv('m.bip','Aggression toward staff (TB-1, simulated)');setv('m.ht','140');setv('m.reason','New prescription / dose change; prescriber requested school observations (simulated)');setv('m.hx','No known allergies; no seizure history (simulated)');
+ setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.bcba',val('m.bcba')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.nurse','School nurse (simulated)');setv('m.doc','Dr. Sample, child psychiatry (simulated)');setv('m.docfax','fax (000) 000-0000 (simulated)');setv('m.roi',MDY(SD(n+1)));setv('m.sched','Weekly for 4 weeks, then monthly');setv('m.bip','Aggression toward staff (TB-1, simulated)');setv('m.ht','140');setv('m.reason','New prescription / dose change; prescriber requested school observations (simulated)');setv('m.hx','No known allergies; no seizure history (simulated)');
  $$('.hd-client').forEach(x=>x.textContent='SIMULATED – Sample Student');
  $('#nMed').value=sc.meds.length;renderMeds();
  sc.meds.forEach((m,i)=>{const k=MEDS.findIndex(x=>x.n===m.lib);setv(`md[${i}].lib`,String(k));renderMedInfo(i);setv(`md[${i}].dose`,m.dose);setv(`md[${i}].start`,MDY(SD(m.start)));setv(`md[${i}].change`,fill(m.change)+' (simulated)');setv(`md[${i}].school`,m.school);m.w.forEach(s=>setv(`md[${i}].w.${s}`,true));setv(`md[${i}].instr`,(m.instr||'Report any red-flag item at once')+' (simulated)');});

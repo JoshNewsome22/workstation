@@ -57,7 +57,7 @@ const FORM='QS-1_Staff-Quick-Start_v2026-10.html';
   page=await br.newPage({viewport:{width:1300,height:900}});wire(page,log);
   await page.goto(BASE+'/NBH-Workstation/index.html',{waitUntil:'load'});await sleep(800);
   await page.evaluate(()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m);};try{wsUI.confirm=async()=>true;}catch(e){}});
-  await page.fill('#pClient','Mateo Rivera');await page.fill('#pSid','4471823');await page.fill('#pBcba','J. Newsome, BCBA');
+  await page.fill('#pClient','Mateo Rivera');await page.fill('#pSid','4471823');await page.fill('#pBcba','J. Ellis, BCBA');
   await page.evaluate(()=>{['#pClient','#pSid','#pBcba'].forEach(s=>document.querySelector(s).dispatchEvent(new Event('input',{bubbles:true})));});
   const settle=async id=>{const t=Date.now();while(Date.now()-t<20000&&!(await page.evaluate(id=>!!state.status[id],id)))await sleep(150);};
   for(const id of ['DM-1','TB-1','FS-1','TD-1','CR-1','GB-1']){await page.evaluate(i=>openForm(i,true),id);await settle(id);
@@ -73,7 +73,7 @@ const FORM='QS-1_Staff-Quick-Start_v2026-10.html';
     btn:(()=>{const b=document.querySelector('#nbhCaseBtn');return b?(b.closest('.nbh-case-grp').hidden?'hidden':b.textContent):'none';})(),state:document.querySelector('#caseState').innerText.slice(0,160),client:S.meta.client,sid:S.meta.sid}));
   ok('4b QS-1 takes the case into its empty fields: the who box, the chain, the five things, the tiers, the record table and the skills',
     got.who.length>20&&got.may.length>3&&got.gets.length>3&&got.five>=3&&got.tiers.filter(t=>t[2]).length>=3&&got.rec.length>=2&&got.skills.length>=1&&got.pulled>=12,got);
-  ok('4c the health line carries the precautions, the BCBA is a call card, and the Setup box and the toolbar say what came',/Precautions on file/.test(got.health)&&got.calls.some(c=>/Newsome/.test(c))&&/From the case:/.test(got.state)&&/From the case/.test(got.btn),{health:got.health,calls:got.calls,btn:got.btn});
+  ok('4c the health line carries the precautions, the BCBA is a call card, and the Setup box and the toolbar say what came',/Precautions on file/.test(got.health)&&got.calls.some(c=>/Ellis/.test(c))&&/From the case:/.test(got.state)&&/From the case/.test(got.btn),{health:got.health,calls:got.calls,btn:got.btn});
   ok('5a the packet bar’s student and ID reached the Setup fields',got.client==='Mateo Rivera'&&got.sid==='4471823',{client:got.client,sid:got.sid});
   const m1=await fr.evaluate(()=>{setView('who');return {marks:document.querySelectorAll('#edWho .qs-pull').length,mayMark:!!document.querySelector('#edWho [data-mark="may"].qs-pull')};});
   await fr.fill('[data-k="may"]','Push the work away, or leave the room.');await sleep(400);

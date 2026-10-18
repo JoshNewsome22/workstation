@@ -533,7 +533,7 @@ async function loadSim(){
   const D=n=>fmt(step(n,-1)),F=n=>fmt(step(n,1)),Y=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();S.sys='match';
   S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'3',nick:'Sam',plan:'BIP dated '+Y(30)+' (Form TD-1): break card and a 2-minute task start; replacement skills from GB-1',func:'Escape or avoidance',
-    setting:'General education classroom (Ms. R.), specials, lunch and recess',rater:'Ms. R. in class; the paraeducator at specials, lunch and recess',bcba:'Joshua Newsome, M.A., BCBA',date:Y(16),start:Y(15),review:Y(0),
+    setting:'General education classroom (Ms. R.), specials, lunch and recess',rater:'Ms. R. in class; the paraeducator at specials, lunch and recess',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(16),start:Y(15),review:Y(0),
     r_perf:'Yes: the behavior is in the repertoire',rf_class:'Activities and privileges (free time, a game, a walk, helper)',rf_closed:'No: only through the sheet (closed)',rf_mag:'from phase 3, free time grows from 5 to 10 minutes and Friday adds a game with a friend',r_disc:'With practice (teach first with examples and non-examples)',r_read:'Needs pictures and faces',r_pa:'Yes, menu carried in below',r_base:'4 school days, teacher rating only',
     r_hist:'A clip chart last year, moved down in front of the class; Sam tore up two point sheets in the spring. Nothing with the student rating himself.',
     t_reduce:'Leaving the work area and tipping the desk (escape); the targets are the plan’s replacement behaviors',t_rem:'A Yes allows one reminder (the teacher tallies reminders in the R R box)',
@@ -543,7 +543,7 @@ async function loadSim(){
     cc_up:'Met on 4 of the last 5 school days',cc_step:'5 points',cc_down:'Met on fewer than 2 of 5 days, or Sam stops choosing a reward',cc_cap:'90',
     tr_ex:'For each target: the teacher and the para act out three examples and three non-examples; Sam labels each with a face card until 9 of 10 are right, two days running.',
     tr_prac:'Two practice periods on '+Y(17)+': Sam rated, Ms. R. rated, they compared; an honest sad face was praised each time it was earned.',tr_acc:'Agreement at or above 80% on 3 practice days',
-    tr_dis:'Ms. R.’s rating stands; Sam may ask once what she saw; no argument on the sheet',tr_who:'J. Newsome with Ms. R., '+Y(18)+' and '+Y(17),
+    tr_dis:'Ms. R.’s rating stands; Sam may ask once what she saw; no argument on the sheet',tr_who:'J. Ellis with Ms. R., '+Y(18)+' and '+Y(17),
     gen_set:'Specials next (art, music), with the para rating; the same sheet travels in the folder',gen_thin:'Rate three periods instead of six once phase 3 holds; then a weekly goal',gen_exit:'Goal at 90% with checks faded for four weeks and the plan data on PR-1 holding',
     iv_q:'Was I working?',iv_len:'3',iv_n:'10',iv_cue:'Tactile timer (vibrating prompt)',iv_timing:'Variable: the length varies around the average, so the cue cannot be predicted',iv_match:'Half of the intervals, chosen beforehand',iv_act:'independent math practice',
     il_dir:'dec',il_unit:'items',il_init:'20',il_step:'2',il_every:'2',il_len:'16',il_chk:'1',il_task:'Math worksheet, problems 1 to 20',il_floor:'6',il_cap:'20',

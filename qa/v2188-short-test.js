@@ -46,7 +46,7 @@ const SHORT_RE=/https?:\/\/\S+?respond\.html#q=[A-Za-z0-9]{10}\.[A-Za-z0-9_-]{22
   const ia=page.frames().find(f=>/IA-1_Indirect/.test(f.url()));
   await ia.evaluate(u=>{window.confirm=()=>true;try{localStorage.removeItem('nbh.ia1.respondent');}catch(e){}
     const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');el.value=v;el.dispatchEvent(new Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));};
-    set('m.client','Mateo Rivera');set('m.sid','4471823');set('m.email','simulated.bcba@palmbeachschools.org');set('m.assessor','J. Newsome');set('rp.box',u);
+    set('m.client','Mateo Rivera');set('m.sid','4471823');set('m.email','simulated.bcba@palmbeachschools.org');set('m.assessor','J. Ellis');set('rp.box',u);
     set('m.beh','Hitting');set('m.def','Forceful contact of an open or closed hand with a peer or adult.');
     [['Ms. Lopez','lopez@example.org','Teacher'],['Mr. Okafor','okafor@example.org','Para']].forEach((p,i)=>{set('inf['+i+'].name',p[0]);set('inf['+i+'].email',p[1]);set('inf['+i+'].role',p[2]);});},BOXURL);
   await ia.evaluate(()=>document.querySelector('#viewSeg button[data-view="outs"]').click());await sleep(300);
@@ -115,7 +115,7 @@ const SHORT_RE=/https?:\/\/\S+?respond\.html#q=[A-Za-z0-9]{10}\.[A-Za-z0-9_-]{22
   const inf=page.frames().find(f=>/IN-1_Stakeholder/.test(f.url()));
   const inl=await inf.evaluate(async()=>{try{navigator.clipboard.writeText=async()=>{throw new Error('no');};}catch(e){}
     const set=(k,v)=>{const e=document.querySelector('[data-m="'+k+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};
-    set('client','Mateo Rivera');set('sid','4471823');set('bcba','J. Newsome, BCBA');set('email','simulated.bcba@palmbeachschools.org');set('beh','Hitting: forceful contact of the hand with another person.');
+    set('client','Mateo Rivera');set('sid','4471823');set('bcba','J. Ellis, BCBA');set('email','simulated.bcba@palmbeachschools.org');set('beh','Hitting: forceful contact of the hand with another person.');
     document.getElementById('rpBtn').click();await new Promise(r=>setTimeout(r,400));const l=document.getElementById('rpLink');const dis=l.disabled;l.click();await new Promise(r=>setTimeout(r,3000));return {dis,note:document.getElementById('rpNote').textContent};});
   ok('13 IN-1’s Copy link still gives its link (short when its reply box keeps them, else the long one as before)',!inl.dis&&(SHORT_RE.test(inl.note)||/respond\.html#z=/.test(inl.note)),{dis:inl.dis,note:inl.note.slice(0,200)});
   ok('no page errors',!errs.length,errs.slice(0,5));

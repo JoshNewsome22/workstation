@@ -78,7 +78,7 @@ async function openIn(page,id){
 }
 const sim=fr=>fr.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};document.querySelector('#simBtn').click();}).then(()=>sleep(1200));
 const bar=page=>page.evaluate(()=>{const s=(i,v)=>{const e=document.getElementById(i);e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};
-  s('pClient','Jordan Rivera');s('pSid','204417');s('pSite','Lincoln Elementary');s('pBcba','J. Newsome');});
+  s('pClient','Jordan Rivera');s('pSid','204417');s('pSite','Lincoln Elementary');s('pBcba','J. Ellis');});
 const factsHave=(page,what)=>page.waitForFunction(w=>{const f=state.facts;if(!f||!f.src)return false;
   return w.every(k=>k==='behaviors'?f.src.behaviors==='TB-1'&&(f.behaviors||[]).length>0:k==='menu'?f.src.menu==='PA-1'&&(f.menu||[]).length>0:
     k==='goals'?!!(f.goals&&(f.goals.acq||[]).length):k==='fn'?!!(f.fn&&f.fn.key):false);},what,{timeout:45000});
@@ -136,7 +136,7 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   ok('A: token cost, the RA-1 answer and the notes are left to the BCBA',got.every(x=>!x.cost&&!x.conf&&!x.note));
   ok('A: the menu keeps the form\'s four rows at least',r.bk.length===Math.max(4,want.length),r.bk.length);
   ok('A: the fill reports the behavior and '+want.length+' backups, not the general fill',r.last&&r.last.filled===1+want.length&&!r.last.generic,r.last);
-  ok('A: the packet still fills the student details',r.meta.client==='Jordan Rivera'&&r.meta.sid==='204417'&&r.meta.bcba==='J. Newsome'&&r.meta.setting==='Lincoln Elementary',r.meta);
+  ok('A: the packet still fills the student details',r.meta.client==='Jordan Rivera'&&r.meta.sid==='204417'&&r.meta.bcba==='J. Ellis'&&r.meta.setting==='Lincoln Elementary',r.meta);
   const extra=Object.keys(r.meta).filter(k=>!['client','sid','bcba','setting','beh'].includes(k)&&String(r.meta[k]||'').trim());
   ok('A: nothing else on the form is touched (schedules, thinning record, audit)',!extra.length&&r.thin.every(x=>Object.values(x).every(v=>!v))&&!Object.keys(r.aud).length,{extra,thin:r.thin,aud:r.aud});
   const gen=await te.evaluate(()=>document.querySelector('#genMetrics').textContent.replace(/\s+/g,' '));

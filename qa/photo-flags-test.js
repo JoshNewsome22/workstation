@@ -44,7 +44,7 @@ const OUT=__dirname+'/out/photo-flags/';fs.mkdirSync(OUT,{recursive:true});
   const pk=JSON.parse(await grab(()=>document.querySelector('#savePacket').click()));
   ok('3a the packet file carries the photo',pk.form==='PACKET'&&pk.packet.photo&&/^data:image\/jpeg;base64,/.test(pk.packet.photo)&&pk.packet.client==='Mateo Rivera',Object.keys(pk.packet));
   const photo=pk.packet.photo;
-  const cf={form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:{client:'Mateo Rivera',sid:'4471823',grade:'3',site:'Royal Palm School',bcba:'J. Newsome',photo},forms:{},cur:null};
+  const cf={form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:{client:'Mateo Rivera',sid:'4471823',grade:'3',site:'Royal Palm School',bcba:'J. Ellis',photo},forms:{},cur:null};
   await page.evaluate(()=>{setPhoto('',true);});
   await page.evaluate(t=>openCaseText(t,null),JSON.stringify(cf));await sleep(600);
   const p5=await page.evaluate(()=>({photo:state.photo.length,shown:!document.querySelector('#pPhotoImg').hidden,client:document.querySelector('#pClient').value}));

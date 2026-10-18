@@ -1556,7 +1556,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
             <label class="field"><span>School or setting</span><input type="text" id="m_school"></label>
             <label class="field"><span>Classroom or program</span><input type="text" id="m_class"></label>
             <label class="field"><span>Data collected by</span><input type="text" id="m_observer"></label>
-            <label class="field"><span>Analyst of record</span><input type="text" id="m_analyst" placeholder="Joshua Newsome, M.A., BCBA"></label>
+            <label class="field"><span>Analyst of record</span><input type="text" id="m_analyst" placeholder="e.g. Jordan Ellis, M.A., BCBA"></label>
             <label class="field"><span>First condition name</span><input type="text" id="m_baseline" placeholder="Baseline"></label>
             <label class="field"><span>Report prepared on</span><input type="date" id="m_prepared"></label>
           </div>
@@ -3999,7 +3999,7 @@ function loadExample(){
   S=blankState();
   S.meta={client:"SIMULATED \u2013 Sample Student",id:"SIM-000",age:"9 yr 4 mo",
     school:"Example ESE center school (simulated)",classroom:"Room 12 (simulated)",
-    observer:"Classroom team (simulated)",analyst:"Joshua Newsome, M.A., BCBA",baseline:"Baseline",
+    observer:"Classroom team (simulated)",analyst:"Jordan Ellis, M.A., BCBA (simulated)",baseline:"Baseline",
     prepared:localISO(new Date()),
     notes:"Physical aggression: any forceful contact toward another person with hand, foot, or object. Self-injury: contact of hand or object to own head with audible sound. Mand for break: independent exchange of the break card. Waits 2 min after mand: scored as independent out of opportunities presented. Tantrum: each episode logged with its start and stop time or its length; the daily total is their sum. Frequency recorded across the 6-hour instructional day.",photo:"",logo:""};
   const b=S.behaviors;
@@ -6111,6 +6111,10 @@ function ddAimNow(b,rows){const aim=num(b.aim);if(aim===null)return null;const n
     if(!o)o={data:{from:"",to:"",days:0,behaviors:[],incidents:0,src:"DD-1"}};
     const d=o.data,rowsOf=c=>c.rowIdx.map(i=>all[i]).filter(r=>r&&r.date);
     d.conds=conds.map(c=>{const r=rowsOf(c);return {name:c.name,from:r.length?r[0].date:"",to:r.length?r[r.length-1].date:"",days:r.filter(x=>S.behaviors.some(b=>plotValue(x,b)!==null)).length};});
+    /* v22.49 (review F157) the day-by-day record, for Form EA-1's treatment design: the last 120 recorded days, each with its phase
+       and its values by behavior */
+    {const ph={};conds.forEach(c=>(c.rowIdx||[]).forEach(i=>{ph[i]=c.name;}));const ob=orderedBehaviors();
+      d.series=all.map((r,i)=>({r,i})).filter(x=>x.r&&x.r.date&&ob.some(b=>plotValue(x.r,b)!==null)).slice(-120).map(x=>{const v={};ob.forEach(b=>{const y=plotValue(x.r,b);if(y!==null)v[b.name||""]=y;});return {date:x.r.date,cond:ph[x.i]||"",v};});}
     const first=conds[0]?rowsOf(conds[0]):[],last=conds.length?rowsOf(conds[conds.length-1]):[];
     const byName={};orderedBehaviors().forEach(b=>{byName[b.name||""]=b;});
     d.behaviors.forEach(x=>{const b=byName[x.name];if(!b)return;

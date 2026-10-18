@@ -31,7 +31,7 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
 const errsOf=log=>log.filter(l=>l.type==='pageerror'||(l.type==='error'&&!/favicon|net::ERR|Failed to load resource/.test(l.text)));
 /* a file saved by GB-1 before this change (the simulation, as it was saved on 4 October 2026) */
 const OLD_GB1={form:'GB-1',rev:'2026-09',saved:'2026-10-04T06:56:37.122Z',rows:{red:1,acq:1},live:{red:[0],acq:[0]},sheet:true,f:{
-  'm.client':'SIMULATED – Sample Student','m.sid':'SIM-000','m.setting':'Room 12, self-contained ESE (simulated)','m.assessor':'Joshua Newsome, M.A., BCBA',
+  'm.client':'SIMULATED – Sample Student','m.sid':'SIM-000','m.setting':'Room 12, self-contained ESE (simulated)','m.assessor':'Jordan Ellis, M.A., BCBA (simulated)',
   'm.date':'2026-10-04','m.progress':'quarterly, with report cards','red[0].beh':'Aggression toward staff (simulated)','red[0].dir':'decrease',
   'red[0].meas':'rate per minute','red[0].cur':'1.4 per minute','red[0].ml':'more','red[0].tgt':'0.2 per minute',
   'red[0].ctx':'the self-contained ESE classroom during instruction','red[0].crit':'3',

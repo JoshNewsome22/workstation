@@ -54,7 +54,7 @@ const post=(u,o)=>J(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:
   const saveFile=async()=>{await page.evaluate(()=>{window.__saved=null;const o=URL.createObjectURL;URL.createObjectURL=b=>{b.text().then(t=>{window.__saved=t;});return o(b);};document.querySelector('#saveBtn').click();});await sleep(500);return JSON.parse(await page.evaluate(()=>window.__saved));};
   const openFile=async t=>{await page.evaluate(t=>{const dt=new DataTransfer();dt.items.add(new File([t],'ia1.json',{type:'application/json'}));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));},t);await sleep(600);};
   await view('setup');
-  await set('m.client','Georgi Sample');await set('m.sid','12345');await set('m.email','bcba@example.org');await set('m.assessor','J. Newsome');await set('rp.w.fast',FAST.join('\n'));
+  await set('m.client','Georgi Sample');await set('m.sid','12345');await set('m.email','bcba@example.org');await set('m.assessor','J. Ellis');await set('rp.w.fast',FAST.join('\n'));
   await set('m.beh','Hitting');await set('m.def','Forceful contact of a hand with a peer.');
   await set('inf[0].name','Ms. Rivera');await set('inf[0].email','rivera@example.org');await set('inf[1].name','Mr. Okafor');await set('inf[1].email','okafor@example.org');
   const b0=await page.evaluate(()=>({url:__rp.boxUrl(),box:__rp.box(),line:document.querySelector('#rpBoxLine').textContent}));
@@ -82,7 +82,7 @@ const post=(u,o)=>J(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:
     const after=await rp.evaluate(()=>({done:document.querySelector('.done').innerHTML,doneHidden:document.querySelector('.done').hidden,code:document.querySelector('.code').hidden,mail:document.querySelector('#nbhr-mail').hidden||document.querySelector('#nbhr-mail').closest('.row').hidden,href:location.href.slice(0,60),warn:document.querySelector('.warn').hidden}));
     return {before,after};};
   const c1=await answer(l1.u,'Ms. Rivera','Teacher',['Y','N','NA','Y']);
-  check('C1 the page says the answers are locked for the BCBA; Send sends them to the box: Sent, no code, no email, no mailto',/locked on this device/.test(c1.before.foot)&&/Send my answers to J\. Newsome/.test(c1.before.btn)&&/<b>Sent\.<\/b>/.test(c1.after.done)&&!c1.after.doneHidden&&c1.after.code&&c1.after.mail&&/respond\.html/.test(c1.after.href),JSON.stringify(c1.after));
+  check('C1 the page says the answers are locked for the BCBA; Send sends them to the box: Sent, no code, no email, no mailto',/locked on this device/.test(c1.before.foot)&&/Send my answers to J\. Ellis/.test(c1.before.btn)&&/<b>Sent\.<\/b>/.test(c1.after.done)&&!c1.after.doneHidden&&c1.after.code&&c1.after.mail&&/respond\.html/.test(c1.after.href),JSON.stringify(c1.after));
   const c2=await answer(l1.u,'Mr. Okafor','Para',['N']);
   check('C2 a second informant sends too',/<b>Sent\.<\/b>/.test(c2.after.done),JSON.stringify(c2.after));
   const l2=await page.evaluate(u=>{const p=NBH_RESPOND.payloadFromHash(u);p.beh='Screaming';p.behLabel='Screaming';p.def='A vocalization above conversation level for 3 s or more.';return location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html'+NBH_RESPOND.payloadToHash(p);},l1.u);

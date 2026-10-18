@@ -8,7 +8,7 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(file)>=0);
 async function shell(br,vp,touch){const ctx=await br.newContext({viewport:vp,hasTouch:!!touch,isMobile:!!touch,userAgent:touch?IPHONE:undefined,serviceWorkers:'block'});
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1400);
   await page.evaluate(()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};const set=(q,v)=>{const e=document.querySelector(q);e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
-    set('#pClient','Mateo Rivera');set('#pSid','4471823');set('#pSite','Royal Palm School');set('#pGrade','5');set('#pBcba','Joshua Newsome, M.A., BCBA');});
+    set('#pClient','Mateo Rivera');set('#pSid','4471823');set('#pSite','Royal Palm School');set('#pGrade','5');set('#pBcba','Jordan Ellis, M.A., BCBA (simulated)');});
   return {ctx,page,errs};}
 async function openSim(page,id,file){await page.evaluate(id=>openForm(id),id);await page.waitForFunction(id=>!!state.status[id],id,{timeout:40000});await sleep(800);
   const fr=frameOf(page,file);await fr.evaluate(()=>{nbhUI.confirm=async()=>true;window.confirm=()=>true;});await loadSim(fr);await sleep(2200);return fr;}

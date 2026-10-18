@@ -20,7 +20,7 @@ const answer=async(rp,name,mode,pick,opens)=>rp.evaluate(([name,mode,pick,opens]
  ok('library loaded beside the form',await page.evaluate(()=>!!window.NBH_RESPOND&&!window.NBH_RESPOND_MISSING));
  ok('toolbar has the two buttons; the email field is on Setup',await page.evaluate(()=>!!document.querySelector('#rpBtn')&&!!document.querySelector('#rcBtn')&&!!document.querySelector('[data-m="email"]')));
  await page.evaluate(()=>{const set=(n,v)=>{const e=document.querySelector('[data-m="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
-   set('client','Sample Student');set('sid','12345');set('nick','Sam');set('bcba','J. Newsome, BCBA');set('email','bcba@example.org');set('beh','Tipping the desk and leaving the room');set('plan','BIP dated 8/12/26');});
+   set('client','Sample Student');set('sid','12345');set('nick','Sam');set('bcba','J. Ellis, BCBA');set('email','bcba@example.org');set('beh','Tipping the desk and leaving the room');set('plan','BIP dated 8/12/26');});
  /* the dialog, prefilled */
  await page.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(200);
  const dlg=await page.evaluate(()=>({open:document.querySelector('#rpDlg').open,student:rpStudent.value,email:rpEmail.value,nick:rpNick.value,beh:rpBeh.value,status:document.querySelector('#rpStatus').hidden,saveOn:!rpSave.disabled,note:rpNote.textContent}));

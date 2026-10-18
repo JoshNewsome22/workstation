@@ -94,7 +94,7 @@ const EXCO=[['L',34,9,1],['R',36,8,0],['M',33,10,1],['L',35,9,2],['R',34,11,0],[
 const EXPR={'0':[8,9,8],'1':[4,5,5],'2':[2,1,1],ctl:[1,2,1]};   /* ratios completed, three sessions each */
 function exampleState(){const X=blank();X.n=3;X.sessMin=5;X.nSess=16;X.nCoSess=10;X.prStep='a2';X.prStart=1;X.prStop=120;
   const D=n=>{const d=new Date();d.setDate(d.getDate()-n);return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();};
-  X.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',setting:'Room 12, small-group table (simulated)',assessor:'Joshua Newsome, M.A., BCBA',date:D(0),
+  X.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',setting:'Room 12, small-group table (simulated)',assessor:'Jordan Ellis, M.A., BCBA (simulated)',date:D(0),
     question:'Do the top three items from the MSWO function as reinforcers for independent block sorting, and which will hold up under a thinned schedule?',
     pasrc:'Form PA-1, MSWO, 5 sessions; top 3 high-preference items carried forward',
     response:'Places one block in the bin from the tray; counted when the block lands in the bin',

@@ -1199,9 +1199,7 @@ hand - so the two stay identical apart from:
   apart - and, as a control, that a plain copy with only the logo changed would
   not.
 
-Left as they are, on purpose: Josh's name as example text and in simulated data
-(51 x "Joshua Newsome, M.A., BCBA", 34 x "J. Newsome", 2 x "Mr. Newsome" - he is
-the school's BCBA; make them neutral if other staff will use it), the forms' view
+Left as they are, on purpose: the forms' view
 preferences `nbh.fitScreen` / `nbh.toolbarCompact` (shared view settings are
 harmless), internal names (`nbh-` classes, nbh-pdf-tools.js), and the invisible
 CSS comment naming the form system's origin.
@@ -8163,7 +8161,7 @@ expects a second respondent in the next free column, A kept).
 end with an email: Send opened the informant's mail app with the answers as a code, which the BCBA pasted into Collect
 responses. Now, when the page carries a reply box, Send locks the answers on the informant's device and sends them to the box;
 the page says **Sent.** and is done. No email, no code, nothing to copy. The page's foot says so ("Your answers are locked on
-this device so that only J. Newsome's own form can open them"). If the box cannot be reached (no internet, the program not
+this device so that only the BCBA's own form can open them"). If the box cannot be reached (no internet, the program not
 set up), the page says so and offers **Open the email** with the code, the way it always worked.
 
 **For the assessor.** Form IA-1 collects the replies itself: the Send-outs sheet collects while it is open (once on opening,
@@ -8247,7 +8245,7 @@ when…", "Are these behaviors more likely…, and do they last long?" becomes "
 long?"; a real plural (tantrums) keeps its plural sentence. With the pronouns set to they, "Does they seem" is now "Do they
 seem". The Respondent pages dialog says so under the plural column. On the page itself, the code row (Copy the code, Save as
 a file, Open the email) stayed visible before Send on every page since v21.39, because the row's own display rule beat the
-hidden attribute: fixed; and the intro sentence says "your answers go straight to J. Newsome" when the page carries a reply
+hidden attribute: fixed; and the intro sentence says "your answers go straight to" the BCBA, by name, when the page carries a reply
 box. Checked by two new checks in `qa/respond-test.js`.
 
 **The one-file edition's shell, hardened.** The shell puts each embedded library (the respondent pages, My pictures, the
@@ -9904,6 +9902,63 @@ case holds DD-1's record now waits for it (it read it once and could miss it by 
 Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the 46 forms filled from its own saved file,
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
+
+### v22.49: the experimental analysis (EA-1) checked against the case; the samples' BCBA is simulated
+
+Form EA-1, from the review (F149 to F157, I76 to I80):
+
+- **Medical clearance is the clearance** (F149). The health record from Form DM-1 (medications with doses, health conditions,
+  allergies) is shown on a read-only line of its own, **Health record (Form DM-1)**. The Medical clearance box is never filled
+  from it, and a medication list the case wrote there before is taken out. While the box is empty and the TB-1 urgency is 3 or
+  4, Setup & safety (printed too) and the session runner say **Safety plan incomplete: no medical clearance**.
+- **The precursor analysis, card by card** (F150). Every card of the precursor template says what follows the precursor:
+  Attention and Demand give their consequence for the precursor only, the severe behavior earns nothing and ends the session by
+  the termination criteria, and Play ignores both. Each card's fidelity line says so, and the runner's script reads "After a
+  precursor".
+- **A near-zero condition is not a function** (F151). The magnitude rule now also asks for at least a quarter of the highest
+  test condition and, when the control is at zero, about one response a session. A condition below it reads **rule met,
+  magnitude low**, is listed under "Check on visual review", and stays out of the outcome and of what goes to Form FS-1. The
+  review's example (Attention and Alone near zero beside Demand) now reads "Differentiated: Demand", and FS-1 gets escape.
+- **The self-injury subtype only after automatic maintenance** (F152). The level-of-differentiation panel computes a subtype
+  only when the alone or no-interaction condition meets the structured criteria and no social condition does, or when the
+  function for the report is set to automatic. Otherwise it says it does not apply, and nothing is carried to TD-1 or FS-1.
+  Responding that stays high everywhere (the Subtype 2 pattern) is read once the extended alone series confirms it and the
+  function is set to automatic, as the automatic and RRB worked examples now do.
+- **The function for the report is chosen** (F153). **Function for the report (Form FS-1)** under Decision starts as the
+  outcome reads and can be set by hand. The evidence takes that choice, else the outcome, and only then the words typed; a
+  clause that rules a function out ("attention ruled out", "evoked little or nothing") never adds that function.
+- **The treatment goal is chosen** (F155). **Goal: Decrease or Increase** beside the dependent variable decides the
+  demonstrations and PND. Unset, it is read from the measure's name, and the design check says so.
+- **Assent** (F156). How the student says stop (Form SI-1) becomes a line of the session termination criteria, and the runner
+  shows the assent status. A new **Assent withdrawn** button ends the session at once and the row says so. Sessions that end
+  with the student leaving or saying stop are counted as assent withdrawn, and the outcome says to pause the analysis and review
+  assent with the team before any further session.
+- **The trial-based analysis gets a reading** (F154): each condition's test segments against its own control (a candidate at
+  20 points or more over at least 10 trials, the form's convention), and the reading goes to Form FS-1 as moderate evidence.
+- **The treatment log can take Form DD-1's record** (F157). **Take Form DD-1's record** fills the log with one behavior's
+  recorded days, DD-1's phase names and the values, and sets the goal from DD-1's direction. Form DD-1 now hands the case its
+  last 120 recorded days for this. The design verdict travels with the analysis to Form PR-1.
+- **A session safety sheet** (I76): one page from Setup & safety for the people at the table, with the termination criteria,
+  the stop signals, who follows a student who leaves, consent and clearance, printed with the confidential line and a "shred it
+  after the session" line.
+- **The variant selector from the case** (I77): the injury risk from the TB-1 urgency level, a precursor when one is carried
+  in, and the rate from Form DD-1, into empty answers only.
+- **A blind second-analyst reading** (I78): the graph without condition names (the control marked), criterion lines or the
+  outcome. The second analyst records a reading, and only then sees the outcome and whether the two agree.
+- **Holds and injuries at the table** (I79). Tick **Hold used** or **Injury** in the runner before Save to the log; the row
+  says so, the outcome says to record a hold the same day on Form DD-1's restraint record (and notify as the district's
+  procedure requires) and an injury on Form IM-1, and the counts travel with the analysis to Form PR-1.
+- **PA-1's ranked items on the cards** (I80): the Materials lines that name PA-1 take the top-ranked items.
+
+Form PR-1 now names, under what the case adds, the analysis' sessions ended for safety or with assent withdrawn, any hold or
+injury, and the treatment design verdict.
+
+**The samples' BCBA.** The worked examples in every form now name a simulated BCBA, **Jordan Ellis (simulated)**, instead of
+the practice's own BCBA, as do the example placeholders and the tests. Two uses of the real name stay on purpose: the "Created
+by" credit on the narrated walkthroughs, and the respondent pages' link dictionary (links already sent decode with it).
+
+Checked by `qa/v2249-test.js` (29) and the tests that load the changed samples; `qa/policy-ea1-test.js` now expects the new
+fields, the subtype beside a social function, the trial-based reading and the walk-out counted as assent withdrawn.
 
 ### v22.48: the Staff Quick Start (QS-1) checked against the plan and the record
 

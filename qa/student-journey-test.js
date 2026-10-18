@@ -36,7 +36,7 @@ const md2=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return m?(+m[2])+'/'+(
 const schoolDays=n=>{const L=[];for(let k=1;L.length<n;k++){const d=day(-k);if(d.getDay()!==0&&d.getDay()!==6)L.unshift(iso(d));}return L;};
 const SD=schoolDays(30);          /* SD[29] is the last school day before today */
 const D={referral:SD[0],consent:SD[1],records:SD[2],obs1:SD[4],obs2:SD[5],obs3:SD[6],baseFrom:SD[8],baseTo:SD[15],fs:SD[16],adopt:SD[17],start:SD[18],restraint:SD[25],ti:SD[27],last:SD[29]};
-const M={client:'Mateo Rivera',first:'Mateo',last:'Rivera',sid:'4471823',dob:'2016-03-14',site:'Royal Palm School',grade:'4',bcba:'J. Newsome, BCBA',email:'simulated.bcba@palmbeachschools.org'};
+const M={client:'Mateo Rivera',first:'Mateo',last:'Rivera',sid:'4471823',dob:'2016-03-14',site:'Royal Palm School',grade:'4',bcba:'J. Ellis, BCBA',email:'simulated.bcba@palmbeachschools.org'};
 const SAMPLE={client:'SIMULATED – Sample Student'};
 const MATEO_MARKS=[/Mateo/,/Rivera/,/4471823/];const SAMPLE_MARKS=[/SIMULATED\s*[–-]\s*Sample/,/Sample Student/,/SIM-000/,/Sample Parent/];
 const STAFF=[{name:'Ms. Lopez (simulated)',email:'lopez.sim@example.org',role:'Teacher'},{name:'Mr. Okafor (simulated)',email:'okafor.sim@example.org',role:'Paraprofessional'}];
@@ -209,7 +209,7 @@ PH.A=async()=>{
   await putAll(ic,{'#cDob':M.dob,'#cParent':'Ana Rivera (simulated)','#cBcba':M.bcba,'#cNotice':D.referral,
     'c.behav':'Hitting peers during independent work; leaving the classroom without permission (simulated).','c.why':'The current supports have not reduced the behavior; the IEP team asked for an FBA (simulated).',
     'p.records':true,'p.indirect':true,'p.abc':true,'p.scatter':true,'p.daily':true,'p.pref':true,'p.bip':true,
-    'c.who':'J. Newsome, BCBA, with the classroom teacher','c.where':'Room 14, the hallway, the cafeteria','c.start':D.consent,'c.dur':'4',
+    'c.who':'J. Ellis, BCBA, with the classroom teacher','c.where':'Room 14, the hallway, the cafeteria','c.start':D.consent,'c.dur':'4',
     '[name="c.decision"][value="yes"]':true,'#cMethod':'sign','#cDate':D.consent,'#sParName':'Ana Rivera (simulated)','#sParRel':'Parent','#sParDate':D.consent});
   await sleep(500);const icf=await factsOut(ic);
   ok('A4 IC-1 gives the consent date',icf&&icf.consent&&icf.consent.date===D.consent&&icf.consent.parent===D.consent,icf);
@@ -484,7 +484,7 @@ PH.F=async()=>{
   for(const code of ['FCT','DRA']){const opt=await td.locator('#addComp').evaluate((e,c)=>{const o=[...e.options].find(o=>o.value===c||o.textContent.startsWith(c+' '));return o?o.value:null;},code);if(opt){await td.locator('#addComp').selectOption(opt);await tapIn(td,'#addCompBtn');await sleep(300);}}
   /* the adoption meeting, signed */
   await tapIn(td,'#viewSeg button[data-view="final"]');
-  await putAll(td,{'ad.date':D.adopt,'ad.team':'Ms. Lopez (simulated) (teacher); Mr. Okafor (simulated) (paraprofessional); J. Newsome (BCBA); Ana Rivera (simulated) (parent)','ad.parent':'yes','ad.notice':D.adopt,'ad.start':D.start});
+  await putAll(td,{'ad.date':D.adopt,'ad.team':'Ms. Lopez (simulated) (teacher); Mr. Okafor (simulated) (paraprofessional); J. Ellis (BCBA); Ana Rivera (simulated) (parent)','ad.parent':'yes','ad.notice':D.adopt,'ad.start':D.start});
   await tapIn(td,'#td85Team');await sleep(400);
   const nSig=await td.locator('#td85List canvas.td85-pad').count();
   const sigOf=k=>td.evaluate(k=>{try{const r=JSON.parse(document.querySelector('[name="ad.sigs"]').value||'[]')[k];return !!(r&&r.img);}catch(e){return false;}},k);
@@ -601,7 +601,7 @@ PH.G=async()=>{
   ok('G10 CN-1’s service log: three entries, minutes from the times, against the IEP’s minutes',(sv.log||[]).length===3&&sv.iep&&sv.iep.minutes===120&&/of 120 minutes/.test(sv.iep.line||''),{log:sv.log,iep:sv.iep,month:sv.month,inMonth});
   /* PR-1: the review, today */
   const pr=await openF('PR-1');
-  await putAll(pr,{'[data-m="date"]':mdy(TODAY),'[data-m="period"]':mdy(D.start)+' – '+mdy(PHONE_DAY),'[data-m="team"]':'Ms. Lopez (simulated), Mr. Okafor (simulated), J. Newsome'});
+  await putAll(pr,{'[data-m="date"]':mdy(TODAY),'[data-m="period"]':mdy(D.start)+' – '+mdy(PHONE_DAY),'[data-m="team"]':'Ms. Lopez (simulated), Mr. Okafor (simulated), J. Ellis'});
   await tapIn(pr,'#viewSeg button[data-view="ev"]');await tapIn(pr,'#ddBtn');await sleep(400);
   if(await pr.locator('#ddAsk').isVisible().catch(()=>false)){await pr.locator('#ddAsk').tap();await sleep(2500);}
   if(await pr.locator('#ddGo').isEnabled().catch(()=>false)){await pr.locator('#ddGo').tap();await sleep(1200);}

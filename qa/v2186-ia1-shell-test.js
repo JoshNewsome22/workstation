@@ -34,7 +34,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const ia=page.frames().find(f=>/IA-1_Indirect/.test(f.url()));
   await ia.evaluate(u=>{window.confirm=()=>true;try{localStorage.removeItem('nbh.ia1.respondent');}catch(e){}
     const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');el.value=v;el.dispatchEvent(new Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));};
-    set('m.client','Mateo Rivera');set('m.sid','4471823');set('m.email','simulated.bcba@palmbeachschools.org');set('m.assessor','J. Newsome');set('rp.box',u);
+    set('m.client','Mateo Rivera');set('m.sid','4471823');set('m.email','simulated.bcba@palmbeachschools.org');set('m.assessor','J. Ellis');set('rp.box',u);
     set('m.beh','Hitting');set('m.def','Forceful contact of an open or closed hand with a peer or adult.');
     [['Ms. Lopez','lopez@example.org','Teacher'],['Mr. Okafor','okafor@example.org','Para']].forEach((p,i)=>{set('inf['+i+'].name',p[0]);set('inf['+i+'].email',p[1]);set('inf['+i+'].role',p[2]);});},BOXURL);
   await ia.evaluate(()=>document.querySelector('#viewSeg button[data-view="outs"]').click());await sleep(300);

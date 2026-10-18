@@ -1044,7 +1044,7 @@ table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-wei
     <div class="f"><label for="hDob">Date of birth</label><input id="hDob" name="h.dob" type="date"></div>
     <div class="f"><label for="hSetting">School / classroom</label><input id="hSetting" name="h.setting" placeholder="Royal Palm School, Rm"></div>
     <div class="f"><label for="hGrade">Grade</label><input id="hGrade" name="h.grade"></div>
-    <div class="f"><label for="hBcba">Reviewed by</label><input id="hBcba" name="h.bcba" placeholder="Joshua Newsome, M.A., BCBA"></div>
+    <div class="f"><label for="hBcba">Reviewed by</label><input id="hBcba" name="h.bcba" placeholder="e.g. Jordan Ellis, M.A., BCBA"></div>
     <div class="f"><label for="hStart">Review started</label><input id="hStart" name="h.start" type="date"></div>
     <div class="f"><label for="hEnd">Review completed</label><input id="hEnd" name="h.end" type="date"></div>
     <div class="f"><label for="hConsent">Consent on file (IC-1 / district) date</label><input id="hConsent" name="h.consent" type="date"></div>
@@ -1924,7 +1924,7 @@ async function loadSim(){
  /* v21.16 audit (F3): loading replaced every entry on every sheet without a question */
  if(($$('[name]').some(el=>el.type==='checkbox'?el.checked:String(el.value).trim()!=='')||lgHas())&&!(await nbhUI.confirm('Load a simulated case?\nEvery entry on every sheet will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=simCase(key);restore({counts:{}});
- Object.keys(sc.set).forEach(k=>setv(k,sc.set[k]));setv('h.bcba',val('h.bcba')||'Joshua Newsome, M.A., BCBA');
+ Object.keys(sc.set).forEach(k=>setv(k,sc.set[k]));setv('h.bcba',val('h.bcba')||'Jordan Ellis, M.A., BCBA (simulated)');
  sc.src.forEach(([k,d])=>{setv(`src.${k}.r`,true);setv(`src.${k}.d`,ymd(d));setv(`src.${k}.w`,'District system (simulated)');setv(`src.${k}.n`,'Reviewed; see sheets (simulated)');});
  Object.keys(sc.na||{}).forEach(k=>setv(`src.${k}.n`,sc.na[k]));
  LG=lgClean(sc.ledger);lgRenderAll();lgStore();refresh();$('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;setView('incidents');}

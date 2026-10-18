@@ -23,7 +23,7 @@ const QABF=Array.from({length:25},(_,i)=>(i+1)+'. Simulated QABF item '+(i+1)+' 
   const saveFile=async()=>{await page.evaluate(()=>{window.__saved=null;const o=URL.createObjectURL;URL.createObjectURL=b=>{b.text().then(t=>{window.__saved=t;});return o(b);};document.querySelector('#saveBtn').click();});await sleep(500);return JSON.parse(await page.evaluate(()=>window.__saved));};
   const openFile=async t=>{await page.evaluate(t=>{const dt=new DataTransfer();dt.items.add(new File([t],'ia1.json',{type:'application/json'}));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));},t);await sleep(600);};
   await view('setup');
-  await set('m.client','Georgi Sample');await set('m.sid','12345');await set('m.email','bcba@example.org');await set('m.assessor','J. Newsome');await set('rp.w.qabf',QABF);
+  await set('m.client','Georgi Sample');await set('m.sid','12345');await set('m.email','bcba@example.org');await set('m.assessor','J. Ellis');await set('rp.w.qabf',QABF);
   /* ---- A. targets ---- */
   const a1=await page.evaluate(()=>({opts:[...document.querySelector('#tgtSel').options].map(o=>o.textContent),del:document.querySelector('#tgtDel').disabled,note:document.querySelector('#tgtNote').textContent}));
   check('A1 a fresh form holds one untitled target: the toolbar’s list says so, Remove is off, the Setup note explains',a1.opts.join()==='1. (untitled target)'&&a1.del&&/holds one target behavior/.test(a1.note),JSON.stringify(a1));

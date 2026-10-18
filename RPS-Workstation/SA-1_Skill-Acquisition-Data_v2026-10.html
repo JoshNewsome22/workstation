@@ -912,7 +912,7 @@ td input,td select{max-width:100%}
       <div><label>Goal this program serves (Form GB-1)</label><input data-m="goal" placeholder="GB-1 goal number and its short name"></div>
       <div><label>Plan it belongs to (Form TD-1 replacement skill, or IEP goal)</label><input data-m="plan" placeholder="BIP dated 8/5/26 (Form TD-1): replacement skill 1"></div>
       <div><label>Setting(s) where it is taught</label><input data-m="setting" placeholder="resource room table; general education classroom"></div>
-      <div><label>Who teaches (name and initials used on the sheet)</label><input data-m="teachers" placeholder="J. Newsome (JN); Ms. R. (MR)"></div>
+      <div><label>Who teaches (name and initials used on the sheet)</label><input data-m="teachers" placeholder="e.g. J. Ellis (JE); Ms. R. (MR)"></div>
       <div><label>Case BCBA</label><input data-m="bcba"></div>
       <div><label>Date written</label><input data-m="date"></div>
       <div><label>Start date</label><input data-m="start"></div>
@@ -1472,7 +1472,7 @@ async function loadSim(){
   const D=n=>fmt(step(n,-1)),Y=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();
   S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',program:'Break request (FCT), Program 2',goal:'GB-1 goal 3: asks for a break with the card on 90% of opportunities across 3 sessions and 2 adults',
-    plan:'BIP dated '+Y(28)+' (Form TD-1): replacement skill 1, the break card replaces leaving the area',setting:'Resource room table; general education classroom from the probes on',teachers:'J. Newsome (JN); Ms. R., classroom teacher (MR); paraeducator (KP) for probes',bcba:'Joshua Newsome, M.A., BCBA',date:Y(27),start:Y(26),review:Y(0),
+    plan:'BIP dated '+Y(28)+' (Form TD-1): replacement skill 1, the break card replaces leaving the area',setting:'Resource room table; general education classroom from the probes on',teachers:'J. Ellis (JE); Ms. R., classroom teacher (MR); paraeducator (KP) for probes',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(27),start:Y(26),review:Y(0),
     skill:'Hands the break card to the adult when a non-preferred task is presented',def:'Within 5 s of the task being placed and the instruction given, picks up the card and places it in the adult’s hand or on the adult’s side of the table. Reaching for the card without releasing it, pushing the task away, or no response within 5 s is scored as an error.',
     sd:'The adult places the task on the desk, with the break card at the top right corner, and says “Time to work.”',lat:'within 5 s of the instruction',materials:'Break card (laminated, 3 by 5 in., red border); three non-preferred tasks (cutting, tracing, sorting); timer',prereq:'Attends to the adult at the table; tolerates the task on the table for 10 s; picks up and releases a card on request (probed '+Y(27)+')',
     mc_pct:'90',mc_n:'3',mc_inst:'2',mc_sets:'2',mc_why:'A communication skill the plan depends on: 90% across 3 sessions with both adults, then probed with the paraeducator',
@@ -1489,13 +1489,13 @@ async function loadSim(){
     pr_fail:'Teach in the probed condition with the same procedure for up to 3 sessions; add the condition to the training rotation; re-probe a week after it reaches criterion',closed:''};
   S.chk={mc_first:false,showCorrect:true,showFirst:true};
   const tr=['––––––––––','–––I––––––','FFIFPFPIFP','PIPFIPPIPP','PIIPVIIPIV','IVIIPIVIIV','IIVIIVIIIV','IIIVIIIVII','IIIIVIIIII','IIIIIIII–I','IIIIIIIIII','IIIII–IIII'];
-  const ph=['B','B','T','T','T','T','T','T','T','T','T','M'],inst=['JN','JN','JN','JN','JN','MR','JN','MR','JN','MR','JN','MR'];
+  const ph=['B','B','T','T','T','T','T','T','T','T','T','M'],inst=['JE','JE','JE','JE','JE','MR','JE','MR','JE','MR','JE','MR'];
   const notes=['probe: card on the table, no prompts','probe','full physical from the start (most-to-least)','partial physical','partial physical; verbal model on the last trials','faded to verbal model; MR’s first session','verbal model with a 2-s delay','2-s delay','first session at criterion','at criterion with MR','mastered: 3 sessions at or above 90% with JN and MR','maintenance, 1 week after mastery; break shortened to 1 minute'];
   const dls=['','','0','0','0','0','2','2','2','2','2','2'];   /* v21.37: the delay row, as the notes already describe it */
   S.sess=tr.map((t,i)=>({date:D(tr.length-1-i+2),ph:ph[i],inst:inst[i],tr:Array.from(t),dl:dls[i],note:notes[i]}));
   S.steps=['Turns on the water','Wets both hands','Pumps the soap once','Rubs hands together for 10 s (front, back, between fingers)','Rinses both hands','Turns off the water','Pulls one paper towel','Dries hands and drops the towel in the bin'].map(t=>({text:t}));
   const lv=['–I––I–––','PIFFIFPF','VIFFIFPF','IIPFIFPF','IIVFIFPF','IIIPIFPF','IIIVIVPF','IIIIIVPF'];
-  const tph=['B','T','T','T','T','T','T','T'],tin=['JN','JN','MR','JN','MR','JN','MR','JN'];
+  const tph=['B','T','T','T','T','T','T','T'],tin=['JE','JE','MR','JE','MR','JE','MR','JE'];
   const tnotes=['probe: the whole chain, no prompts','step 1 taught (partial physical); later steps prompted through','step 1 verbal model','step 1 independent; step 3 taught','step 3 verbal model','step 3 independent; step 4 taught','step 4 verbal model','step 4 independent once; step 6 prompted through at verbal'];
   S.tas=lv.map((t,i)=>({date:D(lv.length-1-i+1),ph:tph[i],inst:tin[i],lv:Array.from(t),note:tnotes[i]}));
   S.probes=[{date:D(1),type:'Maintenance',dim:'Same as training',desc:'Resource room table, JN, task set 1, one week after mastery',n:'10',k:'9',note:'held without the timer'},

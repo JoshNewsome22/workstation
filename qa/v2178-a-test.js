@@ -85,7 +85,9 @@ const errs=[];
     ok('EA-1: hypothesis carried in names each form and its function',/IA-1: Attention/.test(hyp)&&/IN-1: Multiple/.test(hyp)&&/ABC-1: Escape\/avoidance/.test(hyp)&&/OB-1: Escape/.test(hyp),hyp);
     ok('EA-1: prior hypothesis unclear or conflicting when the forms differ',await v('v.hyp')==='none',await v('v.hyp'));
     ok('EA-1: consent from Form IC-1',/9\/1\/2026/.test(await v('s.consent')),await v('s.consent'));
-    const med=await v('s.med');ok('EA-1: medications, names and doses',/Methylphenidate \(simulated\) 10 mg/.test(med)&&/Melatonin \(simulated\) 3 mg/.test(med),med);
+    /* v22.49 (F149) the medications go to the read-only health record line, never into Medical clearance */
+    const med=await p.evaluate(()=>{const e=document.getElementById('eaHealth');return e?e.textContent:'';}),clr=await v('s.med');
+    ok('EA-1: medications, names and doses, on the health record line and not in Medical clearance',/Methylphenidate \(simulated\) 10 mg/.test(med)&&/Melatonin \(simulated\) 3 mg/.test(med)&&!/Methylphenidate/.test(clr||''),{med,clr});
     ok('EA-1: definition, urgency, precursor (TD-1 first)',await v('m.def')===F.behaviors[0].def&&await v('m.urg')==='3'&&await v('m.prec')===F.plan.prec,[await v('m.def'),await v('m.urg'),await v('m.prec')]);
     ok('EA-1: the shared fill still places the target behavior',/Aggression toward staff/.test(await v('m.beh')),await v('m.beh'));
     ok('EA-1: the answer counts them',r&&r.filled>=8,r);

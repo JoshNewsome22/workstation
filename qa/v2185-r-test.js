@@ -41,7 +41,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   const setM=(k,v)=>p.evaluate(([k,v])=>{const e=document.querySelector('[data-m="'+k+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},[k,v]);
   const setN=o=>p.evaluate(o=>{Object.keys(o).forEach(k=>{const e=document.querySelector('[data-n="'+k+'"]');e.value=o[k];e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));});},o);
   const newNote=()=>p.evaluate(()=>document.getElementById('newNote').click());
-  await setM('client','Mateo Rivera');await setM('sid','4471823');await setM('dob','03/14/2016');await setM('school','Royal Palm School');await setM('bcba','Joshua Newsome, M.A., BCBA');
+  await setM('client','Mateo Rivera');await setM('sid','4471823');await setM('dob','03/14/2016');await setM('school','Royal Palm School');await setM('bcba','Jordan Ellis, M.A., BCBA (simulated)');
   /* six notes: four today (observation 60, a call 30 with the parent typed, a training typed as 30 of 45, a direct session 20),
      one 45 days ago (consultation 40), one dated today without times, one undated with times */
   await setN({date:TODAY,start:'09:00',end:'10:00',type:'Observation',present:'Ms. R. (teacher), J. Ortiz (paraeducator), the student',purpose:'Scheduled observation and TI-1'});
@@ -86,7 +86,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   /* 3: the printed service log */
   const pg=await p.evaluate(()=>({opts:[...document.getElementById('svcPeriod').options].map(o=>o.value),txt:document.getElementById('svcOut').innerText,rows:document.querySelectorAll('#svcOut table.sl-t tbody tr[data-open]').length}));
   ok('3a the period is this month by default, with this week, the earlier month and every entry to choose',pg.opts[0]==='m:'+isoD(t0).slice(0,7)&&pg.opts.includes('w')&&pg.opts.includes('all')&&pg.opts.includes('m:'+isoD(OLD).slice(0,7)),pg.opts);
-  ok('3b the page: student, ID, date of birth, school, provider with credential, IEP service',/Mateo Rivera/.test(pg.txt)&&/4471823/.test(pg.txt)&&/03\/14\/2016/.test(pg.txt)&&/Royal Palm School/.test(pg.txt)&&/Joshua Newsome, M\.A\., BCBA/.test(pg.txt)&&/120 minutes per month, consultation/.test(pg.txt),pg.txt.slice(0,600));
+  ok('3b the page: student, ID, date of birth, school, provider with credential, IEP service',/Mateo Rivera/.test(pg.txt)&&/4471823/.test(pg.txt)&&/03\/14\/2016/.test(pg.txt)&&/Royal Palm School/.test(pg.txt)&&/Jordan Ellis, M\.A\., BCBA \(simulated\)/.test(pg.txt)&&/120 minutes per month, consultation/.test(pg.txt),pg.txt.slice(0,600));
   ok('3c this month\'s four entries with start, end, minutes and service; the total; the signature line',pg.rows===4&&/9:00 am/.test(pg.txt)&&/10:00 am/.test(pg.txt)&&/Total, 4 entries\s*140/.test(pg.txt)&&/Provider signature/.test(pg.txt)&&/Against the IEP: 120 of 120 minutes in /.test(pg.txt),pg.txt.slice(500,1600));
   await p.click('#svcPrint');await sleep(150);const ps=await p.evaluate(()=>window.__pstate);await sleep(1600);
   const after=await p.evaluate(()=>({cls:document.body.classList.contains('cn-svc-only'),st:!!document.getElementById('cnSvcPage')}));
@@ -101,7 +101,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   ok('3f the whole-form print still renders, with the service log in it',pages(pdf2)>=4,pages(pdf2));
   /* 4: CSV */
   const csv=await grab(p,'svcCsv');const L=csv.t.split('\n');
-  ok('4a the service log CSV: a header and this month\'s four rows with minutes, kind and provider',L.length===5&&/^"Student","Student ID","Date","Start","End","Minutes","Kind"/.test(L[0])&&L.slice(1).every(r=>/"Mateo Rivera","4471823"/.test(r)&&/"Joshua Newsome, M\.A\., BCBA"$/.test(r))&&/"60","Observation"/.test(csv.t)&&/^CN-1_service-log_Mateo_Rivera_/.test(csv.name),{L,name:csv.name});
+  ok('4a the service log CSV: a header and this month\'s four rows with minutes, kind and provider',L.length===5&&/^"Student","Student ID","Date","Start","End","Minutes","Kind"/.test(L[0])&&L.slice(1).every(r=>/"Mateo Rivera","4471823"/.test(r)&&/"Jordan Ellis, M\.A\., BCBA \(simulated\)"$/.test(r))&&/"60","Observation"/.test(csv.t)&&/^CN-1_service-log_Mateo_Rivera_/.test(csv.name),{L,name:csv.name});
   await p.selectOption('#svcPeriod','all');await sleep(200);const csvAll=await grab(p,'svcCsv');
   ok('4b every entry when the period is every entry',csvAll.t.split('\n').length===6&&/_all\.csv$/.test(csvAll.name),csvAll.name);
   const ncsv=await grab(p,'csvBtn');const nh=ncsv.t.split('\n')[0];
@@ -159,10 +159,10 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   const setId=(id,x)=>t.evaluate(([id,x])=>{const e=document.getElementById(id);e.value=x;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},[id,x]);
   ok('7a an empty TD-1 sends no signatures',await t.evaluate(()=>{const o=window.__nbhFactsOut();return !(o&&o.plan&&o.plan.adoption&&o.plan.adoption.signatures);}));
   await t.click('#viewSeg button[data-view="final"]');await sleep(300);
-  await setT('ad.date','2026-10-08');await setT('ad.team','Ms. R. (ESE teacher); Mr. L. (LEA representative); Joshua Newsome (BCBA); general education teacher');await setT('ad.parent','yes');
+  await setT('ad.date','2026-10-08');await setT('ad.team','Ms. R. (ESE teacher); Mr. L. (LEA representative); Jordan Ellis (BCBA); general education teacher');await setT('ad.parent','yes');
   await t.click('#td85Team');await sleep(300);
   const r0=await t.evaluate(()=>JSON.parse(document.querySelector('[name="ad.sigs"]').value));
-  ok('7b List the team present makes a row for each (name and role; a role alone stays a role)',r0.length===4&&r0[0].name==='Ms. R.'&&r0[0].role==='ESE teacher'&&r0[2].name==='Joshua Newsome'&&r0[2].role==='BCBA'&&r0[3].name===''&&r0[3].role==='general education teacher',r0);
+  ok('7b List the team present makes a row for each (name and role; a role alone stays a role)',r0.length===4&&r0[0].name==='Ms. R.'&&r0[0].role==='ESE teacher'&&r0[2].name==='Jordan Ellis'&&r0[2].role==='BCBA'&&r0[3].name===''&&r0[3].role==='general education teacher',r0);
   await t.click('#td85Team');await sleep(200);
   ok('7c listing again adds no one twice',await t.evaluate(()=>JSON.parse(document.querySelector('[name="ad.sigs"]').value).length)===4);
   await t.evaluate(()=>{window.__ptypes=[];document.addEventListener('pointerdown',e=>{if(e.target.matches&&e.target.matches('canvas.td85-pad'))window.__ptypes.push(e.pointerType);},true);});

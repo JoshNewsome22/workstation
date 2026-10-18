@@ -774,6 +774,10 @@ td input,td select{max-width:100%}
 .ea-alone .ea-sub{font-size:11.5px;color:var(--ink-soft);padding:3px 0 0}
 .ea-flag{border-left:4px solid var(--nbh-flag);background:var(--nbh-flag-soft);padding:8px 12px;margin:0 0 8px;font-size:12.5px;line-height:1.5;color:var(--ink)}
 .ea-flag b{color:var(--nbh-flag);font-family:var(--sans);font-size:11.5px}
+/* v22.49 (review F149, F156) the health record line, read only; the assent plan in the runner */
+.dval.ea-ro{font-size:12px;line-height:1.45;padding:5px 8px}
+.ea-assent{border-left:4px solid var(--nbh-teal,#3d7f86);background:#eef6f5;padding:7px 12px;margin:0 0 8px;font-size:12.5px;line-height:1.5}
+.ea-assent[hidden],#eaHealthRow[hidden]{display:none}
 .ea-flag button.tool{margin:6px 6px 0 0}
 .ea-true{margin:0 0 10px}
 .ea-ready{font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);margin:-4px 0 0}
@@ -1111,6 +1115,10 @@ body.view-walk #walk{display:block}
 
 /* ---- the job aids: printed from this view only; the view never prints with the form ---- */
 #walk #wk-aids{display:none}
+/* v22.49 (review I78) while the second analyst reads blind, only the blind reading shows */
+body.ea-blind #analysis > *:not(#eaBlindWrap):not(.nbh-print-head){display:none!important}
+body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important}
+#eaBlindRun[hidden]{display:none}
 @media print{
   #walk{display:none!important}
   .wk-go-line{display:none!important}
@@ -1120,6 +1128,17 @@ body.view-walk #walk{display:block}
   body.wk-printing #walk > .wk-body{display:none!important}
   body.wk-printing #walk #wk-aids{display:block!important}
   body.wk-printing #walk{page:wk-aids}
+}
+/* v22.49 (review I76) the session safety sheet: printed alone, from Setup & safety; it carries student information */
+#eaSS{display:none}
+.ea-ev{display:inline-flex;align-items:center;gap:4px;font-family:var(--sans);font-size:12px;margin:0 2px}
+@media print{
+  body.ea-ss-printing > *:not(#eaSS){display:none!important}
+  body.ea-ss-printing #eaSS{display:block!important;font-family:var(--sans);font-size:10.5pt;color:#111}
+  #eaSS h1{font-size:15pt;margin:0 0 2px}#eaSS .ss-sub{font-size:9.5pt;color:#444;margin:0 0 8px}
+  #eaSS table{width:100%;border-collapse:collapse}#eaSS th{width:28%;text-align:left;vertical-align:top;font-size:9.5pt;padding:5px 8px;background:#eef3f2;border:1px solid #b9c7c4;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #eaSS td{vertical-align:top;padding:5px 8px;border:1px solid #b9c7c4;white-space:pre-wrap}#eaSS .ss-flag{color:#8e2a2a;font-weight:700}
+  #eaSS .ss-foot{margin-top:10px;font-size:9pt;color:#8e2a2a;font-weight:600}
 }
 /* the job aids hold no student information, so their pages do not carry the form's confidential-record footer */
 @page wk-aids{
@@ -1273,11 +1292,13 @@ body.view-walk #walk{display:block}
   <div class="warn ev"><b>Evidence</b>Hagopian et al. (1997) found low agreement among three predoctoral interns interpreting multielement analyses (M = .46), developed structured criteria that reproduced an expert panel's interpretations (exact agreement .94), and after training in the criteria the interns' mean agreement rose to .81. The criteria draw an upper and a lower criterion line one standard deviation above and below the mean of the control condition and count test-condition points outside them. Roane, Fisher, Kelley, Mevers, and Bouxsein (2013) generalized the rule to analyses of any length: a test condition is differentiated when the number of points above the upper line minus the number below the lower line is at least half the points in that condition, with additional rules for trends, low magnitude, and multiple control; the lower line is set at zero when the standard deviation exceeds the control mean. Saini, Fisher, and Retzlaff (2018) applied the criteria on an ongoing basis, series by series, to existing analyses: the interim interpretations predicted the final post hoc interpretations with a very high degree of accuracy and identified function after 19 sessions on average instead of 32.</div>
   <div class="warn"><b>Applied guidance</b>The interpretation sheet computes the criterion lines and the Roane rule from the sessions log and flags trend and low-magnitude patterns for visual review. For latency measures the rule is inverted (points below the lower line count as evidence), an adaptation of this form; Sunde, Briggs, and Mitteer (2022) published structured criteria adapted for latency-based analyses, and those should be applied on visual review. A function is reported only when the rule is met and the pattern survives visual inspection for trend and consistency; otherwise the analysis continues or a variant is chosen.</div>
 
+  <div class="warn"><b>On this form</b>The function handed to Form FS-1 is the one under <b>Function for the report</b>, which starts as the outcome reads and can be set by hand after visual review. A condition that meets u &minus; l but not the magnitude rule reads &ldquo;rule met, magnitude low&rdquo; and is left out of the outcome. A second analyst can read the analysis blind under <b>Second Analyst&rsquo;s Reading</b>: the graph without the condition names, the criterion lines or the outcome, then the comparison (Hagopian et al., 1997).</div>
   <h3 class="sub">5. Single-Subject Designs for the Treatment That Follows</h3>
   <div class="warn ev"><b>Evidence</b>Baer, Wolf, and Risley (1968) described the reversal and multiple-baseline designs as two designs commonly used to demonstrate reliable control of a behavior change; Sidman (1960) set the steady-state logic: change conditions only after responding is stable. Barlow and Hayes (1979) described the alternating-treatments design; Hartmann and Hall (1976) the changing-criterion design; Horner and Baer (1978) the multiple-probe technique. Thompson and Iwata (2005) reviewed the control conditions used to demonstrate reinforcement effects (extinction, noncontingent reinforcement, DRO, DRA), noting that NCR and DRO controls have often been used because conventional extinction is difficult to implement. Kratochwill et al. (2010, 2013) set the What Works Clearinghouse standards: at least three demonstrations of the effect at three points in time, at least five data points per phase (three with reservations), interobserver agreement on at least 20% of sessions in each condition at 80% or higher, and a visual analysis of level, trend, variability, immediacy, overlap, and consistency; Lane and Gast (2014) give a step-by-step guide to that analysis. Horner et al. (2005) had earlier proposed quality indicators for participants, setting, dependent and independent variables, fidelity, and social validity (Wolf, 1978).</div>
   <div class="warn"><b>Applied guidance</b>The treatment-design sheet builds the phase plan for the chosen design, sets the phase-change rule, counts demonstrations of effect, and computes per-phase level, trend, and percentage of non-overlapping data (Scruggs, Mastropieri, &amp; Casto, 1987) from the logged data. A withdrawal is not used when the behavior is dangerous or the treatment cannot ethically be removed; use a multiple baseline across settings or behaviors, or a DRO or NCR reversal, instead.</div>
   <h3 class="sub">6. Running Sessions at the Table</h3>
   <div class="warn"><b>Applied guidance</b>The Sessions sheet has a session runner above the log. Pick the condition and the runner reads its card: the session length, the consequence period after each target (for example, the 30-s break in Demand), the attention schedule in the control condition and how long attention is held back after a target, and the prompt-step interval. All of them can be edited before you start. During the session, tap <b>Target</b> for every response (keys: Space or T) and <b>Precursor</b> when a precursor is being analyzed (P). <b>Consequence follows</b> says which response the consequence period follows: the target, the precursor (a precursor analysis), or either (a synthesized analysis whose card says target or precursor). When it follows the precursor, the precursor is the response the log records, and the target count goes in the notes; <b>Undo</b> (Z) removes the last target. The runner times each consequence period and cues its end, cues each noncontingent attention delivery, and can end the session at a termination count. Latency sessions end at the first target and record its latency. Trial-based sessions run the control segment and then the test segment, each ending at the first target, and write the 1 or 0 into the trial-based log. When the session is over, check the summary and press <b>Save to the log</b>. The date, condition, phase, minutes, the value the primary measure needs (count, latency, or percentage of intervals), the terminated box and a short note go into the next empty row, and the log and the graph update. Sound, flash and vibration can each be turned off. For the alone or no-interaction condition the runner also shows how it is run, as Setup &amp; safety says: supervised, or true alone with the stop-or-step-in rule, and it flags a card whose wording does not match. A student who walks out ends the session: press End early and write &ldquo;left the room&rdquo; in Notes; Interpretation counts these sessions on their own line. The runner is for the data collector; the therapist runs the session.</div>
+  <div class="warn"><b>Safety at the table</b>Press <b>Assent withdrawn</b> when the student shows a stop signal from the assent plan (Form SI-1) or leaves: the session ends at once and its row says so, and the outcome then says to pause the analysis and review assent with the team before any further session. Tick <b>Hold used</b> or <b>Injury</b> before Save to the log: a hold is a restraint, recorded the same day on Form DD-1&rsquo;s restraint record and reported as the district&rsquo;s procedure requires; an injury goes on Form IM-1. <b>Print the session safety sheet</b> on Setup &amp; safety gives the people at the table one page; shred it after the session.</div>
   <h3 class="sub">7. Two Analyses Added in 2026: The Component FA and the Higher-Level RRB Analysis</h3>
   <div class="warn ev"><b>Evidence</b><em>Component FA.</em> Bann and Morris (2026) ran a component functional analysis with nine clinic-referred children (4&ndash;13 years, intellectual or developmental disability; eight with autism): four sessions of six trials, each trial one ordering of three establishing operations (attention restricted, tangibles restricted, instructions presented) added one at a time for up to 60 s each after a 60-s play component, with the matching consequences delivered one at a time for up to 20 s each when the behavior occurred and persisted. Evocative-effect probabilities predicted the outcome of an extended multielement analysis with AUC .94&ndash;1.0 and, at the authors&rsquo; optimal cutoffs with four sessions, 100% sensitivity and specificity (evocative) and 87.5% sensitivity with 100% specificity (reinforcement). The component analysis averaged 20 min per session and 76 min in total against 92 min for the multielement analysis, and a single session predicted the multielement outcome for eight of nine children. FCT followed by DRA built on the identified function reduced the behavior by 95% (one child) to 100% (seven children) relative to the multielement test condition. The sample held five isolated tangible functions, one escape, two synthesized, no attention-only and no automatic function; the cutoffs were derived on this sample and have not been applied prospectively, and the format never exposes the child to a low-stimulation, no-consequence context, so it cannot detect automatic reinforcement or idiosyncratic functions. <em>Higher-level RRB.</em> Fergus, Ahearn, Matthews, and Pandola (2026) replicated Rodriguez, Thompson, Schlichenmeyer, and Stocco (2012) with four adolescents and young adults with autism (13&ndash;22 years) at a residential school. A multielement analysis (attention, escape, no-interaction or alone, unstructured play; 5-min sessions) in a room baited before every session with about 20&ndash;30 unaligned, mismatched, disrupted, or incomplete items showed undifferentiated responding including the no-interaction condition for three participants and persistent responding across an extended alone series with low undifferentiated multielement responding for the fourth, read as automatic reinforcement; three further referrals showed escape or attention functions and were excluded. Three effective competing stimuli identified in an augmented competing stimulus assessment (Hagopian et al., 2020; an item associated with at least an 80% reduction in RRB relative to a no-stimulus control) reduced arranging and ordering to zero or near zero for all four, with the support level (none, prompting, or prompting plus blocking) set by the assessment phase in which the stimuli competed; blocking was later withdrawn for both participants who had needed it, and no emotional responses were recorded in any of their treatment sessions.</div>
   <div class="warn"><b>Applied guidance</b>The component FA is offered on the selector sheet for a time-limited case with a social hypothesis. The form prints the trial protocol, logs occurrence and latency per component on the sessions sheet, computes the evocative and reinforcement probabilities, and applies the authors&rsquo; cutoffs (.50 evocative with four, two, or one session and .33 with exactly three; .25 reinforcement) as a working convention that flags a candidate function: a function is reported only after the extended multielement confirmation, which this variant loads as its condition cards, and a no-interaction screen precedes the component FA because the format cannot detect automatic reinforcement. The higher-level RRB variant loads the baited-room analysis; the environmental establishing operation is recorded on the conditions sheet, episodes per minute are measured from 1-s continuous recording, and the interpretation sheet reads the outcome by the narrative rules Fergus et al. used. An automatic result routes to the process-versus-product analysis and the A-CSA, whose rules are printed on the interpretation sheet; a social result leaves the competing-stimulus pathway and goes to the social-function branches of Form TD-1.</div>
@@ -1298,7 +1319,7 @@ body.view-walk #walk{display:block}
     <div class="f"><label for="mId">Student ID</label><input id="mId" name="m.sid"></div>
     <div class="f"><label for="mDob">Date of birth</label><input id="mDob" name="m.dob"></div>
     <div class="f"><label for="mSetting">Setting / room</label><input id="mSetting" name="m.setting"></div>
-    <div class="f"><label for="mAssessor">Analyst (BCBA)</label><input id="mAssessor" name="m.assessor" placeholder="Joshua Newsome, M.A., BCBA"></div>
+    <div class="f"><label for="mAssessor">Analyst (BCBA)</label><input id="mAssessor" name="m.assessor" placeholder="e.g. Jordan Ellis, M.A., BCBA"></div>
     <div class="f"><label for="mDate">Start date</label><input id="mDate" name="m.date"></div>
   </div>
   <div class="defs">
@@ -1312,7 +1333,11 @@ body.view-walk #walk{display:block}
   <h3 class="sub">Safety Plan</h3>
   <!-- v22.37 (review F148): on screen only, when the case's Form IC-1 is known and does not cover the experimental analysis -->
   <div class="ea-flag noprint" id="eaConsentFlag" role="status" hidden></div>
+  <div class="ea-flag" id="eaClearFlag" role="status" hidden></div>   <!-- v22.49 (review F149): printed too -->
   <div class="defs">
+    <!-- v22.49 (review F149): the health record from Form DM-1 is shown on its own line, read only; Medical clearance is the
+         nurse's or physician's clearance and is never filled from a medication list -->
+    <div class="drow" id="eaHealthRow" hidden><div class="dlab">Health record (Form DM-1)</div><div class="dval ea-ro" id="eaHealth"></div></div>
     <div class="drow"><div class="dlab">Medical clearance</div><div class="dval"><textarea name="s.med" placeholder="Nurse or physician consulted; date; restrictions" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Session termination criteria</div><div class="dval"><textarea name="s.term" placeholder="e.g., any tissue damage; 3 head hits within 10 s; any aggression producing a mark; student requests to stop (Kahng et al., 2015)"></textarea></div></div>
     <div class="drow"><div class="dlab">Protective equipment and blocking</div><div class="dval"><textarea name="s.pe" placeholder="Helmet, arm guards, mats, therapist blocking rules; note that blocking is a consequence" class="nbh-line" rows="1"></textarea></div></div>
@@ -1320,6 +1345,8 @@ body.view-walk #walk{display:block}
     <div class="drow"><div class="dlab">Consent and notification</div><div class="dval"><textarea name="s.consent" placeholder="Parent consent date; administrator notified; district procedure" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Analysis termination criteria</div><div class="dval"><textarea name="s.stop" placeholder="e.g., structured criteria met; 5 series without differentiation; injury; 3 weeks elapsed" class="nbh-line" rows="1"></textarea></div></div>
   </div>
+  <!-- v22.49 (review I76): one page for the table, printed from here -->
+  <p class="noprint ea-cnote"><button type="button" class="tool" id="eaSSBtn">Print the session safety sheet</button> One page for the therapist, the data collector and the observer: the termination criteria, the stop signals, who follows a student who leaves, consent and clearance. It holds student information: shred it after the session.</p>
   <!-- the enhancement sprint (B2): how the alone or no-interaction condition is run. Supervised is the default; true alone
        can be chosen only after four steps: the policy check, the stop-or-step-in rule, how the student is watched and the
        parent's agreement -->
@@ -1454,6 +1481,8 @@ body.view-walk #walk{display:block}
   <div class="ea-run noprint" id="eaRun" role="region" aria-label="Session runner">
     <div class="ea-hd"><b>Run a Session</b><span class="ea-hint">Times the session, cues the consequence periods, the attention schedule and the prompt steps, counts the target, and writes the next row of the log below. For a yoked control it replays a master session&rsquo;s deliveries.</span></div>
     <div class="ea-flag" id="eaRunConsent" role="status" hidden></div>   <!-- v22.37 (review F148): the consent check, in the runner too -->
+    <div class="ea-flag" id="eaRunClear" role="status" hidden></div>   <!-- v22.49 (review F149): no medical clearance -->
+    <div class="ea-assent" id="eaRunAssent" role="status" hidden></div>   <!-- v22.49 (review F156): the assent plan, Form SI-1 -->
     <div class="ea-set">
       <label class="ea-wide" for="eaCond">Condition<select id="eaCond"></select></label>
       <label for="eaMode">Session type<select id="eaMode"><option value="session">Timed session</option><option value="latency">Latency: ends at the first target</option><option value="trial">Trial: control, then test segment</option></select></label>
@@ -1484,8 +1513,11 @@ body.view-walk #walk{display:block}
     <div class="ea-ctl">
       <button type="button" class="ea-go" id="eaStart">Start session</button>
       <button type="button" id="eaEnd" disabled>End early</button>
+      <button type="button" id="eaAssentEnd" disabled title="The student said or showed stop, or left: the session ends and the row says so">Assent withdrawn</button>
       <button type="button" id="eaSave" disabled>Save to the log</button>
       <button type="button" id="eaDiscard" disabled>Discard</button>
+      <label class="ea-ev" title="Tick before Save to the log: the row says so, and the case carries it"><input type="checkbox" id="eaInj"> Injury</label>
+      <label class="ea-ev" title="Tick before Save to the log: a hold is a restraint and is recorded the same day on Form DD-1"><input type="checkbox" id="eaHoldUsed"> Hold used</label>
       <span class="ea-gap"></span>
       <span class="ea-lbl">Alerts:</span>
       <button type="button" class="ea-tog" data-ea="on" aria-pressed="true">Alerts on</button>
@@ -1545,7 +1577,7 @@ body.view-walk #walk{display:block}
   <h3 class="sub" style="margin-top:0">Structured Visual-Inspection Criteria (Hagopian et al., 1997; Roane et al., 2013)</h3>
   <div class="ident" style="margin-bottom:8px"><div class="f"><label for="critPhase">Phase to interpret</label><select id="critPhase" name="d.phase" data-ph="1"><option value="">All phases</option></select></div><div class="f"><label for="critRule">Criterion applied</label><select id="critRule" name="d.crit" data-ph="1"><option value="">Roane rule: u − l ≥ n / 2 with this form's magnitude floor</option><option value="svi">SVI quotient ≥ .50: points beyond one SD of the control mean ÷ n (as applied by Bann &amp; Morris, 2026; no trend rules)</option></select></div><div class="f"><label for="critTrend">Trend rules applied on visual review</label><select id="critTrend" name="d.trend" data-ph="1"><option value=""></option><option>Yes: Roane et al. (2013) trend rules applied</option><option>No: quotient only, trends noted in the flags</option></select></div></div>
   <p class="method" style="margin:0 0 6px;font-size:11.5px">Interpret each phase on its own when the design changed (e.g., a pairwise test after an undifferentiated multielement). The quotient option reproduces the criterion Bann and Morris (2026) used for their multielement analyses; they did not apply the Roane et al. trend rules, so state here whether trend rules were applied.</p>
-  <p class="method" style="margin-top:0">Criterion lines are drawn at one standard deviation above and below the control mean (lower line at zero when the deviation exceeds the mean). For each test condition: u = points above the upper line, l = points below the lower line, n = points in the condition. Differentiated when u − l ≥ n / 2 and the condition mean is at least 1.5 times the control mean (latency: at most two-thirds of the control latency), the magnitude floor this form applies in place of the published low-magnitude rules, which should also be checked on visual review. Trend and multiple-control patterns are flagged.</p>
+  <p class="method" style="margin-top:0">Criterion lines are drawn at one standard deviation above and below the control mean (lower line at zero when the deviation exceeds the mean). For each test condition: u = points above the upper line, l = points below the lower line, n = points in the condition. Differentiated when u − l ≥ n / 2 and the condition mean passes this form's magnitude rule: at least 1.5 times the control mean and 0.1 above it, at least a quarter of the highest test condition, and about one response a session when the control is at zero (latency: at most two-thirds of the control latency). The rule stands in for the published low-magnitude rules, which should also be checked on visual review; a condition below it reads “rule met, magnitude low” and is neither reported nor handed to Form FS-1. Trend and multiple-control patterns are flagged.</p>
   <table class="grid" id="critTbl"></table>
   <div class="warn verdict" id="critVerdict"><b>Outcome</b>Enter sessions to compute.</div>
   <div class="figure" id="critFig"></div>
@@ -1588,6 +1620,20 @@ body.view-walk #walk{display:block}
   <h3 class="sub">Agreement and Fidelity Obtained</h3>
   <div class="stat" id="ioaStat"></div>
 
+  <!-- v22.49 (review I78): the second analyst reads the graph without the condition names, the criterion lines or the computed
+       outcome, records a reading, and only then sees the outcome and whether the two agree (Hagopian et al., 1997) -->
+  <div id="eaBlindWrap">
+  <h3 class="sub">Second Analyst&rsquo;s Reading</h3>
+  <p class="method" style="margin-top:0">The second analyst reads the analysis blind: the graph without the condition names (the control is marked), without the criterion lines and without the outcome above. <span class="noprint"><button type="button" class="tool" id="eaBlindGo">Start a blind reading</button></span></p>
+  <div id="eaBlindRun" class="noprint" hidden>
+    <div class="figure" id="eaBlindFig"></div>
+    <div class="ea-cnote" id="eaBlindPick"></div>
+    <div class="ident"><div class="f"><label for="d2Who">Second analyst</label><input id="d2Who" name="d2.who"></div><div class="f"><label for="d2Date">Date</label><input id="d2Date" name="d2.date"></div></div>
+    <p class="ea-cnote"><button type="button" class="tool" id="eaBlindShow">Record the reading and show the outcome</button> <button type="button" class="tool" id="eaBlindCancel">Cancel</button></p>
+  </div>
+  <input type="hidden" name="d2.read"><input type="hidden" name="d2.agree"><input type="hidden" name="d2.outcome">
+  <div class="ea-cnote" id="eaBlindRes"></div>
+  </div>
   <h3 class="sub">Decision</h3>
   <div class="chkrow" style="display:block">
     <label><input type="checkbox" name="d.fn"> Function identified; proceed to function-based treatment design (treatment-design sheet)</label>
@@ -1602,6 +1648,8 @@ body.view-walk #walk{display:block}
   </div>
   <div class="defs">
     <div class="drow"><div class="dlab">Function(s) identified</div><div class="dval"><textarea name="d.func" placeholder="e.g., social negative reinforcement (escape from multi-step math tasks); multiple control ruled out" class="nbh-line" rows="1"></textarea></div></div>
+    <!-- v22.49 (review F153): the function the case hands Form FS-1 is chosen here, not guessed from the words above -->
+    <div class="drow"><div class="dlab">Function for the report (Form FS-1)</div><div class="dval" style="padding:4px 8px"><select name="d.fnkey" id="dFnKey" class="inline" data-ph="1"><option value="" id="dFnAuto">As the outcome reads</option><option value="attention">Attention</option><option value="escape">Escape</option><option value="tangible">Tangible</option><option value="automatic">Automatic</option><option value="multiple">Multiple control</option><option value="unclear">Undetermined</option></select></div></div>
     <div class="drow"><div class="dlab">Treatment implication</div><div class="dval"><textarea name="d.tx" placeholder="e.g., FCT for break requests with escape extinction (Carr & Durand, 1985; Tiger, Hanley, & Bruzek, 2008); demand fading; NCR on a schedule matched to the FA rate"></textarea></div></div>
     <div class="drow"><div class="dlab">Interpretation notes</div><div class="dval"><textarea name="d.note"></textarea></div></div>
   </div>
@@ -1625,6 +1673,8 @@ body.view-walk #walk{display:block}
   <div class="defs">
     <div class="drow"><div class="dlab">Independent variable</div><div class="dval"><textarea id="tIV" name="t.iv" placeholder="e.g., FCT for break requests + escape extinction; NCR every 60 s" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Dependent variable(s)</div><div class="dval"><textarea id="tDV" name="t.dv" data-tx="1" placeholder="e.g., aggression per min; independent mands per min" class="nbh-line" rows="1"></textarea></div></div>
+    <!-- v22.49 (review F155): which direction is improvement is chosen, not read from the measure's name -->
+    <div class="drow"><div class="dlab">Goal</div><div class="dval" style="padding:4px 8px"><select id="tGoal" name="t.goal" data-tx="1" class="inline"><option value=""></option><option value="decrease">Decrease (a behavior to reduce)</option><option value="increase">Increase (a skill to build)</option></select></div></div>
     <div class="drow"><div class="dlab">Phase-change rule</div><div class="dval"><textarea id="tRule" name="t.rule" placeholder="≥ 5 sessions and stable: no trend; 80% of points within 25% of the phase median (Lane & Gast, 2014)" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">IOA and fidelity plan</div><div class="dval"><textarea id="tIoa" name="t.ioa" placeholder="IOA ≥ 20% of sessions per phase at ≥ 80%; implementer checklist ≥ 20% of sessions" class="nbh-line" rows="1"></textarea></div></div>
   </div>
@@ -1635,6 +1685,8 @@ body.view-walk #walk{display:block}
   <button class="tool noprint" id="addPhase">+ Add phase</button>
 
   <h3 class="sub">Treatment Data Log and Graph</h3>
+  <!-- v22.49 (review F157): the team's daily record is Form DD-1; the log can take it instead of having it typed twice -->
+  <p class="noprint ea-cnote" id="txDDRow" hidden><button type="button" class="tool" id="txFromDD">Take Form DD-1&rsquo;s record</button> <span id="txDDHint"></span></p>
   <p class="method" style="margin-top:0">One row per session; the phase label must match the phase plan. The graph draws phase lines and the table below reports per-phase level, trend, and percentage of non-overlapping data against the preceding phase. <span class="noprint">Set rows in the toolbar.</span></p>
   <table class="grid" id="txTbl"><thead><tr><th class="c" style="width:32px">#</th><th style="width:74px">Date</th><th style="width:14%">Phase</th><th style="width:12%">Tier / setting</th><th class="c" style="width:64px">Value</th><th class="c" style="width:56px">IOA %</th><th class="c" style="width:56px">Fid. %</th><th>Notes</th></tr></thead><tbody id="txBody"></tbody></table>
   <div class="figure" id="txFig"></div>
@@ -1820,7 +1872,7 @@ body.view-walk #walk{display:block}
     <div><h4>What You Say and Do</h4><ul><li>Supervised: no materials and no interaction. The door stays open, or the student stays in the shared room; sit or stand at a distance where you can see and hear the student, never in the doorway.</li><li>No social consequences: no talk, eye contact, touch, scolding, comfort or items, whatever the student does.</li><li>Never keep the student in. If they walk out, let them go: End early. The adult named under Staffing follows, close enough to keep the student safe.</li><li>Ignore, for aggression: the therapist present, facing away, not interacting; blocking only by the plan&rsquo;s blocking rules.</li><li>True alone, only when it is set on Setup &amp; safety: watch and listen without a break through the window or on video, and step in exactly as the stop rule says.</li><li>Stepping in means blocking, moving the danger away or ending the session. A hold is a physical restraint, used only as the crisis plan allows.</li><li>Apply the termination criteria exactly as written, in this condition as in every other; End early marks the session terminated.</li></ul></div>
     <div><h4>What Goes on the Sheet</h4><ul><li>Setup &amp; safety: Alone or no-interaction condition, Supervised by default. True alone only after the four steps: the policy check, the stop-or-step-in rule, how the student is watched, and the parent&rsquo;s agreement.</li><li>A terminated session: Term. checked and the runner&rsquo;s note in Notes. A student who walked out: End early, and &ldquo;left the room&rdquo; in Notes. Interpretation counts the two on separate lines.</li><li>The extended-alone screen: five 5-min sessions, each with the phase label Ext. alone.</li></ul></div>
   </div>
-  <div class="decide"><b>Decision.</b> Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013). When sessions keep ending on the termination criteria, the Interpretation view notes that latency or precursor measures may be more appropriate. Sessions that ended because the student left the room are counted on their own line: if that keeps happening, run the condition with the adult in the room, or plan an analysis of leaving.</div>
+  <div class="decide"><b>Decision.</b> Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013). When sessions keep ending on the termination criteria, the Interpretation view notes that latency or precursor measures may be more appropriate. Sessions that ended because the student left the room, or said or showed stop, are counted on their own line as assent withdrawn: the analysis pauses and the team reviews assent (Form SI-1) before any further session.</div>
   <h4 class="flowhead">The Screen&rsquo;s Card, Word for Word</h4>
   <div class="card4">
     <div class="pm-none"><b>Alone / No interaction (screen)</b><i>Establishing operation</i>No materials and no interaction; five consecutive 5-min sessions. Supervised: the door stays open or the student stays in the shared room; an adult watches from a distance, able to see and hear the student the whole time; the student may leave at any time.<i>Signal</i>Door open, no materials; adult at a distance, not interacting<i>Session duration</i>5 min × 5<i>After a target</i>None<i>Note the template adds to Rationale</i>Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013).</div>
@@ -1903,7 +1955,7 @@ body.view-walk #walk{display:block}
   <div class="card4">
     <div class="pm-red"><b>Synthesized test</b><i>Establishing operation</i>All interview-reported establishing operations presented together (e.g., demand plus removal of tablet plus diverted attention)<i>Signal</i>Room A or placemat: red<i>Materials</i>Items named in the interview<i>Therapist</i>All reported reinforcers delivered together for 30 s contingent on the target or a precursor; then EOs re-presented<i>After a target</i>Synthesized reinforcers (e.g., break + tablet + attention) contingent on target or precursor<i>Session duration</i>5 min</div>
     <div class="pm-green"><b>Matched control</b><i>Establishing operation</i>All the same reinforcers freely and continuously available; no EOs<i>Signal</i>Placemat: green<i>Materials</i>Same items<i>Therapist</i>Provide reinforcers throughout; no demands<i>After a target</i>None<i>From the note it adds to Rationale</i>“Follow with isolated tests when the plan needs the operative contingency (Fisher et al., 2016; Holehan et al., 2020).”</div>
-    <div class="pm-none"><b>Precursor FA</b><i>Cards</i>The standard four; the Attention card’s consequence reads “contingent on each PRECURSOR”<i>From the note it adds to Rationale</i>“…the programmed consequence is delivered contingent on the precursor (defined on the setup sheet…”; “The severe behavior is recorded and the session ends per the termination criteria if it occurs.”</div>
+    <div class="pm-none"><b>Precursor FA</b><i>Cards</i>The standard four, each worded for the precursor: Attention and Demand give their consequence “contingent on each PRECURSOR”, the severe behavior earns nothing and ends the session by the termination criteria, and Play ignores both<i>From the note it adds to Rationale</i>“…the programmed consequence is delivered contingent on the precursor (defined on the setup sheet…”; “The severe behavior is recorded and the session ends per the termination criteria if it occurs.”</div>
   </div>
 </section>
 
@@ -1951,7 +2003,7 @@ body.view-walk #walk{display:block}
     <div><dt>Analysis termination criteria</dt><dd>When the analysis as a whole stops: for example, the structured criteria met, five series without differentiation, an injury, or a time limit.</dd></div>
     <div><dt>Criterion lines (UCL, LCL)</dt><dd>One standard deviation above and below the control condition’s mean. The lower line is set at zero when the standard deviation exceeds the mean (Hagopian et al., 1997; Roane et al., 2013).</dd></div>
     <div><dt>u, l and n</dt><dd>For one test condition: the points above the upper line, the points below the lower line, and all its points. The rule compares u − l with n / 2.</dd></div>
-    <div><dt>Differentiated</dt><dd>u − l is at least n / 2 and the condition’s mean is at least 1.5 times the control mean, the magnitude floor this form applies. For latency the rule is inverted.</dd></div>
+    <div><dt>Differentiated</dt><dd>u − l is at least n / 2 and the condition’s mean passes the magnitude rule this form applies: at least 1.5 times the control mean, at least a quarter of the highest test condition, and about one response a session when the control is at zero. For latency the rule is inverted.</dd></div>
     <div><dt>Undifferentiated</dt><dd>No test condition meets the rule. EA-1’s next steps, in order: the extended-alone screen, a pairwise test, establishing operations modified from interview data, then a synthesized analysis.</dd></div>
     <div><dt>Extended-alone screen</dt><dd>Five consecutive 5-min alone or no-interaction sessions (Querim et al., 2013), run supervised by default. Persistence indicates automatic reinforcement; extinction, a social function to test next.</dd></div>
     <div><dt>Supervised alone</dt><dd>The form&rsquo;s default for the alone or no-interaction condition: the door stays open or the student stays in the shared room, an adult who can see and hear the student the whole time stays at a distance without interacting, and no one keeps the student in.</dd></div>
@@ -2019,6 +2071,20 @@ const AL={
    beh:'No interaction throughout; no programmed consequence for RRB; the watching adult steps in by the stop rule'}}
 };
 const AL_KEY={'Alone / No interaction':'std','Alone / No interaction (screen)':'scr','No interaction':'rrb'};
+/* v22.49 (review F150) the precursor analysis: in every card the programmed consequence follows the precursor, so the severe
+   behavior need not occur (Smith & Churchill, 2002; Fritz et al., 2013). The severe behavior is recorded, earns nothing and ends
+   the session by the termination criteria; the control ignores both. Worded card by card, not by replacing words in one card. */
+const PRE_CARDS={
+ 'Attention':{cons:'Brief attention (5\u201310 s of concern or reprimand, light touch) contingent on each PRECURSOR; then return to work. The severe behavior is recorded, earns no attention, and ends the session by the termination criteria',
+  fid:'Attention within 2 s of every precursor, and for the precursor only; the severe behavior earns nothing and is recorded; EO in place at the start'},
+ 'Demand':{beh:'Prompt sequence every 5\u201310 s; praise for compliance; a severe response earns no break',
+  cons:'30-s break contingent on each PRECURSOR: task removed, therapist turns away; then re-present. The severe behavior is recorded, earns no break, and ends the session by the termination criteria',
+  fid:'Break within 2 s of every precursor, and for the precursor only; the severe behavior earns no break and is recorded; tasks presented continuously'},
+ 'Alone / No interaction':{other:'None; the severe behavior ends the session by the termination criteria',
+  fid:'No social consequence for the precursor or the severe behavior'},
+ 'Play (control)':{beh:'Interact, praise, deliver attention on a 30-s schedule; ignore the precursor and the severe behavior',
+  cons:'None (attention withheld for 5 s after a precursor or a severe response, then the schedule resumes)',
+  fid:'Attention on the 30-s schedule; no consequence for the precursor or the severe behavior'}};
 /* ---------- condition templates ---------- */
 const TPL={
  standard:{design:'Multielement',conds:[
@@ -2125,10 +2191,11 @@ document.addEventListener('change',e=>{if(e.target.dataset.cond)refreshCondNames
 async function loadTpl(quiet){const k=val('v.chosen');if(!k){if(!quiet)alert('Choose a variant first.');return;}const t=TPL[k];const conds=(t.conds||TPL.standard.conds).map(alWord);   /* B2: worded for the arrangement on Setup & safety */
  if(!quiet&&!(await nbhUI.confirm('Replace the condition cards?\nThey are replaced with the '+REC[k].t+' template.',{ok:'Replace',danger:true})))return;
  $('#nCond').value=conds.length;renderConds();
- conds.forEach((c,i)=>{Object.keys(c).forEach(f=>setv(`c[${i}].${f}`,c[f]));if(t.dur&&!t.conds)setv(`c[${i}].dur`,t.dur);if(k==='precursor')setv(`c[${i}].cons`,c.cons.replace('contingent on each target','contingent on each PRECURSOR'));});
+ conds.forEach((c,i)=>{Object.keys(c).forEach(f=>setv(`c[${i}].${f}`,c[f]));if(t.dur&&!t.conds)setv(`c[${i}].dur`,t.dur);if(k==='precursor'){const p=PRE_CARDS[c.name];if(p)Object.keys(p).forEach(f=>setv(`c[${i}].${f}`,p[f]));}});
  setv('v.design',t.design);if(k==='latency')setv('m.measure','latency');else if(k==='trial')setv('m.measure','trial');else setv('m.measure','rate');
  if(k==='rrb'||k==='cfa'){setv('m.sessmin','5');if(k==='rrb'&&!val('rrb.unit'))setv('rrb.unit','RRB episodes per min from 1-s continuous recording; new episode after a 1-s pause or contact with a new item');}extPanels();
  if(t.note)setv('v.rationale',(val('v.rationale')?val('v.rationale')+' ':'')+t.note);
+ try{window.eaMenuCards&&window.eaMenuCards();}catch(e){}   /* v22.49 (I80) */
  refreshCondNames();renderSess();alRender();if(!quiet)setView('conditions');}
 $('#loadTpl').addEventListener('click',()=>loadTpl(false));
 
@@ -2305,6 +2372,12 @@ function lodCompute(){
   const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
   const mA=mean(A), mP=mean(P);
   const out=$('#lodOutEA');
+  /* v22.49 (review F152) the subtypes describe automatically maintained self-injury (Hagopian, Rooker, & Zarcone, 2015): the level
+     of differentiation means something only once the analysis shows automatic maintenance, that is, the alone or no-interaction
+     condition meets the structured criteria and no social condition does, or the function for the report is set to automatic */
+  {const C=critAll(rows),soc=C.results.filter(r=>r.met&&!AUTO_RX.test(r.name)),aloneMet=C.results.some(r=>r.met&&AUTO_RX.test(r.name)),auto=val('d.fnkey')==='automatic';
+    if(soc.length&&!auto){out.innerHTML='<b>Level of differentiation</b>Not applicable: the analysis shows a social function ('+soc.map(r=>esc(r.name)).join(', ')+'). The subtypes describe automatically maintained self-injury (Hagopian, Rooker, &amp; Zarcone, 2015), so no subtype or treatment prediction is computed or carried to Forms TD-1 and FS-1.';return;}
+    if(!aloneMet&&!auto){out.innerHTML='<b>Level of differentiation</b>Not yet applicable: the subtype is read once the analysis shows automatic maintenance, when the '+esc(alone.name)+' condition meets the structured criteria and no social condition does, or when the function for the report (Decision) is set to automatic after visual review (Roane et al., 2013). Responding that stays high in every condition and persists through the extended alone series on the guide is the Subtype 2 pattern: set the function to automatic once it does.';return;}}
   if(!(mA>0)){
     out.innerHTML='<b>Level of differentiation</b>The mean in the alone / no-interaction condition is zero, so the ratio is undefined. Behavior that does not occur when the student is alone is not automatically maintained, and subtyping does not apply.';
     return;
@@ -2367,28 +2440,67 @@ document.addEventListener('change',e=>{if(e.target.dataset.trial)renderTrialFig(
 /* ---------- interpretation ---------- */
 function stats(a){const n=a.length;if(!n)return {n:0,mean:0,sd:0};const mean=a.reduce((x,y)=>x+y,0)/n;const sd=Math.sqrt(a.reduce((x,y)=>x+(y-mean)**2,0)/n);return {n,mean,sd};}
 function slope(a){const n=a.length;if(n<2)return 0;const xm=(n-1)/2,ym=a.reduce((x,y)=>x+y,0)/n;let num=0,den=0;a.forEach((y,i)=>{num+=(i-xm)*(y-ym);den+=(i-xm)**2;});return den?num/den:0;}
-function renderAnalysis(){$('#sumClient').textContent=val('m.client');$('#sumBeh').textContent=val('m.beh');$('#sumVar').textContent=[REC[val('v.chosen')]?.t,val('v.design')].filter(Boolean).join(' · ');
- const allRows=sessData();const phases=[];allRows.forEach(r=>{if(!phases.includes(r.phase))phases.push(r.phase);});const sel=$('#critPhase');const cur=sel.value;sel.innerHTML='<option value="">All phases</option>'+phases.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');sel.value=phases.includes(cur)?cur:'';
- const rows=sel.value?allRows.filter(r=>r.phase===sel.value):allRows;const cn=condNames(),mz=val('m.measure'),inv=mz==='latency';const ctrl=cn.find(c=>c.type==='control');const tbl=$('#critTbl'),v=$('#critVerdict');
- if(val('m.measure')==='trial'){tbl.innerHTML='';$('#critFig').innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag na">Trial-based analysis: interpret from the trial-based summary on the sessions sheet by comparing test and control segments within each condition (Bloom et al., 2011). The criterion-line rule applies to session-based rates.</span>';return;}
- if(!ctrl){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">Mark one condition as the control on the conditions sheet.</span>';return;}
- const cy=rows.filter(r=>r.c===ctrl.i).map(r=>r.y);const cs=stats(cy);if(!cs.n){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">No control-condition sessions logged yet.</span>';return;}
+/* v22.49 (review F151, F152) the structured criteria for each test condition against the control: u, l, n, the rule and the
+   magnitude rule. The magnitude rule is at least 1.5 times the control mean and 0.1 above it, at least a quarter of the highest
+   test condition, and, when the control is at zero, about one response a session (rate: 1 ÷ the session length; count: 1). A
+   condition below it reads "rule met, magnitude low" and is not counted as met. Latency inverts the rule as before. */
+function critAll(rows){const cn=condNames(),mz=val('m.measure'),inv=mz==='latency',svi=val('d.crit')==='svi';const ctrl=cn.find(c=>c.type==='control');
+ if(!ctrl)return {ctrl:null,results:[]};const cs=stats(rows.filter(r=>r.c===ctrl.i).map(r=>r.y));if(!cs.n)return {ctrl,cs,results:[]};
  const UCL=cs.mean+cs.sd,LCL=cs.sd>cs.mean?0:cs.mean-cs.sd;
- let h=`<thead><tr><th class="lab">Condition</th><th class="c">n</th><th class="c">Mean</th><th class="c">Above UCL (u)</th><th class="c">Below LCL (l)</th><th class="c">u − l</th><th class="c">n / 2</th><th class="c">Rule</th><th>Flags for visual review</th></tr></thead><tbody>`;
- h+=`<tr><td class="lab">${esc(ctrl.name)}${/control/i.test(ctrl.name)?'':' (control)'}</td><td class="c">${cs.n}</td><td class="c">${cs.mean.toFixed(2)}</td><td class="c" colspan="5" style="color:var(--ink-soft)">SD ${cs.sd.toFixed(2)} · UCL ${UCL.toFixed(2)} · LCL ${LCL.toFixed(2)}</td><td></td></tr>`;
- const results=[];const testMeans=cn.filter(c=>c.type!=='control').map(c=>stats(rows.filter(r=>r.c===c.i).map(r=>r.y)).mean);const topMean=Math.max(0,...testMeans);
- cn.filter(c=>c.type!=='control').forEach(c=>{const ys=rows.filter(r=>r.c===c.i).map(r=>r.y);const st=stats(ys);if(!st.n){h+=`<tr><td class="lab">${esc(c.name)}</td><td class="c">0</td><td colspan="7" style="color:var(--ink-soft)">no sessions</td></tr>`;return;}
+ const tests=cn.filter(c=>c.type!=='control'),testMeans=tests.map(c=>stats(rows.filter(r=>r.c===c.i).map(r=>r.y)).mean),topMean=Math.max(0,...testMeans);
+ const sessMin=parseFloat(val('m.sessmin'))||10,zeroFloor=mz==='rate'?1/sessMin:mz==='count'?1:0;
+ const results=tests.map(c=>{const ys=rows.filter(r=>r.c===c.i).map(r=>r.y);const st=stats(ys);if(!st.n)return {name:c.name,c:c.i,n:0,mean:0,u:0,l:0,ruleMet:false,met:false,flags:[],svi};
   let u=ys.filter(y=>y>UCL).length,l=ys.filter(y=>y<LCL).length;if(inv){const t=u;u=l;l=t;}
-  const svi=val('d.crit')==='svi';const ruleMet=svi?(u/st.n>=0.5):((u-l)>=st.n/2);const magOk=svi?true:(inv?st.mean<=0.67*cs.mean:(st.mean>=1.5*cs.mean&&st.mean-cs.mean>=0.1));const met=ruleMet&&magOk;const flags=[];const sl=slope(ys);
-  if(ruleMet&&!magOk)flags.push(inv?'low magnitude: latency not at least one-third shorter than control (practice rule)':'low magnitude: mean not at least 1.5× control (practice rule)');
+  const ruleMet=svi?(u/st.n>=0.5):((u-l)>=st.n/2);const flags=[];const sl=slope(ys);
+  const base=svi?true:(inv?st.mean<=0.67*cs.mean:(st.mean>=1.5*cs.mean&&st.mean-cs.mean>=0.1));
+  const lowQ=!svi&&!inv&&topMean>0&&st.mean<0.25*topMean,lowZ=!svi&&!inv&&cs.mean<=1e-9&&zeroFloor>0&&st.mean<zeroFloor;
+  const met=ruleMet&&base&&!lowQ&&!lowZ;
+  if(ruleMet&&!base)flags.push(inv?'low magnitude: latency not at least one-third shorter than control (this form\'s rule)':'low magnitude: mean not at least 1.5× control (this form\'s rule)');
+  if(ruleMet&&lowQ)flags.push('low magnitude: mean under one-quarter of the highest test condition (this form\'s rule)');
+  if(ruleMet&&lowZ)flags.push('low magnitude: the control is at zero and this is under about one response a session (this form\'s rule)');
   if(st.n<3)flags.push('fewer than 3 exposures');
   if(Math.abs(sl)>0.15*Math.max(st.mean,0.01)&&st.n>=4)flags.push(sl>0?'upward trend':'downward trend');
   if(met&&cs.sd>cs.mean)flags.push('variable control: LCL set at 0');
-  if(met&&!inv&&topMean>0&&st.mean<0.25*topMean)flags.push('magnitude: mean under one-quarter of the highest test condition (practice flag)');
-  results.push({name:c.name,met,n:st.n,mean:st.mean,u,l,flags});
-  h+=`<tr><td class="lab">${esc(c.name)}</td><td class="c">${st.n}</td><td class="c">${st.mean.toFixed(2)}</td><td class="c">${u}</td><td class="c">${l}</td><td class="c">${u-l}</td><td class="c">${(st.n/2).toFixed(1)}</td><td class="c"><span class="tag ${met?'ok':ruleMet?'mid':'na'}">${met?'met':ruleMet?'rule met, magnitude low':'not met'}</span></td><td style="font-size:10.5px">${svi?'SVI quotient '+(u/st.n).toFixed(2)+(flags.length?'; ':''):''}${flags.join('; ')||(svi?'':'—')}</td></tr>`;});
+  return {name:c.name,c:c.i,n:st.n,mean:st.mean,u,l,ruleMet,met,flags,svi};});
+ return {ctrl,cs,UCL,LCL,results};}
+var AUTO_RX=/alone|ignore|no[\s-]?interaction|\bnis\b/i;
+/* v22.49 (review F156, I79) the lines about a session's safety: assent withdrawn (the student left the room, or said or showed
+   stop), a hold used, an injury. They show whatever the analysis can read so far. */
+function safeLines(rows){const L=[];const left=rows.filter(r=>/left the room/i.test(val(`s[${r.i}].n`)));
+ const wd=rows.filter(r=>/assent withdrawn/i.test(val(`s[${r.i}].n`))&&!left.includes(r));
+ if(left.length||wd.length)L.push(`${left.length+wd.length} session(s) ended with assent withdrawn (${[left.length?left.length+' the student left the room':'',wd.length?wd.length+' the student said or showed stop':''].filter(Boolean).join('; ')}). Pause the analysis and review assent with the team (Form SI-1) before any further session.`);
+ {const inj=rows.filter(r=>/\binjury\b/i.test(val(`s[${r.i}].n`))),hold=rows.filter(r=>/\bhold used\b/i.test(val(`s[${r.i}].n`)));
+  if(hold.length)L.push(`A hold was used in session${hold.length>1?'s':''} ${hold.map(r=>r.i+1).join(', ')}. A hold is a restraint: record each on Form DD-1’s restraint record the same day and notify as the district’s procedure requires, then review the safety plan before the next session.`);
+  if(inj.length)L.push(`Injury in session${inj.length>1?'s':''} ${inj.map(r=>r.i+1).join(', ')}: record it on Form IM-1, check the termination criteria were followed, and review the safety plan before the next session.`);}
+ return L;}
+function safeList(rows){const L=safeLines(rows);return L.length?`<ul class="rules" style="margin-top:6px">${L.map(x=>`<li>${x}</li>`).join('')}</ul>`:'';}
+function renderAnalysis(){$('#sumClient').textContent=val('m.client');$('#sumBeh').textContent=val('m.beh');$('#sumVar').textContent=[REC[val('v.chosen')]?.t,val('v.design')].filter(Boolean).join(' · ');
+ const allRows=sessData();const phases=[];allRows.forEach(r=>{if(!phases.includes(r.phase))phases.push(r.phase);});const sel=$('#critPhase');const cur=sel.value;sel.innerHTML='<option value="">All phases</option>'+phases.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');sel.value=phases.includes(cur)?cur:'';
+ const rows=sel.value?allRows.filter(r=>r.phase===sel.value):allRows;const cn=condNames(),mz=val('m.measure'),inv=mz==='latency';const ctrl=cn.find(c=>c.type==='control');const tbl=$('#critTbl'),v=$('#critVerdict');
+ /* v22.49 (review F154) the trial-based analysis: each condition's test segments against its own control segments. A condition is a
+    candidate when its test percentage exceeds its control by 20 points or more over at least 10 trials, this form's convention
+    (no numeric criterion has been published: Bloom et al., 2011); the reading goes to Form FS-1 as moderate evidence */
+ if(val('m.measure')==='trial'){$('#critFig').innerHTML='';const st=trialStats().filter(c=>c.ctl.run||c.tst.run);
+  if(!st.length){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">No trials logged yet: the trial-based log is on the sessions sheet.</span>';return;}
+  let th='<thead><tr><th class="lab">Condition</th><th class="c">Trials</th><th class="c">Control segments</th><th class="c">Test segments</th><th class="c">Difference</th><th class="c">Reading</th></tr></thead><tbody>';const cand=[];
+  st.forEach(c=>{const n=Math.min(c.ctl.run,c.tst.run),d=c.tst.pct!=null&&c.ctl.pct!=null?c.tst.pct-c.ctl.pct:null,is=d!=null&&n>=10&&d>=20;if(is)cand.push(c);
+   th+=`<tr><td class="lab">${esc(c.name)}</td><td class="c">${n}</td><td class="c">${c.ctl.pct==null?'—':Math.round(c.ctl.pct)+'%'}</td><td class="c">${c.tst.pct==null?'—':Math.round(c.tst.pct)+'%'}</td><td class="c">${d==null?'—':(d>0?'+':'')+Math.round(d)}</td><td class="c"><span class="tag ${is?'ok':'na'}">${is?'candidate':n<10?'fewer than 10 trials':'not a candidate'}</span></td></tr>`;});
+  tbl.innerHTML=th+'</tbody>';
+  const head=cand.length?`Trial-based reading: ${cand.map(c=>esc(c.name)).join(', ')} (candidate${cand.length>1?'s':''}: the test segments exceed their own control by 20 points or more over at least 10 trials).`:'Trial-based reading: no candidate yet (no condition’s test segments exceed its own control by 20 points over at least 10 trials).';
+  v.innerHTML=`<b>Outcome</b><span class="tag ${cand.length===1?'ok':'mid'}">${head}</span><ul class="rules" style="margin-top:6px"><li>The 20-point margin over at least 10 trials is this form’s convention: no numeric criterion has been published for the trial-based analysis (Bloom et al., 2011). Read the bar chart on the sessions sheet too and confirm on visual review; the reading goes to Form FS-1 as moderate evidence.</li></ul>`;
+  {const o=$('#dFnAuto');if(o){const k=fnFromNames(cand.map(c=>c.name),!cand.length);o.textContent='As the outcome reads'+(k?': '+FN_WORD[k]:'');}}
+  return;}
+ if(!ctrl){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">Mark one condition as the control on the conditions sheet.</span>'+safeList(rows);return;}
+ const cy=rows.filter(r=>r.c===ctrl.i).map(r=>r.y);const cs=stats(cy);if(!cs.n){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">No control-condition sessions logged yet.</span>'+safeList(rows);return;}
+ const UCL=cs.mean+cs.sd,LCL=cs.sd>cs.mean?0:cs.mean-cs.sd;
+ let h=`<thead><tr><th class="lab">Condition</th><th class="c">n</th><th class="c">Mean</th><th class="c">Above UCL (u)</th><th class="c">Below LCL (l)</th><th class="c">u − l</th><th class="c">n / 2</th><th class="c">Rule</th><th>Flags for visual review</th></tr></thead><tbody>`;
+ h+=`<tr><td class="lab">${esc(ctrl.name)}${/control/i.test(ctrl.name)?'':' (control)'}</td><td class="c">${cs.n}</td><td class="c">${cs.mean.toFixed(2)}</td><td class="c" colspan="5" style="color:var(--ink-soft)">SD ${cs.sd.toFixed(2)} · UCL ${UCL.toFixed(2)} · LCL ${LCL.toFixed(2)}</td><td></td></tr>`;
+ /* v22.49 (review F151, F152) the per-condition reading comes from critAll(), which the subtype panel uses too */
+ const A=critAll(rows),results=A.results.filter(r=>r.n);
+ A.results.forEach(r=>{if(!r.n){h+=`<tr><td class="lab">${esc(r.name)}</td><td class="c">0</td><td colspan="7" style="color:var(--ink-soft)">no sessions</td></tr>`;return;}
+  h+=`<tr><td class="lab">${esc(r.name)}</td><td class="c">${r.n}</td><td class="c">${r.mean.toFixed(2)}</td><td class="c">${r.u}</td><td class="c">${r.l}</td><td class="c">${r.u-r.l}</td><td class="c">${(r.n/2).toFixed(1)}</td><td class="c"><span class="tag ${r.met?'ok':r.ruleMet?'mid':'na'}">${r.met?'met':r.ruleMet?'rule met, magnitude low':'not met'}</span></td><td style="font-size:10.5px">${r.svi?'SVI quotient '+(r.u/r.n).toFixed(2)+(r.flags.length?'; ':''):''}${r.flags.join('; ')||(r.svi?'':'—')}</td></tr>`;});
  tbl.innerHTML=h+'</tbody>';
- const met=results.filter(r=>r.met);const lines=[];let tag='na',head='';
+ const met=results.filter(r=>r.met);const lines=[];let tag='na',head='';const low=results.filter(r=>r.n&&r.ruleMet&&!r.met);
  if(!results.length)head='No test conditions logged.';
  else if(!met.length){tag='mid';head='Undifferentiated by the structured criteria.';lines.push('Follow the sequence on the guide, a practice rule of this form drawing on Vollmer et al. (1995) and Iwata & Dozier (2008): extended alone screen, pairwise test, EO modification, then a synthesized analysis.');
   const aloneRow=cn.find(c=>/alone|ignore|no interaction/i.test(c.name));if(aloneRow){const ay=rows.filter(r=>r.c===aloneRow.i).map(r=>r.y);const am=stats(ay).mean;const topM=Math.max(...results.map(r=>r.mean));if(ay.length&&am>0&&am>=0.75*topM&&cs.mean>=0.5*am&&!inv)lines.push('Responding is elevated and undifferentiated in every condition including alone: consider automatic reinforcement and run the extended alone series (Roane et al., 2013; Querim et al., 2013). This pattern check is a practice heuristic; apply the Roane appendix rules for automatic reinforcement on visual review.');}}
@@ -2396,19 +2508,30 @@ function renderAnalysis(){$('#sumClient').textContent=val('m.client');$('#sumBeh
  else{tag='mid';head=`Multiple conditions meet the rule: ${met.map(m=>esc(m.name)).join(', ')}.`;const aloneMet=met.find(m=>/alone|ignore|no interaction/i.test(m.name));
   if(aloneMet&&cs.mean>=0.5*aloneMet.mean)lines.push('The alone or no-interaction condition is among those elevated and the control condition is itself high: responding is elevated across conditions. Check the pattern against the automatic-reinforcement and multiple-control rules of Roane et al. (2013) on visual review, and run the extended alone series (Querim et al., 2013) before concluding multiple social control.');
   else lines.push('Multiple control is possible, but an apparent multiple-control pattern often may be a by-product of aggregated topographies (Beavers & Iwata, 2011) or may reflect an elevated alone condition; check whether the alone or no-interaction condition is also elevated and whether one target was scored.');}
+ /* v22.49 (review F151) a condition that meets u − l but not the magnitude rule is left out of the outcome and of what goes to Form FS-1 */
+ if(low.length&&!inv)lines.push(`Check on visual review: ${low.map(r=>esc(r.name)).join(', ')} (rule met, magnitude low; left out of the outcome and of what is handed to Form FS-1). This form's magnitude rule: at least 1.5 times the control mean and 0.1 above it, at least a quarter of the highest test condition, and, when the control is at zero, about one response a session. It is the form's convention in place of the published low-rate rules: read Hagopian et al. (1997) and Roane et al. (2013) on visual review.`);
  if(val('d.crit')==='svi')lines.push('Criterion applied: SVI quotient ≥ .50 (points beyond one SD of the control mean ÷ points in the condition), as Bann and Morris (2026) applied it, without the Roane et al. (2013) trend rules and without this form\'s magnitude floor. Trend rules applied on visual review: '+(val('d.trend')||'not stated')+'.');
  /* the enhancement sprint (B2): a session the student ended by walking out ("left the room" in Notes) is counted on its own line, not with the safety stops */
  const left=rows.filter(r=>/left the room/i.test(val(`s[${r.i}].n`))),stopped=rows.filter(r=>r.term&&!left.includes(r));
  if(stopped.length)lines.push(`${stopped.length} session(s) terminated per the safety criteria; latency or precursor measures may be more appropriate.`);
- if(left.length)lines.push(`${left.length} session(s) ended because the student left the room. If this keeps happening, run the condition with the adult in the room, or plan an analysis of leaving.`);
+ lines.push(...safeLines(rows));   /* v22.49 (F156, I79) */
  const exposures=cn.map(c=>rows.filter(r=>r.c===c.i).length).filter(n=>n>0);const exp=exposures.length?Math.min(...exposures):0;if(exp<3)lines.push(`Fewest exposures to any condition: ${exp}. Saini et al. (2018) applied the criteria from three pairs onward; interpret provisionally before that.`);
  v.innerHTML=`<b>Outcome</b><span class="tag ${tag}">${head}</span>${lines.length?`<ul class="rules" style="margin-top:6px">${lines.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}`;
+ {const o=$('#dFnAuto');if(o){const k=fnFromNames(met.map(m=>m.name),!met.length&&results.length);o.textContent='As the outcome reads'+(k?': '+FN_WORD[k]:'');}}   /* v22.49 (F153) */
  lineGraph($('#critFig'),null,{title:'Analysis with criterion lines',cap:'Dashed lines: upper and lower criterion lines from the control condition (Hagopian et al., 1997; Roane et al., 2013).',points:rows.map(r=>({x:r.i+1,y:r.y,series:cn.findIndex(c=>c.i===r.c),phase:r.phase})),seriesNames:cn.map(c=>c.name),yLabel:yLabelFor(),hollow:cn.findIndex(c=>c.type==='control'),refs:[{y:UCL,label:'UCL'},{y:LCL,label:'LCL',dash:'2 3'}]});
  /* IOA stats */
  const withIoa=rows.filter(r=>r.ioa!=null);const perCond=cn.map(c=>{const rs=rows.filter(r=>r.c===c.i);const w=rs.filter(r=>r.ioa!=null);return `${esc(c.name)}: ${rs.length?Math.round(100*w.length/rs.length):0}%`;});
  try{rrbRead();cfaCompute();}catch(e){}
  $('#ioaStat').innerHTML=`<div><b>Sessions with IOA</b><span>${rows.length?Math.round(100*withIoa.length/rows.length):0}%</span><em>${withIoa.length} of ${rows.length}; standard ≥ 20% per condition</em></div><div><b>Mean IOA</b><span>${withIoa.length?(withIoa.reduce((a,r)=>a+r.ioa,0)/withIoa.length).toFixed(1)+'%':'—'}</span><em>standard ≥ 80%</em></div><div><b>By condition</b><span style="font-size:11px">${perCond.join(' · ')}</span><em>share of sessions with IOA</em></div>`;}
 
+/* v22.49 (review F153) the function key from the conditions that meet the rule, by their names */
+var FN_WORD={attention:'Attention',escape:'Escape',tangible:'Tangible',automatic:'Automatic',multiple:'Multiple control',unclear:'Undetermined'};
+function fnOfName(s){return AUTO_RX.test(s)?'automatic':/demand|escape|task/i.test(s)?'escape':/attention/i.test(s)?'attention':/tangible|item/i.test(s)?'tangible':/synth|iisca/i.test(s)?'multiple':'';}
+function fnFromNames(names,undiff){const k=[...new Set(names.map(fnOfName).filter(Boolean))];return k.length>1?'multiple':k.length?k[0]:undiff?'unclear':'';}
+window.eaFnFromNames=fnFromNames;
+/* v22.49 the helpers the other script blocks use (this script is wrapped in a function) */
+window.eaAPI={setv,val,$,renderTxRows,renderTx,sessData,condNames,lineGraph,critAll,yLabelFor,trialStats,renderTrials,renderAnalysis,renderGraph,renderSess,loadTpl,setView};
+document.addEventListener('change',e=>{if(e.target&&e.target.name==='d.fnkey')try{lodCompute();}catch(x){}});
 /* ---------- treatment design ---------- */
 const DESIGNS={
  abab:{note:'Withdrawal: baseline (A), treatment (B), return to baseline (A), treatment (B). Three demonstrations of effect (A1→B1, B1→A2, A2→B2). Threat: withdrawal may be unsafe or the behavior may not reverse (irreversibility); if so use a multiple baseline or a DRO/NCR reversal.',phases:[['A1','Baseline: FA control condition or natural routine',5,'stable: ≥ 5 sessions, no trend'],['B1','Treatment',5,'stable and clearly below A1'],['A2','Baseline withdrawn',5,'return toward A1 level'],['B2','Treatment reinstated',5,'replicates B1']]},
@@ -2436,7 +2559,9 @@ function renderTx(){renderTxRows();const rows=[];$$('#txBody tr').forEach((tr,i)
  lineGraph($('#txFig'),null,{title:'Treatment evaluation: '+(val('t.iv')||'intervention'),cap:'Phase lines mark changes in the phase label; multiple tiers are drawn as separate series.',points:rows.map(r=>({x:r.x,y:r.y,series:tiers.length>1?tiers.indexOf(r.tier):0,phase:r.phase})),seriesNames,yLabel:val('t.dv')||'Value',hollow:-1});
  /* per-phase stats: within each tier, phases in order of appearance */
  const design=val('t.design');const dv=val('t.dv');
- const lowerBetter=!/mand|correct|on-task|complian|appropriate|independ|task|complet|request|engag/i.test(dv);
+ /* v22.49 (review F155) the goal decides; only when it is not set is it read from the measure's name, and the check says so */
+ const goal=val('t.goal'),guess=!(/\b(mands?|correct|on[- ]task|complian\w*|independen\w*|complet\w*|requests?|engag\w*)\b/i.test(dv)||/(^|[^n])appropriate/i.test(dv))||/\b(off[- ]task|refus\w*|inappropriate)\b/i.test(dv);
+ const lowerBetter=goal==='increase'?false:goal==='decrease'?true:guess;
  const isCtl=lab=>/^(a\d*\b|bl|base|probe|withdraw|control|c\s*\(|nc r|dro|ncr)/i.test(lab);
  let h='<thead><tr><th class="lab">Tier · phase</th><th class="c">n</th><th class="c">Mean</th><th class="c">Median</th><th class="c">Range</th><th class="c">Trend (slope)</th><th class="c">PND vs prior</th><th class="c">Level change</th></tr></thead><tbody>';const stat=[];
  const tierList=tiers.length?tiers:[''];
@@ -2445,7 +2570,7 @@ function renderTx(){renderTxRows();const rows=[];$$('#txBody tr').forEach((tr,i)
    const prev=idx?tr.filter(r=>r.phase===order[idx-1]).map(r=>r.y):[];const p=pnd(prev,ys,isCtl(k)?!lowerBetter:lowerBetter);const lc=prev.length?st.mean-stats(prev).mean:null;stat.push({tier:t,k,n:st.n,mean:st.mean,pnd:p,lc,slope:slope(ys),ctl:isCtl(k),first:idx===0});
    h+=`<tr><td class="lab">${esc((t?t+' · ':'')+k)}</td><td class="c">${st.n}</td><td class="c">${st.mean.toFixed(2)}</td><td class="c">${med.toFixed(2)}</td><td class="c">${Math.min(...ys)}–${Math.max(...ys)}</td><td class="c">${slope(ys).toFixed(2)}</td><td class="c">${p==null?'—':Math.round(p)+'%'}</td><td class="c">${lc==null?'—':(lc>0?'+':'')+lc.toFixed(2)}</td></tr>`;});});
  $('#txStat').innerHTML=rows.length?h+'</tbody>':'';
- const v=$('#txVerdict');if(!rows.length){v.innerHTML='<b>Design check</b>Enter phases and data to evaluate.';return;}
+ const v=$('#txVerdict');if(!rows.length){window.__eaTxVerdict=null;v.innerHTML='<b>Design check</b>Enter phases and data to evaluate.';return;}
  const lines=[];const short=stat.filter(s=>s.n<5);if(short.length)lines.push(`${short.length} phase(s) with fewer than 5 points: ${short.map(s=>(s.tier?esc(s.tier)+' · ':'')+esc(s.k)+' ('+s.n+')').join(', ')} (WWC: 5 to meet, 3 with reservations).`);
  let demos=0,changes=0;
  if(design==='atd'){const atd=rows.filter(r=>/^atd/i.test(r.phase));const per=tierList.map(t=>({t,ys:atd.filter(r=>r.tier===t).map(r=>r.y)})).filter(x=>x.ys.length);
@@ -2455,7 +2580,9 @@ function renderTx(){renderTxRows();const rows=[];$$('#txBody tr').forEach((tr,i)
   lines.push(`${changes} phase change(s) logged across ${tierList.length} tier(s); ${demos} show a level change in the expected direction. The standard requires three demonstrations at three points in time (Kratochwill et al., 2010)${design==='cc'?'; for a changing-criterion design, also confirm visually that responding tracked each criterion (Hartmann & Hall, 1976)':''}.`);}
  const ioaRows=rows.filter(r=>r.ioa!=null);lines.push(`IOA on ${rows.length?Math.round(100*ioaRows.length/rows.length):0}% of sessions${ioaRows.length?`, mean ${(ioaRows.reduce((a,r)=>a+r.ioa,0)/ioaRows.length).toFixed(1)}%`:''}; fidelity on ${Math.round(100*rows.filter(r=>r.fid!=null).length/rows.length)}% of sessions.`);
  const first=stat.find(s=>s.first);if(first&&Math.abs(first.slope)>0.1*Math.max(first.mean,0.01)&&first.n>=3)lines.push('Baseline shows a trend; Sidman (1960): change conditions only after steady state, unless the trend runs against the expected treatment effect.');
+ if(!goal)lines.push('Goal not set: read as '+(lowerBetter?'decrease':'increase')+' from the measure\'s name. Choose Decrease or Increase beside the dependent variable.');else lines.push('Goal: '+goal+' ('+(lowerBetter?'lower':'higher')+' values are improvement).');
  const ok=demos>=3&&!short.length;
+ window.__eaTxVerdict={name:(DESIGNS[design]&&$('#dsgn').selectedIndex>0?$('#dsgn').options[$('#dsgn').selectedIndex].textContent:''),demos,changes,ok,points:rows.length,goal:goal||'',from:rows.length&&/Form DD-1/.test(val('tx[0].n'))?'DD-1':''};   /* v22.49 (F157) */
  v.innerHTML=`<b>Design check</b><span class="tag ${ok?'ok':'mid'}">${ok?'Meets the three-demonstration and five-point standards on the data logged.':'Not yet at standard.'}</span><ul class="rules" style="margin-top:6px">${lines.map(x=>`<li>${x}</li>`).join('')}</ul>`;}
 document.addEventListener('input',e=>{if(e.target.dataset.tx)renderTx();});
 document.addEventListener('change',e=>{if(e.target.dataset.ph)renderAnalysis();});
@@ -2567,7 +2694,7 @@ const CFA_SIM=[['TAE',0,[1,'',''],[18,'',''],[0,'','']],['AET',0,[0,0,1],['','',
 /* the enhancement sprint (B2): asks first, with the question the other forms use; Cancel changes nothing */
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\nScenario: '+$('#simScenario option:checked').textContent+'. Every sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=SIMS[key];restore({counts:{}});
- setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Assessment room 3 (simulated)');setv('m.assessor',val('m.assessor')||'Joshua Newsome, M.A., BCBA');setv('m.date',new Date().toLocaleDateString());
+ setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Assessment room 3 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
  setv('m.beh',sc.beh);setv('m.def','Simulated definition; see TB-1 for the real target.');setv('m.prec',sc.variant==='precursor'?'Screaming: vocalization above conversational level lasting ≥ 1 s (simulated)':'');setv('m.hyp','Simulated hypothesis carried in from IA-1: '+(sc.v.hyp==='escape'?'escape from demands':sc.v.hyp==='social'?'attention or tangible':sc.v.hyp==='auto'?'automatic':sc.v.hyp==='idio'?'synthesized escape-to-tangible with attention':'unclear'));setv('m.urg',sc.v.risk==='high'?'4':sc.v.risk==='mod'?'3':'2');
  setv('s.med','Nurse consulted (simulated); no restrictions');setv('s.term','Any tissue damage; 3 head hits within 10 s; student requests to stop (simulated)');setv('s.pe','Arm guards available; therapist blocks per plan (simulated)');setv('s.staff','Therapist, data collector, crisis-trained observer (simulated)');setv('s.consent','Parent consent on file (simulated)');setv('s.stop','Structured criteria met, or 5 series without differentiation (simulated)');
  setv('m.sessmin',/^(iisca|rrb|cfa)$/.test(sc.variant)?'5':'10');setv('m.interval','10');setv('m.ioaplan','≥ 25% per condition');setv('m.ioaindex','Interval-by-interval');setv('m.fidelity','Checklist per condition; 25% of sessions');
@@ -2586,6 +2713,8 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\
  if(mz==='pct'){/* not used */}
  if(rows.length){$('#nSess').value=Math.max(8,Math.min(80,rows.length+4));renderSess();rows.forEach((r,i)=>{setv(`s[${i}].c`,String(r.c));setv(`s[${i}].p`,r.phase);setv(`s[${i}].m`,String(r.m));setv(`s[${i}].v`,String(r.v));setv(`s[${i}].d`,new Date(Date.now()-(rows.length-i)*864e5).toLocaleDateString());if(i%4===0)setv(`s[${i}].ioa`,String(85+Math.round(rnd()*14)));if(mz==='latency'&&r.v<600&&rnd()<0.3)setv(`s[${i}].t`,true);});}
  if(sc.variant==='automatic'||key==='automatic')setv('d.alone',true);
+ /* v22.49 (F152) the worked examples that conclude automatic say so under Function for the report, as a BCBA would after visual review */
+ if(key==='automatic'||key==='rrb')setv('d.fnkey','automatic');
  if(key==='rrb'){setv('m.def','RRB episode: touching or rearranging items in a disruptive manner (simulated; see TB-1)');setv('rrb.mode','noint');setv('rrb.why','Elopement history and direct supervision required (simulated)');setv('rrb.items','24');
   setv('rrb.types','Markers in the caddy — unaligned (three turned cap-down)\nBlue cap on a black pen — mismatched\nTop desk drawer — left open\nBinder on the shelf — rings open\nCushion on the reading chair — crooked\nTrash-can lid — askew\nMr. Potato Head — eyes out (incomplete)\nPuzzle — two pieces beside the board\n… 16 further items listed on the baiting checklist (simulated)');
   setv('rrb.source','Two 30-min observations by the analyst; supervising clinician\u2019s report (simulated)');setv('rrb.leisure','Magnetic tiles, picture books, tangle fidget (PA-1 moderately preferred, 50–79%)');setv('rrb.same',true);setv('rrb.touch',true);setv('rrb.restore',true);
@@ -2620,7 +2749,7 @@ bindNum('nCond',renderConds);bindNum('nSess',renderSess);bindNum('nTrial',()=>re
 /* ---------- save / open / clear ---------- */
 function snapshot(){const f={};$$('[name]').forEach(el=>{f[el.name]=el.type==='checkbox'?el.checked:el.value;});return f;}
 function snapshotPrefix(p){const f={};$$('[name]').forEach(el=>{if(el.name.startsWith(p))f[el.name]=el.value;});return f;}
-function applyFields(f){Object.keys(f).forEach(k=>{const el=document.querySelector('[name="'+k+'"]');if(!el)return;if(el.type==='checkbox')el.checked=!!f[k];else el.value=f[k];});}
+function applyFields(f){Object.keys(f).forEach(k=>{const el=document.querySelector('[name="'+k+'"]');if(!el)return;if(el.type==='checkbox')el.checked=!!f[k];else el.value=f[k];});try{window.eaPaintClear&&window.eaPaintClear();window.eaPaintBlind&&window.eaPaintBlind();}catch(e){}}   /* v22.49 (F149, I78) */
 function collect(){return {form:'EA-1',rev:'2026-09',saved:new Date().toISOString(),counts:{cond:+$('#nCond').value,sess:+$('#nSess').value,trial:+$('#nTrial').value,tx:+$('#nTx').value,phases:$('#phaseBody').children.length},fields:snapshot()};}
 function reset(){$('#condWrap').innerHTML='';$('#sessBody').innerHTML='';$('#trialTbl').innerHTML='';$('#txBody').innerHTML='';$('#phaseBody').innerHTML='';$('#varRec').innerHTML='';$$('[name^="m."],[name^="s."],[name^="v."],[name^="d."],[name^="t."],[name^="q."],[name^="rrb."],[name^="cfa."]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});}
 function restore(d){reset();const c=d.counts||{};$('#nCond').value=c.cond||4;$('#nSess').value=c.sess||24;$('#nTrial').value=c.trial||10;$('#nTx').value=c.tx||30;
@@ -2704,7 +2833,7 @@ cfaInit();restore({counts:{}});
   function script(){const c=R.c;if(!c){byId('eaScript').innerHTML='';return;}
     const row=(k,v)=>v?'<dt>'+k+'</dt><dd>'+v.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</dd>':'';
     byId('eaScript').innerHTML='<dl>'+row('Condition',c.name+(/control|test/i.test(c.name)?'':(c.type==='control'?' (control)':' (test)')))+row('How it is run',window.eaAlone?window.eaAlone.runLine(c.name):'')+row('Check this card',window.eaAlone&&window.eaAlone.runFlag?window.eaAlone.runFlag(c):'')+row('Before and during',c.eo)+row('Signal',c.sd)+row('Materials',c.mat)
-      +row('Therapist',c.beh)+row('After a target',c.cons)+row('Other behavior',c.other)+row('Fidelity',c.fid)+'</dl>';}
+      +row('Therapist',c.beh)+row({pre:'After a precursor',any:'After a precursor or a target'}[byId('eaFollow').value]||'After a target',c.cons)+row('Other behavior',c.other)+row('Fidelity',c.fid)+'</dl>';}   /* v22.49 (F150) */
 
   /* ---- sound, flash, vibration ---- */
   function ctx(){try{if(!R.ac){const A=window.AudioContext||window.webkitAudioContext;if(A)R.ac=new A();}if(R.ac&&R.ac.state==='suspended')R.ac.resume().catch(()=>{});}catch(e){}return R.ac;}
@@ -2811,6 +2940,8 @@ cfaInit();restore({counts:{}});
     R.state='done';R.term=!!term;R.why=why||'';stop();wakeOff();lock(false);cue('end');summary();
     note(term?'Session ended: '+why+'. Check the summary, then Save to the log.':'Session over. Check the summary, then Save to the log.',term);
   }
+  /* v22.49 (review F156) the student withdrew assent: the session ends at once, no question, and the row says so */
+  function assentEnd(){if(R.state!=='run'&&R.state!=='pause')return;if(R.state==='pause'){R.state='run';R.t0=now();}finish(true,'assent withdrawn at '+fmt(el()));}
   async function endEarly(){if(R.state!=='run'&&R.state!=='pause')return;if(!(await nbhUI.confirm('End this session now?\nIt is marked terminated.',{ok:'End now'})))return;if(R.state!=='run'&&R.state!=='pause')return;
     if(R.state==='pause'){R.state='run';R.t0=now();}finish(true,'ended early at '+fmt(el()));}
 
@@ -2853,6 +2984,8 @@ cfaInit();restore({counts:{}});
     if(i<0){note('The log is full (80 rows).',true);return;}
     const notes=[];if(prePrimary()&&measure()!=='latency')notes.push('targets '+r.n);else if(r.pre)notes.push('precursors '+r.pre);if(measure()!=='latency'&&r.lat!=null)notes.push('latency '+Math.round(r.lat)+' s');
     if(R.term)notes.push(R.why);if(R.mode==='latency'&&!R.ev.length)notes.push('no target: latency is the session length');
+    /* v22.49 (review I79) an injury, or a hold used, is written into the row in fixed words the case and Form PR-1 read */
+    if(byId('eaInj').checked)notes.push('injury: record it on Form IM-1');if(byId('eaHoldUsed').checked)notes.push('hold used: a restraint, record it today on Form DD-1');byId('eaInj').checked=false;byId('eaHoldUsed').checked=false;
     if(R.yoke)notes.push('yoked to session '+(R.yoke.k+1)+': '+R.yokeN+' of '+R.yoke.t.length+' deliveries replayed, '+R.yokeHit+' within 3 s of a target');
     else if(R.del.length)notes.push(R.del.length+' deliver'+(R.del.length===1?'y':'ies')+', times kept for a yoked session');
     setF('s['+i+'].d',new Date().toLocaleDateString());setF('s['+i+'].c',String(c.i));setF('s['+i+'].p',byId('eaPhase').value.trim()||'FA');
@@ -2883,7 +3016,7 @@ cfaInit();restore({counts:{}});
     byId('eaPre').hidden=!(V('m.prec')||/precursor/i.test(V('v.chosen'))||R.pre.length);
     byId('eaTarget').disabled=!run;byId('eaPre').disabled=!run;byId('eaUndo').disabled=!run||R.mode!=='session';
     setText('eaStart',R.state==='run'?'Pause':R.state==='pause'?'Resume':'Start session');byId('eaStart').disabled=R.state==='done';
-    byId('eaEnd').disabled=!run;byId('eaSave').disabled=R.state!=='done';byId('eaDiscard').disabled=R.state==='ready';
+    byId('eaEnd').disabled=!run;byId('eaAssentEnd').disabled=!run;byId('eaSave').disabled=R.state!=='done';byId('eaDiscard').disabled=R.state==='ready';
     setText('eaMinT',trial?'Segment length (min)':'Length (min)');
     /* the cue box */
     const cueBox=byId('eaCue');let html='',hot=false;
@@ -2926,7 +3059,7 @@ cfaInit();restore({counts:{}});
   async function ncGate(){const gap=window.__eaConsentGap?window.__eaConsentGap():'';if(!gap||R.nc)return true;
     const v=await ncAsk(gap);if(v==null){note('Not started: Form IC-1 does not cover the experimental analysis.',true);return false;}R.nc=v;R.ncLast=v;return true;}
   byId('eaStart').addEventListener('click',async()=>{if(R.state==='ready'&&!(await ncGate()))return;start();});
-  byId('eaEnd').addEventListener('click',endEarly);
+  byId('eaEnd').addEventListener('click',endEarly);byId('eaAssentEnd').addEventListener('click',assentEnd);   /* v22.49 (F156) */
   byId('eaSave').addEventListener('click',async()=>{if(R.state==='done'&&!(await ncGate()))return;save();});
   byId('eaDiscard').addEventListener('click',async()=>{if(R.state!=='done'&&!(await nbhUI.confirm('Discard this session?\nNothing from it is written to the log.',{ok:'Discard',danger:true})))return;reset(false);note('Session discarded.');});
   byId('eaTarget').addEventListener('click',()=>tap('tgt'));
@@ -5553,11 +5686,20 @@ document.addEventListener('click',e=>{const a=e.target.closest('.wk-go');if(!a)r
 <script id="v2178-ev">
 (function(){"use strict";
 /* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
-const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+/* v22.49 (review F153) the words are read last, clause by clause; a clause that rules a function out ("attention ruled out", "no
+   evidence of attention", "evoked little or nothing") never adds that function, and "multiple control ruled out" is not multiple */
+const NEG=/ruled out|not supported|not (?:indicated|shown|found|elevated)|no evidence|unlikely|little or nothing|did not|didn't|no (?:effect|difference|responding)/;
+const K=t=>{t=String(t||'').toLowerCase().split(/[;,.]|\bbut\b|\bwhile\b/).filter(c=>!NEG.test(c)).join(' ; ');if(!t.replace(/[\s;]/g,''))return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
   const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
   const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
   return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
 const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+/* v22.49 (review I79) the session safety record the case carries with the analysis: sessions logged, sessions ended for safety,
+   sessions ended with assent withdrawn, and the dates of a hold used or an injury (for Form PR-1; a hold itself is recorded on Form DD-1) */
+function eaSafety(rows){const v=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';},on=n=>{const e=document.querySelector('[name="'+n+'"]');return !!(e&&e.checked);};
+  if(!rows.length)return undefined;const o={sessions:rows.length,terminated:0,assent:0,holds:[],injuries:[]};
+  rows.forEach(i=>{const nt=v('s['+i+'].n'),d=v('s['+i+'].d')||('session '+(i+1));if(/assent withdrawn|left the room/i.test(nt))o.assent++;else if(on('s['+i+'].t'))o.terminated++;
+    if(/\bhold used\b/i.test(nt))o.holds.push(d);if(/\binjury\b/i.test(nt))o.injuries.push(d);});return o;}
 const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
   if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
 const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
@@ -5572,21 +5714,27 @@ const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function()
    undifferentiated names no function. */
 OUT(function(){const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};
   const txt=n=>{const e=document.querySelector('[name="'+n+'"]');return e&&e.tagName==='SELECT'&&e.selectedIndex>0?T(e.options[e.selectedIndex].textContent):'';};
-  const rows=[...document.querySelectorAll('#sessBody tr')].map((tr,i)=>i).filter(i=>val('s['+i+'].c')!==''&&val('s['+i+'].v')!=='');const func=val('d.func');if(!rows.length&&!func)return null;
+  const rows=[...document.querySelectorAll('#sessBody tr')].map((tr,i)=>i).filter(i=>val('s['+i+'].c')!==''&&val('s['+i+'].v')!=='');const func=val('d.func');
+  /* v22.49 (review F154) a trial-based analysis counts its trials */
+  const trialN=val('m.measure')==='trial'&&window.eaAPI&&window.eaAPI.trialStats?window.eaAPI.trialStats().reduce((a,c)=>a+Math.min(c.ctl.run,c.tst.run),0):0;
+  if(!rows.length&&!func&&!trialN)return null;
   const vd=document.getElementById('critVerdict'),tag=vd&&vd.querySelector('.tag'),head=T(tag?tag.textContent:'');
   const word=s=>/alone|ignore|no interaction/i.test(s)?'Automatic':/demand|escape|task/i.test(s)?'Escape':/attention/i.test(s)?'Attention':/tangible|item/i.test(s)?'Tangible':/synth|iisca/i.test(s)?'Synthesized contingencies (multiple)':T(s);
   let met=[],strength='',m;
   if((m=/^Differentiated: (.+?) meets the rule/.exec(head))){met=[m[1]];strength=/Review flags/.test(vd.textContent)?'Moderate':'Strong';}
+  else if((m=/^Trial-based reading: (.+?) \(candidate/.exec(head))){met=m[1].split(/,\s*/);strength='Moderate';}   /* v22.49 (F154) */
   else if((m=/^Multiple conditions meet the rule: (.+?)\.?$/.exec(head.split('.')[0]+'.'))){met=m[1].split(/,\s*/);strength='Moderate';}
   const found=met.map(word),undiff=/^Undifferentiated/.test(head);
   const fn=func||(found.length?found.join(' and '):undiff?'Undifferentiated':'');
-  const key=K(func)||(found.length>1?'multiple':K(found[0]||''))||(undiff?'unclear':'');
+  /* v22.49 (review F153) the key: the function chosen for the report, else the outcome's conditions, else the words */
+  const pick=val('d.fnkey'),fromOut=window.eaFnFromNames?eaFnFromNames(met,undiff):'';
+  const key=pick||fromOut||K(func)||(undiff?'unclear':'');
   if(func&&!strength)strength=document.querySelector('[name="d.fn"]:checked')?'Strong':'Moderate';
   if(!key||key==='unclear')strength='';
   const variant=txt('v.chosen'),design=val('v.design');
   const sd=rows.map(i=>val('s['+i+'].d')).filter(Boolean);
   return EV(Object.assign({form:'EA-1',method:'Functional analysis'+(variant||design?' ('+[variant,design].filter(Boolean).join(', ')+')':''),design:design||variant},
-    SPAN(sd.length?sd:[val('m.date')]),{n:rows.length||null,fn,fnKey:key,strength,by:val('m.assessor'),
+    SPAN(sd.length?sd:[val('m.date')]),{n:rows.length||trialN||null,fn,fnKey:key,strength,by:val('m.assessor'),safety:eaSafety(rows),txDesign:window.__eaTxVerdict||undefined,
     statement:(func?'Function(s) identified: '+func+'. ':'')+(head?head+(/[.]$/.test(head)?'':'.'):'')}));});
 
 /* v21.78 the FBA chain, in: what the analysis is built on, when the field is empty (never over what is typed): "Hypothesis
@@ -5614,25 +5762,136 @@ window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.
     else line=k.on?'Form IC-1: the experimental analysis is NOT consented ('+eaWhy(k)+')':k.word+'; the experimental analysis is NOT consented';
     if(line&&autoLine('s.consent',line)){n++;got.push('consent');}
     if(T(fa.stop))put('s.term',T(fa.stop).replace(/[.;\s]+$/,'')+' (Form IC-1, Specific procedures A)','the stop rule');}
-  const h=f.profile&&f.profile.health,meds=h&&Array.isArray(h.meds)?h.meds.filter(m=>m&&T(m.name)):[];
-  if(meds.length)put('s.med','Current medications (Form DM-1): '+meds.map(m=>T(m.name)+(T(m.dose)?' '+T(m.dose):'')).join('; ')+'.','medications');
+  /* v22.49 (review F149) the health record (Form DM-1): the medications with their doses, the health conditions and the allergies,
+     on a read-only line of its own. A medication list is not medical clearance: the clearance box stays the nurse's or physician's,
+     and a list the case wrote there before ("Current medications (Form DM-1): ...") is taken out. */
+  {const h=f.profile&&f.profile.health,meds=h&&Array.isArray(h.meds)?h.meds.filter(m=>m&&T(m.name)):[],L=[];
+    if(meds.length)L.push('Medications: '+meds.map(m=>T(m.name)+(T(m.dose)?' '+T(m.dose):'')).join('; '));
+    if(h&&T(h.conditions))L.push('Health conditions: '+T(h.conditions).replace(/[.\s]+$/,''));
+    if(h&&T(h.allergies))L.push('Allergies: '+T(h.allergies).replace(/[.\s]+$/,''));
+    window.__eaHealth=L;try{window.eaPaintHealth();}catch(e){}if(L.length)got.push('the health record');
+    const med=document.querySelector('[name="s.med"]');if(med&&/^Current medications \(Form DM-1\):/.test(T(med.value))){med.value='';['input','change'].forEach(t=>med.dispatchEvent(new Event(t,{bubbles:true})));}}
   const b=(f.behaviors||[]).find(x=>x&&!(x.isRep||/replacement|alternative/i.test(x.type||'')));
   if(b){put('m.def',b.def,'the definition');if(b.urg!=null)put('m.urg',String(b.urg),'the urgency level');}
   put('m.prec',(f.plan&&T(f.plan.prec))||(f.crisis&&T(f.crisis.precursor)),'the precursor');
+  /* v22.49 (review F156) the assent plan (Form SI-1): how this student says stop becomes a line of the session termination criteria
+     ("Assent withdrawn when the student ...: the session ends"), kept up to date while it is the case's own line; its status
+     (given, partial, refused) shows in the runner */
+  {const st=f.student||{},sg=st.stop&&T(st.stop.signs);window.__eaAssent={status:T(st.assent),signs:sg||'',steps:st.stop&&T(st.stop.steps)||''};
+    if(sg&&autoLine2('s.term','Assent withdrawn when the student '+sg.replace(/[.\s]+$/,'')+' (Form SI-1): the session ends.')){n++;got.push('the assent plan');}
+    try{window.eaPaintAssent();}catch(e){}}
+  try{const more=window.__eaCaseMore(f);n+=more.n;got.push(...more.got);}catch(e){}   /* v22.49 (I77, I80, F157) */
   if(n)try{if(typeof refresh==='function')refresh();}catch(e){}
   try{window.eaPaintConsent();}catch(e){}
+  try{window.eaPaintClear();}catch(e){}
   const gf=(g&&g.filled)||0;return gf||n?{filled:gf+n,note:got.length?'from the case: '+got.join(', '):((g&&g.note)||'')}:g;};
+/* v22.49 (review I77, I80, F157) more of the case, read in */
+window.__eaCaseMore=function(f){let n=0;const got=[];const q=nm=>document.querySelector('[name="'+nm+'"]');
+  const put=(nm,v)=>{const el=q(nm);if(!el||!v||T(el.value))return false;if(el.tagName==='SELECT'&&![...el.options].some(o=>o.value===v))return false;el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));n++;return true;};
+  /* I77 the variant selector: injury risk from the TB-1 urgency level, a precursor when one is carried in, the rate from Form DD-1 */
+  const u=parseInt(T(q('m.urg')&&q('m.urg').value),10),vs=[];
+  if(u>=1&&u<=4&&put('v.risk',u>=4?'high':u===3?'mod':'none'))vs.push('injury risk (TB-1 level '+u+')');
+  if(T(q('m.prec')&&q('m.prec').value)&&put('v.prec','yes'))vs.push('a precursor');
+  const dd=f.data&&Array.isArray(f.data.behaviors)?f.data.behaviors:[],tb=(f.behaviors||[]).find(x=>x&&!(x.isRep||/replacement|alternative/i.test(x.type||'')));
+  const db=(tb&&dd.find(x=>T(x.name).toLowerCase()===T(tb.label).toLowerCase()))||dd.find(x=>x&&x.kind==='target');
+  if(db&&db.days>0&&/count|rate/.test(db.measure||'')){const z=(db.zero||0)/db.days,r=z>=0.5?'low':(db.mean||0)>=12?'high':'mod';if(put('v.rate',r))vs.push('the rate (Form DD-1)');}
+  if(vs.length)got.push('the variant answers: '+vs.join(', '));
+  /* F157 Form DD-1's day-by-day record, for the treatment log */
+  window.__eaSeries=f.data&&Array.isArray(f.data.series)&&f.data.series.length?f.data.series:null;window.__eaDDBeh=dd;
+  {const row=document.getElementById('txDDRow');if(row){row.hidden=!window.__eaSeries;const h=document.getElementById('txDDHint');if(h&&window.__eaSeries)h.textContent=window.__eaSeries.length+' recorded day'+(window.__eaSeries.length===1?'':'s')+' on Form DD-1; the log takes one behavior, its phases and its values.';}}
+  /* I80 PA-1's ranked items on the condition cards */
+  const menu=Array.isArray(f.menu)?f.menu.map(m=>T(m&&(m.name||m.item))).filter(Boolean):[];window.__eaMenu=menu;if(menu.length&&window.eaMenuCards()){got.push('the PA-1 items on the cards');n++;}
+  return {n,got};};
+/* I80 the Materials lines of the template cards that name PA-1 take the ranked items: the top three for highly preferred, the first
+   for one preferred item, the next three for moderately preferred; a line already changed is left as it is */
+window.eaMenuCards=function(){const m=window.__eaMenu||[];if(!m.length)return false;let ch=false;const top=m.slice(0,3).join(', '),mid=(m.length>3?m.slice(3,6):m.slice(0,3)).join(', ');
+  const MAP={'Highly preferred items from PA-1':'Highly preferred items from PA-1: '+top,'Preferred item from PA-1':'Preferred item from PA-1: '+m[0],'Two or three moderately preferred items':'Two or three moderately preferred items from PA-1: '+mid,'Moderately preferred items (test-specific control feature)':'Moderately preferred items from PA-1: '+mid+' (test-specific control feature)'};
+  document.querySelectorAll('[name^="c["][name$="].mat"]').forEach(el=>{const t=T(el.value);if(MAP[t]){el.value=MAP[t];['input','change'].forEach(x=>el.dispatchEvent(new Event(x,{bubbles:true})));ch=true;}});return ch;};
+/* F157 the log takes Form DD-1's record of one behavior: the one the dependent variable names, else the first target */
+document.addEventListener('click',async e=>{if(!e.target.closest||!e.target.closest('#txFromDD'))return;const S=window.__eaSeries,A=window.eaAPI;if(!S||!A)return;
+  const q=nm=>document.querySelector('[name="'+nm+'"]'),dv=T(q('t.dv')&&q('t.dv').value).toLowerCase(),beh=window.__eaDDBeh||[];
+  const names=[...new Set(S.flatMap(x=>Object.keys(x.v||{})))];const nm=names.find(x=>x&&dv.indexOf(x.toLowerCase())>=0)||((beh.find(b=>b.kind==='target'&&names.includes(b.name))||{}).name)||names[0];if(!nm)return;
+  const D=S.filter(x=>x.v&&x.v[nm]!=null).slice(-77);const ph=[...new Set(D.map(x=>x.cond||'A'))];
+  if(!(await nbhUI.confirm('Take Form DD-1\u2019s record of '+nm+'?\n'+D.length+' recorded days, phases '+ph.join(', ')+'. The treatment log\u2019s rows are replaced.',{ok:'Take it'})))return;
+  A.$('#nTx').value=String(Math.max(8,Math.min(80,D.length+3)));A.renderTxRows();
+  const n=+A.$('#nTx').value;for(let i=0;i<n;i++){['d','p','tier','v','ioa','fid','n'].forEach(k=>A.setv('tx['+i+'].'+k,''));}
+  D.forEach((x,i)=>{A.setv('tx['+i+'].d',MDY(ISO(x.date))||x.date);A.setv('tx['+i+'].p',x.cond||'A');A.setv('tx['+i+'].v',String(x.v[nm]));A.setv('tx['+i+'].n','Form DD-1');});
+  if(!T(q('t.dv').value))A.setv('t.dv',nm+' (Form DD-1)');const b=beh.find(x=>x.name===nm);if(b&&!T(q('t.goal').value)&&/^(decrease|increase)$/.test(b.direction||''))A.setv('t.goal',b.direction);
+  A.renderTx();{const ev=document.querySelector('[name="t.dv"]');if(ev)ev.dispatchEvent(new Event('change',{bubbles:true}));}try{nbhUI.toast('The log holds Form DD-1\u2019s record of '+nm+': '+D.length+' days. Phase labels are DD-1\u2019s phases; match them to the phase plan.',{kind:'ok'});}catch(x){}});
+/* I76 the session safety sheet */
+document.addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('#eaSSBtn'))return;const v=n=>{const el=document.querySelector('[name="'+n+'"]');return el?T(el.value):'';};
+  const x=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'),a=window.__eaAssent||{},hl=window.__eaHealth||[],gap=window.__eaConsentGap?window.__eaConsentGap():'',al=window.eaAlone&&window.eaAlone.mode?window.eaAlone.mode():'sup';
+  const row=(k,val,flag)=>'<tr><th>'+k+'</th><td'+(flag?' class="ss-flag"':'')+'>'+val+'</td></tr>';
+  let h='<h1>Session safety sheet</h1><p class="ss-sub">Form EA-1 &middot; '+x(v('m.client')||'Student')+(v('m.sid')?' &middot; ID '+x(v('m.sid')):'')+(v('m.assessor')?' &middot; '+x(v('m.assessor')):'')+' &middot; Session date ____________</p><table><tbody>';
+  h+=row('Target behavior',x(v('m.beh')||'(not written)')+(v('m.def')?'\n'+x(v('m.def')):''));
+  if(v('m.prec'))h+=row('Precursor',x(v('m.prec')));
+  h+=row('End the session when',x(v('s.term')||'(no termination criteria written: write them on Setup & safety before any session)'),!v('s.term'));
+  h+=row('Assent (Form SI-1)',a.status||a.signs?x((a.status?'Status: '+a.status+'. ':'')+(a.signs?'Stop signals: '+a.signs+'. When you see one, the session ends: press Assent withdrawn.':'')):'Not recorded on Form SI-1: agree before the session how the student says stop.',!(a.status||a.signs)||a.status==='refused');
+  h+=row('Alone or no interaction',al==='true'?'True alone, as set on Setup &amp; safety: watched and heard without a break; the door never locked, latched or held shut; the stop-or-step-in rule followed exactly.':'Supervised: an adult able to see and hear the student; no one keeps the student in.');
+  h+=row('Protective equipment and blocking',x(v('s.pe')||'(none written)'));
+  h+=row('Staffing; who follows a student who leaves',x(v('s.staff')||'(not written)'),!v('s.staff'));
+  h+=row('Consent',x(v('s.consent')||'(not recorded)')+(gap?'\n'+x(gap):''),!!gap||!v('s.consent'));
+  h+=row('Medical clearance',x(v('s.med')||'NOT RECORDED: do not run the session until the nurse or physician has been consulted.'),!v('s.med'));
+  if(hl.length)h+=row('Health record (Form DM-1)',x(hl.join('\n')));
+  h+=row('A hold or an injury','Tick Hold used or Injury in the runner before Save to the log. A hold is a restraint: it is recorded the same day on Form DD-1 and reported as the district procedure requires; an injury goes on Form IM-1.');
+  h+='</tbody></table><p class="ss-foot">Confidential student record (FERPA). For the people at this session only; shred it after the session.</p>';
+  let box=document.getElementById('eaSS');if(!box){box=document.createElement('div');box.id='eaSS';document.body.appendChild(box);}box.innerHTML=h;
+  document.body.classList.add('ea-ss-printing');const done=()=>{document.body.classList.remove('ea-ss-printing');box.innerHTML='';window.removeEventListener('afterprint',done);};
+  window.addEventListener('afterprint',done);setTimeout(()=>{window.print();setTimeout(done,1500);},80);});
+/* I78 the blind second-analyst reading: the test conditions as letters in a shuffled order, the control marked, no criterion lines */
+(function(){const A=()=>window.eaAPI||{};const $1=id=>document.getElementById(id),q=nm=>document.querySelector('[name="'+nm+'"]');let MAP=null;
+  function paintRes(){const r=$1('eaBlindRes');if(!r)return;const rd=T(q('d2.read')&&q('d2.read').value),ag=T(q('d2.agree')&&q('d2.agree').value),oc=T(q('d2.outcome')&&q('d2.outcome').value),who=T(q('d2.who')&&q('d2.who').value),dt=T(q('d2.date')&&q('d2.date').value);
+    const e=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');r.innerHTML=rd?'<b>Blind reading'+(who?' by '+e(who):'')+(dt?', '+e(dt):'')+':</b> '+e(rd)+'. <b>The criteria:</b> '+e(oc||'—')+'. <b>'+(ag==='agree'?'The two agree.':'The two disagree: settle it on visual review and record it under Interpretation notes.')+'</b>':'';}
+  window.eaPaintBlind=paintRes;
+  function start(){const rows=A().sessData(),cn=A().condNames(),ph=T(q('d.phase')&&q('d.phase').value),R=ph?rows.filter(r=>r.phase===ph):rows;const ctrl=cn.find(c=>c.type==='control');
+    if(!ctrl||!R.length){try{nbhUI.toast('The blind reading needs sessions and one control condition.',{kind:'warn'});}catch(x){}return;}
+    const tests=cn.filter(c=>c!==ctrl&&R.some(r=>r.c===c.i)).map(c=>c).sort(()=>Math.random()-0.5);MAP=tests.map((c,k)=>({L:String.fromCharCode(65+k),c}));
+    const order=[ctrl].concat(MAP.map(m=>m.c)),names=['Control'].concat(MAP.map(m=>'Condition '+m.L));
+    document.body.classList.add('ea-blind');$1('eaBlindRun').hidden=false;
+    A().lineGraph($1('eaBlindFig'),null,{title:'Blind reading',cap:'The control is drawn hollow. No condition names and no criterion lines.',points:R.map(r=>({x:r.i+1,y:r.y,series:order.findIndex(c=>c.i===r.c),phase:r.phase})).filter(p=>p.series>=0),seriesNames:names,yLabel:A().yLabelFor(),hollow:0,refs:[]});
+    $1('eaBlindPick').innerHTML='<b>Your reading.</b> Tick each condition where responding is clearly elevated above the control, or Undifferentiated. '+MAP.map(m=>'<label class="ea-ev"><input type="checkbox" data-bl="'+m.L+'"> Condition '+m.L+'</label>').join(' ')+' <label class="ea-ev"><input type="checkbox" data-bl="U"> Undifferentiated</label>';
+    $1('eaBlindRes').innerHTML='';window.scrollTo(0,0);}
+  function stop(){document.body.classList.remove('ea-blind');$1('eaBlindRun').hidden=true;$1('eaBlindFig').innerHTML='';MAP=null;}
+  function show(){if(!MAP)return;const who=T(q('d2.who').value);if(!who){try{nbhUI.toast('Write the second analyst\u2019s name first.',{kind:'warn'});}catch(x){}return;}
+    const picked=[...document.querySelectorAll('#eaBlindPick [data-bl]:checked')].map(i=>i.dataset.bl);if(!picked.length){try{nbhUI.toast('Tick the elevated conditions, or Undifferentiated.',{kind:'warn'});}catch(x){}return;}
+    const und=picked.includes('U'),sel=und?[]:MAP.filter(m=>picked.includes(m.L)).map(m=>m.c.name);
+    const ph=T(q('d.phase')&&q('d.phase').value),rows=A().sessData(),R=ph?rows.filter(r=>r.phase===ph):rows,met=A().critAll(R).results.filter(r=>r.met).map(r=>r.name);
+    const same=und?!met.length:(met.length===sel.length&&sel.every(x=>met.includes(x)));
+    A().setv('d2.read',und?'Undifferentiated':sel.join(', ')+' elevated');A().setv('d2.outcome',met.length?met.join(', ')+' meet'+(met.length===1?'s':'')+' the rule':'undifferentiated by the structured criteria');A().setv('d2.agree',same?'agree':'disagree');
+    if(!T(q('d2.date').value))A().setv('d2.date',new Date().toLocaleDateString());stop();paintRes();['d2.read','d2.date'].forEach(nm=>{const el=q(nm);if(el)el.dispatchEvent(new Event('change',{bubbles:true}));});}
+  document.addEventListener('click',e=>{if(!e.target.closest)return;if(e.target.closest('#eaBlindGo'))start();else if(e.target.closest('#eaBlindCancel'))stop();else if(e.target.closest('#eaBlindShow'))show();});
+  document.addEventListener('change',e=>{if(e.target&&/^d2\./.test(e.target.name||''))paintRes();});})();
 /* v22.37 (review F148) the lines the case writes in "Consent and notification": one of them already there is the case's
    own, so a newer reading replaces it; any other text in the field is the BCBA's and stays */
 const AUTO=/^(Parent consent obtained .*\(Form IC-1\)|Form IC-1: the experimental analysis is NOT consented\b.*|(Consent (declined|revoked|pending|not established)|No consent on file)\b.*\(Form IC-1\).*)$/;
 function autoLine(name,line){const el=document.querySelector('[name="'+name+'"]');if(!el)return false;const cur=String(el.value||'');let v='';
   if(!T(cur))v=line;else{const L=cur.split('\n'),i=L.findIndex(x=>AUTO.test(x.trim()));if(i<0||L[i].trim()===line)return false;L[i]=line;v=L.join('\n');}
   el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));return true;}
+/* v22.49 (review F156) a line the case keeps in a field of the BCBA's: the line that begins "Assent withdrawn when the student"
+   and names Form SI-1 is the case's own and is replaced; any other text stays, and the line is added below it */
+function autoLine2(name,line){const el=document.querySelector('[name="'+name+'"]');if(!el)return false;const cur=String(el.value||''),L=cur?cur.split('\n'):[];
+  const i=L.findIndex(x=>/^Assent withdrawn when the student .*\(Form SI-1\)/.test(x.trim()));if(i>=0&&L[i].trim()===line)return false;if(i>=0)L[i]=line;else L.push(line);
+  el.value=L.filter((x,j)=>x.trim()||j<L.length-1).join('\n').replace(/^\n+/,'');['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));return true;}
+window.eaPaintAssent=function(){const a=window.__eaAssent||{},n=document.getElementById('eaRunAssent');if(!n)return;const e=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  if(!a.status&&!a.signs){n.hidden=true;n.innerHTML='';return;}
+  n.hidden=false;n.innerHTML='<b>Assent (Form SI-1):</b> '+(a.status?e(a.status):'not recorded')+(a.signs?'. Stop signals: '+e(a.signs)+'. When you see one, press Assent withdrawn.':'.')+(a.status==='refused'?' <b>The student refused: do not run a session; review assent with the team first.</b>':'');};
 function eaWhy(k){const fa=(k.dec&&k.dec.fa)||{};return k.exceptions?'consent with exceptions: '+T(k.exceptions).replace(/[.;\s]+$/,''):fa.dec==='no'?'the parent said no to it':fa.dec==='na'?'it was not proposed to the parent':'its own decision is not recorded';}
 /* v22.37 (review F148) the consent gap: '' outside the workstation (no case), when the case carries no consent record, or
    when IC-1 covers the analysis; otherwise what IC-1 says. The runner asks for a reason before a session while it is set. */
 window.__eaConsentGap=function(){const C=window.nbhCase;if(!C||!C.facts||!C.consent)return '';const k=C.consent();if(!k.known||C.covers('fa'))return '';
   return k.on?'Form IC-1 does not cover the experimental analysis ('+eaWhy(k)+')':k.word;};
+/* v22.49 (review F149) the health record line, and the safety plan's own check: an analysis of behavior that can injure (TB-1
+   urgency 3 or 4) carries a medical clearance (the form's rule, after Kahng et al., 2015); while the box is empty the Setup sheet,
+   its print and the session runner say the safety plan is incomplete */
+window.eaPaintHealth=function(){const L=window.__eaHealth||[],row=document.getElementById('eaHealthRow'),box=document.getElementById('eaHealth');if(!row||!box)return;
+  row.hidden=!L.length;box.innerHTML=L.map(x=>'<div>'+String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>').join('');};
+window.eaClearGap=function(){const v=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};
+  const u=parseInt(v('m.urg'),10);return (u>=3)&&!v('s.med');};
+window.eaPaintClear=function(){const g=window.eaClearGap();
+  [['eaClearFlag','Safety plan incomplete: no medical clearance. Behavior at TB-1 urgency level '+'3 or 4 can injure: consult the school nurse or the student\u2019s physician and write who, when and any restrictions under Medical clearance before the first session.'],
+   ['eaRunClear','Safety plan incomplete: no medical clearance (Setup & safety). Do not run a session until the nurse or physician has been consulted.']].forEach(([id,t])=>{
+    const n=document.getElementById(id);if(!n)return;n.hidden=!g;n.innerHTML=g?'<b>Medical clearance.</b> '+t:'';});};
+document.addEventListener('input',e=>{const n=e.target&&e.target.name;if(n==='s.med'||n==='m.urg')window.eaPaintClear();});
 window.eaPaintConsent=function(){const g=window.__eaConsentGap(),e=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
   [['eaConsentFlag','Do not run a session unless the parent consents to it. Record the consent on Form IC-1, Specific procedures A.'],
    ['eaRunConsent','Do not run a session unless the parent consents to it. A session started anyway asks why, and the reason is written with that session.']].forEach(([id,t])=>{

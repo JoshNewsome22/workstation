@@ -34,7 +34,7 @@ async function shell(br,vp,ua,touch,keep){const ctx=await br.newContext({viewpor
     await clTx('readwrite',st=>{st.put(A);st.put(B);st.put(C);});await paintBlank();},!!keep);
   await sleep(900);return {ctx,page,errs};}
 const setBar=page=>page.evaluate(()=>{const set=(q,v)=>{const e=document.querySelector(q);e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
-  set('#pClient','Mateo Rivera');set('#pSid','4471823');set('#pSite','Royal Palm School');set('#pGrade','12th grade');set('#pBcba','Joshua Newsome, M.A., BCBA');});
+  set('#pClient','Mateo Rivera');set('#pSid','4471823');set('#pSite','Royal Palm School');set('#pGrade','12th grade');set('#pBcba','Jordan Ellis, M.A., BCBA (simulated)');});
 async function open(page,id){await page.evaluate(id=>openForm(id),id);await page.waitForFunction(id=>!!state.status[id],id,{timeout:40000});await sleep(1500);
   await page.evaluate(()=>{const t=document.getElementById('tipHide');if(t&&t.offsetParent)t.click();});await sleep(200);
   const file=await page.evaluate(id=>ALL.find(f=>f[0]===id)[2],id);return page.frames().find(f=>f.url().indexOf(encodeURI(file))>=0||f.url().indexOf(file)>=0);}

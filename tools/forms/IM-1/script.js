@@ -645,7 +645,7 @@ async function loadSim(){
   const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
   const Y=n=>MDY(step(n,-1));
   S=blank();SEL=null;SELP=null;CARE_OPEN=false;
-  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'4',dob:'',site:'Elementary, self-contained classroom',bcba:'Joshua Newsome, M.A., BCBA',
+  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'4',dob:'',site:'Elementary, self-contained classroom',bcba:'Jordan Ellis, M.A., BCBA (simulated)',
     beh:'Self-injury: head hitting and hand biting',behdef:'Head hitting: forceful contact of the head with a hard surface or the fist from 15 cm or more. Hand biting: closing the teeth on the hand or wrist hard enough to leave a mark (Form TB-1).',
     plan:'CR-1 dated '+Y(32)+'; restraint log on CR-1; medical review after any High estimate',medical:'No bleeding disorder; no allergy; risperidone 0.5 mg since '+Y(40)+' (Form MS-1)',
     t_other_text:'',examiner:'School nurse (RN), with the BCBA observing the first two',second:'Classroom aide (simulated)',secondRole:'Paraprofessional',consent:'yes',consentDate:Y(34),trained:'Nurse and BCBA scored two students together on '+Y(33)+'; agreement on every item',nurse:'School nurse (simulated)',intake:Y(30),every:'3',tod:'Arrival, 8:05, in the health room'};

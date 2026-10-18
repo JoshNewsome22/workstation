@@ -401,12 +401,12 @@ async function loadSim(){
   const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
   const D=n=>fmt(step(n,-1)),Y=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();S.type='gbg';
-  S.meta={cls:'SIMULATED – Room 12',teacher:'Ms. K.',grade:'2',nstud:'22',site:'Elementary school',when:'Math block, 9:15 to 9:45',runs:'The teacher, with a paraeducator keeping the score',bcba:'Joshua Newsome, M.A., BCBA',date:Y(20),start:Y(10),review:Y(0),
+  S.meta={cls:'SIMULATED – Room 12',teacher:'Ms. K.',grade:'2',nstud:'22',site:'Elementary school',when:'Math block, 9:15 to 9:45',runs:'The teacher, with a paraeducator keeping the score',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(20),start:Y(10),review:Y(0),
     tier:'Class-wide support around one or more students with a BIP',
     problem:'Talking out and out-of-seat behavior through the math block, from most of the class; the teacher stops the lesson 10 to 15 times in half an hour. Two students have individual plans; the rest copy them.',
     plans:'D.R. (TD-1, escape; break card) and M.A. (TD-1, attention; DRA for hand-raising). Both play on their team under the team rule; D.R. keeps the break card and a break is not a foul.',
     goal_txt:'The class works through the math block with the teacher stopping fewer than three times, and raised hands instead of calling out.',
-    measure:'Fouls per team per game period',b_who:'J. Newsome and the paraeducator (interobserver agreement 92% on day 2)',b_dates:D(14)+' to '+D(11),b_def:'Talking without a hand up (any audible word to the class or the teacher); out of seat without permission (bottom off the chair for more than 3 seconds); touching others or their things. Counted per team in the 30-minute block.',b_note:'The para tallied by team on a clipboard so the baseline matches the game’s count.',
+    measure:'Fouls per team per game period',b_who:'J. Ellis and the paraeducator (interobserver agreement 92% on day 2)',b_dates:D(14)+' to '+D(11),b_def:'Talking without a hand up (any audible word to the class or the teacher); out of seat without permission (bottom off the chair for more than 3 seconds); touching others or their things. Counted per team in the 30-minute block.',b_note:'The para tallied by team on a clipboard so the baseline matches the game’s count.',
     dir:'low',crit:'5',unit:'fouls per team',mins:'30',reward:'Five minutes of free choice at the end of the day (the class voted)',rw_when:'At the end of the same day',announce:'The para reads the tally at 9:45; the teacher names the winners; the class claps; nothing is said about a team over the goal.',never:'No marks are removed as a reward or added as a punishment for anything outside the three rules; a losing team is not scolded; the game is not stopped early.',
     g_fouls:'Talking without a hand up\nOut of seat without permission\nTouching others or their things',g_win:'Every team with no more than the criterion number of fouls wins (all teams can win)',g_time:'Every day during the math block, 9:15 to 9:45; a second game in the afternoon from phase 2',g_prize:'A victory tag for the day and five minutes of free choice at 2:40; Friday, the week’s winners pick the class game',g_rec:'the paraeducator, with a tally mark on the board under the team name, in a neutral voice, without stopping the lesson',g_fade:'Phase 1 daily; phase 2 three days a week with the prize at the end of the day; phase 3 unannounced games with the prize on Friday',
     cc_up:'Met by every team on 3 of the last 4 game days (working convention)',cc_step:'1',cc_end:'2',cc_down:'Met on fewer than 2 of the last 4 game days: step back one, score fidelity, re-vote the menu',
@@ -414,7 +414,7 @@ async function loadSim(){
     decision:'Criterion stepped from 5 to 4 on '+D(6)+' and to 3 on '+D(2)+', each after 3 of 4 game days met. Phase 2 (three games a week, prize at the end of the day) began '+D(2)+'.',
     notreach:'D.R. cost the Cardinals 3 of their 5 fouls on '+D(9)+'; the break card was re-taught and the fouls fell. No team of one needed so far.',
     sv:'The class asks whether the game is on; both teams clap for each other. Two students said the Cardinals “always lose” in week 1; not said since the criterion moved.',
-    f_who:'J. Newsome',f_date:D(1),f_per:'Math block',f_min:'30'};
+    f_who:'J. Ellis',f_date:D(1),f_per:'Math block',f_min:'30'};
   S.chk={po_exp:false,po_score:false,po_rules:false};
   S.exp=[{text:'Hands up to talk',looks:'hand raised, voice off until called on',nex:'talking without a hand up'},{text:'Stay in your seat',looks:'bottom on the chair, chair on the floor; a break card is permission',nex:'out of seat without permission'},{text:'Hands and feet to yourself',looks:'hands on your own desk and your own work',nex:'touching others or their things'},{text:'Follow directions the first time',looks:'started within 10 seconds of the direction',nex:''}];
   S.menu=[{item:'Five minutes of free choice at the end of the day',kind:'Activity',amt:'5 minutes',how:'class vote, first choice'},{item:'Music during independent work',kind:'Privilege',amt:'one block',how:'class vote'},{item:'Teacher reads an extra chapter',kind:'Social',amt:'10 minutes',how:'class vote'},{item:'Friday class game (the winners choose)',kind:'Activity',amt:'15 minutes',how:'teacher’s offer for the week'}];
@@ -428,7 +428,7 @@ async function loadSim(){
     if(d[0]!=='B'){const met=d[2]<=+d[1]&&d[3]<=+d[1];r.rw=met?'Delivered':'Not earned';}
     if(i===4)r.note='first game; rules reviewed twice';if(i===5)r.note='Cardinals: 3 fouls from D.R.; break card re-taught after';if(i===8)r.note='criterion to 4';if(i===9)r.note='fire drill in the block';if(i===12)r.note='criterion to 3; phase 2';return r;});
   S.fid=FID.map((f,i)=>({in:i===4?'No':'Yes',note:i===4?'Fouls recorded neutrally; no praise given to the team under the goal mid-game':i===8?'Free choice at 2:40 for both teams':''}));
-  S.fl=[{date:D(9),who:'J. Newsome',pct:'80',missed:'3, 5'},{date:D(4),who:'J. Newsome',pct:'90',missed:'5'}];
+  S.fl=[{date:D(9),who:'J. Ellis',pct:'80',missed:'3, 5'},{date:D(4),who:'J. Ellis',pct:'90',missed:'5'}];
   renderAll();setView('design');
   nbhUI.toast('Simulation loaded: '+'a simulated second-grade Good Behavior Game with two teams, four baseline days and eleven game days.',{kind:'ok'});
 }

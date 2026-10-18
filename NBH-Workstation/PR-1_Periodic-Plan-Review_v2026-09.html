@@ -1936,7 +1936,7 @@ async function loadSim(){
     return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();
   S.meta={client:'SIMULATED \u2013 Sample Student',sid:'SIM-000',grade:'5th, ESE center school',
-    site:'Example ESE center school (simulated), Room 12',bcba:'Joshua Newsome, M.A., BCBA',date:D(0),
+    site:'Example ESE center school (simulated), Room 12',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:D(0),
     plan:'BIP dated '+D(105)+', built on Form TD-1 \u2014 break-card FCT with delay tolerance',
     revNo:'3',period:D(35)+' \u2013 '+D(0),why:'Scheduled review',
     team:'Classroom teacher, both aides, SLP, assistant principal, parent, case BCBA',
@@ -1971,9 +1971,9 @@ async function loadSim(){
     {p:D(35)+' \u2013 '+D(0),t:'0.3',r:'7.4',i:'95.5',cc:'2.4',n:'Contextual fit addressed (Form CF-1)'}
   ];
   S.act=[
-    {a:'Brief and train the substitute pool so the replacement is tested against untrained adults',f:'ST-1 (training)',w:'J. Newsome',b:D(-14),s:'Open'},
+    {a:'Brief and train the substitute pool so the replacement is tested against untrained adults',f:'ST-1 (training)',w:'J. Ellis',b:D(-14),s:'Open'},
     {a:'Probe the break card in the library and the cafeteria',f:'TD-1 (the plan)',w:'Aide A',b:D(-10),s:'Open'},
-    {a:'Re-check integrity unannounced after the substitute briefing',f:'TI-1 (integrity)',w:'J. Newsome',b:D(-21),s:'Open'},
+    {a:'Re-check integrity unannounced after the substitute briefing',f:'TI-1 (integrity)',w:'J. Ellis',b:D(-21),s:'Open'},
     {a:'Hold the current delay rather than advancing this period',f:'None \u2014 this form',w:'Team',b:D(0),s:'Done'}
   ];
   /* one support at a time: the delay ladder follows the proximity and prompt steps, as on Forms RM-1 and DT-1 (90 s
@@ -2187,6 +2187,13 @@ function prAssentPart(a){if(!a||typeof a!=='object')return null;const l=a.last10
   const r=Math.max(0,+l.refused||0),w=Math.max(0,+l.withdrew||0);
   return {k,r,w,caution:r+w>=3,line:'Assent (Form DD-1): refused on '+r+' and withdrew on '+w+' of the last '+k+' day'+(k===1?'':'s')+' marked.'};}
 {const was=prAlsoText;prAlsoText=function(f){const t=was.apply(this,arguments);const a=f&&f.data?prAssentPart(f.data.assent):null;return a?(t?t+'\n':'')+a.line:t;};}
+/* v22.49 (review F157, I79) Form EA-1's session safety record (sessions ended for safety or with assent withdrawn, a hold used, an
+   injury) and its treatment design verdict, as the analysis hands them to the case */
+{const was2=prAlsoText;prAlsoText=function(f){const t=was2.apply(this,arguments);const ev=f&&f.evidence&&f.evidence['EA-1'];if(!ev||typeof ev!=='object')return t;const L=[];
+  const s=ev.safety;if(s&&s.sessions){const b=[s.sessions+' session'+(s.sessions===1?'':'s')];if(s.terminated)b.push(s.terminated+' ended for safety');if(s.assent)b.push(s.assent+' ended with assent withdrawn');
+    if(s.holds&&s.holds.length)b.push('a hold used in '+s.holds.length+' ('+s.holds.join(', ')+')');if(s.injuries&&s.injuries.length)b.push('an injury in '+s.injuries.length+' ('+s.injuries.join(', ')+')');L.push('Experimental analysis (Form EA-1): '+b.join('; ')+'.');}
+  const d=ev.txDesign;if(d&&d.points)L.push('Treatment design (Form EA-1)'+(d.name?', '+d.name:'')+(d.from==='DD-1'?', on Form DD-1\u2019s record':'')+': '+d.demos+' demonstration'+(d.demos===1?'':'s')+' of the three asked; '+(d.ok?'meets the three-demonstration and five-point standards.':'not yet at standard.'));
+  return L.length?(t?t+'\n':'')+L.join('\n'):t;};}
 function prAssentRender(){const el=document.getElementById('prAssent');if(!el)return;const d=prCase80&&prCase80.data,a=d?prAssentPart(d.assent):null;
   if(!a){el.hidden=true;el.innerHTML='';return;}
   const all=d.assent,inAlso=prT(S.meta.alsoCase).indexOf(a.line)>=0,L=(Array.isArray(all.list)?all.list:[]).filter(x=>x&&x.date&&x.mark&&!/^(?:yes|assent(?:ed)?|gave|given|\+)$/i.test(prT(x.mark))).slice(-10);

@@ -5,7 +5,7 @@
    how the student is watched; the parent's agreement), and falls back to supervised when one goes, taking the form's own
    card wording with it; the Guide, the cards, the walkthrough, the session runner, the job aids and the print say so
    (the print is read from the PDF); files saved before open supervised for the sessions to come, with a line of history;
-   walk-outs are counted on their own line; Load simulation asks first; the runner, the yoked replay and the data are
+   walk-outs are counted on their own line (as assent withdrawn since v22.49); Load simulation asks first; the runner, the yoked replay and the data are
    otherwise unchanged (checked against the form as it was before, from git).
    Run: WS_URL=http://127.0.0.1:<port> WS_ROOT=<checkout> node qa/policy-ea1-test.js
    The PDF text is read with Python's pymupdf when it is installed; without it the print checks read the page instead. */
@@ -173,12 +173,17 @@ const STUB=()=>{window.confirm=()=>true;window.alert=()=>{};};
    const a=await simSnap(preUrl,key),b=await simSnap(URL,key);
    const diff=Object.keys(Object.assign({},a.f,b.f)).filter(k=>a.f[k]!==b.f[k]);
    /* by design: the alone-type cards' wording, the trial-based Ignore card's wording, and the new fields */
-   const expected=k=>/^s\.alone/.test(k)||/^c\[\d+\]\.(eo|sd|beh)$/.test(k)&&(()=>{const i=/\d+/.exec(k)[0];const nm=b.f['c['+i+'].name'];return /^(Alone \/ No interaction|Alone \/ No interaction \(screen\)|No interaction|Ignore)$/.test(nm);})();
+   /* v22.49: the samples' BCBA is the simulated Jordan Ellis; the review's new fields (the blind second reading, the function
+      for the report, the treatment goal), which the automatic worked examples set to automatic */
+   const expected=k=>!(k in a.f)&&/^(d2\.\w+|d\.fnkey|t\.goal)$/.test(k)||/^s\.alone/.test(k)||k==='m.assessor'&&/^Jordan Ellis\b.*\(simulated\)$/.test(b.f[k]||'')||/^c\[\d+\]\.(eo|sd|beh)$/.test(k)&&(()=>{const i=/\d+/.exec(k)[0];const nm=b.f['c['+i+'].name'];return /^(Alone \/ No interaction|Alone \/ No interaction \(screen\)|No interaction|Ignore)$/.test(nm);})();
    const bad=diff.filter(k=>!expected(k));
    console.log('NOTE simulation "'+key+'": '+Object.keys(b.f).length+' fields compared; changed by design: '+diff.filter(expected).join(', '));
    ok('simulation "'+key+'": every field the same as before except the alone-type cards and the new fields',bad.length===0,{bad:bad.map(k=>[k,a.f[k],b.f[k]])});
    ok('simulation "'+key+'": the session runner reads every card as before',JSON.stringify(a.runner)===JSON.stringify(b.runner),{pre:a.runner,now:b.runner});
-   ok('simulation "'+key+'": interpretation, IOA and the RRB and LOD readings unchanged',a.crit===b.crit&&a.ioa===b.ioa&&a.rrb===b.rrb&&a.lod===b.lod,{pre:a.crit.slice(0,200),now:b.crit.slice(0,200)});
+   /* v22.49 by design: no subtype beside a social function (F152), and the trial-based analysis reads its own segments (F154) */
+   const lodOk=a.lod===b.lod||/^Level of differentiationNot applicable: the analysis shows a social function \(/.test(b.lod||'');
+   const critOk=a.crit===b.crit||key==='trial'&&/^OutcomeTrial-based reading: Tangible \(candidate: /.test(b.crit);
+   ok('simulation "'+key+'": interpretation, IOA and the RRB and LOD readings unchanged, but for the subtype beside a social function and the trial-based reading',critOk&&a.ioa===b.ioa&&a.rrb===b.rrb&&lodOk,{pre:[a.crit.slice(0,200),String(a.lod).slice(0,120)],now:[b.crit.slice(0,200),String(b.lod).slice(0,120)]});
   }
  }
 
@@ -201,7 +206,7 @@ const STUB=()=>{window.confirm=()=>true;window.alert=()=>{};};
  await p.evaluate(STUB);await p.evaluate(()=>eaStart.click());await sleep(300);await p.evaluate(()=>{eaTarget.click();eaTarget.click();});await p.evaluate(()=>eaEnd.click());await sleep(200);await p.evaluate(()=>eaSave.click());await sleep(200);
  const row=await p.evaluate(()=>{const n=+document.querySelector('#nSess').value;for(let i=n-1;i>=0;i--){const c=document.querySelector(`[name="s[${i}].c"]`).value;if(c!=='')return {i,c,v:document.querySelector(`[name="s[${i}].v"]`).value,t:document.querySelector(`[name="s[${i}].t"]`).checked,n:document.querySelector(`[name="s[${i}].n"]`).value};}return null;});
  ok('a session ended early on the alone card is logged as before: count, Term. checked, the runner\'s note',!!row&&row.c==='2'&&row.v==='2'&&row.t&&/ended early at/.test(row.n),row);
- /* that session was a walk-out: Interpretation counts it on its own line, not with the safety stops */
+ /* that session was a walk-out: Interpretation counts it on its own line, not with the safety stops; since v22.49 (F156) as assent withdrawn */
  const terms=await p.evaluate(()=>{const n=+document.querySelector('#nSess').value;let k=0;for(let i=0;i<n;i++){if(document.querySelector(`[name="s[${i}].c"]`).value!==''&&document.querySelector(`[name="s[${i}].v"]`).value!==''&&document.querySelector(`[name="s[${i}].t"]`).checked)k++;}return k;});
  await p.evaluate(()=>document.querySelector('#viewSeg [data-view="analysis"]').click());await sleep(250);
  const crit1=await p.evaluate(()=>document.querySelector('#critVerdict').textContent);
@@ -209,7 +214,7 @@ const STUB=()=>{window.confirm=()=>true;window.alert=()=>{};};
  await set(p,'s['+row.i+'].n',row.n+'; left the room');await p.evaluate(()=>document.querySelector('#viewSeg [data-view="analysis"]').click());await sleep(250);
  const crit2=await p.evaluate(()=>document.querySelector('#critVerdict').textContent);
  const stopLine=k=>new RegExp(k+' session\\(s\\) terminated per the safety criteria');
- ok('Interpretation: a session with "left the room" in Notes is counted on its own line, and not with the safety stops',stopLine(terms).test(crit1)&&!/left the room/.test(crit1)&&/1 session\(s\) ended because the student left the room\. If this keeps happening, run the condition with the adult in the room, or plan an analysis of leaving\./.test(crit2)&&(terms>1?stopLine(terms-1).test(crit2):!/terminated per the safety criteria/.test(crit2)),{terms,crit1:crit1.slice(-400),crit2:crit2.slice(-400)});
+ ok('Interpretation: a session with "left the room" in Notes is counted on its own line as assent withdrawn, and not with the safety stops',stopLine(terms).test(crit1)&&!/left the room/.test(crit1)&&/1 session\(s\) ended with assent withdrawn \(1 the student left the room\)\. Pause the analysis and review assent with the team \(Form SI-1\) before any further session\./.test(crit2)&&(terms>1?stopLine(terms-1).test(crit2):!/terminated per the safety criteria/.test(crit2)),{terms,crit1:crit1.slice(-400),crit2:crit2.slice(-400)});
  await p.close();
 
  /* ---------------- 6. print, read from the PDF ---------------- */

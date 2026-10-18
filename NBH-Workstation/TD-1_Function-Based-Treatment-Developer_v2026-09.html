@@ -1005,7 +1005,7 @@ td input,td select{max-width:100%}
     <div class="f"><label for="mId">Student ID</label><input id="mId" name="m.sid"></div>
     <div class="f"><label for="mDob">Date of birth</label><input id="mDob" name="m.dob"></div>
     <div class="f"><label for="mSetting">Setting / classroom</label><input id="mSetting" name="m.setting"></div>
-    <div class="f"><label for="mAssessor">BCBA</label><input id="mAssessor" name="m.assessor" placeholder="Joshua Newsome, M.A., BCBA"></div>
+    <div class="f"><label for="mAssessor">BCBA</label><input id="mAssessor" name="m.assessor" placeholder="e.g. Jordan Ellis, M.A., BCBA"></div>
     <div class="f"><label for="mDate">Date</label><input id="mDate" name="m.date"></div>
   </div>
   <div class="defs">
@@ -2927,7 +2927,7 @@ const SIMV={
 /* v21.44 (A1): the simulation asks first, with the question the other forms ask; it replaced every entry without asking */
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated case?\nEvery sheet is filled with a worked example of the scenario chosen beside the button. Anything already entered will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=SIMS[key],X=SIMV[key]||{},pick=(k,d)=>k in X?X[k]:d;restore({counts:{}});const fcr=!!sc.sbt||sc.comps.some(c=>c==='FCT'||c==='DRA');   /* the plan has a functional communication response (v21.16) */
- setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.assessor',val('m.assessor')||'Joshua Newsome, M.A., BCBA');setv('m.date',new Date().toLocaleDateString());
+ setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
  setv('m.beh',sc.beh);setv('m.fn',sc.fn);setv('m.eadesign',sc.sbt?'IISCA: synthesized test vs. control, multielement (simulated)':'Multielement, 4 series (simulated)');setv('m.reinf',sc.reinf);setv('m.rate',String(sc.rate));setv('m.sessmin','10');setv('m.rep',sc.rep);/* v21.21 cross-form (X4b): m.repdesc is the replacement behavior (the plan summary and the flowchart show it as
    that, GB-1 writes it after "will", EB-1 under "What the request looks like"); the simulation filled it with
    a description of the student's current repertoire. Whether the behavior is already in the repertoire is

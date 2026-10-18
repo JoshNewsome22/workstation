@@ -17,7 +17,7 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(encodeURI(file)
   const ctx=await br.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});const log=[];const page=await ctx.newPage();L.wire(page,log);
   await page.goto(L.BASE+'/NBH-Workstation/index.html');await L.sleep(1200);
   await page.evaluate(()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};const set=(q,v)=>{const e=document.querySelector(q);e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
-    set('#pClient','Mateo Rivera');set('#pSid','4471823');set('#pSite','Royal Palm School');set('#pGrade','5');set('#pBcba','Joshua Newsome, M.A., BCBA');try{localStorage.removeItem('nbh.packet');}catch(e){}});
+    set('#pClient','Mateo Rivera');set('#pSid','4471823');set('#pSite','Royal Palm School');set('#pGrade','5');set('#pBcba','Jordan Ellis, M.A., BCBA (simulated)');try{localStorage.removeItem('nbh.packet');}catch(e){}});
   const files=await page.evaluate(ids=>ids.map(id=>ALL.find(f=>f[0]===id)[2]),FORMS);
   for(let i=0;i<FORMS.length;i++){const id=FORMS[i];await page.evaluate(id=>openForm(id),id);await page.waitForFunction(id=>!!state.status[id],id,{timeout:40000}).catch(()=>{});await L.sleep(600);
     const fr=frameOf(page,files[i]);if(!fr){console.log('no frame',id);continue;}await fr.evaluate(()=>{try{nbhUI.confirm=async()=>true;}catch(e){}window.confirm=()=>true;});try{await L.loadSim(fr);}catch(e){}await L.sleep(1500);}
