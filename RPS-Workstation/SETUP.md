@@ -9903,6 +9903,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.62: AD-1 runs a session: work and total clocks, tokens, the block, resumes, and the row
+
+- **Run a session here** (Tab 4 of Form AD-1, above the session log). Choose the arrangement and the phase, press Start
+  session, and tap Response for each response (or Independent correct, when only independent correct responses earn;
+  Task, not earned for a task presented and not earned; Problem behavior). Keys: Space or R, P, N.
+- **Two clocks, as DeLeon et al. (2014) kept them.** The work clock stops while the student has the item, during token
+  exchange, and after a removal until the next task is presented; the total clock runs from Start to the end (p. 299).
+- **Each arrangement runs by its rule.** Distributed starts the access at each response and counts down the amount; at
+  zero it asks for the removal and times the return to work (Resumes, the cost that stays in the distributed rate,
+  p. 301). Accumulated banks one unit a response and gives the whole block at the end, timed to the units earned;
+  tokens are traded first, with the exchange time kept apart; intermediate delivers every k responses. Edible pieces
+  wait for Eaten instead of a countdown.
+- **The session ends by Section B's rule**: the Nth response, the work period, or whichever comes first (a session that
+  ends on the cap earns only the units banked).
+- **Write the row to the log** puts date, phase, arrangement, opportunities, responses, problem behavior, work minutes,
+  access seconds, total minutes and mean resume seconds into the session log, and the graph and comparison update. Discard
+  writes nothing. The runner is not printed.
+
+Checked by `qa/v2262-test.js` (9), on a clock the test moves, so every time is exact.
+
 ### v22.61: AD-1 from DeLeon et al. (2014): the timing rule, the end rule, access earned and reversals
 
 - **The timing rule sets the primary rate.** On Form AD-1, "Work time only" keeps responses per minute of work as the

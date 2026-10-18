@@ -382,6 +382,20 @@ table.cc-log{min-width:900px}
   table.cc-log th:nth-child(1){width:4%!important}table.cc-log th:nth-child(2){width:13.5%!important}table.cc-log th:nth-child(3){width:8%!important}
   table.cc-log th:nth-child(4){width:13.5%!important}table.cc-log th:nth-child(5){width:18.5%!important}table.cc-log th:nth-child(6){width:11%!important}
   table.cc-log th:nth-child(7){width:13%!important}table.cc-log th:nth-child(8){width:7%!important}table.cc-log th:nth-child(9){width:8.5%!important}table.cc-log th:nth-child(10){width:3%!important}}
+/* v22.62 the session runner */
+#adRun{border:1px solid var(--nbh-rule2,#cdd6d2);border-left:3px solid var(--nbh-teal,#2c6e63);padding:8px 14px;margin:10px 0 14px;background:#fff}
+#adRun>summary{cursor:pointer;padding:6px 0;font-size:14px;min-height:32px}
+#adRun .adr-clocks{display:flex;flex-wrap:wrap;gap:10px 22px;margin:10px 0}
+#adRun .adr-clocks div{min-width:92px}#adRun .adr-clocks span{display:block;font-size:11.5px;color:var(--muted,#5c6b6b);font-weight:600}
+#adRun .adr-clocks strong{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums}
+#adRun .adr-btns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+#adRun .adr-btns button{min-height:44px;min-width:44px}
+#adRun #adrResp{min-width:150px;font-size:16px}
+#adRun[data-st="access"] #adrAcc,#adRun[data-st="block"] #adrAcc{color:#2C6E63}
+#adRun[data-st="work"] #adrWork{color:#2C6E63}
+#adRun[data-st="removed"] #adrMsg,#adRun[data-st="exchange"] #adrMsg,#adRun[data-st="done"] #adrMsg{font-weight:600}
+#adRun #adrMsg{font-size:13.5px;margin:8px 0 4px}
+@media print{#adRun{display:none!important}}
 </style>
 <style id="nbh-brand">
 /* ===== Newsome Behavioral Health — shared form system ===== */
@@ -1124,6 +1138,35 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
   <h2 class="nbh-band">Efficacy Data: Session Log, Graph, and Comparison</h2>
   <p class="lede">One row per session, in the order run. Record work time and total time separately, so rate can be read on work time and cost on total time. The graph and the comparison below update from the rows.</p>
   <p><button type="button" class="tool wk-go" data-go="dis">See a distributed and an accumulated session run in the walkthrough &rarr;</button></p>
+  <details id="adRun" data-st="ready"><summary><b>Run a session here</b>: a work clock that stops during access and exchange, a total clock, the banked units, and the row written to the log</summary>
+    <div id="adrBody" hidden>
+    <div class="grid g3" style="margin-top:8px">
+      <div><label class="f" for="adrCond">Arrangement</label><select id="adrCond"></select></div>
+      <div><label class="f" for="adrPhase">Phase</label><input type="text" id="adrPhase" placeholder="e.g., BL or ME"></div>
+      <div class="small" id="adrRule" style="align-self:end"></div>
+    </div>
+    <div class="adr-clocks">
+      <div><span>Work</span><strong id="adrWork">0:00</strong></div>
+      <div><span>Total</span><strong id="adrTot">0:00</strong></div>
+      <div><span id="adrAccL">Access</span><strong id="adrAcc">0:00</strong></div>
+      <div><span>Responses</span><strong id="adrN">0</strong></div>
+      <div><span>Banked</span><strong id="adrBank">&mdash;</strong></div>
+      <div><span>Prob. beh.</span><strong id="adrPBn">0</strong></div>
+    </div>
+    <div class="adr-btns">
+      <button type="button" class="tool nbh-btn-primary" id="adrStart">Start session</button>
+      <button type="button" class="tool" id="adrResp" disabled>Response</button>
+      <button type="button" class="tool" id="adrMiss" disabled>Task, not earned</button>
+      <button type="button" class="tool" id="adrPB" disabled>Problem behavior</button>
+      <button type="button" class="tool" id="adrNext" disabled>Next task presented</button>
+      <button type="button" class="tool" id="adrEnd" disabled>End session</button>
+      <button type="button" class="tool nbh-btn-primary" id="adrWrite" disabled>Write the row to the log</button>
+      <button type="button" class="tool nbh-btn-danger" id="adrDiscard" disabled>Discard</button>
+    </div>
+    <p id="adrMsg" role="status" aria-live="polite">Choose the arrangement and press Start session. Keys: Space or R for a response, P for problem behavior, N for the next task.</p>
+    <p class="small">The work clock stops while the student has the item, during token exchange, and after a removal until the next task is presented (a response tapped first counts the task as presented at the removal); the total clock runs from Start to the end. DeLeon et al. (2014) took token-trading and access time out of session time (p. 299) and noted that the time to get back to work after each delivery stays in the distributed rate (p. 301); Resumes is that time.</p>
+    </div>
+  </details>
   <div class="log-wrap" tabindex="0" role="region" aria-label="Session log"><table class="log"><caption id="sessCap">Opportunities = tasks, instructions or trials presented. Responses = the work unit (completions, compliance, or independent correct). Resumes = mean seconds from removal of the reinforcer to the next response (distributed and intermediate sessions).</caption>
     <thead><tr><th style="width:3%">#</th><th style="width:9%">Date</th><th style="width:4%">Phase</th><th style="width:13%">Condition</th><th class="num" id="thOpp">Opp.</th><th class="num" id="thResp">Resp.</th><th class="num">Prob. beh.</th><th class="num">Work (min)</th><th class="num">Access (s)</th><th class="num">Total (min)</th><th class="num">Resumes (s)</th><th class="num">Rate /work min</th><th class="num">%</th><th class="num">Prob. beh. /min</th><th class="num">Resp. /total min</th><th style="width:3%"></th></tr></thead>
     <tbody id="tbSess"></tbody></table></div>
@@ -1984,6 +2027,112 @@ function labels(){const cls=val('q_type')==='cls';
 /* ---------- refresh everything ---------- */
 function refresh(){try{labels();learner();rfProfile();const pre=recalcPre();projection(pre);scripts();const sx=sessions();const pf=preference();const ig=integrity();stepCalc();const sv=validity();decision(sx,pf,ig,sv)}catch(e){console.error(e)}}
 window.adRefresh=refresh;
+
+/* ---------- v22.62 the session runner (DeLeon et al., 2014): a work clock that stops during access and exchange and
+   restarts when the next task is presented, a total clock, the banked units or tokens, the block set to the responses
+   times the unit, the time from each removal to the next response; the session ends by Section B's rule and the runner
+   writes the row to the log ---------- */
+(function(){
+  const box=document.getElementById('adRun');if(!box)return;
+  const B=id=>document.getElementById(id),T=()=>Date.now();
+  let R={st:'ready'},tick=null;
+  const ord=x=>{const m=x%100;return x+(m>=11&&m<=13?'th':({1:'st',2:'nd',3:'rd'}[x%10]||'th'))};
+  function cfgNow(){const k=B('adrCond').value,u=num(val('r_unit')),pieces=val('r_utype')==='pieces',mode=val('w_mode')||'count',N=num(val('w_req')),wt=num(val('w_time'));
+    return {k,u:u>0?u:0,pieces,mode,N:mode!=='time'&&N>0?Math.round(N):null,wt:mode!=='count'&&wt>0?wt:null,capMs:mode!=='count'&&wt>0?wt*60000:null,
+      kk:Math.max(2,Math.round(num(val('w_k'))||5)),total:val('clock_rule')==='total',icr:!!val('dr_icr')};}
+  function ruleText(c){const end=c.N&&c.wt?'Ends at the '+ord(c.N)+' response or '+c.wt+' min of '+(c.total?'session':'work')+' time, whichever comes first':c.N?'Ends at the '+ord(c.N)+' response':c.wt?'Ends at '+c.wt+' min of '+(c.total?'session':'work')+' time':'Set the session rule in Section B';
+    const each=c.k==='bl'?'no programmed reinforcement':c.u?(c.pieces?plural(c.u,'piece'):c.u+' s')+' per response'+(c.k==='int'?', delivered every '+c.kk:c.k==='dis'?', delivered at once':', banked'):'set the amount per response (Section B)';
+    return end+'; '+each+'.';}
+  function fill(){const c=B('adrCond'),cur=c.value;c.innerHTML=included().map(k=>'<option value="'+k+'">'+NAME[k]+'</option>').join('');if([...c.options].some(o=>o.value===cur))c.value=cur;if(R.st==='ready')B('adrRule').textContent=ruleText(cfgNow());}
+  const work=()=>R.workMs+(R.st==='work'?T()-R.from:0),acc=()=>R.accMs+((R.st==='access'||R.st==='block')?T()-R.from:0),tot=()=>(R.st==='done'?R.tEnd:T())-R.t0;
+  const unitAmt=x=>R.c.pieces?plural(x*R.c.u,'piece'):mmss(x*R.c.u);
+  function say(m){B('adrMsg').textContent=m;}
+  /* each change of state is stamped with the moment it happened (at), which a timer that ended between two ticks of the
+     display passes in, so a block or the work-time cap ends exactly when it ran out */
+  function go(st,at){R.st=st;R.from=at||T();box.dataset.st=st;}
+  function startAccess(units,block,at){const t=at||T();R.workMs+=R.st==='work'?t-R.from:0;go(block?'block':'access',t);R.accEnd=R.c.pieces?null:R.from+units*R.c.u*1000;R.blockUnits=units;
+    say(block?(R.c.pieces?'The block: '+unitAmt(units)+'. Tap Eaten when they are finished.':'The block: '+unitAmt(units)+' of the item without interruption. The session ends when the timer reaches zero.')
+      :(R.c.pieces?'Give '+unitAmt(units)+'. The work clock is stopped. Tap Eaten: next task when it is eaten.':'Access: '+unitAmt(units)+' of the item. The work clock is stopped.'));paint();}
+  function done(at){const t=at||T();if(R.st==='work')R.workMs+=t-R.from;go('done',t);R.tEnd=t;clearInterval(tick);tick=null;
+    const res=R.res.length?mean(R.res)/1000:null;
+    say('Session over: '+plural(R.n,'response')+', '+fmt(R.workMs/60000,2)+' min of work, '+mmss(R.accMs/1000)+' of access, '+fmt(tot()/60000,2)+' min in all'+(res!=null?'; resumes '+fmt(res,1)+' s on average':'')+'. Check it, then write the row to the log.');paint();}
+  /* the work ends by the rule (or End): banked units are delivered as the block; tokens are traded first */
+  function endWork(at){const t=at||T();if(R.st==='work'){R.workMs+=t-R.from;R.from=t;R.st='ended';}R.ended=true;const k=R.c.k;
+    if(R.st==='access'){paint();return;}
+    if((k==='acc'||k==='int')&&R.bank>0){const b=R.bank;R.bank=0;startAccess(b,true,t);return;}
+    if(k==='tok'&&R.bank>0){go('exchange',t);say('Count the '+plural(R.bank,'token')+' with the student and trade them for '+unitAmt(R.bank)+' (exchange time is kept apart from work time). Then tap Tokens traded.');paint();return;}
+    done(t);}
+  function accessOver(at){R.accMs+=at-R.from;R.from=at;
+    if(R.st==='block'){done(at);return;}
+    if(R.ended){if(R.c.k==='int'&&R.bank>0){const b=R.bank;R.bank=0;go('removed',at);startAccess(b,true,at);return;}done(at);return;}
+    if(R.c.pieces){go('work',at);say('Present the next task.');paint();return;}
+    go('removed',at);R.remAt=at;say('Time’s up: remove the item and present the next task at once. The time to the next response is the resume time.');paint();}
+  function capHit(){return R.c.capMs&&(R.c.total?tot():work())>=R.c.capMs;}
+  function onTick(){if(R.st==='access'||R.st==='block'){if(R.accEnd&&T()>=R.accEnd)accessOver(R.accEnd);}
+    if((R.st==='work'||R.st==='removed')&&capHit()&&!R.ended){const over=(R.c.total?tot():work())-R.c.capMs;say('Time is up for the session.');endWork(T()-Math.max(0,over));}
+    paint();}
+  function paint(){const live=R.st!=='ready',c=R.c||cfgNow();
+    B('adrWork').textContent=live?mmss(work()/1000):'0:00';B('adrTot').textContent=live?mmss(tot()/1000):'0:00';
+    if(live&&(R.st==='access'||R.st==='block')&&R.accEnd){B('adrAccL').textContent='Access left';B('adrAcc').textContent=mmss(Math.max(0,R.accEnd-T())/1000);}
+    else{B('adrAccL').textContent='Access';B('adrAcc').textContent=live?mmss(acc()/1000):'0:00';}
+    B('adrN').textContent=live?R.n:0;B('adrPBn').textContent=live?R.pb:0;
+    B('adrBank').textContent=live&&(c.k==='acc'||c.k==='tok'||c.k==='int')?R.bank+(c.u?' ('+unitAmt(R.bank)+')':''):'—';
+    const run=R.st==='work'||R.st==='removed'||R.st==='access'||R.st==='block'||R.st==='exchange';
+    B('adrStart').disabled=R.st!=='ready';B('adrResp').disabled=!(R.st==='work'||R.st==='removed');B('adrMiss').disabled=B('adrResp').disabled;
+    B('adrPB').disabled=!run;B('adrEnd').disabled=!run;B('adrWrite').disabled=R.st!=='done';B('adrDiscard').disabled=R.st==='ready';
+    B('adrCond').disabled=R.st!=='ready';B('adrPhase').disabled=R.st!=='ready';
+    const nx=B('adrNext');let lab='Next task presented',on=false;
+    if(R.st==='removed')on=true;
+    else if(R.st==='access'){lab=c.pieces?'Eaten: next task':'Access over (item removed)';on=true;}
+    else if(R.st==='exchange'){lab='Tokens traded: start the block';on=true;}
+    else if(R.st==='block'){lab=c.pieces?'Eaten: end the session':'Block over';on=true;}
+    nx.textContent=lab;nx.disabled=!on;
+    B('adrResp').textContent=c.icr?'Independent correct':'Response';}
+  function start(){const c=cfgNow();if(!c.k){say('Choose the arrangement first.');return;}
+    if(!c.N&&!c.capMs){say('Set the session rule in Section B (responses per session or the work period) first.');return;}
+    if(c.k!=='bl'&&!c.u){say('Enter the amount per response in Section B first.');return;}
+    R={st:'ready',c,n:0,opp:0,pb:0,bank:0,workMs:0,accMs:0,res:[],ended:false,date:new Date()};R.t0=T();go('work');
+    B('adrRule').textContent=ruleText(c);
+    say('Present the first task. Tap '+(c.icr?'Independent correct for each independent correct response':'Response for each response')+(c.k==='dis'?'; access starts at once and the work clock stops.':c.k==='bl'?'.':'; each one banks '+unitAmt(1)+'.'));
+    clearInterval(tick);tick=setInterval(onTick,200);paint();}
+  function resp(){if(!(R.st==='work'||R.st==='removed'))return;const t=T();
+    if(R.st==='removed'){R.res.push(t-R.remAt);R.workMs+=t-R.remAt;go('work');}
+    R.n++;R.opp++;const k=R.c.k;
+    if(k==='dis'){if(R.c.N&&R.n>=R.c.N)R.ended=true;startAccess(1,false);return;}
+    if(k==='acc'||k==='tok'||k==='int')R.bank++;
+    if(k==='int'&&R.bank>=R.c.kk){const b=R.bank;R.bank=0;if(R.c.N&&R.n>=R.c.N)R.ended=true;startAccess(b,false);return;}
+    if(R.c.N&&R.n>=R.c.N){endWork();return;}
+    say(k==='bl'?'Present the next task.':'Banked: '+plural(R.bank,k==='tok'?'token':'unit')+' ('+unitAmt(R.bank)+'). Present the next task.');paint();}
+  function miss(){if(!(R.st==='work'||R.st==='removed'))return;const t=T();if(R.st==='removed'){R.workMs+=t-R.remAt;go('work');}R.opp++;say('Task presented, not earned ('+R.opp+' tasks so far). Present the next task.');paint();}
+  function next(){const t=T();
+    if(R.st==='removed'){go('work');say('Next task presented: the work clock is running.');paint();return;}
+    if(R.st==='access'||R.st==='block'){accessOver(t);return;}
+    if(R.st==='exchange'){const b=R.bank;R.bank=0;R.exMs=(R.exMs||0)+t-R.from;startAccess(b,true,t);}}
+  async function endNow(){if(R.st==='ready'||R.st==='done')return;
+    if(R.st==='work'||R.st==='removed'){if(!(await nbhUI.confirm('End the work now?'+(R.bank>0?'\nThe banked '+unitAmt(R.bank)+' is delivered as the block.':''),{ok:'End now'})))return;if(R.st==='work'||R.st==='removed')endWork();return;}
+    if(R.st==='access'||R.st==='block'){R.ended=true;R.bank=0;R.accMs+=T()-R.from;R.from=T();R.st='exchange';}
+    done();}
+  function write(){if(R.st!=='done')return;const d=R.date,ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const res=R.res.length?fmt(mean(R.res)/1000,1):'';
+    const tr=addRow('tbSess',[ds,B('adrPhase').value.trim(),NAME[R.c.k],String(R.opp),String(R.n),String(R.pb),fmt(R.workMs/60000,2),String(Math.round(R.accMs/1000)),fmt(tot()/60000,2),res]);
+    try{const f=tr.querySelector('input');if(f)f.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
+    refresh();R={st:'ready'};box.dataset.st='ready';paint();fill();say('Row '+rows('tbSess').length+' written to the session log. Start the next session when ready.');}
+  async function discard(){if(R.st==='ready')return;if(!(await nbhUI.confirm('Discard this session?\nNothing from it is written to the log.',{ok:'Discard',danger:true})))return;
+    clearInterval(tick);tick=null;R={st:'ready'};box.dataset.st='ready';paint();fill();say('Session discarded. Nothing was written to the log.');}
+  B('adrStart').addEventListener('click',start);B('adrResp').addEventListener('click',resp);B('adrMiss').addEventListener('click',miss);
+  B('adrPB').addEventListener('click',()=>{if(R.st==='ready'||R.st==='done')return;R.pb++;paint();});
+  B('adrNext').addEventListener('click',next);B('adrEnd').addEventListener('click',endNow);B('adrWrite').addEventListener('click',write);B('adrDiscard').addEventListener('click',discard);
+  /* the runner's fields are out of the page while it is closed (a closed details keeps its fields' boxes in Chrome, but
+     they cannot take the cursor, and Focus counted them) */
+  box.addEventListener('toggle',()=>{B('adrBody').hidden=!box.open;fill();});document.addEventListener('change',e=>{if(R.st==='ready'&&e.target&&e.target.id!=='adrCond')fill();});
+  B('adrCond').addEventListener('change',()=>{if(R.st==='ready')B('adrRule').textContent=ruleText(cfgNow());});
+  /* Space on a focused button would press it as well, on its keyup: the key counts once */
+  document.addEventListener('keyup',e=>{if(box.open&&R.st!=='ready'&&R.st!=='done'&&e.key===' '&&e.target&&e.target.tagName==='BUTTON')e.preventDefault();},true);
+  document.addEventListener('keydown',e=>{if(!box.open||R.st==='ready'||R.st==='done'||e.metaKey||e.ctrlKey||e.altKey)return;const t=e.target;if(t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable))return;
+    const k=e.key;if(k===' '||k==='r'||k==='R'){e.preventDefault();resp();}else if(k==='p'||k==='P'){e.preventDefault();B('adrPB').click();}else if(k==='n'||k==='N'){e.preventDefault();if(!B('adrNext').disabled)next();}});
+  window.adRunner={state:()=>R.st};
+  fill();paint();
+})();
 
 /* ---------- save / open ---------- */
 function serialize(){
