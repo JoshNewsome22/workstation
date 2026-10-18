@@ -9903,6 +9903,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.67: VI-1's clinical findings from the independent review (Wave 3, part 1)
+
+- **A setting event or MO is not eliminated by agreement (F158).** Mill's method of agreement tests a necessary
+  condition, and a setting event or motivating operation raises the odds only on the days it is present, so it is
+  not expected in every occurrence. The joint summary now reads the candidate's class from the register: a setting
+  event or MO that no matched pair implicates is "Retained: setting event or MO", never
+  "Eliminated", and the rule points it to Concomitant variation. Antecedents are eliminated as before.
+- **A consequence is tested by its contingency (F159).** A consequence follows the behavior by definition, so it
+  cannot be present in a period without the behavior, and "absent in all matched non-occurrences" was true of every
+  consequence automatically. A candidate the register classes as a consequence now reads n/a on that side, its
+  verdict is "Consequence: see Tab 6", and its column in the non-occurrence ledger is greyed
+  and marked "Tab 6" (Martens et al., 2008). The rule of inference says so.
+- **No planned reversal without consent and a stop rule (F160).** Decision 1 now confirms the hypothesis without
+  withdrawing treatment (a brief embedded probe, or a multiple baseline across tasks or settings); a reversal that
+  withdraws treatment is named as an experimental manipulation that needs the consent an FA needs and a written stop
+  rule. Decisions 3 and 4 say the same. Two new fields, **Consent for the test** and **Safety stop rule**, are filled
+  from the case's consent (Form IC-1): the consent line says whether the experimental analysis is covered (or names
+  the exceptions), and the parent's stop rule fills an empty stop-rule box. A caution under the decision names what is
+  missing for decisions 1, 3 and 4, and says so plainly when the case's consent does not cover an experimental
+  analysis (BACB Ethics Code, 2022, 2.11 and 2.15). The high-confidence advice no longer plans a reversal, and the
+  worked example confirms its escape hypothesis with a multiple baseline across the two work periods, since its
+  parent declined an experimental analysis.
+- **Tab 6 and Form ABC-1 (F163).** The data requirements now say what ABC-1 supplies (the four figures for each
+  consequence, entered as they are) and what it does not (the antecedent coded in every interval). Each antecedent row
+  shows the odds ratio and Yule's Q beside the ratio. A new setting, **How the counts were taken**, switches to
+  incident-plus-sample counts: the probabilities and the ratio then show a dash, because they move with how many
+  windows were sampled, and the classification uses Yule's Q with ABC-1's bands (.20, .43, .60). A hint says how
+  ABC-1's counts go into an antecedent row.
+- The new fields are saved under their own key, so a file saved before this version opens field for field.
+
+Checked by `qa/v2267-test.js` (19).
+
 ### v22.66: two attributions corrected from the reinforcer-assessment articles
 
 - **TD-1, Magnitude.** Matching the assessment format to the access the treatment will give is now credited to
