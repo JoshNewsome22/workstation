@@ -188,7 +188,7 @@ document.addEventListener('input',e=>{const el=e.target;
     if(el.dataset.r==='log'){const tr=el.closest('tr');const r=S.log[+el.dataset.i],p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);tr.children[6].textContent=p!=null&&q?pct(p/q*100):'—';tr.children[9].textContent=m!=null&&n?pct(m/n*100):'—';renderRecord();}
     else if(el.dataset.r==='tg'||el.dataset.r==='per'||el.dataset.r==='lv'){renderSheet();renderPoints();if(el.dataset.r==='per'||el.dataset.r==='lv')renderWkSoon();}
     return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(il_|iv_|mp_|goal|sh_|nick|client|menu|sm_|t_rem|when|pf_|ci_|smp_)/.test(el.dataset.m)){renderPoints();renderSheet();}if(/^bc_/.test(el.dataset.m)||el.dataset.m==='client')renderBc();if(el.dataset.m==='goal'||el.dataset.m==='r_base')renderRecord();}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(il_|iv_|mp_|goal|sh_|nick|client|menu|sm_|t_rem|when|pf_|ci_|smp_)/.test(el.dataset.m)){renderPoints();renderSheet();}if(/^iv_/.test(el.dataset.m))renderCueList();if(/^bc_/.test(el.dataset.m)||el.dataset.m==='client')renderBc();if(el.dataset.m==='goal'||el.dataset.m==='r_base')renderRecord();}
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){if(el.type==='checkbox')S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.checked;else S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.value;
@@ -261,6 +261,7 @@ function renderIl(){const el=$('#ilPreview');if(!el)return;if(!S.meta.il_init&&!
 
 /* ---------------- setup verdict ---------------- */
 function renderSetup(){
+  renderCueList();   /* v22.63 */
   const m=S.meta,out=[];
   if(/Not yet/.test(m.r_disc||''))out.push('The student cannot yet tell the target from its absence: start at phase 0 (teacher rates only) and run the discrimination practice on the Teach sheet before any rating depends on the student.');
   if(/pictures|read aloud/.test(m.r_read||'')&&!S.chk.pict)out.push('The student needs pictures: tick <b>Pictorial sheet</b> on the System sheet so the faces and period pictures print.');
@@ -272,6 +273,27 @@ function renderSetup(){
   const sv=$('#sysVerdict');if(sv)sv.innerHTML=(S.chk.pict&&S.tg.length>4)?'<div class="verdict v-mid">Pictorial sheet with more than four targets: the cells will be small. Four or fewer reads best; or tick the student-size print.</div>':'';
   $('#setupVerdict').innerHTML=out.length?'<div class="verdict v-mid">'+out.map(x=>'<div>'+x+'</div>').join('')+'</div>':(m.client?'<div class="verdict v-ok"><b>Ready to design.</b> Targets next, then the system and the goal.</div>':'');
 }
+
+/* v22.63 a variable cue from a list (Bancroft & Bourret, 2008, make a new list of values for each session): n lengths from
+   about a third of the average to about twice it (1 to 6 minutes at an average of 3), skewed so the median sits below the
+   average (the long ones spread out), whose mean is the average exactly (to the second); shuffled by the day and S.meta.iv_seed, so the adult's list and the iPad's timer agree */
+function smCueList(n,avg,seedStr){n=Math.max(2,Math.min(60,Math.round(n||10)));avg=avg>0?avg:3;const lo=avg/3,hi=2*avg,v=[];
+  for(let i=0;i<n;i++)v.push(lo+(hi-lo)*Math.pow((i+0.5)/n,1.5));
+  const m=v.reduce((a,b)=>a+b,0)/n,k=(avg-lo)/(m-lo),w=v.map(x=>Math.round((lo+(x-lo)*k)*60));
+  w[w.length-1]+=Math.round(avg*60*n)-w.reduce((a,b)=>a+b,0);
+  let h=2166136261;for(const c of String(seedStr||''))h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;
+  const r=()=>{h=(h+0x6D2B79F5)>>>0;let t=h;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};
+  for(let i=w.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[w[i],w[j]]=[w[j],w[i]];}
+  return w;}
+function smCueToday(){const d=new Date(),ds=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();return smCueList(num(S.meta.iv_n)||10,num(S.meta.iv_len)||3,ds+'|'+(S.meta.iv_seed||''));}
+const smMS=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+function renderCueList(){const box=document.getElementById('ivCueList');if(!box)return;
+  if(!/^Variable/.test(S.meta.iv_timing||'')){box.innerHTML='';return;}
+  const w=smCueToday(),avg=num(S.meta.iv_len)||3;let t=0;const at=w.map(s=>smMS(t+=s));
+  box.innerHTML='<b>Today&rsquo;s cue times</b>, from the start of the session (for the adult; keep them out of the student&rsquo;s sight): '+at.join(', ')+
+    '<br><span class="smr-mute">Lengths: '+w.map(smMS).join(', ')+' &mdash; from '+smMS(Math.min(...w))+' to '+smMS(Math.max(...w))+', averaging '+smMS(Math.round(avg*60))+' exactly. The iPad&rsquo;s cue timer follows the same list.</span> '+
+    '<button type="button" class="tool" id="ivCueNew">New order</button>';}
+document.addEventListener('click',e=>{if(e.target&&e.target.id==='ivCueNew'){S.meta.iv_seed=String((+S.meta.iv_seed||0)+1);renderCueList();const f=document.querySelector('[data-m="iv_timing"]');if(f)f.dispatchEvent(new Event('change',{bubbles:true}));}});   /* the change marks the case unsaved */
 
 /* ---------------- the student's sheet ---------------- */
 function sheetTitle(){if(S.meta.sh_title)return S.meta.sh_title;const n=S.meta.nick||S.meta.client||'My';const poss=n==='My'?'My':n+'’s';

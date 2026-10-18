@@ -673,7 +673,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     const c=await qctx.newCDPSession(qp);
     let ok=true;await c.send('Storage.overrideQuotaForOrigin',{origin:ORIGIN,quotaSize:3*1024*1024}).catch(e=>{ok=String(e);});
     await qp.goto(NBH);
-    const t=await waitChip(qp,/^Not saved for offline use/,90000);
+    const t=await waitChip(qp,/^Not saved for offline use(?! yet)/,90000);   /* the settled result, not the chip before the save starts */
     const qn=await names(qp,NBH);
     check('M a device without room: the chip says Not saved for offline use: no room, and no half-saved set is left',ok===true&&t==='Not saved for offline use: no room'&&qn.length===1&&qn[0].endsWith(':state'),t+' '+qn.join(', ')+' '+ok);
     check('M ... and the workstation works online',await openIn(qp,'PD-1'));

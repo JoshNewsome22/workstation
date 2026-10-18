@@ -523,6 +523,7 @@ table.grid.inner td{height:24px}
 
 .method b{display:inline;margin:0;font-size:inherit;font-family:inherit;color:var(--ink)}
 
+.flags{margin:10px 0 4px;padding-left:20px;font-size:13px;line-height:1.5}.flags li{margin:4px 0}.flags:empty{display:none}   /* v22.64 the summary's flags */
 </style>
 <style id="nbh-brand">
 /* ===== Newsome Behavioral Health — shared form system ===== */
@@ -1155,6 +1156,16 @@ body.view-walk #walk{display:block}
       <div class="seg" id="psRepSeg">
         <button data-rep="1" aria-pressed="true">Each pair once</button>
         <button data-rep="2" aria-pressed="false">Twice, sides reversed</button>
+        <button data-rep="3" aria-pressed="false">Three times</button>
+      </div>
+    </div>
+  </div>
+  <div class="tgroup">
+    <span>PS no selection</span>
+    <div class="row">
+      <div class="seg" id="psNoneSeg">
+        <button data-none="0" aria-pressed="true">Score Neither</button>
+        <button data-none="1" aria-pressed="false">Sample both, then again</button>
       </div>
     </div>
   </div>
@@ -1484,7 +1495,7 @@ body.view-walk #walk{display:block}
   </div>
 
   <div class="warn"><b>Procedure</b>
-    Every stimulus is paired with every other stimulus. Present the pair, one item on each side, and prompt "pick one." Score which side was selected, <b>Neither</b> if no selection within 30 s (remove both), or <b>Both</b> if the student reached for both (block and re-present; the re-presentation is a new trial). Deliver the selected item for the access duration and remove the other. The trial list below is generated from the stimulus pool with sides counterbalanced and order shuffled; use the seed to reproduce a list.</div>
+    Every stimulus is paired with every other stimulus. Present the pair, one item on each side, and prompt "pick one." Score which side was selected, <b>Neither</b> if no selection within 30 s (remove both), or <b>Both</b> if the student reached for both (block and re-present; the re-presentation is a new trial). Deliver the selected item for the access duration and remove the other. The trial list below is generated from the stimulus pool with sides counterbalanced and order shuffled; use the seed to reproduce a list. <b>Three times</b> (PS presentations) runs three administrations, each in its own order, and the hierarchy combines them: DeLeon et al. (2009) ran the paired-stimulus assessment three times. <b>Sample both, then again</b> (PS no selection) does not score a pair with no selection at once: the student samples each item briefly (a touch, or a small taste of an edible) and the pair is presented again; only no selection the second time is scored Neither (Fisher et al., 1992; Piazza et al., 1996).</div>
   <div class="row psctl noprint">
     <label>Seed <input type="number" id="psSeed" value="1" min="1" max="9999"></label>
     <button class="tool" id="psGen">Generate trial list</button>
@@ -1924,6 +1935,7 @@ body.view-walk #walk{display:block}
     <thead><tr><th>Stimulus</th><th class="n">Informant rank</th><th class="n">SS % approach</th><th class="n">PS % selected</th><th class="n" id="sumMsHead">MSWO % selected</th><th class="n">FO % engaged</th><th class="n">SS-dur % engaged</th><th class="n">Mean rank (direct)</th><th>Composite</th><th class="n">Fit</th></tr></thead>
     <tbody></tbody>
   </table>
+  <ul class="flags" id="sumFlags"></ul>
   <div class="figure" id="sumFig"></div>
   <p class="method">Composite rank is the mean of each stimulus's rank across the direct methods completed (indirect rank is shown for comparison only). Composite categories are working conventions: <b>HP</b> mean rank within the top third of the pool, <b>MP</b> middle third, <b>LP</b> bottom third. Disagreement between methods for a stimulus is a reason to run a reinforcer assessment on that stimulus, not to average the disagreement away. <b>Fit</b> is the contextual-fit score from the Ecological sheet: a high-preference item with poor fit goes into the plan under a restricted-access rule, not out of it.</p>
 
@@ -2070,7 +2082,7 @@ body.view-walk #walk{display:block}
   </div>
   <div class="decide"><b>Decision.</b> HP ≥ 80% of presentations selected, MP 40–79%, LP &lt; 40% (working conventions). A side bias above about 75% of selections to one side means the hierarchy reflects position, not preference: re-run with the selection response prompted to the array center, or use MSWO with rotated positions.</div>
   <h4 class="flowhead">The Sheet’s Procedure, Word for Word</h4>
-  <div class="wk-quote"><b>Paired stimulus</b>Every stimulus is paired with every other stimulus. Present the pair, one item on each side, and prompt “pick one.” Score which side was selected, Neither if no selection within 30 s (remove both), or Both if the student reached for both (block and re-present; the re-presentation is a new trial). Deliver the selected item for the access duration and remove the other. The trial list below is generated from the stimulus pool with sides counterbalanced and order shuffled; use the seed to reproduce a list.</div>
+  <div class="wk-quote"><b>Paired stimulus</b>Every stimulus is paired with every other stimulus. Present the pair, one item on each side, and prompt “pick one.” Score which side was selected, Neither if no selection within 30 s (remove both), or Both if the student reached for both (block and re-present; the re-presentation is a new trial). Deliver the selected item for the access duration and remove the other. The trial list below is generated from the stimulus pool with sides counterbalanced and order shuffled; use the seed to reproduce a list. <b>Three times</b> (PS presentations) runs three administrations, each in its own order, and the hierarchy combines them: DeLeon et al. (2009) ran the paired-stimulus assessment three times. <b>Sample both, then again</b> (PS no selection) does not score a pair with no selection at once: the student samples each item briefly (a touch, or a small taste of an edible) and the pair is presented again; only no selection the second time is scored Neither (Fisher et al., 1992; Piazza et al., 1996).</div>
 </section>
 
 <section class="proc" id="wk-mswo" aria-labelledby="wk-mswo-h">
@@ -2259,7 +2271,7 @@ const TYPES=['','Edible','Leisure item','Activity','Social','Sensory','Other'];
 /* ---------------- state ---------------- */
 let S=blank();
 function blank(){
-  return {form:'PA-1',rev:'2026-09b',n:6,access:30,ssTrials:5,psRep:1,msMode:'mswo',msSessions:5,foLen:300,ssdLen:120,nStab:8,nMon:12,csaSeries:3,
+  return {form:'PA-1',rev:'2026-09b',n:6,access:30,ssTrials:5,psRep:1,psNone:0,msMode:'mswo',msSessions:5,foLen:300,ssdLen:120,nStab:8,nMon:12,csaSeries:3,
     meta:{},stim:[],prereq:[Array(10).fill(''),Array(10).fill('')],
     ss:[],ps:{seed:1,trials:[]},ms:[],fo:[],ssd:[],raisd:[],
     eco:{settings:[],matrix:{},attrs:[],obs:[]},csa:{ctrl:['','',''],rows:[],aug:{},run:{},ord:{}},stab:[],mon:[],ioa:[]};
@@ -2312,7 +2324,7 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
 function bindNum(id,key,after){const e=$('#'+id);e.value=S[key];e.addEventListener('change',()=>{const v=+e.value;if(!isFinite(v)||v<+e.min||v>+e.max){e.value=S[key];return;}S[key]=v;ensure();after();});}
 function bindSeg(id,attr,key,after){$$('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{S[key]=isNaN(+b.dataset[attr])?b.dataset[attr]:+b.dataset[attr];syncSeg(id,attr,key);ensure();after();}));}
 function syncSeg(id,attr,key){$$('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset[attr])===String(S[key])?'true':'false'));}
-function syncToolbar(){['nStim:n','accessS:access','ssTrials:ssTrials','msSessions:msSessions','foLen:foLen','ssdLen:ssdLen','nStab:nStab','nMon:nMon','csaSeries:csaSeries'].forEach(p=>{const [id,k]=p.split(':');$('#'+id).value=S[k];});syncSeg('psRepSeg','rep','psRep');syncSeg('msModeSeg','mode','msMode');}
+function syncToolbar(){['nStim:n','accessS:access','ssTrials:ssTrials','msSessions:msSessions','foLen:foLen','ssdLen:ssdLen','nStab:nStab','nMon:nMon','csaSeries:csaSeries'].forEach(p=>{const [id,k]=p.split(':');$('#'+id).value=S[k];});syncSeg('psRepSeg','rep','psRep');syncSeg('psNoneSeg','none','psNone');syncSeg('msModeSeg','mode','msMode');}
 
 /* ---------------- meta fields ---------------- */
 function bindMeta(){
@@ -2377,6 +2389,11 @@ function cat(p,hi,mid){if(p==null)return'';return p>=hi?'<span class="tag ok">HP
 function rng(seed){let a=seed>>>0||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function genPS(){
   const n=S.n,r=rng(S.ps.seed);const pairs=[];let flip=false;
+  /* v22.64 three administrations (DeLeon et al., 2009), each every pair once in its own shuffled order, sides alternating
+     from one administration to the next */
+  if(S.psRep===3){let all=[];for(let a=0;a<3;a++){const ps=[];let f=a%2===1;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){ps.push(f?{l:j,r:i}:{l:i,r:j});f=!f;}
+      for(let k=ps.length-1;k>0;k--){const m=Math.floor(r()*(k+1));[ps[k],ps[m]]=[ps[m],ps[k]];}all=all.concat(ps);}
+    S.ps.trials=all.map(p=>({l:p.l,r:p.r,sel:'',pb:false}));return;}
   for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
     if(S.psRep===2){pairs.push({l:i,r:j});pairs.push({l:j,r:i});}
     else{pairs.push(flip?{l:j,r:i}:{l:i,r:j});flip=!flip;}
@@ -2388,7 +2405,7 @@ $('#psGen').addEventListener('click',async()=>{if(S.ps.trials.some(t=>t.sel)&&!(
 function renderPS(){
   $('#psSeed').value=S.ps.seed;
   const tr=S.ps.trials;const np=S.n*(S.n-1)/2;
-  $('#psInfo').textContent=`${np} pairs × ${S.psRep} = ${np*S.psRep} trials for ${S.n} stimuli.`;
+  $('#psInfo').textContent=`${np} pairs × ${S.psRep} = ${np*S.psRep} trials for ${S.n} stimuli.`+(S.psRep===3?` Three administrations of ${np} trials (1–${np}, ${np+1}–${2*np}, ${2*np+1}–${3*np}), each in its own order; the hierarchy combines them (DeLeon et al., 2009).`:'');
   if(!tr.length){$('#psTbl').innerHTML='<tbody><tr><td class="empty2">Generate the trial list to begin.</td></tr></tbody>';computePS();return;}
   const half=Math.ceil(tr.length/2);
   const col=rows=>rows.map(({t,k})=>`<tr><td class="c">${k+1}</td><td class="lab" data-lbl="${t.l}">${esc(name(t.l))}</td><td class="lab" data-lbl="${t.r}">${esc(name(t.r))}</td><td class="c"><select data-k="${k}" data-f="sel"><option value=""></option><option value="L"${t.sel==='L'?' selected':''}>Left</option><option value="R"${t.sel==='R'?' selected':''}>Right</option><option value="N"${t.sel==='N'?' selected':''}>Neither</option><option value="B"${t.sel==='B'?' selected':''}>Both</option></select></td><td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${t.pb?' checked':''}></td></tr>`).join('');
@@ -2498,6 +2515,19 @@ function renderSummary(){
   const comp=r=>{if(r.mean==null)return '';const pos=withData.indexOf(r);return pos<third?'<span class="tag ok">HP</span>':pos<2*third?'<span class="tag mid">MP</span>':'<span class="tag no">LP</span>';};
   const order=[...withData,...rows.filter(r=>r.mean==null)];
   $('#sumTbl tbody').innerHTML=order.map(r=>`<tr><td>${esc(name(r.i))}</td><td class="n">${esc(r.ir)||'&mdash;'}</td><td class="n">${fmtP(r.pa)}</td><td class="n">${fmtP(r.ps)}</td><td class="n">${fmtP(r.ms)}</td><td class="n">${fmtP(r.fo)}</td><td class="n">${fmtP(r.sd)}</td><td class="n">${r.mean==null?'&mdash;':r.mean.toFixed(1)+' <small>('+r.k+')</small>'}</td><td>${comp(r)}</td><td class="n">${eco[r.i].fit==null?'&mdash;':eco[r.i].fit+'% '+(eco[r.i].fit>=75?'<span class="tag ok">Good</span>':eco[r.i].fit>=50?'<span class="tag mid">Fair</span>':'<span class="tag no">Poor</span>')}</td></tr>`).join('');
+  /* v22.64 what the hierarchy alone cannot say, from the reinforcer-assessment literature */
+  {const F=[],nm=i=>esc(name(i)),sel=r=>[r.ps,r.ms].filter(v=>v!=null);
+    const zero=rows.filter(r=>sel(r).length&&sel(r).every(v=>v===0));
+    if(zero.length)F.push('<b>Never selected</b>: '+zero.map(r=>nm(r.i)).join(', ')+'. A never-selected item is a weak candidate: in Glover et al. (2008) such items did not consistently maintain responding, while a low-but-selected item may still reinforce when presented alone (Francisco et al., 2008).');
+    const by=k=>rows.filter(r=>r[k]!=null).sort((a,b)=>b[k]-a[k]);
+    for(const k of ['ps','ms']){const t=by(k);if(t.length<2)continue;
+      if(t[0][k]-t[1][k]<=10)F.push('<b>The top two are close</b> on '+(k==='ps'?'paired stimulus':(S.msMode==='mswo'?'MSWO':'MSW'))+': '+nm(t[0].i)+' '+fmtP(t[0][k])+', '+nm(t[1].i)+' '+fmtP(t[1][k])+'. Stimuli chosen about equally often can separate as the work requirement rises: test both in Form RA-1 (progressive ratio) before choosing (Roane et al., 2001).');
+      break;}
+    const sp=rows.filter(r=>r.pa!=null&&r.pa>=80&&((r.ps!=null&&r.ps<40)||(r.ps==null&&r.ms!=null&&r.ms<40)));
+    if(sp.length)F.push('<b>Approached alone, rarely chosen in pairs</b>: '+sp.map(r=>nm(r.i)+' (single stimulus '+fmtP(r.pa)+', '+(r.ps!=null?'paired '+fmtP(r.ps):'MSWO '+fmtP(r.ms))+')').join(', ')+'. Such an item may reinforce when delivered alone (Roscoe et al., 1999) but persist less as the requirement rises (Penrod et al., 2008): test it in Form RA-1 (single operant, then progressive ratio) before it goes into a thin schedule.');
+    const mid=withData.filter((r,pos)=>pos>=third&&pos<2*third);
+    if(mid.length&&withData.length>=3)F.push('<b>The middle of the hierarchy</b> ('+mid.map(r=>nm(r.i)).join(', ')+'): in Piazza et al. (1996) middle-ranked items reinforced responding only against low-ranked items for two of four participants. If the plan must use one (the top item is unavailable), test it in Form RA-1 (single operant) before relying on it.');
+    $('#sumFlags').innerHTML=F.map(x=>'<li>'+x+'</li>').join('');}
   renderSummaryFig();renderMethodFigs();
 }
 
@@ -2813,6 +2843,7 @@ bindNum('foLen','foLen',renderFO);
 bindNum('ssdLen','ssdLen',renderFO);
 bindSeg('psRepSeg','rep','psRep',async()=>{if(S.ps.trials.length){if(await nbhUI.confirm('Change the presentations?\nThe paired-stimulus trial list is regenerated and its scores are cleared.',{ok:'Change',danger:true}))genPS();else{syncSeg('psRepSeg','rep','psRep');}}renderPS();});
 bindSeg('msModeSeg','mode','msMode',renderMS);
+bindSeg('psNoneSeg','none','psNone',()=>renderPS());   /* v22.64 */
 
 /* v21.16 (F1): the single-stimulus "PB trials" count sits on each stimulus's row of trials, which is an
    array, and JSON keeps only an array's items, so the count never reached the saved file. It travels
@@ -3109,7 +3140,7 @@ function trialRunner(spec){
   function accessEnd(t,early){r.eng.off(t);r.out.eng=r.eng.total(t);r.out.accMs=t-r.ph.at;r.out.early=!!early;r.clk.stop();r.st='done';
     if(!early)cue('access');r.note(spec.accessMsg(r.cur,r.out)+' '+spec.saveHint);sync();stageFocus(r);}
   r.step=()=>{
-    if(r.st==='window'){const end=r.ph.at+r.ph.dur;if(el()>=end){r.out=Object.assign({at:end,timeout:true},spec.timeout(r.cur));r.clk.stop();r.st='done';cue('window');r.note(r.out.msg+' '+spec.saveHint);sync();stageFocus(r);}}
+    if(r.st==='window'){const end=r.ph.at+r.ph.dur;if(el()>=end){const d=spec.timeout(r.cur,r);if(d&&d.again){r.clk.reset();r.st='ready';cue('window');r.note(d.msg);sync();stageFocus(r);return;}r.out=Object.assign({at:end,timeout:true},d);r.clk.stop();r.st='done';cue('window');r.note(r.out.msg+' '+spec.saveHint);sync();stageFocus(r);}}
     else if(r.st==='access'){const end=r.ph.at+r.ph.dur;if(el()>=end)accessEnd(end,false);}
   };
   r.early=()=>{if(phase()!=='access'){r.note('Done early ends an access period, and none is running.',true);return;}if(r.st==='paused')r.st='access';accessEnd(el(),true);};
@@ -3224,20 +3255,23 @@ function psList(){return qa('#psTbl select[data-f="sel"]').map(s=>{const tr=s.cl
 function psNext(){const L=psList(),x=L.find(t=>!t.el.value);return x?{k:x.k,l:x.l,r:x.r,total:L.length,done:L.filter(t=>t.el.value).length}:null;}
 const psWin=()=>numOf(byId('pa-run-ps-win'),30,1,120);
 const PSM={};const psMemo=k=>PSM[k]||(PSM[k]={both:0,pb:false});
+/* v22.64 the PS no-selection setting, read from its toggle (the form's state is not in this script's scope) */
+const psSample=()=>{const b=document.querySelector('#psNoneSeg button[aria-pressed="true"]');return !!(b&&b.dataset.none==='1');};
 const PS=byId('pa-run-ps')&&trialRunner({kind:'ps',view:'ps',label:'Paired stimulus',winName:'Response window',
   locks:['#accessS','#psGen','#psSeed','#psRepSeg button'],saveHint:'Check it, then Save and next.',
   win:psWin,acc:accSec,next:psNext,sig:()=>psList().map(t=>t.l+'-'+t.r).join(',')+'|'+accSec(),
   unit:c=>c?'trial '+(c.k+1)+' of '+c.total:'the next trial',
   onRun:()=>{Object.keys(PSM).forEach(k=>delete PSM[k]);PS.both=0;fillMeta('psDate',todayUS());},
   targets:c=>[q('#psTbl select[data-f="sel"][data-k="'+c.k+'"]')],
-  goMsg:c=>'Present '+nameOf(c.l)+' on the left and '+nameOf(c.r)+' on the right and prompt “pick one.” With no selection in '+psWin()+' s the trial is scored Neither.',
+  goMsg:c=>'Present '+nameOf(c.l)+' on the left and '+nameOf(c.r)+' on the right and prompt “pick one.” '+(psSample()&&!psMemo(c.k).sampled?'With no selection in '+psWin()+' s the student samples both and the pair is presented again.':'With no selection in '+psWin()+' s the trial is scored Neither.'),
   resp(code,c,r){
     if(code==='L'||code==='R'){const i=code==='L'?c.l:c.r,o=code==='L'?c.r:c.l,side=code==='L'?'Left':'Right';
       return {code,label:side+' ('+nameOf(i)+')',item:i,itemName:nameOf(i),access:true,msg:side+': allow access to '+nameOf(i)+' and remove '+nameOf(o)+'.'};}
-    if(code==='N')return {code:'N',label:'Neither',msg:'Neither. Remove both items.'};
+    if(code==='N'){const m=psMemo(c.k);if(psSample()&&!m.sampled){m.sampled=true;return {again:true,msg:'No selection: block the reach, let the student sample each item briefly (a touch, or a small taste of an edible), then present the same pair again and press Start trial. No selection the second time is scored Neither (Fisher et al., 1992).'};}return {code:'N',label:'Neither',msg:'Neither. Remove both items.'};}   /* v22.64 */
     if(code==='B'){const m=psMemo(c.k);m.both++;m.pb=m.pb||r.pb;PS.both=(PS.both||0)+1;
       return {again:true,msg:'Both: block the reach and take both items back. Present the same pair again as a new trial and press Start trial (Both on this pair so far: '+m.both+').'};}},
-  timeout:()=>({code:'N',label:'Neither',msg:'No selection within '+psWin()+' s: scored Neither. Remove both items.'}),
+  timeout:c=>{const m=c?psMemo(c.k):{};if(psSample()&&c&&!m.sampled){m.sampled=true;return {again:true,msg:'No selection: block the reach, let the student sample each item briefly (a touch, or a small taste of an edible), then present the same pair again and press Start trial. No selection the second time is scored Neither (Fisher et al., 1992).'};}   /* v22.64 */
+    return {code:'N',label:'Neither',msg:'No selection within '+psWin()+' s: scored Neither. Remove both items.'};},
   accessMsg:(c,o)=>(o.early?'Access ended early.':'Access over: take '+o.itemName+' back.'),
   write(c,o,pb){const s=q('#psTbl select[data-f="sel"][data-k="'+c.k+'"]');if(!s){PS.note('That trial is no longer on the list.',true);return false;}
     const m=psMemo(c.k);setField(s,o.code);

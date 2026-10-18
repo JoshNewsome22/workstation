@@ -9903,6 +9903,41 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.64: PA-1 from the reinforcer-assessment articles: three administrations, sampling, and the summary's flags
+
+- **Three administrations of the paired-stimulus list.** "PS presentations" adds **Three times**: every pair once in each
+  of three administrations, each in its own order, sides alternating from one to the next; the hierarchy combines them
+  (DeLeon et al., 2009, ran the paired-stimulus assessment three times).
+- **Sample both, then again.** "PS no selection" can now let the student sample each item briefly (a touch, or a small
+  taste) and present the pair again before a trial is scored Neither (Fisher et al., 1992; Piazza et al., 1996). The
+  runner does it on the Neither key and when the response window runs out; only no selection the second time is scored.
+  The default stays Score Neither.
+- **What the hierarchy alone cannot say.** The Combined Hierarchy now lists, under the table:
+  - items **never selected**: weak candidates (Glover et al., 2008), unlike a low-but-selected item, which may still
+    reinforce when presented alone (Francisco et al., 2008);
+  - **the top two close together** (within 10 points on paired stimulus or MSWO): test both in Form RA-1's progressive
+    ratio before choosing (Roane et al., 2001);
+  - items **approached alone but rarely chosen in pairs** (single stimulus 80% or more, paired under 40%): they may
+    reinforce when delivered alone (Roscoe et al., 1999) but persist less as the requirement rises (Penrod et al., 2008),
+    so test them in RA-1 before a thin schedule;
+  - **the middle of the hierarchy**: middle-ranked items reinforced only against low-ranked items for two of four
+    participants in Piazza et al. (1996), so test one in RA-1 before the plan relies on it.
+
+Checked by `qa/v2264-test.js` (11).
+
+### v22.63: SM-1's variable cue from a list, from Bancroft and Bourret (2008)
+
+- **The lengths are a list for the session.** With a variable cue on Form SM-1's interval system, the cue lengths run from
+  about a third of the average to about twice it (1 to 6 minutes at an average of 3, as the hint cites from Bulla and
+  Frieder, 2017), with the long ones spread out, and they average the interval length exactly. Before, each cue was a fresh draw from 1 to
+  5 minutes, which neither matched the hint nor held the average within a session.
+- **The adult's cue times.** The Intervals panel shows today's cue times from the start of the session, for the adult
+  (keep them out of the student's sight), with the lengths, the shortest and the longest. The order changes each day, and
+  **New order** gives another (kept with the case); Bancroft and Bourret make a new list for each session.
+- **The iPad's cue timer follows the same list**, so the times on the screen and the cues agree. A fixed cue is unchanged.
+
+Checked by `qa/v2263-test.js` (8).
+
 ### v22.62: AD-1 runs a session: work and total clocks, tokens, the block, resumes, and the row
 
 - **Run a session here** (Tab 4 of Form AD-1, above the session log). Choose the arrangement and the phase, press Start

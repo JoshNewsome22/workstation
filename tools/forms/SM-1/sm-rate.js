@@ -185,7 +185,9 @@ function smRSayPeriod(M){const r=M.rows[SMR.sel];if(!r)return;smRSay(r.label+'. 
 async function smRWake(on){try{if(on){if(!SMR.wl&&navigator.wakeLock&&document.visibilityState==='visible'){SMR.wl=await navigator.wakeLock.request('screen');SMR.wl.addEventListener&&SMR.wl.addEventListener('release',()=>{SMR.wl=null;});}}
   else if(SMR.wl&&!SMR.kid&&!SMR.cue&&!document.body.classList.contains('view-rate')){const w=SMR.wl;SMR.wl=null;await w.release();}}catch(e){SMR.wl=null;}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(SMR.kid||SMR.cue||document.body.classList.contains('view-rate')&&smD().rchime))smRWake(true);});
-function smRCueNext(){const avg=(num(S.meta.iv_len)||3)*60000,vr=/^Variable/.test(S.meta.iv_timing||'');return vr?avg*(1/3+Math.random()*4/3):avg;}
+/* v22.63 a variable cue takes the next length from the session's list (smCueToday), the same list the Setup sheet shows */
+function smRCueNext(){const avg=(num(S.meta.iv_len)||3)*60000,vr=/^Variable/.test(S.meta.iv_timing||'');if(!vr)return avg;
+  if(!SMR.cueQ||!SMR.cueQ.length)SMR.cueQ=(typeof smCueToday==='function'?smCueToday():[avg/1000]).slice();return SMR.cueQ.shift()*1000;}
 function smRCount(){const el=$('#smRCount');if(!el)return;const s=Math.max(0,Math.round((SMR.cueAt-Date.now())/1000));el.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 function smRTick(){const on=SMR.kid||document.body.classList.contains('view-rate');if(!on||!S.sys)return;
   if(SMR.cue){if(Date.now()>=SMR.cueAt){SMR.cueAt=Date.now()+smRCueNext();const day=smRDay()||smREmpty(),M=smRModel(day);if(M){const i=M.rows.findIndex((r,ri)=>!smRRowDone(M,day,ri,'me'));if(i>=0)SMR.sel=i;else SMR.cue=false;}
@@ -250,7 +252,7 @@ document.addEventListener('click',async e=>{const t=e.target;if(t.closest('#smRF
   if((b=t.closest('#smRHold'))&&e.detail===0){smRGate();return;}   /* a keyboard press opens it at once */
   if(t.closest('#smRFin')){smRFinish();return;}
   if(t.closest('#smRPrint')){smExtraPrint(smRPage(SMR.date),'landscape');return;}
-  if(t.closest('#smRCueOn')){smRAudio();SMR.cue=true;SMR.cueAt=Date.now()+smRCueNext();smRWake(true);smRRender();return;}
+  if(t.closest('#smRCueOn')){smRAudio();SMR.cue=true;SMR.cueQ=null;SMR.cueAt=Date.now()+smRCueNext();smRWake(true);smRRender();return;}
   if(t.closest('#smRCueOff')){SMR.cue=false;smRWake(false);smRRender();return;}
   if((b=t.closest('[data-ropen]'))){SMR.date=b.dataset.ropen;SMR.sel=-1;smRRender();$('#smRate').scrollIntoView({block:'start'});return;}
   if((b=t.closest('[data-rprint]'))){smExtraPrint(smRPage(b.dataset.rprint),'landscape');return;}
