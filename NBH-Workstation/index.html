@@ -2260,7 +2260,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.56';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.57';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3518,7 +3518,7 @@ $('#diag').addEventListener('click',()=>{
    ['PDF tools','checking\u2026','pdf-lib.min.js and nbh-pdf-tools.js, beside index.html, for Finish PDF','diagPdf'],
    ['Picture library',EMBED?(EMBED.pictos?'inside this file':'not inside this file'):'checking\u2026','nbh-pictos.js, beside the forms, for the pictures on Forms SM-1, VS-1 and TK-1 (photos work without it)','diagPic'],
    ['My pictures',EMBED?(EMBED.pictures?'inside this file':'not inside this file'):'checking\u2026','nbh-pictures.js, beside the forms: a photo of a real item becomes a picture for Forms VS-1, SM-1, TK-1 and TV-1, its background cut away on this device (v21.62)','diagMine'],
-   ['Sounds and pictures on this device','checking\u2026','nbh-media.js, beside index.html: the sound tracks and pictures Form TV-1 carries are kept once on this device, out of the case file (v22.56); a file you save, a backup or Drive carries them again','diagMedia'],
+   ['Sounds and pictures on this device','checking\u2026','nbh-media.js, beside index.html: the sound tracks and pictures Form TV-1 carries are kept once on this device, out of the case file (v22.56), and every form\u2019s pictures and the student photo in the caseload and History (v22.57); a file you save, a backup or Drive carries them again','diagMedia'],
    ['Respondent pages',EMBED?(EMBED.respond?'inside this file':'not inside this file'):'checking\u2026','nbh-respond.js and respond.html, beside the forms, for the questionnaires Form IA-1 sends to informants','diagRsp'],
    ['Offline copy',typeof PWA!=='undefined'?PWA.diag():'not available','sw.js, beside index.html, keeps the workstation\u2019s files on this device so that it opens without the internet (v21.43); the chip beside Autosave says what it is doing'],
    ['Staff directory',pplDiag(),'The school staff the forms offer where a staff member is named (Staff directory, in the top bar): how many, and whether Google Drive has the latest'],
@@ -3631,7 +3631,7 @@ $('#skipForm').addEventListener('click',e=>{e.preventDefault();const fr=state.cu
 function dataWhere(){
   const rows=[
     ['The caseload, its history (restore points) and Autosave copies','This browser on this '+HERE+', protected by its passcode','Until you remove them, or the time set in Caseload (<i>Forget a student not saved for</i>); Autosave copies 14 days. <b>Remove all student data from this '+HERE+'</b> clears them'],
-    ['Sound tracks and pictures Form TV-1 carries (the media store)','This browser on this '+HERE+', protected by its passcode','While a caseload record, a restore point, an Autosave copy or the case on screen refers to them; a student removed takes the ones only they used. <b>Remove all student data from this '+HERE+'</b> clears them'],
+    ['Sound tracks, pictures and the student photo (the media store)','This browser on this '+HERE+', protected by its passcode','While a caseload record, a restore point, an Autosave copy or the case on screen refers to them; a student removed takes the ones only they used. <b>Remove all student data from this '+HERE+'</b> clears them'],
     ['Case files (<b>Save case</b>, or <b>Save case to a file</b> with Google Drive on)','Where you save them: the district drive','As the district keeps records'],
     ['<b>Use Google Drive</b> (only if you turn it on, in Caseload)','Each student\u2019s case, in your school Google Drive (the folder '+DRV_FOLDER+'); the workstation sees only the files it made there','Until removed, then 30 days in Drive\u2019s trash; a copy not kept in a clash (Replaced copies) '+(typeof drvKeepDays==='function'?drvKeepDays():30)+' days'],
     ['Questionnaires sent by email (only when you press Send)','One email per person from your school account through Gmail; the link names the student by initials and the behavior asked about','In your Gmail Sent folder'],
@@ -4910,16 +4910,42 @@ async function grab(id,verb,extra,ms,frame){
 /* v22.22 the case as data: what Save case writes in the website edition, and in the one-file edition (with its id) */
 /* v22.56 the media store (nbh-media.js): the sound tracks and pictures Form TV-1 carries are kept once on this device and the
    case holds references, so Autosave, the caseload and case history stay small; anything written to a file, a hand-on copy, a
-   backup or Drive carries them again, so a file opens anywhere. Other forms' pictures stay inside the case for now. */
+   backup or Drive carries them again, so a file opens anywhere. (v22.57) The other forms' pictures and the student photo are
+   kept so by the caseload and History; those forms hold them inline while open. */
 const MEDIA_FORMS=['TV-1'];
-function mediaHas(d){if(!window.nbhMedia||!d||!d.forms)return false;
-  return MEDIA_FORMS.some(id=>{const f=d.forms[id];if(!f||!f.snap)return false;try{return /data:(image|audio|video)\//.test(JSON.stringify(f.snap));}catch(e){return false;}});}
-async function mediaIn(d,how){const M=window.nbhMedia;if(!M||!d||!d.forms)return d;let n=0,bytes=0;
-  for(const id of MEDIA_FORMS){const f=d.forms[id];if(!f||!f.snap)continue;let t;try{t=JSON.stringify(f.snap);}catch(e){continue;}
-    if(!/data:(image|audio|video)\//.test(t))continue;
-    try{const r=await M.absorbText(t,4000);if(r.n){f.snap=JSON.parse(r.text);n+=r.n;bytes+=r.bytes;}}catch(e){}}
+/* v22.57 every form's pictures and the student photo: the caseload copy, History's restore points and Drive's copy brought
+   here keep them in the store too (each holds references), and a form other than TV-1 is handed them inline, as before, when
+   the case opens or one form is restored. A picture is the same picture inline or as a reference: Drive's "same copy" test
+   and History's comparisons see it so. */
+function mediaHas(d){const M=window.nbhMedia;if(!M||!d||!d.forms)return false;if(M.isRef(d.photoSrc))return true;
+  return Object.keys(d.forms).some(id=>{const f=d.forms[id];if(!f||!f.snap)return false;let t;try{t=JSON.stringify(f.snap);}catch(e){return false;}
+    return MEDIA_FORMS.includes(id)?/data:(image|audio|video)\//.test(t):t.indexOf(M.PREFIX)>=0;});}
+async function mediaIn(d,how){const M=window.nbhMedia;if(!M||!d||!d.forms)return d;let n=0,bytes=0,miss=0;
+  for(const id of Object.keys(d.forms)){const f=d.forms[id];if(!f||!f.snap)continue;let t;try{t=JSON.stringify(f.snap);}catch(e){continue;}
+    if(MEDIA_FORMS.includes(id)){if(!/data:(image|audio|video)\//.test(t))continue;
+      try{const r=await M.absorbText(t,4000);if(r.n){f.snap=JSON.parse(r.text);n+=r.n;bytes+=r.bytes;}}catch(e){}}
+    else if(t.indexOf(M.PREFIX)>=0){try{const r=await M.inlineText(t);f.snap=JSON.parse(r.text);miss+=r.missing.length;}catch(e){}}}
+  if(M.isRef(d.photoSrc)){let u='';try{u=await M.dataUrl(d.photoSrc);}catch(e){}if(u)d.photoSrc=u;else{delete d.photoSrc;miss++;}}
   if(n&&how!=='autosave')wsUI.toast(n+(n===1?' sound or picture':' sounds and pictures')+' ('+(bytes/1048576).toFixed(1)+' MB) now kept on this device, out of the case file. A file you save carries them again.',{ms:8000});
+  if(miss)wsUI.toast(miss+(miss===1?' picture is':' pictures are')+' no longer on this '+HERE+', so the case opens without '+(miss===1?'it':'them')+'. A case file saved earlier still holds '+(miss===1?'it':'them')+'.',{kind:'warn',ms:10000});
   return d;}
+/* a form's snapshot handed to the form: a form other than TV-1 gets its pictures inline */
+async function mediaSnapIn(id,snap){const M=window.nbhMedia;if(!M||MEDIA_FORMS.includes(id)||!snap)return snap;
+  try{const t=JSON.stringify(snap);if(t.indexOf(M.PREFIX)<0)return snap;return JSON.parse((await M.inlineText(t)).text);}catch(e){return snap;}}
+/* the case kept on this device: each picture, sound and the student photo of 4000+ characters as a reference */
+const MEDIA_BIG=/data:(?:image|audio|video)\/[^"\\]{4000}/;
+async function mediaPackParts(forms,photoSrc){const M=window.nbhMedia,out={forms,photoSrc,changed:false};
+  if(!M||!forms)return out;try{await M.ready();}catch(e){return out;}if(M.mode()==='memory')return out;
+  const F={};for(const id of Object.keys(forms)){const f=forms[id];F[id]=f;if(!f||!f.snap)continue;let t;try{t=JSON.stringify(f.snap);}catch(e){continue;}
+    if(!MEDIA_BIG.test(t))continue;try{const r=await M.absorbText(t,4000);if(r.n){F[id]=Object.assign({},f,{snap:JSON.parse(r.text)});out.changed=true;}}catch(e){}}
+  if(out.changed)out.forms=F;
+  if(typeof photoSrc==='string'&&photoSrc.length>=4000&&/^data:image\//.test(photoSrc)){try{const r=await M.put(photoSrc,{refOnly:true});if(M.isRef(r)&&M.mode()!=='memory'){out.photoSrc=r;out.changed=true;}}catch(e){}}
+  return out;}
+async function mediaPackText(text){if(typeof text!=='string'||!MEDIA_BIG.test(text))return text;
+  try{const d=parseCase(text);if(!d||!d.forms)return text;const pk=await mediaPackParts(d.forms,d.photoSrc);if(!pk.changed)return text;
+    d.forms=pk.forms;if('photoSrc' in d)d.photoSrc=pk.photoSrc;return JSON.stringify(d);}catch(e){return text;}}
+async function mediaSameText(a,b){const M=window.nbhMedia;if(!M||typeof a!=='string'||typeof b!=='string')return false;
+  try{if(b.indexOf(M.PREFIX)>=0&&(await M.inlineText(b)).text===a)return true;if(a.indexOf(M.PREFIX)>=0&&(await M.inlineText(a)).text===b)return true;}catch(e){}return false;}
 async function mediaOut(text){const M=window.nbhMedia;if(!M||typeof text!=='string'||text.indexOf(M.PREFIX)<0)return text;
   try{const r=await M.inlineText(text);if(r.missing.length)wsUI.toast(r.missing.length+(r.missing.length===1?' sound or picture is':' sounds or pictures are')+' not on this device, so the file carries a reference in its place.',{kind:'warn',ms:9000});return r.text;}catch(e){return text;}}
 /* v22.56 nothing stays in the store once nothing refers to it. After a student leaves the caseload here (Remove, Remove
@@ -5316,7 +5342,8 @@ function clSummary(){let items=[];try{items=todayItems().map(x=>({k:x.k,t:clStri
 async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);if(!key)return;
   try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
   if(late&&late.length){try{const old=(await clList()||[]).find(r=>r.key===key),od=old&&parseCase(old.text);forms=Object.assign({},forms);late.forEach(id=>{if(od&&od.forms&&od.forms[id]&&!forms[id])forms[id]=od.forms[id];});}catch(e){}}
-  const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined});
+  let mp={forms,photoSrc:state.photoSrc||undefined};try{mp=await mediaPackParts(forms,state.photoSrc||undefined);}catch(e){}   /* v22.57 the pictures in the store, references here */
+  const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:mp.photoSrc,forms:mp.forms,facts:state.facts||undefined,cur:state.cur||undefined});
   const rec={key,scope:clScope(),client:String(p.client||(!String(p.sid||'').trim()&&staffOnlyName())||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
   try{const old=(await clList()||[]).find(r=>r.key===key);if(typeof drvStamp==='function')drvStamp(rec,old);}catch(e){}   /* v21.89 the device, and the Drive version it stands on */
   try{await clTx('readwrite',st=>st.put(rec));}catch(e){try{wsUI.toast('The caseload copy could not be kept on this device ('+(e&&e.message||e)+'). The case file is saved as usual.',{kind:'warn'});}catch(x){}}}
@@ -6566,7 +6593,7 @@ async function drvPut(r,id,k){const base=r.drv&&r.drv.ver||null,text=r.text;
 async function drvBring(f,r,j){j=j||await drvRead(f.id);const x=j.rec||{};
   const key=clKey({client:x.client||'',sid:x.sid||''});if(!key)return null;
   const rec=Object.assign({},r||{},{key,scope:clScope(),client:x.client||'',sid:x.sid||'',site:x.site||'',grade:x.grade||'',bcba:x.bcba||'',saved:x.saved||f.modifiedTime,
-    sum:x.sum||{items:[]},text:j.text,dev:x.dev||'',read:x.read,unfiled:false,drv:{id:f.id,ver:String(f.version),dirty:false,at:new Date().toISOString()}});
+    sum:x.sum||{items:[]},text:await mediaPackText(j.text),dev:x.dev||'',read:x.read,unfiled:false,drv:{id:f.id,ver:String(f.version),dirty:false,at:new Date().toISOString()}});
   if(!(await drvPutIf(rec,r))){DRV.again=DRV.again||true;return null;}return rec;}
 /* v22.06 written only over the copy the sync read: a Save case made here while the sync was busy is not replaced (it waits
    for Drive, and the next pass sends it or asks which copy to keep). Read and write in one transaction. */
@@ -6579,7 +6606,7 @@ function drvDelIf(r){return clTx('readwrite',st=>{const o={result:false},g=st.ge
 /* both changed without the other: asked (interactive) or left for the chip */
 async function drvClash(r,f,k,opt,res){const j=await drvRead(f.id);
   if(j.nbh!=='case-sync'){await drvPut(r,f.id,k);res.sent++;res.up.push(drvIni(r));return;}
-  if(j.text===r.text){if(!(await drvPutIf(Object.assign({},r,{drv:Object.assign({},r.drv||{},{id:f.id,ver:String(f.version),dirty:false})}),r)))DRV.again=DRV.again||true;return;}
+  if(j.text===r.text||await mediaSameText(j.text,r.text)){if(!(await drvPutIf(Object.assign({},r,{drv:Object.assign({},r.drv||{},{id:f.id,ver:String(f.version),dirty:false})}),r)))DRV.again=DRV.again||true;return;}
   const rs=(j.rec&&j.rec.saved)||f.modifiedTime,rd=(j.rec&&j.rec.dev)||(f.appProperties&&f.appProperties.dev)||'other device';
   /* the first time this device joins: the newer save stays, the other goes to Replaced copies */
   if(opt.first&&!(r.drv&&r.drv.id)){if(Date.parse(r.saved)>=Date.parse(rs)){await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'older copy from the '+rd);await drvPut(r,f.id,k);res.sent++;res.up.push(drvIni(r));}
@@ -8241,6 +8268,7 @@ function hxDiff(a,b){const L=[],fa=(a&&a.forms)||{},fb=(b&&b.forms)||{},of=(a&&a
 /* keep a point: o = {key,text,at,dev,why}; the same as the newest point, or a save already kept (the same case at the same
    time), keeps nothing new (that point is returned) */
 async function hxKeep(o){if(clOff()||!o||!o.key||!o.text)return null;
+  {const t2=await mediaPackText(o.text);if(t2!==o.text)o=Object.assign({},o,{text:t2});}   /* v22.57 the pictures in the store, references here */
   let d=null;try{d=parseCase(o.text);}catch(e){return null;}if(!d||!d.forms)return null;
   const sig=hxSig(d),L=await hxPoints(o.key),at=o.at||new Date().toISOString();
   if(L[0]&&L[0].sig===sig)return L[0];const same=L.find(x=>x.sig===sig&&x.at===at);if(same)return same;
@@ -8397,9 +8425,9 @@ async function hxEntryText(e){const V=HX.view;if(V&&V.texts[e.id])return V.texts
   if(e.src==='here')t=await hxText(e.p.id);
   else{let j;try{j=await hxRevRead(e.fid,e.rid);}catch(err){throw new Error(err&&err.gone?'That copy is no longer in Google Drive.':err&&err.signin?'You are signed out of Google: tap Drive at the top, then try again.':err&&err.net?'Google Drive could not be reached.':String(err&&err.message||err));}
     if(!j||j.nbh!=='case-sync'||!j.text)throw new Error(j&&j.nbh==='case-gone'?'That copy in Google Drive marks a removal; it holds no case.':'That copy in Google Drive is not a workstation case.');
-    t=j.text;const x=j.rec||{};if(x.dev)e.dev=x.dev;if(x.saved)e.at=x.saved;e.raw=hxHash(t);
+    t=j.text;const x=j.rec||{};if(x.dev)e.dev=x.dev;if(x.saved)e.at=x.saved;const tp=await mediaPackText(t);e.raw=hxHash(tp);   /* v22.57 as this device keeps it */
     if(V){const older=(V.E||[]).filter(z=>z!==e&&hxT(z.at)<hxT(e.at))[0];let ot=older&&V.texts[older.id]||'';if(older&&!ot&&older.src==='here')ot=await hxText(older.p.id);
-      try{e.chg=ot?hxDiff(parseCase(ot),parseCase(t)):[];}catch(err){e.chg=[];}
+      try{e.chg=ot?hxDiff(parseCase(ot),parseCase(tp)):[];}catch(err){e.chg=[];}
       const k=V.key;hxQueue(()=>hxNoteDrive({fid:e.fid,mt:e.mt,key:k,saved:x.saved||'',dev:x.dev||'',raw:e.raw}));}}
   if(!t)throw new Error('That save could not be read on this '+HERE+'.');
   if(V)V.texts[e.id]=t;return t;}
@@ -8440,7 +8468,7 @@ async function hxOne(id,fid){const V=HX.view,e=hxEntry(id);if(!e||HX.busy)return
     try{await hxKeepScreen('before Form '+fid+' was restored');}catch(x){}
     try{$('#dlg').close();}catch(x){}
     const fr=state.frames[fid];if(fr){fr.remove();delete state.frames[fid];}delete state.status[fid];
-    setPending(fid,F.title||rec[1],F.snap,false);if(!state.caseOrder.includes(fid))state.caseOrder.push(fid);
+    setPending(fid,F.title||rec[1],await mediaSnapIn(fid,F.snap),false);if(!state.caseOrder.includes(fid))state.caseOrder.push(fid);   /* v22.57 its pictures inline */
     state.lastSig=String(state.lastSig||'')+'|~hx'+fid;
     openForm(fid);await settled(fid,30000);try{renderRail();paintSave();}catch(x){}
     wsUI.toast('Form '+fid+' is as it was '+hxWhenIn(e.at)+'; the rest of the case is as it was on screen. Save case keeps it.',{kind:'ok',ms:9000});}
@@ -8449,8 +8477,8 @@ async function hxOne(id,fid){const V=HX.view,e=hxEntry(id);if(!e||HX.busy)return
 /* Compare with now: the case on screen when it is this student's, else the copy on this device */
 async function hxCmp(id){const V=HX.view,e=hxEntry(id);if(!e)return;if(V.panels[id]&&V.panels[id].k==='cmp'){hxPanel(id,'',null);return;}
   hxPanel(id,'cmp','<p class="hint">Comparing…<\/p>');
-  try{const then=parseCase(await hxEntryText(e));let now=null,what='';
-    if(V.me&&clKey(packet())===V.key){now=parseCase(await hxScreenText());what='the case on screen';}
+  try{const then=parseCase(await mediaPackText(await hxEntryText(e)));let now=null,what='';   /* v22.57 a picture is the same picture inline or as a reference */
+    if(V.me&&clKey(packet())===V.key){now=parseCase(await mediaPackText(await hxScreenText()));what='the case on screen';}
     else if(V.r){now=parseCase(V.r.text);what='the copy on this '+HERE+', saved '+hxWhenIn(V.r.saved);}
     if(e.src==='drive')hxPaint();
     const L=now?hxDiff(then,now):null;

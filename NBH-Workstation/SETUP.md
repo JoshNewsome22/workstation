@@ -9903,6 +9903,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.57: the media store, part 2: every form's pictures and the student photo kept once on the device
+
+- **What changes.** v22.56 kept Form TV-1's sound tracks and pictures once on the device. Now the pictures every other form
+  carries (TK-1's choices and tokens, VS-1's boards and cards, SM-1's targets and store, DD-1's and IA-1's photos, and so
+  on) and the student photo's original are kept the same way wherever the workstation keeps a copy on the device: the
+  caseload copy, each of History's restore points (up to 30 a student) and a copy Google Drive brings here. Each holds a
+  short reference where it held the picture, so the same picture is no longer kept again in every save. The bar's small
+  thumb stays inside the copy.
+- **The forms see no difference.** A form gets its pictures inline, as before, when the case opens (from the caseload, a
+  file, History or Drive) and when History restores one form. Save case, a case that opens on its own, the caseload backup
+  and Drive put the pictures back in, so a file opens anywhere.
+- **Drive and History compare a picture as the same picture** whether a copy holds it inline or by reference: Drive does not
+  ask which of two copies to keep when they differ only so, and History's "what changed" and Compare do not list a picture
+  that did not change.
+- A picture no copy refers to any more leaves the device with the rest (a student removed, Remove all student data, the
+  weekly tidy), as in v22.56. Where the browser has no store (a private window), pictures stay inside each copy as before.
+
+Checked by `qa/v2257-test.js` (10) and the tests that save, autosave, back up, sync and reopen cases.
+
 ### v22.56: the media store: sound tracks and pictures kept once on the device, out of the case file; a track up to 60 MB
 
 - **What changes.** A sound track or a picture Form TV-1 carries used to sit inside the case file as text, so the case file,
