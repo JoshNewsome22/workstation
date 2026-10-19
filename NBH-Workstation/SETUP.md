@@ -9903,6 +9903,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.37: @ names a staff member in any text box
+
+- **@ and a name, from the staff directory (the BCBA's ask, on Form ABC-1's Brief Incident Description).** In any text
+  box of a form that is not already a name box (a description, a note, a team list), type @ and the first letters of a
+  name. The staff directory lists the people whose name starts that way, beside the cursor. A role's first letters work
+  too (@couns finds the counselor). @ alone lists everyone.
+- A tap, Enter or Tab writes the name in place of the @ and the letters, with a space after it. The up and down arrows
+  move the choice. Escape closes the list until the next @.
+- An @ inside a word (an email address) lists nothing. Letters that start no one's name say so, and Enter is then a new
+  line as always. The name boxes keep their own list. The list follows the sheet's scale (Fit) and is never printed.
+- Staff only, from this device's directory; nothing is sent. This applies to every form, from the shared block.
+- qa/mention-test.js (13 checks).
+
 ### v23.36: On an iPad the open view tab stays in sight when the tab strip narrows
 
 - **The view tabs on a touch screen (an iPad's report).** TB-1 at Actual size showed "Select & prioritize, Cluster
