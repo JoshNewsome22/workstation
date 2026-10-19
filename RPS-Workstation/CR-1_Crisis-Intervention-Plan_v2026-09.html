@@ -1603,11 +1603,14 @@ const DB_LAB={dbDate:'Incident date and time',dbWhen:'Debriefing date',dbBy:'Fac
   dbAfter:'What happened immediately after the restraint ended',dbBreath:'Breathing during the hold',dbInjury:'Injuries, marks, or medical concerns',
   dbStudent:'The student\u2019s account',dbStaff:'Staff experience'};
 const crT=v=>String(v==null?'':v).trim();
-function crDebSnap(){const o={};DB_KEYS.concat(DB_RP).forEach(k=>{o[k]=crT(S.meta[k]);});o.act=(S.act||[]).filter(a=>a&&['c','w','who','by','st'].some(f=>crT(a[f]))).map(a=>Object.assign({},a));
-  o.notify=Object.assign({},S.notify||{});return o;}
+function crDebSnap(){const o={};DB_KEYS.concat(DB_RP).forEach(k=>{o[k]=crT(S.meta[k]);});o.act=(S.act||[]).filter(a=>a&&['c','w','who','by','st'].some(f=>crT(a[f])));o.notify=S.notify||{};return crDebCanon(o);}
 function crDebHas(o){return !!o&&(DB_KEYS.some(k=>k!=='dbDate'&&k!=='dbReport'&&crT(o[k]))||(o.act||[]).some(a=>a&&crT(a.c)));}
 function crDebLoad(o){o=o||{};DB_KEYS.concat(DB_RP).forEach(k=>{S.meta[k]=crT(o[k]);});S.act=(o.act||[]).map(a=>Object.assign({c:'',w:'',who:'',by:'',st:''},a));
   S.notify=Object.assign({},o.notify||{});}
+/* a kept debriefing in one shape, whatever wrote it (the file, the example), so a record saved and reopened is the same */
+function crDebCanon(x){const t=v=>v==null||typeof v==='object'?'':String(v),o={};x=x&&typeof x==='object'?x:{};DB_KEYS.concat(DB_RP).forEach(f=>{o[f]=t(x[f]);});
+  o.act=(Array.isArray(x.act)?x.act:[]).filter(a=>a&&typeof a==='object'&&!Array.isArray(a)).map(a=>({c:t(a.c),w:t(a.w),who:t(a.who),by:t(a.by),st:t(a.st)}));o.notify={};
+  if(x.notify&&typeof x.notify==='object')Object.keys(x.notify).forEach(n=>{if(/^\d+$/.test(n)&&x.notify[n]===true)o.notify[n]=true;});return o;}
 const crDebs=()=>{if(!S.debs||typeof S.debs!=='object'||Array.isArray(S.debs))S.debs={};return S.debs;};
 const crDebFree=()=>{const D=crDebs();let j=1;while(D['u'+j])j++;return 'u'+j;};
 /* keep the debriefing on screen under its restraint (or as one with none chosen) and open another: a restraint's, or 'u…' */
@@ -1775,9 +1778,7 @@ function crRecord(src){
   /* v23.03 (review F338) the debriefings of the other restraints, by restraint number ('u1'... for one with no restraint chosen); a
      file saved before has none */
   const D=src.debs&&typeof src.debs==='object'&&!Array.isArray(src.debs)?src.debs:{};
-  Object.keys(D).forEach(k=>{const x=D[k];if(!/^(\d{1,3}|u\d{1,3})$/.test(k)||!x||typeof x!=='object'||Array.isArray(x))return;const o={};
-    DB_KEYS.concat(DB_RP).forEach(f=>{o[f]=txt(x[f]);});o.act=rows(x.act,['c','w','who','by','st']);o.notify={};
-    if(x.notify&&typeof x.notify==='object')Object.keys(x.notify).forEach(n=>{if(/^\d+$/.test(n)&&x.notify[n]===true)o.notify[n]=true;});R.debs[k]=o;});
+  Object.keys(D).forEach(k=>{const x=D[k];if(!/^(\d{1,3}|u\d{1,3})$/.test(k)||!x||typeof x!=='object'||Array.isArray(x))return;R.debs[k]=crDebCanon(x);});
   return R;
 }
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
@@ -1872,12 +1873,12 @@ async function loadSim(){
      lists one planning day before the first restraint; the debriefing is about the second restraint (1:42 PM) */
   const I=n=>crcMDY(D(n));
   /* v23.03 (review F338) the third restraint's debriefing, kept beside the second's */
-  S.debs={'3':{dbDate:D(6)+', 10:15 AM',dbWhen:D(5),dbBy:'Jordan Ellis, M.A., BCBA (simulated)',dbReport:'Yes, within 24 hours',
+  S.debs={'3':crDebCanon({dbDate:D(6)+', 10:15 AM',dbWhen:D(5),dbBy:'Jordan Ellis, M.A., BCBA (simulated)',dbReport:'Yes, within 24 hours',
     dbWho:'Aide B, assistant principal, BCBA; the substitute by telephone (simulated)',dbContext:'A substitute teacher in the afternoon writing block; the break card was not honored on time.',
     dbLead:'Asked twice for the break card; the substitute said to finish the page first. Paper torn, then the student moved toward the aide.',
     dbFollowed:'Partly \u2014 explained below',dbFollowedWhy:'The substitute had not been shown the plan, so the first two stages were skipped.',
     dbStaff:'Aide B asked for a refresher on the release step; offered and scheduled (simulated).',
-    act:[{c:'Substitute folders carry a one-page summary of the crisis plan, starting with the break card',w:'Staffing or schedule',who:'Assistant principal (simulated)',by:D(-5),st:'Open'}],notify:{}}};
+    act:[{c:'Substitute folders carry a one-page summary of the crisis plan, starting with the break card',w:'Staffing or schedule',who:'Assistant principal (simulated)',by:D(-5),st:'Open'}],notify:{}})};
   S.log=[
     {d:D(28),dur:'35 s',set:'Room 12, afternoon writing',staff:'Aide B, teacher',rep:'Yes',deb:'Yes',pre:'Delay reached 90 s with one adult; timer not visible',
      rd:I(28),rt:'13:10',xd:I(28),xt:'13:11',pd:I(28),pt:'15:05',pok:'',wd:I(28),wt:'14:30',wok:'1',ak:I(27),md:I(27),mk:I(23),
