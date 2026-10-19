@@ -2370,20 +2370,25 @@ const LEVELS=[
   {pts:'4',desc:'No more than 4 prompts to finish the task; not on time for class: gone more than 4 minutes'},
   {pts:'5',desc:'No prompts or redirects to finish the task; on time for class'}
 ];
+/* v22.7x (review F261): one set of thresholds. The ladder's and the fading table's "Move on when", the Record's decisions and
+   the Guide read the same numbers: agreement at or above SM_AG.up to move on, below SM_AG.down to step back, the teacher's
+   No ratings matched at SM_AG.no or more, judged only when the window holds SM_AG.noMin of them; each phase's window (w) in
+   school days at the current goal (two weeks = 10, four weeks = 20). All are working conventions of this form. */
+const SM_AG={up:90,down:80,no:80,noMin:3};
 const LADDER=[
-  {ph:'0',what:'Teacher rates only. The student sees the sheet and the rating at the end of each period; no points depend on it yet.',when:'3 to 5 school days; the record sets the first goal from the mean.'},
-  {ph:'1',what:'The student rates every period; the teacher rates every period independently; points follow the match table. Honest Nos are praised.',when:'Agreement at or above 80% and the goal met on 4 of the last 5 days.'},
-  {ph:'2',what:'The teacher matches half the periods, chosen beforehand by coin or dice; the student does not know which until the comparison. Unmatched periods earn the student&rsquo;s rating.',when:'Agreement at or above 90% on the matched periods for two weeks.'},
-  {ph:'3',what:'One matched period a day, drawn at random; the rest earn the student&rsquo;s rating.',when:'Agreement at or above 90% for two weeks.'},
-  {ph:'4',what:'The student rates alone; one surprise match a week. The reward follows the student&rsquo;s own total.',when:'Goal at its ceiling for four weeks.'},
-  {ph:'5',what:'The sheet is retired; a verbal self-report at the end of the day and the plan&rsquo;s own data (Form PR-1).',when:'Exit on the plan&rsquo;s criteria.'}
+  {ph:'0',w:0,what:'Teacher rates only. The student sees the sheet and the rating at the end of each period; no points depend on it yet.',when:'3 to 5 school days of the teacher&rsquo;s ratings; the Record suggests the first goal from them.'},
+  {ph:'1',w:5,met:true,what:'The student rates every period; the teacher rates every period independently; points follow the match table. Honest Nos are praised.',when:'Agreement at or above 90%, the student matching at least 80% of the teacher&rsquo;s No ratings, and the goal met on 4 of the last 5 school days at the current goal.'},
+  {ph:'2',w:10,what:'The teacher matches half the periods, chosen beforehand by coin or dice; the student does not know which until the comparison. Unmatched periods earn the student&rsquo;s rating.',when:'Agreement at or above 90% on the matched periods, and at least 80% on the teacher&rsquo;s Nos, over two weeks (10 school days) at the current goal.'},
+  {ph:'3',w:10,what:'One matched period a day, drawn at random; the rest earn the student&rsquo;s rating.',when:'The same, over two weeks (10 school days), on the one matched period a day.'},
+  {ph:'4',w:20,cap:true,what:'The student rates alone; one surprise match a week. The reward follows the student&rsquo;s own total.',when:'Goal at its ceiling for four weeks (20 school days), the surprise checks agreeing.'},
+  {ph:'5',w:0,what:'The sheet is retired; a verbal self-report at the end of the day and the plan&rsquo;s own data (Form PR-1).',when:'Exit on the plan&rsquo;s criteria.'}
 ];
 const FADE=[
-  {what:'Every period rated, reward the same day.',when:'Agreement at or above 80% and the goal met on 4 of 5 days for two weeks (phase 2 of the ladder or beyond).'},
-  {what:'Only the hardest half of the periods rated; the rest are assumed met unless the teacher notes otherwise.',when:'Goal met on 4 of 5 days for two weeks with no rise in the unrated periods&rsquo; behavior on the plan&rsquo;s data.'},
-  {what:'One rating at the end of each half day.',when:'Two weeks at criterion.'},
-  {what:'One end-of-day self-rating; the reward moves to a weekly total with a small daily acknowledgment.',when:'Three weeks at criterion with agreement held on the surprise checks.'},
-  {what:'A verbal self-report at the end of the day, no sheet; the plan&rsquo;s own data continue.',when:'Four weeks at criterion.'},
+  {what:'Every period rated, reward the same day.',when:'Agreement at or above 90% and the goal met on 4 of the last 5 school days, held for two weeks (10 school days), at phase 2 of the ladder or beyond.'},
+  {what:'Only the hardest half of the periods rated; the rest are assumed met unless the teacher notes otherwise.',when:'Goal met on 4 of the last 5 school days for two weeks (10 school days) with no rise in the unrated periods&rsquo; behavior on the plan&rsquo;s data. (The Record and the iPad count each unrated period as met, its full points, and leave it out of the behavior measure.)'},
+  {what:'One rating at the end of each half day.',when:'Two weeks (10 school days) at criterion: the goal met on 4 of the last 5.'},
+  {what:'One end-of-day self-rating; the reward moves to a weekly total with a small daily acknowledgment.',when:'Three weeks (15 school days) at criterion with agreement held on the surprise checks.'},
+  {what:'A verbal self-report at the end of the day, no sheet; the plan&rsquo;s own data continue.',when:'Four weeks (20 school days) at criterion.'},
   {what:'Retired. The behavior is monitored on Form PR-1 and a sheet returns only if the data call for it.',when:'Exit on the plan&rsquo;s criteria.'}
 ];
 const BCRULES=[
@@ -2469,9 +2474,15 @@ function renderBck(){
 function renderFid(){
   $('#fidTbl tbody').innerHTML=FID.map((t,i)=>`<tr><td class="num">${i+1}</td><td>${t}</td><td><select data-r="fid" data-i="${i}" data-f="in" aria-label="Step ${i+1} in the plan"><option value=""></option><option${S.fid[i].in==='Yes'?' selected':''}>Yes</option><option${S.fid[i].in==='No'?' selected':''}>No</option><option${S.fid[i].in==='N/A'?' selected':''}>N/A</option></select></td><td><input data-r="fid" data-i="${i}" data-f="note" value="${esc(S.fid[i].note)}"></td></tr>`).join('');
 }
+/* v22.7x (review F259, F260): the goal-met cell is worked out from the points and that day's goal (the tick stays only for a
+   row without points); the On No cell gives how many of the teacher's No ratings the student matched */
+function smMetCell(r,i){const p=num(r.pts),q=num(r.poss),g=num(r.goal);if(String(r.ph||'')==='0')return '<span class="hint" title="A teacher-only day earns no points">—</span>';
+  if(p!=null&&q&&g!=null)return p/q*100>=g-1e-9?'<b style="color:#2F6B37">yes</b>':'no';
+  return '<input type="checkbox" data-r="log" data-i="'+i+'" data-f="met"'+(r.met?' checked':'')+' aria-label="Goal met on day '+(i+1)+'">';}
+function smOnNo(r){const t=num(r.tno),m=num(r.nom);return t!=null?(m||0)+' of '+t:'—';}
 function renderL(){
   $('#lTbl tbody').innerHTML=S.log.map((r,i)=>{const p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);
-    return `<tr><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td><td><input data-r="log" data-i="${i}" data-f="ph" value="${esc(r.ph)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="goal" value="${esc(r.goal)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="pts" value="${esc(r.pts)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="poss" value="${esc(r.poss)}" style="text-align:center"></td><td class="num">${p!=null&&q?pct(p/q*100):'—'}</td><td><input data-r="log" data-i="${i}" data-f="m" value="${esc(r.m)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="n" value="${esc(r.n)}" style="text-align:center"></td><td class="num">${m!=null&&n?pct(m/n*100):'—'}</td><td class="num"><input type="checkbox" data-r="log" data-i="${i}" data-f="met"${r.met?' checked':''} aria-label="Goal met on day ${i+1}"></td><td><input data-r="log" data-i="${i}" data-f="tgp" value="${esc(r.tgp||'')}" placeholder="80,67,100" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('log',i,'day')}</tr>`;}).join('');
+    return `<tr><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td><td><input data-r="log" data-i="${i}" data-f="ph" value="${esc(r.ph)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="goal" value="${esc(r.goal)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="pts" value="${esc(r.pts)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="poss" value="${esc(r.poss)}" style="text-align:center"></td><td class="num">${p!=null&&q?pct(p/q*100):'—'}</td><td><input data-r="log" data-i="${i}" data-f="beh" value="${esc(r.beh||'')}" style="text-align:center" aria-label="Behavior percent on day ${i+1}"></td><td><input data-r="log" data-i="${i}" data-f="m" value="${esc(r.m)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="n" value="${esc(r.n)}" style="text-align:center"></td><td class="num">${m!=null&&n?pct(m/n*100):'—'}</td><td class="num">${smOnNo(r)}</td><td class="num">${smMetCell(r,i)}</td><td><input data-r="log" data-i="${i}" data-f="tgp" value="${esc(r.tgp||'')}" placeholder="80,67,100" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('log',i,'day')}</tr>`;}).join('');
 }
 function renderWk(){
   const t=$('#wkTbl');if(S.sys!=='rubric'){t.innerHTML='';return;}
@@ -2487,7 +2498,7 @@ function renderWk(){
 }
 document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.value;
-    if(el.dataset.r==='log'){const tr=el.closest('tr');const r=S.log[+el.dataset.i],p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);tr.children[6].textContent=p!=null&&q?pct(p/q*100):'—';tr.children[9].textContent=m!=null&&n?pct(m/n*100):'—';renderRecord();}
+    if(el.dataset.r==='log'){const tr=el.closest('tr');const r=S.log[+el.dataset.i],p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);tr.children[6].textContent=p!=null&&q?pct(p/q*100):'—';tr.children[10].textContent=m!=null&&n?pct(m/n*100):'—';if(el.dataset.f!=='met')tr.children[12].innerHTML=smMetCell(r,+el.dataset.i);renderRecord();}
     else if(el.dataset.r==='tg'||el.dataset.r==='per'||el.dataset.r==='lv'){renderSheet();renderPoints();if(el.dataset.r==='per'||el.dataset.r==='lv')renderWkSoon();}
     return;}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(il_|iv_|mp_|goal|sh_|nick|client|menu|sm_|t_rem|when|pf_|ci_|smp_)/.test(el.dataset.m)){renderPoints();renderSheet();}if(/^iv_/.test(el.dataset.m))renderCueList();if(/^bc_/.test(el.dataset.m)||el.dataset.m==='client')renderBc();if(el.dataset.m==='goal'||el.dataset.m==='r_base')renderRecord();}
@@ -2505,7 +2516,7 @@ $('#addT').addEventListener('click',()=>{if(S.tg.length>=6)return;S.tg.push({wor
 $('#delT').addEventListener('click',async ()=>{if(S.tg.length<=1)return;const r=S.tg[S.tg.length-1];if((r.word||r.def)&&!(await nbhUI.confirm('Remove the last target?\nIts name, definition, cues and examples are deleted.',{ok:'Remove',danger:true})))return;S.tg.pop();renderT();renderSheet();renderPoints();renderSetup();});
 $('#addP').addEventListener('click',()=>{if(S.per.length>=16)return;S.per.push({t:'',label:'',icon:'',img:''});renderP();renderSheet();renderPoints();renderWk();});
 $('#delP').addEventListener('click',async ()=>{if(S.per.length<=1)return;const r=S.per[S.per.length-1];if((r.t||r.label)&&!(await nbhUI.confirm('Remove the last period?\nIts time, label and icon are deleted.',{ok:'Remove',danger:true})))return;S.per.pop();renderP();renderSheet();renderPoints();renderWk();});
-$('#addL').addEventListener('click',()=>{S.log.push({date:'',ph:curPhase(),goal:S.meta.goal||'',pts:'',poss:String(possible().poss||''),m:'',n:'',met:false,tgp:'',note:''});renderL();renderRecord();});
+$('#addL').addEventListener('click',()=>{S.log.push({date:'',ph:curPhase(),goal:S.meta.goal||'',pts:'',poss:String(possible().poss||''),beh:'',m:'',n:'',met:false,tgp:'',note:''});renderL();renderRecord();});
 $('#delL').addEventListener('click',async ()=>{if(!S.log.length)return;const r=S.log[S.log.length-1];if((r.date||r.pts)&&!(await nbhUI.confirm('Remove the last day?\nIts date, points and note are deleted from the Record.',{ok:'Remove',danger:true})))return;S.log.pop();renderL();renderRecord();});
 $('#wkAdd').addEventListener('click',()=>{const maxp=Math.max(...S.lv.map(l=>num(l.pts)||0));let added=0;
   DAYS.forEach((d,di)=>{let pts=0,n=0;S.per.forEach((p,pi)=>{const v=num(S.wk['d'+di+'_p'+pi]);if(v){pts+=num(S.lv[v-1].pts)||0;n++;}});
@@ -2738,61 +2749,136 @@ function renderBc(){
 }
 
 /* ---------------- the record ---------------- */
-function rows(){return S.log.map(r=>({...r,p:num(r.pts),q:num(r.poss),m:num(r.m),n:num(r.n),g:num(r.goal),ph:String(r.ph||''),tp:String(r.tgp||'').split(',').map(x=>num(x))})).map(r=>({...r,pc:r.p!=null&&r.q?r.p/r.q*100:null,ag:r.m!=null&&r.n?r.m/r.n*100:null}));}
+/* v22.7x (review F258): a row holds the points, what the student earned (the reward measure), and the behavior: the share of
+   the teacher's ratings that were Yes (beh; with a style of more levels, the teacher's mean level as a share of the top), the
+   teacher's No ratings and how many of them the student matched (tno, nom), the student's own Nos (sno), the behavior per
+   target (bgp) and the periods assumed met at fading step 2 (asm). The iPad writes them all; on paper Behavior % is typed.
+   A sheet with no teacher rating (contract, expectations and earns, the rubric rated by the student alone, the performance
+   count) has no behavior measure: its points are the student's own rating, and the Record says so. Check-in/check-out is
+   rated by the adult alone, so its points are the behavior measure.
+   (F259) A day's goal is met when its points reach that day's goal: worked out, not ticked; the tick stands only on a row
+   without points. A teacher-only day (phase 0) earns no points and has no goal to meet. */
+function rows(){return S.log.map(r=>({...r,p:num(r.pts),q:num(r.poss),m:num(r.m),n:num(r.n),g:num(r.goal),ph:String(r.ph||''),tp:String(r.tgp||'').split(',').map(x=>num(x)),
+    b:num(r.beh),tno:num(r.tno),nom:num(r.nom),sno:num(r.sno),asm:num(r.asm),bp:String(r.bgp||'').split(',').map(x=>num(x))}))
+  .map(r=>{const pc=r.p!=null&&r.q?r.p/r.q*100:null;return {...r,pc,ag:r.m!=null&&r.n?r.m/r.n*100:null,b:r.b!=null?r.b:S.sys==='cico'?pc:null,
+    mt:r.ph==='0'?null:pc!=null&&r.g!=null?pc>=r.g-1e-9:!!r.met};});}
+function smHasT(){return S.sys==='match'||S.sys==='interval'||S.sys==='cico'||(S.sys==='rubric'&&!!S.chk.rubmatch);}
+function smMatched(){return ['match','interval','interlock'].includes(S.sys)||(S.sys==='rubric'&&!!S.chk.rubmatch);}
+const smMean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
+/* (F259, F261) the rules on the Reinforcement sheet, read as "N of the last M" (defaults 4 of 5 to raise, fewer than 2 of 5 to
+   lower), the days each new goal is held before any change (3), the step and the ceiling */
+function smRuleN(txt,def){const m=String(txt||'').match(/(\d+)\s+of\s+(?:the\s+)?(?:last\s+)?(\d+)/i);if(!m)return def;const n=+m[1],w=+m[2];return n>0&&w>=n&&w<=20?[n,w]:def;}
+function smTH(){const up=smRuleN(S.meta.cc_up,[4,5]),dn=smRuleN(S.meta.cc_down,[2,5]),h=num(S.meta.cc_hold),st=num(String(S.meta.cc_step||'').replace(/^[^\d]*/,''));
+  return {upN:up[0],upW:up[1],dnN:dn[0],dnW:dn[1],hold:h!=null&&h>=1&&h<=20?Math.round(h):3,step:st!=null&&st>0&&st<=50?st:5,cap:num(S.meta.cc_cap)};}
+/* (F259, F261) the decision window: the days at the current goal and in the current ladder phase, from the day they began.
+   Days at another goal or phase do not count; a goal or a phase changed on the Reinforcement or Teach sheet starts a new run. */
+function smRun(R){const g=num(S.meta.goal),ph=curPhase(),T=R.filter(r=>r.ph!=='0'&&r.pc!=null);let k=T.length;
+  while(k>0&&T[k-1].g===g&&(!ph||T[k-1].ph===ph))k--;
+  const rows=T.slice(k);return {rows,g,ph,since:rows.length?String(rows[0].date||''):''};}
+/* (F262) the points a day earns when the student rates honestly and the targets were met in b% of the periods: on Self & Match
+   an agreed No pays too (both-Yes for each met period, both-No for the rest, of the top match points); a style of more levels
+   pays the adult's level plus the bonus; other sheets pay the level itself. And back again. */
+function smPtsAt(b){if(b==null)return null;if(S.sys!=='match')return b;const lv=typeof smRLv==='function'?smRLv():null;
+  if(lv&&lv.length>2){const mx=Math.max(...lv.map(x=>x[1]))||1,bo=typeof smBonus==='function'?smBonus():1;return (b/100*mx+bo)/(mx+bo)*100;}
+  const k=mp(),top=Math.max(k.yy,k.nn,k.yn,k.ny)||1;return (b*k.yy+(100-b)*k.nn)/top;}
+function smBehAt(p){if(p==null)return null;if(S.sys!=='match')return p;const lv=typeof smRLv==='function'?smRLv():null;
+  if(lv&&lv.length>2){const mx=Math.max(...lv.map(x=>x[1]))||1,bo=typeof smBonus==='function'?smBonus():1;return Math.max(0,Math.min(100,(p/100*(mx+bo)-bo)/mx*100));}
+  const k=mp(),top=Math.max(k.yy,k.nn,k.yn,k.ny)||1;return k.yy===k.nn?null:Math.max(0,Math.min(100,(p*top-100*k.nn)/(k.yy-k.nn)));}
+/* (F262) the baseline: the teacher-only days (phase 0), read as the behavior measure (a row from before v22.7x with points only
+   is read as its percent of points). The first goal is set at a level the student reached on at least half of them (the
+   middle day, the higher of two), in points as the sheet pays them, rounded down to 5; with how many baseline days meet it.
+   No suggestion from fewer than 3 baseline days. */
+function smBase(R){const B=R.filter(r=>r.ph==='0'),xs=B.map(r=>r.b!=null?{b:r.b,p:smPtsAt(r.b)}:r.pc!=null?{b:null,p:r.pc}:null).filter(Boolean);
+  const bs=xs.filter(x=>x.b!=null).map(x=>x.b);let sug=null,met=0,bAt=null;
+  if(xs.length>=3){const so=xs.slice().sort((a,b)=>b.p-a.p),mid=so[Math.ceil(so.length/2)-1];sug=Math.floor(mid.p/5)*5;met=xs.filter(x=>x.p>=sug-1e-9).length;bAt=smBehAt(sug);}
+  return {days:B.length,n:xs.length,beh:bs.length===xs.length&&bs.length>0,bm:smMean(bs),pm:smMean(xs.map(x=>x.p)),sug,met,bAt};}
 function renderRecord(){
-  const R=rows(),v=$('#logVerdict'),M=$('#logMetrics'),RU=$('#logRules');
-  const base=R.filter(r=>r.ph==='0'&&r.pc!=null),bm=base.length?base.reduce((s,r)=>s+r.pc,0)/base.length:null;
-  const sug=bm!=null?Math.max(50,Math.min(80,Math.round((bm+10)/5)*5)):null;
-  const tx=R.filter(r=>r.ph!=='0'&&r.pc!=null),last=tx.slice(-5),met=last.filter(r=>r.met).length;
-  const agr=last.filter(r=>r.ag!=null),agm=agr.length?agr.reduce((s,r)=>s+r.ag,0)/agr.length:null;
-  const mean=tx.length?tx.reduce((s,r)=>s+r.pc,0)/tx.length:null;
-  M.innerHTML=`<div class="metric"><b>Baseline mean</b><div class="val">${bm!=null?pct(bm):'—'}</div><div class="sub">${base.length} teacher-only day${base.length===1?'':'s'}${sug!=null?' · suggested first goal '+sug+'%':''}</div></div>
-    <div class="metric"><b>Mean since self-rating began</b><div class="val">${mean!=null?pct(mean):'—'}</div><div class="sub">${tx.length} day${tx.length===1?'':'s'}</div></div>
-    <div class="metric"><b>Goal met, last 5 days</b><div class="val">${last.length?met+' of '+last.length:'—'}</div><div class="sub">current goal ${S.meta.goal?pct(num(S.meta.goal)):'—'}</div></div>
-    <div class="metric"><b>Agreement, last 5 days</b><div class="val">${agm!=null?pct(agm):'—'}</div><div class="sub">student and teacher ratings</div></div>`;
-  const TM=$('#tgMetrics');if(TM){const last5=R.slice(-5);TM.innerHTML=S.tg.map((t,i)=>{const vals=last5.map(r=>r.tp[i]).filter(x=>x!=null);const mn=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;return '<div class="metric"><b>Target '+(i+1)+', last 5 days</b><div class="val">'+(mn!=null?pct(mn):'—')+'</div><div class="sub">'+esc(t.word||'')+(t.goal?' · goal '+esc(t.goal)+'%':'')+'</div></div>';}).join('');}
-  if(!R.length){v.innerHTML='<div class="verdict v-mid"><b>No days yet.</b> Enter the teacher-only days as phase 0; the record will suggest a first goal.</div>';RU.innerHTML='';drawLog(R);return;}
+  const R=rows(),v=$('#logVerdict'),M=$('#logMetrics'),RU=$('#logRules'),hasT=smHasT(),TH=smTH(),bs=smBase(R),run=smRun(R),ph=curPhase();
+  const tx=R.filter(r=>r.ph!=='0'&&r.pc!=null),RR=run.rows,last=RR.slice(-TH.upW),met=last.filter(r=>r.mt).length;
+  const PH=R.filter(r=>r.ph!=='0'&&r.pc!=null&&(!ph||r.ph===ph)),w5=PH.slice(-5),agr=w5.filter(r=>r.ag!=null),agm=smMean(agr.map(r=>r.ag));
+  const noR=w5.filter(r=>r.tno!=null),tnoS=noR.reduce((s,r)=>s+r.tno,0),nomS=noR.reduce((s,r)=>s+(r.nom||0),0);
+  const txb=tx.filter(r=>r.b!=null),bmean=smMean(txb.map(r=>r.b)),pmean=smMean(tx.map(r=>r.pc));
+  const at=run.g!=null?pct(run.g):'—',since=run.since?' since '+run.since:'',inPh=run.ph?' in phase '+run.ph:'';
+  M.innerHTML=`<div class="metric"><b>Baseline (teacher only)</b><div class="val">${bs.n?(bs.beh?pct(bs.bm):pct(bs.pm)):'—'}</div><div class="sub">${bs.days} teacher-only day${bs.days===1?'':'s'}${bs.n?(bs.beh?' · the targets met in that share of the teacher&rsquo;s ratings':' · percent of points'):''}${bs.sug!=null?' · suggested first goal '+bs.sug+'% of the points, met on '+bs.met+' of '+bs.n:''}</div></div>
+    <div class="metric"><b>${hasT?'Behavior since self-rating began':'Points since self-rating began'}</b><div class="val">${hasT?(bmean!=null?pct(bmean):'—'):(pmean!=null?pct(pmean):'—')}</div><div class="sub">${hasT?(txb.length+' day'+(txb.length===1?'':'s')+' with the teacher&rsquo;s ratings'+(pmean!=null&&S.sys!=='cico'?' · '+pct(pmean)+' of the points':'')):tx.length+' day'+(tx.length===1?'':'s')+' · this sheet has no teacher rating: the points are the student&rsquo;s own'}</div></div>
+    <div class="metric"><b>Goal met at the current goal</b><div class="val">${last.length?met+' of '+last.length:'—'}</div><div class="sub">${RR.length?(RR.length>last.length?'the last '+last.length+' of ':'')+RR.length+' school day'+(RR.length===1?'':'s')+' at '+at+inPh+esc(since):'current goal '+at+(run.ph?' · phase '+run.ph:'')+' · no days at it yet'}</div></div>
+    <div class="metric"><b>Agreement, last 5 days</b><div class="val">${agm!=null?pct(agm):'—'}</div><div class="sub">${tnoS?'on the teacher&rsquo;s Nos: '+nomS+' of '+tnoS:'student and teacher ratings'}</div></div>`;
+  const TM=$('#tgMetrics');if(TM){const last5=R.filter(r=>r.ph!=='0').slice(-5);TM.innerHTML=S.tg.map((t,i)=>{const bv=last5.map(r=>r.bp[i]).filter(x=>x!=null),vals=bv.length?bv:last5.map(r=>r.tp[i]).filter(x=>x!=null);const mn=smMean(vals);
+    return '<div class="metric"><b>Target '+(i+1)+', last 5 days</b><div class="val">'+(mn!=null?pct(mn):'—')+'</div><div class="sub">'+esc(t.word||'')+(bv.length?' · teacher rated it met':vals.length?' · of the points':'')+(t.goal?' · goal '+esc(t.goal)+'%':'')+'</div></div>';}).join('');}
+  if(!R.length){v.innerHTML='<div class="verdict v-mid"><b>No days yet.</b> Enter the teacher-only days as phase 0 (Behavior %: the share of the teacher&rsquo;s ratings that were Yes); the Record suggests a first goal from them.</div>';RU.innerHTML='';drawLog(R);return;}
   const rules=[];
-  if(last.length>=5){
-    if(met>=4)rules.push(['ok','Goal met on '+met+' of the last 5 days: raise the goal by the step on the Reinforcement sheet'+(num(S.meta.cc_cap)!=null&&num(S.meta.goal)!=null&&num(S.meta.goal)>=num(S.meta.cc_cap)?' (it is at the ceiling: hold it and move down the matching ladder instead)':'')+'.']);
-    else if(met<2)rules.push(['no','Goal met on '+met+' of the last 5 days: lower the goal to a level the student has reached, re-check the reward with a brief MSWO, and look at fidelity before anything else.']);
-    else rules.push(['mid','Goal met on '+met+' of the last 5 days: hold the goal.']);
-  }else rules.push(['mid','Fewer than five days since self-rating began: no decision yet.']);
-  /* agreement is judged only where the system has a teacher match: Self & Match, cued intervals, the interlocking
-     session, and the rubric with the teacher matching; a contract, the expectations sheet, check-in/check-out and the
-     performance count have no second rating */
-  const matched=['match','interval','interlock'].includes(S.sys)||(S.sys==='rubric'&&!!S.chk.rubmatch);
-  if(!matched){}
-  else if(agm!=null){
-    if(agm<80)rules.push(['no','Agreement '+pct(agm)+' over the last five days: move back one phase on the matching ladder and re-run the rating practice.']);
-    else if(agm>=90&&met>=4)rules.push(['ok','Agreement '+pct(agm)+' and the goal met on 4 of 5: the next phase of the matching ladder is due.']);
-    else rules.push(['mid','Agreement '+pct(agm)+': stay on the current phase.']);
-  }else if(tx.length)rules.push(['mid','No matches entered for the last five days: agreement cannot be judged.']);
-  const ph=curPhase();
-  v.innerHTML='<div class="verdict '+(rules.some(r=>r[0]==='no')?'v-no':rules.some(r=>r[0]==='ok')?'v-ok':'v-mid')+'"><b>Phase '+(ph||'?')+' · '+R.length+' day'+(R.length===1?'':'s')+' recorded.</b> '+esc(rules[0][1])+'</div>';
-  RU.innerHTML='<ul style="font-family:var(--sans);font-size:12.5px;margin:4px 0 4px 18px">'+rules.map(r=>'<li>'+esc(r[1])+'</li>').join('')+'</ul><p class="hint">The thresholds (4 of 5, 2 of 5, 80%, 90%) are the form’s working conventions, written on the Reinforcement and Teach sheets; change them there if the team uses others.</p>';
+  /* the baseline and the first goal (F262) */
+  if(ph==='0'||!tx.length){
+    if(bs.n>=3)rules.push(['mid','Baseline: '+bs.n+' teacher-only day'+(bs.n===1?'':'s')+(bs.beh?', the targets met in '+pct(bs.bm)+' of the teacher&rsquo;s ratings on average':', '+pct(bs.pm)+' of the points on average')+'. Suggested first goal: '+bs.sug+'% of the points, met on '+bs.met+' of the '+bs.n+' baseline days'+(bs.beh&&S.sys==='match'&&bs.bAt!=null?' (a student rating honestly earns it on a day with the targets met in about '+pct(bs.bAt)+' of the periods, since an agreed No pays too)':'')+'. Start phase 1 there.']);
+    else rules.push(['mid',bs.n+' teacher-only day'+(bs.n===1?'':'s')+' so far: the first goal is suggested from 3 or more (3 to 5 school days, Teach sheet).']);
+  }
+  let change='';
+  if(tx.length&&ph!=='0'){
+    const g=run.g,atCap=TH.cap!=null&&g!=null&&g>=TH.cap,wD=RR.slice(-TH.dnW),metD=wD.filter(r=>r.mt).length;
+    const upDue=RR.length>=TH.hold&&met>=TH.upN,dnDue=RR.length>=TH.hold&&metD+Math.max(0,TH.dnW-wD.length)<TH.dnN;
+    const prevG=(()=>{const T=R.filter(r=>r.ph!=='0'&&r.pc!=null),i0=RR.length?T.indexOf(RR[0]):T.length;for(let k=i0-1;k>=0;k--){if(T[k].g!=null&&T[k].g!==g)return T[k].g;}return null;})();
+    const down=g==null?null:prevG!=null&&prevG<g?prevG:Math.max(0,g-TH.step),up=g==null?null:TH.cap!=null?Math.min(TH.cap,g+TH.step):g+TH.step;
+    const wtxt=n=>' of the last '+n+' school day'+(n===1?'':'s')+' at '+pct(g)+esc(since);
+    if(g==null)rules.push(['mid','No goal on the Reinforcement sheet: the days cannot be judged against one.']);
+    else if(!RR.length)rules.push(['mid','The goal is '+pct(g)+(run.ph?' in phase '+run.ph:'')+', with no school days at it yet: hold it for '+TH.hold+' school days before any change.']);
+    else if(RR.length<TH.hold)rules.push(['mid',RR.length+' school day'+(RR.length===1?'':'s')+' at '+pct(g)+inPh+esc(since)+': hold. No change before '+TH.hold+' school days at this goal (Reinforcement sheet).']);
+    else if(dnDue){change='down';rules.push(['no','Goal met on '+metD+wtxt(wD.length)+': lower the goal to '+pct(down)+', a level the student has reached, re-check the reward with a brief MSWO, and look at fidelity before anything else.']);}
+    else if(upDue&&atCap)rules.push(['ok','Goal met on '+met+wtxt(last.length)+': hold the goal at its ceiling ('+pct(TH.cap)+').']);
+    else if(upDue){change='up';rules.push(['ok','Goal met on '+met+wtxt(last.length)+': raise the goal by the step, to '+pct(up)+(TH.cap!=null?' (ceiling '+pct(TH.cap)+')':'')+'.']);}
+    else rules.push(['mid','Goal met on '+met+wtxt(last.length)+': hold the goal'+(RR.length<TH.upW?' ('+RR.length+' school days at it so far; the rule looks at '+TH.upW+')':'')+'.']);
+  }
+  /* the matching ladder (F260, F261): judged only where the system has a teacher match; one change at a time, the goal first */
+  if(smMatched()&&tx.length&&ph&&ph!=='0'){
+    const L=LADDER.find(l=>l.ph===ph),sw=w5.filter(r=>r.sno!=null),said=sw.reduce((s,r)=>s+r.sno,0),nev=sw.length>=3&&said===0;
+    if(agm!=null&&agr.length>=3&&agm<SM_AG.down){if(change==='up'){rules.pop();rules.push(['mid','Goal met often at '+pct(run.g)+', but hold it: agreement has dropped, and the points mean little until it recovers.']);change='';}
+      rules.push(['no','Agreement '+pct(agm)+' over the last '+agr.length+' school days in phase '+ph+': move back one phase on the matching ladder and re-run the rating practice.']);}
+    else if(nev)rules.push(['no','The student has not said No in the last '+sw.length+' days rated: agreement means little when only Yes is used (the student agrees whenever the teacher says Yes). Re-teach with the non-examples on the Teach sheet, praise an honest No, and do not thin the matching yet.']);
+    else if(L&&L.w&&ph!=='5'){
+      const W=RR.slice(-L.w),wa=W.filter(r=>r.ag!=null),wam=smMean(wa.map(r=>r.ag)),wn=W.filter(r=>r.tno!=null),wt=wn.reduce((s,r)=>s+r.tno,0),wm=wn.reduce((s,r)=>s+(r.nom||0),0),wnp=wt?wm/wt*100:null;
+      const atCap=TH.cap!=null&&run.g!=null&&run.g>=TH.cap,next=LADDER[LADDER.indexOf(L)+1];
+      if(change)rules.push(['mid','The next ladder phase waits: one change at a time, the goal first, then the ladder once the new goal has held for '+L.w+' school days.']);
+      else if(RR.length<L.w)rules.push(['mid','Phase '+ph+': '+RR.length+' of the '+L.w+' school days at the current goal that the ladder is judged on (Teach sheet).']);
+      else if(L.cap&&!atCap)rules.push(['mid','Phase '+ph+': the goal is not at its ceiling yet; phase '+next.ph+' follows four weeks at the ceiling.']);
+      else if(!wn.length)rules.push(['mid','Agreement '+(wam!=null?pct(wam):'—')+'; agreement on the teacher&rsquo;s No ratings is not known for these days (entered by hand). Rate the next days on the Rate page, or enter the sheets&rsquo; marks there, before thinning the matching.']);
+      else if(wt<SM_AG.noMin)rules.push(['mid','Agreement '+(wam!=null?pct(wam):'—')+', but only '+wt+' No rating'+(wt===1?'':'s')+' by the teacher in the last '+W.length+' school days: not enough to judge whether the student says No honestly. Run the non-example practice (Teach sheet) or hold until there are more.']);
+      else if(wam!=null&&wam>=SM_AG.up&&wnp>=SM_AG.no&&(!L.met||met>=TH.upN)){const pin=!String((typeof smD==='function'?smD().pin:'')||'').trim()&&W.some(r=>/^ipad:/.test(String(r.src||'')));
+        rules.push(['ok','Agreement '+pct(wam)+' and the teacher&rsquo;s Nos matched '+wm+' of '+wt+' ('+pct(wnp)+') over the last '+W.length+' school days at '+pct(run.g)+': phase '+next.ph+' of the matching ladder is due.'+(pin?' Set a PIN on the Rate page first: with none, the adult&rsquo;s part of the Student screen opens to anyone who holds the button, so the teacher&rsquo;s ratings on the iPad cannot be told from the student&rsquo;s.':'')]);}
+      else rules.push(['mid','Agreement '+(wam!=null?pct(wam):'—')+', the teacher&rsquo;s Nos matched '+wm+' of '+wt+(wnp!=null?' ('+pct(wnp)+')':'')+': stay on phase '+ph+'.']);
+    }
+  }
+  if(!hasT&&tx.length)rules.push(['mid','This sheet has no teacher rating: its points are the student&rsquo;s own, and the plan&rsquo;s own data (Form DD-1) carry the behavior.']);
+  const vtag=rules.some(r=>r[0]==='no')?'v-no':rules.some(r=>r[0]==='ok')?'v-ok':'v-mid';
+  v.innerHTML='<div class="verdict '+vtag+'"><b>Phase '+(ph||'?')+' · '+R.length+' day'+(R.length===1?'':'s')+' recorded.</b> '+(rules[0]?rules[0][1]:'')+'</div>';
+  RU.innerHTML='<ul style="font-family:var(--sans);font-size:12.5px;margin:4px 0 4px 18px">'+rules.map(r=>'<li>'+r[1]+'</li>').join('')+'</ul><p class="hint">The thresholds ('+TH.upN+' of '+TH.upW+' to raise, fewer than '+TH.dnN+' of '+TH.dnW+' to lower, each new goal held '+TH.hold+' school days; agreement '+SM_AG.up+'% to move on the ladder and below '+SM_AG.down+'% to step back, the teacher&rsquo;s Nos matched at '+SM_AG.no+'%) are the form&rsquo;s working conventions, written on the Reinforcement and Teach sheets. Only the days at the current goal and phase count, and one change is advised at a time.</p>';
   drawLog(R);
 }
 function drawLog(R){
   /* full check: the legend under the chart was one centred line of about 1100 units in a 900-unit chart, cut at both
      ends; it is two lines now, with the plot 14 units shorter to make room (B 48 -> 62; the chart's size is unchanged) */
   const W=900,H=320,L=56,Rg=20,T=18,B=62,n=Math.max(R.length,10);const X=i=>L+(i+0.5)*(W-L-Rg)/n,Y=v=>T+(H-T-B)*(1-v/100);
+  /* v22.7x (review F258): the behavior (the teacher's ratings) is the main line where the sheet has a teacher rating; the
+     points, which pay an honest No too, are the second line */
+  const hasT=smHasT()&&S.sys!=='cico'&&R.some(r=>r.b!=null);
   let s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>';
   [0,25,50,75,100].forEach(p=>{s+='<line x1="'+L+'" y1="'+Y(p)+'" x2="'+(W-Rg)+'" y2="'+Y(p)+'" stroke="#e3e8ea"/><text x="'+(L-6)+'" y="'+(Y(p)+4)+'" font-size="11" text-anchor="end" fill="#5B6B6B" font-family="system-ui,sans-serif">'+p+'%</text>';});
   s+='<line x1="'+L+'" y1="'+Y(0)+'" x2="'+(W-Rg)+'" y2="'+Y(0)+'" stroke="#182e43"/><line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+Y(0)+'" stroke="#182e43"/>';
   /* phase changes as dashed lines, the goal as a stepped line */
   let prev=null;R.forEach((r,i)=>{if(prev!==null&&r.ph!==prev){const x=X(i)-(W-L-Rg)/n/2;s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+Y(0)+'" stroke="#182e43" stroke-dasharray="4 4"/><text x="'+(x+4).toFixed(1)+'" y="'+(T+12)+'" font-size="11" fill="#182e43" font-family="system-ui,sans-serif">phase '+esc(r.ph)+'</text>';}prev=r.ph;});
-  let gp='';R.forEach((r,i)=>{if(r.g!=null){const x0=X(i)-(W-L-Rg)/n/2,x1=X(i)+(W-L-Rg)/n/2;gp+='M'+x0.toFixed(1)+' '+Y(r.g).toFixed(1)+' L'+x1.toFixed(1)+' '+Y(r.g).toFixed(1)+' ';}});
+  let gp='';R.forEach((r,i)=>{if(r.g!=null&&r.ph!=='0'){const x0=X(i)-(W-L-Rg)/n/2,x1=X(i)+(W-L-Rg)/n/2;gp+='M'+x0.toFixed(1)+' '+Y(r.g).toFixed(1)+' L'+x1.toFixed(1)+' '+Y(r.g).toFixed(1)+' ';}});
   if(gp)s+='<path d="'+gp+'" stroke="#9b4e15" stroke-width="2" fill="none"/>';
-  let d='';R.forEach((r,i)=>{if(r.pc==null){d+='|';return;}d+=(d&&!d.endsWith('|')?'L':'M')+X(i).toFixed(1)+' '+Y(r.pc).toFixed(1)+' ';});
-  d.split('|').forEach(seg=>{if(seg.trim())s+='<path d="'+seg+'" fill="none" stroke="#2f5568" stroke-width="2"/>';});
-  /* a thin line per target when per-target percents were entered */
-  const TC=['#5C9E31','#9B4E15','#5b3f78','#b1860b','#8E2A2A'];S.tg.forEach((t,ti)=>{let dd='';R.forEach((r,i)=>{const v=r.tp[ti];if(v==null){dd+='|';return;}dd+=(dd&&!dd.endsWith('|')?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';});dd.split('|').forEach(seg=>{if(seg.trim())s+='<path d="'+seg+'" fill="none" stroke="'+TC[ti%5]+'" stroke-width="1.2" stroke-dasharray="3 3"/>';});});
-  R.forEach((r,i)=>{if(r.pc==null)return;s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(r.pc).toFixed(1)+'" r="4.5" fill="'+(r.ph==='0'?'#fff':r.met?'#2F6B37':'#2f5568')+'" stroke="#2f5568" stroke-width="1.5"/>';
+  const line=(get,col,w,dash)=>{let d='';R.forEach((r,i)=>{const v=get(r);if(v==null){d+='|';return;}d+=(d&&!d.endsWith('|')?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';});
+    d.split('|').forEach(seg=>{if(seg.trim())s+='<path d="'+seg+'" fill="none" stroke="'+col+'" stroke-width="'+w+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';});};
+  if(hasT)line(r=>r.pc,'#9aa9b0',1.6,'6 3');
+  line(r=>hasT?r.b:r.pc,'#2f5568',2);
+  /* a thin line per target: the teacher's ratings per target where kept, else the points per target */
+  const TC=['#5C9E31','#9B4E15','#5b3f78','#b1860b','#8E2A2A'];S.tg.forEach((t,ti)=>line(r=>{const bv=r.bp[ti];return bv!=null?bv:hasT?null:r.tp[ti];},TC[ti%5],1.2,'3 3'));
+  R.forEach((r,i)=>{const v=hasT?r.b:r.pc;if(v!=null)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="4.5" fill="'+(r.ph==='0'?'#fff':r.mt?'#2F6B37':'#2f5568')+'" stroke="#2f5568" stroke-width="1.5"/>';
+    if(hasT&&r.pc!=null)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(r.pc).toFixed(1)+'" r="2.5" fill="#9aa9b0"/>';
     if(r.ag!=null)s+='<rect x="'+(X(i)-3).toFixed(1)+'" y="'+(Y(r.ag)-3).toFixed(1)+'" width="6" height="6" fill="#76a2a3"/>';
     s+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(0)+14)+'" font-size="10" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+esc(String(r.date||i+1).slice(0,6))+'</text>';});
-  [['Percent of points (line; filled green when the goal was met; hollow in the teacher-only phase)',H-22],['goal (brown) · agreement (small squares) · per-target percents (thin dashed lines)',H-7]].forEach(([t,y])=>{
-    s+='<text x="'+((L+W-Rg)/2)+'" y="'+y+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+t+'</text>';});
+  [[hasT?'Behavior: the share of the teacher’s ratings that were Yes (line; green when the day’s goal was met; hollow in phase 0)':'Percent of points (line; filled green when the goal was met; hollow in the teacher-only phase)',H-22],
+   [hasT?'points (grey dashes; an honest No earns points too) · goal of points (brown) · agreement (squares) · per target (thin dashes)':'goal (brown) · agreement (small squares) · per-target percents (thin dashed lines)',H-7]].forEach(([t,y])=>{
+    s+='<text x="'+((L+W-Rg)/2)+'" y="'+y+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+esc(t)+'</text>';});
   $('#logPlot').innerHTML=s;
 }
 
@@ -2828,7 +2914,7 @@ function fromFile(d){
   const fid=arr('fid',['in','note'],FID.length);if(fid&&fid.length===FID.length)o.fid=fid;
   const fade=arr('fade',['on','note'],FADE.length);if(fade&&fade.length===FADE.length)o.fade=fade;
   const bck=arr('bck',['in','note'],BCRULES.length);if(bck&&bck.length===BCRULES.length)o.bck=bck;
-  o.log=arr('log',['date','ph','goal','pts','poss','m','n','met','tgp','note','src'],400)||[];   /* src (v21.46): 'ipad:yyyy-mm-dd' for a row a day rated on the iPad wrote */
+  o.log=arr('log',['date','ph','goal','pts','poss','beh','m','n','tno','nom','sno','asm','met','tgp','bgp','note','src'],400)||[];   /* v22.7x (F258) the behavior and the No counts */   /* src (v21.46): 'ipad:yyyy-mm-dd' for a row a day rated on the iPad wrote */
   Object.keys(obj('wk')).forEach(k=>{if(/^d[0-4]_p\d+$/.test(k))o.wk[k]=str(s.wk[k]);});
   o.tg.forEach(t=>{if(!window.NBH_PICTOS||!NBH_PICTOS[t.icon])t.icon='';});o.per.forEach(p=>{if(!window.NBH_PICTOS||!NBH_PICTOS[p.icon])p.icon='';});
   if(typeof mmFromFile==='function'){const mm=mmFromFile(s.mm);if(mm)o.mm=mm;}   /* v21.66 Match the model; mmEnsure cleans it */
@@ -2843,8 +2929,8 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const out=[['Day','Date','Phase','Goal %','Points','Possible','%','Matches','Ratings','Agreement %','Goal met','Per target %','Note']];
-  rows().forEach((r,i)=>out.push([i+1,r.date,r.ph,r.goal,r.pts,r.poss,r.pc==null?'':r.pc.toFixed(1),r.m,r.n,r.ag==null?'':r.ag.toFixed(1),r.met?'yes':'no',r.tgp||'',r.note]));
+  const out=[['Day','Date','Phase','Goal %','Points','Possible','% of points','Behavior %','Matches','Ratings','Agreement %','Teacher No','No matched','Student No','Goal met','Per target % (points)','Per target % (behavior)','Note']];   /* v22.7x (F258, F260) */
+  rows().forEach((r,i)=>out.push([i+1,r.date,r.ph,r.goal,r.pts,r.poss,r.pc==null?'':r.pc.toFixed(1),r.b==null?'':r.b.toFixed(1),r.m,r.n,r.ag==null?'':r.ag.toFixed(1),r.tno==null?'':r.tno,r.nom==null?'':r.nom,r.sno==null?'':r.sno,r.mt==null?'':r.mt?'yes':'no',r.tgp||'',r.bgp||'',r.note]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='SM-1_record.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
@@ -2864,7 +2950,7 @@ async function loadSim(){
     mp_yy:'2',mp_nn:'1',mp_yn:'0',mp_ny:'0',goal:'75',goal_txt:'',menu:'Extra recess with a friend (5 min) · Line leader · Drawing time at the back table · Feed the class fish · Teacher helper',
     when:'Same day, at the end of the sheet',bonus:'A sticker on the sheet when every rating in the day matches',never:'Points are never taken away; a mismatch earns 0 and nothing more is said; the sheet is never shown to the class',
     homeNote:'The sheet goes home in the folder; a parent initials it; a goal day earns five minutes of praise and a story, not a second reward',group:'',
-    cc_up:'Met on 4 of the last 5 school days',cc_step:'5 points',cc_down:'Met on fewer than 2 of 5 days, or Sam stops choosing a reward',cc_cap:'90',
+    cc_up:'Met on 4 of the last 5 school days',cc_hold:'3 school days',cc_step:'5 points',cc_down:'Met on fewer than 2 of 5 days, or Sam stops choosing a reward',cc_cap:'90',
     tr_ex:'For each target: the teacher and the para act out three examples and three non-examples; Sam labels each with a face card until 9 of 10 are right, two days running.',
     tr_prac:'Two practice periods on '+Y(17)+': Sam rated, Ms. R. rated, they compared; an honest sad face was praised each time it was earned.',tr_acc:'Agreement at or above 80% on 3 practice days',
     tr_dis:'Ms. R.’s rating stands; Sam may ask once what she saw; no argument on the sheet',tr_who:'J. Ellis with Ms. R., '+Y(18)+' and '+Y(17),
@@ -2876,7 +2962,7 @@ async function loadSim(){
     ci_key:'2 = Yes, met the expectation · 1 = Partly, with a reminder · 0 = No',ci_mentor:'Mr. Ortiz, front office',ci_in:'8:10; greet, card out, goal said aloud, materials check',ci_out:'2:55; total the points, praise or problem-solve, copy home',ci_goal:'80',ci_home:'Yes, signed and returned next morning',
     smp_goal:'“Stay in my area and use my break card” (Sam chose it from two)',smp_eval:'At check-out Sam circles YES or NO on the goal and says one thing that helped',smp_instr:'At the cue: “Am I in my area? Yes, keep going.” Taught aloud, then whispered, then silent',smp_selfr:'Sam picks the reward from the menu when the total meets the goal, after Ms. R. initials the total',
     bc_student:'',bc_teacher:'Ms. R.',bc_parent:'Sam’s father',bc_start:Y(10),bc_review:F(4),bc_voice:'Negotiated line by line',bc_task:'Earn the goal on my point sheet',bc_how:'At least 4 of 5 school days in the week',bc_when:'Every school day, all six periods, Room 12 and specials',bc_record:'Ms. R. initials the task record each day the goal is met',bc_adult:'Ms. R. will rate every period and give the daily reward the same day; Dad will read the home note each night and sign on Friday',bc_rw:'Extra recess with a friend',bc_rwmuch:'10 minutes',bc_rwwhen:'Friday at 2:40',bc_rwwho:'Ms. R.',bc_bonus:'Five days in a row earns lunch with a friend in the classroom',bc_pen:'None: a day the task is not done earns nothing, and nothing is lost',bc_pentext:'',bc_renego:'Either of us may ask for a meeting; the contract is rewritten, never changed by one side',
-    sh_date:'',sh_title:'',sh_reward:'',decision:'Week 3: goal raised from 75 to 80 on '+Y(2)+' (met 4 of 5). Matching stays at every period until agreement holds at 90.',sv:'Sam chose the sheet with faces over the one with words and asks for the recess reward most days.'};
+    sh_date:'',sh_title:'',sh_reward:'',decision:'Week 3: goal raised from 75 to 80 on '+Y(2)+' (met 4 of 5 after 5 school days at 75). Matching stays at every period until agreement holds at 90 and Sam matches the teacher’s Nos at 80.',sv:'Sam chose the sheet with faces over the one with words and asks for the recess reward most days.'};
   S.chk={pict:true,home:true,weekly:false,big:false,graph:true,eval:true,pocket:false,rubmatch:true};
   /* v21.45 the design and the reward store */
   S.d={look:'bright',rate:'thumbs',av:'faceboy2',wf:true,mid:'18 points by lunch = 5 minutes of drawing at the back table',cstrip:false};
@@ -2885,16 +2971,23 @@ async function loadSim(){
     {word:'I followed directions the first time',def:'Starts the task within 10 s of the direction, with at most one reminder',cue:'Start within 10 seconds',ex:'Opens the book when asked',nex:'Says “no” and waits for a third prompt',icon:'follow',img:'',goal:'80'},
     {word:'I used kind words and hands',def:'No hitting, pushing, grabbing or name-calling; asks for help or a break with the card',cue:'Gentle and respectful',ex:'Asks for a turn; uses the break card',nex:'Pushes a chair; calls a peer a name',icon:'safehands',img:'',goal:'90'}];
   S.per=[{t:'8:30',label:'Arrival',icon:'arrival',img:''},{t:'9:15',label:'Reading',icon:'reading',img:''},{t:'10:00',label:'Math',icon:'math',img:''},{t:'11:00',label:'Specials',icon:'art',img:''},{t:'12:15',label:'Lunch and recess',icon:'lunch',img:''},{t:'1:30',label:'Centers',icon:'centers',img:''}];
-  S.fade.forEach((f,i)=>{f.on=i===0;f.note=i===0?'From '+Y(11)+'; every period rated':'';});S.bck.forEach(b=>{b.in='Yes';});
-  S.lad.forEach((l,i)=>{l.on=i===1;l.note=i===0?'Days 1 to 4 ('+Y(15)+' to '+Y(12)+'): mean 58%; first goal set at 70':i===1?'From '+Y(11)+'; agreement 75% in week 1, 88% in week 2, 92% in week 3':'';});
+  S.fade.forEach((f,i)=>{f.on=i===0;f.note=i===0?'From '+Y(16)+'; every period rated':'';});S.bck.forEach(b=>{b.in='Yes';});
+  S.lad.forEach((l,i)=>{l.on=i===1;l.note=i===0?'Days 1 to 4 ('+Y(20)+' to '+Y(17)+'): the targets met in 41% of the teacher’s ratings; first goal set at 70% of the points (met on 2 of the 4 days)':i===1?'From '+Y(16)+'; agreement 75% in week 1, 88% in week 2, 92% in week 3':'';});
   S.fid.forEach((f,i)=>{f.in='Yes';f.note=i===2?'Ms. R. rates on her clipboard before Sam shows his sheet':i===8?'Returned 9 of 11 days':'';});
-  const base=[52,61,56,64],g1=70,g2=75,g3=80;
-  const days=[[g1,'0',52,36,null,null],[g1,'0',61,36,null,null],[g1,'0',56,36,null,null],[g1,'0',64,36,null,null],
-    [g1,'1',64,36,13,18],[g1,'1',72,36,14,18],[g1,'1',69,36,13,18],[g1,'1',78,36,15,18],[g1,'1',75,36,15,18],
-    [g1,'1',81,36,16,18],[g1,'1',78,36,16,18],[g1,'1',83,36,17,18],[g1,'1',86,36,16,18],[g1,'1',72,36,16,18],
-    [g2,'1',83,36,17,18],[g2,'1',89,36,17,18],[g2,'1',78,36,16,18],[g2,'1',86,36,17,18],[g2,'1',92,36,18,18],
-    [g3,'1',83,36,17,18],[g3,'1',89,36,17,18]];
-  S.log=days.map((d,i)=>{const pts=Math.round(36*d[2]/100);const tp=[Math.min(100,d[2]+8),Math.max(0,d[2]-10),Math.min(100,d[2]+4)];return{date:D(days.length-1-i),ph:d[1],goal:String(d[0]),pts:String(pts),poss:'36',m:d[4]==null?'':String(d[4]),n:d[5]==null?'':String(d[5]),met:d[1]!=='0'&&pts/36*100>=d[0],tgp:tp.join(','),note:i===4?'first day rating':i===14?'goal raised to 75':i===19?'goal raised to 80':''};});
+  /* v22.7x (review F258, F262): the baseline is four teacher-only days (no points, the share of the teacher's ratings that were
+     Yes), and each self-rating day carries the behavior beside the points, with the teacher's Nos and how many Sam matched */
+  const g1=70,g2=75,g3=80;
+  const days=[[null,'0',null,30,null,null],[null,'0',null,44,null,null],[null,'0',null,38,null,null],[null,'0',null,52,null,null],
+    [g1,'1',64,40,13,18],[g1,'1',72,50,14,18],[g1,'1',69,46,13,18],[g1,'1',78,60,15,18],[g1,'1',75,56,15,18],
+    [g1,'1',81,64,16,18],[g1,'1',78,60,16,18],[g1,'1',83,68,17,18],[g1,'1',86,74,16,18],[g1,'1',72,52,16,18],
+    [g2,'1',83,68,17,18],[g2,'1',89,80,17,18],[g2,'1',78,62,16,18],[g2,'1',86,76,17,18],[g2,'1',92,86,18,18],
+    [g3,'1',83,70,17,18],[g3,'1',89,80,17,18]];
+  const cl=v=>Math.max(0,Math.min(100,v));
+  S.log=days.map((d,i)=>{const b=d[3],tno=Math.round(18*(1-b/100)),base=d[1]==='0';
+    if(base)return{date:D(days.length-1-i),ph:'0',goal:'',pts:'',poss:'',beh:String(b),m:'',n:'',tno:'',nom:'',sno:'',asm:'',met:false,tgp:'',bgp:[cl(b+10),cl(b-12),cl(b+2)].join(','),note:i===0?'teacher rating only':'',src:''};
+    const pts=Math.round(36*d[2]/100),nom=Math.max(0,tno-(d[5]-d[4]));
+    return{date:D(days.length-1-i),ph:d[1],goal:String(d[0]),pts:String(pts),poss:'36',beh:String(b),m:String(d[4]),n:String(d[5]),tno:String(tno),nom:String(nom),sno:String(nom),asm:'',met:pts/36*100>=d[0],
+      tgp:[cl(d[2]+8),cl(d[2]-10),cl(d[2]+4)].join(','),bgp:[cl(b+10),cl(b-12),cl(b+2)].join(','),note:i===4?'first day rating':i===14?'goal raised to 75':i===19?'goal raised to 80':'',src:''};});
   S.meta.goal='80';
   if(typeof smRSim==='function')smRSim();   /* v21.46 today's first periods rated on the iPad (sm-rate.js) */
   if(typeof mmSim==='function')mmSim(D);   /* v21.66 */
@@ -2934,15 +3027,20 @@ window.__nbhFactsIn=function(f){
   if(n)renderAll();return {filled:n};
 };
 /* v21.74 out: the Record's days (the share of the points earned, the goal, whether it was met), for Form DD-1's week summary.
+   v22.7x (review F258, F259, F262): with the behavior (beh: the share of the teacher's ratings that were Yes), the ladder
+   phase (ph; a teacher-only day, phase 0, has no points and no goal to meet, so Forms DD-1 and PR-1 leave it out of the
+   treatment figures) and the goal met as worked out from the points.
    A date without a year ("10/13", as the Record writes it) is this year's, or last year's when that is more than two months ahead. */
 const nbhSmIso=s=>{s=String(s||'').trim();let m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
   m=/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2}|\d{4}))?$/.exec(s);if(!m||+m[1]<1||+m[1]>12||+m[2]<1||+m[2]>31)return '';
   const now=new Date();let y=m[3]?(m[3].length===2?2000+(+m[3]):+m[3]):now.getFullYear();
   if(!m[3]&&new Date(y,+m[1]-1,+m[2])-now>61*864e5)y--;
   return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');};
-window.__nbhFactsOut=function(){try{const days=(S.log||[]).map(r=>{const d=nbhSmIso(r.date),p=num(r.pts),q=num(r.poss);
-    return d&&p!=null&&q?{date:d,pct:Math.round(p/q*1000)/10,goal:num(r.goal),met:!!r.met}:null;}).filter(Boolean).slice(-60);
-  return days.length?{points:{days,src:'SM-1'}}:null;}catch(e){return null;}};
+window.__nbhFactsOut=function(){try{const r1=v=>v==null?null:Math.round(v*10)/10;
+  const days=rows().map(r=>{const d=nbhSmIso(r.date);if(!d)return null;
+    if(r.ph==='0')return r.b!=null||r.pc!=null?{date:d,pct:r1(r.pc),beh:r1(r.b),ph:'0',goal:null,met:null}:null;
+    return r.pc!=null?{date:d,pct:r1(r.pc),beh:r1(r.b),ph:r.ph,goal:r.g,met:!!r.mt}:null;}).filter(Boolean).slice(-60);
+  return days.length?{points:{days,src:'SM-1',beh:smHasT()?(S.sys==='cico'?'adult':'teacher'):''}}:null;}catch(e){return null;}};
 window.__nbhFactsPick=function(sel){
   let n=0;const dup=[];
   const add=o=>{const had=nbhSmK(o.word)?S.tg.find(t=>nbhSmK(t.word)===nbhSmK(o.word)):null;
@@ -3464,10 +3562,28 @@ function smRVal(M,day,r,t){const k=r+'_'+t,ok=v=>Number.isInteger(v)&&v>=0&&v<M.
   else if(M.sys==='match'){if(a!=null){done=true;p=b!=null?M.lv[b][1]+(a===b?M.bonus:0):M.lv[a][1];}else if(b!=null)p=0;}
   else if(a!=null||b!=null){done=a!=null;p=M.lv[b!=null?b:a][1];}
   return {a,b,p,done,both:a!=null&&b!=null,same:a!=null&&b!=null&&a===b};}
-function smRTotals(M,day){let pts=0,m=0,n=0,wait=0;const tp=M.tg.map(()=>0);
-  M.rows.forEach((r,ri)=>M.tg.forEach((t,ti)=>{const v=smRVal(M,day,ri,ti);pts+=v.p;tp[ti]+=v.p;if(v.both){n++;if(v.same)m++;}if(M.match&&v.a!=null&&v.b==null)wait++;}));
+/* v22.7x (review F261): at fading step 2 only the hardest half of the periods are rated, and "the rest are assumed met": once
+   the day is finished (or as it is finished), each period with no rating at all counts as met, its full points, instead of
+   0 against the full possible; it is left out of the behavior measure (smRBeh), which is only what was seen */
+function smFadeStep(){let k=-1;(S.fade||[]).forEach((f,i)=>{if(f&&f.on)k=i;});return k;}
+function smRAssume(day,final){return !!day&&(!!day.f2||(!!final&&smFadeStep()===1));}
+function smRTotals(M,day,final){let pts=0,m=0,n=0,wait=0,asm=0;const tp=M.tg.map(()=>0),as=smRAssume(day,final);
+  M.rows.forEach((r,ri)=>{const none=as&&!M.tg.some((t,ti)=>day.me[ri+'_'+ti]!=null||day.t[ri+'_'+ti]!=null);if(none)asm++;
+    M.tg.forEach((t,ti)=>{if(none){pts+=M.maxc;tp[ti]+=M.maxc;return;}const v=smRVal(M,day,ri,ti);pts+=v.p;tp[ti]+=v.p;if(v.both){n++;if(v.same)m++;}if(M.match&&v.a!=null&&v.b==null)wait++;});});
   const poss=M.rows.length*M.tg.length*M.maxc,g=num(S.meta.goal),need=g!=null&&poss?Math.ceil(poss*g/100):null,per=M.rows.length*M.maxc;
-  return {pts,poss,need,g,m,n,wait,tp:tp.map(x=>per?Math.round(x/per*100):'')};}
+  return {pts,poss,need,g,m,n,wait,asm,tp:tp.map(x=>per?Math.round(x/per*100):'')};}
+/* v22.7x (review F258, F260): the behavior a day rated on the iPad shows: the adult's ratings, as the share at the top level
+   (Yes; with a style of more levels, the mean level as a share of the top), overall and per target; the adult's Nos (below
+   the top level) on the ratings the student also made, and how many of them the student matched; the student's own Nos.
+   A sheet the adult does not rate has none. */
+function smRBeh(M,day){if(!M||!day||!M.raters.includes('t'))return null;const mx=Math.max(...M.lv.map(x=>x[1]))||1;
+  let sum=0,cnt=0,tno=0,nom=0,sno=0;const ts=M.tg.map(()=>[0,0]);
+  M.rows.forEach((r,ri)=>M.tg.forEach((t,ti)=>{const v=smRVal(M,day,ri,ti);
+    if(v.b!=null){const f=M.lv[v.b][1]/mx;sum+=f;cnt++;ts[ti][0]+=f;ts[ti][1]++;if(v.a!=null&&M.lv[v.b][1]<mx){tno++;if(v.a===v.b)nom++;}}
+    if(v.a!=null&&M.lv[v.a][1]<mx)sno++;}));
+  return {b:cnt?sum/cnt*100:null,tp:ts.map(x=>x[1]?Math.round(x[0]/x[1]*100):''),n:cnt,yes:Math.round(sum),tno,nom,sno};}
+/* v22.7x (review F262): phase 0 of the matching ladder, the teacher rating alone (the baseline) */
+function smRPh0(M){return curPhase()==='0'&&!!M&&M.raters.includes('t');}
 /* whose rating the buttons set: the student's or the adult's; a one-rater sheet has only that rater (the adult may correct the student's) */
 function smRWho(M){return M.raters.length===1?M.raters[0]:SMR.mode;}
 function smRRowDone(M,day,ri,who){return M.tg.every((t,ti)=>day[who][ri+'_'+ti]!=null);}
@@ -3493,6 +3609,7 @@ function smRRender(){const host=$('#smRate');if(!host)return;smREnsure();if(!SMR
   if(!M){host.innerHTML='<div class="smr-empty">The '+({perf:'performance count',interlock:'interlocking session'}[S.sys]||'')+' sheet is kept on paper. Rating on the iPad works with Self &amp; Match, the contract, expectations and earns, check-in/check-out, cued intervals and the rubric point sheet.</div>';return;}
   if(SMR.sel<0||SMR.sel>=M.rows.length)SMR.sel=smRNow(M,day);
   if(!SMR.kid&&!SMR.modeSet&&M.raters.length===1&&M.raters[0]==='t')SMR.mode='t';   /* check-in/check-out: the adult rates */
+  if(!SMR.kid&&!SMR.modeSet&&smRPh0(M))SMR.mode='t';   /* v22.7x (F262) phase 0: the adult rates alone */
   const T=smRTotals(M,day),kid=SMR.kid,teach=SMR.mode==='t';
   let h='';
   /* the top: who, the date, the mode, the day's buttons */
@@ -3507,10 +3624,14 @@ function smRRender(){const host=$('#smRate');if(!host)return;smREnsure();if(!SMR
   /* the goal */
   const st=smStore(),wfI=st.find(o=>o.n&&o.n===day.wf),wfP=wfI?num(wfI.p):null,bank=smRBank();
   const W=v=>Math.max(0,Math.min(100,T.poss?v/T.poss*100:0)).toFixed(1)+'%';
+  if(smRPh0(M)){const B=smRBeh(M,day);h+='<div class="smr-goal smr-ph0"><div class="smr-gl"><span><b>Phase 0: '+esc(M.tw)+' rates alone.</b> '+(B&&B.n?'Today the targets met in <b>'+B.yes+'</b> of '+B.n+' rating'+smPoss(B.n)+' ('+Math.round(B.b)+'%).':'No rating yet today.')+'</span></div>'+
+    '<div class="smr-wait">No points depend on the sheet yet: the day goes into the Record as a baseline day, the share of the adult&rsquo;s ratings that were Yes. The Record suggests the first goal from 3 or more such days.</div></div>';}
+  else{
+  if(smFadeStep()===1&&!day.fin)h+='<div class="smr-wait">Fading step 2: the periods left unrated today count as met (their full points) when the day is finished.</div>';
   h+='<div class="smr-goal"><div class="smr-gl"><span><b class="big">'+T.pts+'</b> point'+smPoss(T.pts)+' '+(T.need!=null?(T.pts>=T.need?'<span class="smr-met">Goal reached!</span>':'· '+(T.need-T.pts)+' more to my goal of '+T.need):'of '+T.poss)+'</span>'+
     (bank!=null?'<span class="smr-bank">In my bank: <b>'+bank+'</b></span>':'')+'</div><div class="smr-bar'+(wfP!=null&&wfP!==T.need&&wfP<=T.poss?' rw':'')+'" role="img" aria-label="'+T.pts+' of '+T.poss+' points'+(T.need!=null?', goal '+T.need:'')+'"><div class="smr-fill" style="width:'+W(T.pts)+'"></div>'+
     (T.need!=null?'<div class="smr-mk" style="left:'+W(T.need)+'"><span>goal '+T.need+'</span></div>':'')+(wfP!=null&&wfP!==T.need&&wfP<=T.poss?'<div class="smr-mk rw" style="left:'+W(wfP)+'"><span>'+esc(wfI.n)+' '+wfP+'</span></div>':'')+'</div>'+
-    (teach&&T.wait?'<div class="smr-wait">'+T.wait+' rating'+smPoss(T.wait)+' not matched yet: '+(T.wait===1?'it counts':'they count')+' as the student rated, until you rate '+(T.wait===1?'it':'them')+'.</div>':'')+'</div>';
+    (teach&&T.wait?'<div class="smr-wait">'+T.wait+' rating'+smPoss(T.wait)+' not matched yet: '+(T.wait===1?'it counts':'they count')+' as the student rated, until you rate '+(T.wait===1?'it':'them')+'.</div>':'')+'</div>';}
   /* what the student is working for */
   if(st.length){h+='<div class="smr-wf"><b>'+(day.fin?'I chose:':'I’m working for:')+'</b><div class="smr-tiles">'+st.map((o,i)=>{const p=num(o.p),on=day.fin?o.n===day.rw:o.n===day.wf,can=!day.fin||p==null||p<=T.pts+(bank!=null?bank:0);
       return '<button type="button" class="smr-tile'+(on?' on':'')+(can?'':' dim')+'" data-rwf="'+i+'" aria-pressed="'+on+'">'+smStorePic(o,kid?54:38)+'<span>'+esc(o.n||'')+'</span>'+(o.p?'<i>'+esc(o.p)+'</i>':'')+'</button>';}).join('')+'</div></div>';}
@@ -3569,7 +3690,8 @@ function smRSettings(M){const d=smD();
     (M.sys!=='interval'?'<label class="ck"><input type="checkbox" data-d="rchime"'+(d.rchime?' checked':'')+'> Chime when a period ends and open it for rating (the times on the schedule; the iPad stays awake while the Rate page or the Student screen is open)</label>':
      '<label>The cue <select data-d="rcue"><option value=""'+(d.rcue!=='flash'?' selected':'')+'>A soft chime and the screen flashes</option><option value="flash"'+(d.rcue==='flash'?' selected':'')+'>The screen flashes, no sound (for a quiet room)</option></select></label>')+
     '<label>PIN for '+esc(M.tw.toLowerCase())+'’s part on the Student screen <input data-d="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" value="'+esc(d.pin||'')+'" placeholder="none" style="width:8em"></label>'+
-    '<p class="hint">On the Student screen the student sees only their part. '+esc(M.tw)+'’s part opens by holding '+esc(M.tw.toLowerCase())+'’s button for a second, and the PIN when one is set: it keeps the student on their part; it is not a lock on the file.</p></details>';}
+    '<p class="hint">On the Student screen the student sees only their part. '+esc(M.tw)+'’s part opens by holding '+esc(M.tw.toLowerCase())+'’s button for a second, and the PIN when one is set: it keeps the student on their part; it is not a lock on the file.</p>'+
+    (M.match&&!String(d.pin||'').trim()?'<p class="hint"><b>No PIN set:</b> anyone who holds the button opens '+esc(M.tw.toLowerCase())+'’s part, so on the Student screen the student could rate as '+esc(M.tw.toLowerCase())+'. Set one before the matching is thinned: the Record asks for it then (review F260).</p>':'')+'</details>';}
 function smRDays(){const ks=Object.keys(S.days||{}).filter(k=>smRAny(S.days[k])).sort().reverse();if(!ks.length)return '';
   return '<div class="smr-days"><h3>Days rated on the iPad</h3><table><thead><tr><th>Day</th><th>Points</th><th>Goal</th><th>Same answer</th><th>Reward</th><th></th></tr></thead><tbody>'+ks.map(k=>{const d=S.days[k],M=smRModel(d);if(!M)return '';const T=smRTotals(M,d);
     return '<tr'+(k===SMR.date?' class="cur"':'')+'><td>'+esc(smRLong(k))+(d.fin?'':' <i>(not finished)</i>')+'</td><td>'+T.pts+' / '+T.poss+'</td><td>'+(T.need==null?'—':T.pts>=T.need?'met':'not met')+'</td><td>'+(M.match&&T.n?T.m+' of '+T.n:'—')+'</td><td>'+esc(d.rw||'')+'</td><td class="b"><button type="button" class="smr-b" data-ropen="'+k+'">Open</button><button type="button" class="smr-b" data-rprint="'+k+'">Print</button><button type="button" class="smr-b" data-rdel="'+k+'" aria-label="Delete '+esc(smRLong(k))+'">Delete</button></td></tr>';}).join('')+'</tbody></table></div>';}
@@ -3639,10 +3761,18 @@ function smRParty(T){let fx=$('#smRFx');if(!fx){fx=document.createElement('div')
   let c='';if(!calm)for(let i=0;i<70;i++)c+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;background:'+C[i%C.length]+';animation-delay:'+(Math.random()*.8).toFixed(2)+'s;animation-duration:'+(1.8+Math.random()*1.4).toFixed(2)+'s;transform:rotate('+Math.round(Math.random()*360)+'deg)"></i>';
   fx.innerHTML='<div class="smr-conf">'+c+'</div><div class="smr-party" role="status"><div class="smr-pbig">'+smGlyph('st',84).replace('fill="#fff"','fill="#f5c518"')+'</div><b>'+(smName()?esc(smName())+', you':'You')+' reached your goal!</b><span>'+T.pts+' points today</span><button type="button" class="smr-b pri" id="smRFxOk">Yay!</button></div>';
   fx.hidden=false;smRChime();clearTimeout(SMR.fx);SMR.fx=setTimeout(()=>{fx.hidden=true;},7000);}
-async function smRFinish(){const day=smRDay();if(!smRAny(day))return;const M=smRModel(day),T=smRTotals(M,day),met=T.need!=null&&T.pts>=T.need;
-  if(!(await nbhUI.confirm('Finish '+smRLong(SMR.date)+'?\n'+T.pts+' of '+T.poss+' points'+(T.need!=null?(met?': the goal is met.':': the goal ('+T.need+') is not met.'):'.')+(T.wait?'\n'+T.wait+' rating'+smPoss(T.wait)+' not matched count as the student rated.':'')+'\nThe day goes into the Record as one row'+(day.fin?' (its row is updated)':'')+'.',{ok:'Finish the day'})))return;
-  const row={date:smRShort(SMR.date),ph:curPhase(),goal:S.meta.goal||'',pts:String(T.pts),poss:String(T.poss),m:M.match?String(T.m):'',n:M.match?String(T.n):'',met,tgp:['match','contract','smiley','cico'].includes(M.sys)?T.tp.join(','):'',
-    note:'Rated on the iPad'+(day.note?': '+day.note.replace(/\s+/g,' ').slice(0,200):''),src:'ipad:'+SMR.date};
+/* v22.7x (review F258, F260, F261, F262): the row carries the behavior and the No counts beside the points; a teacher-only day
+   (phase 0) goes in as a baseline day with no points; at fading step 2 the unrated periods count as met */
+async function smRFinish(){const day=smRDay();if(!smRAny(day))return;const M=smRModel(day),T=smRTotals(M,day,true),B=smRBeh(M,day),ph0=smRPh0(M),met=!ph0&&T.need!=null&&T.pts>=T.need;
+  const bl=B&&B.n?'the targets met in '+B.yes+' of '+B.n+' of '+M.tw.toLowerCase()+'’s ratings ('+Math.round(B.b)+'%)':'';
+  if(!(await nbhUI.confirm('Finish '+smRLong(SMR.date)+'?\n'+(ph0?'A teacher-only day (phase 0): '+(bl||'no rating by '+M.tw.toLowerCase())+'. It goes into the Record as a baseline day, with no points.':
+      T.pts+' of '+T.poss+' points'+(T.need!=null?(met?': the goal is met.':': the goal ('+T.need+') is not met.'):'.')+(bl?'\nBehavior: '+bl+'.':'')+(T.asm?'\n'+T.asm+' period'+smPoss(T.asm)+' not rated count as met (fading step 2).':'')+(T.wait?'\n'+T.wait+' rating'+smPoss(T.wait)+' not matched count as the student rated.':'')+'\nThe day goes into the Record as one row'+(day.fin?' (its row is updated)':'')+'.'),{ok:'Finish the day'})))return;
+  const r1=v=>String(Math.round(v*10)/10);
+  const row={date:smRShort(SMR.date),ph:curPhase(),goal:ph0?'':S.meta.goal||'',pts:ph0?'':String(T.pts),poss:ph0?'':String(T.poss),beh:B&&B.b!=null?r1(B.b):'',m:M.match&&!ph0?String(T.m):'',n:M.match&&!ph0?String(T.n):'',
+    tno:B&&!ph0&&M.match?String(B.tno):'',nom:B&&!ph0&&M.match?String(B.nom):'',sno:B&&!ph0&&M.match?String(B.sno):'',asm:T.asm?String(T.asm):'',met,tgp:!ph0&&['match','contract','smiley','cico'].includes(M.sys)?T.tp.join(','):'',
+    bgp:B&&B.n&&M.sys!=='interval'&&M.sys!=='rubric'?B.tp.join(','):'',
+    note:'Rated on the iPad'+(T.asm?' ('+T.asm+' period'+smPoss(T.asm)+' assumed met, fading step 2)':'')+(day.note?': '+day.note.replace(/\s+/g,' ').slice(0,200):''),src:'ipad:'+SMR.date};
+  if(smFadeStep()===1)day.f2=true;else delete day.f2;
   let i=S.log.findIndex(r=>r.src==='ipad:'+SMR.date);
   if(i<0){const j=S.log.findIndex(r=>!r.src&&String(r.date||'').trim()===row.date);if(j>=0&&(await nbhUI.confirm('The Record already has a row for '+row.date+', entered by hand. Replace it with the day rated on the iPad?\nCancel keeps it and adds a row.',{ok:'Replace'})))i=j;}
   if(i>=0)S.log[i]=Object.assign({},S.log[i],row);else S.log.push(row);
@@ -3686,7 +3816,7 @@ function smRFromFile(s,o){o.days={};const D=s&&s.days&&typeof s.days==='object'&
   const cells=v=>{const r={};if(v&&typeof v==='object'&&!Array.isArray(v))Object.keys(v).slice(0,800).forEach(c=>{if(/^\d{1,2}_\d$/.test(c)&&Number.isInteger(v[c])&&v[c]>=0&&v[c]<10)r[c]=v[c];});return r;};
   Object.keys(D).slice(0,1000).forEach(k=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(k))return;const x=D[k];if(!x||typeof x!=='object'||Array.isArray(x))return;
     const rem={};if(x.rem&&typeof x.rem==='object'&&!Array.isArray(x.rem))Object.keys(x.rem).slice(0,60).forEach(c=>{if(/^\d{1,2}$/.test(c)&&Number.isInteger(x.rem[c])&&x.rem[c]>0&&x.rem[c]<100)rem[c]=x.rem[c];});
-    o.days[k]={alt:!!x.alt,me:cells(x.me),t:cells(x.t),rem,wf:str(x.wf,120),rw:str(x.rw,120),spent:str(x.spent,8).replace(/[^\d.]/g,''),note:str(x.note,2000),fin:/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(str(x.fin,40))?str(x.fin,40):'',sig:str(x.sig,400)};});
+    o.days[k]={alt:!!x.alt,me:cells(x.me),t:cells(x.t),rem,wf:str(x.wf,120),rw:str(x.rw,120),spent:str(x.spent,8).replace(/[^\d.]/g,''),note:str(x.note,2000),fin:/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(str(x.fin,40))?str(x.fin,40):'',sig:str(x.sig,400)};if(x.f2===true)o.days[k].f2=true;});   /* f2 (v22.7x, review F261): finished at fading step 2; kept only when set */
   if(o.d)o.d.pin=String(o.d.pin||'').replace(/\D/g,'').slice(0,6);if(o.d&&!o.d.pin)delete o.d.pin;
   if(o.d&&o.d.rcue&&o.d.rcue!=='flash')delete o.d.rcue;
   return o;}

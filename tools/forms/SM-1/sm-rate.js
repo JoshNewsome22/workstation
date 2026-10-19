@@ -51,10 +51,28 @@ function smRVal(M,day,r,t){const k=r+'_'+t,ok=v=>Number.isInteger(v)&&v>=0&&v<M.
   else if(M.sys==='match'){if(a!=null){done=true;p=b!=null?M.lv[b][1]+(a===b?M.bonus:0):M.lv[a][1];}else if(b!=null)p=0;}
   else if(a!=null||b!=null){done=a!=null;p=M.lv[b!=null?b:a][1];}
   return {a,b,p,done,both:a!=null&&b!=null,same:a!=null&&b!=null&&a===b};}
-function smRTotals(M,day){let pts=0,m=0,n=0,wait=0;const tp=M.tg.map(()=>0);
-  M.rows.forEach((r,ri)=>M.tg.forEach((t,ti)=>{const v=smRVal(M,day,ri,ti);pts+=v.p;tp[ti]+=v.p;if(v.both){n++;if(v.same)m++;}if(M.match&&v.a!=null&&v.b==null)wait++;}));
+/* v22.7x (review F261): at fading step 2 only the hardest half of the periods are rated, and "the rest are assumed met": once
+   the day is finished (or as it is finished), each period with no rating at all counts as met, its full points, instead of
+   0 against the full possible; it is left out of the behavior measure (smRBeh), which is only what was seen */
+function smFadeStep(){let k=-1;(S.fade||[]).forEach((f,i)=>{if(f&&f.on)k=i;});return k;}
+function smRAssume(day,final){return !!day&&(!!day.f2||(!!final&&smFadeStep()===1));}
+function smRTotals(M,day,final){let pts=0,m=0,n=0,wait=0,asm=0;const tp=M.tg.map(()=>0),as=smRAssume(day,final);
+  M.rows.forEach((r,ri)=>{const none=as&&!M.tg.some((t,ti)=>day.me[ri+'_'+ti]!=null||day.t[ri+'_'+ti]!=null);if(none)asm++;
+    M.tg.forEach((t,ti)=>{if(none){pts+=M.maxc;tp[ti]+=M.maxc;return;}const v=smRVal(M,day,ri,ti);pts+=v.p;tp[ti]+=v.p;if(v.both){n++;if(v.same)m++;}if(M.match&&v.a!=null&&v.b==null)wait++;});});
   const poss=M.rows.length*M.tg.length*M.maxc,g=num(S.meta.goal),need=g!=null&&poss?Math.ceil(poss*g/100):null,per=M.rows.length*M.maxc;
-  return {pts,poss,need,g,m,n,wait,tp:tp.map(x=>per?Math.round(x/per*100):'')};}
+  return {pts,poss,need,g,m,n,wait,asm,tp:tp.map(x=>per?Math.round(x/per*100):'')};}
+/* v22.7x (review F258, F260): the behavior a day rated on the iPad shows: the adult's ratings, as the share at the top level
+   (Yes; with a style of more levels, the mean level as a share of the top), overall and per target; the adult's Nos (below
+   the top level) on the ratings the student also made, and how many of them the student matched; the student's own Nos.
+   A sheet the adult does not rate has none. */
+function smRBeh(M,day){if(!M||!day||!M.raters.includes('t'))return null;const mx=Math.max(...M.lv.map(x=>x[1]))||1;
+  let sum=0,cnt=0,tno=0,nom=0,sno=0;const ts=M.tg.map(()=>[0,0]);
+  M.rows.forEach((r,ri)=>M.tg.forEach((t,ti)=>{const v=smRVal(M,day,ri,ti);
+    if(v.b!=null){const f=M.lv[v.b][1]/mx;sum+=f;cnt++;ts[ti][0]+=f;ts[ti][1]++;if(v.a!=null&&M.lv[v.b][1]<mx){tno++;if(v.a===v.b)nom++;}}
+    if(v.a!=null&&M.lv[v.a][1]<mx)sno++;}));
+  return {b:cnt?sum/cnt*100:null,tp:ts.map(x=>x[1]?Math.round(x[0]/x[1]*100):''),n:cnt,yes:Math.round(sum),tno,nom,sno};}
+/* v22.7x (review F262): phase 0 of the matching ladder, the teacher rating alone (the baseline) */
+function smRPh0(M){return curPhase()==='0'&&!!M&&M.raters.includes('t');}
 /* whose rating the buttons set: the student's or the adult's; a one-rater sheet has only that rater (the adult may correct the student's) */
 function smRWho(M){return M.raters.length===1?M.raters[0]:SMR.mode;}
 function smRRowDone(M,day,ri,who){return M.tg.every((t,ti)=>day[who][ri+'_'+ti]!=null);}
@@ -80,6 +98,7 @@ function smRRender(){const host=$('#smRate');if(!host)return;smREnsure();if(!SMR
   if(!M){host.innerHTML='<div class="smr-empty">The '+({perf:'performance count',interlock:'interlocking session'}[S.sys]||'')+' sheet is kept on paper. Rating on the iPad works with Self &amp; Match, the contract, expectations and earns, check-in/check-out, cued intervals and the rubric point sheet.</div>';return;}
   if(SMR.sel<0||SMR.sel>=M.rows.length)SMR.sel=smRNow(M,day);
   if(!SMR.kid&&!SMR.modeSet&&M.raters.length===1&&M.raters[0]==='t')SMR.mode='t';   /* check-in/check-out: the adult rates */
+  if(!SMR.kid&&!SMR.modeSet&&smRPh0(M))SMR.mode='t';   /* v22.7x (F262) phase 0: the adult rates alone */
   const T=smRTotals(M,day),kid=SMR.kid,teach=SMR.mode==='t';
   let h='';
   /* the top: who, the date, the mode, the day's buttons */
@@ -94,10 +113,14 @@ function smRRender(){const host=$('#smRate');if(!host)return;smREnsure();if(!SMR
   /* the goal */
   const st=smStore(),wfI=st.find(o=>o.n&&o.n===day.wf),wfP=wfI?num(wfI.p):null,bank=smRBank();
   const W=v=>Math.max(0,Math.min(100,T.poss?v/T.poss*100:0)).toFixed(1)+'%';
+  if(smRPh0(M)){const B=smRBeh(M,day);h+='<div class="smr-goal smr-ph0"><div class="smr-gl"><span><b>Phase 0: '+esc(M.tw)+' rates alone.</b> '+(B&&B.n?'Today the targets met in <b>'+B.yes+'</b> of '+B.n+' rating'+smPoss(B.n)+' ('+Math.round(B.b)+'%).':'No rating yet today.')+'</span></div>'+
+    '<div class="smr-wait">No points depend on the sheet yet: the day goes into the Record as a baseline day, the share of the adult&rsquo;s ratings that were Yes. The Record suggests the first goal from 3 or more such days.</div></div>';}
+  else{
+  if(smFadeStep()===1&&!day.fin)h+='<div class="smr-wait">Fading step 2: the periods left unrated today count as met (their full points) when the day is finished.</div>';
   h+='<div class="smr-goal"><div class="smr-gl"><span><b class="big">'+T.pts+'</b> point'+smPoss(T.pts)+' '+(T.need!=null?(T.pts>=T.need?'<span class="smr-met">Goal reached!</span>':'· '+(T.need-T.pts)+' more to my goal of '+T.need):'of '+T.poss)+'</span>'+
     (bank!=null?'<span class="smr-bank">In my bank: <b>'+bank+'</b></span>':'')+'</div><div class="smr-bar'+(wfP!=null&&wfP!==T.need&&wfP<=T.poss?' rw':'')+'" role="img" aria-label="'+T.pts+' of '+T.poss+' points'+(T.need!=null?', goal '+T.need:'')+'"><div class="smr-fill" style="width:'+W(T.pts)+'"></div>'+
     (T.need!=null?'<div class="smr-mk" style="left:'+W(T.need)+'"><span>goal '+T.need+'</span></div>':'')+(wfP!=null&&wfP!==T.need&&wfP<=T.poss?'<div class="smr-mk rw" style="left:'+W(wfP)+'"><span>'+esc(wfI.n)+' '+wfP+'</span></div>':'')+'</div>'+
-    (teach&&T.wait?'<div class="smr-wait">'+T.wait+' rating'+smPoss(T.wait)+' not matched yet: '+(T.wait===1?'it counts':'they count')+' as the student rated, until you rate '+(T.wait===1?'it':'them')+'.</div>':'')+'</div>';
+    (teach&&T.wait?'<div class="smr-wait">'+T.wait+' rating'+smPoss(T.wait)+' not matched yet: '+(T.wait===1?'it counts':'they count')+' as the student rated, until you rate '+(T.wait===1?'it':'them')+'.</div>':'')+'</div>';}
   /* what the student is working for */
   if(st.length){h+='<div class="smr-wf"><b>'+(day.fin?'I chose:':'I’m working for:')+'</b><div class="smr-tiles">'+st.map((o,i)=>{const p=num(o.p),on=day.fin?o.n===day.rw:o.n===day.wf,can=!day.fin||p==null||p<=T.pts+(bank!=null?bank:0);
       return '<button type="button" class="smr-tile'+(on?' on':'')+(can?'':' dim')+'" data-rwf="'+i+'" aria-pressed="'+on+'">'+smStorePic(o,kid?54:38)+'<span>'+esc(o.n||'')+'</span>'+(o.p?'<i>'+esc(o.p)+'</i>':'')+'</button>';}).join('')+'</div></div>';}
@@ -156,7 +179,8 @@ function smRSettings(M){const d=smD();
     (M.sys!=='interval'?'<label class="ck"><input type="checkbox" data-d="rchime"'+(d.rchime?' checked':'')+'> Chime when a period ends and open it for rating (the times on the schedule; the iPad stays awake while the Rate page or the Student screen is open)</label>':
      '<label>The cue <select data-d="rcue"><option value=""'+(d.rcue!=='flash'?' selected':'')+'>A soft chime and the screen flashes</option><option value="flash"'+(d.rcue==='flash'?' selected':'')+'>The screen flashes, no sound (for a quiet room)</option></select></label>')+
     '<label>PIN for '+esc(M.tw.toLowerCase())+'’s part on the Student screen <input data-d="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" value="'+esc(d.pin||'')+'" placeholder="none" style="width:8em"></label>'+
-    '<p class="hint">On the Student screen the student sees only their part. '+esc(M.tw)+'’s part opens by holding '+esc(M.tw.toLowerCase())+'’s button for a second, and the PIN when one is set: it keeps the student on their part; it is not a lock on the file.</p></details>';}
+    '<p class="hint">On the Student screen the student sees only their part. '+esc(M.tw)+'’s part opens by holding '+esc(M.tw.toLowerCase())+'’s button for a second, and the PIN when one is set: it keeps the student on their part; it is not a lock on the file.</p>'+
+    (M.match&&!String(d.pin||'').trim()?'<p class="hint"><b>No PIN set:</b> anyone who holds the button opens '+esc(M.tw.toLowerCase())+'’s part, so on the Student screen the student could rate as '+esc(M.tw.toLowerCase())+'. Set one before the matching is thinned: the Record asks for it then (review F260).</p>':'')+'</details>';}
 function smRDays(){const ks=Object.keys(S.days||{}).filter(k=>smRAny(S.days[k])).sort().reverse();if(!ks.length)return '';
   return '<div class="smr-days"><h3>Days rated on the iPad</h3><table><thead><tr><th>Day</th><th>Points</th><th>Goal</th><th>Same answer</th><th>Reward</th><th></th></tr></thead><tbody>'+ks.map(k=>{const d=S.days[k],M=smRModel(d);if(!M)return '';const T=smRTotals(M,d);
     return '<tr'+(k===SMR.date?' class="cur"':'')+'><td>'+esc(smRLong(k))+(d.fin?'':' <i>(not finished)</i>')+'</td><td>'+T.pts+' / '+T.poss+'</td><td>'+(T.need==null?'—':T.pts>=T.need?'met':'not met')+'</td><td>'+(M.match&&T.n?T.m+' of '+T.n:'—')+'</td><td>'+esc(d.rw||'')+'</td><td class="b"><button type="button" class="smr-b" data-ropen="'+k+'">Open</button><button type="button" class="smr-b" data-rprint="'+k+'">Print</button><button type="button" class="smr-b" data-rdel="'+k+'" aria-label="Delete '+esc(smRLong(k))+'">Delete</button></td></tr>';}).join('')+'</tbody></table></div>';}
@@ -226,10 +250,18 @@ function smRParty(T){let fx=$('#smRFx');if(!fx){fx=document.createElement('div')
   let c='';if(!calm)for(let i=0;i<70;i++)c+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;background:'+C[i%C.length]+';animation-delay:'+(Math.random()*.8).toFixed(2)+'s;animation-duration:'+(1.8+Math.random()*1.4).toFixed(2)+'s;transform:rotate('+Math.round(Math.random()*360)+'deg)"></i>';
   fx.innerHTML='<div class="smr-conf">'+c+'</div><div class="smr-party" role="status"><div class="smr-pbig">'+smGlyph('st',84).replace('fill="#fff"','fill="#f5c518"')+'</div><b>'+(smName()?esc(smName())+', you':'You')+' reached your goal!</b><span>'+T.pts+' points today</span><button type="button" class="smr-b pri" id="smRFxOk">Yay!</button></div>';
   fx.hidden=false;smRChime();clearTimeout(SMR.fx);SMR.fx=setTimeout(()=>{fx.hidden=true;},7000);}
-async function smRFinish(){const day=smRDay();if(!smRAny(day))return;const M=smRModel(day),T=smRTotals(M,day),met=T.need!=null&&T.pts>=T.need;
-  if(!(await nbhUI.confirm('Finish '+smRLong(SMR.date)+'?\n'+T.pts+' of '+T.poss+' points'+(T.need!=null?(met?': the goal is met.':': the goal ('+T.need+') is not met.'):'.')+(T.wait?'\n'+T.wait+' rating'+smPoss(T.wait)+' not matched count as the student rated.':'')+'\nThe day goes into the Record as one row'+(day.fin?' (its row is updated)':'')+'.',{ok:'Finish the day'})))return;
-  const row={date:smRShort(SMR.date),ph:curPhase(),goal:S.meta.goal||'',pts:String(T.pts),poss:String(T.poss),m:M.match?String(T.m):'',n:M.match?String(T.n):'',met,tgp:['match','contract','smiley','cico'].includes(M.sys)?T.tp.join(','):'',
-    note:'Rated on the iPad'+(day.note?': '+day.note.replace(/\s+/g,' ').slice(0,200):''),src:'ipad:'+SMR.date};
+/* v22.7x (review F258, F260, F261, F262): the row carries the behavior and the No counts beside the points; a teacher-only day
+   (phase 0) goes in as a baseline day with no points; at fading step 2 the unrated periods count as met */
+async function smRFinish(){const day=smRDay();if(!smRAny(day))return;const M=smRModel(day),T=smRTotals(M,day,true),B=smRBeh(M,day),ph0=smRPh0(M),met=!ph0&&T.need!=null&&T.pts>=T.need;
+  const bl=B&&B.n?'the targets met in '+B.yes+' of '+B.n+' of '+M.tw.toLowerCase()+'’s ratings ('+Math.round(B.b)+'%)':'';
+  if(!(await nbhUI.confirm('Finish '+smRLong(SMR.date)+'?\n'+(ph0?'A teacher-only day (phase 0): '+(bl||'no rating by '+M.tw.toLowerCase())+'. It goes into the Record as a baseline day, with no points.':
+      T.pts+' of '+T.poss+' points'+(T.need!=null?(met?': the goal is met.':': the goal ('+T.need+') is not met.'):'.')+(bl?'\nBehavior: '+bl+'.':'')+(T.asm?'\n'+T.asm+' period'+smPoss(T.asm)+' not rated count as met (fading step 2).':'')+(T.wait?'\n'+T.wait+' rating'+smPoss(T.wait)+' not matched count as the student rated.':'')+'\nThe day goes into the Record as one row'+(day.fin?' (its row is updated)':'')+'.'),{ok:'Finish the day'})))return;
+  const r1=v=>String(Math.round(v*10)/10);
+  const row={date:smRShort(SMR.date),ph:curPhase(),goal:ph0?'':S.meta.goal||'',pts:ph0?'':String(T.pts),poss:ph0?'':String(T.poss),beh:B&&B.b!=null?r1(B.b):'',m:M.match&&!ph0?String(T.m):'',n:M.match&&!ph0?String(T.n):'',
+    tno:B&&!ph0&&M.match?String(B.tno):'',nom:B&&!ph0&&M.match?String(B.nom):'',sno:B&&!ph0&&M.match?String(B.sno):'',asm:T.asm?String(T.asm):'',met,tgp:!ph0&&['match','contract','smiley','cico'].includes(M.sys)?T.tp.join(','):'',
+    bgp:B&&B.n&&M.sys!=='interval'&&M.sys!=='rubric'?B.tp.join(','):'',
+    note:'Rated on the iPad'+(T.asm?' ('+T.asm+' period'+smPoss(T.asm)+' assumed met, fading step 2)':'')+(day.note?': '+day.note.replace(/\s+/g,' ').slice(0,200):''),src:'ipad:'+SMR.date};
+  if(smFadeStep()===1)day.f2=true;else delete day.f2;
   let i=S.log.findIndex(r=>r.src==='ipad:'+SMR.date);
   if(i<0){const j=S.log.findIndex(r=>!r.src&&String(r.date||'').trim()===row.date);if(j>=0&&(await nbhUI.confirm('The Record already has a row for '+row.date+', entered by hand. Replace it with the day rated on the iPad?\nCancel keeps it and adds a row.',{ok:'Replace'})))i=j;}
   if(i>=0)S.log[i]=Object.assign({},S.log[i],row);else S.log.push(row);
@@ -273,7 +305,7 @@ function smRFromFile(s,o){o.days={};const D=s&&s.days&&typeof s.days==='object'&
   const cells=v=>{const r={};if(v&&typeof v==='object'&&!Array.isArray(v))Object.keys(v).slice(0,800).forEach(c=>{if(/^\d{1,2}_\d$/.test(c)&&Number.isInteger(v[c])&&v[c]>=0&&v[c]<10)r[c]=v[c];});return r;};
   Object.keys(D).slice(0,1000).forEach(k=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(k))return;const x=D[k];if(!x||typeof x!=='object'||Array.isArray(x))return;
     const rem={};if(x.rem&&typeof x.rem==='object'&&!Array.isArray(x.rem))Object.keys(x.rem).slice(0,60).forEach(c=>{if(/^\d{1,2}$/.test(c)&&Number.isInteger(x.rem[c])&&x.rem[c]>0&&x.rem[c]<100)rem[c]=x.rem[c];});
-    o.days[k]={alt:!!x.alt,me:cells(x.me),t:cells(x.t),rem,wf:str(x.wf,120),rw:str(x.rw,120),spent:str(x.spent,8).replace(/[^\d.]/g,''),note:str(x.note,2000),fin:/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(str(x.fin,40))?str(x.fin,40):'',sig:str(x.sig,400)};});
+    o.days[k]={alt:!!x.alt,me:cells(x.me),t:cells(x.t),rem,wf:str(x.wf,120),rw:str(x.rw,120),spent:str(x.spent,8).replace(/[^\d.]/g,''),note:str(x.note,2000),fin:/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(str(x.fin,40))?str(x.fin,40):'',sig:str(x.sig,400)};if(x.f2===true)o.days[k].f2=true;});   /* f2 (v22.7x, review F261): finished at fading step 2; kept only when set */
   if(o.d)o.d.pin=String(o.d.pin||'').replace(/\D/g,'').slice(0,6);if(o.d&&!o.d.pin)delete o.d.pin;
   if(o.d&&o.d.rcue&&o.d.rcue!=='flash')delete o.d.rcue;
   return o;}
