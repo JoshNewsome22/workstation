@@ -183,7 +183,9 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(900);
     check(await page.evaluate(()=>!!S.meta.rWatch&&!!S.meta.dbBreath&&S.meta.rpNeed==='no'&&/broke this plan.s breathing rule/.test(S.meta.rpWhy)&&!!S.meta.rpOn&&S.meta.rpFor==='restraint 2 on the log'),'the simulation names the watching adult, the breathing check, and a No that names the broken rule');
     await view(page,'deb');check(/v-ok/.test(await cls(page,'#rpVerdict'))&&!/These answers were given for/.test(await text(page,'#rpVerdict')),'the simulated debriefing: a No with its reason, for this restraint');
-    const simBip=await page.evaluate(()=>window.__bipText());check(simBip.includes('BREATHING: NO HOLD MAY RESTRICT IT')&&simBip.includes('Breathing during the hold:'),'the simulated plan copies the rule and the breathing line to the BIP');
+    /* v23.02 (CR-1 review F344) the debriefing goes into the BIP copy only with "with the debriefing and the log" ticked */
+    const simBip=await page.evaluate(()=>window.__bipText()),simAll=await page.evaluate(()=>{const b=document.getElementById('bipAll');b.checked=true;const t=window.__bipText();b.checked=false;return t;});
+    check(simBip.includes('BREATHING: NO HOLD MAY RESTRICT IT')&&!simBip.includes('Breathing during the hold:')&&simAll.includes('Breathing during the hold:'),'the simulated plan copies the rule to the BIP, and the debriefing\'s breathing line when the debriefing is ticked');
     check(!/broke this plan.s breathing rule; see What Changes/.test(await printedText(page)),'the simulated answer does not print');
     /* a file saved before the change */
     await openText(page,JSON.stringify(OLD['CR-1']));
