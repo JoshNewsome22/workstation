@@ -1012,7 +1012,9 @@ td input,td select{max-width:100%}
     <div class="drow"><div class="dlab">Target behavior (TB-1)</div><div class="dval"><textarea name="m.beh" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Function (EA-1 outcome)</div><div class="dval" style="padding:4px 8px"><select name="m.fn" class="inline" data-fn="1"><option value=""></option><option value="escape">Escape / avoidance (social negative)</option><option value="attention">Attention (social positive)</option><option value="tangible">Tangible / activity (social positive)</option><option value="automatic">Automatic (nonsocial)</option><option value="multiple">Multiple control (build a component per function)</option></select> <label style="margin-left:14px">EA-1 design used <input name="m.eadesign" class="inline" style="width:200px" placeholder="e.g., multielement, 4 series"></label></div></div>
     <div class="drow"><div class="dlab">Specific reinforcer and EO</div><div class="dval"><textarea name="m.reinf" placeholder="e.g., break from multi-step math worksheets; adult attention when teacher helps peers; tablet; hand-to-mouth stimulation" class="nbh-line" rows="1"></textarea></div></div>
-    <div class="drow"><div class="dlab">Baseline level (from EA-1 / ABC-1)</div><div class="dval" style="display:flex;gap:14px;padding:3px 8px;font-size:12.5px;flex-wrap:wrap"><label>Rate per min <input name="m.rate" class="inline" style="width:60px" data-calc="1"></label><label>Mean IRT (s) <span id="irtOut" style="font-weight:600">—</span></label><label>Session length (min) <input name="m.sessmin" class="inline" style="width:50px" placeholder="10"></label><label>% intervals (if used) <input name="m.pct" class="inline" style="width:50px"></label></div></div>
+    <!-- v23.04 (review F181, F184) where the function and the baseline rate came from: EA-1, FS-1 or typed; DD-1's school-day rate -->
+    <div hidden><textarea name="m.fnsrc" readonly tabindex="-1" aria-label="Where the function came from"></textarea><textarea name="m.ratesrc" readonly tabindex="-1" aria-label="Where the baseline rate came from"></textarea></div>
+    <div class="drow"><div class="dlab">Baseline level (from EA-1 / ABC-1)<span class="hint" id="tdRateSrc" style="display:block;font-weight:400"></span></div><div class="dval" style="display:flex;gap:14px;padding:3px 8px;font-size:12.5px;flex-wrap:wrap"><label>Rate per min <input name="m.rate" class="inline" style="width:60px" data-calc="1"></label><label>Mean IRT (s) <span id="irtOut" style="font-weight:600">—</span></label><label>Session length (min) <input name="m.sessmin" class="inline" style="width:50px" placeholder="10"></label><label>% intervals (if used) <input name="m.pct" class="inline" style="width:50px"></label></div></div>
     <div class="drow"><div class="dlab">Precursor (TB-1)</div><div class="dval"><textarea name="m.prec" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Replacement behavior already in repertoire?</div><div class="dval" style="padding:4px 8px"><select name="m.rep" class="inline"><option value=""></option><option value="yes">Yes: a recognizable request exists but does not occur under the EO</option><option value="partial">Partly: vocal or gestural approximations</option><option value="no">No recognizable request for this reinforcer</option></select> <label style="margin-left:14px">Replacement behavior <input name="m.repdesc" class="inline" style="width:260px" placeholder="e.g., hand an adult the break card"></label></div></div>
     <div class="drow"><div class="dlab">Preferred stimuli (PA-1 / RA-1)</div><div class="dval"><textarea name="m.pref" placeholder="Top items and their reinforcer-assessment result; matched-stimulation candidates for automatic functions" class="nbh-line" rows="1"></textarea></div></div>
@@ -2111,7 +2113,10 @@ function renderLOD(){const o=$('#lodOut');if(!o)return;const play=num('auto.play
  const lod=(1-play/alone)*100;let st=sr!=null&&sr>25?'Subtype 3':lod>=62.5?'Subtype 1':'Subtype 2';const pred=lod>=63.7;const lines=[];
  lines.push(`LOD = 1 − (${play} ÷ ${alone}) × 100 = ${lod.toFixed(1)}% (Hagopian et al., 2023, Equation 1).`);
  lines.push(st==='Subtype 3'?`Self-restraint in ${sr}% of intervals (> 25% across three series): Subtype 3.`:lod>=62.5?'LOD ≥ 62.5%: Subtype 1 (differentiated; sensitive to alternative reinforcement).':'LOD < 62.5%: Subtype 2 (undifferentiated; comparatively insensitive to reinforcement-based treatment).');
- lines.push(pred?'LOD ≥ 63.7%: predicted positive response to reinforcement-based treatment alone (Hagopian et al., 2018).':'LOD < 63.7%: reinforcement alone is not predicted to be sufficient (Hagopian et al., 2018); build the additional components below.');
+ /* v23.04 (review F185) the 2023 rule classifies; the 2018 cutoff is a note, and the band between the two is borderline */
+ lines.push(lod>=63.7?'LOD ≥ 63.7%: predicted positive response to reinforcement-based treatment alone (Hagopian et al., 2018).'
+   :lod>=62.5?'LOD between 62.5% and 63.7%: Subtype 1 under the 2023 rule, below the 2018 cutoff of 63.7%. Borderline: confirm against the EA-1 graph before relying on reinforcement alone.'
+   :'LOD < 63.7%: reinforcement alone is not predicted to be sufficient (Hagopian et al., 2018); build the additional components below.');
  if(ser!=null&&ser<3)lines.push('Fewer than three series: the cutoff was derived from analyses with at least three series; extend the analysis before classifying.');
  lines.push('Confirm against the EA-1 graph: aberrant points, trends, or topography shifts can change the classification; reconsider social variables during treatment (Hagopian et al., 2023).');
  const few=ser!=null&&ser<3;
@@ -2383,7 +2388,7 @@ function rbWords(t){t=String(t==null?'':t).trim();if(!t)return null;
    counted. The cards' own steps are judged by name (RB_XDEF): the ones that prescribe extinction of the behavior */
 const RB_XALL=/extinction|withhold(ing)? (the )?reinforcers?\b/i,
  RB_XFN={escape:/no break|prompt sequence|guided compliance|is not removed|not remove the (task|demand)/i,attention:/\bno (attention|comments?|reprimands?|eye contact)\b/i,tangible:/not returned|does not produce/i,automatic:/\bblock(ing)?( or (disrupt|interrupt))?( (every|each)\b| at onset)|neutral block or interruption/i},
- RB_XOK=/not feasible|where feasible|if feasible|if viable|extinction (component|period|challenge|burst)s?\b|resistance to extinction|automatic extinction|extinction or DNRA/i,
+ RB_XOK=/extinction is not used|not feasible|where feasible|if feasible|if viable|extinction (component|period|challenge|burst)s?\b|resistance to extinction|automatic extinction|extinction or DNRA/i,
  RB_XDEF={'DF.s3':'','FCT.s4':'','SBT_FCR.s1':'','SBT_TR.s2':'','RRB_RB.s1':'automatic'};
 const rbX=(t,fn)=>!!t&&(RB_XALL.test(t)||(fn==='multiple'?Object.values(RB_XFN):[RB_XFN[fn]]).some(r=>r&&r.test(t)))&&!RB_XOK.test(t);
 const rbXdef=(key,fn)=>key in RB_XDEF&&(!RB_XDEF[key]||RB_XDEF[key]===fn||fn==='multiple');
@@ -2755,15 +2760,25 @@ window.__td1EE={mode:()=>eeMode(),active:()=>!!eeMode(),issues:()=>eeIssues().ma
 
 /* ---------- component cards ---------- */
 let compSeq=0;
+/* v23.04 (review F178) demand fading chosen because the setting cannot tolerate the behavior (Select, question 2: no), or with
+   extinction ruled out on the Responding sheet (question 4: no), runs without escape extinction (Geiger, Carr & LeBlanc, 2010;
+   Pace et al., 1993). The card's fourth step follows: the form's own words for the one answer are swapped for its words for the
+   other; a step the BCBA has rewritten is left alone. */
+const DF_NOEXT='Escape extinction is not used on this branch, since the setting cannot tolerate the behavior: set the demand level low enough that problem behavior stays near zero. If it occurs, do not hold the task through it; start the next session one demand level lower (Pace et al., 1993).';
+const tdNoExt=()=>val('m.fn')==='escape'&&(val('q.escape.1')==='no'||val('rb.3')==='no');
+function tdDfSync(){const no=tdNoExt();$$('#compWrap .card[data-code="DF"]').forEach(c=>{const n='cp['+c.dataset.i+'].s3',v=val(n);
+  if(no&&v===LIB.DF.steps[3])setv(n,DF_NOEXT);else if(!no&&v===DF_NOEXT)setv(n,LIB.DF.steps[3]);});}
+document.addEventListener('change',e=>{const n=e.target&&e.target.name;if(n==='q.escape.1'||n==='rb.3'||n==='m.fn'){tdDfSync();try{renderPlan();}catch(err){}}});
 function addComp(code,at){const L=LIB[code];if(!L)return;const i=(at!=null&&!$('#compWrap .card[data-i="'+at+'"]'))?+at:compSeq;compSeq=Math.max(compSeq,i+1);const d=document.createElement('div');d.className='card';d.dataset.code=code;d.dataset.i=i;
- const seed=irt();const seedTxt=seed?`${fmtS(Math.round(seed*0.8))} (80% of mean IRT ${fmtS(seed)})`:'enter baseline rate on setup';
+ /* v23.04 (review F184) a rate from DD-1's school day is not a session interresponse time (Vollmer et al., 1993): no seed from it */
+ const dayRate=val('m.ratesrc')==='DD-1',seed=dayRate?null:irt();const seedTxt=seed?`${fmtS(Math.round(seed*0.8))} (80% of mean IRT ${fmtS(seed)})`:dayRate?'':'enter baseline rate on setup';
  d.innerHTML=`<div class="chd"><span class="tag ok">${code}</span><span class="chdt">${esc(L.name)}</span><button type="button" class="rm noprint" data-rm="1" style="margin-left:auto">Remove</button></div>
  <p class="method" style="margin:0 0 6px">Source: ${esc(L.src)}</p>${L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:''}
- <div class="param">${L.params.map((p,k)=>`<div class="f"><label>${esc(p[0])}</label><input name="cp[${i}].p${k}" value="${esc(p[1]==='SEED_IRT'?seedTxt:'')}" placeholder="${esc(p[1]==='SEED_IRT'?'':p[1])}"></div>`).join('')}</div>
+ <div class="param">${L.params.map((p,k)=>`<div class="f"><label>${esc(p[0])}</label><input name="cp[${i}].p${k}" value="${esc(p[1]==='SEED_IRT'?seedTxt:'')}" placeholder="${esc(p[1]==='SEED_IRT'?(dayRate?'from a session baseline: the rate on Setup is a school-day rate (Form DD-1)':''):p[1])}"></div>`).join('')}</div>
  <b style="font-family:var(--sans);font-size:11px">Implementation steps (edit to the student; each becomes an integrity item)</b>
  <ol class="steps">${L.steps.map((s,k)=>`<li><textarea name="cp[${i}].s${k}" rows="1" data-auto="1">${esc(s)}</textarea></li>`).join('')}</ol>
  <div class="defs" style="margin-top:6px"><div class="drow"><div class="dlab">Data collected</div><div class="dval"><input name="cp[${i}].data" placeholder="e.g., target per min; mands per min and % independent; compliance; breaks delivered"></div></div><div class="drow"><div class="dlab">Materials and cues</div><div class="dval"><input name="cp[${i}].mat" placeholder="e.g., work card, break card on switch, timer, schedule signal cards"></div></div></div>`;
- $('#compWrap').appendChild(d);autosize(d);eeSoon();if(code==='EE'||code==='C_CSA')try{window.tdCsaCards();}catch(e){}}   /* v21.44 (B3): any card can carry escape extinction or hands-on help */
+ $('#compWrap').appendChild(d);if(code==='DF')tdDfSync();autosize(d);eeSoon();if(code==='EE'||code==='C_CSA')try{window.tdCsaCards();}catch(e){}}   /* v21.44 (B3): any card can carry escape extinction or hands-on help */
 /* v22.78 (review F118): the enrichment card's matched stimuli and the competing-stimulus card's items take PA-1's competing
    stimulus assessment from the case (window.__tdCsa), into empty boxes only; a file opened later puts its own values back */
 window.tdCsaCards=function(){const c=window.__tdCsa;if(!c)return;const put=(nm,v)=>{const e=document.querySelector('[name="'+nm+'"]');if(e&&v&&!String(e.value||'').trim()){e.value=v;['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));}};
@@ -2795,8 +2810,18 @@ const THIN={
    seeded from the baseline and may have been edited; a card whose interval does not start with a number and a unit
    keeps the relative wording */
 const seedOf=c=>{const m=/^\s*(\d+(?:\.\d+)?)\s*(s|sec|secs|seconds?|min|mins|minutes?)\b/i.exec(val(`cp[${c.i}].p0`));if(!m)return null;const n=+m[1];return /^s/i.test(m[2])?n:n*60;};
-function thinText(c,lv,j){if(!['NCE','NCR','DRO'].includes(c.code))return lv[1];const sd=seedOf(c);if(!sd)return lv[1];
- return j===0?lv[1]+' ('+fmtS(sd)+' on the card)':j===1?lv[1]+' ('+fmtS(sd*2)+')':j===2?lv[1]+' ('+fmtS(sd*4)+')':lv[1];}
+/* v23.04 (review F179) the NCE, NCR and DRO ladders are built from the card's own initial interval (× 2, × 4, × 8) up to its terminal
+   interval, and a rung is never shorter than the one before: the fixed 2.5- and 5-minute rungs had told staff to shorten the timer
+   whenever the baseline rate was below about 1.3 per minute. With no terminal interval on the card, 5 minutes stands in. */
+const termOf=c=>{const m=/(\d+(?:\.\d+)?)\s*(s|sec|secs|seconds?|min|mins|minutes?)\b/i.exec(val(`cp[${c.i}].p2`));if(!m)return null;const n=+m[1];return /^s/i.test(m[2])?n:n*60;};
+function thinText(c,lv,j){if(!['NCE','NCR','DRO'].includes(c.code))return lv[1];const sd=seedOf(c),tm=termOf(c),T=tm||300,pre=c.code==='DRO'?'Interval':'FT';
+ const cite=c.code==='NCE'?' (Vollmer et al., 1995, reached 2.5 and 10 min)':'';
+ if(!sd)return j<3?lv[1]:j===3?pre+' \u00d7 8, or the terminal interval if that comes first':'Terminal interval'+(tm?': '+fmtS(tm):' (the card\u2019s)')+cite;
+ const rung=k=>k<4?Math.min(sd*Math.pow(2,k),Math.max(T,sd)):Math.max(T,sd),v=rung(j),p=j?rung(j-1):null;
+ if(j===0)return lv[1]+' ('+fmtS(sd)+' on the card)';
+ if(v<=p)return 'Hold at '+fmtS(p)+': '+(tm?'the card\u2019s terminal interval':'the terminal interval (5 min until the card names one)')+' is reached';
+ if(j===4)return 'Terminal interval: '+fmtS(v)+(tm?'':' (until the card names one)')+cite;
+ return pre+' \u00d7 '+Math.pow(2,j)+' ('+fmtS(v)+(v>=T?', the terminal interval':'')+')';}
 function renderPlan(){const cs=comps();$('#planSummary').innerHTML='<b>Components</b>'+(cs.length?cs.map(c=>`<span class="tag ok" style="margin-right:6px">${c.code}</span>${esc(c.name)}`).join('<br>'):'None yet.');
  const fb=$('#fidTbl tbody');let k=0;fb.innerHTML=cs.flatMap(c=>c.steps.map(s=>`<tr><td class="n">${++k}</td><td>${c.code}</td><td style="font-size:11.5px">${esc(s)}</td></tr>`)).join('')
   /* v21.44 (B3): the safety items of escape extinction (or physical guidance), scored like the steps */
@@ -2809,6 +2834,11 @@ function monRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class
 function renderMonRows(){const n=+$('#nMon').value,b=$('#monBody');while(b.children.length>n)b.lastChild.remove();for(let i=b.children.length;i<n;i++)b.appendChild(monRow(i));}
 function monData(){const rows=[];$$('#monBody tr').forEach((tr,i)=>{const t=num(`mo[${i}].t`);if(t==null)return;const sc=num(`mo[${i}].sc`),so=num(`mo[${i}].so`);rows.push({x:i+1,t,a:num(`mo[${i}].a`),ind:num(`mo[${i}].ind`),fid:(sc!=null&&so)?100*sc/so:null,phase:val(`mo[${i}].p`)||'Tx',lv:num(`mo[${i}].lv`),err:!!document.querySelector(`[name="mo[${i}].err"]`)?.checked});});return rows;}
 function marker(x,y,col,fill){return `<circle cx="${x}" cy="${y}" r="4" fill="${fill}" stroke="${col}" stroke-width="1.2"/>`;}
+/* v23.04 (review F180) the cards that teach a replacement response */
+const tdHasRep=()=>comps().some(c=>/^(FCT|FCT_CFA|DRA|DRI|DNRA|DRAAUTO)$|^(SBT_|MAND_)/.test(c.code));
+const tdRule=(crit,ind,nn)=>'Advance one thinning level when the target is at or below '+(crit?crit+' per minute':'the criterion set on the monitoring sheet')
+  +(tdHasRep()?' and the replacement is at least '+(ind||'80')+'% independent':'')+' for '+(nn||'3')+' consecutive sessions at the current level'
+  +(tdHasRep()?'; with no percent-independent data, hold':' (no replacement response in this plan: the rate criterion only)')+'; step back after two consecutive sessions above criterion at that level.';
 function renderMon(){renderMonRows();const rows=monData();const el=$('#monFig'),lg=$('#monLegend');const base=num('m.rate');
  if(!rows.length){el.innerHTML='<h3>Progress</h3><div class="empty">No data yet.</div>';lg.innerHTML='';$('#monVerdict').innerHTML='<b>Decision</b>Enter sessions to evaluate.';return;}
  const W=640,H=270,L=46,R=46,T=22,B=40,pw=W-L-R,ph=H-T-B;const xmax=Math.max(...rows.map(r=>r.x),5);
@@ -2841,7 +2871,9 @@ function renderMon(){renderMonRows();const rows=monData();const el=$('#monFig'),
  else if(isBL(end.phase))head='Baseline in effect: the thinning rule applies to treatment sessions.';
  else if(crit==null)head='Enter the criterion for problem behavior below the graph to apply the thinning rule.';
  else{const okT=last.length>=n&&last.every(r=>r.t<=crit),hasInd=last.some(r=>r.ind!=null),okA=last.every(r=>r.ind==null||r.ind>=indC);const recent=run.slice(-2);const above=recent.length===2&&recent.every(r=>r.t>crit);
-  if(okT&&okA){tag='ok';head=`Advance one thinning level: target ≤ ${crit}/min${hasInd?` and alternative ≥ ${indC}% independent`:' (no % independent recorded)'} for the last ${n} sessions${at}.`;}
+  /* v23.04 (review F180) with a replacement in the plan, the rule needs its percent-independent data before a level is advanced */
+  if(okT&&okA&&!hasInd&&tdHasRep()){tag='mid';head=`Hold: the target is at criterion, but the last ${n} sessions${at} have no percent-independent data for the replacement, and the rule needs them before thinning.`;}
+  else if(okT&&okA){tag='ok';head=`Advance one thinning level: target ≤ ${crit}/min${hasInd?` and alternative ≥ ${indC}% independent`:' (no replacement response in this plan: the rate criterion only)'} for the last ${n} sessions${at}.`;}
   else if(above){tag='no';head=`Step back one level: the last two sessions${at} are above criterion.`;}
   else{tag='mid';head='Hold the current level'+(run.length<n?`: ${run.length} session${run.length===1?'':'s'}${at} so far; the rule needs ${n}.`:'.');}}
  if(base&&last.length){const mean=last.reduce((a,r)=>a+r.t,0)/last.length;lines.push(`Recent mean ${mean.toFixed(2)}/min = ${Math.round(100*(1-mean/base))}% reduction from baseline ${base}/min (90% benchmark: Hagopian et al., 1998; Harding et al., 2009).`);}
@@ -2878,10 +2910,16 @@ function finalExtras(){const extras=[];
  if(thinRows.length)extras.push(['Thinning ladder',thinRows.map(r=>`${r[0]}: ${r[1]} — advance when ${r[2]}${r[3]&&r[3]!=='—'?'; step back when '+r[3]:''}`)]);
  if(val('p.pre')||val('p.gen')||val('p.post')||val('p.complex'))extras.push(['Generalization and maintenance',[val('p.pre')&&'Before treatment: '+val('p.pre'),val('p.gen')&&'Tactics: '+val('p.gen'),val('p.post')&&'After criterion: '+val('p.post'),val('p.complex')&&'Response complexity: '+val('p.complex')].filter(Boolean)]);
  const ioa=val('t.ioa');const crit=val('mon.crit'),nn=val('mon.n'),ind=val('mon.ind'),fid=val('mon.fid');
- extras.push(['Data, integrity, and decision rules',['Record the target behavior, the replacement response and its independence, and the steps completed on the integrity checklist each observed session.',`Advance one thinning level when the target is at or below ${crit?crit+' per minute':'the criterion set on the monitoring sheet'} and the replacement is at least ${ind||'80'}% independent for ${nn||'3'} consecutive sessions at the current level; step back after two consecutive sessions above criterion at that level.`,`Integrity criterion ${fid||'90'}% of steps in each observed session; any session in which the behavior contacted the reinforcer is reviewed with the implementer the same week.`,ioa&&'Agreement and fidelity plan: '+ioa].filter(Boolean)]);
+ extras.push(['Data, integrity, and decision rules',['Record the target behavior, the replacement response and its independence, and the steps completed on the integrity checklist each observed session.',tdRule(crit,ind,nn),`Integrity criterion ${fid||'90'}% of steps in each observed session; any session in which the behavior contacted the reinforcer is reviewed with the implementer the same week.`,ioa&&'Agreement and fidelity plan: '+ioa].filter(Boolean)]);
  return extras;}
+/* v23.04 (review F181) the function's label: an EA-1 analysis's, FS-1's descriptive hypothesis, or one chosen on this form; and when
+   extinction rests on a hypothesis no analysis tested, the plan says so */
+function tdFnHead(){const src=val('m.fnsrc');return src==='EA-1'||(!src&&val('m.eadesign'))?'Function (EA-1 analysis'+(val('m.eadesign')?': '+val('m.eadesign').replace(/\s*\(simulated\)$/,''):'')+')'
+  :src==='FS-1'?'Hypothesized function (Form FS-1, descriptive assessment)':'Function (as chosen on this form)';}
+function tdFnNote(){const src=val('m.fnsrc'),ea=src==='EA-1'||(!src&&val('m.eadesign'));if(ea||!val('m.fn'))return '';
+  return comps().some(c=>c.code==='EXT')||val('rb.3')==='yes'?'The function is a hypothesis no analysis has tested, and extinction is planned on it: the first weeks of data are the test of the hypothesis (see the evaluation design).':'';}
 function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'}[fn]||'—';
- $('#finalHead').innerHTML=`<div class="sumhead"><div><b>Student</b><span>${esc(val('m.client'))}</span></div><div><b>Target behavior</b><span>${esc(val('m.beh'))}</span></div><div><b>Function (EA-1)</b><span>${esc(fnLabel)}</span></div></div>
+ $('#finalHead').innerHTML=`<div class="sumhead"><div><b>Student</b><span>${esc(val('m.client'))}</span></div><div><b>Target behavior</b><span>${esc(val('m.beh'))}</span></div><div><b>${esc(tdFnHead())}</b><span>${esc(fnLabel)}</span></div></div>${tdFnNote()?`<p class="method" style="margin:4px 0 0">${esc(tdFnNote())}</p>`:''}
  <div class="defs"><div class="drow"><div class="dlab">Reinforcer and establishing operation</div><div class="dval" style="padding:5px 8px">${esc(val('m.reinf'))||'—'}</div></div><div class="drow"><div class="dlab">Replacement behavior</div><div class="dval" style="padding:5px 8px">${esc(val('m.repdesc'))||'See the teaching steps below'}</div></div><div class="drow"><div class="dlab">Components in this plan</div><div class="dval" style="padding:5px 8px">${cs.map(c=>esc(c.name)).join('; ')||'None selected yet.'}</div></div><div class="drow"><div class="dlab">Prepared by / date</div><div class="dval" style="padding:5px 8px">${esc(val('m.assessor'))} · ${esc(val('m.date'))||new Date().toLocaleDateString()}</div></div></div>`;
  let n=0;let out='';const used=new Set();
  GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code));if(!inG.length)return;out+=`<div class="plan-group">${esc(title)}</div>`;
@@ -2921,7 +2959,7 @@ const SIMS={
 const SIMV={
  escape_fct:{injure:'yes'},
  sbt:{injure:'yes',FCT:['"My way" (simple FCR) → "Excuse me. May I have my way, please?" (complex FCR)','Vocal model at the EO, faded by a progressive delay','30–60 s of the synthesized reinforcers (break, tablet, attention)','Re-present the EO; no break, tablet or attention for problem behavior','Tolerance response to unpredictable denial, then contextually appropriate behaviors in lengthening chains','Denial on 90% of FCRs; reinforcers after a routine'],EXT:['Synthesized: re-present the EO; no break, tablet or attention for the behavior',/* v21.44 (B3) */EE_P1.no,'Two adults present week 1; stop per safety plan'],mat:'Task materials, tablet, timer, signal cards (simulated)',complex:'Complex FCR ("Excuse me. May I have my way, please?") once "my way" is independent (simulated)',hier:'full vocal model → partial vocal model → independent (simulated)',prec:'Prompt "my way" at the first scream; reinforce the FCR (simulated)',target:'Synthesized extinction: re-present the EO; no break, tablet or attention (simulated)',after:'Re-present the EO within 5 s; reinforce the next FCR (simulated)',rbnot:'No break, tablet or attention for the behavior; no negotiation (simulated)'},
- escape_nce:{injure:'yes',mat:'Task materials at the current demand level, NCE timer, arm guards (simulated)',prec:'At the first scream, keep the task in place; the next break comes on the NCE timer, not early (simulated)',after:'Re-present the task within 5 s; the next break comes on the NCE timer (simulated)',crisis:'Trigger: injury (redness, swelling, broken skin) or head hitting that continues through blocking for 1 min → second adult, nurse check, district crisis procedure (simulated)'},
+ escape_nce:{injure:'yes',mat:'Task materials at the current demand level, NCE timer, arm guards (simulated)',prec:'At the first scream, block the head hitting with a soft hand and stay calm; breaks keep coming on the NCE timer (simulated)',after:'When calm, return to the task at the current demand level; the NCE timer keeps running (simulated)',rb3:'no',rbnot:'No comments about the behavior; no raising the demand level after an episode (simulated)',crisis:'Trigger: injury (redness, swelling, broken skin) or head hitting that continues through blocking for 1 min → second adult, nurse check, district crisis procedure (simulated)'},
  attention_ncr:{injure:'no',FCT:['"Talk to me" card on a switch → vocal "talk to me please"','Most-to-least: physical prompt at the EO, faded across trials','30 s of attention (conversation, praise)','No attention, comments, or eye contact for the behavior','Signaled multiple schedule','S+ 20% of period'],EXT:['Attention: no attention, comments, or eye contact for the behavior','No','Two adults present week 1; stop per safety plan'],mat:'"Talk to me" card on switch, timer, signal cards (simulated)',complex:'Vocal "talk to me please" after card is reliable (simulated)',reinf:'praise for prompted; praise + token for unprompted (simulated)',prec:'',after:'Keep attending to the other students; attention comes on the NCR schedule or for the next mand (simulated)',rbnot:'No reprimands, eye contact, or comments about the behavior (simulated)'},
  tangible_fct:{injure:'no',FCT:['"Tablet" card on a switch → vocal "tablet please"','Most-to-least: physical prompt at the EO, faded across trials','Tablet for 1 min','Grabbing does not produce the tablet; a grabbed item goes back to the peer','Signaled delay, faded','30-s signaled delay'],EXT:['Tangible: grabbing does not produce the tablet; a grabbed item goes back to the peer','No','Two adults present week 1; stop per safety plan'],mat:'Tablet card on switch, tablet, timer, delay signal card (simulated)',complex:'Vocal "tablet please" after card is reliable (simulated)',reinf:'praise for prompted; praise + token for unprompted (simulated)',prec:'',target:'Tangible extinction: grabbing does not produce the tablet; a grabbed item goes back to the peer (simulated)',after:'Return the grabbed item to the peer; give the tablet for the next mand (simulated)',rbnot:'No tablet, no negotiation, no comments about the behavior (simulated)'},
  auto_ee:{injure:'no',mat:'Chew tube on lanyard, textured ball, vibrating toy, timer (simulated)',complex:'',reinf:'praise for prompted; praise + token for unprompted (simulated)',prec:'',after:'Resume the activity with the chew tube within reach; praise its next use (simulated)',rbnot:'No reprimands or comments about the behavior (simulated)'},
@@ -2932,7 +2970,7 @@ const SIMV={
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated case?\nEvery sheet is filled with a worked example of the scenario chosen beside the button. Anything already entered will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=SIMS[key],X=SIMV[key]||{},pick=(k,d)=>k in X?X[k]:d;restore({counts:{}});const fcr=!!sc.sbt||sc.comps.some(c=>c==='FCT'||c==='DRA');   /* the plan has a functional communication response (v21.16) */
  setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
- setv('m.beh',sc.beh);setv('m.fn',sc.fn);setv('m.eadesign',sc.sbt?'IISCA: synthesized test vs. control, multielement (simulated)':'Multielement, 4 series (simulated)');setv('m.reinf',sc.reinf);setv('m.rate',String(sc.rate));setv('m.sessmin','10');setv('m.rep',sc.rep);/* v21.21 cross-form (X4b): m.repdesc is the replacement behavior (the plan summary and the flowchart show it as
+ setv('m.beh',sc.beh);setv('m.fn',sc.fn);setv('m.fnsrc','EA-1');setv('m.eadesign',sc.sbt?'IISCA: synthesized test vs. control, multielement (simulated)':'Multielement, 4 series (simulated)');setv('m.reinf',sc.reinf);setv('m.rate',String(sc.rate));setv('m.sessmin','10');setv('m.rep',sc.rep);/* v21.21 cross-form (X4b): m.repdesc is the replacement behavior (the plan summary and the flowchart show it as
    that, GB-1 writes it after "will", EB-1 under "What the request looks like"); the simulation filled it with
    a description of the student's current repertoire. Whether the behavior is already in the repertoire is
    the answer beside it (m.rep). */
@@ -2955,7 +2993,7 @@ setv('m.repdesc',({escape_fct:'press the break card (simulated)',sbt:'say "my wa
  {const tx0=rows.findIndex(r=>!/^(BL|A)\b/.test(r.p)),planDay=days[Math.max(0,tx0)].toLocaleDateString();setv('m.date',planDay);setv('tr[0].c',planDay);}
  /* selectors */ setv('rf.0','yes');setv('rf.2','no');setv('rf.3','yes, effective');setv('rf.4','yes');setv('pa.0','yes');setv('pa.1','no');setv('pa.2','limited');setv('pa.3',sc.fn==='tangible'||sc.fn==='attention'?sc.fn:'none or automatic');setv('pa.4','no');setv('sch.0','maintenance and thinning of an acquired response');setv('sch.1','yes');setv('sch.2','yes');setv('sch.3','no');['delay','rate','quality','mag','reassess','validate','class'].forEach(k=>setv('rp.'+k,true));
  setv('pr.0','yes');setv('pr.1','discrete response (mand, selection, label)');setv('pr.2','yes');setv('pr.3','new; no independent occurrences');setv('pr.4','yes');setv('pr.hier',pick('hier','full physical → partial physical → gesture → independent (simulated)'));setv('pr.fade','drop a level after 3 consecutive correct; return after 2 errors (simulated)');setv('pr.reinf',pick('reinf','praise for prompted; praise + break/token for unprompted (simulated)'));
- setv('ec.0','yes');setv('ec.1','no');setv('ec.2','yes');setv('ec.3','yes');setv('rb.0',sc.fn);setv('rb.1',sc.fn==='escape'?'yes':'no');setv('rb.2',pick('injure',sc.rate>2?'yes':'no'));setv('rb.3','yes');setv('rb.4','no');setv('rb.prec',pick('prec','Prompt the break card at the first scream; reinforce the mand (simulated)'));setv('rb.target',pick('target',''));setv('rb.after',pick('after','Re-present the task within 5 s; reinforce the next mand (simulated)'));setv('rb.not',pick('rbnot','No break, no negotiation, no comments about the behavior (simulated)'));setv('rb.crisis',pick('crisis','Trigger: 2 hits within 10 s → second adult, clear peers, district crisis procedure (simulated)'));
+ setv('ec.0','yes');setv('ec.1','no');setv('ec.2','yes');setv('ec.3','yes');setv('rb.0',sc.fn);setv('rb.1',sc.fn==='escape'?'yes':'no');setv('rb.2',pick('injure',sc.rate>2?'yes':'no'));setv('rb.3',pick('rb3','yes'));setv('rb.4','no');setv('rb.prec',pick('prec','Prompt the break card at the first scream; reinforce the mand (simulated)'));setv('rb.target',pick('target',''));setv('rb.after',pick('after','Re-present the task within 5 s; reinforce the next mand (simulated)'));setv('rb.not',pick('rbnot','No break, no negotiation, no comments about the behavior (simulated)'));setv('rb.crisis',pick('crisis','Trigger: 2 hits within 10 s → second adult, clear peers, district crisis procedure (simulated)'));
  /* v21.44 (B3): escape extinction's guidance, stop rule, assent and consent, worked through for the escape scenarios:
     a light touch with the stop rule for aggression, no physical guidance for the synthesized and self-injury cases */
  if(sc.fn==='escape'){const g=key==='escape_fct'?'yes':'no',on=val('m.date');setv('ee.pg',g);
@@ -2993,6 +3031,9 @@ setv('m.repdesc',({escape_fct:'press the break card (simulated)',sbt:'say "my wa
  for(let k=0;k<10;k++)setv(`ant.ecs.f[${k}].in`,'yes');setv('ant.ecs.f[8].n','Blocking withdrawn at the first PE-only session (simulated)');
  rows.forEach((r,i)=>{if(/^Tx/.test(r.p))setv(`mo[${i}].n`,(/L1/.test(r.p)?'blocks '+[1,0,0,2,1,0][i%6]+'; ':'blocks 0 (withdrawn); ')+'prompts '+[0,1,0,0,0,1][i%6]+'; emotional responses 0 (simulated)');});}
  renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();[...(sc.fn==='escape'?['A_PROX','A_HIGHP']:[]),'A_RAPPORT','A_SCHEDULE','A_SETEVENT',...(sc.fn==='attention'?['A_NCA']:[]),...(sc.fn==='automatic'?['A_EXERCISE']:[]),...(sc.sbt?['SBT_FCR','SBT_TR','SBT_CAB']:fcr?['DT_PROG']:[]),'MAND_CONT','VBMAPP',...(fcr?['S_MULT']:[]),'P_MTL','E_MODEL','R_PB'].forEach(c=>{if(!$$('#compWrap .card').some(k=>k.dataset.code===c))addComp(c);});
+ /* v23.04 (review F178) with extinction not feasible, the consequence protocol starts without its generic extinction step, as one
+    added by hand does */
+ {const pb=$('#compWrap .card[data-code="R_PB"]');if(pb&&val('rb.3')==='no')rbCardSync(null,pb);}
  {const hc=$('#compWrap .card[data-code="A_HIGHP"]');if(hc){const hi=hc.dataset.i;['Give me five; Touch your nose; Thumbs up','"Pick up your pencil and write your name on the worksheet"','Varied (never the previous trial\'s order)','Drop to 2 high-p instructions after 3 sessions at or above 80% low-p cooperation, then to 1 (simulated)'].forEach((v,k)=>setv(`cp[${hi}].p${k}`,v));}}
  if(key==='escape_fct'){/* the trial sheet: four sessions, the third high-p instruction slipping in session 2 */
   $('#nHp').value=4;renderHpRows();const T=[['1-2-3',[['y','y','y','n'],['y','y','y','n'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y']]],['2-3-1',[['y','y','n',''],['y','y','y','y'],['y','y','y','n'],['y','y','n',''],['y','y','y','y']]],['3-1-2',[['y','y','y','y'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y'],['y','y','y','y']]],['1-3-2',[['y','y','y','y'],['y','y','y','y'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y']]]];
@@ -3059,7 +3100,7 @@ function bipText(){
   const cs=comps(),fn=val('m.fn');
   const fnLabel={escape:'Escape / avoidance (social negative)',attention:'Attention (social positive)',tangible:'Tangible / activity (social positive)',automatic:'Automatic (nonsocial)',multiple:'Multiple control'}[fn]||'';
   const B=[[null,'FORM TD-1 · FUNCTION-BASED TREATMENT PLAN',bipHead([['Student',val('m.client')],['ID',val('m.sid')],['Date',val('m.date')]])]];
-  B.push(['TARGET BEHAVIOR AND FUNCTION',bipLine('Target behavior',val('m.beh')),bipLine('Function (EA-1)',fnLabel),bipLine('EA-1 design',val('m.eadesign')),bipLine('Reinforcer and establishing operation',val('m.reinf')),
+  B.push(['TARGET BEHAVIOR AND FUNCTION',bipLine('Target behavior',val('m.beh')),bipLine(tdFnHead(),fnLabel),bipLine('EA-1 design',val('m.fnsrc')==='FS-1'?'':val('m.eadesign')),tdFnNote()?'- '+tdFnNote():null,bipLine('Reinforcer and establishing operation',val('m.reinf')),
     bipLine('Precursor',val('m.prec')),bipLine('Replacement behavior',val('m.repdesc')),bipLine('Setting / classroom',val('m.setting')),bipLine('BCBA',val('m.assessor')),bipLine('Severity and safety',val('m.safety'))]);
   const rate=val('m.rate'),sess=val('m.sessmin'),pct=val('m.pct'),crit=val('mon.crit'),nn=val('mon.n'),ind=val('mon.ind'),fid=val('mon.fid'),ioa=val('t.ioa');
   B.push(['BASELINE AND CRITERIA',rate?'Baseline: '+rate+' per minute'+(sess?' in sessions of '+sess+' minutes':'')+(irt()?' (mean interresponse time '+fmtS(irt())+')':''):bipLine('Session length',sess?sess+' minutes':''),
@@ -3083,7 +3124,7 @@ function bipText(){
   B.push(['REINFORCEMENT THINNING LADDER'].concat(thin.map(r=>'- '+r[0]+': '+r[1]+' — '+(/^Maintain/.test(r[2])?lc(r[2]):'advance when '+lc(r[2]))+(r[3]&&r[3]!=='—'?'; step back when '+lc(r[3]):''))));
   B.push(['GENERALIZATION AND MAINTENANCE',bipLine('Before treatment',val('p.pre')),bipLine('Tactics',val('p.gen')),bipLine('After criterion',val('p.post')),bipLine('Response complexity',val('p.complex'))]);
   if(cs.length||crit||nn||ind||fid||ioa)B.push(['DATA, INTEGRITY, AND DECISION RULES','- Record the target behavior, the replacement response and its independence, and the steps completed on the integrity checklist each observed session.',
-    '- Advance one thinning level when the target is at or below '+(crit?crit+' per minute':'the criterion set on the monitoring sheet')+' and the replacement is at least '+(ind||'80')+'% independent for '+(nn||'3')+' consecutive sessions at the current level; step back after two consecutive sessions above criterion at that level.',
+    '- '+tdRule(crit,ind,nn),
     '- Integrity criterion '+(fid||'90')+'% of steps in each observed session; any session in which the behavior contacted the reinforcer is reviewed with the implementer the same week.',
     ioa?'- Agreement and fidelity plan: '+ioa:'']);
   /* v21.82 (I): the least-restrictive review, who collects which data, social validity, review and exit, the student and
@@ -5291,6 +5332,18 @@ window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,argume
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
   try{k=window.__tdDelayIn?window.__tdDelayIn((f&&f.delay)||null):0;}catch(e){}
   if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the delay steps from Form DT-1'].filter(Boolean).join('; ')};};}
+</script>
+<script id="td1-v2304">
+/* v23.04 (review F181, F184) what the case placed: the function from an EA-1 analysis or from FS-1's hypothesis, and a baseline rate
+   from DD-1's school day; a function or rate typed here afterwards is the BCBA's own */
+(function(){const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';},put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}};
+  const rateNote=()=>{const el=document.getElementById('tdRateSrc');if(el)el.textContent=g('m.ratesrc')==='DD-1'?'From Form DD-1\u2019s school-day rate: the intervals are seeded from a session baseline, not from it.':'';};
+  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const fn0=g('m.fn'),r0=g('m.rate'),r=was?was.apply(this,arguments):null;
+    try{const fn=g('m.fn');if(fn&&!fn0){const ea=f&&f.evidence&&f.evidence['EA-1'];put('m.fnsrc',ea&&(String(ea.fnKey||'')===fn||new RegExp(fn,'i').test(String(ea.fn||'')))?'EA-1':'FS-1');}
+      if(g('m.rate')&&!r0&&f&&f.data)put('m.ratesrc','DD-1');rateNote();}catch(e){}return r;};
+  document.addEventListener('change',e=>{if(!e.isTrusted||!e.target)return;if(e.target.name==='m.fn')put('m.fnsrc',e.target.value?'typed':'');});
+  document.addEventListener('input',e=>{if(!e.isTrusted||!e.target)return;if(e.target.name==='m.rate'){put('m.ratesrc','');rateNote();}});
+  rateNote();})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

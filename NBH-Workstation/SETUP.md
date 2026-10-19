@@ -9903,6 +9903,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.04: TD-1 runs demand fading without extinction where the setting cannot tolerate the behavior, builds thinning ladders that never shorten, holds thinning without the replacement's data, says where the function came from, and stops seeding session intervals from a school-day rate (review Wave 3)
+
+- **Demand fading without extinction (F178).** On the Select sheet, "Can the environment tolerate any problem
+  behavior? No" leads to demand fading and noncontingent escape. Both run without extinction (Geiger, Carr and
+  LeBlanc, 2010). But the demand-fading card still told staff to keep the task in place through the behavior.
+  - Now, on that branch, or when the Responding sheet says extinction is not feasible, the card's fourth step reads:
+    "Escape extinction is not used on this branch … If it occurs, do not hold the task through it; start the next
+    session one demand level lower (Pace et al., 1993)."
+  - The step follows the answers either way. A step the BCBA has rewritten is left alone.
+  - The worked example ("Escape, no compliance") now answers "not feasible" on the Responding sheet, and its steps
+    keep no task in place. The escape-extinction block no longer appears for it.
+- **Thinning ladders that never shorten (F179).** The NCE, NCR and DRO ladders had fixed 2.5- and 5-minute rungs after
+  "× 4". With any baseline rate below about 1.3 per minute, they told staff to shorten the timer at level 4.
+  - Every rung is now built from the card's own first interval (× 2, × 4, × 8), up to the card's terminal interval
+    (5 minutes until the card names one).
+  - A rung is never shorter than the one before. Once the terminal interval is reached, the ladder holds.
+  - The ladder in the final plan and the BIP copy follows.
+- **No thinning without the replacement's data (F180).** With a replacement taught in the plan (FCT, DRA, DNRA, and the
+  others), the decision box says to hold when the target is at criterion but the last sessions have no
+  percent-independent data. A plan with no replacement says it uses the rate criterion only. The final plan and the
+  BIP copy state the rule the same way.
+- **Where the function came from (F181).** The final plan and the BIP copy label the function by its source:
+  - "Function (EA-1 analysis: …)";
+  - "Hypothesized function (Form FS-1, descriptive assessment)";
+  - "as chosen on this form".
+
+  When extinction is planned on a hypothesis that no analysis has tested, the plan says that the first weeks of data
+  are the test.
+- **A school-day rate (F184).** A baseline rate placed from Form DD-1's school-day data is marked as one on Setup. It
+  no longer seeds the NCE, NCR or DRO first interval, since it is not a session interresponse time (Vollmer et al.,
+  1993). The card asks for a session baseline instead.
+- **One level-of-differentiation rule (F185).** An LOD between 62.5% and 63.7% is now called borderline, Subtype 1
+  under the 2023 rule and below the 2018 cutoff, to be confirmed on the EA-1 graph. Before, the box called it both
+  sufficient and not.
+- **Next (part 2):**
+  - F183: the assessment cards apart from the staff steps.
+  - F187: the empty planners left off paper.
+  - F182 and I91: the session log from DD-1 and TI-1.
+  - I92: the checklist handed to TI-1.
+  - I94 and I95.
+  - F186 waits for the paper's own counts.
+- qa/td1-w3-test.js (10 checks).
+
 ### v23.03: CR-1 keeps one debriefing for each restraint (review Wave 3)
 
 - **One debriefing per restraint (F338).** Each debriefing used to overwrite the last. Worse, choosing another restraint
