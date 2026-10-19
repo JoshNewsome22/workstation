@@ -1261,6 +1261,16 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 td input,td select{max-width:100%}
 </style>
+<style id="tk1-v2325">
+/* v23.25 (review F302) what earns a token, on the Board when it is written */
+.bd-rule{position:absolute;font:italic 400 calc(13pt*var(--s))/1.2 Georgia,"Georgia Pro","Times New Roman",serif;color:#1d4a77;text-align:center;white-space:normal;overflow:hidden}
+.bd-rule.rl{text-align:left}
+/* v23.25 (review F299) the ride plan's safety box */
+.bp .bp-safe{border:1.5px solid #b3261e;border-radius:6px;padding:4px 10px 6px;margin:6px 0}
+.bp .bp-safe h4{color:#b3261e;margin-top:2px}
+.bp .bp-safe ul{margin:2px 0 0 1.1em;padding:0}
+#tkPhotoPerm,#tkReqOut,#tkLossNote{margin:4px 0 0}
+</style>
 </head>
 <body class="view-setup">
 
@@ -1362,7 +1372,7 @@ td input,td select{max-width:100%}
       <div><label>Possessive</label><select data-m="poss" name="m.poss"><option value="s">&rsquo;s (Sam&rsquo;s Chart)</option><option value="bare">bare apostrophe (James&rsquo; Chart)</option></select></div>
       <div><label>Setting word in the Board title (Rules row layout and bus books; blank gives &ldquo;&rsquo;s Chart&rdquo;, or &ldquo;&rsquo;s Bus Chart&rdquo; on a bus book)</label><input data-m="setting" name="m.setting" placeholder="Bus"></div>
       <div class="class-only"><label>Board layout</label><select data-m="layout" name="m.layout"><option value="ft">First-Then (two boxes)</option><option value="rules">Rules row (a row of targets and an Earn box)</option></select></div>
-      <div><label>Student photo (round, in the top corners of the Board)</label><div class="pick" data-r="photo" data-i="0" id="phPick"></div></div>
+      <div><label>Student photo (round, in the top corners of the Board)</label><div class="pick" data-r="photo" data-i="0" id="phPick"></div><p class="hint" id="tkPhotoPerm" hidden></p></div>
       <div><label>Photo in its circle: left &harr; right <span id="phXv"></span></label><input type="range" min="0" max="100" step="1" data-m="ph_x" name="m.ph_x" value="50"></div>
       <div><label>Photo in its circle: up &harr; down <span id="phYv"></span></label><input type="range" min="0" max="100" step="1" data-m="ph_y" name="m.ph_y" value="35"></div>
       <div><label>Photo in its circle: size <span id="phZv"></span></label><input type="range" min="100" max="300" step="5" data-m="ph_z" name="m.ph_z" value="100"></div>
@@ -1371,6 +1381,8 @@ td input,td select{max-width:100%}
       <div><label>When there is no photo</label><select data-m="avatar" name="m.avatar"><option value="faceboy2">Library: Boy (teal shirt)</option><option value="av:boy">Boy avatar</option><option value="av:girl">Girl avatar</option><option value="av:child">Neutral child avatar</option><option value="student">Library: Student</option><option value="me">Library: Me</option><option value="faceboy">Library: Boy (curly hair)</option></select></div>
     </div>
     <div id="setupVerdict"></div>
+    <p class="hint" id="tkReqOut" hidden></p>
+    <div id="tkLossNote" hidden></div>
     <p class="hint" id="buildLine"></p>
 
     <!-- (v21.49) the bus ride: tools/forms/TK-1/bus.js -->
@@ -1379,12 +1391,14 @@ td input,td select{max-width:100%}
     <p class="hint">A token board for the ride: the bus rules are the cards on the Targets page (two to five; seatbelt on, stay in your seat, quiet voice, hands to self), the item to earn is a Choices card, and the tokens come at checkpoints along the route. Type the ride&rsquo;s usual length; the form works out when each token comes, and prints a ride plan for the bus staff.</p>
     <div class="fieldgrid">
       <div><label>Ride length, in minutes (the usual ride)</label><input data-m="bus_min" name="m.bus_min" inputmode="numeric" placeholder="25"></div>
+      <!-- v23.25 (review F303) how long the student usually rides before a rule is broken: the first checkpoints come a little sooner -->
+      <div><label>Minutes the student usually rides before a rule is broken (from a baseline ride or two, or the bus incidents)</label><input data-m="bus_base" name="m.bus_base" inputmode="decimal" placeholder="for example 6"></div>
       <div><label>Where the ride starts (as it prints)</label><input data-m="bus_from" name="m.bus_from" placeholder="School"></div>
       <div><label>Where it ends: the stop</label><input data-m="bus_to" name="m.bus_to" placeholder="Home"></div>
       <div><label>&nbsp;</label><button class="tool" id="busSwap" type="button">Swap them (the morning ride)</button></div>
     </div>
     <details class="bus-maps"><summary>The length from Maps (optional)</summary>
-      <p class="hint">To find the ride&rsquo;s length, type the two addresses and tap <b>Open in Maps</b>: the Maps app on this device shows the driving time, and you type the minutes above (a school bus with its stops usually takes longer than a car; ask the transportation office for the route&rsquo;s time if you can). The addresses are kept only in this file. The form never sends them anywhere, never prints them, and leaves them out of the CSV; Maps receives them only when you tap the button. Leave them blank and type the minutes if you prefer.</p>
+      <p class="hint">To find the ride&rsquo;s length, type the two addresses and tap <b>Open in Maps</b>: the Maps app on this device shows the driving time, and you type the minutes above (a school bus with its stops usually takes longer than a car; ask the transportation office for the route&rsquo;s time if you can). The addresses go to Apple Maps when you tap the button, and are cleared from this file as Maps opens: the book needs only the minutes. The form never prints them and leaves them out of the CSV. Leave them blank and type the minutes if you prefer.</p>
       <div class="fieldgrid">
         <div><label>Start address</label><input data-m="bus_fromA" name="m.bus_fromA" autocomplete="off" data-nbh-nowording placeholder="the school's address"></div>
         <div><label>Stop address</label><input data-m="bus_toA" name="m.bus_toA" autocomplete="off" data-nbh-nowording placeholder="the student's stop"></div>
@@ -1409,6 +1423,13 @@ td input,td select{max-width:100%}
       <label class="ck"><input type="checkbox" data-c="pg_bus" name="c.pg_bus" checked> Print the ride plan for the bus staff (a portrait page after the book&rsquo;s pages)</label>
     </div>
     <div class="fieldgrid"><div style="grid-column:1/-1"><label>A note for the bus staff (prints on the ride plan)</label><textarea data-m="bus_note" name="m.bus_note" data-nbh-nowording rows="2" style="width:100%;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px" placeholder="where the student sits, where the board goes, who meets the bus"></textarea></div></div>
+    <!-- v23.25 (review F299) what the bus staff do when the ride becomes unsafe, who they call, and whether an aide rides -->
+    <h3 style="margin:14px 0 4px">If it becomes unsafe</h3>
+    <div class="fieldgrid">
+      <div><label>Does an aide or monitor ride this bus?</label><select data-m="bus_aide" name="m.bus_aide"><option value=""></option><option value="yes">Yes: the aide or monitor runs the board</option><option value="no">No aide or monitor on this bus</option></select></div>
+      <div><label>Who the bus staff call (dispatch or the school office, and the number)</label><input data-m="bus_call" name="m.bus_call" data-nbh-nowording placeholder="Transportation dispatch, 555-0100"></div>
+      <div style="grid-column:1/-1"><label>What the behavior and crisis plans say to do (prints on the ride plan; filled from the case when it holds the safety flags and the crisis plan)</label><textarea data-m="bus_safe" name="m.bus_safe" data-nbh-nowording rows="3" style="width:100%;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px" placeholder="the safety concerns on file, what the behavior plan says to do when the behavior happens, the crisis plan's steps"></textarea></div>
+    </div>
     <div id="busCalc"></div>
     </div>
 
@@ -1417,6 +1438,8 @@ td input,td select{max-width:100%}
       <div><label>Tokens to earn (slots on the Board; on a bus book, the checkpoints of a ride) <span class="hint" id="busNHint"></span></label><select data-m="n" name="m.n"><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
       <div><label>Token picture</label><div class="pick" data-r="tok" data-i="0" id="tokPick"></div></div>
       <div><label>Token name (in the captions: &ldquo;Your First Star!&rdquo;)</label><input data-m="tokname" name="m.tokname" placeholder="Star"></div>
+      <!-- v23.25 (review F302) what earns a token: prints on the Board and on its back, so every adult gives it for the same thing -->
+      <div class="class-only"><label>Earns a token (what, and how much: the schedule)</label><input data-m="tok_rule" name="m.tok_rule" data-nbh-nowording placeholder="3 problems correct; 2 minutes of writing"></div>
       <div><label>The last token (it fills the board; the item comes next)</label><select data-m="term" name="m.term"><option value="none">The same as the others</option><option value="ring">The same picture, with an orange double border</option><option value="pic">Its own picture, with an orange double border</option></select></div>
       <div id="termPicRow"><label>The last token&rsquo;s picture</label><div class="pick" data-r="tokL" data-i="0" id="tokLPick"></div></div>
     </div>
@@ -4462,6 +4485,13 @@ function busPlan(){const R=busRide(),st=busStep(),cps=busCps(),n=nTok(),rules=bu
       const lastT=cps.length?cps[cps.length-1].t:0;if(R-lastT>5)note.push('The last landmark is '+Math.round(R-lastT)+' minutes before the stop, so the board is full well before the item: add a landmark nearer the stop, or give the item on the bus.');
       if(cps.length>2&&gmin>0&&gmax>2.5*gmin)note.push('The landmarks are unevenly spaced ('+busClock(gmin)+' to '+busClock(gmax)+' apart): the long gaps are the hard part of the ride; add a landmark in the longest one if there is one to see.');
       if(cps.some((c,i)=>i&&c.t===cps[i-1].t))warn.push('Two landmarks have the same minute: give each its own.');}}
+  /* v23.25 (review F299) the board needs an adult who is not driving */
+  if(S.meta.bus_aide==='no')warn.push('No aide or monitor rides this bus, and the ride plan has one run the board, never the driver while driving: plan who can, or use the board at the stop only (Step 4 of the fading).');
+  /* v23.25 (review F303) the first checkpoints come a little sooner than the student usually rides without breaking a rule */
+  {const base=num(S.meta.bus_base);const first=st==='timer'?(fixed?busNum('bus_every',5,1,30):(cps.length?cps[0].t:0)):gmax;
+   if(base==null||base<=0)note.push('Type how long the student usually rides before a rule is broken (a baseline ride or two, or the bus incidents): the first checkpoints should come a little sooner than that, so the first rides earn.');
+   else if(first>base+1e-9){const ev=[2,3,4,5,6,8,10,15].filter(e=>e<=base*.9+1e-9).pop(),need=Math.ceil((st==='timer'&&!fixed?Math.max(R*.5,R-busNum('bus_lead',2,0,10)):R)/(base*.9));
+     warn.push((st==='timer'?'The tokens come about every '+busClock(first):'The longest stretch between landmarks is '+busClock(first))+', longer than the '+busClock(base)+' the student usually rides without breaking a rule, so few would be earned: '+(st!=='timer'?'go back to the timer step, or add a landmark in the long stretch.':need<=10&&!fixed?'use more tokens (about '+need+' over this ride).':ev?'a token every '+ev+' minutes, a little under the usual stretch.':'start with a shorter ride, or the board at the stop only.'));}}
   if(busReward()==='bus')note.push('An item on the bus: check the district’s transportation rules first, and any allergy or choking-risk plan, before a snack is eaten on the bus; a non-food item (a sticker, a song, a few minutes with a tablet) is the usual choice.');
   const total=n*k,goal=Math.max(1,Math.min(total,Math.round(num(S.meta.bus_goal)||total)));
   /* the stops are fixed, so a missed checkpoint cannot be made up later on the ride: with every token needed, one miss means no item */
@@ -4495,7 +4525,7 @@ function busWire(){
   document.addEventListener('click',e=>{const d=e.target.closest('button[data-lmdel]');if(d){S.lm.splice(+d.dataset.lmdel,1);ensure();renderAll();return;}
     if(e.target.closest('#lmAdd')){if(S.lm.length<10){S.lm.push(Object.assign(cello(),{min:''}));renderAll();const ins=$$('#lmTbl input[data-f="l"]');if(ins.length)ins[ins.length-1].focus();}return;}
     if(e.target.closest('#busSwap')){const m=S.meta;[m.bus_from,m.bus_to]=[m.bus_to||'',m.bus_from||''];[m.bus_fromA,m.bus_toA]=[m.bus_toA||'',m.bus_fromA||''];renderAll();return;}
-    if(e.target.closest('#busMaps')){const u=busMapsUrl();if(u)window.open(u,'_blank','noopener');return;}});
+    if(e.target.closest('#busMaps')){const u=busMapsUrl();if(u){window.open(u,'_blank','noopener');S.meta.bus_fromA='';S.meta.bus_toA='';$$('[data-m="bus_fromA"],[data-m="bus_toA"]').forEach(x=>{x.value='';});renderAll();}return;}});   /* v23.25 (review F307) the addresses are cleared as Maps opens */
   /* a landmark's minute changes how many checkpoints there are: the token count, the captions and the plan follow at once */
   document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.r==='lm'){if(S.caps.length!==nTok())ensure();}});
   document.addEventListener('change',e=>{const el=e.target;if(el.dataset&&(el.dataset.m==='kind'||/^bus_(rule|step|time)$/.test(el.dataset.m||''))){ensure();renderAll();}});}
@@ -4569,22 +4599,31 @@ function busPlanPage(){const p=busPlan(),T=turned(),f=String(S.meta.first||'').t
     '<div class="bp-h"><div class="bp-t">'+who+' Bus Ride Plan</div><div class="bp-s">For the bus staff &middot; '+sub+'</div></div>'+
     busRouteSvg(p)+
     '<div class="bp-cols"><div class="bp-col"><h4>What earns a '+one+'</h4><div class="bp-cards">'+cards+'</div><p>'+earn+'</p></div>'+
-    '<div class="bp-col"><h4>When</h4><p>'+when+'</p><h4>The item</h4><p>'+item+'</p></div></div>'+
-    '<h4>At each checkpoint</h4><ol class="bp-ol"><li><b>Rules followed:</b> give the '+one+' right away, with brief praise that names the rule (&ldquo;Great job staying in your seat!&rdquo;), and let '+nm+' put it on the board.</li><li><b>Not followed:</b> no '+one+' this time. Calmly name the rule once (&ldquo;Seatbelt on.&rdquo;); the earned '+tok+' stay on the board, and the next checkpoint is a fresh chance.</li><li>The bus aide or monitor runs the board, never the driver while driving. Keep the board and '+tok+' attached (hook-and-loop) so nothing loose drops or goes in a mouth.</li></ol>'+
-    '<div class="bp-cols"><div class="bp-col"><h4>Fading</h4><ol class="bp-steps">'+stepHtml+'</ol></div><div class="bp-col">'+(note?'<h4>Notes</h4><p>'+esc(note).replace(/\n/g,'<br>')+'</p>':'<h4>Notes</h4><div class="bp-lines"><i></i><i></i><i></i></div>')+'</div></div>'+
+    '<div class="bp-col"><h4>When</h4><p>'+when+'</p><h4>The item</h4><p>'+item+'</p>'+(note?'<h4>Notes</h4><p>'+esc(note).replace(/\n/g,'<br>')+'</p>':'<h4>Notes</h4><div class="bp-lines"><i></i><i></i></div>')+'</div></div>'+
+    '<h4>At each checkpoint</h4><ol class="bp-ol"><li><b>Rules followed:</b> give the '+one+' right away, with brief praise that names the rule (&ldquo;Great job staying in your seat!&rdquo;), and let '+nm+' put it on the board.</li><li><b>Not followed:</b> no '+one+' this time. Calmly name the rule once (&ldquo;Seatbelt on.&rdquo;); '+(String(S.meta.loss_rule||'').trim()?'token loss follows the plan (Form TE-1): '+esc(String(S.meta.loss_rule).trim().replace(/[\s.]+$/,''))+'. ':'the earned '+tok+' stay on the board, and ')+'the next checkpoint is a fresh chance.</li><li>The bus aide or monitor runs the board, never the driver while driving. Keep the board and '+tok+' attached (hook-and-loop) so nothing loose drops or goes in a mouth.</li></ol>'+
+    '<div class="bp-cols"><div class="bp-col"><h4>Fading</h4><p>Move on a step when most checkpoints are earned on five rides in a row (a working convention).</p><ol class="bp-steps">'+stepHtml+'</ol></div><div class="bp-col">'+tkSafeHtml()+'</div></div>'+
     '<h4>Ride log</h4><table class="bp-log">'+logHead+Array.from({length:7},()=>logRow).join('')+'</table><p class="bp-key">Tick a box for each checkpoint with a '+one+' (leave it empty when there was none); write the '+tok+' earned and whether the item was given.</p>'+
     '</div></div>';}
 
+/* v23.25 (review F299) If it becomes unsafe: a safety rule is put right at once, not only by holding back a token; what the behavior and
+   crisis plans say (Setup, filled from the case); who to call; a hold is an emergency step only, by trained staff, documented and reported */
+function tkSafeHtml(){const t=String(S.meta.bus_safe||'').trim(),c=String(S.meta.bus_call||'').trim();
+  return '<div class="bp-safe"><h4>If it becomes unsafe</h4><ul>'+
+    '<li>Seatbelt and seat rules are put right at once, not only by holding back a '+esc(tokName().toLowerCase())+'.</li>'+
+    (t?'<li>'+esc(t).replace(/\n/g,'<br>')+'</li>':'<li>What the behavior plan and the crisis plan say to do: <span class="bp-blank">______________________________________________</span></li>')+
+    '<li>Call: '+(c?'<b>'+esc(c)+'</b>':'<span class="bp-blank">______________________________</span>')+'.</li>'+
+    '<li>A physical hold is an emergency step only, by trained staff under the district&rsquo;s procedure, documented and reported (s. 1003.573, F.S.).</li></ul></div>';}
 /* ---------------- the simulator's bus ride (Load simulator on a bus book): nothing in it is real ---------------- */
 function busSim(){Object.assign(S.meta,{kind:'bus',site:'Elementary, bus route 12 (sample)',setting:'',bus_min:'25',bus_from:'School',bus_to:'Home',bus_fromA:'',bus_toA:'',bus_rule:'all',bus_time:'spread',bus_lead:'2',bus_every:'5',bus_step:'timer',bus_reward:'arrive',bus_goal:'',
-    bus_note:'Sam sits in the second seat on the right, by the window, with the board on the seat back. Mom meets the bus.'});
+    bus_note:'Sam sits in the second seat on the right, by the window, with the board on the seat back. Mom meets the bus.',bus_base:'6',bus_aide:'yes',bus_call:'Transportation dispatch, 555-0100 (sample)',
+    bus_safe:'Out of the seat while the bus moves: the aide asks once, then the driver stops where it is safe. Hitting: the aide moves Sam to the seat beside the aide and calls dispatch.'});
   S.ch=['sticker','musicfun','ipad','snackfun','cardbubbles','cardbooks'].map(k=>cello(k));
   S.tg=[cello('sitting','Stay in my seat'),cello('quiet','Quiet voice'),cello('safehands','Hands to self'),cello(),cello(),cello()];
   S.lm=[['store','Grocery store','5'],['park','The park','10'],['','Fire station','14'],['libraryplace','Library','18'],['','The bridge','22']].map(([k,l,m])=>Object.assign(cello(k,l),{min:m}));}
-/* the ride plan fits its page: the log gives up rows first (down to three), then the type shrinks a little (to 8.5 pt) */
-function busFitPlan(root){$$('.pg[data-kind="busplan"] .bp',root||document).filter(bp=>root||!bp.closest('#wkStage')).forEach(bp=>{if(!bp.clientHeight)return;bp.style.fontSize='';const over=()=>bp.scrollHeight>bp.clientHeight+1;
+/* the ride plan fits its page: the log gives up rows first (down to three), then the type shrinks a little (to 8 pt; v23.25, with the safety box) */
+function busFitPlan(root){$$('.pg[data-kind="busplan"] .bp',root||document).filter(bp=>root||!bp.closest('#wkStage')).forEach(bp=>{if(!bp.clientHeight)return;bp.style.fontSize='';const over=()=>bp.scrollHeight>bp.clientHeight+1-(root?16:0);   /* v23.25 the walkthrough's copy, fitted before its type has settled, keeps a line in hand */
   const rows=[...bp.querySelectorAll('table.bp-log tr')].slice(1);let i=rows.length;while(over()&&i>3)rows[--i].remove();
-  let fs=10.5,g=0;while(over()&&fs>8.5&&g++<12){fs-=.25;bp.style.fontSize=fs+'pt';}});}
+  let fs=10.5,g=0;while(over()&&fs>8&&g++<12){fs-=.25;bp.style.fontSize=fs+'pt';}});}
 
 /* what the walkthrough needs of a bus book (called inside its copy of the state, on the timer step): the ride's checkpoints,
    the landmark steps, the ride plan page, and what to say about a book that is not finished */
@@ -4646,6 +4685,40 @@ const TXT0={
   h2:'STEP 2 : YOU SELECT WHAT TO TEACH YOUR LEARNER\n**Teaching Targets:** This page is for selecting which behaviors you target: a replacement behavior from the behavior plan, or a new skill. **This page is where you choose what to teach your learner!** A replacement behavior should do the same job for the learner as the problem behavior did (the function found in the assessment), and it should be easier for the learner than the problem behavior. Work on one target on the board at a time, and agree on what counts, so every adult gives the {token} for the same thing.\n\n**Prerequisite Skills:** Make sure the learner has the skills a new skill depends on before teaching it. For example, make sure the learner can attend to an instructor for a short, set time before teaching academic skills that require attending for longer and then answering questions. Another example: before teaching a learner to raise a hand, select a picture, or make a gesture for attention, make sure the learner can make the movement.\n\n__**Steps:**__\n1. Select the skill you would like to teach your learner from the choices on the front of this page. If the skill you are working on is not there, write its name on the blank picture.\n2. Now place the picture of the skill in the gray box on the next page under the word \u201cFirst.\u201d',
   h3:'STEP 3 : DELIVER TOKEN ({TOKENS}), REINFORCE BEHAVIOR\nPlace the picture of the skill you are teaching your learner under the word **FIRST**. The picture of the activity your learner will earn goes under the word **THEN**.\n\n__**Tokens**__:\nThis page is also where your learner places each {token} as it is earned. Give the {token} right after the behavior, with brief praise, and let the learner put it in the next box. There are {n} boxes, so when the {n}th {token} is earned, your learner gets the THEN item at once.{last} Keep the exchange immediate when the board is new; a longer wait can be built in later.\n\n__**Not So FAST**__: Before starting, decide how much of the behavior earns one {token}: how many responses, or how long. For example, three problems answered, or two minutes of staying seated. This is the schedule of reinforcement, and it must not ask too much. When a skill is brand new, give a {token} after every correct response or every short stretch of the behavior. As the skill becomes reliable, raise the requirement a little at a time; if the behavior falls apart after a step up, you raised it too fast: go back one step.'
 };
+/* v23.25 (review Wave 3: F298, F301, F302, F303, F306) the backs' default texts, corrected, and a set for each kind of Board: First-Then
+   (TXT0), a Rules row (TXT_RULES) and a bus book (TXT_BUS). A book whose back still holds a default text (the old one, or the set
+   for another kind) takes the set for its kind; an edited back is kept as written. {rule}: what earns a token (Setup, Tokens);
+   {goal} and {where}: when and where a bus book's item is given. */
+const TXT_OLD=Object.assign({},TXT0);
+function txtEd(t,E){return E.reduce((s,e)=>s.indexOf(e[0])<0?s:s.split(e[0]).join(e[1]),t);}
+(function(){const FIX={
+  cb:[['2. As necessary, use prompting to assist the learner with the selection.','2. If needed, help with the pointing, but let your learner make the choice.']],
+  h1:[['2. As necessary, use prompting to assist the learner with the selection.','2. If needed, help with the pointing, but let your learner make the choice.'],
+      ['There are plenty of extra picture choices in the “extras book”, and if you don’t see an image choice that your learner wants, use the __OTHER__ image to write in the name of the item/activity.',
+       'For spares, print a sheet of one card (Print a sheet of this card, on Setup); if you don’t see a picture your learner wants, use the __OTHER__ card to write in the name of the item or activity.']],
+  te:[[' before starting the token economy, and keep going until the student reaches for the token.',' before starting the token economy.']],
+  tt:[['so every adult gives the {token} for the same thing.','so every adult gives the {token} for the same thing. If the target is asking for something, like a break, still give what was asked for, every time.']],
+  h2:[['so every adult gives the {token} for the same thing.','so every adult gives the {token} for the same thing. If the target is asking for something, like a break, still give what was asked for, every time.']],
+  tb:[['go back one step.','go back one step.{rule}']],
+  h3:[['go back one step.','go back one step.{rule}']]};
+  Object.keys(FIX).forEach(k=>{TXT0[k]=txtEd(TXT0[k],FIX[k]);});})();
+const TXT_RULES=(function(){const R={},row=[['A picture of the skill you are teaching your learner goes on the front of this page under the word **FIRST**. The picture of the activity your learner will earn goes under the word **THEN**.','The rules go in the row on the front of this page. The picture of the item your learner will earn goes in the **Earn** box.'],
+    ['Place the picture of the skill you are teaching your learner under the word **FIRST**. The picture of the activity your learner will earn goes under the word **THEN**.','Put the rules your learner is working on in the row. The picture of the item your learner will earn goes in the **Earn** box.'],
+    ['__**FIRST-THEN**__:\nFirst-Then means that access to something your learner likes comes only after they first do something they like less.','__**THE RULES ROW**__:\nThe board shows the rules your learner is working on in a row, and the item they are working for in the **Earn** box: the item comes only after the rules are followed.'],
+    ['keep the THEN item put away at other times','keep the item put away at other times'],['your learner gets the THEN item at once.','your learner gets the item in the Earn box at once.'],
+    ['place the picture in the green box under the word “Then.”','place the picture in the green **Earn** box.'],
+    ['Work on one target on the board at a time, and agree on what counts','The rules in the row are worked on together, so keep them few (two to five), and agree on what counts'],
+    ['2. Now place the picture of the skill in the gray box on the next page under the word “First.”','2. Now place the pictures of the rules in the row on the next page.']];
+  Object.keys(TXT0).forEach(k=>{R[k]=txtEd(TXT0[k],row);});return R;})();
+const TXT_BUS=(function(){const B={},bus=[['Give the {token} right after the behavior, with brief praise, and let the learner put it in the next box. There are {n} boxes, so when the {n}th {token} is earned, your learner gets the item in the Earn box at once.{last} Keep the exchange immediate when the board is new; a longer wait can be built in later.',
+      'At each checkpoint on the ride, when the rules were followed, give the {token} with brief praise that names the rule, and let the learner put it in the next box. There are {n} boxes; {goal}, your learner gets the item {where}.{last}'],
+    ['__**Not So FAST**__: Before starting, decide how much of the behavior earns one {token}: how many responses, or how long. For example, three problems answered, or two minutes of staying seated. This is the schedule of reinforcement, and it must not ask too much. When a skill is brand new, give a {token} after every correct response or every short stretch of the behavior. As the skill becomes reliable, raise the requirement a little at a time; if the behavior falls apart after a step up, you raised it too fast: go back one step.{rule}',
+      '__**Not So FAST**__: The checkpoints are the schedule: a {token} at each one when the rules were followed since the last. The first checkpoints should come a little sooner than the student usually rides without breaking a rule, so the first rides earn; space them out, and move to landmarks, only as the rides go well (the fading steps on the ride plan).'],
+    ['This page is for selecting which behaviors you target: a replacement behavior from the behavior plan, or a new skill. **This page is where you choose what to teach your learner!**','This page holds the bus rules: two to five, such as seatbelt on, stay in your seat, quiet voice, hands to self. **Choose the rules your learner works on during the ride.**']];
+  Object.keys(TXT_RULES).forEach(k=>{B[k]=txtEd(TXT_RULES[k],bus);});return B;})();
+const txtKind=()=>S.meta.kind==='bus'?'bus':S.meta.layout==='rules'?'rules':'ft';
+const txtDef=k=>({ft:TXT0,rules:TXT_RULES,bus:TXT_BUS})[txtKind()][k];
+const txtIsDef=(k,v)=>v===TXT_OLD[k]||v===TXT0[k]||v===TXT_RULES[k]||v===TXT_BUS[k];
 const CREDIT0='To find more resources and information visit\nwww.Behavior-Charts.com';
 /* v21.44 the avatar a book starts with: the practice's own Boy picture from the library (the drawn boy where the library is
    not beside the form) */
@@ -4662,6 +4735,7 @@ function ensure(){
   const fix=(k,n,def)=>{if(!Array.isArray(S[k])||S[k].length!==n)S[k]=def();};fix('ft',2,()=>[cello(),cello()]);fix('tok',1,()=>[cello('tk:star')]);fix('tokL',1,()=>[cello('tk:medal')]);fix('photo',1,()=>[cello()]);fix('bg',2,()=>[cello(),cello()]);fix('sp',1,()=>[cello()]);
   if(!Array.isArray(S.lm))S.lm=[];S.lm=S.lm.slice(0,10).map(o=>Object.assign(cello(),o&&typeof o==='object'?o:{},{min:String(o&&o.min!=null?o.min:'')}));   /* (v21.49) the bus ride's landmarks */
   if(!S.txt||typeof S.txt!=='object')S.txt={};Object.keys(TXT0).forEach(k=>{if(typeof S.txt[k]!=='string')S.txt[k]=TXT0[k];});
+  Object.keys(TXT0).forEach(k=>{if(txtIsDef(k,S.txt[k]))S.txt[k]=txtDef(k);});   /* v23.25 (review F301) the default back for this kind of Board */
   Object.keys(DEF).forEach(k=>{if(!/^#[0-9a-f]{6}$/i.test(S.meta[k]||''))S.meta[k]=DEF[k];});
   if(!Array.isArray(S.caps))S.caps=[];const n=nTok();if(S.caps.length!==n)S.caps=defCaps(n,tokName());
 }
@@ -4762,9 +4836,29 @@ function renderTbls(){
   busTables();
   renderSetup();
 }
-function renderSetup(){const m=S.meta,v=$('#setupVerdict');const bl=$('#buildLine');if(bl)bl.textContent='This copy of the form: build '+BUILD+'.';const nch=S.ch.filter(has).length,ntg=S.tg.filter(has).length;
+/* v23.25 (review F300) Form DM-1's photo / media permission, from the case: "No" keeps the student's photo out of the book (the avatar
+   prints), "Unknown" asks for it to be checked; a book opened on its own, with no case, is unchanged */
+function tkPerm(){try{const f=window.nbhCase&&nbhCase.facts,fl=f&&f.profile&&f.profile.flags;return fl&&fl.photo?String(fl.photo):'';}catch(e){return '';}}
+const tkHasPhoto=()=>!!(S.photo[0]&&S.photo[0].ph);
+function tkSetupNotes(){const w=tkPerm(),pe=$('#tkPhotoPerm');if(pe){const t=w==='No'?'Form DM-1: no photo or media permission. Use the avatar, or a picture the student picks.':w==='Unknown'?'Form DM-1: the photo and media permission is not known. Check it before a photo of the student goes in the book.':'';pe.hidden=!t;pe.textContent=t;}
+  const ro=$('#tkReqOut');if(ro){const on=S.tg.map(o=>String(lbl(o)||'').trim().toLowerCase());const L=String(S.meta.req_out||'').split('; ').filter(x=>x&&!on.includes(x.toLowerCase()));
+    ro.hidden=!L.length;ro.textContent=L.length?'Not put on the Targets page from the case: '+L.join('; ')+'. A request the plan teaches earns what it asks for, every time (Form TD-1), not a token: put the work on the First card instead (for example, Math: 3 problems = 1 star); a break can be a Then card. To add it anyway, tick it under From the case.':'';}
+  const ln=$('#tkLossNote');if(ln){let L=null;try{const t=window.nbhCase&&nbhCase.facts&&nbhCase.facts.token;L=t&&t.loss&&t.loss.on?t.loss:null;}catch(e){}
+    const r=L?String(L.rule||'').replace(/\s+/g,' ').trim():'',used=String(S.meta.loss_rule||'').trim();ln.hidden=!L;
+    ln.innerHTML=L?'<div class="verdict v-mid"><b>Form TE-1 records token loss</b>'+(r?': '+esc(r.length>200?r.slice(0,199)+'\u2026':r):'')+'. '+(isBus()?(used?'The ride plan prints the plan\u2019s rule. ':'The ride plan says the earned '+esc(plural(tokName()).toLowerCase())+' stay on the board. <button type="button" class="tool" id="tkLossUse">Print the plan\u2019s rule on the ride plan</button> '):'The walkthrough says the earned '+esc(plural(tokName()).toLowerCase())+' stay on the board: follow the plan\u2019s rule. ')+'</div>':'';}}
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('#tkLossUse');if(!b)return;let r='';try{r=String(nbhCase.facts.token.loss.rule||'').replace(/\s+/g,' ').trim();}catch(x){}
+  if(!r)return;if(await nbhUI.confirm('Print the token-loss rule from Form TE-1 on the ride plan?\nThe line \u201cthe earned tokens stay on the board\u201d is replaced by the plan\u2019s rule.',{ok:'Print it'})){S.meta.loss_rule=r;renderAll();}});
+/* the student photo's picker asks first when DM-1 records no permission, or does not know */
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('#phPick button[data-pick]');const w=tkPerm();if(!b||(w!=='No'&&w!=='Unknown')||b.dataset.tkok)return;
+  e.preventDefault();e.stopPropagation();const q=w==='No'?'Form DM-1 records no photo or media permission for this student.\nUse the avatar, or a picture the student picks, not a photo of the student.':'Form DM-1 does not know whether there is photo or media permission for this student.\nCheck it before a photo of the student goes in the book.';
+  if(await nbhUI.confirm(q,{ok:'Choose a picture anyway',cancel:'Keep the avatar'})){b.dataset.tkok='1';b.click();delete b.dataset.tkok;}},true);
+/* Save as video asks first while the book holds a photo the permission does not cover */
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('#wkVideo');const w=tkPerm();if(!b||!tkHasPhoto()||(w!=='No'&&w!=='Unknown')||b.dataset.tkok)return;
+  e.preventDefault();e.stopPropagation();if(await nbhUI.confirm('The book holds a photo, and Form DM-1 '+(w==='No'?'records no photo or media permission':'does not know whether there is photo or media permission')+' for this student: the video would show it.\nTake the photo out first (Student photo, No picture), or make the video anyway.',{ok:'Make the video anyway',cancel:'Not now'})){b.dataset.tkok='1';b.click();delete b.dataset.tkok;}},true);
+function renderSetup(){const m=S.meta,v=$('#setupVerdict');tkSetupNotes();const bl=$('#buildLine');if(bl)bl.textContent='This copy of the form: build '+BUILD+'.';const nch=S.ch.filter(has).length,ntg=S.tg.filter(has).length;
   if(!m.client&&!m.first&&!nch&&!ntg){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The student and the first name as it prints, the photo, the tokens; then the Choices and Targets pages.'+lkPhrase()+'</div>';return;}
-  const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0]))miss.push('a photo (the '+esc(lbl({k:avKey()})||'avatar').toLowerCase()+' avatar prints instead)');if(nch<6)miss.push((6-nch)+' of the six choices');if(isBus()){if(ntg<2)miss.push('at least two bus rules on the Targets page');}else if(ntg<6)miss.push((6-ntg)+' of the six targets');
+  const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0])&&tkPerm()!=='No')miss.push('a photo (the '+esc(lbl({k:avKey()})||'avatar').toLowerCase()+' avatar prints instead)');if(tkHasPhoto()&&tkPerm()==='No')miss.push('the book holds a photo, but Form DM-1 records no photo or media permission: take it out (Student photo, No picture)');if(nch<6)miss.push((6-nch)+' of the six choices');if(isBus()){if(ntg<2)miss.push('at least two bus rules on the Targets page');}else if(ntg<1)miss.push('a target on the Targets page');   /* v23.25 (review F298) one target is a finished Targets page */
+  if(!isBus()&&!String(m.tok_rule||'').trim())miss.push('what earns a '+esc(tokName().toLowerCase())+' (Tokens: Earns a token)');   /* v23.25 (review F302) */
   /* (v21.42i) the same picture twice among the six is usually a slip of the finger in the picker */
   const twice=(k,name)=>{const seen={},d=[];S[k].forEach((o,i)=>{const id=o.ph?'ph:'+o.ph:o.k;if(!id)return;if(seen[id]!==undefined)d.push(name+' '+(seen[id]+1)+' and '+(i+1));else seen[id]=i;});return d;};
   const dup=twice('ch','choices').concat(twice('tg','targets'));if(dup.length)miss.push('the same picture on '+dup.join(', ')+' (change one, unless that is meant)');
@@ -4842,14 +4936,17 @@ function photoFit(){const x=Math.max(0,Math.min(100,num(S.meta.ph_x)??50)),y=Mat
 /* (v21.42i) the two photos face each other: one of them prints mirrored (the samples mirror the right one) */
 function flipSide(){const f=S.meta.ph_flip||'r';return f==='l'||f==='none'?f:'r';}
 function photoInner(){const o=S.photo[0];return has(o)?(o.ph?pic(o,'',photoFit()):pic(o,'')):pic({k:avKey()},'');}
+/* v23.25 (review F302) what earns a token, under the Board's title (a classroom book; it prints only once written) */
+function tkRuleHtml(rl){const r=String(S.meta.tok_rule||'').trim().replace(/[\s.;]+$/,'');if(!r||isBus())return '';const t='Earns a '+esc(tokName().toLowerCase())+': '+esc(r);
+  return rl?'<div class="bd-rule rl" style="left:'+pt(16)+';right:'+pt(96)+';top:'+pt(74)+'">'+t+'</div>':'<div class="bd-rule" style="left:'+pt(130)+';right:'+pt(130)+';top:'+pt(64)+';white-space:nowrap;text-overflow:ellipsis">'+t+'</div>';}
 function photoHtml(side){return '<div class="bd-photo '+side+(flipSide()===side?' flip':'')+'">'+photoInner()+'</div>';}
 function presetBox(o,cls,ul,cx){return '<div class="bx ft '+cls+'"'+(cx!=null?' style="left:'+pt(cx-74.94)+'"':'')+'>'+(has(o)?cardHtml(o,0,{ul}):'<span class="dot"></span>')+'</div>';}
 function pageBoard(){if(busEach())return busGridBoard();const d=strip();const panelH=pageMode()==='fill'?null:BDH;const rl=S.meta.layout==='rules'||isBus();   /* (v21.49) a bus book: the rules row, or a row for each rule */
   let inner;
   if(rl){const rules=isBus()?busRules():S.tg.filter(has).slice(0,5);while(rules.length<2)rules.push(S.tg[rules.length]||cello());
     const k=rules.length,ph=panelH||(612/scl()-d.band-6.8),avail=ph-100-10,earn=Math.min(146.88,avail-48),rp=Math.min(173,avail-50),cw=(PANW-14-8-(earn+2)-20-(k-1)*10)/k;
-    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+(isWord(o)?'':pic(o,''))+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div>'+busGoalHtml()+'</div></div>';}
-  else inner=photoHtml('l')+photoHtml('r')+'<div class="ttl bd" data-frac=".72"><span class="ul">'+nameTitle()+'</span></div><div class="ftlab" style="left:'+pt(163.62)+'">First</div><div class="ftlab" style="left:'+pt(432.04)+'">Then</div>'+presetBox(S.ft[0],'grey',false,163.62)+presetBox(S.ft[1],'green',true,432.04);
+    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div>'+tkRuleHtml(true)+'<div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+(isWord(o)?'':pic(o,''))+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div>'+busGoalHtml()+'</div></div>';}
+  else inner=photoHtml('l')+photoHtml('r')+'<div class="ttl bd" data-frac=".72"><span class="ul">'+nameTitle()+'</span></div><div class="ftlab" style="left:'+pt(163.62)+'">First</div><div class="ftlab" style="left:'+pt(432.04)+'">Then</div>'+presetBox(S.ft[0],'grey',false,163.62)+presetBox(S.ft[1],'green',true,432.04)+tkRuleHtml(false);
   return pgOpen('bd','front')+'<div class="panel" style="bottom:'+pt(d.band)+'">'+inner+(rl?'':qrBox())+'</div>'+stripHtml()+pgClose;}
 function parkRows(n){const per=n<=3?n:n<=4?2:n<=6?3:n<=8?4:5;const rows=Math.ceil(n/per);const out=[];let left=n;for(let r=0;r<rows;r++){const k=Math.min(per,Math.ceil(left/(rows-r)));out.push(k);left-=k;}return out;}
 function pageTokens(){if(busEach())return busGridTokens();const n=nTok(),rows=parkRows(n);const sz=112.53;
@@ -4859,10 +4956,17 @@ function pageTokens(){if(busEach())return busGridTokens();const n=nTok(),rows=pa
   return pgOpen('tk','front')+'<div class="panel"><div class="tkcorner l">'+corner+'</div><div class="tkcorner r">'+corner+'</div><div class="ttl tk" data-frac=".8"><span class="ul">Tokens!!!</span></div>'+boxes+'<div class="foot">See Instructions On The Back</div>'+(rows[rows.length-1]>=3?qrBox().replace('class="qr"','class="qr up"'):qrBox())+'</div>'+pgClose;}
 const BACKT={ch:['cb','Choice Board'],tg:['tt','Teaching Targets'],bd:['tb','Token Board'],tk:['te','Token Economy']};
 function inline(s){s=esc(s);return s.replace(/\*\*\*(.+?)\*\*\*/g,'<b><i>$1</i></b>').replace(/__(.+?)__/g,'<u>$1</u>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>');}
-function fill(t){const n=nTok(),tn=tokName();return String(t||'').replace(/\{last\}/g,termOn()?' The last {token} looks different from the others, so your learner can see that it finishes the board and the THEN item comes next.':'').replace(/\{n\}th/g,WORDS[n]==='one'?'first':WORDS[n]==='two'?'second':WORDS[n]==='three'?'third':WORDS[n]==='five'?'fifth':WORDS[n]==='eight'?'eighth':WORDS[n]==='nine'?'ninth':WORDS[n]+'th').replace(/\{n\}/g,WORDS[n]).replace(/\{TOKENS\}/g,plural(tn).toUpperCase()).replace(/\{tokens\}/g,plural(tn)).replace(/\{token\}/g,tn.toLowerCase());}
+/* v23.25 (review F301, F302) {n} counts every box of a board with a row for each rule; {goal}, {where} and {rule} as above */
+function tkGoalW(){if(!isBus())return 'when the board is full';const p=busPlan();return p.goal<p.total?'when '+p.goal+' of the '+p.total+' {tokens} are on the board':'when the board is full';}
+function tkWhereW(){return !isBus()?'at once':busReward()==='arrive'?'at the stop, from the adult who meets the bus':'on the bus';}
+function tkRuleW(){const r=String(S.meta.tok_rule||'').trim().replace(/[\s.;]+$/,'');return r&&!isBus()?' This book\u2019s rule: '+r+' earns one {token}.':'';}
+function fill(t){const n=busEach()?tokTotal():nTok(),tn=tokName();return String(t||'').replace(/\{goal\}/g,tkGoalW()).replace(/\{where\}/g,tkWhereW()).replace(/\{rule\}/g,tkRuleW()).replace(/\{last\}/g,termOn()?' The last {token} looks different from the others, so your learner can see that it finishes the board and '+(txtKind()==='ft'?'the THEN item':'the item')+' comes next.':'').replace(/\{n\}th/g,WORDS[n]==='one'?'first':WORDS[n]==='two'?'second':WORDS[n]==='three'?'third':WORDS[n]==='five'?'fifth':WORDS[n]==='eight'?'eighth':WORDS[n]==='nine'?'ninth':(WORDS[n]||n)+'th').replace(/\{n\}/g,WORDS[n]||String(n)).replace(/\{TOKENS\}/g,plural(tn).toUpperCase()).replace(/\{tokens\}/g,plural(tn)).replace(/\{token\}/g,tn.toLowerCase());}
 function md(t){return fill(t).replace(/\r/g,'').split(/\n\s*\n/).map(p=>{p=p.trim();if(!p)return '';let h='';if(/^##\s*/.test(p)){const i=p.indexOf('\n');h='<h4>'+inline((i<0?p:p.slice(0,i)).replace(/^##\s*/,''))+'</h4>';p=i<0?'':p.slice(i+1).trim();}return h+(p?'<p>'+inline(p).replace(/\n/g,'<br>')+'</p>':'');}).join('');}
+/* v23.25 (review F302) Form TB-1's definitions of the targets on the page, with examples and non-examples, on the Teaching Targets back */
+function tkDefsHtml(){const D=S.tgdef&&typeof S.tgdef==='object'?S.tgdef:null;if(!D)return '';const on=S.tg.map(o=>String(lbl(o)||'').trim());const k=Object.keys(D).filter(x=>on.includes(x)).slice(0,3);if(!k.length)return '';
+  return '<p><b>What counts (Form TB-1):</b></p>'+k.map(x=>{const d=D[x]||{};return '<p><b>'+esc(x)+':</b> '+esc(d.def||'')+(d.ex?' <i>Examples:</i> '+esc(d.ex):'')+(d.nex?' <i>Not examples:</i> '+esc(d.nex):'')+'</p>';}).join('');}
 function pageBack(kind,cont){const [key,title]=BACKT[kind];const credit=kind==='tk'&&!cont&&String(S.meta.credit||'').trim();
-  return pgOpen(kind,'back',cont?'contd':'')+'<div class="tband"></div><div class="bttl">'+esc(title)+'</div><div class="bbody fit" data-min="'+(11*scl()).toFixed(2)+'"'+(credit?' style="padding-bottom:'+pt(78)+'"':'')+'>'+(cont?'<p class="cont">'+esc(title)+', continued</p>'+cont:md(S.txt[key]))+'</div>'+(credit?'<div class="credit">'+esc(credit).replace(/\n/g,' <br>')+'</div>':'')+pgClose;}
+  return pgOpen(kind,'back',cont?'contd':'')+'<div class="tband"></div><div class="bttl">'+esc(title)+'</div><div class="bbody fit" data-min="'+(11*scl()).toFixed(2)+'"'+(credit?' style="padding-bottom:'+pt(78)+'"':'')+'>'+(cont?'<p class="cont">'+esc(title)+', continued</p>'+cont:md(S.txt[key])+(kind==='tg'?tkDefsHtml():''))+'</div>'+(credit?'<div class="credit">'+esc(credit).replace(/\n/g,' <br>')+'</div>':'')+pgClose;}
 function stepHtml(key){const t=fill(S.txt[key]||'').replace(/\r/g,'');const i=t.indexOf('\n');const head=i<0?t:t.slice(0,i),body=i<0?'':t.slice(i+1);return '<div class="step">'+esc(head.trim())+'</div>'+md(body);}
 function pagesHowto(){return '<div class="pg front" data-kind="how1"><div class="howto"><div class="h1">HOW TO USE</div><div class="cols"><div class="col bbody fit" style="height:6.6in">'+stepHtml('h1')+'</div><div class="col bbody fit" style="height:6.6in">'+stepHtml('h2')+'</div></div></div></div>'+
   '<div class="pg front" data-kind="how2"><div class="howto"><div class="h1">HOW TO USE</div><div class="bbody fit" style="height:6.6in;max-width:8.2in;margin:0 auto">'+stepHtml('h3')+'</div></div></div>';}
@@ -4938,7 +5042,7 @@ function renderOut(){
   $('#bkOut').innerHTML='<div class="book">'+TABS.map(t=>pageBack(t[0])).join('')+pagesHowto()+'</div>';
   const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);const r=relabel($('#book'));turnPages();return r;});
   const size=mode==='fill'?'the full 8.5 in height':mode==='11'?'the 11 x 7.26 in page centred with trim marks':'the 8.82 x 5.82 in page centred with trim marks';
-  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':turned()?' portrait, each book page turned on its side at full size ('+size.replace(/ centred with trim marks$/,'')+', with trim marks), for Safari on the iPad and iPhone, which prints portrait only':' landscape, '+size)+'; print at 100%. (Form build '+BUILD+'.)';
+  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':turned()?' portrait, each book page turned on its side at full size ('+size.replace(/ centred with trim marks$/,'')+', with trim marks), for Safari on the iPad and iPhone, which prints portrait only':' landscape, '+size)+'; print at 100%. (Form build '+BUILD+'.)'+(tkHasPhoto()&&(tkPerm()==='No'||tkPerm()==='Unknown')?' The book holds a photo, and Form DM-1 '+(tkPerm()==='No'?'records no photo or media permission':'does not know the photo permission')+'.':'');
   const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
   const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
   const tr=$('#termPicRow');if(tr)tr.style.display=termMode()==='pic'?'':'none';const lk=$('#phLook');if(lk){const one=S.meta.layout==='rules'||isBus();lk.innerHTML=one?photoHtml('r'):photoHtml('l')+photoHtml('r');}
@@ -4989,16 +5093,17 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.id==='tkState'){if(!lkQuiet)restoreState(el.value);return;}
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'){const a=S[el.dataset.r];if(!a||!a[+el.dataset.i])return;a[+el.dataset.i][el.dataset.f]=el.value;renderOutSoon();return;}
   if(el.dataset.b!==undefined){S.txt[el.dataset.b]=el.value;renderOutSoon();return;}
-  if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n')return;S.meta[k]=el.value;if(k==='wm')$('#wmPct').textContent=el.value;if(k==='tokname'){recaps(false);renderTbls();}renderOutSoon();}});
+  if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n')return;S.meta[k]=el.value;if(k==='wm')$('#wmPct').textContent=el.value;if(k==='tokname'){recaps(false);renderTbls();}if(k==='tok_rule')renderSetup();renderOutSoon();}});
 document.addEventListener('change',e=>{const el=e.target;if(el.id==='tkState')return;
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderOut();return;}
-  if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n'){if(S.meta.n!==el.value){S.meta.n=el.value;ensure();recaps(true);renderAll();}return;}S.meta[k]=el.value;if(k==='sp_card'||k==='layout'||k==='avatar'||k==='term')renderTbls();renderOut();}});
+  if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n'){if(S.meta.n!==el.value){S.meta.n=el.value;ensure();recaps(true);renderAll();}return;}S.meta[k]=el.value;if(k==='layout'){renderAll();return;}   /* v23.25 (review F301) the backs follow the layout */
+  if(k==='sp_card'||k==='layout'||k==='avatar'||k==='term')renderTbls();renderOut();}});
 $('#wholeBtn').addEventListener('click',()=>{S.meta.order='all';delete S.meta.prevOrder;renderAll();});
 $('#phReset').addEventListener('click',()=>{S.meta.ph_x='50';S.meta.ph_y='35';S.meta.ph_z='100';renderAll();});
 $('#capReset').addEventListener('click',()=>{recaps(true);renderAll();});
 $('#colReset').addEventListener('click',()=>{Object.assign(S.meta,DEF);renderAll();});
-$('#bkReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restore the default text of the four backs?\nYour edits to them are replaced.',{ok:'Restore',danger:true})){['tb','cb','te','tt'].forEach(k=>{S.txt[k]=TXT0[k];});renderAll();}});
-$('#howReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restore the default how-to text?\nYour edits to the three steps are replaced.',{ok:'Restore',danger:true})){['h1','h2','h3'].forEach(k=>{S.txt[k]=TXT0[k];});renderAll();}});
+$('#bkReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restore the default text of the four backs?\nYour edits to them are replaced.',{ok:'Restore',danger:true})){['tb','cb','te','tt'].forEach(k=>{S.txt[k]=txtDef(k);});renderAll();}});
+$('#howReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restore the default how-to text?\nYour edits to the three steps are replaced.',{ok:'Restore',danger:true})){['h1','h2','h3'].forEach(k=>{S.txt[k]=txtDef(k);});renderAll();}});
 $('#chClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six choices?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.ch=Array.from({length:6},()=>cello());renderAll();}});
 $('#tgClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six targets?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.tg=Array.from({length:6},()=>cello());renderAll();}});
 function spare(kind,sel){S.meta.sp_card=kind+':'+sel.value;if(S.meta.order!=='spare')S.meta.prevOrder=S.meta.order||'all';S.meta.order='spare';renderAll();setView('preview');setTimeout(()=>{fitAll();window.print();},80);}
@@ -5093,11 +5198,49 @@ function caseTargets(behaviors,acq,taken){const groups=[],out=[];let dup=0,skip=
     const m=/\bsee\s+target\s+(\d+)\b/i.exec(w),T=m?B[+m[1]-1]:null;add(w,T&&T.isRep?T.label:'');});
   (acq||[]).forEach(g=>{if(String(g&&g.beh||'').trim())add(g.beh);});
   return {list:out,dup,skip};}
-window.__nbhFactsIn=function(f){let n=0;const empty=a=>a.every(o=>!has(o)&&!o.l);
-  if(empty(S.tg)){caseTargets(f.behaviors,f.goals&&f.goals.acq,[]).list.slice(0,6).forEach((w,i)=>{S.tg[i]=cellFor(w);n++;});}
+/* v23.25 (review F298) a request the plan teaches (a replacement for a behavior with a social function, asking for a break, help or
+   attention, or any replacement when Form TD-1 teaches functional communication) earns what it asks for every time, so it is not made a
+   token target from the case; Setup says so, and From the case can still add it by hand */
+const TK_REQ=/\b(ask|asks|asking|request|requests|requesting|mand|mands|manding|break|help)\b/i;
+const tkSocial=x=>/escape|avoid|attention|tangible|access/i.test(String(x||''));
+function tkReqOut(f){const B=f.behaviors||[],fct=((f.plan&&f.plan.teach)||[]).some(t=>/functional communication|\bFCT\b/i.test(String(t||''))),cf=f.fn&&(f.fn.key||f.fn.label),out=[],gone=new Set();
+  const socRep=tkSocial(cf)||B.some(x=>x&&!x.isRep&&tkSocial(x.fnKey||x.fn)),req=l=>fct||TK_REQ.test(String(l||'')),at=[];
+  const put=(l,i)=>{const c=tgtClean(l);if(c&&!at.some(x=>x[1]===c))at.push([i,c]);};
+  B.forEach((b,i)=>{if(b&&b.isRep&&String(b.label||'').trim()&&socRep&&req(b.label)){gone.add(i);put(b.label,i);}});
+  const B2=B.map((b,i)=>{if(!b)return b;if(gone.has(i))return Object.assign({},b,{isRep:false,rep:''});if(b.isRep)return b;const w=String(b.rep||'').trim();if(!w)return b;
+    const m=/\bsee\s+target\s+(\d+)\b/i.exec(w);if(m&&gone.has(+m[1]-1))return Object.assign({},b,{rep:''});const T=m?B[+m[1]-1]:null,lab=T&&T.isRep?T.label:w;
+    if(tkSocial(b.fnKey||b.fn||cf)&&req(lab)){put(lab,i);return Object.assign({},b,{rep:''});}return b;});
+  at.sort((a,b)=>a[0]-b[0]).forEach(x=>out.push(x[1]));return {B:B2,out};}
+window.__nbhFactsIn=function(f){let n=0;const empty=a=>a.every(o=>!has(o)&&!o.l),notes=[],T=v=>String(v==null?'':v).trim();f=f||{};
+  if(empty(S.tg)){const R=tkReqOut(f);caseTargets(R.B,f.goals&&f.goals.acq,[]).list.slice(0,6).forEach((w,i)=>{S.tg[i]=cellFor(w);n++;});
+    S.meta.req_out=R.out.join('; ');if(R.out.length)notes.push('left out '+R.out.join(', ')+': a request the plan teaches earns what it asks for, not a token (see Setup)');
+    /* v23.25 (review F302) Form TB-1's definition of each replacement placed, for the Teaching Targets back */
+    const D={};(f.behaviors||[]).forEach(b=>{if(!b||!b.isRep||!T(b.def))return;const c=tgtClean(b.label);if(S.tg.some(o=>T(o.l)===c))D[c]={def:T(b.def),ex:T(b.ex),nex:T(b.nex)};});if(Object.keys(D).length)S.tgdef=D;}
   if((f.menu||[]).length&&window.nbhCase)nbhCase.menuUsed=true;   /* v22.78 (review I62): a stale menu is flagged here */
-  if(empty(S.ch)&&(f.menu||[]).length){f.menu.filter(x=>x&&!x.contra).sort((a,b)=>(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).slice(0,6).forEach((x,i)=>{S.ch[i]=cellFor(x.name);n++;});}   /* v22.78 (review F118): never a contra item */
-  if(n)renderAll();return {filled:n,note:n?undefined:'the case holds no replacement behavior, objective or reinforcer menu yet'};};
+  /* v22.78 (review F118): never a contra item; v23.25 (review F304): high-preference items first, then middle, then an item ranked without a
+     tier; never a low-preference or an unranked one */
+  if(empty(S.ch)&&(f.menu||[]).length){const tw=x=>x.tier==='HP'?0:x.tier==='MP'?1:!x.tier&&x.rank!=null?2:9;
+    const ok=f.menu.filter(x=>x&&!x.contra&&tw(x)<9).sort((a,b)=>tw(a)-tw(b)||(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).slice(0,6);
+    ok.forEach((x,i)=>{S.ch[i]=Object.assign(cellFor(x.name),{tier:x.tier});n++;});
+    if(ok.length<6)notes.push((ok.length?ok.length+' choice'+(ok.length===1?'':'s')+' from Form PA-1 (high-preference items first, no low-preference one)':'no high- or middle-preference item on Form PA-1')+'; fill the rest from a fresh preference check');}
+  /* v23.25 (review F302) what earns a token, from Form TE-1's plan */
+  {const tp=f.token&&f.token.schedules&&f.token.schedules.tp,w=tp&&(T(tp.text)||(tp.n?tp.n+(tp.n===1?' response':' responses'):''));if(w&&!T(S.meta.tok_rule)){S.meta.tok_rule=w.replace(/[\s.;]+$/,'');n++;}}
+  /* v23.25 (review F299) for a bus book: whether an aide rides (Form DM-1's transportation), and what the plans say to do when it becomes unsafe */
+  {const P=f.profile||{},tr=T(P.trans);if(tr&&!T(S.meta.bus_aide)){const a=/\bno\s+(aide|monitor)\b|\bwithout\s+(an?\s+)?(aide|monitor)\b/i.test(tr)?'no':/\b(aide|monitor)\b/i.test(tr)?'yes':'';if(a){S.meta.bus_aide=a;n++;}}
+   if(!T(S.meta.bus_safe)){const L=[],cut=(x,k)=>{x=T(x).replace(/\s+/g,' ');return x.length>k?x.slice(0,k-1).replace(/\s+\S*$/,'')+'…':x;};const fl=P.flags||{},sf=Array.isArray(fl.safety)?fl.safety.filter(Boolean):[];
+     if(sf.length)L.push('Safety concerns on file (Form DM-1): '+sf.join(', ')+'.');
+     const rt=f.plan&&f.plan.respond&&T(f.plan.respond.target);if(rt)L.push('When the behavior happens (Form TD-1): '+cut(rt,220).replace(/[\s.]*$/,'.'));
+     const st=(f.crisis&&Array.isArray(f.crisis.stages)?f.crisis.stages:[]).filter(x=>x&&T(x.s)&&T(x.do)),key=st.filter(x=>/escalat|peak|crisis/i.test(x.s));
+     (key.length?key:st.slice(0,2)).slice(0,2).forEach(x=>L.push('The crisis plan (Form CR-1), '+T(x.s).toLowerCase()+': '+cut(x.do,200).replace(/[\s.]*$/,'.')));
+     if(L.length){S.meta.bus_safe=L.join('\n');n++;}}}
+  if(n)renderAll();else renderSetup();return {filled:n,note:notes.length?notes.join('; '):n?undefined:'the case holds no replacement behavior, objective or reinforcer menu yet'};};
+/* v23.25 (review F305, in part) the board, out to the case (new key "board"): the kind, the targets, what earns a token, the count, the
+   choices, and on a bus book the ride, the checkpoints, the step and the goal */
+window.__nbhFactsOut=function(){try{const T=v=>String(v==null?'':v).trim(),tg=S.tg.filter(o=>has(o)||T(o.l)).map(o=>T(lbl(o))).filter(Boolean),ch=S.ch.filter(o=>has(o)||T(o.l)).map(o=>T(lbl(o))).filter(Boolean);
+  if(!tg.length&&!ch.length)return null;const o={kind:isBus()?'bus':S.meta.layout==='rules'?'rules':'first-then',targets:tg,count:busEach()?tokTotal():nTok(),token:tokName(),src:'TK-1'};
+  if(T(S.meta.tok_rule)&&!isBus())o.rule=T(S.meta.tok_rule);if(ch.length)o.choices=ch;
+  if(isBus()){const p=busPlan();o.bus={minutes:p.R,step:p.st,checkpoints:p.cps.slice(0,20).map(c=>busClock(c.t)+(c.lm?' '+c.lab:'')),goal:p.goal,total:p.total,item:busReward()==='arrive'?'at the stop':'on the bus'};if(T(S.meta.bus_aide))o.bus.aide=S.meta.bus_aide;}
+  return {board:o};}catch(e){return null;}};
 /* (v21.43) the Targets page holds skills and replacement behaviors only: a problem behavior goes in as its named replacement
    (or not at all), and a reduction goal never; the note says what was left out and why */
 window.__nbhFactsPick=function(sel){let n=0,skip=0,full=0;const put=(a,w)=>{w=String(w||'').trim();if(!w)return false;const slot=a.find(o=>!has(o)&&!o.l);if(!slot){full++;return false;}Object.assign(slot,cellFor(w));return true;};
@@ -5616,8 +5759,8 @@ function compose(D){
   const cred=div('wk-credit');cred.textContent=CREDIT_WALK;st.appendChild(cred);   /* v21.44 the author's credit, on every frame */
   /* the book, drawn from the forced copy of the state */
   /* the demo target: the first one that is an ongoing behavior (an -ing word, which suits a two-minute interval), else the first */
-  const F=forced(()=>{const used=o=>has(o)||String(o.l||'').trim();const gi=S.tg.findIndex(o=>used(o)&&gerund(lbl(o)));
-    const pk={ch:firstUsed(S.ch),tg:gi>=0?gi:firstUsed(S.tg)},n=nTok(),cpt=CPT/72,tpt=TPT/72;
+  const F=forced(()=>{const used=o=>has(o)||String(o.l||'').trim();const gi=S.tg.findIndex(o=>used(o)&&gerund(lbl(o))&&!TK_REQ.test(lbl(o))),gr=S.tg.findIndex(o=>used(o)&&!TK_REQ.test(lbl(o)));   /* v23.25 (review F298) never a request */
+    const pk={ch:firstUsed(S.ch),tg:gi>=0?gi:gr>=0?gr:firstUsed(S.tg)},n=nTok(),cpt=CPT/72,tpt=TPT/72;
     return{pg:{ch:pageGrid('ch'),tg:pageGrid('tg'),bd:pageBoard(),tk:pageTokens(),chb:pageBack('ch')},
       ch:S.ch.map(o=>has(o)||String(o.l||'').trim()?cardHtml(o,cpt):''),tg:S.tg.map(o=>has(o)||String(o.l||'').trim()?cardHtml(o,cpt):''),
       tok:Array.from({length:n},(_,i)=>tokCard(tpt,i===n-1)),chipTok:tokCard(.6,false),n,term:termOn(),pick:pk,

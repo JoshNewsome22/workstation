@@ -43,13 +43,17 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
 async function open(ctx,url,log){const p=await ctx.newPage();wire(p,log);await p.goto(url||URL1);await sleep(500);
   await p.evaluate(()=>{window.confirm=()=>true;});return p;}
 /* (v21.49) and its keys in the record (the bus settings, the two print ticks, the landmarks) are left out of the comparison */
-const noBus=o=>{Object.keys(o.meta||{}).forEach(k=>{if(/^bus_/.test(k)||k==='kind')delete o.meta[k];});if(o.chk){delete o.chk.bus_cap;delete o.chk.pg_bus;}delete o.lm;return o;};
+const noBus=o=>{Object.keys(o.meta||{}).forEach(k=>{if(/^bus_/.test(k)||k==='kind'||/^(tok_rule|req_out|loss_rule)$/.test(k))delete o.meta[k];});if(o.chk){delete o.chk.bus_cap;delete o.chk.pg_bus;}delete o.lm;
+  /* (v23.25, TK-1 review Wave 3) the backs' corrected texts, what earns a token and the definitions came after the link too: left out here, and the baseline prints the same backs (sameTxt) */
+  delete o.txt;delete o.tgdef;return o;};
+const sameTxt=async(A,B)=>{const t=await B.evaluate(()=>JSON.stringify(S.txt).replace(/\{rule\}/g,''));await A.evaluate(t=>{S.txt=JSON.parse(t);renderAll();},t);await sleep(150);};
+const vOf=P=>P.evaluate(()=>document.querySelector('#setupVerdict').innerHTML.replace('; what earns a star (Tokens: Earns a token)',''));
 const sOf=p=>p.evaluate(()=>JSON.stringify(S)).then(j=>JSON.stringify(noBus(JSON.parse(j))));
 const noLk=j=>{const o=JSON.parse(j);delete o.meta.lk;return JSON.stringify(o);};
 const lkOf=p=>p.evaluate(()=>S.meta.lk||'');
 /* the bridge's own count (input, select and textarea, less file and hidden ones), computed in the page */
 /* (v21.49) the Bus ride type came after the link: its fields (the Book type and the bus band) are left out of the count */
-const totals=p=>p.evaluate(()=>{let n=0,t=0;document.querySelectorAll('input,select,textarea').forEach(e=>{if(e.type==='file'||e.type==='hidden'||e.closest('#busBand')||e.dataset.m==='kind')return;t++;
+const totals=p=>p.evaluate(()=>{let n=0,t=0;document.querySelectorAll('input,select,textarea').forEach(e=>{if(e.type==='file'||e.type==='hidden'||e.closest('#busBand')||e.dataset.m==='kind'||e.dataset.m==='tok_rule')return;t++;
   if(e.type==='checkbox'||e.type==='radio'){if(e.checked)n++;}else if(String(e.value||'').trim())n++;});return {filled:n,total:t};});
 const sim=p=>p.evaluate(async()=>{await loadSim();});
 /* a file into the panel's own file input, as a person picking it would */
@@ -105,23 +109,23 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
   {const A=await open(ctx,URL0,log),B=await open(ctx,URL1,log);
     /* the avatar a book starts with changed after the link (v21.44: the practice's Boy picture); the baseline gets the same */
     const setAv=(P,v)=>P.evaluate(v=>{S.meta.avatar=v;const e=document.querySelector('[data-m="avatar"]');if(e)e.value=v;renderAll();},v);
-    const av0=await A.evaluate(()=>S.meta.avatar);await setAv(B,av0);await sleep(200);
+    const av0=await A.evaluate(()=>S.meta.avatar);await setAv(B,av0);await sleep(200);await sameTxt(A,B);
     const a0=await totals(A),b0=await totals(B);
     ok('1 blank: the field totals are the ones from before the link',JSON.stringify(a0)===JSON.stringify(b0),{was:a0,now:b0});
     ok('1 blank: no lk in the record, and the record is the one from before',!('lk' in (await B.evaluate(()=>S.meta)))&&(await sOf(A))===(await sOf(B)));
     ok('1 blank: the panel is off, with its sentence and one button',await B.evaluate(()=>!document.querySelector('#lkPanel .lk-off').hidden&&document.querySelector('#lkPanel .lk-on').hidden&&
       /^Link this book with Form TE-1, the token economy plan for the same student\./.test(document.querySelector('#lkPanel .lk-offtxt').textContent)&&document.querySelector('#lkPanel [data-lk="on"]').textContent==='Link with Form TE-1'));
-    ok('1 blank: the Setup verdict is the one from before',(await A.evaluate(()=>document.querySelector('#setupVerdict').innerHTML))===(await B.evaluate(()=>document.querySelector('#setupVerdict').innerHTML)));
+    ok('1 blank: the Setup verdict is the one from before',(await vOf(A))===(await vOf(B)));
     const pa=await pdfPages(A),pb=await pdfPages(B);
     ok('1 blank: the book prints 11 sheets, as before',pb===11&&pa===pb,{was:pa,now:pb});
     ok('1 blank: the printed text is the one from before',(await bookText(A))===(await bookText(B)));
     await sim(A);await sim(B);await sleep(300);
     /* the simulator's cards changed after the link (v21.43: the practice's own pictures); the baseline gets the same cards,
        so this compares the link alone */
-    await A.evaluate(j=>{const o=JSON.parse(j);S.ch=o.ch;S.tg=o.tg;renderAll();},await B.evaluate(()=>JSON.stringify({ch:S.ch,tg:S.tg})));await setAv(B,av0);await sleep(200);
+    await A.evaluate(j=>{const o=JSON.parse(j);S.ch=o.ch;S.tg=o.tg;renderAll();},await B.evaluate(()=>JSON.stringify({ch:S.ch,tg:S.tg})));await setAv(B,av0);await sleep(200);await sameTxt(A,B);
     const a1=await totals(A),b1=await totals(B);
     ok('1 simulator: the same totals, no lk, the same record',JSON.stringify(a1)===JSON.stringify(b1)&&(await sOf(A))===(await sOf(B))&&!('lk' in (await B.evaluate(()=>S.meta))),{was:a1,now:b1});
-    ok('1 simulator: the same Setup verdict',(await A.evaluate(()=>document.querySelector('#setupVerdict').innerHTML))===(await B.evaluate(()=>document.querySelector('#setupVerdict').innerHTML)));
+    ok('1 simulator: the same Setup verdict (apart from v23.25\'s question, what earns a token)',(await vOf(A))===(await vOf(B)));
     const sa=JSON.parse(await saved(A)),sb=JSON.parse(await saved(B));
     ok('1 simulator: the saved file is the one from before (apart from the time)',JSON.stringify(noBus(sa.S))===JSON.stringify(noBus(sb.S))&&sa.form===sb.form&&sa.rev===sb.rev);
     const qa=await pdfPages(A),qb=await pdfPages(B);
@@ -132,7 +136,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('1 link on: the totals do not move (the panel has no field)',JSON.stringify(await totals(B))===JSON.stringify(b1));
     await B.evaluate(()=>nbhLink.unlink());await sleep(150);
     ok('1 Unlink: no lk left, the panel off, the verdict as before',await B.evaluate(()=>!('lk' in S.meta)&&!nbhLink.state().on&&!JSON.parse(document.querySelector('#tkState').value).meta.lk)&&
-      (await A.evaluate(()=>document.querySelector('#setupVerdict').innerHTML))===(await B.evaluate(()=>document.querySelector('#setupVerdict').innerHTML)));
+      (await vOf(A))===(await vOf(B)));
     await A.close();await B.close();}
 
   /* ---- 3. a blank book and TE-1's simulation file; 13. Undo ---- */

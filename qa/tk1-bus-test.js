@@ -96,7 +96,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('the form sent nothing anywhere with the addresses',!reqs.some(u=>/Private|Example%20School|Example School/.test(u)),reqs.slice(r0));
   /* 6. a saved file */
   const [sv]=await Promise.all([page.waitForEvent('download'),page.evaluate(()=>document.getElementById('saveBtn').click())]);const file=JSON.parse(fs.readFileSync(await sv.path(),'utf8'));
-  ok('the saved file holds the bus ride (and the addresses, kept only in it)',file.S.meta.kind==='bus'&&file.S.meta.bus_min==='25'&&file.S.lm.length===5&&file.S.meta.bus_toA===A2,file.S.meta);
+  ok('the saved file holds the bus ride, and the addresses were cleared as Maps opened (v23.25)',file.S.meta.kind==='bus'&&file.S.meta.bus_min==='25'&&file.S.lm.length===5&&!file.S.meta.bus_toA&&!file.S.meta.bus_fromA&&await page.evaluate(()=>document.querySelector('[data-m="bus_toA"]').value===''),file.S.meta);
   const re=await page.evaluate(f=>{const bad=JSON.parse(JSON.stringify(f));bad.S.lm[0]={k:'<img src=x onerror=alert(1)>',ph:'zz"><b>',l:'Store',min:'5<script>'};bad.S.lm.push(...Array(20).fill({k:'store',l:'x',min:'3'}));
     const o=fromFile(bad);return{n:o.lm.length,k:o.lm[0].k,ph:o.lm[0].ph,min:o.lm[0].min,kind:o.meta.kind,good:fromFile(f).lm.map(x=>x.l||x.k).join('|')};},file);
   ok('a file’s landmarks: at most ten, an unknown picture or photo id dropped, the minute digits only',re.n===10&&re.k===''&&re.ph===''&&re.min==='5'&&re.kind==='bus'&&re.good==='Grocery store|The park|Fire station|Library|The bridge',re);

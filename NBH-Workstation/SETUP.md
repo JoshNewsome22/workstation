@@ -9903,6 +9903,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.25: TK-1 keeps a taught request off the token board, gives the bus staff a safety box, respects DM-1's photo permission, and prints backs that match the Board (review Wave 3)
+
+- **A request is not a token target (F298).** From the case, a replacement that asks for the function's reinforcer is left
+  off the Targets page: asking for a break, help or attention for a behavior with a social function, or any replacement
+  when Form TD-1 teaches functional communication.
+  - Setup says why: the request earns what it asks for, every time, and the work goes on the First card. From the case can
+    still add it by hand.
+  - The walkthrough never demonstrates a request as its token target.
+  - The Teaching Targets back and Step 2 say to give what was asked for, every time.
+  - One target is a finished Targets page.
+- **The ride plan, if it becomes unsafe (F299).**
+  - A new box on the ride plan says that seatbelt and seat rules are put right at once, not only by holding back a token.
+  - It also gives what the behavior and crisis plans say, who to call, and that a hold is an emergency step only, by
+    trained staff, documented and reported (s. 1003.573, F.S.).
+  - Setup asks whether an aide or monitor rides, and warns when none does.
+  - From the case: the aide from Form DM-1's transportation line (DM-1 now sends it with the profile), and the safety
+    concerns, TD-1's response to the behavior and CR-1's escalation and peak steps.
+- **The photo (F300).** When Form DM-1 records no photo or media permission, Setup says so and stops asking for a photo.
+  - The picker asks before a photo goes in, and "Unknown" asks for a check.
+  - A photo already in the book is named on Setup, on the Preview and before Save as video.
+- **Backs that follow the Board (F301).** A Rules-row board and a bus book get their own default backs: the row and the
+  Earn box, tokens at the checkpoints, and the item at the stop or on the bus. A board with a row for each rule counts
+  every box. An edited back is kept as written.
+- **What earns a token (F302).**
+  - "Earns a token" on Setup prints under the Board's title and on the Token Board back. It fills from Form TE-1's plan.
+  - Setup keeps it open until it is written.
+  - Form TB-1's definition, examples and non-examples of each target placed print on the Teaching Targets back.
+- **Checkpoints and the usual stretch (F303).** Setup asks how long the student usually rides before a rule is broken. The
+  checkpoints are checked against it, with a count or an interval to use. The ride plan says to move on a step when most
+  checkpoints are earned on five rides in a row.
+- **Choices (F304).** From Form PA-1, high-preference items first, then middle; never a low-preference or unranked one.
+- **To and from the case (F305, in part).**
+  - The board goes to the case as "board": its kind, targets, rule, count and choices, and a bus ride's checkpoints, goal
+    and aide. The workstation names it on the case line.
+  - When Form TE-1 records token loss, Setup says so and, after asking, the ride plan prints the plan's rule.
+  - The ride log for Form DD-1 is left for later.
+- **Slips (F306).** The learner makes the choice (help with the pointing only), the spare cards are printed from Setup
+  (there is no "extras book"), and reaching for a token is no longer given as the test. A book saved with the old default
+  backs takes the corrected ones.
+- **The Maps addresses (F307)** are cleared from the book as Maps opens.
+- The narration and its recordings are unchanged.
+- qa/tk1-w3-test.js (20 checks). tk1-bus-test and link-tk1-test follow the changes.
+
 ### v23.24: SV-1's respondent pages label the student by initials only
 
 - **Initials only.** The Respondent pages dialog fills the student label with the initials, without the student number, as
