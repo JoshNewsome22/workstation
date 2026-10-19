@@ -9903,6 +9903,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.90: DD-1 counts an incident only when asked, gives a part-day behavior its own minutes, counts a cue with no response, and calls a trend or a change only when it is one (review Wave 3)
+
+- **An incident and the day's count (F101).** In a classroom the tally is usually on the sheet already, and the
+  incident is written afterwards.
+  - Logging an incident no longer adds one to the day's count by default. The box now reads "This one is not on the
+    sheet yet: add one to Tue 10/13's count of …", unticked.
+  - The workstation's Log it now has the same box, unticked.
+  - A day's cell that carries an incident's one is marked (an orange line under it). Its title says how many it
+    includes and how to take them off.
+- **A behavior watched for part of the day (F102).** Each behavior's row in Set up has **Minutes observed**.
+  - For a rate or a percent of time whose Observation length is not the whole day, those minutes are the denominator,
+    whatever the day's minutes. Six responses in a 45-minute period now read 8 an hour, not 1.
+  - Until the minutes are set, the row and the results say the value is divided by the day's minutes.
+  - The sheet's definitions show the minutes beside the observation length.
+- **Latency with no response (F103).** A latency behavior's row has **Longest wait counted**.
+  - A cue marked No response counts at that wait in the day's mean, and a longer response is counted at it too, so not
+    answering makes the day look worse, not better.
+  - With none set, a cue with no response is still left out of the mean.
+  - Either way, the day's notes say how many cues were answered ("Latency, …: 1 of 3 cues answered").
+  - The live recorder's guide and session summary say the same.
+- **A flat trend (F105).** A trend is called flat when the fitted line's change across the condition stays inside the
+  stability envelope's half-width, as well as under the old 1%-of-the-mean-a-day floor. A baseline of 9, 11, 8, 12, 10,
+  10 is flat, not "accelerating". The results' note says the rule (Ledford et al., 2018; Lane & Gast, 2014).
+- **The week's change and the notes home (F107).**
+  - A change between weeks is called only when it is at least 20% of last week's mean and at least one unit (five
+    points for a percentage). A smaller one reads "about the same", in the week summary and in the note for home: a fall
+    from 2.0 to 1.9 a day is no longer told to a parent as an improvement.
+  - The incident note no longer promises "the plan stays the same" after a restraint, a seclusion or an escort, or when
+    a new phase starts within the week. It says the team will look at what happened and let the family know if anything
+    in the plan changes.
+- qa/dd1-w3-test.js (13 checks). qa/v2174-test.js and qa/v2194-log-test.js tick the box where they meant to count.
+
 ### v22.89: AD-1 keeps an integrity log read for each arrangement, and sends its decision to the case (review Wave 3)
 
 - **The integrity log (F410).** One checklist used to stand for the whole evaluation: the decision read "integrity 90.0%"

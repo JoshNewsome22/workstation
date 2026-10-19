@@ -2263,7 +2263,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.89';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.90';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -8792,6 +8792,8 @@ async function logNowOpen(){
     '<label class="ln-f"><span>What happened (B), as it would look on video<\/span><textarea id="lnWhat" rows="2"><\/textarea><\/label>'+
     '<label class="ln-f"><span>What adults did (C), in order<\/span><textarea id="lnDid" rows="2"><\/textarea><\/label>'+
     '<div class="ln-g"><label class="ln-f"><span>How it ended<\/span><input id="lnEnded" placeholder="e.g. back at his desk by 10:32"><\/label><label class="ln-f"><span>Recorded by<\/span><input id="lnBy" value="'+esc(p.bcba||'')+'"><\/label><\/div>'+
+    /* v22.90 (DD-1 review F101) the tally is usually on the sheet already: the day's count takes this one only when asked */
+    '<label class="ln-chk"><input type="checkbox" id="lnCount"> This one is not on the data sheet yet: add one to the day’s count<\/label>'+
     '<p class="td-more"><button type="submit" class="primary" id="lnSave">Log it<\/button> <button type="button" id="lnDict" aria-pressed="false" title="Dictate into the box you are in (on this device; nothing is recorded). Say period, comma, question mark, new line.">'+LN_MIC+'Dictate<\/button><\/p>'+
     '<p class="hint">It lands on Form DD-1 as <i>Home told: not yet<\/i>; mark that on the form once home has been told. A restraint or a seclusion starts its notice deadlines on Form DD-1, as it does when logged on the form: fill in its restraint record there (the state report and the district’s form 2547 come from it). Form ABC-1’s <i>Add DD-1’s incidents<\/i> brings it into the ABC record.<\/p>'+
     '<\/form>');
@@ -8826,7 +8828,7 @@ async function lnDeliver(key,inc){
 }
 async function logNowSave(ev){if(ev)ev.preventDefault();if(LN.busy)return;
   const g=k=>{const e=$(k);return e?String(e.value||''):'';};
-  const inc={date:g('#lnDate'),time:g('#lnTime'),beh:g('#lnBeh').trim(),before:g('#lnBefore').trim(),what:g('#lnWhat').trim(),words:'',did:g('#lnDid').trim(),ended:g('#lnEnded').trim(),by:g('#lnBy').trim(),hold:g('#lnHold'),parent:'no',parentWhen:'',bcba:true};
+  const inc={date:g('#lnDate'),time:g('#lnTime'),beh:g('#lnBeh').trim(),before:g('#lnBefore').trim(),what:g('#lnWhat').trim(),words:'',did:g('#lnDid').trim(),ended:g('#lnEnded').trim(),by:g('#lnBy').trim(),hold:g('#lnHold'),parent:'no',parentWhen:'',bcba:true,count:!!($('#lnCount')&&$('#lnCount').checked)};
   if(!/^\d{4}-\d{2}-\d{2}$/.test(inc.date)){wsUI.toast('Give the incident its date.',{kind:'warn'});return;}
   if(!inc.beh&&!inc.what){wsUI.toast('Name the behavior, or say what happened.',{kind:'warn'});return;}
   const key=g('#lnWho');LN.busy=true;const b=$('#lnSave');if(b){b.disabled=true;b.textContent='Logging…';}

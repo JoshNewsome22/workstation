@@ -46,14 +46,14 @@ const stub=()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m
   const inc=await page.evaluate(async()=>{const b=orderedBehaviors()[0],d=S.rows[S.rows.length-1].date,was=num(S.rows.find(x=>x.date===d).values[b.id]);
     document.getElementById('ddIncAdd').click();const g=document.getElementById('dlgInc'),set=(k,v)=>{const e=g.querySelector(k);e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));};
     const tiers=[...g.querySelectorAll('#incTier option')].map(o=>o.textContent);
-    set('#incDate',d);set('#incTime','10:20');set('#incBeh',b.id);set('#incTier','Tier 2');set('#incBefore','Math worksheet handed out');set('#incWhat','Pushed the worksheet off the desk and hit the aide on the arm');
+    set('#incDate',d);set('#incTime','10:20');set('#incBeh',b.id);set('#incTier','Tier 2');set('#incBefore','Math worksheet handed out');set('#incWhat','Pushed the worksheet off the desk and hit the aide on the arm');g.querySelector('#incCount').checked=true;
     set('#incWords','I am not doing this');set('#incDid','Aide stepped back, offered the break card, one adult spoke');set('#incEnded','Back at the desk by 10:32');set('#incBy','Ms. Alvarez (simulated)');
     const countable=!g.querySelector('#incCount').disabled&&g.querySelector('#incCount').checked;g.querySelector('#incSave').click();
     const now=num(S.rows.find(x=>x.date===d).values[b.id]);const i=S.incidents[0];
     const row=document.querySelector('#ddInc tbody tr');const r={tiers,countable,was,now,counted:i.counted,row:row?row.innerText:''};
     document.querySelector('[data-inc-note]').click();r.note=document.getElementById('incNoteTx').value;document.getElementById('dlgIncNote').close();
     /* a day not on the sheet is added for it */
-    document.getElementById('ddIncAdd').click();set('#incDate','2026-12-01');set('#incBeh',b.id);g.querySelector('#incSave').click();
+    document.getElementById('ddIncAdd').click();set('#incDate','2026-12-01');set('#incBeh',b.id);g.querySelector('#incCount').checked=true;g.querySelector('#incSave').click();
     const nd=S.rows.find(x=>x.date==='2026-12-01');r.newDay=nd?nd.values[b.id]:null;
     /* the edit moves the count to the new behavior's day */
     const b2=orderedBehaviors()[1],w2=num(S.rows.find(x=>x.date===d).values[b2.id]);

@@ -1667,7 +1667,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
         <ul>
           <li><b>Frequency and rate:</b> tap <b>+1</b> at each occurrence. A rate is the count over the minutes observed.</li>
           <li><b>Duration and percent of time:</b> tap when an episode starts and again when it ends. Each episode goes to the episode log with its start time and length, so one behavior&rsquo;s episodes never overlap.</li>
-          <li><b>Latency:</b> tap <b>Cue given</b> as you give the cue and <b>Response</b> when the student responds. The day&rsquo;s value is the mean latency in minutes; a cue marked <b>No response</b> is left out of the mean and reported.</li>
+          <li><b>Latency:</b> tap <b>Cue given</b> as you give the cue and <b>Response</b> when the student responds. The day&rsquo;s value is the mean latency in minutes. A cue marked <b>No response</b> counts at the behavior&rsquo;s <b>longest wait</b> when one is set on its row (Set up), so not answering makes the day look worse, not better; with none set it is left out of the mean. Either way the day&rsquo;s notes say how many cues were answered.</li>
           <li><b>Interresponse time:</b> tap <b>Response</b> at each response. The day&rsquo;s value is the mean time between responses, in minutes; no interval spans a pause.</li>
           <li><b>Percent correct, percent independent and prompt level:</b> one tap per opportunity. Prompt levels are numbered in the order listed under the controls; edit the list to match the program.</li>
           <li><b>Percent of intervals</b> (momentary time sampling, partial or whole interval): record these with the observation timer on Form MT-1, which runs the marks and scores each interval by its rule, then type the day&rsquo;s percent on the sheet.</li>
@@ -2146,7 +2146,7 @@ function episodeDayValue(row,beh){
   const st=episodeStats(row,beh);
   if(!st||!st.timed) return null;
   if(beh.measure==="pdur"){
-    const mins=effObsMin(row);
+    const mins=behObsMin(row,beh);
     return (mins&&mins>0) ? 100*st.total/mins : null;
   }
   return st.total;
@@ -2175,7 +2175,7 @@ function plotValue(row,beh){
   const raw = num(row.values[beh.id]);
   if(raw===null) return null;
   if(beh.measure==="rate"){
-    const mins=effObsMin(row);
+    const mins=behObsMin(row,beh);
     if(!mins||mins<=0) return null;
     return raw/(mins/60);
   }
@@ -2253,9 +2253,12 @@ function envelopeHalfWidth(vals){
   const base=median(vals);
   return base===null ? 0 : Math.abs(base)*pctv*mode;
 }
-function trendDirection(slope,direction,tolerance){
+/* v22.90 (review F105) flat when the fitted line's change across the condition stays inside the stability envelope's half-width
+   (the band around the median), or when the slope is under the 1%-a-day floor; the rule that called it is kept */
+function trendDirection(slope,direction,tolerance,span,band){
   if(slope===null||slope===undefined) return {word:"not calculable",effect:"neutral"};
-  if(Math.abs(slope)<tolerance) return {word:"flat (zero-celerating)",effect:"neutral"};
+  if(Math.abs(slope)<tolerance) return {word:"flat (zero-celerating)",effect:"neutral",rule:"floor"};
+  if(band>0&&span>0&&Math.abs(slope)*span<=band+1e-9) return {word:"flat (zero-celerating)",effect:"neutral",rule:"envelope"};
   const rising = slope>0;
   const improving = direction==="decrease" ? !rising : rising;
   return {word: rising?"accelerating":"decelerating", effect: improving?"improve":"worsen"};
@@ -2289,7 +2292,7 @@ function analyzeCondition(cond,beh,rows){
     }).length/pts.length;
     out.trendStable = out.trendStability >= S.settings.crit;
     const tol = Math.max(0.01,(out.mean||1)*0.01);
-    out.trendWord = trendDirection(out.slope,beh.direction,tol);
+    out.trendWord = trendDirection(out.slope,beh.direction,tol,pts[pts.length-1].x-pts[0].x,hw);
   }
   out.first=pts[0].y; out.last=pts[pts.length-1].y;
   out.withinChange = out.last-out.first;
@@ -2782,6 +2785,9 @@ function renderBehaviors(){
       <td colspan="2" style="vertical-align:top">
         <span class="rowlabel" style="display:block;text-align:left;margin-bottom:3px">Observation length</span>
         <input type="text" data-f="obsLength" list="obsLengths" value="${esc(b.obsLength||"")}" placeholder="Entire school day">
+        <label class="dd-ymax"><span>Minutes observed<\/span><input type="number" step="any" min="0" data-f="obsMin" value="${num(b.obsMin)>0?esc(b.obsMin):""}" placeholder="the day's" title="For a rate or a percent of time watched for part of the day: the minutes of that period. Left empty, the day's minutes are used."><\/label>
+        <p class="hint dd-obswarn" style="color:#8a4b12;margin:4px 0 0${ddObsWarn(b)?"":";display:none"}">${ddObsWarnTxt(b)}<\/p>
+        <label class="dd-ymax dd-latmax"${b.measure==="latency"?"":' style="display:none"'}><span>Longest wait counted (min)<\/span><input type="number" step="any" min="0" data-f="latMax" value="${num(b.latMax)>0?esc(b.latMax):""}" placeholder="none" title="A cue with no response is counted at this many minutes in the day's mean latency. Left empty, it is left out of the mean and written in the day's notes."><\/label>
         <label class="dd-ymax"><span>Y-axis maximum<\/span><input type="number" step="any" min="0" data-f="yMax" value="${b.yMax===null||b.yMax===undefined?"":esc(b.yMax)}" ${ddYmaxAttrs(b)}><\/label>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px;justify-content:space-between">
           <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-soft)">Graph color <input type="color" data-f="color" value="${esc(b.color)}" style="width:40px;height:26px;padding:1px;border:1px solid var(--rule)"></label>
@@ -2830,6 +2836,14 @@ function windowMinutes(){
   const a=timeToMin(S.settings.dayStart), b=timeToMin(S.settings.dayEnd);
   return (a===null||b===null||b<=a) ? null : (b-a);
 }
+/* v22.90 (review F102) a behavior watched for only part of the day (its Observation length is not the whole day) and given
+   its own minutes observed: those minutes are its rate's and percent's denominator, whatever the day's minutes; a
+   whole-day behavior keeps the day's */
+function ddWholeDay(b){return !b||!String(b.obsLength||'').trim()||/entire|whole|all day|full day/i.test(b.obsLength);}
+function behObsMin(row,b){const own=num(b&&b.obsMin);if(!ddWholeDay(b)&&own!==null&&own>0)return own;return effObsMin(row);}
+/* a rate or percent of time watched for part of the day with no minutes of its own: still divided by the day's */
+function ddObsWarn(b){return !!b&&(b.measure==='rate'||b.measure==='pdur')&&!ddWholeDay(b)&&!(num(b.obsMin)>0);}
+function ddObsWarnTxt(b){return ddObsWarn(b)?`Watched for “${esc(b.obsLength)}”, but its ${b.measure==='rate'?'rate':'percent of time'} is divided by the day’s minutes until its minutes observed are set.`:'';}
 // minutes actually observed: a typed override wins, otherwise the standard window
 function effObsMin(row){
   const o=num(row.obsMin);
@@ -2866,7 +2880,7 @@ function sheetDefsHtml(obs,defsOn){
   return `<div class="sd-wrap"><h4>Definitions and measurement</h4><div class="sd-grid">${obs.map((b,i)=>`<div class="sd-card" style="--c:${esc(b.color)}">
     <div class="sd-h"><span class="bnum" style="background:${esc(b.color)}">${i+1}</span><b>${esc(b.name||"Untitled")}</b><span class="sd-k">${esc(KINDS[b.kind||"target"]||"")}</span></div>
     <p>${esc(b.definition||"No definition written yet (Client & behaviors tab).")}</p>
-    <div class="sd-m">${esc(MEASURES[b.measure].label)}${b.obsLength?` \u00b7 ${esc(b.obsLength)}`:""}</div></div>`).join("")}</div>${key}</div>`;}
+    <div class="sd-m">${esc(MEASURES[b.measure].label)}${b.obsLength?` \u00b7 ${esc(b.obsLength)}${!ddWholeDay(b)&&num(b.obsMin)>0?` (${esc(b.obsMin)} min)`:""}`:""}</div></div>`).join("")}</div>${key}</div>`;}
 function renderData(){
   renderSheetId();
   const rows=ddBlank||sortedRows();
@@ -2931,7 +2945,7 @@ function renderData(){
   </tr>`:""}
   <tr class="hrow">
     <th class="col-date rowlabel" colspan="2">Measurement</th>
-    ${obs.map(b=>`<th class="metacell" colspan="${span(b)}">${esc(MEASURES[b.measure].label)}<br><span style="font-weight:400">${esc(b.obsLength||"")}</span></th>`).join("")}
+    ${obs.map(b=>`<th class="metacell" colspan="${span(b)}">${esc(MEASURES[b.measure].label)}<br><span style="font-weight:400">${esc(b.obsLength||"")}${!ddWholeDay(b)&&num(b.obsMin)>0?` (${esc(b.obsMin)} min)`:""}</span></th>`).join("")}
   </tr>
   <tr class="entry">
     <th class="col-date">Date</th>
@@ -3024,7 +3038,7 @@ function epFootHTML(row,b){
   const parts=[`<b>${st.n}</b> episode${st.n===1?"":"s"}`];
   if(st.timed){
     parts.push(`total <b>${fmtDur(st.total)}</b> (${r1(st.total)} min)`);
-    if(b.measure==="pdur"){ const v=episodeDayValue(row,b), om=effObsMin(row);
+    if(b.measure==="pdur"){ const v=episodeDayValue(row,b), om=behObsMin(row,b);
       parts.push(v===null?"enter observation minutes to get a percent":`<b>${r1(v)}%</b> of ${esc(om)} min observed`); }
     parts.push(`mean ${fmtDur(st.mean)}`, `longest ${fmtDur(st.max)}`);
   }
@@ -3814,7 +3828,8 @@ function renderResults(){
 
       ${(s=>s?`<div class="dd-keep">${s}<\/div>`:"")(episodeSection(beh,rows,conds))}
       <div class="dd-keep"><div class="sec-title"><h3>Within-condition analysis<\/h3><span>level, trend, variability, and stability computed separately for each condition<\/span><\/div>
-      ${withData.length?withinTable(analyses,beh)+`<p class="caution">Envelope width is a percentage of each condition's own median, so conditions with low medians get narrow envelopes, and at a median of 0 the envelope has no width: only the points at 0 fall inside it. Near-zero count data will often fall below the stability criterion even when the level is clinically excellent; read stability alongside the range rather than on its own. A trend is called flat (zero-celerating) when its slope, up or down, is less than 1% of the condition's mean per day (or less than 0.01 per day, whichever is larger), a convention of this form.<\/p>`:`<div class="empty">No condition has data for this behavior.<\/div>`}${acrossNone}<\/div>
+      ${ddObsWarn(beh)?`<p class="caution dd-obswarn">${esc(beh.name||"This behavior")} is watched for “${esc(beh.obsLength)}”, but no minutes observed are set for it, so its ${beh.measure==="rate"?"rate":"percent of time"} is computed over the day's minutes (${windowMinutes()===null?"the minutes typed":windowMinutes()+" min by default"}). Set its minutes observed on the behavior's row (Set up).<\/p>`:""}
+      ${withData.length?withinTable(analyses,beh)+`<p class="caution">Envelope width is a percentage of each condition's own median, so conditions with low medians get narrow envelopes, and at a median of 0 the envelope has no width: only the points at 0 fall inside it. Near-zero count data will often fall below the stability criterion even when the level is clinically excellent; read stability alongside the range rather than on its own. A trend is called flat (zero-celerating) when the fitted line changes, across the condition, by no more than the stability envelope's half-width, or when its slope, up or down, is less than 1% of the condition's mean per day (or less than 0.01 per day, whichever is larger): conventions of this form that approximate reading the trend against the envelope (Ledford et al., 2018; Lane &amp; Gast, 2014).<\/p>`:`<div class="empty">No condition has data for this behavior.<\/div>`}${acrossNone}<\/div>
       ${cmps?`<div class="sec-title"><h3>Across-condition analysis<\/h3><span>adjacent condition comparisons<\/span><\/div>${cmps}`:""}
       ${pairSection(beh,rows,conds,analyses)}
       ${todSection(beh,rows,conds)}
@@ -4198,6 +4213,10 @@ $("#behTable").addEventListener("input",e=>{
   if(f==="name"||f==="measure"||f==="color"||f==="kind"){ renderData(); renderIntervalPanel(); syncResultControls(); }
   // the definition and observation length head the data sheet's columns, so it redraws with them
   if(f==="definition"||f==="obsLength"){ renderData(); renderIntervalPanel(); }
+  /* v22.90 (review F102, F103) the minutes observed and the longest wait change the values; the setup row shows its warning */
+  if(f==="obsMin"||f==="latMax"){ renderData(); renderIntervalPanel(); }
+  if(f==="obsLength"||f==="obsMin"||f==="measure"){ const q=`#behTable tr[data-b="${CSS.escape(b.id)}"]`, w=document.querySelector(q+" .dd-obswarn"), lm=document.querySelector(q+" .dd-latmax");
+    if(w){ w.style.display=ddObsWarn(b)?"":"none"; w.innerHTML=ddObsWarnTxt(b); } if(lm) lm.style.display=b.measure==="latency"?"":"none"; }
   renderResults();
 });
 $("#behTable").addEventListener("click",async e=>{
@@ -4904,7 +4923,7 @@ function act(b,what,v){
     else if(add(b,"on")) note(nm+": episode "+(st.eps.length+1)+" started.");
   }
   else if(k==="lat"){
-    if(what==="alt"){ if(!st.pend){ note("No cue is waiting for a response.",true); return; } if(add(b,"none")) note(nm+": no response to the cue; it is left out of the mean."); }
+    if(what==="alt"){ if(!st.pend){ note("No cue is waiting for a response.",true); return; } if(add(b,"none")) note(nm+": no response to the cue; "+(num(b.latMax)>0?"it counts at "+r1(num(b.latMax))+" min in the mean.":"it is left out of the mean and written in the day"+RSQ+"s notes.")); }
     else if(st.pend){ if(add(b,"resp")) note(nm+": response after "+clk(T-st.pend.c)+"."); }
     else if(add(b,"cue")) note(nm+": cue given, waiting for the response.");
   }
@@ -5165,7 +5184,13 @@ function dailyPlan(p){
     else if(r.k==="dur") p.cells.push(Object.assign(base,{type:"dur",eps:st.eps.map(logEp)}));
     else if(r.k==="tri"&&r.m==="trials"){ if(st.n) p.cells.push(Object.assign(base,{type:"pair",c:st.c,n:st.n})); }
     else if(r.k==="tri"){ if(st.n) p.cells.push(Object.assign(base,{type:"mean",n:st.n,s:st.c,pct:true})); }
-    else if(r.k==="lat"){ if(st.lat.length) p.cells.push(Object.assign(base,{type:"mean",n:st.lat.length,s:st.lat.reduce((a,x)=>a+x.d,0)/60000})); }
+    /* v22.90 (review F103) a cue with no response: counted at the behavior's longest wait when one is set (and a longer
+       response is counted at it too), else left out of the mean; either way the share of cues answered goes in the day's notes */
+    else if(r.k==="lat"){ const cap=num(b.latMax)>0?num(b.latMax):null,all=st.lat.length+st.miss;
+      const nt=st.miss?`Latency, ${bname(b)}: ${st.lat.length} of ${all} cue${all===1?"":"s"} answered`+(cap?` (no response counted at ${r1(cap)} min)`:" (no response left out of the mean)"):"";
+      if(cap&&all) p.cells.push(Object.assign(base,{type:"mean",n:all,s:st.lat.reduce((a,x)=>a+Math.min(x.d/60000,cap),0)+st.miss*cap,note:nt}));
+      else if(st.lat.length) p.cells.push(Object.assign(base,{type:"mean",n:st.lat.length,s:st.lat.reduce((a,x)=>a+x.d,0)/60000,note:nt}));
+      else if(st.miss) p.notes=(p.notes||[]).concat([nt]); }
     else if(r.k==="irt"){ if(st.irt.length) p.cells.push(Object.assign(base,{type:"mean",n:st.irt.length,s:st.irt.reduce((a,x)=>a+x.d,0)/60000})); }
     else if(r.k==="prm"){ if(st.n) p.cells.push(Object.assign(base,{type:"mean",n:st.n,s:st.sum})); }
   });
@@ -5285,7 +5310,7 @@ function applyDur(row,c,add,conflict,orig){
      needs no line, and stays as it is when the session adds no episode */
   let carry=null;
   if(oldTyped!==null&&oldTyped>0&&(pd||neu.length)){
-    const mins=pd?oldTyped*(effObsMin(orig)||0)/100:oldTyped;
+    const mins=pd?oldTyped*(behObsMin(orig,b)||0)/100:oldTyped;
     carry={start:"",end:"",dur:fmtDur(mins),note:pd?"Percent typed on the sheet before this session, as minutes of the observation (not one episode)":"Total typed on the sheet before this session (not one episode)",auto:false};
   }
   if(!neu.length&&!carry) return;
@@ -5294,7 +5319,10 @@ function applyDur(row,c,add,conflict,orig){
 /* every cell in its turn; the observation minutes first, so a percent of time is worked out against the new minutes.
    how(c) is what was chosen for a value already on the row: "add", "replace" or "keep" (Skip: the sheet's value stays);
    a cell with nothing on the row is simply written */
+/* v22.90 (review F103) a line for the day's notes, once */
+function ddRowNote(row,t){t=String(t||'').trim();if(!t)return;const cur=String(row.notes||'');if(cur.indexOf(t)<0)row.notes=cur.trim()?cur.replace(/\s+$/,'')+' · '+t:t;}
 function apply(row,p,how,ns,orig){
+  (p.notes||[]).forEach(t=>ddRowNote(row,t));
   p.cells.forEach(c=>{
     const b=c.b, conflict=has(orig,c), h=conflict?how(c):"replace";
     if(h==="keep") return;
@@ -5303,6 +5331,7 @@ function apply(row,p,how,ns,orig){
     else if(c.type==="cnt"){ row.values[b.id]=s2((add?num(orig.values[b.id])||0:0)+c.n); }
     else if(c.type==="pair"){ row.values[b.id]=s2((add?num(orig.values[b.id])||0:0)+c.c); row.values[OPP(b.id)]=s2((add?num(orig.values[OPP(b.id)])||0:0)+c.n); }
     else if(c.type==="mean"||c.type==="bmean"){ let n=c.n, s=c.s; if(add){ const bs=baseOf(orig,c,ns); n+=bs.n; s+=bs.s; } setMean(row,b,c.key,n,s,c.pct,c.slot); }
+    if(c.note) ddRowNote(row,c.note);   /* v22.90 (review F103) */
     else if(c.type==="dur") applyDur(row,c,add,conflict,orig);
     else if(c.type==="bcnt"||c.type==="bmin") setSlotVal(row,b.id,c.slot,s2((add?slotVal(orig,b.id,c.slot)||0:0)+c.n));
     else if(c.type==="bpair"){ setSlotVal(row,b.id,c.slot,s2((add?slotVal(orig,b.id,c.slot)||0:0)+c.c)); setSlotVal(row,OPP(b.id),c.slot,s2((add?slotVal(orig,OPP(b.id),c.slot)||0:0)+c.n)); }
@@ -5348,7 +5377,8 @@ function sessionText(r,T){
   if(r.k==="dur") return st.eps.length?pl(st.eps.length,"episode")+", "+clk(st.total)+" ("+r1(st.total/60000)+" min) to the episode log"+(m==="pdur"&&T>0?"; "+r1(100*st.total/T)+"% of the session":""):"No episodes (written as 0)";
   if(r.k==="tri") return st.n?st.c+" of "+st.n+" "+pos(r.b)+" ("+r1(100*st.c/st.n)+"%)":"No trials: not written";
   if(r.k==="prm") return st.n?pl(st.n,"trial")+", mean level "+r1(st.sum/st.n):"No trials: not written";
-  if(r.k==="lat") return (st.lat.length?pl(st.lat.length,"latency","latencies")+", mean "+r1(st.mean/60000)+" min":"No response to a cue: not written")+(st.miss?"; "+st.miss+" cue"+(st.miss===1?"":"s")+" without a response, left out":"");
+  if(r.k==="lat"){ const cap=num(r.b.latMax)>0?num(r.b.latMax):null;   /* v22.90 (review F103) */
+    return (st.lat.length?pl(st.lat.length,"latency","latencies")+", mean "+r1(st.mean/60000)+" min":cap&&st.miss?"No response to a cue":"No response to a cue: not written")+(st.miss?"; "+st.miss+" cue"+(st.miss===1?"":"s")+" without a response, "+(cap?"counted at "+r1(cap)+" min":"left out of the mean")+"; the day"+RSQ+"s notes say how many were answered":""); }
   if(r.k==="irt") return st.irt.length?pl(st.n,"response")+", mean interresponse time "+r1(st.mean/60000)+" min ("+pl(st.irt.length,"interval")+")":"Fewer than two responses: not written";
   return "";
 }
@@ -5654,7 +5684,7 @@ wrap("showTab",pillPaint);
 
 window.ddLive={state:()=>L.state,elapsed:()=>elapsed(),entries:()=>L.ev.map(e=>Object.assign({},e)),segments:()=>L.segs.map(g=>Object.assign({},g)),
   stats:id=>{ const b=behById(id); return b?stats(b,elapsed()):null; },cues:()=>CUES.slice(),wake:()=>({want:wantWake,held:!!wake}),
-  armed:()=>L.armed,plan:iso=>planFor(iso===undefined?E.date.value:iso)};
+  armed:()=>L.armed,plan:iso=>planFor(iso===undefined?E.date.value:iso),note:ddRowNote};   /* v22.90 note: the test calls it */
 E.date.value=today();
 renderCards(true); whereSync(); locks(); paint();
 })();
@@ -5966,7 +5996,7 @@ function ddIncDlg(){let d=document.getElementById("dlgInc");if(d)return d;d=docu
   <div class="inc-g"><label class="field"><span>Home told</span><select id="incParent"><option value="no">Not yet</option><option value="yes">Yes</option></select></label>
   <label class="field"><span>How and when</span><input id="incParentWhen" placeholder="e.g. phone call 3:15"></label><label class="field"><span>Recorded by</span><input id="incBy"></label></div>
   <label class="chk"><input type="checkbox" id="incBcba"> The BCBA has been told</label>
-  <label class="chk" id="incCountL"><input type="checkbox" id="incCount" checked> <span id="incCountT">Add one to the day&rsquo;s count</span></label>
+  <label class="chk" id="incCountL"><input type="checkbox" id="incCount"> <span id="incCountT">This one is not on the sheet yet: add one to the day&rsquo;s count</span></label>
   <div class="dd-actions"><button type="button" class="btn ghost" id="incCancel">Cancel</button><button type="button" class="btn" id="incSave">Save</button></div>`;
   document.body.appendChild(d);
   d.querySelector("#incCancel").addEventListener("click",()=>d.close());
@@ -5975,7 +6005,7 @@ function ddIncDlg(){let d=document.getElementById("dlgInc");if(d)return d;d=docu
 let ddIncEditing=null;
 function ddIncCountUi(){const d=document.getElementById("dlgInc"),b=S.behaviors.find(x=>x.id===d.querySelector("#incBeh").value),ok=ddCountable(b),c=d.querySelector("#incCount");
   c.disabled=!ok;if(!ok)c.checked=false;
-  d.querySelector("#incCountT").textContent=ok?`Add one to ${d.querySelector("#incDate").value?shortDay(d.querySelector("#incDate").value):"the day"}’s count of ${b.name||"this behavior"}`:
+  d.querySelector("#incCountT").textContent=ok?`This one is not on the sheet yet: add one to ${d.querySelector("#incDate").value?shortDay(d.querySelector("#incDate").value):"the day"}’s count of ${b.name||"this behavior"}`:
     (b?`${b.name||"This behavior"} is not counted by frequency${S.settings.entryMode==="interval"?" (the sheet is in intervals)":""}; enter the day’s value on the sheet`:"Pick a behavior counted by frequency to add it to the day’s count");}
 function ddIncOpen(id){const d=ddIncDlg(),i=id?(S.incidents||[]).find(x=>x.id===id):null,T=ddTiers();ddIncEditing=i?i.id:null;
   const now=new Date();d.querySelector("#incTitle").textContent=i?"Edit the incident":"Log an incident";
@@ -5987,7 +6017,7 @@ function ddIncOpen(id){const d=ddIncDlg(),i=id?(S.incidents||[]).find(x=>x.id===
   v("#incBeh",i?(ddIncBeh(i)?i.beh:""):(behs.find(b=>(b.kind||"target")==="target")||behs[0]||{id:""}).id);v("#incTier",i?i.tier:"");
   ["Before","What","Words","Did","Ended","ParentWhen","By"].forEach(k=>v("#inc"+k,i?i[k.charAt(0).toLowerCase()+k.slice(1)]:(k==="By"?(S.meta.observer||""):"")));
   v("#incParent",i&&i.parent==="yes"?"yes":"no");d.querySelector("#incBcba").checked=!!(i&&i.bcba);
-  ddIncCountUi();const c=d.querySelector("#incCount");if(!c.disabled)c.checked=i?i.counted:true;
+  ddIncCountUi();const c=d.querySelector("#incCount");if(!c.disabled)c.checked=i?!!i.counted:false;   /* v22.90 (review F101) the tally is usually on the sheet already: counted only when asked */
   try{d.showModal();}catch(e){d.setAttribute("open","");}}
 function ddIncSave(){const d=document.getElementById("dlgInc"),g=k=>d.querySelector(k).value;
   const o={date:ddIsoOk(g("#incDate"))?g("#incDate"):"",time:ddTimeOk(g("#incTime"))?g("#incTime"):"",beh:g("#incBeh"),tier:g("#incTier"),before:g("#incBefore").trim(),what:g("#incWhat").trim(),
@@ -6013,7 +6043,9 @@ function ddIncNoteText(i){const nm=ddFirst(),L=[];
   if(i.before)L.push(`What was going on just before: ${i.before.replace(/\.?\s*$/,".")}`);
   if(i.did)L.push(`What the adults did: ${i.did.replace(/\.?\s*$/,".")}`);
   if(i.ended)L.push(`How it ended: ${i.ended.replace(/\.?\s*$/,".")}`);
-  L.push("");L.push(`${nm}’s plan stays the same, and we will keep you posted on how the rest of the week goes. Please reach out with any questions.`);
+  /* v22.90 (review F107) after a hold, or with a new phase near the day, the plan is not promised to stay the same */
+  const held=/restraint|seclusion|escort/i.test(i.hold||""),ph=S.rows.some(r=>r.phaseType==="full"&&r.date&&r.date>=i.date&&r.date<=ddAddDays(i.date,7));
+  L.push("");L.push(held||ph?`The team will look at what happened and let you know if anything in ${nm}’s plan changes. Please reach out with any questions.`:`${nm}’s plan stays the same, and we will keep you posted on how the rest of the week goes. Please reach out with any questions.`);
   L.push("");L.push([i.by||S.meta.observer||"",S.meta.school||""].filter(Boolean).join(", "));
   return L.join("\n").replace(/\n+$/,"");}
 function ddIncNote(id){const i=(S.incidents||[]).find(x=>x.id===id);if(!i)return;let d=document.getElementById("dlgIncNote");
@@ -6043,8 +6075,11 @@ function ddStatTxt(b,s){if(!s)return "—";const pc=MEASURES[b.measure].two||/%/
   if(b.measure==="count")return `${r1(s.total)} <span>(${r1(s.mean)} a day)</span>`;
   if(b.measure==="duration")return `${r1(s.total)} min <span>(${r1(s.mean)} a day)</span>`;
   return pc?`${r1(s.mean)}%`:`${r1(s.mean)} <span>${esc(MEASURES[b.measure].unit)}</span>`;}
+/* v22.90 (review F107) a change is called only when it is one: at least 20% of last week's mean and at least one unit (five
+   points for a percentage); a smaller one is about the same */
 function ddChange(b,a,c){if(!a||!c)return {t:"—",k:""};const d=c.mean-a.mean,up=(b.direction||(b.kind==="target"?"decrease":"increase"))!=="decrease";
-  if(Math.abs(d)<1e-9)return {t:"no change",k:""};const good=up?d>0:d<0;
+  if(Math.abs(d)<1e-9)return {t:"no change",k:""};const pc=MEASURES[b.measure].two||/%/.test(MEASURES[b.measure].unit);
+  if(Math.abs(d)<Math.max(0.2*Math.abs(a.mean),pc?5:1))return {t:"about the same"+(a.mean>0?` (${d<0?"down":"up"} ${Math.round(Math.abs(d)/a.mean*100)}%)`:""),k:""};const good=up?d>0:d<0;
   const t=a.mean>0?`${d<0?"down":"up"} ${Math.round(Math.abs(d)/a.mean*100)}%`:`up from 0`;return {t,k:good?"good":"bad"};}
 /* v22.80 (review F258, F262): Form SM-1 sends the behavior beside the points (beh: the share of the teacher's ratings that were
    Yes) and the ladder phase; a teacher-only day (phase 0) has no points and stays out of the week's figures */
@@ -6558,10 +6593,11 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 .gs-bar .gs-use{display:flex;gap:5px;align-items:center;font-size:13px}.gs-bar .gs-use input{width:auto}
 .gs-bad{color:#8e2a2a}
 #dataTable input.gs-cell{box-shadow:inset 0 -2px 0 #4a9a6e}
+#dataTable input.inc-cell{box-shadow:inset 0 -2px 0 #b5651d}
 dialog.gs-dlg{width:min(640px,calc(100vw - 24px))}dialog.gs-dlg .field{display:block}dialog.gs-dlg .field input{width:100%;box-sizing:border-box;font-size:16px}dialog.gs-dlg textarea{min-height:0}
 .gs-tabset{border:1px solid var(--rule-soft);border-radius:3px;padding:6px 10px;margin:8px 0}.gs-tabset label{display:block;padding:4px 0;font-size:14px}.gs-tabset input{width:auto;margin-right:5px}
 .gs-prev{font-size:13.5px}.gs-prev ul{margin:4px 0 6px 18px;padding:0}.gs-prev li{margin:2px 0}
-@media print{#dataTable input.gs-cell{box-shadow:none}}
+@media print{#dataTable input.gs-cell,#dataTable input.inc-cell{box-shadow:none}}
 </style>
 <script id="dd-v2178">
 /* ===================================================================================================
@@ -6833,6 +6869,12 @@ function ddDayCol(){const t=$("#dataTable");if(!t)return;const dc=$("#dataCols")
     if(tr.querySelector("td.col-day"))return;const rows=ddBlank||S.rows,r=rows.find(x=>x.id===tr.dataset.r);if(!r)return;const nc=tr.querySelector("td.col-notes");if(nc)nc.insertAdjacentHTML("beforebegin",ddDayCell(r));});
   t.classList.toggle("dd-as-on",ddAsAny());if(made)applyColW(ddColP);else ddDayColW(ddColP,false);}
 {const rd2=renderData;renderData=function(){const r=rd2.apply(this,arguments);try{ddDayCol();}catch(e){}return r;};}
+/* v22.90 (review F101) a day's cell that carries an incident's one says so, so a double count can be seen and taken off */
+function ddIncMarks(){const by={};(S.incidents||[]).forEach(i=>{if(!i||!i.counted||!i.date||!i.beh)return;const r=S.rows.find(x=>x.date===i.date);if(!r)return;const k=r.id+'|'+i.beh;by[k]=(by[k]||0)+1;});
+  Object.keys(by).forEach(k=>{const j=k.indexOf('|'),rid=k.slice(0,j),key=k.slice(j+1),n=by[k];
+    const inp=document.querySelector(`#dataTable tr[data-r="${CSS.escape(rid)}"] input[data-v="${CSS.escape(key)}"]`);
+    if(inp){inp.classList.add('inc-cell');inp.title=`Includes ${n} added from the incident log. To take ${n===1?'it':'them'} off, edit the incident and untick “add one to the day’s count”.`+(inp.title&&!/incident log/.test(inp.title)?' '+inp.title:'');}});}
+{const rd4=renderData;renderData=function(){const r=rd4.apply(this,arguments);try{ddIncMarks();}catch(e){}return r;};}
 /* the assent picked in the row: the sheet's own input handler has written it; the day keeps it in shape and paper follows */
 document.addEventListener("input",e=>{const s=e.target;if(!s||!s.matches||!s.matches("#dataTable select.dd-as"))return;const tr=s.closest("tr"),r=tr&&S.rows.find(x=>x.id===tr.dataset.r);if(!r)return;
   ddTagSet(r,"assent",s.value);const a=ddAsOk(r.assent);s.className="dd-as"+(a?" on-"+a:"");const po=tr.querySelector("td.col-day .po");if(po)po.textContent=ddAsWord(a);
@@ -9479,7 +9521,7 @@ function stTry(row,b,p,who){const k=ST_KIND(b.measure),pk=stPartKind(p),v=row.va
     const neu=p.e.map(x=>({start:x[0],end:x[1],dur:fmtDur(x[2]/60),note:"From "+who+"’s phone",auto:false})),old=episodesOf(row,b);let carry=null;
     if(!old.length){const t=episodesCount(row,b)?null:num(v[b.id]);
       /* as the live recorder does: a total typed before the first episode is kept (and comes back if the episodes go), and rides in the log as a line of its own */
-      if(t!==null&&t>0){const mins=b.measure==="pdur"?t*(effObsMin(row)||0)/100:t;carry={start:"",end:"",dur:fmtDur(mins),note:b.measure==="pdur"?"Percent typed on the sheet before the phone’s episodes, as minutes of the observation (not one episode)":"Total typed on the sheet before the phone’s episodes (not one episode)",auto:false};}
+      if(t!==null&&t>0){const mins=b.measure==="pdur"?t*(behObsMin(row,b)||0)/100:t;carry={start:"",end:"",dur:fmtDur(mins),note:b.measure==="pdur"?"Percent typed on the sheet before the phone’s episodes, as minutes of the observation (not one episode)":"Total typed on the sheet before the phone’s episodes (not one episode)",auto:false};}
       if(!row.typed||typeof row.typed!=="object")row.typed={};row.typed[b.id]=v[b.id]==null?"":v[b.id];}
     if(!row.episodes||typeof row.episodes!=="object")row.episodes={};
     row.episodes[b.id]=old.map(e=>Object.assign({},e)).concat(carry?[carry]:[],neu);syncEpisodeValue(row,b);
@@ -11493,7 +11535,7 @@ window.TKWALK={build,renderAt,play,pause,seek,toggle,
       var bc=d.querySelector("#incBcba");if(bc)bc.checked=inc.bcba!==false;
       var hold=d.querySelector("#incHold");if(hold){hold.value=inc.hold||"";if(hold.value!==(inc.hold||""))hold.value="";}
       if(typeof ddIncCountUi==="function")ddIncCountUi();
-      var c=d.querySelector("#incCount");if(c&&!c.disabled)c.checked=inc.count!==false;
+      var c=d.querySelector("#incCount");if(c&&!c.disabled)c.checked=inc.count===true;   /* v22.90 (review F101) Log it now counts only when asked */
       var n0=(S.incidents||[]).length;
       ddIncSave();
       if(d.open){try{d.close();}catch(e){}return {ok:false,why:"the form did not take it"};}

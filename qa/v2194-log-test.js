@@ -44,7 +44,7 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(file)>=0);
     await page.click('#tdLog');await sleep(700);
     const d2=await page.evaluate(()=>({who:$('#lnWho').tagName,first:($('#lnWho').options&&$('#lnWho').options[0]||{}).textContent,lead:$('#dlgBody .hp-lead').textContent,beh:[...document.querySelectorAll('#lnBehList option')].map(o=>o.value)}));
     ok('6 with the case on screen the sheet offers the student on screen first (v22.22: the other students kept here after it) and the case’s behaviors',d2.who==='SELECT'&&/^Mateo Rivera \(on screen\)/.test(d2.first),d2);
-    await page.evaluate(b=>{$('#lnTime').value='13:05';$('#lnBeh').value=b.toLowerCase();$('#lnWhat').value='Hit the teacher';$('#lnHold').value='restraint';$('#lnDid').value='Two-person hold, 2 minutes';},sim.b[0].name);
+    await page.evaluate(b=>{$('#lnTime').value='13:05';$('#lnBeh').value=b.toLowerCase();$('#lnWhat').value='Hit the teacher';$('#lnHold').value='restraint';$('#lnDid').value='Two-person hold, 2 minutes';$('#lnCount').checked=true;},sim.b[0].name);
     await page.click('#lnSave');await sleep(2500);
     const inc2=await fr.evaluate(()=>{const L=(S.incidents||[]);const i=L.filter(x=>x.time==='13:05').pop()||{};return {n:L.length,name:ddIncName(i),beh:i.beh,hold:i.hold||'',time:i.time,counted:!!i.counted};});
     const toast2=await page.evaluate(()=>[...document.querySelectorAll('.ws-toast')].map(e=>e.textContent.trim()).join(' | ').slice(-220));
