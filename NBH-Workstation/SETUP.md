@@ -9903,6 +9903,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.89: AD-1 keeps an integrity log read for each arrangement, and sends its decision to the case (review Wave 3)
+
+- **The integrity log (F410).** One checklist used to stand for the whole evaluation: the decision read "integrity 90.0%"
+  from a single observation of one arrangement.
+  - Tab 6A's checklist now scores one observation. **Write this observation to the log** adds a row (date, session
+    number, arrangement, observer, steps correct, steps applicable) and clears the checklist for the next one. A paper
+    checklist can be entered as a row directly.
+  - Below the log, a table gives each arrangement's mean and lowest integrity, and how many of its sessions were
+    observed. An arrangement that was run but never observed is named, and so is one observed under the criterion.
+  - The decision reads integrity by arrangement ("integrity by arrangement: distributed 90.0% (1 of 5 sessions),
+    accumulated 100.0% (1 of 5 sessions), accumulated + tokens 90.0% (1 of 5 sessions)"), naming any arrangement under
+    the criterion or not observed.
+  - A file saved before the log, with only the checklist scored, says the figure is one session's integrity.
+  - The simulated case logs one observation in each arrangement.
+- **The decision reaches the case (F412).** Once a decision is chosen (not "Continue the evaluation"), AD-1 tells the
+  case:
+  - the arrangement and the work response;
+  - the reinforcer, the amount per response and the work requirement;
+  - how earned units are shown, the exchange and how access ends;
+  - the warning, the fallback, the ladder and the review date.
+
+  In the workstation:
+  - The line under the bar names the arrangement.
+  - Form QS-1's staff sheet says how the reward comes, in plain words, once. For example: "How the reward comes: a token
+    for each one math problem completed; after 10 tasks, count the tokens together and trade them for the tablet (30 s
+    per problem). When the time is up: …".
+  - Tab 7 has **Copy the plan as text** for Forms TE-1, TK-1 and SR-1, which do not read it yet.
+- **Not done:** Forms TE-1, TK-1 and SR-1 filling their own fields (the exchange ratio, the back-up, the schedule) from the
+  arrangement; for now the plan is copied as text.
+- qa/ad1-w3b-test.js (10 checks).
+
 ### v22.88: AD-1 stops a session that turns dangerous, names the rows it cannot read, keeps its evidence guide out of the student's record, and reads IOA by arrangement (review Wave 3)
 
 - **Stop rules (F408).** The comparison withholds the reinforcer on purpose (baseline, the accumulated wait, the removal

@@ -1464,6 +1464,15 @@ function place(p,v){v=T(v);if(!v||PASS.has(p))return false;PASS.add(p);
   if(was&&v!==was){if(T(S.changed[p])!==v)S.changed[p]=v;return false;}
   return false;}
 /* a list line (a day card) placed once: the same words already on a card, or placed there before, are not placed again */
+/* v22.89 (AD-1 review F412) the arrangement Form AD-1 chose, as a line for staff */
+function adReward(a){const lc=x=>x?x.charAt(0).toLowerCase()+x.slice(1):x;const w=lc(T(a.work))||'task finished',rf=T(a.reinforcer)||'the reward',u=T(a.unit),N=a.req>0?a.req+' '+(a.req===1?'task':'tasks'):'the last task',end=T(a.end);
+  const k=a.key,head='How the reward comes: ';let t;
+  if(k==='dis')t=head+rf+' right after each '+w+(u?' ('+u+')':'')+'.';
+  else if(k==='acc')t=head+'each '+w+' earns time with '+rf+(u?' ('+u+')':'')+'; it is given all at once after '+N+', not between tasks.';
+  else if(k==='tok')t=head+'a token for each '+w+'; after '+N+', count the tokens together and trade them for '+rf+(u?' ('+u+')':'')+'.';
+  else if(k==='int')t=head+'each '+w+' is marked; every '+(a.every||5)+', '+rf+' for the marked amount'+(u?' ('+u+')':'')+'.';
+  else t=head+T(a.choice)+(T(a.reinforcer)?' ('+rf+')':'')+'.';
+  return t+(end?' When the time is up: '+lc(end).replace(/[.\s]+$/,'')+'.':'');}
 function placeRow(k,f,v){v=T(v);if(!v)return false;
   for(let i=0;i<S[k].length;i++){if(T(S[k][i][f])===v||T(S.pulled[k+'.'+i+'.'+f])===v){PASS.add(k+'.'+i+'.'+f);return false;}}
   const i=blankRow(k);return i>=0&&place(k+'.'+i+'.'+f,v);}
@@ -1534,6 +1543,8 @@ window.__nbhFactsIn=function(f){ensure();PASS=new Set();const p=P();let n=0;
   /* v22.39 (review F461) DM-1's "what to avoid" is a note about the student, not a non-negotiable: it goes with the day, beside What helps;
      rule 1 pairs the plan's own lines (its response, and its "staff do not") */
   if(pf&&pf.avoid&&placeRow('day','text','Avoid: '+pf.avoid))n++;
+  /* v22.89 (AD-1 review F412) how the reward comes, from the arrangement Form AD-1 chose: staff hear it in plain words */
+  {const a=f.arrangement;if(a&&a.choice){const ln=adReward(a);if(ln&&placeRow('day','text',ln))n++;}}
   /* v22.48 (review F395) the replacement and the skill goals are skills being taught, unless the record (Form DD-1) shows one at its
      aim; a goal's annual objective is not printed as something the student can do; a goal naming a skill already listed is not
      listed again */

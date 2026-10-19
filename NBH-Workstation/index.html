@@ -2263,7 +2263,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.88';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.89';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2542,8 +2542,10 @@ const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-
   /* v22.74 (review F284) the class-wide system on GC-1: arrangement, phase, criterion, changes, fidelity */ 'GC-1':'classwide',
   /* v22.82 (review I191) the brief given to limited-contact staff: setting, roles, issue date, the plan version it was built from */ 'EB-1':'brief',
   /* v22.83 (review F248, F249) the performance diagnostic (Form PD-1): the plan component, the leading domain, the changes chosen, the
-     reassessment date and the note for the student's file; no staff names */ 'PD-1':'perf'};
-const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1','TE-1','RA-1','CT-1','GC-1','EB-1','PD-1'];
+     reassessment date and the note for the student's file; no staff names */ 'PD-1':'perf',
+  /* v22.89 (AD-1 review F412) the reinforcer arrangement chosen on Form AD-1 and its plan: the reinforcer, the amount, the work
+     requirement, the exchange, how access ends, the ladder */ 'AD-1':'arrangement'};
+const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1','TE-1','RA-1','CT-1','GC-1','EB-1','PD-1','AD-1'];
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsOwed=false;   /* v21.87 a send asked while a read runs is kept; a change read without sending is still owed to the forms */
 function noteFactSource(id,st){
@@ -2565,8 +2567,8 @@ async function factsFlush(){
   if(factsPushes!==n)await new Promise(r=>setTimeout(r,300));
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||f.token||f.reinf||f.caregiver||f.classwide||f.brief||f.perf||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide,f.brief,f.perf]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||f.token||f.reinf||f.caregiver||f.classwide||f.brief||f.perf||f.arrangement||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide,f.brief,f.perf,f.arrangement]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
   factsBusy=true;
@@ -2646,6 +2648,7 @@ function paintFacts(){
   if(f.reinf&&(f.reinf.items||[]).length)bits.push('<b>Reinforcer verdicts:</b> '+f.reinf.items.length+' <i>('+esc(s.reinf||'')+')</i>');   /* v22.54 (F419) */
   if(f.token)bits.push('<b>Token system</b>'+(f.token.step&&f.token.step.n?': step '+(f.token.step.n|0):'')+' <i>('+esc(s.token||'')+')</i>');   /* v22.54 (F421) */
   if(f.caregiver)bits.push('<b>Caregiver training:</b> '+esc(f.caregiver.stand||'in training')+' <i>('+esc(s.caregiver||'')+')</i>');   /* v22.72 (F353) */
+  if(f.arrangement)bits.push('<b>Reinforcer arrangement:</b> '+esc(f.arrangement.choice||'')+(f.arrangement.unit?', '+esc(f.arrangement.unit):'')+' <i>('+esc(s.arrangement||'')+')</i>');   /* v22.89 (AD-1 F412) */
   if(f.classwide)bits.push('<b>Class-wide system:</b> '+esc(f.classwide.arrangement||'')+(f.classwide.phase?', phase '+esc(String(f.classwide.phase)):'')+' <i>('+esc(s.classwide||'')+')</i>');   /* v22.74 (F284) */
   t.innerHTML=bits.join(' &nbsp;&middot;&nbsp; ');
 }

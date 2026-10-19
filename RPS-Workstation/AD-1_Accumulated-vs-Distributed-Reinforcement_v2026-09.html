@@ -1241,7 +1241,18 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
   </div>
   <table><thead><tr><th style="width:5%">#</th><th>Step</th><th class="num" style="width:7%">Yes</th><th class="num" style="width:7%">No</th><th class="num" style="width:7%">N/A</th></tr></thead>
     <tbody id="tbTI"></tbody></table>
-  <div class="readout" id="tiOut"><div><span>Integrity</span><strong>&mdash;</strong></div></div>
+  <div class="readout" id="tiOut"><div><span>This observation</span><strong>&mdash;</strong></div></div>
+  <!-- v22.89 (review F410): one row per observation, so integrity is read for each arrangement, not from one checklist -->
+  <div class="grid g4" style="align-items:end">
+    <div><label class="f">Session # observed</label><input type="number" name="ti_sess" min="1" step="1"></div>
+    <div><button type="button" class="tool nbh-btn-primary" id="btnTIlog">Write this observation to the log</button></div>
+    <div class="small" id="tiLogMsg" role="status" style="grid-column:span 2"></div>
+  </div>
+  <h4>Integrity Log</h4>
+  <p class="small">One row per observation. The checklist above scores it and writes the row; a paper checklist can be entered here directly. Integrity is read for each arrangement, with the share of its sessions observed: a drift in one arrangement changes the very variable being compared.</p>
+  <table><thead><tr><th style="width:13%">Date</th><th class="num" style="width:9%">Session #</th><th style="width:19%">Arrangement</th><th>Observer</th><th class="num">Steps correct</th><th class="num">Steps applicable</th><th class="num">Integrity</th><th style="width:3%"></th></tr></thead><tbody id="tbTI2"></tbody></table>
+  <div class="rowbtns"><button class="tool" data-add="tbTI2">Add row</button></div>
+  <div id="tiLogOut"></div>
   <h3>B. Interobserver Agreement</h3>
   <p class="lede">Total count for session totals (smaller divided by larger), trial-by-trial for choices and scored trials (agreements divided by trials), total duration for timed measures. Collect IOA on at least a third of sessions in each arrangement.</p>
   <table><thead><tr><th style="width:9%">Session #</th><th style="width:18%">Measure</th><th style="width:16%">Method</th><th class="num">Observer 1</th><th class="num">Observer 2</th><th class="num">Agreements</th><th class="num">Trials</th><th class="num">IOA %</th><th style="width:3%"></th></tr></thead><tbody id="tbIOA"></tbody></table>
@@ -1315,6 +1326,9 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
     <div><label class="f">Data kept during daily use</label><input type="text" name="pl_data"></div>
     <div><label class="f">Review date</label><input type="date" name="pl_review"></div>
   </div>
+  <!-- v22.89 (review F412): the decision reaches the case (Form QS-1 says how the reward comes), and the plan copies as text for the forms that do not read it yet -->
+  <p class="noprint ad-gp"><button type="button" class="tool" id="btnPlanCopy">Copy the plan as text</button><span class="small" id="planCopyMsg" role="status"></span></p>
+  <p class="small noprint">In the workstation, the decision and this plan go to the case once a decision is chosen: Form QS-1's staff sheet says how the reward comes. For Forms TE-1, TK-1 and SR-1, copy the plan as text.</p>
   <div class="sig"><div>BCBA signature / date</div><div>Teacher or implementer / date</div><div>Parent or guardian / date</div></div>
 </section>
 
@@ -1732,6 +1746,7 @@ const templates={
   tbRem:()=>idx()+txt()+n()+n()+n()+n()+dt()+del(),
   tbSess:()=>idx()+dt()+txt()+sel(CONDS)+n()+n()+n()+n()+n()+n()+n()+sel(['Stopped'])+calc()+calc()+calc()+calc()+del(),   /* v22.88 (review F408) Stopped early */
   tbCC:()=>idx()+dt()+sel(['Forced','Choice'])+sel(['Standard','Cards reversed','Tasks reversed'])+sel(CONDS.concat(['No selection']))+sel(['Left','Center-left','Center','Center-right','Right'])+sel(['Completed','Partial','Not completed'])+n()+txt()+del(),
+  tbTI2:()=>dt()+n('1')+sel(CONDS.concat(['Choice trials']))+txt()+n()+n()+calc()+del(),   /* v22.89 (review F410) the integrity log */
   tbIOA:()=>txt()+sel(['Responses','Problem behavior','Opportunities','Choices','Work time','Access time','On-task intervals'])+sel(['Total count','Trial-by-trial','Total duration'])+n()+n()+n()+n()+calc()+del(),
   tbStep:()=>idx()+n('1')+txt()+calc()+txt()+txt()+del(),
   tbGen:()=>dt()+txt()+txt()+txt()+sel(CONDS.slice(1))+txt()+sel(['Yes','No','Partly'])+del(),
@@ -2017,14 +2032,27 @@ function preference(){
 function integrity(){
   let y=0,no=0;for(let i=1;i<=TI_ITEMS.length;i++){const c=document.querySelector('[name="ti'+i+'"]:checked');if(!c)continue;if(c.value==='y')y++;else if(c.value==='n')no++}
   const crit=num(val('ti_crit'))??90;const p=(y+no)?100*y/(y+no):null;
-  $('#tiOut').innerHTML='<div><span>Integrity</span><strong>'+(p==null?'—':fmt(p,1)+'%')+'</strong></div><div><span>Steps scored</span><strong>'+(y+no)+'</strong></div><div><span>Status</span><strong>'+(p==null?'—':p>=crit?'Meets '+crit+'%':'Retrain: below '+crit+'%')+'</strong></div>';
+  $('#tiOut').innerHTML='<div><span>This observation</span><strong>'+(p==null?'—':fmt(p,1)+'%')+'</strong></div><div><span>Steps scored</span><strong>'+(y+no)+'</strong></div><div><span>Status</span><strong>'+(p==null?'—':p>=crit?'Meets '+crit+'%':'Retrain: below '+crit+'%')+'</strong></div>';
+  /* v22.89 (review F410) the integrity log: integrity per arrangement, with the share of its sessions observed; an
+     arrangement run but never observed is named, and so is one observed under the criterion */
+  const SDi=sessData(),LG=rows('tbTI2').map(tr=>{const v=vals(tr);const c=num(v[4]),a=num(v[5]);const q=(c!=null&&a)?100*c/a:null;tr.cells[6].textContent=q==null?'—':fmt(q,1)+'%';
+    return {s:num(v[1]),k:KEY[v[2]]||(v[2]==='Choice trials'?'cc':null),p:q}}).filter(r=>r.p!=null);
+  const byA=ORDER.concat(['cc']).map(k=>{const a=LG.filter(r=>r.k===k),of=k==='cc'?null:SDi.filter(s=>s.c===k).length;if(!a.length&&!of)return null;
+    const ps=a.map(r=>r.p);return {k,n:a.length,m:ps.length?mean(ps):null,lo:ps.length?Math.min(...ps):null,ss:new Set(a.map(r=>r.s).filter(x=>x!=null&&SDi.some(s=>s.i===x&&s.c===k))).size,of}}).filter(Boolean);
+  const unObs=byA.filter(b=>!b.n&&b.k!=='bl'),under=byA.filter(b=>b.n&&b.lo<crit);
+  $('#tiLogOut').innerHTML=LG.length?'<table class="sum"><thead><tr><th>Arrangement</th><th class="num">Observations</th><th class="num">Mean</th><th class="num">Lowest</th><th class="num">Sessions observed</th></tr></thead><tbody>'+
+    byA.map(b=>'<tr><td>'+(b.k==='cc'?'':'<span class="chip" style="--c:'+COL[b.k]+'"></span>')+adArr(b.k)+'</td><td class="num">'+b.n+'</td><td class="num">'+(b.m==null?'—':fmt(b.m,1)+'%')+'</td><td class="num">'+(b.lo==null?'—':fmt(b.lo,1)+'%')+'</td><td class="num">'+(b.of==null?'—':b.ss+' of '+b.of)+'</td></tr>').join('')+'</tbody></table>'+
+    (under.length?'<p class="caution" id="tiUnder"><b>Under '+crit+'%:</b> '+under.map(b=>adArr(b.k).toLowerCase()+' (lowest '+fmt(b.lo,1)+'%)').join('; ')+'. Retrain before reading that arrangement\'s results.</p>':'')+
+    (unObs.length?'<p class="small" id="tiUnobs">No integrity observation yet of '+unObs.map(b=>adArr(b.k).toLowerCase()).join(', ')+'.</p>':'')
+    :'<p class="small">No observation written to the log yet.</p>';
   const R=rows('tbIOA').map(tr=>{const v=vals(tr);const a=num(v[3]),b=num(v[4]),ag=num(v[5]),tn=num(v[6]);let p=null;
     if(v[2]==='Trial-by-trial'){if(ag!=null&&tn)p=100*ag/tn}else if(a!=null&&b!=null){p=(a===0&&b===0)?100:100*Math.min(a,b)/Math.max(a,b)}
     tr.cells[7].textContent=p==null?'—':fmt(p,1)+'%';return {s:v[0],m:v[1],p}}).filter(r=>r.p!=null);
   /* v22.88 (review F416) each mean with its range, every check under 80% named, and the third of sessions checked in each
      arrangement, each IOA row's session number looked up in the log */
   const S=rows('tbSess').length,SD=sessData();const cov=new Set(R.map(r=>num(r.s)).filter(x=>x!=null)).size;
-  if(!R.length){$('#ioaOut').innerHTML='';return {ti:p,crit,ioa:null}}
+  const lg={n:LG.length,byA,unObs,under};
+  if(!R.length){$('#ioaOut').innerHTML='';return {ti:p,crit,ioa:null,lg}}
   const by={};R.forEach(r=>{(by[r.m||'Other']=by[r.m||'Other']||[]).push(r.p)});
   const rg=a=>a.length>1?' <span class="small">('+fmt(Math.min(...a),1)+'–'+fmt(Math.max(...a),1)+')</span>':'';
   const low=R.filter(r=>r.p<80).sort((a,b)=>a.p-b.p).map(r=>({p:r.p,lab:String(r.m||'measure').toLowerCase()+(num(r.s)!=null?', session '+num(r.s):r.s?', '+String(r.s).toLowerCase():'')}));
@@ -2034,8 +2062,15 @@ function integrity(){
     (low.length?'<p class="caution" id="ioaLow"><b>Under 80%:</b> '+low.map(x=>fmt(x.p,1)+'% ('+esc(x.lab)+')').join('; ')+'. Go over the definition with both observers and check again before the results are read.</p>':'')+
     (thin.length?'<p class="small">Under a third of sessions in '+thin.map(a=>NAME[a.k].toLowerCase()).join(', ')+': collect IOA on at least a third of sessions in each arrangement.</p>':(S&&cov/S<1/3?'<p class="small">Coverage is below a third of sessions.</p>':''));
   const all=R.map(r=>r.p);
-  return {ti:p,crit,ioa:mean(all),lo:Math.min(...all),hi:Math.max(...all),low:low[0]||null,thin,cov:S?cov/S:null,n:R.length};
+  return {ti:p,crit,ioa:mean(all),lo:Math.min(...all),hi:Math.max(...all),low:low[0]||null,thin,cov:S?cov/S:null,n:R.length,lg};
 }
+function adArr(k){return k==='cc'?'Choice trials':NAME[k];}
+/* v22.89 (review F410) the checklist writes its observation to the log and clears for the next */
+$('#btnTIlog').addEventListener('click',()=>{let y=0,no=0;for(let i=1;i<=TI_ITEMS.length;i++){const c=document.querySelector('[name="ti'+i+'"]:checked');if(!c)continue;if(c.value==='y')y++;else if(c.value==='n')no++}
+  const m=$('#tiLogMsg');if(!(y+no)){m.textContent='Score the steps above first.';return}if(!val('ti_cond')){m.textContent='Choose the arrangement observed first.';return}
+  addRow('tbTI2',[val('ti_date'),val('ti_sess'),val('ti_cond'),val('ti_obs'),String(y),String(y+no)]);
+  for(let i=1;i<=TI_ITEMS.length;i++)document.querySelectorAll('[name="ti'+i+'"]').forEach(r=>{r.checked=false});F('ti_sess').value='';
+  m.textContent='Written to the log as row '+rows('tbTI2').length+' ('+fmt(100*y/(y+no),1)+'%). The checklist is clear for the next observation.';refresh();});
 
 /* ---------- tab 7 ---------- */
 function stepCalc(){rows('tbStep').forEach((tr,i)=>{tr.cells[0].textContent=i+1;const v=vals(tr);const r=num(v[0]);const m=String(v[1]).match(/([\d.]+)\s*(s|sec|seconds?|min|minutes?|pieces?|tokens?)?/i);let t='—';
@@ -2057,7 +2092,10 @@ function decision(sx,pf,ig,sv){
   else L.push(sx&&sx.stopped&&sx.stopped.length?'<b>Efficacy (Tab 4).</b> Every session entered was stopped early under the stop rule; none can be compared.':'<b>Efficacy (Tab 4).</b> No sessions entered yet.');
   if(sx&&sx.stopped&&sx.stopped.length){const by={};sx.stopped.forEach(s=>{by[s.c]=(by[s.c]||0)+1});L.push('<b>Stopped early (Tab 3E).</b> '+ORDER.filter(k=>by[k]).map(k=>plural(by[k],NAME[k].toLowerCase()+' session')).join(', ')+' ended under the stop rule and '+(sx.stopped.length===1?'is':'are')+' left out of the comparison.');}
   if(pf&&pf.top){L.push('<b>Preference (Tab 5).</b> '+NAME[pf.top]+' chosen on '+pf.cnt[pf.top]+' of '+pf.n+' choice trials ('+fmt(100*pf.cnt[pf.top]/pf.n,0)+'%); '+(pf.met?'stopping rule met.':'stopping rule not yet met.'))}else L.push('<b>Preference (Tab 5).</b> No choice trials entered yet.');
-  if(ig){const a=[];if(ig.ti!=null)a.push('integrity '+fmt(ig.ti,1)+'% ('+(ig.ti>=ig.crit?'meets':'below')+' '+ig.crit+'%)');if(ig.ioa!=null)a.push('IOA '+(ig.n>1&&ig.lo!==ig.hi?fmt(ig.lo,1)+'–'+fmt(ig.hi,1)+'% (mean '+fmt(ig.ioa,1)+'%)':fmt(ig.ioa,1)+'%')+' across '+plural(ig.n,'check')+(ig.cov!=null?', '+fmt(100*ig.cov,0)+'% of sessions':'')+(ig.low?'; lowest '+fmt(ig.low.p,1)+'% ('+esc(ig.low.lab)+'), under 80%':'')+(ig.thin&&ig.thin.length?'; under a third of sessions checked in '+ig.thin.map(x=>NAME[x.k].toLowerCase()).join(', '):''));   /* v22.88 (review F416) */if(a.length)L.push('<b>Data quality (Tab 6).</b> '+a.join('; ')+'.')}
+  if(ig){const a=[];/* v22.89 (review F410) integrity per arrangement from the log; one checklist is one session's integrity */
+    if(ig.lg&&ig.lg.n){const B=ig.lg.byA.filter(b=>b.n);a.push('integrity by arrangement: '+B.map(b=>adArr(b.k).toLowerCase()+' '+fmt(b.m,1)+'%'+(b.of!=null?' ('+b.ss+' of '+b.of+' sessions)':'')).join(', ')+
+      (ig.lg.under.length?'; under '+ig.crit+'% in '+ig.lg.under.map(b=>adArr(b.k).toLowerCase()).join(', '):'')+(ig.lg.unObs.length?'; not observed: '+ig.lg.unObs.map(b=>adArr(b.k).toLowerCase()).join(', '):''));}
+    else if(ig.ti!=null)a.push('integrity '+fmt(ig.ti,1)+'% on the one observation scored'+(val('ti_cond')?' ('+esc(String(val('ti_cond')).toLowerCase())+')':'')+', '+(ig.ti>=ig.crit?'meets':'below')+' '+ig.crit+'%; one observation is one session\'s integrity: write each to the log (Tab 6A)');if(ig.ioa!=null)a.push('IOA '+(ig.n>1&&ig.lo!==ig.hi?fmt(ig.lo,1)+'–'+fmt(ig.hi,1)+'% (mean '+fmt(ig.ioa,1)+'%)':fmt(ig.ioa,1)+'%')+' across '+plural(ig.n,'check')+(ig.cov!=null?', '+fmt(100*ig.cov,0)+'% of sessions':'')+(ig.low?'; lowest '+fmt(ig.low.p,1)+'% ('+esc(ig.low.lab)+'), under 80%':'')+(ig.thin&&ig.thin.length?'; under a third of sessions checked in '+ig.thin.map(x=>NAME[x.k].toLowerCase()).join(', '):''));   /* v22.88 (review F416) */if(a.length)L.push('<b>Data quality (Tab 6).</b> '+a.join('; ')+'.')}
   if(sv!=null)L.push('<b>Acceptability (Tab 8).</b> Mean rating '+fmt(sv,1)+' of 5.');
   if(L.best&&pf&&pf.top)L.push(L.best===pf.top?'<b>Agreement.</b> The most effective and the most chosen arrangement are the same: '+NAME[L.best]+'.':'<b>Disagreement.</b> Most effective: '+NAME[L.best]+'; most chosen: '+NAME[pf.top]+'. See step 3 of the decision guide.');
   $('#decSummary').innerHTML=L.map(x=>'<li>'+x+'</li>').join('');
@@ -2247,8 +2285,8 @@ function loadSim(){
     g_measure:'rate',p4_notes:'Stable baseline (0.2–0.4 per min). In the multielement phase both accumulated arrangements separated from distributed immediately and stayed separated: no overlap on rate across 10 accumulated sessions. Problem behavior under distributed stayed near baseline and clustered at removals.',
     cc_opts:'Amber (distributed), teal (accumulated), navy (tokens), white (control); positions rotated each trial',nw_n:'6',nw_big:'6',
     p5_concl:'Accumulated + tokens chosen on 7 of 10 choice trials, five in a row (choices 6–10), which met the stopping rule. Distributed was chosen twice, both early, each time with problem behavior in the terminal link.',
-    ti_date:'2026-09-16',ti_obs:'School psychologist (second observer)',ti_cond:'Accumulated + tokens',ti_crit:'90',
-    dec_arr:'Accumulated + tokens',dec_date:'2026-09-24',dec_rationale:'Accumulated + tokens produced the highest rate (mean 2.34 per work minute vs 1.32 distributed; no overlap), the least problem behavior, and sessions about 5 min shorter than distributed. The student chose it on 7 of 10 choice trials, five in a row. Integrity 90%; IOA 97%.',
+    ti_date:'2026-09-16',ti_obs:'School psychologist (second observer)',ti_cond:'Accumulated + tokens',ti_crit:'90',ti_sess:'19',
+    dec_arr:'Accumulated + tokens',dec_date:'2026-09-24',dec_rationale:'Accumulated + tokens produced the highest rate (mean 2.34 per work minute vs 1.32 distributed; no overlap), the least problem behavior, and sessions about 5 min shorter than distributed. The student chose it on 7 of 10 choice trials, five in a row. Integrity 90%–100% (one observation in each arrangement); IOA 97%.',
     pl_rf:'Tablet: racing game (bricks as the alternate)',pl_unit:'30 s per problem',pl_req:'10',pl_bank:'Token board',pl_exch:'Count the tokens aloud together, set the desk timer to the earned time, hand over the tablet',pl_where:'Student’s desk',
     pl_end:'Timer at zero: “Time’s up,” open hand, 5-s wait, tablet to the bin',pl_warn:'Visual timer only',pl_return:'Board cleared, card turned over, next worksheet on the desk',pl_pbwork:'Block grabbing; tokens already earned stay; next problem presented',
     pl_pbacc:'Access ends at zero regardless; no extra time is given',pl_refuse:'Wait with an open hand for 10 s; then remove it with minimal attention and record it',pl_who:'Classroom teacher; paraprofessional in the afternoon',pl_when:'Morning math and afternoon reading worksheets',
@@ -2276,6 +2314,7 @@ function loadSim(){
     ['2026-09-21','Choice','Standard',D,'Center-right','Completed','2',''],['2026-09-21','Choice','Standard',T,'Left','Completed','0',''],['2026-09-21','Choice','Standard',D,'Right','Completed','3',''],['2026-09-21','Choice','Standard',T,'Center-left','Completed','0',''],
     ['2026-09-22','Choice','Standard',A,'Center-right','Completed','0',''],['2026-09-22','Choice','Standard',T,'Right','Completed','0',''],['2026-09-22','Choice','Standard',T,'Left','Completed','1',''],['2026-09-22','Choice','Standard',T,'Center-left','Completed','0',''],
     ['2026-09-23','Choice','Standard',T,'Center-right','Completed','0',''],['2026-09-23','Choice','Standard',T,'Right','Completed','0','Fifth in a row: stop']];
+  t.tbTI2=[['2026-09-11','8','Accumulated','School psychologist (second observer)','10','10'],['2026-09-15','14','Distributed','School psychologist (second observer)','9','10'],['2026-09-16','19','Accumulated + tokens','School psychologist (second observer)','9','10']];
   t.tbIOA=[['5','Responses','Total count','10','10','',''],['5','Problem behavior','Total count','0','0','',''],['7','Responses','Total count','10','10','',''],['9','Problem behavior','Total count','4','3','',''],['12','Problem behavior','Total count','0','0','',''],['14','Problem behavior','Total count','2','2','',''],['17','Work time','Total duration','4.6','4.5','',''],['20','Problem behavior','Total count','0','0','',''],['22','Responses','Total count','9','9','',''],['Choice trials','Choices','Trial-by-trial','','','14','14']];
   const adv='3 consecutive sessions: rate at or above 2.0 per min and problem behavior at or below 1',back='2 consecutive sessions with problem behavior at 50% or more of the baseline mean';
   t.tbStep=[['10','30 s',adv,back],['15','30 s',adv,back],['20','30 s',adv,back],['30','30 s','Hold; review at the next plan review',back]];
@@ -2285,6 +2324,23 @@ function loadSim(){
 }
 /* the enhancement sprint (A2): asks every time, with the question the other forms use (it asked only once session rows
    existed, so typed details were replaced without a word); Cancel changes nothing */
+/* v22.89 (review F412) the decision, out to the case once one is chosen (not 'Continue the evaluation'); and the plan as text */
+function adPlan(){const d=String(val('dec_arr')||'').trim();if(!d||/^Continue/i.test(d))return null;const t=k=>String(val(k)||'').trim();
+  const key=KEY[d]||(/tokens/i.test(d)?'tok':/^Accumulated/i.test(d)?'acc':/^Distributed/i.test(d)?'dis':/^Intermediate/i.test(d)?'int':'');
+  const ladder=rows('tbStep').map(vals).filter(v=>v.some(x=>String(x).trim())).map(v=>({req:num(v[0]),unit:String(v[1]||'').trim(),adv:String(v[2]||'').trim(),back:String(v[3]||'').trim()}));
+  return {choice:d,key,date:t('dec_date'),work:t('w_unit')||t('s_task'),reinforcer:t('pl_rf'),unit:t('pl_unit'),req:num(val('pl_req')),bank:t('pl_bank'),exchange:t('pl_exch'),
+    end:t('pl_end'),warn:t('pl_warn'),every:key==='int'?Math.max(2,Math.round(num(val('w_k'))||5)):null,fallback:t('pl_fallback'),ladder,review:t('pl_review'),src:'AD-1'};}
+window.__nbhFactsOut=function(){try{const a=adPlan();return a?{arrangement:a}:null;}catch(e){return null;}};
+function adPlanText(){const a=adPlan();if(!a)return '';const L=['Reinforcer arrangement (Form AD-1): '+a.choice+(a.date?', decided '+a.date:'')];
+  [['Reinforcer',a.reinforcer],['Work response',a.work],['Amount per response',a.unit],['Work requirement now',a.req!=null?String(a.req):''],['How earned units are shown',a.bank],['Exchange routine',a.exchange],
+   ['How access ends',a.end],['Warning before the end',a.warn],['Fallback arrangement',a.fallback],['Review date',a.review]].forEach(([k,v])=>{if(v)L.push(k+': '+v);});
+  if(a.ladder.length)L.push('Extending the work requirement: '+a.ladder.map((x,i)=>(i+1)+') '+(x.req!=null?x.req+' responses':'')+(x.unit?', '+x.unit:'')+(x.adv?'; advance after '+x.adv:'')).join(' '));
+  return L.join('\n');}
+$('#btnPlanCopy').addEventListener('click',async()=>{const m=$('#planCopyMsg'),t=adPlanText();if(!t){m.textContent=' Choose the decision (Section B) first.';return}
+  let ok=false;try{await navigator.clipboard.writeText(t);ok=true;}catch(e){}
+  if(!ok){try{const x=document.createElement('textarea');x.value=t;x.setAttribute('readonly','');x.style.position='fixed';x.style.opacity='0';document.body.appendChild(x);x.select();ok=document.execCommand('copy');x.remove();}catch(e){}}
+  m.textContent=ok?' Copied: paste it into Form TE-1, TK-1 or SR-1.':' Could not copy here; select the plan fields instead.';});
+window.adPlanText=adPlanText;
 /* v22.88 (review F413) the evidence guide prints with the form only when ticked, or alone */
 (function(){const g=document.getElementById('adGuide'),t=document.getElementById('adGuidePr'),b=document.getElementById('adGuideAlone');if(!g)return;
   if(t)t.addEventListener('change',()=>g.classList.toggle('pr-skip',!t.checked));
