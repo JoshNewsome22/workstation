@@ -9903,6 +9903,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.22: IA-1 keeps the student's photo off pages without permission, reads the PBQ at its own level, never calls one informant consensus, and makes no video from a case (review Wave 3)
+
+- **The photo and permission (F40).** When Form DM-1 records no photo or media permission, no photo goes on a respondent
+  page, whether it came from the workstation's bar or was chosen on this form.
+  - The Respondent pages dialog and the Send-outs sheet say the pages show initials only.
+  - "Unknown" on DM-1 asks for the permission to be checked first.
+  - A form opened on its own, with no case, is unchanged.
+- **Initials only.** The page labels the student by initials, without the student number, as IN-1 and CF-1 now do.
+- **The PBQ's own level (F42).** A leading PBQ column with no item rated 3 (about half the time) or higher is no longer
+  counted as an outcome: the published profile reads only those items. The sheet and the Guide say so.
+- **One informant is not consensus (F43).** With fewer than three informants holding an outcome, the convergence line
+  says "no consensus possible under 3".
+  - "Indirect hypothesis carried to the packet" is filled only from an agreement of at least three informants at 80%;
+    otherwise the assessor chooses. The same rule holds for a main analysis chosen from a group of informants.
+  - The evidence for FS-1 says "Informant outcomes", not "Informant consensus".
+- **The FAST's N/A (F46).** The sheet and the English respondent page give the FAST's own instruction: answer yes or no,
+  and N/A when uncertain, followed by the page's usual line on where the answers go. The narrated walkthrough is unchanged for now: re-recording its two N/A lines is listed for
+  later.
+- **Dangerous behavior (F47).** The Decision and the Guide point to a latency-based, trial-based or precursor analysis on
+  Form EA-1, with the crisis plan (Form CR-1) in place first, rather than a full multielement analysis. Three references
+  are added.
+- **The social-positive verdict (F48).** It now gives the basis (7 of 7 agreed cases in Iwata et al., 2013) and says a
+  single-function test "may be enough".
+- **No video from a case (F49).** Save as video and the captions are refused while the form holds a student's name or
+  scores. The note says to make them from the worked example in an empty form.
+- qa/ia1-w3-test.js (10 checks). respond-test and ia1-outs-test follow the initials-only label, and ia1-wefa-test the
+  three-informant rule.
+
 ### v23.21: SA-1 takes one mastery criterion from the objective, reads a faded prompt as fading, records errors before the prompt, and holds several programs in one file (review Wave 3)
 
 - **One mastery criterion (F198).** The GB-1 objective's percentage and sessions fill an empty Setup criterion.

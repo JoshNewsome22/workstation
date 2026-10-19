@@ -73,7 +73,7 @@ const QABF=Array.from({length:25},(_,i)=>(i+1)+'. Simulated QABF item '+(i+1)+' 
   await page.evaluate(()=>{window.__dl=[];const o=URL.createObjectURL;URL.createObjectURL=b=>{window.__dl.push(b);return o(b);};HTMLAnchorElement.prototype.click=function(){if(this.download)window.__dlName=this.download;};});
   await act(hfA,'page');
   const b3=await page.evaluate(id=>({name:window.__dlName,made:__rp.outs().filter(o=>o.made).length,st:document.querySelector('#outBody tr[data-id="'+id+'"] .tag').textContent,note:document.querySelector('#outNote').textContent.slice(0,40)}),hfA);
-  check('B3 Page saves that target and instrument’s respondent page and marks every row of that pair "Page made"',/^IA-1_FAST_Hitting_respondent_G\.S\._ID_12345_\.html$/.test(b3.name||'')&&b3.made===2&&b3.st==='Page made'&&/Page saved/.test(b3.note),JSON.stringify(b3));
+  check('B3 Page saves that target and instrument’s respondent page and marks every row of that pair "Page made"',/^IA-1_FAST_Hitting_respondent_G\.S\.html$/.test(b3.name||'')&&b3.made===2&&b3.st==='Page made'&&/Page saved/.test(b3.note),JSON.stringify(b3));
   const hqB=await rowOf('Hitting','qabf','B');await act(hqB,'link');
   const b4=await page.evaluate(id=>({box:!document.querySelector('#outLinkBox').hidden,url:document.querySelector('#outLinkBox').value.slice(0,60),ok:/respond\.html#[pz]=/.test(document.querySelector('#outLinkBox').value),st:document.querySelector('#outBody tr[data-id="'+id+'"] .tag').textContent}),hqB);
   check('B4 Link puts the row’s link in the box (and on the clipboard) and marks the pair made',b4.box&&b4.ok&&b4.st==='Page made',JSON.stringify(b4));

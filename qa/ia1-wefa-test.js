@@ -42,7 +42,7 @@ const WEFA=Array.from({length:18},(_,i)=>(i+1)+'. Simulated WEFA statement '+(i+
  ok('verdict: each set labelled on its own, as the form does',/Sets A by set: Attention \(access to social attention\) 4 of 5, Likely; Tangibles \(access to items or activities\) 1 of 5, Not likely; Escape \/ avoidance 3 of 5, Moderately likely; Sensory \(automatic reinforcement\) 0 of 5, Not likely\. Each set is labelled on its own, as the form does/.test(v),v);
  let row=await text('#convTbl');
  ok('convergence: the WEFA row is counted under Attention with the margin caution',/WEFA[^]*Attention \(access to social attention\)[^]*Att 4 · Tang 1 · Esc 3 · Sens 0[^]*counted[^]*margin of one item[^]*Attention/.test(row),row);
- ok('m.fn: the WEFA outcome sets the packet hypothesis through INST',(await get('m.fn'))==='attention');
+ ok('m.fn: one informant\'s WEFA outcome is not consensus, so the packet hypothesis waits for the assessor (Wave 3 F43)',(await get('m.fn'))==='');
  await page.evaluate(()=>document.querySelector('#hypDraft').click());await sleep(200);
  ok('hypothesis draft: the WEFA outcome is in the counts',/^The indirect data suggest attention \(1 of 1 informants; 1 of 1 counted outcomes\)/.test(await get('hyp.c')),await get('hyp.c'));
  await set('wefa[0][12]','Y');await set('wefa[0][13]','Y');await sleep(250);v=await text('#wefaVerdict');row=await text('#convTbl');
