@@ -9903,6 +9903,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.10: TD-1 prints the specialist planners only when they are used, and fills the staff-training table from ST-1's record (review Wave 3)
+
+- **The planners off paper while unused (F187).** The high-probability sequence planner and the arranging and ordering
+  planner held 242 fields and two blank fidelity checklists. They printed on the Antecedents sheet for every plan.
+  - Each now prints only when it holds an entry or its card is in the plan: the high-p sequence, or the arranging and
+    ordering package.
+  - Both stay on screen. The workstation's packet print follows.
+- **Who was trained, from Form ST-1 (I95).** The Staff Training table takes each trainee on Form ST-1's record into an
+  empty row, or into the row that already names them.
+  - Once the criterion is met, the four parts of behavioral skills training are ticked, the date is entered, and the
+    note names the criterion.
+  - A trainee still in training is marked "not to implement alone until the criterion is met".
+  - A row already typed is kept.
+- qa/td1-w3b-test.js (6 checks).
+
 ### v23.09: DM-1 hands the family's language, the rights-holder and the medication dates to the forms that need them, dates its status answers, and builds Packet Contents from the workstation (review Wave 3)
 
 - **Consent in the family's language (F1).** The case carries who holds educational rights and who signs, in Form IC-1's
