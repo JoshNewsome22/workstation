@@ -2551,6 +2551,10 @@ async function factsFlush(){
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
   (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||f.token||f.reinf||f.caregiver||f.classwide||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
 function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide]):'';}
+/* v22.8x (review F143, I71) Form DA-1 joins the case as 'demands' (the tasks that evoke problem behavior for EA-1's demand
+   condition, where TD-1's demand fading starts, the modifications by task): one block, so the lists above stay as they are */
+FACT_SRC['DA-1']='demands';FACT_GEN.push('DA-1');
+{const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.demands);};factsSig=function(f){return fsg(f)+(f&&f.demands?JSON.stringify(f.demands):'');};}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
   factsBusy=true;

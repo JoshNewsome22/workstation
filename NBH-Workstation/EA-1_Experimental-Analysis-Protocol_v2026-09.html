@@ -5906,6 +5906,29 @@ window.eaPaintConsent=function(){const g=window.__eaConsentGap(),e=s=>String(s).
     const n=document.getElementById(id);if(!n)return;n.hidden=!g;n.innerHTML=g?'<b>Consent check:</b> '+e(g)+'. '+t:'';});};
 })();
 </script>
+<script id="ea1-da1">
+/* v22.8x (review F143, I71) Form DA-1's results in Form EA-1 (the case's 'demands', which the workstation reads from DA-1):
+   the Materials line of each Demand card names the tasks the demand assessment found evoke problem behavior, in rank order,
+   when the line is still the template's ("Tasks at the student's instructional level"), empty, or one the case wrote before;
+   a line typed by hand is kept. Cards loaded later from a template take them too (loadTpl ends with eaMenuCards). */
+(function(){const T=v=>String(v==null?'':v).trim();
+  const TPL=/^Tasks at the student(’|')s instructional level$/,MINE=/^Tasks from Form DA-1:/;
+  window.eaDemandCards=function(d){if(!d||!Array.isArray(d.fa))return false;const names=d.fa.map(o=>T(o&&o.name)).filter(Boolean);if(!names.length)return false;
+    const line='Tasks from Form DA-1: '+names[0]+(names.length>1?' (or rotate with '+names.slice(1).join(' and ')+', and note which was used)':'')+(d.rule==='latency'?'; ranked by latency':'');
+    let ch=false;
+    document.querySelectorAll('[name^="c["][name$="].name"]').forEach(el=>{if(!/^demand\b/i.test(T(el.value)))return;const i=el.name.slice(2,el.name.indexOf(']'));
+      const m=document.querySelector('[name="c['+i+'].mat"]');if(!m)return;const v=T(m.value);if(v===line||!(v===''||TPL.test(v)||MINE.test(v)))return;
+      m.value=line;['input','change'].forEach(x=>m.dispatchEvent(new Event(x,{bubbles:true})));ch=true;});
+    return ch;};
+  let busy=false;const wm=window.eaMenuCards;
+  window.eaMenuCards=function(){let r=false;try{r=wm?wm.apply(this,arguments):false;}catch(e){r=false;}if(!busy)try{if(window.eaDemandCards(window.__eaDemands))r=true;}catch(e){}return r;};
+  const was=window.__nbhFactsIn;
+  window.__nbhFactsIn=function(f){let r=null;busy=true;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}busy=false;
+    let ch=false;try{window.__eaDemands=(f&&f.demands)||null;ch=window.eaDemandCards(window.__eaDemands);}catch(e){}
+    if(ch){r=r&&typeof r==='object'?Object.assign({},r):{filled:0};r.filled=(r.filled||0)+1;r.note=(r.note?r.note+', ':'from the case: ')+'the demand tasks (Form DA-1)';}
+    return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
