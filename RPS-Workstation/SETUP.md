@@ -9903,6 +9903,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.39: Form ABC-1: a saved background sample can be edited
+
+- **Edit on each background sample (the BCBA's ask, from an iPad),** as each incident has. Its answers go back into the
+  Background samples form: date, time, seconds scored, activity, adult within view, every box and the sound level. A
+  line says which sample is open, and the row is marked in the list.
+- **Save changes replaces it where it stands.** Its id and place in the list are kept. An older file's window in minutes
+  stays in minutes while its number is left as it was. The sound level is kept, changed, or taken off with the box.
+  The form is then ready for today's next sample.
+- **Cancel edit** leaves the sample as it was. Deleting the open sample closes it. A background check coming due while
+  one is open closes it too, so the new check starts from an empty form, not the old sample's answers.
+- Nothing of it prints: the buttons and the editing line are screen-only.
+- qa/abc-edit-sample-test.js (10 checks).
+
 ### v23.38: Form ABC-1 measures the room's sound level
 
 - **A Sound level meter on the Observation Timer (the BCBA's ask).** It is optional and off until you turn it on. The

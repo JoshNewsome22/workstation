@@ -1403,6 +1403,8 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
     </div>
     <div class="btnrow">
       <button class="btn" id="bg-save">Save sample</button>
+      <button class="btn quiet" id="bg-edit-cancel" type="button" hidden>Cancel edit</button>
+      <span id="bg-edit-flag" class="status" hidden></span>
       <span class="spacer"></span>
       <span id="bg-status" class="status" aria-live="polite"></span>
     </div>
@@ -2115,19 +2117,65 @@ function renderIncidents(){
 }
 
 function renderSamples(){
+  /* v23.39 the sample open for editing was deleted (or the record replaced): the form is no longer editing it */
+  if(state.bgEditingId && !state.samples.some(x => x.id === state.bgEditingId)) bgEditDone(true);
   if(!state.samples.length){
     $("#bg-table").innerHTML = `<div class="empty"><b>No background samples yet</b>Without them the analysis reports conditional probabilities only, and marks contingency strength as not estimable.</div>`;
     return;
   }
   $("#bg-table").innerHTML = `<table>
-    <thead><tr><th style="width:100px">Date</th><th style="width:70px">Time</th><th style="width:70px" class="num">Window</th><th>Antecedent conditions</th><th>Events observed</th><th class="noprint" style="width:80px">&nbsp;</th></tr></thead>
-    <tbody>${state.samples.map(s => `<tr>
+    <thead><tr><th style="width:100px">Date</th><th style="width:70px">Time</th><th style="width:70px" class="num">Window</th><th>Antecedent conditions</th><th>Events observed</th><th class="noprint" style="width:96px">&nbsp;</th></tr></thead>
+    <tbody>${state.samples.map(s => `<tr${s.id === state.bgEditingId ? ' class="bg-editing"' : ""}>
       <td>${esc(s.date)}${s.activity?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(s.activity)}</div>`:""}</td><td>${esc(s.time||"")}${window.abcNoiseLine?abcNoiseLine(s):""}</td><td class="num">${esc(s.window||"")} ${s.unit==="s"?"s":"min"}</td>
       <td>${(s.antecedents||[]).length ? labelsFor(s.antecedents, A_BY_ID, {}, "auto") : '<span style="color:var(--ink-faint)">none</span>'}</td>
       <td>${s.events.length ? labelsFor(s.events, C_BY_ID, {}, "auto") : '<span style="color:var(--ink-faint)">none</span>'}</td>
-      <td class="noprint"><button class="btn danger" data-delsample="${esc(s.id)}" style="padding:4px 10px;font-size:12px;min-height:28px">Delete</button></td>
+      <td class="noprint"><button class="btn quiet" data-editsample="${esc(s.id)}" style="padding:4px 10px;font-size:12px;min-height:28px">Edit</button>
+          <button class="btn danger" data-delsample="${esc(s.id)}" style="padding:4px 10px;font-size:12px;min-height:28px;margin-top:4px">Delete</button></td>
     </tr>`).join("")}</tbody></table>`;
 }
+
+/* v23.39 a background sample opened again to correct it, as an incident is with Edit: its answers back in the form, a line
+   saying which sample is open, Save changes replacing it; Cancel edit leaves it as it was */
+function bgClearForm(){
+  $$('#bg-a-opts input, #bg-c-opts input, #bg-p-opts input, #bg-se-opts input').forEach(cb => { cb.checked = false; cb.closest(".opt").classList.remove("checked"); });
+  $("#bg-staffpresent").value = "";
+  if(window.abcNoiseLoad) abcNoiseLoad(null);
+}
+function loadSampleIntoForm(s){
+  bgClearForm();
+  state.bgEditingId = s.id;
+  $("#bg-date").value = s.date || ""; $("#bg-time").value = s.time || "";
+  $("#bg-window").value = s.window == null ? "" : String(s.window);
+  $("#bg-activity").value = s.activity || ""; $("#bg-staffpresent").value = s.staffPresent || "";
+  const put = (prefix, ids) => (ids||[]).forEach(id => { const cb = document.getElementById(prefix+"-"+id); if(cb){ cb.checked = true; cb.closest(".opt").classList.add("checked"); } });
+  put("bga", s.antecedents); put("bgc", s.events); put("bgp", s.precursors); put("bgse", s.settingEvents);
+  if(window.abcNoiseLoad) abcNoiseLoad(s);
+  const f = $("#bg-edit-flag"); f.hidden = false;
+  f.textContent = "Editing the sample of " + [s.date, s.time].filter(Boolean).join(" at ") + (s.unit !== "s" && s.window ? " (its window is in minutes, from an older file)" : "") + ": Save changes replaces it.";
+  $("#bg-save").textContent = "Save changes"; $("#bg-edit-cancel").hidden = false;
+  switchTab("background"); renderSamples();
+  const d = $("#bg-date"); if(d){ try{ d.focus({ preventScroll:true }); }catch(e){} d.scrollIntoView({ block:"center" }); }
+}
+function bgEditDone(keepForm){
+  const was = state.bgEditingId; state.bgEditingId = null;
+  const f = $("#bg-edit-flag"); if(f){ f.hidden = true; f.textContent = ""; }
+  const b = $("#bg-save"); if(b) b.textContent = "Save sample";
+  const c = $("#bg-edit-cancel"); if(c) c.hidden = true;
+  if(!keepForm){ bgClearForm(); $("#bg-date").value = todayISO(); $("#bg-time").value = nowHM(); $("#bg-window").value = String(+$("#h-window").value || 10); }
+  if(was) renderSamples();
+}
+document.addEventListener("click", e => {
+  const t = e.target && e.target.closest ? e.target : null; if(!t) return;
+  const ed = t.closest("[data-editsample]");
+  if(ed){ const s = state.samples.find(x => x.id === ed.dataset.editsample); if(s) loadSampleIntoForm(s); return; }
+  if(t.closest("#bg-edit-cancel")){ bgEditDone(false); flash($("#bg-status"), "Edit cancelled: the sample is as it was."); }
+});
+/* a background check comes due while a sample is open: the new check starts from an empty form, not the old sample's answers */
+window.addEventListener("abc-record-window", () => {
+  if(!state.bgEditingId) return;
+  bgEditDone(true); bgClearForm();
+  const ls = state.samples.slice(-1)[0] || {}, le = state.entries.slice(-1)[0] || {}; $("#bg-activity").value = ls.activity || le.activity || "";
+});
 
 /* =====================================================================
    6. TABS + WIRING
@@ -3814,12 +3862,21 @@ function init(){
     if(!date){ flash($("#bg-status"), "Add a date first.", true); return; }
     const pr = PRECURSORS.filter(i => !i.other && $("#bgp-"+i.id)?.checked).map(i => i.id);
     const se = SETTING_EVENTS.filter(i => !i.other && $("#bgse-"+i.id)?.checked).map(i => i.id);
-    state.samples.push({ id:uid(), date, time:$("#bg-time").value,
+    const smp = { id:uid(), date, time:$("#bg-time").value,
       window:Number($("#bg-window").value)||null, unit:"s", activity:$("#bg-activity").value.trim(), antecedents:an, events:ev,
-      precursors:pr, settingEvents:se, staffPresent:$("#bg-staffpresent").value });
+      precursors:pr, settingEvents:se, staffPresent:$("#bg-staffpresent").value };
+    /* v23.39 a sample opened with Edit is replaced where it stands: its id, and what the form does not show, are kept; an
+       older file's window in minutes stays in minutes while its number is left as it was */
+    const ei = state.bgEditingId ? state.samples.findIndex(x => x.id === state.bgEditingId) : -1;
+    if(ei >= 0){ const was = state.samples[ei];
+      if(was.unit !== "s" && was.window != null && smp.window === Number(was.window)) smp.unit = was.unit;
+      state.samples[ei] = Object.assign({}, was, smp, { id:was.id }); }
+    else state.samples.push(smp);
     $$('#bg-a-opts input, #bg-c-opts input, #bg-p-opts input, #bg-se-opts input').forEach(cb => { cb.checked = false; cb.closest(".opt").classList.remove("checked"); });
     $("#bg-time").value = nowHM();
-    flash($("#bg-status"), "Sample saved \u2014 " + state.samples.length + " on file.");
+    flash($("#bg-status"), ei >= 0 ? "Sample updated." : "Sample saved \u2014 " + state.samples.length + " on file.");
+    /* an edit done: the form is ready for today's next sample (the sound level box is read, then emptied, after this) */
+    if(ei >= 0){ bgEditDone(true); $("#bg-date").value = todayISO(); $("#bg-staffpresent").value = ""; $("#bg-window").value = String(+$("#h-window").value || 10); }
     refreshAll();
   });
   $("#bg-delete-all").addEventListener("click", async () => {
@@ -6707,12 +6764,19 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
   if(typeof clearForm === 'function'){ const was = clearForm; window.clearForm = clearForm = function(){ const o = was.apply(this, arguments); put(byId('e-noise'), null); return o; }; }
   if(typeof loadIntoForm === 'function'){ const was = loadIntoForm; window.loadIntoForm = loadIntoForm = function(entry){ const o = was.apply(this, arguments); put(byId('e-noise'), entry && entry.noise && isFinite(entry.noise.v) ? entry.noise : null); return o; }; }
   /* a background sample takes the level in its box when it is saved */
-  let n0 = -1;
-  document.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('#bg-save')) n0 = state.samples.length; }, true);
+  let n0 = -1, ed = null;
+  document.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('#bg-save')){ n0 = state.samples.length; ed = state.bgEditingId || null; } }, true);
   document.addEventListener('click', e => { if(!(e.target && e.target.closest && e.target.closest('#bg-save'))) return;
-    const n = n0; n0 = -1; if(n < 0 || state.samples.length !== n + 1) return;
-    const r = take(byId('bg-noise')); if(r){ state.samples[n].noise = r; if(typeof renderSamples === 'function') renderSamples(); }
+    const n = n0, id = ed; n0 = -1; ed = null; if(n < 0) return;
+    /* v23.39 a sample opened with Edit takes the box as it is now (emptied, its level is taken off) */
+    let smp = null;
+    if(id){ if(state.bgEditingId) return; smp = state.samples.find(x => x.id === id) || null; }
+    else if(state.samples.length === n + 1) smp = state.samples[n];
+    if(!smp) return;
+    const r = take(byId('bg-noise')); if(r) smp.noise = r; else delete smp.noise;
+    if(typeof renderSamples === 'function') renderSamples();
     put(byId('bg-noise'), null); });
+  window.abcNoiseLoad = smp => put(byId('bg-noise'), smp && smp.noise && isFinite(smp.noise.v) ? smp.noise : null);
 
   /* the tables */
   window.abcNoiseLine = r => (r && r.noise && isFinite(r.noise.v)) ? `<div class="snd-line">sound ${Math.round(r.noise.v)}${r.noise.cal ? ' dBA' : ' <span class="snd-sc">(iPad scale)</span>'}</div>` : '';
@@ -6797,7 +6861,7 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
   const css = document.createElement('style'); css.id = 'abc1-v2338-css';
   css.textContent = '.snd-ctl{margin-top:8px}.snd-ctl .snd-tog[aria-pressed="true"]{background:#e4eef0;border-color:var(--nbh-teal,#2f7f86)}.snd-ctl .snd-tog[aria-pressed="true"]::before{content:"\\25CF\\00a0";color:#b4412e}' +
     '.snd-now{font:600 13px var(--nbh-sans,system-ui,sans-serif);color:var(--ink-soft,#46606b);font-variant-numeric:tabular-nums}.snd-now.snd-warn{color:#a5452f}.snd-note{margin-top:6px}' +
-    '.obs-bar .obs-snd{font-variant-numeric:tabular-nums;white-space:nowrap}.snd-line{font-size:11.5px;color:var(--ink-faint)}.snd-sc{white-space:nowrap}.snd-day{font-size:12px;color:var(--ink-soft,#46606b);margin:0 0 4px}' +
+    '#bg-table tr.bg-editing td{background:#fff7e6}.obs-bar .obs-snd{font-variant-numeric:tabular-nums;white-space:nowrap}.snd-line{font-size:11.5px;color:var(--ink-faint)}.snd-sc{white-space:nowrap}.snd-day{font-size:12px;color:var(--ink-soft,#46606b);margin:0 0 4px}' +
     '@media print{.snd-ctl,.snd-note,.obs-snd{display:none!important}}';
   (document.head || document.documentElement).appendChild(css);
 
