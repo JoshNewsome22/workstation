@@ -2260,7 +2260,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.76';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.77';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2929,7 +2929,7 @@ function staticize(html){
    Guide stays out unless kept for that form; the references go to one list at the end (or stay with each form, or stay out);
    Form ABC-1's incident log prints compact; the empty boxes meant for handwriting stay out of a form that holds data. */
 const MP_GUIDE_FORMS=['DM-1','EA-1','EB-1','GB-1','IA-1','IC-1','MS-1','OB-1','PA-1','QS-1','RR-1','RA-1','TB-1','TD-1',
-  /* v22.7x (I242) the forms whose Guide is their Guide view (.only-guide), left out of the packet now unless kept here */
+  /* v22.77 (I242) the forms whose Guide is their Guide view (.only-guide), left out of the packet now unless kept here */
   'BC-1','CF-1','CN-1','CR-1','CT-1','DA-1','FS-1','GC-1','HD-1','IM-1','IN-1','MT-1','PD-1','PR-1','RM-1','SA-1','SI-1','SM-1','SR-1','ST-1','SV-1',
   'TE-1','TI-1','TK-1','TV-1','VS-1'];
 function packetOpts(){let o={};try{o=JSON.parse(localStorage.getItem('nbh.packet')||'{}')||{};}catch(e){}
@@ -2978,7 +2978,7 @@ function packetShape(x,i,mo,bag){
      student, the page numbers and the FERPA line. Each is scoped to this section like the collected styles, which drops
      @page, so the packet's own page rule holds for every page. */
   root.querySelectorAll('style').forEach(s=>{try{s.textContent=scopeCSS(s.textContent,'.mp-'+i);}catch(e){}});
-  /* the Guide. v22.7x (review I242, found by the packet gate): a form's Guide view (.only-guide, what the form shows when
+  /* the Guide. v22.77 (review I242, found by the packet gate): a form's Guide view (.only-guide, what the form shows when
      Guide is picked) is its Guide too: the Guide pages of 22 forms (Form IN-1's "Why Interview", Form CR-1's summary of the
      statute, Form VS-1's research table) printed in every packet, with no way to leave them out */
   const guides=new Set();root.querySelectorAll('#guide,[data-pane="guide"],.only-guide').forEach(e=>guides.add(e));
@@ -3021,7 +3021,7 @@ function packetShape(x,i,mo,bag){
   if(!mo.blanks&&root.querySelector('.nbh-val')){
     if(id==='TD-1')root.querySelectorAll('.defs .drow').forEach(r=>{const l=r.querySelector('.dlab');if(l&&/^(Data collected|Materials and cues)$/.test(txt(l))&&!r.querySelector('.nbh-val'))r.remove();});
     if(id==='DM-1')root.querySelectorAll('#pkTbl tbody tr').forEach(r=>{const cb=r.querySelector('input[type="checkbox"]');if(!(cb&&cb.hasAttribute('checked'))&&!r.querySelector('.nbh-val'))r.remove();});}
-  /* v22.7x (review I241) for the packet check: the values in this section that say they are simulated (a worked example) */
+  /* v22.77 (review I241) for the packet check: the values in this section that say they are simulated (a worked example) */
   const sim=[];root.querySelectorAll('.nbh-val').forEach(v=>{const t=txt(v);if(sim.length<8&&/\bsimulated\b/i.test(t)&&!sim.includes(t))sim.push(t.slice(0,120));});
   const band=doc.createElement('div');band.className='mp-band';band.innerHTML='<span>Section '+(i+1)+' of %%MPN%%</span><span>Form '+esc(id)+'</span>';root.insertBefore(band,root.firstChild);
   return {id,title:x.title,html:root.innerHTML,sheets:names,guide:keepGuide&&guides.size>0,sim};
@@ -3039,14 +3039,14 @@ function packetRefs(bag,n){const seen=new Set(),norm=s=>s.toLowerCase().replace(
     '<h2 class="mp-app-t">References and Sources<\/h2><p class="mp-app-note">The regulations, standards and literature the forms in this packet cite, gathered here once. Each form names its own sources on screen.<\/p>'+body+'<\/section>';}
 function mpDate(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));if(!m)return String(s||'');return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
 
-/* v22.7x (review I241) the packet check. Before the print dialog opens, the print window lists what is wrong with the packet
+/* v22.77 (review I241) the packet check. Before the print dialog opens, the print window lists what is wrong with the packet
    about to print, on screen only, each line with its fix where there is one. It is built from what the workstation already
    knows (the bar, each form's state, the shaped sections) and, in the print window, from the measuring the window does anyway
    (the parts scaled to fit, each form's length): nothing is laid out twice, and nothing printed changes (the list is shown
    after the packet is measured and never printed). A form's usual length is its page count with its full worked example in
    the full packet (qa/packet-gate-baseline.json); a form at twice that and 8 pages more is listed. */
 const MP_PAGES={'DM-1':6,'IC-1':9,'RR-1':10,'TB-1':13,'SI-1':12,'IN-1':18,'IA-1':26,'OB-1':6,'IM-1':9,'ABC-1':33,'SP-1':8,'MT-1':3,'VI-1':27,
-  'EA-1':13,'DA-1':14,'PA-1':23,'RA-1':9,'FS-1':14,'TD-1':40,'GB-1':5,'CF-1':9,'SV-1':13,'SA-1':10,'SR-1':48,'TE-1':7,'GC-1':11,'VS-1':27,'TK-1':13,
+  'EA-1':13,'DA-1':14,'PA-1':23,'RA-1':9,'FS-1':14,'TD-1':40,'GB-1':5,'CF-1':9,'SV-1':13,'SA-1':10,'SR-1':48,'TE-1':7,'GC-1':13,'VS-1':27,'TK-1':13,
   'CR-1':12,'DT-1':32,'AD-1':41,'BC-1':5,'MS-1':10,'ST-1':7,'EB-1':2,'QS-1':8,'CT-1':7,'TV-1':3,'TI-1':9,'PD-1':14,'CN-1':9,'DD-1':16,'SM-1':20,
   'HD-1':22,'PR-1':8,'RM-1':14};
 function mpCheckItems(chosen,parts,shaped,p){
@@ -3134,7 +3134,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   /* Open the print window now, while the click still counts as the user's own.
      Opened after the forms were collected - several seconds later with a full
      packet - a browser's pop-up blocker treats it as unrequested and stops it. */
-  let w=opt.win&&!opt.win.closed?opt.win:window.open('','_blank');   /* v22.7x (I241) a fix in the packet check builds again in its window */
+  let w=opt.win&&!opt.win.closed?opt.win:window.open('','_blank');   /* v22.77 (I241) a fix in the packet check builds again in its window */
   state.mpLast={ids:chosen.map(c=>c[0]),opt:Object.assign({},opt,{win:null})};
   if(!w){
     state.blankOk=names;          // a second press goes straight through
@@ -3178,7 +3178,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   const kept=shaped.filter(s=>s.guide).map(s=>'Form '+s.id);
 
   const p=packet();
-  const t1=performance.now(),chk=opt.check===false?'':mpCheckHtml(mpCheckItems(chosen,parts,shaped,p),shaped.map(s=>s.id));state.mpLast.ms=Math.round(performance.now()-t1);   /* v22.7x (I241) */
+  const t1=performance.now(),chk=opt.check===false?'':mpCheckHtml(mpCheckItems(chosen,parts,shaped,p),shaped.map(s=>s.id));state.mpLast.ms=Math.round(performance.now()-t1);   /* v22.77 (I241) */
   const stamp=new Date();
   const head=`<div class="mp-cover" data-mk="NBHPKT;%%MPRUN%%">
     <div class="mp-brand"><img src="${$('#logo').src}" alt="Newsome Behavioral Health"></div>
@@ -3263,7 +3263,7 @@ async function masterRun(chosen,opt){opt=opt||{};
        that prints as a grey block wherever content stops short of the page */
     .mp-sec,.mp-sec .nbh-page{background:#fff!important}
     .mp-sec{page-break-before:always;break-before:page}
-    /* v22.7x (found with the packet gate, I242): a form's own named page (Form TK-1's turned sheets on an iPad, page:tkport)
+    /* v22.77 (found with the packet gate, I242): a form's own named page (Form TK-1's turned sheets on an iPad, page:tkport)
        took its sheets off the section's page, so they printed without the section's running head; its @page rule is
        already left out (v22.15), and here every part of a section stays on the section's page */
     .mp-sec *{page:auto!important}
@@ -3292,7 +3292,7 @@ async function masterRun(chosen,opt){opt=opt||{};
     /* a card that must not split is laid out as one atomic box: under a named page Chromium 141 stretched Form TD-1's
        parent-signature card across two pages when its break-inside:avoid fell at a page end */
     .mp-sec .td85-card{display:inline-block;width:100%;box-sizing:border-box;vertical-align:top}   /* v22.09 every card, not only the parent's (review F476) */
-    /* v22.7x (review F476 again, found by the packet gate, I242): the sign-in cards are the items of a grid (two columns on
+    /* v22.77 (review F476 again, found by the packet gate, I242): the sign-in cards are the items of a grid (two columns on
        paper), and a grid item is laid out as a block whatever display it is given, so the rule above never reached them: a
        card at a page end still stretched over two pages, its signature printed above the next person's name. Here the list
        is a run of lines, two cards to a line, each an inline box that a page break cannot cut. */
@@ -3384,7 +3384,7 @@ async function masterRun(chosen,opt){opt=opt||{};
        page width has to win or the right-hand columns fall off the sheet */
     .mp-sec table td,.mp-sec table th{min-width:0!important}
     .mp-sec .noprint,.mp-sec .toolbar{display:none!important}
-    /* v22.7x (review I241) the packet check: on screen only, shown once the packet is measured, never printed */
+    /* v22.77 (review I241) the packet check: on screen only, shown once the packet is measured, never printed */
     .mp-check{margin:16px 0 22px;padding:14px 16px 12px;border:1px solid #e0b9a8;border-left:4px solid #a8321e;border-radius:4px;background:#fdf6f2;
       font:14px/1.45 Inter,"Segoe UI",Arial,sans-serif;color:#24313c}
     .mp-check h2{font:600 17px/1.3 Inter,"Segoe UI",Arial,sans-serif;color:#182e43;margin:0 0 4px;outline:none}
@@ -3417,7 +3417,7 @@ async function masterRun(chosen,opt){opt=opt||{};
        t = (t || '').trim().toLowerCase();
        if (!t || t === 'all') return true;
        return t.split(',').some(function(q){
-         /* v22.7x (found with the packet gate, I242): this script is written out of a template literal, which drops a lone
+         /* v22.77 (found with the packet gate, I242): this script is written out of a template literal, which drops a lone
             backslash, so these patterns reached the window with "a space" read as the letter s: "screen and (pointer:coarse)"
             and every width query were asked of the screen, not the page, and on an upright iPad the touch sizes and the iPad
             text rules were measured as if they printed. The backslashes are doubled to arrive whole. */
@@ -3481,7 +3481,7 @@ async function masterRun(chosen,opt){opt=opt||{};
        }
        return out;
      }
-     var fitBy = {};   /* v22.7x (I241) the smallest scale per form, for the packet check */
+     var fitBy = {};   /* v22.77 (I241) the smallest scale per form, for the packet check */
      document.querySelectorAll('.mp-sec').forEach(function(sec){
        var left = document.body.getBoundingClientRect().left, n = 0, least = 1;
        for (var pass = 0; pass < 4; pass++) {
@@ -3526,7 +3526,7 @@ async function masterRun(chosen,opt){opt=opt||{};
          var cur = parseFloat(el.style.zoom) || 1; el.style.zoom = (cur * (PAGEH - 6) / h).toFixed(3); el.setAttribute('data-mp-fit', '');
          var t = sec.getAttribute('data-title') || 'a form'; tall[t] = (tall[t] || 0) + 1;
        }
-       /* v22.7x (review I241) about how many pages the form takes, for the packet check: its height between the page breaks it
+       /* v22.77 (review I241) about how many pages the form takes, for the packet check: its height between the page breaks it
           forces, a page at a time; read here, while the print rules hold, so nothing is laid out again */
        var ys = [sec.getBoundingClientRect().top, sec.getBoundingClientRect().bottom], pg = 0;
        cuts.forEach(function(c){ var r = c[0].getBoundingClientRect(); ys.push(c[1] ? r.top : r.bottom); });
@@ -3551,7 +3551,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   if(!w||w.closed)w=window.open('','_blank');
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
   w.document.open();w.document.write(docM);w.document.close();
-  /* v22.7x (I241) with anything on the packet check, the print dialog waits for Print as it is, so the list is read first */
+  /* v22.77 (I241) with anything on the packet check, the print dialog waits for Print as it is, so the list is read first */
   setTimeout(()=>{let n=0;try{n=(w.__nbhCheck||{}).n||0;}catch(e){}try{w.focus();if(!n)w.print();}catch(e){}},900);
   /* v21.90 Safari prints the packet without its page header and footer; saved as PDF, Finish PDF adds them */
   if(appleMobile()||!chromeMajor())try{wsUI.toast('To file the packet as a PDF: in the print window, Share, then Save to Files. Then Finish PDF here adds the page header and footer, the bookmarks and the page numbers.',{ms:14000});}catch(e){}

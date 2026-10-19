@@ -9903,6 +9903,44 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.77: the whole packet checked before each release, and a check in the print window (review I242, I241)
+
+- **The master print is checked before every release (I242).** A new release check builds the master print as it is built
+  for an IEP meeting (every form of a simulated student's case, each with its worked example, Form TD-1 signed in at the
+  meeting), prints it to PDF and reads every page back. It fails when a page is not letter upright or loses its margins;
+  when a page lacks the practice, the student's name and ID, the FERPA line or "Page N of M"; when the FERPA notice leaves
+  the cover's first page or the contents do not match the forms; when a page is blank, holds only a heading or one stray
+  line; when a signature prints apart from its signer's name; when print falls under 6 pt; when a Guide prints; or when a
+  form's page count changes without the release saying so. Faults the packet already had are listed and may only shrink.
+- **TD-1's sign-in cards in the master print** (review F476, again). The v22.09 fix never reached the cards, which sit in
+  a grid: a card at the foot of a page still stretched onto the next, and a signature printed above the next person's
+  name. The cards now print two to a line, each whole on one page.
+- **Guides out of the packet.** The Guide pages of 22 forms (Form IN-1's "Why Interview", Form CR-1's summary of the
+  statute, Form VS-1's research table, among others) printed in every master print. They are left out now, as the other
+  forms' Guides are, and **Packet options** can keep any of them (it lists 40 forms with a Guide; it listed 14). The
+  simulated full packet is 73 pages shorter.
+- **Before you print (I241).** After **Build master print**, the print window first lists what is wrong with the packet,
+  before the print dialog opens: no student or ID in the bar (every page's head would read "Student not named"), forms
+  that name another student, a ticked form that could not be read, a form with nothing in it, forms holding a worked
+  example (simulated data), a Guide kept in Packet options, a table or chart shrunk below 60% to fit the page, a form far
+  longer than usual, a form whose own page rule would turn the packet sideways, the cover's contents not matching the
+  forms. Each line has its fix where there is one: **Open Form X** (the print window closes and the form opens), **Leave it
+  out** (unticks it and builds the packet again in the same window), **Leave the Guide out**, **Name the student**.
+  **Print as it is** opens the print dialog. The list is on screen only; it is never printed and moves nothing on paper.
+  With nothing to list, the print dialog opens at once, as before.
+- **The packet as an iPad builds it.** The print window measures the packet as it will print, to shrink only what is too
+  wide; on an upright iPad it measured the screen's touch sizes and larger text as if they printed, so parts were shrunk
+  more than needed (Form IM-1's body map and Form RA-1's graph printed under 6 pt). It now measures the page. Form TK-1's
+  pages turned upright on an iPad printed without the section's running head; they carry it now. The release check can
+  build the packet as an upright iPad does, too.
+- Still to do, and listed by the check on every run: Form VS-1 in the master print (its rule cards print on top of one
+  another, two pages hold empty card frames, and the First, then strip prints without its pictures; printed on its own it
+  is fine); Form SM-1's second "The Student's Sheet" heading alone on a page; Form VI-1's last note line alone on a page;
+  print under 6 pt in eight forms (IM-1, MT-1, DA-1, FS-1, TK-1, DD-1, HD-1, RM-1).
+
+- qa/packet-gate-test.js (about 3 minutes; with `GATE_DEVICE=ipad` it builds the packet as an upright iPad does), with
+  qa/packet-gate.py and qa/packet-gate-baseline.json; both runs are in the release list.
+
 ### v22.76: GC-1 writes the teacher's game script, and prints a picture poster for young classes (review Wave 3)
 
 - **A teacher's game script (I145).** The Poster page offers a fourth page, **Teacher's game script**, printed only when it

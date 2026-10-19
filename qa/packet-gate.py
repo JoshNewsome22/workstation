@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v22.7x (review I242) the packet print gate's reader: reads the master print's PDF page by page with PyMuPDF and reports,
+"""v22.77 (review I242) the packet print gate's reader: reads the master print's PDF page by page with PyMuPDF and reports,
 as JSON on stdout, what qa/packet-gate-test.js checks. Called as: python3 -I qa/packet-gate.py PACKET.pdf META.json
 
 META (written by the test from the packet's own page): the sections in order ({k, id, short}), the practice, the running

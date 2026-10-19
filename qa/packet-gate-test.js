@@ -1,4 +1,4 @@
-/* v22.7x (review I242) the full-packet print gate. The master print is built the way the BCBA builds it: the simulated student
+/* v22.77 (review I242) the full-packet print gate. The master print is built the way the BCBA builds it: the simulated student
    in the bar, every form of a student's case opened with its worked example (Form TD-1 also with four simulated people signed
    in and the parent's signature, the sign-in of review F476), every one ticked, Build master print pressed, and the print
    window printed to PDF with Chromium (print media, the packet's own page). The PDF is read back page by page with PyMuPDF
@@ -19,7 +19,7 @@
        F317, F413, F426);
      8 the page count per form against qa/packet-gate-baseline.json: a change fails unless WS_PRINT_CHANGED names the form
        (or is "all"); then the new count is listed and written to the baseline.
-   v22.7x (review I241) the packet check in the print window:
+   v22.77 (review I241) the packet check in the print window:
      10 the window lists the packet's problems before the print dialog (on screen, not on paper, the dialog held), quickly;
         for the simulated packet, the worked examples and their own students, the parts shrunk under 70%, nothing else;
         its estimate of each form's length is near the PDF's; built without the check the packet prints the same pages,
