@@ -9903,6 +9903,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.14: BC-1 asks how much reinforcement the changed setting delivers, checks trend and overlap before it calls contrast, and hands its verdict to the case (review Wave 3)
+
+- **The direction test reads the reinforcement (F428).** The setup sheet asks whether the changed setting delivers less,
+  the same or more of the behavior's reinforcer after the change, the plan's own reinforcement included; what the plan did
+  (extinction, DRA or FCT, thinning, punishment, NCR) is a separate list of ticks. With DRA or FCT keeping the reinforcer as
+  frequent, the verdict says positive contrast is not expected and a rise elsewhere points first to the behavior still
+  working there. Files saved before are read with their old answer, and the verdict asks for the new one.
+- **Trend, overlap and immediacy (F429).** A rise the baseline's own trend already reaches, or one where most sessions after
+  the change sit inside the baseline range, is "Not clear evidence of an interaction". Other verdicts say "Consistent with
+  ..." and list the checks; a "Trend and overlap" card shows them.
+- **A zero baseline (F431)** is read on the rate itself ("rose from 0 to 2.33").
+- **Dates (F432).** A row whose phase disagrees with its date and the date of the change is named; a dated row with no
+  phase takes it from the date of the change.
+- **The verdict leaves the form (F433, I216).** It goes to the case: Form PR-1 shows it under "What Did the Behavior Do?",
+  and Today names a rise in the untreated setting and a re-check that is due. "Re-check due" is on the due list. From the
+  case, the date of the change (DD-1), the plan after it (TD-1) and the function (FS-1, as a hint) fill empty fields.
+- **Integrity since the change (F434).** TI-1's lowest and latest observations since the date of the change, against TI-1's
+  criterion; the verdict says when the latest is under it.
+- **A tally sheet (I219).** Setup prints one page for the untreated setting's staff: what to count, how, whom to return it
+  to and by when, a row a day.
+- **Smaller fixes.** Short phase labels that fit on an iPad (F436); the Direction card agrees with "Not a contrast test"
+  (F437); the worked example says what a two-phase comparison can show (F435); the Guide keeps what a school case uses and
+  folds the laboratory detail away (I220, part).
+
+Checked by `qa/bc1-w3-test.js` (24).
+
 ### v23.13: SR-1 starts a DRO, DRL or NCR from Form DD-1's baseline and names it on the card; Export CSV writes the designed schedule (review Wave 3)
 
 - **The baseline from Form DD-1 (I137).** With DD-1's record in the case, the DRO, DRL and NCR designers show the target's

@@ -3968,6 +3968,25 @@ table.pr-change{margin-top:10px}table.pr-change td.pr-chcap{font-size:12.5px;lin
       const el=document.querySelector('#fadeTbl [data-d="'+i+'"][data-f="s"]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}}catch(e){}
   if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the delay ladder from Form DT-1 on the fading sequence'].filter(Boolean).join('; ')};};}
 </script>
+<script id="pr1-bc1">
+/* v23.14 (review F433, I216, Form BC-1) what Form BC-1 found in the untreated setting, from the case (contrast), under "What Did
+   the Behavior Do?": the verdict, the course, the re-check date and the action. Shown only; not saved with this form, and nothing
+   typed here changes. Markup is added here, so the form's own sheets are untouched. */
+(function(){
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const md=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(v||'');};
+  function paint(c){let el=document.getElementById('prContrast');
+    if(!el){const at=document.getElementById('dataMetrics');if(!at)return;el=document.createElement('div');el.id='prContrast';el.className='pr-contrast';el.setAttribute('role','status');at.parentNode.insertBefore(el,at.nextSibling);}
+    if(!c||typeof c!=='object'||!(c.headline||c.recheck)){el.hidden=true;el.innerHTML='';return;}
+    const where=c.conName||'the untreated setting',line=(c.headline?c.headline+' in '+where+(c.change?' ('+c.change+' against its baseline)':'')+'.':'')+
+      (c.course?' Course: '+String(c.course).split(' \u2014')[0]+'.':'')+(c.recheck?' Re-check due '+md(c.recheck)+'.':'')+(c.action?' Action: '+c.action:'');
+    el.hidden=false;
+    el.innerHTML='<p class="hint" style="margin:8px 0 4px"><b>The untreated setting (Form BC-1):</b> '+E(line)+'</p>'+
+      (c.kind==='positive'?'<div class="verdict v-mid"><b>A rise where the plan is not running.</b> Form BC-1 reads it as consistent with positive contrast: weigh extending the plan to '+E(where)+' at this review.</div>':'');}
+  const was=window.__nbhFactsIn;
+  window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f&&f.contrast);}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
@@ -4136,24 +4155,5 @@ a{text-underline-offset:2px}
 }
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
-<script id="pr1-bc1">
-/* v23.14 (review F433, I216, Form BC-1) what Form BC-1 found in the untreated setting, from the case (contrast), under "What Did
-   the Behavior Do?": the verdict, the course, the re-check date and the action. Shown only; not saved with this form, and nothing
-   typed here changes. Markup is added here, so the form's own sheets are untouched. */
-(function(){
-  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const md=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(v||'');};
-  function paint(c){let el=document.getElementById('prContrast');
-    if(!el){const at=document.getElementById('dataMetrics');if(!at)return;el=document.createElement('div');el.id='prContrast';el.className='pr-contrast';el.setAttribute('role','status');at.parentNode.insertBefore(el,at.nextSibling);}
-    if(!c||typeof c!=='object'||!(c.headline||c.recheck)){el.hidden=true;el.innerHTML='';return;}
-    const where=c.conName||'the untreated setting',line=(c.headline?c.headline+' in '+where+(c.change?' ('+c.change+' against its baseline)':'')+'.':'')+
-      (c.course?' Course: '+String(c.course).split(' \u2014')[0]+'.':'')+(c.recheck?' Re-check due '+md(c.recheck)+'.':'')+(c.action?' Action: '+c.action:'');
-    el.hidden=false;
-    el.innerHTML='<p class="hint" style="margin:8px 0 4px"><b>The untreated setting (Form BC-1):</b> '+E(line)+'</p>'+
-      (c.kind==='positive'?'<div class="verdict v-mid"><b>A rise where the plan is not running.</b> Form BC-1 reads it as consistent with positive contrast: weigh extending the plan to '+E(where)+' at this review.</div>':'');}
-  const was=window.__nbhFactsIn;
-  window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f&&f.contrast);}catch(e){}return r;};
-})();
-</script>
 </body>
 </html>
