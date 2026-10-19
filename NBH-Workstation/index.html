@@ -2263,7 +2263,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.90';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.91';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5334,7 +5334,9 @@ function todayItems(){const f=state.facts||{},d=f.data,ti=f.integrity,L=[];
   (state.due||[]).forEach(x=>L.push({k:'Due',t:'<b>'+esc(x.id)+'</b> '+esc(x.what)+' '+dueText(x.d),open:x.id}));
   if(d){const inc=(d.incidentList||[]).filter(i=>!incTold(f,i)&&(tdDays(i.date)||0)<=30);
     if(inc.length)L.push({k:'Home',t:inc.length+' incident'+(inc.length===1?'':'s')+' home has not been told about: '+inc.slice(-3).map(i=>esc(tdMd(i.date)+' '+(i.beh||'')+(i.time?' '+i.time:''))).join('; ')+(inc.length>3?' and '+(inc.length-3)+' more':''),open:'DD-1'});
-    if(d.to&&tdSchoolDays(d.to)>=3)L.push({k:'Data',t:'No data on Form DD-1 since '+esc(tdMd(d.to))+' ('+tdSchoolDays(d.to)+' school days)',open:'DD-1'});
+    /* v22.91 (DD-1 review I51) the days DD-1 marks absent or no school are not school days without data */
+    {const ab=(Array.isArray(d.absent)?d.absent:[]).filter(x=>x>d.to).length,sd=d.to?tdSchoolDays(d.to)-ab:0;
+     if(d.to&&sd>=3)L.push({k:'Data',t:'No data on Form DD-1 since '+esc(tdMd(d.to))+' ('+sd+' school days'+(ab?'; '+ab+' marked absent or no school left out':'')+')',open:'DD-1'});}
     (d.behaviors||[]).filter(b=>b.aimMet).forEach(b=>L.push({k:'Aim',t:esc(b.name)+' has been at its aim '+b.run+' days in a row ('+b.need+' asked): raise the criterion or plan the next step (DD-1\u2019s aim is a treatment step; whether the IEP goal is met is judged on Form GB-1)',open:'GB-1'}));}
   if(ti&&(ti.obs||[]).length){const o=ti.obs[ti.obs.length-1],n=tdDays(o.date);
     if(n!==null&&n>14)L.push({k:'Integrity',t:'No integrity check on Form TI-1 for '+n+' days (the last, '+esc(tdMd(o.date))+', '+o.pct+'%)',open:'TI-1'});

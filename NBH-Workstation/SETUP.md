@@ -9903,6 +9903,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.91: DD-1 records a second observer, marks a day the student was absent, keeps the effect sizes off paper, and shows four weeks (review Wave 3)
+
+- **A second observer (F104).** The graph page cites the design standard that makes interobserver agreement a condition
+  of a visual analysis counting, and the form had nowhere to record agreement.
+  - A day's details (the day button) now take a second observer's value for each behavior entered as one number. As it
+    is typed, the dialog shows the agreement, the smaller value over the larger (two zeros agree).
+  - The day button shows a small **2** on a day with a second observer.
+  - The results give, under each behavior's within-condition table, the days with a second observer in each condition,
+    of the days with data, with the mean and the lowest agreement.
+  - A condition with agreement on fewer than 20% of its days is named, and so is one with a mean under 80%, against the
+    standard the page cites (Kratochwill et al., 2010).
+  - The case carries each behavior's agreement, for Form PR-1 and Form FS-1 to quote.
+  - The day's own numbers do not change.
+- **Absent, or no school (I51).** A day's details now have **The student: At school / Absent / No school**.
+  - A marked day shows A or N at the foot of its column on the graphs.
+  - The week summary lists the marked days.
+  - In the workstation, Today's "No data on Form DD-1 since …" leaves the marked days out of its school-day count and
+    says how many it left out.
+- **Effect sizes on paper only when asked (I53).** PND, PEM, Tau and NAP are research-synthesis statistics, and a parent
+  or a team reads "100% PND" as "100% better".
+  - They stay on screen, but print only when **Effect sizes on paper** is ticked (kept with the record).
+  - The descriptive summary says the same in plain words: "On 13 of 14 Intervention days the value was below the lowest
+    Baseline day."
+- **Four weeks (I55).** The week summary adds each behavior's mean for each of the last four weeks, oldest first, ending
+  with the week shown. The case carries the four values for Form CN-1 and Form PR-1.
+- **Not done:**
+  - I52, a decision line under each graph tied to the plan's review rule. It needs the decision rule the practice adopts
+    (a source); Today's decision list already reads Form PR-1's rule.
+  - I54, second-observer entries from the staff-phone links.
+- qa/dd1-w3b-test.js (11 checks).
+
 ### v22.90: DD-1 counts an incident only when asked, gives a part-day behavior its own minutes, counts a cue with no response, and calls a trend or a change only when it is one (review Wave 3)
 
 - **An incident and the day's count (F101).** In a classroom the tally is usually on the sheet already, and the
