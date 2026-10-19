@@ -804,7 +804,17 @@ td input,td select{max-width:100%}
   table.rt:not(#dataTbl):not(#susTbl) th{border-bottom:0;padding-bottom:2px}
   table.rt:not(#dataTbl):not(#susTbl) td{border-top:0}
 }
+/* v23.14 (review F428, I219) the plan's procedures as ticks, 44 px tall on screen; the tally sheet prints alone when asked */
+.bc-proc{display:flex;flex-wrap:wrap;gap:0 22px}.bc-proc label{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-family:var(--sans);font-size:13px;white-space:nowrap;margin:0}
+.bc-proc input[type=checkbox]{flex:none;width:20px!important;min-width:20px!important;height:20px;margin:0;padding:0}
+@media screen and (max-width:700px){.bc-proc label{white-space:normal}}
+.bc-tally{display:none}
+.bc-tallytbl td{height:34px}
 @media print{
+  body.bc-tally-on > *:not(main){display:none!important}
+  body.bc-tally-on main.sheet > *:not(.bc-tally){display:none!important}
+  body.bc-tally-on main.sheet > .bc-tally{display:block!important}
+  body:not(.bc-tally-on) .bc-tally{display:none!important}
   .bc-plotwrap{overflow:visible}
   #anVerdict .verdict,#anLeft,#anLate,#anMetrics,.metric,.bc-plotwrap,#bcPlot{break-inside:avoid;page-break-inside:avoid}
   #susKey{break-before:avoid;page-break-before:avoid}
@@ -870,16 +880,24 @@ td input,td select{max-width:100%}
     </table>
 
     <h3 style="margin-top:14px">The Changed Component</h3>
-    <p class="hint">The setting, period, or stimulus where the schedule is being altered &mdash; where the plan goes in, extinction starts, or reinforcement is thinned. The analysis tests the constant component against how conditions here changed, so record that below.</p>
+    <p class="hint">The setting, period, or stimulus where the schedule is being altered &mdash; where the plan goes in, extinction starts, or reinforcement is thinned. The analysis tests the constant component against how much reinforcement this setting delivers after the change, so record that below.</p>
     <table class="rt">
       <tr><th style="width:24%">Component</th><td><input data-m="chgName" placeholder="e.g., Room 12 independent work"></td></tr>
       <tr><th>Schedule before</th><td><input data-m="chgBefore" placeholder="e.g., escape delivered on most occurrences"></td></tr>
       <tr><th>Schedule after</th><td><input data-m="chgAfter" placeholder="e.g., extinction for aggression, FCT on FR 1"></td></tr>
-      <tr><th>Conditions there after the change</th><td><select data-m="chgCond"><option></option>
-        <option>Worse &mdash; reinforcement reduced, extinction introduced, or punishment added</option>
-        <option>Better &mdash; reinforcement increased or made richer</option>
-        <option>About the same, or mixed</option></select></td></tr>
-      <tr><th>Date of the change</th><td><input data-m="chgDate"></td></tr>
+      <!-- v23.14 (review F428) the amount of reinforcement there decides the direction; what the plan did is a separate list -->
+      <tr><th>Reinforcement there after the change</th><td><select data-m="chgRf"><option></option>
+        <option>Less &mdash; the reinforcer comes less often, or less of it, than before</option>
+        <option>About the same overall</option>
+        <option>More &mdash; the reinforcer comes more often, or more of it, than before</option></select>
+        <p class="hint" style="margin:4px 0 0">Count every way the behavior&rsquo;s reinforcer reaches the student in that setting, the plan&rsquo;s own included: a break card honored on FR 1 keeps escape coming as often as before.</p></td></tr>
+      <tr><th>What the plan did there</th><td><div class="bc-proc">
+        <label><input type="checkbox" data-m="pExt"> Extinction for the target behavior</label>
+        <label><input type="checkbox" data-m="pDra"> DRA or FCT (the reinforcer for an alternative)</label>
+        <label><input type="checkbox" data-m="pThin"> Reinforcement thinned</label>
+        <label><input type="checkbox" data-m="pPun"> Punishment or response cost added</label>
+        <label><input type="checkbox" data-m="pNcr"> Noncontingent reinforcement</label></div></td></tr>
+      <tr><th>Date of the change</th><td><input data-m="chgDate" placeholder="M/D/YY; rows dated on or after it are after the change"></td></tr>
     </table>
 
     <h3 style="margin-top:14px">The Constant Component</h3>
@@ -895,6 +913,8 @@ td input,td select{max-width:100%}
       <tr><th>Who implements each component</th><td><input data-m="who"></td></tr>
       <tr><th>Why contrast is expected</th><td><textarea data-m="why" rows="2" placeholder="Reynolds (1961a): a change in rate during one stimulus produced by changing the schedule associated with a different stimulus"></textarea></td></tr>
     </table>
+    <!-- v23.14 (review I219) a one-page tally sheet for the staff who record the constant component -->
+    <div class="noprint" style="margin-top:10px"><button type="button" class="tool" id="tallyBtn">Print a tally sheet for the constant component</button></div>
   </section>
 
   <!-- ============ DATA ============ -->
@@ -929,6 +949,8 @@ td input,td select{max-width:100%}
       <tr><th>Integrity in the changed component (Form TI-1)</th><td><input data-m="r_int"></td></tr>
       <tr><th>Conclusion</th><td><textarea data-m="concl" rows="3"></textarea></td></tr>
       <tr><th>Action taken</th><td><textarea data-m="action" rows="2" placeholder="For example, extending the plan to the constant component (researchers had not identified common methods of mitigating contrast in applied settings: Boyle, Uribe-Zarain, &amp; Powell, 2023)"></textarea></td></tr>
+      <!-- v23.14 (review F433, I219) the date to run this form again, on the workstation's due list and Today screen -->
+      <tr><th>Re-check due (re-run this form)</th><td><input data-m="next" placeholder="M/D/YY"></td></tr>
     </table>
     <h3 style="margin-top:14px">Sign-off</h3>
     <table class="rt">
@@ -940,30 +962,36 @@ td input,td select{max-width:100%}
   <section class="only-guide">
     <h2 class="nbh-band">The Definitions and Their Sources</h2>
     <p>Reynolds (1961a) named two things. An <b>interaction</b> is a change in behavior during one stimulus brought about by changing the schedule associated with a different stimulus. The interaction is a <b>contrast</b> when the change in the rate of responding during one stimulus is <i>in a direction away from</i> the rate of responding during the other stimulus. A change in the <i>same</i> direction as the change during the other stimulus is now called <b>induction</b>, not contrast, although Pavlov (1927, as cited in Reynolds, 1961a) had used &ldquo;induction&rdquo; for a contrast effect.</p>
-    <p id="bcRule">This form tests direction the way the rows below define it: the change in the constant component is compared with the change in conditions in the changed component, recorded on the setup sheet as worse or better, because contrast follows the change in reinforcement there rather than the change in its rate (Reynolds, 1961a; see &ldquo;It follows reinforcement, not the rate there&rdquo; below). A change of 10% or more against that change (a rise when conditions there became worse, a fall when they became better) counts as contrast, one the other way as induction, and a smaller one as no appreciable interaction. The changed component&rsquo;s own rate is a check that the plan took hold, and stands in for the record only when it is left blank and the rate moved 10% or more. The comparison needs at least three sessions in each phase, since a phase of fewer than three data points cannot show an effect, and it is a two-phase (AB) comparison, from which causal inferences are difficult to draw (Kratochwill et al., 2010). It is the difference between a plan producing spillover benefit and a plan producing a problem somewhere else, and the two are distinguished by sign rather than by impression.</p>
+    <p id="bcRule">This form tests direction the way the rows below define it: the change in the constant component is compared with the change in reinforcement in the changed component, recorded on the setup sheet as less, about the same or more, because contrast follows the change in reinforcement there rather than the change in its rate (Reynolds, 1961a; see &ldquo;It follows reinforcement, not the rate there&rdquo; below). What the plan did there (extinction, DRA or FCT, thinning, punishment, NCR) is recorded beside it and does not set the direction: extinction with a break card honored on FR 1 can leave the reinforcer as frequent as before. A change of 10% or more against that change (a rise when the reinforcement there became less, a fall when it became more) is read as consistent with contrast, one the other way as induction, and a smaller one as no appreciable interaction. From a baseline mean of zero the change is read on the rate itself: any rate above zero after the change is a rise. Before any of these is said, the constant component&rsquo;s data are checked the way visual analysis checks them (Kratochwill et al., 2010): the baseline&rsquo;s trend (a least-squares line over the baseline sessions) is carried over the sessions after the change, and if it already reaches their mean the change is not called an interaction; and if fewer than half of the sessions after the change lie beyond the whole baseline range in the direction of the change, it is not called one either. Whether the change was immediate (the last three baseline sessions against the first three after) is reported beside it. A row whose phase disagrees with its date and the date of the change is listed under the verdict. The changed component&rsquo;s own rate is a check that the plan took hold, and stands in for the record only when it is left blank and the rate moved 10% or more. The comparison needs at least three sessions in each phase, since a phase of fewer than three data points cannot show an effect, and it is a two-phase (AB) comparison, from which causal inferences are difficult to draw (Kratochwill et al., 2010). It is the difference between a plan producing spillover benefit and a plan producing a problem somewhere else, and the two are distinguished by sign rather than by impression.</p>
     <table class="rt" style="margin-top:8px">
-      <tr><th style="width:24%">Positive contrast</th><td>The constant component rises as conditions in the changed component worsen &mdash; reinforcement reduced, extinction introduced, or punishment added.</td></tr>
-      <tr><th>Negative contrast</th><td>The constant component falls as conditions in the changed component improve.</td></tr>
-      <tr><th>Induction</th><td>The constant component moves in the same direction as the change in conditions in the changed component: it falls as conditions there worsen and rises as they improve. Reported here rather than discarded, because a plan that reduces behavior in both settings is worth documenting.</td></tr>
+      <tr><th style="width:24%">Positive contrast</th><td>The constant component rises as the changed component delivers less reinforcement &mdash; reinforcement thinned or withheld with nothing in its place, or punishment added.</td></tr>
+      <tr><th>Negative contrast</th><td>The constant component falls as the changed component delivers more reinforcement.</td></tr>
+      <tr><th>Induction</th><td>The constant component moves in the same direction as the change in reinforcement in the changed component: it falls as reinforcement there becomes less and rises as it becomes more. Reported here rather than discarded, because a plan that reduces behavior in both settings is worth documenting.</td></tr>
       <tr><th>Transient contrast</th><td>Nevin and Shettleworth (1966) used this for rate changes <i>within</i> a constant component, following the preceding component: rate in the constant component was high and fell with time when preceded by extinction, low and rose with time when preceded by more frequent reinforcement. Williams (2002) calls contrast after a component transition local contrast and concludes that it contributes to molar (overall) contrast under some conditions, but not generally.</td></tr>
       <tr><th>Sustained contrast</th><td>Rate changes across successive schedule cycles (Nevin &amp; Shettleworth, 1966): the change in a component&rsquo;s overall rate. It need not last. Terrace (1966) showed both contrast and the peak shift disappearing during extended discrimination training, which he suggested could be attributed to the dissipation of emotional responses that resulted from response suppression. Bloomfield (1966) found a peak at an intermediate stage of discrimination training that declined, later in training, to a stable level still above the baseline rate; the peak correlated with the number of responses to S&minus; and the final rate did not.</td></tr>
     </table>
 
-    <h2 class="nbh-band" style="margin-top:16px">What the Early Work Established</h2>
+    <!-- v23.14 (review I220) what a school BCBA uses; the laboratory detail is kept below, on screen only -->
+    <h2 class="nbh-band" style="margin-top:16px">What Matters for a School Case</h2>
     <table class="rt">
+      <tr><th style="width:26%">In a school</th><td>Record the untreated setting on the same days as the treated one, with the same definition and period (the setup sheet prints a tally sheet for its staff, who should change nothing about how they respond while it is counted). With three or more sessions in each phase the analysis reads the verdict; a verdict consistent with positive contrast is a reason to extend the plan to that setting and to run this form again (Re-check due), not proof of what caused the rise. Practitioners surveyed by Boyle, Uribe-Zarain, and Powell (2023) reported that contrast led to conversations with stakeholders and affected buy-in, so tell the staff of both settings what is being counted and why.</td></tr>
       <tr><th style="width:26%">It does not need extinction</th><td>Contrast occurs when the other component merely programs <i>fewer</i> reinforcers rather than none (Findley, 1958, and Schuster, 1960, as cited in Reynolds, 1961a). A plan that thins reinforcement in one setting can produce contrast in another without any extinction component.</td></tr>
-      <tr><th>It follows reinforcement, not the rate there</th><td>When reinforcement for not responding produced very low rates of responding in one component but maintained a high frequency of food presentations, the increase in the other component was eliminated (Reynolds, 1961a). For this form: a fall in the changed component&rsquo;s rate is not by itself a worsening of conditions there, which is why the setup sheet asks how conditions changed.</td></tr>
-      <tr><th>Interresponse-time accounts are in doubt</th><td>Reynolds and Catania (1961) obtained contrast with fixed-interval and with DRL schedules, which they argued casts doubt on accounts depending on selective reinforcement or punishment of different interresponse times.</td></tr>
-      <tr><th>Schedule type matters</th><td>Bloomfield (1967) found fixed-ratio components susceptible to contrast while low-rate (DRL) components were not. What is running in the constant component affects whether contrast shows up there at all.</td></tr>
-      <tr><th>Not only multiple schedules</th><td>Catania (1961) obtained contrast in concurrent as well as multiple schedules. Lattal and Miles (2024) conclude that, with certain caveats, resurgence appears to be an instance of behavioral contrast measured against an extinction baseline.</td></tr>
+      <tr><th>It follows reinforcement, not the rate there</th><td>When reinforcement for not responding produced very low rates of responding in one component but maintained a high frequency of food presentations, the increase in the other component was eliminated (Reynolds, 1961a). For this form: a fall in the changed component&rsquo;s rate is not by itself less reinforcement there, which is why the setup sheet asks how much reinforcement the setting delivers after the change. When DRA or FCT keeps the reinforcer coming as often as before, positive contrast is not expected on this account, and a rise in the untreated setting points first to the behavior still working there.</td></tr>
+      <tr><th>Resurgence is close kin</th><td>Lattal and Miles (2024) conclude that, with certain caveats, resurgence appears to be an instance of behavioral contrast measured against an extinction baseline (see the resurgence row on the analysis sheet).</td></tr>
       <tr><th>Target responding need not be near zero</th><td>Resurgence is assessed against an extinction baseline of the target response, whereas contrast has been assessed under a variety of reinforcement schedules (Lattal &amp; Miles, 2024), so an increase in the constant component does not need the behavior there to have been reduced or extinguished first.</td></tr>
       <tr><th>Applied evidence is limited</th><td>Despite decades of basic research, contrast has remained largely unstudied by applied researchers (Boyle, Hoffmann, &amp; Lambert, 2018). Board Certified Behavior Analysts surveyed by Boyle, Uribe-Zarain, and Powell (2023) reported that contrast led to conversations with stakeholders and affected buy-in and rapport; the authors noted that researchers had not identified common methods of mitigating it in applied settings.</td></tr>
     </table>
+    <details class="noprint bc-lab" style="margin-top:8px"><summary>Laboratory background (not needed for a school case)</summary>
+    <table class="rt" style="margin-top:6px">
+      <tr><th style="width:26%">Interresponse-time accounts are in doubt</th><td>Reynolds and Catania (1961) obtained contrast with fixed-interval and with DRL schedules, which they argued casts doubt on accounts depending on selective reinforcement or punishment of different interresponse times.</td></tr>
+      <tr><th>Schedule type matters</th><td>Bloomfield (1967) found fixed-ratio components susceptible to contrast while low-rate (DRL) components were not. What is running in the constant component affects whether contrast shows up there at all.</td></tr>
+      <tr><th>Not only multiple schedules</th><td>Catania (1961) obtained contrast in concurrent as well as multiple schedules.</td></tr>
+    </table></details>
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="hint noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
     <h2 class="noprint nbh-band" style="margin-top:16px">About the simulation</h2>
     <p class="noprint hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated case loaded: 6 baseline and 12 post-change sessions in both components, with the direction test and the course across sessions computed.</p>
-    <p class="hint" style="margin-top:10px">Sources: Reynolds (1961a, <i>Behavioral contrast</i>; 1961b, <i>Contrast, generalization, and the process of discrimination</i>); Reynolds &amp; Catania (1961); Catania (1961); Nevin &amp; Shettleworth (1966); Bloomfield (1966, 1967); Terrace (1966); Williams (1983, 2002) for the later reviews; Lattal &amp; Miles (2024) for the relation to resurgence; Boyle, Hoffmann, &amp; Lambert (2018) and Boyle, Uribe-Zarain, &amp; Powell (2023) for contrast in applied settings, the second for practitioner reports. The direction test on this form is described above. The 10% band used to call a change negligible, the thirds of the changed phase used for the course across sessions and the 60% used to call it declining are working conventions, not findings; the minimum of three sessions per phase follows Kratochwill et al. (2010).</p>
+    <p class="hint" style="margin-top:10px">Sources: Reynolds (1961a, <i>Behavioral contrast</i>; 1961b, <i>Contrast, generalization, and the process of discrimination</i>); Reynolds &amp; Catania (1961); Catania (1961); Nevin &amp; Shettleworth (1966); Bloomfield (1966, 1967); Terrace (1966); Williams (1983, 2002) for the later reviews; Lattal &amp; Miles (2024) for the relation to resurgence; Boyle, Hoffmann, &amp; Lambert (2018) and Boyle, Uribe-Zarain, &amp; Powell (2023) for contrast in applied settings, the second for practitioner reports. The direction test on this form is described above. The 10% band used to call a change negligible, the thirds of the changed phase used for the course across sessions, the 60% used to call it declining, the least-squares baseline trend, the half of the sessions beyond the baseline range and the three sessions either side used for immediacy are working conventions, not findings; the minimum of three sessions per phase follows Kratochwill et al. (2010).</p>
     <p class="hint" id="bcRefs"><b>Reference list.</b>
     Bloomfield, T. M. (1966). Two types of behavioral contrast in discrimination learning. <em>Journal of the Experimental Analysis of Behavior, 9</em>(2), 155&ndash;161. &bull;
     Bloomfield, T. M. (1967). Behavioral contrast and relative reinforcement frequency in two multiple schedules. <em>Journal of the Experimental Analysis of Behavior, 10</em>(2), 151&ndash;158. &bull;
@@ -980,6 +1008,7 @@ td input,td select{max-width:100%}
     Williams, B. A. (1983). Another look at contrast in multiple schedules. <em>Journal of the Experimental Analysis of Behavior, 39</em>(2), 345&ndash;384. &bull;
     Williams, B. A. (2002). Behavioral contrast redux. <em>Animal Learning &amp; Behavior, 30</em>(1), 1&ndash;20.</p>
   </section>
+  <section class="bc-tally" id="bcTally" aria-hidden="true"></section>   <!-- v23.14 (review I219) printed alone, from Setup -->
 </main>
 
 <script id="nbh-wording" src="nbh-wording.js"></script>
@@ -988,7 +1017,9 @@ td input,td select{max-width:100%}
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const f2=v=>v==null||!isFinite(v)?'\u2014':v.toFixed(2);
-const PH=['','Baseline (before the change)','After the change'];
+/* v23.14 (review F436) short labels: "Baseline (before the change)" was cut off on an iPad; a file saved with it is read as Baseline */
+const PH=['','Baseline','After the change'];
+const PH_OLD={'Baseline (before the change)':'Baseline'};
 function blank(){return{meta:{},rows:[]};}
 let S=blank();
 function ensure(){while(S.rows.length<8)S.rows.push({d:'',p:'',con:'',chg:'',n:''});}
@@ -1015,6 +1046,7 @@ function renderData(){
      field cannot have its caret put back, so "12.5" went in as "5.21". Only the phase changes the row's look. */
   if(el.dataset.f==='p'){const tr=el.closest('tr');if(tr)tr.className=el.value===PH[1]?'ph-b':el.value===PH[2]?'ph-c':'';}
   if(el.dataset.f==='con'||el.dataset.f==='chg'){if(bad(el.value))el.setAttribute('aria-invalid','true');else el.removeAttribute('aria-invalid');}
+  if(el.dataset.f==='d'&&ev==='change')phaseFromDates();
   if(el.dataset.f!=='n'&&el.dataset.f!=='d')renderAn();}));
 $('#addRow').addEventListener('click',()=>{S.rows.push({d:'',p:'',con:'',chg:'',n:''});renderData();});
 $('#addFive').addEventListener('click',()=>{for(let i=0;i<5;i++)S.rows.push({d:'',p:'',con:'',chg:'',n:''});renderData();});
@@ -1041,6 +1073,19 @@ const pct=v=>v==null?'\u2014':(v>=0?'+':'')+v.toFixed(1)+'%';
 const amt=v=>v==null?'an undefined amount (its baseline mean is zero)':pct(v);
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 
+/* v23.14 (review F428) the amount of reinforcement the changed component delivers after the change */
+const RF=['','Less — the reinforcer comes less often, or less of it, than before','About the same overall','More — the reinforcer comes more often, or more of it, than before'];
+/* v23.14 (review F432) a date as the form takes it (M/D/YY, M/D/YYYY or YYYY-MM-DD), as YYYY-MM-DD; '' when it is not one */
+function isoOf(v){v=String(v==null?'':v).trim();let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v);if(m)return v;m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(v);
+  if(!m)return '';const mo=+m[1],d=+m[2];if(mo<1||mo>12||d<1||d>31)return '';return (m[3].length===2?'20'+m[3]:m[3])+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0');}
+const mdy=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(iso||'');};
+/* v23.14 (review F432) a row with a date and no phase takes it from the date of the change: before it, Baseline; on or after it,
+   After the change. Set in place, so a field being typed in is not redrawn. */
+function phaseFromDates(){const cd=isoOf(S.meta.chgDate);if(!cd)return 0;let n=0;
+  S.rows.forEach((r,i)=>{const d=isoOf(r.d);if(!d||r.p)return;r.p=d>=cd?PH[2]:PH[1];n++;
+    const sel=document.querySelector('#dataTbl select[data-i="'+i+'"]');if(sel){sel.value=r.p;const tr=sel.closest('tr');if(tr)tr.className=r.p===PH[1]?'ph-b':'ph-c';}});
+  if(n)renderAn();return n;}
+
 function analyse(){
   const B=phase(PH[1]), C=phase(PH[2]);
   /* (F6) rows holding a rate that the analysis cannot use: no phase, one rate missing, or a rate below 0 */
@@ -1049,7 +1094,10 @@ function analyse(){
   /* baseline rows placed after the first post-change row are pooled into the baseline, so they are listed */
   const f=S.rows.findIndex(r=>r.p===PH[2]);
   const lateB=f<0?[]:S.rows.map((r,i)=>i).filter(i=>i>f&&S.rows[i].p===PH[1]).map(i=>i+1);
-  if(B.length<MINPTS||C.length<MINPTS)return {ok:false,B,C,out,lateB};
+  /* v23.14 (review F432) rows whose phase disagrees with their date and the date of the change */
+  const cd=isoOf(S.meta.chgDate);
+  const mis=cd?S.rows.map((r,i)=>({i,d:isoOf(r.d),p:r.p})).filter(o=>o.d&&((o.p===PH[1]&&o.d>=cd)||(o.p===PH[2]&&o.d<cd))).map(o=>o.i+1):[];
+  if(B.length<MINPTS||C.length<MINPTS)return {ok:false,B,C,out,lateB,mis,cd};
   const bCon=mean(B.map(r=>r.con)), bChg=mean(B.map(r=>r.chg));
   const cCon=mean(C.map(r=>r.con)), cChg=mean(C.map(r=>r.chg));
   const dCon=bCon>0?(cCon-bCon)/bCon*100:null;
@@ -1057,17 +1105,37 @@ function analyse(){
   /* first and last third of the changed phase, for the course across sessions */
   const k=Math.max(1,Math.floor(C.length/3));
   const early=mean(C.slice(0,k).map(r=>r.con)), late=mean(C.slice(-k).map(r=>r.con));
-  return {ok:true,B,C,out,lateB,bCon,bChg,cCon,cChg,dCon,dChg,early,late,k};
+  /* v23.14 (review F429, I217) the rest of visual analysis in the constant component (Kratochwill et al., 2010): the baseline's
+     trend (least squares over the baseline sessions, in session order) carried over the sessions after the change; how many
+     sessions after the change lie beyond the whole baseline range in the direction of the change (non-overlap); and the last
+     three baseline sessions against the first three after it (immediacy) */
+  const all=B.concat(C).sort((a,b)=>a.i-b.i),pos=new Map(all.map((r,j)=>[r.i,j]));
+  const xb=B.map(r=>pos.get(r.i)),yb=B.map(r=>r.con),mx=mean(xb),my=mean(yb);
+  const sxx=xb.reduce((t,x)=>t+(x-mx)*(x-mx),0),slope=sxx>0?xb.reduce((t,x,j)=>t+(x-mx)*(yb[j]-my),0)/sxx:0;
+  const proj=my+slope*(mean(C.map(r=>pos.get(r.i)))-mx);
+  const up=cCon>=bCon,bMax=Math.max(...yb),bMin=Math.min(...yb);
+  const beyond=C.filter(r=>up?r.con>bMax:r.con<bMin).length,pnd=beyond/C.length*100;
+  const n3=Math.min(3,B.length,C.length),lastB=mean(B.slice(-n3).map(r=>r.con)),firstC=mean(C.slice(0,n3).map(r=>r.con));
+  return {ok:true,B,C,out,lateB,mis,cd,bCon,bChg,cCon,cChg,dCon,dChg,early,late,k,slope,proj,beyond,pnd,n3,lastB,firstC};
 }
-/* (F3) the direction in which the change in the changed component pushes the behavior there: -1 when
-   conditions became worse, +1 when better, from the setup sheet. Contrast follows the change in reinforcement
-   there, not the change in its rate (Reynolds, 1961a), so the rate stands in only when the record is blank
-   and it moved 10% or more. */
+/* v23.14 (review F431) a change against a baseline mean: as a percentage when the mean is above zero; from a mean of zero, on the
+   rate itself (any rate above zero after the change is a rise) */
+function chgOf(b,c){return b>0?{pct:(c-b)/b*100,big:Math.abs((c-b)/b*100)>=BAND,sgn:Math.sign(c-b),abs:c-b}:{pct:null,big:c>b,sgn:Math.sign(c-b),abs:c-b};}
+const chgWords=(x,c)=>x.pct!=null?(x.sgn<0?'fell':'rose')+' by '+Math.abs(x.pct).toFixed(1)+'%':(x.sgn>0?'rose from 0 to '+f2(c)+' (from a baseline of zero, the change is read on the rate itself)':'stayed at 0');
+const chgShort=(x,c)=>x.pct!=null?pct(x.pct):(x.sgn>0?'from 0 to '+f2(c):'0 → 0');
+/* (F3, v23.14 review F428) the direction in which the change in the changed component pushes the behavior there: -1 when it
+   delivers less reinforcement after the change, +1 when more, from the setup sheet. Contrast follows the change in
+   reinforcement there, not the change in its rate (Reynolds, 1961a), so the rate stands in only when the record is blank and
+   it moved 10% or more. A record saved with the earlier question (conditions worse, better, about the same) is read with it. */
 function direction(A,m){
+  const r=RF.indexOf(m.chgRf||'');
+  if(r===1)return {d:-1,from:'rf'};
+  if(r===3)return {d:1,from:'rf'};
+  if(r===2)return {d:0,from:'same'};
   const c=COND.indexOf(m.chgCond||'');
-  if(c===1)return {d:-1,from:'cond'};
-  if(c===2)return {d:1,from:'cond'};
-  if(c===3)return {d:0,from:'same'};
+  if(c===1)return {d:-1,from:'legacy'};
+  if(c===2)return {d:1,from:'legacy'};
+  if(c===3)return {d:0,from:'same',legacy:true};
   if(A.dChg!=null&&Math.abs(A.dChg)>=BAND)return {d:Math.sign(A.dChg),from:'rate'};
   return {d:0,from:'none'};
 }
@@ -1076,7 +1144,74 @@ function leftOut(A){
   let h='';
   if(A.out.length)h+=`<p class="hint" id="anLeft">Left out of the analysis: row${A.out.length===1?'':'s'} ${A.out.join(', ')}. A row counts only with a phase and both rates, each a number of 0 or more.</p>`;
   if(A.lateB.length)h+=`<p class="hint" id="anLate">Row${A.lateB.length===1?'':'s'} ${A.lateB.join(', ')} ${A.lateB.length===1?'is':'are'} marked baseline but come${A.lateB.length===1?'s':''} after the first post-change row, and ${A.lateB.length===1?'is':'are'} pooled into the baseline. Check the phase labels.</p>`;
+  /* v23.14 (review F432) */
+  if(A.mis&&A.mis.length)h+=`<p class="hint" id="anMis">Row${A.mis.length===1?'':'s'} ${A.mis.join(', ')}: the phase disagrees with the date. The date of the change on the setup sheet is ${esc(mdy(A.cd))}; rows dated before it are baseline, rows on or after it are after the change. Check the phase labels or the date of the change.</p>`;
   return h;
+}
+/* v23.14 (review F434) Form TI-1's observations in the changed component since the date of the change (all of them when that
+   date is not known), from the case; the latest under TI-1's criterion is named under the verdict */
+function tiSince(){const t=window.__bcTi;if(!t||typeof t!=='object')return null;const cd=isoOf(S.meta.chgDate);
+  const o=(t.obs||[]).filter(x=>x&&isFinite(parseFloat(x.pct))&&/^\d{4}-\d\d-\d\d/.test(String(x.date||''))&&(!cd||String(x.date).slice(0,10)>=cd)).sort((a,b)=>String(a.date)<String(b.date)?-1:1);
+  const crit=isFinite(parseFloat(t.criterion))?+t.criterion:null;return o.length?{o,crit,last:o[o.length-1]}:null;}
+/* v23.14 (review F428, F429, F431, F435, F437) the verdict as one object, for the sheet and for the case: its kind, its words,
+   the notes under it and the Direction card */
+function verdict(A,m){
+  const D=direction(A,m),X=chgOf(A.bCon,A.cCon);
+  const conN=esc(m.conName)||'the constant component', chgN=esc(m.chgName)||'the changed component', ConN=cap(conN), ChgN=cap(chgN);
+  const unchNo=String(m.conUnchanged||'').indexOf('No')===0;
+  const how=(D.from==='rf'?`${chgN} delivered ${D.d<0?'less':'more'} reinforcement after the change`:D.from==='legacy'?`conditions in ${chgN} became ${D.d<0?'worse':'better'}`:`${chgN} ${A.dChg<0?'fell':'rose'} by ${Math.abs(A.dChg||0).toFixed(1)}%`)+
+    (D.from!=='rate'&&A.dChg!=null?' (its own rate: '+pct(A.dChg)+')':'');
+  const moved=chgWords(X,A.cCon),notes=[];let cls,txt,kind;
+  const dirV=unchNo?'Not tested':(!D.d?'—':!X.big?'Negligible':X.sgn===D.d?'Same':'Opposite');
+  const dirSub=unchNo?'something changed in the constant component too':D.from==='rf'?'constant against the change in reinforcement on the setup sheet':D.from==='legacy'?'constant against the change in conditions (the earlier question)':D.from==='rate'?'constant against the changed component’s rate':'no change to test against';
+  /* the checks visual analysis makes, in the direction of the change */
+  const trend=X.sgn!==0&&Math.sign(A.slope)===X.sgn&&(X.sgn>0?A.proj>=A.cCon:A.proj<=A.cCon), overlap=X.big&&A.pnd<50;
+  const imm=chgOf(A.lastB,A.firstC),immediate=imm.big&&imm.sgn===X.sgn;
+  const checks=`The checks: the baseline trend (${A.slope>=0?'+':''}${A.slope.toFixed(2)} a session) carried on reaches ${f2(A.proj)} against ${f2(A.cCon)} after the change; ${A.beyond===A.C.length?'all '+A.C.length:A.beyond+' of the '+A.C.length} sessions after the change lie ${X.sgn>=0?'above the highest':'below the lowest'} baseline session; the change was ${immediate?'immediate':'gradual'} (the last ${A.n3} baseline sessions ${f2(A.lastB)}, the first ${A.n3} after ${f2(A.firstC)}).`;
+  if(unchNo){kind='untested';cls='v-na';
+    txt=`<b>Not a contrast test.</b> The setup sheet records that something was altered in ${conN} as well, so the comparison cannot separate contrast from the effect of that change. ${ConN} changed by ${A.dCon==null?chgShort(X,A.cCon):pct(A.dCon)} and ${chgN} by ${amt(A.dChg)}.`;}
+  else if(D.from==='same'){kind='none-test';cls='v-na';txt=`<b>No direction test.</b> The setup sheet records ${D.legacy?'conditions':'the reinforcement'} in ${chgN} as about the same${D.legacy?', or mixed':''}, so there is no change there for ${conN} to move against. ${ConN} ${moved}; describe that change rather than classifying it as contrast or induction.`;}
+  else if(!D.d){kind='none-test';cls='v-na';txt=`<b>No direction test.</b> ${ChgN} changed by ${A.dChg==null?amt(null):pct(A.dChg)+', within the '+BAND+'% band this form treats as negligible'}, and the setup sheet does not record how the reinforcement there changed, so there is no change for ${conN} (${chgShort(X,A.cCon)}) to move against. If the plan was meant to lower the behavior there, check the plan and its integrity (Form TI-1) first. If it changed reinforcement without changing the rate, record that on the setup sheet.`;}
+  else if(!X.big){kind='none';cls='v-ok';txt=`No appreciable interaction: ${conN} ${X.pct!=null?'changed by '+pct(X.pct)+', within the '+BAND+'% band this form treats as negligible':'stayed at 0'}. The change in ${chgN} did not carry over.`;}
+  else if(trend||overlap){kind='unclear';cls='v-na';
+    const why=[trend?`the baseline was already ${X.sgn>0?'rising':'falling'} (${A.slope>=0?'+':''}${A.slope.toFixed(2)} a session), and that trend carried on reaches ${f2(A.proj)}, ${X.sgn>0?'at or above':'at or below'} the mean after the change (${f2(A.cCon)})`:'',
+      overlap?`only ${A.beyond} of the ${A.C.length} sessions after the change (${Math.round(A.pnd)}%) lie ${X.sgn>0?'above the highest':'below the lowest'} baseline session`:''].filter(Boolean);
+    txt=`<b>Not clear evidence of an interaction.</b> ${ConN} ${moved}, but ${why.join(', and ')}. A change the baseline could explain is not reported as ${X.sgn===D.d?'induction':'contrast'}; keep recording both settings and read it again after more sessions.`;}
+  else if(X.sgn===D.d){kind='induction';cls='v-mid';
+    txt=`<b>Consistent with induction, not contrast.</b> ${ConN} ${moved}, in the same direction as the change in ${chgN} (${how}). It is an interaction, but not a contrast. `+
+      (X.sgn<0?'A fall in the constant component alongside the plan is a generalized improvement worth documenting and probing deliberately rather than assuming.':'A rise in the constant component alongside the plan means the problem is getting worse there too; look for a common cause rather than for contrast.')+' '+checks;}
+  else if(X.sgn>0){kind='positive';cls='v-no';
+    txt=`<b>Consistent with positive contrast.</b> ${ConN}, where nothing was changed, ${moved} while ${how}. The change runs opposite to the change in ${chgN}, the pattern this form counts as contrast (see the Guide); a two-phase comparison cannot rule out other causes (Kratochwill et al., 2010). One response is to extend the plan to the constant component rather than to treat the rise there as a new problem; researchers had not identified common methods of mitigating contrast in applied settings (Boyle, Uribe-Zarain, &amp; Powell, 2023). `+checks;}
+  else {kind='negative';cls='v-mid';
+    txt=`<b>Consistent with negative contrast.</b> ${ConN}, where nothing was changed, ${moved} while ${how}. The change runs opposite to the change in ${chgN}. Check first that the change in ${chgN} was the one intended. `+checks;}
+  if(!unchNo){
+    if(D.from==='rate')notes.push(`The setup sheet does not record how the reinforcement in ${chgN} changed, so the direction of its rate stands in for it. Contrast follows the change in reinforcement there rather than the change in its rate (see the Guide), so record it.`);
+    if(D.from==='legacy')notes.push(`This record answers the earlier question (conditions worse or better), which counted extinction as worse whatever the plan delivered. Answer “Reinforcement there after the change” on the setup sheet.`);
+    if((D.from==='rf'||D.from==='legacy')&&A.dChg!=null&&D.d){
+      if(Math.abs(A.dChg)<BAND)notes.push(`${ChgN}’s own rate changed by only ${pct(A.dChg)}, so this rests on the change in reinforcement recorded on the setup sheet.`);
+      /* less reinforcement is expected to lower the behavior there; more may raise it or lower it, so only a rise under less is questioned */
+      else if(D.d<0&&A.dChg>0)notes.push(`${ChgN}’s own rate rose by ${A.dChg.toFixed(1)}% although the reinforcement there became less. Check the plan and its integrity (Form TI-1) before reading the change in ${conN} as contrast or induction.`);}
+    /* v23.14 (review F428) DRA, FCT or NCR that keeps the reinforcer as frequent as before, or more: no positive contrast is expected */
+    if((m.pDra==='1'||m.pNcr==='1')&&(D.from==='same'||D.d>0)&&X.sgn>0&&X.big)
+      notes.push(`With ${m.pNcr==='1'&&m.pDra!=='1'?'noncontingent reinforcement':'DRA or FCT'} keeping the reinforcer in ${chgN} as frequent as before, or more, positive contrast is not expected on the reinforcement account the Guide describes (Reynolds, 1961a); a rise in ${conN} then points first to a second source: the behavior still produces its reinforcer there. Compare with the FBA (Form FS-1) and the ABC record.`);
+    /* v23.14 (review F434) */
+    const ti=tiSince();if(ti&&ti.crit!=null&&+ti.last.pct<ti.crit)notes.push(`Form TI-1’s latest observation${A.cd?' since the change':''}, ${Math.round(+ti.last.pct*10)/10}% on ${esc(mdy(String(ti.last.date).slice(0,10)))}, is under its ${ti.crit}% criterion: read the change in ${chgN} as a test of how the plan was run before reading ${conN}.`);
+    if(m.conUnchanged!=='Yes — nothing about this component was altered')
+      notes.push('Confirm on the setup sheet that nothing was altered in the constant component before reporting this as contrast.');}
+  return {kind,cls,txt,notes,dirV,dirSub,D,X,trend,overlap,immediate};
+}
+/* (F5, v23.14 review F431) the course across sessions: each block against the constant component's baseline mean, read on the
+   rate itself from a baseline of zero */
+function course(A){
+  const E=chgOf(A.bCon,A.early),L=chgOf(A.bCon,A.late);
+  const size=x=>x.pct!=null?Math.abs(x.pct):Math.abs(x.abs);
+  let sus;
+  if(E.big&&L.big&&E.sgn!==L.sgn)sus='Reversed — the first and last blocks changed in opposite directions';
+  else if(E.big&&L.big)sus=size(L)<size(E)*DECL?'Declining — still present in the last block, at under 60% of its first-block size':'Persisting — still present in the last block';
+  else if(E.big)sus='Faded — present in the first block, gone by the last';
+  else if(L.big)sus='Late onset — absent in the first block, present in the last';
+  else sus=A.bCon>0?'No change of 10% or more in either block':'No rate above zero in either block';
+  return {E,L,sus};
 }
 function renderAn(){
   const A=analyse();
@@ -1084,59 +1219,21 @@ function renderAn(){
   if(!A.ok){
     $('#anVerdict').innerHTML='<p class="hint">Enter at least three sessions in each phase, with a rate in both components, to see the analysis.</p>'+leftOut(A);
     $('#anMetrics').innerHTML='';$('#susTbl').innerHTML='';drawPlot(A);return;}
-  const m=S.meta, D=direction(A,m);
-  const conN=esc(m.conName)||'the constant component', chgN=esc(m.chgName)||'the changed component';
-  const ConN=cap(conN), ChgN=cap(chgN);
-  const dirV=(A.dCon==null||!D.d)?'\u2014':Math.abs(A.dCon)<BAND?'Negligible':Math.sign(A.dCon)===D.d?'Same':'Opposite';
+  const m=S.meta, V=verdict(A,m);
+  /* v23.14 (review F437) the Direction card says "Not tested" when the verdict does */
   $('#anMetrics').innerHTML=
-    card('Constant component',f2(A.cCon),`baseline ${f2(A.bCon)} \u2192 ${pct(A.dCon)}`)+
-    card('Changed component',f2(A.cChg),`baseline ${f2(A.bChg)} \u2192 ${pct(A.dChg)}`)+
+    card('Constant component',f2(A.cCon),`baseline ${f2(A.bCon)} → ${chgShort(V.X,A.cCon)}`)+
+    card('Changed component',f2(A.cChg),`baseline ${f2(A.bChg)} → ${pct(A.dChg)}`)+
     card('Sessions',`${A.B.length} / ${A.C.length}`,'baseline / after the change')+
-    card('Direction',dirV,D.from==='cond'?'constant against the change in conditions on the setup sheet':D.from==='rate'?'constant against the changed component\u2019s rate':'no change to test against');
-
-  let cls,txt;const notes=[];
-  const how=D.from==='cond'?`conditions in ${chgN} became ${D.d<0?'worse':'better'}${A.dChg==null?'':' (its own rate: '+pct(A.dChg)+')'}`
-    :`${chgN} ${A.dChg<0?'fell':'rose'} by ${Math.abs(A.dChg||0).toFixed(1)}%`;
-  if(A.dCon==null){cls='v-na';txt=`The baseline mean of ${conN} is zero, which makes its percentage change undefined. Compare the absolute rates instead.`;}
-  else if(D.from==='same'){cls='v-na';txt=`<b>No direction test.</b> The setup sheet records conditions in ${chgN} as about the same, or mixed, so there is no change there for ${conN} to move against. ${ConN} changed by ${pct(A.dCon)}; describe that change rather than classifying it as contrast or induction.`;}
-  else if(!D.d){cls='v-na';txt=`<b>No direction test.</b> ${ChgN} changed by ${A.dChg==null?amt(null):pct(A.dChg)+', within the '+BAND+'% band this form treats as negligible'}, and the setup sheet does not record how conditions there changed, so there is no change for ${conN} (${pct(A.dCon)}) to move against. If the plan was meant to lower the behavior there, check the plan and its integrity (Form TI-1) first. If it changed reinforcement without changing the rate, record that on the setup sheet.`;}
-  else if(Math.abs(A.dCon)<BAND){cls='v-ok';txt=`No appreciable interaction: ${conN} changed by ${pct(A.dCon)}, within the ${BAND}% band this form treats as negligible. The change in ${chgN} did not carry over.`;}
-  else if(Math.sign(A.dCon)===D.d){cls='v-mid';
-    txt=`<b>Induction, not contrast.</b> ${ConN} ${A.dCon<0?'fell':'rose'} by ${Math.abs(A.dCon).toFixed(1)}%, ${D.from==='cond'?'in the same direction as the change in conditions in '+chgN+' ('+(D.d<0?'worse':'better')+')':'the same way as '+chgN+' ('+pct(A.dChg)+')'}. It is an interaction, but not a contrast. `+
-      (A.dCon<0?'A fall in the constant component alongside the plan is a generalized improvement worth documenting and probing deliberately rather than assuming.':'A rise in the constant component alongside the plan means the problem is getting worse there too; look for a common cause rather than for contrast.');}
-  else if(A.dCon>0){cls='v-no';
-    txt=`<b>Positive contrast.</b> ${ConN}, where nothing was changed, rose by ${A.dCon.toFixed(1)}% while ${how}. The change runs opposite to the change in ${chgN}, the pattern this form counts as contrast (see the Guide). One response is to extend the plan to the constant component rather than to treat the rise there as a new problem; researchers had not identified common methods of mitigating contrast in applied settings (Boyle, Uribe-Zarain, &amp; Powell, 2023).`;}
-  else {cls='v-mid';
-    txt=`<b>Negative contrast.</b> ${ConN}, where nothing was changed, fell by ${Math.abs(A.dCon).toFixed(1)}% while ${how}. The change runs opposite to the change in ${chgN}. Check first that the change in ${chgN} was the one intended.`;}
-  if(D.from==='rate'&&A.dCon!=null)notes.push(`The setup sheet does not record how conditions in ${chgN} changed, so the direction of its rate stands in for them. Contrast follows the change in reinforcement there rather than the change in its rate (see the Guide), so record it.`);
-  if(D.from==='cond'&&A.dCon!=null&&A.dChg!=null){
-    if(Math.abs(A.dChg)<BAND)notes.push(`${ChgN}\u2019s own rate changed by only ${pct(A.dChg)}, so this rests on the change in conditions recorded on the setup sheet.`);
-    /* worse conditions are expected to lower the behavior there; better ones may raise it (richer reinforcement for
-       it) or lower it (reinforcement given freely), so only a rise under worse conditions is questioned */
-    else if(D.d<0&&A.dChg>0)notes.push(`${ChgN}\u2019s own rate rose by ${A.dChg.toFixed(1)}% although conditions there became worse. Check the plan and its integrity (Form TI-1) before reading the change in ${conN} as contrast or induction.`);
-  }
-  const unch=m.conUnchanged;
-  if(unch&&unch.indexOf('No')===0){cls='v-na';notes.length=0;
-    txt=`<b>Not a contrast test.</b> The setup sheet records that something was altered in ${conN} as well, so the comparison cannot separate contrast from the effect of that change. ${ConN} changed by ${amt(A.dCon)} and ${chgN} by ${amt(A.dChg)}.`;}
-  else if(unch!=='Yes \u2014 nothing about this component was altered')
-    notes.push('Confirm on the setup sheet that nothing was altered in the constant component before reporting this as contrast.');
-  $('#anVerdict').innerHTML=`<div class="verdict ${cls}">${txt}${notes.length?' '+notes.join(' '):''}</div>`+leftOut(A);
-
-  /* (F5) the course across sessions: each block against the constant component's baseline mean */
-  const dE=A.bCon>0?(A.early-A.bCon)/A.bCon*100:null, dL=A.bCon>0?(A.late-A.bCon)/A.bCon*100:null;
-  let sus='\u2014';
-  if(dE!=null&&dL!=null){
-    const e=Math.abs(dE)>=BAND, l=Math.abs(dL)>=BAND;
-    if(e&&l&&Math.sign(dE)!==Math.sign(dL))sus='Reversed \u2014 the first and last blocks changed in opposite directions';
-    else if(e&&l)sus=Math.abs(dL)<Math.abs(dE)*DECL?'Declining \u2014 still present in the last block, at under 60% of its first-block size':'Persisting \u2014 still present in the last block';
-    else if(e)sus='Faded \u2014 present in the first block, gone by the last';
-    else if(l)sus='Late onset \u2014 absent in the first block, present in the last';
-    else sus='No change of 10% or more in either block';
-  }
+    card('Direction',V.dirV,V.dirSub)+
+    /* v23.14 (review F429, I217) */
+    card('Trend and overlap',`${A.beyond} of ${A.C.length}`,`sessions after the change beyond the baseline range; baseline trend ${A.slope>=0?'+':''}${A.slope.toFixed(2)} a session; ${V.immediate?'immediate':'gradual'}`);
+  $('#anVerdict').innerHTML=`<div class="verdict ${V.cls}">${V.txt}${V.notes.length?' '+V.notes.join(' '):''}</div>`+leftOut(A);
+  const K=course(A),cell=(x,c)=>x.pct!=null?(x.pct>=0?'+':'')+x.pct.toFixed(1)+'%':(x.abs>0?'+'+f2(x.abs)+' (from 0)':'0');
   $('#susTbl').innerHTML='<thead><tr><th style="text-align:left">Block of the changed phase</th><th style="width:18%">Constant component</th><th style="width:18%">Change from its baseline</th></tr></thead><tbody>'+
-    `<tr><td>First ${A.k} session${A.k===1?'':'s'}</td><td style="text-align:center">${f2(A.early)}</td><td style="text-align:center">${dE==null?'\u2014':(dE>=0?'+':'')+dE.toFixed(1)+'%'}</td></tr>`+
-    `<tr><td>Last ${A.k} session${A.k===1?'':'s'}</td><td style="text-align:center">${f2(A.late)}</td><td style="text-align:center">${dL==null?'\u2014':(dL>=0?'+':'')+dL.toFixed(1)+'%'}</td></tr>`+
-    `<tr style="background:#EFF3F1;font-weight:600"><td>Course</td><td colspan="2" style="text-align:center">${esc(sus)}</td></tr></tbody>`;
+    `<tr><td>First ${A.k} session${A.k===1?'':'s'}</td><td style="text-align:center">${f2(A.early)}</td><td style="text-align:center">${cell(K.E)}</td></tr>`+
+    `<tr><td>Last ${A.k} session${A.k===1?'':'s'}</td><td style="text-align:center">${f2(A.late)}</td><td style="text-align:center">${cell(K.L)}</td></tr>`+
+    `<tr style="background:#EFF3F1;font-weight:600"><td>Course</td><td colspan="2" style="text-align:center">${esc(K.sus)}</td></tr></tbody>`;
   drawPlot(A);
 }
 function drawPlot(A){
@@ -1170,12 +1267,28 @@ function drawPlot(A){
   svg.innerHTML=s;
 }
 
-function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;el.value=S.meta[k]||'';
-  if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
-    el.addEventListener(ev,()=>{S.meta[k]=el.value;renderAn();});}});}
+/* v23.14 (review F428, F432) a tick is kept as '1'; leaving the date of the change gives undated-phase rows their phase */
+function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m,cb=el.type==='checkbox';if(cb)el.checked=S.meta[k]==='1';else el.value=S.meta[k]||'';
+  if(!el._b){el._b=1;const ev=el.tagName==='SELECT'||cb?'change':'input';
+    el.addEventListener(ev,()=>{S.meta[k]=cb?(el.checked?'1':''):el.value;renderAn();});
+    if(k==='chgDate')el.addEventListener('change',phaseFromDates);}});}
 function renderAll(){ensure();renderData();renderAn();bindMeta();}
 
-$('#printBtn').addEventListener('click',()=>window.print());
+$('#printBtn').addEventListener('click',()=>{document.body.classList.remove('bc-tally-on');window.print();});
+/* v23.14 (review I219) a one-page tally sheet for the staff of the constant component: the behavior and how it is counted, the
+   period, whom to return it to and by when, and a row a day; it says to change nothing about how that setting runs */
+function tallyHTML(){const m=S.meta,E=v=>esc(String(v||'').trim()),rows=Array.from({length:14},()=>'<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
+  const nx=isoOf(m.next);
+  return `<div class="nbh-print-head"><div class="nbh-print-meta"><div class="nbh-print-title">Tally Sheet: ${E(m.conName)||'the constant component'}</div><div>Form BC-1 &middot; Behavioral Contrast &middot; Confidential student record</div></div></div>
+  <table class="rt"><tr><th style="width:22%">Student</th><td>${E(m.client)}</td><th style="width:16%">Setting</th><td>${E(m.conName)}</td></tr>
+  <tr><th>Behavior to count</th><td colspan="3">${E(m.beh)}</td></tr>
+  <tr><th>Count it as</th><td colspan="3">${E(m.measure)}</td></tr>
+  <tr><th>Period</th><td>${E(m.len)}</td><th>Return to</th><td>${E(m.bcba)}${nx?' by '+esc(mdy(nx)):''}</td></tr></table>
+  <p class="hint" style="margin:8px 0">Keep everything in this setting as it always is: respond to the behavior the way you always have, with the same people, activities and schedule, while it is being counted. Make a mark each time the behavior happens; at the end of the period write the total and the minutes you watched.</p>
+  <table class="rt bc-tallytbl"><thead><tr><th style="width:13%">Date</th><th style="width:15%">Period or time</th><th>Tally</th><th style="width:10%">Total</th><th style="width:13%">Minutes watched</th><th style="width:10%">Initials</th></tr></thead><tbody>${rows}</tbody></table>`;}
+$('#tallyBtn').addEventListener('click',()=>{$('#bcTally').innerHTML=tallyHTML();document.body.classList.add('bc-tally-on');
+  const off=()=>{document.body.classList.remove('bc-tally-on');window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);
+  try{window.print();}catch(e){off();}});
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'BC-1',rev:'2026-09',saved:new Date().toISOString(),S},null,1)],{type:'application/json'}));
@@ -1204,6 +1317,7 @@ function readSaved(d){
   for(const r of rows){
     if(!r||typeof r!=='object'||Array.isArray(r))return null;
     const row={};for(const k of ['d','p','con','chg','n']){const v=str(r[k]);if(v===null)return null;row[k]=v;}
+    if(PH_OLD[row.p])row.p=PH_OLD[row.p];   /* v23.14 (review F436) */
     n.rows.push(row);
   }
   return n;
@@ -1232,7 +1346,7 @@ async function loadSim(){
   S.meta={client:'SIMULATED \u2013 Sample Student',sid:'SIM-000',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:D(0),
     beh:'Aggression toward staff (simulated)',measure:'Occurrences per hour of the period',len:'60 min each period',
     chgName:'Room 12 independent work',chgBefore:'Escape delivered on most occurrences of aggression',
-    chgAfter:'Extinction for aggression, break-card FCT on FR 1 (Form TD-1)',chgCond:COND[1],chgDate:day[6],
+    chgAfter:'Extinction for aggression; break-card FCT, thinned from FR 1 to one break per 15 min of work from the second week (Form TD-1)',chgRf:RF[1],pExt:'1',pDra:'1',pThin:'1',chgDate:day[6],
     conName:'Specials and the cafeteria',conSched:'Unchanged \u2014 no plan in place, staff respond as they always have',
     conUnchanged:'Yes \u2014 nothing about this component was altered',conChanged:'',
     who:'Room 12: classroom team. Specials and cafeteria: specials teachers and cafeteria monitors, none trained on the plan.',
@@ -1242,8 +1356,8 @@ async function loadSim(){
     r_relapse:'Not resurgence: reinforcement for the break card was not worsened during this period. Not renewal: no context change occurred in specials, which is the setting where the increase appeared.',
     r_meas:'Same definition and same 60-min period in both settings. IOA taken in both: 96% Room 12, 92% specials.',
     r_int:'95.5% on an unannounced observation in Room 12 (Form TI-1), so the reduction there is not an artifact of the plan not running.',
-    concl:'Positive contrast. Aggression in Room 12 fell substantially under the plan while aggression in specials and the cafeteria, where nothing changed, rose against its own baseline. The specials rate moved away from the Room 12 rate, which is contrast in Reynolds\u2019s sense, rather than treatment failure or a second function. The increase was still present in the last block of sessions, so it had not faded over the phase.',
-    action:'Extend the plan to specials and the cafeteria rather than treating the increase there as a separate problem. Brief the specials teachers and cafeteria monitors on Form ST-1, carry the break card and the S\u0394 into both settings, and re-run this form after four weeks.'};
+    concl:'Consistent with positive contrast. Aggression in Room 12 fell substantially under the plan, as the breaks were thinned, while aggression in specials and the cafeteria, where nothing changed, rose against its own baseline, at once and beyond every baseline session. The specials rate moved away from the Room 12 rate, the pattern of contrast in Reynolds\u2019s sense. A second function was looked for on Form FS-1 and the ABC record and not found, but this two-phase comparison cannot rule it out. The increase was still present in the last block of sessions, so it had not faded over the phase.',
+    action:'Extend the plan to specials and the cafeteria rather than treating the increase there as a separate problem. Brief the specials teachers and cafeteria monitors on Form ST-1, carry the break card and the S\u0394 into both settings, and re-run this form after four weeks.',next:D(-27)};
   const B=[[2.6,6.2],[3.0,5.8],[2.4,6.6],[2.8,6.0],[2.6,6.4],[3.2,5.6]];
   const C=[[3.4,2.2],[4.0,1.6],[4.2,1.0],[3.8,1.2],[4.6,0.8],[4.4,0.6],[4.2,0.8],[4.8,0.4],[4.4,0.6],[4.6,0.4],[4.2,0.6],[4.8,0.2]];
   S.rows=[];
@@ -1262,8 +1376,17 @@ renderAll();
 /* v21.78 the case: in. The form kept the shared fill (the target behavior), and two fields come from the case when
    they are empty: the measure, from the dimension and counting unit Form TB-1 gives the behavior named here (else the
    first target behavior), and "Integrity in the changed component", from Form TI-1. Nothing typed is replaced. */
+/* v23.14 (review I216, F434) also from the case, each into an empty field: the date of the change from Form DD-1 (the start of
+   its second condition) or Form TD-1 (the plan's start), what the plan does there from Form TD-1 (its response to the behavior
+   and its schedule), and the function Form FS-1 found as a hint in the "separate function" row. The integrity line reads Form
+   TI-1's observations since the date of the change: the lowest and the latest, and the criterion when one is under it; with no
+   date of the change, or no observation since, the pooled line as before. */
 (function(){
 const tiLine=t=>{if(!t||typeof t!=='object')return '';const o=(t.obs||[]).filter(x=>x&&isFinite(parseFloat(x.pct)));
+  const cd=isoOf(S.meta.chgDate),since=cd?o.filter(x=>/^\d{4}-\d\d-\d\d/.test(String(x.date||''))&&String(x.date).slice(0,10)>=cd).sort((a,b)=>String(a.date)<String(b.date)?-1:1):[];
+  if(since.length){const crit=isFinite(parseFloat(t.criterion))?+t.criterion:null,lo=since.reduce((a,x)=>+x.pct<+a.pct?x:a),la=since[since.length-1],P=x=>(Math.round(+x.pct*10)/10)+'% on '+String(x.date).slice(0,10);
+    return 'Treatment integrity since the change: '+(since.length===1?P(la):'lowest '+P(lo)+', latest '+P(la))+' over '+since.length+' TI-1 observation'+(since.length===1?'':'s')+
+      (crit==null?'':since.some(x=>+x.pct<crit)?'; under the '+crit+'% criterion':'; all at or above the '+crit+'% criterion');}
   const ov=isFinite(parseFloat(t.overall))?+t.overall:(o.length?o.reduce((a,x)=>a+ +x.pct,0)/o.length:null);if(ov==null)return '';
   const last=o.map(x=>String(x.date||'')).filter(Boolean).sort().pop();
   return 'Treatment integrity '+(Math.round(ov*10)/10)+'%'+(o.length?' over '+o.length+' TI-1 observation'+(o.length===1?'':'s'):' (Form TI-1)')+(last?' (latest '+last+')':'');};
@@ -1271,14 +1394,33 @@ const pickB=(bs,cur)=>{bs=(bs||[]).filter(b=>b&&String(b.label||'').trim());cons
   return (c&&bs.find(b=>c===L(b)||c.indexOf(L(b))===0))||bs.find(b=>!b.isRep)||bs[0]||null;};
 const put=(key,v)=>{const el=document.querySelector('[data-m="'+key+'"]');if(!el||!v||String(el.value||'').trim()||String(S.meta[key]||'').trim())return 0;
   el.value=v;S.meta[key]=v;el.dispatchEvent(new Event('input',{bubbles:true}));return 1;};
+const isoD=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(String(v||''));return m?m[1]+'-'+m[2]+'-'+m[3]:'';};
 const was=window.__nbhFactsIn;
 window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;f=f||{};const got=[];
   if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
+  window.__bcTi=f.integrity||null;
+  const pl=f.plan||{},cs=(f.data&&Array.isArray(f.data.conds))?f.data.conds:[],c1=cs[1]?isoD(cs[1].from):'',ps=isoD((pl.adoption||{}).start);
+  if(put('chgDate',c1?mdy(c1):ps?mdy(ps):'')){k++;got.push(c1?'the date of the change from Form DD-1':'the date of the change from Form TD-1');phaseFromDates();}
+  {const rs=pl.respond||{},sch=(Array.isArray(pl.sched)?pl.sched:[]).filter(Boolean),aft=[String(rs.target||'').trim(),sch.length?'schedule: '+sch.join(', '):''].filter(Boolean).join('; ');
+   if(put('chgAfter',aft?aft+' (Form TD-1)':'')){k++;got.push('the plan from Form TD-1');}}
+  {const fl=f.fn&&String(f.fn.label||f.fn.key||'').trim(),el=document.querySelector('[data-m="r_fn"]');
+   if(el&&fl)el.placeholder='Form FS-1 found: '+fl+'. Is a different function at work in the constant component? Contrast does not require a new function; a second function does.';}
   const b=pickB(f.behaviors,S.meta.beh),ms=b?[String(b.dim||'').trim(),String(b.unit||'').trim()].filter(Boolean).join(' — '):'';
   if(put('measure',ms)){k++;got.push('the measure from Form TB-1');}
   if(put('r_int',tiLine(f.integrity))){k++;got.push('integrity from Form TI-1');}
-  if(k)try{renderAll();}catch(e){}
+  try{if(k)renderAll();else renderAn();}catch(e){}
   return {filled:n+k,note:got.join('; ')||((r&&r.note)||'')};};
+/* v23.14 (review F433, I216) out: the verdict, for Form PR-1 and the workstation's Today screen (contrast: its kind, headline and
+   words, the two settings, the change in the constant component, the course, the date of the change, the re-check date and the
+   action). Nothing is sent while there is no verdict and no re-check date. */
+const plain=h=>{const d=document.createElement('div');d.innerHTML=String(h||'');return d.textContent.replace(/\s+/g,' ').trim();};
+window.__nbhFactsOut=function(){try{const A=analyse(),m=S.meta,o={src:'BC-1'},rc=isoOf(m.next);if(rc)o.recheck=rc;
+  if(String(m.conName||'').trim())o.conName=String(m.conName).trim();if(String(m.chgName||'').trim())o.chgName=String(m.chgName).trim();
+  if(A.ok){const V=verdict(A,m),d=document.createElement('div');d.innerHTML=V.txt;const b=d.querySelector('b');
+    o.kind=V.kind;o.headline=b?b.textContent.replace(/\.$/,''):plain(V.txt).split(': ')[0];o.verdict=plain(V.txt);o.change=chgShort(V.X,A.cCon);o.rise=V.X.sgn>0&&V.X.big;
+    o.course=course(A).sus;o.sessions={b:A.B.length,c:A.C.length};if(A.cd)o.changed=A.cd;}
+  if(String(m.action||'').trim())o.action=String(m.action).trim();
+  if(!A.ok&&!rc)return null;return {contrast:o};}catch(e){return null;}};
 })();
 </script>
 
