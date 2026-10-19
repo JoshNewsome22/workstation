@@ -3192,7 +3192,9 @@ function fsBgCompose(f){const R=f.records||{},P=f.profile||{},H=P.health||{},L=P
   /* v22.97 (review F176) the earlier plan Form RR-1 records: its status and date */
   const pr=R.prior;if(pr&&typeof pr==='object'&&!Array.isArray(pr)){if(fsBgT(pr.bipStatus)||fsBgT(pr.bipDate))rec.push('Earlier plan: '+(fsBgT(pr.bipStatus)||'a BIP')+(fsBgT(pr.bipDate)?', dated '+fsBgMd(pr.bipDate):'')+'.');}
   else{const prior=fsBgList(R.prior||R.interventions||R.priorInterventions);if(prior)rec.push('Earlier interventions: '+fsBgDot(prior));}
-  const iep=fsBgT(R.iep||(P.dates||{}).iep),re=fsBgT(R.reeval||(P.dates||{}).reeval);if(iep||re)rec.push([iep?'Annual IEP '+fsBgMd(iep):'',re?'reevaluation due '+fsBgMd(re):''].filter(Boolean).join('; ')+'.');
+  /* v23.00 (RR-1 review F23) the IEP held and the annual review due, each under its own name */
+  const iep=fsBgT(R.iep||(P.dates||{}).iep),held=fsBgT(R.iepHeld||(P.dates||{}).iepHeld),re=fsBgT(R.reeval||(P.dates||{}).reeval);
+  if(iep||re||held)rec.push([held?'IEP held '+fsBgMd(held):'',iep?'annual IEP review due '+fsBgMd(iep):'',re?'reevaluation due '+fsBgMd(re):''].filter(Boolean).join('; ').replace(/^./,x=>x.toUpperCase())+'.');
   o.bgRecords=rec.join(' ');
   o.bgProfile=[P.strengths?'Strengths: '+fsBgDot(P.strengths):'',P.interests?'Interests: '+fsBgDot(P.interests):'',
     P.expr||P.recep?'Communicates: '+fsBgDot([P.expr?'expressive, '+fsBgT(P.expr):'',P.recep?'receptive, '+fsBgT(P.recep):''].filter(Boolean).join('; ')):''].filter(Boolean).join(' ');

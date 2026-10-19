@@ -1511,8 +1511,9 @@ window.__nbhFactsOut=function(){
    const m={name,dose:g('m['+i+'].dose'),times:[g('m['+i+'].freq'),g('m['+i+'].time')].filter(Boolean).join(', '),reason:g('m['+i+'].purpose')};const rx=g('m['+i+'].rx');if(rx)m.rx=rx;meds.push(m);}
   const h={};if(meds.length)h.meds=meds;if(g('h.psy'))h.prescriber=g('h.psy');if(g('h.allergy'))h.allergies=g('h.allergy');if(g('h.cond'))h.conditions=g('h.cond');
   if(!h.prescriber){const rx=meds.map(m=>m.rx).find(Boolean);if(rx)h.prescriber=rx;}
-  const d={};const iep=g('p.annual')||g('p.iepdate');if(iep)d.iep=iep;if(g('p.iepdate'))d.iepHeld=g('p.iepdate');if(g('p.reeval'))d.reeval=g('p.reeval');
-  if(Object.keys(h).length||d.iep||d.reeval){o=o||{};o.profile=o.profile||{src:'DM-1'};if(Object.keys(h).length)o.profile.health=h;if(d.iep||d.reeval)o.profile.dates=d;}
+  /* v23.00 (RR-1 review F23) the annual review date only; the date the IEP was held is sent as iepHeld, never as the review */
+  const d={};if(g('p.annual'))d.iep=g('p.annual');if(g('p.iepdate'))d.iepHeld=g('p.iepdate');if(g('p.reeval'))d.reeval=g('p.reeval');
+  if(Object.keys(h).length||d.iep||d.reeval||d.iepHeld){o=o||{};o.profile=o.profile||{src:'DM-1'};if(Object.keys(h).length)o.profile.health=h;if(d.iep||d.reeval||d.iepHeld)o.profile.dates=d;}
  }catch(e){}
  return o;};})();
 /* v21.82 the profile also carries the home language (with whether the family needs an interpreter, and the kind and the ELL

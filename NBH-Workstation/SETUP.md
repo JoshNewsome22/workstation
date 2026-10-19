@@ -9903,6 +9903,46 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.00: RR-1 and the workstation word removals in the regulation's terms, count removal days by school year, keep the IEP meeting date apart from the review date, and test a weekday pattern against chance (review Wave 3)
+
+- **Ten removal days, in the regulation's terms (F21).** At ten counted days, the workstation's Today list no longer
+  says that a manifestation determination is required. It now says:
+  - services continue during any further removal (34 CFR 300.530(b)(2), (d)(4));
+  - a series of more than 10 days is a change of placement only if the team finds a pattern (34 CFR 300.536);
+  - record the team's decision on Form RR-1.
+
+  RR-1 now sends the flags the ledger raised for this school year and the decisions the team recorded. Only when a
+  decision to change placement is recorded does the Today list name the manifestation determination: "due within 10
+  school days, by …", counted on RR-1's own calendar (34 CFR 300.530(e)(1)).
+- **Removal days by school year (F22).** The Incidents and Synthesis sheets now show this school year's counted days,
+  with the year in the heading. The total over every year is given beside it ("11 counted over 2 school years"),
+  because the 10-day provisions count within one school year.
+- **The IEP meeting and the review date (F23).** When **Annual review due** is blank, the date the IEP was held is no
+  longer sent as the review date. It goes as "IEP held", so the Today list no longer shows an overdue review for a
+  month after every IEP meeting. Form DM-1 does the same. Form FS-1's records paragraph names both: "IEP held …;
+  annual IEP review due …".
+- **A partial day with no portion (F26).** An office stay or a day cut short, added to the ledger without a portion of
+  the day, now says that it counts as a whole school day. **Add to ledger** asks for the portion.
+- **A weekday pattern, against chance (F27).** The busiest weekday is called a day-of-week pattern only when incidents
+  falling at random on the five school days would give a day that busy less than 5% of the time, and the probability is
+  printed. Otherwise the count is given as a count: "5 of 8 weekday incidents fall on Mon. With 8 incidents, a day this
+  busy is common by chance (p = 0.052), so it is not a pattern yet."
+- **Back-to-back removals (F28).** Removals that run more than 10 consecutive school days between them are flagged.
+  If they are in substance one removal, 34 CFR 300.536(a)(1) applies and no pattern finding is needed. The team
+  decides, and the change-of-placement fields open for that year.
+- **The assessments a review can propose (F29).** The checklist adds IN-1 interviews, SI-1 student interview and
+  assent, OB-1 direct observation, MT-1 interval recording, DA-1 demand assessment and IM-1 injury monitoring.
+  - The interviews, observations and the demand assessment count as tests.
+  - OB-1 and MT-1 count as confirmation by observation.
+  - The related-forms list names the current set.
+- **Next (part 2):**
+  - F24: the synthesis to the case (the interventions to FS-1, the target labels to TB-1, the questions to IA-1).
+  - F25: DM-1's program facts.
+  - I14: the inventory and the restraint history from IC-1, CR-1 and DD-1.
+  - I12: a timeline figure.
+  - I11, I13 and I15 wait for their sources.
+- qa/rr1-w3-test.js (14 checks).
+
 ### v22.99: OB-1 carries the count agreement and names every figure below 80%, needs ten marked intervals before calling a student discrepant, compares the observations with and without each condition, tells attention from items, and checks the dates against consent (review Wave 3)
 
 - **The second observer's interval rows (F71).** An untouched interval row for the second observer used to count as

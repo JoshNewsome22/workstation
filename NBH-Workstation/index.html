@@ -2263,7 +2263,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.99';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.00';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5450,8 +5450,13 @@ function tdTimelines(f){const L=[],push=(k,t,open)=>L.push({k,t,open});const pf=
   const iep=rc.iep||dt.iep,re=rc.reeval||dt.reeval;
   if(iep){const n=tdLeft(iep);if(n!==null&&n<=30&&n>=-30)push('Timeline','The annual IEP review is '+esc(tdMd(iep))+' ('+tdWhen(iep)+'): bring the progress report (Form GB-1) and the plan review','GB-1');}
   if(re){const n=tdLeft(re);if(n!==null&&n<=45&&n>=-30)push('Timeline','The reevaluation is due '+esc(tdMd(re))+' ('+tdWhen(re)+')','RR-1');}
-  /* removals: at ten school days a change of placement asks for a manifestation determination and a review of the plan (34 CFR 300.530) */
-  const rm=rc.removals;if(rm&&+rm.days>=8)push('Timeline',(rm.at10||+rm.days>=10?'<b>'+rm.days+' days of removal this year</b>: a manifestation determination and a review of the plan are required (34 CFR 300.530)':rm.days+' days of removal this year: at ten, a manifestation determination and a review of the plan are required'),'RR-1');
+  /* v23.00 (RR-1 review F21) removals in the regulation's terms: at ten school days, services during any further removal; a series
+     is a change of placement only when the team finds a pattern; a manifestation determination is due from a recorded decision
+     to change placement (34 CFR 300.530(b)(2), (e)(1); 300.536) */
+  const rm=rc.removals,rmd=(rm&&rm.decision)||{};if(rm&&+rm.days>=8)push('Timeline',(rm.at10||+rm.days>=10?'<b>'+rm.days+' days of removal this year</b>: services continue during any further removal (34 CFR 300.530(b)(2), (d)(4)); a series of more than 10 days is a change of placement only if the team finds a pattern (34 CFR 300.536). Record the team\u2019s decision on Form RR-1'
+    :rm.days+' days of removal this year: at ten, services continue during any further removal (34 CFR 300.530(b)(2)), and the team decides whether the series is a change of placement (34 CFR 300.536)'),'RR-1');
+  if(rm&&rm.flags&&rm.flags.indexOf('a1r')>=0&&!rmd.change)push('Timeline','Back-to-back removals run more than 10 consecutive school days: if they are one removal, it is a change of placement without a pattern finding (34 CFR 300.536(a)(1)). Record the team\u2019s decision on Form RR-1','RR-1');
+  if(rmd.change&&!rmd.md){const n=rmd.mdDue?tdLeft(rmd.mdDue):null;push('Timeline','<b>A change of placement was decided on '+esc(tdMd(rmd.change))+'</b>: the manifestation determination is due within 10 school days'+(rmd.mdDue?', by '+esc(tdMd(rmd.mdDue))+(n!==null?' ('+tdWhen(rmd.mdDue)+')':''):'')+' (34 CFR 300.530(e)(1))','RR-1');}
   if(rc.mdr){const n=tdDays(rc.mdr);if(n!==null&&n>=0&&n<=30&&!(rv.date&&rv.date>=rc.mdr))push('Timeline','After the manifestation determination on '+esc(tdMd(rc.mdr))+', review the plan (Form PR-1)','PR-1');}
   return L;}
 /* v22.41 (review F458, F459) the restraint deadlines as one list, from Form DD-1's restraint record and Form CR-1's log:

@@ -1152,7 +1152,7 @@ table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-wei
   <div class="readout noprint" id="rlIncLive" aria-live="polite"></div>
   <div class="stat" id="incStat">
     <div><b>INCIDENTS DOCUMENTED</b><span id="stInc">0</span><em id="stIncSub"></em></div>
-    <div><b>DAYS REMOVED (LEDGER)</b><span id="stDays">0</span><em id="stDaysSub"></em></div>
+    <div><b id="stDaysH">DAYS REMOVED (LEDGER)</b><span id="stDays">0</span><em id="stDaysSub"></em></div>
     <div><b>MOST FREQUENT LOCATION</b><span id="stLoc" style="font-size:13px">&mdash;</span><em id="stLocSub"></em></div>
     <div><b>MOST FREQUENT ACTION</b><span id="stAct" style="font-size:13px">&mdash;</span><em id="stActSub"></em></div>
   </div>
@@ -1251,7 +1251,7 @@ table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-wei
   <div class="sumhead"><div><b>Student</b><span class="hd-client"></span></div><div><b>Reviewed by</b><span class="hd-bcba"></span></div><div><b>Review date</b><span class="hd-date"></span></div></div>
   <div class="stat">
     <div><b>SOURCES REVIEWED</b><span id="syS">0</span><em id="sySSub"></em></div>
-    <div><b>INCIDENTS / DAYS REMOVED</b><span id="syI">0 / 0</span><em>incidents in period; days from the ledger</em></div>
+    <div><b>INCIDENTS / DAYS REMOVED</b><span id="syI">0 / 0</span><em id="syISub">incidents in period; days from the ledger</em></div>
     <div><b>PRIOR INTERVENTIONS</b><span id="syP">0</span><em id="syPSub"></em></div>
     <div><b>ATTENDANCE</b><span id="syA">&mdash;</span><em id="syASub"></em></div>
   </div>
@@ -1269,6 +1269,13 @@ table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-wei
       <label><input type="checkbox" name="y.ea"> EA-1 experimental analysis</label>
       <label><input type="checkbox" name="y.vi"> VI-1 / DT-1 variable analysis</label>
       <label><input type="checkbox" name="y.ms"> MS-1 side-effect monitoring</label>
+      <!-- v23.00 (review F29) the interviews, observations and analyses the workstation now holds -->
+      <label><input type="checkbox" name="y.in"> IN-1 teacher, parent and staff interviews</label>
+      <label><input type="checkbox" name="y.si"> SI-1 student interview and assent</label>
+      <label><input type="checkbox" name="y.ob"> OB-1 direct observation</label>
+      <label><input type="checkbox" name="y.mt"> MT-1 interval recording</label>
+      <label><input type="checkbox" name="y.da"> DA-1 demand assessment</label>
+      <label><input type="checkbox" name="y.im"> IM-1 injury monitoring</label>
       <label><input type="checkbox" name="y.eval"> Other evaluation (SLP, OT, psych)</label>
     </div></div></div>
     <div class="drow"><div class="dlab">Records still to obtain</div><div class="dval"><textarea name="y.obtain" placeholder="e.g., prior-school FBA (requested 8/20); outside ABA report; medication list from prescriber (release needed)"></textarea></div></div>
@@ -1314,7 +1321,7 @@ table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-wei
     Vollmer, T. R., Roane, H. S., Ringdahl, J. E., &amp; Marcus, B. A. (1999). Evaluating treatment challenges with differential reinforcement of alternative behavior. <em>Journal of Applied Behavior Analysis, 32</em>(1), 9&ndash;23. &bull;
     Wilder, D. A., Atwell, J., &amp; Wine, B. (2006). The effects of varying levels of treatment integrity on child compliance during treatment with a three-step prompting procedure. <em>Journal of Applied Behavior Analysis, 39</em>(3), 369&ndash;373.<br><br>
     <b>Related forms in this set</b><br>
-    IC-1 informed consent &bull; IA-1 indirect functional assessment &bull; ABC-1 ABC recording &bull; SP-1 scatter plot &bull; DD-1 daily behavior data &bull; PA-1 preference assessment &bull; RA-1 reinforcer assessment &bull; EA-1 experimental analysis &bull; VI-1 variable isolation &bull; DT-1 delay tolerance &bull; TB-1 target behavior development &bull; TD-1 function-based treatment developer &bull; MS-1 medication side-effect monitoring.
+    DM-1 student profile &bull; IC-1 informed consent &bull; TB-1 target behavior development &bull; IA-1 indirect functional assessment &bull; IN-1 stakeholder interviews &bull; SI-1 student interview &bull; OB-1 direct observation &bull; ABC-1 ABC recording &bull; MT-1 interval recording &bull; SP-1 scatter plot &bull; DD-1 daily behavior data &bull; IM-1 injury monitoring &bull; PA-1 preference assessment &bull; RA-1 reinforcer assessment &bull; DA-1 demand assessment &bull; EA-1 experimental analysis &bull; VI-1 variable isolation &bull; DT-1 delay tolerance &bull; MS-1 medication side-effect monitoring &bull; FS-1 FBA summary report &bull; TD-1 function-based treatment developer &bull; CR-1 crisis and restraint.
   </div>
 </div>
 
@@ -1401,10 +1408,15 @@ function bars(title,rows,W){const H=18*rows.length+30,L=150,pw=W-L-40,max=Math.m
 const lc=s=>/^[A-Z][a-z]/.test(s)?s.charAt(0).toLowerCase()+s.slice(1):s;
 function topOf(rows){const r=rows.filter(x=>x[0]!=='(blank)');return r.length?r.filter(x=>x[1]===r[0][1]):[];}
 const isoOK=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'');
-function renderIncidents(){const inc=incidents(),rd=removalDays(inc),days=rd.total;
+/* v23.00 (review F27) the chance that, with n incidents falling on the five school days at random, the busiest day holds at least m:
+   1 − n! [x^n] (Σ_{k<m} x^k/k!)^5 / 5^n */
+function rrMaxDayP(n,m){let a=[1];const b=[];let f=1;for(let k=0;k<m&&k<=n;k++){if(k)f*=k;b.push(1/f);}
+ for(let d=0;d<5;d++){const c=new Array(Math.min(n,a.length-1+b.length-1)+1).fill(0);a.forEach((x,i)=>b.forEach((y,j)=>{if(i+j<c.length)c[i+j]+=x*y;}));a=c;}
+ let nf=1;for(let k=2;k<=n;k++)nf*=k;const under=(a[n]||0)*nf/Math.pow(5,n);return Math.max(0,Math.min(1,1-under));}
+function renderIncidents(){const inc=incidents(),rd=removalDays(inc),days=rd.head;   /* v23.00 (review F22) the school year's */
  const dated=inc.map(x=>x.d).filter(isoOK).sort();
  $('#stInc').textContent=inc.length;$('#stIncSub').textContent=dated.length?'first '+fmt(dated[0])+', last '+fmt(dated[dated.length-1]):'';
- $('#stDays').textContent=lgN(days);$('#stDaysSub').textContent=rd.legend;
+ $('#stDays').textContent=lgN(days);$('#stDaysSub').textContent=rd.legend;$('#stDaysH').textContent='DAYS REMOVED, '+rd.headY+' (LEDGER)';
  const tl=tally(inc,'l'),tt=tally(inc,'t'),tc=tally(inc,'c'),TL=topOf(tl),TT=topOf(tt),TC=topOf(tc),each=T=>T.length>1?' each':'';
  $('#stLoc').textContent=TL.length?TL.map(x=>x[0]).join('; '):'\u2014';$('#stLocSub').textContent=TL.length?TL[0][1]+' of '+inc.length+each(TL)+(TT.length?'; time: '+TT.map(x=>x[0]).join(' or '):''):'';
  $('#stAct').textContent=TC.length?TC.map(x=>x[0]).join('; '):'\u2014';$('#stActSub').textContent=TC.length?TC[0][1]+' of '+inc.length+each(TC):'';
@@ -1434,11 +1446,16 @@ function renderIncidents(){const inc=incidents(),rd=removalDays(inc),days=rd.tot
   const removal=inc.filter(x=>/suspension|office|removal|Seclusion/i.test(x.c)).length;if(!few&&removal/n>=0.5)parts.push(`Removal from the setting (office, suspension, seclusion, crisis removal) followed ${removal} of ${n} incidents. If the behavior is escape-maintained, these consequences may be reinforcing it; the record alone cannot distinguish that from a history of a consistent consequence.`);
   const conf=inc.filter(x=>/Conference|Parent contact/i.test(x.c)).length;if(!few&&conf/n>=0.5)parts.push(`Adult conference or parent contact followed ${conf} of ${n} incidents: a possible attention hypothesis to carry to IA-1.`);
   const dow={};inc.forEach(x=>{if(isoOK(x.d)){const w=new Date(x.d+'T12:00:00').getDay();dow[w]=(dow[w]||0)+1;}});const dd=Object.entries(dow).sort((a,b)=>b[1]-a[1]);const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  if(n>=5&&dd.length&&dd[0][1]/n>=0.4)parts.push(dd.filter(x=>x[1]===dd[0][1]).map(x=>`${x[1]} of ${n} incidents fall on ${DN[x[0]]}`).join(', and ')+': a day-of-week pattern to check against attendance, home schedule, and the SP-1 scatter plot.');
+  /* v23.00 (review F27) the busiest weekday is called a pattern only when incidents falling on the five school days at random would
+     give a day that busy less than 5% of the time; otherwise the count is given as a count */
+  {const wd=dd.filter(x=>x[0]>=1&&x[0]<=5),nw=wd.reduce((a,x)=>a+x[1],0),top=wd.length?wd[0][1]:0;
+   if(nw>=5&&top/nw>=0.4){const p=rrMaxDayP(nw,top),say=wd.filter(x=>x[1]===top).map(x=>`${x[1]} of ${nw} weekday incidents fall on ${DN[x[0]]}`).join(', and ');
+    parts.push(p<0.05?say+` (unlikely by chance: p = ${p<0.001?'< 0.001':p.toFixed(3)}): a day-of-week pattern to check against attendance, home schedule, and the SP-1 scatter plot.`
+      :say+`. With ${nw} incidents, a day this busy is common by chance (p = ${p.toFixed(3)}), so it is not a pattern yet; keep counting.`);}}
   v.innerHTML='<b>Pattern in the record</b>'+(parts.length?'<ul class="rules">'+parts.map(p=>'<li>'+esc(p)+'</li>').join('')+'</ul>':'No single location, time block, or consequence accounts for half of the documented incidents; the referral record alone does not suggest a pattern.')+noteHtml+'<div class="method" style="margin-top:6px">Referral counts reflect adult decisions to document; they do not estimate the behavior\'s rate. Treat each statement above as a hypothesis for interview and observation.</div>';}
  /* attendance */
  const A=attendance();$('#aRate').value=A.rate;$('#attReadout').textContent=A.note;
- return {inc,days,tl,tt,tc,A};}
+ return {inc,days,daysY:rd.headY,tl,tt,tc,A};}
 /* v21.16 audit (F8). The rate was computed from any two numbers: 12 absences in 10 days enrolled read "-20%". It is
    shown only for 0 <= days absent <= days enrolled, and the formula is stated under the fields. */
 function attendance(){const enr=num('a.enr'),ab=num('a.abs'),f=v=>v%1?v.toFixed(1):String(v),rule='Attendance rate = (days enrolled \u2212 days absent) \u00f7 days enrolled.';
@@ -1535,7 +1552,9 @@ function lgRow(r,i,isDay){const x={i,r,warn:[],dates:[],comp:null,days:0,by:{},o
  else{const z=lgDt(one?r.s:r.e);for(let d=lgDt(r.s),g=0;d<=z&&g<800;d.setDate(d.getDate()+1),g++)if(isDay(d))x.dates.push(ymd(d));
   if(!one&&pOK)x.warn.push('A portion of the day applies to one date only; clear the To date or the portion.');
   if(!x.dates.length)x.warn.push(one?'This date is not a school day on this form\'s calendar: a weekend or a listed no-school day.':'No school day falls between these dates on this form\'s calendar.');
-  x.part=one&&pOK&&x.dates.length?p:0;x.comp=x.part||x.dates.length;}
+  x.part=one&&pOK&&x.dates.length?p:0;x.comp=x.part||x.dates.length;
+  /* v23.00 (review F26) an office stay or a day cut short, with no portion entered, counts as a whole school day */
+  if(r.t==='partial'&&one&&p===null&&x.dates.length)x.warn.push('No portion of the day is entered, so this row counts as a whole school day. Enter the portion (for example 0.25 for an hour and a half), or leave it blank if the team counts the whole day.');}
  const ov=r.o===''?null:Number(r.o);
  if(ov!==null&&!(ov>=0))x.warn.push('The changed number of school days must be 0 or more; it is not used.');
  if(ov!==null&&ov>=0&&(x.comp===null||Math.abs(ov-x.comp)>E)){x.ovr=true;x.days=ov;if(!r.ow.trim())x.warn.push('Say why the number of school days differs from the dates.');}
@@ -1603,7 +1622,12 @@ function lgYear(o,isDay){const E=1e-9,Z=LG.yr[o.y]||lgYr(),SY=lgSYL(o.y);
     +(Z.mv?'; result recorded: '+lgLow(lgLab(LG_MV,Z.mv)):'')+'.',
    q:[['34 CFR \u00a7 300.530(e)(1)',LG_Q.e]]});}
  if(Z.mv==='yes')o.flags.push({k:'f',y:o.y,t:'Conduct found to be a manifestation',s:'Recorded'+(Z.md?' at the determination held '+fmt(Z.md):'')+': the conduct was a manifestation of the child\'s disability.',q:[['34 CFR \u00a7 300.530(f)',LG_Q.f]]});
- o.rows.filter(x=>x.r.g&&x.sy===o.y).forEach(x=>o.flags.push(lgGFlag(x)));}
+ o.rows.filter(x=>x.r.g&&x.sy===o.y).forEach(x=>o.flags.push(lgGFlag(x)));
+ /* v23.00 (review F28) back-to-back removals that run more than 10 consecutive school days: one removal in substance falls under
+    300.536(a)(1), which needs no pattern finding; the team decides whether they are one */
+ o.runs.filter(r=>r.n>10&&r.xs.length>1).forEach(r=>o.flags.push({k:'a1r',y:o.y,t:'A run of more than 10 consecutive school days across removals',
+  s:'Removals '+r.xs.map(x=>x.i+1).sort((a,b)=>a-b).join(' and ')+' run '+r.n+' consecutive school days ('+fmt(r.from)+' to '+fmt(r.to)+'). If they are in substance one removal, it is a removal for more than 10 consecutive school days and a change of placement without a pattern finding; the team decides, and records the decision below.',
+  q:[['34 CFR \u00a7 300.536(a)',LG_Q.a0+' '+LG_Q.a1]]}));}
 function put2(a,x){if(!a.includes(x))a.push(x);}
 function lgGFlag(x){const r=x.r;return {k:'g',y:x.sy,t:'Special circumstances',
  s:'Removal '+(x.i+1)+' ('+lgRange(r)+', '+lgLow(lgLab(LG_TYPES,r.t)||'Type not chosen')+', '+lgDays(x.days)+'): '+lgLab(LG_G,r.g)+'.'+(x.days>45+1e-9?' It is recorded as '+lgDays(x.days)+'; \u00a7 300.530(g) reads \u201cfor not more than 45 school days\u201d.':''),
@@ -1623,7 +1647,12 @@ function removalDays(inc){const C=LGC||lgCompute(),E=1e-9,notes=[];let top=null;
  const neg=LG.rows.filter(r=>r.src==='daysout'&&Number(r.was)<0).length;if(neg)notes.push(`${neg} row(s) have a negative number of days out; they are not counted.`);
  const miss=(inc||[]).filter(x=>LG_SUSP.includes(x.c)&&!LG.rows.some(r=>r.inc===x.i));
  if(miss.length)notes.push(miss.length+' incident'+(miss.length===1?' with a suspension as the action taken is':'s with a suspension as the action taken are')+' not in the removal ledger ('+miss.map(x=>x.d?fmt(x.d):'no date').join(', ')+'): use Add to ledger and classify '+(miss.length===1?'it':'each one')+', so the count is complete.');
- return {legend:n>10+E?'more than 10 school days in '+sy:n>=10-E?'10 school days in '+sy:n>=7-E?'approaching 10 school days in '+sy:'',notes,total:C.total};}
+ /* v23.00 (review F22) the 10-school-day provisions count by school year, so the headline is this school year's counted days (or the
+    latest year with a removal), and the sum over every year is named beside it */
+ const cy=lgSY(ymd(new Date())),hy=C.years.find(o=>o.y===cy)||C.years.slice().sort((a,b)=>b.y-a.y)[0]||null,hn=hy?hy.counted:0,hsy=hy?lgSYL(hy.y):lgSYL(cy);
+ const leg=(k,y)=>k>10+E?'more than 10 school days in '+y:k>=10-E?'10 school days in '+y:k>=7-E?'approaching 10 school days in '+y:'';
+ const many=C.years.length>1&&Math.abs(C.total-hn)>E;
+ return {legend:[leg(hn,hsy),many?lgN(C.total)+' counted over '+C.years.length+' school years':''].filter(Boolean).join('; '),notes,total:C.total,head:hn,headY:hsy,topLegend:leg(n,sy)};}
 /* ---- drawing ---- */
 const lgOpts=(list,blank)=>(blank?'<option value=""><\/option>':'')+list.map(([k,l])=>`<option value="${k}">${esc(l)}<\/option>`).join('');
 const lgTxt=(el,t)=>{if(el&&el.textContent!==t)el.textContent=t;};
@@ -1657,7 +1686,7 @@ function lgRenderNs(){const box=$('#rlNsEdit');
 function lgRenderAll(){lgRenderNs();lgRenderRows();lgDecSig=null;}
 function lgDecide(C){const need=[];
  C.years.forEach(o=>{const Z=LG.yr[o.y]||lgYr(),hasP=!!(Z.pd||Z.pv||Z.pb.trim()),hasC=!!(Z.cd||Z.nd||Z.md||Z.mv);
-  const P=o.series||hasP,Q=o.flags.some(f=>f.k==='a1')||Z.pv==='pattern'||hasC;if(P||Q)need.push([o.y,P,Q]);});
+  const P=o.series||hasP,Q=o.flags.some(f=>f.k==='a1'||f.k==='a1r')||Z.pv==='pattern'||hasC;   /* v23.00 (F28) */if(P||Q)need.push([o.y,P,Q]);});
  const sig=JSON.stringify(need),box=$('#rlDecide');if(sig===lgDecSig)return;lgDecSig=sig;
  box.innerHTML=need.length?need.map(([y,P,Q])=>`<fieldset class="rl-yr" data-y="${y}"><legend>${lgSYL(y)}<\/legend><div class="rl-grid">`
   +(P?`<p class="rl-sub rl-full">Pattern determination (34 CFR \u00a7 300.536(a)(2), (b)(1))<\/p><label class="rl-f"><span>Date of the determination<\/span><input type="date" data-k="pd"><\/label><label class="rl-f rl-wide"><span>Determination<\/span><select data-k="pv">${lgOpts(LG_PV)}<\/select><\/label><label class="rl-f rl-full"><span>Basis<\/span><textarea data-k="pb" rows="2"><\/textarea><\/label>`:'')
@@ -1745,7 +1774,7 @@ $('#incTbl').addEventListener('click',e=>{const b=e.target.closest('button[data-
  if(b.dataset.act==='go'||LG.rows.some(r=>r.inc===i)){lgGo(i);return;}
  if(LG.rows.length>=200)return;
  LG.rows.push(lgNewRow({s:lgISO(val(`ic[${i}].d`)),t:LG_ACT[val(`ic[${i}].c`)]||'other',inc:i}));lgRenderRows();lgStore();refresh();
- lgTxt($('#rlIncLive'),'Incident '+(i+1)+' is now removal '+LG.rows.length+' in the ledger, with its date and type. Set its end date and classification on the Removal days sheet.');
+ lgTxt($('#rlIncLive'),'Incident '+(i+1)+' is now removal '+LG.rows.length+' in the ledger, with its date and type. Set its end date, the portion of the day if it was part of one, and its classification on the Removal days sheet.');
  const nb=document.querySelector('#incTbl button[data-lgi="'+i+'"]');if(nb)nb.focus();});
 /* the workstation's field-by-field restore sets #rrLedgerStore and fires input and change; a value that is not a
    ledger changes nothing, and the store goes back to mirroring the ledger */
@@ -1768,7 +1797,7 @@ function refresh(){$$('.hd-client').forEach(x=>x.textContent=val('h.client'));$$
  $('#srcReadout').textContent=`${src} of ${SOURCES.length} record types marked reviewed; ${na} marked not available or requested.`;
  lgUpdate();const I=renderIncidents(),R=renderInt2();
  $('#syS').textContent=src;$('#sySSub').textContent=na?na+' not available':'';
- $('#syI').textContent=I.inc.length+' / '+lgN(I.days);
+ $('#syI').textContent=I.inc.length+' / '+lgN(I.days);$('#syISub').textContent='incidents in period; days removed in '+I.daysY+' (ledger)';
  $('#syP').textContent=R.length;$('#syPSub').textContent=R.filter(x=>/^Effective/.test(x.o)).length+' effective on data';
  $('#syA').textContent=I.A.txt;$('#syASub').textContent=I.A.sub;
  /* synthesis verdict */
@@ -1777,17 +1806,18 @@ function refresh(){$$('.hd-client').forEach(x=>x.textContent=val('h.client'));$$
     was proposed; "Partly" (confirmation by observation) passed with no observation proposed; records marked not
     available were only counted, although the Sources sheet says they are carried here as gaps; a review dated as
     completed before it started passed. */
- const suff=val('y.suff'),PROP=[['ia','IA-1'],['abc','ABC-1'],['sp','SP-1'],['dd','DD-1'],['pa','PA-1'],['ra','RA-1'],['ea','EA-1'],['vi','VI-1 / DT-1'],['ms','MS-1'],['eval','other evaluation']];
- const prop=PROP.filter(([k])=>val('y.'+k)).length,tests=PROP.filter(([k])=>/^(ia|abc|sp|dd|ea|vi)$/.test(k)&&val('y.'+k)).map(([,l])=>l);
+ const suff=val('y.suff'),PROP=[['ia','IA-1'],['in','IN-1'],['si','SI-1'],['abc','ABC-1'],['ob','OB-1'],['mt','MT-1'],['sp','SP-1'],['dd','DD-1'],['pa','PA-1'],['ra','RA-1'],['ea','EA-1'],['da','DA-1'],['vi','VI-1 / DT-1'],['ms','MS-1'],['im','IM-1'],['eval','other evaluation']];
+ /* v23.00 (review F29) interviews (IN-1, SI-1), observation (OB-1, MT-1) and the demand assessment (DA-1) are tests too */
+ const prop=PROP.filter(([k])=>val('y.'+k)).length,tests=PROP.filter(([k])=>/^(ia|in|si|abc|ob|mt|sp|dd|ea|da|vi)$/.test(k)&&val('y.'+k)).map(([,l])=>l);
  const naL=SOURCES.filter(([k])=>/not available|n\/a|missing|requested/i.test(val(`src.${k}.n`))).map(([k,l])=>k==='other'?(val('src.other.name')||'Other'):l);
  const gaps=[];
  if(!val('h.consent'))gaps.push('No consent date recorded (IC-1 or district form). Parental consent is not required before reviewing existing data (34 CFR \u00a7300.300(d)(1)(i)); record the date once consent for the FBA is obtained.');
  if(!val('h.end'))gaps.push('Review completion date missing.');else if(val('h.start')&&val('h.end')<val('h.start'))gaps.push('The review is dated as completed before it started; check the dates.');
  if(src<6)gaps.push('Fewer than six record types reviewed; check the inventory before concluding.');
- if(!items.length)gaps.push('No target behavior synthesized.');else if(!tests.length)gaps.push('No interview, observation, or analysis is proposed (IA-1, ABC-1, SP-1, DD-1, EA-1, VI-1 / DT-1): records suggest hypotheses about function but do not test them.');
+ if(!items.length)gaps.push('No target behavior synthesized.');else if(!tests.length)gaps.push('No interview, observation, or analysis is proposed (IA-1, IN-1, SI-1, ABC-1, OB-1, MT-1, SP-1, DD-1, EA-1, DA-1, VI-1 / DT-1): records suggest hypotheses about function but do not test them.');
  if(!suff)gaps.push('Sufficiency recommendation not selected.');
  if(suff==='no'&&!prop)gaps.push('Additional assessment is needed but none is proposed.');
- if(suff==='partial'&&!['abc','sp','dd'].some(k=>val('y.'+k)))gaps.push('Partly sufficient is selected, which proposes confirmation by observation, but no observation (ABC-1, SP-1, or DD-1) is proposed.');
+ if(suff==='partial'&&!['abc','ob','mt','sp','dd'].some(k=>val('y.'+k)))gaps.push('Partly sufficient is selected, which proposes confirmation by observation, but no observation (ABC-1, OB-1, MT-1, SP-1, or DD-1) is proposed.');
  $('#synVerdict').innerHTML='<b>Records-based summary</b>'+(items.length?'<ul class="rules">'+items.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')
   +(naL.length?`<div style="margin-top:4px">Records not available or requested (${naL.length}): ${esc(naL.join('; '))}.</div>`:'')
   +(suff?`<div style="margin-top:4px">Recommendation: existing data ${suff==='yes'?'sufficient':suff==='partial'?'partly sufficient; confirmation proposed':'not sufficient'}; ${prop} additional assessment(s) proposed.</div>`:'')
@@ -1993,9 +2023,15 @@ window.__nbhFactsOut=function(){try{const C=lgCompute(),E=1e-9,cy=lgSY(ymd(new D
  const list=rows.map(x=>{const it={date:x.r.s,days:Math.round((x.by[cy]!=null?x.by[cy]:x.days)*100)/100,kind:lgLab(LG_TYPES,x.r.t)||''};if(x.r.e&&x.r.e!==x.r.s)it.to=x.r.e;it.counted=LG_CNT[x.r.c]||'';return it;});
  const days=o?Math.round(o.counted*100)/100:0,R={};
  if(list.length)R.removals={days,list,at10:days>=10-E,year:lgSYL(cy)};
+ /* v23.00 (review F21) the flags this year raised and what the team recorded, so the workstation reports the team's decisions rather
+    than inferring them; the manifestation determination's due date only from a recorded decision to change placement */
+ if(o){const Zc=LG.yr[cy]||lgYr(),fl=[...new Set(o.flags.map(f=>f.k))];if(!R.removals&&(fl.length||Zc.cd))R.removals={days,list,at10:days>=10-E,year:lgSYL(cy)};
+  if(R.removals){R.removals.flags=fl;const dc={};if(Zc.pv)dc.pattern=Zc.pv;if(Zc.pd)dc.patternDate=Zc.pd;if(Zc.cd){dc.change=Zc.cd;const due=lgAfter(Zc.cd,10,C.isDay);if(due)dc.mdDue=due;}
+   if(Zc.nd)dc.notice=Zc.nd;if(Zc.md)dc.md=Zc.md;if(Object.keys(dc).length)R.removals.decision=dc;}}
  const yz=Object.keys(LG.yr).sort().reverse(),Z=LG.yr[cy]&&LG.yr[cy].md?LG.yr[cy]:(yz.map(y=>LG.yr[y]).find(z=>z&&z.md)||null);
  if(Z&&Z.md){R.mdr=Z.md;if(Z.mv)R.mdrResult=Z.mv==='yes'?'manifestation':'not a manifestation';}
- const iep=val('i.annual')||val('i.iepdate');if(iep)R.iep=iep;if(val('i.reeval'))R.reeval=val('i.reeval');if(val('h.consent'))R.consent=val('h.consent');
+ /* v23.00 (review F23) the annual review date only: the date the IEP was held goes as iepHeld, never as the review */
+ if(val('i.annual'))R.iep=val('i.annual');if(val('i.iepdate'))R.iepHeld=val('i.iepdate');if(val('i.reeval'))R.reeval=val('i.reeval');if(val('h.consent'))R.consent=val('h.consent');
  /* v22.97 (FS-1 review F176) the earlier plan: the current BIP's status and date, for Form FS-1's records paragraph */
  if(val('i.bipstat')||val('i.bipdate'))R.prior={bipStatus:val('i.bipstat'),bipDate:val('i.bipdate')};
  return Object.keys(R).length?{records:R}:null;}catch(e){return null;}};
