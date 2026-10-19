@@ -861,6 +861,10 @@ td input,td select{max-width:100%}
 #bipDlg textarea{display:block;width:100%;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid #c9d3d9;border-radius:2px;padding:8px}
 #bipDlg .bip-row{margin-top:10px;text-align:right}
 </style>
+<style id="td1-v2328">
+/* v23.28 (review F183) the BCBA's assessments, listed apart from the staff steps */
+.plan-assess{margin:3px 0 4px 1.2em;padding:0}.plan-assess li{margin:1px 0}
+</style>
 </head>
 
 <body class="view-setup">
@@ -1421,6 +1425,7 @@ td input,td select{max-width:100%}
   <h3 class="sub">Treatment Integrity Checklist</h3>
   <p class="method" style="margin-top:0">Generated from the steps on the build sheet; each is scored on the monitoring sheet. Integrity criterion: 90% of steps per observed session; errors that reinforce the problem behavior are flagged separately (St. Peter Pipkin et al., 2010).</p>
   <table class="rank cmp" id="fidTbl"><thead><tr><th class="n" style="width:6%">#</th><th style="width:18%">Component</th><th>Step</th></tr></thead><tbody></tbody></table>
+  <p class="hint" id="tdFidNote" hidden></p>
 
   <h3 class="sub">Reinforcement Thinning Plan</h3>
   <div class="hint noprint" id="tdSrNote" hidden></div><!-- v23.12 (review I136) Form SR-1's schedule, named beside the ladder -->
@@ -1560,7 +1565,7 @@ td input,td select{max-width:100%}
     <div class="nbh-print-meta"><div class="nbh-print-title">Function-Based Treatment Developer</div><div>Form TD-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">Integrity and Progress Log</div>
-  <p class="method" style="margin:0 0 8px">One row per session or observation. Level is the thinning level in effect. Steps correct / observed gives integrity. The graph plots the target behavior, the alternative response, and (dashed) integrity; the decision box applies the thinning rule to the sessions at the level now in effect (the latest session's phase and level), using the criterion entered below the graph, and applies the integrity criterion to each observed session. A phase named BL, A, A1 or Baseline is baseline. <span class="noprint">Set rows in the toolbar.</span></p>
+  <p class="method" style="margin:0 0 8px">One row per session or observation. Level is the thinning level in effect. Steps correct / observed gives integrity. The graph plots the target behavior, the alternative response, and (dashed) integrity; the decision box applies the thinning rule to the sessions at the level now in effect (the latest session's phase and level), using the criterion entered below the graph, and applies the integrity criterion to each observed session. A phase named BL, A, A1 or Baseline is baseline. Form DD-1 is the session record and Form TI-1 the integrity record; this log serves the thinning decision only, and an empty log stays out of the IEP packet. <span class="noprint">Set rows in the toolbar.</span></p>
   <table class="grid" id="monTbl"><thead><tr><th class="c" style="width:32px">#</th><th style="width:74px">Date</th><th style="width:11%">Phase</th><th class="c" style="width:44px">Level</th><th class="c" style="width:58px" id="thTarget">Target /min</th><th class="c" style="width:58px">Alt. resp. /min</th><th class="c" style="width:58px">% indep.</th><th class="c" style="width:48px">Steps ✓</th><th class="c" style="width:48px">Steps obs.</th><th class="c" style="width:40px">Reinf. error</th><th>Notes</th></tr></thead><tbody id="monBody"></tbody></table>
   <div class="figure" id="monFig"></div>
   <div class="legendrow" id="monLegend"></div>
@@ -2796,6 +2801,9 @@ $('#addCompBtn').addEventListener('click',()=>{const c=$('#addComp').value;if(c)
     generic extinction step */
  if(c==='R_PB'){const d=$('#compWrap').lastElementChild;if(d&&d.dataset.code==='R_PB')rbCardSync(null,d);}});
 document.addEventListener('click',e=>{if(e.target.dataset.rm){e.target.closest('.card').remove();}});
+/* v23.28 (review F183) the assessment and target-selection cards: done by the BCBA once or at review, not staff steps */
+const TD_ASSESS=new Set(['C_CSA','C_ACSA','C_HELMET','C_MEDREF','P_ASSESS','E_ASSESS','VBMAPP','EFL','AFLS','PEAK']);
+const tdIsAssess=c=>TD_ASSESS.has(c&&c.code!==undefined?c.code:c);
 function comps(){return $$('#compWrap .card').map(c=>({code:c.dataset.code,i:+c.dataset.i,name:LIB[c.dataset.code].name,steps:LIB[c.dataset.code].steps.map((s,k)=>val(`cp[${c.dataset.i}].s${k}`)).filter(Boolean)}));}
 
 /* ---------- plan ---------- */
@@ -2829,7 +2837,8 @@ function thinText(c,lv,j){if(!['NCE','NCR','DRO'].includes(c.code))return lv[1];
  if(j===4)return 'Terminal interval: '+fmtS(v)+(tm?'':' (until the card names one)')+cite;
  return pre+' \u00d7 '+Math.pow(2,j)+' ('+fmtS(v)+(v>=T?', the terminal interval':'')+')';}
 function renderPlan(){const cs=comps();$('#planSummary').innerHTML='<b>Components</b>'+(cs.length?cs.map(c=>`<span class="tag ok" style="margin-right:6px">${c.code}</span>${esc(c.name)}`).join('<br>'):'None yet.');
- const fb=$('#fidTbl tbody');let k=0;fb.innerHTML=cs.flatMap(c=>c.steps.map(s=>`<tr><td class="n">${++k}</td><td>${c.code}</td><td style="font-size:11.5px">${esc(s)}</td></tr>`)).join('')
+ const fb=$('#fidTbl tbody');let k=0;{const ax=cs.filter(tdIsAssess),fn=$('#tdFidNote');if(fn){fn.hidden=!ax.length;fn.textContent=ax.length?'Not scored here: '+ax.map(c=>c.name).join('; ')+'. The BCBA completes them; they are not staff steps.':'';}}
+ fb.innerHTML=cs.filter(c=>!tdIsAssess(c)).flatMap(c=>c.steps.map(s=>`<tr><td class="n">${++k}</td><td>${c.code}</td><td style="font-size:11.5px">${esc(s)}</td></tr>`)).join('')
   /* v21.44 (B3): the safety items of escape extinction (or physical guidance), scored like the steps */
   +(eeMode()?EE_FID[val('ee.pg')==='yes'?'yes':'no']:[]).map(s=>`<tr><td class="n">${++k}</td><td>Safety</td><td style="font-size:11.5px">${esc(s)}</td></tr>`).join('');
  const tb=$('#thinTbl tbody');const crit=val('mon.crit'),n=val('mon.n')||'3',ind=val('mon.ind')||'80';
@@ -2845,7 +2854,9 @@ const tdHasRep=()=>comps().some(c=>/^(FCT|FCT_CFA|DRA|DRI|DNRA|DRAAUTO)$|^(SBT_|
 const tdRule=(crit,ind,nn)=>'Advance one thinning level when the target is at or below '+(crit?crit+' per minute':'the criterion set on the monitoring sheet')
   +(tdHasRep()?' and the replacement is at least '+(ind||'80')+'% independent':'')+' for '+(nn||'3')+' consecutive sessions at the current level'
   +(tdHasRep()?'; with no percent-independent data, hold':' (no replacement response in this plan: the rate criterion only)')+'; step back after two consecutive sessions above criterion at that level.';
-function renderMon(){renderMonRows();const rows=monData();const el=$('#monFig'),lg=$('#monLegend');const base=num('m.rate');
+/* v23.28 (review F182) an empty log is marked, so the IEP packet leaves it out */
+function tdMonMark(){const mk=document.getElementById('monitor');if(mk)mk.classList.toggle('td-empty',!monData().length);}
+function renderMon(){renderMonRows();const rows=monData();tdMonMark();const el=$('#monFig'),lg=$('#monLegend');const base=num('m.rate');
  if(!rows.length){el.innerHTML='<h3>Progress</h3><div class="empty">No data yet.</div>';lg.innerHTML='';$('#monVerdict').innerHTML='<b>Decision</b>Enter sessions to evaluate.';return;}
  const W=640,H=270,L=46,R=46,T=22,B=40,pw=W-L-R,ph=H-T-B;const xmax=Math.max(...rows.map(r=>r.x),5);
  const nice=v=>{if(v<=0)return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const m=v/e;return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*e;};
@@ -2928,16 +2939,21 @@ function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={esca
  $('#finalHead').innerHTML=`<div class="sumhead"><div><b>Student</b><span>${esc(val('m.client'))}</span></div><div><b>Target behavior</b><span>${esc(val('m.beh'))}</span></div><div><b>${esc(tdFnHead())}</b><span>${esc(fnLabel)}</span></div></div>${tdFnNote()?`<p class="method" style="margin:4px 0 0">${esc(tdFnNote())}</p>`:''}
  <div class="defs"><div class="drow"><div class="dlab">Reinforcer and establishing operation</div><div class="dval" style="padding:5px 8px">${esc(val('m.reinf'))||'—'}</div></div><div class="drow"><div class="dlab">Replacement behavior</div><div class="dval" style="padding:5px 8px">${esc(val('m.repdesc'))||'See the teaching steps below'}</div></div><div class="drow"><div class="dlab">Components in this plan</div><div class="dval" style="padding:5px 8px">${cs.map(c=>esc(c.name)).join('; ')||'None selected yet.'}</div></div><div class="drow"><div class="dlab">Prepared by / date</div><div class="dval" style="padding:5px 8px">${esc(val('m.assessor'))} · ${esc(val('m.date'))||new Date().toLocaleDateString()}</div></div></div>`;
  let n=0;let out='';const used=new Set();
- GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code));if(!inG.length)return;out+=`<div class="plan-group">${esc(title)}</div>`;
+ GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c));if(!inG.length)return;out+=`<div class="plan-group">${esc(title)}</div>`;
   inG.forEach(c=>{used.add(c.code);const L=LIB[c.code];const params=L.params.map((p,k)=>[p[0],c.code==='EXT'&&k===1?eeP1Out(c.i):val(`cp[${c.i}].p${k}`)]).filter(x=>x[1]);const data=val(`cp[${c.i}].data`),mat=val(`cp[${c.i}].mat`);
    out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b><small>${esc(L.src)}</small></div>`;
    if(params.length||mat)out+=`<div class="plan-set">${params.map(x=>`<b>${esc(x[0])}:</b> ${esc(x[1])}`).join(' &nbsp;·&nbsp; ')}${mat?(params.length?' &nbsp;·&nbsp; ':'')+'<b>Materials:</b> '+esc(mat):''}</div>`;
    if(L.caution)out+=`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`;
    c.steps.forEach(s=>{n++;out+=stepRow(n,s);});
    if(data)out+=`<div class="plan-set"><b>Record:</b> ${esc(data)}</div>`;out+='</div>';});});
- const rest=cs.filter(c=>!used.has(c.code));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`;c.steps.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});}
+ const rest=cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`;c.steps.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});}
  const extras=finalExtras();
  extras.forEach(([title,lines,tail])=>{out+=`<div class="plan-group">${esc(title)}</div><div class="plan-comp">`;lines.forEach(s=>{n++;out+=stepRow(n,s);});out+=(tail||'')+'</div>';});
+ /* v23.28 (review F183) the BCBA's assessments, under their own heading and not numbered as staff steps */
+ {const asr=cs.filter(tdIsAssess);if(asr.length){out+='<div class="plan-group">Assessments the BCBA completes before or alongside the plan</div><p class="method" style="margin:2px 0 6px">Done by the BCBA, once or at review: they are not staff steps, and they are not scored for integrity.</p>';
+  asr.forEach(c=>{const L=LIB[c.code],params=L.params.map((p,k)=>[p[0],val(`cp[${c.i}].p${k}`)]).filter(x=>x[1]),data=val(`cp[${c.i}].data`);
+   out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b><small>${esc(L.src)}</small></div>`+(params.length?`<div class="plan-set">${params.map(x=>`<b>${esc(x[0])}:</b> ${esc(x[1])}`).join(' &nbsp;·&nbsp; ')}</div>`:'')+
+    (L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:'')+`<ul class="plan-assess">${c.steps.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul>`+(data?`<div class="plan-set"><b>Result:</b> ${esc(data)}</div>`:'')+'</div>';});}}
  $('#finalBody').innerHTML=out||'<div class="empty">No components yet. Send recommendations from the selection sheets, then return here.</div>';}
 function printFinal(){renderPlan();renderFinal();document.body.classList.add('print-final');const done=()=>{document.body.classList.remove('print-final');window.removeEventListener('afterprint',done);};window.addEventListener('afterprint',done);window.print();setTimeout(done,3000);}
 /* v21.44 (A1): a plan whose own words do not follow question 4 asks first; (B3) so does one whose escape extinction is
@@ -3077,7 +3093,7 @@ function tdPlanners(){const codes=new Set($$('#compWrap .card').map(c=>c.dataset
 window.addEventListener('beforeprint',()=>{try{tdPlanners();}catch(e){}});
 function guidePrint(){tdPlanners();const on=!!($('#printGuide')&&$('#printGuide').checked);['#guide','#refs'].forEach(q=>{const s=$(q);if(!s)return;s.classList.toggle('pr-skip',!on);Array.prototype.forEach.call(s.children,c=>{if(!c.dataset.prKeep)c.dataset.prKeep=c.classList.contains('noprint')?'1':'0';c.classList.toggle('noprint',!on||c.dataset.prKeep==='1');});});}
 $('#printGuide').addEventListener('change',guidePrint);window.addEventListener('beforeprint',guidePrint);
-window.addEventListener('message',ev=>{if(ev.data&&ev.data.nbh==='collect')guidePrint();});guidePrint();
+window.addEventListener('message',ev=>{if(ev.data&&ev.data.nbh==='collect'){tdMonMark();guidePrint();}});guidePrint();tdMonMark();   /* v23.28 (review F182) */
 $('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;restore({counts:{}});$('#simBanner').hidden=true;setView('setup');});
 window.addEventListener('beforeprint',()=>{renderModel();renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();renderPlan();renderFinal();renderMon();autosize();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
@@ -3124,8 +3140,8 @@ function bipText(){
     const mat=val(`cp[${c.i}].mat`);if(mat)lines.push('Materials and cues: '+mat);if(L.caution)lines.push('Caution: '+L.caution);c.steps.forEach(s=>{n++;lines.push(n+'. '+s);});
     const data=val(`cp[${c.i}].data`);if(data)lines.push('Record: '+data);return lines;};
   const used=new Set();
-  GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code));inG.forEach((c,k)=>{used.add(c.code);B.push(comp(c,k?null:title.toUpperCase()));});});
-  cs.filter(c=>!used.has(c.code)).forEach((c,k)=>B.push(comp(c,k?null:'OTHER COMPONENTS')));
+  GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c));inG.forEach((c,k)=>{used.add(c.code);B.push(comp(c,k?null:title.toUpperCase()));});});
+  cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c)).forEach((c,k)=>B.push(comp(c,k?null:'OTHER COMPONENTS')));
   B.push(['POSITIONING, SEATING, ATTENTION, AND SETTING-EVENT RULES',bipLine('Positioning',val('ant.pos')),bipLine('Seating',val('ant.seat')),bipLine('Attention and rapport schedule',val('ant.att')),bipLine('Setting events',val('ant.se'))]);
   B.push(['PROMPT HIERARCHY AND FADING',bipLine('Hierarchy',val('pr.hier')),bipLine('Fading rule',val('pr.fade')),bipLine('Reinforcement',val('pr.reinf'))]);
   B.push(['RESPONDING TO THE PRECURSOR AND THE TARGET BEHAVIOR',bipLine('On the precursor',val('rb.prec')),bipLine('On the target behavior',val('rb.target')),bipLine('After the episode',val('rb.after')),bipLine('Staff do not',val('rb.not'))]);
@@ -3140,6 +3156,9 @@ function bipText(){
     '- '+tdRule(crit,ind,nn),
     '- Integrity criterion '+(fid||'90')+'% of steps in each observed session; any session in which the behavior contacted the reinforcer is reviewed with the implementer the same week.',
     ioa?'- Agreement and fidelity plan: '+ioa:'']);
+  /* v23.28 (review F183) the BCBA's assessments, not numbered as staff steps */
+  cs.filter(tdIsAssess).forEach((c,k)=>{const L=LIB[c.code],lines=[k?null:'ASSESSMENTS THE BCBA COMPLETES (NOT STAFF STEPS)','Assessment: '+c.name];L.params.forEach((p,j)=>{const v=val(`cp[${c.i}].p${j}`);if(v)lines.push(p[0]+': '+v);});
+    if(L.caution)lines.push('Caution: '+L.caution);c.steps.forEach(x=>lines.push('- '+x));const d=val(`cp[${c.i}].data`);if(d)lines.push('Result: '+d);B.push(lines);});
   /* v21.82 (I): the least-restrictive review, who collects which data, social validity, review and exit, the student and
      family considerations, and the adoption record (td-v2182) */
   if(window.__td82Bip)try{window.__td82Bip(B,{comps:cs,bipLine});}catch(e){}
@@ -3187,8 +3206,8 @@ function extraCrit(title,line){if(/^Responding/.test(title))return /^(On the tar
 /* every line, in the order and with the numbers renderFinal prints; inList and crit after the BCBA's changes */
 function planLines(){const cs=comps(),L=[],used=new Set(),O=over();
   const push=(d,grp,comp,cmp,kind,sIn,sCrit,card)=>{d=T(d);L.push({n:L.length+1,d,grp,comp,cmp,kind,sIn:!kind&&!!sIn,sCrit:!kind&&(!!sCrit||(cmp==='con'&&CONSEQ.test(d))),card:!!card});};
-  GROUPS.forEach(([title,codes],gi)=>{cs.filter(c=>codes.includes(c.code)).forEach(c=>{used.add(c.code);c.steps.forEach(s=>push(s,title,c.name,GIVE.test(s)?'con':GCMP[gi]||'','',(gi===1||gi===3)&&GIVE.test(s),gi===4||REIN.test(s),true));});});
-  cs.filter(c=>!used.has(c.code)).forEach(c=>c.steps.forEach(s=>push(s,'Other components',c.name,'','',false,REIN.test(s),true)));
+  GROUPS.forEach(([title,codes],gi)=>{cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c)).forEach(c=>{used.add(c.code);c.steps.forEach(s=>push(s,title,c.name,GIVE.test(s)?'con':GCMP[gi]||'','',(gi===1||gi===3)&&GIVE.test(s),gi===4||REIN.test(s),true));});});
+  cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c)).forEach(c=>c.steps.forEach(s=>push(s,'Other components',c.name,'','',false,REIN.test(s),true)));
   finalExtras().forEach(([title,lines])=>lines.forEach(s=>{const kd=extraKind(title,s);push(s,title,'',kd?'':extraCmp(title,s),kd,extraIn(title,s),extraCrit(title,s),false);}));
   /* a plan with no lines of its own for staff: the cards' reinforcement and extinction steps are suggested instead */
   if(!L.some(x=>x.sIn&&!x.card))L.forEach(x=>{if(x.card&&!x.kind&&(REIN.test(x.d)||GCMP[GROUPS.findIndex(g=>g[0]===x.grp)]==='con'))x.sIn=true;});
@@ -4466,6 +4485,8 @@ window.__nbhFactsOut=function(){
      antecedent strategy under "the behaviour occurred" would tell staff to do it
      at exactly the wrong moment. */
   function phaseOf(code){
+    /* v23.28 (review F183) the BCBA's assessments are named apart, not given to staff as steps */
+    if (/^(C_CSA|C_ACSA|C_HELMET|C_MEDREF|P_ASSESS|E_ASSESS|VBMAPP|EFL|AFLS|PEAK)$/.test(code)) return 'bcba';
     if (PHASE[code]) return PHASE[code];
     if (/^A_/.test(code) || /^PA_/.test(code)) return 'before';
     if (/^S_/.test(code)) return 'timer';
@@ -4616,7 +4637,11 @@ window.__nbhFactsOut=function(){
     var before = group(cards, 'before'), timer = group(cards, 'timer'),
         teach = group(cards, 'teach'), alt = group(cards, 'alt'),
         bad = group(cards, 'problem'), safe = group(cards, 'safety'),
-        other = group(cards, 'other');
+        other = group(cards, 'other'), bcbaG = group(cards, 'bcba');
+    if (bcbaG.length) {
+      h += '<div class="fl-node" style="border-style:dashed"><div class="fl-step">For the BCBA &mdash; assessments done before or alongside the plan, not staff steps</div>' +
+        bcbaG.map(function(p){ return '<div class="fl-proc"><div class="fl-name"><span class="fl-code">' + fesc(p.code) + '</span>' + fesc(p.name) + '</div></div>'; }).join('') + '</div>' + arrow();
+    }
 
     if (before.length) {
       h += '<div class="fl-node"><div class="fl-step">Step 1 &mdash; before you start</div>' +

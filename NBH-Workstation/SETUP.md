@@ -9903,6 +9903,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.28: TD-1 lists the BCBA's assessments apart from the staff steps, and leaves an empty session log out of the IEP packet (review Wave 3)
+
+- **The BCBA's assessments (F183).** Ten cards are assessments or target selection the BCBA completes once or at review:
+  the competing-stimulus and augmented competing-stimulus assessments, the helmet re-test, the medical consultation, the
+  prompt and error-correction assessments, VB-MAPP, EFL, AFLS and PEAK. They were numbered as staff steps.
+  - The final plan and the BIP text list them last, under "Assessments the BCBA completes before or alongside the plan",
+    as a list, not numbered.
+  - The integrity checklist leaves them out and names them in a note.
+  - The plan's step list leaves them out, so Forms QS-1, TI-1, ST-1 and TV-1 do not take them as staff steps.
+  - The staff flowchart names them in a dashed "For the BCBA" box, not among the staff steps.
+- **The session log (F182).** The Integrity and Progress Log says Form DD-1 is the session record and Form TI-1 the
+  integrity record; the log serves the thinning decision only. A log with no session entered stays out of the IEP packet,
+  unless the packet keeps the empty boxes meant for handwriting.
+- qa/td1-w3c-test.js (13 checks).
+
 ### v23.27: RM-1 is made at plan time, takes the case's plan and baseline, scores the lean-baseline row in one convention, and prints the record without the literature (review Wave 3)
 
 - **At plan time (F308).** The case map lists RM-1 under Plan, after SR-1: the exposure to relapse and the inoculation plan,

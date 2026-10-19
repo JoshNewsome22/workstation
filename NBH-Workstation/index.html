@@ -2265,7 +2265,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.27';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.28';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3065,6 +3065,8 @@ function packetShape(x,i,mo,bag){
     if(blk&&blk!==root&&txt(blk).length<12000)push(blk);});
   root.querySelectorAll('.cite').forEach(push);
   if(mo.refs!=='form')refs.forEach(r=>{if(mo.refs==='end')(bag[id]=bag[id]||[]).push(...refLines(r));drop(r);});
+  /* v23.28 (TD-1 review F182) Form TD-1's Integrity and Progress Log with no session entered stays out; Form DD-1 is the record */
+  if(id==='TD-1'&&!mo.blanks)root.querySelectorAll('#monitor.td-empty').forEach(drop);
   /* one letterhead, then the section line above it */
   const heads=[...root.querySelectorAll('.nbh-print-head')];heads.slice(1).forEach(h=>h.remove());
   /* a table's caption and footer rows */
