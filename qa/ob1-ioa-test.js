@@ -33,14 +33,15 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  ok('obs 2 interval IOA between 85 and 93',sim.hand.iv>=85&&sim.hand.iv<=93,sim.hand.iv);
  ok('obs 2 peer IOA matches',sim.form.peerCount.p===sim.hand.peerCount&&sim.form.peerIv.p===sim.hand.peerIv);
  ok('obs 2 agreement line reads the figures',sim.line===`Agreement: count ${sim.hand.count}% (${sim.hand.counts[0]} and ${sim.hand.counts[1]}); intervals ${sim.hand.iv}% (${sim.hand.k} of ${sim.hand.n}); peer count ${sim.hand.peerCount}% (0 and 0); peer intervals ${sim.hand.peerIv}% (${sim.hand.pk} of ${sim.hand.n})`,sim.line);
- ok('obs 2 Agreement field is the interval IOA, read-only, titled',sim.agree.value===String(sim.hand.iv)&&sim.agree.readOnly===true&&/computed from the second observer/.test(sim.agree.title),sim.agree);
+ /* v22.99 (review F72) the Agreement field carries the total count IOA, the measure the counts rest on */
+ ok('obs 2 Agreement field is the count IOA, read-only, titled',sim.agree.value===String(sim.hand.count)&&sim.agree.readOnly===true&&/computed from the second observer/.test(sim.agree.title),sim.agree);
  ok('obs 2 sheet shows the observer-2 count row and interval rows',sim.rows===1&&sim.iv2===20&&sim.peerIv2===20&&sim.iv2on===2,{rows:sim.rows,iv2:sim.iv2,peerIv2:sim.peerIv2,on:sim.iv2on});
  ok('obs 2 count table: six columns, observer-2 interval cells',sim.ths===6&&JSON.stringify(sim.o2cells)==='["10%2 of 20","0%0 of 20"]',{ths:sim.ths,o2cells:sim.o2cells});
  ok('obs 1 (typed agreement, no second record) unchanged',sim.obs1===0&&sim.agree0==='90',{obs1:sim.obs1,agree0:sim.agree0});
- ok('summary() agree list keeps its contract',JSON.stringify(sim.summary)===JSON.stringify([{i:0,t:'90',v:90,ok:true},{i:1,t:String(sim.hand.iv),v:sim.hand.iv,ok:true}])&&sim.computed===1,{agree:sim.summary,computed:sim.computed});
+ ok('summary() agree list keeps its contract',JSON.stringify(sim.summary)===JSON.stringify([{i:0,t:'90',v:90,ok:true},{i:1,t:String(sim.hand.count),v:sim.hand.count,ok:true}])&&sim.computed===1,{agree:sim.summary,computed:sim.computed});
  const sumText=await page.evaluate(()=>document.querySelector('#sumBox').textContent);
- ok('summary sentence present',/Agreement was computed from a second observer’s record in 1 of 3 observations \(interval-by-interval for the interval sample, total count otherwise\)\./.test(sumText));
- ok('summary still names the typed and computed agreements',/Agreement with a second observer was recorded for 2 of 3 observations \(90%\)/.test(sumText),sumText.match(/Agreement[^.]*\./g));
+ ok('summary sentence present',/Agreement was computed from a second observer’s record in 1 of 3 observations \(total count agreement, the measure the counts and rates rest on; interval-by-interval only where no second count was taken\)\./.test(sumText));
+ ok('summary still names the typed and computed agreements',/Agreement with a second observer was recorded for 2 of 3 observations \(0% to 90%\)/.test(sumText),sumText.match(/Agreement[^.]*\./g));
  /* tick and untick on observation 1 */
  const tick=async on=>page.evaluate(on=>{const c=document.querySelectorAll('.obs-page')[0].querySelector('input[data-field="obs2On"]');c.checked=on;c.dispatchEvent(new Event('change',{bubbles:true}));},on);
  const look=()=>page.evaluate(()=>{const pg=document.querySelectorAll('.obs-page')[0],ag=pg.querySelector('input[data-field="agree"]');return {on:state.obs[0].obs2On,rows:pg.querySelectorAll('input[data-field="count2"]').length,ioa:pg.querySelectorAll('p.ioa').length,ioaText:(pg.querySelector('p.ioa')||{}).textContent,iv2:pg.querySelectorAll('button.iv[data-field="iv2"]').length,peerIv2:pg.querySelectorAll('button.iv[data-field="peerIv2"]').length,agree:ag.value,ro:ag.readOnly,sum:summary().agree[0]};});
@@ -50,7 +51,8 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  await page.evaluate(()=>{const e=document.querySelectorAll('.obs-page')[0].querySelector('input[data-field="count2"]');e.value='8';e.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(200);
  const t2=await look();
  const hand2=await page.evaluate(()=>{const o=state.obs[0];let k=0;for(let j=0;j<20;j++) if(!!o.iv[j]===!!o.iv2[j]) k++;return {ivp:Math.round(k*1000/20)/10,k,marked:o.iv.filter(Boolean).length};});
- ok('typed count 8 against 7: count IOA 87.5%, interval IOA from obs 1 marks against none',/^Agreement: count 87\.5% \(7 and 8\); intervals /.test(t2.ioaText)&&t2.ioaText.includes(`intervals ${hand2.ivp}% (${hand2.k} of 20)`)&&t2.agree===String(hand2.ivp)&&t2.ro===true&&t2.sum.t===String(hand2.ivp),{line:t2.ioaText,agree:t2.agree,hand:hand2});
+ /* v22.99 (review F71) an untouched observer-2 interval row is no record: no interval agreement until it holds a mark or is said to be scored */
+ ok('typed count 8 against 7: count IOA 87.5%, intervals not scored by the second observer',t2.ioaText==='Agreement: count 87.5% (7 and 8); intervals not scored by the second observer'&&t2.agree==='87.5'&&t2.ro===true&&t2.sum.t==='87.5',{line:t2.ioaText,agree:t2.agree,hand:hand2});
  /* mark a second-observer interval the first observer marked: agreement rises by one interval */
  const firstOn=await page.evaluate(()=>{const b=document.querySelectorAll('.obs-page')[0].querySelector('button.iv[data-field="iv"].on');return +b.dataset.iv;});
  await page.evaluate(j=>document.querySelectorAll('.obs-page')[0].querySelector('button.iv[data-field="iv2"][data-iv="'+j+'"]').click(),firstOn);await sleep(150);
@@ -63,7 +65,7 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  const t4=await look();
  ok('no interval sample: agreement is the count IOA, no interval rows',t4.agree==='87.5'&&t4.ro===true&&t4.ioaText==='Agreement: count 87.5% (7 and 8)'&&t4.iv2===0,t4);
  await page.evaluate(()=>{const s=document.querySelector('#ivLen');s.value='15';s.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(400);
- const t5=await look();ok('sample back on: interval rows and marks return',t5.iv2===20&&t5.agree===String(Math.round((hand2.k+1)*1000/20)/10),{iv2:t5.iv2,agree:t5.agree});
+ const t5=await look();ok('sample back on: interval rows and marks return',t5.iv2===20&&t5.agree==='87.5',{iv2:t5.iv2,agree:t5.agree});
  /* untick: everything goes, the typed agreement is back, the data is kept */
  await tick(false);await sleep(200);const t6=await look();
  ok('unticked: fields go, typed agreement back, second record kept in state',t6.on===false&&t6.rows===0&&t6.ioa===0&&t6.iv2===0&&t6.agree==='90'&&t6.ro===false&&t6.sum.t==='90'&&(await page.evaluate(()=>state.obs[0].count2==='8'&&state.obs[0].iv2.some(Boolean))),t6);
@@ -74,7 +76,7 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  await page.evaluate(()=>{state.obs=[];render();});
  await page.setInputFiles('#fileIn',{name:'sim_OB-1.json',mimeType:'application/json',buffer:Buffer.from(json)});await sleep(500);
  const back=await page.evaluate(()=>{const o=state.obs[1],pg=document.querySelectorAll('.obs-page')[1];return {n:state.obs.length,on:o.obs2On,count2:o.count2,iv2:o.iv2.filter(Boolean).length,rows:pg.querySelectorAll('input[data-field="count2"]').length,iv2btn:pg.querySelectorAll('button.iv[data-field="iv2"].on').length,agree:pg.querySelector('input[data-field="agree"]').value,line:pg.querySelector('p.ioa').textContent,obs1rows:document.querySelectorAll('.obs-page')[0].querySelectorAll('input[data-field="count2"]').length};});
- ok('file restores the second record and the computed agreement',back.n===3&&back.on===true&&back.count2==='2'&&back.iv2===2&&back.rows===1&&back.iv2btn===2&&back.agree===String(sim.hand.iv)&&back.line===sim.line&&back.obs1rows===0,back);
+ ok('file restores the second record and the computed agreement',back.n===3&&back.on===true&&back.count2==='2'&&back.iv2===2&&back.rows===1&&back.iv2btn===2&&back.agree===String(sim.hand.count)&&back.line===sim.line&&back.obs1rows===0,back);
  /* an older file without the fields */
  const old=JSON.parse(json);old.obs.forEach(o=>{delete o.obs2On;delete o.count2;delete o.peerCount2;delete o.iv2;delete o.peerIv2;});
  await page.setInputFiles('#fileIn',{name:'old_OB-1.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(old))});await sleep(500);
@@ -87,7 +89,7 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  const H=csv[0];
  ok('CSV header: four new columns at the end, earlier order kept',H.slice(-4).join('|')==='Student count (obs 2)|Peer count (obs 2)|Count IOA (%)|Interval IOA (%)'&&H.slice(0,23).join('|')==='Date|Start|End|Minutes|Setting|Activity|Arrangement|Announced|Count|Per hour|Peer count|Intervals scored|Peer intervals|Intervals sampled|Conditions present|What followed|Conclusion|Peer per hour|Interval method|Interval length (s)|Second observer|Agreement (%)|Limits on this record',H);
  const col=n=>H.indexOf(n);
- ok('CSV obs 2 row carries the second record and the IOA',csv[2][col('Student count (obs 2)')]==='2'&&csv[2][col('Peer count (obs 2)')]==='0'&&csv[2][col('Count IOA (%)')]===String(sim.hand.count)&&csv[2][col('Interval IOA (%)')]===String(sim.hand.iv)&&csv[2][col('Agreement (%)')]===String(sim.hand.iv)&&csv[2][col('Second observer')]==='Paraprofessional',csv[2].slice(-5));
+ ok('CSV obs 2 row carries the second record and the IOA',csv[2][col('Student count (obs 2)')]==='2'&&csv[2][col('Peer count (obs 2)')]==='0'&&csv[2][col('Count IOA (%)')]===String(sim.hand.count)&&csv[2][col('Interval IOA (%)')]===String(sim.hand.iv)&&csv[2][col('Agreement (%)')]===String(sim.hand.count)&&csv[2][col('Second observer')]==='Paraprofessional',csv[2].slice(-5));
  ok('CSV obs 1 and 3 rows: new columns blank, typed agreement kept',csv[1].slice(-4).join('')===''&&csv[3].slice(-4).join('')===''&&csv[1][col('Agreement (%)')]==='90'&&csv[3][col('Agreement (%)')]==='',[csv[1].slice(-5),csv[3].slice(-5)]);
  /* print: observer-2 rows and the line print on sheet 2 only; the checkbox never */
  await page.emulateMedia({media:'print'});await sleep(200);
@@ -111,11 +113,11 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  /* print page counts: blank against the pre-edit file */
  const p2=await ctx.newPage();wire(p2,log);
  const count=async url=>{await p2.goto(url);await sleep(600);await p2.emulateMedia({media:'print'});await sleep(300);const n=pages(await p2.pdf({preferCSSPageSize:true,printBackground:true}));await p2.emulateMedia({media:'screen'});return n;};
- /* the pre-edit copy lived in the working session; without it the v21.36 counts (blank 6, simulation 9) stand in */
+ /* the pre-edit copy lived in the working session; without it the v22.98 counts (blank 6, simulation 10) stand in */
  const havePre=fs.existsSync(PRE.replace('file://',''));
  const blankNow=await count(URL),blankPre=havePre?await count(PRE):6;
  await p2.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});await p2.evaluate(()=>document.querySelector('#simBtn').click());await sleep(600);
- await p2.emulateMedia({media:'print'});await sleep(300);const simPre=havePre?pages(await p2.pdf({preferCSSPageSize:true,printBackground:true})):9;
+ await p2.emulateMedia({media:'print'});await sleep(300);const simPre=havePre?pages(await p2.pdf({preferCSSPageSize:true,printBackground:true})):10;
  console.log('print pages: blank now',blankNow,'blank pre-edit',blankPre,'| simulation now',simPages,'simulation pre-edit',simPre);
  ok('blank form print page count unchanged',blankNow===blankPre,{now:blankNow,pre:blankPre});
  ok('simulation print grew by at most the lines added',simPages<=simPre+1,{now:simPages,pre:simPre});

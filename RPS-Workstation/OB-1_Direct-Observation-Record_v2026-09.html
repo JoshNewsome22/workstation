@@ -1405,10 +1405,13 @@ body.view-obs #obRec{display:block}
   <div class="tblwrap"><table class="grid" id="sumTbl"></table></div>
   <p class="method" id="sumNote"></p>
 
-  <h3 class="sub">Conditions Present When the Behavior Occurred</h3>
-  <p class="method">Counted across observations in which the behavior was seen at all. A condition
+  <!-- v22.99 (review I36) the heading and the note follow the record: conditions ticked on every observation are compared -->
+  <h3 class="sub" id="condHead">Conditions Present When the Behavior Occurred</h3>
+  <p class="method" id="condNote">Counted across observations in which the behavior was seen at all. A condition
   that is present in most of them is a hypothesis to test, not a finding: it may simply be the
   condition the student is in most of the day.</p>
+  <p class="method noprint" id="condAllRow"><label class="chk"><input type="checkbox" id="condAll"> Conditions were ticked on every
+  observation, with or without the behavior</label></p>
   <table class="grid" id="condTbl"></table>
 
   <h3 class="sub">What Followed the Behavior</h3>
@@ -1418,13 +1421,19 @@ body.view-obs #obRec{display:block}
   <p class="method" id="sumRules"><b>How These Statements Are Made</b>They are working conventions
   of this form. Entries the figures cannot use come first. A condition is named as present in every
   observation once the behavior occurred in at least two observations and the condition was ticked
-  on each of them. Demands withdrawn is named when it was ticked on at least 60% of the observations
-  in which the behavior occurred, and on at least two; removal is named whenever it was ticked. The
-  peer comparison pools each row of the interval sample over every observation: discrepant when the
-  student&rsquo;s percentage is at least twice the peer&rsquo;s, not clearly discrepant when it is less
-  than one and a half times the peer&rsquo;s. Nothing is said between the two, or when no peer
-  interval is marked, because the form cannot tell a peer at 0% from a peer who was not scored.
-  Agreement below 80% is named for each observation.</p>
+  on each of them. When conditions are ticked on every observation, with or without the behavior, a
+  condition is also named when the behavior occurred in every observation with it and in none without
+  it, and one present in every observation is named as one these observations cannot judge. Demands
+  withdrawn, attention given, and an item or activity given are each named when ticked on at least 60%
+  of the observations in which the behavior occurred, and on at least two; removal is named whenever it
+  was ticked. The peer comparison pools each row of the interval sample over every observation and
+  gives the intervals behind each percentage: discrepant when the student&rsquo;s percentage is at
+  least twice the peer&rsquo;s and at least 10 of the student&rsquo;s intervals are marked; higher than
+  the peer&rsquo;s but too few to call discrepant with fewer marked; not clearly discrepant when it is
+  less than one and a half times the peer&rsquo;s. Nothing is said between the two, or when no peer
+  interval is marked, because the form cannot tell a peer at 0% from a peer who was not scored. The
+  whole observations&rsquo; counts and rates are given beside it. Agreement below 80% is named for each
+  observation and each figure: total count, interval-by-interval, scored-interval and unscored-interval.</p>
 
   <h3 class="sub">Statement for the FBA Summary (Form FS-1)</h3>
   <div class="defs">
@@ -1470,8 +1479,11 @@ body.view-obs #obRec{display:block}
   100 (Cooper, Heron, &amp; Heward, 2020). Interval-by-interval agreement is inflated when the behavior is very
   frequent or very rare, so the form also computes scored-interval IOA (intervals both scored over intervals
   either scored), the stricter check for a rare behavior, and unscored-interval IOA (both unscored over either
-  unscored), the stricter check for a frequent one; each is flagged below 80%. The Agreement (%) field stays
-  typed for an agreement computed elsewhere.</div>
+  unscored), the stricter check for a frequent one; each is flagged below 80%. The Agreement (%) field holds the
+  total count IOA, since the counts and rates rest on the count (the interval figure only where no second count
+  was taken), and stays typed for an agreement computed elsewhere. The second observer&rsquo;s interval rows count
+  once they hold a mark, or once the box under them says both rows were scored: an untouched row is not a record
+  of nothing seen.</div>
   <div class="warn"><b>Applied guidance</b>Bring the definition from Form TB-1 and read it once
   before starting. Agree with the teacher beforehand where you will sit, that you will not respond to
   the student, and what you will do if the student approaches you. Tell the teacher you are recording
@@ -1592,7 +1604,10 @@ const CONS = [
   ["reprimand", "Reprimand or correction"],
   ["talk",      "Discussion about the behavior"],
   ["escape",    "Demand withdrawn, reduced, or delayed"],
-  ["access",    "Access to an item, activity, or attention"],
+  /* v22.99 (review I37) attention and an item told apart; the single box stays for older records, shown where it was ticked */
+  ["attnGiven", "Attention given (comfort, conversation, an adult staying close)"],
+  ["item",      "An item or activity given"],
+  ["access",    "Access to an item, activity, or attention (older record: not told apart)"],
   ["removal",   "Removed from the area or sent to the office"],
   ["seclusion", "Secluded alone in a room or area (prohibited for a student with an IEP: report it)"],   /* v22.41 (review F70) apart from removal */
   ["restraint", "Physical restraint (parent notice that school day; incident report within 24 hours)"],
@@ -1605,7 +1620,7 @@ const METHODS = {partial:"Partial interval", whole:"Whole interval", mts:"Moment
 
 const state = {
   meta:{},
-  cfg:{ ivLen:15, ivMethod:"partial", ivN:20 },
+  cfg:{ ivLen:15, ivMethod:"partial", ivN:20, condAll:true },   /* v22.99 (review I36) a new record ticks conditions on every observation */
   obs:[]
 };
 
@@ -1659,7 +1674,9 @@ function blank(){
            ante:{}, cons:{}, conclusion:"",
            count:"", peerCount:"", iv:[], peerIv:[], ivUsed:false, notes:"",
            /* v21.36 OB-1: a second observer's record, shown when obs2On */
-           obs2On:false, count2:"", peerCount2:"", iv2:[], peerIv2:[] };
+           obs2On:false, count2:"", peerCount2:"", iv2:[], peerIv2:[],
+           /* v22.99 (review F71) the second observer scored both interval rows: an unmarked interval is then a record of none */
+           iv2On:false };
 }
 
 /* ---------------------------------------------------- v21.32 OB-1: times, lines, the note box, the Log */
@@ -1793,8 +1810,12 @@ const AGREE_TIP = "computed from the second observer's record";
 function ivNow(){ return state.cfg.ivLen ? Math.max(0, +state.cfg.ivN||0) : 0; }
 function obs2Any(o){
   return !!(o && o.obs2On && (String(o.count2==null?"":o.count2).trim() !== "" || String(o.peerCount2==null?"":o.peerCount2).trim() !== ""
-    || (o.iv2||[]).some(Boolean) || (o.peerIv2||[]).some(Boolean)));
+    || (o.iv2||[]).some(Boolean) || (o.peerIv2||[]).some(Boolean) || o.iv2On));
 }
+/* v22.99 (review F71) a second observer's interval row is a record once it holds a mark, or once the box under the rows says
+   both were scored; an untouched row is not 'scored as not occurring' */
+function iv2Scored(o){ return !!(o && (o.iv2On || (o.iv2||[]).some(Boolean))); }
+function peerIv2Scored(o){ return !!(o && (o.iv2On || (o.peerIv2||[]).some(Boolean))); }
 function countIOA(a, b){
   const x = cnt(a), y = cnt(b);
   if(x === null || y === null || Number.isNaN(x) || Number.isNaN(y)) return null;
@@ -1821,10 +1842,33 @@ function ioa(o){
   if(!obs2Any(o)) return null;
   const n = ivNow();
   const r = { count: countIOA(o.count, o.count2), peerCount: countIOA(o.peerCount, o.peerCount2),
-              iv: n ? ivIOA(o.iv||[], o.iv2||[], n) : null, peerIv: n ? ivIOA(o.peerIv||[], o.peerIv2||[], n) : null };
-  r.agree = r.iv ? r.iv.p : (r.count ? r.count.p : null);
-  r.su = n ? suIOA(o.iv||[], o.iv2||[], n) : null; r.peerSu = n ? suIOA(o.peerIv||[], o.peerIv2||[], n) : null;   /* v21.37 */
+              iv: n && iv2Scored(o) ? ivIOA(o.iv||[], o.iv2||[], n) : null, peerIv: n && peerIv2Scored(o) ? ivIOA(o.peerIv||[], o.peerIv2||[], n) : null };
+  /* v22.99 (review F72) the agreement carried is the total count IOA: the counts and rates rest on the count, and
+     interval-by-interval agreement is inflated for a rare behavior; the interval figure only where no second count was taken */
+  r.agree = r.count ? r.count.p : (r.iv ? r.iv.p : null);
+  r.su = n && iv2Scored(o) ? suIOA(o.iv||[], o.iv2||[], n) : null; r.peerSu = n && peerIv2Scored(o) ? suIOA(o.peerIv||[], o.peerIv2||[], n) : null;   /* v21.37 */
+  r.ivNot = !!(n && !iv2Scored(o));   /* v22.99 (F71) */
   return r;
+}
+/* v22.99 (review F72) every agreement figure below 80%, named, for the summary and the FS-1 statement */
+function ioaLow(a){
+  if(!a) return [];
+  const L = [], f = (x, w) => { if(x && x.p < 80) L.push(w(x)); };
+  f(a.count, x => "total count agreement " + x.p + "% (counts of " + x.a + " and " + x.b + ")");
+  f(a.iv, x => "interval-by-interval " + x.p + "% (" + x.k + " of " + x.n + ")");
+  if(a.su){ f(a.su.scored, x => "scored-interval " + x.p + "% (" + x.k + " of " + x.n + ")"); f(a.su.unscored, x => "unscored-interval " + x.p + "% (" + x.k + " of " + x.n + ")"); }
+  f(a.peerCount, x => "peer count agreement " + x.p + "% (counts of " + x.a + " and " + x.b + ")");
+  f(a.peerIv, x => "peer interval-by-interval " + x.p + "% (" + x.k + " of " + x.n + ")");
+  if(a.peerSu) f(a.peerSu.scored, x => "peer scored-interval " + x.p + "% (" + x.k + " of " + x.n + ")");
+  return L;
+}
+/* v22.99 (review F72) one observation's agreement in the words of the FS-1 statement */
+function ioaWords(a){
+  const P = [];
+  if(a.count) P.push("total count " + a.count.p + "% (counts of " + a.count.a + " and " + a.count.b + ")");
+  if(a.iv) P.push("interval-by-interval " + a.iv.p + "%");
+  if(a.su && a.su.scored) P.push("scored-interval " + a.su.scored.p + "%");
+  return P.join(", ");
 }
 /* the agreement a sheet carries: computed from the second record where there is one, else as typed */
 function agreeOf(o){ const a = ioa(o); return a && a.agree !== null ? String(a.agree) : String(o.agree==null?"":o.agree); }
@@ -1835,6 +1879,7 @@ function ioaText(o){
   if(a.iv) parts.push("intervals " + a.iv.p + "% (" + a.iv.k + " of " + a.iv.n + ")");
   if(a.peerCount) parts.push("peer count " + a.peerCount.p + "% (" + a.peerCount.a + " and " + a.peerCount.b + ")");
   if(a.peerIv) parts.push("peer intervals " + a.peerIv.p + "% (" + a.peerIv.k + " of " + a.peerIv.n + ")");
+  if(a.ivNot) parts.push("intervals not scored by the second observer");   /* v22.99 (F71) */
   return "Agreement: " + (parts.length ? parts.join("; ") : "nothing to compute yet (a count is a whole number)");
 }
 const IOA_EMPTY = "Agreement: enter the second observer's count, or mark the second observer's intervals.";
@@ -1942,7 +1987,10 @@ function obsHTML(o, i, n){
       + ivRow(o.peerIv, i, "peerIv", "Peer", ivN)
       + (o.obs2On ? ivRow(o.iv2 || (o.iv2 = []), i, "iv2", "Student (observer 2)", ivN)
                   + ivRow(o.peerIv2 || (o.peerIv2 = []), i, "peerIv2", "Peer (observer 2)", ivN) : '')
-      + '</tbody></table></div>';
+      + '</tbody></table></div>'
+      /* v22.99 (review F71) both of the second observer's rows were scored, so an unmarked interval is a record of none */
+      + (o.obs2On ? '<p class="method noprint iv2chk"><label class="chk"><input type="checkbox" data-obs="' + i + '" data-field="iv2On"'
+        + (o.iv2On ? ' checked' : '') + '> Observer 2 scored both interval rows: an interval left unmarked means the behavior was not seen in it</label></p>' : '');
   }
 
   /* --- narrative --- */
@@ -1962,8 +2010,11 @@ function obsHTML(o, i, n){
 
   /* --- conditions --- */
   h += '<div class="twoup">'
-     + '<div><h3 class="sub">Conditions Present When the Behavior Occurred</h3>' + boxes(i, "ante", ANTE, o.ante) + '</div>'
-     + '<div><h3 class="sub">What Followed the Behavior</h3>' + boxes(i, "cons", CONS, o.cons) + '</div>'
+     /* v22.99 (review I36) on a record that ticks them on every observation, the conditions present whether or not the
+        behavior occurred; (I37) an older record's single access box shows only where it was ticked */
+     + '<div><h3 class="sub">' + (state.cfg.condAll ? 'Conditions Present During the Observation' : 'Conditions Present When the Behavior Occurred') + '</h3>'
+       + (state.cfg.condAll ? '<p class="method noprint condhint">Tick each one present, whether or not the behavior occurred.</p>' : '') + boxes(i, "ante", ANTE, o.ante) + '</div>'
+     + '<div><h3 class="sub">What Followed the Behavior</h3>' + boxes(i, "cons", CONS.filter(([k]) => k !== "access" || (o.cons && o.cons.access)), o.cons) + '</div>'
      + '</div>';
 
   h += '<div class="defs">'
@@ -2034,7 +2085,9 @@ function cleanCfg(c){
   c = c && typeof c === "object" ? c : {};
   return { ivLen: c.ivLen != null && [0,10,15,30,60].includes(+c.ivLen) ? +c.ivLen : 15,
            ivMethod: Object.prototype.hasOwnProperty.call(METHODS, c.ivMethod) ? c.ivMethod : "partial",
-           ivN: Math.max(4, Math.min(60, Math.round(+c.ivN) || 20)) };
+           ivN: Math.max(4, Math.min(60, Math.round(+c.ivN) || 20)),
+           /* v22.99 (review I36) an older file ticked conditions only when the behavior occurred */
+           condAll: c.condAll === true };
 }
 function cfgText(c){
   return c.ivLen ? METHODS[c.ivMethod].toLowerCase() + ", " + c.ivN + " × " + c.ivLen + " s intervals"
@@ -2083,6 +2136,10 @@ function refreshHeads(){
     const hc = pg.querySelector("td.howc"); if(hc) hc.textContent = howCount(minutesOf(o));
   });
 }
+/* v22.99 (review I40) the consent the case holds (Form IC-1), for the observation plan's date check */
+let obConsent = null;
+const obIso = v => { const t = String(v||"").trim(); let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t); if(m) return m[1] + "-" + m[2] + "-" + m[3];
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(t); return m ? (m[3].length === 2 ? "20" + m[3] : m[3]) + "-" + ("0" + m[1]).slice(-2) + "-" + ("0" + m[2]).slice(-2) : ""; };
 function planNote(){
   const box = $("#planBox");
   const n = state.obs.length;
@@ -2098,6 +2155,15 @@ function planNote(){
     if(arr.size >= 2) parts.push("Contrasting arrangements are covered (" + [...arr].join("; ") + ").");
     if(!unannounced && n >= 2) parts.push("All observations are announced; an unannounced one tells you whether the announced ones were typical.");
     if(dated < n) parts.push((n-dated) + " observation" + (n-dated===1?" has":"s have") + " no date.");
+    /* v22.99 (review I40) the observation dates against the parent's consent: the first thing a reader of an FBA checks */
+    const cd = obConsent && obConsent.on ? obIso(obConsent.date) : "";
+    if(cd){
+      const before = state.obs.map((o, i) => ({ i, d: obIso(o.date) })).filter(x => x.d && x.d < cd);
+      const ds = state.obs.map(o => obIso(o.date)).filter(Boolean).sort();
+      if(before.length) parts.push("Observation" + (before.length === 1 ? " " : "s ") + before.map(x => (x.i+1) + " (" + fmtDate(x.d) + ")").join(" and ")
+        + (before.length === 1 ? " is" : " are") + " dated before the parent\u2019s consent (" + fmtDate(cd) + ", Form IC-1). An observation for the FBA follows consent: check the date, or say on the sheet why it was done before.");
+      else if(ds.length) parts.push("Consent on file since " + fmtDate(cd) + " (Form IC-1); the observations are dated " + fmtDate(ds[0]) + (ds.length > 1 && ds[ds.length-1] !== ds[0] ? " to " + fmtDate(ds[ds.length-1]) : "") + ", after it.");
+    }
   }
   box.innerHTML = "<b>Observation plan</b>" + (parts.length
     ? '<ul class="rules">' + parts.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>"
@@ -2170,8 +2236,14 @@ function summary(){
     .filter(a => a.t !== "")
     .map(a => ({ i:a.i, t:a.t, v:+a.t, ok:/^\d+(\.\d+)?$/.test(a.t) && +a.t <= 100 }));
   const computed = rows.filter(r => r.ioa && r.ioa.agree !== null).length;
+  /* v22.99 (review I36) each condition over the observations with it and without it, on a record that ticks them on every
+     observation: an observation counts once anything was recorded on it */
+  const seen = rows.filter(r => r.mins || r.c !== null || r.any), cond = {};
+  ANTE.forEach(([k]) => { const w = seen.filter(r => r.o.ante && r.o.ante[k]), wo = seen.filter(r => !(r.o.ante && r.o.ante[k]));
+    cond[k] = { pres:w.length, presB:w.filter(r => r.any).length, abs:wo.length, absB:wo.filter(r => r.any).length }; });
   return { rows, totalMin, withAny, ante, cons, totC, totPC, counted:counted.length, pCounted:pCounted.length,
-           paired:paired.length, rateAll, peerRateAll, ivTot, ivPTot, ivAll, ivN, agree, computed };
+           paired:paired.length, rateAll, peerRateAll, ivTot, ivPTot, ivAll, ivN, agree, computed,
+           cond, seen:seen.length, condAll:!!state.cfg.condAll };
 }
 /* the agreements recorded, as "90%" or "75% to 90%" */
 function agreeRange(list){
@@ -2179,6 +2251,9 @@ function agreeRange(list){
   return lo === hi ? lo + "%" : lo + "% to " + hi + "%";
 }
 
+/* v22.99 (review F73) the fewest marked intervals of the student's from which the pooled sample is called discrepant: a working
+   convention of this form, like the ratio */
+const OB_DISC_MIN = 10;
 function renderSummary(){
   const d = summary();
   const settings = settingList();
@@ -2267,7 +2342,24 @@ function renderSummary(){
     }
     return t + "</tbody>";
   };
-  $("#condTbl").innerHTML = tally(ANTE, d.ante, d.withAny.length, "Condition");
+  /* v22.99 (review I36) a record that ticks conditions on every observation compares the observations with and without each */
+  { const ca = $("#condAll"); if(ca) ca.checked = d.condAll;
+    $("#condHead").textContent = d.condAll ? "Conditions Present, With and Without the Behavior" : "Conditions Present When the Behavior Occurred";
+    $("#condNote").innerHTML = d.condAll
+      ? "Each condition over the observations in which it was present and those in which it was not. A condition present in most observations with the behavior is still a hypothesis to test: the comparison shows whether the behavior also occurred without it."
+      : "Counted across observations in which the behavior was seen at all. A condition that is present in most of them is a hypothesis to test, not a finding: it may simply be the condition the student is in most of the day. This record ticked conditions only when the behavior occurred; tick the box below once they are ticked on every observation.";
+    if(d.condAll){
+      let t = '<thead><tr><th>Condition</th><th class="c" style="width:120px">With the behavior</th><th class="c" style="width:150px">Behavior when present</th>'
+            + '<th class="c" style="width:150px">Behavior when absent</th></tr></thead><tbody>';
+      const any = ANTE.filter(([k]) => d.cond[k].pres > 0);
+      if(!d.seen || !any.length) t += '<tr><td colspan="4" style="color:var(--ink-soft)">Nothing recorded yet.</td></tr>';
+      else any.sort((a,b) => d.ante[b[0]] - d.ante[a[0]] || d.cond[b[0]].pres - d.cond[a[0]].pres).forEach(([k,label]) => { const c = d.cond[k];
+        t += "<tr><td>" + esc(label) + "</td>"
+          + '<td class="c">' + d.ante[k] + " of " + d.withAny.length + "</td>"
+          + '<td class="c">' + c.presB + " of " + c.pres + "</td>"
+          + '<td class="c">' + (c.abs ? c.absB + " of " + c.abs : "never absent") + "</td></tr>"; });
+      $("#condTbl").innerHTML = t + "</tbody>";
+    } else $("#condTbl").innerHTML = tally(ANTE, d.ante, d.withAny.length, "Condition"); }
   $("#consTbl").innerHTML = tally(CONS, d.cons, d.withAny.length, "What followed");
 
   const parts = [];
@@ -2289,27 +2381,49 @@ function renderSummary(){
     });
     if(!d.withAny.length) parts.push("The behavior was not seen in any observation. That is a finding: check the definition against Form TB-1, and whether the observations covered the conditions the referral names.");
     const top = ANTE.filter(([k]) => d.ante[k] === d.withAny.length && d.withAny.length >= 2);
-    if(top.length) parts.push("Present in every observation in which the behavior occurred: "
-      + top.map(([,l]) => l.toLowerCase()).join("; ") + ". Carry to Form ABC-1 for conditional probabilities before treating it as the antecedent.");
+    /* v22.99 (review I36) with conditions ticked on every observation: the ones the behavior followed, and the ones always present */
+    const only = d.condAll ? top.filter(([k]) => d.cond[k].abs >= 1 && d.cond[k].absB === 0) : [];
+    const always = d.condAll ? top.filter(([k]) => d.cond[k].abs === 0) : [];
+    only.forEach(([k,l]) => parts.push("The behavior occurred in every observation with " + l.toLowerCase() + " and in none without it ("
+      + d.cond[k].presB + " of " + d.cond[k].pres + " against 0 of " + d.cond[k].abs + "). Carry to Form ABC-1 for conditional probabilities before treating it as the antecedent."));
+    if(always.length) parts.push("Present in every observation, with or without the behavior: " + always.map(([,l]) => l.toLowerCase()).join("; ")
+      + ". These observations cannot show whether it matters; an observation without it would.");
+    const rest = d.condAll ? top.filter(x => only.indexOf(x) < 0 && always.indexOf(x) < 0) : top;
+    if(rest.length) parts.push("Present in every observation in which the behavior occurred: "
+      + rest.map(([,l]) => l.toLowerCase()).join("; ") + ". Carry to Form ABC-1 for conditional probabilities before treating it as the antecedent.");
     if(d.cons.escape && d.cons.escape >= Math.max(2, d.withAny.length*0.6))
       parts.push("Demands were withdrawn or reduced after the behavior in " + d.cons.escape + " of " + d.withAny.length + " observations: an escape hypothesis worth testing, and a plan risk if it continues.");
+    /* v22.99 (review I37) attention and an item or activity, each by the same rule */
+    if(d.cons.attnGiven && d.cons.attnGiven >= Math.max(2, d.withAny.length*0.6))
+      parts.push("Attention was given after the behavior in " + d.cons.attnGiven + " of " + d.withAny.length + " observations: an attention hypothesis worth testing.");
+    if(d.cons.item && d.cons.item >= Math.max(2, d.withAny.length*0.6))
+      parts.push("An item or activity was given after the behavior in " + d.cons.item + " of " + d.withAny.length + " observations: a tangible hypothesis worth testing.");
     if(d.cons.removal) parts.push("Removal from the setting followed the behavior in " + d.cons.removal + " observation" + (d.cons.removal===1?"":"s") + ". Where the behavior is escape-maintained, that consequence reinforces it.");
+    /* v22.99 (review F73) the intervals behind each percentage, and no "discrepant" from fewer than 10 of the student's */
     if(d.ivN && d.ivAll){
       const s = pct(d.ivTot,d.ivAll), p = pct(d.ivPTot,d.ivAll);
+      const fig = "Student " + s + "% of intervals (" + d.ivTot + " of " + d.ivAll + ") against a comparison peer at " + p + "% (" + d.ivPTot + " of " + d.ivAll + ")";
       if(s !== null && p !== null && p > 0 && s >= p*2)
-        parts.push("Student " + s + "% of intervals against a comparison peer at " + p + "%: discrepant for this setting.");
+        parts.push(fig + (d.ivTot >= OB_DISC_MIN ? ": discrepant for this setting."
+          : ": higher than the peer\u2019s in this sample, but too few marked intervals to call it discrepant (at least " + OB_DISC_MIN + " of the student\u2019s)."));
       else if(s !== null && p !== null && p > 0 && s < p*1.5)
-        parts.push("Student " + s + "% of intervals against a comparison peer at " + p + "%: not clearly discrepant from the room, which is itself worth reporting.");
+        parts.push(fig + ": not clearly discrepant from the room, which is itself worth reporting.");
     }
+    if(d.counted && d.pCounted && d.rateAll !== null && d.peerRateAll !== null)
+      parts.push("Over the whole observations, the student had " + d.totC + " occurrence" + (d.totC===1?"":"s") + " (" + d.rateAll + " per hour) and the comparison peer "
+        + d.totPC + " (" + d.peerRateAll + " per hour).");
     /* v21.17: agreement, which each sheet records and nothing used */
     const okA = d.agree.filter(a => a.ok);
     if(okA.length) parts.push("Agreement with a second observer was recorded for " + okA.length + " of "
       + state.obs.length + " observation" + (state.obs.length===1?"":"s") + " (" + agreeRange(okA) + ").");
     /* v21.36 OB-1 */
     if(d.computed) parts.push("Agreement was computed from a second observer\u2019s record in " + d.computed + " of "
-      + state.obs.length + " observation" + (state.obs.length===1?"":"s") + " (interval-by-interval for the interval sample, total count otherwise).");
-    okA.filter(a => a.v < 80).forEach(a => parts.push("Observation " + (a.i+1) + ": agreement " + a.v
+      + state.obs.length + " observation" + (state.obs.length===1?"":"s") + " (total count agreement, the measure the counts and rates rest on; interval-by-interval only where no second count was taken).");
+    /* v22.99 (review F72) every figure below 80% is named, the stricter interval checks too; a typed agreement as before */
+    okA.filter(a => a.v < 80 && !(d.rows[a.i].ioa && d.rows[a.i].ioa.agree !== null)).forEach(a => parts.push("Observation " + (a.i+1) + ": agreement " + a.v
       + "%, below the 80% long used as the minimum (Guide, section 1). Check the definition and the observers’ training before relying on this observation."));
+    d.rows.forEach(r => { const low = ioaLow(r.ioa); if(low.length) parts.push("Observation " + (r.i+1) + ": " + low.join(", ")
+      + ", below the 80% long used as the minimum (Guide, section 1). Check the definition and the observers’ training before relying on this observation."); });
     d.agree.filter(a => !a.ok).forEach(a => parts.push("Observation " + (a.i+1) + ": the agreement “" + a.t + "” is not a percentage from 0 to 100."));
     const lim = state.obs.filter(o => (o.notes||"").trim()).length;
     if(lim) parts.push(lim + " observation" + (lim===1?" carries":"s carry") + " a note limiting the record; keep it with any statement drawn from them.");
@@ -2342,6 +2456,15 @@ function draft(){
   const top = ANTE.filter(([k]) => d.ante[k] >= Math.max(2, d.withAny.length*0.6));
   if(top.length) bits.push("Conditions present in most observations in which the behavior occurred were "
     + top.map(([,l]) => l.toLowerCase()).join("; ") + ".");
+  /* v22.99 (review I36) with conditions ticked on every observation, the observations with each and without it */
+  if(d.condAll && top.length){
+    const w = top.filter(([k]) => d.cond[k].abs).map(([k,l], j) => "in " + d.cond[k].presB + " of " + (j ? d.cond[k].pres : pl(d.cond[k].pres, "observation"))
+      + " with " + l.toLowerCase() + " and in " + d.cond[k].absB + " of " + d.cond[k].abs + " without it");
+    if(w.length) bits.push("The behavior occurred " + w.join("; ") + ".");
+    const a = top.filter(([k]) => !d.cond[k].abs);
+    if(a.length) bits.push(a.map(([,l]) => l.charAt(0) + l.slice(1).toLowerCase()).join("; ") + (a.length === 1 ? " was" : " were") + " present in every observation, so these observations cannot show whether "
+      + (a.length === 1 ? "it matters" : "they matter") + ".");
+  }
   const topC = CONS.filter(([k]) => d.cons[k] >= Math.max(2, d.withAny.length*0.6));
   if(topC.length) bits.push("What most often followed was "
     + topC.map(([,l]) => l.toLowerCase()).join("; ") + ".");
@@ -2355,8 +2478,14 @@ function draft(){
       + what + (p ? ", against " + p + "% for a comparison peer scored at the same moments" : "") + ".");
   }
   const okA = d.agree.filter(a => a.ok);
-  if(okA.length) bits.push("Interobserver agreement was assessed in " + okA.length + " of " + pl(n, "observation")
-    + " (" + agreeRange(okA) + ").");
+  /* v22.99 (review F72) the agreement of each observation, as total count with the interval figures beside it, and any below 80% */
+  if(okA.length){
+    const each = okA.map(a => { const r = d.rows[a.i], dt = fmtDate(r.o.date), head = "observation " + (a.i+1) + (dt ? " on " + dt : "");
+      return r.ioa && r.ioa.agree !== null ? head + ", " + ioaWords(r.ioa) : head + ", " + a.v + "%"; });
+    const low = okA.filter(a => { const r = d.rows[a.i]; return r.ioa && r.ioa.agree !== null ? ioaLow(r.ioa).length > 0 : a.v < 80; }).map(a => a.i + 1);
+    bits.push("Interobserver agreement was assessed in " + okA.length + " of " + pl(n, "observation") + ": " + each.join("; ") + "."
+      + (low.length ? " Agreement was below 80% in observation" + (low.length === 1 ? " " : "s ") + low.join(" and ") + ", so " + (low.length === 1 ? "its figures carry" : "their figures carry") + " that caution." : ""));
+  }
   bits.push("These observations describe when and where the behavior occurred; they do not establish what maintains it.");
   return bits.join(" ");
 }
@@ -2399,6 +2528,13 @@ document.addEventListener("change", e => {
   if(t.dataset && t.dataset.field === "obs2On" && t.dataset.obs !== undefined){
     const o = state.obs[+t.dataset.obs]; if(!o) return;
     o.obs2On = !!t.checked;
+    render();
+    return;
+  }
+  /* v22.99 (review F71) the second observer's untouched rows count only once they are said to be scored */
+  if(t.dataset && t.dataset.field === "iv2On" && t.dataset.obs !== undefined){
+    const o = state.obs[+t.dataset.obs]; if(!o) return;
+    o.iv2On = !!t.checked;
     render();
     return;
   }
@@ -2495,7 +2631,7 @@ $("#addObs").addEventListener("click", () => {
 
 ["ivLen","ivMethod","ivN"].forEach(id => {
   $("#"+id).addEventListener("change", async () => {
-    const next = cleanCfg({ ivLen:+$("#ivLen").value, ivMethod:$("#ivMethod").value, ivN:$("#ivN").value });
+    const next = cleanCfg(Object.assign({}, state.cfg, { ivLen:+$("#ivLen").value, ivMethod:$("#ivMethod").value, ivN:$("#ivN").value }));
     /* v21.17: the setting labels every observation's sample, the ones already scored too, so it is
        not changed under marked intervals without asking */
     const marked = state.obs.some(o => (o.iv||[]).some(Boolean) || (o.peerIv||[]).some(Boolean));
@@ -2626,7 +2762,7 @@ async function loadSim(){
     peerBy:"Classroom teacher, before the first observation",
     peerWhy:"Same grade and sex, no behavior plan, described as typical for this class"
   };
-  state.cfg = { ivLen:15, ivMethod:"partial", ivN:20 };
+  state.cfg = { ivLen:15, ivMethod:"partial", ivN:20, condAll:true };
   /* k of the 20 intervals, chosen at random */
   const pick = k => { const a = Array.from({length:20}, (_, j) => j);
     for(let j = 19; j > 0; j--){ const r = Math.floor(Math.random()*(j+1)); [a[j], a[r]] = [a[r], a[j]]; }
@@ -2679,7 +2815,7 @@ async function loadSim(){
   /* v21.36 OB-1: the second observation carries a second observer's record. The counts disagree outright
      (0 and 2) while interval-by-interval agreement is 90% (18 of 20): the inflation the Guide warns of when
      the behavior is rare, since both observers leave most intervals unmarked. */
-  Object.assign(state.obs[1], { secondObs:"Paraprofessional", obs2On:true, count2:"2", peerCount2:"0",
+  Object.assign(state.obs[1], { secondObs:"Paraprofessional", obs2On:true, count2:"2", peerCount2:"0", iv2On:true, ante:{demand:true},
     iv2: Array.from({length:20}, (_, j) => j === 6 || j === 13), peerIv2: Array.from({length:20}, () => false) });
   $("#ivLen").value = state.cfg.ivLen;
   $("#ivMethod").value = state.cfg.ivMethod;
@@ -4637,13 +4773,24 @@ const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function()
    when the rule holds over 3 or more observations with the behavior, otherwise Weak; none without a function. */
 OUT(function(){const obs=(state.obs||[]).filter(o=>o&&(T(o.date)||T(o.count)||T(o.mins)||T(o.start)||T(o.activity)));const carry=T(state.meta&&state.meta.carry);if(!obs.length&&!carry)return null;
   let d=null;try{d=summary();}catch(e){d=null;}const w=d&&d.withAny?d.withAny.length:0,c=(d&&d.cons)||{};
-  const rule=x=>w&&(c[x]||0)>=Math.max(2,w*0.6),esc=rule('escape'),acc=rule('access');
-  const fn=esc&&acc?'Escape from demands and access to items, activities or attention':esc?'Escape from demands (a hypothesis to test)':acc?'Access to an item, activity or attention (a hypothesis to test)':'';
-  const key=esc&&acc?'multiple':esc?'escape':'';
-  const box=document.getElementById('sumBox');
+  const rule=x=>w&&(c[x]||0)>=Math.max(2,w*0.6),esc=rule('escape'),acc=rule('access'),att=rule('attnGiven'),tan=rule('item');
+  /* v22.99 (review I37) attention given and an item given are told apart, each with its key; an older record's single box in words only */
+  const names=[esc&&'escape from demands',att&&'attention',tan&&'access to items or activities',acc&&'access to an item, activity or attention (not told apart)'].filter(Boolean);
+  const keys=[esc&&'escape',att&&'attention',tan&&'tangible'].filter(Boolean);
+  const fn=!names.length?'':names.length===1?names[0].charAt(0).toUpperCase()+names[0].slice(1)+' (a hypothesis to test)':(names.slice(0,-1).join(', ')+' and '+names[names.length-1]).replace(/^./,x=>x.toUpperCase());
+  const key=names.length>1?'multiple':keys[0]||'';
   return EV(Object.assign({form:'OB-1',method:'Direct observation (descriptive)'},SPAN(obs.map(o=>o.date)),{n:obs.length||null,fn,fnKey:key,
-    strength:fn?(w>=3?'Moderate':'Weak'):'',by:T(state.meta&&state.meta.observer),statement:carry||(box?[...box.querySelectorAll('li')].map(x=>T(x.textContent)).join(' ')||T(box.textContent).replace(/^What the observations show\s*/,''):'')}));});
+    strength:fn?(w>=3?'Moderate':'Weak'):'',by:T(state.meta&&state.meta.observer),statement:carry||(typeof draft==='function'?T(draft()):'')}));});
+/* v22.99 (review F73) with the FS-1 box empty, the statement is the FS-1 statement the form writes (the observations, minutes, counts, rates
+   and agreement), not the summary's advice */
 })();
+</script>
+<script id="ob1-v2299">
+/* v22.99 (review I40) the case's consent is kept for the observation plan's date check; the behavior and the function fields are
+   still filled by the workstation's generic fill, so this answers null. (I36) the box for an older record's conditions. */
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
+  try{const C=window.nbhCase;obConsent=C&&C.consent?C.consent(f):(f&&f.consent?{on:true,date:f.consent.obtained||f.consent.date||''}:null);planNote();}catch(e){}return r;};
+  const ca=document.getElementById('condAll');if(ca)ca.addEventListener('change',()=>{state.cfg.condAll=!!ca.checked;render();});})();
 </script>
 <script id="v2241-holds">
 /* v22.41 (review F70) the case hears of a restraint or a seclusion ticked on an observation: its dates go out with the

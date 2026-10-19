@@ -9903,6 +9903,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.99: OB-1 carries the count agreement and names every figure below 80%, needs ten marked intervals before calling a student discrepant, compares the observations with and without each condition, tells attention from items, and checks the dates against consent (review Wave 3)
+
+- **The second observer's interval rows (F71).** An untouched interval row for the second observer used to count as
+  "scored, nothing seen", so typing only their count produced 90% interval agreement against a record nobody made. A
+  row now counts once it holds a mark. A new box under the rows, **Observer 2 scored both interval rows**, covers a row
+  left blank because nothing was seen. Until then the agreement line reads "intervals not scored by the second
+  observer".
+- **The agreement carried (F72).**
+  - The **Agreement (%)** box now holds the total count agreement, because the counts and rates rest on the count. The
+    interval figure is used only where no second count was taken.
+  - The summary names every figure below 80% for each observation: total count, interval-by-interval, scored-interval
+    and unscored-interval. In the example, observation 2 had counts of 0 and 2, and its interval-by-interval 90% no
+    longer hides that.
+  - The FS-1 statement gives each observation's agreement and names the ones below 80%.
+- **Discrepant from the peer (F73).**
+  - The peer comparison gives the intervals behind each percentage, for example "4 of 60 against 1 of 60".
+  - "Discrepant for this setting" now needs at least 10 of the student's intervals marked, as well as twice the peer's
+    percentage. With fewer, the summary says the student was higher but there are too few intervals to call it.
+  - The whole observations' counts and rates are given beside the comparison.
+  - With the FS-1 box empty, the case now receives the FS-1 statement the form writes, not the summary's advice.
+- **Conditions in every observation (I36).**
+  - A new record ticks conditions in every observation, whether or not the behavior occurred. The sheet's heading
+    reads **Conditions Present During the Observation**.
+  - The summary shows each condition over the observations with it and without it. It names a condition when the
+    behavior occurred every time it was present and never without it. It names a condition present in every
+    observation as one these observations cannot judge. The FS-1 statement gives the comparison.
+  - An older record ticked conditions only when the behavior occurred, so it keeps the old count. A box under the
+    heading turns the comparison on once conditions are ticked on every observation.
+- **Attention and items apart (I37).** "What followed" has **Attention given** and **An item or activity given** in
+  place of the single access box.
+  - Each is named in the summary by the same rule as demands withdrawn.
+  - Each reaches Forms FS-1 and EA-1 with its function key: attention, or tangible.
+  - An older record's single box still shows, only on the observations where it was ticked, and is passed on in words
+    only.
+- **Consent before observing (I40).** The observation plan reads the parent's consent date from the case (Form IC-1).
+  It names any observation dated before consent, or confirms that the observations follow it.
+- **Next (part 2):**
+  - F74: more than one target behavior on one record.
+  - I38: timed episodes for a behavior measured by duration.
+  - I39, the rotating comparison peer, waits for a source for the rotation rule.
+- qa/ob1-w3-test.js (16 checks). qa/ob1-ioa-test.js now expects the count agreement in the Agreement box, and the
+  example's 10 printed pages as its baseline.
+
 ### v22.98: FS-1's limits go forward: TD-1 programs generalization to the settings the FBA did not sample, and PR-1 asks each review whether the result that would disprove the hypothesis was seen (review Wave 3)
 
 - **What the FBA could not show, carried forward (I86).** FS-1 now sends the case three things it already records:
