@@ -6420,7 +6420,12 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
     SPAN(A.coded.map(e=>e.date)),{n:N,fn,fnKey:K(key)||key,strength:fn?strength:'',by:T(h.observer),statement:st,
       /* v22.51 the agreement check (F85) and the case's target behaviors recorded (F84) */
       ioa:(window.abcIoaSum&&abcIoaSum())||undefined,
-      targets:(()=>{const L=BEHAVIORS.filter(b=>b.caseT&&A.coded.some(e=>(e.behaviors||[]).includes(b.id))).map(b=>b.label);return L.length?L:undefined;})()}));});
+      targets:(()=>{const L=BEHAVIORS.filter(b=>b.caseT&&A.coded.some(e=>(e.behaviors||[]).includes(b.id))).map(b=>b.label);return L.length?L:undefined;})(),
+      /* v22.70 (VI-1 review I84) the counts behind the conditional probabilities, for Form VI-1's Contingency view: the
+         incidents (N) and background samples (M); for each consequence class, the incidents it followed (a) and the samples
+         it was delivered in (c); for each antecedent coded, the incidents (a) and samples (c) with it in place */
+      cont:M?{N,M,cons:k.filter(r=>r.cls!=='none').map(r=>({label:r.label,cls:r.cls,a:r.n,c:Math.round((r.pBase||0)*M)})),
+        ant:antecedentStats(A.coded,A.samples).filter(r=>r.n>0).sort((x,y)=>y.n-x.n).slice(0,8).map(r=>({label:r.item.label,a:r.n,c:Math.round((r.pBaseCondition||0)*M)}))}:undefined}));});
 })();
 </script>
 <script id="v2251-case">

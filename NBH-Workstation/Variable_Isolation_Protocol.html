@@ -799,7 +799,7 @@ td input,td select{max-width:100%}
 <section class="panel" id="p4" role="tabpanel" data-panel="p4">
   <h2 class="nbh-band">Method of Difference: Matched Non-Occurrence Pairs</h2>
   <p class="lede">For each occurrence, find a comparison period when the behavior did <em>not</em> occur under conditions as close as possible to the occurrence. Then identify what differed.</p>
-  <div class="note"><p><b>Rule of inference.</b> If an occurrence and a non-occurrence share every candidate except one, that one candidate is implicated. The fewer the differences, the stronger the inference; a pair that differs on four variables tells you only that one of the four matters. Combined with Agreement, this is Mill's <em>joint method</em>, which Mill judged a great advantage over agreement alone: a variable present across all occurrences <em>and</em> absent across all matched non-occurrences is the strongest evidence this protocol can give short of an experiment. That holds for an antecedent. A consequence follows the behavior by definition, so it cannot be present in a period without the behavior and the joint method says nothing about it: test it by its contingency in the Contingency view (Martens et al., 2008). A setting event or motivating operation raises the odds on the days it is present, so it is not expected in every occurrence: absence in some occurrences does not set it aside; test it in Concomitant variation. This is also the logic of a structured descriptive assessment (Anderson &amp; Long, 2002) with the antecedent arranged by circumstance rather than by the analyst.</p></div>
+  <div class="note"><p><b>Rule of inference.</b> If an occurrence and a non-occurrence share every candidate except one, that one candidate is implicated. The fewer the differences, the stronger the inference; a pair that differs on four variables tells you only that one of the four matters. Combined with Agreement, this is Mill's <em>joint method</em>, which Mill judged a great advantage over agreement alone: a variable present across all occurrences <em>and</em> absent across all matched non-occurrences is the strongest evidence this protocol can give short of an experiment. That holds for an antecedent. A consequence follows the behavior by definition, so it cannot be present in a period without the behavior and the joint method says nothing about it: test it by its contingency in the Contingency view (Martens et al., 2008). A setting event or motivating operation raises the odds on the days it is present, so it is not expected in every occurrence: absence in some occurrences does not set it aside; test it in Concomitant variation, by the days with it and the days without it. This is also the logic of a structured descriptive assessment (Anderson &amp; Long, 2002) with the antecedent arranged by circumstance rather than by the analyst.</p></div>
 
   <h3>How to Sample Non-Occurrences</h3>
   <ol>
@@ -866,6 +866,15 @@ td input,td select{max-width:100%}
     <thead><tr><th style="width:26%">Candidate</th><th class="num" style="width:7%">n</th><th class="num" style="width:8%">&rho;</th><th style="width:14%">Direction</th><th style="width:17%">Plausible third variable?</th><th>Interpretation</th></tr></thead>
     <tbody></tbody>
   </table></div>
+
+  <!-- v22.70 (review I81) a setting event or MO tested by the days with it and without it; saved apart (x) -->
+  <h3>Setting Events: Days With and Without</h3>
+  <p class="small">A setting event or motivating operation is not tested by agreement or by matched pairs: it raises the odds on the days it is present. Compare the behavior on the days with it and the days without it, from the daily record (Form DD-1) and the log that records the setting event (home note, nurse&rsquo;s log, attendance). The reading is this form&rsquo;s convention, not an empirical cut-off: with at least 5 days on each side, a rate on the days with it at least 1.5 times the rate without it supports the setting event, two thirds of it or less suggests the opposite, and anything between shows no clear difference.</p>
+  <div class="tblwrap wide" tabindex="0" role="region" aria-label="Setting events, days with and without"><table id="seTbl">
+    <thead><tr><th style="width:22%">Setting event or MO</th><th class="num" style="width:10%">Days with it (n)</th><th class="num" style="width:12%">Behavior per day, with</th><th class="num" style="width:10%">Days without (n)</th><th class="num" style="width:12%">Behavior per day, without</th><th class="num" style="width:8%">Ratio</th><th>Reading</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <datalist id="seList"></datalist>
 
   <!-- v22.69 (review I85) hidden: matching appears even with attention that does not reinforce the behavior (St. Peter et al.,
        2005), so it cannot point to a function. It stays in the form, shown only when an opened file holds counts in it. -->
@@ -1019,6 +1028,13 @@ td input,td select{max-width:100%}
   <div><label class="f">Conditions the next assessment must compare, and conditions that can be dropped</label><textarea name="h_conditions"></textarea></div>
   <div><label class="f">Confounds still unresolved</label><textarea name="h_confounds"></textarea></div>
 
+  <!-- v22.70 (review I83) a summary for the family and the team, written from the record in English or Spanish; saved apart (x) -->
+  <h3>Summary for the Family and Team</h3>
+  <div class="grid g3 noprint"><div><label class="f" for="sumLang">Language</label><select id="sumLang" class="vi-x" data-x="sum_lang"><option value="">English</option><option value="es">Español</option></select></div>
+    <div style="grid-column:span 2;align-self:end"><button type="button" id="btnSum">Write the summary</button> <button type="button" id="btnSumCopy">Copy the text</button></div></div>
+  <div><label class="f" for="sumText">Summary (plain words; edit before you share it)</label><textarea id="sumText" class="vi-x" data-x="sum_text" rows="10"></textarea></div>
+  <p class="small noprint">Written from this form: the function chosen, the confidence band, the antecedents implicated, the setting events the days with and without support, and the next step. Labels from the register and the definition are copied as written: put them in plain words, and in Spanish for the Spanish summary, before you share it. Writing again replaces the text; you are asked first when it has been edited.</p>
+
   <div class="sig"><div>BCBA signature / date</div><div>Teacher or team member / date</div><div>Administrator / date</div></div>
 </section>
 
@@ -1134,6 +1150,11 @@ td input,td select{max-width:100%}
   const cvBody=$('#cvTbl tbody');
   for(let i=1;i<=12;i++){
     cvBody.appendChild(el('tr',{},`<td>${i}</td><td><input type="text"></td><td class="num"><input type="number" step="any" class="cvX"></td><td class="num"><input type="number" step="any" class="cvY"></td><td><input type="text"></td>`));
+  }
+  /* v22.70 (review I81) the setting-event rows, saved apart (x) */
+  const seBody=$('#seTbl tbody');
+  for(let i=1;i<=4;i++){const X=(k,h)=>h.replace(/^<input/,'<input class="vi-x" data-x="se'+i+'_'+k+'"');
+    seBody.appendChild(el('tr',{class:'seRow'},`<td>${X('l','<input type="text" list="seList">')}</td><td class="num">${X('dw','<input type="number" min="0">')}</td><td class="num">${X('mw','<input type="number" min="0" step="any">')}</td><td class="num">${X('do','<input type="number" min="0">')}</td><td class="num">${X('mo','<input type="number" min="0" step="any">')}</td><td class="calc se1"></td><td class="se2"></td>`));
   }
   const cvLog=$('#cvLogTbl tbody');
   for(let i=1;i<=5;i++){
@@ -1300,6 +1321,19 @@ td input,td select{max-width:100%}
   }
   $('#cvTbl').addEventListener('input',calcCV);$('#cvName').addEventListener('input',calcCV);$('#cvMeasure').addEventListener('input',calcCV);
 
+  /* v22.70 (review I81) days with and without: the ratio of the two rates and the reading, by this form's convention */
+  function calcSE(){
+    $$('#seTbl tbody tr').forEach(tr=>{const f=tr.querySelectorAll('input'),nw=+f[1].value||0,mw=f[2].value===''?NaN:+f[2].value,no=+f[3].value||0,mo=f[4].value===''?NaN:+f[4].value;
+      const o1=tr.querySelector('.se1'),o2=tr.querySelector('.se2');let r=NaN,t='';
+      if(isFinite(mw)&&isFinite(mo)&&nw>0&&no>0){r=mo>0?mw/mo:(mw>0?Infinity:NaN);
+        t=nw<5||no<5?'Too few days to read (5 or more on each side)':!isFinite(r)?(mw>0?'Supports: behavior only on the days with it':'No behavior on either side'):
+          shown(r)>=1.5?'Supports: more behavior on the days with it':shown(r)<=0.67?'Less behavior on the days with it':'No clear difference';}
+      o1.textContent=isFinite(r)?fmt(r):(r===Infinity?'\u221e':'');o2.textContent=t;});
+    const dl=$('#seList');if(dl)dl.innerHTML=$$('#registerTbl tbody tr').filter(tr=>{const s=tr.querySelector('td:nth-child(3) select');return s&&s.value==='Setting event / MO';})
+      .map(tr=>tr.querySelector('td:nth-child(2) input').value.trim()).filter(Boolean).map(v=>'<option value="'+v.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')+'">').join('');
+  }
+  $('#seTbl').addEventListener('input',calcSE);$('#registerTbl').addEventListener('change',calcSE);
+
   function calcMatch(){
     const rows=$$('#matchTbl tbody tr');
     const R=rows.map(r=>+r.querySelector('.mr').value||0),C=rows.map(r=>+r.querySelector('.mc').value||0);
@@ -1429,7 +1463,7 @@ td input,td select{max-width:100%}
 
   /* save / load / clear */
   const fields=()=>$$('input:not([type=file]):not([type=hidden]):not(.vi-nl):not(.vi-x),select:not(.vi-nl):not(.vi-x),textarea:not(.vi-x)');
-  function recalcAll(){syncLabels();calcAgreement();calcJoint();calcCV();calcMatch();calcCon();calcACH();calcHill();viDecWarn();}
+  function recalcAll(){syncLabels();calcAgreement();calcJoint();calcCV();calcSE();calcMatch();calcCon();calcACH();calcHill();viDecWarn();}
   /* v21.16 audit (F9, F10, F2a): the one way to empty the record, used by Clear all, Open data and Load simulation.
      Every field returns to its default, the hypothesis headers of the matrix included (Clear all used to skip
      them, so a previous case's hypotheses stayed on screen and in the next saved file). */
@@ -1591,6 +1625,9 @@ td input,td select{max-width:100%}
     setN('c_method','10-s partial interval, continuous across the two independent blocks');
     setN('c_window','Same interval + next interval (\u2264 20 s)');
     setN('c_time','8 sessions across 3 weeks: 740 10-s intervals (about 2 h 3 min)');
+
+    /* v22.70 (review I81) the setting events by days with and without: poor sleep supports, the substitute adult too few days */
+    fill('#seTbl',[['Poor sleep','6','6.3','16','3.4'],['Substitute adult','3','4','19','4.1']]);
 
     /* ---------------- tab 6: contingency ----------------
        Escape shows a strong positive contingency; attention does not. */
@@ -3003,6 +3040,96 @@ function fill(f){let n=0;const E=(f&&f.evidence)||{},d=f&&f.data&&(!f.data.src||
 const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   let n=0;try{n=fill(f||{});}catch(e){n=0;}
   if(!n)return r;const g=r&&typeof r==='object'?r:{};return {filled:(g.filled||0)+n,note:[g.note,'the evidence already collected'].filter(Boolean).join('; ')};};
+})();
+</script>
+<script id="v2270-abc">
+/* v22.70 (review I84) in: the Contingency view from Form ABC-1's counts. Consequence side: each consequence class with the
+   incidents (n_B) and how many it followed, and the background samples (n_notB) and how many it was delivered in. Antecedent
+   side, with "How the counts were taken" set to ABC-1's incidents plus samples: with A, the incidents and samples with the
+   antecedent in place and of them the incidents; without A, the rest. A table is written only while every row in it is
+   empty or came from ABC-1 (its label ends "(Form ABC-1)"); counts typed here are kept. */
+(function(){"use strict";
+const T=x=>String(x==null?'':x).replace(/\s+/g,' ').trim(),fire=e=>['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));
+const MARK=/ \(Form ABC-1\)$/;
+function tb(sel,rows){const tr=Array.from(document.querySelectorAll(sel+' tbody tr'));if(!tr.length)return false;
+  if(!tr.every(r=>{const f=Array.from(r.querySelectorAll('input'));return f.every(x=>!T(x.value))||MARK.test(T(f[0].value));}))return false;
+  let k=0;tr.forEach((r,i)=>{const f=Array.from(r.querySelectorAll('input')),v=rows[i]||[];f.forEach((x,j)=>{const w=v[j]==null?'':String(v[j]);if(x.value!==w){x.value=w;k=1;}});});
+  if(k)fire(tr[0].querySelector('input'));return k>0;}
+function fill(f){const e=f&&f.evidence&&f.evidence['ABC-1'],c=e&&e.cont;if(!c||!(c.M>0)||!(c.N>0))return 0;let n=0;
+  const cons=(c.cons||[]).filter(r=>r.a>0||r.c>0).sort((x,y)=>y.a-x.a).slice(0,4).map(r=>[T(r.label)+' (Form ABC-1)',c.N,r.a,c.M,r.c]);
+  const ant=(c.ant||[]).slice(0,4).map(r=>[T(r.label)+' (Form ABC-1)',r.a+r.c,r.a,(c.N-r.a)+(c.M-r.c),c.N-r.a]);
+  if(cons.length&&tb('#conTbl',cons))n++;
+  if(ant.length&&tb('#antTbl',ant)){n++;const k=document.getElementById('cKind');if(k&&k.value!=='abc'){k.value='abc';fire(k);}}
+  const m=document.querySelector('[name="c_method"]');if(n&&m&&!T(m.value)){m.value='Form ABC-1: '+c.N+' incidents, '+c.M+' background samples';fire(m);}
+  return n;}
+const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let n=0;try{n=fill(f||{});}catch(e){n=0;}
+  if(!n)return r;const g=r&&typeof r==='object'?r:{};return {filled:(g.filled||0)+n,note:[g.note,'the contingency counts from Form ABC-1'].filter(Boolean).join('; ')};};
+})();
+</script>
+<script id="v2270-sum">
+/* v22.70 (review I83) the summary for the family and the team, in English or Spanish, from the record: the function chosen
+   beside the statement, the confidence band, the antecedents the joint method implicates, the setting events the days with
+   and without support, and the next step. It is a draft to edit: writing again over edited text asks first. */
+(function(){"use strict";
+const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s)),T=x=>String(x==null?'':x).replace(/\s+/g,' ').trim();
+const ST={
+  title:{en:'Summary of the behavior assessment ({date})',es:'Resumen de la evaluación de la conducta ({date})'},
+  studied:{en:'What we studied: {def}.',es:'Lo que estudiamos: {def}.'},
+  found:{en:'What we found:',es:'Lo que encontramos:'},
+  escape:{en:'The behavior seems to help {first} get out of, or put off, work and other demands.',es:'La conducta parece ayudar a {first} a evitar o retrasar el trabajo y otras exigencias.'},
+  attention:{en:'The behavior seems to get {first} attention from adults or classmates.',es:'La conducta parece conseguir que {first} reciba atención de los adultos o de los compañeros.'},
+  tangible:{en:'The behavior seems to get {first} a favorite item or activity.',es:'La conducta parece conseguirle a {first} un objeto o una actividad favorita.'},
+  automatic:{en:'The behavior seems to continue for how it feels to {first}, whether or not anyone responds.',es:'La conducta parece continuar por lo que le hace sentir a {first}, responda alguien o no.'},
+  multiple:{en:'The behavior seems to serve more than one purpose for {first}.',es:'La conducta parece cumplir más de un propósito para {first}.'},
+  unclear:{en:'We do not yet know what keeps the behavior going.',es:'Todavía no sabemos qué mantiene la conducta.'},
+  none:{en:'The team has not yet named what keeps the behavior going.',es:'El equipo todavía no ha determinado qué mantiene la conducta.'},
+  high:{en:'We are fairly confident in this explanation.',es:'Tenemos bastante confianza en esta explicación.'},
+  moderate:{en:'This is our best explanation so far, with moderate confidence.',es:'Es nuestra mejor explicación hasta ahora, con una confianza moderada.'},
+  low:{en:'The evidence is still weak; we need more information.',es:'La evidencia todavía es débil; necesitamos más información.'},
+  when:{en:'When it happens most: {list}.',es:'Cuándo ocurre más: {list}.'},
+  harder:{en:'What makes some days harder: {list}.',es:'Lo que hace más difíciles algunos días: {list}.'},
+  times:{en:'{lab} (about {x} times as much behavior on those days)',es:'{lab} (alrededor de {x} veces más conducta esos días)'},
+  next:{en:'What comes next:',es:'Lo que sigue:'},
+  d1:{en:'We will start a support plan built on this explanation and check that it works, without stopping the plan to test it.',es:'Empezaremos un plan de apoyo basado en esta explicación y comprobaremos que funciona, sin suspender el plan para probarlo.'},
+  d2:{en:'We will watch during planned activities, changing only what happens before the behavior.',es:'Observaremos durante actividades planificadas, cambiando solo lo que ocurre antes de la conducta.'},
+  d3:{en:'With your permission, we will run short planned tests within the usual routine to confirm the explanation.',es:'Con su permiso, haremos pruebas breves y planificadas dentro de la rutina habitual para confirmar la explicación.'},
+  d4:{en:'With your permission, we will do a functional analysis: short, closely supervised sessions that test each explanation.',es:'Con su permiso, haremos un análisis funcional: sesiones breves y bien supervisadas que ponen a prueba cada explicación.'},
+  d5:{en:'We will collect more information before deciding.',es:'Reuniremos más información antes de decidir.'},
+  d6:{en:'We will ask for a medical or other evaluation first, because a health or other cause may be part of the behavior.',es:'Primero pediremos una evaluación médica u otra, porque una causa de salud u otra puede ser parte de la conducta.'},
+  d0:{en:'The team will decide the next step and let you know.',es:'El equipo decidirá el siguiente paso y se lo hará saber.'},
+  caveat:{en:'This explanation comes from watching {first} and from records, not from testing; it may change as we learn more.',es:'Esta explicación viene de observar a {first} y de los registros, no de pruebas; puede cambiar a medida que sepamos más.'},
+  interp:{en:'An interpreter is available for any conversation about this summary.',es:'Hay intérprete disponible para cualquier conversación sobre este resumen.'},
+  ask:{en:'Questions: {who}.',es:'Preguntas: {who}.'}};
+let last='';
+function compose(lang){const t=(k,v)=>{let s=(ST[k]||{})[lang]||(ST[k]||{}).en||'';Object.keys(v||{}).forEach(x=>{s=s.split('{'+x+'}').join(v[x]);});return s;};
+  const val=n=>{const e=$('[name="'+n+'"]');return e?T(e.value):'';};
+  const first=val('s_name').replace(/^SIMULATED\s*[–-]\s*/i,'').split(/\s+/)[0]||(lang==='es'?'su hijo/a':'your child');
+  const iso=val('s_end')||val('s_start'),m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso),dt=m?new Date(+m[1],+m[2]-1,+m[3],12):new Date();
+  const date=dt.toLocaleDateString(lang==='es'?'es':'en-US',{year:'numeric',month:'long',day:'numeric'});
+  const num=x=>{const s=String(Math.round(x*10)/10);return lang==='es'?s.replace('.',','):s;};
+  const def=(val('s_def').split(/(?<=[.;])\s/)[0]||'').replace(/[.;]\s*$/,'');
+  const fn=($('#hFn')||{}).value||'',band=T(($('#hillBand')||{}).textContent).toLowerCase();
+  const conf=/high/.test(band)?'high':/moderate/.test(band)?'moderate':/low/.test(band)?'low':'';
+  const when=$$('#jointTbl tbody tr').map(tr=>{const f=tr.querySelectorAll('input,select');return f[4]&&/^(Strongly implicated|Implicated)/.test(f[4].value)?T(f[0].value):'';}).filter(Boolean);
+  const hard=$$('#seTbl tbody tr').map(tr=>{const f=tr.querySelectorAll('input'),o=tr.querySelector('.se2'),r=tr.querySelector('.se1');
+    return o&&/^Supports/.test(o.textContent)&&T(f[0].value)?(isFinite(+r.textContent)?t('times',{lab:T(f[0].value),x:num(+r.textContent)}):T(f[0].value)):'';}).filter(Boolean);
+  const dk=$('input[name="decision"]:checked'),bc=val('s_bcba');
+  const L=[t('title',{date}),''];if(def)L.push(t('studied',{def}),'');
+  L.push(t('found')+' '+t(fn||'none',{first})+(conf&&fn&&fn!=='unclear'?' '+t(conf):''));
+  if(when.length)L.push(t('when',{list:when.join(', ')}));if(hard.length)L.push(t('harder',{list:hard.join('; ')}));
+  L.push('',t('next')+' '+t(dk?'d'+dk.value:'d0'),'',t('caveat',{first}),t('interp'));if(bc)L.push(t('ask',{who:bc}));
+  return L.join('\n');}
+async function write(){const box=$('#sumText');if(!box)return;const lang=($('#sumLang')||{}).value||'en',txt=compose(lang);
+  if(T(box.value)&&box.value!==last&&box.value!==txt){const q='Replace the summary? It has been edited, and writing it again replaces the text.';
+    const go=window.nbhUI&&nbhUI.confirm?await nbhUI.confirm(q,{ok:'Replace'}):window.confirm(q);if(!go)return;}
+  box.value=txt;last=txt;box.dispatchEvent(new Event('input',{bubbles:true}));}
+function init(){const b=$('#btnSum'),c=$('#btnSumCopy'),l=$('#sumLang'),box=$('#sumText');if(!b||!box)return;
+  b.addEventListener('click',write);
+  if(l)l.addEventListener('change',()=>{if(box.value&&box.value===last)write();});
+  if(c)c.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(box.value);c.textContent='Copied';setTimeout(()=>{c.textContent='Copy the text';},1500);}catch(e){box.focus();box.select();}});}
+window.viSummary=compose;
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 <script id="v2178-ev">

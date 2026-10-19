@@ -9903,6 +9903,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.70: VI-1 reads ABC-1's counts, tests setting events by days, and writes a family summary (review Wave 3, part 3b)
+
+- **The Contingency view fills from Form ABC-1 (I84).** ABC-1 now sends the counts behind its conditional
+  probabilities: the incidents, the background samples, and for each consequence class and each antecedent it coded,
+  how many incidents and samples had it. VI-1 puts them in the Contingency view: each consequence class with the
+  incidents and how many it followed, and the samples and how many it was delivered in; each antecedent with the
+  incidents and samples with it in place and without it. **How the counts were taken** is set to ABC-1's incidents
+  plus samples, so the antecedent rows are read by Yule's Q, as ABC-1 reads them. Each row's label ends "(Form ABC-1)";
+  a table is written only while every row in it is empty or came from ABC-1, so counts typed here are kept.
+- **Setting events by the days with and without them (I81).** Concomitant variation has a new table, **Setting
+  Events: Days With and Without**: for a setting event or motivating operation, the days with it and the behavior per
+  day on them, the days without it and the behavior per day on those, the ratio, and a reading. The reading is the
+  form's convention: with 5 or more days on each side, a ratio of 1.5 or more supports the setting event, two thirds or
+  less reads as less behavior on those days, anything between as no clear difference. The register's setting events
+  are offered by name. The rule of inference in Difference points here.
+- **A summary for the family and team (I83).** Synthesis & decision ends with **Summary for the Family and Team**:
+  **Write the summary** composes plain sentences, in English or Spanish, from the form (the function chosen beside the
+  statement, the confidence band, the antecedents the joint method implicates, the setting events the days with and
+  without support, the next step, with "with your permission" for a step that arranges conditions) and a closing line
+  that the explanation comes from watching and records, not testing. It is a draft to edit: register labels and the
+  definition are copied as written, so put them in plain words (and in Spanish) before sharing. Changing the language
+  rewrites an unedited summary; writing again over edited text asks first. **Copy the text** puts it on the clipboard.
+- The new fields are saved under their own key, so files saved before open as they did.
+
+Checked by `qa/v2270-test.js` (15).
+
 ### v22.69: VI-1 fills from the case, names its views, and tests all eight candidates (review Wave 3, part 3a)
 
 - **Evidence Already Collected fills from the case (F164).** Each form the case holds fills its row: Form SP-1, the
