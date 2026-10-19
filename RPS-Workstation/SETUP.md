@@ -9903,6 +9903,46 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.96: FS-1 records a synthesized functional analysis, gives each target its own level of evidence, keeps interviews from lowering a demonstrated function, names its levels by design, and keeps the Guide out of the report (review Wave 3)
+
+- **A synthesized (IISCA) result (F168).** The function list has **Synthesized / more than one (as tested)** for an
+  analysis that tested a synthesized contingency. Form EA-1's synthesized result arrives with it, where it had arrived
+  with no function and dropped out of the level of evidence. It counts like any other function. A level-1 statement
+  reads "The function is a synthesized contingency (the consequences tested together)", and the case receives it as more
+  than one function. Only a functional analysis counts this way: an interview or a descriptive record that names more than
+  one function is still left uncounted and named under the table, as before.
+- **Each target's own evidence (F169).** The evidence sheet has a **Target** column: the target a source assessed, or
+  all targets. When the report has more than one target, each one gets its own:
+  - level of evidence, findings paragraph and convergence table;
+  - summary statement level, from its own sources and those about every target.
+
+  A functional analysis that showed an automatic function for head hitting is no longer outvoted by the descriptive
+  sources about aggression. Form EA-1's and the other forms' rows take the target their form names, when it matches one
+  of the report's targets.
+- **A disagreement lowers a level only from the same tier or better (F170).** A contradicting source, or a competing
+  function with as many supporting sources, lowers the level only when it stands on the same tier as the function's best
+  design or better. Three interviews naming attention no longer lower a functional analysis that demonstrated escape, and
+  neither does one interview marked Contradicts. The disagreement is still named in the level box, the findings and the
+  text for the BIP, with the fact that it did not lower the level. The Guide's rule says the same.
+- **Unknown counts as assessed only from a test (F173).** A source recorded as Unknown counts among the sources that
+  assessed function only when it is a functional analysis or a contingency analysis that came out undifferentiated.
+  Unknown on a descriptive, daily-rate or indirect record is listed under the table, not counted. The example's daily
+  count has no function now, and the report says "7 sources that assessed function", not 8.
+- **Levels named by design (F174).** The levels read: 1, function demonstrated; 2, contingency described, not tested;
+  3, pattern observed; 4, reported. "Moderate confidence" is gone. At levels 2–4 the statement ends "The hypothesized
+  function is …, consistent with the descriptive record and not yet tested (level 2)".
+- **The Guide stays off the report (F172).** The report prints without the Guide's methodology and reference list, and
+  so does the workstation's packet. **Print the guide** prints the Guide on its own.
+- **The example (F177).** The head-hitting statement's consequence is "a pause in the demand", the escape it reports. It
+  had also named the adult moving closer, which is attention.
+- **Next (part 2):**
+  - F171: the experimental-analysis detail block.
+  - F175: the setting event into Form TD-1.
+  - F176: Form RR-1's earlier plan.
+  - I86: the FBA's limits carried forward.
+  - I87: the assessment window and a ready-to-sign check.
+- qa/fs1-w3-test.js (11 checks).
+
 ### v22.95: DT-1 keeps every session's sheet and every discounting probe in the record (review Wave 3)
 
 - **The session log (F403, I203).** Tab 5 held one session sheet, so entering session 23 replaced session 22's trials. Only

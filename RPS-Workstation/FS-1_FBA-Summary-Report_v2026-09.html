@@ -678,7 +678,11 @@ body.view-path .only-setup,body.view-path .only-ev,body.view-path .only-beh,body
 body.view-rep .only-setup,body.view-rep .only-ev,body.view-rep .only-beh,body.view-rep .only-path,body.view-rep .only-guide{display:none}
 body.view-guide .only-setup,body.view-guide .only-ev,body.view-guide .only-beh,body.view-guide .only-path,body.view-guide .only-rep{display:none}
 @media print{
-  .only-setup,.only-ev,.only-beh,.only-path,.only-rep,.only-guide{display:block!important}
+  .only-setup,.only-ev,.only-beh,.only-path,.only-rep{display:block!important}
+  /* v22.96 (review F172) the Guide is methodology, not part of the student's report: it prints only from Print the guide */
+  body:not(.fs-print-guide) .only-guide{display:none!important}
+  body.fs-print-guide .only-setup,body.fs-print-guide .only-ev,body.fs-print-guide .only-beh,body.fs-print-guide .only-path,body.fs-print-guide .only-rep{display:none!important}
+  body.fs-print-guide .only-guide{display:block!important}
   .sheet{box-shadow:none}
   table.rt td select{-webkit-appearance:none;appearance:none}
 }
@@ -862,6 +866,7 @@ td input,td select{max-width:100%}
   <div class="tgroup"><span>Sheet actions</span><div class="row">
     <button id="simBtn">Load simulation</button>
     <button class="primary" id="printBtn">Print / Save as PDF</button>
+    <button id="printGuideBtn" title="Prints the Guide on its own; the report is printed without it">Print the guide</button>
     <button id="saveBtn">Save data</button>
     <button id="bipBtn" title="Compose the plan text from this form and copy it to the clipboard, to paste into the BIP">Copy for the BIP</button><span id="bipMsg" class="bip-msg noprint" role="status" aria-live="polite"></span>
     <button id="loadBtn">Open data</button>
@@ -918,8 +923,8 @@ td input,td select{max-width:100%}
       <button class="tool" id="addSrc">Add source</button><button class="tool" id="delSrc">Remove last</button>
     </div>
     <div class="grid-wrap"><table class="rt" id="srcTbl"><thead><tr>
-      <th style="width:6%">Form</th><th style="width:19%">Method</th><th style="width:12%">Dates</th><th style="width:15%">Conducted by</th>
-      <th>What it contributed</th><th style="width:13%">Function supported</th><th style="width:9%">Strength</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:6%">Form</th><th style="width:17%">Method</th><th style="width:10%">Dates</th><th style="width:12%">Conducted by</th>
+      <th>What it contributed</th><th style="width:11%" title="The target behavior this source assessed; a source about every target counts for each">Target</th><th style="width:13%">Function supported</th><th style="width:9%">Strength</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
     <h2 class="nbh-band" style="margin-top:18px">Convergence Across Sources</h2>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Convergence across sources"><table class="rt" id="convTbl"></table></div>
@@ -1023,11 +1028,12 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">How the Level of Evidence Is Derived</h2>
     <p>The band is set by the best method tier that was actually conducted <i>and</i> that supported the stated function, then reduced if the sources disagree. It is a working convention for keeping the report's language proportionate to its design, not an empirical finding. The form applies it as follows.</p>
     <ul class="fs-rules">
-      <li><b>What counts.</b> A source counts toward a function when its method tests function (tiers 1&ndash;4 below) and it has a function and a strength. A source recorded as Unknown assessed function but identified none: it is counted among the sources that assessed function, not as support. Preference assessments, reinforcer assessments and treatment integrity observations are listed with the methods but carry no tier: they do not test what maintains the behavior, and are not counted.</li>
+      <li><b>What counts.</b> A source counts toward a function when its method tests function (tiers 1&ndash;4 below) and it has a function and a strength. A source recorded as Unknown from a test (tier 1 or 2) assessed function but identified none: it is counted among the sources that assessed function, not as support. Unknown on a descriptive, daily-rate or indirect record is listed but not counted: such a record cannot show that no function operates. Preference assessments, reinforcer assessments and treatment integrity observations are listed with the methods but carry no tier: they do not test what maintains the behavior, and are not counted.</li>
       <li><b>Tier.</b> A function's tier is the best tier among the sources rated Strong or Moderate that support it. A Weak rating counts as support but does not set the tier, so a function supported only by Weak ratings is at level 4.</li>
       <li><b>The function the level describes.</b> The best-supported function: the best tier first, then the most sources rated Strong, then the most supporting sources. A function that no source supports is never reported, however often it is contradicted.</li>
-      <li><b>Reductions.</b> One level if any source contradicts that function, and one level if another function has at least as many supporting sources. The level does not fall below 4.</li>
-      <li><b>Summary statements.</b> Each target's statement ends with its hypothesized function at the level of evidence for that function: &ldquo;The function is&hellip;&rdquo; only at level 1, &ldquo;The hypothesized function is&hellip;&rdquo; with its level at levels 2&ndash;4.</li>
+      <li><b>Reductions.</b> One level if a source at the same tier or better contradicts that function, and one level if another function has at least as many supporting sources and its own tier is the same or better. A disagreement from a lower tier is named in the report but does not lower the level: three interviews do not undo what a functional analysis demonstrated. The level does not fall below 4.</li>
+      <li><b>Targets.</b> Each source names the target behavior it assessed, or every target. With more than one target, each target's level, findings and summary statement come from its own sources and those about every target.</li>
+      <li><b>Summary statements.</b> Each target's statement ends with its hypothesized function at the level of evidence for that function: &ldquo;The function is&hellip;&rdquo; only at level 1, &ldquo;The hypothesized function is&hellip;, not yet tested&rdquo; with its level at levels 2&ndash;4. The levels are named by what the design shows: 1, function demonstrated; 2, contingency described, not tested; 3, pattern observed; 4, reported.</li>
     </ul>
     <table class="rt">
       <tr><th style="width:16%">Tier 1</th><td><b>Experimental.</b> A functional analysis with a demonstration of experimental control &mdash; differentiated responding across conditions, replicated. Licenses causal language: the behavior <i>is maintained by</i>.</td></tr>
@@ -1083,7 +1089,9 @@ const nod=s=>esc(String(s==null?'':s).trim().replace(/[.]+$/,''));
 const SUBT=['','Subtype 1 \u2014 differentiated (LOD \u2265 62.5%)','Subtype 2 \u2014 undifferentiated (LOD < 62.5%)',
  'Subtype 3 \u2014 co-occurring self-restraint','Not classifiable \u2014 no functional analysis conducted',
  'Not classifiable \u2014 fewer than three no-interaction series','Not applicable \u2014 not automatically maintained self-injury'];
-const FN=['','Attention (social positive)','Tangible / activity (social positive)','Escape / avoidance (social negative)','Automatic (nonsocial)','Unknown \u2013 record separately'];
+const FN=['','Attention (social positive)','Tangible / activity (social positive)','Escape / avoidance (social negative)','Automatic (nonsocial)','Unknown \u2013 record separately',
+  /* v22.96 (review F168) an IISCA or other synthesized test: the consequences tested together, named in the row's contribution */
+  'Synthesized / more than one (as tested)'];
 const METHODS=[
   ['','',0],
   ['Functional analysis, analogue conditions','EA-1',1],
@@ -1115,9 +1123,11 @@ function ensure(){
   if(!S.src.length)for(let i=0;i<5;i++)S.src.push({form:'',method:'',dates:'',who:'',contrib:'',fn:'',str:''});
   if(!S.hyp.length)for(let i=0;i<3;i++)S.hyp.push({h:'',how:'',out:'',what:''});
   if(!S.beh.length)S.beh.push(newBeh());
+  S.beh.forEach(b=>{if(!b.id)b.id=fsId();});
   if(S.cur>=S.beh.length)S.cur=0;
 }
-function newBeh(){return{lab:'',def:'',dim:'',base:'',fn:'',sub:'',lod:'',se:'',ant:'',cons:'',
+const fsId=()=>'t'+Math.random().toString(36).slice(2,9);   /* v22.96 (review F169) a target's own key, kept when it is renamed */
+function newBeh(){return{id:fsId(),lab:'',def:'',dim:'',base:'',fn:'',sub:'',lod:'',se:'',ant:'',cons:'',
   desired:'',desCons:'',alt:'',altCons:'',rationale:'',notes:''};}
 const tierOf=m=>{const r=METHODS.find(x=>x[0]===m);return r?r[2]:0;};
 const formOf=m=>{const r=METHODS.find(x=>x[0]===m);return r?r[1]:'';};
@@ -1128,7 +1138,12 @@ function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forE
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
 /* -------------------- evidence sources -------------------- */
+/* v22.96 (review F169) a source names the target behavior it assessed, or every target; a target removed since leaves its rows
+   counting for every target */
+const tgtOk=id=>!!id&&S.beh.some(b=>b.id===id);
+function tgtOpts(v){return '<option value="">All targets</option>'+S.beh.map((b,i)=>`<option value="${esc(b.id)}"${b.id===v?' selected':''}>${esc(b.lab)||'Target '+(i+1)}</option>`).join('');}
 function renderSrc(){
+  S.src.forEach(r=>{if(r.tgt&&!tgtOk(r.tgt))r.tgt='';});
   const opt=(arr,v)=>arr.map(o=>{const t=Array.isArray(o)?o[0]:o;return `<option${t===v?' selected':''}>${t}</option>`;}).join('');
   $('#srcTbl tbody').innerHTML=S.src.map((r,i)=>`<tr>
     <td style="text-align:center;font-family:var(--sans);font-size:11.5px">${esc(rowForm(r))||'&mdash;'}</td>
@@ -1136,13 +1151,14 @@ function renderSrc(){
     <td><input data-i="${i}" data-f="dates"value="${esc(r.dates)}"></td>
     <td><input data-i="${i}" data-f="who" value="${esc(r.who)}"></td>
     <td><textarea data-i="${i}" data-f="contrib" rows="2">${esc(r.contrib)}</textarea></td>
+    <td><select data-i="${i}" data-f="tgt">${tgtOpts(r.tgt)}</select></td>
     <td><select data-i="${i}" data-f="fn">${opt(FN,r.fn)}</select></td>
     <td><select data-i="${i}" data-f="str">${opt(STR,r.str)}</select></td>
     <td class="nx noprint"><button type="button" class="rowDel noprint" data-del="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
 }
 ['change','input'].forEach(ev=>$('#srcTbl').addEventListener(ev,e=>{const el=e.target;if(el.dataset.i===undefined)return;
   S.src[+el.dataset.i][el.dataset.f]=el.value;
-  if(el.dataset.f==='method'||el.dataset.f==='fn'||el.dataset.f==='str')renderAll();else renderReport();}));
+  if(el.dataset.f==='method'||el.dataset.f==='fn'||el.dataset.f==='str'||el.dataset.f==='tgt')renderAll();else renderReport();}));
 $('#addSrc').addEventListener('click',()=>{S.src.push({form:'',method:'',dates:'',who:'',contrib:'',fn:'',str:''});renderAll();});
 $('#delSrc').addEventListener('click',()=>{if(S.src.length>1){S.src.pop();renderAll();}});
 /* v21.33 (R): any row can be deleted; a row that holds an entry asks first; the table keeps one row */
@@ -1179,28 +1195,39 @@ $('#hypTbl').addEventListener('click',async e=>{const b=e.target.closest('button
 const UNK=FN[5],SUP=['Strong','Moderate','Weak'],SETS=['Strong','Moderate'];
 const rankFn=(a,b)=>((a.tier||9)-(b.tier||9))||(b.strong-a.strong)||(b.n-a.n);
 const formsOf=a=>esc([...new Set(a.map(r=>rowForm(r)||'?'))].join(', '));
-function convergence(){
-  const rec=S.src.filter(r=>r.method);
-  const fa=rec.filter(r=>tierOf(r.method)>0&&r.fn&&(r.fn===UNK||r.str));
+/* v22.96 (review F169) for one target: its own sources and those about every target. (F173) A source recorded as Unknown counts
+   as having assessed function only when it is a test (tier 1 or 2), an analysis that came out undifferentiated; a descriptive,
+   daily-rate or indirect record cannot show that no function operates, so it is listed, not counted. */
+function convergence(tid){
+  const rec=S.src.filter(r=>r.method&&(!tid||!r.tgt||!tgtOk(r.tgt)||r.tgt===tid));
+  const fa=rec.filter(r=>tierOf(r.method)>0&&r.fn&&(r.fn===UNK?tierOf(r.method)<=2:r.str));
   const used=fa.filter(r=>r.fn!==UNK);
   const rows=FN.filter(f=>f&&f!==UNK).map(f=>{
     const sup=used.filter(r=>r.fn===f&&SUP.includes(r.str));
     const set=sup.filter(r=>SETS.includes(r.str)).map(r=>tierOf(r.method));
     return {fn:f,n:sup.length,strong:sup.filter(r=>r.str==='Strong').length,
       tier:set.length?Math.min(...set):null,weak:sup.length?Math.min(...sup.map(r=>tierOf(r.method))):null,
-      con:used.filter(r=>r.fn===f&&r.str==='Contradicts').length,srcs:sup.map(r=>rowForm(r)||'?')};
+      con:used.filter(r=>r.fn===f&&r.str==='Contradicts').length,conTiers:used.filter(r=>r.fn===f&&r.str==='Contradicts').map(r=>tierOf(r.method)),srcs:sup.map(r=>rowForm(r)||'?')};
   }).filter(r=>r.n||r.con).sort(rankFn);
   /* v22.68 (review F162) a source with a strength but no single function is named under the table, not dropped silently */
-  return {rec,fa,used,rows,noFn:fa.filter(r=>r.fn===UNK),notFn:rec.filter(r=>!tierOf(r.method)),noName:rec.filter(r=>tierOf(r.method)>0&&!r.fn&&r.str)};
+  return {rec,fa,used,rows,noFn:fa.filter(r=>r.fn===UNK),notFn:rec.filter(r=>!tierOf(r.method)),noName:rec.filter(r=>tierOf(r.method)>0&&!r.fn&&r.str),
+    unkDesc:rec.filter(r=>r.fn===UNK&&tierOf(r.method)>2)};
 }
 function renderConv(){
-  const {rows,noFn,notFn,noName}=convergence(),E=evidence();
+  const T=fsTargets();
+  if(T.length>1){const parts=T.map((b,i)=>{const out=convHtml(b.id,fsTargetE(b));return `<h3 class="fs-conv-t">${nod(b.lab)||'Target '+(i+1)}</h3>`+out.table+out.note;});
+    $('#convTbl').innerHTML='';$('#convNote').innerHTML=parts.join('');return;}
+  const out=convHtml('',evidence());$('#convTbl').innerHTML=out.tbl;$('#convNote').innerHTML=out.note;}
+/* v22.96 (review F169) one target's convergence table and notes */
+function convHtml(tid,E){
+  const {rows,noFn,notFn,noName,unkDesc}=convergence(tid);
   let foot='';
+  if(unkDesc&&unkDesc.length)foot+=`<p class="hint">Recorded as Unknown, but a descriptive, daily-rate or indirect record cannot show that no function operates, so listed and not counted among the sources that assessed function: ${formsOf(unkDesc)}.</p>`;
   if(noName&&noName.length)foot+=`<p class="hint">Not counted, no single function named: ${formsOf(noName)}. Choose the function in its row; when the source names more than one, give each its own row.</p>`;
   if(noFn.length)foot+=`<p class="hint">Recorded as Unknown, so not counted as support for any function: ${formsOf(noFn)}.</p>`;
   if(notFn.length)foot+=`<p class="hint">Listed with the methods but not counted: ${formsOf(notFn)}. Preference assessments, reinforcer assessments and treatment integrity observations do not test what maintains the behavior.</p>`;
-  if(!rows.length){$('#convTbl').innerHTML='<tbody><tr><td class="hint">Enter at least one source with a function and a strength.</td></tr></tbody>';$('#convNote').innerHTML=foot;return;}
-  $('#convTbl').innerHTML='<thead><tr><th style="text-align:left">Function</th><th style="width:15%">Sources supporting</th><th style="width:13%">Rated strong</th><th style="width:15%">Best method tier</th><th style="width:13%">Contradicted by</th><th style="width:22%">Forms</th></tr></thead><tbody>'+
+  if(!rows.length){const t='<tbody><tr><td class="hint">Enter at least one source with a function and a strength.</td></tr></tbody>';return {tbl:t,table:'<div class="grid-wrap"><table class="rt">'+t+'</table></div>',note:foot};}
+  const tbl='<thead><tr><th style="text-align:left">Function</th><th style="width:15%">Sources supporting</th><th style="width:13%">Rated strong</th><th style="width:15%">Best method tier</th><th style="width:13%">Contradicted by</th><th style="width:22%">Forms</th></tr></thead><tbody>'+
     rows.map(r=>`<tr><td>${esc(r.fn)}</td><td style="text-align:center">${r.n}</td><td style="text-align:center">${r.strong||''}</td>
       <td style="text-align:center">${r.tier?'Tier '+r.tier:r.n?'Weak only (tier '+r.weak+')':'&mdash;'}</td><td style="text-align:center">${r.con||''}</td>
       <td style="font-size:11.5px">${esc([...new Set(r.srcs)].join(', '))}</td></tr>`).join('')+'</tbody>';
@@ -1211,7 +1238,7 @@ function renderConv(){
     if(E.contra)note+=`<div class="verdict v-mid">${esc(E.top.fn)} is the best-supported function but is contradicted by ${E.contra} source${E.contra===1?'':'s'}. The disagreement belongs in the report, not in a footnote.</div>`;
     if(!E.tier)note+=`<div class="verdict v-mid">Every source supporting ${esc(E.top.fn)} is rated Weak, so its level cannot rise above 4.</div>`;
   }
-  $('#convNote').innerHTML=note+foot;
+  return {tbl,table:'<div class="grid-wrap"><table class="rt">'+tbl+'</table></div>',note:note+foot};
 }
 
 /* -------------------- targets -------------------- */
@@ -1262,6 +1289,7 @@ function renderBehForm(){
   if(/^\d+$/.test(el.dataset.b))return;
   S.beh[S.cur][el.dataset.b]=el.value;
   if(['lab','se','ant','cons','fn','sub','lod','desired','desCons','alt','altCons'].includes(el.dataset.b)){renderBehBar();renderStmt();drawPath();}
+  if(el.dataset.b==='lab'||el.dataset.b==='fn'){renderSrc();renderConv();}   /* v22.96 (review F169) */
   renderReport();}));
 
 /* v21.16 audit: text run into a sentence loses a terminal period; its first letter is lowered unless the
@@ -1270,16 +1298,16 @@ const plain=s=>String(s==null?'':s).trim().replace(/[.]+$/,'');
 const isAcr=w=>{const c=w.replace(/[^A-Za-z0-9]/g,'');return c.length>1&&/[A-Z]/.test(c)&&c===c.toUpperCase();};
 const lc1=s=>{s=plain(s);const w=s.split(/\s+/)[0]||'';return isAcr(w)?s:s.charAt(0).toLowerCase()+s.slice(1);};
 const lcw=s=>plain(s).replace(/\S+/g,w=>isAcr(w)?w:w.toLowerCase());
-const fnWords=f=>String(f||'').replace(/\s*\(.*\)/,'').toLowerCase();
+const fnWords=f=>f===FN[6]?'a synthesized contingency (the consequences tested together)':String(f||'').replace(/\s*\(.*\)/,'').toLowerCase();
 /* the statement's last sentence states the function at the level of evidence for that function:
    "The function is" only at level 1; at levels 2-4 it is the hypothesized function, with its level */
 function fnClause(b){
   if(!b.fn)return '';
   if(b.fn===UNK)return ' No function has been identified.';
-  const E=evidence(b.fn),f=fnWords(b.fn);
+  const E=evidence(b.fn,b.id),f=fnWords(b.fn);
   if(!E.band)return ` The hypothesized function is ${f}; no source on the evidence sheet supports it yet.`;
-  return E.band===1?` The function is ${f} (level 1, high confidence).`
-    :` The hypothesized function is ${f} (level ${E.band}, ${E.label.toLowerCase()} confidence).`;
+  return E.band===1?` The function is ${f} (level 1, demonstrated).`
+    :` The hypothesized function is ${f}, ${({2:'consistent with the descriptive record and not yet tested',3:'consistent with the observed pattern and not yet tested',4:'as reported, and not yet tested'})[E.band]} (level ${E.band}).`;
 }
 function stmtText(b){
   if(!b.ant&&!b.cons)return '';
@@ -1347,40 +1375,61 @@ function drawPath(){
 
 /* -------------------- level of evidence -------------------- */
 /* what each level lets the report say; true of the level however it was reached */
-const LEVELS={1:['High','v-ok','The report may state that the behavior is maintained by this consequence.'],
-  2:['Moderate','v-ok','The report may state that the consequence is differentially associated with the behavior, not that manipulating it will change the behavior.'],
-  3:['Limited','v-mid','The report may state that the behavior occurs more often under these conditions. It may not state a function as established.'],
-  4:['Preliminary','v-no','The report may state what the sources describe. A function stated at this level is a hypothesis to be tested, not a finding.']};
+/* v22.96 (review F174) each level is named by what its design shows, not by a confidence a descriptive record does not earn */
+const LEVELS={1:['Function demonstrated','v-ok','The report may state that the behavior is maintained by this consequence.'],
+  2:['Contingency described, not tested','v-ok','The report may state that the consequence is differentially associated with the behavior, not that manipulating it will change the behavior.'],
+  3:['Pattern observed','v-mid','The report may state that the behavior occurs more often under these conditions. It may not state a function as established.'],
+  4:['Reported','v-no','The report may state what the sources describe. A function stated at this level is a hypothesis to be tested, not a finding.']};
 /* what the strongest design was; shown only when the level was not reduced from it */
 const DESIGN={1:'Experimental control was demonstrated.',
   2:'A contingency was compared against a base rate, or a variable was isolated systematically without manipulation.',
   3:'Descriptive observation only.',4:'Informant report or records only.'};
 /* the level of one function (the best-supported one when none is named): its best tier, one level lower if
    any source contradicts it and one lower if another function has at least as many supporting sources */
-function evidence(fn){
-  const C=convergence(),cand=C.rows.filter(r=>r.n>0);
+/* v22.96 (review F170) a contradicting source, or a competing function with as many supporting sources, lowers the level only when
+   it stands on the same tier or better: three interviews do not lower what a functional analysis demonstrated. A disagreement from
+   a lower tier is still named in the report. (F169) The level is a target's, from that target's sources. */
+function evidence(fn,tid){
+  const C=convergence(tid),cand=C.rows.filter(r=>r.n>0);
   const E={band:null,nSrc:C.fa.length,nRec:C.rec.length};
   const top=fn?cand.find(r=>r.fn===fn):cand[0];
   if(!top)return E;
   const other=cand.filter(r=>r.fn!==top.fn).sort((a,b)=>b.n-a.n)[0];
-  const second=other&&other.n>=top.n?other:null;
-  const downgrade=(top.con?1:0)+(second?1:0);
-  const band=Math.min(4,(top.tier||4)+downgrade);
-  return Object.assign(E,{band,tier:top.tier,downgrade,contra:top.con,second,top,
+  const second=other&&other.n>=top.n?other:null,tt=top.tier||4;
+  const contraCounted=(top.conTiers||[]).filter(t=>t<=tt).length,secondCounts=!!(second&&(second.tier||4)<=tt);
+  const downgrade=(contraCounted?1:0)+(secondCounts?1:0);
+  const band=Math.min(4,tt+downgrade);
+  return Object.assign(E,{band,tier:top.tier,downgrade,contra:top.con,contraCounted,second,secondCounts,top,
     label:LEVELS[band][0],cls:LEVELS[band][1],txt:LEVELS[band][2]});
 }
+/* v22.96 (review F170) why a level stands where it does: a reduction names its reason, and a disagreement from a lower tier is
+   named without lowering it */
+function levelBasis(E){
+  const why=[E.contraCounted?`${E.contraCounted} source${E.contraCounted===1?'':'s'} at the same tier or better contradict${E.contraCounted===1?'s':''} it`:null,
+    E.secondCounts?`${E.second.fn} has ${E.second.n>E.top.n?'more':'as many'} supporting sources (${E.second.n} against ${E.top.n}) at the same tier or better`:null].filter(Boolean);
+  const reduced=E.band>(E.tier||4);
+  let t=!E.tier?'No source rated Strong or Moderate supports this function. '+E.txt
+    :reduced?`${E.txt} Reduced from level ${E.tier}, the tier of its strongest design, because ${why.join(' and ')}.`:`${DESIGN[E.tier]} ${E.txt}`;
+  if(E.downgrade&&!reduced)t+=` Level 4 is the lowest level, so it is not lowered further, although ${why.join(' and ')}.`;
+  const nLow=(E.contra||0)-(E.contraCounted||0),low=[nLow?`${nLow} contradicting source${nLow===1?'':'s'}`:null,
+    E.second&&!E.secondCounts?`${E.second.fn} with ${E.second.n>E.top.n?'more':'as many'} supporting sources (${E.second.n} against ${E.top.n})`:null].filter(Boolean);
+  if(low.length)t+=` The disagreement from a lower tier (${low.join('; ')}) is recorded and weighed; it does not lower a level reached by a stronger design.`;
+  return {reduced,txt:t};}
+/* v22.96 (review F169) the targets the report names; with more than one, each has its own level */
+const fsTargets=()=>S.beh.filter(b=>b.lab||b.def);
+const fsTargetE=b=>evidence(b.fn&&b.fn!==UNK?b.fn:'',b.id);
 function renderConf(){
+  const T=fsTargets();
+  if(T.length>1){const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
+    $('#confBox').innerHTML=T.map((b,i)=>{const E=fsTargetE(b),nm=nod(b.lab)||'Target '+(i+1);
+      if(!E.band)return `<p class="hint"><b>${nm}.</b> ${E.nRec?'No function is supported by a source that assessed function for this target, so no level of evidence can be derived.':'No source on the evidence sheet assessed this target.'}</p>`;
+      return `<div class="verdict ${E.cls}"><b>${nm}: level ${E.band} &mdash; ${E.label}.</b> ${levelBasis(E).txt}</div>`;}).join('');
+    $('#confMetrics').innerHTML=T.map((b,i)=>{const E=fsTargetE(b);if(!E.band)return '';return card((nod(b.lab)||'Target '+(i+1))+': function',esc(E.top.fn),`${E.top.n} of ${E.nSrc} sources that assessed function for it support it`)+card('Best method tier',E.tier?`Tier ${E.tier}`:'Weak only','among the sources rated Strong or Moderate that support it');}).join('');
+    return;}
   const E=evidence();
   if(!E.band){$('#confBox').innerHTML=`<p class="hint">${E.nRec?'No function is supported by a source that assessed function, so no level of evidence can be derived.':'Enter evidence sources to derive the level of evidence.'}</p>`;$('#confMetrics').innerHTML='';return;}
-  const why=[E.contra?`${E.contra} source${E.contra===1?'':'s'} contradict${E.contra===1?'s':''} it`:null,
-    E.second?`${esc(E.second.fn)} has ${E.second.n>E.top.n?'more':'as many'} supporting sources (${E.second.n} against ${E.top.n})`:null].filter(Boolean);
   /* a reduction is named only when it moved the level; level 4 cannot move, and then the reason is still given */
-  const reduced=E.band>(E.tier||4);
-  let txt=!E.tier?'No source rated Strong or Moderate supports this function. '+E.txt
-    :reduced?`${E.txt} Reduced from level ${E.tier}, the tier of its strongest design, because ${why.join(' and ')}.`
-    :`${DESIGN[E.tier]} ${E.txt}`;
-  if(E.downgrade&&!reduced)txt+=` Level 4 is the lowest level, so it is not lowered further, although ${why.join(' and ')}.`;
-  $('#confBox').innerHTML=`<div class="verdict ${E.cls}"><b>Level ${E.band} &mdash; ${E.label} confidence.</b> ${txt}</div>`;
+  $('#confBox').innerHTML=`<div class="verdict ${E.cls}"><b>Level ${E.band} &mdash; ${E.label}.</b> ${levelBasis(E).txt}</div>`;
   const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
   $('#confMetrics').innerHTML=
     card('Best-supported function',esc(E.top.fn),`${E.top.n} of ${E.nSrc} sources that assessed function support it`)+
@@ -1432,13 +1481,11 @@ function renderReport(){
   });
   h+=`<h3>Findings</h3>`;
   const findingsAt=h.length;
-  if(E.band){
-    h+=`<p>Across ${E.nSrc} source${E.nSrc===1?'':'s'} that assessed function, ${E.top.n} support${E.top.n===1?'s':''} `+
-       `<b>${esc(E.top.fn)}</b>. On the strength of the designs used, the behavior ${verb} this consequence. `+
-       `This is a level ${E.band} conclusion (${esc(E.label.toLowerCase())} confidence).</p>`;
-    if(E.contra)h+=`<p>${E.contra} source${E.contra===1?'':'s'} contradict${E.contra===1?'s':''} this function. That disagreement is recorded on the evidence sheet and has been weighed rather than set aside.</p>`;
-    if(E.second)h+=`<p>${esc(E.second.fn)} is supported by ${E.second.n} source${E.second.n===1?'':'s'}, ${E.second.n>E.top.n?'more than':'as many as'} this function${E.band>(E.tier||4)?', and the level has been reduced for that reason':''}.</p>`;
-  }
+  /* v22.96 (review F169) with more than one target, the findings for each from its own sources */
+  const TT=fsTargets();
+  if(TT.length>1)TT.forEach((b,i)=>{const Eb=fsTargetE(b),nm=nod(b.lab)||'Target '+(i+1);
+    h+=Eb.band?fsFindings(Eb,nm):`<p><b>${nm}.</b> No level of evidence has been derived for this target: no source on the evidence sheet supports a function for it.</p>`;});
+  else if(E.band)h+=fsFindings(E,'');
   else h+='<p class="hint">No level of evidence has been derived: no source on the evidence sheet supports a function.</p>';
   h+=xaReport();
   const setAside=S.hyp.filter(x=>x.h&&x.out==='Set aside');
@@ -1460,6 +1507,15 @@ function renderReport(){
   $('#reportOut').innerHTML=h;
 }
 
+/* v22.96 (review F169, F170, F174) one target's findings: the count, the design's verb, the level by name, and a disagreement
+   named with whether it lowered the level */
+function fsFindings(E,nm){const verb={1:'is maintained by',2:'is differentially associated with',3:'occurs more often under conditions associated with',4:'is described in the sources as related to'}[E.band];
+  const B=levelBasis(E),lowC=(E.contra||0)-(E.contraCounted||0);
+  let h=`<p>${nm?'<b>'+nm+'.</b> ':''}Across ${E.nSrc} source${E.nSrc===1?'':'s'} that assessed function${nm?' for this target':''}, ${E.top.n} support${E.top.n===1?'s':''} `+
+    `<b>${esc(E.top.fn)}</b>. On the strength of the designs used, the behavior ${verb} this consequence. This is a level ${E.band} conclusion (${esc(E.label.toLowerCase())}).</p>`;
+  if(E.contra)h+=`<p>${E.contra} source${E.contra===1?'':'s'} contradict${E.contra===1?'s':''} this function${lowC===E.contra?', each from a lower tier than the design behind it, so the level stands':''}. That disagreement is recorded on the evidence sheet and has been weighed rather than set aside.</p>`;
+  if(E.second)h+=`<p>${esc(E.second.fn)} is supported by ${E.second.n} source${E.second.n===1?'':'s'}, ${E.second.n>E.top.n?'more than':'as many as'} this function${E.secondCounts&&B.reduced?', and the level has been reduced for that reason':E.secondCounts?'':', all from a lower tier, so the level stands'}.</p>`;
+  return h;}
 /* -------------------- experimental analysis detail (Fergus et al., 2026; Bann & Morris, 2026) -------------------- */
 const ACSA_LEVEL={'Free access':'the competing stimuli alone','Prompted engagement':'the competing stimuli with prompted engagement','Prompted engagement plus response blocking':'the competing stimuli with prompted engagement and response blocking'};
 function xaReport(){
@@ -1509,6 +1565,10 @@ function renderAll(){ensure();renderSrc();renderHyp();renderConv();renderBehBar(
 
 /* -------------------- toolbar -------------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
+/* v22.96 (review F172) the Guide prints on its own; the report and the master print leave it out */
+$('#printGuideBtn').addEventListener('click',()=>{document.body.classList.add('fs-print-guide');const off=()=>{document.body.classList.remove('fs-print-guide');window.removeEventListener('afterprint',off);};
+  window.addEventListener('afterprint',off);window.print();setTimeout(off,1500);});
+window.nbhPrintNodes=function(){return ['.only-setup','.only-ev','.only-beh','.only-path','.only-rep'].map(q=>document.querySelector('section'+q)).filter(Boolean);};
 $('#saveBtn').addEventListener('click',()=>{
   const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');
@@ -1563,8 +1623,8 @@ async function loadSim(){
      contrib:'Independent demand and delivered escape survived the method of agreement across 10 occurrences; six other candidates were eliminated. Across eight matched pairs, independent demand was implicated in all eight and delivered escape in six. Daily minutes of independent demand correlated with daily aggression at rho = +0.99.',
      fn:'Escape / avoidance (social negative)',str:'Strong'},
     {method:'Daily rate or duration data with visual analysis',dates:D(58)+'\u2013'+D(6),who:'Classroom team',
-     contrib:'Mean 4.2 per day across the assessment, range 0\u20139, stable with no trend.',
-     fn:'Unknown \u2013 record separately',str:''},
+     contrib:'Mean 4.2 per day across the assessment, range 0\u20139, stable with no trend. A daily count measures level; it is not a test of function.',
+     fn:'',str:''},   /* v22.96 (review F173) */
     {method:'Preference assessment',dates:D(21),who:'J. Ellis',
      contrib:'MSWO across five sessions. Tablet 92%, fruit chew 71%, praise 46%.',
      fn:'',str:''},
@@ -1604,7 +1664,7 @@ async function loadSim(){
     fn:'Escape / avoidance (social negative)',sub:'Not applicable \u2014 not automatically maintained self-injury',
     se:'the same setting events as for aggression are present',
     ant:'a repeated independent academic demand after a first refusal',
-    cons:'a pause in the demand and the adult moving closer',
+    cons:'a pause in the demand',   /* v22.96 (review F177) the escape the statement reports, and nothing else */
     desired:'Requests help or indicates the task is too hard',
     desCons:'Adult support, which the student rarely seeks',
     alt:'Hands the break card and waits',
@@ -1648,7 +1708,7 @@ window.__nbhFactsOut=function(){
 };
 const nbhFsIsRep=b=>!!(b&&(b.isRep||/replacement|alternative/i.test(b.type||'')));
 function nbhFsRow(b){const r=newBeh();r.lab=b.label||'';r.def=b.def||'';r.dim=b.dim||'';r.base=b.base||b.rate||'';r.alt=b.rep||'';
-  const re={escape:/escape/i,attention:/attention/i,tangible:/tangible/i,automatic:/automatic/i,unknown:/unknown/i}[b.fnKey||(window.nbhCase?window.nbhCase.fnKeyOf(b.fn):'')];
+  const re={escape:/escape/i,attention:/attention/i,tangible:/tangible/i,automatic:/automatic/i,unknown:/unknown/i,multiple:/^Synthesized/}[b.fnKey||(window.nbhCase?window.nbhCase.fnKeyOf(b.fn):'')];
   r.fn=re?(FN.find(o=>re.test(o))||''):'';return r;}
 window.__nbhFactsIn=function(f){
   const behs=(f.behaviors||[]).filter(b=>b.src!=='FS-1'&&(b.label||b.def)&&!nbhFsIsRep(b));if(!behs.length)return {filled:0};
@@ -1731,15 +1791,14 @@ function bipText(){
       bipLine('Why the alternative should win',b.rationale),bipLine('Notes',b.notes)]);});
   const L=['LEVEL OF EVIDENCE'];
   if(E.band){const verb={1:'is maintained by',2:'is differentially associated with',3:'occurs more often under conditions associated with',4:'is described in the sources as related to'}[E.band];
-    const why=[E.contra?E.contra+' source'+(E.contra===1?'':'s')+' contradict'+(E.contra===1?'s':'')+' it':null,E.second?E.second.fn+' has '+(E.second.n>E.top.n?'more':'as many')+' supporting sources ('+E.second.n+' against '+E.top.n+')':null].filter(Boolean);
-    const reduced=E.band>(E.tier||4);
-    let basis=!E.tier?'No source rated Strong or Moderate supports this function. '+E.txt:reduced?E.txt+' Reduced from level '+E.tier+', the tier of its strongest design, because '+why.join(' and ')+'.':DESIGN[E.tier]+' '+E.txt;
-    if(E.downgrade&&!reduced)basis+=' Level 4 is the lowest level, so it is not lowered further, although '+why.join(' and ')+'.';
-    L.push('Best-supported function: '+E.top.fn,'Level: '+E.band+' ('+E.label.toLowerCase()+' confidence)',
+    const LB=levelBasis(E),reduced=LB.reduced,basis=LB.txt;   /* v22.96 (review F170) */
+    L.push('Best-supported function: '+E.top.fn,'Level: '+E.band+' ('+E.label.toLowerCase()+')',
       'Finding: Across '+E.nSrc+' source'+(E.nSrc===1?'':'s')+' that assessed function, '+E.top.n+' support'+(E.top.n===1?'s':'')+' '+E.top.fn+'. On the strength of the designs used, the behavior '+verb+' this consequence.',
       'Basis: '+basis,
       E.contra?E.contra+' source'+(E.contra===1?'':'s')+' contradict'+(E.contra===1?'s':'')+' this function; the disagreement is recorded on the evidence sheet and has been weighed rather than set aside.':'',
-      E.second?E.second.fn+' is supported by '+E.second.n+' source'+(E.second.n===1?'':'s')+', '+(E.second.n>E.top.n?'more than':'as many as')+' this function'+(reduced?', and the level has been reduced for that reason':'')+'.':'');}
+      E.second?E.second.fn+' is supported by '+E.second.n+' source'+(E.second.n===1?'':'s')+', '+(E.second.n>E.top.n?'more than':'as many as')+' this function'+(E.secondCounts&&reduced?', and the level has been reduced for that reason':E.secondCounts?'':', all from a lower tier, so the level stands')+'.':'');
+    /* v22.96 (review F169) with more than one target, each target's own level */
+    const TT=fsTargets();if(TT.length>1)TT.forEach((b,i)=>{const Eb=fsTargetE(b);L.push((bipTxt(b.lab)||'Target '+(i+1))+': '+(Eb.band?Eb.top.fn+', level '+Eb.band+' ('+Eb.label.toLowerCase()+'), from '+Eb.nSrc+' source'+(Eb.nSrc===1?'':'s')+' that assessed function for it':'no level derived'));});}
   else if(E.nRec)L.push('No function is supported by a source that assessed function, so no level of evidence can be derived.');
   B.push(L);
   B.push(['SOURCES OF EVIDENCE'].concat(S.src.filter(r=>r.method).map(r=>'- '+r.method+(rowForm(r)?' (Form '+rowForm(r)+')':'')+(bipTxt(r.dates)?', '+bipTxt(r.dates):'')+(bipTxt(r.who)?', '+bipTxt(r.who):'')+
@@ -3019,8 +3078,13 @@ function fsEvMethod(id,e){const m=String(e.method||'');
   if(id==='EA-1')return /trial|iisca|synthes/i.test(m)?METHODS[2][0]:/component/i.test(m)?METHODS[3][0]:METHODS[1][0];
   if(id==='ABC-1')return /conditional|background/i.test(m)?METHODS[4][0]:METHODS[6][0];
   return ({'VI-1':METHODS[5][0],'SP-1':METHODS[7][0],'OB-1':METHODS[6][0],'IA-1':METHODS[11][0],'IN-1':METHODS[11][0]})[id]||'';}
-function fsEvFn(e){const k=e.fnKey||'';return ({attention:FN[1],tangible:FN[2],escape:FN[3],automatic:FN[4],unclear:FN[5]})[k]||'';}
+/* v22.96 (review F168) more than one function counts as a synthesized result only from a functional analysis; from any other
+   source it stays uncounted and named under the table (F162) */
+function fsEvFn(e,m){const k=e.fnKey||'';if(k==='multiple')return m&&tierOf(m)===1?FN[6]:'';return ({attention:FN[1],tangible:FN[2],escape:FN[3],automatic:FN[4],unclear:FN[5]})[k]||'';}
 const fsEvT=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+/* v22.96 (review F169) the target a source form names, matched to this report's targets by name; otherwise every target */
+function fsEvTgt(e){const n=fsEvT(e&&(e.target||e.beh||e.behavior)).toLowerCase();if(!n)return '';
+  const b=S.beh.find(x=>{const l=fsEvT(x.lab).toLowerCase();return l&&(l===n||l.indexOf(n)>=0||n.indexOf(l)>=0);});return b?b.id:'';}
 const fsEvNames=(r,id)=>new RegExp('(^|[^A-Za-z0-9-])'+id.replace('-','\\-')+'(?![0-9])').test([r.contrib,r.who,r.dates,r.h,r.how,r.what].map(fsEvT).join(' '));
 function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
   const ids=fsEvOrder.concat(Object.keys(E).filter(k=>fsEvOrder.indexOf(k)<0));
@@ -3028,7 +3092,7 @@ function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
     if(S.src.some(r=>fsEvT(r.form)===id||(!fsEvT(r.form)&&formOf(r.method)===id)||fsEvNames(r,id)))return;
     const method=fsEvMethod(id,e);if(!method)return;
     const contrib=[fsEvT(e.method)+(e.n!=null&&e.n!==''?' ('+e.n+' '+(fsEvUnit[id]||'')+')':''),fsEvT(e.statement)].filter(Boolean).join('. ').replace(/\.\./g,'.');
-    const row={form:id,method,dates:fsEvT(e.dates),who:fsEvT(e.by),contrib,fn:fsEvFn(e),str:STR.indexOf(e.strength)>0?e.strength:''};
+    const row={form:id,method,dates:fsEvT(e.dates),who:fsEvT(e.by),contrib,fn:fsEvFn(e,method),str:STR.indexOf(e.strength)>0?e.strength:'',tgt:fsEvTgt(e)};
     const slot=S.src.find(r=>!rowHas(r));if(slot)Object.assign(slot,row);else S.src.push(row);put.push(id);n++;});
   /* v22.36 Form IA-1's analyses by group (all informants, school, home, a named group) that were ticked "In the case": a row
      each, beside the assessment's own row; one already listed (its contribution starts with the group's name) is left as it is */
