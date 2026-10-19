@@ -695,6 +695,12 @@ body.im-ro .imLocs path{cursor:default}
 .imMark.sev-1 .core{fill:#E3A008}
 .imMark.sev-2 .core{fill:#DD6B20}
 .imMark.sev-3 .core{fill:#B42318}
+/* v23.16 (review I228) the same wound, still healing: a dashed outer ring; (I229) a healed site from Part I: a dashed outline */
+.imMark .healr{fill:none;stroke:#2f5568;stroke-width:1.4;stroke-dasharray:2.5 2}
+.imLocs path.healed{stroke:#6B3FA0;stroke-width:1.8;stroke-dasharray:3 2}
+@media print{.imLocs path.healed{stroke:#6B3FA0;stroke-width:1.4;stroke-dasharray:3 2}}
+.imHeal{margin-top:3px}.imHeal select{font-size:11.5px}
+#imHigh .fieldgrid{margin-top:4px}
 .imMark .ring2{fill:none;stroke:#DD6B20;stroke-width:1.6}
 .imMark .ring3{fill:none;stroke:#B42318;stroke-width:2.6}
 .imMark .hatch{fill:url(#imHatch);stroke:none}
@@ -948,7 +954,7 @@ td input,td select{max-width:100%}
   <div class="nbh-mast-inner">
     <div class="nbh-brandrow">
       <img class="nbh-logo" data-nbh-logo="1" alt="Royal Palm School">
-      <div class="nbh-formmeta"><span class="nbh-formid">Form IM-1</span><span>Revised September 2026</span><span>Confidential student record</span></div>
+      <div class="nbh-formmeta"><span class="nbh-formid">Form IM-1</span><span>Revised October 2026</span><span>Confidential student record</span></div>
     </div>
     <div class="nbh-titlerow">
       <div class="nbh-titleblock">
@@ -988,7 +994,7 @@ td input,td select{max-width:100%}
 <main class="sheet">
   <div class="nbh-print-head">
     <img class="nbh-print-logo" data-nbh-logo="1" alt="Royal Palm School">
-    <div class="nbh-print-meta"><div class="nbh-print-title">Self-Injury Trauma Scale and Injury Monitoring</div><div>Form IM-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+    <div class="nbh-print-meta"><div class="nbh-print-title">Self-Injury Trauma Scale and Injury Monitoring</div><div>Form IM-1 &middot; Revised October 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
 
   <!-- ===================== SETUP ===================== -->
@@ -1075,6 +1081,7 @@ td input,td select{max-width:100%}
     <div class="tools noprint"><button type="button" class="tool imNewAdm">Start a new administration</button><button type="button" class="tool imSaveAdm">Save to history</button><span class="status" id="imAdmStatus"></span></div>
     <div id="imRoNote"></div>
     <div class="metrics" id="imIdxMap"></div>
+    <div id="imHighMap" class="noprint"></div><!-- v23.16 (review F450): on paper the rule prints once, under Part III -->
     <p class="hint noprint">Tap a location to place a marker and open its row; tap a marker to select it; tap the same location again while it is selected to move its marker. Every location is also a keyboard target (Tab to it, Enter to add it), and the Scoring page adds a location from a list. The private areas are not examined: the shaded buttocks, on the back figure, open Noticed During Required Care instead of a row; the side of the hip, on the front figure, is checked and scored as Hips/buttocks; and Genitalia and Rectum, which have no surface on the figure, are on the list but cannot be chosen. L and R are the student&rsquo;s left and right.</p>
     <div class="imMapWrap">
       <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><pattern id="imHatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="4" fill="#B42318"/><line x1="0" y1="0" x2="0" y2="4" stroke="#fff" stroke-width="1.4"/></pattern><pattern id="imPrivHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#E6E9ED"/><line x1="0" y1="0" x2="0" y2="6" stroke="#A3AEB9" stroke-width="2"/></pattern></defs></svg>
@@ -1187,6 +1194,9 @@ td input,td select{max-width:100%}
     <datalist id="imKinds"><option value="abrasion"><option value="laceration"><option value="bite"><option value="bruise"><option value="scratch"><option value="pick mark"></datalist>
     <h3 style="margin-top:14px">Part III. Scoring Summary</h3>
     <div id="imPart3"></div>
+    <!-- v23.16 (review F450): the paper's rule for a High estimate, and where to record that it was followed -->
+    <div id="imHigh" class="imKeep" hidden><div id="imHighV"></div>
+      <div class="fieldgrid" id="imHighF"><div><label>School nurse saw the student (who, when)</label><input data-a="nurseSaw" placeholder="e.g., School nurse, 8:20 in the health room"></div><div><label>Parent or guardian told (who, when)</label><input data-a="parentTold" placeholder="e.g., by the nurse, by phone at 9:10"></div></div></div>
 
     <!-- v21.44 (B5): the report question for this administration. It stays on the screen: on paper the record shows only
          that it was answered, and when, and Print the report record prints the answer on a sheet of its own. Wording approved by the BCBA, October 2026. -->
@@ -1402,7 +1412,7 @@ const normName=s=>String(s||'').toLowerCase().replace(/\([^)]*\)/g,' ').replace(
 const samePerson=(a,b)=>{const x=normName(a),y=normName(b);return !!x&&!!y&&(x===y||x.startsWith(y+' ')||y.startsWith(x+' '));};
 
 /* ---------------- state ---------------- */
-const admBlank=()=>({id:'',date:'',time:'',examiner:'',second:'',secondRole:'',present:false,assent:'',note:'',ro:false,rows:[],rep:repBlank(),pc:''});
+const admBlank=()=>({id:'',date:'',time:'',examiner:'',second:'',secondRole:'',present:false,assent:'',note:'',ro:false,rows:[],rep:repBlank(),pc:'',nurseSaw:'',parentTold:''});   /* v23.16 (F450) nurseSaw, parentTold */
 /* v21.44 (B4): an injury noticed during required care, and the one being written (kept with the record, so a half-written
    entry is saved and comes back; its id is the entry's it corrects, or empty for a new one). Every entry is in a
    private area, so its report question always has that box ticked. alone: no second adult was there (aloneWhy says
@@ -1424,7 +1434,13 @@ function ensure(){
 }
 /* dates as the sheets write them (M/D/YYYY, M/D/YY) or ISO; anything else is not a date */
 function pDate(s){s=String(s||'').trim();let m=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/.exec(s);if(m){let y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2],12);}
-  m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);if(m)return new Date(+m[1],+m[2]-1,+m[3],12);return null;}
+  m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);if(m)return new Date(+m[1],+m[2]-1,+m[3],12);
+  /* v23.16 (review F455) a date in words, as dictated or pasted: "September 8, 2026", "Sept. 8 2026", "8 September 2026" */
+  const mo=w=>{const k=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(String(w).slice(0,3).toLowerCase());return k>=0&&/^[a-z]+$/i.test(w)?k:-1;};
+  const ok=(y,k,d)=>{const x=new Date(y,k,d,12);return k>=0&&x.getMonth()===k&&x.getDate()===d?x:null;};
+  m=/^([A-Za-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$/.exec(s);if(m)return ok(+m[3],mo(m[1]),+m[2]);
+  m=/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\.?,?\s+(\d{4})$/.exec(s);if(m)return ok(+m[3],mo(m[2]),+m[1]);
+  return null;}
 const MDY=d=>(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
 const today=()=>MDY(new Date());
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
@@ -1452,7 +1468,11 @@ function score(rows){
   const risk=R.length&&!scored?null:RISK[band];
   return{R,total,f,grp,n:R.length,ni,si,band,risk,rule,noN,noS,scored,complete:!noN&&!noS};
 }
-const riskTag=sc=>sc.risk==null?'<span class="risk r-x">'+NONE+'</span>':'<span class="risk r-'+sc.band+'">'+sc.risk+'</span>';
+const riskTag=sc=>sc.stopped?'<span class="risk r-x">not estimated</span>':sc.risk==null?'<span class="risk r-x">'+NONE+'</span>':'<span class="risk r-'+sc.band+'">'+sc.risk+'</span>';
+/* v23.16 (review F451) a check that stopped before the examination was complete is not estimated: no risk, and the indices
+   (when any location was seen) marked partial; a completed check that found nothing stays NI 0, SI 0, Low */
+const scoreA=a=>{const sc=score(a&&a.rows);return a&&a.assent==='stopped'?Object.assign({},sc,{risk:null,band:0,rule:'the check stopped before the examination was complete: not estimated',stopped:true}):sc;};
+const ix=(sc,k)=>sc[k]==null?NONE:sc.stopped?(sc.n?sc[k]+' (partial)':NONE):sc[k];
 const grpLine=sc=>GROUPS.map(g=>g[1].split(' ')[0]+' '+sc.grp[g[0]]).join(' · ');
 
 /* ---------------- the body map ---------------- */
@@ -1469,23 +1489,33 @@ function marker(r,i){const sv=['1','2','3'].includes(String(r.sev))?String(r.sev
   const core=ct?'<rect class="core" x="-8.5" y="-8.5" width="17" height="17" rx="2.5"/>':'<circle class="core" r="9"/>';
   const hatch=sv==='3'?(ct?'<rect class="hatch" x="-8.5" y="-8.5" width="17" height="17" rx="2.5"/>':'<circle class="hatch" r="9"/>'):'';
   const ring=sv==='2'?(ct?'<rect class="ring2" x="-12" y="-12" width="24" height="24" rx="3"/>':'<circle class="ring2" r="12.5"/>'):sv==='3'?(ct?'<rect class="ring3" x="-12.5" y="-12.5" width="25" height="25" rx="3"/>':'<circle class="ring3" r="13"/>'):'';
-  const label=l.name+': number '+(r.n||NONE)+', '+(r.type||'type not set')+(r.sev?' severity '+r.sev:'');
-  return '<g class="imMark sev-'+sv+(sel?' sel':'')+'" data-row="'+i+'" transform="translate('+(+r.x).toFixed(1)+','+(+r.y).toFixed(1)+')" role="button" tabindex="0" aria-label="'+esc(label)+'"><title>'+esc(label)+'</title>'+(sel?'<circle class="selring" r="16"/>':'')+ring+core+hatch+'<circle class="disc" r="5"/><text y="3.3">'+esc(r.n||'?')+'</text></g>';}
+  const label=l.name+': number '+(r.n||'not chosen')+', '+(r.type||'type not set')+(r.sev?' severity '+r.sev:'')+(r.heal==='healing'?', the same wound, healing':'');
+  return '<g class="imMark sev-'+sv+(sel?' sel':'')+'" data-row="'+i+'" transform="translate('+(+r.x).toFixed(1)+','+(+r.y).toFixed(1)+')" role="button" tabindex="0" aria-label="'+esc(label)+'"><title>'+esc(label)+'</title>'+(sel?'<circle class="selring" r="16"/>':'')+(r.heal==='healing'?'<circle class="healr" r="15.5"/>':'')+ring+core+hatch+'<circle class="disc" r="5"/><text y="3.3">'+esc(r.n||'?')+'</text></g>';}
 function renderMap(){
   /* a row tints its own surface: the side of the hip (front) and the buttocks (back) are told apart */
   $$('#imMaps path[data-loc]').forEach(p=>{const loc=p.dataset.loc,priv=isPrivPath(loc,p.ownerSVGElement.dataset.view),row=S.cur.rows.find(r=>r.loc===loc),mine=!!row&&isPrivRow(row)===priv;
-    p.classList.toggle('has',mine);p.classList.toggle('selp',(SEL===loc&&mine)||(SEL==null&&SELP===loc&&priv));});
+    p.classList.toggle('has',mine);p.classList.toggle('selp',(SEL===loc&&mine)||(SEL==null&&SELP===loc&&priv));
+    p.classList.toggle('healed',!priv&&S.healed.some(h=>h.loc===loc));});   /* v23.16 (I229) the Part I healed sites */
   ['front','back','head'].forEach(v=>{const g=$('#imMarks-'+v),e=$('#imEchoes-'+v);if(!g)return;
     g.innerHTML=S.cur.rows.map((r,i)=>r.view===v&&isFinite(+r.x)&&isFinite(+r.y)?marker(r,i):'').join('');
     /* a head location marked on one head figure is echoed on the other, so the figure and the detail agree */
     e.innerHTML=S.cur.rows.map(r=>{const l=LOC[r.loc];if(!l||l.region!=='head'||r.view===v)return '';const other=v==='head'?r.view==='front':v==='front'&&r.view==='head';const s=SURF[r.loc]&&SURF[r.loc][v];
       return other&&s?'<circle class="echo" cx="'+s.cx+'" cy="'+s.cy+'" r="'+(v==='head'?10:6)+'"/>':'';}).join('');});
   document.body.classList.toggle('im-ro',!!S.cur.ro);
-  $('#imChips').innerHTML=S.cur.rows.length?S.cur.rows.map(r=>'<button type="button" data-chip="'+esc(r.loc)+'" class="'+(SEL===r.loc?'on':'')+'" aria-pressed="'+(SEL===r.loc)+'">'+esc(LOC[r.loc].name)+(r.n?' · '+esc(r.n):'')+(r.type?' '+esc(r.type)+(r.sev?'-'+esc(r.sev):''):'')+'</button>').join(''):'';
+  $('#imChips').innerHTML=S.cur.rows.length?S.cur.rows.map(r=>'<button type="button" data-chip="'+esc(r.loc)+'" class="'+(SEL===r.loc?'on':'')+'" aria-pressed="'+(SEL===r.loc)+'">'+esc(LOC[r.loc].name)+(r.n?' · '+esc(r.n):' · ?')+(r.type?' '+esc(r.type)+(r.sev?'-'+esc(r.sev):''):'')+(r.heal==='healing'?' · healing':'')+'</button>').join(''):'';
 }
 function svgPoint(svg,e){try{const m=svg.getScreenCTM();if(!m||!isFinite(e.clientX))return null;const pt=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());return{x:Math.round(pt.x*10)/10,y:Math.round(pt.y*10)/10};}catch(err){return null;}}
-function newRow(loc,view,pt){const v=view||homeView(loc);const s=SURF[loc]&&SURF[loc][v];
-  return{loc,n:'1',type:'',sev:'',kind:'',note:'',how:'',view:s?v:'',x:pt?pt.x:s?s.cx:'',y:pt?pt.y:s?s.cy:''};}
+/* v23.16 (review F456) the number is chosen, not assumed (the marker shows ? until it is); (I228) a location injured at
+   the last completed check starts as "same wound, healing", any other as "new since the last check": change it when wrong */
+function prevAdm(){const H=histSorted().filter(h=>h.assent!=='stopped'&&h.id!==S.cur.id),d=pDate(S.cur.date);const B=d?H.filter(h=>{const x=pDate(h.date);return x&&x<d;}):H;return B.length?B[B.length-1]:null;}
+function newRow(loc,view,pt){const v=view||homeView(loc);const s=SURF[loc]&&SURF[loc][v],pv=prevAdm();
+  return{loc,n:'',type:'',sev:'',kind:'',note:'',how:'',view:s?v:'',x:pt?pt.x:s?s.cx:'',y:pt?pt.y:s?s.cy:'',heal:pv&&pv.rows.some(r=>r.loc===loc)?'healing':'new'};}
+const HEALS=[['new','New since the last check'],['healing','Same wound, healing']];
+/* a site counts as new when marked new, or (a record from before the flag) when it was not injured at the check before */
+const isNewSite=(r,prev)=>r.heal==='new'||(r.heal!=='healing'&&!(prev&&(prev.rows||[]).some(x=>x.loc===r.loc)));
+function newHeal(h){const H=histSorted().filter(x=>x.assent!=='stopped'),k=H.findIndex(x=>x.id===h.id),prev=k>0?H[k-1]:null;const R=(h.rows||[]).filter(r=>LOC[r.loc]);
+  const nw=R.filter(r=>isNewSite(r,prev)).length;return{nw,heal:R.length-nw};}
+const healNote=loc=>{const H=S.healed.filter(h=>h.loc===loc&&(h.ev||h.note));return H.length?'<p class="hint" style="margin:0 0 4px"><b>Healed (Part I):</b> '+H.map(h=>esc([h.ev,h.note].filter(Boolean).join(': '))).join('; ')+'. Do not score it as a current injury.</p>':'';};   /* v23.16 (I229) */
 function tapLoc(loc,view,pt){
   /* v21.44 (B4): a private area is not examined. It offers only the care path; a row an earlier record holds there is
      still opened, as it was recorded. The buttocks never take a marker, and a row recorded there is never moved to
@@ -1522,7 +1552,7 @@ function renderKey(){
 /* ---------------- the current administration: side panel, chart, indices ---------------- */
 function rowControls(r,i,ctx){const dis=S.cur.ro?' disabled':'';const sevs=SEVS[r.type]||[];
   const sel=(f,opts,label,extra)=>'<select data-r="rows" data-i="'+i+'" data-f="'+f+'" aria-label="'+esc(label)+'"'+dis+(extra||'')+'><option value="">'+(f==='sev'&&!r.type?'choose the type first':'')+'</option>'+opts.map(o=>'<option value="'+o[0]+'"'+(String(r[f])===o[0]?' selected':'')+'>'+esc(o[1])+'</option>').join('')+'</select>';
-  return{n:sel('n',NUMS,'Number of wounds, '+LOC[r.loc].name),type:sel('type',TYPES,'Type of the worst wound, '+LOC[r.loc].name),sev:sel('sev',sevs,'Severity of the worst wound, '+LOC[r.loc].name,r.type?'':' disabled'),
+  return{heal:sel('heal',HEALS,'New since the last check, or the same wound healing, '+LOC[r.loc].name),n:sel('n',NUMS,'Number of wounds, '+LOC[r.loc].name),type:sel('type',TYPES,'Type of the worst wound, '+LOC[r.loc].name),sev:sel('sev',sevs,'Severity of the worst wound, '+LOC[r.loc].name,r.type?'':' disabled'),
     how:sel('how',HOW,'How it happened, '+LOC[r.loc].name),
     kind:'<input data-r="rows" data-i="'+i+'" data-f="kind" list="imKinds" value="'+esc(r.kind)+'" placeholder="bite, bruise" aria-label="Kind of wound, '+esc(LOC[r.loc].name)+'"'+dis+'>',
     note:'<input data-r="rows" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'" placeholder="size, age, what was seen" aria-label="Comment, '+esc(LOC[r.loc].name)+'"'+dis+'>'};}
@@ -1532,13 +1562,13 @@ function renderSide(){const el=$('#imSide');const i=S.cur.rows.findIndex(r=>r.lo
     h+='<div style="font-weight:600;font-size:14px;margin-bottom:4px">'+esc(PRIV_NAME[SELP]||l.name)+' <span class="hint">('+esc(GNAME[l.region])+'; a private area)</span></div><p class="imPrivMsg">Staff do not examine private areas. If an injury here was noticed while giving care the student needed anyway, such as help with toileting or changing, record what was seen as noticed during required care.</p><div class="tools" style="margin:6px 0 0"><button type="button" class="tool" data-carenew="'+esc(AREA_OF[SELP]||'')+'">Record an injury noticed during required care</button></div>';}
   else if(i<0){h+='<p class="hint" style="margin:0">'+(S.cur.rows.length?'Tap a marker, a location or a chip below the map to open its row.':'No injured location yet. Tap the figure where the injury is, or add the location on the Scoring page.')+'</p>';}
   else{const r=S.cur.rows[i],c=rowControls(r,i,'side'),l=LOC[r.loc],priv=isPrivRow(r);
-    h+='<div style="font-weight:600;font-size:14px;margin-bottom:4px">'+esc(r.loc==='hips'&&!priv?'Hips/buttocks: the side of the hip':l.name)+' <span class="hint">('+esc(GNAME[l.region])+(r.view?'':'; no surface on the figure')+')</span></div>'+(priv?'<p class="imPrivMsg">A private area, recorded before the private-area rule: kept as recorded.</p>':LOC_NOTE[r.loc]?'<p class="hint" style="margin:0 0 4px">'+esc(LOC_NOTE[r.loc])+'</p>':'')+'<div class="fieldgrid"><div><label>Number of wounds</label>'+c.n+'</div><div><label>Type of the worst wound</label>'+c.type+'</div><div><label>Severity ('+(r.type||'AL or CT')+' criteria)</label>'+c.sev+'</div><div><label>How it happened</label>'+c.how+'</div><div><label>Kind (free note)</label>'+c.kind+'</div><div><label>Comment</label>'+c.note+'</div></div>'+
+    h+='<div style="font-weight:600;font-size:14px;margin-bottom:4px">'+esc(r.loc==='hips'&&!priv?'Hips/buttocks: the side of the hip':l.name)+' <span class="hint">('+esc(GNAME[l.region])+(r.view?'':'; no surface on the figure')+')</span></div>'+(priv?'<p class="imPrivMsg">A private area, recorded before the private-area rule: kept as recorded.</p>':LOC_NOTE[r.loc]?'<p class="hint" style="margin:0 0 4px">'+esc(LOC_NOTE[r.loc])+'</p>':'')+healNote(r.loc)+'<div class="fieldgrid"><div><label>Number of wounds</label>'+c.n+'</div><div><label>Type of the worst wound</label>'+c.type+'</div><div><label>Severity ('+(r.type||'AL or CT')+' criteria)</label>'+c.sev+'</div><div><label>How it happened</label>'+c.how+'</div><div><label>New, or the same wound healing</label>'+c.heal+'</div><div><label>Kind (free note)</label>'+c.kind+'</div><div><label>Comment</label>'+c.note+'</div></div>'+
       (S.cur.ro?'':'<div class="tools" style="margin:6px 0 0"><button type="button" class="tool rowDel" data-del="rows" data-i="'+i+'" style="font-size:12.5px;color:#8E2A2A">Remove this location</button></div>');}
   el.innerHTML=h;}
 function renderChart(){
   const tb=$('#imChart tbody');
   tb.innerHTML=S.cur.rows.length?S.cur.rows.map((r,i)=>{const c=rowControls(r,i,'chart'),l=LOC[r.loc];
-    return '<tr'+(SEL===r.loc?' class="sel"':'')+' data-rowloc="'+esc(r.loc)+'"><td class="num">'+(i+1)+'</td><td class="grp">'+esc(GNAME[l.region])+'</td><td><button type="button" class="imRowSel" data-loc="'+esc(r.loc)+'" style="font:inherit;border:0;background:transparent;padding:0;cursor:pointer;text-align:left;font-weight:600">'+esc(l.name)+'</button>'+(isPrivRow(r)?'<br><span class="hint">private area; recorded before the rule</span>':r.loc==='hips'?'<br><span class="hint">the side of the hip</span>':'')+'</td><td>'+c.n+'</td><td>'+c.type+'</td><td>'+c.sev+'</td><td>'+c.kind+'</td><td>'+c.how+'</td><td>'+c.note+'</td><td class="num hint">'+(r.view?esc(r.view):'from the list')+'</td>'+(S.cur.ro?'<td class="nx noprint"></td>':delCell('rows',i,'location'))+'</tr>';}).join(''):'<tr><td colspan="11" class="hint">No injured location in this administration. Tap the body map, or add a location above.</td></tr>';
+    return '<tr'+(SEL===r.loc?' class="sel"':'')+' data-rowloc="'+esc(r.loc)+'"><td class="num">'+(i+1)+'</td><td class="grp">'+esc(GNAME[l.region])+'</td><td><button type="button" class="imRowSel" data-loc="'+esc(r.loc)+'" style="font:inherit;border:0;background:transparent;padding:0;cursor:pointer;text-align:left;font-weight:600">'+esc(l.name)+'</button>'+(isPrivRow(r)?'<br><span class="hint">private area; recorded before the rule</span>':r.loc==='hips'?'<br><span class="hint">the side of the hip</span>':'')+'<div class="imHeal">'+c.heal+'</div></td><td>'+c.n+'</td><td>'+c.type+'</td><td>'+c.sev+'</td><td>'+c.kind+'</td><td>'+c.how+'</td><td>'+c.note+'</td><td class="num hint">'+(r.view?esc(r.view):'from the list')+'</td>'+(S.cur.ro?'<td class="nx noprint"></td>':delCell('rows',i,'location'))+'</tr>';}).join(''):'<tr><td colspan="11" class="hint">No injured location in this administration. Tap the body map, or add a location above.</td></tr>';
   const used={};S.cur.rows.forEach(r=>{used[r.loc]=1;});
   /* v21.44 (B4): Genitalia and Rectum are listed, but cannot be chosen; Hips/buttocks adds the side of the hip */
   $('#imAddLoc').innerHTML='<option value="">'+(S.cur.ro?'read-only':'choose')+'</option>'+GROUPS.map(g=>'<optgroup label="'+g[1]+'">'+LOCS.filter(l=>l.region===g[0]&&!used[l.id]).map(l=>PRIVATE[l.id]?'<option value="'+l.id+'" disabled>'+esc(l.name)+' (private area: not examined)</option>':'<option value="'+l.id+'">'+esc(l.name)+(l.id==='hips'?' (the side of the hip only)':hasSurface(l.id)?'':' (no surface on the figure)')+'</option>').join('')+'</optgroup>').join('');
@@ -1546,20 +1576,28 @@ function renderChart(){
   const c=S.cur;$('#imAdmLine').innerHTML='Administration'+(c.date?' of <b>'+esc(c.date)+'</b>':' <b>not yet dated</b> (date it on the Body map page)')+(c.examiner?' by '+esc(c.examiner):'')+(c.ro?' · <b>read-only</b> (opened from the History)':c.id?' · saved in the History'+(savedSame()?'':', changed since'):' · not yet in the History');
 }
 $('#imChart').addEventListener('click',e=>{const b=e.target.closest('button.imRowSel');if(!b)return;SEL=SEL===b.dataset.loc?null:b.dataset.loc;SELP=null;renderCur();});
-function renderIdx(){const sc=score(S.cur.rows);
-  const h='<div class="metric"><b>Number Index (NI)</b><div class="val">'+(sc.ni==null?NONE:sc.ni)+'</div><div class="sub">Part II number total '+sc.total+(sc.noN?' · '+sc.noN+' without a number':'')+'</div></div>'+
-    '<div class="metric"><b>Severity Index (SI)</b><div class="val">'+(sc.si==null?NONE:sc.si)+'</div><div class="sub">severity scores: 1 ×'+sc.f[1]+' · 2 ×'+sc.f[2]+' · 3 ×'+sc.f[3]+(sc.noS?' · '+sc.noS+' not yet rated':'')+'</div></div>'+
+function renderIdx(){const sc=scoreA(S.cur);
+  const h='<div class="metric"><b>Number Index (NI)</b><div class="val">'+ix(sc,'ni')+'</div><div class="sub">Part II number total '+sc.total+(sc.noN?' · '+sc.noN+' without a number':'')+'</div></div>'+
+    '<div class="metric"><b>Severity Index (SI)</b><div class="val">'+ix(sc,'si')+'</div><div class="sub">severity scores: 1 ×'+sc.f[1]+' · 2 ×'+sc.f[2]+' · 3 ×'+sc.f[3]+(sc.noS?' · '+sc.noS+' not yet rated':'')+'</div></div>'+
     '<div class="metric"><b>Injured locations</b><div class="val">'+sc.n+'</div><div class="sub">'+esc(grpLine(sc))+'</div></div>'+
-    '<div class="metric r-'+(sc.risk==null?'x':sc.band)+'"><b>Estimate of current risk</b><div class="val">'+(sc.risk==null?NONE:sc.risk)+'</div><div class="sub">'+esc(sc.rule)+'</div></div>';
+    '<div class="metric r-'+(sc.risk==null?'x':sc.band)+'"><b>Estimate of current risk</b><div class="val">'+(sc.stopped?'not estimated':sc.risk==null?NONE:sc.risk)+'</div><div class="sub">'+esc(sc.rule)+'</div></div>';
   $('#imIdxMap').innerHTML=h;$('#imIdxChart').innerHTML=h;
-  const st=$('#imAdmStatus');st.textContent=S.cur.rows.length?sc.n+' injured location'+(sc.n===1?'':'s')+(sc.complete?'':' · '+(sc.noS+sc.noN)+' still to be typed and rated')+(S.cur.id?(savedSame()?' · saved':' · changed since it was saved'):' · not yet saved to the History'):'';
+  const st=$('#imAdmStatus');st.textContent=S.cur.rows.length?sc.n+' injured location'+(sc.n===1?'':'s')+(sc.complete?'':' · '+[sc.noN?sc.noN+' without a number':'',sc.noS?sc.noS+' still to be typed and rated':''].filter(Boolean).join(', '))+(S.cur.id?(savedSame()?' · saved':' · changed since it was saved'):' · not yet saved to the History'):'';
   const old=S.cur.rows.filter(isPrivRow).map(r=>LOC[r.loc].name);
   $('#imRoNote').innerHTML=(S.cur.ro?'<div class="verdict v-mid"><b>Opened from the History, read-only.</b> The map and chart show the administration of '+esc(S.cur.date||'?')+'. Choose <b>Edit this one</b> on the History page to change it, or start a new administration.</div>':'')+
     (old.length?'<div class="verdict v-mid"><b>A private area in a record made before the private-area rule:</b> '+esc(old.join(', '))+'. It is kept and scored as recorded. New injuries in a private area are recorded only under Noticed During Required Care.</div>':'');
   renderTwo();
+  /* v23.16 (review F450) the paper's rule (Iwata et al., 1990, as the Guide gives it): a High estimate needs immediate medical
+     attention, so the form says what to do now and keeps the two steps with the administration; a Moderate one, medical
+     attention as needed and periodic monitoring. The fields stay put (they are not re-drawn), so typing in them is safe. */
+  {const hi=!sc.stopped&&sc.risk!=null&&sc.band===2,md=!sc.stopped&&sc.risk!=null&&sc.band===1,t=k=>String(S.cur[k]==null?'':S.cur[k]).trim(),fl=!!(t('nurseSaw')||t('parentTold'));
+    const H='<b>High estimate (Iwata et al., 1990): immediate medical attention.</b> The school nurse sees the student now, and the parent or guardian is told today; the medical review on Form CR-1 follows, and the prescriber is told where medication is in play (Form MS-1).',
+      M='<b>Moderate estimate (Iwata et al., 1990):</b> medical attention as needed, and periodic monitoring: tell the school nurse.';
+    const box=$('#imHigh');if(box){box.hidden=!(hi||md||fl);$('#imHighV').innerHTML=hi?'<div class="verdict v-no">'+H+(t('nurseSaw')&&t('parentTold')?'':' Record both below: until they are, the workstation lists it as open.')+'</div>':md?'<div class="verdict v-mid">'+M+'</div>':'';$('#imHighF').style.display=(hi||fl)?'':'none';}
+    const mp=$('#imHighMap');if(mp)mp.innerHTML=hi?'<div class="verdict v-no">'+H+' Record it on the Scoring page, under Part III.</div>':md?'<div class="verdict v-mid">'+M+'</div>':'';}
   /* Part III as a table, as on the published sheet */
-  $('#imPart3').innerHTML='<div class="grid-wrap"><table class="rt sc" style="max-width:860px"><tr><th class="lk">A. Number Index</th><td>Part II number total <b>'+sc.total+'</b> &rarr; NI score <b>'+(sc.ni==null?NONE:sc.ni)+'</b> <span class="hint">(0 no injuries; 1 = 1 to 4; 2 = 5 to 8; 3 = 9 to 12; 4 = 13 to 16; 5 = 17 or more)</span></td></tr>'+
-    '<tr><th class="lk">B. Severity Index</th><td>Frequency of severity scores: 1: <b>'+sc.f[1]+'</b>; 2: <b>'+sc.f[2]+'</b>; 3: <b>'+sc.f[3]+'</b> &rarr; SI score <b>'+(sc.si==null?NONE:sc.si)+'</b> <span class="hint">('+(sc.si==null?'no wound rated yet':['no injuries','all severity scores are 1','one 2, no 3s','two or more 2s, no 3s','no more than one 3','two or more 3s'][sc.si])+')</span></td></tr>'+
+  $('#imPart3').innerHTML='<div class="grid-wrap"><table class="rt sc" style="max-width:860px"><tr><th class="lk">A. Number Index</th><td>Part II number total <b>'+sc.total+'</b> &rarr; NI score <b>'+ix(sc,'ni')+'</b> <span class="hint">(0 no injuries; 1 = 1 to 4; 2 = 5 to 8; 3 = 9 to 12; 4 = 13 to 16; 5 = 17 or more)</span></td></tr>'+
+    '<tr><th class="lk">B. Severity Index</th><td>Frequency of severity scores: 1: <b>'+sc.f[1]+'</b>; 2: <b>'+sc.f[2]+'</b>; 3: <b>'+sc.f[3]+'</b> &rarr; SI score <b>'+ix(sc,'si')+'</b> <span class="hint">('+(sc.si==null?'no wound rated yet':['no injuries','all severity scores are 1','one 2, no 3s','two or more 2s, no 3s','no more than one 3','two or more 3s'][sc.si])+')</span></td></tr>'+
     '<tr><th class="lk">C. Estimate of current risk</th><td>'+riskTag(sc)+' <span class="hint">'+esc(sc.rule)+'</span></td></tr></table></div>'+
     (sc.n&&!sc.complete?'<div class="verdict v-mid"><b>Incomplete:</b> '+(sc.noS?sc.noS+' location'+(sc.noS===1?'':'s')+' without a type and severity':'')+(sc.noS&&sc.noN?'; ':'')+(sc.noN?sc.noN+' without a number':'')+'. The indices count what is rated so far.</div>':'');
 }
@@ -1646,11 +1684,11 @@ function repInput(el){const sc=el.dataset.rs,rep=sc==='cur'?S.cur.rep:S.careDraf
 function renderCur(){renderMap();renderSide();renderChart();renderIdx();renderRepCur();}
 
 /* ---------------- administrations ---------------- */
-const rowsCopy=a=>(a||[]).map(r=>({loc:r.loc,n:r.n,type:r.type,sev:r.sev,kind:r.kind,note:r.note,how:r.how||'',view:r.view,x:r.x,y:r.y}));
-const admSnap=a=>JSON.stringify({date:a.date,time:a.time,examiner:a.examiner,second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:a.assent||'',note:a.note,rows:rowsCopy(a.rows),rep:repCopy(a.rep),x:REPX.map(k=>String((a.rep||{})[k]||''))});
+const rowsCopy=a=>(a||[]).map(r=>({loc:r.loc,n:r.n,type:r.type,sev:r.sev,kind:r.kind,note:r.note,how:r.how||'',view:r.view,x:r.x,y:r.y,heal:r.heal==='new'||r.heal==='healing'?r.heal:''}));   /* v23.16 (I228) heal */
+const admSnap=a=>JSON.stringify({nurseSaw:a.nurseSaw||'',parentTold:a.parentTold||'',date:a.date,time:a.time,examiner:a.examiner,second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:a.assent||'',note:a.note,rows:rowsCopy(a.rows),rep:repCopy(a.rep),x:REPX.map(k=>String((a.rep||{})[k]||''))});
 /* one shape for a filed administration and one for the administration on the map, in the order the loader writes them */
-const histEntry=(a,id)=>({id:id||a.id||uid(),date:a.date||'',time:a.time||'',examiner:a.examiner||'',second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:ASSENTN[a.assent]?a.assent:'',note:a.note||'',rows:rowsCopy(a.rows),rep:repCopy(a.rep),pc:a.pc==='no'||a.pc==='wait'?a.pc:''});
-const curFrom=(h,ro)=>({id:h.id||'',date:h.date||'',time:h.time||'',examiner:h.examiner||'',second:h.second||'',secondRole:h.secondRole||'',present:!!h.present,assent:ASSENTN[h.assent]?h.assent:'',note:h.note||'',ro:!!ro,rows:rowsCopy(h.rows),rep:repCopy(h.rep),pc:h.pc==='no'||h.pc==='wait'?h.pc:''});
+const histEntry=(a,id)=>({id:id||a.id||uid(),date:a.date||'',time:a.time||'',examiner:a.examiner||'',second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:ASSENTN[a.assent]?a.assent:'',note:a.note||'',rows:rowsCopy(a.rows),rep:repCopy(a.rep),pc:a.pc==='no'||a.pc==='wait'?a.pc:'',nurseSaw:a.nurseSaw||'',parentTold:a.parentTold||''});
+const curFrom=(h,ro)=>({id:h.id||'',date:h.date||'',time:h.time||'',examiner:h.examiner||'',second:h.second||'',secondRole:h.secondRole||'',present:!!h.present,assent:ASSENTN[h.assent]?h.assent:'',note:h.note||'',ro:!!ro,rows:rowsCopy(h.rows),rep:repCopy(h.rep),pc:h.pc==='no'||h.pc==='wait'?h.pc:'',nurseSaw:h.nurseSaw||'',parentTold:h.parentTold||''});
 function savedSame(){const h=S.cur.id&&S.hist.find(x=>x.id===S.cur.id);return !!h&&admSnap(h)===admSnap(S.cur);}
 function bindAdm(){$$('[data-a]').forEach(el=>{const k=el.dataset.a;if(el.type==='checkbox')el.checked=!!S.cur[k];else el.value=S.cur[k]||'';el.disabled=!!S.cur.ro;});}
 async function saveAdm(){
@@ -1666,11 +1704,15 @@ async function saveAdm(){
   if(pc==='no'&&!(await nbhUI.confirm('The parent said No to injury checks (Form IC-1, E).\nFile this as an injury written down without a scheduled check, marked as such, with the reason under Conditions?',{ok:'File it, marked'})))return;
   if(pc==='wait'&&!(await nbhUI.confirm('The parent’s decision on injury checks (Form IC-1, E) is not Yes: it is not recorded yet.\nScheduled checks wait for it; first aid and writing down an injury that can be seen do not. File this administration anyway (marked as filed before the decision)?',{ok:'File anyway'})))return;
   c.pc=pc;
+  /* v23.16 (review F455) a date the schedule cannot read is not filed: it would vanish from the schedule and the workstation */
+  if(String(c.date||'').trim()&&!pDate(c.date)){setView('map');nbhUI.toast('Not filed: "'+String(c.date).trim()+'" is not a date the schedule can read. Write it as M/D/YYYY (for example '+today()+'), or as a month and day in words with the year.',{kind:'warn'});return;}
   const stopped=c.assent==='stopped';
   if(!stopped&&!c.rows.length&&!(await nbhUI.confirm('Save an administration with no injured location?\nIt is filed as "no injuries" (NI 0, SI 0, Low).',{ok:'Save'})))return;
   /* v21.44 (B5): the report question is answered right away */
   if(c.rows.length&&!c.rep.need&&!(await nbhUI.confirm('Does this need a report? is not answered for this administration.\nFile it anyway, and answer it right away?',{ok:'File anyway'})))return;
-  const sc=score(c.rows);if(!stopped&&!sc.complete&&!(await nbhUI.confirm('Not every location is typed and rated ('+(sc.noS+sc.noN)+' to finish).\nSave it as it stands?',{ok:'Save anyway'})))return;
+  const sc=score(c.rows);if(!stopped&&!sc.complete&&!(await nbhUI.confirm('Not every location is numbered, typed and rated ('+(sc.noS+sc.noN)+' to finish).\nSave it as it stands?',{ok:'Save anyway'})))return;
+  /* v23.16 (review F450) */
+  if(!stopped&&sc.risk!=null&&sc.band===2&&!(String(c.nurseSaw||'').trim()&&String(c.parentTold||'').trim())&&!(await nbhUI.confirm('High estimate: immediate medical attention.\nThe school nurse sees the student now and the parent or guardian is told today. File it now, and record both on the Scoring page as soon as they happen?',{ok:'File it'})))return;
   if(!c.date){c.date=today();}
   const snap=histEntry(c,c.id||uid());
   const i=S.hist.findIndex(h=>h.id===snap.id);if(i>=0)S.hist[i]=snap;else S.hist.push(snap);c.id=snap.id;
@@ -1693,8 +1735,8 @@ function renderHist(){
   const H=histSorted();
   /* v21.44: the second adult and the student's assent beside the examiner; the answer to the report question on the
      screen only (paper shows that it was answered, and when); a check that stopped is marked and not graphed */
-  $('#imHist tbody').innerHTML=H.length?H.map((h,i)=>{const sc=score(h.rows),cur=S.cur.id===h.id,stop=h.assent==='stopped',rq=repOn(h.rep);
-    return '<tr'+(cur?' class="sel"':'')+'><td class="num">'+(i+1)+'</td><td>'+esc(h.date||NONE)+(h.time?'<br><span class="hint">'+esc(h.time)+'</span>':'')+(stop?'<br><b class="imStop">Check stopped</b>':'')+(h.pc==='no'?'<br><b class="imStop">Written down without the parent&rsquo;s Yes (IC-1 E is No)</b>':h.pc==='wait'?'<br><b class="imStop">Filed before the parent&rsquo;s decision (IC-1 E)</b>':'')+'</td><td>'+esc(h.examiner||NONE)+'<br><span class="hint">'+(h.second?'with '+esc(h.second)+(h.secondRole?' ('+esc(h.secondRole)+')':''):'second adult not recorded')+'</span></td><td class="num">'+sc.total+'</td><td class="num">'+(sc.ni==null?NONE:sc.ni)+'</td><td class="num">'+(sc.si==null?NONE:sc.si)+'</td><td>'+sc.n+' <span class="hint">('+esc(grpLine(sc))+')</span></td><td>'+riskTag(sc)+'</td><td class="hint">'+(stop?'<b>The check stopped:</b> the student said no or pulled away. Not graphed; the indices cover only what was seen before it stopped.<br>':'')+esc(sc.rule)+(h.note?'<br>'+esc(h.note):'')+'<br><span class="imScr noprint">Report: '+esc(repShort(h.rep))+'</span><span class="imPaper">Report question: '+esc(rq)+(rq==='not answered'?'':' (see the report record)')+'</span></td><td class="noprint"><button type="button" class="tool" data-open="'+esc(h.id)+'" style="font-size:11.5px">Open</button> <button type="button" class="tool" data-edit="'+esc(h.id)+'" style="font-size:11.5px">Edit this one</button>'+(cur?'<br><span class="hint">on the map now</span>':'')+'</td>'+delCell('hist',S.hist.indexOf(h),'administration')+'</tr>';}).join(''):'<tr><td colspan="11" class="hint">No administration saved yet. Score one on the Body map and Scoring pages, then "Save to history".</td></tr>';
+  $('#imHist tbody').innerHTML=H.length?H.map((h,i)=>{const sc=scoreA(h),cur=S.cur.id===h.id,stop=h.assent==='stopped',rq=repOn(h.rep),nh=newHeal(h),hi=!stop&&sc.risk!=null&&sc.band===2,tx=k=>String(h[k]==null?'':h[k]).trim();
+    return '<tr'+(cur?' class="sel"':'')+'><td class="num">'+(i+1)+'</td><td>'+esc(h.date||NONE)+(h.time?'<br><span class="hint">'+esc(h.time)+'</span>':'')+(stop?'<br><b class="imStop">Check stopped</b>':'')+(h.pc==='no'?'<br><b class="imStop">Written down without the parent&rsquo;s Yes (IC-1 E is No)</b>':h.pc==='wait'?'<br><b class="imStop">Filed before the parent&rsquo;s decision (IC-1 E)</b>':'')+'</td><td>'+esc(h.examiner||NONE)+'<br><span class="hint">'+(h.second?'with '+esc(h.second)+(h.secondRole?' ('+esc(h.secondRole)+')':''):'second adult not recorded')+'</span></td><td class="num">'+sc.total+'</td><td class="num">'+ix(sc,'ni')+'</td><td class="num">'+ix(sc,'si')+'</td><td>'+sc.n+' <span class="hint">('+esc(grpLine(sc))+')</span>'+(sc.n?'<br><span class="hint">'+nh.nw+' new, '+nh.heal+' healing</span>':'')+'</td><td>'+riskTag(sc)+'</td><td class="hint">'+(hi?(tx('nurseSaw')&&tx('parentTold')?'<b>High:</b> nurse saw the student: '+esc(tx('nurseSaw'))+'; parent or guardian told: '+esc(tx('parentTold'))+'.<br>':'<b class="imStop">High estimate: the nurse&rsquo;s visit and telling the parent are not yet recorded.</b><br>'):'')+(stop?'<b>The check stopped:</b> the student said no or pulled away. Not graphed; the indices cover only what was seen before it stopped.<br>':'')+esc(sc.rule)+(h.note?'<br>'+esc(h.note):'')+'<br><span class="imScr noprint">Report: '+esc(repShort(h.rep))+'</span><span class="imPaper">Report question: '+esc(rq)+(rq==='not answered'?'':' (see the report record)')+'</span></td><td class="noprint"><button type="button" class="tool" data-open="'+esc(h.id)+'" style="font-size:11.5px">Open</button> <button type="button" class="tool" data-edit="'+esc(h.id)+'" style="font-size:11.5px">Edit this one</button>'+(cur?'<br><span class="hint">on the map now</span>':'')+'</td>'+delCell('hist',S.hist.indexOf(h),'administration')+'</tr>';}).join(''):'<tr><td colspan="11" class="hint">No administration saved yet. Score one on the Body map and Scoring pages, then "Save to history".</td></tr>';
   renderPlot(H);
 }
 $('#imHist').addEventListener('click',e=>{const o=e.target.closest('button[data-open]'),d=e.target.closest('button[data-edit]');if(o)openAdm(o.dataset.open,false);else if(d)openAdm(d.dataset.edit,true);});
@@ -1895,7 +1937,11 @@ function schedule(){
   items.forEach(x=>{x.over=!x.done&&!x.hold&&x.date<now;});
   return{items,every,intake,last,next,adms,cs};
 }
-function schedHtml(){const s=schedule();
+/* v23.16 (review F455) dates entered that the schedule cannot read, said where they are */
+function badDates(){const L=[],b=v=>String(v||'').trim()&&!pDate(v);if(b(S.meta.intake))L.push('the intake date ("'+S.meta.intake+'")');
+  S.events.forEach((e,i)=>{if(b(e.date))L.push('event row '+(i+1)+' ("'+e.date+'")');});S.hist.forEach(h=>{if(b(h.date))L.push('the administration dated "'+h.date+'"');});return L;}
+function schedHtml(){const bd=badDates();return (bd.length?'<div class="verdict v-mid"><b>Not a date the schedule can read:</b> '+esc(bd.join('; '))+'. Write dates as M/D/YYYY, or as a month and day in words with the year.</div>':'')+schedHtml0();}
+function schedHtml0(){const s=schedule();
   if(s.cs==='no')return '<b>Schedule</b><b>No scheduled checks.</b> The parent&rsquo;s decision on injury checks (Form IC-1, Specific procedures E) is No'+(S.meta.consentDate?' ('+esc(S.meta.consentDate)+')':'')+'. Nothing here is due. An injury that can be seen is written down, and the school nurse gives first aid.'+
     (s.items.length?'<ul>'+s.items.map(x=>'<li>'+esc(x.what)+'</li>').join('')+'</ul>':'');
   if(!s.intake&&!s.adms.length&&!S.events.length)return '<b>Schedule</b>Enter the intake date and the interval on the Setup page; the form lists what is due here, and the workstation shell shows it with the case.';
@@ -1967,10 +2013,10 @@ function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='IM-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v),obj=k=>s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])?s[k]:{};
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
-  const rows=a=>Array.isArray(a)?a.filter(x=>x&&LOC[x.loc]).slice(0,LOCS.length).map(x=>({loc:x.loc,n:['1','2','3'].includes(str(x.n))?str(x.n):'',type:['AL','CT'].includes(x.type)?x.type:'',sev:['1','2','3'].includes(str(x.sev))&&x.type?str(x.sev):'',kind:str(x.kind),note:str(x.note),how:HOWN[str(x.how)]?str(x.how):'',view:['front','back','head'].includes(x.view)?x.view:'',x:num(x.x)==null?'':num(x.x),y:num(x.y)==null?'':num(x.y)})):[];
+  const rows=a=>Array.isArray(a)?a.filter(x=>x&&LOC[x.loc]).slice(0,LOCS.length).map(x=>({loc:x.loc,n:['1','2','3'].includes(str(x.n))?str(x.n):'',type:['AL','CT'].includes(x.type)?x.type:'',sev:['1','2','3'].includes(str(x.sev))&&x.type?str(x.sev):'',kind:str(x.kind),note:str(x.note),how:HOWN[str(x.how)]?str(x.how):'',view:['front','back','head'].includes(x.view)?x.view:'',x:num(x.x)==null?'':num(x.x),y:num(x.y)==null?'':num(x.y),heal:['new','healing'].includes(str(x.heal))?str(x.heal):''})):[];
   /* v21.44: a file saved before the second adult, the student's assent, the report question and the care log opens
      with them empty (an earlier administration is filed again only once they are recorded) */
-  const adm=x=>({id:str(x&&x.id),date:str(x&&x.date),time:str(x&&x.time),examiner:str(x&&x.examiner),second:str(x&&x.second),secondRole:str(x&&x.secondRole),present:!!(x&&x.present===true),assent:ASSENTN[str(x&&x.assent)]?str(x.assent):'',note:str(x&&x.note),ro:!!(x&&x.ro),rows:rows(x&&x.rows),rep:repCopy(x&&x.rep),pc:['no','wait'].includes(str(x&&x.pc))?str(x.pc):''});
+  const adm=x=>({id:str(x&&x.id),date:str(x&&x.date),time:str(x&&x.time),examiner:str(x&&x.examiner),second:str(x&&x.second),secondRole:str(x&&x.secondRole),present:!!(x&&x.present===true),assent:ASSENTN[str(x&&x.assent)]?str(x.assent):'',note:str(x&&x.note),ro:!!(x&&x.ro),rows:rows(x&&x.rows),rep:repCopy(x&&x.rep),pc:['no','wait'].includes(str(x&&x.pc))?str(x.pc):'',nurseSaw:str(x&&x.nurseSaw),parentTold:str(x&&x.parentTold)});
   o.cur=adm(obj('cur'));
   o.hist=Array.isArray(s.hist)?s.hist.slice(0,200).map(x=>{const a=adm(x);delete a.ro;if(!a.id)a.id=uid();return a;}):[];
   const seen={};o.hist.forEach(h=>{if(seen[h.id])h.id=uid();seen[h.id]=1;});
@@ -1998,15 +2044,16 @@ $('#csvBtn').addEventListener('click',()=>{
   /* v21.44: the four last columns (how it happened, the second adult, whether the report question was answered and when,
      the student's assent) and the care log. The answer and the report itself are not in the CSV: they print only on
      the report record. */
-  const out=[['Record','Administration','Date','Examiner or nurse','Group','Location','Number','Type','Severity','Kind','Comment or findings','Part II number total','NI','SI','Injured locations','Risk','Risk rule','Action','Referral','How it happened','Second adult','Report question','Student’s assent']];
+  const out=[['Record','Administration','Date','Examiner or nurse','Group','Location','Number','Type','Severity','Kind','Comment or findings','Part II number total','NI','SI','Injured locations','Risk','Risk rule','Action','Referral','How it happened','Second adult','Report question','Student’s assent','New or healing','Nurse saw the student (High estimate)','Parent or guardian told (High estimate)']];
   const sec=h=>h.second?h.second+(h.secondRole?' ('+h.secondRole+')':'')+(h.present?'':' (presence not ticked)'):'';
   const asn=h=>h.assent==='yes'?'asked first; agreed':h.assent==='stopped'?'the check stopped: the student said no or pulled away':'';
   const H=histSorted();const list=H.map(h=>({h,tag:'Administration'}));if(S.cur.rows.length&&!savedSame())list.push({h:S.cur,tag:'Current (not in the History)'});
-  list.forEach((x,k)=>{const h=x.h,sc=score(h.rows),n=k<H.length?k+1:'current';
-    if(!h.rows.length)out.push([x.tag,n,h.date,h.examiner,'',h.assent==='stopped'?'(check stopped)':'(no injuries)','','','','',h.note,sc.total,sc.ni,sc.si,sc.n,sc.risk||'',sc.rule,'','','',sec(h),repCsv(h.rep),asn(h)]);
-    h.rows.forEach(r=>{const l=LOC[r.loc];if(!l)return;out.push([x.tag,n,h.date,h.examiner,GNAME[l.region],l.name,r.n,r.type,r.sev,r.kind,r.note,sc.total,sc.ni==null?'':sc.ni,sc.si==null?'':sc.si,sc.n,sc.risk||'',sc.rule,'','',HOWN[r.how]||'',sec(h),repCsv(h.rep),asn(h)]);});});
-  S.nurse.forEach(r=>out.push(['Nurse check','',r.date,r.who,'','','','','','',r.findings,'','','','','','',r.action,r.referral,'','','','']));
-  S.care.forEach(c=>{const a=CAREA[c.area],l=a&&LOC[a[2]];out.push(['Noticed during required care','',c.date,c.by+(c.byRole?' ('+c.byRole+')':''),l?GNAME[l.region]:'',a?a[1]:'','','','','',c.seen+(c.task?' (during '+c.task+')':''),'','','','','','','',[c.nurse?'School nurse: '+c.nurse:'',c.parent?'Parent or guardian: '+c.parent:''].filter(Boolean).join('; '),'',c.alone?'None present: '+c.aloneWhy:c.second+(c.secondRole?' ('+c.secondRole+')':''),repCsv(c.rep),'']);});
+  const cix=(sc,k)=>sc[k]==null?'':sc.stopped?(sc.n?sc[k]+' (partial)':''):sc[k],hp=(h,sc)=>!sc.stopped&&sc.risk!=null&&sc.band===2?[h.nurseSaw||'not recorded',h.parentTold||'not recorded']:['',''];   /* v23.16 (F451, F450) */
+  list.forEach((x,k)=>{const h=x.h,sc=scoreA(h),n=k<H.length?k+1:'current';
+    if(!h.rows.length)out.push([x.tag,n,h.date,h.examiner,'',h.assent==='stopped'?'(check stopped)':'(no injuries)','','','','',h.note,sc.total,cix(sc,'ni'),cix(sc,'si'),sc.n,sc.risk||'',sc.rule,'','','',sec(h),repCsv(h.rep),asn(h),''].concat(hp(h,sc)));
+    h.rows.forEach(r=>{const l=LOC[r.loc];if(!l)return;out.push([x.tag,n,h.date,h.examiner,GNAME[l.region],l.name,r.n,r.type,r.sev,r.kind,r.note,sc.total,cix(sc,'ni'),cix(sc,'si'),sc.n,sc.risk||'',sc.rule,'','',HOWN[r.how]||'',sec(h),repCsv(h.rep),asn(h),r.heal==='healing'?'same wound, healing':r.heal==='new'?'new':''].concat(hp(h,sc)));});});
+  S.nurse.forEach(r=>out.push(['Nurse check','',r.date,r.who,'','','','','','',r.findings,'','','','','','',r.action,r.referral,'','','','','','','']));
+  S.care.forEach(c=>{const a=CAREA[c.area],l=a&&LOC[a[2]];out.push(['Noticed during required care','',c.date,c.by+(c.byRole?' ('+c.byRole+')':''),l?GNAME[l.region]:'',a?a[1]:'','','','','',c.seen+(c.task?' (during '+c.task+')':''),'','','','','','','',[c.nurse?'School nurse: '+c.nurse:'',c.parent?'Parent or guardian: '+c.parent:''].filter(Boolean).join('; '),'',c.alone?'None present: '+c.aloneWhy:c.second+(c.secondRole?' ('+c.secondRole+')':''),repCsv(c.rep),'','','','']);});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='IM-1_'+(S.meta.client||'student').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();SEL=null;SELP=null;CARE_OPEN=false;renderAll();setView('setup');}});
 
@@ -2028,8 +2075,8 @@ async function loadSim(){
   /* v21.44: every administration names the second adult, ticks that the aide was there for the whole check, records that
      the student was asked first, and answers the report question on the day */
   const noRep=(why,d)=>Object.assign(repBlank(),{need:'no',why,on:d});
-  const adm=(d,ex,note,rows,why)=>histEntry({date:d,time:'08:05',examiner:ex,second:'Classroom aide (simulated)',secondRole:'Paraprofessional',present:true,assent:'yes',note,rows,rep:noRep(why,d)});
-  const R=(loc,n,type,sev,kind,note,how)=>{const v=homeView(loc),s=SURF[loc][v];return{loc,n,type,sev,kind,note,how:how||'',view:v,x:s.cx,y:s.cy};};
+  const adm=(d,ex,note,rows,why,more)=>histEntry(Object.assign({date:d,time:'08:05',examiner:ex,second:'Classroom aide (simulated)',secondRole:'Paraprofessional',present:true,assent:'yes',note,rows,rep:noRep(why,d)},more||{}));
+  const R=(loc,n,type,sev,kind,note,how,heal)=>{const v=homeView(loc),s=SURF[loc][v];return{loc,n,type,sev,kind,note,how:how||'',view:v,x:s.cx,y:s.cy,heal:heal||'new'};};
   const nurse='School nurse (simulated)',fits='Every injury matches the head hitting and hand biting staff have seen this student do; no box applies.';
   S.hist=[
     adm(Y(30),nurse,'Intake. The student agreed when asked, with the picture card. Examined in the health room by the nurse, with the classroom aide as the second adult; sleeves and pant legs rolled up, shoes and socks off, the back and stomach seen by lifting the shirt a little; private areas not examined.',[
@@ -2037,9 +2084,10 @@ async function loadSim(){
       R('eyearea_L','1','AL','1','scratch','spotted scabbing below the left eye from picking','match'),
       R('hand_R','3','AL','2','bite','five distinct superficial bite marks over the base of the right thumb and the back of the hand','seen'),
       R('larm_L','1','CT','2','bruise','extensive swelling and discoloration over the left forearm from banging it on the desk edge','seen'),
-      R('face','1','CT','1','bruise','faint discoloration over the right cheek, no swelling','match')],fits),
+      R('face','1','CT','1','bruise','faint discoloration over the right cheek, no swelling','match')],fits,
+      {nurseSaw:'School nurse (simulated), at once, in the health room (the intake)',parentTold:'By the nurse, by phone, the same morning (simulated)'}),
     adm(Y(15),nurse,'Three weeks; the plan (FCT and noncontingent attention) in its second week. Head hitting falling on Form DD-1.',[
-      R('scalp','1','CT','1','bruise','one area of discoloration, swelling gone','match'),
+      R('scalp','1','CT','1','bruise','one area of discoloration, swelling gone','match','healing'),
       R('hand_R','2','AL','2','bite','three superficial bite marks, two of them healing','seen'),
       R('larm_L','1','CT','2','bruise','forearm still swollen after the arm banging on '+Y(20),'seen')],fits),
     adm(Y(0),nurse,'Six weeks. No head hitting on Form DD-1 for nine school days; hand biting at under one a day.',[
@@ -2077,6 +2125,22 @@ window.__nbhFactsIn=function(f){const m=S.meta;let n=0;const b=f.behaviors||[];
     if(v){m.consent=v;n++;if(!String(m.consentDate||'').trim()){const d=pDate(off?(k.ended||ij.date):ij.date);m.consentDate=(d?MDY(d)+' ':'')+'(Form IC-1, Specific procedures E'+(off?'; consent '+k.state.toLowerCase():'')+')';n++;}}}
   if(n)renderAll();
   return {filled:((r&&r.filled)||0)+n,note:n?'the parent’s decision on injury checks from Form IC-1':(r&&r.note)};};})();
+/* v23.16 (review F453) more of the case, into empty places only: each restraint or seclusion on Form CR-1's log (its incident
+   report deadline carries the date) becomes a row of Restraints and Injury Reports, so the post-restraint check is scheduled;
+   a date taken once is remembered (meta.crDone), so a row deleted by hand does not come back; the medical alerts line takes
+   the medications, health conditions and allergies from Form DM-1 */
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=0;const m=S.meta,got=[],T=v=>String(v==null?'':v).trim();f=f||{};
+  const cr=f.crisis||{},dl=Array.isArray(cr.deadlines)?cr.deadlines:[],seen=T(m.crDone).split('|').filter(Boolean),add=[];
+  dl.filter(x=>x&&x.kind==='rep'&&/^\d{4}-\d\d-\d\d$/.test(T(x.event))).forEach(x=>{const e=T(x.event);if(seen.includes(e))return;seen.push(e);const d=pDate(e),sec=/seclusion/i.test(x.what||'');
+    if(!S.events.some(v=>{const vd=pDate(v.date);return vd&&vd.getTime()===d.getTime()&&(sec||v.kind==='Restraint');})){S.events.push({date:MDY(d),kind:sec?'Other':'Restraint',note:(sec?'Seclusion':'Restraint')+' on the log of Form CR-1'});add.push(MDY(d));}});
+  if(seen.join('|')!==T(m.crDone)){m.crDone=seen.join('|');}
+  if(add.length){n+=add.length;got.push((add.length===1?'a restraint':add.length+' restraints')+' from Form CR-1 ('+add.join(', ')+')');}
+  const h=f.profile&&f.profile.health;if(h&&!T(m.medical)){const L=[],meds=Array.isArray(h.meds)?h.meds.filter(x=>x&&T(x.name)):[];
+    if(meds.length)L.push('Medications: '+meds.map(x=>T(x.name)+(T(x.dose)?' '+T(x.dose):'')).join('; '));
+    if(T(h.conditions))L.push('Health conditions: '+T(h.conditions).replace(/[.\s]+$/,''));if(T(h.allergies))L.push('Allergies: '+T(h.allergies).replace(/[.\s]+$/,''));
+    if(L.length){m.medical=L.join('. ')+' (Form DM-1)';n++;got.push('the medical alerts from Form DM-1');}}
+  if(n)renderAll();
+  return {filled:((r&&r.filled)||0)+n,note:got.length?((r&&r.note)?r.note+'; ':'')+got.join('; '):(r&&r.note)};};})();
 window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {filled:0};S.meta.beh=b.label;if(b.def)S.meta.behdef=b.def;renderAll();return {filled:1};};
 
 /* v21.78 the case: out. The injuries this form records, for the workstation's Today and Safety lists: the latest date an
@@ -2087,16 +2151,22 @@ window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {fille
    made, the parent or guardian. Dates are ISO. */
 window.__nbhFactsOut=function(){
   const iso=d=>d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'',tx=v=>String(v==null?'':v).trim();
-  const H=histSorted(),inj=[];H.forEach(h=>{const d=pDate(h.date);if(d&&score(h.rows).n)inj.push(d);});
+  /* v23.16 (review F452, I228) an administration counts as an injury record only when it found a new site (a wound marked
+     new, or a location not injured at the check before); the same wound seen healing at the next check is not counted again */
+  const H=histSorted(),inj=[],newS=[];H.forEach(h=>{const d=pDate(h.date);if(!d||h.assent==='stopped')return;const nh=newHeal(h);if(nh.nw){inj.push(d);newS.push([d,nh.nw]);}});
   S.events.forEach(e=>{const d=pDate(e.date);if(d&&e.kind==='Injury report')inj.push(d);});S.care.forEach(c=>{const d=pDate(c.date);if(d)inj.push(d);});
   if(!H.length&&!S.events.length&&!S.care.length&&!S.meta.intake)return null;
   const now=new Date();now.setHours(12,0,0,0);const from=addDays(now,-30),last=inj.length?new Date(Math.max(...inj)):null;
-  const o={count30:inj.filter(d=>d>=from&&d<=addDays(now,1)).length,open:[]};if(last)o.last=iso(last);
-  const lh=H.filter(h=>pDate(h.date)).slice(-1)[0];if(lh){const sc=score(lh.rows);o.latest={date:iso(pDate(lh.date)),sites:sc.n,ni:sc.ni,si:sc.si,risk:sc.risk||''};}
+  const o={count30:inj.filter(d=>d>=from&&d<=addDays(now,1)).length,newSites30:newS.filter(x=>x[0]>=from&&x[0]<=addDays(now,1)).reduce((a,x)=>a+x[1],0),open:[]};if(last)o.last=iso(last);
+  /* v23.16 (review F451) the latest is the latest completed check; (I226) every completed check, for the plan review and the notes */
+  const CH=H.filter(h=>pDate(h.date)&&h.assent!=='stopped'),lh=CH.slice(-1)[0];if(lh){const sc=score(lh.rows);o.latest={date:iso(pDate(lh.date)),sites:sc.n,ni:sc.ni,si:sc.si,risk:sc.risk||''};}
+  if(CH.length)o.series=CH.map(h=>{const sc=score(h.rows);return {date:iso(pDate(h.date)),sites:sc.n,newSites:newHeal(h).nw,ni:sc.ni,si:sc.si,risk:sc.risk||''};});
+  /* v23.16 (review F450) a High estimate stays open until the nurse's visit and the call to the parent are recorded */
+  CH.forEach(h=>{const sc=score(h.rows),d=pDate(h.date);if(sc.risk!=null&&sc.band===2&&!(tx(h.nurseSaw)&&tx(h.parentTold)))o.open.push({what:'High estimate on the SIT Scale of '+MDY(d)+': record that the school nurse saw the student and the parent or guardian was told (immediate medical attention)',due:iso(d),done:false});});
   schedule().items.filter(x=>!x.done&&!x.hold).forEach(x=>o.open.push({what:x.what+(x.over?' (overdue)':''),due:iso(x.date),done:false}));
   const repOpen=(rep,what,d)=>{if(!rep)return;if(!rep.need)o.open.push({what:'Answer the report question (abuse or neglect) for '+what,due:iso(d),done:false});
     else if(rep.need==='yes'&&!repKept(rep)&&!['when','to','by'].every(k=>tx(rep[k])))o.open.push({what:'Record the report made for '+what+' (when, to whom, by whom)',due:iso(d),done:false});};
-  H.forEach(h=>{const d=pDate(h.date);if(d)repOpen(h.rep,'the SIT Scale of '+MDY(d),d);});
+  H.forEach(h=>{const d=pDate(h.date);if(d&&score(h.rows).n)repOpen(h.rep,'the SIT Scale of '+MDY(d),d);});   /* v23.16 (review F454) only a check that found an injury owes the answer, as Save to history asks */
   S.care.forEach(c=>{const d=pDate(c.date);if(!d)return;const w='the injury noticed during care on '+MDY(d);repOpen(c.rep,w,d);
     if(!tx(c.nurse))o.open.push({what:'Pass '+w+' to the school nurse',due:iso(d),done:false});
     if(!tx(c.parent)&&c.rep&&c.rep.need!=='yes')o.open.push({what:'Tell the parent or guardian about '+w,due:iso(d),done:false});});

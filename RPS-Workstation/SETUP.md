@@ -9903,6 +9903,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.16: IM-1 acts on a High estimate, counts each new injury once, takes restraints from CR-1 and outlines healed sites (review Wave 3)
+
+- **A High estimate says what to do now.**
+  - The nurse sees the student at once, the parent is told today, and the medical review on CR-1 and the prescriber
+    follow.
+  - Two lines on the Scoring page record that the nurse saw the student and that the parent was told. Until both are
+    filled in, the workstation's Today list shows the item.
+  - A Moderate estimate gets the paper's own line.
+- **New or healing.** Each location is marked "New since the last check" or "Same wound, healing", pre-filled from the
+  last check. The workstation's count of injuries in the last 30 days counts only new ones, so a wound seen healing at
+  three checks is one injury.
+- **Healed sites on the map.** The Part I scars and healed injuries are outlined on the figure and named beside the
+  location, so they are not scored again.
+- **A check that stopped** is shown as "not estimated", not Low.
+- **From the case:**
+  - Each restraint on Form CR-1's log becomes a row of Restraints and Injury Reports, so the check after it is
+    scheduled.
+  - The medical alerts come from Form DM-1.
+  - A completed check that found no injury no longer asks for the report question.
+- **Small fixes:**
+  - A date written in words is read. One the form cannot read is named and not filed.
+  - A tapped location has no number until one is chosen.
+  - The masthead says October 2026.
+
+Checked by `qa/im1-w3-test.js`.
+
 ### v23.15: DA-1 names the tasks that evoke the behavior for EA-1, reads the latency as observed, takes a second observer, and sends its results to EA-1 and TD-1 (review Wave 3)
 
 - **Two questions, two columns.** A task *evokes problem behavior* when it occurred in at least half of its sessions. Only
