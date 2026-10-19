@@ -417,7 +417,21 @@ body{
 .ioa-hint{font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);line-height:1.45;margin:4px 0 10px}
 .ioa-box{display:block;margin:6px 0 10px}
 .ioa-lab{font-size:11.5px;font-family:var(--sans);color:var(--ink-soft);margin-bottom:3px}
+/* v22.79 (review I69, F137, I68) the session record under each design's table: fixed columns, scrolling inside its box on a phone */
+.rec-box{display:block;margin:10px 0 10px}.rec-box.rec-empty .gridwrap{display:none}
+.rec-tbl{width:100%;min-width:720px;table-layout:fixed}
+.rec-tbl th.rec-s{width:8%}.rec-tbl th.rec-t{width:9%}.rec-tbl th.rec-pre{width:22%}.rec-tbl th.rec-ms{width:14%}.rec-tbl th.rec-who{width:13%}
+.rec-tbl th.rec-fr{width:9%}.rec-tbl th.rec-fid{width:8%}.rec-tbl th.rec-end{width:15%}.rec-tbl th.rec-x{width:5%}
+.rec-tbl input,.rec-tbl select{width:100%;min-width:0;box-sizing:border-box}
+.rec-tbl button{min-width:0;width:100%;padding:4px 0}
+.rec-out{font-family:var(--sans);font-size:12.5px;color:var(--ink);margin:6px 0 2px;line-height:1.45}.rec-out:empty{display:none}
+.ra-run-planfr{display:block;margin-top:4px;font:600 12px var(--nbh-sans,system-ui,sans-serif);padding:6px 9px;border-radius:5px;border:1px solid var(--nbh-slate,#254657);background:#fff;color:var(--nbh-navy,#182e43);cursor:pointer;min-height:34px}
+.ra-run-planfr[hidden]{display:none}
 @media print{
+  .rec-box.rec-empty{display:none}
+  .rec-tbl{min-width:0}
+  .rec-tbl th.rec-x,.rec-tbl td.rec-x{display:none}
+  .rec-tbl input,.rec-tbl select{-webkit-appearance:none;appearance:none;border:0;background:none;padding:0 2px}
   #ioaBox.ioa-empty{display:none}
   #ioaTbl{min-width:0}
   #ioaTbl th:nth-child(7),#ioaTbl td:nth-child(7){display:none}
@@ -445,6 +459,9 @@ body{
 .warn b{font-family:var(--sans);font-size:11px;letter-spacing:.02em;display:block;
   margin-bottom:3px;color:var(--ink)}
 .warn.ra-food{border-left-color:var(--nbh-flag);background:var(--nbh-flag-soft)}.warn.ra-food b{color:var(--nbh-flag)} /* v22.37 (review F135) */
+/* v22.79 (review F132, F133, F137, I68): the Summary's note on conflicting designs, the agreement and fidelity counts, the assent line in the runners */
+.warn.ra-sumnote{border-left-color:var(--nbh-flag);background:var(--nbh-flag-soft)}#sumNote[hidden],.ra-run-assent[hidden]{display:none}
+.ra-run-assent{border-left:4px solid var(--nbh-teal,#3d7f86);background:#eef6f5;padding:6px 11px;margin:0 0 8px;font-size:12.5px;line-height:1.5}
 .method{font-size:12px;line-height:1.55;color:var(--ink-soft);margin-top:4px}
 .method b{color:var(--ink);font-family:var(--sans);font-size:11px;
   display:block;margin:12px 0 3px}
@@ -1749,7 +1766,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <li><b>Response.</b> Choose a free-operant response the student can already emit, that is easy to count, that produces nothing on its own, and that is effortful enough to stop when reinforcement is absent. Arbitrary responses (pressing a switch, placing a block in a bin, sorting cards) give the cleanest test; a target academic response gives the most useful one. Define it before the first session.</li>
     <li><b>Consequence.</b> Deliver the stimulus immediately (within 2&ndash;3 s) in a fixed magnitude: one edible piece, or a fixed number of seconds of access after which the item is removed. Do not add praise unless praise is the stimulus under test.</li>
     <li><b>Control.</b> Every design needs a no-consequence condition with the same response and materials. Without it, responding could reflect the materials rather than the stimulus.</li>
-    <li><b>Motivating operations.</b> Restrict access to the tested stimuli for at least a few hours before sessions; run sessions at a consistent time; for edibles, not immediately after a meal. Record any pre-session access.</li>
+    <li><b>Motivating operations.</b> For edibles and items, restrict access to the tested stimuli for at least a few hours before sessions. For attention, praise or escape, do not withhold them for hours: keep the few minutes before the session brief and neutral (no interaction from the assessor) and record what the student had just before. Run sessions at a consistent time; for edibles, not immediately after a meal. Record any pre-session access.</li>
     <li><b>Pre-session exposure.</b> Before the first reinforcement session with a stimulus, prompt the response once and deliver the stimulus so the contingency contacts behavior.</li>
     <li><b>Measurement.</b> Responses per minute for single-operant; responses at each option and each option&rsquo;s share of them (allocation) for concurrent operants; break point for progressive ratio. Record problem behavior every session. Collect IOA on at least one session per condition when the result will be written into a plan.</li>
     <li><b>Decision.</b> Judge single-operant and concurrent-operants outcomes by visual analysis of level, trend, and overlap across replicated phases; the summary sheet computes ratios to support that judgment, not to replace it.</li>
@@ -1799,7 +1816,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="drow"><div class="dlab">Materials and position</div><div class="dval"><textarea data-meta="materials" placeholder="e.g., tray of 50 blocks, bin 20 cm to the right; for concurrent: two identical bins 40 cm apart" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Consequence magnitude and timing</div><div class="dval"><textarea data-meta="magnitude" placeholder="e.g., 20 s access delivered within 2 s; edible: one piece" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Control condition</div><div class="dval"><textarea data-meta="control" placeholder="e.g., same materials, responses produce nothing; assessor present, neutral" class="nbh-line" rows="1"></textarea></div></div>
-    <div class="drow"><div class="dlab">MO control before sessions</div><div class="dval"><textarea data-meta="mo" placeholder="e.g., no access to tested items for 3 h; sessions 9:30 daily; not within 30 min of snack" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">MO control before sessions</div><div class="dval"><textarea data-meta="mo" placeholder="e.g., no tablet or edibles for 3 h; praise as usual, none in the 5 min before; sessions 9:30 daily; not within 30 min of snack" class="nbh-line" rows="1"></textarea></div></div>
     <!-- v22.37 (review F135): the parent's food-item decision, the allergies and the limits, before any edible is delivered -->
     <div class="drow"><div class="dlab">Food items: approved, allergies or diet, limits (Form IC-1)</div><div class="dval"><textarea data-meta="food" placeholder="e.g., Goldfish crackers and fruit snacks approved; no peanut; one small serving per session (Form IC-1, Specific procedures B)" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Session signal (multielement only)</div><div class="dval"><textarea data-meta="signal" placeholder="e.g., colored placemat per condition; item shown before session" class="nbh-line" rows="1"></textarea></div></div>
@@ -1838,6 +1855,8 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="f"><label for="mCap">Session cap for PR (min)</label><input id="mCap" data-meta="prcap" placeholder="e.g., 20"></div>
     <div class="f ra-full" style="grid-column:1/-1"><label for="mPBdef">Problem behavior to record</label><textarea id="mPBdef" data-meta="pbdef" class="nbh-line" rows="1"></textarea></div>
     <div class="f"><label for="mStopRule">Stop rule for problem behavior</label><input id="mStopRule" data-meta="stoprule" placeholder="e.g., end session at first aggression"></div>
+    <!-- v22.79 (review F131): the single-operant labels' absolute floor, a working convention -->
+    <div class="f"><label for="mMinDiff">Smallest difference that counts (responses/min)</label><input id="mMinDiff" data-meta="minDiff" type="number" min="0" step="0.1" placeholder="1"></div>
   </div>
   <div class="cite">Response selection follows the arbitrary-response approach of Roscoe et al. (1999) and the task responses used by Roane et al. (2001), DeLeon et al. (2009) and Glover et al. (2008); a harder response lowers rates and brings ratio strain sooner (Penrod et al., 2008). Whichever is chosen, the same response, materials, and session length are used in every condition so that only the consequence differs.</div>
 </div>
@@ -1851,9 +1870,10 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   <div class="bar nbh-band">Single-Operant Assessment</div>
   <div class="ra-run noprint" id="ra-run-so" data-ra-view="so" role="region" aria-label="Single-operant session runner">
     <div class="ra-run-hd"><h3>Run This Session</h3><span class="ra-run-hint">Times the session at the toolbar length, runs the schedule, cues each reinforcer and times its access, and writes the next row of the sheet below.</span></div>
+    <div class="ra-run-assent" id="ra-run-so-assent" role="status" hidden></div>   <!-- v22.79 (review I68): the assent plan, Form SI-1 -->
     <div class="ra-run-set">
       <div class="ra-run-f"><label for="ra-run-so-cond">Condition</label><select id="ra-run-so-cond"></select></div>
-      <div class="ra-run-f"><label for="ra-run-so-fr">Schedule (FR)</label><input id="ra-run-so-fr" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"><span class="ra-run-src" id="ra-run-so-frsrc">Every response: FR 1</span></div>
+      <div class="ra-run-f"><label for="ra-run-so-fr">Schedule (FR)</label><input id="ra-run-so-fr" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"><span class="ra-run-src" id="ra-run-so-frsrc">Every response: FR 1</span><button type="button" class="ra-run-planfr" id="ra-run-so-planfr" hidden>Test at the plan ratio</button></div>
       <div class="ra-run-f"><label for="ra-run-so-acc">Access (s)</label><input id="ra-run-so-acc" type="number" min="0" max="600" step="1" value="0" inputmode="decimal"><span class="ra-run-src" id="ra-run-so-accsrc"></span></div>
       <div class="ra-run-f"><label for="ra-run-so-amode">Access ends</label><select id="ra-run-so-amode"><option value="time">At the access time</option><option value="eat">When it is consumed (tap Consumed)</option></select></div>
       <div class="ra-run-f ra-run-w2"><label for="ra-run-so-clock">Clock during access</label><select id="ra-run-so-clock"><option value="pause">Pauses: minutes available</option><option value="avail">Runs: minutes less access</option><option value="run">Runs: all minutes</option></select></div>
@@ -1879,6 +1899,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="ra-run-ctl">
       <button type="button" class="ra-run-go" id="ra-run-so-start">Start session</button>
       <button type="button" id="ra-run-so-end" disabled>End session</button>
+      <button type="button" id="ra-run-so-wd" disabled title="The student said or showed stop, or left: the session ends at once">Student withdrew</button>
       <button type="button" id="ra-run-so-save" disabled>Save to the sheet</button>
       <button type="button" id="ra-run-so-discard" disabled>Discard</button>
       <span class="ra-run-gap"></span>
@@ -1902,10 +1923,15 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     Each session lasts the toolbar session length. In <b>Control</b> sessions the response produces nothing. In a <b>stimulus</b> session every response (or every <em>n</em>th, if testing a plan schedule) produces the stimulus at the set magnitude. Reversal: run control until stable, then one stimulus, then control, then the stimulus again. Multielement: alternate control and stimulus sessions in a counterbalanced order with a distinct signal for each. Record total responses and the minutes actually run; rate is computed. If access time is subtracted from the session, enter the minutes the response was available.</div>
   <div class="readout" id="soReadout"></div>
   <div class="gridwrap"><table class="grid" id="soTbl"></table></div>
+  <!-- v22.79 (review I69, F137, I68): before and after each session: the pre-session record, the implementer, the fidelity and how it ended -->
+  <div class="rec-box" id="recBox-so"><div class="ioa-lab">Session record (before and after each session)</div>
+    <div class="gridwrap"><table class="grid rec-tbl" id="recTbl-so"></table></div>
+    <div class="rowbtns noprint"><button type="button" class="tool" data-recadd="so">Add a session record</button></div>
+    <p class="rec-out" id="recOut-so"></p></div>
   <div class="figure"><h3>Responses per Minute by Session</h3><p class="cap">Open markers: control. Filled markers: stimulus sessions, one shape per stimulus. Vertical lines mark phase changes in a reversal design.</p><svg id="soPlot" viewBox="0 0 640 220"></svg></div>
   <h3 class="sub">Condition Summary</h3>
   <table class="rank" id="soRank"><thead><tr><th>Condition</th><th class="n">Sessions</th><th class="n">Mean rate</th><th class="n">Range</th><th class="n">Ratio to control</th><th class="n">Overlap with control</th><th class="n">PB sessions</th><th>Reinforcement effect</th></tr></thead><tbody></tbody></table>
-  <p class="method">"Ratio to control" is the stimulus mean divided by the control mean. "Overlap" is the share of stimulus sessions at or below the highest control rate. The verdict labels are working conventions for this practice: <b>Clear</b> = ratio &ge; 2 and no overlap across at least 3 sessions per condition; <b>Probable</b> = ratio &ge; 1.5 or overlap &le; 25%; <b>None</b> otherwise. Confirm by visual analysis of the plot, including level change at each phase reversal.</p>
+  <p class="method">"Ratio to control" is the stimulus mean divided by the control mean. "Overlap" is the share of stimulus sessions at or below the highest control rate. The verdict labels are working conventions for this practice: <b>Clear</b> = ratio &ge; 2 and no overlap across at least 3 sessions per condition; <b>Probable</b> = ratio &ge; 1.5 or overlap &le; 25%; <b>None</b> otherwise. Clear and Probable also need the stimulus mean at least the <b>smallest difference that counts</b> (Setup; 1 response a minute unless set, a working convention) above the control mean, since a rate near zero makes a small effect look large; with the control at zero the ratio column shows that difference. With fewer than 3 sessions in either condition the label is <b>Too few sessions</b>. Confirm by visual analysis of the plot, including level change at each phase reversal.</p>
   <div class="cite">Single-operant arrangement after Roscoe, Iwata, and Kahng (1999, <em>JABA, 32</em>, 479&ndash;493), who found that 7 of 8 participants consistently preferred the high-preference stimulus under a concurrent schedule, yet for 6 of those 7 the low-preference stimulus, available alone, maintained response rates as high as those for the high-preference stimulus under the concurrent schedule; this arrangement answers the absolute question. The multielement comparison of several stimuli against a no-reinforcer control is this form's arrangement; Roane, Lerman, and Vorndran (2001) tested their stimuli under progressive-ratio schedules in a single-operant arrangement.</div>
 </div>
 
@@ -1918,6 +1944,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   <div class="bar nbh-band">Concurrent-Operants Assessment</div>
   <div class="ra-run noprint co-st-only" id="ra-run-co" data-ra-view="co" role="region" aria-label="Concurrent-operants session runner">
     <div class="ra-run-hd"><h3>Run This Session</h3><span class="ra-run-hint">Times the session at the toolbar length, counts responses at each station, runs each option's schedule and access time, and writes the next row of the sheet below.</span></div>
+    <div class="ra-run-assent" id="ra-run-co-assent" role="status" hidden></div>   <!-- v22.79 (review I68): the assent plan, Form SI-1 -->
     <div class="ra-run-set">
       <div class="ra-run-f"><label for="ra-run-co-pos">Option A position</label><select id="ra-run-co-pos"><option value="">Not recorded</option><option value="L">L</option><option value="M">M</option><option value="R">R</option></select><span class="ra-run-src" id="ra-run-co-possrc"></span></div>
       <div class="ra-run-f"><label for="ra-run-co-cond">Condition</label><select id="ra-run-co-cond"><option value="">Reinforcement</option><option value="bl">Baseline (no consequence)</option></select></div>
@@ -1947,6 +1974,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="ra-run-ctl">
       <button type="button" class="ra-run-go" id="ra-run-co-start">Start session</button>
       <button type="button" id="ra-run-co-end" disabled>End session</button>
+      <button type="button" id="ra-run-co-wd" disabled title="The student said or showed stop, or left: the session ends at once">Student withdrew</button>
       <button type="button" id="ra-run-co-save" disabled>Save to the sheet</button>
       <button type="button" id="ra-run-co-discard" disabled>Discard</button>
       <span class="ra-run-gap"></span>
@@ -1972,6 +2000,11 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     Set out two or three identical response stations, equally spaced. Each station produces a different consequence: one stimulus each, and, when included, a control station that produces nothing. Before each session, prompt one response at every station and deliver its consequence so the student contacts each contingency. Then run the session without prompts and record responses at each station. Rotate station positions every session and record the position of Option A. Compare allocation across stations.</div>
   <div class="readout co-st-only" id="coReadout"></div>
   <div class="gridwrap co-st-only"><table class="grid" id="coTbl"></table></div>
+  <!-- v22.79 (review I69, F137, I68): before and after each session: the pre-session record, the implementer, the fidelity and how it ended -->
+  <div class="rec-box co-st-only" id="recBox-co"><div class="ioa-lab">Session record (before and after each session)</div>
+    <div class="gridwrap"><table class="grid rec-tbl" id="recTbl-co"></table></div>
+    <div class="rowbtns noprint"><button type="button" class="tool" data-recadd="co">Add a session record</button></div>
+    <p class="rec-out" id="recOut-co"></p></div>
   <div class="figure co-st-only"><h3>Proportion of Responses Allocated to Each Option</h3><p class="cap">One line per option; the control option, when used, is dashed. A stimulus option that stays above the control across position rotations is preferred relative to the alternatives in that session.</p><svg id="coPlot" viewBox="0 0 640 220"></svg></div>
   <h3 class="sub co-st-only">Allocation Summary</h3>
   <table class="rank co-st-only" id="coRank"><thead><tr><th>Option</th><th class="n">Sessions</th><th class="n">Total responses</th><th class="n">Mean % allocation</th><th class="n">Sessions with most responses</th><th class="n">Position effect</th><th>Relative standing</th></tr></thead><tbody></tbody></table>
@@ -2076,6 +2109,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   <div class="bar nbh-band">Progressive-Ratio Assessment</div>
   <div class="ra-run noprint" id="ra-run-pr" data-ra-view="pr" role="region" aria-label="Progressive-ratio session runner">
     <div class="ra-run-hd"><h3>Run This Session</h3><span class="ra-run-hint">Runs the progression from the toolbar, counts responses toward the current ratio, cues each reinforcer and times its access, ends the session at the stop interval or the session cap, and ticks the completed ratios in the next row of the sheet below.</span></div>
+    <div class="ra-run-assent" id="ra-run-pr-assent" role="status" hidden></div>   <!-- v22.79 (review I68): the assent plan, Form SI-1 -->
     <div class="ra-run-set">
       <div class="ra-run-f"><label for="ra-run-pr-cond">Condition</label><select id="ra-run-pr-cond"></select></div>
       <div class="ra-run-f"><label for="ra-run-pr-acc">Access (s)</label><input id="ra-run-pr-acc" type="number" min="0" max="600" step="1" value="0" inputmode="decimal"><span class="ra-run-src" id="ra-run-pr-accsrc"></span></div>
@@ -2104,6 +2138,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="ra-run-ctl">
       <button type="button" class="ra-run-go" id="ra-run-pr-start">Start session</button>
       <button type="button" id="ra-run-pr-end" disabled>End session</button>
+      <button type="button" id="ra-run-pr-wd" disabled title="The student said or showed stop, or left: the session ends at once">Student withdrew</button>
       <button type="button" id="ra-run-pr-save" disabled>Save to the sheet</button>
       <button type="button" id="ra-run-pr-discard" disabled>Discard</button>
       <span class="ra-run-gap"></span>
@@ -2127,11 +2162,16 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     One stimulus per session. Begin at the starting ratio. When the ratio is met, deliver the stimulus at the set magnitude, then advance to the next ratio in the progression. Continue until no response occurs for the stop interval, or the session cap is reached. Tick each ratio as it is completed; the break point is the last completed ratio. A ratio still in progress when the session ends is not ticked and does not count. Run a control session (same progression, no consequence) and 2&ndash;3 sessions per stimulus in a counterbalanced order.</div>
   <div class="readout" id="prReadout"></div>
   <div class="gridwrap"><table class="grid" id="prTbl"></table></div>
+  <!-- v22.79 (review I69, F137, I68): before and after each session: the pre-session record, the implementer, the fidelity and how it ended -->
+  <div class="rec-box" id="recBox-pr"><div class="ioa-lab">Session record (before and after each session)</div>
+    <div class="gridwrap"><table class="grid rec-tbl" id="recTbl-pr"></table></div>
+    <div class="rowbtns noprint"><button type="button" class="tool" data-recadd="pr">Add a session record</button></div>
+    <p class="rec-out" id="recOut-pr"></p></div>
   <div class="figure"><h3>Break Point by Session</h3><p class="cap">Bars show the last completed ratio in each session, grouped by stimulus; the control sessions are hatched.</p><svg id="prPlot" viewBox="0 0 640 220"></svg></div>
   <div class="figure"><h3>Cumulative Responses Across Sessions</h3><p class="cap">Every response recorded, added up session by session for each condition; the control is dashed. Break points can match while the responding they took differs (Penrod et al., 2008).</p><svg id="prCum" viewBox="0 0 640 220"></svg></div>
   <h3 class="sub">Break-Point Summary</h3>
   <div class="gridwrap"><table class="rank" id="prRank"><thead><tr><th class="n">Rank</th><th>Condition</th><th class="n">Sessions</th><th class="n">Mean break point</th><th class="n">Range</th><th class="n">Median break point</th><th class="n">Mean responses</th><th class="n">Mean ratios completed</th><th class="n">Mean minutes</th><th class="n">Responses per minute</th><th class="n">PB sessions</th><th>Potency</th></tr></thead><tbody></tbody></table></div>
-  <p class="method">Potency labels are working conventions and are only meaningful within one set of parameters. Steps are counted along the sheet&rsquo;s progression, with each mean placed at the first ratio at or above it. <b>High</b> = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; <b>Moderate</b> = at least 1 step above the control mean but not High; <b>Low</b> = less than 1 step above the control mean. The control carries no label, and a stimulus has none until it and the control each have a scored session. <b>Responses</b> counts the responses in the completed ratios; <b>Ratios completed</b> counts the ticked ratios: in a stimulus session each one produced a reinforcer, and a control session delivers none. <b>Minutes</b> and <b>All responses</b> (every response recorded, the ratio in progress included) are entered by the runner when it saves the session, or by hand; <b>Responses per minute</b> is all responses over all minutes for the sessions that have both. With <b>Each ratio twice</b>, each ratio has two columns and the steps are counted over the distinct ratios. A break point that moves a lot from session to session is better read by the median than the mean.</p>
+  <p class="method">Potency labels are working conventions and are only meaningful within one set of parameters. Steps are counted along the sheet&rsquo;s progression, with each mean placed at the first ratio at or above it. <b>High</b> = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; <b>Moderate</b> = at least 1 step above the control mean but not High; <b>Low</b> = less than 1 step above the control mean. The control carries no label, and a stimulus has none until it and the control each have 2 scored sessions (a single break point is unstable): <b>Too few sessions</b>. <b>Responses</b> counts the responses in the completed ratios; <b>Ratios completed</b> counts the ticked ratios: in a stimulus session each one produced a reinforcer, and a control session delivers none. <b>Minutes</b> and <b>All responses</b> (every response recorded, the ratio in progress included) are entered by the runner when it saves the session, or by hand; <b>Responses per minute</b> is all responses over all minutes for the sessions that have both. With <b>Each ratio twice</b>, each ratio has two columns and the steps are counted over the distinct ratios. A break point that moves a lot from session to session is better read by the median than the mean.</p>
   <div class="cite">Progressive-ratio reinforcer assessment after Roane, Lerman, and Vorndran (2001, <em>JABA, 34</em>, 145&ndash;167), who found that, for all 4 participants, one of two stimuli chosen equally often in a paired-stimulus preference assessment supported more responding than the other as the ratio requirement increased, and after DeLeon, Frank, Gregory, and Allman (2009, <em>JABA, 42</em>, 729&ndash;733), who found that higher-preference stimuli from a paired-choice assessment produced larger break points in 10 of 12 comparisons. Penrod, Wallace, and Dyer (2008, <em>JABA, 41</em>, 177&ndash;188) found that high-preference stimuli maintained responding under higher schedule requirements than low-preference stimuli for 3 of 4 participants and were equally effective for the fourth; Trosclair-Lasserre et al. (2008, <em>JABA, 41</em>, 203&ndash;220) found that differences between reinforcer magnitudes did not appear at the lowest schedule requirements in three of four evaluations, suggesting that magnitude effects may be mediated by the schedule requirement. Penrod et al. also found break points that matched while the number of responses and the session time differed widely, so the sheet keeps both for each session and plots the cumulative responses. Francisco, Borrero, and Sy (2008, <em>JABA, 41</em>, 189&ndash;202) delivered each edible until it was consumed, with the task unavailable meanwhile. Poling (2010, <em>JABA, 43</em>, 347&ndash;349) notes that PR schedules are not an especially quick way to scale reinforcer potency and that long ratios are aversive, argues that members of protected populations should not be exposed to them unless there are clear offsetting benefits, and lists the influence of initial ratio and step size on applied findings among uninvestigated questions. In basic research a longer stop criterion increased the number of ratios completed (Stafford &amp; Branch, 1998, <em>JEAB, 70</em>, 123&ndash;138), so parameters are fixed here and printed with every result.</div>
 </div>
 
@@ -2152,8 +2192,9 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <thead><tr><th>Stimulus</th><th class="n">PA-1 rank / %</th><th class="n">SO ratio to control</th><th class="n">SO verdict</th><th class="n">CO mean allocation</th><th class="n">CO standing</th><th class="n">PR mean break point</th><th class="n">PR potency</th><th>Reinforcer verdict</th></tr></thead>
     <tbody></tbody>
   </table>
-  <p class="method">The reinforcer verdict is a working convention, applied in this order: <b>Confirmed</b> when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the potency is Moderate and no plan ratio is entered, or the single-operant verdict is Probable and the potency Moderate; <b>Relative only</b> when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; <b>Probable</b> when the single-operant verdict is Probable or the potency is Moderate; <b>Not supported</b> when the single-operant verdict is None or the potency is Low; <b>Untested</b> when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</p>
-  <p class="method">The design columns carry each sheet&rsquo;s labels. SO verdict: <b>Clear</b> = ratio to control &ge; 2 and no overlap across at least 3 sessions per condition; <b>Probable</b> = ratio &ge; 1.5 or overlap &le; 25%; <b>None</b> otherwise. CO standing: <b>Preferred</b>, <b>Comparable</b> and <b>Not chosen</b> as defined on the concurrent-operants sheet; <b>Lower</b> = 20% or more of the responses, but more than 20 points below the leading option. PR potency: <b>High</b>, <b>Moderate</b> and <b>Low</b> as defined on the progressive-ratio sheet.</p>
+  <p class="warn ra-sumnote" id="sumNote" role="status" hidden></p>   <!-- v22.79 (review F132, F133) -->
+  <p class="method">The reinforcer verdict is a working convention, applied in this order: <b>Conflicting</b>, first, when one design gives its negative label (single-operant None, potency Low) and another its positive one (Clear, High, or Preferred under concurrent operants): the note under the table names them, to be resolved under Reinforcer(s) selected and why; <b>Confirmed</b> when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the single-operant verdict is Probable and the potency Moderate (Moderate alone never confirms, plan ratio or not); <b>Relative only</b> when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; <b>Probable</b> when the single-operant verdict is Probable or the potency is Moderate; <b>Not supported</b> when the single-operant verdict is None or the potency is Low; <b>Untested</b> when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</p>
+  <p class="method">The design columns carry each sheet&rsquo;s labels. SO verdict: <b>Clear</b> = ratio to control &ge; 2 and no overlap across at least 3 sessions per condition; <b>Probable</b> = ratio &ge; 1.5 or overlap &le; 25%; both with the stimulus mean at least the smallest difference that counts (Setup) above the control&rsquo;s; <b>None</b> otherwise; <b>Too few</b> with fewer than 3 sessions in either condition. CO standing: <b>Preferred</b>, <b>Comparable</b> and <b>Not chosen</b> as defined on the concurrent-operants sheet; <b>Lower</b> = 20% or more of the responses, but more than 20 points below the leading option. PR potency: <b>High</b>, <b>Moderate</b> and <b>Low</b> as defined on the progressive-ratio sheet.</p>
 
   <div class="co-coa-only" id="sumCoaBlock">
   <h3 class="sub">Condition Comparison (COA) Verdicts</h3>
@@ -2176,6 +2217,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
       <div class="gridwrap"><table class="grid" id="ioaTbl"></table></div>
       <div class="rowbtns noprint"><button type="button" class="tool" id="ioaAdd">Add a check</button></div>
       <p id="ioaOut"></p>
+      <p class="rec-out" id="recSum"></p>   <!-- v22.79 (review F137): the agreement checks, the fidelity and the withdrawals, by design -->
       <p class="ioa-hint">Methods: counts, the smaller over the larger (in 10-s intervals where the data allow; Roscoe et al., 1999, p. 485); progressive ratio, the count at each ratio step, agreeing steps over steps (DeLeon et al., 2009, p. 731), or exact counts in 10-s intervals (Roane et al., 2001, p. 148); break point, the same or not; duration, the shorter over the longer (exact 10-s intervals in Fisher et al., 1992, p. 493). For each ratio step, type the counts in order, separated by commas.</p></div>
     <div class="f"><label for="mPBsum">Problem behavior across sessions (summary)</label><textarea id="mPBsum" data-meta="pbsum" class="nbh-line" rows="1"></textarea></div>
   </div>
@@ -2269,7 +2311,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div><h4>What You Say and Do</h4><ul><li>Control: the response produces nothing; stay present and neutral.</li><li>Before the first reinforcement session with a stimulus: prompt the response once and deliver the stimulus.</li><li>Stimulus session: deliver the stimulus within 2–3 s of each response (or each nth, on a plan schedule), at the set magnitude, with no praise; remove a timed item when the runner cues the end of access.</li><li>Data collector: set Condition, check Schedule (FR), Access (s) and Minutes on the sheet, press Start session, and tap Response for every response (Space or R) and Problem behavior for each instance (P).</li></ul></div>
     <div><h4>What Goes on the Sheet</h4><ul><li>Save to the sheet writes Date, Condition, Responses, Minutes and PB into the next empty row; Rate / min is computed.</li><li>Minutes: the minutes the response was available (the runner's clock waits during access), unless Clock during access is set to run.</li><li>Reversal: Phase start on the first session of each phase; the runner ticks it when the condition changes.</li><li>The Condition Summary: Ratio to control, Overlap with control, Reinforcement effect.</li></ul></div>
   </div>
-  <div class="decide"><b>Decision.</b> RA-1’s working conventions: Clear = ratio ≥ 2 and no overlap across at least 3 sessions per condition; Probable = ratio ≥ 1.5 or overlap ≤ 25%; None otherwise. Confirm by visual analysis of the plot, including level change at each phase reversal.</div>
+  <div class="decide"><b>Decision.</b> RA-1’s working conventions: Clear = ratio ≥ 2 and no overlap across at least 3 sessions per condition; Probable = ratio ≥ 1.5 or overlap ≤ 25%; both with the stimulus mean at least the smallest difference that counts (Setup) above the control; None otherwise; Too few sessions under 3 in either condition. Confirm by visual analysis of the plot, including level change at each phase reversal.</div>
   <h4 class="flowhead">The Sheet’s Procedure, Word for Word</h4>
   <div class="card4"><div class="c-so"><b>Single-Operant Assessment</b>Each session lasts the toolbar session length. In Control sessions the response produces nothing. In a stimulus session every response (or every nth, if testing a plan schedule) produces the stimulus at the set magnitude. Reversal: run control until stable, then one stimulus, then control, then the stimulus again. Multielement: alternate control and stimulus sessions in a counterbalanced order with a distinct signal for each. Record total responses and the minutes actually run; rate is computed. If access time is subtracted from the session, enter the minutes the response was available.</div></div>
 </section>
@@ -2328,7 +2370,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div><h4>What You Say and Do</h4><ul><li>Enter the plan ratio before reading potency; it applies the plan-ratio criterion.</li><li>Read each stimulus across its row: SO verdict, CO standing, PR potency, then the reinforcer verdict.</li><li>Compare the verdicts with the PA-1 rank or percentage, and note where they part.</li></ul></div>
     <div><h4>What Goes on the Sheet</h4><ul><li>Plan ratio / schedule.</li><li>Reinforcer(s) selected and why; Schedule and magnitude supported by the data; Reinforcers to rotate or reserve; Conditions not tested (delay, task type, setting, staff); Re-test trigger.</li><li>Interobserver agreement (design, sessions, %); Problem behavior across sessions (summary); the signatures.</li></ul></div>
   </div>
-  <div class="decide"><b>Decision.</b> The reinforcer verdict is a working convention, applied in this order: Confirmed when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the potency is Moderate and no plan ratio is entered, or the single-operant verdict is Probable and the potency Moderate; Relative only when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; Probable when the single-operant verdict is Probable or the potency is Moderate; Not supported when the single-operant verdict is None or the potency is Low; Untested when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</div>
+  <div class="decide"><b>Decision.</b> The reinforcer verdict is a working convention, applied in this order: Conflicting, first, when one design gives its negative label (single-operant None, potency Low) and another its positive one (Clear, High, or Preferred under concurrent operants); Confirmed when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the single-operant verdict is Probable and the potency Moderate (Moderate alone never confirms); Relative only when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; Probable when the single-operant verdict is Probable or the potency is Moderate; Not supported when the single-operant verdict is None or the potency is Low; Untested when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</div>
 </section>
 
 <section class="proc" id="wk-stop" aria-labelledby="wk-stop-h">
@@ -2371,11 +2413,11 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div><dt>Magnitude</dt><dd>The fixed amount delivered: one edible piece, or a fixed number of seconds of access after which the item is removed. Written for each stimulus in Magnitude, portion, or access rule.</dd></div>
     <div><dt>Control condition</dt><dd>The same response and materials with no consequence. Every design has one; without it, responding could reflect the materials rather than the stimulus.</dd></div>
     <div><dt>Pre-session exposure</dt><dd>Before the first reinforcement session with a stimulus, the response is prompted once and the stimulus delivered. Under concurrent operants, one prompted response at every station, before each session.</dd></div>
-    <div><dt>MO control</dt><dd>Access to the tested stimuli restricted for at least a few hours before sessions, sessions at a consistent time, edibles not immediately after a meal, and any pre-session access recorded.</dd></div>
+    <div><dt>MO control</dt><dd>For edibles and items, access restricted for at least a few hours before sessions; for attention, praise or escape, a brief neutral period just before instead (a few minutes with no interaction); sessions at a consistent time, edibles not immediately after a meal, and any pre-session access recorded.</dd></div>
     <div><dt>Reversal (A-B-A-B) and multielement</dt><dd>Two single-operant designs. Reversal: control until stable, then one stimulus, control, the stimulus again, with Phase start at each change. Multielement: control and stimulus sessions alternating in a counterbalanced order, each with its own Session signal.</dd></div>
     <div><dt>Rate / min and Minutes</dt><dd>Responses divided by Minutes: the minutes the response was available (the runner's clock waits during access), or, when the runner's clock is set to run, the minutes run less access time or the minutes run.</dd></div>
     <div><dt>Ratio to control and Overlap with control</dt><dd>A stimulus’s mean rate divided by the control’s; and the share of its sessions at or below the highest control rate.</dd></div>
-    <div><dt>Reinforcement effect</dt><dd>Clear = ratio ≥ 2 and no overlap across at least 3 sessions per condition; Probable = ratio ≥ 1.5 or overlap ≤ 25%; None otherwise. Working conventions, confirmed by visual analysis of the plot.</dd></div>
+    <div><dt>Reinforcement effect</dt><dd>Clear = ratio ≥ 2 and no overlap across at least 3 sessions per condition; Probable = ratio ≥ 1.5 or overlap ≤ 25%; both with the stimulus mean at least the smallest difference that counts above the control; None otherwise; Too few sessions under 3 in either condition. Working conventions, confirmed by visual analysis of the plot.</dd></div>
     <div><dt>Station and Option A position</dt><dd>Identical response stations, one per option, equally spaced. The positions rotate every session, and the sheet records where Option A stood: L, M or R.</dd></div>
     <div><dt>Mean % allocation</dt><dd>An option’s share of each session’s responses, averaged across sessions. Sessions with most responses counts the sessions in which it led.</dd></div>
     <div><dt>Position effect</dt><dd>Computed for Option A, whose position the sheet records: Suspected when its mean allocation differs by more than 40 points between positions; n/a for the other options.</dd></div>
@@ -2385,8 +2427,8 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div><dt>Session cap</dt><dd>The longest a progressive-ratio session may run: 20 minutes in the example, set in Session cap for PR (min).</dd></div>
     <div><dt>Break point</dt><dd>The last completed ratio. A ratio still in progress when the session ends is not ticked and does not count.</dd></div>
     <div><dt>Responses and Ratios completed</dt><dd>Responses counts the responses in the completed ratios; Ratios completed counts the ticked ratios: in a stimulus session each one produced a reinforcer, and a control session delivers none.</dd></div>
-    <div><dt>Potency labels and the plan ratio</dt><dd>Steps are counted along the sheet’s progression, with each mean placed at the first ratio at or above it. High = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; Moderate = at least 1 step above the control mean but not High; Low = less than 1 step above the control mean. The plan ratio is typed as a number or as FR n.</dd></div>
-    <div><dt>Reinforcer verdict</dt><dd>Confirmed, Relative only, Probable, Not supported or Untested, tested in that order as the summary defines them. Untested when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen.</dd></div>
+    <div><dt>Potency labels and the plan ratio</dt><dd>Steps are counted along the sheet’s progression, with each mean placed at the first ratio at or above it. High = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; Moderate = at least 1 step above the control mean but not High; Low = less than 1 step above the control mean; no label until the stimulus and the control each have 2 sessions. The plan ratio is typed as a number or as FR n.</dd></div>
+    <div><dt>Reinforcer verdict</dt><dd>Conflicting, Confirmed, Relative only, Probable, Not supported or Untested, tested in that order as the summary defines them. Untested when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen.</dd></div>
     <div><dt>Run This Session</dt><dd>The runner at the top of each assessment sheet: it times the session, counts responses, cues each reinforcer and times its access, shows a Session Summary, and with Save to the sheet writes the next empty row.</dd></div>
     <div><dt>IOA</dt><dd>Agreement between the data collector’s record and a second observer’s independent record, on at least one session per condition when the result will be written into a plan.</dd></div>
     <div><dt>Re-test trigger</dt><dd>The condition, written on the summary, under which the team tests the stimulus again: for example, a falling response rate, or each new schedule step.</dd></div>
@@ -2412,7 +2454,7 @@ const TYPES=['','Edible','Leisure item','Activity','Social / attention','Token',
 
 let S=blank();
 function blank(){return {form:'RA-1',n:3,sessMin:5,nSess:16,nCoSess:10,prStep:'a1',prRep:1,prStart:1,prStop:120,
-  meta:{},stim:[],so:[],co:[],pr:[],coa:blankCoa(),ioa:[]};}
+  meta:{},stim:[],so:[],co:[],pr:[],coa:blankCoa(),ioa:[],rec:[]};}
 function ensure(){
   const n=S.n;
   while(S.stim.length<n)S.stim.push({name:'',type:'',pa:'',mag:''});S.stim.length=n;
@@ -2421,6 +2463,7 @@ function ensure(){
   const prN=Math.max(3,n*3+3);while(S.pr.length<prN)S.pr.push({date:'',cond:'',done:[],pb:false,resp:'',min:'',all:''});S.pr.length=prN;
   ensureCoa();
   if(!Array.isArray(S.ioa))S.ioa=[];
+  if(!Array.isArray(S.rec))S.rec=[];S.rec=S.rec.filter(x=>x&&typeof x==='object'&&['so','co','pr'].includes(x.sheet));   /* v22.79 (review I69) */
 }
 const name=i=>S.stim[i]&&S.stim[i].name.trim()?S.stim[i].name.trim():'Stimulus '+CODES[i];
 const condLabel=c=>c==='ctl'?'Control':c===''?'':name(+c);
@@ -2435,7 +2478,7 @@ function syncToolbar(){['nStim:n','sessMin:sessMin','nSess:nSess','nCoSess:nCoSe
 
 /* meta */
 function bindMeta(){$$('[data-meta]').forEach(el=>{const k=el.dataset.meta;if(el.type==='checkbox')el.checked=!!S.meta[k];else el.value=S.meta[k]||'';
-  el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',()=>{S.meta[k]=el.type==='checkbox'?el.checked:el.value;echo();if(k==='coOpts'){renderCO();renderSummary();}if(k==='coMode'){applyCoMode();renderCOA();renderSummary();}if(k==='planRatio'){computePR();renderSummary();}});});echo();}
+  el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',()=>{S.meta[k]=el.type==='checkbox'?el.checked:el.value;echo();if(k==='coOpts'){renderCO();renderSummary();}if(k==='coMode'){applyCoMode();renderCOA();renderSummary();}if(k==='planRatio'){computePR();renderSummary();}if(k==='minDiff'){computeSO();renderSummary();}});});echo();}   /* v22.79 (review F131) */
 function echo(){$$('.echo-client').forEach(e=>e.textContent=S.meta.client||'');$$('.echo-response').forEach(e=>e.textContent=S.meta.response||'');}
 
 /* stimuli */
@@ -2454,6 +2497,12 @@ function renderSO(){
 }
 $('#soTbl').addEventListener('input',e=>{const el=e.target,k=+el.dataset.k;if(isNaN(k))return;S.so[k][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;computeSO();renderSummary();});
 function soRows(){return S.so.map((s,k)=>{const m=s.min!==''?+s.min:S.sessMin;const rate=(s.cond!==''&&s.resp!==''&&m>0)?(+s.resp)/m:null;return {k,cond:s.cond,rate,pb:s.pb,phase:s.phase};});}
+/* v22.79 (review F131) the smallest difference over the control that counts, responses a minute (Setup; 1 when blank) */
+const raMinDiff=()=>{const v=parseFloat(S.meta.minDiff);return isFinite(v)&&v>=0?v:1;};
+/* the ratio as the tables show it: with the control at zero, the difference instead of an infinite ratio */
+/* v22.79 (review I67) the schedule a verdict was reached at, shown once any session ran above FR 1: "at FR 5", "at FR 1–5" */
+const raSchedTxt=s=>s.frHi>1&&s.verdict&&s.verdict!=='few'?' <small>at FR '+(s.frLo===s.frHi?s.frHi:s.frLo+'–'+s.frHi)+'</small>':'';
+const raRatioTxt=s=>s.ratio==null?'&mdash;':s.cm===0?'&mdash; (+'+(Math.round(10*s.diff)/10)+'/min)':s.ratio.toFixed(2);
 function soStats(){
   const rows=soRows().filter(r=>r.rate!=null);const ctl=rows.filter(r=>r.cond==='ctl').map(r=>r.rate);
   const cm=mean(ctl),cmax=ctl.length?Math.max(...ctl):null;
@@ -2461,17 +2510,23 @@ function soStats(){
   S.stim.forEach((_,i)=>{const rs=rows.filter(r=>String(r.cond)===String(i));const v=rs.map(r=>r.rate);const m=mean(v);
     const ratio=(m!=null&&cm!=null)?(cm>0?m/cm:(m>0?Infinity:null)):null;
     const ov=(v.length&&cmax!=null)?v.filter(x=>x<=cmax).length/v.length:null;
-    let verdict='';if(m!=null&&cm!=null){if(ratio>=2&&ov===0&&v.length>=3&&ctl.length>=3)verdict='clear';else if(ratio>=1.5||(ov!=null&&ov<=.25))verdict='probable';else verdict='none';}
-    out.stim.push({i,n:v.length,mean:m,min:v.length?Math.min(...v):null,max:v.length?Math.max(...v):null,ratio,ov,verdict,pb:rs.filter(r=>r.pb).length});});
+    /* v22.79 (review F130, F131): every label needs 3 sessions in each condition (fewer: "few", no verdict), and Clear and
+       Probable also need the stimulus mean at least the difference floor (Setup, a working convention) over the control's, so
+       a control at zero no longer makes any responding at all a Clear effect */
+    const diff=(m!=null&&cm!=null)?m-cm:null,floor=raMinDiff();
+    let verdict='';if(m!=null&&cm!=null){if(v.length<3||ctl.length<3)verdict='few';else if(ratio>=2&&ov===0&&diff>=floor)verdict='clear';else if((ratio>=1.5||(ov!=null&&ov<=.25))&&diff>=floor)verdict='probable';else verdict='none';}
+    /* v22.79 (review I67): the schedule the stimulus's sessions ran (the session record's FR, FR 1 when none) */
+    const frs=rs.map(r=>soFR(r.k)),frLo=frs.length?Math.min(...frs):null,frHi=frs.length?Math.max(...frs):null;
+    out.stim.push({i,n:v.length,mean:m,min:v.length?Math.min(...v):null,max:v.length?Math.max(...v):null,ratio,ov,diff,cm,verdict,frLo,frHi,pb:rs.filter(r=>r.pb).length});});
   return out;
 }
 function computeSO(){
   soRows().forEach(r=>{$('#soR'+r.k).innerHTML=r.rate==null?'':r.rate.toFixed(1);});
   const st=soStats();const scored=soRows().filter(r=>r.rate!=null).length;
   $('#soReadout').textContent=scored?`${scored} sessions scored; ${st.ctl.n} control.`:'No sessions scored yet.';
-  const tagV=v=>v==='clear'?'<span class="tag ok">Clear</span>':v==='probable'?'<span class="tag mid">Probable</span>':v==='none'?'<span class="tag no">None</span>':'';
+  const tagV=v=>v==='clear'?'<span class="tag ok">Clear</span>':v==='probable'?'<span class="tag mid">Probable</span>':v==='none'?'<span class="tag no">None</span>':v==='few'?'<span class="tag na">Too few sessions</span>':'';
   let h=`<tr><td>Control</td><td class="n">${st.ctl.n||''}</td><td class="n">${f1(st.ctl.mean)}</td><td class="n">${st.ctl.n?f1(st.ctl.min)+'&ndash;'+f1(st.ctl.max):'&mdash;'}</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">${st.ctl.pb||''}</td><td></td></tr>`;
-  h+=st.stim.map(s=>`<tr><td>${esc(name(s.i))}</td><td class="n">${s.n||''}</td><td class="n">${f1(s.mean)}</td><td class="n">${s.n?f1(s.min)+'&ndash;'+f1(s.max):'&mdash;'}</td><td class="n">${s.ratio==null?'&mdash;':s.ratio===Infinity?'&infin;':s.ratio.toFixed(2)}</td><td class="n">${s.ov==null?'&mdash;':Math.round(100*s.ov)+'%'}</td><td class="n">${s.pb||''}</td><td>${tagV(s.verdict)}</td></tr>`).join('');
+  h+=st.stim.map(s=>`<tr><td>${esc(name(s.i))}</td><td class="n">${s.n||''}</td><td class="n">${f1(s.mean)}</td><td class="n">${s.n?f1(s.min)+'&ndash;'+f1(s.max):'&mdash;'}</td><td class="n">${raRatioTxt(s)}</td><td class="n">${s.ov==null?'&mdash;':Math.round(100*s.ov)+'%'}</td><td class="n">${s.pb||''}</td><td>${tagV(s.verdict)}${raSchedTxt(s)}</td></tr>`).join('');
   $('#soRank tbody').innerHTML=h;plotSO();return st;
 }
 const SHAPES=['circle','square','diamond','triangle'];
@@ -2517,12 +2572,60 @@ function renderIOA(){const t=document.getElementById('ioaTbl');if(!t)return;if(!
   computeIOA();}
 function computeIOA(){const out=document.getElementById('ioaOut');if(!out)return;const ps=[];
   (S.ioa||[]).forEach((x,i)=>{const r=ioaPct(x),c=document.getElementById('ioaP'+i);if(c)c.textContent=r?Math.round(r.p)+'%'+(r.t?' ('+r.t+')':''):'';if(r)ps.push(r.p);});
-  out.textContent=ps.length?ps.length+' check'+(ps.length===1?'':'s')+': mean '+Math.round(mean(ps))+'% (range '+Math.round(Math.min(...ps))+'–'+Math.round(Math.max(...ps))+'%).':'';}
+  out.textContent=ps.length?ps.length+' check'+(ps.length===1?'':'s')+': mean '+Math.round(mean(ps))+'% (range '+Math.round(Math.min(...ps))+'–'+Math.round(Math.max(...ps))+'%).':'';
+  if(typeof computeRec==='function')try{computeRec();}catch(e){}}   /* v22.79 (review F137) */
 if(document.getElementById('ioaTbl')){
   document.getElementById('ioaAdd').addEventListener('click',()=>{if(!Array.isArray(S.ioa))S.ioa=[];S.ioa.push({sess:'',sheet:'pr',kind:'step',a:'',b:''});renderIOA();const f=document.querySelector('#ioaTbl tr:last-child input');if(f)f.dispatchEvent(new Event('input',{bubbles:true}));});
   document.getElementById('ioaTbl').addEventListener('input',e=>{const el=e.target,i=+el.dataset.i;if(isNaN(i)||!el.dataset.f||!S.ioa[i])return;S.ioa[i][el.dataset.f]=el.value;computeIOA();});
   document.getElementById('ioaTbl').addEventListener('change',e=>{const el=e.target,i=+el.dataset.i;if(isNaN(i)||!el.dataset.f||!S.ioa[i])return;S.ioa[i][el.dataset.f]=el.value;computeIOA();});
   document.getElementById('ioaTbl').addEventListener('click',e=>{const b=e.target.closest('[data-ioadel]');if(!b)return;S.ioa.splice(+b.dataset.ioadel,1);renderIOA();});}
+/* v22.79 (review I69, F137, I68, I67) the session record under each design's table: one row a session, by the session's number
+   (# in that table): the time, the pre-session access (what the student had, and when), the brief MSWO's top item, the
+   implementer, the schedule the session ran (single operant), the fidelity % and how it ended. The runner writes the row when it
+   saves a session (into a row already started for that session, empty boxes only, and how it ended). Under each table, by
+   condition: the sessions with an agreement check (the Summary's table), the fidelity scored, and the sessions the student
+   withdrew from, counted apart from problem behavior. */
+const REC_END=['','Completed','Ended early','Stop rule (no response)','Session cap','Student withdrew'];
+const recBlank=v=>({sheet:v,sess:'',time:'',pre:'',mswo:'',who:'',fr:'',fid:'',end:''});
+function renderRec(){if(!Array.isArray(S.rec))S.rec=[];['so','co','pr'].forEach(v=>{const t=document.getElementById('recTbl-'+v);if(!t)return;
+  const rows=S.rec.map((x,i)=>({x,i})).filter(o=>o.x.sheet===v),fr=v==='so',box=document.getElementById('recBox-'+v);if(box){box.classList.toggle('rec-empty',!rows.length);box.classList.toggle('noprint',!rows.length);}   /* empty: the label and the button only, never printed or copied into the walkthrough */
+  const inp=(i,f,val,ph,num)=>'<input type="'+(num?'number':'text')+'"'+(num?' min="'+(f==='fr'?1:0)+'" max="100" step="1"':'')+' data-ri="'+i+'" data-rf="'+f+'" value="'+esc(val||'')+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'>';
+  t.innerHTML='<thead><tr><th class="c rec-s">Session</th><th class="c rec-t">Time</th><th class="c rec-pre">Pre-session access</th><th class="c rec-ms">Brief MSWO top</th><th class="c rec-who">Implementer</th>'+(fr?'<th class="c rec-fr" title="The schedule the session ran: FR 1 when blank">Schedule (FR)</th>':'')+'<th class="c rec-fid">Fidelity %</th><th class="c rec-end">Ended</th><th class="c rec-x"></th></tr></thead><tbody>'+
+    rows.map(({x,i})=>'<tr><td class="c">'+inp(i,'sess',x.sess,'#',1)+'</td><td class="c">'+inp(i,'time',x.time,'9:30')+'</td><td>'+inp(i,'pre',x.pre,'what, and when')+'</td><td>'+inp(i,'mswo',x.mswo)+'</td><td>'+inp(i,'who',x.who)+'</td>'+
+      (fr?'<td class="c">'+inp(i,'fr',x.fr,'1',1)+'</td>':'')+'<td class="c">'+inp(i,'fid',x.fid,'',1)+'</td><td class="c"><select data-ri="'+i+'" data-rf="end">'+REC_END.map(o=>'<option'+(o===x.end?' selected':'')+'>'+o+'</option>').join('')+'</select></td>'+
+      '<td class="c rec-x"><button type="button" class="tool noprint" data-recdel="'+i+'" aria-label="Remove this session record">&times;</button></td></tr>').join('')+'</tbody>';});
+  computeRec();}
+const recOf=v=>(S.rec||[]).filter(x=>x.sheet===v&&parseInt(x.sess,10)>0);
+const recCond=(v,k)=>{const r=v==='so'?S.so:v==='pr'?S.pr:null,row=r&&r[k-1];return row&&row.cond!==''?row.cond:null;};
+/* the schedule a single-operant session ran: its record's FR, else FR 1 */
+const soFR=k=>{const x=(S.rec||[]).find(r=>r.sheet==='so'&&parseInt(r.sess,10)===k+1&&parseInt(r.fr,10)>0);return x?parseInt(x.fr,10):1;};
+const RA_DES={so:'Single operant',co:'Concurrent operants',pr:'Progressive ratio'};
+function recLines(v){const R=recOf(v),io=(S.ioa||[]).filter(x=>x&&x.sheet===v&&parseInt(x.sess,10)>0);
+  const by=list=>{if(v==='co')return '';const m=new Map();list.forEach(x=>{const c=recCond(v,parseInt(x.sess,10));if(c==null)return;const k=condLabel(c);m.set(k,(m.get(k)||0)+1);});return [...m].map(([k,n])=>k+' '+n).join(', ');};
+  const nS=v==='so'?soRows().filter(r=>r.rate!=null).length:v==='pr'?prRows().filter(r=>r.cond!==''&&r.scored).length:S.co.filter(s=>(s.r||[]).some(x=>x!=='')).length;
+  const fid=R.filter(x=>x.fid!==''&&isFinite(+x.fid)).map(x=>+x.fid),wd=R.filter(x=>x.end==='Student withdrew'),L=[];
+  if(nS)L.push('Agreement checks: '+(io.length?io.length+' of '+nS+' sessions'+(by(io)?' ('+by(io)+')':''):'none yet (the Summary\u2019s agreement check)')+'.');
+  if(fid.length)L.push('Fidelity scored on '+fid.length+' session'+(fid.length===1?'':'s')+', mean '+Math.round(mean(fid))+'%'+(Math.min(...fid)<80?', lowest '+Math.round(Math.min(...fid))+'%':'')+'.');
+  if(wd.length)L.push('The student withdrew from '+wd.length+' session'+(wd.length===1?'':'s')+(by(wd)?' ('+by(wd)+')':'')+', counted apart from problem behavior: review assent with the team (Form SI-1) before more sessions.');
+  return L;}
+function computeRec(){['so','co','pr'].forEach(v=>{const o=document.getElementById('recOut-'+v);if(o)o.textContent=recLines(v).join(' ');});
+  const sm=document.getElementById('recSum');if(sm)sm.textContent=['so','co','pr'].map(v=>{const L=recLines(v);return L.length?RA_DES[v]+': '+L.join(' '):'';}).filter(Boolean).join(' ');}
+['input','change'].forEach(t=>document.addEventListener(t,e=>{const el=e.target;if(!el||!el.dataset||el.dataset.ri==null||!el.dataset.rf)return;const x=(S.rec||[])[+el.dataset.ri];if(!x)return;
+  x[el.dataset.rf]=el.value;if(el.dataset.rf==='fr'||el.dataset.rf==='sess'){computeSO();renderSummary();}else computeRec();}));
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;const a=t.closest('[data-recadd]'),d=t.closest('[data-recdel]');
+  if(a){S.rec.push(recBlank(a.dataset.recadd));renderRec();const f=document.querySelector('#recTbl-'+a.dataset.recadd+' tbody tr:last-child input');if(f){f.dispatchEvent(new Event('input',{bubbles:true}));f.focus();}}
+  else if(d){S.rec.splice(+d.dataset.recdel,1);renderRec();computeSO();renderSummary();}});
+/* the runner, after it saves a session: {sheet, sess, time, fr, end}; the implementer is the assessor on Setup when empty */
+window.raRecAdd=function(o){if(!o||!['so','co','pr'].includes(o.sheet))return;if(!Array.isArray(S.rec))S.rec=[];
+  let x=S.rec.find(r=>r.sheet===o.sheet&&String(r.sess)===String(o.sess));if(!x){x=recBlank(o.sheet);S.rec.push(x);}
+  const w=Object.assign({who:raT(S.meta.assessor)},o);Object.keys(w).forEach(k=>{if(k in x&&w[k]!=null&&w[k]!==''&&(k==='end'||!String(x[k]||'').trim()))x[k]=String(w[k]);});
+  renderRec();computeSO();renderSummary();};
+window.raPlanRatio=()=>planRatio();
+/* v22.79 (review I68) the assent plan from Form SI-1 (the case's student part): its status and how the student says or shows
+   stop, shown in each runner; Student withdrew ends a session at once */
+window.raAssentPaint=function(){const a=window.__raAssent||{};['so','co','pr'].forEach(v=>{const n=document.getElementById('ra-run-'+v+'-assent');if(!n)return;
+  if(!a.status&&!a.signs){n.hidden=true;n.innerHTML='';return;}
+  n.hidden=false;n.innerHTML='<b>Assent (Form SI-1):</b> '+(a.status?esc(a.status):'not recorded')+(a.signs?'. Stop signals: '+esc(a.signs)+'. When you see one, press Student withdrew: the session ends at once, and it is counted apart from problem behavior.':'.')+(a.refused?' <b>The student refused: do not run a session; review assent with the team first.</b>':'');});};
 function renderCO(){
   const opts=coOptList();
   let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c" title="Baseline: no consequence at any station">Condition</th><th class="c">Option A position</th>${opts.map((o,j)=>`<th class="c">${esc(o.label)}<br><span class="sub2">responses</span></th>`).join('')}<th class="c">Total</th>${opts.map(o=>`<th class="c">% ${esc(o.label)}</th>`).join('')}<th class="c">PB</th></tr></thead><tbody>`;
@@ -2920,8 +3023,9 @@ function prStats(){
   const plan=planRatio();
   const conds=[{key:'ctl',label:'Control',rows:ctl}].concat(S.stim.map((_,i)=>({key:String(i),label:name(i),rows:rows.filter(r=>String(r.cond)===String(i))})));
   const st=conds.map(c=>{const b=c.rows.map(r=>r.bp);const m=mean(b);let pot='';
+    /* v22.79 (review F132): a single break point is unstable, so no potency until the control and the stimulus each have 2 sessions */
     if(c.key!=='ctl'&&m!=null&&cm!=null){const idxM=lad.findIndex(v=>v>=m),idxC=lad.findIndex(v=>v>=cm);const stepsAbove=(idxM<0?lad.length:idxM)-(idxC<0?lad.length:idxC);
-      if(stepsAbove>=3&&(plan==null||m>plan))pot='high';else if(m>cm&&stepsAbove>=1)pot='moderate';else pot='low';}
+      if(c.rows.length<2||ctl.length<2)pot='few';else if(stepsAbove>=3&&(plan==null||m>plan))pot='high';else if(m>cm&&stepsAbove>=1)pot='moderate';else pot='low';}
     const tm=c.rows.filter(r=>r.min!=null&&r.min>0&&r.all!=null),mins=c.rows.filter(r=>r.min!=null).map(r=>r.min);
     return {key:c.key,label:c.label,n:b.length,mean:m,med:median(b),min:b.length?Math.min(...b):null,max:b.length?Math.max(...b):null,resp:mean(c.rows.map(r=>r.resp)),reinf:mean(c.rows.map(r=>r.reinf)),pb:c.rows.filter(r=>r.pb).length,pot,rows:c.rows,
       mmin:mins.length?mean(mins):null,rate:tm.length?tm.reduce((a,r)=>a+r.all,0)/tm.reduce((a,r)=>a+r.min,0):null};});
@@ -2931,7 +3035,7 @@ function computePR(){
   prRows().forEach(r=>{const on=r.cond!==''&&r.scored;$('#prB'+r.k).innerHTML=on?esc(r.bp):'';$('#prN'+r.k).innerHTML=on?esc(r.resp):'';$('#prK'+r.k).innerHTML=on?r.reinf:'';});
   const {st,rows}=prStats();
   $('#prReadout').textContent=rows.length?`${rows.length} sessions scored; ${st[0].n} control.`:'No sessions scored yet.';
-  const tagP=p=>p==='high'?'<span class="tag ok">High</span>':p==='moderate'?'<span class="tag mid">Moderate</span>':p==='low'?'<span class="tag no">Low</span>':'';
+  const tagP=p=>p==='high'?'<span class="tag ok">High</span>':p==='moderate'?'<span class="tag mid">Moderate</span>':p==='low'?'<span class="tag no">Low</span>':p==='few'?'<span class="tag na">Too few sessions</span>':'';
   const ranked=st.slice().sort((a,b)=>(b.mean??-1)-(a.mean??-1));
   $('#prRank tbody').innerHTML=ranked.map((s,r)=>`<tr><td class="n">${s.n?r+1:''}</td><td>${esc(s.label)}</td><td class="n">${s.n||''}</td><td class="n">${f1(s.mean)}</td><td class="n">${s.n?s.min+'&ndash;'+s.max:'&mdash;'}</td><td class="n">${f1(s.med)}</td><td class="n">${f1(s.resp)}</td><td class="n">${f1(s.reinf)}</td><td class="n">${f1(s.mmin)}</td><td class="n">${f1(s.rate)}</td><td class="n">${s.pb||''}</td><td>${tagP(s.pot)}</td></tr>`).join('');
   plotPR(st);plotCum(st);return st;
@@ -2965,27 +3069,39 @@ function plotCum(st){const box=$('#prCum');if(!box)return;const C=['#24313C','#2
   box.innerHTML=g;}
 
 /* ---------- summary ---------- */
+/* v22.79 (review F130 to F133) the reinforcer verdict, one rule for the Summary and the case, in this order: Untested; Conflicting
+   when one design gives its negative label (SO None, PR Low) and another its positive one (SO Clear, PR High, CO Preferred);
+   Confirmed (SO Clear, PR High, or SO Probable with PR Moderate: Moderate alone never confirms, plan ratio or not); Relative
+   only; Probable; Not supported; Untested (a design with too few sessions has no label) */
+function raVerdict(i,so,co,pr){const a=so.stim[i]||{verdict:''},c=co.st.find(x=>x.key===String(i)),p=pr.st.find(x=>x.key===String(i));
+  const tested=(a.verdict!=='')||(c&&c.stand!=='')||(p&&p.pot!=='');if(!tested)return 'Untested';
+  const neg=a.verdict==='none'||(p&&p.pot==='low'),pos=a.verdict==='clear'||(p&&p.pot==='high')||(c&&c.stand==='preferred');
+  if(neg&&pos)return 'Conflicting';
+  if(a.verdict==='clear'||(p&&p.pot==='high')||(a.verdict==='probable'&&p&&p.pot==='moderate'))return 'Confirmed';
+  if(c&&(c.stand==='preferred'||c.stand==='comparable')&&a.verdict!=='none'&&(!p||p.pot!=='low'))return 'Relative only';
+  if(a.verdict==='probable'||(p&&p.pot==='moderate'))return 'Probable';
+  if(a.verdict==='none'||(p&&p.pot==='low'))return 'Not supported';
+  return 'Untested';}
+const RA_VTAG={Confirmed:'ok','Relative only':'mid',Probable:'mid','Not supported':'no',Conflicting:'no',Untested:'na'};
 function renderSummary(){
   const so=soStats(),co=S.meta.coMode==='coa'?coaSumStats():coStats(),pr=prStats();
-  const tagV=v=>v==='clear'?'<span class="tag ok">Clear</span>':v==='probable'?'<span class="tag mid">Probable</span>':v==='none'?'<span class="tag no">None</span>':'&mdash;';
+  const tagV=v=>v==='clear'?'<span class="tag ok">Clear</span>':v==='probable'?'<span class="tag mid">Probable</span>':v==='none'?'<span class="tag no">None</span>':v==='few'?'<span class="tag na">Too few</span>':'&mdash;';
   const tagS=s=>s==='preferred'?'<span class="tag ok">Preferred</span>':s==='comparable'?'<span class="tag mid">Comparable</span>':s==='notchosen'?'<span class="tag no">Not chosen</span>':s==='lower'?'<span class="tag na">Lower</span>':'&mdash;';
-  const tagP=p=>p==='high'?'<span class="tag ok">High</span>':p==='moderate'?'<span class="tag mid">Moderate</span>':p==='low'?'<span class="tag no">Low</span>':'&mdash;';
+  const tagP=p=>p==='high'?'<span class="tag ok">High</span>':p==='moderate'?'<span class="tag mid">Moderate</span>':p==='low'?'<span class="tag no">Low</span>':p==='few'?'<span class="tag na">Too few</span>':'&mdash;';
+  const notes=[],plan=planRatio();
   $('#sumTbl tbody').innerHTML=S.stim.map((s,i)=>{const a=so.stim[i];const c=co.st.find(x=>x.key===String(i));const p=pr.st.find(x=>x.key===String(i));
-    const plan=planRatio();
-    let v;const soOK=a.verdict==='clear',prOK=p&&p.pot&&(p.pot==='high'||(p.pot==='moderate'&&plan==null));
-    const tested=(a.verdict!=='')||(c&&c.stand!=='')||(p&&p.pot!=='');
-    if(!tested)v='<span class="tag na">Untested</span>';
-    else if(soOK||prOK||(a.verdict==='probable'&&p&&p.pot==='moderate'))v='<span class="tag ok">Confirmed</span>';
-    else if(c&&(c.stand==='preferred'||c.stand==='comparable')&&a.verdict!=='none'&&(!p||p.pot!=='low'))v='<span class="tag mid">Relative only</span>';
-    else if(a.verdict==='probable'||(p&&p.pot==='moderate'))v='<span class="tag mid">Probable</span>';
-    else if(a.verdict==='none'||(p&&p.pot==='low'))v='<span class="tag no">Not supported</span>';
-    else v='<span class="tag na">Untested</span>';
-    return `<tr><td>${esc(name(i))}</td><td class="n">${esc(s.pa)||'&mdash;'}</td><td class="n">${a.ratio==null?'&mdash;':a.ratio===Infinity?'&infin;':a.ratio.toFixed(2)}</td><td class="n">${tagV(a.verdict)}</td><td class="n">${c&&c.mean!=null?Math.round(c.mean)+'%':'&mdash;'}</td><td class="n">${c?(c.coaTag||tagS(c.stand)):'&mdash;'}</td><td class="n">${p?f1(p.mean):'&mdash;'}</td><td class="n">${p?tagP(p.pot):'&mdash;'}</td><td>${v}</td></tr>`;}).join('');
+    const vw=raVerdict(i,so,co,pr),v='<span class="tag '+RA_VTAG[vw]+'">'+vw+'</span>';
+    if(vw==='Conflicting')notes.push('<b>'+esc(name(i))+': Conflicting.</b> '+[a.verdict==='none'?'single operant None':a.verdict==='clear'?'single operant Clear':'',p&&p.pot==='low'?'progressive ratio Low':p&&p.pot==='high'?'progressive ratio High':'',c&&c.stand==='preferred'?'concurrent operants Preferred':''].filter(Boolean).join(', ')+'. One design says it reinforces and another that it does not: resolve it under Reinforcer(s) selected and why (more sessions, or the plan\u2019s own schedule) before it goes into the plan.');
+    /* v22.79 (review I67): a Confirmed stimulus never tested at or above the plan ratio */
+    if(vw==='Confirmed'&&plan!=null&&!((a.frHi||0)>=plan&&a.verdict==='clear')&&!(p&&p.pot==='high'))notes.push('<b>'+esc(name(i))+'</b>: Confirmed at FR '+(a.frHi||1)+'; the plan ratio is FR '+plan+' and no session tested it there. Test it at the plan ratio (the single-operant runner\u2019s Test at the plan ratio) or in the progressive ratio before the plan relies on it.');
+    if(vw==='Confirmed'&&plan==null&&p&&p.pot==='high'&&a.verdict!=='clear')notes.push('<b>'+esc(name(i))+'</b>: High potency against the control only, since no plan ratio is entered above.');
+    return `<tr><td>${esc(name(i))}</td><td class="n">${esc(s.pa)||'&mdash;'}</td><td class="n">${a.ratio==null?'&mdash;':raRatioTxt(a)}</td><td class="n">${tagV(a.verdict)}${raSchedTxt(a)}</td><td class="n">${c&&c.mean!=null?Math.round(c.mean)+'%':'&mdash;'}</td><td class="n">${c?(c.coaTag||tagS(c.stand)):'&mdash;'}</td><td class="n">${p?f1(p.mean):'&mdash;'}</td><td class="n">${p?tagP(p.pot):'&mdash;'}</td><td>${v}</td></tr>`;}).join('');
+  {const n=$('#sumNote');if(n){n.hidden=!notes.length;n.innerHTML=notes.join(' ');}}   /* v22.79 (review F132, F133) */
   renderSumCoa();
 }
 
 function computeAll(){computeSO();computeCO();computePR();renderSummary();}
-function renderAll(){ensure();syncToolbar();renderStim();renderSO();renderCO();renderCOA();renderPR();renderIOA();renderSummary();bindMeta();$('#coOpts').value=S.meta.coOpts||'2';applyCoMode();}
+function renderAll(){ensure();syncToolbar();renderStim();renderSO();renderCO();renderCOA();renderPR();renderIOA();renderRec();renderSummary();bindMeta();$('#coOpts').value=S.meta.coOpts||'2';applyCoMode();}
 bindNum('nStim','n',()=>{renderStim();renderSO();renderCO();renderCOA();renderPR();renderSummary();});
 bindNum('sessMin','sessMin',()=>{renderSO();computeCOA();});
 bindNum('nSess','nSess',renderSO);
@@ -3029,7 +3145,7 @@ async function loadSim(){
     materials:'Tray of 50 blocks, bin 20 cm to the right; for concurrent operants, two identical bins 40 cm apart',
     magnitude:'20 s access delivered within 2 s of the response; edible: one piece',
     control:'Same materials, responses produce nothing; assessor present and neutral',
-    mo:'No access to tested items for 3 h before the session; sessions at 9:30 daily; never within 30 min of snack',
+    mo:'No tablet or fruit chews for 3 h before the session; praise as usual through the day, none from the assessor in the 5 min before; sessions at 9:30 daily; never within 30 min of snack',   /* v22.79 (review F136) */
     signal:'Colored placemat per condition; the item is shown once before the session starts',
     d_so:true, d_co:true, d_pr:true,
     prcap:'20',
@@ -3298,7 +3414,7 @@ function exampleState(){const X=blank();X.n=3;X.sessMin=5;X.nSess=16;X.nCoSess=1
     response:'Places one block in the bin from the tray; counted when the block lands in the bin',
     materials:'Tray of 50 blocks, bin 20 cm to the right; for concurrent operants, three identical bins 40 cm apart',
     magnitude:'20 s access delivered within 2 s of the response; edible: one piece',control:'Same materials, responses produce nothing; assessor present and neutral',
-    mo:'No access to tested items for 3 h before the session; sessions at 9:30 daily; never within 30 min of snack',signal:'Colored placemat per condition; the item is shown once before the session starts',
+    mo:'No tablet or fruit chews for 3 h before the session; praise as usual through the day, none from the assessor in the 5 min before; sessions at 9:30 daily; never within 30 min of snack',signal:'Colored placemat per condition; the item is shown once before the session starts',
     d_so:true,d_co:true,d_pr:true,prcap:'20',pbdef:'Any forceful contact with an adult or the materials, or leaving the table for more than 10 s',stoprule:'End the session at the first instance of aggression; record the session as terminated',
     soDesign:'Multielement',coOpts:'3',planRatio:'5',coMode:'st',ioa:'Second observer on 33% of sessions across all three conditions; mean 96% on responses per session',
     recs:'Tablet access is the reinforcer of record for independent work. Fruit chew is a usable back-up. Praise alone did not function as a reinforcer.',schedule:'FR 5 with 20-s tablet access; break points of 15–17 support thinning to FR 8 over two weeks'};
@@ -3651,7 +3767,7 @@ function compose(D){
     const tf=Math.max(tc+.5,K.t+K.d-4);camTo(tf,tf+1.2,pad(uni([wrel(prRank),wrel(prFig)]),12));return K.d;};
   /* ---- at the table ---- */
   SC.rules=K=>{const t=K.t;panelShow(t,false);veil(t,K.t+K.d+.2,.88);
-    const tips=[['Deliver immediately','a fixed magnitude, no added praise'],['A no-consequence control','the same materials, the assessor neutral'],['Restrict access before','a few hours; record any access there was'],['Problem behavior every session','and the stop rule'],['A second observer','about one session in three, when the result goes into a plan']];
+    const tips=[['Deliver immediately','a fixed magnitude, no added praise'],['A no-consequence control','the same materials, the assessor neutral'],['Restrict access before','items a few hours, praise a few minutes'],['Problem behavior every session','and the stop rule'],['A second observer','about one session in three, when the result goes into a plan']];
     const c=card('smw-tips raw-tips','<h3>For every design</h3>'+tips.map((x,i)=>'<div class="tp" data-i="'+i+'"><b>'+(i+1)+'</b><p><strong>'+esc(x[0])+'</strong> '+esc(x[1])+'</p></div>').join(''),{x:180,y:28,w:920},t+.3,K.t+K.d+.2);
     const rs=[...c.el.querySelectorAll('.tp')].map(e=>sub(e,{o:.35,h:0}));const at=[['Deliver the stimulus',.1],['no-consequence control',.36],['Restrict access',.5],['Record problem behavior',.72],['second observer',.84]].map((a,i)=>Math.max(t+.9+i*.5,K.at(a[0],a[1])-.2));
     rs.forEach((fx,i)=>{fx.tr.move(at[i],at[i]+.35,{o:1,h:1});fx.tr.move((at[i+1]||K.t+K.d)-.05,(at[i+1]||K.t+K.d)+.3,{h:0});});return K.d+.3;};
@@ -3995,21 +4111,21 @@ window.raFoodLimit=function(label){const ed=raFoodEd();if(!ed||ed.dec!=='yes'||!
   return {filled:((r&&r.filled)||0)+n,note:((r&&r.note&&!r.generic)?r.note+'; ':'')+'the food-item decision and allergies, into Setup'};};}
 document.addEventListener('input',raFoodPaint);document.addEventListener('change',raFoodPaint);
 {const ra=renderAll;renderAll=function(){const x=ra.apply(this,arguments);raFoodPaint();return x;};}
+/* v22.79 (review I68) in: the student's assent plan (Form SI-1): its status and stop signals, for the runners */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was.apply(this,arguments);
+  try{const st=(f&&f.student)||{},sg=st.stop&&raT(st.stop.signs);window.__raAssent={status:raT(st.assent),signs:sg||'',refused:/refus/i.test(raT(st.assent))};window.raAssentPaint();}catch(e){}
+  return r;};}
 /* v22.54 (review F419, Form TE-1) out: each stimulus's reinforcer verdict as the Summary sheet works it out (the same rule,
    in the same order: Confirmed, Relative only, Probable, Not supported, Untested), with its mean progressive-ratio break
    point, for Form TE-1's RA-1 column (filled in empty cells only, in RA-1's own words) - key reinf: {items:[{name,
    verdict, bp}], plan}. Nothing is sent while no stimulus is named. */
 window.__nbhFactsOut=function(){try{
   const so=soStats(),co=S.meta.coMode==='coa'?coaSumStats():coStats(),pr=prStats(),plan=planRatio();
-  const items=S.stim.map((s,i)=>{if(!s||!raT(s.name))return null;const a=so.stim[i]||{verdict:''},c=co.st.find(x=>x.key===String(i)),p=pr.st.find(x=>x.key===String(i));
-    const tested=(a.verdict!=='')||(c&&c.stand!=='')||(p&&p.pot!=='');let v;
-    if(!tested)v='Untested';
-    else if(a.verdict==='clear'||(p&&p.pot&&(p.pot==='high'||(p.pot==='moderate'&&plan==null)))||(a.verdict==='probable'&&p&&p.pot==='moderate'))v='Confirmed';
-    else if(c&&(c.stand==='preferred'||c.stand==='comparable')&&a.verdict!=='none'&&(!p||p.pot!=='low'))v='Relative only';
-    else if(a.verdict==='probable'||(p&&p.pot==='moderate'))v='Probable';
-    else if(a.verdict==='none'||(p&&p.pot==='low'))v='Not supported';
-    else v='Untested';
-    const o={name:raT(s.name),verdict:v};if(p&&p.mean!=null&&isFinite(p.mean))o.bp=Math.round(p.mean*10)/10;return o;}).filter(Boolean);
+  const items=S.stim.map((s,i)=>{if(!s||!raT(s.name))return null;const p=pr.st.find(x=>x.key===String(i));
+    const v=raVerdict(i,so,co,pr);   /* v22.79 (review F130 to F133): the Summary's own rule */
+    const o={name:raT(s.name),verdict:v};if(p&&p.mean!=null&&isFinite(p.mean))o.bp=Math.round(p.mean*10)/10;
+    {const a=so.stim[i];if(a&&a.n)o.fr=a.frHi;}   /* v22.79 (review I67): the highest single-operant schedule it was tested at */
+    return o;}).filter(Boolean);
   if(!items.length)return null;const r={items};if(plan!=null)r.plan=plan;if(raT(S.meta.date))r.date=raT(S.meta.date);return {reinf:r};
 }catch(e){return null;}};
 })();
@@ -4264,8 +4380,8 @@ window.__nbhFactsOut=function(){try{
     stopLoops();cue('end',why==='ended'?null:'end@'+at);unsched();wakeOff();
     lock(R);summary(R);calm(R,$(R,'sum'));
     if(R.v==='pr'){renderLadder(R,true);const bp=R.idx?ratioAt(R,R.idx-1):0,b=bp?'Break point FR '+bp+'.':'No ratio completed: break point 0.';
-      note(R,(why==='stop'?'No response for '+R.cfg.stop+' s: the session is over. ':why==='cap'?'Session cap ('+R.cfg.cap+' min) reached. ':'Session ended at '+up(at)+'. ')+b+' Check the summary, then Save to the sheet.');}
-    else note(R,(why==='ended'?'Session ended at '+up(at)+'.':'Session over.')+' Check the summary, then Save to the sheet.');
+      note(R,(why==='stop'?'No response for '+R.cfg.stop+' s: the session is over. ':why==='cap'?'Session cap ('+R.cfg.cap+' min) reached. ':why==='withdrew'?'The student withdrew at '+up(at)+': the session ended at once. ':'Session ended at '+up(at)+'. ')+b+' Check the summary, then Save to the sheet.');}
+    else note(R,(why==='ended'?'Session ended at '+up(at)+'.':why==='withdrew'?'The student withdrew at '+up(at)+': the session ended at once, and it is counted apart from problem behavior.':'Session over.')+' Check the summary, then Save to the sheet.');
     paintAll();}
   /* a button that has just been disabled drops the focus; hand it to something safe in the runner,
      never to a field on the sheet, and never away from a field the user is typing in elsewhere */
@@ -4352,8 +4468,10 @@ window.__nbhFactsOut=function(){try{
     const durTxt=c.clock==='run'?'counted, not toward the schedule':'materials away: recorded apart, not counted';
     if(R.v==='so'){
       rows.push(['Condition',c.ctl?'Control (no consequence)':c.label+', FR '+c.fr+(c.eat?', access until consumed':c.accMs?', '+secTxt(c.accMs)+' of access':'')]);
-      rows.push(['Time run',up(r.run)+(R.why==='ended'?' (ended early)':'')+clockTxt],['Responses',String(r.n)]);
+      rows.push(['Time run',up(r.run)+(R.why==='ended'?' (ended early)':R.why==='withdrew'?' (the student withdrew)':'')+clockTxt],['Responses',String(r.n)]);
       rows.push(['Minutes on the sheet',r.min+(c.clock==='run'?' (minutes run)':' (minutes the response was available)')],['Rate',r1(r.rate)+' per minute']);
+      /* v22.79 (review F129): with the clock running through access, the stimulus's rate is capped by the access time */
+      if(c.clock==='run'&&!c.ctl&&r.accMs)rows.push(['Caution','The clock ran through '+up(r.accMs)+' of access, so this rate is capped by the access time and reads low against the control. Compare conditions with the clock paused (the default).']);
       if(!c.ctl)rows.push(['Reinforcers',String(r.sr)]);
       if(r.accMs)rows.push(['Access time',up(r.accMs)]);
       if(r.during)rows.push(['Responses during access',r.during+' ('+durTxt+')']);
@@ -4363,12 +4481,12 @@ window.__nbhFactsOut=function(){try{
     else if(R.v==='co'){
       rows.push(['Condition',c.bl?'Baseline (no consequence at any station)':'Reinforcement'],['Option A position',c.pos||'Not recorded']);
       c.opts.forEach((o,j)=>rows.push([o.label,r.cnt[j]+' ('+Math.round(r.pct[j])+'%)'+(o.ctl?'':', '+plural(r.srs[j],'reinforcer'))]));
-      rows.push(['Total responses',String(r.tot)],['Changeovers',r.chg+' (for reference; the sheet has no column for them)'],['Time run',up(r.run)+(R.why==='ended'?' (ended early)':'')+clockTxt]);
+      rows.push(['Total responses',String(r.tot)],['Changeovers',r.chg+' (for reference; the sheet has no column for them)'],['Time run',up(r.run)+(R.why==='ended'?' (ended early)':R.why==='withdrew'?' (the student withdrew)':'')+clockTxt]);
       if(r.during)rows.push(['Responses during access',r.during+' ('+durTxt+')']);
       rows.push(['Problem behavior',pbTxt],['Goes to',to]);}
     else{
       rows.push(['Condition',c.ctl?'Control (same progression, no consequence)':c.label+(c.eat?', access until consumed':c.accMs?', '+secTxt(c.accMs)+' of access':'')]);
-      rows.push(['Ended',(r.why==='stop'?'No response for '+c.stop+' s':r.why==='cap'?'Session cap ('+c.cap+' min) reached':'Ended by the assessor')+' at '+up(r.run)+clockTxt]);
+      rows.push(['Ended',(r.why==='stop'?'No response for '+c.stop+' s':r.why==='cap'?'Session cap ('+c.cap+' min) reached':r.why==='withdrew'?'The student withdrew':'Ended by the assessor')+' at '+up(r.run)+clockTxt]);
       rows.push(['Break point',r.bp?'FR '+r.bp+' (last completed ratio)':'0 (FR '+ratioAt(R,0)+' not completed)']);
       rows.push(['Ratios completed',r.done+' (the sheet\u2019s Ratios completed column)'],['Responses in completed ratios',r.resp+' (as the sheet counts responses)']);
       rows.push(['Ratio in progress','FR '+r.cur+': '+r.prog+' of '+r.cur]);
@@ -4406,6 +4524,9 @@ window.__nbhFactsOut=function(){try{
     return{k,extra};}
   function save(R){if(R.state!=='done'||!R.cfg)return;
     const res=R.v==='so'?saveSO(R):R.v==='co'?saveCO(R):savePR(R);if(res===-1||!res)return;
+    /* v22.79 (review I69, I68, I67) the session record: the time it started, the schedule (single operant) and how it ended */
+    try{const d=R.date||new Date(),c=R.cfg||{},END={ended:'Ended early',withdrew:'Student withdrew',stop:'Stop rule (no response)',cap:'Session cap'};
+      if(window.raRecAdd)window.raRecAdd({sheet:R.v,sess:String(res.k+1),time:d.getHours()+':'+pad(d.getMinutes()),fr:R.v==='so'&&!c.ctl?String(c.fr||1):'',end:END[R.why]||'Completed'});}catch(e){}
     fresh(R);$(R,'sum').hidden=true;sync(R,true);
     let nx='';if(R.tk>=0)nx=' Next: session '+(R.tk+1)+(R.v!=='co'?', '+condLabel($(R,'cond').value):'')+'.';
     note(R,'Saved as session '+(res.k+1)+'.'+res.extra+nx);paintAll();calm(R,$(R,'start'));}
@@ -4420,7 +4541,10 @@ window.__nbhFactsOut=function(){try{
     const c=$(R,'cond').value,ctl=c==='ctl';
     if(!R.accEdited){const a=ctl?{sec:0,src:''}:accessFor(+c);$(R,'acc').value=String(a.sec);R.accSrc=a.src;}
     setText($(R,'accsrc'),ctl?'Control: no consequence':R.accEdited?'Set here for this session':R.accSrc);
-    if(R.v==='so'){const f=Math.round(num($(R,'fr'),1));setText($(R,'frsrc'),ctl?'Control: no consequence':f<=1?'Every response: FR 1':'Every '+ordinal(f)+' response');}
+    if(R.v==='so'){const f=Math.round(num($(R,'fr'),1)),pl=window.raPlanRatio?window.raPlanRatio():null,pb=$(R,'planfr');
+      setText($(R,'frsrc'),ctl?'Control: no consequence':(f<=1?'Every response: FR 1':'Every '+ordinal(f)+' response')+(pl&&f===Math.round(pl)?', the plan ratio':''));
+      /* v22.79 (review I67) test at the plan schedule: the plan ratio typed on the Summary, one tap away */
+      if(pb){const on=!ctl&&!!pl&&f!==Math.round(pl)&&R.state==='ready';if(pb.hidden===on)pb.hidden=!on;setText(pb,pl?'Test at the plan ratio (FR '+Math.round(pl)+')':'Test at the plan ratio');}}
     lock(R);}
   function syncCO(R,choose){
     const opts=coOpts(),sig=opts.map(o=>o.key+'\u0001'+o.label).join('\u0002');
@@ -4512,7 +4636,7 @@ window.__nbhFactsOut=function(){try{
     else{const dur=c?c.dur:sessMs(),ea=paused(R)?e-accIn(R,e):e,left=dur-Math.min(ea,dur);
       setText($(R,'left'),down(left));setText($(R,'el'),'· '+up(e)+' elapsed'+(paused(R)&&R.accUntil&&st==='run'?' (clock waiting)':''));
       width($(R,'bar'),(st==='ready'?0:Math.min(100,100*ea/dur)).toFixed(1)+'%');}
-    setText($(R,'state'),{ready:'Ready',run:'Running',pause:'Paused',done:R.why==='ended'?'Ended':'Done'}[st]);
+    setText($(R,'state'),{ready:'Ready',run:'Running',pause:'Paused',done:R.why==='ended'?'Ended':R.why==='withdrew'?'Student withdrew':'Done'}[st]);
     const cu=cueFor(R,e),box=$(R,'cue');setText($(R,'cueh'),cu[0]);setText($(R,'cuet'),cu[1]);
     box.classList.toggle('ra-run-now',cu[2]==='now'||(st==='run'&&now()-R.hot<900));
     if(R.v==='co'){(c?c.opts:[]).forEach((o,j)=>setText(byId('ra-run-co-n'+j),String(R.cnt[j]||0)));
@@ -4524,7 +4648,7 @@ window.__nbhFactsOut=function(){try{
     dis($(R,'pb'),!run);dis($(R,'undo'),!run||!R.undo.length);
     setText($(R,'start'),st==='run'?'Pause':st==='pause'?'Resume':'Start session');
     dis($(R,'start'),st==='done'||(st==='ready'&&other));
-    dis($(R,'end'),!run);dis($(R,'save'),st!=='done');dis($(R,'discard'),st==='ready');
+    dis($(R,'end'),!run);dis($(R,'wd'),!run);dis($(R,'save'),st!=='done');dis($(R,'discard'),st==='ready');   /* v22.79 (review I68) Student withdrew */
     const fresh=R.msg&&(now()-R.msgAt<8000||st==='done'),m=$(R,'msg'),t=fresh?R.msg:'';setText(m,t);m.classList.toggle('ra-run-warn',!!(fresh&&R.warn));
     if(R.v==='pr'&&R.state!=='ready')renderLadder(R);}
   function paintToggles(box){qa('.ra-run-tog',box).forEach(b=>{const k=b.dataset.ra,on=!!PR[k];
@@ -4552,7 +4676,10 @@ window.__nbhFactsOut=function(){try{
   /* ---------- wiring ---------- */
   VIEWS.forEach(v=>{const R=RS[v];
     $(R,'start').addEventListener('click',()=>startPause(R));
+    if($(R,'planfr'))$(R,'planfr').addEventListener('click',()=>{const pl=window.raPlanRatio?window.raPlanRatio():null,f=$(R,'fr');if(!pl||!f||R.state!=='ready')return;f.value=String(Math.round(pl));['input','change'].forEach(t=>f.dispatchEvent(new Event(t,{bubbles:true})));defaults(R);});
     $(R,'end').addEventListener('click',()=>endNow(R));
+    /* v22.79 (review I68): the student said or showed stop, or left: no question, the session ends at once */
+    if($(R,'wd'))$(R,'wd').addEventListener('click',()=>{if(R.state==='run'||R.state==='pause')finish(R,'withdrew',el(R));});
     $(R,'save').addEventListener('click',()=>save(R));
     $(R,'discard').addEventListener('click',()=>discard(R));
     $(R,'pb').addEventListener('click',()=>tapPB(R));
@@ -6626,8 +6753,8 @@ S.setup=[
   cap:'The control condition: the same response and materials, and the response produces nothing. Every design needs one; without it, responding could reflect the materials rather than the stimulus. The assessor stays present and neutral.',
   rec:[['Control condition','Same materials, responses produce nothing; assessor present and neutral']]}),
  F(ROOM,{clock:'9:30',s:'rest',fill:[0],obs:O('Setup','Sessions at 9:30','the same time every day','rec'),does:'Arrives for the 9:30 session',
-  cap:'Motivating operations: access to the tested stimuli is restricted for at least a few hours before sessions, sessions run at a consistent time, and an edible is not tested immediately after a meal. Any pre-session access is recorded.',
-  rec:[['MO control before sessions','No access to tested items for 3 h before the session; sessions at 9:30 daily; never within 30 min of snack']]}),
+  cap:'Motivating operations: access to the tested items and edibles is restricted for at least a few hours before sessions; praise is not withheld for hours: the few minutes before the session are brief and neutral. Sessions run at a consistent time, and an edible is not tested immediately after a meal. Any pre-session access is recorded.',
+  rec:[['MO control before sessions','No tablet or fruit chews for 3 h before the session; praise as usual through the day, none from the assessor in the 5 min before; sessions at 9:30 daily; never within 30 min of snack']]}),
  F(TAB,{a:'hold',tablet:'adult',s:'rest',obs:O('Multielement','Tablet (video)','the blue placemat','rec'),does:'Looks at the tablet',
   cap:'In a multielement design each condition has its own signal, the same in every session: for the example student, a colored placemat per condition, and the item shown once before the session starts. The blue placemat and the tablet, held up, begin a tablet session.',
   rec:[['Session signal (multielement only)','Colored placemat per condition; the item is shown once before the session starts']]}),
@@ -6734,7 +6861,7 @@ S.sum=[
   cap:'The plan ratio is entered on the summary sheet, and it changes the labels on both sheets as soon as it is typed. If the plan will use FR 10, the fruit chew’s 8.3 is still 3 steps above the control but not above the plan ratio, so it is not High: Moderate. The tablet stays High. The fruit chew’s break point did not exceed the ratio the plan will use.',
   rec:[['Plan ratio / schedule','10'],['PR potency','High','Moderate','Low']]}),
  F(BRD,{board:'verd',does:'Confirmed, Confirmed, Not supported',
-  cap:'The summary sheet combines the designs into a reinforcer verdict, also a working convention, applied in order. RA-1: “Confirmed when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the potency is Moderate and no plan ratio is entered, or the single-operant verdict is Probable and the potency Moderate.” With FR 5: Tablet (video) and Fruit chew Confirmed. Praise + high five is Not supported: “Not supported when the single-operant verdict is None or the potency is Low.”',
+  cap:'The summary sheet combines the designs into a reinforcer verdict, also a working convention, applied in order. RA-1: “Confirmed when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the single-operant verdict is Probable and the potency Moderate (Moderate alone never confirms, plan ratio or not).” With FR 5: Tablet (video) and Fruit chew Confirmed. Praise + high five is Not supported: “Not supported when the single-operant verdict is None or the potency is Low.”',
   rec:[['Reinforcer verdict','Confirmed','Confirmed','Not supported']]}),
  F(BRD,{board:'pa',does:'92, 71, 46: the same order as the break points',
   cap:'Then the correspondence with the preference assessment. The PA-1 percentages, 92, 71 and 46, fall in the same order as the break points. RA-1 cites DeLeon, Frank, Gregory, and Allman (2009), who found that higher-preference stimuli from a paired-choice assessment produced larger break points in 10 of 12 comparisons, and notes that agreement depends on the arrangement: the fruit chew was Not chosen under concurrent operants, yet reinforced responding when tested alone.',
@@ -6758,8 +6885,8 @@ S.stop=[
   cap:'When the control produces as much responding as the stimulus, no effect can be shown: the ratio to control is about 1, and responding could reflect the materials rather than the stimulus. RA-1 asks for a response effortful enough to stop when reinforcement is absent; a response the materials maintain on their own cannot show whether a stimulus reinforces it.',
   rec:[['Ratio to control','1.00'],['Reinforcement effect','None']]}),
  F(ROOM,{tray:false,bins:0,clock:'9:20',chew:'mouth',s:'eat',obs:O('Pre-session access','Record it','fruit chews at snack','alert'),does:'Eats fruit chews at snack',
-  cap:'Pre-session access is recorded. The student has had fruit chews at snack at 9:20, so the 9:30 fruit-chew session does not run now: access to the tested stimuli is restricted for at least a few hours before sessions, edibles are not tested immediately after a meal, and the example’s MO control says never within 30 min of snack.',
-  rec:[['MO control before sessions','No access to tested items for 3 h before the session; sessions at 9:30 daily; never within 30 min of snack']]}),
+  cap:'Pre-session access is recorded. The student has had fruit chews at snack at 9:20, so the 9:30 fruit-chew session does not run now: access to the tested items and edibles is restricted for at least a few hours before sessions, edibles are not tested immediately after a meal, and the example’s MO control says never within 30 min of snack.',
+  rec:[['MO control before sessions','No tablet or fruit chews for 3 h before the session; praise as usual through the day, none from the assessor in the 5 min before; sessions at 9:30 daily; never within 30 min of snack']]}),
  F(BRD,{board:'enough',does:'No stopping rule: the minimums are floors',
   cap:'When is an assessment complete? RA-1: “This form sets no rule for when an assessment is complete. The behavior analyst decides from the stability of responding across sessions in each design.” Its minimums are floors, not stopping rules: a reversal alternates phases until the effect replicates; the single-operant label Clear needs at least 3 sessions per condition; the progressive ratio runs 2–3 sessions per stimulus and a control, since a single break point is unstable. The stop rule, the stop interval and the session cap end a session, not the assessment.',
   rec:[]}),
@@ -7002,7 +7129,7 @@ const Q=[
   {w:'S · Motivating operations',f:S.stop[3],
     q:'Ten minutes before the 9:30 session the student had fruit chews at snack. The fruit-chew session is next in the rotation. What do you do?',o:[
     ['Record the pre-session access, and hold the fruit-chew session for another day at the usual time',1],['Run it: the order is counterbalanced',0],['Run it, with two pieces per response to make up for it',0]],
-    why:'<b>Motivating operations are controlled, and access is recorded.</b> RA-1: “Restrict access to the tested stimuli for at least a few hours before sessions; run sessions at a consistent time; for edibles, not immediately after a meal. Record any pre-session access.” Two pieces would also change the magnitude, which stays fixed.'},
+    why:'<b>Motivating operations are controlled, and access is recorded.</b> RA-1: “For edibles and items, restrict access to the tested stimuli for at least a few hours before sessions.” and “Record any pre-session access.” Two pieces would also change the magnitude, which stays fixed.'},
   {w:'A · Reading the effect',f:S.stop[2],
     q:'Control sessions run at about 4 responses per minute, the same as the fruit-chew sessions. What does that say?',o:[
     ['No reinforcement effect is shown, and responding may come from the materials: the response may need to change',1],['The fruit chew works: 4 per minute is a good rate',0],['The control sessions were run wrong and should be dropped',0]],
@@ -7093,7 +7220,7 @@ const Q=[
      say:['Before the first reinforcement session with a stimulus: prompt the response once and deliver the stimulus','Control: the response produces nothing; stay present and neutral','Stimulus session: every response (or every nth, on a plan schedule) produces the stimulus within 2–3 s, at the set magnitude; access is timed and the item removed','No praise unless praise is the stimulus under test'],
      sheet:['Save to the sheet writes Date, Condition, Responses, Minutes and PB into the next empty row; in a reversal it ticks Phase start when the condition changes','Minutes on the sheet: Minutes run, or Minutes run less access time when access time is subtracted from the session','The form computes Rate / min, the Condition Summary and the plot'],
      frames:[['so',0],['so',1],['so',2],['so',3],['so',4],['so',5],['so',6],['so',7],['so',8]],
-     decide:'<b>Decision.</b> RA-1’s working conventions: Clear = ratio ≥ 2 and no overlap across at least 3 sessions per condition; Probable = ratio ≥ 1.5 or overlap ≤ 25%; None otherwise. Judge by visual analysis of level, trend and overlap across replicated phases; the ratios support that judgment and do not replace it.',
+     decide:'<b>Decision.</b> RA-1’s working conventions: Clear = ratio ≥ 2 and no overlap across at least 3 sessions per condition; Probable = ratio ≥ 1.5 or overlap ≤ 25%; both at least the smallest difference that counts above the control; None otherwise; Too few sessions under 3 in either condition. Judge by visual analysis of level, trend and overlap across replicated phases; the ratios support that judgment and do not replace it.',
      checks:[['Before the session',['Materials as written; the tested stimuli out of the student’s reach','Access to the session’s stimulus restricted as set in MO control; any pre-session access recorded','Multielement: the condition’s signal in place','First reinforcement session with a stimulus: the response prompted once and the stimulus delivered']],
        ['Control session',['No programmed consequence for the response','Assessor present and neutral; no praise']],
        ['Stimulus session',['Stimulus delivered within 2–3 s of each response (or each nth, on a plan schedule)','Magnitude as written: one piece, or access timed and the item removed','No praise unless praise is the stimulus under test','Nothing delivered after problem behavior']],
@@ -7114,7 +7241,7 @@ const Q=[
      say:['Begin at the starting ratio','When the ratio is met: deliver the stimulus at the set magnitude, then advance to the next ratio in the progression','No response for the stop interval, or the session cap reached: the session ends','Control session: the same progression, no consequence'],
      sheet:['Each completed ratio ticked: Save to the sheet ticks them','The form computes Break point, Responses and Ratios completed from the ticks','The ratio in progress when the session ended is not ticked and does not count; the runner’s Session Summary shows it','PB ticked when problem behavior occurred'],
      frames:[['pr',0],['pr',1],['pr',2],['pr',3],['pr',4],['pr',5],['pr',6],['pr',7]],
-     decide:'<b>Decision.</b> RA-1’s working conventions, in steps of the progression, each mean placed at the first ratio at or above it: High = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; Moderate = at least 1 step above the control mean but not High; Low = less than 1 step above the control mean. Break points can change with the stop interval, session cap and magnitude, and the number of ratios completed falls as step size grows, so results are compared only within the same parameters.',
+     decide:'<b>Decision.</b> RA-1’s working conventions, in steps of the progression, each mean placed at the first ratio at or above it: High = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; Moderate = at least 1 step above the control mean but not High; Low = less than 1 step above the control mean; no label until each has 2 sessions. Break points can change with the stop interval, session cap and magnitude, and the number of ratios completed falls as step size grows, so results are compared only within the same parameters.',
      checks:[['Parameters',['Progression, starting ratio, stop interval and session cap as written, the same in every session','One stimulus per session; sessions in a counterbalanced order; a control session with the same progression']],
        ['Each ratio',['Responses counted toward the ratio in progress','The stimulus delivered when the ratio was met, within 2–3 s, at the set magnitude; nothing in a control session','Then the next ratio in the progression']],
        ['Ending the session',['Ended after the stop interval with no response, or at the session cap; End session when the stop rule was met','Break point: the last completed ratio; the ratio in progress not ticked','Response tapped for every response and Problem behavior for each instance; Save to the sheet after the Session Summary was checked']]]}];
@@ -7129,7 +7256,7 @@ const Q=[
         'The stimuli from PA-1, each in the exact form it will be delivered, with its magnitude. A brief MSWO immediately before each session when the preference assessment is more than a few days old or the stimulus is an edible.',
         'One response for every condition: one the student can already emit, easy to count, producing nothing on its own, and effortful enough to stop when reinforcement is absent.',
         'A no-consequence control with the same response and materials, in every design.',
-        'Motivating operations: access to the tested stimuli restricted for at least a few hours; sessions at a consistent time; edibles not immediately after a meal; any pre-session access recorded.',
+        'Motivating operations: items and edibles restricted for at least a few hours; attention or praise not withheld, a brief neutral period just before; sessions at a consistent time; edibles not immediately after a meal; any pre-session access recorded.',
         'Problem behavior recorded every session, with a written stop rule; IOA on at least one session per condition when the result will be written into a plan.'])+
       '<div class="jp-cols"><div><h2>The Sheets</h2>'+list(SHEETS.map(s=>s.title))+
       '<h2>Reading the Drawings</h2><div class="jp-key"><span>The table seen from above: the student’s hand comes from the near edge, the assessor’s from the far edge</span><span><i style="background:#fffdf8;border:2px solid #1d3b5a"></i>The data collector’s screen, beside the table</span><span><i style="background:#8d989e"></i><i style="background:#2f5fa3"></i><i style="background:#e0742f"></i><i style="background:#3f8a4f"></i>Placemat: the condition’s signal in a multielement design</span></div>'+      '</div><div class="jp-cover-scene"></div></div>'+

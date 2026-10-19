@@ -1494,7 +1494,7 @@ window.__nbhFactsIn=function(f){ensure();PASS=new Set();const p=P();let n=0;
   /* v22.48 (review F397) the Who box follows the plan as every other field does: a box still holding what the case placed takes the
      new words; a box rewritten here keeps its words and is offered the plan's new ones (S.changed). */
   {const L=[];if(pf){if(pf.strengths)L.push('Strengths: '+pf.strengths);if(pf.interests)L.push('Likes: '+pf.interests);if(pf.expr||pf.recep)L.push('Communicates: '+[pf.expr,pf.recep].filter(Boolean).join('; '));if(pf.signals)L.push('Shows yes, no and stop: '+pf.signals);if(pf.at)L.push('Uses: '+pf.at);}
-    if(menu.length&&window.nbhCase)L.push('Works for: '+nbhCase.menuLine(menu,5));if(L.length&&place('who',L.join('\n')))n++;}
+    if(menu.length&&window.nbhCase){const ln=nbhCase.menuLine(nbhCase.menuItems?nbhCase.menuItems(f):menu,5);if(ln)L.push('Works for: '+ln);}   /* v22.79 (review F134): never an item Form RA-1 found no effect for */if(L.length&&place('who',L.join('\n')))n++;}
   /* v22.48 (review F389) health and safety from the health record (Form DM-1): the conditions and allergies, an emergency medicine
      by name (never a dose), what a seizure can look like, and the precautions on file; the nurse is added to Who to call */
   const hh=(pf&&pf.health)||{},cond=T(hh.conditions),alg=T(hh.allergies),seiz=/seiz|epilep/i.test(cond),HL=[];

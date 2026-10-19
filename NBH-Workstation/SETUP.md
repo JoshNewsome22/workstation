@@ -9903,6 +9903,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.79: RA-1's verdicts need enough sessions, flag conflicting designs, and record each session (review Wave 3)
+
+- **Enough sessions for a label (F130, F132).** A single-operant label needs three sessions in each condition and a
+  progressive-ratio potency two; fewer reads **Too few sessions**, and the reinforcer verdict stays Untested.
+- **A floor over a control at zero (F131).** Clear and Probable also need the stimulus to beat the control by the
+  **smallest difference that counts** (Setup; one response a minute unless set). With the control at zero the ratio column
+  shows the difference, not ∞.
+- **Moderate alone never confirms (F132).** Moderate potency reads Probable whether or not a plan ratio is entered; a note
+  says when High is read against the control only.
+- **Conflicting (F133).** When one design says the stimulus reinforces and another says it does not (single operant None or
+  potency Low against Clear, High or Preferred), the verdict is **Conflicting**, and the note names the designs to resolve.
+- **The plan forms take RA-1's verdicts (F134).** Forms SR-1, SA-1, SM-1 and QS-1 now take the reinforcer menu by the
+  shared rule: an item RA-1 found no effect for is left out, a low-preference item it confirmed stays.
+- **Motivating operations for praise (F136).** Items and edibles are restricted for a few hours; attention, praise or
+  escape is not withheld for hours, only kept brief and neutral just before the session.
+- **A session record (I69, F137).** Under each design's table: the time, the pre-session access, the brief MSWO's top item,
+  the implementer, the schedule, the fidelity and how the session ended; the runner writes it on Save. Under each table, by
+  condition: the sessions with an agreement check, the fidelity scored, and the sessions the student withdrew from.
+- **Test at the plan ratio (I67).** The single-operant runner offers the plan ratio typed on the Summary; the verdict says
+  the schedule it was reached at, and the Summary warns when a Confirmed stimulus was never tested at the plan ratio.
+- **The student's say (I68).** The assent plan from Form SI-1 shows in the runners; **Student withdrew** ends a session at
+  once, counted apart from problem behavior.
+- With the clock running through access, the session summary warns that the rate is capped (F129).
+
+- qa/ra1-w3-test.js (19 checks). The recorded narration of the walkthrough still says "restrict access to the stimulus for a few hours" (F136 changed the script; the recording is to be redone).
+
 ### v22.78: PA-1's competing items reach the plan, its trials carry a stop rule, and the hierarchy is cut from the items assessed (review Wave 3)
 
 - **The competing items go to the plan (F118).** Each item the competing stimulus assessment tested carries its verdict to

@@ -1,4 +1,4 @@
-/* v22.7x Form RA-1, review Wave 3: every single-operant label needs 3 sessions a condition (F130) and a difference floor over
+/* v22.79 Form RA-1, review Wave 3: every single-operant label needs 3 sessions a condition (F130) and a difference floor over
    the control (F131); progressive-ratio potency needs 2 sessions each and Moderate alone never confirms (F132); one design's
    positive label against another's negative reads Conflicting (F133); SR-1, SA-1, SM-1 and QS-1 take the menu by the shared rule,
    RA-1's verdicts included (F134); the motivating-operations rule for attention and praise (F136); the session record with the
