@@ -9903,6 +9903,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.30: RR-1's Synthesis sheet lays the record's incidents, removals, medication changes, dated events and absences on one timeline (review Wave 3)
+
+- **One timeline of the record (I12).** The Health sheet said medication dates are entered "so they can be laid
+  against the incident dates", but no sheet did it. The Synthesis sheet now draws one date axis with a lane each for:
+  - the incidents;
+  - the ledger's removals, each as long as it lasted;
+  - the medication starts and changes, the change dates read from the "Changes" text (a year left out is taken from
+    the record's dates);
+  - the dated events, numbered on the axis and listed under it;
+  - the absence dates, from a new optional field under Attendance.
+
+  A medication started long before the rest of the record is named at the left edge rather than stretching the axis.
+  Nurse visits are recorded as a count, so they are not drawn.
+- **Around each change.** Under the figure, the incidents on record in the 14 days before and the 14 days from each
+  medication change and dated event, as counts only. When the record's first incident falls inside a "before" window,
+  its date is given. An event that repeats a medication change on the same date is not counted twice.
+- The figure appears once incidents or removals and one other kind of dated entry are entered. Until then the screen
+  says what it needs. It prints on the Synthesis sheet and is not saved; the printed record stays at the same number
+  of pages.
+- qa/rr1-w3d-test.js (11 checks).
+
 ### v23.29: RR-1 takes its records inventory and restraint history from the case: the records IC-1 names, CR-1's restraint log and plan dates, DD-1's incident record (review Wave 3)
 
 - **The records Form IC-1 names (I14).** IC-1's "Information we already have and will review" now travels with the
