@@ -97,13 +97,15 @@ const CASE={behaviors:[
   {let {p,ctx}=await open(FILES.VS);const st=()=>p.evaluate(()=>({ch:S.choice.slice(0,num(S.meta.ch_n)||4).map(o=>o.k+'/'+o.l),ft:S.ft.map(o=>o.k+'/'+o.l),tk:S.tk.map(o=>o.k+'/'+o.l),
       inputs:Array.from(document.querySelectorAll('[data-r="choice"][data-f="l"]')).map(e=>e.value)}));
     const b0=await st(),a=await apply(p,CASE),s=await st();
-    ok('VS-1: the choice board takes the high and middle items as labels, the pictures as they were',s.ch.join('|')===[b0.ch[0].split('/')[0]+'/Tablet: racing game',b0.ch[1].split('/')[0]+'/Fruit chew',b0.ch[2].split('/')[0]+'/Drawing',b0.ch[3]].join('|'),{b0,s});
+    /* v23.26 (VS-1 review F288) each item goes on with its own library picture and its word; a starting picture the menu does not fill is cleared */
+    ok('VS-1: the choice board takes the high and middle items, each with its own picture',s.ch.join('|')==='tablet/Tablet: racing game|fruit/Fruit chew|drawing/Drawing|/',{b0,s});
     ok('VS-1: the board on screen shows them',s.inputs.slice(0,3).join('|')==='Tablet: racing game|Fruit chew|Drawing',s.inputs);
-    ok('VS-1: "Then" and the token reward take the top item; First and the token picture are left',s.ft[0]===b0.ft[0]&&s.ft[1]===b0.ft[1].split('/')[0]+'/Tablet: racing game'&&s.tk[0]===b0.tk[0]&&s.tk[1]===b0.tk[1].split('/')[0]+'/Tablet: racing game',{b0,s});
-    ok('VS-1: five filled, the note asks to check the pictures, autosave heard',a.r.filled===5&&/check that each picture/.test(a.r.note)&&a.inp>0,a);
+    ok('VS-1: "Then" and the token reward take the top item with its picture; First and the token picture are left',s.ft[0]===b0.ft[0]&&s.ft[1]==='tablet/Tablet: racing game'&&s.tk[0]===b0.tk[0]&&s.tk[1]==='tablet/Tablet: racing game',{b0,s});
+    ok('VS-1: the board, Then and the reward filled; the note says the names went on with their own pictures; autosave heard',a.r.filled>=5&&/went on with their own pictures/.test(a.r.note)&&a.inp>0,a);
     const a2=await apply(p,CASE);ok('VS-1: a second pass fills nothing',a2.r.filled===0&&JSON.stringify(await st())===JSON.stringify(s),a2);await ctx.close();
     ({p,ctx}=await open(FILES.VS));await p.evaluate(()=>{S.choice[0].l='Swing (typed)';S.ft[1].l='Recess (typed)';S.tk[1].l='Stickers (typed)';renderAll();});await apply(p,CASE);const t=await st();
-    ok('VS-1: typed labels are kept; the menu fills the rest without repeating',t.ch.map(x=>x.split('/')[1]).join('|')==='Swing (typed)|Tablet: racing game|Fruit chew|Drawing'&&/Recess \(typed\)$/.test(t.ft[1])&&/Stickers \(typed\)$/.test(t.tk[1]),t);await ctx.close();}
+    /* v23.26 (VS-1 review F288) the case fills a board only while it is as it started, so one changed by hand is left as it is */
+    ok('VS-1: typed labels are kept, and a board changed by hand is left as it is',t.ch.join('|')==='ipad/Swing (typed)|ball/|drawing/|puzzle/'&&t.ft[1]==='ipad/Recess (typed)'&&t.tk[1]==='ipad/Stickers (typed)',t);await ctx.close();}
 
   /* ---------- MT-1 ---------- */
   {let {p,ctx}=await open(FILES.MT);await apply(p,CASE);

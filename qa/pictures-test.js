@@ -134,9 +134,12 @@ const near=(a,b,t)=>Math.abs(a-b)<=t;
   const file=await vs.evaluate(()=>window.__saved);
   const ctx2=await br.newContext({viewport:{width:1300,height:900}});const v2=await ctx2.newPage();wire(v2,log);await v2.goto(F.vs);await sleep(600);
   const fresh=await v2.evaluate(async()=>(await NBHPIC.all()).length);
+  /* v23.26 (VS-1 review F289) VS-1 asks before a file's pictures join this device's My pictures: the BCBA says yes here */
+  await v2.evaluate(()=>{window.__vsAsk=[];nbhUI.confirm=async t=>{window.__vsAsk.push(t);return true;};});
   await v2.evaluate(t=>{const dt=new DataTransfer();dt.items.add(new File([t],'vs.json',{type:'application/json'}));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));},file);await sleep(1500);
   const ab=await v2.evaluate(async id=>{const a=await NBHPIC.all();return {n:a.length,has:!!NBHPIC.get(id),label:NBHPIC.get(id)&&NBHPIC.get(id).label,lib:S.photos[0]&&S.photos[0].lib,board:S.board[0].ph};},libId);
-  check('H1 a fresh browser starts with no pictures; a VS-1 file opened there adds the two its photos came from, named as the form\u2019s copies are',fresh===0&&ab.n===2&&ab.has&&ab.label==='Red toy'&&ab.lib===libId&&ab.board,JSON.stringify(ab));
+  const asked=await v2.evaluate(()=>window.__vsAsk);
+  check('H1 a fresh browser starts with no pictures; a VS-1 file opened there asks, and on yes adds the two its photos came from, named as the form\u2019s copies are',fresh===0&&asked.length===1&&/from another device/.test(asked[0])&&ab.n===2&&ab.has&&ab.label==='Red toy'&&ab.lib===libId&&ab.board,JSON.stringify({ab,asked}));
   await ctx2.close();
   /* ---- I. the forms without the file beside them ---- */
   const ctx3=await br.newContext({viewport:{width:1300,height:900}});await ctx3.route('**/nbh-pictures.js',r=>r.abort());

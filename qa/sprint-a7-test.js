@@ -235,9 +235,16 @@ const TREQ=/^@media print\{@page\{size:letter portrait;margin:\.5in;@top-left\{c
     check(d.S&&d.S.meta.sheets==='turn'&&await q.evaluate(()=>S.meta.sheets==='turn'&&document.querySelector('[data-m="sheets"]').value==='turn'),'Sheets "Portrait sheets for Safari" is saved with the data and opens again',d.S&&d.S.meta.sheets);
     const old=process.env.A7_OLD_VS1?fs.readFileSync(process.env.A7_OLD_VS1,'utf8'):JSON.stringify(OLD_VS1,null,1);
     const od=JSON.parse(old);check(od.form==='VS-1'&&!('sheets' in od.S.meta),'the old file is a VS-1 file with no Sheets setting ('+(process.env.A7_OLD_VS1?process.env.A7_OLD_VS1.split('/').pop():'saved by the committed form before A7, '+old.length+' bytes')+')');
+    /* v23.26 (VS-1 review F288, F295) an older file opens with the First and Then cards' repeated headings cleared and the rule
+       cards' four old default sentences brought up to date; a new setting it never had opens blank. Nothing else changes. */
+    const RULES_NEW={waiting:['My turn is coming. Hands in my lap.','My turn is coming. Calm body, I can wait.'],listening:['Eyes on the speaker, mouth quiet.','Body toward the speaker, mouth quiet.'],
+      calm:['Still body, slow breath.','Slow breaths, gentle hands.'],eyes:['Look at the teacher when she talks.','Body toward the teacher when the teacher talks, or eyes on my work.']};
+    const want=JSON.parse(JSON.stringify(od.S));(want.ft||[]).forEach((c,i)=>{if(c.l===['First','Then'][i])c.l='';});
+    (want.rules||[]).forEach(r=>{const n=RULES_NEW[r.k];if(n&&r.say===n[0]){r.say=n[1];if(r.k==='eyes'&&r.l==='Eyes on the teacher')r.l='Ready to listen';}});
     const compare=async(r,how)=>{const got=await r.evaluate(()=>JSON.parse(JSON.stringify(S)));const sheets=got.meta.sheets;delete got.meta.sheets;
-      const diff=Object.keys(od.S).filter(k=>JSON.stringify(od.S[k])!==JSON.stringify(got[k]));const shown=await r.evaluate(()=>document.querySelector('[data-m="sheets"]').value);
-      check(sheets==='auto'&&shown==='auto'&&!diff.length,'the old file opens '+how+' with every part as saved ('+Object.keys(od.S).length+' parts compared) and Sheets Automatic',{sheets,shown,diff});};
+      Object.keys(got.meta).forEach(k=>{if(!(k in want.meta)&&got.meta[k]==='')delete got.meta[k];});
+      const diff=Object.keys(want).filter(k=>JSON.stringify(want[k])!==JSON.stringify(got[k]));const shown=await r.evaluate(()=>document.querySelector('[data-m="sheets"]').value);
+      check(sheets==='auto'&&shown==='auto'&&!diff.length,'the old file opens '+how+' with every part as saved, but for the v23.26 card words ('+Object.keys(od.S).length+' parts compared) and Sheets Automatic',{sheets,shown,diff});};
     const r=await openForm(ctx);await openFile(r,old);await compare(r,'in a fresh page');
     for(const v of ['full','turn']){const s=await openForm(ctx);await setSheets(s,v);await sleep(150);await openFile(s,old);await compare(s,'after Sheets was set to '+(v==='full'?'Full sheets':'Portrait sheets for Safari')+' in the same page');
       const t=await s.evaluate(()=>({turned:turned(),note:(document.querySelector('.vs-sheets[data-v="board"]')||{}).textContent}));check(t.turned&&/Sheets: Automatic\.$/.test(t.note),'  and prints turned, as Automatic does on an iPad; the note says Automatic',t);await s.close();}

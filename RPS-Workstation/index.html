@@ -2265,7 +2265,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.25';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.26';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2567,6 +2567,11 @@ FACT_SRC['BC-1']='contrast';FACT_GEN.push('BC-1');
 FACT_SRC['TK-1']='board';FACT_GEN.push('TK-1');
 {const h0=hasFacts,s0=factsSig;hasFacts=function(f){return h0(f)||!!(f&&f.board);};factsSig=function(f){const s=s0(f);return f&&f.board?s+'|'+JSON.stringify(f.board):s;};}
 /* ---- end of the TK-1 block ---- */
+/* ---- v23.26 (VS-1 review F292) Form VS-1's visuals join the case as "visuals": what is printed and its words, the break and help
+   cards with what the adults do, the date and the BCBA ---- */
+FACT_SRC['VS-1']='visuals';FACT_GEN.push('VS-1');
+{const h0=hasFacts,s0=factsSig;hasFacts=function(f){return h0(f)||!!(f&&f.visuals);};factsSig=function(f){const s=s0(f);return f&&f.visuals?s+'|'+JSON.stringify(f.visuals):s;};}
+/* ---- end of the VS-1 block ---- */
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsOwed=false;   /* v21.87 a send asked while a read runs is kept; a change read without sending is still owed to the forms */
 function noteFactSource(id,st){
@@ -2682,6 +2687,7 @@ function paintFacts(){
   if(f.schedule)bits.push('<b>Schedule:</b> '+esc(f.schedule.nota||f.schedule.title||'')+' <i>('+esc(s.schedule||'')+')</i>');   /* v23.12 (I136) */
   if(f.relapse)bits.push('<b>Challenges:</b> '+(f.relapse.rel|0)+' of '+(f.relapse.n|0)+' with relapse <i>('+esc(s.relapse||'')+')</i>');   /* v23.12 (F326) */
   if(f.board)bits.push('<b>Token board:</b> '+esc(f.board.kind==='bus'?'bus ride':f.board.kind||'')+', '+(f.board.count|0)+' '+esc(String(f.board.token||'token').toLowerCase())+(f.board.rule?', '+esc(f.board.rule):'')+' <i>('+esc(s.board||'')+')</i>');   /* v23.25 (TK-1 F305) */
+  if(f.visuals&&Array.isArray(f.visuals.items))bits.push('<b>Visuals:</b> '+esc(f.visuals.items.map(v=>v.what).join(', '))+' <i>('+esc(s.visuals||'')+')</i>');   /* v23.26 (VS-1 F292) */
   t.innerHTML=bits.join(' &nbsp;&middot;&nbsp; ');
 }
 $('#factsSend').addEventListener('click',async()=>{

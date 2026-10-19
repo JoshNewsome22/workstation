@@ -9903,6 +9903,45 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.26: VS-1 puts PA-1's reinforcers on with their own pictures, asks before a file's pictures stay on the device, prints the plan's own break card, and says what each countdown square is for (review Wave 3)
+
+- **Reinforcers with their own pictures (F288).**
+  - PA-1's menu goes on the choice board, the first-then board's Then card and the token board's reward with a matching
+    library picture and its word together. That means high- and middle-preference items, and a low-preference item RA-1
+    confirmed.
+  - A name with no matching picture clears the starting picture, and Strips and boards names it.
+  - The case fills a board once, and only while it is as it started, so a word the BCBA cleared is not written back. A
+    picture chosen later takes the place of the case's word.
+  - The First, Then and Working-for cards have their own word fields. The first-then board no longer prints "First" and
+    "Then" again under the pictures.
+- **Pictures on the device (F289).**
+  - A file whose pictures came from another device's My pictures asks before they join this device's, once per picture.
+    No keeps them in the student's file only.
+  - Remove can also take a picture off the device.
+  - When Form DM-1 records no photo or media permission (or does not know), the Pictures page says so, and Upload and
+    Take a photo ask first.
+- **The plan's own break card (F290).**
+  - The break and help cards are a list: tick the ones to print, each with its own word and picture, and what the adult
+    does when it is handed over. That line prints at the foot of the sheet, not on the card.
+  - Only the break card is ticked to start, and from the case the plan's own request (Form TD-1's or TB-1's replacement)
+    takes its place. The simulation prints the break card alone.
+  - An older file keeps its four cards.
+- **The countdown (F291).** "Each square is" (a finished task, a calm minute, a step of the delay, or time alone) sets the
+  countdown's words. Time alone brings a note from the delay research. The Guide says the requirement during the wait does
+  the teaching (Ghaemmaghami, Hanley & Jessel, 2016; Vollmer et al., 1999), and points to Form DT-1.
+- **To the case (F292, in part).** The visuals go to the case as "visuals": what is printed, its words, and the break card
+  with what the adults do. The Board page has a date and the case BCBA. The workstation names them on the case line.
+- **The Guide (F293, F294).**
+  - It gives the PECS meta-analysis's answer on speech.
+  - The picture-type row and the Pictures page say what Mirenda and Locke (1989) found, and to teach each picture with more
+    than one example.
+  - Ferster and Skinner (1957), Mirenda and Locke, Ghaemmaghami et al. and Vollmer et al. join the reference list.
+- **The rule cards (F295).** No eye contact or still hands. "When the teacher talks", not "when she talks". The hint says
+  to choose the rules from the plan. An older file's default sentences are brought up to date.
+- **Sizes (F296).** The card sheets' hint agrees with the schedule's sizes.
+- The sentence strip (F297) is left for later.
+- qa/vs1-w3-test.js (14 checks). pictures-test answers the new question; sprint-a7 and v2178-c2 expect the card words and the pictures from the case.
+
 ### v23.25: TK-1 keeps a taught request off the token board, gives the bus staff a safety box, respects DM-1's photo permission, and prints backs that match the Board (review Wave 3)
 
 - **A request is not a token target (F298).** From the case, a replacement that asks for the function's reinforcer is left

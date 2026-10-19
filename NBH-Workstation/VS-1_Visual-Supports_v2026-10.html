@@ -877,6 +877,12 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 td input,td select{max-width:100%}
 </style>
+<style id="vs1-v2326">
+/* v23.26 (review F288, F290) the words under the First, Then and Working-for pictures; the break and help cards' table; the adults' line */
+input.vs-word{display:block;width:100%;margin-top:4px;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px}
+.vs-adult{margin-top:.25in;font:400 11pt/1.35 var(--sans);color:#333;text-align:left;width:100%}
+#vsNeed,#vsPerm,#wEachNote{margin:4px 0 0}
+</style>
 </head>
 <body class="view-board">
 
@@ -937,6 +943,9 @@ td input,td select{max-width:100%}
     <p class="hint">A grid of picture cells on a board with a category band, in the style of the school&rsquo;s boards: a light board, white cells with rounded corners, and an optional velcro dot in the centre of each cell for the exchange cards. Leave cells empty for a blank board the cards attach to. The preview is drawn at the printed size.</p>
     <div class="fieldgrid">
       <div><label>Student (for the file)</label><input data-m="client"></div>
+      <!-- v23.26 (review F292) when the visuals were made, and by whom -->
+      <div><label>Date</label><input data-m="date" placeholder="m/d/yyyy"></div>
+      <div><label>Case BCBA</label><input data-m="bcba"></div>
       <div><label>Board title (prints in the band)</label><input data-m="b_title" placeholder="NEEDS"></div>
       <div><label>Band position</label><select data-m="b_bandpos"><option value="bottom">Bottom</option><option value="top">Top</option><option value="none">No band</option></select></div>
       <div><label>Band color</label><select data-m="b_color"><option value="#cfe3cf">Green</option><option value="#cddbe8">Blue</option><option value="#e6d7ee">Purple</option><option value="#f6e2c6">Orange</option><option value="#f4d6d6">Red</option><option value="#f8f0c4">Yellow</option><option value="#e8e8e8">Grey</option></select></div>
@@ -957,7 +966,7 @@ td input,td select{max-width:100%}
   <!-- ===================== CARD SHEETS ===================== -->
   <section class="only-cards">
     <h2 class="nbh-band">Picture Cards for Cutting</h2>
-    <p class="hint">Sheets of repeated cards, like the Writing and Shopping sheets: a picture with its word, a fixed number of each, cut lines between them. Laminate, cut, and put velcro on the back. Two inches is the usual exchange-card size; one inch suits a schedule strip; three inches suits a first-then board.</p>
+    <p class="hint">Sheets of repeated cards, like the Writing and Shopping sheets: a picture with its word, a fixed number of each, cut lines between them. Laminate, cut, and put velcro on the back. Two inches is the usual exchange-card size; one and a half or two inches matches the visual schedule here, and one inch a small desk strip; three inches suits a first-then board.</p>
     <div class="fieldgrid">
       <div><label>Card size</label><select data-m="c_size"><option value="1">1 inch</option><option value="1.5">1.5 inch</option><option value="2" selected>2 inch</option><option value="2.5">2.5 inch</option><option value="3">3 inch</option></select></div>
       <div><label>Label</label><select data-m="c_label"><option value="above">Word above the picture</option><option value="below">Word below the picture</option><option value="none">Picture only</option></select></div>
@@ -974,7 +983,7 @@ td input,td select{max-width:100%}
   <!-- ===================== RULE CARDS ===================== -->
   <section class="only-rules">
     <h2 class="nbh-band">Rule Cards and the Expectations Poster</h2>
-    <p class="hint">Large cards for the expectations a plan teaches: a picture, the rule in two or three words, and a short sentence the adult says when pre-correcting. Tick the rules this student needs; each prints at the size chosen. The poster puts the ticked rules on one page for the wall. Keep the wording positive, what to do rather than what to stop.</p>
+    <p class="hint">Large cards for the expectations a plan teaches: a picture, the rule in two or three words, and a short sentence the adult says when pre-correcting. Tick the rules this student needs; each prints at the size chosen. The poster puts the ticked rules on one page for the wall. Keep the wording positive, what to do rather than what to stop. Choose the rules from the plan, and leave out eye-contact and still-hands rules unless the team has decided they matter for this student.</p>
     <div class="fieldgrid">
       <div><label>Card size</label><select data-m="r_size"><option value="full">Full page</option><option value="half" selected>Half page (two per sheet)</option><option value="quarter">Quarter page (four per sheet)</option></select></div>
       <div><label>Poster title</label><input data-m="r_title" placeholder="Our Classroom Expectations"></div>
@@ -1001,8 +1010,8 @@ td input,td select{max-width:100%}
     </div>
     <h3>First-then</h3>
     <div class="fieldgrid">
-      <div><label>First (the task)</label><div class="pick" data-r="ft" data-i="0" id="ftFirst"></div></div>
-      <div><label>Then (what follows)</label><div class="pick" data-r="ft" data-i="1" id="ftThen"></div></div>
+      <div><label>First (the task)</label><div class="pick" data-r="ft" data-i="0" id="ftFirst"></div><input class="vs-word" data-r="ft" data-i="0" data-f="l" aria-label="First: the word under the picture"></div>
+      <div><label>Then (what follows)</label><div class="pick" data-r="ft" data-i="1" id="ftThen"></div><input class="vs-word" data-r="ft" data-i="1" data-f="l" aria-label="Then: the word under the picture"></div>
       <div><label>Words under the pictures</label><select data-m="ft_words"><option value="yes">Yes</option><option value="no">No</option></select></div>
     </div>
     <h3>Visual schedule</h3>
@@ -1018,19 +1027,28 @@ td input,td select{max-width:100%}
       <div><label>Header</label><input data-m="ch_title" placeholder="I want…"></div>
       <div><label>Choices shown</label><select data-m="ch_n"><option>2</option><option>3</option><option selected>4</option><option>6</option></select></div>
     </div>
+    <p class="hint" id="vsNeed" hidden></p>
     <div class="grid-wrap"><table class="rt" id="chTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Picture</th><th>Label</th></tr></thead><tbody></tbody></table></div>
     <h3>Token board</h3>
     <div class="fieldgrid">
       <div><label>Tokens to earn</label><select data-m="tk_n"><option>3</option><option selected>5</option><option>8</option><option>10</option></select></div>
       <div><label>Token picture</label><div class="pick" data-r="tk" data-i="0" id="tkPic"></div></div>
-      <div><label>Working for (picture)</label><div class="pick" data-r="tk" data-i="1" id="tkRw"></div></div>
+      <div><label>Working for (picture)</label><div class="pick" data-r="tk" data-i="1" id="tkRw"></div><input class="vs-word" data-r="tk" data-i="1" data-f="l" aria-label="Working for: the word under the picture"></div>
       <div><label>Header</label><input data-m="tk_title" placeholder="I am working for…"></div>
     </div>
     <h3>Wait card and countdown</h3>
     <div class="fieldgrid">
       <div><label>Countdown squares</label><select data-m="w_n"><option>3</option><option selected>5</option></select></div>
       <div><label>Wait card words</label><input data-m="w_words" placeholder="Wait. It is coming."></div>
+      <!-- v23.26 (review F291) the countdown says what takes a square away: the requirement during the wait does the teaching -->
+      <div><label>Each square is</label><select data-m="w_each"><option value="">one finished task, or a short wait with calm hands</option><option value="task">one finished task</option><option value="calm">one calm minute</option><option value="step">one step of the delay (Form DT-1)</option><option value="time">a minute on the clock (time alone)</option></select></div>
     </div>
+    <p class="hint" id="wEachNote" hidden>Time alone does not teach waiting: in Ghaemmaghami, Hanley and Jessel (2016) a delay that simply ran out failed for all four children, and a delay ended by a small task or calm behavior worked. Choose what the student does for each square, and run the delay itself on Form DT-1.</p>
+    <!-- v23.26 (review F290) the break and help cards: tick the ones the plan teaches; each its own word and picture, and what the adult does -->
+    <h3>Break and help cards</h3>
+    <p class="hint">In functional communication training the card is the replacement behavior: print the request the plan names, and while it is new every adult honors it at once, every time. A card no adult has been told how to answer is better left unticked. What the adult does prints at the foot of the sheet, not on the card.</p>
+    <div class="tools"><button class="tool" id="brkAdd">Add a card</button></div>
+    <div class="grid-wrap"><table class="rt" id="brkTbl"><thead><tr><th style="width:5%">Print</th><th style="width:22%">Picture</th><th style="width:22%">Word</th><th>What the adult does when it is handed over</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3>Feelings scale</h3>
     <div class="fieldgrid"><div><label>Title</label><input data-m="fs_title" placeholder="How big is my feeling?"></div></div>
     <div class="grid-wrap"><table class="rt" id="fsTbl"><thead><tr><th style="width:6%">Level</th><th style="width:22%">Picture</th><th style="width:28%">Word</th><th>What I can do</th></tr></thead><tbody></tbody></table></div>
@@ -1041,7 +1059,8 @@ td input,td select{max-width:100%}
   <!-- ===================== LIBRARY ===================== -->
   <section class="only-library">
     <h2 class="nbh-band">Pictures</h2>
-    <p class="hint">The shared pictogram library (OpenMoji, CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts, and the practice&rsquo;s own cards and pictures), and this student&rsquo;s own photos. A photo is resized to a thumbnail and stored inside the saved file, so a real toilet, the student&rsquo;s own water bottle or the actual bus can stand in for the drawing wherever a picture is used. Real photos are the most concrete picture type and the first step of the picture hierarchy; line drawings are more abstract. <b>My pictures</b> (v21.62) are the practice&rsquo;s own: a photo of a real item, taken with the camera on a plain sheet of paper, has its background cut away here on this device and is kept in this browser for every form and every student; <b>Take a photo</b> adds one and uses it here, <b>My pictures</b> names, removes, saves and opens them.</p>
+    <p class="hint">The shared pictogram library (OpenMoji, CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts, and the practice&rsquo;s own cards and pictures), and this student&rsquo;s own photos. A photo is resized to a thumbnail and stored inside the saved file, so a real toilet, the student&rsquo;s own water bottle or the actual bus can stand in for the drawing wherever a picture is used. Photographs are usually easier to match to the real thing than line drawings (Mirenda &amp; Locke, 1989): use the type the student already matches, and teach each picture with more than one example of the item. <b>My pictures</b> (v21.62) are the practice&rsquo;s own: a photo of a real item, taken with the camera on a plain sheet of paper, has its background cut away here on this device and is kept in this browser for every form and every student; <b>Take a photo</b> adds one and uses it here, <b>My pictures</b> names, removes, saves and opens them. A file that carries pictures from another device asks before they join this device&rsquo;s My pictures; on a shared device, say No, and they stay in this student&rsquo;s file only. A picture of the student, a name on a bottle or a bus number can identify the student.</p>
+    <p class="hint" id="vsPerm" hidden></p>
     <h3>My photos</h3>
     <div class="tools"><button class="tool" id="phAdd">Upload a photo</button><button class="tool" id="phCam">Take a photo</button><button class="tool" id="phMine">My pictures&hellip;</button></div>
     <div class="photos" id="photos"></div>
@@ -1053,17 +1072,17 @@ td input,td select{max-width:100%}
   <!-- ===================== GUIDE ===================== -->
   <section class="only-guide">
     <h2 class="nbh-band">What This Form Builds</h2>
-    <p>Visual supports are an evidence-based practice for learners with autism in the National Clearinghouse review (Steinbrenner et al., 2020), and most of what this form prints has its own line of research. The communication board and the picture cards are the materials of the Picture Exchange Communication System (Bondy &amp; Frost, 1994): the learner hands a picture to a partner to request, and the system moves through six phases from a single exchange to sentences and comments. Charlop-Christy, Carpenter, Le, LeBlanc and Kellet (2002) taught PECS to three children with autism and saw gains in speech and social behavior and reductions in problem behavior alongside the exchanges; Flippin, Reszka and Watson (2010) meta-analyzed the communication effects, and Ganz et al. (2012) the broader aided-AAC literature. The board is a tool, not a program: the teaching protocol, the partner training and the data belong on Forms SA-1 and TD-1.</p>
+    <p>Visual supports are an evidence-based practice for learners with autism in the National Clearinghouse review (Steinbrenner et al., 2020), and most of what this form prints has its own line of research. The communication board and the picture cards are the materials of the Picture Exchange Communication System (Bondy &amp; Frost, 1994): the learner hands a picture to a partner to request, and the system moves through six phases from a single exchange to sentences and comments. Charlop-Christy, Carpenter, Le, LeBlanc and Kellet (2002) taught PECS to three children with autism and saw gains in speech and social behavior and reductions in problem behavior alongside the exchanges; those were three children, and not the usual outcome: Flippin, Reszka and Watson (2010) judged PECS promising but not yet established, with small to moderate gains in communication and small to negative gains in speech; Ganz et al. (2012) meta-analyzed the broader aided-AAC literature. The board is a tool, not a program: the teaching protocol, the partner training and the data belong on Forms SA-1 and TD-1.</p>
     <p>The visual schedule and the first-then board rest on the activity-schedule research: MacDuff, Krantz and McClannahan (1993) taught children with autism to follow photographic schedules through long chains of activities with maintenance and generalization; Lequia, Machalicek and Rispoli (2012) reviewed activity schedules for challenging behavior, and Knight, Sartini and Spriggs (2015) judged visual activity schedules an evidence-based practice. Dettmer, Simpson, Myles and Ganz (2000) showed visual supports easing transitions. The first-then board is the Premack principle made visible (Premack, 1959): the preferred activity follows the less preferred one. The choice board rests on the choice-making literature (Shogren, Faggella-Luby, Bae &amp; Wehmeyer, 2004); the token board on token reinforcement (Hackenberg, 2018; Form TE-1); the wait card and countdown on delay-tolerance teaching (Hanley, Jin, Vanselow &amp; Hanratty, 2014; Form DT-1). Rule cards are the materials of precorrection (Colvin, Sugai &amp; Patching, 1993): the adult shows the card and states the expectation before the situation that evokes the problem, then reinforces the expected behavior. The feelings scale follows a widely used program (Buron &amp; Curtis, 2003) whose peer-reviewed evidence is limited; it is here as a teaching visual, with the plan&rsquo;s coping responses written beside each level.</p>
     <h2 class="nbh-band" style="margin-top:16px">What the Research Supports</h2>
     <table class="rt">
-      <tr><th style="width:28%">Picture exchange teaches requesting</th><td>In PECS the learner initiates by giving a picture, which is why the cards are loose and the board is velcro: the picture has to travel. Phase I is a single exchange with two trainers (one prompting from behind), Phase II adds distance and persistence, Phase III discrimination between pictures, Phase IV sentence strips, Phases V and VI answering and commenting (Bondy &amp; Frost, 1994). Charlop-Christy et al. (2002) report all three children reaching Phase VI with collateral gains; Flippin et al. (2010) find small to moderate effects on communication across the single-case studies and note that speech gains are variable.</td></tr>
+      <tr><th style="width:28%">Picture exchange teaches requesting</th><td>In PECS the learner initiates by giving a picture, which is why the cards are loose and the board is velcro: the picture has to travel. Phase I is a single exchange with two trainers (one prompting from behind), Phase II adds distance and persistence, Phase III discrimination between pictures, Phase IV sentence strips, Phases V and VI answering and commenting (Bondy &amp; Frost, 1994). Charlop-Christy et al. (2002) report all three children reaching Phase VI with collateral gains; Flippin et al. (2010) judged PECS promising but not yet established: gains in communication were small to moderate, and gains in speech small to negative.</td></tr>
       <tr><th>Schedules build independence</th><td>MacDuff et al. (1993) used graduated guidance to teach photographic schedules and faded all prompts; the children moved through chains of leisure and homework activities on their own and kept doing so with new photographs. Knight et al. (2015) rated visual activity schedules evidence-based on the single-case literature, and Lequia et al. (2012) found reductions in challenging behavior across the studies they reviewed, with on-schedule behavior and transitions the usual targets.</td></tr>
       <tr><th>Transitions go better with a visual</th><td>Dettmer et al. (2000) added visual schedules and transition cues for two children with autism and recorded shorter transition latencies and fewer physical prompts.</td></tr>
       <tr><th>Choice itself matters</th><td>Shogren et al. (2004) meta-analyzed choice-making as an intervention for problem behavior and found reductions across studies; a choice board gives the choice a form a non-speaking student can use. Tiger, Hanley and Hernandez (2006) found that some preschoolers (3 of 6) consistently preferred having a choice even when the outcomes were the same, and that the preference for choice grew when more items were offered.</td></tr>
       <tr><th>Precorrection with a card</th><td>Colvin et al. (1993) set out precorrection: identify the context, state the expected behavior, modify the context, rehearse, reinforce, prompt, monitor. The rule card is the prompt and the rehearsal aid; the poster is the context modification.</td></tr>
-      <tr><th>Tokens and waiting</th><td>Token boards carry the token-production and exchange schedules Hackenberg (2018) reviews; the token board here shows the student the count, which Ferster and Skinner&rsquo;s analysis of the count as a stimulus argues for (Form SR-1). Hanley et al. (2014) taught tolerance of denial and delay with a signal and something to do during the wait; the wait card and countdown are those signals.</td></tr>
-      <tr><th>Picture type</th><td>Photographs are more concrete than line drawings and are the usual first step for a learner new to pictures; a drawing generalizes across the many toilets and buses a photo does not show. The library gives both: the student&rsquo;s own photos and the pictograms.</td></tr>
+      <tr><th>Tokens and waiting</th><td>Token boards carry the token-production and exchange schedules Hackenberg (2018) reviews; the token board here shows the student the count, which Ferster and Skinner&rsquo;s analysis of the count as a stimulus argues for (Form SR-1). A signal helps a learner wait (Vollmer et al., 1999), but the requirement during the wait does the teaching: in Ghaemmaghami, Hanley and Jessel (2016) a delay that simply ran out failed and a delay ended by a small task or calm behavior worked, as in Hanley et al. (2014). The countdown says what each square stands for; the delay itself is run on Form DT-1.</td></tr>
+      <tr><th>Picture type</th><td>Real objects and photographs are usually easier to match to the thing they stand for than line drawings (Mirenda &amp; Locke, 1989). Use the type the student already matches, and teach each picture with more than one example of the item: neither a photo nor a drawing carries over to new examples on its own. The library gives both: the student&rsquo;s own photos and the pictograms.</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:16px">Making and Using the Visuals</h2>
     <table class="rt">
@@ -1080,17 +1099,21 @@ td input,td select{max-width:100%}
     Charlop-Christy, M. H., Carpenter, M., Le, L., LeBlanc, L. A., &amp; Kellet, K. (2002). Using the Picture Exchange Communication System (PECS) with children with autism: Assessment of PECS acquisition, speech, social-communicative behavior, and problem behavior. <em>Journal of Applied Behavior Analysis, 35</em>(3), 213&ndash;231. &bull;
     Colvin, G., Sugai, G., &amp; Patching, B. (1993). Precorrection: An instructional approach for managing predictable problem behaviors. <em>Intervention in School and Clinic, 28</em>(3), 143&ndash;150. &bull;
     Dettmer, S., Simpson, R. L., Myles, B. S., &amp; Ganz, J. B. (2000). The use of visual supports to facilitate transitions of students with autism. <em>Focus on Autism and Other Developmental Disabilities, 15</em>(3), 163&ndash;169. &bull;
+    Ferster, C. B., &amp; Skinner, B. F. (1957). <em>Schedules of reinforcement</em>. Appleton-Century-Crofts. &bull;
     Flippin, M., Reszka, S., &amp; Watson, L. R. (2010). Effectiveness of the Picture Exchange Communication System (PECS) on communication and speech for children with autism spectrum disorders: A meta-analysis. <em>American Journal of Speech-Language Pathology, 19</em>(2), 178&ndash;195. &bull;
     Ganz, J. B., Earles-Vollrath, T. L., Heath, A. K., Parker, R. I., Rispoli, M. J., &amp; Duran, J. B. (2012). A meta-analysis of single case research studies on aided augmentative and alternative communication systems with individuals with autism spectrum disorders. <em>Journal of Autism and Developmental Disorders, 42</em>(1), 60&ndash;74. &bull;
+    Ghaemmaghami, M., Hanley, G. P., &amp; Jessel, J. (2016). Contingencies promote delay tolerance. <em>Journal of Applied Behavior Analysis, 49</em>(3), 548&ndash;575. &bull;
     Hackenberg, T. D. (2018). Token reinforcement: Translational research and application. <em>Journal of Applied Behavior Analysis, 51</em>(2), 393&ndash;435. &bull;
     Hanley, G. P., Jin, C. S., Vanselow, N. R., &amp; Hanratty, L. A. (2014). Producing meaningful improvements in problem behavior of children with autism via synthesized analyses and treatments. <em>Journal of Applied Behavior Analysis, 47</em>(1), 16&ndash;36. &bull;
     Knight, V., Sartini, E., &amp; Spriggs, A. D. (2015). Evaluating visual activity schedules as evidence-based practice for individuals with autism spectrum disorders. <em>Journal of Autism and Developmental Disorders, 45</em>(1), 157&ndash;178. &bull;
     Lequia, J., Machalicek, W., &amp; Rispoli, M. J. (2012). Effects of activity schedules on challenging behavior exhibited in children with autism spectrum disorders: A systematic review. <em>Research in Autism Spectrum Disorders, 6</em>(1), 480&ndash;492. &bull;
     MacDuff, G. S., Krantz, P. J., &amp; McClannahan, L. E. (1993). Teaching children with autism to use photographic activity schedules: Maintenance and generalization of complex response chains. <em>Journal of Applied Behavior Analysis, 26</em>(1), 89&ndash;97. &bull;
+    Mirenda, P., &amp; Locke, P. A. (1989). A comparison of symbol transparency in nonspeaking persons with intellectual disabilities. <em>Journal of Speech and Hearing Disorders, 54</em>(2), 131&ndash;140. &bull;
     Premack, D. (1959). Toward empirical behavior laws: I. Positive reinforcement. <em>Psychological Review, 66</em>(4), 219&ndash;233. &bull;
     Shogren, K. A., Faggella-Luby, M. N., Bae, S. J., &amp; Wehmeyer, M. L. (2004). The effect of choice-making as an intervention for problem behavior: A meta-analysis. <em>Journal of Positive Behavior Interventions, 6</em>(4), 228&ndash;237. &bull;
     Steinbrenner, J. R., Hume, K., Odom, S. L., Morin, K. L., Nowell, S. W., Tomaszewski, B., Szendrey, S., McIntyre, N. S., Yücesoy-Özkan, S., &amp; Savage, M. N. (2020). <em>Evidence-based practices for children, youth, and young adults with autism</em>. FPG Child Development Institute, National Clearinghouse on Autism Evidence and Practice. &bull;
-    Tiger, J. H., Hanley, G. P., &amp; Hernandez, E. (2006). An evaluation of the value of choice with preschool children. <em>Journal of Applied Behavior Analysis, 39</em>(1), 1&ndash;16.</p>
+    Tiger, J. H., Hanley, G. P., &amp; Hernandez, E. (2006). An evaluation of the value of choice with preschool children. <em>Journal of Applied Behavior Analysis, 39</em>(1), 1&ndash;16. &bull;
+    Vollmer, T. R., Borrero, J. C., Lalli, J. S., &amp; Daniel, D. (1999). Evaluating self-control and impulsivity in children with severe behavior disorders. <em>Journal of Applied Behavior Analysis, 32</em>(4), 451&ndash;466.</p>
     <p class="hint">Pictures are OpenMoji (openmoji.org), CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts, and the practice&rsquo;s own cards and pictures, from its own files (the YouTube logo is a trademark of Google LLC, iPad of Apple Inc. and Time Timer of Time Timer LLC).</p>
   </section>
 </main>
@@ -1119,17 +1142,25 @@ const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="r
 document.addEventListener('click',e=>{const b=e.target.closest('button.rowDel[data-del]');if(!b)return;e.preventDefault();rowDel(b.dataset.del,+b.dataset.i);});
 
 /* ---------------- state ---------------- */
-const RULES0=[['safehands','Safe hands','Hands to myself and gentle with things.',1],['walkingfeet','Walking feet','In the hallway we walk.',1],['sitting','Sitting','Bottom on the chair, feet on the floor.',1],['waiting','Waiting','My turn is coming. Hands in my lap.',1],['quiet','Quiet voice','Inside voice, so everyone can work.',1],['listening','Listening ears','Eyes on the speaker, mouth quiet.',0],['raisehand','Raise my hand','Hand up and wait to be called on.',0],['askhelp','Ask for help','Hand up, or the help card.',0],['takebreak','Take a break','Use the break card, then come back.',0],['stayarea','Stay in my area','In my space until the teacher says.',0],['calm','Calm body','Still body, slow breath.',0],['eyes','Eyes on the teacher','Look at the teacher when she talks.',0],['kindwords','Kind words','Say it kindly or ask for help.',0],['lineup','Line up','Walking feet to my spot in line.',0],['cleanup','Clean up','Put things back where they go.',0],['stop','Stop','Stop and look at the adult.',0]];
+const RULES0=[['safehands','Safe hands','Hands to myself and gentle with things.',1],['walkingfeet','Walking feet','In the hallway we walk.',1],['sitting','Sitting','Bottom on the chair, feet on the floor.',1],['waiting','Waiting','My turn is coming. Calm body, I can wait.',1],['quiet','Quiet voice','Inside voice, so everyone can work.',1],['listening','Listening ears','Body toward the speaker, mouth quiet.',0],['raisehand','Raise my hand','Hand up and wait to be called on.',0],['askhelp','Ask for help','Hand up, or the help card.',0],['takebreak','Take a break','Use the break card, then come back.',0],['stayarea','Stay in my area','In my space until the teacher says.',0],['calm','Calm body','Slow breaths, gentle hands.',0],['eyes','Ready to listen','Body toward the teacher when the teacher talks, or eyes on my work.',0],['kindwords','Kind words','Say it kindly or ask for help.',0],['lineup','Line up','Walking feet to my spot in line.',0],['cleanup','Clean up','Put things back where they go.',0],['stop','Stop','Stop and look at the adult.',0]];
 const FS0=[['calmface','Calm','I am ready to learn.'],['ok','A little upset','Take three slow breaths.'],['worried','Upset','Ask for a break with my card.'],['frustrated','Very upset','Go to the calm corner; squeeze the ball.'],['angry','Too big','Get an adult. Use my words or my card.']];
 function cello(k,l){return{k:k||'',ph:'',l:l||''};}
-function blank(){return{meta:{},chk:{},photos:[],board:[],cards:[],rules:RULES0.map(r=>({on:!!r[3],k:r[0],ph:'',l:r[1],say:r[2]})),ft:[cello('writing','First'),cello('ipad','Then')],sched:['arrival','reading','math','snack','recess','lunch'].map(k=>cello(k)),choice:['ipad','ball','drawing','puzzle','bubbles','story'].map(k=>cello(k)),tk:[cello('sticker'),cello('ipad')],fs:FS0.map(f=>({k:f[0],ph:'',l:f[1],d:f[2]}))};}
+/* v23.26 (review F290) the break and help cards a sheet can print: only the break card is ticked to start (the plan's own request,
+   from the case, takes its place); an older file printed all four, so it keeps them */
+const BRK0=[['takebreak','Break, please',1],['askhelp','Help, please',0],['finished','All done',0],['more','More, please',0]];
+/* v23.26 (review F295) the rule cards' old default sentences, brought up to date in an older file */
+const RULES_OLD={waiting:'My turn is coming. Hands in my lap.',listening:'Eyes on the speaker, mouth quiet.',calm:'Still body, slow breath.',eyes:'Look at the teacher when she talks.'};
+function blank(){return{meta:{},chk:{},photos:[],board:[],cards:[],rules:RULES0.map(r=>({on:!!r[3],k:r[0],ph:'',l:r[1],say:r[2]})),ft:[cello('writing'),cello('ipad')],brk:BRK0.map(b=>({on:!!b[2],k:b[0],ph:'',l:b[1],do:''})),sched:['arrival','reading','math','snack','recess','lunch'].map(k=>cello(k)),choice:['ipad','ball','drawing','puzzle','bubbles','story'].map(k=>cello(k)),tk:[cello('sticker'),cello('ipad')],fs:FS0.map(f=>({k:f[0],ph:'',l:f[1],d:f[2]}))};}
 let S=blank();
 function ensure(){
   const R=Math.max(2,Math.min(5,num(S.meta.b_rows)||3)),C=Math.max(2,Math.min(6,num(S.meta.b_cols)||4));
   while(S.board.length<R*C)S.board.push(cello());if(S.board.length>R*C)S.board.length=R*C;
   if(!S.cards.length)S.cards.push({k:'',ph:'',l:'',qty:'20'});
   while(S.sched.length<2)S.sched.push(cello());const chn=num(S.meta.ch_n)||4;while(S.choice.length<chn)S.choice.push(cello());
-  if(S.ft.length!==2)S.ft=[cello('','First'),cello('','Then')];if(S.tk.length!==2)S.tk=[cello(),cello()];if(S.fs.length!==5)S.fs=FS0.map(f=>({k:f[0],ph:'',l:f[1],d:f[2]}));
+  if(S.ft.length!==2)S.ft=[cello(),cello()];if(S.ft[0].l==='First')S.ft[0].l='';if(S.ft[1].l==='Then')S.ft[1].l='';   /* v23.26 (review F288) the picture's own word, not the heading again */
+  if(!Array.isArray(S.brk))S.brk=BRK0.map(b=>({on:true,k:b[0],ph:'',l:b[1],do:''}));
+  (S.rules||[]).forEach(r=>{const R=RULES0.find(x=>x[0]===r.k);if(R&&RULES_OLD[r.k]&&r.say===RULES_OLD[r.k]){r.say=R[2];if(r.k==='eyes'&&r.l==='Eyes on the teacher')r.l=R[1];}});
+ if(S.tk.length!==2)S.tk=[cello(),cello()];if(S.fs.length!==5)S.fs=FS0.map(f=>({k:f[0],ph:'',l:f[1],d:f[2]}));
 }
 /* ---------------- pictures ---------------- */
 function photo(id){return S.photos.find(p=>p.id===id);}
@@ -1155,7 +1186,7 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
   if(MINE){$('#pdCam',d).addEventListener('click',()=>{NBHPIC.open({use:!!PICK}).then(pic=>{if(!pic)return;if(PICK){const o=PICK.arr[PICK.i];libPhoto(pic,p=>{o.ph=p.id;o.k='';d.close();PICK.done();});}else{grid();renderLib();}});});
     $('#pdLib',d).addEventListener('click',()=>{NBHPIC.manage().then(grid);});}
   d.grid=grid;return d;}
-function openPick(arr,i,done){PICK={arr,i,done};const d=pickDlg();$('#pdQ',d).value='';d.grid();if(MINE)NBHPIC.all();if(d.showModal)d.showModal();else d.setAttribute('open','');}
+function openPick(arr,i,done){PICK={arr,i,done:()=>{const o=arr[i];if(o){if(o.fromCase){o.l='';delete o.fromCase;}delete o.need;}done();}};   /* v23.26 (review F288) */const d=pickDlg();$('#pdQ',d).value='';d.grid();if(MINE)NBHPIC.all();if(d.showModal)d.showModal();else d.setAttribute('open','');}
 function addPhoto(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,320/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
   const p={id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),label:(file.name||'photo').replace(/\.[^.]+$/,'').slice(0,30),img:c.toDataURL('image/jpeg',0.82)};S.photos.push(p);cb(p);};im.src=r.result;};r.readAsDataURL(file);}
 $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;addPhoto(f,p=>{if(PICK){PICK.arr[PICK.i].ph=p.id;PICK.arr[PICK.i].k='';const d=$('#pickDlg');if(d&&d.open)d.close();PICK.done();PICK=null;}renderLib();});});
@@ -1176,6 +1207,11 @@ function renderBoardTbl(){$('#bTbl tbody').innerHTML=S.board.map((o,i)=>'<tr><td
 function renderCardsTbl(){$('#cTbl tbody').innerHTML=S.cards.map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('cards',i,o)+'</td><td><input data-r="cards" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph}))+'"></td><td><input data-r="cards" data-i="'+i+'" data-f="qty" value="'+esc(o.qty)+'" style="text-align:center"></td>'+delCell('cards',i,'card')+'</tr>').join('');}
 function renderRulesTbl(){$('#rTbl tbody').innerHTML=S.rules.map((o,i)=>'<tr><td class="num"><input type="checkbox" data-r="rules" data-i="'+i+'" data-f="on"'+(o.on?' checked':'')+' aria-label="Rule '+(i+1)+' on"></td><td>'+pickCell('rules',i,o)+'</td><td><input data-r="rules" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'"></td><td><input data-r="rules" data-i="'+i+'" data-f="say" value="'+esc(o.say)+'"></td>'+delCell('rules',i,'rule')+'</tr>').join('');}
 function renderStripTbls(){
+  /* v23.26 (review F288) the words under the First, Then and Working-for pictures (blank: the picture's own name), and the names from the case with no picture yet */
+  $$('input.vs-word').forEach(el=>{const o=S[el.dataset.r][+el.dataset.i];if(!o)return;if(document.activeElement!==el)el.value=o.l||'';el.placeholder=lbl({k:o.k,ph:o.ph})||'the picture\u2019s own name';});
+  {const nd=[].concat(S.choice,S.ft,S.tk).filter(o=>o&&o.need&&!o.k&&!o.ph).map(o=>o.l).filter(Boolean),e=$('#vsNeed');if(e){e.hidden=!nd.length;e.textContent=nd.length?'No library picture matched '+nd.join(', ')+' (from Form PA-1): choose one, or upload a photo of the real item.':'';}}
+  {const tb=$('#brkTbl tbody');if(tb)tb.innerHTML=S.brk.map((o,i)=>'<tr><td class="ck"><input type="checkbox" data-r="brk" data-i="'+i+'" data-f="on"'+(o.on?' checked':'')+' aria-label="Print card '+(i+1)+'"></td><td>'+pickCell('brk',i,o)+'</td><td><input data-r="brk" data-i="'+i+'" data-f="l" value="'+esc(o.l||'')+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph}))+'"></td><td><input data-r="brk" data-i="'+i+'" data-f="do" value="'+esc(o.do||'')+'" placeholder="Say yes at once, every time, while the card is new"></td>'+delCell('brk',i,'card')+'</tr>').join('');}
+  {const n=$('#wEachNote');if(n)n.hidden=S.meta.w_each!=='time';}
   $('#ftFirst').outerHTML=pickCell('ft',0,S.ft[0]).replace('class="pick"','class="pick" id="ftFirst"');$('#ftThen').outerHTML=pickCell('ft',1,S.ft[1]).replace('class="pick"','class="pick" id="ftThen"');
   $('#tkPic').outerHTML=pickCell('tk',0,S.tk[0]).replace('class="pick"','class="pick" id="tkPic"');$('#tkRw').outerHTML=pickCell('tk',1,S.tk[1]).replace('class="pick"','class="pick" id="tkRw"');
   $('#scTbl tbody').innerHTML=S.sched.map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('sched',i,o)+'</td><td><input data-r="sched" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph}))+'"></td>'+delCell('sched',i,'step')+'</tr>').join('');
@@ -1190,7 +1226,9 @@ function renderLib(){
 }
 $('#libCat').addEventListener('change',renderLib);$('#libQ').addEventListener('input',renderLib);
 $('#photos').addEventListener('input',e=>{const i=e.target.closest('input[data-phl]');if(i){const p=photo(i.dataset.phl);if(p)p.label=i.value.slice(0,30);}});
-$('#photos').addEventListener('click',async e=>{const b=e.target.closest('button[data-phdel]');if(!b)return;if(!(await nbhUI.confirm('Remove this photo?\nAny visual using it loses the picture.',{ok:'Remove',danger:true})))return;const id=b.dataset.phdel;S.photos=S.photos.filter(p=>p.id!==id);['board','cards','rules','ft','sched','choice','tk','fs'].forEach(k=>S[k].forEach(o=>{if(o.ph===id)o.ph='';}));renderAll();});
+$('#photos').addEventListener('click',async e=>{const b=e.target.closest('button[data-phdel]');if(!b)return;if(!(await nbhUI.confirm('Remove this photo?\nAny visual using it loses the picture.',{ok:'Remove',danger:true})))return;const id=b.dataset.phdel,gone=S.photos.find(p=>p.id===id);S.photos=S.photos.filter(p=>p.id!==id);['board','cards','rules','ft','sched','choice','tk','fs','brk'].forEach(k=>S[k].forEach(o=>{if(o.ph===id)o.ph='';}));renderAll();
+  /* v23.26 (review F289) and, if asked, off this device's My pictures too */
+  if(MINE&&gone&&gone.lib&&NBHPIC.get(gone.lib)&&(await nbhUI.confirm('Also take it off this device\u2019s My pictures?\nIt is then gone from the picture chooser for every student on this device.',{ok:'Take it off this device',cancel:'Keep it there'}))){try{await NBHPIC.remove(gone.lib);}catch(x){}}});
 
 /* ---------------- outputs at true size ---------------- */
 /* (v21.44, A7) Safari on the iPad and iPhone ignores a page's request for landscape paper and prints on portrait Letter inside its
@@ -1267,9 +1305,10 @@ function stripsHtml(){
     else{const perPage=vPer(size,LAY);for(let p=0;p<items.length;p+=perPage){h+=page('<div class="strip" style="'+sw+';min-height:'+(LAY?TH:10)+'in"><div class="ttl">'+esc(m.sc_title||'My Schedule')+'</div><div class="rowc" style="align-items:flex-start;justify-content:center;gap:.6in"><div class="col">'+items.slice(p,p+perPage).map(o=>cellHtml(o,size,{label:'below',dot:'yes'})).join('')+'</div><div class="donecol"><div class="ttl" style="font-size:.3in;margin-bottom:0">Done</div>'+items.slice(p,p+perPage).map(()=>'<div class="box" style="width:'+size+'in;height:'+size+'in"><span class="dot" style="position:static;transform:none;display:inline-block;width:.6in;height:.6in;border:2px solid #182e43;border-radius:50%"></span></div>').join('')+'</div></div></div>','the schedule');}}}
   if(c.s_choice){const n=num(m.ch_n)||4,items=S.choice.slice(0,n),size=n>4?2.1:2.6;h+=page('<div class="strip" style="'+sw+';min-height:6in"><div class="ttl">'+esc(m.ch_title||'I want…')+'</div><div class="rowc">'+items.map(o=>cellHtml(o,size,{label:'below',dot:'yes'})).join('')+'</div></div>','the choice board');}
   if(c.s_token){const n=Math.max(1,Math.min(10,num(m.tk_n)||5)),ts=n<=5?1.25:n<=8?1.05:.9;h+=page('<div class="strip" style="'+sw+';min-height:5.5in"><div class="ttl">'+esc(m.tk_title||'I am working for…')+'</div><div class="rowc">'+cellHtml(S.tk[1],2.6,{label:'below',dot:'yes'})+'</div><div class="rowc">'+Array.from({length:n},()=>'<div class="tok" style="width:'+ts+'in;height:'+ts+'in">'+pic(S.tk[0],'')+'</div>').join('')+'</div><div class="ttl" style="font-size:.25in;font-family:var(--sans)">'+n+' tokens, then my reward</div></div>','the token board');}
-  if(c.s_wait){const n=num(m.w_n)||5,cols=['#5C9E31','#B1CC33','#FCEA2B','#F4AA41','#EA5A47'].slice(5-n);h+=page('<div class="strip" style="'+sw+';min-height:4.4in"><div class="ttl">Wait</div><div class="rowc">'+cellHtml({k:'waiting'},3,{label:'none',dot:'no'})+'<div style="font:600 .5in var(--sans);max-width:3in;line-height:1.1">'+esc(m.w_words||'Wait. It is coming.')+'</div></div></div><div class="strip" style="'+sw+';min-height:3.6in;margin-top:.3in"><div class="ttl">Countdown</div><div class="cdown">'+cols.map((col,i)=>'<div class="sq" style="width:1.25in;height:1.25in;background:'+col+'">'+(n-i)+'</div>').join('')+'</div><div class="ttl" style="font-size:.25in;font-family:var(--sans)">Take one away each time; at zero it is your turn.</div></div>','the wait card and countdown');}
+  if(c.s_wait){const n=num(m.w_n)||5,cols=['#5C9E31','#B1CC33','#FCEA2B','#F4AA41','#EA5A47'].slice(5-n);h+=page('<div class="strip" style="'+sw+';min-height:4.4in"><div class="ttl">Wait</div><div class="rowc">'+cellHtml({k:'waiting'},3,{label:'none',dot:'no'})+'<div style="font:600 .5in var(--sans);max-width:3in;line-height:1.1">'+esc(m.w_words||'Wait. It is coming.')+'</div></div></div><div class="strip" style="'+sw+';min-height:3.6in;margin-top:.3in"><div class="ttl">Countdown</div><div class="cdown">'+cols.map((col,i)=>'<div class="sq" style="width:1.25in;height:1.25in;background:'+col+'">'+(n-i)+'</div>').join('')+'</div><div class="ttl" style="font-size:.25in;font-family:var(--sans)">'+esc(({task:'Take one away each time you finish one; at zero it is your turn.',calm:'Take one away for each calm minute; at zero it is your turn.',step:'Take one away at each step of the wait; at zero it is your turn.',time:'Take one away each minute; at zero it is your turn.'})[m.w_each]||'Take one away each time you finish one, or wait with calm hands; at zero it is your turn.')+'</div></div>','the wait card and countdown');}
   if(c.s_scale){h+=page('<div class="scale" style="'+(LAY?'width:'+TW+'in;height:'+TH+'in;padding:.2in':'width:7.5in;height:10in')+'"><div class="ttl" style="text-align:center;font:700 .45in var(--serif,Georgia,serif)">'+esc(m.fs_title||'How big is my feeling?')+'</div>'+S.fs.map((o,i)=>'<div class="lv"><div class="n">'+(i+1)+'</div>'+pic(o,'',"width:1.1in;height:1.1in")+'<div><div class="w">'+esc(o.l)+'</div><div class="d">'+esc(o.d)+'</div></div></div>').join('')+'</div>','the feelings scale');}
-  if(c.s_break){h+=page('<div class="rowc" style="display:flex;gap:'+(LAY?'.35':'.5')+'in;justify-content:center;flex-wrap:wrap"><div class="rule" style="width:3.5in;height:3.5in;font-size:.55in">'+pic({k:'takebreak'},'',"width:1.9in;height:1.9in")+'<div class="t">Break, please</div></div><div class="rule" style="width:3.5in;height:3.5in;font-size:.55in">'+pic({k:'askhelp'},'',"width:1.9in;height:1.9in")+'<div class="t">Help, please</div></div><div class="rule" style="width:3.5in;height:3.5in;font-size:.55in">'+pic({k:'finished'},'',"width:1.9in;height:1.9in")+'<div class="t">All done</div></div><div class="rule" style="width:3.5in;height:3.5in;font-size:.55in">'+pic({k:'more'},'',"width:1.9in;height:1.9in")+'<div class="t">More, please</div></div></div>','the break and help cards');}
+  /* v23.26 (review F290) the cards ticked, each with its word and picture; what the adults do at the foot of the sheet */
+  if(c.s_break){const B=S.brk.filter(o=>o.on&&(o.k||o.ph||String(o.l||'').trim())),ad=B.filter(o=>String(o.do||'').trim());if(B.length)h+=page('<div class="rowc" style="display:flex;gap:'+(LAY?'.35':'.5')+'in;justify-content:center;flex-wrap:wrap">'+B.map(o=>'<div class="rule" style="width:3.5in;height:3.5in;font-size:.55in">'+pic(o,'',"width:1.9in;height:1.9in")+'<div class="t">'+esc(String(o.l||'').trim()||lbl(o))+'</div></div>').join('')+'</div>'+(ad.length?'<div class="vs-adult"><b>For the adults:</b> '+ad.map(o=>'<b>'+esc(String(o.l||'').trim()||lbl(o))+':</b> '+esc(String(o.do).trim())).join('; ')+'</div>':''),'the break and help cards');}
   return h;}
 function renderStrips(){$('#stripsOut').innerHTML=stripsHtml()||'<p class="hint">Tick the visuals to print.</p>';}
 /* ---------------- events ---------------- */
@@ -1279,7 +1318,7 @@ document.addEventListener('input',e=>{const el=e.target;
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type==='checkbox'){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.checked;renderOut();return;}
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderOut();}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(b_rows|b_cols|ch_n)$/.test(el.dataset.m)){ensure();renderBoardTbl();renderStripTbls();}renderOut();}});
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(b_rows|b_cols|ch_n|w_each)$/.test(el.dataset.m)){ensure();renderBoardTbl();renderStripTbls();}renderOut();}});
 $('#bFill').addEventListener('click',()=>{const c=$('#bFillCat').value;const ks=KEYS.filter(k=>P[k].c===c&&!S.board.some(o=>o.k===k));let j=0;S.board.forEach(o=>{if(!(o.k||o.ph)&&j<ks.length){o.k=ks[j++];}});renderBoardTbl();renderOut();});
 $('#bClear').addEventListener('click',async ()=>{if(await nbhUI.confirm('Empty every cell of the board?\nEvery symbol, photo and label on the board is removed.',{ok:'Empty',danger:true})){S.board.forEach(o=>{o.k='';o.ph='';o.l='';});renderBoardTbl();renderOut();}});
 $('#cAdd').addEventListener('click',()=>{if(S.cards.length>=30)return;S.cards.push({k:'',ph:'',l:'',qty:'20'});renderCardsTbl();});
@@ -1287,10 +1326,11 @@ $('#cDel').addEventListener('click',()=>{if(S.cards.length<=1)return;S.cards.pop
 $('#rAdd').addEventListener('click',()=>{if(S.rules.length>=24)return;S.rules.push({on:true,k:'',ph:'',l:'',say:''});renderRulesTbl();});
 $('#rDel').addEventListener('click',()=>{if(S.rules.length<=1)return;S.rules.pop();renderRulesTbl();renderOut();});
 $('#scAdd').addEventListener('click',()=>{if(S.sched.length>=14)return;S.sched.push(cello());renderStripTbls();});
+$('#brkAdd').addEventListener('click',()=>{if(S.brk.length>=8)return;S.brk.push({on:true,k:'',ph:'',l:'',do:''});renderStripTbls();renderOut();});
 $('#scDel').addEventListener('click',()=>{if(S.sched.length<=1)return;S.sched.pop();renderStripTbls();renderOut();});
-async function rowDel(r,i){const o=S[r]&&S[r][i];if(!o||!['cards','rules','sched'].includes(r))return;
+async function rowDel(r,i){const o=S[r]&&S[r][i];if(!o||!['cards','rules','sched','brk'].includes(r))return;
   if((o.k||o.ph||o.l||o.say)&&!(await nbhUI.confirm('Delete this row?\nWhat was entered in it is deleted.',{ok:'Delete',danger:true})))return;S[r].splice(i,1);
-  if(!S[r].length)S[r].push(r==='cards'?{k:'',ph:'',l:'',qty:'20'}:r==='rules'?{on:true,k:'',ph:'',l:'',say:''}:cello());
+  if(!S[r].length)S[r].push(r==='cards'?{k:'',ph:'',l:'',qty:'20'}:r==='rules'?{on:true,k:'',ph:'',l:'',say:''}:r==='brk'?{on:true,k:'',ph:'',l:'',do:''}:cello());
   if(r==='cards')renderCardsTbl();else if(r==='rules')renderRulesTbl();else renderStripTbls();renderOut();}
 /* (v21.44, A7) the line above each page's visuals: how they print on this device and where the Sheets setting is; where Print the
    visuals lays the sheets out for Safari, what differs from the sheets shown, and any sheet it must still scale to fit, with how much
@@ -1322,7 +1362,19 @@ function probeFits(v){const out=$('#'+v+'Out');if(!out||!out.offsetWidth)return 
   return r;}
 function renderOut(){renderBoard();renderCards();renderRules();renderStrips();if(!LAY)sheetNotes(true);}
 function bindMeta(){$$('[data-m]').forEach(el=>{if(S.meta[el.dataset.m]!==undefined)el.value=S.meta[el.dataset.m];else if(el.tagName==='SELECT')S.meta[el.dataset.m]=el.value;else el.value='';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();if(MINE)NBHPIC.absorb(S.photos);bindMeta();renderBoardTbl();renderCardsTbl();renderRulesTbl();renderStripTbls();renderLib();renderOut();}
+/* v23.26 (review F289) a file's pictures that came from another device's My pictures join this device's only when the BCBA says so
+   (No on a shared device: they stay in this student's file); asked once for each picture */
+const VS_ASKED=new Set();let vsAsking=false;
+function vsAbsorb(){if(!MINE||vsAsking)return;const cand=S.photos.filter(p=>p&&typeof p.lib==='string'&&p.lib&&!VS_ASKED.has(p.lib));if(!cand.length)return;vsAsking=true;
+  Promise.resolve(NBHPIC.ready()).then(()=>NBHPIC.all()).then(()=>{const pend=cand.filter(p=>!NBHPIC.get(p.lib));cand.forEach(p=>VS_ASKED.add(p.lib));if(!pend.length)return;
+    return nbhUI.confirm('This file carries '+(pend.length===1?'a picture':pend.length+' pictures')+' from another device\u2019s My pictures.\nAdd '+(pend.length===1?'it':'them')+' to this device\u2019s My pictures, for every student? On a shared device, choose No: '+(pend.length===1?'it stays':'they stay')+' in this student\u2019s file only.',{ok:'Add to this device',cancel:'No, this file only'}).then(y=>{if(y)NBHPIC.absorb(pend);});})
+  .catch(()=>{}).then(()=>{vsAsking=false;});}
+/* Form DM-1's photo / media permission, from the case: "No" or "Unknown" asks before a photo is taken or uploaded */
+function vsPerm(){try{const f=window.nbhCase&&nbhCase.facts,fl=f&&f.profile&&f.profile.flags;return fl&&fl.photo?String(fl.photo):'';}catch(e){return '';}}
+function vsPermPaint(){const e=$('#vsPerm');if(!e)return;const w=vsPerm(),t=w==='No'?'Form DM-1: no photo or media permission. Use the pictograms, or a photo of an object with nothing that identifies the student.':w==='Unknown'?'Form DM-1: the photo and media permission is not known. Check it before a photo goes in.':'';e.hidden=!t;e.textContent=t;}
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('#phAdd,#phCam,#pdPhoto,#pdCam');const w=vsPerm();if(!b||(w!=='No'&&w!=='Unknown')||b.dataset.vsok)return;
+  e.preventDefault();e.stopPropagation();if(await nbhUI.confirm((w==='No'?'Form DM-1 records no photo or media permission for this student.':'Form DM-1 does not know whether there is photo or media permission for this student.')+'\nA photo of an object is fine; a photo that shows the student, a name or a bus number is not.',{ok:'Go on',cancel:'Not now'})){b.dataset.vsok='1';b.click();delete b.dataset.vsok;}},true);
+function renderAll(){ensure();vsAbsorb();vsPermPaint();bindMeta();renderBoardTbl();renderCardsTbl();renderRulesTbl();renderStripTbls();renderLib();renderOut();}
 
 /* ---------------- printing ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -1393,20 +1445,46 @@ $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
 
-/* v21.78 the case: in. The reinforcer menu from Form PA-1 (the high and middle preference items, in its order) names
-   the choice board's choices, the first-then board's "Then" and the token board's reward, only where that label is
-   still empty (the "Then" card's own word counts as empty) and no photo is on the card. The pictures are left as they
-   are, so the note asks the person to check that each picture matches its new name. Nothing typed is replaced. */
-(function(){const was=window.__nbhFactsIn;
-window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;f=f||{};
+/* v21.78 the case: in. v23.26 (review F288): the reinforcer menu from Form PA-1 (high and middle preference, and a low-preference item
+   RA-1 confirmed) goes on the choice board, the first-then board's Then card and the token board's reward with a matching library
+   picture and its word together; a name with no matching picture clears the starting picture and asks for one. Once only, and only
+   into a board still as it started, so a word the BCBA cleared is not written back; a picture chosen later takes the place of the
+   case's word. (F290) The plan's request (Form TD-1's replacement, or Form TB-1's) is the break and help card ticked. */
+(function(){const was=window.__nbhFactsIn;const CH0=['ipad','ball','drawing','puzzle','bubbles','story'],T=v=>String(v==null?'':v).trim();
+ const vsMatch=w=>{const lw=T(w).toLowerCase();if(!lw)return '';let k=KEYS.find(k=>P[k]&&T(P[k].l).toLowerCase()===lw);if(k)return k;k=KEYS.find(k=>P[k]&&T(P[k].l).length>3&&lw.includes(T(P[k].l).toLowerCase()));return k||'';};
+ window.__vsMatch=vsMatch;
+ const brkDefault=()=>Array.isArray(S.brk)&&S.brk.length===BRK0.length&&S.brk.every((o,i)=>o.k===BRK0[i][0]&&!o.ph&&o.l===BRK0[i][1]&&!T(o.do));
+window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;const miss=[];f=f||{};
   if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
-  const menu=(window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(f.menu||[]).filter(m=>m&&String(m.name||'').trim()&&m.tier!=='LP')).map(m=>String(m.name).trim()),   /* v22.59 RA-1's verdicts kept */L=s=>String(s||'').trim().toLowerCase();
-  if(menu.length){ensure();const chn=num(S.meta.ch_n)||4,ch=S.choice.slice(0,chn),used=new Set(ch.map(o=>L(o.l)).filter(Boolean));
-    const free=menu.filter(x=>!used.has(L(x)));ch.forEach(o=>{if(!o.ph&&!L(o.l)&&free.length){o.l=free.shift();k++;}});
-    const t=S.ft[1];if(t&&!t.ph&&(!L(t.l)||L(t.l)==='then')){t.l=menu[0];k++;}
-    const w=S.tk[1];if(w&&!w.ph&&!L(w.l)){w.l=menu[0];k++;}}
+  ensure();
+  const all=window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(f.menu||[]).filter(m=>m&&T(m.name)&&m.tier!=='LP');   /* v22.59 RA-1's verdicts kept */
+  const menu=all.filter(m=>m&&(m.tier==='HP'||m.tier==='MP'||m.keep)).map(m=>T(m.name)).filter(Boolean);
+  const put=(o,name)=>{const key=vsMatch(name);o.k=key;o.ph='';o.l=name;o.fromCase=1;if(key)delete o.need;else{o.need=1;miss.push(name);}k++;};
+  if(menu.length&&!S.meta.case_menu){const chn=num(S.meta.ch_n)||4,ch=S.choice.slice(0,chn);
+    if(ch.every((o,i)=>!o.ph&&!T(o.l)&&(!o.k||o.k===CH0[i])))ch.forEach((o,i)=>{if(i<menu.length)put(o,menu[i]);else{o.k='';o.ph='';}});
+    const t=S.ft[1];if(t&&!t.ph&&!T(t.l)&&(!t.k||t.k==='ipad'))put(t,menu[0]);
+    const w=S.tk[1];if(w&&!w.ph&&!T(w.l)&&(!w.k||w.k==='ipad'))put(w,menu[0]);
+    if(k)S.meta.case_menu='1';}
+  const rep=T((f.plan&&f.plan.rep)||((f.behaviors||[]).find(b=>b&&b.isRep)||{}).label);
+  if(rep&&!S.meta.case_brk&&brkDefault()){const lw=rep.toLowerCase(),i=/\bbreak\b/.test(lw)?0:/\bhelp\b/.test(lw)?1:/all done|finished/.test(lw)?2:/\bmore\b/.test(lw)?3:-1;
+    S.brk.forEach((o,j)=>{o.on=j===i;});if(i<0)S.brk.push({on:true,k:vsMatch(rep),ph:'',l:rep.slice(0,40),do:''});
+    const c=i>=0?S.brk[i]:S.brk[S.brk.length-1],rf=T(f.plan&&f.plan.reinf);c.do='Honor it at once, every time, while the card is new'+(rf?': '+rf.replace(/[\s.]+$/,''):'')+'.';
+    S.meta.case_brk='1';k++;}
   if(k){try{renderAll();}catch(e){}const el=document.querySelector('[data-r="choice"][data-f="l"]')||document.querySelector('[data-m]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}
-  return {filled:n+k,note:k?'reinforcer names from Form PA-1 went on as labels; check that each picture matches':((r&&r.note)||'')};};
+  else try{vsPermPaint();}catch(e){}
+  return {filled:n+k,note:k?(miss.length?'reinforcer names from Form PA-1 went on with their pictures; no library picture for '+miss.join(', ')+': choose one on Strips and boards':'reinforcer names from Form PA-1 went on with their own pictures'):((r&&r.note)||'')};};
+/* v23.26 (review F292, in part) the visuals, out to the case (new key "visuals"): what is printed, its words, and the break and help cards,
+   with the date and the BCBA, so the staff forms can name them */
+window.__nbhFactsOut=function(){try{const c=S.chk||{},m=S.meta||{},L=o=>T(o&&o.l)||T(lbl(o)),out=[];
+  if(c.s_ft)out.push({what:'First-then board',words:L(S.ft[0])+' then '+L(S.ft[1])});
+  if(c.s_sched){const it=S.sched.filter(o=>o.k||o.ph).map(L).filter(Boolean);if(it.length)out.push({what:'Visual schedule',words:it.join(', ')});}
+  if(c.s_choice){const it=S.choice.slice(0,num(m.ch_n)||4).map(L).filter(Boolean);if(it.length)out.push({what:'Choice board',words:it.join(', ')});}
+  if(c.s_token)out.push({what:'Token board',words:(num(m.tk_n)||5)+' tokens for '+L(S.tk[1])});
+  if(c.s_wait)out.push({what:'Wait card and countdown',words:T(m.w_words)||'Wait. It is coming.'});
+  if(c.s_scale)out.push({what:'Feelings scale',words:S.fs.map(o=>T(o.l)).filter(Boolean).join(', ')});
+  if(c.s_break){const B=S.brk.filter(o=>o.on);if(B.length)out.push({what:'Break and help cards',words:B.map(L).join(', '),adult:B.map(o=>T(o.do)).filter(Boolean).join('; ')});}
+  if(S.rules&&S.rules.some(r=>r.on))out.push({what:'Rule cards',words:S.rules.filter(r=>r.on).map(r=>T(r.l)).filter(Boolean).join(', ')});
+  if(!out.length)return null;const v={items:out,src:'VS-1'};if(T(m.date))v.date=T(m.date);if(T(m.bcba))v.by=T(m.bcba);return {visuals:v};}catch(e){return null;}};
 })();
 </script>
 
