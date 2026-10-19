@@ -13,6 +13,11 @@
          holds the goal; fading step 2 with 3 of 6 periods rated finishes 36 of 36.
    F262  phase 0 on the iPad: the adult rates alone, 12 Yes and 6 No for 3 days is 66.7% behavior with no points; the first
          goal suggested in points with how many baseline days meet it; the paper hint says how to enter a teacher-only day.
+   The minors and improvements: F263 a penalty clause holds the contract at "Not ready" with rule 9 No; F266 Setup's
+   performance-deficit answers; F267 the citations and the reference list; F264 the case's allergies, language and photo
+   permission; F265 the plan sent with the point days and a GB-1 objective's criterion; I134 back-ups matching the function;
+   I135 SI-1's assent and words; I132 dated changes from the Record's advice and the Teach sheet, drawn on the graph; I131
+   a paper sheet entered from its marks on the Rate page.
    usage: node qa/sm1-w3-test.js   (WS_URL as in qa/lib.js) */
 const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
 const W=BASE+'/NBH-Workstation/';
@@ -111,6 +116,61 @@ const wire=(p,errs)=>{p.on('pageerror',e=>errs.push(e.message));p.on('console',m
     /Baseline \(teacher only\) 67% 3 teacher-only days .*suggested first goal 80% of the points, met on 3 of 3/.test(d0.R.met[0])&&/Suggested first goal: 80% of the points, met on 3 of the 3 baseline days \(a student rating honestly earns it on a day with the targets met in about 60% of the periods/.test(d0.R.rules),d0.R);
   ok('F262 the facts out send the teacher-only days as behavior, with no points, goal or goal met',d0.f.length===3&&d0.f.every(x=>x.ph==='0'&&x.pct===null&&x.beh===66.7&&x.goal===null&&x.met===null),d0.f);
   ok('F262 the paper hint says how to enter a teacher-only day',/A teacher-only day \(phase 0\) has no points: enter its date, phase 0 and the Behavior % only/.test(d0.hint));
+
+  /* ---------- the minors and improvements ---------- */
+  const m3=await page.evaluate(()=>{W3.reset(1);S.meta.client='Sam (simulated)';S.meta.bc_parent='Sam’s father (simulated)';S.bck.forEach(b=>{b.in='Yes';});
+    S.meta.bc_pen='A stated consequence (write it below; use with caution)';S.meta.bc_pentext='Loses Friday free time and recess the next day';renderBck();renderBc();
+    const sel=document.querySelectorAll('#bcTbl select')[8],a={v:$('#bcVerdict').textContent,dis:sel.disabled,val:sel.value,doc:$('#bcOut').textContent};
+    S.meta.bc_pen='None: a day the task is not done earns nothing, and nothing is lost';renderBck();renderBc();a.v2=$('#bcVerdict').textContent;a.doc2=$('#bcOut').textContent;
+    const su={};for(const v of ['No: teach the skill first; the sheet comes later','Partly: teach the skill alongside the sheet']){S.meta.r_perf=v;renderSetup();su[v[0]]=$('#setupVerdict').innerHTML;}S.meta.r_perf='';renderSetup();
+    const guide=document.body.textContent,refs=[...document.getElementById('smRefs').childNodes].map(n=>n.textContent).join('').replace(/^\s*Reference list\.\s*/,'').split('•').map(x=>x.trim()).filter(Boolean);
+    return {a,su,kim:/Maynard & Kim/.test(guide),smith:/\(Smith, Thompson & Maynard, 2022\)/.test(guide),rhode:/an exact match earned a bonus point, and ratings more than one point apart earned none/.test(guide)&&/not Rhode’s rule/.test(guide),
+      derisi:/DeRisi and Butz \(1975\) is a practice manual/.test(guide),refs:refs.map(r=>r.slice(0,24)),mc:refs.some(r=>/^McClannahan, L\. E\./.test(r)),sm88:refs.some(r=>/^Smith, D\. J\., Young, K\. R\./.test(r))};});
+  ok('F263 a penalty clause sets rule 9 to No and holds the contract at “Not ready”, warning on recess taken away',/Not ready: a penalty needs the BIP team’s agreement/.test(m3.a.v)&&/takes away recess/.test(m3.a.v)&&m3.a.dis&&m3.a.val==='No'&&/Agreed in the BIP dated/.test(m3.a.doc),m3.a);
+  ok('F263 without the penalty the ten rules met read “Ready to sign” again',/All ten rules met\. Ready to sign\./.test(m3.a.v2)&&!/Agreed in the BIP/.test(m3.a.doc2),m3.a.v2);
+  ok('F266 Setup: “No” says teach the skill first, “Partly” says teach it alongside; neither is “Ready to design”',/v-mid/.test(m3.su.N)&&/Not yet: teach the skill first/.test(m3.su.N)&&/Teach the skill alongside the sheet/.test(m3.su.P)&&!/Ready to design/.test(m3.su.N+m3.su.P),m3.su);
+  const sorted=m3.refs.slice().sort((x,y)=>x.toLowerCase().replace(/[^a-z]/g,'')<y.toLowerCase().replace(/[^a-z]/g,'')?-1:1);
+  ok('F267 the citations: Smith, Thompson & Maynard (no Kim), the Rhode row as the procedure is summarized, DeRisi & Butz cited, the two missing references added, the list in order',
+    !m3.kim&&m3.smith&&m3.rhode&&m3.derisi&&m3.mc&&m3.sm88&&JSON.stringify(sorted)===JSON.stringify(m3.refs)&&/^Amato-Zech/.test(m3.refs[0]),m3);
+  const cf=await page.evaluate(()=>{const F={profile:{src:'DM-1',health:{allergies:'Peanuts (simulated)'},language:{home:'Spanish',interpreter:true,notes:'Interpreter: district line (simulated)'},flags:{photo:'No'}},
+      student:{assent:'given',preference:'Smaller worksheets (simulated)',likes:'Drawing (simulated)',date:'2026-10-01'}};
+    S.meta.bc_assent='';S.meta.rf_class='';window.__nbhFactsIn(F);const r={};r.case0=$('#smCaseBox').textContent;
+    S.meta.rf_class='Edibles (last resort, with family agreement)';smCaseRender();r.case1=$('#smCaseBox').textContent;
+    S.meta.rf_class='';S.store=[{n:'Candy bar',icon:'',img:'',p:'10',tier:''}];smCaseRender();r.case2=$('#smCaseBox').textContent;S.store=[];
+    renderBc();r.bc=$('#bcOut').textContent;r.assent=S.meta.bc_assent;r.stu=$('#smStuBox').textContent;r.tear=tearOff();
+    S.d.avimg='data:image/png;base64,iVBORw0KGgo=';r.av=smAvatar(40);r.note=smPhotoNote();
+    window.__nbhFactsIn(Object.assign({},F,{profile:Object.assign({},F.profile,{flags:{photo:'Yes'}}),student:{assent:'refused',date:'2026-10-02'}}));r.av2=smAvatar(40);r.stu2=$('#smStuBox').innerHTML;S.d.avimg='';
+    window.__nbhFactsIn({});return r;});
+  ok('F264 the case’s allergies show beside the back-ups, and food as a back-up (the class or a store item) is warned on with them',/Allergies \(Form DM-1\): Peanuts \(simulated\)/.test(cf.case0)&&!/Food as a back-up/.test(cf.case0)&&/Food as a back-up\..*Peanuts/.test(cf.case1)&&/Food as a back-up \(Candy bar\)/.test(cf.case2),cf);
+  ok('F264 the family’s language and interpreter print on the contract and the home note',/Family’s language: Spanish · Interpreter: district line \(simulated\)/.test(cf.bc)&&/Family&rsquo;s language: Spanish/.test(cf.tear),{bc:cf.bc.slice(-400),tear:cf.tear.slice(-300)});
+  ok('F264 photo permission No keeps the student’s own photo off the sheet and says so; Yes shows it',!/av-img/.test(cf.av)&&/photo\/media permission on file is No/.test(cf.note)&&/<img class="av-img"/.test(cf.av2),cf);
+  ok('I135 Form SI-1’s assent and words: shown beside the goal set with the student, assent taken onto the contract; a refusal is flagged',cf.assent==='Given'&&/The student’s assent: given \(Form SI-1, 10\/1\/2026\); asked again at each review date/.test(cf.bc)&&
+    /From Form SI-1, 10\/1\/2026/.test(cf.stu)&&/Smaller worksheets \(simulated\)/.test(cf.stu)&&/The student has refused/.test(cf.stu2),cf);
+  const fn=await page.evaluate(()=>{S.meta.func='Escape or avoidance';S.store=[];smCaseRender();const t=$('#smFnBox').textContent;document.getElementById('smFnAdd').click();const st=smStore().map(o=>o.n+' '+o.p);S.meta.func='Automatic';smCaseRender();const t2=$('#smFnBox').textContent;S.store=[];S.meta.func='';smCaseRender();return {t,st,t2};});
+  ok('I134 back-ups that match the function, capped for escape, added to the store on request',/Back-ups that match the function \(Escape or avoidance, Form FS-1\)/.test(fn.t)&&/never on the skill being taught/.test(fn.t)&&fn.st.length===3&&fn.st[0]==='Break pass: 3 minutes away from the task 8'&&fn.t2==='',fn);
+  const pl=await page.evaluate(async()=>{W3.reset(1);for(const k of W3.days.slice(0,5))await W3.day(k,(ri,ti)=>ri===0&&ti===0?[1,1]:[0,0]);S.fid[8].in='N/A';const P=window.__nbhFactsOut().points.plan;
+    S.tg=[{word:'',def:'',cue:'',ex:'',nex:'',icon:'',img:'',goal:''},{word:'',def:'',cue:'',ex:'',nex:'',icon:'',img:'',goal:''}];
+    window.__nbhFactsIn({goals:{acq:[{beh:'Ask for a break (simulated)',cond:'a demand presented',crit:'independently in at least 80% of opportunities'}],red:[]}});const g=S.tg[0];return {P,g:{word:g.word,def:g.def,goal:g.goal}};});
+  ok('F265 the point days carry the plan: the targets, the match table, the goal, the phase, the fidelity steps in the plan',pl.P&&pl.P.sys==='match'&&pl.P.targets.length>=2&&pl.P.match&&pl.P.match.yy===2&&pl.P.goal===50&&pl.P.phase==='1'&&pl.P.fidelity.length===8&&/^The sheet is on the desk/.test(pl.P.fidelity[0])&&Array.isArray(pl.P.changes),pl.P);
+  ok('F265 a GB-1 objective leaves the definition for the BCBA and carries its criterion as the target’s goal',pl.g.word==='Ask for a break (simulated)'&&pl.g.def===''&&pl.g.goal==='80',pl.g);
+  const ch=await page.evaluate(async()=>{W3.reset(1);for(const k of W3.days.slice(0,5))await W3.day(k,(ri,ti)=>ri===0&&ti===0?[1,1]:[0,0]);renderRecord();
+    const b=[...document.querySelectorAll('#logRules [data-chg]')].map(x=>x.textContent),v=$('#logVerdict').textContent;document.querySelector('#logRules [data-chg^="goal|"]').click();await new Promise(r=>setTimeout(r,150));
+    const r={b,v,goal:S.meta.goal,chg:JSON.parse(JSON.stringify(S.chg)),list:$('#logChg').textContent,rules:[...document.querySelectorAll('#logRules li')].map(l=>l.textContent).join(' | ')};
+    S.meta.goal='50';S.meta.cc_cap='50';renderRecord();document.querySelector('#logRules [data-chg^="lad|"]').click();await new Promise(r=>setTimeout(r,150));r.ph=curPhase();r.chg2=S.chg.slice(-1)[0];
+    const fb=document.querySelectorAll('#fadeTbl input[type=checkbox]')[1];fb.checked=true;fb.dispatchEvent(new Event('change',{bubbles:true}));r.fade=S.chg.slice(-1)[0];
+    const o=fromFile(JSON.parse(JSON.stringify({form:'SM-1',rev:'2026-10',S})));r.kept=JSON.stringify(o.chg)===JSON.stringify(S.chg);
+    document.getElementById('simBtn').click();await new Promise(r=>setTimeout(r,900));renderRecord();r.svg=[...document.querySelectorAll('#logPlot text')].map(t=>t.textContent).filter(t=>/^goal /.test(t));return r;});
+  ok('I132 the Record’s advice has a button that makes the change, dated, with the rule that triggered it; the verdict carries no button',ch.b.includes('Raise it to 55%')&&!/Raise it to/.test(ch.v)&&ch.goal==='55'&&ch.chg.length===1&&/^\d+\/\d+$/.test(ch.chg[0].date)&&ch.chg[0].what==='Goal 50% → 55%'&&/goal met on 5 of the last 5 school days at 50%/.test(ch.chg[0].why)&&/Goal 50% → 55%/.test(ch.list)&&/no school days at it yet/.test(ch.rules),ch);
+  ok('I132 a ladder step and a fading step are dated too, kept in the saved file',ch.ph==='2'&&ch.chg2.what==='Ladder phase 1 → 2'&&ch.fade.what==='Fading step 2 ticked'&&ch.fade.k==='fade'&&ch.kept,ch);
+  ok('I132 the graph marks each goal change from the Record (the simulation’s 75% and 80%)',JSON.stringify(ch.svg)==='["goal 75%","goal 80%"]',ch.svg);
+  const pp=await page.evaluate(async()=>{W3.reset(1);const k='2030-02-04';SMR.date=k;SMR.paper=false;setView('rate');smRRender();document.getElementById('smRPaper').click();
+    const cells=document.querySelectorAll('#smRate [data-rpc]').length,hint=(document.querySelector('#smRate .smr-paperh')||{}).textContent||'';
+    const tap=k2=>document.querySelector('#smRate [data-rpc="'+k2+'"]').click();tap('me|0|0');const a=S.days[k].me['0_0'];tap('me|0|0');const b=S.days[k].me['0_0'];tap('me|0|0');const c='0_0' in S.days[k].me;
+    for(let ri=0;ri<6;ri++)for(let ti=0;ti<3;ti++){tap('me|'+ri+'|'+ti);tap('t|'+ri+'|'+ti);}
+    tap('t|5|2');tap('me|5|2');await smRFinish();const row=S.log.find(r=>r.src==='ipad:'+k);SMR.paper=false;setView('log');
+    return {cells,hint,a,b,c,row:row&&{pts:row.pts,poss:row.poss,beh:row.beh,m:row.m,n:row.n,tno:row.tno,nom:row.nom,note:row.note}};});
+  ok('I131 the paper sheet scored from its marks: tap cells for both raters, the form works out the points, the match, the behavior and the No counts',pp.cells===36&&/From the paper sheet:/.test(pp.hint)&&pp.a===0&&pp.b===1&&pp.c===false&&
+    pp.row&&pp.row.pts==='35'&&pp.row.poss==='36'&&pp.row.beh==='94.4'&&pp.row.m==='18'&&pp.row.n==='18'&&pp.row.tno==='1'&&pp.row.nom==='1'&&/^Entered from the paper sheet/.test(pp.row.note),pp);
   await page.close();
 
   /* ---------- the behavior on Form DD-1 and Form PR-1 ---------- */

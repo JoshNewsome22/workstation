@@ -17,7 +17,7 @@
      if it were matched, as Rhode, Morgan and Young (1983) did once matching was faded. */
 
 const SMR_SYS=['match','contract','smiley','cico','interval','rubric'];
-const SMR={date:'',sel:-1,mode:'me',modeSet:false,kid:false,ac:null,wl:null,cue:false,cueAt:0,cueLen:0,begun:-2,hold:0,tick:0};
+const SMR={date:'',sel:-1,mode:'me',modeSet:false,kid:false,paper:false,ac:null,wl:null,cue:false,cueAt:0,cueLen:0,begun:-2,hold:0,tick:0};
 function smRISO(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function smRDateOf(iso){const p=String(iso).split('-').map(Number);return new Date(p[0],p[1]-1,p[2],12);}
 function smRLong(iso){try{return smRDateOf(iso).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}catch(e){return iso;}}
@@ -105,7 +105,7 @@ function smRRender(){const host=$('#smRate');if(!host)return;smREnsure();if(!SMR
   h+='<div class="smr-top"><div class="smr-who">'+(smAvatar(46)||'')+'<b>'+esc(smName()?smName()+'’s day':'My day')+'</b>'+
     (kid?'<span class="smr-date">'+esc(smRLong(SMR.date))+'</span>':'<input type="date" id="smRDate" value="'+esc(SMR.date)+'" aria-label="The day rated">')+'</div>';
   if(!kid)h+='<div class="smr-modes" role="group" aria-label="Who is rating">'+(M.raters.includes('me')||M.raters.length===1?'<button type="button" data-rmode="me" aria-pressed="'+!teach+'">'+esc(smRStu())+(M.raters[0]==='t'&&M.raters.length===1?' sees':' rates')+'</button>':'')+'<button type="button" data-rmode="t" aria-pressed="'+teach+'">'+esc(M.tw)+(M.raters.includes('t')?' rates':' checks')+'</button></div>'+
-    '<div class="smr-acts"><button type="button" class="smr-b pri" id="smRKid">Student screen</button><button type="button" class="smr-b" id="smRFin"'+(smRAny(day)?'':' disabled')+'>'+(day.fin?'Finish again':'Finish the day')+'</button><button type="button" class="smr-b" id="smRPrint"'+(smRAny(day)?'':' disabled')+'>Print the day</button></div>';
+    '<div class="smr-acts"><button type="button" class="smr-b pri" id="smRKid">Student screen</button><button type="button" class="smr-b" id="smRFin"'+(smRAny(day)?'':' disabled')+'>'+(day.fin?'Finish again':'Finish the day')+'</button><button type="button" class="smr-b" id="smRPrint"'+(smRAny(day)?'':' disabled')+'>Print the day</button><button type="button" class="smr-b" id="smRPaper" aria-pressed="'+!!SMR.paper+'">From the paper sheet</button></div>';
   else h+='<div class="smr-kidbar">'+(teach?'<button type="button" class="smr-b" data-rmode="me">Back to '+esc(smRStu())+'</button><button type="button" class="smr-b" id="smRKidOff">Leave the student screen</button>':'<button type="button" class="smr-hold" id="smRHold" aria-label="'+esc(M.tw)+': press and hold">'+esc(M.tw)+'<i></i></button>')+'</div>';
   h+='</div>';
   if(day.sig&&day.sig!==smRSig(M)&&smRAny(day))h+='<div class="smr-warn">This day was rated on a sheet that has changed since (the system, the rating style, the periods or the targets). Its ratings are shown on the sheet as it is now: check them before you finish the day.</div>';
@@ -128,6 +128,7 @@ function smRRender(){const host=$('#smRate');if(!host)return;smREnsure();if(!SMR
   /* the period card */
   h+=smRCard(M,day,T);
   /* the day at a glance */
+  if(!kid&&SMR.paper)h+='<div class="smr-wait smr-paperh"><b>From the paper sheet:</b> choose its date above, then tap each cell to enter the marks as they are on the sheet ('+esc(smRWord(M,0))+', then '+M.lv.slice(1).map((x,i)=>esc(smRWord(M,i+1))).join(', then ')+', then blank again), '+(M.raters.length>1?esc(smRStu())+'&rsquo;s and '+esc(M.tw.toLowerCase())+'&rsquo;s. ':'')+'The points, the match, the behavior and the goal met are worked out as for a day rated here; then Finish the day.</div>';   /* v22.7x (review I131) */
   if(!kid||teach)h+=smRGrid(M,day,T);
   if(kid){h+='<div class="smr-foot">'+esc(smRLong(SMR.date))+' · Form SM-1</div>';}
   else{h+=smRSettings(M)+smRDays();}
@@ -167,7 +168,7 @@ function smRSpk(){return '<svg viewBox="0 0 24 24" width="22" height="22" aria-h
 function smRGrid(M,day,T){const who=r=>r==='me'?esc(smRStu()):esc(M.tw);const two=M.raters.length>1;
   let h='<div class="smr-grid"><table><thead><tr><th rowspan="'+(two?2:1)+'">'+(M.sys==='interval'?'Check':'Period')+'</th>'+M.tg.map(t=>'<th colspan="'+M.raters.length+'">'+esc(t.word)+'</th>').join('')+'<th rowspan="'+(two?2:1)+'">R</th><th rowspan="'+(two?2:1)+'">Points</th></tr>'+
     (two?'<tr>'+M.tg.map(()=>M.raters.map(r=>'<th class="w">'+who(r)+'</th>').join('')).join('')+'</tr>':'')+'</thead><tbody>';
-  M.rows.forEach((r,ri)=>{let p=0;h+='<tr class="'+(ri===SMR.sel?'cur':'')+'" data-rsel="'+ri+'"><th>'+esc(r.label)+(r.sub?' <small>'+esc(r.sub)+'</small>':'')+'</th>'+M.tg.map((t,ti)=>{const v=smRVal(M,day,ri,ti);p+=v.p;return M.raters.map(x=>{const l=x==='me'?v.a:v.b;return '<td class="'+(v.both?(v.same?'sm':'df'):'')+'">'+(l!=null?smRG(M,l,18):'<span class="smr-blank">·</span>')+'</td>';}).join('');}).join('')+'<td>'+(day.rem[ri]?'R'.repeat(Math.min(5,day.rem[ri])):'')+'</td><td class="p">'+(smRRowAny(M,day,ri,M.raters[0])||smRRowAny(M,day,ri,'t')?p:'')+'</td></tr>';});
+  M.rows.forEach((r,ri)=>{let p=0;h+='<tr class="'+(ri===SMR.sel?'cur':'')+'" data-rsel="'+ri+'"><th>'+esc(r.label)+(r.sub?' <small>'+esc(r.sub)+'</small>':'')+'</th>'+M.tg.map((t,ti)=>{const v=smRVal(M,day,ri,ti);p+=v.p;return M.raters.map(x=>{const l=x==='me'?v.a:v.b,g=l!=null?smRG(M,l,18):'<span class="smr-blank">·</span>';return '<td class="'+(v.both?(v.same?'sm':'df'):'')+'">'+(SMR.paper&&!SMR.kid?'<button type="button" class="smr-pc" data-rpc="'+x+'|'+ri+'|'+ti+'" aria-label="'+esc(r.label)+', '+esc(t.word)+', '+(x==='me'?esc(smRStu()):esc(M.tw))+': '+(l!=null?esc(smRWord(M,l)):'blank')+'">'+g+'</button>':g)+'</td>';}).join('');}).join('')+'<td>'+(day.rem[ri]?'R'.repeat(Math.min(5,day.rem[ri])):'')+'</td><td class="p">'+(smRRowAny(M,day,ri,M.raters[0])||smRRowAny(M,day,ri,'t')?p:'')+'</td></tr>';});
   h+='<tr class="tot"><th colspan="'+(1+M.tg.length*M.raters.length+1)+'">Today'+(M.match&&T.n?' · same answer '+T.m+' of '+T.n+' ('+Math.round(T.m/T.n*100)+'%)':'')+'</th><td class="p">'+T.pts+' / '+T.poss+'</td></tr></tbody></table></div>';
   return h;}
 function smRCueBar(){const iv=num(S.meta.iv_len)||3,vr=/^Variable/.test(S.meta.iv_timing||'');
@@ -260,7 +261,7 @@ async function smRFinish(){const day=smRDay();if(!smRAny(day))return;const M=smR
   const row={date:smRShort(SMR.date),ph:curPhase(),goal:ph0?'':S.meta.goal||'',pts:ph0?'':String(T.pts),poss:ph0?'':String(T.poss),beh:B&&B.b!=null?r1(B.b):'',m:M.match&&!ph0?String(T.m):'',n:M.match&&!ph0?String(T.n):'',
     tno:B&&!ph0&&M.match?String(B.tno):'',nom:B&&!ph0&&M.match?String(B.nom):'',sno:B&&!ph0&&M.match?String(B.sno):'',asm:T.asm?String(T.asm):'',met,tgp:!ph0&&['match','contract','smiley','cico'].includes(M.sys)?T.tp.join(','):'',
     bgp:B&&B.n&&M.sys!=='interval'&&M.sys!=='rubric'?B.tp.join(','):'',
-    note:'Rated on the iPad'+(T.asm?' ('+T.asm+' period'+smPoss(T.asm)+' assumed met, fading step 2)':'')+(day.note?': '+day.note.replace(/\s+/g,' ').slice(0,200):''),src:'ipad:'+SMR.date};
+    note:(day.paper?'Entered from the paper sheet':'Rated on the iPad')+(T.asm?' ('+T.asm+' period'+smPoss(T.asm)+' assumed met, fading step 2)':'')+(day.note?': '+day.note.replace(/\s+/g,' ').slice(0,200):''),src:'ipad:'+SMR.date};
   if(smFadeStep()===1)day.f2=true;else delete day.f2;
   let i=S.log.findIndex(r=>r.src==='ipad:'+SMR.date);
   if(i<0){const j=S.log.findIndex(r=>!r.src&&String(r.date||'').trim()===row.date);if(j>=0&&(await nbhUI.confirm('The Record already has a row for '+row.date+', entered by hand. Replace it with the day rated on the iPad?\nCancel keeps it and adds a row.',{ok:'Replace'})))i=j;}
@@ -271,6 +272,8 @@ document.addEventListener('click',async e=>{const t=e.target;if(t.closest('#smRF
   if(!t.closest('#smRate'))return;smRAudio();const day0=smRDay()||smREmpty(),M=smRModel(day0);let b;
   if((b=t.closest('[data-rl]'))&&M){smRSet(+b.dataset.rt,+b.dataset.rl);return;}
   if((b=t.closest('[data-rgo]'))&&M){SMR.sel=Math.max(0,Math.min(M.rows.length-1,SMR.sel+(+b.dataset.rgo)));smRRender();if(smD().rspeak&&SMR.mode==='me')smRSayPeriod(M);return;}
+  if((b=t.closest('[data-rpc]'))&&M){smRPaperTap(b.dataset.rpc);return;}   /* v22.7x (review I131) */
+  if((b=t.closest('#smRPaper'))){SMR.paper=!SMR.paper;smRRender();return;}
   if((b=t.closest('[data-rsel]'))&&M){SMR.sel=+b.dataset.rsel;smRRender();return;}
   if((b=t.closest('[data-rsay]'))&&M){const k=b.dataset.rsay;if(k==='p')smRSayPeriod(M);else{const q=M.tg[+k];smRSay(q.word+(q.cue?'. '+q.cue:''));}return;}
   if((b=t.closest('[data-rmode]'))){SMR.mode=b.dataset.rmode;SMR.modeSet=true;smRRender();return;}
@@ -305,7 +308,7 @@ function smRFromFile(s,o){o.days={};const D=s&&s.days&&typeof s.days==='object'&
   const cells=v=>{const r={};if(v&&typeof v==='object'&&!Array.isArray(v))Object.keys(v).slice(0,800).forEach(c=>{if(/^\d{1,2}_\d$/.test(c)&&Number.isInteger(v[c])&&v[c]>=0&&v[c]<10)r[c]=v[c];});return r;};
   Object.keys(D).slice(0,1000).forEach(k=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(k))return;const x=D[k];if(!x||typeof x!=='object'||Array.isArray(x))return;
     const rem={};if(x.rem&&typeof x.rem==='object'&&!Array.isArray(x.rem))Object.keys(x.rem).slice(0,60).forEach(c=>{if(/^\d{1,2}$/.test(c)&&Number.isInteger(x.rem[c])&&x.rem[c]>0&&x.rem[c]<100)rem[c]=x.rem[c];});
-    o.days[k]={alt:!!x.alt,me:cells(x.me),t:cells(x.t),rem,wf:str(x.wf,120),rw:str(x.rw,120),spent:str(x.spent,8).replace(/[^\d.]/g,''),note:str(x.note,2000),fin:/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(str(x.fin,40))?str(x.fin,40):'',sig:str(x.sig,400)};if(x.f2===true)o.days[k].f2=true;});   /* f2 (v22.7x, review F261): finished at fading step 2; kept only when set */
+    o.days[k]={alt:!!x.alt,me:cells(x.me),t:cells(x.t),rem,wf:str(x.wf,120),rw:str(x.rw,120),spent:str(x.spent,8).replace(/[^\d.]/g,''),note:str(x.note,2000),fin:/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(str(x.fin,40))?str(x.fin,40):'',sig:str(x.sig,400)};if(x.f2===true)o.days[k].f2=true;if(x.paper===true)o.days[k].paper=true;});   /* f2 (v22.7x, review F261): finished at fading step 2; kept only when set */
   if(o.d)o.d.pin=String(o.d.pin||'').replace(/\D/g,'').slice(0,6);if(o.d&&!o.d.pin)delete o.d.pin;
   if(o.d&&o.d.rcue&&o.d.rcue!=='flash')delete o.d.rcue;
   return o;}
@@ -316,3 +319,10 @@ function smRSim(){const iso=smRISO();S.days={};
   S.days[iso]={alt:false,me:{'0_0':0,'0_1':0,'0_2':0,'1_0':0,'1_1':1,'1_2':0,'2_0':0,'2_1':0,'2_2':0},t:{'0_0':0,'0_1':0,'0_2':0,'1_0':0,'1_1':1,'1_2':0,'2_0':0,'2_1':1,'2_2':0},
     rem:{'1':1,'2':2},wf:'Feed the class fish',rw:'',spent:'',note:'',fin:'',sig:''};
   SMR.date=iso;SMR.sel=-1;}
+/* v22.7x (review I131): a paper sheet scored from its marks. On the Rate page, "From the paper sheet" turns the day's grid into
+   tap targets: each tap moves a cell to the next level (the top first) and back to blank, for the student's mark and the
+   adult's, so a paper day is scored as a day rated here (points, the match, the behavior, the No counts, the goal met) and
+   Finish the day writes its Record row, noted as entered from the paper sheet. Hand-typed rows stay as they are. */
+function smRPaperTap(k){const [who,ri,ti]=String(k).split('|');if(who!=='me'&&who!=='t')return;const day=smRDay(SMR.date,true),M=smRModel(day);if(!M||!M.raters.includes(who))return;
+  const key=(+ri)+'_'+(+ti),cur=day[who][key],nx=cur==null?0:cur+1;if(nx>=M.lv.length)delete day[who][key];else day[who][key]=nx;
+  day.paper=true;if(!day.sig)day.sig=smRSig(M);smRRender();}
