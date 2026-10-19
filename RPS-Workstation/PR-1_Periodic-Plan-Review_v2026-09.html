@@ -2112,7 +2112,7 @@ let prCase=null;
 const prT=v=>String(v==null?'':v).trim();
 const prMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
 const prR=x=>x==null?'':String(Math.round(x*10)/10);
-function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null;if(!d&&!pts&&!ti)return '';
+function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null,cg=f.caregiver||null;if(!d&&!pts&&!ti&&!cg)return '';
   const conds=(d&&d.conds)||[],cur=conds.length?conds[conds.length-1]:null,from=cur&&cur.from?cur.from:(d&&d.from)||'',to=(d&&d.to)||'';
   const inP=x=>x&&(!from||x>=from)&&(!to||x<=to);const L=[];
   if(from)L.push((cur&&conds.length>1?'Since '+prMd(from)+' ('+cur.name+', ':'From '+prMd(from)+' to '+prMd(to)+' (')+((cur&&cur.days)||(d&&d.days)||0)+' school days with data):');
@@ -2131,6 +2131,11 @@ function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||n
     const M=Array.isArray(ti.missed)?ti.missed.filter(m=>m&&prT(m.d)):[];
     if(M.length){const cl=t=>{t=prT(t);return t.length>80?t.slice(0,77).replace(/\s+\S*$/,'')+'\u2026':t;};
       L.push('Steps missed on the observations the integrity verdict is judged on (Form TI-1): '+M.slice(0,6).map(m=>(m.pn?'plan step '+m.pn:'checklist step '+m.n)+', \u201c'+cl(m.d)+'\u201d ('+prR(m.pct)+'% correct'+(m.ec?', '+m.ec+' commission':'')+(m.eo?', '+m.eo+' omission':'')+(m.crit?', critical':'')+')').join('; ')+(M.length>6?'; and '+(M.length-6)+' more':'')+'.');}}
+  /* v22.72 (review F353) whether the family was trained to run the home plan, and whether it is holding (Form CT-1) */
+  if(cg){const fu=(cg.followUp||[]).filter(x=>x&&x.date).slice(-1)[0];
+    L.push('The home plan (Form CT-1): '+(cg.name?cg.name+(cg.rel?' ('+cg.rel.toLowerCase()+')':'')+', ':'')+(cg.stand||'in training')+
+      (cg.probe&&cg.probe.pct!=null?'; in-home probe '+(cg.probe.date?'on '+prMd(cg.probe.date)+' ':'')+prR(cg.probe.pct)+'% of steps correct':'')+
+      (fu?'; follow-up probe on '+prMd(fu.date)+' '+prR(fu.pct)+'%':'')+(cg.due&&!fu?'; follow-up probe due '+prMd(cg.due):'')+'.');}
   return L.join('\n');}
 function prCaseBar(){let b=document.getElementById('prCaseBar');const f=prCase||{},d=f.data,t=f.integrity,framed=window.parent!==window;
   if(!b){const at=document.querySelector('.nbh-band');if(!at)return;b=document.createElement('div');b.id='prCaseBar';b.className='pr-casebar noprint';b.setAttribute('role','status');at.parentNode.insertBefore(b,at);}

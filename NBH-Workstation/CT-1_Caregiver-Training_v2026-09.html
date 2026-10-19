@@ -1094,6 +1094,8 @@ td input,td select{max-width:100%}
       <tr><th style="width:24%">Skill or protocol taught</th><td colspan="3"><input data-m="skill"></td></tr>
       <tr><th>Its source</th><td><input data-m="src" placeholder="BIP (Form TD-1), FBA (Form FS-1)"></td>
           <th style="width:16%">Consent for home programming</th><td><input data-m="consent" placeholder="BIP implementation consent date (Form IC-1), or the IEP with parent training"></td></tr>
+      <tr><th>Target behavior (Form TB-1)</th><td><input data-m="beh" placeholder="The BIP behavior this training addresses; filled from the case"></td>
+          <th>Function (Form FS-1)</th><td><input data-m="fn" placeholder="Filled from the case"></td></tr>   <!-- v22.72 (review F355) -->
       <tr><th>What the family was told this is for</th><td colspan="3"><textarea data-m="purpose" rows="2" placeholder="In the words used with them, not the words used at the IEP meeting"></textarea></td></tr>
     </table>
     <div class="note2"><b>Caregivers are not staff, and this form is not Form ST-1 with the nouns changed.</b> A caregiver has no supervisor, no colleague to tap out to, no end of shift, and a relationship with the student that continues after the procedure ends. They also hold information no one else has. Training that ignores this produces agreement in the session and nothing afterwards.</div>
@@ -1110,6 +1112,10 @@ td input,td select{max-width:100%}
       <th style="width:44px">#</th><th style="width:20%">Routine or time of day</th><th style="width:24%">What happens now</th>
       <th style="width:20%">What the family wants instead</th><th style="width:11%">Priority</th><th>Targeted now?</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div id="goalVerdict"></div>
+    <!-- v22.72 (review I180) the student's say, from the student interview (Form SI-1), beside the family's priorities -->
+    <table class="rt" style="margin-top:10px">
+      <tr><th style="width:26%">The student&rsquo;s say in the home plan</th><td><textarea data-m="stuSay" rows="2" data-nbh-nowording placeholder="Whether the student agreed, and what they would like from the plan, in their own words (filled from the student interview, Form SI-1)"></textarea></td></tr>
+    </table>
 
     <h2 class="nbh-band" style="margin-top:16px">Whether This Can Run at Home</h2>
     <p class="hint">The home equivalent of contextual fit. Answered by the caregiver, not inferred.</p>
@@ -1138,7 +1144,7 @@ td input,td select{max-width:100%}
       <div class="bstrow"><div>2. Modeling</div><div><label><input type="checkbox" data-m="c_mod"> Delivered</label>&nbsp;&nbsp;<input data-m="c_mod_how" style="width:62%" placeholder="With the actual student where possible, not with the trainer playing the child"></div></div>
       <div class="bstrow"><div>3. Rehearsal</div><div><label><input type="checkbox" data-m="c_reh"> Delivered</label>&nbsp;&nbsp;<input data-m="c_reh_how" style="width:62%" placeholder="Caregiver runs it with the student while the trainer is present"></div></div>
       <div class="bstrow"><div>4. Feedback</div><div><label><input type="checkbox" data-m="c_fb"> Delivered</label>&nbsp;&nbsp;<input data-m="c_fb_how" style="width:62%" placeholder="Immediate and specific; strengths first"></div></div>
-      <div class="bstrow"><div>5. In-situ probe</div><div><label><input type="checkbox" data-m="c_situ"> Conducted</label>&nbsp;&nbsp;<input data-m="c_situ_how" style="width:62%" placeholder="In the real routine, at the real time of day, with the trainer not prompting"></div></div>
+      <div class="bstrow"><div>5. In-situ training</div><div><label><input type="checkbox" data-m="c_situ"> Delivered</label>&nbsp;&nbsp;<input data-m="c_situ_how" style="width:62%" placeholder="Practice and feedback in the real routine, at the real time of day (the in-home probe is recorded on the Competency sheet)"></div></div>
     </div>
     <h2 class="nbh-band" style="margin-top:16px">Protocol Steps</h2>
     <p class="hint">Mark a step <b>critical</b> when an error on it defeats the purpose of the protocol; every step marked critical must be scored in the rounds the competency decision is made on, and correct every time.</p>
@@ -1171,28 +1177,46 @@ td input,td select{max-width:100%}
       <tr><th>Rehearsed under a hard condition?</th><td><select data-m="relapseReh"><option></option>
         <option>Yes &mdash; rehearsed with escalating protest</option><option>Described only</option><option>Not covered</option></select></td></tr>
       <tr><th>What the family was told to expect</th><td><textarea data-m="expect" rows="2" placeholder="That a temporary increase is likely at some steps, with the figures, so it is not read as the plan failing"></textarea></td></tr>
-      <tr><th>Who they call, and how fast the answer comes</th><td><input data-m="call" placeholder="A name and a commitment, not a general office number"></td></tr>
+      <!-- v22.72 (review F349) when safety comes first, the emergency route, and a contact the school can keep -->
+      <tr><th>When safety comes first</th><td><textarea data-m="safety" rows="3" placeholder="What it looks like when the plan stops and everyone is kept safe (someone could be hurt): how the student and any brothers or sisters are kept safe, and what the caregiver does instead. The plan can wait; safety cannot."></textarea></td></tr>
+      <tr><th>In an emergency</th><td><textarea data-m="emerg" rows="2" placeholder="911 when anyone is hurt or in danger; 988 (call or text) or the county&rsquo;s mobile response team for a mental-health crisis, with its number"></textarea>
+        <div class="noprint ct-emergrow"><button type="button" class="tool" id="ctEmergBtn">Write in 911 and 988</button></div></td></tr>
+      <tr><th>Who they contact, when it is answered, and outside those hours</th><td><input data-m="call" placeholder="The school contact (school phone or district email), the hours it is answered, and what to do outside those hours"></td></tr>
       <tr><th>What would make them stop running it</th><td><textarea data-m="stop" rows="2" placeholder="Asked directly. The honest answer here predicts the integrity data better than anything else on this form."></textarea></td></tr>
     </table>
+    <div class="ct-crisis noprint" id="ctCrisis" role="note" hidden></div>   <!-- v22.72 (review F349) on screen only -->
+    <div class="verdict v-mid noprint" id="ctSafetyNote" role="note" hidden></div>
 
     <h2 class="nbh-band" style="margin-top:16px">Follow-up and the Family&rsquo;s View</h2>
     <table class="rt">
       <tr><th style="width:26%">In-home probe date and result</th><td><input data-m="probe"></td></tr>
       <tr><th>Steps correct on the probe</th><td><input data-m="probe_pct" placeholder="Correct out of scored steps, e.g., 4/4 or 100%"></td></tr>
-      <tr><th>Critical steps correct on the probe</th><td><input data-m="probe_crit" placeholder="Correct out of the critical steps scored, e.g., 3/3; blank when none came due"></td></tr>
+      <tr><th>Critical steps correct on the probe</th><td><input data-m="probe_crit" placeholder="Correct out of the critical steps scored, e.g., 2/2">
+        <label class="ct-chk"><input type="checkbox" data-m="probe_nocrit"> No critical step came due on the probe</label></td></tr>
       <tr><th>Follow-up contacts agreed</th><td><input data-m="followup" placeholder="When, how, and who initiates"></td></tr>
+      <tr><th>Next follow-up probe due</th><td><input type="date" data-m="fu_due" class="ct-date"></td></tr>
       <tr><th>I can run this on an ordinary day</th><td><select data-m="sv1"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
       <tr><th>This is worth the effort it takes</th><td><select data-m="sv2"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
       <tr><th>I would be comfortable doing this in front of other people</th><td><select data-m="sv3"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
       <tr><th>What the family said in their own words</th><td><textarea data-m="sv4" rows="2" data-nbh-nowording></textarea></td></tr>
     </table>
+    <!-- v22.72 (review F351, I176) follow-up probes at home: running it independently is something the record shows -->
+    <h3 style="margin-top:14px">Follow-up Probes at Home</h3>
+    <p class="hint">The same routine, scored the same way, a while after the in-home probe (in person or by video call, agreed with the family). One at or above the criterion, with every critical step scored on it correct, shows the plan is running at home; weeks 1, 3 and 6 are a working convention, not a finding.</p>
+    <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
+      <button class="tool" id="addFu" type="button">Add follow-up probe</button><button class="tool" id="delFu" type="button">Remove last</button>
+    </div>
+    <div class="grid-wrap" tabindex="0" role="region" aria-label="Follow-up probes at home"><table class="rt" id="fuTbl"><thead><tr>
+      <th style="width:16%">Date</th><th style="width:13%">Steps correct</th><th style="width:15%">Critical steps correct</th><th style="width:15%">The relapse moment came up</th><th style="width:14%">How</th><th style="text-align:left">What was seen</th></tr></thead><tbody></tbody></table></div>
     <h3 style="margin-top:14px">Sign-off</h3>
     <table class="rt">
       <tr><th style="width:24%">Outcome</th><td colspan="3"><select data-m="outcome" style="width:60%"><option></option>
-        <option>Competent &mdash; running it independently at home</option>
+        <option>Running it independently at home &mdash; held at a follow-up probe</option>
+        <option>Competent on the in-home probe &mdash; follow-up probe due</option>
         <option>Competent in rehearsal &mdash; home probe still required</option>
         <option>Not yet &mdash; further sessions scheduled</option>
-        <option>Paused at the family&rsquo;s request</option></select></td></tr>
+        <option>Paused at the family&rsquo;s request</option></select>
+        <div class="ct-outwarn" id="ctOutWarn" role="note" hidden></div></td></tr>
       <tr><th>Caregiver</th><td class="sigline"></td><th style="width:12%">Date</th><td class="sigline"></td></tr>
       <tr><th>Trainer</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
     </table>
@@ -1216,7 +1240,8 @@ td input,td select{max-width:100%}
       <tr><th>Per-step accuracy</th><td>For each step, the percentage of the rounds in which it was scored that it was performed correctly.</td></tr>
       <tr><th>Critical steps</th><td>The same calculation restricted to steps marked critical, pooled across the decision rounds: once the criterion has been met, the latest rounds it counts (the latest two when it asks for two consecutive rounds); before that, every scored round. Every step marked critical must be scored in the decision rounds and correct every time.</td></tr>
       <tr><th>Rounds to criterion</th><td>The number of scored rounds up to and including the round in which the criterion was first met on the required number of consecutive rounds. The card and the verdict name that round as it is labelled on the grid.</td></tr>
-      <tr><th>Competency decision</th><td>Criterion met on the required consecutive rounds and still met in the latest rounds it counts, <i>and</i> every step marked critical scored in those rounds and correct every time, <i>and</i> the relapse response rehearsed under a hard condition, <i>and</i> an in-home probe recorded with the steps correct on it at or above the criterion percentage. Parsons, Rollyson &amp; Reid (2012) suggest that where the mastery criterion is a lower percentage than 100%, certain critical steps be identified that must be performed at 100%; holding the in-home probe to the rehearsal percentage is this form&rsquo;s convention, as it is on Form ST-1. When the critical steps correct on the probe are recorded (the rehearsal runner fills them from a round set up as Home probe), every critical step scored on the probe must have been correct, as in the decision rounds. That, too, is this form&rsquo;s convention, as on Form ST-1.</td></tr>
+      <tr><th>Competency decision</th><td>Criterion met on the required consecutive rounds and still met in the latest rounds it counts, <i>and</i> every step marked critical scored in those rounds and correct every time, <i>and</i> the relapse response rehearsed under a hard condition, <i>and</i> an in-home probe recorded with the steps correct on it at or above the criterion percentage. Parsons, Rollyson &amp; Reid (2012) suggest that where the mastery criterion is a lower percentage than 100%, certain critical steps be identified that must be performed at 100%; holding the in-home probe to the rehearsal percentage is this form&rsquo;s convention, as it is on Form ST-1. When any step is marked critical, the critical steps correct on the probe must be recorded (the rehearsal runner fills them from a round set up as Home probe), or <b>No critical step came due on the probe</b> ticked, and every critical step scored on the probe must have been correct, as in the decision rounds. That, too, is this form&rsquo;s convention, as on Form ST-1. When the target behavior can put someone at risk (aggression, self-injury, property destruction), <b>When safety comes first</b> and <b>In an emergency</b> must be written before the caregiver is cleared.</td></tr>
+      <tr><th>Follow-up probes</th><td>Competent on the in-home probe is one observation. <b>Running it independently at home</b> needs a follow-up probe at or above the criterion percentage, with every critical step scored on it correct; the latest follow-up probe decides, so one below the criterion reads Not holding at home. The outcome on the sign-off is checked against the decision: an outcome that claims more than the decision shows is flagged on screen and on paper.</td></tr>
     </table>
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="hint noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print. <b>What the family said in their own words</b> has no button: it holds their words, so it is not checked or rewritten. Elsewhere, a caregiver&rsquo;s own words belong in quotation marks, which Check wording leaves alone.</p><!-- /writing help -->
@@ -1246,7 +1271,64 @@ const fmt=(a,b)=>b>0?(100*a/b).toFixed(1)+'%':'\u2014';
 const FIT=['I have time to do this in that routine','I can do it without leaving another child unsupervised',
  'I have whatever it needs to hand','The other adults in the house will do the same thing',
  'I believe this is the right thing for my child','I can do it on a bad day, not only a good one'];
-function blank(){return{meta:{},goals:[],fit:{},steps:[],rounds:[],cells:{},nRounds:4,crit:80,critN:2};}
+function blank(){return{meta:{},goals:[],fit:{},steps:[],rounds:[],cells:{},fu:[],nRounds:4,crit:80,critN:2};}   /* v22.72 fu: follow-up probes */
+/* v22.72 (review F351) the outcomes the sign-off offers, each with the decision it needs (level: 0 none, 1 competent in
+   rehearsal with the relapse response rehearsed, 2 competent on the in-home probe, 3 holding at a follow-up probe) */
+const OUTCOMES=[['Running it independently at home \u2014 held at a follow-up probe',3],['Competent on the in-home probe \u2014 follow-up probe due',2],
+  ['Competent in rehearsal \u2014 home probe still required',1],['Not yet \u2014 further sessions scheduled',0],['Paused at the family\u2019s request',0]];
+const OUT_OLD='Competent \u2014 running it independently at home';
+let ctLvl=0,ctDec={cls:'',txt:''},ctCaseF=null;
+const ctT=v=>String(v==null?'':v).trim();
+function ctFilled(k){return !!ctT((S.meta||{})[k]);}
+function ctDay(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(ctT(iso));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:ctT(iso);}
+const CT_RISK=/aggress|\bhit(s|ting)?\b|\bkick|\bbit(e|es|ing)\b|scratch|punch|slap|head.?butt|chok|hair.?pull|self.?injur|\bSIB\b|head.?(bang|hit)|hand.?bit|skin.?pick|destruct|property|\bthrow|\bbreaking\b|elop|\bbolt|run(s|ning)?\s+(away|off)/i;
+/* the target behavior can put someone at risk: this form's line, the case's target behaviors, the plan's behavior */
+function ctRisk(){const f=ctCaseF||{},L=[ctT((S.meta||{}).beh)];(f.behaviors||[]).forEach(b=>{if(b&&!b.isRep)L.push(ctT(b.label),ctT(b.def));});
+  if(f.plan)L.push(ctT(f.plan.beh));if(f.crisis)L.push(ctT(f.crisis.beh||f.crisis.dbeh));return L.some(t=>t&&CT_RISK.test(t));}
+/* a follow-up probe's figures: the steps correct and the critical steps (a figure, or none when none came due) */
+function ctFuRead(r){const p=pctIn(r.pct),ct=ctT(r.crit),none=/^(none|n\/?a|0\s*(\/|of)\s*0)\b/i.test(ct),c=none?null:pctIn(ct);
+  let bad='';if(p===null)return null;if(!(p>=0&&p<=100))bad='steps correct (\u201c'+r.pct+'\u201d) that are not a figure from 0 to 100%: enter the correct steps out of the steps scored, for example 4/4';
+  else if(c!==null&&!(c>=0&&c<=100))bad='critical steps correct (\u201c'+r.crit+'\u201d) that are not a figure: enter them, for example 2/2, or none';
+  return {date:ctT(r.date),p,c,none,bad};}
+/* the latest follow-up probe with a figure (by date when dated, else the last row written) */
+function ctFuLatest(){const L=(S.fu||[]).map((r,i)=>{const x=ctFuRead(r);return x?Object.assign(x,{i}):null;}).filter(Boolean);if(!L.length)return null;
+  L.sort((a,b)=>(a.date&&b.date&&a.date!==b.date)?(a.date<b.date?-1:1):a.i-b.i);return L[L.length-1];}
+function renderFu(){const tb=document.querySelector('#fuTbl tbody');if(!tb)return;const o=(a,v)=>'<option value=""></option>'+a.map(x=>'<option'+(x===v?' selected':'')+'>'+x+'</option>').join('');
+  tb.innerHTML=(S.fu||[]).map((r,i)=>'<tr><td><input type="date" data-fu="'+i+'" data-f="date" value="'+esc(r.date)+'" aria-label="Follow-up probe '+(i+1)+' date"></td>'+
+    '<td><input data-fu="'+i+'" data-f="pct" value="'+esc(r.pct)+'" placeholder="e.g., 4/4" aria-label="Follow-up probe '+(i+1)+' steps correct"></td>'+
+    '<td><input data-fu="'+i+'" data-f="crit" value="'+esc(r.crit)+'" placeholder="e.g., 2/2, or none" aria-label="Follow-up probe '+(i+1)+' critical steps correct"></td>'+
+    '<td><select data-fu="'+i+'" data-f="rel" aria-label="Follow-up probe '+(i+1)+': the relapse moment came up">'+o(['Yes','No'],r.rel)+'</select></td>'+
+    '<td><select data-fu="'+i+'" data-f="how" aria-label="Follow-up probe '+(i+1)+': how">'+o(['In person','Video call'],r.how)+'</select></td>'+
+    '<td><textarea data-fu="'+i+'" data-f="note" rows="1" aria-label="Follow-up probe '+(i+1)+': what was seen">'+esc(r.note)+'</textarea></td></tr>').join('');}
+/* the sign-off: an outcome that claims more than the decision shows is flagged, on screen and on paper */
+function ctOutcomeCheck(){const el=document.getElementById('ctOutWarn');if(!el)return;const v=ctT((S.meta||{}).outcome),o=OUTCOMES.find(x=>x[0]===v);
+  if(!o||o[1]<=ctLvl){el.hidden=true;el.textContent='';return;}
+  el.hidden=false;el.textContent='Outcome entered does not match the decision: '+(o[1]===3?'running it independently at home needs a follow-up probe at or above the criterion, with the critical steps on it correct.':
+    o[1]===2?'competent on the in-home probe needs the decision above to read Competent.':'competent in rehearsal needs the criterion met and holding, every critical step correct, and the relapse response rehearsed under a hard condition.');}
+/* the critical steps the in-home probe did not show: named from a round set up as Home probe (the latest), else counted from
+   the critical steps recorded on the probe (2/2 of 3 marked) */
+function ctProbeUnseen(){const j=(S.rounds||[]).map((r,k)=>r&&r.type==='Home probe'?k:-1).filter(k=>k>=0).pop();
+  if(j===undefined)return [];const out=[];(S.steps||[]).forEach((st,i)=>{if(st.crit&&!scored(code(i,j)))out.push(i);});return out;}
+function ctProbeNote(M){let el=document.getElementById('ctProbeNote');if(!el){const t=document.querySelector('#weakTbl');if(!t)return;el=document.createElement('p');el.id='ctProbeNote';el.className='hint';
+    (t.closest('.grid-wrap')||t).insertAdjacentElement('afterend',el);}
+  const marked=M.crit.marked,probe=ctT((S.meta||{}).probe);let txt='';
+  if(marked&&probe){const un=ctProbeUnseen(),m=/(\d+)\s*(?:\/|of)\s*(\d+)/i.exec(ctT((S.meta||{}).probe_crit)),n=m?+m[2]:null;
+    if((S.meta||{}).probe_nocrit)txt='No critical step came due on the in-home probe, so none has been seen at home yet: watch for them at the follow-up probe.';
+    else if(un.length)txt='Not seen on the in-home probe (Home probe round): critical '+(un.length>1?'steps ':'step ')+un.map(i=>i+1).join(', ')+'. Watch for '+(un.length>1?'them':'it')+' at the follow-up probe.';
+    else if(n!==null&&n<marked)txt='The in-home probe scored '+n+' of the '+marked+' steps marked critical: a critical step that did not come due there has not been seen at home. Watch for it at the follow-up probe.';}
+  el.textContent=txt;el.hidden=!txt;}
+/* on screen: the school's crisis plan and the precautions on file, beside the safety rows; a note while they are empty */
+function ctSafetyPaint(){const box=document.getElementById('ctCrisis'),note=document.getElementById('ctSafetyNote');if(!box||!note)return;
+  const f=ctCaseF||{},cr=f.crisis||null,fl=f.profile&&f.profile.flags,L=[];
+  if(cr&&(ctT(cr.beh||cr.dbeh)||ctT(cr.precursor)||(cr.stages||[]).length)){
+    if(ctT(cr.beh||cr.dbeh))L.push('<li><b>The behavior it covers:</b> '+esc(ctT(cr.beh||cr.dbeh))+'</li>');
+    if(ctT(cr.precursor))L.push('<li><b>The earliest sign:</b> '+esc(ctT(cr.precursor))+'</li>');
+    const st=(cr.stages||[]).map(x=>ctT(x&&x.s)).filter(Boolean);if(st.length)L.push('<li><b>Its stages:</b> '+esc(st.join('; '))+'</li>');}
+  if(fl&&(fl.safety||[]).length)L.push('<li><b>Precautions on file (Form DM-1):</b> '+esc(fl.safety.join(', '))+'</li>');
+  box.hidden=!L.length;box.innerHTML=L.length?'<b>From the case, for reference (on screen only).</b> The school&rsquo;s crisis plan (Form CR-1) is for trained school staff; it is not a home procedure. Use it to write When safety comes first with the family, in their words.<ul>'+L.join('')+'</ul>':'';
+  const miss=['safety','emerg'].filter(k=>!ctFilled(k));
+  note.hidden=!miss.length;note.innerHTML=miss.length?'<b>'+(miss.length>1?'When safety comes first and In an emergency are':miss[0]==='safety'?'When safety comes first is':'In an emergency is')+' not written yet.</b> '+
+    (ctRisk()?'The target behavior can put someone at risk, so the caregiver is not cleared until '+(miss.length>1?'they are':'it is')+' written.':'Write '+(miss.length>1?'them':'it')+' with the family before the plan runs at home: what keeps everyone safe, and whom they call in an emergency.'):'';}
 let S=blank();
 /* v21.16 audit (F3, F4, F7, F13). A record is put into a known shape before anything is drawn from it.
    - The number of rounds is a whole number from 1 to 8 (2.5 stopped the page); the criterion and the number
@@ -1266,6 +1348,11 @@ function ensure(){
   S.goals=(Array.isArray(S.goals)?S.goals:[]).map(g=>{g=obj(g)?g:{};return Object.assign({},g,{r:str(g.r),now:str(g.now),want:str(g.want),p:str(g.p),t:str(g.t)});});
   S.steps=(Array.isArray(S.steps)?S.steps:[]).map(s=>{s=obj(s)?s:{};return Object.assign({},s,{d:str(s.d),crit:!!s.crit});});
   S.rounds=(Array.isArray(S.rounds)?S.rounds:[]).map(r=>{r=obj(r)?r:{};return Object.assign({},r,{date:str(r.date),type:str(r.type),fb:str(r.fb)});});
+  /* v22.72 (review F351) the follow-up probes (three rows to write in); the old top outcome claimed more than one probe shows
+     and becomes the one the probe supports */
+  S.fu=(Array.isArray(S.fu)?S.fu:[]).map(r=>{r=obj(r)?r:{};return Object.assign({},r,{date:str(r.date),pct:str(r.pct),crit:str(r.crit),rel:str(r.rel),how:str(r.how),note:str(r.note)});});
+  while(S.fu.length<3)S.fu.push({date:'',pct:'',crit:'',rel:'',how:'',note:''});
+  if(S.meta.outcome===OUT_OLD)S.meta.outcome=OUTCOMES[1][0];
   if(!S.goals.length)for(let i=0;i<4;i++)S.goals.push({r:'',now:'',want:'',p:'',t:''});
   if(!S.steps.length)for(let i=0;i<6;i++)S.steps.push({d:'',crit:false});
   while(S.rounds.length<S.nRounds)S.rounds.push({date:'',type:'',fb:''});
@@ -1427,7 +1514,8 @@ function renderSum(){
     /* v21.24 rehearsal runner (G1): the critical steps correct on the in-home probe; when they are recorded, every critical
        step scored on the probe must have been correct (100%), as in the decision rounds. Blank, the decision is as
        before. */
-    scp=pctIn(S.meta.probe_crit);
+    scp=pctIn(S.meta.probe_crit), none=!!S.meta.probe_nocrit;
+  let lvl=0;   /* v22.72 (review F351) what the decision supports, for the sign-off */
   const held=!M.toCrit?'':R(M.win[M.win.length-1])===metAt?`met at ${metAt}`:`met at ${metAt} and holding in ${winLab}`;
   const alone='before the caregiver runs it alone', un=M.crit.unseen, unPl=un.length>1;
   let cls,txt;
@@ -1438,24 +1526,40 @@ function renderSum(){
   else if(!M.crit.ok){cls='v-mid';txt=`Criterion ${held}, but critical-step accuracy in ${winLab} is ${fmt(M.crit.c,M.crit.n)}; every critical step must be correct in those rounds. Rehearse the critical steps ${alone}.`;}
   else if(reh!=='Yes \u2014 rehearsed with escalating protest'){cls='v-mid';
     txt=`Criterion ${held}${M.crit.marked?', including critical steps':''}. The relapse response has not been rehearsed under a hard condition \u2014 that is the rehearsal most likely to change what happens at home.`;}
-  else if(!probe){cls='v-mid';txt=`Criterion ${held}, and the relapse response rehearsed. An in-home probe in the real routine is still outstanding: record its date and result, and the steps correct on it, below.`;}
+  else if((lvl=1)&&!probe){cls='v-mid';txt=`Criterion ${held}, and the relapse response rehearsed. An in-home probe in the real routine is still outstanding: record its date and result, and the steps correct on it, below.`;}
   else if(sp===null){cls='v-mid';txt=`Criterion ${held}, and the relapse response rehearsed. The in-home probe is recorded, but not the steps correct on it \u2014 enter them below (for example 5/6 or 83%) before sign-off.`;}
   else if(!(sp>=0&&sp<=100)){cls='v-mid';txt=`Criterion ${held}, and the relapse response rehearsed. The steps correct entered for the in-home probe (\u201c${esc(S.meta.probe_pct)}\u201d) are not a figure from 0 to 100% \u2014 enter the correct steps out of the steps scored, for example 5/6.`;}
   else if(sp<S.crit){cls='v-no';txt=`Not yet competent at home: the criterion was ${held} in rehearsal, but the in-home probe obtained ${pf(sp)} of steps correct, below the ${S.crit}% criterion. Rehearse in the routine and probe again ${alone}.`;}
-  else if(scp!==null&&!(scp>=0&&scp<=100)){cls='v-mid';txt=`Criterion ${held}, and the relapse response rehearsed. The critical steps correct entered for the in-home probe (\u201c${esc(S.meta.probe_crit)}\u201d) are not a figure from 0 to 100% \u2014 enter the critical steps correct out of those scored, for example 3/3, or leave it blank when none came due.`;}
+  else if(scp!==null&&!(scp>=0&&scp<=100)){cls='v-mid';txt=`Criterion ${held}, and the relapse response rehearsed. The critical steps correct entered for the in-home probe (\u201c${esc(S.meta.probe_crit)}\u201d) are not a figure from 0 to 100% \u2014 enter the critical steps correct out of those scored, for example 2/2, or tick No critical step came due on the probe.`;}
   else if(scp!==null&&scp<100){cls='v-no';txt=`Not yet competent at home: the criterion was ${held} in rehearsal, and the in-home probe obtained ${pf(sp)} of steps correct, but only ${pf(scp)} of the critical steps scored on it were correct; every critical step must be correct. Rehearse the critical steps in the routine and probe again ${alone}.`;}
-  else {cls='v-ok';txt=`Competent: criterion ${held}, ${M.crit.marked?`critical steps at ${fmt(M.crit.c,M.crit.n)}`:'no steps marked critical'}, relapse response rehearsed under protest, and an in-home probe at ${pf(sp)} of steps correct${scp!==null?`, critical steps on it at ${pf(scp)}`:''}.`;}
+  /* v22.72 (review F350) with any step marked critical, a blank is not recorded: the figure, or the tick that none came due */
+  else if(scp===null&&M.crit.marked&&!none){cls='v-mid';txt=`Criterion ${held}, the relapse response rehearsed, and the in-home probe at ${pf(sp)} of steps correct, but the critical steps correct on it are not recorded. Enter them (for example 2/2), or tick No critical step came due on the probe, before sign-off.`;}
+  /* v22.72 (review F349) a behavior that can hurt someone: the safety rows before the caregiver is cleared */
+  else if(ctRisk()&&!(ctFilled('safety')&&ctFilled('emerg'))){cls='v-mid';txt=`Criterion ${held}, the relapse response rehearsed, and the in-home probe at ${pf(sp)} of steps correct. The target behavior can put someone at risk, so write ${!ctFilled('safety')&&!ctFilled('emerg')?'When safety comes first and In an emergency':!ctFilled('safety')?'When safety comes first':'In an emergency'} under If the Behavior Comes Back before the caregiver runs it alone.`;}
+  else {const base=`criterion ${held}, ${M.crit.marked?`critical steps at ${fmt(M.crit.c,M.crit.n)}`:'no steps marked critical'}, relapse response rehearsed under protest, and an in-home probe at ${pf(sp)} of steps correct${scp!==null?`, critical steps on it at ${pf(scp)}`:none&&M.crit.marked?', no critical step came due on it':''}`;
+    /* v22.72 (review F351, I176) the latest follow-up probe decides whether it is holding at home */
+    const fu=ctFuLatest(),due=String(S.meta.fu_due||'').trim(),dueTxt=due?' A follow-up probe is due '+ctDay(due)+'.':' Set the date of the next follow-up probe below.';
+    if(fu&&fu.bad){lvl=2;cls='v-mid';txt=`Competent on the in-home probe: ${base}. The follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}has ${fu.bad}.`;}
+    else if(fu&&(fu.p<S.crit||(fu.c!==null&&fu.c<100))){lvl=1;cls='v-no';txt=`Not holding at home: the follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}obtained ${pf(fu.p)} of steps correct${fu.c!==null?`, critical steps ${pf(fu.c)}`:''}, ${fu.p<S.crit?`below the ${S.crit}% criterion`:'and every critical step must be correct'}. Rehearse in the routine and probe again before the plan is left to run at home.`;}
+    else if(fu&&fu.c===null&&M.crit.marked&&!fu.none){lvl=2;cls='v-mid';txt=`Competent on the in-home probe: ${base}. The follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}obtained ${pf(fu.p)} of steps correct, but its critical steps are not recorded: enter them (for example 2/2), or none when none came due.`;}
+    else if(fu){lvl=3;cls='v-ok';txt=`Competent and holding at home: ${base}; and a follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}at ${pf(fu.p)} of steps correct${fu.c!==null?`, critical steps ${pf(fu.c)}`:''}.`;}
+    else {lvl=2;cls='v-ok';txt=`Competent on the in-home probe: ${base}. One probe is one observation: running it independently at home is shown by a follow-up probe at or above the criterion.${dueTxt}`;}}
   $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
+  ctLvl=lvl;ctDec={cls,txt};try{ctOutcomeCheck();}catch(e){}try{ctSafetyPaint();}catch(e){}   /* v22.72 (review F351, F349) */
   try{ct1ConsentNote();}catch(e){}   /* v22.37 (review F348) */
   const weak=M.rows.filter(r=>r.s>0&&(100*r.c/r.s<S.crit||r.last!=='C'));
   $('#weakTbl').innerHTML='<thead><tr><th style="width:52px">Step</th><th style="text-align:left">What the caregiver does</th><th style="width:64px">Crit.</th><th style="width:80px">Per-step</th><th style="width:230px">Focus</th></tr></thead><tbody>'+
     (weak.length?weak.map(r=>{
-      const f=r.ec&&!r.eo?'Rehearse the step itself \u2014 the form is wrong'
+      /* v22.72 (review F351) a step correct in the latest round in which it was scored is watched for at home, not re-taught */
+      let f=r.last==='C'?'Correct in the latest round: watch for it at home'
+        :r.ec&&!r.eo?'Rehearse the step itself \u2014 the form is wrong'
         :r.eo&&!r.ec?'Rehearse the cue that says the step is due'
         :r.ec&&r.eo?'Re-teach the step and when it applies':'One more round to confirm';
+      if(r.crit&&ctProbeUnseen().includes(r.i))f+='. Critical, and not seen on the in-home probe: watch for it at the follow-up probe';
       return `<tr><td style="text-align:center">${r.i+1}</td><td>${esc(S.steps[r.i].d)}</td>
         <td style="text-align:center">${r.crit?'&#10003;':''}</td><td style="text-align:center">${fmt(r.c,r.s)}</td><td>${f}</td></tr>`;}).join('')
     :`<tr><td colspan="5" class="hint">Every scored step is at or above ${S.crit}% and was correct in the last round in which it was scored.</td></tr>`)+'</tbody>';
+  try{ctProbeNote(M);}catch(e){}   /* v22.72 (review F351) */
 }
 ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(!el.dataset)return;
   if(el.dataset.g!==undefined){S.goals[+el.dataset.g][el.dataset.f]=el.value;if(el.dataset.f!=='now'&&el.dataset.f!=='want')renderGoals();}
@@ -1470,6 +1574,7 @@ function renderSum(){
     /* v21.16 audit (F13): a round date is kept as it is typed, without redrawing the field under the cursor */
     if(el.dataset.f==='date'){const pv=el.nextElementSibling;if(pv)pv.textContent=el.value;}else renderGrid();}
   else if(el.dataset.fb!==undefined){S.rounds[+el.dataset.fb].fb=el.value;}
+  else if(el.dataset.fu!==undefined){const r=S.fu[+el.dataset.fu];if(r){r[el.dataset.f]=el.value;if(el.dataset.f!=='note')renderSum();}}   /* v22.72 follow-up probes */
 }));
 $('#addGoal').addEventListener('click',()=>{S.goals.push({r:'',now:'',want:'',p:'',t:''});renderGoals();});
 /* v21.16 audit (F3): a routine, a step or rounds that hold entries are removed only after a question, and a
@@ -1497,8 +1602,9 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
   if(el.type==='checkbox')el.checked=!!S.meta[k];else el.value=S.meta[k]||'';
   if(!el._b){el._b=1;const ev=(el.tagName==='SELECT'||el.type==='checkbox')?'change':'input';
     el.addEventListener(ev,()=>{S.meta[k]=el.type==='checkbox'?el.checked:el.value;
-      if(k==='probe'||k==='probe_pct'||k==='probe_crit'||k==='relapseReh')renderSum();});}});}
-function renderAll(){ensure();renderGoals();renderFit();renderSteps();renderGrid();renderSum();bindMeta();
+      if(k==='probe'||k==='probe_pct'||k==='probe_crit'||k==='probe_nocrit'||k==='relapseReh'||k==='safety'||k==='emerg'||k==='beh'||k==='fu_due')renderSum();
+      else if(k==='outcome')ctOutcomeCheck();});}});}   /* v22.72 the rows the decision now reads */
+function renderAll(){ensure();renderGoals();renderFit();renderSteps();renderGrid();renderFu();renderSum();bindMeta();
   $('#nRounds').value=S.nRounds;$('#critPct').value=S.crit;$('#critN').value=S.critN;}
 
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -1534,7 +1640,8 @@ async function loadSim(){
     return w===0||w===6||(m===8&&w===1&&nth===1)||(m===10&&(t===11||(w===4&&nth===4)||(w===5&&t>=23&&t<=29)))
       ||(m===11&&t>=24)||(m===0&&(t===1||(w===1&&nth===3)))||(m===1&&w===1&&nth===3)||(m===4&&w===1&&last);};
   const day=n=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);
-    for(let k=n;k>0;){d.setDate(d.getDate()-1);if(!off(d))k--;}return d;};
+    for(let k=n;k>0;){d.setDate(d.getDate()-1);if(!off(d))k--;}
+    for(let k=n;k<0;){d.setDate(d.getDate()+1);if(!off(d))k++;}return d;};   /* v22.72 a negative n counts school days ahead */
   const D=n=>{const d=day(n);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   const Di=n=>{const d=day(n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
   S=blank();S.nRounds=4;S.crit=80;S.critN=2;
@@ -1553,18 +1660,22 @@ async function loadSim(){
     c_mod:true,c_mod_how:'Modelled with the student at the actual homework table, twice, before the parent ran it',
     c_reh:true,c_reh_how:'One role-play, then three rounds with the student present, the last two in the routine at the real time of day',
     c_fb:true,c_fb_how:'Immediate, two strengths then one correction, and a re-run of the failed step straight away',
-    c_situ:true,c_situ_how:'Unannounced call-in probe at 4:15pm on '+D(5)+' \u2014 trainer observed without prompting',
-    relapseDo:'Keep the card where he can reach it. Say the wait once. Do not give the tablet while he is screaming, even if it has already been two minutes \u2014 wait until he is quiet and hands the card, then give it. If it goes past ten minutes, stop the homework, keep him safe, and tell me the next morning rather than changing the plan on your own.',
+    c_situ:true,c_situ_how:'Two rounds in the routine at the tablet transition, at the real time of day, with feedback straight after each',
+    relapseDo:'Keep the card where he can reach it. Say the wait once. Do not give the tablet while he is screaming, even if it has already been two minutes \u2014 wait until he is quiet and hands the card, then give it. If it goes past ten minutes, stop the tablet routine, keep him and his sister safe, and let the school know the same day rather than changing the plan on your own.',
+    safety:'If he hits his sister, bangs his head or throws something heavy, the plan stops: take his sister to another room, step back out of his reach, and give him space. Nothing is given to make him stop, and the tablet stays off. Once he is calm, carry on with the evening and tell the school the same day.',
+    emerg:'Call 911 if anyone is hurt or in danger. For a mental-health crisis, call or text 988, or the county\u2019s mobile response team (simulated: 555-0199).',
+    beh:'Physical aggression (simulated)',fn:'Access to tangible items (the tablet)',
     relapseReh:'Yes \u2014 rehearsed with escalating protest',
     expect:'Told that a temporary increase is likely at some steps (it came at 42% of thinning steps, and at least once in about three quarters of cases), with the figures given, so that a bad week is read as the expected course rather than as the plan failing.',
-    call:'Text or call me directly; I answer the same day, and before 6pm on a school day.',
+    call:'The school office (555-0142) or the BCBA\u2019s district email, answered 7:30 am to 3:30 pm on school days. Evenings, weekends and the summer: the plan stays as it is, and 911 for an emergency.',
     stop:'Asked directly. She said she would stop if the sister started missing her own homework because of it. That is concrete and fixable \u2014 the plan was changed so the card is used at the tablet transition first, which does not compete with the sister\u2019s homework, and homework is added later.',
-    probe:D(5)+' \u2014 4 of 4 steps scored correct at the tablet transition (he handed the card, so steps 5 and 6 did not arise), no prompting from the trainer',
-    probe_pct:'4/4',
+    probe:D(5)+' \u2014 at the tablet transition, about 4:15 pm; the family knew a visit would come that week. 4 of 4 steps scored correct (he handed the card, so steps 5 and 6 did not arise), no prompting from the trainer',
+    probe_pct:'4/4',probe_crit:'2/2',fu_due:Di(-5),
     followup:'Text check after week 1, call after week 3, then at the next review (Form PR-1). Parent initiates sooner if needed.',
     sv1:'Agree',sv2:'Strongly agree',sv3:'Agree',
     sv4:'"The card is easier than the chart because there is nothing to keep up with. I can do the tablet one. I am not sure about homework yet with his sister there."',
-    outcome:'Competent \u2014 running it independently at home'};
+    outcome:'Competent on the in-home probe \u2014 follow-up probe due',
+    stuSay:'Assent given at the student interview. Would like: \u201cmore time on the tablet if I ask nicely.\u201d'};
   S.goals=[
     {r:'Coming off the tablet, about 5pm',now:'Screaming and throwing the tablet when it is taken; can last 20 minutes',want:'He asks for more time instead of throwing it, and hands it over when the time is up',p:'1 (highest)',t:'Yes'},
     {r:'Homework at the kitchen table, 4pm',now:'Refuses, leaves the table, sister gets distracted',want:'He asks for a break instead of leaving',p:'2',t:'Later'},
@@ -1587,7 +1698,7 @@ async function loadSim(){
     {date:Di(15),type:'Role-play',fb:'Warning and card placement were exact. Correction: the tablet was handed back while he was still shouting \u2014 the step that matters most. Re-ran it twice.'},
     {date:Di(15),type:'With the student, trainer present',fb:'Held it this time. Correction: explained the rule while he was escalating; the plan says say it once. Praised the wait.'},
     {date:Di(10),type:'In the routine, trainer present',fb:'All steps correct at the real time of day. Nothing to correct. Named what she did at step 4 so it is repeatable.'},
-    {date:Di(10),type:'In the routine, trainer present',fb:'Second clean round, with louder protest; the criterion, met at R3, still holds. Moved to scheduling the unannounced probe.'}
+    {date:Di(10),type:'In the routine, trainer present',fb:'Second clean round, with louder protest; the criterion, met at R3, still holds. Agreed the week of the in-home probe with the family.'}
   ];
   const plan=[['C','C','C','C'],['C','C','C','C'],['C','C','C','C'],['EC','C','C','C'],['EO','EC','C','C'],['C','C','C','C']];
   plan.forEach((row,i)=>row.forEach((v,j)=>{S.cells[key(i,j)]=v;}));
@@ -1619,6 +1730,14 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
     cur=String((el&&el.value)||S.meta.consent||'').trim();   /* v22.37 (review F348): from the implementation consent only */
   if(f.consent&&cur&&CT1_AUTO.test(cur)&&cur!==want){S.meta.consent=want;if(el)el.value=want;last=el||last;n++;}
   else if(want)meta('consent',want);}
+  /* v22.72 (review F355, I180) the replacement skill from the plan (Form TD-1) and its source; the student's say (Form SI-1),
+     in the student's words */
+  {const p=f.plan||null;if(p&&String(p.rep||'').trim()){meta('skill',p.rep);meta('src','BIP (Form TD-1)'+(f.fn&&(f.fn.label||f.fn.key)?'; FBA (Form FS-1)':''));}}
+  {const st=f.student||null;if(st){const A={given:'Assent given',partial:'Assent partly given',refused:'Assent not given'},bits=[];
+    if(A[st.assent])bits.push(A[st.assent]+' at the student interview'+(st.date?' ('+dm(st.date)+')':'')+'.');
+    if(String(st.preference||'').trim())bits.push('Would like: '+String(st.preference).trim()+'.');
+    if(String(st.likes||'').trim())bits.push('Likes and does well: '+String(st.likes).trim()+'.');
+    if(bits.length)meta('stuSay',bits.join(' '));}}
   const menu=(window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(Array.isArray(f.menu)?f.menu:[]).filter(m=>m&&m.name&&m.tier!=='LP')).slice()   /* v22.59 RA-1's verdicts kept */.sort((a,b)=>(+a.rank||99)-(+b.rank||99)).slice(0,6).map(m=>String(m.name).trim());
   if(menu.length)meta('homeR','From the school menu, to check with the family: '+menu.join(', '));
   const T=(f.training&&Array.isArray(f.training.steps)?f.training.steps:[]).filter(x=>x&&String(x.d||'').trim());
@@ -1644,6 +1763,58 @@ function ct1LangFlag(){const x=ct1Lang();let el=document.getElementById('ctLangF
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ct1Case=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;try{ct1LangFlag();}catch(e){}try{ct1ConsentNote();}catch(e){}return r;};}
 document.addEventListener('input',e=>{if(e.target&&e.target.dataset&&e.target.dataset.m==='consent')try{ct1ConsentNote();}catch(x){}});   /* v22.37 (review F348) */
 </script>
+<script id="ct1-v2272">
+/* ===================== v22.72 Form CT-1, review Wave 3 part 1 =====================
+   F349 when safety comes first: the target behavior (this form's line, else the case's) read for harm to someone; the
+   safety rows held before the caregiver is cleared; the school's crisis plan and the case's precautions shown on screen as a
+   reference (the school's plan is for trained staff, never a home procedure, so only its behavior, earliest sign and stage
+   names are shown). F351 the sign-off checked against the decision; follow-up probes; the critical steps the in-home probe
+   did not show. F353 the caregiver's training, out to the case (key caregiver) for Form PR-1. */
+document.getElementById('addFu').addEventListener('click',()=>{S.fu.push({date:'',pct:'',crit:'',rel:'',how:'',note:''});renderFu();});
+document.getElementById('delFu').addEventListener('click',async()=>{if(S.fu.length<=1)return;const r=S.fu[S.fu.length-1];
+  if(['date','pct','crit','rel','how','note'].some(k=>ctT(r[k]))&&!(await nbhUI.confirm('Remove follow-up probe '+S.fu.length+'?\nWhat was entered for it will be deleted.',{ok:'Remove',danger:true})))return;
+  S.fu.pop();renderFu();renderSum();});
+document.getElementById('ctEmergBtn').addEventListener('click',()=>{const el=document.querySelector('[data-m="emerg"]');if(!el)return;
+  const t='Call 911 if anyone is hurt or in danger, or might be. For a mental-health crisis, call or text 988, or call the county\u2019s mobile response team: ____________.';
+  if(ctT(el.value)&&!el.value.includes('911'))el.value=ctT(el.value)+' '+t;else if(!ctT(el.value))el.value=t;else return;
+  el.dispatchEvent(new Event('input',{bubbles:true}));el.focus();});
+/* the case, in: kept for the risk check and the crisis box */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ctCaseF=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;try{renderSum();}catch(e){}return r;};}
+/* what is due (the shell's Today list): the next follow-up probe only; the dates of follow-up probes already run are not deadlines */
+window.__nbhDue=function(){const d=ctT((S.meta||{}).fu_due);return d?[{what:'Next follow-up probe at home',date:d}]:[];};
+/* the case, out (F353): the caregiver trained and where the training stands, for Form PR-1. Nothing is sent before a
+   caregiver is named or a round is coded. */
+{const iso=t=>{t=ctT(t);let m=/(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+    m=/\b(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\b/.exec(t);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}return '';};
+  window.__nbhCaregiverFacts=function(){const m=S.meta||{},name=ctT(m.cg),coded=Object.keys(S.cells||{}).some(k=>S.cells[k]);if(!name&&!coded)return null;
+    const STAND=['in training','competent in rehearsal','competent on the in-home probe','holding at a follow-up probe'];
+    const top=(S.goals||[]).find(g=>g&&g.p==='1 (highest)'&&ctT(g.r)&&g.t==='Yes');
+    const fu=(S.fu||[]).map(r=>{const x=ctFuRead(r);return x&&!x.bad?{date:iso(r.date),pct:Math.round(x.p*10)/10,crit:x.c===null?null:Math.round(x.c*10)/10}:null;}).filter(Boolean);
+    const o={name,rel:ctT(m.rel),stand:STAND[ctLvl]||STAND[0],level:ctLvl,decision:{cls:ctDec.cls.replace(/^v-/,''),text:ctDec.txt.replace(/<[^>]+>/g,'')},
+      outcome:ctT(m.outcome),src:'CT-1'};
+    const pd=iso(m.probe),pp=pctIn(m.probe_pct),pc=pctIn(m.probe_crit);
+    if(ctT(m.probe))o.probe={date:pd,pct:pp!=null&&isFinite(pp)?Math.round(pp*10)/10:null,crit:pc!=null&&isFinite(pc)?Math.round(pc*10)/10:null,none:!!m.probe_nocrit};
+    if(fu.length)o.followUp=fu;if(ctT(m.fu_due))o.due=iso(m.fu_due)||ctT(m.fu_due);
+    if(top)o.routine=ctT(top.r);['relapseDo','safety','emerg','call','where'].forEach(k=>{if(ctT(m[k]))o[k==='emerg'?'emergency':k]=ctT(m[k]);});
+    const sv={day:ctT(m.sv1),worth:ctT(m.sv2),public:ctT(m.sv3)};if(sv.day||sv.worth||sv.public)o.ratings=sv;
+    return o;};
+  const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+    let c=null;try{c=window.__nbhCaregiverFacts();}catch(e){c=null;}if(!c)return o;o=o||{};o.caregiver=c;return o;};}
+</script>
+<style id="ct1-v2272-css">
+/* v22.72 (review F349, F350, F351) */
+.ct-chk{display:flex!important;align-items:center;justify-content:flex-start;gap:6px;margin-top:6px;font-family:var(--sans);font-size:12.5px;text-align:left}
+.ct-chk input[type=checkbox]{width:auto!important;min-width:0;height:auto;flex:0 0 auto;margin:0}
+@media screen{.ct-chk{min-height:44px;margin-top:2px}}
+.ct-emergrow{margin-top:6px}
+.ct-date{max-width:180px}
+.ct-crisis{margin:8px 0;padding:9px 12px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:3px;background:#fdf6e7;font-family:var(--sans);font-size:12.5px;line-height:1.5;color:#3d2a00}
+.ct-crisis ul{margin:4px 0 0 18px;padding:0}
+.ct-outwarn{margin-top:6px;padding:6px 10px;border-left:3px solid #8E2A2A;background:#F6E0E0;font-family:var(--sans);font-size:12.5px}
+#fuTbl input,#fuTbl select,#fuTbl textarea{width:100%;box-sizing:border-box}
+@media screen and (max-width:700px){.grid-wrap > #fuTbl{min-width:720px}}
+@media print{.ct-outwarn{border:1px solid #8E2A2A;background:none}.ct-chk input{-webkit-appearance:auto;appearance:auto}}
+</style>
 <style id="ct1-v2182-css">
 .nbh-lang-flag{margin:8px 0 12px;padding:8px 12px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:4px;background:#fdf6e7;color:#3d2a00;font-size:13.5px;line-height:1.45}
 @media print{.nbh-lang-flag{display:none!important}}
@@ -1665,7 +1836,7 @@ document.addEventListener('input',e=>{if(e.target&&e.target.dataset&&e.target.da
 'use strict';
 const D=document,byId=id=>D.getElementById(id),q=(s,r)=>(r||D).querySelector(s),qa=(s,r)=>Array.from((r||D).querySelectorAll(s));
 const CH=n=>String.fromCharCode(n),MID=CH(183),NDASH=CH(8211),MDASH=CH(8212),RSQ=CH(8217),LDQ=CH(8220),RDQ=CH(8221);
-const CFG={form:'CT-1',view:'train',max:8,dp:1,arrLabel:'Arrangement',arr:['Role-play','With the student, trainer present','In the routine, trainer present','Home probe'],probeArr:'Home probe',means:{EC:'attempted but done wrong',EO:'not attempted',NA:'did not arise in the round'},learner:'caregiver',whoKey:'client',whoLabel:'Student',comps:[['c_inst','Instruction','1. Instruction: delivered'],['c_mod','Modeling','2. Modeling: delivered'],['c_reh','Rehearsal','3. Rehearsal: delivered'],['c_fb','Feedback','4. Feedback: delivered'],['c_situ','In-situ probe','5. In-situ probe: conducted']],compsTitle:'Components Delivered',locks:['#nRounds','#delStep','#simBtn','#clearBtn','#loadBtn'],probeNote:'A round marked Home probe counts in the grid like any other round. Saving it also fills the in-home probe under Follow-up and the Family'+RSQ+'s View from its codes (the steps correct and the critical steps correct), the probe that clears the caregiver.',probe:{text:'probe',pct:'probe_pct',crit:'probe_crit',where:'Follow-up and the Family'+RSQ+'s View'},targets:false};
+const CFG={form:'CT-1',view:'train',max:8,dp:1,arrLabel:'Arrangement',arr:['Role-play','With the student, trainer present','In the routine, trainer present','Home probe'],probeArr:'Home probe',means:{EC:'attempted but done wrong',EO:'not attempted',NA:'did not arise in the round'},learner:'caregiver',whoKey:'client',whoLabel:'Student',comps:[['c_inst','Instruction','1. Instruction: delivered'],['c_mod','Modeling','2. Modeling: delivered'],['c_reh','Rehearsal','3. Rehearsal: delivered'],['c_fb','Feedback','4. Feedback: delivered'],['c_situ','In-situ training','5. In-situ training: delivered']],compsTitle:'Components Delivered',locks:['#nRounds','#delStep','#simBtn','#clearBtn','#loadBtn'],probeNote:'A round marked Home probe counts in the grid like any other round. Saving it also fills the in-home probe under Follow-up and the Family'+RSQ+'s View from its codes (the steps correct and the critical steps correct), the probe that clears the caregiver.',probe:{text:'probe',pct:'probe_pct',crit:'probe_crit',none:'probe_nocrit',where:'Follow-up and the Family'+RSQ+'s View'},targets:false};
 const box=byId('rrRun'),body=byId('rrBody'),msgEl=byId('rrMsg');
 if(!box||!body||!msgEl||typeof window.renderAll!=='function'||typeof window.renderGrid!=='function')return;
 const LABEL={C:'Correct',EC:'Commission',EO:'Omission',NA:'N/A'},KEYOF={C:'C',EC:'M',EO:'O',NA:'N'},ORDER=['C','EC','EO','NA'];
@@ -1776,14 +1947,15 @@ function promptHTML(){const p=fbParts(),j=R.round;
 
 /* ---------------- what saving may also tick or fill ---------------- */
 /* the components under the form's Training Components Delivered: offered only for a box not yet ticked; Instruction
-   and Modeling only when the trainer ticks them (the runner cannot see them); Rehearsal for a coded round, or the
-   in-situ component for a round set up as the probe; Feedback when feedback is written to the round's row */
+   and Modeling only when the trainer ticks them (the runner cannot see them); Rehearsal for a coded round that is not the
+   probe; the in-situ component (v22.72, review F357: in-situ training, practice and feedback in the real routine) for a
+   round run in the routine with the trainer present; Feedback when feedback is written to the round's row */
 function compOffers(){const out=[],f=figs();
   (CFG.comps||[]).forEach(([k,name,label])=>{const el=q('[data-m="'+k+'"]');if(!el||el.type!=='checkbox')return;
     let dflt=null;
     if(k==='c_inst'||k==='c_mod')dflt=false;
     else if(k==='c_reh')dflt=!isProbe()&&f.coded>0?true:null;
-    else if(k==='c_situ')dflt=isProbe()&&f.coded>0?true:null;
+    else if(k==='c_situ')dflt=R.arr==='In the routine, trainer present'&&f.coded>0?true:null;
     else if(k==='c_fb')dflt=R.fbOn?true:null;
     if(dflt!==null)out.push({k,name,label,ticked:!!(S.meta||{})[k],dflt});});
   return out;}
@@ -2068,6 +2240,9 @@ async function save(){
       if(!el)throw new Error('R'+(j+1)+' has no feedback field');setField(el,fb);}
     comps.forEach(k=>{const el=q('[data-m="'+k+'"]');if(el&&!el.checked)setCheck(el);});
     pr.forEach(([k,v])=>{const el=q('[data-m="'+CFG.probe[k]+'"]');if(!el)throw new Error('the form has no '+k+' field for the probe');setField(el,v);});
+    /* v22.72 (review F350) a probe in which no critical step came due says so, and one in which they did clears the tick */
+    if(probeOn()&&CFG.probe.none){const pv=probeVals(),fg=figs(),nb=q('[data-m="'+CFG.probe.none+'"]');
+      if(nb&&pv&&fg.anyCrit){const want=!pv.crit;if(!!nb.checked!==want){nb.checked=want;fire(nb);}}}
   }catch(e){err=String(e&&e.message||e);}
   R.writing=false;
   /* the round is read back from the record: anything that did not arrive keeps the round in the runner */
@@ -2168,7 +2343,7 @@ render();
             '[name="m.setting"]','[name="s.site"]','[name="s.school"]','[name="c.setting"]',
             '[name="h.setting"]','#h-location','#m_school','#mSetting','#sSchool','#cSetting',
             '#hSetting','#m_site'],
-    bcba  :['[data-m="bcba"]','[name="s_bcba"]','[data-meta="assessor"]','[name="m.assessor"]',
+    bcba  :['[data-m="bcba"]','[data-m="trainer"]','[name="s_bcba"]','[data-meta="assessor"]','[name="m.assessor"]',
             '[name="m.author"]','[name="h.bcba"]','[name="c.bcba"]','[data-m="assessor"]',
             '#m_analyst','[name="m.analyst"]','#mAssessor','#mBcba','#cBcba','#hBcba',
             '[name="s.bcba"]'],

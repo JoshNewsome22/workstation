@@ -9903,6 +9903,41 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.72: CT-1 puts safety first, holds the probe to its critical steps, and ties the sign-off to the record (review Wave 3, part 1)
+
+- **When safety comes first (F349).** If the Behavior Comes Back has three new rows: **When safety comes first** (when the
+  plan stops and everyone is kept safe, written with the family), **In an emergency** (**Write in 911 and 988** puts in 911,
+  988 and a blank for the county's mobile response team), and **Who they contact, when it is answered, and outside those
+  hours** in place of a personal promise. When the target behavior can put someone at risk (aggression, self-injury,
+  property destruction, running away), the caregiver is not cleared until the first two are written. On screen only, the
+  school's crisis plan (Form CR-1: its behavior, earliest sign and stage names, never what staff do at each stage) and the
+  precautions on Form DM-1 are shown beside the rows as a reference; the school's plan is for trained staff, not a home
+  procedure.
+- **The critical steps on the in-home probe (F350).** With any step marked critical, a blank **Critical steps correct on
+  the probe** is not recorded: enter the figure, or tick **No critical step came due on the probe**. The rehearsal runner
+  ticks it for a home probe in which no critical step came due.
+- **The sign-off says what the record shows (F351, I176).** The outcomes are now: running it independently at home, held
+  at a follow-up probe; competent on the in-home probe, follow-up probe due; competent in rehearsal, home probe still
+  required; not yet; paused. An outcome that claims more than the decision is flagged on screen and on paper ("Outcome
+  entered does not match the decision"). **Follow-up Probes at Home** has rows for the date, steps correct, critical steps,
+  whether the relapse moment came up and how (in person or by video call); the latest one decides, so one below the
+  criterion reads **Not holding at home**. **Next follow-up probe due** goes on the Today list. A file saved with the old
+  "Competent, running it independently at home" opens as competent on the in-home probe.
+- **Steps to Watch** says "Correct in the latest round: watch for it at home" for a step that is no longer wrong, and
+  names the critical steps the in-home probe did not show.
+- **The plan in (F355, I180).** Setup has **Target behavior (Form TB-1)** and **Function (Form FS-1)**, filled from the
+  case; **Skill or protocol taught** and **Its source** fill from the plan (Form TD-1); **Trainer** takes the case's BCBA.
+  Goals & fit has **The student's say in the home plan**, filled from the student interview (Form SI-1) in the
+  student's words.
+- **CT-1 out to the case (F353).** The caregiver trained, where the training stands, the probe, the follow-up probes and
+  the next one due go to the case; the workstation lists **Caregiver training** among the case's facts, and Form PR-1's
+  "what else the case says" names it under question 1.
+- **The worked example (F357).** Component 5 is **In-situ training** (practice and feedback in the real routine); the
+  in-home probe is the assessment. The example's probe week is agreed with the family, the relapse response reports the
+  same day through the school, and the contact gives the school's hours.
+
+Checked by `qa/v2272-test.js` (27).
+
 ### v22.71: RA-1's walkthroughs in one new look, the table seen from above
 
 - **The drawn stories, the practice questions and the printed job aids are redrawn.** Each step is the table seen
