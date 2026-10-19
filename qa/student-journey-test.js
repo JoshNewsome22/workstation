@@ -369,8 +369,11 @@ PH.D=async()=>{
   const sp=await openF('SP-1');
   const wk=SD.slice(3,8);   /* a school week (Monday to Friday if the calendar allows) */
   await putAll(sp,{'#mObserver':'Ms. Lopez (simulated)','#mWeek':mdy(wk[0])+' – '+mdy(wk[4]),'#mSetting':'Room 14'});
-  for(const d of wk){const wd=new Date(d+'T12:00:00').getDay();await put(sp,'[name="sp.date.'+wd+'"]',d);}
-  const cols=wk.map(d=>new Date(d+'T12:00:00').getDay());
+  /* v22.8x the column of each date's weekday on the sheet as it opens (since review F95 a new sheet starts on Monday, Monday
+     to Friday; it was Sunday to Saturday) */
+  const ds=await sp.evaluate(()=>+state.cfg.dayStart||0),colOf=d=>(new Date(d+'T12:00:00').getDay()-ds+7)%7;
+  for(const d of wk)await put(sp,'[name="sp.date.'+colOf(d)+'"]',d);
+  const cols=wk.map(colOf);
   for(const c of cols)for(const r of [5,6]){const b=sp.locator('button.cell[data-r="'+r+'"][data-c="'+c+'"]');await b.scrollIntoViewIfNeeded();await b.tap();await sleep(60);}
   await sleep(500);const spe=(await factsOut(sp)||{}).evidence||{};
   ok('D4 SP-1: ten marks tapped; the pattern names the heaviest interval',spe.n>=1&&/Heaviest interval/.test(spe.statement||''),spe);
