@@ -912,6 +912,31 @@ td input,td select{max-width:100%}
   #sessTbl td input[data-f="p"]{min-width:3.4em}
 }
 </style>
+<style id="mt1-w3-css">
+/* v23.07 review Wave 3 */
+.nbh-print-meta .mt-who:empty{display:none}
+.nbh-print-meta .mt-who{font-weight:600;color:var(--ink)}
+.typebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 2px;font-family:var(--sans);font-size:12.5px}
+.typebar input{flex:1 1 220px;min-width:0;font:inherit;font-family:ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px;letter-spacing:.08em}
+.typebar .hint{flex-basis:100%;margin:0}
+#sessTbl td.tso input{display:block;margin:0 0 2px}
+#sessTbl td.tso input:last-child{margin:0}
+#sessTbl .ivof{display:block;font-family:var(--sans);font-size:10px;color:var(--ink-soft);white-space:nowrap}
+.metric .chance{font-family:var(--sans);font-size:10.5px;color:var(--ink-soft);margin-top:2px}
+#mtPhases table{margin-top:10px}
+#mtPhases td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#mtPhases .hint{font-size:10.5px;margin:2px 0 0}
+@media print{
+  /* v23.07 (review F114) Print blank sheet: the sheet only, its marks, figures and this session's date, time and notes left off the paper (never cleared) */
+  body.print-blank .only-log,body.print-blank .only-guide{display:none!important}
+  body.print-blank .tog button[aria-pressed=true]{background:#fff!important;color:var(--ink-soft)!important}
+  body.print-blank #sumMetrics,body.print-blank #sumVerdict,body.print-blank #ioaOut{display:none!important}
+  body.print-blank [data-m="date"],body.print-blank [data-m="start"],body.print-blank [data-m="notes"],body.print-blank [data-m="chg"]{color:transparent!important}
+  #sessTbl td.tso input{margin:0;font-size:9px;line-height:1.15}
+  /* v23.07 (F112) eight identity fields in two rows on paper, as the six were */
+  .fieldgrid{grid-template-columns:repeat(4,1fr)!important}
+}
+</style>
 <style id="mt1-touch-css">
 /* v21.44 (A6): on a touch screen every target on the live sheet is at least 44 px, with room between targets.
    Screen and a coarse pointer only: paper and the computer layout are unchanged.
@@ -956,7 +981,7 @@ td input,td select{max-width:100%}
     <div class="nbh-titlerow">
       <div class="nbh-titleblock">
         <h1>Discontinuous Measurement Data Sheet</h1>
-        <p class="nbh-sub">Momentary time sampling, partial interval, and whole interval on one sheet. Choose the observation length and the ratio, and the interval times build themselves. A built-in timer runs the observation and alerts you at each mark.</p>
+        <p class="nbh-sub">Momentary time sampling, partial interval, and whole interval on one sheet. Choose the observation length and the interval, and the interval times build themselves. A built-in timer runs the observation and alerts you at each mark.</p>
       </div>
     </div>
     <p class="nbh-savenote">Autosave keeps a safety copy of this form in this browser, on this device, for up to 14 days, and offers it back when the form is opened here again. On a shared device, delete it when you finish (the Autosave button). The record is the file you save: save it to the district drive, not a personal device.</p>
@@ -985,13 +1010,15 @@ td input,td select{max-width:100%}
 <main class="sheet">
   <div class="nbh-print-head">
     <img class="nbh-print-logo" data-nbh-logo="1" alt="Royal Palm School">
-    <div class="nbh-print-meta"><div class="nbh-print-title">Discontinuous Measurement Data Sheet</div><div>Form MT-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+    <div class="nbh-print-meta"><div class="nbh-print-title">Discontinuous Measurement Data Sheet</div><div>Form MT-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div><div class="mt-who" id="mtWho"></div><!-- v23.07 (review F112) the student, the ID, the grade and the school on every printed page set --></div>
   </div>
 
   <!-- ============ SHEET ============ -->
   <section class="only-sheet">
     <div class="fieldgrid">
       <div><label>Student</label><input data-m="client"></div>
+      <div><label>Student ID</label><input data-m="sid"></div><!-- v23.07 (review F112) -->
+      <div><label>School / grade</label><input data-m="site"></div>
       <div><label>Observer</label><input data-m="obs"></div>
       <div><label>Date</label><input data-m="date"></div>
       <div><label>Location</label><input data-m="loc"></div>
@@ -1009,10 +1036,10 @@ td input,td select{max-width:100%}
       <div><label>Method</label><select data-m="method" data-calc="1">
         <option>Momentary time sampling</option><option>Partial interval</option><option>Whole interval</option></select></div>
       <div><label>Observation length</label><select data-m="mins" data-calc="1"></select></div>
-      <div><label>Ratio (minutes : seconds)</label><select data-m="ratio" data-calc="1">
-        <option>1:1</option><option>1:2</option><option>1:3</option><option>1:4</option><option>1:5</option><option>1:6</option></select></div>
+      <div><label>Interval length</label><select data-m="iv" data-calc="1" title="Choose the interval from the behavior: 10 seconds for brief, discrete behaviors; 15 to 30 seconds for momentary samples of long-duration behavior"></select></div><!-- v23.07 (review F111) -->
       <div><label>Columns</label><select data-m="cols" data-calc="1"><option>4</option><option>3</option><option>2</option><option>6</option></select></div>
       <div><label>Record IOA column</label><select data-m="ioaOn" data-calc="1"><option>No</option><option>Yes</option></select></div>
+      <div><label>Observer 2 on another device</label><button type="button" class="tool" id="ioaFileBtn" title="Open the file the second observer saved on their own device: its marks go in the Obs 2 column">Open observer 2&rsquo;s file</button><input type="file" id="ioaFileIn" accept="application/json" hidden></div><!-- v23.07 (review F116) -->
     </div>
     <div class="derived" id="derived"></div>
     <div id="instr" class="hint" style="margin:6px 0"></div>
@@ -1054,6 +1081,13 @@ td input,td select{max-width:100%}
     </div>
     <div class="tmr-flash" id="tmrFlash" aria-hidden="true"></div>
     <div class="ivgrid" id="ivWrap"></div>
+    <div class="typebar noprint" id="typeBar"><!-- v23.07 (review I59) -->
+      <label for="typeMarks">Type the marks</label>
+      <input id="typeMarks" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="+ + &minus; + N &minus; &hellip;" aria-describedby="typeHint">
+      <select id="typeInto" aria-label="Into which column"><option value="m">into Observer 1</option><option value="i">into Observer 2</option></select>
+      <button type="button" class="tool" id="typeApply">Fill the intervals</button>
+      <span class="hint" id="typeHint">From a paper sheet, in order from interval 1: <b>+</b> occurred, <b>&minus;</b> (or -) did not, <b>N</b> could not observe; spaces are ignored.</span>
+    </div>
 
     <div class="metrics" id="sumMetrics"></div>
     <div id="sumVerdict"></div>
@@ -1067,37 +1101,37 @@ td input,td select{max-width:100%}
     <div class="capbar noprint">
       <button class="tool" id="captureSheet">Capture this session to the log</button>
       <button class="tool" id="clearSheet">Clear sheet for the next session</button>
-      <span class="hint" id="capMsg">Capture adds one row to the session log &mdash; date, method, ratio, length, intervals, the percentage and, with an IOA column scored, the three agreement figures &mdash; with the condition, the change and the notes above. Clear sheet empties the marks, the start time, the change and the notes; the student, the behavior, the settings, the date and the log stay.</span>
+      <span class="hint" id="capMsg">Capture adds one row to the session log &mdash; the date, the start time, the location, the observer, the method, the interval, the length, the intervals scored (of those on the sheet, and N/A), the percentage and, with an IOA column scored, the three agreement figures &mdash; with the condition, the change and the notes above. A sheet already logged is asked about before it is logged again. Clear sheet empties the marks, the start time, the change and the notes; the student, the behavior, the settings, the date and the log stay.</span>
     </div>
   </section>
 
   <!-- ============ LOG ============ -->
   <section class="only-log">
     <h2 class="nbh-band">Session Log</h2>
-    <p class="hint">One row per completed sheet, so the percentages can be graphed across days. Keep the method, the observation length and the ratio constant within a phase &mdash; together they set what a mark means and how long each interval is, so changing any of them changes what the number means, and the graph will show a step that is an artefact of the measure.</p>
+    <p class="hint">One row per completed sheet, so the percentages can be graphed across days. Keep the method, the observation length and the interval constant within a phase &mdash; together they set what a mark means and how long each interval is, so changing any of them changes what the number means, and the graph will show a step that is an artefact of the measure. The graph writes the measure above it and marks a change of measure with a dotted line.</p>
     <div class="row" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addSess">Add session</button><button class="tool" id="capture">Capture current sheet</button><button class="tool" id="delSess">Remove last</button>
     </div>
     <div class="grid-wrap"><table class="rt" id="sessTbl"><thead><tr>
-      <th style="width:38px">#</th><th style="width:10%">Date</th><th style="width:14%">Method</th><th style="width:7%">Ratio</th>
-      <th style="width:8%">Length</th><th style="width:7%">Intervals</th><th style="width:7%">% occur</th>
-      <th style="width:11%" title="Point-by-point / occurrence / non-occurrence agreement, as captured from the sheet">IOA % (pt / occ / non)</th>
-      <th style="width:12%">Change at this session</th><th style="width:12%">Condition or change label</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:34px">#</th><th style="width:8%">Date</th><th style="width:11%" title="When the session started, where, and who observed">Time, setting, observer</th><th style="width:11%">Method</th><th style="width:6%" title="The interval length; a row from before shows the paper-sheet ratio when you point at it">Interval</th>
+      <th style="width:6%">Length</th><th style="width:8%" title="Intervals scored + or &minus;, of those on the sheet, and N/A">Intervals</th><th style="width:6%">% occur</th>
+      <th style="width:10%" title="Point-by-point / occurrence / non-occurrence agreement, as captured from the sheet">IOA % (pt / occ / non)</th>
+      <th style="width:10%">Change at this session</th><th style="width:10%">Condition or change label</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Session graph" style="margin-top:12px"><svg id="mtPlot" viewBox="0 0 900 320" aria-label="Percentage of intervals across sessions"></svg></div>
+    <div id="mtPhases"></div><!-- v23.07 (review I60) each condition's sessions, dates, level and agreement -->
   </section>
 
   <!-- ============ GUIDE ============ -->
   <section class="only-guide">
-    <h2 class="nbh-band">The Ratio</h2>
-    <p>The ratio reads <b>minutes of observation : seconds of interval</b>. At 1:1 a five-minute observation uses a five-second interval, a twenty-minute observation uses a twenty-second interval, and either way you score sixty intervals. Raising the second number lengthens the interval and reduces the count: at 1:2 the same observation yields thirty intervals, at 1:3 twenty, and at 1:6 ten.</p>
+    <h2 class="nbh-band">The Interval</h2><!-- v23.07 (review F111) -->
+    <p>Choose the <b>interval length</b> from the behavior and the <b>observation length</b> from the activity; the number of intervals follows from the two: a 30-minute observation in 10-second intervals is 180 intervals, in 20-second intervals 90, and a 10-minute observation in 20-second intervals is 30. The derived count shows beside the selectors, and only lengths that divide the observation evenly are offered.</p>
     <table class="rt" style="margin-top:8px">
-      <tr><th style="width:12%">Ratio</th><th style="width:22%">Interval length</th><th style="width:18%">Intervals</th><th>What it suits</th></tr>
-      <tr><td>1:1</td><td>1 second per minute observed</td><td>60</td><td>The finest setting. Best estimate of duration, and the most demanding to run.</td></tr>
-      <tr><td>1:2</td><td>2 seconds per minute observed</td><td>30</td><td>A common compromise for a single observer with other duties.</td></tr>
-      <tr><td>1:3</td><td>3 seconds per minute observed</td><td>20</td><td>Workable while teaching, for a behavior that occurs in long bouts.</td></tr>
-      <tr><td>1:4 to 1:6</td><td>4 to 6 seconds per minute</td><td>15, 12, 10</td><td>Coarse. Reasonable for screening or for a high-duration behavior; a poor estimate of anything brief.</td></tr>
+      <tr><th style="width:16%">Interval</th><th>What it suits</th></tr>
+      <tr><td>10 seconds</td><td>Brief, discrete behaviors (talk-outs, hitting, swiping materials) with partial interval: for events of this kind Rapp et al. (2008) found that only 10-second partial-interval recording reliably detected most changes. The finest look for momentary sampling.</td></tr>
+      <tr><td>15 to 30 seconds</td><td>Momentary samples of long-duration behavior (on-task, engagement, out of seat): with intervals up to 30 seconds momentary time sampling detected most moderate and large changes in duration events (Rapp et al., 2008). Whole interval for a behavior you are increasing.</td></tr>
+      <tr><td>1 minute or more</td><td>Screening, or a behavior that comes in long bouts. A poor estimate of anything brief, and the longer a partial interval, the more it overestimates.</td></tr>
     </table>
-    <p class="hint">The form shows the derived interval length and interval count beside the selector so the arithmetic is visible rather than assumed. If your reading of the ratio differs from this one, the two numbers will make that obvious immediately.</p>
+    <p class="hint">The paper sheet this form was modelled on set the interval by a ratio, minutes of observation : seconds of interval (10 minutes at 1:2 is 20 seconds). The form shows that ratio when there is one; a file saved with a ratio keeps its interval.</p>
 
     <h2 class="nbh-band" style="margin-top:16px">Which Method, and What It Does to the Number</h2>
     <p>All three produce a percentage of intervals, and none of them produces a duration. The percentage is an estimate: partial and whole interval are biased in known directions, and momentary time sampling errs in both &mdash; which is why the method must be recorded on every sheet and held constant across a phase.</p>
@@ -1114,10 +1148,10 @@ td input,td select{max-width:100%}
       <tr><th style="width:24%">Full phase change</th><td>A <b>solid</b> vertical line, and the data path <b>breaks</b> at it. Use it when the condition itself changes &mdash; the plan starts, a component is added or withdrawn, a reversal begins. Each condition is then read on its own, because level, trend, and variability are not meaningful across a boundary the intervention moved.</td></tr>
       <tr><th>Conditional change</th><td>A <b>dashed</b> vertical line, and the path <b>continues</b>. Use it for something that changed inside the condition without changing the condition &mdash; a new aide, a medication change, a room move, a holiday. The data stay one series because the intervention did not change, but the marker is there when you are asked why that week looks different.</td></tr>
     </table>
-    <p class="hint">The label you type appears beside the line. Labels alternate between two heights so that two changes close together do not overlap, and a label near the right edge flips to the left of its line.</p>
+    <p class="hint">The label you type appears beside the line. Labels alternate between two heights so that two changes close together do not overlap, and a label near the right edge flips to the left of its line. The measure is written above the graph, and a session measured differently from the one before gets a <b>dotted</b> line: a step there may be the measure. Form GB-1&rsquo;s criterion for the behavior, when it is a percentage of intervals, is a dashed green line; under the graph, each condition&rsquo;s sessions, dates, level and agreement.</p><!-- v23.07 (review F115, I58, I60) -->
 
     <h2 class="nbh-band" style="margin-top:16px">The Observation Timer</h2>
-    <p>The timer above the sheet takes its settings from the sheet. The observation length sets the clock and the ratio sets the interval, so the marks always match the rows: 5 minutes at 1:1 runs 5:00 with a mark every 5 seconds (60 marks); 10 minutes at 1:2 runs 10:00 with a mark every 20 seconds (30 marks). Method, length and ratio are locked while the timer runs, so the marks cannot drift away from the sheet; changed once marks are scored, they ask first and then clear the marks.</p>
+    <p>The timer above the sheet takes its settings from the sheet. The observation length sets the clock and the interval length sets the marks, so the marks always match the rows: 5 minutes in 5-second intervals runs 5:00 with a mark every 5 seconds (60 marks); 10 minutes in 20-second intervals runs 10:00 with a mark every 20 seconds (30 marks). Method, length and interval are locked while the timer runs, so the marks cannot drift away from the sheet; changed once marks are scored, they ask first and then clear the marks.</p>
     <table class="rt">
       <tr><th style="width:24%">At each mark</th><td>The timer alerts you with a beep, a flash around the edge of the screen, and a vibration on a phone or tablet. The interval waiting to be scored turns amber on the sheet. Score it with the large <b>+</b>, <b>&minus;</b> and <b>N/A</b> buttons, with the keys <b>+</b>, <b>&minus;</b> and <b>N</b>, or on the sheet itself. A press always fills the oldest interval still waiting, so a missed mark is never skipped over silently.</td></tr>
       <tr><th>Momentary time sampling</th><td>At the beep, look at the student and score what is happening at that moment. The buttons will not score a mark before it arrives.</td></tr>
@@ -1126,16 +1160,17 @@ td input,td select{max-width:100%}
       <tr><th>Alerts</th><td>Sound, flash and vibration can each be turned off, and <b>Alerts on</b> turns all of them off at once; the clock and the amber highlight keep running. <b>3-2-1 ticks</b> adds three soft ticks before each mark when marks are 10 seconds or more apart, so you can look up in time for a momentary sample. <b>Test alert</b> plays one alert. These settings are saved with the data file.</td></tr>
       <tr><th>Pause and reset</th><td><b>Pause</b> stops the clock, for example when the student leaves the room. <b>Reset timer</b> returns the clock to 0:00 without touching the marks; <b>Clear sheet for the next session</b> resets both. The date and start time fill in when you press Start, if they are blank.</td></tr>
       <tr class="noprint"><th>Timing</th><td>The clock is computed from the device&rsquo;s own time rather than by counting ticks, so it does not drift. Beeps are scheduled ahead on the audio clock, so on a computer they keep time even if you switch to another tab; a phone or tablet may pause a page that is not on screen, so keep the form in front during the observation. While the timer runs, the screen is kept awake where the browser allows it.</td></tr>
-      <tr><th>Agreement</th><td>With <b>Record IOA column</b> set to Yes, <b>Score into</b> chooses which column the buttons fill. Two observers collecting agreement data each run the timer on their own device and press Start together.</td></tr>
+      <tr><th>Agreement</th><td>With <b>Record IOA column</b> set to Yes, <b>Score into</b> chooses which column the buttons fill. Two observers collecting agreement data each run the timer on their own device and press Start together; the second observer saves the file, and <b>Open observer 2&rsquo;s file</b> puts its marks in the Obs 2 column when the method, length and interval match. A paper sheet&rsquo;s marks go in with <b>Type the marks</b>.</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:16px">Agreement</h2>
     <p>Interval data support point-by-point agreement directly: the number of intervals both observers scored the same way, divided by the number of intervals both observers scored + or &minus;, times 100. Occurrence agreement is the intervals both scored + divided by the intervals either scored +; non-occurrence agreement is the same for &minus;. Overall agreement is hard to interpret when the behavior is scored in very few or very many intervals, so report occurrence agreement for a behavior scored in few intervals and non-occurrence agreement for one scored in most &mdash; two observers who both score mostly zeros will produce a high overall figure that says nothing about whether they agree on the behavior, and so will two who both score mostly plus marks.</p>
     <p>An interval either observer marked N/A, or that only one observer scored, is left out of all three figures: N/A means the observer could not see, so it is neither an agreement nor a disagreement. The sheet flags occurrence or non-occurrence agreement below 80% and names the figure to act on: occurrence agreement when fewer than half of the two observers' marks in the intervals compared are +, non-occurrence agreement when more than half are. The 80% cut-off is this form's convention, not a finding. Capture carries the three figures to the session log&rsquo;s IOA column, as point-by-point / occurrence / non-occurrence, and the CSV lists the log after the intervals.</p>
-    <p class="hint">Sources: Cooper, Heron, &amp; Heward (2020) on discontinuous measurement and its biases; Powell, Martindale, &amp; Kulp (1975) and Powell et al. (1977) on the estimation properties of momentary, partial, and whole interval recording; Meany-Daboul et al. (2007) comparing the treatment interpretations drawn from momentary time sampling and partial-interval recording with those drawn from continuous recording; Rapp et al. (2008) on interval size and the detection of changes in behavior; Hopkins &amp; Hermann (1977) on overall, occurrence, and non-occurrence agreement for interval data. The ratio convention on this form follows the sheet it was modelled on and is a formatting convention, not a finding.</p>
+    <p>Under each figure is the agreement two observers would reach <b>by chance</b>, scoring independently at the rates they did (Hopkins &amp; Hermann, 1977); a figure close to its chance value says little about agreement on the behavior, whatever the 80% convention says.</p><!-- v23.07 (review I56) -->
+    <p class="hint">Sources: Cooper, Heron, &amp; Heward (2020) on discontinuous measurement and its biases; Powell, Martindale, &amp; Kulp (1975) and Powell et al. (1977) on the estimation properties of momentary, partial, and whole interval recording; Meany-Daboul et al. (2007) comparing the treatment interpretations drawn from momentary time sampling and partial-interval recording with those drawn from continuous recording; Rapp et al. (2008) on interval size and the detection of changes in behavior; Hopkins &amp; Hermann (1977) on overall, occurrence, and non-occurrence agreement for interval data. The ratio of the paper sheet the form was modelled on (shown beside the interval when there is one) was a formatting convention, not a finding.</p>
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
     <h2 class="noprint nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p class="noprint"><b>Load simulation</b> (toolbar) fills the data sheet and the session log with simulated scores; none of it is a real student record. Simulated observation loaded: whole interval, 10 minutes at a 1:2 ratio &mdash; 30 intervals of 20 seconds &mdash; with a second observer and a seven-session log.</p>
+    <p class="noprint"><b>Load simulation</b> (toolbar) fills the data sheet and the session log with simulated scores; none of it is a real student record. Simulated observation loaded: whole interval, 10 minutes in 20-second intervals &mdash; 30 intervals &mdash; with a second observer and a seven-session log.</p>
     <p class="hint" id="mtRefs"><b>Reference list.</b>
     Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
     Hopkins, B. L., &amp; Hermann, J. A. (1977). Evaluating interobserver reliability of interval data. <em>Journal of Applied Behavior Analysis, 10</em>(1), 121&ndash;126. &bull;
@@ -1151,10 +1186,13 @@ td input,td select{max-width:100%}
 <script>
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function blank(){return{meta:{method:'Momentary time sampling',mins:'5',ratio:'1:1',cols:'4',ioaOn:'No'},
+function blank(){return{meta:{method:'Momentary time sampling',mins:'5',iv:'5',ratio:'1:1',cols:'4',ioaOn:'No'},
   marks:{},ioa:{},sess:[]};}
 let S=blank();
 function ensure(){if(!S.sess.length)S.sess.push({d:'',m:'',r:'',len:'',n:'',p:'',ioa:'',chg:'',ph:'',note:''});}
+/* v23.07 (review F112) the print head names the student, the ID, the grade and the school, on the log's pages too */
+function paintWho(){const el=document.getElementById('mtWho');if(!el)return;
+  el.textContent=[['',S.meta.client],['ID ',S.meta.sid],['',S.meta.site]].filter(x=>String(x[1]||'').trim()).map(x=>x[0]+String(x[1]).trim()).join(' \u00b7 ');}
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 /* v21.16 audit (F6): a new record (Clear all, Open data, Load simulation) stops and resets a running
@@ -1167,14 +1205,20 @@ function toHM24(v){const t=String(v==null?"":v).trim().toLowerCase();if(!t)retur
   if(m[3]==="p"&&h<12)h+=12;else if(m[3]==="a"&&h===12)h=0;else if(!m[3]&&h>=1&&h<=6)h+=12;return String(h).padStart(2,"0")+":"+String(mi).padStart(2,"0");}
 
 
-/* ---------- the ratio: minutes of observation : seconds of interval ---------- */
+/* ---------- the interval (v23.07, review F111) ----------
+   The interval length is chosen (S.meta.iv, seconds) and the count follows: minutes x 60 / interval. A file from before has
+   only the paper sheet's ratio, minutes of observation : seconds of interval, and keeps the interval it had (minutes x the
+   ratio's second number). The ratio is still given when the interval is a whole multiple of the minutes. */
+const IVS=[5,10,15,20,30,45,60,90,120,180,300];
 function params(){
   const mins=parseInt(S.meta.mins,10)||5;
   const den=parseInt(String(S.meta.ratio||'1:1').split(':')[1],10)||1;
-  const ivSec=mins*den;              /* 5 min at 1:1 -> 5 s; at 1:3 -> 15 s */
-  const total=Math.round((mins*60)/ivSec);   /* always 60/den */
-  return {mins,den,ivSec,total};
+  let ivSec=parseInt(S.meta.iv,10);
+  if(!(ivSec>0))ivSec=mins*den;      /* a file from before: 5 min at 1:1 -> 5 s; at 1:3 -> 15 s */
+  const total=Math.max(1,Math.floor((mins*60)/ivSec));
+  return {mins,den,ivSec,total,ratio:ivSec%mins===0?'1:'+(ivSec/mins):''};
 }
+const ivName=s=>s<60?s+' seconds':s+' seconds ('+(s%60?(s/60).toFixed(1):s/60)+' min)';
 const mmss=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 
 function renderSetup(){
@@ -1182,12 +1226,20 @@ function renderSetup(){
   if(sel&&!sel.options.length){
     for(let m=5;m<=60;m+=5)sel.appendChild(new Option(m+' minutes',String(m)));
   }
-  const p=params();
+  /* v23.07 (review F111): the intervals that divide the observation evenly; a file from before keeps its interval */
+  let p=params();
+  if(!S.meta.iv||(p.mins*60)%p.ivSec){const ok=IVS.filter(x=>(p.mins*60)%x===0&&x<=p.ivSec);S.meta.iv=String((p.mins*60)%p.ivSec?(ok.length?ok[ok.length-1]:5):p.ivSec);p=params();}
+  S.meta.ratio=p.ratio;
+  const ivSel=$('[data-m="iv"]');
+  if(ivSel){const opts=IVS.filter(x=>(p.mins*60)%x===0&&p.mins*60/x>=4);   /* at least four intervals */if(!opts.includes(p.ivSec))opts.push(p.ivSec);opts.sort((a,b)=>a-b);
+    const want=opts.join(',');if(ivSel.dataset.opts!==want){ivSel.innerHTML=opts.map(x=>`<option value="${x}">${ivName(x)}</option>`).join('');ivSel.dataset.opts=want;}
+    ivSel.value=String(p.ivSec);}
   $('#derived').innerHTML=
     `<span>Interval length <b>${p.ivSec} seconds</b></span>`+
     `<span>Intervals to score <b>${p.total}</b></span>`+
     `<span>Observation <b>${p.mins} minutes</b> (${mmss(p.mins*60)})</span>`+
-    `<span>Ratio <b>${esc(S.meta.ratio)}</b> &mdash; ${p.den} second${p.den===1?'':'s'} of interval per minute observed</span>`;
+    (p.ratio?`<span>Paper-sheet ratio <b>${p.ratio}</b></span>`:`<span>No whole-number paper-sheet ratio</span>`)+
+    (p.total>180?`<span><b>A long sheet</b>: ${p.total} intervals to score</span>`:'');
   const m=S.meta.method;
   $('#instr').innerHTML= m==='Partial interval'
     ? '<b>Partial interval.</b> Score <b>+</b> if the behavior occurred at any point during the interval, and <b>&minus;</b> if it did not occur at all. This overestimates duration.'
@@ -1264,7 +1316,7 @@ function renderSum(){
     else if(m==='Whole interval'&&t==='Reduction target')note='Whole interval underestimates duration. For a reduction target it will make the behavior look less frequent than it is; partial interval or momentary sampling is the more usual choice here.';
     else if(m==='Partial interval'&&(t==='Replacement behavior'||t==='Acquisition target'))note='Partial interval overestimates duration, so it will credit a fragment of the behavior as a whole interval. For a behavior you are increasing, whole interval sets the more honest bar.';
     else if(m==='Momentary time sampling')note='Momentary sampling estimates duration reasonably well when the interval is short relative to the behavior, and misses a brief behavior unless it is under way at a mark.';
-    v=`<div class="verdict v-ok"><b>${pct.toFixed(1)}% of scored intervals.</b> ${esc(S.meta.method)}, ${p.ivSec}-second intervals, ratio ${esc(S.meta.ratio)}. ${note}</div>`;
+    v=`<div class="verdict v-ok"><b>${pct.toFixed(1)}% of scored intervals.</b> ${esc(S.meta.method)}, ${p.ivSec}-second intervals, ${p.mins} minutes. ${note}</div>`;
   }
   $('#sumVerdict').innerHTML=v;
   /* IOA. v21.16 audit.
@@ -1278,43 +1330,52 @@ function renderSum(){
      marks in the intervals compared are +, non-occurrence agreement when more than half are (Bijou et al.,
      1968, as reported by Hopkins & Hermann, 1977). Only the occurrence figure used to be checked and named. */
   if(S.meta.ioaOn!=='Yes'){$('#ioaOut').innerHTML='';return;}
-  const {agree,tot,occA,occT,nonA,nonT,plusN,left}=ioaFigs(p);
+  const {agree,tot,occA,occT,nonA,nonT,plusN,left,o1,o2,n1,n2}=ioaFigs(p);
   const f=(a,b)=>b?(100*a/b).toFixed(1)+'%':'\u2014';
-  const c2=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
+  /* v23.07 (review I56): the agreement two observers would reach by chance, scoring independently at the rates they did
+     (Hopkins & Hermann, 1977): overall (O1*O2 + N1*N2) / T^2; occurrence O1*O2 / (T^2 - N1*N2); non-occurrence N1*N2 / (T^2 - O1*O2) */
+  const T2=tot*tot,ch=(a,b)=>b>0?'chance alone: '+(100*a/b).toFixed(1)+'%':'';
+  const chance=[ch(o1*o2+n1*n2,T2),ch(o1*o2,T2-n1*n2),ch(n1*n2,T2-o1*o2)];
+  const c2=(l,v,s,k)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div>${tot&&chance[k]?`<div class="chance">${chance[k]}</div>`:''}</div>`;
   const low=[occT&&occA/occT<.8?'Occurrence':'',nonT&&nonA/nonT<.8?'Non-occurrence':''].filter(Boolean);
   const share=tot?plusN/(2*tot):0;
   const act=share<.5?'The behavior was scored in fewer than half of the intervals compared. Overall agreement can look high when both observers score mostly non-occurrence; the occurrence figure is the one to act on.'
     :share>.5?'The behavior was scored in more than half of the intervals compared. Overall agreement can look high when both observers score mostly occurrence; the non-occurrence figure is the one to act on.'
     :'The behavior was scored in half of the intervals compared, so neither figure is inflated more than the other.';
   $('#ioaOut').innerHTML='<div class="metrics">'+
-    c2('Point-by-point IOA',f(agree,tot),`${agree} of ${tot} intervals compared scored alike`+(left?`; ${left} left out (N/A, or one observer only)`:''))+
-    c2('Occurrence agreement',f(occA,occT),`${occA} of ${occT}`)+
-    c2('Non-occurrence agreement',f(nonA,nonT),`${nonA} of ${nonT}`)+'</div>'+
+    c2('Point-by-point IOA',f(agree,tot),`${agree} of ${tot} intervals compared scored alike`+(left?`; ${left} left out (N/A, or one observer only)`:''),0)+
+    c2('Occurrence agreement',f(occA,occT),`${occA} of ${occT}`,1)+
+    c2('Non-occurrence agreement',f(nonA,nonT),`${nonA} of ${nonT}`,2)+'</div>'+
     (low.length?`<div class="verdict v-mid">${low.length>1?'Occurrence and non-occurrence agreement are':low[0]+' agreement is'} below 80%. ${act}</div>`:'');
 }
 
 /* v21.37: the three agreement figures, counted once for the sheet and for the capture to the session log */
 function ioaFigs(p){const pm=v=>v==='1'||v==='0';
-  let agree=0,tot=0,occA=0,occT=0,nonA=0,nonT=0,plusN=0,left=0;
+  let agree=0,tot=0,occA=0,occT=0,nonA=0,nonT=0,plusN=0,left=0,o1=0,o2=0;
   for(let i=0;i<p.total;i++){const a=S.marks[i],b=S.ioa[i];
     if(!pm(a)||!pm(b)){if(a||b)left++;continue;}
-    tot++;if(a===b)agree++;plusN+=(a==='1')+(b==='1');
+    tot++;if(a===b)agree++;plusN+=(a==='1')+(b==='1');o1+=(a==='1');o2+=(b==='1');
     if(a==='1'||b==='1'){occT++;if(a===b)occA++;}
     if(a==='0'||b==='0'){nonT++;if(a===b)nonA++;}}
-  return{agree,tot,occA,occT,nonA,nonT,plusN,left};}
+  return{agree,tot,occA,occT,nonA,nonT,plusN,left,o1,o2,n1:tot-o1,n2:tot-o2};}
 /* the log's IOA cell: point-by-point / occurrence / non-occurrence, each as a percentage or a dash */
 function ioaCell(p){if(S.meta.ioaOn!=='Yes')return'';const g=ioaFigs(p);if(!g.tot)return'';
   const f=(a,b)=>b?(100*a/b).toFixed(1):'\u2014';return f(g.agree,g.tot)+' / '+f(g.occA,g.occT)+' / '+f(g.nonA,g.nonT);}
 
 /* ---------- session log ---------- */
+/* v23.07 (review F109, F111): a row keeps when, where and by whom the session was observed, its interval, and the intervals
+   on the sheet and N/A beside those scored; a row from before shows its interval from its ratio and its length */
+const rowIv=r=>{if(String(r.iv||'').trim())return String(r.iv).trim();const mm=parseInt(r.len,10),dn=parseInt(String(r.r||'').split(':')[1],10);return mm&&dn?(mm*dn)+' s':'';};
+const rowMeasure=r=>[String(r.m||'').trim(),rowIv(r)?parseInt(rowIv(r),10)+'-s intervals':'',String(r.len||'').trim()].filter(Boolean).join(' \u00b7 ');
 function renderSess(){
   $('#sessTbl tbody').innerHTML=S.sess.map((r,i)=>`<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
     <td><input data-s="${i}" data-f="d" value="${esc(r.d)}"></td>
+    <td class="tso"><input data-s="${i}" data-f="start" value="${esc(r.start||'')}" placeholder="time" aria-label="Session ${i+1}: start time"><input data-s="${i}" data-f="loc" value="${esc(r.loc||'')}" placeholder="setting" aria-label="Session ${i+1}: setting"><input data-s="${i}" data-f="obs" value="${esc(r.obs||'')}" placeholder="observer" aria-label="Session ${i+1}: observer"></td>
     <td><input data-s="${i}" data-f="m" value="${esc(r.m)}"></td>
-    <td><input data-s="${i}" data-f="r" value="${esc(r.r)}"></td>
+    <td><input data-s="${i}" data-f="iv" value="${esc(rowIv(r))}"${r.r?` title="Paper-sheet ratio ${esc(r.r)}"`:''}></td>
     <td><input data-s="${i}" data-f="len" value="${esc(r.len)}"></td>
-    <td><input data-s="${i}" data-f="n" value="${esc(r.n)}"></td>
+    <td><input data-s="${i}" data-f="n" value="${esc(r.n)}">${String(r.tot||'').trim()?`<span class="ivof">of ${esc(r.tot)}${+r.na?' \u00b7 '+esc(r.na)+' N/A':''}</span>`:''}</td>
     <td><input type="number" step="any" data-s="${i}" data-f="p" value="${esc(r.p)}"></td>
     <td><input data-s="${i}" data-f="ioa" value="${esc(r.ioa||'')}" title="Point-by-point / occurrence / non-occurrence"></td>
     <td><select data-s="${i}" data-f="chg"><option value=""></option>${
@@ -1325,25 +1386,32 @@ function renderSess(){
   drawPlot();
 }
 ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(el.dataset.s===undefined)return;
-  S.sess[+el.dataset.s][el.dataset.f]=el.value;if(el.dataset.f==='p'||el.dataset.f==='ph'||el.dataset.f==='chg')drawPlot();}));
-$('#addSess').addEventListener('click',()=>{S.sess.push({d:'',m:'',r:'',len:'',n:'',p:'',ioa:'',chg:'',ph:'',note:''});renderSess();});
+  S.sess[+el.dataset.s][el.dataset.f]=el.value;if(/^(p|ph|chg|m|iv|len|d|ioa)$/.test(el.dataset.f))drawPlot();}));
+$('#addSess').addEventListener('click',()=>{S.sess.push({d:'',start:'',loc:'',obs:'',m:'',iv:'',r:'',len:'',n:'',p:'',ioa:'',chg:'',ph:'',note:''});renderSess();});
 $('#delSess').addEventListener('click',()=>{if(S.sess.length>1){S.sess.pop();renderSess();}});
 /* The sheet's condition, its change marker and its notes go with the numbers:
    a session in which a procedure was used should say so on the log, where the
    graph is read, not only on the sheet it was scored on. A first row that is
    still empty is filled rather than left blank above the first real session. */
-const emptyRow=r=>!['d','m','r','len','n','p','ioa','chg','ph','note'].some(k=>String(r[k]||'').trim());
+const emptyRow=r=>!['d','start','loc','obs','m','iv','r','len','n','p','ioa','chg','ph','note'].some(k=>String(r[k]||'').trim());
 /* v21.33 (R): any session can be deleted, not only the last; the log keeps at least one (blank) row */
 $('#sessTbl').addEventListener('click',async e=>{const b=e.target.closest('.rowDel');if(!b)return;const i=+b.dataset.del,r=S.sess[i];if(!r)return;
   if(!emptyRow(r)&&!(await nbhUI.confirm('Delete this row?\nThe session logged on it is deleted from the log.',{ok:'Delete',danger:true})))return;
   S.sess.splice(i,1);ensure();renderSess();});
-function captureSheet(goToLog){
-  const p=params();let plus=0,scored=0;
-  for(let i=0;i<p.total;i++){const v=S.marks[i];if(v==='1'){plus++;scored++;}else if(v==='0')scored++;}
+/* v23.07 (review F113): the sheet logged last is remembered (its date, its measure and both observers' marks); captured again
+   unchanged, the form asks first */
+const capFP=p=>[S.meta.date||'',S.meta.method,p.mins,p.ivSec,JSON.stringify(S.marks),JSON.stringify(S.ioa)].join('|');
+async function captureSheet(goToLog){
+  const p=params();let plus=0,scored=0,na=0;
+  for(let i=0;i<p.total;i++){const v=S.marks[i];if(v==='1'){plus++;scored++;}else if(v==='0')scored++;else if(v==='x')na++;}
   if(!scored){alert('Score some intervals on the data sheet first.');return;}
-  const row={d:S.meta.date||'',m:S.meta.method,r:S.meta.ratio,len:p.mins+' min',
-    n:String(scored),p:(100*plus/scored).toFixed(1),ioa:ioaCell(p),chg:S.meta.chg||'',ph:S.meta.cond||'',note:S.meta.notes||''};   /* v21.37: the IOA figures go with the session */
+  const fp=capFP(p),lc=S.meta.lastCap;
+  if(lc&&lc.fp===fp&&!(await nbhUI.confirm('This sheet is already logged as session '+lc.n+'.\nLog it again? Cancel keeps the log as it is.',{ok:'Log it again'}))){
+    const msg=$('#capMsg');if(msg){msg.textContent='Not logged again: this sheet is session '+lc.n+' on the log.';msg.classList.add('done');}if(goToLog)setView('log');return;}
+  const row={d:S.meta.date||'',start:S.meta.start||'',loc:S.meta.loc||'',obs:S.meta.obs||'',m:S.meta.method,iv:p.ivSec+' s',r:p.ratio,len:p.mins+' min',
+    n:String(scored),tot:String(p.total),na:String(na),p:(100*plus/scored).toFixed(1),ioa:ioaCell(p),chg:S.meta.chg||'',ph:S.meta.cond||'',note:S.meta.notes||''};   /* v21.37: the IOA figures go with the session */
   if(S.sess.length===1&&emptyRow(S.sess[0]))S.sess[0]=row;else S.sess.push(row);
+  S.meta.lastCap={fp,n:S.sess.indexOf(row)+1};
   /* a phase change belongs to the one session it was made at */
   S.meta.chg='';const chgSel=$('[data-m="chg"]');if(chgSel)chgSel.value='';
   renderSess();
@@ -1355,7 +1423,7 @@ $('#capture').addEventListener('click',()=>captureSheet(true));
 $('#captureSheet').addEventListener('click',()=>captureSheet(false));
 $('#clearSheet').addEventListener('click',async()=>{
   if(!(await nbhUI.confirm('Clear the sheet for the next session?\nThe marks, the start time, the change marker and the notes are cleared. The student, the behavior, the settings, the date, the condition and the session log stay.',{ok:'Clear the sheet',danger:true})))return;
-  S.marks={};S.ioa={};S.meta.start='';S.meta.notes='';S.meta.chg='';
+  S.marks={};S.ioa={};S.meta.start='';S.meta.notes='';S.meta.chg='';delete S.meta.lastCap;
   bindMeta();const chgSel=$('[data-m="chg"]');if(chgSel)chgSel.value='';renderGrid();renderSum();
   const msg=$('#capMsg');if(msg){msg.textContent='Sheet cleared for the next session. The session log is unchanged.';msg.classList.add('done');}
   setView('sheet');
@@ -1363,7 +1431,7 @@ $('#clearSheet').addEventListener('click',async()=>{
 function drawPlot(){
   const svg=$('#mtPlot');const W=900,H=320,L=52,R=22,T=26,B=64;
   const pts=S.sess.map((r,i)=>({i,y:parseFloat(r.p),ph:r.ph,chg:r.chg})).filter(p=>isFinite(p.y));
-  if(pts.length<2){svg.innerHTML='';return;}
+  if(pts.length<2){svg.innerHTML='';renderPhases();return;}
   const n=pts.length,px=k=>L+(n===1?(W-L-R)/2:(k/(n-1))*(W-L-R)),py=v=>T+(1-v/100)*(H-T-B);
   let s=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/><rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="none" stroke="#CDD6D2"/>`;
   for(let i=0;i<=4;i++){const v=100*i/4,y=py(v);
@@ -1385,6 +1453,20 @@ function drawPlot(){
     if(k>0&&p.chg==='Full phase change')open=false;
     path+=(open?'L':'M')+px(k).toFixed(1)+' '+py(p.y).toFixed(1)+' ';open=true;
   });
+  /* v23.07 (review F115): the measure of the first session above the plot, and a dotted line where a session's method,
+     interval or length differs from the one before it, labelled with the new measure, at the foot of the plot */
+  const mPts=S.sess.map((r,i)=>({i,r,y:parseFloat(r.p)})).filter(q=>isFinite(q.y));
+  if(mPts.length&&rowMeasure(mPts[0].r))s+=`<text x="${L}" y="${T-9}" font-size="10" fill="#1B2A2E" font-family="Inter,Arial,sans-serif">Measure: ${esc(rowMeasure(mPts[0].r))}</text>`;
+  let mc=0;
+  mPts.forEach((q,k)=>{if(!k)return;const a=rowMeasure(mPts[k-1].r),b=rowMeasure(q.r);if(!b||!a||a===b)return;
+    const x=(px(k)+px(k-1))/2,y=H-B-6-(mc%2)*11,w=b.length*4.6,flip=(x+4+w)>(W-R);
+    s+=`<line class="mt-mchg" x1="${x}" x2="${x}" y1="${T}" y2="${H-B}" stroke="#6B4E9B" stroke-width="1.4" stroke-dasharray="1.5 3"/>`
+      +`<text x="${flip?x-4:x+4}" y="${y}" font-size="9" text-anchor="${flip?'end':'start'}" fill="#6B4E9B" font-family="Inter,Arial,sans-serif">${esc(b)}</text>`;mc++;});
+  /* v23.07 (review I58): Form GB-1's criterion for this behavior, when it is set as a percentage of intervals */
+  const gl=typeof window.mtGoal==='function'?window.mtGoal():null;
+  if(gl&&gl.pct>=0&&gl.pct<=100){const y=py(gl.pct);
+    s+=`<g class="mt-goal"><title>${esc(gl.text)}</title><line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#2F6B37" stroke-width="1.3" stroke-dasharray="6 4"/>`
+      +`<text x="${W-R-4}" y="${y-4}" font-size="9.5" text-anchor="end" fill="#2F6B37" font-family="Inter,Arial,sans-serif">Goal ${gl.pct}% (Form GB-1)</text></g>`;}
   s+=`<path d="${path}" fill="none" stroke="#254657" stroke-width="2"/>`;
   pts.forEach((p,k)=>{s+=`<circle cx="${px(k)}" cy="${py(p.y)}" r="3.8" fill="#254657"/>`;});
   pts.forEach((p,k)=>{s+=`<text x="${px(k)}" y="${H-B+15}" font-size="10" text-anchor="middle" fill="#5C6B6B" font-family="Inter,Arial,sans-serif">${p.i+1}</text>`;});
@@ -1392,10 +1474,29 @@ function drawPlot(){
   s+=`<g font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#54676f">
         <line x1="${L+8}" x2="${L+8}" y1="${H-B+20}" y2="${H-B+30}" stroke="#1B2A2E" stroke-width="1.6"/><text x="${L+15}" y="${H-B+29}">full phase change (path breaks)</text>
         <line x1="${L+215}" x2="${L+215}" y1="${H-B+20}" y2="${H-B+30}" stroke="#9B4E15" stroke-width="1.2" stroke-dasharray="4 3"/><text x="${L+222}" y="${H-B+29}">conditional change (path continues)</text>
+        <line x1="${L+430}" x2="${L+430}" y1="${H-B+20}" y2="${H-B+30}" stroke="#6B4E9B" stroke-width="1.4" stroke-dasharray="1.5 3"/><text x="${L+437}" y="${H-B+29}">measure changed (a step there may be the measure)</text>
       </g>`;
   s+=`<text x="${(L+W-R)/2}" y="${H-6}" font-size="11" text-anchor="middle" fill="#1B2A2E" font-family="Inter,Arial,sans-serif">Session</text>
       <text x="14" y="${(T+H-B)/2}" font-size="11" text-anchor="middle" fill="#1B2A2E" font-family="Inter,Arial,sans-serif" transform="rotate(-90 14 ${(T+H-B)/2})">% of intervals</text>`;
   svg.innerHTML=s;
+  renderPhases();
+}
+/* v23.07 (review I60): each condition, from one full phase change to the next (a conditional change stays inside it, as on
+   the graph): its sessions, dates, mean and range, first and last, and the mean point-by-point agreement where captured */
+function renderPhases(){
+  const box=document.getElementById('mtPhases');if(!box)return;
+  const rows=S.sess.map((r,i)=>({r,i,y:parseFloat(r.p)})).filter(o=>isFinite(o.y));
+  if(rows.length<2){box.innerHTML='';return;}
+  const ph=[];rows.forEach(o=>{if(!ph.length||o.r.chg==='Full phase change')ph.push({lab:String(o.r.ph||'').trim(),rows:[]});ph[ph.length-1].rows.push(o);});
+  const f1=v=>v.toFixed(1),io1=r=>{const m=/^\s*(\d+(?:\.\d+)?)/.exec(String(r.ioa||''));return m?+m[1]:null;};
+  let h='<table class="rt"><thead><tr><th style="width:22%">Condition</th><th style="width:12%">Sessions</th><th style="width:18%">Dates</th><th style="width:16%">Mean % (range)</th><th style="width:14%">First \u2192 last</th><th>Mean IOA (point-by-point)</th></tr></thead><tbody>';
+  ph.forEach(g=>{const ys=g.rows.map(o=>o.y),io=g.rows.map(o=>io1(o.r)).filter(v=>v!=null),mean=ys.reduce((a,b)=>a+b,0)/ys.length;
+    const a=g.rows[0],z=g.rows[g.rows.length-1],cc=g.rows.filter((o,k)=>k&&o.r.chg==='Conditional change').map(o=>esc(String(o.r.ph||'').trim()||'a change')+' at session '+(o.i+1));
+    h+=`<tr><td>${esc(g.lab||'(no label)')}${cc.length?`<div class="hint">conditional change: ${cc.join(', ')}</div>`:''}</td>`
+      +`<td class="n">${a.i+1}${z!==a?'\u2013'+(z.i+1):''} (${g.rows.length})</td><td>${esc(String(a.r.d||'').trim()||'\u2014')}${z!==a?' \u2013 '+esc(String(z.r.d||'').trim()||'\u2014'):''}</td>`
+      +`<td class="n">${f1(mean)}${ys.length>1?' ('+f1(Math.min(...ys))+'\u2013'+f1(Math.max(...ys))+')':''}</td><td class="n">${f1(a.y)} \u2192 ${f1(z.y)}</td>`
+      +`<td class="n">${io.length?f1(io.reduce((x,y)=>x+y,0)/io.length)+'% ('+io.length+' session'+(io.length===1?'':'s')+')':'\u2014'}</td></tr>`;});
+  box.innerHTML=h+'</tbody></table>';
 }
 
 /* v21.16 audit.
@@ -1405,7 +1506,7 @@ function drawPlot(){
    F5: the method, the observation length and the ratio decide what each mark means (what + records, and
    how long each interval is). Changed after marks are scored, they relabelled those marks silently; the
    change now asks first and clears the marks of both observers, or is cancelled and the setting stays. */
-const RESCORE={method:'method',mins:'observation length',ratio:'ratio'};
+const RESCORE={method:'method',mins:'observation length',iv:'interval length'};   /* v23.07 (F111) the interval, not the ratio */
 const anyMarks=()=>[S.marks,S.ioa].some(o=>Object.values(o||{}).some(Boolean));
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
   if(el.tagName==='SELECT'){const v=S.meta[k]==null?'':String(S.meta[k]);if([...el.options].some(o=>o.value===v))el.value=v;}
@@ -1419,27 +1520,35 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
         S.marks={};S.ioa={};
       }
       S.meta[k]=el.value;
-      if(el.dataset.calc){renderSetup();renderGrid();renderSum();}});}});}
-function renderAll(){ensure();renderSetup();bindMeta();renderSetup();renderGrid();renderSum();renderSess();}
+      if(/^(client|sid|site)$/.test(k))paintWho();
+      if(el.dataset.calc){renderSetup();bindMeta();renderGrid();renderSum();}});}});}
+function renderAll(){ensure();renderSetup();bindMeta();renderSetup();renderGrid();renderSum();renderSess();paintWho();}
 
-$('#printBtn').addEventListener('click',()=>window.print());
-$('#blankBtn').addEventListener('click',async()=>{
-  if(!(await nbhUI.confirm('Print an empty sheet?\nThe marks are cleared, and the sheet prints empty at the current settings.',{ok:'Clear and print',danger:true})))return;
-  S.marks={};S.ioa={};renderGrid();renderSum();setTimeout(()=>window.print(),150);});
+$('#printBtn').addEventListener('click',()=>{document.body.classList.remove('print-blank');window.print();});
+/* v23.07 (review F114): a blank copy of the sheet for the next session prints from the sheet as it is: on paper the marks,
+   the figures and this session's date, time, change and notes are left off, and only the sheet prints; nothing is cleared */
+$('#blankBtn').addEventListener('click',()=>{document.body.classList.add('print-blank');setTimeout(()=>window.print(),60);});
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-blank'));
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'MT-1',rev:'2026-09',saved:new Date().toISOString(),S},null,1)],{type:'application/json'}));
   a.download=`MT-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.S)throw 0;S=Object.assign(blank(),d.S);S.meta=Object.assign(blank().meta,d.S.meta);renderAll();resetTimer();}
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.S)throw 0;S=Object.assign(blank(),d.S);S.meta=Object.assign(blank().meta,d.S.meta);
+      if(!d.S.meta||!String(d.S.meta.iv||'').trim())delete S.meta.iv;   /* v23.07 (F111) a file from before keeps the interval its ratio gave */
+      renderAll();resetTimer();}
     catch(err){alert('That file could not be read as a saved MT-1 form.');}};r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
   const p=params();const rows=[['Interval','Time','Observer 1','Observer 2']];
   for(let i=0;i<p.total;i++)rows.push([i+1,mmss((i+1)*p.ivSec),S.marks[i]||'',S.ioa[i]||'']);
   /* v21.37: the session log follows the intervals, one row per session, the IOA figures as the log holds them */
-  if(S.sess.some(r=>!emptyRow(r))){rows.push([]);rows.push(['Session','Date','Method','Ratio','Length','Intervals','% occur','IOA % (point-by-point / occurrence / non-occurrence)','Change at this session','Condition or change label','Note']);
-    S.sess.forEach((r,i)=>{if(!emptyRow(r))rows.push([i+1,r.d,r.m,r.r,r.len,r.n,r.p,r.ioa||'',r.chg,r.ph,r.note]);});}
+  if(S.sess.some(r=>!emptyRow(r))){rows.push([]);
+    /* v23.07 (review F115, F109): the measure first, and each session's time, setting, observer, interval and N/A */
+    const lg=S.sess.filter(r=>!emptyRow(r)),chgs=[];lg.forEach((r,k)=>{if(k&&rowMeasure(r)&&rowMeasure(lg[k-1])&&rowMeasure(r)!==rowMeasure(lg[k-1]))chgs.push('session '+(S.sess.indexOf(r)+1)+': '+rowMeasure(r));});
+    rows.push(['Measure',rowMeasure(lg[0])].concat(chgs.length?['Changed at '+chgs.join('; ')]:[]));
+    rows.push(['Session','Date','Start time','Setting','Observer','Method','Interval','Ratio (paper sheet)','Length','Intervals scored','Intervals on the sheet','N/A','% occur','IOA % (point-by-point / occurrence / non-occurrence)','Change at this session','Condition or change label','Note']);
+    S.sess.forEach((r,i)=>{if(!emptyRow(r))rows.push([i+1,r.d,r.start||'',r.loc||'',r.obs||'',r.m,rowIv(r),r.r||'',r.len,r.n,r.tot||'',r.na||'',r.p,r.ioa||'',r.chg,r.ph,r.note]);});}
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='MT-1_intervals.csv';document.body.appendChild(a);a.click();a.remove();});
@@ -1454,7 +1563,7 @@ async function loadSim(){
     beh:'On-task: eyes and hands oriented to the assigned materials',
     ttype:'Acquisition target',
     def:'Eyes directed at the assigned materials and at least one hand in contact with them or with the writing tool. Looking at the adult while being spoken to counts. Looking away, leaving the seat, or hands idle does not.',
-    method:'Whole interval',mins:'10',ratio:'1:2',cols:'4',ioaOn:'Yes',
+    method:'Whole interval',mins:'10',iv:'20',ratio:'1:2',cols:'4',ioaOn:'Yes',
     cond:'Plan',chg:'',
     notes:'Whole interval chosen because this is an acquisition target and a fragment of on-task should not be credited as a full interval. Second observer present for the whole session; agreement computed above.'};
   const p=params();
@@ -1474,16 +1583,53 @@ async function loadSim(){
     {d:D(2),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'70.0',ph:'Plan',note:'This sheet'}
   ];
   S.sess[S.sess.length-1].ioa=ioaCell(p);   /* v21.37: this sheet's own agreement figures, as Capture writes them */
+  /* v23.07 (review F109, F113): each session's time, setting and observer, the interval and the intervals on the sheet; the
+     sheet on screen is the last session, already logged */
+  const W1=['13:30','Room 12, independent writing block','Aide A (simulated)'],W2=['10:15','Room 12, small-group reading','Aide B (simulated)'];
+  S.sess.forEach((r,k)=>{const w=k===5?W2:W1;r.start=w[0];r.loc=w[1];r.obs=w[2];r.iv='20 s';r.tot='30';r.na='0';});
+  S.meta.lastCap={fp:capFP(p),n:S.sess.length};
   renderAll();resetTimer();setView('sheet');
-  nbhUI.toast('Simulation loaded: ' + 'simulated whole-interval observation, 10 minutes at a 1:2 ratio, with a second observer.', {kind:'ok'});
+  nbhUI.toast('Simulation loaded: ' + 'simulated whole-interval observation, 10 minutes in 20-second intervals, with a second observer.', {kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
+/* v23.07 (review F116): the second observer's own file, saved on their device, into the Obs 2 column, once its method, length
+   and interval match this sheet's */
+$('#ioaFileBtn').addEventListener('click',()=>$('#ioaFileIn').click());
+$('#ioaFileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=async()=>{let d=null;try{d=JSON.parse(rd.result);}catch(x){d=null;}
+    const o=d&&d.S;if(!o||!o.meta||!o.marks||typeof o.marks!=='object'){alert('That file could not be read as a saved MT-1 form.');return;}
+    const p=params(),om=o.meta,omins=parseInt(om.mins,10)||5,oden=parseInt(String(om.ratio||'1:1').split(':')[1],10)||1,oiv=parseInt(om.iv,10)||omins*oden,diff=[];
+    if(String(om.method||'')!==String(S.meta.method||''))diff.push('the method ('+(om.method||'none')+' there, '+S.meta.method+' here)');
+    if(omins!==p.mins)diff.push('the observation length ('+omins+' minutes there, '+p.mins+' here)');
+    if(oiv!==p.ivSec)diff.push('the interval ('+oiv+' seconds there, '+p.ivSec+' here)');
+    if(diff.length){alert('Observer 2\u2019s file was not scored the same way as this sheet, so the marks cannot be compared: '+diff.join('; ')+'.');return;}
+    const keys=Object.keys(o.marks).filter(k=>/^\d+$/.test(k)&&+k<p.total&&['1','0','x'].includes(o.marks[k]));
+    if(!keys.length){alert('Observer 2\u2019s file has no marks on its sheet.');return;}
+    const dd=String(om.date||'').trim(),md=String(S.meta.date||'').trim(),had=Object.values(S.ioa).some(Boolean);
+    if(!(await nbhUI.confirm('Put observer 2\u2019s marks in the Obs 2 column?\n'+keys.length+' marks'+(String(om.obs||'').trim()?' by '+String(om.obs).trim():'')+', '+String(om.method).toLowerCase()+', '+oiv+'-second intervals.'
+        +(dd&&md&&dd!==md?' That file is dated '+dd+'; this sheet, '+md+'.':'')+(had?' The marks already in the Obs 2 column are replaced.':''),{ok:'Put them in'})))return;
+    S.ioa={};keys.forEach(k=>{S.ioa[k]=o.marks[k];});S.meta.ioaOn='Yes';
+    if(String(om.obs||'').trim()&&!String(S.meta.obs2||'').trim())S.meta.obs2=String(om.obs).trim();
+    renderAll();nbhUI.toast('Observer 2\u2019s '+keys.length+' marks are in the Obs 2 column; the agreement figures are under the grid.',{kind:'ok'});};
+  rd.readAsText(f);e.target.value='';});
+/* v23.07 (review I59): a paper sheet's marks typed in one line, in order from interval 1 */
+$('#typeApply').addEventListener('click',async()=>{const t=String($('#typeMarks').value||''),into=$('#typeInto').value==='i'?'i':'m';
+  const MAP={'+':'1','1':'1','y':'1','-':'0','\u2212':'0','\u2013':'0','0':'0','n':'x','x':'x','/':'x'},seq=[],bad=[];
+  for(const ch of t.toLowerCase()){if(/[\s,;.|]/.test(ch))continue;if(MAP[ch])seq.push(MAP[ch]);else if(!bad.includes(ch))bad.push(ch);}
+  if(bad.length||!seq.length){alert(bad.length?'Only + (or 1), \u2212 (or -, 0) and N (or x, /) are read; this line also has '+bad.map(c=>'\u201c'+c+'\u201d').join(', ')+'.':'Type the marks in order: + occurred, \u2212 did not, N could not observe.');return;}
+  const p=params();if(seq.length>p.total){alert('That is '+seq.length+' marks for the '+p.total+' intervals on this sheet: check the line, or the interval length.');return;}
+  const store=into==='i'?S.ioa:S.marks;
+  if(Object.values(store).some(Boolean)&&!(await nbhUI.confirm('Replace the marks in the '+(into==='i'?'Obs 2':'Observer 1')+' column?\nThe '+seq.length+' marks typed fill intervals 1 to '+seq.length+'; the column is cleared first.',{ok:'Replace'})))return;
+  Object.keys(store).forEach(k=>delete store[k]);seq.forEach((v,i)=>{store[i]=v;});
+  if(into==='i')S.meta.ioaOn='Yes';
+  $('#typeMarks').value='';renderAll();
+  nbhUI.toast(seq.length+' interval'+(seq.length===1?'':'s')+' filled in the '+(into==='i'?'Obs 2':'Observer 1')+' column'+(seq.length<p.total?'; '+(p.total-seq.length)+' left to score':'')+'.',{kind:'ok'});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
 </script>
 <script id="mt-tmr">
 /* ============ MT-1 observation timer (v21.14) ============
-   The sheet sets the timer: observation length -> the clock; ratio -> interval -> the marks.
+   The sheet sets the timer: observation length -> the clock; interval -> the marks (v23.07: chosen, F111).
    Elapsed time is read from performance.now(), never counted, so it cannot drift.
    Beeps are scheduled ahead on the audio clock; the flash, the vibration and the sheet's
    highlight fire from the display loop. Preferences live in S.meta.tmr and save with the file. */
@@ -1491,7 +1637,7 @@ renderAll();
   const el=id=>document.getElementById(id);
   const box=el('tmr'); if(!box||typeof params!=='function')return;
   const flashEl=el('tmrFlash'); if(flashEl&&flashEl.parentNode!==document.body)document.body.appendChild(flashEl);
-  const LOCK=['method','mins','ratio'];
+  const LOCK=['method','mins','iv'];   /* v23.07 (F111) the interval is chosen */
   const DEF={on:1,sound:1,flash:1,vib:1,cue:0};
   const C=2*Math.PI*27;
   const T={state:'ready',t0:0,acc:0,last:0,geo:null,ac:null,nodes:{},sched:{},wake:null,raf:0,tick:0,msg:'',warn:false,msgAt:0,ft:0};
@@ -1712,14 +1858,51 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
 })();
 </script>
 
+<script id="mt1-w3-case">
+/* v23.07 (review F110) the case: out. The session log, so the percentages are not typed again: intervals = {beh, ttype, def,
+   sessions:[{date, iso, pct, method, iv (s), mins, n, tot, na, ioa:{pt, occ, non}, cond, chg, start, loc, obs, note}]}. The
+   workstation does not read it yet (MT-1 is not one of its case sources), and DD-1 does not place it yet: both are proposed
+   in the notes. (review I58) In: Form GB-1's objective for this behavior, when its criterion is a percentage of intervals,
+   drawn on the session graph. Nothing on the sheet is filled from it. */
+(function(){
+  const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+  const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+    if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
+  const num=v=>{const n=parseFloat(v);return isFinite(n)?n:null;};
+  const was=window.__nbhFactsOut;
+  window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+    const beh=T(S.meta.beh),rows=S.sess.filter(x=>!emptyRow(x)&&num(x.p)!==null);
+    if(!beh||!rows.length)return r;
+    const sessions=rows.map(x=>{const io=String(x.ioa||'').split('/').map(num),o={date:T(x.d),iso:ISO(x.d),pct:num(x.p),method:T(x.m),iv:parseInt(rowIv(x),10)||null,
+        mins:parseInt(x.len,10)||null,n:parseInt(x.n,10)||null,cond:T(x.ph),chg:T(x.chg)};
+      if(T(x.tot))o.tot=parseInt(x.tot,10)||null;if(T(x.na))o.na=parseInt(x.na,10)||0;
+      if(io.length===3&&io.some(v=>v!==null))o.ioa={pt:io[0],occ:io[1],non:io[2]};
+      ['start','loc','obs','note'].forEach(k=>{if(T(x[k]))o[k]=T(x[k]);});return o;});
+    return Object.assign({},r||{},{intervals:{form:'MT-1',beh,ttype:T(S.meta.ttype),def:T(S.meta.def),measure:'percentage of intervals',sessions}});};
+  const STOP=new Set(['with','from','that','this','than','behavior','behaviour','student','during','when','will','into','their','other','each']);
+  const words=s=>T(s).toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>3&&!STOP.has(w));
+  let goal=null;window.mtGoal=()=>goal;
+  function pickGoal(f){const g=f&&f.goals,beh=words(S.meta.beh);if(!g||!beh.length)return null;
+    const all=[].concat((g.red||[]).map(x=>({x,lvl:x.tgt})),(g.acq||[]).map(x=>({x,lvl:x.crit})));
+    for(const o of all){const x=o.x||{};if(!words(x.beh).some(w=>beh.includes(w)))continue;
+      if(!/interval|time sampl/i.test([x.meas,x.meth,x.crit,x.tgt,x.text].map(T).join(' ')))continue;
+      const m=/(\d+(?:\.\d+)?)\s*%/.exec(T(o.lvl))||/(\d+(?:\.\d+)?)\s*%/.exec(T(x.crit))||/(\d+(?:\.\d+)?)\s*%/.exec(T(x.text));
+      if(m&&+m[1]<=100)return {pct:+m[1],text:T(x.text||x.crit)};}
+    return null;}
+  const was2=window.__nbhFactsIn;
+  window.__nbhFactsIn=function(f){const r=was2?was2.apply(this,arguments):null;try{goal=pickGoal(f||{});drawPlot();}catch(e){}return r;};
+})();
+</script>
+
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
    identifiers get retyped into every one. This adds a small shared file that
    carries them once. It fills only fields that exist on this form and are
    currently empty, so it can never overwrite work already entered.
-   Nothing is stored in the browser; the packet is an ordinary file you save
-   to the district drive alongside the forms. ============================= */
+   The packet is an ordinary file you save to the district drive alongside the
+   forms (v23.07, review F108: this said nothing is stored in the browser; Autosave
+   keeps a safety copy on the device, as the masthead says). ============== */
 (function(){
   var MAP={
     client:['[data-m="client"]','[name="m.client"]','[name="s_name"]','[data-meta="client"]',

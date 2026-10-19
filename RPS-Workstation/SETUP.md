@@ -9903,6 +9903,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.07: MT-1 asks for the interval and keeps each session whole: the log, the graph's measure and criterion, two observers' files, and a blank sheet that keeps the marks (review Wave 3)
+
+- **Choose the interval.** The data sheet asks for the interval length and the observation length, and the number of
+  intervals follows: 10 seconds for brief behaviors with partial interval, 15 to 30 seconds for momentary samples of
+  on-task and other long behaviors. A file saved before keeps its interval. The paper sheet's ratio is shown when there
+  is one.
+- **The log keeps the whole session:** start time, setting, observer, interval, the intervals on the sheet, and N/A. A
+  sheet already logged is asked about before it is logged twice.
+- **The graph** names the measure above it and draws a dotted line where the measure changes. Form GB-1's criterion for
+  the behavior is a dashed line. Under the graph: each condition's sessions, dates, level and agreement.
+- **Two observers.** Each runs the timer on their own device; the second saves the file, and **Open observer 2's file**
+  puts its marks in the Obs 2 column. A paper sheet's marks go in with **Type the marks**. Each agreement figure shows
+  the agreement expected by chance.
+- **Student ID and School / grade** are on the sheet, filled by the student bar. **Print blank sheet** no longer clears
+  the marks.
+- The session log goes out with the case, for Form DD-1 once the workstation reads it.
+- qa/mt1-w3-test.js (23 checks). qa/sprint-a6-test.js compares MT-1 with this release's MT-1, which changed on purpose.
+
 ### v23.06: TV-1 keeps the training video to the plan and to who may watch it: where it is kept, the plan's own schedule, staff or family, each behavior's function, the crisis plan, and who watched (review Wave 3)
 
 - **Where the video goes, and who may watch it.** Before You Record asks where the finished video is kept and who may

@@ -1,4 +1,4 @@
-/* v22.8x Form MT-1, discontinuous measurement, review Wave 3 (simulated data only).
+/* v23.07 Form MT-1, discontinuous measurement, review Wave 3 (simulated data only).
    F108  the masthead says what Autosave keeps on the device; nothing on the form says nothing is stored in the browser.
    F109  a logged session keeps its start time, setting, observer, the intervals on the sheet and N/A; Clear sheet loses none.
    F110  the session log goes out to the case (intervals.sessions), for DD-1 to take (proposed).
