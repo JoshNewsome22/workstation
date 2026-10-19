@@ -3219,9 +3219,9 @@ function fsBgCompose(f){const R=f.records||{},P=f.profile||{},H=P.health||{},L=P
     +((H.conditions||meds.length)?' Considered as possible setting events.':'');
   o.bgCulture=[L.home?'Home language: '+fsBgT(L.home)+(L.interpreter===true?'; the family needs an interpreter':L.interpreter===false?'; no interpreter needed':'')+'.':(L.interpreter===true?'The family needs an interpreter.':''),
     L.notes?fsBgDot(L.notes):'',P.culture?'Cultural considerations: '+fsBgDot(P.culture):''].filter(Boolean).join(' ');
-  o.bgStudent=[fsBgDot(st.hypothesis),st.likes?'Likes and does well: '+fsBgDot(st.likes):'',st.preference?'Would like from a plan: '+fsBgDot(st.preference):'',st.assent?'Assent: '+st.assent+'.':''].filter(Boolean).join(' ');
+  o.bgStudent=[fsBgDot(st.hypothesis),st.likes?'Likes and does well: '+fsBgDot(st.likes):'',st.preference?'Would like from a plan: '+fsBgDot(st.preference):'',st.assent?'Assent: '+st.assent+(fsBgT(st.assentNote)?' ('+fsBgT(st.assentNote)+')':'')+'.':''].filter(Boolean).join(' ');
   o.bgFamily=[par.concerns?'Concerns: '+fsBgDot(par.concerns):'',par.goals?'Goals: '+fsBgDot(par.goals):''].filter(Boolean).join(' ');
-  const a=fsBgT(st.assent).toLowerCase();if(a)o.assent=(FS_ASSENT[a]||fsBgT(st.assent))+' (Form SI-1'+(st.date?', '+fsBgMd(st.date):'')+')';
+  const a=fsBgT(st.assent).toLowerCase();if(a)o.assent=(FS_ASSENT[a]||fsBgT(st.assent))+' (Form SI-1'+(st.date?', '+fsBgMd(st.date):'')+')'+(fsBgT(st.assentNote)?'; '+fsBgT(st.assentNote):'');   /* v23.23 (SI-1 review F62) the counts beside the status */
   return o;}
 function fsBackground(f){if(!f||typeof f!=='object')return {n:0};const o=fsBgCompose(f),put=[];
   Object.keys(o).forEach(k=>{const v=fsBgT(o[k]);if(!v||fsBgT(S.meta[k]))return;S.meta[k]=v;put.push(k);});

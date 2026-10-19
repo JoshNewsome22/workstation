@@ -9903,6 +9903,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.23: SI-1 keeps other students' names off the summary and the FBA report, reads assent from the start of each session, and calls a component preferred only after it has met every other (review Wave 3)
+
+- **Other students named (F60).** Students name other students, and the answers are written as said.
+  - A new box on the Interview page, "Other students the student names", lists each name once. The summary page, the line
+    for Form FS-1 and everything sent to the case then say "a classmate" instead, capitalized at the start of a sentence.
+  - Words in the answers that look like names, and are not listed, are pointed out on the Interview and Summary pages,
+    with "Show them as a classmate" and "Keep them as written". Print the summary page asks once more.
+  - A note under "Before the first question", the Summary page and the Guide say why: the family reads the summary and the
+    FBA report, and a parent may inspect only what is about their own child (FERPA, 34 CFR 99.12(a)).
+  - The worked example lists its simulated classmate.
+- **Preferred (F61).** A component is called preferred only once it has been offered against every other listed component,
+  as well as being chosen on two thirds of at least three offers. Until then the result says which pairs are still to
+  offer. A table of the pairs offered sits under the result, with the gaps shaded.
+- **Assent overall (F62).** Read from what the student said at the start of each session:
+  - given when every session with assent recorded had it;
+  - partial when some were declined at the start;
+  - refused when none had it.
+  - A withdrawal during a session, and a blank cell ("not recorded"), are reported beside the status, not counted as
+    partial. The counts go to the case, and Form FS-1 prints them beside the status. The hint under the field says so.
+- **The function tags (F67).** "A classmate bothers me or teases me" is no longer counted toward attention: what happens
+  after decides. The noise line is split: "It is loud, crowded or bright" points to escape, and "I am tired, hungry or not
+  feeling well" is a setting event, not counted. An older file with the old noise line marked reads it as the first.
+- **The student's hypothesis line (F68).** What the student marked is written after "the student marked:", in short words
+  and in the version the student saw. Only typed answers and the student's word for the behavior are quoted.
+- **The review notice (F69).** It names the rule that fired: the share above the convention, three or more withdrawals in
+  a row, or both.
+- **From and to the case (F63, F64, in part).**
+  - When no component is listed, the plan's components come from Form TD-1 (the replacement first, eight at most).
+  - "Parent or guardian aware" is filled from a current consent on Form IC-1, and the age from Form DM-1's date of birth.
+  - The case now carries the student's goal, what is worth working for, who helps, and what helps when upset, and the
+    assent plan as SI-1 holds it.
+  - The hints under the goal and reward questions no longer promise that GB-1 and PA-1 take them.
+  - Form IC-1 reading the assent plan is left for the IC-1 work.
+- A quotation mark inside an answer keeps its partner when the answer goes to the case.
+- qa/si1-w3-test.js (16 checks).
+
 ### v23.22: IA-1 keeps the student's photo off pages without permission, reads the PBQ at its own level, never calls one informant consensus, and makes no video from a case (review Wave 3)
 
 - **The photo and permission (F40).** When Form DM-1 records no photo or media permission, no photo goes on a respondent

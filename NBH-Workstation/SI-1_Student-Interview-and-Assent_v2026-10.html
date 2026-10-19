@@ -870,6 +870,11 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 td input,td select{max-width:100%}
 </style>
+<style id="si1-v2323">
+/* v23.23 (review F61) the pairs offered: a pair not yet offered is shaded */
+#pairTbl{margin-top:6px}#pairTbl th,#pairTbl td{text-align:center}#pairTbl tbody th{text-align:left;font-weight:normal}#pairTbl td.gap{background:#f1ece2}
+#hypNames .tool,#sumNames .tool{margin:6px 6px 0 0}
+</style>
 </head>
 <body class="view-interview">
 
@@ -935,6 +940,8 @@ td input,td select{max-width:100%}
       <div><label>Language of the interview</label><input data-m="lang" placeholder="English; Spanish with an interpreter"></div>
       <div><label>Parent or guardian aware (consent on Form IC-1)</label><select data-m="paware"><option></option><option>Yes</option><option>No, interview deferred</option></select></div>
       <div><label>Case BCBA</label><input data-m="bcba"></div>
+      <!-- v23.23 (review F60) other students the student names, listed once: the summary, the FS-1 line and the case say "a classmate" -->
+      <div><label>Other students the student names (shown as &ldquo;a classmate&rdquo; on the summary)</label><input data-m="others" data-nbh-nowording placeholder="first names, separated by commas"></div>
     </div>
     <div class="ckrow"><span class="hint">How the student responded:</span>
       <label class="ck"><input type="checkbox" data-c="m_verbal"> Spoke</label>
@@ -958,6 +965,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="instr">
       <p><b>Before the first question.</b> Read the box above aloud, in the version chosen. Then tell the student why you are asking, in one sentence: &ldquo;I want to understand what school is like for you, so we can make it better. There are no wrong answers. You can skip any question, and you can stop any time.&rdquo; Write what the student says, in the student&rsquo;s words. Do not correct an answer and do not suggest one; when the student is stuck, offer two or three examples and let the student pick or say something else. The younger version adds three faces to some questions: the student points, and the words under the face are read aloud. Under &ldquo;How the student responded&rdquo;, mark every way the student answered.</p>
+      <p><b>Other students.</b> Students often name other students. Write the answer as the student said it, and list each name once in &ldquo;Other students the student names&rdquo; above: the summary page, the line for Form FS-1 and what goes to the case then say &ldquo;a classmate&rdquo; instead. The family reads the summary and the FBA report, and a parent may see only what is about their own child (FERPA, 34 CFR 99.12(a)).</p>
       <p>The questions follow the student-assisted and student-directed interviews in the literature (Kern, Dunlap, Clarke &amp; Childs, 1994; Reed, Thomas, Sprague &amp; Horner, 1997; O&rsquo;Neill et al., 2015): what the student likes and does well, what is hard and why, what happens before and after the behavior, what the student would rather do, what helps, and what the student wants.</p>
     </div>
 
@@ -992,6 +1000,7 @@ td input,td select{max-width:100%}
     <p class="hint">This line is the student&rsquo;s report, counted from the boxes marked above. It is one source among the interviews (Form IN-1), the records (RR-1) and the observations (OB-1); it is carried into the FS-1 summary as what the student said, not as the finding.</p>
     <div class="metrics" id="hypMetrics"></div>
     <div id="hypOut"></div>
+    <div id="hypNames" class="noprint"></div>
   </section>
 
   <!-- ===================== ASSENT ===================== -->
@@ -1007,7 +1016,7 @@ td input,td select{max-width:100%}
       <div><label>When it is asked</label><input data-m="a_when" placeholder="at the start of every session and at each new activity"></div>
       <div><label>Applies to</label><select data-m="a_scope"><option></option><option>Assessment sessions only</option><option>Treatment sessions only</option><option>Assessment and treatment sessions</option></select></div>
       <div><label>Reviewed with the student on</label><input data-m="a_rev"></div>
-      <div><label>Assent overall (for Form FS-1)</label><select data-m="a_status"><option value=""></option><option value="given">Given</option><option value="partial">Partial: some parts or some sessions</option><option value="refused">Refused</option><option value="not able">Not able to give assent (consent only)</option></select><span class="hint">Left blank, the case reads it from the log: given when every session had assent, refused when none did, partial otherwise.</span></div>
+      <div><label>Assent overall (for Form FS-1)</label><select data-m="a_status"><option value=""></option><option value="given">Given</option><option value="partial">Partial: some parts or some sessions</option><option value="refused">Refused</option><option value="not able">Not able to give assent (consent only)</option></select><span class="hint">Left blank, the case reads it from the log, from what the student said at the start of each session: given when every session with assent recorded had it (a withdrawal during a session is reported beside it), refused when none had it, partial when some were declined at the start. A blank cell counts as not recorded.</span></div>
     </div>
     <h2 class="nbh-band">Assent Behaviors and Withdrawal-of-Assent Behaviors, for This Student</h2>
     <p class="hint">Observable, so that two adults would agree. Assent is what the student does that means &ldquo;yes, keep going&rdquo;; withdrawal is what the student does that means &ldquo;no, not now&rdquo;. Include the quiet forms (turning away, going still, a long pause) as well as the loud ones.</p>
@@ -1069,7 +1078,8 @@ td input,td select{max-width:100%}
   <!-- ===================== SUMMARY ===================== -->
   <section class="only-summary">
     <h2 class="nbh-band">Summary for the FBA File</h2>
-    <p class="hint">One page, built from the other pages: the interview findings and the student&rsquo;s hypothesis, the assent plan and the log so far, the preference result. <span class="noprint">&ldquo;Print the summary page&rdquo; prints this page alone; the ordinary print button prints the whole form.</span></p>
+    <p class="hint">One page, built from the other pages: the interview findings and the student&rsquo;s hypothesis, the assent plan and the log so far, the preference result. The family reads this page, so other students the student names are shown as &ldquo;a classmate&rdquo; (list them on the Interview page). <span class="noprint">&ldquo;Print the summary page&rdquo; prints this page alone; the ordinary print button prints the whole form.</span></p>
+    <div id="sumNames" class="noprint"></div>
     <div id="sumOut"></div>
   </section>
 
@@ -1095,10 +1105,10 @@ td input,td select{max-width:100%}
 
     <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
     <table class="rt">
-      <tr><th style="width:28%">The student&rsquo;s hypothesis line</th><td>Each &ldquo;right before&rdquo; and &ldquo;usually after&rdquo; line the student endorses carries a tag (attention, escape, tangible, automatic). The counts per function are summed across both lists; the function or functions with the highest non-zero count are named first, the rest follow with their counts. Lines without a tag (being sent to the office, losing points) are listed but not counted. The line is labelled as the student&rsquo;s report.</td></tr>
+      <tr><th style="width:28%">The student&rsquo;s hypothesis line</th><td>Most &ldquo;right before&rdquo; and &ldquo;usually after&rdquo; lines carry a tag (attention, escape, tangible, automatic). The counts per function are summed across both lists; the function or functions with the highest non-zero count are named first, the rest follow with their counts. Lines without a tag are listed but not counted: getting in trouble or losing points; a classmate bothering or teasing, which can set up escape from the classmate as well as the classmate&rsquo;s attention, so what happens after decides; and being tired, hungry or unwell, a setting event rather than a function. The line is labelled as the student&rsquo;s report: what the student marked is written in the form&rsquo;s short words, in the version the student saw, after &ldquo;the student marked&rdquo;; only typed answers and the student&rsquo;s word for the behavior are quoted.</td></tr>
       <tr><th>Share of sessions with withdrawal</th><td>Sessions are rows of the assent log with a date or a session name. A withdrawal is a row with a withdrawn-at minute, or a row where assent was not obtained. Share = withdrawals divided by sessions. The last ten sessions are shown beside the total.</td></tr>
       <tr><th>Review threshold</th><td>Working convention: a share above 25% (editable), or three withdrawals in a row, calls for a review with the student and the case BCBA and a repeat of the preference page. Any withdrawal is honored on the day; the threshold decides when the procedure itself is questioned.</td></tr>
-      <tr><th>Preference result</th><td>For each component: times offered (as A or B), times chosen, percent chosen. The ranking by percent chosen is compared with the student&rsquo;s stated rank; a difference is noted, since choice and report can disagree. A component chosen on two thirds or more of its offers, over at least three offers, is reported as preferred (working convention).</td></tr>
+      <tr><th>Preference result</th><td>For each component: times offered (as A or B), times chosen, percent chosen. The ranking by percent chosen is compared with the student&rsquo;s stated rank; a difference is noted, since choice and report can disagree. A component chosen on two thirds or more of its offers, over at least three offers, is reported as preferred (working convention), and only once it has been offered against every other listed component: a rank built from unequal pairings is not a rank (Fisher et al., 1992). The table of pairs under the result shows which pairs are still to offer.</td></tr>
     </table>
 
     <h2 class="nbh-band" style="margin-top:16px">What Keeps the Interview Honest</h2>
@@ -1106,6 +1116,7 @@ td input,td select{max-width:100%}
       <tr><th style="width:28%">Setting</th><td>Not in front of peers; not right after an incident; the student chooses the room where the choice exists. Someone the student trusts asks, or sits in.</td></tr>
       <!-- v21.44 (B5). Wording approved by the BCBA, October 2026. -->
       <tr><th>Who hears the answers</th><td>Before the first question the student is told, in plain words, who will read the answers and what cannot be kept private: the box at the top of the Interview page, read aloud in the version chosen, with a tick when it was read. Promise only what you can keep. The answers go to the team and the parent or guardian. If the student says someone is hurting them, or that they might hurt themselves or someone else, the adult must pass it on to the people whose job is to keep the student safe, and suspected abuse or neglect is reported right away by the person who hears it, as your state&rsquo;s law and your agency&rsquo;s policy require. If a student tells you something like that: stay calm, listen, and do not ask for details. Do not write it in this interview, which the family may read. Write the student&rsquo;s exact words on a separate sheet for the report, report it right away, follow your agency&rsquo;s policy on who tells the family, and do not promise to keep it secret. If the student seems worried by the box, or says they do not want to go on, ask whether they still want to talk today, and note it. The family hears the same limits on Form IC-1, and the Ethics Code asks for them at the outset (BACB, 2020, Code 3.10).</td></tr>
+      <tr><th>Other students</th><td>The answer is written as said, names included, and each other student named is listed once on the Interview page. The summary page, the line for Form FS-1 and the case show &ldquo;a classmate&rdquo; in place of each listed name: the parent and the district read them, and a parent may inspect only the information about their own child (FERPA, 34 CFR 99.12(a)). Words in the answers that look like names are pointed out on the Interview and Summary pages, and once more before the summary is printed.</td></tr>
       <tr><th>Wording</th><td>The student&rsquo;s word for the behavior, not the plan&rsquo;s. Short questions. Examples offered in threes, never one. The answer written as said, including &ldquo;I don&rsquo;t know&rdquo;.</td></tr>
       <tr><th>Stopping</th><td>The interview is itself a session: assent is asked for at the start, a break is offered, and the student can end it. A stopped interview is recorded as such and tried again another day, not pressed.</td></tr>
       <tr><th>What is done with it</th><td>The student is told what will change and what cannot change, and why. A preference the plan cannot honor is written on the Preference page with the reason, so the student&rsquo;s request is not silently dropped.</td></tr>
@@ -1119,6 +1130,8 @@ td input,td select{max-width:100%}
     Behavior Analyst Certification Board. (2020). <em>Ethics code for behavior analysts</em>. Littleton, CO: Author. &bull;
     Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
     Dunlap, G., dePerczel, M., Clarke, S., Wilson, D., Wright, S., White, R., &amp; Gomez, A. (1994). Choice making to promote adaptive behavior for students with emotional and behavioral challenges. <em>Journal of Applied Behavior Analysis, 27</em>(3), 505&ndash;518. &bull;
+    Family Educational Rights and Privacy, 34 C.F.R. &sect; 99.12 (2024). &bull;
+    Fisher, W., Piazza, C. C., Bowman, L. G., Hagopian, L. P., Owens, J. C., &amp; Slevin, I. (1992). A comparison of two approaches for identifying reinforcers for persons with severe and profound disabilities. <em>Journal of Applied Behavior Analysis, 25</em>(2), 491&ndash;498. &bull;
     Hanley, G. P. (2010). Toward effective and preferred programming: A case for the objective measurement of social validity with recipients of behavior change programs. <em>Behavior Analysis in Practice, 3</em>(1), 13&ndash;21. &bull;
     Hanley, G. P., Piazza, C. C., Fisher, W. W., Contrucci, S. A., &amp; Maglieri, K. A. (1997). Evaluation of client preference for function-based treatment packages. <em>Journal of Applied Behavior Analysis, 30</em>(3), 459&ndash;473. &bull;
     Hanley, G. P., Piazza, C. C., Fisher, W. W., &amp; Maglieri, K. A. (2005). On the effectiveness of and preference for punishment and extinction components of function-based interventions. <em>Journal of Applied Behavior Analysis, 38</em>(1), 51&ndash;65. &bull;
@@ -1143,7 +1156,8 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const num=v=>{const n=parseFloat(String(v==null?'':v).replace('%',''));return isFinite(n)?n:null;};
 const pct=v=>v==null?'–':(Math.round(v*10)/10).toFixed(0)+'%';
 const NONE='–';
-const unq=s=>String(s==null?'':s).trim().replace(/^["\u201c\u201d]+/,'').replace(/["\u201c\u201d]+$/,'');
+/* v23.23 only a wrapping pair of quotation marks is taken off: 'Says "no" or "I want to go back"' keeps its last mark */
+const unq=s=>{s=String(s==null?'':s).trim();const m=/^["\u201c\u201d]+([^]*?)["\u201c\u201d]+$/.exec(s);return m&&!/["\u201c\u201d]/.test(m[1])?m[1].trim():s;};
 
 /* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
    the row and re-keys whatever else refers to it by index, after a confirm when the row holds an entry. ---- */
@@ -1165,8 +1179,8 @@ const ITEMS=[
   {id:'upset',box:'qUpset',read:'When you are upset, what helps you calm down? What makes it worse?',young:'What helps when you feel upset?',hint:'Both halves. &ldquo;What makes it worse&rdquo; is the list of things staff will stop doing.',fq:'Does it help?',fl:'agree'},
   {id:'who',box:'qWho',read:'Who at school helps you most? Who would you go to if something was wrong?',young:'Who helps you at school?',hint:'Named people. They are who should ask for assent and run the first sessions.',fq:'Is it easy to ask them for help?',fl:'agree'},
   {id:'change',box:'qChange',read:'If you could change one thing about school, what would it be?',young:'What do you want to change at school?',hint:'',fq:'',fl:''},
-  {id:'goal',box:'qGoal',read:'What is a goal you have for yourself this year? Say it the way you would say it to a friend.',young:'What do you want to get better at?',hint:'Written in the student&rsquo;s words. Form GB-1 can carry it as the student&rsquo;s goal beside the plan&rsquo;s.',fq:'Do you think you can do it?',fl:'agree'},
-  {id:'reward',box:'qReward',read:'What would be worth working for? What would you like to earn, and who would you like to hear it from?',young:'What would you like to earn?',hint:'Things, activities, time with someone, a message home. Form PA-1 tests the list.',fq:'How much do you want it?',fl:'want'}
+  {id:'goal',box:'qGoal',read:'What is a goal you have for yourself this year? Say it the way you would say it to a friend.',young:'What do you want to get better at?',hint:'Written in the student&rsquo;s words. Copy it into Form GB-1 beside the plan&rsquo;s goals; it also goes to the case with the interview.',fq:'Do you think you can do it?',fl:'agree'},
+  {id:'reward',box:'qReward',read:'What would be worth working for? What would you like to earn, and who would you like to hear it from?',young:'What would you like to earn?',hint:'Things, activities, time with someone, a message home. Test the list on Form PA-1; it also goes to the case with the interview.',fq:'How much do you want it?',fl:'want'}
 ];
 /* v21.44 (B5): who hears what the student says, read aloud before the first question; a reading and a younger
    version, shown in the version chosen. The first line opens, the last asks, the rest are the points. Wording approved by the BCBA, October 2026. */
@@ -1185,24 +1199,27 @@ function renderConf(){const L=CONF[young()?'young':'read'];
 /* what the student says happens before and after, each tagged with the function it points to */
 const FN={att:'attention',esc:'escape',tan:'tangible',auto:'automatic'};
 const BEF=[
-  {id:'b_hard',f:'esc',read:'I am given work that is too hard, too long or boring',young:'The work is hard or boring'},
-  {id:'b_told',f:'esc',read:'Someone tells me what to do, or corrects me',young:'Someone tells me what to do'},
-  {id:'b_stop',f:'tan',read:'I have to stop something I like, or I am told no',young:'I have to stop something fun, or I hear no'},
-  {id:'b_want',f:'tan',read:'Someone else has something I want',young:'Someone has what I want'},
-  {id:'b_alone',f:'att',read:'No one is paying attention to me; the adults are busy with others',young:'Nobody is paying attention to me'},
-  {id:'b_peer',f:'att',read:'A classmate bothers me or teases me',young:'Someone bothers me'},
-  {id:'b_noise',f:'auto',read:'It is loud, crowded or bright, or I am tired or hungry',young:'It is too loud, or I am tired'},
-  {id:'b_bored',f:'auto',read:'Nothing in particular; it happens when I am alone or there is nothing to do',young:'Nothing is happening'}
+  {id:'b_hard',f:'esc',read:'I am given work that is too hard, too long or boring',young:'The work is hard or boring',sh:'work too hard, too long or boring',ys:'work hard or boring'},
+  {id:'b_told',f:'esc',read:'Someone tells me what to do, or corrects me',young:'Someone tells me what to do',sh:'being told what to do, or corrected',ys:'being told what to do'},
+  {id:'b_stop',f:'tan',read:'I have to stop something I like, or I am told no',young:'I have to stop something fun, or I hear no',sh:'having to stop something liked, or being told no',ys:'having to stop something fun, or hearing no'},
+  {id:'b_want',f:'tan',read:'Someone else has something I want',young:'Someone has what I want',sh:'someone else having something wanted',ys:'someone having something wanted'},
+  {id:'b_alone',f:'att',read:'No one is paying attention to me; the adults are busy with others',young:'Nobody is paying attention to me',sh:'no one paying attention, the adults busy with others',ys:'nobody paying attention'},
+  /* v23.23 (review F67) teasing can set up escape from the classmate as well as the classmate's attention: what happens after decides, so it is not counted */
+  {id:'b_peer',f:'',tag:'not counted: what happens after decides',read:'A classmate bothers me or teases me',young:'Someone bothers me',sh:'a classmate bothering or teasing',ys:'someone bothering'},
+  /* v23.23 (review F67) the old line split in two: noise, crowds and light point to escape; tired, hungry or unwell is a setting event, not counted */
+  {id:'b_noise',f:'esc',read:'It is loud, crowded or bright',young:'It is too loud',sh:'loud, crowded or bright',ys:'too loud'},
+  {id:'b_tired',f:'',tag:'setting event: not counted',read:'I am tired, hungry or not feeling well',young:'I am tired or hungry',sh:'tired, hungry or not feeling well',ys:'tired or hungry'},
+  {id:'b_bored',f:'auto',read:'Nothing in particular; it happens when I am alone or there is nothing to do',young:'Nothing is happening',sh:'nothing in particular: alone, or nothing to do',ys:'nothing happening'}
 ];
 const AFT=[
-  {id:'a_talk',f:'att',read:'An adult comes over and talks to me',young:'A grown-up comes and talks to me'},
-  {id:'a_look',f:'att',read:'Classmates look at me or laugh',young:'Kids look at me or laugh'},
-  {id:'a_out',f:'esc',read:'I get out of the work, or it gets shorter or easier',young:'I do not have to do the work'},
-  {id:'a_sent',f:'esc',read:'I get sent out of the room or to the office',young:'I get sent out'},
-  {id:'a_get',f:'tan',read:'I get the thing, or I get to keep it',young:'I get the thing'},
-  {id:'a_do',f:'tan',read:'I get to do what I wanted',young:'I get to do what I wanted'},
-  {id:'a_calm',f:'auto',read:'Nothing changes around me; it just feels better or calmer',young:'It just feels better'},
-  {id:'a_lose',f:'',read:'I get in trouble, or I lose points or a privilege',young:'I get in trouble'}
+  {id:'a_talk',f:'att',read:'An adult comes over and talks to me',young:'A grown-up comes and talks to me',sh:'an adult comes over and talks',ys:'a grown-up comes and talks'},
+  {id:'a_look',f:'att',read:'Classmates look at me or laugh',young:'Kids look at me or laugh',sh:'classmates look or laugh',ys:'kids look or laugh'},
+  {id:'a_out',f:'esc',read:'I get out of the work, or it gets shorter or easier',young:'I do not have to do the work',sh:'gets out of the work, or it gets shorter or easier',ys:'does not have to do the work'},
+  {id:'a_sent',f:'esc',read:'I get sent out of the room or to the office',young:'I get sent out',sh:'sent out of the room or to the office',ys:'sent out'},
+  {id:'a_get',f:'tan',read:'I get the thing, or I get to keep it',young:'I get the thing',sh:'gets the thing, or keeps it',ys:'gets the thing'},
+  {id:'a_do',f:'tan',read:'I get to do what I wanted',young:'I get to do what I wanted',sh:'gets to do what was wanted',ys:'gets to do what was wanted'},
+  {id:'a_calm',f:'auto',read:'Nothing changes around me; it just feels better or calmer',young:'It just feels better',sh:'nothing changes; it feels better or calmer',ys:'it feels better'},
+  {id:'a_lose',f:'',read:'I get in trouble, or I lose points or a privilege',young:'I get in trouble',sh:'in trouble, or loses points or a privilege',ys:'in trouble'}
 ];
 
 /* ---------------- state ---------------- */
@@ -1227,6 +1244,40 @@ function setVer(v){S.meta.ver=v==='young'?'young':'read';document.body.classList
 $$('#verSeg button').forEach(b=>b.addEventListener('click',()=>{setVer(b.dataset.ver);renderConf();renderItems();renderHard();renderLists();renderSummary();}));
 const young=()=>S.meta.ver==='young';
 const wordFor=o=>young()?o.young:o.read;
+/* v23.23 (review F60) other students the student names: listed once on the Interview page, then shown as "a classmate" on the summary
+   page, in the line for Form FS-1 and in what goes to the case (a parent may inspect only what is about their own child, FERPA,
+   34 CFR 99.12(a)). Capitalized words in the answers that look like names, and are not listed, are pointed out. */
+function siOthers(){return String((S.meta&&S.meta.others)||'').split(/[,;\n]+/).map(x=>x.trim().replace(/^["“”']+|["“”']+$/g,'')).filter(x=>x.length>=2);}
+function redact(t){t=String(t==null?'':t);const L=siOthers().sort((a,b)=>b.length-a.length);if(!L.length||!t)return t;
+  const rx=new RegExp('(^|[^\\p{L}\\p{N}])('+L.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+')).join('|')+')(?![\\p{L}\\p{N}])','giu');
+  return t.replace(rx,(m0,p,nm,off,all)=>p+(/(^\s*|[.!?]["”’)]?\s+|["“‘(]\s*)$/.test(all.slice(0,off)+p)?'A classmate':'a classmate'));}
+function siRedactObj(o){if(typeof o==='string')return redact(o);if(Array.isArray(o))return o.map(siRedactObj);
+  if(o&&typeof o==='object'){const r={};Object.keys(o).forEach(k=>{r[k]=siRedactObj(o[k]);});return r;}return o;}
+function siRedactDom(root){if(!root||!siOthers().length)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),L=[];let n;
+  while((n=w.nextNode()))if(!(n.parentElement&&n.parentElement.closest('.s-grid')))L.push(n);L.forEach(t=>{const v=redact(t.nodeValue);if(v!==t.nodeValue)t.nodeValue=v;});}
+const SI_NOT_NAMES=new Set(('monday tuesday wednesday thursday friday saturday sunday january february march april may june july august september october november december '+
+  'english spanish math science reading writing art music gym recess lunch spelling history pe mom dad mommy daddy mama papa grandma grandpa nana abuela abuelo '+
+  'god christmas halloween thanksgiving easter okay ok mr mrs ms mx dr mister miss coach teacher principal nurse office school').split(' '));
+function siNameGuess(){const m=S.meta||{},own=String(m.client||'').toLowerCase().split(/[\s,.\-]+/).filter(Boolean);
+  const listed=[].concat(...siOthers().map(x=>x.toLowerCase().split(/\s+/))),kept=String(m.names_kept||'').toLowerCase().split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
+  const texts=ITEMS.map(it=>S.iv[it.id]&&S.iv[it.id].a).concat((S.hard||[]).map(r=>r&&r.note),[m.conf_say,m.p_want,m.p_say,m.beh]),out=[];
+  texts.forEach(t0=>{const t=String(t0||'');const re=/(^|[^\p{L}\p{N}])(\p{Lu}\p{Ll}+)(?![\p{L}\p{N}])/gu;let x;
+    while((x=re.exec(t))){const w=x[2],lw=w.toLowerCase(),before=t.slice(0,x.index+x[1].length);
+      if(/(^\s*|[.!?]["”’)]?\s+|["“‘(]\s*)$/.test(before))continue;
+      if(/\b(Mr|Mrs|Ms|Miss|Dr|Mx|Coach|Mister|Teacher|Principal|Nurse)\.?\s+$/i.test(before))continue;
+      if(SI_NOT_NAMES.has(lw)||own.includes(lw)||listed.includes(lw)||kept.includes(lw)||out.some(y=>y.toLowerCase()===lw))continue;out.push(w);}});
+  return out.slice(0,12);}
+function siNamesSet(list,rep){if(!list.length)return;const k=rep?'others':'names_kept',cur=String(S.meta[k]||'').split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean);
+  list.forEach(x=>{if(!cur.some(y=>y.toLowerCase()===x.toLowerCase()))cur.push(x);});S.meta[k]=cur.join(', ');
+  const el=document.querySelector('[data-m="'+k+'"]');if(el)el.value=S.meta[k];renderHyp();renderSummary();}
+function siNamesPaint(){const g=siNameGuess(),h=g.length?'<div class="verdict v-mid">These words in the student&rsquo;s answers look like names: <b>'+g.map(esc).join(', ')+'</b>. If they are other students, the summary and the line for Form FS-1 should say &ldquo;a classmate&rdquo; instead.<br>'+
+    '<button type="button" class="tool" data-sinames="replace">Show them as &ldquo;a classmate&rdquo;</button><button type="button" class="tool" data-sinames="keep">Keep them as written</button></div>':'';
+  ['hypNames','sumNames'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=h;});}
+async function siNamesAsk(){const g=siNameGuess();if(!g.length)return;let yes=false;
+  const t='These words in the student’s answers look like names: '+g.join(', ')+'.\nThe family reads the summary. If they are other students, show them as “a classmate”?';
+  try{yes=window.nbhUI&&nbhUI.confirm?await nbhUI.confirm(t,{ok:'Show as “a classmate”',cancel:'Keep as written'}):window.confirm(t);}catch(e){yes=false;}
+  siNamesSet(g,!!yes);}
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-sinames]');if(b)siNamesSet(siNameGuess(),b.dataset.sinames==='replace');});
 
 /* ---------------- the interview ---------------- */
 function renderItems(){
@@ -1243,7 +1294,7 @@ function renderHard(){
     '<td><input data-r="hard" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td>'+delCell('hard',i)+'</tr>').join('');
 }
 function renderLists(){
-  const mk=(list,box)=>{$('#'+box).innerHTML=list.map(o=>'<label class="ck"><input type="checkbox" data-c="'+o.id+'"'+(S.chk[o.id]?' checked':'')+'><span>'+esc(wordFor(o))+(o.f?'<span class="tag">'+FN[o.f]+'</span>':'<span class="tag">not counted</span>')+'</span></label>').join('');};
+  const mk=(list,box)=>{$('#'+box).innerHTML=list.map(o=>'<label class="ck"><input type="checkbox" data-c="'+o.id+'"'+(S.chk[o.id]?' checked':'')+'><span>'+esc(wordFor(o))+'<span class="tag">'+esc(o.tag||(o.f?FN[o.f]:'not counted'))+'</span>'+'</span></label>').join('');};
   mk(BEF,'befList');mk(AFT,'aftList');
 }
 function hypothesis(){
@@ -1253,15 +1304,17 @@ function hypothesis(){
   return{c,bef,aft,order,top};
 }
 function hypLine(){
-  const h=hypothesis(),v=S.iv,beh=S.meta.beh||'the behavior';
+  const h=hypothesis(),v=S.iv,lab=unq(S.meta.beh);
   if(!h.bef.length&&!h.aft.length&&!v.before.a&&!v.after.a)return '';
-  const low=s=>/^I\b/.test(s)?s:s.charAt(0).toLowerCase()+s.slice(1);
+  /* v23.23 (review F68) what the student marked is written as marked, in the form's short words for the version the student saw;
+     only typed answers and the student's own word for the behavior are quoted. (F60) A listed classmate's name is not written. */
+  const mk=o=>young()?(o.ys||o.sh):o.sh,said=t=>'the student said: &ldquo;'+esc(redact(unq(t)))+'&rdquo;';
   let s='Student&rsquo;s report (SI-1'+(S.meta.date?', '+esc(S.meta.date):'')+'): ';
-  s+='before '+esc(beh)+', '+(h.bef.length?h.bef.map(o=>low(o.read)).join('; '):(v.before.a?'&ldquo;'+esc(v.before.a)+'&rdquo;':'nothing marked'))+'. ';
-  s+='Afterwards, '+(h.aft.length?h.aft.map(o=>low(o.read)).join('; '):(v.after.a?'&ldquo;'+esc(v.after.a)+'&rdquo;':'nothing marked'))+'. ';
+  s+='before '+(lab?'&ldquo;'+esc(redact(lab))+'&rdquo;':'the behavior')+', '+(h.bef.length?'the student marked: '+h.bef.map(mk).join('; '):(v.before.a?said(v.before.a):'nothing marked'))+'. ';
+  s+='Afterwards, '+(h.aft.length?'the student marked: '+h.aft.map(mk).join('; '):(v.after.a?said(v.after.a):'nothing marked'))+'. ';
   if(h.order.length)s+='What the student names points to <b>'+h.top.map(k=>FN[k]).join(' and ')+'</b> ('+h.order.map(k=>FN[k]+' '+h.c[k]).join(', ')+').';
   else s+='Nothing the student marked carries a function tag.';
-  if(v.rather.a)s+=' Would rather: &ldquo;'+esc(unq(v.rather.a))+'&rdquo;';
+  if(v.rather.a)s+=' Would rather: &ldquo;'+esc(redact(unq(v.rather.a)))+'&rdquo;';
   return s;
 }
 function renderHyp(){
@@ -1269,6 +1322,7 @@ function renderHyp(){
   $('#hypMetrics').innerHTML=Object.keys(FN).map(k=>'<div class="metric"><b>'+FN[k]+'</b><div class="val">'+h.c[k]+'</div><div class="sub">lines the student marked</div></div>').join('');
   const line=hypLine();
   $('#hypOut').innerHTML=line?'<div class="hypline"><b>The student&rsquo;s hypothesis, as reported</b>'+line+'</div><p class="hint">Copy this line into Form FS-1 under the student interview. It is not a function; it is what the student said.</p>':'<div class="verdict v-mid">No lines marked yet. The summary line is written from the before and after boxes once the student has answered.</div>';
+  siNamesPaint();
 }
 
 /* ---------------- assent ---------------- */
@@ -1285,9 +1339,11 @@ const isSess=r=>!!(r.date||r.sess||r.got);
 const isWd=r=>r.got==='N'||num(r.wmin)!=null;
 function assentStats(){
   const rows=S.al.filter(isSess),n=rows.length,w=rows.filter(isWd).length,got=rows.filter(r=>r.got==='Y').length;
+  /* v23.23 (review F62) declined at the start, withdrawn during a session that began with assent, and not recorded */
+  const no=rows.filter(r=>r.got==='N').length,blank=n-got-no,wdur=rows.filter(r=>r.got==='Y'&&num(r.wmin)!=null).length;
   const last=rows.slice(-10),wl=last.filter(isWd).length;let run=0;for(let i=rows.length-1;i>=0&&isWd(rows[i]);i--)run++;
   const thr=num(S.meta.a_thr)==null?25:num(S.meta.a_thr);
-  return{n,w,got,share:n?w/n*100:null,nl:last.length,wl,shareL:last.length?wl/last.length*100:null,run,thr};
+  return{n,w,got,no,blank,wdur,share:n?w/n*100:null,nl:last.length,wl,shareL:last.length?wl/last.length*100:null,run,thr};
 }
 function renderAssent(){
   const a=assentStats();
@@ -1297,7 +1353,8 @@ function renderAssent(){
     '<div class="metric"><b>Review threshold</b><div class="val">'+a.thr+'%</div><div class="sub">working convention; '+a.run+' in a row now</div></div>';
   let v='';
   if(!a.n)v='<div class="verdict v-mid">No sessions logged yet. Log every session, including the ones where assent was not obtained.</div>';
-  else if(a.share>a.thr||a.run>=3)v='<div class="verdict v-no">Withdrawal in '+pct(a.share)+' of sessions'+(a.run>=3?', and '+a.run+' sessions in a row':'')+', above the '+a.thr+'% working convention. Review the procedure with the student and the case BCBA: what is being asked, how long, with whom, and what the student would rather do. Repeat the preference page before the next session. Each withdrawal was honored on the day; the question now is the plan.</div>';
+  /* v23.23 (review F69) the notice names the rule that fired: the share above the convention, three or more in a row, or both */
+  else if(a.share>a.thr||a.run>=3)v='<div class="verdict v-no">'+[a.share>a.thr?'Withdrawal in '+pct(a.share)+' of sessions ('+a.w+' of '+a.n+'), above the '+a.thr+'% working convention':'',a.run>=3?(a.share>a.thr?'and ':'')+a.run+' withdrawals in a row (the last '+a.run+' sessions logged)':''].filter(Boolean).join(', ')+'. Review the procedure with the student and the case BCBA: what is being asked, how long, with whom, and what the student would rather do. Repeat the preference page before the next session. Each withdrawal was honored on the day; the question now is the plan.</div>';
   else if(a.w>0)v='<div class="verdict v-mid">Withdrawal in '+pct(a.share)+' of sessions ('+a.w+' of '+a.n+'), at or below the '+a.thr+'% working convention. Check that each row says what was changed; a withdrawal with nothing changed is a missed signal.</div>';
   else v='<div class="verdict v-ok">Assent obtained and kept in every logged session ('+a.n+'). Keep asking at the start of each session and at each new activity.</div>';
   $('#assentVerdict').innerHTML=v;
@@ -1316,14 +1373,20 @@ function renderPR(){
     '<td><input data-r="pr" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td>'+delCell('pr',i,'choice')+'</tr>').join('');
 }
 function prefStats(){
-  const st=S.pc.map((c,i)=>({i,name:c.words||c.name,off:0,ch:0,rank:num(c.rank)}));
-  S.pr.forEach(r=>{if(r.a===''||r.b===''||!r.chose)return;const A=st[+r.a],B=st[+r.b];if(!A||!B)return;A.off++;B.off++;if(r.chose==='A')A.ch++;if(r.chose==='B')B.ch++;});
+  const st=S.pc.map((c,i)=>({i,name:c.words||c.name,off:0,ch:0,rank:num(c.rank),asA:0,asB:0}));
+  /* v23.23 (review F61) the pairs offered (M) and the choices within each pair (W): a leader is called preferred only after it has
+     been offered against every other listed component (Fisher et al., 1992) */
+  const M={},W={},pk=(x,y)=>x+'|'+y,bump=(o,k)=>{o[k]=(o[k]||0)+1;};
+  S.pr.forEach(r=>{if(r.a===''||r.b===''||!r.chose)return;const A=st[+r.a],B=st[+r.b];if(!A||!B)return;A.off++;B.off++;A.asA++;B.asB++;bump(M,pk(A.i,B.i));bump(M,pk(B.i,A.i));
+    if(r.chose==='A'){A.ch++;bump(W,pk(A.i,B.i));}if(r.chose==='B'){B.ch++;bump(W,pk(B.i,A.i));}});
   const used=st.filter(s=>s.name);used.forEach(s=>{s.p=s.off?s.ch/s.off*100:null;});
   const byChoice=used.filter(s=>s.off).slice().sort((a,b)=>b.p-a.p||b.ch-a.ch);
   const offers=S.pr.filter(r=>r.a!==''&&r.b!==''&&r.chose).length;
-  const top=byChoice[0]&&byChoice[0].off>=3&&byChoice[0].p>=66.6?byChoice[0]:null;
+  const lead=byChoice[0]&&byChoice[0].off>=3&&byChoice[0].p>=66.6?byChoice[0]:null;
+  const unmet=lead?used.filter(s=>s.i!==lead.i&&!M[pk(lead.i,s.i)]):[];
+  const top=lead&&!unmet.length?lead:null;
   const least=byChoice.length>1?byChoice[byChoice.length-1]:null;
-  return{used,byChoice,offers,top,least};
+  return{used,byChoice,offers,top,lead,unmet,least,M,W,pk};
 }
 function renderPref(){
   const p=prefStats();
@@ -1331,8 +1394,12 @@ function renderPref(){
   let s='<div class="grid-wrap"><table class="rt" id="prefTbl"><thead><tr><th>Component</th><th>Times offered</th><th>Times chosen</th><th>Chosen</th><th>Rank by choice</th><th>Stated rank</th></tr></thead><tbody>';
   p.used.forEach(c=>{const rk=p.byChoice.findIndex(x=>x.i===c.i);s+='<tr><td>'+esc((c.i+1)+'. '+c.name)+'</td><td class="num">'+c.off+'</td><td class="num">'+c.ch+'</td><td class="num">'+pct(c.p)+'</td><td class="num">'+(rk>=0?rk+1:NONE)+'</td><td class="num">'+(c.rank==null?NONE:c.rank)+'</td></tr>';});
   s+='</tbody></table></div>';
+  /* v23.23 (review F61) the pairs offered, so the gaps are visible */
+  if(p.used.length>1){const C=p.used;s+='<p class="hint" style="margin-top:8px">Pairs offered: each cell is how often the row&rsquo;s component was chosen over the column&rsquo;s, of the times the two were offered together. A shaded cell is a pair not yet offered.</p><div class="grid-wrap"><table class="rt" id="pairTbl"><thead><tr><th></th>'+C.map(c=>'<th>'+(c.i+1)+'</th>').join('')+'</tr></thead><tbody>'+
+    C.map(r=>'<tr><th>'+esc((r.i+1)+'. '+r.name)+'</th>'+C.map(c=>{if(c.i===r.i)return '<td>'+NONE+'</td>';const n=p.M[p.pk(r.i,c.i)]||0;return n?'<td class="num">'+(p.W[p.pk(r.i,c.i)]||0)+' of '+n+'</td>':'<td class="gap" aria-label="not yet offered"></td>';}).join('')+'</tr>').join('')+'</tbody></table></div>';}
   if(!p.offers)s+='<div class="verdict v-mid">No choices recorded yet. Offer pairs until the same component is chosen most of the time; three offers of each is the working minimum.</div>';
-  else if(p.top){const dis=p.top.rank!=null&&p.top.rank!==1;s+='<div class="verdict v-ok">Preferred: <b>'+esc(p.top.name)+'</b>, chosen '+p.top.ch+' of '+p.top.off+' times offered ('+pct(p.top.p)+'), over '+p.offers+' choices.'+(p.least&&p.least.p<=33.4?' Least chosen: '+esc(p.least.name)+' ('+pct(p.least.p)+').':'')+(dis?' The student&rsquo;s stated rank puts it at '+p.top.rank+'; choice and report disagree, so ask again and go with what the student does.':'')+'</div>';}
+  else if(p.top){const dis=p.top.rank!=null&&p.top.rank!==1;s+='<div class="verdict v-ok">Preferred: <b>'+esc(p.top.name)+'</b>, chosen '+p.top.ch+' of '+p.top.off+' times offered ('+pct(p.top.p)+'), over '+p.offers+' choices.'+(p.least&&p.least.p<=33.4?' Least chosen: '+esc(p.least.name)+' ('+pct(p.least.p)+').':'')+(dis?' The student&rsquo;s stated rank puts it at '+p.top.rank+'; choice and report disagree, so ask again and go with what the student does.':'')+(!p.top.asA||!p.top.asB?' It was always shown on the same side; offer it on the other side too.':'')+'</div>';}
+  else if(p.lead)s+='<div class="verdict v-mid"><b>'+esc(p.lead.name)+'</b> leads, chosen '+p.lead.ch+' of '+p.lead.off+' times offered ('+pct(p.lead.p)+'), but has not yet been offered against '+p.unmet.map(c=>esc(c.name)).join(', ')+'. Offer '+(p.unmet.length>1?'those pairs':'that pair')+' next, on each side, before calling it preferred.</div>';
   else s+='<div class="verdict v-mid">'+p.offers+' choices recorded; no component yet chosen on two thirds or more of at least three offers (working convention). Keep offering pairs, and vary which side each one is shown on.</div>';
   $('#prefOut').innerHTML=s;
 }
@@ -1357,7 +1424,7 @@ function renderSummary(){
   if(young()){const fs=ITEMS.filter(it=>it.fq&&v[it.id].s).map(it=>esc(it.fq)+' '+faceOf(v[it.id].s)+' '+esc(SCALES[it.fl][+v[it.id].s-1]));if(fs.length)s+='<p><b>Faces:</b> '+fs.join(' &bull; ')+'</p>';}
   s+='<h3>Assent</h3>';
   /* v21.82 the overall assent, as the case carries it to Form FS-1 */
-  {const st=assentStatus();if(st)s+='<p><b>Assent overall:</b> '+esc(st)+(m.a_status?'':' (read from the log)')+'</p>';}
+  {const st=assentStatus(),nt=assentNote();if(st||nt)s+='<p><b>Assent overall:</b> '+esc(st||'not recorded')+(m.a_status||!st?'':' (read from the log)')+(nt?': '+esc(nt):'')+'.</p>';}
   s+='<p><b>Asked how:</b> '+esc(m.a_ask||NONE)+' <b>By:</b> '+esc(m.a_who||NONE)+' <b>When:</b> '+esc(m.a_when||NONE)+(m.a_scope?' <b>Applies to:</b> '+esc(m.a_scope):'')+'</p>';
   const ab=S.ab.filter(r=>r.beh),wb=S.wb.filter(r=>r.beh);
   s+='<p><b>Assent looks like:</b> '+(ab.length?ab.map(r=>esc(r.beh)).join('; '):NONE)+'</p><p><b>Withdrawal looks like:</b> '+(wb.length?wb.map(r=>esc(r.beh)).join('; '):NONE)+'</p>';
@@ -1366,7 +1433,7 @@ function renderSummary(){
   s+='<p><b>Log so far:</b> '+a.n+' sessions, '+a.w+' with withdrawal ('+pct(a.share)+'; threshold '+a.thr+'%, a working convention'+(a.n&&(a.share>a.thr||a.run>=3)?'; <b>review due</b>':'')+').</p>';
   s+='<h3>Treatment preference</h3>';
   if(p.used.length){s+='<table class="st"><tr><th>Component</th><th>Offered</th><th>Chosen</th><th>%</th><th>Stated rank</th></tr>'+p.used.map(c=>'<tr><td>'+esc(c.name)+'</td><td>'+c.off+'</td><td>'+c.ch+'</td><td>'+pct(c.p)+'</td><td>'+(c.rank==null?NONE:c.rank)+'</td></tr>').join('')+'</table>';
-    s+='<p><b>Result:</b> '+(p.top?'preferred '+esc(p.top.name)+', chosen '+p.top.ch+' of '+p.top.off+' offers.':(p.offers?p.offers+' choices recorded; no clear preference yet.':'no choices recorded yet.'))+'</p>';}
+    s+='<p><b>Result:</b> '+(p.top?'preferred '+esc(p.top.name)+', chosen '+p.top.ch+' of '+p.top.off+' offers.':p.lead?esc(p.lead.name)+' leads ('+p.lead.ch+' of '+p.lead.off+' offers) but has not yet been offered against '+p.unmet.map(c=>esc(c.name)).join(', ')+', so no preference is called yet.':(p.offers?p.offers+' choices recorded; no clear preference yet.':'no choices recorded yet.'))+'</p>';}
   else s+='<p>No components listed yet.</p>';
   if(m.p_want)s+='<p><b>Would like from a plan:</b></p>'+q(m.p_want);
   if(m.p_say)s+='<p><b>About the plan:</b></p>'+q(m.p_say);
@@ -1374,6 +1441,7 @@ function renderSummary(){
   if(m.p_next)s+='<p><b>Repeat on:</b> '+esc(m.p_next)+'</p>';
   s+='<div class="s-foot"><div>Student <span class="bl"></span></div><div>Interviewer <span class="bl"></span></div><div>Case BCBA <span class="bl"></span></div><div>Date <span class="bl"></span></div></div>';
   $('#sumOut').innerHTML=s;
+  siRedactDom($('#sumOut'));siNamesPaint();
 }
 
 /* ---------------- meta + render ---------------- */
@@ -1386,7 +1454,7 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'&&el.tagName!=='SELECT'){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.value;
     if(el.dataset.r==='al')renderAssent();else if(el.dataset.r==='pc'){renderPref();if(el.dataset.f==='name'||el.dataset.f==='words')renderPRSoon();}else if(el.dataset.r==='pr')renderPref();
     renderSumSoon();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='beh')renderItemsSoon();if(el.dataset.m==='a_thr')renderAssent();renderSumSoon();}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='beh')renderItemsSoon();if(el.dataset.m==='a_thr')renderAssent();if(el.dataset.m==='others'||el.dataset.m==='client')renderHyp();renderSumSoon();}
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;
@@ -1419,7 +1487,7 @@ async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
-$('#sumPrintBtn').addEventListener('click',()=>{renderSummary();document.body.classList.add('si-sum-only');
+$('#sumPrintBtn').addEventListener('click',async()=>{await siNamesAsk();renderSummary();document.body.classList.add('si-sum-only');
   const off=()=>{document.body.classList.remove('si-sum-only');window.removeEventListener('afterprint',off);};
   window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);});
 $('#saveBtn').addEventListener('click',()=>{
@@ -1471,7 +1539,7 @@ async function loadSim(){
     w_steps:'1. "Okay, we can stop." Stop the task at once. 2. Offer the two cards: a different task, or a break. 3. If neither is taken within a minute, end the session and walk the student back. 4. Write the minute and what was changed. 5. Try again at the next scheduled time, not sooner.',w_change:'Shorter task (5 minutes), a different problem set, or a different adult; after two withdrawals in a row, the BCBA sits in on the next session',a_thr:'25',
     p_want:'"Smaller worksheets. A way to take a break without getting in trouble. No points chart on the wall."',
     p_say:'"The break card is fine. I do not want the points thing where everyone can see it."',p_change:'The token board moved from the wall to a folder the student keeps. The first-then schedule stays (the teacher needs it for the class), explained to the student with the reason; the student agreed to try it for two weeks.',p_next:'At the first plan review (PR-1), or sooner if two withdrawals fall in one week',
-    conf_say:'"So my mom will see it? Okay. Ms. Ortiz can stay."'};
+    conf_say:'"So my mom will see it? Okay. Ms. Ortiz can stay."',others:'Jaden'};
   S.chk={conf_read:true,m_verbal:true,m_written:true,m_breaks:true,b_hard:true,b_told:true,b_peer:true,a_out:true,a_sent:true,a_talk:true,w_pause:true,w_choice:true,w_end:true,w_note:true,w_tell:true,w_nolose:true};
   const iv={like:'Drawing, mostly comics. Basketball at recess. I am good at remembering things people say. Science is okay when we do the experiments.',
     before:'Math, usually. Mr. Patel hands out the worksheet and it is like forty problems. Or Jaden says something about me and I am already mad.',
@@ -1514,7 +1582,16 @@ window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {fille
    logged session had assent at the start and none was withdrawn, refused when none had, partial otherwise), what the student
    would like from a plan (the field, else the component the student chose most, else what was said about the plan) and what the
    student likes and does well. Nothing is sent while the interview is empty. */
-function assentStatus(){const m=S.meta.a_status;if(m)return m;const a=assentStats();if(!a.n)return '';return !a.got&&a.w>=a.n?'refused':a.w||a.got<a.n?'partial':'given';}
+/* v23.23 (review F62) read from what the student said at the start of each session: given when every session with assent recorded had
+   it, refused when none had it, partial when some were declined at the start; a withdrawal during a session, and a blank cell, are
+   reported beside the status (assentNote) rather than turning it into partial */
+function assentStatus(){const m=S.meta.a_status;if(m)return m;const a=assentStats();if(!a.n||!(a.got+a.no))return '';return !a.got?'refused':a.no?'partial':'given';}
+function assentNote(){const a=assentStats();if(!a.n)return '';const P=[],se=k=>k===1?' session':' sessions';
+  if(a.got)P.push('given at the start of '+(a.got===a.n?(a.n===1?'the one logged session':'all '+a.n+' logged sessions'):a.got+' of '+a.n+' logged sessions'));
+  if(a.no)P.push('declined at the start of '+(a.got?a.no+se(a.no):(a.no===a.n?'all '+a.n+' logged sessions':a.no+' of '+a.n+' logged sessions')));
+  if(a.wdur)P.push('withdrawn during '+a.wdur+se(a.wdur));
+  if(a.blank)P.push('not recorded for '+a.blank+se(a.blank));
+  return P.join('; ');}
 {const plain=h=>{const t=document.createElement('textarea');t.innerHTML=String(h||'').replace(/<[^>]+>/g,'');return t.value.replace(/\s+/g,' ').trim();};
  const iso=s=>{s=String(s||'').trim();let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
    return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2):'';};
@@ -1524,8 +1601,33 @@ function assentStatus(){const m=S.meta.a_status;if(m)return m;const a=assentStat
    if(hyp)o.hypothesis=hyp;if(st)o.assent=st;if(pref)o.preference=pref;if(likes)o.likes=likes;
    /* v22.48 (review I197) how the student says stop (the withdrawal behaviors) and what staff do then, for Form QS-1 */
    const sg=(S.wb||[]).map(r=>unq(r&&r.beh).trim()).filter(Boolean),ws=unq(m.w_steps).trim();if(sg.length||ws){o.stop={};if(sg.length)o.stop.signs=sg.join('; ');if(ws)o.stop.steps=ws;}
+   /* v23.23 (review F62) the counts behind the status, for Form FS-1 to print beside it */
+   {const nt=assentNote();if(st&&nt)o.assentNote=nt;}
+   /* v23.23 (review F63) the student's goal, what is worth working for, who helps, and what helps or makes it worse, in the student's words */
+   [['goal','goal'],['reward','reward'],['who','helpers'],['upset','upset']].forEach(x=>{const t=unq(S.iv[x[0]]&&S.iv[x[0]].a).trim();if(t)o[x[1]]=t;});
+   /* v23.23 (review F64) the assent plan as this form holds it: how assent is asked, by whom and when, what assent and withdrawal look
+      like, what staff do, the review with the student, and the log's counts */
+   {const ab=(S.ab||[]).map(r=>unq(r&&r.beh).trim()).filter(Boolean),stp=[['w_pause','pause'],['w_choice','offer a choice'],['w_end','end the session if still no'],['w_note','note it'],['w_tell','tell the BCBA'],['w_nolose','nothing is lost for saying no']].filter(x=>S.chk[x[0]]).map(x=>x[1]).join(', ');
+    const ap={ask:unq(m.a_ask).trim(),who:unq(m.a_who).trim(),when:unq(m.a_when).trim(),scope:String(m.a_scope||''),assent:ab.join('; '),withdrawal:sg.join('; '),steps:[stp,ws].filter(Boolean).join('. '),reviewed:iso(m.a_rev)||String(m.a_rev||'').trim()};
+    Object.keys(ap).forEach(k=>{if(!ap[k])delete ap[k];});const a=assentStats();if(a.n)ap.log={sessions:a.n,given:a.got,declined:a.no,withdrawn:a.wdur,notRecorded:a.blank};
+    if(Object.keys(ap).length)o.assentPlan=ap;}
    if(!Object.keys(o).length)return r;const d=iso(m.date);if(d)o.date=d;
-   return Object.assign({},r||{},{student:o});}catch(e){return r;}};}
+   return Object.assign({},r||{},{student:siRedactObj(o)});}catch(e){return r;}};}
+
+/* v23.23 (review F63, F64) the case, in, into empty parts only: the plan's components from Form TD-1 (the replacement first, then the
+   teaching, antecedent and schedule cards, eight at most) when no component is listed; "Parent or guardian aware" when Form IC-1 holds
+   a current consent; the age from Form DM-1's date of birth. The behavior stays in the student's words. */
+{const siAge=d=>{const b=new Date(d+'T12:00:00'),t=new Date();if(isNaN(b))return null;let a=t.getFullYear()-b.getFullYear();if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--;return a>=2&&a<=25?a:null;};
+ window.__nbhFactsIn=function(f){let n=0;const notes=[];
+  try{f=f||{};const P=f.plan;
+   if(P&&typeof P==='object'&&S.pc.every(r=>!(r.name||r.words||r.rank||r.say))){const L=[],add=x=>{x=String(x||'').trim();if(x&&!L.some(y=>y.toLowerCase()===x.toLowerCase()))L.push(x);};
+     if(P.rep)add('Replacement: '+P.rep);[P.teach,P.antCards,P.sched].forEach(g=>(Array.isArray(g)?g:[]).forEach(add));
+     if(L.length){S.pc=L.slice(0,8).map(x=>({name:x,words:'',rank:'',say:''}));n+=Math.min(8,L.length);if(L.length>8)notes.push('the first 8 of the plan’s '+L.length+' components');}}
+   const c=f.consent;if(c&&typeof c==='object'&&!String(S.meta.paware||'').trim()&&(c.on||(!c.v&&(c.date||c.parent)))){S.meta.paware='Yes';n++;}
+   const dob=f.profile&&f.profile.dob;if(!String(S.meta.age||'').trim()&&/^\d{4}-\d\d-\d\d$/.test(String(dob||''))){const a=siAge(dob);if(a!=null){S.meta.age=String(a);n++;}}
+  }catch(e){}
+  if(n)renderAll();
+  return {filled:n,note:'the interview keeps the behavior in the student’s words'+(notes.length?'; '+notes.join('; '):'')};};}
 </script>
 
 <script>
