@@ -9903,6 +9903,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.80: SM-1 measures the behavior, not only the points, and changes one thing at a time (review Wave 3)
+
+- **The behavior beside the points.** Each day on the Record now has the behavior: the share of the teacher's ratings
+  that were Yes (or the teacher's level, on a sheet with more levels). The iPad records it; on paper, type it in the new
+  Behavior % column. The points stay what the student earns and what the goal is written on: on Self & Match an honest No
+  earns points, so a day with no target behavior, rated honestly, is 50% of the points and 0% behavior. The graph draws the
+  behavior as its main line, the points beside it. Forms DD-1 and PR-1 print the behavior first ("the teacher rated the
+  targets met in 52% of the ratings (76% of the points)"). Sheets the teacher does not rate keep their points and say so.
+- **Goal met is worked out, at the current goal only.** A day's goal met comes from its points and that day's goal. The
+  goal rules count only the days at the current goal and ladder phase, and each new goal is held for 3 school days (a new
+  row on the Reinforcement sheet) before any change.
+- **Agreement on the teacher's Nos.** The Record gives how many of the teacher's No ratings the student matched (On No) and
+  moves the matching ladder on it; a student who never says No is flagged. A ladder step on iPad days asks for a PIN first.
+- **One set of thresholds, one change at a time.** The Teach sheet, the fading table, the Record and the Guide agree (90%
+  to move on, below 80% to step back, the teacher's Nos matched at 80%); a goal change comes first, the ladder after; at the
+  ceiling the goal is held. At fading step 2 the periods left unrated count as met.
+- **The teacher-only baseline (phase 0).** On the iPad the teacher rates alone and the day goes in as the behavior, with no
+  points; on paper, enter the date, phase 0 and the Behavior %. The first goal is suggested from the baseline days, in
+  points, with how many of them meet it.
+- **Changes dated.** The Record's advice has a button that makes the change (raise or lower the goal, the next ladder phase);
+  each change, and each phase or fading step ticked, is dated with its reason, listed under the graph and marked on it.
+- **A paper sheet scored from its marks.** On the Rate page, From the paper sheet: tap each cell to the marks on the sheet,
+  and the form scores the day as one rated on the iPad.
+- **From the case.** Allergies (Form DM-1) beside the back-ups, with a warning on food; the family's language and
+  interpreter on the parent's copy; photo permission No keeps the student's photo off the sheets; Form SI-1's assent and
+  words beside the goal and on the contract; back-ups that match the function (Form FS-1), with limits on escape.
+- **The contract.** A penalty clause holds it at "Not ready" until the BIP team agrees and the BIP date is written in.
+- **Setup** says "Not yet: teach the skill first" when the skill is not in the student's repertoire.
+- **Citations corrected** (Smith, Thompson & Maynard, 2022; the Rhode procedure; two missing references added).
+
+- qa/sm1-w3-test.js (48 checks). SM-1 printed alone with its worked example runs to 30 pages (it was 28): the wider Record, the decision rules and two references.
+
 ### v22.79: RA-1's verdicts need enough sessions, flag conflicting designs, and record each session (review Wave 3)
 
 - **Enough sessions for a label (F130, F132).** A single-operant label needs three sessions in each condition and a

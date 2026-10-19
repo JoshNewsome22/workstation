@@ -68,7 +68,7 @@ const LEVELS=[
   {pts:'4',desc:'No more than 4 prompts to finish the task; not on time for class: gone more than 4 minutes'},
   {pts:'5',desc:'No prompts or redirects to finish the task; on time for class'}
 ];
-/* v22.7x (review F261): one set of thresholds. The ladder's and the fading table's "Move on when", the Record's decisions and
+/* v22.80 (review F261): one set of thresholds. The ladder's and the fading table's "Move on when", the Record's decisions and
    the Guide read the same numbers: agreement at or above SM_AG.up to move on, below SM_AG.down to step back, the teacher's
    No ratings matched at SM_AG.no or more, judged only when the window holds SM_AG.noMin of them; each phase's window (w) in
    school days at the current goal (two weeks = 10, four weeks = 20). All are working conventions of this form. */
@@ -125,7 +125,7 @@ function ensure(){
   if(!Array.isArray(S.fade)||S.fade.length!==FADE.length)S.fade=FADE.map(()=>({on:false,note:''}));
   if(!Array.isArray(S.bck)||S.bck.length!==BCRULES.length)S.bck=BCRULES.map(()=>({in:'',note:''}));
   if(!S.wk||typeof S.wk!=='object')S.wk={};
-  if(!Array.isArray(S.chg))S.chg=[];   /* v22.7x (review I132) the dated changes */
+  if(!Array.isArray(S.chg))S.chg=[];   /* v22.80 (review I132) the dated changes */
   while(S.tg.length<2)S.tg.push({word:'',def:'',cue:'',ex:'',nex:'',icon:'',img:'',goal:''});
   while(S.per.length<4)S.per.push({t:'',label:'',icon:'',img:''});
   S.per.forEach(p=>{const h=toHM24(p.t);if(h)p.t=h;});
@@ -165,7 +165,7 @@ function renderLad(){
 function renderFade(){
   $('#fadeTbl tbody').innerHTML=FADE.map((l,i)=>`<tr${S.fade[i].on?' style="background:#F4F8F7"':''}><td class="num">${i+1}</td><td class="num"><input type="checkbox" data-r="fade" data-i="${i}" data-f="on"${S.fade[i].on?' checked':''} aria-label="Fading step ${i+1} in use"></td><td>${l.what}</td><td>${l.when}</td><td><input data-r="fade" data-i="${i}" data-f="note" value="${esc(S.fade[i].note)}" placeholder="started, data, moved on"></td></tr>`).join('');
 }
-/* v22.7x (review F263): a penalty clause sets rule 9 (the contract is positive) to No while it stands and holds the verdict: a
+/* v22.80 (review F263): a penalty clause sets rule 9 (the contract is positive) to No while it stands and holds the verdict: a
    penalty needs the BIP team's agreement, written into the BIP (Form TD-1) with the parent's informed consent (Form IC-1); one
    that takes away recess or what was earned goes against the sheet's own rule that points are never taken away */
 const smPen=()=>/^A stated/.test(S.meta.bc_pen||'');
@@ -180,7 +180,7 @@ function renderBck(){const pen=smPen(),inOf=i=>i===8&&pen?'No':S.bck[i].in;
 function renderFid(){
   $('#fidTbl tbody').innerHTML=FID.map((t,i)=>`<tr><td class="num">${i+1}</td><td>${t}</td><td><select data-r="fid" data-i="${i}" data-f="in" aria-label="Step ${i+1} in the plan"><option value=""></option><option${S.fid[i].in==='Yes'?' selected':''}>Yes</option><option${S.fid[i].in==='No'?' selected':''}>No</option><option${S.fid[i].in==='N/A'?' selected':''}>N/A</option></select></td><td><input data-r="fid" data-i="${i}" data-f="note" value="${esc(S.fid[i].note)}"></td></tr>`).join('');
 }
-/* v22.7x (review F259, F260): the goal-met cell is worked out from the points and that day's goal (the tick stays only for a
+/* v22.80 (review F259, F260): the goal-met cell is worked out from the points and that day's goal (the tick stays only for a
    row without points); the On No cell gives how many of the teacher's No ratings the student matched */
 function smMetCell(r,i){const p=num(r.pts),q=num(r.poss),g=num(r.goal);if(String(r.ph||'')==='0')return '<span class="hint" title="A teacher-only day earns no points">—</span>';
   if(p!=null&&q&&g!=null)return p/q*100>=g-1e-9?'<b style="color:#2F6B37">yes</b>':'no';
@@ -282,7 +282,7 @@ function renderIl(){const el=$('#ilPreview');if(!el)return;if(!S.meta.il_init&&!
 function renderSetup(){
   renderCueList();   /* v22.63 */
   const m=S.meta,out=[];
-  /* v22.7x (review F266): a skill not yet in the repertoire is taught first; the sheet pays for doing more of a behavior the student can do */
+  /* v22.80 (review F266): a skill not yet in the repertoire is taught first; the sheet pays for doing more of a behavior the student can do */
   if(/^No/.test(m.r_perf||''))out.push('<b>Not yet: teach the skill first</b> (Form SA-1 for the teaching data); start the sheet when the skill is in the repertoire. A point sheet pays for doing more of what the student can already do; it does not teach it.');
   else if(/^Partly/.test(m.r_perf||''))out.push('Teach the skill alongside the sheet, and keep the goal low until the skill data (Form SA-1) show it.');
   if(/Not yet/.test(m.r_disc||''))out.push('The student cannot yet tell the target from its absence: start at phase 0 (teacher rates only) and run the discrimination practice on the Teach sheet before any rating depends on the student.');
@@ -450,11 +450,11 @@ function renderBc(){
   h+='<h4>What I earn</h4><div class="clause"><p><b>Reward:</b> '+v('bc_rw',240)+' &nbsp; <b>How much:</b> '+v('bc_rwmuch',120)+'</p><p><b>When:</b> '+v('bc_rwwhen',200)+' &nbsp; <b>From:</b> '+v('bc_rwwho',140)+'</p>'+(m.bc_bonus?'<p><b>Bonus:</b> '+esc(m.bc_bonus)+'</p>':'')+'</div>';
   h+='<h4>What the adults will do</h4><div class="clause"><p>'+v('bc_adult',300)+'</p></div>';
   h+='<h4>If the task is not done</h4><div class="clause"><p>'+(/^A stated/.test(m.bc_pen||'')&&m.bc_pentext?esc(m.bc_pentext):'Nothing is earned that day, and nothing already earned is taken away. The contract starts again the next day.')+'</p>'+
-    (/^A stated/.test(m.bc_pen||'')?'<p><b>Agreed in the BIP dated</b> '+v('bc_penbip',110)+' (Form TD-1), with the parent&rsquo;s informed consent.</p>':'')+'</div>';   /* v22.7x (review F263) */
+    (/^A stated/.test(m.bc_pen||'')?'<p><b>Agreed in the BIP dated</b> '+v('bc_penbip',110)+' (Form TD-1), with the parent&rsquo;s informed consent.</p>':'')+'</div>';   /* v22.80 (review F263) */
   h+='<h4>Changing the contract</h4><div class="clause"><p>'+(m.bc_renego?esc(m.bc_renego):'Either of us may ask for a meeting to change the contract. Changes are written here and signed again; nobody changes it alone.')+' Review date: '+v('bc_review',110)+'.</p></div>';
   h+='<h4>Task record</h4><table class="ct"><tr><th style="width:14%">Date</th><th>Task done (initials)</th><th>Reward given (initials)</th><th>Date</th><th>Task done (initials)</th><th>Reward given (initials)</th></tr>'+Array.from({length:7},()=>'<tr><td style="height:22px"></td><td></td><td></td><td></td><td></td><td></td></tr>').join('')+'</table>';
   h+='<div class="sig"><div>Student: '+esc(st)+'<br>Signature and date</div><div>Teacher: '+esc(tc)+'<br>Signature and date</div>'+(pa?'<div>Parent: '+esc(pa)+'<br>Signature and date</div>':'')+'<div>Witness<br>Signature and date</div></div>';
-  /* v22.7x (review I135, F264): the student's assent, and the family's language and interpreter on the parent's copy, when known */
+  /* v22.80 (review I135, F264): the student's assent, and the family's language and interpreter on the parent's copy, when known */
   if(m.bc_assent)h+='<p class="sub" style="margin-top:8px"><b>The student&rsquo;s assent:</b> '+esc(m.bc_assent.toLowerCase())+(smCaseF&&smCaseF.student&&smCaseF.student.date?' (Form SI-1, '+esc(smMDY(smCaseF.student.date))+')':'')+'; asked again at each review date.</p>';
   const lg=smLangLine();if(pa&&lg)h+='<p class="sub">'+lg+'</p>';
   h+='<p class="sub" style="margin-top:10px">Starts '+esc(m.bc_start||'________')+' · '+(m.bc_voice?esc(m.bc_voice)+' · ':'')+'After Homme, Csanyi, Gonzales &amp; Rechs (1970) · Form SM-1</p>';
@@ -462,7 +462,7 @@ function renderBc(){
 }
 
 /* ---------------- the record ---------------- */
-/* v22.7x (review F258): a row holds the points, what the student earned (the reward measure), and the behavior: the share of
+/* v22.80 (review F258): a row holds the points, what the student earned (the reward measure), and the behavior: the share of
    the teacher's ratings that were Yes (beh; with a style of more levels, the teacher's mean level as a share of the top), the
    teacher's No ratings and how many of them the student matched (tno, nom), the student's own Nos (sno), the behavior per
    target (bgp) and the periods assumed met at fading step 2 (asm). The iPad writes them all; on paper Behavior % is typed.
@@ -497,7 +497,7 @@ function smPtsAt(b){if(b==null)return null;if(S.sys!=='match')return b;const lv=
 function smBehAt(p){if(p==null)return null;if(S.sys!=='match')return p;const lv=typeof smRLv==='function'?smRLv():null;
   if(lv&&lv.length>2){const mx=Math.max(...lv.map(x=>x[1]))||1,bo=typeof smBonus==='function'?smBonus():1;return Math.max(0,Math.min(100,(p/100*(mx+bo)-bo)/mx*100));}
   const k=mp(),top=Math.max(k.yy,k.nn,k.yn,k.ny)||1;return k.yy===k.nn?null:Math.max(0,Math.min(100,(p*top-100*k.nn)/(k.yy-k.nn)));}
-/* (F262) the baseline: the teacher-only days (phase 0), read as the behavior measure (a row from before v22.7x with points only
+/* (F262) the baseline: the teacher-only days (phase 0), read as the behavior measure (a row from before v22.80 with points only
    is read as its percent of points). The first goal is set at a level the student reached on at least half of them (the
    middle day, the higher of two), in points as the sheet pays them, rounded down to 5; with how many baseline days meet it.
    No suggestion from fewer than 3 baseline days. */
@@ -570,7 +570,7 @@ function drawLog(R){
   /* full check: the legend under the chart was one centred line of about 1100 units in a 900-unit chart, cut at both
      ends; it is two lines now, with the plot 14 units shorter to make room (B 48 -> 62; the chart's size is unchanged) */
   const W=900,H=320,L=56,Rg=20,T=18,B=62,n=Math.max(R.length,10);const X=i=>L+(i+0.5)*(W-L-Rg)/n,Y=v=>T+(H-T-B)*(1-v/100);
-  /* v22.7x (review F258): the behavior (the teacher's ratings) is the main line where the sheet has a teacher rating; the
+  /* v22.80 (review F258): the behavior (the teacher's ratings) is the main line where the sheet has a teacher rating; the
      points, which pay an honest No too, are the second line */
   const hasT=smHasT()&&S.sys!=='cico'&&R.some(r=>r.b!=null);
   let s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>';
@@ -578,7 +578,7 @@ function drawLog(R){
   s+='<line x1="'+L+'" y1="'+Y(0)+'" x2="'+(W-Rg)+'" y2="'+Y(0)+'" stroke="#182e43"/><line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+Y(0)+'" stroke="#182e43"/>';
   /* phase changes as dashed lines, the goal as a stepped line */
   let prev=null;R.forEach((r,i)=>{if(prev!==null&&r.ph!==prev){const x=X(i)-(W-L-Rg)/n/2;s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+Y(0)+'" stroke="#182e43" stroke-dasharray="4 4"/><text x="'+(x+4).toFixed(1)+'" y="'+(T+12)+'" font-size="11" fill="#182e43" font-family="system-ui,sans-serif">phase '+esc(r.ph)+'</text>';}prev=r.ph;});
-  /* v22.7x (review I132): a dated line where the goal changed (from the rows), and where a fading step was ticked (the dated changes) */
+  /* v22.80 (review I132): a dated line where the goal changed (from the rows), and where a fading step was ticked (the dated changes) */
   {let pg=null;R.forEach((r,i)=>{if(r.ph==='0'||r.g==null)return;if(pg!=null&&r.g!==pg){const x=X(i)-(W-L-Rg)/n/2;s+='<line x1="'+x.toFixed(1)+'" y1="'+(T+16)+'" x2="'+x.toFixed(1)+'" y2="'+Y(0)+'" stroke="#9b4e15" stroke-dasharray="2 3"/><text x="'+(x+4).toFixed(1)+'" y="'+(T+26)+'" font-size="10.5" fill="#9b4e15" font-family="system-ui,sans-serif">goal '+esc(String(r.g))+'%</text>';}pg=r.g;});
    const iso=R.map(r=>nbhSmIso(r.date));(S.chg||[]).filter(c=>c.k==='fade').forEach(c=>{const d=nbhSmIso(c.date);if(!d)return;const i=iso.findIndex(x=>x&&x>=d);if(i<0)return;const x=X(i)-(W-L-Rg)/n/2;
      s+='<line x1="'+x.toFixed(1)+'" y1="'+(T+30)+'" x2="'+x.toFixed(1)+'" y2="'+Y(0)+'" stroke="#5b3f78" stroke-dasharray="1 3"/><text x="'+(x+4).toFixed(1)+'" y="'+(T+40)+'" font-size="10.5" fill="#5b3f78" font-family="system-ui,sans-serif">'+esc(c.what.replace(/ ticked$/,'').toLowerCase())+'</text>';});}
@@ -633,9 +633,9 @@ function fromFile(d){
   const fid=arr('fid',['in','note'],FID.length);if(fid&&fid.length===FID.length)o.fid=fid;
   const fade=arr('fade',['on','note'],FADE.length);if(fade&&fade.length===FADE.length)o.fade=fade;
   const bck=arr('bck',['in','note'],BCRULES.length);if(bck&&bck.length===BCRULES.length)o.bck=bck;
-  o.log=arr('log',['date','ph','goal','pts','poss','beh','m','n','tno','nom','sno','asm','met','tgp','bgp','note','src'],400)||[];   /* v22.7x (F258) the behavior and the No counts */   /* src (v21.46): 'ipad:yyyy-mm-dd' for a row a day rated on the iPad wrote */
+  o.log=arr('log',['date','ph','goal','pts','poss','beh','m','n','tno','nom','sno','asm','met','tgp','bgp','note','src'],400)||[];   /* v22.80 (F258) the behavior and the No counts */   /* src (v21.46): 'ipad:yyyy-mm-dd' for a row a day rated on the iPad wrote */
   Object.keys(obj('wk')).forEach(k=>{if(/^d[0-4]_p\d+$/.test(k))o.wk[k]=str(s.wk[k]);});
-  o.chg=(arr('chg',['date','what','why','k'],200)||[]).filter(c=>c.what);   /* v22.7x (review I132) */
+  o.chg=(arr('chg',['date','what','why','k'],200)||[]).filter(c=>c.what);   /* v22.80 (review I132) */
   o.tg.forEach(t=>{if(!window.NBH_PICTOS||!NBH_PICTOS[t.icon])t.icon='';});o.per.forEach(p=>{if(!window.NBH_PICTOS||!NBH_PICTOS[p.icon])p.icon='';});
   if(typeof mmFromFile==='function'){const mm=mmFromFile(s.mm);if(mm)o.mm=mm;}   /* v21.66 Match the model; mmEnsure cleans it */
   return o;
@@ -649,7 +649,7 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const out=[['Day','Date','Phase','Goal %','Points','Possible','% of points','Behavior %','Matches','Ratings','Agreement %','Teacher No','No matched','Student No','Goal met','Per target % (points)','Per target % (behavior)','Note']];   /* v22.7x (F258, F260) */
+  const out=[['Day','Date','Phase','Goal %','Points','Possible','% of points','Behavior %','Matches','Ratings','Agreement %','Teacher No','No matched','Student No','Goal met','Per target % (points)','Per target % (behavior)','Note']];   /* v22.80 (F258, F260) */
   rows().forEach((r,i)=>out.push([i+1,r.date,r.ph,r.goal,r.pts,r.poss,r.pc==null?'':r.pc.toFixed(1),r.b==null?'':r.b.toFixed(1),r.m,r.n,r.ag==null?'':r.ag.toFixed(1),r.tno==null?'':r.tno,r.nom==null?'':r.nom,r.sno==null?'':r.sno,r.mt==null?'':r.mt?'yes':'no',r.tgp||'',r.bgp||'',r.note]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='SM-1_record.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
@@ -694,7 +694,7 @@ async function loadSim(){
   S.fade.forEach((f,i)=>{f.on=i===0;f.note=i===0?'From '+Y(16)+'; every period rated':'';});S.bck.forEach(b=>{b.in='Yes';});
   S.lad.forEach((l,i)=>{l.on=i===1;l.note=i===0?'Days 1 to 4 ('+Y(20)+' to '+Y(17)+'): the targets met in 41% of the teacher’s ratings; first goal set at 70% of the points (met on 2 of the 4 days)':i===1?'From '+Y(16)+'; agreement 75% in week 1, 88% in week 2, 92% in week 3':'';});
   S.fid.forEach((f,i)=>{f.in='Yes';f.note=i===2?'Ms. R. rates on her clipboard before Sam shows his sheet':i===8?'Returned 9 of 11 days':'';});
-  /* v22.7x (review F258, F262): the baseline is four teacher-only days (no points, the share of the teacher's ratings that were
+  /* v22.80 (review F258, F262): the baseline is four teacher-only days (no points, the share of the teacher's ratings that were
      Yes), and each self-rating day carries the behavior beside the points, with the teacher's Nos and how many Sam matched */
   const g1=70,g2=75,g3=80;
   const days=[[null,'0',null,30,null,null],[null,'0',null,44,null,null],[null,'0',null,38,null,null],[null,'0',null,52,null,null],
@@ -735,7 +735,7 @@ window.__nbhFactsIn=function(f){
   let n=0;const behs=f.behaviors||[],acq=(f.goals&&f.goals.acq)||[];
   if(S.tg.every(t=>!t.word&&!t.def)){
     const rows=[];
-    /* v22.7x (review F265): a GB-1 objective's condition is not a definition: the definition is left for the BCBA to write, and the
+    /* v22.80 (review F265): a GB-1 objective's condition is not a definition: the definition is left for the BCBA to write, and the
        objective's criterion, when it is a percent, becomes the target's goal */
     acq.forEach(g=>{if(g.beh&&rows.length<5&&!rows.some(r=>r.word===g.beh))rows.push(nbhSmRow({word:g.beh,def:'',goal:nbhSmPct(g.crit)}));});
     behs.forEach(b=>{const w=b.isRep?b.label:b.rep;if(!w)return;const had=rows.find(r=>r.word===w);
@@ -746,11 +746,11 @@ window.__nbhFactsIn=function(f){
   const red=behs.filter(b=>!b.isRep);
   if(!S.meta.t_reduce&&red.length){S.meta.t_reduce=red.map(b=>b.label+(b.rep?' (replaced by '+b.rep+')':'')).join('; ');n++;}
   if(!S.meta.func&&f.fn){const v=nbhCase.optionFor(document.querySelector('[data-m="func"]'),f.fn.key||f.fn.label);if(v){S.meta.func=v;n++;}}
-  if(!S.meta.menu&&(f.menu||[]).length){S.meta.menu=nbhCase.menuLine(f.menu,5);n++;}
+  if(!S.meta.menu&&(f.menu||[]).length){const ln=nbhCase.menuLine((nbhCase.menuItems?nbhCase.menuItems(f):f.menu),5);if(ln){S.meta.menu=ln;n++;}}   /* v22.79 (review F134): by the shared rule, Form RA-1's verdicts included */
   if(n)renderAll();return {filled:n};
 };
 /* v21.74 out: the Record's days (the share of the points earned, the goal, whether it was met), for Form DD-1's week summary.
-   v22.7x (review F258, F259, F262): with the behavior (beh: the share of the teacher's ratings that were Yes), the ladder
+   v22.80 (review F258, F259, F262): with the behavior (beh: the share of the teacher's ratings that were Yes), the ladder
    phase (ph; a teacher-only day, phase 0, has no points and no goal to meet, so Forms DD-1 and PR-1 leave it out of the
    treatment figures) and the goal met as worked out from the points.
    A date without a year ("10/13", as the Record writes it) is this year's, or last year's when that is more than two months ahead. */
@@ -770,7 +770,7 @@ window.__nbhFactsPick=function(sel){
     if(had){if(nbhSmFill(had,o))return true;if(dup.indexOf(had.word)<0)dup.push(had.word);return false;}
     if(S.tg.length>=5&&!S.tg.some(t=>!t.word&&!t.def))return false;const slot=S.tg.find(t=>!t.word&&!t.def);if(slot)Object.assign(slot,nbhSmRow(o));else S.tg.push(nbhSmRow(o));return true;};
   sel.behaviors.forEach(b=>{const w=b.isRep?b.label:(b.rep||b.label);if(add({word:w,def:w===b.label?b.def:'',ex:w===b.label?(b.ex||''):'',nex:w===b.label?(b.nex||''):''}))n++;});
-  sel.goals.acq.forEach(g=>{if(add({word:g.beh,def:'',goal:nbhSmPct(g.crit)}))n++;});   /* v22.7x (review F265) */
+  sel.goals.acq.forEach(g=>{if(add({word:g.beh,def:'',goal:nbhSmPct(g.crit)}))n++;});   /* v22.80 (review F265) */
   sel.goals.red.forEach(g=>{if(add({word:g.beh,def:'no '+(g.ml||'more')+' than '+(g.tgt||'the target level')}))n++;});
   if(sel.fn){const v=nbhCase.optionFor(document.querySelector('[data-m="func"]'),sel.fn.key||sel.fn.label);if(v){S.meta.func=v;n++;}}
   if(sel.menu.length){S.meta.menu=[S.meta.menu,sel.menu.map(m=>m.name).join(', ')].filter(Boolean).join(', ');n++;}
@@ -780,7 +780,7 @@ window.__nbhFactsPick=function(sel){
   return {filled:n,note:notes.join(' ')};
 };
 
-/* ===================== v22.7x Wave 3 (review F264, F265, I132, I134, I135) ===================== */
+/* ===================== v22.80 Wave 3 (review F264, F265, I132, I134, I135) ===================== */
 /* (F264, I135) what the case knows about the student: Form DM-1's allergies and diet, home language and interpreter, and
    photo/media permission; Form SI-1's assent and the student's own words. Kept for this session only (the case sends them
    each time the form opens in the workstation); nothing of it is written into the form's saved file but the assent, when the

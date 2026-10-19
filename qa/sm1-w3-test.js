@@ -1,4 +1,4 @@
-/* v22.7x Form SM-1, Wave 3 review (F258-F262): the behavior beside the points, the goal met worked out at the current goal,
+/* v22.80 Form SM-1, Wave 3 review (F258-F262): the behavior beside the points, the goal met worked out at the current goal,
    agreement on the teacher's No ratings, one set of thresholds with one change at a time, and the teacher-only baseline.
    F258  a day of all No ratings, rated honestly at goal 50, earns 50% of the points and is 0% behavior; the Record row, the
          graph, the Record's metric and the facts out carry the behavior; Behavior % is typed on a paper row; a sheet the

@@ -51,7 +51,7 @@ function smRVal(M,day,r,t){const k=r+'_'+t,ok=v=>Number.isInteger(v)&&v>=0&&v<M.
   else if(M.sys==='match'){if(a!=null){done=true;p=b!=null?M.lv[b][1]+(a===b?M.bonus:0):M.lv[a][1];}else if(b!=null)p=0;}
   else if(a!=null||b!=null){done=a!=null;p=M.lv[b!=null?b:a][1];}
   return {a,b,p,done,both:a!=null&&b!=null,same:a!=null&&b!=null&&a===b};}
-/* v22.7x (review F261): at fading step 2 only the hardest half of the periods are rated, and "the rest are assumed met": once
+/* v22.80 (review F261): at fading step 2 only the hardest half of the periods are rated, and "the rest are assumed met": once
    the day is finished (or as it is finished), each period with no rating at all counts as met, its full points, instead of
    0 against the full possible; it is left out of the behavior measure (smRBeh), which is only what was seen */
 function smFadeStep(){let k=-1;(S.fade||[]).forEach((f,i)=>{if(f&&f.on)k=i;});return k;}
@@ -61,7 +61,7 @@ function smRTotals(M,day,final){let pts=0,m=0,n=0,wait=0,asm=0;const tp=M.tg.map
     M.tg.forEach((t,ti)=>{if(none){pts+=M.maxc;tp[ti]+=M.maxc;return;}const v=smRVal(M,day,ri,ti);pts+=v.p;tp[ti]+=v.p;if(v.both){n++;if(v.same)m++;}if(M.match&&v.a!=null&&v.b==null)wait++;});});
   const poss=M.rows.length*M.tg.length*M.maxc,g=num(S.meta.goal),need=g!=null&&poss?Math.ceil(poss*g/100):null,per=M.rows.length*M.maxc;
   return {pts,poss,need,g,m,n,wait,asm,tp:tp.map(x=>per?Math.round(x/per*100):'')};}
-/* v22.7x (review F258, F260): the behavior a day rated on the iPad shows: the adult's ratings, as the share at the top level
+/* v22.80 (review F258, F260): the behavior a day rated on the iPad shows: the adult's ratings, as the share at the top level
    (Yes; with a style of more levels, the mean level as a share of the top), overall and per target; the adult's Nos (below
    the top level) on the ratings the student also made, and how many of them the student matched; the student's own Nos.
    A sheet the adult does not rate has none. */
@@ -71,7 +71,7 @@ function smRBeh(M,day){if(!M||!day||!M.raters.includes('t'))return null;const mx
     if(v.b!=null){const f=M.lv[v.b][1]/mx;sum+=f;cnt++;ts[ti][0]+=f;ts[ti][1]++;if(v.a!=null&&M.lv[v.b][1]<mx){tno++;if(v.a===v.b)nom++;}}
     if(v.a!=null&&M.lv[v.a][1]<mx)sno++;}));
   return {b:cnt?sum/cnt*100:null,tp:ts.map(x=>x[1]?Math.round(x[0]/x[1]*100):''),n:cnt,yes:Math.round(sum),tno,nom,sno};}
-/* v22.7x (review F262): phase 0 of the matching ladder, the teacher rating alone (the baseline) */
+/* v22.80 (review F262): phase 0 of the matching ladder, the teacher rating alone (the baseline) */
 function smRPh0(M){return curPhase()==='0'&&!!M&&M.raters.includes('t');}
 /* whose rating the buttons set: the student's or the adult's; a one-rater sheet has only that rater (the adult may correct the student's) */
 function smRWho(M){return M.raters.length===1?M.raters[0]:SMR.mode;}
@@ -98,7 +98,7 @@ function smRRender(){const host=$('#smRate');if(!host)return;smREnsure();if(!SMR
   if(!M){host.innerHTML='<div class="smr-empty">The '+({perf:'performance count',interlock:'interlocking session'}[S.sys]||'')+' sheet is kept on paper. Rating on the iPad works with Self &amp; Match, the contract, expectations and earns, check-in/check-out, cued intervals and the rubric point sheet.</div>';return;}
   if(SMR.sel<0||SMR.sel>=M.rows.length)SMR.sel=smRNow(M,day);
   if(!SMR.kid&&!SMR.modeSet&&M.raters.length===1&&M.raters[0]==='t')SMR.mode='t';   /* check-in/check-out: the adult rates */
-  if(!SMR.kid&&!SMR.modeSet&&smRPh0(M))SMR.mode='t';   /* v22.7x (F262) phase 0: the adult rates alone */
+  if(!SMR.kid&&!SMR.modeSet&&smRPh0(M))SMR.mode='t';   /* v22.80 (F262) phase 0: the adult rates alone */
   const T=smRTotals(M,day),kid=SMR.kid,teach=SMR.mode==='t';
   let h='';
   /* the top: who, the date, the mode, the day's buttons */
@@ -128,7 +128,7 @@ function smRRender(){const host=$('#smRate');if(!host)return;smREnsure();if(!SMR
   /* the period card */
   h+=smRCard(M,day,T);
   /* the day at a glance */
-  if(!kid&&SMR.paper)h+='<div class="smr-wait smr-paperh"><b>From the paper sheet:</b> choose its date above, then tap each cell to enter the marks as they are on the sheet ('+esc(smRWord(M,0))+', then '+M.lv.slice(1).map((x,i)=>esc(smRWord(M,i+1))).join(', then ')+', then blank again), '+(M.raters.length>1?esc(smRStu())+'&rsquo;s and '+esc(M.tw.toLowerCase())+'&rsquo;s. ':'')+'The points, the match, the behavior and the goal met are worked out as for a day rated here; then Finish the day.</div>';   /* v22.7x (review I131) */
+  if(!kid&&SMR.paper)h+='<div class="smr-wait smr-paperh"><b>From the paper sheet:</b> choose its date above, then tap each cell to enter the marks as they are on the sheet ('+esc(smRWord(M,0))+', then '+M.lv.slice(1).map((x,i)=>esc(smRWord(M,i+1))).join(', then ')+', then blank again), '+(M.raters.length>1?esc(smRStu())+'&rsquo;s and '+esc(M.tw.toLowerCase())+'&rsquo;s. ':'')+'The points, the match, the behavior and the goal met are worked out as for a day rated here; then Finish the day.</div>';   /* v22.80 (review I131) */
   if(!kid||teach)h+=smRGrid(M,day,T);
   if(kid){h+='<div class="smr-foot">'+esc(smRLong(SMR.date))+' · Form SM-1</div>';}
   else{h+=smRSettings(M)+smRDays();}
@@ -251,7 +251,7 @@ function smRParty(T){let fx=$('#smRFx');if(!fx){fx=document.createElement('div')
   let c='';if(!calm)for(let i=0;i<70;i++)c+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;background:'+C[i%C.length]+';animation-delay:'+(Math.random()*.8).toFixed(2)+'s;animation-duration:'+(1.8+Math.random()*1.4).toFixed(2)+'s;transform:rotate('+Math.round(Math.random()*360)+'deg)"></i>';
   fx.innerHTML='<div class="smr-conf">'+c+'</div><div class="smr-party" role="status"><div class="smr-pbig">'+smGlyph('st',84).replace('fill="#fff"','fill="#f5c518"')+'</div><b>'+(smName()?esc(smName())+', you':'You')+' reached your goal!</b><span>'+T.pts+' points today</span><button type="button" class="smr-b pri" id="smRFxOk">Yay!</button></div>';
   fx.hidden=false;smRChime();clearTimeout(SMR.fx);SMR.fx=setTimeout(()=>{fx.hidden=true;},7000);}
-/* v22.7x (review F258, F260, F261, F262): the row carries the behavior and the No counts beside the points; a teacher-only day
+/* v22.80 (review F258, F260, F261, F262): the row carries the behavior and the No counts beside the points; a teacher-only day
    (phase 0) goes in as a baseline day with no points; at fading step 2 the unrated periods count as met */
 async function smRFinish(){const day=smRDay();if(!smRAny(day))return;const M=smRModel(day),T=smRTotals(M,day,true),B=smRBeh(M,day),ph0=smRPh0(M),met=!ph0&&T.need!=null&&T.pts>=T.need;
   const bl=B&&B.n?'the targets met in '+B.yes+' of '+B.n+' of '+M.tw.toLowerCase()+'’s ratings ('+Math.round(B.b)+'%)':'';
@@ -272,7 +272,7 @@ document.addEventListener('click',async e=>{const t=e.target;if(t.closest('#smRF
   if(!t.closest('#smRate'))return;smRAudio();const day0=smRDay()||smREmpty(),M=smRModel(day0);let b;
   if((b=t.closest('[data-rl]'))&&M){smRSet(+b.dataset.rt,+b.dataset.rl);return;}
   if((b=t.closest('[data-rgo]'))&&M){SMR.sel=Math.max(0,Math.min(M.rows.length-1,SMR.sel+(+b.dataset.rgo)));smRRender();if(smD().rspeak&&SMR.mode==='me')smRSayPeriod(M);return;}
-  if((b=t.closest('[data-rpc]'))&&M){smRPaperTap(b.dataset.rpc);return;}   /* v22.7x (review I131) */
+  if((b=t.closest('[data-rpc]'))&&M){smRPaperTap(b.dataset.rpc);return;}   /* v22.80 (review I131) */
   if((b=t.closest('#smRPaper'))){SMR.paper=!SMR.paper;smRRender();return;}
   if((b=t.closest('[data-rsel]'))&&M){SMR.sel=+b.dataset.rsel;smRRender();return;}
   if((b=t.closest('[data-rsay]'))&&M){const k=b.dataset.rsay;if(k==='p')smRSayPeriod(M);else{const q=M.tg[+k];smRSay(q.word+(q.cue?'. '+q.cue:''));}return;}
@@ -308,7 +308,7 @@ function smRFromFile(s,o){o.days={};const D=s&&s.days&&typeof s.days==='object'&
   const cells=v=>{const r={};if(v&&typeof v==='object'&&!Array.isArray(v))Object.keys(v).slice(0,800).forEach(c=>{if(/^\d{1,2}_\d$/.test(c)&&Number.isInteger(v[c])&&v[c]>=0&&v[c]<10)r[c]=v[c];});return r;};
   Object.keys(D).slice(0,1000).forEach(k=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(k))return;const x=D[k];if(!x||typeof x!=='object'||Array.isArray(x))return;
     const rem={};if(x.rem&&typeof x.rem==='object'&&!Array.isArray(x.rem))Object.keys(x.rem).slice(0,60).forEach(c=>{if(/^\d{1,2}$/.test(c)&&Number.isInteger(x.rem[c])&&x.rem[c]>0&&x.rem[c]<100)rem[c]=x.rem[c];});
-    o.days[k]={alt:!!x.alt,me:cells(x.me),t:cells(x.t),rem,wf:str(x.wf,120),rw:str(x.rw,120),spent:str(x.spent,8).replace(/[^\d.]/g,''),note:str(x.note,2000),fin:/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(str(x.fin,40))?str(x.fin,40):'',sig:str(x.sig,400)};if(x.f2===true)o.days[k].f2=true;if(x.paper===true)o.days[k].paper=true;});   /* f2 (v22.7x, review F261): finished at fading step 2; kept only when set */
+    o.days[k]={alt:!!x.alt,me:cells(x.me),t:cells(x.t),rem,wf:str(x.wf,120),rw:str(x.rw,120),spent:str(x.spent,8).replace(/[^\d.]/g,''),note:str(x.note,2000),fin:/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(str(x.fin,40))?str(x.fin,40):'',sig:str(x.sig,400)};if(x.f2===true)o.days[k].f2=true;if(x.paper===true)o.days[k].paper=true;});   /* f2 (v22.80, review F261): finished at fading step 2; kept only when set */
   if(o.d)o.d.pin=String(o.d.pin||'').replace(/\D/g,'').slice(0,6);if(o.d&&!o.d.pin)delete o.d.pin;
   if(o.d&&o.d.rcue&&o.d.rcue!=='flash')delete o.d.rcue;
   return o;}
@@ -319,7 +319,7 @@ function smRSim(){const iso=smRISO();S.days={};
   S.days[iso]={alt:false,me:{'0_0':0,'0_1':0,'0_2':0,'1_0':0,'1_1':1,'1_2':0,'2_0':0,'2_1':0,'2_2':0},t:{'0_0':0,'0_1':0,'0_2':0,'1_0':0,'1_1':1,'1_2':0,'2_0':0,'2_1':1,'2_2':0},
     rem:{'1':1,'2':2},wf:'Feed the class fish',rw:'',spent:'',note:'',fin:'',sig:''};
   SMR.date=iso;SMR.sel=-1;}
-/* v22.7x (review I131): a paper sheet scored from its marks. On the Rate page, "From the paper sheet" turns the day's grid into
+/* v22.80 (review I131): a paper sheet scored from its marks. On the Rate page, "From the paper sheet" turns the day's grid into
    tap targets: each tap moves a cell to the next level (the top first) and back to blank, for the student's mark and the
    adult's, so a paper day is scored as a day rated here (points, the match, the behavior, the No counts, the goal met) and
    Finish the day writes its Record row, noted as entered from the paper sheet. Hand-typed rows stay as they are. */
