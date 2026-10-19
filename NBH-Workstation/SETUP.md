@@ -9903,6 +9903,15 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.36: On an iPad the open view tab stays in sight when the tab strip narrows
+
+- **The view tabs on a touch screen (an iPad's report).** TB-1 at Actual size showed "Select & prioritize, Cluster
+  builder, D": the open tab sat half under the strip's edge. The open tab was brought into view when it was chosen, when
+  the iPad turned and when the form opened, but not when the strip itself grew narrower.
+- Now it is also brought into view whenever the strip's width changes: Fit or Actual size, the toolbar wrapping, Focus,
+  and Side by side. This applies to every form, from the shared block. Nothing changes with a mouse, and nothing prints.
+- qa/tabs-touch-test.js (3 checks).
+
 ### v23.35: TB-1 says Count / frequency, with Rate a category of its own
 
 - **The measurement words (the BCBA's correction).** The dimension list said "Count / rate". It now offers

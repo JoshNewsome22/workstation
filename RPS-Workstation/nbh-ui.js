@@ -876,6 +876,10 @@ try { if (window.matchMedia) (function(){
   window.addEventListener('resize', function(){ setTimeout(show, 120); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(show, 200); }); else setTimeout(show, 200);
   window.addEventListener('load', function(){ setTimeout(show, 400); });
+  /* v23.36 and whenever the strip's own width changes (Fit or Actual size, the toolbar wrapping, Focus, Side by side), so the
+     open tab is not left half under its edge */
+  if (window.ResizeObserver) { var ro = null, watch = function(){ var s = find(); if (!s || ro) return; ro = new ResizeObserver(function(){ setTimeout(show, 30); }); ro.observe(s); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch(); window.addEventListener('load', watch); }
 })(); } catch (e) {}
 /* v21.94 Dictate: a switch in the toolbar, beside the view buttons, that writes what you say into the text box you are in.
    The words are heard on the device by the speech recogniser Form TV-1 uses (nbh-dictate.js, loaded when first pressed;
