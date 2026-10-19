@@ -9903,6 +9903,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.95: DT-1 keeps every session's sheet and every discounting probe in the record (review Wave 3)
+
+- **The session log (F403, I203).** Tab 5 held one session sheet, so entering session 23 replaced session 22's trials. Only
+  the five summary figures carried to Progress survived. Now:
+  - **Carry** also keeps the sheet on screen in the **session log**: its fields and every trial, replacing the entry with
+    the same session number.
+  - **Open this session** brings a kept session back into the sheet, every trial with its summary. If the sheet on screen
+    is not kept as it stands, the form asks first.
+  - **New session sheet** starts at the next number with today's date. It keeps the phase, the step, the implementer, the
+    setting and the length.
+  - **Remove from the log** takes a session out of the record. Its Progress row stays.
+  - **Trial log (CSV)** downloads every kept trial as one table (session, date, phase, step, implementer, then the trial),
+    for Form DD-1 or a spreadsheet.
+  - The line under the log says which sessions are kept and whether the sheet on screen is one of them.
+- **The probe log (F403, I203).** Tab 3 held one discounting probe, so the re-probe the form recommends overwrote the
+  baseline points. Now:
+  - **Log this probe** also keeps the probe's points, keyed by date.
+  - **Open this probe** brings a kept probe back into the table.
+  - The graph draws the other kept probe (the earliest, otherwise the next) as a dashed curve with open points beside
+    the one on screen. A line under the graph gives each probe's half-value delay. A probe with a different delayed amount
+    is not drawn, and the line says to re-probe with the same amount.
+- **Where the logs are kept.** Both logs are kept with the form's own file and with the workstation's case.
+- **The example:**
+  - The session log keeps sessions 20 to 22. Sessions 20 and 21 give their Progress rows' figures trial by trial
+    (66.7% and 92.8 s; 83.3% and 93.1 s).
+  - The probe log keeps the baseline probe and the re-probe after four weeks. The re-probe's log row now holds the figures
+    its points give: AUC 0.588, log k −2.24, a half-value delay of about 172 s.
+- qa/dt1-w3d-test.js (12 checks).
+
 ### v22.94: DT-1's delay-tolerance protocol reaches the forms that run and review it, and its safety block takes the student's assent and the plan's rule for problem behavior (review Wave 3)
 
 - **The protocol goes to the case (F402, I202).** DT-1 built a ladder, a tolerance response, delay cues and twelve

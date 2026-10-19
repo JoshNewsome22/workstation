@@ -1037,6 +1037,7 @@ td input,td select{max-width:100%}
     <div><span>Fit R&sup2;</span><strong id="outR2">&mdash;</strong></div>
   </div></details>
   <p class="small" id="ddJB" aria-live="polite"></p>
+  <p class="small" id="ddOverlay"></p>
   <svg class="plot" id="ddPlot" viewBox="0 0 640 240" aria-label="Discount function"></svg>
   <p class="small">Points are entered indifference points; the curve is the best-fit hyperbola V = A/(1 + kD) found by least squares on a log-spaced grid of k. Half-value delay = 1/k, the delay at which value has fallen to half of A.</p>
 
@@ -1053,6 +1054,10 @@ td input,td select{max-width:100%}
   <h4>Re-probe log</h4>
   <table><thead><tr><th style="width:16%">Date</th><th style="width:18%">Phase</th><th class="num" style="width:12%">AUC</th><th class="num" style="width:12%">log k</th><th>Interpretation</th></tr></thead><tbody id="tbDDlog"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbDDlog">Add re-probe</button><button class="tool" id="btnDDlogAdd">Log this probe</button></div>
+  <!-- v22.95 (review F403, I203): every probe logged keeps its points -->
+  <div class="noprint" id="ddProbeBar"><div class="rowbtns"><label class="f" for="ddPick" style="margin:0 6px 0 0;align-self:center">Probes kept</label><select id="ddPick"></select><button class="tool" id="btnDdOpen">Open this probe</button></div>
+  <p class="small" id="ddProbeNote" aria-live="polite"></p>
+  <div hidden><textarea id="dtProbeLog" name="dd_probes" readonly tabindex="-1" aria-label="Discounting probes (kept for the workstation)"></textarea></div></div>
 <!-- v22.93 (review I205): rarely run in a school; opened when anything in it holds an entry, and left off paper while closed -->
 <details class="adv" id="advPD"><summary>Probability discounting probe (advanced: rarely run in a school)</summary>
 <h3 style="margin-top:20px">Probability Discounting Probe</h3>
@@ -1189,7 +1194,11 @@ td input,td select{max-width:100%}
 <section class="panel" id="p5" role="tabpanel" data-panel="p5">
   <h2 class="nbh-band">Session Data Sheet</h2>
   <p class="wk-go-line"><a href="#" class="wk-go" data-go="train">What one delay trial looks like, and how its row is scored &rarr; Walkthrough</a></p>
-  <p class="lede">One sheet per session. Print blank copies for paper collection or enter live; the summary computes on the fly. Score the obtained delay for every trial; programmed-versus-obtained delay is your integrity measure (Leon et al. reported mean obtained delay and mean differential per phase).</p>
+  <p class="lede">One sheet per session, kept in the session log when it is carried. Print blank copies for paper collection or enter live; the summary computes on the fly. Score the obtained delay for every trial; programmed-versus-obtained delay is your integrity measure (Leon et al. reported mean obtained delay and mean differential per phase).</p>
+  <!-- v22.95 (review F403, I203): every session's sheet is kept in the record -->
+  <div class="noprint" id="ssLogBar"><div class="rowbtns"><label class="f" for="ssPick" style="margin:0 6px 0 0;align-self:center">Session log</label><select id="ssPick"></select><button class="tool" id="btnSsOpen">Open this session</button><button class="tool" id="btnSsNew">New session sheet</button><button class="tool" id="btnSsDel">Remove from the log</button><button class="tool" id="btnSsCsv">Trial log (CSV)</button></div>
+  <p class="small" id="ssLogNote" aria-live="polite"></p>
+  <div hidden><textarea id="dtSessLog" name="ss_log" readonly tabindex="-1" aria-label="Session log (kept for the workstation)"></textarea></div></div>
   <div class="grid g4">
     <div><label class="f">Date</label><input type="date" name="ss_date"></div>
     <div><label class="f">Session #</label><input type="number" name="ss_num" min="1"></div>
@@ -1901,8 +1910,8 @@ $('#btnCarry').addEventListener('click',async ()=>{
   else{const empty=rows('tbProg').find(tr=>vals(tr).every(v=>!String(v).trim()));if(empty){const f=empty.querySelectorAll('input,select');vp.forEach((v,i)=>{f[i].value=v});recalc('tbProg')}else addRow('tbProg',vp)}
   const vd=[date,phase,prog,r1(o.obt)];const emptyD=rows('tbDA').find(tr=>vals(tr).every(v=>!String(v).trim()));
   if(emptyD){const f=emptyD.querySelectorAll('input,select');vd.forEach((v,i)=>{f[i].value=v});recalc('tbDA')}else addRow('tbDA',vd);
-  const probe=carryProbe(phase,date,o,prog);
-  alert('Session '+n+' carried: '+(same?'Progress row replaced':'Progress row added')+', a Delay accuracy row added'+probe+'. Write the decision in Tab 6 and the action in Tab 7.');
+  ssKeep();const probe=carryProbe(phase,date,o,prog);   /* v22.95 (review F403) */
+  alert('Session '+n+' carried: '+(same?'Progress row replaced':'Progress row added')+', a Delay accuracy row added, the sheet kept in the session log'+probe+'. Write the decision in Tab 6 and the action in Tab 7.');
 });
 
 /* ---------- progress graph ---------- */
@@ -2105,7 +2114,7 @@ async function loadSim(){
     ['0.25','33','Offers 60, 30, 45, 37, 33'],['0.1','19','Offers 60, 30, 15, 23, 19: chose the certain option down to 30']];
   o.tables.tbDDlog=[
     [D(26),'Baseline','0.29','-1.65','Steep discounting; the subjective value halves at about 44 s (fitted R\u00b2 = 0.98)'],
-    [D(4),'After 4 weeks of training','0.58','-2.23','Shallower curve: the value now halves at about 168 s, against 44 s at baseline (same reward, amount and delays)']
+    [D(4),'After 4 weeks of training','0.588','-2.24','Shallower curve: the value now halves at about 172 s, against 44 s at baseline (same reward, amount and delays)']
   ];
 
   /* ---------------- tab 4: protocol builder / fading ladder ---------------- */
@@ -2242,6 +2251,24 @@ async function loadSim(){
   o.fixed.tbSV=[5,5,4,5, 4,4,5,4, 5,5,5,4, 5,4,5,5, 5,5,4,5, 5,5,5,5, 4];
   F.sv_comments='The implementer and the teacher both rated the procedure as usable without a second adult. The teacher noted that the 90 s delay is now long enough to finish giving directions to the rest of the group, which was the original reason for the referral.';
 
+  /* v22.95 (review F403, I203) the session log keeps sessions 20 to 22 (session 22 is the sheet on screen; 20 and 21 give the
+     Progress rows' figures trial by trial), and the probe log keeps the baseline probe and the re-probe after four weeks of
+     training (the points its log row was computed from: AUC 0.588, log k -2.24) */
+  const IMM=['IMM','','0','0','','','','0','0','Yes','Request honored at once'],SSF={ss_phase:'Training',ss_delay:'90',ss_imp:'Aide A',ss_setting:F.ss_setting,ss_len:'30',ss_ioa:'No'};
+  F.ss_log=JSON.stringify([
+    Object.assign({ss_num:'20',ss_date:D(8)},SSF,{ss_notes:'Session 20, the first at 90 s: four of six delays waited; one aggression (trial 6), and he left the table once (trial 9). Below criterion: repeat 90 s.',trials:[
+      ['Delay','SC','90','92','5','Prompted','Yes','0','0','Yes','One gestural prompt for the tolerance response'],IMM,['Delay','SC','90','93','4','Indep.','Yes','0','0','Yes',''],['Delay','SC','90','93','6','Indep.','Yes','0','0','Yes',''],IMM,
+      ['Delay','No response','90','','3','None','No','1','1','No','Aggression at 30 s: timer paused; he did not return to the problems, so no break'],IMM,['Delay','SC','90','93.2','5','Indep.','Yes','0','0','Yes',''],
+      ['Delay','IMP','90','','2','Prompted','No','0','1','No','Left the table at 50 s for the tablet bin; back with a gestural prompt, no break'],IMM]}),
+    Object.assign({ss_num:'21',ss_date:D(7)},SSF,{ss_notes:'Session 21 at 90 s: five of six delays waited; one aggression on trial 3. At criterion (1 of 2): repeat 90 s.',trials:[
+      ['Delay','SC','90','92','4','Indep.','Yes','0','0','Yes',''],IMM,['Delay','No response','90','','3','Prompted','No','1','1','No','Aggression at 25 s: timer paused; he did not return to the problems, so no break'],
+      ['Delay','SC','90','93','5','Indep.','Yes','0','0','Yes',''],IMM,['Delay','SC','90','94','4','Indep.','Yes','0','0','Yes',''],['Delay','SC','90','93','3','Indep.','Yes','0','0','Yes',''],IMM,
+      ['Delay','SC','90','93.5','4','Indep.','Yes','0','0','Yes',''],IMM]}),
+    {ss_num:String(F.ss_num),ss_date:F.ss_date,ss_phase:F.ss_phase,ss_delay:String(F.ss_delay),ss_imp:F.ss_imp,ss_setting:F.ss_setting,ss_len:String(F.ss_len),ss_ioa:F.ss_ioa,ss_notes:F.ss_notes,trials:o.tables.tbTrials}]);
+  const PRB={type:F.dd_type,rule:F.dd_rule,A:F.dd_A,units:F.dd_units};
+  F.dd_probes=JSON.stringify([Object.assign({date:D(26)},PRB,{points:o.tables.tbDD}),Object.assign({date:D(4)},PRB,{points:[
+    ['0','117','Offers 60, 90, 105, 113, 117: took the full amount every time'],['15','109','Offers 60, 90, 105, 113, 109'],['30','101','Offers 60, 90, 105, 97, 101'],
+    ['60','93','Offers 60, 90, 105, 97, 93'],['120','71','Offers 60, 90, 75, 67, 71'],['300','41','Offers 60, 30, 45, 37, 41: took the immediate amount down to 45']]})]);
   restore(o);
   nbhUI.toast('Simulation loaded: a simulated case across Tabs 1\u20138, from preassessment to generalization.', {kind:'ok'});
 }
@@ -2329,7 +2356,7 @@ $('#btnDDlogAdd').addEventListener('click',async()=>{computeDD(true);const auc=$
   const date=$('[name=dd_date]').value,done=rows('tbDDlog').filter(tr=>!blankRow(tr)),same=date?done.find(tr=>vals(tr)[0]===date):null;
   if(same&&!(await nbhUI.confirm('Replace the re-probe log row for '+date+'?\nIts AUC and log k are rewritten; its phase and interpretation are kept.',{ok:'Replace'})))return;
   const jb=/^Nonsystematic/.test($('#ddJB').textContent)?' Nonsystematic by Johnson and Bickel\u2019s criteria: read k with caution.':'';
-  putRow('tbDDlog',same||null,[date,same?null:(done.length?'Re-probe':'Baseline'),auc,/\d/.test(lk)?lk:'',same?null:('Half-value delay '+$('#outHalf').textContent+'.'+jb)]);openAdv(false);
+  putRow('tbDDlog',same||null,[date,same?null:(done.length?'Re-probe':'Baseline'),auc,/\d/.test(lk)?lk:'',same?null:('Half-value delay '+$('#outHalf').textContent+'.'+jb)]);openAdv(false);ddKeep();
   said('Probe logged'+(date?' for '+date:'')+': AUC '+auc+(/\d/.test(lk)?', log k '+lk:'')+'.');});
 /* the session sheet's figures go to the probe's own row on Tab 8: the row already dated that day, or the first planned row not yet
    run, or a new one; the dimension, the conditions and whether the stop rule was met are for the person to write */
@@ -2452,6 +2479,76 @@ function dtProtocol(){const lad=rows('tbFade').map(tr=>{const x=vals(tr);return 
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   try{const d=dtProtocol();if(!d)return r;return Object.assign({},r||{},{delay:d});}catch(e){return r;}};}
 window.dtProtocol=dtProtocol;
+/* v22.95 (review F403, I203) the session log: every session's sheet (its fields and every trial) is kept in the record, keyed by
+   session number. Carry keeps the sheet on screen, replacing the same number; a kept session opens back into the sheet; a new
+   sheet starts at the next number with the phase, the step, the implementer, the setting and the length carried over; the whole
+   log downloads as one trial-by-trial CSV for Form DD-1 or a spreadsheet. The log sits in a hidden field, so the form's own file
+   and the workstation's case both keep it. */
+const SS_F=['ss_num','ss_date','ss_phase','ss_delay','ss_imp','ss_setting','ss_len','ss_ioa','ss_notes'];
+const jsonList=id=>{try{const a=JSON.parse(($(id)||{}).value||'[]');return Array.isArray(a)?a.filter(e=>e&&typeof e==='object'):[];}catch(e){return [];}};
+const ssGet=()=>jsonList('#dtSessLog');
+function ssPut(L){L.sort((a,b)=>(num(a.ss_num)||0)-(num(b.ss_num)||0));const t=$('#dtSessLog');t.value=L.length?JSON.stringify(L):'';t.dispatchEvent(new Event('input',{bubbles:true}));ssPaint();}
+function ssNow(){const o={};SS_F.forEach(n=>{o[n]=String(($('[name='+n+']')||{}).value||'');});o.trials=rows('tbTrials').map(vals).filter(v=>v.some(x=>String(x).trim()));return o;}
+const ssKey=e=>JSON.stringify(SS_F.map(n=>String(e[n]==null?'':e[n])).concat([JSON.stringify(e.trials||[])]));
+function ssKeep(){const o=ssNow(),n=num(o.ss_num);if(n==null)return false;const L=ssGet().filter(e=>num(e.ss_num)!==n);L.push(o);ssPut(L);return true;}
+function ssShow(e){SS_F.forEach(n=>{const el=$('[name='+n+']');if(el)el.value=e[n]==null?'':String(e[n]);});const tb=$('#tbTrials');tb.innerHTML='';
+  (e.trials||[]).forEach(v=>addRow('tbTrials',v));for(let i=tb.rows.length;i<10;i++)addRow('tbTrials');summarizeTrials();
+  const f=$('[name=ss_notes]');if(f)f.dispatchEvent(new Event('input',{bubbles:true}));}
+function ssDirty(){const o=ssNow();if(!o.trials.length&&!o.ss_notes)return false;const k=ssGet().find(e=>num(e.ss_num)===num(o.ss_num));return !k||ssKey(k)!==ssKey(o);}
+function ssPaint(){const sel=$('#ssPick');if(!sel)return;const L=ssGet(),keep=sel.value,cur=num(($('[name=ss_num]')||{}).value);
+  const lab=e=>'Session '+e.ss_num+(e.ss_date?' · '+e.ss_date:'')+(e.ss_phase?' · '+e.ss_phase:'')+(String(e.ss_delay||'')!==''?' · '+e.ss_delay+' s':'')+' · '+(e.trials||[]).length+' trials';
+  sel.innerHTML=L.length?L.map(e=>'<option value="'+esc(e.ss_num)+'">'+esc(lab(e))+'</option>').join(''):'<option value="">No session kept yet</option>';
+  if(L.some(e=>String(e.ss_num)===keep))sel.value=keep;else if(cur!=null&&L.some(e=>num(e.ss_num)===cur))sel.value=String(cur);
+  ['btnSsOpen','btnSsDel','btnSsCsv'].forEach(id=>{$('#'+id).disabled=!L.length;});
+  $('#ssLogNote').textContent=(L.length?L.length+' session'+(L.length>1?'s':'')+' kept: '+L.map(e=>e.ss_num).join(', ')+'. ':'No session kept yet. ')+(ssDirty()?'The sheet on screen is not kept as it stands: Carry keeps it.':L.length?'The sheet on screen is kept.':'');}
+$('#btnSsOpen').addEventListener('click',async()=>{const n=num($('#ssPick').value),e=ssGet().find(x=>num(x.ss_num)===n);if(!e)return;
+  if(ssDirty()&&!(await nbhUI.confirm('Open session '+n+'?\nThe sheet on screen is not kept as it stands (Carry keeps it); opening replaces it on screen.',{ok:'Open'})))return;ssShow(e);ssPaint();});
+$('#btnSsNew').addEventListener('click',async()=>{if(ssDirty()&&!(await nbhUI.confirm('Start a new session sheet?\nThe sheet on screen is not kept as it stands (Carry keeps it).',{ok:'New sheet'})))return;
+  const o=ssNow(),mx=Math.max(0,num(o.ss_num)||0,...ssGet().map(e=>num(e.ss_num)||0)),t=new Date(),iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  ssShow({ss_num:String(mx+1),ss_date:iso,ss_phase:o.ss_phase,ss_delay:o.ss_delay,ss_imp:o.ss_imp,ss_setting:o.ss_setting,ss_len:o.ss_len,ss_ioa:'',ss_notes:'',trials:[]});ssPaint();});
+$('#btnSsDel').addEventListener('click',async()=>{const n=num($('#ssPick').value);if(n==null)return;
+  if(!(await nbhUI.confirm('Remove session '+n+' from the log?\nIts trials leave the record; its Progress row stays.',{ok:'Remove',danger:true})))return;ssPut(ssGet().filter(e=>num(e.ss_num)!==n));});
+$('#btnSsCsv').addEventListener('click',()=>{const L=ssGet();if(!L.length)return;const q=v=>{v=String(v==null?'':v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const R=[['Session','Date','Phase','Programmed delay (s)','Implementer','Trial','Trial type','Choice','Prog. delay (s)','Obt. delay (s)','Latency (s)','TR','Engaged','Prob. beh.','Collat.','Delivered','Notes']];
+  L.forEach(e=>(e.trials||[]).forEach((v,i)=>R.push([e.ss_num,e.ss_date,e.ss_phase,e.ss_delay,e.ss_imp,i+1].concat(v.slice(0,11)))));
+  const name=($('[name=s_name]').value||'student').replace(/[^\w-]+/g,'_'),blob=new Blob([R.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DT1_trials_'+name+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);});
+
+/* v22.95 (review F403, I203) the probe log: Log this probe also keeps the probe's points, keyed by date, so a re-probe no longer
+   overwrites the baseline; a kept probe opens back into the table; the graph draws the other kept probe (the earliest, else the
+   next) beside the one on screen, each with its own fit, when the delayed amount is the same */
+const ddGet=()=>jsonList('#dtProbeLog');
+function ddPut(L){L.sort((a,b)=>String(a.date).localeCompare(String(b.date)));const t=$('#dtProbeLog');t.value=L.length?JSON.stringify(L):'';t.dispatchEvent(new Event('input',{bubbles:true}));ddPaint();}
+function ddNow(){return {date:$('[name=dd_date]').value,type:$('[name=dd_type]').value,rule:$('[name=dd_rule]').value,A:$('#ddA').value,units:$('[name=dd_units]').value,
+  points:rows('tbDD').map(vals).filter(v=>String(v[0]).trim()!==''&&String(v[1]).trim()!=='').map(v=>[v[0],v[1],v[2]||''])};}
+function ddKeep(){const o=ddNow();if(!o.date||o.points.length<2)return false;const L=ddGet().filter(e=>e.date!==o.date);L.push(o);ddPut(L);return true;}
+function ddShow(e){[['dd_date','date'],['dd_type','type'],['dd_rule','rule'],['dd_units','units']].forEach(([n,k])=>{const el=$('[name='+n+']');if(el)el.value=e[k]||'';});$('#ddA').value=e.A||'';
+  const tb=$('#tbDD');tb.innerHTML='';(e.points||[]).forEach(v=>addRow('tbDD',v));computeDD(true);$('#ddA').dispatchEvent(new Event('input',{bubbles:true}));}
+function ddPaint(){const sel=$('#ddPick');if(!sel)return;const L=ddGet(),keep=sel.value,cur=$('[name=dd_date]').value;
+  sel.innerHTML=L.length?L.map(e=>'<option value="'+esc(e.date)+'">'+esc((e.date||'no date')+' · '+(e.points||[]).length+' delays'+(e.A?' · A = '+e.A:''))+'</option>').join(''):'<option value="">No probe kept yet</option>';
+  if(L.some(e=>e.date===keep))sel.value=keep;else if(L.some(e=>e.date===cur))sel.value=cur;$('#btnDdOpen').disabled=!L.length;
+  $('#ddProbeNote').textContent=L.length?L.length+' probe'+(L.length>1?'s':'')+' kept: '+L.map(e=>e.date).join(', ')+'. Log this probe keeps the one on screen.':'No probe kept yet. Log this probe keeps the one on screen with its points.';
+  computeDD(true);}
+$('#btnDdOpen').addEventListener('click',async()=>{const e=ddGet().find(x=>x.date===$('#ddPick').value);if(!e)return;const o=ddNow(),k=ddGet().find(x=>x.date===o.date);
+  if(o.points.length&&(!k||JSON.stringify(k.points)!==JSON.stringify(o.points))&&!(await nbhUI.confirm('Open the probe of '+e.date+'?\nThe probe on screen is not kept as it stands (Log this probe keeps it); opening replaces it on screen.',{ok:'Open'})))return;ddShow(e);ddPaint();});
+function ddFit(pts,A){let best={k:null,sse:Infinity};for(let e=-6;e<=2;e+=0.005){const k=10**e;const sse=pts.reduce((s,p)=>s+(p.ip-A/(1+k*p.d))**2,0);if(sse<best.sse)best={k,sse}}return best.k;}
+drawDD=function(pts,A,dmax,k){const cur=$('[name=dd_date]').value,O=ddGet().filter(e=>e.date&&e.date!==cur),B=O[0]||null;
+  const bp=B&&+B.A===A?(B.points||[]).map(v=>({d:num(v[0]),ip:num(v[1])})).filter(p=>p.d!=null&&p.ip!=null).sort((a,b)=>a.d-b.d):[],bk=bp.length>=2?ddFit(bp,A):null;
+  const ov=$('#ddOverlay');if(ov)ov.textContent=bk?'Solid line and filled points: this probe'+(cur?' ('+cur+')':'')+'. Dashed line and open points: the probe of '+B.date+', half-value delay '+fmt(1/bk,1)+' s against '+fmt(1/k,1)+' s here.':
+    B&&!bp.length&&+B.A!==A?'The probe of '+B.date+' used a different delayed amount (A = '+B.A+'), so it is not drawn here: re-probe with the same amount.':'';
+  const dm=Math.max(dmax,...bp.map(p=>p.d)),svg=$('#ddPlot');const W=640,H=240,L=46,R=16,Tp=14,Bt=34;const px=d=>L+(d/dm)*(W-L-R),py=v=>Tp+(1-v/A)*(H-Tp-Bt);
+  let s=`<rect x="${L}" y="${Tp}" width="${W-L-R}" height="${H-Tp-Bt}" fill="none" stroke="#CDD6D2"/>`;
+  for(let i=0;i<=4;i++){const v=A*i/4,y=py(v);s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#EEF2F0"/><text x="${L-6}" y="${y+4}" font-size="10" text-anchor="end" fill="#5C6B6B">${fmt(v,1)}</text>`}
+  for(let i=0;i<=4;i++){const d=dm*i/4,x=px(d);s+=`<text x="${x}" y="${H-Bt+14}" font-size="10" text-anchor="middle" fill="#5C6B6B">${Math.round(d)}</text>`}
+  s+=`<text x="${(L+W-R)/2}" y="${H-4}" font-size="11" text-anchor="middle" fill="#1B2A2E">Delay (s)</text>`;
+  const curve=(kk,st)=>{let p='';for(let i=0;i<=120;i++){const d=dm*i/120,v=A/(1+kk*d);p+=(i?'L':'M')+px(d).toFixed(1)+' '+py(v).toFixed(1)+' '}return `<path d="${p}" fill="none" ${st}/>`;};
+  if(bk){s+=curve(bk,'stroke="#9B4E15" stroke-width="1.6" stroke-dasharray="5 4"');bp.forEach(p=>s+=`<circle cx="${px(p.d)}" cy="${py(p.ip)}" r="4" fill="#fff" stroke="#9B4E15" stroke-width="1.5"/>`);}
+  s+=curve(k,'stroke="#2C6E63" stroke-width="2"');pts.forEach(p=>s+=`<circle cx="${px(p.d)}" cy="${py(p.ip)}" r="4.5" fill="#1B2A2E"/>`);
+  svg.innerHTML=s;};
+document.addEventListener('input',e=>{const t=e.target;if(!t)return;if(t.id==='dtProbeLog')ddPaint();else if(t.id==='dtSessLog'||(t.closest&&t.closest('#p5')))ssPaint();});
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.closest&&t.closest('#p5'))ssPaint();});
+{const ra=recalcAll;recalcAll=function(){const x=ra.apply(this,arguments);ssPaint();ddPaint();return x;};}   /* v22.95 */
+ssPaint();ddPaint();
 })();
 </script>
 <script>
