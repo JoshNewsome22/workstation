@@ -10,7 +10,7 @@
            the forms keep what the file holds; cleared, saved and reopened, they stay empty;
       and also: the "From the case" list (the Function item cannot be ticked; a selection holding it places nothing
       there; the footnote and the answer say what is placed and what is not), the form's own Open packet (the packet's
-      function is left out; Save packet still carries the form's own), and IA-1's own rule (its attention scenario, and
+      function is left out; Save packet still carries the form's own, but IN-1's no longer, v23.18), and IA-1's own rule (its attention scenario, and
       the same scores typed in, still fill its own field).
    2. Load simulation asks first in IA-1, PA-1, MS-1 and AD-1, with the question the other forms use: Cancel keeps
       every field, Load replaces them, and a stubbed window.confirm still answers it (the older checks rely on that).
@@ -251,7 +251,9 @@ async function openCase(page,file){
   ok(id+': Open packet leaves the hypothesis alone and says so',r.fn===''&&/The function in the packet was not placed: the hypothesis on this form is your own\.$/.test(r.al),r);
   await p.evaluate(s=>{const e=document.querySelector(s);e.value='tangible';e.dispatchEvent(new Event('change',{bubbles:true}));},sel.fn);await sleep(200);
   const pk=JSON.parse((await caught(p,'Save packet'))||'{}');
-  ok(id+': Save packet still carries this form\'s own hypothesis to the other forms',pk.packet&&pk.packet.fn==='tangible'&&pk.packet.client==='Packet Student',pk.packet);
+  /* v23.18 (IN-1 review F51) IN-1's packet leaves the interview hypothesis out: it travels through the case as a tier-4 source */
+  if(id==='IN-1')ok(id+': Save packet leaves the interview hypothesis out',pk.packet&&!('fn' in pk.packet)&&pk.packet.client==='Packet Student',pk.packet);
+  else ok(id+': Save packet still carries this form\'s own hypothesis to the other forms',pk.packet&&pk.packet.fn==='tangible'&&pk.packet.client==='Packet Student',pk.packet);
   await ctx.close();}
 
  /* ---------- Load simulation asks first ---------- */

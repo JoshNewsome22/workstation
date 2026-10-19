@@ -19,10 +19,14 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  /* the dialog, prefilled */
  await page.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(200);
  const dlg=await page.evaluate(()=>({open:document.querySelector('#rpDlg').open,student:rpStudent.value,email:rpEmail.value,beh:rpBeh.value,status:document.querySelector('#rpStatus').hidden,saveOn:!rpSave.disabled,word:document.querySelector('#rpWordRow').style.display}));
- ok('dialog prefilled: initials and ID, email, behavior; ready; the student word row hidden',dlg.open&&dlg.student==='S.S. (ID 12345)'&&dlg.email==='bcba@example.org'&&/Aggression: forceful/.test(dlg.beh)&&dlg.status&&dlg.saveOn&&dlg.word==='none',dlg);
+ /* v23.18 (IN-1 review F56) the label is the initials only; the student number is added by choice, below */
+ ok('dialog prefilled: initials, email, behavior; ready; the student word row hidden',dlg.open&&dlg.student==='S.S.'&&dlg.email==='bcba@example.org'&&/Aggression: forceful/.test(dlg.beh)&&dlg.status&&dlg.saveOn&&dlg.word==='none',dlg);
  await page.evaluate(()=>{rpInst.value='student';rpInst.dispatchEvent(new Event('change'));});
  ok('student set without the student\'s word: save disabled with a reason',await page.evaluate(()=>rpSave.disabled&&!document.querySelector('#rpStatus').hidden&&/own word/.test(document.querySelector('#rpStatus').textContent)&&document.querySelector('#rpWordRow').style.display===''));
  await page.evaluate(()=>{rpWord.value='hit';rpWord.dispatchEvent(new Event('input'));});
+ /* v23.18 (IN-1 review F53) a student page also waits for the assent recorded on Form SI-1 */
+ ok('student set with the word but no assent recorded: save still disabled, saying why',await page.evaluate(()=>rpSave.disabled&&/assent on Form SI-1/.test(document.querySelector('#rpStatus').textContent)));
+ await page.evaluate(()=>{rpAssent.checked=true;rpAssent.dispatchEvent(new Event('change'));});
  const stu=await page.evaluate(()=>({on:!rpSave.disabled,q:__rp.payload().open.map(o=>o.label).join('\n')}));
  ok('student set: the word replaces [target behavior], 12 answers (v21.40: the communication question added)',stu.on&&/when you hit\./.test(stu.q)&&!/\[target behavior\]/.test(stu.q)&&stu.q.split('\n').length===12,stu.q.slice(0,120));
  await page.evaluate(()=>{rpInst.value='parent';rpInst.dispatchEvent(new Event('change'));rpDue.value='10/10/2026';});
@@ -30,7 +34,7 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  ok('parent payload: form IN-1, no items, 35 answers (15 yns checklist rows under 2 question heads, 20 text answers of 1500; v21.40 added five questions), mailMax 1800',pay.form==='IN-1'&&pay.inst==='parent'&&pay.items===0&&pay.open===35&&pay.yns===15&&pay.heads===2&&pay.max===20&&/^1\. Describe your child/.test(pay.first)&&pay.email==='bcba@example.org'&&pay.due==='10/10/2026'&&pay.mailMax===1800,pay);
  /* the page as a file */
  const html=await grab(page,()=>__rp.file());
- ok('page file named and self-contained',/^IN-1_Parent_respondent_S\.S\._ID_12345_\.html$/.test(html.name)&&/NBH_RESPOND_RUNTIME/.test(html.text)&&/What are your child/.test(html.text)&&!/Sample Student/.test(html.text),html.name);
+ ok('page file named and self-contained',/^IN-1_Parent_respondent_S\.S\.html$/.test(html.name)&&/NBH_RESPOND_RUNTIME/.test(html.text)&&/What are your child/.test(html.text)&&!/Sample Student/.test(html.text),html.name);
  const link=await page.evaluate(()=>__rp.link());
  ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#z=1[a-z][A-Za-z0-9_-]{60,}$/.test(link),link.slice(0,80));
  /* the parent answers the file */
@@ -38,7 +42,7 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,prog:!!document.querySelector('.prog'),tas:document.querySelectorAll('textarea:not(.code)').length,maxl:document.querySelector('textarea:not(.code)').getAttribute('maxlength'),
    yns:document.querySelectorAll('.yns').length,choice:document.querySelectorAll('.yns .opts label').length,notes:document.querySelectorAll('.yns input[type=text]').length,heads:Array.from(document.querySelectorAll('label.f')).filter(l=>/^5\. Do you believe .* \u2014 Currently on medication\?$/.test(l.textContent)||/^8\. Does the problem behavior occur more often when: \u2014 A certain type/.test(l.textContent)).length,
    student:document.querySelector('.def').textContent,extras:document.querySelectorAll('.grid2 input[type=text]').length}));
- ok('respondent page: no items card, 35 answers (20 typed at 1500, 15 as Yes / No / Sometimes with a note), 2 question heads, the student label',r1.items===0&&!r1.prog&&r1.tas===20&&r1.maxl==='1500'&&r1.yns===15&&r1.choice===45&&r1.notes===15&&r1.heads===2&&/S\.S\. \(ID 12345\)/.test(r1.student)&&r1.extras===2,r1);
+ ok('respondent page: no items card, 35 answers (20 typed at 1500, 15 as Yes / No / Sometimes with a note), 2 question heads, the student label',r1.items===0&&!r1.prog&&r1.tas===20&&r1.maxl==='1500'&&r1.yns===15&&r1.choice===45&&r1.notes===15&&r1.heads===2&&/S\.S\./.test(r1.student)&&!/ID 12345/.test(r1.student)&&r1.extras===2,r1);
  await rp.evaluate(()=>{document.querySelector('button:not(.ghost)').click();});await sleep(100);
  ok('send without a name asks first',await rp.evaluate(()=>!document.querySelector('.warn').hidden&&/Your name/.test(document.querySelector('.warn').textContent)));
  const LONG='He is funny and affectionate and very into his tablet; he is easier at home than at school as long as the day is predictable and nobody rushes him.';
@@ -67,7 +71,7 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  await page.evaluate(()=>document.querySelector('#rcGo').click());await sleep(300);
  const today=new Date(),ymd=(today.getMonth()+1)+'/'+today.getDate()+'/'+String(today.getFullYear()).slice(2);
  const placed=await page.evaluate(()=>({n:S.resp.length,r:S.resp[0],a0:S.ans['0_0'],a1:S.ans['0_1'],mx4:S.mx['0_4'],n4:S.ans['0_4'],mx7:S.mx['0_7'],n7:S.ans['0_7'],a14:S.ans['0_14'],banner:document.querySelector('#rcBanner').textContent,hidden:document.querySelector('#rcBanner').hidden,view:document.body.className,
-   head:document.querySelector('#intBody .resp-int.cur table.ihead').textContent,row:document.querySelector('#respTbl tbody tr input[data-f="n"]').value,pct:document.querySelector('#respTbl tbody tr td:nth-child(8)').textContent,radio:document.querySelector('[name="mx_0_4_0"][value="Yes"]').checked}));
+   head:document.querySelector('#intBody .resp-int.cur table.ihead').textContent,row:document.querySelector('#respTbl tbody tr input[data-f="n"]').value,pct:document.querySelector('#respTbl tbody tr td:nth-child(10)').textContent,   /* v23.18 (review F57) two columns before it */radio:document.querySelector('[name="mx_0_4_0"][value="Yes"]').checked}));
  ok('placed into respondent 1: name, relationship, date, interviewer, written format; every answer; the checklists with the note; the interview shown',placed.n===1&&placed.r.n==='Ms. Rivera'&&placed.r.rel==='Mother'&&placed.r.d===ymd&&placed.r.by==='J. Ellis, BCBA'&&placed.r.role==='Parent or guardian'&&placed.r.fmt==='Written (respondent page)'&&/^1\. He is funny/.test(placed.a0)&&/^2\. He is funny/.test(placed.a1)&&placed.mx4.join()==='Yes,No,Sometimes,Yes,No'&&/^Currently on medication: since March\n5\. He is funny/.test(placed.n4)&&placed.mx7.length===10&&placed.mx7[0]==='Sometimes'&&/^8\. He is funny/.test(placed.n7)&&/^15\. He is funny/.test(placed.a14)
    &&/Collected 1 response from respondent pages into respondent 1 \(Ms\. Rivera\)/.test(placed.banner)&&!placed.hidden&&placed.view==='view-int'&&/Ms\. Rivera/.test(placed.head)&&placed.row==='Ms. Rivera'&&placed.pct==='100%'&&placed.radio,placed);
  /* a code of another form is refused */
@@ -80,7 +84,7 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  const link2=await page.evaluate(()=>__rp.link());
  await rp.goto(link2);await sleep(500);
  const r2=await rp.evaluate(()=>({tas:document.querySelectorAll('textarea:not(.code)').length,items:document.querySelectorAll('li.it').length,prog:!!document.querySelector('.prog'),first:document.querySelector('label.f').textContent,student:document.querySelector('.def').textContent,band:document.querySelector('h1').textContent}));
- ok('respond.html renders the school set from the link like the file: 20 typed answers (v21.40: six questions added, one a checklist), no items card, the student label',r2.tas===20&&r2.items===0&&!r2.prog&&/S\.S\. \(ID 12345\)/.test(r2.student)&&/Teacher, Staff Member/.test(r2.band),r2);
+ ok('respond.html renders the school set from the link like the file: 20 typed answers (v21.40: six questions added, one a checklist), no items card, the student label',r2.tas===20&&r2.items===0&&!r2.prog&&/S\.S\./.test(r2.student)&&!/ID 12345/.test(r2.student)&&/Teacher, Staff Member/.test(r2.band),r2);
  await rp.evaluate(()=>{const inp=document.querySelectorAll('input[type=text]');inp[0].value='Mr. Okafor';inp[1].value='5th grade teacher';document.querySelectorAll('textarea:not(.code)').forEach((t,i)=>{t.value='Short answer '+(i+1);});document.querySelector('#nbhr-conf input[value="unsure"]').click();document.querySelector('button:not(.ghost)').click();});await sleep(300);
  const sent2=await rp.evaluate(()=>({code:document.querySelector('.code').value,mail:document.querySelector('#nbhr-mail').getAttribute('href'),done:document.querySelector('.done').textContent}));
  ok('short answers: Send gives a code and a mailto to the interviewer that fits an email link',/^NBH1\./.test(sent2.code)&&/^mailto:bcba%40example\.org\?subject=Teacher%20and%20staff%20questions%20for%20Form%20IN-1/.test(sent2.mail)&&sent2.mail.length<1900&&/email program should open/.test(sent2.done),{len:sent2.mail.length,mail:sent2.mail.slice(0,90)});

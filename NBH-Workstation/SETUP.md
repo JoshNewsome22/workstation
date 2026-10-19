@@ -9903,6 +9903,29 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.18: IN-1 keeps the interview hypothesis out of the packet, counts written answers apart, shows the consent date, labels respondent pages by initials, and asks how well each informant knows the student (review Wave 3)
+
+- **The packet (F51).** "Save packet" no longer writes the interview hypothesis.
+  - Other forms read a packet's function as their own. TD-1 filled "Function (EA-1 outcome)" from it.
+  - The hypothesis reaches Forms FS-1 and EA-1 through the case, as a weak, tier-4 source. The row and its hint now say so.
+- **The student's interview (F53).** With a student respondent, Setup says that the student's own interview, with the
+  assent plan and the student's hypothesis, is Form SI-1. The Guide's table says the same.
+  - A respondent page for the student set cannot be made until a box confirms the student's assent is planned and
+    recorded on SI-1.
+- **Written answers (F54).** The evidence sent to the case now says how many respondents were interviewed and how many
+  answered in writing. A record answered entirely in writing reads "Written stakeholder questionnaires (indirect)". The
+  Respondents card says the same.
+- **Consent (F55).** The consent from Form IC-1 shows on the Setup sheet and prints.
+  - A respondent dated before it is named on screen.
+- **The respondent page's label (F56).** It is now the initials only. The student number is added only by ticking "Add the
+  student number (pages for school staff only)". A file name no longer ends in a doubled dot.
+- **How well each informant knows the student (F57).** The Respondents table asks how often each person sees the student
+  (daily, weekly or less often) and since when, in which settings.
+  - Both answers are saved, and the convergence table shows them under each name.
+  - The respondent pages do not ask these questions yet.
+- qa/in1-w3-test.js (9 checks). in1-respond-test and in1-audit-test follow the new label, the assent box and the two new
+  columns.
+
 ### v23.17: TB-1 asks before a target is removed, keeps a student's examples out of the bank, takes a cluster's members onto its card, works out the agreement pilot, and prints the template only when used (review Wave 3)
 
 - **No target is lost to the count (F30).** Lowering "Target behaviors in plan" past a target that holds anything now asks

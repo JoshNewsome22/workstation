@@ -26,7 +26,7 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  /* the convergence table on the simulation */
  await loadSim(page);await sleep(500);
  const tbl=await page.evaluate(()=>{const rows={};document.querySelectorAll('#convTbl tbody tr').forEach(tr=>{const tds=Array.from(tr.children).map(td=>td.textContent.trim());rows[tds[0]]=tds.slice(1);});
-   return {heads:Array.from(document.querySelectorAll('#convTbl thead th')).map(th=>th.textContent).slice(1),rows,fn:document.querySelector('[data-m="fn"]').value,pct:Array.from(document.querySelectorAll('#respTbl tbody tr td:nth-child(8)')).map(td=>td.textContent)};});
+   return {heads:Array.from(document.querySelectorAll('#convTbl thead th')).map(th=>th.textContent).slice(1),rows,fn:document.querySelector('[data-m="fn"]').value,pct:Array.from(document.querySelectorAll('#respTbl tbody tr td:nth-child(10)')).map(td=>td.textContent)};});
  const R=tbl.rows,NA='not asked of this role';
  ok('simulation: the interviews complete on the longer sets (the SLP leaves five setting-event rows blank, as someone who sees the student twice a week would)',tbl.pct.join()==='100%,100%,100%,80%,100%',tbl.pct);
  ok('comm row: parent, three school answers and the student side by side',R['How the student communicates and asks']&&/bringing me the thing/.test(R['How the student communicates and asks'][0])&&/comes to my desk/.test(R['How the student communicates and asks'][1])&&/tugs my sleeve/.test(R['How the student communicates and asks'][2])&&/card in my sessions/.test(R['How the student communicates and asks'][3])&&/I say help/.test(R['How the student communicates and asks'][4]),R['How the student communicates and asks']);
@@ -90,7 +90,7 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  /* a record saved before v21.40 opens with the questions unanswered and no error */
  const old=JSON.stringify({form:'IN-1',rev:'2026-09',S:{meta:{client:'Old Record',beh:'Old behavior'},resp:[{n:'Old parent',role:'Parent or guardian',rel:'Mother',d:'1/2/26',by:'JN',fmt:'Telephone'}],ans:{'0_14':'old insight'},mx:{'0_7':['Yes','No','','','','','','','','']},cur:0}});
  await (await page.$('#fileIn')).setInputFiles({name:'old.json',mimeType:'application/json',buffer:Buffer.from(old)});await sleep(400);
- const o2=await page.evaluate(()=>({n:S.resp.length,a14:S.ans['0_14'],a15:S.ans['0_15'],cf:S.resp[0].cf,fmt:S.resp[0].fmt,pct:document.querySelector('#respTbl tbody tr td:nth-child(8)').textContent,q:document.querySelectorAll('#intBody .resp-int .qcard').length}));
+ const o2=await page.evaluate(()=>({n:S.resp.length,a14:S.ans['0_14'],a15:S.ans['0_15'],cf:S.resp[0].cf,fmt:S.resp[0].fmt,pct:document.querySelector('#respTbl tbody tr td:nth-child(10)').textContent,q:document.querySelectorAll('#intBody .resp-int .qcard').length}));
  ok('a record saved before v21.40 opens: the old answers on their questions, the added ones blank, 20 question cards',o2.n===1&&o2.a14==='old insight'&&o2.a15===undefined&&o2.cf===''&&o2.fmt==='Telephone'&&o2.q===20&&/^\d+%$/.test(o2.pct),o2);
  /* the guide */
  const guide=await page.evaluate(()=>document.querySelector('.only-guide').textContent);
