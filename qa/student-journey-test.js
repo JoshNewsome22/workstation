@@ -369,7 +369,7 @@ PH.D=async()=>{
   const sp=await openF('SP-1');
   const wk=SD.slice(3,8);   /* a school week (Monday to Friday if the calendar allows) */
   await putAll(sp,{'#mObserver':'Ms. Lopez (simulated)','#mWeek':mdy(wk[0])+' – '+mdy(wk[4]),'#mSetting':'Room 14'});
-  /* v22.8x the column of each date's weekday on the sheet as it opens (since review F95 a new sheet starts on Monday, Monday
+  /* v23.05 the column of each date's weekday on the sheet as it opens (since review F95 a new sheet starts on Monday, Monday
      to Friday; it was Sunday to Saturday) */
   const ds=await sp.evaluate(()=>+state.cfg.dayStart||0),colOf=d=>(new Date(d+'T12:00:00').getDay()-ds+7)%7;
   for(const d of wk)await put(sp,'[name="sp.date.'+colOf(d)+'"]',d);

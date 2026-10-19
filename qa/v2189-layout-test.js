@@ -73,7 +73,7 @@ const H=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);return e
        the case comes round after the tap) would move the page under the finger; the tapped cell must stay where it was on
        the screen */
     await sp.evaluate(()=>{const st=document.createElement('style');st.textContent='html,body{overflow-anchor:none!important}';document.head.appendChild(st);});
-    /* v22.8x the layout settles before the cell is measured and tapped: a change (the simulation, the view, the entry mode)
+    /* v23.05 the layout settles before the cell is measured and tapped: a change (the simulation, the view, the entry mode)
        reaches the case a moment later (the workstation reads the forms every few seconds and sends the case back), and the
        consent line above the grid can then grow a few px as the phone's small-type pass reaches it; measured before that, the
        grid moved under the finger and the tap marked the neighbouring cell. The case is read and sent now, and the cell is

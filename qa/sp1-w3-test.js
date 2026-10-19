@@ -1,4 +1,4 @@
-/* v22.8x Form SP-1, the scatter plot, review Wave 3 (simulated data only).
+/* v23.05 Form SP-1, the scatter plot, review Wave 3 (simulated data only).
    F89  the printed sheet says what each mark stands for, with the numbers: the legend gives the slash's and the shaded
         cell's counts from the behavior's own cutoff (tapped or counted, two levels or one), on every sheet of the print,
         and the summary's first line says what high rate meant.
