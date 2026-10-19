@@ -900,6 +900,7 @@ td input,td select{max-width:100%}
       <span id="catCount" class="hint"></span>
       <button id="catOpen" type="button">Open all</button>
       <button id="catClose" type="button">Close all</button>
+      <button id="catCsvBtn" type="button">Export the catalogue (CSV)</button><!-- v23.13 (review I140) -->
     </div>
     <div id="catOut"></div>
   </section>
@@ -973,6 +974,8 @@ td input,td select{max-width:100%}
         <option value="lh">Interval schedule with a limited hold</option>
         <option value="lag">Lag schedule (variability)</option></select></div>
     </div>
+    <!-- v23.13 (review I137) Form DD-1's baseline, offered to the DRO, DRL and NCR designers -->
+    <div class="hint noprint" id="srDdBase" hidden style="margin:8px 0"></div>
     <div class="only-ds for-dro">
       <h3>DRO from the baseline</h3>
       <div class="fieldgrid">
@@ -1780,6 +1783,8 @@ function design(){
     o.params.push(['Interval schedule',esc(m.lh_sched||'')],['Hold',hold+' s'],['Opportunity signaled by',esc(m.lh_sig||'')]);
     o.rule='Run the interval schedule. When an interval elapses, signal the opportunity ('+(m.lh_sig||'')+'). If '+B+' occurs within '+hold+' seconds, deliver '+R_+'; if not, the opportunity closes and the next interval starts.';
     o.data=['Opportunities offered, taken within the hold, and missed'];o.notes='A hold shorter than the student&rsquo;s latency is extinction with a name; measure latency first.';}
+  /* v23.13 (review I137) the card names where its baseline came from */
+  if(SR_BASE[sel]&&String(m[sel+'_bsrc']||'').trim())o.params.unshift(['Baseline from',esc(m[sel+'_bsrc'])]);
   /* v23.11 (review F271) a reduction card says how the replacement is reinforced, or says it names none (Vollmer & Iwata, 1992) */
   if(['dro','drl','ncr'].includes(sel)&&o.rule){if(String(m.alt||'').trim()){o.rule+=' <b>The replacement:</b> answer '+A+' at once with '+R_+', every time; it does not change the timer or the count.';o.data.push('Instances of '+A+' per session');}
     else o.warn.push('No replacement response is named: this card is '+sel.toUpperCase()+' alone. Name the alternative from Form TB-1 or GB-1 (DRA), so the student learns what to do instead.');}
@@ -1795,7 +1800,7 @@ function design(){
     o.data=['Responses, whether novel, whether paid; the number of distinct responses per session'];o.notes='Lee, McComas and Jawor (2002); Cammilleri and Hanley (2005). With small lags the student may cycle through n + 1 responses; raise the lag or add a DRA criterion for quality.';}
   return o;
 }
-function renderDesign(){
+function renderDesign(){try{srDdBox();}catch(e){}
   const o=design();const out=$('#dsOut');setDs(S.meta.ds_sel||'');
   if(!o){out.innerHTML='<p class="hint">Choose a schedule to design; the parameters appear above and the plan here.</p>';return;}
   let h='<h3>'+o.title+'</h3>';if(o.nota)h+='<div class="metric" style="margin:6px 0"><b>Notation</b><div class="val" style="font-family:ui-monospace,Menlo,monospace;font-size:16px">'+o.nota+'</div></div>';
@@ -1858,11 +1863,24 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved SR-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form SR-1. Nothing was changed.':'That file could not be read as a saved SR-1 form. Nothing was changed.');return;}
     const prev=S;S=next;try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved SR-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
-$('#csvBtn').addEventListener('click',()=>{
+function srCsv(){
   const q=v=>'"'+String(v==null?'':v).replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&rsquo;/g,'’').replace(/&ldquo;|&rdquo;/g,'"').replace(/&ndash;/g,'–').replace(/&mdash;/g,'—').replace(/&hellip;/g,'…').replace(/&minus;/g,'−').replace(/&rarr;/g,'→').replace(/&times;/g,'×').replace(/&le;/g,'≤').replace(/&ge;/g,'≥').replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&plusmn;/g,'±').replace(/&prime;/g,'′').replace(/&prop;/g,'∝').replace(/&middot;/g,'·').replace(/&bull;/g,'•').replace(/"/g,'""')+'"';
-  const rows=[['family','name','abbreviation','notation','one line','definition','how it is programmed','what it produces','where it has been used','what goes wrong','in a school','our use','references']];
-  CAT.forEach(c=>rows.push([FAM[c.fam],c.name,c.abbr,c.nota,c.one,c.def,c.prog,c.prod,c.used,c.pit,c.ex,S.notes[c.id]||'',c.refs.map(k=>REFS[k]).join(' | ')]));
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv'}));a.download='SR-1_schedules-of-reinforcement.csv';document.body.appendChild(a);a.click();a.remove();});
+  /* v23.13 (review I140) Export CSV writes the schedule as designed (the student's entries, the design, its settings, its steps,
+     the data to keep and what is still to settle); the catalogue's entries export from their own button on the Catalogue page */
+  const dl=(rows,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv'}));a.download=name;document.body.appendChild(a);a.click();a.remove();};
+  if(this&&this.id==='catCsvBtn'){const rows=[['family','name','abbreviation','notation','one line','definition','how it is programmed','what it produces','where it has been used','what goes wrong','in a school','our use','references']];
+    CAT.forEach(c=>rows.push([FAM[c.fam],c.name,c.abbr,c.nota,c.one,c.def,c.prog,c.prod,c.used,c.pit,c.ex,S.notes[c.id]||'',c.refs.map(k=>REFS[k]).join(' | ')]));
+    dl(rows,'SR-1_schedules-of-reinforcement.csv');return;}
+  const m=S.meta,o=m.ds_sel?design():null,rows=[['Form SR-1: the schedule as designed','']];
+  if(!o)rows.push(['No design is chosen yet','Choose one on the Design page. The catalogue exports from the Catalogue page.']);
+  else{[['Student',m.client],['Date',m.date],['Run by',m.who],['Behavior being reduced',m.beh],['Response that earns',SR_EARN.includes(o.id)?(m.earn||m.alt):''],['Replacement',m.alt],
+      ['Reinforcer',m.sr],['Function',m.func],['Design',o.title],['Notation',o.nota],['Rule',o.rule]].forEach(r=>{if(String(r[1]||'').trim())rows.push(r);});
+    o.params.forEach(p=>rows.push(['Setting: '+p[0],p[1]]));
+    if(o.steps&&o.steps.length){rows.push([]);rows.push(o.stepsHead);o.steps.forEach(r=>rows.push(r));rows.push([]);}
+    o.data.forEach(d=>rows.push(['Data to keep',d]));o.warn.forEach(w=>rows.push(['Still to settle',w]));
+    if(String(m.cd_review||'').trim())rows.push(['Card review',m.cd_review]);}
+  dl(rows,'SR-1_schedule-design.csv');}
+$('#csvBtn').addEventListener('click',srCsv);$('#catCsvBtn').addEventListener('click',srCsv);
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nThe student, the chooser answers, the design and the catalogue notes are all cleared.',{ok:'Clear all',danger:true})){S=blank();renderAll();}});
 /* v21.44 (A1): the simulation asks first, with the question the other forms ask; it replaced the student, the chooser
    answers, the design and the catalogue notes without asking */
@@ -1892,6 +1910,7 @@ const SR_FSR={'Attention':'adult attention: comments, praise, someone close (the
 let srCrisis=[];
 window.__nbhFactsIn=function(f){
   const m=S.meta;let n=0;const B0=(f.behaviors||[]),b=B0.find(x=>x&&!x.isRep&&!/replacement|alternative/i.test(x.type||''))||B0[0],a=((f.goals&&f.goals.acq)||[])[0];
+  srData=(f&&f.data)||null;try{srDdBox();}catch(e){}   /* v23.13 (review I137) */
   try{srCrisis=((f.crisis&&f.crisis.stages)||[]).map(x=>String(x&&(x.s||x.name)||x||'').trim()).filter(Boolean).slice(0,6);}catch(e){srCrisis=[];}
   if(b){if(!m.beh){m.beh=nbhCase.line(b,true);n++;}if(!m.behs){m.behs=b.label;n++;}if(!m.alt&&b.rep){m.alt=b.rep;n++;}}
   const rp=(f.behaviors||[]).find(x=>x.isRep);
@@ -1924,6 +1943,31 @@ window.__nbhFactsOut=function(){try{const m=S.meta,o=m.ds_sel?design():null;if(!
   if(!sc.back&&sc.params){const b=sc.params.find(p=>/^Step back when$/i.test(p.k));if(b)sc.back=b.v;}   /* the design's own rule when the field is blank */
   if(o.warn.length)sc.open=o.warn.map(t).filter(Boolean).slice(0,6);
   return {schedule:sc};}catch(e){return null;}};
+/* v23.13 (review I137) the baseline from Form DD-1's shared record: the target's baseline phase (a count per day or a rate per
+   hour), with its dates and school days, offered to the DRO, DRL and NCR designers. Used, it fills the count and the minutes,
+   and the card names the source and the dates; typing either by hand drops the source. DD-1 records whole school days, so the
+   offer says when they fit (a schedule run across the day) and when they do not (one run in sessions, as on Form TD-1). */
+var srData=null,SR_BASE={dro:['dro_n','dro_min'],drl:['drl_n','drl_min'],ncr:['ncr_n','ncr_min']};
+function srDdPick(){const d=srData,m=S.meta;if(!d||!Array.isArray(d.behaviors))return null;
+  const L=d.behaviors.filter(b=>b&&(b.measure==='rate'||b.measure==='count')&&(b.kind||'target')==='target'&&(b.base||b.cur)&&isFinite(+(b.base||b.cur).mean));if(!L.length)return null;
+  const lc=x=>String(x||'').toLowerCase().trim(),b=L.find(x=>srSame(x.name,m.behs)||srSame(x.name,m.beh)||(lc(m.behs)&&lc(x.name).indexOf(lc(m.behs))>=0))||L[0];
+  const st=b.base||b.cur,nm=(b.base?b.baseName:b.curName)||'',c=(d.conds||[]).find(x=>x&&x.name===nm)||(b.base?(d.conds||[])[0]:null)||{};
+  return {b,nm,phase:!!b.base,from:c.from||d.from||'',to:c.to||d.to||'',days:st.days|0,mean:+st.mean,rate:b.measure==='rate'};}
+const srMd=x=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(x||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(x||'');};
+function srDdBox(){const el=document.getElementById('srDdBase');if(!el)return;const sel=S.meta.ds_sel,p=SR_BASE[sel]?srDdPick():null;el.hidden=!p;if(!p){el.innerHTML='';return;}
+  const used=String(S.meta[sel+'_bsrc']||'').trim();
+  el.innerHTML='<b>Form DD-1\u2019s baseline for '+esc(p.b.name||'the target')+'</b> ('+(p.phase?esc(p.nm||'the first phase'):'the data so far; no phase change yet')+', '+esc(srMd(p.from))+'\u2013'+esc(srMd(p.to))+', '
+    +p.days+' school day'+(p.days===1?'':'s')+'): '+esc(String(p.mean))+(p.rate?' per hour':' per day')+'. These are whole school days: use them only when this schedule runs across the day; a schedule run in sessions needs a session baseline. '
+    +(p.rate?'':'<label style="display:inline;font-weight:400">Minutes observed per day <input id="srDdMin" inputmode="decimal" style="width:5em"></label> ')
+    +'<button type="button" id="srDdUse">'+(used?'Use it again':'Use it on this design')+'</button>'+(used?' <i>In use: '+esc(used)+'</i>':'');}
+document.addEventListener('click',e=>{if(!e.target||!e.target.closest||!e.target.closest('#srDdUse'))return;const sel=S.meta.ds_sel,K=SR_BASE[sel],p=K&&srDdPick();if(!p)return;
+  const mn=p.rate?60:parseFloat((document.getElementById('srDdMin')||{}).value);
+  if(!(mn>0)){if(window.nbhUI&&nbhUI.toast)nbhUI.toast('Enter the minutes observed per school day first.');return;}
+  S.meta[K[0]]=String(Math.round(p.mean*100)/100);S.meta[K[1]]=String(mn);
+  S.meta[sel+'_bsrc']='Form DD-1, '+(p.phase?(p.nm||'the first phase'):'the data so far')+', '+srMd(p.from)+'\u2013'+srMd(p.to)+', '+p.days+' school day'+(p.days===1?'':'s')+', '+p.mean+(p.rate?' per hour':' per day in '+mn+' minutes');
+  renderAll();});
+document.addEventListener('input',e=>{const k=e.target&&e.target.dataset&&e.target.dataset.m;if(!k)return;
+  Object.keys(SR_BASE).forEach(d=>{if(SR_BASE[d].includes(k)&&S.meta[d+'_bsrc']){delete S.meta[d+'_bsrc'];setTimeout(()=>{try{renderAll();}catch(x){}},0);}});});
 window.__nbhFactsPick=function(sel){
   const m=S.meta;let n=0;const b=sel.behaviors[0],a=sel.goals.acq[0];
   if(b){m.beh=nbhCase.line(b,true);m.behs=b.label;if(b.rep)m.alt=b.rep;n++;}

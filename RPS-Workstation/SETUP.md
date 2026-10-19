@@ -9903,6 +9903,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.13: SR-1 starts a DRO, DRL or NCR from Form DD-1's baseline and names it on the card; Export CSV writes the designed schedule (review Wave 3)
+
+- **The baseline from Form DD-1 (I137).** With DD-1's record in the case, the DRO, DRL and NCR designers show the target's
+  baseline: the phase, its dates and school days, and the rate per hour or count per day.
+  - The box says these are whole school days. They fit a schedule run across the day. A schedule run in sessions needs
+    a session baseline.
+  - "Use it on this design" fills the count and the minutes. A count per day first asks for the minutes observed per
+    day.
+  - The card's settings then name the source, for example "Form DD-1, Baseline, 9/15/2026–9/26/2026, 8 school days, 3
+    per hour".
+  - Typing either field by hand drops the source.
+- **Export CSV is the design (I140).** Export CSV now writes the schedule as designed: the student's entries, the design,
+  its notation and rule, its settings, its steps, the data to keep, and what is still to settle.
+  - With no design chosen, the file says so.
+  - The catalogue's entries and the program's notes now export from "Export the catalogue (CSV)" on the Catalogue page.
+  - The notes stay in the student's file for now. Their placeholder asks "with whom", so moving them to the device's
+    storage is a privacy question for a later decision.
+- qa/sr1-w3c-test.js (9 checks).
+
 ### v23.12: SR-1 hands the designed schedule to the case and RM-1 hands over its challenge results; TD-1 and PR-1 read them (review Wave 3)
 
 - **The schedule to the case (I136).** Once a design is chosen and the behavior is named, SR-1 sends the schedule to the
