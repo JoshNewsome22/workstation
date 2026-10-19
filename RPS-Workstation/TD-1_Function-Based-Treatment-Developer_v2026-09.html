@@ -5399,6 +5399,37 @@ function tdSrFill(){const s=tdSched;if(!s||!['thin','chain'].includes(s.id))retu
   document.addEventListener('input',e=>{if(!e.isTrusted||!e.target)return;if(e.target.name==='m.rate'){put('m.ratesrc','');rateNote();}});
   rateNote();})();
 </script>
+<script id="td1-da1">
+/* v23.15 (review F143, I71) Form DA-1's results on Form TD-1 (the case's 'demands'): a screen-only box on the Antecedent sheet with
+   what the demand assessment found (the tasks that evoke problem behavior, where demand fading starts and its terminal steps,
+   the modifications to try, task by task), and, into empty boxes only (or a line the case wrote before), the Materials and cues
+   of a Demand fading card and the Task set of a Task interspersal card. A high-probability request sequence is not filled: its
+   single-step requests are chosen and probed on the planner (DA-1's tasks are whole activities). */
+(function(){const T=v=>String(v==null?'':v).trim(),E=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');let D=null;
+  const MINE=/\(Form DA-1\)$/;
+  const put=(nm,v)=>{const e=document.querySelector('[name="'+nm+'"]');if(!e||!v)return false;const c=T(e.value);if(c===v||(c&&!MINE.test(c)))return false;
+    e.value=v;['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));return true;};
+  const names=a=>(Array.isArray(a)?a:[]).map(o=>T(o&&o.name)).filter(Boolean);
+  window.tdDa1Cards=function(){if(!D)return false;let ch=false;const fade=names(D.fade),term=names(D.terminal),high=names(D.high),fa=names(D.fa);
+    document.querySelectorAll('#compWrap .card').forEach(c=>{const i=c.dataset.i;
+      if(c.dataset.code==='DF'&&fade.length)ch=put('cp['+i+'].mat','Tasks in fading order: '+fade.join(', then ')+(term.length?'; terminal steps: '+term.join(', then '):'')+' (Form DA-1)')||ch;
+      if(c.dataset.code==='A_INTERSPERSE'&&high.length)ch=put('cp['+i+'].p1','Easy items from '+high.join(' and ')+(fa.length?', interspersed in '+fa.join(' and '):'')+' (Form DA-1)')||ch;});
+    return ch;};
+  function paint(){let box=document.getElementById('tdDa1');if(!D){if(box)box.remove();return;}
+    if(!box){const at=document.querySelector('#antecedent #antModel');if(!at)return;box=document.createElement('div');box.id='tdDa1';box.className='warn noprint';box.style.margin='0 0 12px';at.parentNode.insertBefore(box,at);}
+    const L=[];const fa=names(D.fa),fade=names(D.fade),term=names(D.terminal);
+    L.push('<li><b>Evoke problem behavior</b> (the demand condition of Form EA-1): '+(fa.length?E(fa.join(', ')):'none')+'.</li>');
+    if(fade.length)L.push('<li><b>Demand fading</b> starts with '+E(fade.join(', then '))+(term.length?'; terminal steps '+E(term.join(', then ')):'')+'.</li>');
+    (Array.isArray(D.mods)?D.mods:[]).forEach(x=>{if(x&&T(x.task)&&Array.isArray(x.lines)&&x.lines.length)L.push('<li><b>'+E(x.task)+'</b>: '+E(x.lines.join(' '))+'</li>');});
+    box.innerHTML='<b>From the demand assessment (Form DA-1'+(T(D.dates)?', '+E(D.dates):'')+')</b><span style="display:block;margin-top:2px">'+E(T(D.verdict))+(D.rule==='latency'?' Ranked by latency.':'')+'</span><ul style="margin:6px 0 0">'+L.join('')+'</ul>';}
+  const was=window.__nbhFactsIn;
+  window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+    try{D=(f&&f.demands&&typeof f.demands==='object')?f.demands:null;paint();if(window.tdDa1Cards()){r=r&&typeof r==='object'?Object.assign({},r):{filled:0};r.filled=(r.filled||0)+1;}}catch(e){}
+    return r;};
+  /* a Demand fading or Task interspersal card added after the case was read takes them too */
+  const w=document.getElementById('compWrap');if(w&&window.MutationObserver)new MutationObserver(()=>{if(D)try{window.tdDa1Cards();}catch(e){}}).observe(w,{childList:true});
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

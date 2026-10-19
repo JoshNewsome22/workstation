@@ -9903,6 +9903,29 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.15: DA-1 names the tasks that evoke the behavior for EA-1, reads the latency as observed, takes a second observer, and sends its results to EA-1 and TD-1 (review Wave 3)
+
+- **Two questions, two columns.** A task *evokes problem behavior* when it occurred in at least half of its sessions. Only
+  those tasks are named for EA-1's demand condition. Compliance (high-p 80% or more, low-p 40% or less) places a task in
+  the fading plan. A task the student just does not do, without problem behavior, is no longer sent to EA-1.
+- **Latency as observed.** The break-schedule and interspersal recommendations use the latency of the sessions in which
+  the behavior happened. A clean session no longer pushes the break interval past the real latency. Per-Task Means shows
+  both latencies.
+- **Latency-based sessions rank by latency.** When the Inventory says the session has no programmed consequence or ends
+  at the first problem behavior, the ranking, the verdict and the chart go by latency.
+- **No whole task as a high-p sequence.** The single-step requests are chosen on TD-1's planner.
+- **A second observer (optional).** Turn it on under the Assessment sheet and enter the second observer's record of some
+  sessions. The agreement per task and overall goes to the Results sheet, the plan, the CSV and the printout.
+- **The case.** DA-1's results reach EA-1, whose Demand card lists the tasks, and TD-1, whose Demand fading and Task
+  interspersal cards get the order and the easy items, with a box on the Antecedent sheet. When FS-1 has no function yet,
+  DA-1 takes the hypothesis from IA-1, IN-1, OB-1, ABC-1 and SP-1, and the assent signals from SI-1.
+- **Smaller fixes:**
+  - a School field for the packet;
+  - the worked example's note corrected;
+  - the masthead says October 2026.
+
+Checked by `qa/da1-w3-test.js`.
+
 ### v23.14: BC-1 asks how much reinforcement the changed setting delivers, checks trend and overlap before it calls contrast, and hands its verdict to the case (review Wave 3)
 
 - **The direction test reads the reinforcement (F428).** The setup sheet asks whether the changed setting delivers less,
