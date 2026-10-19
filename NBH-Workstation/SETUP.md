@@ -9903,6 +9903,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.76: GC-1 writes the teacher's game script, and prints a picture poster for young classes (review Wave 3)
+
+- **A teacher's game script (I145).** The Poster page offers a fourth page, **Teacher's game script**, printed only when it
+  is ticked: "How to Run the Game", written from the rule. It says what to do and say before, during and after the game:
+  go over the expectations, say the goal and how to win, start the timer, mark each foul in a neutral voice (or, for
+  CW-FIT, give points with praise when the timer sounds; for tootling, collect and screen the cards; for
+  self-monitoring, run the cue and check a sample; for a dependent arrangement, never name or blame the student), praise
+  at least every few minutes, what never happens, the end of the game, the reward and the Record. The steps the
+  fidelity check looks at first are marked "Every time". The script goes to the case with the class system: Form TI-1
+  offers **Add the class game's script** and Form ST-1 **Use the class game's script**, so the steps are typed once and
+  the teacher can be trained to them and checked on them. Neither form takes them unless asked.
+- **A picture poster for young and ESE classes (I143).** Under the poster's options, **A picture beside each expectation,
+  rule and the prize** puts a picture from the shared library (the one Forms SM-1, VS-1 and TK-1 use) beside each
+  expectation, a crossed picture beside each rule of the Good Behavior Game, and one beside the prize. Each picture is
+  chosen from the words of its line, and a different one can be picked for each expectation. **Large print** enlarges the
+  class pages, and **The expectations in the family's language** prints a line (written or checked by the district's
+  interpreter) in italics under each expectation. With all of it and the script, the poster still prints one page per
+  sheet.
+- qa/v2276-test.js (12 checks).
+
 ### v22.75: GC-1 starts where the class already is, keeps probes apart, checks the tallies, and shows on the student's graph (review Wave 3)
 
 - **One rule for the starting criterion (F285).** The Setup sheet, the Design sheet, the Guide and TD-1's group-contingency

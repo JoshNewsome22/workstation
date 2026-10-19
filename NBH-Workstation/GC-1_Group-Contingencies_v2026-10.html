@@ -655,6 +655,34 @@ table.rt td.met.y{color:#2F6B37}table.rt td.met.n{color:#8E2A2A}
 .gc-now{margin:6px 0 0}
 tr.gc-own-step td{background:#f6f8f8}
 #agrTbl td.agr-p{font-weight:600}
+/* v22.76 (review I143, I145) */
+#posterOut .po-pic{width:62px;height:62px;flex:0 0 62px}
+#posterOut ol.po-exp li > .po-pic{margin-top:-6px}
+#posterOut .l2{font-size:16px;font-style:italic;color:#222;margin-top:3px}
+#posterOut .po-rw{display:flex;align-items:center;gap:12px}
+#posterOut ul.po-piclist{list-style:none;padding-left:0}
+#posterOut ul.po-piclist li{display:flex;align-items:center;gap:10px;margin:6px 0}
+#posterOut ul.po-piclist .po-pic{width:46px;height:46px;flex-basis:46px}
+#posterOut .po-picno{position:relative;display:inline-block;flex:0 0 46px;width:46px;height:46px}
+#posterOut .po-picno .po-pic{width:46px;height:46px}
+#posterOut .po-picno .po-no{position:absolute;inset:0;width:46px;height:46px}
+#posterOut .po-large .po-title{font-size:44px}
+#posterOut .po-large ol.po-exp .w{font-size:34px}
+#posterOut .po-large ol.po-exp .l{font-size:19px}
+#posterOut .po-large .po-goal{font-size:30px}
+#posterOut .po-large table.po-score th.team{font-size:30px}
+#posterOut .po-large table.po-score th,#posterOut .po-large table.po-score td{font-size:22px}
+#posterOut .po-large table.po-score td.box{height:96px}
+#posterOut .po-large ul.po-list{font-size:22px}
+#posterOut .po-large .po-big{font-size:34px}
+#posterOut .po-large .po-pic{width:80px;height:80px;flex-basis:80px}
+#posterOut ol.po-steps{margin:6px 0 0;padding-left:26px;font-size:16px;line-height:1.5}
+#posterOut ol.po-steps li{margin:6px 0}
+#posterOut ol.po-steps li.crit{font-weight:600}
+#posterOut .po-every{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#7a1f14}
+#posterOut .po-note{font-size:13px;color:#333;margin-top:12px}
+.gc-picpick{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px;font-family:var(--sans);font-size:13px}
+.gc-picpick select{min-height:44px;margin-left:6px}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:10px 0}
 .metric{border:1px solid var(--rule-2);border-left:3px solid var(--rule);background:#FAFCFC;padding:9px 11px;border-radius:2px}
 .metric b{display:block;font-family:var(--sans);font-size:10.5px;letter-spacing:.04em;color:var(--ink-soft);text-transform:uppercase}
@@ -1130,7 +1158,10 @@ td input,td select{max-width:100%}
     <table class="rt noprint" style="margin-bottom:8px">
       <tr><th style="width:24%">Title on the poster</th><td><input data-m="po_title" placeholder="filled from the class; e.g., Room 12 Expectations" style="width:60%"></td></tr>
       <tr><th>Days across the scoreboard</th><td><select data-m="po_days" style="width:40%"><option value="">5 (Monday to Friday)</option><option value="5">5 (Monday to Friday)</option><option value="4">4 (Monday to Thursday)</option><option value="3">3 (Monday, Wednesday, Friday)</option><option value="1">1 (today)</option></select></td></tr>
-      <tr><th>Pages</th><td><div class="ckrow"><label class="ck"><input type="checkbox" data-c="po_exp"> Expectations</label><label class="ck"><input type="checkbox" data-c="po_score"> Scoreboard</label><label class="ck"><input type="checkbox" data-c="po_rules"> Rules card</label></div><span class="hint">All three print when none is ticked.</span></td></tr>
+      <tr><th>Pages</th><td><div class="ckrow"><label class="ck"><input type="checkbox" data-c="po_exp"> Expectations</label><label class="ck"><input type="checkbox" data-c="po_score"> Scoreboard</label><label class="ck"><input type="checkbox" data-c="po_rules"> Rules card</label><label class="ck"><input type="checkbox" data-c="po_script"> Teacher&rsquo;s game script</label></div><span class="hint">The three class pages print when none of them is ticked; the teacher&rsquo;s script prints only when it is ticked.</span></td></tr>
+      <!-- v22.76 (review I143): for young students, students who do not yet read, and families -->
+      <tr><th>Pictures and print size</th><td><div class="ckrow"><label class="ck"><input type="checkbox" data-c="po_pics"> A picture beside each expectation, rule and the prize</label><label class="ck"><input type="checkbox" data-c="po_big"> Large print</label></div><div id="gcPicPick"></div></td></tr>
+      <tr><th>The expectations in the family&rsquo;s language</th><td><textarea data-m="po_l2" rows="3" placeholder="one line per expectation, in the same order; written or checked by the district&rsquo;s interpreter. Each prints under its expectation in italics."></textarea></td></tr>
     </table>
     <div id="gcPosterWhy" class="noprint"></div>
     <div id="posterOut"></div>
@@ -1278,6 +1309,8 @@ td input,td select{max-width:100%}
 <div id="gcClassOut"></div>
 
 <script id="nbh-wording" src="nbh-wording.js"></script>
+<!-- v22.76 (review I143): the shared pictogram library, one file beside the forms (the one-file edition inlines it), for the picture poster -->
+<script src="nbh-pictos.js"></script>
 
 <script>
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
@@ -1355,6 +1388,7 @@ function ensure(){
   if(!Array.isArray(S.fade)||S.fade.length!==FADE.length)S.fade=FADE.map(()=>({crit:'',date:''}));
   if(!Array.isArray(S.fid)||S.fid.length!==FID.length)S.fid=fidMigrate(S.fid)||FID.map(()=>({in:'',note:''}));
   S.teams.forEach(t=>{if(t&&t.crit==null)t.crit='';});
+  S.exp.forEach(e=>{if(e&&e.pic==null)e.pic='';});   /* v22.76 (review I143) */
   if(S.meta.id_rule===ID_LOW_OLD)S.meta.id_rule=ID_LOW;   /* v22.74 (review F282) the option reworded */
   while(S.exp.length<3)S.exp.push({text:'',looks:'',nex:''});
   while(S.menu.length<3)S.menu.push({item:'',kind:'',amt:'',how:''});
@@ -1549,12 +1583,12 @@ document.addEventListener('change',e=>{const el=e.target;
     const r=el.dataset.r,i=+el.dataset.i,f=el.dataset.f;
     if(el.type==='checkbox')S[r][i][f]=el.checked;else if(!(r==='log'&&/^v\d$/.test(f)))S[r][i][f]=el.value;
     if(r==='log'){if(f==='ph'){renderL();}renderRecord();renderBase();renderRule();renderPosterSoon();renderAgr();}
-    if(r==='fid')renderFidelity();if(r==='menu')renderMenu();if(r==='agr'){renderAgr();renderRecord();}
+    if(r==='fid')renderFidelity();if(r==='menu')renderMenu();if(r==='exp'&&f==='pic')renderPoster();if(r==='agr'){renderAgr();renderRecord();}
     return;}
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderRule();renderPoster();}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderRule();renderPoster();renderRecord();renderBase();renderL();}
 });
-$('#addE').addEventListener('click',()=>{if(S.exp.length>=5)return;S.exp.push({text:'',looks:'',nex:''});renderE();renderExp();renderPoster();});
+$('#addE').addEventListener('click',()=>{if(S.exp.length>=5)return;S.exp.push({text:'',looks:'',nex:'',pic:''});renderE();renderExp();renderPoster();});
 $('#delE').addEventListener('click',async ()=>{if(S.exp.length<=1)return;const r=S.exp[S.exp.length-1];if((r.text||r.looks)&&!(await nbhUI.confirm('Remove the last expectation?\nIts text and examples are deleted.',{ok:'Remove',danger:true})))return;S.exp.pop();renderE();renderExp();renderPoster();});
 $('#addM').addEventListener('click',()=>{if(S.menu.length>=12)return;S.menu.push({item:'',kind:'',amt:'',how:''});renderM();renderMenu();});
 $('#delM').addEventListener('click',async ()=>{if(S.menu.length<=1)return;const r=S.menu[S.menu.length-1];if(r.item&&!(await nbhUI.confirm('Remove the last item?\nIts name, amount and delivery are deleted from the menu.',{ok:'Remove',danger:true})))return;S.menu.pop();renderM();renderMenu();});
@@ -1708,19 +1742,55 @@ function renderRule(){
 }
 
 /* ---------------- the poster ---------------- */
+/* v22.76 (review I143): pictures from the shared library (nbh-pictos.js) for the expectations, the fouls and the prize:
+   chosen from the words of each line, or picked for an expectation below the poster's options */
+const GC_PICS=[[/hand.{0,12}(up|raise)|raise.{0,10}hand|call(ing)?\s+out|\btalk/i,'raisehand'],[/seat|\bsit|chair/i,'sitting'],[/hands.{0,15}feet|hands to|touch|keep.{0,10}hands|safe hands/i,'safehands'],
+  [/follow|direction|first time/i,'follow'],[/kind|nice words|name.?call|teas/i,'kindwords'],[/quiet|voice|noise|shout|yell/i,'quiet'],[/walk|\brun/i,'walkingfeet'],[/listen/i,'listening'],[/wait|turn/i,'waiting'],
+  [/share/i,'share'],[/clean|tidy/i,'cleanup'],[/line\s?up|in line/i,'lineup'],[/eyes|look at/i,'eyes'],[/calm/i,'calm'],[/help/i,'askhelp'],[/break/i,'takebreak'],[/area|space|spot/i,'stayarea'],[/work|task|start/i,'follow']];
+const GC_RW=[[/free (choice|time)/i,'freetime'],[/game/i,'game'],[/music|song|dance/i,'musicfun'],[/read|story|chapter|book/i,'story'],[/recess|outside|playground/i,'cardplayground'],[/draw|art\b|color/i,'drawing'],[/sticker/i,'sticker'],[/helper|job/i,'helper']];
+function gcPicFor(text,tab){for(const [re,k] of tab)if(re.test(text||''))return k;return '';}
+function gcPicsOk(){return !!(window.picto&&window.NBH_PICTOS);}
+function gcPic(k,cls){return k&&gcPicsOk()&&window.NBH_PICTOS[k]?window.picto(k,cls||'po-pic'):'';}
+function gcNoPic(k){const p=gcPic(k,'po-pic');return p?'<span class="po-picno">'+p+'<svg class="po-no" viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="31" fill="none" stroke="#b3261e" stroke-width="6"/><line x1="14" y1="58" x2="58" y2="14" stroke="#b3261e" stroke-width="6"/></svg></span>':'';}
+function renderPicPick(){const el=$('#gcPicPick');if(!el)return;if(!S.chk.po_pics){el.innerHTML='';return;}
+  if(!gcPicsOk()){el.innerHTML='<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so the poster has no pictures. Put it in the same folder as the form.</p>';return;}
+  const keys=Object.keys(window.NBH_PICTOS).filter(k=>window.NBH_PICTOS[k].c==='rules');
+  el.innerHTML='<div class="gc-picpick">'+S.exp.map((e,i)=>e.text.trim()?'<label>'+esc(e.text)+' <select data-r="exp" data-i="'+i+'" data-f="pic" aria-label="Picture for '+esc(e.text)+'"><option value="">'+esc('Chosen from the words'+(gcPicFor(e.text+' '+e.looks,GC_PICS)?' ('+window.NBH_PICTOS[gcPicFor(e.text+' '+e.looks,GC_PICS)].l+')':''))+'</option>'+keys.map(k=>'<option value="'+k+'"'+(e.pic===k?' selected':'')+'>'+esc(window.NBH_PICTOS[k].l)+'</option>').join('')+'</select></label>':'').join('')+'</div>';}
+/* v22.76 (review I145): the teacher's game script, written from the rule: what to say and do before, during and after
+   the game. The steps marked crit are the ones the fidelity check looks at first. It goes to the case with the class
+   system, where Form ST-1 can train to it and Form TI-1 can check it. */
+function scriptSteps(){if(!S.type)return [];const m=S.meta,c=curCrit(),ex=S.exp.filter(e=>e.text.trim()).map(e=>e.text.trim()),T=teamNames(),lo=dir()==='low',st=[],add=(d,crit)=>st.push({d,crit:!!crit});
+  add('Before the game, go over the expectations with the class, in the students’ words'+(ex.length?': '+ex.join('; '):'')+'.');
+  add('Say the '+(T.length?'teams and the ':'')+'goal for today out loud: '+(depHide()?'our class goal':c!=null?critPhrase(c):'the criterion')+'. '+winLine(),true);
+  add((m.mins?'Set the timer for '+m.mins+' minutes and say':'Say')+' that the game has started'+(m.when?' ('+lc(m.when)+')':'')+'.');
+  if(S.type==='gbg'||(lo&&!['cwfit','tootle','selfmon'].includes(S.type)))add('Each time someone breaks a rule, mark it at once against '+(T.length?'their team':'the class')+' where everyone can see the tally, say it in a neutral voice ("'+(T[0]||'Team')+', that’s a mark"), and go on teaching. No lecture.',true);
+  if(S.type==='cwfit')add('Each time the timer sounds (every '+(m.c_int||'few')+' minutes), give a point to each team whose members are all using the skills, with a praise statement'+(m.c_praise?' ("'+m.c_praise+'")':'')+'.',true);
+  if(S.type==='selfmon')add('At each cue, have every student record their answer'+(m.s_q?' ("'+m.s_q+'")':'')+', and check a few students’ records against what you saw.',true);
+  if(S.type==='tootle')add('Collect the tootle cards'+(m.t_how?' ('+lc(m.t_how)+')':'')+', read them first for put-downs and tattling, read some aloud, and add the count to the class chart.',true);
+  if(S.type==='indep')add('Mark each student’s card or chart at every check'+(m.in_track?' ('+lc(m.in_track)+')':'')+'.',true);
+  if(S.type==='random')add('After the period, draw from the jar as written; never read a drawn name aloud when the goal was missed.',true);
+  if(S.type==='dep')add('Never name or blame the student whose score counts; peers may encourage, never pressure. If anyone turns on the student, change the arrangement today (the exit rule).',true);
+  add('Every few minutes, praise a '+(T.length?'team':'student or the class')+' that is at or '+(lo?'under':'over')+' the goal, and say what they did ("'+(T[0]||'Class')+', hands up and waiting: that is how we play").',true);
+  add('Ignore behavior that is not on the list; add no other consequence during the game.');
+  add(m.never?'Never: '+m.never.replace(/[.\s]+$/,'')+'.':'Never take a mark or point away as a reward, and never stop the game early as a punishment.',true);
+  add('At the end, count the '+(lo?'marks':'points')+', read them aloud, and name the winners: '+winLine()+' Say nothing more about a '+(T.length?'team':'day')+' that did not win.');
+  add('Give the reward as written: '+lc(rewardText())+(m.rw_when?' ('+lc(m.rw_when)+')':'')+'.',true);
+  add('Enter the day on the Record: the date, the phase, the goal and each '+(T.length?'team’s':'')+' score.');
+  return st;}
 function renderPoster(){
   const m=S.meta,run=curRun(),c=run.crit,since=run.rows.length?critSince():'',T=teamNames(),ex=S.exp.filter(e=>e.text.trim());
   const gl=fewestOnly()?'Our target':'The goal',sinceTxt=since?' <span class="po-since">(since '+esc(since)+')</span>':'';
   const title=m.po_title||((m.cls?m.cls+' ':'Our ')+'Expectations');
   const want=k=>!!S.chk[k]||!(S.chk.po_exp||S.chk.po_score||S.chk.po_rules);
+  const P=!!S.chk.po_pics,l2=lines(m.po_l2),pk=e=>P?gcPic(e.pic||gcPicFor(e.text+' '+e.looks,GC_PICS),'po-pic'):'',big=S.chk.po_big?' po-large':'';
   const days={'1':['Today'],'3':['Monday','Wednesday','Friday'],'4':['Monday','Tuesday','Wednesday','Thursday']}[m.po_days]||['Monday','Tuesday','Wednesday','Thursday','Friday'];
   const foot='<div class="po-foot"><span>'+esc(m.cls||'')+(m.teacher?' · '+esc(m.teacher):'')+'</span><span>Form GC-1</span></div>';
   let h='';
-  if(want('po_exp'))h+='<div class="po-page"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">'+esc(title)+'</div>'+
-    (ex.length?'<ol class="po-exp">'+ex.map((e,i)=>'<li><span class="n">'+(i+1)+'</span><div><div class="w">'+esc(e.text)+'</div>'+(e.looks?'<div class="l">'+esc(e.looks)+'</div>':'')+'</div></li>').join('')+'</ol>':'<p class="hint">No expectations yet; enter them on the Setup sheet.</p>')+
-    (m.reward||m.g_prize?'<div class="po-big" style="margin-top:18px">We earn: '+esc(rewardText())+'</div>':'')+foot+'</div>';
+  if(want('po_exp'))h+='<div class="po-page'+big+'"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">'+esc(title)+'</div>'+
+    (ex.length?'<ol class="po-exp">'+ex.map((e,i)=>'<li><span class="n">'+(i+1)+'</span>'+pk(e)+'<div><div class="w">'+esc(e.text)+'</div>'+(e.looks?'<div class="l">'+esc(e.looks)+'</div>':'')+(l2[i]?'<div class="l2" lang="">'+esc(l2[i])+'</div>':'')+'</div></li>').join('')+'</ol>':'<p class="hint">No expectations yet; enter them on the Setup sheet.</p>')+
+    (m.reward||m.g_prize?'<div class="po-big po-rw" style="margin-top:18px">'+(P?gcPic(gcPicFor(rewardText(),GC_RW)||'trophy','po-pic'):'')+'<span>We earn: '+esc(rewardText())+'</span></div>':'')+foot+'</div>';
   if(want('po_score')){const rows=T.length?T:['Our class'];
-    h+='<div class="po-page"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">Scoreboard</div>'+
+    h+='<div class="po-page'+big+'"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">Scoreboard</div>'+
       '<div class="po-goal">'+(depHide()?'The goal: our class goal':c!=null?gl+': '+esc(critPhrase(c))+sinceTxt:gl+': ____ '+esc(unitWord()))+'</div>'+
       '<table class="po-score"><thead><tr><th class="team">Team</th>'+days.map(d=>'<th>'+d+'</th>').join('')+'</tr></thead><tbody>'+
       rows.map((t,i)=>'<tr><th class="team">'+(T.length?'<span class="po-team" style="background:'+TEAMCOL[i]+'"></span>':'')+esc(t)+'</th>'+days.map(()=>'<td class="box"></td>').join('')+'</tr>').join('')+
@@ -1729,18 +1799,24 @@ function renderPoster(){
       '<div class="po-big" style="margin-top:16px;font-size:20px">'+esc(winLine())+'</div>'+foot+'</div>';}
   if(want('po_rules')){
     if(S.type==='gbg'){const f=fouls();
-      h+='<div class="po-page"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">The Good Behavior Game</div><div class="po-cols"><div><div class="po-h">How we play</div><ul class="po-list">'+
+      h+='<div class="po-page'+big+'"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">The Good Behavior Game</div><div class="po-cols"><div><div class="po-h">How we play</div><ul class="po-list">'+
         '<li>'+(T.length?T.length+' teams: '+esc(T.join(', ')):'The class plays in teams')+'</li><li>'+esc(m.g_time||('When: '+(m.when||'____')))+(m.mins?' ('+esc(m.mins)+' minutes)':'')+'</li><li>A mark goes against a team when a member breaks a rule</li><li>'+(m.g_rec?'Scored by '+esc(lc(m.g_rec)):'The teacher keeps the score on the board')+'</li></ul></div>'+
-        '<div><div class="po-h">The rules</div>'+(f.length?'<ul class="po-list">'+f.map(x=>'<li>No '+esc((y=>y.charAt(0).toLowerCase()+y.slice(1))(x.replace(/^no\s+/i,'')))+'</li>').join('')+'</ul>':'<p class="hint">Enter the fouls on the Design sheet or the third column of the expectations.</p>')+'</div></div>'+
+        '<div><div class="po-h">The rules</div>'+(f.length?'<ul class="po-list'+(P?' po-piclist':'')+'">'+f.map(x=>'<li>'+(P?gcNoPic(gcPicFor(x,GC_PICS)):'')+'<span>No '+esc((y=>y.charAt(0).toLowerCase()+y.slice(1))(x.replace(/^no\s+/i,'')))+'</span></li>').join('')+'</ul>':'<p class="hint">Enter the fouls on the Design sheet or the third column of the expectations.</p>')+'</div></div>'+
         '<div class="po-h">How to win</div><div class="po-big">'+esc(winLine())+'</div>'+(c!=null?'<div style="font-size:19px;line-height:1.5">'+gl+': '+esc(critPhrase(c))+sinceTxt+'</div>':'')+
-        '<div class="po-h">The prize</div><div class="po-big">'+esc(rewardText())+(m.rw_when?' <span style="font-weight:400;font-size:18px">('+esc(m.rw_when.toLowerCase())+')</span>':'')+'</div>'+foot+'</div>';}
-    else{h+='<div class="po-page"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">'+esc(S.type&&!depHide()?TYPES[S.type]:'How We Earn')+'</div>'+
+        '<div class="po-h">The prize</div><div class="po-big po-rw">'+(P?gcPic(gcPicFor(rewardText(),GC_RW)||'trophy','po-pic'):'')+'<span>'+esc(rewardText())+(m.rw_when?' <span style="font-weight:400;font-size:18px">('+esc(m.rw_when.toLowerCase())+')</span>':'')+'</span></div>'+foot+'</div>';}
+    else{h+='<div class="po-page'+big+'"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">'+esc(S.type&&!depHide()?TYPES[S.type]:'How We Earn')+'</div>'+
         '<div class="po-h">The rule</div><div style="font-size:19px;line-height:1.5">'+(S.type?posterRule():'Choose an arrangement on the Design sheet.')+'</div>'+
-        (ex.length?'<div class="po-h">How we earn</div><ul class="po-list">'+ex.map(e=>'<li><b>'+esc(e.text)+'</b>'+(e.looks?': '+esc(e.looks):'')+'</li>').join('')+'</ul>':'')+
+        (ex.length?'<div class="po-h">How we earn</div><ul class="po-list'+(P?' po-piclist':'')+'">'+ex.map((e,i)=>'<li>'+pk(e)+'<span><b>'+esc(e.text)+'</b>'+(e.looks?': '+esc(e.looks):'')+(l2[i]?'<br><i>'+esc(l2[i])+'</i>':'')+'</span></li>').join('')+'</ul>':'')+
         '<div class="po-h">The reward</div><div class="po-big">'+esc(rewardText())+(m.rw_when?' <span style="font-weight:400;font-size:18px">('+esc(m.rw_when.toLowerCase())+')</span>':'')+'</div>'+foot+'</div>';}
   }
+  /* v22.76 (review I145): the teacher's game script, a page of its own, printed only when it is ticked */
+  if(S.chk.po_script){const st=scriptSteps();
+    h+='<div class="po-page po-script"><p class="po-kicker">'+esc(m.cls||'Our class')+' &middot; for the adult running the game</p><div class="po-title">How to Run the Game</div>'+
+      (st.length?'<ol class="po-steps">'+st.map(s=>'<li'+(s.crit?' class="crit"':'')+'>'+esc(s.d)+(s.crit?' <b class="po-every">Every time.</b>':'')+'</li>').join('')+'</ol>':'<p class="hint">Choose an arrangement on the Design sheet; the script is written from it.</p>')+
+      '<p class="po-note">The steps marked &ldquo;Every time&rdquo; are the ones the fidelity check looks at first (Fidelity sheet). Form ST-1 can train the teacher on these steps, and Form TI-1 can check them.</p>'+foot+'</div>';}
   $('#posterOut').innerHTML=h;
   const pw=$('#gcPosterWhy');if(pw)pw.innerHTML=depWhy();
+  renderPicPick();
 }
 
 /* ---------------- the record ---------------- */
@@ -1870,7 +1946,7 @@ function fromFile(d){
   GC_MOVED=null;if(s.v!==2){const mv={};['plans','notreach'].forEach(k=>{if(String(o.meta[k]||'').trim())mv[k]=o.meta[k];delete o.meta[k];});if(Object.keys(mv).length)GC_MOVED=mv;}
   o.type=Object.keys(TYPES).includes(s.type)?s.type:'';
   const arr=(k,fields,n)=>Array.isArray(s[k])?s[k].slice(0,n||50).map(x=>{const r={};fields.forEach(f=>{r[f]=f==='v'?(Array.isArray(x&&x.v)?x.v.slice(0,4).map(str):[]).concat(['','','','']).slice(0,4):str(x&&x[f]);});return r;}):null;
-  o.exp=arr('exp',['text','looks','nex'],5)||[];o.menu=arr('menu',['item','kind','amt','how'],12)||[];o.teams=arr('teams',['name','members','crit'],4)||[];
+  o.exp=arr('exp',['text','looks','nex','pic'],5)||[];o.menu=arr('menu',['item','kind','amt','how'],12)||[];o.teams=arr('teams',['name','members','crit'],4)||[];
   const fade=arr('fade',['crit','date'],FADE.length);if(fade&&fade.length===FADE.length)o.fade=fade;
   o.log=arr('log',['date','ph','crit','v','rw','note'],400)||[];o.log.forEach(r=>{if(!['B','1','2','3','4'].includes(r.ph))r.ph='1';});
   const fid=fidMigrate(arr('fid',['in','note'],50));if(fid)o.fid=fid;   /* v22.74 (review F283) the ten old steps are mapped */
@@ -2012,7 +2088,8 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
 window.__nbhClasswideFacts=function(){if(!S.type)return null;const run=curRun(),fl=S.fl.filter(x=>x&&(x.date||x.pct)).slice(-1)[0];
   const A=S.agr.filter(a=>agrPct(a)!=null),la=A[A.length-1];
   return {type:S.type,arrangement:TYPES[S.type],start:gcIso(S.meta.start),phase:curPhase()||run.ph||'',agree:la?{date:gcIso(la.date),pct:agrPct(la)}:null,crit:run.crit,unit:unitWord(),dir:dir(),since:gcIso(critSince()),
-    changes:critChanges(),fid:fl?{date:gcIso(fl.date),pct:num(fl.pct)}:null,review:gcIso(S.meta.review),gameDays:gameRows().length};};
+    changes:critChanges(),fid:fl?{date:gcIso(fl.date),pct:num(fl.pct)}:null,review:gcIso(S.meta.review),gameDays:gameRows().length,
+    script:scriptSteps()};};   /* v22.76 (review I145) for Forms ST-1 and TI-1 */
 const wasOut=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,arguments):null;}catch(e){o=null;}
   let c=null;try{c=window.__nbhClasswideFacts();}catch(e){c=null;}if(!c)return o;o=o||{};o.classwide=c;return o;};
 })();

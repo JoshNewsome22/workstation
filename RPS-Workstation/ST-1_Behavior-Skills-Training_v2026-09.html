@@ -1750,6 +1750,25 @@ window.__nbhFactsIn=function(f){const t=f&&f.training,st=t&&Array.isArray(t.step
   let g=null;try{g=window.nbhCase&&typeof window.nbhCase.generic==='function'?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
   return {filled:n+((g&&g.filled)|0),note:note||(g&&g.note)||''};};
 </script>
+<script id="st1-gc1">
+/* v22.76 (review I145): the class game's script (Form GC-1), to train the teacher to run the game to criterion. "Use
+   the class game's script" fills an empty step list with it, its every-time steps marked critical; on a list already
+   started it adds only the steps not there yet */
+let stGame=null;
+const stGK=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
+function stGameSteps(){return ((stGame&&stGame.script)||[]).filter(s=>s&&String(s.d||'').trim()).map(s=>({d:String(s.d).trim().slice(0,600),crit:!!s.crit}));}
+function stGameBtn(){let b=document.getElementById('useGame');const n=stGameSteps().length;
+  if(!b){const at=document.getElementById('delStep');if(!at)return;b=document.createElement('button');b.className='tool';b.id='useGame';b.type='button';
+    b.textContent='Use the class game\u2019s script';at.parentNode.insertBefore(b,at.nextSibling);
+    b.addEventListener('click',()=>{const L=stGameSteps(),empty=S.steps.every(x=>!String(x.d||'').trim())&&!Object.keys(S.cells||{}).length;let k=0;
+      if(empty){S.steps=L.slice(0,40).map(x=>({d:x.d,crit:x.crit,cmp:''}));k=S.steps.length;}
+      else{const have=new Set(S.steps.map(x=>stGK(x.d)));L.forEach(x=>{if(have.has(stGK(x.d)))return;S.steps.push({d:x.d,crit:x.crit,cmp:''});have.add(stGK(x.d));k++;});}
+      renderAll();const ta=document.querySelector('#stepTbl textarea');if(ta)ta.dispatchEvent(new Event('input',{bubbles:true}));
+      nbhUI.toast(k?k+' step'+(k===1?'':'s')+' from the class game (Form GC-1)'+(empty?'':' added after the steps already there')+'.':'Every step of the class game\u2019s script is already on the list.',k?{kind:'ok'}:undefined);});}
+  b.style.display=n?'':'none';b.title=n?n+' steps in the class game\u2019s script (Form GC-1)':'';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){stGame=(f&&f.classwide)||null;stGameBtn();return was?was.apply(this,arguments):null;};}
+stGameBtn();
+</script>
 <script id="st1-v2182">
 /* v21.82 the case: Out, new key 'staff' = {people:[{name, role, criterion, met, date}], all}. The trainee on this record,
    with the criterion it is judged on and whether it is met: met when the decision on the Competency page reads Competent

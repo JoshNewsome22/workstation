@@ -1770,6 +1770,20 @@ window.__nbhFactsIn=function(f){tiQuick=(f&&f.quick)||null;tiQuickBtn();
   const k=tiQuickAdd();renderAll();
   return {filled:((g&&g.filled)||0)+k,note:'the steps are the non-negotiables on Form QS-1'};};
 tiQuickBtn();
+/* v22.76 (review I145): the class game's script (Form GC-1). "Add the class game's script" adds its steps not yet on
+   the list, with its every-time steps marked critical; nothing is added unless it is asked for, since this record
+   checks the student's plan */
+let tiGame=null;
+function tiGameSteps(){return ((tiGame&&tiGame.script)||[]).filter(s=>s&&String(s.d||'').trim()).map(s=>({d:String(s.d).trim(),crit:!!s.crit}));}
+function tiGameBtn(){let b=document.getElementById('addGame');const n=tiGameSteps().length;
+  if(!b){const at=document.getElementById('addQuick')||document.getElementById('delStep');if(!at)return;b=document.createElement('button');b.className='tool';b.id='addGame';b.type='button';
+    b.textContent='Add the class game\u2019s script';at.parentNode.insertBefore(b,at.nextSibling);
+    b.addEventListener('click',()=>{const have=new Set(S.steps.map(st=>tiK(st.d)));let k=0;
+      tiGameSteps().forEach(g=>{if(have.has(tiK(g.d)))return;let i=S.steps.findIndex(st=>!String(st.d||'').trim());if(i<0){addBlankStep();i=S.steps.length-1;}S.steps[i].d=g.d;S.steps[i].crit=g.crit;have.add(tiK(g.d));k++;});
+      renderAll();nbhUI.toast(k?k+' step'+(k===1?'':'s')+' from the class game (Form GC-1) added.':'Every step of the class game\u2019s script is already on the list.',k?{kind:'ok'}:undefined);});}
+  b.style.display=n?'':'none';b.title=n?n+' steps in the class game\u2019s script (Form GC-1)':'';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){tiGame=(f&&f.classwide)||null;tiGameBtn();return was?was.apply(this,arguments):null;};}
+tiGameBtn();
 /* v21.75 out: each scored observation's date, type and integrity (correct steps over scored steps), the critical-step
    figure and the overall one, for Form DD-1's graphs and week summary, Form PR-1 and the workstation's Today list */
 window.__nbhFactsOut=function(){try{const M=metrics(),iso=v=>{v=String(v||'').trim();let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v);if(m)return v;
