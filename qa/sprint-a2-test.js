@@ -283,7 +283,10 @@ async function openCase(page,file){
 
  /* ---------- files saved before this change still open ---------- */
  const expect={'IA-1':d=>({client:d.fields['m.client'],named:d.fields}),'IN-1':d=>({client:d.S.meta.client}),'PA-1':d=>({client:d.meta.client}),
-   'MS-1':d=>({client:d.fields['m.client'],named:d.fields}),'AD-1':d=>({client:d.fields.s_name,named:d.fields})};
+   /* v22.8x (review F441): MS-1's vitals sheet has no Appetite column now; an earlier file's appetite value is kept in that row's notes */
+   'MS-1':d=>{const f=Object.assign({},d.fields);Object.keys(f).forEach(k=>{const m=/^v\[(\d+)\]\.app$/.exec(k);if(!m)return;const v=String(f[k]).trim();delete f[k];if(!v)return;
+     const nk='v['+m[1]+'].n';f[nk]=(String(f[nk]||'').trim()?String(f[nk]).trim()+'; ':'')+'Appetite '+v+' (0\u20133, from the vitals sheet of an earlier version)';});
+     return {client:d.fields['m.client'],named:f};},'AD-1':d=>({client:d.fields.s_name,named:d.fields})};
  for(const id of Object.keys(F)){
   const fp=path.join(OLD,id+'.json');if(!fs.existsSync(fp)){ok(id+': the file saved before this change is there ('+fp+'; set OLDSAVE to its folder)',false);continue;}
   const d=JSON.parse(fs.readFileSync(fp,'utf8')),e=expect[id](d);
