@@ -2112,7 +2112,7 @@ let prCase=null;
 const prT=v=>String(v==null?'':v).trim();
 const prMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
 const prR=x=>x==null?'':String(Math.round(x*10)/10);
-function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null,cg=f.caregiver||null,cw=f.classwide||null;if(!d&&!pts&&!ti&&!cg&&!cw)return '';
+function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null,cg=f.caregiver||null,cw=f.classwide||null,sn=f.sv&&Array.isArray(f.sv.named)&&f.sv.named.length?f.sv.named:null;if(!d&&!pts&&!ti&&!cg&&!cw&&!sn)return '';
   const conds=(d&&d.conds)||[],cur=conds.length?conds[conds.length-1]:null,from=cur&&cur.from?cur.from:(d&&d.from)||'',to=(d&&d.to)||'';
   const inP=x=>x&&(!from||x>=from)&&(!to||x<=to);const L=[];
   if(from)L.push((cur&&conds.length>1?'Since '+prMd(from)+' ('+cur.name+', ':'From '+prMd(from)+' to '+prMd(to)+' (')+((cur&&cur.days)||(d&&d.days)||0)+' school days with data):');
@@ -2146,6 +2146,9 @@ function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||n
     L.push('The class-wide system (Form GC-1): '+cw.arrangement+(cw.start?' since '+prMd(cw.start):'')+(cw.phase?'; phase '+cw.phase+(ph&&ph.date&&ch.indexOf(ph)>0?' since '+prMd(ph.date):''):'')+
       (cw.crit!=null?', criterion '+cw.crit+(cw.unit?' '+cw.unit:'')+(cw.since?' since '+prMd(cw.since):''):'')+
       (cw.fid&&cw.fid.pct!=null?'; latest fidelity check '+prR(cw.fid.pct)+'%'+(cw.fid.date?' on '+prMd(cw.fid.date):''):'; no fidelity check logged')+'.');}
+  /* v22.81 (review I114) what the consumers named on Form SV-1 that the plan does not measure, and the side effects they named */
+  if(sn){const un=sn.filter(x=>x&&x.tag==='unmeasured'),se=sn.filter(x=>x&&x.tag==='side'),q=x=>'\u201c'+prT(x.text)+'\u201d ('+prT(x.role).toLowerCase()+', '+(x.round==='pre'?'pre':'post')+' round)';
+    if(un.length)L.push('Named by the consumers on Form SV-1 and not measured: '+un.map(q).join('; ')+'.');if(se.length)L.push('Side effects named on Form SV-1: '+se.map(q).join('; ')+'.');}
   return L.join('\n');}
 function prCaseBar(){let b=document.getElementById('prCaseBar');const f=prCase||{},d=f.data,t=f.integrity,framed=window.parent!==window;
   if(!b){const at=document.querySelector('.nbh-band');if(!at)return;b=document.createElement('div');b.id='prCaseBar';b.className='pr-casebar noprint';b.setAttribute('role','status');at.parentNode.insertBefore(b,at);}
@@ -2184,7 +2187,10 @@ function prNextCheck(iso,every){if(!iso||!every)return '';const t=every.toLowerC
   const m=(typeof S!=='undefined'&&S&&S.meta)||{},dec=prT(m.dec),date=prIso(m.date),next=prIso(m.next),every=prT(m.post),back=prT(m.back);
   if(!date&&!next&&!dec&&!every&&!back)return r||null;
   const rv={decision:PR_DEC[dec]||'',decisionText:dec,rules:{minDays:10,improvePct:25,fadePct:90,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
-  if(date)rv.date=date;if(next)rv.next=next;if(prT(m.decWhat))rv.changes=prT(m.decWhat);if(prT(m.decWhy))rv.why=prT(m.decWhy);if(prT(m.earlier))rv.earlier=prT(m.earlier);
+  if(date)rv.date=date;if(next)rv.next=next;if(prT(m.decWhat))rv.changes=prT(m.decWhat);
+  /* v22.81 (review F224) for Form SV-1's concordance: the change from baseline as this form prints it (a reduction is negative)
+     and the answer on independent use of the replacement skill */
+  try{const C=course();if(C.pct!=null)rv.pct=Math.round(C.pct*10)/10;}catch(e){}if(prT(m.repInd))rv.repInd=prT(m.repInd);if(prT(m.decWhy))rv.why=prT(m.decWhy);if(prT(m.earlier))rv.earlier=prT(m.earlier);
   if(rv.decision==='exit'||every||back){const tn=/(\d+(?:\.\d+)?)/.exec(back),tw=/\b(one|two|three|four|five|six|seven|eight|nine|ten|once|twice)\b/i.exec(back);
     const x={every,threshold:back,thresholdN:tn?+tn[1]:tw?PR_NUM[tw[1].toLowerCase()]:null};
     if(rv.decision==='exit'&&date){x.date=date;const nc=prNextCheck(date,every);if(nc)x.next=nc;}rv.exit=x;}
@@ -2274,7 +2280,10 @@ function prSvLine(sv){if(!sv||typeof sv!=='object')return '';const sc=prT(sv.sca
   const rd=(r,nm)=>{if(!r||prN(r.mean)==null)return;P.push(nm+' mean '+prF(r.mean)+(r.n!=null?' ('+r.n+' respondent'+(+r.n===1?'':'s')+(r.date?', '+prMd(r.date)+'/'+String(r.date).slice(0,4):'')+')':(r.date?' ('+prMd(r.date)+'/'+String(r.date).slice(0,4)+')':'')));};
   rd(sv.post,'Post');rd(sv.pre,'Pre');if(!P.length)return '';
   const fl=Array.isArray(sv.flagged)?sv.flagged.map(x=>prT(x).replace(/[.\s]+$/,'')).filter(Boolean):[];
-  return 'Form '+(prT(sv.form)||'SV-1')+', scale '+sc+': '+P.join('; ')+'.'+(sv.label?' '+prT(sv.label)+'.':'')+(fl.length?' Rated at the low end: '+fl.join('; ')+'.':' No item rated at the low end.');}
+  /* v22.81 (review F218) the means by role, the consumers first: a pooled mean lets the staff outweigh the student and the family */
+  const RL=[['student','student'],['caregiver','caregiver'],['implementer','implementers'],['administrator','administrator'],['other','other']];
+  const ro=sv.roles&&typeof sv.roles==='object'?RL.filter(([k])=>prN(sv.roles[k])!=null).map(([k,l])=>l+' '+prF(sv.roles[k])):[];
+  return 'Form '+(prT(sv.form)||'SV-1')+', scale '+sc+': '+P.join('; ')+'.'+(ro.length?' By role ('+(sv.rolesRound==='pre'?'pre':'post')+'): '+ro.join(', ')+'.':'')+(sv.label?' '+prT(sv.label)+'.':'')+(fl.length?' Rated at the low end: '+fl.join('; ')+'.':' No item rated at the low end.');}
 function prFitLine(fit){if(!fit||typeof fit!=='object'||prN(fit.mean)==null)return '';const lo=Array.isArray(fit.low)?fit.low.map(x=>prT(x).replace(/[.\s]+$/,'')).filter(Boolean):[];
   return 'Form CF-1, scale '+(prT(fit.scale)||'1-6')+': mean '+prF(fit.mean)+(fit.band?' ('+prT(fit.band)+')':'')+(fit.date?', '+prMd(fit.date)+'/'+String(fit.date).slice(0,4):'')+'.'+(lo.length?' Rated low: '+lo.join('; ')+'.':' No item rated low.');}
 /* the data in one line: the target behavior at baseline and in the most recent period, and the change */
@@ -2316,16 +2325,21 @@ document.getElementById('prLogPrint').addEventListener('click',()=>{const h=docu
 /* the social validity and contextual fit conditions for exit, from the case */
 function prExit82(){const f=prCase82||{},sv=f.sv,fit=f.fit,miss=[];
   const cut=sv&&prN(sv.cut)!=null?+sv.cut:4.5,post=sv&&sv.post&&prN(sv.post.mean)!=null?+sv.post.mean:null;
-  if(post==null)miss.push('social validity: no post round on Form SV-1');else if(post<cut)miss.push('social validity: SV-1 post mean '+prF(post)+' is below '+cut);
+  /* v22.81 (review F218) what Form SV-1 decides: met only when its verdict is "Socially valid" (sv.ok), which needs the student,
+     a caregiver and an implementer, no role low and two post rounds; a pooled post mean is read only from a file of an older SV-1 */
+  const ok=sv&&typeof sv.ok==='boolean'?sv.ok:null,minC=sv&&prN(sv.minConsumer)!=null?+sv.minConsumer:null,label=sv?prT(sv.label):'';
+  if(post==null)miss.push('social validity: no post round on Form SV-1');
+  else if(ok===false)miss.push('social validity: Form SV-1 reads \u201c'+(label||'not yet socially valid')+'\u201d'+(minC!=null&&minC<cut?' (the lowest of the student\u2019s and the caregiver\u2019s means is '+prF(minC)+', below '+cut+')':''));
+  else if(ok==null&&post<cut)miss.push('social validity: SV-1 post mean '+prF(post)+' is below '+cut);
   const fm=fit&&prN(fit.mean)!=null?+fit.mean:prN(S.meta.cf);
   if(fm==null)miss.push('contextual fit: not measured on Form CF-1');else if(fm<4)miss.push('contextual fit: CF-1 mean '+prF(fm)+' is below 4 (adequate fit)');
-  return {miss,post,cut,fm};}
+  return {miss,post,cut,fm,ok,minC,label};}
 function prExitReady(){const E=exitState(),X=prExit82(),miss=E.open.map(i=>READY_SHORT[i]+(E.blankT.indexOf(i)>=0?' (ticked, but its entry is blank)':''));
   if(!E.post)miss.push('the monitoring after exit');X.miss.forEach(x=>miss.push(x));return {ok:!miss.length,missing:miss};}
 function prExit82Render(){let el=document.getElementById('prExit82');const v=document.getElementById('exitVerdict');if(!v)return;
   if(!el){el=document.createElement('div');el.id='prExit82';el.className='pr-exit82';v.parentNode.insertBefore(el,v.nextSibling);}
   const X=prExit82();
-  el.innerHTML='<p class="hint" style="margin:4px 0"><b>Also counted before exit:</b> '+(X.miss.length?prEsc(X.miss.join('; '))+'.':'social validity (SV-1 post mean '+prF(X.post)+', at or above '+X.cut+') and contextual fit (CF-1 mean '+prF(X.fm)+') are both met.')+'</p>';}
+  el.innerHTML='<p class="hint" style="margin:4px 0"><b>Also counted before exit:</b> '+(X.miss.length?prEsc(X.miss.join('; '))+'.':'social validity ('+(X.ok?'Form SV-1: '+prEsc(X.label)+(X.minC!=null?', the lowest consumer mean '+prF(X.minC):''):'SV-1 post mean '+prF(X.post)+', at or above '+X.cut)+') and contextual fit (CF-1 mean '+prF(X.fm)+') are both met.')+'</p>';}
 {const ra=renderAll;renderAll=function(){if(!Array.isArray(S.log))S.log=[];const r=ra.apply(this,arguments);try{prLogRender();prExit82Render();}catch(e){}return r;};}
 {const re=renderExitVerdict;renderExitVerdict=function(){const r=re.apply(this,arguments);try{prExit82Render();}catch(e){}return r;};}
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){prCase82=f||null;const r=was?was.apply(this,arguments):null;let k=0;f=f||{};

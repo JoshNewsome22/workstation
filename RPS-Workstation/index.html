@@ -2260,7 +2260,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.80';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.81';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2973,6 +2973,11 @@ function packetShape(x,i,mo,bag){
   const titleOf=sh=>{const h=[...sh.querySelectorAll('.bar,.nbh-band,h2,h1')].find(b=>!b.closest('.nbh-print-head'));if(!h)return '';const inner=h.querySelector('h1,h2');return txt(inner||h).replace(/\s*\d+ of \d+ shown$/,'');};
   const drop=e=>{const w=e.parentElement;e.remove();if(w&&w.classList.contains('nbh-page')&&!txt(w)&&!w.querySelector('img,svg,canvas,table,input,textarea,select'))w.remove();};
   root.querySelectorAll('.noprint').forEach(e=>e.remove());
+  /* v22.81 (review F220) Form SV-1 prints its team copy in the packet, whatever the form's own choice: the ratings and open
+     answers by role, no respondent named beside a rating (the respondents were told the rated staff see only aggregates) */
+  if(id==='SV-1'){root.querySelectorAll('.sv-byname,.sv-nmcol,.sv-nm').forEach(e=>e.remove());
+    root.querySelectorAll('.sv-byrole,.sv-rl,.sv-byrole-i').forEach(e=>e.classList.remove('sv-byrole','sv-rl','sv-byrole-i'));
+    const cl=root.querySelector('#svCopyLine');if(cl)cl.textContent='Team copy: the ratings and open answers are shown by role, the implementers together; no respondent is named beside a rating.';}
   /* v22.15 (review F475): a form's own <style> elements travel inside its section; one with an @page rule (Form TK-1's book:
      letter landscape, no margins, the margin boxes blanked) turned every page of the packet sideways and took away the
      student, the page numbers and the FERPA line. Each is scoped to this section like the collected styles, which drops
@@ -3046,8 +3051,8 @@ function mpDate(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));if(!m
    after the packet is measured and never printed). A form's usual length is its page count with its full worked example in
    the full packet (qa/packet-gate-baseline.json); a form at twice that and 8 pages more is listed. */
 const MP_PAGES={'DM-1':6,'IC-1':9,'RR-1':10,'TB-1':13,'SI-1':12,'IN-1':18,'IA-1':26,'OB-1':6,'IM-1':9,'ABC-1':33,'SP-1':8,'MT-1':3,'VI-1':27,
-  'EA-1':13,'DA-1':14,'PA-1':23,'RA-1':9,'FS-1':14,'TD-1':40,'GB-1':5,'CF-1':9,'SV-1':13,'SA-1':10,'SR-1':48,'TE-1':7,'GC-1':13,'VS-1':27,'TK-1':13,
-  'CR-1':12,'DT-1':32,'AD-1':41,'BC-1':5,'MS-1':10,'ST-1':7,'EB-1':2,'QS-1':8,'CT-1':7,'TV-1':3,'TI-1':9,'PD-1':14,'CN-1':9,'DD-1':16,'SM-1':20,
+  'EA-1':13,'DA-1':14,'PA-1':24,'RA-1':10,'FS-1':14,'TD-1':40,'GB-1':5,'CF-1':9,'SV-1':11,'SA-1':10,'SR-1':48,'TE-1':7,'GC-1':13,'VS-1':27,'TK-1':13,
+  'CR-1':12,'DT-1':32,'AD-1':41,'BC-1':5,'MS-1':10,'ST-1':7,'EB-1':2,'QS-1':8,'CT-1':7,'TV-1':3,'TI-1':9,'PD-1':14,'CN-1':9,'DD-1':16,'SM-1':22,
   'HD-1':22,'PR-1':8,'RM-1':14};
 function mpCheckItems(chosen,parts,shaped,p){
   const out=[],T=s=>String(s==null?'':s).trim(),F=id=>'Form '+id,got=new Set(parts.map(x=>x.id)),who=state.whoIs||{};
@@ -3300,6 +3305,9 @@ async function masterRun(chosen,opt){opt=opt||{};
     .mp-sec #td85Block .td85-list>.td85-card{width:48.5%;margin:0 3% 8px 0}
     .mp-sec #td85Block .td85-list>.td85-card:nth-child(2n){margin-right:0}
     .mp-sec .sigblock,.mp-sec .ic-sigs,.mp-sec .ic-signpart,.mp-sec .td85-card,.mp-sec .twoup,.mp-sec .figure,.mp-sec .dd-keep,.mp-sec .warn.verdict,.mp-sec .mp-refblk{break-inside:avoid;page-break-inside:avoid}
+    /* v22.81 (found by the packet gate): every signature block the gate checks stays on one page, Form RA-1's and Form SM-1's
+       signature rows too (a row of three lines split, its last line alone at the top of the next page) */
+    .mp-sec .sig,.mp-sec .eb-sig,.mp-sec .hs-sig,.mp-sec .cn-sig{break-inside:avoid;page-break-inside:avoid}
     .mp-band{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid #cfdad8;margin:0 0 10px;padding:0 0 4px;
       font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#54676f;break-after:avoid;page-break-after:avoid}
     .mp-cap{font:600 12px/1.35 Inter,"Segoe UI",Arial,sans-serif;color:#254657;margin:10px 0 4px;break-after:avoid;page-break-after:avoid}

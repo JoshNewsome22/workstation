@@ -9903,6 +9903,82 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.81: SV-1 tells the case what it decides, needs the consumers, prints a team copy, reads PR-1's sign, keeps every review's round, and asks in Spanish and with faces (review Wave 3)
+
+- **What the case is told is what the form decides (F218).** Form SV-1 sent the case one mean pooled over every rating, so two
+  staff who like the plan outweighed a student and a parent who do not, and Form PR-1 could call social validity met at exit
+  while SV-1 itself read "Acceptability concern". SV-1 now sends its verdict (met only when it reads "Socially valid"), the
+  post mean of each role, the effects mean and the lowest of the student's and the caregiver's means. PR-1's exit check
+  reads the verdict and names it when it is not met ("Form SV-1 reads 'Acceptability concern' (the lowest of the student's
+  and the caregiver's means is 2.00, below 4.5)"), and its social validity row gives the means by role.
+- **The consumers the verdict needs (F219).** "Socially valid" needs ratings from the student, a caregiver and an
+  implementer, the people the plan is for. A teacher, the principal and a related-service provider are not enough:
+  administrator and other rows count in addition, never in their place. The student is excused only when there is no
+  student row and the reason is recorded under "Roles missing, and why", and the verdict then says so.
+- **A team copy (F220).** Respondents told that the rated staff see only aggregates were named beside their ratings on the
+  printed Summary. **What prints** (on the Summary) chooses the **team copy**, which prints each section's ratings and open
+  answers by role (the implementers together) with no respondent named, leaves the respondent column out of Items Flagged
+  and the person-by-person comparison with Form CF-1 out altogether, or the **BCBA copy**, by name, for the BCBA's file. The
+  team copy is the default whenever a respondent was promised anonymity, and the workstation's master print always uses it.
+- **The goals on their latest round (F221).** The goals were judged on the pre round only, so a plan inherited mid-year, its
+  goals rated at the review, read "Below the working thresholds, Goals pre-mean —" with every goal rated 6. The goals are
+  judged on the latest round that holds goals ratings, and the verdict says "goals rated at review only; no pre round".
+- **An earlier "agree" holds only while the data agree (F222).** A ticked "an earlier post round showed agree" kept the plan
+  "Socially valid" when this review's data showed no change, or a worsening, that the consumers called improvement. An
+  earlier "agree" now carries over only while this review's data and the consumers do not part, the verdict names the
+  review it came from (the tick asks for its date), and when it does not carry over the verdict says why.
+- **PR-1's figures as PR-1 prints them, and the case in (F224).** The change from baseline was typed again "as a positive
+  number", the opposite of PR-1's sign: copied as printed (-38%), it read as no improvement. The box now takes the change as
+  PR-1 prints it, with "The behavior is to go down" (or up) beside it and the reading next to it ("38% below baseline: an
+  improvement"); a file saved before reads its positive figure as PR-1's. Independent use takes PR-1's own five answers. In
+  the workstation, while they are empty, the change, the answer and the review date come from Form PR-1, the replacement
+  skill and the behavior from Form TD-1, and an implementer's contextual fit values means from Form CF-1 (which now sends
+  each respondent's, by name); the people trained on Form ST-1 and the household on Form CT-1 are offered as respondent
+  rows (**Add ...**), never added unasked.
+- **The goals round goes to TB-1 (F225).** The Summary told the BCBA to record the goals round in Form FS-1 under a method
+  FS-1 does not have. It now goes to Form TB-1's "Selection rationale" (filled while empty in the workstation), where the
+  choice of targets is argued: the goals means by role and what the consumers want, in their words.
+- **Every review's post round kept (F226).** The record held one post round, so each review overwrote the last and "two post
+  administrations" rested on a number typed by hand. **Start the next review's post round** keeps the round whole (its
+  ratings, open answers, PR-1 figures and conditions) and clears the post columns; the Summary's **Post Rounds Across
+  Reviews** shows each round's means by role, E5, E6, the PR-1 change, the concordance and the verdict then. The rounds are
+  counted from the record, and an earlier "agree" is read from them. The worked example keeps its first review's round.
+- **The student in "Where Consumers Disagree" (F227).** The student answers items of their own, so the student never
+  appeared in the table. Each student item is now set beside the adults' item it pairs with (G6 with G1, P7a with P1, P7b
+  with P6, E8a with E3, E8b with E6).
+- **The Goals pre round at plan sign-off (F223).** G2 to G4 ask about the replacement skill, the amount of change and the
+  settings, which only the plan sets, yet the pre round was dated at target selection. The Goals pre round is now taken at
+  plan sign-off, with Procedures; the open item, G1 and G5 can be asked earlier, at target selection, to inform Form TB-1's
+  choice of targets, and are entered in the pre round. The sheet, the Guide and the worked example say so.
+- **The conditions per respondent, and the options on the page (I115).** Anonymity, pressure and whether the options were
+  explained belong to each administration (a phone interview by the BCBA is not anonymous). Under the round's ticks, a
+  table now takes each respondent's own Yes or No (blank keeps the round's tick; a respondent marked not anonymous is not
+  anonymous in either round). A round counts what its lowest respondent met, and the Summary names the respondents below
+  three of four. **The options, as respondents are told them** (what else could be done, and that the plan can change) head
+  every respondent page.
+- **A Spanish respondent page (I111).** **Respondent pages** offers Spanish: the form's own statements, open items and scale,
+  drafted in Spanish for it, on the respondent page's Spanish. A note asks for the district's interpreter or a bilingual
+  colleague to read the page before its first use ("slightly agree" has no single Spanish rendering). Answers in Spanish
+  are collected as before.
+- **The student's response strip (I112).** **Print the student's response strip** (Setup, under Respondents) prints a page
+  to put in front of the student: the student's items for the round, each with six faces on the form's own 1 to 6 scale
+  (so nothing is mapped) and "I don't know", the student's open questions first in each section, a script for the adult
+  who reads it (never a person the plan is about) and places for the student's agreement to answer and who entered it.
+- **The open answers coded (I114).** Under each open answer, a code: it names a current target, something the plan does
+  not measure, a side effect, or no outcome. What the consumers name and the plan does not measure, and every side effect,
+  is listed in the Checks, goes to Form TB-1's selection rationale with the goals round, and to Form PR-1's "Also in the
+  review period", so an outcome that matters to a family becomes a measure rather than a sentence.
+- **The published scales (I113).** The Guide says that this form's items are its own, with no published norms, and names
+  the published school scales a district may want beside it: the IRP-15 for teachers (Martens et al., 1985), the TARF-R for
+  parents (Reimers & Wacker, 1988) and the CIRP for students (Witt & Elliott, 1985), to be used from the published source,
+  with permission where needed, each on its own scale. Their wording is not reproduced.
+- **The master print, checked (v22.77's gate).** Form RA-1's signature row (v22.79) and Form SM-1's contract signatures
+  (v22.80) split across two pages in the master print, the last line alone at the top of the next; every signature block
+  the gate checks now stays on one page. The baseline takes the new page counts: PA-1 24, RA-1 10, SM-1 22, SV-1 11 (the
+  team copy is shorter than the grids by name).
+- qa/sv1-w3-test.js (19 checks) and qa/sv1-w3b-test.js (10 checks); qa/v2182-j-test.js reads the new exit check, and
+  qa/sv1-respond-test.js checks that the on-screen hints stay off the blank print (which the Guide's new paragraph lengthens).
+
 ### v22.80: SM-1 measures the behavior, not only the points, and changes one thing at a time (review Wave 3)
 
 - **The behavior beside the points.** Each day on the Record now has the behavior: the share of the teacher's ratings

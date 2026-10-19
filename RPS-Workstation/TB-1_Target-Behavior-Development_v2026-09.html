@@ -2056,6 +2056,13 @@ window.__nbhFactsIn=function(f){
   return {filled:n};
 };
 
+/* v22.81 (review F225) the goals round of Form SV-1 (sv.goals): what the consumers want, and their goals means by role, into the
+   selection rationale while it is empty, where the choice of targets is argued (Form FS-1 has no social validity method) */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):{filled:0};let k=0;
+  try{const g=f&&f.sv&&f.sv.goals,el=document.querySelector('[name="m.rationale"]');
+    if(g&&typeof g.line==='string'&&g.line.trim()&&el&&!String(el.value||'').trim()){el.value=g.line.trim();['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));k=1;}}catch(e){}
+  return k?{filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the social validity of the goals from Form SV-1'].filter(Boolean).join('; ')}:r;};}
+
 /* ---------- (v21.63) the best library entry for a card's label: its exact name or other name, else the one entry every word of the
    label is in; the bank's entries come first in LIB.entries, so one of your own with the same name wins ---------- */
 function libBest(lab){if(!LIB)return null;const f=libFold(lab);if(!f)return null;

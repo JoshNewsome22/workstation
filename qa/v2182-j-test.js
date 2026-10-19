@@ -67,12 +67,12 @@ const ISO=/^\d{4}-\d{2}-\d{2}$/;
     ok('PR-1 typed rows are not overwritten',st2.sv==='Typed by the BCBA'&&st2.fit==='Typed fit'&&st2.el==='Typed by the BCBA',st2);
     /* exitReady */
     const ex=await p.evaluate(f=>{window.__nbhFactsIn(f);const a=window.__nbhFactsOut().review.exitReady;
-      const g=JSON.parse(JSON.stringify(f));g.sv.post.mean=4.0;g.fit.mean=3.5;window.__nbhFactsIn(g);const b=window.__nbhFactsOut().review.exitReady;
+      const g=JSON.parse(JSON.stringify(f));g.sv.post.mean=4.0;delete g.sv.ok;g.fit.mean=3.5;   /* v22.81 an older SV-1's facts: no ok, the pooled mean read */window.__nbhFactsIn(g);const b=window.__nbhFactsOut().review.exitReady;
       const h=JSON.parse(JSON.stringify(f));delete h.sv;window.__nbhFactsIn(h);const c=window.__nbhFactsOut().review.exitReady;
       const keep={m:Object.assign({},S.meta),r:Object.assign({},S.ready)};
-      window.__nbhFactsIn(f);READY.forEach((_,i)=>S.ready[i]=true);['xBeh','xRep','xSched','xInt','xGen','nat','watch','back','post'].forEach(k=>{if(!String(S.meta[k]||'').trim())S.meta[k]='Written';});renderAll();
+      {const f2=JSON.parse(JSON.stringify(f));f2.sv.ok=true;f2.sv.label='Socially valid';window.__nbhFactsIn(f2);}READY.forEach((_,i)=>S.ready[i]=true);['xBeh','xRep','xSched','xInt','xGen','nat','watch','back','post'].forEach(k=>{if(!String(S.meta[k]||'').trim())S.meta[k]='Written';});renderAll();
       const d=window.__nbhFactsOut().review.exitReady,txt=document.querySelector('#prExit82').textContent;S.meta=keep.m;S.ready=keep.r;renderAll();return {a,b,c,d,txt};},f);
-    ok('PR-1 exitReady {ok, missing} with the simulation: open conditions named, social validity and fit met',ex.a&&ex.a.ok===false&&Array.isArray(ex.a.missing)&&ex.a.missing.length>0&&!ex.a.missing.some(x=>/social validity|contextual fit/.test(x)),ex.a);
+    ok('PR-1 exitReady {ok, missing} with the simulation: open conditions named, contextual fit met; social validity not met, since Form SV-1 does not call the simulated plan socially valid (v22.81, review F218)',ex.a&&ex.a.ok===false&&Array.isArray(ex.a.missing)&&ex.a.missing.length>0&&!ex.a.missing.some(x=>/contextual fit/.test(x))&&ex.a.missing.some(x=>/^social validity: Form SV-1 reads \u201c/.test(x)),ex.a);
     ok('PR-1 exitReady counts a post mean below 4.5 and a fit below 4',ex.b.missing.some(x=>/social validity: SV-1 post mean 4\.00 is below 4\.5/.test(x))&&ex.b.missing.some(x=>/contextual fit: CF-1 mean 3\.50 is below 4/.test(x)),ex.b.missing);
     ok('PR-1 exitReady counts no post round',ex.c.missing.some(x=>/no post round/.test(x)),ex.c.missing);
     ok('PR-1 exitReady ok with every condition met',ex.d.ok===true&&ex.d.missing.length===0&&/both met/.test(ex.txt),ex);

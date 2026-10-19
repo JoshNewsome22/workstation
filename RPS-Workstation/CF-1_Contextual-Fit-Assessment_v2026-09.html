@@ -1656,7 +1656,10 @@ const was=window.__nbhFactsOut;
 window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   try{ensure();const A2=analyse(2),rd=A2.n?2:1,A=rd===2?A2:analyse(1);if(!A.n||A.overall==null)return r;
     const fit={mean:Math.round(A.overall*100)/100,scale:'1-6',low:A.items.filter(x=>x.flag).map(x=>x.txt),round:rd,n:A.n,possible:A.possible,respondents:A.k,thr:S.thr};
-    const b=band(A.overall);if(b)fit.band=b[0];const d=rd===2?(iso(S.meta.readmin)||iso(S.meta.date)):iso(S.meta.date);if(d)fit.date=d;
+    const b=band(A.overall);if(b)fit.band=b[0];
+    /* v22.81 (review F224) each respondent's own "Values and acceptability" mean in rounds 1 and 2, by name, for Form SV-1 */
+    const vI=ITEMS.map((x,i)=>x[0]==='V'?i:-1).filter(i=>i>=0),vm=(j,rd)=>{const vs=vI.map(i=>val(i,j,rd)).filter(v=>v!=null);return vs.length?Math.round(vs.reduce((a,c)=>a+c,0)/vs.length*100)/100:null;};
+    const values=S.raters.map((p,j)=>({name:String(p.name||'').trim(),role:String(p.role||'').trim(),r1:vm(j,1),r2:vm(j,2)})).filter(x=>x.name&&(x.r1!=null||x.r2!=null));if(values.length)fit.values=values;const d=rd===2?(iso(S.meta.readmin)||iso(S.meta.date)):iso(S.meta.date);if(d)fit.date=d;
     const o=r&&typeof r==='object'?r:{};o.fit=fit;return o;}catch(e){return r;}};
 })();
 </script>

@@ -737,6 +737,41 @@ body.view-guide .only-setup,body.view-guide .only-goals,body.view-guide .only-pr
   .sheet{box-shadow:none}
 }
 
+/* ---- v22.81 (review F220) the team copy: by role, no respondent named; the BCBA copy: by name ---- */
+.sv-byrole,.sv-rl,.sv-byrole-i{display:none}
+.sv-copypick{margin:4px 0 10px;font-family:var(--sans);font-size:13px}
+.sv-copypick select{width:auto!important;max-width:100%;margin-left:6px}
+#svCopyWarn{display:block;margin-top:4px}
+select.sv-dir{width:auto!important;border:1px solid var(--rule-2)!important;border-radius:3px}
+#prChgRead{margin-left:6px}
+.sv-byrole table.sv td.c{text-align:center}
+.sv-byrole .sv-opr{margin:4px 0 10px;font-size:12.5px}
+.sv-byrole .sv-opr li{margin:2px 0}
+@media print{
+  .sv-team .sv-byname,.sv-team .sv-nmcol,.sv-team .sv-nm{display:none!important}
+  .sv-team .sv-byrole{display:block!important}
+  .sv-team .sv-rl,.sv-team .sv-byrole-i{display:inline!important}
+  .sv-copyline{font-family:var(--sans);font-size:11px;color:#54676f;margin:0 0 6px}
+}
+
+/* ---- v22.81 (review I112) the student's response strip, printed on its own ---- */
+.sv-strip{display:none}
+@media print{html.sv-printstrip body>*:not(.sv-strip){display:none!important}html.sv-printstrip .sv-strip{display:block!important}}
+.sv-strip{font-family:var(--sans);color:#182e43}
+.sv-strip h1{font:700 22px/1.2 var(--sans);margin:0 0 2px}
+.sv-strip .st-sub{font-size:11px;color:#54676f;margin:0 0 8px}
+.sv-strip .st-script{border:1px solid #9fb3ae;border-radius:6px;padding:8px 12px;font-size:12.5px;line-height:1.45;margin:6px 0 10px;background:#f5f8f7}
+.sv-strip .st-sec{font:700 13px/1.2 var(--sans);text-transform:uppercase;letter-spacing:.06em;color:#54676f;margin:12px 0 2px}
+.sv-strip .st-item{break-inside:avoid;page-break-inside:avoid;margin:0;padding:8px 0 10px;border-top:1px solid #cfdad8}
+.sv-strip .st-q{font:600 18px/1.3 var(--sans);margin:0 0 6px}
+.sv-strip .st-faces{display:flex;gap:8px;align-items:flex-end;flex-wrap:nowrap}
+.sv-strip .st-face{text-align:center;font-size:10.5px;width:74px;line-height:1.2}
+.sv-strip .st-face svg{width:56px;height:56px;display:block;margin:0 auto 2px}
+.sv-strip .st-idk{border:1.5px dashed #9fb3ae;border-radius:6px;padding:14px 4px;font-size:10.5px;width:66px;text-align:center;margin-left:6px}
+.sv-strip .st-line{border-bottom:1px solid #9fb3ae;height:26px}
+.sv-strip .st-foot{font-size:12px;margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;break-inside:avoid}
+.sv-strip .st-foot div{border-bottom:1px solid #9fb3ae;padding-bottom:4px}
+
 /* ---- v21.33 (R): a row can be deleted anywhere, not only the last one ---- */
 td.nx,th.nx{width:30px;text-align:center;padding:0}
 .rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
@@ -921,13 +956,13 @@ td input,td select{max-width:100%}
       <div><label>Case BCBA</label><input data-m="bcba"></div>
       <div><label>Case BCBA email (respondent pages reply here)</label><input data-m="email" type="email" autocomplete="off"></div>
       <div><label>Date of this record</label><input data-m="date"></div>
-      <div><label>Post administrations so far, counting this one</label><select data-m="post_n"><option value="">None yet (pre only)</option><option value="1">1 (first post round)</option><option value="2">2</option><option value="3">3</option><option value="4">4 or more</option></select></div>
+      <div><label>Post administrations so far, counting this one <span class="hint">(this record counts its own post rounds; set this only for rounds recorded elsewhere)</span></label><select data-m="post_n"><option value="">None yet (pre only)</option><option value="1">1 (first post round)</option><option value="2">2</option><option value="3">3</option><option value="4">4 or more</option></select></div>
       <div><label>Collected by (never a person being rated)</label><input data-m="collector"></div>
     </div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:24%">The behavior the plan targets, as the consumers would say it</th><td><input data-m="beh" placeholder="plain words, not the operational definition"></td></tr>
       <tr><th>The replacement skill the plan teaches</th><td><input data-m="skill"></td></tr>
-      <tr><th>When the pre round was taken</th><td><input data-m="pre_when" placeholder="Goals at target selection (FS-1 draft date); Procedures at plan sign-off (with IC-1 and contextual fit round 1)"></td></tr>
+      <tr><th>When the pre round was taken</th><td><input data-m="pre_when" placeholder="Goals and Procedures at plan sign-off (with IC-1 and contextual fit round 1); the open item first asked at target selection, if it was"></td></tr>
       <tr><th>When the post round was taken</th><td><input data-m="post_when" placeholder="At the PR-1 review dated ... ; at exit or fading"></td></tr>
       <tr><th>Why now</th><td><textarea data-m="why" rows="2" placeholder="What prompted this administration"></textarea></td></tr>
       <tr><th>Plan modified since the last round?</th><td><div class="ckrow"><label class="ck"><input type="checkbox" data-c="modified"> Yes: the Procedures section is re-rated, because acceptability was rated for the earlier version</label></div></td></tr>
@@ -936,12 +971,13 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band" style="margin-top:18px">Respondents</h2>
     <p class="hint">Every form needs at least one <b>student</b> row, in whatever mode the student can respond (the youths were the judges in Willner et al., 1977, as cited in Wolf, 1978), at least one <b>caregiver</b>, at least one <b>implementer</b>, and the <b>administrator</b> for the cost and practicality items of the Procedures section. A missing student or caregiver row is flagged, not blocked; record the reason below. Student rows answer the student version of each section; the contextual fit columns take an implementer&rsquo;s own &ldquo;Values and acceptability&rdquo; domain mean from rounds 1 and 2 of the contextual fit form (Form CF-1), so the same person&rsquo;s two answers can be compared.</p>
     <div class="row" style="margin:8px 0;display:flex;gap:8px">
-      <button class="tool" id="addR">Add respondent</button><button class="tool" id="delR">Remove last</button>
+      <button class="tool" id="addR">Add respondent</button><button class="tool" id="delR">Remove last</button><button class="tool" id="stripBtn" type="button" title="A printed page to put in front of the student: the student's items with six faces, the open questions, and a script for the adult who reads it aloud">Print the student&rsquo;s response strip</button>
     </div>
+    <div id="svOffer" class="noprint"></div>
     <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr>
       <th style="width:4%">#</th><th style="width:15%">Name or initials</th><th style="width:14%">Role</th><th style="width:11%">Mode</th>
       <th style="width:9%">Anonymous to the rated staff?</th><th style="width:9%">Pre date</th><th style="width:9%">Post date</th>
-      <th style="width:7%">Contextual fit values, round 1</th><th style="width:7%">Contextual fit values, round 2</th><th>Note (adaptation, who read it aloud, consent)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:7%" class="sv-nmcol">Contextual fit values, round 1</th><th style="width:7%" class="sv-nmcol">Contextual fit values, round 2</th><th>Note (adaptation, who read it aloud, consent)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:24%">Roles missing, and why</th><td><textarea data-m="missing_why" rows="2" placeholder="e.g., no caregiver reachable this round; administrator to rate at the next review"></textarea></td></tr>
     </table>
@@ -954,6 +990,9 @@ td input,td select{max-width:100%}
       <tr><td>Collected by someone other than the person being rated, and the rated person sees only aggregates (anonymity)</td><td class="ckc"><input type="checkbox" data-c="pre_anon" aria-label="Pre: anonymity"></td><td class="ckc"><input type="checkbox" data-c="post_anon" aria-label="Post: anonymity"></td></tr>
       <tr><td>Respondent asked the open question first, before any rating item (Willner&rsquo;s open listing)</td><td class="ckc"><input type="checkbox" data-c="pre_open" aria-label="Pre: open question first"></td><td class="ckc"><input type="checkbox" data-c="post_open" aria-label="Post: open question first"></td></tr>
     </tbody></table></div>
+    <div class="sv-byname"><p class="hint">By respondent: a condition can differ from one respondent to another (an interview by the BCBA is not anonymous; a page sent by email carries the options text). Leave a cell at &ldquo;as the round&rdquo; to take the round&rsquo;s tick above. A round counts what its lowest respondent met.</p>
+    <div class="grid-wrap"><table class="rt" id="condRespTbl"></table></div></div>
+    <table class="rt" style="margin-top:10px"><tr><th style="width:24%">The options, as respondents are told them</th><td><textarea data-m="options" rows="2" placeholder="What else could be done, and that the plan can change. Printed at the top of the respondent pages."></textarea></td></tr></table>
     <div id="setupVerdict"></div>
   </section>
 
@@ -962,13 +1001,13 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Section G: The Social Significance of the Goals</h2>
     <div class="instr">
       <blockquote>&ldquo;The social significance of the goals. Are the specific behavioral goals really what society wants?&rdquo; (Wolf, 1978, p. 207)</blockquote>
-      <p>Administer <b>pre</b>, at target selection and before the FS-1 targets are final, and again <b>post</b>. Ask the open question first and write the answer down before any rating item: Willner et al. (as cited in Wolf, 1978) could not predict which behaviors the youths would value, and &ldquo;some of the behaviors that he thought would be most important to the youths were never mentioned by them.&rdquo; The answers are coded later into the target list and recorded in FS-1 with no tier.</p>
+      <p>Administer <b>pre</b> at plan sign-off, with the Procedures pre round, and again <b>post</b>. G2 to G4 ask about the replacement skill, the amount of change and the settings, which only the plan sets: asked at target selection, they would be answered about a plan that does not exist yet. The open question, G1 and G5 can be asked earlier, at target selection, to inform Form TB-1&rsquo;s choice of targets; enter those answers in the pre round. Ask the open question first and write the answer down before any rating item: Willner et al. (as cited in Wolf, 1978) could not predict which behaviors the youths would value, and &ldquo;some of the behaviors that he thought would be most important to the youths were never mentioned by them.&rdquo; Code each answer under it (a current target, something not measured, a side effect): what the consumers name and the plan does not measure goes to Form TB-1&rsquo;s selection rationale and to Form PR-1.</p>
     </div>
-    <div class="roundbar" id="gRound"><button data-r="pre" aria-pressed="true">Pre &mdash; at target selection</button><button data-r="post" aria-pressed="false">Post &mdash; at review</button></div>
+    <div class="roundbar" id="gRound"><button data-r="pre" aria-pressed="true">Pre &mdash; at plan sign-off</button><button data-r="post" aria-pressed="false">Post &mdash; at review</button></div>
     <div class="scalekey"><span><b>1</b> strongly disagree</span><span><b>2</b> disagree</span><span><b>3</b> slightly disagree</span><span><b>4</b> slightly agree</span><span><b>5</b> agree</span><span><b>6</b> strongly agree</span><span><b>N/A</b> I cannot judge</span></div>
     <p class="anch">Said to the respondent: <b>6 = exactly what I want; 1 = not what I want at all.</b> The 1 to 6 scale is the contextual fit form&rsquo;s (Form CF-1), so the two forms read alike.</p>
-    <div class="rnd" data-sec="G" data-r="pre"><h3 class="rcap printonly">Pre round</h3><div class="grid-wrap"><table class="op" id="gOpen_pre"></table></div><div class="grid-wrap"><table class="sv" id="gTbl_pre"></table></div></div>
-    <div class="rnd" data-sec="G" data-r="post"><h3 class="rcap printonly">Post round</h3><div class="grid-wrap"><table class="op" id="gOpen_post"></table></div><div class="grid-wrap"><table class="sv" id="gTbl_post"></table></div></div>
+    <div class="rnd" data-sec="G" data-r="pre"><h3 class="rcap printonly">Pre round</h3><div class="grid-wrap sv-byname"><table class="op" id="gOpen_pre"></table></div><div class="grid-wrap sv-byname"><table class="sv" id="gTbl_pre"></table></div><div class="sv-byrole" id="gRole_pre"></div></div>
+    <div class="rnd" data-sec="G" data-r="post"><h3 class="rcap printonly">Post round</h3><div class="grid-wrap sv-byname"><table class="op" id="gOpen_post"></table></div><div class="grid-wrap sv-byname"><table class="sv" id="gTbl_post"></table></div><div class="sv-byrole" id="gRole_post"></div></div>
     <p class="hint" style="margin-top:8px">G5 is the guard for the discrepancy Wolf describes on p. 213: a parent says &ldquo;improved&rdquo; while the measured rate is flat &ldquo;because the child has stopped cursing, which was important to the parent, but not measured by us.&rdquo; A low G5 now, with high satisfaction later, says the consumer is responding to something the plan does not measure.</p>
   </section>
 
@@ -983,8 +1022,8 @@ td input,td select{max-width:100%}
     <div class="roundbar" id="pRound"><button data-r="pre" aria-pressed="true">Pre &mdash; at plan sign-off</button><button data-r="post" aria-pressed="false">Post &mdash; at review</button></div>
     <div class="scalekey"><span><b>1</b> strongly disagree</span><span><b>2</b> disagree</span><span><b>3</b> slightly disagree</span><span><b>4</b> slightly agree</span><span><b>5</b> agree</span><span><b>6</b> strongly agree</span><span><b>N/A</b> I have not seen it run</span></div>
     <p class="anch">Said to the respondent: <b>6 = completely acceptable; 1 = not acceptable; N/A = I have not seen it run.</b></p>
-    <div class="rnd" data-sec="P" data-r="pre"><h3 class="rcap printonly">Pre round</h3><div class="grid-wrap"><table class="op" id="pOpen_pre"></table></div><div class="grid-wrap"><table class="sv" id="pTbl_pre"></table></div></div>
-    <div class="rnd" data-sec="P" data-r="post"><h3 class="rcap printonly">Post round</h3><div class="grid-wrap"><table class="op" id="pOpen_post"></table></div><div class="grid-wrap"><table class="sv" id="pTbl_post"></table></div></div>
+    <div class="rnd" data-sec="P" data-r="pre"><h3 class="rcap printonly">Pre round</h3><div class="grid-wrap sv-byname"><table class="op" id="pOpen_pre"></table></div><div class="grid-wrap sv-byname"><table class="sv" id="pTbl_pre"></table></div><div class="sv-byrole" id="pRole_pre"></div></div>
+    <div class="rnd" data-sec="P" data-r="post"><h3 class="rcap printonly">Post round</h3><div class="grid-wrap sv-byname"><table class="op" id="pOpen_post"></table></div><div class="grid-wrap sv-byname"><table class="sv" id="pTbl_post"></table></div><div class="sv-byrole" id="pRole_post"></div></div>
   </section>
 
   <!-- ===================== EFFECTS ===================== -->
@@ -996,13 +1035,15 @@ td input,td select{max-width:100%}
     </div>
     <div class="scalekey"><span><b>1</b> strongly disagree</span><span><b>2</b> disagree</span><span><b>3</b> slightly disagree</span><span><b>4</b> slightly agree</span><span><b>5</b> agree</span><span><b>6</b> strongly agree</span><span><b>N/A</b> I cannot judge</span></div>
     <p class="anch">Said to the respondent: <b>6 = yes, clearly; 1 = no, not at all.</b></p>
-    <div class="rnd on" data-sec="E" data-r="post"><div class="grid-wrap"><table class="op" id="eOpen_post"></table></div><div class="grid-wrap"><table class="sv" id="eTbl_post"></table></div></div>
+    <div class="rnd on" data-sec="E" data-r="post"><div class="grid-wrap sv-byname"><table class="op" id="eOpen_post"></table></div><div class="grid-wrap sv-byname"><table class="sv" id="eTbl_post"></table></div><div class="sv-byrole" id="eRole_post"></div></div>
     <p class="hint" style="margin-top:8px">E1 is compared on the Summary sheet with PR-1 section 2 (percent change from baseline) and E2 with PR-1 section 3 (used independently). The comparison is a concordance, not a score: it never changes the PR-1 suggestion.</p>
   </section>
 
   <!-- ===================== SUMMARY ===================== -->
   <section class="only-sum">
     <h2 class="nbh-band">Summary</h2>
+    <div class="sv-copypick noprint"><label>What prints <select data-m="print_copy" aria-label="What prints"><option value="">The team copy when any respondent was told the rated staff see only aggregates; otherwise the BCBA copy</option><option value="team">The team copy: ratings and open answers by role, no respondent named</option><option value="bcba">The BCBA copy: each respondent&rsquo;s ratings by name</option></select></label><span id="svCopyWarn" class="hint"></span></div>
+    <p class="printonly sv-copyline" id="svCopyLine"></p>
     <div id="sumVerdict"></div>
     <div id="condNote"></div>
     <div class="metrics" id="secMetrics"></div>
@@ -1013,27 +1054,32 @@ td input,td select{max-width:100%}
     <p class="hint">Computed for the respondents who rated the item in both rounds. When the respondents differ between rounds the change is marked as not like for like (the contextual fit form&rsquo;s rule).</p>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Change from pre to post"><table class="rt" id="cmpTbl"></table></div>
     <h3 style="margin-top:14px">Items Flagged</h3>
-    <p class="hint">Any item on which a respondent rated at or below the threshold<span class="noprint"> in the toolbar</span>, by role and round. E5 is flagged on its reversed value, so a high E5 (something got worse) is what appears here.</p>
+    <p class="hint">Any item on which a respondent rated at or below the threshold<span class="noprint"> in the toolbar</span>, by role and round<span class="sv-byrole-i"> (in the team copy, by role only: the implementers together, no one named)</span>. E5 is flagged on its reversed value, so a high E5 (something got worse) is what appears here.</p>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Items flagged"><table class="rt" id="flagTbl"></table></div>
     <h3 style="margin-top:14px">Where Consumers Disagree</h3>
-    <p class="hint">Items on which the role means are 2 or more points apart. Willner et al. (as cited in Wolf, 1978) found that the experts were not able to predict what the youths valued; disagreement between roles is the finding, not noise.</p>
+    <p class="hint">Items on which the role means are 2 or more points apart. Willner et al. (as cited in Wolf, 1978) found that the experts were not able to predict what the youths valued; disagreement between roles is the finding, not noise.<span class="noprint"> The student answers items of their own; each is set beside the adults&rsquo; item it pairs with (G6 with G1, P7a with P1, P7b with P6, E8a with E3, E8b with E6), so the student&rsquo;s view is compared too.</span></p>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Where consumers disagree"><table class="rt" id="splitTbl"></table></div>
 
     <h3 style="margin-top:14px">Concordance With PR-1</h3>
     <p class="hint">Enter the figures from the current PR-1 review. The lines below compare them with E1 and E2. They are read into PR-1 section 4 as a concordance with no tier and no weight: the decision follows the data.</p>
     <table class="rt">
-      <tr><th style="width:26%">PR-1 section 2: percent change from baseline</th><td><input data-m="pr_change" placeholder="improvement as a positive number, e.g., 38; worsening as negative" style="width:60%"></td></tr>
-      <tr><th>PR-1 section 3: replacement skill used independently?</th><td><select data-m="pr_indep" style="width:60%"><option></option><option>Yes, independently</option><option>With prompts</option><option>Not yet</option></select></td></tr>
+      <tr><th style="width:26%">PR-1 section 2: percent change from baseline</th><td><input data-m="pr_change" placeholder="as PR-1 prints it, e.g., -38" style="width:30%" aria-label="PR-1 percent change from baseline, as PR-1 prints it"> <select data-m="pr_dir" class="sv-dir" aria-label="Which way the behavior is to go"><option value="">The behavior is to go down</option><option value="increase">The behavior is to go up</option></select> <span id="prChgRead" class="hint"></span></td></tr>
+      <tr><th>PR-1 section 3: replacement skill used independently?</th><td><select data-m="pr_indep" style="width:60%"><option></option><option>Yes, across settings and people</option><option>Yes, but only with trained staff</option><option>Yes, but only in one setting</option><option>Prompted only</option><option>Not yet</option></select></td></tr>
       <tr><th>PR-1 review date</th><td><input data-m="pr_date" style="width:60%"></td></tr>
-      <tr><th>Earlier post round</th><td><div class="ckrow"><label class="ck"><input type="checkbox" data-c="prior_agree"> An earlier post round already showed concordance &ldquo;agree&rdquo; (counts toward the verdict; name the review under &ldquo;When the post round was taken&rdquo;)</label></div></td></tr>
+      <tr><th>Earlier post round</th><td><div class="ckrow"><label class="ck"><input type="checkbox" data-c="prior_agree"> An earlier post round recorded elsewhere (on paper, or before this record) already showed concordance &ldquo;agree&rdquo;</label> <input data-m="prior_date" placeholder="its review date" style="width:9em" aria-label="The review date of that earlier post round"></div><span class="hint noprint">An earlier round kept in Post Rounds Across Reviews below counts on its own. An earlier &ldquo;agree&rdquo; carries over only while this review&rsquo;s data do not contradict the consumers.</span></td></tr>
     </table>
     <div id="concord"></div>
-    <h3 style="margin-top:14px">Against the Contextual Fit Form (implementers only)</h3>
-    <div class="grid-wrap" tabindex="0" role="region" aria-label="Against the contextual fit form"><table class="rt" id="cfTbl"></table></div>
+    <div id="histWrap"><h3 style="margin-top:14px">Post Rounds Across Reviews</h3>
+    <p class="hint">Each review&rsquo;s post round is kept whole: when the next review comes, <b>Start the next review&rsquo;s post round</b> keeps this one here (its ratings, open answers, PR-1 figures and conditions) and clears the post columns. The means are by role, the effects with E5 reversed; E5 and E6 are shown as rated.</p>
+    <div class="grid-wrap" tabindex="0" role="region" aria-label="Post rounds across reviews"><table class="rt" id="histTbl"></table></div>
+    <div class="noprint" style="margin:8px 0"><button class="tool" id="nextPost" type="button">Start the next review&rsquo;s post round</button></div></div>
+    <div class="sv-byname"><h3 style="margin-top:14px">Against the Contextual Fit Form (implementers only)</h3>
+    <div class="grid-wrap" tabindex="0" role="region" aria-label="Against the contextual fit form"><table class="rt" id="cfTbl"></table></div></div>
+    <p class="sv-byrole hint">The comparison with the contextual fit form, person by person, is in the BCBA copy only.</p>
     <h3 style="margin-top:14px">Checks Before Reporting</h3>
     <div id="flagList"></div>
-    <h3 style="margin-top:14px">What Goes to FS-1 and PR-1</h3>
-    <p class="hint">Copy the first of these into FS-1 (Evidence: a source with method &ldquo;Social validity &mdash; goals (Wolf, 1978)&rdquo;, tier none, and a short paragraph in the Report). In the workstation, PR-1 section 4&rsquo;s row &ldquo;Social validity (SV-1, this period)&rdquo; fills automatically from this form while it is empty; with this form opened on its own, copy the PR-1 line below into that row. Neither entry carries a function, a strength, or a tier, and neither counts toward convergence.</p>
+    <h3 style="margin-top:14px">What Goes to TB-1 and PR-1</h3>
+    <p class="hint">The goals round belongs with the choice of targets: in the workstation, Form TB-1&rsquo;s &ldquo;Selection rationale&rdquo; takes the first of these while it is empty (and Form GB-1, where the goals are written, can be read beside it); with this form opened on its own, copy it there. PR-1 section 4&rsquo;s row &ldquo;Social validity (SV-1, this period)&rdquo; fills automatically from this form while it is empty; with this form opened on its own, copy the PR-1 line below into that row. Neither carries a function, a strength or a tier, and neither counts toward the convergence of the FBA (Form FS-1 has no social validity method).</p>
     <div class="feed" id="feedFs"></div>
     <div class="feed" id="feedPr"></div>
     <table class="rt" style="margin-top:12px">
@@ -1050,10 +1096,11 @@ td input,td select{max-width:100%}
     <div class="instr"><blockquote>&ldquo;The suggestion seemed to be that society would need to validate our work on at least three levels:<br>1. The social significance of the <b>goals</b>. Are the specific behavioral goals really what society wants?<br>2. The social appropriateness of the <b>procedures</b>. Do the ends justify the means? That is, do the participants, caregivers and other consumers consider the treatment procedures acceptable?<br>3. The social importance of the <b>effects</b>. Are consumers satisfied with the results? All the results, including any unpredicted ones?<br>We have come to refer to these as judgements of social validity.&rdquo; (Wolf, 1978, p. 207)</blockquote></div>
     <p>The judges are the consumers: &ldquo;the participants, caregivers and other consumers,&rdquo; &ldquo;the specific consumer or representatives of the relevant community.&rdquo; Experts are not the judges. Wolf recalls that his team thought &ldquo;we were psychologists and thus the most qualified judges of what was best for people. Somehow, they didn&rsquo;t seem convinced by that logic&rdquo; (p. 206), and the first replication community &ldquo;fired&rdquo; the program before the team knew of any complaint; after a consumer feedback system was built, &ldquo;the Achievement Place program has not been summarily &lsquo;fired&rsquo; from a community&rdquo; (p. 211). Consumer feedback was designed as ongoing quality control, collected &ldquo;throughout the year of training and certification, and each year thereafter&rdquo; (p. 211), not once.</p>
     <p><b>The boundary with the contextual fit form.</b> Contextual fit (Form CF-1) asks the implementers whether they can and will run the plan: knowledge, skills, values, resources, routine, administrative support, expected effectiveness. SV-1 asks the consumers, including the student and the caregiver who never run the plan, whether the plan is aimed at the right thing, done in an acceptable way, and worked for them. The overlap is that form&rsquo;s &ldquo;Values and acceptability&rdquo; items; SV-1 item P2 mirrors its item 10 and the Summary sets an implementer&rsquo;s contextual fit values mean beside their SV-1 procedures mean rather than repeating the items.</p>
+    <p><b>Published acceptability scales.</b> This form&rsquo;s items are its own, written from Wolf (1978); they have no published norms. Where a district or an IEP team wants a published instrument with its own scoring, school versions exist: the Intervention Rating Profile-15 for teachers (IRP-15; Martens, Witt, Elliott, &amp; Darveaux, 1985), the Treatment Acceptability Rating Form&ndash;Revised for parents (TARF-R; Reimers &amp; Wacker, 1988) and the Children&rsquo;s Intervention Rating Profile for students (CIRP; Witt &amp; Elliott, 1985). Their wording is the authors&rsquo;: use them from the published source, with permission where it is needed, beside this form rather than in its place, and report each on its own scale.</p>
 
     <h2 class="nbh-band" style="margin-top:16px">When to Administer</h2>
     <table class="rt">
-      <tr><th style="width:26%">Pre, Goals</th><td>At target selection, before FS-1&rsquo;s targets and statements are final. The open item and G1&ndash;G6 inform TB-1 and GB-1 and are recorded in FS-1.</td></tr>
+      <tr><th style="width:26%">Pre, Goals</th><td>At plan sign-off, with the Procedures pre round: G2&ndash;G4 ask about the replacement skill, the amount of change and the settings, which only the plan sets. The open item, G1 and G5 can be asked earlier, at target selection, to inform TB-1 and GB-1 (they go to TB-1&rsquo;s selection rationale); they are entered in the pre round.</td></tr>
       <tr><th>Pre, Procedures</th><td>At plan sign-off, alongside IC-1 consent and round 1 of the contextual fit form (Form CF-1). Implementers answer SV-1 Section P and the contextual fit form both; the student and the caregiver answer SV-1 only.</td></tr>
       <tr><th>Post, all three sections</th><td>At every PR-1 review and at exit or fading. A minimum of two post administrations before a plan is called socially valid.</td></tr>
       <tr><th>After a modification</th><td>Re-administer Procedures after any plan modification (PR-1 decision &ldquo;Modify the plan&rdquo;), since acceptability was rated for the earlier version.</td></tr>
@@ -1099,9 +1146,11 @@ td input,td select{max-width:100%}
     <p class="hint" id="svRefs"><b>Reference list.</b>
     Wolf, M. M. (1978). Social validity: The case for subjective measurement or how applied behavior analysis is finding its heart. <em>Journal of Applied Behavior Analysis, 11</em>(2), 203&ndash;214. https://doi.org/10.1901/jaba.1978.11-203 &bull;
     Cited as in Wolf (1978), and not consulted directly for this form: Berleman, Seaberg &amp; Steinburn (1972), satisfaction without measured effect (Wolf, p. 212); Braukmann, Fixsen, Kirigin, Phillips, Phillips &amp; Wolf (1975), consumer feedback as quality control (p. 211); Foxx &amp; Azrin (1972) and Porterfield, Herbert-Jackson &amp; Risley (1976), <em>Journal of Applied Behavior Analysis, 9</em>, 55&ndash;64, acceptability of procedures to caregivers (p. 210); Kent &amp; O&rsquo;Leary (1976) and Brigham, Graubard &amp; Stans (1972), subjective ratings against objective change (p. 210); Levi &amp; Anderson (1975), each individual as the best judge of his own situation (p. 213); Minkin et al. (1976), <em>Journal of Applied Behavior Analysis, 9</em>, 127&ndash;140, the four-step validation method (pp. 209&ndash;210); Willner et al. (1977), <em>Journal of Applied Behavior Analysis, 10</em>, 219&ndash;230, youth-rated teaching-parent behaviors (pp. 208&ndash;209).
+    Published school acceptability scales named in the Guide, not reproduced here: Martens, B. K., Witt, J. C., Elliott, S. N., &amp; Darveaux, D. X. (1985). Teacher judgments concerning the acceptability of school-based interventions. <em>Professional Psychology: Research and Practice, 16</em>(2), 191&ndash;198. Reimers, T. M., &amp; Wacker, D. P. (1988). Parents&rsquo; ratings of the acceptability of behavioral treatment recommendations made in an outpatient clinic: A preliminary analysis of the influence of treatment effectiveness. <em>Behavioral Disorders, 14</em>(1), 7&ndash;15. Witt, J. C., &amp; Elliott, S. N. (1985). Acceptability of classroom management strategies. In T. R. Kratochwill (Ed.), <em>Advances in school psychology</em> (Vol. 4, pp. 251&ndash;288). Erlbaum. &bull;
     The items on this form are written for a school FBA/BIP and are not a published instrument; the thresholds and verdict labels are working conventions of this form.</p>
   </section>
 </main>
+<div id="svStrip" class="sv-strip"></div>
 
 <!-- v21.39: respondent pages and Collect responses (the dialogs and their rules; nothing here prints) -->
 <style id="sv1-respond-css">
@@ -1138,10 +1187,12 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
       <div class="f"><label for="rpRound">Round</label><select id="rpRound"><option value="pre">Pre: Goals and Procedures</option><option value="post">Post: Goals, Procedures and Effects</option></select></div>
       <div class="f"><label for="rpStudent">Student label on the page (initials and ID, not the full name)</label><input id="rpStudent"></div>
       <div class="f"><label for="rpNick">How the items name the student (a first name at most, or &ldquo;the student&rdquo;)</label><input id="rpNick"></div>
+      <div class="f"><label for="rpLang">Language of the page</label><select id="rpLang"><option value="">English</option><option value="es">Espa&ntilde;ol (Spanish)</option></select></div>
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
     </div>
     <div class="f"><label for="rpBeh">The behavior the plan targets, as the page states it (plain words)</label><input id="rpBeh"></div>
+    <p class="hint" id="rpLangNote" hidden><b>Spanish.</b> The statements, the open items and the scale are this form&rsquo;s own, drafted in Spanish for it, and the page&rsquo;s own words are the respondent page&rsquo;s Spanish. Have the district&rsquo;s interpreter or a bilingual colleague read the page (Preview) before its first use: &ldquo;slightly agree&rdquo; and its neighbours have no single Spanish rendering. The plan, the behavior and the options appear as typed, so type them in Spanish for this page.</p>
     <label class="gf-note"><input type="checkbox" id="rpOpen" checked> Ask the open items of each section too (in the respondent&rsquo;s own words)</label>
     <div id="rpStatus" class="gf-warn" hidden></div>
     <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpPreview">Preview</button><span class="hint" id="rpNote"></span></div>
@@ -1218,7 +1269,7 @@ const applies=(x,role)=>x.who==='any'?true:x.who==='all'?!STU(role):x.who==='stu
 const wording=(x,role)=>{const nm=(S.meta.nick||S.meta.client||'').trim()||'[student]';return (STU(role)&&x.st?x.st:x.t).replace(/\[student\]/g,nm);};
 
 /* ---------------- state ---------------- */
-function blank(){return{meta:{},chk:{},resp:[],rat:{pre:{},post:{}},open:{pre:{},post:{}},round:'pre',thr:3};}
+function blank(){return{v:2,meta:{},chk:{},resp:[],rat:{pre:{},post:{}},open:{pre:{},post:{}},round:'pre',thr:3,hist:[],rcond:{pre:{},post:{}},code:{pre:{},post:{}}};}   /* v22.81 v:2, the change from baseline as PR-1 prints it (review F224); hist, the earlier post rounds (F226) */
 let S=blank();
 const newResp=()=>({name:'',role:'',mode:'',anon:'',pre:'',post:'',cf1:'',cf2:'',note:''});
 function ensure(){
@@ -1229,6 +1280,12 @@ function ensure(){
       if(!m||+m[2]>=S.resp.length||!(ITEM(m[1])||OPENS.find(x=>x.id===m[1])))delete o[k];}));});
   if(S.round!=='pre'&&S.round!=='post')S.round='pre';
   if(!(S.thr>=1&&S.thr<=5))S.thr=3;
+  if(!Array.isArray(S.hist))S.hist=[];
+  /* v22.81 (I115, I114) a respondent's own conditions and the codes of the open answers belong to a respondent and an answer that exist */
+  ['rcond','code'].forEach(nm=>{if(!S[nm]||typeof S[nm]!=='object')S[nm]={};['pre','post'].forEach(r=>{if(!S[nm][r]||typeof S[nm][r]!=='object')S[nm][r]={};
+    Object.keys(S[nm][r]).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k);if(!m||+m[2]>=S.resp.length)delete S[nm][r][k];});});});
+  /* v22.81 (review F224) PR-1's own five answers on independent use; the two this form had before read as their match */
+  if(S.meta.pr_indep==='Yes, independently')S.meta.pr_indep='Yes, across settings and people';else if(S.meta.pr_indep==='With prompts')S.meta.pr_indep='Prompted only';
 }
 const key=(id,i)=>id+'_'+i;
 /* numeric value of a rating, or null when blank or N/A */
@@ -1253,8 +1310,8 @@ function renderResp(){
     <td><select data-ri="${i}" data-f="anon" aria-label="Respondent ${i+1} anonymous to the rated staff">${opt(['Yes','No'],r.anon)}</select></td>
     <td><input data-ri="${i}" data-f="pre" value="${esc(r.pre)}" aria-label="Respondent ${i+1} pre date"></td>
     <td><input data-ri="${i}" data-f="post" value="${esc(r.post)}" aria-label="Respondent ${i+1} post date"></td>
-    <td><input data-ri="${i}" data-f="cf1" value="${esc(r.cf1)}" aria-label="Respondent ${i+1} contextual fit values mean round 1"${IMPL(r.role)?'':' disabled placeholder="—"'}></td>
-    <td><input data-ri="${i}" data-f="cf2" value="${esc(r.cf2)}" aria-label="Respondent ${i+1} contextual fit values mean round 2"${IMPL(r.role)?'':' disabled placeholder="—"'}></td>
+    <td class="sv-nmcol"><input data-ri="${i}" data-f="cf1" value="${esc(r.cf1)}" aria-label="Respondent ${i+1} contextual fit values mean round 1"${IMPL(r.role)?'':' disabled placeholder="—"'}></td>
+    <td class="sv-nmcol"><input data-ri="${i}" data-f="cf2" value="${esc(r.cf2)}" aria-label="Respondent ${i+1} contextual fit values mean round 2"${IMPL(r.role)?'':' disabled placeholder="—"'}></td>
     <td><input data-ri="${i}" data-f="note" value="${esc(r.note)}" aria-label="Respondent ${i+1} note"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this respondent" aria-label="Delete respondent ${i+1}">&times;</button></td></tr>`).join('');
 }
 /* v21.33 (R): a respondent can be deleted anywhere in the list. Their ratings and open-item answers in both rounds
@@ -1264,7 +1321,7 @@ async function delResp(i){const r=S.resp[i];if(!r)return;
   const has=Object.keys(r).some(f=>String(r[f]||'').trim())||held;
   if(has&&!(await nbhUI.confirm('Delete respondent '+(i+1)+(String(r.name||'').trim()?' ('+String(r.name).trim()+')':'')+'?\nTheir details, their ratings and their open-item answers in both rounds will be deleted.',{ok:'Delete',danger:true})))return;
   S.resp.splice(i,1);
-  ['pre','post'].forEach(rd=>[['rat',S.rat],['open',S.open]].forEach(([nm,M])=>{const o=M[rd]||{},nw={};Object.keys(o).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k);
+  ['pre','post'].forEach(rd=>[['rat',S.rat],['open',S.open],['rcond',S.rcond],['code',S.code]].forEach(([nm,M])=>{if(!M)return;const o=M[rd]||{},nw={};Object.keys(o).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k);
     if(!m){nw[k]=o[k];return;}const j=+m[2];if(j===i)return;nw[m[1]+'_'+(j>i?j-1:j)]=o[k];});M[rd]=nw;}));
   if(!S.resp.length)S.resp.push(newResp());
   renderAll();}
@@ -1285,9 +1342,25 @@ function renderGrid(sec,round){
     `</tbody><tfoot><tr><td class="n"></td><td class="item">Respondent mean${sec==='E'?' (E5 reversed)':''}</td>${R.map((r,i)=>`<td>${f2(respMean(round,sec,i))}</td>`).join('')}<td>${f2(secMean(round,sec).mean)}</td></tr></tfoot>`;
   op.innerHTML=`<thead><tr><th style="width:28%">Open item (asked first)</th>${R.map((r,i)=>`<th>${rlabel(r,i)}</th>`).join('')}</tr></thead><tbody>`+
     SECOPENS(sec).map(o=>`<tr><td class="q">${esc(o.id)}. ${esc(wording(o,''))}${o.st?`<div class="hint">Student wording: ${esc(wording(o,'Student'))}</div>`:''}${o.who==='student'?'<span class="who hint">student item</span>':''}</td>`+
-      R.map((r,i)=>applies(o,r.role)?`<td><textarea data-o="${key(o.id,i)}" data-r="${round}" data-nbh-nowording rows="3" aria-label="${esc(o.id)} answer, respondent ${i+1}">${esc(S.open[round][key(o.id,i)]||'')}</textarea></td>`:'<td class="na">—</td>').join('')+'</tr>').join('')+'</tbody>';
+      R.map((r,i)=>applies(o,r.role)?`<td><textarea data-o="${key(o.id,i)}" data-r="${round}" data-nbh-nowording rows="3" aria-label="${esc(o.id)} answer, respondent ${i+1}">${esc(S.open[round][key(o.id,i)]||'')}</textarea>${codeSel(round,key(o.id,i),o.id,i)}</td>`:'<td class="na">—</td>').join('')+'</tr>').join('')+'</tbody>';
 }
-function renderGrids(){Object.keys(SECS).forEach(s=>SECS[s].rounds.forEach(r=>renderGrid(s,r)));setRound(S.round);
+/* v22.81 (review I114) each open answer coded: does it name a current target, something the plan does not measure, or a side
+   effect? What is named and not measured goes to Form TB-1 (the selection rationale) and Form PR-1 (Also in the review period). */
+const OCODES=[['target','names a current target'],['unmeasured','names something not measured'],['side','names a side effect'],['none','names no outcome']];
+const codeSel=(round,k,id,i)=>{const v=((S.code||{})[round]||{})[k]||'';return '<select class="sv-code" data-cd="'+k+'" data-r="'+round+'" aria-label="'+esc(id)+' code, respondent '+(i+1)+'"><option value="">Not coded</option>'+OCODES.map(([c,l])=>'<option value="'+c+'"'+(v===c?' selected':'')+'>The answer '+l+'</option>').join('')+'</select>';};
+function namedOutcomes(){const L=[];['pre','post'].forEach(rd=>Object.keys((S.code||{})[rd]||{}).forEach(k=>{const tag=S.code[rd][k];if(tag!=='unmeasured'&&tag!=='side')return;const m=/^(\w+)_(\d+)$/.exec(k),t=String(S.open[rd][k]||'').trim();
+  if(!m||!t)return;const p=S.resp[+m[2]];if(!p)return;L.push({text:t,tag,role:p.role?GROUP(p.role):'Respondent',round:rd,i:+m[2],id:m[1]});}));return L;}
+/* v22.81 (review F220) the team copy of a section's round: each role's mean on each item and the open answers by role, with
+   no respondent named (the implementers together); printed in place of the grids by name when the team copy is chosen */
+function renderRoleGrid(sec,round){const el=$('#'+SECS[sec].tbl.replace('Tbl','Role')+'_'+round);if(!el)return;
+  const gs=GROUPS.filter(g=>S.resp.some(r=>r.role&&GROUP(r.role)===g)),items=SECITEMS(sec);
+  if(!gs.length){el.innerHTML='<p class="hint">No respondent row has a role yet.</p>';return;}
+  const opens=SECOPENS(sec).map(o=>{const L=[];S.resp.forEach((p,i)=>{if(!applies(o,p.role))return;const t=String(S.open[round][key(o.id,i)]||'').trim(),cd=((S.code||{})[round]||{})[key(o.id,i)];if(t)L.push('<li><b>'+esc(GROUP(p.role))+':</b> \u201c'+esc(t)+'\u201d'+(cd?' <i>(the answer '+esc((OCODES.find(x=>x[0]===cd)||['',''])[1])+')</i>':'')+'</li>');});
+    return L.length?'<p class="sv-opr"><b>'+esc(o.id)+'. '+esc(wording(o,''))+'</b></p><ul class="sv-opr">'+L.join('')+'</ul>':'';}).join('');
+  el.innerHTML=(opens||'<p class="hint">No open answer in this round.</p>')+'<div class="grid-wrap"><table class="sv"><thead><tr><th>#</th><th>Item</th>'+gs.map(g=>'<th>'+esc(g)+'<span class="rl">'+S.resp.filter(r=>r.role&&GROUP(r.role)===g).length+' asked</span></th>').join('')+'<th>Mean</th></tr></thead><tbody>'+
+    items.map(x=>'<tr><td class="n">'+x.id+'</td><td class="item">'+esc(wording(x,x.who==='student'?'Student':''))+'</td>'+gs.map(g=>{const any=S.resp.some(r=>r.role&&GROUP(r.role)===g&&applies(x,r.role));return '<td class="c">'+(any?f2(itemMean(round,x.id,inGroup(g))):'\u2014')+'</td>';}).join('')+'<td class="m">'+f2(itemMean(round,x.id))+'</td></tr>').join('')+
+    '</tbody><tfoot><tr><td class="n"></td><td class="item">Role mean'+(sec==='E'?' (E5 reversed)':'')+'</td>'+gs.map(g=>'<td class="c">'+f2(secMean(round,sec,inGroup(g)).mean)+'</td>').join('')+'<td>'+f2(secMean(round,sec).mean)+'</td></tr></tfoot></table></div>';}
+function renderGrids(){Object.keys(SECS).forEach(s=>SECS[s].rounds.forEach(r=>{renderGrid(s,r);renderRoleGrid(s,r);}));setRound(S.round);
   let done=0,tot=0;Object.keys(SECS).forEach(s=>SECS[s].rounds.forEach(r=>SECITEMS(s).forEach(x=>S.resp.forEach((p,i)=>{if(!applies(x,p.role))return;tot++;if(S.rat[r][key(x.id,i)])done++;}))));
   $('#progTxt').textContent=done+' of '+tot+' ratings entered';}
 
@@ -1300,40 +1373,75 @@ function groupsPresent(){const g=new Set();S.resp.forEach((r,i)=>{['pre','post']
 const anyRatings=round=>Object.keys(S.rat[round]).some(k=>S.rat[round][k]);
 /* the latest round that holds ratings for a section */
 const latest=sec=>SECS[sec].rounds.slice().reverse().find(r=>secMean(r,sec).n)||SECS[sec].rounds[SECS[sec].rounds.length-1];
-const condCount=round=>['opt','coer','anon','open'].filter(c=>S.chk[round+'_'+c]).length;
+/* v22.81 (review I115) the conditions of administration belong to each administration: a respondent's own Yes or No, else the
+   round's tick; "anonymous" is No for a respondent marked not anonymous on the Respondents table. A round counts what its
+   lowest respondent met; with nobody rated yet, the round's ticks. */
+const CONDS=[['opt','Options explained'],['coer','No coercion'],['anon','Anonymous'],['open','Open question first']];
+function condFor(rd,c,i){const r=S.resp[i]||{};if(c==='anon'&&r.anon==='No')return false;const v=((S.rcond||{})[rd]||{})[c+'_'+i];return v==='Yes'?true:v==='No'?false:!!S.chk[rd+'_'+c];}
+const respCond=(rd,i)=>CONDS.filter(([c])=>condFor(rd,c,i)).length;
+const ratedIn=(rd,i)=>Object.keys(S.rat[rd]||{}).some(k=>k.endsWith('_'+i)&&S.rat[rd][k]);
+const condCount=round=>{const who=S.resp.map((r,i)=>i).filter(i=>ratedIn(round,i));return who.length?Math.min(...who.map(i=>respCond(round,i))):['opt','coer','anon','open'].filter(c=>S.chk[round+'_'+c]).length;};
+function renderCondResp(){const t=$('#condRespTbl');if(!t)return;const R=S.resp.map((r,i)=>[r,i]).filter(([r])=>r.role||String(r.name||'').trim());
+  if(!R.length){t.innerHTML='<tbody><tr><td class="hint">No respondent listed yet.</td></tr></tbody>';return;}
+  const cell=(rd,c,i)=>{const r=S.resp[i];if(c==='anon'&&r.anon==='No')return '<td class="c hint">No (Respondents table)</td>';const v=((S.rcond||{})[rd]||{})[c+'_'+i]||'',dflt=S.chk[rd+'_'+c]?'yes':'no';
+    return '<td class="c"><select data-rcnd="'+rd+':'+c+':'+i+'" aria-label="'+esc(RNAME[rd]+': '+CONDS.find(x=>x[0]===c)[1]+', respondent '+(i+1))+'"><option value="">as the round ('+dflt+')</option><option'+(v==='Yes'?' selected':'')+'>Yes</option><option'+(v==='No'?' selected':'')+'>No</option></select></td>';};
+  t.innerHTML='<thead><tr><th rowspan="2">Respondent</th><th colspan="4">Pre</th><th colspan="4">Post</th></tr><tr>'+['pre','post'].map(()=>CONDS.map(c=>'<th>'+c[1]+'</th>').join('')).join('')+'</tr></thead><tbody>'+
+    R.map(([r,i])=>'<tr><td>'+esc(r.name||'Respondent '+(i+1))+(r.role?'<span class="rl">'+esc(r.role)+'</span>':'')+'</td>'+['pre','post'].map(rd=>CONDS.map(([c])=>cell(rd,c,i)).join('')).join('')+'</tr>').join('')+'</tbody>';}
+/* v22.81 (review F224) the change from baseline is entered as PR-1 prints it: (period - baseline) / baseline, so a behavior
+   that is to go down and went down 38% is -38. chg below is the improvement (positive is better), whichever way the behavior
+   is to go. Files saved before this read their positive improvement as PR-1's sign (fromFile). */
+function prRaw(){const v=parseFloat(String(S.meta.pr_change||'').replace(/[^\d.\-]/g,''));return isFinite(v)?v:NaN;}
+function prImp(){const v=prRaw();return isNaN(v)?NaN:(S.meta.pr_dir==='increase'?v:-v);}
+function prChgTxt(){const v=prRaw();if(isNaN(v))return '';const a=Math.abs(v);return (v>0?'+':'')+v+'%'+(v?', '+a+'% '+(v<0?'below':'above')+' baseline':', no change from baseline');}
 function concordance(){
-  const chg=parseFloat(String(S.meta.pr_change||'').replace(/[^\d.\-]/g,'')),e1=itemMean('post','E1'),e2=itemMean('post','E2'),ind=S.meta.pr_indep||'';
+  const chg=prImp(),e1=itemMean('post','E1'),e2=itemMean('post','E2'),ind=S.meta.pr_indep||'',ct=prChgTxt();
   const out={e1:{code:'none',text:''},e2:{code:'none',text:''}};
   if(isNaN(chg)||e1==null)out.e1={code:'none',text:'E1 concordance: enter the PR-1 percent change and at least one E1 rating.'};
-  else if(chg>=25&&e1>=4.5)out.e1={code:'agree',text:`Consumers and the data agree the behavior improved (PR-1 change ${chg}%, E1 mean ${f2(e1)}).`};
-  else if(chg>=25&&e1<=3)out.e1={code:'unseen',text:`Data show change the consumers do not see (PR-1 change ${chg}%, E1 mean ${f2(e1)}): check whether the measured behavior is the one that matters to them (SV-1 G1 and G5), and whether the change is visible in their setting.`};
-  else if(chg<10&&e1>=4.5)out.e1={code:'unsupported',text:`Consumers report improvement the data do not show (PR-1 change ${chg}%, E1 mean ${f2(e1)}). Wolf (1978, p. 212): “A program that is described by its consumers as well-liked or effective may not necessarily be either.” Either the consumer is responding to something unmeasured (ask the open item; consider adding the measure) or the rating is distorted; the decision follows the data. This never upgrades the PR-1 suggestion.`};
-  else out.e1={code:'mixed',text:`Neither clearly concordant nor discordant (PR-1 change ${chg}%, E1 mean ${f2(e1)}): report both figures as they stand.`};
+  else if(chg>=25&&e1>=4.5)out.e1={code:'agree',text:`Consumers and the data agree the behavior improved (PR-1 change ${ct}, E1 mean ${f2(e1)}).`};
+  else if(chg>=25&&e1<=3)out.e1={code:'unseen',text:`Data show change the consumers do not see (PR-1 change ${ct}, E1 mean ${f2(e1)}): check whether the measured behavior is the one that matters to them (SV-1 G1 and G5), and whether the change is visible in their setting.`};
+  else if(chg<10&&e1>=4.5)out.e1={code:'unsupported',text:`Consumers report improvement the data do not show (PR-1 change ${ct}, E1 mean ${f2(e1)}). Wolf (1978, p. 212): “A program that is described by its consumers as well-liked or effective may not necessarily be either.” Either the consumer is responding to something unmeasured (ask the open item; consider adding the measure) or the rating is distorted; the decision follows the data. This never upgrades the PR-1 suggestion.`};
+  else out.e1={code:'mixed',text:`Neither clearly concordant nor discordant (PR-1 change ${ct}, E1 mean ${f2(e1)}): report both figures as they stand.`};
   if(!ind||e2==null)out.e2={code:'none',text:'E2 concordance: enter PR-1 section 3 (used independently) and at least one E2 rating.'};
   else if((/^Yes/.test(ind)&&e2>=4.5)||(/^Not/.test(ind)&&e2<=3))out.e2={code:'agree',text:`Consumers and PR-1 agree on independent use of the replacement skill (PR-1: ${ind}; E2 mean ${f2(e2)}).`};
   else if((/^Yes/.test(ind)&&e2<=3)||(/^Not/.test(ind)&&e2>=4.5))out.e2={code:'discord',text:`Consumers and PR-1 disagree on independent use (PR-1: ${ind}; E2 mean ${f2(e2)}): ask where and when the skill is seen, and whether the consumers’ setting is one the data cover.`};
   else out.e2={code:'mixed',text:`Independent use: neither clearly concordant nor discordant (PR-1: ${ind}; E2 mean ${f2(e2)}).`};
   return out;
 }
+/* v22.81 (review F226) the post rounds: this record's own (the earlier ones kept in hist, and this one) or the number set for
+   rounds recorded elsewhere, whichever is more; (F222) an earlier "agree": a kept round's, else one ticked with its date */
+function postCount(){return Math.max((S.hist||[]).length+(anyRatings('post')?1:0),+(S.meta.post_n||0)||0);}
+function priorAgree(){const h=(S.hist||[]).slice().reverse().find(x=>x.code==='agree');if(h)return {date:h.date||'',kept:true};
+  return S.chk.prior_agree?{date:String(S.meta.prior_date||'').trim(),kept:false}:null;}
+/* v22.81 (review F219) the consumers the verdict needs: the student, a caregiver and an implementer. The student is excused only
+   when there is no student row and the reason is recorded; administrator and other rows count in addition, never in their place. */
+function consumersMissing(groups){const why=String(S.meta.missing_why||'').trim(),stuRow=S.resp.some(r=>STU(r.role));
+  return ['Student','Caregiver','Implementer'].filter(g=>!groups.includes(g)&&!(g==='Student'&&!stuRow&&why));}
 function verdict(){
-  const groups=groupsPresent(),post=anyRatings('post'),postN=+(S.meta.post_n||0),C=concordance();
-  const gRound=latest('G'),pRound=latest('P');
-  const gAll=secMean('pre','G').mean,pAll=secMean('post','P').mean,eAll=secMean('post','E').mean;
+  const groups=groupsPresent(),post=anyRatings('post'),postN=postCount(),C=concordance();
+  const gRound=latest('G'),pRound=latest('P'),gPre=secMean('pre','G').n>0;
+  /* v22.81 (review F221) the goals are judged on the latest round that holds goals ratings, as the role check is */
+  const gAll=secMean(gRound,'G').mean,pAll=secMean('post','P').mean,eAll=secMean('post','E').mean;
   const gLow=groups.filter(g=>{const m=secMean(gRound,'G',inGroup(g)).mean;return m!=null&&m<=3;});
   const g5=itemMean(gRound,'G5');
   const pLow=groups.filter(g=>{const m=secMean(pRound,'P',inGroup(g)).mean;return m!=null&&m<=3;});
   const pLowAny=groups.filter(g=>['pre','post'].some(r=>{const m=secMean(r,'P',inGroup(g)).mean;return m!=null&&m<=3;}));
-  const agree=C.e1.code==='agree'||!!S.chk.prior_agree;
+  /* v22.81 (review F222) an earlier review's "agree" carries over only while this review's data and the consumers do not part */
+  const PA=priorAgree(),code=C.e1.code,agreeNow=code==='agree',carried=!agreeNow&&!!PA&&code!=='unsupported'&&code!=='unseen',agree=agreeNow||carried;
+  const agreeTxt=agreeNow?'with concordance \u201cagree\u201d':carried?'with concordance \u201cagree\u201d at the review of '+(PA.date||'an earlier review (its date not recorded)'):'';
+  const gTxt=f2(gAll)+(gPre?' ('+RNAME[gRound].toLowerCase()+')':' (goals rated at review only; no pre round)');
+  const miss=consumersMissing(groups),excused=!groups.includes('Student')&&!miss.includes('Student');
   const gOk=gAll!=null&&gAll>=4.5&&!gLow.length,pOk=pAll!=null&&pAll>=4.5&&!pLow.length,eOk=eAll!=null&&eAll>=4.5&&agree;
-  const info={groups,post,postN,gAll,pAll,eAll,gLow,g5,pLow,pLowAny,agree,gRound,pRound,C};
+  const info={groups,post,postN,gAll,pAll,eAll,gLow,g5,pLow,pLowAny,agree,gRound,pRound,C,miss,PA,carried};
   if(!groups.length)return Object.assign(info,{label:'No ratings yet',cls:'v-mid',why:'The verdict appears as the ratings are entered.'});
-  if(pLow.length)return Object.assign(info,{label:'Acceptability concern',cls:'v-no',why:`Procedures mean at or below 3 from ${pLow.join(' and ')} (${RNAME[pRound].toLowerCase()} round). If the role implements the plan, read with TI-1 integrity; if the role is the student or the caregiver, consider “Modify the plan” on PR-1 even where the data are good, because a plan people will not keep is not a plan (Wolf, 1978, pp. 206, 210).`});
+  if(pLow.length)return Object.assign(info,{label:'Acceptability concern',cls:'v-no',why:`Procedures mean at or below 3 from ${pLow.join(' and ')} (${RNAME[pRound].toLowerCase()} round). If the role implements the plan, read with TI-1 integrity; if the role is the student or the caregiver, consider \u201cModify the plan\u201d on PR-1 even where the data are good, because a plan people will not keep is not a plan (Wolf, 1978, pp. 206, 210).`});
   if(gLow.length||(g5!=null&&g5<=3))return Object.assign(info,{label:'Goals contested',cls:'v-no',why:`${gLow.length?'Goals mean at or below 3 from '+gLow.join(' and ')+'. ':''}${g5!=null&&g5<=3?'G5 (nothing important left out) has a mean of '+f2(g5)+': something the consumers care about is not among the goals. ':''}Go back to the open items and to TB-1 and GB-1 before the targets are final.`});
-  if(groups.length<3||!post)return Object.assign(info,{label:'Insufficient',cls:'v-mid',why:`${groups.length<3?'Only '+groups.length+' role'+(groups.length>1?'s have':' has')+' rated (three are needed: at least the student, a caregiver and an implementer). ':''}${!post?'No post round yet: the goals and procedures can be reported as accepted in advance, nothing can be said about the effects. ':''}`});
-  if(gOk&&pOk&&eOk&&postN>=2)return Object.assign(info,{label:'Socially valid',cls:'v-ok',why:`Goals ${f2(gAll)} (pre), Procedures ${f2(pAll)} (post) with no role at or below 3, Effects ${f2(eAll)} (post) with concordance “agree”, on post administration ${postN}. The label is a working convention of this form; the checks below still apply, and the next review re-asks every question.`});
+  if(miss.length||!post)return Object.assign(info,{label:'Insufficient',cls:'v-mid',why:`${miss.length?'No ratings yet from '+miss.map(g=>g==='Implementer'?'an implementer':g==='Caregiver'?'a caregiver':'the student').join(', ')+'. The verdict needs at least the student, a caregiver and an implementer, the people the plan is for; administrator and other rows count in addition, never in their place'+(miss.includes('Student')&&!S.resp.some(r=>STU(r.role))?' (when the student cannot respond in any mode, say why under \u201cRoles missing, and why\u201d)':'')+'. ':''}${!post?((S.hist||[]).length?'This review\u2019s post round is not rated yet ('+S.hist.length+' earlier post round'+(S.hist.length===1?'':'s')+' kept below). ':'No post round yet: the goals and procedures can be reported as accepted in advance, nothing can be said about the effects. '):''}`});
+  const exc=excused?' The student did not rate (the reason is recorded on the Setup sheet).':'';
+  if(gOk&&pOk&&eOk&&postN>=2)return Object.assign(info,{label:'Socially valid',cls:'v-ok',why:`Goals ${gTxt}, Procedures ${f2(pAll)} (post) with no role at or below 3, Effects ${f2(eAll)} (post) ${agreeTxt}, on post administration ${postN}.${exc} The label is a working convention of this form; the checks below still apply, and the next review re-asks every question.`});
   if(gOk&&pOk&&eOk)return Object.assign(info,{label:'Insufficient',cls:'v-mid',why:`Every criterion is met, on ${postN?'one':'an unrecorded number of'} post administration${postN?'':'s'}. The plan is not called socially valid until a second post round agrees (rule 8): consumer feedback is ongoing quality control, not a one-off.`});
-  if(gOk&&pOk)return Object.assign(info,{label:'Accepted, effect unconfirmed by consumers',cls:'v-mid',why:`Goals ${f2(gAll)} and Procedures ${f2(pAll)} meet the working thresholds; Effects ${eAll==null?'not yet rated':f2(eAll)+' (post)'}${eAll!=null&&eAll>=4.5&&!agree?' with no concordance “agree” on this or an earlier review':''}. The data on PR-1 decide what happens to the plan; this says the consumers do not yet report that it worked for them.`});
-  const short=[];if(!gOk)short.push('Goals pre-mean '+f2(gAll));if(!pOk)short.push('Procedures post-mean '+f2(pAll));
+  const broke=PA&&!agree&&(code==='unsupported'||code==='unseen')?' The \u201cagree\u201d of the review of '+(PA.date||'an earlier review')+' does not carry over: at this review the data and the consumers part (see Concordance).':'';
+  if(gOk&&pOk)return Object.assign(info,{label:'Accepted, effect unconfirmed by consumers',cls:'v-mid',why:`Goals ${gTxt} and Procedures ${f2(pAll)} meet the working thresholds; Effects ${eAll==null?'not yet rated':f2(eAll)+' (post)'}${eAll!=null&&eAll>=4.5&&!agree&&!broke?' with no concordance \u201cagree\u201d on this or an earlier review':''}.${broke} The data on PR-1 decide what happens to the plan; this says the consumers do not yet report that it worked for them.`});
+  const short=[];if(!gOk)short.push(gAll==null?'Goals not rated':gPre?'Goals '+RNAME[gRound].toLowerCase()+'-mean '+f2(gAll):'Goals mean '+f2(gAll)+' (goals rated at review only; no pre round)');if(!pOk)short.push('Procedures post-mean '+f2(pAll));
   return Object.assign(info,{label:'Below the working thresholds',cls:'v-mid',why:`${short.join('; ')} (4.5 is the working threshold). No role is at or below 3, so this is not a contested goal or an acceptability concern; read the flagged items and the disagreement table for where the shortfall sits.`});
 }
 
@@ -1352,11 +1460,23 @@ function renderSetup(){
 }
 
 /* ---------------- summary ---------------- */
+/* v22.81 (review F220) the team copy prints when chosen, or by default when any respondent was told the rated staff see only aggregates */
+const teamCopy=()=>S.meta.print_copy==='team'||(!S.meta.print_copy&&S.resp.some(r=>r.anon==='Yes'));
+/* a respondent named on screen and in the BCBA copy; in the team copy, the role only (the implementers together) */
+const who=(p,i,withRole)=>'<span class="sv-nm">'+esc(p.name||'Respondent '+(i+1))+(withRole&&p.role?' ('+esc(p.role)+')':'')+'</span><span class="sv-rl">'+(p.role?'a respondent ('+esc(GROUP(p.role).toLowerCase())+')':'a respondent')+'</span>';
+/* v22.81 (review F227) the student's items and the adults' item each pairs with */
+const PAIR={G6:'G1',P7a:'P1',P7b:'P6',E8a:'E3',E8b:'E6'};
 function renderSum(){
   const V=verdict(),groups=V.groups,R=S.resp;
+  const tc=teamCopy();$$('main.sheet').forEach(e=>e.classList.toggle('sv-team',tc));
+  $('#svCopyLine').textContent=tc?'Team copy: the ratings and open answers are shown by role, the implementers together; no respondent is named beside a rating. The BCBA copy, with each respondent\u2019s ratings, stays in the BCBA\u2019s file.':'BCBA copy: each respondent\u2019s ratings by name. Keep it in the BCBA\u2019s file; give the team the team copy.';
+  const promised=R.filter(r=>r.anon==='Yes').length;
+  $('#svCopyWarn').textContent=S.meta.print_copy==='bcba'&&promised?promised+' respondent'+(promised===1?' was':'s were')+' told the rated staff see only aggregates (Setup). The BCBA copy names them beside their ratings; do not give it to the team. The workstation\u2019s master print always uses the team copy.':'';
+  {const v=prRaw(),rd=$('#prChgRead');if(rd)rd.textContent=isNaN(v)?'':prChgTxt()+(v?': '+((S.meta.pr_dir==='increase'?v>0:v<0)?'an improvement':'a worsening'):'');}
   $('#sumVerdict').innerHTML=`<div class="verdict ${V.cls}"><b>${esc(V.label)}.</b> ${V.why}</div>`;
   const pc=condCount('pre'),qc=condCount('post'),capt=[];
   if(anyRatings('pre')&&pc<3)capt.push('pre round ('+pc+' of 4)');if(anyRatings('post')&&qc<3)capt.push('post round ('+qc+' of 4)');
+  {const low=[];['pre','post'].forEach(rd=>R.forEach((p,i)=>{if(ratedIn(rd,i)&&respCond(rd,i)<3)low.push(who(p,i)+' ('+rd+', '+respCond(rd,i)+' of 4)');}));if(low.length&&capt.length)capt.push('by respondent: '+low.join(', '));}   /* v22.81 (I115) */
   $('#condNote').innerHTML=capt.length?`<div class="verdict v-mid"><b>Ratings collected without the conditions Wolf (1978) names as needed for consumers to be the best evaluators</b> (${capt.join('; ')}): read as reports, not as validation.</div>`:`<p class="hint">Conditions of administration met: pre ${pc} of 4, post ${qc} of 4.</p>`;
   const cells=[['G','pre','Goals, pre'],['G','post','Goals, post'],['P','pre','Procedures, pre'],['P','post','Procedures, post'],['E','post','Effects, post']];
   $('#secMetrics').innerHTML=cells.map(([s,r,l])=>{const m=secMean(r,s);return`<div class="metric${m.mean!=null&&m.mean<=3?' low':''}"><b>${l}</b><div class="val">${f2(m.mean)}</div><div class="sub">${m.n?m.n+' ratings from '+m.resp+' respondent'+(m.resp>1?'s':''):'nothing rated'}</div></div>`;}).join('');
@@ -1370,10 +1490,12 @@ function renderSum(){
     rows.push(`<tr><td class="c">${x.id}</td><td>${esc(wording(x,x.who==='student'?'Student':''))}</td><td class="c">${f2(itemMean('pre',x.id))}</td><td class="c">${f2(itemMean('post',x.id))}</td><td class="c">${sgn(d)}</td><td class="c">${both.length}</td><td>${like?'like for like':'not like for like'}</td></tr>`);}));
   $('#cmpTbl').innerHTML=rows.length?'<thead><tr><th>Item</th><th>Wording</th><th>Pre mean</th><th>Post mean</th><th>Change (paired)</th><th>Paired n</th><th>Respondents</th></tr></thead><tbody>'+rows.join('')+'</tbody>':'<tbody><tr><td class="hint">No item has been rated in either round.</td></tr></tbody>';
   /* flagged */
-  const fl=[];['pre','post'].forEach(r=>ITEMS.forEach(x=>R.forEach((p,i)=>{if(!applies(x,p.role))return;const v=scored(r,x.id,i);if(v!=null&&v<=S.thr)fl.push(`<tr><td class="c">${x.id}</td><td>${esc(wording(x,p.role))}</td><td>${RNAME[r]}</td><td>${esc(p.name||'Respondent '+(i+1))}</td><td>${esc(p.role)}</td><td class="c">${val(r,x.id,i)}${x.rev?' <span class="hint">(reverse item: a high rating is the concern)</span>':''}</td></tr>`);})));
-  $('#flagTbl').innerHTML=fl.length?'<thead><tr><th>Item</th><th>Wording</th><th>Round</th><th>Respondent</th><th>Role</th><th>Rating</th></tr></thead><tbody>'+fl.join('')+'</tbody>':`<tbody><tr><td class="hint">No rating at or below ${S.thr}.</td></tr></tbody>`;
+  const fl=[];['pre','post'].forEach(r=>ITEMS.forEach(x=>R.forEach((p,i)=>{if(!applies(x,p.role))return;const v=scored(r,x.id,i);if(v!=null&&v<=S.thr)fl.push(`<tr><td class="c">${x.id}</td><td>${esc(wording(x,p.role))}</td><td>${RNAME[r]}</td><td class="sv-nmcol">${esc(p.name||'Respondent '+(i+1))}</td><td><span class="sv-nm">${esc(p.role)}</span><span class="sv-rl">${esc(GROUP(p.role))}</span></td><td class="c">${val(r,x.id,i)}${x.rev?' <span class="hint">(reverse item: a high rating is the concern)</span>':''}</td></tr>`);})));
+  $('#flagTbl').innerHTML=fl.length?'<thead><tr><th>Item</th><th>Wording</th><th>Round</th><th class="sv-nmcol">Respondent</th><th>Role</th><th>Rating</th></tr></thead><tbody>'+fl.join('')+'</tbody>':`<tbody><tr><td class="hint">No rating at or below ${S.thr}.</td></tr></tbody>`;
   /* disagreement between roles */
-  const sp=[];ITEMS.forEach(x=>{const r=latest(x.s);const ms=groups.map(g=>[g,itemMean(r,x.id,inGroup(g))]).filter(a=>a[1]!=null);if(ms.length<2)return;const hi=Math.max(...ms.map(a=>a[1])),lo=Math.min(...ms.map(a=>a[1]));
+  const sp=[];ITEMS.forEach(x=>{if(x.who==='student')return;const r=latest(x.s);const ms=groups.map(g=>[g,itemMean(r,x.id,inGroup(g))]).filter(a=>a[1]!=null&&!(a[0]==='Student'&&x.who!=='any'));
+    const st=Object.keys(PAIR).find(k=>PAIR[k]===x.id);if(st){const m=itemMean(r,st,inGroup('Student'));if(m!=null)ms.push(['Student (on '+st+', paired)',m]);}
+    if(ms.length<2)return;const hi=Math.max(...ms.map(a=>a[1])),lo=Math.min(...ms.map(a=>a[1]));
     if(hi-lo>=2)sp.push(`<tr><td class="c">${x.id}</td><td>${esc(wording(x,''))}</td><td>${RNAME[r]}</td><td>${ms.map(a=>a[0]+' '+f2(a[1])).join('; ')}</td><td class="c">${f2(hi-lo)}</td></tr>`);});
   $('#splitTbl').innerHTML=sp.length?'<thead><tr><th>Item</th><th>Wording</th><th>Round</th><th>Role means</th><th>Range</th></tr></thead><tbody>'+sp.join('')+'</tbody>':'<tbody><tr><td class="hint">No item on which the role means are 2 or more points apart'+(groups.length<2?' (fewer than two roles have rated)':'')+'.</td></tr></tbody>';
   /* concordance */
@@ -1388,30 +1510,84 @@ function renderSum(){
   const flags=[];
   const miss=['Student','Caregiver','Implementer','Administrator'].filter(g=>!R.some(r=>GROUP(r.role)===g&&r.role));
   if(miss.length)flags.push(`No ${miss.join(', ').toLowerCase()} row${miss.length>1?'s':''}. ${String(S.meta.missing_why||'').trim()?'Reason recorded: '+esc(S.meta.missing_why):'No reason recorded on the Setup sheet.'}`);
-  R.forEach((p,i)=>{if(p.role&&p.anon==='No')flags.push(`${esc(p.name||'Respondent '+(i+1))} (${esc(p.role)}) was not anonymous to the rated staff: a rating that can be traced may be distorted by fear of retaliation (Wolf, 1978, p. 212).`);});
+  R.forEach((p,i)=>{if(p.role&&p.anon==='No')flags.push(`${who(p,i,true)} was not anonymous to the rated staff: a rating that can be traced may be distorted by fear of retaliation (Wolf, 1978, p. 212).`);});
   if(String(S.meta.collector||'').trim()===''&&groups.length)flags.push('Who collected the ratings is not recorded. It must not be a person being rated.');
   V.pLowAny.forEach(g=>{flags.push(`Low acceptability from ${g.toLowerCase()} (Procedures mean at or below 3). ${g==='Implementer'?'Write to TI-1 as a predicted-low-integrity note and read with the obtained integrity.':g==='Student'||g==='Caregiver'?'Consider “Modify the plan” on PR-1 even where the data are good.':'Read with the cost and practicality items.'}`);});
-  R.forEach((p,i)=>{const v=val('post','E5',i);if(v!=null&&v>=4){const t=S.open.post[key('Eo',i)]||'';flags.push(`Unplanned negative effect reported by ${esc(p.role||'respondent '+(i+1))} (E5 = ${v})${t?': “'+esc(t)+'”':' with no open-item text.'} Record it on PR-1 and decide whether to measure it.`);}});
+  R.forEach((p,i)=>{const v=val('post','E5',i);if(v!=null&&v>=4){const t=S.open.post[key('Eo',i)]||'';flags.push(`Unplanned negative effect reported by ${p.role?esc(GROUP(p.role).toLowerCase()==='implementer'?'an implementer':GROUP(p.role).toLowerCase()):'respondent '+(i+1)} (E5 = ${v})${t?': “'+esc(t)+'”':' with no open-item text.'} Record it on PR-1 and decide whether to measure it.`);}});
   R.forEach((p,i)=>{if(!STU(p.role))return;const t=S.open.post[key('E8c',i)]||'';if(/worse/i.test(t))flags.push(`The student’s open item names something worse: “${esc(t)}” Record it on PR-1.`);});
   if(S.chk.modified)flags.push('The plan was modified since the last round: the Procedures ratings before the modification were for a different plan. Compare only post-modification ratings.');
   ['Go','Eo'].forEach(id=>{const o=OPENS.find(x=>x.id===id);['pre','post'].forEach(r=>{if(!SECS[o.s].rounds.includes(r)||!secMean(r,o.s).n)return;const empty=R.filter((p,i)=>applies(o,p.role)&&SECITEMS(o.s).some(x=>applies(x,p.role)&&val(r,x.id,i)!=null)&&!String(S.open[r][key(id,i)]||'').trim());
-    if(empty.length)flags.push(`${o.s==='G'?'Goals':'Effects'} open item blank for ${empty.map(p=>esc(p.name||p.role)).join(', ')} (${r} round) although ratings were given. The open item is mandatory and is asked first.`);});});
+    if(empty.length)flags.push(`${o.s==='G'?'Goals':'Effects'} open item blank for ${empty.map(p=>who(p,R.indexOf(p))).join(', ')} (${r} round) although ratings were given. The open item is mandatory and is asked first.`);});});
+  namedOutcomes().forEach(x=>{const p=S.resp[x.i];flags.push(x.tag==='unmeasured'?`Named by ${who(p,x.i)} (${x.round} round) and not measured: \u201c${esc(x.text)}\u201d. Consider it as a target on Form TB-1, and record it on PR-1.`:`A side effect named by ${who(p,x.i)} (${x.round} round): \u201c${esc(x.text)}\u201d. Record it on PR-1 and decide whether to measure it.`);});
   if(V.C.e1.code==='unsupported')flags.push('Consumers report improvement the data do not show. The PR-1 suggestion stands; ask the open item and consider whether what the consumers see should be measured.');
   $('#flagList').innerHTML=flags.length?'<ul>'+flags.map(f=>'<li>'+f+'</li>').join('')+'</ul>':'<p class="hint">Nothing outstanding.</p>';
-  /* text for FS-1 and PR-1 */
-  const gm=g=>{const m=secMean('pre','G',inGroup(g));return m.n?g.toLowerCase()+' '+f2(m.mean)+' ('+m.n+')':null;};
-  const themes=R.map((p,i)=>{const t=S.open.pre[key('Go',i)];return t?`${p.role||'respondent '+(i+1)}: “${t.trim()}”`:null;}).filter(Boolean);
-  $('#feedFs').textContent=`FS-1, Evidence: method “Social validity — goals (Wolf, 1978)”, tier none, no function, no strength, not counted toward convergence.\nContribution: Goals pre-means by role: ${groups.map(gm).filter(Boolean).join('; ')||'none yet'}. Open-item themes: ${themes.join(' | ')||'none recorded'}.\nFS-1 Report, “Social validity of the goals”: asked ${R.filter(r=>r.role).map(r=>r.role.toLowerCase()).join(', ')||'no one yet'}; conditions of administration ${pc} of 4. ${String(S.meta.fs_note||'').trim()?'Goal added or dropped: '+S.meta.fs_note.trim():'No goal added or dropped because of the open items.'}`;
+  /* text for TB-1 and PR-1 */
+  $('#feedFs').textContent=goalsLine();
   const pm=(sec,r)=>groups.map(g=>{const m=secMean(r,sec,inGroup(g));return m.n?g.toLowerCase()+' '+f2(m.mean):null;}).filter(Boolean).join(', ')||'—';
+  renderHist();
   $('#feedPr').textContent=`PR-1 section 4, row “Social validity (SV-1, this period)”: Goals ${pm('G',latest('G'))}; Procedures ${pm('P',latest('P'))}; Effects ${pm('E','post')}. Conditions of administration: pre ${pc} of 4, post ${qc} of 4.\nConcordance: ${V.C.e1.text} ${V.C.e2.text}\nVerdict (working convention): ${V.label}.${V.pLowAny.length?' Decision check: low acceptability from '+V.pLowAny.join(' and ').toLowerCase()+'.':''}${R.some((p,i)=>{const v=val('post','E5',i);return v!=null&&v>=4;})?' Decision check: unplanned negative effect reported; see the Note.':''}`;
 }
 
+/* v22.81 (review F225) the goals round, for TB-1's selection rationale (and the case: sv.goals): the goals means by role from
+   the pre round (the review round when there is none), the open-item themes by role, the goal added or dropped */
+function goalsFact(){const rd=secMean('pre','G').n?'pre':'post',roles={};groupsPresent().forEach(g=>{const m=secMean(rd,'G',inGroup(g));if(m.n)roles[g]=Math.round(m.mean*100)/100;});
+  const themes=[];S.resp.forEach((p,i)=>{const t=String(S.open[rd][key('Go',i)]||'').trim();if(t)themes.push((p.role?GROUP(p.role):'Respondent')+': \u201c'+t+'\u201d');});
+  const o={round:rd,roles,themes,cond:condCount(rd)};const fs=String(S.meta.fs_note||'').trim();if(fs)o.change=fs;return Object.keys(roles).length||themes.length?o:null;}
+function goalsLine(){const g=goalsFact();if(!g)return 'Social validity of the goals (Form SV-1): no goals rated yet.';
+  const rs=Object.keys(g.roles).map(k=>k.toLowerCase()+' '+f2(g.roles[k])).join('; ');
+  const un=namedOutcomes().filter(x=>x.tag==='unmeasured');
+  return 'Social validity of the goals (Form SV-1, '+(g.round==='pre'?'pre round':'rated at review; no pre round')+', 1 to 6): '+(rs||'no means yet')+'. Conditions of administration '+g.cond+' of 4.'+(g.themes.length?' What the consumers want: '+g.themes.join(' | ')+'.':'')+(un.length?' Named and not measured: '+un.map(x=>x.role.toLowerCase()+': \u201c'+x.text+'\u201d').join(' | ')+'.':'')+' '+(g.change?'Goal added or dropped: '+g.change:'No goal added or dropped because of the open items.');}
+/* v22.81 (review F226) the post rounds across reviews: the kept rounds, then this one; means by role, E5 and E6 as rated */
+function histRow(h,cur){const T=['Student','Caregiver','Implementer'],cell=g=>{const r=(h.roles||{})[g];if(!r)return '<td class="c">\u2014</td>';
+    return '<td class="c">'+['G','P','E'].map(s=>r[s]!=null?s+' '+(+r[s]).toFixed(2):'').filter(Boolean).join('<br>')+'</td>';};
+  const codeTxt={agree:'agree',unseen:'data show change the consumers do not see',unsupported:'consumers report improvement the data do not show',mixed:'mixed',none:'not computed'}[h.code]||'\u2014';
+  return '<tr'+(cur?' class="cur"':'')+'><td>'+esc(h.date||'')+(cur?'<br><small>this review</small>':'')+'</td>'+T.map(cell).join('')+'<td class="c">'+(h.sec&&h.sec.E!=null?(+h.sec.E).toFixed(2):'\u2014')+'</td><td class="c">'+(h.e5!=null?(+h.e5).toFixed(2):'\u2014')+'</td><td class="c">'+(h.e6!=null?(+h.e6).toFixed(2):'\u2014')+'</td><td>'+esc(h.chgTxt||'')+'</td><td>'+esc(codeTxt)+'</td><td>'+esc(h.label||'')+'</td></tr>';}
+function histSnap(){const C=concordance(),V=verdict(),roles={},r2=x=>x==null?null:Math.round(x*100)/100;
+  GROUPS.forEach(g=>{const f=inGroup(g),o={};['G','P','E'].forEach(sec=>{const m=secMean('post',sec,f).mean;if(m!=null)o[sec]=r2(m);});if(Object.keys(o).length)roles[g]=o;});
+  const ds=S.resp.map(r=>String(r.post||'').trim()).filter(Boolean);
+  return {date:String(S.meta.pr_date||'').trim()||ds[ds.length-1]||String(S.meta.date||'').trim(),pr_change:String(S.meta.pr_change||''),pr_dir:S.meta.pr_dir==='increase'?'increase':'',
+    pr_indep:String(S.meta.pr_indep||''),chgTxt:prChgTxt(),cond:{opt:!!S.chk.post_opt,coer:!!S.chk.post_coer,anon:!!S.chk.post_anon,open:!!S.chk.post_open},code:C.e1.code,label:V.label,roles,
+    sec:{G:r2(secMean('post','G').mean),P:r2(secMean('post','P').mean),E:r2(secMean('post','E').mean)},e5:r2(itemMean('post','E5')),e6:r2(itemMean('post','E6')),
+    resp:S.resp.map(r=>({name:String(r.name||''),role:String(r.role||'')})),rat:Object.assign({},S.rat.post),open:Object.assign({},S.open.post)};}
+function renderHist(){const t=$('#histTbl');if(!t)return;const H=(S.hist||[]).slice(),cur=anyRatings('post')?histSnap():null;
+  $('#histWrap').classList.toggle('noprint',!H.length&&!cur);   /* printed once there is a post round */
+  if(!H.length&&!cur){t.innerHTML='<tbody><tr><td class="hint">No post round yet.</td></tr></tbody>';return;}
+  t.innerHTML='<thead><tr><th style="width:11%">Review</th><th>Student</th><th>Caregiver</th><th>Implementers</th><th style="width:8%">Effects (all)</th><th style="width:7%">E5 something worse</th><th style="width:7%">E6 solved</th><th style="width:13%">PR-1 change</th><th style="width:13%">Concordance (E1)</th><th style="width:13%">Verdict then</th></tr></thead><tbody>'+
+    H.map(h=>histRow(h,false)).join('')+(cur?histRow(cur,true):'')+'</tbody>';}
+async function nextPost(){if(!anyRatings('post')){alert('This review\u2019s post round has no ratings yet, so there is nothing to keep.');return;}
+  if(!(await nbhUI.confirm('Start the next review\u2019s post round?\nThis post round (its ratings, open answers, PR-1 figures and conditions) is kept whole in Post Rounds Across Reviews, and the post columns are cleared for the next review. The pre round and the respondents stay.',{ok:'Keep it and start the next'})))return;
+  {const h=histSnap();h.rcond=Object.assign({},S.rcond.post);h.code=Object.assign({},S.code.post);S.hist.push(h);}S.rat.post={};S.open.post={};S.rcond.post={};S.code.post={};['pr_change','pr_indep','pr_date'].forEach(k=>{delete S.meta[k];});['opt','coer','anon','open'].forEach(c=>{delete S.chk['post_'+c];});
+  S.resp.forEach(r=>{r.post='';});if(+S.meta.post_n)S.meta.post_n=String(Math.min(4,+S.meta.post_n+1));S.chk.prior_agree=false;delete S.meta.prior_date;
+  renderAll();if(window.nbhUI)nbhUI.toast('Post round of '+(S.hist[S.hist.length-1].date||'this review')+' kept ('+S.hist.length+' kept). The post columns are ready for the next review.',{kind:'ok'});}
+$('#nextPost').addEventListener('click',nextPost);
+/* v22.81 (review I112) the student's response strip: the student's items for the round on the Goals and Procedures sheets,
+   each with six faces on the form's own 1 to 6 scale (so nothing is mapped), "I don't know", the student's open questions
+   first in each section, a script for the adult who reads it (never a person the plan is about) and a place for the assent */
+function stripFace(k){const d=(k-3.5)*3.4,c=['#f4b6a6','#f8cdb4','#fbe2b8','#e6ecb4','#cfe6b4','#b7deb0'][k-1];
+  return '<svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="26" fill="'+c+'" stroke="#182e43" stroke-width="2"/><circle cx="21" cy="24" r="2.8" fill="#182e43"/><circle cx="39" cy="24" r="2.8" fill="#182e43"/><path d="M18 '+(42-d/2)+' Q30 '+(42+d)+' 42 '+(42-d/2)+'" fill="none" stroke="#182e43" stroke-width="2.6" stroke-linecap="round"/></svg>';}
+function stripHTML(){const rd=S.round==='post'?'post':'pre',nick=String(S.meta.nick||'').trim()||'you',secs=rd==='post'?['G','P','E']:['G','P'];
+  const W=['No way','No','A little no','A little yes','Yes','Yes, a lot!'];
+  const faces='<div class="st-faces">'+[1,2,3,4,5,6].map(k=>'<div class="st-face">'+stripFace(k)+'<b>'+k+'</b><br>'+W[k-1]+'</div>').join('')+'<div class="st-idk">I don\u2019t know</div></div>';
+  const q=x=>'<div class="st-item"><p class="st-q">'+esc(wording(x,'Student'))+'</p>'+faces+'</div>';
+  const op=o=>'<div class="st-item"><p class="st-q">'+esc(wording(o,'Student'))+'</p><div class="st-line"></div><div class="st-line"></div></div>';
+  return '<div class="st-page"><h1>What I think about my plan</h1><p class="st-sub">Form SV-1 \u00b7 student response strip \u00b7 '+esc(RNAME[rd])+' round'+(String(S.meta.plan||'').trim()?' \u00b7 '+esc(S.meta.plan):'')+'</p>'+
+    '<div class="st-script"><b>For the adult who reads this aloud</b> (someone the plan is not about, in a quiet place): read each sentence and let '+esc(nick==='you'?'the student':nick)+' point to a face, or say a number. Write down the open answers word for word. Say first: \u201cI want to know what you think about your plan at school. There are no right or wrong answers, and nothing changes for you because of what you say. Point to the face that shows how much you agree. You can say \u2018I don\u2019t know\u2019, and you can stop any time.\u201d If '+esc(nick==='you'?'the student':nick)+' does not want to answer, stop: write that below; it is an answer too.</div>'+
+    secs.map(sec=>{const items=SECITEMS(sec).filter(x=>applies(x,'Student')),opens=SECOPENS(sec).filter(o=>applies(o,'Student'));if(!items.length&&!opens.length)return '';
+      return '<p class="st-sec">'+esc(SECS[sec].name)+'</p>'+opens.map(op).join('')+items.map(q).join('');}).join('')+
+    '<div class="st-foot"><div>Read by (not a person the plan is about):</div><div>Date:</div><div>Agreed to answer: \u2610 yes \u2610 no</div><div>How: \u2610 pointed \u2610 said \u2610 other:</div><div style="grid-column:1/3">If not, why (in the student\u2019s words):</div><div style="grid-column:1/3">Entered on Form SV-1 by, and when:</div></div></div>';}
+function printStrip(){$('#svStrip').innerHTML=stripHTML();const h=document.documentElement;h.classList.add('sv-printstrip');
+  const off=()=>{h.classList.remove('sv-printstrip');window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);
+  try{window.print();}finally{setTimeout(off,1500);}}
+$('#stripBtn').addEventListener('click',printStrip);
+
 /* ---------------- events ---------------- */
 document.addEventListener('change',e=>{const el=e.target;
+  if(el.dataset.rcnd!==undefined){const [rd,c,i]=el.dataset.rcnd.split(':');if(el.value)S.rcond[rd][c+'_'+i]=el.value;else delete S.rcond[rd][c+'_'+i];renderSetup();renderSum();return;}   /* v22.81 (I115) */
+  if(el.dataset.cd!==undefined){if(el.value)S.code[el.dataset.r][el.dataset.cd]=el.value;else delete S.code[el.dataset.r][el.dataset.cd];renderGrids();renderSum();return;}   /* v22.81 (I114) */
   if(el.dataset.k!==undefined){S.rat[el.dataset.r][el.dataset.k]=el.value;el.className=/^[1-6]$/.test(el.value)?'s'+el.value:'';renderGrids();renderSum();return;}
-  if(el.dataset.ri!==undefined){const r=S.resp[+el.dataset.ri];if(!r)return;r[el.dataset.f]=el.value;if(el.dataset.f==='role')renderResp();renderGrids();renderSetup();renderSum();return;}
+  if(el.dataset.ri!==undefined){const r=S.resp[+el.dataset.ri];if(!r)return;r[el.dataset.f]=el.value;if(el.dataset.f==='role')renderResp();renderGrids();renderSetup();renderCondResp();renderSum();return;}
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderSetup();renderSum();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(nick|client)$/.test(el.dataset.m))renderGrids();renderSetup();renderSum();return;}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(nick|client)$/.test(el.dataset.m))renderGrids();renderSetup();renderSum();return;}   /* print_copy, pr_dir and prior_date re-render the Summary too */
   if(el.id==='thrIn'){const v=Math.round(+el.value);S.thr=v>=1&&v<=5?v:3;el.value=S.thr;renderGrids();renderSum();}});
 document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.o!==undefined){S.open[el.dataset.r][el.dataset.o]=el.value;return;}
@@ -1424,7 +1600,7 @@ function bindMeta(){
   $$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});
   $('#thrIn').value=S.thr;
 }
-function renderAll(){ensure();bindMeta();renderResp();renderGrids();renderSetup();renderSum();}
+function renderAll(){ensure();bindMeta();renderResp();renderGrids();renderSetup();renderCondResp();renderSum();}
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -1452,6 +1628,23 @@ function fromFile(d){
     if(O&&typeof O==='object'&&!Array.isArray(O))Object.keys(O).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k);if(m&&oids.has(m[1])&&+m[2]<o.resp.length)o.open[r][k]=str(O[k]);});});
   o.round=s.round==='post'?'post':'pre';
   const t=Math.round(+s.thr);o.thr=t>=1&&t<=5?t:3;
+  /* v22.81 (review F224) a file saved before the change was entered as PR-1 prints it held the improvement as a positive number */
+  if(!(+s.v>=2)&&o.meta.pr_change){const v=parseFloat(String(o.meta.pr_change).replace(/[^\d.\-]/g,''));if(isFinite(v))o.meta.pr_change=String(-v);}
+  /* (I115, I114) a respondent's own conditions, the codes of the open answers */
+  ['rcond','code'].forEach(nm=>{const X=s[nm]&&typeof s[nm]==='object'?s[nm]:{};['pre','post'].forEach(r=>{const O=X[r]&&typeof X[r]==='object'?X[r]:{};Object.keys(O).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k),v=str(O[k]);
+    if(!m||+m[2]>=o.resp.length)return;if(nm==='rcond'?(/^(opt|coer|anon|open)$/.test(m[1])&&/^(Yes|No)$/.test(v)):(oids.has(m[1])&&/^(target|unmeasured|side|none)$/.test(v)))o[nm][r][k]=v;});});});
+  /* (F226) the kept post rounds, field by field */
+  const num=x=>x==null||x===''||!isFinite(+x)?null:Math.round(+x*100)/100,CODES=['agree','unseen','unsupported','mixed','none'];
+  if(Array.isArray(s.hist))s.hist.forEach(h=>{if(!h||typeof h!=='object'||Array.isArray(h))return;const n={date:str(h.date),pr_change:str(h.pr_change),pr_dir:h.pr_dir==='increase'?'increase':'',pr_indep:str(h.pr_indep),chgTxt:str(h.chgTxt),
+    cond:{},code:CODES.includes(h.code)?h.code:'none',label:str(h.label),roles:{},sec:{},e5:num(h.e5),e6:num(h.e6),resp:[],rat:{},open:{}};
+    ['opt','coer','anon','open'].forEach(c=>{n.cond[c]=!!(h.cond&&h.cond[c]);});
+    if(h.roles&&typeof h.roles==='object')GROUPS.forEach(g=>{const r=h.roles[g];if(r&&typeof r==='object'){const x={};['G','P','E'].forEach(k=>{const v=num(r[k]);if(v!=null)x[k]=v;});if(Object.keys(x).length)n.roles[g]=x;}});
+    ['G','P','E'].forEach(k=>{n.sec[k]=h.sec&&typeof h.sec==='object'?num(h.sec[k]):null;});
+    if(Array.isArray(h.resp))h.resp.forEach(r=>{if(r&&typeof r==='object')n.resp.push({name:str(r.name),role:ROLES.includes(r.role)?r.role:''});});
+    if(h.rat&&typeof h.rat==='object')Object.keys(h.rat).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k),v=str(h.rat[k]);if(m&&ids.has(m[1])&&+m[2]<n.resp.length&&/^([1-6]|NA)$/.test(v))n.rat[k]=v;});
+    if(h.open&&typeof h.open==='object')Object.keys(h.open).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k);if(m&&oids.has(m[1])&&+m[2]<n.resp.length)n.open[k]=str(h.open[k]);});
+    ['rcond','code'].forEach(nm=>{if(!h[nm]||typeof h[nm]!=='object')return;n[nm]={};Object.keys(h[nm]).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k),v=str(h[nm][k]);if(m&&+m[2]<n.resp.length&&(nm==='rcond'?/^(Yes|No)$/.test(v):/^(target|unmeasured|side|none)$/.test(v)))n[nm][k]=v;});});
+    o.hist.push(n);});
   return o;
 }
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
@@ -1494,18 +1687,18 @@ async function loadSim(){
   /* a second post round for an escape-maintained desk-tipping case: the teacher, the paraeducator, the mother and the
      student rate the goals and procedures before the plan and again now, and the effects now */
   S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',nick:'Sam',plan:'BIP dated '+D(40)+' (Form TD-1): break card (FCT) and escape extinction during independent work',
-    setting:'Room 12, independent work in reading and math',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:D(3),post_n:'2',
+    setting:'Room 12, independent work in reading and math',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:D(3),
     collector:'J. Ellis (case BCBA). The teacher and the paraeducator see only the aggregates on the Summary sheet.',
     beh:'Tipping his desk and walking out of the room when independent work starts',skill:'Asking for a two-minute break with the card, then coming back to the work',
-    pre_when:'Goals at target selection, '+D(55)+' (FS-1 draft); Procedures at plan sign-off, '+D(42)+', with IC-1 and contextual fit round 1',
-    post_when:'Second PR-1 review, '+D(3)+'. The first post round was taken at the first review on '+D(23)+' and its concordance was “agree”.',
+    pre_when:'Goals and Procedures at plan sign-off, '+D(42)+', with IC-1 and contextual fit round 1; the open item was first asked at target selection, '+D(55),
+    post_when:'Second PR-1 review, '+D(3)+'. The first post round was taken at the first review on '+D(23)+' and is kept in Post Rounds Across Reviews (concordance “agree”).',
     why:'Scheduled PR-1 review. The first post round showed the caregiver less satisfied than the staff; this round checks whether that held.',
     missing_why:'No administrator row: the assistant principal will rate the Procedures section (P8) at the next review. Until then the cost and practicality items carry only the implementers’ view.',
-    pr_change:'38',pr_indep:'Yes, independently',pr_date:D(3),
+    pr_change:'-38',pr_indep:'Yes, across settings and people',pr_date:D(3),
     fs_note:'The caregiver’s pre open item named swearing at his sister and calls to her at work. Calls to work were added as a secondary measure on PR-1; swearing at home was not (outside the school’s reach; referred to the home program).',
     decision:'Continue the plan (PR-1 decision follows the data: 38% improvement, skill used independently). Record the homework refusal the mother reports as an unplanned effect and start a homework count this week; it is not yet a target. Ask the assistant principal to rate P8 at the next review.',
     next:'Third PR-1 review, '+F(20)+'. Procedures again if the homework count leads to a modification.'};
-  S.chk={pre_opt:true,pre_coer:true,pre_anon:true,pre_open:true,post_coer:true,post_anon:true,post_open:true,prior_agree:true};
+  S.chk={pre_opt:true,pre_coer:true,pre_anon:true,pre_open:true,post_coer:true,post_anon:true,post_open:true};
   S.resp=[
     {name:'Ms. R.',role:'Teacher (implementer)',mode:'Self-completed',anon:'Yes',pre:D(42),post:D(3),cf1:'5.3',cf2:'5.7',note:'Rated alone in the planning period; sealed envelope to the BCBA'},
     {name:'Paraeducator B',role:'Paraprofessional (implementer)',mode:'Self-completed',anon:'Yes',pre:D(42),post:D(3),cf1:'3.0',cf2:'5.0',note:'Contextual fit round 1 was taken before B had seen the plan run'},
@@ -1529,6 +1722,17 @@ async function loadSim(){
   say('post',1,{Go:'That the break requests stay polite and he keeps coming back.',Po:'Not now. Two other students asked for cards and we gave them.',Eo:'Break requests are polite now. He comes back on his own after the timer. The other two students with cards use them less than he does.'});
   say('post',2,{Go:'That he keeps it up, and that the swearing at home stops.',Po:'No. The teacher explained the card to me and I like that he asks instead of leaving.',Eo:'The calls from school have stopped. The swearing at home is about the same. He now refuses homework completely, which is new since the plan started, and I do not know if the card has something to do with it.'});
   say('post',3,{Go:'To finish my work and go to recess.',P7c:'Nothing now.',E8c:'Better: I do not get sent out. I get my break. Worse: homework. I do not want to do it at home.'});
+  /* the first post round, at the first review, kept whole (v22.81, review F226): the caregiver less satisfied than the staff, the data and the consumers agreeing */
+  {const h={date:D(23),pr_change:'-31',pr_dir:'',pr_indep:'Yes, but only with trained staff',cond:{opt:false,coer:true,anon:true,open:true},code:'agree',label:'Insufficient',
+    resp:S.resp.map(r=>({name:r.name,role:r.role})),rat:{},open:{}};
+   const pt=(i,o)=>Object.keys(o).forEach(id=>{h.rat[key(id,i)]=String(o[id]);});
+   pt(0,{G1:6,G2:5,G3:5,G4:6,G5:5,P1:6,P2:6,P3:5,P4:5,P5:5,P6:6,E1:5,E2:4,E3:5,E4:4,E5:2,E6:4,E7:6});
+   pt(1,{G1:5,G2:5,G3:4,G4:5,G5:4,P1:5,P2:5,P3:4,P4:5,P5:5,P6:5,E1:5,E2:4,E3:4,E4:4,E5:2,E6:4,E7:5});
+   pt(2,{G1:5,G2:6,G3:4,G4:5,G5:4,P1:5,P2:6,P3:'NA',P4:'NA',P5:5,P6:5,E1:4,E2:3,E3:4,E4:3,E5:3,E6:3,E7:4});
+   pt(3,{G6:5,P7a:5,P7b:5,E8a:5,E8b:4});
+   h.open[key('Eo',2)]='The calls from school have stopped. He still swears at his sister.';
+   const keep={rat:S.rat.post,open:S.open.post,chk:Object.assign({},S.chk),meta:Object.assign({},S.meta)};S.rat.post=h.rat;S.open.post=h.open;S.meta.pr_change=h.pr_change;S.meta.pr_indep=h.pr_indep;S.meta.pr_date=h.date;
+   S.chk.post_opt=false;Object.assign(h,histSnap(),{date:h.date,resp:h.resp,rat:h.rat,open:h.open});S.rat.post=keep.rat;S.open.post=keep.open;S.chk=keep.chk;S.meta=keep.meta;S.hist=[h];}
   S.round='post';
   renderAll();setView('sum');
   nbhUI.toast('Simulation loaded: a simulated administration, pre and post rounds on a desk-tipping plan, four respondents.',{kind:'ok'});
@@ -1593,7 +1797,7 @@ function rpSlot(o,taken){const nm=String(o.name||'').trim().toLowerCase(),role=r
   let i=S.resp.findIndex((r,j)=>!taken.includes(j)&&nm&&String(r.name||'').trim().toLowerCase()===nm&&r.role===role);
   if(i<0)i=S.resp.findIndex((r,j)=>!taken.includes(j)&&rpBlankRow(r,j));
   return i;}
-const rpMode=t=>/read/i.test(t)?'Read aloud':/interview/i.test(t)?'Interview':/pict/i.test(t)?'Pictorial':/adapt/i.test(t)?'Adapted':'Self-completed';
+const rpMode=t=>/read|le\u00edd|leid|voz alta/i.test(t)?'Read aloud':/interview|entrevista/i.test(t)?'Interview':/pict|dibuj|caras/i.test(t)?'Pictorial':/adapt/i.test(t)?'Adapted':'Self-completed';
 function rcRead(texts){const found=[];texts.forEach(t=>NBH_RESPOND.find(t).forEach(o=>found.push(o)));
   const mine=found.filter(o=>o.form==='SV-1'&&rpParse(o.inst));const out=$('#rcOut');rcData=null;
   if(!mine.length){out.innerHTML='<div class="gf-warn">'+(found.length?'The codes found belong to another form ('+esc([...new Set(found.map(o=>o.form))].join(', '))+'), not SV-1.':'No answer code (NBH1....) was found in what was pasted or chosen.')+'</div>';return;}
@@ -1620,7 +1824,45 @@ $('#rcRead').addEventListener('click',()=>rcRead([$('#rcText').value]));
 $('#rcFileBtn').addEventListener('click',()=>$('#rcFile').click());
 $('#rcFile').addEventListener('change',async e=>{const fs=Array.from(e.target.files||[]);if(!fs.length)return;const texts=await Promise.all(fs.map(f=>f.text()));$('#rcStatus').textContent=fs.length+' file'+(fs.length===1?'':'s')+' read';rcRead(texts.concat([$('#rcText').value]));e.target.value='';});
 $('#rcDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
-window.__rp={file:rpFile,link:rpLinkUrl,read:rcRead,payload:rpPayload};   /* for the checks */
+/* v22.81 (review I111) the respondent page in Spanish: this form's own statements and open items, drafted in Spanish for it (a
+   bilingual colleague or the district's interpreter reads the page before its first use); the page's own words are
+   nbh-respond.js's Spanish. (I115) The options, as respondents are told them, head the page in either language. */
+const ES_T={G1:'La conducta que este plan busca reducir es la que m\u00e1s me importa, a m\u00ed o a [student].',
+ G2:'La habilidad nueva que ense\u00f1a el plan (la que reemplaza a la conducta) es algo que [student] de verdad va a necesitar fuera de este plan.',
+ G3:'El cambio que busca el plan har\u00eda una diferencia real en el d\u00eda de [student].',G4:'El plan se enfoca en los lugares y los momentos correctos.',
+ G5:'En las metas no se dej\u00f3 fuera nada que sea importante para m\u00ed.',G6:'Este plan es sobre algo en lo que quiero mejorar.',
+ P1:'La forma en que el plan responde a la conducta de [student] es justa y respetuosa.',
+ P2:'Me sentir\u00eda c\u00f3modo o c\u00f3moda si la familia de [student], otro maestro o el director vieran c\u00f3mo se aplica el plan.',
+ P3:'Lo que el plan pide a los adultos es razonable para lo que probablemente va a lograr.',P4:'El plan se puede aplicar en este sal\u00f3n tal como est\u00e1 escrito, en un d\u00eda normal.',
+ P5:'Comparado con lo que se hac\u00eda antes, prefiero este plan.',P6:'Los premios y privilegios del plan, y la forma de ganarlos, me parecen aceptables.',
+ P7a:'Los adultos son justos conmigo cuando usan este plan.',P7b:'S\u00e9 lo que puedo ganar y c\u00f3mo ganarlo.',
+ P8:'El costo del plan en tiempo del personal y en materiales es aceptable para esta escuela.',
+ E1:'La conducta a la que apunta el plan est\u00e1 mejor que antes del plan.',E2:'[student] usa la habilidad nueva por su propia cuenta.',
+ E3:'El cambio es lo bastante grande como para que importe en el d\u00eda de [student].',E4:'Han mejorado cosas que no eran el objetivo del plan.',
+ E5:'Algo ha empeorado desde que empez\u00f3 el plan.',E6:'El problema que yo ten\u00eda est\u00e1 resuelto, o casi resuelto.',
+ E7:'Me gustar\u00eda que se volviera a usar este plan, o uno parecido.',E8a:'Ahora las cosas est\u00e1n mejor para m\u00ed.',E8b:'Me gusta c\u00f3mo me va ahora en la escuela.',
+ Go:'En sus propias palabras, \u00bfqu\u00e9 es lo que m\u00e1s le gustar\u00eda que fuera diferente para [student] al final de este a\u00f1o escolar?',
+ Po:'\u00bfHay alguna parte del plan que usted no querr\u00eda que se hiciera, o que le incomodar\u00eda que alguien viera?',P7c:'Hay una parte de este plan que no me gusta:',
+ Eo:'\u00bfQu\u00e9 ha cambiado, para bien o para mal, desde que empez\u00f3 el plan? Incluya cualquier cosa, aunque no sea una de las metas.',E8c:'\u00bfQu\u00e9 est\u00e1 mejor ahora? \u00bfQu\u00e9 est\u00e1 peor?'};
+const ES_ST={Go:'\u00bfQu\u00e9 es lo que m\u00e1s quieres que cambie para ti en la escuela este a\u00f1o?'};
+const ES_ROLE={student:'el estudiante',caregiver:'el padre, la madre o la persona a cargo',teacher:'el maestro o la maestra que aplica el plan',para:'el asistente o la asistente que aplica el plan',admin:'la administraci\u00f3n de la escuela',rsp:'el proveedor de servicios relacionados',other:'otra persona'};
+const ES_SEC={G:'Metas',P:'Procedimientos',E:'Efectos'},ES_RND={pre:'previa',post:'posterior'};
+const esWord=(x,role,nick)=>(STU(role)&&ES_ST[x.id]?ES_ST[x.id]:(ES_T[x.id]||x.t)).replace(/\[student\]/g,nick&&nick!=='the student'?nick:'el estudiante');
+{const base=rpPayload;rpPayload=function(){const p=base.apply(this,arguments),opt=String(S.meta.options||'').trim(),es=$('#rpLang')&&$('#rpLang').value==='es';
+  if(!es){if(opt)p.instructions='Before you answer: '+opt+' '+p.instructions;return p;}
+  const rk=$('#rpRole').value,round=$('#rpRound').value,role=RP_ROLE(rk),nick=$('#rpNick').value.trim()||'the student',secs=RP_SECS[round].map(s=>ES_SEC[s]),plan=String(S.meta.plan||'').trim(),who=String(S.meta.bcba||'').trim()||'el BCBA';
+  const and=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' y '+a[a.length-1];
+  Object.assign(p,{lang:'es',title:'Validez social, ronda '+ES_RND[round],heading:'Validez social: '+and(secs),
+    sub:'Para '+ES_ROLE[rk]+', ronda '+ES_RND[round]+'. \u00bfEl plan'+(plan?' ('+plan+')':'')+' apunta a lo correcto, se aplica de una forma aceptable'+(round==='post'?' y le ha funcionado a usted':'')+'? Solo las personas para quienes es el plan pueden decirlo.',
+    instructions:(opt?'Antes de responder: '+opt+' ':'')+'Califique cada afirmaci\u00f3n desde su propio punto de vista, de 1 (totalmente en desacuerdo) a 6 (totalmente de acuerdo), o N/A si no puede juzgarla. No hay respuestas correctas, y nada de lo que diga cambia lo que recibe el estudiante. Cuando termine, pulse Enviar: se abre su programa de correo con un mensaje para '+who+' listo para enviar.',
+    items:rpItems(role,round).map(x=>({n:x.id,text:esWord(x,role,nick)})),
+    scale:Object.assign({},p.scale,{naLabel:'N/A: no puedo juzgarlo, o no lo he visto aplicarse',anchors:['1 totalmente en desacuerdo','2 en desacuerdo','3 un poco en desacuerdo','4 un poco de acuerdo','5 de acuerdo','6 totalmente de acuerdo']}),
+    extras:[{id:'name',label:'Su nombre',req:true},{id:'mode',label:'C\u00f3mo respondi\u00f3 (por su cuenta, se lo leyeron en voz alta, en una entrevista)'}],
+    itemsHeading:'Las afirmaciones',openHeading:'En sus propias palabras',subject:'Respuestas de validez social (ronda '+ES_RND[round]+') para el formulario SV-1'});
+  if(p.open)p.open=rpOpens(role,round).map(o=>({id:o.id,label:ES_SEC[o.s]+': '+esWord(o,role,nick)}));
+  return p;};}
+$('#rpLang').addEventListener('change',()=>{$('#rpLangNote').hidden=$('#rpLang').value!=='es';rpStatus();});
+window.__rp={file:rpFile,link:rpLinkUrl,read:rcRead,payload:()=>rpPayload()};   /* for the checks */
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
@@ -1646,8 +1888,53 @@ window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):n
     const flagged=[];Object.keys(SECS).forEach(sec=>{const rd=sec==='E'?'post':latest(sec);SECITEMS(sec).forEach(x=>{
       if(S.resp.some((p,i)=>{const v=scored(rd,x.id,i);return v!=null&&v<=S.thr&&applies(x,p.role);})){const t=wording(x,x.who==='student'?'Student':'');flagged.push(x.rev?t.replace(/\.$/,'')+' (reverse-scored: rated high)':t);}});});
     const sv={scale:'1-6',flagged,form:'SV-1',cut:4.5,thr:S.thr};if(pre)sv.pre=pre;if(post)sv.post=post;
-    try{const V=verdict();if(V&&V.label)sv.label=V.label;}catch(e){}
+    try{const V=verdict();if(V&&V.label)sv.label=V.label;
+      /* v22.81 (review F218) what the form decides, not a pool: ok only when the verdict is "Socially valid"; the post mean of each
+         role (every section, E5 reversed), the effects mean, and the lowest of the student's and the caregiver's means; the post
+         rounds counted. PR-1 reads ok (and minConsumer) before it calls social validity met at exit. */
+      sv.ok=V.label==='Socially valid';const rd=anyRatings('post')?'post':'pre',roles={};
+      GROUPS.forEach(g=>{let t=0,n=0;Object.keys(SECS).forEach(sec=>{if(!SECS[sec].rounds.includes(rd))return;const m=secMean(rd,sec,inGroup(g));if(m.n){t+=m.mean*m.n;n+=m.n;}});if(n)roles[g.toLowerCase()]=r2(t/n);});
+      sv.roles=roles;sv.rolesRound=rd;const e=secMean('post','E').mean;if(e!=null)sv.effects=r2(e);
+      const mc=['student','caregiver'].map(k=>roles[k]).filter(x=>x!=null);if(mc.length)sv.minConsumer=Math.min(...mc);sv.posts=postCount();
+      const g=goalsFact();if(g)sv.goals=Object.assign(g,{line:goalsLine()});
+      const nm=namedOutcomes();if(nm.length)sv.named=nm.map(x=>({text:x.text,tag:x.tag,role:x.role,round:x.round}));}catch(e){}   /* v22.81 (I114) */
     const o=r&&typeof r==='object'?r:{};o.sv=sv;return o;}catch(e){return r;}};
+})();
+</script>
+
+<script id="sv1-case-in">
+/* v22.81 (review F224) the case: in. While its box is empty, this form takes from Form PR-1 the change from baseline as PR-1
+   prints it (review.pct), PR-1's answer on independent use (review.repInd, PR-1's own five answers) and the review date; from
+   Form TD-1 the replacement skill (plan.rep) and the behavior (plan.beh, else the case's first target). The people of the case
+   are offered as respondent rows, never added unasked: those trained on Form ST-1 (staff.people) as implementers and the
+   household on Form CT-1 (caregiver) as caregivers. An implementer's contextual fit values means come from Form CF-1
+   (fit.values, by name) into the empty boxes of the row with that name. */
+(function(){
+const T=v=>String(v==null?'':v).trim(),md=t=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(T(t));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(t);};
+let offer=[];
+function people(f){const L=[];const st=f&&f.staff&&Array.isArray(f.staff.people)?f.staff.people:[];
+  st.forEach(p=>{const n=T(p.name);if(n)L.push({name:n,role:/para/i.test(T(p.role))?'Paraprofessional (implementer)':'Teacher (implementer)',from:'Form ST-1'+(T(p.role)?', '+T(p.role):'')});});
+  const cg=f&&f.caregiver;if(cg){const hh=Array.isArray(cg.household)?cg.household:[cg];hh.forEach(p=>{const n=T(p&&p.name);if(n)L.push({name:n,role:'Caregiver',from:'Form CT-1'+(T(p.rel)?', '+T(p.rel):'')});});}
+  const have=new Set(S.resp.map(r=>T(r.name).toLowerCase()).filter(Boolean));return L.filter(p=>!have.has(p.name.toLowerCase()));}
+function renderOffer(){const el=document.getElementById('svOffer');if(!el)return;if(!offer.length){el.innerHTML='';return;}
+  el.innerHTML='<div class="verdict v-mid"><b>From the case:</b> '+offer.map((p,i)=>'<button type="button" class="tool" data-svadd="'+i+'">Add '+esc(p.name)+' ('+esc(p.role.replace(' (implementer)','').toLowerCase())+')</button> <span class="hint">'+esc(p.from)+'</span>').join(' ')+'</div>';}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-svadd]');if(!b)return;const p=offer[+b.dataset.svadd];if(!p)return;
+  let i=S.resp.findIndex(r=>!Object.keys(r).some(k=>T(r[k])));if(i<0){S.resp.push(newResp());i=S.resp.length-1;}
+  Object.assign(S.resp[i],{name:p.name,role:p.role});offer=offer.filter(x=>x!==p);renderAll();});
+const was=window.__nbhFactsIn;
+window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}let k=0;f=f||{};
+  const put=(key,v)=>{v=T(v);if(!v||T(S.meta[key]))return;S.meta[key]=v;k++;};
+  const rv=f.review||{};
+  if(rv.pct!=null&&isFinite(+rv.pct)&&!T(S.meta.pr_change)){S.meta.pr_change=String(Math.round(+rv.pct));if(!T(S.meta.pr_dir))S.meta.pr_dir='';k++;}
+  put('pr_indep',rv.repInd);if(rv.date)put('pr_date',md(rv.date));
+  const pl=f.plan||{};put('skill',pl.rep);put('beh',pl.beh||(Array.isArray(f.behaviors)&&f.behaviors[0]&&f.behaviors[0].label));
+  const vals=f.fit&&Array.isArray(f.fit.values)?f.fit.values:[];
+  vals.forEach(v=>{const n=T(v&&v.name).toLowerCase();if(!n)return;S.resp.forEach(p=>{if(!IMPL(p.role)||T(p.name).toLowerCase()!==n)return;
+    if(v.r1!=null&&isFinite(+v.r1)&&!T(p.cf1)){p.cf1=(+v.r1).toFixed(1);k++;}if(v.r2!=null&&isFinite(+v.r2)&&!T(p.cf2)){p.cf2=(+v.r2).toFixed(1);k++;}});});
+  try{offer=people(f);}catch(e){offer=[];}
+  try{if(k)renderAll();else renderOffer();}catch(e){}
+  const n=((r&&r.filled)||0)+k;return {filled:n,note:k?'the PR-1 figures, the plan and the contextual fit means from the case':((r&&r.note)||'')};};
+{const ra=renderAll;renderAll=function(){const x=ra.apply(this,arguments);try{renderOffer();}catch(e){}return x;};}
 })();
 </script>
 
