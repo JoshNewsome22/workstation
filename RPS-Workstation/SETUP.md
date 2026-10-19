@@ -9903,6 +9903,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.03: CR-1 keeps one debriefing for each restraint (review Wave 3)
+
+- **One debriefing per restraint (F338).** Each debriefing used to overwrite the last. Worse, choosing another restraint
+  kept the previous incident's account under the new restraint's heading. Now the Debriefing sheet shows the debriefing
+  of the restraint chosen under **Restraint on the log**:
+  - Choosing another restraint keeps the one on screen and opens that restraint's own debriefing, or a blank one. What
+    was typed before any restraint was chosen goes with the first restraint chosen that has none.
+  - A debriefing carries its account, its answers to "Does this need a report?", the changes it led to, and the
+    readiness ticks.
+  - The others are listed under the sheet with **Open**, and each prints in full under its restraint's heading.
+  - They are saved with the record and the workstation's case. They go into **Copy for the BIP** (when "with the
+    debriefing and the log" is ticked) and into the workstation's spreadsheet.
+  - A restraint with a debriefing kept shows **Debrief done: Yes** on the log.
+  - Deleting a restraint from the log renumbers the debriefings after it. The deleted restraint's own debriefing is kept,
+    with no restraint chosen.
+- **The example** keeps debriefings for the second and third restraints.
+- **Next:** I175, CR-1's actions and review dates handed to PR-1, IM-1, DM-1 and Today.
+- qa/cr1-w3b-test.js (12 checks).
+
 ### v23.02: CR-1 counts restraints within the semester's own days, takes the count and the dates from the log, checks the debriefing's report answer against the clock, copies only the plan into the BIP, and records when the plan was first developed (review Wave 3)
 
 - **The semester's own days (F339).** Setup has **Semester begins** and **Semester ends**.

@@ -1240,6 +1240,8 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
     <h3 style="margin-top:14px">Parent Notification and Reporting &mdash; Readiness Check</h3>
     <p class="hint">These are the school&rsquo;s obligations under &sect; 1003.573(7)(c)&ndash;(d) and (8)(b), listed so the team can confirm they were met. The time limits come from the statute.</p>
     <div id="notifyWrap"></div>
+    <!-- v23.03 (review F338) the debriefings of the other restraints: listed on screen, printed in full -->
+    <div id="crDebOthers"></div>
   </section>
 
   <!-- ====== LOG ====== -->
@@ -1355,7 +1357,7 @@ const NOTIFY=[
  'Documentation provided electronically to the principal, the district ESE director, and the bureau chief (each month that school is in session)',
  'The date this crisis intervention plan was last reviewed, and whether changes were recommended, is recorded on the incident report'
 ];
-function blank(){return{meta:{},team:[],pbis:[],act:[],log:[],notify:{},closed:[]};}
+function blank(){return{meta:{},team:[],pbis:[],act:[],log:[],notify:{},closed:[],debs:{}};}   /* v23.03 (F338) debs: the other debriefings */
 let S=blank();
 function ensure(){
   while(S.team.length<4)S.team.push({n:'',r:'',g:'',p:''});
@@ -1437,6 +1439,7 @@ function actVerdict(){
     : `<div class="verdict v-mid">No change has been recorded yet.${note} &sect; 1003.573(4)(a)6.f. lists debriefing with staff among the activities for reducing the use of restraint; on this form, a debriefing that produces no change to the plan, the environment, or the supports is a record of what happened rather than a reduction activity.</div>`;
 }
 function renderLog(){
+  const dDone=crDebDone();   /* v23.03 (F338) */
   $('#logTbl tbody').innerHTML=S.log.map((r,i)=>`<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
     <td><input data-l="${i}" data-f="d" value="${esc(r.d)}"></td>
@@ -1450,6 +1453,8 @@ function renderLog(){
   crcRender();
   logMetrics();
   /* v23.02 (review F339) a restraint of an earlier semester stays on the log, greyed */
+  /* v23.03 (review F338) a restraint with a debriefing kept is debriefed: its Debrief done follows */
+  Object.keys(dDone).forEach(k=>{const e=document.querySelector('#logTbl select[data-l="'+(+k-1)+'"][data-f="deb"]');if(e){e.value='Yes';e.disabled=true;e.title='A debriefing of this restraint is on the Debriefing sheet';}});
   crcStates().forEach((s,i)=>{const tr=$('#logTbl tbody').rows[i];if(tr){tr.classList.toggle('cr-earlier',s.dated&&!s.inSem);tr.title=s.dated&&!s.inSem?'An earlier semester: kept for the year\u2019s record, not counted this semester':'';}});
 }
 /* v21.16 audit (F7, F8). A restraint with no report or debriefing status counted as "none" late and "none" not
@@ -1585,6 +1590,51 @@ function bindMeta(){crDateDone=String(S.meta.dbDate||'');$$('[data-m]').forEach(
    rpFor live in hidden fields, so the workstation's case file holds them as well. Wording approved by the BCBA, October 2026. */
 const RP_KEYS=['rpR1','rpR2','rpR3','rpR4','rpR5','rpR6'];
 const RP_FIELDS=['rpNeed','rpWhy','rpWhen','rpTo','rpBy','rpTold'];
+/* v23.03 (review F338) one debriefing per restraint. The sheet shows the debriefing of the restraint chosen on the log; the others
+   are kept in S.debs by restraint number, or as 'u1'... when no restraint was chosen. Choosing another restraint keeps the one on
+   screen and opens that restraint's own, or a blank one; what was typed before any restraint was chosen goes with the first one
+   chosen that has none. A debriefing is its fields, its answers to Does This Need a Report?, the changes it led to and the readiness
+   ticks. */
+const DB_KEYS=['dbDate','dbWhen','dbBy','dbReport','dbWho','dbContext','dbLead','dbRisk','dbPbis','dbFollowed','dbFollowedWhy','dbAfter','dbBreath','dbInjury','dbStudent','dbStaff'];
+const DB_RP=RP_KEYS.concat(RP_FIELDS,['rpOn','rpFor']);
+const DB_LAB={dbDate:'Incident date and time',dbWhen:'Debriefing date',dbBy:'Facilitated by',dbReport:'District incident report completed',dbWho:'Who took part',
+  dbContext:'What was happening before it started',dbLead:'The behavior leading up to the decision to restrain',dbRisk:'Why there was an imminent risk of serious injury',
+  dbPbis:'Which interventions from the plan were used, and in what order',dbFollowed:'Was the plan followed as written?',dbFollowedWhy:'What got in the way',
+  dbAfter:'What happened immediately after the restraint ended',dbBreath:'Breathing during the hold',dbInjury:'Injuries, marks, or medical concerns',
+  dbStudent:'The student\u2019s account',dbStaff:'Staff experience'};
+const crT=v=>String(v==null?'':v).trim();
+function crDebSnap(){const o={};DB_KEYS.concat(DB_RP).forEach(k=>{o[k]=crT(S.meta[k]);});o.act=(S.act||[]).filter(a=>a&&['c','w','who','by','st'].some(f=>crT(a[f]))).map(a=>Object.assign({},a));
+  o.notify=Object.assign({},S.notify||{});return o;}
+function crDebHas(o){return !!o&&(DB_KEYS.some(k=>k!=='dbDate'&&k!=='dbReport'&&crT(o[k]))||(o.act||[]).some(a=>a&&crT(a.c)));}
+function crDebLoad(o){o=o||{};DB_KEYS.concat(DB_RP).forEach(k=>{S.meta[k]=crT(o[k]);});S.act=(o.act||[]).map(a=>Object.assign({c:'',w:'',who:'',by:'',st:''},a));
+  S.notify=Object.assign({},o.notify||{});}
+const crDebs=()=>{if(!S.debs||typeof S.debs!=='object'||Array.isArray(S.debs))S.debs={};return S.debs;};
+const crDebFree=()=>{const D=crDebs();let j=1;while(D['u'+j])j++;return 'u'+j;};
+/* keep the debriefing on screen under its restraint (or as one with none chosen) and open another: a restraint's, or 'u…' */
+function crDebSwap(nw,key){const D=crDebs(),old=crT(S.meta.dbRow),cur=crDebSnap(),has=crDebHas(cur);let carry=null;
+  if(old){if(has)D[old]=cur;else delete D[old];}
+  else if(has){if(nw&&!key&&!crDebHas(D[nw]))carry=cur;else D[crDebFree()]=cur;}
+  const k=key||nw,next=carry||(k?D[k]:null);if(k)delete D[k];
+  crDebLoad(next);S.meta.dbRow=nw;}
+function crDebRefresh(){ensure();renderAct();renderNotify();bindMeta();crcOptions();const sel=document.querySelector('select[data-m="dbRow"]');if(sel)sel.value=crT(S.meta.dbRow);
+  renderTrig();crSafety();renderLog();crDebOthers();}
+document.addEventListener('change',e=>{const t=e.target;if(!t||!t.matches||!t.matches('select[data-m="dbRow"]'))return;
+  if(crT(S.meta.dbRow)===crT(t.value))return;crDebSwap(crT(t.value),'');crDebRefresh();},true);
+/* the log's Debrief done follows the debriefings kept: a restraint with one is debriefed */
+function crDebDone(){const D=crDebs(),on=crT(S.meta.dbRow),cur=crDebHas(crDebSnap());const out={};
+  (S.log||[]).forEach((r,i)=>{const k=String(i+1);if((on===k&&cur)||crDebHas(D[k])){out[k]=1;if(r.deb!=='Yes')r.deb='Yes';}});return out;}
+function crDebOthers(){const box=document.getElementById('crDebOthers');if(!box)return;const D=crDebs(),keys=Object.keys(D).filter(k=>crDebHas(D[k]))
+    .sort((a,b)=>(a[0]==='u')-(b[0]==='u')||(+a.replace('u',''))-(+b.replace('u','')));
+  if(!keys.length){box.innerHTML='';return;}
+  const name=k=>k[0]==='u'?'A debriefing with no restraint chosen':'Restraint '+k,when=o=>crT(o.dbDate)||crT(o.dbWhen);
+  box.innerHTML='<div class="cr-deb-list noprint"><b>Debriefings of other restraints, kept with this record:</b> '+keys.map(k=>esc(name(k))+(when(D[k])?' ('+esc(when(D[k]))+')':'')
+      +'<button type="button" class="tool" data-debopen="'+k+'">Open</button>').join('; ')+'</div>'
+    +keys.map(k=>{const o=D[k];return '<div class="cr-deb-full"><h3>Post-Incident Debriefing: '+esc(name(k))+'</h3><table class="rt">'
+      +DB_KEYS.filter(f=>crT(o[f])).map(f=>'<tr><th style="width:30%">'+esc(DB_LAB[f])+'</th><td>'+esc(crT(o[f]))+'</td></tr>').join('')
+      +((o.act||[]).filter(a=>crT(a.c)).length?'<tr><th>What changes as a result</th><td>'+(o.act||[]).filter(a=>crT(a.c)).map(a=>esc(crT(a.c))+(a.w?' ('+esc(a.w)+')':'')+(crT(a.who)?'; '+esc(crT(a.who)):'')+(crT(a.by)?', by '+esc(crT(a.by)):'')+(a.st?'; '+esc(a.st):'')).join('<br>')+'</td></tr>':'')
+      +'</table></div>';}).join('');}
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button[data-debopen]'):null;if(!b)return;const k=b.dataset.debopen;
+  if(/^\d+$/.test(k))crDebSwap(k,'');else crDebSwap('',k);crDebRefresh();});
 const rpHas=()=>RP_KEYS.some(k=>S.meta[k]==='1')||RP_FIELDS.some(k=>String(S.meta[k]||'').trim()!=='');
 const rpTexts=()=>RP_KEYS.map(k=>{const e=document.querySelector('[data-mc="'+k+'"]');return e?e.parentNode.textContent.replace(/\s+/g,' ').trim():k;});
 const crToday=()=>{const d=new Date();return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();};
@@ -1656,6 +1706,9 @@ const CR_LOG_LAB={d:'Date',dur:'Duration',set:'Setting and activity',staff:'Staf
   rd:'Restraint began (date)',rt:'Restraint began (time)',xd:'Released (date)',xt:'Released (time)',pd:'Incident report completed (date)',pt:'Incident report completed (time)',
   pok:'Report completed by the end of the school day on which the school reopened',wd:'Written notice to the parent (date)',wt:'Written notice to the parent (time)',
   wok:'Written notice given before the end of the school day of the restraint',ak:'Parent’s signed acknowledgment of the notice (date)',md:'Incident report mailed (date)',mk:'Parent’s signed acknowledgment of the report (date)'};
+/* v23.03 (review F338) the spreadsheet carries the other debriefings after this form's entries */
+function crCsvOthers(out){const D=crDebs();Object.keys(D).filter(k=>crDebHas(D[k])).forEach(k=>{const o=D[k],sh='Debriefing ('+(k[0]==='u'?'no restraint chosen':'restraint '+k)+')';
+  DB_KEYS.filter(f=>crT(o[f])).forEach(f=>out.push([sh,DB_LAB[f],crT(o[f])]));(o.act||[]).filter(a=>crT(a.c)).forEach(a=>out.push([sh,'What changes as a result',[crT(a.c),a.w,crT(a.who),crT(a.by),a.st].filter(Boolean).join('; ')]));});return out;}
 function crCsvRows(){const out=[['Sheet','Entry','Value']],clean=x=>String(x==null?'':x).replace(/\s+/g,' ').trim();
   const SEC={'only-setup':'Setup','only-plan':'Crisis intervention plan','only-deb':'Debriefing','only-log':'Restraint log'};
   const labelOf=el=>{const td=el.closest('td');if(td){const th=td.previousElementSibling;if(th&&th.tagName==='TH')return clean(th.textContent);}
@@ -1671,11 +1724,11 @@ function crCsvRows(){const out=[['Sheet','Entry','Value']],clean=x=>String(x==nu
   (S.log||[]).forEach((r,i)=>(Array.isArray(r.att)?r.att:[]).forEach((a,j)=>{const v=['d','t','m','o'].map(f=>clean(a[f])).filter(Boolean).join(', ');if(v)out.push(['Restraint log','Restraint '+(i+1)+': telephone or e-mail attempt '+(j+1),v]);}));
   (S.closed||[]).forEach((z,i)=>{if(!clean(z.a)&&!clean(z.w))return;out.push(['Restraint log','No-school day '+(i+1),[clean(z.a),clean(z.b)].filter(Boolean).join(' to ')+(clean(z.w)?' ('+clean(z.w)+')':'')]);});
   Object.keys(S.notify||{}).filter(k=>S.notify[k]===true).forEach(k=>out.push(['Debriefing','Readiness check: '+(NOTIFY[+k]||'item '+(+k+1)),'yes']));
-  return out;}
+  return crCsvOthers(out);}
 $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([crCsvRows().map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='CR-1_'+(S.meta.client||'student').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
-function renderAll(){ensure();renderTeam();renderPbis();renderAct();renderLog();renderNotify();bindMeta();renderTrig();crProneW();}
+function renderAll(){ensure();renderTeam();renderPbis();renderAct();renderLog();renderNotify();bindMeta();renderTrig();crProneW();crDebOthers();}
 /* v22.41 a face-down (prone) restraint: district Policy 5.181 (6c-xii) rules it out for a student with breathing or circulation
    problems, and this plan's health concerns may name one */
 function crProneW(){const el=document.getElementById('crProneW');if(!el)return;const m=S.meta||{},tx=['hPhys','hAlert','hAvoid'].map(k=>String(m[k]||'')).join(' ');
@@ -1719,6 +1772,12 @@ function crRecord(src){
      neither and opens with them empty; everything it does hold is read exactly as before. */
   (Array.isArray(src.log)?src.log:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).forEach((x,i)=>{R.log[i].att=rows(x.att,['d','t','m','o']);});
   R.closed=rows(src.closed,['a','b','w']);
+  /* v23.03 (review F338) the debriefings of the other restraints, by restraint number ('u1'... for one with no restraint chosen); a
+     file saved before has none */
+  const D=src.debs&&typeof src.debs==='object'&&!Array.isArray(src.debs)?src.debs:{};
+  Object.keys(D).forEach(k=>{const x=D[k];if(!/^(\d{1,3}|u\d{1,3})$/.test(k)||!x||typeof x!=='object'||Array.isArray(x))return;const o={};
+    DB_KEYS.concat(DB_RP).forEach(f=>{o[f]=txt(x[f]);});o.act=rows(x.act,['c','w','who','by','st']);o.notify={};
+    if(x.notify&&typeof x.notify==='object')Object.keys(x.notify).forEach(n=>{if(/^\d+$/.test(n)&&x.notify[n]===true)o.notify[n]=true;});R.debs[k]=o;});
   return R;
 }
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
@@ -1812,6 +1871,13 @@ async function loadSim(){
   /* v21.22 (K10): each restraint's times and notice log, every date a school day of the simulated calendar, which
      lists one planning day before the first restraint; the debriefing is about the second restraint (1:42 PM) */
   const I=n=>crcMDY(D(n));
+  /* v23.03 (review F338) the third restraint's debriefing, kept beside the second's */
+  S.debs={'3':{dbDate:D(6)+', 10:15 AM',dbWhen:D(5),dbBy:'Jordan Ellis, M.A., BCBA (simulated)',dbReport:'Yes, within 24 hours',
+    dbWho:'Aide B, assistant principal, BCBA; the substitute by telephone (simulated)',dbContext:'A substitute teacher in the afternoon writing block; the break card was not honored on time.',
+    dbLead:'Asked twice for the break card; the substitute said to finish the page first. Paper torn, then the student moved toward the aide.',
+    dbFollowed:'Partly \u2014 explained below',dbFollowedWhy:'The substitute had not been shown the plan, so the first two stages were skipped.',
+    dbStaff:'Aide B asked for a refresher on the release step; offered and scheduled (simulated).',
+    act:[{c:'Substitute folders carry a one-page summary of the crisis plan, starting with the break card',w:'Staffing or schedule',who:'Assistant principal (simulated)',by:D(-5),st:'Open'}],notify:{}}};
   S.log=[
     {d:D(28),dur:'35 s',set:'Room 12, afternoon writing',staff:'Aide B, teacher',rep:'Yes',deb:'Yes',pre:'Delay reached 90 s with one adult; timer not visible',
      rd:I(28),rt:'13:10',xd:I(28),xt:'13:11',pd:I(28),pt:'15:05',pok:'',wd:I(28),wt:'14:30',wok:'1',ak:I(27),md:I(27),mk:I(23),
@@ -2361,7 +2427,9 @@ document.addEventListener('click',async e=>{const b=e.target&&e.target.closest?e
          restraint deleted go with the debriefing that named it; answers already said to be for another one keep saying so. */
       const fm=/^restraint (\d+) on the log$/.exec(String(S.meta.rpFor||'').trim()),fk=fm?+fm[1]:0;
       if(fk&&fk===i+1)S.meta.rpFor=n===fk?'':'a restraint since deleted from the log';else if(fk>i+1)S.meta.rpFor='restraint '+(fk-1)+' on the log';
-      const ff=document.querySelector('[data-m="rpFor"]');if(ff)ff.value=S.meta.rpFor||'';}
+      const ff=document.querySelector('[data-m="rpFor"]');if(ff)ff.value=S.meta.rpFor||'';
+      /* v23.03 (review F338) the debriefings kept follow their restraint's number; the deleted restraint's own is kept, with none chosen */
+      const D=crDebs(),nd={};Object.keys(D).forEach(k=>{if(!/^\d+$/.test(k)){nd[k]=D[k];return;}const x=+k;if(x===i+1){let j=1;while(nd['u'+j]||D['u'+j])j++;nd['u'+j]=D[k];}else nd[x>i+1?String(x-1):k]=D[k];});S.debs=nd;}
     ensure();R.redraw();return;}
   if(d.cadelx!==undefined){const p=String(d.cadelx).split('.'),r=S.log[+p[0]],k=+p[1];if(!r||!Array.isArray(r.att)||!r.att[k])return;
     if(crcFilled(r.att[k])&&!(await nbhUI.confirm('Delete this row?\nAttempt '+(k+1)+' of restraint '+(+p[0]+1)+' will be deleted.',{ok:'Delete',danger:true})))return;
@@ -2415,6 +2483,9 @@ function bipText(){
     bipLine('Who took part',m.dbWho),bipLine('What was happening before it started',m.dbContext),bipLine('The behavior leading up to the decision to restrain',m.dbLead),bipLine('Why there was an imminent risk of serious injury',m.dbRisk),
     bipLine('Which interventions from the plan were used, and in what order',m.dbPbis),bipLine('Was the plan followed as written',bipPlain(m.dbFollowed)+(bipTxt(m.dbFollowedWhy)?(m.dbFollowed?'. ':'')+bipTxt(m.dbFollowedWhy):'')),
     bipLine('What happened immediately after the restraint ended',m.dbAfter),bipLine('Breathing during the hold',m.dbBreath),bipLine('Injuries, marks, or medical concerns',m.dbInjury),bipLine('The student’s account',m.dbStudent),bipLine('Staff experience',m.dbStaff)]);
+  /* v23.03 (review F338) the debriefings of the other restraints, each under its restraint */
+  if(all){const D=crDebs();Object.keys(D).filter(k=>/^\d+$/.test(k)&&crDebHas(D[k])).sort((a,b)=>a-b).forEach(k=>{const o=D[k];
+    B.push(['POST-INCIDENT DEBRIEFING: RESTRAINT '+k].concat(DB_KEYS.map(f=>bipLine(DB_LAB[f].replace(/\?$/,''),bipPlain(o[f]))),(o.act||[]).filter(a=>bipTxt(a.c)).map(a=>'- Change: '+bipTxt(a.c)+(a.w?' \u2014 '+a.w:'')+(bipTxt(a.by)?', by '+bipTxt(a.by):''))));});}
   if(all)B.push(['WHAT CHANGES AS A RESULT'].concat(S.act.filter(a=>bipTxt(a.c)).map(a=>'- '+bipTxt(a.c)+(a.w?' — '+a.w:'')+(bipTxt(a.who)?'; '+bipTxt(a.who):'')+(bipTxt(a.by)?', by '+bipTxt(a.by):'')+(a.st?' ('+a.st+')':''))));
   /* the readiness check: an item the debriefed restraint's notice log records is given from it, as on screen; otherwise its tick */
   const states=crcStates(),v=crcTxt(m.dbRow).trim(),nr=/^\d+$/.test(v)?+v:0,st=nr>=1&&nr<=states.length?states[nr-1]:null;
@@ -3205,6 +3276,10 @@ window.__nbhFactsOut=function(){
 </script>
 
 <style id="cr1-w3-css">
+/* v23.03 (review F338) the other debriefings: a list on screen, each in full on paper */
+.cr-deb-list{margin:12px 0 4px;padding:8px 12px;border:1px solid #cfe0d6;border-radius:6px;background:#f6faf8;font-size:13px}.cr-deb-list button{margin-left:6px;font-size:12px;min-height:30px}
+.cr-deb-full{display:none}@media print{.cr-deb-list{display:none!important}.cr-deb-full{display:block}}
+.cr-deb-full h3{margin-top:16px}
 /* v23.02 (review F339) a restraint of an earlier semester; (F344) the BIP tick */
 #logTbl tr.cr-earlier td{background:#f4f5f6;color:#5f6b72}#logTbl tr.cr-earlier td:first-child::after{content:" (earlier semester)";font-weight:400;font-size:11px;display:block}
 .bip-all{margin-left:8px;font-size:12px}
