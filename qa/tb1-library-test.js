@@ -111,7 +111,8 @@ async function printPdf(page,file,onlyDefine){
  const ePre=pick(e=>e.type==='Precursor');
  console.log('   using',eSingle.id,eClus.id,eFunc.id,eProd.id,eOther.id,ePre.id);
  check('no control was added to the page by the library (controls '+await page.evaluate(()=>document.querySelectorAll('input,select,textarea').length)+')',
-  await page.evaluate(()=>document.querySelectorAll('input,select,textarea').length===343));
+  /* v23.17 (TB-1 review F35, F34, F39) 13 of the form's own: the pilot's A and B for 4 targets, the hidden sel[].from of 4 rows, the print choice */
+  await page.evaluate(()=>document.querySelectorAll('input,select,textarea').length===356));
  check('a library row on every card, the panel and the candidate picker are drawn',await page.evaluate(()=>{const n=+document.querySelector('#nTgt').value;
   return document.querySelectorAll('#tgtWrap .card .tb1lib-host').length===n&&[...document.querySelectorAll('.tb1lib-host')].every(h=>h.shadowRoot)&&!!document.querySelector('#tb1LibPanel').shadowRoot&&!!document.querySelector('#tb1LibCand').shadowRoot;}));
  check('the Guide counts come from the library',await page.evaluate(()=>document.querySelector('[data-tb1lib="n"]').textContent===String(TB1_LIB.entries.length)&&document.querySelector('[data-tb1lib="cats"]').textContent==='14'));

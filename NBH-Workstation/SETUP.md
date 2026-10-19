@@ -9903,6 +9903,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.17: TB-1 asks before a target is removed, keeps a student's examples out of the bank, takes a cluster's members onto its card, works out the agreement pilot, and prints the template only when used (review Wave 3)
+
+- **No target is lost to the count (F30).** Lowering "Target behaviors in plan" past a target that holds anything now asks
+  first, naming the target. Cancel puts the number back. An empty target still goes without a question.
+- **The bank (F32).** "Save this definition to my bank" now leaves out the examples, non-examples and borderline cases
+  unless asked.
+  - It says why: they are usually the student's own, and the bank is offered for every student on this device.
+  - The library panel has "Delete my bank", for shared iPads.
+  - The Guide says what the bank keeps on the device and how to delete it.
+- **A cluster's members on its card (F33).** A cluster target whose label matches a sheet-3 cluster takes the members as
+  its included topographies, one per line, along with the cluster's function, the members' shared dimension and the
+  cluster number.
+  - It follows later changes on sheet 3 while the card still holds what the cluster gave it.
+  - A list typed on the card that differs from the members gets a note.
+  - The worked example now lists the members.
+- **Candidates already taken (F34).** "Take the candidates marked Target" no longer adds a candidate a second time. That
+  covers one it took before, one whose words and a target's label contain one another, and one that resolves to the same
+  library entry.
+- **The agreement pilot (F35).** Two columns hold each observer's total, or the agreements and the intervals or trials
+  scored. The percentage is worked out from them by the index.
+  - A pilot under 80% is marked.
+  - The checklist's "Agreement pilot completed ... 80% or higher" row is unticked and held for that target until a pilot
+    reaches 80%.
+  - Each target's pilot goes to the case: date, observers, index, percentage, and whether it met 80%.
+- **Sources (F38).** The two "at least three" rows and the "no function words" row now name the form's own convention,
+  with the source cited for comparison.
+- **On paper (F39).** The arranging-and-ordering template and the distance-threshold table print only when one of their
+  fields holds something or a card carries the template's definition.
+  - Beside Print, "The definitions only (sheets 2 to 5)" leaves the Guide and the References off the paper.
+- qa/tb1-w3-test.js (12 checks).
+
 ### v23.16: IM-1 acts on a High estimate, counts each new injury once, takes restraints from CR-1 and outlines healed sites (review Wave 3)
 
 - **A High estimate says what to do now.**
