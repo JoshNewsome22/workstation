@@ -665,6 +665,8 @@ table.rt tr.hp td{background:#FBEBDC}
 /* v22.37 (review F141) the checkboxes of the "Before the first session" block and the trial record */
 .fieldgrid .pre-chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);padding:4px 0}.fieldgrid .pre-chk input{width:auto;margin:0}
 td.chk{text-align:center}td.chk input{width:auto}
+/* v23.15 (review F144, I73) the second observer's switch */
+.ioa-on{display:flex;align-items:center;gap:6px;font-family:var(--sans);font-size:13px;margin:4px 0 8px}.ioa-on input{width:auto;margin:0}
 .instr{border:1px solid var(--rule-2);border-left:3px solid var(--rule);background:#FAFCFC;padding:8px 12px;margin:8px 0 14px;font-family:var(--sans);font-size:12.5px;line-height:1.45}
 .instr p{margin:4px 0}
 .instr ol{margin:4px 0 4px 18px;padding:0}
@@ -828,7 +830,7 @@ td input,td select{max-width:100%}
   <div class="nbh-mast-inner">
     <div class="nbh-brandrow">
       <img class="nbh-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
-      <div class="nbh-formmeta"><span class="nbh-formid">Form DA-1</span><span>Revised September 2026</span><span>Confidential student record</span></div>
+      <div class="nbh-formmeta"><span class="nbh-formid">Form DA-1</span><span>Revised October 2026</span><span>Confidential student record</span></div>
     </div>
     <div class="nbh-titlerow">
       <div class="nbh-titleblock">
@@ -862,7 +864,7 @@ td input,td select{max-width:100%}
 <main class="sheet">
   <div class="nbh-print-head">
     <img class="nbh-print-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
-    <div class="nbh-print-meta"><div class="nbh-print-title">Demand Assessment</div><div>Form DA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+    <div class="nbh-print-meta"><div class="nbh-print-title">Demand Assessment</div><div>Form DA-1 &middot; Revised October 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
 
   <!-- ===================== INVENTORY ===================== -->
@@ -872,6 +874,7 @@ td input,td select{max-width:100%}
       <div><label>Student</label><input data-m="client"></div>
       <div><label>Student ID</label><input data-m="sid"></div>
       <div><label>Grade</label><input data-m="grade"></div>
+      <div><label>School</label><input data-m="site"></div><!-- v23.15 (review F145): the packet's school goes here, not into the setting -->
       <div><label>Setting(s) assessed</label><input data-m="setting" placeholder="resource room; general education classroom during independent work"></div>
       <div><label>Target behavior (Form TB-1 definition)</label><input data-m="target" placeholder="e.g., aggression: hitting, kicking or pushing an adult, and throwing materials"></div>
       <div><label>Hypothesis that sent the team here (Forms IA-1, OB-1, FS-1)</label><input data-m="hyp" placeholder="escape from academic demands; worst in math and writing"></div>
@@ -943,14 +946,28 @@ td input,td select{max-width:100%}
     <div class="grid-wrap"><table class="rt wide" id="sessTbl"><thead><tr>
       <th style="width:3%">#</th><th style="width:16%">Task</th><th style="width:6%">Date</th><th style="width:5%">Minutes</th><th style="width:6%">Instructions given</th><th style="width:6%">Complied</th><th style="width:6%">Compliance</th><th style="width:7%">Latency to first PB (s)</th><th style="width:5%">PB count</th><th style="width:6%">PB per min</th><th style="width:9%">Affect (1 to 5)</th><th style="width:5%">Guidance stops</th><th style="width:9%">Stopped early: why</th><th style="width:6%">Hold or injury: reported</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3>Per-Task Means</h3>
-    <p class="hint">Computed from the sessions above. A session with no problem behavior counts toward the mean latency at the full session length, the convention of latency-based analyses in which the session ends when the response occurs or the time runs out (Thomason-Sassi, Iwata, Neidert &amp; Roscoe, 2011); it is a floor on the true latency, so the table also shows in how many sessions problem behavior occurred at all.</p>
+    <p class="hint">Computed from the sessions above. A session with no problem behavior counts toward the mean latency at the full session length, the convention of latency-based analyses in which the session ends when the response occurs or the time runs out (Thomason-Sassi, Iwata, Neidert &amp; Roscoe, 2011); it is a floor on the true latency, so the table also shows in how many sessions problem behavior occurred at all, and the mean over only the sessions in which it occurred (the observed latency, which the modification rules on the Results sheet use).</p>
     <div class="grid-wrap"><table class="rt mid" id="meanTbl"><thead><tr>
-      <th style="width:4%">#</th><th>Task</th><th style="width:9%">Sessions</th><th style="width:11%">Mean compliance</th><th style="width:12%">Mean latency (s)</th><th style="width:11%">Sessions with PB</th><th style="width:11%">Mean PB per min</th><th style="width:10%">Mean affect</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th>Task</th><th style="width:9%">Sessions</th><th style="width:11%">Mean compliance</th><th style="width:11%">Mean latency, with floor (s)</th><th style="width:11%">Mean latency, observed (s)</th><th style="width:11%">Sessions with PB</th><th style="width:11%">Mean PB per min</th><th style="width:10%">Mean affect</th></tr></thead><tbody></tbody></table></div>
     <h3>Task-Choice Probes (optional)</h3>
     <p class="hint">Offer two tasks at once, with their materials in view, and ask the student to pick one to do next; record the pick. Five to ten probes with the pairs spread across the tasks give a rough preference ranking; the Results sheet reports how often each task was chosen when offered.</p>
     <div class="tools"><button class="tool" id="addProbe">Add a probe</button><button class="tool" id="delProbe">Remove last</button></div>
     <div class="grid-wrap"><table class="rt" id="probeTbl"><thead><tr>
       <th style="width:4%">#</th><th style="width:26%">Task A</th><th style="width:26%">Task B</th><th style="width:16%">Picked</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <!-- v23.15 (review F144, I73): a second observer's independent record of some sessions, and the agreement per session and
+         per task. Printed only when a second observer recorded sessions: the agreement per task and overall (the per-session entries are on
+         screen and in the CSV). -->
+    <div id="ioaSec">
+    <h3>Second Observer and Agreement (optional)</h3>
+    <p class="hint noprint">For some sessions, spread across the tasks (a third of them as a working convention), a second observer records the same session independently. Agreement per session: the problem-behavior count and the instructions complied with as total-count agreement (the smaller count divided by the larger; both zero is 100%), the latency as agreeing when the two are within 10 seconds or both record none, and the affect rating as exact agreement (Cooper, Heron &amp; Heward, 2020). The figures go to the Results sheet, the plan draft and the CSV.</p>
+    <label class="ioa-on noprint"><input type="checkbox" data-m="ioaOn" id="ioaOn"> A second observer recorded some sessions</label>
+    <div id="ioaWrap" hidden>
+      <div class="fieldgrid noprint"><div><label for="ioaObs">Second observer</label><input id="ioaObs" data-m="obs2" placeholder="name and role"></div></div>
+      <div class="grid-wrap noprint"><table class="rt wide" id="ioaTbl"><thead><tr>
+        <th style="width:3%">#</th><th style="width:17%">Task</th><th style="width:7%">Date</th><th style="width:7%">Instructions given</th><th style="width:7%">Complied</th><th style="width:8%">Latency to first PB (s)</th><th style="width:6%">PB count</th><th style="width:12%">Affect (1 to 5)</th><th style="width:8%">Count agreement</th><th style="width:8%">Complied agreement</th><th style="width:8%">Latency within 10 s</th><th>Affect the same</th></tr></thead><tbody></tbody></table></div>
+      <div id="ioaSum"></div>
+    </div>
+    </div>
   </section>
 
   <!-- ===================== RESULTS ===================== -->
@@ -958,12 +975,12 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Ranked Tasks</h2>
     <div class="metrics" id="resMetrics"></div>
     <div id="resVerdict"></div>
-    <p class="hint">Ranked from the task most likely to evoke problem behavior to the least, by mean rate of problem behavior and then by mean latency (shorter first). A task is called a <b>low-probability demand</b> when problem behavior occurred in at least half of its sessions or mean compliance was 40% or below, and a <b>high-probability demand</b> when problem behavior occurred in no more than a quarter of its sessions and mean compliance was 80% or above; the 80% and 40% lines are the ones Mace et al. (1988) used to sort requests into high- and low-probability sets. Everything else is <b>mixed</b>. All three cutoffs are working conventions.</p>
+    <p class="hint"><!-- v23.15 (review F138, F140) -->Ranked from the task most likely to evoke problem behavior to the least: by mean rate of problem behavior, then by mean latency (shorter first); when the sessions are latency-based (no programmed consequence, or the session ends at the first problem behavior, on the Inventory sheet), by mean latency first, then rate (Call et al., 2009). Two separate questions: a task <b>evokes problem behavior</b> when it occurred in at least half of its sessions, and those are the tasks for the demand condition; by compliance, a task is a <b>high-probability demand</b> when mean compliance was 80% or above and problem behavior occurred in no more than a quarter of its sessions, a <b>low-probability demand</b> when mean compliance was 40% or below (the lines Mace et al. (1988) used to sort requests), and otherwise <b>mixed</b>, which places it in the fading plan. Low compliance alone says the student does not do the task, not that the task evokes the behavior. All the cutoffs are working conventions.</p>
     <div class="grid-wrap"><table class="rt wide" id="rankTbl"><thead><tr>
-      <th style="width:4%">Rank</th><th>Task</th><th style="width:8%">Mean PB per min</th><th style="width:8%">Mean latency (s)</th><th style="width:8%">Sessions with PB</th><th style="width:8%">Mean compliance</th><th style="width:7%">Mean affect</th><th style="width:8%">Chosen when offered</th><th style="width:8%">Informant rating</th><th style="width:11%">Class</th><th style="width:16%">Features</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">Rank</th><th>Task</th><th style="width:8%">Mean PB per min</th><th style="width:8%">Mean latency (s)</th><th style="width:8%">Sessions with PB</th><th style="width:8%">Mean compliance</th><th style="width:7%">Mean affect</th><th style="width:8%">Chosen when offered</th><th style="width:8%">Informant rating</th><th style="width:8%">Evokes problem behavior</th><th style="width:8%">Compliance class</th><th style="width:12%">Features</th></tr></thead><tbody></tbody></table></div>
 
     <h2 class="nbh-band" style="margin-top:16px">Problem Behavior by Task</h2>
-    <div class="chartbar"><label for="chartSel">Chart shows</label><select id="chartSel" data-m="chart"><option value="rate">Mean problem behavior per minute</option><option value="lat">Mean latency to the first problem behavior (seconds)</option><option value="comp">Mean compliance (percent)</option></select><span class="hint">Bars in rank order; blue bars are low-probability demands, hatched orange bars high-probability demands, grey bars mixed.</span></div>
+    <div class="chartbar"><label for="chartSel">Chart shows</label><select id="chartSel" data-m="chart"><option value="rate">Mean problem behavior per minute</option><option value="lat">Mean latency to the first problem behavior (seconds)</option><option value="comp">Mean compliance (percent)</option></select><span class="hint">Bars in rank order; blue bars are tasks that evoke problem behavior, hatched orange bars high-probability demands, grey bars neither.</span></div>
     <svg id="daChart" viewBox="0 0 900 340" role="img" aria-label="Bar chart of problem behavior by task"></svg>
 
     <h2 class="nbh-band" style="margin-top:16px">Recommendations</h2>
@@ -987,30 +1004,31 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band" style="margin-top:16px">What the Research Supports</h2>
     <table class="rt">
       <tr><th style="width:28%">The demand condition needs the right demands</th><td>Roscoe, Rooker, Pence and Longworth (2009) ran a demand assessment before the functional analysis for participants whose problem behavior was thought to be escape-maintained, exposing each to a set of tasks and ranking them by the problem behavior they evoked. Functional analyses that used the high-ranked tasks in the demand condition were differentiated; analyses that used low-ranked tasks were not. The tasks named by this form&rsquo;s first recommendation are chosen by the same logic.</td></tr>
-      <tr><th>Latency is enough to rank tasks</th><td>Call, Pabico and Lomas (2009) measured the latency to the first problem behavior across candidate demands, selected the demands with the shortest latencies for the functional analysis, and obtained clear escape functions. Thomason-Sassi, Iwata, Neidert and Roscoe (2011) compared latency-based and rate-based functional analyses and found that latency to the first response gave the same conclusion as rate in most cases. Both measures are kept here; the ranking uses rate first and latency to break ties, and the chart can show either.</td></tr>
+      <tr><th>Latency is enough to rank tasks</th><td>Call, Pabico and Lomas (2009) measured the latency to the first problem behavior across candidate demands, selected the demands with the shortest latencies for the functional analysis, and obtained clear escape functions. Thomason-Sassi, Iwata, Neidert and Roscoe (2011) compared latency-based and rate-based functional analyses and found that latency to the first response gave the same conclusion as rate in most cases. Both measures are kept here; the ranking uses rate first and latency to break ties (latency first when the sessions are latency-based), and the chart can show either.</td></tr>
       <tr><th>Difficulty is an establishing operation</th><td>Weeks and Gaylord-Ross (1981) showed that difficult tasks produced more aberrant behavior than easy ones in students with severe disabilities, and that an errorless teaching procedure on the difficult task reduced it. Carr and Durand (1985) built their assessment on easy versus difficult tasks and found behavior problems rose under the difficult ones; the treatment, functional communication training, taught a request for help. The Inventory sheet&rsquo;s difficulty and &ldquo;can the student do it&rdquo; columns drive the easier-materials recommendation.</td></tr>
       <tr><th>Novelty, length and pace matter too</th><td>Smith, Iwata, Goh and Shore (1995) analyzed establishing operations for escape-maintained self-injury and found that, for different participants, task novelty, session duration and the rate of task presentation changed the amount of self-injury. The inventory records novelty and usual length so that these can be compared across tasks; the instruction pacing is chosen once on the Inventory sheet and held constant across tasks, and the shorten-the-task recommendation applies when problem behavior arrives late in a long session.</td></tr>
       <tr><th>Where fading starts</th><td>Pace, Iwata, Cowdery, Andree and McIntyre (1993) treated escape-maintained self-injury by removing demands altogether and then reintroducing them gradually with escape extinction; Zarcone, Iwata, Smith, Mazaleski and Lerman (1994) replicated the fading and showed that self-injury re-emerged when the demand rate rose too fast and was extinguished when the step was held. A fading plan needs to start with demands that evoke little or nothing; the high-probability demands this form identifies are those.</td></tr>
-      <tr><th>Interspersal and high-probability sequences</th><td>Horner, Day, Sprague, O&rsquo;Brien and Heathfield (1991) reduced aggression and self-injury during instruction by interspersing easy, already-mastered requests among the difficult ones. Mace et al. (1988) preceded a low-probability request with a run of high-probability requests, defined by compliance of 80% or more and 40% or less, and compliance with the low-probability request rose. Both procedures need a sorted list of demands, which the ranking supplies.</td></tr>
+      <tr><th>Interspersal and high-probability sequences</th><td>Horner, Day, Sprague, O&rsquo;Brien and Heathfield (1991) reduced aggression and self-injury during instruction by interspersing easy, already-mastered requests among the difficult ones. Mace et al. (1988) preceded a low-probability request with a run of brief, single-step high-probability requests (compliance of 80% or more; the low-probability requests, 40% or less), and compliance with the low-probability request rose. This form&rsquo;s tasks are whole activities: the high-probability ones are where fading starts and a source of easy items to intersperse, not a high-probability request sequence (its single-step requests are chosen on Form TD-1&rsquo;s planner).</td></tr><!-- v23.15 (review F142) -->
       <tr><th>Curricular revision and choice</th><td>Dunlap, Kern-Dunlap, Clarke and Robbins (1991) and Kern, Childs, Dunlap, Clarke and Falk (1994) used assessment of the features of academic tasks that set the occasion for problem behavior, then revised the curriculum (shorter tasks, a choice of tasks, functional materials, fine-motor demands removed) and reduced the behavior. Dyer, Dunlap and Winterling (1990) showed that a choice of tasks and reinforcers reduced serious problem behavior; Kern, Vorndran, Hilt, Ringdahl, Adelman and Dunlap (1998) reviewed the choice literature. The antecedent modifications this form proposes are those.</td></tr>
       <tr><th>The form of the instruction can be the problem</th><td>Fisher, Adelinis, Thompson, Worsdell and Zarcone (1998) found destructive behavior maintained by the termination of &ldquo;don&rsquo;t&rdquo; requests, and McComas, Hoch, Paone and El-Roy (2000) found idiosyncratic establishing operations for escape during academic tasks (the type of prompt, the presence of a particular material). The prompting and presentation columns are on the inventory for this reason, and the recommendations flag a task that evokes behavior despite low effort and adequate skill as one whose presentation should be changed.</td></tr>
-      <tr><th>Escape without extinction</th><td>Vollmer, Marcus and Ringdahl (1995) reduced escape-maintained self-injury with noncontingent escape, breaks delivered on a time schedule, and thinned the schedule. A break schedule set below the mean latency to problem behavior is one of the modifications proposed here. Geiger, Carr and LeBlanc (2010) give the treatment-selection model for escape-maintained behavior that Form TD-1 follows; this form supplies its antecedent branch.</td></tr>
+      <tr><th>Escape without extinction</th><td>Vollmer, Marcus and Ringdahl (1995) reduced escape-maintained self-injury with noncontingent escape, breaks delivered on a time schedule, and thinned the schedule. A break schedule set below the mean latency to problem behavior (as observed, not floored) is one of the modifications proposed here. Geiger, Carr and LeBlanc (2010) give the treatment-selection model for escape-maintained behavior that Form TD-1 follows; this form supplies its antecedent branch.</td></tr>
       <tr><th>The functional analysis itself</th><td>Iwata, Dorsey, Slifer, Bauman and Richman (1982/1994) set out the demand condition that Form EA-1 runs: instructions presented about every 30 seconds with a vocal, model, physical prompting sequence, brief escape following problem behavior. Hanley, Iwata and McCord (2003) review the method and the conditions. Cooper, Heron and Heward (2020) give the textbook account of establishing operations, negative reinforcement and antecedent interventions used in the Guide.</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
     <table class="rt">
       <tr><th style="width:28%">Compliance</th><td>Instructions complied with divided by instructions given, per session, as a percent; the per-task figure is the mean of the session percents. What counts as complied is the definition on the Inventory sheet.</td></tr>
       <tr><th>Rate of problem behavior</th><td>Problem behaviors counted divided by the session&rsquo;s minutes; the per-task figure is the mean of the session rates.</td></tr>
-      <tr><th>Latency</th><td>Seconds from the first instruction to the first problem behavior. A session with no problem behavior is entered as the session&rsquo;s full length in seconds (a floor, not an observation); the per-task figure is the mean. &ldquo;Sessions with PB&rdquo; shows how often the floor was used.</td></tr>
+      <tr><th>Latency</th><td>Seconds from the first instruction to the first problem behavior. A session with no problem behavior is entered as the session&rsquo;s full length in seconds (a floor, not an observation); the per-task figure is the mean, used for the ranking. &ldquo;Sessions with PB&rdquo; shows how often the floor was used. The modification rules use the observed latency, the mean over only the sessions with problem behavior.</td></tr>
       <tr><th>Affect</th><td>Mean of the 1 to 5 session ratings.</td></tr>
       <tr><th>Chosen when offered</th><td>Across the choice probes, the number of times the task was picked divided by the number of probes in which it was offered.</td></tr>
-      <tr><th>Ranking</th><td>Tasks are sorted by mean rate, highest first; ties are broken by mean latency, shortest first, then by mean compliance, lowest first. A task with no sessions is unranked.</td></tr>
-      <tr><th>Class</th><td>Low-probability demand: problem behavior in at least 50% of sessions, or mean compliance at or below 40%. High-probability demand: problem behavior in at most 25% of sessions and mean compliance at or above 80%. Otherwise mixed. Working conventions; the 80 and 40 are from Mace et al. (1988).</td></tr>
-      <tr><th>Differentiation verdict</th><td>The assessment is called differentiated when the top-ranked task&rsquo;s mean rate is at least twice the bottom-ranked task&rsquo;s (or the bottom is zero and the top is not) and at least one task is a low-probability demand; weak when there is a low-probability demand but the spread is smaller; undifferentiated when no task is a low-probability demand. Working convention.</td></tr>
-      <tr><th>Tasks for the demand condition</th><td>Up to three low-probability demands in rank order. When there are none, the form says so and points to longer sessions, a different pacing or presentation, or the possibility that the function is not escape from these demands.</td></tr>
-      <tr><th>Starting tasks for demand fading</th><td>The high-probability demands in reverse rank order (least evocative first), followed by the mixed tasks; the low-probability demands are the terminal steps. When no task qualifies as high-probability, the lowest-ranked task is offered with a note that fading should start from no demands at all (Pace et al., 1993).</td></tr>
-      <tr><th>Antecedent modifications</th><td>Proposed per low-probability or mixed task from its inventory features and its session data: easier materials or prerequisite teaching when difficulty is above skill or the student cannot do the task; shorten the task or schedule breaks when the mean latency is at least half the session (behavior arrives late); choice and interspersal with high-probability demands when the latency is short (the demand&rsquo;s onset is the problem); pre-teaching when the task is novel; reduce the response effort when the task is high effort; shorten the usual block when the task normally runs 15 minutes or more; change the presentation or prompt when the task is low effort, within the student&rsquo;s skills and still evocative; use the task as a choice option when it was chosen in at least half the probes in which it was offered. The cutoffs are working conventions.</td></tr>
-      <tr><th>Informant disagreement</th><td>Flagged when an informant rated a task 4 or 5 and it came out high-probability, or rated it 1 or 2 and it came out low-probability.</td></tr>
+      <tr><th>Ranking</th><td>Tasks are sorted by mean rate, highest first; ties are broken by mean latency, shortest first, then by mean compliance, lowest first. With latency-based sessions (Inventory sheet), by mean latency first, then rate. A task with no sessions is unranked.</td></tr>
+      <tr><th>Evokes problem behavior; compliance class</th><td>A task evokes problem behavior when it occurred in at least 50% of its sessions. Separately, by compliance: high-probability demand, mean compliance at or above 80% with problem behavior in at most 25% of sessions; low-probability demand, mean compliance at or below 40%; otherwise mixed. Working conventions; the 80 and 40 are from Mace et al. (1988).</td></tr>
+      <tr><th>Differentiation verdict</th><td>Differentiated when a task evokes problem behavior and the top-ranked task&rsquo;s mean rate is at least twice the bottom-ranked task&rsquo;s (or the bottom is zero and the top is not; with latency-based sessions, the bottom&rsquo;s mean latency at least twice the top&rsquo;s); weak when the spread is smaller; undifferentiated when no task evokes it. Working convention.</td></tr>
+      <tr><th>Tasks for the demand condition</th><td>Up to three tasks that evoke problem behavior, in rank order; compliance alone never names one. When there are none, the form says so and points to longer sessions, a different pacing or presentation, or the possibility that the function is not escape from these demands.</td></tr>
+      <tr><th>Starting tasks for demand fading</th><td>The high-probability demands in reverse rank order (least evocative first), followed by the mixed tasks that do not evoke problem behavior; the tasks that evoke it, and the low-probability demands, are the terminal steps. When no task qualifies as high-probability, the lowest-ranked task is offered with a note that fading should start from no demands at all (Pace et al., 1993).</td></tr>
+      <tr><th>Antecedent modifications</th><td>Proposed per low-probability or mixed task from its inventory features and its session data: easier materials or prerequisite teaching when difficulty is above skill or the student cannot do the task; shorten the task or schedule breaks when the observed latency is at least half the session (behavior arrives late); choice and interspersal when the observed latency is short (the demand&rsquo;s onset is the problem); pre-teaching when the task is novel; reduce the response effort when the task is high effort; shorten the usual block when the task normally runs 15 minutes or more; change the presentation or prompt when the task is low effort, within the student&rsquo;s skills and still evokes problem behavior; use the task as a choice option when it was chosen in at least half the probes in which it was offered. The cutoffs are working conventions.</td></tr>
+      <tr><th>Informant disagreement</th><td>Flagged when an informant rated a task 4 or 5 and it came out high-probability, or rated it 1 or 2 and it evoked problem behavior.</td></tr>
+      <tr><th>Agreement (optional)</th><td>Per session: count and complied as total-count agreement, latency within 10 s, affect exact; then per task and overall (Cooper et al., 2020).</td></tr><!-- v23.15 (review F144, I73) -->
     </table>
     <h2 class="nbh-band" style="margin-top:16px">Cautions</h2>
     <table class="rt">
@@ -1090,13 +1108,16 @@ const selV=(r,i,f,opts,val,label)=>'<select data-r="'+r+'" data-i="'+i+'" data-f
 function blank(){return{meta:{},tasks:[],sess:[],probes:[]};}
 let S=blank();
 const newTask=()=>({name:'',where:'',len:'',effort:'',diff:'',nov:'',prompt:'',pres:'',cando:'',rating:'',note:''});
-const newSess=t=>({t:t==null?'':String(t),date:'',min:S.meta.len||'',given:'',comp:'',lat:'',pb:'',aff:'',stops:'',why:'',hold:'',note:''});   /* v22.37 (F141): stops, why, hold */
+const newSess=t=>({t:t==null?'':String(t),date:'',min:S.meta.len||'',given:'',comp:'',lat:'',pb:'',aff:'',stops:'',why:'',hold:'',note:'',g2:'',c2:'',l2:'',p2:'',a2:''});   /* v22.37 (F141): stops, why, hold; v23.15 (F144): the second observer's g2..a2 */
 const newProbe=()=>({a:'',b:'',pick:'',note:''});
 function ensure(){
   if(!Array.isArray(S.tasks))S.tasks=[];if(!Array.isArray(S.sess))S.sess=[];if(!Array.isArray(S.probes))S.probes=[];if(!S.meta||typeof S.meta!=='object')S.meta={};
   while(S.tasks.length<3)S.tasks.push(newTask());
 }
 const sessLen=()=>num(S.meta.len)??5;
+/* v23.15 (review F140) sessions with no programmed consequence, or that end at the first problem behavior, are latency-based */
+const latMode=()=>/latency/i.test(S.meta.conseq||'');
+const stripH=s=>String(s).replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&rsquo;|’/g,"'");
 const nPer=()=>Math.max(1,Math.min(10,Math.round(num(S.meta.nper)??3)));
 const taskName=i=>{const t=S.tasks[i];return t?(t.name||('Task '+(i+1))):'';};
 
@@ -1150,7 +1171,7 @@ function renderInv(){renderPgRule();renderPreFirst();
 /* ---------------- sessions ---------------- */
 const taskOpts=(r,i,f,val,label)=>'<select data-r="'+r+'" data-i="'+i+'" data-f="'+f+'" aria-label="'+esc(label)+'"><option value=""></option>'+S.tasks.map((t,k)=>'<option value="'+k+'"'+(String(k)===String(val)?' selected':'')+'>'+(k+1)+' · '+esc(t.name||('Task '+(k+1)))+'</option>').join('')+'</select>';
 function sessCalc(r){const g=num(r.given),c=num(r.comp),m=num(r.min),p=num(r.pb),l=num(r.lat),has=g!=null||p!=null||l!=null;
-  return{has,comp:g!=null&&g>0&&c!=null?Math.max(0,Math.min(100,c/g*100)):null,rate:m!=null&&m>0&&p!=null?p/m:null,lat:l!=null?l:(m!=null&&m>0&&has&&!(p>0)?m*60:null),hadPb:(p!=null&&p>0)||l!=null,aff:num(r.aff)};}
+  return{has,comp:g!=null&&g>0&&c!=null?Math.max(0,Math.min(100,c/g*100)):null,rate:m!=null&&m>0&&p!=null?p/m:null,lat:l!=null?l:(m!=null&&m>0&&has&&!(p>0)?m*60:null),latObs:l,hadPb:(p!=null&&p>0)||l!=null,aff:num(r.aff)};}
 function renderSess(){
   $('#sessTbl tbody').innerHTML=S.sess.map((r,i)=>{const c=sessCalc(r);
     return `<tr><td class="num">${i+1}</td><td>${taskOpts('sess',i,'t',r.t,'Task, session '+(i+1))}</td>
@@ -1168,6 +1189,7 @@ function renderSess(){
     <td class="chk"><input type="checkbox" data-r="sess" data-i="${i}" data-f="hold"${r.hold?' checked':''} aria-label="Hold or injury: reported, session ${i+1}"></td>
     <td><input data-r="sess" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('sess',i,'session')}</tr>`;}).join('');
   const n=S.sess.length;$('#orderHint').textContent=n?n+' session'+(n===1?'':'s')+' · '+S.sess.filter(s=>num(s.given)!=null||num(s.pb)!=null||s.lat).length+' with data':'';
+  renderIoa();
 }
 function updateSessRow(i){const tr=$('#sessTbl tbody').rows[i];if(!tr)return;const c=sessCalc(S.sess[i]);tr.children[6].textContent=pct(c.comp);tr.children[9].textContent=f1(c.rate);}
 function renderProbes(){
@@ -1177,74 +1199,97 @@ function renderProbes(){
 
 /* ---------------- computation ---------------- */
 function stats(){
-  const n=S.tasks.length;const out=S.tasks.map((t,i)=>({i,t,name:taskName(i),n:0,comp:null,lat:null,rate:null,aff:null,pbN:0,offered:0,picked:0,cls:'',feat:[]}));
+  const n=S.tasks.length;const out=S.tasks.map((t,i)=>({i,t,name:taskName(i),n:0,comp:null,lat:null,latObs:null,nLat:0,rate:null,aff:null,pbN:0,ev:false,offered:0,picked:0,cls:'',feat:[]}));
   S.tasks.forEach((t,i)=>{const ss=S.sess.filter(s=>String(s.t)===String(i)).map(sessCalc).filter(x=>x.has);const o=out[i];
     o.n=ss.length;if(!ss.length)return;o.comp=mean(ss.map(x=>x.comp));o.lat=mean(ss.map(x=>x.lat));o.rate=mean(ss.map(x=>x.rate));o.aff=mean(ss.map(x=>x.aff));o.pbN=ss.filter(x=>x.hadPb).length;
-    const pbShare=o.pbN/ss.length;
-    if(pbShare>=0.5||(o.comp!=null&&o.comp<=40))o.cls='low';else if(pbShare<=0.25&&o.comp!=null&&o.comp>=80)o.cls='high';else o.cls='mixed';});
+    /* v23.15 (review F139) the observed latency: the mean over the sessions in which problem behavior occurred and its latency was
+       entered (no floor), for the modification rules; o.lat keeps the floor, for the ranking and the tables */
+    o.latObs=mean(ss.map(x=>x.latObs));o.nLat=ss.filter(x=>x.latObs!=null).length;
+    /* v23.15 (review F138) two questions kept apart: does the task evoke the behavior (problem behavior in at least half of its
+       sessions: the tasks for EA-1's demand condition), and how readily does the student do it (compliance, Mace et al.'s 80/40:
+       where the task sits in the fading plan). Low compliance alone no longer names a task for the demand condition. */
+    const pbShare=o.pbN/ss.length;o.ev=pbShare>=0.5;
+    if(o.comp!=null&&o.comp<=40)o.cls='low';else if(pbShare<=0.25&&o.comp!=null&&o.comp>=80)o.cls='high';else o.cls='mixed';});
   S.probes.forEach(p=>{const a=out[+p.a],b=out[+p.b];if(p.a!==''&&a){a.offered++;if(p.pick==='a')a.picked++;}if(p.b!==''&&b){b.offered++;if(p.pick==='b')b.picked++;}});
   out.forEach(o=>{const t=o.t,f=[];if(/Above/.test(t.diff))f.push('above skills');if(/Not yet/.test(t.cando))f.push('cannot yet do');if(/With help/.test(t.cando))f.push('needs help');if(/Novel/.test(t.nov))f.push('novel');if(t.effort==='High')f.push('high effort');if(num(t.len)!=null&&num(t.len)>=15)f.push(num(t.len)+' min long');if(/physical/.test(t.prompt))f.push('physical guidance');o.feat=f;});
-  const ranked=out.filter(o=>o.n>0).sort((a,b)=>((b.rate??-1)-(a.rate??-1))||((a.lat??1e9)-(b.lat??1e9))||((a.comp??101)-(b.comp??101)));
+  /* v23.15 (review F140) latency-based sessions (the Inventory sheet's own words: "latency measure only", "latency-based session")
+     are ranked by mean latency first (a clean session counts as the full session, Call et al., 2009), then rate; otherwise by rate
+     first, as before */
+  const byRate=(a,b)=>((b.rate??-1)-(a.rate??-1))||((a.lat??1e9)-(b.lat??1e9))||((a.comp??101)-(b.comp??101));
+  const byLat=(a,b)=>((a.lat??1e9)-(b.lat??1e9))||((b.rate??-1)-(a.rate??-1))||((a.comp??101)-(b.comp??101));
+  const ranked=out.filter(o=>o.n>0).sort(latMode()?byLat:byRate);
   ranked.forEach((o,k)=>{o.rank=k+1;});
   return{all:out,ranked};
 }
 function recommend(R){
-  const L=sessLen()*60,low=R.ranked.filter(o=>o.cls==='low'),high=R.ranked.filter(o=>o.cls==='high'),mixed=R.ranked.filter(o=>o.cls==='mixed');
-  const rec={fa:[],fade:[],mods:[],flags:[],verdict:null};
+  /* v23.15 (review F138, F139, F140, F142) the tasks for the demand condition are the ones that evoke problem behavior; the
+     verdict follows the ranking rule; the latency rules use the latency observed; no whole task is offered as a high-p request */
+  const L=sessLen()*60,LM=latMode(),ev=R.ranked.filter(o=>o.ev),high=R.ranked.filter(o=>o.cls==='high'),lowC=R.ranked.filter(o=>o.cls==='low'&&!o.ev);
+  const rec={fa:[],fade:[],terminal:[],mods:[],flags:[],verdict:null,rule:LM?'latency':'rate'};
   if(!R.ranked.length){rec.verdict=['mid','No sessions yet.','Enter sessions on the Assessment sheet; the ranking and the recommendations appear here.'];return rec;}
   const top=R.ranked[0],bot=R.ranked[R.ranked.length-1];
-  const spread=top.rate!=null&&bot.rate!=null&&((bot.rate===0&&top.rate>0)||(bot.rate>0&&top.rate>=2*bot.rate));
-  if(!low.length)rec.verdict=['no','Undifferentiated: no task qualified as a low-probability demand.','Problem behavior did not reach half of the sessions for any task and compliance stayed above 40%. Before running a demand condition with these tasks, try longer sessions, faster pacing or the classroom presentation, or check whether the behavior is escape from something other than these demands (Smith et al., 1995).'];
-  else if(spread)rec.verdict=['ok','Differentiated: '+esc(top.name)+' evoked the most problem behavior ('+f1(top.rate)+' per minute, mean latency '+f0(top.lat)+' s); '+esc(bot.name)+' the least ('+f1(bot.rate)+' per minute).',low.length+' low-probability and '+high.length+' high-probability demand'+(high.length===1?'':'s')+' identified.'];
-  else rec.verdict=['mid','Weak differentiation: '+low.length+' low-probability demand'+(low.length===1?'':'s')+', but the top task’s rate is less than twice the bottom task’s.','Add sessions for the tasks that are close in rank, or widen the set with an easier task, before the ranking is used for fading.'];
-  rec.fa=low.slice(0,3);
-  if(high.length)rec.fade=high.slice().reverse().concat(mixed.slice().reverse());
+  const spread=LM?(top.lat!=null&&bot.lat!=null&&top.lat<bot.lat&&bot.lat>=2*top.lat)
+    :(top.rate!=null&&bot.rate!=null&&((bot.rate===0&&top.rate>0)||(bot.rate>0&&top.rate>=2*bot.rate)));
+  const evN=ev.length+' task'+(ev.length===1?' evokes':'s evoke')+' problem behavior';
+  if(!ev.length)rec.verdict=['no','Undifferentiated: no task evoked problem behavior in at least half of its sessions.','Before running a demand condition with these tasks, try longer sessions, faster pacing or the classroom presentation, or check whether the behavior is escape from something other than these demands (Smith et al., 1995).'+(lowC.length?' '+lowC.map(o=>esc(o.name)).join(', ')+(lowC.length===1?' has':' have')+' low compliance without problem behavior: the student does not do '+(lowC.length===1?'it':'them')+', a question of skill or motivation for Form TD-1, not a task for the demand condition.':'')];
+  else if(spread)rec.verdict=['ok',(LM?'Differentiated: '+esc(top.name)+' evoked problem behavior soonest (mean latency '+f0(top.lat)+' s, problem behavior in '+top.pbN+' of '+top.n+' sessions); '+esc(bot.name)+' the latest ('+f0(bot.lat)+' s).'
+      :'Differentiated: '+esc(top.name)+' evoked the most problem behavior ('+f1(top.rate)+' per minute, mean latency '+f0(top.lat)+' s); '+esc(bot.name)+' the least ('+f1(bot.rate)+' per minute).'),
+    evN+'; '+high.length+' high-probability demand'+(high.length===1?'':'s')+' by compliance.'];
+  else rec.verdict=['mid','Weak differentiation: '+evN+', but '+(LM?'the bottom task’s mean latency is less than twice the top task’s.':'the top task’s rate is less than twice the bottom task’s.'),'Add sessions for the tasks that are close in rank, or widen the set with an easier task, before the ranking is used for fading.'];
+  rec.fa=ev.slice(0,3);
+  /* fading starts from the high-probability demands, then the mixed tasks that do not evoke problem behavior (least evocative
+     first); the tasks that evoke it, and the ones with low compliance, are the terminal steps */
+  const hard=R.ranked.filter(o=>o.ev||o.cls==='low'),mid=R.ranked.filter(o=>!o.ev&&o.cls==='mixed');
+  if(high.length)rec.fade=high.slice().reverse().concat(mid.slice().reverse());
   else{rec.fade=R.ranked.slice(-1);rec.fadeNote='No task met the high-probability criterion. Start fading from no demands at all (Pace et al., 1993) and bring '+esc(bot.name)+' in first, as the least evocative task.';}
-  rec.terminal=low.slice().reverse();
-  low.concat(mixed).forEach(o=>{const t=o.t,m=[];
+  rec.terminal=hard.filter(o=>!rec.fade.includes(o)).reverse();
+  hard.concat(mid).forEach(o=>{const t=o.t,m=[],lo=o.latObs,inN=' in the '+(o.nLat===1?'session':o.nLat+' sessions')+' in which it occurred';
     if(/Above/.test(t.diff)||/Not yet/.test(t.cando))m.push('Easier materials or prerequisite teaching: the task is '+(/Above/.test(t.diff)?'above the student’s skills':'one the student cannot yet do')+' (Weeks & Gaylord-Ross, 1981; Carr & Durand, 1985). Teach a request for help alongside.');
-    if(o.lat!=null&&o.lat>=L/2&&o.pbN>0)m.push('Shorten the task and schedule breaks: problem behavior arrived at a mean of '+f0(o.lat)+' s, in the second half of the session. Set the work period below that latency and give a break on a time schedule, then thin (Smith et al., 1995; Vollmer, Marcus & Ringdahl, 1995).');
-    if(o.lat!=null&&o.lat<L/4&&o.pbN>0)m.push('Choice and interspersal: problem behavior arrived within '+f0(o.lat)+' s on average, so the onset of the demand is the problem. Offer a choice of which task or which part first (Dyer, Dunlap & Winterling, 1990) and precede it with a run of high-probability demands'+(high.length?' ('+high.map(h=>esc(h.name)).join(', ')+')':'')+' (Mace et al., 1988; Horner et al., 1991).');
+    if(lo!=null&&lo>=L/2)m.push('Shorten the task and schedule breaks: problem behavior arrived at a mean of '+f0(lo)+' s'+inN+', in the second half of the session. Set the work period below that latency and give a break on a time schedule, then thin (Smith et al., 1995; Vollmer, Marcus & Ringdahl, 1995).');
+    if(lo!=null&&lo<L/4)m.push('Choice and interspersal: problem behavior arrived within '+f0(lo)+' s on average'+inN+', so the onset of the demand is the problem. Offer a choice of which task or which part first (Dyer, Dunlap & Winterling, 1990), and intersperse easy, already-mastered items in it (Horner et al., 1991). A high-probability request sequence before it needs brief single-step requests the student does on the first ask, chosen and probed on Form TD-1’s planner (Mace et al., 1988), not whole tasks.');
     if(/Novel/.test(t.nov))m.push('Pre-teach and familiarize: the task is novel; run it first without the demand to respond, then with a familiar format (Smith et al., 1995).');
     if(t.effort==='High')m.push('Reduce the response effort: fewer items per page, a different response mode (pointing, a device, dictation), or the task split into parts (Kern et al., 1994).');
-    if(t.effort==='Low'&&/^(Below|At) skills/.test(t.diff)&&t.cando==='Yes'&&o.cls==='low')m.push('Change how it is presented or prompted: the task is low effort and within the student’s skills yet still evokes the behavior, so look at the instruction itself, the prompt type and the materials present (Fisher et al., 1998; McComas et al., 2000). Compare the task under a different presentation before treating it as aversive in itself.');
+    if(t.effort==='Low'&&/^(Below|At) skills/.test(t.diff)&&t.cando==='Yes'&&o.ev)m.push('Change how it is presented or prompted: the task is low effort and within the student’s skills yet still evokes the behavior, so look at the instruction itself, the prompt type and the materials present (Fisher et al., 1998; McComas et al., 2000). Compare the task under a different presentation before treating it as aversive in itself.');
     if(num(t.len)!=null&&num(t.len)>=15&&!m.some(x=>/Shorten/.test(x)))m.push('Shorten the usual block: the task normally runs '+num(t.len)+' minutes; the sessions here were '+sessLen()+'. Expect more behavior at the classroom length, and set the first fading step well below it.');
     if(o.offered&&o.picked/o.offered>=0.5)m.push('Keep it as a choice option: the student picked it in '+o.picked+' of '+o.offered+' probes, so it is less aversive than its rank suggests when the student controls the order.');
     if(!m.length)m.push('No feature on the inventory explains it: compare it under a shorter block, with a choice, and with easy requests interspersed, one change at a time (Dunlap et al., 1991).');
     rec.mods.push({o,m});});
-  R.ranked.forEach(o=>{const r=num(o.t.rating);if(r==null)return;if(r>=4&&o.cls==='high')rec.flags.push(esc(o.name)+': rated '+r+' by the informants but came out high-probability in the sessions. Check whether the classroom version differs (length, group, who presents).');if(r<=2&&o.cls==='low')rec.flags.push(esc(o.name)+': rated '+r+' but came out low-probability. The informants may be seeing the task after the student has been taught to tolerate it, or the session format changed it.');});
+  R.ranked.forEach(o=>{const r=num(o.t.rating);if(r==null)return;if(r>=4&&o.cls==='high')rec.flags.push(esc(o.name)+': rated '+r+' by the informants but came out high-probability in the sessions. Check whether the classroom version differs (length, group, who presents).');if(r<=2&&o.ev)rec.flags.push(esc(o.name)+': rated '+r+' but evoked problem behavior in '+o.pbN+' of '+o.n+' sessions. The informants may be seeing the task after the student has been taught to tolerate it, or the session format changed it.');});
   return rec;
 }
 
 /* ---------------- results ---------------- */
 function renderResults(){
   const R=stats(),rec=recommend(R),M=$('#resMetrics'),V=$('#resVerdict'),TB=$('#rankTbl tbody'),O=$('#recOut');
-  const nS=S.sess.filter(s=>s.t!==''&&sessCalc(s).has).length,top=R.ranked[0],bot=R.ranked[R.ranked.length-1];
+  const nS=S.sess.filter(s=>s.t!==''&&sessCalc(s).has).length,top=R.ranked[0],bot=R.ranked[R.ranked.length-1],LM=latMode(),I=ioaStats();
   M.innerHTML=`<div class="metric"><b>Tasks assessed</b><div class="val">${R.ranked.length}</div><div class="sub">of ${S.tasks.filter(t=>t.name).length} on the inventory</div></div>
-    <div class="metric"><b>Sessions</b><div class="val">${nS}</div><div class="sub">${S.probes.length} choice probe${S.probes.length===1?'':'s'}</div></div>
-    <div class="metric"><b>Most evocative</b><div class="val" style="font-size:16px">${top?esc(top.name):'—'}</div><div class="sub">${top?f1(top.rate)+' per min · latency '+f0(top.lat)+' s':''}</div></div>
+    <div class="metric"><b>Sessions</b><div class="val">${nS}</div><div class="sub">${S.probes.length} choice probe${S.probes.length===1?'':'s'}${I.n?' · second observer on '+I.n:''}</div></div>
+    <div class="metric"><b>Most evocative</b><div class="val" style="font-size:16px">${top?esc(top.name):'—'}</div><div class="sub">${top?(LM?'latency '+f0(top.lat)+' s · '+f1(top.rate)+' per min':f1(top.rate)+' per min · latency '+f0(top.lat)+' s'):''}</div></div>
     <div class="metric"><b>Least evocative</b><div class="val" style="font-size:16px">${bot?esc(bot.name):'—'}</div><div class="sub">${bot?f1(bot.rate)+' per min · compliance '+pct(bot.comp):''}</div></div>`;
-  V.innerHTML='<div class="verdict v-'+rec.verdict[0]+'"><b>'+rec.verdict[1]+'</b> '+rec.verdict[2]+'</div>';
-  const clsName={low:'Low-probability demand',high:'High-probability demand',mixed:'Mixed'};
-  TB.innerHTML=R.ranked.map(o=>`<tr class="${o.cls==='low'?'top':o.cls==='high'?'hp':''}"><td class="num">${o.rank}</td><td>${esc(o.name)}</td><td class="num">${f1(o.rate)}</td><td class="num">${f0(o.lat)}</td><td class="num">${o.pbN} of ${o.n}</td><td class="num">${pct(o.comp)}</td><td class="num">${o.aff==null?'—':(Math.round(o.aff*10)/10).toFixed(1)}</td><td class="num">${o.offered?o.picked+' of '+o.offered:'—'}</td><td class="num">${esc(o.t.rating||'—')}</td><td>${clsName[o.cls]||''}</td><td>${esc(o.feat.join(', '))}</td></tr>`).join('')+
-    R.all.filter(o=>!o.n&&o.t.name).map(o=>`<tr><td class="num">—</td><td>${esc(o.name)}</td><td class="num" colspan="9">no sessions</td></tr>`).join('');
+  /* v23.15 (review F140, F144) the rule the ranking used, and the agreement, under the verdict */
+  V.innerHTML='<div class="verdict v-'+rec.verdict[0]+'"><b>'+rec.verdict[1]+'</b> '+rec.verdict[2]+'</div>'
+    +(R.ranked.length?'<p class="hint" id="rankRule">'+(LM?'Ranked by mean latency, shortest first, then rate: the sessions are latency-based ('+esc(S.meta.conseq)+').':'Ranked by mean rate, highest first, then latency'+(S.meta.conseq?' ('+esc(S.meta.conseq)+')':'')+'.')+(I.n?' '+esc(ioaText(I)):'')+'</p>':'');
+  const clsName={low:'Low-p',high:'High-p',mixed:'Mixed'},clsLong={low:'low-probability by compliance',high:'high-probability demand',mixed:'mixed'};
+  TB.innerHTML=R.ranked.map(o=>`<tr class="${o.ev?'top':o.cls==='high'?'hp':''}"><td class="num">${o.rank}</td><td>${esc(o.name)}</td><td class="num">${f1(o.rate)}</td><td class="num">${f0(o.lat)}</td><td class="num">${o.pbN} of ${o.n}</td><td class="num">${pct(o.comp)}</td><td class="num">${o.aff==null?'—':(Math.round(o.aff*10)/10).toFixed(1)}</td><td class="num">${o.offered?o.picked+' of '+o.offered:'—'}</td><td class="num">${esc(o.t.rating||'—')}</td><td class="num">${o.ev?'Yes':'No'}</td><td class="num">${clsName[o.cls]||''}</td><td>${esc(o.feat.join(', '))}</td></tr>`).join('')+
+    R.all.filter(o=>!o.n&&o.t.name).map(o=>`<tr><td class="num">—</td><td>${esc(o.name)}</td><td class="num" colspan="10">no sessions</td></tr>`).join('');
   if(!R.ranked.length){O.innerHTML='';drawChart(R);return;}
   let h='<div class="recbox"><h4>1. Tasks for the demand condition of Form EA-1</h4>';
-  h+=rec.fa.length?'<ul class="reclist">'+rec.fa.map(o=>'<li><b>'+esc(o.name)+'</b>: '+f1(o.rate)+' per minute, mean latency '+f0(o.lat)+' s, problem behavior in '+o.pbN+' of '+o.n+' sessions, compliance '+pct(o.comp)+'.</li>').join('')+'</ul><p class="hint">Use these in the demand condition with the pacing, prompting and consequence used here, so the condition tests escape from demands the student does escape from (Roscoe et al., 2009; Call et al., 2009). If more than one is listed, run the condition with the first, or rotate them across sessions and note which was used.</p>':'<p class="hint">None. No task met the low-probability criterion; see the verdict above.</p>';
+  h+=rec.fa.length?'<ul class="reclist">'+rec.fa.map(o=>'<li><b>'+esc(o.name)+'</b>: '+(LM?'mean latency '+f0(o.lat)+' s, '+f1(o.rate)+' per minute':f1(o.rate)+' per minute, mean latency '+f0(o.lat)+' s')+', problem behavior in '+o.pbN+' of '+o.n+' sessions, compliance '+pct(o.comp)+'.</li>').join('')+'</ul><p class="hint">Use these in the demand condition with the pacing, prompting and consequence used here, so the condition tests escape from demands the student does escape from (Roscoe et al., 2009; Call et al., 2009). If more than one is listed, run the condition with the first, or rotate them across sessions and note which was used.</p>':'<p class="hint">None. No task evoked problem behavior in at least half of its sessions; see the verdict above.</p>';
   h+='</div><div class="recbox"><h4>2. Starting tasks for demand fading (Form TD-1)</h4>';
   h+=rec.fadeNote?'<p class="hint">'+rec.fadeNote+'</p>':'';
-  h+='<ul class="reclist">'+rec.fade.map((o,k)=>'<li>Step '+(k+1)+': <b>'+esc(o.name)+'</b> ('+clsName[o.cls].toLowerCase()+'; '+f1(o.rate)+' per minute, compliance '+pct(o.comp)+')</li>').join('')+(rec.terminal.length?'<li>Terminal steps, in order: '+rec.terminal.map(o=>'<b>'+esc(o.name)+'</b>').join(', ')+', each introduced in a short block with the modifications below, and the step held until problem behavior stays low (Pace et al., 1993; Zarcone et al., 1994).</li>':'')+'</ul>';
-  h+='<p class="hint">The high-probability demands are also the interspersal set: a run of them before a hard request, or mixed through a hard task (Mace et al., 1988; Horner et al., 1991).</p></div>';
-  h+='<div class="recbox"><h4>3. Candidate antecedent modifications, task by task</h4>'+rec.mods.map(x=>'<p style="margin:6px 0 2px;font-family:var(--sans);font-size:12.5px"><b>'+esc(x.o.name)+'</b> (rank '+x.o.rank+', '+clsName[x.o.cls].toLowerCase()+')</p><ul class="reclist">'+x.m.map(m=>'<li>'+m+'</li>').join('')+'</ul>').join('')+'</div>';
+  h+='<ul class="reclist">'+rec.fade.map((o,k)=>'<li>Step '+(k+1)+': <b>'+esc(o.name)+'</b> ('+clsLong[o.cls]+'; '+f1(o.rate)+' per minute, compliance '+pct(o.comp)+')</li>').join('')+(rec.terminal.length?'<li>Terminal steps, in order: '+rec.terminal.map(o=>'<b>'+esc(o.name)+'</b>').join(', ')+', each introduced in a short block with the modifications below, and the step held until problem behavior stays low (Pace et al., 1993; Zarcone et al., 1994).</li>':'')+'</ul>';
+  h+='<p class="hint">Easy, already-mastered items from the high-probability tasks can also be interspersed in a hard task (Horner et al., 1991). A high-probability request sequence is something else: brief single-step requests the student does on the first ask, chosen and probed on Form TD-1’s planner (Mace et al., 1988); the tasks here are whole activities, not those requests.</p></div>';   /* v23.15 (review F142) */
+  h+='<div class="recbox"><h4>3. Candidate antecedent modifications, task by task</h4>'+rec.mods.map(x=>'<p style="margin:6px 0 2px;font-family:var(--sans);font-size:12.5px"><b>'+esc(x.o.name)+'</b> (rank '+x.o.rank+', '+(x.o.ev?'evokes problem behavior; ':'')+clsLong[x.o.cls]+')</p><ul class="reclist">'+x.m.map(m=>'<li>'+m+'</li>').join('')+'</ul>').join('')+'</div>';
   if(rec.flags.length)h+='<div class="recbox"><h4>4. Where the informants and the data disagree</h4><ul class="reclist">'+rec.flags.map(f=>'<li>'+f+'</li>').join('')+'</ul></div>';
   O.innerHTML=h;drawChart(R);
 }
 async function draftPlan(){
   const R=stats(),rec=recommend(R);if(!R.ranked.length){alert('There are no sessions yet; nothing to draft from.');return;}
   if(S.meta.plan&&!(await nbhUI.confirm('Replace the plan text with a fresh draft?\nThe plan text already written is replaced by a draft from the results.',{ok:'Replace'})))return;
-  const strip=s=>String(s).replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&rsquo;|’/g,"'");
-  const L=[];L.push('Demand assessment, '+(S.meta.client||'student')+(S.meta.dates?', sessions '+S.meta.dates:'')+'. '+R.ranked.length+' tasks, '+S.sess.filter(s=>s.t!=='').length+' sessions of '+sessLen()+' min. Verdict: '+strip(rec.verdict[1]));
-  L.push('Demand condition (EA-1): '+(rec.fa.length?rec.fa.map(o=>strip(o.name)).join('; '):'no task qualified; see the Results sheet')+'.');
+  const strip=stripH,I=ioaStats();
+  const L=[];L.push('Demand assessment, '+(S.meta.client||'student')+(S.meta.dates?', sessions '+S.meta.dates:'')+'. '+R.ranked.length+' tasks, '+S.sess.filter(s=>s.t!=='').length+' sessions of '+sessLen()+' min, ranked by '+(latMode()?'mean latency (latency-based sessions)':'mean rate')+'. Verdict: '+strip(rec.verdict[1]));
+  if(I.n)L.push('Agreement: '+ioaText(I));   /* v23.15 (review F144) */
+  L.push('Demand condition (EA-1): '+(rec.fa.length?rec.fa.map(o=>strip(o.name)).join('; '):'no task evoked problem behavior in at least half of its sessions; see the Results sheet')+'.');
   L.push('Demand fading (TD-1): start with '+rec.fade.map(o=>strip(o.name)).join(', then ')+(rec.terminal.length?'; terminal steps '+rec.terminal.map(o=>strip(o.name)).join(', then ')+'. Hold each step until problem behavior stays low across sessions (working convention: three consecutive sessions at or below 0.2 per minute) before the next step.':'.'));
   rec.mods.forEach(x=>L.push(strip(x.o.name)+': '+x.m.map(strip).join(' ')));
   if(rec.flags.length)L.push('Informant disagreement: '+rec.flags.map(strip).join(' '));
@@ -1252,7 +1297,7 @@ async function draftPlan(){
   S.meta.plan=L.join('\n\n');bindMeta();
 }
 function drawChart(R){
-  const mode=S.meta.chart||'rate',W=900,H=340,Lm=56,Rg=20,T=22,B=72;const ranked=R.ranked;
+  const mode=S.meta.chart||(latMode()?'lat':'rate'),W=900,H=340,Lm=56,Rg=20,T=22,B=72;const ranked=R.ranked;
   let s='<defs><pattern id="daHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#C8701F"/><line x1="0" y1="0" x2="0" y2="6" stroke="#fff" stroke-width="2.2"/></pattern></defs><rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>';
   const label=mode==='rate'?'Mean problem behavior per minute':mode==='lat'?'Mean latency to the first problem behavior (s)':'Mean compliance (%)';
   if(!ranked.length){s+='<text x="'+(W/2)+'" y="'+(H/2)+'" font-size="13" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">No sessions yet</text>';$('#daChart').innerHTML=s;return;}
@@ -1262,30 +1307,32 @@ function drawChart(R){
   const n=ranked.length,bw=Math.min(70,(W-Lm-Rg)/n*0.62),X=i=>Lm+(i+0.5)*(W-Lm-Rg)/n,Y=v=>T+(H-T-B)*(1-v/max);
   const ticks=5;for(let k=0;k<=ticks;k++){const v=max*k/ticks;s+='<line x1="'+Lm+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-Rg)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e3e8ea"/><text x="'+(Lm-6)+'" y="'+(Y(v)+4).toFixed(1)+'" font-size="11" text-anchor="end" fill="#5B6B6B" font-family="system-ui,sans-serif">'+(mode==='rate'?(Math.round(v*100)/100):Math.round(v))+'</text>';}
   s+='<line x1="'+Lm+'" y1="'+Y(0)+'" x2="'+(W-Rg)+'" y2="'+Y(0)+'" stroke="#182e43"/><line x1="'+Lm+'" y1="'+T+'" x2="'+Lm+'" y2="'+Y(0)+'" stroke="#182e43"/>';
-  ranked.forEach((o,i)=>{const v=vals[i];if(v==null)return;const x=X(i)-bw/2,y=Y(v),h=Y(0)-y;const col=o.cls==='low'?'#1F5FA8':o.cls==='high'?'url(#daHatch)':'#B9C3CB';   /* v21.36: blue, hatched orange, grey: told apart in grayscale and by every observer */
+  ranked.forEach((o,i)=>{const v=vals[i];if(v==null)return;const x=X(i)-bw/2,y=Y(v),h=Y(0)-y;const col=o.ev?'#1F5FA8':o.cls==='high'?'url(#daHatch)':'#B9C3CB';   /* v21.36: blue, hatched orange, grey: told apart in grayscale and by every observer */
     s+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(0,h).toFixed(1)+'" fill="'+col+'" rx="2"><title>'+esc(o.name)+': '+(mode==='rate'?f1(v)+' per min':mode==='lat'?f0(v)+' s':pct(v))+'</title></rect>';
     s+='<text x="'+X(i).toFixed(1)+'" y="'+(y-5).toFixed(1)+'" font-size="11" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif">'+(mode==='rate'?f1(v):mode==='lat'?f0(v):pct(v))+'</text>';
     const cw=Math.max(12,Math.floor((W-Lm-Rg)/n/6.2)),lines=[];String(o.name).split(/\s+/).forEach(w=>{if(lines.length&&(lines[lines.length-1]+' '+w).length<=cw)lines[lines.length-1]+=' '+w;else lines.push(w);});if(lines.length>3){lines.length=3;lines[2]=lines[2].slice(0,cw-1)+'…';}
     lines.forEach((ln,k)=>{s+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(0)+15+13*k)+'" font-size="11" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif">'+esc(ln)+'</text>';});});
-  s+='<text x="'+((Lm+W-Rg)/2)+'" y="'+(H-8)+'" font-size="11.5" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+label+' by task, in rank order · blue: low-probability demand · orange, hatched: high-probability demand · grey: mixed</text>';
+  s+='<text x="'+((Lm+W-Rg)/2)+'" y="'+(H-8)+'" font-size="11.5" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+label+' by task, in rank order · blue: evokes problem behavior · orange, hatched: high-probability demand · grey: neither</text>';
   $('#daChart').innerHTML=s;
 }
 
 /* ---------------- events ---------------- */
-let resT=0;function renderResultsSoon(){clearTimeout(resT);resT=setTimeout(()=>{renderMeans();renderResults();},200);}
+let resT=0;function renderResultsSoon(){clearTimeout(resT);resT=setTimeout(()=>{renderMeans();renderResults();renderIoaSum();},200);}
 function renderMeans(){const R=stats();
-  $('#meanTbl tbody').innerHTML=R.all.filter(o=>o.t.name||o.n).map(o=>`<tr><td class="num">${o.i+1}</td><td>${esc(o.name)}</td><td class="num">${o.n}</td><td class="num">${pct(o.comp)}</td><td class="num">${f0(o.lat)}</td><td class="num">${o.n?o.pbN+' of '+o.n:'—'}</td><td class="num">${f1(o.rate)}</td><td class="num">${o.aff==null?'—':(Math.round(o.aff*10)/10).toFixed(1)}</td></tr>`).join('');}
+  $('#meanTbl tbody').innerHTML=R.all.filter(o=>o.t.name||o.n).map(o=>`<tr><td class="num">${o.i+1}</td><td>${esc(o.name)}</td><td class="num">${o.n}</td><td class="num">${pct(o.comp)}</td><td class="num">${f0(o.lat)}</td><td class="num">${f0(o.latObs)}</td><td class="num">${o.n?o.pbN+' of '+o.n:'—'}</td><td class="num">${f1(o.rate)}</td><td class="num">${o.aff==null?'—':(Math.round(o.aff*10)/10).toFixed(1)}</td></tr>`).join('');}
 const cv=el=>el.type==='checkbox'?(el.checked?'1':''):el.value;   /* v22.37 (F141): a checkbox keeps '1' or '' */
 document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=cv(el);
-    if(el.dataset.r==='sess')updateSessRow(+el.dataset.i);
+    if(el.dataset.r==='sess'){updateSessRow(+el.dataset.i);updateIoaRow(+el.dataset.i);}
     if(el.dataset.r==='tasks'&&el.dataset.f==='name'){$$('#sessTbl select[data-f="t"],#probeTbl select[data-f="a"],#probeTbl select[data-f="b"]').forEach(s=>{const o=s.options[+el.dataset.i+1];if(o)o.textContent=(+el.dataset.i+1)+' · '+(el.value||('Task '+(+el.dataset.i+1)));});}
     renderResultsSoon();if(el.dataset.r==='tasks')renderInv();return;}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=cv(el);if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='len')renderResultsSoon();}
 });
 document.addEventListener('change',e=>{const el=e.target;
-  if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=cv(el);if(el.dataset.r==='tasks')renderInv();renderResultsSoon();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=cv(el);if(el.dataset.m==='chart')drawChart(stats());if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='prompt')renderPgRule();if(el.dataset.m==='prompt'||el.dataset.m==='conseq')renderPreFirst();}
+  if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=cv(el);if(el.dataset.r==='tasks')renderInv();if(el.dataset.r==='sess'){if(el.dataset.f==='t')renderIoa();else updateIoaRow(+el.dataset.i);}renderResultsSoon();return;}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=cv(el);if(el.dataset.m==='chart')drawChart(stats());if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='prompt')renderPgRule();if(el.dataset.m==='prompt'||el.dataset.m==='conseq')renderPreFirst();
+    if(el.dataset.m==='conseq'){if(!S.meta.chart&&$('#chartSel'))$('#chartSel').value=latMode()?'lat':'rate';renderResultsSoon();}   /* v23.15 (review F140) */
+    if(el.dataset.m==='ioaOn')renderIoa();}
 });
 $('#addTask').addEventListener('click',()=>{if(S.tasks.length>=12)return;S.tasks.push(newTask());renderTasks();renderSess();renderProbes();renderInv();renderResultsSoon();});
 $('#delTask').addEventListener('click',async ()=>{if(S.tasks.length<=1)return;const i=S.tasks.length-1,used=S.sess.some(s=>String(s.t)===String(i))||S.probes.some(p=>String(p.a)===String(i)||String(p.b)===String(i));
@@ -1311,13 +1358,41 @@ async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
     S.sess=S.sess.filter(s=>String(s.t)!==String(i));S.sess.forEach(s=>{s.t=rk(s.t);});
     S.probes=S.probes.filter(p=>String(p.a)!==String(i)&&String(p.b)!==String(i));S.probes.forEach(p=>{p.a=rk(p.a);p.b=rk(p.b);});
     if(!S.tasks.length)S.tasks.push(newTask());renderTasks();renderSess();renderProbes();renderInv();renderMeans();renderResults();}
-  else if(r==='sess'){if((row.t!==''||row.date||row.given||row.comp||row.lat||row.pb||row.aff||row.stops||row.why||row.hold||row.note)&&!(await nbhUI.confirm('Delete this row?\nThe session it holds is deleted.',{ok:'Delete',danger:true})))return;S.sess.splice(i,1);renderSess();renderMeans();renderResults();}
+  else if(r==='sess'){if((row.t!==''||row.date||row.given||row.comp||row.lat||row.pb||row.aff||row.stops||row.why||row.hold||row.note||has2(row))&&!(await nbhUI.confirm('Delete this row?\nThe session it holds is deleted.',{ok:'Delete',danger:true})))return;S.sess.splice(i,1);renderSess();renderMeans();renderResults();}
   else if(r==='probes'){if((row.a!==''||row.b!==''||row.pick||row.note)&&!(await nbhUI.confirm('Delete this row?\nThe choice probe it holds is deleted.',{ok:'Delete',danger:true})))return;S.probes.splice(i,1);renderProbes();renderMeans();renderResults();}
 }
 $('#daPngBtn').addEventListener('click',()=>svgToPng($('#daChart'),graphFile('DA-1',S.meta.client)));
 
+/* ---------------- v23.15 (review F144, I73) the second observer ----------------
+   Per session, a second observer's instructions given, complied, latency, count and affect (g2, c2, l2, p2, a2 on the session
+   row, so deleting or reordering sessions keeps them with their session). Agreement per session: total-count agreement for the
+   count and for the instructions complied with (smaller / larger; both zero is 100%), the latency agreeing within 10 s or both
+   none, the affect exact. A session counts once any of the five is entered. */
+const O2=['g2','c2','l2','p2','a2'];
+const has2=r=>!!r&&O2.some(k=>String(r[k]==null?'':r[k]).trim()!=='');
+function ioaRow(r){if(!has2(r))return null;
+  const tc=(x,y)=>{x=num(x);y=num(y);if(x==null||y==null)return null;return x===y?100:Math.min(x,y)/Math.max(x,y)*100;};
+  const l1=num(r.lat),l2=num(r.l2),a1=String(r.aff||''),a2=String(r.a2||'');
+  return{cnt:tc(r.pb,r.p2),cmp:tc(r.comp,r.c2),lat:(l1==null&&l2==null)||(l1!=null&&l2!=null&&Math.abs(l1-l2)<=10),aff:a1&&a2?a1===a2:null};}
+function ioaStats(){const sum=A=>({n:A.length,cnt:mean(A.map(a=>a.cnt)),cmp:mean(A.map(a=>a.cmp)),latN:A.filter(a=>a.lat).length,latOf:A.length,affN:A.filter(a=>a.aff===true).length,affOf:A.filter(a=>a.aff!=null).length});
+  const rows=S.sess.map(r=>({r,a:r.t!==''?ioaRow(r):null})).filter(x=>x.a),per={};rows.forEach(x=>{(per[x.r.t]=per[x.r.t]||[]).push(x.a);});
+  return{n:rows.length,of:S.sess.filter(s=>s.t!==''&&sessCalc(s).has).length,all:sum(rows.map(x=>x.a)),
+    per:Object.keys(per).sort((a,b)=>a-b).map(t=>Object.assign({t:+t,name:taskName(+t),of:S.sess.filter(s=>String(s.t)===t&&sessCalc(s).has).length},sum(per[t])))};}
+const ioaText=I=>I.n?'Second observer'+(S.meta.obs2?' ('+S.meta.obs2+')':'')+' on '+I.n+' of '+I.of+' sessions: problem-behavior count agreement '+pct(I.all.cnt)+' (mean), instructions complied with '+pct(I.all.cmp)+', latency within 10 s in '+I.all.latN+' of '+I.all.latOf+(I.all.affOf?', affect the same in '+I.all.affN+' of '+I.all.affOf:'')+'.':'';
+function renderIoa(){const w=$('#ioaWrap'),sec=$('#ioaSec');if(!w)return;const on=!!S.meta.ioaOn;w.hidden=!on;sec.classList.toggle('noprint',!on);
+  const tb=$('#ioaTbl tbody');if(!on){tb.innerHTML='';$('#ioaSum').innerHTML='';return;}
+  const inp=(i,f,v,lab,ph)=>'<input data-r="sess" data-i="'+i+'" data-f="'+f+'" value="'+esc(v||'')+'" style="text-align:center"'+(ph?' placeholder="'+ph+'"':'')+' aria-label="Second observer: '+lab+', session '+(i+1)+'">';
+  tb.innerHTML=S.sess.map((r,i)=>r.t===''?'':'<tr data-s="'+i+'"><td class="num">'+(i+1)+'</td><td>'+esc(taskName(+r.t))+'</td><td>'+esc(r.date)+'</td><td>'+inp(i,'g2',r.g2,'instructions given')+'</td><td>'+inp(i,'c2',r.c2,'complied')+'</td><td>'+inp(i,'l2',r.l2,'latency','none')+'</td><td>'+inp(i,'p2',r.p2,'problem-behavior count')+'</td><td>'+selV('sess',i,'a2',AFF.map((a,k)=>[k?String(k):'',a]),r.a2||'','Second observer: affect, session '+(i+1))+'</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>').join('');
+  S.sess.forEach((r,i)=>updateIoaRow(i));renderIoaSum();}
+function updateIoaRow(i){const tr=document.querySelector('#ioaTbl tbody tr[data-s="'+i+'"]');if(!tr)return;const a=ioaRow(S.sess[i]),c=tr.children;tr.classList.toggle('noprint',!a);   /* on paper, only the sessions recorded */
+  c[8].textContent=a?pct(a.cnt):'';c[9].textContent=a?pct(a.cmp):'';c[10].textContent=a?(a.lat?'Yes':'No'):'';c[11].textContent=a&&a.aff!=null?(a.aff?'Yes':'No'):'';}
+function renderIoaSum(){const el=$('#ioaSum');if(!el||!S.meta.ioaOn)return;const I=ioaStats();
+  el.innerHTML=I.n?'<p class="hint">'+esc(ioaText(I))+'</p><div class="grid-wrap"><table class="rt mid"><thead><tr><th>Task</th><th style="width:13%">Sessions with a second observer</th><th style="width:12%">Count agreement</th><th style="width:12%">Complied agreement</th><th style="width:12%">Latency within 10 s</th><th style="width:12%">Affect the same</th></tr></thead><tbody>'
+    +I.per.map(p=>'<tr><td>'+esc(p.name)+'</td><td class="num">'+p.n+' of '+p.of+'</td><td class="num">'+pct(p.cnt)+'</td><td class="num">'+pct(p.cmp)+'</td><td class="num">'+p.latN+' of '+p.latOf+'</td><td class="num">'+(p.affOf?p.affN+' of '+p.affOf:'—')+'</td></tr>').join('')+'</tbody></table></div>'
+    :'<p class="hint">No session has a second observer&rsquo;s record yet.</p>';}
+
 /* ---------------- meta + render ---------------- */
-function bindMeta(){$$('[data-m]').forEach(el=>{if(el.type==='checkbox')el.checked=!!S.meta[el.dataset.m];else el.value=S.meta[el.dataset.m]||'';});if($('#chartSel')&&!S.meta.chart)$('#chartSel').value='rate';}
+function bindMeta(){$$('[data-m]').forEach(el=>{if(el.type==='checkbox')el.checked=!!S.meta[el.dataset.m];else el.value=S.meta[el.dataset.m]||'';});if($('#chartSel')&&!S.meta.chart)$('#chartSel').value=latMode()?'lat':'rate';}
 function renderAll(){ensure();bindMeta();renderTasks();renderInv();renderSess();renderProbes();renderMeans();renderResults();}
 
 /* ---------------- toolbar ---------------- */
@@ -1334,7 +1409,7 @@ function fromFile(d){
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});
   const arr=(k,fields,n)=>Array.isArray(s[k])?s[k].slice(0,n).map(x=>{const r={};fields.forEach(f=>{r[f]=str(x&&x[f]);});return r;}):[];
   o.tasks=arr('tasks',['name','where','len','effort','diff','nov','prompt','pres','cando','rating','note'],12);
-  o.sess=arr('sess',['t','date','min','given','comp','lat','pb','aff','stops','why','hold','note'],200);   /* v22.37 (F141): an older file opens with the new ones empty */
+  o.sess=arr('sess',['t','date','min','given','comp','lat','pb','aff','stops','why','hold','note','g2','c2','l2','p2','a2'],200);   /* v22.37 (F141): an older file opens with the new ones empty; v23.15 (F144) the second observer */
   o.probes=arr('probes',['a','b','pick','note'],60);
   const ok=v=>v===''||(/^\d+$/.test(v)&&+v<o.tasks.length);
   o.sess=o.sess.filter(x=>ok(x.t));o.probes=o.probes.filter(x=>ok(x.a)&&ok(x.b)).map(x=>{if(!['','a','b','none'].includes(x.pick))x.pick='';return x;});
@@ -1350,10 +1425,11 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const out=[['Session','Task #','Task','Date','Minutes','Instructions given','Complied','Compliance %','Latency to first PB (s)','PB count','PB per min','Affect (1 to 5)','Guidance stops','Stopped early: why','Hold or injury: reported','Note']];
-  S.sess.forEach((r,i)=>{const c=sessCalc(r);out.push([i+1,r.t===''?'':+r.t+1,r.t===''?'':taskName(+r.t),r.date,r.min,r.given,r.comp,c.comp==null?'':c.comp.toFixed(1),r.lat,r.pb,c.rate==null?'':c.rate.toFixed(3),r.aff,r.stops||'',r.why||'',r.hold?'Yes':'',r.note]);});
-  out.push([]);out.push(['Task #','Task','Sessions','Mean compliance %','Mean latency (s)','Sessions with PB','Mean PB per min','Mean affect','Chosen','Offered','Class','Rank']);
-  const R=stats();R.all.filter(o=>o.t.name||o.n).forEach(o=>out.push([o.i+1,o.name,o.n,o.comp==null?'':o.comp.toFixed(1),o.lat==null?'':o.lat.toFixed(0),o.pbN,o.rate==null?'':o.rate.toFixed(3),o.aff==null?'':o.aff.toFixed(2),o.picked,o.offered,o.cls,o.rank||'']));
+  const out=[['Session','Task #','Task','Date','Minutes','Instructions given','Complied','Compliance %','Latency to first PB (s)','PB count','PB per min','Affect (1 to 5)','Guidance stops','Stopped early: why','Hold or injury: reported','Note','Observer 2: instructions given','Observer 2: complied','Observer 2: latency (s)','Observer 2: PB count','Observer 2: affect','Count agreement %','Complied agreement %','Latency within 10 s','Affect the same']];
+  S.sess.forEach((r,i)=>{const c=sessCalc(r);out.push([i+1,r.t===''?'':+r.t+1,r.t===''?'':taskName(+r.t),r.date,r.min,r.given,r.comp,c.comp==null?'':c.comp.toFixed(1),r.lat,r.pb,c.rate==null?'':c.rate.toFixed(3),r.aff,r.stops||'',r.why||'',r.hold?'Yes':'',r.note].concat((a=>[r.g2||'',r.c2||'',r.l2||'',r.p2||'',r.a2||'',a&&a.cnt!=null?a.cnt.toFixed(1):'',a&&a.cmp!=null?a.cmp.toFixed(1):'',a?(a.lat?'Yes':'No'):'',a&&a.aff!=null?(a.aff?'Yes':'No'):''])(ioaRow(r))));});
+  out.push([]);out.push(['Task #','Task','Sessions','Mean compliance %','Mean latency, with floor (s)','Mean latency, observed (s)','Sessions with PB','Mean PB per min','Mean affect','Chosen','Offered','Evokes PB','Compliance class','Rank']);
+  const R=stats();R.all.filter(o=>o.t.name||o.n).forEach(o=>out.push([o.i+1,o.name,o.n,o.comp==null?'':o.comp.toFixed(1),o.lat==null?'':o.lat.toFixed(0),o.latObs==null?'':o.latObs.toFixed(0),o.pbN,o.rate==null?'':o.rate.toFixed(3),o.aff==null?'':o.aff.toFixed(2),o.picked,o.offered,o.n?(o.ev?'Yes':'No'):'',o.cls,o.rank||'']));
+  {const I=ioaStats();if(I.n){out.push([]);out.push(['Agreement',ioaText(I)]);}}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='DA-1_sessions.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('inventory');}});
 
@@ -1364,11 +1440,11 @@ async function loadSim(){
   const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
   const Y=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);},D=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate();};
   S=blank();
-  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'3',setting:'Resource room, one-to-one at a table, with the classroom teacher presenting',target:'Aggression (hitting, kicking or pushing an adult) and throwing materials; Form TB-1 definition',
+  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'3',site:'Sample Elementary (simulated)',setting:'Resource room, one-to-one at a table, with the classroom teacher presenting',target:'Aggression (hitting, kicking or pushing an adult) and throwing materials; Form TB-1 definition',
     hyp:'Escape from academic demands; IA-1 and OB-1 both point to written work in math and language arts, with recess and specials clear',informants:'Ms. R. (classroom teacher); Mr. D. (paraeducator); parent by phone',runner:'J. Ellis (BCBA) recording; Ms. R. presenting the tasks',
     bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(6),dates:Y(3)+' and '+Y(2),len:'5',nper:'3',pace:'Next instruction as soon as the last is completed or prompted through',prompt:'Three-step: vocal, then model, then physical guidance, about 5 seconds apart',
     conseq:'Brief escape: materials removed for 30 seconds, then the task resumes (the demand-condition contingency)',compdef:'The step is started within 5 seconds of the vocal instruction or the model, before physical guidance',chart:'rate',
-    decision:'EA-1 scheduled for next week with the subtraction worksheet in the demand condition; TD-1 to open with fading from the sorting and clean-up tasks',notes:'Session 7 (reading aloud) stopped at 4 minutes under the CR-1 rule; the minutes are entered as run. Mr. D. rated the worksheet a 3; Ms. R. a 5; the 5 is entered.'};
+    decision:'EA-1 scheduled for next week with the subtraction worksheet in the demand condition; TD-1 to open with fading from the sorting and clean-up tasks',notes:'Session 6 (reading aloud) stopped at 4 minutes under the CR-1 rule; the minutes are entered as run. Mr. D. rated the worksheet a 3; Ms. R. a 5; the 5 is entered.'};
   S.tasks=[
     {name:'Subtraction worksheet with regrouping',where:'Classroom, 10:00 math block',len:'20',effort:'High',diff:'Above skills',nov:'Familiar',prompt:'Vocal, model, physical',pres:'Page handed over',cando:'With help',rating:'5',note:'The worst block of the day by both informants; 20 problems on a page'},
     {name:'Copying sentences (handwriting)',where:'Classroom, 9:15 language arts',len:'15',effort:'High',diff:'At skills',nov:'Familiar',prompt:'Vocal, model',pres:'Page handed over',cando:'Yes',rating:'4',note:'Slow and effortful; grips the pencil hard'},
@@ -1381,7 +1457,10 @@ async function loadSim(){
     [0,5,10,3,55,7,1],[3,5,10,9,'',0,4],[5,5,12,12,'',0,5],[2,5,9,4,110,3,2],[4,5,10,10,'',0,4],[1,5,10,4,165,2,2],
     [2,5,9,3,60,5,1],[4,5,10,8,240,1,3],[1,5,9,5,95,4,2],[5,5,12,11,'',0,5],[0,5,10,2,30,6,1],[3,5,10,9,'',0,4]];
   S.sess=rows.map((r,i)=>({t:String(r[0]),date:D(i<9?3:2),min:String(r[1]),given:String(r[2]),comp:String(r[3]),lat:r[4]===''?'':String(r[4]),pb:String(r[5]),aff:String(r[6]),
-    stops:i===1||i===6?'1':i===5?'2':'',why:i===5?'Still upset after the calm pause; pushed the book away (assent plan)':'',hold:'',note:i===5?'Stopped at 4 min under the CR-1 rule':i===7?'Looked away for the last minute':''}));   /* v22.37 (F141): the stop rule's record */
+    stops:i===1||i===6?'1':i===5?'2':'',why:i===5?'Still upset after the calm pause; pushed the book away (assent plan)':'',hold:'',note:i===5?'Stopped at 4 min under the CR-1 rule':i===7?'Looked away for the last minute':'',g2:'',c2:'',l2:'',p2:'',a2:''}));   /* v22.37 (F141): the stop rule's record */
+  /* v23.15 (review F144) a second observer on one session of each task, six of eighteen: [session, given, complied, latency, count, affect] */
+  [[1,10,2,38,6,1],[3,9,4,135,3,2],[7,10,9,'',0,4],[9,9,4,110,4,1],[10,10,9,'',0,4],[15,12,11,'',0,5]].forEach(x=>{Object.assign(S.sess[x[0]],{g2:String(x[1]),c2:String(x[2]),l2:String(x[3]),p2:String(x[4]),a2:String(x[5])});});
+  Object.assign(S.meta,{ioaOn:'1',obs2:'Mr. D. (paraeducator)'});
   Object.assign(S.meta,{preConsent:'Consent on file (simulated); it covers the demand assessment',preAdmin:Y(4),preCrisis:'1',preAssent:'Says “stop” or “no more”, pushes the materials away, puts his head down (simulated)'});
   const probes=[[0,5,'b'],[1,4,'b'],[2,3,'b'],[0,1,'b'],[4,5,'b'],[1,3,'b'],[0,2,'b'],[2,4,'b'],[3,5,'b'],[1,2,'a']];
   S.probes=probes.map((p,i)=>({a:String(p[0]),b:String(p[1]),pick:p[2],note:i===9?'Took the pencil before Ms. R. finished asking':''}));
@@ -1400,6 +1479,14 @@ window.__nbhFactsIn=function(f){
   const m=S.meta;let n=0;const b=(f.behaviors||[])[0];
   if(!m.target&&b){m.target=nbhCase.line(b,true);n++;}
   if(!m.hyp&&f.fn&&(f.fn.label||f.fn.key)){m.hyp=(f.fn.statements&&f.fn.statements[0])||f.fn.label;n++;}
+  /* v23.15 (review F143, I71) DA-1 is usually run before Form FS-1 concludes (the case map's "Test what you think" comes before
+     "Conclude"): with no FS-1 function in the case, the hypothesis line takes the functions the earlier assessments name (the
+     case's evidence from Forms IA-1, IN-1, OB-1, ABC-1 and SP-1), and the assent signals come from the assent plan (Form SI-1);
+     empty lines only */
+  if(!m.hyp&&!(f.fn&&(f.fn.label||f.fn.key))){const E=f.evidence||{},T=v=>String(v==null?'':v).trim();
+    const L=['IA-1','IN-1','OB-1','ABC-1','SP-1'].filter(id=>E[id]&&T(E[id].fn)).map(id=>id+': '+T(E[id].fn)+(T(E[id].strength)?' ('+T(E[id].strength).toLowerCase()+')':''));
+    if(L.length){m.hyp=L.join('; ');n++;}}
+  {const st=f.student||{},sg=st.stop&&String(st.stop.signs||'').trim();if(sg&&!String(m.preAssent||'').trim()){m.preAssent=sg.replace(/[.\s]+$/,'')+' (Form SI-1)';n++;}}
   /* v22.37 (review F141) "Before the first session": the consent as IC-1 records it, and whether it covers the demand
      assessment (a line the case wrote before is replaced as the case changes; one typed by hand stays); the crisis plan box
      ticked when the case holds Form CR-1's plan. */
@@ -1415,6 +1502,17 @@ window.__nbhFactsPick=function(sel){
   if(sel.fn){m.hyp=(sel.fn.statements&&sel.fn.statements[0])||sel.fn.label;n++;}
   renderAll();return {filled:n};
 };
+/* v23.15 (review F143, I71) the case: out, as the workstation's 'demands'. What the assessment decided, for Form EA-1's demand
+   condition and Form TD-1's antecedent sheet: the tasks that evoke problem behavior in rank order, the high-probability demands,
+   the fading start and the terminal steps, the modifications by task, the conventions the sessions ran under, the ranking rule,
+   the agreement and the team's decision. Nothing until a session is entered. */
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  const R=stats();if(!R.ranked.length)return r;const rec=recommend(R),I=ioaStats(),m=S.meta,rd=(v,k)=>v==null?null:Math.round(v*Math.pow(10,k))/Math.pow(10,k);
+  const t=o=>({name:o.name,rank:o.rank,rate:rd(o.rate,2),lat:rd(o.lat,0),latObs:rd(o.latObs,0),pb:o.pbN+' of '+o.n,comp:rd(o.comp,0),evokes:o.ev,cls:o.cls});
+  return Object.assign({},r||{},{demands:{form:'DA-1',dates:m.dates||'',rule:rec.rule,verdict:stripH(rec.verdict[1]),fa:rec.fa.map(t),high:R.ranked.filter(o=>o.cls==='high').map(t),
+    fade:rec.fade.map(t),terminal:rec.terminal.map(t),mods:rec.mods.map(x=>({task:x.o.name,lines:x.m.map(stripH)})),
+    conventions:{len:m.len||'',nper:m.nper||'',pace:m.pace||'',prompt:m.prompt||'',conseq:m.conseq||'',compdef:m.compdef||''},
+    ioa:I.n?{sessions:I.n,of:I.of,count:rd(I.all.cnt,0),complied:rd(I.all.cmp,0),latency:I.all.latN+' of '+I.all.latOf}:null,decision:m.decision||''}});};}
 </script>
 
 <script>
