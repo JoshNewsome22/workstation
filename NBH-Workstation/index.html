@@ -2528,6 +2528,17 @@ const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-
   /* v22.72 (review F353) the caregiver trained on CT-1 and where the training stands */ 'CT-1':'caregiver',
   /* v22.74 (review F284) the class-wide system on GC-1: arrangement, phase, criterion, changes, fidelity */ 'GC-1':'classwide'};
 const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1','TE-1','RA-1','CT-1','GC-1'];
+/* ---- v22.7x (review F433, I216) Form BC-1's verdict joins the case as "contrast" (one block; nothing else in this file changes):
+   it counts as part of the case and of its signature, and Today names a rise in the untreated setting (consistent with positive
+   contrast, or induction with a rise) and, when BC-1 has not said so itself on the due list, a re-check due within a week ---- */
+FACT_SRC['BC-1']='contrast';FACT_GEN.push('BC-1');
+{const h0=hasFacts,s0=factsSig,t0=todayItems;
+ hasFacts=function(f){return h0(f)||!!(f&&f.contrast);};
+ factsSig=function(f){const s=s0(f);return f&&f.contrast?s+'|'+JSON.stringify(f.contrast):s;};
+ todayItems=function(){const L=t0.apply(this,arguments);try{const c=(state.facts||{}).contrast;if(c&&typeof c==='object'){const where=c.conName||'the untreated setting';
+   if(c.kind==='positive'||(c.kind==='induction'&&c.rise))L.push({k:'Decision',t:'<b>Form BC-1</b>: '+esc((c.headline||'A rise')+' in '+where+(c.change?' ('+c.change+')':''))+(c.course?'; '+esc(String(c.course).split(' \u2014')[0].toLowerCase()):'')+(c.action?'. '+esc(String(c.action).slice(0,140)):''),open:'BC-1'});
+   const n=c.recheck?tdLeft(c.recheck):null;if(n!==null&&n<=7&&!(state.due||[]).some(x=>x.id==='BC-1'))L.push({k:'Timeline',t:'Run Form BC-1 again '+(n<0?'(the re-check was due '+esc(tdMd(c.recheck))+')':'by '+esc(tdMd(c.recheck)))+': does the change in '+esc(where)+' persist?',open:'BC-1'});}}catch(e){}return L;};}
+/* ---- end of the BC-1 block ---- */
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsOwed=false;   /* v21.87 a send asked while a read runs is kept; a change read without sending is still owed to the forms */
 function noteFactSource(id,st){
