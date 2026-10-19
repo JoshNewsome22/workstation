@@ -2389,7 +2389,8 @@ function readSaved(d){
   const obs=(Array.isArray(S1.obs)?S1.obs:[]).slice(0,nObs).map(x=>obj(x)||{});while(obs.length<nObs)obs.push({});
   const cells=obj(S1.cells)||{},m=obj(S1.meta)||{},code=(i,j)=>{const v=cells[i+'_'+j];return typeof v==='string'?v:'';};
   const rows=[];obs.forEach((ob,j)=>{if(ob.type!=='Unannounced')return;let c=0,s=0;
-    steps.forEach((_,i)=>{const v=code(i,j);if(SCD(v)){s++;if(v==='C')c++;}});if(s)rows.push({j,c,s});});
+    steps.forEach((_,i)=>{const v=code(i,j);if(SCD(v)){s++;if(v==='C')c++;}});if(s)rows.push({j,c,s,d:isISO(ob.date)?String(ob.date):''});});
+  rows.sort((a,b)=>a.d.localeCompare(b.d)||a.j-b.j);   /* v22.87 (TI-1 review F239) date order, as TI-1 decides */
   const dec=rows.slice(-critN);
   const oList=dec.map(r=>{let cc=0,cs=0;const errs=[];
     steps.forEach((st,i)=>{if(!st.crit)return;const v=code(i,r.j);if(SCD(v)){cs++;if(v==='C')cc++;else errs.push({n:i+1,code:v});}});
@@ -2416,8 +2417,9 @@ function readRetrain(d){
     if(!x||!(Number.isInteger(x.n)&&x.n>=1&&x.n<=2000)||seen[x.n]||typeof x.text!=='string'||typeof x.critical!=='boolean'||!Array.isArray(x.codes)||x.codes.length!==k||
       !x.codes.every(v=>v===''||VALID(v))||!num(x.pct,0,100)||!(Number.isInteger(x.commission)&&x.commission>=0)||!(Number.isInteger(x.omission)&&x.omission>=0))
       return{err:'a step in it is not in the form TI-1 writes'};
-    seen[x.n]=1;tg.push({n:x.n,text:norm(x.text).slice(0,20000),critical:x.critical,codes:x.codes.slice(),commission:x.commission,omission:x.omission,pct:x.pct});}
-  tg.sort((a,b)=>a.n-b.n);
+    seen[x.n]=1;tg.push({n:x.n,text:norm(x.text).slice(0,20000),critical:x.critical,codes:x.codes.slice(),commission:x.commission,omission:x.omission,pct:x.pct,
+      priority:Number.isInteger(x.priority)&&x.priority>=1&&x.priority<=4?x.priority:4,component:x.component==='consequence'||x.component==='antecedent'?x.component:''});}
+  tg.sort((a,b)=>a.priority-b.priority||a.n-b.n);   /* v22.87 (TI-1 review F240) TI-1's order: commission on a consequence step first */
   /* the critical steps with an error on the latest observation, as far as the list shows them */
   const last=oList[k-1];tg.forEach(t=>{const v=t.codes[k-1];if(t.critical&&(v==='EC'||v==='EO'))last.errs.push({n:t.n,code:v});});
   const st=obj(o.student)||{},iv=obj(o.interventionist)||{},sv=typeof o.saved==='string'&&!isNaN(Date.parse(o.saved))?o.saved:'';
@@ -2470,7 +2472,8 @@ function clean(ti){const o=obj(ti);if(!o)return undefined;const out={};
   const r=obj(o.retrain);if(r&&Array.isArray(r.steps)&&Array.isArray(r.obs)){
     const oList=r.obs.slice(0,8).map(obsClean);
     const st=r.steps.slice(0,2000).map(x=>{x=obj(x)||{};const codes=(Array.isArray(x.codes)?x.codes:[]).slice(0,oList.length).map(v=>VALID(v)?v:'');while(codes.length<oList.length)codes.push('');
-      return{n:Number.isInteger(x.n)&&x.n>=1&&x.n<=2000?x.n:0,text:txt(x.text,20000),critical:x.critical===true,codes,commission:cnt(x.commission)||0,omission:cnt(x.omission)||0,pct:fin(x.pct,0,100)||0};}).filter(x=>x.n);
+      return{n:Number.isInteger(x.n)&&x.n>=1&&x.n<=2000?x.n:0,text:txt(x.text,20000),critical:x.critical===true,codes,commission:cnt(x.commission)||0,omission:cnt(x.omission)||0,pct:fin(x.pct,0,100)||0,
+        priority:Number.isInteger(x.priority)&&x.priority>=1&&x.priority<=4?x.priority:4,component:x.component==='consequence'||x.component==='antecedent'?x.component:''};}).filter(x=>x.n);
     out.retrain=Object.assign(srcObj(r),{crit:fin(r.crit,50,100),critN:Number.isInteger(r.critN)&&r.critN>=1&&r.critN<=5?r.critN:null,obs:oList,steps:st,targeted:txt(r.targeted,600)});}
   const p=obj(o.probe);if(p&&Number.isInteger(p.col)&&p.col>=1&&p.col<=8){const w=obj(p.written)||{};
     out.probe=Object.assign(srcObj(p),{col:p.col,crit:fin(p.crit,50,100),date:isISO(p.date)?p.date:null,integrity:fin(p.integrity,0,100),critical:fin(p.critical,0,100),
@@ -2479,10 +2482,11 @@ function clean(ti){const o=obj(ti);if(!o)return undefined;const out={};
   return Object.keys(out).length?out:undefined;}
 /* the steps to retrain that are on this form's step list now, for the step list and the rehearsal runner */
 function targetsNow(){const r=S.ti&&S.ti.retrain;if(!r)return[];const out=[];
-  r.steps.forEach(t=>{if(!matchWhy(t,S.steps))out.push({i:t.n-1,pattern:pattern(t,r.obs)});});return out;}
+  r.steps.forEach(t=>{if(!matchWhy(t,S.steps))out.push({i:t.n-1,pattern:pattern(t,r.obs),pr:t.priority||4});});return out;}
 window.stTiTargets=targetsNow;
 window.stTiMark=function(i){const t=targetsNow().find(x=>x.i===i);if(!t)return'';
-  return'<p class="st-ti-mark"><span class="st-ti-rb">Retrain<\/span> Form TI-1: '+esc(t.pattern)+'<\/p>';};
+  const PRW={1:'first: a commission error on a consequence step',2:'a critical step below criterion',3:'an omission on a consequence step'};   /* v22.87 (TI-1 review F240) */
+  return'<p class="st-ti-mark"><span class="st-ti-rb">Retrain'+(t.pr<4?' '+String.fromCharCode(183)+' priority '+t.pr:'')+'<\/span> Form TI-1: '+(PRW[t.pr]?PRW[t.pr]+'; ':'')+esc(t.pattern)+'<\/p>';};
 /* the marks follow the step list as it is typed into (the form redraws the list only on its own changes): a step whose
    text no longer reads as TI-1's loses its mark at once, and gets it back when it reads the same again */
 function paintMarks(){qa('#stepTbl tbody textarea[data-f="d"]').forEach(ta=>{const td=ta.parentNode;if(!td)return;
@@ -2689,7 +2693,7 @@ goBtn.addEventListener('click',()=>{if(!T.rec||!T.ch)return;const P=plan();if(P.
   if(P.tg.take){let written='';const el=q('[data-m="targeted"]');
     if(el&&(P.tg.field==='fill'||(P.tg.field==='conflict'&&ch.kr.targeted==='replace'))){setField(el,P.tg.text);written=P.tg.text;}
     ti.retrain=Object.assign({},base,{crit:x.crit,critN:x.critN,obs:x.obs.map(o=>({col:o.col,date:o.date,integrity:o.integrity,critical:o.critical})),
-      steps:x.targets.map(t=>({n:t.n,text:t.text,critical:t.critical,codes:t.codes.slice(),commission:t.commission,omission:t.omission,pct:t.pct})),targeted:written});
+      steps:x.targets.map(t=>({n:t.n,text:t.text,critical:t.critical,codes:t.codes.slice(),commission:t.commission,omission:t.omission,pct:t.pct,priority:t.priority||4,component:t.component||''})),targeted:written});
     done.push('the steps to retrain ('+list(x.targets.map(t=>String(t.n)))+')');}
   if(P.pr.take){const p=P.pr.p,w={date:'',pct:'',crit:''};
     P.pr.fields.forEach(f=>{const el=q('[data-m="'+f.k+'"]'),put=f.state==='fill'||(f.state==='conflict'&&ch.kr[f.k]==='replace');

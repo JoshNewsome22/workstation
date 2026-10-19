@@ -9903,6 +9903,59 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.87: TI-1 fails a critical or consequence step done wrongly, reads its observations by date, tells the case its own verdict, and calls for the incident report when a safety step is broken (review Wave 3)
+
+- **A critical or consequence step done wrongly fails the verdict (F238).** A commission error on a critical step, or on
+  a consequence step, on the deciding observations now reads "Criterion not met", whatever the percentages. With five
+  critical steps, one error in ten used to pass at 90%; the error that passed was the step that holds the escape
+  contingency. When no critical step came due on the deciding observations, the verdict is "Not yet decidable for the
+  critical steps", not green. Form ST-1's gate reads the same way.
+- **Observations by date (F239).** The verdict, the band, the trend, the retraining list and what the case is told
+  take "the last" observations by date; column order only breaks a tie. An observation saved over the oldest column,
+  once all eight hold data, is still the newest.
+  - The verdict names each deciding observation with its date ("76.9% (#4, 10/9/2026)").
+  - A note says so when the columns are not in date order.
+  - An observation replaced in its column is kept on the record (date, type, integrity, critical steps) and listed
+    under **Earlier Observations Kept on This Record**.
+  - PR-1's and ST-1's readers of a TI-1 file use the same order.
+- **The case is told TI-1's own verdict (F240).** TI-1 now sends its verdict (met, not met or not decidable), the
+  deciding observations with their dates, any commission on a critical or consequence step, and the band.
+  - Today's decision line rests on it. A later announced check at 100% no longer reads as "review the plan" while TI-1
+    says the plan is not being run. Without a verdict (a TI-1 file saved before this release), the latest check not marked announced is used, never an
+    announced one.
+  - The transition summary says the criterion's state.
+  - ST-1 keeps TI-1's priority on each retraining target and lists them in that order ("Retrain · priority 1: first,
+    a commission error on a consequence step").
+- **The band (F241).** The fidelity band is never green beside a verdict that is not. It is a caution, with the reason,
+  when a consequence step was done as a commission error on the deciding observations, when a consequence step ran
+  below 80% of its opportunities there, or when the program is in acquisition. A new plan type, "Both (reduces a
+  behavior and teaches a replacement)", is read as the stricter.
+- **Steps from QS-1 are checked before they are scored (F242).** The plan's step list from Form TD-1 already came first.
+  When the steps come from Form QS-1's non-negotiables instead, a line that names a hold or a block is tagged Safety, and
+  a reinforcer given to end a behavior Consequence, both critical. The Setup sheet asks the BCBA to confirm every tag,
+  and the verdict stays open until **Tags checked**.
+- **Why first (F243).** The Retraining sheet asks, before its list, whether the interventionist can do each step
+  correctly in rehearsal now; if so, the cause is not a skill, and Form PD-1 finds out why. It says each
+  recommendation assumes a skill cause, and quotes the barriers recorded. The Guide's unsourced sentence that omissions
+  are "often solved by a prompt or a checklist" is gone.
+- **A Safety tag (F246).** A step can be tagged Safety (no hold, no block, no confinement), and is critical.
+  - Coded Commission, on the grid or from the runner, it shows on the Summary and the Scoring sheet: the incident
+    report within 24 hours and the parent's notice the same school day (s. 1003.573(7)(a) and (7)(c), F.S., as Form
+    CR-1 quotes them), and the entry on Form DD-1's incident log. Seclusion is prohibited.
+  - The case is told, and Today names it until DD-1's incident log holds a restraint that day.
+- **One coding rule (F245).** How to Score defines Commission and Omission for consequence steps (a consequence the plan
+  withholds delivered; an earned consequence not delivered) and for the rest, with a short "Which code?" tree that
+  prints. The weighted figure counts twice only a commission on a consequence step, as the studies tested.
+- **Reactivity (F247).** The announced-minus-unannounced figure is shown only when an announced check falls after an
+  unannounced one; otherwise it reads "confounded with time". The wording no longer says the difference measures the
+  observer's presence.
+- **Already done:** the header's storage sentence (F244) was corrected in an earlier release.
+- Not done:
+  - F246's "restraint or seclusion observed" tick on each observation column; the safety step carries it for now.
+  - I121 to I125 (integrity by implementer and setting, a feedback record after each observation, agreement standards,
+    a plan for the next checks, a one-page summary for the team and the family).
+- qa/ti1-w3-test.js (16 checks) and qa/ti1-w3b-test.js (9 checks).
+
 ### v22.86: ST-1 holds the whole team trained on a plan, its sign-off cannot clear a trainee the decision does not, and its first TI-1 re-check is on the Due list (review Wave 3)
 
 - **Several trainees in one record (F230, I118).** A classroom plan is run by several adults. One ST-1 record now holds

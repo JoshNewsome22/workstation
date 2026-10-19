@@ -2052,6 +2052,7 @@ function tiRead(d,pFrom,pTo){
   let rows=[];obs.forEach((ob,j)=>{let c=0,s=0,cc=0,cs=0;steps.forEach((st,i)=>{const v=code(i,j);if(!SCD(v))return;s++;if(v==='C')c++;if(st.crit){cs++;if(v==='C')cc++;}});
     if(s)rows.push({j,c,s,cc,cs,pct:100*c/s,crit:cs?100*cc/cs:null,type:String(ob.type||''),date:/^\d{4}-\d{2}-\d{2}$/.test(String(ob.date||''))?String(ob.date):''});});
   if(!rows.length)return{empty:true};
+  rows.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||a.j-b.j);   /* v22.87 (TI-1 review F239) date order, as TI-1 decides */
   const dec=rows.filter(r=>r.type==='Unannounced').slice(-critN),latest=dec.length?dec[dec.length-1]:rows[rows.length-1];
   /* v22.37 (review F319) TI-1's own verdict: the last critN unannounced observations all at or above its criterion; an announced one
      never counts, and fewer than critN cannot be judged */

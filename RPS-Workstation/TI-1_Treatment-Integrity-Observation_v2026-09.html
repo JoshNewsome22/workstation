@@ -701,6 +701,7 @@ table.rt.ti-opp td.oc input{width:38px;border:1px solid var(--rule-2);border-rad
 .ti-few{font-family:var(--sans);font-size:10.5px;color:#9B4E15;display:block}
 .ti-band{margin:8px 0 6px}
 .ti-band .verdict b{font-family:var(--sans);font-size:11px;letter-spacing:.02em;display:block;margin-bottom:2px}
+.ti-why-first{margin:6px 0 10px;padding:8px 10px;border-left:4px solid #8A4B12;background:#fbf6ef;font-size:13px}
 .ti-flag{background:#F6E0E0;border-left:3px solid #8E2A2A;padding:7px 12px;font-family:var(--sans);font-size:12.5px;margin:4px 0 6px}
 .ti-flag.ti-flag-om{background:#FBEEDB;border-left-color:#9B4E15}
 .ti-flag b{font-family:var(--sans);font-size:11px;letter-spacing:.02em;display:block;margin-bottom:2px}
@@ -1118,7 +1119,7 @@ input[data-m],textarea[data-m]{font:inherit}
           <th>Hypothesized function</th><td><input data-m="fn" style="width:100%"></td></tr>
       <tr><th>Date range</th><td><input data-m="range" style="width:100%"></td>
           <th>Prepared</th><td><input data-m="prep" style="width:100%"></td></tr>
-      <tr><th>Plan type</th><td><select data-m="ptype" style="width:100%" aria-label="Plan type"><option value=""></option><option>Behavior reduction</option><option>Skill acquisition</option></select></td>
+      <tr><th>Plan type</th><td><select data-m="ptype" style="width:100%" aria-label="Plan type"><option value=""></option><option>Behavior reduction</option><option>Skill acquisition</option><option>Both (reduces a behavior and teaches a replacement)</option></select></td>
           <th>Program phase</th><td><select data-m="phase" style="width:100%" aria-label="Program phase"><option value=""></option><option>Acquisition</option><option>Maintenance</option></select></td></tr>
     </table>
     <p class="hint" style="margin-top:6px">Plan type sets how the Summary reads the 80&ndash;89% fidelity band; program phase is carried to the retraining list, because consequence errors matter most while a task is first being learned (Burlison et al., 2026).</p>
@@ -1126,13 +1127,14 @@ input[data-m],textarea[data-m]{font:inherit}
     <h2 class="nbh-band" style="margin-top:18px">How to Score</h2>
     <table class="rt">
       <tr><th style="width:22%">Correct</th><td>The step was implemented as written.</td></tr>
-      <tr><th>Commission</th><td>Error of commission &mdash; the step was attempted but implemented incorrectly. Something happened that should not have.</td></tr>
-      <tr><th>Omission</th><td>Error of omission &mdash; the step was not attempted at all. Something that should have happened did not.</td></tr>
+      <tr><th>Commission</th><td>Error of commission. On a <b>consequence</b> step: a consequence the plan withholds was delivered (the reinforcer after the target behavior, the demand or the delay ended early on protest, the wrong consequence). On any other step: the step was done incorrectly, or something the plan does not call for was added.</td></tr>
+      <tr><th>Omission</th><td>Error of omission. On a <b>consequence</b> step: an earned consequence was not delivered. On any other step: the step was not done when it came due.</td></tr>
       <tr><th>N/A</th><td>The step did not apply during this observation, because the condition that calls for it never arose. N/A is excluded from every integrity denominator; the agreement check (IOA) compares N/A codes like any other code.</td></tr>
       <tr><th>Component</th><td>On the Protocol Steps table, tag each step <b>Antecedent</b> (what is arranged, presented or prompted before the behavior) or <b>Consequence</b> (what follows the target behavior, the alternative behavior or a correct response, including withholding a consequence). Tagging a step Consequence marks it critical by default; untick the mark if the plan says otherwise. Consequence steps get their own figures on the Summary: delivering a reinforcer after the behavior that should be on extinction, or after a wrong response, has been linked to loss of treatment effect in several DRA, DRO and discrimination-training studies, though not in all (St. Peter Pipkin et al., 2010; Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026; Burlison et al., 2026). Antecedent errors were not tested in those studies, so the tag says where an error sits, not that it matters less.</td></tr>
       <tr><th>Opportunities</th><td>A step can come due more than once in an observation. The sheet holds one code per step per observation (Commission if any time was a commission error, otherwise Omission, otherwise Correct). For consequence steps the Scoring sheet also takes the counts &mdash; correct, commission, omission &mdash; for every time the step came due, so that fidelity can be stated per opportunity and N/A when there was none, as O&rsquo;Neill et al. (2026) report it. The live runner writes the counts; by hand, count them from the session.</td></tr>
     </table>
-    <p class="hint" style="margin-top:8px">Run both announced and unannounced observations. The summary compares them, because a difference between the two is a measure of reactivity, not of skill.</p>
+    <p class="ti-tree" style="margin-top:8px"><b>Which code?</b> Did the step come due? No: <b>N/A</b>. Yes: was it done as written? Yes: <b>Correct</b>. No, on a consequence step: was something the plan withholds given (a reinforcer, an end to the demand or the delay)? <b>Commission</b>. Was something earned held back? <b>Omission</b>. No, on any other step: not done, <b>Omission</b>; done wrongly, or something added, <b>Commission</b>.</p>
+    <p class="hint" style="margin-top:8px">Run both announced and unannounced observations, mixed across the same weeks and activities. A difference between the two may reflect the observer&rsquo;s presence, a change over time, or different activities; the summary reads it as reactivity only when an announced check falls after an unannounced one.</p>
 
     <h2 class="nbh-band" style="margin-top:18px">Protocol Steps</h2>
     <p class="hint">Mark a step <b>critical</b> when an error on it defeats the purpose of the protocol &mdash; typically the reinforcement contingency, an extinction component, or a safety step. Critical steps are scored separately, because an overall figure in the nineties can hide a failure on the one step that carries the contingency. Tag the <b>component</b> of each step; a step tagged Consequence is marked critical as it is tagged.</p>
@@ -1183,7 +1185,7 @@ input[data-m],textarea[data-m]{font:inherit}
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Errors by component and class"><table class="rt" id="classTbl"></table></div>
     <h3 style="margin-top:14px">Announced Against Unannounced</h3>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Announced against unannounced"><table class="rt" id="reactTbl"></table></div>
-    <p class="hint">A large drop from announced to unannounced means the score is measuring the observer's presence rather than the interventionist's usual practice. Treat the unannounced figure as the estimate of what the student actually receives.</p>
+    <p class="hint">A large drop from announced to unannounced may mean the score reflects the observer&rsquo;s presence rather than the interventionist&rsquo;s usual practice, but only when the two kinds of check were mixed across the same weeks and activities; otherwise it may be a change over time. Treat the unannounced figure as the estimate of what the student actually receives: an observer who arrives unannounced is still in the room, so it reduces reactivity rather than removing it.</p>
     <h3 style="margin-top:14px">Agreement on the Integrity Scoring Itself</h3>
     <p class="hint">Tick <b>IOA</b> on an observation column in the scoring sheet, then enter the second observer's codes below. Integrity data need their own reliability check before they are used to judge a plan.</p>
     <div class="grid-wrap"><table class="pi" id="ioaTbl"></table></div>
@@ -1221,13 +1223,13 @@ input[data-m],textarea[data-m]{font:inherit}
       <tr><th>Global integrity</th><td>All correct steps &divide; all scored steps, pooled across every observation.</td></tr>
       <tr><th>All-or-nothing by step</th><td>The proportion of steps that were correct on every observation where they applied. This locates the unreliable steps rather than the unreliable sessions.</td></tr>
       <tr><th>Critical-step integrity</th><td>The same pooled calculation, restricted to steps marked critical.</td></tr>
-      <tr><th>Mastery criterion</th><td>Met when each of the last unannounced observations with scored steps, taken in column order, is at or above the percentage<span class="noprint"> set in the toolbar; the toolbar also sets how many</span>. When it is met, critical-step integrity on those same observations is checked against the same percentage, and below it the verdict says the plan is not yet running as written.</td></tr>
-      <tr><th>Reactivity</th><td>Integrity pooled across the announced observations (their correct steps &divide; their scored steps) minus the same figure for the unannounced observations, in percentage points.</td></tr>
-      <tr><th>Trend</th><td>Least-squares slope of individual trial integrity across the scored observations, taken in column order (an observation with no scored step is skipped), in percentage points per observation.</td></tr>
+      <tr><th>Mastery criterion</th><td>Met when each of the last unannounced observations with scored steps, taken in date order (column order breaks a tie; an undated observation counts as the oldest), is at or above the percentage<span class="noprint"> set in the toolbar; the toolbar also sets how many</span>. When it is met, critical-step integrity on those same observations is checked against the same percentage, and below it the verdict says the plan is not yet running as written. A commission error on a critical step, or on a consequence step, on those observations fails the criterion whatever the percentages; with no critical step come due on them, the verdict stays open.</td></tr>
+      <tr><th>Reactivity</th><td>Integrity pooled across the announced observations (their correct steps &divide; their scored steps) minus the same figure for the unannounced observations, in percentage points. Shown only when at least one announced check falls after an unannounced one; otherwise the difference is confounded with time.</td></tr>
+      <tr><th>Trend</th><td>Least-squares slope of individual trial integrity across the scored observations, taken in date order (an observation with no scored step is skipped), in percentage points per observation.</td></tr>
       <tr><th>IOA</th><td>Point-by-point agreement on the integrity codes themselves: steps coded identically by both observers &divide; steps coded by both, &times; 100, with N/A counted as a code. Shown for each IOA observation and pooled across them.</td></tr>
       <tr><th>Opportunity fidelity (consequence steps)</th><td>For a step tagged Consequence: correct opportunities &divide; (correct + commission + omission) across the observations, from the counts on the Scoring sheet; a scored code with no counts is one opportunity; N/A when the step never came due. Flagged when fewer than 5 opportunities stand behind it (a form convention).</td></tr>
       <tr><th>Commission rate, omission rate</th><td>On consequence steps: commission opportunities &divide; all opportunities, and omission opportunities &divide; all opportunities. These are reported beside the overall figure, never in place of it.</td></tr>
-      <tr><th>Weighted integrity</th><td>Correct &divide; (correct + omission + 2 &times; commission), over every step&rsquo;s opportunities. Counting a commission error twice is this form&rsquo;s convention, chosen because commission errors were the more damaging class in the studies; no study quantifies the relative weight.</td></tr>
+      <tr><th>Weighted integrity</th><td>Correct &divide; (correct + omission + commission + commission on consequence steps), over every step&rsquo;s opportunities: a commission error on a consequence step counts twice. This is this form&rsquo;s convention; the studies tested consequence errors only, and none quantifies the weight.</td></tr>
       <tr><th>Lowest step, range</th><td>The lowest per-step percentage among scored steps, and the lowest and highest individual trial integrity across the scored observations. Fidelity varies between observations and implementers, and performance after a drop in fidelity depended on the preceding level in Burlison et al. (2026), so the spread is recorded, not only the mean.</td></tr>
       <tr><th>Fidelity band</th><td>Pooled integrity on the observations the verdict is judged on (all scored observations when no unannounced one is scored), placed in one of four bands: 90% and above; 80&ndash;89%; 60&ndash;79%; below 60%. The bands are this form&rsquo;s working convention, informed by the parametric studies but not set by them.</td></tr>
     </table>
@@ -1237,10 +1239,10 @@ input[data-m],textarea[data-m]{font:inherit}
     <h2 class="nbh-band" style="margin-top:18px">The Retraining List for Form ST-1</h2>
     <p><b>Save retraining list for ST-1</b>, on the Retraining sheet, writes a file for Form ST-1 from the observations the verdict is judged on: every step below the criterion or with an error on them, with its codes, its commission and omission counts and its percentage correct, and each of those observations&rsquo; integrity. The Retraining sheet&rsquo;s own list pools every observation, so the file can list fewer steps, or different ones.</p>
     <h2 class="nbh-band" style="margin-top:18px">Why These Distinctions Matter</h2>
-    <p>Commission and omission errors are not interchangeable. An omitted step usually means the interventionist did not know it was due, or was taken up with something else when it came due (a step whose condition never arose is N/A, not an omission); a commission error means the step was attempted and performed wrongly, which is a discrimination or fluency problem. The first is often solved by a prompt or a checklist, the second by rehearsal with feedback. Recording only a single integrity percentage discards the information that decides which.</p>
+    <p>Commission and omission errors are not interchangeable. An omitted step usually means the interventionist did not know it was due, or was taken up with something else when it came due (a step whose condition never arose is N/A, not an omission); a commission error means something was done that the plan does not call for. Which remedy fits depends on why it happened (a skill not yet fluent, an unclear cue, or the conditions in the room, such as staffing or competing demands), and Form PD-1 sorts these out before retraining. Recording only a single integrity percentage discards the information that decides which.</p>
     <p>A single aggregate figure also hides where the failure sits. Ninety-three percent integrity on a fourteen-step protocol is a different clinical situation depending on whether the missed step was a greeting or the reinforcement contingency, which is why critical steps are scored on their own.</p>
     <h2 class="nbh-band" style="margin-top:18px">Error Classes, Opportunities and Fidelity Bands</h2>
-    <p>Score every protocol step on each opportunity. Record whether an error was an omission (a prescribed step not done) or a commission (a non-prescribed action done, e.g., delivering the reinforcer after the target behavior). Mark consequence-delivery steps as critical by default. Parametric studies of DRO and of discrimination training show that reinforcing the behavior that should be on extinction is the error class most strongly linked to loss of treatment effect, that effects of combined consequence errors were comparable to full fidelity at 80% and for most participants at 60%, were degraded at 40%, and were absent at 20% (O&rsquo;Neill et al., 2026), and that acquisition of a new discrimination was blocked for 5 of 6 learners when consequences averaged about 67% fidelity (Burlison et al., 2026). These were analog studies with adult volunteers; treat the bands on this form as clinical conventions, not validated cut-offs.</p>
+    <p>Score every protocol step on each opportunity. Record whether an error was an omission (a prescribed step not done) or a commission (on a consequence step, a consequence the plan withholds delivered, e.g., the reinforcer after the target behavior; on another step, the step done wrongly or something added). Mark consequence-delivery steps as critical by default. Parametric studies of DRO and of discrimination training show that reinforcing the behavior that should be on extinction has been linked to loss of treatment effect, though not in every study, that effects of combined consequence errors were comparable to full fidelity at 80% and for most participants at 60%, were degraded at 40%, and were absent at 20% (O&rsquo;Neill et al., 2026), and that acquisition of a new discrimination was blocked for 5 of 6 learners when consequences averaged about 67% fidelity (Burlison et al., 2026). These were analog studies with adult volunteers; treat the bands on this form as clinical conventions, not validated cut-offs.</p>
     <p>The bands the Summary applies: <b>90% and above</b>, acceptable, routine monitoring. <b>80&ndash;89%</b>, acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, a caution. <b>60&ndash;79%</b>, caution: effects were degraded for some learners at these levels, so any consequence step in error is retrained. <b>Below 60%</b>, not acceptable: the student&rsquo;s data are not read as a test of the plan, and retraining comes before the plan continues. No band is an empirically validated safe threshold, and 80% is not a standard the research sets: in earlier DRO work commission errors were harmful for some participants even at 80% fidelity (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026), and at 60% three of eleven participants in O&rsquo;Neill et al. (2026) lost the treatment effect, which is why those authors call their findings tentative.</p>
     <p>Why the split by error class: in Burlison et al. (2026) the probability of a correct response on the next trial was 0.29 (in 33% blocks) and 0.24 (in 67% blocks) after a wrong response had been reinforced, against 0.46 and 0.63 after earned reinforcement had been withheld, and the authors conclude that error reinforcement was the more detrimental type of error. Omission errors are the less damaging class, not a harmless one: the condition in which every consequence was wrong blocked learning entirely, and omission-only errors raised responding for some participants in the DRO work summarized by O&rsquo;Neill et al. (2026). The weighted figure counts a commission error twice as a convention of this form; neither study quantifies the weight. Opportunity counts follow O&rsquo;Neill et al. (2026), who report obtained fidelity separately for each error type as correct opportunities over all opportunities, with N/A when a phase offered none, and who note that with a single opportunity one outcome yields 100% or 0% regardless of the implementer&rsquo;s typical behavior.</p>
     <p>What this form does not claim: that antecedent or prompting errors matter less (neither study tested them); that variable fidelity is worse than steady fidelity at the same mean (not compared); that these results were obtained with staff or parents implementing plans with clients (both studies used computer-delivered errors with adult volunteers, 11 and 6 of them); or that any of its bands, weights or minimum counts were derived from the studies. Once errors are corrected, learners with a history of them can still master the task (all six did in Burlison et al., 2026), so detected low fidelity is a reason to retrain, not to abandon the plan.</p>
@@ -1277,7 +1279,7 @@ function blank(){return{meta:{},nObs:4,crit:90,critN:2,
   steps:[],obs:[],cells:{},ioa:{},opp:{}};}
 /* v2026-10 fidelity (F): each step carries a component tag (ant = antecedent, con = consequence); consequence steps
    take opportunity counts per observation in S.opp["step_obs"] = {c, ec, eo}. */
-const CMP=[['',''],['ant','Antecedent'],['con','Consequence']];
+const CMP=[['',''],['ant','Antecedent'],['con','Consequence'],['safe','Safety']];   /* v22.87 (review F246) a safety step: no hold, no block, no confinement */
 const cmpLabel=v=>v==='con'?'Consequence':v==='ant'?'Antecedent':'';
 const cmpBadge=st=>st&&st.cmp?`<span class="ti-cmp-b${st.cmp==='con'?' ti-cmp-con':''}">${cmpLabel(st.cmp)}</span>`:'';
 function setStepField(i,f,v){const st=S.steps[i];if(!st)return;st[f]=v;
@@ -1294,7 +1296,7 @@ function ensure(){
   while(S.obs.length<S.nObs)S.obs.push({date:'',type:'',ctx:'',ioa:false});
   S.obs.length=S.nObs;
   if(!S.steps.length)for(let i=0;i<8;i++)S.steps.push({d:'',crit:false});
-  S.steps.forEach(st=>{st.cmp=st.cmp==='con'||st.cmp==='ant'?st.cmp:'';});
+  S.steps.forEach(st=>{st.cmp=st.cmp==='con'||st.cmp==='ant'||st.cmp==='safe'?st.cmp:'';if(st.cmp==='safe')st.crit=true;});   /* v22.87 (review F246) a safety step is critical */
   if(!S.opp||typeof S.opp!=='object'||Array.isArray(S.opp))S.opp={};
   Object.keys(S.opp).forEach(k=>{const o=S.opp[k],num=x=>Number.isInteger(+x)&&+x>=0?+x:0;
     if(!o||typeof o!=='object'){delete S.opp[k];return;}o.c=num(o.c);o.ec=num(o.ec);o.eo=num(o.eo);if(!(o.c+o.ec+o.eo))delete S.opp[k];});
@@ -1439,7 +1441,7 @@ function metrics(){
   const global={c:sc.filter(x=>x.v==='C').length,n:sc.length};
   const ind=[];for(let j=0;j<nO;j++){const col=[];for(let i=0;i<nS;i++)col.push(code(i,j));
     const s=col.filter(scored).length;ind.push({j,c:col.filter(v=>v==='C').length,s});}
-  const used=ind.filter(x=>x.s>0);
+  const rk=tiRank(),used=ind.filter(x=>x.s>0).sort((a,b)=>rk(a.j)-rk(b.j));   /* v22.87 (review F239) in date order */
   const aonT={c:used.filter(x=>x.c===x.s).length,n:used.length};
   const stepRows=[];for(let i=0;i<nS;i++){const row=[];for(let j=0;j<nO;j++)row.push(code(i,j));
     const s=row.filter(scored).length;stepRows.push({i,c:row.filter(v=>v==='C').length,s,
@@ -1467,15 +1469,27 @@ function metrics(){
     byCmp[k]={steps:rs.length,scored:rs.filter(x=>x.n>0).length,c:rs.reduce((a,b)=>a+b.c,0),ec:rs.reduce((a,b)=>a+b.ec,0),eo:rs.reduce((a,b)=>a+b.eo,0),n:rs.reduce((a,b)=>a+b.n,0),
       ecSteps:rs.filter(x=>x.ec>0).map(x=>x.i),eoSteps:rs.filter(x=>x.eo>0).map(x=>x.i)};});
   const tot={c:stepOpp.reduce((a,b)=>a+b.c,0),ec:stepOpp.reduce((a,b)=>a+b.ec,0),eo:stepOpp.reduce((a,b)=>a+b.eo,0)};
-  const weighted={c:tot.c,n:tot.c+tot.eo+2*tot.ec};
+  const weighted={c:tot.c,n:tot.c+tot.eo+tot.ec+byCmp.con.ec};   /* v22.87 (review F245) only a consequence step's commission counts twice */
   let lowest=null;stUsed.forEach(r=>{const p=100*r.c/r.s;if(!lowest||p<lowest.pct)lowest={i:r.i,pct:p,c:r.c,s:r.s};});
   const indPct=used.map(x=>100*x.c/x.s),range=indPct.length?{lo:Math.min(...indPct),hi:Math.max(...indPct),n:indPct.length}:null;
   return {global,ind,aonT,stepRows,aonS,critM,ec,eo,ann,unann,slope,used,stepOpp,byCmp,weighted,lowest,range,tot:{c:tot.c,ec:tot.ec,eo:tot.eo,n:tot.c+tot.ec+tot.eo}};
 }
+/* v22.87 (review F239) observations in date order: the verdict, the band, the trend, the export and the retraining list take "the
+   last" by date, column order only breaking a tie (an undated observation counts as the oldest), so an observation saved over the
+   oldest column once all eight hold data is still the newest */
+function tiIsoD(t){t=String(t==null?'':t).trim();let m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(t);return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';}
+function tiOrder(){return (S.obs||[]).map((o,j)=>({j,d:tiIsoD(o&&o.date)})).sort((a,b)=>(a.d||'').localeCompare(b.d||'')||a.j-b.j).map(x=>x.j);}
+function tiRank(){const r={};tiOrder().forEach((j,k)=>{r[j]=k;});return j=>r[j]==null?j:r[j];}
+const tiUsD=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+/* (review F247) reactivity reads as reactivity only when an announced check falls after an unannounced one */
+function tiMixed(){let un=false;for(const j of tiOrder()){const t=(S.obs[j]||{}).type;if(t==='Unannounced')un=true;else if(t==='Announced'&&un)return true;}return false;}
+/* (review F240) the verdict as the Summary reads it, for the case */
+let tiVerdict=null;
 /* the fidelity band: this form's working convention (see the Guide); the studies set no threshold */
 function bandOf(p,ptype){
   if(p==null)return{cls:'v-mid',name:'No band yet',txt:'No scored observation to place in a band.'};
-  const acq=ptype==='Skill acquisition',red=ptype==='Behavior reduction';
+  const acq=ptype==='Skill acquisition'||/^Both/.test(String(ptype||'')),red=ptype==='Behavior reduction';   /* v22.87 (review F241) a plan that does both is read as the stricter */
   if(p>=90)return{cls:'v-ok',name:'90% and above',txt:'Acceptable: routine monitoring.'};
   if(p>=80)return{cls:acq?'v-mid':'v-ok',name:'80–89%',txt:red?'Acceptable for a behavior-reduction plan in this evidence base; schedule a re-check.':
     acq?'Caution for a skill-acquisition program: consequences delivered at about 67% fidelity on average prevented mastery for 5 of 6 learners (Burlison et al., 2026); schedule a re-check and retrain any consequence step in error.':
@@ -1494,39 +1508,64 @@ function renderSummary(){
     card('Errors of commission',M.ec||'0',M.ec?'attempted but done wrong':'none recorded')+
     card('Errors of omission',M.eo||'0',M.eo?'step never attempted':'none recorded')+
     card('Trend',M.slope==null?'':(M.slope>=0?'+':'')+M.slope.toFixed(1)+' pts',M.slope==null?'Needs 3 scored observations':'per observation')+
-    card('Reactivity',(M.ann.s&&M.unann.s)?((100*M.ann.c/M.ann.s-100*M.unann.c/M.unann.s>=0?'+':'')+(100*M.ann.c/M.ann.s-100*M.unann.c/M.unann.s).toFixed(1)+' pts'):'',
-         (M.ann.s&&M.unann.s)?'announced minus unannounced':'Needs both observation types')+
+    card('Reactivity',(M.ann.s&&M.unann.s&&tiMixed())?((100*M.ann.c/M.ann.s-100*M.unann.c/M.unann.s>=0?'+':'')+(100*M.ann.c/M.ann.s-100*M.unann.c/M.unann.s).toFixed(1)+' pts'):'',
+         (M.ann.s&&M.unann.s)?(tiMixed()?'announced minus unannounced':'confounded with time: no announced check falls after an unannounced one'):'Needs both observation types')+
     card('Commission on consequence steps',M.byCmp.con.n?fmt(M.byCmp.con.ec,M.byCmp.con.n):'',M.byCmp.con.n?`${M.byCmp.con.ec} of ${M.byCmp.con.n} opportunities: reinforcer delivered when the plan withholds it`:(M.byCmp.con.steps?'No consequence step scored yet':'No step tagged Consequence'))+
     card('Omission on consequence steps',M.byCmp.con.n?fmt(M.byCmp.con.eo,M.byCmp.con.n):'',M.byCmp.con.n?`${M.byCmp.con.eo} of ${M.byCmp.con.n} opportunities: earned consequence withheld`:(M.byCmp.con.steps?'No consequence step scored yet':'No step tagged Consequence'))+
-    card('Weighted integrity',fmt(M.weighted.c,M.weighted.n),M.weighted.n?'commission counted twice: a form convention, not an empirical weight':'No opportunity scored')+
+    card('Weighted integrity',fmt(M.weighted.c,M.weighted.n),M.weighted.n?'commission on consequence steps counted twice: a form convention, not an empirical weight':'No opportunity scored')+
     card('Lowest step',M.lowest?fmt(M.lowest.c,M.lowest.s):'',M.lowest?`step ${M.lowest.i+1}: ${M.lowest.c} of ${M.lowest.s} scored`:'No step scored yet')+
     card('Range across observations',M.range?(M.range.n>1?M.range.lo.toFixed(1)+'–'+M.range.hi.toFixed(1)+'%':M.range.lo.toFixed(1)+'%'):'',M.range?`individual trial integrity, ${M.range.n} scored observation${M.range.n===1?'':'s'}`:'No observation scored yet');
 
   /* verdict against the mastery criterion */
-  const un=S.obs.map((o,j)=>({o,j})).filter(x=>x.o.type==='Unannounced');
+  const rkU=tiRank(),un=S.obs.map((o,j)=>({o,j})).filter(x=>x.o.type==='Unannounced').sort((a,b)=>rkU(a.j)-rkU(b.j));   /* v22.87 (review F239) */
   const unRows=un.map(x=>{const col=S.steps.map((_,i)=>code(i,x.j));
     const s=col.filter(scored).length;return s?{j:x.j,v:100*col.filter(v=>v==='C').length/s}:null;}).filter(Boolean);
   const unScores=unRows.map(r=>r.v),lastJ=unRows.slice(-S.critN).map(r=>r.j);
   const last=unScores.slice(-S.critN);
-  let cls='v-mid',txt='';
+  /* v22.87 (review F239) each deciding observation named with its date */
+  const lastR=unRows.slice(-S.critN),labR=r=>{const d=tiIsoD((S.obs[r.j]||{}).date);return r.v.toFixed(1)+'% (#'+(r.j+1)+(d?', '+tiUsD(d):'')+')';};
+  let cls='v-mid',txt='',vState='not decidable';
   if(unScores.length<S.critN){cls='v-mid';txt=`Not yet decidable: ${unScores.length} of the ${S.critN} required unannounced observations have been scored.`;}
-  else if(last.every(v=>v>=S.crit)){cls='v-ok';txt=`Criterion met: the last ${S.critN} unannounced observations were all at or above ${S.crit}% (${last.map(v=>v.toFixed(1)+'%').join(', ')}).`;}
-  else {cls='v-no';txt=`Criterion not met: the last ${S.critN} unannounced observations were ${last.map(v=>v.toFixed(1)+'%').join(', ')}, against a criterion of ${S.crit}%. Retrain the steps listed on the retraining sheet before the plan's outcome data are interpreted.`;}
+  else if(last.every(v=>v>=S.crit)){cls='v-ok';vState='met';txt=`Criterion met: the last ${S.critN} unannounced observations were all at or above ${S.crit}%: ${lastR.map(labR).join(', ')}.`;}
+  else {cls='v-no';vState='not met';txt=`Criterion not met: the last ${S.critN} unannounced observations were ${lastR.map(labR).join(', ')}, against a criterion of ${S.crit}%. Retrain the steps listed on the retraining sheet before the plan's outcome data are interpreted.`;}
+  /* v22.87 (review F238) a commission error on a critical step, or on a consequence step, on a deciding observation fails the
+     verdict whatever the percentages, as Form ST-1's gate does; with no critical step come due, the verdict stays open */
+  const tiFail=[];if(unScores.length>=S.critN)S.steps.forEach((st,i)=>lastJ.forEach(j=>{const v=code(i,j),x=oppOf(i,j);
+    if(st.crit&&v==='EC')tiFail.push({i,j,con:st.cmp==='con'});else if(st.cmp==='con'&&x.ec>0)tiFail.push({i,j,con:true});}));
+  if(tiFail.length){const by={};tiFail.forEach(f=>{(by[f.i]=by[f.i]||[]).push('#'+(f.j+1));});
+    const which=Object.keys(by).map(i=>'step '+(+i+1)+(S.steps[i].cmp==='con'?' (consequence)':' (critical)')+' on '+by[i].join(', ')).join('; ');
+    if(cls==='v-no')txt+=` A commission error also fell on ${which}.`;
+    else{cls='v-no';vState='not met';txt=`Criterion not met: on the deciding observations (${lastR.map(labR).join(', ')}), a commission error fell on ${which}. A critical or consequence step done wrongly can defeat the plan whatever the overall figure. Retrain the steps listed on the retraining sheet before the plan's outcome data are interpreted.`;}}
   /* v21.16 audit (F4): critical-step integrity is checked on the observations the criterion was judged on. It was
      pooled over every observation, announced and earlier ones included, so critical-step errors already retrained
      held back a met criterion, and a critical-step error on the deciding observations could pass unflagged. */
   if(cls==='v-ok'){let cc=0,cn=0;
     S.steps.forEach((st,i)=>{if(st.crit)lastJ.forEach(j=>{const v=code(i,j);if(scored(v)){cn++;if(v==='C')cc++;}});});
-    if(cn&&100*cc/cn<S.crit){cls='v-mid';
+    if(cn&&100*cc/cn<S.crit){cls='v-mid';vState='not met';
       txt+=` Overall criterion is met, but critical-step integrity on those observations is ${fmt(cc,cn)} (${cc} of ${cn}) — treat the plan as not yet running as written.`;}
-    else if(!cn&&S.steps.some(st=>st.crit))txt+=' No step marked critical came due on those observations, so they say nothing about the critical steps.';}
-  $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
+    else if(!cn&&S.steps.some(st=>st.crit)){cls='v-mid';vState='not decidable';txt=`Not yet decidable for the critical steps: the last ${S.critN} unannounced observations were at or above ${S.crit}% (${lastR.map(labR).join(', ')}), but no step marked critical came due on them. Observe a period in which the critical steps arise.`;}}
+  /* v22.87 (review F242) steps taken from Form QS-1's non-negotiables arrive untagged: the verdict waits until they are checked */
+  if(S.meta.fromQs==='1'&&S.steps.some((st,i)=>!st.cmp&&S.obs.some((_,j)=>scored(code(i,j))))){cls='v-mid';vState='not decidable';
+    txt='Not yet decidable: the steps came from Form QS-1\u2019s non-negotiables, and some scored steps have no component. Confirm each step\u2019s component and critical mark on the Setup sheet, then press Tags checked. (As the steps stand: '+txt+')';}
+  const outOfOrder=tiOrder().some((j,k,a)=>k&&j<a[k-1]);
+  $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`+(outOfOrder?'<p class="hint">The observation columns are not in date order: the verdict, the band, the trend and what the case is told use date order.</p>':'');
+  tiVerdict={status:vState,text:txt,criterion:+S.crit,obs:lastR.map(r=>({col:r.j+1,date:tiIsoD((S.obs[r.j]||{}).date)||null,pct:Math.round(r.v*10)/10})),fail:tiFail.map(f=>({step:f.i+1,col:f.j+1,consequence:!!f.con}))};
 
   /* v2026-10 fidelity (F): the band, judged on the same observations as the verdict, with the consequence-step flag
      and the evidence sentences beside it */
   const bj=lastJ.length?lastJ:null;let bc=0,bs=0;
   (bj||M.used.map(x=>x.j)).forEach(j=>{S.steps.forEach((_,i)=>{const v=code(i,j);if(scored(v)){bs++;if(v==='C')bc++;}});});
-  const bp=bs?100*bc/bs:null,B=bandOf(bp,S.meta.ptype||''),con=M.byCmp.con;
+  const bp=bs?100*bc/bs:null,B0=bandOf(bp,S.meta.ptype||''),con=M.byCmp.con;
+  /* v22.87 (review F241, F238) the band is never green beside a verdict that is not, and is a caution when a consequence step was
+     done as a commission error on the deciding observations, ran below 80% of its opportunities there, or the program is in
+     acquisition, when consequence errors matter most */
+  const bwhy=[];if(bp!=null){if(cls!=='v-ok')bwhy.push('the verdict above is '+(cls==='v-no'?'not met':'not yet met'));
+    let ce=0;const low=[];S.steps.forEach((st,i)=>{if(st.cmp!=='con')return;let c=0,n=0;(bj||[]).forEach(j=>{const x=oppOf(i,j);ce+=x.ec;c+=x.c;n+=x.c+x.ec+x.eo;});if(n&&100*c/n<80)low.push(i+1);});
+    if(ce)bwhy.push('a consequence step was done as a commission error '+ce+' time'+(ce===1?'':'s')+' on the deciding observations');
+    if(low.length)bwhy.push('consequence step'+(low.length>1?'s ':' ')+low.join(', ')+' ran below 80% of '+(low.length>1?'their':'its')+' opportunities there');
+    if(S.meta.phase==='Acquisition'&&bp<90)bwhy.push('the program is in acquisition, when consequence errors matter most (Burlison et al., 2026)');}
+  const B=bwhy.length&&B0.cls==='v-ok'?{cls:'v-mid',name:B0.name,txt:'Caution: '+bwhy.join('; ')+'. Retrain the consequence steps first and schedule a re-check.'}:bwhy.length&&B0.cls==='v-mid'?Object.assign({},B0,{txt:B0.txt+' Also: '+bwhy.join('; ')+'.'}):B0;
+  if(tiVerdict)tiVerdict.band={name:B.name,cls:B.cls};
   const judged=bs?(bj?`judged on observation${bj.length>1?'s ':' '}${bj.map(j=>'#'+(j+1)).join(', ')}, the ${bj.length>1?'ones':'one'} the verdict uses`:'judged on every scored observation, as no unannounced observation is scored yet'):'';
   let flag='';
   if(con.ec)flag=`<div class="ti-flag"><b>Integrity errors fell on consequence steps</b>${con.ec} commission error${con.ec===1?'':'s'} on consequence step${con.ecSteps.length===1?'':'s'} ${con.ecSteps.map(i=>i+1).join(', ')}: a reinforcer delivered when the plan withholds it, or the wrong consequence delivered. This error class has been linked to loss of treatment effect in several DRA, DRO and discrimination-training studies, though not in all (St. Peter Pipkin et al., 2010; Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026; Burlison et al., 2026). These steps head the retraining list.</div>`;
@@ -1612,6 +1651,12 @@ function renderRT(){
       <td>${pat}</td><td>${rec}</td></tr>`;}).join('')
     :`<tr><td colspan="8" class="hint">No step falls below ${S.crit}%, no commission error was recorded, and no consequence step was omitted.</td></tr>`;
   $('#rtTbl').innerHTML=h+'</tbody>';
+  /* v22.87 (review F243) why first: each recommendation assumes the cause is a skill; barriers recorded point elsewhere */
+  let why=document.getElementById('rtWhyNote');const tb=$('#rtTbl'),at=tb&&(tb.closest('.grid-wrap')||tb);
+  if(!why&&at){why=document.createElement('div');why.id='rtWhyNote';at.parentNode.insertBefore(why,at);}
+  if(why){const bar=String(S.meta.barrier||'').trim();
+    why.innerHTML=flagged.length?'<p class="ti-why-first"><b>Why first.</b> For each step below, ask: can the interventionist do it correctly in rehearsal now? If yes, the cause is not a skill, and retraining will not fix it: find out why with Form PD-1 (the conditions, the materials, the feedback, the workload). Each recommendation below assumes the cause is a skill.'+
+      (bar?' <b>Barriers recorded on this form:</b> \u201c'+esc(bar)+'\u201d. They point away from retraining as the first step.':'')+'</p>':'';}
 }
 
 /* ---------------- meta binding ---------------- */
@@ -2105,6 +2150,7 @@ async function save(){
   if(c&&!c.empty&&!(await nbhUI.confirm('Replace what observation #'+(j+1)+' holds?\nObservation #'+(j+1)+' already holds '+holds(c)+'. They are replaced with this observation'+RSQ+'s codes, date, type and context.',{ok:'Replace',danger:true}))){
     note('Nothing was saved, and observation #'+(j+1)+' is unchanged.');return;}
   if(R.st!=='review')return;
+  if(c&&!c.empty)try{window.tiArchive(j);}catch(e){}   /* v22.87 (review F239) the observation replaced is kept on the record */
   const codes=[];for(let i=0;i<n;i++)codes.push(roll(i).code);
   const ctx=ctxText(),multi=multiLines(),chk=byId('tiRunNoteChk'),addNote=!!(multi.length&&(!chk||chk.checked));
   const date=isISO(R.date)?R.date:'',type=R.type;let err='';
@@ -2168,7 +2214,7 @@ const hBtn=byId('tiRetrainBtn'),hNote=byId('tiRetrainNote'),hSaved=byId('tiRetra
 /* the observations the verdict is judged on, found as the verdict finds them: unannounced observations with at least
    one scored step, in column order, the last S.critN of them */
 function deciding(){const rows=[];S.obs.forEach((o,j)=>{if(!o||o.type!=='Unannounced')return;let c=0,s=0;
-  for(let i=0;i<nSteps();i++){const v=cell(i,j);if(SCD(v)){s++;if(v==='C')c++;}}if(s)rows.push({j,c,s});});return rows.slice(-S.critN);}
+  for(let i=0;i<nSteps();i++){const v=cell(i,j);if(SCD(v)){s++;if(v==='C')c++;}}if(s)rows.push({j,c,s});});const rk=tiRank();rows.sort((a,b)=>rk(a.j)-rk(b.j));return rows.slice(-S.critN);}   /* v22.87 (review F239) date order */
 function retrainData(){const dec=deciding(),crit=S.crit;
   const obs=dec.map(r=>{let cc=0,cs=0;S.steps.forEach((st,i)=>{if(st&&st.crit){const v=cell(i,r.j);if(SCD(v)){cs++;if(v==='C')cc++;}}});
     const o=S.obs[r.j]||{};return{col:r.j+1,date:isISO(o.date)?String(o.date):null,type:String(o.type||'').toLowerCase(),integrity:r2(100*r.c/r.s),critical:cs?r2(100*cc/cs):null};});
@@ -3519,6 +3565,55 @@ window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,argume
     if(S.plan&&S.plan.rev)o.integrity.planRev=S.plan.rev;}}catch(e){}
   return o;};
 })();
+</script>
+<script id="ti1-v2287">
+/* v22.87 (review F240) the case is told TI-1's own verdict: met, not met or not decidable, the deciding observations with their
+   dates, any commission on a critical or consequence step there, and the band; the observations go in date order */
+{const w=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=w?w.apply(this,arguments):null;
+  try{if(r&&r.integrity){if(!tiVerdict)renderSummary();if(tiVerdict)r.integrity.verdict=JSON.parse(JSON.stringify(tiVerdict));}}catch(e){}return r;};}
+</script>
+<script id="ti1-v2287b">
+/* v22.87 (review F239, F242, F246) */
+/* F239: an observation replaced in its column (all eight hold data) is kept on the record: its date, type and figures */
+window.tiArchive=function(j){const o=S.obs[j]||{};let c=0,s=0,cc=0,cs=0;S.steps.forEach((st,i)=>{const v=code(i,j);if(scored(v)){s++;if(v==='C')c++;if(st.crit){cs++;if(v==='C')cc++;}}});
+  if(!s)return;if(!Array.isArray(S.past))S.past=[];const d=new Date();
+  S.past.push({date:tiIsoD(o.date)||'',type:String(o.type||''),pct:Math.round(1000*c/s)/10,crit:cs?Math.round(1000*cc/cs)/10:null,n:s,col:j+1,replaced:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')});
+  if(S.past.length>60)S.past=S.past.slice(-60);};
+function tiPastClean(){if(!Array.isArray(S.past)){delete S.past;return;}const f=v=>typeof v==='number'&&isFinite(v)&&v>=0&&v<=100?v:null;
+  S.past=S.past.filter(x=>x&&typeof x==='object').slice(-60).map(x=>({date:tiIsoD(x.date)||'',type:x.type==='Announced'||x.type==='Unannounced'?x.type:'',pct:f(x.pct),crit:f(x.crit),n:Number.isInteger(x.n)&&x.n>0?x.n:0,col:Number.isInteger(x.col)?x.col:null,replaced:tiIsoD(x.replaced)||''})).filter(x=>x.pct!=null);
+  if(!S.past.length)delete S.past;}
+function tiPastRender(){let box=document.getElementById('tiPast');const rt=document.getElementById('reactTbl'),at=rt&&(rt.closest('.grid-wrap')||rt);
+  if(!box&&at){box=document.createElement('div');box.id='tiPast';at.parentNode.insertBefore(box,at.nextSibling);}if(!box)return;
+  const P=S.past||[];box.innerHTML=P.length?'<h3 style="margin-top:14px">Earlier Observations Kept on This Record</h3><p class="hint">Observations replaced in their column once all '+MAXOBS_TI+' held data. They are kept here; the verdict, the band and the trend use the observations in the columns.</p>'+
+    '<table class="rt"><thead><tr><th>Date</th><th>Type</th><th>Integrity</th><th>Critical steps</th><th>Steps scored</th><th>Replaced</th></tr></thead><tbody>'+
+    P.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(x=>'<tr><td>'+esc(tiUsD(x.date)||'(no date)')+'</td><td>'+esc(x.type)+'</td><td style="text-align:center">'+x.pct+'%</td><td style="text-align:center">'+(x.crit==null?'&mdash;':x.crit+'%')+'</td><td style="text-align:center">'+x.n+'</td><td>'+esc(tiUsD(x.replaced))+'</td></tr>').join('')+'</tbody></table>':'';}
+const MAXOBS_TI=8;
+/* F246: a safety step coded Commission records a hold, a block or a confinement: the incident report and the parent's notice are due */
+function tiSafetyHits(){const L=[];S.steps.forEach((st,i)=>{if(st.cmp!=='safe')return;S.obs.forEach((o,j)=>{const v=code(i,j),x=oppOf(i,j);if(v==='EC'||x.ec>0)L.push({i,j,date:tiIsoD(o&&o.date)});});});return L;}
+function tiSafetyRender(){const H=tiSafetyHits();let inShell=false;try{inShell=window.parent!==window;}catch(e){}
+  const html=H.length?'<div class="verdict v-no ti-safety"><b>A safety step was coded Commission.</b> '+H.map(h=>'Observation #'+(h.j+1)+(h.date?' ('+tiUsD(h.date)+')':'')+', step '+(h.i+1)).join('; ')+
+    '. This records a physical restraint, a blocked exit or a confinement. File the incident report within 24 hours and tell the parent the same school day (s. 1003.573(7)(a) and (7)(c), F.S., as Form CR-1 quotes them), and log it on Form DD-1&rsquo;s incident log so the restraint report and Form CR-1&rsquo;s deadlines hear of it. Seclusion is prohibited.'+
+    (inShell?' <button type="button" class="tool noprint" data-ti-open="DD-1">Open Form DD-1 beside this form</button>':'')+'</div>':'';
+  ['tiSafetySum','tiSafetyScore'].forEach((id,k)=>{let b=document.getElementById(id);
+    if(!b){const ref=k?document.getElementById('piTbl'):document.getElementById('verdictBox');const at=ref&&(k?(ref.closest('.grid-wrap')||ref):ref);if(!at)return;b=document.createElement('div');b.id=id;at.parentNode.insertBefore(b,at);}
+    b.innerHTML=html;});}
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-ti-open]');if(!b)return;try{window.parent.postMessage({nbh:'open',want:b.getAttribute('data-ti-open'),beside:true},'*');}catch(x){}});
+/* a step tagged Safety is critical */
+document.addEventListener('change',e=>{const t=e.target;if(!t||!t.matches||!t.matches('#stepTbl select[data-f="cmp"]'))return;const i=+t.getAttribute('data-s');
+  if(t.value==='safe'&&S.steps[i]&&!S.steps[i].crit){S.steps[i].crit=true;setTimeout(()=>renderAll(),0);}});
+/* F242: the steps Form QS-1's non-negotiables gave are tagged where their words say so, and the Setup sheet asks for the rest */
+function tiQsTag(){let k=0;S.steps.forEach(st=>{if(st.cmp)return;const d=String(st.d||'');
+  if(/\(not:[^)]*\b(hold|grab|restrain|block|confin|seclu|lock)/i.test(d)){st.cmp='safe';st.crit=true;k++;}
+  else if(/\(not:[^)]*\b(end|give|hand|let|use)\b[^)]*\b(behavior|protest|in progress|escape)/i.test(d)){st.cmp='con';st.crit=true;k++;}});return k;}
+function tiQsBanner(){let b=document.getElementById('tiQsBanner');const t=document.getElementById('stepTbl'),at=t&&(t.closest('.grid-wrap')||t);
+  if(S.meta.fromQs!=='1'){if(b)b.remove();return;}if(!b&&at){b=document.createElement('div');b.id='tiQsBanner';b.className='noprint';at.parentNode.insertBefore(b,at);}if(!b)return;
+  b.innerHTML='<div class="verdict v-mid"><b>Check the steps’ tags.</b> These steps came from Form QS-1’s non-negotiables, which are handout lines, not the plan’s step list (Form TD-1). Lines that name a hold or a block are tagged Safety, and a reinforcer given to end a behavior Consequence; confirm every step’s component and critical mark before the first observation. Until then the verdict stays open. <button type="button" class="tool" id="tiQsOk">Tags checked</button></div>';}
+document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#tiQsOk')){delete S.meta.fromQs;renderAll();}});
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const empty=!S.steps.some(st=>String(st.d||'').trim());const r=was?was.apply(this,arguments):null;
+  try{if(empty&&r&&/non-negotiables on Form QS-1/.test(r.note||'')){S.meta.fromQs='1';tiQsTag();renderAll();}}catch(e){}return r;};}
+{const ra=renderAll;renderAll=function(){try{tiPastClean();}catch(e){}const r=ra.apply(this,arguments);try{tiPastRender();tiSafetyRender();tiQsBanner();}catch(e){console.error(e);}return r;};}
+/* the case: the safety steps coded Commission, with their dates */
+{const w=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=w?w.apply(this,arguments):null;try{const H=tiSafetyHits();if(r&&r.integrity&&H.length)r.integrity.safety=H.map(h=>({date:h.date||null,step:h.i+1,col:h.j+1}));}catch(e){}return r;};}
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

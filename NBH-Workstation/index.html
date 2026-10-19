@@ -2263,7 +2263,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.86';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.87';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5334,7 +5334,9 @@ function todayItems(){const f=state.facts||{},d=f.data,ti=f.integrity,L=[];
     (d.behaviors||[]).filter(b=>b.aimMet).forEach(b=>L.push({k:'Aim',t:esc(b.name)+' has been at its aim '+b.run+' days in a row ('+b.need+' asked): raise the criterion or plan the next step (DD-1\u2019s aim is a treatment step; whether the IEP goal is met is judged on Form GB-1)',open:'GB-1'}));}
   if(ti&&(ti.obs||[]).length){const o=ti.obs[ti.obs.length-1],n=tdDays(o.date);
     if(n!==null&&n>14)L.push({k:'Integrity',t:'No integrity check on Form TI-1 for '+n+' days (the last, '+esc(tdMd(o.date))+', '+o.pct+'%)',open:'TI-1'});
-    if(o.pct<(ti.criterion||90)){const x=tdIntegrity(f);if(x)L.push({k:'Integrity',t:x.t,open:x.open});}}
+    if(o.pct<(ti.criterion||90)||(ti.verdict&&ti.verdict.status==='not met')){const x=tdIntegrity(f);if(x)L.push({k:'Integrity',t:x.t,open:x.open});}
+    /* v22.87 (TI-1 review F246) a safety step coded Commission on TI-1, with no restraint on DD-1's incident log that day */
+    (ti.safety||[]).forEach(h=>{const held=((d&&d.incidentList)||[]).some(i=>i&&i.date===h.date&&i.hold);if(!held)L.push({k:'Safety',t:'Form TI-1 recorded a safety step (step '+esc(h.step)+') as Commission'+(h.date?' on '+esc(tdMd(h.date)):'')+': a hold, a block or a confinement. File the incident report within 24 hours, tell the parent, and log it on Form DD-1',open:'DD-1'});});}
   else if(d&&d.days)L.push({k:'Integrity',t:'No integrity check on Form TI-1 in the case yet',open:'TI-1'});
   {const x=tdPerfDue(f);if(x)L.push(x);}   /* v22.83 */
   /* v22.85 (PR-1 review F320) the trigger for an earlier review written on Form PR-1: a restraint since the last review */
@@ -5394,7 +5396,15 @@ function tdRules(f){const r=f.review&&f.review.rules||{};return {minDays:+r.minD
 /* v22.83 (review F249) integrity under the criterion: find out why before retraining. Retrain only when Form PD-1 found the
    training domain leading, or items in it answered No; once PD-1 holds a result, its leading domain and the changes chosen are
    said instead. A single check under the criterion is checked again first: PD-1 is for a consistent pattern. */
-function tdIntegrity(f,decision){const ti=f.integrity,obs=ti&&ti.obs||[],crit=ti&&ti.criterion||90;if(!obs.length)return null;const o=obs[obs.length-1];if(!(o.pct<crit))return null;
+/* v22.87 (TI-1 review F240) the figure a decision rests on: Form TI-1's own verdict when it sends one (its deciding unannounced
+   observations, critical and consequence steps counted), else the latest observation not marked announced, never an announced one */
+function tiDecisive(ti){if(!ti)return null;const v=ti.verdict,obs=Array.isArray(ti.obs)?ti.obs:[];
+  if(v&&v.status){const o=(v.obs||[]).slice(-1)[0]||{};return {status:v.status,pct:o.pct!=null?o.pct:null,date:o.date||'',fail:(v.fail||[]).length};}
+  const un=obs.filter(o=>o&&o.type!=='Announced'),o=un.length?un[un.length-1]:null;return o?{status:'',pct:o.pct,date:o.date,fail:0}:null;}
+function tdIntegrity(f,decision){const ti=f.integrity,obs=ti&&ti.obs||[],crit=ti&&ti.criterion||90,tv=tiDecisive(ti);if(!tv)return null;
+  if(!(tv.status==='not met'||(tv.status!=='met'&&tv.pct!=null&&tv.pct<crit)))return null;const o={pct:tv.pct,date:tv.date};
+  if(tv.fail)return {t:'Form TI-1 found a critical or consequence step done wrongly on the last unannounced check ('+esc(tdMd(o.date))+'), so the plan is not yet run as written: '+(decision?'retrain first, then judge the plan':'retrain the steps missed (the retraining list on Form TI-1)'),open:'TI-1'};
+  if(tv.status==='not met'&&tv.pct!=null&&tv.pct>=crit)return {t:'Form TI-1\u2019s criterion is not met on its last unannounced checks ('+esc(tdMd(o.date))+', '+o.pct+'%): its critical steps were below criterion, so the plan is not yet run as written: '+(decision?'retrain first, then judge the plan':'retrain the steps missed (the retraining list on Form TI-1)'),open:'TI-1'};
   const last=obs.slice(-3),n=last.filter(x=>x.pct<crit).length,m=last.length,pf=f.perf&&typeof f.perf==='object'?f.perf:null;
   const head=n>1?'Integrity under the '+crit+'% criterion on '+n+' of the last '+m+' checks (the last, '+esc(tdMd(o.date))+', '+o.pct+'%)':(decision?'the last integrity check was '+o.pct+'%':'The last integrity check was '+o.pct+'%, under the '+crit+'% criterion');
   if(pf&&pf.lead){const train=pf.lead==='T';
@@ -5406,13 +5416,14 @@ function tdIntegrity(f,decision){const ti=f.integrity,obs=ti&&ti.obs||[],crit=ti
 /* v22.83 (review F253) the reassessment Form PD-1 set, once it is near or past */
 function tdPerfDue(f){const pf=f.perf;if(!pf||!pf.reassess)return null;const n=tdLeft(pf.reassess);if(n===null||n>7)return null;
   const pl=String(pf.plan||'');return {k:'Integrity',t:'The reassessment Form PD-1 set'+(pl?' for '+esc(pl.length>60?pl.slice(0,58).replace(/\s+\S*$/,'')+'\u2026':pl):'')+' is '+(n<0?(-n)+' day'+(n===-1?'':'s')+' past':n===0?'today':'in '+n+' day'+(n===1?'':'s'))+' ('+esc(tdMd(pf.reassess))+'): repeat the measure, and the checklist if nothing has changed',open:'PD-1'};}
-function tdDecision(f){const d=f.data,L=[];if(!d||!Array.isArray(d.behaviors))return L;const R=tdRules(f),ti=f.integrity,obs=ti&&(ti.obs||[]).length?ti.obs[ti.obs.length-1]:null,crit=ti&&ti.criterion||90;
+function tdDecision(f){const d=f.data,L=[];if(!d||!Array.isArray(d.behaviors))return L;const R=tdRules(f),ti=f.integrity,obs=tiDecisive(ti),crit=ti&&ti.criterion||90;
   d.behaviors.forEach(b=>{if(!b.base||!b.cur||b.base.mean==null||b.cur.mean==null||!(b.cur.days>=R.minDays))return;const up=/replacement|acquisition|skill/i.test(b.kind||'')||b.direction==='increase';
     const bm=+b.base.mean,cm=+b.cur.mean,chg=bm?((up?cm-bm:bm-cm)/bm*100):(up?(cm>0?100:0):(cm>0?-100:0));if(chg>=R.improvePct)return;
     const how=chg<=-R.improvePct?(up?'lower':'higher')+' than before the plan ('+Math.round(Math.abs(chg))+'%)':'about where it was before the plan ('+(chg>=0?'+':'')+Math.round(chg)+'%)';
     const lead=esc(b.name)+': '+b.cur.days+' days into '+esc(b.curName||'the plan')+', '+how+'; Form PR-1 counts '+R.improvePct+'% as progress';
     if(!obs)L.push({k:'Decision',t:lead+'. Check that the plan is being run (Form TI-1) before changing it',open:'TI-1'});
-    else if(obs.pct<crit){const x=tdIntegrity(f,true);L.push({k:'Decision',t:lead+', but '+x.t.replace(/^Integrity/,'integrity'),open:x.open});}
+    else if(obs.status==='not met'||(obs.status!=='met'&&obs.pct!=null&&obs.pct<crit)){const x=tdIntegrity(f,true);L.push({k:'Decision',t:lead+', but '+x.t.replace(/^Integrity/,'integrity'),open:x.open});}
+    else if(obs.status==='not decidable')L.push({k:'Decision',t:lead+'. Form TI-1 cannot yet judge whether the plan is run as written: complete its unannounced checks before changing the plan',open:'TI-1'});
     else L.push({k:'Decision',t:lead+', with integrity at '+obs.pct+'%: review the plan (modify it, or go back to the assessment)',open:'PR-1'});});
   return L;}
 function tdTimelines(f){const L=[],push=(k,t,open)=>L.push({k,t,open});const pf=f.profile||{},dt=pf.dates||{},rc=f.records||{},rv=f.review||{};
@@ -5486,7 +5497,7 @@ function tdSummaryHTML(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.pl
     sec('Target behaviors',li(tg.map(b=>'<b>'+esc(b.label)+'<\/b>'+(b.isRep||/replacement/i.test(b.type||'')?' (replacement)':'')+(b.def?': '+esc(b.def):''))))+
     sec('Function and the evidence',(f.fn&&(f.fn.statements||[]).length?'<p>'+f.fn.statements.map(esc).join(' ')+'<\/p>':'')+li(ev))+
     sec('The plan',li([pl.rep?'Replacement: '+esc(pl.rep):'',A(pl.ant).length?'Before it happens: '+esc(A(pl.ant).join('; ')):'',rs.prec?'At the first sign: '+esc(rs.prec):'',rs.target?'If it happens: '+esc(rs.target):'',rs.after?'Afterwards: '+esc(rs.after):'',rs.not?'Never: '+esc(rs.not):'',f.crisis&&(f.crisis.stages||[]).length?'Crisis plan: '+f.crisis.stages.length+' stages (Form CR-1)':''].filter(Boolean)))+
-    sec('Where things stand',li(lvl)+(ti&&(ti.obs||[]).length?'<p>Treatment integrity: '+esc(ti.obs[ti.obs.length-1].pct)+'% on '+esc(ti.obs[ti.obs.length-1].date)+' ('+ti.obs.length+' observations, criterion '+esc(ti.criterion||90)+'%).<\/p>':''))+
+    sec('Where things stand',li(lvl)+(ti&&(ti.obs||[]).length?(ti.verdict&&ti.verdict.status?'<p>Treatment integrity (Form TI-1): criterion '+esc(ti.verdict.status==='met'?'met':ti.verdict.status==='not met'?'not met':'not yet decidable')+' on the last unannounced checks ('+(ti.verdict.obs||[]).map(o=>esc(o.pct)+'%'+(o.date?' on '+esc(o.date):'')).join(', ')+'); '+ti.obs.length+' observations, criterion '+esc(ti.criterion||90)+'%.<\/p>':'<p>Treatment integrity: '+esc(ti.obs[ti.obs.length-1].pct)+'% on '+esc(ti.obs[ti.obs.length-1].date)+' ('+ti.obs.length+' observations, criterion '+esc(ti.criterion||90)+'%).<\/p>'):''))+
     sec('What worked, and what did not yet',li(worked.map(x=>'Progress: '+x).concat(not.map(x=>'Not yet: '+x))))+
     sec('Open deadlines and what is due',li(open.concat(due)))+
     sec('Contacts',li([p.bcba?'Case BCBA: '+esc(p.bcba):'',p.site?'School: '+esc(p.site):''].filter(Boolean)))+
