@@ -9903,6 +9903,43 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.94: DT-1's delay-tolerance protocol reaches the forms that run and review it, and its safety block takes the student's assent and the plan's rule for problem behavior (review Wave 3)
+
+- **The protocol goes to the case (F402, I202).** DT-1 built a ladder, a tolerance response, delay cues and twelve
+  integrity steps, and nothing read them. Its hand-off was one free-text line, so each was typed again into the behavior
+  plan, the staff quick start, the integrity form and the review.
+
+  DT-1 now tells the case:
+  - the arrangement, the tolerance response, the cues, the share of requests honored at once, the reset rule and the
+    activity;
+  - the session criterion and the rules to advance and step back;
+  - the stop rule and what staff do about problem behavior during the delay;
+  - the ladder, with the date each step was met. The step in training is the first one with no date.
+
+  It also sends its integrity steps written with this case's details (the cue, the tolerance response, the activity,
+  the reset rule, the rule for problem behavior). Steps that do not apply are left out: the choice step on the FCT path,
+  the immediate-reinforcement step when no requests are honored at once, and the token step when no tokens are used.
+
+  Each form below fills only what is empty there:
+  - **Form TD-1:** the delay component's card takes DT-1's steps, activity and cue where it is empty or still holds the
+    library's wording ("5, 15, 30, 60 s, 2 min, 5 min"). Its thinning ladder lists DT-1's own steps, with the dates met
+    and the one in training, and DT-1's rules to advance and step back. Without a protocol in the case, the library's
+    steps come back.
+  - **Form QS-1:** the day gets one line for staff: the delay cue, the tolerance response, the activity, the wait now in
+    training, and what to do about problem behavior during the wait.
+  - **Form TI-1:** **Add Form DT-1's delay-training steps** adds the integrity steps beside those already written. Each
+    step is tagged with its component, and a consequence step is marked critical.
+  - **Form PR-1:** the fading sequence gets one row: the support and its steps, DT-1's criterion, the date the first step
+    was met, and where the ladder stands. A row already naming Form DT-1 is left as written.
+
+  The workstation's case summary shows the ladder and the step in training. Tab 8's hand-off says where the protocol goes.
+- **Safety and consent (I204).** Tab 1's assent line fills from Form SI-1 when it is empty: the date, whether assent was
+  given, how the student says stop, and what staff do then. When Form TD-1 writes a response to the behavior, an empty
+  **Problem behavior during the delay** choice is set to "As the behavior plan writes it (Form TD-1)", with TD-1's own
+  words shown under it.
+- **Next (part 4):** F403 and I203, the session log and the probe log.
+- qa/dt1-w3c-test.js (11 checks).
+
 ### v22.93: DT-1 lays out the sheet for the arrangement chosen, runs the FCT path's baseline on the break it trains, carries figures across tabs, and folds the research-grade measures away (review Wave 3)
 
 - **The arrangement drives the sheet (F399, I201).** Tab 1 said the arrangement decides which assessments in Tab 2 apply,

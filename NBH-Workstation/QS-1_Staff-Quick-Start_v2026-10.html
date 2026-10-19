@@ -1473,6 +1473,15 @@ function adReward(a){const lc=x=>x?x.charAt(0).toLowerCase()+x.slice(1):x;const 
   else if(k==='int')t=head+'each '+w+' is marked; every '+(a.every||5)+', '+rf+' for the marked amount'+(u?' ('+u+')':'')+'.';
   else t=head+T(a.choice)+(T(a.reinforcer)?' ('+rf+')':'')+'.';
   return t+(end?' When the time is up: '+lc(end).replace(/[.\s]+$/,'')+'.':'');}
+/* v22.94 (DT-1 review F402) the delay-tolerance protocol as a line for staff: the cue, the tolerance response, the activity,
+   the wait now in training, and what staff do about problem behavior during the wait */
+function dtWait(d){const lc=x=>x?x.charAt(0).toLowerCase()+x.slice(1):x,cut=x=>T(x).replace(/[.\s]+$/,''),sec=v=>v>=60&&v%60===0?(v/60)+' min':v+' s';
+  const now=d.current!=null?d.current:d.mastered;if(now==null&&!T(d.tr))return '';
+  let t='Waiting after a request: '+(T(d.cues)?'give the delay cue ('+cut(d.cues)+')':'give the delay cue')+'; the student answers with the tolerance response'+(T(d.tr)?' ('+lc(cut(d.tr))+')':'');
+  if(T(d.activity))t+=' and starts '+lc(cut(d.activity));
+  t+='; what was asked for comes when the wait is done'+(now!=null?' (now '+sec(+now)+')':'')+'.';
+  if(T(d.pbDuring))t+=' Problem behavior during the wait: '+lc(cut(d.pbDuring))+'.';
+  return t;}
 function placeRow(k,f,v){v=T(v);if(!v)return false;
   for(let i=0;i<S[k].length;i++){if(T(S[k][i][f])===v||T(S.pulled[k+'.'+i+'.'+f])===v){PASS.add(k+'.'+i+'.'+f);return false;}}
   const i=blankRow(k);return i>=0&&place(k+'.'+i+'.'+f,v);}
@@ -1545,6 +1554,8 @@ window.__nbhFactsIn=function(f){ensure();PASS=new Set();const p=P();let n=0;
   if(pf&&pf.avoid&&placeRow('day','text','Avoid: '+pf.avoid))n++;
   /* v22.89 (AD-1 review F412) how the reward comes, from the arrangement Form AD-1 chose: staff hear it in plain words */
   {const a=f.arrangement;if(a&&a.choice){const ln=adReward(a);if(ln&&placeRow('day','text',ln))n++;}}
+  /* v22.94 (DT-1 review F402, I202) waiting after a request, from the delay-tolerance protocol Form DT-1 built */
+  {const d=f.delay;if(d){const ln=dtWait(d);if(ln&&placeRow('day','text',ln))n++;}}
   /* v22.48 (review F395) the replacement and the skill goals are skills being taught, unless the record (Form DD-1) shows one at its
      aim; a goal's annual objective is not printed as something the student can do; a goal naming a skill already listed is not
      listed again */

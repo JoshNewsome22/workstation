@@ -1816,6 +1816,21 @@ window.__nbhFactsIn=function(f){tiQuick=(f&&f.quick)||null;tiQuickBtn();
   const k=tiQuickAdd();renderAll();
   return {filled:((g&&g.filled)||0)+k,note:'the steps are the non-negotiables on Form QS-1'};};
 tiQuickBtn();
+/* v22.94 (DT-1 review F402, I202) the integrity steps of the delay-tolerance protocol Form DT-1 built, written with this case's
+   cue, tolerance response, activity, reset rule and rule for problem behavior, each tagged with its component (a consequence
+   step critical). They are added on request, beside the steps already written, never in place of them. */
+let tiDelay=null;
+function tiDelaySteps(){return ((tiDelay&&tiDelay.items)||[]).filter(x=>x&&String(x.d||'').trim()).map(x=>({d:'Delay training: '+String(x.d).trim(),cmp:x.cmp==='con'||x.cmp==='ant'?x.cmp:'',crit:!!x.crit}));}
+function tiDelayAdd(){const L=tiDelaySteps(),have=new Set(S.steps.map(st=>tiK(st.d)));let n=0;
+  L.forEach(x=>{if(have.has(tiK(x.d)))return;let i=S.steps.findIndex(st=>!String(st.d||'').trim());if(i<0){addBlankStep();i=S.steps.length-1;}
+    S.steps[i].d=x.d;S.steps[i].cmp=x.cmp;S.steps[i].crit=x.crit;have.add(tiK(x.d));n++;});
+  return n;}
+function tiDelayBtn(){let b=document.getElementById('addDelay');const n=tiDelaySteps().length;
+  if(!b){const at=document.getElementById('addQuick')||document.getElementById('delStep');if(!at)return;b=document.createElement('button');b.className='tool';b.id='addDelay';b.type='button';
+    b.textContent='Add Form DT-1\u2019s delay-training steps';at.parentNode.insertBefore(b,at.nextSibling);
+    b.addEventListener('click',()=>{const k=tiDelayAdd();renderAll();nbhUI.toast(k?k+' step'+(k===1?'':'s')+' from Form DT-1 added, tagged by component.':'Every delay-training step on Form DT-1 is already a step.',k?{kind:'ok'}:undefined);});}
+  b.style.display=n?'':'none';b.title=n?n+' integrity step'+(n===1?'':'s')+' on Form DT-1':'';}
+tiDelayBtn();
 /* v22.76 (review I145): the class game's script (Form GC-1). "Add the class game's script" adds its steps not yet on
    the list, with its every-time steps marked critical; nothing is added unless it is asked for, since this record
    checks the student's plan */
@@ -3614,6 +3629,10 @@ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.cl
 {const ra=renderAll;renderAll=function(){try{tiPastClean();}catch(e){}const r=ra.apply(this,arguments);try{tiPastRender();tiSafetyRender();tiQsBanner();}catch(e){console.error(e);}return r;};}
 /* the case: the safety steps coded Commission, with their dates */
 {const w=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=w?w.apply(this,arguments):null;try{const H=tiSafetyHits();if(r&&r.integrity&&H.length)r.integrity.safety=H.map(h=>({date:h.date||null,step:h.i+1,col:h.j+1}));}catch(e){}return r;};}
+</script>
+<script id="ti1-v2294">
+/* v22.94 (DT-1 review F402) the case's delay-tolerance protocol, heard last so the plan's own step list cannot pass it by */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){try{tiDelay=(f&&f.delay)||null;tiDelayBtn();}catch(e){}return was?was.apply(this,arguments):null;};}
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

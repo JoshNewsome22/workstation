@@ -3185,6 +3185,24 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
     putOver(O);decorate();return;}
   if(e.target.id==='td46Reset'){putOver({in:{},crit:{},ee:''});decorate();}});
 }
+/* v22.94 (DT-1 review F402, I202) the delay-tolerance protocol Form DT-1 built: the delay component's card takes DT-1's
+   ladder, its activity and its delay cue where the card is empty or still holds the library's wording, and the thinning
+   ladder lists DT-1's own steps (the dates they were met, the one in training) with DT-1's rules to advance and step back.
+   Without a protocol in the case the library's steps come back. */
+const THIN_DT=THIN.DT_PROG.slice();let tdDelay=null;
+const tdSec=v=>v>=60&&v%60===0?(v/60)+' min':v+' s';
+const tdLad=d=>(d&&Array.isArray(d.ladder)?d.ladder:[]).filter(x=>x&&x.s!=null&&isFinite(+x.s));
+window.__tdDelayIn=function(d){tdDelay=d&&typeof d==='object'?d:null;const L=tdLad(tdDelay);let k=0;
+  THIN.DT_PROG=L.length?L.map((x,j)=>[String(j+1),tdSec(+x.s)+(x.met?' (met '+x.met+', Form DT-1)':tdDelay.current!=null&&+x.s===+tdDelay.current?' (in training, Form DT-1)':' (Form DT-1)')]):THIN_DT;
+  const c=document.querySelector('#compWrap .card[data-code="DT_PROG"]');
+  if(c&&tdDelay){const i=c.dataset.i,P=LIB.DT_PROG.params,put=(n,v)=>{v=String(v||'').trim();const cur=val(`cp[${i}].p${n}`);if(!v||(cur&&cur!==P[n][1]))return 0;
+      const e=document.querySelector(`[name="cp[${i}].p${n}"]`);if(!e)return 0;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));return 1;};
+    if(L.length)k+=put(0,L.map(x=>tdSec(+x.s)).join(', ')+' (Form DT-1)');k+=put(1,tdDelay.activity);k+=put(2,tdDelay.cues);}
+  try{renderPlan();}catch(e){}return k;};
+function tdDelayRules(){if(!tdDelay||!tdLad(tdDelay).length)return;const adv=[tdDelay.crit,tdDelay.adv].map(x=>String(x||'').trim()).filter(Boolean).join('; '),back=String(tdDelay.back||'').trim();
+  const R=$$('#thinTbl tbody tr').filter(tr=>/^DT_PROG\s/.test(tr.children[0].textContent));
+  R.forEach((tr,j)=>{if(j<R.length-1&&adv)tr.children[2].textContent=adv+' (Form DT-1)';if(j&&back)tr.children[3].textContent=back+' (Form DT-1)';});}
+{const rp=renderPlan;renderPlan=function(){const r=rp.apply(this,arguments);try{tdDelayRules();}catch(e){}return r;};}
 restore({counts:{}});
 })();
 
@@ -5263,6 +5281,12 @@ window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,argume
       Object.keys(rq).forEach(k=>{if(!rq[k])delete rq[k];});if(Object.keys(rq).length){o=o||{};o.plan=o.plan||{src:'TD-1'};o.plan.request=rq;}}}catch(e){}
   return o;};
 })();
+</script>
+<script id="td1-v2294">
+/* v22.94 (DT-1 review F402, I202) the case's delay-tolerance protocol (Form DT-1) to the delay component and the thinning ladder */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{k=window.__tdDelayIn?window.__tdDelayIn((f&&f.delay)||null):0;}catch(e){}
+  if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the delay steps from Form DT-1'].filter(Boolean).join('; ')};};}
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

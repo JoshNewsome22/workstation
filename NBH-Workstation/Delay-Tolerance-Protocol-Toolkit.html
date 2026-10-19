@@ -1330,6 +1330,7 @@ td input,td select{max-width:100%}
     <div><label class="f">Caregiver trained (date, setting)</label><input type="text" name="ho_care"></div>
   </div>
   <div><label class="f">Plan written into the BIP (section and date)</label><input type="text" name="ho_bip"></div>
+  <p class="small">In the workstation this protocol goes to the case: Form TD-1's delay component takes the steps, the activity and the cue; Form QS-1 gives staff the waiting line; Form TI-1 adds the integrity steps on request; Form PR-1 puts the delay ladder on its fading sequence. Each fills only what is empty there.</p>   <!-- v22.94 (review F402) -->
 </section>
 
 <!-- ===== 9 EVIDENCE GUIDE ===== -->
@@ -2386,9 +2387,26 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
   if(C&&C.consent&&ce&&!String(ce.value||'').trim()){const kc=C.consent(f);
     if(kc.on&&(!kc.covered||C.covers('var',f))){ce.value=(kc.covered?'Analysis of specific variables (waiting practice): ':'')+kc.word+(kc.covered?'':'; the item is not listed (an older Form IC-1)');
       ce.dispatchEvent(new Event('input',{bubbles:true}));k++;got.push('the consent from Form IC-1');}}
+  /* v22.94 (review I204) the student's assent from Form SI-1, and the rule for problem behavior during the delay from Form TD-1,
+     each only where empty: Form TD-1's own words for the behavior are shown under the choice */
+  const asn=document.querySelector('[name="s_assent"]'),st=f.student;
+  if(asn&&st&&(st.assent||st.stop)&&!String(asn.value||'').trim()){const md=x=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(x||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+    const AW={given:'assent given',partial:'assent partly given',refused:'assent refused'},sp=st.stop||{};
+    asn.value=['Form SI-1'+(md(st.date)?', '+md(st.date):''),AW[st.assent]||'',sp.signs?'says stop by: '+sp.signs:'',sp.steps?'then: '+sp.steps:''].filter(Boolean).join('; ');
+    asn.dispatchEvent(new Event('input',{bubbles:true}));k++;got.push('the assent from Form SI-1');}
+  const pbd=document.querySelector('[name="pb_during"]'),rsp=f.plan&&f.plan.respond&&String(f.plan.respond.target||'').trim();
+  if(pbd&&rsp&&!pbd.value){pbd.value='As the behavior plan writes it (Form TD-1)';pbd.dispatchEvent(new Event('change',{bubbles:true}));k++;got.push('the rule for problem behavior from Form TD-1');}
+  dtPbNote(rsp||'');
   dtConsentNote();
   return {filled:n+k,note:got.join('; ')||((r&&r.note)||'')};};
 })();
+/* v22.94 (review I204) what Form TD-1 writes for the behavior, under the choice that defers to it */
+let dtTdWords='';
+function dtPbNote(words){if(words!=null)dtTdWords=words;const sel=document.querySelector('[name="pb_during"]');if(!sel)return;let p=document.getElementById('dtPbNote');
+  const on=sel.value==='As the behavior plan writes it (Form TD-1)'&&!!dtTdWords;
+  if(!p){p=document.createElement('p');p.id='dtPbNote';p.className='small';const at=sel.closest('.grid');if(!at)return;at.parentNode.insertBefore(p,at.nextSibling);}
+  p.hidden=!on;p.textContent=on?'Form TD-1 writes: '+dtTdWords:'';}
+document.addEventListener('change',e=>{if(e.target&&e.target.name==='pb_during')dtPbNote();});
 /* v22.37 (review F401) a screen-only line under the consent field while it is empty, saying why */
 function dtConsentNote(){const e=document.getElementById('dtConsentNote'),ce=document.querySelector('[name="s_consent"]');if(!e||!ce)return;
   const on=!String(ce.value||'').trim();if(e.hidden===on)e.hidden=!on;if(!on)return;
@@ -2401,6 +2419,39 @@ document.addEventListener('input',e=>{if(e.target&&e.target.name==='s_consent')d
 dtConsentNote();
 {const ra=recalcAll;recalcAll=function(){const x=ra.apply(this,arguments);applyArr(false);openAdv(true);return x;};}   /* v22.93 */
 applyArr(false);openAdv(true);
+/* v22.94 (review F402, I202) the protocol to the case, for the forms that run and review it: the arrangement, the tolerance
+   response, the cues, the share of requests honored at once, the reset rule, the activity, the session criterion and the rules
+   to advance and step back, the stop rule and what staff do about problem behavior during the delay, the ladder with the date
+   each step was met (the step in training is the first with no date), and the integrity steps written with this case's
+   details, each tagged as Form TI-1 tags a step. Nothing is sent while the protocol has neither a ladder nor a tolerance response. */
+function dtV(n){const e=document.querySelector('[name="'+n+'"]');if(!e)return '';if(e.type==='radio'){const c=document.querySelector('[name="'+n+'"]:checked');return c?c.value:'';}
+  if(e.type==='checkbox')return e.checked;return String(e.value||'').trim();}
+function dtTiItems(){const a=arrNow(),T=$$('#tbTI tr td:first-child').map(td=>td.textContent.trim()),cut=x=>String(x||'').replace(/[.\s]+$/,'');
+  const CMP=['ant','ant','ant','con','ant','con','ant','con','con','con','con',''],out=[];
+  const rule=dtV('rule_text'),tok=dtV('tok_use'),tr=dtV('tr_form'),cues=dtV('cues'),act=dtV('ia_what')||dtV('ia_type'),reset=dtV('reset'),pb=dtV('pb_during'),sd=dtV('stop_demand');
+  T.forEach((t,i)=>{let d=t;
+    if(i===1&&a==='fct')return;                                        /* no choice on the FCT path */
+    if(i===2){if(!dtV('opt_rule')&&!rule)return;if(rule)d='Antecedent rule stated verbatim: '+cut(rule);}
+    if(i===3){if(!dtV('prob_rft'))return;if(dtV('prob_ratio'))d='Immediate-reinforcement trials ('+cut(dtV('prob_ratio'))+') delivered within 2 s';}
+    if(i===4&&cues)d+=' (cues: '+cut(cues)+')';
+    if(i===5&&tr)d+=' (tolerance response: '+cut(tr)+')';
+    if(i===6&&act)d+=' ('+cut(act)+')';
+    if(i===7&&reset)d+=' ('+cut(reset)+')';
+    if(i===8&&pb)d='Problem behavior during the delay handled as written: '+cut(pb)+(sd?'; a stopped session: '+cut(sd):'');
+    if(i===10&&(!tok||tok==='None'))return;
+    out.push({d,cmp:CMP[i]||'',crit:CMP[i]==='con'});});
+  return out;}
+function dtProtocol(){const lad=rows('tbFade').map(tr=>{const x=vals(tr);return {s:num(x[0]),met:x[1]||'',note:x[2]||''};}).filter(x=>x.s!=null);
+  const tr=dtV('tr_form');if(!lad.length&&!tr)return null;
+  const a=arrNow(),AL={srpos:'Positive reinforcement, concurrent choice',srneg:'Negative reinforcement, task choice',fct:'Delay tolerance after FCT',combo:'Combined appetitive and aversive outcomes'};
+  const cur=lad.find(x=>!x.met)||null,done=lad.filter(x=>x.met),o={arrange:a,arrangeLabel:AL[a]||'',delaytype:dtV('delaytype'),tr,trCrit:dtV('tr_crit'),cues:dtV('cues'),
+    prob:dtV('prob_rft')?dtV('prob_ratio'):'',rft:dtV('rft_int'),reset:dtV('reset'),req:dtV('req_type'),activity:dtV('ia_what')||dtV('ia_type'),crit:dtV('step_crit'),
+    adv:dtV('adv_rule'),back:dtV('back_rule'),stop:dtV('stop_rule'),pbDuring:dtV('pb_during'),stopDemand:dtV('stop_demand'),ladder:lad,
+    current:cur?cur.s:null,mastered:done.length?done[done.length-1].s:null,terminal:num(dtV('fd_end')),items:dtTiItems(),src:'DT-1'};
+  return o;}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const d=dtProtocol();if(!d)return r;return Object.assign({},r||{},{delay:d});}catch(e){return r;}};}
+window.dtProtocol=dtProtocol;
 })();
 </script>
 <script>

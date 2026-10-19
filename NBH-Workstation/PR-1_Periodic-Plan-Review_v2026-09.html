@@ -3925,6 +3925,20 @@ table.pr-change{margin-top:10px}table.pr-change td.pr-chcap{font-size:12.5px;lin
 .pr-logchk{color:#8E2A2A}
 </style>
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="pr1-v2294">
+/* v22.94 (DT-1 review F402, I202) the delay-tolerance ladder Form DT-1 runs is a support being faded: one row on the fading
+   sequence (the support and its steps, DT-1's criterion and rule to advance, the date the first step was met, whether the
+   ladder is through, and where it stands), put in an empty row once; a row already naming Form DT-1 is left as written */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{const d=f&&f.delay,L=d&&Array.isArray(d.ladder)?d.ladder.filter(x=>x&&x.s!=null&&isFinite(+x.s)):[];
+    if(L.length&&!S.fade.some(x=>/Form DT-1/.test(String(x.s||'')+' '+String(x.w||'')))){const sec=v=>v>=60&&v%60===0?(v/60)+' min':v+' s',met=L.filter(x=>x.met);
+      const row={s:'Immediate delivery after a request: the wait lengthened '+L.map(x=>sec(+x.s)).join(', ')+' (Form DT-1)',c:[d.crit,d.adv].map(x=>String(x||'').trim()).filter(Boolean).join('; '),
+        d:met.length?met[0].met:'',m:met.length===L.length?'Yes':met.length?'In progress':'',
+        w:(met.length?'Last step met: '+sec(+met[met.length-1].s)+' ('+met[met.length-1].met+')':'No step met yet')+(d.current!=null?'; in training: '+sec(+d.current):'')};
+      let i=S.fade.findIndex(x=>!filledRow(x));if(i<0){S.fade.push(FADE());i=S.fade.length-1;}S.fade[i]=Object.assign(FADE(),row);renderFade();k=1;
+      const el=document.querySelector('#fadeTbl [data-d="'+i+'"][data-f="s"]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}}catch(e){}
+  if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the delay ladder from Form DT-1 on the fading sequence'].filter(Boolean).join('; ')};};}
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
