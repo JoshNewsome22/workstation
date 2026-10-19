@@ -364,7 +364,8 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     check(await page.evaluate(()=>document.querySelector('#imCareEdit [data-cd="seen"]')&&document.querySelector('#imCareEdit [data-cd="seen"]').value==='half-written note'),'the half-written entry comes back open');
     /* the CSV */
     const csv=await csvText(page);const head=(csv.split('\n')[0]||'').split('","');
-    check(head.length===23&&/How it happened/.test(head[19])&&/Second adult/.test(head[20])&&/Report question/.test(head[21])&&/assent/.test(head[22]),'CSV: the four new columns at the end, the others where they were',head.slice(17));
+    /* v22.8x (IM-1 review F450, I228) three more columns after these four: new or healing, and the High estimate's two steps */
+    check(head.length===26&&/How it happened/.test(head[19])&&/Second adult/.test(head[20])&&/Report question/.test(head[21])&&/assent/.test(head[22])&&/New or healing/.test(head[23])&&/Nurse saw the student/.test(head[24])&&/Parent or guardian told/.test(head[25]),'CSV: the four new columns at the end, the others where they were',head.slice(17));
     check(/"Noticed during required care"/.test(csv)&&/"None present: The teacher was with the class/.test(csv),'CSV: the care log is in it, with the one-adult entry marked');
     check(!/Hotline, ref T-1|a rash the nurse has charted|Yes: made|it matches after all/.test(csv)&&/"answered on \d+\/\d+\/\d+"/.test(csv),'CSV: whether the question was answered, and when; never the answer or the report');
     check(/"the check stopped: the student said no or pulled away"/.test(csv),'CSV: the check that stopped is marked');
