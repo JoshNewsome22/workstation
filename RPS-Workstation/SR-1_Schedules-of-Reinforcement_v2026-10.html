@@ -947,8 +947,11 @@ td input,td select{max-width:100%}
       <div><label>Plan this serves</label><input data-m="plan" placeholder="e.g., BIP dated 8/5/26 (Form TD-1)"></div>
       <div><label>Setting</label><input data-m="setting"></div>
       <div><label>Who runs the schedule</label><input data-m="who" placeholder="classroom teacher; aide in specials"></div>
-      <div style="grid-column:span 2"><label>Behavior the schedule is for (the response that earns, or the behavior being reduced)</label><input data-m="beh" placeholder="operational definition, or the form it is defined on"></div>
+      <div style="grid-column:span 2"><label>Behavior being reduced (DRO, DRL, NCR, FCT thinning, chained and the other reduction designs)</label><input data-m="beh" placeholder="operational definition, or the form it is defined on"></div>
       <div><label>Short name for the rule (how staff call the behavior)</label><input data-m="behs" placeholder="calling out"></div>
+      <!-- v23.11 (review F268) the response a token, ratio, interval, limited-hold, lag or interlocking design pays: never the behavior being reduced -->
+      <div style="grid-column:span 2"><label>Response that earns (token, ratio, interval, limited-hold, lag and interlocking designs)</label><input data-m="earn" placeholder="the replacement or a skill; never the behavior being reduced"></div>
+      <div><label>Short name for the response that earns</label><input data-m="earns" placeholder="a card touch"></div>
       <div><label>Alternative or replacement response (if any)</label><input data-m="alt"></div>
       <div><label>Short name for the alternative</label><input data-m="alts" placeholder="a raised hand"></div>
       <div><label>Reinforcer (from Form PA-1 or RA-1)</label><input data-m="sr"></div>
@@ -1132,7 +1135,7 @@ td input,td select{max-width:100%}
       <tr><th style="width:28%">DRO starting interval</th><td>The mean inter-response time from baseline (minutes observed &divide; occurrences), times the share chosen (75% by default): a value the student already meets most of the time (Poling &amp; Ryan, 1982; Vollmer &amp; Iwata, 1992). Steps increase the interval by the chosen percentage until the terminal value; the criterion and the step-back rule are written by the user.</td></tr>
       <tr><th>DRL limits</th><td>The first full-session limit is the baseline count scaled to the session length, rounded down to a whole number; the limits then fall in equal steps to the target share of baseline. Spaced-responding criteria start at the baseline mean IRT and lengthen by the same factor each step.</td></tr>
       <tr><th>Variable series</th><td>Fleshler and Hoffman (1962): the nth of N intervals with mean T is T[1 + ln N + (N &minus; n) ln(N &minus; n) &minus; (N &minus; n + 1) ln(N &minus; n + 1)], which keeps the probability of reinforcement nearly constant through the interval (Catania &amp; Reynolds, 1968). The arithmetic series is 2T/(N + 1), 4T/(N + 1) &hellip; 2NT/(N + 1), shuffled. Both average T. Random schedules state the probability per cycle (RI) or per response (RR) instead.</td></tr>
-      <tr><th>NCR</th><td>The first interval is the baseline mean IRT (Vollmer et al., 1993); thinning by fixed increments or by performance (Kahng et al., 2000); an omission rule guards against accidental reinforcement (Vollmer et al., 1997). The step table doubles the interval until the terminal value, which is a working convention.</td></tr>
+      <tr><th>NCR</th><td>The first interval is the baseline mean IRT (the performance-based start of Kahng et al., 2000; Vollmer et al., 1993, began with near-continuous attention); thinning by fixed increments or by performance (Kahng et al., 2000); an omission rule guards against accidental reinforcement (Vollmer et al., 1997). The step table doubles the interval until the terminal value, which is a working convention.</td></tr>
       <tr><th>Multiple-schedule thinning</th><td>S+ held constant while S&minus; is multiplied by the factor until the terminal value, after Hanley et al. (2001) and Greer et al. (2016); the criteria are the user&rsquo;s, with the chooser&rsquo;s defaults as working conventions.</td></tr>
       <tr><th>Data sheets</th><td>The card lists the data to keep; the sheets are the workstation&rsquo;s: Form DD-1 for counts, intervals and sessions (DRO intervals run and earned, DRL counts against the limit, NCR deliveries, reinforcers per session, PR breakpoints, tokens and exchanges), Form SM-1 for the interlocking session sheet, and Form MT-1 for interval samples (momentary and variable-momentary DRO checks, the S+ / S&minus; periods of a multiple schedule). The card&rsquo;s Data sheet used line names them when it is left blank.</td></tr>
       <tr><th>Token prices</th><td>Responses per back-up = tokens per back-up &times; responses per token. The designer warns when an exchange costs more than 50 responses (tokens per exchange &times; responses per token), a working convention after Bullock and Hackenberg (2006) as reported in DeLeon et al. (2013).</td></tr>
@@ -1245,12 +1248,12 @@ const CAT=[
  prog:'Deliver the reinforcer immediately after each instance of the defined response, every time, by every adult. Write the response class exactly: CRF teaches whatever gets paid, including the prompt dependence or the sloppy form that was paid along with it.',
  prod:'Fast acquisition and a high, steady rate while the reinforcer keeps its value; quick satiation with consumables; the least persistence of any schedule when reinforcement stops, with a burst and then a fast decline.',
  used:'The acquisition phase of discrete-trial teaching; the first phase of functional communication training, in which every communication response is honored before thinning begins (Carr &amp; Durand, 1985; Hagopian et al., 1998); the first phase of differential reinforcement of alternative behavior (Vollmer et al., 1999).',
- pit:'Satiation; an abrupt move to a lean schedule that looks like extinction to the learner; staff who drift to intermittent delivery without a plan, which is a variable-ratio schedule nobody designed. Lerman et al. (1996) showed that behavior with an intermittent history extinguishes more slowly, which cuts both ways.',
+ pit:'Satiation; an abrupt move to a lean schedule that looks like extinction to the learner; staff who drift to intermittent delivery without a plan, which is a variable-ratio schedule nobody designed. The basic literature finds slower extinction after intermittent reinforcement (Ferster &amp; Skinner, 1957; Catania, 2007), but Lerman et al. (1996) did not reproduce it with self-injury, so plan for persistence without counting on the history to predict it.',
  ex:'Every correct card touch earns a token; every &ldquo;break please&rdquo; earns a break, for the first week.',refs:['fs57','deleon13','carr85','hagopian98','vollmer99','lerman96']},
 {id:'ext',fam:'basic',name:'Extinction',abbr:'EXT',nota:'EXT',one:'The reinforcer that maintained the response is withheld; the response no longer pays.',
  def:'In Ferster and Skinner&rsquo;s terms, &ldquo;no responses are reinforced.&rdquo; As a treatment component it means withholding the reinforcer that the assessment identified: attention extinction, escape extinction, or sensory extinction. Iwata, Pace, Cowdery and Miltenberger (1994) showed that extinction works only when the consequence withheld is the one that maintained the behavior; planned ignoring of escape-maintained behavior is not extinction, it is a reinforcer.',
  prog:'Name the maintaining reinforcer; withhold it for every instance; keep delivering it for the alternative response (DRA) or on a time basis (NCR); write what staff do at each instance so that nobody delivers the reinforcer by accident.',
- prod:'A temporary increase in rate, magnitude or novel forms of the behavior in a minority of cases (an extinction burst), and sometimes aggression, both clearly less common when extinction is combined with reinforcement procedures than when it is used alone (Lerman &amp; Iwata, 1995; Lerman, Iwata &amp; Wallace, 1999); slower extinction after an intermittent history (Lerman et al., 1996); spontaneous recovery after a break; and resurgence of an older response when a newer one is in turn extinguished (Lieving &amp; Lattal, 2003).',
+ prod:'A temporary increase in rate, magnitude or novel forms of the behavior in a minority of cases (an extinction burst), and sometimes aggression, both clearly less common when extinction is combined with reinforcement procedures than when it is used alone (Lerman &amp; Iwata, 1995; Lerman, Iwata &amp; Wallace, 1999); slower extinction after intermittent reinforcement in the basic literature (Ferster &amp; Skinner, 1957), which Lerman et al. (1996) did not find with self-injury; spontaneous recovery after a break; and resurgence of an older response when a newer one is in turn extinguished (Lieving &amp; Lattal, 2003).',
  used:'A component of nearly every function-based treatment: FCT, DRA, DRO and NCR all include it in their usual forms. Hagopian et al. (1998) found FCT with extinction far more effective than FCT without it across 21 inpatient cases.',
  pit:'A mislabelled function; inconsistent application, which turns extinction into intermittent reinforcement and makes the behavior more persistent; bursts that endanger the student or others; behaviors whose reinforcer cannot be withheld (automatic) or must not be (a safety need).',
  ex:'Calling out no longer produces a teacher response; raising a hand does, every time, within five seconds.',refs:['fs57','iwata94','lermaniwata95','lerman99','lerman96','lieving03','hagopian98']},
@@ -1265,7 +1268,7 @@ const CAT=[
  def:'&ldquo;Similar to fixed-ratio except that reinforcements are scheduled according to a random series of ratios having a given mean and lying between arbitrary values&rdquo; (Ferster &amp; Skinner, 1957).',
  prog:'Write a list of ratios in an arithmetic progression (2, 4, 6, 8 &hellip;), shuffle it, and work through it; or use a random-ratio procedure (a die) when the exact distribution matters less. Many short ratios balanced by a few long ones maintain more behavior than a few short ones balanced by many moderate ones, even at the same mean (DeLeon et al., 2013).',
  prod:'A high, steady rate with little or no pause after reinforcement; the most persistence under extinction of the basic schedules.',
- used:'Maintenance phases after acquisition; intermittent praise that is unpredictable to the student; the random sample of periods a teacher matches in a self-monitoring system (Rhode, Morgan &amp; Young, 1983). An unplanned VR schedule from inconsistent staff responses is the usual way problem behavior becomes persistent (Lerman et al., 1996).',
+ used:'Maintenance phases after acquisition; intermittent praise that is unpredictable to the student; the random sample of periods a teacher matches in a self-monitoring system (Rhode, Morgan &amp; Young, 1983). Inconsistent staff responses make an unplanned VR schedule; whether that makes problem behavior more persistent in practice is not settled (Lerman et al., 1996).',
  pit:'A mean raised too far produces strain just as a fixed ratio does; a list that is not shuffled becomes a fixed sequence the student learns.',
  ex:'Praise after a random 2 to 6 completed items, drawn from a shuffled card deck; the mean is 4.',refs:['fs57','deleon13','rhode83','lerman96']},
 {id:'rr',fam:'basic',name:'Random ratio',abbr:'RR',nota:'RR n (p = 1/n)',one:'Each response is reinforced with a constant probability; the mean ratio is the reciprocal of that probability.',
@@ -1300,7 +1303,7 @@ const CAT=[
  def:'A modifier added to interval schedules, not a schedule on its own: once the interval has elapsed, the reinforcer is available only for t seconds, then withdrawn until the next interval (Catania, 2007; Ferster &amp; Skinner, 1957).',
  prog:'Add a window to any interval schedule: &ldquo;when the opportunity opens you have 10 seconds to respond.&rdquo;',
  prod:'Raises the rate under interval schedules, since a pause now costs reinforcers; a very short hold approaches extinction.',
- used:'Latency contingencies (respond within t of the opportunity); mand opportunities that close; the limited-hold comparison in schedule-thinning work (Hanley et al., 2001).',
+ used:'Latency contingencies (respond within t of the opportunity); mand opportunities that close (Ferster &amp; Skinner, 1957; Catania, 2007).',
  pit:'A hold shorter than the student&rsquo;s response latency; staff who extend the window informally and thereby remove it.',
  ex:'When the teacher says &ldquo;who can tell me,&rdquo; a hand raised within 5 seconds is called on; later hands are not.',refs:['catania07','fs57','hanley01']},
 {id:'pr',fam:'basic',name:'Progressive ratio (and progressive interval, progressive delay)',abbr:'PR',nota:'PR step 2 (1, 3, 5, 7 &hellip;)',one:'The response requirement grows after each reinforcer until responding stops; the last ratio completed is the breakpoint.',
@@ -1341,7 +1344,7 @@ const CAT=[
  ex:'The aide&rsquo;s timer vibrates on average every 4 minutes; at each vibration every student who is working gets a mark.',refs:['catania07','bulla17']},
 {id:'ncr',fam:'time',name:'Noncontingent reinforcement',abbr:'NCR',nota:'FT 10 s + EXT, thinned to FT 5 min',one:'The functional reinforcer is delivered on a time schedule, usually with extinction, so the behavior no longer has to produce it.',
  def:'Time-based delivery of the reinforcer identified by assessment, almost always with extinction of the problem behavior. Vollmer, Iwata, Zarcone, Smith and Mazaleski (1993) showed it as effective as DRO for attention-maintained self-injury and easier to run; Carr, Severtson and Lepper (2009) rated it empirically supported.',
- prog:'Start dense: at or below the baseline mean time between responses (Vollmer et al., 1993 began at the mean inter-response time). Thin by fixed increments or on a performance criterion; Kahng, Iwata, DeLeon and Wallace (2000) compared the two and both reached a terminal schedule with low rates. Dense schedules worked where lean ones did not (Hagopian, Fisher &amp; Legacy, 1994). Add a brief omission rule (delay the delivery a few seconds if the behavior just occurred) to avoid accidental reinforcement (Vollmer et al., 1997).',
+ prog:'Start dense: at or below the baseline mean time between responses (the performance-based start of Kahng et al., 2000; Vollmer et al., 1993, began with near-continuous attention and thinned to FT 5 min). Thin by fixed increments or on a performance criterion; Kahng, Iwata, DeLeon and Wallace (2000) compared the two and both reached a terminal schedule with low rates. Dense schedules worked where lean ones did not (Hagopian, Fisher &amp; Legacy, 1994). Add a brief omission rule (delay the delivery a few seconds if the behavior just occurred) to avoid accidental reinforcement (Vollmer et al., 1997).',
  prod:'Rapid reduction through two mechanisms: the motivating operation is abolished and the response&ndash;reinforcer relation is broken.',
  used:'Attention-, escape- and tangible-maintained behavior; automatic reinforcement with matched stimuli delivered freely.',
  pit:'It teaches no replacement; it competes with FCT if both run at once; satiation lowers the value of the reinforcer for the alternative response; thinning too fast re-establishes the motivation.',
@@ -1398,7 +1401,7 @@ const CAT=[
  ex:'Holding the squeeze ball with both hands during circle earns praise every 30 seconds.',refs:['vollmeriwata92','tarpley79']},
 {id:'fct',fam:'dr',name:'Functional communication training',abbr:'FCT (DRC)',nota:'FCT: FR 1 for FCR + EXT &rarr; thinning',one:'DRA in which the alternative is a communication response that produces the functional reinforcer.',
  def:'Carr and Durand (1985) taught children to request the reinforcer their problem behavior had produced; Tiger, Hanley and Bruzek (2008) give the practical guide. The functional communication response (FCR) is reinforced continuously at first, the problem behavior is placed on extinction, and the schedule is then thinned.',
- prog:'Pick an FCR that is low effort, easy to recognize and acceptable in every setting; teach it with prompts in the situation that evokes the problem behavior; honor every instance; thin with a signaled multiple schedule, a chained schedule or delay fading (see the applied entries). Hagopian et al. (1998): FCT with extinction reduced problem behavior by 90% or more in most cases, FCT without extinction rarely did, and some cases needed punishment added.',
+ prog:'Pick an FCR that is low effort, easy to recognize and acceptable in every setting; teach it with prompts in the situation that evokes the problem behavior; honor every instance; thin with a signaled multiple schedule, a chained schedule or delay fading (see the applied entries). Hagopian et al. (1998): FCT with extinction reduced problem behavior by 90% or more in fewer than half of the applications (11 of 25), FCT without extinction in none, and FCT with punishment in all 17; thinning cost several extinction-based cases their effect.',
  prod:'A new response that replaces the old one on the same reinforcer; durable when the thinning is signaled and gradual.',
  used:'The most widely replicated function-based treatment; Greer et al. (2016) analyzed 25 applications of thinning after FCT.',
  pit:'An FCR that is honored only sometimes without a signal (a mixed schedule); an FCR the student emits at a rate nobody can honor; thinning by delay alone, which often fails (Hagopian et al., 2011).',
@@ -1641,14 +1644,20 @@ function shuffle(a,R){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Ma
 function setDs(sel){document.body.className=document.body.className.replace(/\bds-\S+/g,'').trim()+(sel?' ds-'+sel:'');}
 function tbl(head,rows){return '<table class="rt"><thead><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>';}
 function nm(full,short,dflt){const s=(short||'').trim();if(s)return s;const f=(full||'').trim();if(!f)return dflt;const head=f.split(/[:(]/)[0].trim();return head.length>=3&&head.length<=60?head:dflt;}
+/* v23.11 (review F268) the designs that pay a response; on them the rule's response is the one that earns */
+const SR_EARN=['vi','pr','token','lh','lag','interlock'];
+const srSame=(a,b)=>{const f=x=>String(x||'').toLowerCase().replace(/\s*\(.*?\)\s*/g,' ').replace(/[^a-z]+/g,' ').trim();return !!f(a)&&f(a)===f(b);};
 function design(){
-  const m=S.meta,sel=m.ds_sel;const B=esc(nm(m.beh,m.behs,'the behavior')),A=esc(nm(m.alt,m.alts,'the request')),R_=esc(nm(m.sr,m.srs,'the reinforcer'));if(!sel)return null;const o={id:sel,title:'',nota:'',rule:'',params:[],steps:null,stepsHead:null,data:[],warn:[],notes:''};
+  const m=S.meta,sel=m.ds_sel,EARN=SR_EARN.includes(sel),E=esc(nm(m.earn,m.earns,'')||nm(m.alt,m.alts,'')||'the response that earns');
+  const B=EARN?E:esc(nm(m.beh,m.behs,'the behavior')),A=esc(nm(m.alt,m.alts,'the request')),R_=esc(nm(m.sr,m.srs,'the reinforcer'));if(!sel)return null;const o={id:sel,title:'',nota:'',rule:'',params:[],steps:null,stepsHead:null,data:[],warn:[],notes:''};
   const base=(nk,mk)=>{const n=num(m[nk]),mn=num(m[mk]);if(n==null||mn==null||n<=0||mn<=0)return null;return{n,mn,rate:n/mn,irt:mn*60/n};};
+  if(EARN){if(!String(m.earn||'').trim()&&!String(m.alt||'').trim())o.warn.push('Name the response that earns (Setup): the replacement or a skill. The behavior being reduced never earns.');
+    else if(srSame(m.earn||m.alt,m.beh)||(m.behs&&srSame(m.earns||m.alts,m.behs)))o.warn.push('<b>The response that earns is the behavior being reduced.</b> Choose the replacement or a skill: this card would strengthen the behavior the plan exists to reduce.');}
   if(sel==='dro'){
     const b=base('dro_n','dro_min'),share=(num(m.dro_share)??75)/100,step=(num(m.dro_step)??33)/100,term=(num(m.dro_term)??15)*60,type=m.dro_type||'whole',reset=m.dro_reset||'reset';
     o.title='DRO: differential reinforcement of other behavior';
     if(!b){o.warn.push('Enter the baseline count and minutes; the interval is set from the mean time between occurrences.');}
-    else{let iv=Math.max(5,Math.floor(b.irt*share/5)*5);o.nota=(type==='whole'?'DRO ':type==='mom'?'momentary DRO ':'variable-momentary DRO ')+fmtS(iv)+(reset==='reset'?' (resetting)':' (non-resetting)');
+    else{let iv=Math.max(5,Math.floor(b.irt*share/5)*5);o.nota=(type==='whole'?'DRO ':type==='mom'?'momentary DRO ':'variable-momentary DRO ')+fmtS(iv)+(type==='whole'?(reset==='reset'?' (resetting)':' (non-resetting)'):'');   /* v23.11 (review F277) resetting is a whole-interval feature (Repp, Barton & Brulle, 1983) */
       o.params.push(['Baseline rate',r1(b.rate)+' per minute'],['Baseline mean IRT',fmtS(b.irt)],['Starting interval',fmtS(iv)+' ('+Math.round(share*100)+'% of the mean IRT)'],['Type',type==='whole'?'Whole-interval: the behavior must be absent for the entire interval':type==='mom'?'Momentary: the behavior must be absent at the instant the interval ends':'Variable-momentary: checks at random times averaging the interval (range half to one and a half times)'],['Resetting',reset==='reset'?'An occurrence restarts the timer':'An occurrence loses that interval; the next starts on schedule']);
       const rows=[];let k=1,cur=iv;while(cur<term&&k<=12){rows.push([k,fmtS(cur),type==='vmom'?fmtS(cur*0.5)+' to '+fmtS(cur*1.5):'—',esc(m.dro_crit||'')]);cur=Math.round(cur*(1+step)/5)*5;k++;}rows.push([k,fmtS(term)+' (terminal)',type==='vmom'?fmtS(term*0.5)+' to '+fmtS(term*1.5):'—','hold']);
       o.stepsHead=['Step','Interval','Check times (variable-momentary)','Criterion to step up'];o.steps=rows;
@@ -1672,7 +1681,8 @@ function design(){
       else if(variant==='interval'){const nInt=Math.max(1,Math.round(sess/ivl)),perInt=perSess/nInt;const first=Math.max(1,Math.floor(perInt)),last=Math.max(0,Math.floor(perInt*target));o.nota='interval DRL &le; '+first+' per '+ivl+' min';const rows=[];for(let k=0;k<=steps;k++){rows.push([k+1,'at most '+Math.round(first-(first-last)*k/steps)+' per '+ivl+'-minute interval',esc(m.drl_crit||'')]);}o.stepsHead=['Step','Limit per interval','Criterion to step down'];o.steps=rows;
         o.rule='Divide the session into '+ivl+'-minute intervals. Count '+B+' in each. At the end of each interval with a count at or under the limit, deliver '+R_+'; an interval over the limit earns nothing and the next starts fresh.';
         o.params.push(['Baseline per interval',r1(perInt)],['Intervals per session',nInt]);o.data=['Count per interval; intervals earned per session'];}
-      else{const irt0=Math.max(2,Math.round(b.irt)),factor=Math.pow(1/target,1/steps);o.nota='DRL IRT &gt; '+irt0+' s, lengthening';const rows=[];let c=irt0;for(let k=0;k<=steps;k++){rows.push([k+1,'at least '+fmtS(Math.round(c))+' since the last response',esc(m.drl_crit||'')]);c*=factor;}o.stepsHead=['Step','Criterion IRT','Criterion to step'];o.steps=rows;
+      else{if(target<=0)o.warn.push('A target of 0% is extinction, not DRL: the spaced criterion is held at 1% of the baseline rate. Use DRO or DRA for a behavior that must stop.');   /* v23.11 (review F277) */
+        const irt0=Math.max(2,Math.round(b.irt)),factor=Math.pow(1/Math.max(target,0.01),1/steps);o.nota='DRL IRT &gt; '+irt0+' s, lengthening';const rows=[];let c=irt0;for(let k=0;k<=steps;k++){rows.push([k+1,'at least '+fmtS(Math.round(c))+' since the last response',esc(m.drl_crit||'')]);c*=factor;}o.stepsHead=['Step','Criterion IRT','Criterion to step'];o.steps=rows;
         o.rule='Time from each instance of '+B+'. An instance that comes at least the criterion time after the previous one is reinforced with '+R_+'; one that comes sooner is not, and the timer restarts from it.';
         o.params.push(['Baseline mean IRT',fmtS(b.irt)],['First criterion','the baseline mean, so about half of responses pay at first']);o.data=['Each IRT (or responses paid and unpaid per session)'];
         o.notes='Spaced-responding DRL is the form used for rapid eating (Lennox et al., 1987; Wright &amp; Vollmer, 2002). It pays the behavior, so it is for behavior that should continue at a slower pace.';}
@@ -1713,7 +1723,7 @@ function design(){
     o.title='NCR: noncontingent reinforcement';
     if(!b)o.warn.push('Enter the baseline count and minutes.');
     else{let iv=Math.max(5,Math.floor(b.irt/5)*5);o.nota=(kind==='ft'?'FT ':'VT ')+fmtS(iv)+' ('+dur+' s access) + EXT';
-      o.params.push(['Baseline mean IRT',fmtS(b.irt)],['Starting interval',fmtS(iv)+' (the baseline mean IRT, after Vollmer et al., 1993)'],['Each delivery',dur+' s of '+R_],['Omission rule','If '+B+' occurred in the last '+omit+' s, wait '+omit+' s of its absence before delivering'],['Thinning',m.ncr_thin==='perf'?'Performance-based: one step after each session at or under criterion; one step back after a session above it':'Fixed increments: one step each day the criterion holds']);
+      o.params.push(['Baseline mean IRT',fmtS(b.irt)],['Starting interval',fmtS(iv)+' (the baseline mean IRT, as in Kahng et al., 2000)'],['Each delivery',dur+' s of '+R_],['Omission rule','If '+B+' occurred in the last '+omit+' s, wait '+omit+' s of its absence before delivering'],['Thinning',m.ncr_thin==='perf'?'Performance-based: one step after each session at or under criterion; one step back after a session above it':'Fixed increments: one step each day the criterion holds']);
       if(kind==='vt'){const L=shuffle(fhSeries(iv,10),rng(Math.round(num(m.vi_seed)??7)*7919));o.params.push(['Intervals at the starting interval (Fleshler–Hoffman, shuffled)','<div class="series">'+L.map(fmtS).join(', ')+'</div>']);}   /* v22.60 (Bancroft & Bourret, 2008) */
       const rows=[];let k=1,cur=iv;while(cur<term&&k<=12){rows.push([k,fmtS(cur),esc(m.ncr_crit||'')]);cur=Math.round(cur*2/5)*5;k++;}rows.push([k,fmtS(term)+' (terminal)','hold']);o.stepsHead=['Step','Interval','Criterion to step'];o.steps=rows;
       o.rule='Set the timer to '+(kind==='vt'?'the next interval on the list ('+fmtS(iv)+' on average; at each later step, multiply every value by that step\'s interval over '+fmtS(iv)+')':fmtS(iv))+'. When it rings, deliver '+dur+' seconds of '+R_+' whatever the student is doing, unless '+B+' happened in the last '+omit+' seconds, in which case wait for '+omit+' seconds without it, then deliver. '+B+' itself never produces '+R_+'.';
@@ -1770,6 +1780,15 @@ function design(){
     o.params.push(['Interval schedule',esc(m.lh_sched||'')],['Hold',hold+' s'],['Opportunity signaled by',esc(m.lh_sig||'')]);
     o.rule='Run the interval schedule. When an interval elapses, signal the opportunity ('+(m.lh_sig||'')+'). If '+B+' occurs within '+hold+' seconds, deliver '+R_+'; if not, the opportunity closes and the next interval starts.';
     o.data=['Opportunities offered, taken within the hold, and missed'];o.notes='A hold shorter than the student&rsquo;s latency is extinction with a name; measure latency first.';}
+  /* v23.11 (review F271) a reduction card says how the replacement is reinforced, or says it names none (Vollmer & Iwata, 1992) */
+  if(['dro','drl','ncr'].includes(sel)&&o.rule){if(String(m.alt||'').trim()){o.rule+=' <b>The replacement:</b> answer '+A+' at once with '+R_+', every time; it does not change the timer or the count.';o.data.push('Instances of '+A+' per session');}
+    else o.warn.push('No replacement response is named: this card is '+sel.toUpperCase()+' alone. Name the alternative from Form TB-1 or GB-1 (DRA), so the student learns what to do instead.');}
+  /* v23.11 (review F277) the card promises steps on the data: say so when the step criterion or the step-back rule is blank */
+  {const C={dro:['dro_crit','dro_back'],drl:['drl_crit'],ncr:['ncr_crit'],thin:['th_crit','th_back']}[sel],W={crit:'the criterion to step up',back:'the step-back rule'};
+   const miss=C&&o.steps?C.filter(k=>!String(m[k]||'').trim()).map(k=>W[k.split('_')[1]]):[];
+   if(miss.length)o.warn.push('Write '+miss.join(' and ')+' before printing the card: the card says steps are taken on the data.');}
+  /* v23.11 (review F269) a thinning, chained, NCR or DRO schedule for a social function delivers the functional reinforcer */
+  if(['thin','chain','ncr','dro'].includes(sel)&&SR_FSR[m.func]&&/\(Forms? PA-1/.test(m.sr||''))o.warn.push('This schedule should deliver the functional reinforcer ('+esc(SR_FSR[m.func].replace(/ \(the function, Form FS-1\)$/,''))+'); the PA-1 items go in \u201cDuring S\u2212 the student has\u201d.');
   if(sel==='lag'){const n=Math.max(1,Math.round(num(m.lag_n)??1));o.title='Lag schedule';o.nota='Lag '+n;
     o.params.push(['Response class',esc(m.lag_class||'')],['Different means',esc(m.lag_diff||'')],['Never paid',esc(m.lag_never||'')]);
     o.rule='Keep a running list of the last '+n+' '+(m.lag_class||'responses')+'. A response that differs from all '+n+' earns '+R_+'; a repeat of any of them earns nothing. '+(m.lag_never?'Never pay: '+m.lag_never+'.':'');
@@ -1796,13 +1815,16 @@ function renderCard(){
   if(!o){out.innerHTML='<p class="hint">Design a schedule first; the card is written from it.</p>';return;}
   const bl='<span class="bl"></span>';
   let h='<div class="c-title">'+esc(m.cd_title||((m.client||'Student')+': '+o.title))+'</div><div class="c-nota">'+o.nota+'</div>'+
-    '<div class="c-grid"><div><b>Student:</b> '+esc(m.client||'')+'</div><div><b>Setting:</b> '+esc(m.setting||'')+'</div><div><b>Run by:</b> '+esc(m.who||'')+'</div><div><b>Date:</b> '+esc(m.date||'')+'</div><div><b>Behavior:</b> '+esc(m.beh||'')+'</div>'+(m.alt?'<div><b>Replacement:</b> '+esc(m.alt)+'</div>':'')+'<div><b>Reinforcer:</b> '+esc(m.sr||'')+'</div>'+(m.func?'<div><b>Function:</b> '+esc(m.func)+'</div>':'')+'</div>';
+    '<div class="c-grid"><div><b>Student:</b> '+esc(m.client||'')+'</div><div><b>Setting:</b> '+esc(m.setting||'')+'</div><div><b>Run by:</b> '+esc(m.who||'')+'</div><div><b>Date:</b> '+esc(m.date||'')+'</div>'+(SR_EARN.includes(o.id)?'<div><b>Response that earns:</b> '+esc(m.earn||m.alt||'')+'</div>':'<div><b>Behavior:</b> '+esc(m.beh||'')+'</div>')+(m.alt&&!(SR_EARN.includes(o.id)&&(!String(m.earn||'').trim()||srSame(m.earn,m.alt)))?'<div><b>Replacement:</b> '+esc(m.alt)+'</div>':'')+'<div><b>Reinforcer:</b> '+esc(m.sr||'')+'</div>'+(m.func?'<div><b>Function:</b> '+esc(m.func)+'</div>':'')+'</div>';
   h+='<h3>The rule</h3><div class="rule">'+o.rule+'</div>';
   if(o.params.length)h+='<h3>Settings</h3><table class="ct">'+o.params.map(p=>'<tr><th style="width:30%">'+p[0]+'</th><td>'+p[1]+'</td></tr>').join('')+'</table>';
   if(o.steps){const dated=o.stepsHead[0]==='Step';/* a step table gets a Date reached column; the PR breakpoints, the token prices and the interlocking minutes do not */
     h+='<h3>'+(o.id==='pr'?'Breakpoints':o.id==='token'?'Back-ups':o.id==='interlock'?'Requirement by minute':'Steps')+'</h3><table class="ct"><tr>'+o.stepsHead.map(x=>'<th>'+x+'</th>').join('')+(dated?'<th style="width:14%">Date reached</th>':'')+'</tr>'+o.steps.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+(dated?'<td></td>':'')+'</tr>').join('')+'</table>';}
   h+='<h3>Data to keep</h3><ul>'+o.data.map(d=>'<li>'+d+'</li>').join('')+'<li>On: '+(m.cd_data?esc(m.cd_data):sheetFor(o))+'</li></ul>';
-  h+='<h3>What never happens</h3><ul><li>'+esc(nm(m.beh,m.behs,'The behavior'))+' is never argued with, lectured about, or given the reinforcer by accident; if it happens, the rule above says exactly what to do.</li><li>The schedule is not changed by anyone during the day; steps are taken on the data, by the person named on the plan.</li><li>Nothing already earned is taken away.</li></ul>';
+  h+='<h3>What never happens</h3><ul><li>'+esc(nm(m.beh,m.behs,'The behavior'))+' is never argued with, lectured about, or given the reinforcer by accident; if it happens, the rule above says exactly what to do.</li><li>The schedule is not changed by anyone during the day; steps are taken on the data, by the person named on the plan.</li><li>Nothing already earned is taken away.</li>'
+    /* v23.11 (review F272) the work goes on, but no one holds the student to it: for escape, and always on a chained schedule */
+    +((o.id==='chain'||(m.func==='Escape or avoidance'&&['thin','ncr','dro','drl'].includes(o.id)))?'<li><b>No one holds the student, guides hand over hand, blocks a doorway or stands over the desk to keep the work in place.</b> If the student leaves or the behavior becomes dangerous, the crisis plan (Form CR-1) takes over and the session is recorded as not run.'
+      +(srCrisis.length?' The crisis plan\u2019s stages: '+srCrisis.map(esc).join('; ')+'.':'')+'</li>':'')+'</ul>';
   if(o.warn.length)h+='<h3>Cautions</h3><ul>'+o.warn.map(w=>'<li>'+w+'</li>').join('')+'</ul>';
   h+='<div class="c-foot"><div>Step in force today: '+bl+' &nbsp; Initials: '+bl+'</div><div>Review: '+esc(m.cd_review||'')+' &nbsp; BCBA: '+esc(m.bcba||'')+'<br><span style="font-size:10.5px;color:#444">Form SR-1</span></div></div>';
   out.innerHTML=h;
@@ -1864,22 +1886,36 @@ renderAll();
 
 /* v21.31 the case: hooks. The schedule's behavior, its short name, the alternative response, the
    function and the reinforcer come from the case when their fields are empty; the picker replaces them. */
+/* v23.11 (review F269) the reinforcer a schedule for a social function delivers is the functional one (a break, attention, the item);
+   PA-1's items go to S- (competing items) instead. (F272) the crisis plan's stages, for the escape line on the card. */
+const SR_FSR={'Attention':'adult attention: comments, praise, someone close (the function, Form FS-1)','Escape or avoidance':'a break from the task (the function, Form FS-1)','Tangible':'the item or activity the behavior gets (the function, Form FS-1)'};
+let srCrisis=[];
 window.__nbhFactsIn=function(f){
-  const m=S.meta;let n=0;const b=(f.behaviors||[])[0],a=((f.goals&&f.goals.acq)||[])[0];
+  const m=S.meta;let n=0;const B0=(f.behaviors||[]),b=B0.find(x=>x&&!x.isRep&&!/replacement|alternative/i.test(x.type||''))||B0[0],a=((f.goals&&f.goals.acq)||[])[0];
+  try{srCrisis=((f.crisis&&f.crisis.stages)||[]).map(x=>String(x&&(x.s||x.name)||x||'').trim()).filter(Boolean).slice(0,6);}catch(e){srCrisis=[];}
   if(b){if(!m.beh){m.beh=nbhCase.line(b,true);n++;}if(!m.behs){m.behs=b.label;n++;}if(!m.alt&&b.rep){m.alt=b.rep;n++;}}
   const rp=(f.behaviors||[]).find(x=>x.isRep);
   if(!m.alt&&(a||rp)){m.alt=a?a.beh:rp.label;n++;}
+  /* v23.11 (review F268) the response that earns: the replacement, or the first skill goal; never a reduction target */
+  if(!m.earn&&(rp||a)){m.earn=rp?rp.label:a.beh;n++;}
   if(!m.func&&f.fn){const v=nbhCase.optionFor(document.querySelector('[data-m="func"]'),f.fn.key||f.fn.label);if(v){m.func=v;n++;}}
   /* v22.79 (review F134): the menu by the shared rule (nbhCase.menuItems): an item Form RA-1 found no effect for is left out, one it confirmed stays */
-  if(!m.sr&&(f.menu||[]).length){const ln=nbhCase.menuLine((nbhCase.menuItems?nbhCase.menuItems(f):f.menu),3);if(ln){m.sr=ln+(f.reinf?' (Forms PA-1, RA-1)':' (Form PA-1)');n++;}}
+  {const ln=(f.menu||[]).length?nbhCase.menuLine((nbhCase.menuItems?nbhCase.menuItems(f):f.menu),3):'',tag=f.reinf?' (Forms PA-1, RA-1)':' (Form PA-1)';
+   if(SR_FSR[m.func]){if(!m.sr){m.sr=SR_FSR[m.func];n++;}if(ln&&!m.th_comp){m.th_comp=ln+tag;n++;}}
+   else if(!m.sr&&ln){m.sr=ln+tag;n++;}}
   if(n)renderAll();return {filled:n};
 };
+/* v23.11 (review F276) the card's review date on the workstation's due list */
+window.__nbhDue=function(){const v=String(S.meta.cd_review||'').trim();return /\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)?[{what:'Schedule card review',date:v}]:[];};
 window.__nbhFactsPick=function(sel){
   const m=S.meta;let n=0;const b=sel.behaviors[0],a=sel.goals.acq[0];
   if(b){m.beh=nbhCase.line(b,true);m.behs=b.label;if(b.rep)m.alt=b.rep;n++;}
   if(a){m.alt=a.beh;n++;}
+  if(a||(b&&b.rep)){m.earn=a?a.beh:b.rep;n++;}   /* v23.11 (review F268) */
   if(sel.fn){const v=nbhCase.optionFor(document.querySelector('[data-m="func"]'),sel.fn.key||sel.fn.label);if(v){m.func=v;n++;}}
-  if(sel.menu.length){m.sr=sel.menu.map(x=>x.name).join(', ')+' (Form PA-1)';m.srs=sel.menu[0].name;n++;}
+  /* v23.11 (review F269) for a social function the picked items are the competing items; the reinforcer stays the functional one */
+  if(sel.menu.length){const ln=sel.menu.map(x=>x.name).join(', ')+' (Form PA-1)';
+    if(SR_FSR[m.func]){m.th_comp=ln;if(!String(m.sr||'').trim()||/\(Forms? PA-1/.test(m.sr))m.sr=SR_FSR[m.func];}else{m.sr=ln;m.srs=sel.menu[0].name;}n++;}
   renderAll();return {filled:n};
 };
 </script>
@@ -1905,7 +1941,7 @@ window.__nbhFactsPick=function(sel){
     grade :['[data-m="grade"]','[name="s_grade"]','[name="m.grade"]','[name="s.grade"]',
             '[name="c.grade"]','[name="h.grade"]','#sGrade','#mGrade','#cGrade','#hGrade',
             '#m_grade'],
-    site  :['[data-m="site"]','[name="s_site"]','[data-m="setting"]','[data-meta="setting"]',
+    site  :['[data-m="site"]','[name="s_site"]','[data-meta="setting"]',
             '[name="m.setting"]','[name="s.site"]','[name="s.school"]','[name="c.setting"]',
             '[name="h.setting"]','#h-location','#m_school','#mSetting','#sSchool','#cSetting',
             '#hSetting','#m_site'],

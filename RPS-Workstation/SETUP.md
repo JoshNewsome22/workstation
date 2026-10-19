@@ -9903,6 +9903,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.11: SR-1 pays the response that earns, delivers the functional reinforcer, says how the replacement is reinforced and that no one holds the student, corrects three citations, and puts the card's review date on the due list (review Wave 3)
+
+- **The response that earns (F268).** Setup has a new field, "Response that earns", with a short name. It sits apart from
+  the behavior being reduced.
+  - The token, ratio, interval, limited-hold, lag and interlocking designs write their rule about that response. Left
+    blank, they use the replacement.
+  - The card prints "Response that earns" on those designs and "Behavior" on the reduction designs.
+  - A design with no response that earns, or with the behavior being reduced as that response, is warned.
+  - From the case, the replacement or the first skill goal fills the field. A reduction target never does.
+- **The functional reinforcer (F269).** For an attention, escape or tangible function, the reinforcer filled from the case is
+  the functional one: attention, a break, or the item.
+  - PA-1's items go to "During S- the student has" (the competing items) instead.
+  - A thinning, chained, NCR or DRO schedule for a social function that still delivers PA-1 items is warned.
+  - An automatic function keeps PA-1's items as the reinforcer.
+- **The replacement on reduction cards (F271).** A DRO, DRL or NCR card now says the replacement is answered at once,
+  every time, and that it does not change the timer or the count. Its count is added to the data to keep.
+  - With no replacement named, the card is warned as DRO, DRL or NCR alone.
+- **No one holds the student (F272).** An escape-function thinning, NCR, DRO or DRL card, and every chained card, says:
+  - no one holds the student, guides hand over hand, blocks a doorway or stands over the desk;
+  - if the student leaves or the behavior becomes dangerous, the crisis plan (Form CR-1) takes over and the session is
+    recorded as not run.
+  - The crisis plan's stages are named when the case has them.
+- **Citations (F273-F275).**
+  - **Hagopian et al. (1998):** FCT with extinction reached 90% reduction in 11 of 25 applications, not "most cases".
+  - **Lerman et al. (1996):** did not find slower extinction after intermittent reinforcement with self-injury. The
+    basic finding is credited to Ferster and Skinner (1957).
+  - **The first NCR interval:** credited to Kahng et al. (2000). The limited-hold line no longer cites Hanley et al.
+    (2001).
+- **Due list and Setting (F276).** The card's review date now appears on the workstation's due list. The packet's school
+  no longer lands in Setting.
+- **Edge cases in the designers (F277).**
+  - Momentary DRO is no longer called resetting.
+  - A spaced DRL target of 0% is warned as extinction, and the steps stay finite.
+  - A blank step criterion or step-back rule is named before the card prints.
+- qa/sr1-w3-test.js (11 checks).
+
 ### v23.10: TD-1 prints the specialist planners only when they are used, and fills the staff-training table from ST-1's record (review Wave 3)
 
 - **The planners off paper while unused (F187).** The high-probability sequence planner and the arranging and ordering
