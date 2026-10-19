@@ -1,4 +1,4 @@
-/* v22.7x Form DM-1, review Wave 3: the home language, the interpreter need and the rights-holder reach Form IC-1, which says
+/* v23.09 Form DM-1, review Wave 3: the home language, the interpreter need and the rights-holder reach Form IC-1, which says
    when its consent does not match the family's language (F1); the medication start and last-change dates reach Forms MS-1 and
    RR-1 (F3); the status answers carry the date they were confirmed, follow the forms that hold the facts, and the workstation
    says "as of" when it repeats them (F4); Packet Contents follows the workstation's form list and ticks the forms the case holds

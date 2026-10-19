@@ -6209,7 +6209,7 @@ function ddGcMarks(F,rows){const cw=ddCaseFacts&&ddCaseFacts.classwide;const C=c
     out+=`<g class="dd-gc"><line x1="${x}" y1="${y}" x2="${x}" y2="${y+9}" stroke="#6B4FA0" stroke-width="2"/><rect x="${(+x-w/2).toFixed(1)}" y="${y+10}" width="${w.toFixed(1)}" height="12" rx="2" fill="#fff" fill-opacity=".85"/><text x="${x}" y="${y+19.5}" font-size="9.5" font-weight="600" fill="#6B4FA0" text-anchor="middle">${esc(lab)}<\/text><title>Form GC-1: ${esc((cw.arrangement||"the class-wide system")+(k===0?" began":c.ph==="4"?" retired (probes only)":", phase "+c.ph)+" on "+shortDay(c.date)+(c.crit!=null?" (criterion "+c.crit+(cw.unit?" "+cw.unit:"")+")":""))}<\/title><\/g>`;});
   return out;}
 {const fr1=ddFrame;ddFrame=function(rows){const F=fr1.apply(this,arguments);try{F.condLines+=ddGcMarks(F,rows);}catch(e){}return F;};}
-/* v22.7x (review I4, Form DM-1): each medication change Form DM-1 records (profile.health.changes) marked on the graphs: a
+/* v23.09 (review I4, Form DM-1): each medication change Form DM-1 records (profile.health.changes) marked on the graphs: a
    dotted rust line through the plot on the day of the change, labelled at its foot ("Rx Risperidone up"), its tooltip saying
    what changed. A change before the first plotted day is not drawn. They are marks, not conditions */
 function ddMedChanges(){const h=ddCaseFacts&&ddCaseFacts.profile&&ddCaseFacts.profile.health;return h&&Array.isArray(h.changes)?h.changes.filter(c=>c&&c.med&&ddIsoOk(c.date)):[];}

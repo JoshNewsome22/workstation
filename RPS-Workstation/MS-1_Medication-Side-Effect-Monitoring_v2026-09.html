@@ -1623,6 +1623,9 @@ restore({counts:{}});
    generic or brand name, else entered as Other with the name as prescribed; a card is added up to the form's 6), the
    prescriber, the health conditions and allergies as the medical history, and the first target behavior of Form TB-1
    as the BIP target tracked alongside, each only where the field is empty; then the shared fill. */
+const msMDY=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||'').trim());return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(v||'').trim();};
+function msDates(i,m){let k=0;const put=(f,v)=>{const e=document.querySelector(`[name="md[${i}].${f}"]`);if(e&&v&&!String(e.value||'').trim()){e.value=v;k++;}};
+ const ch=m.change||m.chg;put('start',msMDY(m.start));put('change',ch?msMDY(ch)+' (Form DM-1)':'');return k;}   /* v23.09 m.chg as well, the key Form MS-1's review proposed */
 const msTok=s=>String(s||'').toLowerCase().split(/[^a-z]+/).filter(w=>w.length>2&&!/^(er|xr|cr|sr|la|xl|otc|and|enter|manually|other)$/.test(w));
 const msLib=name=>{const t=msTok(name)[0];if(!t)return -1;return MEDS.findIndex((x,k)=>k<MEDS.length-1&&(msTok(x.n).includes(t)||msTok(x.b).includes(t)));};
 window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note:''};let n=0,last=null;
@@ -1640,15 +1643,16 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
  medsIn.forEach(m=>{let i=$$('#medWrap .card').map(c=>+c.dataset.med).find(emptyCard);
   if(i==null){const e=$('#nMed');if(+e.value>=+e.max)return;e.value=+e.value+1;renderMeds();i=+e.value-1;}
   const k=msLib(m.name);setv(`md[${i}].lib`,String(k>=0?k:MEDS.length-1));if(k<0)setv(`md[${i}].name`,String(m.name).trim());renderMedInfo(i);
-  setv(`md[${i}].dose`,[m.dose,m.times].filter(x=>String(x||'').trim()).join(', '));last=document.querySelector(`[name="md[${i}].dose"]`);n++;});
- /* v23.08 (review F444): each medication's start and last-change dates from Form DM-1 (m.start, m.chg), into a card's empty
-    boxes, so the EPS schedule runs from them; DM-1 does not send them yet (proposed in the notes) */
- const dm=x=>{x=String(x||'').trim();const i=/^(\d{4})-(\d{2})-(\d{2})$/.exec(x);return i?(+i[2])+'/'+(+i[3])+'/'+i[1]:x;};let dated=0;
- (Array.isArray(H.meds)?H.meds:[]).forEach(m=>{if(!m||!String(m.name||'').trim())return;const t=msTok(m.name)[0];if(!t)return;
-  const card=$$('#medWrap .card').map(c=>+c.dataset.med).find(i=>msTok(medTitle(i)).includes(t));if(card==null)return;
-  [['start',m.start],['change',m.chg||m.change]].forEach(([k,v])=>{if(String(v||'').trim()&&!val(`md[${card}].${k}`)){setv(`md[${card}].${k}`,dm(v));last=document.querySelector(`[name="md[${card}].${k}"]`);dated++;}});});
- if(dated)renderScreenDue();
- if(last){renderGrid(true);renderReport();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+  setv(`md[${i}].dose`,[m.dose,m.times].filter(x=>String(x||'').trim()).join(', '));last=document.querySelector(`[name="md[${i}].dose"]`);n++;
+  msDates(i,m);});
+ /* v23.09 (review F3) the start and last-change dates Form DM-1 records go into a card's empty Start date and Last change boxes,
+    for the medications just placed and for a card already holding the same medication */
+ (Array.isArray(H.meds)?H.meds:[]).forEach(m=>{if(!m||!String(m.name||'').trim()||medsIn.includes(m))return;const t=msTok(m.name)[0];
+  const i=$$('#medWrap .card').map(c=>+c.dataset.med).find(k=>{const nm=(medList().find(x=>x.i===k)||{}).name||'';return nm&&(nm.trim().toLowerCase()===String(m.name).trim().toLowerCase()||(t&&msTok(nm)[0]===t));});
+  const k=i!=null?msDates(i,m):0;if(k){n+=k;last=last||document.querySelector(`[name="md[${i}].start"]`);}});
+ if(last){renderGrid(true);renderReport();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
+  /* v23.09 (review F3) a start date just filled gives the screening schedule its date to work from */
+  renderScreenDue();}
  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
  return {filled:n+dated+(g&&g.filled||0),note:n?(n>(roi?1:0)?'Medications, prescriber and history from Form DM-1':'')+(roi?(n>1?'; ':'')+'the release date from Form IC-1':''):(dated?'the medications\u2019 start and change dates from Form DM-1':'')};};
 /* v23.08 (review F445) the case: out, and what is due. Due (read by the workstation's due list): the AIMS screens the plan

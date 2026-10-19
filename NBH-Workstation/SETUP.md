@@ -9903,6 +9903,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.09: DM-1 hands the family's language, the rights-holder and the medication dates to the forms that need them, dates its status answers, and builds Packet Contents from the workstation (review Wave 3)
+
+- **Consent in the family's language (F1).** The case carries who holds educational rights and who signs, in Form IC-1's
+  words. IC-1 takes the home language with the interpreter need, and the signer's relationship and name, into its empty
+  fields. Beside the language and beside the signatures, it says when no interpreter in the family's language is
+  recorded, or when the interpreter's language is not the family's.
+- **Medication dates (F3).** Each medication's start and last-change dates go with the case. Forms MS-1 and RR-1 fill them
+  in, and MS-1's screening schedule works from the start date.
+- **Status answers carry a date (F4).** The BIP status, the crisis plan and the photo permission have an "As of" date, set
+  when a person changes them.
+  - An intake answer (No, No BIP, Pending) follows the case: CR-1's crisis plan, TD-1's adopted plan, IC-1's consent. It
+    is dated and written to the change log; nothing else typed is changed.
+  - The workstation says "as of" when it repeats them. After 90 days, the hand-over check asks for them to be confirmed
+    on DM-1.
+- **Packet Contents from the workstation (F5).** The rows follow the workstation's own form list. The forms this case
+  holds work on are ticked In file and marked "in this case". Files saved before keep their ticks.
+- **Who may be told what (F6).** A contact's "May be told about" replaces "Permission to discuss". The behavior and the
+  plan may be shared only under a dated release, recorded on the card; otherwise the card says "Logistics only".
+- **The rights at 18 (F7, I2).** The IEP statement, the notice at 18 and how decisions will be made have their own fields.
+  The steps still open go to the due list and the calendar. **Draft the letter on the rights at 18** drafts the letter to
+  the family for the ESE contact.
+- **The cover reads the case (I1).** In the workstation, the packet sheet shows what the case holds (forms, the BIP's
+  adoption, the crisis plan, the consent, the student's assent) beside DM-1's own answers, read that day, with any
+  difference marked.
+- **Family facts on the bar (I3).** The folded bar and the case summary give the home language, the interpreter need, the
+  rights-holder and the signer.
+- **Medication changes on the graph (I4).** Every change is dated in a table under the medications, and Form DD-1 marks
+  each one on its graphs.
+- **A disclosure log (I5).** The packet sheet logs each disclosure of the behavior record: what, to whom, why, and what
+  allowed it.
+- **Smaller fixes:**
+  - the rights-holder list has a foster parent and a person acting as parent (F2);
+  - the bar's BCBA lands in the team table's BCBA row and goes back to the bar (F9);
+  - typing "parent report" takes back a code the form filled (F10).
+- qa/dm1-w3-test.js (35 checks).
+
 ### v23.08: MS-1 checks the release before a report goes out, acts on a red flag as it is rated, counts only the days observed, moves measured items to the vitals sheet, and gives raters a one-page brief (review Wave 3)
 
 - **The report checks the release.** With no release-of-information date on the plan, the report says, at the top and

@@ -1867,9 +1867,9 @@ function paintSum(){
   const f=state.facts,bits=[];
   if(f){if((f.behaviors||[]).length)bits.push(f.behaviors.length+(f.behaviors.length===1?' target behavior':' target behaviors'));if(f.fn&&(f.fn.key||f.fn.label))bits.push('function: '+(f.fn.key||f.fn.label));
     const g=f.goals||{},gn=(g.red||[]).length+(g.acq||[]).length;if(gn)bits.push(gn+(gn===1?' goal':' goals'));if((f.menu||[]).length)bits.push(f.menu.length+' reinforcers');
-    const fl=f.profile&&f.profile.flags;if(fl){if((fl.safety||[]).length)bits.push('safety: '+fl.safety.join(', ').toLowerCase());if(fl.photo==='No')bits.push('no photo permission'+dmAsOf(fl,'photo',true));const crHas=!!(f.crisis&&(f.crisis.stages||[]).length);   /* v22.7x (review F4) */
+    const fl=f.profile&&f.profile.flags;if(fl){if((fl.safety||[]).length)bits.push('safety: '+fl.safety.join(', ').toLowerCase());if(fl.photo==='No')bits.push('no photo permission'+dmAsOf(fl,'photo',true));const crHas=!!(f.crisis&&(f.crisis.stages||[]).length);   /* v23.09 (review F4) */
       if(/outdated/i.test(fl.crisis||''))bits.push('crisis plan outdated'+dmAsOf(fl,'crisis',true));else if(fl.crisis==='No'&&!crHas)bits.push('no crisis plan'+dmAsOf(fl,'crisis',true));}
-    {const fam=dmFamily(f,false);if(fam.length)bits.push('family: '+fam.join('; '));}}   /* v22.7x (review I3) */
+    {const fam=dmFamily(f,false);if(fam.length)bits.push('family: '+fam.join('; '));}}   /* v23.09 (review I3) */
   $('#sumCase').textContent=bits.length?'The case: '+bits.join(', '):'';
   row.hidden=!document.body.classList.contains('bar-folded');
   if(typeof paintPhoto==='function')paintPhoto();
@@ -2265,7 +2265,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.08';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.09';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2635,7 +2635,7 @@ function paintFacts(){
     const crHas=!!(f.crisis&&(f.crisis.stages||[]).length);
     if(/outdated/i.test(fl.crisis||''))parts.push('<b>Crisis plan outdated</b>'+esc(dmAsOf(fl,'crisis')));else if(fl.crisis==='No')parts.push(crHas?'<b>DM-1 still says no crisis plan; Form CR-1 holds one</b>'+esc(dmAsOf(fl,'crisis')):'<b>No crisis plan</b>'+esc(dmAsOf(fl,'crisis')));
     if(parts.length)bits.push('<span class="flag">'+parts.join(' &nbsp;&middot;&nbsp; ')+'</span> <i>('+esc(s.profile||'DM-1')+')</i>');}
-  /* v22.7x (review I3) the family facts Form DM-1 holds: the home language and the interpreter need, who holds the rights, who signs */
+  /* v23.09 (review I3) the family facts Form DM-1 holds: the home language and the interpreter need, who holds the rights, who signs */
   {const fam=dmFamily(f,true);if(fam.length)bits.push('<b>Family:</b> '+esc(fam.join(' \u00b7 '))+' <i>('+esc(s.profile||'DM-1')+')</i>');}
   if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
   if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
@@ -2684,7 +2684,7 @@ window.addEventListener('message',ev=>{
   if(d.nbh==='ask'){relay(ev,d);return;}
   if(d.nbh==='open'){openFor(ev,d);return;}   /* v21.43 Form TK-1 or TE-1 opening its partner; at openFor() */
   if(d.nbh==='send-facts'){sendFactsFor(ev);return;}   /* v21.63 Form TB-1's Send the targets button */
-  /* v22.7x (review F5) Form DM-1's Packet Contents asks for the workstation's form list and which forms this case holds work on
+  /* v23.09 (review F5) Form DM-1's Packet Contents asks for the workstation's form list and which forms this case holds work on
      (a form loaded or waiting in the case with more than four fields filled, as the rail ticks it); only an open form is answered */
   if(d.nbh==='forms?'){if(!relayFrom(ev.source))return;const L=ALL.map(([fid,title])=>{const st=state.status[fid]||(state.pending[fid]||{}).status;return [fid,title,!!(st&&st.filled>4)];});
     try{ev.source.postMessage({nbh:'forms-list',forms:L},'*');}catch(e){}return;}
@@ -5339,10 +5339,10 @@ async function clearCase(){
 }
 /* ================= v21.75 Today, the end of the week, the hand-over check =================
    Read from the case as the open forms give it (state.facts) and from what is due (state.due). Nothing here is kept. */
-/* v22.7x (review F4) a status answer Form DM-1 repeats here (the crisis plan, the photo permission, the BIP) carries the date it
+/* v23.09 (review F4) a status answer Form DM-1 repeats here (the crisis plan, the photo permission, the BIP) carries the date it
    was last confirmed there (profile.flags.asOf): it is said "as of" that date, and after 90 days (a working convention) the
    hand-over check asks for it to be confirmed again */
-/* v22.7x (review I3) the family facts Form DM-1 holds, as the bar and the case summary say them (DM-1 is the source; the bar only
+/* v23.09 (review I3) the family facts Form DM-1 holds, as the bar and the case summary say them (DM-1 is the source; the bar only
    repeats it): the home language with the interpreter need and its kind, who holds the educational rights, and who signs (in Form
    IC-1's words; with the signer's name when named is true) */
 function dmFamily(f,named){const pf=(f&&f.profile)||{},L=pf.language||{},R=pf.rights||{},out=[],k=/Interpreter:\s*([^;]+)/.exec(String(L.notes||''));
@@ -5405,7 +5405,7 @@ function handoverItems(){const f=state.facts||{},fl=f.profile&&f.profile.flags,L
   if(f.plan&&!f.crisis)L.push({t:'A plan with no crisis plan: Form CR-1 is not in the case',open:'CR-1'});
   if(fl&&fl.crisis==='No'&&f.crisis&&(f.crisis.stages||[]).length)L.push({t:'Form DM-1 still records no crisis plan, but Form CR-1 holds one: update DM-1\u2019s crisis-plan status',open:'DM-1'});   /* v22.29 (F465) */
   else if(fl&&(fl.crisis==='No'||/outdated/i.test(fl.crisis||'')))L.push({t:'Form DM-1 records the crisis plan as '+(fl.crisis==='No'?'missing':'outdated')+esc(dmAsOf(fl,'crisis')),open:'CR-1'});
-  /* v22.7x (review F4) DM-1's status answers last confirmed more than 90 days ago are named to confirm again */
+  /* v23.09 (review F4) DM-1's status answers last confirmed more than 90 days ago are named to confirm again */
   if(fl){const old=[['crisis','the crisis plan',fl.crisis],['photo','the photo permission',fl.photo],['bip','the BIP status',fl.bip]].filter(([k,,v])=>v&&dmDays(fl.asOf&&fl.asOf[k])>dmStale());
     if(old.length)L.push({t:'Confirm on Form DM-1: '+old.map(([k,w])=>w+esc(dmAsOf(fl,k))).join('; '),open:'DM-1'});}
   /* v22.29 (review F467) an objective GB-1 has not finished (a box still empty) is named, not printed as if written */
@@ -6127,7 +6127,7 @@ function calEvents(f){const E=[],add=(date,what,form)=>{const s=String(date||'')
   (cr.deadlines||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Notice')+' (restraint or seclusion)','CR-1'));
   (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Injury follow-up'),'IM-1'));
   if(f.prefs)add(f.prefs.reassess,'Preference reassessment','PA-1');add(ad.start,'Plan starts','TD-1');
-  /* v22.7x (review I2) the steps of the rights at 18 Form DM-1 still has open (the 17th and 18th birthdays) */
+  /* v23.09 (review I2) the steps of the rights at 18 Form DM-1 still has open (the 17th and 18th birthdays) */
   ((pf.rights||{}).timeline||[]).forEach(x=>{if(x)add(x.due,String(x.what||'Rights at 18'),'DM-1');});
   ((f.home||{}).sheets||[]).filter(s=>s&&s.due&&!s.back).forEach(s=>add(s.due,'Home sheet back: '+(s.name||'sheet'),'HD-1'));
   return E;}

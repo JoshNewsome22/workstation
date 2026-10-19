@@ -1867,7 +1867,9 @@ function paintSum(){
   const f=state.facts,bits=[];
   if(f){if((f.behaviors||[]).length)bits.push(f.behaviors.length+(f.behaviors.length===1?' target behavior':' target behaviors'));if(f.fn&&(f.fn.key||f.fn.label))bits.push('function: '+(f.fn.key||f.fn.label));
     const g=f.goals||{},gn=(g.red||[]).length+(g.acq||[]).length;if(gn)bits.push(gn+(gn===1?' goal':' goals'));if((f.menu||[]).length)bits.push(f.menu.length+' reinforcers');
-    const fl=f.profile&&f.profile.flags;if(fl){if((fl.safety||[]).length)bits.push('safety: '+fl.safety.join(', ').toLowerCase());if(fl.photo==='No')bits.push('no photo permission');if(/outdated/i.test(fl.crisis||''))bits.push('crisis plan outdated');else if(fl.crisis==='No')bits.push('no crisis plan');}}
+    const fl=f.profile&&f.profile.flags;if(fl){if((fl.safety||[]).length)bits.push('safety: '+fl.safety.join(', ').toLowerCase());if(fl.photo==='No')bits.push('no photo permission'+dmAsOf(fl,'photo',true));const crHas=!!(f.crisis&&(f.crisis.stages||[]).length);   /* v23.09 (review F4) */
+      if(/outdated/i.test(fl.crisis||''))bits.push('crisis plan outdated'+dmAsOf(fl,'crisis',true));else if(fl.crisis==='No'&&!crHas)bits.push('no crisis plan'+dmAsOf(fl,'crisis',true));}
+    {const fam=dmFamily(f,false);if(fam.length)bits.push('family: '+fam.join('; '));}}   /* v23.09 (review I3) */
   $('#sumCase').textContent=bits.length?'The case: '+bits.join(', '):'';
   row.hidden=!document.body.classList.contains('bar-folded');
   if(typeof paintPhoto==='function')paintPhoto();
@@ -2263,7 +2265,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.08';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.09';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2628,11 +2630,13 @@ function paintFacts(){
   if(f.profile)bits.push('<b>Profile</b> <i>('+esc(s.profile||'')+')</i>');
   /* v21.68 Form DM-1's flags: the safety precautions ticked, no photo/media permission, a crisis plan outdated or missing */
   const fl=f.profile&&f.profile.flags;
-  if(fl){const parts=[];if((fl.safety||[]).length)parts.push('<b>Safety:</b> '+esc(fl.safety.join(', ')));if(fl.photo==='No')parts.push('<b>No photo/media permission</b>');
+  if(fl){const parts=[];if((fl.safety||[]).length)parts.push('<b>Safety:</b> '+esc(fl.safety.join(', ')));if(fl.photo==='No')parts.push('<b>No photo/media permission</b>'+esc(dmAsOf(fl,'photo')));
     /* v22.29 (review F465) DM-1's "No" is typed at intake and never follows CR-1: once CR-1 holds a plan, the line says DM-1 is out of date */
     const crHas=!!(f.crisis&&(f.crisis.stages||[]).length);
-    if(/outdated/i.test(fl.crisis||''))parts.push('<b>Crisis plan outdated</b>');else if(fl.crisis==='No')parts.push(crHas?'<b>DM-1 still says no crisis plan; Form CR-1 holds one</b>':'<b>No crisis plan</b>');
+    if(/outdated/i.test(fl.crisis||''))parts.push('<b>Crisis plan outdated</b>'+esc(dmAsOf(fl,'crisis')));else if(fl.crisis==='No')parts.push(crHas?'<b>DM-1 still says no crisis plan; Form CR-1 holds one</b>'+esc(dmAsOf(fl,'crisis')):'<b>No crisis plan</b>'+esc(dmAsOf(fl,'crisis')));
     if(parts.length)bits.push('<span class="flag">'+parts.join(' &nbsp;&middot;&nbsp; ')+'</span> <i>('+esc(s.profile||'DM-1')+')</i>');}
+  /* v23.09 (review I3) the family facts Form DM-1 holds: the home language and the interpreter need, who holds the rights, who signs */
+  {const fam=dmFamily(f,true);if(fam.length)bits.push('<b>Family:</b> '+esc(fam.join(' \u00b7 '))+' <i>('+esc(s.profile||'DM-1')+')</i>');}
   if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
   if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
   if(f.data)bits.push('<b>Data:</b> '+(f.data.days|0)+' school day'+((f.data.days|0)===1?'':'s')+' <i>('+esc(s.data||'')+')</i>');
@@ -2680,6 +2684,10 @@ window.addEventListener('message',ev=>{
   if(d.nbh==='ask'){relay(ev,d);return;}
   if(d.nbh==='open'){openFor(ev,d);return;}   /* v21.43 Form TK-1 or TE-1 opening its partner; at openFor() */
   if(d.nbh==='send-facts'){sendFactsFor(ev);return;}   /* v21.63 Form TB-1's Send the targets button */
+  /* v23.09 (review F5) Form DM-1's Packet Contents asks for the workstation's form list and which forms this case holds work on
+     (a form loaded or waiting in the case with more than four fields filled, as the rail ticks it); only an open form is answered */
+  if(d.nbh==='forms?'){if(!relayFrom(ev.source))return;const L=ALL.map(([fid,title])=>{const st=state.status[fid]||(state.pending[fid]||{}).status;return [fid,title,!!(st&&st.filled>4)];});
+    try{ev.source.postMessage({nbh:'forms-list',forms:L},'*');}catch(e){}return;}
   if(d.nbh==='gid'){if(!Object.values(state.frames).some(f=>f.contentWindow===ev.source))return;const g=String(d.v||'').trim();   /* v21.98 a key given on Form DD-1 */
     if(/\.apps\.googleusercontent\.com$/.test(g))kvSet('nbh.google.client',g);else if(!g)kvDel('nbh.google.client');gidToForms();return;}
   if(d.nbh==='people-open'){if(Object.values(state.frames).some(f=>f.contentWindow===ev.source))pplOpen();return;}   /* v22.35 a form's Edit the staff directory */
@@ -5330,6 +5338,21 @@ async function clearCase(){
 }
 /* ================= v21.75 Today, the end of the week, the hand-over check =================
    Read from the case as the open forms give it (state.facts) and from what is due (state.due). Nothing here is kept. */
+/* v23.09 (review F4) a status answer Form DM-1 repeats here (the crisis plan, the photo permission, the BIP) carries the date it
+   was last confirmed there (profile.flags.asOf): it is said "as of" that date, and after 90 days (a working convention) the
+   hand-over check asks for it to be confirmed again */
+/* v23.09 (review I3) the family facts Form DM-1 holds, as the bar and the case summary say them (DM-1 is the source; the bar only
+   repeats it): the home language with the interpreter need and its kind, who holds the educational rights, and who signs (in Form
+   IC-1's words; with the signer's name when named is true) */
+function dmFamily(f,named){const pf=(f&&f.profile)||{},L=pf.language||{},R=pf.rights||{},out=[],k=/Interpreter:\s*([^;]+)/.exec(String(L.notes||''));
+  if(L.home)out.push(String(L.home)+(L.interpreter===true?', interpreter needed'+(k?' ('+k[1].trim()+')':''):''));else if(L.interpreter===true)out.push('interpreter needed');
+  if(R.holder)out.push('rights: '+String(R.holder).replace(/\s*\(.*\)$/,''));
+  if(R.signer)out.push('signs: '+String(R.signer).replace(/\s*\(.*\)$/,'')+(named&&R.name?' ('+R.name+')':''));
+  return out;}
+function dmStale(){return 90;}   /* function declarations: the bar's summary can be painted before this part of the script has run */
+function dmDays(iso){return /^\d{4}-\d\d-\d\d$/.test(String(iso||''))?Math.round((Date.now()-new Date(iso+'T12:00:00').getTime())/864e5):null;}
+function dmAsOf(fl,k,short){const d=fl&&fl.asOf&&fl.asOf[k],n=dmDays(d);if(n==null)return '';const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d),w=(+m[2])+'/'+(+m[3])+(short?'':'/'+m[1]);
+  return ' (as of '+w+(n>dmStale()&&!short?', '+n+' days ago':'')+')';}
 const tdMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
 function tdDays(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));if(!m)return null;const t=new Date();t.setHours(0,0,0,0);return Math.round((t-new Date(+m[1],+m[2]-1,+m[3]))/864e5);}
 function tdSchoolDays(iso){const n=tdDays(iso);if(n===null||n<=0)return 0;let k=0;const t=new Date();t.setHours(12,0,0,0);for(let i=0;i<n;i++){const wd=t.getDay();if(wd&&wd!==6)k++;t.setDate(t.getDate()-1);}return k;}
@@ -5380,10 +5403,13 @@ function handoverItems(){const f=state.facts||{},fl=f.profile&&f.profile.flags,L
   if(!(f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length)))L.push({t:'No goals written (Form GB-1)',open:'GB-1'});
   if(f.plan&&!f.crisis)L.push({t:'A plan with no crisis plan: Form CR-1 is not in the case',open:'CR-1'});
   if(fl&&fl.crisis==='No'&&f.crisis&&(f.crisis.stages||[]).length)L.push({t:'Form DM-1 still records no crisis plan, but Form CR-1 holds one: update DM-1\u2019s crisis-plan status',open:'DM-1'});   /* v22.29 (F465) */
-  else if(fl&&(fl.crisis==='No'||/outdated/i.test(fl.crisis||'')))L.push({t:'Form DM-1 records the crisis plan as '+(fl.crisis==='No'?'missing':'outdated'),open:'CR-1'});
+  else if(fl&&(fl.crisis==='No'||/outdated/i.test(fl.crisis||'')))L.push({t:'Form DM-1 records the crisis plan as '+(fl.crisis==='No'?'missing':'outdated')+esc(dmAsOf(fl,'crisis')),open:'CR-1'});
+  /* v23.09 (review F4) DM-1's status answers last confirmed more than 90 days ago are named to confirm again */
+  if(fl){const old=[['crisis','the crisis plan',fl.crisis],['photo','the photo permission',fl.photo],['bip','the BIP status',fl.bip]].filter(([k,,v])=>v&&dmDays(fl.asOf&&fl.asOf[k])>dmStale());
+    if(old.length)L.push({t:'Confirm on Form DM-1: '+old.map(([k,w])=>w+esc(dmAsOf(fl,k))).join('; '),open:'DM-1'});}
   /* v22.29 (review F467) an objective GB-1 has not finished (a box still empty) is named, not printed as if written */
   const unf=gbUnfinished(f.goals);if(unf.length)L.push({t:unf.length+(unf.length===1?' objective is':' objectives are')+' unfinished on Form GB-1: '+esc(unf.map(u=>u.which+' ('+u.missing.join(', ')+' missing)').join('; ')),open:'GB-1'});
-  if(state.photo&&fl&&fl.photo==='No')L.push({t:'The student’s photo is on the case, but Form DM-1 records no photo or media permission: take it off before the case is handed on (the photo button on the bar)',open:''});
+  if(state.photo&&fl&&fl.photo==='No')L.push({t:'The student’s photo is on the case, but Form DM-1 records no photo or media permission'+esc(dmAsOf(fl,'photo'))+': take it off before the case is handed on (the photo button on the bar)',open:''});
   if(f.data&&(f.data.incidentList||[]).some(i=>!incTold(f,i)))L.push({t:'Incidents home has not been told about (Form DD-1’s incident log)',open:'DD-1'});
   return L;}
 async function handoverOpen(){await gatherFacts(false);const L=handoverItems();
@@ -6100,6 +6126,8 @@ function calEvents(f){const E=[],add=(date,what,form)=>{const s=String(date||'')
   (cr.deadlines||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Notice')+' (restraint or seclusion)','CR-1'));
   (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Injury follow-up'),'IM-1'));
   if(f.prefs)add(f.prefs.reassess,'Preference reassessment','PA-1');add(ad.start,'Plan starts','TD-1');
+  /* v23.09 (review I2) the steps of the rights at 18 Form DM-1 still has open (the 17th and 18th birthdays) */
+  ((pf.rights||{}).timeline||[]).forEach(x=>{if(x)add(x.due,String(x.what||'Rights at 18'),'DM-1');});
   ((f.home||{}).sheets||[]).filter(s=>s&&s.due&&!s.back).forEach(s=>add(s.due,'Home sheet back: '+(s.name||'sheet'),'HD-1'));
   return E;}
 const clInitials=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/).filter(Boolean);return w.length?w.map(x=>x[0].toUpperCase()+'.').join(' '):'Student';};
