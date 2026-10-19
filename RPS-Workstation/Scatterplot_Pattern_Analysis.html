@@ -782,6 +782,7 @@ table.rank td.n{text-align:center;width:46px}
   .cite{margin-top:10px;padding-top:6px;font-size:10px}
   td.time{font-size:10px}
   td.dateline input:not([data-filled]){color:transparent}
+  td.dateline .sp-pdate{display:block;text-align:center;padding:3px 0;font-family:var(--sans);font-size:max(9px,var(--datefs,10.5px));font-variant-numeric:tabular-nums;white-space:nowrap}
   thead th{font-size:10px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
@@ -2274,6 +2275,10 @@ function staticClone(node){
       const o = b.options[a.selectedIndex]; if(o) o.setAttribute("selected","selected");
     }else if(a.tagName === "TEXTAREA"){
       b.textContent = a.value;
+    }else if(a.type === "date" && b.closest("td.dateline")){
+      /* v23.05 fix: on paper the day's date is text (10/5/26), never under 6 pt; the date box printed the ISO form at 5.6 pt */
+      const d = parseISO(a.value), t = document.createElement("span");t.className = "sp-pdate";
+      t.textContent = d ? (d.getMonth()+1) + "/" + d.getDate() + "/" + String(d.getFullYear()).slice(2) : "";b.replaceWith(t);
     }else b.setAttribute("value", a.value);
   }
   clone.querySelectorAll(".noprint,.readout").forEach(e => e.remove());
