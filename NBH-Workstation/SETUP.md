@@ -9903,6 +9903,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.78: PA-1's competing items reach the plan, its trials carry a stop rule, and the hierarchy is cut from the items assessed (review Wave 3)
+
+- **The competing items go to the plan (F118).** Each item the competing stimulus assessment tested carries its verdict to
+  the case. Form TD-1's preferred-stimuli line now starts with the competing items (HC first, then HC with prompting, then HC
+  with disruption, each with its reduction), and its environmental-enrichment and competing-stimulus cards take them. An item
+  under which the behavior rose above its control level is left out of every form that takes the menu, and TD-1 says why; a
+  low-preference item that competed stays. PA-1's Summary prints the competing items for the plan.
+- **A safety plan for the trials (F119).** The competing stimulus sheet has the session termination criteria, medical
+  clearance, supervision and an assent line, as Form EA-1 has. The runner shows the stop rule and the assent line while a
+  trial runs; **Assent withdrawn** ends a trial at once, and each trial stopped early is written under **Trials stopped
+  early**. Behavior at TB-1 urgency 3 or 4 with no clearance says the safety plan is incomplete. The case fills the assent line
+  from Form SI-1 and the criteria from EA-1.
+- **Thirds of the items assessed (F121).** The composite is cut into thirds of the items with data, not of the pool; with
+  fewer than three assessed, or under half the pool, it is not tiered, and the case carries no HP, MP or LP.
+- **The Leif et al. criterion counts intervals (F122).** With the behavior per minute it makes no item HC, and the two
+  selects no longer offer the pair. The re-test table is scored by the criterion chosen on the sheet.
+- **Protective equipment in a school (F124).** The blocking form states the mechanical-restraint rule (s. 1003.573, F.S.;
+  Form CR-1); equipment opens who recommended it, when, and the parent's agreement, and running the blocking condition with
+  equipment and no recommendation is flagged.
+- **From the case (F123).** The target behavior, the hypothesis source (EA-1's result), the subtype and the purpose fill
+  empty fields; a social function in the case is noted on the sheet.
+- **Smaller fixes.** The fit reads Incomplete until all seven attributes are rated (F125); one engagement tag, High
+  engagement, beside the category (F126); the walkthrough's competing-stimulus numbers match the sheet (F127).
+- **Session fidelity (I61).** Six ticks on each direct-method sheet; the runner ticks what it times; Form TI-1 can take them
+  as its steps.
+- **A stale menu is flagged (I62).** A form that took the menu shows one line when an item is marked Shifted on PA-1's
+  Monitoring sheet or the reassessment date has passed.
+- **A page for the family (I65).** The Summary prints one page in plain words, English or Spanish headings, no name; have the
+  interpreter translate the typed text before it goes home.
+
+- qa/pa1-w3-test.js (27 checks).
+
 ### v22.77: the whole packet checked before each release, and a check in the print window (review I242, I241)
 
 - **The master print is checked before every release (I242).** A new release check builds the master print as it is built

@@ -2421,7 +2421,7 @@ if(window.NBHLink){
   function ranked(menu){
     var seen = {};
     return (Array.isArray(menu) ? menu : []).filter(function(m){
-      if (!m || !tr(m.name) || !isRanked(m) || m.tier === 'LP' || m.contra) return false;   /* v22.7x (review F118): the behavior rose with a contra item on PA-1's competing stimulus assessment */
+      if (!m || !tr(m.name) || !isRanked(m) || m.tier === 'LP' || m.contra) return false;   /* v22.78 (review F118): the behavior rose with a contra item on PA-1's competing stimulus assessment */
       var k = nm(m.name); if (seen[k]) return false; seen[k] = 1; return true;
     }).sort(function(a, b){ return (+a.rank) - (+b.rank); });
   }
@@ -2515,7 +2515,7 @@ if(window.NBHLink){
       else if (!cur && !c && (behsOf(f).length || acqOf(f).length)) notes.push('the case names no replacement or skill for the behavior the tokens are earned for');
     }
     if (Array.isArray(f.menu) && f.menu.length) {
-      if (window.nbhCase) nbhCase.menuUsed = true;   /* v22.7x (review I62): a stale menu is flagged here */
+      if (window.nbhCase) nbhCase.menuUsed = true;   /* v22.78 (review I62): a stale menu is flagged here */
       var items = ranked(f.menu), was = sigBk();
       if (S.bk.every(rowEmpty)) {
         if (items.length) { fill.len = S.bk.length; items.forEach(put); fill.bk = sigBk(); n += items.length; rows = true; }

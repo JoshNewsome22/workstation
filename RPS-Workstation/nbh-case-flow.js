@@ -60,7 +60,9 @@
   C.goals = function(){ var g = (C.facts && C.facts.goals) || {}; return { red: g.red || [], acq: g.acq || [] }; };
   C.menu = function(){ return (C.facts && C.facts.menu) || []; };
   C.line = function(b, withDef){ if (!b) return ''; return withDef && b.def ? (b.label + ': ' + b.def) : (b.label || ''); };
-  C.menuLine = function(items, n){ return (items || []).filter(function(m){ return m.tier !== 'LP'; }).slice(0, n || 5).map(function(m){ return m.name; }).join(', '); };
+  /* v22.78 (review F118): an item marked contra (the behavior rose with it on PA-1's competing stimulus assessment) is never
+     offered; a low-preference item C.menuItems kept (RA-1 confirmed it, or it competed on the CSA) stays */
+  C.menuLine = function(items, n){ C.menuUsed = true; return (items || []).filter(function(m){ return m && !m.contra && (m.tier !== 'LP' || m.keep); }).slice(0, n || 5).map(function(m){ return m.name; }).join(', '); };
   C.has = function(f){ f = f || C.facts; return !!(f && ((f.behaviors && f.behaviors.length) || (f.fn && (f.fn.key || f.fn.label)) ||
     (f.goals && ((f.goals.red || []).length || (f.goals.acq || []).length)) || (f.menu && f.menu.length))); };
   /* the fields the packet map names: the first behavior and the function, when the field is empty */
@@ -105,7 +107,33 @@
        listed) goes into a form's empty parent name box (IC-1's consent); a text box only */
     try { var hm = f.profile && f.profile.home, pb = document.querySelectorAll('input[name="c.parent"]');
       if (hm && hm.name) for (var pi = 0; pi < pb.length; pi++) { if (!/^(text|)$/.test(pb[pi].type || '') && pb[pi].type !== 'text') continue; if (!String(pb[pi].value || '').trim()) { pb[pi].value = hm.name; pb[pi].dispatchEvent(new Event('input', { bubbles: true })); pb[pi].dispatchEvent(new Event('change', { bubbles: true })); if (rep && typeof rep.filled === 'number') rep.filled++; } } } catch(e) {}
-    C.last = rep; C.paint(); try { C.paintConsent0(); } catch(e) {} holdEnd(hv); return rep;
+    C.last = rep; C.paint(); try { C.paintConsent0(); } catch(e) {} try { C.paintStale(); } catch(e) {} holdEnd(hv); return rep;
+  };
+  /* v22.78 (review I62) a stale reinforcer menu: on a form that took PA-1's menu (C.menuUsed, set by menuItems and menuLine), one
+     line when an item on it is marked Shifted on PA-1's Monitoring sheet or the reassessment date has passed; Watch is not
+     flagged. Screen only, under the toolbar. */
+  function mdOf(d){ var m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(String(d || '')); return m ? (+m[2]) + '/' + (+m[3]) : String(d || ''); }
+  C.menuStale = function(f){
+    f = f || C.facts || {}; var m = Array.isArray(f.menu) ? f.menu : [], p = f.prefs || {}, t = new Date();
+    if (!m.length) return '';
+    var today = t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2);
+    var sh = m.filter(function(x){ return x && x.name && x.mon && x.mon.status === 'Shifted'; }), od = !!(p.reassess && /^\d{4}-\d\d-\d\d$/.test(p.reassess) && p.reassess < today);
+    if (!sh.length && !od) return '';
+    var bits = ['Reinforcer menu: ranked ' + (p.last ? mdOf(p.last) + ' ' : '') + 'on Form PA-1'];
+    if (sh.length) bits.push(sh.map(function(x){ return x.name; }).join(', ') + ' marked Shifted on PA-1' + (sh[0].mon.date ? ' on ' + mdOf(sh[0].mon.date) : ''));
+    if (od) bits.push('reassessment overdue since ' + mdOf(p.reassess));
+    return bits.join('; ') + '. Check the menu with the BCBA before using ' + (sh.length ? (sh.length > 1 ? 'those items' : 'that item') : 'it') + '.';
+  };
+  C.paintStale = function(){
+    var b = q('#nbhStaleMenu'), t = C.menuUsed ? C.menuStale() : '';
+    if (!t) { if (b) b.hidden = true; return; }
+    if (!b) {
+      var host = q('.toolbar') || q('.nbh-actions'); if (!host || !host.parentNode) return;
+      b = document.createElement('div'); b.id = 'nbhStaleMenu'; b.className = 'noprint'; b.setAttribute('role', 'status');
+      b.style.cssText = 'border-left:4px solid #9b4e15;background:#fbf1e3;color:#3a2a1c;padding:6px 12px;margin:6px auto;max-width:8.5in;box-sizing:border-box;font-size:13px;line-height:1.45';
+      host.parentNode.insertBefore(b, host.nextSibling);
+    }
+    b.hidden = false; b.textContent = t;
   };
 
   /* ---- the toolbar group and the picker ---- */
@@ -363,16 +391,22 @@
   /* v22.59 the reinforcer menu a form offers from the case: PA-1's items without its low-preference third, except that an
      item Form RA-1 confirmed as a reinforcer stays whatever its preference (Roscoe, Iwata, & Kahng, 1999, found that
      low-preference stimuli often worked as reinforcers when delivered alone), and an item RA-1 found no reinforcing effect
-     for is left out. Each item kept carries RA-1's verdict as ra; the list's gone names the items left out for it. */
+     for is left out. Each item kept carries RA-1's verdict as ra; the list's gone names the items left out for it.
+     v22.78 (review F118): PA-1's competing stimulus assessment rides on each item (m.csa): an item under which the behavior
+     rose above its control level (m.contra) is left out too, and a low-preference item that reached the criterion (HC) stays,
+     marked keep. goneWhy says why each was left out ('ra' or 'csa'); competing lists the HC items, for an automatic function. */
   C.menuItems = function(f){
-    f = f || {}; var T = function(x){ return String(x == null ? '' : x).trim(); }, ra = {}, out = [], gone = [];
+    f = f || {}; var T = function(x){ return String(x == null ? '' : x).trim(); }, ra = {}, out = [], gone = [], why = {}, comp = [];
+    C.menuUsed = true;   /* v22.78 (review I62): this form takes the menu, so a stale menu is flagged on it */
     ((f.reinf && f.reinf.items) || []).forEach(function(x){ if (x && T(x.name)) ra[T(x.name).toLowerCase()] = T(x.verdict); });
     (Array.isArray(f.menu) ? f.menu : []).forEach(function(m){
-      if (!m || !T(m.name)) return; var v = ra[T(m.name).toLowerCase()] || '';
-      if (v === 'Not supported') { gone.push(T(m.name)); return; }
-      if (m.tier === 'LP' && v !== 'Confirmed') return;
-      var o = {}; for (var k in m) o[k] = m[k]; o.ra = v; out.push(o); });
-    out.gone = gone; return out;
+      if (!m || !T(m.name)) return; var v = ra[T(m.name).toLowerCase()] || '', hc = !!(m.csa && /^HC/.test(m.csa.verdict || ''));
+      if (hc && !m.contra) comp.push(m);
+      if (m.contra) { gone.push(T(m.name)); why[T(m.name)] = 'csa'; return; }
+      if (v === 'Not supported') { gone.push(T(m.name)); why[T(m.name)] = 'ra'; return; }
+      if (m.tier === 'LP' && v !== 'Confirmed' && !hc) return;
+      var o = {}; for (var k in m) o[k] = m[k]; o.ra = v; if (m.tier === 'LP') o.keep = v === 'Confirmed' ? 'ra' : 'csa'; out.push(o); });
+    out.gone = gone; out.goneWhy = why; out.competing = comp; return out;
   };
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */

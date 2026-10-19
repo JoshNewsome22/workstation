@@ -60,7 +60,7 @@
   C.goals = function(){ var g = (C.facts && C.facts.goals) || {}; return { red: g.red || [], acq: g.acq || [] }; };
   C.menu = function(){ return (C.facts && C.facts.menu) || []; };
   C.line = function(b, withDef){ if (!b) return ''; return withDef && b.def ? (b.label + ': ' + b.def) : (b.label || ''); };
-  /* v22.7x (review F118): an item marked contra (the behavior rose with it on PA-1's competing stimulus assessment) is never
+  /* v22.78 (review F118): an item marked contra (the behavior rose with it on PA-1's competing stimulus assessment) is never
      offered; a low-preference item C.menuItems kept (RA-1 confirmed it, or it competed on the CSA) stays */
   C.menuLine = function(items, n){ C.menuUsed = true; return (items || []).filter(function(m){ return m && !m.contra && (m.tier !== 'LP' || m.keep); }).slice(0, n || 5).map(function(m){ return m.name; }).join(', '); };
   C.has = function(f){ f = f || C.facts; return !!(f && ((f.behaviors && f.behaviors.length) || (f.fn && (f.fn.key || f.fn.label)) ||
@@ -109,7 +109,7 @@
       if (hm && hm.name) for (var pi = 0; pi < pb.length; pi++) { if (!/^(text|)$/.test(pb[pi].type || '') && pb[pi].type !== 'text') continue; if (!String(pb[pi].value || '').trim()) { pb[pi].value = hm.name; pb[pi].dispatchEvent(new Event('input', { bubbles: true })); pb[pi].dispatchEvent(new Event('change', { bubbles: true })); if (rep && typeof rep.filled === 'number') rep.filled++; } } } catch(e) {}
     C.last = rep; C.paint(); try { C.paintConsent0(); } catch(e) {} try { C.paintStale(); } catch(e) {} holdEnd(hv); return rep;
   };
-  /* v22.7x (review I62) a stale reinforcer menu: on a form that took PA-1's menu (C.menuUsed, set by menuItems and menuLine), one
+  /* v22.78 (review I62) a stale reinforcer menu: on a form that took PA-1's menu (C.menuUsed, set by menuItems and menuLine), one
      line when an item on it is marked Shifted on PA-1's Monitoring sheet or the reassessment date has passed; Watch is not
      flagged. Screen only, under the toolbar. */
   function mdOf(d){ var m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(String(d || '')); return m ? (+m[2]) + '/' + (+m[3]) : String(d || ''); }
@@ -392,12 +392,12 @@
      item Form RA-1 confirmed as a reinforcer stays whatever its preference (Roscoe, Iwata, & Kahng, 1999, found that
      low-preference stimuli often worked as reinforcers when delivered alone), and an item RA-1 found no reinforcing effect
      for is left out. Each item kept carries RA-1's verdict as ra; the list's gone names the items left out for it.
-     v22.7x (review F118): PA-1's competing stimulus assessment rides on each item (m.csa): an item under which the behavior
+     v22.78 (review F118): PA-1's competing stimulus assessment rides on each item (m.csa): an item under which the behavior
      rose above its control level (m.contra) is left out too, and a low-preference item that reached the criterion (HC) stays,
      marked keep. goneWhy says why each was left out ('ra' or 'csa'); competing lists the HC items, for an automatic function. */
   C.menuItems = function(f){
     f = f || {}; var T = function(x){ return String(x == null ? '' : x).trim(); }, ra = {}, out = [], gone = [], why = {}, comp = [];
-    C.menuUsed = true;   /* v22.7x (review I62): this form takes the menu, so a stale menu is flagged on it */
+    C.menuUsed = true;   /* v22.78 (review I62): this form takes the menu, so a stale menu is flagged on it */
     ((f.reinf && f.reinf.items) || []).forEach(function(x){ if (x && T(x.name)) ra[T(x.name).toLowerCase()] = T(x.verdict); });
     (Array.isArray(f.menu) ? f.menu : []).forEach(function(m){
       if (!m || !T(m.name)) return; var v = ra[T(m.name).toLowerCase()] || '', hc = !!(m.csa && /^HC/.test(m.csa.verdict || ''));

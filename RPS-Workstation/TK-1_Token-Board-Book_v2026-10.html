@@ -5095,7 +5095,8 @@ function caseTargets(behaviors,acq,taken){const groups=[],out=[];let dup=0,skip=
   return {list:out,dup,skip};}
 window.__nbhFactsIn=function(f){let n=0;const empty=a=>a.every(o=>!has(o)&&!o.l);
   if(empty(S.tg)){caseTargets(f.behaviors,f.goals&&f.goals.acq,[]).list.slice(0,6).forEach((w,i)=>{S.tg[i]=cellFor(w);n++;});}
-  if(empty(S.ch)&&(f.menu||[]).length){f.menu.slice().sort((a,b)=>(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).slice(0,6).forEach((x,i)=>{S.ch[i]=cellFor(x.name);n++;});}
+  if((f.menu||[]).length&&window.nbhCase)nbhCase.menuUsed=true;   /* v22.78 (review I62): a stale menu is flagged here */
+  if(empty(S.ch)&&(f.menu||[]).length){f.menu.filter(x=>x&&!x.contra).sort((a,b)=>(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).slice(0,6).forEach((x,i)=>{S.ch[i]=cellFor(x.name);n++;});}   /* v22.78 (review F118): never a contra item */
   if(n)renderAll();return {filled:n,note:n?undefined:'the case holds no replacement behavior, objective or reinforcer menu yet'};};
 /* (v21.43) the Targets page holds skills and replacement behaviors only: a problem behavior goes in as its named replacement
    (or not at all), and a reduction goal never; the note says what was left out and why */

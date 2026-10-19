@@ -1,4 +1,4 @@
-/* v22.7x Form PA-1, review Wave 3: the competing stimulus verdicts go to the case and the plan forms (F118); the trials carry a
+/* v22.78 Form PA-1, review Wave 3: the competing stimulus verdicts go to the case and the plan forms (F118); the trials carry a
    stop rule, medical clearance, supervision and an assent line, with Assent withdrawn in the runner (F119); the composite thirds
    are thirds of the items assessed (F121); the Leif et al. criterion only with % of intervals, and the re-test scored by the
    same test (F122); protective equipment and the mechanical-restraint rule (F124); the CSA sheet fills from the case and notes
