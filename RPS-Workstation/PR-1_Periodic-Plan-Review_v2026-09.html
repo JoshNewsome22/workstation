@@ -1031,7 +1031,7 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Used independently</th><td><select data-m="repInd"><option></option>
         <option>Yes, across settings and people</option><option>Yes, but only with trained staff</option>
         <option>Yes, but only in one setting</option><option>Prompted only</option><option>Not yet</option></select></td>
-        <th style="width:18%">Current schedule</th><td><textarea data-m="repSched" placeholder="e.g., 90 s delay, mult schedule" rows="1" class="pr-line"></textarea></td></tr>
+        <th style="width:18%">Current schedule</th><td><textarea data-m="repSched" placeholder="e.g., 90 s delay, mult schedule" rows="1" class="pr-line"></textarea><div class="hint noprint" id="prSchedSrc" hidden></div></td></tr>
       <tr><th>Terminal schedule intended</th><td><textarea data-m="repTerm" rows="1" class="pr-line"></textarea></td>
         <th>Distance still to travel</th><td><textarea data-m="repGap" rows="1" class="pr-line"></textarea></td></tr>
       <tr><th>Relapse at challenges so far (Form RM-1)</th><td colspan="3"><textarea data-m="relapse" rows="1" class="pr-line"></textarea></td></tr>
@@ -3680,6 +3680,17 @@ td > textarea.nbh-cell:focus{background:var(--wash,#EEF3F2);outline:none}
   .nbh-pm.nbh-pm-inl{display:inline-block;vertical-align:baseline}
 }
 </style>
+<script id="pr1-v2312">
+/* v23.12 (review F326) the terminal schedule from Form SR-1's design and the relapse line from Form RM-1, each into its row when
+   the row is empty; under "Current schedule" the design is named so the reviewer writes the step in force from the card */
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=0;
+  try{const put=(k,v)=>{const e=document.querySelector('[data-m="'+k+'"]');if(!e||!v||String(e.value||'').trim())return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));n++;};
+    const s=f&&f.schedule,h=document.getElementById('prSchedSrc');
+    if(s&&s.terminal)put('repTerm',s.terminal+' (Form SR-1: '+(s.nota||s.title||'')+')');
+    if(h){h.hidden=!s;h.textContent=s?'Form SR-1\u2019s design: '+(s.nota||s.title||'')+(s.start?', starting at '+s.start:'')+'. Write the step in force from the card.':'';}
+    if(f&&f.relapse&&f.relapse.line)put('relapse',f.relapse.line);}catch(e){}
+  if(n&&r&&typeof r==='object'&&typeof r.filled==='number')r.filled+=n;return r;};})();
+</script>
 <script id="nbh-field-care" src="nbh-field-care.js"></script>
 <style id="nbh-design-css">
 /* ---- design pass: rules every form shares -------------------------------------

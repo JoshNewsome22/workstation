@@ -2799,6 +2799,19 @@ td > textarea.nbh-cell:focus{background:var(--wash,#EEF3F2);outline:none}
   .nbh-pm.nbh-pm-inl{display:inline-block;vertical-align:baseline}
 }
 </style>
+<script id="rm1-v2312">
+/* v23.12 (review F326) what the challenges showed, to the case: each scored challenge (its number on the log, date, type,
+   planned or not, what changed, relapse or not, the highest rate before and after, and after as a proportion of baseline),
+   with one line for Form PR-1's "Relapse at challenges so far" */
+window.__nbhFactsOut=function(){try{
+  const T=v=>String(v==null?'':v).trim(),sc=S.ch.map((c,i)=>({c,i,s:scoreCh(c)})).filter(x=>x.s.ok);if(!sc.length)return null;
+  const list=sc.map(x=>{const o={n:x.i+1,rel:!!x.s.rel,before:x.s.mA,after:x.s.mB};['date','type','planned','what'].forEach(k=>{if(T(x.c[k]))o[k]=T(x.c[k]);});
+    if(x.s.pB!=null)o.pB=Math.round(x.s.pB*100)/100;return o;});
+  const md=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:(d||'');},rel=list.filter(x=>x.rel),last=list[list.length-1];
+  const line=rel.length+' of '+list.length+' challenge'+(list.length===1?'':'s')+' showed relapse'+(rel.length?' ('+rel.map(x=>(x.type||'type not named')+(x.date?' '+md(x.date):'')).join('; ')+')':'')
+    +(list.length>1?'; the last'+(last.date?', '+md(last.date):'')+(last.what?' ('+last.what+')':'')+': '+(last.rel?'relapse':'no relapse'):(last.what?' ('+last.what+')':''))+' (Form RM-1)';
+  return {relapse:{src:'RM-1',n:list.length,rel:rel.length,list,line}};}catch(e){return null;}};
+</script>
 <script id="nbh-field-care" src="nbh-field-care.js"></script>
 <style id="nbh-design-css">
 /* ---- design pass: rules every form shares -------------------------------------

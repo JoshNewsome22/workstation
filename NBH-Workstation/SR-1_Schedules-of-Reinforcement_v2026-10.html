@@ -1907,6 +1907,23 @@ window.__nbhFactsIn=function(f){
 };
 /* v23.11 (review F276) the card's review date on the workstation's due list */
 window.__nbhDue=function(){const v=String(S.meta.cd_review||'').trim();return /\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)?[{what:'Schedule card review',date:v}]:[];};
+/* v23.12 (review I136, F326) the designed schedule to the case, once a design is chosen and the behavior is named: the design,
+   its notation and rule, the settings, each step (what it requires and its criterion), the first and the terminal step, the
+   criterion to step up and the step-back rule, the card's date and review date, and what the designer still warns about */
+window.__nbhFactsOut=function(){try{const m=S.meta,o=m.ds_sel?design():null;if(!o||!String(m.beh||m.behs||'').trim())return null;
+  const t=h=>{const d=document.createElement('textarea');d.innerHTML=String(h==null?'':h).replace(/<[^>]+>/g,' ');return d.value.replace(/\s+/g,' ').trim();},
+    put=(x,k,v)=>{v=t(v);if(v)x[k]=v;};
+  const sc={src:'SR-1',id:o.id};put(sc,'title',o.title);put(sc,'nota',o.nota);put(sc,'rule',o.rule);
+  put(sc,'beh',m.behs||m.beh);if(SR_EARN.includes(o.id))put(sc,'earn',m.earns||m.earn||m.alts||m.alt);put(sc,'alt',m.alts||m.alt);put(sc,'sr',m.sr);put(sc,'func',m.func);
+  put(sc,'who',m.who);put(sc,'date',m.date);put(sc,'review',m.cd_review);
+  if(o.params.length)sc.params=o.params.map(p=>({k:t(p[0]),v:t(p[1])})).filter(p=>p.k&&p.v);
+  if(o.steps&&o.steps.length&&o.stepsHead&&o.stepsHead[0]==='Step'){const H=o.stepsHead.map(x=>t(x).replace(/\s*\(.*?\)\s*/g,'')),z=H.length-1,
+      what=r=>{const c=r.slice(1,z).map((x,k)=>({h:H[k+1],c:t(x).replace(/\s*\(terminal\)\s*/,'')})).filter(x=>x.c&&x.c!=='\u2014');return c.length===1?c[0].c:c.map(x=>x.h+' '+x.c).join('; ');};
+    sc.steps=o.steps.map(r=>({n:t(r[0]),what:what(r),crit:t(r[z])}));sc.start=sc.steps[0].what;sc.terminal=sc.steps[sc.steps.length-1].what;}
+  const C={dro:['dro_crit','dro_back'],drl:['drl_crit'],ncr:['ncr_crit'],thin:['th_crit','th_back']}[o.id];if(C){put(sc,'crit',m[C[0]]);if(C[1])put(sc,'back',m[C[1]]);}
+  if(!sc.back&&sc.params){const b=sc.params.find(p=>/^Step back when$/i.test(p.k));if(b)sc.back=b.v;}   /* the design's own rule when the field is blank */
+  if(o.warn.length)sc.open=o.warn.map(t).filter(Boolean).slice(0,6);
+  return {schedule:sc};}catch(e){return null;}};
 window.__nbhFactsPick=function(sel){
   const m=S.meta;let n=0;const b=sel.behaviors[0],a=sel.goals.acq[0];
   if(b){m.beh=nbhCase.line(b,true);m.behs=b.label;if(b.rep)m.alt=b.rep;n++;}

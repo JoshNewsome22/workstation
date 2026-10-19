@@ -9903,6 +9903,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.12: SR-1 hands the designed schedule to the case and RM-1 hands over its challenge results; TD-1 and PR-1 read them (review Wave 3)
+
+- **The schedule to the case (I136).** Once a design is chosen and the behavior is named, SR-1 sends the schedule to the
+  case. It carries:
+  - the design, its notation and rule, and its settings;
+  - each step, with what it requires and its criterion, and the first and terminal steps;
+  - the criterion to step up and the step-back rule;
+  - the card's dates;
+  - what the designer still warns about.
+  - The case bar names the schedule.
+- **What the challenges showed (F326).** RM-1 now sends each scored challenge to the case: its date, type, whether it was
+  planned, what changed, relapse or not, and the rates before and after.
+  - It also sends one line for the plan review. The case bar shows how many challenges showed relapse.
+- **Form TD-1.** The schedule is named beside the thinning ladder, with its first and terminal steps.
+  - On a multiple or chained schedule, it fills the FCT and DRA cards' Thinning tactic and Terminal schedule fields when
+    they are empty.
+  - The BIP carries a REINFORCEMENT SCHEDULE section after the ladder, with the notation, the rule, the steps from first
+    to terminal, the criteria and the card's review date.
+  - The card staff run and the plan now say the same thing.
+- **Form PR-1.** Two rows fill when they are empty: "Terminal schedule intended", from SR-1's design, and "Relapse at
+  challenges so far", from RM-1's line.
+  - "Current schedule" is left for the reviewer, with the design named under it: SR-1 does not record the step in force.
+- qa/sr1-w3b-test.js (8 checks).
+
 ### v23.11: SR-1 pays the response that earns, delivers the functional reinforcer, says how the replacement is reinforced and that no one holds the student, corrects three citations, and puts the card's review date on the due list (review Wave 3)
 
 - **The response that earns (F268).** Setup has a new field, "Response that earns", with a short name. It sits apart from
