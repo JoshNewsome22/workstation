@@ -885,6 +885,24 @@ h3.sub{font-family:var(--serif);font-size:15px;color:var(--nbh-navy);margin:16px
 /* v21.17 (OB-1 fixes) */
 /* the summary table scrolls inside its own box on a narrow screen, never the page */
 .tblwrap{overflow-x:auto;margin-bottom:14px}
+/* v23.1x (review F74, I38) the other target behaviors on Setup, their rows on the sheets, and their tiles on the Live Recorder */
+#mbTbl td{vertical-align:top}#mbTbl textarea{width:100%;min-height:44px}
+#mbTbl td.c label{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px}
+#mbTbl button.rm{min-height:44px}
+table.obs-count tr.mbrow td.lab{font-weight:600}
+table.obs-count tr.mbdur td.lab{padding-left:18px}
+.obr-more{display:grid;gap:8px;margin-top:10px}.obr-more[hidden]{display:none}
+.obr-mrow{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,1fr);gap:8px 12px;align-items:stretch}
+.obr-mrow .obr-tap{grid-area:auto;min-height:76px}
+.obr-mside{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:0}
+.obr-mlab{font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.obr-mside .obr-undo{min-height:44px}
+.obr-tap.obr-timing{box-shadow:inset 0 0 0 4px #F2C14E}
+.obr-tap[data-beh]::before{content:attr(data-beh);font-size:11.5px;font-weight:600;line-height:1.15;max-width:calc(100% - 34px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e3eef0}
+.obr-mlab .small{font-weight:400}
+/* on a phone, as the main tiles: the name, the two tiles, their Undo buttons under them */
+@media (max-width:760px){.obr-mrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.obr-mside{display:contents}.obr-mlab{grid-column:1 / -1;order:0}
+  .obr-mrow .obr-tap{order:1}.obr-mside .obr-undo{order:2}}
 .tblwrap > table.grid{margin-bottom:0}
 table.grid thead th[colspan]{text-align:center}
 p.method.ivrule{margin:-2px 0 6px}
@@ -1134,6 +1152,7 @@ body.view-obs #obRec{display:block}
 @media not all and (orientation:landscape) and (max-height:860px){
   body.view-obs #obRec.obr-ended{display:flex;flex-direction:column}
   .obr.obr-ended .obr-sum,.obr.obr-ended .obr-iv,.obr.obr-ended .obr-keys{order:1}
+  .obr.obr-ended .obr-more{order:2}   /* v23.1x (review F74) the other behaviors' tiles, idle once ended, go last */
 }
 /* v21.44 (A3): a short landscape window, wider than tall and at most 860 px tall: an iPad held sideways, on its own or in the
    workstation, but also most laptop windows, and an upright 768 x 1024 iPad inside the workstation, whose form frame is
@@ -1173,6 +1192,7 @@ body.view-obs #obRec{display:block}
      follows them, then the interval sample */
   .obr.obr-ended .obr-ctl{order:2;margin-top:0}
   .obr.obr-ended .obr-sum,.obr.obr-ended .obr-iv,.obr.obr-ended .obr-keys{order:3}
+  .obr.obr-ended .obr-more{order:4}   /* v23.1x (review F74) */
   .obr-sum{margin-top:0}
 }
 @media print{#obRec,.obr-flash,.obr-pill{display:none!important}}
@@ -1264,8 +1284,20 @@ body.view-obs #obRec{display:block}
       <div class="dval"><textarea data-meta="behavior" rows="2" placeholder="carry the definition from Form TB-1 so every observer scores the same behavior"></textarea></div></div>
     <div class="drow"><div class="dlab">Operational definition</div>
       <div class="dval"><textarea data-meta="definition" rows="2" placeholder="what counts as an occurrence, in terms two observers would score the same way"></textarea></div></div>
+    <!-- v23.1x (review I38) a behavior defined by how long it lasts is timed: printed only when ticked -->
+    <div class="drow noprint" id="dur1Row"><div class="dlab">Measured as</div>
+      <div class="dval"><label class="chk"><input type="checkbox" id="mDur1"> <span id="dur1Txt">Time each episode (duration): the Live Recorder&rsquo;s Student tile starts and stops it, and each sheet takes the total minutes and the longest episode</span></label></div></div>
     <div class="drow"><div class="dlab">Referral question</div>
       <div class="dval"><textarea data-meta="question" rows="2" placeholder="what these observations are meant to settle &mdash; e.g. does the behavior cluster in independent academic work?"></textarea></div></div>
+  </div>
+
+  <!-- v23.1x (review F74) more than one target behavior on one record: each has its own count on every sheet and its own tile on
+       the Live Recorder; the interval sample stays on the first. Printed only when there is one. -->
+  <div class="mbwrap noprint" id="mbWrap">
+    <h3 class="sub">Other Target Behaviors on This Record</h3>
+    <p class="method noprint">Up to three more of the student&rsquo;s target behaviors from Form TB-1, each with its own definition. Each is counted on every observation sheet and has its own tiles on the Live Recorder (keys 5 to 7, Shift for the peer). The interval sample, the second observer&rsquo;s record and the conditions stay with the first behavior above.</p>
+    <table class="grid" id="mbTbl"><thead><tr><th style="width:30%">Target behavior</th><th>Operational definition</th><th class="c" style="width:76px">Timed (duration)</th><th class="noprint" style="width:84px"></th></tr></thead><tbody></tbody></table>
+    <p class="method noprint"><button type="button" class="tool" id="mbAdd">Add a target behavior</button></p>
   </div>
 
   <div class="warn verdict" id="planBox"></div>
@@ -1336,6 +1368,7 @@ body.view-obs #obRec{display:block}
       <div class="obr-nlast" id="obrNoteLast" hidden></div>
     </div>
   </div>
+  <div class="obr-more" id="obrMore" hidden></div>   <!-- v23.1x (review F74) the other target behaviors' tiles -->
   <div class="obr-sum" id="obrSum" hidden></div>
   <div class="obr-iv">
     <div class="obr-ivhd"><h3>Interval Sample</h3><span class="obr-ivstat" id="obrIvStat">Not started</span><button type="button" id="obrSample" disabled>Start sample</button></div>
@@ -1365,7 +1398,9 @@ body.view-obs #obRec{display:block}
   </div>
   <p class="obr-keys">Keys while recording: <b>1</b> counts the student and <b>Shift+1</b> the peer; <b>2</b> and <b>3</b> score the
     student&rsquo;s interval + and &minus;, <b>Shift+2</b> and <b>Shift+3</b> the peer&rsquo;s, and <b>4</b> scores &minus; for both;
-    <b>Space</b> pauses or resumes; <b>Z</b> and <b>Shift+Z</b> undo the last count, <b>X</b> the last mark.</p>
+    <b>Space</b> pauses or resumes; <b>Z</b> and <b>Shift+Z</b> undo the last count, <b>X</b> the last mark. With other target
+    behaviors on Setup, <b>5</b>, <b>6</b> and <b>7</b> count them and <b>Shift</b> with the same key counts the peer. A timed behavior&rsquo;s
+    tile starts an episode at the first tap and ends it at the next.</p>
 </section>
 <div class="obr-flash noprint" id="obrFlash" aria-hidden="true"></div>
 <button type="button" class="obr-pill noprint" id="obrPill" hidden><span aria-hidden="true">&#9679; </span><span id="obrPillT">Recording</span></button>
@@ -1404,6 +1439,9 @@ body.view-obs #obRec{display:block}
   <h3 class="sub">Every Observation</h3>
   <div class="tblwrap"><table class="grid" id="sumTbl"></table></div>
   <p class="method" id="sumNote"></p>
+  <!-- v23.1x (review F74, I38) each target behavior's counts, rates and timed episodes, with more than one or a timed one -->
+  <h3 class="sub" id="behHead" hidden>Each Target Behavior</h3>
+  <div class="tblwrap" id="behWrap" hidden><table class="grid" id="behTbl"></table></div>
 
   <!-- v22.99 (review I36) the heading and the note follow the record: conditions ticked on every observation are compared -->
   <h3 class="sub" id="condHead">Conditions Present When the Behavior Occurred</h3>
@@ -1535,6 +1573,17 @@ body.view-obs #obRec{display:block}
       moment the interval ends. The sample covers only its own intervals, while the count covers
       the whole observation; note in the narrative the time the sample starts, so the two can be
       lined up.</li>
+    <!-- v23.1x (review F74, I38) -->
+    <li><b>More than one target behavior.</b> Up to three more of the student&rsquo;s targets from Form TB-1 can be
+      observed on the same record, each under its own definition (Other Target Behaviors, on Setup). Each has its own count
+      for the student and the peer on every sheet, and its own rates in the summary and its own sentence in the FS-1
+      statement. The interval sample, the second observer&rsquo;s record and the conditions stay with the first behavior;
+      a behavior that needs its own sample or agreement check needs a record of its own.</li>
+    <li><b>Time a behavior that is defined by how long it lasts.</b> Where TB-1 gives duration as the dimension (a tantrum,
+      out of seat, crying), count its episodes and time each one from onset to offset, as its definition states them; the
+      sheet takes the total minutes and the longest episode, and the summary the share of the minutes observed (Cooper,
+      Heron, &amp; Heward, 2020). An episode still going when the observation ends is timed to the end, and the notes say
+      so. The peer&rsquo;s episodes are counted, not timed.</li>
   </ul>
 
   <h3 class="sub">6. The Live Recorder</h3>
@@ -1554,12 +1603,19 @@ body.view-obs #obRec{display:block}
     <li><b>Alerts and Keys.</b> Tone, flash and vibration can each be turned off. The keys are on the buttons: 1 and
       Shift+1 count, 2 and 3 (Shift for the peer) score + and &minus;, 4 scores &minus; for both, Space pauses, Z, Shift+Z
       and X undo.</li>
+    <!-- v23.1x (review F74, I38) -->
+    <li><b>Several Behaviors, Timed Episodes.</b> Each other target behavior on Setup has a row of its own under the main
+      tiles, with its name on its tiles, keys 5 to 7 (Shift for the peer) and its own Undo. For a timed behavior the Student
+      tile starts an episode at the first tap and ends it at the next; the tile is ringed and shows the episode&rsquo;s time
+      while it runs, and Undo opens the last episode again or takes away the one running. In a partial-interval sample, every
+      interval an episode of the first behavior runs into is marked +. Save to the record writes each behavior&rsquo;s
+      counts, and a timed one&rsquo;s minutes, into its own rows of the sheet.</li>
   </ul>
 
   <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
   <p class="method noprint nbh-wh">A multi-line text box on this form shows an <strong>Improve wording</strong> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <strong>Check wording</strong> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <strong>Rewrite with Claude</strong> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <strong>Lock</strong> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <strong>Also hide</strong>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <strong>Writing Tools</strong> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print. Typing in the panel is never counted by the Live Recorder.</p><!-- /writing help -->
   <h3 class="noprint sub">About the simulation</h3>
-  <p class="noprint method"><b>Load simulation</b> (toolbar) fills the record with simulated observations; none of it is a real student record. Three simulated observations loaded, all in one classroom, across independent work and a small group, one of them unannounced. The summary and the FS-1 statement are both filled in &mdash; use the view buttons to step through them.</p>
+  <p class="noprint method"><b>Load simulation</b> (toolbar) fills the record with simulated observations; none of it is a real student record. Three simulated observations loaded, all in one classroom, across independent work and a small group, one of them unannounced, with a second target behavior (out of seat, its episodes timed) beside the first. The summary and the FS-1 statement are both filled in &mdash; use the view buttons to step through them.</p>
 
   <div class="cite">
     Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em>
@@ -1676,8 +1732,40 @@ function blank(){
            /* v21.36 OB-1: a second observer's record, shown when obs2On */
            obs2On:false, count2:"", peerCount2:"", iv2:[], peerIv2:[],
            /* v22.99 (review F71) the second observer scored both interval rows: an unmarked interval is then a record of none */
-           iv2On:false };
+           iv2On:false,
+           /* v23.1x (review I38) the first behavior's episodes, timed: total minutes and the longest; (F74) the other target
+              behaviors, one entry each in Setup's order: count, peer count, and when timed total minutes and the longest */
+           durTot:"", durLong:"", mb:[] };
 }
+
+/* ---------------------------------------------------- v23.1x (review F74, I38) the target behaviors of the record */
+/* The first is Setup's own two boxes (and every older record's only one); the others are rows in state.meta.more
+   ({label, def, dur}), up to MB_MAX, in the order Setup lists them. dur "1": its episodes are timed (TB-1's dimension
+   is duration). On a sheet, the first behavior keeps its fields (count, peerCount, the interval sample, the second
+   observer's record); behavior k of the others is o.mb[k] {c, p, tot, long}. */
+const MB_MAX = 3;
+function mbList(){ if(!Array.isArray(state.meta.more)) state.meta.more = []; return state.meta.more; }
+function behList(){
+  const L = [{ k:-1, label:String(state.meta.behavior||"").trim(), def:String(state.meta.definition||"").trim(), dur:state.meta.dur1 === "1" }];
+  mbList().forEach((b, k) => L.push({ k, label:String(b && b.label || "").trim(), def:String(b && b.def || "").trim(), dur:!!b && b.dur === "1" }));
+  return L;
+}
+/* a behavior's name as a tile, a column or a sentence says it: the words before a dash or a colon */
+function behShort(b, n){ n = n || 40; const t = b.label || (b.k < 0 ? "The target behavior" : "Behavior " + (b.k + 2));
+  const x = t.split(/\s+[—–-]\s+|:\s/)[0].trim() || t; return x.length > n ? x.slice(0, n - 1).trimEnd() + "…" : x; }
+function mbOf(o, k){ if(!Array.isArray(o.mb)) o.mb = []; while(o.mb.length <= k) o.mb.push({c:"", p:"", tot:"", long:""}); return o.mb[k]; }
+/* the counts and timed minutes of behavior b on observation o, as typed */
+function behObs(o, b){ if(b.k < 0) return { c:o.count, p:o.peerCount, tot:o.durTot, long:o.durLong };
+  const x = (Array.isArray(o.mb) && o.mb[b.k]) || {}; return { c:x.c, p:x.p, tot:x.tot, long:x.long }; }
+/* minutes typed: a number of 0 or more; NaN for anything else; null when empty */
+function minsVal(v){ const t = String(v == null ? "" : v).trim(); if(t === "") return null; return /^\d*\.?\d+$/.test(t) ? +t : NaN; }
+/* more than one behavior, or a timed one: the sheets and the summary say each behavior's own figures */
+function behMany(){ const L = behList(); return L.length > 1 || L[0].dur; }
+/* a record's other behaviors and their entries as a file holds them, made safe */
+function cleanMore(m){ return (Array.isArray(m) ? m : []).filter(b => b && typeof b === "object").slice(0, MB_MAX)
+  .map(b => ({ label:String(b.label == null ? "" : b.label), def:String(b.def == null ? "" : b.def), dur:b.dur === "1" || b.dur === true ? "1" : "" })); }
+function cleanMb(a){ return (Array.isArray(a) ? a : []).slice(0, MB_MAX).map(x => { x = x && typeof x === "object" ? x : {};
+  const t = v => v == null || typeof v === "object" ? "" : String(v); return { c:t(x.c), p:t(x.p), tot:t(x.tot), long:t(x.long) }; }); }
 
 /* ---------------------------------------------------- v21.32 OB-1: times, lines, the note box, the Log */
 /* A narrative time is kept as HH:MM (24-hour), what the time picker gives. Older files hold "9:14" or
@@ -1956,7 +2044,7 @@ function obsHTML(o, i, n){
      + '<th class="c">Comparison peer</th>'
      + (o2 ? '<th class="c o2">Student (observer 2)</th><th class="c o2">Peer (observer 2)</th>' : '')
      + '<th>How it was taken</th></tr></thead><tbody>'
-     + '<tr><td class="lab">Occurrences counted</td>'
+     + '<tr><td class="lab">' + (behMany() ? esc((behList().length > 1 ? behShort(behList()[0]) + ': ' : '') + (behList()[0].dur ? 'episodes counted' : 'occurrences counted')).replace(/^./, x => x.toUpperCase()) : 'Occurrences counted') + '</td>'
      + '<td class="c"><input class="num" data-obs="' + i + '" data-field="count" inputmode="numeric" value="'
        + esc(o.count) + '" aria-label="Occurrences, student"></td>'
      + '<td class="c"><input class="num" data-obs="' + i + '" data-field="peerCount" inputmode="numeric" value="'
@@ -1966,9 +2054,23 @@ function obsHTML(o, i, n){
            + '<td class="c o2"><input class="num" data-obs="' + i + '" data-field="peerCount2" inputmode="numeric" value="'
            + esc(o.peerCount2) + '" aria-label="Occurrences, peer, observer 2"></td>' : '')
      + '<td class="howc">' + esc(howCount(mins)) + '</td></tr>';
+  /* v23.1x (review F74, I38) the first behavior's timed episodes, then each other target behavior's own rows */
+  const BL = behList(), many = BL.length > 1, o2c = o2 ? '<td class="c o2"></td><td class="c o2"></td>' : '';
+  const nin = (field, aria, val) => '<input class="num" data-obs="' + i + '" data-field="' + field + '" inputmode="decimal" value="' + esc(val) + '" aria-label="' + esc(aria) + '">';
+  const durRows = (b, fT, fL, v) => '<tr class="mbdur"><td class="lab">Total minutes of the episodes</td><td class="c">' + nin(fT, "Total minutes, " + behShort(b), v.tot) + '</td><td class="c"></td>' + o2c
+      + '<td>The episodes timed, start to end</td></tr>'
+    + '<tr class="mbdur"><td class="lab">Longest episode (minutes)</td><td class="c">' + nin(fL, "Longest episode, " + behShort(b), v.long) + '</td><td class="c"></td>' + o2c
+      + '<td>The longest of them</td></tr>';
+  if(BL[0].dur) h += durRows(BL[0], "durTot", "durLong", behObs(o, BL[0]));
+  BL.slice(1).forEach(b => { const v = behObs(o, b), w = behShort(b);
+    h += '<tr class="mbrow"><td class="lab">' + esc(w) + (b.dur ? ': episodes' : ': occurrences') + '</td>'
+      + '<td class="c">' + nin("mb:" + b.k + ":c", (b.dur ? "Episodes, " : "Occurrences, ") + w + ", student", v.c) + '</td>'
+      + '<td class="c">' + nin("mb:" + b.k + ":p", (b.dur ? "Episodes, " : "Occurrences, ") + w + ", peer", v.p) + '</td>' + o2c
+      + '<td>Whole count, as above</td></tr>';
+    if(b.dur) h += durRows(b, "mb:" + b.k + ":tot", "mb:" + b.k + ":long", v); });
   if(ivN){
     const k  = ivCount(o.iv, ivN), pk = ivCount(o.peerIv, ivN);
-    h += '<tr class="ivpct"><td class="lab">' + esc(METHODS[state.cfg.ivMethod]) + '</td>'
+    h += '<tr class="ivpct"><td class="lab">' + esc(METHODS[state.cfg.ivMethod]) + (many ? ' (' + esc(behShort(BL[0])) + ')' : '') + '</td>'
        + ivCell(k, ivN) + ivCell(pk, ivN)
        + (o2 ? ivCell(ivCount(o.iv2||[], ivN), ivN, "o2") + ivCell(ivCount(o.peerIv2||[], ivN), ivN, "o2") : '')
        + '<td>' + ivN + ' × ' + state.cfg.ivLen + ' s intervals, scored below</td></tr>';
@@ -1981,7 +2083,7 @@ function obsHTML(o, i, n){
     h += '<h3 class="sub">Concurrent Interval Sample</h3>'
       + '<p class="method ivrule">' + esc(METHODS[state.cfg.ivMethod] + ": " + RULES[state.cfg.ivMethod] + ".")
       + ' The top row is the student and the row below the comparison peer, scored in the same intervals'
-      + ' on the same definition.<span class="noprint"> Click an interval to mark it.</span></p>'
+      + ' on the same definition.' + (behList().length > 1 ? ' The sample is of ' + esc(behShort(behList()[0])) + ' only.' : '') + '<span class="noprint"> Click an interval to mark it.</span></p>'
       + '<div class="ivwrap"><table class="ivgrid' + (o.obs2On ? ' four' : '') + '"><tbody>'
       + ivRow(o.iv, i, "iv", "Student", ivN)
       + ivRow(o.peerIv, i, "peerIv", "Peer", ivN)
@@ -2075,9 +2177,9 @@ function howCount(mins){ return "Whole count over the " + (mins===null ? "observ
 /* the header a continuation sheet repeats; it follows the Setup and the sheet's own fields */
 function repHTML(o){
   const line = [o.date ? fmtDate(o.date) : "", o.setting, o.activity].filter(Boolean).join(" · ");
-  const beh = String(state.meta.behavior || "—");
+  const BL = behList(), beh = BL.length > 1 ? BL.map(b => behShort(b, 30)).join("; ") : String(state.meta.behavior || "—");   /* v23.1x (review F74) */
   return '<span><b>Student</b> ' + esc(state.meta.client||"—") + '</span>'
-       + '<span><b>Target behavior</b> ' + esc(beh.length > 70 ? beh.slice(0,69).trimEnd() + "…" : beh) + '</span>'
+       + '<span><b>Target behavior' + (BL.length > 1 ? 's' : '') + '</b> ' + esc(beh.length > 70 ? beh.slice(0,69).trimEnd() + "…" : beh) + '</span>'
        + (line ? '<span><b>' + esc(line) + '</b></span>' : '');
 }
 /* interval settings from a file, checked against the toolbar's own choices */
@@ -2116,10 +2218,40 @@ function render(){
     ? state.obs.length + " observation" + (state.obs.length===1?"":"s")
     : "none yet";
   renderMeta();
+  renderMB();   /* v23.1x (review F74, I38) */
   renderSummary();
   planNote();
   renderLog();   /* v21.32 OB-1 */
 }
+/* v23.1x (review F74, I38) Setup's other target behaviors (a row each: the behavior, its definition, timed or not) and the first
+   behavior's timed box; the block prints only when it holds a behavior, the box only when ticked */
+function renderMB(){
+  const tb = $("#mbTbl tbody"), wrap = $("#mbWrap"), add = $("#mbAdd"), L = mbList();
+  if(tb){ const a = document.activeElement, keep = a && tb.contains(a) ? [a.dataset.mbk, a.dataset.mbf, a.selectionStart] : null;
+    tb.innerHTML = L.map((b, k) => '<tr><td><textarea class="mbl" rows="2" data-mbk="' + k + '" data-mbf="label" aria-label="Target behavior ' + (k + 2) + '" placeholder="from Form TB-1">' + esc(b.label) + '</textarea></td>'
+      + '<td><textarea rows="2" data-mbk="' + k + '" data-mbf="def" aria-label="Definition of target behavior ' + (k + 2) + '" placeholder="what counts as an occurrence">' + esc(b.def) + '</textarea></td>'
+      + '<td class="c"><label><input type="checkbox" data-mbk="' + k + '" data-mbf="dur"' + (b.dur === "1" ? " checked" : "") + ' aria-label="Time the episodes of target behavior ' + (k + 2) + '"></label></td>'
+      + '<td class="noprint"><button type="button" class="rm" data-mbdel="' + k + '">Remove</button></td></tr>').join("");
+    if(keep){ const e = tb.querySelector('[data-mbk="' + keep[0] + '"][data-mbf="' + keep[1] + '"]'); if(e){ try{ e.focus({preventScroll:true}); if(keep[2] != null && e.setSelectionRange) e.setSelectionRange(keep[2], keep[2]); }catch(x){} } } }
+  if(wrap) wrap.classList.toggle("noprint", !L.length);
+  if(add) add.hidden = L.length >= MB_MAX;
+  const d1 = $("#mDur1"), row = $("#dur1Row"); if(d1) d1.checked = state.meta.dur1 === "1"; if(row) row.classList.toggle("noprint", state.meta.dur1 !== "1");
+}
+document.addEventListener("input", e => { const t = e.target; if(!t || !t.dataset || t.dataset.mbk === undefined || t.type === "checkbox") return;
+  const b = mbList()[+t.dataset.mbk]; if(!b) return; b[t.dataset.mbf] = t.value; renderMeta(); renderSummary(); });
+document.addEventListener("change", e => { const t = e.target; if(!t) return;
+  if(t.id === "mDur1"){ state.meta.dur1 = t.checked ? "1" : ""; render(); return; }
+  if(!t.dataset || t.dataset.mbk === undefined) return; const b = mbList()[+t.dataset.mbk]; if(!b) return;
+  if(t.type === "checkbox") b.dur = t.checked ? "1" : ""; else b[t.dataset.mbf] = t.value;
+  render(); });
+document.addEventListener("click", async e => {
+  if(e.target.closest && e.target.closest("#mbAdd")){ const L = mbList(); if(L.length >= MB_MAX) return; L.push({label:"", def:"", dur:""}); render();
+    const inp = document.querySelector('#mbTbl textarea[data-mbk="' + (L.length - 1) + '"][data-mbf="label"]'); if(inp) try{ inp.focus(); }catch(x){} return; }
+  const del = e.target.closest && e.target.closest("button[data-mbdel]"); if(!del) return;
+  const k = +del.dataset.mbdel, L = mbList(), b = L[k]; if(!b) return;
+  const held = state.obs.filter(o => { const x = Array.isArray(o.mb) && o.mb[k]; return x && ["c","p","tot","long"].some(f => String(x[f]||"").trim()); }).length;
+  if((held || String(b.label||"").trim()) && !(await nbhUI.confirm("Remove " + (String(b.label||"").trim() || "this target behavior") + " from the record?" + (held ? "\nIts counts on " + held + " observation" + (held === 1 ? "" : "s") + " are removed with it." : ""), {ok:"Remove", danger:true}))) return;
+  L.splice(k, 1); state.obs.forEach(o => { if(Array.isArray(o.mb)) o.mb.splice(k, 1); }); render(); });
 function renderMeta(){
   $$("[data-meta]").forEach(e => { if(e.value !== (state.meta[e.dataset.meta]||"")) e.value = state.meta[e.dataset.meta]||""; });
   $$(".hd-client").forEach(e => e.textContent = state.meta.client || "");
@@ -2148,6 +2280,10 @@ function planNote(){
   const arr  = new Set(state.obs.map(o => o.arrange).filter(Boolean));
   const unannounced = state.obs.filter(o => o.announced === "Unannounced").length;
   const parts = [];
+  /* v23.1x (review F74) another target behavior with no definition, or a definition with no behavior named */
+  mbList().forEach((b, k) => { const l = String(b.label||"").trim(), d = String(b.def||"").trim();
+    if(l && !d) parts.push("Target behavior " + (k + 2) + " (" + behShort({k, label:l}, 40) + ") has no operational definition: carry it from Form TB-1, so every observer scores it the same way.");
+    else if(d && !l) parts.push("Target behavior " + (k + 2) + " has a definition but no name."); });
   if(!n) parts.push("No observation has been added yet.");
   else {
     if(n < 3) parts.push("Only " + n + " observation" + (n===1?"":"s") + " recorded: three or more, across different times of day, is what separates a setting effect from a low rate.");
@@ -2326,6 +2462,7 @@ function renderSummary(){
     + " recording " + esc(RULES[m]) + ". On the All observations row, every marked interval over every "
     + "interval sampled.";
   $("#sumNote").innerHTML = key;
+  renderBeh();   /* v23.1x (review F74, I38) */
 
   const tally = (list, counts, denom, head) => {
     let t = '<thead><tr><th>' + head + '</th><th class="c" style="width:120px">Observations</th>'
@@ -2427,10 +2564,73 @@ function renderSummary(){
     d.agree.filter(a => !a.ok).forEach(a => parts.push("Observation " + (a.i+1) + ": the agreement “" + a.t + "” is not a percentage from 0 to 100."));
     const lim = state.obs.filter(o => (o.notes||"").trim()).length;
     if(lim) parts.push(lim + " observation" + (lim===1?" carries":"s carry") + " a note limiting the record; keep it with any statement drawn from them.");
+    /* v23.1x (review F74, I38) each target behavior's own figures, and its entries the figures cannot use */
+    if(behMany()){ const X = behSummary();
+      X.forEach(x => { const w = behShort(x.b, 60);
+        x.rows.forEach(r => { if(x.b.k >= 0 && r.badC) parts.push("Observation " + (r.i+1) + ": the count of " + w + " “" + String(r.v.c).trim() + "” is not a whole number, so it is left out.");
+          if(x.b.k >= 0 && r.badP) parts.push("Observation " + (r.i+1) + ": the peer’s count of " + w + " “" + String(r.v.p).trim() + "” is not a whole number, so it is left out.");
+          if(x.b.dur && (r.badT || r.badL)) parts.push("Observation " + (r.i+1) + ": the timed minutes of " + w + " are not a number of minutes, so they are left out."); });
+        if(x.over.length) parts.push("Observation" + (x.over.length === 1 ? " " : "s ") + x.over.join(" and ") + ": the longest episode of " + w + " is longer than the total timed. Check the minutes.");
+        if(x.b.k >= 0 || x.b.dur) parts.push(behWords(x, state.obs.length)); }); }
   }
   $("#sumBox").innerHTML = "<b>What the observations show</b>"
     + (parts.length ? '<ul class="rules">' + parts.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>"
                     : "Nothing outstanding.");
+}
+
+/* v23.1x (review F74, I38) each target behavior over the observations: the observations it was seen in, its count and rate, the
+   peer's, and for a timed behavior the minutes timed, the longest episode and the share of the minutes observed. Each rate pairs
+   a count with its own observation's minutes, as the table above does. */
+function behSummary(){
+  return behList().map(b => {
+    const rows = state.obs.map((o, i) => { const v = behObs(o, b), mins = minutesOf(o), c0 = cnt(v.c), p0 = cnt(v.p), t0 = minsVal(v.tot), l0 = minsVal(v.long);
+      return { i, mins, v, c:Number.isNaN(c0) ? null : c0, p:Number.isNaN(p0) ? null : p0, t:Number.isNaN(t0) ? null : t0, l:Number.isNaN(l0) ? null : l0,
+        badC:Number.isNaN(c0), badP:Number.isNaN(p0), badT:Number.isNaN(t0), badL:Number.isNaN(l0) }; });
+    const sum = (a, f) => a.reduce((x, r) => x + f(r), 0);
+    const cs = rows.filter(r => r.c !== null), cm = cs.filter(r => r.mins), ps = rows.filter(r => r.p !== null), pm = ps.filter(r => r.mins);
+    const ts = rows.filter(r => r.t !== null), tm = ts.filter(r => r.mins), ls = rows.filter(r => r.l !== null);
+    const minC = sum(cm, r => r.mins), minP = sum(pm, r => r.mins), minT = sum(tm, r => r.mins);
+    return { b, rows, counted:cs.length, tot:sum(cs, r => r.c), rate:minC ? r1(sum(cm, r => r.c)/minC*60) : null,
+      seen:rows.filter(r => (r.c || 0) > 0 || (r.t || 0) > 0).length, pCounted:ps.length, pTot:sum(ps, r => r.p), pRate:minP ? r1(sum(pm, r => r.p)/minP*60) : null,
+      timed:ts.length, durTot:ts.length ? r1(sum(ts, r => r.t)) : null, durLong:ls.length ? Math.max(...ls.map(r => r.l)) : null,
+      durPct:minT ? r1(sum(tm, r => r.t)/minT*100) : null,
+      over:rows.filter(r => r.t !== null && r.l !== null && r.l > r.t + 1e-9).map(r => r.i + 1) };
+  });
+}
+/* one behavior's figures in words, for the summary, the FS-1 statement and the evidence */
+function behWords(x, n){
+  const b = x.b, pl = (k, w) => k + " " + w + (k === 1 ? "" : "s"), unit = b.dur ? "episode" : "occurrence";
+  if(!x.counted && !x.timed) return behShort(b, 60) + ": no count entered yet.";
+  let t = behShort(b, 60) + ": " + (x.counted ? pl(x.tot, unit) : "no count") + " in " + x.seen + " of " + pl(n, "observation")
+    + (x.rate !== null ? " (" + x.rate + " per hour)" : "");
+  if(x.pCounted) t += "; the comparison peer " + pl(x.pTot, unit) + (x.pRate !== null ? " (" + x.pRate + " per hour)" : "");
+  if(b.dur && x.timed) t += "; " + x.durTot + " minutes timed in all" + (x.durLong !== null ? ", the longest episode " + x.durLong + " minutes" : "")
+    + (x.durPct !== null ? " (" + x.durPct + "% of the minutes observed)" : "");
+  return t + ".";
+}
+/* the FS-1 statement's sentences for one behavior (and each behavior's statement in the evidence) */
+function behTimed(x){ return "Its episodes were timed: " + x.durTot + " minutes in all" + (x.durLong !== null ? ", the longest " + x.durLong + " minutes" : "")
+  + (x.durPct !== null ? " (" + x.durPct + "% of the minutes observed)" : "") + "."; }
+function behSentence(x, n){
+  const b = x.b, u = b.dur ? "episode" : "occurrence", pl = (k, w) => k + " " + w + (k === 1 ? "" : "s");
+  let t = behShort(b, 60) + " was observed in " + x.seen + " of " + pl(n, "observation")
+    + (x.counted ? ", with " + pl(x.tot, u) + " recorded" + (x.rate !== null ? " (" + x.rate + " per hour)" : "") : "") + ".";
+  if(x.pCounted) t += " The comparison peer had " + pl(x.pTot, u) + (x.pRate !== null ? " (" + x.pRate + " per hour)" : "") + ".";
+  if(b.dur && x.timed) t += " " + behTimed(x);
+  return t;
+}
+function renderBeh(){
+  const show = behMany(), hd = $("#behHead"), wr = $("#behWrap"), tbl = $("#behTbl");
+  if(hd) hd.hidden = !show; if(wr) wr.hidden = !show; if(!show || !tbl) { if(tbl) tbl.innerHTML = ""; return; }
+  const X = behSummary(), n = state.obs.length, num = v => v === null ? "" : v, anyDur = X.some(x => x.b.dur);
+  let h = '<thead><tr><th>Target behavior</th><th class="c" style="width:70px">Seen in</th><th class="c" style="width:60px">Count</th><th class="c" style="width:64px">Per hour</th>'
+    + '<th class="c" style="width:60px">Peer count</th><th class="c" style="width:64px">Peer per hour</th>'
+    + (anyDur ? '<th class="c" style="width:72px">Minutes timed</th><th class="c" style="width:70px">Longest (min)</th><th class="c" style="width:70px">% of time</th>' : '') + '</tr></thead><tbody>';
+  X.forEach(x => { h += '<tr><td>' + esc(behShort(x.b, 60)) + (x.b.dur ? ' <span class="small">(timed)</span>' : '') + '</td>'
+    + '<td class="c">' + x.seen + ' of ' + n + '</td><td class="c">' + (x.counted ? x.tot : '') + '</td><td class="c">' + num(x.rate) + '</td>'
+    + '<td class="c">' + (x.pCounted ? x.pTot : '') + '</td><td class="c">' + num(x.pRate) + '</td>'
+    + (anyDur ? '<td class="c">' + (x.b.dur ? num(x.durTot) : '') + '</td><td class="c">' + (x.b.dur ? num(x.durLong) : '') + '</td><td class="c">' + (x.b.dur && x.durPct !== null ? x.durPct + '%' : '') + '</td>' : '') + '</tr>'; });
+  tbl.innerHTML = (X.length > 1 ? '<caption class="method" style="caption-side:bottom;text-align:left;margin-top:4px">Each rate pairs the behavior&rsquo;s count with its own observations&rsquo; minutes. The interval sample, the agreement figures and the conditions on this summary are for the first behavior, ' + esc(behShort(X[0].b, 60)) + '.</caption>' : '') + h + '</tbody>';
 }
 
 /* ---------------------------------------------------- the FS-1 sentence */
@@ -2446,12 +2646,16 @@ function draft(){
     + (d.totalMin ? " totalling " + d.totalMin + " minutes" : "")
     + (settings.length ? " across " + settings.join(", ") : "") + ".");
   if(acts.length) bits.push("Activities observed: " + acts.join("; ") + ".");
-  bits.push("The behavior was observed in " + d.withAny.length + " of " + pl(n, "observation")
+  /* v23.1x (review F74) with several behaviors, the first is named; the others have sentences of their own, below */
+  const BL = behList(), XB = behMany() ? behSummary() : null;
+  bits.push((BL.length > 1 ? "The first target behavior (" + behShort(BL[0], 60) + ") was observed in " : "The behavior was observed in ") + d.withAny.length + " of " + pl(n, "observation")
     + (d.totC ? ", with " + pl(d.totC, "occurrence") + " recorded" : "")
     + (d.totC && d.rateAll !== null ? " (" + d.rateAll + " per hour)" : "") + ".");
   /* v21.17: the peer's count, where one was taken, beside the student's */
   if(d.pCounted) bits.push("A comparison peer observed over the same minutes had " + pl(d.totPC, "occurrence")
     + (d.peerRateAll !== null ? " (" + d.peerRateAll + " per hour)" : "") + ".");
+  /* v23.1x (review I38) a timed first behavior: its minutes */
+  if(XB && XB[0].b.dur && XB[0].timed) bits.push(behTimed(XB[0]));
   /* items that contain commas are joined with semicolons, so each reads as one item */
   const top = ANTE.filter(([k]) => d.ante[k] >= Math.max(2, d.withAny.length*0.6));
   if(top.length) bits.push("Conditions present in most observations in which the behavior occurred were "
@@ -2486,7 +2690,10 @@ function draft(){
     bits.push("Interobserver agreement was assessed in " + okA.length + " of " + pl(n, "observation") + ": " + each.join("; ") + "."
       + (low.length ? " Agreement was below 80% in observation" + (low.length === 1 ? " " : "s ") + low.join(" and ") + ", so " + (low.length === 1 ? "its figures carry" : "their figures carry") + " that caution." : ""));
   }
-  bits.push("These observations describe when and where the behavior occurred; they do not establish what maintains it.");
+  /* v23.1x (review F74) each other target behavior with anything entered, in sentences of its own */
+  if(XB) XB.slice(1).filter(x => x.counted || x.timed).forEach(x => bits.push(behSentence(x, n)));
+  bits.push(BL.length > 1 ? "These observations describe when and where the behaviors occurred; they do not establish what maintains them."   /* v23.1x (review F74) */
+    : "These observations describe when and where the behavior occurred; they do not establish what maintains it.");
   return bits.join(" ");
 }
 
@@ -2506,6 +2713,8 @@ document.addEventListener("input", e => {
     o.narrative[+t.dataset.row][t.dataset.field] = t.value;
     return;
   }
+  /* v23.1x (review F74) another target behavior's count or timed minutes: o.mb[k] */
+  { const mm = /^mb:(\d+):(c|p|tot|long)$/.exec(t.dataset.field || ""); if(mm){ mbOf(o, +mm[1])[mm[2]] = t.value; refreshLight(+oi); return; } }
   if(t.dataset.field){
     o[t.dataset.field] = t.value;
     /* v21.23: minutes typed that equal the minutes from the times are no override */
@@ -2697,6 +2906,9 @@ $("#fileIn").addEventListener("change", e => {
       state.meta = Object.assign({}, d.meta && typeof d.meta === "object" ? d.meta : {});
       state.cfg  = cleanCfg(d.cfg);
       state.obs = Array.isArray(d.obs) ? d.obs.filter(o => o && typeof o === "object").map(o => Object.assign(blank(), o)) : [];
+      /* v23.1x (review F74, I38) an older file opens as one behavior; the others and their entries are read safely */
+      state.meta.more = cleanMore(state.meta.more); state.meta.dur1 = state.meta.dur1 === "1" ? "1" : "";
+      state.obs.forEach(o => { o.mb = cleanMb(o.mb); ["durTot","durLong"].forEach(k => { if(o[k] == null || typeof o[k] === "object") o[k] = ""; else o[k] = String(o[k]); }); });
       $("#ivLen").value = state.cfg.ivLen;
       $("#ivMethod").value = state.cfg.ivMethod;
       $("#ivN").value = state.cfg.ivN;
@@ -2722,8 +2934,15 @@ $("#csvBtn").addEventListener("click", () => {
     "Scored-interval IOA (%)","Unscored-interval IOA (%)",
     /* v21.36 OB-1: the second observer's record and the agreement computed from it; blank without one */
     "Student count (obs 2)","Peer count (obs 2)","Count IOA (%)","Interval IOA (%)"];
+  /* v23.1x (review F74, I38) the first behavior's timed minutes, and each other behavior's columns, after all the others */
+  const BL = behList();
+  if(BL[0].dur) head.push("Minutes timed", "Longest episode (min)");
+  BL.slice(1).forEach(b => { const w = behShort(b, 40); head.push(w + ": count", w + ": peer count"); if(b.dur) head.push(w + ": minutes timed", w + ": longest episode (min)"); });
   const out = [head.map(q).join(",")];
   d.rows.forEach(r => {
+    const more = [];
+    if(BL[0].dur) more.push(raw(r.o.durTot), raw(r.o.durLong));
+    BL.slice(1).forEach(b => { const v = behObs(r.o, b); more.push(raw(v.c), raw(v.p)); if(b.dur) more.push(raw(v.tot), raw(v.long)); });
     const on = (list, held) => list.filter(([k]) => held && held[k]).map(([,l]) => l).join("; ");
     out.push([r.o.date, r.o.start, r.o.end, r.mins, r.o.setting, r.o.activity, r.o.arrange,
       r.o.announced, raw(r.o.count), r.rate, raw(r.o.peerCount), r.k, r.pk, d.ivN,
@@ -2732,7 +2951,7 @@ $("#csvBtn").addEventListener("click", () => {
       r.o.secondObs, raw(agreeOf(r.o)), r.o.notes,
       r.ioa && r.ioa.su && r.ioa.su.scored ? r.ioa.su.scored.p : "", r.ioa && r.ioa.su && r.ioa.su.unscored ? r.ioa.su.unscored.p : "",
       r.o.obs2On ? raw(r.o.count2) : "", r.o.obs2On ? raw(r.o.peerCount2) : "",
-      r.ioa && r.ioa.count ? r.ioa.count.p : "", r.ioa && r.ioa.iv ? r.ioa.iv.p : ""].map(q).join(","));
+      r.ioa && r.ioa.count ? r.ioa.count.p : "", r.ioa && r.ioa.iv ? r.ioa.iv.p : ""].concat(more).map(q).join(","));
   });
   const blob = new Blob([out.join("\n")], {type:"text/csv"});
   const a = document.createElement("a");
@@ -2760,7 +2979,10 @@ async function loadSim(){
     definition:"Audible on contact or leaving a visible mark. Each contact counted separately; contacts separated by less than 3 s count as one.",
     question:"Does the behavior cluster in independent academic work, and is it discrepant from the class?",
     peerBy:"Classroom teacher, before the first observation",
-    peerWhy:"Same grade and sex, no behavior plan, described as typical for this class"
+    peerWhy:"Same grade and sex, no behavior plan, described as typical for this class",
+    /* v23.1x (review F74, I38) a second target behavior, timed: out of seat */
+    more:[{ label:"Out of seat (simulated) — leaving the assigned seat during seated work",
+            def:"Both feet away from the seat area without permission. Timed from leaving the seat until seated again; a return of less than 5 s does not end the episode.", dur:"1" }]
   };
   state.cfg = { ivLen:15, ivMethod:"partial", ivN:20, condAll:true };
   /* k of the 20 intervals, chosen at random */
@@ -2815,6 +3037,8 @@ async function loadSim(){
   /* v21.36 OB-1: the second observation carries a second observer's record. The counts disagree outright
      (0 and 2) while interval-by-interval agreement is 90% (18 of 20): the inflation the Guide warns of when
      the behavior is rare, since both observers leave most intervals unmarked. */
+  /* v23.1x (review F74, I38) out of seat on each sheet: episodes, the peer's, the minutes timed and the longest */
+  state.obs[0].mb = [{c:"3", p:"1", tot:"6.5", long:"3"}]; state.obs[1].mb = [{c:"0", p:"0", tot:"0", long:""}]; state.obs[2].mb = [{c:"2", p:"0", tot:"4", long:"3"}];
   Object.assign(state.obs[1], { secondObs:"Paraprofessional", obs2On:true, count2:"2", peerCount2:"0", iv2On:true, ante:{demand:true},
     iv2: Array.from({length:20}, (_, j) => j === 6 || j === 13), peerIv2: Array.from({length:20}, () => false) });
   $("#ivLen").value = state.cfg.ivLen;
@@ -2845,7 +3069,12 @@ render();
    record until Save to the record, which types the results into an observation sheet's own fields and presses
    its own interval buttons, as a person would. Elapsed time comes from performance.now(), never from counting
    ticks; the interval chimes and the end chime are also scheduled ahead on the audio clock. Text is changed
-   inside its own text node, so the running clock does not wake the page's mutation observers. */
+   inside its own text node, so the running clock does not wake the page's mutation observers.
+   v23.1x (review F74, I38): the record's other target behaviors (Setup, up to three) each have a Student and a Peer tile of their
+   own (keys 5 to 7, Shift for the peer), saved into their own rows of the sheet; the interval sample stays on the first behavior.
+   A behavior whose episodes are timed (Setup's Timed box, from TB-1's duration dimension) starts an episode at the Student tile's
+   first tap and ends it at the next; the sheet takes the episodes, the total minutes and the longest. The peer's tile counts the
+   peer's episodes without timing them. */
 (function(){
   'use strict';
   const byId = id => document.getElementById(id);
@@ -2878,7 +3107,7 @@ render();
   const E = {};
   ('obrPlan obrPeer obrIvInfo obrCap obrClock obrState obrSub obrBar obrTapS obrTapP obrNS obrNP obrRateS obrRateP obrUndoS obrUndoP ' +
    'obrIvStat obrSample obrSP obrSM obrPP obrPM obrBoth obrUndoM obrCue obrStrip obrStart obrStartT obrStartK obrEnd obrInto obrSave ' +
-   'obrDiscard obrTest obrMsg obrSum').split(' ').forEach(id => { E[id] = byId(id); });
+   'obrDiscard obrTest obrMsg obrSum obrMore').split(' ').forEach(id => { E[id] = byId(id); });
 
   /* text is changed in its own text node: no childList mutation, so the page's observers stay asleep */
   function setText(e, v){ if(!e) return; v = String(v); const f = e.firstChild;
@@ -2891,7 +3120,10 @@ render();
   const PR = {on:1, sound:1, flash:1, vib:1};
   const LOG = [];
   const R = {state:'ready', t0:0, acc:0, wallStart:0, wallEnd:0, pauses:[], plan:0, planVal:'', taps:{s:[], p:[]}, peer:true,
-             msg:'', warn:false, msgAt:0, mt:0, ft:0, why:'', intoRef:null};
+             msg:'', warn:false, msgAt:0, mt:0, ft:0, why:'', intoRef:null,
+             /* v23.1x (review I38, F74) the first behavior timed (from Setup at Start) and its episodes {a, b} in observed ms (b null
+                while it runs); the other behaviors, each {k, ref, label, dur, taps, ep}; the first behavior's name for its tiles */
+             d1:false, ep1:[], mb:[], name1:''};
   let S = null, CELLS = null, NUMS = null;
   const el = () => R.acc + (R.state === 'run' ? now() - R.t0 : 0);
   function cfgNow(){ const c = state.cfg || {}, len = +c.ivLen || 0;
@@ -2903,7 +3135,17 @@ render();
   const rows = () => R.peer ? ['s', 'p'] : ['s'];
   const passedOf = e => S ? Math.min(S.n, Math.max(0, Math.floor((e - S.t)/S.L + 1e-9))) : 0;
   const ivAt = e => { if(!S || e < S.t) return -1; const k = Math.floor((e - S.t)/S.L + 1e-9); return k < S.n ? k : -1; };
-  const tapIn = (r, k) => R.taps[r].some(x => x.iv === k);
+  /* v23.1x (review I38) a timed first behavior: an interval is also marked where one of its episodes was going on during it */
+  const tapIn = (r, k) => R.taps[r].some(x => x.iv === k) || (r === 's' && R.d1 && epIn(k));
+  function epIn(k){ if(!S || !R.ep1.length) return false; const a0 = S.t + k*S.L, b0 = a0 + S.L, e = el();
+    return R.ep1.some(x => { const b = x.b === null ? e : x.b; return x.a < b0 && (b > a0 || (x.b === null && b >= a0)); }); }
+  /* v23.1x (review F74, I38) the behaviors on Setup, read when the recorder is ready and kept from Start to the save */
+  const BEH = () => { try{ return typeof behList === 'function' ? behList() : []; }catch(e){ return []; } };
+  const bname = (b, n) => { try{ return typeof behShort === 'function' ? behShort(b, n) : (b.label || 'The target behavior'); }catch(e){ return 'The target behavior'; } };
+  function mbFrom(){ let refs = []; try{ refs = typeof mbList === 'function' ? mbList() : []; }catch(e){}
+    return BEH().slice(1).map(b => ({k:b.k, ref:refs[b.k] || null, label:bname(b, 32), full:bname(b, 60), dur:!!b.dur, taps:{s:[], p:[]}, ep:[]})); }
+  const epOpen = L => L.length && L[L.length - 1].b === null ? L[L.length - 1] : null;
+  function epSum(L, e){ let tot = 0, long = 0; L.forEach(x => { const d = Math.max(0, (x.b === null ? e : x.b) - x.a); tot += d; if(d > long) long = d; }); return {tot, long, n:L.length}; }
   /* partial interval: an interval is marked if the behavior occurred at any time during it, so a count in it is a + */
   const eff = (r, k) => !S ? undefined : (S.m === 'partial' && tapIn(r, k)) ? '+' : S.marks[r][k];
   const scored = k => rows().every(r => eff(r, k));
@@ -2965,7 +3207,8 @@ render();
       if(R.plan && e >= R.plan){ finish('plan'); return; }
       boundaries(e); }
     paint(); }
-  function boundaries(e){ if(!S) return; const p = passedOf(e); for(let k = S.last; k < p; k++){ S.last = k + 1; boundary(k); } }
+  function boundaries(e){ if(!S) return; const p = passedOf(e); let moved = false; for(let k = S.last; k < p; k++){ S.last = k + 1; boundary(k); moved = true; }
+    if(moved && R.d1 && R.state === 'run' && epOpen(R.ep1)) sched(); }   /* v23.1x (review I38) */
   /* the end of interval k: alert and prompt, unless it is already scored for everyone */
   function boundary(k){
     const last = k === S.n - 1;
@@ -2982,10 +3225,14 @@ render();
     if(R.state !== 'ready') return;
     const plan = planMs();
     if(Number.isNaN(plan)){ note('The planned length has to be a number of minutes, or empty for none.', true); return; }
-    Object.assign(R, {state:'run', acc:0, t0:now(), wallStart:Date.now(), wallEnd:0, pauses:[], plan, planVal:tx(E.obrPlan.value), taps:{s:[], p:[]}, why:''});
-    S = null; buildStrip(); hide(E.obrSum, true);
+    Object.assign(R, {state:'run', acc:0, t0:now(), wallStart:Date.now(), wallEnd:0, pauses:[], plan, planVal:tx(E.obrPlan.value), taps:{s:[], p:[]}, why:'',
+      d1:!!(BEH()[0] || {}).dur, ep1:[], mb:mbFrom(), name1:bname(BEH()[0] || {k:-1}, 32)});   /* v23.1x (review F74, I38) */
+    S = null; buildStrip(); buildMore(); hide(E.obrSum, true);
     audioGo(); loops(); sched(); wakeOn();
-    note('Recording since ' + hm(W(R.wallStart)) + '. Tap Student or Peer for every occurrence (keys 1 and Shift+1).');
+    const nm = R.mb.length;
+    note('Recording since ' + hm(W(R.wallStart)) + '. ' + (R.d1 ? 'Tap Student when an episode starts and again when it ends (key 1); Peer counts the peer’s episodes (Shift+1).'
+      : 'Tap Student or Peer for every occurrence (keys 1 and Shift+1).')
+      + (nm ? ' Keys ' + (nm === 1 ? '5 counts' : '5 to ' + (4 + nm) + ' count') + ' the other target behavior' + (nm === 1 ? '' : 's') + ', Shift for the peer.' : ''));
     try{ E.obrTapS.focus({preventScroll:true}); }catch(e){}
   }
   /* the observation ends: at the planned length, at End (its time taken when End was pressed), or where a pause began */
@@ -2995,6 +3242,8 @@ render();
     else if(why === 'plan'){ const e = el(); R.acc = R.plan; R.wallEnd = Date.now() - Math.max(0, e - R.plan); }
     else { R.acc = eObs; R.wallEnd = wall; }
     R.state = 'ended'; R.why = why; stopLoops();
+    /* v23.1x (review I38) an episode still going when the observation ends is timed to the end, and the sheet's notes say so */
+    [R.ep1].concat(R.mb.map(m => m.ep)).forEach(L => { const x = epOpen(L); if(x){ x.b = Math.max(x.a, R.acc); x.cut = true; } });
     boundaries(R.acc);
     if(why === 'plan') cue('end', 'end');
     unsched(); wakeOff();
@@ -3019,8 +3268,8 @@ render();
   }
   function reset(){
     stopLoops(); unsched(); wakeOff();
-    Object.assign(R, {state:'ready', acc:0, t0:0, wallStart:0, wallEnd:0, pauses:[], plan:0, taps:{s:[], p:[]}, why:''});
-    S = null; lockCfg(false); buildStrip(); hide(E.obrSum, true); paint();
+    Object.assign(R, {state:'ready', acc:0, t0:0, wallStart:0, wallEnd:0, pauses:[], plan:0, taps:{s:[], p:[]}, why:'', d1:false, ep1:[], mb:mbFrom(), name1:''});
+    S = null; lockCfg(false); buildStrip(); buildMore(); hide(E.obrSum, true); paint();
   }
   /* a button that has just been disabled drops the focus: hand it to the next control in the recorder */
   function calm(to){ const a = document.activeElement;
@@ -3032,18 +3281,50 @@ render();
     if(r === 'p' && !R.peer){ note('The comparison peer is switched off (Comparison peer, above).', true); return; }
     if(R.state !== 'run'){ note(R.state === 'pause' ? 'Paused: press Resume or Space to record.' : R.state === 'ended' ? 'The observation has ended.' : 'Press Start first.', true); return; }
     const e = el(), k = ivAt(e), auto = k >= 0 && S.m === 'partial' && !eff(r, k);
+    /* v23.1x (review I38) a timed behavior: the Student tile starts an episode, and the next tap ends it */
+    const timed = r === 's' && R.d1;
+    if(timed){ const open = epOpen(R.ep1);
+      if(open){ open.b = Math.max(open.a, e); hit(btn); sched(); note('Student: episode ' + R.ep1.length + ' ended, ' + clock(open.b - open.a) + ' long.'); return; }
+      R.ep1.push({a:e, b:null}); }
     R.taps[r].push({t:e, iv:k, wall:Date.now()});
-    if(auto) sched();
+    if(auto || timed) sched();
     hit(btn);
-    note(WHOC[r] + ': ' + R.taps[r].length + '.' + (auto ? ' Interval ' + (k + 1) + ' is marked + for ' + WHO[r] + '.' : ''));
+    note((timed ? 'Student: episode ' + R.taps[r].length + ' started; tap again when it ends.' : WHOC[r] + ': ' + R.taps[r].length + '.')
+      + (auto ? ' Interval ' + (k + 1) + ' is marked + for ' + WHO[r] + '.' : ''));
   }
   function undoCount(r){
     if(R.state === 'ready') return;
     if(r === 'p' && !R.peer){ note('The comparison peer is switched off.', true); return; }
     const list = R.taps[r]; if(!list.length){ note('There is no count to undo for ' + WHO[r] + '.', true); return; }
+    /* v23.1x (review I38) a timed behavior: Undo opens again the episode last ended, or takes away the one going on (after End, the last) */
+    if(r === 's' && R.d1 && R.ep1.length){ const ep = R.ep1[R.ep1.length - 1];
+      if(ep.b !== null && (R.state === 'run' || R.state === 'pause')){ ep.b = null; sched(); note('Episode ' + R.ep1.length + ' is going on again, timed from its start.'); return; }
+      R.ep1.pop(); }
     const x = list.pop(); let extra = '';
     if(S && x.iv >= 0 && S.m === 'partial' && !eff(r, x.iv)) extra = ' Interval ' + (x.iv + 1) + ' is no longer marked for ' + WHO[r] + (x.iv < passedOf(el()) ? ': score it again.' : '.');
     sched(); note('Last count removed for ' + WHO[r] + ': ' + list.length + '.' + extra);
+  }
+
+  /* v23.1x (review F74, I38) the other target behaviors: their own counts, the student's episodes timed where Setup says so */
+  function tapM(j, r, btn){
+    const m = R.mb[j]; if(!m) return;
+    if(r === 'p' && !R.peer){ note('The comparison peer is switched off (Comparison peer, above).', true); return; }
+    if(R.state !== 'run'){ note(R.state === 'pause' ? 'Paused: press Resume or Space to record.' : R.state === 'ended' ? 'The observation has ended.' : 'Press Start first.', true); return; }
+    const e = el(), timed = r === 's' && m.dur;
+    if(timed){ const open = epOpen(m.ep);
+      if(open){ open.b = Math.max(open.a, e); hit(btn); note(m.label + ', student: episode ' + m.ep.length + ' ended, ' + clock(open.b - open.a) + ' long.'); return; }
+      m.ep.push({a:e, b:null}); }
+    m.taps[r].push({t:e, wall:Date.now()}); hit(btn);
+    note(m.label + ', ' + (r === 's' ? 'student' : 'peer') + ': ' + (timed ? 'episode ' + m.taps[r].length + ' started; tap again when it ends.' : m.taps[r].length + '.'));
+  }
+  function undoM(j, r){
+    const m = R.mb[j]; if(!m || R.state === 'ready') return;
+    if(r === 'p' && !R.peer){ note('The comparison peer is switched off.', true); return; }
+    const list = m.taps[r]; if(!list.length){ note('There is no count of ' + m.label + ' to undo for ' + WHO[r] + '.', true); return; }
+    if(r === 's' && m.dur && m.ep.length){ const ep = m.ep[m.ep.length - 1];
+      if(ep.b !== null && (R.state === 'run' || R.state === 'pause')){ ep.b = null; note(m.label + ': episode ' + m.ep.length + ' is going on again, timed from its start.'); return; }
+      m.ep.pop(); }
+    list.pop(); note('Last count of ' + m.label + ' removed for ' + WHO[r] + ': ' + list.length + '.');
   }
 
   /* ---------- scoring the sample: which interval a press scores, and when the method allows it ---------- */
@@ -3144,6 +3425,12 @@ render();
     if(tx(o.count)) out.push('a count (' + tx(o.count) + ')');
     if(tx(o.peerCount)) out.push('a peer count (' + tx(o.peerCount) + ')');
     if(k) out.push(plural(k, 'marked interval'));
+    /* v23.1x (review I38, F74) the first behavior's timed minutes, and the other behaviors' counts and minutes */
+    if(tx(o.durTot)) out.push('minutes timed (' + tx(o.durTot) + ')');
+    const L = BEH();
+    (Array.isArray(o.mb) ? o.mb : []).forEach((x, j) => { if(!x || typeof x !== 'object') return; const b = L[j + 1], w = b ? bname(b, 40) : 'behavior ' + (j + 2);
+      if(tx(x.c)) out.push('a count of ' + w + ' (' + tx(x.c) + ')'); if(tx(x.p)) out.push('a peer count of ' + w + ' (' + tx(x.p) + ')');
+      if(tx(x.tot)) out.push('minutes of ' + w + ' timed (' + tx(x.tot) + ')'); });
     return out;
   }
   const nextEmpty = () => state.obs.findIndex(o => o && !existing(o).length);
@@ -3177,11 +3464,15 @@ render();
     if(ps.length){ const tot = ps.reduce((a, p) => a + (p.to - p.from), 0);
       out.push('Recording paused ' + ps.map(p => hms(W(p.from)) + '–' + hms(W(p.to))).join(' and ') + ' (' + clock(tot) + ' in all); the minutes are the ' + r1(R.acc/60000) + ' observed.'); }
     if(sample && (miss.s || miss.p)) out.push('Interval sample: ' + missText(miss) + ' not scored; they read as not marked.');
+    /* v23.1x (review I38) */
+    const cut = (L, w) => { const x = L[L.length - 1]; if(x && x.cut) out.push('The last episode of ' + w + ' was still going when the observation ended, so it is timed to the end.'); };
+    if(R.d1) cut(R.ep1, R.name1 || 'the target behavior'); R.mb.forEach(m => { if(m.dur) cut(m.ep, m.label); });
     return out;
   }
   /* the recorder's own lines, in the exact words it writes them: replaced on a replacement, never the user's text */
   const NOTE_RES = [/\s*Recording paused \d[\d:–]*(?: and \d[\d:–]*)* \([\d:]+ in all\); the minutes are the [\d.]+ observed\./g,
-                    /\s*Interval sample: [\w ]+ not scored; they read as not marked\./g];
+                    /\s*Interval sample: [\w ]+ not scored; they read as not marked\./g,
+                    /\s*The last episode of [^\n]{1,80}? was still going when the observation ended, so it is timed to the end\./g];   /* v23.1x (review I38) */
   const NARR_RE = /^Interval sample began at /;
   function notesWrite(i, lines){
     const ta = fieldOf(i, 'notes'); if(!ta) return;
@@ -3214,9 +3505,22 @@ render();
         const pg = page(i), b = pg && pg.querySelector('button.iv[data-obs="' + i + '"][data-field="' + f + '"][data-iv="' + k + '"]');
         if(b && (b.getAttribute('aria-pressed') === 'true') !== want) b.click();
       } });
+    /* v23.1x (review I38, F74) the first behavior's timed minutes; each other behavior into its own row, found by its Setup entry
+       (one taken off Setup since Start is not written, and the save says so) */
+    const mins = ms => String(r1(ms/60000));
+    if(R.d1){ const x = epSum(R.ep1, R.acc); putF(i, 'durTot', mins(x.tot)); putF(i, 'durLong', x.n ? mins(x.long) : ''); }
+    let refs = []; try{ refs = mbList(); }catch(e){}
+    const lost = [];
+    R.mb.forEach(m => { const k = m.ref ? refs.indexOf(m.ref) : -1; if(k < 0){ if(m.taps.s.length || m.taps.p.length) lost.push(m.label); return; }
+      putF(i, 'mb:' + k + ':c', String(m.taps.s.length)); putF(i, 'mb:' + k + ':p', R.peer ? String(m.taps.p.length) : '');
+      if(m.dur){ const x = epSum(m.ep, R.acc); putF(i, 'mb:' + k + ':tot', mins(x.tot)); putF(i, 'mb:' + k + ':long', x.n ? mins(x.long) : ''); } });
     narrWrite(i, sample ? hhmm(W(S.wall)) : '', sample ? sampleLine() : '');   /* v21.32 OB-1: HH:MM for the time picker */
     notesWrite(i, noteLines(sample, miss));
+    return lost;
   }
+  /* v23.1x (review F74, I38) a field the sheet does not show (Setup changed while recording) is kept in the record all the same */
+  function putF(i, f, v){ if(put(fieldOf(i, f), v)) return; const o = state.obs[i]; if(!o) return;
+    const mm = /^mb:(\d+):(c|p|tot|long)$/.exec(f); if(mm){ try{ mbOf(o, +mm[1])[mm[2]] = v; }catch(e){} } else o[f] = v; }
   async function save(){
     if(R.state !== 'ended') return;
     const c = cfgNow();
@@ -3239,10 +3543,11 @@ render();
       if(R.state !== 'ended') return; }
     else { const add = byId('addObs'); if(add) add.click(); i = state.obs.length - 1;
       if(i < 0 || !page(i)){ note('A new observation could not be added, so nothing was written.', true); return; } }
-    write(i, sample, miss);
+    const lost = write(i, sample, miss) || [];
     const n = i + 1, when = hm(W(R.wallStart));
     R.intoRef = null; reset(); fillInto();
-    note('Saved into observation ' + n + ' (recorded from ' + when + '). Add the setting, what happened and the checklists on its sheet.');
+    note('Saved into observation ' + n + ' (recorded from ' + when + '). Add the setting, what happened and the checklists on its sheet.'
+      + (lost.length ? ' ' + andList(lost) + (lost.length === 1 ? ' was' : ' were') + ' taken off Setup during the recording, so ' + (lost.length === 1 ? 'its count was' : 'their counts were') + ' not saved.' : ''), !!lost.length);
     calm(E.obrStart);
     const pg = page(i); if(pg) try{ pg.scrollIntoView({block:'start'}); }catch(e){}
   }
@@ -3257,13 +3562,55 @@ render();
     out.push(['Saves into', i >= 0 ? 'observation ' + (i + 1) + (existing(state.obs[i]).length ? ', replacing what it holds (you are asked first)' : '')
       : 'a new observation (observation ' + (state.obs.length + 1) + ')']);
     out.push(['Observed', clock(R.acc) + ' (' + mins + ' min), ' + hm(W(R.wallStart)) + ' to ' + hm(W(R.wallEnd)) + (ps.length ? ', paused ' + plural(ps.length, 'time') : '')]);
-    out.push(['Student', plural(R.taps.s.length, 'occurrence') + rate(R.taps.s.length)]);
-    out.push(['Comparison peer', R.peer ? plural(R.taps.p.length, 'occurrence') + rate(R.taps.p.length) : 'switched off: the peer count stays empty']);
+    /* v23.1x (review F74, I38) each behavior by name where there are several; episodes and the minutes timed where timed */
+    const many = R.mb.length > 0, mn = ms => r1(ms/60000) + ' min';
+    const timedTxt = L => { const x = epSum(L, R.acc); return x.n ? '; ' + mn(x.tot) + ' timed, the longest episode ' + mn(x.long) : ''; };
+    out.push([many ? R.name1 + ': student' : 'Student', plural(R.taps.s.length, R.d1 ? 'episode' : 'occurrence') + rate(R.taps.s.length) + (R.d1 ? timedTxt(R.ep1) : '')]);
+    out.push([many ? R.name1 + ': peer' : 'Comparison peer', R.peer ? plural(R.taps.p.length, R.d1 ? 'episode' : 'occurrence') + rate(R.taps.p.length) : 'switched off: the peer count stays empty']);
+    R.mb.forEach(m => out.push([m.label, 'student ' + plural(m.taps.s.length, m.dur ? 'episode' : 'occurrence') + rate(m.taps.s.length) + (m.dur ? timedTxt(m.ep) : '')
+      + (R.peer ? '; peer ' + plural(m.taps.p.length, m.dur ? 'episode' : 'occurrence') + rate(m.taps.p.length) : '')]));
     if(S){ const m = unscored(), k = r => { let x = 0; for(let j = 0; j < S.n; j++) if(eff(r, j) === '+') x++; return x; };
       out.push(['Interval sample', cfgText(S) + ': the student marked in ' + k('s') + (R.peer ? ', the peer in ' + k('p') : '') + ' of ' + S.n
         + (m.s || m.p ? '; not scored: ' + missText(m) : '') + (sameCfg(cfgNow()) ? '' : '; the toolbar setting has changed since, so the marks cannot be saved')]); }
     E.obrSum.innerHTML = '<b>Recording Summary<\/b><table>' + out.map(([a, b]) => '<tr><th scope="row">' + H(a) + '<\/th><td>' + H(b) + '<\/td><\/tr>').join('') + '<\/table>';
     hide(E.obrSum, false);
+  }
+  /* v23.1x (review F74, I38) a row of tiles for each other target behavior: its name and Undo, Student, Peer. Ready, the rows
+     follow Setup; from Start they are the ones the recording holds. */
+  let MORE = [];
+  function buildMore(){
+    const host = E.obrMore; if(!host) return;
+    if(R.state === 'ready') R.mb = mbFrom();
+    const sig = JSON.stringify(R.mb.map(m => [m.label, m.full, m.dur]));
+    if(host.__sig === sig) return; host.__sig = sig;
+    host.innerHTML = R.mb.map((m, j) => '<div class="obr-mrow" role="group" aria-label="' + H(m.full) + '"><div class="obr-mside"><span class="obr-mlab">' + H(m.full)
+      + (m.dur ? ' <span class="small">(episodes timed)<\/span>' : '') + '<\/span>'
+      + '<button type="button" class="obr-undo" data-mu="' + j + '" data-who="s" disabled>Undo student<\/button>'
+      + '<button type="button" class="obr-undo" data-mu="' + j + '" data-who="p" disabled>Undo peer<\/button><\/div>'
+      + ['s', 'p'].map(r => '<button type="button" class="obr-tap obr-tap-' + r + '" data-mk="' + j + '" data-who="' + r + '" data-beh="' + H(m.label) + '" aria-keyshortcuts="'
+        + (r === 'p' ? 'Shift+' : '') + (5 + j) + '" disabled><span class="obr-who">' + WHOC[r] + '<\/span><span class="obr-n">0<\/span><span class="obr-rate">&mdash; per hour<\/span><kbd aria-hidden="true">'
+        + (r === 'p' ? '&#8679;' : '') + (5 + j) + '<\/kbd><\/button>').join('') + '<\/div>').join('');
+    MORE = Array.from(host.querySelectorAll('.obr-mrow')).map(row => ({ts:row.querySelector('[data-mk][data-who="s"]'), tp:row.querySelector('[data-mk][data-who="p"]'),
+      us:row.querySelector('[data-mu][data-who="s"]'), up:row.querySelector('[data-mu][data-who="p"]')}));
+    MORE.forEach(x => { ['ts', 'tp'].forEach(t => { x[t + 'n'] = x[t].querySelector('.obr-n'); x[t + 'r'] = x[t].querySelector('.obr-rate'); }); });
+    hide(host, !R.mb.length);
+  }
+  /* the line under a count: the rate, or for a timed behavior the episode going on, else the minutes timed so far */
+  function tileLine(n, L, timed, e, st, perH){
+    if(!timed) return perH(n);
+    if(st === 'ready') return 'tap at its start and its end';
+    const o = epOpen(L); return o ? 'episode ' + clock(e - o.a) : clock(epSum(L, e).tot) + ' timed in all';
+  }
+  function paintMore(e, st, perH){
+    const run = st === 'run';
+    if(st === 'ready') buildMore();
+    const many = R.mb.length > 0, nm = many ? (st === 'ready' ? bname(BEH()[0] || {k:-1}, 32) : R.name1) : null;
+    [E.obrTapS, E.obrTapP].forEach(b => { if(!b) return; if(nm === null){ if(b.hasAttribute('data-beh')) b.removeAttribute('data-beh'); } else if(b.getAttribute('data-beh') !== nm) b.setAttribute('data-beh', nm); });
+    R.mb.forEach((m, j) => { const x = MORE[j]; if(!x) return;
+      setText(x.tsn, m.taps.s.length); setText(x.tpn, m.taps.p.length);
+      setText(x.tsr, tileLine(m.taps.s.length, m.ep, m.dur, e, st, perH)); setText(x.tpr, R.peer ? perH(m.taps.p.length) : 'switched off');
+      dis(x.ts, !run); dis(x.tp, !run || !R.peer); dis(x.us, st === 'ready' || !m.taps.s.length); dis(x.up, st === 'ready' || !R.peer || !m.taps.p.length);
+      cls(x.ts, 'obr-timing', m.dur && st !== 'ready' && !!epOpen(m.ep)); });
   }
   function buildStrip(){
     const s = E.obrStrip; CELLS = null; NUMS = null;
@@ -3371,7 +3718,11 @@ render();
     const bw = (plan && st !== 'ready' ? Math.min(100, 100*e/plan) : 0).toFixed(1) + '%'; if(E.obrBar.style.width !== bw) E.obrBar.style.width = bw;
     const perH = n => st !== 'ready' && e >= 60000 ? r1(n/(e/60000)*60) + ' per hour' : '— per hour';
     setText(E.obrNS, R.taps.s.length); setText(E.obrNP, R.taps.p.length);
-    setText(E.obrRateS, perH(R.taps.s.length)); setText(E.obrRateP, R.peer ? perH(R.taps.p.length) : 'switched off');
+    /* v23.1x (review I38) a timed first behavior shows the episode going on, and its tile is ringed while it runs */
+    const d1 = st === 'ready' ? !!(BEH()[0] || {}).dur : R.d1;
+    setText(E.obrRateS, tileLine(R.taps.s.length, R.ep1, d1, e, st, perH)); setText(E.obrRateP, R.peer ? perH(R.taps.p.length) : 'switched off');
+    cls(E.obrTapS, 'obr-timing', d1 && st !== 'ready' && !!epOpen(R.ep1));
+    paintMore(e, st, perH);   /* v23.1x (review F74) */
     dis(E.obrTapS, !run); dis(E.obrTapP, !run || !R.peer);
     dis(E.obrUndoS, st === 'ready' || !R.taps.s.length); dis(E.obrUndoP, st === 'ready' || !R.peer || !R.taps.p.length);
     const pp = String(R.peer); if(E.obrPeer.getAttribute('aria-pressed') !== pp) E.obrPeer.setAttribute('aria-pressed', pp);
@@ -3411,6 +3762,9 @@ render();
   E.obrBoth.addEventListener('click', () => both(E.obrBoth));
   E.obrUndoM.addEventListener('click', undoMark);
   E.obrSample.addEventListener('click', sampleBtn);
+  /* v23.1x (review F74) */
+  if(E.obrMore) E.obrMore.addEventListener('click', ev => { const t = ev.target && ev.target.closest && ev.target.closest('[data-mk],[data-mu]'); if(!t || t.disabled) return;
+    if(t.dataset.mk !== undefined) tapM(+t.dataset.mk, t.dataset.who, t); else undoM(+t.dataset.mu, t.dataset.who); paint(); });
   E.obrPeer.addEventListener('click', peerToggle);
   E.obrTest.addEventListener('click', () => { if(!PR.on){ note('Alerts are off. Turn them on to test.', true); return; }
     ctx(); cue('test', ''); note('Test alert' + (PR.sound ? '' : ' (sound is off)') + '. If you heard nothing, check the device volume and silent mode.'); });
@@ -3439,16 +3793,22 @@ render();
     return t.tagName === 'INPUT' && TEXTY.test((t.getAttribute('type') || '').toLowerCase()); }
   document.addEventListener('keydown', e => {
     if(R.state === 'ready' || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]')) return;
-    const code = e.code || '', key = e.key || '', sh = e.shiftKey, SH = '!@#$';
+    const code = e.code || '', key = e.key || '', sh = e.shiftKey, SH = '!@#$', SHM = '%^&';
     let act = null;
     if(code === 'Space' || key === ' '){ if(R.state === 'ended') return; act = startPause; }
     else {
-      let n = 0, peer = false;
-      if(/^Digit[1-4]$/.test(code)){ n = +code.slice(5); peer = sh; }
+      let n = 0, peer = false, mk = -1;
+      /* v23.1x (review F74) 5 to 7 count the other target behaviors, Shift the peer */
+      if(/^Digit[5-7]$/.test(code)){ mk = +code.slice(5) - 5; peer = sh; }
+      else if(/^Numpad[5-7]$/.test(code)) mk = +code.slice(6) - 5;
+      else if(!code && /^[5-7]$/.test(key)) mk = +key - 5;
+      else if(!code && key && SHM.indexOf(key) >= 0){ mk = SHM.indexOf(key); peer = true; }
+      else if(/^Digit[1-4]$/.test(code)){ n = +code.slice(5); peer = sh; }
       else if(/^Numpad[1-4]$/.test(code)) n = +code.slice(6);
       else if(!code && /^[1-4]$/.test(key)) n = +key;
       else if(!code && key && SH.indexOf(key) >= 0){ n = SH.indexOf(key) + 1; peer = true; }
-      if(n === 1) act = () => tap(peer ? 'p' : 's', peer ? E.obrTapP : E.obrTapS);
+      if(mk >= 0){ if(R.mb[mk]) act = () => { tapM(mk, peer ? 'p' : 's', MORE[mk] && (peer ? MORE[mk].tp : MORE[mk].ts)); paint(); }; }
+      else if(n === 1) act = () => tap(peer ? 'p' : 's', peer ? E.obrTapP : E.obrTapS);
       else if(n === 2) act = () => mark(peer ? 'p' : 's', '+', peer ? E.obrPP : E.obrSP);
       else if(n === 3) act = () => mark(peer ? 'p' : 's', MINUS, peer ? E.obrPM : E.obrSM);
       else if(n === 4) act = () => both(E.obrBoth);
@@ -3467,9 +3827,9 @@ render();
   let fk = 0;
   function fillSoon(){ clearTimeout(fk); fk = setTimeout(() => { fillInto(); if(R.state === 'ended') summaryBox(); paint(); }, 60); }
   const host = byId('obsPages'); try{ if(host) new MutationObserver(fillSoon).observe(host, {childList:true}); }catch(e){}
-  document.addEventListener('input', e => { const t = e.target; if(t && t.dataset && t.dataset.obs !== undefined) fillSoon(); });
+  document.addEventListener('input', e => { const t = e.target; if(t && t.dataset && (t.dataset.obs !== undefined || t.dataset.mbk !== undefined || t.dataset.meta === 'behavior')) fillSoon(); });   /* v23.1x (review F74) Setup's behaviors too */
   document.addEventListener('change', e => { const t = e.target; if(!t) return;
-    if(t.dataset && t.dataset.obs !== undefined) fillSoon(); else if(CFG.indexOf(t.id) >= 0) paint(); });
+    if(t.dataset && (t.dataset.obs !== undefined || t.dataset.mbk !== undefined)) fillSoon(); else if(CFG.indexOf(t.id) >= 0 || t.id === 'mDur1') paint(); });
   document.addEventListener('click', e => { const t = e.target; if(t && t.closest && t.closest('#viewSeg,#simBtn,#clearBtn,#addObs')){ fillInto(); paint(); } });
   window.addEventListener('scroll', () => { if(R.state !== 'ready') paintPill(el()); }, {passive:true});
   window.addEventListener('resize', () => { if(R.state !== 'ready') paintPill(el()); });
@@ -3483,9 +3843,12 @@ render();
       s:Array.from({length:S.n}, (_, k) => eff('s', k) || ''), p:Array.from({length:S.n}, (_, k) => eff('p', k) || '')} : null,
     cues: () => LOG.map(x => Object.assign({}, x)), scheduled: () => Object.keys(AU.T).sort(), audio: () => !!AU.ac,
     prefs: () => Object.assign({}, PR), wake: () => !!wake,
-    target: (r, v) => { const t = target(r, v === '-' ? MINUS : v); return t.why ? {why:t.why} : {k:t.k, early:!!t.early, late:!!t.late}; }
+    target: (r, v) => { const t = target(r, v === '-' ? MINUS : v); return t.why ? {why:t.why} : {k:t.k, early:!!t.early, late:!!t.late}; },
+    /* v23.1x (review F74, I38) */
+    timed: () => R.d1, episodes: () => R.ep1.map(x => ({a:x.a, b:x.b, cut:!!x.cut})),
+    more: () => R.mb.map(m => ({k:m.k, label:m.label, dur:m.dur, s:m.taps.s.length, p:m.taps.p.length, ep:m.ep.map(x => ({a:x.a, b:x.b, cut:!!x.cut}))}))
   };
-  syncW(); buildStrip(); fillInto(); paint();
+  R.mb = mbFrom(); syncW(); buildStrip(); buildMore(); fillInto(); paint();
 })();
 </script>
 
@@ -4820,6 +5183,76 @@ OUT(function(){const obs=(state.obs||[]).filter(o=>o&&(T(o.date)||T(o.count)||T(
     el.textContent=t;}
   const was=window.__nbhFactsIn;
   window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f);}catch(e){}return r;};
+})();
+</script>
+<script id="ob1-v23beh">
+/* v23.1x (review F74, I38) the case's target behaviors, in and out.
+   In: the workstation's generic fill still puts TB-1's first target (its name and definition) into the behavior box, as before. When
+   that fill has just put it into an empty box, the other targets the case carries (not the replacements) become this record's other
+   target behaviors, up to three, each with its own definition, and a target whose TB-1 dimension is duration has its episodes timed.
+   The case panel's ticked targets (Use the ticked items) go the same way, every one ticked: the first into the behavior box, the rest
+   beside the ones already on Setup. Out: with more than one behavior, or a timed one, the evidence carries one statement per
+   behavior (perBehavior, as Form SP-1's does), next to the record's own statement. */
+(function(){"use strict";
+  const T = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  const fold = s => T(s).toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const isDur = b => /duration/i.test(String(b && b.dim || ''));
+  /* each target once: not one already on Setup, nor the first behavior (whose box holds "name: definition") */
+  function addMore(list){
+    const L = mbList(), have = new Set(L.map(b => fold(b.label)).filter(Boolean)), box = fold(state.meta.behavior);
+    const taken = f => have.has(f) || (!!box && (box === f || box.startsWith(f + ' ')));
+    let n = 0; const left = [];
+    list.forEach(b => { const f = fold(b && b.label); if(!f || taken(f)) return;
+      if(L.length >= MB_MAX){ left.push(T(b.label)); return; }
+      L.push({label:T(b.label), def:T(b.def), dur:isDur(b) ? '1' : ''}); have.add(f); n++; });
+    return {n, left};
+  }
+  const tooMany = left => left.length ? 'Three more target behaviors fit on one record: ' + left.join(', ') + (left.length === 1 ? ' was' : ' were') + ' not placed; observe ' + (left.length === 1 ? 'it' : 'them') + ' on a record of ' + (left.length === 1 ? 'its' : 'their') + ' own.' : '';
+  const was = window.__nbhFactsIn;
+  window.__nbhFactsIn = function(f){
+    let r = null; try{ r = was ? was.apply(this, arguments) : null; }catch(e){ r = null; }
+    const C = window.nbhCase;
+    if(r || !f || typeof f !== 'object' || !C || typeof C.generic !== 'function') return r;
+    const before = T(state.meta.behavior);
+    r = C.generic(f, false);   /* the first behavior and the function, as before: it answers {filled, generic:true} */
+    try{
+      const all = Array.isArray(f.behaviors) ? f.behaviors : [], b0 = all[0];
+      if(!before && b0 && T(state.meta.behavior) && !mbList().length){
+        if(isDur(b0)) state.meta.dur1 = '1';
+        const x = addMore(all.slice(1).filter(b => b && T(b.label) && !b.isRep));
+        if(x.n){ r = Object.assign({}, r, {filled:(r && r.filled || 0) + x.n, more:x.n}); const t = tooMany(x.left); if(t) r.note = t; }
+        render();
+      }
+    }catch(e){}
+    return r;
+  };
+  /* ticked: a target already on the record stays where it is; the first ticked one not on it replaces the behavior box, as the
+     generic fill did, and the rest are added beside the others (none is taken away: Setup's Remove does that) */
+  window.__nbhFactsPick = function(sel){
+    sel = sel || {}; const C = window.nbhCase, list = (Array.isArray(sel.behaviors) ? sel.behaviors : []).filter(b => b && T(b.label));
+    const box = fold(state.meta.behavior), on = new Set(mbList().map(b => fold(b.label)).filter(Boolean));
+    const onRec = b => { const f = fold(b.label); return on.has(f) || (!!box && (box === f || box.startsWith(f + ' '))); };
+    const first = list[0] && !onRec(list[0]) ? list[0] : null;
+    let r = {filled:0};
+    if(C && typeof C.generic === 'function') r = Object.assign({}, C.generic({behaviors:first ? [first] : [], fn:sel.fn}, true) || r);
+    if(first) state.meta.dur1 = isDur(first) ? '1' : '';
+    const x = addMore(list.filter(b => b !== first));
+    r.filled = (r.filled || 0) + x.n; const t = tooMany(x.left); if(t) r.note = t;
+    render(); return r;
+  };
+  const wasOut = window.__nbhFactsOut;
+  window.__nbhFactsOut = function(){
+    let r = null; try{ r = wasOut ? wasOut.apply(this, arguments) : null; }catch(e){ r = null; }
+    try{
+      if(!r || !r.evidence || !behMany()) return r;
+      const n = state.obs.length;
+      const per = behSummary().filter(x => x.counted || x.timed).map(x => ({behavior:behShort(x.b, 60), label:T(x.b.label), statement:behSentence(x, n),
+        n:x.counted, seen:x.seen, count:x.tot, rate:x.rate, peerCount:x.pCounted ? x.pTot : null, peerRate:x.pRate,
+        timed:!!x.b.dur, durTot:x.b.dur ? x.durTot : null, durLong:x.b.dur ? x.durLong : null, durPct:x.b.dur ? x.durPct : null}));
+      if(!per.length) return r;
+      return Object.assign({}, r, {evidence:Object.assign({}, r.evidence, {perBehavior:per})});
+    }catch(e){ return r; }
+  };
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
