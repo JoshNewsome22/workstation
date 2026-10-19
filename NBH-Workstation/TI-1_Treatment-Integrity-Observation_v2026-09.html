@@ -1204,7 +1204,8 @@ input[data-m],textarea[data-m]{font:inherit}
     <h3 style="margin-top:14px">Observer Notes and Follow-up</h3>
     <table class="rt">
       <tr><th style="width:22%">What was observed</th><td><textarea data-m="notes" rows="3" style="width:100%"></textarea></td></tr>
-      <tr><th>Barriers to implementation</th><td><textarea data-m="barrier" rows="2" style="width:100%" placeholder="Staffing, competing demands, materials, plan complexity, disagreement with the plan"></textarea></td></tr>
+      <tr><th>Barriers to implementation</th><td><textarea data-m="barrier" rows="2" style="width:100%" placeholder="Staffing, competing demands, materials, plan complexity, disagreement with the plan"></textarea>
+        <div class="noprint ti-why" id="tiWhy" hidden><button type="button" class="tool" id="tiWhyBtn">Find out why (Form PD-1)</button> <span class="hint">Barriers are better found with the supervisor, item by item, than from memory. Form PD-1 opens beside this one with this check&rsquo;s figures offered; retrain only if it finds the training domain leading.</span></div></td></tr>
       <tr><th>Action taken</th><td><textarea data-m="action" rows="2" style="width:100%"></textarea></td></tr>
       <tr><th>Re-check due</th><td><input data-m="recheck" style="width:100%"></td></tr>
       <tr><th>Effect on the behavior data</th><td><textarea data-m="effect" rows="2" style="width:100%" placeholder="Whether the student's data over this period can be interpreted given the integrity obtained"></textarea></td></tr>
@@ -1803,7 +1804,11 @@ window.__nbhFactsOut=function(){try{const M=metrics(),iso=v=>{v=String(v||'').tr
     m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(v);return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
   const obs=M.used.map(x=>{const o=S.obs[x.j]||{};return {date:iso(o.date),type:String(o.type||''),pct:Math.round(1000*x.c/x.s)/10,n:x.s};}).filter(o=>o.date);
   if(!obs.length)return null;
-  return {integrity:{obs,overall:M.global.n?Math.round(1000*M.global.c/M.global.n)/10:null,crit:M.critM.n?Math.round(1000*M.critM.c/M.critM.n)/10:null,criterion:+S.crit||90,src:'TI-1'}};}catch(e){return null;}};
+  /* v22.83 (review F251) whom it observed, the protocol, and each scored step's figure, so Form PD-1 can offer the right one */
+  const tt=v=>String(v==null?'':v).trim(),mm=S.meta||{};
+  const steps=M.stepRows?M.stepRows.filter(r=>r.s>0).map(r=>({d:tt((S.steps[r.i]||{}).d).slice(0,160),pct:Math.round(1000*r.c/r.s)/10,crit:!!r.crit})).filter(x=>x.d):[];
+  return {integrity:{obs,overall:M.global.n?Math.round(1000*M.global.c/M.global.n)/10:null,crit:M.critM.n?Math.round(1000*M.critM.c/M.critM.n)/10:null,criterion:+S.crit||90,src:'TI-1',
+    who:tt(mm.int).slice(0,80),role:tt(mm.pos).slice(0,80),skill:tt(mm.skill).slice(0,120),steps}};}catch(e){return null;}};
 </script>
 
 <script id="ti1-run">
@@ -3502,6 +3507,9 @@ window.__nbhFactsIn=function(f){const c=C();P=c?c.planSteps(f):null;
     try{nbhUI.toast(r.steps.length+' step'+(r.steps.length===1?'':'s')+' from the plan (Form TD-1), '+P.crit+' critical.',{kind:'ok'});}catch(e){}
     return {filled:((g&&g.filled)|0)+r.steps.length,note:'the steps are the plan\u2019s step list (Form TD-1)'};}
   const r=wasIn?wasIn.apply(this,arguments):null;try{bar();}catch(e){}return r;};
+/* v22.83 (review F249) Find out why: in the workstation, Form PD-1 opens beside this form */
+(function(){const w=document.getElementById('tiWhy'),b=document.getElementById('tiWhyBtn');if(!w||!b)return;let inShell=false;try{inShell=window.parent!==window;}catch(e){}
+  if(!inShell)return;w.hidden=false;b.addEventListener('click',()=>{try{window.parent.postMessage({nbh:'open',want:'PD-1',beside:true},'*');}catch(e){}});})();
 const wasOut=window.__nbhFactsOut;
 /* out: integrity.missed, the steps the retraining list names (below the criterion or with an error on the deciding
    observations), most urgent first, each with its number on the plan (pn) when it came from the plan's list */

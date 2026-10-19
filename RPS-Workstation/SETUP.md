@@ -9903,6 +9903,98 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.83: PD-1 is a supervision record, sends low integrity to "find out why", offers TI-1's figure instead of writing it in, and names the instrument as published (review Wave 3)
+
+- **A supervision record, not the student's (F248).** PD-1 is about an adult's working conditions. The masthead, the
+  printed header and the page footer now say "Supervision record kept by the BCBA. Not part of the student's file." The
+  student appears by initials only: **Student the plan is for (initials only)** takes initials from the bar (M.R.), and
+  the Student ID field is gone. A file saved before opens with the name turned into initials and the ID dropped.
+  **The staff member was told** records that the staff member heard what the checklist is for (the conditions for the
+  task, not a judgement of the person) and who will see it; until it is, Setup says to tell them first.
+- **A note for the student's file (F248, F253).** The Plan sheet drafts **Note for the Student's File and the Plan
+  Review**: the plan component, how often it was delivered, the domain found leading, the changes chosen, the measure,
+  the reassessment date and the result, without the staff member's or supervisor's name. The note is checked for those
+  names. It goes to the case (with the leading domain, the changes and the reassessment date) only when it names no
+  one, and Form PR-1's "Also in the review period" quotes it. Nothing else about the person leaves the form.
+- **Off the student's packet unless ticked (F248).** **Tick the ones I've used** leaves PD-1 out of the master print.
+  Ticking it by hand asks first: it is a supervision record, and parents can ask to see what is in the packet.
+- **Low integrity: find out why before retraining (F249).** Today no longer says "retrain the steps missed" on one
+  integrity check.
+  - Integrity under the criterion on two or more of the last three checks says **find out why before retraining
+    (Form PD-1)** and opens PD-1.
+  - A single check under the criterion says to check again first, since PD-1 is for a consistent pattern.
+  - Once PD-1 holds a result, Today names its leading domain, the changes chosen and the reassessment date.
+  - "Retrain" stays only when PD-1 found the training domain leading, or training items answered No.
+  - The decision list says the same.
+  - Form TI-1 has **Find out why (Form PD-1)** beside Barriers to implementation. In the workstation it opens PD-1 beside
+    TI-1, and PD-1 takes TI-1's figures as it opens.
+- **TI-1's figure offered, never written in (F251).** "Current level" is the BCBA's own measure of the pinpointed task.
+  - TI-1's integrity is no longer written into it from a word list. That list matched "session" in a concern about
+    arriving late.
+  - A new box, **The concern is a step of the plan**, decides whether the figure is offered at all.
+  - When it is ticked, the figure is offered beside the field: TI-1's overall figure and each step under the criterion,
+    each with a tap to use it.
+  - It is offered only when TI-1 observed the staff member assessed. TI-1 now sends whom it observed and each step's
+    figure.
+  - When TI-1 observed someone else, the figure is not offered and that is said.
+  - The concern started from TI-1's missed steps (v22.46) follows the same rule.
+- **The instrument as published (F252).**
+  - The Guide no longer calls version 1.1 an unpublished training document. It names Jimenez, Wilder, Brand, Carr,
+    Sellers and Mason (2023), which assessed its validity and reliability from video vignettes, and its 2024 correction
+    of Resources item 3.
+  - It names the 2013 version's correction (Carr & Wilder, 2016).
+  - It names Bowe and Sellers (2018) as the closest study to a school: preschool teachers and paraprofessionals, where
+    the indicated training worked and posted reminders did not.
+  - It says the wording here has not been compared line by line with the published appendix.
+  - The masthead says "most NOs", and the four sources are in the reference list.
+- **The reassessment on the due list (F253).** The reassessment date is a date field. It appears on the due list and in
+  Today when it is a week away or past.
+- **What the case already knows (F254).**
+  - The people the case knows are a pick list for the staff member assessed, and the role follows: those trained on
+    Form ST-1 and the person TI-1 observed.
+  - An empty "Plan or program" takes the plan from Form TD-1.
+  - ST-1's result is shown beside Training items 1 and 4 as evidence to weigh, never as the answer.
+  - The school no longer lands in the task's setting: the field is now **Where and when the task is due**.
+- **Verified means on record (F255).**
+  - An asterisked item marked "Direct observation" counts as verified only when an observation row names it (R4, C3 ...).
+  - An item marked "Employee interview" counts only when the staff interview has a date.
+  - An item seen only under conditions that were not typical is listed.
+- **The worked example (F256).**
+  - Training item 4 is Yes, as its own note says (16 NOs, training 1 of 5).
+  - A consecutive plan is now a list of steps in rank order: each step's start, its criterion for moving on, and the date
+    it is checked.
+  - A step that starts before the one before it is checked is pointed out.
+  - The example's three steps follow one another.
+- **The business-setting questions (F257).**
+  - Austin's seven questions show behind a switch and print only when answered.
+  - The one that judged the person ("capacity to learn the task") is dropped; Training item 1 covers it.
+- **Each plan row opens its form (I127).** In the workstation, a plan row has **Open Form ...**:
+  - ST-1 for training rows; ST-1 already takes TI-1's missed steps.
+  - QS-1 for the job aid and clarification rows.
+  - DD-1 for highlighting outcomes.
+  - TI-1 for feedback.
+  - CN-1 for supervisor presence.
+- **The measure, before and after (I128).** The Plan sheet holds the performance measure as it is checked and graphs it,
+  with each step's start marked.
+- **A one-page plan for the staff member and supervisor (I129).** **Print the one-page plan** prints, on its own page:
+  - the task, and what changes;
+  - the steps one at a time;
+  - who does what by when, and how we will know.
+
+  It says it is about the conditions for the task, not a judgement, and carries no student name, ID or initials.
+- **Interview mode (I130).** On the Interview sheet, **Interview mode** shows one question at a time, in order, with large
+  answers.
+  - The follow-up shows only when it applies.
+  - An asterisked item says to verify before answering.
+  - Items a skip rule has answered are passed over.
+  - Nothing new is saved, and printing is unchanged.
+- Not done: keeping PD-1 out of **Save case**, backup and hand-over altogether (F248's second step), or in a staff-side
+  file of its own (I126). That is a decision about where the district keeps supervision records, so it is the BCBA's and
+  the district's to make. PD-1 still saves with the case. It now carries initials only, and the note is the part meant for
+  the student's file.
+- qa/pd1-w3-test.js (24 checks), qa/pd1-w3b-test.js (19 checks). qa/v2178-c2-test.js, qa/v2246b-test.js and
+  qa/v2178-shell-test.js now expect the figure offered rather than written in, and Today's new wording.
+
 ### v22.82: EB-1 says what to do at the first sign, knows its plan version, takes the student profile, and gives asking the better deal (review Wave 3)
 
 - **What to do at the earliest sign (F381).** The brief named the earliest sign but never what to do about it, although the

@@ -1506,7 +1506,10 @@ function renderRail(){
 function railButton(id){return $('#rail [data-open="'+(id||state.cur||ALL[0][0])+'"]')||$('#rail [data-open]');}
 $('#rail').addEventListener('click',e=>{
   const tick=e.target.closest('[data-tick]');
-  if(tick){state.ticked[tick.dataset.tick]=tick.checked;renderRail();e.stopPropagation();return;}
+  if(tick){const id=tick.dataset.tick;e.stopPropagation();
+    /* v22.83 (review F248) a supervision record goes into the student's packet only when the BCBA says so */
+    if(tick.checked&&MP_ASK[id]&&!confirm(MP_ASK[id])){tick.checked=false;return;}
+    state.ticked[id]=tick.checked;renderRail();return;}
   const it=e.target.closest('.item'); if(!it)return;
   /* v21.78 a tap in the space around a form's tick box (left of its name) ticks it, rather than opening the form */
   if(e.target===it){const cb=it.querySelector('[data-tick]'),b=it.querySelector('button.open');if(cb&&b&&e.clientX<b.getBoundingClientRect().left){cb.click();return;}}
@@ -1626,7 +1629,7 @@ const onNarrow=()=>{
 };
 if(NARROW.addEventListener) NARROW.addEventListener('change',onNarrow); else if(NARROW.addListener) NARROW.addListener(onNarrow);
 $('#tickUsed').addEventListener('click',()=>{
-  ALL.forEach(([id])=>{const st=state.status[id]||(state.pending[id]||{}).status;state.ticked[id]=!!(st&&st.filled>4);});   /* v21.61 the case's forms not loaded yet count */
+  ALL.forEach(([id])=>{const st=state.status[id]||(state.pending[id]||{}).status;state.ticked[id]=!!(st&&st.filled>4)&&!MP_ASK[id];});   /* v21.61 the case's forms not loaded yet count; v22.83 PD-1 only by hand */
   renderRail();
 });
 $('#tickNone').addEventListener('click',()=>{state.ticked={};renderRail();});
@@ -2260,7 +2263,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.82';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.83';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2485,11 +2488,15 @@ async function relay(ev,d){
   else{const open=!!state.frames[want];relayNote(from,want,open?'no answer':'not open');answer({ok:false,why:open?'no answer':'not open'});}
 }
 const OPEN_PAIR={'TK-1':'TE-1','TE-1':'TK-1'};
+/* v22.83 (review F249) Form TI-1's Find out why opens Form PD-1, which takes TI-1's part of the case as it opens */
+const OPEN_ALSO={'TI-1':['PD-1'],'PD-1':['ST-1','QS-1','TI-1','DD-1','CN-1']};   /* v22.83 (review I127) a PD-1 plan row opens the form that carries it out */
+/* v22.83 (review F248) forms ticked into the master print only by hand, after this question */
+const MP_ASK={'PD-1':'Form PD-1 is a supervision record about a staff member, kept by the BCBA. It is not part of the student\u2019s file, and parents can ask to see what is in the packet.\n\nPrint it with this student\u2019s packet anyway?'};
 function openFor(ev,d){
   const from=relayFrom(ev.source),want=typeof d.want==='string'?d.want:'',
         reply=m=>{try{ev.source.postMessage(Object.assign({nbh:'opened',want},m),'*');}catch(e){}};
   if(!from){relayNote('',want,'open ignored: not a form frame');return;}
-  if(OPEN_PAIR[from]!==want||!ALL.some(f=>f[0]===want)){relayNote(from,want,'open ignored: not its pair');return;}
+  if((OPEN_PAIR[from]!==want&&!(OPEN_ALSO[from]||[]).includes(want))||!ALL.some(f=>f[0]===want)){relayNote(from,want,'open ignored: not its pair');return;}
   if(state.restoring){relayNote(from,want,'open refused: restoring');reply({ok:false,why:'busy'});return;}
   const t=Date.now(),o=state.openAt||(state.openAt={});
   if(t-(o[from]||0)<1000){relayNote(from,want,'open ignored: too soon');return;}
@@ -2504,7 +2511,13 @@ function openFor(ev,d){
   /* beside: whether the two now show side by side; false tells the asker that its partner took its place (a phone) */
   const both=splitOn()&&state.split.includes(from)&&state.split.includes(want);
   relayNote(from,want,'opened');reply({ok:true,beside:both});
+  if((OPEN_ALSO[from]||[]).includes(want))openAlsoFacts(from,want);
 }
+/* v22.83 the partner opened by OPEN_ALSO takes the asker's part of the case as it is now: read from the asker alone (a full read
+   waits on the partner, which is still loading) and handed to the partner as it loads, or at once if it is open */
+async function openAlsoFacts(from,want){const k=FACT_SRC[from];if(!k)return;const r=await grab(from,'facts?',null,3000);const out=r&&r.facts;
+  if(out&&out[k]){const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});f[k]=out[k];f.src[k]=from;state.facts=f;}
+  const fr=state.frames[want];if(fr&&fr.dataset.loaded)pushFactsTo(fr);}
 
 /* ================= the case: facts that flow between forms (v21.31) =================
    The target behaviors are defined once, on Form TB-1; the function is concluded on Form FS-1, the
@@ -2527,8 +2540,10 @@ const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-
   /* v22.54 (review F421, F419) the token system designed on TE-1; RA-1's reinforcer verdicts */ 'TE-1':'token','RA-1':'reinf',
   /* v22.72 (review F353) the caregiver trained on CT-1 and where the training stands */ 'CT-1':'caregiver',
   /* v22.74 (review F284) the class-wide system on GC-1: arrangement, phase, criterion, changes, fidelity */ 'GC-1':'classwide',
-  /* v22.82 (review I191) the brief given to limited-contact staff: setting, roles, issue date, the plan version it was built from */ 'EB-1':'brief'};
-const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1','TE-1','RA-1','CT-1','GC-1','EB-1'];
+  /* v22.82 (review I191) the brief given to limited-contact staff: setting, roles, issue date, the plan version it was built from */ 'EB-1':'brief',
+  /* v22.83 (review F248, F249) the performance diagnostic (Form PD-1): the plan component, the leading domain, the changes chosen, the
+     reassessment date and the note for the student's file; no staff names */ 'PD-1':'perf'};
+const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1','TE-1','RA-1','CT-1','GC-1','EB-1','PD-1'];
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsOwed=false;   /* v21.87 a send asked while a read runs is kept; a change read without sending is still owed to the forms */
 function noteFactSource(id,st){
@@ -2550,8 +2565,8 @@ async function factsFlush(){
   if(factsPushes!==n)await new Promise(r=>setTimeout(r,300));
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||f.token||f.reinf||f.caregiver||f.classwide||f.brief||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide,f.brief]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||f.token||f.reinf||f.caregiver||f.classwide||f.brief||f.perf||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide,f.brief,f.perf]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
   factsBusy=true;
@@ -3717,7 +3732,7 @@ const CASE_MAP=[
  ['Plan','Function first, then goals, then the components the case needs; contextual fit before anyone is trained.',
   [['TD-1','function-based treatment: antecedent, teaching, consequence, crisis'],['GB-1','goals and objectives: they carry forward'],['CF-1','contextual fit with the people who will run it'],['SV-1','social validity before (and again after)'],['SA-1','skill-acquisition data for the replacement skill'],['SM-1','self-monitoring, point systems, behavioral contract'],['SR-1','the schedule of reinforcement, designed and thinned'],['TE-1','token economy'],['GC-1','class-wide and group contingencies'],['VS-1','visual supports and communication boards'],['TK-1','the token board book: choices, targets, board and tokens, printed, laminated and bound'],['CR-1','crisis plan and debriefing, when the behavior is dangerous'],['DT-1','delay tolerance'],['AD-1','accumulated or distributed reinforcement'],['BC-1','behavioral contrast across settings'],['MS-1','medication side effects, when medication changes']]],
  ['Train and run it','Before the start date, then every week.',
-  [['ST-1','staff training to competency (BST)'],['EB-1','the one-page brief for limited-contact staff'],['QS-1','the staff quick start: four pages and a flow sheet for the adults running the plan'],['CT-1','caregiver training'],['TV-1','the training video for the team or the family: the script from the case, a teleprompter, the cards on screen'],['HD-1','home data sheets the family keeps'],['TI-1','treatment integrity, observed'],['PD-1','when integrity is low: why, and what fixes it'],['CN-1','every consultation, visit and call, logged'],['RS-1','ongoing supervision of the RBT who runs the plan: the monthly 5%, contacts and observation']]],
+  [['ST-1','staff training to competency (BST)'],['EB-1','the one-page brief for limited-contact staff'],['QS-1','the staff quick start: four pages and a flow sheet for the adults running the plan'],['CT-1','caregiver training'],['TV-1','the training video for the team or the family: the script from the case, a teleprompter, the cards on screen'],['HD-1','home data sheets the family keeps'],['TI-1','treatment integrity, observed'],['PD-1','when integrity is low: why, and what fixes it (a supervision record about the adult, off the student’s packet unless ticked)'],['CN-1','every consultation, visit and call, logged'],['RS-1','ongoing supervision of the RBT who runs the plan: the monthly 5%, contacts and observation']]],
  ['Review and exit','At each review date, and whenever the graph says so.',
   [['PR-1','periodic review: continue, change, fade, exit'],['RM-1','relapse mitigation and inoculation before fading'],['SV-1','social validity after'],['DD-1','the graph decides']]]
 ];
@@ -5319,8 +5334,9 @@ function todayItems(){const f=state.facts||{},d=f.data,ti=f.integrity,L=[];
     (d.behaviors||[]).filter(b=>b.aimMet).forEach(b=>L.push({k:'Aim',t:esc(b.name)+' has been at its aim '+b.run+' days in a row ('+b.need+' asked): raise the criterion or plan the next step',open:'GB-1'}));}
   if(ti&&(ti.obs||[]).length){const o=ti.obs[ti.obs.length-1],n=tdDays(o.date);
     if(n!==null&&n>14)L.push({k:'Integrity',t:'No integrity check on Form TI-1 for '+n+' days (the last, '+esc(tdMd(o.date))+', '+o.pct+'%)',open:'TI-1'});
-    if(o.pct<(ti.criterion||90))L.push({k:'Integrity',t:'The last integrity check was '+o.pct+'%, under the '+(ti.criterion||90)+'% criterion: retrain the steps missed before reading the data',open:'TI-1'});}
+    if(o.pct<(ti.criterion||90)){const x=tdIntegrity(f);if(x)L.push({k:'Integrity',t:x.t,open:x.open});}}
   else if(d&&d.days)L.push({k:'Integrity',t:'No integrity check on Form TI-1 in the case yet',open:'TI-1'});
+  {const x=tdPerfDue(f);if(x)L.push(x);}   /* v22.83 */
   return L;}
 async function todayOpen(){await gatherFacts(false);try{await gatherDue();}catch(e){}
   const L=todayItems(),p=packet(),f=state.facts;
@@ -5372,13 +5388,28 @@ const tdT=v=>String(v==null?'':v).trim();
 /* the plan review's rules (PR-1's own, or these defaults): judge a phase after ten school days; a change of 20% or more from
    the level before the plan counts as progress */
 function tdRules(f){const r=f.review&&f.review.rules||{};return {minDays:+r.minDays>0?+r.minDays:10,improvePct:+r.improvePct>0?+r.improvePct:20};}
+/* v22.83 (review F249) integrity under the criterion: find out why before retraining. Retrain only when Form PD-1 found the
+   training domain leading, or items in it answered No; once PD-1 holds a result, its leading domain and the changes chosen are
+   said instead. A single check under the criterion is checked again first: PD-1 is for a consistent pattern. */
+function tdIntegrity(f,decision){const ti=f.integrity,obs=ti&&ti.obs||[],crit=ti&&ti.criterion||90;if(!obs.length)return null;const o=obs[obs.length-1];if(!(o.pct<crit))return null;
+  const last=obs.slice(-3),n=last.filter(x=>x.pct<crit).length,m=last.length,pf=f.perf&&typeof f.perf==='object'?f.perf:null;
+  const head=n>1?'Integrity under the '+crit+'% criterion on '+n+' of the last '+m+' checks (the last, '+esc(tdMd(o.date))+', '+o.pct+'%)':(decision?'the last integrity check was '+o.pct+'%':'The last integrity check was '+o.pct+'%, under the '+crit+'% criterion');
+  if(pf&&pf.lead){const train=pf.lead==='T';
+    const did=': Form PD-1'+(pf.date?' ('+esc(tdMd(pf.date))+')':'')+' found '+esc(String(pf.leadName||pf.lead).toLowerCase())+' leading'+(train?'':(pf.fixes&&pf.fixes.length?'; the changes: '+esc(pf.fixes.slice(0,3).join('; ').toLowerCase()):''))+(pf.reassess&&!train?', reassessed '+esc(tdMd(pf.reassess)):'');
+    if(train)return {t:head+did+(decision?': retrain first, then judge the plan':': retrain the steps missed (the retraining list on Form TI-1)'),open:'TI-1'};
+    return {t:head+did+(decision?'; judge the plan once the change has run'+(pf.tNo?' (retrain the training items answered No too)':''):(pf.tNo?'; training items answered No as well: retrain those too':'')),open:'PD-1'};}
+  if(n<2)return {t:head+(m===1?' (the only check so far)':' (1 of the last '+m+')')+': check again before acting; if it repeats, find out why before retraining (Form PD-1)',open:'TI-1'};
+  return {t:head+': find out why before retraining (Form PD-1)'+(decision?', then judge the plan':''),open:'PD-1'};}
+/* v22.83 (review F253) the reassessment Form PD-1 set, once it is near or past */
+function tdPerfDue(f){const pf=f.perf;if(!pf||!pf.reassess)return null;const n=tdLeft(pf.reassess);if(n===null||n>7)return null;
+  const pl=String(pf.plan||'');return {k:'Integrity',t:'The reassessment Form PD-1 set'+(pl?' for '+esc(pl.length>60?pl.slice(0,58).replace(/\s+\S*$/,'')+'\u2026':pl):'')+' is '+(n<0?(-n)+' day'+(n===-1?'':'s')+' past':n===0?'today':'in '+n+' day'+(n===1?'':'s'))+' ('+esc(tdMd(pf.reassess))+'): repeat the measure, and the checklist if nothing has changed',open:'PD-1'};}
 function tdDecision(f){const d=f.data,L=[];if(!d||!Array.isArray(d.behaviors))return L;const R=tdRules(f),ti=f.integrity,obs=ti&&(ti.obs||[]).length?ti.obs[ti.obs.length-1]:null,crit=ti&&ti.criterion||90;
   d.behaviors.forEach(b=>{if(!b.base||!b.cur||b.base.mean==null||b.cur.mean==null||!(b.cur.days>=R.minDays))return;const up=/replacement|acquisition|skill/i.test(b.kind||'')||b.direction==='increase';
     const bm=+b.base.mean,cm=+b.cur.mean,chg=bm?((up?cm-bm:bm-cm)/bm*100):(up?(cm>0?100:0):(cm>0?-100:0));if(chg>=R.improvePct)return;
     const how=chg<=-R.improvePct?(up?'lower':'higher')+' than before the plan ('+Math.round(Math.abs(chg))+'%)':'about where it was before the plan ('+(chg>=0?'+':'')+Math.round(chg)+'%)';
     const lead=esc(b.name)+': '+b.cur.days+' days into '+esc(b.curName||'the plan')+', '+how+'; Form PR-1 counts '+R.improvePct+'% as progress';
     if(!obs)L.push({k:'Decision',t:lead+'. Check that the plan is being run (Form TI-1) before changing it',open:'TI-1'});
-    else if(obs.pct<crit)L.push({k:'Decision',t:lead+', but the last integrity check was '+obs.pct+'%: retrain first, then judge the plan',open:'TI-1'});
+    else if(obs.pct<crit){const x=tdIntegrity(f,true);L.push({k:'Decision',t:lead+', but '+x.t.replace(/^Integrity/,'integrity'),open:x.open});}
     else L.push({k:'Decision',t:lead+', with integrity at '+obs.pct+'%: review the plan (modify it, or go back to the assessment)',open:'PR-1'});});
   return L;}
 function tdTimelines(f){const L=[],push=(k,t,open)=>L.push({k,t,open});const pf=f.profile||{},dt=pf.dates||{},rc=f.records||{},rv=f.review||{};

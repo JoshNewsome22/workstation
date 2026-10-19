@@ -64,8 +64,8 @@ const PLAN2={beh:'Hitting (simulated)',src:'TD-1',stepsRev:'rev2',steps:[
   const h=await r.evaluate(i=>prAlsoText({integrity:i}),INT);
   ok('11 PR-1 names the steps missed, by their plan numbers',/Steps missed on the observations/.test(h)&&/plan step 70, “On the target behavior/.test(h)&&/1 commission/.test(h)&&/critical/.test(h),h);
   const pd=await open('PD-1','PD-1_Performance-Diagnostic-Checklist_v2026-09.html');
-  const k=await pd.evaluate(i=>{__nbhFactsIn({integrity:i});return {c:document.querySelector('[data-m="concern"]').value,b:document.querySelector('[data-m="baseline"]').value};},INT);
-  ok('12 PD-1: an empty concern names the steps missed, and the current level follows from TI-1',/^Does not carry out these steps of the plan/.test(k.c)&&/plan step 70/.test(k.c)&&/Treatment integrity 85%/.test(k.b),k);
+  const k=await pd.evaluate(i=>{__nbhFactsIn({integrity:i});return {c:document.querySelector('[data-m="concern"]').value,b:document.querySelector('[data-m="baseline"]').value,s:document.querySelector('#blSug').textContent};},INT);
+  ok('12 PD-1: an empty concern names the steps missed; the current level is offered from TI-1, not written (v22.83)',/^Does not carry out these steps of the plan/.test(k.c)&&/plan step 70/.test(k.c)&&k.b===''&&/Treatment integrity 85%/.test(k.s),k);
   }catch(x){console.log('FAIL exception '+(x&&x.stack||x));fails++;}
   ok('13 no script errors',errs.length===0,errs);
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

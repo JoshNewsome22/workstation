@@ -1,6 +1,6 @@
 /* v21.78 helper C2: the case facts go into eight forms, only where a field is empty (simulated student only: Mateo Rivera).
-   1. CF-1 "Integrity obtained", BC-1 "Integrity in the changed component" and PD-1 "Current level" take Form TI-1's integrity;
-      PD-1 only when the concern is about running the plan;
+   1. CF-1 "Integrity obtained" and BC-1 "Integrity in the changed component" take Form TI-1's integrity; PD-1 offers it beside
+      "Current level" and never writes it in (v22.83, review F251), only when the concern is ticked as a step of the plan;
    2. Form PA-1's menu: AD-1's preference results and reinforcer inventory, DT-1's preference table, VS-1's choice board,
       first-then "Then" and token reward labels (the pictures untouched), each item once, a second pass adding nothing;
    3. Form TB-1's behaviors: MT-1's definition, GC-1's definition of a disruption, BC-1's measure (dimension and unit),
@@ -58,11 +58,14 @@ const CASE={behaviors:[
 
   /* ---------- PD-1 ---------- */
   {let {p,ctx}=await open(FILES.PD);await apply(p,CASE);
-    ok('PD-1: with no concern yet, the current level is Form TI-1\'s integrity',await mv(p,'baseline')===TI_LINE&&await p.evaluate(t=>S.meta.baseline===t,TI_LINE),await mv(p,'baseline'));await ctx.close();
-    ({p,ctx}=await open(FILES.PD));await typeM(p,{concern:'The paraprofessional skips the error-correction step of the plan during math.'});await apply(p,CASE);
-    ok('PD-1: a concern about running the plan takes it too',await mv(p,'baseline')===TI_LINE);await ctx.close();
+    ok('PD-1 (v22.83): Form TI-1\'s integrity is never written into the current level; the note says it is offered',await mv(p,'baseline')===''&&await p.evaluate(()=>!S.meta.baseline),await mv(p,'baseline'));await ctx.close();
+    ({p,ctx}=await open(FILES.PD));await typeM(p,{concern:'The paraprofessional skips the error-correction step of the plan during math.'});
+    await p.evaluate(()=>{const c=document.querySelector('[data-c="planstep"]');c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}));});const b=await apply(p,CASE);
+    const sug=await p.evaluate(()=>document.querySelector('#blSug').textContent);
+    ok('PD-1 (v22.83): a concern ticked as a step of the plan gets the figure offered beside the field, not written',await mv(p,'baseline')===''&&sug.includes(TI_LINE)&&/offered beside/.test(b.r.note),{sug,b});await ctx.close();
     ({p,ctx}=await open(FILES.PD));await typeM(p,{concern:'Arrives 15 minutes late to the morning meeting.'});const a=await apply(p,CASE);
-    ok('PD-1: a concern about something else is left for the person, and the note says why',await mv(p,'baseline')===''&&/not about running the plan/.test(a.r.note),a);await ctx.close();
+    const sug2=await p.evaluate(()=>document.querySelector('#blSug').textContent);
+    ok('PD-1 (v22.83): a concern about something else: nothing written, and the figure waits for the "step of the plan" box',await mv(p,'baseline')===''&&/only when the concern is a step of the plan/.test(sug2),{a,sug2});await ctx.close();
     ({p,ctx}=await open(FILES.PD));await typeM(p,{baseline:'Data sheet blank on 7 of 10 days'});await apply(p,CASE);
     ok('PD-1: a typed current level is kept',await mv(p,'baseline')==='Data sheet blank on 7 of 10 days');await ctx.close();}
 
