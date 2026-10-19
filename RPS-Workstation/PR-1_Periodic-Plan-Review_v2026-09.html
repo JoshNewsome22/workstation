@@ -2324,7 +2324,11 @@ function prSvLine(sv){if(!sv||typeof sv!=='object')return '';const sc=prT(sv.sca
   const ro=sv.roles&&typeof sv.roles==='object'?RL.filter(([k])=>prN(sv.roles[k])!=null).map(([k,l])=>l+' '+prF(sv.roles[k])):[];
   return 'Form '+(prT(sv.form)||'SV-1')+', scale '+sc+': '+P.join('; ')+'.'+(ro.length?' By role ('+(sv.rolesRound==='pre'?'pre':'post')+'): '+ro.join(', ')+'.':'')+(sv.label?' '+prT(sv.label)+'.':'')+(fl.length?' Rated at the low end: '+fl.join('; ')+'.':' No item rated at the low end.');}
 function prFitLine(fit){if(!fit||typeof fit!=='object'||prN(fit.mean)==null)return '';const lo=Array.isArray(fit.low)?fit.low.map(x=>prT(x).replace(/[.\s]+$/,'')).filter(Boolean):[];
-  return 'Form CF-1, scale '+(prT(fit.scale)||'1-6')+': mean '+prF(fit.mean)+(fit.band?' ('+prT(fit.band)+')':'')+(fit.date?', '+prMd(fit.date)+'/'+String(fit.date).slice(0,4):'')+'.'+(lo.length?' Rated low: '+lo.join('; ')+'.':' No item rated low.');}
+  /* v23.19 (CF-1 review F209) the ratings and respondents the figure rests on; a band from an incomplete round is marked provisional */
+  const nn=+fit.n,pp=+fit.possible,kk=+fit.respondents,r2=fit.round2&&typeof fit.round2==='object'?fit.round2:null;
+  return 'Form CF-1, scale '+(prT(fit.scale)||'1-6')+': mean '+prF(fit.mean)+(fit.band?' ('+prT(fit.band)+')':fit.bandProvisional?' ('+prT(fit.bandProvisional)+', provisional)':'')+(fit.date?', '+prMd(fit.date)+'/'+String(fit.date).slice(0,4):'')+'.'
+    +(nn&&pp?' Round '+(fit.round||1)+': '+nn+' of '+pp+' ratings'+(kk?' from '+kk+' respondent'+(kk===1?'':'s'):'')+'.':'')+(r2?' Round 2 in progress: '+(+r2.n)+' of '+(+r2.possible)+' ratings.':'')
+    +(lo.length?' Rated low: '+lo.join('; ')+'.':' No item rated low.');}
 /* the data in one line: the target behavior at baseline and in the most recent period, and the change */
 function prDataLine(){const C=course(),u=prT(S.meta.tUnit),b=prT(S.meta.beh);if(C.b==null&&!C.last)return '';
   return (b?b+': ':'')+'baseline '+(C.b!=null?f2(C.b):'not recorded')+(C.last?', period '+C.last.n+' '+f2(C.last.t):'')+(u?' '+u:'')+(C.pct!=null?' ('+pctTxt(C.pct)+' against baseline)':'')+'.';}

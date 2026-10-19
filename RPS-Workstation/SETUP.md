@@ -9903,6 +9903,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.19: CF-1 waits to ask item 21 until the plan has run, keeps a complete round as the case's figure, dates round 2, and files respondents by role (review Wave 3)
+
+- **Item 21 waits for the plan to run (F208).** "I have seen enough of this plan working to keep running it on a hard day"
+  can only be answered once the plan has run.
+  - In a round given before the plan starts, the item is not rated and is left out of every mean and flag. The grid says
+    why; item 20 asks the expectation.
+  - The respondent page keeps all 21 items, so replies still place as before, but asks for the last one to be left blank.
+  - The worked example's two rounds are both before the plan starts.
+- **One reply no longer replaces a complete round (F209).** The case keeps round 1 until round 2 is complete, or rated by
+  the same people on the same items.
+  - Until then, round 2 is reported as in progress.
+  - A band from an incomplete round is marked provisional.
+  - Form PR-1's fit line now gives the round, the number of ratings and respondents, and any round 2 in progress.
+- **Round 2's own date and timing (F212).** "Round 2 given on" and "Round 2: when" sit under the round bar. The case
+  dates round 2 from them, and the verdict follows round 2's moment.
+  - The re-administration date reaches the workstation's due list while round 2 holds no rating.
+- **Initials only (F213).** The respondent page labels the student by initials, without the student number.
+- **The filed copy by role (F214).** "Print by role", on by default beside Export CSV, prints respondents as number and
+  role (R1 Classroom teacher), and the names column of the Respondents table stays off the paper. Names stay on screen,
+  in the saved file and in the CSV.
+- **What a self-report shows (F215).** A strong verdict now says the people "say they know it, can do it ..." and that Form
+  ST-1 shows whether they can. A flagged item is "where integrity is most likely to fall first".
+- **The reply box (F216).** The Guide and the dialog say that, with the reply box set up, the answers are sealed on the
+  respondent's device and go to the reply box.
+- **Export CSV (F217).** It now gives both rounds side by side, each item's and domain's mean in each round and the change,
+  then the enhancement rows. The file is named for the student and the date.
+- qa/cf1-w3-test.js (12 checks). cf1-respond-test follows the initials-only label.
+
 ### v23.18: IN-1 keeps the interview hypothesis out of the packet, counts written answers apart, shows the consent date, labels respondent pages by initials, and asks how well each informant knows the student (review Wave 3)
 
 - **The packet (F51).** "Save packet" no longer writes the interview hypothesis.

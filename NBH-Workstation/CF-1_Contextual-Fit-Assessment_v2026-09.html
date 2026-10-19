@@ -837,6 +837,8 @@ td input,td select{max-width:100%}
   [data-m="when"]{width:100%!important}
 }
 </style>
+<style id="cf1-v2319">/* v23.19 (review F214) the filed copy by role: the names column stays off the paper */
+@media print{body.cf-byrole #rTbl th:nth-child(2),body.cf-byrole #rTbl td:nth-child(2){display:none}}</style>
 </head>
 <body class="view-setup">
 
@@ -876,6 +878,7 @@ td input,td select{max-width:100%}
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
     <button id="csvBtn">Export CSV</button>
+    <label style="display:inline-flex;gap:6px;align-items:center;font-size:12px" title="The filed copy names each respondent by number and role; names stay on screen and in the saved file"><input type="checkbox" id="cfByRole" checked> Print by role</label>
     <button id="rpBtn" title="Make a one-page questionnaire (a file or a link) for one respondent and one round, answered on any phone or computer and sent back by email">Respondent pages</button>
     <button id="rcBtn" title="Read the answer codes the respondent pages sent back and place them into the respondent columns">Collect responses</button>
     <button id="clearBtn">Clear all</button>
@@ -923,6 +926,9 @@ td input,td select{max-width:100%}
       <button data-r="1" aria-pressed="true">Round 1 &mdash; before enhancement</button>
       <button data-r="2" aria-pressed="false">Round 2 &mdash; after enhancement</button>
     </div>
+    <!-- v23.19 (review F212) round 2's own date and timing -->
+    <div class="row" id="r2Meta" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:6px 0"><label style="font-weight:400">Round 2 given on <input data-m="date2" placeholder="m/d/yyyy" style="width:9em"></label>
+      <label style="font-weight:400">Round 2: when <select data-m="when2"><option></option><option>Before the plan starts</option><option>After a period of implementation</option><option>After an integrity problem on Form TI-1</option><option>At a scheduled review</option></select></label></div>
     <div class="scalekey">
       <span><b>1</b> strongly disagree</span><span><b>2</b> disagree</span><span><b>3</b> slightly disagree</span>
       <span><b>4</b> slightly agree</span><span><b>5</b> agree</span><span><b>6</b> strongly agree</span>
@@ -983,11 +989,11 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">What Contextual Fit Is, and What It Is Not</h2>
     <p>Contextual fit is the extent to which a support plan matches the values, skills, and resources of the people who will run it and the settings where it will run. It is a property of the relationship between a plan and a context, not a property of the plan and not a judgment of the staff. A technically excellent plan can have poor contextual fit, and fit affects whether a plan is run as written: after a protocol designed to improve fit was introduced, implementation fidelity rose and problem behavior fell (Monzalve &amp; Horner, 2021, with four participants). Poor fit is therefore one likely reason a well-designed plan produces no change.</p>
     <p>This form is not a satisfaction survey and not an evaluation of the implementer. It asks what would have to be true for the plan to actually run, and records where those conditions are absent. The answer to a low score is a change to the plan or to the supports around it, not pressure on the person who gave the score.</p>
-    <p class="noprint hint rp-guide"><b>Respondent pages.</b> Ratings given independently are the point of this form, and <b>Respondent pages</b> in the toolbar makes that easy: a one-page questionnaire with the 21 items for one respondent and one round, as a file to attach to an email or as a link when the workstation is on a website. The respondent answers on any phone or computer and presses Send; an email to the case BCBA opens with the answers as a code, and <b>Collect responses</b> reads the codes back into that respondent&rsquo;s column and round here, with their name, role and periods. The page shows the student as initials and ID only and sends nothing anywhere but the email the respondent chooses to send.</p>
+    <p class="noprint hint rp-guide"><b>Respondent pages.</b> Ratings given independently are the point of this form, and <b>Respondent pages</b> in the toolbar makes that easy: a one-page questionnaire with the 21 items for one respondent and one round, as a file to attach to an email or as a link when the workstation is on a website. The respondent answers on any phone or computer and presses Send; an email to the case BCBA opens with the answers as a code, and <b>Collect responses</b> reads the codes back into that respondent&rsquo;s column and round here, with their name, role and periods. The page shows the student by initials only. With the practice&rsquo;s reply box set up, the answers are sealed on the respondent&rsquo;s device and go to the reply box when they press Send; otherwise they travel only in the email the respondent sends. The page stores nothing.</p>
     <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
     <table class="rt">
       <tr><th style="width:28%">Item mean</th><td>The mean rating across respondents who answered that item.</td></tr>
-      <tr><th>Domain mean</th><td>The mean of all answered ratings within the domain, across respondents. Unanswered items are excluded rather than scored as neutral.</td></tr>
+      <tr><th>Domain mean</th><td>The mean of all answered ratings within the domain, across respondents. Unanswered items are excluded rather than scored as neutral. Item 21 asks for experience of the plan running, so a round given before the plan starts leaves it out of every mean; item 20 asks the expectation.</td></tr>
       <tr><th>Overall fit</th><td>The mean of every answered rating on the form, across items and respondents, so a domain with more items counts for more. The published Self-Assessment of Contextual Fit is scored differently: a mean for each two-item subscale, and a total that is the mean of the subscale means (Horner, Salentine &amp; Albin, 2003).</td></tr>
       <tr><th>Fit band</th><td>Named from the overall fit: strong at 5.0 or above; adequate from 4.0 to below 5.0 (with named gaps when an item is flagged); poor from 3.0 to below 4.0; very poor below 3.0. The bands are a working convention, not a finding. Whatever the band, the verdict names the flagged items, and it shows green only when no item is flagged and every rating is in. Its advice assumes the plan has not started unless &ldquo;When this was administered&rdquo; says otherwise.</td></tr>
       <tr><th>Ratings entered</th><td>Each respondent listed can give one rating per item in each round. The verdict counts the ratings entered and the respondents who gave them; while any are missing, the band is provisional and the verdict gives no go-ahead. When the two rounds were not rated by the same respondents on the same items, the change between them is marked as not like for like.</td></tr>
@@ -1035,11 +1041,11 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
 <dialog id="rpDlg" class="gf noprint" aria-labelledby="rpTitle">
   <form method="dialog" class="gf-head"><b id="rpTitle">Respondent pages</b><button value="close" aria-label="Close">&#x2715;</button></form>
   <div class="gf-body">
-    <p class="hint">One page per respondent and round, with the 21 items. Send it as a file (attach it to an email; it opens in any browser, nothing to install) or, when the workstation is on a website, as a link. The respondent answers and presses Send; an email to you opens with the answers as a short code, which <b>Collect responses</b> places into that respondent&rsquo;s column and round. Keep the student&rsquo;s full name out of it: the page shows the label below.</p>
+    <p class="hint">One page per respondent and round, with the 21 items. Send it as a file (attach it to an email; it opens in any browser, nothing to install) or, when the workstation is on a website, as a link. The respondent answers and presses Send. With the reply box set up, the answers are sealed on their device and go to the reply box; otherwise an email to you opens with the answers as a short code, which <b>Collect responses</b> places into that respondent&rsquo;s column and round. The page stores nothing. Keep the student&rsquo;s full name out of it: the page shows the label below.</p>
     <div class="grid2">
       <div class="f"><label for="rpRole">Respondent role (the page names it; the respondent can correct it)</label><select id="rpRole"><option value="teacher" selected>Classroom teacher</option><option value="para">Paraprofessional</option><option value="rsp">Related-service provider</option><option value="other">Other</option></select></div>
       <div class="f"><label for="rpRound">Round</label><select id="rpRound"><option value="1">Round 1, before enhancement</option><option value="2">Round 2, after enhancement</option></select></div>
-      <div class="f"><label for="rpStudent">Student label on the page (initials and ID, not the full name)</label><input id="rpStudent"></div>
+      <div class="f"><label for="rpStudent">Student label on the page (initials only: not the full name or the student number)</label><input id="rpStudent"></div>
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
     </div>
@@ -1112,7 +1118,12 @@ function ensure(){
     if(!m||+m[1]>=ITEMS.length||+m[2]>=S.raters.length)delete S.scores[n][key];}));
 }
 const k=(i,r)=>i+'_'+r;
-const val=(i,r,round)=>{const v=S.scores[round||S.round][k(i,r)];return v?+v:null;};
+/* v23.19 (review F208, F212) item 21 asks for experience of the plan running, so a round given before the plan starts leaves it
+   out: it is not asked, not rated, and not in any mean or flag. Each round has its own timing; round 2's falls back to round 1's. */
+const CF_EXP=ITEMS.length-1;
+function cfWhen(rd){return String((rd===2?(S.meta.when2||S.meta.when):S.meta.when)||'').trim();}
+function cfPre(rd){const w=cfWhen(rd);return rd===2?(!!S.meta.when2&&w==='Before the plan starts'):(!w||w==='Before the plan starts');}
+const val=(i,r,round)=>{const rd=round||S.round;if(i===CF_EXP&&cfPre(rd))return null;const v=S.scores[rd][k(i,r)];return v?+v:null;};
 
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
@@ -1155,10 +1166,16 @@ $('#delR').addEventListener('click',async()=>{if(S.raters.length<=1)return;const
   S.raters.pop();renderAll();});
 
 /* ---------------- rating grid ---------------- */
+/* v23.19 (review F214) on paper, by default, a respondent is named by number and role (R1 Teacher): the filed copy is read by the
+   parent and the administrator item 17 asks about; names stay on screen, in the saved file and in the CSV */
+let cfAnon=false;
+function rName(j){const r=S.raters[j]||{};if(cfAnon)return 'R'+(j+1)+(String(r.role||'').trim()?' '+String(r.role).trim():'');return String(r.name||'').trim()||'R'+(j+1);}
+window.addEventListener('beforeprint',()=>{const c=document.getElementById('cfByRole');cfAnon=!c||c.checked;document.body.classList.toggle('cf-byrole',cfAnon);try{renderAll();}catch(e){}});
+window.addEventListener('afterprint',()=>{if(!cfAnon)return;cfAnon=false;document.body.classList.remove('cf-byrole');try{renderAll();}catch(e){}});
 function renderGrid(){
   const nR=S.raters.length;
   let h=`<thead><tr><th style="width:34px">#</th><th class="item" style="text-align:left">Item</th>
-    ${S.raters.map((r,j)=>`<th style="min-width:78px">${esc(r.name)||'R'+(j+1)}</th>`).join('')}
+    ${S.raters.map((r,j)=>`<th style="min-width:78px">${esc(rName(j))}</th>`).join('')}
     <th style="width:66px">Mean</th><th style="width:60px">Spread</th></tr></thead><tbody>`;
   let dom=null;
   ITEMS.forEach(([d,txt],i)=>{
@@ -1168,9 +1185,10 @@ function renderGrid(){
     const mean=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
     const spread=vs.length>1?Math.max(...vs)-Math.min(...vs):null;
     const flag=vs.some(v=>v<=S.thr);
-    h+=`<tr class="${flag?'flag':''}"><td class="n">${i+1}</td><td class="item">${esc(txt)}</td>
+    const skip=i===CF_EXP&&cfPre(S.round);
+    h+=`<tr class="${flag?'flag':''}${skip?' cf-skip':''}"><td class="n">${i+1}</td><td class="item">${esc(txt)}${skip?'<div class="hint">Not asked in a round given before the plan starts: nobody has seen it work yet. It is left out of this round&rsquo;s means; item 20 asks the expectation.</div>':''}</td>
       ${S.raters.map((_,j)=>{const v=val(i,j);
-        return `<td class="r"><select class="${v?'s'+v:''}" data-i="${i}" data-j="${j}">
+        return `<td class="r"><select class="${v?'s'+v:''}" data-i="${i}" data-j="${j}"${skip?' disabled aria-label="Not asked before the plan starts"':''}>
           <option value=""></option>${[1,2,3,4,5,6].map(n=>`<option value="${n}"${v===n?' selected':''}>${n}</option>`).join('')}
         </select></td>`;}).join('')}
       <td class="m">${f1(mean)}</td><td class="m">${spread==null?'\u2014':spread}</td></tr>`;
@@ -1217,7 +1235,7 @@ function analyse(round){
   const k=S.raters.filter((_,j)=>items.some(x=>x.vs[j]!=null)).length;
   const keys=items.flatMap(x=>x.vs.map((v,j)=>v==null?'':x.i+'_'+j)).filter(Boolean).join(',');
   return {items,doms,overall:all.length?all.reduce((a,b)=>a+b,0)/all.length:null,n:all.length,
-    possible:ITEMS.length*S.raters.length,k,R:S.raters.length,keys};
+    possible:(ITEMS.length-(cfPre(rd)?1:0))*S.raters.length,k,R:S.raters.length,keys,round:rd,pre:cfPre(rd)};
 }
 /* v21.16 audit (F9). The bands and their cut-offs are unchanged (a working convention, stated in the Guide); the
    verdict now follows the ratings it is given and the moment it is given in.
@@ -1237,7 +1255,7 @@ function band(m){
 }
 function judge(A){
   const b=band(A.overall);if(!b)return null;
-  const w=String(S.meta.when||'').trim(),run=!!w&&w!=='Before the plan starts';
+  const w=cfWhen(A.round||S.round),run=!!w&&w!=='Before the plan starts';   /* v23.19 (review F212) the round's own timing */
   const fl=A.items.filter(x=>x.flag).map(x=>x.i+1),nF=fl.length,T=esc(S.thr),all=A.n>=A.possible;
   const named=nF===1?'item '+fl[0]+' has':'items '+fl.slice(0,-1).join(', ')+' and '+fl[nF-1]+' each have';
   const go=run?'Continue':'Proceed',when=run?'now':'before the plan starts';
@@ -1246,9 +1264,9 @@ function judge(A){
   if(name==='Strong fit'){
     if(!all)txt=nF?`The ratings entered are strong overall, but ${named} a rating at or below ${T}. ${wait}`:`The ratings entered are strong. ${wait}`;
     else txt=nF?`The ratings are strong overall, but ${named} a rating at or below ${T}. Record a decision for ${nF===1?'it':'each'} on the Enhancement sheet ${when}; then ${go.toLowerCase()}, and measure integrity as planned.`
-      :`The people who will run this plan know it, can do it, and have the conditions to carry it out. ${go}, and measure integrity as planned.`;}
+      :`The people who will run this plan say they know it, can do it, and have the conditions to carry it out; Form ST-1 shows whether they can. ${go}, and measure integrity as planned.`;}
   else if(name==='Adequate fit'){
-    if(nF){name='Adequate fit with named gaps';txt=`The plan is workable but specific conditions are missing. Address the flagged items ${when}; they are where integrity will fall first.`;}
+    if(nF){name='Adequate fit with named gaps';txt=`The plan is workable but specific conditions are missing. Address the flagged items ${when}; they are where integrity is most likely to fall first.`;}
     else txt=all?`The plan is workable, and no item has a rating at or below ${T}. ${go}, and measure integrity as planned; the weakest domain is the first place to look if integrity falls.`
       :`The plan looks workable on the ratings entered, and none is at or below ${T}. ${wait}`;}
   else if(name==='Poor fit')txt=run?'The plan as written does not fit this context. Revise the plan or the supports now; while it runs as written, low integrity is likely and the outcome will be hard to interpret.'
@@ -1277,7 +1295,7 @@ function renderBarriers(){
   drawDom(A);
   $('#flagTbl').innerHTML='<thead><tr><th style="width:44px">Item</th><th style="width:16%">Domain</th><th style="text-align:left">Statement</th><th style="width:70px">Mean</th><th style="width:70px">Lowest</th><th style="width:22%">Who rated it lowest</th></tr></thead><tbody>'+
     (flagged.length?flagged.map(x=>{
-      const who=x.vs.map((v,j)=>v===x.min?(S.raters[j].name||'R'+(j+1)):null).filter(Boolean).join(', ');
+      const who=x.vs.map((v,j)=>v===x.min?rName(j):null).filter(Boolean).join(', ');
       return `<tr><td style="text-align:center">${x.i+1}</td><td>${esc(DOMAINS.find(d=>d[1]===x.d)[0])}</td>
         <td>${esc(x.txt)}</td><td style="text-align:center">${f1(x.mean)}</td>
         <td style="text-align:center">${x.min}</td><td>${esc(who)}</td></tr>`;}).join('')
@@ -1285,7 +1303,7 @@ function renderBarriers(){
   $('#splitTbl').innerHTML='<thead><tr><th style="width:44px">Item</th><th style="text-align:left">Statement</th><th style="width:70px">Spread</th><th style="width:34%">Ratings by respondent</th></tr></thead><tbody>'+
     (wide.length?wide.map(x=>`<tr><td style="text-align:center">${x.i+1}</td><td>${esc(x.txt)}</td>
       <td style="text-align:center">${x.spread}</td>
-      <td>${x.vs.map((v,j)=>`${esc(S.raters[j].name||'R'+(j+1))}: ${v==null?'\u2014':v}`).join(' &nbsp;|&nbsp; ')}</td></tr>`).join('')
+      <td>${x.vs.map((v,j)=>`${esc(rName(j))}: ${v==null?'\u2014':v}`).join(' &nbsp;|&nbsp; ')}</td></tr>`).join('')
      :'<tr><td colspan="4" class="hint">No item shows a spread of 3 or more across respondents.</td></tr>')+'</tbody>';
 }
 function drawDom(A){
@@ -1389,7 +1407,8 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const key=el.dataset.m;
   if(!el._b){el._b=1;el.addEventListener('input',()=>{S.meta[key]=el.value;});
     if(el.tagName==='SELECT')el.addEventListener('change',()=>{S.meta[key]=el.value;});}});}
 /* v21.16 audit (F9): the advice depends on when the form was administered */
-$('[data-m="when"]').addEventListener('change',e=>{S.meta.when=e.target.value;renderBarriers();renderSum();});
+$('[data-m="when"]').addEventListener('change',e=>{S.meta.when=e.target.value;renderAll();});
+$('[data-m="when2"]').addEventListener('change',e=>{S.meta.when2=e.target.value;renderAll();});   /* v23.19 (review F208, F212) the timing decides item 21 */
 function renderAll(){ensure();renderR();renderGrid();renderBarriers();renderEnh();renderSum();bindMeta();
   $('#thr').value=S.thr;
   $$('#roundBar button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.r===S.round)));}
@@ -1438,13 +1457,20 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const rows=[['Item','Domain','Statement',...S.raters.map((r,j)=>(r.name||'R'+(j+1))+' round '+S.round),'Mean','Spread']];
-  const A=analyse();
-  A.items.forEach(x=>rows.push([x.i+1,DOMAINS.find(d=>d[1]===x.d)[0],x.txt,...x.vs.map(v=>v==null?'':v),
-    x.mean==null?'':x.mean.toFixed(2),x.spread==null?'':x.spread]));
+  /* v23.19 (review F217) both rounds side by side, each item's and domain's mean in each round and the change, then the
+     enhancement rows; the file is named for the student and the date, as Save data is */
+  const nmR=j=>String(S.raters[j].name||'').trim()||'R'+(j+1),A1=analyse(1),A2=analyse(2),f=v=>v==null?'':v.toFixed(2),ch=(a,b)=>a==null||b==null?'':(b-a).toFixed(2);
+  const rows=[['Item','Domain','Statement',...S.raters.map((r,j)=>nmR(j)+' round 1'),...S.raters.map((r,j)=>nmR(j)+' round 2'),'Mean round 1','Mean round 2','Change','Spread round 1','Spread round 2']];
+  A1.items.forEach((x,i)=>{const y=A2.items[i];rows.push([x.i+1,DOMAINS.find(d=>d[1]===x.d)[0],x.txt,...x.vs.map(v=>v==null?'':v),...y.vs.map(v=>v==null?'':v),f(x.mean),f(y.mean),ch(x.mean,y.mean),x.spread==null?'':x.spread,y.spread==null?'':y.spread]);});
+  rows.push([]);rows.push(['','Domain','','Mean round 1','Mean round 2','Change']);
+  A1.doms.forEach((d,i)=>rows.push(['',d.nm,'',f(d.mean),f(A2.doms[i].mean),ch(d.mean,A2.doms[i].mean)]));
+  rows.push(['','Overall contextual fit','',f(A1.overall),f(A2.overall),ch(A1.overall,A2.overall)]);
+  if((S.enh||[]).length){rows.push([]);rows.push(['Item','Domain','Barrier','Type','What will change','Who','By when','Status']);
+    S.enh.forEach(e=>rows.push([e.item,e.dom,e.bar,e.type,e.what,e.who,e.by,e.st]));}
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
-  a.download='CF-1_ratings.csv';document.body.appendChild(a);a.click();a.remove();});
+  const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_'),t=new Date(),ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  a.download=`CF-1_${nm}_${ymd}.csv`;document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
 /* ---------------- simulation ---------------- */
@@ -1469,7 +1495,7 @@ async function loadSim(){
     when:'Before the plan starts',
     why:'The previous plan for this student reached 60% integrity and was abandoned. The team wanted to know what would stop this one from running before committing to it.',
     accepted:'The team accepted that a second adult cannot be guaranteed during the afternoon writing block this semester. Rather than pretend otherwise, the plan was changed so the afternoon block uses a shorter delay that one adult can hold. This is recorded as a deliberate difference between periods, not as drift.',
-    readmin:D(12),
+    readmin:D(12),date2:D(12),when2:'Before the plan starts',   /* v23.19 (review F208, F212) */
     ti:'95.5% on an unannounced observation, '+D(2)+' (Form TI-1)',
     predict:'The two lowest-rated domains before enhancement were resources and time (3.00) and administrative support (3.33). Both were addressed by changing the afternoon delay and by protecting coaching time. On the TI-1 observation after enhancement, no step failed for a time or staffing reason. After enhancement the two lowest items (both 4.50) were running the plan while the student is escalated, which matched the only step that had needed a prompt during training on Form ST-1, and enough adults present, the risk the team accepted.',
     concl:'Contextual fit before enhancement was poor (3.99 of 6). Had the plan been launched on that basis, the earlier pattern would almost certainly have repeated: resources and time sat at 3.00 and administrative support at 3.33, and the newest aide rated ten of the 21 items two to three points below everyone else. Every gap was fixable by changing the plan or the supports rather than by pressing the staff. Re-administration after enhancement moved the overall score to 5.20, and the plan then reached 95.5% integrity on an unannounced observation.'};
@@ -1553,13 +1579,13 @@ $('#simBtn').addEventListener('click',loadSim);
 const RP_ROLES=[['teacher','Classroom teacher'],['para','Paraprofessional'],['rsp','Related-service provider'],['other','']];
 const RP_ROLE=k=>{const r=RP_ROLES.find(x=>x[0]===k);return r?r[1]:null;};
 function rpParse(inst){const m=/^([a-z]+)-r([12])$/.exec(String(inst||''));if(!m||RP_ROLE(m[1])==null)return null;return {rk:m[1],role:RP_ROLE(m[1]),round:+m[2]};}
-function rpInitials(){const nm=String(S.meta.client||'').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';const id=String(S.meta.sid||'').trim();return (ini?ini+'.':'')+(id?(ini?' ':'')+'(ID '+id+')':'')||'the student';}
+function rpInitials(){const nm=String(S.meta.client||'').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';return (ini?ini+'.':'')||'the student';}   /* v23.19 (review F213) initials only: the returned ratings are keyed by name, and a student number identifies (34 CFR 99.3) */
 function rpPayload(){const rk=$('#rpRole').value,round=+$('#rpRound').value,role=RP_ROLE(rk),plan=String(S.meta.plan||'').trim(),bcba=String(S.meta.bcba||'').trim()||'the BCBA';
   return {v:1,form:'CF-1',inst:rk+'-r'+round,title:'Contextual fit, round '+round,heading:'Contextual Fit: Round '+round+(round===1?' (before enhancement)':' (after enhancement)'),
     student:$('#rpStudent').value.trim(),bcba,email:$('#rpEmail').value.trim(),due:$('#rpDue').value.trim(),
     sub:'For '+(role?'a '+role.toLowerCase():'someone')+' who will run the plan'+(plan?' ('+plan+')':'')+'. Do you know it, can you do it, do you believe in it, and do you have the time and backing to carry it out? Rated alone, not in a meeting: the disagreements are what the form is for.',
-    instructions:'Rate each statement from your own view, 1 (strongly disagree) to 6 (strongly agree); there is no midpoint, and no statement is skipped. A low rating changes the plan or the supports around it, not what is expected of you. When you have finished, press Send: your email program opens with a message to '+bcba+' ready to go.',
-    items:ITEMS.map(([d,txt],i)=>({n:i+1,text:txt})),scale:{kind:'num',min:1,max:6,anchors:['1 strongly disagree','2 disagree','3 slightly disagree','4 slightly agree','5 agree','6 strongly agree']},
+    instructions:'Rate each statement from your own view, 1 (strongly disagree) to 6 (strongly agree); there is no midpoint. '+(cfPre(round)?'Rate every statement but the last, which waits until the plan has run.':'Rate every statement.')+' A low rating changes the plan or the supports around it, not what is expected of you. When you have finished, press Send: your email program opens with a message to '+bcba+' ready to go.',
+    items:ITEMS.map(([d,txt],i)=>({n:i+1,text:i===CF_EXP&&cfPre(round)?'Leave this one blank if the plan has not started yet: '+txt:txt})),   /* v23.19 (review F208) the count stays 21, so a reply is placed as before */scale:{kind:'num',min:1,max:6,anchors:['1 strongly disagree','2 disagree','3 slightly disagree','4 slightly agree','5 agree','6 strongly agree']},
     extras:[{id:'name',label:'Your name',req:true},{id:'role',label:'Your role (teacher, paraprofessional, SLP...)'},{id:'when',label:'When you run the plan (which periods)'},{id:'mo',label:'Months with this student'}],
     itemsHeading:'The statements',subject:'Contextual fit round '+round+' answers for Form CF-1'};}
 function rpStatus(){const st=$('#rpStatus'),bad=[];
@@ -1569,7 +1595,7 @@ function rpStatus(){const st=$('#rpStatus'),bad=[];
   $('#rpSave').disabled=$('#rpLink').disabled=$('#rpMail').disabled=$('#rpPreview').disabled=!!bad.length;
   const served=/^https?:$/.test(location.protocol);$('#rpLink').title=served?'Copy a link to respond.html on this website carrying this questionnaire':'A link works when the workstation is on a website; opened from a folder, send the file';
   $('#rpNote').textContent=bad.length?'':ITEMS.length+' items, round '+$('#rpRound').value+'.'+(served?'':' Opened from a folder: send the file; the link needs the workstation on a website.');}
-function rpFile(){const p=rpPayload();const html=NBH_RESPOND.pageHTML(p);const name='CF-1_'+p.inst+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';
+function rpFile(){const p=rpPayload();const html=NBH_RESPOND.pageHTML(p);const name='CF-1_'+p.inst+'_respondent_'+((p.student||'student').replace(/[^\w.-]+/g,'_').replace(/[._]+$/,'')||'student')+'.html';   /* v23.19 a label ending in a dot no longer doubles it */
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   if(window.nbhUI)nbhUI.toast('Respondent page saved: '+name+'. Attach it to an email to the respondent.',{kind:'ok'});return name;}
 function rpLinkUrl(){const p=rpPayload();const base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';return base+NBH_RESPOND.payloadToHash(p);}
@@ -1654,13 +1680,18 @@ const iso=t=>{t=String(t==null?'':t).trim();let m=/^(\d{4})-(\d{1,2})-(\d{1,2})/
   m=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/.exec(t);if(!m)return '';return (m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');};
 const was=window.__nbhFactsOut;
 window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
-  try{ensure();const A2=analyse(2),rd=A2.n?2:1,A=rd===2?A2:analyse(1);if(!A.n||A.overall==null)return r;
+  /* v23.19 (review F209) round 2 replaces round 1 only once it is complete, or rated by the same people on the same items; until
+     then round 1 goes on and round 2 is named as in progress. The band goes only with a complete round. */
+  try{ensure();const A1=analyse(1),A2=analyse(2),r2ok=A2.n>0&&(A2.n>=A2.possible||(A1.n>0&&A2.keys===A1.keys)),rd=r2ok||!A1.n?2:1,A=rd===2?A2:A1;if(!A.n||A.overall==null)return r;
     const fit={mean:Math.round(A.overall*100)/100,scale:'1-6',low:A.items.filter(x=>x.flag).map(x=>x.txt),round:rd,n:A.n,possible:A.possible,respondents:A.k,thr:S.thr};
-    const b=band(A.overall);if(b)fit.band=b[0];
+    const b=band(A.overall);if(b){if(A.n>=A.possible)fit.band=b[0];else fit.bandProvisional=b[0];}
+    if(rd===1&&A2.n)fit.round2={n:A2.n,possible:A2.possible,respondents:A2.k,state:'in progress'};
     /* v22.81 (review F224) each respondent's own "Values and acceptability" mean in rounds 1 and 2, by name, for Form SV-1 */
     const vI=ITEMS.map((x,i)=>x[0]==='V'?i:-1).filter(i=>i>=0),vm=(j,rd)=>{const vs=vI.map(i=>val(i,j,rd)).filter(v=>v!=null);return vs.length?Math.round(vs.reduce((a,c)=>a+c,0)/vs.length*100)/100:null;};
-    const values=S.raters.map((p,j)=>({name:String(p.name||'').trim(),role:String(p.role||'').trim(),r1:vm(j,1),r2:vm(j,2)})).filter(x=>x.name&&(x.r1!=null||x.r2!=null));if(values.length)fit.values=values;const d=rd===2?(iso(S.meta.readmin)||iso(S.meta.date)):iso(S.meta.date);if(d)fit.date=d;
+    const values=S.raters.map((p,j)=>({name:String(p.name||'').trim(),role:String(p.role||'').trim(),r1:vm(j,1),r2:vm(j,2)})).filter(x=>x.name&&(x.r1!=null||x.r2!=null));if(values.length)fit.values=values;const d=rd===2?(iso(S.meta.date2)||iso(S.meta.readmin)||iso(S.meta.date)):iso(S.meta.date);if(d)fit.date=d;
     const o=r&&typeof r==='object'?r:{};o.fit=fit;return o;}catch(e){return r;}};
+/* v23.19 (review F212) the re-administration date on the workstation's due list while round 2 holds no rating */
+window.__nbhDue=function(){const d=String(S.meta.readmin||'').trim();try{ensure();if(!d||analyse(2).n)return [];}catch(e){return [];}return [{what:'Re-administer contextual fit (round 2)',date:d}];};
 })();
 </script>
 

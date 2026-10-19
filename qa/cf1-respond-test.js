@@ -23,7 +23,8 @@ const answer=async(rp,who,pick)=>rp.evaluate(([who,pick])=>{const inp=document.q
  /* the dialog, prefilled */
  await page.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(200);
  const dlg=await page.evaluate(()=>({open:document.querySelector('#rpDlg').open,student:rpStudent.value,email:rpEmail.value,round:rpRound.value,status:document.querySelector('#rpStatus').hidden,saveOn:!rpSave.disabled,note:rpNote.textContent}));
- ok('dialog prefilled: initials and ID, email, the current round; 21 items',dlg.open&&dlg.student==='S.S. (ID 12345)'&&dlg.email==='bcba@example.org'&&dlg.round==='1'&&dlg.status&&dlg.saveOn&&/21 items, round 1/.test(dlg.note),dlg);
+ /* v23.19 (CF-1 review F213) the label is the initials only */
+ ok('dialog prefilled: initials, email, the current round; 21 items',dlg.open&&dlg.student==='S.S.'&&dlg.email==='bcba@example.org'&&dlg.round==='1'&&dlg.status&&dlg.saveOn&&/21 items, round 1/.test(dlg.note),dlg);
  await page.evaluate(()=>{rpEmail.value='';rpEmail.dispatchEvent(new Event('input'));});
  ok('no email: save disabled with a reason',await page.evaluate(()=>rpSave.disabled&&!document.querySelector('#rpStatus').hidden&&/Enter your email/.test(document.querySelector('#rpStatus').textContent)));
  await page.evaluate(()=>{rpEmail.value='bcba@example.org';rpEmail.dispatchEvent(new Event('input'));rpDue.value='10/10/2026';});
@@ -31,13 +32,13 @@ const answer=async(rp,who,pick)=>rp.evaluate(([who,pick])=>{const inp=document.q
  ok('payload: form CF-1, teacher round 1, the 21 items in order, 1 to 6, four extras',pay.form==='CF-1'&&pay.inst==='teacher-r1'&&pay.items.length===21&&/step by step/.test(pay.items[0].text)&&/hard day/.test(pay.items[20].text)&&pay.scale.max===6&&pay.extras.map(x=>x.id).join()==='name,role,when,mo'&&/BIP dated 8\/12\/26/.test(pay.sub),pay.inst);
  /* the page as a file */
  const file=await grab(page,()=>__rp.file());
- ok('page file named and self-contained, no full name',/^CF-1_teacher-r1_respondent_S\.S\._ID_12345_\.html$/.test(file.r)&&/NBH_RESPOND_RUNTIME/.test(file.text)&&/without looking it up/.test(file.text)&&!/Sample Student/.test(file.text),file.r);
+ ok('page file named and self-contained, no full name',/^CF-1_teacher-r1_respondent_S\.S\.html$/.test(file.r)&&/NBH_RESPOND_RUNTIME/.test(file.text)&&/without looking it up/.test(file.text)&&!/Sample Student/.test(file.text),file.r);
  const link=await page.evaluate(()=>__rp.link());
  ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#z=1[a-z][A-Za-z0-9_-]{60,}$/.test(link),link.slice(0,80));
  /* the teacher answers the file */
  const rp=await ctx.newPage();const rlog=[];wire(rp,rlog);await rp.setContent(file.text,{waitUntil:'load'});await sleep(300);
  const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,opts:document.querySelectorAll('li.it .opts label').length,inputs:document.querySelectorAll('input[type=text]').length,open:document.querySelectorAll('textarea:not(.code)').length,student:document.querySelector('.def').textContent,key:document.querySelector('.key').textContent}));
- ok('respondent page renders 21 items with 1 to 6, four questions about the respondent, no open items, the student label',r1.items===21&&r1.opts===126&&r1.inputs===4&&r1.open===0&&/S\.S\. \(ID 12345\)/.test(r1.student)&&/strongly disagree/.test(r1.key),r1);
+ ok('respondent page renders 21 items with 1 to 6, four questions about the respondent, no open items, the student label',r1.items===21&&r1.opts===126&&r1.inputs===4&&r1.open===0&&/S\.S\./.test(r1.student)&&!/ID 12345/.test(r1.student)&&/strongly disagree/.test(r1.key),r1);
  await answer(rp,['Ms. Rivera','Teacher','Morning math and the return from lunch','14'],i=>String(6-(i%3)));await sleep(300);
  const sent=await rp.evaluate(()=>({prog:document.querySelector('.prog').textContent,code:document.querySelector('.code').value,mail:document.querySelector('#nbhr-mail').getAttribute('href'),done:!document.querySelector('.done').hidden}));
  ok('21 of 21 answered, then Send gives a code and a mailto to the case BCBA',/21 of 21/.test(sent.prog)&&/^NBH1\./.test(sent.code)&&/^mailto:bcba%40example\.org\?subject=Contextual%20fit%20round%201%20answers/.test(sent.mail)&&sent.mail.indexOf(encodeURIComponent(sent.code))>0&&sent.done,{prog:sent.prog,mail:sent.mail.slice(0,90)});
