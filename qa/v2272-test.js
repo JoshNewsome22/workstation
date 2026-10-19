@@ -98,8 +98,8 @@ const CT='CT-1_Caregiver-Training_v2026-09.html';
     cg.outcome==='Competent on the in-home probe — follow-up probe due',cg);
   const due=await p.evaluate(()=>{const before=nbhCase.due();const e=document.querySelector('#fuTbl [data-fu="0"][data-f="date"]');e.value='2026-10-21';e.dispatchEvent(new Event('input',{bubbles:true}));
     const after=nbhCase.due();e.value='';e.dispatchEvent(new Event('input',{bubbles:true}));return {before,after};});
-  ok('19a the Today list takes the next follow-up probe, and not the dates of follow-up probes already run',
-    due.before.length===1&&due.before[0].what==='Next follow-up probe at home'&&/^\d{4}-\d{2}-\d{2}$/.test(due.before[0].date)&&JSON.stringify(due.after)===JSON.stringify(due.before),due);
+  ok('19a the Today list takes the next follow-up probe, and not the dates of follow-up probes already run (v22.73: one per caregiver, and the booster)',
+    due.before.filter(d=>/^Next follow-up probe at home/.test(d.what)).length===1&&/^\d{4}-\d{2}-\d{2}$/.test(due.before.find(d=>/^Next follow-up/.test(d.what)).date)&&JSON.stringify(due.after)===JSON.stringify(due.before),due);
   /* F357 */
   const f357=await p.evaluate(()=>({situ:document.querySelector('[data-m="c_situ"]').closest('.bstrow').firstElementChild.textContent,how:S.meta.c_situ_how,probe:S.meta.probe,fb:S.rounds.map(r=>r.fb).join(' '),
     all:JSON.stringify(S)}));

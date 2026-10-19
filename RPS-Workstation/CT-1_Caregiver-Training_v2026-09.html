@@ -696,6 +696,8 @@ body.view-goals .only-setup,body.view-goals .only-train,body.view-goals .only-su
 body.view-train .only-setup,body.view-train .only-goals,body.view-train .only-sum,body.view-train .only-guide{display:none}
 body.view-sum .only-setup,body.view-sum .only-goals,body.view-sum .only-train,body.view-sum .only-guide{display:none}
 body.view-guide .only-setup,body.view-guide .only-goals,body.view-guide .only-train,body.view-guide .only-sum{display:none}
+body.view-card .only-setup,body.view-card .only-goals,body.view-card .only-train,body.view-card .only-sum,body.view-card .only-guide{display:none}
+body:not(.view-card) .only-card{display:none}   /* v22.73 the family card prints only from its own button */
 @media print{.only-setup,.only-goals,.only-train,.only-sum,.only-guide{display:block!important}.sheet{box-shadow:none}
   table.rt td select,table.pi td.r select{-webkit-appearance:none;appearance:none}}
 
@@ -1051,8 +1053,14 @@ td input,td select{max-width:100%}
       <button data-view="goals" aria-pressed="false">Goals &amp; fit</button>
       <button data-view="train" aria-pressed="false">Training</button>
       <button data-view="sum" aria-pressed="false">Competency</button>
+      <button data-view="card" aria-pressed="false">Family card</button>
       <button data-view="guide" aria-pressed="false">Guide</button>
     </div></div></div>
+  <!-- v22.73 (review F354) the adults in the home, each with rounds, probes and a sign-off of their own -->
+  <div class="tgroup tg-keep"><span>Caregiver</span><div class="row">
+    <select id="cgSel" aria-label="The caregiver these sheets show"></select>
+    <button id="cgAdd" type="button">+ Caregiver</button>
+  </div></div>
   <div class="tgroup"><span>Rehearsals</span><div class="row">
     <input type="number" id="nRounds" min="1" max="8" value="4">
   </div></div>
@@ -1098,6 +1106,7 @@ td input,td select{max-width:100%}
           <th>Function (Form FS-1)</th><td><input data-m="fn" placeholder="Filled from the case"></td></tr>   <!-- v22.72 (review F355) -->
       <tr><th>What the family was told this is for</th><td colspan="3"><textarea data-m="purpose" rows="2" placeholder="In the words used with them, not the words used at the IEP meeting"></textarea></td></tr>
     </table>
+    <div class="ct-cgbar"><p class="hint" id="cgNote" role="status"></p><button class="tool noprint" id="cgDel" type="button">Remove this caregiver</button></div>
     <div class="note2"><b>Caregivers are not staff, and this form is not Form ST-1 with the nouns changed.</b> A caregiver has no supervisor, no colleague to tap out to, no end of shift, and a relationship with the student that continues after the procedure ends. They also hold information no one else has. Training that ignores this produces agreement in the session and nothing afterwards.</div>
   </section>
 
@@ -1165,6 +1174,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Competency and Follow-up</h2>
     <div class="verdict v-mid noprint" id="ctConsentNote" role="note" hidden></div>   <!-- v22.37 (review F348): on screen only -->
     <div id="verdictBox"></div>
+    <div class="ct-house" id="cgHouse" hidden></div>   <!-- v22.73 (review F354) where each adult in the home stands -->
     <div class="metrics" id="metricWrap"></div>
     <h3 style="margin-top:12px">Steps to Watch in the Home Probe</h3>
     <p class="hint">Any step whose accuracy across the rounds in which it was scored is below the criterion, or that was not correct in the last round in which it was scored, even if the caregiver has since been correct on it.</p>
@@ -1195,6 +1205,12 @@ td input,td select{max-width:100%}
         <label class="ct-chk"><input type="checkbox" data-m="probe_nocrit"> No critical step came due on the probe</label></td></tr>
       <tr><th>Follow-up contacts agreed</th><td><input data-m="followup" placeholder="When, how, and who initiates"></td></tr>
       <tr><th>Next follow-up probe due</th><td><input type="date" data-m="fu_due" class="ct-date"></td></tr>
+      <!-- v22.73 (review I178) a booster rehearsal of the relapse response before the next thinning step (Form SR-1 or the plan review) -->
+      <tr><th>Next thinning step</th><td><input type="date" data-m="thin_next" class="ct-date" aria-label="Date of the next thinning step">
+        <input data-m="thin_what" class="ct-thinwhat" placeholder="What changes, e.g., the wait goes from 2 to 4 minutes"></td></tr>
+      <tr><th>Booster rehearsal before it</th><td><input type="date" data-m="boost_date" class="ct-date" aria-label="Date of the booster rehearsal">
+        <select data-m="boost_res" aria-label="The booster rehearsal"><option></option><option>Rehearsed with escalating protest; held</option><option>Rehearsed; needed a prompt</option><option>Described only</option></select>
+        <div class="hint" id="ctBoostNote"></div></td></tr>
       <tr><th>I can run this on an ordinary day</th><td><select data-m="sv1"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
       <tr><th>This is worth the effort it takes</th><td><select data-m="sv2"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
       <tr><th>I would be comfortable doing this in front of other people</th><td><select data-m="sv3"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
@@ -1222,6 +1238,16 @@ td input,td select{max-width:100%}
     </table>
   </section>
 
+  <!-- v22.73 (review I177) FAMILY CARD: one page for the family, printed on its own -->
+  <section class="only-card">
+    <h2 class="nbh-band">Family Card</h2>
+    <p class="hint">One page for the family to keep where the routine happens, printed from what is on this form: the steps, what to do if the behavior comes back, when safety comes first, the emergency numbers and whom to contact. It carries no name, and nothing is translated here.</p>
+    <div class="row noprint ct-cardbar"><label>Headings in <select data-m="cardLang" id="cardLang"><option value="">English</option><option value="es">Espa&ntilde;ol</option></select></label>
+      <button class="primary" id="cardPrint" type="button">Print the family card</button></div>
+    <div class="verdict v-mid noprint" id="cardNote" role="note" hidden></div>
+    <div class="ct-card" id="ctCard"></div>
+  </section>
+
   <!-- GUIDE -->
   <section class="only-guide">
     <h2 class="nbh-band">How Caregiver Training Differs from Staff Training</h2>
@@ -1241,6 +1267,7 @@ td input,td select{max-width:100%}
       <tr><th>Critical steps</th><td>The same calculation restricted to steps marked critical, pooled across the decision rounds: once the criterion has been met, the latest rounds it counts (the latest two when it asks for two consecutive rounds); before that, every scored round. Every step marked critical must be scored in the decision rounds and correct every time.</td></tr>
       <tr><th>Rounds to criterion</th><td>The number of scored rounds up to and including the round in which the criterion was first met on the required number of consecutive rounds. The card and the verdict name that round as it is labelled on the grid.</td></tr>
       <tr><th>Competency decision</th><td>Criterion met on the required consecutive rounds and still met in the latest rounds it counts, <i>and</i> every step marked critical scored in those rounds and correct every time, <i>and</i> the relapse response rehearsed under a hard condition, <i>and</i> an in-home probe recorded with the steps correct on it at or above the criterion percentage. Parsons, Rollyson &amp; Reid (2012) suggest that where the mastery criterion is a lower percentage than 100%, certain critical steps be identified that must be performed at 100%; holding the in-home probe to the rehearsal percentage is this form&rsquo;s convention, as it is on Form ST-1. When any step is marked critical, the critical steps correct on the probe must be recorded (the rehearsal runner fills them from a round set up as Home probe), or <b>No critical step came due on the probe</b> ticked, and every critical step scored on the probe must have been correct, as in the decision rounds. That, too, is this form&rsquo;s convention, as on Form ST-1. When the target behavior can put someone at risk (aggression, self-injury, property destruction), <b>When safety comes first</b> and <b>In an emergency</b> must be written before the caregiver is cleared.</td></tr>
+      <tr><th>Several caregivers</th><td>Each adult in the home who will meet the behavior has a record of their own in this form (<b>+ Caregiver</b> in the toolbar): their rehearsal rounds, the relapse rehearsal, the in-home probe, the follow-up probes, the family&rsquo;s view and the sign-off. The family&rsquo;s goals, the fit answers, the protocol steps, the relapse response and the safety rows are shared. The <b>Household</b> line on the Competency sheet gives where each adult stands; if one adult holds out while another gives in, the behavior is on intermittent reinforcement, so every adult who will meet it is trained (Briggs et al., 2018, on resurgence). A booster rehearsal of the relapse response before each thinning step is this form&rsquo;s working convention: Briggs et al. (2018) found resurgence at 42% of thinning steps, and few relapse-mitigation procedures have been evaluated for caregivers (Kimball et al., 2023).</td></tr>
       <tr><th>Follow-up probes</th><td>Competent on the in-home probe is one observation. <b>Running it independently at home</b> needs a follow-up probe at or above the criterion percentage, with every critical step scored on it correct; the latest follow-up probe decides, so one below the criterion reads Not holding at home. The outcome on the sign-off is checked against the decision: an outcome that claims more than the decision shows is flagged on screen and on paper.</td></tr>
     </table>
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
@@ -1278,6 +1305,82 @@ const OUTCOMES=[['Running it independently at home \u2014 held at a follow-up pr
   ['Competent in rehearsal \u2014 home probe still required',1],['Not yet \u2014 further sessions scheduled',0],['Paused at the family\u2019s request',0]];
 const OUT_OLD='Competent \u2014 running it independently at home';
 let ctLvl=0,ctDec={cls:'',txt:''},ctCaseF=null;
+/* v22.73 (review F354) several caregivers in one record. Each adult's own part (CG_OWN: who they are, the components they
+   were given, their rounds and codes, the relapse rehearsal, what would make them stop, the probes, the follow-up probes, the
+   family's view and the sign-off) is kept in S.house.list; the sheets show one adult at a time, the current one's part in S as
+   before, so everything else reads it unchanged. The family's goals, the fit answers, the protocol steps, the relapse response,
+   the safety rows, the criterion and the case's lines are shared. A file saved before this opens as a one-caregiver record. */
+const CG_OWN=['cg','rel','dates','where','c_inst','c_inst_how','c_mod','c_mod_how','c_reh','c_reh_how','c_fb','c_fb_how','c_situ','c_situ_how',
+  'relapseReh','stop','probe','probe_pct','probe_crit','probe_nocrit','followup','fu_due','sv1','sv2','sv3','sv4','outcome','boost_date','boost_res'];
+const cgClone=v=>JSON.parse(JSON.stringify(v==null?null:v));
+const cgBlankOwn=n=>({meta:{},rounds:[],cells:{},nRounds:n||4,fu:[]});
+function cgOwnOf(st){const m={};CG_OWN.forEach(k=>{const v=st.meta&&st.meta[k];if(v!==undefined&&v!==''&&v!==false)m[k]=v;});
+  return {meta:m,rounds:cgClone(st.rounds||[]),cells:cgClone(st.cells||{}),nRounds:st.nRounds||4,fu:cgClone(st.fu||[])};}
+function cgEnsure(){const H=S.house,ok=H&&typeof H==='object'&&Array.isArray(H.list);
+  const L=ok?H.list.filter(r=>r&&typeof r==='object'&&r.id).map(r=>({id:String(r.id),own:r.own&&typeof r.own==='object'?r.own:cgBlankOwn(S.nRounds)})):[];
+  if(!L.length){S.house={list:[{id:'c1',own:cgOwnOf(S)}],cur:'c1'};return;}
+  S.house={list:L,cur:L.some(r=>r.id===H.cur)?H.cur:L[0].id};}
+const cgRec=id=>((S.house&&S.house.list)||[]).find(r=>r.id===id)||null;
+function cgStore(){if(!S.house)return;const r=cgRec(S.house.cur);if(r)r.own=cgOwnOf(S);}
+function cgApply(own){own=own||cgBlankOwn();CG_OWN.forEach(k=>{delete S.meta[k];});Object.assign(S.meta,cgClone(own.meta||{}));
+  S.rounds=cgClone(own.rounds||[]);S.cells=cgClone(own.cells||{});S.nRounds=own.nRounds||4;S.fu=cgClone(own.fu||[]);}
+function cgLoad(id){const r=cgRec(id);if(!r)return;S.house.cur=id;cgApply(r.own);renderAll();}
+function cgSwitch(id){if(!S.house||!cgRec(id)||id===S.house.cur)return;cgStore();cgLoad(id);}
+/* run fn with another adult's part in S, and put S back */
+function cgWith(rec,fn){if(!rec||!S.house||rec.id===S.house.cur)return fn();const keep=S;
+  S=Object.assign({},keep,{meta:Object.assign({},keep.meta)});cgApply(rec.own);
+  while(S.rounds.length<S.nRounds)S.rounds.push({date:'',type:'',fb:''});S.rounds.length=S.nRounds;
+  try{return fn();}finally{S=keep;}}
+const CG_STAND=['in training','competent in rehearsal','competent on the in-home probe','holding at a follow-up probe'];
+function cgStand(){const d=ctDecide(),coded=Object.keys(S.cells||{}).some(k=>S.cells[k]);
+  return {lvl:d.lvl,cls:d.cls,txt:d.txt,stand:d.notHold?'not holding at home':!coded&&!d.lvl?'not yet trained':CG_STAND[d.lvl]||CG_STAND[0]};}
+function cgWho(m){return ctT(m.rel)||ctT(m.cg)||'Caregiver';}
+function cgHouse(){if(!S.house)return [];cgStore();return S.house.list.map(r=>cgWith(r,()=>Object.assign({id:r.id,name:ctT(S.meta.cg),rel:ctT(S.meta.rel)},cgStand())));}
+function cgPaint(){const sel=document.getElementById('cgSel');if(!sel||!S.house)return;const L=S.house.list;
+  sel.innerHTML=L.map((r,i)=>{const m=r.id===S.house.cur?S.meta:(r.own&&r.own.meta)||{};const rel=ctT(m.rel),nm=ctT(m.cg);
+    return '<option value="'+esc(r.id)+'">'+(i+1)+'. '+esc(rel&&nm?rel+' \u2014 '+nm:rel||nm||'(not named yet)')+'</option>';}).join('');sel.value=S.house.cur;
+  const del=document.getElementById('cgDel');if(del)del.disabled=L.length<2;
+  const n=document.getElementById('cgNote');if(n)n.textContent=L.length<2?'This record holds one caregiver. + Caregiver in the toolbar adds another adult in the home, with rehearsal rounds, probes and a sign-off of their own; the family\u2019s goals, the fit answers, the protocol steps and the safety rows are shared.':
+    'This record holds '+L.length+' caregivers: the toolbar\u2019s Caregiver list switches between them. Each has rehearsal rounds, probes and a sign-off of their own; the family\u2019s goals, the fit answers, the protocol steps and the safety rows are shared.';}
+function cgHousePaint(){const el=document.getElementById('cgHouse');if(!el)return;const L=(S.house&&S.house.list)||[];
+  if(L.length<2){el.hidden=true;el.innerHTML='';return;}
+  const H=cgHouse();el.hidden=false;el.innerHTML='<b>Household:</b> '+H.map(h=>esc(h.rel||'Caregiver')+(h.name?' ('+esc(h.name)+')':'')+': '+esc(h.stand)).join(' &middot; ')+
+    (H.some(h=>h.lvl<2)?'. <span class="ct-house-warn">Until every adult who will meet the behavior can run the plan, one adult giving in while another holds out keeps it going.</span>':'.');}
+/* the fit question on the other adults: train them here */
+function cgFitNote(){const a=(S.fit||{})[3];if(a!=='Partly'&&a!=='No')return '';const n=((S.house&&S.house.list)||[]).length;
+  return n<2?' The other adults in the house: train them on this form before the plan runs at home (+ Caregiver in the toolbar).':' The other adults in the house: the Household line on the Competency sheet gives where each stands.';}
+/* a step removed: every other adult's codes for it go too, and the codes after it move up */
+function cgStepGone(i){((S.house&&S.house.list)||[]).forEach(r=>{if(r.id===S.house.cur||!r.own)return;const nw={};
+  Object.keys(r.own.cells||{}).forEach(k=>{const m=/^(\d+)_(\d+)$/.exec(k);if(!m)return;const st=+m[1];if(st===i)return;nw[(st>i?st-1:st)+'_'+m[2]]=r.own.cells[k];});r.own.cells=nw;});}
+const cgCoded=i=>((S.house&&S.house.list)||[]).some(r=>r.id!==S.house.cur&&r.own&&Object.keys(r.own.cells||{}).some(k=>k.split('_')[0]===String(i)&&r.own.cells[k]));
+/* v22.73 (review I178) the booster rehearsal before the next thinning step */
+function ctBoostPaint(){const el=document.getElementById('ctBoostNote');if(!el)return;const m=S.meta||{},th=ctT(m.thin_next),bd=ctT(m.boost_date);let t='';
+  if(th&&!bd)t='A booster rehearsal of the relapse response with the caregiver is due before '+ctDay(th)+': resurgence is likeliest just after a thinning step (Briggs et al., 2018).';
+  else if(th&&bd&&bd>th)t='The booster rehearsal ('+ctDay(bd)+') falls after the thinning step ('+ctDay(th)+'): rehearse before the step.';
+  else if(th&&bd&&m.boost_res==='Described only')t='Described only: rehearse it, with the protest escalating, before the step.';
+  el.textContent=t;el.hidden=!t;}
+/* v22.73 (review I177) the family card */
+const CARD={en:{title:'At home',steps:'The steps',every:'every time',back:'If the behavior comes back',safety:'When safety comes first',emerg:'In an emergency',call:'Whom to contact',
+    foot:(d,t)=>'Prepared with the family on '+d+(t?' by '+t:'')+'. Form CT-1.'},
+  es:{title:'En casa',steps:'Los pasos',every:'siempre',back:'Si el comportamiento vuelve',safety:'Cuando la seguridad va primero',emerg:'En una emergencia',call:'A qui\u00e9n contactar',
+    foot:(d,t)=>'Preparado con la familia el '+d+(t?' por '+t:'')+'. Formulario CT-1.'}};
+function renderCard(){const box=document.getElementById('ctCard');if(!box)return;const m=S.meta||{},es=m.cardLang==='es',H=CARD[es?'es':'en'];
+  const top=(S.goals||[]).find(g=>g&&g.p==='1 (highest)'&&ctT(g.r)&&g.t==='Yes')||(S.goals||[]).find(g=>g&&ctT(g.r)&&g.t==='Yes');
+  const steps=(S.steps||[]).filter(x=>ctT(x.d));const P=t=>'<p>'+esc(ctT(t))+'</p>';
+  let h='<div class="ct-card-h">'+H.title+(top?': '+esc(ctT(top.r)):'')+'</div>';
+  if(steps.length)h+='<h4>'+H.steps+'</h4><ol>'+steps.map(x=>'<li>'+esc(ctT(x.d))+(x.crit?'<span class="ct-every">'+H.every+'</span>':'')+'</li>').join('')+'</ol>';
+  if(ctT(m.relapseDo))h+='<h4>'+H.back+'</h4>'+P(m.relapseDo);
+  if(ctT(m.safety))h+='<h4>'+H.safety+'</h4>'+P(m.safety);
+  if(ctT(m.emerg))h+='<h4>'+H.emerg+'</h4><div class="ct-card-emerg">'+P(m.emerg)+'</div>';
+  if(ctT(m.call))h+='<h4>'+H.call+'</h4>'+P(m.call);
+  const d=new Date().toLocaleDateString(es?'es-US':'en-US',{year:'numeric',month:'long',day:'numeric'});
+  h+='<div class="ct-card-foot">'+esc(H.foot(d,ctT(m.trainer)))+'</div>';box.innerHTML=h;
+  const miss=[];if(!steps.length)miss.push('the protocol steps (Training)');if(!ctT(m.relapseDo))miss.push('what the caregiver does when it returns');
+  if(!ctT(m.safety))miss.push('When safety comes first');if(!ctT(m.emerg))miss.push('In an emergency');if(!ctT(m.call))miss.push('whom they contact');
+  const lang=typeof ct1Lang==='function'?ct1Lang():null,notes=[];
+  if(miss.length)notes.push('<b>Not on the card yet:</b> '+esc(miss.join(', '))+'.');
+  if(es||lang)notes.push('<b>Before it goes home:</b> '+(es?'the headings are in Spanish; ':'')+'the steps and the rest are as typed on this form'+(lang&&lang.home?' (home language: '+esc(lang.home)+')':'')+'. Have the district&rsquo;s interpreter translate them first.');
+  const n=document.getElementById('cardNote');if(n){n.hidden=!notes.length;n.innerHTML=notes.join(' ');}}
 const ctT=v=>String(v==null?'':v).trim();
 function ctFilled(k){return !!ctT((S.meta||{})[k]);}
 function ctDay(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(ctT(iso));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:ctT(iso);}
@@ -1353,6 +1456,7 @@ function ensure(){
   S.fu=(Array.isArray(S.fu)?S.fu:[]).map(r=>{r=obj(r)?r:{};return Object.assign({},r,{date:str(r.date),pct:str(r.pct),crit:str(r.crit),rel:str(r.rel),how:str(r.how),note:str(r.note)});});
   while(S.fu.length<3)S.fu.push({date:'',pct:'',crit:'',rel:'',how:'',note:''});
   if(S.meta.outcome===OUT_OLD)S.meta.outcome=OUTCOMES[1][0];
+  cgEnsure();   /* v22.73 (review F354) */
   if(!S.goals.length)for(let i=0;i<4;i++)S.goals.push({r:'',now:'',want:'',p:'',t:''});
   if(!S.steps.length)for(let i=0;i<6;i++)S.steps.push({d:'',crit:false});
   while(S.rounds.length<S.nRounds)S.rounds.push({date:'',type:'',fb:''});
@@ -1398,6 +1502,7 @@ function renderFit(){
   else if(part>=3){cls='v-mid';txt=`${part} conditions answered Partly. Workable, but note what would have to change against each.`;}
   else if(part){cls='v-ok';txt=`The conditions for running this at home are in place, ${part===1?'one':'two'} of them only partly: note what would have to change against ${part===1?'it':'each'}.`;}
   else {cls='v-ok';txt='The conditions for running this at home are in place.';}
+  try{txt+=cgFitNote();}catch(e){}   /* v22.73 (review F354) */
   $('#fitVerdict').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
 }
 function renderSteps(){
@@ -1414,9 +1519,9 @@ async function delGoalAt(i){const g=S.goals[i];if(!g)return;
 $('#goalTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delGoalAt(+b.dataset.di);});
 async function delStepAt(i){const st=S.steps[i];if(!st)return;
   const lock=$('#delStep');if(lock&&lock.disabled){alert(lock.title||'Locked while a round is open in the rehearsal runner.');return;}
-  if(((st.d||'').trim()||st.crit||S.rounds.some((_,j)=>code(i,j)))&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nIts description and its codes in every round will be deleted, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
+  if(((st.d||'').trim()||st.crit||S.rounds.some((_,j)=>code(i,j))||cgCoded(i))&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nIts description and its codes in every round will be deleted, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
   S.steps.splice(i,1);
-  const nw={};Object.keys(S.cells).forEach(k=>{const m=/^(\d+)_(\d+)$/.exec(k);if(!m)return;const s=+m[1];if(s===i)return;nw[(s>i?s-1:s)+'_'+m[2]]=S.cells[k];});S.cells=nw;
+  const nw={};Object.keys(S.cells).forEach(k=>{const m=/^(\d+)_(\d+)$/.exec(k);if(!m)return;const s=+m[1];if(s===i)return;nw[(s>i?s-1:s)+'_'+m[2]]=S.cells[k];});S.cells=nw;cgStepGone(i);   /* v22.73 every adult's codes */
   if(!S.steps.length)S.steps.push({d:'',crit:false});
   ensure();renderSteps();renderGrid();renderSum();}
 $('#stepTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delStepAt(+b.dataset.di);});
@@ -1487,25 +1592,14 @@ function pctIn(t){t=String(t==null?'':t).trim();if(!t)return null;
   m=/^(\d+(?:\.\d+)?)\s*(?:\/|of)\s*(\d+(?:\.\d+)?)$/i.exec(t);if(m)return +m[2]>0?100*m[1]/m[2]:NaN;
   m=/^(\d+(?:\.\d+)?)$/.exec(t);return m?+m[1]:NaN;}
 const pf=v=>(Math.round(v*10)/10)+'%';
-function renderSum(){
-  const M=metrics();
-  const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v||'\u2014'}</div><div class="sub">${s||''}</div></div>`;
-  const last=M.used.length?fmt(M.used.slice(-1)[0].c,M.used.slice(-1)[0].s):'';
-  /* v21.16 audit (F5, F6, F12): rounds are named as the grid labels them (R3), not by their count among
-     scored rounds; the critical-steps card says what was scored and where */
+/* v22.73 (review F354) the decision, as a value: the verdict's class and text, the level it supports (0 to 3) and whether a
+   follow-up probe found it not holding at home. renderSum draws it for the caregiver shown; the household line reads it for
+   each adult in turn. */
+function ctDecide(){const M=metrics();
   const R=x=>'R'+(x.j+1), rnd=n=>n+' consecutive round'+(n===1?'':'s');
   const metAt=M.toCrit?R(M.used[M.toCrit-1]):'';
   const winLab=M.win.length>1?R(M.win[0])+'\u2013'+R(M.win[M.win.length-1]):M.win.length?R(M.win[0]):'';
   const stepList=a=>(a.length>1?'steps ':'step ')+a.map(i=>i+1).join(', ');
-  const where=M.toCrit?`in the latest ${M.win.length>1?M.win.length+' rounds':'round'} (${winLab})`:'across all scored rounds';
-  const critSub=!M.crit.marked?'none marked critical'
-    :M.crit.n?`${M.crit.c} of ${M.crit.n} ${where}`+(M.crit.unseen.length?`; ${stepList(M.crit.unseen)} not scored`:'')
-    :`critical steps not scored ${M.toCrit?where:'yet'}`;
-  $('#metricWrap').innerHTML=
-    card('Final round',last,M.used.length?'round '+R(M.used.slice(-1)[0]):'')+
-    card('Pooled accuracy',fmt(M.tot.c,M.tot.n),`${M.tot.c} of ${M.tot.n} scored steps`)+
-    card('Critical steps',M.crit.n?fmt(M.crit.c,M.crit.n):'',critSub)+
-    card('Rounds to criterion',M.toCrit||'',M.toCrit?`${rnd(S.critN)} at or above ${S.crit}%, met at ${metAt}`:'not yet met');
   /* v21.16 audit (F5, F6, F9, F10). The decision, in order: something scored; the criterion met; still met
      in the latest rounds it counts; every critical step scored there and correct; the relapse response
      rehearsed under a hard condition; an in-home probe recorded, with the steps correct on it at or above the
@@ -1515,7 +1609,7 @@ function renderSum(){
        step scored on the probe must have been correct (100%), as in the decision rounds. Blank, the decision is as
        before. */
     scp=pctIn(S.meta.probe_crit), none=!!S.meta.probe_nocrit;
-  let lvl=0;   /* v22.72 (review F351) what the decision supports, for the sign-off */
+  let lvl=0,notHold=false;   /* v22.72 (review F351) what the decision supports, for the sign-off */
   const held=!M.toCrit?'':R(M.win[M.win.length-1])===metAt?`met at ${metAt}`:`met at ${metAt} and holding in ${winLab}`;
   const alone='before the caregiver runs it alone', un=M.crit.unseen, unPl=un.length>1;
   let cls,txt;
@@ -1540,12 +1634,34 @@ function renderSum(){
     /* v22.72 (review F351, I176) the latest follow-up probe decides whether it is holding at home */
     const fu=ctFuLatest(),due=String(S.meta.fu_due||'').trim(),dueTxt=due?' A follow-up probe is due '+ctDay(due)+'.':' Set the date of the next follow-up probe below.';
     if(fu&&fu.bad){lvl=2;cls='v-mid';txt=`Competent on the in-home probe: ${base}. The follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}has ${fu.bad}.`;}
-    else if(fu&&(fu.p<S.crit||(fu.c!==null&&fu.c<100))){lvl=1;cls='v-no';txt=`Not holding at home: the follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}obtained ${pf(fu.p)} of steps correct${fu.c!==null?`, critical steps ${pf(fu.c)}`:''}, ${fu.p<S.crit?`below the ${S.crit}% criterion`:'and every critical step must be correct'}. Rehearse in the routine and probe again before the plan is left to run at home.`;}
+    else if(fu&&(fu.p<S.crit||(fu.c!==null&&fu.c<100))){lvl=1;notHold=true;cls='v-no';txt=`Not holding at home: the follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}obtained ${pf(fu.p)} of steps correct${fu.c!==null?`, critical steps ${pf(fu.c)}`:''}, ${fu.p<S.crit?`below the ${S.crit}% criterion`:'and every critical step must be correct'}. Rehearse in the routine and probe again before the plan is left to run at home.`;}
     else if(fu&&fu.c===null&&M.crit.marked&&!fu.none){lvl=2;cls='v-mid';txt=`Competent on the in-home probe: ${base}. The follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}obtained ${pf(fu.p)} of steps correct, but its critical steps are not recorded: enter them (for example 2/2), or none when none came due.`;}
     else if(fu){lvl=3;cls='v-ok';txt=`Competent and holding at home: ${base}; and a follow-up probe ${fu.date?'on '+ctDay(fu.date)+' ':''}at ${pf(fu.p)} of steps correct${fu.c!==null?`, critical steps ${pf(fu.c)}`:''}.`;}
     else {lvl=2;cls='v-ok';txt=`Competent on the in-home probe: ${base}. One probe is one observation: running it independently at home is shown by a follow-up probe at or above the criterion.${dueTxt}`;}}
+  return {M,cls,txt,lvl,notHold};}
+function renderSum(){
+  const M=metrics();
+  const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v||'\u2014'}</div><div class="sub">${s||''}</div></div>`;
+  const last=M.used.length?fmt(M.used.slice(-1)[0].c,M.used.slice(-1)[0].s):'';
+  /* v21.16 audit (F5, F6, F12): rounds are named as the grid labels them (R3), not by their count among
+     scored rounds; the critical-steps card says what was scored and where */
+  const R=x=>'R'+(x.j+1), rnd=n=>n+' consecutive round'+(n===1?'':'s');
+  const metAt=M.toCrit?R(M.used[M.toCrit-1]):'';
+  const winLab=M.win.length>1?R(M.win[0])+'\u2013'+R(M.win[M.win.length-1]):M.win.length?R(M.win[0]):'';
+  const stepList=a=>(a.length>1?'steps ':'step ')+a.map(i=>i+1).join(', ');
+  const where=M.toCrit?`in the latest ${M.win.length>1?M.win.length+' rounds':'round'} (${winLab})`:'across all scored rounds';
+  const critSub=!M.crit.marked?'none marked critical'
+    :M.crit.n?`${M.crit.c} of ${M.crit.n} ${where}`+(M.crit.unseen.length?`; ${stepList(M.crit.unseen)} not scored`:'')
+    :`critical steps not scored ${M.toCrit?where:'yet'}`;
+  $('#metricWrap').innerHTML=
+    card('Final round',last,M.used.length?'round '+R(M.used.slice(-1)[0]):'')+
+    card('Pooled accuracy',fmt(M.tot.c,M.tot.n),`${M.tot.c} of ${M.tot.n} scored steps`)+
+    card('Critical steps',M.crit.n?fmt(M.crit.c,M.crit.n):'',critSub)+
+    card('Rounds to criterion',M.toCrit||'',M.toCrit?`${rnd(S.critN)} at or above ${S.crit}%, met at ${metAt}`:'not yet met');
+  const {cls,txt,lvl}=ctDecide();   /* v22.73 the decision, read apart from the drawing */
   $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
   ctLvl=lvl;ctDec={cls,txt};try{ctOutcomeCheck();}catch(e){}try{ctSafetyPaint();}catch(e){}   /* v22.72 (review F351, F349) */
+  try{cgHousePaint();}catch(e){}try{ctBoostPaint();}catch(e){}   /* v22.73 (review F354, I178) */
   try{ct1ConsentNote();}catch(e){}   /* v22.37 (review F348) */
   const weak=M.rows.filter(r=>r.s>0&&(100*r.c/r.s<S.crit||r.last!=='C'));
   $('#weakTbl').innerHTML='<thead><tr><th style="width:52px">Step</th><th style="text-align:left">What the caregiver does</th><th style="width:64px">Crit.</th><th style="width:80px">Per-step</th><th style="width:230px">Focus</th></tr></thead><tbody>'+
@@ -1584,8 +1700,8 @@ $('#delGoal').addEventListener('click',async()=>{if(S.goals.length>1){const n=S.
   S.goals.pop();renderGoals();}});
 $('#addStep').addEventListener('click',()=>{S.steps.push({d:'',crit:false});renderSteps();renderGrid();});
 $('#delStep').addEventListener('click',async()=>{if(S.steps.length>1){const i=S.steps.length-1;
-  if(((S.steps[i].d||'').trim()||S.rounds.some((_,j)=>code(i,j)))&&!(await nbhUI.confirm('Remove step '+(i+1)+'?\nIts description and its codes in every round will be deleted.',{ok:'Remove',danger:true})))return;
-  S.steps.pop();ensure();renderSteps();renderGrid();renderSum();}});
+  if(((S.steps[i].d||'').trim()||S.rounds.some((_,j)=>code(i,j))||cgCoded(i))&&!(await nbhUI.confirm('Remove step '+(i+1)+'?\nIts description and its codes in every round will be deleted.',{ok:'Remove',danger:true})))return;
+  cgStepGone(i);S.steps.pop();ensure();renderSteps();renderGrid();renderSum();}});
 /* v21.16 audit (F3, F4): each setting takes only a value inside its stated range (whole numbers for the
    counts) and otherwise puts the current value back. 2.5 rehearsals stopped the page with an error; 0%
    silently became 80%, and 30%, 150%, -1, 2.5 or 9 consecutive rounds were taken. */
@@ -1603,14 +1719,15 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
   if(!el._b){el._b=1;const ev=(el.tagName==='SELECT'||el.type==='checkbox')?'change':'input';
     el.addEventListener(ev,()=>{S.meta[k]=el.type==='checkbox'?el.checked:el.value;
       if(k==='probe'||k==='probe_pct'||k==='probe_crit'||k==='probe_nocrit'||k==='relapseReh'||k==='safety'||k==='emerg'||k==='beh'||k==='fu_due')renderSum();
-      else if(k==='outcome')ctOutcomeCheck();});}});}   /* v22.72 the rows the decision now reads */
+      else if(k==='outcome')ctOutcomeCheck();
+      if(k==='cg'||k==='rel')cgPaint();if(k==='thin_next'||k==='boost_date'||k==='boost_res')ctBoostPaint();if(k==='cardLang')renderCard();});}});}   /* v22.72 the rows the decision now reads */
 function renderAll(){ensure();renderGoals();renderFit();renderSteps();renderGrid();renderFu();renderSum();bindMeta();
-  $('#nRounds').value=S.nRounds;$('#critPct').value=S.crit;$('#critN').value=S.critN;}
+  $('#nRounds').value=S.nRounds;$('#critPct').value=S.crit;$('#critN').value=S.critN;try{cgPaint();renderCard();}catch(e){}}   /* v22.73 */
 
 $('#printBtn').addEventListener('click',()=>window.print());
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'CT-1',rev:'2026-09',saved:new Date().toISOString(),S},null,1)],{type:'application/json'}));
+  a.href=URL.createObjectURL(new Blob([(cgStore(),JSON.stringify({form:'CT-1',rev:'2026-09',saved:new Date().toISOString(),S},null,1))],{type:'application/json'}));
   /* v21.16 audit (F14): the file is named for the local date; the UTC date named an evening's save for tomorrow */
   const t=new Date(),ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
   a.download=`CT-1_${nm}_${ymd}.json`;document.body.appendChild(a);a.click();a.remove();});
@@ -1702,6 +1819,10 @@ async function loadSim(){
   ];
   const plan=[['C','C','C','C'],['C','C','C','C'],['C','C','C','C'],['EC','C','C','C'],['EO','EC','C','C'],['C','C','C','C']];
   plan.forEach((row,i)=>row.forEach((v,j)=>{S.cells[key(i,j)]=v;}));
+  renderAll();
+  /* v22.73 (review F354) the father, home after 7pm, to be trained at the next session */
+  S.house.list.push({id:'c2',own:{meta:{cg:'Simulated parent 2',rel:'Father',where:'In the home'},rounds:[],cells:{},nRounds:4,fu:[]}});
+  S.meta.thin_next=Di(-12);S.meta.thin_what='The wait after the card goes from 2 to 4 minutes';
   renderAll();setView('sum');
   nbhUI.toast('Simulation loaded: simulated caregiver training with four rehearsal rounds.', {kind:'ok'});
 }
@@ -1780,17 +1901,31 @@ document.getElementById('ctEmergBtn').addEventListener('click',()=>{const el=doc
   el.dispatchEvent(new Event('input',{bubbles:true}));el.focus();});
 /* the case, in: kept for the risk check and the crisis box */
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ctCaseF=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;try{renderSum();}catch(e){}return r;};}
-/* what is due (the shell's Today list): the next follow-up probe only; the dates of follow-up probes already run are not deadlines */
-window.__nbhDue=function(){const d=ctT((S.meta||{}).fu_due);return d?[{what:'Next follow-up probe at home',date:d}]:[];};
+/* what is due (the shell's Today list): the next follow-up probe only; the dates of follow-up probes already run are not deadlines.
+   v22.73: for each adult in the home; and the booster rehearsal before the next thinning step (I178) */
+window.__nbhDue=function(){const out=[];const L=S.house?S.house.list:[null];if(S.house)cgStore();
+  L.forEach(r=>cgWith(r,()=>{const d=ctT((S.meta||{}).fu_due);if(d)out.push({what:'Next follow-up probe at home'+(L.length>1?' ('+cgWho(S.meta)+')':''),date:d});}));
+  const th=ctT((S.meta||{}).thin_next);if(th)out.push({what:'Booster rehearsal before the thinning step',date:th});return out;};
+document.getElementById('cgSel').addEventListener('change',e=>cgSwitch(e.target.value));
+document.getElementById('cgAdd').addEventListener('click',()=>{if(!S.house)return;cgStore();const id='c'+Date.now().toString(36);
+  S.house.list.push({id,own:cgBlankOwn(S.nRounds)});cgLoad(id);setView('setup');try{document.querySelector('[data-m="cg"]').focus();}catch(e){}});
+document.getElementById('cgDel').addEventListener('click',async()=>{if(!S.house||S.house.list.length<2)return;cgStore();const r=cgRec(S.house.cur),m=S.meta;
+  if(!(await nbhUI.confirm('Remove '+cgWho(m)+(ctT(m.cg)&&ctT(m.rel)?' ('+ctT(m.cg)+')':'')+' from this record?\nTheir rehearsal rounds, probes and sign-off are deleted; the family\u2019s goals, the fit answers and the steps stay.',{ok:'Remove',danger:true})))return;
+  const at=S.house.list.indexOf(r);S.house.list.splice(at,1);cgLoad(S.house.list[Math.max(0,at-1)].id);});
+document.getElementById('cardPrint').addEventListener('click',()=>{renderCard();document.body.classList.add('ct-card-print');
+  const done=()=>{document.body.classList.remove('ct-card-print');window.removeEventListener('afterprint',done);};window.addEventListener('afterprint',done);
+  try{window.print();}finally{setTimeout(done,1500);}});
+document.getElementById('viewSeg').addEventListener('click',e=>{const b=e.target.closest('button[data-view="card"]');if(b)renderCard();});
+document.addEventListener('input',()=>{if(document.body.classList.contains('view-card'))renderCard();});
 /* the case, out (F353): the caregiver trained and where the training stands, for Form PR-1. Nothing is sent before a
    caregiver is named or a round is coded. */
 {const iso=t=>{t=ctT(t);let m=/(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
     m=/\b(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\b/.exec(t);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}return '';};
-  window.__nbhCaregiverFacts=function(){const m=S.meta||{},name=ctT(m.cg),coded=Object.keys(S.cells||{}).some(k=>S.cells[k]);if(!name&&!coded)return null;
-    const STAND=['in training','competent in rehearsal','competent on the in-home probe','holding at a follow-up probe'];
+  const one=function(){const m=S.meta||{},name=ctT(m.cg),coded=Object.keys(S.cells||{}).some(k=>S.cells[k]);if(!name&&!coded)return null;
+    const st=cgStand(),ctLvl=st.lvl,ctDec={cls:st.cls,txt:st.txt};
     const top=(S.goals||[]).find(g=>g&&g.p==='1 (highest)'&&ctT(g.r)&&g.t==='Yes');
     const fu=(S.fu||[]).map(r=>{const x=ctFuRead(r);return x&&!x.bad?{date:iso(r.date),pct:Math.round(x.p*10)/10,crit:x.c===null?null:Math.round(x.c*10)/10}:null;}).filter(Boolean);
-    const o={name,rel:ctT(m.rel),stand:STAND[ctLvl]||STAND[0],level:ctLvl,decision:{cls:ctDec.cls.replace(/^v-/,''),text:ctDec.txt.replace(/<[^>]+>/g,'')},
+    const o={name,rel:ctT(m.rel),stand:st.stand,level:ctLvl,decision:{cls:ctDec.cls.replace(/^v-/,''),text:ctDec.txt.replace(/<[^>]+>/g,'')},
       outcome:ctT(m.outcome),src:'CT-1'};
     const pd=iso(m.probe),pp=pctIn(m.probe_pct),pc=pctIn(m.probe_crit);
     if(ctT(m.probe))o.probe={date:pd,pct:pp!=null&&isFinite(pp)?Math.round(pp*10)/10:null,crit:pc!=null&&isFinite(pc)?Math.round(pc*10)/10:null,none:!!m.probe_nocrit};
@@ -1798,6 +1933,11 @@ window.__nbhDue=function(){const d=ctT((S.meta||{}).fu_due);return d?[{what:'Nex
     if(top)o.routine=ctT(top.r);['relapseDo','safety','emerg','call','where'].forEach(k=>{if(ctT(m[k]))o[k==='emerg'?'emergency':k]=ctT(m[k]);});
     const sv={day:ctT(m.sv1),worth:ctT(m.sv2),public:ctT(m.sv3)};if(sv.day||sv.worth||sv.public)o.ratings=sv;
     return o;};
+  /* v22.73 (review F354, I179) the first adult as before, every adult under household, and the protocol steps for the home checklist */
+  window.__nbhCaregiverFacts=function(){if(!S.house)return null;cgStore();const L=S.house.list.map(r=>cgWith(r,one)).filter(Boolean);if(!L.length)return null;
+    const o=Object.assign({},L[0]);if(L.length>1)o.household=L.map(x=>({name:x.name,rel:x.rel,stand:x.stand,level:x.level}));
+    const steps=(S.steps||[]).filter(x=>ctT(x.d)).map(x=>({d:ctT(x.d),crit:!!x.crit}));if(steps.length)o.steps=steps;
+    if(ctT(S.meta.thin_next))o.thinNext=iso(S.meta.thin_next);return o;};
   const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
     let c=null;try{c=window.__nbhCaregiverFacts();}catch(e){c=null;}if(!c)return o;o=o||{};o.caregiver=c;return o;};}
 </script>
@@ -1812,6 +1952,31 @@ window.__nbhDue=function(){const d=ctT((S.meta||{}).fu_due);return d?[{what:'Nex
 .ct-crisis ul{margin:4px 0 0 18px;padding:0}
 .ct-outwarn{margin-top:6px;padding:6px 10px;border-left:3px solid #8E2A2A;background:#F6E0E0;font-family:var(--sans);font-size:12.5px}
 #fuTbl input,#fuTbl select,#fuTbl textarea{width:100%;box-sizing:border-box}
+/* v22.73 (review F354, I177, I178) */
+.ct-house{margin:6px 0 10px;padding:7px 11px;border:1px solid var(--rule-2);border-left:3px solid var(--nbh-teal);background:#FAFCFC;font-family:var(--sans);font-size:12.5px;line-height:1.5}
+#cgSel{max-width:190px}
+#cgAdd,#cgDel{white-space:nowrap}
+.ct-cgbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0}.ct-cgbar .hint{margin:0;flex:1 1 320px}
+#cgDel:disabled{display:none}
+.ct-thinwhat{margin-top:6px;width:100%;box-sizing:border-box}
+.ct-cardbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0 12px;font-family:var(--sans);font-size:13px}
+.ct-card{max-width:7.2in;margin:0 auto;border:2px solid #22343f;border-radius:10px;padding:18px 24px;font-family:var(--sans);font-size:16px;line-height:1.45;color:#16242e;background:#fff}
+.ct-card .ct-card-h{font-size:22px;font-weight:700;margin:0 0 10px;border-bottom:2px solid #22343f;padding-bottom:6px}
+.ct-card h4{font-size:15px;letter-spacing:.03em;text-transform:uppercase;margin:14px 0 4px;color:#22343f}
+.ct-card ol{margin:4px 0 0 22px;padding:0}.ct-card li{margin:3px 0}
+.ct-card .ct-every{display:inline-block;margin-left:6px;padding:0 7px;border:1px solid #8E2A2A;border-radius:9px;font-size:12px;color:#8E2A2A;font-weight:600;vertical-align:1px}
+.ct-card p{margin:2px 0 0;white-space:pre-wrap}
+.ct-card .ct-card-emerg{border:2px solid #8E2A2A;border-radius:6px;padding:6px 10px;margin-top:6px}
+.ct-card .ct-card-foot{margin-top:16px;font-size:12px;color:#5b6770}
+@media print{
+  .only-card{display:none!important}
+  body.ct-card-print .only-card{display:block!important}
+  body.ct-card-print main.sheet > :not(.only-card),body.ct-card-print .only-card > :not(.ct-card){display:none!important}
+  body.ct-card-print .ct-card{border-width:2px;max-width:none}
+  /* the card goes home: none of the student record's running heads (name, ID, "retain in the student's file") */
+  @page ctcard{@top-left{content:""}@top-center{content:""}@top-right{content:""}@bottom-left{content:""}@bottom-center{content:""}@bottom-right{content:""}}
+  body.ct-card-print .only-card{page:ctcard}
+}
 @media screen and (max-width:700px){.grid-wrap > #fuTbl{min-width:720px}}
 @media print{.ct-outwarn{border:1px solid #8E2A2A;background:none}.ct-chk input{-webkit-appearance:auto;appearance:auto}}
 </style>
@@ -1836,7 +2001,7 @@ window.__nbhDue=function(){const d=ctT((S.meta||{}).fu_due);return d?[{what:'Nex
 'use strict';
 const D=document,byId=id=>D.getElementById(id),q=(s,r)=>(r||D).querySelector(s),qa=(s,r)=>Array.from((r||D).querySelectorAll(s));
 const CH=n=>String.fromCharCode(n),MID=CH(183),NDASH=CH(8211),MDASH=CH(8212),RSQ=CH(8217),LDQ=CH(8220),RDQ=CH(8221);
-const CFG={form:'CT-1',view:'train',max:8,dp:1,arrLabel:'Arrangement',arr:['Role-play','With the student, trainer present','In the routine, trainer present','Home probe'],probeArr:'Home probe',means:{EC:'attempted but done wrong',EO:'not attempted',NA:'did not arise in the round'},learner:'caregiver',whoKey:'client',whoLabel:'Student',comps:[['c_inst','Instruction','1. Instruction: delivered'],['c_mod','Modeling','2. Modeling: delivered'],['c_reh','Rehearsal','3. Rehearsal: delivered'],['c_fb','Feedback','4. Feedback: delivered'],['c_situ','In-situ training','5. In-situ training: delivered']],compsTitle:'Components Delivered',locks:['#nRounds','#delStep','#simBtn','#clearBtn','#loadBtn'],probeNote:'A round marked Home probe counts in the grid like any other round. Saving it also fills the in-home probe under Follow-up and the Family'+RSQ+'s View from its codes (the steps correct and the critical steps correct), the probe that clears the caregiver.',probe:{text:'probe',pct:'probe_pct',crit:'probe_crit',none:'probe_nocrit',where:'Follow-up and the Family'+RSQ+'s View'},targets:false};
+const CFG={form:'CT-1',view:'train',max:8,dp:1,arrLabel:'Arrangement',arr:['Role-play','With the student, trainer present','In the routine, trainer present','Home probe'],probeArr:'Home probe',means:{EC:'attempted but done wrong',EO:'not attempted',NA:'did not arise in the round'},learner:'caregiver',whoKey:'client',whoLabel:'Student',comps:[['c_inst','Instruction','1. Instruction: delivered'],['c_mod','Modeling','2. Modeling: delivered'],['c_reh','Rehearsal','3. Rehearsal: delivered'],['c_fb','Feedback','4. Feedback: delivered'],['c_situ','In-situ training','5. In-situ training: delivered']],compsTitle:'Components Delivered',locks:['#nRounds','#delStep','#simBtn','#clearBtn','#loadBtn','#cgSel','#cgAdd','#cgDel'],probeNote:'A round marked Home probe counts in the grid like any other round. Saving it also fills the in-home probe under Follow-up and the Family'+RSQ+'s View from its codes (the steps correct and the critical steps correct), the probe that clears the caregiver.',probe:{text:'probe',pct:'probe_pct',crit:'probe_crit',none:'probe_nocrit',where:'Follow-up and the Family'+RSQ+'s View'},targets:false};
 const box=byId('rrRun'),body=byId('rrBody'),msgEl=byId('rrMsg');
 if(!box||!body||!msgEl||typeof window.renderAll!=='function'||typeof window.renderGrid!=='function')return;
 const LABEL={C:'Correct',EC:'Commission',EO:'Omission',NA:'N/A'},KEYOF={C:'C',EC:'M',EO:'O',NA:'N'},ORDER=['C','EC','EO','NA'];

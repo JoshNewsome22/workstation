@@ -1981,6 +1981,17 @@ function nbhHdLangFlag(){const x=nbhHdLang();let el=document.getElementById('hdL
   el.innerHTML='<b>Before these go home.</b> Home language: '+esc(x.home||'not recorded (an interpreter is asked for)')+'. Have this translated or explained by an interpreter (the district&rsquo;s interpreter service) before it goes home.';}
 {const rs0=renderSheets;renderSheets=function(){const r=rs0.apply(this,arguments);try{nbhHdLangFlag();}catch(e){}return r;};}
 document.addEventListener('input',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.m==='lang')nbhHdLangFlag();});
+/* v22.73 (review I179, Form CT-1) the home plan's protocol steps on the routine checklist as Adult steps, while the checklist
+   holds no Adult step: the family ticks what they ran beside the tally. A family's ticks are a self-report and tend to run
+   higher than an observed probe, so they are read beside CT-1's follow-up probes, never instead of them. */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
+  try{const cg=f&&f.caregiver,st=cg&&Array.isArray(cg.steps)?cg.steps.filter(x=>x&&String(x.d||'').trim()):[];
+    if(st.length&&!S.sk.some(x=>x.label&&x.who==='Adult')){const kids=S.sk.filter(x=>x.label);const take=st.slice(0,Math.max(0,12-kids.length));
+      S.sk=take.map(x=>({label:String(x.d).trim(),who:'Adult',rt:''})).concat(kids);if(!S.sk.length)S.sk.push({label:'',who:'Adult',rt:''});renderAll();
+      const note='The home plan\u2019s steps (Form CT-1) are on the routine checklist as Adult steps'+(take.length<st.length?' (the first '+take.length+')':'')+'. The family\u2019s ticks are a self-report: read them beside the follow-up probes on Form CT-1, never instead of them.';
+      if(r&&typeof r==='object'){r.filled=(r.filled||0)+take.length;r.note=[r.note,note].filter(Boolean).join(' ');}
+      return r||{filled:take.length,note};}}catch(e){}
+  return r;};}
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){nbhHdCase=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;let n=0;
   try{const L=(f&&f.profile&&f.profile.language)||{},C=(f&&f.plan&&f.plan.considerations)||{},home=String(L.home||C.language||'').trim();
     const el=$('[data-m="lang"]');if(home&&!String(S.meta.lang||'').trim()&&el&&!String(el.value||'').trim()){S.meta.lang=home+((L.interpreter===true||C.interpreter===true)?' (interpreter requested)':'');el.value=S.meta.lang;n=1;el.dispatchEvent(new Event('input',{bubbles:true}));}

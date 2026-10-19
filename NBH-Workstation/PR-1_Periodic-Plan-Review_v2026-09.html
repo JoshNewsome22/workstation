@@ -2132,7 +2132,9 @@ function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||n
     if(M.length){const cl=t=>{t=prT(t);return t.length>80?t.slice(0,77).replace(/\s+\S*$/,'')+'\u2026':t;};
       L.push('Steps missed on the observations the integrity verdict is judged on (Form TI-1): '+M.slice(0,6).map(m=>(m.pn?'plan step '+m.pn:'checklist step '+m.n)+', \u201c'+cl(m.d)+'\u201d ('+prR(m.pct)+'% correct'+(m.ec?', '+m.ec+' commission':'')+(m.eo?', '+m.eo+' omission':'')+(m.crit?', critical':'')+')').join('; ')+(M.length>6?'; and '+(M.length-6)+' more':'')+'.');}}
   /* v22.72 (review F353) whether the family was trained to run the home plan, and whether it is holding (Form CT-1) */
-  if(cg){const fu=(cg.followUp||[]).filter(x=>x&&x.date).slice(-1)[0];
+  if(cg&&Array.isArray(cg.household)&&cg.household.length>1){   /* v22.73 (review F354) every adult in the home */
+    L.push('The home plan (Form CT-1): '+cg.household.map(h=>(h.name||h.rel||'a caregiver')+(h.name&&h.rel?' ('+h.rel.toLowerCase()+')':'')+', '+(h.stand||'in training')).join('; ')+(cg.due?'; follow-up probe due '+prMd(cg.due):'')+'.');}
+  else if(cg){const fu=(cg.followUp||[]).filter(x=>x&&x.date).slice(-1)[0];
     L.push('The home plan (Form CT-1): '+(cg.name?cg.name+(cg.rel?' ('+cg.rel.toLowerCase()+')':'')+', ':'')+(cg.stand||'in training')+
       (cg.probe&&cg.probe.pct!=null?'; in-home probe '+(cg.probe.date?'on '+prMd(cg.probe.date)+' ':'')+prR(cg.probe.pct)+'% of steps correct':'')+
       (fu?'; follow-up probe on '+prMd(fu.date)+' '+prR(fu.pct)+'%':'')+(cg.due&&!fu?'; follow-up probe due '+prMd(cg.due):'')+'.');}

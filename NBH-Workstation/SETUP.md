@@ -9903,6 +9903,31 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.73: CT-1 trains every adult in the home, prints a family card, and fills HD-1's checklist (review Wave 3, part 2)
+
+- **Several caregivers in one record (F354).** **+ Caregiver** in the toolbar adds another adult in the home; the
+  **Caregiver** list switches between them, and **Remove this caregiver** on Setup takes one out. Each has their own rehearsal rounds, components, relapse rehearsal, in-home
+  probe, follow-up probes, the family's view and sign-off; the family's goals, the fit answers, the protocol steps, the
+  relapse response and the safety rows are shared. The Competency sheet's **Household** line gives where each adult
+  stands (for example "Mother: competent on the in-home probe · Father: not yet trained"), and says why it matters while
+  one is not there yet: one adult giving in while another holds out keeps the behavior going. When the fit question on
+  the other adults is answered Partly or No, the fit verdict says to train them here. A protocol step deleted takes its
+  codes for every adult; a file saved before this opens as one caregiver; the worked example adds the father, not yet
+  trained. The case gets the first caregiver as before and every adult under household, and Form PR-1 names each.
+- **A family card (I177).** The new **Family card** view prints one page for the family, on its own: the routine, the
+  steps (critical ones marked "every time"), what to do if the behavior comes back, when safety comes first, the
+  emergency numbers in a box, and whom to contact. It carries no name, and none of the student record's running heads. The headings can be in Spanish; the steps and the
+  rest stay as typed, and the card says to have the district's interpreter translate them before it goes home. The
+  form's own print leaves the card out.
+- **The home checklist on Form HD-1 (I179).** HD-1 puts the home plan's protocol steps on its routine checklist as Adult
+  steps, before the child's, while the checklist holds no Adult step, and notes that the family's ticks are a self-report
+  to read beside CT-1's follow-up probes, never instead of them.
+- **A booster rehearsal before the next thinning step (I178).** The Competency sheet takes the date of the next thinning
+  step and what changes, and the booster rehearsal before it; a booster is asked for until it is recorded, one dated after
+  the step is flagged, and the step goes on the Today list.
+
+Checked by `qa/v2273-test.js` (17).
+
 ### v22.72: CT-1 puts safety first, holds the probe to its critical steps, and ties the sign-off to the record (review Wave 3, part 1)
 
 - **When safety comes first (F349).** If the Behavior Comes Back has three new rows: **When safety comes first** (when the
