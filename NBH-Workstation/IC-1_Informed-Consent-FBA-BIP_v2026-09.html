@@ -828,6 +828,8 @@ td input,td select{max-width:100%}
 ul.ic-conf{margin:4px 0 2px 18px;padding:0}
 ul.ic-conf li{margin:2px 0}
 .ic-revnote{margin:6px 0 10px}
+/* v22.7x (review F1) the family's language from Form DM-1 against this consent's: screen only */
+.warn.ic-lang{border-left-color:#9b4e15;background:#fbf1e3;margin:6px 0 10px}.warn.ic-lang[hidden]{display:none}
 </style>
 <style id="ic1-audit-css">
 /* v21.16 audit (F10, F11). On paper: the parent's decision, how consent was obtained and the signatures stay on one
@@ -1018,6 +1020,7 @@ ul.ic-conf li{margin:2px 0}
     <div class="f"><label for="cIep">IEP or reevaluation due</label><input id="cIep" name="c.iepdue" type="date"></div>
     <div class="f"><label for="cNotice">Date of this request</label><input id="cNotice" name="c.reqdate" type="date"></div>
   </div>
+  <div class="warn ic-lang noprint" id="icLangWarn" role="status" hidden></div>   <!-- v22.7x (review F1) -->
 
   <h3 class="sub">1. Why We Are Asking</h3>
   <p class="method" style="margin:0 0 6px">We are asking for your permission to conduct a functional behavior assessment (FBA) for your child. An FBA is a way of finding out what a behavior does for a student: what tends to happen before it, what tends to happen after it, and in what situations it is more and less likely. The results are used to write or revise a behavior intervention plan (BIP) that teaches a better way to get the same result and changes the situations that set the behavior off. Federal and Florida special-education rules require your informed written consent before the school evaluates or reevaluates your child. An FBA done for one student as part of an evaluation or reevaluation is covered by that rule, so we need your consent before we begin.</p>
@@ -1143,6 +1146,7 @@ ul.ic-conf li{margin:2px 0}
     <div class="f"><label for="sIntLang">Language</label><input id="sIntLang" name="s.int.lang"></div>
     <div class="f"><label for="sIntDate">Date</label><input id="sIntDate" name="s.int.date" type="date"></div>
   </div>
+  <div class="warn ic-lang noprint" id="icLangWarn2" role="status" hidden></div>   <!-- v22.7x (review F1) -->
   </div>
   </div>
   <div class="cite">Consent elements follow 34 CFR &sect;300.9 and &sect;300.503 and Florida Rule 6A-6.03411(1)(g); the plain-language structure follows BACB Ethics Code Standards 2.08 and 2.11, and the limits of confidentiality Standard 3.10; access to records after 34 CFR &sect;99.10 and &sect;300.613, and the independent educational evaluation after &sect;300.502(b). A copy of the signed form goes to the parent; the original is retained in the student's behavior file with the FBA.</div>
@@ -3002,6 +3006,30 @@ window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById
       ['input','change'].forEach(t=>{try{el.dispatchEvent(new Event(t,{bubbles:true}));}catch(e){}});}}catch(e){}
   let g=null;if(!was){try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}}
   return {filled:n+(r&&r.filled||0)+(g&&g.filled||0),note:n?'Behaviors of concern from Form TB-1':(r&&r.note)||''};};})();
+/* v22.7x (review F1) in: the family's home language and interpreter need, and who holds educational rights, from Form DM-1
+   (profile.language, profile.rights), each into an empty field: Home language ("Spanish; interpreter: spoken"), the signer's
+   relationship in this form's words, and the signer's printed name. Then a check, on screen only: when DM-1 says the family
+   needs an interpreter or speaks another language, and this consent records no interpreter in that language, or a different
+   home language, it says so before the consent is given (34 CFR 300.9(a), 300.503(c)). */
+(function(){const T=v=>String(v==null?'':v).trim(),q=nm=>document.querySelector('[name="'+nm+'"]');
+  const put=(nm,v)=>{const e=q(nm);v=T(v);if(!e||!v||T(e.value))return false;if(e.tagName==='SELECT'&&![...e.options].some(o=>o.value===v||o.text===v))return false;e.value=v;['input','change'].forEach(t=>{try{e.dispatchEvent(new Event(t,{bubbles:true}));}catch(x){}});return true;};
+  const word=s=>T(s).toLowerCase().split(/[^a-z\u00c0-\u024f]+/).filter(w=>w.length>2&&!/^(interpreter|spoken|sign|written|translation|and|the|with|needed|yes)$/.test(w));
+  window.icLangPaint=function(){const L=window.__icLang||{},home=T(L.home),need=L.interpreter===true;
+    const other=home&&!/^english\b/i.test(home),hw=word(home)[0]||'';
+    const cl=T((q('c.lang')||{}).value),il=T((q('s.int.lang')||{}).value),iname=T((q('s.int.name')||{}).value);
+    const P=[];if(home&&cl&&hw&&!word(cl).includes(hw))P.push('the home language on this form ('+cl+') is not the family\u2019s on Form DM-1 ('+home+')');
+    if((need||other)&&!(iname&&il&&(!hw||word(il).includes(hw))))P.push(need?'Form DM-1 says the family needs an interpreter'+(home?' ('+home+')':'')+', and no interpreter'+(hw?' in '+home:'')+' is recorded under the signatures':'the family\u2019s home language is '+home+' (Form DM-1), and no interpreter in it is recorded under the signatures');
+    const t=P.length?'<b>Language</b>'+P.map(x=>x.charAt(0).toUpperCase()+x.slice(1)).join('. ')+'. Give the consent in the parent\u2019s native language or other mode of communication, and record the interpreter and the language (34 CFR 300.9(a); 300.503(c)).':'';
+    ['icLangWarn','icLangWarn2'].forEach(id=>{const e=document.getElementById(id);if(e){e.hidden=!t;e.innerHTML=t;}});};
+  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+    let n=0;const got=[];try{const P=(f&&f.profile)||{},L=P.language||{},R=P.rights||{};window.__icLang={home:T(L.home),interpreter:L.interpreter};
+      const kind=/^Interpreter:\s*([^;]+)/.exec(T(L.notes)),lang=T(L.home)?T(L.home)+(L.interpreter===true?'; interpreter'+(kind?': '+kind[1].trim():''):''):'';
+      if(put('c.lang',lang)){n++;got.push('the home language');}
+      if(put('s.par.rel',R.signer)){n++;got.push('the signer\u2019s relationship');}
+      if(R.name&&put('s.par.name',R.name)){n++;got.push('the signer\u2019s name');}
+      window.icLangPaint();}catch(e){}
+    return n?{filled:(r&&r.filled||0)+n,note:[(r&&r.note)||'','from Form DM-1: '+got.join(', ')].filter(Boolean).join('; ')}:r;};
+  document.addEventListener('input',e=>{if(e.target&&/^(c\.lang|s\.int\.(lang|name))$/.test(e.target.name||''))window.icLangPaint();});})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

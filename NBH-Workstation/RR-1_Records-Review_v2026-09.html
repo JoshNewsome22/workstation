@@ -1984,6 +1984,10 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
   for(let i=0;i<4;i++){const ne=document.querySelector('[name="md['+i+'].n"]');if(!ne||String(ne.value||'').trim())continue;
    if(['dose','start','chg','fx'].some(k=>{const e=document.querySelector('[name="md['+i+'].'+k+'"]');return e&&String(e.value||'').trim();}))continue;
    put('md['+i+'].n',m.name);put('md['+i+'].dose',[m.dose,m.times].filter(Boolean).join(' / '));have.add(String(m.name).trim().toLowerCase());break;}});
+ /* v22.7x (review F3) the start and last-change dates Form DM-1 records, into the row of the same medication where empty */
+ const rrMD=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||'').trim());return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(v||'').trim();};
+ (Array.isArray(H.meds)?H.meds:[]).forEach(m=>{if(!m||!m.name)return;for(let i=0;i<4;i++){const ne=document.querySelector('[name="md['+i+'].n"]');if(!ne||String(ne.value||'').trim().toLowerCase()!==String(m.name).trim().toLowerCase())continue;
+   put('md['+i+'].start',m.start);if(m.change)put('md['+i+'].chg',rrMD(m.change)+' (Form DM-1)');break;}});
  put('i.iepdate',D.iepHeld);put('i.annual',D.iep);put('i.reeval',D.reeval);
  if(last){refresh();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}

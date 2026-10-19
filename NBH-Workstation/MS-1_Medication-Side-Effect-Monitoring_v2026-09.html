@@ -1490,6 +1490,9 @@ restore({counts:{}});
    generic or brand name, else entered as Other with the name as prescribed; a card is added up to the form's 6), the
    prescriber, the health conditions and allergies as the medical history, and the first target behavior of Form TB-1
    as the BIP target tracked alongside, each only where the field is empty; then the shared fill. */
+const msMDY=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||'').trim());return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(v||'').trim();};
+function msDates(i,m){let k=0;const put=(f,v)=>{const e=document.querySelector(`[name="md[${i}].${f}"]`);if(e&&v&&!String(e.value||'').trim()){e.value=v;k++;}};
+ put('start',msMDY(m.start));put('change',m.change?msMDY(m.change)+' (Form DM-1)':'');return k;}
 const msTok=s=>String(s||'').toLowerCase().split(/[^a-z]+/).filter(w=>w.length>2&&!/^(er|xr|cr|sr|la|xl|otc|and|enter|manually|other)$/.test(w));
 const msLib=name=>{const t=msTok(name)[0];if(!t)return -1;return MEDS.findIndex((x,k)=>k<MEDS.length-1&&(msTok(x.n).includes(t)||msTok(x.b).includes(t)));};
 window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note:''};let n=0,last=null;
@@ -1507,8 +1510,16 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
  medsIn.forEach(m=>{let i=$$('#medWrap .card').map(c=>+c.dataset.med).find(emptyCard);
   if(i==null){const e=$('#nMed');if(+e.value>=+e.max)return;e.value=+e.value+1;renderMeds();i=+e.value-1;}
   const k=msLib(m.name);setv(`md[${i}].lib`,String(k>=0?k:MEDS.length-1));if(k<0)setv(`md[${i}].name`,String(m.name).trim());renderMedInfo(i);
-  setv(`md[${i}].dose`,[m.dose,m.times].filter(x=>String(x||'').trim()).join(', '));last=document.querySelector(`[name="md[${i}].dose"]`);n++;});
- if(last){renderGrid(true);renderReport();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+  setv(`md[${i}].dose`,[m.dose,m.times].filter(x=>String(x||'').trim()).join(', '));last=document.querySelector(`[name="md[${i}].dose"]`);n++;
+  msDates(i,m);});
+ /* v22.7x (review F3) the start and last-change dates Form DM-1 records go into a card's empty Start date and Last change boxes,
+    for the medications just placed and for a card already holding the same medication */
+ (Array.isArray(H.meds)?H.meds:[]).forEach(m=>{if(!m||!String(m.name||'').trim()||medsIn.includes(m))return;const t=msTok(m.name)[0];
+  const i=$$('#medWrap .card').map(c=>+c.dataset.med).find(k=>{const nm=(medList().find(x=>x.i===k)||{}).name||'';return nm&&(nm.trim().toLowerCase()===String(m.name).trim().toLowerCase()||(t&&msTok(nm)[0]===t));});
+  const k=i!=null?msDates(i,m):0;if(k){n+=k;last=last||document.querySelector(`[name="md[${i}].start"]`);}});
+ if(last){renderGrid(true);renderReport();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
+  /* v22.7x (review F3) a start date just filled gives the screening schedule its date to work from */
+  renderScreenDue();}
  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
  return {filled:n+(g&&g.filled||0),note:n?(n>(roi?1:0)?'Medications, prescriber and history from Form DM-1':'')+(roi?(n>1?'; ':'')+'the release date from Form IC-1':''):''};};
 })();
