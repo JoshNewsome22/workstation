@@ -106,7 +106,7 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
   const F=await p.evaluate(async()=>{await (async()=>{document.getElementById('clearBtn').click();})();await new Promise(x=>setTimeout(x,300));
     const r=window.__nbhFactsIn({profile:{health:{meds:[{name:'Risperidone',dose:'0.5 mg',times:'twice daily, 8:00',start:'2026-05-04',chg:'2026-09-10'}],prescriber:'Dr. Sample (simulated)'}},behaviors:[{label:'Aggression toward staff (simulated)'}]});
     return {r,start:document.querySelector('[name="md[0].start"]').value,chg:document.querySelector('[name="md[0].change"]').value,due:document.getElementById('screenDue').textContent};});
-  ok('F444 Form DM-1\'s start and last-change dates go into the card, and the EPS schedule runs from the start',F.start==='5/4/2026'&&F.chg==='9/10/2026'&&/From the start of Risperidone on 5\/4\/2026/.test(F.due),F);
+  ok('F444 Form DM-1\'s start and last-change dates go into the card, and the EPS schedule runs from the start',F.start==='5/4/2026'&&F.chg==='9/10/2026 (Form DM-1)'&&/From the start of Risperidone on 5\/4\/2026/.test(F.due),F);
   /* ---------- F441: an earlier file's appetite column ---------- */
   const A=await p.evaluate(async()=>{const d={form:'MS-1',rev:'2026-09',counts:{med:1,days:14,vit:4},cells:{},fields:{'m.client':'SIMULATED – Old File','v[0].d':'9/21','v[0].wt':'38.2','v[0].app':'2','v[0].n':'weighed after lunch'},screens:[]};
     const dt=new DataTransfer();dt.items.add(new File([JSON.stringify(d)],'old.json',{type:'application/json'}));const fi=document.getElementById('fileIn');fi.files=dt.files;fi.dispatchEvent(new Event('change',{bubbles:true}));
