@@ -1162,6 +1162,7 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
   <span class="obs-clk" id="obsBarClock">0:00</span>
   <span class="obs-nx" id="obsBarNext"></span>
   <span class="obs-ct" id="obsBarCounts"></span>
+  <span class="obs-snd" id="obsBarSnd" hidden></span>
   <span class="obs-due" id="obsDue" hidden><span id="obsDueText">Background check is due</span>
     <button type="button" class="obs-go" id="obsRecord">Record the window</button>
     <button type="button" id="obsSkip">Behavior occurred: skip</button></span>
@@ -1248,6 +1249,14 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
         <button type="button" class="obs-tog" data-obs="vib" aria-pressed="true">Vibrate</button>
         <button type="button" id="obsTest">Test alert</button>
       </div>
+      <!-- v23.38 the sound level meter -->
+      <div class="obs-ctl snd-ctl" id="sndRow">
+        <button type="button" class="snd-tog" id="sndBtn" aria-pressed="false">Sound level meter</button>
+        <span class="snd-now" id="sndNow"></span>
+        <span class="obs-gap"></span>
+        <button type="button" id="sndCal">Set against a meter&hellip;</button>
+      </div>
+      <p class="note snd-note" id="sndNote"><b>Sound level meter (optional).</b> The iPad&rsquo;s microphone measures how loud the room is while you observe: only the level is kept, every 10 seconds, never the sound, and nothing leaves this device. Each incident gets the level of the seconds just before you press <b>Incident starting</b> (ending 2 seconds before, so the behavior&rsquo;s own sound is left out), and each background check the level of its scored seconds; the Analysis tab compares the two. Until the iPad is set against a sound level meter its numbers are on its own scale: they compare with each other, not with a meter&rsquo;s dB. Keep the iPad in one place, screen on. <b>With a sound level meter instead</b> (or as well), type its dBA reading in the <b>Sound level</b> box: on an incident, the reading just before the behavior began; on a background check, the reading at the check. A microphone in the room, even one that keeps no sound, should be covered by the consent and your district&rsquo;s rules.</p>
       <div class="obs-msg" id="obsMsg" aria-live="polite"></div>
       <p class="note">At each check the timer alerts you. If the target behavior occurred in the window since the last check, the check is skipped: that window is already an incident, and the timer skips it by itself when an incident was logged in it. Otherwise press <b>Record the window</b>; Background samples opens with the date, time and the seconds scored filled in: the conditions in place now, and the events in the last few seconds, the consequence window. Checks run on the clock, not on what the student is doing, which is what keeps the samples response-independent. Random checks are spread from half to one and a half times the average gap; for a session with a second observer, use a fixed schedule so both of you check at the same moments.</p>
       <table class="obs-log" id="obsLog" hidden><thead><tr><th>Check</th><th>Window</th><th>Minutes</th><th>Result</th></tr></thead><tbody></tbody></table>
@@ -1297,6 +1306,7 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
             <option value="5">5 &mdash; crisis</option>
           </select>
         </label>
+        <label class="field noprint">Sound level<input id="e-noise" type="number" min="0" max="140" step="1" inputmode="decimal" placeholder="Optional"></label>
       </div>
     </div>
 
@@ -1379,6 +1389,7 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
             <option value="no">No</option>
           </select>
         </label>
+        <label class="field noprint">Sound level<input id="bg-noise" type="number" min="0" max="140" step="1" inputmode="decimal" placeholder="Optional"></label>
       </div>
       <h4>Antecedent conditions in place at the check</h4>
       <div id="bg-a-opts" style="columns:2;column-gap:28px"></div>
@@ -2088,7 +2099,7 @@ function renderIncidents(){
     </tr></thead><tbody>
     ${rows.map(e => `<tr>
       <td><span style="white-space:nowrap">${esc(e.date)}</span>${e.activity?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(e.activity)}</div>`:""}</td>
-      <td>${esc(e.time||"")}${e.duration?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(e.duration)} min</div>`:""}</td>
+      <td>${esc(e.time||"")}${window.abcNoiseLine?abcNoiseLine(e):""}${e.duration?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(e.duration)} min</div>`:""}</td>
       <td>${e.mode==="open" ? '<span style="color:var(--ink-faint)">narrative only</span>' : labelsFor(e.antecedents, A_BY_ID, e.antecedentOther, "auto")}</td>
       <td>${labelsFor(e.behaviors, B_BY_ID, e.behaviorOther, "b")}
           ${(e.precursors||[]).length?`<div style="margin-top:3px;font-size:11px;color:var(--ink-faint)">preceded by ${(e.precursors||[]).map(id=>esc((P_BY_ID[id]&&P_BY_ID[id].other&&e.precursorOther&&e.precursorOther[id])?e.precursorOther[id]:(P_BY_ID[id]?P_BY_ID[id].label:id))).join(", ")}</div>`:""}
@@ -2111,7 +2122,7 @@ function renderSamples(){
   $("#bg-table").innerHTML = `<table>
     <thead><tr><th style="width:100px">Date</th><th style="width:70px">Time</th><th style="width:70px" class="num">Window</th><th>Antecedent conditions</th><th>Events observed</th><th class="noprint" style="width:80px">&nbsp;</th></tr></thead>
     <tbody>${state.samples.map(s => `<tr>
-      <td>${esc(s.date)}${s.activity?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(s.activity)}</div>`:""}</td><td>${esc(s.time||"")}</td><td class="num">${esc(s.window||"")} ${s.unit==="s"?"s":"min"}</td>
+      <td>${esc(s.date)}${s.activity?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(s.activity)}</div>`:""}</td><td>${esc(s.time||"")}${window.abcNoiseLine?abcNoiseLine(s):""}</td><td class="num">${esc(s.window||"")} ${s.unit==="s"?"s":"min"}</td>
       <td>${(s.antecedents||[]).length ? labelsFor(s.antecedents, A_BY_ID, {}, "auto") : '<span style="color:var(--ink-faint)">none</span>'}</td>
       <td>${s.events.length ? labelsFor(s.events, C_BY_ID, {}, "auto") : '<span style="color:var(--ink-faint)">none</span>'}</td>
       <td class="noprint"><button class="btn danger" data-delsample="${esc(s.id)}" style="padding:4px 10px;font-size:12px;min-height:28px">Delete</button></td>
@@ -2191,6 +2202,8 @@ function exportJSON(){
     header:state.header, entries:state.entries, samples:state.samples,
     /* v21.21 cross-form (X2): "Function established by FA" belongs to the record; it was not saved */
     faFunction:state.faFunction,
+    /* v23.38 the sound level meter's log, when it was used (a record without one is saved as before) */
+    noise:(state.noise && state.noise.runs && state.noise.runs.length) ? state.noise : undefined,
     /* v22.51 the agreement check (F85) and the case's target behaviors used as rows (F84) */
     ioa:state.ioa || {}, caseTargets: BEHAVIORS.filter(b => b.caseT).map(b => ({ id:b.id, label:b.label, def:b.def || "" }))
   }, null, 2), "application/json");
@@ -2200,6 +2213,8 @@ function csvCell(v){ const s = String(v==null?"":v); return /[",\n]/.test(s) ? '
 function exportCSV(){
   readHeader();
   const head = ["id","date","time","duration_min","activity","staff","adult_within_view","intensity","antecedents","precursors","behaviors","consequences","immediate","resolution","setting_events","narrative"];
+  /* v23.38 the sound level, when an incident has one */
+  const snd = state.entries.some(e => e.noise && isFinite(e.noise.v)); if(snd) head.push("sound_level","sound_scale");
   const lines = [head.join(",")];
   state.entries.forEach(e => {
     const nm = (ids,dict,others) => (ids||[]).map(id => (dict[id] && dict[id].other && others && others[id]) ? others[id] : (dict[id]?dict[id].label:id)).join("; ");
@@ -2211,7 +2226,7 @@ function exportCSV(){
       e.immediate ? (I_BY_ID[e.immediate]?I_BY_ID[e.immediate].label:e.immediate) : "",
       nm(e.resolution,R_BY_ID,e.resolutionOther),
       nm(e.settingEvents,SE_BY_ID,e.settingEventOther), e.narrative
-    ].map(csvCell).join(","));
+    ].concat(snd ? [e.noise && isFinite(e.noise.v) ? Math.round(e.noise.v) : "", e.noise && isFinite(e.noise.v) ? (e.noise.cal ? "dBA" : "iPad scale") : ""] : []).map(csvCell).join(","));
   });
   download("ABC_incidents_" + stamp() + ".csv", "\uFEFF" + lines.join("\r\n"), "text/csv;charset=utf-8");
 }
@@ -2291,6 +2306,7 @@ function importJSON(file){
       if(Array.isArray(d.caseTargets) && window.abcAddTargets) abcAddTargets(d.caseTargets);
       writeHeader(d.header); sortEntries(); refreshAll();
       if(window.abcIoaSet) abcIoaSet(d.ioa || {});
+      state.noise = (d.noise && Array.isArray(d.noise.runs)) ? d.noise : { runs: [] };
       $("#data-status").textContent = "Loaded " + state.entries.length + " incidents and " + state.samples.length + " background samples.";
     }catch(err){
       state.entries = kept.entries; state.samples = kept.samples; state.faFunction = kept.faFunction;
@@ -3086,6 +3102,7 @@ function renderAnalysis(){
 
   if(seSt.length) html += settingEventSection(seSt, N, M);
   if(staffSt) html += staffSection(staffSt);
+  if(window.abcNoiseSection) html += abcNoiseSection(S);
   html += acSection(S.coded, N);
   html += eoSection(eo, N);
 
@@ -3688,7 +3705,7 @@ async function loadDemo(){
                    staffPresent: chance(0.70) ? "yes" : "no" });
   }
 
-  state.entries = entries; state.samples = samples;
+  state.entries = entries; state.samples = samples; state.noise = { runs: [] };
   sortEntries();
   writeHeader({ client:"SIMULATED \u2014 not a student record", observer:"Training data",
                 location:"Example classroom", start:days[0], end:days[days.length-1],
@@ -3850,7 +3867,7 @@ function init(){
   $("#load-demo").addEventListener("click", loadDemo);
   $("#clear-all").addEventListener("click", async () => {
     if(await nbhUI.confirm("Clear all?\nIncidents, samples, the header fields and the function established by FA are cleared.", {ok:"Clear all", danger:true})){
-      state.entries = []; state.samples = [];
+      state.entries = []; state.samples = []; state.noise = { runs: [] };
       writeHeader({client:"",observer:"",location:"",start:"",end:"",target:"",window:"",checks:""});
       /* v21.21 cross-form (X2): the function is saved with the record now, so it is cleared with it */
       $("#a-function").value = ""; state.faFunction = "";
@@ -3932,14 +3949,14 @@ document.addEventListener("DOMContentLoaded", init);
     const c={k:T.checks.length+1,from:T.prevWall,to:wall,mins:Math.max(1,Math.round((wall-T.prevWall)/60000)),outcome:'open',why:''};
     const inc=SW.on?'an incident was being timed':incidentIn(c.from,c.to);
     if(inc){c.outcome='skipped';c.why=inc;}
-    T.checks.push(c);T.prevWall=wall;T.lastAt=T.nextAt;T.nextAt=nextFrom(T.lastAt);
+    T.checks.push(c);try{window.dispatchEvent(new CustomEvent('abc-check',{detail:{k:c.k,at:wall,win:winSec(),outcome:c.outcome}}));}catch(e){}T.prevWall=wall;T.lastAt=T.nextAt;T.nextAt=nextFrom(T.lastAt);
     if(c.outcome==='open'){T.open=c;alertNow(false);note('Background check '+c.k+' is due: record what is in place now and what happened in the last '+winSec()+' seconds, or skip it if the target behavior occurred since the last check.');}
     else note('Background check '+c.k+' skipped: '+c.why+'.');
     sched();renderLog();
   }
   function recordWindow(){
     const c=T.open;if(!c)return;const d=new Date(c.to);
-    setVal('bg-date',iso(d));setVal('bg-time',hm(d));setVal('bg-window',String(winSec()));
+    setVal('bg-date',iso(d));setVal('bg-time',hm(d));setVal('bg-window',String(winSec()));try{window.dispatchEvent(new CustomEvent('abc-record-window',{detail:{k:c.k,at:c.to,win:winSec()}}));}catch(e){}
     const ba=byId('bg-activity');if(ba&&!ba.value){const ls=(state.samples||[]).slice(-1)[0]||{},le=(state.entries||[]).slice(-1)[0]||{};ba.value=ls.activity||le.activity||'';}
     T.pend={c,n:(state.samples||[]).length};
     if(typeof switchTab==='function')switchTab('background');
@@ -3981,7 +3998,7 @@ document.addEventListener("DOMContentLoaded", init);
   function stopLoops(){if(T.raf)cancelAnimationFrame(T.raf);T.raf=0;clearInterval(T.tick);T.tick=0;}
   function loops(){stopLoops();T.tick=setInterval(step,250);T.raf=requestAnimationFrame(frame);}
   function startPause(){
-    if(T.state==='run'){T.acc=elapsed();T.state='pause';stopLoops();unsched();wakeOff();note('Paused at '+fmt(T.acc)+'. Checks wait until you resume.');return;}
+    if(T.state==='run'){T.acc=elapsed();T.state='pause';try{window.dispatchEvent(new CustomEvent('abc-obs',{detail:{state:'pause'}}));}catch(e){}stopLoops();unsched();wakeOff();note('Paused at '+fmt(T.acc)+'. Checks wait until you resume.');return;}
     if(T.state==='ended')return;
     ctx();
     if(T.state==='ready'){
@@ -3990,7 +4007,7 @@ document.addEventListener("DOMContentLoaded", init);
       if(!byId('h-start').value)setVal('h-start',iso(new Date()));
       T.msg='';
     }
-    T.t0=now();T.state='run';sched();
+    T.t0=now();T.state='run';try{window.dispatchEvent(new CustomEvent('abc-obs',{detail:{state:'run'}}));}catch(e){}sched();
     if(T.ac&&T.ac.state!=='running')T.ac.resume().then(()=>{if(T.state==='run')sched();}).catch(()=>{});
     wakeOn();setTop();loops();note(T.acc>0?'Resumed.':'Observation started. '+(T.nextAt?'First background check at '+fmt(T.nextAt)+'.':'No background checks scheduled.'));renderLog();
   }
@@ -3998,7 +4015,7 @@ document.addEventListener("DOMContentLoaded", init);
     if(T.state==='ready'||T.state==='ended')return;
     if(!auto&&!(await nbhUI.confirm('End the observation now?',{ok:'End'})))return;
     if(T.state==='ready'||T.state==='ended')return;
-    T.acc=auto&&T.plan?T.plan:elapsed();T.state='ended';stopLoops();unsched();wakeOff();
+    T.acc=auto&&T.plan?T.plan:elapsed();T.state='ended';try{window.dispatchEvent(new CustomEvent('abc-obs',{detail:{state:'ended'}}));}catch(e){}stopLoops();unsched();wakeOff();
     if(T.open&&!(T.pend&&T.pend.c===T.open)){T.open.outcome='missed';T.open=null;}
     if(!byId('h-end').value)setVal('h-end',iso(new Date()));
     /* v22.51 (F80) the session's minutes go into Minutes observed, for the unconditional probability */
@@ -4016,7 +4033,7 @@ document.addEventListener("DOMContentLoaded", init);
 
   /* ---- incident stopwatch ---- */
   function swToggle(){
-    if(!SW.on){SW.on=true;SW.t0=Date.now();const d=new Date(SW.t0);setVal('e-date',iso(d));setVal('e-time',hm(d));
+    if(!SW.on){SW.on=true;SW.t0=Date.now();try{window.dispatchEvent(new CustomEvent('abc-incident-start',{detail:{at:SW.t0,win:winSec()}}));}catch(e){}const d=new Date(SW.t0);setVal('e-date',iso(d));setVal('e-time',hm(d));
       clearInterval(SW.iv);SW.iv=setInterval(swPaint,250);
       if(typeof switchTab==='function'&&byId('panel-record')&&byId('panel-record').hidden)switchTab('record');
       note('Incident started at '+clock(SW.t0)+'. Code it as it unfolds'+cwin()+'; press Incident over when it ends.');}
@@ -6533,6 +6550,260 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
     el.textContent=t;}
   const was=window.__nbhFactsIn;
   window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f);}catch(e){}return r;};
+})();
+</script>
+<script id="abc1-v2338">
+/* v23.38 the sound level meter: how loud the room is while you observe, through the iPad's microphone. Only the level is
+   kept (10 times a second while it listens, one A-weighted level for each 10 seconds in the record), never the sound, and
+   nothing is sent. Each incident takes the level of the consequence window's seconds ending 2 seconds before Incident
+   starting (the behavior's own sound is left out); each background check the level of its scored seconds. The levels are
+   the iPad's own scale (its full scale + 100) until it is set against a sound level meter, then dBA; a level typed from a
+   meter goes in the same box. The Analysis tab compares the incidents' levels with the checks'. */
+(function(){
+  const byId = id => document.getElementById(id);
+  if(typeof state !== 'object' || !byId('sndBtn')) return;
+  if(!state.noise || !Array.isArray(state.noise.runs)) state.noise = { runs: [] };
+  const CAL = 'nbh.abc.sndCal', NOMINAL = 100, BLOCK = 10000, KEEP = 12 * 60000;
+  const M = { on:false, ctx:null, stream:null, iv:0, an:null, buf:null, ring:[], run:null, blk:null, paused:false, checks:{}, agc:null, wtd:false, shown:0 };
+  const calGet = () => { try{ const j = JSON.parse(localStorage.getItem(CAL) || 'null'); return j && isFinite(j.off) ? j : null; }catch(e){ return null; } };
+  const offNow = () => { const c = calGet(); return c ? c.off : NOMINAL; };
+  const dB = e => 10 * Math.log10(Math.max(e, 1e-12));
+  const r1 = v => Math.round(v * 10) / 10;
+  const word = (v, cal) => Math.round(v) + (cal ? ' dBA' : ' (iPad scale)');
+  const dictating = () => { const b = byId('nbhDictBtn'); return !!b && b.getAttribute('aria-pressed') === 'true'; };
+  function say(t, warn){ const n = byId('sndNow'); if(n){ n.textContent = t; n.classList.toggle('snd-warn', !!warn); } }
+
+  /* A-weighting (IEC 61672) for the context's own sample rate: the analog poles through the bilinear transform, as three
+     second-order sections, set to 0 dB at 1 kHz */
+  function aWeight(ac){
+    if(!ac.createIIRFilter) return null;
+    const fs = ac.sampleRate, k = 2 * fs, z = f => { const p = 2 * Math.PI * f; return (k - p) / (k + p); };
+    const z1 = z(20.598997), z2 = z(107.65265), z3 = z(737.86223), z4 = z(12194.217);
+    const S = [[[1,-2,1],[1,-2*z1,z1*z1]], [[1,-2,1],[1,-(z2+z3),z2*z3]], [[1,2,1],[1,-2*z4,z4*z4]]];
+    const w = 2 * Math.PI * 1000 / fs, mag = c => { let re = 0, im = 0; c.forEach((x, i) => { re += x * Math.cos(-w * i); im += x * Math.sin(-w * i); }); return Math.hypot(re, im); };
+    let g = 1; S.forEach(([b, a]) => { g *= mag(b) / mag(a); });
+    S[0][0] = S[0][0].map(x => x / g);
+    try{ return S.map(([b, a]) => ac.createIIRFilter(b, a)); }catch(e){ return null; }
+  }
+
+  /* one reading: the energy of the last frame, kept with its time; the 10-second blocks go into the record */
+  function ingest(t, e){
+    const ring = M.ring; ring.push(t, e);
+    if(ring.length > 2 && ring[0] < t - KEEP){ let i = 0; while(i < ring.length && ring[i] < t - KEEP) i += 2; ring.splice(0, i); }
+    const bi = Math.floor(t / BLOCK);
+    if(!M.blk || M.blk.i !== bi){ flush(); M.blk = { i:bi, e:0, n:0 }; }
+    M.blk.e += e; M.blk.n++;
+  }
+  function flush(){
+    const b = M.blk; M.blk = null; if(!b || b.n < 20) return;   /* under 2 seconds heard in the block: not kept */
+    if(!state.noise || !Array.isArray(state.noise.runs)) state.noise = { runs: [] };
+    let run = M.run; if(run && state.noise.runs.indexOf(run) < 0) run = M.run = null;   /* a file opened, or Clear all, since */
+    if(!run){ run = M.run = { at:new Date(b.i * BLOCK).toISOString(), b0:b.i, off:calGet() ? calGet().off : null, agc:M.agc, wtd:M.wtd, v:[] }; state.noise.runs.push(run); }
+    const k = b.i - run.b0; if(k < 0) return;
+    while(run.v.length < k) run.v.push(null);
+    run.v[k] = r1(dB(b.e / b.n));
+  }
+  /* the level (the iPad's raw scale) from..to, or null when under half of it was heard */
+  function level(from, to){
+    const ring = M.ring; let e = 0, n = 0;
+    for(let i = 0; i < ring.length; i += 2){ const t = ring[i]; if(t >= from && t < to){ e += ring[i + 1]; n++; } }
+    return n && n >= (to - from) / 100 * 0.5 ? dB(e / n) : null;
+  }
+  function rec(raw, w){ const c = calGet(); return { v:r1(raw + (c ? c.off : NOMINAL)), cal:!!c, src:'mic', w }; }
+
+  function frame(){
+    if(!M.an) return;
+    const b = M.buf || (M.buf = new Float32Array(M.an.fftSize)); M.an.getFloatTimeDomainData(b);
+    let e = 0; for(let i = 0; i < b.length; i++) e += b[i] * b[i]; e /= b.length;
+    if(M.paused || dictating() || document.visibilityState !== 'visible'){ paint(); return; }
+    ingest(Date.now(), e); paint();
+  }
+  function paint(){
+    const bar = byId('obsBarSnd'), btn = byId('sndBtn');
+    if(btn){ btn.setAttribute('aria-pressed', String(M.on)); btn.textContent = M.on ? 'Sound level meter: on' : 'Sound level meter'; }
+    if(!M.on){ if(bar) bar.hidden = true; return; }
+    if(Date.now() - M.shown < 450) return; M.shown = Date.now();
+    let t;
+    if(dictating()) t = 'Paused while you dictate';
+    else if(M.paused) t = 'Paused with the observation';
+    else { const raw = level(Date.now() - 1000, Date.now() + 1), c = calGet(); t = raw == null ? 'Listening…' : 'Now ' + word(raw + (c ? c.off : NOMINAL), !!c); }
+    say(t, false);
+    if(bar){ bar.hidden = false; bar.textContent = /^Now /.test(t) ? 'Sound ' + t.slice(4) : t; }
+  }
+
+  async function start(){
+    if(M.on) return;
+    if(dictating()){ say('Stop Dictate first: the meter and Dictate cannot both use the microphone.', true); return; }
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ say('This browser gives the page no microphone.', true); return; }
+    const A = window.AudioContext || window.webkitAudioContext; if(!A){ say('This browser cannot measure sound.', true); return; }
+    let ac = null, stream = null;
+    try{ ac = new A(); }catch(e){ say('This browser cannot measure sound.', true); return; }   /* made at the tap, so Safari lets it run */
+    try{ stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false } }); }
+    catch(e){ try{ ac.close(); }catch(x){} say('The microphone was not allowed. Allow it for this site to measure the sound level.', true); return; }
+    try{
+      const src = ac.createMediaStreamSource(stream); let node = src;
+      const w = aWeight(ac); if(w) w.forEach(f => { node.connect(f); node = f; });
+      const an = ac.createAnalyser(); an.fftSize = 4096; an.smoothingTimeConstant = 0; node.connect(an);
+      const mute = ac.createGain(); mute.gain.value = 0; an.connect(mute); mute.connect(ac.destination);   /* Safari reads only what reaches the output */
+      if(ac.state === 'suspended') await ac.resume().catch(() => {});
+      const tr = stream.getAudioTracks()[0], st = tr && tr.getSettings ? tr.getSettings() : {};
+      M.agc = st.autoGainControl === true || st.echoCancellation === true ? true : (st.autoGainControl === false ? false : null);
+      if(tr) tr.addEventListener('ended', () => { if(M.on){ stop(); say('The microphone stopped (another app or a setting took it). Turn the meter on again.', true); } });
+      Object.assign(M, { on:true, ctx:ac, stream, an, buf:null, wtd:!!w, run:null, blk:null, paused:false, shown:0 });
+      M.iv = setInterval(frame, 100);
+      paint();
+    }catch(e){ try{ stream.getTracks().forEach(t => t.stop()); ac.close(); }catch(x){} say('The sound level could not be measured on this device.', true); }
+  }
+  function stop(){
+    clearInterval(M.iv); M.iv = 0; flush();
+    try{ M.stream && M.stream.getTracks().forEach(t => t.stop()); }catch(e){}
+    try{ M.ctx && M.ctx.close(); }catch(e){}
+    Object.assign(M, { on:false, ctx:null, stream:null, an:null, run:null, blk:null, paused:false });
+    paint(); say('');
+  }
+  byId('sndBtn').addEventListener('click', () => { if(M.on) stop(); else start(); });
+  byId('sndCal').addEventListener('click', async () => {
+    const c = calGet();
+    if(!M.on){ say('Turn the meter on first, then set it against a sound level meter held beside the iPad.', true); return; }
+    const raw = level(Date.now() - 3000, Date.now() + 1);
+    if(raw == null){ say('Let the meter listen a few seconds first.', true); return; }
+    const ans = window.prompt('Hold a sound level meter (set to A-weighting) beside the iPad and type its reading now, in dBA.' + (c ? '\nThis iPad was set on ' + c.date + '.' : '') + '\nLeave it empty to clear the setting.', '');
+    if(ans == null) return;
+    if(!String(ans).trim()){ try{ localStorage.removeItem(CAL); }catch(e){} M.run = null; say('The setting is cleared: the iPad’s own scale from now on.'); return; }
+    const v = parseFloat(String(ans).replace(',', '.'));
+    if(!(v >= 20 && v <= 130)){ say('That reading is not a dBA level (20 to 130).', true); return; }
+    try{ localStorage.setItem(CAL, JSON.stringify({ off:r1(v - raw), date:new Date().toLocaleDateString() })); }catch(e){}
+    flush(); M.run = null;   /* the levels from now on are dBA: a new stretch of the log */
+    say('Set: this iPad now reads dBA, from this sound level meter.');
+  });
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && M.ctx && M.ctx.state !== 'running') M.ctx.resume().catch(() => {}); });
+
+  /* the timer's moments */
+  window.addEventListener('abc-obs', e => { const s = e.detail && e.detail.state;
+    if(s === 'pause'){ M.paused = true; flush(); } else if(s === 'run') M.paused = false;
+    else if(s === 'ended' && M.on){ stop(); say('The meter stopped with the observation.'); } paint(); });
+  window.addEventListener('abc-check', e => { const d = e.detail || {}; if(d.outcome !== 'open') return;
+    const raw = level(d.at - d.win * 1000, d.at + 1); if(raw != null) M.checks[d.k] = rec(raw, d.win); });
+  /* with the meter off, a box is left as it is (a level typed from a meter stays) */
+  window.addEventListener('abc-record-window', e => { const d = e.detail || {};
+    let r = M.checks[d.k]; if(!r){ if(!M.on) return; const raw = level(d.at - d.win * 1000, d.at + 1); r = raw == null ? null : rec(raw, d.win); }
+    put(byId('bg-noise'), r); });
+  window.addEventListener('abc-incident-start', e => { const d = e.detail || {}; if(!M.on) return;
+    const end = d.at - 2000, raw = level(end - d.win * 1000, end);
+    put(byId('e-noise'), raw == null ? null : rec(raw, d.win)); });
+
+  /* the boxes: a level the meter put there is kept with its scale; one typed (from a meter) is dBA */
+  function put(inp, r){ if(!inp) return; if(!r){ inp.value = ''; inp.removeAttribute('data-snd'); return; }
+    inp.value = String(Math.round(r.v)); inp.setAttribute('data-snd', JSON.stringify(r));
+    inp.title = r.cal ? 'From the meter, in dBA' : 'From the meter, on the iPad’s own scale'; }
+  function take(inp){ if(!inp || inp.value === '') return null; const v = Number(inp.value); if(!isFinite(v)) return null;
+    let r = null; try{ r = JSON.parse(inp.getAttribute('data-snd') || 'null'); }catch(e){}
+    if(r && String(Math.round(r.v)) === inp.value) return r;
+    return { v, cal:true, src:'typed' }; }
+  ['e-noise', 'bg-noise'].forEach(id => { const n = byId(id); if(n) n.addEventListener('input', ev => { if(ev.isTrusted){ n.removeAttribute('data-snd'); n.title = ''; } }); });
+
+  /* the incident's level goes with it, comes back on Edit and is cleared with the form */
+  if(typeof readForm === 'function'){ const was = readForm; window.readForm = readForm = function(){ const e = was.apply(this, arguments); const r = take(byId('e-noise')); if(r) e.noise = r; else delete e.noise; return e; }; }
+  if(typeof clearForm === 'function'){ const was = clearForm; window.clearForm = clearForm = function(){ const o = was.apply(this, arguments); put(byId('e-noise'), null); return o; }; }
+  if(typeof loadIntoForm === 'function'){ const was = loadIntoForm; window.loadIntoForm = loadIntoForm = function(entry){ const o = was.apply(this, arguments); put(byId('e-noise'), entry && entry.noise && isFinite(entry.noise.v) ? entry.noise : null); return o; }; }
+  /* a background sample takes the level in its box when it is saved */
+  let n0 = -1;
+  document.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('#bg-save')) n0 = state.samples.length; }, true);
+  document.addEventListener('click', e => { if(!(e.target && e.target.closest && e.target.closest('#bg-save'))) return;
+    const n = n0; n0 = -1; if(n < 0 || state.samples.length !== n + 1) return;
+    const r = take(byId('bg-noise')); if(r){ state.samples[n].noise = r; if(typeof renderSamples === 'function') renderSamples(); }
+    put(byId('bg-noise'), null); });
+
+  /* the tables */
+  window.abcNoiseLine = r => (r && r.noise && isFinite(r.noise.v)) ? `<div class="snd-line">sound ${Math.round(r.noise.v)}${r.noise.cal ? ' dBA' : ' <span class="snd-sc">(iPad scale)</span>'}</div>` : '';
+
+  /* ---- the analysis ---- */
+  const med = a => q(a, .5);
+  function q(a, p){ const s = a.slice().sort((x, y) => x - y); if(!s.length) return null; const h = (s.length - 1) * p, l = Math.floor(h); return s[l] + (s[Math.min(l + 1, s.length - 1)] - s[l]) * (h - l); }
+  const lv = r => r.noise.v, has = r => !!(r && r.noise && isFinite(r.noise.v));
+  function strip(inc, chk, thr, cal){
+    const all = inc.concat(chk).map(lv), lo = Math.floor(Math.min(...all) / 5) * 5, hi = Math.ceil(Math.max(...all) / 5) * 5 || lo + 5;
+    const W = 960, L = 170, R = 14, x = v => L + (v - lo) / Math.max(1, hi - lo) * (W - L - R);
+    const row = (rs, y, col) => rs.map(r => `<circle cx="${x(lv(r)).toFixed(1)}" cy="${y}" r="4.2" fill="${col}" fill-opacity=".72"/>`).join('');
+    let ticks = ''; const st = hi - lo > 30 ? 10 : 5;
+    for(let v = lo; v <= hi; v += st) ticks += `<line x1="${x(v)}" x2="${x(v)}" y1="14" y2="80" stroke="#e3e8ee"/><text x="${x(v)}" y="96" font-size="10.5" text-anchor="middle" fill="#5b6876">${v}</text>`;
+    return `<svg class="chart" viewBox="0 0 ${W} 104" role="img" aria-label="Sound level before each incident and at each background check">${ticks}` +
+      `<text x="${L - 10}" y="33" font-size="11.5" text-anchor="end" fill="#22303c">before incidents</text><text x="${L - 10}" y="63" font-size="11.5" text-anchor="end" fill="#22303c">at background checks</text>` +
+      `<line x1="${x(thr)}" x2="${x(thr)}" y1="10" y2="84" stroke="#a5452f" stroke-dasharray="4 3"/><text x="${x(thr) + 4}" y="12" font-size="10" fill="#a5452f">loud</text>` +
+      row(inc, 29, '#3d4f6b') + row(chk, 59, '#8a99ad') + `<text x="${L - 24}" y="96" font-size="10.5" text-anchor="end" fill="#5b6876">${cal ? 'dBA' : 'the iPad’s own scale'}</text></svg>`;
+  }
+  /* each observation's log: the level minute by minute, the incidents above it */
+  function days(S){
+    const by = {};
+    (state.noise.runs || []).forEach(run => { const off = run.off == null ? NOMINAL : run.off;
+      run.v.forEach((v, i) => { if(v == null) return; const t = (run.b0 + i) * BLOCK, d = new Date(t), day = localISO(d);
+        if(S.f.from && day < S.f.from) return; if(S.f.to && day > S.f.to) return;
+        const m = Math.floor((d.getHours() * 60 + d.getMinutes())), o = by[day] || (by[day] = { cal:run.off != null, m:{} });
+        const c = o.m[m] || (o.m[m] = { e:0, n:0 }); c.e += Math.pow(10, (v + off) / 10); c.n++; }); });
+    return Object.keys(by).sort().slice(-3).map(day => {
+      const ms = Object.keys(by[day].m).map(Number).sort((a, b) => a - b), pts = ms.map(m => [m, dB(by[day].m[m].e / by[day].m[m].n)]);
+      const inc = S.coded.filter(e => e.date === day && e.time).map(e => +e.time.slice(0, 2) * 60 + +e.time.slice(3, 5));
+      const W = 960, H = 150, L = 40, R = 12, T = 14, B = 22, m0 = ms[0], m1 = Math.max(ms[ms.length - 1], m0 + 10);
+      const ys = pts.map(p => p[1]), y0 = Math.floor(Math.min(...ys) / 5) * 5, y1 = Math.max(Math.ceil(Math.max(...ys) / 5) * 5, y0 + 10);
+      const x = m => L + (m - m0) / (m1 - m0) * (W - L - R), y = v => T + (y1 - v) / (y1 - y0) * (H - T - B);
+      let d = '', prev = null; pts.forEach(([m, v]) => { d += (prev == null || m - prev > 2 ? 'M' : 'L') + x(m).toFixed(1) + ' ' + y(v).toFixed(1); prev = m; });
+      let ax = ''; for(let h = Math.ceil(m0 / 60) * 60; h <= m1; h += 60){ const hh = h / 60; ax += `<line x1="${x(h)}" x2="${x(h)}" y1="${T}" y2="${H - B}" stroke="#e3e8ee"/><text x="${x(h)}" y="${H - 6}" font-size="10.5" text-anchor="middle" fill="#5b6876">${(hh % 12) || 12}${hh < 12 ? ' am' : ' pm'}</text>`; }
+      ax += `<text x="${L - 6}" y="${y(y1) + 4}" font-size="10.5" text-anchor="end" fill="#5b6876">${y1}</text><text x="${L - 6}" y="${y(y0) + 4}" font-size="10.5" text-anchor="end" fill="#5b6876">${y0}</text>`;
+      const tk = inc.filter(m => m >= m0 - 1 && m <= m1 + 1).map(m => `<line x1="${x(m)}" x2="${x(m)}" y1="${T - 6}" y2="${H - B}" stroke="#a5452f" stroke-width="1.6" stroke-opacity=".8"/>`).join('');
+      return `<div class="chartbox"><div class="snd-day">${esc(day)}: the level minute by minute${inc.length ? ', each incident a red line' : ''}</div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sound level on ${esc(day)}">${ax}${tk}<path d="${d}" fill="none" stroke="#3d4f6b" stroke-width="1.8"/></svg></div>`;
+    }).join('');
+  }
+  window.abcNoiseSection = function(S){
+    let inc = S.coded.filter(has), chk = S.samples.filter(has);
+    const logged = (state.noise.runs || []).some(r => r.v.some(v => v != null));
+    if(!inc.length && !chk.length && !logged) return '';
+    /* one scale: dBA (set against a meter, or typed from one) and the iPad's own scale are not compared */
+    const nCal = inc.concat(chk).filter(r => r.noise.cal).length, nRaw = inc.length + chk.length - nCal, useCal = nCal >= nRaw;
+    const dropped = useCal ? nRaw : nCal;
+    if(dropped){ inc = inc.filter(r => !!r.noise.cal === useCal); chk = chk.filter(r => !!r.noise.cal === useCal); }
+    const unit = useCal ? ' dBA' : '', title = 'Sound level before incidents and at the background checks', hint = `${inc.length} incidents, ${chk.length} checks with a level`;
+    const scale = useCal ? '' : caveat(`<b>The iPad&rsquo;s own scale.</b> These levels were not set against a sound level meter: they compare with each other, and a difference between them is in decibels, but they are not the room&rsquo;s dB. To read dBA, set the meter against a sound level meter on the Record tab; the levels from then on are dBA.`);
+    const mix = dropped ? gate(`<b>${dropped} level${dropped === 1 ? ' is' : 's are'} on the other scale</b> (${useCal ? 'the iPad&rsquo;s own scale' : 'dBA'}) and left out: the two scales are not compared.`) : '';
+    const agc = (state.noise.runs || []).some(r => r.agc === true) ? caveat(`<b>Safari evened out loud and quiet</b> on at least one observation (its voice leveling stayed on), so the differences below are smaller than the room&rsquo;s.`) : '';
+    const dayCharts = days(S);
+    if(inc.length < 3 || chk.length < 5)
+      return card(title, hint, gate(`<b>Not enough levels to compare yet.</b> The comparison needs at least 3 incidents and 5 background checks with a sound level (it has ${inc.length} and ${chk.length}). Turn the Sound level meter on with the observation timer: the levels fill in by themselves at Incident starting and at each check.`) + mix + dayCharts + scale);
+    const vi = inc.map(lv), vc = chk.map(lv), mi = med(vi), mc = med(vc), dif = mi - mc, thr = q(vc, .75);
+    const a = inc.filter(r => lv(r) >= thr).length, b = chk.filter(r => lv(r) >= thr).length, c = inc.length - a, d = chk.length - b;
+    const t = twoByTwo(a, b, c, d), st = qStrength(t.q);
+    const rng = v => `${Math.round(Math.min(...v))}&ndash;${Math.round(Math.max(...v))}`;
+    const sgn = v => { const r = Math.round(v); return (r > 0 ? '+' : r < 0 ? '&minus;' : '') + Math.abs(r) + ' dB'; }, rd = Math.round(dif);
+    const groups = {}; inc.concat(chk).forEach(r => { const k = String(r.activity || '').trim().toLowerCase(); if(!k) return; const g = groups[k] || (groups[k] = { name:String(r.activity).trim(), i:[], c:[] }); (inc.includes(r) ? g.i : g.c).push(lv(r)); });
+    const gs = Object.values(groups).filter(g => g.i.length && g.c.length).sort((x, y) => (y.i.length + y.c.length) - (x.i.length + x.c.length)).slice(0, 8);
+    const byAct = gs.length >= 2 ? `<div class="matrix-wrap"><table><thead><tr><th>Activity</th><th class="num">Before incidents</th><th class="num">At checks</th><th class="num">Difference</th></tr></thead><tbody>${gs.map(g => { const x = med(g.i), y = med(g.c);
+      return `<tr><td>${esc(g.name)}</td><td class="num">${Math.round(x)} <span style="color:var(--ink-faint)">(${g.i.length})</span></td><td class="num">${Math.round(y)} <span style="color:var(--ink-faint)">(${g.c.length})</span></td><td class="num">${sgn(x - y)}</td></tr>`; }).join('')}</tbody></table></div>` : '';
+    return card(title, hint,
+      `<div class="metrics">
+        <div class="metric"><div class="v">${Math.round(mi)}${unit}</div><div class="k">median level before an incident (range ${rng(vi)}, ${inc.length} incidents)</div></div>
+        <div class="metric"><div class="v">${Math.round(mc)}${unit}</div><div class="k">median level at a background check (range ${rng(vc)}, ${chk.length} checks)</div></div>
+        <div class="metric"><div class="v">${sgn(dif)}</div><div class="k">${rd > 0 ? 'louder before incidents than at the checks' : rd < 0 ? 'quieter before incidents than at the checks' : 'the same before incidents as at the checks'}</div></div>
+        <div class="metric"><div class="v">${pct(t.pRow)}</div><div class="k">of sampled units in the loud quarter contained the behavior (${a}/${a + b})</div></div>
+        <div class="metric"><div class="v">${pct(t.pNot)}</div><div class="k">of the quieter sampled units contained the behavior (${c}/${c + d})</div></div>
+        <div class="metric"><div class="v" style="color:${st.color}">${num(t.q, 2)}</div><div class="k">Yule's Q (${st.word}${t.q != null && t.q <= -0.2 ? ', less likely when loud' : ''}${t.sparse ? ', thin' : ''})</div></div>
+      </div>` +
+      `<div class="chartbox">${strip(inc, chk, thr, useCal)}</div>` +
+      gate(`<b>Loud</b> is the loudest quarter of the background checks: ${Math.round(thr)}${unit} or more. The checks sample the room on the clock, so a quarter of the observed time was at least that loud; ${pct(inc.length ? a / inc.length : null)} of the incidents began then. Behavior that begins far more often when the room is loud than when it is not points to noise as an antecedent, an establishing operation for escape, worth testing directly (McCord, Iwata, Galensky, Ellingson, &amp; Thomson, 2001); a descriptive record cannot show that the noise evokes it.`) +
+      mix + byAct + dayCharts +
+      caveat(`<b>Noise travels with the activity.</b> Transitions, lunch and group work are louder and also carry their own demands and attention, so a difference here can be the activity&rsquo;s. ${byAct ? 'The table compares each activity with itself; ' : ''}the Activity filter above narrows the incidents and the checks alike.`) +
+      caveat(`<b>Where each level comes from.</b> An incident&rsquo;s is the consequence window&rsquo;s seconds ending 2 seconds before Incident starting was pressed, so the behavior&rsquo;s own sound is mostly left out; an incident typed in afterwards has none unless one is typed. A check&rsquo;s is its scored seconds.`) +
+      agc + scale);
+  };
+
+  const css = document.createElement('style'); css.id = 'abc1-v2338-css';
+  css.textContent = '.snd-ctl{margin-top:8px}.snd-ctl .snd-tog[aria-pressed="true"]{background:#e4eef0;border-color:var(--nbh-teal,#2f7f86)}.snd-ctl .snd-tog[aria-pressed="true"]::before{content:"\\25CF\\00a0";color:#b4412e}' +
+    '.snd-now{font:600 13px var(--nbh-sans,system-ui,sans-serif);color:var(--ink-soft,#46606b);font-variant-numeric:tabular-nums}.snd-now.snd-warn{color:#a5452f}.snd-note{margin-top:6px}' +
+    '.obs-bar .obs-snd{font-variant-numeric:tabular-nums;white-space:nowrap}.snd-line{font-size:11.5px;color:var(--ink-faint)}.snd-sc{white-space:nowrap}.snd-day{font-size:12px;color:var(--ink-soft,#46606b);margin:0 0 4px}' +
+    '@media print{.snd-ctl,.snd-note,.obs-snd{display:none!important}}';
+  (document.head || document.documentElement).appendChild(css);
+
+  /* for the form's tests: readings as the meter would take them (the time in ms, the level on the raw scale) */
+  window.abcNoise = { on:() => M.on, feed:(t0, t1, raw) => { for(let t = t0; t < t1; t += 100) ingest(t, Math.pow(10, raw / 10)); }, flush, level:(a, b) => level(a, b), stop };
+  if((state.entries || []).some(has) || (state.samples || []).some(has)){ try{ renderIncidents(); renderSamples(); }catch(e){} }
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>

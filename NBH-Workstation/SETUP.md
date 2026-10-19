@@ -9903,6 +9903,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.38: Form ABC-1 measures the room's sound level
+
+- **A Sound level meter on the Observation Timer (the BCBA's ask).** It is optional and off until you turn it on. The
+  iPad's microphone measures how loud the room is while you observe. Only the level is kept, one A-weighted level for
+  each 10 seconds; no sound is ever recorded, and nothing leaves the device.
+- **Each record gets a level by itself.**
+  - At Incident starting: the consequence window's seconds ending 2 seconds before the press, so the behavior's own
+    sound is left out.
+  - At each background check (Record the window): its scored seconds.
+  - The level goes into a new Sound level box on the incident and on the sample. A reading typed from a sound level
+    meter goes in the same box and counts as dBA.
+- **The Analysis tab compares the two,** as it compares an adult in view:
+  - the median level before incidents and at the checks, and the difference in dB;
+  - the loudest quarter of the background checks against the rest: p(behavior | loud) and Yule's Q;
+  - a dot chart, a table by activity, and each observation minute by minute with its incidents.
+  - Caveats: noise travels with the activity; where each level comes from; the iPad's own scale.
+- **Set against a meter.** Until the iPad is set against a sound level meter (Set against a meter: type the meter's
+  dBA reading once), its numbers are its own scale (full scale + 100). They compare with each other but are not the
+  room's dB. After the setting they are dBA. The two scales are never mixed in the analysis.
+- **When the meter does not measure.**
+  - It pauses with the observation and stops when the observation ends.
+  - It measures nothing while Dictate has the microphone.
+  - It asks Safari to turn its voice leveling off, and the analysis says so when Safari kept it on.
+- **Unchanged without the meter.** The level shows in the incident and sample lists and in the spreadsheet (sound_level,
+  sound_scale), and is saved and opened with the record. A record that never used the meter is saved, printed and
+  analysed exactly as before. The meter and both Sound level boxes are not printed, so a paper form prints as before; Clear all and the simulated
+  record clear the meter's log.
+- **New wording for the BCBA's review:** the meter's note on the Record tab (with the line for typing a meter's reading), the analysis card's text and its caveats. The BCBA confirmed the microphone is allowed for their use.
+- **To check on the iPad:** that Safari lets the page turn voice leveling off, and that the check chime is still loud
+  enough while the microphone is on.
+- qa/abc-noise-test.js (18 checks).
+
 ### v23.37: @ names a staff member in any text box
 
 - **@ and a name, from the staff directory (the BCBA's ask, on Form ABC-1's Brief Incident Description).** In any text
