@@ -1784,6 +1784,19 @@ function tiGameBtn(){let b=document.getElementById('addGame');const n=tiGameStep
   b.style.display=n?'':'none';b.title=n?n+' steps in the class game\u2019s script (Form GC-1)':'';}
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){tiGame=(f&&f.classwide)||null;tiGameBtn();return was?was.apply(this,arguments):null;};}
 tiGameBtn();
+/* v22.7x (review I61) Form PA-1's session fidelity: the six steps of each direct method it recorded come with the case
+   (prefs.fidelity); "Add Form PA-1's assessment steps" adds them, named by method, when a technician runs the assessment */
+let tiPA=null;
+function tiPASteps(){return ((tiPA&&tiPA.fidelity)||[]).flatMap(m=>(m&&m.steps||[]).map(x=>String(x&&x.d||'').trim()).filter(Boolean).map(d=>'Form PA-1, '+String(m.method||'assessment').toLowerCase()+': '+d));}
+function tiPABtn(){let b=document.getElementById('addPA');const n=tiPASteps().length;
+  if(!b){const at=document.getElementById('addQuick')||document.getElementById('delStep');if(!at)return;b=document.createElement('button');b.className='tool';b.id='addPA';b.type='button';
+    b.textContent='Add Form PA-1\u2019s assessment steps';at.parentNode.insertBefore(b,at.nextSibling);
+    b.addEventListener('click',()=>{const L=tiPASteps(),have=new Set(S.steps.map(st=>tiK(st.d)));let k=0;
+      L.forEach(d=>{if(have.has(tiK(d)))return;let i=S.steps.findIndex(st=>!String(st.d||'').trim());if(i<0){addBlankStep();i=S.steps.length-1;}S.steps[i].d=d;have.add(tiK(d));k++;});
+      renderAll();nbhUI.toast(k?k+' step'+(k===1?'':'s')+' from Form PA-1 added.':'Every PA-1 assessment step is already a step.',k?{kind:'ok'}:undefined);});}
+  b.style.display=n?'':'none';b.title=n?n+' fidelity step'+(n===1?'':'s')+' on Form PA-1':'';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){tiPA=(f&&f.prefs)||null;tiPABtn();return was.apply(this,arguments);};}
+tiPABtn();
 /* v21.75 out: each scored observation's date, type and integrity (correct steps over scored steps), the critical-step
    figure and the overall one, for Form DD-1's graphs and week summary, Form PR-1 and the workstation's Today list */
 window.__nbhFactsOut=function(){try{const M=metrics(),iso=v=>{v=String(v||'').trim();let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v);if(m)return v;
