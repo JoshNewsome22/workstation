@@ -9903,6 +9903,56 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.93: DT-1 lays out the sheet for the arrangement chosen, runs the FCT path's baseline on the break it trains, carries figures across tabs, and folds the research-grade measures away (review Wave 3)
+
+- **The arrangement drives the sheet (F399, I201).** Tab 1 said the arrangement decides which assessments in Tab 2 apply,
+  but nothing read it, and Tab 2 called the choice baseline required on the path that skips it. Now Tab 2 shows what the
+  arrangement calls for:
+  - **The two choice arrangements:** the dimension check and the choice baseline.
+  - **The escape arrangement:** the aversiveness check (E) as well. The session sheet names the self-control choice as
+    the smaller task now and the impulsive choice as the larger task later, and the choice baseline's delay column says
+    "Delay to the later task".
+  - **Delay tolerance after FCT:** a new **FCT baseline** takes the place of A and B. The request is honored at once for
+    a session or two, then the same reinforcer is delayed with no training. The table records requests, delay trials,
+    the waits that ended in the reinforcer, and problem behavior, with % waited and problem behavior per minute.
+
+  On the FCT path:
+  - The session sheet's Choice column reads **Waited / Did not wait**.
+  - The readout reads "Delays waited", and Progress and Tab 8 read "% waited".
+
+  Other behavior:
+  - With no arrangement chosen, every block shows.
+  - A block that holds entries stays in view, marked, when the arrangement does not call for it.
+  - When the arrangement is changed, a session criterion still at one of the defaults follows it. A criterion the BCBA
+    wrote is kept.
+- **The example is rewritten on its own path (F399).** It ran the choice baseline and both discounting probes with tablet
+  time while training a delay to a break, and then concluded "the delay, not the task, evokes the aggression". Now:
+  - It runs the FCT baseline on the break (honored at once, delayed 30 s twice, honored at once), with no dimension
+    check, choice baseline or aversiveness check.
+  - Its probes use break minutes.
+  - Its conclusions say what the sessions show: delaying the break, with the same work in place, evokes the aggression.
+  - Its criterion counts delays waited.
+- **Figures carried, not typed twice (F404).**
+  - **Carry the baseline to Progress** writes the choice baseline (Tab 2B) or the FCT baseline as sessions 1 onward,
+    phase Baseline. Carried again, the rows are rewritten and their decisions kept.
+  - **Log this observation** writes Tab 7's agreement and integrity to the IOA and integrity log.
+  - **Log this probe** writes a discounting probe's AUC, log k and half-value delay to the re-probe log. The first is
+    Baseline, later ones Re-probe.
+  - A session sheet carried with phase **Generalization probe** or **Maintenance probe** also writes its figures into
+    its row on Tab 8.
+- **Research-grade measures folded away (I205).** These sit in closed sections:
+  - the probability discounting probe;
+  - the hyperbolic fit figures (k, log k, R²);
+  - Step 5's group arrangement and episodic future thinking.
+
+  A section opens when anything in it holds an entry, and a logged probe opens the fit figures. A closed section does not
+  print.
+- **Next (part 3):**
+  - F402 and I202: the protocol sent to the case for Forms TD-1, QS-1, TI-1 and PR-1.
+  - F403 and I203: session and probe logs.
+  - I204: a safety and consent block filled from Forms TD-1, CR-1, IC-1 and SI-1.
+- qa/dt1-w3b-test.js (17 checks).
+
 ### v22.92: DT-1 writes what staff do when the student hits during the delay, scores a delay by the reinforcer delivered, and records problem behavior in its probes (review Wave 3)
 
 - **Problem behavior during the delay, and a stopped session (F398).** Step 4 now has two fields beside the stop rule:

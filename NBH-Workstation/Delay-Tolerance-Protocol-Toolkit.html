@@ -900,6 +900,7 @@ td input,td select{max-width:100%}
     <div class="chk"><input type="radio" name="arrange" value="fct" id="a3"><label for="a3"><b>Delay tolerance after FCT.</b> Student already has a functional communication response; the problem is waiting when the request is deferred. Use contingency-based progressive delay (Tab 4), not a choice arrangement.</label></div>
     <div class="chk"><input type="radio" name="arrange" value="combo" id="a4"><label for="a4"><b>Combined appetitive and aversive outcomes.</b> Identified as a research gap by Finch et al.; document rationale.</label></div>
   </fieldset>
+  <p class="small noprint" id="arrNote" aria-live="polite" hidden></p>
   <div class="grid g2">
     <div><label class="f">Function(s) of challenging behavior and source</label><input type="text" name="s_function" placeholder="e.g., synthesized attention + tangible; IISCA 3/14/26"></div>
     <div><label class="f">Rationale for arrangement</label><input type="text" name="s_rationale"></div>
@@ -948,7 +949,10 @@ td input,td select{max-width:100%}
 <section class="panel" id="p2" role="tabpanel" data-panel="p2">
   <h2 class="nbh-band">Preassessment Battery</h2>
   <p class="wk-go-line"><a href="#" class="wk-go" data-go="dim">How each of these looks at the table, step by step &rarr; Walkthrough</a></p>
-  <p class="lede">Run what the case calls for. The choice baseline is required: it is the one measure used in every experiment reviewed, and without it there is no demonstration that impulsive choice existed before treatment.</p>
+  <p class="lede" id="preLede">Run what the case calls for. The choice baseline is required: it is the one measure used in every experiment reviewed, and without it there is no demonstration that impulsive choice existed before treatment.</p>
+  <!-- v22.93 (review F399, I201): the arrangement on Tab 1 decides which blocks show; a block holding entries stays in view -->
+  <div class="arr-blk" id="preChoice">
+  <p class="small noprint arr-keep" hidden></p>
   <div class="note"><p><b>Order of operations.</b> Dimension check first (does choice track the dimension with no delay in play?), then choice baseline (does delay shift allocation away from the larger option?), then a waiting or naturalistic probe if a duration baseline is needed. A student who does not select the larger option when both are immediate is telling you the dimension is wrong, not that they are impulsive. Neef et al. (2001) used the preassessment to pick the dimension per participant; Finch et al. recommend the same.</p></div>
 
   <h3>A. Dimension Sensitivity Check (Both Options Immediate)</h3>
@@ -957,12 +961,23 @@ td input,td select{max-width:100%}
   <div class="chk"><input type="checkbox" name="mag_pass" id="mp"><label for="mp"><b>Criterion met:</b> &ge;80% allocation to the larger/better option across two consecutive sessions with no delay. If not met, change the reinforcer or dimension before continuing.</label> <span class="small" id="magCrit"></span></div>
 
   <h3>B. Choice Baseline</h3>
-  <p class="lede">Impulsive option = smaller/lower quality, immediate. Self-control option = larger/better, delayed. Increase the delay across sessions until allocation shifts; that switch point is the delay training has to get past, so the starting delay in Tab 4 is set below it. Include at least one session with any challenging behavior scored.</p>
-  <table><thead><tr><th style="width:13%">Date</th><th class="num" style="width:13%">Delay to SC option (s)</th><th class="num" style="width:9%">Trials</th><th class="num" style="width:11%">SC choices</th><th class="num" style="width:10%">% SC</th><th class="num" style="width:12%">Chall. beh. (count)</th><th>Notes</th></tr></thead><tbody id="tbBase"></tbody></table>
-  <div class="rowbtns"><button class="tool" data-add="tbBase">Add row</button></div>
+  <p class="lede"><span data-arr-srneg="Self-control option = the smaller, easier or less aversive task, now. Impulsive option = the larger, harder or more aversive task, later.">Impulsive option = smaller/lower quality, immediate. Self-control option = larger/better, delayed.</span> Increase the delay across sessions until allocation shifts; that switch point is the delay training has to get past, so the starting delay in Tab 4 is set below it. Include at least one session with any challenging behavior scored.</p>
+  <table><thead><tr><th style="width:13%">Date</th><th class="num" style="width:13%" data-arr-srneg="Delay to the later task (s)">Delay to SC option (s)</th><th class="num" style="width:9%">Trials</th><th class="num" style="width:11%">SC choices</th><th class="num" style="width:10%">% SC</th><th class="num" style="width:12%">Chall. beh. (count)</th><th>Notes</th></tr></thead><tbody id="tbBase"></tbody></table>
+  <div class="rowbtns"><button class="tool" data-add="tbBase">Add row</button><button class="tool" id="btnBaseCarry">Carry the baseline to Progress</button></div>
   <div class="grid g2">
     <div><label class="f">Baseline delay at which allocation switched to the impulsive option (s)</label><input type="number" name="bl_switch" min="0" step="1"></div>
     <div><label class="f">Baseline pattern</label><input type="text" name="bl_summary" placeholder="e.g., exclusive SC at 0-5 s; exclusive impulsive at 10 s and above"></div>
+  </div>
+  </div>
+
+  <div class="arr-blk" id="preFct">
+  <p class="small noprint arr-keep" hidden></p>
+  <h3>FCT Baseline (Delay Tolerance after FCT, in place of A and B)</h3>
+  <p class="lede">On this path the student already asks and is not choosing between two outcomes, so no dimension check or choice baseline is run. The baseline keeps the reinforcer the plan will delay: the request honored at once for one or two sessions, then the first delay placed on that same reinforcer with no training, then the request honored at once again. Ghaemmaghami et al. (2016), the study Tab 4 follows for this path, delayed the reinforcer the request had produced. Score the requests, the waits that ended in the reinforcer, and problem behavior; the stop rule on Tab 4 holds here too.</p>
+  <table><thead><tr><th style="width:12%">Date</th><th style="width:17%">Condition</th><th class="num" style="width:7%">Delay (s)</th><th class="num" style="width:7%">Minutes</th><th class="num" style="width:7%">Requests</th><th class="num" style="width:7%">Delay trials</th><th class="num" style="width:7%">Waited</th><th class="num" style="width:7%">% waited</th><th class="num" style="width:7%">Prob. beh. (count)</th><th class="num" style="width:7%">PB / min</th><th>Notes</th></tr></thead><tbody id="tbFct"></tbody></table>
+  <div class="rowbtns"><button class="tool" data-add="tbFct">Add row</button><button class="tool" id="btnFctCarry">Carry the baseline to Progress</button></div>
+  <p class="small">Waited = the delay ran to its end and the reinforcer was delivered. A wait that ended in problem behavior with no reinforcer is not counted as waited.</p>
+  <div><label class="f">Baseline pattern</label><input type="text" name="fct_summary" placeholder="e.g., no problem behavior with every request honored at once; aggression within 20 s when the same break was delayed 30 s"></div>
   </div>
 
   <h3>C. Waiting Assessment (Optional)</h3>
@@ -975,6 +990,8 @@ td input,td select{max-width:100%}
   <table><thead><tr><th style="width:16%">Date</th><th style="width:30%">Task</th><th class="num" style="width:14%">Engagement (s)</th><th>Notes</th></tr></thead><tbody id="tbNat"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbNat">Add row</button></div>
 
+  <div class="arr-blk" id="preEsc">
+  <p class="small noprint arr-keep" hidden></p>
   <h3>E. Aversiveness Verification (Escape Arrangements)</h3>
   <p class="lede">Present tasks in pairs or an array; record selection order. Porter and Sy (2020) verified aversiveness for each participant before training. Mean selection rank is the average position in which a task was picked (1 = first); % selected is the number of rounds in which it was picked first divided by the number of rounds it was on offer. Both are computed from the selection rounds below once any round is entered.</p>
   <table><thead><tr><th style="width:28%">Task</th><th class="num" style="width:14%">Mean selection rank</th><th class="num" style="width:12%">% selected</th><th style="width:16%">Classification</th><th>Assigned to (impulsive / SC option)</th></tr></thead><tbody id="tbAv"></tbody></table>
@@ -982,11 +999,12 @@ td input,td select{max-width:100%}
   <p class="small">Selection rounds: one row per round, and in each cell the rank the task was picked in (1 = first). Leave a cell blank when the task was not on offer in that round.</p>
   <table id="tbAvRT"><thead id="avHead"></thead><tbody id="tbAvR"></tbody></table>
   <div class="rowbtns"><button class="tool" id="btnAvRound">Add round</button></div>
+  </div>
 
   <h3>Conclusion</h3>
   <div class="grid g2">
-    <div><label class="f">Impulsive choice demonstrated at clinically relevant delays?</label><select name="pre_conc"><option value=""></option><option>Yes, proceed to training</option><option>No, delay is not the controlling variable; re-examine</option><option>Equivocal, extend baseline</option></select></div>
-    <div><label class="f">Dimension and values locked for training</label><input type="text" name="pre_lock"></div>
+    <div><label class="f" data-arr-fct="Problem behavior or failed waits shown when the reinforcer is delayed?">Impulsive choice demonstrated at clinically relevant delays?</label><select name="pre_conc"><option value=""></option><option>Yes, proceed to training</option><option>No, delay is not the controlling variable; re-examine</option><option>Equivocal, extend baseline</option></select></div>
+    <div><label class="f" data-arr-fct="Reinforcer and values locked for training">Dimension and values locked for training</label><input type="text" name="pre_lock"></div>
   </div>
   <div><label class="f">Clinical summary</label><textarea name="pre_summary"></textarea></div>
 </section>
@@ -1009,11 +1027,15 @@ td input,td select{max-width:100%}
   <div class="rowbtns"><button class="tool" data-add="tbDD">Add delay</button><button class="tool" id="btnDD">Calculate AUC and k</button></div>
   <div class="readout">
     <div><span>AUC (0&ndash;1)</span><strong id="outAUC">&mdash;</strong></div>
+    <div><span>Half-value delay</span><strong id="outHalf">&mdash;</strong></div>
+  </div>
+  <!-- v22.93 (review I205): the hyperbolic fit figures, opened when the re-probe log holds a probe -->
+  <details class="adv" data-watch="#tbDDlog"><summary>Fit figures: hyperbolic k, log k and R&sup2;</summary>
+  <div class="readout">
     <div><span>Hyperbolic k (per s)</span><strong id="outK">&mdash;</strong></div>
     <div><span>log&#8321;&#8320; k</span><strong id="outLogK">&mdash;</strong></div>
     <div><span>Fit R&sup2;</span><strong id="outR2">&mdash;</strong></div>
-    <div><span>Half-value delay</span><strong id="outHalf">&mdash;</strong></div>
-  </div>
+  </div></details>
   <p class="small" id="ddJB" aria-live="polite"></p>
   <svg class="plot" id="ddPlot" viewBox="0 0 640 240" aria-label="Discount function"></svg>
   <p class="small">Points are entered indifference points; the curve is the best-fit hyperbola V = A/(1 + kD) found by least squares on a log-spaced grid of k. Half-value delay = 1/k, the delay at which value has fallen to half of A.</p>
@@ -1030,7 +1052,9 @@ td input,td select{max-width:100%}
 
   <h4>Re-probe log</h4>
   <table><thead><tr><th style="width:16%">Date</th><th style="width:18%">Phase</th><th class="num" style="width:12%">AUC</th><th class="num" style="width:12%">log k</th><th>Interpretation</th></tr></thead><tbody id="tbDDlog"></tbody></table>
-  <div class="rowbtns"><button class="tool" data-add="tbDDlog">Add re-probe</button></div>
+  <div class="rowbtns"><button class="tool" data-add="tbDDlog">Add re-probe</button><button class="tool" id="btnDDlogAdd">Log this probe</button></div>
+<!-- v22.93 (review I205): rarely run in a school; opened when anything in it holds an entry, and left off paper while closed -->
+<details class="adv" id="advPD"><summary>Probability discounting probe (advanced: rarely run in a school)</summary>
 <h3 style="margin-top:20px">Probability Discounting Probe</h3>
 <p class="lede">Optional, and a separate question from the one above. Here the larger outcome is <em>uncertain</em> rather than delayed: the student chooses between a smaller certain amount and a larger amount delivered with probability <em>p</em>. Enter the indifference point at each probability and the sheet computes area under the curve and a hyperbolic <em>h</em> against odds against.</p>
 <div class="note"><p><b>These are not the same process.</b> Green and Myerson (2004) reviewed the evidence that delay and probability discounting are distinct: the magnitude effect runs in <em>opposite</em> directions &mdash; larger delayed rewards are discounted less steeply, while larger probabilistic rewards are discounted <em>more</em> steeply &mdash; and the two dissociate across groups and manipulations. Do not read a steep delay curve as predicting a steep probability curve, or treat one as a substitute for the other. Both are well described by a hyperboloid with an exponent, and the exponent differs between them.</p>
@@ -1057,6 +1081,7 @@ td input,td select{max-width:100%}
   <div><label class="f">Comparison with the delay probe</label><textarea name="pd_compare" placeholder="Report both. A student may discount delay steeply and probability shallowly, or the reverse; the pair describes different problems."></textarea></div>
   <div><label class="f">What this changes in the plan</label><textarea name="pd_use" placeholder="Steep probability discounting argues for certainty of delivery — honour every request — rather than for shortening delays."></textarea></div>
 </div>
+</details>
 </section>
 
 <!-- ===== 4 PROTOCOL BUILDER ===== -->
@@ -1151,8 +1176,10 @@ td input,td select{max-width:100%}
   <div class="chk"><input type="checkbox" name="opt_rule" id="o2"><label for="o2"><b>Antecedent rule.</b> A stated rule about the contingency before the session. Record it verbatim so every implementer says the same thing.</label></div>
   <div><label class="f">Rule, verbatim</label><input type="text" name="rule_text"></div>
   <div class="chk"><input type="checkbox" name="opt_commit" id="o3"><label for="o3"><b>Commitment response.</b> Student may commit to the self-control option in advance of the choice point, which removes the impulsive option. Effective in 3/3 applications (Perrin &amp; Neef, 2012, Exp. 2), all escape arrangements.</label></div>
+  <details class="adv"><summary>Research-grade options: group arrangement, episodic future thinking</summary>
   <div class="chk"><input type="checkbox" name="opt_group" id="o5"><label for="o5"><b>Group arrangement.</b> One reviewed study (Dixon &amp; Holcomb, 2000) ran SCT with groups. Reasonable for a classroom; take individual data.</label></div>
   <div class="chk"><input type="checkbox" name="opt_eft" id="o6"><label for="o6"><b>Episodic future thinking prompts</b> (for verbal students). Emerging evidence, from adults: episodic future thinking reduced delay discounting in adults with alcohol dependence (Snider et al., 2016), and future-thinking priming reduced it more among cigarette smokers than among nonsmokers, a difference the authors did not find explained by baseline discounting (Shevorykin et al., 2021). Adjunct; not part of the SCT evidence base.</label></div>
+  </details>
 
   <div class="caution"><p><b>Autonomy check.</b> These procedures change what a student chooses. Write the plan so it opens options rather than closes them: the student keeps a real choice at the choice point, the "impulsive" option is not punished, and the terminal arrangement is one the student could reasonably prefer. A selection someone else would label impulsive is still the student's to make (Bannerman et al., 1990; Peterson et al., 2021).</p></div>
   <div class="chk"><input type="checkbox" name="auton" id="au"><label for="au">Plan reviewed against least-restrictive and self-determination standards; no coercive component included.</label></div>
@@ -1175,12 +1202,12 @@ td input,td select{max-width:100%}
     <div><label class="f">Session length (min)</label><input type="number" name="ss_len" min="0" step="any"></div>
     <div><label class="f">Second observer present</label><select name="ss_ioa"><option value=""></option><option>Yes</option><option>No</option></select></div>
   </div>
-  <table><caption>Trial record. SC = self-control (larger-later) option; IMP = impulsive (smaller-sooner) option; IMM = immediate-reinforcement trial (no delay programmed). On an IMM trial, Choice, Latency, TR and Engaged are left blank: there is no delay to choose, start or wait through. Delivered = the requirement was met and the reinforcer given: a delay trial is completed when it was, whatever the clock read (under a contingency-based delay the delay ends when the requirement is met). A wait that ended in problem behavior with no reinforcer is No response, Delivered No, never an impulsive choice.</caption>
-    <thead><tr><th class="num" style="width:5%">#</th><th style="width:9%">Trial type</th><th style="width:9%">Choice</th><th class="num" style="width:8%">Prog. delay (s)</th><th class="num" style="width:8%">Obt. delay (s)</th><th class="num" style="width:8%">Latency (s)</th><th style="width:9%">TR</th><th style="width:9%">Engaged</th><th class="num" style="width:7%">Prob. beh.</th><th class="num" style="width:7%">Collat.</th><th style="width:8%" title="The requirement was met and the reinforcer delivered: what makes a delay trial completed, whatever the clock read">Delivered</th><th>Notes</th></tr></thead>
+  <table><caption>Trial record. <span data-arr-fct="Waited = the student waited through the delay; Did not wait = left, took the item or asked again before the delay ended;" data-arr-srneg="SC = self-control: the smaller or easier task now; IMP = impulsive: the larger or harder task after the delay;">SC = self-control (larger-later) option; IMP = impulsive (smaller-sooner) option;</span> IMM = immediate-reinforcement trial (no delay programmed). On an IMM trial, Choice, Latency, TR and Engaged are left blank: there is no delay to choose, start or wait through. Delivered = the requirement was met and the reinforcer given: a delay trial is completed when it was, whatever the clock read (under a contingency-based delay the delay ends when the requirement is met). A wait that ended in problem behavior with no reinforcer is No response, Delivered No, never an impulsive choice.</caption>
+    <thead><tr><th class="num" style="width:5%">#</th><th style="width:9%">Trial type</th><th style="width:9%" data-arr-fct="Outcome">Choice</th><th class="num" style="width:8%">Prog. delay (s)</th><th class="num" style="width:8%">Obt. delay (s)</th><th class="num" style="width:8%">Latency (s)</th><th style="width:9%">TR</th><th style="width:9%">Engaged</th><th class="num" style="width:7%">Prob. beh.</th><th class="num" style="width:7%">Collat.</th><th style="width:8%" title="The requirement was met and the reinforcer delivered: what makes a delay trial completed, whatever the clock read">Delivered</th><th>Notes</th></tr></thead>
     <tbody id="tbTrials"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbTrials">Add trial</button><button class="tool" id="btnTrials10">Add 10 trials</button><button class="tool" id="btnCarry">Carry this session to Progress and Delay accuracy</button></div>
   <div class="readout">
-    <div><span>Self-control choices, delay trials</span><strong id="oSC">&mdash;</strong></div>
+    <div><span data-arr-fct="Delays waited, delay trials" data-arr-srneg="Self-control choices (the smaller task now), delay trials">Self-control choices, delay trials</span><strong id="oSC">&mdash;</strong></div>
     <div><span>Delay trials completed (reinforcer delivered)</span><strong id="oDone">&mdash;</strong></div>
     <div><span>Ended without reinforcement</span><strong id="oEnd">&mdash;</strong></div>
     <div><span>Mean obtained delay (s)</span><strong id="oObt">&mdash;</strong></div>
@@ -1197,11 +1224,11 @@ td input,td select{max-width:100%}
 <!-- ===== 6 PROGRESS ===== -->
 <section class="panel" id="p6" role="tabpanel" data-panel="p6">
   <h2 class="nbh-band">Progress Monitoring</h2>
-  <p class="lede">One row per session. The chart draws percent self-control choice (left axis) and the delay achieved (right axis) so both dependent variables are visible together; add the phase label and the graph will mark phase changes.</p>
-  <table><thead><tr><th class="num" style="width:6%">Sess.</th><th style="width:11%">Date</th><th style="width:13%">Phase</th><th class="num" style="width:9%">Prog. delay (s)</th><th class="num" style="width:9%">Delay achieved (s)</th><th class="num" style="width:8%">% SC</th><th class="num" style="width:8%">PB / min</th><th class="num" style="width:8%">% engaged</th><th>Decision</th><th style="width:5%"></th></tr></thead><tbody id="tbProg"></tbody></table>
+  <p class="lede">One row per session. The chart draws <span data-arr-fct="the percent of delays waited">percent self-control choice</span> (left axis) and the delay achieved (right axis) so both dependent variables are visible together; add the phase label and the graph will mark phase changes.</p>
+  <table><thead><tr><th class="num" style="width:6%">Sess.</th><th style="width:11%">Date</th><th style="width:13%">Phase</th><th class="num" style="width:9%">Prog. delay (s)</th><th class="num" style="width:9%">Delay achieved (s)</th><th class="num" style="width:8%" data-arr-fct="% waited">% SC</th><th class="num" style="width:8%">PB / min</th><th class="num" style="width:8%">% engaged</th><th>Decision</th><th style="width:5%"></th></tr></thead><tbody id="tbProg"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbProg">Add session</button><button class="tool" id="btnPlot">Draw graph</button></div>
   <svg class="plot" id="progPlot" viewBox="0 0 640 240" aria-label="Progress graph"></svg>
-  <p class="small">Solid line: % self-control choice. Dashed line: delay achieved (s). Vertical rules: phase changes. Each row carries its session sheet's figures: % SC on delay trials, the delay achieved as the mean obtained delay on the delay trials completed, problem behavior per minute, and the % of delay trials engaged<span class="noprint"> (the Carry button on Tab 5 writes them)</span>. Visual analysis per Finch et al.'s scoring rule: an application counts as successful only when there is a systematic change in the intended direction <em>and</em> the design permits confident attribution to the intervention.</p>
+  <p class="small">Solid line: <span data-arr-fct="% of delays waited">% self-control choice</span>. Dashed line: delay achieved (s). Vertical rules: phase changes. Each row carries its session sheet's figures: % SC on delay trials, the delay achieved as the mean obtained delay on the delay trials completed, problem behavior per minute, and the % of delay trials engaged<span class="noprint"> (the Carry button on Tab 5 writes them)</span>. Visual analysis per Finch et al.'s scoring rule: an application counts as successful only when there is a systematic change in the intended direction <em>and</em> the design permits confident attribution to the intervention.</p>
   <h3>Design and Attribution</h3>
   <div class="grid g2">
     <div><label class="f">Experimental design</label><select name="pg_design"><option value=""></option><option>Reversal (ABAB)</option><option>Multiple baseline across settings</option><option>Multiple baseline across participants</option><option>Multielement (condition comparison)</option><option>Changing criterion (fading steps)</option><option>AB, non-experimental</option></select></div>
@@ -1241,7 +1268,7 @@ td input,td select{max-width:100%}
   <p class="small">90% or better before a delay step is advanced or the student&rsquo;s data are read. Below 90%, retrain the implementer on the missed steps before the next session rather than interpreting the student&rsquo;s data. This is this protocol's rule (Form PR-1 uses 90% too). Form TI-1 reads 80&ndash;89% as a band that calls for a re-check; here it means re-check and retrain, not advance.</p>
 
   <h3>B. Delay Accuracy (Obtained vs. Programmed)</h3>
-  <p class="lede">Copy the mean obtained delay from each session sheet. Leon et al. reported the mean obtained delay and the mean differential for every phase. Alex's 10-s phase in their food analysis ran at a mean of 17.2 s, a 7.2-s differential, which is the kind of drift that makes a fading step meaningless.</p>
+  <p class="lede">The Carry button on Tab 5 writes the mean obtained delay from each session sheet. Leon et al. reported the mean obtained delay and the mean differential for every phase. Alex's 10-s phase in their food analysis ran at a mean of 17.2 s, a 7.2-s differential, which is the kind of drift that makes a fading step meaningless.</p>
   <table><thead><tr><th style="width:14%">Date</th><th style="width:14%">Phase</th><th class="num" style="width:16%">Programmed (s)</th><th class="num" style="width:16%">Mean obtained (s)</th><th class="num" style="width:14%">Differential (s)</th><th>Action</th></tr></thead><tbody id="tbDA"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbDA">Add row</button></div>
 
@@ -1257,7 +1284,7 @@ td input,td select{max-width:100%}
   <div class="readout"><div><span>Intervals</span><strong id="oIOAn">&mdash;</strong></div><div><span>Block-by-block IOA</span><strong id="oIOA">&mdash;</strong></div><div><span>Total-count agreement</span><strong id="oIOAt">&mdash;</strong></div></div>
   <h4>IOA and integrity log</h4>
   <table><thead><tr><th style="width:14%">Date</th><th style="width:16%">Phase</th><th style="width:22%">Measure</th><th class="num" style="width:14%">IOA %</th><th class="num" style="width:14%">Integrity %</th><th>Notes</th></tr></thead><tbody id="tbQlog"></tbody></table>
-  <div class="rowbtns"><button class="tool" data-add="tbQlog">Add row</button></div>
+  <div class="rowbtns"><button class="tool" data-add="tbQlog">Add row</button><button class="tool" id="btnQlogAdd">Log this observation</button></div>
 </section>
 
 <!-- ===== 8 GENERALIZATION & MAINTENANCE ===== -->
@@ -1267,7 +1294,7 @@ td input,td select{max-width:100%}
 
   <h3>A. Generalization Probe Plan</h3>
   <p class="lede">Program at least one probe on each dimension below. Probe format should be identical to the naturalistic baseline in Tab 2D so results are comparable (the Dunkel-Jackson et al., 2016 model). Passage et al. (2012) probed with a novel intervening activity; Bloh (2010) probed with novel reinforcers in a novel setting.</p>
-  <table><thead><tr><th style="width:15%">Dimension</th><th style="width:26%">Trained condition</th><th style="width:26%">Probe condition</th><th style="width:11%">Date</th><th class="num" style="width:8%">% SC</th><th class="num" style="width:8%">Delay (s)</th><th class="num" style="width:8%">PB / min</th><th style="width:8%">Stop rule met</th><th style="width:4%"></th></tr></thead><tbody id="tbGen"></tbody></table>
+  <table><thead><tr><th style="width:15%">Dimension</th><th style="width:26%">Trained condition</th><th style="width:26%">Probe condition</th><th style="width:11%">Date</th><th class="num" style="width:8%" data-arr-fct="% waited">% SC</th><th class="num" style="width:8%">Delay (s)</th><th class="num" style="width:8%">PB / min</th><th style="width:8%">Stop rule met</th><th style="width:4%"></th></tr></thead><tbody id="tbGen"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbGen">Add probe</button></div>
   <p class="small">Suggested dimensions: setting, implementer (teacher, paraprofessional, parent), reinforcer, intervening activity, delay cue wording, task materials, contingency type (positive to negative or the reverse), and an unsignaled delay with no activity offered.</p>
 
@@ -1279,7 +1306,7 @@ td input,td select{max-width:100%}
 
   <h3>C. Maintenance Schedule</h3>
   <p class="lede">Probes use the baseline choice procedure with no training components (as Passage et al., 2012 did at 41 days). Record and act on relapse: resurgence, renewal in a new setting, and reinstatement after a free reinforcer are all plausible here and none has been studied in SCT.</p>
-  <table><thead><tr><th style="width:16%">Interval</th><th style="width:14%">Due</th><th style="width:14%">Done</th><th class="num" style="width:10%">% SC</th><th class="num" style="width:12%">Delay (s)</th><th class="num" style="width:10%">PB / min</th><th>Result / action</th></tr></thead>
+  <table><thead><tr><th style="width:16%">Interval</th><th style="width:14%">Due</th><th style="width:14%">Done</th><th class="num" style="width:10%" data-arr-fct="% waited">% SC</th><th class="num" style="width:12%">Delay (s)</th><th class="num" style="width:10%">PB / min</th><th>Result / action</th></tr></thead>
     <tbody id="tbMaint"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbMaint">Add probe</button></div>
 
@@ -1402,7 +1429,7 @@ td input,td select{max-width:100%}
 
 <section class="panel noprint" id="p10" role="tabpanel" data-panel="p10">
   <h2 class="nbh-band">Walkthrough: Running the Delay Assessments</h2>
-  <div class="wk-top"><p>What each assessment looks like at the table: the adult and the student drawn step by step, what is said, what the student does, and what goes on the sheet. The student is this form’s simulated example. Press <b>Play all</b> in any section to watch it run, then try the practice at the end.</p>
+  <div class="wk-top"><p>What each assessment looks like at the table: the adult and the student drawn step by step, what is said, what the student does, and what goes on the sheet. The student is this form’s simulated example. Sections A and B show a choice arrangement with tablet time; the example on the form is on the FCT path, so its baseline delays the break itself (Tab 2, FCT baseline). Press <b>Play all</b> in any section to watch it run, then try the practice at the end.</p>
     <button type="button" class="tool nbh-btn nbh-btn-secondary" id="wkPrintBtn" title="Prints one sheet per procedure: setup, script, the drawn steps, what to record, and an observer’s integrity checklist">Print the job aids</button></div>
   <div class="wk-nav"><a href="#wk-setup">0 The table</a><a href="#wk-dim">A Dimension check</a><a href="#wk-base">B Choice baseline</a><a href="#wk-wait">C Waiting</a><a href="#wk-nat">D Naturalistic</a><a href="#wk-avers">E Aversiveness</a><a href="#wk-dd">Discounting probe</a><a href="#wk-pd">Probability probe</a><a href="#wk-train">Training trial</a><a href="#wk-practice">Practice</a><a href="#wk-terms">Terms</a></div>
 <section class="proc" id="wk-setup">
@@ -1420,6 +1447,7 @@ td input,td select{max-width:100%}
 <div class="flow">
   <div><b>A. Dimension check</b>Both options immediate. Does the student take the larger one?<span class="go"><i>&ge; 80% B on two sessions</i> &rarr; B. <em>Below that</em> &rarr; change the reinforcer or the dimension and run A again. Nothing else is interpretable until this passes.</span></div>
   <div><b>B. Choice baseline</b>Delay on the larger option only, raised across sessions until allocation switches; then one session back at 0 s.<span class="go"><i>Switch, then recovery at 0 s</i> &rarr; delay is the controlling variable; training starts below that switch point. <em>No switch at any usable delay</em> &rarr; delay is not the problem; re-examine the case (Tab 2 conclusion).</span></div>
+  <div class="opt"><b>FCT baseline</b>On the FCT path (Tab 1), A and B are not run: the request is honored at once for a session or two, then the same reinforcer is delayed with no training.<span class="go"><i>Problem behavior back when the reinforcer is delayed</i> &rarr; training starts below that delay, on the same reinforcer.</span></div>
   <div class="opt"><b>C. Waiting &middot; D. Naturalistic</b>Optional duration baselines: waiting with nothing to do, or staying with a task with nothing arranged.<span class="go">Run D when the plan will teach waiting with an activity, and repeat it identically as the generalization probe later. Run C when the routine really demands clock-waiting.</span></div>
   <div class="opt"><b>E. Aversiveness</b>Escape arrangements only: which tasks the student avoids, by selection order.<span class="go">Feeds the two sides of an escape choice. <em>A flat order</em> &rarr; no task is aversive enough to build a choice on.</span></div>
   <div class="opt"><b>Discounting probes</b>Indifference points at several delays, and separately at several probabilities.<span class="go">Optional. Gives AUC and <i>k</i> to re-measure after training. Same reward, same amount, or the comparison is not interpretable.</span></div>
@@ -1440,7 +1468,7 @@ td input,td select{max-width:100%}
   <div class="decide"><b>Decision.</b> &ge; 80% for the larger option across two consecutive sessions: the dimension works, go to B. Below that: change the reinforcer or the dimension (magnitude, quality, or duration) and run this again. The toolkit's Tab 2 conclusion field records which.</div>
 </section>
 <section class="proc" id="wk-base">
-  <div class="band"><h2>B. Choice baseline</h2><div class="when">Delay on the larger option only &middot; Tab 2, table B &middot; required in every study the toolkit reviews</div></div>
+  <div class="band"><h2>B. Choice baseline</h2><div class="when">Delay on the larger option only &middot; Tab 2, table B &middot; required for the two choice arrangements (Tab 1)</div></div>
   <p class="lead">Now the larger option costs a wait. Same two cards, same sentence, but the 2-minute break comes after a timer runs. Run a session at 0 s first to anchor, then raise the delay across sessions. The delay at which the student's choices switch from the larger option to the smaller-now option is the switch point; training starts below it. At least one delayed session should also score challenging behavior, because that is often what the delay produces.</p>
   <div class="story" data-story="base">
   <div class="scene"><div class="say2"></div><div class="does"></div></div>
@@ -1637,10 +1665,13 @@ const dt=()=>`<td><input type="date"></td>`;
 const calc=()=>`<td class="calc"></td>`;
 const del=()=>`<td><button class="tool" data-del title="Remove row">&times;</button></td>`;
 const sel=(opts)=>`<td><select><option value=""></option>${opts.map(o=>`<option>${o}</option>`).join('')}</select></td>`;
+/* v22.93 (review I201) options whose label follows the arrangement keep a fixed value */
+const selv=(opts)=>`<td><select><option value=""></option>${opts.map(o=>`<option value="${o}">${o}</option>`).join('')}</select></td>`;
 const templates={
   tbPref:()=>T(txt(),n(),sel(['Paired stimulus','MSWO','Free operant','Single stimulus','Teacher nomination']),dt(),txt()),
   tbMag:()=>T(dt(),txt(),txt(),n('1'),n(),calc()),
   tbBase:()=>T(dt(),n(),n('1'),n(),calc(),n(),txt()),
+  tbFct:()=>T(dt(),sel(['Request honored at once (0 s)','Delay on the same reinforcer']),n(),n(),n(),n(),n(),calc(),n(),calc(),txt()),   /* v22.93 (review F399) */
   tbWait:()=>T(dt(),txt(),n(),txt()),
   tbNat:()=>T(dt(),txt(),n(),txt()),
   tbAv:()=>T(txt(),n(),n(),sel(['High aversive','Moderate','Low aversive']),sel(['Impulsive option (delayed)','Self-control option (immediate)','Not used'])),
@@ -1648,7 +1679,7 @@ const templates={
   tbPD:()=>T(n(),n(),calc(),calc(),txt(),del()),
   tbDDlog:()=>T(dt(),txt(),n(),n(),txt()),
   tbFade:()=>T(calc(),n(),calc(),dt(),txt()),
-  tbTrials:()=>T(calc(),sel(['Delay','IMM']),sel(['SC','IMP','No response']),n(),n(),n(),sel(['Indep.','Prompted','None']),sel(['Yes','Partial','No']),n(),n(),sel(['Yes','No']),txt()),   /* v22.92 (review F400) Delivered */
+  tbTrials:()=>T(calc(),sel(['Delay','IMM']),selv(['SC','IMP','No response']),n(),n(),n(),sel(['Indep.','Prompted','None']),sel(['Yes','Partial','No']),n(),n(),sel(['Yes','No']),txt()),   /* v22.92 (review F400) Delivered */
   tbProg:()=>T(n('1'),dt(),txt(),n(),n(),n(),n(),n(),txt(),del()),
   tbDA:()=>T(dt(),txt(),n(),n(),calc(),txt()),
   tbIOA:()=>T(calc(),n(),n(),calc(),del()),
@@ -1673,13 +1704,14 @@ function recalc(id){
   if(id==='tbAv')renderAvGrid();
   if(id==='tbAvR')calcAv();
   if(id==='tbBase')R.forEach(tr=>{const v=vals(tr);tr.cells[4].textContent=pct(num(v[3])||0,num(v[2])||0)});
+  if(id==='tbFct')R.forEach(tr=>{const v=vals(tr);const m=num(v[3]),dtr=num(v[5]),pb=num(v[7]);tr.cells[7].textContent=dtr?pct(num(v[6])||0,dtr):'\u2014';tr.cells[9].textContent=(m&&pb!=null)?fmt(pb/m,2):'\u2014'});
   /* v21.16 audit (F5): the discounting figures, integrity, IOA and the progress graph follow every change */
   if(id==='tbPD'){recalcPD();computePD(true);return}
   if(id==='tbDD'){const A=num($('#ddA').value);R.forEach(tr=>{const v=vals(tr);const ip=num(v[1]);tr.cells[2].textContent=(A&&ip!=null)?fmt(ip/A,3):'\u2014'});computeDD(true)}
   if(id==='tbTI')scoreTI();
   if(id==='tbProg')drawProg();
   if(id==='tbFade')R.forEach((tr,i)=>{const d=num(vals(tr)[0]);tr.cells[0].textContent=i+1;tr.cells[2].textContent=d==null?'\u2014':mmss(d)});
-  if(id==='tbTrials'){R.forEach((tr,i)=>tr.cells[0].textContent=i+1);summarizeTrials();}
+  if(id==='tbTrials'){R.forEach((tr,i)=>tr.cells[0].textContent=i+1);relabelChoice();summarizeTrials();}
   if(id==='tbDA')R.forEach(tr=>{const v=vals(tr);const p=num(v[2]),o=num(v[3]);tr.cells[4].textContent=(p!=null&&o!=null)?fmt(o-p,2):'\u2014'});
   if(id==='tbIOA'){R.forEach((tr,i)=>{tr.cells[0].textContent=i+1;const v=vals(tr);const a=num(v[0]),b=num(v[1]);tr.cells[3].textContent=(a==null||b==null)?'\u2014':fmt(ioaScore(a,b),2)});computeIOA();}
 }
@@ -1868,7 +1900,8 @@ $('#btnCarry').addEventListener('click',async ()=>{
   else{const empty=rows('tbProg').find(tr=>vals(tr).every(v=>!String(v).trim()));if(empty){const f=empty.querySelectorAll('input,select');vp.forEach((v,i)=>{f[i].value=v});recalc('tbProg')}else addRow('tbProg',vp)}
   const vd=[date,phase,prog,r1(o.obt)];const emptyD=rows('tbDA').find(tr=>vals(tr).every(v=>!String(v).trim()));
   if(emptyD){const f=emptyD.querySelectorAll('input,select');vd.forEach((v,i)=>{f[i].value=v});recalc('tbDA')}else addRow('tbDA',vd);
-  alert('Session '+n+' carried: '+(same?'Progress row replaced':'Progress row added')+' and a Delay accuracy row added. Write the decision in Tab 6 and the action in Tab 7.');
+  const probe=carryProbe(phase,date,o,prog);
+  alert('Session '+n+' carried: '+(same?'Progress row replaced':'Progress row added')+', a Delay accuracy row added'+probe+'. Write the decision in Tab 6 and the action in Tab 7.');
 });
 
 /* ---------- progress graph ---------- */
@@ -1991,8 +2024,8 @@ async function loadSim(){
     ia_fade:'Adult prompts to start the activity fade from verbal to gestural to none by step 4',
     c_pdia:true, c_pdsd:true, c_pdar:true,
     auton:true,
-    dim_dur:true,
-    dim_values:'Duration of access: 30 s of tablet now vs. 2 min of tablet after the delay in the Tab 2 choice assessments; every break in training is 2 min',
+    /* v22.93 (review F399) on the FCT path nothing is manipulated beside the delay: the break is the one the card asks for */
+    dim_values:'No second dimension (FCT path): the break is 2 min in baseline and in every training session; only the delay changes',
     opt_rule:true,
     ho_bip:'Yes \u2013 the BIP names delay tolerance as the thinning procedure',
     ho_staff:'Both aides trained to 90% integrity on two consecutive sessions before running trials',
@@ -2009,23 +2042,21 @@ async function loadSim(){
      step number, mm:ss, the differential, the interval score) have no field, and the placeholder written for
      them had pushed each later value one field to the right. */
   o.tables.tbPref=[
-    ['Tablet \u2013 video clips','92','MSWO',D(33),'Terminal reinforcer for the break'],
-    ['Fruit chew','71','MSWO',D(33),'Back-up / token exchange'],
+    ['Tablet \u2013 video clips','92','MSWO',D(33),'Token back-up at the end of the block'],
+    ['Fruit chew','71','MSWO',D(33),'Second token back-up'],
     ['Bin of magnetic tiles','64','MSWO',D(33),'Intervening activity option'],
     ['Praise + high five','46','Paired stimulus',D(33),'Not used as the terminal reinforcer']
   ];
-  o.tables.tbMag=[
-    [D(32),'30 s tablet','2 min tablet','10','9'],
-    [D(31),'30 s tablet','2 min tablet','10','10'],
-    [D(30),'30 s tablet','2 min tablet','10','9']
-  ];
-  /* v21.16 audit (F2): the plan's stop rule (end the session at the second aggression) holds in baseline too, as
-     the Walkthrough runs it, so the two 30-s sessions end early. Tab 6 carries these four sessions. */
-  o.tables.tbBase=[
-    [D(29),'0','10','10','0','Both options immediate: the larger option on every trial, no challenging behavior'],
-    [D(28),'30','6','1','3','Delay introduced without training: ended at trial 6 on the second aggression (stop rule); one table hit as well'],
-    [D(27),'30','4','0','2','Replicates: ended at trial 4 on the second aggression \u2014 the delay, not the task, is the problem'],
-    [D(26),'0','10','10','0','Back to 0 s: the larger option on every trial, no challenging behavior']
+  /* v22.93 (review F399) the example is on the FCT path, so no dimension check or choice baseline is run (the student is not
+     choosing between two outcomes): its baseline honors the break card at once, then delays that same break 30 s with no
+     training, then honors it at once again. The plan's stop rule (end the session at the second aggression) holds in baseline too,
+     so the two 30-s sessions end early. Tab 6 carries these four sessions. */
+  o.tables.tbMag=[];o.tables.tbBase=[];
+  o.tables.tbFct=[
+    [D(29),'Request honored at once (0 s)','0','22','10','0','0','0','Every break request honored at once: no problem behavior'],
+    [D(28),'Delay on the same reinforcer','30','12','6','6','1','3','The break delayed 30 s, no training: ended at request 6 on the second aggression (stop rule); one table hit as well'],
+    [D(27),'Delay on the same reinforcer','30','6','4','4','0','2','Replicates: ended at request 4 on the second aggression'],
+    [D(26),'Request honored at once (0 s)','0','22','10','0','0','0','Back to 0 s: every request honored, no problem behavior']
   ];
   o.tables.tbWait=[
     [D(29),'\u201cWait, please.\u201d','8','Aggression \u2014 hit the aide\u2019s forearm'],
@@ -2037,25 +2068,14 @@ async function loadSim(){
     [D(28),'Maintenance math problems','95','Engaged, needed one verbal prompt'],
     [D(27),'Looking at a book','40','Brief, disengaged quickly']
   ];
-  /* v21.16 audit (F2): five rounds of "pick the one you want to do first". The tiles were picked first and
-     independent writing last in four rounds of five, as the Walkthrough shows (ranks by round: tiles 1,1,1,2,1;
-     mastered math 2,2,2,1,2; independent math 3,3,3,3,4; writing 4,4,4,4,3). A task picked last is the most
-     aversive (Tab 1); the rows had it the other way round, with a mean rank of 4.6 among four tasks. */
-  o.tables.tbAv=[
-    ['Independent writing','','','High aversive','Impulsive option (delayed)'],
-    ['Independent math','','','High aversive','Impulsive option (delayed)'],
-    ['Maintenance math (mastered)','','','Low aversive','Self-control option (immediate)'],
-    ['Magnetic tiles','','','Low aversive','Self-control option (immediate)']
-  ];
-  /* v21.37: the five rounds themselves (rank picked, by table E's rows: writing, independent math, mastered math, tiles);
-     mean rank 3.8, 3.2, 1.8, 1.2 and % selected 0, 0, 20, 80 are computed from them */
-  o.avr=[['4','3','2','1'],['4','3','2','1'],['4','3','2','1'],['4','3','1','2'],['3','4','2','1']];
+  /* v22.93 (review F399) no aversiveness check either: it assigns tasks to the two sides of an escape choice, and this example
+     makes no choice (the Walkthrough's section E still shows one run) */
+  o.tables.tbAv=[];o.avr=[];
   Object.assign(F,{
-    mag_pass:true, bl_switch:30,
-    bl_summary:'At 0 s the student takes the larger option on every trial with no challenging behavior. A 30 s delay on the larger option, with no training, drops self-control choices to 1 of 6 and 0 of 4, and both sessions end early at the second aggression (the stop rule). Back at 0 s, exclusive choice of the larger option and zero challenging behavior return, so the delay controls both.',
-    pre_summary:'The mand is in the repertoire and effective. Unassisted waiting tolerance is 5\u201311 s. With both options immediate, the larger break (2 min) is clearly preferred over the smaller one (30 s), on 28 of 30 dimension-check trials, so a delay-fading procedure is warranted rather than a magnitude manipulation.',
+    fct_summary:'With every break request honored at once, no problem behavior in either session. With the same break delayed 30 s and no training, 1 of 6 and 0 of 4 delays were waited through, and both sessions ended early at the second aggression (the stop rule). Back at 0 s, no problem behavior: delaying the break evokes the aggression.',
+    pre_summary:'The mand is in the repertoire and effective: honored at once, it keeps problem behavior at zero. Delaying the same break by 30 s, with the same work in place, brings the aggression back, and unassisted waiting tolerance is 5\u201311 s (table C). No choice assessment was run: the student is not choosing between two outcomes, and the plan delays the break the card asks for, so the baseline delays that break. A delay-fading procedure on the break is warranted.',
     pre_conc:'Yes, proceed to training',
-    pre_lock:'Terminal reinforcer locked as 2 min tablet; intervening activity locked as two mastered maintenance problems or magnetic tiles, student\u2019s choice'
+    pre_lock:'Terminal reinforcer locked as the 2-min break the break card asks for, the same in baseline and in training; intervening activity locked as two mastered maintenance problems or magnetic tiles, student\u2019s choice'
   });
 
   /* ---------------- tab 3: delay discounting probe ---------------- */
@@ -2065,8 +2085,8 @@ async function loadSim(){
      school day, as its comparison note says. */
   /* v22.92 (review F407) the example's probes deliver the chosen outcome on randomly drawn trials, as the walkthrough describes:
      equivalence of hypothetical and real rewards has not been shown for students with intellectual disability */
-  Object.assign(F,{ dd_date:D(26), dd_type:'Experienced choice, classroom adaptation \u2013 tablet minutes',dd_rule:'Real outcome on randomly drawn trials',
-                    dd_A:'120', dd_units:'seconds of tablet access' });
+  Object.assign(F,{ dd_date:D(26), dd_type:'Experienced choice, classroom adaptation \u2013 break minutes',dd_rule:'Real outcome on randomly drawn trials',
+                    dd_A:'120', dd_units:'seconds of break' });   /* v22.93 (review F399) the reinforcer the plan delays */
   o.tables.tbDD=[
     ['0','117','Offers 60, 90, 105, 113, 117: took the full amount every time'],
     ['15','101','Offers 60, 90, 105, 97, 101: one switch to the immediate amount, at 105'],
@@ -2075,8 +2095,8 @@ async function loadSim(){
     ['120','27','Offers 60, 30, 15, 23, 27: took the immediate amount down to 30'],
     ['300','11','Offers 60, 30, 15, 7, 11: took the immediate amount down to 15']
   ];
-  Object.assign(F,{pd_date:D(25),pd_type:'Experienced choice, classroom adaptation \u2013 tablet minutes',pd_rule:'Real outcome on randomly drawn trials',
-    pd_A:'120',pd_units:'seconds of tablet access',
+  Object.assign(F,{pd_date:D(25),pd_type:'Experienced choice, classroom adaptation \u2013 break minutes',pd_rule:'Real outcome on randomly drawn trials',
+    pd_A:'120',pd_units:'seconds of break',
     pd_compare:'Delay and probability were probed with the same reward a day apart. Delay: AUC 0.29, log k \u22121.65. Probability: AUC 0.31, h \u2248 1.0. Both are discounted steeply. Note that the two AUC figures are computed on different x-axes \u2014 delay in seconds, probability in odds against \u2014 so they are not directly comparable as numbers; read each against its own curve and against re-measurement after treatment, not against each other. Green and Myerson (2004) treat delay and probability discounting as distinct processes, and the pair describes the problem better than either alone.',
     pd_use:'Both dimensions matter for this student, so the plan addresses both: the delay is faded systematically (Tab 4), and every break-card request is honoured to keep the probability of delivery at 1. Had probability been discounted shallowly while delay was steep, the reliability of delivery would have mattered less and the whole effort could have gone into the fading ladder.'});
   o.tables.tbPD=[['1','117','Certain \u2014 anchor. Offers 60, 90, 105, 113, 117'],['0.9','109','Offers 60, 90, 105, 113, 109: took the sure amount only at 113'],
@@ -2092,9 +2112,9 @@ async function loadSim(){
      Custom. The pattern had been set to an option's wording rather than its value, which left it blank. */
   Object.assign(F,{
     fd_mode:'custom', fd_start:3, fd_end:180,
-    step_crit:'80% self-control choices across 2 consecutive sessions with problem behavior at or below 0.2 per minute',
+    step_crit:'80% of delays waited (reinforcer delivered) across 2 consecutive sessions with problem behavior at or below 0.2 per minute',
     adv_rule:'Advance one step when the criterion is met on two consecutive sessions',
-    back_rule:'Step back one level after two consecutive sessions below 50% self-control, and re-run the previous step to criterion',
+    back_rule:'Step back one level after two consecutive sessions below 50% of delays waited, and re-run the previous step to criterion',
     tr_form:'Hands the break card, then says or signs \u201cokay\u201d and starts the intervening activity',
     tr_crit:'Independent tolerance response on 80% of delay trials across two sessions'
   });
@@ -2109,10 +2129,10 @@ async function loadSim(){
   // [session, school days ago, phase, programmed delay (s), delay (or choice) trials, SC, problem behavior,
   //  minutes, delay trials engaged, delay achieved (mean obtained delay on the delay trials completed), decision]
   const SESS=[
-    [1,29,'Baseline',0,10,10,0,22,'','0','Baseline, 0 s (Tab 2B)'],
-    [2,28,'Baseline',30,6,1,3,12,'','31','Baseline, 30 s: ended at the second aggression (stop rule)'],
-    [3,27,'Baseline',30,4,0,2,6,'','','Baseline, 30 s: ended at the second aggression (stop rule)'],
-    [4,26,'Baseline',0,10,10,0,22,'','0','Baseline, back at 0 s'],
+    [1,29,'Baseline',0,0,0,0,22,'','0','Baseline: every request honored at once (Tab 2, FCT baseline)'],
+    [2,28,'Baseline',30,6,1,3,12,'','31','Baseline, the break delayed 30 s: ended at the second aggression (stop rule)'],
+    [3,27,'Baseline',30,4,0,2,6,'','','Baseline, the break delayed 30 s: ended at the second aggression (stop rule)'],
+    [4,26,'Baseline',0,0,0,0,22,'','0','Baseline, back to every request honored at once'],
     [5,24,'TR training',3,6,4,1,20,3,'3.4','Below criterion: repeat 3 s'],
     [6,23,'TR training',3,6,5,1,20,4,'3.2','At criterion (1 of 2): repeat 3 s'],
     [7,22,'TR training',3,6,6,0,20,5,'3.3','At criterion twice running: advance to 6 s'],
@@ -2133,7 +2153,7 @@ async function loadSim(){
     [22,6,'Training',90,6,5,1,30,4,'93.6','At criterion twice running: advance to 180 s']
   ];
   const r1=x=>String(Math.round(x*10)/10), r2=x=>String(Math.round(x*100)/100);
-  o.tables.tbProg=SESS.map(r=>[String(r[0]),D(r[1]),r[2],String(r[3]),r[9],r1(100*r[5]/r[4]),r2(r[6]/r[7]),r[8]===''?'':r1(100*r[8]/r[4]),r[10]]);
+  o.tables.tbProg=SESS.map(r=>[String(r[0]),D(r[1]),r[2],String(r[3]),r[9],r[4]?r1(100*r[5]/r[4]):'',r2(r[6]/r[7]),r[8]===''?'':r1(100*r[8]/r[4]),r[10]]);
   o.tables.tbFade=[
     ['3',D(22),'Met at sessions 6\u20137 (TR training)'],
     ['6',D(20),'Met at sessions 8\u20139'],
@@ -2176,12 +2196,12 @@ async function loadSim(){
   ];
   Object.assign(F,{
     pg_design:'Changing criterion (fading steps)', pg_attrib:'Partially',
-    pg_va:'Level: in baseline, self-control choices were 100% at 0 s, 17% and 0% at 30 s (both 30-s sessions ended early at the second aggression) and 100% again at 0 s. In training they ran at 67\u2013100% on every step from 3 s to 90 s, and problem behavior stayed at or below 0.05 per minute except in session 15. Trend: the first session at 3, 10 and 90 s fell below the criterion and the next two met it; session 15, the first at 45 s, ended on the stop rule, and 45 s was met after 20 s was run again. Variability: small within each step. Attribution: the 0, 30, 30, 0 s baseline shows that the delay, not the task, evokes the aggression, and each delay was met only after it was programmed (changing-criterion logic), but training was never withdrawn, so the change from baseline to training rests on one comparison: attribution is partial.'
+    pg_va:'Level: in baseline, with every break request honored at once, there was no problem behavior; with the same break delayed 30 s, 17% and 0% of delays were waited through and both sessions ended early at the second aggression; back at 0 s, none again. In training, delays waited ran at 67\u2013100% on every step from 3 s to 90 s, and problem behavior stayed at or below 0.05 per minute except in session 15. Trend: the first session at 3, 10 and 90 s fell below the criterion and the next two met it; session 15, the first at 45 s, ended on the stop rule, and 45 s was met after 20 s was run again. Variability: small within each step. Attribution: the 0, 30, 30, 0 s baseline on the break itself shows that delaying the break, with the same work in place, evokes the aggression, and each delay was met only after it was programmed (changing-criterion logic), but training was never withdrawn, so the change from baseline to training rests on one comparison: attribution is partial.'
   });
 
   /* ---------------- tab 7: integrity and IOA ---------------- */
   Object.assign(F,{ ti_date:D(6), ti_imp:'Aide A', ti_obs:'Jordan Ellis, M.A., BCBA (simulated)',
-                    ioa_date:D(6), ioa_beh:'Self-control choice on each delay trial (1 = SC, 0 = IMP), one row per trial', ioa_int:'' });
+                    ioa_date:D(6), ioa_beh:'Delay waited on each delay trial (1 = waited, 0 = not), one row per trial', ioa_int:'' });
   /* 12 integrity items: all yes except item 8 (reset rule), scored no */
   o.fixed.tbTI=[];
   for(let i=1;i<=12;i++){ const yes=(i!==8); o.fixed.tbTI.push(yes,!yes,false); }
@@ -2189,15 +2209,15 @@ async function loadSim(){
      nine of the 22 sessions, across baseline, TR training and training (Tab 7 asks for at least a third). */
   o.tables.tbIOA=[['1','1'],['1','1'],['1','1'],['1','1'],['0','0'],['1','1']];
   o.tables.tbQlog=[
-    [D(28),'Baseline','Self-control choice, trial by trial','100','100','\u2014'],
-    [D(26),'Baseline','Self-control choice, trial by trial','100','100','\u2014'],
-    [D(23),'TR training','Self-control choice, trial by trial','100','91.7','Tolerance response prompted too early once; reviewed'],
-    [D(20),'Training','Self-control choice, trial by trial','100','91.7','Reset rule applied late once; reviewed with the aide'],
-    [D(18),'Training','Self-control choice, trial by trial','100','100','\u2014'],
-    [D(15),'Training','Self-control choice, trial by trial','100','100','\u2014'],
-    [D(11),'Training','Self-control choice, trial by trial','100','100','\u2014'],
-    [D(9),'Training','Self-control choice, trial by trial','83.3','91.7','Observers disagreed on one of six trials; the definition of a completed wait was reviewed'],
-    [D(6),'Training','Self-control choice, trial by trial','100','91.7','Item 8 (reset rule): the timer was paused late on trial 4 \u2014 booster planned']
+    [D(28),'Baseline','Delay waited, trial by trial','100','100','\u2014'],
+    [D(26),'Baseline','Delay waited, trial by trial','100','100','\u2014'],
+    [D(23),'TR training','Delay waited, trial by trial','100','91.7','Tolerance response prompted too early once; reviewed'],
+    [D(20),'Training','Delay waited, trial by trial','100','91.7','Reset rule applied late once; reviewed with the aide'],
+    [D(18),'Training','Delay waited, trial by trial','100','100','\u2014'],
+    [D(15),'Training','Delay waited, trial by trial','100','100','\u2014'],
+    [D(11),'Training','Delay waited, trial by trial','100','100','\u2014'],
+    [D(9),'Training','Delay waited, trial by trial','83.3','91.7','Observers disagreed on one of six trials; the definition of a completed wait was reviewed'],
+    [D(6),'Training','Delay waited, trial by trial','100','91.7','Item 8 (reset rule): the timer was paused late on trial 4 \u2014 booster planned']
   ];
 
   /* ---------------- tab 8: generalization and maintenance ---------------- */
@@ -2228,8 +2248,108 @@ async function loadSim(){
 $('#btnSim').addEventListener('click',loadSim);
 $('#btnClear').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every field on this form?\nUnsaved entries will be lost.',{ok:'Clear all',danger:true}))location.reload()});
 
+/* v22.93 (review F399, I201) the arrangement chosen on Tab 1 drives the sheet. Tab 2 shows the assessments it calls for: the
+   dimension check and the choice baseline for the two choice arrangements, the aversiveness check for an escape arrangement too,
+   and the FCT baseline (the request honored at once, then the same reinforcer delayed) for delay tolerance after FCT. A block that
+   holds entries stays in view, marked. The session sheet, Progress and Tab 8 name the measure as the path does (delays waited after
+   FCT; the smaller task now as the self-control choice in an escape arrangement), and a session criterion nobody has changed follows
+   the arrangement the person picks. With no arrangement chosen, everything shows. */
+const ARR_SHOW={'':['preChoice','preEsc','preFct'],srpos:['preChoice'],srneg:['preChoice','preEsc'],fct:['preFct'],combo:['preChoice','preEsc']};
+const ARR_CRIT={fct:'Delay completed (requirement met, reinforcer delivered) on at least 80% of delay trials',
+  srpos:'Self-control choice on at least 80% of delay trials (a trial with no response counts against it)',
+  srneg:'Self-control choice (the smaller task now) on at least 80% of delay trials (a trial with no response counts against it)'};
+ARR_CRIT.combo=ARR_CRIT.srpos;
+const ARR_LEDE={'':'Choose the arrangement on Tab 1 and this tab shows the assessments it calls for; until then every block is shown. For the two choice arrangements the choice baseline is required: it is the one measure used in every experiment reviewed, and without it there is no demonstration that impulsive choice existed before treatment.',
+  srpos:'Run what the case calls for. The choice baseline is required for this arrangement: it is the one measure used in every experiment reviewed, and without it there is no demonstration that impulsive choice existed before treatment.',
+  srneg:'Run what the case calls for. The choice baseline is required for this arrangement, and so is the aversiveness check (E), which decides which task goes on which side of the choice. In an escape arrangement the self-control option is the smaller or easier task now, and the impulsive option is the larger task later.',
+  fct:'Delay tolerance after FCT (Tab 1): the student already asks, and the question is waiting once the request is deferred. The FCT baseline below takes the place of the dimension check and the choice baseline; run the waiting and naturalistic baselines (C, D) when the case calls for them.',
+  combo:'Run what the case calls for. The choice baseline is required for this arrangement, and the aversiveness check (E) for its escape side; write the rationale for combining the two outcomes on Tab 1.'};
+const ARR_NOTE={srpos:'Tab 2 shows the dimension check and the choice baseline; the session sheet reads self-control choices.',
+  srneg:'Tab 2 shows the dimension check, the choice baseline and the aversiveness check; the self-control choice is the smaller task now.',
+  fct:'Tab 2 shows the FCT baseline in place of the dimension check and the choice baseline; the session sheet and Progress read delays waited.',
+  combo:'Tab 2 shows the choice assessments and the aversiveness check.'};
+function arrNow(){const r=document.querySelector('[name=arrange]:checked');return r?r.value:'';}
+/* anything in a block that differs from its starting value */
+function blkFilled(b){return Array.from(b.querySelectorAll('input,select,textarea')).some(e=>{if(e.type==='button'||e.type==='file')return false;
+  if(e.type==='checkbox'||e.type==='radio')return e.checked!==e.defaultChecked;
+  if(e.tagName==='SELECT'){const d=Array.from(e.options).find(o=>o.defaultSelected)||e.options[0];return e.value!==(d?d.value:'');}
+  return String(e.value||'').trim()!==''&&e.value!==e.defaultValue;});}
+function relabelChoice(){const a=arrNow(),L=a==='fct'?{SC:'Waited',IMP:'Did not wait'}:a==='srneg'?{SC:'SC (task now)',IMP:'IMP (task later)'}:{SC:'SC',IMP:'IMP'};
+  rows('tbTrials').forEach(tr=>{const c=tr.querySelectorAll('select')[1];if(c)Array.from(c.options).forEach(o=>{if(L[o.value]&&o.textContent!==L[o.value])o.textContent=L[o.value];});});}
+function applyArr(byPerson){const a=arrNow(),show=ARR_SHOW[a]||ARR_SHOW[''];
+  ['preChoice','preEsc','preFct'].forEach(id=>{const b=document.getElementById(id);if(!b)return;const want=show.indexOf(id)>=0,keep=!want&&blkFilled(b);
+    b.hidden=!want&&!keep;const k=b.querySelector('.arr-keep');if(k){k.hidden=!keep;k.textContent=keep?'The arrangement on Tab 1 does not call for this block; it stays in view because it holds entries.':'';}});
+  const lede=$('#preLede');if(lede)lede.textContent=ARR_LEDE[a]||ARR_LEDE[''];
+  const note=$('#arrNote');if(note){note.textContent=ARR_NOTE[a]||'';note.hidden=!ARR_NOTE[a];}
+  const key=a==='fct'?'arrFct':a==='srneg'?'arrSrneg':'';
+  $$('[data-arr-fct],[data-arr-srneg]').forEach(e=>{if(e.dataset.arrDef==null)e.dataset.arrDef=e.textContent;const t=(key&&e.dataset[key])||e.dataset.arrDef;if(e.textContent!==t)e.textContent=t;});
+  relabelChoice();
+  /* the session criterion follows a change the person makes, while it still reads as one of the defaults */
+  const sc=$('[name=step_crit]');if(byPerson&&sc&&ARR_CRIT[a]){const cur=String(sc.value||'').trim(),all=Object.keys(ARR_CRIT).map(k=>ARR_CRIT[k]).concat([sc.defaultValue]);
+    if((!cur||all.indexOf(cur)>=0)&&cur!==ARR_CRIT[a]){sc.value=ARR_CRIT[a];sc.dispatchEvent(new Event('input',{bubbles:true}));}}}
+document.addEventListener('change',e=>{if(e.target&&e.target.name==='arrange')applyArr(e.isTrusted);});
+
+/* v22.93 (review F404) figures carried instead of typed twice: the baseline (Tab 2B, or the FCT baseline) to Progress as phase
+   Baseline; Tab 7's integrity and agreement to its log; a discounting probe to the re-probe log; and a session sheet whose phase
+   is a probe to its row on Tab 8. A row already there for the same date is rewritten after a question, its notes kept. */
+const r1c=v=>v==null||!isFinite(v)?'':String(Math.round(v*10)/10),r2c=v=>v==null||!isFinite(v)?'':String(Math.round(v*100)/100);
+const blankRow=tr=>vals(tr).every(v=>!String(v).trim());
+function putRow(id,tr,v){if(!tr)tr=rows(id).find(blankRow);if(!tr){addRow(id,v.map(x=>x==null?'':x));return}
+  const f=tr.querySelectorAll('input,select');v.forEach((x,i)=>{if(f[i]&&x!=null)f[i].value=x;});recalc(id);}
+const said=m=>{if(window.nbhUI&&nbhUI.toast)nbhUI.toast(m,{kind:'ok'});else alert(m);};
+async function carryBaseline(fct){
+  const R=rows(fct?'tbFct':'tbBase').map(vals).filter(v=>v[0]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0);
+  if(!R.length){alert('Enter at least one dated baseline row first.');return}
+  const out=R.map((v,i)=>{let pc,pbm=null,del;
+    if(fct){const m=num(v[3]),dtr=num(v[5]),pb=num(v[7]);del=v[2];pc=dtr?100*(num(v[6])||0)/dtr:null;pbm=(m&&pb!=null)?pb/m:null;}
+    else{const t=num(v[2]);del=v[1];pc=t?100*(num(v[3])||0)/t:null;}
+    return {date:v[0],row:[String(i+1),v[0],'Baseline',del,num(del)===0?'0':'',r1c(pc),r2c(pbm),'','Baseline ('+(fct?'Tab 2, FCT baseline':'Tab 2B')+')']};});
+  const P=rows('tbProg'),taken=P.map(vals).filter(v=>num(v[0])!=null&&v[2]!=='Baseline').map(v=>num(v[0]));
+  const clash=out.map(o=>+o.row[0]).filter(n=>taken.indexOf(n)>=0);
+  if(clash.length){alert('Session'+(clash.length>1?'s ':' ')+clash.join(', ')+' in the Progress table '+(clash.length>1?'are':'is')+' not a baseline session. The baseline is carried as sessions 1 to '+out.length+'; renumber those rows first, or enter the baseline there by hand.');return}
+  const same=out.map(o=>P.find(tr=>{const v=vals(tr);return v[2]==='Baseline'&&num(v[0])===+o.row[0];}));
+  if(same.some(Boolean)&&!(await nbhUI.confirm('Replace the baseline rows already in the Progress table?\nThey are rewritten from this table; their decisions are kept.',{ok:'Replace'})))return;
+  out.forEach((o,i)=>{if(same[i])o.row[8]=null;putRow('tbProg',same[i]||null,o.row);});
+  drawProg();said('Baseline carried to Progress: '+out.length+' session'+(out.length>1?'s':'')+' as phase Baseline.');}
+$('#btnFctCarry').addEventListener('click',()=>carryBaseline(true));
+$('#btnBaseCarry').addEventListener('click',()=>carryBaseline(false));
+function tiPct(){let y=0,n=0;for(let i=1;i<=12;i++){const c=document.querySelector(`[name=ti${i}]:checked`);if(!c)continue;if(c.value==='y'){y++;n++}else if(c.value==='n')n++}return n?100*y/n:null;}
+function ioaPct(){const R=rows('tbIOA').map(vals).map(v=>[num(v[0]),num(v[1])]).filter(v=>v[0]!=null&&v[1]!=null);return R.length?100*R.reduce((s,v)=>s+ioaScore(v[0],v[1]),0)/R.length:null;}
+$('#btnQlogAdd').addEventListener('click',async()=>{const ti=tiPct(),io=ioaPct();
+  if(ti==null&&io==null){alert('Score the integrity checklist (A) or enter the agreement intervals (C) first.');return}
+  const date=(io!=null&&$('[name=ioa_date]').value)||$('[name=ti_date]').value||$('[name=ioa_date]').value;
+  const phase=date&&$('[name=ss_date]').value===date?$('[name=ss_phase]').value:'',meas=$('[name=ioa_beh]').value;
+  const same=date?rows('tbQlog').find(tr=>{const x=vals(tr);return x[0]===date&&x[2]===meas;}):null;
+  if(same&&!(await nbhUI.confirm('Replace the log row for '+date+'?\nIts figures are rewritten; its notes are kept.',{ok:'Replace'})))return;
+  putRow('tbQlog',same||null,[date,phase,meas,r1c(io),r1c(ti),same?null:'']);
+  said('Logged: '+[io!=null?'agreement '+r1c(io)+'%':'',ti!=null?'integrity '+r1c(ti)+'%':''].filter(Boolean).join(', ')+'.');});
+$('#btnDDlogAdd').addEventListener('click',async()=>{computeDD(true);const auc=$('#outAUC').textContent,lk=$('#outLogK').textContent;
+  if(!/\d/.test(auc)){alert('Enter the delayed amount and at least two indifference points first; the probe is logged with its AUC and log k.');return}
+  const date=$('[name=dd_date]').value,done=rows('tbDDlog').filter(tr=>!blankRow(tr)),same=date?done.find(tr=>vals(tr)[0]===date):null;
+  if(same&&!(await nbhUI.confirm('Replace the re-probe log row for '+date+'?\nIts AUC and log k are rewritten; its phase and interpretation are kept.',{ok:'Replace'})))return;
+  const jb=/^Nonsystematic/.test($('#ddJB').textContent)?' Nonsystematic by Johnson and Bickel\u2019s criteria: read k with caution.':'';
+  putRow('tbDDlog',same||null,[date,same?null:(done.length?'Re-probe':'Baseline'),auc,/\d/.test(lk)?lk:'',same?null:('Half-value delay '+$('#outHalf').textContent+'.'+jb)]);openAdv(false);
+  said('Probe logged'+(date?' for '+date:'')+': AUC '+auc+(/\d/.test(lk)?', log k '+lk:'')+'.');});
+/* the session sheet's figures go to the probe's own row on Tab 8: the row already dated that day, or the first planned row not yet
+   run, or a new one; the dimension, the conditions and whether the stop rule was met are for the person to write */
+function carryProbe(phase,date,o,prog){
+  if(phase==='Generalization probe'){const R=rows('tbGen'),tr=R.find(t=>vals(t)[3]===date)||R.find(t=>{const v=vals(t);return !v[3]&&(v[0]||v[1]||v[2]);})||null;
+    putRow('tbGen',tr,[null,null,null,date,r1c(o.sc),o.achieved!=null?r1c(o.achieved):prog,r2c(o.pbm),null]);
+    return ', and its figures written into a generalization probe row on Tab 8 (write the dimension and whether the stop rule was met)';}
+  if(phase==='Maintenance probe'){const R=rows('tbMaint'),tr=R.find(t=>vals(t)[2]===date)||R.find(t=>{const v=vals(t);return !v[2]&&(v[0]||v[1]);})||null;
+    putRow('tbMaint',tr,[null,null,date,r1c(o.sc),o.achieved!=null?r1c(o.achieved):prog,r2c(o.pbm),null]);
+    return ', and its figures written into the maintenance schedule on Tab 8';}
+  return '';}
+
+/* v22.93 (review I205) research-grade measures folded away: the probability discounting probe, the hyperbolic fit figures and
+   Step 5's group and episodic-future-thinking options sit in closed sections, opened when anything in them (or in the table a
+   section names) holds an entry, and left off paper while closed. Opening a record sets each section from what it holds. */
+function openAdv(reset){$$('details.adv').forEach(d=>{const w=d.dataset.watch?document.querySelector(d.dataset.watch):null,f=blkFilled(d)||!!(w&&blkFilled(w));
+  if(reset)d.open=f;else if(f&&!d.open)d.open=true;});}
+document.addEventListener('input',e=>{const d=e.target&&e.target.closest&&e.target.closest('details.adv');if(d&&!d.open)d.open=true;});
+
 /* ---------- starter rows ---------- */
-['tbPref','tbMag','tbBase','tbWait','tbNat','tbAv','tbDDlog','tbDA','tbQlog','tbGen'].forEach(id=>{addRow(id);addRow(id)});
+['tbPref','tbMag','tbBase','tbFct','tbWait','tbNat','tbAv','tbDDlog','tbDA','tbQlog','tbGen'].forEach(id=>{addRow(id);addRow(id)});
 [0,5,10,30,60,120].forEach(d=>addRow('tbDD',[d]));
 for(let i=0;i<10;i++)addRow('tbTrials');
 for(let i=0;i<5;i++)addRow('tbProg');
@@ -2279,6 +2399,8 @@ function dtConsentNote(){const e=document.getElementById('dtConsentNote'),ce=doc
 document.addEventListener('input',e=>{if(e.target&&e.target.name==='s_consent')dtConsentNote();});
 {const ra=recalcAll;recalcAll=function(){const x=ra.apply(this,arguments);dtConsentNote();return x;};}
 dtConsentNote();
+{const ra=recalcAll;recalcAll=function(){const x=ra.apply(this,arguments);applyArr(false);openAdv(true);return x;};}   /* v22.93 */
+applyArr(false);openAdv(true);
 })();
 </script>
 <script>
@@ -2938,6 +3060,15 @@ dtConsentNote();
 })();
 </script>
 
+<style id="dt1-w3-css">
+/* v22.93 (review F399, I201) the blocks of Tab 2 the arrangement does not call for; (I205) the research-grade measures folded away */
+.arr-blk[hidden],.arr-keep[hidden]{display:none!important}
+.arr-keep{color:var(--amber,#9B4E15);margin:10px 0 0}
+details.adv{margin:16px 0;border:1px solid var(--rule2,#CDD6D2);border-radius:8px;padding:0 14px}
+details.adv>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+details.adv[open]>summary{border-bottom:1px solid var(--rule2,#CDD6D2);margin-bottom:8px}
+@media print{details.adv:not([open]){display:none!important}details.adv{border:0;padding:0}details.adv>summary{display:none}}
+</style>
 <style id="nbh-case-css">
 /* the case: the toolbar group and the picker (v21.31) */
 .nbh-case-grp[hidden]{display:none!important}
