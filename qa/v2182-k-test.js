@@ -80,7 +80,7 @@ const errs=[];const ISO=/^\d{4}-\d{2}-\d{2}$/;
     const r1=await p.evaluate(f=>window.__nbhFactsIn(f),F);await sleep(300);
     const st=await p.evaluate(()=>({meta:Object.assign({},S.meta),src:S.src.map(r=>Object.assign({},r)),vals:[...document.querySelectorAll('#bgTbl textarea')].map(t=>t.value),rep:document.getElementById('reportOut').innerText,txt:window.__bipText()}));
     const m=st.meta;
-    ok('FS-1: records from RR-1',/Removals this school year \(2026-27\): 4\.5 days over 2 removals/.test(m.bgRecords||'')&&/Check-in\/check-out/.test(m.bgRecords)&&/Annual IEP 3\/1\/2027/.test(m.bgRecords)&&/reevaluation due 1\/15\/2028/.test(m.bgRecords),m.bgRecords);
+    ok('FS-1: records from RR-1',/Removals this school year \(2026-27\): 4\.5 days over 2 removals/.test(m.bgRecords||'')&&/Check-in\/check-out/.test(m.bgRecords)&&/Annual IEP review due 3\/1\/2027/.test(m.bgRecords)&&/reevaluation due 1\/15\/2028/.test(m.bgRecords),m.bgRecords);
     ok('FS-1: strengths, interests and communication from DM-1',/Strengths: Draws comics/.test(m.bgProfile||'')&&/Interests: Basketball/.test(m.bgProfile)&&/expressive, Full sentences; receptive, Two-step/.test(m.bgProfile),m.bgProfile);
     ok('FS-1: health and medications considered',/Health conditions: ADHD/.test(m.bgHealth||'')&&/Methylphenidate \(simulated\) 10 mg \(8:00\) for attention/.test(m.bgHealth)&&/Allergies: Peanuts/.test(m.bgHealth)&&/setting events/.test(m.bgHealth),m.bgHealth);
     ok('FS-1: language and culture',/Home language: Spanish; the family needs an interpreter/.test(m.bgCulture||'')&&/Cultural considerations: No pork/.test(m.bgCulture),m.bgCulture);
