@@ -440,6 +440,19 @@ td.mark{width:var(--cellw);padding:0;position:relative;background:#fff}
 .cell[data-state="1"] svg{display:block}
 .cell[data-state="2"]{background:var(--ink);color:#fff}
 .cell[data-state="2"] svg{display:none}
+/* v22.8x (review F91) an interval or a day not observed: an X on a light hatch, on screen and on paper */
+.cell[data-state="x"],td.mark.lvlx{background:repeating-linear-gradient(135deg,#eef1f4 0 4px,#fff 4px 8px)}
+.cell[data-state="x"] .glyph{color:#5b6b78;font-weight:700}
+td.mark.lvlx input.count{color:#5b6b78;font-weight:700}
+th.sp-absent{color:#8a96a0;text-decoration:line-through}
+button.sp-abs{margin-left:3px;padding:0 3px;min-width:0;height:16px;line-height:14px;font-size:9px;border:1px solid #c5ced5;border-radius:3px;background:#fff;color:#5b6b78;cursor:pointer;vertical-align:middle}
+button.sp-abs[aria-pressed="true"]{background:#5b6b78;color:#fff;border-color:#5b6b78}
+.swatch.sp-xsw{display:inline-flex;align-items:center;justify-content:center;font:700 10px/1 var(--sans,Arial,sans-serif);color:#5b6b78;background:repeating-linear-gradient(135deg,#eef1f4 0 3px,#fff 3px 6px)}
+#xTool[aria-pressed="true"]{background:#5b6b78;color:#fff}
+.sp-thr{font-weight:400;opacity:.8}
+table.scatter th.corner .sp-key{display:block;font:600 8.5px/1.1 var(--sans,Arial,sans-serif);color:var(--ink-soft,#5b6b78);text-align:right;padding-right:6px;white-space:nowrap;letter-spacing:0;text-transform:none}
+/* a phone: the time column stays narrow (v21.89), so the key wraps in it */
+@media screen and (max-width:600px){table.scatter th.corner .sp-key{white-space:normal;padding-right:2px;font-size:8px}}
 .cell .glyph{
   position:relative;z-index:1;font-weight:600;letter-spacing:.02em;
   display:block;max-width:100%;overflow:hidden;white-space:nowrap;
@@ -1012,6 +1025,7 @@ td input,td select{max-width:100%}
       <label class="row" style="gap:5px">
         <input type="checkbox" id="useCodes"> codes
       </label>
+      <button type="button" id="xTool" aria-pressed="false" title="Mark intervals not observed (the student was pulled out, lunch in another room): while this is on, a tap marks or clears an X; a whole day is switched with the \u2715 beside its name">X: not observed</button><!-- v22.8x (review F91) -->
     </div>
   </div>
 
@@ -1096,9 +1110,11 @@ td input,td select{max-width:100%}
       <div class="lgrow"><span class="swatch"></span>
         <span>Blank — the behavior did not occur in this interval.</span></div>
       <div class="lgrow lg-slash"><span class="swatch"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="3" y1="97" x2="97" y2="3"/></svg></span>
-        <span>Slash — low rate (below the cutoff set above).</span></div>
+        <span id="lgSlash">Slash — low rate (below the cutoff set above).</span></div>
       <div class="lgrow"><span class="swatch filled"></span>
         <span id="lgShaded">Shaded — high rate (at or above the cutoff).</span></div>
+      <div class="lgrow"><span class="swatch sp-xsw"></span>
+        <span id="lgX">X — not observed (absent, pulled out, no sheet): left out of every count.</span></div><!-- v22.8x (review F91) -->
       </div>
       <p class="noprint" id="lgHow" style="margin:9px 0 0;font-size:11.5px;color:var(--ink-soft)">
         Click a cell to move it blank → slash → shaded. Arrow keys move between
@@ -1207,13 +1223,24 @@ const state = {
   behaviors:[{meta:{}, cells:{}}],
   cur:0
 };
-const BKEYS = ["behavior","definition","example","nonexample","ioa"];
+/* v22.8x (review F90): the high-rate cutoff is each behavior's own (threshold), kept with its name and definition;
+   state.cfg.threshold stays as the record's default for a behavior that has none (a file from before) */
+const BKEYS = ["behavior","definition","example","nonexample","ioa","threshold"];
 state.behaviors[0].cells = state.cells;
 
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
 function key(r,c){ return r+"_"+c; }
+/* v22.8x (review F90) the cutoff of the behavior on the sheet */
+function thr(){ const t = +state.meta.threshold || +state.cfg.threshold || 2; return Math.max(1, t); }
+/* v22.8x (review F91) not observed: a day (absent, a field trip, no sheet: state.meta.absent{day}, shared by every
+   behavior, as the dates are) or one interval (pulled out, lunch in another room: cell.x) is kept out of every count
+   and every denominator; a blank cell on an observed day is "observed, none" */
+function dayAbsent(c){ return state.meta["absent"+c] === "1"; }
+function cellObs(r,c){ return !dayAbsent(c) && !(state.cells[key(r,c)] && state.cells[key(r,c)].x); }
+function lvAt(r,c){ return cellObs(r,c) ? level(cellOf(r,c)) : 0; }
+let spXMode = false;                       // the "X: not observed" tool: a tap marks or clears an interval not observed
 function cellOf(r,c){
   const k = key(r,c);
   if(!state.cells[k]) state.cells[k] = {s:0,n:null,code:""};
@@ -1277,12 +1304,13 @@ function dayLabels(){
    distinction back on brings the slashes back. */
 function oneLevel(){ return +state.cfg.levels === 1; }
 function level(cell){
+  if(cell && cell.x) return 0;             // v22.8x (review F91) not observed
   if(state.cfg.mode === "count"){
     if(cell.n === null || cell.n === "" || isNaN(cell.n)) return 0;
     const v = Number(cell.n);
     if(v <= 0) return 0;
     if(oneLevel()) return 2;
-    return v >= state.cfg.threshold ? 2 : 1;
+    return v >= thr() ? 2 : 1;
   }
   if(oneLevel()) return cell.s > 0 ? 2 : 0;
   return cell.s;
@@ -1338,8 +1366,15 @@ function gridHTML(c0, c1){
   const rows = rowLabels(), cols = dayLabels();
   const nR = rows.length, nC = c1 - c0;
 
-  let h = "<thead><tr><th class='corner timecol'></th>";
-  for(let c=c0;c<c1;c++) h += "<th>"+cols[c]+"</th>";
+  /* v22.8x (review F89): the rule for marking, in the corner of every grid, so each printed sheet carries it (the legend
+     prints once, on a behavior's last sheet) */
+  const t = thr(), keyTxt = oneLevel() ? "\u25A0 occurred" : state.cfg.mode === "count" ? "1" + (t > 2 ? "\u2013" + (t-1) : "") + " low \u00b7 " + t + "+ high"
+    : "/ " + (t > 2 ? "1\u2013" + (t-1) : "1") + " \u00b7 \u25A0 " + t + "+";
+  let h = "<thead><tr><th class='corner timecol'><span class='sp-key'>" + keyTxt + "<br>X not observed</span></th>";
+  /* v22.8x (review F91): beside each day's name, the switch for a day not observed (on screen only) */
+  for(let c=c0;c<c1;c++) h += "<th"+(dayAbsent(c)?" class='sp-absent'":"")+">"+cols[c]
+    + "<button type='button' class='sp-abs noprint' data-abs='"+c+"' aria-pressed='"+dayAbsent(c)+"' title='Not observed this day (absent, a field trip, no sheet): kept out of every count' aria-label='"
+    + esc(cols[c]+(state.meta["date"+c]?" "+shortDate(state.meta["date"+c]):""))+": not observed'>\u2715</button></th>";
   h += "<th class='tot'>Total</th></tr>";
   h += "<tr><td class='time'>Date</td>";
   for(let c=c0;c<c1;c++){
@@ -1355,7 +1390,7 @@ function gridHTML(c0, c1){
   const rowTot = new Array(nR).fill(0);
   for(let r=0;r<nR;r++){
     for(let c=c0;c<c1;c++){
-      const lv = level(cellOf(r,c));
+      const lv = lvAt(r,c);
       if(lv > 0){ colTot[c-c0]++; rowTot[r]++; }
       if(lv === 2) colHigh[c-c0]++;
     }
@@ -1368,24 +1403,24 @@ function gridHTML(c0, c1){
     h += "<td class='time"+(peak > 0 && rowTot[r] === peak ? " peak" : "")+"'>"
        + rows[r] + "</td>";
     for(let c=c0;c<c1;c++){
-      const cell = cellOf(r,c), lv = level(cell);
+      const cell = cellOf(r,c), no = !cellObs(r,c), lv = no ? 0 : level(cell);
       if(state.cfg.mode === "count"){
         /* Counting and coding are not alternatives: a sheet tracking two behaviors
            still needs to say which one the number belongs to, so the picker sits
            in the corner of a counted cell exactly as it does on a tapped one. */
-        h += "<td class='mark lvl"+lv+"'>" + slashSVG("bg")
+        h += "<td class='mark lvl"+(no?"x":lv)+"'>" + slashSVG("bg")
            + "<input class='count' inputmode='numeric' name='sp.n."+r+"_"+c+"' data-r='"+r+"' data-c='"+c+"' value='"
-           + (cell.n === null ? "" : esc(String(cell.n))) + "' "
+           + (no ? "X" : cell.n === null ? "" : esc(String(cell.n))) + "' "+(dayAbsent(c)?"readonly ":"")
            + "aria-label='"+rows[r]+", "+cols[c]+" count'>"
            + (state.cfg.codes ? codeSelect(r,c,cell) : "")
            + "</td>";
       }else{
         /* v21.16 audit (F10): the cell of the grid is the table cell, which holds the mark button and, with codes
            on, the code picker; as a gridcell inside a cell the button broke the grid's structure (axe) */
-        h += "<td class='mark' role='gridcell'><button class='cell' data-state='"+lv+"' data-r='"+r+"' data-c='"+c+"' "
-           + "aria-label='"+rows[r]+", "+cols[c]+"'>"
+        h += "<td class='mark' role='gridcell'><button class='cell' data-state='"+(no?"x":lv)+"' data-r='"+r+"' data-c='"+c+"' "
+           + "aria-label='"+rows[r]+", "+cols[c]+(no?", not observed":"")+"'>"
            + slashSVG("")
-           + "<span class='glyph'>"+(lv && cell.code ? esc(cell.code) : "")+"</span>"
+           + "<span class='glyph'>"+(no ? "X" : lv && cell.code ? esc(cell.code) : "")+"</span>"
            + "</button>";
         if(state.cfg.codes) h += codeSelect(r,c,cell);
         h += "</td>";
@@ -1514,21 +1549,25 @@ function listOf(a, max){
 }
 function renderReadout(){
   const rows = rowLabels(), nR = rows.length, nC = dayLabels().length, pages = pageRanges();
-  let marked = 0, hi = 0;
+  let marked = 0, hi = 0, obs = 0;
   const rowTot = new Array(nR).fill(0);
   for(let r=0;r<nR;r++) for(let c=0;c<nC;c++){
+    if(!cellObs(r,c)) continue;            // v22.8x (review F91)
+    obs++;
     const lv = level(cellOf(r,c));
     if(lv>0){ marked++; rowTot[r]++; }
     if(lv===2) hi++;
   }
+  const nObs = Array.from({length:nC}, (_, c) => c).filter(c => !dayAbsent(c)).length;
   const peak = Math.max(0, ...rowTot);
   const tops = rows.filter((x, r) => peak > 0 && rowTot[r] === peak);
   $("#readout").textContent =
-    nR + " intervals \u00d7 " + nC + " days = " + (nR*nC) + " cells \u00b7 "
+    nR + " intervals \u00d7 " + nC + " days = " + (nR*nC) + " cells"
+    + (obs < nR*nC ? " (" + obs + " observed" + (nObs < nC ? ", " + nObs + " of " + nC + " days" : "") + ")" : "") + " \u00b7 "
     + marked + " marked" + (oneLevel() ? "" : " (" + hi + " high rate)")
     + (pages.length>1 ? " \u00b7 across " + pages.length + " sheets" : "")
     + (peak > 0 ? " \u00b7 densest interval" + (tops.length > 1 ? "s" : "") + ": " + listOf(tops)
-        + " (" + peak + " of " + nC + " days" + (tops.length > 1 ? " each" : "") + ")" : "");
+        + " (" + peak + " of " + nObs + " days" + (nObs < nC ? " observed" : "") + (tops.length > 1 ? " each" : "") + ")" : "");
 }
 /* v21.16 audit (F16): sheets after the first name the client and behavior in their header; they follow typing */
 function renderReps(){
@@ -1588,11 +1627,19 @@ onGrids("click", e => {
     try{ dt.showPicker(); }catch(err){ /* older browser: typing still works */ }
     return;
   }
+  /* v22.8x (review F91): a day not observed, switched beside its name */
+  const ab = e.target.closest("button.sp-abs");
+  if(ab){ const c = +ab.dataset.abs; if(dayAbsent(c)) delete state.meta["absent"+c]; else state.meta["absent"+c] = "1"; render(); return; }
   const b = e.target.closest("button.cell");
   if(!b) return;
   const cell = cellOf(+b.dataset.r, +b.dataset.c);
+  if(dayAbsent(+b.dataset.c)){ nbhUI.toast("This day is marked not observed: the \u2715 beside its name marks it observed again.", {kind:"warn"}); return; }
+  if(spXMode){ if(cell.x) delete cell.x; else cell.x = 1; }
+  else if(cell.x){ delete cell.x; }        // a tap on an interval not observed makes it observed, blank
+  else{
   cell.s = oneLevel() ? (cell.s ? 0 : 2) : (cell.s + 1) % 3;
   if(cell.s === 0) cell.code = "";
+  }
   /* v21.89 a tapped cell is where the finger is: the page stays put while the grid is drawn again, and the cell is not scrolled to */
   const y = window.scrollY, x = window.scrollX;
   render();
@@ -1620,11 +1667,13 @@ onGrids("input", e => {
   const inp = e.target;
   if(inp.classList.contains("count")){
     const cell = cellOf(+inp.dataset.r, +inp.dataset.c);
-    cell.n = inp.value === "" ? null : Number(inp.value);
+    /* v22.8x (review F91): an X typed in a count box is an interval not observed */
+    if(/^\s*x\s*$/i.test(inp.value)){ cell.x = 1; cell.n = null; }
+    else{ delete cell.x; cell.n = inp.value === "" || isNaN(Number(inp.value)) ? null : Number(inp.value); }
     delete cell.est;                // v21.16 audit (F1): typed, so no longer carried over from a tapped mark
     const td = inp.closest("td");
     const lv = level(cell);
-    td.className = "mark lvl" + lv;
+    td.className = "mark lvl" + (cell.x ? "x" : lv);
     updateTotalsOnly(inp.closest("table.scatter"));
     return;
   }
@@ -1655,7 +1704,7 @@ function updateTotalsOnly(tbl){
     const rowTot = new Array(nR).fill(0);
     for(let r=0;r<nR;r++) for(let i=0;i<nC;i++){
       const c = colIdx[i]; if(c < 0) continue;
-      const lv = level(cellOf(r,c));
+      const lv = lvAt(r,c);
       if(lv>0){ colTot[i]++; rowTot[r]++; }
       if(lv===2) colHigh[i]++;
     }
@@ -1702,9 +1751,14 @@ onGrids("keydown", e => {
   if(e.key === "ArrowUp")    return go(-1,0);
   if(e.key === "ArrowRight" && el.tagName === "BUTTON") return go(0,1);
   if(e.key === "ArrowLeft"  && el.tagName === "BUTTON") return go(0,-1);
+  if(el.tagName === "BUTTON" && /^[xX]$/.test(e.key) && !dayAbsent(c)){   /* v22.8x (review F91) X: not observed */
+    e.preventDefault();
+    const cell = cellOf(r,c); if(cell.x) delete cell.x; else cell.x = 1;
+    render(); focusCell(r,c); return;
+  }
   if(el.tagName === "BUTTON" && ["0","1","2"].includes(e.key)){
     e.preventDefault();
-    const cell = cellOf(r,c);
+    const cell = cellOf(r,c); delete cell.x;
     cell.s = oneLevel() ? (+e.key ? 2 : 0) : +e.key;
     if(cell.s === 0) cell.code = "";
     render(); focusCell(r,c);
@@ -1820,9 +1874,10 @@ function syncPreset(){
     state.cfg.days      = Math.max(1, Math.min(60, +$("#days").value || 7));
     state.cfg.perSheet  = Math.max(1, +$("#perSheet").value || 10);
     state.cfg.dayStart  = +$("#dayStart").value;
-    state.cfg.threshold = Math.max(1, +$("#threshold").value || 2);
+    /* v22.8x (review F90): the cutoff is the behavior's on the sheet; the others keep theirs */
+    if(id === "threshold"){ state.meta.threshold = String(Math.max(1, +$("#threshold").value || thr())); renderBehBar(); }
     /* v21.16 audit (F18, F3): the fields and the Sheet list show the values in use */
-    $("#days").value = state.cfg.days; $("#threshold").value = state.cfg.threshold;
+    $("#days").value = state.cfg.days; $("#threshold").value = thr();
     syncPreset();
     render();
   });
@@ -1842,23 +1897,24 @@ $("#modeSeg").addEventListener("click", e => {
    cleared by typing no longer comes back as an old mark. A count carried over from a tapped mark is the smallest
    count that mark stands for (1 for a slash, the cutoff for a shaded cell) and is flagged (est), so the summary
    can say its total is a minimum; typing the count removes the flag. */
-function lvlOfCount(n){
+function lvlOfCount(n, t){
   if(n === null || n === undefined || n === "" || isNaN(n)) return 0;
-  const v = Number(n);
-  return v <= 0 ? 0 : v >= state.cfg.threshold ? 2 : 1;
+  const v = Number(n), c = t || thr();
+  return v <= 0 ? 0 : v >= c ? 2 : 1;
 }
 function carryMarks(to){
   commitBeh();
-  state.behaviors.forEach(b => Object.keys(b.cells || {}).forEach(k => {
+  state.behaviors.forEach(b => { const t = Math.max(1, +(b.meta && b.meta.threshold) || +state.cfg.threshold || 2);   /* v22.8x (F90) its own cutoff */
+    Object.keys(b.cells || {}).forEach(k => {
     const cell = b.cells[k]; if(!cell) return;
     if(to === "count"){
       const s = +cell.s || 0;
       if(!s){ if(cell.n !== 0) cell.n = null; delete cell.est; }
-      else if(lvlOfCount(cell.n) !== s){ cell.n = s === 2 ? Math.ceil(state.cfg.threshold) : 1; cell.est = 1; }
+      else if(lvlOfCount(cell.n, t) !== s){ cell.n = s === 2 ? Math.ceil(t) : 1; cell.est = 1; }
     }else{
-      cell.s = lvlOfCount(cell.n);
+      cell.s = lvlOfCount(cell.n, t);
     }
-  }));
+  }); });
 }
 /* a cell's count, read only when the sheet is kept as counts: in tap mode a count left from an earlier switch of
    entry mode is not what the sheet records */
@@ -1905,6 +1961,12 @@ async function retime(prevStart, prevStep){
   return true;
 }
 
+/* v22.8x (review F91) the X tool: while it is on, a tap marks or clears an interval not observed */
+$("#xTool").addEventListener("click", e => {
+  spXMode = !spXMode; e.currentTarget.setAttribute("aria-pressed", String(spXMode));
+  document.documentElement.classList.toggle("sp-xmode", spXMode);
+  nbhUI.toast(spXMode ? "X: a tap now marks an interval not observed, or clears it. Tap the button again to mark the behavior." : "Taps mark the behavior again.", {kind:"ok"});
+});
 $("#useCodes").addEventListener("change", e => {
   state.cfg.codes = e.target.checked;
   renderCodes();
@@ -1921,7 +1983,12 @@ $("#levelSeg").addEventListener("click", e => {
 /* ---------------------------------------------------- behaviors */
 function commitBeh(){
   const b = state.behaviors[state.cur] || (state.behaviors[state.cur] = {meta:{}, cells:{}});
+  /* v22.8x (review F90): every behavior carries its cutoff (the record's, when none was set), so a record reads the same
+     after it is kept and opened again */
+  const t0 = String(Math.max(1, +state.cfg.threshold || 2));
+  if(!state.meta.threshold) state.meta.threshold = t0;
   BKEYS.forEach(k => { b.meta[k] = state.meta[k] || ""; });
+  state.behaviors.forEach(x => { if(x && x.meta && !x.meta.threshold) x.meta.threshold = t0; });
   b.cells = state.cells;
 }
 function useBeh(i, quiet){
@@ -1944,9 +2011,10 @@ function renderBehBar(){
   commitBeh();
   seg.innerHTML = state.behaviors.map((b, i) => {
     const nm = behName(i);
+    const t = Math.max(1, +(b.meta && b.meta.threshold) || +state.cfg.threshold || 2);   /* v22.8x (review F90) */
     return "<button type='button' data-b='"+i+"' aria-pressed='"+(i === state.cur)+"'"
-         + " title='"+esc(nm)+"'>" + (i+1) + " \u00b7 "
-         + esc(nm.length > 34 ? nm.slice(0,33) + "\u2026" : nm) + "</button>";
+         + " title='"+esc(nm)+(oneLevel() ? "" : ": high rate at "+t+" or more")+"'>" + (i+1) + " \u00b7 "
+         + esc(nm.length > 34 ? nm.slice(0,33) + "\u2026" : nm) + (oneLevel() ? "" : "<span class='sp-thr'> \u00b7 high "+t+"+</span>") + "</button>";
   }).join("");
   const del = $("#delBeh"); if(del) del.hidden = state.behaviors.length < 2;
   const note = $("#behNote");
@@ -1976,6 +2044,10 @@ function loadBehaviors(d){
     state.behaviors = [{meta:m, cells: d.cells || {}}];
     state.cur = 0;
   }
+  /* v22.8x (review F90): a file from before each behavior had its cutoff: the record's cutoff becomes each one's, so
+     nothing is scored again */
+  const t0 = String(Math.max(1, +((d.cfg || {}).threshold) || +state.cfg.threshold || 2));
+  state.behaviors.forEach(x => { if(!x.meta.threshold) x.meta.threshold = t0; });
   const b = state.behaviors[state.cur];
   BKEYS.forEach(k => { state.meta[k] = b.meta[k] || ""; });
   state.cells = b.cells;
@@ -2000,7 +2072,7 @@ $("#behSeg").addEventListener("click", e => {
 });
 $("#addBeh").addEventListener("click", () => {
   commitBeh();
-  state.behaviors.push({meta:{}, cells:{}});
+  state.behaviors.push({meta:{threshold:String(thr())}, cells:{}});   /* v22.8x (F90) its own cutoff, from the one on screen */
   useBeh(state.behaviors.length-1);
   const f = $("#mBehavior"); if(f) f.focus();
 });
@@ -2015,10 +2087,12 @@ $("#delBeh").addEventListener("click", async () => {
 window.nbhExtraSig = function(){
   commitBeh();
   let s = state.cur + "|" + state.behaviors.length + "|" + (state.cfg.levels || 2);
+  s += "|" + Object.keys(state.meta).filter(k => /^absent\d+$/.test(k) && state.meta[k]).join(",");   /* v22.8x (F91) */
   state.behaviors.forEach(b => {
+    s += "|t" + ((b.meta && b.meta.threshold) || "");   /* v22.8x (F90) */
     for(const k in b.cells){
       const c = b.cells[k];
-      if(c && (c.s || c.n || c.code)) s += ";" + k + ":" + (c.s||0) + ":" + (c.n===null||c.n===undefined?"":c.n) + ":" + (c.code||"");
+      if(c && (c.s || c.n || c.code || c.x)) s += ";" + k + ":" + (c.s||0) + ":" + (c.n===null||c.n===undefined?"":c.n) + ":" + (c.code||"") + (c.x?":x":"");
     }
     s += "|";
   });
@@ -2032,11 +2106,16 @@ const CITE_TWO = "In the original procedure the slash denoted a single occurrenc
 const CITE_ONE = "In the original procedure the slash denoted a single occurrence within the "
   + "interval and the filled cell denoted more than one; this sheet records occurrence only, "
   + "so a shaded cell means the behavior occurred at least once in the interval, at any rate.";
+/* v22.8x (review F89): the legend that prints on every sheet gives the rule with this behavior's numbers, so the
+   person marking the paper can code a cell: a slash for 1 to cutoff-1 in the interval, shaded for the cutoff or more */
 function renderLegendText(){
-  const one = oneLevel();
+  const one = oneLevel(), t = thr(), cnt = state.cfg.mode === "count";
+  const lo = t <= 2 ? "1" : "1 to " + (t-1);
+  const sl = $("#lgSlash"); if(sl) sl.textContent = cnt ? "Slash \u2014 low rate: a count of " + lo + " (write the count in the cell)." : "Slash \u2014 low rate: " + lo + " in the interval.";
   const sh = $("#lgShaded"); if(sh) sh.textContent = one
-    ? "Shaded \u2014 the behavior occurred in this interval."
-    : "Shaded \u2014 high rate (at or above the cutoff).";
+    ? "Shaded \u2014 the behavior occurred in this interval, any number of times."
+    : cnt ? "Shaded \u2014 high rate: a count of " + t + " or more." : "Shaded \u2014 high rate: " + t + " or more in the interval.";
+  const lx = $("#lgX"); if(lx) lx.textContent = "X \u2014 not observed (absent, pulled out, no sheet): left out of every count.";
   const how = $("#lgHow"); if(how) how.textContent = one
     ? "Click a cell to switch it blank \u2194 shaded. Arrow keys move between cells; 0 clears a cell and 1 shades it."
     : "Click a cell to move it blank \u2192 slash \u2192 shaded. Arrow keys move between cells; 0, 1 and 2 set a cell directly.";
@@ -2423,6 +2502,7 @@ $("#csvBtn").addEventListener("click", () => {
     const line = [q(lab)];
     cols.forEach((_,c) => {
       const cell = cellOf(r,c), lv = level(cell);
+      if(!cellObs(r,c)){ line.push(q("not observed")); return; }   /* v22.8x (F91) */
       const v = state.cfg.mode === "count"
         ? (cell.n === null ? "" : cell.n)
         : (oneLevel() ? ["","","occurred"] : ["","low","high"])[lv];
@@ -2446,7 +2526,7 @@ function syncToolbar(){
   $("#days").value    = state.cfg.days;
   $("#perSheet").value= state.cfg.perSheet || 10;
   $("#dayStart").value= state.cfg.dayStart;
-  $("#threshold").value = state.cfg.threshold;
+  $("#threshold").value = thr();   /* v22.8x (F90) */
   $("#useCodes").checked = !!state.cfg.codes;
   $$("#levelSeg button").forEach(x =>
     x.setAttribute("aria-pressed", String(+x.dataset.levels === (+state.cfg.levels || 2))));
@@ -2457,6 +2537,7 @@ function syncToolbar(){
 }
 function renderMeta(){
   $$("[data-meta]").forEach(i => i.value = state.meta[i.dataset.meta] || "");
+  { const t = $("#threshold"); if(t) t.value = thr(); }   /* v22.8x (F90) the behavior's own cutoff */
   const wp = $("#mWeekPick"); if(wp) wp.value = state.meta.weekStart || state.meta.date0 || "";
 }
 /* v22.31 Week of from a calendar: the first day picked writes "Month d, yyyy – Month d, yyyy" over the sheet's days (school
@@ -2492,13 +2573,18 @@ function weekDates(start){
 
 
 /* ---------------------------------------------------- pattern summary */
+/* v22.8x (review F91): only what was observed counts: a day not observed is out of every figure, an interval not
+   observed out of its row's and its day's; obs is the number of observed days (perRow) or intervals (perCol) */
 function summaryData(){
   const rows = rowLabels(), cols = dayLabels();
   const nR = rows.length, nC = cols.length;
-  const perRow = rows.map(() => ({low:0, high:0, sum:0}));
-  const perCol = cols.map(() => ({low:0, high:0, sum:0}));
-  let marked = 0, high = 0, counted = 0, anyCount = false, est = 0, maxN = 0;
+  const perRow = rows.map(() => ({low:0, high:0, sum:0, obs:0}));
+  const perCol = cols.map(() => ({low:0, high:0, sum:0, obs:0}));
+  const obsDays = cols.map((x, c) => c).filter(c => !dayAbsent(c));
+  let marked = 0, high = 0, counted = 0, anyCount = false, est = 0, maxN = 0, cellsObs = 0;
   for(let r=0;r<nR;r++) for(let c=0;c<nC;c++){
+    if(!cellObs(r,c)) continue;
+    perRow[r].obs++; perCol[c].obs++; cellsObs++;
     const cell = cellOf(r,c), lv = level(cell);
     const v = countOf(cell);                                        // v21.16 audit (F1)
     if(v !== null && v > 0){ anyCount = true; counted += v; perRow[r].sum += v; perCol[c].sum += v;
@@ -2508,7 +2594,8 @@ function summaryData(){
     if(lv === 2){ high++; perRow[r].high++; perCol[c].high++; }
     else        { perRow[r].low++;  perCol[c].low++;  }
   }
-  return {rows, cols, nR, nC, perRow, perCol, marked, high, counted, anyCount, est, maxN};
+  return {rows, cols, nR, nC, perRow, perCol, marked, high, counted, anyCount, est, maxN, obsDays, nObs: obsDays.length, cellsObs,
+          absent: cols.map((x, c) => c).filter(c => dayAbsent(c))};
 }
 
 /* v21.16 audit (F5): each chart defines its own hatching under an id of its own, and its low-rate bars point at
@@ -2606,6 +2693,7 @@ function dayChart(d){
        + '" height="'+(y(p.high)-y(total))+'"/>';
     if(total && colW >= 8)  g += '<text class="val" x="'+(cx+bw/2)+'" y="'+(y(total)-3)
        + '" text-anchor="middle">'+total+'</text>';
+    if(dayAbsent(c)) g += '<text class="val" x="'+(cx+bw/2)+'" y="'+(y(0)-3)+'" text-anchor="middle">X</text>';   /* v22.8x (F91) not observed */
     if(c % every) return;
     g += '<text class="tick" x="'+(cx+bw/2)+'" y="'+(y(0)+12)+'" text-anchor="middle">'
        + esc(d.cols[c]) + '</text>';
@@ -2628,7 +2716,7 @@ function rankTable(d){
   idx.forEach(o => {
     t += "<tr><td>"+esc(d.rows[o.i])+"</td><td class='n'>"+o.t+"</td>"
        + (one ? "" : "<td class='n'>" + (o.h || "") + "</td>")
-       + "<td class='n'>"+Math.round(100*o.t/d.nC)+"</td></tr>";
+       + "<td class='n'>"+Math.round(100*o.t/Math.max(1, d.perRow[o.i].obs))+"</td></tr>";   /* v22.8x (F91) of the days that interval was observed */
   });
   return t + "</tbody></table>";
 }
@@ -2816,11 +2904,15 @@ function controlData(){
   const d = summaryData();
   const n = d.nC, k = d.nR;
 
-  const y = [];
+  /* v22.8x (review F91): the sum over the days observed; an interval left out on some of them (an X) is scaled to the
+     days observed, so a pull-out does not read as a quiet interval */
+  const y = [], nObs = d.nObs;let scaled = 0;
   for(let r=0;r<k;r++){
     let t = 0;
-    for(let c=0;c<n;c++) t += score(cellOf(r,c));   // 0 / 1 / 2, or 0 / 1
-    y.push(t);
+    for(let c=0;c<n;c++) if(cellObs(r,c)) t += score(cellOf(r,c));   // 0 / 1 / 2, or 0 / 1
+    const o = d.perRow[r].obs;
+    if(o > 0 && o < nObs){ t = t * nObs / o; scaled++; }
+    y.push(Math.round(t*100)/100);
   }
   const total = y.reduce((a,b) => a+b, 0);
   const mean = k ? total/k : 0;
@@ -2840,7 +2932,7 @@ function controlData(){
   const flagged = new Set();
   hits.forEach(h => h.idx.forEach(i => flagged.add(i)));
 
-  return {d, n, k, y, total, mean, sigma, sMR, sSD, hits, flagged};
+  return {d, n: nObs, nAll: n, scaled, k, y, total, mean, sigma, sMR, sSD, hits, flagged};
 }
 
 function detectSignals(y, mean, sigma){
@@ -3030,7 +3122,7 @@ function renderControl(){
   }
 
   let html = "<div class='stat'>"
-    + "<div><b>DAYS OBSERVED</b><span>"+a.n+"</span><em>Kahng et al. used 30</em></div>"
+    + "<div><b>DAYS OBSERVED</b><span>"+a.n+"</span><em>"+(a.n < a.nAll ? "of "+a.nAll+" on the sheet; " : "")+"Kahng et al. used 30</em></div>"
     + "<div><b>INTERVALS PER DAY</b><span>"+a.k+"</span><em>"
       + state.cfg.interval+"-min blocks</em></div>"
     + "<div><b>MEAN</b><span>"+a.mean.toFixed(1)+"</span><em>central line</em></div>"
@@ -3057,7 +3149,10 @@ function renderControl(){
     + "<p class='cap'>" + (oneLevel()
         ? "This record was kept without the low / high distinction, so every interval is scored 0 for no occurrence and 1 for occurrence, "
         : "Every interval is scored 0 for no occurrence, 1 for low and 2 for high, ")
-    + "then summed down the column of days. The solid line is the mean of those sums; the "
+    + "then summed down the column of days" + (a.n < a.nAll ? " observed (" + a.n + " of " + a.nAll + "; a day not observed is left out)" : "")
+    + (a.scaled ? "; " + a.scaled + " interval" + (a.scaled === 1 ? " was" : "s were") + " not observed on every one of them, and "
+        + (a.scaled === 1 ? "its sum is" : "their sums are") + " scaled to the days observed (sum \u00d7 days observed \u00f7 days that interval was observed)" : "")
+    + ". The solid line is the mean of those sums; the "
     + "three broken lines sit 1, 2 and 3 SD above it. Filled points are the intervals that met "
     + "one of the four criteria below. Lower limits are not drawn, following the paper, because "
     + "the scatter plot is used to find periods of high responding.</p>"
@@ -3160,6 +3255,34 @@ function methodNote(a){
     + "</div>";
 }
 
+/* v22.8x (review F89, F91, F92): the summary's first line, as text: what high rate meant, the days observed, the intervals
+   and days with the most; the same words go to the case for each behavior */
+function summaryLine(d){
+  const cells = d.cellsObs;
+  /* v21.16 audit (F6): every interval and day tied for the most is named, a day with its date */
+  const rowT = d.perRow.map(p => p.low + p.high), colT = d.perCol.map(p => p.low + p.high);
+  const rowMax = Math.max(...rowT), colMax = Math.max(...colT);
+  const topR = d.perRow.map((p, i) => i).filter(i => rowT[i] === rowMax);
+  const topRows = topR.map(i => d.rows[i] + (typeof spAct === "function" && spAct(i) ? " (" + spAct(i) + ")" : ""));
+  const topCols = d.cols.map((x, i) => colT[i] === colMax ? dayName(i, d) : null).filter(x => x !== null);
+  const each = n => n > 1 ? " each" : "";
+  const rObs = topR.length ? Math.max(...topR.map(i => d.perRow[i].obs)) : d.nObs;
+  const cObs = Math.max(0, ...d.perCol.map((p, i) => colT[i] === colMax ? p.obs : 0));
+  return (d.nObs < d.nC ? "Observed on " + d.nObs + " of " + d.nC + " days (not observed: "
+        + listOf(d.absent.map(i => dayName(i, d)), 4) + "). " : "")
+    + (cells < d.nR * d.nC ? d.marked + " of the " + cells + " intervals observed were marked (" : d.marked + " of " + cells + " intervals marked (")
+    + Math.round(100*d.marked/Math.max(1, cells)) + "% of the observation window)"
+    + (oneLevel() ? "" : ", " + d.high + " of them at high rate (" + thr() + " or more in an interval)")
+    /* v21.16 audit (F1): a total that includes counts carried over from tapped marks is a minimum */
+    + (d.anyCount ? (d.est
+        ? ", at least " + d.counted + " occurrences in total (" + d.est + " of the counts "
+          + (d.est === 1 ? "was" : "were") + " carried over from marks made by tapping, as the smallest count "
+          + "each mark stands for)"
+        : ", " + d.counted + " occurrences recorded in total") : "")
+    + ". Heaviest interval" + (topRows.length > 1 ? "s" : "") + ": " + listOf(topRows) + " (" + rowMax
+    + " of " + rObs + " days" + (rObs < d.nC ? " observed" : "") + each(topRows.length) + "). Heaviest day" + (topCols.length > 1 ? "s" : "") + ": "
+    + listOf(topCols) + " (" + colMax + " of " + cObs + " intervals" + each(topCols.length) + ").";
+}
 function renderSummary(){
   $("#sClient").textContent   = state.meta.client   || "";
   $("#sBehavior").textContent = state.meta.behavior || "";
@@ -3174,27 +3297,7 @@ function renderSummary(){
     return;
   }
 
-  const cells = d.nR * d.nC;
-  /* v21.16 audit (F6): every interval and day tied for the most is named, a day with its date */
-  const rowT = d.perRow.map(p => p.low + p.high), colT = d.perCol.map(p => p.low + p.high);
-  const rowMax = Math.max(...rowT), colMax = Math.max(...colT);
-  const topRows = d.rows.filter((x, i) => rowT[i] === rowMax);
-  const topCols = d.cols.map((x, i) => colT[i] === colMax ? dayName(i, d) : null).filter(x => x !== null);
-  const each = n => n > 1 ? " each" : "";
-
-  let html = "<p class='cap' style='margin-bottom:16px'>"
-    + d.marked + " of " + cells + " intervals marked ("
-    + Math.round(100*d.marked/cells) + "% of the observation window)"
-    + (oneLevel() ? "" : ", " + d.high + " of them at high rate")
-    /* v21.16 audit (F1): a total that includes counts carried over from tapped marks is a minimum */
-    + (d.anyCount ? (d.est
-        ? ", at least " + d.counted + " occurrences in total (" + d.est + " of the counts "
-          + (d.est === 1 ? "was" : "were") + " carried over from marks made by tapping, as the smallest count "
-          + "each mark stands for)"
-        : ", " + d.counted + " occurrences recorded in total") : "")
-    + ". Heaviest interval" + (topRows.length > 1 ? "s" : "") + ": " + esc(listOf(topRows)) + " (" + rowMax
-    + " of " + d.nC + " days" + each(topRows.length) + "). Heaviest day" + (topCols.length > 1 ? "s" : "") + ": "
-    + esc(listOf(topCols)) + " (" + colMax + " of " + d.nR + " intervals" + each(topCols.length) + ").</p>";
+  let html = "<p class='cap' style='margin-bottom:16px'>" + esc(summaryLine(d)) + "</p>";
 
   const pick = CHARTS[state.cfg.chart] || CHARTS.bars;
   html += "<div class='figure'><h3>" + pick.title + "</h3>"
@@ -4624,11 +4727,21 @@ const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function()
 /* v21.78 the FBA chain, out: the scatter plot's pattern as evidence for Forms FS-1 and EA-1: the Pattern Summary's first
    line (intervals marked, heaviest intervals and days) for the behavior on screen, over the sheet's dated days. A scatter
    plot shows when the behavior occurs, not why, so it names no function and no strength. */
-OUT(function(){let d=null;try{if(typeof commitBeh==='function')commitBeh();d=summaryData();}catch(e){d=null;}if(!d||!d.marked)return null;
-  let p=document.querySelector('#sumBody p.cap');if(!p){try{renderSummary();}catch(e){}p=document.querySelector('#sumBody p.cap');}const m=state.meta||{};
-  const dates=Object.keys(m).filter(k=>/^date\d+$/.test(k)&&+k.slice(4)<(d.nC||99)).map(k=>m[k]);
-  return EV(Object.assign({form:'SP-1',method:'Scatter plot of when the behavior occurs (descriptive)'},SPAN(dates),{n:d.nC||null,fn:'',fnKey:'',strength:'',by:T(m.observer),
-    statement:(T(m.behavior)?T(m.behavior)+': ':'')+T(p?p.textContent:'')+' A scatter plot shows when the behavior occurs, not why.'}));});
+/* v22.8x (review F92): every behavior on the record, not only the one on screen: each behavior's own first line (its own
+   cutoff, the days observed) in the statement, one after the other, and each on its own in perBehavior; n is the days
+   observed (review F91). The behavior on screen is put back as it was. */
+OUT(function(){if(typeof commitBeh==='function')commitBeh();const m=state.meta||{},keep={cells:state.cells,thr:m.threshold,beh:m.behavior},per=[];let nC=0,nObs=0;
+  try{(state.behaviors||[]).forEach((b,i)=>{state.cells=b.cells||{};m.threshold=(b.meta&&b.meta.threshold)||'';m.behavior=(b.meta&&b.meta.behavior)||'';
+      const d=summaryData();nC=d.nC;nObs=d.nObs;if(!d.marked)return;const nm=T(m.behavior)||('Behavior '+(i+1));
+      per.push({behavior:nm,statement:nm+': '+T(summaryLine(d)),marked:d.marked,high:d.high,threshold:thr(),n:d.nObs,windows:typeof spWindows==='function'?spWindows():[]});});}
+  finally{state.cells=keep.cells;m.threshold=keep.thr;m.behavior=keep.beh;}
+  if(!per.length)return null;
+  const dates=Object.keys(m).filter(k=>/^date\d+$/.test(k)&&+k.slice(4)<(nC||99)&&!(typeof dayAbsent==='function'&&dayAbsent(+k.slice(4)))).map(k=>m[k]);
+  const ev=EV(Object.assign({form:'SP-1',method:'Scatter plot of when the behavior occurs (descriptive)'},SPAN(dates),{n:nObs||null,fn:'',fnKey:'',strength:'',by:T(m.observer),
+    statement:per.map(x=>x.statement).join(' ')+' A scatter plot shows when the behavior occurs, not why.'}));
+  ev.perBehavior=per.map(x=>({behavior:x.behavior,statement:x.statement,marked:x.marked,high:x.high,threshold:x.threshold,n:x.n}));
+  const W=[].concat(...per.map(x=>x.windows.map(w=>Object.assign({behavior:x.behavior},w))));if(W.length)ev.windows=W;   /* v22.8x (review I49) */
+  return ev;});
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
