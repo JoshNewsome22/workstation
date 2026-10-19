@@ -24,13 +24,16 @@ const answer=async(rp,name,mode,pick,opens)=>rp.evaluate(([name,mode,pick,opens]
  /* the dialog, prefilled */
  await page.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(200);
  const dlg=await page.evaluate(()=>({open:document.querySelector('#rpDlg').open,student:rpStudent.value,email:rpEmail.value,nick:rpNick.value,beh:rpBeh.value,status:document.querySelector('#rpStatus').hidden,saveOn:!rpSave.disabled,note:rpNote.textContent}));
- ok('dialog prefilled: initials and ID, email, first name, behavior; teacher pre = 11 items',dlg.open&&dlg.student==='S.S. (ID 12345)'&&dlg.email==='bcba@example.org'&&dlg.nick==='Sam'&&/Tipping/.test(dlg.beh)&&dlg.status&&dlg.saveOn&&/11 items for the teacher \(implementer\), pre round/.test(dlg.note),dlg);
+ ok('dialog prefilled: initials only (v23.24), email, first name, behavior; teacher pre = 11 items',dlg.open&&dlg.student==='S.S.'&&dlg.email==='bcba@example.org'&&dlg.nick==='Sam'&&/Tipping/.test(dlg.beh)&&dlg.status&&dlg.saveOn&&/11 items for the teacher \(implementer\), pre round/.test(dlg.note),dlg);
+ /* v23.24 the student number only by choice, for pages to school staff: ticked here, so the checks below carry it */
+ const sid=await page.evaluate(()=>{const c=document.getElementById('rpSid');c.checked=true;c.dispatchEvent(new Event('change'));const on=rpStudent.value;c.checked=false;c.dispatchEvent(new Event('change'));const off=rpStudent.value;c.checked=true;c.dispatchEvent(new Event('change'));return {on,off,now:rpStudent.value};});
+ ok('the student number is added only when ticked, and taken off again',sid.on==='S.S. (ID 12345)'&&sid.off==='S.S.'&&sid.now==='S.S. (ID 12345)',sid);
  const pay=await page.evaluate(()=>{const set=(id,v)=>{const e=document.getElementById(id);e.value=v;e.dispatchEvent(new Event('change'));};set('rpRole','student');set('rpRound','post');const s=__rp.payload();set('rpRole','admin');set('rpRound','pre');const a=__rp.payload();set('rpRole','teacher');set('rpRound','pre');rpDue.value='10/10/2026';return {s,a};});
  ok('student post page: 5 student items in the student wording, 3 open items in the student wording',pay.s.inst==='student-post'&&pay.s.items.map(x=>x.n).join()==='G6,P7a,P7b,E8a,E8b'&&/I want to get better at/.test(pay.s.items[0].text)&&pay.s.open.length===3&&/What do you most want to be different for you at school/.test(pay.s.open[0].label),pay.s.items.map(x=>x.n));
  ok('administrator pre page: the adult items and P8; the nick in the wording',pay.a.inst==='admin-pre'&&pay.a.items.length===12&&pay.a.items.some(x=>x.n==='P8')&&/something Sam will actually need/.test(pay.a.items[1].text),pay.a.items.map(x=>x.n));
  /* the page as a file */
  const file=await grab(page,()=>__rp.file());
- ok('page file named and self-contained, no full name',/^SV-1_teacher-pre_respondent_S\.S\._ID_12345_\.html$/.test(file.r)&&/NBH_RESPOND_RUNTIME/.test(file.text)&&/Sam will actually need/.test(file.text)&&!/Sample Student/.test(file.text),file.r);
+ ok('page file named and self-contained, no full name',/^SV-1_teacher-pre_respondent_S\.S\._ID_12345\.html$/.test(file.r)&&/NBH_RESPOND_RUNTIME/.test(file.text)&&/Sam will actually need/.test(file.text)&&!/Sample Student/.test(file.text),file.r);
  const link=await page.evaluate(()=>__rp.link());
  ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#z=1[a-z][A-Za-z0-9_-]{60,}$/.test(link),link.slice(0,80));
  /* the teacher answers the file */

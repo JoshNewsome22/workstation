@@ -9903,6 +9903,14 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.24: SV-1's respondent pages label the student by initials only
+
+- **Initials only.** The Respondent pages dialog fills the student label with the initials, without the student number, as
+  Forms IN-1, CF-1 and IA-1 now do: a student number is identifying (34 CFR 99.3).
+  - "Add the student number (pages for school staff only)" adds it by choice.
+  - A label ending in a dot no longer doubles it in the page's file name.
+- sv1-respond-test follows the initials-only label and checks the new box.
+
 ### v23.23: SI-1 keeps other students' names off the summary and the FBA report, reads assent from the start of each session, and calls a component preferred only after it has met every other (review Wave 3)
 
 - **Other students named (F60).** Students name other students, and the answers are written as said.

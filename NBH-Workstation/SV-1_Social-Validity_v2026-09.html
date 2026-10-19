@@ -1185,7 +1185,7 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
     <div class="grid2">
       <div class="f"><label for="rpRole">Respondent role</label><select id="rpRole"><option value="student">Student (student wording)</option><option value="caregiver">Caregiver</option><option value="teacher" selected>Teacher (implementer)</option><option value="para">Paraprofessional (implementer)</option><option value="admin">Administrator (adds P8)</option><option value="rsp">Related-service provider</option><option value="other">Other</option></select></div>
       <div class="f"><label for="rpRound">Round</label><select id="rpRound"><option value="pre">Pre: Goals and Procedures</option><option value="post">Post: Goals, Procedures and Effects</option></select></div>
-      <div class="f"><label for="rpStudent">Student label on the page (initials and ID, not the full name)</label><input id="rpStudent"></div>
+      <div class="f"><label for="rpStudent">Student label on the page (initials only: never the full name)</label><input id="rpStudent"><label style="display:flex;gap:6px;align-items:center;font-weight:400;margin-top:4px"><input type="checkbox" id="rpSid" style="width:auto"> Add the student number (pages for school staff only)</label></div>
       <div class="f"><label for="rpNick">How the items name the student (a first name at most, or &ldquo;the student&rdquo;)</label><input id="rpNick"></div>
       <div class="f"><label for="rpLang">Language of the page</label><select id="rpLang"><option value="">English</option><option value="es">Espa&ntilde;ol (Spanish)</option></select></div>
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
@@ -1753,7 +1753,8 @@ function rpParse(inst){const m=/^([a-z]+)-(pre|post)$/.exec(String(inst||''));if
 const rpItems=(role,round)=>RP_SECS[round].flatMap(sec=>SECITEMS(sec).filter(x=>applies(x,role)));
 const rpOpens=(role,round)=>RP_SECS[round].flatMap(sec=>SECOPENS(sec).filter(x=>applies(x,role)));
 const rpWord=(x,role,nick)=>(STU(role)&&x.st?x.st:x.t).replace(/\[student\]/g,nick||'the student');
-function rpInitials(){const nm=String(S.meta.client||'').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';const id=String(S.meta.sid||'').trim();return (ini?ini+'.':'')+(id?(ini?' ':'')+'(ID '+id+')':'')||'the student';}
+function rpInitials(){const nm=String(S.meta.client||'').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';return (ini?ini+'.':'')||'the student';}   /* v23.24 initials only: a student number is identifying (34 CFR 99.3) */
+function rpWithId(){const id=String(S.meta.sid||'').trim(),el=$('#rpStudent'),base=el.value.replace(/\s*\(ID [^)]*\)\s*$/,'').trim()||rpInitials();el.value=$('#rpSid').checked&&id?base+' (ID '+id+')':base;rpStatus();}
 function rpPayload(){const rk=$('#rpRole').value,round=$('#rpRound').value,role=RP_ROLE(rk),nick=$('#rpNick').value.trim()||'the student';
   const items=rpItems(role,round),secs=RP_SECS[round].map(sec=>SECS[sec].name),plan=String(S.meta.plan||'').trim();
   const p={v:1,form:'SV-1',inst:rk+'-'+round,title:'Social validity, '+RNAME[round].toLowerCase()+' round',heading:'Social Validity: '+secs.join(', '),
@@ -1773,14 +1774,14 @@ function rpStatus(){const rk=$('#rpRole').value,round=$('#rpRound').value,role=R
   $('#rpSave').disabled=$('#rpLink').disabled=$('#rpMail').disabled=$('#rpPreview').disabled=!!bad.length;
   const served=/^https?:$/.test(location.protocol);$('#rpLink').title=served?'Copy a link to respond.html on this website carrying this questionnaire':'A link works when the workstation is on a website; opened from a folder, send the file';
   $('#rpNote').textContent=bad.length?'':n+' item'+(n===1?'':'s')+' for the '+role.toLowerCase()+', '+RNAME[round].toLowerCase()+' round.'+(served?'':' Opened from a folder: send the file; the link needs the workstation on a website.');}
-function rpFile(){const p=rpPayload();const html=NBH_RESPOND.pageHTML(p);const name='SV-1_'+p.inst+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';
+function rpFile(){const p=rpPayload();const html=NBH_RESPOND.pageHTML(p);const name='SV-1_'+p.inst+'_respondent_'+((p.student||'student').replace(/[^\w.-]+/g,'_').replace(/[._]+$/,'')||'student')+'.html';   /* v23.24 a label ending in a dot no longer doubles it */
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   if(window.nbhUI)nbhUI.toast('Respondent page saved: '+name+'. Attach it to an email to the respondent.',{kind:'ok'});return name;}
 function rpLinkUrl(){const p=rpPayload();const base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';return base+NBH_RESPOND.payloadToHash(p);}
 $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStudent').value=rpInitials();if(!$('#rpEmail').value)$('#rpEmail').value=String(S.meta.email||'').trim();
   if(!$('#rpNick').value)$('#rpNick').value=String(S.meta.nick||'').trim()||'the student';if(!$('#rpBeh').value)$('#rpBeh').value=String(S.meta.beh||'').trim();
   rpStatus();$('#rpDlg').showModal();});
-['rpRole','rpRound','rpEmail','rpStudent'].forEach(id=>{$('#'+id).addEventListener('input',rpStatus);$('#'+id).addEventListener('change',rpStatus);});
+['rpRole','rpRound','rpEmail','rpStudent'].forEach(id=>{$('#'+id).addEventListener('input',rpStatus);$('#'+id).addEventListener('change',rpStatus);});$('#rpSid').addEventListener('change',rpWithId);
 $('#rpEmail').addEventListener('change',()=>{const e=$('[data-m="email"]');if(e&&!e.value){e.value=$('#rpEmail').value.trim();S.meta.email=e.value;}});
 $('#rpSave').addEventListener('click',rpFile);
 $('#rpPreview').addEventListener('click',()=>{const html=NBH_RESPOND.pageHTML(rpPayload());window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');});
