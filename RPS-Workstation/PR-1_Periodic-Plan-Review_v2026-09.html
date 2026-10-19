@@ -3950,6 +3950,21 @@ async function prTiPeriods(x){const O=(x&&Array.isArray(x.obsAll)?x.obsAll:[]).f
 /* closing a review with the decision check open asks first; the check is kept with the log entry */
 {const pc=prCloseReview;prCloseReview=async function(){const t=prT((document.getElementById('decCheck')||{}).textContent).replace(/^Check the decision\.\s*/,'');
   if(t&&!(await nbhUI.confirm('The decision check is not clear:\n\n'+t+'\n\nClose the review anyway? The check is kept with the log entry.',{ok:'Close anyway'})))return false;return pc.apply(this,arguments);};}
+/* v23.31 (CR-1 review I175) the changes a restraint's debriefing on Form CR-1 decided, onto the actions table: each open one once
+   (its words, the form it lands on, who, and by when), into an empty row or a new one, marked as from the debriefing. One deleted
+   here is not brought back (kept in meta.crAct); "Not doing" is left out; a "by when" that is not a date stays in the words. */
+const PR_CRW={'This crisis plan':'CR-1 (crisis)','The BIP (Form TD-1)':'TD-1 (the plan)','The FBA (Form FS-1)':'FS-1 (assessment)','Staff training (Form ST-1)':'ST-1 (training)'};
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{const A=((f&&f.crisis&&Array.isArray(f.crisis.actions))?f.crisis.actions:[]).filter(a=>a&&prT(a.c)&&a.w!=='Nothing changes'&&a.st!=='Not doing');
+   const seen=prT(S.meta.crAct)?prT(S.meta.crAct).split('\n'):[],key=a=>prT(a.deb)+'|'+prT(a.c).toLowerCase().slice(0,80),md=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(v||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+   A.forEach(a=>{const kk=key(a);if(seen.includes(kk))return;seen.push(kk);const c=prT(a.c);if(S.act.some(x=>prT(x.a).toLowerCase().startsWith(c.toLowerCase())))return;
+     const where=PR_CRW[a.w]||'',by=prIsoB(a.by),isD=/^\d{4}-\d\d-\d\d$/.test(by);
+     let x=S.act.find(y=>!['a','f','w','b','s'].some(q=>prT(y[q])));if(!x){x=ACT();S.act.push(x);}
+     x.a=c+(where||!a.w?'':' ('+a.w.charAt(0).toLowerCase()+a.w.slice(1)+')')+(prT(a.by)&&!isD?', by '+prT(a.by):'')+' (from the restraint debriefing'+(a.deb?' of '+md(a.deb):'')+', Form CR-1)';
+     x.f=where;x.w=prT(a.who);x.b=isD?by:'';x.s=a.st==='Done'?'Done':'Open';k++;});
+   if(seen.join('\n')!==prT(S.meta.crAct))S.meta.crAct=seen.join('\n');
+   if(k){renderAct();const el=document.querySelector('#actTbl textarea');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}}catch(e){}
+  if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'',k+' change'+(k===1?'':'s')+' from the restraint debriefing (Form CR-1) on the actions table'].filter(Boolean).join('; ')};};}
 try{renderVerdicts();}catch(e){}
 </script>
 <style id="pr1-v2285-css">

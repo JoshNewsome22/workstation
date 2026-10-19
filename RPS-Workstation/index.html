@@ -2265,7 +2265,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.30';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.31';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5544,6 +5544,18 @@ function tdSafety(f){const L=[],cr=f.crisis||{},inj=f.injury||{},rd=((f.data||{}
   (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>L.push({k:'Injury',t:esc(x.what)+(x.due?' (due '+esc(tdMd(x.due))+', '+tdWhen(x.due)+')':''),open:'IM-1'}));
   if(+inj.count30>=3)L.push({k:'Injury',t:inj.count30+' injuries in the last 30 days (Form IM-1): look at the trend with the team and the nurse',open:'IM-1'});
   return L;}
+/* v23.31 (CR-1 review I175) Form CR-1's own dates on Today: the crisis plan's next review (two weeks ahead, or past), and a change
+   a restraint's debriefing decided that is not done, due within a week or overdue (the form it lands on opens) */
+const crIsoT=v=>{v=String(v==null?'':v).trim();let m=/^(\d{4})-(\d\d)-(\d\d)/.exec(v);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(v);return m?m[3]+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
+const CR_LANDS={'This crisis plan':'CR-1','The BIP (Form TD-1)':'TD-1','The FBA (Form FS-1)':'FS-1','Staff training (Form ST-1)':'ST-1'};
+function crTodayItems(f){const L=[],cr=f&&f.crisis;if(!cr)return L;
+  const rn=crIsoT(cr.revNext);if(rn&&(cr.stages||[]).length){const n=tdLeft(rn);if(n!==null&&n<=14)L.push({k:n<0?'Overdue':'Timeline',t:(n<0?'<b>':'')+'The crisis plan’s review (Form CR-1) is due '+esc(tdMd(rn))+(n<0?'</b>':'')+' ('+tdWhen(rn)+')',open:'CR-1'});}
+  (Array.isArray(cr.actions)?cr.actions:[]).forEach(a=>{if(!a||a.st==='Done'||a.st==='Not doing')return;const by=crIsoT(a.by);if(!by)return;const n=tdLeft(by);if(n===null||n>7)return;
+    const lands=CR_LANDS[a.w]||'CR-1';L.push({k:n<0?'Overdue':'Safety',t:(n<0?'<b>':'')+esc(a.c)+(n<0?'</b>':'')+(a.w&&a.w!=='This crisis plan'?' ('+esc(a.w)+')':'')+': decided at the restraint debriefing'+(a.deb?' of '+esc(tdMd(a.deb)):'')+', due '+esc(tdMd(by))+' ('+tdWhen(by)+')',open:inCase(lands)?lands:'CR-1'});});
+  return L;}
+{const ts0=tdSafety;tdSafety=function(f){const L=ts0.apply(this,arguments);try{(L||[]).push(...crTodayItems(f||{}));}catch(e){}return L;};
+ const ce0=calEvents;calEvents=function(f){const E=ce0.apply(this,arguments);try{const cr=(f||{}).crisis||{},rn=crIsoT(cr.revNext);if(rn&&(cr.stages||[]).length)E.push({date:rn,what:'Crisis plan review',form:'CR-1'});
+   (Array.isArray(cr.actions)?cr.actions:[]).forEach(a=>{if(!a||a.st==='Done'||a.st==='Not doing')return;const by=crIsoT(a.by);if(by)E.push({date:by,what:'Change from the restraint debriefing',form:CR_LANDS[a.w]||'CR-1'});});}catch(e){}return E;};}
 function tdHome(f){const h=f.home;if(!h||!Array.isArray(h.sheets))return [];const late=h.sheets.filter(s=>s&&s.due&&!s.back&&(tdLeft(s.due)||0)<0);
   return late.length?[{k:'Home',t:late.length+' home sheet'+(late.length===1?'':'s')+' not back: '+late.slice(0,3).map(s=>esc((s.name||'sheet')+', due '+tdMd(s.due))).join('; '),open:'HD-1'}]:[];}
 {const ti0=todayItems;todayItems=function(){const f=state.facts||{};let L=[];try{L=tdSafety(f).concat(ti0.apply(this,arguments),tdDecision(f),tdTimelines(f),tdHome(f));}catch(e){L=ti0.apply(this,arguments);}return L;};}

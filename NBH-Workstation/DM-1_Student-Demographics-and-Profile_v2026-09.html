@@ -3111,7 +3111,11 @@ window.__nbhFactsIn=function(f){window.__dmCase=f||null;let n=0;const got=[];
     const md=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(v);return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:v;};
     if(f&&typeof f==='object'){
       const cr=f.crisis&&(f.crisis.stages||[]).length;
-      if(cr&&(!val('p.crisis')||val('p.crisis')==='No')){set('p.crisis','Yes, current');set('p.statconf',today);got.push('crisis plan: Yes, current (Form CR-1 holds a plan of '+cr+' stage'+(cr===1?'':'s')+')');n++;}
+      /* v23.31 (CR-1 review I175) current or outdated by CR-1's own dates: outdated when its next review is past, or it was last dated
+         or reviewed more than a year ago; a dated CR-1 also corrects a Yes answer here that disagrees */
+      const crs=(X=>{if(!X)return null;const pd=iso(X.planDate),rl=iso(X.revLast),rn=iso(X.revNext);if(!pd)return null;const last=[pd,rl].filter(Boolean).sort().pop(),y=(+today.slice(0,4)-1)+today.slice(4);
+        return rn&&rn<today?{v:'Yes, outdated',why:'its next review was due '+md(rn)}:last<y?{v:'Yes, outdated',why:'last dated or reviewed '+md(last)}:{v:'Yes, current',why:'dated '+md(last)};})(f.crisis),pc=val('p.crisis');
+      if(cr&&(!pc||pc==='No'||(crs&&/^Yes, /.test(pc)&&pc!==crs.v))){const v=crs?crs.v:'Yes, current';set('p.crisis',v);set('p.statconf',today);got.push('crisis plan: '+v+' (Form CR-1 holds a plan of '+cr+' stage'+(cr===1?'':'s')+(crs?', '+crs.why:'')+')');n++;}
       const pl=f.plan,ad=(pl&&pl.adoption)||{},adD=iso(ad.date);
       if(pl&&(!val('p.bipstat')||val('p.bipstat')==='No BIP')){set('p.bipstat',adD?'BIP current':'BIP in development (this packet)');if(adD&&!val('p.bipdate'))set('p.bipdate',adD);set('p.statconf',today);got.push('BIP status: '+(adD?'current, adopted '+md(adD):'in development')+' (Form TD-1)');n++;}
       const c=f.consent;if(c&&typeof c==='object'){const on=c.state?!!c.on:!!(c.date||c.parent),cd=iso(c.obtained||c.date||c.parent),off=/^(Declined|Revoked)$/.test(T(c.state));

@@ -2631,6 +2631,12 @@ window.__nbhFactsOut=function(){
       /* v23.29 (RR-1 review I14) the plan's date, its review dates and the semester the count covers, for Form RR-1's history */
       const crIso=v=>{v=T(v);let x=/^(\d{4})-(\d\d)-(\d\d)/.exec(v);if(x)return x[0];x=/^(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/.exec(v);return x?(x[3].length===2?'20'+x[3]:x[3])+'-'+x[1].padStart(2,'0')+'-'+x[2].padStart(2,'0'):v;};   /* a date as ISO when it reads as one */
       c.planDate=crIso(m.date);c.revLast=crIso(m.revLast);c.revNext=crIso(m.revNext);if(T(m.semFrom)||T(m.semTo))c.sem={from:T(m.semFrom),to:T(m.semTo)};
+      /* v23.31 (review I175) the changes each debriefing decided (this one and the others kept), with the debriefing's date, for
+         Form PR-1's actions and Today; "Nothing changes" is left out */
+      {const dd=v=>{const m=/\d{4}-\d\d-\d\d|\d{1,2}\/\d{1,2}\/(?:\d{4}|\d{2})\b/.exec(String(v==null?'':v));const x=m?crIso(m[0]):'';return /^\d{4}-\d\d-\d\d$/.test(x)?x:'';};   /* "Tue 9/29/26, 1:42 PM" */
+       const A=[],add=(L,d)=>(L||[]).forEach(a=>{if(a&&T(a.c)&&a.w!=='Nothing changes')A.push({c:T(a.c),w:T(a.w),who:T(a.who),by:crIso(a.by),st:T(a.st),deb:dd(d)});});
+       add(S.act,m.dbDate);const D=S.debs&&typeof S.debs==='object'?S.debs:{};Object.keys(D).forEach(k=>{const x=D[k];if(x&&typeof x==='object')add(x.act,x.dbDate);});
+       if(A.length)c.actions=A;}
       return o;
     }catch(e){return o;}
   };

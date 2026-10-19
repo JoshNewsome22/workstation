@@ -9903,6 +9903,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.31: CR-1 hands on what it knows: the debriefings' changes reach PR-1's actions and Today, and DM-1's crisis-plan status follows CR-1's dates (review Wave 3)
+
+- **The debriefings' changes (I175).** What each restraint's debriefing decided under "What changes as a result" now
+  travels with the case: the change, where it lands, who, by when, its status and the debriefing's date. That covers
+  this debriefing and the others kept. "Nothing changes" is left out.
+  - **Form PR-1** puts each open change on its actions table once: its words, marked as from the debriefing and its
+    date, the form it lands on, who, and by when. A "by when" that is not a date stays in the words. "Not doing" is
+    left out, and a change deleted from the table is not brought back.
+  - **Today** names a change not done that is due within a week, or overdue, and opens the form it lands on (or CR-1
+    when that form is not in the case). It also names the crisis plan's next review two weeks ahead, or past.
+  - **The caseload calendar** carries both, in plain words.
+- **DM-1's crisis-plan status (I175).** CR-1 now sends its plan and review dates as dates. DM-1, which already answered
+  "Yes, current" from any CR-1 plan, now reads them:
+  - "Yes, outdated" when the next review is past, or the plan was last dated or reviewed more than a year ago;
+  - "Yes, current" otherwise, and the read-from-the-case line says why.
+  - A dated CR-1 also corrects a Yes answer that disagrees. An undated plan reads current, as before.
+- IM-1 took CR-1's restraints in v23.16, and the hand-over check's DM-1 line was fixed in v22.29.
+- qa/cr1-w3c-test.js (9 checks).
+
 ### v23.30: RR-1's Synthesis sheet lays the record's incidents, removals, medication changes, dated events and absences on one timeline (review Wave 3)
 
 - **One timeline of the record (I12).** The Health sheet said medication dates are entered "so they can be laid
