@@ -1028,7 +1028,7 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
     <button id="simBtn">Load simulation</button>
     <button class="primary" id="printBtn">Print / Save as PDF</button>
     <button id="saveBtn">Save data</button>
-    <button id="bipBtn" title="Compose the plan text from this form and copy it to the clipboard, to paste into the BIP">Copy for the BIP</button><span id="bipMsg" class="bip-msg noprint" role="status" aria-live="polite"></span>
+    <button id="bipBtn" title="Compose the plan text from this form and copy it to the clipboard, to paste into the BIP">Copy for the BIP</button><label class="chk noprint bip-all" title="The debriefing, the changes it led to, the parent notices and the restraint log are records of incidents, not plan content"><input type="checkbox" id="bipAll"> with the debriefing and the log</label><span id="bipMsg" class="bip-msg noprint" role="status" aria-live="polite"></span>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
     <button id="clearBtn">Clear all</button>
@@ -1054,6 +1054,10 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <div><label>Case BCBA</label><input data-m="bcba"></div>
       <div><label>Semester</label><input data-m="sem" placeholder="e.g., Fall 2026"></div>
       <div><label>Plan date</label><input data-m="date" data-calc="1"></div>
+      <!-- v23.02 (review F339) the semester's days bound the count; (F346) the date the plan was first developed -->
+      <div><label>Semester begins</label><input type="date" data-m="semFrom" data-calc="1"></div>
+      <div><label>Semester ends</label><input type="date" data-m="semTo" data-calc="1"></div>
+      <div><label>Plan first developed</label><input data-m="dateFirst" data-calc="1" placeholder="the date it was first written"></div>
     </div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:26%">Restraints this semester</th><td><input type="number" min="0" data-m="nRest" data-calc="1"></td>
@@ -1173,6 +1177,7 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <div><label>Facilitated by</label><input data-m="dbBy"></div>
       <div><label>District incident report completed</label><select data-m="dbReport"><option></option><option>Yes, within 24 hours</option><option>Yes, by the end of the day the school reopened</option><option>Not yet, and still within the time allowed</option><option value="Not yet &mdash; overdue">Not yet, and past the time allowed (overdue)</option></select></div>
       <div><label>Restraint on the log</label><select data-m="dbRow" data-calc="1" aria-label="Restraint on the log this debriefing is about"></select></div>
+      <div class="noprint" id="dbRepCheck" style="grid-column:1/-1"></div>   <!-- v23.02 (review F340) -->
     </div>
     <table class="rt" style="margin-top:8px">
       <tr><th style="width:26%">Who took part</th><td><input data-m="dbWho" placeholder="Everyone involved, including anyone who witnessed it"></td></tr>
@@ -1444,6 +1449,8 @@ function renderLog(){
   /* v21.22: the clock's editor follows the rows of the log */
   crcRender();
   logMetrics();
+  /* v23.02 (review F339) a restraint of an earlier semester stays on the log, greyed */
+  crcStates().forEach((s,i)=>{const tr=$('#logTbl tbody').rows[i];if(tr){tr.classList.toggle('cr-earlier',s.dated&&!s.inSem);tr.title=s.dated&&!s.inSem?'An earlier semester: kept for the year\u2019s record, not counted this semester':'';}});
 }
 /* v21.16 audit (F7, F8). A restraint with no report or debriefing status counted as "none" late and "none" not
    debriefed; the cards say how many have no status. The count typed on Setup is shown here when it differs. */
@@ -1452,7 +1459,7 @@ function logMetrics(){
      The report card reads the times entered where they decide the deadline of s. 1003.573(7)(a), and the log's
      Report filed column otherwise, so a record kept before the clock existed counts exactly as it did. The notices
      card reads the notice log: the written notice of (7)(c) and the report by mail of (7)(d). */
-  const all=crcStates(), used=all.filter(s=>s.dated), usedR=used.filter(s=>!s.secl), nSecl=used.length-usedR.length;
+  const all=crcStates(), used=all.filter(s=>s.dated), usedR=used.filter(s=>!s.secl&&s.inSem), nSecl=used.filter(s=>s.secl).length, nEarly=used.filter(s=>!s.secl&&!s.inSem).length;   /* v23.02 (F339) */
   const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
   const rc=used.map(crcRepCard), late=rc.filter(x=>x==='late').length, repNR=rc.filter(x=>x==='nr').length;
   const due=rc.filter(x=>x==='due').length, conf=rc.filter(x=>x==='confirm').length;
@@ -1463,7 +1470,7 @@ function logMetrics(){
   const acks=nt.reduce((k,s)=>k+(s.akDay?0:1)+(s.mkDay?0:1),0), noDate=used.length-nt.length;
   const nr=String(S.meta.nRest==null?'':S.meta.nRest).trim();
   $('#logMetrics').innerHTML=
-    card('Restraints logged',usedR.length,'this semester'+(nSecl?'; '+nSecl+' seclusion'+(nSecl===1?'':'s')+' logged apart (prohibited)':''))+
+    card('Restraints logged',usedR.length,'this semester'+(crSemWin()?'':' (no semester days entered on Setup: every dated restraint counts)')+(nEarly?'; '+nEarly+' in an earlier semester, kept for the year':'')+(nSecl?'; '+nSecl+' seclusion'+(nSecl===1?'':'s')+' logged apart (prohibited)':''))+
     card('Reports late or missing',late,both(late?'each is a reporting obligation not met':'',repNR?repNR+' with no report status recorded':'',due?due+' still within the time allowed':'',conf?conf+' to confirm':''))+
     card('Parent notices late or missing',nLate,both(nLate?'each is a notice obligation not met':'',nDue?nDue+' still within the time allowed':'',nConf?nConf+' to confirm or check':'',
       acks?acks+' signed acknowledgment'+(acks===1?'':'s')+' not recorded':'',noDate?noDate+' with no restraint date entered below':''))+
@@ -1477,13 +1484,32 @@ function renderNotify(){
     `<div class="crc-ni"><label class="chk"><input type="checkbox" data-n="${i}"${S.notify[i]?' checked':''}>${t}<\/label><div class="crc-nsum" id="crcN${i}" hidden><\/div><\/div>`).join('');
   crcNotify();
 }
+/* v23.02 (review F345) the debriefed incident's date and time from its restraint on the log, not typed again; (F340) the debriefing's
+   report answer against that restraint's clock */
+function crDbFromRow(st){st=st||crcStates();const el=document.querySelector('[data-m="dbDate"]'),v=crcTxt(S.meta.dbRow).trim(),n=/^\d+$/.test(v)?+v:0,s=n>=1&&n<=st.length?st[n-1]:null;
+  const w=s?(s.began?crcDT(s.began):s.bDay?crcD(s.bDay):''):'';
+  if(el){if(w){if(S.meta.dbDate!==w){S.meta.dbDate=w;crDateDone=w;}el.value=w;el.readOnly=true;el.classList.add('calc');el.title='From restraint '+n+' on the log';}
+    else if(el.readOnly){el.readOnly=false;el.classList.remove('calc');el.title='';}}
+  const box=document.getElementById('dbRepCheck');if(!box)return;const a=crcTxt(S.meta.dbReport),c=s&&s.rep?s.rep.code:'';let msg='';
+  if(a&&c){const yes=/^Yes/.test(a),over=/overdue/.test(a);
+    if((c==='met'||c==='late')&&!yes)msg='The clock for restraint '+n+' records the report as completed'+(c==='late'?', after the time allowed':'')+'; this answer says it is not done yet.';
+    else if((c==='due'||c==='overdue')&&yes)msg='The clock for restraint '+n+' has no completed report'+(c==='overdue'?' and the time allowed has passed':'')+'; this answer says it was completed.';
+    else if(c==='overdue'&&!over)msg='The clock for restraint '+n+' shows the time allowed has passed; this answer says it is still within it.';
+    else if(c==='late'&&yes)msg='The clock for restraint '+n+' records the report as completed after the time allowed; this answer says it was on time.';}
+  box.innerHTML=msg?'<div class="verdict v-mid"><b>Check the incident report.</b> '+esc(msg)+' Correct the one that is wrong.</div>':'';}
 function renderTrig(){
   /* v21.16 audit (F7). The count was read with parseInt, so 2.5 read as "2 restraints" and -1 as "No restraint
      recorded"; it has to be a whole number. The same count is kept twice, typed here and counted on the restraint
      log, and the two sheets could disagree ("required" here, "Not yet" on the log) without a word; a difference is
      shown on both. */
+  /* v23.02 (review F345, F339) with restraints dated on the log this semester, the count and the date of the second come from it
+     and are not typed; a record with none keeps what was typed */
+  const stL=crcStates(),inL=stL.filter(s=>s.dated&&!s.secl&&s.inSem),logged=inL.length;
+  {const ne=document.querySelector('[data-m="nRest"]'),de=document.querySelector('[data-m="d2"]'),sec=inL[1],d2=sec?(sec.bDay?crcD(sec.bDay):crcTxt(sec.r.d).trim()):'';
+   const lock=(e,on,v)=>{if(!e)return;if(on){S.meta[e.dataset.m]=v;e.value=v;}e.readOnly=on;e.classList.toggle('calc',on);e.title=on?'From the restraint log, this semester':'';};
+   lock(ne,logged>0,String(logged));lock(de,logged>0,d2);}
+  crDbFromRow(stL);
   const raw=String(S.meta.nRest==null?'':S.meta.nRest).trim(), n=raw===''?NaN:Number(raw);
-  const logged=S.log.filter(r=>crcDated(r)&&r.kind!=='seclusion').length;
   let h='';
   if(raw!==''&&!(Number.isInteger(n)&&n>=0))h='<div class="verdict v-mid">Enter the number of restraints this semester as a whole number (0, 1, 2 &hellip;).</div>';
   else if(raw!==''){
@@ -1544,7 +1570,9 @@ function bindMeta(){crDateDone=String(S.meta.dbDate||'');$$('[data-m]').forEach(
   if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
     el.addEventListener(ev,()=>{S.meta[k]=el.value;if(k==='rpNeed')rpStamp();if(el.dataset.calc)renderTrig();});
     /* v21.44 (review fix): the incident date counts for Does This Need a Report? once it is entered (the box is left), not at each key */
-    if(k==='dbDate')el.addEventListener('change',()=>{crDateDone=String(S.meta.dbDate||'');crSafety();});}});
+    if(k==='dbDate')el.addEventListener('change',()=>{crDateDone=String(S.meta.dbDate||'');crSafety();});
+    /* v23.02 (F339, F340) the semester's days recount the log; the report answer is checked against the clock */
+    if(k==='semFrom'||k==='semTo')el.addEventListener('change',()=>renderLog());if(k==='dbReport')el.addEventListener('change',()=>crDbFromRow());}});
   /* v21.44 (B5): a tick in Does This Need a Report? is kept in the record as "1"; a file saved before it has none */
   $$('[data-mc]').forEach(el=>{const k=el.dataset.mc;el.checked=S.meta[k]==='1';
     if(!el._b){el._b=1;el.addEventListener('change',()=>{S.meta[k]=el.checked?'1':'';crSafety();});}});}
@@ -1719,7 +1747,9 @@ async function loadSim(){
   S=blank();
   S.meta={client:'SIMULATED \u2013 Sample Student',sid:'SIM-000',dob:'4/18/'+(sy-10),grade:'5th, ESE center school',
     site:'Example ESE center school (simulated), Room 12',bcba:'Jordan Ellis, M.A., BCBA (simulated)',
-    sem:(fall?'Fall ':'Spring ')+T.getFullYear(),date:D(4),nRest:'3',d2:D(14),
+    sem:(fall?'Fall ':'Spring ')+T.getFullYear(),date:D(4),nRest:'3',d2:D(14),dateFirst:D(13),
+    /* v23.02 (review F339) the semester's days, around the simulator's windows: August to December, or January to May */
+    semFrom:fall?T.getFullYear()+'-08-10':T.getFullYear()+'-01-06',semTo:fall?T.getFullYear()+'-12-18':T.getFullYear()+'-05-29',
     related:'BIP dated '+D(86)+', revised '+D(12)+' (Form TD-1); FBA summary (Form FS-1); IEP reviewed '+D(107),
     dbeh:'Aggression toward staff that escalates to sustained striking with a closed fist toward the head or face, or striking while the adult is bent over and off balance.',
     imminent:'For this student: closed-fist strikes directed above the shoulders, or any strike while an adult is off balance on the stairs or at the bus step. Repeated open-hand contact to an adult\u2019s arm is the target behavior on the BIP and is not by itself an imminent risk of serious injury.',
@@ -1991,12 +2021,17 @@ function crcMl(s,cal,today){
   else{o.code='overdue';o.st='Overdue since the end of '+crcD(m3)+', the 3rd school day';}
   return o;
 }
+/* v23.02 (review F339) the semester's first and last day bound "this semester": a restraint dated outside them is kept for the
+   year's record and the reduction goal, but is not counted toward the second restraint or the plan. With no days entered every
+   dated restraint counts, as before. */
+function crSemWin(){const a=crcYMD(S.meta.semFrom),b=crcYMD(S.meta.semTo);return a&&b&&crcCmp(a,b)<=0?{a,b}:null;}
+function crInSem(day){const w=crSemWin();return !w||!day||(crcCmp(day,w.a)>=0&&crcCmp(day,w.b)<=0);}
 function crcStates(now){
   now=now||new Date();
   const cal=crcCal(),today=crcDay(now);let nth=0;
   return S.log.map((r,i)=>{
     const g=k=>crcTxt(r[k]),s={i,r,g,cal,dated:crcDated(r),nth:0,warn:[],info:[],conv:null};
-    s.secl=r.kind==='seclusion';if(s.dated&&!s.secl)s.nth=++nth;   /* v22.41 (review F341) a seclusion is not a restraint: it is not counted toward the second */
+    s.secl=r.kind==='seclusion';s.inSem=crInSem(crcYMD(g('rd'))||crcYMD(crcMDY(crcTxt(r.d).trim())));if(s.dated&&!s.secl&&s.inSem)s.nth=++nth;   /* v23.02 (F339) */   /* v22.41 (review F341) a seclusion is not a restraint: it is not counted toward the second */
     s.bDay=crcYMD(g('rd'));s.began=crcAt(g('rd'),g('rt'));s.xDay=crcYMD(g('xd'));s.rel=crcAt(g('xd'),g('xt'));
     s.pDay=crcYMD(g('pd'));s.wDay=crcYMD(g('wd'));s.akDay=crcYMD(g('ak'));s.mdDay=crcYMD(g('md'));s.mkDay=crcYMD(g('mk'));
     Object.keys(CRC_DATES).forEach(k=>{const v=g(k).trim();if(v&&!crcYMD(v))s.warn.push(crcBadDate(v,CRC_DATES[k]));});
@@ -2154,7 +2189,9 @@ function crcUpdate(states,now){
 /* (6)(a) and (6)(c), stated only as the statute states them: no number of days for either */
 function crcPlan(){
   const dt=crcTxt(S.meta.date).trim(),pc=crcTxt(S.meta.parentCopy),how=crcTxt(S.meta.parentCopyHow).trim();
-  return{plan:dt?{code:'rec',st:'Plan dated '+esc(dt.slice(0,60))+' on the Setup sheet'}:{code:'none',st:'No plan date on the Setup sheet'},
+  /* v23.02 (review F346) the date the plan was first developed, apart from its current revision */
+  const df=crcTxt(S.meta.dateFirst).trim();
+  return{plan:dt||df?{code:'rec',st:(df?'Plan first developed '+esc(df.slice(0,60))+(dt&&dt!==df?'; current revision dated '+esc(dt.slice(0,60)):'')+' on the Setup sheet':'Plan dated '+esc(dt.slice(0,60))+' on the Setup sheet; the date it was first developed is not entered')}:{code:'none',st:'No plan date on the Setup sheet'},
     copy:pc.indexOf('Yes')===0?{code:how?'rec':'none',st:how?'Provided: '+esc(how.slice(0,120)):'Marked as provided on the plan sheet, with no date or method'}
       :pc?{code:'none',st:'Not yet provided (plan sheet)'}:{code:'none',st:'Not recorded on the plan sheet'}};
 }
@@ -2363,7 +2400,7 @@ function bipText(){
   const m=S.meta;
   const B=[[null,'FORM CR-1 · CRISIS INTERVENTION PLAN',bipHead([['Student',m.client],['ID',m.sid],['Date',m.date]])]];
   B.push(['STUDENT AND TRIGGER',bipLine('Date of birth',m.dob),bipLine('Grade / classroom',m.grade),bipLine('School or setting',m.site),bipLine('Case BCBA',m.bcba),bipLine('Semester',m.sem),
-    bipLine('Restraints this semester',m.nRest),bipLine('Date of the second restraint',m.d2),bipLine('Related plans in force',m.related)]);
+    bipLine('Restraints this semester',m.nRest),bipLine('Date of the second restraint',m.d2),bipLine('Plan first developed',m.dateFirst),bipLine('Related plans in force',m.related)]);
   B.push(['TEAM'].concat(S.team.filter(t=>bipTxt(t.n)).map(t=>'- '+bipTxt(t.n)+(bipTxt(t.r)?', '+bipTxt(t.r):'')+(t.g?' ('+t.g+')':'')+(t.p?' — present at the meeting: '+t.p:''))));
   B.push(['POSITIVE BEHAVIOR INTERVENTIONS AND SUPPORTS',bipLine('Dangerous behavior this plan addresses',m.dbeh),bipLine('What counts as imminent risk of serious injury for this student',m.imminent),bipLine('Earliest reliable precursor',m.precursor)]);
   S.pbis.filter(r=>crcFilled(r)).forEach((r,k)=>{B.push(['STAGE '+(k+1)+(r.s?': '+r.s.toUpperCase():''),bipLine('What staff do',r.do),bipLine('What tells you to move on',r.next),bipLine('Who',r.who)]);});
@@ -2371,15 +2408,18 @@ function bipText(){
   B.push(['IF RESTRAINT NONETHELESS OCCURS',bipLine('Trained staff authorized to restrain',m.rStaff),bipLine('Adult who watches the breathing (not part of the hold)',m.rWatch),bipLine('Discontinuation rule',m.rStop),bipLine('Medical monitoring during and after',m.rMed),bipLine('Who is called, and in what order',m.rCall)]);
   const iBreath=B.length;
   B.push(['REVIEW TIMETABLE',bipLine('Review schedule',m.revSched),bipLine('Last reviewed',m.revLast),bipLine('Next review due',m.revNext),bipLine('Changes recommended at the last review',m.revChanges),bipLine('Copy provided to the parent or guardian',bipPlain(m.parentCopy)+(bipTxt(m.parentCopyHow)?(m.parentCopy?'. ':'')+bipTxt(m.parentCopyHow):''))]);
-  B.push(['POST-INCIDENT DEBRIEFING',bipLine('Incident date and time',m.dbDate),bipLine('Debriefing date',m.dbWhen),bipLine('Facilitated by',m.dbBy),bipLine('District incident report completed',bipPlain(m.dbReport)),bipLine('Restraint on the log',m.dbRow?'Restraint '+m.dbRow:''),
+  /* v23.02 (review F344) incident records are not plan content: the debriefing, its changes, the parent notices and the log only
+     when "with the debriefing and the log" is ticked; the reduction goal stays */
+  const all=!!(document.getElementById('bipAll')||{}).checked;
+  if(all)B.push(['POST-INCIDENT DEBRIEFING',bipLine('Incident date and time',m.dbDate),bipLine('Debriefing date',m.dbWhen),bipLine('Facilitated by',m.dbBy),bipLine('District incident report completed',bipPlain(m.dbReport)),bipLine('Restraint on the log',m.dbRow?'Restraint '+m.dbRow:''),
     bipLine('Who took part',m.dbWho),bipLine('What was happening before it started',m.dbContext),bipLine('The behavior leading up to the decision to restrain',m.dbLead),bipLine('Why there was an imminent risk of serious injury',m.dbRisk),
     bipLine('Which interventions from the plan were used, and in what order',m.dbPbis),bipLine('Was the plan followed as written',bipPlain(m.dbFollowed)+(bipTxt(m.dbFollowedWhy)?(m.dbFollowed?'. ':'')+bipTxt(m.dbFollowedWhy):'')),
     bipLine('What happened immediately after the restraint ended',m.dbAfter),bipLine('Breathing during the hold',m.dbBreath),bipLine('Injuries, marks, or medical concerns',m.dbInjury),bipLine('The student’s account',m.dbStudent),bipLine('Staff experience',m.dbStaff)]);
-  B.push(['WHAT CHANGES AS A RESULT'].concat(S.act.filter(a=>bipTxt(a.c)).map(a=>'- '+bipTxt(a.c)+(a.w?' — '+a.w:'')+(bipTxt(a.who)?'; '+bipTxt(a.who):'')+(bipTxt(a.by)?', by '+bipTxt(a.by):'')+(a.st?' ('+a.st+')':''))));
+  if(all)B.push(['WHAT CHANGES AS A RESULT'].concat(S.act.filter(a=>bipTxt(a.c)).map(a=>'- '+bipTxt(a.c)+(a.w?' — '+a.w:'')+(bipTxt(a.who)?'; '+bipTxt(a.who):'')+(bipTxt(a.by)?', by '+bipTxt(a.by):'')+(a.st?' ('+a.st+')':''))));
   /* the readiness check: an item the debriefed restraint's notice log records is given from it, as on screen; otherwise its tick */
   const states=crcStates(),v=crcTxt(m.dbRow).trim(),nr=/^\d+$/.test(v)?+v:0,st=nr>=1&&nr<=states.length?states[nr-1]:null;
-  B.push(['PARENT NOTIFICATION AND REPORTING'].concat(NOTIFY.map((t,k)=>{const e=st?crcNItem(st,k):null;return e?'- '+t+' — '+bipPlain(e.label)+': '+bipPlain(e.text):S.notify[k]?'- '+t+' — confirmed':'';})));
-  B.push(['RESTRAINT LOG AND REDUCTION GOAL'].concat(S.log.filter(crcDated).map((r,k)=>{const s=states[S.log.indexOf(r)];const when=s&&s.began?crcDT(s.began):s&&s.bDay?crcD(s.bDay):bipTxt(r.d);
+  if(all)B.push(['PARENT NOTIFICATION AND REPORTING'].concat(NOTIFY.map((t,k)=>{const e=st?crcNItem(st,k):null;return e?'- '+t+' — '+bipPlain(e.label)+': '+bipPlain(e.text):S.notify[k]?'- '+t+' — confirmed':'';})));
+  B.push([all?'RESTRAINT LOG AND REDUCTION GOAL':'REDUCTION GOAL'].concat((all?S.log.filter(crcDated):[]).map((r,k)=>{const s=states[S.log.indexOf(r)];const when=s&&s.began?crcDT(s.began):s&&s.bDay?crcD(s.bDay):bipTxt(r.d);
     return '- Restraint '+(k+1)+(when?', '+when:'')+(bipTxt(r.dur)?', '+bipTxt(r.dur):'')+(bipTxt(r.set)?', '+bipTxt(r.set):'')+(bipTxt(r.staff)?' ('+bipTxt(r.staff)+')':'')+(bipTxt(r.pre)?': '+bipTxt(r.pre).replace(/[.]$/,''):'')+'.'+(r.rep?' Report filed: '+r.rep+'.':'')+(r.deb?' Debriefed: '+r.deb+'.':'');}),
     [bipLine('Reduction goal for this student',m.goal),bipLine('Activities, skills, and resources needed',m.goalHow),bipLine('Is the restraint concentrated in a setting or time',m.pattern),bipLine('Has the FBA or BIP been updated in response',m.fbaUpdate)]));
   /* v21.44 (B1): the breathing rule goes into every plan that holds anything, after the restraint section. The answer to
@@ -2494,7 +2534,7 @@ window.__nbhFactsOut=function(){
     let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
     try{
       const now=new Date(),today=crcDay(now),st=crcStates(now),cal=crcCal(),iso=d=>d?crcDateStr(d):'',isoT=d=>d?crcDateStr(d)+'T'+crcTimeStr(d):'';
-      const ev=st.filter(s=>s.dated).map(s=>Object.assign(s,{day:s.bDay||crcYMD(crcMDY(s.ld))})),evR=ev.filter(s=>!s.secl);
+      const ev=st.filter(s=>s.dated).map(s=>Object.assign(s,{day:s.bDay||crcYMD(crcMDY(s.ld))})),evR=ev.filter(s=>!s.secl&&s.inSem);   /* v23.02 (F339) this semester's */
       const deadlines=[];
       ev.forEach(s=>{const d=s.day;if(!d||crcCmp(d,crcAdd(today,-60))<0)return;const e=iso(d),on=' ('+(s.secl?'seclusion':'restraint')+' on '+md(e)+')',inc=T(s.r.ddId);
         const rp=s.rep,repDue=rp.mode==='24h'&&rp.dueAt?isoT(rp.dueAt):rp.mode==='closure'&&rp.ro?iso(rp.ro):s.began?isoT(new Date(s.began.getTime()+864e5)):iso(crcAdd(d,1));
@@ -3164,6 +3204,11 @@ window.__nbhFactsOut=function(){
 })();
 </script>
 
+<style id="cr1-w3-css">
+/* v23.02 (review F339) a restraint of an earlier semester; (F344) the BIP tick */
+#logTbl tr.cr-earlier td{background:#f4f5f6;color:#5f6b72}#logTbl tr.cr-earlier td:first-child::after{content:" (earlier semester)";font-weight:400;font-size:11px;display:block}
+.bip-all{margin-left:8px;font-size:12px}
+</style>
 <style id="nbh-case-css">
 /* the case: the toolbar group and the picker (v21.31) */
 .nbh-case-grp[hidden]{display:none!important}

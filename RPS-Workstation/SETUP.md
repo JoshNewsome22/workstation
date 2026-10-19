@@ -9903,6 +9903,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.02: CR-1 counts restraints within the semester's own days, takes the count and the dates from the log, checks the debriefing's report answer against the clock, copies only the plan into the BIP, and records when the plan was first developed (review Wave 3)
+
+- **The semester's own days (F339).** Setup has **Semester begins** and **Semester ends**.
+  - Only restraints dated between them count toward "this semester": the second restraint that requires the plan
+    (§ 1003.573(6)(a), F.S.), the cards on the log, and the count the workstation's Today list and the IEP packet read.
+  - A restraint from an earlier semester stays on the log, greyed and marked, for the year's record and the reduction
+    goal.
+  - With no days entered, every dated restraint counts as before, and the card says so.
+- **Typed once (F345).**
+  - While the log holds restraints dated this semester, **Restraints this semester** and **Date of the second
+    restraint** come from it and are no longer typed. A record with no dated restraints keeps what was typed.
+  - The debriefing's **Incident date and time** comes from the restraint chosen on the log.
+- **The incident report, checked (F340).** When the debriefing's **District incident report completed** answer
+  disagrees with that restraint's clock, the sheet says so. For example: the clock records the report as completed,
+  and the answer says it is not done yet.
+- **Copy for the BIP copies the plan (F344).** The copy now holds the plan and the reduction goal. The debriefing, the
+  changes it led to, the parent notices and the restraint log are left out, since they are incident records, not plan
+  content. Ticking **with the debriefing and the log** adds them back for a review document.
+- **When the plan was first developed (F346).** Setup has **Plan first developed** beside the plan's current date. The
+  clock's (6)(a) row names both. The example's plan was first developed the day after the second restraint and revised
+  since.
+- **Waiting on the BCBA:**
+  - F342: name the Florida Abuse Hotline in "Does This Need a Report?". The block's wording was approved in October.
+  - F343: the Statute sheet's dates need the enrolled text of ch. 2022-20.
+- **Next (part 2):** F338, one debriefing kept per restraint; I175, CR-1's actions and review dates to PR-1, IM-1, DM-1
+  and Today.
+- qa/cr1-w3-test.js (9 checks).
+
 ### v23.01: RR-1's synthesis reaches the rest of the case: the interventions and the records-based hypothesis go to FS-1, the targets to TB-1, the questions to IA-1, and DM-1's program facts fill RR-1 (review Wave 3)
 
 - **The synthesis leaves the form (F24).** What the BCBA writes on RR-1's Synthesis and Interventions sheets now
