@@ -4967,6 +4967,28 @@ a{text-underline-offset:2px}
   html:not(.nbh-plain) .sheet{overflow-wrap:break-word}
 }
 </style>
+<script id="v228x-spwin">
+/* v22.8x (review I49, Form SP-1) the scatter plot's flagged intervals as times to observe: read from the case (Form SP-1's
+   evidence, its windows, by behavior) and shown on screen above the observation setup. Read only: nothing on this form is filled or
+   changed, and nothing goes back to the case. */
+(function(){"use strict";
+  const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+  function line(f){const ev=f&&f.evidence&&f.evidence['SP-1'],W=ev&&Array.isArray(ev.windows)?ev.windows.filter(w=>w&&w.from&&w.to):[];
+    if(!W.length)return '';const by={};
+    W.forEach(w=>{const k=T(w.behavior)||'the target behavior';(by[k]=by[k]||[]).push(T(w.from)+' – '+T(w.to)+(T(w.activity)?' ('+T(w.activity)+')':''));});
+    return 'From the scatter plot (Form SP-1'+(T(ev.dates)?', '+T(ev.dates):'')+'), the times its control chart flagged, to observe in: '
+      +Object.keys(by).map(k=>k+', '+by[k].join('; ')).join(' · ')+'.';}
+  function paint(f){let el=document.getElementById('spWinNote');const t=line(f);
+    if(!t){if(el)el.remove();return;}
+    if(!el){const at=document.querySelector('#setup');if(!at||!at.parentNode)return;
+      el=document.createElement('p');el.id='spWinNote';el.className='noprint';el.setAttribute('role','note');
+      el.style.cssText='margin:8px 0;padding:8px 12px;border:1px solid #cfdad8;border-left:4px solid #76a2a3;border-radius:4px;background:#f5f8f7;font:13px/1.45 var(--sans,system-ui,sans-serif);color:#1a2933';
+      at.parentNode.insertBefore(el,at);}
+    el.textContent=t;}
+  const was=window.__nbhFactsIn;
+  window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f);}catch(e){}return r;};
+})();
+</script>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
 </html>

@@ -73,6 +73,13 @@ const H=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);return e
        the case comes round after the tap) would move the page under the finger; the tapped cell must stay where it was on
        the screen */
     await sp.evaluate(()=>{const st=document.createElement('style');st.textContent='html,body{overflow-anchor:none!important}';document.head.appendChild(st);});
+    /* v22.8x the layout settles before the cell is measured and tapped: a change (the simulation, the view, the entry mode)
+       reaches the case a moment later (the workstation reads the forms every few seconds and sends the case back), and the
+       consent line above the grid can then grow a few px as the phone's small-type pass reaches it; measured before that, the
+       grid moved under the finger and the tap marked the neighbouring cell. The case is read and sent now, and the cell is
+       measured once it has not moved for 1.2 s. What is checked is unchanged. */
+    await page.evaluate(async()=>{try{await gatherFacts(true);}catch(e){}});
+    {let last=null,same=0;for(let i=0;i<80&&same<8;i++){await sleep(150);const t=await tgt.evaluate(e=>Math.round(e.getBoundingClientRect().top));if(t===last)same++;else{same=0;last=t;}}}
     const y0=await sp.evaluate(()=>scrollY),rc=await tgt.evaluate(e=>[e.dataset.r,e.dataset.c,e.dataset.state]),cy0=await tgt.evaluate(e=>Math.round(e.getBoundingClientRect().top)),bb=await tgt.boundingBox();
     await page.touchscreen.tap(bb.x+bb.width/2,bb.y+bb.height/2);await sleep(700);
     const a1=await sp.evaluate(([r,c])=>({y:scrollY,cy:Math.round(document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']").getBoundingClientRect().top),st:document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']").dataset.state,ta:getComputedStyle(document.documentElement).touchAction,tw:Math.round(document.querySelector('th.timecol').getBoundingClientRect().width)}),rc);

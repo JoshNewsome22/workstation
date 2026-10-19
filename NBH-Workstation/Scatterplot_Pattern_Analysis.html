@@ -440,6 +440,58 @@ td.mark{width:var(--cellw);padding:0;position:relative;background:#fff}
 .cell[data-state="1"] svg{display:block}
 .cell[data-state="2"]{background:var(--ink);color:#fff}
 .cell[data-state="2"] svg{display:none}
+/* v22.8x (review F91) an interval or a day not observed: an X on a light hatch, on screen and on paper */
+.cell[data-state="x"],td.mark.lvlx{background:repeating-linear-gradient(135deg,#eef1f4 0 4px,#fff 4px 8px)}
+.cell[data-state="x"] .glyph{color:#5b6b78;font-weight:700}
+td.mark.lvlx input.count{color:#5b6b78;font-weight:700}
+th.sp-absent{color:#8a96a0;text-decoration:line-through}
+button.sp-abs{margin-left:3px;padding:0 3px;min-width:0;height:16px;line-height:14px;font-size:9px;border:1px solid #c5ced5;border-radius:3px;background:#fff;color:#5b6b78;cursor:pointer;vertical-align:middle}
+button.sp-abs[aria-pressed="true"]{background:#5b6b78;color:#fff;border-color:#5b6b78}
+.swatch.sp-xsw{display:inline-flex;align-items:center;justify-content:center;font:700 10px/1 var(--sans,Arial,sans-serif);color:#5b6b78;background:repeating-linear-gradient(135deg,#eef1f4 0 3px,#fff 3px 6px)}
+#xTool[aria-pressed="true"]{background:#5b6b78;color:#fff}
+.sp-thr{font-weight:400;opacity:.8}
+table.scatter th.corner .sp-key{display:block;font:600 8.5px/1.1 var(--sans,Arial,sans-serif);color:var(--ink-soft,#5b6b78);text-align:right;padding-right:6px;white-space:nowrap;letter-spacing:0;text-transform:none}
+/* v22.8x (review I46) the activity column, beside the times; on paper its text, a size smaller */
+table.scatter th.actcol{width:86px;min-width:86px;font-size:10px}
+table.scatter td.act{padding:0 2px;background:#fff;max-width:86px;overflow:hidden}
+tr.band td.act{background:var(--wash)}
+table.scatter input.sp-act{display:block;width:100%;box-sizing:border-box;border:0;background:transparent;font:inherit;font-family:var(--sans);font-size:10px;color:var(--ink);padding:0 2px;height:min(22px,calc(var(--rowh) - 1px));min-height:0}
+table.scatter input.sp-act:focus{background:#DDEAF3}
+.sp-acttext{display:block;font-family:var(--sans);font-size:9.5px;line-height:1.1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:82px}
+.sp-actin{color:var(--ink-soft)}
+@media screen and (max-width:600px){table.scatter th.actcol,table.scatter td.act{width:58px;min-width:58px;max-width:58px}}
+/* v22.8x (review I48) a second observer: the bar above the grid, the days compared, where the two disagree */
+.sp-ioabar{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:0 0 10px;padding:8px 10px;border:1px solid #c9b458;border-radius:6px;background:#fffbea;font:12.5px/1.45 var(--sans,Arial,sans-serif);color:var(--ink)}
+.sp-ioabar[hidden]{display:none}
+.sp-ioabar input{font:inherit;padding:3px 6px;border:1px solid #c5ced5;border-radius:4px;min-width:0;width:22em;max-width:100%}
+.sp-ioadays{display:flex;flex-wrap:wrap;gap:4px;flex-basis:100%}
+button.sp-ioaday{font:600 11px/1 var(--sans,Arial,sans-serif);padding:5px 7px;border:1px solid #c5ced5;border-radius:4px;background:#fff;color:var(--ink);cursor:pointer}
+button.sp-ioaday[aria-pressed="true"]{background:#7a6418;border-color:#7a6418;color:#fff}
+button.sp-ioaday:disabled{opacity:.45;cursor:default}
+.sp-ioabar p{margin:0;flex-basis:100%}
+#ioaTog[aria-pressed="true"]{background:#7a6418;color:#fff;border-color:#7a6418}
+html.sp-ioamode table.scatter{outline:3px solid #c9b458;outline-offset:1px}
+html.sp-ioamode td.mark.sp-noioa{opacity:.4}
+td.mark.sp-dis{box-shadow:inset 0 0 0 2px #b4472c}
+.sp-ioanote:empty{display:none}
+.sp-ioanote{margin:-8px 0 14px;font-size:11.5px;color:var(--ink-soft)}
+/* v22.8x (review F93) by weekday; (I50) the marking guide, on paper only */
+.sp-wk{margin-top:12px}
+.sp-wk table.sp-wkt th[scope="row"]{text-align:left;font-weight:500;white-space:nowrap;background:none;color:var(--ink);font-size:11px}
+.sp-wk table.sp-wkt td.n,.sp-wk table.sp-wkt th.n{text-align:right;width:auto;white-space:nowrap}
+.sp-wk .sp-wkrule{margin:4px 0 0}
+@media print{.sp-wk{margin-top:4px}.sp-wk table.sp-wkt{font-size:10px;line-height:1.15}.sp-wk table.sp-wkt th,.sp-wk table.sp-wkt td{padding:1px 4px;font-size:10px}.sp-wk .sp-wkrule{display:none}}
+.sp-guide h3{font:600 12.5px/1.3 var(--sans,Arial,sans-serif);margin:12px 0 4px;color:var(--ink)}
+.sp-guide p,.sp-guide li{margin:2px 0;font-size:11.5px;line-height:1.4}
+.sp-guide ul{margin:4px 0 0 18px;padding:0}
+.sp-gbeh{margin:0 0 8px;padding:0 0 6px;border-bottom:1px solid var(--rule-2)}
+.sp-ginit{width:100%}
+.sp-ginit td{height:24px}
+.sp-ginit td:first-child{white-space:nowrap;width:7em}
+.sp-ginit td:nth-child(2){width:11em}
+.sp-ginit td:nth-child(3){width:5em}
+/* a phone: the time column stays narrow (v21.89), so the key wraps in it */
+@media screen and (max-width:600px){table.scatter th.corner .sp-key{white-space:normal;padding-right:2px;font-size:8px}}
 .cell .glyph{
   position:relative;z-index:1;font-weight:600;letter-spacing:.02em;
   display:block;max-width:100%;overflow:hidden;white-space:nowrap;
@@ -969,10 +1021,10 @@ td input,td select{max-width:100%}
   <div class="tgroup">
     <span>Total days</span>
     <div class="row">
-      <input type="number" id="days" min="1" max="60" value="7">
+      <input type="number" id="days" min="1" max="60" value="5">
       <select id="dayStart">
-        <option value="0" selected>Start Sunday</option>
-        <option value="1">Start Monday</option>
+        <option value="0">Start Sunday</option>
+        <option value="1" selected>Start Monday</option>
         <option value="-1">Number the days</option>
       </select>
     </div>
@@ -1012,6 +1064,8 @@ td input,td select{max-width:100%}
       <label class="row" style="gap:5px">
         <input type="checkbox" id="useCodes"> codes
       </label>
+      <label class="row" style="gap:5px" title="A column beside the times for the activity in each interval (math, specials, lunch): it prints, and the summary and the control chart name it"><input type="checkbox" id="actOn"> activity column</label><!-- v22.8x (review I46) -->
+      <button type="button" id="xTool" aria-pressed="false" title="Mark intervals not observed (the student was pulled out, lunch in another room): while this is on, a tap marks or clears an X; a whole day is switched with the \u2715 beside its name">X: not observed</button><!-- v22.8x (review F91) -->
     </div>
   </div>
 
@@ -1041,6 +1095,7 @@ td input,td select{max-width:100%}
       <button id="saveBtn">Save data</button>
       <button id="loadBtn">Open data</button>
       <button id="csvBtn">Export CSV</button>
+      <label class="row" style="gap:5px" title="Prints a page on how to mark the sheet (each behavior's definition, examples and cutoff, what to do when the student is not observed, a line a day to initial) after the first data sheet, so a two-sided print puts it on the back"><input type="checkbox" id="guideOn"> marking guide</label><!-- v22.8x (review I50) -->
       <button id="clearBtn">Clear all</button>
       <input type="file" id="fileIn" accept="application/json" hidden>
     </div>
@@ -1062,13 +1117,23 @@ td input,td select{max-width:100%}
     <div class="sp-behseg" id="behSeg"></div>
     <button type="button" id="addBeh" title="Add another target behavior with a data sheet, summary and control chart of its own">+ Add a behavior</button>
     <button type="button" id="delBeh" title="Remove the behavior shown, with all of its marks" hidden>Remove</button>
+    <button type="button" id="ioaTog" aria-pressed="false" title="A second observer's marks for this behavior, on the days you both kept the sheet: the form compares the two, interval by interval">Second observer</button><!-- v22.8x (review I48) -->
     <span class="hint" id="behNote"></span>
+  </div>
+  <!-- v22.8x (review I48) the second observer's sheet: on screen only -->
+  <div class="sp-ioabar noprint" id="ioaBar" role="group" aria-label="Second observer" hidden>
+    <span><b>Second observer&rsquo;s marks</b> for <span id="ioaBeh"></span>, entered on the grid below.</span>
+    <label>Observer <input id="ioaObs" data-meta="ioaObs" placeholder="name, role"></label>
+    <span class="sp-ioadays" id="ioaDays" role="group" aria-label="Days both observers kept the sheet"></span>
+    <p id="ioaRes" aria-live="polite"></p>
+    <button type="button" id="ioaUse">Use it as this behavior&rsquo;s IOA</button>
+    <button type="button" id="ioaDone">Back to the first observer</button>
   </div>
 
   <div class="ident">
     <div class="f"><label for="mClient">Client</label><input id="mClient" data-meta="client"></div>
     <div class="f"><label for="mObserver">Observer</label><input id="mObserver" data-meta="observer"></div>
-    <div class="f"><label for="mWeek">Week of</label><span class="sp-wkbox"><input id="mWeek" data-meta="week"><input type="date" id="mWeekPick" class="noprint" aria-label="Week of: pick the first day on a calendar" title="Pick the first day on a calendar: the Week of line and the day columns are filled from it"></span></div>
+    <div class="f"><label for="mWeek">Dates covered</label><span class="sp-wkbox"><input id="mWeek" data-meta="week"><input type="date" id="mWeekPick" class="noprint" aria-label="Dates covered: pick the first day on a calendar" title="Pick the first day on a calendar: the Dates covered line and the day columns are filled from it"></span></div><!-- v22.8x (review F98) -->
     <div class="f"><label for="mSetting">Setting</label><input id="mSetting" data-meta="setting"></div>
     <div class="f"><label for="mBehavior">Target behavior</label><input id="mBehavior" data-meta="behavior"></div>
     <div class="f"><label for="mCode">Sheet no.</label><input id="mCode" data-meta="sheet"></div>
@@ -1096,9 +1161,11 @@ td input,td select{max-width:100%}
       <div class="lgrow"><span class="swatch"></span>
         <span>Blank — the behavior did not occur in this interval.</span></div>
       <div class="lgrow lg-slash"><span class="swatch"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="3" y1="97" x2="97" y2="3"/></svg></span>
-        <span>Slash — low rate (below the cutoff set above).</span></div>
+        <span id="lgSlash">Slash — low rate (below the cutoff set above).</span></div>
       <div class="lgrow"><span class="swatch filled"></span>
         <span id="lgShaded">Shaded — high rate (at or above the cutoff).</span></div>
+      <div class="lgrow"><span class="swatch sp-xsw"></span>
+        <span id="lgX">X — not observed (absent, pulled out, no sheet): left out of every count.</span></div><!-- v22.8x (review F91) -->
       </div>
       <p class="noprint" id="lgHow" style="margin:9px 0 0;font-size:11.5px;color:var(--ink-soft)">
         Click a cell to move it blank → slash → shaded. Arrow keys move between
@@ -1139,7 +1206,7 @@ td input,td select{max-width:100%}
   <div class="sumhead">
     <div><b>Client</b><span id="sClient"></span></div>
     <div><b>Target behavior</b><span id="sBehavior"></span></div>
-    <div><b>Week of</b><span id="sWeek"></span></div>
+    <div><b>Dates covered</b><span id="sWeek"></span></div>
   </div>
 
   <div id="sumBody"></div>
@@ -1169,13 +1236,14 @@ td input,td select{max-width:100%}
   <div class="sumhead">
     <div><b>Client</b><span id="cClient"></span></div>
     <div><b>Target behavior</b><span id="cBehavior"></span></div>
-    <div><b>Observation period</b><span id="cWeek"></span></div>
+    <div><b>Dates covered</b><span id="cWeek"></span></div>
   </div>
 
   <div class="f" style="max-width:330px;margin:-6px 0 14px">
     <label for="mIoa">Interobserver agreement (%)</label>
     <input id="mIoa" data-meta="ioa" inputmode="decimal">
   </div>
+  <p class="cap sp-ioanote" id="ioaNoteP"></p><!-- v22.8x (review I48) how the figure was found, when the form computed it -->
 
   <div id="ctlBody"></div>
 
@@ -1195,7 +1263,8 @@ const DAYNAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
 const state = {
   meta:{},
-  cfg:{ startMin:7*60, spanH:12, interval:30, days:7, dayStart:0,
+  /* v22.8x (review F95): a fresh sheet is the school day (7:30 AM to 3:30 PM) and a school week, Monday to Friday */
+  cfg:{ startMin:7*60+30, spanH:8, interval:30, days:5, dayStart:1,
         mode:"tap", codes:false, threshold:2, perSheet:10, levels:2 },
   codes:[{k:"A",d:""},{k:"B",d:""},{k:"C",d:""},{k:"D",d:""}],
   cells:{},                      // "r_c" -> {s:0|1|2, n:number|null, code:""}
@@ -1207,13 +1276,27 @@ const state = {
   behaviors:[{meta:{}, cells:{}}],
   cur:0
 };
-const BKEYS = ["behavior","definition","example","nonexample","ioa"];
+/* v22.8x (review F90): the high-rate cutoff is each behavior's own (threshold), kept with its name and definition;
+   state.cfg.threshold stays as the record's default for a behavior that has none (a file from before) */
+const BKEYS = ["behavior","definition","example","nonexample","ioa","threshold","ioaObs","ioaDays","ioaNote"];   /* v22.8x (I48) the second observer's */
 state.behaviors[0].cells = state.cells;
 
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
 function key(r,c){ return r+"_"+c; }
+/* v22.8x (review F90) the cutoff of the behavior on the sheet */
+/* v22.8x (review I46) an interval's activity, when the sheet has the activity column */
+function spAct(r){ return state.cfg.actOn && Array.isArray(state.cfg.activity) ? String(state.cfg.activity[r] || "").trim() : ""; }
+function thr(){ const t = +state.meta.threshold || +state.cfg.threshold || 2; return Math.max(1, t); }
+/* v22.8x (review F91) not observed: a day (absent, a field trip, no sheet: state.meta.absent{day}, shared by every
+   behavior, as the dates are) or one interval (pulled out, lunch in another room: cell.x) is kept out of every count
+   and every denominator; a blank cell on an observed day is "observed, none" */
+function dayAbsent(c){ return state.meta["absent"+c] === "1"; }
+function cellObs(r,c){ return !dayAbsent(c) && !(state.cells[key(r,c)] && state.cells[key(r,c)].x); }
+function lvAt(r,c){ return cellObs(r,c) ? level(cellOf(r,c)) : 0; }
+let spXMode = false;                       // the "X: not observed" tool: a tap marks or clears an interval not observed
+let spIOA = false;                         // v22.8x (review I48) the grid shows the second observer's marks (b.obs2)
 function cellOf(r,c){
   const k = key(r,c);
   if(!state.cells[k]) state.cells[k] = {s:0,n:null,code:""};
@@ -1277,12 +1360,13 @@ function dayLabels(){
    distinction back on brings the slashes back. */
 function oneLevel(){ return +state.cfg.levels === 1; }
 function level(cell){
+  if(cell && cell.x) return 0;             // v22.8x (review F91) not observed
   if(state.cfg.mode === "count"){
     if(cell.n === null || cell.n === "" || isNaN(cell.n)) return 0;
     const v = Number(cell.n);
     if(v <= 0) return 0;
     if(oneLevel()) return 2;
-    return v >= state.cfg.threshold ? 2 : 1;
+    return v >= thr() ? 2 : 1;
   }
   if(oneLevel()) return cell.s > 0 ? 2 : 0;
   return cell.s;
@@ -1338,10 +1422,18 @@ function gridHTML(c0, c1){
   const rows = rowLabels(), cols = dayLabels();
   const nR = rows.length, nC = c1 - c0;
 
-  let h = "<thead><tr><th class='corner timecol'></th>";
-  for(let c=c0;c<c1;c++) h += "<th>"+cols[c]+"</th>";
+  /* v22.8x (review F89): the rule for marking, in the corner of every grid, so each printed sheet carries it (the legend
+     prints once, on a behavior's last sheet) */
+  const t = thr(), keyTxt = oneLevel() ? "\u25A0 occurred" : state.cfg.mode === "count" ? "1" + (t > 2 ? "\u2013" + (t-1) : "") + " low \u00b7 " + t + "+ high"
+    : "/ " + (t > 2 ? "1\u2013" + (t-1) : "1") + " \u00b7 \u25A0 " + t + "+";
+  const act = !!state.cfg.actOn;   /* v22.8x (review I46) the activity column */
+  let h = "<thead><tr><th class='corner timecol'><span class='sp-key'>" + keyTxt + "<br>X not observed</span></th>" + (act ? "<th class='actcol'>Activity</th>" : "");
+  /* v22.8x (review F91): beside each day's name, the switch for a day not observed (on screen only) */
+  for(let c=c0;c<c1;c++) h += "<th"+(dayAbsent(c)?" class='sp-absent'":"")+">"+cols[c]
+    + "<button type='button' class='sp-abs noprint' data-abs='"+c+"' aria-pressed='"+dayAbsent(c)+"' title='Not observed this day (absent, a field trip, no sheet): kept out of every count' aria-label='"
+    + esc(cols[c]+(state.meta["date"+c]?" "+shortDate(state.meta["date"+c]):""))+": not observed'>\u2715</button></th>";
   h += "<th class='tot'>Total</th></tr>";
-  h += "<tr><td class='time'>Date</td>";
+  h += "<tr><td class='time'>Date</td>" + (act ? "<td class='act'></td>" : "");
   for(let c=c0;c<c1;c++){
     const dv = state.meta["date"+c] || "";
     h += "<td class='dateline'><input type='date' name='sp.date."+c+"' data-date='"+c+"' value='"+esc(dv)+"'"
@@ -1355,7 +1447,7 @@ function gridHTML(c0, c1){
   const rowTot = new Array(nR).fill(0);
   for(let r=0;r<nR;r++){
     for(let c=c0;c<c1;c++){
-      const lv = level(cellOf(r,c));
+      const lv = lvAt(r,c);
       if(lv > 0){ colTot[c-c0]++; rowTot[r]++; }
       if(lv === 2) colHigh[c-c0]++;
     }
@@ -1367,25 +1459,26 @@ function gridHTML(c0, c1){
     h += "<tr"+(band ? " class='band'" : "")+">";
     h += "<td class='time"+(peak > 0 && rowTot[r] === peak ? " peak" : "")+"'>"
        + rows[r] + "</td>";
+    if(act) h += "<td class='act'><input class='sp-act' data-act='"+r+"' name='sp.act."+r+"' value='"+esc(spAct(r))+"' aria-label='Activity, "+rows[r]+"' placeholder='\u2014'></td>";
     for(let c=c0;c<c1;c++){
-      const cell = cellOf(r,c), lv = level(cell);
+      const cell = cellOf(r,c), no = !cellObs(r,c), lv = no ? 0 : level(cell);
       if(state.cfg.mode === "count"){
         /* Counting and coding are not alternatives: a sheet tracking two behaviors
            still needs to say which one the number belongs to, so the picker sits
            in the corner of a counted cell exactly as it does on a tapped one. */
-        h += "<td class='mark lvl"+lv+"'>" + slashSVG("bg")
+        h += "<td class='mark lvl"+(no?"x":lv)+"'>" + slashSVG("bg")
            + "<input class='count' inputmode='numeric' name='sp.n."+r+"_"+c+"' data-r='"+r+"' data-c='"+c+"' value='"
-           + (cell.n === null ? "" : esc(String(cell.n))) + "' "
+           + (no ? "X" : cell.n === null ? "" : esc(String(cell.n))) + "' "+(dayAbsent(c)?"readonly ":"")
            + "aria-label='"+rows[r]+", "+cols[c]+" count'>"
            + (state.cfg.codes ? codeSelect(r,c,cell) : "")
            + "</td>";
       }else{
         /* v21.16 audit (F10): the cell of the grid is the table cell, which holds the mark button and, with codes
            on, the code picker; as a gridcell inside a cell the button broke the grid's structure (axe) */
-        h += "<td class='mark' role='gridcell'><button class='cell' data-state='"+lv+"' data-r='"+r+"' data-c='"+c+"' "
-           + "aria-label='"+rows[r]+", "+cols[c]+"'>"
+        h += "<td class='mark' role='gridcell'><button class='cell' data-state='"+(no?"x":lv)+"' data-r='"+r+"' data-c='"+c+"' "
+           + "aria-label='"+rows[r]+", "+cols[c]+(no?", not observed":"")+"'>"
            + slashSVG("")
-           + "<span class='glyph'>"+(lv && cell.code ? esc(cell.code) : "")+"</span>"
+           + "<span class='glyph'>"+(no ? "X" : lv && cell.code ? esc(cell.code) : "")+"</span>"
            + "</button>";
         if(state.cfg.codes) h += codeSelect(r,c,cell);
         h += "</td>";
@@ -1394,11 +1487,11 @@ function gridHTML(c0, c1){
     h += "<td class='tot'>"+(rowTot[r] || "")+"</td>";
     h += "</tr>";
   }
-  h += "</tbody><tfoot><tr><td class='time'>Intervals marked</td>";
+  h += "</tbody><tfoot><tr><td class='time'>Intervals marked</td>" + (act ? "<td class='act'></td>" : "");
   colTot.forEach(v => h += "<td>"+(v || "")+"</td>");
   h += "<td>"+(colTot.reduce((a,b)=>a+b,0) || "")+"</td></tr>";
   if(!oneLevel()){
-    h += "<tr><td class='time'>of which high rate</td>";
+    h += "<tr><td class='time'>of which high rate</td>" + (act ? "<td class='act'></td>" : "");
     colHigh.forEach(v => h += "<td>"+(v || "")+"</td>");
     h += "<td>"+(colHigh.reduce((a,b)=>a+b,0) || "")+"</td></tr>";
   }
@@ -1413,12 +1506,13 @@ function render(){
   const widest = Math.max(...pages.map(p => p[1]-p[0]));
 
   document.documentElement.style.setProperty("--rowh", rowHeight(nR, spPrinting) + "px");
-  const cw = Math.max(34, Math.min(72, Math.round(430/widest)));
+  const actW = state.cfg.actOn ? 86 : 0;   /* v22.8x (I46) the activity column takes its width from the days */
+  const cw = Math.max(34, Math.min(72, Math.round((430 - actW)/widest)));
   document.documentElement.style.setProperty("--cellw", cw + "px");
   /* the date line is sized to the width a day column really gets: the grid
      fills the sheet, so ten days have about 54px each, not the 43px the cell
      hint says - which had the dates printing at 7px */
-  const dayw = Math.round((700 - 104 - 52) / widest);
+  const dayw = Math.round((700 - 104 - 52 - actW) / widest);
   document.documentElement.style.setProperty("--datefs",
     Math.max(7.5, Math.min(10.5, (dayw - 4) / 5.9)).toFixed(1) + "px");
 
@@ -1514,21 +1608,25 @@ function listOf(a, max){
 }
 function renderReadout(){
   const rows = rowLabels(), nR = rows.length, nC = dayLabels().length, pages = pageRanges();
-  let marked = 0, hi = 0;
+  let marked = 0, hi = 0, obs = 0;
   const rowTot = new Array(nR).fill(0);
   for(let r=0;r<nR;r++) for(let c=0;c<nC;c++){
+    if(!cellObs(r,c)) continue;            // v22.8x (review F91)
+    obs++;
     const lv = level(cellOf(r,c));
     if(lv>0){ marked++; rowTot[r]++; }
     if(lv===2) hi++;
   }
+  const nObs = Array.from({length:nC}, (_, c) => c).filter(c => !dayAbsent(c)).length;
   const peak = Math.max(0, ...rowTot);
   const tops = rows.filter((x, r) => peak > 0 && rowTot[r] === peak);
   $("#readout").textContent =
-    nR + " intervals \u00d7 " + nC + " days = " + (nR*nC) + " cells \u00b7 "
+    nR + " intervals \u00d7 " + nC + " days = " + (nR*nC) + " cells"
+    + (obs < nR*nC ? " (" + obs + " observed" + (nObs < nC ? ", " + nObs + " of " + nC + " days" : "") + ")" : "") + " \u00b7 "
     + marked + " marked" + (oneLevel() ? "" : " (" + hi + " high rate)")
     + (pages.length>1 ? " \u00b7 across " + pages.length + " sheets" : "")
     + (peak > 0 ? " \u00b7 densest interval" + (tops.length > 1 ? "s" : "") + ": " + listOf(tops)
-        + " (" + peak + " of " + nC + " days" + (tops.length > 1 ? " each" : "") + ")" : "");
+        + " (" + peak + " of " + nObs + " days" + (nObs < nC ? " observed" : "") + (tops.length > 1 ? " each" : "") + ")" : "");
 }
 /* v21.16 audit (F16): sheets after the first name the client and behavior in their header; they follow typing */
 function renderReps(){
@@ -1588,11 +1686,20 @@ onGrids("click", e => {
     try{ dt.showPicker(); }catch(err){ /* older browser: typing still works */ }
     return;
   }
+  /* v22.8x (review F91): a day not observed, switched beside its name */
+  const ab = e.target.closest("button.sp-abs");
+  if(ab){ const c = +ab.dataset.abs; if(dayAbsent(c)) delete state.meta["absent"+c]; else state.meta["absent"+c] = "1"; render(); return; }
   const b = e.target.closest("button.cell");
   if(!b) return;
   const cell = cellOf(+b.dataset.r, +b.dataset.c);
+  if(dayAbsent(+b.dataset.c)){ nbhUI.toast("This day is marked not observed: the \u2715 beside its name marks it observed again.", {kind:"warn"}); return; }
+  if(spXMode){ if(cell.x) delete cell.x; else cell.x = 1; }
+  else if(cell.x){ delete cell.x; }        // a tap on an interval not observed makes it observed, blank
+  else{
   cell.s = oneLevel() ? (cell.s ? 0 : 2) : (cell.s + 1) % 3;
   if(cell.s === 0) cell.code = "";
+  }
+  if(spIOA) spIoaAdd(+b.dataset.c);   /* v22.8x (I48) */
   /* v21.89 a tapped cell is where the finger is: the page stays put while the grid is drawn again, and the cell is not scrolled to */
   const y = window.scrollY, x = window.scrollX;
   render();
@@ -1618,13 +1725,21 @@ onGrids("change", e => {
 
 onGrids("input", e => {
   const inp = e.target;
+  if(inp.classList.contains("sp-act")){   /* v22.8x (I46) */
+    if(!Array.isArray(state.cfg.activity)) state.cfg.activity = [];
+    state.cfg.activity[+inp.dataset.act] = inp.value.slice(0, 60);
+    return;
+  }
   if(inp.classList.contains("count")){
     const cell = cellOf(+inp.dataset.r, +inp.dataset.c);
-    cell.n = inp.value === "" ? null : Number(inp.value);
+    /* v22.8x (review F91): an X typed in a count box is an interval not observed */
+    if(/^\s*x\s*$/i.test(inp.value)){ cell.x = 1; cell.n = null; }
+    else{ delete cell.x; cell.n = inp.value === "" || isNaN(Number(inp.value)) ? null : Number(inp.value); }
     delete cell.est;                // v21.16 audit (F1): typed, so no longer carried over from a tapped mark
+    if(spIOA) spIoaAdd(+inp.dataset.c);   /* v22.8x (I48) */
     const td = inp.closest("td");
     const lv = level(cell);
-    td.className = "mark lvl" + lv;
+    td.className = "mark lvl" + (cell.x ? "x" : lv);
     updateTotalsOnly(inp.closest("table.scatter"));
     return;
   }
@@ -1655,7 +1770,7 @@ function updateTotalsOnly(tbl){
     const rowTot = new Array(nR).fill(0);
     for(let r=0;r<nR;r++) for(let i=0;i<nC;i++){
       const c = colIdx[i]; if(c < 0) continue;
-      const lv = level(cellOf(r,c));
+      const lv = lvAt(r,c);
       if(lv>0){ colTot[i]++; rowTot[r]++; }
       if(lv===2) colHigh[i]++;
     }
@@ -1702,11 +1817,17 @@ onGrids("keydown", e => {
   if(e.key === "ArrowUp")    return go(-1,0);
   if(e.key === "ArrowRight" && el.tagName === "BUTTON") return go(0,1);
   if(e.key === "ArrowLeft"  && el.tagName === "BUTTON") return go(0,-1);
+  if(el.tagName === "BUTTON" && /^[xX]$/.test(e.key) && !dayAbsent(c)){   /* v22.8x (review F91) X: not observed */
+    e.preventDefault();
+    const cell = cellOf(r,c); if(cell.x) delete cell.x; else cell.x = 1;
+    render(); focusCell(r,c); return;
+  }
   if(el.tagName === "BUTTON" && ["0","1","2"].includes(e.key)){
     e.preventDefault();
-    const cell = cellOf(r,c);
+    const cell = cellOf(r,c); delete cell.x;
     cell.s = oneLevel() ? (+e.key ? 2 : 0) : +e.key;
     if(cell.s === 0) cell.code = "";
+    if(spIOA) spIoaAdd(c);   /* v22.8x (I48) */
     render(); focusCell(r,c);
   }
 });
@@ -1740,7 +1861,7 @@ const endSel   = $("#endHour");
 for(let m=0;m<1440;m+=30){
   const o = document.createElement("option");
   o.value = m; o.textContent = fmt(m);
-  if(m === 7*60) o.selected = true;
+  if(m === 7*60+30) o.selected = true;   /* v22.8x (F95) */
   startSel.appendChild(o);
 }
 
@@ -1820,9 +1941,10 @@ function syncPreset(){
     state.cfg.days      = Math.max(1, Math.min(60, +$("#days").value || 7));
     state.cfg.perSheet  = Math.max(1, +$("#perSheet").value || 10);
     state.cfg.dayStart  = +$("#dayStart").value;
-    state.cfg.threshold = Math.max(1, +$("#threshold").value || 2);
+    /* v22.8x (review F90): the cutoff is the behavior's on the sheet; the others keep theirs */
+    if(id === "threshold"){ state.meta.threshold = String(Math.max(1, +$("#threshold").value || thr())); renderBehBar(); }
     /* v21.16 audit (F18, F3): the fields and the Sheet list show the values in use */
-    $("#days").value = state.cfg.days; $("#threshold").value = state.cfg.threshold;
+    $("#days").value = state.cfg.days; $("#threshold").value = thr();
     syncPreset();
     render();
   });
@@ -1842,23 +1964,24 @@ $("#modeSeg").addEventListener("click", e => {
    cleared by typing no longer comes back as an old mark. A count carried over from a tapped mark is the smallest
    count that mark stands for (1 for a slash, the cutoff for a shaded cell) and is flagged (est), so the summary
    can say its total is a minimum; typing the count removes the flag. */
-function lvlOfCount(n){
+function lvlOfCount(n, t){
   if(n === null || n === undefined || n === "" || isNaN(n)) return 0;
-  const v = Number(n);
-  return v <= 0 ? 0 : v >= state.cfg.threshold ? 2 : 1;
+  const v = Number(n), c = t || thr();
+  return v <= 0 ? 0 : v >= c ? 2 : 1;
 }
 function carryMarks(to){
   commitBeh();
-  state.behaviors.forEach(b => Object.keys(b.cells || {}).forEach(k => {
-    const cell = b.cells[k]; if(!cell) return;
+  state.behaviors.forEach(b => { const t = Math.max(1, +(b.meta && b.meta.threshold) || +state.cfg.threshold || 2);   /* v22.8x (F90) its own cutoff */
+    [b.cells, b.obs2].forEach(B => { if(B) Object.keys(B).forEach(k => {   /* v22.8x (I48) the second observer's too */
+    const cell = B[k]; if(!cell) return;
     if(to === "count"){
       const s = +cell.s || 0;
       if(!s){ if(cell.n !== 0) cell.n = null; delete cell.est; }
-      else if(lvlOfCount(cell.n) !== s){ cell.n = s === 2 ? Math.ceil(state.cfg.threshold) : 1; cell.est = 1; }
+      else if(lvlOfCount(cell.n, t) !== s){ cell.n = s === 2 ? Math.ceil(t) : 1; cell.est = 1; }
     }else{
-      cell.s = lvlOfCount(cell.n);
+      cell.s = lvlOfCount(cell.n, t);
     }
-  }));
+  }); }); });
 }
 /* a cell's count, read only when the sheet is kept as counts: in tap mode a count left from an earlier switch of
    entry mode is not what the sheet records */
@@ -1880,18 +2003,24 @@ function hasMarks(){
 async function retime(prevStart, prevStep){
   const start = state.cfg.startMin, step = state.cfg.interval;
   if(start === prevStart && step === prevStep) return true;
+  /* v22.8x (review I46) the activities keep their times, as the marks do, when the start moves by whole intervals */
+  if(step === prevStep && Number.isInteger((prevStart - start) / step) && Array.isArray(state.cfg.activity)){
+    const sh = (prevStart - start) / step, m = [];
+    state.cfg.activity.forEach((x, r) => { if(x && r + sh >= 0) m[r + sh] = x; });
+    state.cfg.activity = m;
+  }
   if(!hasMarks()) return true;
   const shift = (prevStart - start) / step;
   if(step === prevStep && Number.isInteger(shift)){
-    state.behaviors.forEach(b => {
+    state.behaviors.forEach(b => { [b.cells, b.obs2].forEach(B => { if(!B) return;   /* v22.8x (I48) the second observer's too */
       const moved = {};
-      Object.keys(b.cells || {}).forEach(k => {
+      Object.keys(B).forEach(k => {
         const m = /^(-?\d+)_(\d+)$/.exec(k);
-        moved[m ? (+m[1] + shift) + "_" + m[2] : k] = b.cells[k];
+        moved[m ? (+m[1] + shift) + "_" + m[2] : k] = B[k];
       });
-      Object.keys(b.cells).forEach(k => { delete b.cells[k]; });   // the same object: state.cells points at it
-      Object.assign(b.cells, moved);
-    });
+      Object.keys(B).forEach(k => { delete B[k]; });   // the same object: state.cells points at it
+      Object.assign(B, moved);
+    }); });
     return true;
   }
   const why = step !== prevStep
@@ -1901,10 +2030,19 @@ async function retime(prevStart, prevStep){
       + "entered on, so they would sit at the wrong times.";
   if(!(await nbhUI.confirm("Clear the marks on every behavior and change the sheet?\n" + why
       + " Cancel keeps the marks and the times they were entered at.", {ok:"Clear the marks", danger:true}))) return false;
-  state.behaviors.forEach(b => { Object.keys(b.cells || {}).forEach(k => { delete b.cells[k]; }); });
+  state.behaviors.forEach(b => { [b.cells, b.obs2].forEach(B => { if(B) Object.keys(B).forEach(k => { delete B[k]; }); }); });
   return true;
 }
 
+/* v22.8x (review F91) the X tool: while it is on, a tap marks or clears an interval not observed */
+$("#xTool").addEventListener("click", e => {
+  spXMode = !spXMode; e.currentTarget.setAttribute("aria-pressed", String(spXMode));
+  document.documentElement.classList.toggle("sp-xmode", spXMode);
+  nbhUI.toast(spXMode ? "X: a tap now marks an interval not observed, or clears it. Tap the button again to mark the behavior." : "Taps mark the behavior again.", {kind:"ok"});
+});
+/* v22.8x (review I46, I50) the activity column, the marking guide */
+$("#actOn").addEventListener("change", e => { state.cfg.actOn = e.target.checked; if(!Array.isArray(state.cfg.activity)) state.cfg.activity = []; render(); });
+$("#guideOn").addEventListener("change", e => { state.cfg.guide = e.target.checked; });
 $("#useCodes").addEventListener("change", e => {
   state.cfg.codes = e.target.checked;
   renderCodes();
@@ -1921,15 +2059,20 @@ $("#levelSeg").addEventListener("click", e => {
 /* ---------------------------------------------------- behaviors */
 function commitBeh(){
   const b = state.behaviors[state.cur] || (state.behaviors[state.cur] = {meta:{}, cells:{}});
+  /* v22.8x (review F90): every behavior carries its cutoff (the record's, when none was set), so a record reads the same
+     after it is kept and opened again */
+  const t0 = String(Math.max(1, +state.cfg.threshold || 2));
+  if(!state.meta.threshold) state.meta.threshold = t0;
   BKEYS.forEach(k => { b.meta[k] = state.meta[k] || ""; });
-  b.cells = state.cells;
+  state.behaviors.forEach(x => { if(x && x.meta && !x.meta.threshold) x.meta.threshold = t0; });
+  if(spIOA) b.obs2 = state.cells; else b.cells = state.cells;   /* v22.8x (review I48) the second observer's marks */
 }
 function useBeh(i, quiet){
   commitBeh();
   state.cur = Math.max(0, Math.min(state.behaviors.length-1, i|0));
   const b = state.behaviors[state.cur];
   BKEYS.forEach(k => { state.meta[k] = b.meta[k] || ""; });
-  state.cells = b.cells;
+  state.cells = spIOA ? (b.obs2 || (b.obs2 = {})) : b.cells;   /* v22.8x (I48) */
   renderMeta();
   if(!quiet) renderBehBar();
   render();
@@ -1944,9 +2087,10 @@ function renderBehBar(){
   commitBeh();
   seg.innerHTML = state.behaviors.map((b, i) => {
     const nm = behName(i);
+    const t = Math.max(1, +(b.meta && b.meta.threshold) || +state.cfg.threshold || 2);   /* v22.8x (review F90) */
     return "<button type='button' data-b='"+i+"' aria-pressed='"+(i === state.cur)+"'"
-         + " title='"+esc(nm)+"'>" + (i+1) + " \u00b7 "
-         + esc(nm.length > 34 ? nm.slice(0,33) + "\u2026" : nm) + "</button>";
+         + " title='"+esc(nm)+(oneLevel() ? "" : ": high rate at "+t+" or more")+"'>" + (i+1) + " \u00b7 "
+         + esc(nm.length > 34 ? nm.slice(0,33) + "\u2026" : nm) + (oneLevel() ? "" : "<span class='sp-thr'> \u00b7 high "+t+"+</span>") + "</button>";
   }).join("");
   const del = $("#delBeh"); if(del) del.hidden = state.behaviors.length < 2;
   const note = $("#behNote");
@@ -1961,13 +2105,16 @@ function dropBeh(i){
   state.cur = Math.max(0, Math.min(state.behaviors.length-1, i));
   const b = state.behaviors[state.cur];
   BKEYS.forEach(k => { state.meta[k] = b.meta[k] || ""; });
-  state.cells = b.cells;
+  state.cells = spIOA ? (b.obs2 || (b.obs2 = {})) : b.cells;   /* v22.8x (I48) */
   renderMeta(); renderBehBar(); render();
 }
 function loadBehaviors(d){
+  spIOA = false;   /* v22.8x (I48) a record opens on the first observer's marks */
   const list = Array.isArray(d.behaviors) ? d.behaviors : null;
   if(list && list.length){
-    state.behaviors = list.map(b => ({meta: Object.assign({}, (b && b.meta) || {}), cells: (b && b.cells) || {}}));
+    state.behaviors = list.map(b => { const o = {meta: Object.assign({}, (b && b.meta) || {}), cells: (b && b.cells) || {}};
+      if(b && b.obs2 && typeof b.obs2 === "object") o.obs2 = b.obs2;   /* v22.8x (I48) */
+      return o; });
     state.cur = Math.max(0, Math.min(state.behaviors.length-1, +d.cur || 0));
   }else{
     /* a file from before behaviors had sheets of their own: one behavior, with
@@ -1976,6 +2123,10 @@ function loadBehaviors(d){
     state.behaviors = [{meta:m, cells: d.cells || {}}];
     state.cur = 0;
   }
+  /* v22.8x (review F90): a file from before each behavior had its cutoff: the record's cutoff becomes each one's, so
+     nothing is scored again */
+  const t0 = String(Math.max(1, +((d.cfg || {}).threshold) || +state.cfg.threshold || 2));
+  state.behaviors.forEach(x => { if(!x.meta.threshold) x.meta.threshold = t0; });
   const b = state.behaviors[state.cur];
   BKEYS.forEach(k => { state.meta[k] = b.meta[k] || ""; });
   state.cells = b.cells;
@@ -2000,7 +2151,7 @@ $("#behSeg").addEventListener("click", e => {
 });
 $("#addBeh").addEventListener("click", () => {
   commitBeh();
-  state.behaviors.push({meta:{}, cells:{}});
+  state.behaviors.push({meta:{threshold:String(thr())}, cells:{}});   /* v22.8x (F90) its own cutoff, from the one on screen */
   useBeh(state.behaviors.length-1);
   const f = $("#mBehavior"); if(f) f.focus();
 });
@@ -2015,11 +2166,14 @@ $("#delBeh").addEventListener("click", async () => {
 window.nbhExtraSig = function(){
   commitBeh();
   let s = state.cur + "|" + state.behaviors.length + "|" + (state.cfg.levels || 2);
+  s += "|" + Object.keys(state.meta).filter(k => /^absent\d+$/.test(k) && state.meta[k]).join(",");   /* v22.8x (F91) */
   state.behaviors.forEach(b => {
-    for(const k in b.cells){
-      const c = b.cells[k];
-      if(c && (c.s || c.n || c.code)) s += ";" + k + ":" + (c.s||0) + ":" + (c.n===null||c.n===undefined?"":c.n) + ":" + (c.code||"");
-    }
+    s += "|t" + ((b.meta && b.meta.threshold) || "");   /* v22.8x (F90) */
+    s += "|i" + ((b.meta && b.meta.ioaDays) || "") + "/" + ((b.meta && b.meta.ioaNote) ? 1 : 0);   /* v22.8x (I48) */
+    [b.cells, b.obs2].forEach((B, j) => { if(B) for(const k in B){
+      const c = B[k];
+      if(c && (c.s || c.n || c.code || c.x)) s += ";" + (j ? "o" : "") + k + ":" + (c.s||0) + ":" + (c.n===null||c.n===undefined?"":c.n) + ":" + (c.code||"") + (c.x?":x":"");
+    } });
     s += "|";
   });
   return s;
@@ -2032,11 +2186,16 @@ const CITE_TWO = "In the original procedure the slash denoted a single occurrenc
 const CITE_ONE = "In the original procedure the slash denoted a single occurrence within the "
   + "interval and the filled cell denoted more than one; this sheet records occurrence only, "
   + "so a shaded cell means the behavior occurred at least once in the interval, at any rate.";
+/* v22.8x (review F89): the legend that prints on every sheet gives the rule with this behavior's numbers, so the
+   person marking the paper can code a cell: a slash for 1 to cutoff-1 in the interval, shaded for the cutoff or more */
 function renderLegendText(){
-  const one = oneLevel();
+  const one = oneLevel(), t = thr(), cnt = state.cfg.mode === "count";
+  const lo = t <= 2 ? "1" : "1 to " + (t-1);
+  const sl = $("#lgSlash"); if(sl) sl.textContent = cnt ? "Slash \u2014 low rate: a count of " + lo + " (write the count in the cell)." : "Slash \u2014 low rate: " + lo + " in the interval.";
   const sh = $("#lgShaded"); if(sh) sh.textContent = one
-    ? "Shaded \u2014 the behavior occurred in this interval."
-    : "Shaded \u2014 high rate (at or above the cutoff).";
+    ? "Shaded \u2014 the behavior occurred in this interval, any number of times."
+    : cnt ? "Shaded \u2014 high rate: a count of " + t + " or more." : "Shaded \u2014 high rate: " + t + " or more in the interval.";
+  const lx = $("#lgX"); if(lx) lx.textContent = "X \u2014 not observed (absent, pulled out, no sheet): left out of every count.";
   const how = $("#lgHow"); if(how) how.textContent = one
     ? "Click a cell to switch it blank \u2194 shaded. Arrow keys move between cells; 0 clears a cell and 1 shades it."
     : "Click a cell to move it blank \u2192 slash \u2192 shaded. Arrow keys move between cells; 0, 1 and 2 set a cell directly.";
@@ -2123,6 +2282,8 @@ function staticClone(node){
     const sp = document.createElement("span"); sp.className = b.className;
     ["data-state","data-r","data-c"].forEach(a => { if(b.hasAttribute(a)) sp.setAttribute(a, b.getAttribute(a)); });
     sp.innerHTML = b.innerHTML; b.replaceWith(sp); });
+  clone.querySelectorAll("table.scatter input.sp-act").forEach(i => {   /* v22.8x (I46) the activity as text on paper */
+    const sp = document.createElement("span"); sp.className = "sp-acttext"; sp.textContent = i.getAttribute("value") || ""; i.replaceWith(sp); });
   clone.querySelectorAll("table.scatter input.count").forEach(i => {
     const sp = document.createElement("span"); sp.className = "count"; sp.textContent = i.getAttribute("value") || ""; i.replaceWith(sp); });
   /* v22.31 the definition, examples and non-examples print whole: a text box prints at the height it has on screen, so on
@@ -2156,12 +2317,14 @@ function staticClone(node){
   return clone;
 }
 function buildPrintSet(mode){
+  const ioa = spIOA; if(ioa) spIoaSet(false);   /* v22.8x (review I48) paper is the first observer's record */
   const was = spPrinting; spPrinting = mode === "packet" ? "packet" : "print";
   const keep = state.cur, out = [];
   commitBeh();
   state.behaviors.forEach((b, i) => {
     useBeh(i, true);
     out.push(staticClone($("#sheet")));
+    if(i === 0 && state.cfg.guide && mode !== "packet") out.push(spGuide());   /* v22.8x (review I50) on the back of the first sheet */
     $$("#spPages .sp-page").forEach(p => out.push(staticClone(p)));
     if(summaryData().marked > 0){
       out.push(staticClone($("#summary")));
@@ -2170,7 +2333,43 @@ function buildPrintSet(mode){
   });
   spPrinting = was;
   useBeh(keep, true);
+  if(ioa) spIoaSet(true);
   return out;
+}
+/* v22.8x (review I50) a marking guide for the back of the first sheet: each behavior's definition, example and non-example
+   and how to mark it with its own cutoff, what to do when the student is not observed (an X, kept out of every count; a
+   blank means watched, none), and a line a day of the first sheet to initial. Printed when "marking guide" is ticked; not in
+   the workstation's packet, which is the record, not the paper handed to the person marking. */
+function spGuide(){
+  const pg = document.createElement("div"); pg.className = "sheet sp-printed sp-guide";
+  const head = document.querySelector("#sheet .nbh-print-head"); if(head) pg.appendChild(head.cloneNode(true));
+  const count = state.cfg.mode === "count", T = v => esc(String(v || "").trim() || "\u2014");
+  const rule = t => oneLevel()
+      ? (count ? "Write the number of times in the interval." : "Shade the interval when the behavior occurred in it, at any rate.")
+      : count ? "Write the number of times in the interval: " + (t > 2 ? "1 to " + (t-1) : "1") + " is low rate, " + t + " or more is high rate."
+      : "A slash (/) when it occurred " + (t > 2 ? "1 to " + (t-1) + " times" : "once") + " in the interval; shade the whole cell for " + t + " or more.";
+  let h = "<div class='bar nbh-band'>How to Mark This Sheet</div>"
+    + "<div class='sp-rep'><span><b>Client</b> " + T(state.meta.client) + "</span><span><b>Dates covered</b> " + T(state.meta.week) + "</span></div>";
+  state.behaviors.forEach((b, i) => {
+    const m = b.meta || {}, t = Math.max(1, +m.threshold || +state.cfg.threshold || 2);
+    h += "<div class='sp-gbeh'><h3>" + (state.behaviors.length > 1 ? (i+1) + " \u00b7 " : "") + T(m.behavior || "Target behavior") + "</h3>"
+      + "<p><b>What counts:</b> " + T(m.definition) + "</p><p><b>For example:</b> " + T(m.example) + "</p>"
+      + "<p><b>Does not count:</b> " + T(m.nonexample) + "</p>"
+      + "<p><b>How to mark:</b> " + esc(rule(t)) + " Leave it blank when you watched and it did not happen.</p></div>";
+  });
+  h += "<h3>When the student is not observed</h3><ul>"
+    + "<li><b>Absent, a field trip, no sheet that day:</b> write X across the day\u2019s column at the top, and why on its line below.</li>"
+    + "<li><b>Pulled out, at lunch in another room, with another adult:</b> write X in those intervals. An X is left out of every count; a blank means you watched and it did not happen.</li>"
+    + "<li><b>Not sure it counts:</b> go by the definition and what does not count; note the time and what happened on the day\u2019s line below, for the BCBA.</li>"
+    + (state.cfg.codes ? "<li><b>Codes:</b> write the letter from the code key in the marked cell.</li>" : "")
+    + (state.cfg.actOn ? "<li><b>Activity:</b> when the activity in an interval was not the one printed beside its time, write the one it was.</li>" : "")
+    + "</ul><h3>Initial each day you marked</h3><table class='rank sp-ginit'><thead><tr><th>Day</th><th>Observer</th><th>Initials</th><th>Notes (not observed, anything unusual)</th></tr></thead><tbody>";
+  const pr = pageRanges()[0], cols = dayLabels();
+  for(let c=pr[0];c<pr[1];c++) h += "<tr><td>" + esc(cols[c] + (state.meta["date"+c] ? " " + shortDate(state.meta["date"+c]) : "")) + "</td><td></td><td></td><td></td></tr>";
+  h += "</tbody></table>";
+  const body = document.createElement("div"); body.innerHTML = h;
+  while(body.firstChild) pg.appendChild(body.firstChild);
+  return pg;
 }
 window.spPrintSet = buildPrintSet;
 
@@ -2197,7 +2396,7 @@ try{
 }catch(err){}
 (function initWeek(){
   const t = new Date();
-  const sun = new Date(t.getFullYear(), t.getMonth(), t.getDate() - t.getDay());
+  const sun = new Date(t.getFullYear(), t.getMonth(), t.getDate() - ((t.getDay() + 6) % 7));   /* v22.8x (F95) this week's Monday */
   $("#weekStart").value = toISO(sun);
 })();
 
@@ -2266,6 +2465,7 @@ $("#printBtn").addEventListener("click", () => {
    during specials, lunch, and the Friday preferred-activity afternoon. */
 async function loadSim(){
   if(!(await nbhUI.confirm("Load a simulated student and fill the sheet?\nThree school weeks of example data, across two sheets. Anything already entered will be replaced.", {ok:"Replace"})))return;
+  spIoaSet(false);   /* v22.8x (I48) */
   const iso=n=>{const d=new Date();d.setDate(d.getDate()-n);return toISO(d);};   /* v21.21 cross-form (X1): local date, not UTC */
   /* the Monday of the most recent complete school week */
   const today=new Date(); const back=((today.getDay()+6)%7)+7;
@@ -2274,11 +2474,11 @@ async function loadSim(){
      is the case the sheet split exists for, and enough points for the control
      chart to say anything. */
   state.cfg={ startMin:7*60+30, spanH:8, interval:30, days:15, dayStart:1,
-              mode:"count", codes:true, threshold:2, perSheet:10, levels:2 };
+              mode:"count", codes:true, threshold:2, perSheet:10, levels:2, actOn:true, activity:[] };
 
   state.meta={
     client:"SIMULATED \u2013 Sample Student", observer:"Classroom team (simulated)",
-    week:"Week of "+new Date(Date.now()-back*864e5).toLocaleDateString(),
+    week:"",
     setting:"Room 12 \u2013 self-contained ESE classroom, specials, cafeteria",
     behavior:"Aggression toward staff (simulated)",
     sheet:"SP-1-SIM",
@@ -2326,6 +2526,7 @@ async function loadSim(){
     /*14 */ {n:[0,1],       c:"B", lbl:"pack up"},
     /*15 */ {n:0,           c:"B", lbl:"dismissal"}
   ];
+  state.cfg.activity = sched.map(x => x.lbl);   /* v22.8x (review I46) */
   const pick=v=>Array.isArray(v)?v[0]+Math.floor(Math.random()*(v[1]-v[0]+1)):v;
 
   state.cells={};
@@ -2363,10 +2564,18 @@ async function loadSim(){
            definition:"Moving more than 3 m from the assigned area or activity without permission, or leaving the room. A new episode is counted once the student has been back in the assigned area for 1 min.",
            example:"Walking out of the classroom during a work block; leaving the lunch table for the hallway; running from the line during a transition.",
            nonexample:"Leaving with permission; moving within the room to a permitted area; being escorted out by staff.",
-           ioa:"88"},
+           ioa:"88", threshold:"2"},
      cells:cells2}
   ];
   state.cur=0;
+  /* v22.8x (review I48) a second observer on the three Wednesdays, who differs from the first on a few intervals; the IOA
+     is the one the form computes */
+  { const b = state.behaviors[0], o2 = {}, days = [2, 7, 12];
+    days.forEach(c => { for(let r=0;r<sched.length;r++){ const x = b.cells[r+"_"+c]; o2[r+"_"+c] = {s:0, n:x ? x.n : 0, code:x ? x.code : ""}; } });
+    const on = Object.keys(o2).filter(k => o2[k].n > 0), off = Object.keys(o2).filter(k => !o2[k].n);
+    if(on[0]) o2[on[0]].n = 0; if(on[3]) o2[on[3]].n = Math.max(1, o2[on[3]].n - 1); if(off[1]) o2[off[1]].n = 1;
+    b.obs2 = o2; state.meta.ioaObs = "Iris Calloway (simulated), paraprofessional"; state.meta.ioaDays = days.join(",");
+    const R = spIoa(); state.meta.ioa = String(R.total); state.meta.ioaNote = spIoaText(R, true); commitBeh(); }
 
   syncToolbar(); renderCodes(); renderMeta(); renderBehBar(); render();
   const seg=document.querySelector('#viewSeg button[data-view="summary"]');
@@ -2376,7 +2585,8 @@ async function loadSim(){
 
 $("#simBtn").addEventListener("click", loadSim);
 $("#clearBtn").addEventListener("click", async () => {
-  if(!(await nbhUI.confirm("Clear every mark on this behavior\u2019s sheet?\nThe header details and any other behaviors stay.", {ok:"Clear the marks", danger:true}))) return;
+  if(!(await nbhUI.confirm(spIOA ? "Clear every mark the second observer entered for this behavior?\nThe first observer\u2019s marks stay."   /* v22.8x (I48) */
+      : "Clear every mark on this behavior\u2019s sheet?\nThe header details and any other behaviors stay.", {ok:"Clear the marks", danger:true}))) return;
   state.cells = {};
   commitBeh();
   render();
@@ -2415,14 +2625,17 @@ $("#fileIn").addEventListener("change", e => {
 });
 
 $("#csvBtn").addEventListener("click", () => {
-  const rows = rowLabels(), cols = dayLabels();
+  const ioa = spIOA; if(ioa) spIoaSet(false);   /* v22.8x (I48) the record is the first observer's */
+  const rows = rowLabels(), cols = dayLabels(), act = !!state.cfg.actOn;   /* v22.8x (I46) the activity, when the sheet has it */
   const q = s => '"' + String(s).replace(/"/g,'""') + '"';
-  let out = [["Interval"].concat(cols.map((c,i) =>
+  let out = [["Interval"].concat(act ? ["Activity"] : [], cols.map((c,i) =>
     c + (state.meta["date"+i] ? " " + state.meta["date"+i] : ""))).map(q).join(",")];
   rows.forEach((lab,r) => {
     const line = [q(lab)];
+    if(act) line.push(q(spAct(r)));
     cols.forEach((_,c) => {
       const cell = cellOf(r,c), lv = level(cell);
+      if(!cellObs(r,c)){ line.push(q("not observed")); return; }   /* v22.8x (F91) */
       const v = state.cfg.mode === "count"
         ? (cell.n === null ? "" : cell.n)
         : (oneLevel() ? ["","","occurred"] : ["","low","high"])[lv];
@@ -2436,6 +2649,7 @@ $("#csvBtn").addEventListener("click", () => {
   a.download = "scatterplot.csv";
   a.click();
   URL.revokeObjectURL(a.href);
+  if(ioa) spIoaSet(true);
 });
 
 function syncToolbar(){
@@ -2446,8 +2660,9 @@ function syncToolbar(){
   $("#days").value    = state.cfg.days;
   $("#perSheet").value= state.cfg.perSheet || 10;
   $("#dayStart").value= state.cfg.dayStart;
-  $("#threshold").value = state.cfg.threshold;
+  $("#threshold").value = thr();   /* v22.8x (F90) */
   $("#useCodes").checked = !!state.cfg.codes;
+  { const ac = $("#actOn"); if(ac) ac.checked = !!state.cfg.actOn; const go = $("#guideOn"); if(go) go.checked = !!state.cfg.guide; }   /* v22.8x (I46, I50) */
   $$("#levelSeg button").forEach(x =>
     x.setAttribute("aria-pressed", String(+x.dataset.levels === (+state.cfg.levels || 2))));
   $$("#modeSeg button").forEach(x =>
@@ -2457,6 +2672,7 @@ function syncToolbar(){
 }
 function renderMeta(){
   $$("[data-meta]").forEach(i => i.value = state.meta[i.dataset.meta] || "");
+  { const t = $("#threshold"); if(t) t.value = thr(); }   /* v22.8x (F90) the behavior's own cutoff */
   const wp = $("#mWeekPick"); if(wp) wp.value = state.meta.weekStart || state.meta.date0 || "";
 }
 /* v22.31 Week of from a calendar: the first day picked writes "Month d, yyyy – Month d, yyyy" over the sheet's days (school
@@ -2480,7 +2696,7 @@ function weekDates(start){
     let fill = true;
     if(had.length && !had.every(i => state.meta["date"+i] === dates[i]))
       fill = confirm("Date the day columns from " + longDate(iso) + " as well?\n\nOK puts " + longDate(dates[0]) + " to " +
-        longDate(dates[dates.length-1]) + " in the columns. Cancel changes only the Week of line.");
+        longDate(dates[dates.length-1]) + " in the columns. Cancel changes only the Dates covered line.");
     if(fill) dates.forEach((x,i) => { state.meta["date"+i] = x; });
     state.meta.weekStart = iso;
     const ws = $("#weekStart"); if(ws) ws.value = iso;
@@ -2492,13 +2708,18 @@ function weekDates(start){
 
 
 /* ---------------------------------------------------- pattern summary */
+/* v22.8x (review F91): only what was observed counts: a day not observed is out of every figure, an interval not
+   observed out of its row's and its day's; obs is the number of observed days (perRow) or intervals (perCol) */
 function summaryData(){
   const rows = rowLabels(), cols = dayLabels();
   const nR = rows.length, nC = cols.length;
-  const perRow = rows.map(() => ({low:0, high:0, sum:0}));
-  const perCol = cols.map(() => ({low:0, high:0, sum:0}));
-  let marked = 0, high = 0, counted = 0, anyCount = false, est = 0, maxN = 0;
+  const perRow = rows.map(() => ({low:0, high:0, sum:0, obs:0}));
+  const perCol = cols.map(() => ({low:0, high:0, sum:0, obs:0}));
+  const obsDays = cols.map((x, c) => c).filter(c => !dayAbsent(c));
+  let marked = 0, high = 0, counted = 0, anyCount = false, est = 0, maxN = 0, cellsObs = 0;
   for(let r=0;r<nR;r++) for(let c=0;c<nC;c++){
+    if(!cellObs(r,c)) continue;
+    perRow[r].obs++; perCol[c].obs++; cellsObs++;
     const cell = cellOf(r,c), lv = level(cell);
     const v = countOf(cell);                                        // v21.16 audit (F1)
     if(v !== null && v > 0){ anyCount = true; counted += v; perRow[r].sum += v; perCol[c].sum += v;
@@ -2508,7 +2729,8 @@ function summaryData(){
     if(lv === 2){ high++; perRow[r].high++; perCol[c].high++; }
     else        { perRow[r].low++;  perCol[c].low++;  }
   }
-  return {rows, cols, nR, nC, perRow, perCol, marked, high, counted, anyCount, est, maxN};
+  return {rows, cols, nR, nC, perRow, perCol, marked, high, counted, anyCount, est, maxN, obsDays, nObs: obsDays.length, cellsObs,
+          absent: cols.map((x, c) => c).filter(c => dayAbsent(c))};
 }
 
 /* v21.16 audit (F5): each chart defines its own hatching under an id of its own, and its low-rate bars point at
@@ -2533,7 +2755,7 @@ function dayName(i, d){
 function intervalChart(d){
   /* v21.16 audit (F12): on paper the bars share out the height the summary page has to give */
   const rh = spPrinting
-    ? Math.max(1.5, Math.min(spPrinting === "packet" ? 12 : 12.5, (spPrinting === "packet" ? 170 : 185) / d.nR))
+    ? Math.max(1.5, Math.min(spPrinting === "packet" ? 12 : 12.5, ((spPrinting === "packet" ? 170 : 185) - (weekdayData(d) ? 20 : 0)) / d.nR))   /* v22.8x (F93) */
     : (d.nR > 32 ? 10.5 : d.nR > 24 ? 12.5 : 15);
   const hid = "sphatch" + (++spHatchSeq);
   const padL = 92, padR = 30, padT = 16, padB = 24;
@@ -2579,7 +2801,8 @@ function intervalChart(d){
 
 function dayChart(d){
   const padL = 34, padR = 8, padT = 14, padB = 30;
-  const W = 300, plotW = W - padL - padR, plotH = spPrinting === "packet" ? 90 : spPrinting ? 100 : 150;   // v21.16 audit (F12)
+  const wk = spPrinting && !!weekdayData(d);   /* v22.8x (F93) on paper the weekdays sit under it, in the same room */
+  const W = 300, plotW = W - padL - padR, plotH = spPrinting === "packet" ? (wk ? 56 : 90) : spPrinting ? (wk ? 60 : 100) : 150;   // v21.16 audit (F12)
   const H = padT + plotH + padB;
   const seen = Math.max(...d.perCol.map(p => p.low + p.high), 0);
   const max = Math.max(4, Math.ceil(seen * 1.15));   // scale to what was observed
@@ -2606,6 +2829,7 @@ function dayChart(d){
        + '" height="'+(y(p.high)-y(total))+'"/>';
     if(total && colW >= 8)  g += '<text class="val" x="'+(cx+bw/2)+'" y="'+(y(total)-3)
        + '" text-anchor="middle">'+total+'</text>';
+    if(dayAbsent(c)) g += '<text class="val" x="'+(cx+bw/2)+'" y="'+(y(0)-3)+'" text-anchor="middle">X</text>';   /* v22.8x (F91) not observed */
     if(c % every) return;
     g += '<text class="tick" x="'+(cx+bw/2)+'" y="'+(y(0)+12)+'" text-anchor="middle">'
        + esc(d.cols[c]) + '</text>';
@@ -2626,9 +2850,9 @@ function rankTable(d){
   let t = "<table class='rank'><thead><tr><th>Interval</th><th class='n'>Days</th>"
         + (one ? "" : "<th class='n'>High</th>") + "<th class='n'>%</th></tr></thead><tbody>";
   idx.forEach(o => {
-    t += "<tr><td>"+esc(d.rows[o.i])+"</td><td class='n'>"+o.t+"</td>"
+    t += "<tr><td>"+esc(d.rows[o.i])+(spAct(o.i) ? " <span class='sp-actin'>("+esc(spAct(o.i))+")</span>" : "")+"</td><td class='n'>"+o.t+"</td>"
        + (one ? "" : "<td class='n'>" + (o.h || "") + "</td>")
-       + "<td class='n'>"+Math.round(100*o.t/d.nC)+"</td></tr>";
+       + "<td class='n'>"+Math.round(100*o.t/Math.max(1, d.perRow[o.i].obs))+"</td></tr>";   /* v22.8x (F91) of the days that interval was observed */
   });
   return t + "</tbody></table>";
 }
@@ -2816,11 +3040,15 @@ function controlData(){
   const d = summaryData();
   const n = d.nC, k = d.nR;
 
-  const y = [];
+  /* v22.8x (review F91): the sum over the days observed; an interval left out on some of them (an X) is scaled to the
+     days observed, so a pull-out does not read as a quiet interval */
+  const y = [], nObs = d.nObs;let scaled = 0;
   for(let r=0;r<k;r++){
     let t = 0;
-    for(let c=0;c<n;c++) t += score(cellOf(r,c));   // 0 / 1 / 2, or 0 / 1
-    y.push(t);
+    for(let c=0;c<n;c++) if(cellObs(r,c)) t += score(cellOf(r,c));   // 0 / 1 / 2, or 0 / 1
+    const o = d.perRow[r].obs;
+    if(o > 0 && o < nObs){ t = t * nObs / o; scaled++; }
+    y.push(Math.round(t*100)/100);
   }
   const total = y.reduce((a,b) => a+b, 0);
   const mean = k ? total/k : 0;
@@ -2840,7 +3068,7 @@ function controlData(){
   const flagged = new Set();
   hits.forEach(h => h.idx.forEach(i => flagged.add(i)));
 
-  return {d, n, k, y, total, mean, sigma, sMR, sSD, hits, flagged};
+  return {d, n: nObs, nAll: n, scaled, k, y, total, mean, sigma, sMR, sSD, hits, flagged};
 }
 
 function detectSignals(y, mean, sigma){
@@ -2948,12 +3176,31 @@ function ceilingNote(a){
     + "in the pattern summary.";
 }
 function spanLabel(a, h){
-  if(h.from === h.to) return a.d.rows[h.from];
+  /* v22.8x (review I46): the activity of a flagged span, when the sheet has the activity column */
+  const acts = []; for(let r=h.from;r<=h.to;r++){ const x = spAct(r); if(x && !acts.includes(x)) acts.push(x); }
+  const ax = acts.length ? " (" + acts.join(", ") + ")" : "";
+  if(h.from === h.to) return a.d.rows[h.from] + ax;
   const i = state.cfg.interval;
   return fmt(state.cfg.startMin + h.from*i) + " – "
-       + fmt(state.cfg.startMin + (h.to+1)*i);
+       + fmt(state.cfg.startMin + (h.to+1)*i) + ax;
 }
 
+/* v22.8x (review I49) the intervals the control chart flags, as observation windows for Forms OB-1 and ABC-1: each run of
+   flagged intervals with its times, the activity when the sheet has the column, and the criteria it met; they go to the
+   case with the evidence (windows), by behavior */
+function spWindows(){
+  const a = controlData(); if(!a.hits.length) return [];
+  const idx = Array.from(a.flagged).sort((x, y) => x - y), runs = [];
+  idx.forEach(i => { const r = runs[runs.length - 1]; if(r && i === r[1] + 1) r[1] = i; else runs.push([i, i]); });
+  const iv = state.cfg.interval, s0 = state.cfg.startMin;
+  return runs.map(([f, t]) => {
+    const acts = []; for(let r=f;r<=t;r++){ const x = spAct(r); if(x && !acts.includes(x)) acts.push(x); }
+    const o = {from: fmt(s0 + f*iv), to: fmt(s0 + (t+1)*iv), start: s0 + f*iv, end: s0 + (t+1)*iv,
+               criteria: Array.from(new Set(a.hits.filter(h => h.idx.some(i => i >= f && i <= t)).map(h => h.c))).sort()};
+    if(acts.length) o.activity = acts.join(", ");
+    return o;
+  });
+}
 function xmrChart(a){
   const padL = 44, padR = 54, padT = 14, padB = 40;
   const W = 640, plotW = W - padL - padR, plotH = 210;
@@ -3015,6 +3262,8 @@ function niceStep(top){
 }
 
 function renderControl(){
+  { const p = $("#ioaNoteP"), nt = String(state.meta.ioaNote || ""), v = String(state.meta.ioa || "").trim();   /* v22.8x (I48) */
+    if(p) p.textContent = v && nt.indexOf(" " + v + "% (") >= 0 ? nt : ""; }
   $("#cClient").textContent   = state.meta.client   || "";
   $("#cBehavior").textContent = state.meta.behavior || "";
   $("#cWeek").textContent     = state.meta.week     || "";
@@ -3030,7 +3279,7 @@ function renderControl(){
   }
 
   let html = "<div class='stat'>"
-    + "<div><b>DAYS OBSERVED</b><span>"+a.n+"</span><em>Kahng et al. used 30</em></div>"
+    + "<div><b>DAYS OBSERVED</b><span>"+a.n+"</span><em>"+(a.n < a.nAll ? "of "+a.nAll+" on the sheet; " : "")+"Kahng et al. used 30</em></div>"
     + "<div><b>INTERVALS PER DAY</b><span>"+a.k+"</span><em>"
       + state.cfg.interval+"-min blocks</em></div>"
     + "<div><b>MEAN</b><span>"+a.mean.toFixed(1)+"</span><em>central line</em></div>"
@@ -3057,7 +3306,10 @@ function renderControl(){
     + "<p class='cap'>" + (oneLevel()
         ? "This record was kept without the low / high distinction, so every interval is scored 0 for no occurrence and 1 for occurrence, "
         : "Every interval is scored 0 for no occurrence, 1 for low and 2 for high, ")
-    + "then summed down the column of days. The solid line is the mean of those sums; the "
+    + "then summed down the column of days" + (a.n < a.nAll ? " observed (" + a.n + " of " + a.nAll + "; a day not observed is left out)" : "")
+    + (a.scaled ? "; " + a.scaled + " interval" + (a.scaled === 1 ? " was" : "s were") + " not observed on every one of them, and "
+        + (a.scaled === 1 ? "its sum is" : "their sums are") + " scaled to the days observed (sum \u00d7 days observed \u00f7 days that interval was observed)" : "")
+    + ". The solid line is the mean of those sums; the "
     + "three broken lines sit 1, 2 and 3 SD above it. Filled points are the intervals that met "
     + "one of the four criteria below. Lower limits are not drawn, following the paper, because "
     + "the scatter plot is used to find periods of high responding.</p>"
@@ -3091,6 +3343,9 @@ function renderControl(){
       + "more behavior falls there than the day as a whole would predict. Cross-reference them "
       + "against the schedule — the activity, the staff member, the demand, the transition — and "
       + "test what you find.</p>";
+    const W = spWindows();   /* v22.8x (review I49) */
+    if(W.length) html += "<p class='cap sp-win'>Observation windows, sent with the case to Forms OB-1 and ABC-1: "
+      + esc(W.map(w => w.from + " \u2013 " + w.to + (w.activity ? " (" + w.activity + ")" : "")).join("; ")) + ".</p>";
   }else{
     html += "<div class='warn' style='margin-top:12px'><b>NO CRITERION WAS MET</b>"
       + "Three of the 15 records in the study also met none of the criteria. This is not "
@@ -3160,6 +3415,69 @@ function methodNote(a){
     + "</div>";
 }
 
+/* v22.8x (review F89, F91, F92): the summary's first line, as text: what high rate meant, the days observed, the intervals
+   and days with the most; the same words go to the case for each behavior */
+/* v22.8x (review F93) by weekday: the dated days observed, Mondays with Mondays, when a weekday comes more than once; per day
+   observed, the intervals marked, those at high rate and the occurrences counted. The first line names the heaviest weekday
+   when, over two of its days or more, it averages half as many intervals again as the lightest and at least one more. */
+const DAYFULL = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+function weekdayData(d){
+  const W = {};
+  d.cols.forEach((x, c) => {
+    const dt = parseISO(state.meta["date"+c]); if(!dt || dayAbsent(c)) return;
+    const w = dt.getDay(), o = W[w] || (W[w] = {w, days:0, marked:0, high:0, occ:0});
+    o.days++; o.marked += d.perCol[c].low + d.perCol[c].high; o.high += d.perCol[c].high; o.occ += d.perCol[c].sum;
+  });
+  const L = Object.keys(W).map(k => W[k]).sort((a, b) => ((a.w + 6) % 7) - ((b.w + 6) % 7));
+  if(!L.some(o => o.days > 1)) return null;
+  L.forEach(o => { o.per = o.marked / o.days; o.hiPer = o.high / o.days; o.occPer = o.occ / o.days; });
+  return L;
+}
+const spF1 = v => (Math.round(v * 10) / 10).toFixed(1);
+function weekdayLine(d){
+  const M = (weekdayData(d) || []).filter(o => o.days > 1); if(M.length < 2) return "";
+  const hi = M.reduce((a, b) => b.per > a.per ? b : a), lo = M.reduce((a, b) => b.per < a.per ? b : a);
+  if(!(hi.per >= 1.5 * lo.per && hi.per - lo.per >= 1)) return "";
+  return " By weekday, " + DAYFULL[hi.w] + "s were the heaviest: " + spF1(hi.per) + " intervals marked a day over " + hi.days + " "
+    + DAYFULL[hi.w] + "s, against " + spF1(lo.per) + " on " + DAYFULL[lo.w] + "s, the lightest.";
+}
+/* the weekdays across, a column a weekday, under the day chart; on paper the day chart and the bars give it the room */
+function weekdayTable(d){
+  const L = weekdayData(d); if(!L) return "";
+  const one = oneLevel(), cnt = d.anyCount, row = (lab, f) => "<tr><th scope='row'>" + lab + "</th>" + L.map(o => "<td class='n'>" + f(o) + "</td>").join("") + "</tr>";
+  return "<div class='sp-wk'><table class='rank sp-wkt'><thead><tr><th scope='col'>By weekday (days observed)</th>"
+    + L.map(o => "<th class='n' scope='col'>" + DAYNAMES[o.w] + " (" + o.days + ")</th>").join("") + "</tr></thead><tbody>"
+    + row("Marked a day", o => spF1(o.per)) + (one ? "" : row("High rate a day", o => spF1(o.hiPer)))
+    + (cnt ? row("Occurrences a day", o => spF1(o.occPer)) : "") + "</tbody></table>"
+    + "<p class='cap sp-wkrule'>Per day observed. The first line names a weekday that, over two of its days or more, averages half as many "
+    + "intervals marked again as the lightest, and at least one more.</p></div>";
+}
+function summaryLine(d){
+  const cells = d.cellsObs;
+  /* v21.16 audit (F6): every interval and day tied for the most is named, a day with its date */
+  const rowT = d.perRow.map(p => p.low + p.high), colT = d.perCol.map(p => p.low + p.high);
+  const rowMax = Math.max(...rowT), colMax = Math.max(...colT);
+  const topR = d.perRow.map((p, i) => i).filter(i => rowT[i] === rowMax);
+  const topRows = topR.map(i => d.rows[i] + (typeof spAct === "function" && spAct(i) ? " (" + spAct(i) + ")" : ""));
+  const topCols = d.cols.map((x, i) => colT[i] === colMax ? dayName(i, d) : null).filter(x => x !== null);
+  const each = n => n > 1 ? " each" : "";
+  const rObs = topR.length ? Math.max(...topR.map(i => d.perRow[i].obs)) : d.nObs;
+  const cObs = Math.max(0, ...d.perCol.map((p, i) => colT[i] === colMax ? p.obs : 0));
+  return (d.nObs < d.nC ? "Observed on " + d.nObs + " of " + d.nC + " days (not observed: "
+        + listOf(d.absent.map(i => dayName(i, d)), 4) + "). " : "")
+    + (cells < d.nR * d.nC ? d.marked + " of the " + cells + " intervals observed were marked (" : d.marked + " of " + cells + " intervals marked (")
+    + Math.round(100*d.marked/Math.max(1, cells)) + "% of the observation window)"
+    + (oneLevel() ? "" : ", " + d.high + " of them at high rate (" + thr() + " or more in an interval)")
+    /* v21.16 audit (F1): a total that includes counts carried over from tapped marks is a minimum */
+    + (d.anyCount ? (d.est
+        ? ", at least " + d.counted + " occurrences in total (" + d.est + " of the counts "
+          + (d.est === 1 ? "was" : "were") + " carried over from marks made by tapping, as the smallest count "
+          + "each mark stands for)"
+        : ", " + d.counted + " occurrences recorded in total") : "")
+    + ". Heaviest interval" + (topRows.length > 1 ? "s" : "") + ": " + listOf(topRows) + " (" + rowMax
+    + " of " + rObs + " days" + (rObs < d.nC ? " observed" : "") + each(topRows.length) + "). Heaviest day" + (topCols.length > 1 ? "s" : "") + ": "
+    + listOf(topCols) + " (" + colMax + " of " + cObs + " intervals" + each(topCols.length) + ")." + weekdayLine(d);
+}
 function renderSummary(){
   $("#sClient").textContent   = state.meta.client   || "";
   $("#sBehavior").textContent = state.meta.behavior || "";
@@ -3174,27 +3492,7 @@ function renderSummary(){
     return;
   }
 
-  const cells = d.nR * d.nC;
-  /* v21.16 audit (F6): every interval and day tied for the most is named, a day with its date */
-  const rowT = d.perRow.map(p => p.low + p.high), colT = d.perCol.map(p => p.low + p.high);
-  const rowMax = Math.max(...rowT), colMax = Math.max(...colT);
-  const topRows = d.rows.filter((x, i) => rowT[i] === rowMax);
-  const topCols = d.cols.map((x, i) => colT[i] === colMax ? dayName(i, d) : null).filter(x => x !== null);
-  const each = n => n > 1 ? " each" : "";
-
-  let html = "<p class='cap' style='margin-bottom:16px'>"
-    + d.marked + " of " + cells + " intervals marked ("
-    + Math.round(100*d.marked/cells) + "% of the observation window)"
-    + (oneLevel() ? "" : ", " + d.high + " of them at high rate")
-    /* v21.16 audit (F1): a total that includes counts carried over from tapped marks is a minimum */
-    + (d.anyCount ? (d.est
-        ? ", at least " + d.counted + " occurrences in total (" + d.est + " of the counts "
-          + (d.est === 1 ? "was" : "were") + " carried over from marks made by tapping, as the smallest count "
-          + "each mark stands for)"
-        : ", " + d.counted + " occurrences recorded in total") : "")
-    + ". Heaviest interval" + (topRows.length > 1 ? "s" : "") + ": " + esc(listOf(topRows)) + " (" + rowMax
-    + " of " + d.nC + " days" + each(topRows.length) + "). Heaviest day" + (topCols.length > 1 ? "s" : "") + ": "
-    + esc(listOf(topCols)) + " (" + colMax + " of " + d.nR + " intervals" + each(topCols.length) + ").</p>";
+  let html = "<p class='cap' style='margin-bottom:16px'>" + esc(summaryLine(d)) + "</p>";
 
   const pick = CHARTS[state.cfg.chart] || CHARTS.bars;
   html += "<div class='figure'><h3>" + pick.title + "</h3>"
@@ -3203,7 +3501,7 @@ function renderSummary(){
   html += "<div class='twoup'>"
     + "<div class='figure' style='margin-bottom:0'><h3>Occurrences by day</h3>"
     + "<p class='cap'>Intervals marked on each day.</p>"
-    + chartBox(dayChart(d), "Occurrences by day", "sp-day") + "</div>"
+    + chartBox(dayChart(d), "Occurrences by day", "sp-day") + weekdayTable(d) + "</div>"   /* v22.8x (review F93) */
     + "<div class='figure' style='margin-bottom:0'><h3>Densest intervals</h3>"
     + "<p class='cap'>Ranked by the number of days marked. The % column is the share of "
     + "observed days.</p>" + rankTable(d) + "</div>"
@@ -3235,6 +3533,114 @@ function renderSummary(){
 
   body.innerHTML = html;
 }
+
+/* ---------------------------------------------------- v22.8x (review I48) a second observer
+   On the days both observers kept the sheet, the second observer's marks are entered on the same grid with "Second
+   observer" on (b.obs2, by behavior; the days compared in meta.ioaDays, the observer in meta.ioaObs). The form compares the
+   two interval by interval on those days: total agreement (occurrence and non-occurrence), occurrence agreement (of the
+   intervals either one marked) and, kept at two levels, the same level (a count is read as low or high with the behavior's
+   cutoff). An interval either one left out as not observed, and a day not observed, are not compared. Where the two
+   disagree is outlined on the grid. "Use it" writes the total agreement into the behavior's IOA, which the control chart
+   reads, with a line naming the days and the observer. The pattern summary, the control chart, the evidence and the paper
+   stay the first observer's. */
+function spIoaDays(){
+  const n = state.cfg.days, out = [];
+  String(state.meta.ioaDays || "").split(",").forEach(x => { const c = parseInt(x, 10); if(c >= 0 && c < n && !out.includes(c)) out.push(c); });
+  return out.sort((a, b) => a - b);
+}
+function spIoaAdd(c){ const s = spIoaDays(); if(!s.includes(c)){ s.push(c); state.meta.ioaDays = s.sort((a, b) => a - b).join(","); } }
+function spIoaDayName(c){ const dt = state.meta["date"+c]; return dayLabels()[c] + (dt ? " " + shortDate(dt) : ""); }
+function spIoa(){
+  const b = state.behaviors[state.cur] || {};
+  const P = spIOA ? (b.cells || {}) : state.cells, Q = spIOA ? state.cells : (b.obs2 || {});
+  const E = {s:0, n:null, code:""}, rows = rowLabels(), nR = rows.length;
+  const days = spIoaDays().filter(c => !dayAbsent(c));
+  let n = 0, agree = 0, either = 0, both = 0, exact = 0, marked2 = 0;
+  const dis = new Set(), rowDis = new Array(nR).fill(0);
+  days.forEach(c => { for(let r=0;r<nR;r++){
+    const k = key(r,c), p = P[k] || E, q = Q[k] || E;
+    if(p.x || q.x) continue;
+    const a = level(p), z = level(q); n++;
+    if(z > 0) marked2++;
+    if((a > 0) === (z > 0)) agree++; else { dis.add(k); rowDis[r]++; }
+    if(a > 0 || z > 0){ either++; if(a > 0 && z > 0) both++; }
+    if(a === z) exact++; else if(a > 0 && z > 0) dis.add(k);
+  } });
+  const pc = (x, y) => y ? Math.round(1000 * x / y) / 10 : null, most = Math.max(0, ...rowDis);
+  return {days, n, agree, total: pc(agree, n), either, both, occ: pc(both, either), exact, level: oneLevel() ? null : pc(exact, n),
+          dis, most, at: most ? rows.filter((x, r) => rowDis[r] === most) : [], marked2};
+}
+function spIoaText(R, withObs){
+  if(!R.n) return "";
+  const nm = String(state.meta.ioaObs || "").trim();
+  return "Interval-by-interval agreement " + R.total + "% (" + R.agree + " of " + R.n + " intervals) on " + R.days.length + " day"
+    + (R.days.length === 1 ? "" : "s") + " (" + listOf(R.days.map(spIoaDayName), 6) + ")"
+    + (withObs ? (nm ? ", " + nm + " as second observer" : ", with a second observer") : "")
+    + (R.occ === null ? "; neither observer marked an interval" : "; occurrence agreement " + R.occ + "% (" + R.both + " of the " + R.either
+      + " intervals either one marked)") + (R.level === null ? "" : "; the same level in " + R.level + "%") + ".";
+}
+function spIoaPaint(){
+  const on = spIOA, bar = $("#ioaBar"), tog = $("#ioaTog");
+  document.documentElement.classList.toggle("sp-ioamode", on);
+  if(tog) tog.setAttribute("aria-pressed", String(on));
+  if(bar) bar.hidden = !on;
+  $$("table.scatter td.mark.sp-dis,table.scatter td.mark.sp-noioa").forEach(td => td.classList.remove("sp-dis", "sp-noioa"));
+  if(!on) return;
+  const R = spIoa(), sel = new Set(spIoaDays());
+  $("#ioaBeh").textContent = behName(state.cur);
+  const dh = $("#ioaDays");
+  if(dh) dh.innerHTML = dayLabels().map((x, c) => "<button type='button' class='sp-ioaday' data-iday='" + c + "' aria-pressed='" + sel.has(c) + "'"
+    + (dayAbsent(c) ? " disabled title='Not observed this day'" : "") + ">" + esc(spIoaDayName(c)) + "</button>").join("");
+  $$("table.scatter td.mark").forEach(td => {
+    const el = td.querySelector("[data-r][data-c]"); if(!el) return;
+    const c = +el.dataset.c;
+    if(!sel.has(c)) td.classList.add("sp-noioa");
+    else if(R.dis.has(key(+el.dataset.r, c))) td.classList.add("sp-dis");
+  });
+  const res = $("#ioaRes");
+  if(res) res.textContent = !R.days.length
+    ? "Pick the days both observers kept the sheet, then enter the second observer\u2019s marks on the grid below (a day is added when you mark it)."
+    : !R.n ? "No interval to compare on those days." : spIoaText(R, false) + (R.dis.size ? " Where the two differ is outlined in red"
+      + (R.most ? "; most often at " + listOf(R.at, 3) + " (" + R.most + ")" : "") + ": go over the definition with both observers there." : " The two agree on every interval.");
+  const use = $("#ioaUse"); if(use) use.disabled = !R.n;
+  $("#readout").textContent = "Second observer \u00b7 " + behName(state.cur) + " \u00b7 " + R.marked2 + " interval" + (R.marked2 === 1 ? "" : "s")
+    + " marked on the days compared" + (R.n ? " \u00b7 agreement " + R.total + "%" : "");
+}
+function spIoaSet(on){
+  if(!!on === spIOA) return;
+  commitBeh();
+  spIOA = !!on;
+  const b = state.behaviors[state.cur];
+  state.cells = spIOA ? (b.obs2 || (b.obs2 = {})) : b.cells;
+  render();
+}
+/* the pattern summary and the control chart are the first observer's, whichever marks the grid shows */
+{ const prim = fn => function(){
+    if(!spIOA) return fn.apply(this, arguments);
+    const b = state.behaviors[state.cur], keep = state.cells; state.cells = (b && b.cells) || {};
+    try{ return fn.apply(this, arguments); } finally { state.cells = keep; } };
+  renderSummary = prim(renderSummary); renderControl = prim(renderControl);
+  const ro = renderReadout; renderReadout = function(){ const r = ro.apply(this, arguments); try{ spIoaPaint(); }catch(e){} return r; }; }
+$("#ioaTog").addEventListener("click", () => {
+  spIoaSet(!spIOA);
+  nbhUI.toast(spIOA ? "Second observer: marks now go on " + behName(state.cur) + "\u2019s second-observer sheet. The summary and the control chart stay the first observer\u2019s."
+    : "Back to the first observer\u2019s marks.", {kind:"ok"});
+});
+$("#ioaDone").addEventListener("click", () => spIoaSet(false));
+$("#ioaDays").addEventListener("click", e => {
+  const d = e.target.closest("button.sp-ioaday"); if(!d || d.disabled) return;
+  const c = +d.dataset.iday, s = spIoaDays(), i = s.indexOf(c);
+  if(i >= 0) s.splice(i, 1); else s.push(c);
+  state.meta.ioaDays = s.sort((a, b) => a - b).join(",");
+  commitBeh(); spIoaPaint();
+});
+$("#ioaUse").addEventListener("click", () => {
+  const R = spIoa(); if(!R.n) return;
+  state.meta.ioa = String(R.total);
+  state.meta.ioaNote = spIoaText(R, true);
+  commitBeh(); renderMeta(); renderControl();
+  nbhUI.toast("IOA " + R.total + "% is now " + behName(state.cur) + "\u2019s; the days and the observer are named under it on the control chart.", {kind:"ok"});
+});
 
 state.cfg.chart = "bars";
 state.cfg.sigma = "mr";
@@ -4550,25 +4956,48 @@ const spMin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(String(t||''));return m?(+m[1]
 function spIncs(){const d=spCase&&spCase.data;return d&&Array.isArray(d.incidentList)?d.incidentList.filter(i=>i&&i.date&&spMin(i.time)!==null):[];}
 function spMine(){commitBeh();const b=state.behaviors[state.cur]||{meta:{}},nm=spK(b.meta.behavior||state.meta.behavior);
   const L=spIncs();return {b,nm,mine:nm?L.filter(i=>{const k=spK(i.beh);return k&&(k===nm||k.indexOf(nm)>=0||nm.indexOf(k)>=0);}):[]};}
-function spPlace(){const {b,mine,nm}=spMine();if(!nm)return {why:'name'};if(!mine.length)return {why:'none'};
+/* v22.8x (review F96): before an incident is placed on a day that already holds marks of its own (a marked interval no
+   incident was placed in: the sheet kept by hand), the form asks: only the days with no marks yet (the first choice), every
+   day, or none. An incident left off is not remembered as placed, so it can be placed later. The message says how many were
+   left off, or how many fell on days already marked. */
+function spPlan(){const {b,mine,nm}=spMine();if(!nm)return {why:'name'};if(!mine.length)return {why:'none'};
   const placed=new Set(String(b.meta.incPlaced||'').split('|').filter(Boolean)),dates={};
   for(let i=0;i<state.cfg.days;i++){const d=state.meta['date'+i];if(d&&dates[d]===undefined)dates[d]=i;}
   if(!Object.keys(dates).length)return {why:'dates'};
-  const nR=rowLabels().length;let n=0,off=0,dup=0;
+  const nR=rowLabels().length,rowOf=t=>Math.floor((spMin(t)-state.cfg.startMin)/state.cfg.interval);let off=0,dup=0;const C=[];
   mine.forEach(x=>{const k=x.date+' '+x.time+' '+spK(x.beh);if(placed.has(k)){dup++;return;}
-    const c=dates[x.date],r=Math.floor((spMin(x.time)-state.cfg.startMin)/state.cfg.interval);
-    if(c===undefined||r<0||r>=nR){off++;return;}
-    const cell=cellOf(r,c);if(state.cfg.mode==='count')cell.n=(cell.n===null||cell.n===''||isNaN(cell.n)?0:Number(cell.n))+1;else cell.s=Math.min(2,(cell.s||0)+1);
-    placed.add(k);n++;});
-  b.meta.incPlaced=[...placed].join('|');commitBeh();render();return {n,off,dup,total:mine.length};}
+    const c=dates[x.date],r=rowOf(x.time);if(c===undefined||r<0||r>=nR){off++;return;}C.push({k,r,c});});
+  /* the intervals placed incidents account for; a day's marks elsewhere are its own */
+  const by=new Set();placed.forEach(k=>{const m=/^(\d{4}-\d{2}-\d{2}) (\S+)/.exec(k);if(!m||dates[m[1]]===undefined)return;const r=rowOf(m[2]);if(r>=0)by.add(r+'_'+dates[m[1]]);});
+  const hand=[...new Set(C.map(o=>o.c))].filter(c=>{for(let r=0;r<nR;r++){const cell=state.cells[r+'_'+c];if(cell&&!cell.x&&!by.has(r+'_'+c)&&level(cell)>0)return true;}return false;}).sort((x,y)=>x-y);
+  return {b,C,off,dup,hand,total:mine.length,placed};}
+function spPut(P,skip){let n=0,left=0;P.C.forEach(o=>{if(skip.has(o.c)){left++;return;}
+    const cell=cellOf(o.r,o.c);if(state.cfg.mode==='count')cell.n=(cell.n===null||cell.n===''||isNaN(cell.n)?0:Number(cell.n))+1;else cell.s=Math.min(2,(cell.s||0)+1);
+    P.placed.add(o.k);n++;});
+  P.b.meta.incPlaced=[...P.placed].join('|');commitBeh();render();return {n,off:P.off,dup:P.dup,total:P.total,left,leftDays:skip.size?P.hand:[]};}
+function spPlace(){const P=spPlan();if(P.why)return P;
+  if(!P.hand.length||!P.C.length)return spPut(P,new Set());
+  const nm=P.hand.map(c=>dayLabels()[c]+(state.meta['date'+c]?' '+shortDate(state.meta['date'+c]):'')),on=P.C.filter(o=>P.hand.includes(o.c)).length,days=new Set(P.C.map(o=>o.c)).size;
+  return (async()=>{
+    if(await nbhUI.confirm('Place DD-1’s incidents only on the days with no marks yet?\nThis sheet already has marks on '+(P.hand.length===days?(days===1?'the day':'all '+days+' days'):P.hand.length+' of the '+days+' days')
+      +' '+(P.C.length===1?'this incident falls':'these '+P.C.length+' incidents fall')+' on ('+nm.join(', ')+')'+(on<P.C.length?', where '+on+' of them '+(on===1?'falls':'fall'):'')
+      +'. Placed there, an incident already marked by hand would count twice.',{ok:'Only the unmarked days',cancel:'Other choices'}))
+      return spPut(P,new Set(P.hand));
+    if(await nbhUI.confirm('Place them on every day, on top of the marks already there?\nOnly when the marks on '+(P.hand.length===1?'that day':'those days')+' are not the incidents logged on Form DD-1. Cancel places none.',{ok:'Every day',cancel:'Cancel'}))
+      return Object.assign(spPut(P,new Set()),{onMarked:on});
+    return {why:'cancel'};})();}
+function spMsg(r){const dn=(r.leftDays||[]).map(c=>dayLabels()[c]+(state.meta['date'+c]?' '+shortDate(state.meta['date'+c]):''));
+  return r.why==='name'?'Name the behavior on this sheet first; incidents are placed by the behavior they were logged under.':r.why==='none'?'Form DD-1 has no incident logged under this behavior.':
+    r.why==='dates'?'Give the sheet its dates first (the date under each day); incidents are placed on the day they happened.':r.why==='cancel'?'No incident placed.':
+    (r.n?r.n+' incident'+(r.n===1?'':'s')+' placed':'No new incident placed')+(r.onMarked?', '+r.onMarked+' of them on days that already held marks':'')
+    +(r.left?'; '+r.left+' left off, on '+(dn.length===1?'a day':'days')+' already marked by hand ('+dn.join(', ')+')':'')
+    +(r.dup?'; '+r.dup+' placed before':'')+(r.off?'; '+r.off+' outside this sheet’s days or hours':'')+'.';}
 function spBtn(){let el=document.getElementById('spIncBtn');const L=spIncs();
   if(!el){const at=document.getElementById('clearBtn');if(!at)return;el=document.createElement('button');el.className=at.className;el.id='spIncBtn';el.type='button';
     el.textContent='Place DD-1’s incidents';at.parentNode.insertBefore(el,at);
-    el.addEventListener('click',()=>{const r=spPlace();
-      const msg=r.why==='name'?'Name the behavior on this sheet first; incidents are placed by the behavior they were logged under.':r.why==='none'?'Form DD-1 has no incident logged under this behavior.':
-        r.why==='dates'?'Give the sheet its dates first (the date under each day); incidents are placed on the day they happened.':
-        (r.n?r.n+' incident'+(r.n===1?'':'s')+' placed':'No new incident placed')+(r.dup?'; '+r.dup+' placed before':'')+(r.off?'; '+r.off+' outside this sheet’s days or hours':'')+'.';
-      nbhUI.toast(msg,r.n?{kind:'ok'}:undefined);});}
+    el.addEventListener('click',()=>{if(typeof spIoaSet==='function')spIoaSet(false);   /* v22.8x (I48) on the first observer's marks */
+      const show=r=>nbhUI.toast(spMsg(r),r&&r.n?{kind:'ok'}:undefined),r=spPlace();
+      if(r&&typeof r.then==='function')r.then(show);else show(r);});}
   el.style.display=L.length?'':'none';el.title=L.length?L.length+' incident'+(L.length===1?'':'s')+' logged on Form DD-1':'';}
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){spCase=f||null;spBtn();return was?was.apply(this,arguments):null;};}
 spBtn();
@@ -4588,7 +5017,7 @@ function spFromCase(f){const behs=((f&&f.behaviors)||[]).filter(b=>b&&b.label&&!
     const first=state.behaviors[0];state.behaviors=behs.slice(0,6).map((b,i)=>{const o=i?{meta:{},cells:{}}:first;put(o.meta,b);return o;});}
   else state.behaviors.forEach(o=>{const b=behs.find(x=>spK(x.label)===spK(o.meta.behavior));if(b)put(o.meta,b);});
   if(!n)return 0;
-  const c=state.behaviors[Math.min(state.cur,state.behaviors.length-1)];state.cur=state.behaviors.indexOf(c);BKEYS.forEach(k=>{state.meta[k]=c.meta[k]||'';});state.cells=c.cells;
+  const c=state.behaviors[Math.min(state.cur,state.behaviors.length-1)];state.cur=state.behaviors.indexOf(c);BKEYS.forEach(k=>{state.meta[k]=c.meta[k]||'';});state.cells=spIOA?(c.obs2||(c.obs2={})):c.cells;   /* v22.8x (I48) */
   renderMeta();renderBehBar();render();return n;}
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;const n=spFromCase(f);
   if(n)return {filled:n,note:state.behaviors.length>1?'a sheet for each target behavior':''};
@@ -4624,11 +5053,21 @@ const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function()
 /* v21.78 the FBA chain, out: the scatter plot's pattern as evidence for Forms FS-1 and EA-1: the Pattern Summary's first
    line (intervals marked, heaviest intervals and days) for the behavior on screen, over the sheet's dated days. A scatter
    plot shows when the behavior occurs, not why, so it names no function and no strength. */
-OUT(function(){let d=null;try{if(typeof commitBeh==='function')commitBeh();d=summaryData();}catch(e){d=null;}if(!d||!d.marked)return null;
-  let p=document.querySelector('#sumBody p.cap');if(!p){try{renderSummary();}catch(e){}p=document.querySelector('#sumBody p.cap');}const m=state.meta||{};
-  const dates=Object.keys(m).filter(k=>/^date\d+$/.test(k)&&+k.slice(4)<(d.nC||99)).map(k=>m[k]);
-  return EV(Object.assign({form:'SP-1',method:'Scatter plot of when the behavior occurs (descriptive)'},SPAN(dates),{n:d.nC||null,fn:'',fnKey:'',strength:'',by:T(m.observer),
-    statement:(T(m.behavior)?T(m.behavior)+': ':'')+T(p?p.textContent:'')+' A scatter plot shows when the behavior occurs, not why.'}));});
+/* v22.8x (review F92): every behavior on the record, not only the one on screen: each behavior's own first line (its own
+   cutoff, the days observed) in the statement, one after the other, and each on its own in perBehavior; n is the days
+   observed (review F91). The behavior on screen is put back as it was. */
+OUT(function(){if(typeof commitBeh==='function')commitBeh();const m=state.meta||{},keep={cells:state.cells,thr:m.threshold,beh:m.behavior},per=[];let nC=0,nObs=0;
+  try{(state.behaviors||[]).forEach((b,i)=>{state.cells=b.cells||{};m.threshold=(b.meta&&b.meta.threshold)||'';m.behavior=(b.meta&&b.meta.behavior)||'';
+      const d=summaryData();nC=d.nC;nObs=d.nObs;if(!d.marked)return;const nm=T(m.behavior)||('Behavior '+(i+1));
+      per.push({behavior:nm,statement:nm+': '+T(summaryLine(d)),marked:d.marked,high:d.high,threshold:thr(),n:d.nObs,windows:typeof spWindows==='function'?spWindows():[]});});}
+  finally{state.cells=keep.cells;m.threshold=keep.thr;m.behavior=keep.beh;}
+  if(!per.length)return null;
+  const dates=Object.keys(m).filter(k=>/^date\d+$/.test(k)&&+k.slice(4)<(nC||99)&&!(typeof dayAbsent==='function'&&dayAbsent(+k.slice(4)))).map(k=>m[k]);
+  const ev=EV(Object.assign({form:'SP-1',method:'Scatter plot of when the behavior occurs (descriptive)'},SPAN(dates),{n:nObs||null,fn:'',fnKey:'',strength:'',by:T(m.observer),
+    statement:per.map(x=>x.statement).join(' ')+' A scatter plot shows when the behavior occurs, not why.'}));
+  ev.perBehavior=per.map(x=>({behavior:x.behavior,statement:x.statement,marked:x.marked,high:x.high,threshold:x.threshold,n:x.n}));
+  const W=[].concat(...per.map(x=>x.windows.map(w=>Object.assign({behavior:x.behavior},w))));if(W.length)ev.windows=W;   /* v22.8x (review I49) */
+  return ev;});
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
