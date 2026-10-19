@@ -1,19 +1,27 @@
+/* Form RA-1 regression: every view, every step of every walkthrough story and a practice question with no errors, the
+   Walkthrough on a phone within its width, and the form's print (compared with the last run's, for information).
+   v22.71: pass or fail. usage: node qa/ra1-regress.js */
 const L=require(__dirname+'/lib.js');const {chromium,sleep,BASE}=L;const fs=require('fs'),crypto=require('crypto');
 const S=__dirname+'/out';
 const norm=buf=>{let s=buf.toString('latin1');s=s.replace(/\/CreationDate \([^)]*\)/g,'/CreationDate (X)').replace(/\/ModDate \([^)]*\)/g,'/ModDate (X)').replace(/\/ID \[<[0-9a-fA-F]+> <[0-9a-fA-F]+>\]/g,'/ID [<X> <X>]');return Buffer.from(s,'latin1');};
+let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,600):''));if(!c)fails++;};
 (async()=>{const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1280,height:900}});await ctx.addInitScript(()=>{window.print=function(){};});
  const log=[];const page=await ctx.newPage();L.wire(page,log);const url=BASE+'/NBH-Workstation/Reinforcer_Assessment_Protocol.html';
  await page.goto(url,{waitUntil:'load'});await sleep(800);
- /* every view, the walkthrough stories stepped, the drill */
+ /* every view, then the Walkthrough: every step of every story, and a practice question answered. v22.71: the stories are
+    stepped in the Walkthrough view (stepping them while another view showed waited out a hidden button's timeout on every
+    click), and they draw with NBHTable, the table seen from above */
  for(const v of await page.$$eval('#viewSeg button',b=>b.map(x=>x.dataset.view))){await page.click(`#viewSeg button[data-view="${v}"]`);await sleep(250);}
- const stories=await page.$$('.story[data-story]');let steps=0;
- for(const st of stories){const next=await st.$('[data-act="next"]');for(let i=0;i<12;i++){if(!next)break;await next.click().catch(()=>{});steps++;await sleep(120);}}
- const drill=await page.$('.scene[data-scene="drill"] svg.tbl');console.log('stories stepped',stories.length,'steps',steps,'drill scene',!!drill);
- const opt=await page.$('#wk-qopts button');if(opt){await opt.click();await sleep(300);await page.click('#wk-qnext');await sleep(600);}
- console.log('errors after views/stories/drill:',JSON.stringify(log).slice(0,400));
+ await page.click('#viewSeg button[data-view="walk"]');await sleep(500);
+ const st=await page.evaluate(async()=>{const out={stories:0,steps:0};for(const k in window.SCENES){out.stories++;const S=window.SCENES[k];for(let i=0;i<S.frames.length;i++){S.go(i);out.steps++;await new Promise(r=>setTimeout(r,40));}}return out;});
+ const drill=!!(await page.$('#walk .scene.nst:not(.story .scene)'));
+ ok('1 every step of every story drawn ('+st.stories+' stories, '+st.steps+' steps), and the practice scene',st.stories===6&&st.steps>40&&drill,{st,drill});
+ const opt=await page.$('#wk-qopts button');if(opt){await opt.click({timeout:3000});await sleep(300);const nx=await page.$('#wk-qnext');if(nx)await nx.click({timeout:3000}).catch(()=>{});await sleep(600);}
+ ok('2 no errors in the views, the stories or the practice',!log.length,log);
  /* phone */
  await page.setViewportSize({width:390,height:800});await sleep(400);await page.click('#viewSeg button[data-view="walk"]').catch(()=>{});await sleep(400);
- console.log('phone scroll/client',await page.evaluate(()=>[document.documentElement.scrollWidth,document.documentElement.clientWidth].join('/')));
+ const sw=await page.evaluate(()=>[document.documentElement.scrollWidth,document.documentElement.clientWidth]);
+ ok('3 on a phone the Walkthrough fits the width ('+sw.join('/')+')',sw[0]<=sw[1]+1,sw);
  await page.setViewportSize({width:1280,height:900});
  /* the normal print from the stored snapshot, against the last run. v21.37: the snapshot lives in qa/data (where
     printbase.js keeps it); when it is missing, the simulation is loaded, its snapshot written and said so, and this
@@ -34,4 +42,5 @@ const norm=buf=>{let s=buf.toString('latin1');s=s.replace(/\/CreationDate \([^)]
  if(fs.existsSync(out)){const prev=fs.readFileSync(out);console.log('print vs the last run:',prev.equals(buf)?'identical':'differs','('+pages(prev)+' -> '+pages(buf)+' pages)');}
  else console.log('first print kept for the next run:',pages(buf),'pages');
  fs.writeFileSync(out,buf);
- console.log('print bytes',buf.length,'LOG',JSON.stringify(log).slice(0,300));await br.close();})();
+ ok('4 the form prints ('+pages(buf)+' pages), with no errors',pages(buf)>0&&!log.length,log);
+ await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

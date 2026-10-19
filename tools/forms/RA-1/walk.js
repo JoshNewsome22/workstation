@@ -150,6 +150,8 @@ const MATL={ctl:'CONTROL','0':'TABLET','1':'FRUIT CHEW','2':'PRAISE + HIGH FIVE'
 const BLOCKC=['#7b61a8','#e8b737','#4f9a8a','#d9583b','#2f5fa3','#c9a13b'];
 const TABLET='<div class="raw-tab"><div class="raw-tabscr"><div class="raw-tabvid"><i></i><i></i><i></i></div><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="rgba(255,255,255,.9)"/><path d="M15.5 12.5v15l12-7.5z" fill="#1d3b5a"/></svg></div></div>';
 const CHEW='<svg viewBox="0 0 120 70" aria-hidden="true"><path d="M6 14l22 10v22L6 56c6-9 6-33 0-42z" fill="#f2b84b" stroke="#8a5a12" stroke-width="2.5" stroke-linejoin="round"/><path d="M114 14L92 24v22l22 10c-6-9-6-33 0-42z" fill="#f2b84b" stroke="#8a5a12" stroke-width="2.5" stroke-linejoin="round"/><rect x="28" y="12" width="64" height="46" rx="18" fill="#e0593a" stroke="#8a2a14" stroke-width="2.5"/><path d="M40 24c8 8 32 8 40 0" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="4" stroke-linecap="round"/><text x="60" y="42" text-anchor="middle" font="700 13px Inter,Arial,sans-serif" fill="#fff">CHEW</text></svg>';
+/* (v22.71) the drawn stories, seen from above the table (story-table.js), draw with the same hands, tablet and fruit chew */
+window.NBH_RA_ART={hands:()=>handArt(),TABLET,CHEW};
 function compose(D){
   const st=D.stage;st.innerHTML='';
   const layer=c=>{const d=div('wk-L '+(c||''));st.appendChild(d);return d;};
@@ -165,7 +167,10 @@ function compose(D){
   const sub=(el,init)=>{const fx={el,tr:new Track(Object.assign({o:0,s:1,dy:0,dx:0},init||{}))};fxs.push(fx);return fx;};
   const pulse=(fx,t0,dur)=>{fx.tr.move(t0,t0+.3,{o:1});fx.tr.move(t0+Math.max(.35,dur-.4),t0+dur,{o:0});};
   const glow=(r,t0,dur,p,parent,round)=>{if(!r)return null;const pp=p==null?6:p;const g=mkFx('wk-glow raw-glow'+(round?' round':''),'',{x:r.x-pp,y:r.y-pp,w:r.w+2*pp,h:r.h+2*pp},null,parent||Lfx);pulse(g,t0,dur);return g;};
-  const note=(r,text,t0,t1,side,parent)=>{if(!r)return null;const n=mkFx('raw-note',esc(text),{x:r.x+r.w/2,y:side==='below'?r.y+r.h+8:r.y-40},{dy:side==='below'?-8:8},parent||Lfx);n.el.style.transform='translateX(-50%)';n.tr.move(t0,t0+.35,{o:1,dy:0},0,easeOut);n.tr.move(t1,t1+.35,{o:0});return n;};
+  /* (v22.71) a note on the stage is kept inside the frame: its centre moves in from an edge as far as its width needs */
+  const note=(r,text,t0,t1,side,parent)=>{if(!r)return null;const n=mkFx('raw-note',esc(text),{x:r.x+r.w/2,y:side==='below'?r.y+r.h+8:r.y-40},{dy:side==='below'?-8:8},parent||Lfx);n.el.style.transform='translateX(-50%)';
+    if(!parent){const w=n.el.offsetWidth;if(w>0)n.el.style.left=f2(clamp(r.x+r.w/2,w/2+14,SW-w/2-14))+'px';}
+    n.tr.move(t0,t0+.35,{o:1,dy:0},0,easeOut);n.tr.move(t1,t1+.35,{o:0});return n;};
   const card=(cls,html,box,t0,t1,init)=>{const c=mkFx('smw-card raw-card '+cls,html,box,Object.assign({dy:16},init||{}));c.tr.move(t0,t0+.5,{o:1,dy:0},0,easeOut);if(t1!=null)c.tr.move(t1,t1+.4,{o:0});return c;};
   const veil=(t0,t1,o)=>{const v=mkFx('smw-veil raw-veilb','',{x:0,y:0,w:SW,h:SH},null,Lveil);v.tr.move(t0,t0+.5,{o:o==null?.5:o});if(t1!=null)v.tr.move(t1,t1+.4,{o:0});return v;};
   const chip=(text,box,t0,t1,cls)=>{const c=mkFx('raw-chip '+(cls||''),esc(text),box,{dy:10,s:.9});c.tr.move(t0,t0+.35,{o:1,dy:0,s:1},0,easeOut);if(t1!=null)c.tr.move(t1,t1+.3,{o:0});return c;};
@@ -304,11 +309,11 @@ function compose(D){
   const runP=paper('raw-run',760);const run=add(runP,copyOf(q1('#ra-run-so'),true));
   if(run){/* the runner as it looks part way through a tablet session */
     const set=(sel,v)=>{const e=run.querySelector(sel);if(e)e.textContent=v;};
-    const sels=[...run.querySelectorAll('.ra-run-set .raw-v')];if(sels[0])sels[0].textContent=EXN[0];if(sels[1])sels[1].textContent='1';if(sels[2])sels[2].textContent='20';if(sels[3])sels[3].textContent='Minutes run less access time';
+    const sels=[...run.querySelectorAll('.ra-run-set .raw-v')];if(sels[0])sels[0].textContent=EXN[0];if(sels[1])sels[1].textContent='1';if(sels[2])sels[2].textContent='20';if(sels[3])sels[3].textContent='At the access time';if(sels[4])sels[4].textContent='Pauses: minutes available';   /* (v22.71) as the narration says: the clock waits */
     const srcs=[...run.querySelectorAll('.ra-run-src')];if(srcs[0])srcs[0].textContent='Every response: FR 1';if(srcs[1])srcs[1].textContent='20 s access, as on Setup';
     set('.ra-run-big','3:48');set('.ra-run-sub b','Running');set('.ra-run-sub span','1:12 elapsed');set('.ra-run-cue b','Deliver '+EXN[0]);set('.ra-run-cue span','20 s of access, then the clock runs again');
     const ns=run.querySelectorAll('.ra-run-n');if(ns[0])ns[0].textContent='17';if(ns[1])ns[1].textContent='0';const bar=run.querySelector('.ra-run-bar span');if(bar)bar.style.width='24%';
-    set('.ra-run-info','Every response produces '+EXN[0]+' for 20 s; the sheet takes minutes run less access time.');const scr=run.querySelector('.ra-run-script');if(scr)scr.remove();const sm=run.querySelector('.ra-run-sum');if(sm)sm.remove();const msg=run.querySelector('.ra-run-msg');if(msg)msg.remove();}
+    set('.ra-run-info','Every response produces '+EXN[0]+' for 20 s; the clock waits during access, so the sheet takes the minutes the response was available.');const scr=run.querySelector('.ra-run-script');if(scr)scr.remove();const sm=run.querySelector('.ra-run-sum');if(sm)sm.remove();const msg=run.querySelector('.ra-run-msg');if(msg)msg.remove();}
   let y=0;[soP,coP,prP,sumP,runP].forEach(p=>{p.style.top=y+'px';y+=p.offsetHeight+80;});world.style.width='1040px';world.style.height=y+'px';
   const wrel=el=>{if(!el)return null;const r=el.getBoundingClientRect(),c=world.getBoundingClientRect();const k=c.width/(world.offsetWidth||1)||1;return{x:(r.left-c.left)/k,y:(r.top-c.top)/k,w:r.width/k,h:r.height/k};};
   const uni=rs=>{rs=rs.filter(Boolean);if(!rs.length)return null;const x=Math.min(...rs.map(r=>r.x)),y0=Math.min(...rs.map(r=>r.y));return{x,y:y0,w:Math.max(...rs.map(r=>r.x+r.w))-x,h:Math.max(...rs.map(r=>r.y+r.h))-y0};};
@@ -319,7 +324,8 @@ function compose(D){
   const glowW=(r,t0,dur,p)=>glow(r,t0,dur,p==null?4:p,world);const noteW=(r,text,t0,t1,side)=>note(r,text,t0,t1,side,world);
   const rowsOf=tbl=>tbl&&tbl.tBodies[0]?[...tbl.tBodies[0].rows]:[];const colOf=(tbl,c)=>uni(rowsOf(tbl).map(tr=>wrel(tr.cells[c])).concat([tbl&&tbl.tHead?wrel(tbl.tHead.rows[0].cells[c]):null]));
   /* the papers are shown over a dimmed table; the hands are out of the frame then */
-  const papers=(t0,t1)=>{const v=veil(t0,t1,.62);worldFx.tr.move(t0,t0+.5,{o:1});if(t1!=null)worldFx.tr.move(t1,t1+.4,{o:0});return v;};
+  /* (v22.71) the papers and the tips over a near-opaque veil: the table no longer shows through them */
+  const papers=(t0,t1)=>{const v=veil(t0,t1,.88);worldFx.tr.move(t0,t0+.5,{o:1});if(t1!=null)worldFx.tr.move(t1,t1+.4,{o:0});return v;};
   const panelShow=(t0,on)=>{panel.tr.move(t0,t0+.4,{o:on?1:0});};
   const matTo=(t,c)=>{matCol.set(t,c);};
   /* the arrangements: one bin on its mat (single operant, progressive ratio), or three bins in a row (concurrent operants) */
@@ -446,7 +452,7 @@ function compose(D){
     const tc=Math.max(tu+3,K.at('no-reinforcer control',.88)-.2);if(rK)glowW(wrel(rK),tc,K.t+K.d-tc,3);
     const tf=Math.max(tc+.5,K.t+K.d-4);camTo(tf,tf+1.2,pad(uni([wrel(prRank),wrel(prFig)]),12));return K.d;};
   /* ---- at the table ---- */
-  SC.rules=K=>{const t=K.t;panelShow(t,false);veil(t,K.t+K.d+.2,.55);
+  SC.rules=K=>{const t=K.t;panelShow(t,false);veil(t,K.t+K.d+.2,.88);
     const tips=[['Deliver immediately','a fixed magnitude, no added praise'],['A no-consequence control','the same materials, the assessor neutral'],['Restrict access before','a few hours; record any access there was'],['Problem behavior every session','and the stop rule'],['A second observer','about one session in three, when the result goes into a plan']];
     const c=card('smw-tips raw-tips','<h3>For every design</h3>'+tips.map((x,i)=>'<div class="tp" data-i="'+i+'"><b>'+(i+1)+'</b><p><strong>'+esc(x[0])+'</strong> '+esc(x[1])+'</p></div>').join(''),{x:180,y:28,w:920},t+.3,K.t+K.d+.2);
     const rs=[...c.el.querySelectorAll('.tp')].map(e=>sub(e,{o:.35,h:0}));const at=[['Deliver the stimulus',.1],['no-consequence control',.36],['Restrict access',.5],['Record problem behavior',.72],['second observer',.84]].map((a,i)=>Math.max(t+.9+i*.5,K.at(a[0],a[1])-.2));
@@ -491,8 +497,13 @@ function chunks(id,text,T,on){const P='․';const guard=text.replace(/(\d)\.(\d)
 /* ---------------- renderAt: the stage at time t ---------------- */
 let RMQ=null;const reduced=()=>{try{RMQ=RMQ||window.matchMedia('(prefers-reduced-motion: reduce)');return !!RMQ.matches;}catch(e){return false;}};
 function cueAt(t){if(!B)return null;const c=B.cues;let lo=0,hi=c.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(c[m].start<=t)lo=m;else hi=m-1;}return c[lo];}
+/* (v22.71) a chapter opens on its own scene: for its first CUT seconds the picture holds the scene as it stands once set up
+   (the last chapter's papers gone, the new arrangement in place), a cut rather than a crossfade from the chapter before; the
+   narration and the captions run on from the chapter's start */
+const CUT=1.4;
 function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=cueAt(t);
-  const v=reduced()&&cue?Math.min(B.D,cue.start+cue.dur-.02):t;
+  let v=reduced()&&cue?Math.min(B.D,cue.start+cue.dur-.02):t;
+  for(const c of B.chapters)if(c.start>0&&v>=c.start&&v<c.start+CUT){v=Math.min(B.D,c.start+CUT);break;}
   const c=B.cam.at(v);css(B.world,'transform','translate('+f2(c.x)+'px,'+f2(c.y)+'px) scale('+c.s.toFixed(4)+')');
   const mc=B.matCol.at(v).v;css(B.mat1,'background',mc==='none'?'#c4bdb0':COL[mc]);txt(B.mat1Lbl,mc==='none'?'':MATL[mc]);
   /* the blocks and the items: placed, carried (following a hand), lifted (a larger shadow) */

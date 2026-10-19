@@ -712,6 +712,8 @@ td input,td select{max-width:100%}
 .ra-run-hint{font-size:12px;line-height:1.4;color:var(--nbh-muted,#54676f);flex:1 1 260px;min-width:0}
 .ra-run-set{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 12px;align-items:start}
 .ra-run-f{display:flex;flex-direction:column;gap:3px;min-width:0}
+/* v22.71 the Clock during access menu takes two columns where the row has them, so its choices read in full */
+@media (min-width:640px){.ra-run-set .ra-run-w2{grid-column:span 2}}
 .ra-run-f label{font-size:11.5px;font-weight:600;color:var(--nbh-navy,#182e43)}
 .ra-run-f select,.ra-run-f input,.ra-run-opts input{font:13px var(--nbh-sans,system-ui,sans-serif);padding:4px 6px;border:1px solid #6f8791;border-radius:4px;
   min-width:0;width:100%;max-width:100%;background:#fff;color:var(--nbh-ink,#1a2933);min-height:30px}
@@ -1404,6 +1406,10 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 /* the caption centred without a transform, so Save as video's painter (which lays the stage out flat, transforms off) wraps it as shown */
 .only-walk .wk-cap{left:0;right:0;margin:0 auto;transform:none;width:fit-content}
 .only-walk .wk-stage .wk-cap.wk-cap.wk-cap{max-width:1140px!important}   /* above the polish layer's .nbh-wide measure */
+/* v21.67 Match the model: the practice and the checks cards */
+.smw-prac .pr{display:flex;gap:14px;justify-content:center;margin:6px 0}.smw-prac .pm{width:170px;text-align:center;border-radius:10px;padding:6px 6px 2px;font-size:22px}
+.smw-prac .pm img,.smw-prac .pm svg{width:100%;height:110px;object-fit:contain;display:block}.smw-prac .sc{font-size:26px;text-align:center;margin:8px 0 0}
+.smw-checks .st{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;font-size:23px}.smw-checks .st span{padding:6px 12px;border-radius:8px}.smw-checks .st i{color:#8a94a0;font-style:normal}
 
 /* ===== Form RA-1, the walkthrough's own pieces (v21.60); the player is Form TK-1's walk.css, the cards and the caption SM-1's ===== */
 body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:22px 26px 30px}
@@ -1523,6 +1529,97 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
 .raw-paper .ra-run{margin:0;max-width:none}
 .raw-paper .raw-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 @media print{#walk .wk-sec{display:none!important}}
+</style>
+<style id="ra1-story-css">
+/* ===== v22.71 Form RA-1, the drawn stories seen from above the table (tools/forms/RA-1/story-table.js) ===== */
+#walk .story .stage.nst-host,#walk .story .stage:has(.nst){height:auto;min-height:0;aspect-ratio:auto;padding:0;background:none;border:0;overflow:visible}
+#walk .story .scene.nst{position:relative;width:100%;height:auto;min-height:0;aspect-ratio:auto;background:none;overflow:visible}
+#walk .nst .nst-frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:12px;background:#d8c29d;box-shadow:0 1px 0 rgba(0,0,0,.04),0 6px 18px -10px rgba(24,46,67,.4)}
+#walk .nst .nst-stage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;overflow:hidden;
+  background:radial-gradient(ellipse at 40% 35%,#f1e6d1 0%,#e2d0b0 58%,#ccb68f 100%)}
+#walk .nst .nst-L{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;transition:opacity .35s ease}
+#walk .nst .nst-tab{z-index:1}#walk .nst .nst-item{z-index:3}#walk .nst .nst-hl{z-index:4}#walk .nst .nst-ht{z-index:5}#walk .nst .nst-fx{z-index:6}#walk .nst .nst-brd{z-index:9;background:#f6f2ea}
+#walk .nst .nst-off{opacity:0!important;visibility:hidden}
+#walk .nst .nst-tab>*,#walk .nst .nst-item>*,#walk .nst .nst-fx>*{transition:opacity .35s ease,transform .7s cubic-bezier(.45,.05,.25,1),background-color .35s ease,visibility .35s}
+/* the table */
+#walk .nst .nst-trayb{position:absolute}
+#walk .nst .nst-blk{position:absolute;border-radius:7px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18),inset 0 3px 0 rgba(255,255,255,.28),0 2px 3px rgba(0,0,0,.28)}
+#walk .nst .nst-mat{position:absolute;border-radius:16px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.18),0 3px 8px rgba(0,0,0,.18)}
+#walk .nst .nst-matl{position:absolute;left:0;right:0;top:12px;text-align:center;color:#fff;font:800 19px/1.15 Inter,"Segoe UI",Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:0 8px}
+#walk .nst .raw-mat3 .nst-matl{font-size:16px;top:12px}
+#walk .nst .nst-bin{position:absolute}
+#walk .nst .raw-binfloor{position:absolute;inset:0}
+#walk .nst .nst-in{position:absolute}
+#walk .nst .nst-none{position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;font:700 19px Inter,Arial,sans-serif}
+#walk .nst .nst-switch{position:absolute;border-radius:50%;background:#2b3945;box-shadow:0 5px 0 #1b252e,0 8px 14px rgba(0,0,0,.3)}
+#walk .nst .nst-switch i{position:absolute;inset:22px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ffe9a6,#f2b84b 60%,#c98a1c);box-shadow:0 0 26px 8px rgba(255,205,90,.6)}
+#walk .nst .nst-arr{position:absolute;left:0;top:0;width:1280px;height:720px}
+#walk .nst .nst-ai{position:absolute;top:262px;width:150px;margin-left:-75px;text-align:center}
+#walk .nst .nst-ai .nst-aip{position:relative;height:110px;display:flex;align-items:center;justify-content:center}
+#walk .nst .nst-ai .nst-aip>.raw-tab,#walk .nst .nst-ai .nst-aip>.raw-chewpic{position:relative;width:140px;height:96px}
+#walk .nst .nst-ai b{display:inline-block;margin-top:8px;background:#1d3b5a;color:#fff;font:700 17px/1.2 Inter,Arial,sans-serif;padding:5px 11px;border-radius:8px}
+#walk .nst .nst-ai.nst-gone{opacity:.25}
+#walk .nst .nst-bubbles{position:relative;width:96px;height:96px}
+#walk .nst .nst-bubbles i{position:absolute;border-radius:50%;border:4px solid #7fb9e6;background:radial-gradient(circle at 35% 30%,#fff 0 18%,rgba(127,185,230,.25) 40%,rgba(127,185,230,.08))}
+#walk .nst .nst-bubbles i:nth-child(1){width:52px;height:52px;left:4px;top:30px}#walk .nst .nst-bubbles i:nth-child(2){width:38px;height:38px;left:50px;top:8px}#walk .nst .nst-bubbles i:nth-child(3){width:30px;height:30px;left:56px;top:56px}
+/* the items */
+#walk .nst .nst-it{position:absolute;left:0;top:0;visibility:visible}
+#walk .nst .nst-it.nst-play .raw-tabvid i{animation:nstPlay 1.1s ease-in-out infinite alternate}
+@keyframes nstPlay{from{opacity:.55}to{opacity:1}}
+#walk .nst .nst-cup{position:absolute;left:0;top:0;width:92px;height:70px;border-radius:12px;background:#fdfaf4;box-shadow:inset 0 0 0 4px #d9cdb6,0 4px 8px rgba(0,0,0,.2)}
+#walk .nst .nst-cup i{position:absolute;width:30px;height:18px;border-radius:7px;background:#f2b84b;box-shadow:inset 0 0 0 2px #8a5a12}
+#walk .nst .nst-cup i:nth-child(1){left:14px;top:14px;transform:rotate(-14deg)}#walk .nst .nst-cup i:nth-child(2){left:46px;top:20px;transform:rotate(18deg);background:#d9583b}#walk .nst .nst-cup i:nth-child(3){left:26px;top:38px;transform:rotate(6deg)}
+#walk .nst .nst-held{position:absolute;left:0;top:0;z-index:2}
+#walk .nst .nst-clip{position:absolute;left:70px;top:40px;width:150px;height:190px;border-radius:10px;background:#a77b4f;box-shadow:0 5px 12px rgba(0,0,0,.25)}
+#walk .nst .nst-clip::before{content:"";position:absolute;inset:16px 12px 12px;border-radius:4px;background:#fff}
+#walk .nst .nst-clip i{position:absolute;left:28px;right:28px;height:5px;border-radius:3px;background:#c9d3d8}
+#walk .nst .nst-clip i:nth-child(1){top:46px}#walk .nst .nst-clip i:nth-child(2){top:70px}#walk .nst .nst-clip i:nth-child(3){top:94px}#walk .nst .nst-clip i:nth-child(4){top:118px;right:60px}
+/* the hands glide between steps; a change of pose crossfades */
+#walk .nst .nst-hand{position:absolute;left:0;top:0;isolation:isolate}
+#walk .nst .nst-pose{position:absolute;left:0;top:0;transition:transform .7s cubic-bezier(.45,.05,.25,1),opacity .28s ease}
+/* the data collector's screen */
+#walk .nst .nst-obsw{position:absolute;left:880px;top:26px;width:372px}
+#walk .nst .nst-obsh{font:700 17px/1.2 Inter,Arial,sans-serif;color:#1d3b5a;letter-spacing:.02em;margin:0 0 8px 4px;text-transform:uppercase}
+#walk .nst .nst-obs{position:relative;background:#fffdf8;border-radius:16px;padding:18px 20px 20px;box-shadow:0 1px 0 rgba(0,0,0,.05),0 10px 26px -12px rgba(24,46,67,.5);border:3px solid transparent}
+#walk .nst .nst-obs.nst-alert{border-color:#f2b84b;background:#fff7e3}
+#walk .nst .nst-o1{font:700 21px/1.25 Inter,Arial,sans-serif;color:#4b5a66;padding-right:112px;min-height:26px}
+#walk .nst .nst-o2{font:800 44px/1.1 Inter,Arial,sans-serif;color:#1d3b5a;margin:8px 0 4px}
+#walk .nst .nst-alert .nst-o2{color:#9b4e15}
+#walk .nst .nst-o3{font:500 21px/1.3 Inter,Arial,sans-serif;color:#4b5a66}
+#walk .nst .nst-ok{position:absolute;right:16px;top:16px;font:700 15px/1 Inter,Arial,sans-serif;padding:6px 10px;border-radius:999px}
+#walk .nst .nst-ok:empty{display:none}
+#walk .nst .nst-k-alert{background:#f2b84b;color:#1d2730}#walk .nst .nst-k-rec{background:#e6eef5;color:#1d3b5a}#walk .nst .nst-k-rec::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:#c43d2e;margin-right:6px;vertical-align:1px}
+#walk .nst .nst-k-ok{background:#e3f1e5;color:#2d6b39}
+#walk .nst .nst-obs2{margin-top:14px;padding:14px 18px 16px}
+#walk .nst .nst-obs2 .nst-o1{font-size:17px}#walk .nst .nst-obs2 .nst-o2{font-size:32px;margin:4px 0 2px}#walk .nst .nst-obs2 .nst-o3{font-size:18px}
+#walk .nst .nst-lad{margin-top:14px;background:#fffdf8;border-radius:14px;padding:12px 12px 10px;box-shadow:0 10px 26px -12px rgba(24,46,67,.5)}
+#walk .nst .nst-lad svg{display:block;width:100%;height:auto}#walk .nst .nst-lad svg+svg{margin-top:8px}
+#walk .nst .nst-wide .nst-obsw{opacity:0}
+/* the clock, the speech, praise, problem behavior */
+#walk .nst .nst-clock{position:absolute;left:36px;top:30px;display:flex;align-items:center;gap:10px;background:#fffdf8;border-radius:12px;padding:10px 16px;box-shadow:0 6px 16px -8px rgba(24,46,67,.5);font:800 30px/1 Inter,Arial,sans-serif;color:#1d3b5a}
+#walk .nst .nst-clock svg{width:34px;height:34px}
+#walk .nst .nst-bub{position:absolute;max-width:360px;background:#fff;color:#1d2730;font:700 26px/1.25 Georgia,"Times New Roman",serif;padding:14px 20px;border-radius:18px;box-shadow:0 8px 20px -8px rgba(0,0,0,.35)}
+#walk .nst .nst-bub::after{content:"";position:absolute;left:28px;bottom:-14px;border:14px solid transparent;border-top-color:#fff;border-bottom:0}
+#walk .nst .nst-pb{position:absolute;left:600px;top:150px;background:#8e2a2a;color:#fff;font:800 20px/1 Inter,Arial,sans-serif;padding:10px 14px;border-radius:10px;box-shadow:0 6px 14px -6px rgba(0,0,0,.5)}
+#walk .nst .nst-hit{position:absolute;left:560px;top:180px;width:150px;height:110px;border-radius:50%;box-shadow:0 0 0 6px rgba(196,61,46,.55),0 0 34px 10px rgba(196,61,46,.35)}
+#walk .nst .nst-clap{position:absolute;left:520px;top:200px;width:120px;height:120px}
+#walk .nst .nst-clap i{position:absolute;left:56px;top:56px;width:8px;height:30px;border-radius:4px;background:#f2b84b;transform-origin:4px -26px}
+#walk .nst .nst-clap i:nth-child(1){transform:rotate(0deg) translateY(-60px)}#walk .nst .nst-clap i:nth-child(2){transform:rotate(72deg) translateY(-60px)}#walk .nst .nst-clap i:nth-child(3){transform:rotate(144deg) translateY(-60px)}#walk .nst .nst-clap i:nth-child(4){transform:rotate(216deg) translateY(-60px)}#walk .nst .nst-clap i:nth-child(5){transform:rotate(288deg) translateY(-60px)}
+/* a sheet, on its own, full size */
+#walk .nst .nst-board{position:absolute;left:50px;top:40px;width:1180px;height:640px;background:#fff;border-radius:18px;box-shadow:0 14px 34px -16px rgba(24,46,67,.5);padding:26px 34px;display:flex;flex-direction:column;justify-content:center}
+#walk .nst .nst-board .nst-bt{position:absolute;left:34px;top:24px}
+#walk .nst .nst-bt{font:700 17px/1.2 Inter,Arial,sans-serif;color:#1d3b5a;text-transform:uppercase;letter-spacing:.04em;margin:0 0 12px}
+#walk .nst .nst-board svg{display:block;width:100%;height:auto}
+/* what the student (or the screen) is doing: a line under the picture, not on it */
+#walk .nst .say2{display:none!important}
+#walk .nst .does{position:static!important;display:block;margin:8px 2px 0;text-align:left;font:500 15px/1.35 Inter,"Segoe UI",Arial,sans-serif;color:#33434f;background:none!important;padding:0!important;transform:none!important;max-width:none}
+#walk .nst .does::before{content:attr(data-who) ": ";font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:13px;color:#1d3b5a}
+@media (prefers-reduced-motion:reduce){#walk .nst .nst-pose,#walk .nst .nst-L,#walk .nst .nst-tab>*,#walk .nst .nst-item>*,#walk .nst .nst-fx>*{transition:none!important}#walk .nst .nst-it.nst-play .raw-tabvid i{animation:none}}
+@media print{#walk .nst .nst-frame{box-shadow:none}}
+#walk .scene.nst{padding:0;border:0;background:none;box-shadow:none;border-radius:0}
+#walk .nst .wk-pose svg{display:block;width:100%;height:100%;overflow:visible}
+#walk .nst .raw-tabscr svg{width:40px;height:40px}
+#walk .nst .raw-chewpic svg{width:100%;height:100%}
 </style>
 </head>
 <body class="view-setup">
@@ -1759,7 +1856,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
       <div class="ra-run-f"><label for="ra-run-so-fr">Schedule (FR)</label><input id="ra-run-so-fr" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"><span class="ra-run-src" id="ra-run-so-frsrc">Every response: FR 1</span></div>
       <div class="ra-run-f"><label for="ra-run-so-acc">Access (s)</label><input id="ra-run-so-acc" type="number" min="0" max="600" step="1" value="0" inputmode="decimal"><span class="ra-run-src" id="ra-run-so-accsrc"></span></div>
       <div class="ra-run-f"><label for="ra-run-so-amode">Access ends</label><select id="ra-run-so-amode"><option value="time">At the access time</option><option value="eat">When it is consumed (tap Consumed)</option></select></div>
-      <div class="ra-run-f"><label for="ra-run-so-clock">Clock during access</label><select id="ra-run-so-clock"><option value="pause">Pauses (minutes the response was available)</option><option value="avail">Runs; the sheet takes minutes run less access</option><option value="run">Runs; the sheet takes minutes run</option></select></div>
+      <div class="ra-run-f ra-run-w2"><label for="ra-run-so-clock">Clock during access</label><select id="ra-run-so-clock"><option value="pause">Pauses: minutes available</option><option value="avail">Runs: minutes less access</option><option value="run">Runs: all minutes</option></select></div>
     </div>
     <p class="ra-run-info" id="ra-run-so-info"></p>
     <div class="ra-run-script" id="ra-run-so-script"></div>
@@ -1824,7 +1921,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="ra-run-set">
       <div class="ra-run-f"><label for="ra-run-co-pos">Option A position</label><select id="ra-run-co-pos"><option value="">Not recorded</option><option value="L">L</option><option value="M">M</option><option value="R">R</option></select><span class="ra-run-src" id="ra-run-co-possrc"></span></div>
       <div class="ra-run-f"><label for="ra-run-co-cond">Condition</label><select id="ra-run-co-cond"><option value="">Reinforcement</option><option value="bl">Baseline (no consequence)</option></select></div>
-      <div class="ra-run-f"><label for="ra-run-co-clock">Clock during access</label><select id="ra-run-co-clock"><option value="pause">Pauses (minutes the response was available)</option><option value="avail">Runs; the sheet takes minutes run less access</option><option value="run">Runs; the sheet takes minutes run</option></select></div>
+      <div class="ra-run-f ra-run-w2"><label for="ra-run-co-clock">Clock during access</label><select id="ra-run-co-clock"><option value="pause">Pauses: minutes available</option><option value="avail">Runs: minutes less access</option><option value="run">Runs: all minutes</option></select></div>
     </div>
     <table class="ra-run-opts" id="ra-run-co-opts">
       <thead><tr><th scope="col">Option</th><th scope="col">Schedule (FR)</th><th scope="col">Access (s)</th><th scope="col">Key</th></tr></thead>
@@ -1983,7 +2080,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
       <div class="ra-run-f"><label for="ra-run-pr-cond">Condition</label><select id="ra-run-pr-cond"></select></div>
       <div class="ra-run-f"><label for="ra-run-pr-acc">Access (s)</label><input id="ra-run-pr-acc" type="number" min="0" max="600" step="1" value="0" inputmode="decimal"><span class="ra-run-src" id="ra-run-pr-accsrc"></span></div>
       <div class="ra-run-f"><label for="ra-run-pr-amode">Access ends</label><select id="ra-run-pr-amode"><option value="time">At the access time</option><option value="eat">When it is consumed (tap Consumed)</option></select></div>
-      <div class="ra-run-f"><label for="ra-run-pr-clock">Clock during access</label><select id="ra-run-pr-clock"><option value="pause">Pauses (minutes the response was available)</option><option value="avail">Runs; the sheet takes minutes run less access</option><option value="run">Runs; the sheet takes minutes run</option></select></div>
+      <div class="ra-run-f ra-run-w2"><label for="ra-run-pr-clock">Clock during access</label><select id="ra-run-pr-clock"><option value="pause">Pauses: minutes available</option><option value="avail">Runs: minutes less access</option><option value="run">Runs: all minutes</option></select></div>
     </div>
     <p class="ra-run-info" id="ra-run-pr-info"></p>
     <div class="ra-run-script" id="ra-run-pr-script"></div>
@@ -2138,7 +2235,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
 <!-- /ra1-walk:section -->
 <div class="wk-body noprint">
   <h2 class="bar nbh-band wk-title" id="wk-title">Walkthrough: Running the Reinforcer Assessment at the Table</h2>
-  <div class="wk-top"><p>What each design looks like at the table: the assessor, the student and the data collector drawn step by step, what is said, what the student does, what the Run This Session panel shows, and what goes on the sheet. The example is the form’s own simulated student, with fixed numbers you can enter yourself. The words are examples; RA-1’s procedures are the rule, and they are quoted word for word. Press <b>Play all</b> in any section to watch it run, then try the practice at the end.</p>
+  <div class="wk-top"><p>What each design looks like at the table, seen from above and step by step: the student’s hand and the assessor’s, what is said, what the student does, what the Run This Session panel shows, and what goes on the sheet. The example is the form’s own simulated student, with fixed numbers you can enter yourself. The words are examples; RA-1’s procedures are the rule, and they are quoted word for word. Press <b>Play all</b> in any section to watch it run, then try the practice at the end.</p>
     <button type="button" id="wk-print" title="Prints a cover and one sheet per design: the drawn steps, the words, what to record, and an observer’s fidelity checklist">Print the job aids</button></div>
   <nav class="wk-nav" aria-label="Walkthrough sections"><a href="#wk-setup">S Before the first session</a><a href="#wk-so">A Single operant</a><a href="#wk-co">B Concurrent operants</a><a href="#wk-pr">C Progressive ratio</a><a href="#wk-sum">D Reading the summary</a><a href="#wk-stop">E Stopping and testing again</a><a href="#wk-practice">Practice</a><a href="#wk-terms">Terms</a></nav>
 
@@ -3209,7 +3306,7 @@ function exampleState(){const X=blank();X.n=3;X.sessMin=5;X.nSess=16;X.nCoSess=1
   X.so=EXSO.map(([c,r],k)=>({date:D(18-Math.floor(k/4)*3),cond:c,resp:String(r),min:'5',pb:false,phase:false}));
   X.co=EXCO.map(([p,a,b,c],k)=>({date:D(14-k),pos:p,r:[String(a),String(b),String(c)],pb:false}));
   const lad=[];for(let i=0,v=1;i<14;i++,v+=2)lad.push(v);const order=['0','1','2','ctl'];X.pr=[];
-  for(let k=0;k<12;k++){const c=order[k%4],stop=EXPR[c][Math.floor(k/4)];const done=lad.map((_,j)=>j<stop);const r0=lad.slice(0,stop).reduce((a,b)=>a+b,0),part=Math.min((lad[stop]||1)-1,1+k%3);X.pr.push({date:D(12-Math.floor(k/4)*2),cond:c,done,resp:String(r0),min:(2+r0*0.07).toFixed(1),all:String(r0+part),pb:false});}
+  for(let k=0;k<12;k++){const c=order[k%4],stop=EXPR[c][Math.floor(k/4)];const done=lad.map((_,j)=>j<stop);X.pr.push({date:D(12-Math.floor(k/4)*2),cond:c,done,resp:String(lad.slice(0,stop).reduce((a,b)=>a+b,0)),pb:false});}
   return X;}
 /* runs fn with the example in the form (its sheets rendered from it), then puts the form back as it was, all in one turn */
 function withExample(fn){const prev=S;S=exampleState();
@@ -3251,6 +3348,8 @@ const MATL={ctl:'CONTROL','0':'TABLET','1':'FRUIT CHEW','2':'PRAISE + HIGH FIVE'
 const BLOCKC=['#7b61a8','#e8b737','#4f9a8a','#d9583b','#2f5fa3','#c9a13b'];
 const TABLET='<div class="raw-tab"><div class="raw-tabscr"><div class="raw-tabvid"><i></i><i></i><i></i></div><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="rgba(255,255,255,.9)"/><path d="M15.5 12.5v15l12-7.5z" fill="#1d3b5a"/></svg></div></div>';
 const CHEW='<svg viewBox="0 0 120 70" aria-hidden="true"><path d="M6 14l22 10v22L6 56c6-9 6-33 0-42z" fill="#f2b84b" stroke="#8a5a12" stroke-width="2.5" stroke-linejoin="round"/><path d="M114 14L92 24v22l22 10c-6-9-6-33 0-42z" fill="#f2b84b" stroke="#8a5a12" stroke-width="2.5" stroke-linejoin="round"/><rect x="28" y="12" width="64" height="46" rx="18" fill="#e0593a" stroke="#8a2a14" stroke-width="2.5"/><path d="M40 24c8 8 32 8 40 0" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="4" stroke-linecap="round"/><text x="60" y="42" text-anchor="middle" font="700 13px Inter,Arial,sans-serif" fill="#fff">CHEW</text></svg>';
+/* (v22.71) the drawn stories, seen from above the table (story-table.js), draw with the same hands, tablet and fruit chew */
+window.NBH_RA_ART={hands:()=>handArt(),TABLET,CHEW};
 function compose(D){
   const st=D.stage;st.innerHTML='';
   const layer=c=>{const d=div('wk-L '+(c||''));st.appendChild(d);return d;};
@@ -3266,7 +3365,10 @@ function compose(D){
   const sub=(el,init)=>{const fx={el,tr:new Track(Object.assign({o:0,s:1,dy:0,dx:0},init||{}))};fxs.push(fx);return fx;};
   const pulse=(fx,t0,dur)=>{fx.tr.move(t0,t0+.3,{o:1});fx.tr.move(t0+Math.max(.35,dur-.4),t0+dur,{o:0});};
   const glow=(r,t0,dur,p,parent,round)=>{if(!r)return null;const pp=p==null?6:p;const g=mkFx('wk-glow raw-glow'+(round?' round':''),'',{x:r.x-pp,y:r.y-pp,w:r.w+2*pp,h:r.h+2*pp},null,parent||Lfx);pulse(g,t0,dur);return g;};
-  const note=(r,text,t0,t1,side,parent)=>{if(!r)return null;const n=mkFx('raw-note',esc(text),{x:r.x+r.w/2,y:side==='below'?r.y+r.h+8:r.y-40},{dy:side==='below'?-8:8},parent||Lfx);n.el.style.transform='translateX(-50%)';n.tr.move(t0,t0+.35,{o:1,dy:0},0,easeOut);n.tr.move(t1,t1+.35,{o:0});return n;};
+  /* (v22.71) a note on the stage is kept inside the frame: its centre moves in from an edge as far as its width needs */
+  const note=(r,text,t0,t1,side,parent)=>{if(!r)return null;const n=mkFx('raw-note',esc(text),{x:r.x+r.w/2,y:side==='below'?r.y+r.h+8:r.y-40},{dy:side==='below'?-8:8},parent||Lfx);n.el.style.transform='translateX(-50%)';
+    if(!parent){const w=n.el.offsetWidth;if(w>0)n.el.style.left=f2(clamp(r.x+r.w/2,w/2+14,SW-w/2-14))+'px';}
+    n.tr.move(t0,t0+.35,{o:1,dy:0},0,easeOut);n.tr.move(t1,t1+.35,{o:0});return n;};
   const card=(cls,html,box,t0,t1,init)=>{const c=mkFx('smw-card raw-card '+cls,html,box,Object.assign({dy:16},init||{}));c.tr.move(t0,t0+.5,{o:1,dy:0},0,easeOut);if(t1!=null)c.tr.move(t1,t1+.4,{o:0});return c;};
   const veil=(t0,t1,o)=>{const v=mkFx('smw-veil raw-veilb','',{x:0,y:0,w:SW,h:SH},null,Lveil);v.tr.move(t0,t0+.5,{o:o==null?.5:o});if(t1!=null)v.tr.move(t1,t1+.4,{o:0});return v;};
   const chip=(text,box,t0,t1,cls)=>{const c=mkFx('raw-chip '+(cls||''),esc(text),box,{dy:10,s:.9});c.tr.move(t0,t0+.35,{o:1,dy:0,s:1},0,easeOut);if(t1!=null)c.tr.move(t1,t1+.3,{o:0});return c;};
@@ -3405,11 +3507,11 @@ function compose(D){
   const runP=paper('raw-run',760);const run=add(runP,copyOf(q1('#ra-run-so'),true));
   if(run){/* the runner as it looks part way through a tablet session */
     const set=(sel,v)=>{const e=run.querySelector(sel);if(e)e.textContent=v;};
-    const sels=[...run.querySelectorAll('.ra-run-set .raw-v')];if(sels[0])sels[0].textContent=EXN[0];if(sels[1])sels[1].textContent='1';if(sels[2])sels[2].textContent='20';if(sels[3])sels[3].textContent='Pauses (minutes the response was available)';
+    const sels=[...run.querySelectorAll('.ra-run-set .raw-v')];if(sels[0])sels[0].textContent=EXN[0];if(sels[1])sels[1].textContent='1';if(sels[2])sels[2].textContent='20';if(sels[3])sels[3].textContent='At the access time';if(sels[4])sels[4].textContent='Pauses: minutes available';   /* (v22.71) as the narration says: the clock waits */
     const srcs=[...run.querySelectorAll('.ra-run-src')];if(srcs[0])srcs[0].textContent='Every response: FR 1';if(srcs[1])srcs[1].textContent='20 s access, as on Setup';
     set('.ra-run-big','3:48');set('.ra-run-sub b','Running');set('.ra-run-sub span','1:12 elapsed');set('.ra-run-cue b','Deliver '+EXN[0]);set('.ra-run-cue span','20 s of access, then the clock runs again');
     const ns=run.querySelectorAll('.ra-run-n');if(ns[0])ns[0].textContent='17';if(ns[1])ns[1].textContent='0';const bar=run.querySelector('.ra-run-bar span');if(bar)bar.style.width='24%';
-    set('.ra-run-info','Every response produces '+EXN[0]+' for 20 s; the clock waits during access, and the sheet takes the minutes the response was available.');const scr=run.querySelector('.ra-run-script');if(scr)scr.remove();const sm=run.querySelector('.ra-run-sum');if(sm)sm.remove();const msg=run.querySelector('.ra-run-msg');if(msg)msg.remove();}
+    set('.ra-run-info','Every response produces '+EXN[0]+' for 20 s; the clock waits during access, so the sheet takes the minutes the response was available.');const scr=run.querySelector('.ra-run-script');if(scr)scr.remove();const sm=run.querySelector('.ra-run-sum');if(sm)sm.remove();const msg=run.querySelector('.ra-run-msg');if(msg)msg.remove();}
   let y=0;[soP,coP,prP,sumP,runP].forEach(p=>{p.style.top=y+'px';y+=p.offsetHeight+80;});world.style.width='1040px';world.style.height=y+'px';
   const wrel=el=>{if(!el)return null;const r=el.getBoundingClientRect(),c=world.getBoundingClientRect();const k=c.width/(world.offsetWidth||1)||1;return{x:(r.left-c.left)/k,y:(r.top-c.top)/k,w:r.width/k,h:r.height/k};};
   const uni=rs=>{rs=rs.filter(Boolean);if(!rs.length)return null;const x=Math.min(...rs.map(r=>r.x)),y0=Math.min(...rs.map(r=>r.y));return{x,y:y0,w:Math.max(...rs.map(r=>r.x+r.w))-x,h:Math.max(...rs.map(r=>r.y+r.h))-y0};};
@@ -3420,7 +3522,8 @@ function compose(D){
   const glowW=(r,t0,dur,p)=>glow(r,t0,dur,p==null?4:p,world);const noteW=(r,text,t0,t1,side)=>note(r,text,t0,t1,side,world);
   const rowsOf=tbl=>tbl&&tbl.tBodies[0]?[...tbl.tBodies[0].rows]:[];const colOf=(tbl,c)=>uni(rowsOf(tbl).map(tr=>wrel(tr.cells[c])).concat([tbl&&tbl.tHead?wrel(tbl.tHead.rows[0].cells[c]):null]));
   /* the papers are shown over a dimmed table; the hands are out of the frame then */
-  const papers=(t0,t1)=>{const v=veil(t0,t1,.62);worldFx.tr.move(t0,t0+.5,{o:1});if(t1!=null)worldFx.tr.move(t1,t1+.4,{o:0});return v;};
+  /* (v22.71) the papers and the tips over a near-opaque veil: the table no longer shows through them */
+  const papers=(t0,t1)=>{const v=veil(t0,t1,.88);worldFx.tr.move(t0,t0+.5,{o:1});if(t1!=null)worldFx.tr.move(t1,t1+.4,{o:0});return v;};
   const panelShow=(t0,on)=>{panel.tr.move(t0,t0+.4,{o:on?1:0});};
   const matTo=(t,c)=>{matCol.set(t,c);};
   /* the arrangements: one bin on its mat (single operant, progressive ratio), or three bins in a row (concurrent operants) */
@@ -3547,7 +3650,7 @@ function compose(D){
     const tc=Math.max(tu+3,K.at('no-reinforcer control',.88)-.2);if(rK)glowW(wrel(rK),tc,K.t+K.d-tc,3);
     const tf=Math.max(tc+.5,K.t+K.d-4);camTo(tf,tf+1.2,pad(uni([wrel(prRank),wrel(prFig)]),12));return K.d;};
   /* ---- at the table ---- */
-  SC.rules=K=>{const t=K.t;panelShow(t,false);veil(t,K.t+K.d+.2,.55);
+  SC.rules=K=>{const t=K.t;panelShow(t,false);veil(t,K.t+K.d+.2,.88);
     const tips=[['Deliver immediately','a fixed magnitude, no added praise'],['A no-consequence control','the same materials, the assessor neutral'],['Restrict access before','a few hours; record any access there was'],['Problem behavior every session','and the stop rule'],['A second observer','about one session in three, when the result goes into a plan']];
     const c=card('smw-tips raw-tips','<h3>For every design</h3>'+tips.map((x,i)=>'<div class="tp" data-i="'+i+'"><b>'+(i+1)+'</b><p><strong>'+esc(x[0])+'</strong> '+esc(x[1])+'</p></div>').join(''),{x:180,y:28,w:920},t+.3,K.t+K.d+.2);
     const rs=[...c.el.querySelectorAll('.tp')].map(e=>sub(e,{o:.35,h:0}));const at=[['Deliver the stimulus',.1],['no-consequence control',.36],['Restrict access',.5],['Record problem behavior',.72],['second observer',.84]].map((a,i)=>Math.max(t+.9+i*.5,K.at(a[0],a[1])-.2));
@@ -3592,8 +3695,13 @@ function chunks(id,text,T,on){const P='․';const guard=text.replace(/(\d)\.(\d)
 /* ---------------- renderAt: the stage at time t ---------------- */
 let RMQ=null;const reduced=()=>{try{RMQ=RMQ||window.matchMedia('(prefers-reduced-motion: reduce)');return !!RMQ.matches;}catch(e){return false;}};
 function cueAt(t){if(!B)return null;const c=B.cues;let lo=0,hi=c.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(c[m].start<=t)lo=m;else hi=m-1;}return c[lo];}
+/* (v22.71) a chapter opens on its own scene: for its first CUT seconds the picture holds the scene as it stands once set up
+   (the last chapter's papers gone, the new arrangement in place), a cut rather than a crossfade from the chapter before; the
+   narration and the captions run on from the chapter's start */
+const CUT=1.4;
 function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=cueAt(t);
-  const v=reduced()&&cue?Math.min(B.D,cue.start+cue.dur-.02):t;
+  let v=reduced()&&cue?Math.min(B.D,cue.start+cue.dur-.02):t;
+  for(const c of B.chapters)if(c.start>0&&v>=c.start&&v<c.start+CUT){v=Math.min(B.D,c.start+CUT);break;}
   const c=B.cam.at(v);css(B.world,'transform','translate('+f2(c.x)+'px,'+f2(c.y)+'px) scale('+c.s.toFixed(4)+')');
   const mc=B.matCol.at(v).v;css(B.mat1,'background',mc==='none'?'#c4bdb0':COL[mc]);txt(B.mat1Lbl,mc==='none'?'':MATL[mc]);
   /* the blocks and the items: placed, carried (following a hand), lifted (a larger shadow) */
@@ -6473,7 +6581,7 @@ function make(root){
   draw(cur);
   return {set,countdown,spinTo,el};
 }
-return Object.assign({make},X.exports||{});
+return Object.assign({make,board:BOARD,ladder:LADDER},X.exports||{});
 
 })();
 /* ============================================================ the stories (RA-1) */
@@ -6543,7 +6651,7 @@ S.so=[
   rec:[['Condition','Tablet (video)'],['Schedule (FR)','1'],['Access (s)','20']]}),
  F(TAB,{tablet:'student',s:'holdTablet',play:true,fill:[1],obs:O('Tablet (video)','Access 0:14','remove it at 0:00','rec'),does:'Watches the video',
   cap:'Twenty seconds of access, the magnitude written on Setup; the runner counts it down. The session clock waits during access, so the 5 minutes are minutes with the response available, and the Minutes column gets those; Clock during access can instead let the clock run.',
-  rec:[['Clock during access','Pauses (minutes the response was available)']]}),
+  rec:[['Clock during access','Pauses: minutes available']]}),
  F(TAB,{a:'take',tablet:'adult',s:'rest',fill:[1],obs:O('Access over','Remove it now','the response is available','alert'),does:'Lets go of the tablet',
   cap:'At 0:00 the runner cues the end of access, and the assessor removes the tablet, whatever the student is doing. A block dropped during access is counted, but it does not count toward the next reinforcer; the next block after access produces the next 20 s.',
   rec:[]}),
@@ -6669,6 +6777,170 @@ S.h={O,F,LD,ROOM,CTL,TAB,CHW,PRS,CO3,PR,BRD};
 return S;
 })();
 </script>
+<script id="ra1-story">
+/* (v22.71) Form RA-1, the Walkthrough view's drawn stories, seen from above the table, in the look of the walkthrough video:
+   the tray of blocks, the bin or the three stations on their mats, the tablet and the fruit chew on the assessor's side, the
+   student's hand from the near edge and the assessor's from the far edge (Form TK-1's hand drawings, as the video draws them),
+   and the data collector's screen beside the table. No figures are drawn. A step that shows a sheet (a board) shows it alone,
+   full size, in place of the table. Each step is the same data the stories always had (window.NBHStories: who does what, what
+   is on the table, what the screen shows); NBHTable.make(el).set(step) draws it, and the hands and the items glide from one
+   step to the next. The caption under the picture says what the student (or the screen) is doing. Put into the form by
+   tools/forms/RA-1/patch-story.py. */
+window.NBHTable=(function(){
+'use strict';
+const SW=1280,SH=720;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const div=(cls,html)=>{const d=document.createElement('div');if(cls)d.className=cls;if(html!=null)d.innerHTML=html;return d;};
+const art=()=>window.NBH_RA_ART||{};
+/* the multielement signals, as the form and the video use them */
+const PM={gray:['#8d989e','Control'],blue:['#2f5fa3','Tablet'],red:['#e0742f','Fruit chew'],green:['#3f8a4f','Praise + high five']};
+const TAGC={tablet:'#2f5fa3','fruit chew':'#e0742f',nothing:'#8d989e',control:'#8d989e'};
+const BLOCKC=['#7b61a8','#e8b737','#4f9a8a','#d9583b','#2f5fa3','#c9a13b'];
+/* the table's places (the stage is 1280 by 720; the screen panel takes the right-hand side) */
+const TRAY={x:40,y:250,w:300,h:250},BK=38,GAP=8;
+const ONE={x:575,y:470},BIN=160,MAT={x:455,y:205,w:240,h:430};
+const THREE=[415,585,755],BIN3=124,MAT3={y:215,w:150,h:420},BIN3Y=505;
+const DROP={x:575,y:300};             /* where a delivered item sits, in front of the student */
+const HOME={tablet:{x:660,y:92},chew:{x:470,y:92}};
+const SHOULDER={learner:[430,SH+560],teacher:[600,-560]},HSC={learner:1.12,teacher:1.18};
+const ANCH={point:'tip',pinch:'grip',open:'palm'};
+/* the shape of the clock chip and the bell, check and dot of the screen's status */
+const CLOCK='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#fff" stroke="#1d3b5a" stroke-width="2"/><path d="M12 6.5V12l3.6 2.2" fill="none" stroke="#1d3b5a" stroke-width="2" stroke-linecap="round"/></svg>';
+const KIND={alert:['Cue','nst-k-alert'],rec:['Running','nst-k-rec'],ok:['Done','nst-k-ok']};
+
+/* opt.px: a fixed width in CSS pixels (the printed job aids, laid out in inches, where the window's width says nothing) */
+function make(host,opt){
+  host.innerHTML='';host.classList.add('nst');
+  const frame=div('nst-frame');host.appendChild(frame);
+  const st=div('wk-stage nst-stage');st.setAttribute('aria-hidden','true');frame.appendChild(st);
+  const px=opt&&+opt.px>0?+opt.px:0;
+  const fit=()=>{const w=px||frame.clientWidth||SW;st.style.transform='scale('+(w/SW).toFixed(5)+')';};
+  if(px){frame.style.width=px+'px';frame.style.borderRadius='4px';fit();}
+  else{try{new ResizeObserver(fit).observe(frame);}catch(e){window.addEventListener('resize',fit);}requestAnimationFrame(fit);fit();}
+  const L=c=>{const d=div('nst-L '+c);st.appendChild(d);return d;};
+  const Ltab=L('nst-tab'),Litem=L('nst-item'),Lhl=L('nst-hl'),Lht=L('nst-ht'),Lfx=L('nst-fx'),Lbrd=L('nst-brd');
+  const at=(el,x,y,w,h)=>{el.style.left=x+'px';el.style.top=y+'px';if(w!=null)el.style.width=w+'px';if(h!=null)el.style.height=h+'px';return el;};
+  /* ---- the table ---- */
+  const tray=at(div('raw-tray nst-trayb'),TRAY.x,TRAY.y,TRAY.w,TRAY.h);Ltab.appendChild(tray);
+  {const cols=6,rows=5,ox=TRAY.x+(TRAY.w-(cols*BK+(cols-1)*GAP))/2,oy=TRAY.y+(TRAY.h-(rows*BK+(rows-1)*GAP))/2;
+    for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){const b=at(div('nst-blk'),ox+i*(BK+GAP),oy+j*(BK+GAP),BK,BK);b.style.background=BLOCKC[(i+j*2)%BLOCKC.length];b.style.transform='rotate('+(((i*7+j*3)%5-2)*3)+'deg)';tray.appendChild(b);}
+    tray.querySelectorAll('.nst-blk').forEach(b=>{b.style.left=(parseFloat(b.style.left)-TRAY.x)+'px';b.style.top=(parseFloat(b.style.top)-TRAY.y)+'px';});}
+  const mat1=at(div('raw-mat nst-mat','<span class="nst-matl"></span>'),MAT.x,MAT.y,MAT.w,MAT.h);Ltab.appendChild(mat1);
+  const bin1=at(div('raw-bin nst-bin','<div class="raw-binfloor"></div>'),ONE.x-BIN/2,ONE.y-BIN/2,BIN,BIN);Ltab.appendChild(bin1);
+  const mats3=THREE.map(x=>{const m=at(div('raw-mat raw-mat3 nst-mat','<span class="nst-matl"></span>'),x-MAT3.w/2,MAT3.y,MAT3.w,MAT3.h);Ltab.appendChild(m);return m;});
+  const bins3=THREE.map(x=>{const b=at(div('raw-bin raw-bin3 nst-bin','<div class="raw-binfloor"></div>'),x-BIN3/2,BIN3Y-BIN3/2,BIN3,BIN3);Ltab.appendChild(b);return b;});
+  const none3=at(div('raw-none nst-none','nothing'),0,0,140,56);Ltab.appendChild(none3);
+  const sw=at(div('nst-switch','<i></i>'),ONE.x-70,ONE.y-70,140,140);Ltab.appendChild(sw);
+  /* the brief MSWO array: up to three items in a row in front of the student */
+  const arr=div('nst-arr');Ltab.appendChild(arr);
+  /* ---- the items ---- */
+  const A=art();
+  const tab=div('raw-fc raw-item nst-it','<div class="wk-sh raw-sh"></div>'+(A.TABLET||'<div class="raw-tab"><div class="raw-tabscr"></div></div>'));tab.style.width='150px';tab.style.height='105px';Litem.appendChild(tab);
+  const chew=div('raw-fc raw-item nst-it','<div class="wk-sh raw-sh"></div><div class="raw-chewpic">'+(A.CHEW||'')+'</div>');chew.style.width='110px';chew.style.height='66px';Litem.appendChild(chew);
+  const cup=div('nst-cup','<i></i><i></i><i></i>');Litem.appendChild(cup);
+  const held=div('nst-blk nst-held');held.style.width=BK+'px';held.style.height=BK+'px';held.style.background=BLOCKC[1];Litem.appendChild(held);
+  const clip=div('nst-clip','<i></i><i></i><i></i><i></i>');Litem.appendChild(clip);
+  /* ---- the hands (TK-1's drawings, each pose drawn about the point that touches) ---- */
+  const hands={};
+  const mkHand=who=>{const ARTH=(typeof A.hands==='function'?A.hands():A.hands)||null;const root=div('wk-hand nst-hand nst-'+who);(who==='teacher'?Lht:Lhl).appendChild(root);
+    const h={who,root,poses:{},cur:null};
+    if(ARTH&&ARTH[who])['point','pinch','open'].forEach(p=>{const a=ARTH[who][p];if(!a)return;const an=a[ANCH[p]]||[a.w/2,0];const e=div('wk-pose nst-pose',a.svg);
+      e.style.width=a.w+'px';e.style.height=a.h+'px';e.style.transformOrigin=an[0]+'px '+an[1]+'px';root.appendChild(e);h.poses[p]={el:e,ax:an[0],ay:an[1]};});
+    hands[who]=h;return h;};
+  const HL=mkHand('learner'),HT=mkHand('teacher');
+  /* a hand at p in a pose: turned along the arm from its shoulder; null takes it off the table, back along the arm */
+  const handTo=(h,p,pose)=>{const sh=SHOULDER[h.who],sc=HSC[h.who];
+    let q=p,vis=!!p;if(!p){const c=h.last||{x:sh[0],y:h.who==='teacher'?60:SH-40};const dx=sh[0]-c.x,dy=sh[1]-c.y,len=Math.hypot(dx,dy)||1;q={x:c.x+dx/len*420,y:c.y+dy/len*420};}
+    else h.last=p;
+    const ang=Math.atan2(q.x-sh[0],sh[1]-q.y)*180/Math.PI,want=pose||h.cur||'pinch';
+    for(const name in h.poses){const P=h.poses[name],on=vis&&name===want;
+      P.el.style.transform='translate('+(q.x-P.ax).toFixed(1)+'px,'+(q.y-P.ay).toFixed(1)+'px) rotate('+ang.toFixed(2)+'deg) scale('+sc+')';
+      P.el.style.opacity=on?'1':'0';P.el.style.visibility='visible';}
+    if(vis)h.cur=want;};
+  /* ---- the screen beside the table, the clock, the speech, the sheet ---- */
+  const obsW=div('nst-obsw','<div class="nst-obsh">Data collector&rsquo;s screen</div><div class="nst-obs"><div class="nst-o1"></div><div class="nst-o2"></div><div class="nst-o3"></div><div class="nst-ok"></div></div>'
+    +'<div class="nst-obs nst-obs2"><div class="nst-o1"></div><div class="nst-o2"></div><div class="nst-o3"></div></div><div class="nst-lad"><svg class="tbl" viewBox="-2 -2 245 44" aria-hidden="true"><g class="ra-lad"></g></svg><svg class="tbl" viewBox="243 -2 245 44" aria-hidden="true"><g class="ra-lad"></g></svg></div>');Lfx.appendChild(obsW);
+  const O1=obsW.querySelectorAll('.nst-obs')[0],O2=obsW.querySelectorAll('.nst-obs')[1],lad=obsW.querySelector('.nst-lad');
+  const clock=div('nst-clock',CLOCK+'<b></b>');Lfx.appendChild(clock);
+  const bub=div('nst-bub');Lfx.appendChild(bub);
+  const pbm=div('nst-pb','Problem behavior');Lfx.appendChild(pbm);
+  const fx=div('nst-hit');Lfx.appendChild(fx);
+  const clap=div('nst-clap','<i></i><i></i><i></i><i></i><i></i>');Lfx.appendChild(clap);
+  const brd=div('nst-board','<div class="nst-bt">On the screen</div><svg class="tbl" viewBox="0 0 480 172" aria-hidden="true"></svg>');Lbrd.appendChild(brd);
+  const show=(el,on)=>{el.classList.toggle('nst-off',!on);};
+  const place=(el,p,w,h)=>{el.style.transform='translate('+(p.x-w/2).toFixed(1)+'px,'+(p.y-h/2).toFixed(1)+'px)';};
+  const fillBin=(bin,n,small)=>{const fl=bin.querySelector('.raw-binfloor');n=Math.max(0,Math.min(9,n|0));if(fl._n===n)return;fl._n=n;const sz=small?28:34,c=small?BIN3/2:BIN/2;
+    const SLOT=[[0,0],[-1,-1],[1,-1],[-1,1],[1,1],[0,-1],[0,1],[-1,0],[1,0]];fl.innerHTML='';for(let i=0;i<n;i++){const b=div('nst-blk nst-in');const s=SLOT[i];
+      b.style.width=sz+'px';b.style.height=sz+'px';b.style.left=(c-sz/2+s[0]*sz*1.05-8)+'px';b.style.top=(c-sz/2+s[1]*sz*1.05-8)+'px';b.style.background=BLOCKC[(i*2+1)%BLOCKC.length];b.style.transform='rotate('+((i*37)%40-20)+'deg)';fl.appendChild(b);}};
+  const tagCol=t=>TAGC[String(t||'').toLowerCase()]||'#8d989e';
+  let wide=false;
+  function set(f){f=f||{};
+    const board=!!f.board;show(Lbrd,board);[Ltab,Litem,Lhl,Lht].forEach(l=>show(l,!board));
+    if(board){const svg=brd.querySelector('svg');if(svg._k!==f.board){svg._k=f.board;const N=window.NBHScene;svg.innerHTML=(N&&N.board&&N.board(f.board))||'';}}
+    /* the screen panel, or the table across the whole frame */
+    const obs=!board&&!f.noObs&&(f.obs||f.obs2||f.lad);wide=!obs;st.classList.toggle('nst-wide',wide);show(obsW,!!obs);
+    const paintO=(el,o,k)=>{show(el,!!o);if(!o)return;el.querySelector('.nst-o1').textContent=o.t1||'';el.querySelector('.nst-o2').textContent=o.t2||'';el.querySelector('.nst-o3').textContent=o.t3||'';
+      if(k){const kk=KIND[o.k]||null;const e=el.querySelector('.nst-ok');e.textContent=kk?kk[0]:'';e.className='nst-ok '+(kk?kk[1]:'');el.classList.toggle('nst-alert',o.k==='alert');}};
+    paintO(O1,f.obs,true);paintO(O2,f.obs2,false);
+    show(lad,!!f.lad);if(f.lad){const N=window.NBHScene;const lh=(N&&N.ladder&&N.ladder(f.lad))||'';lad.querySelectorAll('g').forEach(g=>{g.innerHTML=lh;});}
+    show(clock,!board&&!!f.clock);clock.querySelector('b').textContent=f.clock||'';
+    /* the arrangement: one bin on its mat, three stations, a switch, or the brief MSWO array */
+    const n=f.bins==null?1:f.bins,three=n===3,one=n===1&&!f.button;
+    show(tray,!board&&f.tray!==false);show(mat1,one||!!f.button);show(bin1,one);mats3.forEach(m=>show(m,three));bins3.forEach(b=>show(b,three));show(sw,!!f.button);
+    const pm=PM[f.pm]||null;mat1.style.background=pm?pm[0]:'#c4bdb0';mat1.querySelector('.nst-matl').textContent=pm?pm[1]:'';
+    const fill=f.fill||[];fillBin(bin1,fill[0]||0,false);bins3.forEach((b,i)=>fillBin(b,fill[i]||0,true));
+    const tags=f.tags||[];mats3.forEach((m,i)=>{const t=tags[i]||['',''];m.style.background=tagCol(t[1]);m.querySelector('.nst-matl').textContent=(t[0]&&t[0]!==t[1]?t[0]+' · ':'')+(t[1]||'');});
+    const ix=i=>three?THREE[i]:ONE.x,iy=()=>three?BIN3Y:ONE.y;
+    /* the items on the assessor's side: in three-station sessions each above its own mat */
+    const slotOf=name=>{if(three){const i=tags.findIndex(t=>String(t[1]||'').toLowerCase()===name);if(i>=0)return{x:THREE[i],y:100};}return HOME[name==='fruit chew'?'chew':name];};
+    const tablet=f.tablet,TP=slotOf('tablet');
+    const aHold=(f.a==='hold'||f.a==='hand'||f.a==='take');
+    const aP=f.a==='hand'?{x:DROP.x,y:DROP.y-10}:f.a==='take'?{x:DROP.x,y:DROP.y}:{x:DROP.x+20,y:205};
+    let tabAt=null;if(tablet==='table')tabAt=TP;else if(tablet==='student'||tablet==='near')tabAt=DROP;else if(tablet==='adult')tabAt=aHold?{x:aP.x,y:aP.y+18}:{x:DROP.x+20,y:220};
+    show(tab,!board&&!!tabAt);if(tabAt)place(tab,tabAt,150,105);tab.classList.toggle('nst-play',!!f.play);
+    const CP=slotOf('fruit chew');show(cup,!board&&!!f.cup);if(f.cup)place(cup,{x:CP.x,y:CP.y},92,70);
+    let chewAt=null;if(f.chew==='adult')chewAt=aHold&&tablet!=='adult'?{x:aP.x,y:aP.y+14}:{x:DROP.x-10,y:230};else if(f.s==='takeit'&&f.chew)chewAt={x:DROP.x,y:DROP.y};
+    show(chew,!board&&!!chewAt);if(chewAt)place(chew,chewAt,110,66);
+    show(none3,three);if(three){const i=tags.findIndex(t=>/nothing|control/i.test(String(t[1]||'')));place(none3,{x:THREE[i<0?2:i],y:100},140,56);}
+    /* the brief MSWO array */
+    const items=f.arr||[];show(arr,!board&&items.length>0);if(items.length){arr.innerHTML=items.map((a,i)=>{const nm=String(a.l1||'');const pic=/tablet/i.test(nm)?(A.TABLET||''):/chew/i.test(nm)?'<div class="raw-chewpic">'+(A.CHEW||'')+'</div>':'<div class="nst-bubbles"><i></i><i></i><i></i></div>';
+      return '<div class="nst-ai'+(a.gone?' nst-gone':'')+'" style="left:'+(THREE[i]||THREE[2])+'px"><div class="nst-aip">'+pic+'</div><b>'+esc(nm)+'</b></div>';}).join('');}
+    /* the student's hand */
+    const binP=k=>({x:ix(k|0)+(three?-4:-6),y:iy()-(three?26:34)});
+    let lp=null,lpose='pinch',hold=f.hold==='block';
+    switch(f.s){
+      case 'pick':lp={x:TRAY.x+TRAY.w-60,y:TRAY.y+TRAY.h/2};hold=true;break;
+      case 'place':lp=binP(f.at);hold=f.hold==='block'||!f.button;if(f.button){lp={x:ONE.x-4,y:ONE.y-8};lpose='point';hold=false;}break;
+      case 'hi5':lp={x:DROP.x-20,y:262};lpose='open';hold=false;break;
+      case 'rest':lp={x:430,y:SH-30};lpose='open';hold=false;break;
+      case 'takeit':lp=chewAt&&f.chew==='adult'?{x:chewAt.x-10,y:chewAt.y+26}:tabAt?{x:tabAt.x-30,y:tabAt.y+40}:{x:DROP.x,y:DROP.y+30};hold=false;break;
+      case 'holdTablet':lp={x:DROP.x-36,y:DROP.y+34};lpose='open';hold=false;break;
+      case 'hit':lp={x:DROP.x+60,y:226};lpose='open';hold=false;break;
+      case 'eat':lp={x:300,y:SH+40};hold=false;break;
+      case 'reachArr':{const k=items.findIndex(a=>/tablet/i.test(String(a.l1||'')));lp={x:(THREE[k<0?2:k])-6,y:350};hold=false;break;}
+      case 'away':lp=null;hold=false;break;
+      default:lp=null;hold=false;}
+    if(board)lp=null;handTo(HL,lp,lpose);
+    show(held,!board&&hold&&!!lp);if(hold&&lp)held.style.transform='translate('+(lp.x-BK/2+4).toFixed(1)+'px,'+(lp.y-BK/2+8).toFixed(1)+'px) rotate(-8deg)';
+    /* the assessor's hand */
+    let tp=null,tpose='pinch';
+    switch(f.a){
+      case 'hold':case 'hand':case 'take':tp={x:aP.x+40,y:aP.y-6};break;
+      case 'hi5':tp={x:DROP.x+18,y:228};tpose='open';break;
+      case 'pointBin':tp={x:ix(f.at|0)+10,y:iy()-96};tpose='point';break;
+      case 'write':tp={x:150,y:118};break;
+      default:tp=null;}
+    if(board||f.ap==='seat')tp=null;handTo(HT,tp,tpose);
+    show(clip,!board&&f.a==='write');
+    /* speech, praise, problem behavior */
+    show(bub,!board&&!!f.say);if(f.say){bub.textContent='“'+f.say+'”';const bx=tp?Math.min(tp.x+60,820):DROP.x+90;bub.style.left=bx+'px';bub.style.top=(tp?Math.max(20,tp.y-150):40)+'px';}
+    show(clap,!board&&!!f.clap);show(pbm,!board&&!!f.pb);show(fx,!board&&f.s==='hit');
+  }
+  return {set};
+}
+return {make};
+})();
+</script>
 <script id="wk-js">
 (()=>{
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -6693,7 +6965,7 @@ function paint(ov,f){ov.say.textContent=quote(f.say);ov.say.className=sayClass(f
 window.SCENES={};
 WALK.querySelectorAll('.story[data-story]').forEach(root=>{
   const key=root.dataset.story,frames=ST[key];if(!frames)return;
-  const sceneEl=root.querySelector('.scene');const scene=window.NBHScene.make(sceneEl);const ov=overlay(sceneEl);
+  const sceneEl=root.querySelector('.scene');const scene=(window.NBHTable||window.NBHScene).make(sceneEl);const ov=overlay(sceneEl);
   const recEl=root.querySelector('.wk-line'),label=root.dataset.recLabel||'On the sheet',at=root.querySelector('.wk-at');
   const live=document.createElement('div');live.className='wk-sr';live.setAttribute('aria-live','polite');root.appendChild(live);
   const ol=root.querySelector('ol.storysteps');ol.innerHTML=frames.map(f=>'<li>'+esc(f.cap)+'</li>').join('');
@@ -6790,7 +7062,7 @@ const Q=[
 ];
 (()=>{
   const el=WALK.querySelector('.scene[data-scene="drill"]');if(!el)return;
-  const scene=window.NBHScene.make(el),ov=overlay(el);
+  const scene=(window.NBHTable||window.NBHScene).make(el),ov=overlay(el);
   const show=f=>{scene.set(f);paint(ov,f);};
   const $=id=>document.getElementById(id);
   const where=$('wk-qwhere'),qt=$('wk-qtext'),opts=$('wk-qopts'),why=$('wk-qwhy'),qn=$('wk-qn'),qs=$('wk-qscore'),next=$('wk-qnext');
@@ -6860,7 +7132,7 @@ const Q=[
         'Motivating operations: access to the tested stimuli restricted for at least a few hours; sessions at a consistent time; edibles not immediately after a meal; any pre-session access recorded.',
         'Problem behavior recorded every session, with a written stop rule; IOA on at least one session per condition when the result will be written into a plan.'])+
       '<div class="jp-cols"><div><h2>The Sheets</h2>'+list(SHEETS.map(s=>s.title))+
-      '<h2>Who Is Who in the Drawings</h2><div class="jp-key"><span><i style="background:#254657"></i>Assessor</span><span><i style="background:#3d7f86"></i>Student</span><span><i style="background:#7c7466"></i>Data collector</span><span><i style="background:#6f7c74"></i>Second observer</span><span><i style="background:#fff;border:2px solid #182e43"></i>The runner’s screen, drawn large</span><span><i style="background:#fff;border:1.5px solid #182e43;border-radius:3px"></i>A label for the reader: what a station produces</span><span><i style="background:#8d989e"></i><i style="background:#2f5fa3"></i><i style="background:#b8433a"></i><i style="background:#3f8a4f"></i>Placemat: the condition’s signal in a multielement design</span></div>'+      '</div><div class="jp-cover-scene"></div></div>'+
+      '<h2>Reading the Drawings</h2><div class="jp-key"><span>The table seen from above: the student’s hand comes from the near edge, the assessor’s from the far edge</span><span><i style="background:#fffdf8;border:2px solid #1d3b5a"></i>The data collector’s screen, beside the table</span><span><i style="background:#8d989e"></i><i style="background:#2f5fa3"></i><i style="background:#e0742f"></i><i style="background:#3f8a4f"></i>Placemat: the condition’s signal in a multielement design</span></div>'+      '</div><div class="jp-cover-scene"></div></div>'+
       '<h2>Fixed Before the First Session</h2><table class="jp-fix"><tbody>'+
       [['Question the plan needs answered',''],['Response (operational definition)',''],['Materials and position',''],['Consequence magnitude and timing',''],['Control condition',''],['MO control before sessions',''],
        ['Session signal (multielement only)',''],['PR progression · start · stop interval (s) · session cap (min)',''],['Problem behavior to record',''],['Stop rule for problem behavior',''],
@@ -6877,9 +7149,9 @@ const Q=[
       parts.push(h);
     });
     host.innerHTML=parts.join('');
-    const cover=host.querySelector('.jp-cover-scene');if(cover)window.NBHScene.make(cover).set(ST.setup[8]);
+    const cover=host.querySelector('.jp-cover-scene');if(cover)(window.NBHTable?window.NBHTable.make(cover,{px:422}):window.NBHScene.make(cover)).set(ST.setup[8]);
     /* every step gets its own drawing: a fresh scene set to that frame */
-    host.querySelectorAll('.jp-step .jp-scene').forEach((el,k)=>{window.NBHScene.make(el).set(draw[k]);});
+    host.querySelectorAll('.jp-step .jp-scene').forEach((el,k)=>{(window.NBHTable?window.NBHTable.make(el,{px:165}):window.NBHScene.make(el)).set(draw[k]);});
   }
   window.raWalk=Object.assign(window.raWalk||{},{buildJobAids:build,sheets:SHEETS.map(s=>({title:s.title,steps:s.frames.length}))});
   function printAids(){

@@ -9903,6 +9903,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.71: RA-1's walkthroughs in one new look, the table seen from above
+
+- **The drawn stories, the practice questions and the printed job aids are redrawn.** Each step is the table seen
+  from above: the student's hand and the assessor's (no figures), the tray, the bins, the items, and the data
+  collector's screen beside the table, written as the step writes it. A high five shows both hands, the assessor's
+  from across the table; the tablet sits in front of the student while the access runs; the progressive ratio's
+  ladder is on the screen in two rows. A step that shows a sheet shows it alone, full size, with no table behind it.
+  What the student does is a line under the picture, not a caption on it. The job aids draw every step at its printed
+  width, and their key is now **Reading the Drawings**.
+- **The video opens each chapter on its own scene.** Concurrent operants starts on its three stations and Progressive
+  ratio on its table, with the last chapter's things gone, instead of fading through them. The notes on the stage stay
+  inside the frame, and the table no longer shows through the sheets and the rules.
+- **The video's runner says what its narration says:** the clock waits during access, so the sheet takes the minutes
+  the response was available.
+- **Clock during access reads in full.** The three runners' choices are now **Pauses: minutes available**, **Runs:
+  minutes less access** and **Runs: all minutes**, and the field is two columns wide on a laptop or iPad.
+- `qa/ra1-regress.js` is repaired: it steps the stories, checks the practice scenes, a phone's width and print, and
+  reports a result.
+
+Checked by `qa/v2271-test.js` (14) and `qa/ra1-regress.js`.
+
 ### v22.70: VI-1 reads ABC-1's counts, tests setting events by days, and writes a family summary (review Wave 3, part 3b)
 
 - **The Contingency view fills from Form ABC-1 (I84).** ABC-1 now sends the counts behind its conditional
