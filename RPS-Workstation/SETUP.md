@@ -9903,6 +9903,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.98: FS-1's limits go forward: TD-1 programs generalization to the settings the FBA did not sample, and PR-1 asks each review whether the result that would disprove the hypothesis was seen (review Wave 3)
+
+- **What the FBA could not show, carried forward (I86).** FS-1 now sends the case three things it already records:
+  - the settings not assessed;
+  - what would change its conclusion;
+  - the hypotheses marked **Cannot be ruled out**, each with its reason.
+- **Form TD-1.** When the generalization tactic is empty, it is filled: "Program generalization to the settings the FBA
+  did not sample (Form FS-1): …. Probe there before fading." A tactic already written is kept.
+- **Form PR-1.** Above the decision check, a short table shows what the FBA said would change its conclusion and the
+  hypotheses it left open, and asks **This period:** Not observed, Observed or Not checked. It prints with the review.
+  When the answer is Observed and the decision is not a return to assessment, the decision check says so: "return to
+  assessment, or say under Reasoning why the function still holds." With no limits from the FBA, the table stays hidden.
+- **Next:**
+  - I88: a one-page summary for the parent in English and Spanish.
+  - I90: a settings-by-source grid.
+  - I89, the supervisor's checklist, waits for the BACB Ethics Code wording.
+- qa/fs1-w3c-test.js (9 checks).
+
 ### v22.97: FS-1 shows only the analysis format that was run, keeps treatment results out of the FBA, passes the setting event to TD-1, names the earlier plan from RR-1, and checks the report before signing (review Wave 3)
 
 - **The experimental-analysis detail (F171).** The evidence sheet's detail table has 31 fields for two clinic formats, and

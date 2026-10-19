@@ -3276,6 +3276,8 @@ window.__nbhFactsOut=function(){
     P('m.reinf',eo||T(((f.fn&&f.fn.statements)||[]).filter(Boolean)[0]),'the reinforcer and EO (FS-1)');
     /* v22.97 (FS-1 review F175) the setting event in FS-1's summary statement, for the setting-event check */
     P('ant.se',fs1&&T(fs1.se)?'Setting event (Form FS-1): '+T(fs1.se):'','the setting event (FS-1)');
+    /* v22.98 (FS-1 review I86) the settings the FBA did not sample are where generalization has to be programmed */
+    {const lim=f.fn&&f.fn.limits;P('p.gen',lim&&T(lim.notAssessed)?'Program generalization to the settings the FBA did not sample (Form FS-1): '+T(lim.notAssessed).replace(/[.\s]+$/,'')+'. Probe there before fading.':'','the settings not sampled (FS-1)');}
     /* severity and safety: TB-1's urgency level of each target, and the precautions DM-1 records */
     const urg=prob.filter(b=>T(b.urg)).map(b=>T(b.label)+' level '+T(b.urg)),sf=((f.profile&&f.profile.flags&&f.profile.flags.safety)||[]).filter(Boolean);
     P('m.safety',[urg.length?'TB-1 urgency: '+urg.join('; '):'',sf.length?'Precautions on file (DM-1): '+sf.join(', '):''].filter(Boolean).join('. '),'severity and safety');

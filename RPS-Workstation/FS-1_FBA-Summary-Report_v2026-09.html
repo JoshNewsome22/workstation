@@ -1730,6 +1730,10 @@ window.__nbhFactsOut=function(){
   const out={};
   if(fnTxt)out.fn={key:key(fnTxt),label:fnTxt,statements:behs.map(b=>b.statement).filter(Boolean),
     perBehavior:behs.map(b=>({label:b.label,fn:b.fn,fnKey:b.fnKey,statement:b.statement,alt:b.alt,se:b.se,ant:b.ant}))};
+  /* v22.98 (review I86) the FBA's limits go forward: the settings it did not sample, what would change its conclusion, and the
+     hypotheses it could not rule out, for Form TD-1's generalization tactics and Form PR-1's review */
+  if(out.fn){const T=x=>String(x||'').trim(),open=S.hyp.filter(x=>T(x.h)&&x.out==='Cannot be ruled out').map(x=>({h:T(x.h),what:T(x.what)||T(x.how)}));
+    if(T(S.meta.notassessed)||T(S.meta.falsify)||open.length)out.fn.limits={notAssessed:T(S.meta.notassessed),falsify:T(S.meta.falsify),open};}
   /* v22.48 (review F395) each summary statement's setting event and trigger ride on fn.perBehavior, which the workstation passes on
      (behaviorsFS stands in for the target behaviors only when Form TB-1 has none), for Form QS-1's When */
   if(behs.length)out.behaviorsFS=behs;

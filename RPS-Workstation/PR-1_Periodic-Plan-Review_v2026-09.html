@@ -1069,6 +1069,12 @@ table.pr-ddprev{min-width:600px}
           <th>Consent (Form IC-1)</th><td><select data-m="chConsent" aria-label="Consent on Form IC-1"><option></option><option>Obtained again on Form IC-1</option><option>Not needed: no substantial change</option><option>Not yet</option></select></td></tr>
       <tr><th>The student&rsquo;s assent</th><td colspan="3"><input data-m="chAssent" aria-label="The student's assent" placeholder="what the student was told about the change and what the student said"></td></tr>
     </table>
+    <!-- v22.98 (FS-1 review I86): the FBA's own test, asked each review -->
+    <table class="rt" id="prFbaTest" hidden>
+      <tr><td colspan="2" class="pr-chcap"><b>The FBA&rsquo;s test (Form FS-1).</b> <span id="prFbaFalsify"></span></td></tr>
+      <tr><th style="width:24%">This period</th><td><select data-m="fsTest" aria-label="The FBA's test this period"><option></option><option>Not observed</option><option>Observed</option><option>Not checked</option></select></td></tr>
+      <tr id="prFbaOpenRow"><th>Not ruled out by the FBA</th><td id="prFbaOpen"></td></tr>
+    </table>
     <div id="decCheck" aria-live="polite"></div>
     <h3 style="margin-top:14px">Actions</h3>
     <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
@@ -3848,6 +3854,18 @@ function prChecks85(){const m=S.meta,dec=prT(m.dec),why=prT(m.decWhy),X=prSafety
   if(!extra.length)return;const box=document.getElementById('decCheck');if(!box)return;const v=box.querySelector('.verdict');
   if(v)v.insertAdjacentHTML('beforeend',' '+extra.join(' '));else box.innerHTML='<div class="verdict v-mid"><b>Check the decision.</b> '+extra.join(' ')+'</div>';}
 {const rv=renderVerdicts;renderVerdicts=function(){const r=rv.apply(this,arguments);try{prChecks85();prSafetyRender();}catch(e){}return r;};}
+/* v22.98 (FS-1 review I86) what the FBA said would disprove its hypothesis, and the hypotheses it left open, shown with this review;
+   when the disproving result was observed this period, the decision check asks for a return to assessment or a reason */
+let prFbaLim=null;
+function prFbaRender(){const t=document.getElementById('prFbaTest');if(!t)return;const L=prFbaLim||{},fal=prT(L.falsify),open=(Array.isArray(L.open)?L.open:[]).filter(x=>x&&prT(x.h));
+  t.hidden=!fal&&!open.length;document.getElementById('prFbaFalsify').textContent=fal?'What would change its conclusion: '+fal:'The FBA did not say what would change its conclusion.';
+  document.getElementById('prFbaOpenRow').hidden=!open.length;document.getElementById('prFbaOpen').textContent=open.map(x=>prT(x.h)+(prT(x.what)?' ('+prT(x.what).replace(/[.\s]+$/,'')+')':'')).join('; ');
+  if(S.meta.fsTest==='Observed'&&!t.hidden){const dec=prT(S.meta.dec);
+    if(!/assessment/i.test(dec)){const msg='The result the FBA said would disprove its hypothesis was observed this period (Form FS-1): return to assessment, or say under Reasoning why the function still holds.';
+      const box=document.getElementById('decCheck'),v=box&&box.querySelector('.verdict');if(box){if(v)v.insertAdjacentHTML('beforeend',' '+msg);else box.innerHTML='<div class="verdict v-mid"><b>Check the decision.</b> '+msg+'</div>';}}}}
+{const rv=renderVerdicts;renderVerdicts=function(){const r=rv.apply(this,arguments);try{prFbaRender();}catch(e){}return r;};}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{prFbaLim=(f&&f.fn&&f.fn.limits)||null;renderVerdicts();}catch(e){}return r;};}
+document.addEventListener('change',e=>{if(e.target&&e.target.dataset&&e.target.dataset.m==='fsTest')renderVerdicts();});
 /* the case: in. "Why this review now" from the safety events, while empty */
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
   try{const X=prSafety(f||{}),el=document.querySelector('[data-m="why"]');
