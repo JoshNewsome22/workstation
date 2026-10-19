@@ -9903,6 +9903,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.97: FS-1 shows only the analysis format that was run, keeps treatment results out of the FBA, passes the setting event to TD-1, names the earlier plan from RR-1, and checks the report before signing (review Wave 3)
+
+- **The experimental-analysis detail (F171).** The evidence sheet's detail table has 31 fields for two clinic formats, and
+  they printed empty in every report. Now:
+  - A format's rows show on screen and paper only when its **Conducted** is Yes, or when they hold entries. The validity
+    caveats (agreement, fidelity, concurrent treatment, implementer changes, a stopped analysis) stay in view.
+  - The two rows that can only be filled after treatment (response blocking withdrawn, and the treatment outcome) are
+    shown only when an older record holds them. They are marked as belonging on Form PR-1 or Form DD-1, and the report
+    leaves them out: an FBA is written before the plan.
+- **The setting event to Form TD-1 (F175).** FS-1's setting event for the target fills Form TD-1's setting-event check
+  when it is empty: "Setting event (Form FS-1): …".
+- **The earlier plan from Form RR-1 (F176).** Form RR-1 now sends the current BIP's status and date. FS-1's records
+  paragraph writes it: "Earlier plan: BIP on file, current, dated …".
+- **The window, the date, and a check before signing (I87).**
+  - With no window typed, the report gives the first and last dates on the evidence sheet and says so.
+    **From the evidence sheet** beside the field fills them in.
+  - The report states its date, today's when none is typed.
+  - Above the signatures, a check (on screen only) lists what the report still needs: the parent's consent, the
+    student's assent, the window, the settings not assessed, the limitations, what would change the conclusion, an
+    alternative behavior for each target, a function for a source rated but not named, and a source that supports a
+    function. When nothing is missing it says the report is ready to sign.
+- **Next (part 3):**
+  - I86: the FBA's limits carried to Forms TD-1 and PR-1.
+  - I88: a one-page summary for the parent in English and Spanish.
+  - I90: a settings-by-source grid.
+  - I89, the supervisor's checklist, waits for the BACB Ethics Code wording.
+- qa/fs1-w3b-test.js (9 checks).
+
 ### v22.96: FS-1 records a synthesized functional analysis, gives each target its own level of evidence, keeps interviews from lowering a demonstrated function, names its levels by design, and keeps the Guide out of the report (review Wave 3)
 
 - **A synthesized (IISCA) result (F168).** The function list has **Synthesized / more than one (as tested)** for an

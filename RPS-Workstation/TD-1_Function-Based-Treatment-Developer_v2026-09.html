@@ -3274,6 +3274,8 @@ window.__nbhFactsOut=function(){
     /* the reinforcer and the EO: FS-1's antecedent and consequence for this behavior, else its summary statement */
     const eo=fs1?[T(fs1.ant)?'EO: '+T(fs1.ant):'',T(fs1.cons)?'Reinforcer: '+T(fs1.cons):''].filter(Boolean).join('; '):'';
     P('m.reinf',eo||T(((f.fn&&f.fn.statements)||[]).filter(Boolean)[0]),'the reinforcer and EO (FS-1)');
+    /* v22.97 (FS-1 review F175) the setting event in FS-1's summary statement, for the setting-event check */
+    P('ant.se',fs1&&T(fs1.se)?'Setting event (Form FS-1): '+T(fs1.se):'','the setting event (FS-1)');
     /* severity and safety: TB-1's urgency level of each target, and the precautions DM-1 records */
     const urg=prob.filter(b=>T(b.urg)).map(b=>T(b.label)+' level '+T(b.urg)),sf=((f.profile&&f.profile.flags&&f.profile.flags.safety)||[]).filter(Boolean);
     P('m.safety',[urg.length?'TB-1 urgency: '+urg.join('; '):'',sf.length?'Precautions on file (DM-1): '+sf.join(', '):''].filter(Boolean).join('. '),'severity and safety');
