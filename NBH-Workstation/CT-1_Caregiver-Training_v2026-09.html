@@ -1861,7 +1861,9 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
     if(bits.length)meta('stuSay',bits.join(' '));}}
   const menu=(window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(Array.isArray(f.menu)?f.menu:[]).filter(m=>m&&m.name&&m.tier!=='LP')).slice()   /* v22.59 RA-1's verdicts kept */.sort((a,b)=>(+a.rank||99)-(+b.rank||99)).slice(0,6).map(m=>String(m.name).trim());
   if(menu.length)meta('homeR','From the school menu, to check with the family: '+menu.join(', '));
-  const T=(f.training&&Array.isArray(f.training.steps)?f.training.steps:[]).filter(x=>x&&String(x.d||'').trim());
+  /* v22.7x (TV-1 review F363): when Form TV-1 says who each step is for, only the family's home steps (who: home); its school
+     steps are not a home protocol. Steps with no "who" (sent before v22.7x) come in as before */
+  const T0=(f.training&&Array.isArray(f.training.steps)?f.training.steps:[]).filter(x=>x&&String(x.d||'').trim()),T=T0.some(x=>x.who)?T0.filter(x=>/\bhome\b/.test(String(x.who||''))):T0;
   let steps=false;
   if(T.length&&S.steps.every(x=>!String(x.d||'').trim())&&!Object.keys(S.cells||{}).some(k=>S.cells[k])){S.steps=T.map(x=>({d:String(x.d).trim(),crit:!!x.crit}));n+=T.length;steps=true;}
   if(n){renderAll();const el=last||$('#stepTbl [data-s="0"]')||$('[data-m]');try{if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
