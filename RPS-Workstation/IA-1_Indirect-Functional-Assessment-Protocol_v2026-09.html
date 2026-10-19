@@ -1319,6 +1319,9 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
     <div class="nbh-print-meta"><div class="nbh-print-title">Indirect Functional Assessment Protocol</div><div>Form IA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">Setup: Target Behavior, Informants, and Instrument Plan</div>
+  <!-- v23.01 (RR-1 review F24) the questions the records review carried to the interviews, kept with this file -->
+  <div class="ia-rrq" id="iaRrq" hidden><b>Questions from the records review (Form RR-1)</b><ul></ul><span class="ia-rrq-h">Ask them in the interviews: each comes from a finding in the records.</span></div>
+  <div hidden><textarea id="iaRrqStore" name="m.rrq" readonly tabindex="-1" aria-label="Questions from the records review (kept with the file)"></textarea></div>
   <div class="ident">
     <div class="f"><label for="mClient">Student</label><input id="mClient" name="m.client"></div>
     <div class="f"><label for="mId">Student ID</label><input id="mId" name="m.sid"></div>
@@ -7355,6 +7358,18 @@ OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
   window.__iaConsentPaint=paint;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',paint);else paint();
 })();
+</script>
+<style id="ia1-v2301-css">.ia-rrq{margin:8px 0 10px;padding:8px 12px;border-left:4px solid #2c6e63;background:#eef5f3;font-size:13px}.ia-rrq ul{margin:4px 0 4px 18px;padding:0}.ia-rrq-h{color:#4a5a62;font-size:12px}</style>
+<script id="ia1-v2301">
+/* v23.01 (RR-1 review F24) the questions Form RR-1 carried to this assessment: shown on the Setup sheet and kept with the file; the
+   case's current list replaces the kept one, since they are RR-1's words */
+(function(){const st=document.getElementById('iaRrqStore'),box=document.getElementById('iaRrq');if(!st||!box)return;
+  const E=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function paint(){const q=String(st.value||'').split('\n').map(x=>x.trim()).filter(Boolean);box.hidden=!q.length;box.querySelector('ul').innerHTML=q.map(x=>'<li>'+E(x)+'</li>').join('');}
+  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):{filled:0};
+    try{const q=f&&f.records&&Array.isArray(f.records.questions)?f.records.questions.map(x=>String(x).trim()).filter(Boolean):[];
+      if(q.length&&q.join('\n')!==st.value){st.value=q.join('\n');st.dispatchEvent(new Event('input',{bubbles:true}));}paint();}catch(e){}return r;};
+  st.addEventListener('input',paint);st.addEventListener('change',paint);paint();})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

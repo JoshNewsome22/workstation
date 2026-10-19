@@ -9903,6 +9903,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.01: RR-1's synthesis reaches the rest of the case: the interventions and the records-based hypothesis go to FS-1, the targets to TB-1, the questions to IA-1, and DM-1's program facts fill RR-1 (review Wave 3)
+
+- **The synthesis leaves the form (F24).** What the BCBA writes on RR-1's Synthesis and Interventions sheets now
+  travels with the case.
+  - **Form FS-1's records paragraph** lists each documented intervention with its function, its outcome and whether
+    integrity was measured. For example: "Reduced work (half sheet) (function: escape / avoidance; partly effective;
+    integrity measured)".
+  - **FS-1's evidence sheet** gains a records-review row:
+    - its method, Indirect: records review;
+    - the review's dates;
+    - the function the records suggest, when every target's hypothesis agrees on one ("cannot tell" beside a named
+      function is set aside);
+    - each target's hypothesis in words.
+
+    The strength is left for the BCBA to rate. A records-review row already typed is not added twice.
+  - **Form TB-1** offers the targets RR-1 names as candidates, once each, reported by "the records review (Form
+    RR-1)". The decision is left to the BCBA.
+  - **Form IA-1's Setup sheet** shows the questions RR-1 carried to the interviews, and keeps them with the file. The
+    case's current list replaces the kept one, since they are RR-1's words.
+  - RR-1 also sends the records not available and the records still to obtain.
+- **Form DM-1's program facts (F25).** DM-1 now sends the eligibility, secondary eligibility, eligibility date,
+  placement, staffing ratio, and the BIP's status and date. RR-1's IEP sheet takes each one into its empty field: the
+  BIP status in RR-1's own words, the placement as text. A field already typed on RR-1 is kept, since the record can
+  differ from DM-1's entry.
+- **Next:** I14 (the inventory and the restraint history from IC-1, CR-1 and DD-1) and I12 (a timeline figure).
+- qa/rr1-w3b-test.js (9 checks).
+
 ### v23.00: RR-1 and the workstation word removals in the regulation's terms, count removal days by school year, keep the IEP meeting date apart from the review date, and test a weekday pattern against chance (review Wave 3)
 
 - **Ten removal days, in the regulation's terms (F21).** At ten counted days, the workstation's Today list no longer

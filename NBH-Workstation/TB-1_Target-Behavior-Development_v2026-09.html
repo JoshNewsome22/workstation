@@ -2055,6 +2055,18 @@ window.__nbhFactsIn=function(f){
     have.push(libFold(lab));n++;});
   return {filled:n};
 };
+/* v23.01 (RR-1 review F24) the targets Form RR-1's synthesis names, typed there as they will appear here, become candidate rows
+   once each, with the records review as who reported them; the decision is left to you */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):{filled:0};let n=0;
+  try{const H=f&&f.records&&Array.isArray(f.records.hypotheses)?f.records.hypotheses:[];if(!H.length)return r;
+    const have=[];for(let i=0;i<candN;i++){const b=libFold(val(`cand[${i}].beh`));if(b)have.push(b);}
+    const has=lab=>{const fl=libFold(lab);return !!fl&&have.some(h=>h===fl||h.startsWith(fl+' '));};
+    H.forEach(h=>{const lab=String(h&&h.label||'').trim();if(!lab||has(lab))return;
+      let i=-1;for(let k=0;k<candN;k++){if($$(`[name^="cand[${k}]."]`).every(el=>!String(el.value).trim())){i=k;break;}}
+      if(i<0){addCand();i=candN-1;}
+      const set=(k,v)=>{const el=document.querySelector(`[name="cand[${i}].${k}"]`);if(!el||!v)return;el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));};
+      set('beh',lab);set('by','the records review (Form RR-1)');have.push(libFold(lab));n++;});}catch(e){}
+  return {filled:((r&&r.filled)||0)+n,note:r&&r.note};};}
 
 /* v22.81 (review F225) the goals round of Form SV-1 (sv.goals): what the consumers want, and their goals means by role, into the
    selection rationale while it is empty, where the choice of targets is argued (Form FS-1 has no social validity method) */

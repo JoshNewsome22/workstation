@@ -2015,9 +2015,15 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
    if(['dose','start','chg','fx'].some(k=>{const e=document.querySelector('[name="md['+i+'].'+k+'"]');return e&&String(e.value||'').trim();}))continue;
    put('md['+i+'].n',m.name);put('md['+i+'].dose',[m.dose,m.times].filter(Boolean).join(' / '));have.add(String(m.name).trim().toLowerCase());break;}});
  put('i.iepdate',D.iepHeld);put('i.annual',D.iep);put('i.reeval',D.reeval);
+ /* v23.01 (review F25) the program facts Form DM-1 holds, each into its empty field: a choice only where this form offers it (the
+    BIP status in this form's own words); the fields stay editable, since the record can differ from DM-1's entry */
+ {const PG=P.program||{},BS={'No BIP':'No BIP on file','BIP current':'BIP on file, current','BIP expired / under revision':'BIP on file, expired or not revised at last IEP'};
+  const pick=(k,v)=>{const e=document.querySelector('[name="'+k+'"]');v=String(v==null?'':v).trim();if(!e||!v||String(e.value||'').trim())return;
+   if(e.tagName!=='SELECT'){put(k,v);return;}const o=[...e.options].find(x=>x.text.trim().toLowerCase()===v.toLowerCase());if(!o)return;e.value=o.value;last=e;n++;};
+  pick('i.elig',PG.elig);pick('i.elig2',PG.elig2);put('i.eligdate',PG.eligDate);pick('i.place',PG.placement);pick('i.ratio',PG.ratio);pick('i.bipstat',BS[PG.bipStatus]||'');put('i.bipdate',PG.bipDate);}
  if(last){refresh();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
- return {filled:n+(g&&g.filled||0),note:n?'Consent and health record from the case':''};};
+ return {filled:n+(g&&g.filled||0),note:n?'Consent, health record and program from the case (Forms IC-1 and DM-1)':''};};
 window.__nbhFactsOut=function(){try{const C=lgCompute(),E=1e-9,cy=lgSY(ymd(new Date()));
  const o=C.years.find(y=>y.y===cy),rows=C.rows.filter(x=>x.by[cy]>E||x.sy===cy);
  const list=rows.map(x=>{const it={date:x.r.s,days:Math.round((x.by[cy]!=null?x.by[cy]:x.days)*100)/100,kind:lgLab(LG_TYPES,x.r.t)||''};if(x.r.e&&x.r.e!==x.r.s)it.to=x.r.e;it.counted=LG_CNT[x.r.c]||'';return it;});
@@ -2034,6 +2040,16 @@ window.__nbhFactsOut=function(){try{const C=lgCompute(),E=1e-9,cy=lgSY(ymd(new D
  if(val('i.annual'))R.iep=val('i.annual');if(val('i.iepdate'))R.iepHeld=val('i.iepdate');if(val('i.reeval'))R.reeval=val('i.reeval');if(val('h.consent'))R.consent=val('h.consent');
  /* v22.97 (FS-1 review F176) the earlier plan: the current BIP's status and date, for Form FS-1's records paragraph */
  if(val('i.bipstat')||val('i.bipdate'))R.prior={bipStatus:val('i.bipstat'),bipDate:val('i.bipdate')};
+ /* v23.01 (review F24) the synthesis leaves the form: the documented interventions, the records-based hypothesis for each target,
+    the questions carried to the interviews and observations, the records not available, and the review's dates */
+ const T=v=>String(v==null?'':v).trim(),iv=[],hy=[];
+ for(let i=0;i<(+(($('#nInt')||{}).value)||0);i++){const nm=val(`in[${i}].n`);if(!nm)continue;iv.push({name:T(nm),fn:val(`in[${i}].f`),dates:val(`in[${i}].d`),integrity:val(`in[${i}].i`),outcome:val(`in[${i}].o`),evidence:val(`in[${i}].e`)});}
+ for(let i=0;i<(+(($('#nBeh')||{}).value)||0);i++){const lab=val(`b[${i}].label`);if(!lab)continue;
+  hy.push({label:T(lab),functions:FUNCS.filter(([k])=>val(`b[${i}].fn.${k}`)).map(([k])=>k),agreement:val(`b[${i}].agree`),hyp:val(`b[${i}].hyp`),ant:val(`b[${i}].ant`),con:val(`b[${i}].con`),se:val(`b[${i}].se`)});}
+ if(iv.length)R.interventions=iv;if(hy.length)R.hypotheses=hy;
+ const q=String(val('y.questions')||'').split(/\n+/).map(T).filter(Boolean);if(q.length)R.questions=q;
+ const miss=SOURCES.filter(([k])=>/not available|n\/a|missing|requested/i.test(val(`src.${k}.n`))).map(([k,l])=>k==='other'?(val('src.other.name')||'Other'):l);if(miss.length)R.missing=miss;
+ if(val('y.obtain'))R.obtain=val('y.obtain');if(val('h.start')||val('h.end'))R.reviewed={from:val('h.start'),to:val('h.end')};
  return Object.keys(R).length?{records:R}:null;}catch(e){return null;}};
 })();
 </script>

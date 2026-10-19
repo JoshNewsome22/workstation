@@ -3179,10 +3179,20 @@ const fsBgMd=x=>{x=fsBgT(x);const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(x);return m
 const fsBgDot=s=>{s=fsBgT(s);return s&&!/[.!?\u201d")]$/.test(s)?s+'.':s;};
 const fsBgList=v=>Array.isArray(v)?v.map(x=>typeof x==='string'?x:x&&(x.name||x.what||x.text)||'').map(fsBgT).filter(Boolean).join('; '):fsBgT(v);
 /* the student interview on the evidence table: its method, its place after IN-1 */
+/* v23.01 (RR-1 review F24) the records review's evidence row comes first, under its own method */
+{const m0=fsEvMethod;fsEvMethod=function(id,e){return id==='RR-1'?((METHODS.find(x=>x[1]==='RR-1')||[''])[0]):m0(id,e);};if(fsEvOrder.indexOf('RR-1')<0)fsEvOrder.unshift('RR-1');fsEvUnit['RR-1']='';}
 {const m0=fsEvMethod;fsEvMethod=function(id,e){return id==='SI-1'?METHODS[11][0]:m0(id,e);};if(fsEvOrder.indexOf('SI-1')<0)fsEvOrder.splice(fsEvOrder.indexOf('IN-1')+1,0,'SI-1');fsEvUnit['SI-1']='interview';}
 function fsBgFacts(f){if(!f||typeof f!=='object')return f;const E=Object.assign({},f.evidence||{}),st=f.student||{};
   Object.keys(E).forEach(id=>{const e=E[id];if(e&&typeof e==='object'&&!fsBgT(e.statement)&&!fsBgT(e.fnKey)&&!fsBgT(e.fn))delete E[id];});
   if(!E['SI-1']&&fsBgT(st.hypothesis))E['SI-1']={form:'SI-1',method:'Student interview (indirect)',dates:fsBgMd(st.date),n:null,fn:'',fnKey:'',strength:'',statement:fsBgT(st.hypothesis)};
+  /* v23.01 (RR-1 review F24) the records review's hypotheses as its evidence row: the function the records suggest (one target's, or
+     every target's when they agree), the review's dates, and the hypotheses in words; the strength is left to you */
+  {const R=f.records||{},H=Array.isArray(R.hypotheses)?R.hypotheses.filter(h=>h&&fsBgT(h.label)):[];
+   if(!E['RR-1']&&H.length){const KEY={att:'attention',esc:'escape',tan:'tangible',auto:'automatic',unk:'unclear'},key=h=>{let k=(h.functions||[]).map(x=>KEY[x]).filter(Boolean);if(k.length>1)k=k.filter(x=>x!=='unclear');return k.length>1?'multiple':k[0]||'';};
+     const ks=[...new Set(H.map(key))],fk=ks.length===1?ks[0]:'',FW={attention:'Attention',escape:'Escape / avoidance',tangible:'Tangible / activity',automatic:'Automatic',unclear:'Cannot tell from records',multiple:'More than one'};
+     const rv=R.reviewed||{},dd=[rv.from,rv.to].map(fsBgMd).filter(Boolean);
+     E['RR-1']={form:'RR-1',method:'Indirect: records review',dates:dd.length===2&&dd[0]!==dd[1]?dd[0]+' \u2013 '+dd[1]:dd[0]||'',n:null,fn:fk?FW[fk]:'',fnKey:fk,strength:'',target:H.length===1?H[0].label:'',
+       statement:H.map(h=>fsBgT(h.label)+': '+(key(h)?FW[key(h)].toLowerCase():'no function marked')+(fsBgT(h.agreement)?', agreement '+fsBgT(h.agreement):'')+(fsBgT(h.hyp)?'. '+fsBgDot(h.hyp):'.')).join(' ')};}}
   return Object.assign({},f,{evidence:E});}
 const FS_ASSENT={given:'Assent given','partial':'Partial assent: given for some parts or some sessions',refused:'Assent refused','not able':'Not able to give assent; consent only'};
 function fsBgCompose(f){const R=f.records||{},P=f.profile||{},H=P.health||{},L=P.language||{},st=f.student||{},par=((f.evidence||{})['IN-1']||{}).parent||{},o={};
@@ -3191,7 +3201,13 @@ function fsBgCompose(f){const R=f.records||{},P=f.profile||{},H=P.health||{},L=P
   if(fsBgT(R.mdr))rec.push('Manifestation determination '+fsBgMd(R.mdr)+(R.mdrResult?' ('+fsBgT(R.mdrResult)+')':'')+'.');
   /* v22.97 (review F176) the earlier plan Form RR-1 records: its status and date */
   const pr=R.prior;if(pr&&typeof pr==='object'&&!Array.isArray(pr)){if(fsBgT(pr.bipStatus)||fsBgT(pr.bipDate))rec.push('Earlier plan: '+(fsBgT(pr.bipStatus)||'a BIP')+(fsBgT(pr.bipDate)?', dated '+fsBgMd(pr.bipDate):'')+'.');}
-  else{const prior=fsBgList(R.prior||R.interventions||R.priorInterventions);if(prior)rec.push('Earlier interventions: '+fsBgDot(prior));}
+  else if(!Array.isArray(R.interventions)){const prior=fsBgList(R.prior||R.priorInterventions);if(prior)rec.push('Earlier interventions: '+fsBgDot(prior));}
+  /* v23.01 (RR-1 review F24) the interventions Form RR-1 documented, each with its function, outcome and whether integrity was measured */
+  if(Array.isArray(R.interventions)&&R.interventions.length)rec.push('Earlier interventions (Form RR-1): '+R.interventions.map(x=>{if(typeof x==='string')return fsBgT(x);const nm=fsBgT(x&&x.name);if(!nm)return '';
+    const b=[fsBgT(x.fn)&&!/^Not (stated|function-based)$/i.test(fsBgT(x.fn))?'function: '+fsBgT(x.fn).toLowerCase():/^Not function-based$/i.test(fsBgT(x.fn))?'not function-based':'',
+      ({'Effective (data)':'effective on data','Partly effective':'partly effective','Ineffective (data)':'ineffective on data','Unknown: no data':'outcome unknown, no data','Unknown: not implemented':'not implemented'})[fsBgT(x.outcome)]||fsBgT(x.outcome).toLowerCase(),
+      x.integrity==='Yes'?'integrity measured':x.integrity?'no integrity data':''].filter(Boolean);
+    return nm+(b.length?' ('+b.join('; ')+')':'');}).filter(Boolean).join('; ')+'.');
   /* v23.00 (RR-1 review F23) the IEP held and the annual review due, each under its own name */
   const iep=fsBgT(R.iep||(P.dates||{}).iep),held=fsBgT(R.iepHeld||(P.dates||{}).iepHeld),re=fsBgT(R.reeval||(P.dates||{}).reeval);
   if(iep||re||held)rec.push([held?'IEP held '+fsBgMd(held):'',iep?'annual IEP review due '+fsBgMd(iep):'',re?'reevaluation due '+fsBgMd(re):''].filter(Boolean).join('; ').replace(/^./,x=>x.toUpperCase())+'.');
