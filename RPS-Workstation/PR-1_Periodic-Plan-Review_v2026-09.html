@@ -961,6 +961,7 @@ table.pr-ddprev{min-width:600px}
         <option>Scheduled review</option><option>IEP or annual meeting</option>
         <option>Data indicate the plan is not working</option><option>Integrity problem (Form TI-1)</option>
         <option>Relapse at a treatment challenge (Form RM-1)</option><option>Restraint occurred (Form CR-1)</option>
+         <option>Manifestation determination (34 CFR 300.530(f))</option><option>Removals approaching 10 days (Form RR-1)</option>
         <option>Team requested it</option><option>Considering fading or exit</option></select></td></tr>
       <tr><th>Who took part</th><td colspan="3"><textarea data-m="team" rows="1" class="pr-line"></textarea></td></tr>
       <tr><th>Target behavior</th><td><textarea data-m="beh" rows="1" class="pr-line"></textarea></td>
@@ -979,7 +980,7 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Critical-step integrity</th><td><input type="number" step="any" min="0" max="100" data-m="intCrit" data-calc="1" placeholder="%"></td>
           <th>Announced or unannounced</th><td><select data-m="intType"><option></option><option>Unannounced</option><option>Announced</option><option>Both</option></select></td></tr>
       <tr><th>Contextual fit, if measured (Form CF-1)</th><td><input type="number" step="any" min="1" max="6" data-m="cf" data-calc="1" placeholder="of 6"></td>
-          <th>Staff trained to criterion (Form ST-1)</th><td><select data-m="trained"><option></option><option>All</option><option>Some</option><option>None</option></select></td></tr>
+          <th>Staff trained to criterion (Form ST-1)</th><td><select data-m="trained"><option></option><option>All</option><option>Some</option><option>None</option></select><span class="hint" id="prTrainedSrc"></span></td></tr>
     </table>
     <div class="pr-tibar noprint"><button class="tool" id="tiBtn" type="button">Import From TI-1</button><span class="hint" id="tiMsg" role="status" aria-live="polite">Fills the figures above and below from Form TI-1: inside the workstation, from the TI-1 open there; anywhere, from a data file TI-1 saved.</span><input type="file" id="tiFile" accept=".json,application/json" hidden aria-label="A file Form TI-1 saved"></div>
     <h3 style="margin-top:12px">Across the Review Period (Form TI-1)</h3>
@@ -1021,6 +1022,8 @@ table.pr-ddprev{min-width:600px}
     <textarea data-m="alsoCase" rows="4" class="pr-line pr-also" aria-label="Also in the review period"></textarea>
     <!-- v21.80 the student's assent marked on Form DD-1, beside the data it was collected under -->
     <div id="prAssent" class="pr-assent" hidden></div>
+    <!-- v22.85 (review F320) the period's restraints, removals and a manifestation determination, from the case -->
+    <div id="prSafety" class="pr-safety" hidden></div>
 
     <h2 class="nbh-band" style="margin-top:16px">3. Is the Replacement Established?</h2>
     <table class="rt">
@@ -1056,6 +1059,16 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Next review</th><td><input data-m="next"></td>
           <th style="width:18%">Trigger for an earlier review</th><td><textarea data-m="earlier" placeholder="e.g., any restraint, or 3 consecutive days above 4" rows="1" class="pr-line"></textarea></td></tr>
     </table>
+    <!-- v22.85 (review F321) a change to the plan is decided with the parent: where, when, the parent's part, notice and consent -->
+    <table class="rt pr-change" id="prChangeTbl" hidden>
+      <tr><td colspan="4" class="pr-chcap"><b>Who decided.</b> Changing, fading or ending the plan, or going back to assessment, is an IEP team decision made with the parent, with prior written notice when it changes the services, and consent again for a new assessment or a substantial change (34 CFR 300.503(a); BACB Ethics Code 2.09, 2.11; Form IC-1).</td></tr>
+      <tr><th style="width:24%">Where it was decided</th><td><select data-m="chWhere" aria-label="Where it was decided"><option></option><option>IEP team meeting</option><option>IEP amendment agreed without a meeting</option><option>Other team meeting (say which under Reasoning)</option></select></td>
+          <th style="width:14%">Date</th><td><input type="date" data-m="chDate" aria-label="Date decided"></td></tr>
+      <tr><th>The parent took part</th><td colspan="3"><select data-m="chParent" aria-label="The parent took part"><option></option><option>Yes, at the meeting</option><option>Yes, by phone or video</option><option>Yes, in writing</option><option>No</option></select></td></tr>
+      <tr><th>Prior written notice</th><td><input type="date" data-m="chPwn" aria-label="Prior written notice date"></td>
+          <th>Consent (Form IC-1)</th><td><select data-m="chConsent" aria-label="Consent on Form IC-1"><option></option><option>Obtained again on Form IC-1</option><option>Not needed: no substantial change</option><option>Not yet</option></select></td></tr>
+      <tr><th>The student&rsquo;s assent</th><td colspan="3"><input data-m="chAssent" aria-label="The student's assent" placeholder="what the student was told about the change and what the student said"></td></tr>
+    </table>
     <div id="decCheck" aria-live="polite"></div>
     <h3 style="margin-top:14px">Actions</h3>
     <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
@@ -1068,7 +1081,7 @@ table.pr-ddprev{min-width:600px}
     <table class="rt">
       <tr><th style="width:22%">Case BCBA</th><td class="sigline"></td><th style="width:12%">Date</th><td class="sigline"></td></tr>
       <tr><th>Team representative</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
-      <tr><th>Parent informed</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
+      <tr><th>Parent (took part in the decision)</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
     </table>
     <!-- v21.82 the decision log: close this review into the log and start the next one -->
     <div class="pr-closebar noprint"><button class="tool" id="prCloseRev" type="button">Close this review and start the next</button><span class="hint" id="prCloseMsg" role="status" aria-live="polite">Adds this review to the log below (date, decision, data, integrity, social validity, contextual fit, actions, next review), then clears this review&rsquo;s entries for the next one. The plan, the periods table, the decision rules and the fading and exit sheet are kept.</span></div>
@@ -1095,7 +1108,7 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Generalization criterion</th><td><textarea data-m="xGen" placeholder="Settings, people, and materials the criterion must hold across" rows="1" class="pr-line"></textarea></td></tr>
     </table>
     <h3 style="margin-top:14px">Fading Sequence</h3>
-    <p class="hint">Fade one support at a time and record which. Form RM-1 applies here: each fading step is a treatment challenge (Kimball et al., 2023). During schedule thinning in functional communication training, resurgence followed 42% of thinning steps and was temporary in every case (Briggs et al., 2018), so an increase at a step is not by itself a sign of failure.</p>
+    <p class="hint">Fade one support at a time and record which. Form RM-1 applies here: each fading step is a treatment challenge (Kimball et al., 2023). In a clinic series, resurgence occurred during schedule thinning in functional communication training in 19 of 25 applications (76%), and in some it rose above baseline levels (Briggs et al., 2018). An increase at a step is expected and is not by itself a failure, but check that the crisis plan (Form CR-1) is current before each step.</p>
     <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addFade">Add step</button><button class="tool" id="delFade">Remove last</button>
     </div>
@@ -1197,7 +1210,7 @@ const READY=[
  'A contingency outside the plan will maintain the replacement',
  'Someone is named who will notice if it stops working',
  'A threshold for bringing the plan back is written down',
- 'The parent or guardian has been told the plan is ending and why'
+ 'The parent took part in the decision to end the plan, and prior written notice was given'
 ];
 /* v21.16 audit (F3c): a new or cleared record starts with four data rows, three actions and three fading steps; a
    record that is opened keeps the rows it was saved with. ensure() padded every record to those numbers, so rows
@@ -1297,7 +1310,7 @@ function prAims(){const P=prCaseNow(),B=((P&&P.data&&P.data.behaviors)||[]).filt
 function renderFid(){
   const box=$('#fidTbl');if(!box)return;
   const rows=S.rows.map((r,k)=>({k,p:r.p,t:num(r.t),r:num(r.r),i:num(r.i),cc:num(r.cc)}));
-  if(!rows.some(r=>r.i!=null||r.cc!=null)){box.innerHTML='<tbody><tr><td class="hint">No period holds an integrity figure yet. Enter each period\u2019s integrity (and, where TI-1 tags consequence steps, its commission figure) in the table above.</td></tr></tbody>';return;}
+  if(!rows.some(r=>r.i!=null||r.cc!=null)){box.innerHTML='<tbody><tr><td class="hint">No period holds an integrity figure yet. Enter each period\u2019s integrity (and, where TI-1 tags consequence steps, its commission figure) in the table above; Import From TI-1 fills the periods Form DD-1 has dated.</td></tr></tbody>';return;}
   const uT=String(S.meta.tUnit||'').trim(),uR=String(S.meta.rUnit||'').trim();
   let h=`<thead><tr><th style="width:44px">#</th><th>Period</th><th style="width:96px">Target${uT?' <small>('+esc(uT)+')</small>':''}</th><th style="width:96px">Replacement${uR?' <small>('+esc(uR)+')</small>':''}</th><th style="width:88px">Integrity %</th><th style="width:110px">Commission on consequence steps %</th><th>Reading</th></tr></thead><tbody>`;
   let prev=null;
@@ -1307,7 +1320,7 @@ function renderFid(){
     const I=bad(r.i)?null:r.i,CC=bad(r.cc)?null:r.cc;
     if(I!=null){if(I<60){cls='pr-fid-low';parts.push('below 60%: not a test of the plan');}
       else if(I<FID_LOW){cls='pr-fid-low';parts.push('60\u201379%: below the gate; a test of the implementation');}
-      else if(I<INT_CRIT){cls='pr-fid-mid';parts.push('80\u201389%: below the 90% criterion on the most recent observation; re-check');}
+      else if(I<INT_CRIT){cls='pr-fid-mid';parts.push('80\u201389%: below the 90% criterion; re-check');}
       else{if(!cls)cls='pr-fid-ok';parts.push('at or above 90%');}}
     if(CC!=null&&CC>FID_COM){cls='pr-fid-low';parts.push('reinforcer delivered after the target behavior or a wrong response on '+CC+'% of consequence-step opportunities, above '+FID_COM+'%');}
     if(I!=null&&prev!=null&&prev-I>=FID_FALL){if(cls!=='pr-fid-low')cls='pr-fid-mid';parts.push('fell '+(Math.round((prev-I)*10)/10)+' points from the period before: performance right after a drop may be worse than the level alone predicts');}
@@ -1367,13 +1380,16 @@ function drawPlot(){
       <\/g>`;
   svg.innerHTML=s;
 }
+/* v22.85 (review F325) "By when" is a date the due list reads; a date written as text (10/6/26) becomes one */
+function prIsoB(v){v=String(v==null?'':v).trim();if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;const m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(v);
+  return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):v;}
 function renderAct(){
   $('#actTbl tbody').innerHTML=S.act.map((r,i)=>`<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
     <td><textarea data-a="${i}" data-f="a" rows="2">${esc(r.a)}</textarea></td>
-    <td><select data-a="${i}" data-f="f"><option value=""></option>${opt(['TD-1 (the plan)','GB-1 (goals)','ST-1 (training)','TI-1 (integrity)','CF-1 (contextual fit)','RM-1 (relapse)','FS-1 (assessment)','CR-1 (crisis)','CT-1 (caregivers)','None \u2014 this form'],r.f)}</select></td>
+    <td><select data-a="${i}" data-f="f"><option value=""></option>${opt(['TD-1 (the plan)','GB-1 (goals)','ST-1 (training)','TI-1 (integrity)','CF-1 (contextual fit)','RM-1 (relapse)','FS-1 (assessment)','CR-1 (crisis)','CT-1 (caregivers)','IC-1 (consent)','None \u2014 this form'],r.f)}</select></td>
     <td><input data-a="${i}" data-f="w" value="${esc(r.w)}"></td>
-    <td><input data-a="${i}" data-f="b" value="${esc(r.b)}"></td>
+    <td><input type="date" data-a="${i}" data-f="b" value="${esc(r.b=prIsoB(r.b))}" aria-label="Action ${i+1} by when"></td>
     <td><select data-a="${i}" data-f="s"><option value=""></option>${opt(['Open','Done','Not doing'],r.s)}</select></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this action" aria-label="Delete action ${i+1}">&times;</button></td></tr>`).join('');
 }
 /* v21.33 (R): an action can be deleted anywhere in the list */
@@ -1409,17 +1425,20 @@ function renderReady(){
    ties to a return of the behavior. */
 const READY_SHORT=['the behavior criterion','the replacement criterion','the terminal schedule','the integrity criterion',
   'the generalization criterion','the contingency that maintains the replacement','the person who will notice',
-  'the re-entry threshold','the parent informed'];
+  'the re-entry threshold','the parent\u2019s part in the decision and the notice'];
 const READY_FIELD=['xBeh','xRep','xSched','xInt','xGen','nat','watch','back',''];
 function exitState(){
   const m=S.meta,has=k=>!!String(m[k]||'').trim(),d=READY.length,ticked=READY.map((_,i)=>!!S.ready[i]);
   const met=ticked.map((t,i)=>t&&!(READY_FIELD[i]&&!has(READY_FIELD[i]))),n=met.filter(Boolean).length;
   const blankT=ticked.map((t,i)=>t&&!met[i]?i:-1).filter(i=>i>=0),open=met.map((t,i)=>t?-1:i).filter(i=>i>=0),post=has('post');
-  return {n,d,t:ticked.filter(Boolean).length,blankT,open,post,ready:n===d&&post};}
+  /* v22.85 (review F324) one readiness for the verdict, the decision check and the case: social validity and contextual fit count */
+  let X={ok:true,miss:[]};try{if(typeof prExit82==='function')X=prExit82();}catch(e){}
+  return {n,d,t:ticked.filter(Boolean).length,blankT,open,post,x:X,ready:!!(n===d&&post&&X.ok)};}
 function renderExitVerdict(){
   const E=exitState(),names=a=>a.map(i=>READY_SHORT[i]).join(', ');
   let cls,txt;
   if(E.ready){cls='v-ok';txt='All exit conditions are met. The plan can stop, with the monitoring and the re-entry threshold recorded above.';}
+  else if(E.n===E.d&&E.post&&!E.x.ok){cls='v-mid';txt='All '+E.d+' conditions are met and the monitoring is recorded, but the plan cannot stop yet: '+E.x.miss.join('; ')+'.';}
   else if(E.t===E.d){const miss=(E.blankT.length?E.blankT.length:0)+(E.post?0:1);cls='v-mid';
     txt=`All ${E.d} conditions are ticked, but ${[E.blankT.length?'the entry for '+names(E.blankT)+(E.blankT.length===1?' is':' are')+' blank on this sheet':'',E.post?'':'the monitoring after exit is not recorded'].filter(Boolean).join(', and ')}. Record ${miss===1?'it':'them'} before the plan stops.`;}
   else if(E.n>=E.d-2){cls='v-mid';txt=`${E.d-E.n} condition${E.d-E.n===1?'':'s'} outstanding: ${names(E.open)}. Close ${E.d-E.n===1?'it':'them'} before exit rather than exiting and watching.`;}
@@ -1464,8 +1483,11 @@ function renderVerdicts(){
   let h='';
   if(i==null)h='<div class="verdict v-mid"><b>Integrity not recorded.</b> Until it is, the behavior data below cannot distinguish a plan that does not work from one that was not run. Form TI-1.</div>';
   else if(i<INT_CRIT||(c!=null&&c<INT_CRIT))h=`<div class="verdict v-no"><b>Integrity ${i.toFixed(1)}%${c!=null?', critical steps '+c.toFixed(1)+'%':''}.</b> Below the ${INT_CRIT}% criterion, so the plan is not running as written. Treat the behavior data as uninterpretable and make this review about implementation: retrain on Form ST-1, and check Form CF-1 for whether the plan fits the conditions it has to run in.</div>`;
-  else if(fails.length)h=`<div class="verdict v-no"><b>Integrity ${i.toFixed(1)}%${c!=null?', critical steps '+c.toFixed(1)+'%':''} on the most recent observation, but the period does not pass the plan-run gate:</b> ${fails.join('; ')}. The plan was not run as written across the period, so its outcome data are not a test of the plan. Retrain on Form ST-1, re-observe on Form TI-1, then review again; do not revise the plan on these data. Once consequence errors were corrected, every learner in Burlison et al. (2026) went on to master the task.</div>`;
+  else if(fails.length)h=`<div class="verdict v-no"><b>Integrity ${i.toFixed(1)}%${c!=null?', critical steps '+c.toFixed(1)+'%':''} on the most recent observation, but the period does not pass the plan-run gate:</b> ${fails.join('; ')}. The plan was not run as written across the period, so its outcome data are not a test of the plan. Retrain on Form ST-1, re-observe on Form TI-1, then review again; do not revise the plan on these data. In a laboratory study, adult volunteers learned the task once the consequence errors stopped (Burlison et al., 2026): the direction of the evidence, not a promise for this student.</div>`;
   else h=`<div class="verdict v-ok"><b>Integrity ${i.toFixed(1)}%${c!=null?', critical steps '+c.toFixed(1)+'%':''}.</b> At or above the ${INT_CRIT}% criterion, so the plan is running as written and the behavior data below speak to the plan itself.${gateBlank?'':' The period passes the plan-run gate'+[gMean!=null?'mean integrity '+gMean+'%':'',gConLow!=null?'lowest consequence step '+gConLow+'%':'',gConCom!=null?'commission on consequence steps '+gConCom+'%':''].filter(Boolean).reduce((a,b,k)=>a+(k?', ':' (')+b,'')+(gMean!=null||gConLow!=null||gConCom!=null?')':'')+'; passing the gate does not prove the data interpretable, since commission errors harmed some participants even at 80% in earlier DRO work (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026).'}</div>`;
+  /* v22.85 (review F326) staff trained to criterion (Form ST-1): a period run by an adult not yet trained is not a test of the plan */
+  const trn=String(m.trained||'');
+  if(trn==='None'||trn==='Some')h+=`<div class="verdict v-mid"><b>Staff trained to criterion: ${trn}.</b> ${trn==='None'?'No adult':'Not every adult'} running the plan has met the criterion on Form ST-1, so a figure below criterion may reflect training, not the plan. Train on Form ST-1 before reading the behavior data as a test of the plan.</div>`;
   if(i!=null&&gateBlank)h+=`<div class="verdict v-mid">The period&rsquo;s figures (mean integrity, consequence-step commission, lowest consequence step) are not recorded, so the gate is judged on the most recent observation alone. Import From TI-1 fills them, or enter them from TI-1&rsquo;s Summary.</div>`;
   if(drop==='Yes')h+=`<div class="verdict v-mid"><b>Fidelity dropped abruptly during the period${dropNote?': '+esc(dropNote):''}.</b> Read the period after the drop on its own: performance right after a drop is likely to be worse than the new fidelity level alone would predict, and a stretch at full fidelity just before may mask low current fidelity (preliminary sequence effects in Burlison et al., 2026; Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026).</div>`;
   else if(drop==='Not known')h+=`<div class="verdict v-mid">Whether fidelity dropped abruptly in the period is not known. Check TI-1&rsquo;s observations in order, and the figures by implementer, before reading the behavior data as a single period.</div>`;
@@ -1508,7 +1530,7 @@ function renderVerdicts(){
      "Not yet", a plan changed on behavior data read with integrity below the criterion, and a decision that differed from
      the suggestion with no reason given all passed without a word. */
   const dec=String(m.dec||''),why=String(m.decWhy||'').trim(),E=exitState(),chk=[];
-  if(dec==='Exit the plan'&&!E.ready)chk.push(`Exit is recorded, but Exit Readiness on the Fading and exit sheet is not complete (${E.n} of ${E.d} conditions met${E.post?'':'; the monitoring after exit is not recorded'}).`);
+  if(dec==='Exit the plan'&&!E.ready)chk.push(`Exit is recorded, but Exit Readiness on the Fading and exit sheet is not complete (${E.n} of ${E.d} conditions met${E.post?'':'; the monitoring after exit is not recorded'}${E.x.ok?'':'; '+esc(E.x.miss.join('; '))}).`);
   if((dec==='Begin fading'||dec==='Exit the plan')&&notInd)chk.push(`The replacement is recorded as \u201c${esc(REP)}\u201d under Used independently; fading before it is established risks returning the behavior.`);
   if(['Modify the plan','Return to assessment','Begin fading','Exit the plan'].includes(dec)&&!ok)chk.push(`${i==null?'Integrity is not recorded':i<INT_CRIT?'Integrity is below '+INT_CRIT+'%':(c!=null&&c<INT_CRIT)?'Critical-step integrity is below '+INT_CRIT+'%':'The period does not pass the plan-run gate'}, so the behavior data cannot show whether the plan works; a decision about the plan itself needs another reason, recorded under Reasoning. The route this form states is retrain (ST-1), re-observe (TI-1), re-review.`);
   if(dec&&opts.length&&!opts.includes(dec)&&!why)chk.push('The decision differs from the suggestion above; say why under Reasoning.');
@@ -2046,7 +2068,9 @@ function tiRead(d,pFrom,pTo){
   let fall=null;for(let k=1;k<rows.length;k++){const f=rows[k-1].pct-rows[k].pct;if(f>0&&(!fall||f>fall.f))fall={f,a:rows[k-1].j+1,b:rows[k].j+1};}
   const who=String(m.int||'').trim()||'interventionist';
   const impl=(outN?outN+' observation'+(outN===1?'':'s')+' outside the period not counted. ':'')+who+': '+rows.map(r=>'#'+(r.j+1)+' '+tiR1(r.pct)+'% ('+(r.type==='Announced'?'announced':r.type==='Unannounced'?'unannounced':'type not recorded')+(r.date?', '+tiUS(r.date):'')+')').join(', ');
-  return{student:String(m.client||'').trim(),int:who,skill:String(m.skill||'').trim(),n:rows.length,conSteps:con.length,
+  /* v22.85 (review F326) every dated observation with its consequence-step counts, for the period rows */
+  const obsAll=allRows.filter(r=>r.date).map(r=>{let c=0,ec=0,eo=0;con.forEach(i=>{const q=oppOf(i,r.j);c+=q.c;ec+=q.ec;eo+=q.eo;});return{date:r.date,pct:r.pct,c,ec,eo};});
+  return{student:String(m.client||'').trim(),int:who,skill:String(m.skill||'').trim(),n:rows.length,conSteps:con.length,obsAll,
     latest:{col:latest.j+1,date:latest.date,type:latest.type,pct:latest.pct,crit:latest.crit,deciding:dec.includes(latest)},
     fig:{intPct:String(tiR1(latest.pct)),intCrit:latest.crit==null?'':String(tiR1(latest.crit)),intDate:latest.date?tiUS(latest.date):'',intType:latest.type==='Announced'?'Announced':latest.type==='Unannounced'?'Unannounced':'',
       intN:String(rows.length),intMean:String(tiR1(mean)),intLow:String(tiR1(low)),intMet:tiMet,intMetTxt:tiTxt,
@@ -2117,8 +2141,8 @@ function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||n
   const inP=x=>x&&(!from||x>=from)&&(!to||x<=to);const L=[];
   if(from)L.push((cur&&conds.length>1?'Since '+prMd(from)+' ('+cur.name+', ':'From '+prMd(from)+' to '+prMd(to)+' (')+((cur&&cur.days)||(d&&d.days)||0)+' school days with data):');
   if(d){const inc=(d.incidentList||[]).filter(i=>inP(i.date));
-    if(inc.length){const t={};inc.forEach(i=>{const k=i.tier||'no tier';t[k]=(t[k]||0)+1;});const told=inc.filter(i=>i.parent==='yes').length;
-      L.push('Incidents logged on Form DD-1: '+inc.length+' ('+Object.keys(t).map(k=>k+': '+t[k]).join(', ')+'); home told after '+told+' of '+inc.length+'.');}
+    if(inc.length){const t={};inc.forEach(i=>{const k=i.tier||'no tier';t[k]=(t[k]||0)+1;});const told=inc.filter(i=>i.parent==='yes').length,hr=inc.filter(i=>i.hold==='restraint').length,hs=inc.filter(i=>i.hold==='seclusion').length;
+      L.push('Incidents logged on Form DD-1: '+inc.length+' ('+Object.keys(t).map(k=>k+': '+t[k]).join(', ')+')'+(hr?'; '+hr+' marked as a restraint':'')+(hs?'; '+hs+' marked as seclusion':'')+'; home told after '+told+' of '+inc.length+'.');}
     else L.push('Incidents logged on Form DD-1: none.');
     const met=(d.behaviors||[]).filter(b=>b.aimMet),aims=(d.behaviors||[]).filter(b=>b.aim!=null);
     if(aims.length)L.push('At the aim for the days the criterion asks: '+(met.length?met.map(b=>b.name+' ('+b.run+' days in a row, '+b.need+' asked)').join('; '):'none yet')+'.');}
@@ -2229,9 +2253,10 @@ function prAssentRender(){const el=document.getElementById('prAssent');if(!el)re
     (L.length?' <span>'+L.map(x=>prEsc(prT(x.mark).toLowerCase())+' '+prEsc(prMd(prIso(x.date)||x.date))).join(', ')+'.</span>':'')+'</p>'+
     (a.caution?'<div class="verdict v-mid"><b>Assent withdrawn or refused on '+(a.r+a.w)+' of the last '+a.k+' days marked.</b> Weigh this beside the data before judging the plan: ask what the student is avoiding (the demand, the procedure, the person, the setting) and whether the reinforcers still compete, and talk it through with the student and the team before continuing unchanged.</div>':'');}
 function prProbesRender(){const el=document.getElementById('prProbes');if(!el)return;const f=prCase80||{},m=S.meta||{};
-  const P=(Array.isArray(f.probes)?f.probes:[]).map(p=>p&&typeof p==='object'?Object.assign({},p,{iso:prIso(p.date)}):null).filter(p=>p&&p.iso).sort((a,b)=>a.iso<b.iso?-1:a.iso>b.iso?1:0);
+  const PRB=f.data&&Array.isArray(f.data.probes)?f.data.probes:f.probes;   /* v22.85 (review F324) DD-1 sends them inside data */
+  const P=(Array.isArray(PRB)?PRB:[]).map(p=>p&&typeof p==='object'?Object.assign({},p,{iso:prIso(p.date)}):null).filter(p=>p&&p.iso).sort((a,b)=>a.iso<b.iso?-1:a.iso>b.iso?1:0);
   const own=prT(m.dec),exitD=own?(PR_DEC[own]==='exit'?prIso(m.date):''):((f.review&&f.review.exit&&f.review.exit.date)||'');
-  if(!Array.isArray(f.probes)){el.hidden=true;el.innerHTML='';return;}
+  if(!Array.isArray(PRB)){el.hidden=true;el.innerHTML='';return;}
   const one=p=>prEsc(prMd(p.iso))+(prT(p.setting)?' ('+prEsc(prT(p.setting))+')':'');let h='<h3 style="margin-top:14px">Maintenance Probes (Form DD-1)</h3>';
   if(exitD){const M=P.filter(p=>p.kind==='maint'&&p.iso>=exitD),G=P.filter(p=>p.kind==='gen'&&p.iso>=exitD);
     h+='<p class="hint" style="margin:4px 0">Since the exit on '+prEsc(prMd(exitD))+': '+(M.length?M.length+' maintenance probe'+(M.length===1?'':'s')+', '+M.map(one).join('; '):'no maintenance probe yet')+'.'+(G.length?' Generalization probes: '+G.map(one).join('; ')+'.':'')+'</p>';
@@ -2276,10 +2301,11 @@ document.addEventListener('change',e=>{if(prCase80&&e.target&&e.target.dataset&&
    (an SV-1 post mean at or above SV-1's working cut of 4.5) and contextual fit (a CF-1 mean at or above 4, CF-1's
    "Adequate fit"). With the current review not yet decided, review.date and the decision are the last review closed. */
 let prCase82=null;
-const PR_LOGF=['date','period','decision','decisionText','why','data','integrity','sv','fit','actions','next','revNo'];
+const PR_LOGF=['date','period','decision','decisionText','why','data','integrity','sv','fit','actions','next','revNo','team','reason','checks','change'];
 const PR_KEEPACT=a=>!/^(?:Done|Not doing)$/.test(prT(a.s))&&['a','f','w','b','s'].some(k=>prT(a[k]));
 const PR_CLEAR=['period','pFrom','pTo','intMet','intMetTxt','why','team','intPct','intDate','intCrit','intType','cf','trained','intN','intMean','intLow','intConLow','intConCom','intConOm',
-  'intImpl','intDrop','intDropNote','alsoCase','alsoCaseWas','repInd','repGap','relapse','dec','decWhy','decWhat','decSame','next','earlier','svLine','fitLine'];
+  'intImpl','intDrop','intDropNote','alsoCase','alsoCaseWas','repInd','repGap','relapse','dec','decWhy','decWhat','decSame','next','earlier','svLine','fitLine',
+  'chWhere','chDate','chParent','chPwn','chConsent','chAssent'];
 const prN=v=>{const x=parseFloat(v);return isFinite(x)?x:null;};
 const prF=(x,d)=>x==null?'':(+x).toFixed(d==null?2:d);
 function prSvLine(sv){if(!sv||typeof sv!=='object')return '';const sc=prT(sv.scale)||'1-6',P=[];
@@ -2301,8 +2327,11 @@ function prIntLine(){const m=S.meta,p=prT(m.intPct),mn=prT(m.intMean),n=prT(m.in
   if(prT(m.intCrit))L.push('critical steps '+prT(m.intCrit)+'%');return L.join('; ');}
 function prActLine(){return S.act.filter(a=>prT(a.a)).map(a=>prT(a.a)+([prT(a.w),prT(a.b)?'by '+prT(a.b):'',prT(a.s)].filter(Boolean).length?' ('+[prT(a.w),prT(a.b)?'by '+prT(a.b):'',prT(a.s)].filter(Boolean).join(', ')+')':'')).join('; ');}
 function prLogEntry(){const m=S.meta,dec=prT(m.dec),fit=prT(m.fitLine)||(prT(m.cf)?'Form CF-1 mean '+prT(m.cf)+' of 6':'');
-  const e={date:prIso(m.date)||prToday(),decision:PR_DEC[dec]||'',decisionText:dec,why:prT(m.decWhy),data:prDataLine(),integrity:prIntLine(),sv:prT(m.svLine),fit,actions:prActLine(),next:prIso(m.next)||prT(m.next),revNo:prT(m.revNo)};
-  Object.keys(e).forEach(k=>{if(e[k]==='')delete e[k];});if(!e.decision)e.decision='';return e;}
+  const e={date:prIso(m.date)||prToday(),decision:PR_DEC[dec]||'',decisionText:dec,why:prT(m.decWhy),data:prDataLine(),integrity:prIntLine(),sv:prT(m.svLine),fit,actions:prActLine(),next:prIso(m.next)||prT(m.next),revNo:prT(m.revNo),
+    /* v22.85 (review F325) who took part, the period, why it was held, the change's record and any check left open */
+    team:prT(m.team),period:(prIso(m.pFrom)&&prIso(m.pTo)?prMd(prIso(m.pFrom))+'/'+prIso(m.pFrom).slice(0,4)+' to '+prMd(prIso(m.pTo))+'/'+prIso(m.pTo).slice(0,4):prT(m.period)),reason:prT(m.why),
+    change:prChangeLine(),checks:prT((document.getElementById('decCheck')||{}).textContent).replace(/^Check the decision\.\s*/,'')};
+  Object.keys(e).forEach(k=>{if(e[k]==='')delete e[k];});const o={};PR_LOGF.forEach(k=>{if(k in e)o[k]=e[k];});if(!o.decision)o.decision='';return o;}
 function prLogFromFile(a){if(!Array.isArray(a))return [];return a.filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).map(x=>{const o={};
   PR_LOGF.forEach(k=>{if(x[k]!=null&&typeof x[k]!=='object'&&String(x[k])!=='')o[k]=String(x[k]);});if(o.decision==null)o.decision='';return o;}).filter(o=>o.date);}
 function prLogRender(){const t=document.getElementById('prLogTbl'),sec=document.getElementById('prLogSec');if(!t)return;const L=Array.isArray(S.log)?S.log:[];
@@ -2310,7 +2339,7 @@ function prLogRender(){const t=document.getElementById('prLogTbl'),sec=document.
   if(!L.length){t.innerHTML='<tbody><tr><td class="hint">No review closed yet. &ldquo;Close this review and start the next&rdquo; adds the review on this form here.</td></tr></tbody>';return;}
   const md=v=>{const i=prIso(v);return i?prMd(i)+'/'+i.slice(0,4):prEsc(v||'');};
   t.innerHTML='<thead><tr><th style="width:8%">Date</th><th style="width:12%">Decision</th><th style="width:16%">Data</th><th style="width:10%">Integrity</th><th style="width:16%">Social validity</th><th style="width:12%">Contextual fit</th><th>Actions</th><th style="width:8%">Next review</th></tr></thead><tbody>'+
-    L.slice().reverse().map(e=>'<tr><td>'+md(e.date)+(e.revNo?'<br><small>review '+prEsc(e.revNo)+'</small>':'')+'</td><td><b>'+prEsc(e.decisionText||'not recorded')+'</b>'+(e.why?'<br><small>'+prEsc(e.why)+'</small>':'')+'</td><td>'+prEsc(e.data||'')+'</td><td>'+prEsc(e.integrity||'')+'</td><td>'+prEsc(e.sv||'')+'</td><td>'+prEsc(e.fit||'')+'</td><td>'+prEsc(e.actions||'')+'</td><td>'+md(e.next)+'</td></tr>').join('')+'</tbody>';}
+    L.slice().reverse().map(e=>'<tr><td>'+md(e.date)+(e.revNo?'<br><small>review '+prEsc(e.revNo)+'</small>':'')+'</td><td><b>'+prEsc(e.decisionText||'not recorded')+'</b>'+(e.why?'<br><small>'+prEsc(e.why)+'</small>':'')+(e.reason?'<br><small>Why now: '+prEsc(e.reason)+'</small>':'')+(e.period?'<br><small>Period: '+prEsc(e.period)+'</small>':'')+(e.team?'<br><small>Took part: '+prEsc(e.team)+'</small>':'')+(e.change?'<br><small>'+prEsc(e.change)+'</small>':'')+(e.checks?'<br><small class="pr-logchk">Closed with the check open: '+prEsc(e.checks)+'</small>':'')+'</td><td>'+prEsc(e.data||'')+'</td><td>'+prEsc(e.integrity||'')+'</td><td>'+prEsc(e.sv||'')+'</td><td>'+prEsc(e.fit||'')+'</td><td>'+prEsc(e.actions||'')+'</td><td>'+md(e.next)+'</td></tr>').join('')+'</tbody>';}
 async function prCloseReview(){const m=S.meta,msg=document.getElementById('prCloseMsg'),dec=prT(m.dec);
   const q='Close this review and start the next?\nThis review ('+(prT(m.date)||'no date')+(dec?', '+dec:', no decision recorded')+') goes into the review log. Its own entries are then cleared for the next review'+(prT(m.next)?', dated '+prT(m.next):'')+'; the plan, the periods table, the decision rules, the fading and exit sheet and the open actions are kept.';
   if(!(await nbhUI.confirm(q,{ok:'Close the review'})))return false;
@@ -2411,7 +2440,7 @@ function pr83Read(r){const R=pr83R(),b=prN(r.base),c=prN(r.cur),d=prN(r.days),up
     if(b!=null&&b>0)o.chg=(c-b)/b*100;
     const from=b!=null?' (baseline '+prNum(b)+')':'';
     if(g==null){o.state='not judged';o.rule='Now '+prNum(c)+from+'. No goal to judge it against'+(r.goalSrc?': '+r.goalSrc:'')+'.';o.sug='';return o;}
-    o.met=c>=g;o.state=o.met?'met':'not met';o.rule=(o.met?'At goal: now ':'Below goal: now ')+prNum(c)+' against the goal of '+prNum(g)+from+'.';
+    o.met=c>=g;o.state=o.met?'at goal':'below goal';o.rule=(o.met?'At goal: now ':'Below goal: now ')+prNum(c)+' against the goal of '+prNum(g)+from+'.';
     const G=typeof prGate==='function'?prGate():null;
     if(G&&G.blank){o.why='integrity not recorded';return o;}
     if(G&&!G.ok){o.sug='continue';o.why=G.why+': address implementation first';return o;}
@@ -2423,8 +2452,10 @@ function pr83Read(r){const R=pr83R(),b=prN(r.base),c=prN(r.cur),d=prN(r.days),up
   if(!(b>0)){o.state='not judged';o.rule='Not judged: the baseline is 0, so no change is computed.';return o;}
   o.chg=(c-b)/b*100;const good=up?o.chg:-o.chg,txt=relTxt(o.chg)+' baseline';
   if(d!=null&&d<R.minDays){o.state='too few days';o.rule='Too few days ('+d+' of '+R.minDays+'): '+txt+', not judged yet.';o.sug='continue';return o;}
-  o.met=good>=R.improvePct;o.state=o.met?'met':'not met';
-  o.rule=(o.met?'Met: ':'Not met: ')+txt+(d!=null?' over '+d+' school day'+(d===1?'':'s'):'')+(o.met?'':', short of the '+R.improvePct+'% '+(up?'increase':'reduction'))+'.';
+  /* v22.85 (review F327) a 25% change is not the goal met: the rule says what was reached */
+  const rx=R.improvePct+'% '+(up?'increase':'reduction');
+  o.met=good>=R.improvePct;o.state=o.met?rx+' reached':'short of '+rx;
+  o.rule=(o.met?rx+' reached: ':'Not reached: ')+txt+(d!=null?' over '+d+' school day'+(d===1?'':'s'):'')+(o.met?'':', short of the '+R.improvePct+'% '+(up?'increase':'reduction'))+'.';
   /* v22.37 (review F318, F323) the same test as the overall suggestion: no suggestion without integrity, continue while the plan is
      not running as written (critical steps, the plan-run gate, Form TI-1's criterion) or the replacement is not independent;
      fade only at the target's aim (Form DD-1) or, with no aim, a 90% reduction, after at least the minimum days */
@@ -3772,6 +3803,126 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 </script>
 
 
+<script id="pr1-v2285">
+/* v22.85 PR-1 review Wave 3 (F320, F321, F324, F325).
+   - Safety in the period: the restraints and seclusion marked on Form DD-1's incidents in the period, Form CR-1's count this
+     semester and its notices still open, Form RR-1's removals and a manifestation determination. "Why this review now" is
+     filled from them while empty, and the decision check asks about a restraint the reasoning does not mention.
+   - A change to the plan (modify, return to assessment, fade, exit) shows Who decided: where and when, the parent's part, the
+     prior written notice, consent on IC-1 and the student's assent; the check asks for them, and they go to the case and the log.
+   - The open actions go to the case with their dates (review.actions) and on the due list; closing a review with the decision
+     check open asks first, and the log keeps who took part, the period, the reason and the check. */
+const prPd=()=>{const m=S.meta,f=prCase||{},d=f.data||null,conds=(d&&d.conds)||[],cur=conds.length?conds[conds.length-1]:null;
+  return {from:prIso(m.pFrom)||(cur&&cur.from)||(d&&d.from)||'',to:prIso(m.pTo)||(d&&d.to)||prToday()};};
+function prSafety(f){f=f||{};const P=prPd(),inP=x=>!!x&&(!P.from||x>=P.from)&&(!P.to||x<=P.to);
+  const d=f.data||{},inc=(d.incidentList||[]).filter(i=>i&&inP(i.date)),held=inc.filter(i=>i.hold==='restraint'),sec=inc.filter(i=>i.hold==='seclusion');
+  const cr=f.crisis||{},rs=cr.restraints&&cr.restraints.semester?cr.restraints:null,open=(cr.deadlines||[]).filter(x=>x&&!x.done&&x.what),rec=f.records||{},rm=rec.removals&&rec.removals.days?rec.removals:null,mdr=prIso(rec.mdr);
+  const rsIn=!!(rs&&rs.last&&inP(rs.last));
+  return {P,held,sec,rs,rsIn,restrained:held.length>0||rsIn,open,rm,mdr,mdrIn:inP(mdr),mdrResult:prT(rec.mdrResult),any:!!(held.length||sec.length||rs||open.length||rm||mdr)};}
+function prSafetyRender(){const el=document.getElementById('prSafety');if(!el)return;const X=prSafety(prCase);
+  if(!prCase||!X.any){el.hidden=true;el.innerHTML='';return;}el.hidden=false;const L=[];
+  L.push('<b>Restraints in this period</b> (Form DD-1&rsquo;s incidents marked as a restraint): '+(X.held.length?X.held.length+' ('+X.held.map(i=>prMd(i.date)+(i.beh?' '+prEsc(i.beh):'')).join('; ')+')':'none')+'.'+(X.sec.length?' Seclusion: '+X.sec.length+'.':''));
+  if(X.rs)L.push('<b>Form CR-1:</b> '+X.rs.semester+' restraint'+(X.rs.semester===1?'':'s')+' this semester'+(X.rs.last?', the last on '+prMd(X.rs.last):'')+'.'+(X.rs.semester>=2?' A second restraint in a semester requires a crisis intervention plan (s. 1003.573(6)(a), F.S., as Form CR-1 quotes it).':''));
+  if(X.open.length)L.push('<b>Still open on Form CR-1:</b> '+X.open.slice(0,6).map(x=>prEsc(x.what)+(x.due?' (due '+prMd(x.due)+')':'')).join('; ')+(X.open.length>6?'; and '+(X.open.length-6)+' more':'')+'.');
+  if(X.rm)L.push('<b>Removals (Form RR-1):</b> '+X.rm.days+' school day'+(+X.rm.days===1?'':'s')+(X.rm.year?' in '+prEsc(X.rm.year):' this school year')+(X.rm.at10?', at or past 10':+X.rm.days>=8?', approaching 10':'')+'.');
+  if(X.mdr)L.push('<b>Manifestation determination:</b> '+prMd(X.mdr)+'/'+X.mdr.slice(0,4)+(X.mdrResult?' ('+prEsc(X.mdrResult)+')':'')+'. After a manifestation finding, the IEP team reviews the behavior intervention plan (34 CFR 300.530(f)).');
+  el.innerHTML='<h3 style="margin-top:12px">Safety in the Period</h3><ul class="pr-safe">'+L.map(x=>'<li>'+x+'</li>').join('')+'</ul>';}
+const PR_CHANGE=/^(Modify the plan|Return to assessment|Begin fading|Exit the plan)$/;
+function prChangeLine(){const m=S.meta;if(!PR_CHANGE.test(prT(m.dec)))return '';const P=[];
+  if(prT(m.chWhere))P.push('decided at '+prT(m.chWhere).replace(/^IEP/,'an IEP').replace(/^Other/,'another').toLowerCase().replace(/iep/g,'IEP')+(prIso(m.chDate)?' on '+prMd(prIso(m.chDate))+'/'+prIso(m.chDate).slice(0,4):''));
+  if(prT(m.chParent))P.push('parent took part: '+prT(m.chParent).toLowerCase());if(prIso(m.chPwn))P.push('prior written notice '+prMd(prIso(m.chPwn))+'/'+prIso(m.chPwn).slice(0,4));
+  if(prT(m.chConsent))P.push('consent: '+prT(m.chConsent).toLowerCase());if(prT(m.chAssent))P.push('student: '+prT(m.chAssent));return P.length?'Who decided: '+P.join('; ')+'.':'';}
+function prChecks85(){const m=S.meta,dec=prT(m.dec),why=prT(m.decWhy),X=prSafety(prCase),extra=[];
+  const tb=document.getElementById('prChangeTbl');if(tb)tb.hidden=!PR_CHANGE.test(dec);
+  if(X.restrained&&/^(Continue unchanged|Continue and address implementation|Begin fading|Exit the plan)$/.test(dec)&&!/restrain|hold|crisis|CR-1/i.test(why))
+    extra.push('A restraint is on record in this period (Safety in the Period, section 2), and the Reasoning does not mention it: say how this decision takes it into account.');
+  if(X.rs&&X.rs.semester>=2&&X.open.some(x=>/crisis intervention plan/i.test(x.what)))extra.push('This is the second restraint this semester, and Form CR-1&rsquo;s crisis intervention plan is still open.');
+  if(X.mdrIn&&!/manifest|300\.530/i.test(why)&&dec)extra.push('A manifestation determination was held in this period: the IEP team reviews the plan after a manifestation finding (34 CFR 300.530(f)); say how this review answers it under Reasoning.');
+  if(PR_CHANGE.test(dec)){const miss=[];
+    if(!/^Yes/.test(m.chParent||''))miss.push('that the parent took part in the decision');
+    if(!prIso(m.chPwn))miss.push(dec==='Begin fading'?'the prior written notice date (unless the plan already sets out this fading step)':'the prior written notice date');
+    if(dec==='Return to assessment'&&!/^Obtained/.test(m.chConsent||''))miss.push('consent on Form IC-1 for the new assessment');
+    else if(dec==='Modify the plan'&&!prT(m.chConsent))miss.push('whether consent is needed again (Form IC-1)');
+    if(miss.length)extra.push('The plan changes ('+esc(dec)+'), but Who decided does not record '+miss.join(', ')+'.');}
+  if(!extra.length)return;const box=document.getElementById('decCheck');if(!box)return;const v=box.querySelector('.verdict');
+  if(v)v.insertAdjacentHTML('beforeend',' '+extra.join(' '));else box.innerHTML='<div class="verdict v-mid"><b>Check the decision.</b> '+extra.join(' ')+'</div>';}
+{const rv=renderVerdicts;renderVerdicts=function(){const r=rv.apply(this,arguments);try{prChecks85();prSafetyRender();}catch(e){}return r;};}
+/* the case: in. "Why this review now" from the safety events, while empty */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{const X=prSafety(f||{}),el=document.querySelector('[data-m="why"]');
+    const why=X.restrained?'Restraint occurred (Form CR-1)':X.mdrIn?'Manifestation determination (34 CFR 300.530(f))':X.rm&&!X.rm.at10&&+X.rm.days>=8?'Removals approaching 10 days (Form RR-1)':'';
+    if(why&&el&&!prT(S.meta.why)){S.meta.why=why;el.value=why;k=1;}
+    prSafetyRender();renderVerdicts();}catch(e){}
+  return k?{filled:((r&&r.filled)|0)+1,note:[(r&&r.note)||'','why this review now, from the safety events in the case'].filter(Boolean).join('; ')}:r;};}
+/* the case: out. The open actions with their dates, and the change's record */
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const m=S.meta,acts=S.act.filter(a=>prT(a.a)&&!/^(?:Done|Not doing)$/.test(prT(a.s))).map(a=>{const o={what:prT(a.a).slice(0,200),form:prT(a.f).split(' ')[0],who:prT(a.w),status:prT(a.s)||'Open'};const b=prIsoB(a.b);if(/^\d{4}-\d{2}-\d{2}$/.test(b))o.by=b;return o;});
+    if(!r&&!acts.length)return r;const o=r&&typeof r==='object'?r:{};const rv=o.review=o.review||{decision:'',decisionText:''};
+    if(acts.length)rv.actions=acts;
+    if(PR_CHANGE.test(prT(m.dec))){const c={};[['where','chWhere'],['parent','chParent'],['consent','chConsent'],['assent','chAssent']].forEach(([k,f])=>{if(prT(m[f]))c[k]=prT(m[f]);});
+      if(prIso(m.chDate))c.date=prIso(m.chDate);if(prIso(m.chPwn))c.pwn=prIso(m.chPwn);if(Object.keys(c).length)rv.change=c;}
+    return o;}catch(e){return r;}};}
+/* the due list: the next review and every open action with a date */
+window.__nbhDue=function(){const L=[],n=prIso(S.meta.next)||prIsoB(S.meta.next);if(/^\d{4}-\d{2}-\d{2}$/.test(n))L.push({what:'Next review',date:n});
+  S.act.forEach(a=>{const b=prIsoB(a.b);if(prT(a.a)&&/^\d{4}-\d{2}-\d{2}$/.test(b)&&!/^(?:Done|Not doing)$/.test(prT(a.s)))L.push({what:('PR-1 action: '+prT(a.a)).slice(0,60),date:b});});return L;};
+/* v22.85 (review F326) what the case already holds is not typed again. Filled only while empty: the plan under review (Form
+   TD-1's adoption and versions), the replacement behavior, who took part (TD-1's adoption team), staff trained to criterion
+   (Form ST-1: All, Some or None of the adults it lists) and the period's dates (the day after the last review closed on this form,
+   else the start of Form DD-1's current condition, to DD-1's last day with data). Import From TI-1 also places each dated
+   observation in the period row whose dates hold it, and fills that row's Integrity % and commission, asking before it replaces. */
+const prUs=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1].slice(2):'';};
+function prPlanLine(p){p=p||{};const ad=p.adoption&&typeof p.adoption==='object'?p.adoption:{},V=Array.isArray(p.versions)?p.versions.filter(v=>v&&typeof v==='object'):[];
+  if(!prIso(ad.date)&&!V.length)return '';const last=V.length?V[V.length-1]:null,n=+ad.version||(last&&+last.v)||1;
+  const why=last&&prT(last.why)&&prT(last.why)!=='other'&&prT(last.why)!=='adopted'?' ('+prT(last.why)+')':'';
+  const head='BIP v'+n+(n>1&&last&&prIso(last.date)?' revised '+prUs(prIso(last.date))+why:'')+(prIso(ad.date)?(n>1?', first adopted ':' adopted ')+prUs(prIso(ad.date)):'');
+  const L=[head],nt=(n>1&&last&&prIso(last.notice))||prIso(ad.notice);if(nt)L.push('prior written notice '+prUs(nt));
+  if(prIso(ad.start))L.push('started '+prUs(prIso(ad.start)));L.push('Form TD-1');return L.join(', ');}
+function prTrained(st){const P=st&&Array.isArray(st.people)?st.people.filter(x=>x&&prT(x.name)):[];if(!P.length)return null;const k=P.filter(x=>x.met===true).length;
+  return {v:k===P.length?'All':k?'Some':'None',k,n:P.length};}
+function prPdFill(f){const d=f&&f.data;if(!d)return null;const conds=Array.isArray(d.conds)?d.conds:[],cur=conds.length?conds[conds.length-1]:null;
+  const L=Array.isArray(S.log)?S.log:[],last=L.length?prIso(L[L.length-1].date):'';let from='',src='';
+  if(last){const t=new Date(last+'T12:00:00');t.setDate(t.getDate()+1);from=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');src='the day after the last review closed on this form';}
+  else if(cur&&prIso(cur.from)&&!/baseline/i.test(prT(cur.name))){from=prIso(cur.from);src='the start of '+prT(cur.name)+' on Form DD-1';}
+  const to=prIso(d.to)||(cur&&prIso(cur.to))||'';if(!from||!to||to<from)return null;return {from,to,src};}
+let prTr85=null;
+function prTrainedRender(){const el=document.getElementById('prTrainedSrc');if(!el)return;const t=prTr85;
+  el.textContent=t?' Form ST-1: '+t.k+' of the '+t.n+' adult'+(t.n===1?'':'s')+' listed '+(t.k===1?'has':'have')+' met the criterion.':'';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;const what=[];f=f||{};
+  try{const put=(key,v)=>{if(!v||prT(S.meta[key]))return false;const el=document.querySelector('[data-m="'+key+'"]');if(el&&prT(el.value))return false;
+      S.meta[key]=v;if(el){el.value=v;if(el.value!==v){S.meta[key]='';return false;}el.dispatchEvent(new Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));}k++;return true;};
+    const p=f.plan&&typeof f.plan==='object'?f.plan:{};
+    if(put('plan',prPlanLine(p)))what.push('the plan under review');
+    if(typeof p.rep==='string'&&put('rep',prT(p.rep)))what.push('the replacement behavior');
+    if(p.adoption&&typeof p.adoption.team==='string'&&put('team',prT(p.adoption.team)))what.push('who took part');
+    prTr85=prTrained(f.staff);if(prTr85&&put('trained',prTr85.v))what.push('staff trained to criterion');prTrainedRender();
+    if(!prIso(S.meta.pFrom)&&!prIso(S.meta.pTo)){const P=prPdFill(f);if(P&&put('pFrom',P.from)){if(put('pTo',P.to))k--;what.push('the period ('+P.src+' to Form DD-1’s last day with data)');}}
+    if(k)renderVerdicts();}catch(e){}
+  if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'',what.join(', ')+' from the case'].filter(Boolean).join('; ')};};}
+async function prTiPeriods(x){const O=(x&&Array.isArray(x.obsAll)?x.obsAll:[]).filter(o=>o&&o.date);if(!O.length)return '';
+  const dd=S.dd||{},src=dd.t&&Array.isArray(dd.t.rows)&&dd.t.rows.length?dd.t:(dd.r&&Array.isArray(dd.r.rows)?dd.r:null);
+  const R=src?src.rows.filter(r=>r.k>0&&prIso(r.from)&&prIso(r.to)):[];
+  if(!R.length)return ' The period rows carry no dates yet (Fill question 2 from DD-1 dates them), so Integrity % by period is left as it is.';
+  const add=[],rep=[];let placed=0;
+  R.forEach(r=>{const row=S.rows[r.k];if(!row)return;const a=prIso(r.from),b=prIso(r.to),inn=O.filter(o=>o.date>=a&&o.date<=b);if(!inn.length)return;placed+=inn.length;
+    const kn=inn.reduce((t,o)=>t+o.c+o.ec+o.eo,0),v={i:String(tiR1(inn.reduce((t,o)=>t+o.pct,0)/inn.length))};
+    if(x.conSteps&&kn)v.cc=String(tiR1(100*inn.reduce((t,o)=>t+o.ec,0)/kn));
+    Object.keys(v).forEach(f=>{const cur=prT(row[f]);if(cur===v[f])return;(cur?rep:add).push({k:r.k,f,v:v[f],cur});});});
+  if(!placed)return ' No TI-1 observation falls inside a period row Form DD-1 has dated.';
+  if(!add.length&&!rep.length)return '';
+  let all=true;if(rep.length)all=await nbhUI.confirm('Replace figures already in the period rows?\n'+rep.map(z=>'Period '+z.k+', '+(z.f==='i'?'Integrity %':'commission on consequence steps')+': now “'+z.cur+'”, TI-1’s observations in it give “'+z.v+'”').join('; ')+'.\nCancel keeps them and fills only the empty cells.',{ok:'Replace'});
+  const W=all?add.concat(rep):add;W.forEach(z=>{S.rows[z.k][z.f]=z.v;});if(W.length)renderAll();
+  return W.length?' '+W.length+' cell'+(W.length===1?'':'s')+' of the period rows filled from '+placed+' dated observation'+(placed===1?'':'s')+(all?'':'; the figures already there were kept')+'.':' The figures already in the period rows were kept.';}
+{const ta=tiApply;tiApply=async function(x){const ok=await ta.apply(this,arguments);if(ok){try{const t=await prTiPeriods(x);if(t&&tiMsgEl)tiMsg(tiMsgEl.textContent+t);}catch(e){}}return ok;};}
+/* closing a review with the decision check open asks first; the check is kept with the log entry */
+{const pc=prCloseReview;prCloseReview=async function(){const t=prT((document.getElementById('decCheck')||{}).textContent).replace(/^Check the decision\.\s*/,'');
+  if(t&&!(await nbhUI.confirm('The decision check is not clear:\n\n'+t+'\n\nClose the review anyway? The check is kept with the log entry.',{ok:'Close anyway'})))return false;return pc.apply(this,arguments);};}
+try{renderVerdicts();}catch(e){}
+</script>
+<style id="pr1-v2285-css">
+.pr-safety{margin:10px 0 0}.pr-safety ul.pr-safe{margin:4px 0 0 18px;padding:0;font-size:13px;line-height:1.5}
+table.pr-change{margin-top:10px}table.pr-change td.pr-chcap{font-size:12.5px;line-height:1.45;background:#f6f8f8}
+.pr-logchk{color:#8E2A2A}
+</style>
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

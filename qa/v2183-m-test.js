@@ -134,7 +134,7 @@ const F={
     ok('PR-1 1a one row per reduction target, named as the plan names them, and the replacement skill its own row (v22.43, review F462)',t1.length===4&&t1.map(r=>r.name).join('|')==='Hitting|Screaming|Calling out|Break card',t1);
     ok('PR-1 1b baseline and current means from DD-1 matched by name (hitting matched case-insensitively)',t1[0].base==='8'&&t1[0].cur==='2'&&t1[0].days==='20'&&t1[1].base==='5'&&t1[1].cur==='4.5'&&t1[2].base==='6'&&t1[2].cur==='3'&&t1[2].days==='6',t1);
     ok('PR-1 1c change from baseline: -75%, -10%, -50%',t1[0].chg==='-75%'&&t1[1].chg==='-10%'&&t1[2].chg==='-50%',t1.map(r=>r.chg));
-    ok('PR-1 1d the rule (25% reduction, 10 days): hitting met, screaming not met, calling out too few days',/^Met/.test(t1[0].rule)&&/^Not met/.test(t1[1].rule)&&/^Too few days \(6 of 10\)/.test(t1[2].rule),t1.map(r=>r.rule));
+    ok('PR-1 1d the rule (25% reduction, 10 days): hitting reached, screaming not reached, calling out too few days',/^25% reduction reached: /.test(t1[0].rule)&&/^Not reached: /.test(t1[1].rule)&&/^Too few days \(6 of 10\)/.test(t1[2].rule),t1.map(r=>r.rule));
     ok('PR-1 1e no decision is filled from the case (v22.37, review F318): the boxes stay empty',t1.every(r=>r.dec===''),t1.map(r=>r.dec));
     ok('PR-1 1f facts in reports the rows',r1&&r1.filled>=3&&/results by target/.test(r1.note||''),r1);
     /* typed cells stay; a second fill does not overwrite */
@@ -164,12 +164,12 @@ const F={
     const fp=path.join(OUT,'PR-1_saved.json');fs.writeFileSync(fp,saved);
     await p.setInputFiles('#fileIn',fp);await sleep(800);
     const rt=await p.evaluate(()=>({tg:JSON.parse(JSON.stringify(S.tg)),rows:document.querySelectorAll('#pr83Tbl tbody tr[data-k]').length,rule:document.querySelector('#pr83Tbl tbody tr[data-k="0"] .pr83-rule').textContent}));
-    ok('PR-1 5c Open puts them back',JSON.stringify(rt.tg)===JSON.stringify(sj.S.tg)&&rt.rows===4&&/^Met/.test(rt.rule),rt);
+    ok('PR-1 5c Open puts them back',JSON.stringify(rt.tg)===JSON.stringify(sj.S.tg)&&rt.rows===4&&/^25% reduction reached/.test(rt.rule),rt);
     /* close the review: the log line */
     await p.evaluate(()=>document.querySelector('#prCloseRev').click());await sleep(600);
     const lg=await p.evaluate(()=>({e:JSON.parse(JSON.stringify(S.log[S.log.length-1])),tt:document.querySelector('#prLogTbl tbody tr').textContent,tg:JSON.parse(JSON.stringify(S.tg)),out:window.__nbhFactsOut().review.log.slice(-1)[0]}));
-    ok('PR-1 6a the closed review\'s log entry has a short per-target line',/^Hitting -75% \(met\), suggested \w+; Screaming -10% \(not met\), continue; Calling out -50% \(too few days\), suggested continue; Break card [^;]*$/.test(lg.e.targets||''),lg.e);
-    ok('PR-1 6b the log table and review.log carry it',/By target: Hitting -75% \(met\), suggested/.test(lg.tt)&&lg.out&&lg.out.targets===lg.e.targets,{tt:lg.tt.slice(0,300),out:lg.out});
+    ok('PR-1 6a the closed review\'s log entry has a short per-target line',/^Hitting -75% \(25% reduction reached\), suggested \w+; Screaming -10% \(short of 25% reduction\), continue; Calling out -50% \(too few days\), suggested continue; Break card [^;]*$/.test(lg.e.targets||''),lg.e);
+    ok('PR-1 6b the log table and review.log carry it',/By target: Hitting -75% \(25% reduction reached\), suggested/.test(lg.tt)&&lg.out&&lg.out.targets===lg.e.targets,{tt:lg.tt.slice(0,300),out:lg.out});
     ok('PR-1 6c after the close the targets stay with their baselines; this period\'s figures and decisions are cleared for the next review',lg.tg.length===4&&lg.tg[0].base==='8'&&lg.tg[0].cur===''&&lg.tg[0].decision===''&&lg.tg[1].note==='',lg.tg);
     const saved2=await save();const sj2=JSON.parse(saved2);
     const bad=await p.evaluate(s=>{const x=fromFile(s);return x.log.slice(-1)[0].targets;},sj2);

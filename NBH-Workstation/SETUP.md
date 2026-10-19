@@ -9903,6 +9903,64 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.85: PR-1's review counts the period's restraints and removals, decides a change with the parent, keeps its actions on the due list, fills what the case already holds, and says no more than the studies show (review Wave 3)
+
+- **Safety in the period (F320).** A new **Safety in the Period** box reads the case:
+  - the restraints and seclusions marked on Form DD-1's incidents inside the period;
+  - Form CR-1's count this semester, with the crisis intervention plan the second restraint calls for (s. 1003.573(6)(a),
+    F.S.), and the notices still open;
+  - Form RR-1's removals (approaching 10 school days is said) and a manifestation determination.
+  - "Why this review now" is filled from them while it is empty. "Also in the review period" counts the restraints.
+  - The decision check asks about a restraint the reasoning does not mention, the second restraint's plan still open,
+    and a manifestation determination held in the period.
+  - Today: PR-1's trigger for an earlier review ("Any restraint") is met by a restraint since the last review.
+- **A change is decided with the parent (F321).** Modify, return to assessment, fade and exit show **Who decided**:
+  where and when, the parent's part in the decision, the prior written notice date, whether consent is needed again
+  (Form IC-1) and the student's assent.
+  - The decision check asks for each one. The record goes to the case (`review.change`) and to the log.
+  - The sign-off line is the parent who took part. The exit condition is the parent in the decision, with notice.
+  - A return to assessment asks for consent on Form IC-1 for the new assessment, and Today asks for its notice too.
+- **The probes and one readiness (F324).** Form DD-1's maintenance probes, which DD-1 sends inside its data, show on
+  the Fading and Exit sheet. Exit Readiness counts social validity and contextual fit, as the export and the check do,
+  so it no longer says "the plan can stop" when the case says it cannot.
+- **The actions go somewhere (F325).** "By when" is a date (a date typed as 10/6/26 becomes one).
+  - The open actions go to the case with their dates (`review.actions`) and onto the due list beside the next review.
+  - Closing a review with the decision check open asks first.
+  - The log keeps who took part, the period, why the review was held, the change's record and any check left open,
+    and shows them.
+- **What the case already holds is not typed again (F326).** Each is filled only while empty:
+  - the plan under review from Form TD-1 ("BIP v1 adopted 9/24/26, prior written notice 9/24/26, started 9/25/26,
+    Form TD-1"; a revised plan reads as its version, with that version's notice);
+  - the replacement behavior and who took part (TD-1's adoption team);
+  - staff trained to criterion from Form ST-1 (All, Some or None of the adults it lists, with the count beside the
+    field);
+  - the period: from the day after the last review closed on this form, or from the start of Form DD-1's current
+    condition (never baseline), to DD-1's last day with data.
+  - **Import From TI-1** places each dated observation in the period row whose dates hold it (DD-1's import dates the
+    rows) and fills that row's Integrity % and commission on consequence steps. It asks before it replaces an entry;
+    Cancel fills only the empty cells.
+  - Staff trained "Some" or "None" now reads in the integrity verdict: a figure below criterion may reflect training,
+    not the plan.
+- **Sentences that say no more than the studies (F327).**
+  - Fading Sequence: "In a clinic series, resurgence occurred during schedule thinning in functional communication
+    training in 19 of 25 applications (76%), and in some it rose above baseline levels (Briggs et al., 2018). An
+    increase at a step is expected and is not by itself a failure, but check that the crisis plan (Form CR-1) is
+    current before each step." The earlier "42% of thinning steps, temporary in every case" could not be confirmed.
+    Form CT-1 carried the same figure and is corrected the same way.
+  - The integrity verdict, which prints, no longer says every learner in Burlison et al. (2026) mastered the task; it
+    says the study was of adult volunteers and that the result is the direction of the evidence, not a promise.
+  - A target's 25% change reads "25% reduction reached", not "Met"; the IEP team and parents read "met" as the goal
+    met. A replacement skill reads "at goal".
+  - A period row at 80–89% reads "below the 90% criterion; re-check": the figure is the period's, not the latest
+    observation's.
+- A closed review's log entry is kept in the order Open rebuilds it, so a saved and reopened log is the same.
+- Not done:
+  - F326 item 3: Forms RM-1 and SR-1 do not reach the case yet, so "Relapse at challenges" and the schedule fields are
+    still typed. Planned as its own change (both forms and the shell).
+  - I161 to I165 (a decision meeting record with a notice draft, decisions against the IEP goal on daily data, fading
+    steps on the graph, a one-page summary, the student's voice at review).
+- qa/pr1-w3-test.js (16 checks) and qa/pr1-w3b-test.js (14 checks).
+
 ### v22.84: GB-1's progress report reads its own period, never calls a treatment step "met", keeps every report, and takes DD-1's rate per hour into a per-minute goal (review Wave 3)
 
 - **Met means the objective's own target (F188, I97).** The suggested code used to be Mastered whenever DD-1's own aim line

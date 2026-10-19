@@ -2263,7 +2263,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.84';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.85';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5336,6 +5336,9 @@ function todayItems(){const f=state.facts||{},d=f.data,ti=f.integrity,L=[];
     if(o.pct<(ti.criterion||90)){const x=tdIntegrity(f);if(x)L.push({k:'Integrity',t:x.t,open:x.open});}}
   else if(d&&d.days)L.push({k:'Integrity',t:'No integrity check on Form TI-1 in the case yet',open:'TI-1'});
   {const x=tdPerfDue(f);if(x)L.push(x);}   /* v22.83 */
+  /* v22.85 (PR-1 review F320) the trigger for an earlier review written on Form PR-1: a restraint since the last review */
+  {const rv=f.review||{},rs=f.crisis&&f.crisis.restraints;if(/restrain/i.test(rv.earlier||'')&&rs&&rs.last&&(!rv.date||rs.last>rv.date))
+    L.push({k:'Timeline',t:'Form PR-1&rsquo;s trigger for an earlier review (&ldquo;'+esc(String(rv.earlier).slice(0,60))+'&rdquo;) is met: a restraint on '+esc(tdMd(rs.last))+' (Form CR-1). Hold the review now',open:'PR-1'});}
   return L;}
 async function todayOpen(){await gatherFacts(false);try{await gatherDue();}catch(e){}
   const L=todayItems(),p=packet(),f=state.facts;
@@ -5952,7 +5955,7 @@ function tdV2182(f){const L=[],pl=f.plan||{},ad=pl.adoption||{},vs=pl.versions||
   const inUse=!!(ad.start||(f.data&&Array.isArray(f.data.conds)&&f.data.conds.length>1));
   if(pl&&(pl.rep||pl.beh)&&inUse&&!ad.date)L.push({k:'Timeline',t:'The plan is in use with no record of the team adopting it: add the meeting date, who attended and the notice (Form TD-1)',open:'TD-1'});
   const last=lg.length?lg[lg.length-1]:null,lv=vs.length?vs[vs.length-1]:null;
-  if(last&&/^(modify|fade|exit)$/.test(last.decision||'')&&!(lv&&lv.date>=last.date))L.push({k:'Timeline',t:'Form PR-1 decided to '+esc(last.decision)+' the plan on '+esc(tdMd(last.date))+': record the revision and its prior written notice (Form TD-1)',open:'TD-1'});
+  if(last&&/^(modify|fade|exit|reassess)$/.test(last.decision||'')&&!(lv&&lv.date>=last.date))L.push({k:'Timeline',t:(last.decision==='reassess'?'Form PR-1 decided to return to assessment on ':'Form PR-1 decided to '+esc(last.decision)+' the plan on ')+esc(tdMd(last.date))+': record the revision and its prior written notice (Form TD-1)',open:'TD-1'});
   else if(lv&&lv.v>1&&!lv.notice)L.push({k:'Timeline',t:'The plan’s revision of '+esc(tdMd(lv.date))+' has no prior written notice date (Form TD-1)',open:'TD-1'});
   if(ad.start){const n=tdLeft(ad.start);if(n!==null&&n>=0&&n<=7){const m=rsItems(f).length;if(m)L.push({k:'Timeline',t:'The plan starts '+esc(tdMd(ad.start))+' ('+tdWhen(ad.start)+') and '+m+' thing'+(m===1?' is':'s are')+' not ready: see Ready to start',open:''});}}
   return L;}

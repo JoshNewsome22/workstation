@@ -16,13 +16,13 @@ const DATA=(aim,cur)=>({behaviors:[
     await p.close();return r;};
   const a=await run({data:DATA(8,5),goals:{acq:[{beh:'Mand for break (simulated)',crit:'at least 5 requests a day'}]}});
   const ra=a.rows.find(z=>z.kind==='rep');
-  ok('1 the replacement skill gets its own row, judged against its goal (Form DD-1’s aim first)',ra&&ra.goal==='8'&&/Below goal: now 5 against the goal of 8/.test(ra.rule)&&ra.state==='not met',a.rows);
-  ok('2 the reduction target keeps its row and its rule',a.rows.some(z=>!z.kind&&/Aggression/.test(z.name)&&/Met: /.test(z.rule)),a.rows);
+  ok('1 the replacement skill gets its own row, judged against its goal (Form DD-1’s aim first)',ra&&ra.goal==='8'&&/Below goal: now 5 against the goal of 8/.test(ra.rule)&&ra.state==='below goal',a.rows);
+  ok('2 the reduction target keeps its row and its rule',a.rows.some(z=>!z.kind&&/Aggression/.test(z.name)&&/25% reduction reached: /.test(z.rule)),a.rows);
   ok('3 the case carries the replacement row with its kind and goal',Array.isArray(a.targets)&&a.targets.some(t=>t.kind==='rep'&&t.goal===8&&t.cur===5),a.targets);
   ok('4 the table names it a replacement skill with its goal',/Replacement skill, goal 8/.test(a.html),a.html.slice(0,400));
   const b=await run({data:DATA(null,5),goals:{acq:[{beh:'Mand for break (simulated)',crit:'at least 5 requests a day'}]}});
   const rb=b.rows.find(z=>z.kind==='rep');
-  ok('5 with no aim, the goal comes from Form GB-1’s criterion in the same unit; at goal reads met',rb&&rb.goal==='5'&&/Form GB-1/.test(rb.src)&&rb.state==='met'&&/At goal/.test(rb.rule),rb);
+  ok('5 with no aim, the goal comes from Form GB-1’s criterion in the same unit; at goal reads at goal',rb&&rb.goal==='5'&&/Form GB-1/.test(rb.src)&&rb.state==='at goal'&&/At goal/.test(rb.rule),rb);
   const c=await run({data:DATA(null,5),goals:{acq:[{beh:'Mand for break (simulated)',crit:'independently in at least 80% of opportunities'}]}});
   const rc=c.rows.find(z=>z.kind==='rep');
   ok('6 a percentage goal against a count is not judged, and the row says why',rc&&!rc.goal&&rc.state==='not judged'&&/not what Form DD-1 records/.test(rc.rule),rc);
