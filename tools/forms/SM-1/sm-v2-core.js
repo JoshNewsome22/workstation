@@ -101,7 +101,8 @@ function smPhoto(sz,look){const m=smPhotoMode(look);if(!m)return '';
   if(m==='blank')return '<div class="v2-ph v2-ph-blank" style="width:'+sz+'px;height:'+sz+'px"><span>photo</span></div>';
   return '<div class="v2-ph" style="width:'+sz+'px;height:'+sz+'px">'+smAvatar(sz-6)+'</div>';}
 function smPoss(n){return n===1?'':'s';}
-function smAvatar(sz){const d=smD();if(d.avimg)return '<img class="av-img" src="'+d.avimg+'" alt="" style="width:'+sz+'px;height:'+sz+'px">';
+/* v22.7x (review F264): with photo/media permission No on Form DM-1, the student's own photo is not shown (a library picture still is) */
+function smAvatar(sz){const d=smD();if(d.avimg&&(typeof smPhotoOK!=='function'||smPhotoOK()))return '<img class="av-img" src="'+d.avimg+'" alt="" style="width:'+sz+'px;height:'+sz+'px">';
   if(d.av&&window.NBH_PICTOS&&NBH_PICTOS[d.av])return '<span class="av-pic" style="width:'+sz+'px;height:'+sz+'px">'+picto(d.av,'')+'</span>';return '';}
 
 /* ---------------- QR code (qrcode-generator, inlined by build.sh) ---------------- */

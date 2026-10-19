@@ -6046,8 +6046,10 @@ function ddStatTxt(b,s){if(!s)return "—";const pc=MEASURES[b.measure].two||/%/
 function ddChange(b,a,c){if(!a||!c)return {t:"—",k:""};const d=c.mean-a.mean,up=(b.direction||(b.kind==="target"?"decrease":"increase"))!=="decrease";
   if(Math.abs(d)<1e-9)return {t:"no change",k:""};const good=up?d>0:d<0;
   const t=a.mean>0?`${d<0?"down":"up"} ${Math.round(Math.abs(d)/a.mean*100)}%`:`up from 0`;return {t,k:good?"good":"bad"};}
+/* v22.7x (review F258, F262): Form SM-1 sends the behavior beside the points (beh: the share of the teacher's ratings that were
+   Yes) and the ladder phase; a teacher-only day (phase 0) has no points and stays out of the week's figures */
 function ddPointsFor(mon){const P=ddCaseFacts&&ddCaseFacts.points&&Array.isArray(ddCaseFacts.points.days)?ddCaseFacts.points.days:null;if(!P)return null;
-  const end=ddAddDays(mon,6),w=P.filter(x=>x&&x.date>=mon&&x.date<=end&&typeof x.pct==="number");return {days:w,any:P.length};}
+  const end=ddAddDays(mon,6),inW=x=>x&&x.date>=mon&&x.date<=end,w=P.filter(x=>inW(x)&&x.ph!=="0"&&typeof x.pct==="number");return {days:w,any:P.length,base:P.filter(x=>inW(x)&&x.ph==="0").length};}
 function ddWeekRender(){const w=document.getElementById("ddWeekWrap");if(!w||!ddWeek)return;const mon=ddWeek,sun=ddAddDays(mon,6),pm=ddAddDays(mon,-7),ps=ddAddDays(mon,-1);
   const rows=sortedRows(),wk=rows.filter(r=>r.date>=mon&&r.date<=sun),lw=rows.filter(r=>r.date>=pm&&r.date<=ps);
   const behs=orderedBehaviors();const m=S.meta;
@@ -6055,9 +6057,10 @@ function ddWeekRender(){const w=document.getElementById("ddWeekWrap");if(!w||!dd
     return `<tr><td><b style="border-left:4px solid ${esc(b.color)};padding-left:6px">${esc(b.name||"Untitled")}</b><br><span>${esc(KINDS[b.kind||"target"]||"")} · ${esc(MEASURES[b.measure].label)}</span></td>
       <td>${ddStatTxt(b,c)}${c?`<br><span>${c.n} day${c.n===1?"":"s"}</span>`:""}</td><td>${ddStatTxt(b,a)}</td><td class="${ch.k}">${esc(ch.t)}</td><td>${b.aim!==""&&b.aim!=null?esc(b.aim):"—"}</td></tr>`;}).join("");
   const pts=ddPointsFor(mon);let ptsH;
-  if(pts&&pts.days.length){const mean=pts.days.reduce((a,c)=>a+c.pct,0)/pts.days.length,met=pts.days.filter(x=>x.met).length;
-    ptsH=`<p><b>${r1(mean)}%</b> of the points on average across ${pts.days.length} day${pts.days.length===1?"":"s"}; the goal was met on ${met} of them. <span class="hint">(Form SM-1)</span></p>
-      <p class="days">${pts.days.map(x=>`${esc(shortDay(x.date))}: ${r1(x.pct)}%${x.met?" ✓":""}`).join(" · ")}</p>`;}
+  if(pts&&pts.days.length){const mean=pts.days.reduce((a,c)=>a+c.pct,0)/pts.days.length,met=pts.days.filter(x=>x.met).length,bd=pts.days.filter(x=>typeof x.beh==="number"),bm=bd.length?bd.reduce((a,c)=>a+c.beh,0)/bd.length:null;
+    ptsH=(bm!=null?`<p>The teacher rated the targets met in <b>${r1(bm)}%</b> of the ratings on average across ${bd.length} day${bd.length===1?"":"s"} (<b>${r1(mean)}%</b> of the points, which an honest No earns too); the goal was met on ${met} of ${pts.days.length}. <span class="hint">(Form SM-1)</span></p>`:
+      `<p><b>${r1(mean)}%</b> of the points on average across ${pts.days.length} day${pts.days.length===1?"":"s"}; the goal was met on ${met} of them. <span class="hint">(Form SM-1)</span></p>`)+
+      `<p class="days">${pts.days.map(x=>`${esc(shortDay(x.date))}: ${typeof x.beh==="number"?r1(x.beh)+"% met ("+r1(x.pct)+"% of points)":r1(x.pct)+"%"}${x.met?" ✓":""}`).join(" · ")}</p>`+(pts.base?`<p class="hint">${pts.base} teacher-only baseline day${pts.base===1?"":"s"} (phase 0) this week, not counted.</p>`:"");}
   else ptsH=`<p class="hint">${pts?"No point sheet days recorded on Form SM-1 this week.":"No point sheet in the case. Open Form SM-1 in the workstation to bring its Record in."}</p>`;
   const inc=ddIncSorted().filter(i=>i.date>=mon&&i.date<=sun);
   const ph=wk.filter(r=>r.phaseType&&r.phaseType!=="none");const notes=wk.filter(r=>ddT(r.notes));

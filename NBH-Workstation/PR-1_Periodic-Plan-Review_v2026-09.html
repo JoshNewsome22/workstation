@@ -2122,8 +2122,11 @@ function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||n
     else L.push('Incidents logged on Form DD-1: none.');
     const met=(d.behaviors||[]).filter(b=>b.aimMet),aims=(d.behaviors||[]).filter(b=>b.aim!=null);
     if(aims.length)L.push('At the aim for the days the criterion asks: '+(met.length?met.map(b=>b.name+' ('+b.run+' days in a row, '+b.need+' asked)').join('; '):'none yet')+'.');}
-  if(pts){const P=(pts.days||[]).filter(x=>inP(x.date));
-    if(P.length){const m=P.reduce((a,c)=>a+c.pct,0)/P.length;L.push('Point sheet (Form SM-1): '+prR(m)+'% of the points on average across '+P.length+' day'+(P.length===1?'':'s')+'; the goal met on '+P.filter(x=>x.met).length+'.');}}
+  /* v22.7x (review F258, F262): the behavior first (the share of the teacher's ratings that were Yes, which Form SM-1 sends as
+     beh), the points beside it; a teacher-only day (phase 0) is the baseline, not a treatment day */
+  if(pts){const P=(pts.days||[]).filter(x=>inP(x.date)&&x.ph!=='0'&&typeof x.pct==='number');
+    if(P.length){const m=P.reduce((a,c)=>a+c.pct,0)/P.length,B=P.filter(x=>typeof x.beh==='number'),bm=B.length?B.reduce((a,c)=>a+c.beh,0)/B.length:null;
+      L.push('Point sheet (Form SM-1): '+(bm!=null?'the teacher rated the targets met in '+prR(bm)+'% of the ratings on average across '+B.length+' day'+(B.length===1?'':'s')+' ('+prR(m)+'% of the points)':prR(m)+'% of the points on average across '+P.length+' day'+(P.length===1?'':'s'))+'; the goal met on '+P.filter(x=>x.met).length+'.');}}
   if(ti){const O=(ti.obs||[]).filter(o=>inP(o.date));
     if(O.length)L.push('Treatment integrity (Form TI-1): '+O.map(o=>prR(o.pct)+'% on '+prMd(o.date)+(o.type?' ('+o.type.toLowerCase()+')':'')).join(', ')+'.');
     /* v22.46 (I232): the steps TI-1's deciding observations found below its criterion or with an error, by their
