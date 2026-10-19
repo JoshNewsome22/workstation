@@ -766,7 +766,9 @@ th.tb1-xh{width:34px}
   #candTbl tbody td:nth-child(n+5):nth-child(-n+9){align-self:end}
   #candTbl tbody td:nth-child(2)::before{content:'Behavior as reported (plain language)'}
   #candTbl tbody td:nth-child(3)::before{content:'Reported by'}
-  #candTbl tbody td:nth-child(4)::before{content:'Est. rate'}
+  #candTbl tbody td:nth-child(4)::before{content:'Est. count / frequency'}
+  /* v23.35 the first line's two short labels take two lines' room, so their boxes line up */
+  #candTbl tbody td:nth-child(3)::before,#candTbl tbody td:nth-child(4)::before{min-height:2.5em;display:flex;align-items:flex-end}
   #candTbl tbody td:nth-child(5)::before{content:'Urgency'}
   #candTbl tbody td:nth-child(6)::before{content:'Socially significant?'}
   #candTbl tbody td:nth-child(7)::before{content:'Contacts natural reinforcement?'}
@@ -896,7 +898,7 @@ th.tb1-xh{width:34px}
     <ul class="rules">
       <li><b>Same urgency level.</b> Every member requires the same staff response and the same crisis or safety procedure. A topography that causes injury (level 4) never shares a cluster with one that merely disrupts (level 2).</li>
       <li><b>Same hypothesized function</b>, or an explicit decision to record members separately until function is known.</li>
-      <li><b>Same measurement dimension or sampling method.</b> Count/rate members are not mixed with duration or latency members (Johnston &amp; Pennypacker, 2009), or with members recorded by interval or time sampling.</li>
+      <li><b>Same measurement dimension or sampling method.</b> Count / frequency members are not mixed with rate, duration or latency members (Johnston &amp; Pennypacker, 2009), or with members recorded by interval or time sampling.</li>
       <li><b>Same plan consequence.</b> If staff would respond differently to two forms, they are two targets.</li>
       <li><b>Comparable rates.</b> A low-rate dangerous form must not be buried under a high-rate mild form in the graph. When rates differ widely (sheet 3 flags estimated rates five or more times apart, a working convention of this form), keep the cluster label for the plan but give each topography its own column on the data sheet.</li>
     </ul>
@@ -980,7 +982,7 @@ th.tb1-xh{width:34px}
       <th class="n" style="width:5%">#</th>
       <th style="width:24%">Behavior as reported (plain language)</th>
       <th style="width:10%">Reported by</th>
-      <th style="width:8%">Est. rate</th>
+      <th style="width:8%">Est. count / frequency</th>
       <th class="n" style="width:8%">Urgency</th>
       <th style="width:9%">Socially significant?</th>
       <th style="width:9%">Contacts natural reinforcement?</th>
@@ -1179,7 +1181,9 @@ th.tb1-xh{width:34px}
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const URG='<option value=""></option><option>4</option><option>3</option><option>2</option><option>1</option>';
 const FN='<option value=""></option><option>Attention (social positive)</option><option>Tangible / activity (social positive)</option><option>Escape / avoidance (social negative)</option><option>Automatic (nonsocial)</option><option>Unknown – record separately</option>';
-const DIM='<option value=""></option><option>Count / rate</option><option>Duration</option><option>Latency</option><option>Interresponse time</option><option>Partial-interval</option><option>Momentary time sample</option><option>% of opportunities</option>';
+/* v23.35 "Count / frequency" (stored as "Count / rate", so every file and case saved before keeps its answer) and Rate, a category of its own */
+const tbDimWord=v=>v==='Count / rate'?'Count / frequency':v;
+const DIM='<option value=""></option><option value="Count / rate">Count / frequency</option><option>Rate</option><option>Duration</option><option>Latency</option><option>Interresponse time</option><option>Partial-interval</option><option>Momentary time sample</option><option>% of opportunities</option>';
 const TYPE='<option value=""></option><option>Cluster (multiple topographies)</option><option>Single topography</option><option>Precursor</option><option>Replacement / alternative behavior</option>';
 const STYLE='<option value=""></option><option>Topographical</option><option>Topographical + outcome criterion</option><option>Functional (outcome-defined)</option>';
 const YN='<option value=""></option><option>Yes</option><option>No</option><option>Unsure</option>';
@@ -1268,7 +1272,7 @@ $('#selFromCand').addEventListener('click',()=>{
 function clusCard(c){const d=document.createElement('div');d.className='card';d.dataset.clus=c;
  d.innerHTML=`<div class="chd"><span class="tag ok">Cluster ${c+1}</span><span class="chdt">Proposed umbrella label</span></div>
  <div class="ident c3"><div class="f"><label>Umbrella label</label><input name="clus[${c}].lab" placeholder="e.g., Aggression toward others"></div><div class="f"><label>Function (cluster)</label><select name="clus[${c}].fn">${FN}</select></div><div class="f"><label>Staff response</label><input name="clus[${c}].resp" placeholder="e.g., block, prompt mand, continue demand"></div></div>
- <div class="tb1-scroll" tabindex="0" role="region" aria-label="Cluster ${c+1} topographies, scrolls sideways"><table class="rank cmp"><thead><tr><th class="n" style="width:5%">#</th><th>Topography (form)</th><th class="n" style="width:9%">Urgency</th><th style="width:20%">Hypothesized function</th><th style="width:15%">Dimension or sampling method</th><th style="width:9%">Est. rate</th><th style="width:9%">Same staff response?</th></tr></thead><tbody id="clusBody${c}"></tbody></table></div>
+ <div class="tb1-scroll" tabindex="0" role="region" aria-label="Cluster ${c+1} topographies, scrolls sideways"><table class="rank cmp"><thead><tr><th class="n" style="width:5%">#</th><th>Topography (form)</th><th class="n" style="width:9%">Urgency</th><th style="width:20%">Hypothesized function</th><th style="width:15%">Dimension or sampling method</th><th style="width:9%">Est. count / frequency</th><th style="width:9%">Same staff response?</th></tr></thead><tbody id="clusBody${c}"></tbody></table></div>
  <button class="tool noprint" data-addtop="${c}">+ Add topography</button>
  <div class="chkrow"><label><input type="checkbox" name="clus[${c}].hier"> A member is a known precursor or lower member of a hierarchy (must be its own target)</label><label><input type="checkbox" name="clus[${c}].sepcol"> Members will be recorded in separate columns on the data sheet</label></div>
  <div class="warn verdict" id="clusVerdict${c}"><b>Verdict</b>Enter at least two topographies to test the cluster.</div>
@@ -1293,7 +1297,7 @@ function checkClus(c){const rows=$$('#clusBody'+c+' tr');const ms=[];
  const known=k=>[...new Set(ms.map(m=>m[k]).filter(x=>x&&x!==UNK))],blank=k=>ms.some(m=>!m[k]);
  const us=known('u');if(us.length>1){out.push(['no',`Mixed urgency (${us.join(', ')}). Members with different urgency never share a cluster: split.`]);fail=true}else if(blank('u')){out.push(['mid','Urgency missing for a member.']);warn=true}else out.push(['ok',`Same urgency (level ${us[0]}).`]);
  const fs=known('fn'),unk=ms.some(m=>m.fn===UNK);if(fs.length>1){out.push(['no','Different hypothesized functions. Aggregating topographies can mask function (Derby et al., 1994) or produce apparent multiple control (Beavers & Iwata, 2011): split.']);fail=true}else if(blank('fn')){out.push(['mid','Function missing for a member.']);warn=true}else if(unk&&sep)out.push(['ok','Function unknown for a member; members will be recorded in separate columns until a functional analysis clarifies it (Derby et al., 1994).']);else if(unk){out.push(['mid','Function unknown for a member: record members separately until a functional analysis clarifies (Derby et al., 1994).']);warn=true}else out.push(['ok','Same hypothesized function.']);
- const ds=known('d');if(ds.length>1){out.push(['no',`Mixed dimensions or sampling methods (${ds.join(' / ')}). Split.`]);fail=true}else if(blank('d')){out.push(['mid','Dimension or sampling method missing for a member.']);warn=true}else out.push(['ok','Same dimension or sampling method.']);
+ const ds=known('d');if(ds.length>1){out.push(['no',`Mixed dimensions or sampling methods (${ds.map(tbDimWord).join('; ')}). Split.`]);fail=true}else if(blank('d')){out.push(['mid','Dimension or sampling method missing for a member.']);warn=true}else out.push(['ok','Same dimension or sampling method.']);
  const ss=[...new Set(ms.map(m=>m.s))];if(ss.includes('No')){out.push(['no','A member requires a different staff response. Split.']);fail=true}else if(ss.includes('')){out.push(['mid','Confirm every member receives the same staff response.']);warn=true}else out.push(['ok','Same staff response for every member.']);
  const rs=ms.map(m=>m.r).filter(x=>!isNaN(x));
  if(rs.length===ms.length){const mx=Math.max(...rs),mn=Math.min(...rs);if(mx>0&&(mn<=0||mx/mn>=RATIO)){const how=mn>0?`Rates differ by about ${Math.round(mx/mn)}×`:`Rates differ widely (one member's estimated rate is ${mn})`;if(sep)out.push(['ok',how+'; members will be recorded in separate columns, so a low-rate member is not hidden in an aggregated graph.']);else{out.push(['mid',how+'. A low-rate member will be hidden in an aggregated graph: record members in separate columns.']);warn=true}}else out.push(['ok','Rates comparable.']);}else{out.push(['mid','Enter estimated rates to check comparability.']);warn=true}
@@ -1688,7 +1692,7 @@ function libRow(host,t){if(!LIB_ON||!host||host.shadowRoot)return;
  libFill(pick,'','');
  const sync=()=>{const e=libById[pick.value];go.disabled=!e;vw.hidden=!(e&&e.fdef);if(!(e&&e.fdef))vs.value='topo';meta.hidden=!e;
   if(e){vs.options[0].textContent=e.style;const f=vs.value==='func'&&!!e.fdef;
-   $r('.mt').textContent=[e.cat,e.type,f&&e.fdim?e.fdim:e.dim].join(' \u00b7 ')+(e.fdef?(f?' \u00b7 the functional (outcome-defined) version':' \u00b7 also offers a functional (outcome-defined) version'):'')+'.';}};
+   $r('.mt').textContent=[e.cat,e.type,tbDimWord(f&&e.fdim?e.fdim:e.dim)].join(' \u00b7 ')+(e.fdef?(f?' \u00b7 the functional (outcome-defined) version':' \u00b7 also offers a functional (outcome-defined) version'):'')+'.';}};
  q.addEventListener('input',()=>{libFill(pick,q.value,pick.value);sync();});LIB_PICKS.push(()=>{libFill(pick,q.value,pick.value);sync();});
  q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();(pick.value?go:pick).focus();}});
  pick.addEventListener('change',sync);vs.addEventListener('change',sync);
@@ -2186,7 +2190,7 @@ window.__nbhFactsOut=function(){
   reps.forEach(r=>{if(r&&!r.to&&r.base){const v=via[nbhTbSame(r.base)];if(v)r.name=v;}});
   for(let t=0;t<n;t++){const g=k=>val(`tgt[${t}].${k}`);const lab=g('lab');if(!lab)continue;
     const isRep=isRepT(t),rep=isRep?'':(reps[t]&&reps[t].name)||'';
-    out.push({label:isRep?(named[t+1]||lab):lab,def:g('def'),ex:g('ex'),nex:g('nex'),type:g('type'),isRep,fn:g('fn'),fnKey:key(g('fn')),dim:g('dim'),unit:g('unit'),
+    out.push({label:isRep?(named[t+1]||lab):lab,def:g('def'),ex:g('ex'),nex:g('nex'),type:g('type'),isRep,fn:g('fn'),fnKey:key(g('fn')),dim:tbDimWord(g('dim')),unit:g('unit'),
       rep,ctx:g('ctx'),urg:g('urg'),tops:g('tops'),excl:g('excl'),src:'TB-1'});}
   /* a candidate decided "Target – replacement" goes on as a replacement, under its cleaned name */
   if(!out.length){for(let i=0;i<candN;i++){const g=k=>val(`cand[${i}].${k}`);const beh=g('beh');if(!beh||!/^Target/.test(g('dec')))continue;

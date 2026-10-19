@@ -9903,6 +9903,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.35: TB-1 says Count / frequency, with Rate a category of its own
+
+- **The measurement words (the BCBA's correction).** The dimension list said "Count / rate". It now offers
+  "Count / frequency" and "Rate" as separate choices, and the estimate columns of the candidate list and the cluster
+  builder are "Est. count / frequency".
+- **Files and cases saved before** keep their answer: the stored value is unchanged, and it shows as Count / frequency.
+  The case says Count / frequency, so Forms FS-1, QS-1 and the others print the same words.
+- **The cluster check** keeps a count member and a rate member apart, in these words. The Guide's clustering rule
+  says so.
+- The library's 148 count definitions are Count / frequency. The library check reads an option's value where it has
+  one.
+- qa/tb1-dim-test.js (8 checks).
+
 ### v23.34: TB-1's tables read on an iPad: each candidate and each agreement row on labelled lines, and the Type column wide enough for its choices
 
 - **The candidate table on a screen.** Nine columns in the page's width left a behavior's words five lines deep. On an

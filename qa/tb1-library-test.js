@@ -207,7 +207,7 @@ async function printPdf(page,file,onlyDefine){
  check('and loads the functional definition',f2.def===eFunc.fdef);
  check('the note says the functional definition was loaded',/functional \(outcome-defined\) definition was loaded/.test(await page.evaluate(h=>document.querySelector(h).shadowRoot.querySelector('.msg').textContent,host(2))));
  await choose(page,2,eProd.id,'func');
- check('the row’s line names the functional version’s own dimension',await page.evaluate(([h,d])=>document.querySelector(h).shadowRoot.querySelector('.mt').textContent.includes(d),[host(2),eProd.fdim||eProd.dim]));
+ check('the row’s line names the functional version’s own dimension',await page.evaluate(([h,d])=>document.querySelector(h).shadowRoot.querySelector('.mt').textContent.includes(d),[host(2),(w=>w==='Count / rate'?'Count / frequency':w)(eProd.fdim||eProd.dim)]));   /* v23.35 shown in the BCBA's words */
  await page.locator(host(2)+' button.go').click();await sleep(300);if(await dlgOpen(page))await answer(page,'replace');
  {const f=await fields(page,2),v=V(eProd,true);
   check('a functional version loads its own dimension, unit, onset, offset, examples and non-examples ('+eProd.id+')',KEYS.every(k=>f[k]===v[k])&&f.dim===(eProd.fdim||eProd.dim)&&f.unit===(eProd.funit||eProd.unit)&&f.ex===(eProd.fex||eProd.ex),KEYS.filter(k=>f[k]!==v[k]));}

@@ -49,7 +49,7 @@ def options(const):
     m = re.search(r"const " + const + r"='([^']*)';", s)
     if not m:
         sys.exit('the form has no const ' + const + ' (its select options); has the main script changed?')
-    return [o for o in re.findall(r'<option>([^<]*)</option>', m.group(1))]
+    return [v if v else t for v, t in re.findall(r'<option(?: value="([^"]*)")?>([^<]*)</option>', m.group(1)) if (v or t)]   # v23.35 the value where an option has one
 VOC = {'type': options('TYPE'), 'style': options('STYLE'), 'dim': options('DIM'), 'cat': CATS}
 
 errs, seen = [], set()
