@@ -9903,6 +9903,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.34: TB-1's tables read on an iPad: each candidate and each agreement row on labelled lines, and the Type column wide enough for its choices
+
+- **The candidate table on a screen.** Nine columns in the page's width left a behavior's words five lines deep. On an
+  iPad at Fit 150% it also cut "Yes" and the urgency short under their arrows, and put the wording button over the last
+  words. On a screen wider than a phone, each candidate now takes two lines, each answer under its own label:
+  - the behavior, across the page (usually one line), with who reported it, the rate and Delete;
+  - the urgency, "Socially significant?", "Contacts natural reinforcement?", "Cusp?" and the decision.
+- The words in the behavior box stop short of the wording button.
+- **The agreement pilot (Quality check)** is laid out the same way:
+  - the target as a heading;
+  - then the date, the observers, the minutes and the index;
+  - then A, B, the agreement and the disagreements.
+  - The dates no longer show as "2026-10-0".
+- **The selected targets.** The Type column has the room its choices need ("Cluster (multiple topographies)",
+  "Replacement / alternative behavior"). Its boxes draw the small arrow the candidate rows use, not the iPad's wide one.
+- Paper prints every table with its header row, as before, and a phone keeps the tables with their sideways scroll.
+- qa/tb1-screen-test.js (7 checks).
+
 ### v23.33: TK-1 and TV-1 ask before a file's pictures join this device's My pictures, as VS-1 does
 
 - **My pictures on a shared device.** A file whose pictures came from another device's My pictures now asks on TK-1
