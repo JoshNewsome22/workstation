@@ -2263,7 +2263,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.85';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.86';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5939,7 +5939,7 @@ function rsItems(f){const L=[],pl=f.plan||{},ad=pl.adoption||{},fl=f.profile&&f.
   else if(!ad.notice)miss('No prior written notice date for the plan’s adoption (Form TD-1)','TD-1');
   if(!ad.start)miss('No start date for the plan (Form TD-1)','TD-1');
   if(!st||!(st.people||[]).length)miss('No staff trained on the plan yet: train each implementer to criterion before it starts (Form ST-1)','ST-1');
-  else{const not=st.people.filter(p=>!p.met);if(not.length)miss(not.length+' of '+st.people.length+' implementers not yet at criterion: '+not.slice(0,4).map(p=>esc(p.name||p.role||'?')).join(', ')+' (Form ST-1)','ST-1');}
+  else{const not=st.people.filter(p=>!p.met);if(not.length)miss(not.length+' of '+st.people.length+' implementers not yet at criterion: '+not.slice(0,4).map(p=>esc(p.name||p.role||'?')+(p.signoff?' (signed off, but the decision is not at criterion)':'')).join(', ')+' (Form ST-1)','ST-1');}
   if(!f.fit||f.fit.mean==null)miss('Contextual fit not checked with the people who will run the plan (Form CF-1)','CF-1');
   if(!f.sv||!f.sv.pre||f.sv.pre.mean==null)miss('No social validity rating before the plan starts (Form SV-1)','SV-1');
   if(fl&&(fl.safety||[]).length&&!(f.crisis&&(f.crisis.stages||[]).length))miss('Form DM-1 flags safety ('+esc(fl.safety.join(', ').toLowerCase())+') and there is no crisis plan (Form CR-1)','CR-1');

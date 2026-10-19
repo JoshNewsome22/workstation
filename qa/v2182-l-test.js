@@ -41,7 +41,7 @@ async function flagScreenPrint(p,sel,shown,printPrep){
     const b=await p.evaluate(()=>{S.cells={};S.meta.outcome='';renderAll();return window.__nbhFactsOut().staff;});
     ok('1e rounds cleared: not met, no date, all false',b&&b.people[0].met===false&&!('date' in b.people[0])&&b.all===false,b);
     const c=await p.evaluate(()=>{S.meta.outcome='Competent — may run the plan without the trainer present';return window.__nbhFactsOut().staff;});
-    ok('1f the sign-off "Competent — may run the plan without the trainer present" counts as met',c&&c.people[0].met===true&&c.all===true,c);
+    ok('1f (v22.86, review F228) the sign-off "Competent — may run the plan without the trainer present" alone is not met: it goes apart as signoff',c&&c.people[0].met===false&&c.people[0].signoff===true&&c.all===false,c);
     await p.close();}
 
   /* ---------- 2 and 3. GB-1 ---------- */

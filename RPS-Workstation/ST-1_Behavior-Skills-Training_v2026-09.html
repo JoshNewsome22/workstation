@@ -778,7 +778,7 @@ nav.nbh-tabs,.nbh-tabs{display:block;background:#fff;border-bottom:1px solid var
   @page{
     @top-left{content:"Royal Palm School";font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:8pt;color:#254657}
     @top-right{content:"Form ST-1";font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}
-    @bottom-left{content:"Confidential student record. Retain in the student's behavior file.";font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:7.5pt;color:#54676f}
+    @bottom-left{content:"Confidential staff training record naming a student: file with the student's behavior file and in the trainee's supervision record.";font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:7.5pt;color:#54676f}
     @bottom-right{content:"Page " counter(page);font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}
   }
   html,body{background:#fff}
@@ -1113,7 +1113,7 @@ button.st-ti-rm:hover{background:#fbf1f1}
   <div class="nbh-mast-inner">
     <div class="nbh-brandrow">
       <img class="nbh-logo" data-nbh-logo="1" alt="Royal Palm School">
-      <div class="nbh-formmeta"><span class="nbh-formid">Form ST-1</span><span>Revised September 2026</span><span>Confidential staff record</span></div>
+      <div class="nbh-formmeta"><span class="nbh-formid">Form ST-1</span><span>Revised September 2026</span><span>Confidential staff training record naming a student</span></div>
     </div>
     <div class="nbh-titlerow">
       <div class="nbh-titleblock">
@@ -1161,6 +1161,8 @@ button.st-ti-rm:hover{background:#fbf1f1}
   <!-- ============================ SETUP ============================ -->
   <section class="only-setup">
     <h2 class="nbh-band">Trainee, Protocol, and Training Plan</h2>
+    <!-- v22.86 (review F230) several trainees on one step list: who is open, the team at a glance -->
+    <div id="stTeam" class="st-team" aria-live="polite"></div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:22%">Skill or protocol</th><td><input data-m="skill" style="width:100%" placeholder="e.g., Break-card FCT with delay tolerance"></td>
           <th style="width:18%">Plan source</th><td><input data-m="src" style="width:100%" placeholder="e.g., BIP dated 8/12/26; Form TD-1"></td></tr>
@@ -1278,11 +1280,14 @@ button.st-ti-rm:hover{background:#fbf1f1}
     <h3 style="margin-top:16px">Sign-off</h3>
     <table class="rt">
       <tr><th style="width:22%">Outcome</th><td colspan="3"><select data-m="outcome" style="width:60%"><option></option><option>Competent &mdash; may run the plan without the trainer present</option><option>Competent in rehearsal &mdash; in-situ probe still required</option><option>Not yet &mdash; further rehearsal scheduled</option></select></td></tr>
+      <!-- v22.86 (review F228) the reason an outcome stands against the decision above; shown only then -->
+      <tr id="stOvRow" hidden><th>Reason the outcome differs from the decision</th><td colspan="3"><textarea data-m="ov_reason" rows="2" style="width:100%" placeholder="Required when the outcome chosen says more than the decision above"></textarea></td></tr>
       <tr><th>Next review due</th><td><input data-m="review" style="width:100%"></td><th style="width:18%">Refresher interval</th><td><input data-m="refresh" style="width:100%" placeholder="e.g., each semester, or on any plan revision"></td></tr>
-      <tr><th>First TI-1 re-check due</th><td><input data-m="recheck1" style="width:100%" placeholder="Early in independent implementation: an unannounced TI-1 observation, date or window"></td><th>Re-check focus</th><td><input data-m="recheck1_focus" style="width:100%" placeholder="The consequence steps, above all any with a commission error in rehearsal"></td></tr>
+      <tr><th>First TI-1 re-check due</th><td><input type="date" data-m="recheck1" aria-label="First TI-1 re-check: date"><input data-m="recheck1_note" style="width:100%;margin-top:4px" aria-label="First TI-1 re-check: window or note" placeholder="Early in independent implementation: an unannounced TI-1 observation"></td><th>Re-check focus</th><td><input data-m="recheck1_focus" style="width:100%" placeholder="The consequence steps, above all any with a commission error in rehearsal"></td></tr>
       <tr><th>Trainee signature</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
       <tr><th>Trainer signature</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
     </table>
+    <div id="stSignChk" aria-live="polite"></div>
     <p class="hint" style="margin-top:8px">Schedule the first unannounced TI-1 observation early in independent implementation. Burlison et al. (2026) name consequence delivery, and error reinforcement in particular, as the component to monitor especially when a task is first being learned, and ask that the error be identified and corrected quickly as part of regular supervision; neither that study nor O&rsquo;Neill et al. (2026) gives an interval, and reaching criterion in rehearsal was not shown to predict fidelity in situ.</p>
   </section>
 
@@ -1368,6 +1373,9 @@ function ensure(){
   if(!S.cells||typeof S.cells!=='object')S.cells={};
   Object.keys(S.cells).forEach(k=>{const m=/^(\d+)_(\d+)$/.exec(k);if(!m||+m[1]>=S.steps.length||+m[2]>=S.nRounds)delete S.cells[k];});
   if(S.meta&&S.meta.outcome===OUT_OLD)S.meta.outcome=OUT_NEW;
+  /* v22.86 (review F232) the first re-check is a date box: a date typed as text becomes one, other words go to the note */
+  if(S.meta){const r=String(S.meta.recheck1||'').trim();if(r&&!/^\d{4}-\d{2}-\d{2}$/.test(r)){const d=stIsoOf(r);
+    S.meta.recheck1=d;if(!d||!/^\s*(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}\/\d{1,2}\/\d{2,4})\s*$/.test(r)){if(!String(S.meta.recheck1_note||'').trim())S.meta.recheck1_note=r;}}}
   /* v2026-10 fidelity (F): each step carries a component tag (ant = antecedent, con = consequence), as on TI-1 */
   S.steps.forEach(st=>{st.cmp=st.cmp==='con'||st.cmp==='ant'?st.cmp:'';});
 }
@@ -1425,7 +1433,7 @@ function renderGrid(){
     <tr class="obshead"><th></th><th style="text-align:right">Date</th><th></th>
       ${S.rounds.map((r,j)=>`<th><input type="date" data-o="${j}" data-f="date" value="${esc(r.date)}"><span class="pv">${esc(r.date)}</span></th>`).join('')}<th></th></tr>
     <tr class="obshead"><th></th><th style="text-align:right">Arrangement</th><th></th>
-      ${S.rounds.map((r,j)=>`<th><select data-o="${j}" data-f="type"><option value=""></option>${['Role-play','Role-play with error','In-situ practice','In-situ probe'].map(t=>`<option${r.type===t?' selected':''}>${t}</option>`).join('')}</select><span class="pv">${esc(r.type)}</span></th>`).join('')}<th></th></tr>
+      ${S.rounds.map((r,j)=>`<th><select data-o="${j}" data-f="type"><option value=""></option>${['Baseline (before training)','Role-play','Role-play with error','In-situ practice','In-situ probe'].map(t=>`<option${r.type===t?' selected':''}>${t}</option>`).join('')}</select><span class="pv">${esc(r.type)}</span></th>`).join('')}<th></th></tr>
   </thead><tbody>`;
   S.steps.forEach((st,i)=>{
     const vals=S.rounds.map((_,j)=>code(i,j));
@@ -1465,15 +1473,19 @@ function renderFB(){
 }
 $('#fbTbl').addEventListener('input',e=>{if(e.target.dataset.fb!==undefined)S.rounds[+e.target.dataset.fb].fb=e.target.value;});
 
+/* v22.86 (review I117) a round run before any instruction shows what the trainee could do then; it is kept out of the criterion,
+   the decision, the per-step figures and the graph's course, and reported beside them */
+const ST_BL='Baseline (before training)',stIsBL=j=>((S.rounds||[])[j]||{}).type===ST_BL;
+function stBaseline(){const nS=S.steps.length,out=[];for(let j=0;j<S.nRounds;j++){if(!stIsBL(j))continue;let c=0,s=0;for(let i=0;i<nS;i++){const v=code(i,j);if(scored(v)){s++;if(v==='C')c++;}}if(s)out.push({j,c,s});}return out;}
 function metrics(){
-  const nS=S.steps.length,nR=S.nRounds;
-  const ind=[];for(let j=0;j<nR;j++){const col=[];for(let i=0;i<nS;i++)col.push(code(i,j));
+  const nS=S.steps.length,nR=S.nRounds,cd=(i,j)=>stIsBL(j)?'':code(i,j);
+  const ind=[];for(let j=0;j<nR;j++){const col=[];for(let i=0;i<nS;i++)col.push(cd(i,j));
     ind.push({j,c:col.filter(v=>v==='C').length,s:col.filter(scored).length});}
   const used=ind.filter(x=>x.s>0);
-  const stepRows=[];for(let i=0;i<nS;i++){const row=[];for(let j=0;j<nR;j++)row.push(code(i,j));
+  const stepRows=[];for(let i=0;i<nS;i++){const row=[];for(let j=0;j<nR;j++)row.push(cd(i,j));
     const s=row.filter(scored).length;
     stepRows.push({i,c:row.filter(v=>v==='C').length,s,ec:row.filter(v=>v==='EC').length,
-      eo:row.filter(v=>v==='EO').length,crit:S.steps[i].crit,last:row.filter(scored).slice(-1)[0]});}
+      eo:row.filter(v=>v==='EO').length,crit:S.steps[i].crit,last:row.filter(scored).slice(-1)[0],lastJ:row.map((v,j)=>scored(v)?j:-1).filter(j=>j>=0).pop()});}
   /* v21.16 audit (F5, F6).
      Rounds to criterion: the number of scored rounds up to and including the one that completes the first run
      of critN consecutive scored rounds at or above the criterion (a round with no scored step is left out).
@@ -1513,12 +1525,14 @@ function drawAcq(M){
   const svg=$('#acqPlot');const W=660,H=250,L=48,R=18,T=30,B=40;
   const pts=M.used.map((x,k)=>({x:k+1,y:100*x.c/x.s}));
   /* v21.16 audit (F9): with nothing scored the graph says so, instead of a blank box under its heading */
-  if(!pts.length){svg.innerHTML=`<text x="${W/2}" y="${H/2}" font-size="11" text-anchor="middle" fill="#5C6B6B">No rehearsal round has been scored yet.</text>`;return;}
+  const BL=stBaseline(),blTxt=BL.length?'Baseline before training (not counted): '+BL.map(x=>'R'+(x.j+1)+' '+fmt(x.c,x.s)).join(', '):'';
+  if(!pts.length){svg.innerHTML=`<text x="${W/2}" y="${H/2}" font-size="11" text-anchor="middle" fill="#5C6B6B">No rehearsal round has been scored yet.</text>`+(blTxt?`<text x="${W/2}" y="${H/2+16}" font-size="10" text-anchor="middle" fill="#5C6B6B">${esc(blTxt)}</text>`:'');return;}
   const n=Math.max(2,pts.length);
   const px=i=>L+(i-1)/(n-1)*(W-L-R), py=v=>T+(1-v/100)*(H-T-B);
   let s=`<rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="none" stroke="#CDD6D2"/>`;
   for(let i=0;i<=4;i++){const y=T+(H-T-B)*i/4;
     s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#EEF2F0"/><text x="${L-6}" y="${y+4}" font-size="10" text-anchor="end" fill="#5C6B6B">${100-25*i}%</text>`;}
+  if(blTxt)s+=`<text x="${L}" y="${T-8}" font-size="10" fill="#5C6B6B">${esc(blTxt)}</text>`;
   /* criterion line */
   s+=`<line x1="${L}" x2="${W-R}" y1="${py(S.crit)}" y2="${py(S.crit)}" stroke="#2F6B37" stroke-dasharray="5 4"/>
       <text x="${W-R-4}" y="${py(S.crit)+13}" font-size="10" text-anchor="end" fill="#2F6B37">criterion ${esc(S.crit)}%</text>`;
@@ -1541,6 +1555,26 @@ function pctIn(t){t=String(t==null?'':t).trim();if(!t)return null;
   m=/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/.exec(t);if(m)return +m[2]>0?100*m[1]/m[2]:NaN;
   m=/^(\d+(?:\.\d+)?)$/.exec(t);return m?+m[1]:NaN;}
 const pf=v=>(Math.round(v*100)/100)+'%';
+/* v22.86 (review F228, F232, F233, F234) */
+function stIsoOf(t){t=String(t==null?'':t).trim();let m=/(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=/\b(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\b/.exec(t);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}return '';}
+const stUs=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(iso||'');};
+/* the last scored rehearsal round with a date: the probe of this training comes after it */
+function stLastRound(M){let b=null;(M.used||[]).forEach(x=>{const d=stIsoOf((S.rounds[x.j]||{}).date);if(d&&(!b||d>=b.d))b={d,j:x.j};});return b;}
+/* the criterion the probe is judged against: Form TI-1's own, when the probe was imported from TI-1 and is still the one recorded */
+function stProbeCrit(situ){const p=S.ti&&S.ti.probe;if(p&&typeof p.crit==='number'&&p.date&&p.date===stIsoOf(situ))return {v:p.crit,ti:true};return {v:+S.crit,ti:false};}
+/* the first re-check as the sign-off holds it */
+function stRecheck(){const d=stIsoOf(S.meta.recheck1),n=String(S.meta.recheck1_note||'').trim();return d?stUs(d)+(n?' ('+n+')':''):n;}
+function stSignChk(){const box=document.getElementById('stSignChk'),row=document.getElementById('stOvRow');if(!box)return;
+  const v=document.querySelector('#verdictBox .verdict'),ok=!!(v&&v.classList.contains('v-ok')),out=String(S.meta.outcome||''),why=String(S.meta.ov_reason||'').trim();
+  const against=out===OUT_NEW&&!ok;if(row)row.hidden=!against&&!why;
+  if(!against){box.innerHTML='';return;}
+  const said=v&&v.classList.contains('v-no')?'Not yet competent':'still open';
+  box.innerHTML='<div class="verdict '+(why?'v-mid':'v-no')+'"><b>The outcome chosen says Competent, but the decision above reads '+said+'.</b> '+
+    (why?'Chosen against the decision for this reason: “'+esc(why)+'”. The workstation still counts this trainee as not at criterion until the decision is met.'
+      :'Give the reason in the row above, or change the outcome. Until the decision is met, the workstation counts this trainee as not at criterion.')+'</div>';}
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.matches&&t.matches('[data-m="outcome"],[data-m="ov_reason"]'))setTimeout(stSignChk,0);});
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.matches&&t.matches('[data-m="ov_reason"]'))setTimeout(stSignChk,0);});
 function renderSummary(){
   const M=metrics();
   const card=(l,v,sub)=>`<div class="metric"><b>${l}</b><div class="val">${v||'&mdash;'}</div><div class="sub">${sub||''}</div></div>`;
@@ -1562,6 +1596,8 @@ function renderSummary(){
     card('Errors of commission',M.ec||'0',M.ec?'attempted but done wrong':'none recorded')+
     card('Errors of omission',M.eo||'0',M.eo?'not attempted':'none recorded')+
     card('Consequence gate',!M.conG.tagged?'':M.conG.n?fmt(M.conG.c,M.conG.n):'',!M.conG.tagged?'No step tagged Consequence':M.conG.n?`${M.conG.c} of ${M.conG.n} ${where}; ${M.conG.ec} commission, ${M.conG.eo} omission`+(M.conG.unseen.length?`; ${stepList(M.conG.unseen)} not scored`:''):`Consequence steps not scored ${M.toCrit?where:'yet'}`)+
+    (()=>{const B=stBaseline();if(!B.length)return '';const c=B.reduce((a,x)=>a+x.c,0),n=B.reduce((a,x)=>a+x.s,0);
+      return card('Baseline, before training',fmt(c,n),B.map(x=>'R'+(x.j+1)).join(', ')+': not counted toward the criterion');})()+
     card('Commission on consequence steps',M.conG.tagged&&M.conAll.n?fmt(M.conAll.ec,M.conAll.n):'',!M.conG.tagged?'No step tagged Consequence':M.conAll.n?`${M.conAll.ec} of ${M.conAll.n} opportunities across every round`+(M.conAll.ecSteps.length?` (${stepList(M.conAll.ecSteps)})`:''):'No consequence step scored yet');
 
   /* v21.16 audit (F5-F9). The decision, in order: something scored; the criterion met; still met in the
@@ -1572,6 +1608,8 @@ function renderSummary(){
      critical step scored on the probe must have been correct (100%), as in the decision rounds. Blank, the
      decision is as before. */
   const scp=pctIn(S.meta.situ_crit);
+  /* v22.86 (review F234) a probe imported from TI-1 is judged against TI-1's own criterion, and the record says so */
+  const PC=stProbeCrit(situ),PCnote=PC.ti&&PC.v!==+S.crit?` (Form TI-1\u2019s criterion, ${PC.v}%, differs from this form\u2019s rehearsal criterion, ${esc(S.crit)}%: the probe is judged against TI-1\u2019s, the criterion its classroom observations use.)`:'';
   const held=!M.toCrit?'':R(M.win[M.win.length-1])===metAt?`met at ${metAt}`:`met at ${metAt} and holding in ${winLab}`;
   const withCrit=M.critM.marked?', with every critical step correct':'';
   const un=M.critM.unseen, unPl=un.length>1;
@@ -1581,26 +1619,28 @@ function renderSummary(){
   else if(!M.holds){cls='v-mid';txt=`The criterion was met at ${metAt}, but it does not hold in the latest ${M.win.length>1?M.win.length+' rounds':'round'} (${M.win.map(x=>R(x)+' '+fmt(x.c,x.s)).join(', ')}). Rehearse until ${S.critN>1?'the latest '+esc(S.critN)+' rounds are all':'the latest round is'} at or above ${esc(S.crit)}% ${later}.`;}
   else if(!M.conG.ok&&M.conG.unseen.length){cls='v-mid';txt=`Criterion ${held}, but ${stepList(M.conG.unseen)} tagged Consequence ${M.conG.unseen.length>1?'were':'was'} not scored in ${winLab}, so the consequence gate has not been shown: every consequence step must be correct on every opportunity there. Rehearse a round in which ${M.conG.unseen.length>1?'they arise':'it arises'} ${later}.`;}
   else if(!M.conG.ok){cls='v-no';const errs=[M.conG.ec?M.conG.ec+' commission error'+(M.conG.ec===1?'':'s'):'',M.conG.eo?M.conG.eo+' omission'+(M.conG.eo===1?'':'s'):''].filter(Boolean).join(' and ');
-    txt=`Not yet competent: the consequence gate is not met. In ${winLab}, consequence ${stepList(M.conG.bad)} had ${errs} (${fmt(M.conG.c,M.conG.n)} correct); consequence steps must be correct on every opportunity in the decision rounds, with zero commission errors${M.conG.ec?', because delivering a reinforcer after the behavior the plan puts on extinction, or after a wrong response, is the error class most consistently linked to loss of treatment effect (Burlison et al., 2026; O\u2019Neill et al., 2026)':''}. Rehearse ${stepList(M.conG.bad)} with the moment just after the target behavior or a wrong response as the scenario, until ${S.critN>1?'the latest '+esc(S.critN)+' rounds are':'the latest round is'} clean ${later}.`;}
+    txt=`Not yet competent: the consequence gate is not met. In ${winLab}, consequence ${stepList(M.conG.bad)} had ${errs} (${fmt(M.conG.c,M.conG.n)} correct); consequence steps must be correct on every opportunity in the decision rounds, with zero commission errors${M.conG.ec?', because delivering a reinforcer after the behavior the plan puts on extinction, or after a wrong response, has been linked to loss of treatment effect in several DRA, DRO and discrimination-training studies, though not in all (St. Peter Pipkin et al., 2010; Hronek & Kestner, 2025, as summarized by O\u2019Neill et al., 2026; Burlison et al., 2026)':''}. Rehearse ${stepList(M.conG.bad)} with the moment just after the target behavior or a wrong response as the scenario, until ${S.critN>1?'the latest '+esc(S.critN)+' rounds are':'the latest round is'} clean ${later}.`;}
   else if(!M.critM.ok&&un.length){cls='v-mid';txt=`Criterion ${held}, but ${stepList(un)} marked critical ${unPl?'were':'was'} not scored in ${winLab}, so ${unPl?'they have':'it has'} not been shown. Rehearse a round in which ${unPl?'they arise':'it arises'} ${later}.`;}
   else if(!M.critM.ok){cls='v-mid';txt=`Criterion ${held}, but critical-step accuracy in ${winLab} is ${fmt(M.critM.c,M.critM.n)}; every critical step must be correct in those rounds. Rehearse the critical steps ${later}.`;}
   else if(!situ){cls='v-mid';txt=`Rehearsal criterion ${held}${withCrit}. An unannounced in-situ probe with the student is still required before sign-off — score it on Form TI-1 and record its date and the integrity obtained below.`;}
+  else if((()=>{const L=stLastRound(M),d=stIsoOf(situ);return !!(L&&d&&d<L.d);})()){const L=stLastRound(M);cls='v-mid';txt=`Rehearsal criterion ${held}${withCrit}. The probe is dated ${esc(stUs(stIsoOf(situ)))}, before the last scored rehearsal round, R${L.j+1} (${esc(stUs(L.d))}): it is not a probe of this training. Record the unannounced probe taken after training ${later}.`;}
   else if(sp===null){cls='v-mid';txt=`Rehearsal criterion ${held}${withCrit}. The in-situ probe dated ${esc(situ)} has no integrity figure yet — enter the integrity obtained on Form TI-1 below before sign-off.`;}
   else if(!(sp>=0&&sp<=100)){cls='v-mid';txt=`Rehearsal criterion ${held}${withCrit}. The integrity entered for the in-situ probe (“${esc(S.meta.situ_pct)}”) is not a percentage from 0 to 100 — enter the figure obtained on Form TI-1.`;}
-  else if(sp<S.crit){cls='v-no';txt=`Not yet competent in the classroom: the rehearsal criterion was ${held}, but the in-situ probe on ${esc(situ)} obtained ${pf(sp)} integrity, below the ${esc(S.crit)}% criterion. Train in the classroom and probe again ${later}.`;}
+  else if(sp<PC.v){cls='v-no';txt=`Not yet competent in the classroom: the rehearsal criterion was ${held}, but the in-situ probe on ${esc(situ)} obtained ${pf(sp)} integrity, below ${PC.ti?`Form TI-1\u2019s ${esc(PC.v)}% criterion`:`the ${esc(S.crit)}% criterion`}. Train in the classroom and probe again ${later}.`;}
   else if(scp!==null&&!(scp>=0&&scp<=100)){cls='v-mid';txt=`Rehearsal criterion ${held}${withCrit}, and the in-situ probe on ${esc(situ)} obtained ${pf(sp)} integrity. The critical-step integrity entered for the probe (\u201c${esc(S.meta.situ_crit)}\u201d) is not a percentage from 0 to 100 \u2014 enter the figure obtained on Form TI-1, or leave it blank when no critical step came due.`;}
   else if(scp!==null&&scp<100){cls='v-no';txt=`Not yet competent in the classroom: the rehearsal criterion was ${held}, and the in-situ probe on ${esc(situ)} obtained ${pf(sp)} integrity, but its critical-step integrity was ${pf(scp)}; every critical step must be correct. Train the critical steps in the classroom and probe again ${later}.`;}
-  else {cls='v-ok';const rc=String(S.meta.recheck1||'').trim();
-    txt=`Competent: criterion ${held}, ${M.critM.marked?`critical steps at ${fmt(M.critM.c,M.critM.n)}`:'no steps marked critical'}${M.conG.tagged?`, consequence gate met (${fmt(M.conG.c,M.conG.n)} in ${winLab})`:''}, and an in-situ probe on ${esc(situ)} at ${pf(sp)} integrity${scp!==null?`, critical steps on it at ${pf(scp)}`:''}.`+
+  else {cls='v-ok';const rc=stRecheck();
+    txt=`Competent: criterion ${held}, ${M.critM.marked?`critical steps at ${fmt(M.critM.c,M.critM.n)}`:'no steps marked critical'}${M.conG.tagged?`, consequence gate met (${fmt(M.conG.c,M.conG.n)} in ${winLab})`:''}, and an in-situ probe on ${esc(situ)} at ${pf(sp)} integrity${PC.ti?`, at or above Form TI-1\u2019s ${esc(PC.v)}% criterion`:''}${scp!==null?`, critical steps on it at ${pf(scp)}`:''}.`+
       (rc?` First unannounced TI-1 re-check due ${esc(rc)}.`:' Set the first unannounced TI-1 re-check under Sign-off, early in independent implementation: consequence errors mattered most while a task was first being learned (Burlison et al., 2026).');}
-  $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
+  if(PCnote&&situ&&sp!==null)txt+=PCnote;
+  $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;stSignChk();
 
   drawAcq(M);
 
   const weak=M.stepRows.filter(r=>r.s>0&&(100*r.c/r.s<S.crit||r.last!=='C'));
   $('#weakTbl').innerHTML='<thead><tr><th style="width:52px">Step</th><th style="text-align:left">Description</th><th style="width:60px">Crit.</th><th style="width:84px">Per-step %</th><th style="width:110px">Last scored round</th><th style="width:240px">Next rehearsal focus</th></tr></thead><tbody>'+
     (weak.length?weak.map(r=>{
-      const last={C:'Correct',EC:'Commission',EO:'Omission'}[r.last]||'&mdash;';
+      const last=r.last?(r.lastJ!=null?'R'+(r.lastJ+1)+': ':'')+({C:'Correct',EC:'Commission',EO:'Omission'}[r.last]||''):'&mdash;';
       const foc=S.steps[r.i].cmp==='con'&&r.ec?'Rehearse the moment just after the target behavior or a wrong response: a commission error here delivers what the plan withholds (consequence gate)'
         :r.ec&&!r.eo?'Rehearse the step itself; the form is wrong, not the timing'
         :r.eo&&!r.ec?'Rehearse the cue that signals the step is due'
@@ -1635,14 +1675,18 @@ $('#critPct').addEventListener('change',e=>{const v=+e.target.value;if(e.target.
 $('#critN').addEventListener('change',e=>{const v=+e.target.value;if(e.target.value!==''&&Number.isInteger(v)&&v>=1&&v<=5){S.critN=v;renderAll();}else e.target.value=S.critN;});
 $('#printBtn').addEventListener('click',()=>window.print());
 $('#saveBtn').addEventListener('click',()=>{
-  const nm=(S.meta.trainee||'staff').replace(/[^\w-]+/g,'_');
+  const nm=(S.tr&&S.tr.length>1?'team-of-'+S.tr.length:(S.meta.trainee||'staff')).replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'ST-1',rev:'2026-09',saved:new Date().toISOString(),S},null,1)],{type:'application/json'}));
   a.download=`ST-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;
   document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.S)throw 0;S=Object.assign(blank(),d.S);renderAll();}
+  r.onload=()=>{let d=null;try{d=JSON.parse(r.result);}catch(err){d=null;}
+    /* v22.86 (review F229) a record another form saved is refused by name, as TI-1 and CT-1 do */
+    const who=d&&typeof d==='object'?(typeof d.form==='string'?d.form:d.forms&&typeof d.forms==='object'?'CASE':''):'';
+    if(d&&who&&who!=='ST-1'){alert(who==='CASE'?'That is a workstation case file, not a record Form ST-1 saved. Open it in the workstation. Nothing was changed.':'That file was saved by Form '+String(who).slice(0,12)+', not by Form ST-1. Nothing was changed.');return;}
+    try{if(!d||!d.S||typeof d.S!=='object')throw 0;S=Object.assign(blank(),d.S);renderAll();}
     catch(err){alert('That file could not be read as a saved ST-1 form.');}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
@@ -1686,9 +1730,7 @@ async function loadSim(){
     sv1:'Strongly agree',sv2:'Agree',sv3:'Strongly agree',
     outcome:'Competent \u2014 may run the plan without the trainer present',
     review:D(-45)+' (mid-semester)',refresh:'Each semester, and on any revision to the plan',
-    sv4:'Holding the delay is harder when I am covering two students, because the second student needs me during exactly the interval I am supposed to be waiting out. '+
-        'Note on the record: the criterion was first reached at round 3 with one critical step \u2014 re-presenting the break card after a denied request \u2014 omitted inside that window, '+
-        'so rounds 4 and 5 were run to show every critical step correct before the in-situ probe.'};
+    sv4:'Holding the delay is harder when I am covering two students, because the second student needs me during exactly the interval I am supposed to be waiting out.'};
   S.steps=[
     {d:'Sets up the work area with the task, the break card, and the visual timer in the student\u2019s line of sight.',crit:false,cmp:'ant'},
     {d:'States the contingency once, in the wording written in the plan.',crit:false,cmp:'ant'},
@@ -1708,7 +1750,7 @@ async function loadSim(){
   S.rounds=[
     {date:D(2),type:'Role-play',fb:'Setup and contingency statement were exact. Correction: the timer was restarted rather than paused when the student turned away — a commission error on a consequence step, so the consequence gate stays open until the decision rounds are clean. Re-ran step 8 twice immediately.'},
     {date:D(2),type:'Role-play with error',fb:'Step 8 held correctly this time. Correction: the break card was picked up and put in a pocket after the denied request; it has to stay available. Re-ran step 10.'},
-    {date:D(2),type:'Role-play',fb:'Both target steps correct. Correction: the closing phrase was paraphrased — small, but the plan specifies wording. Praised the recovery on step 11.'},
+    {date:D(2),type:'Role-play',fb:'Both target steps correct. Correction: the closing phrase was paraphrased — small, but the plan specifies wording. Praised the recovery on step 11. Note on the record: the criterion was first reached at this round with one critical step \u2014 re-presenting the break card after a denied request \u2014 omitted inside that window, so rounds 4 and 5 were run to show every critical step correct before the in-situ probe.'},
     {date:D(2),type:'Role-play',fb:'All steps correct under escalating protest. Nothing to correct; named what the trainee did on step 8 so it is repeatable.'},
     {date:D(2),type:'Role-play',fb:'Second clean round in a row under the hardest arrangement. The criterion was already reached at round 3; these two rounds confirm it holds when the student protests. Moved to scheduling the in-situ probe.'}
   ];
@@ -1781,10 +1823,11 @@ stGameBtn();
     m=/\b(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\b/.exec(t);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}return '';};
   window.__nbhStaffFacts=function(){const m=S.meta||{},name=String(m.trainee||'').trim();if(!name)return null;
     let M=null;try{M=metrics();}catch(e){M=null;}
-    const v=document.querySelector('#verdictBox .verdict'),met=!!(v&&v.classList.contains('v-ok'))||m.outcome===OUT_NEW;
+    const v=document.querySelector('#verdictBox .verdict'),met=!!(v&&v.classList.contains('v-ok')),signoff=m.outcome===OUT_NEW;   /* v22.86 (review F228) met is the decision; the sign-off goes apart */
     const rounds=M&&M.win&&M.win.length?M.win.map(x=>(S.rounds[x.j]||{}).date).filter(Boolean):[];
     const p={name,role:String(m.pos||'').trim(),criterion:S.crit+'% across '+S.critN+' consecutive round'+(S.critN===1?'':'s')+', then an in-situ probe at '+S.crit+'% or above',met};
-    if(met){const d=iso(m.situ_date)||iso(rounds[rounds.length-1]);if(d)p.date=d;}
+    if(met){const d=iso(m.situ_date);if(d)p.date=d;}
+    if(signoff)p.signoff=true;if(signoff&&!met&&String(m.ov_reason||'').trim())p.override=String(m.ov_reason).trim().slice(0,300);
     return {people:[p],all:met};};
   window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
     let s=null;try{s=window.__nbhStaffFacts();}catch(e){s=null;}if(!s)return o;o=o||{};o.staff=s;return o;};}
@@ -2430,7 +2473,7 @@ function clean(ti){const o=obj(ti);if(!o)return undefined;const out={};
       return{n:Number.isInteger(x.n)&&x.n>=1&&x.n<=2000?x.n:0,text:txt(x.text,20000),critical:x.critical===true,codes,commission:cnt(x.commission)||0,omission:cnt(x.omission)||0,pct:fin(x.pct,0,100)||0};}).filter(x=>x.n);
     out.retrain=Object.assign(srcObj(r),{crit:fin(r.crit,50,100),critN:Number.isInteger(r.critN)&&r.critN>=1&&r.critN<=5?r.critN:null,obs:oList,steps:st,targeted:txt(r.targeted,600)});}
   const p=obj(o.probe);if(p&&Number.isInteger(p.col)&&p.col>=1&&p.col<=8){const w=obj(p.written)||{};
-    out.probe=Object.assign(srcObj(p),{col:p.col,date:isISO(p.date)?p.date:null,integrity:fin(p.integrity,0,100),critical:fin(p.critical,0,100),
+    out.probe=Object.assign(srcObj(p),{col:p.col,crit:fin(p.crit,50,100),date:isISO(p.date)?p.date:null,integrity:fin(p.integrity,0,100),critical:fin(p.critical,0,100),
       c:cnt(p.c),s:cnt(p.s),cc:cnt(p.cc),cs:cnt(p.cs),errs:(Array.isArray(p.errs)?p.errs:[]).slice(0,2000).map(e=>{e=obj(e)||{};return{n:Number.isInteger(e.n)&&e.n>=1&&e.n<=2000?e.n:0,code:e.code==='EC'||e.code==='EO'?e.code:''};}).filter(e=>e.n&&e.code),
       written:{date:txt(w.date,40),pct:txt(w.pct,40),crit:txt(w.crit,40)}});}
   return Object.keys(out).length?out:undefined;}
@@ -2652,7 +2695,7 @@ goBtn.addEventListener('click',()=>{if(!T.rec||!T.ch)return;const P=plan();if(P.
     P.pr.fields.forEach(f=>{const el=q('[data-m="'+f.k+'"]'),put=f.state==='fill'||(f.state==='conflict'&&ch.kr[f.k]==='replace');
       if(el&&put)setField(el,f.want);const key={situ_date:'date',situ_pct:'pct',situ_crit:'crit'}[f.k];w[key]=put||f.state==='same'?f.want:'';});
     const cs=q('[data-m="c_situ"]');if(cs&&!cs.checked&&ch.situ)setCheck(cs);
-    ti.probe=Object.assign({},base,{col:p.col,date:p.date,integrity:p.integrity,critical:p.critical,c:p.c,s:p.s,cc:p.cc,cs:p.cs,errs:p.errs.slice(),written:w});
+    ti.probe=Object.assign({},base,{col:p.col,crit:x.crit,date:p.date,integrity:p.integrity,critical:p.critical,c:p.c,s:p.s,cc:p.cc,cs:p.cs,errs:p.errs.slice(),written:w});
     done.push('the in-situ probe (observation #'+p.col+')');}
   S.ti=clean(ti);if(!S.ti)delete S.ti;
   window.renderAll();
@@ -3961,6 +4004,109 @@ window.__nbhFactsIn=function(f){const c=C();P=c?c.planSteps(f):null;
     return {filled:((g&&g.filled)|0)+r.steps.length,note:'the steps are the plan\u2019s step list (Form TD-1)'};}
   const r=wasIn?wasIn.apply(this,arguments):null;try{bar();}catch(e){}return r;};
 })();
+</script>
+<script id="st1-v2286">
+/* v22.86 (review F232) what is due on this record, for the workstation's Due list and Today: the first unannounced TI-1
+   re-check (the one date the sign-off insists on), the next review, and an in-situ probe dated with no integrity figure yet */
+window.__nbhDue=function(){const m=S.meta||{},L=[],d1=stIsoOf(m.recheck1),rv=stIsoOf(m.review),sd=stIsoOf(m.situ_date);
+  if(d1)L.push({what:'First unannounced TI-1 re-check after training (Form ST-1)',date:d1});
+  if(rv)L.push({what:'Next review of the training (Form ST-1)',date:rv});
+  if(sd&&pctIn(m.situ_pct)===null)L.push({what:'In-situ probe: enter the integrity obtained on Form TI-1 (Form ST-1)',date:sd});
+  return L;};
+</script>
+<script id="st1-v2286c">
+/* v22.86 (review I116) the trainer (the case's BCBA, when the trainer is not named) and the plan source (Form TD-1's adoption),
+   filled while empty. The plan's own step list already comes from TD-1 (v22.46). */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{const put=(key,v)=>{if(!v||String(S.meta[key]||'').trim())return;const el=document.querySelector('[data-m="'+key+'"]');if(el&&String(el.value||'').trim())return;
+      S.meta[key]=v;if(el){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));}k++;};
+    put('trainer',String(S.meta.bcba||'').trim());
+    const ad=f&&f.plan&&f.plan.adoption;if(ad&&stIsoOf(ad.date))put('src','BIP v'+(+ad.version||1)+' adopted '+stUs(stIsoOf(ad.date))+', Form TD-1');}catch(e){}
+  return k?{filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the trainer and the plan source from the case'].filter(Boolean).join('; ')}:r;};}
+</script>
+<style id="st1-v2286b-css">
+/* v22.86 (review F230) the team */
+.st-team{margin:8px 0 0}
+.st-team .st-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.st-team .st-bar b{font-size:12px;color:#54676f;margin-right:4px}
+.st-team .st-bar button[aria-pressed="true"]{background:#1f4e5a;color:#fff;border-color:#1f4e5a}
+.st-team table{margin-top:8px}
+.st-team td.v-ok{color:#1e6b3a;font-weight:600}.st-team td.v-no{color:#8E2A2A;font-weight:600}.st-team td.v-mid{color:#7a5a00;font-weight:600}
+@media print{.st-team .st-bar{display:none}.st-team .st-open{display:none}}
+</style>
+<script id="st1-v2286b">
+/* v22.86 (review F230, I118) several trainees in one record. A classroom plan is run by several adults; they are trained on
+   one step list, and each has a record of their own: the rehearsal rounds and codes, the in-situ probe, the report, the
+   sign-off. The trainee open on screen is the record the sheets show (S.meta, S.rounds, S.cells, S.ti); the others are kept
+   in S.tr, and S.cur says which one is open. The student, the skill, the plan source, the trainer, the criterion and the
+   steps are shared. The workstation is told every trainee's decision (staff.people), so Ready to start, PR-1 and QS-1 see
+   the whole team; each trainee's first TI-1 re-check is on the Due list. A record saved before opens as one trainee. */
+const ST_SHARED=['skill','src','trainer','client','sid','dob','grade','site','setting','bcba','assessor','beh','fn','date'];
+const stCopy=x=>JSON.parse(JSON.stringify(x==null?null:x));
+function stSnap(){const m={};Object.keys(S.meta||{}).forEach(k=>{if(!ST_SHARED.includes(k))m[k]=S.meta[k];});
+  return stCopy({meta:m,nRounds:S.nRounds,rounds:S.rounds||[],cells:S.cells||{},ti:S.ti||null});}
+function stPut(t){const keep={};ST_SHARED.forEach(k=>{if(S.meta&&k in S.meta)keep[k]=S.meta[k];});
+  S.meta=Object.assign({},keep,stCopy(t.meta||{}));S.nRounds=Number.isInteger(t.nRounds)&&t.nRounds>=1&&t.nRounds<=10?t.nRounds:4;
+  S.rounds=stCopy(Array.isArray(t.rounds)?t.rounds:[]);while(S.rounds.length<S.nRounds)S.rounds.push({date:'',type:'',fb:''});
+  S.cells=stCopy(t.cells&&typeof t.cells==='object'?t.cells:{});if(t.ti&&typeof t.ti==='object')S.ti=stCopy(t.ti);else delete S.ti;}
+function stTeamFix(){if(!Array.isArray(S.tr)||!S.tr.length){S.tr=[stSnap()];S.cur=0;}
+  S.tr=S.tr.map(t=>{t=t&&typeof t==='object'&&!Array.isArray(t)?t:{};const meta={};const m=t.meta&&typeof t.meta==='object'&&!Array.isArray(t.meta)?t.meta:{};
+    Object.keys(m).forEach(k=>{if(!ST_SHARED.includes(k)&&(m[k]==null||typeof m[k]!=='object'))meta[k]=m[k];});
+    return {meta,nRounds:Number.isInteger(t.nRounds)&&t.nRounds>=1&&t.nRounds<=10?t.nRounds:4,rounds:Array.isArray(t.rounds)?t.rounds.slice(0,10):[],
+      cells:t.cells&&typeof t.cells==='object'&&!Array.isArray(t.cells)?t.cells:{},ti:t.ti&&typeof t.ti==='object'&&!Array.isArray(t.ti)?t.ti:null};});
+  if(!(Number.isInteger(S.cur)&&S.cur>=0&&S.cur<S.tr.length))S.cur=0;}
+function stSyncCur(){stTeamFix();S.tr[S.cur]=stSnap();}
+{const e0=ensure;ensure=function(){const r=e0.apply(this,arguments);try{stTeamFix();}catch(x){}return r;};}
+/* each trainee's decision, read the way the Competency sheet reads it: each record is put on the sheet in turn, the decision
+   drawn, and the open one put back (all at once, so nothing else runs in between) */
+function stEvalAll(){stSyncCur();const cur=S.cur,out=[];
+  try{S.tr.forEach((t,k)=>{stPut(t);S.cur=k;let cls='',txt='';
+    try{renderSummary();const v=document.querySelector('#verdictBox .verdict');cls=v?v.className:'';txt=v?v.textContent:'';}catch(e){}
+    out.push({k,meta:stCopy(t.meta),cls,txt});});}
+  finally{S.cur=cur;stPut(S.tr[cur]);try{renderSummary();}catch(e){}}
+  return out;}
+const stDec=c=>/\bv-ok\b/.test(c)?'Competent':/\bv-no\b/.test(c)?'Not yet competent':'Open';
+const stName=(m,k)=>String((m&&m.trainee)||'').trim()||'Trainee '+(k+1);
+function stOpen(k){if(!S.tr||k===S.cur||!S.tr[k])return;stSyncCur();S.cur=k;stPut(S.tr[k]);renderAll();
+  try{document.querySelector('[data-m="trainee"]').focus({preventScroll:true});}catch(e){}}
+function stAdd(){stSyncCur();S.tr.push({meta:{},nRounds:4,rounds:[],cells:{},ti:null});S.cur=S.tr.length-1;stPut(S.tr[S.cur]);renderAll();
+  try{document.querySelector('[data-m="trainee"]').focus();}catch(e){}}
+async function stRemove(){if(!S.tr||S.tr.length<2)return;const nm=stName(S.meta,S.cur);
+  if(!(await nbhUI.confirm('Remove '+nm+' from this record?\nTheir rehearsal rounds, probe, report and sign-off are removed. The other trainees and the steps stay.',{ok:'Remove',danger:true})))return;
+  stTeamFix();S.tr.splice(S.cur,1);S.cur=Math.max(0,S.cur-1);stPut(S.tr[S.cur]);renderAll();}
+function stTeamRender(){const box=document.getElementById('stTeam');if(!box||!Array.isArray(S.tr))return;
+  const many=S.tr.length>1,E=many?stEvalAll():null;
+  const bar='<div class="st-bar noprint"><b>Trainees</b>'+S.tr.map((t,k)=>'<button type="button" class="tool" data-st-open="'+k+'" aria-pressed="'+(k===S.cur)+'">'+esc(stName(k===S.cur?S.meta:t.meta,k))+'</button>').join('')+
+    '<button type="button" class="tool" id="stAddBtn">+ Add a trainee</button>'+(many?'<button type="button" class="tool" id="stRmBtn">Remove this trainee</button>':'')+
+    '<span class="hint">'+(many?'One step list and criterion; each trainee has their own rounds, probe, report and sign-off.':'Several adults run the plan? Add each one here, on the same steps.')+'</span></div>';
+  let tbl='';
+  if(many){const rows=E.map(e=>{const m=e.meta,sd=stIsoOf(m.situ_date),rc=stIsoOf(m.recheck1),so=m.outcome===OUT_NEW&&!/\bv-ok\b/.test(e.cls);
+      return '<tr><td>'+esc(stName(m,e.k))+(e.k===S.cur?' <small>(open)</small>':'')+'</td><td>'+esc(m.pos||'')+'</td><td class="'+(e.cls.match(/v-(ok|no|mid)/)||[''])[0]+'">'+stDec(e.cls)+(so?' <small>(signed off against the decision)</small>':'')+'</td>'+
+        '<td>'+(sd?esc(stUs(sd))+(pctIn(m.situ_pct)!==null?', '+esc(String(m.situ_pct).trim())+(/%$/.test(String(m.situ_pct).trim())?'':'%'):''):'&mdash;')+'</td><td>'+(rc?esc(stUs(rc)):'&mdash;')+'</td>'+
+        '<td class="st-open">'+(e.k===S.cur?'':'<button type="button" class="tool" data-st-open="'+e.k+'">Open</button>')+'</td></tr>';}).join('');
+    const met=E.filter(e=>/\bv-ok\b/.test(e.cls)).length;
+    tbl='<table class="rt"><caption style="text-align:left;font-weight:600;padding:4px 0">The team trained on this plan: '+met+' of '+E.length+' at criterion</caption>'+
+      '<thead><tr><th>Trainee</th><th>Position</th><th>Decision</th><th>In-situ probe</th><th>First TI-1 re-check</th><th class="st-open"></th></tr></thead><tbody>'+rows+'</tbody></table>';}
+  box.innerHTML=bar+tbl;}
+{const ra=renderAll;renderAll=function(){const r=ra.apply(this,arguments);try{stTeamRender();}catch(e){console.error(e);}return r;};}
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;const o=t.closest('[data-st-open]');if(o){stOpen(+o.getAttribute('data-st-open'));return;}
+  if(t.closest('#stAddBtn')){stAdd();return;}if(t.closest('#stRmBtn')){stRemove();return;}});
+/* Save data and the workstation's copy carry every trainee: the open one is put back in S.tr first */
+document.addEventListener('click',e=>{const t=e.target;if(t&&t.closest&&t.closest('#saveBtn'))try{stSyncCur();}catch(x){}},true);
+{let tm=0;document.addEventListener('input',e=>{const t=e.target;if(t&&t.matches&&t.matches('[data-m="trainee"],[data-m="pos"]')){clearTimeout(tm);tm=setTimeout(()=>{try{stTeamRender();}catch(x){}},250);}});}
+/* the workstation: every trainee and their decision */
+window.__nbhStaffFacts=function(){const E=stEvalAll(),P=[];
+  E.forEach(e=>{const m=e.meta||{},name=String(m.trainee||'').trim();if(!name)return;const met=/\bv-ok\b/.test(e.cls),signoff=m.outcome===OUT_NEW;
+    const p={name,role:String(m.pos||'').trim(),criterion:S.crit+'% across '+S.critN+' consecutive round'+(S.critN===1?'':'s')+', then an in-situ probe at '+S.crit+'% or above',met};
+    if(met){const d=stIsoOf(m.situ_date);if(d)p.date=d;}if(signoff)p.signoff=true;if(signoff&&!met&&String(m.ov_reason||'').trim())p.override=String(m.ov_reason).trim().slice(0,300);P.push(p);});
+  return P.length?{people:P,all:P.every(p=>p.met)}:null;};
+/* the Due list: each trainee's first re-check and next review, and a probe with no figure yet */
+window.__nbhDue=function(){stSyncCur();const many=S.tr.length>1,L=[];
+  S.tr.forEach((t,k)=>{const m=t.meta||{},who=many?': '+stName(m,k):'',d1=stIsoOf(m.recheck1),rv=stIsoOf(m.review),sd=stIsoOf(m.situ_date);
+    if(d1)L.push({what:'First unannounced TI-1 re-check after training'+who+' (Form ST-1)',date:d1});
+    if(rv)L.push({what:'Next review of the training'+who+' (Form ST-1)',date:rv});
+    if(sd&&pctIn(m.situ_pct)===null)L.push({what:'In-situ probe'+who+': enter the integrity obtained on Form TI-1 (Form ST-1)',date:sd});});
+  return L;};
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

@@ -9903,6 +9903,56 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.86: ST-1 holds the whole team trained on a plan, its sign-off cannot clear a trainee the decision does not, and its first TI-1 re-check is on the Due list (review Wave 3)
+
+- **Several trainees in one record (F230, I118).** A classroom plan is run by several adults. One ST-1 record now holds
+  them all, trained on one step list against one criterion.
+  - **Trainees** on the Setup sheet: a button for each trainee, **+ Add a trainee** and **Remove this trainee**. Each
+    trainee has their own rounds and codes, in-situ probe, report and sign-off. The student, the skill, the plan source,
+    the trainer, the criterion and the steps are shared.
+  - With more than one trainee, **The team trained on this plan** lists each with their position, decision, probe and
+    first re-check ("1 of 3 at criterion"). It prints; the buttons do not.
+  - The workstation is told every trainee's decision. Ready to start, PR-1's "Staff trained to criterion" and QS-1's
+    "Each adult's part" see the whole team, not the first person trained.
+  - Each trainee's first TI-1 re-check and next review are on the Due list, with their name.
+  - Save data keeps the team (the file is named "ST-1_team-of-3_..."). A record saved before opens as one trainee.
+- **The sign-off follows the decision (F228).** Choosing "Competent — may run the plan without the trainer present"
+  while the decision reads Not yet competent, or is still open, now shows a notice under Sign-off, on screen and on paper.
+  - It asks for the reason in a new row; the reason is kept and printed.
+  - The workstation counts a trainee at criterion only when the decision is met. A sign-off against the decision is sent
+    apart, and Ready to start names the trainee "signed off, but the decision is not at criterion".
+  - A trainee at criterion is dated by the in-situ probe only, never by a role-play round.
+- **Open data refuses another form's file (F229).** A file Form TI-1 or CT-1 saved, or a workstation case file, is
+  refused by name ("That file was saved by Form TI-1, not by Form ST-1. Nothing was changed.").
+- **The error class as the studies show it (F231).** The consequence-gate decision, and TI-1's Guide and flag, no longer
+  call commission "the error class most consistently linked" to loss of effect. They say it has been linked to loss of
+  treatment effect in several DRA, DRO and discrimination-training studies, though not in all, and cite the studies that
+  compared the two error classes (St. Peter Pipkin et al., 2010; Hronek & Kestner, 2025, as summarized by O'Neill et al.,
+  2026; Burlison et al., 2026).
+- **The first TI-1 re-check is a date (F232).** "First TI-1 re-check due" is a date box with a note beside it. ST-1 now
+  gives the workstation its own due list: the first re-check, the next review, and an in-situ probe dated with no
+  integrity yet. A re-check typed as text in an older record keeps its date and its words.
+- **The probe of this training (F233, F234).**
+  - A probe dated before the last scored rehearsal round is not accepted when typed by hand either: the decision stays
+    open and says why.
+  - A probe imported from TI-1 is judged against TI-1's own criterion, and the decision names it ("at or above Form
+    TI-1's 80% criterion"). When the two criteria differ, the record says so.
+- **Steps to Watch (F235)** gives the round with its code ("R5: Commission").
+- **One confidentiality line (F236)**, on screen and on paper: "Confidential staff training record naming a student:
+  file with the student's behavior file and in the trainee's supervision record."
+- **The simulation (F237):** the trainer's note on round 3 is with round 3's feedback, not in the trainee's report.
+- **A baseline round (I117).** A round marked "Baseline (before training)" shows what the trainee could do before any
+  instruction. It is kept out of the criterion, the decision, the per-step figures and the graph's course, and shown
+  beside them.
+- **From the case (I116).** The trainer fills from the case's BCBA and the plan source from Form TD-1's adoption, while
+  empty. The plan's own step list already came from TD-1.
+- Not done:
+  - I119: training time from the rehearsal runner (the runner does not keep each round's time yet) and a one-page
+    trainee copy.
+  - I120: Today offering "Retrain on ST-1" from a TI-1 failure.
+  - Each trainee's Competency sheet printed in one go; print each trainee from their own record.
+- qa/st1-w3-test.js (18 checks) and qa/st1-w3b-test.js (18 checks).
+
 ### v22.85: PR-1's review counts the period's restraints and removals, decides a change with the parent, keeps its actions on the due list, fills what the case already holds, and says no more than the studies show (review Wave 3)
 
 - **Safety in the period (F320).** A new **Safety in the Period** box reads the case:
