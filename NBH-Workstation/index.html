@@ -1865,7 +1865,8 @@ function paintSum(){
   if(f){if((f.behaviors||[]).length)bits.push(f.behaviors.length+(f.behaviors.length===1?' target behavior':' target behaviors'));if(f.fn&&(f.fn.key||f.fn.label))bits.push('function: '+(f.fn.key||f.fn.label));
     const g=f.goals||{},gn=(g.red||[]).length+(g.acq||[]).length;if(gn)bits.push(gn+(gn===1?' goal':' goals'));if((f.menu||[]).length)bits.push(f.menu.length+' reinforcers');
     const fl=f.profile&&f.profile.flags;if(fl){if((fl.safety||[]).length)bits.push('safety: '+fl.safety.join(', ').toLowerCase());if(fl.photo==='No')bits.push('no photo permission'+dmAsOf(fl,'photo',true));const crHas=!!(f.crisis&&(f.crisis.stages||[]).length);   /* v22.7x (review F4) */
-      if(/outdated/i.test(fl.crisis||''))bits.push('crisis plan outdated'+dmAsOf(fl,'crisis',true));else if(fl.crisis==='No'&&!crHas)bits.push('no crisis plan'+dmAsOf(fl,'crisis',true));}}
+      if(/outdated/i.test(fl.crisis||''))bits.push('crisis plan outdated'+dmAsOf(fl,'crisis',true));else if(fl.crisis==='No'&&!crHas)bits.push('no crisis plan'+dmAsOf(fl,'crisis',true));}
+    {const fam=dmFamily(f,false);if(fam.length)bits.push('family: '+fam.join('; '));}}   /* v22.7x (review I3) */
   $('#sumCase').textContent=bits.length?'The case: '+bits.join(', '):'';
   row.hidden=!document.body.classList.contains('bar-folded');
   if(typeof paintPhoto==='function')paintPhoto();
@@ -2614,6 +2615,8 @@ function paintFacts(){
     const crHas=!!(f.crisis&&(f.crisis.stages||[]).length);
     if(/outdated/i.test(fl.crisis||''))parts.push('<b>Crisis plan outdated</b>'+esc(dmAsOf(fl,'crisis')));else if(fl.crisis==='No')parts.push(crHas?'<b>DM-1 still says no crisis plan; Form CR-1 holds one</b>'+esc(dmAsOf(fl,'crisis')):'<b>No crisis plan</b>'+esc(dmAsOf(fl,'crisis')));
     if(parts.length)bits.push('<span class="flag">'+parts.join(' &nbsp;&middot;&nbsp; ')+'</span> <i>('+esc(s.profile||'DM-1')+')</i>');}
+  /* v22.7x (review I3) the family facts Form DM-1 holds: the home language and the interpreter need, who holds the rights, who signs */
+  {const fam=dmFamily(f,true);if(fam.length)bits.push('<b>Family:</b> '+esc(fam.join(' \u00b7 '))+' <i>('+esc(s.profile||'DM-1')+')</i>');}
   if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
   if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
   if(f.data)bits.push('<b>Data:</b> '+(f.data.days|0)+' school day'+((f.data.days|0)===1?'':'s')+' <i>('+esc(s.data||'')+')</i>');
@@ -5177,6 +5180,14 @@ async function clearCase(){
 /* v22.7x (review F4) a status answer Form DM-1 repeats here (the crisis plan, the photo permission, the BIP) carries the date it
    was last confirmed there (profile.flags.asOf): it is said "as of" that date, and after 90 days (a working convention) the
    hand-over check asks for it to be confirmed again */
+/* v22.7x (review I3) the family facts Form DM-1 holds, as the bar and the case summary say them (DM-1 is the source; the bar only
+   repeats it): the home language with the interpreter need and its kind, who holds the educational rights, and who signs (in Form
+   IC-1's words; with the signer's name when named is true) */
+function dmFamily(f,named){const pf=(f&&f.profile)||{},L=pf.language||{},R=pf.rights||{},out=[],k=/Interpreter:\s*([^;]+)/.exec(String(L.notes||''));
+  if(L.home)out.push(String(L.home)+(L.interpreter===true?', interpreter needed'+(k?' ('+k[1].trim()+')':''):''));else if(L.interpreter===true)out.push('interpreter needed');
+  if(R.holder)out.push('rights: '+String(R.holder).replace(/\s*\(.*\)$/,''));
+  if(R.signer)out.push('signs: '+String(R.signer).replace(/\s*\(.*\)$/,'')+(named&&R.name?' ('+R.name+')':''));
+  return out;}
 function dmStale(){return 90;}   /* function declarations: the bar's summary can be painted before this part of the script has run */
 function dmDays(iso){return /^\d{4}-\d\d-\d\d$/.test(String(iso||''))?Math.round((Date.now()-new Date(iso+'T12:00:00').getTime())/864e5):null;}
 function dmAsOf(fl,k,short){const d=fl&&fl.asOf&&fl.asOf[k],n=dmDays(d);if(n==null)return '';const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d),w=(+m[2])+'/'+(+m[3])+(short?'':'/'+m[1]);
@@ -5917,6 +5928,8 @@ function calEvents(f){const E=[],add=(date,what,form)=>{const s=String(date||'')
   (cr.deadlines||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Notice')+' (restraint or seclusion)','CR-1'));
   (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Injury follow-up'),'IM-1'));
   if(f.prefs)add(f.prefs.reassess,'Preference reassessment','PA-1');add(ad.start,'Plan starts','TD-1');
+  /* v22.7x (review I2) the steps of the rights at 18 Form DM-1 still has open (the 17th and 18th birthdays) */
+  ((pf.rights||{}).timeline||[]).forEach(x=>{if(x)add(x.due,String(x.what||'Rights at 18'),'DM-1');});
   ((f.home||{}).sheets||[]).filter(s=>s&&s.due&&!s.back).forEach(s=>add(s.due,'Home sheet back: '+(s.name||'sheet'),'HD-1'));
   return E;}
 const clInitials=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/).filter(Boolean);return w.length?w.map(x=>x[0].toUpperCase()+'.').join(' '):'Student';};
