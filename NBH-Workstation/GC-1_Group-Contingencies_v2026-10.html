@@ -654,6 +654,7 @@ table.rt td.met.y{color:#2F6B37}table.rt td.met.n{color:#8E2A2A}
 #posterOut .po-since{font-weight:400;font-size:16px}
 .gc-now{margin:6px 0 0}
 tr.gc-own-step td{background:#f6f8f8}
+#agrTbl td.agr-p{font-weight:600}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:10px 0}
 .metric{border:1px solid var(--rule-2);border-left:3px solid var(--rule);background:#FAFCFC;padding:9px 11px;border-radius:2px}
 .metric b{display:block;font-family:var(--sans);font-size:10.5px;letter-spacing:.04em;color:var(--ink-soft);text-transform:uppercase}
@@ -986,8 +987,8 @@ td input,td select{max-width:100%}
 
     <h3>The Rule, Shared by Every Arrangement</h3>
     <table class="rt">
-      <tr><th style="width:28%">What the record counts</th><td><select data-m="dir" style="width:70%"><option></option><option value="low">Fouls or disruptions: the criterion is a ceiling (at most N)</option><option value="high">Points, tootles or percent on task: the criterion is a floor (at least N)</option></select></td></tr>
-      <tr><th>Starting criterion (number)</th><td><input data-m="crit" inputmode="numeric" placeholder="from the baseline: just inside what the class already does on a good day" style="width:30%"></td></tr>
+      <tr><th style="width:28%">What the record counts</th><td><select data-m="dir" style="width:70%"><option></option><option value="high">Points, tootles or percent on task: the criterion is a floor (at least N)</option><option value="low">Fouls or disruptions: the criterion is a ceiling (at most N)</option></select></td></tr>
+      <tr><th>Starting criterion (number)</th><td><input data-m="crit" inputmode="numeric" placeholder="from the baseline: a level the class already reaches on its better days (the Setup sheet suggests one)" style="width:30%"></td></tr>
       <tr><th>Unit of the criterion</th><td><input data-m="unit" placeholder="fouls per team per game; points per team; percent of students; tootles per day" style="width:60%"></td></tr>
       <tr><th>Length of one period of the game</th><td><input data-m="mins" inputmode="numeric" placeholder="20 to 30 minutes to start, as a working convention" style="width:30%"></td></tr>
       <tr><th>Reward for meeting it</th><td><input data-m="reward" list="gcMenuList" placeholder="from the menu: 5 minutes of free choice at the end of the day; a game on Friday"></td></tr>
@@ -1050,7 +1051,7 @@ td input,td select{max-width:100%}
         <tr><th>Who records the fouls</th><td><input data-m="g_rec" placeholder="the teacher, with a tally mark on the board and the team named, in a neutral voice, without stopping the lesson"></td></tr>
         <tr><th>Fading plan</th><td><input data-m="g_fade" placeholder="see the fading table below: daily to 3 days a week to unannounced; the prize from right after the game to the end of the day to the end of the week"></td></tr>
       </table>
-      <p class="hint">In the original game the class was divided into two teams, a mark went against a team each time one of its members broke a rule, and both teams won if both stayed under the criterion (Barrish et al., 1969). Later studies ran the game with a criterion as low as five marks in a class period, with a winning team announced each day, and found it works across grades from kindergarten to high school (Tingstrom et al., 2006). Donaldson et al. (2011) showed teachers could run it in kindergarten with a brief training; Joslyn et al. (2019) note that the same results have been obtained with a few minutes of teacher training.</p>
+      <p class="hint">In the original game the class was divided into two teams, a mark went against a team each time one of its members broke a rule, and both teams won if both stayed under the criterion (Barrish et al., 1969). Later studies ran the game with a criterion as low as five marks in a class period, with a winning team announced each day, and found it works across grades from kindergarten to high school (Tingstrom et al., 2006). Donaldson et al. (2011) showed teachers could run it in kindergarten after a brief training. The rule-following version (teams earn a point for following the rules) is the one to offer first: Tanol et al. (2010) found it gave the same or fewer rule violations as marking fouls, and the teachers preferred it; choose it under What the record counts.</p>
     </div>
 
     <div class="only-ct for-cwfit"><h3>CW-FIT</h3>
@@ -1141,7 +1142,7 @@ td input,td select{max-width:100%}
     <div id="logVerdict"></div>
     <div class="metrics" id="logMetrics"></div>
     <h3>Days</h3>
-    <p class="hint">One row per game period. Phase B is baseline (no criterion; the class or each team is counted anyway); phases 1 to 4 follow the fading table. What a cell holds follows the arrangement (the line under the buttons says it); the met column is computed from it, the criterion and the direction on the Design sheet. When the Good Behavior Game is won by the fewest fouls, a Won column names the day&rsquo;s winning team or teams (the lowest score; ties both win); for tootling, a Total column carries the running count toward the cumulative goal and Met is the day it is reached.</p>
+    <p class="hint">One row per game period. Phase B is baseline (no criterion; the class or each team is counted anyway): the first run of B days is the baseline every comparison uses, and a later run is a return to baseline, kept apart. Phases 1 to 3 follow the fading table. P is a probe day without the game (phase 3 asks for them), and phase 4 rows are the monthly probes once the game is retired; probes are graphed in gray and kept out of the baseline, the game-day mean and the step rules. What a cell holds follows the arrangement (the line under the buttons says it); the met column is computed from it, the criterion and the direction on the Design sheet. When the Good Behavior Game is won by the fewest fouls, a Won column names the day&rsquo;s winning team or teams (the lowest score; ties both win); for tootling, a Total column carries the running count toward the cumulative goal and Met is the day it is reached.</p>
     <div class="tools"><button class="tool" id="addL">Add a day</button><button class="tool" id="delL">Remove last</button></div>
     <p class="hint" id="lHow"></p>
     <div class="grid-wrap"><table class="rt wide" id="lTbl"><thead></thead><tbody></tbody></table></div>
@@ -1149,6 +1150,11 @@ td input,td select{max-width:100%}
     <div class="legend" id="plotLegend"></div>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Score by day"><svg id="logPlot" viewBox="0 0 900 320" aria-label="Fouls or points per team per day with the criterion line"></svg></div>
     <div class="tools noprint"><button class="tool" id="gcPngBtn" type="button">Save graph as image</button><span class="hint">A PNG of the graph for the report.</span></div>
+    <!-- v22.75 (review I144): a second observer's tally on a game day, against the Record's -->
+    <h3 style="margin-top:14px">Agreement on the Tallies</h3>
+    <p class="hint">About once a week, a second observer (the BCBA) keeps their own tally of one team, or the class, for a whole game period. Agreement is the smaller count over the larger (total count; both zero is 100%). It makes the decisions defensible; the Record notes a step taken without a check since the criterion began (working convention: 80% or more).</p>
+    <div class="tools"><button class="tool" id="addA" type="button">Add a check</button></div>
+    <div class="grid-wrap"><table class="rt" id="agrTbl"><thead><tr><th style="width:5%">#</th><th style="width:15%">Date (a day on the Record)</th><th style="width:18%">Second observer</th><th style="width:18%">Team</th><th style="width:12%">Their count</th><th style="width:12%">The Record&rsquo;s</th><th style="width:10%">Agreement</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3 style="margin-top:14px">Decisions</h3>
     <div id="logRules"></div>
     <table class="rt" style="margin-top:10px">
@@ -1192,7 +1198,7 @@ td input,td select{max-width:100%}
   <!-- ===================== GUIDE ===================== -->
   <section class="only-guide" id="guide"><!-- v22.37 (review F279): id="guide", so the master print leaves the Guide out -->
     <h2 class="nbh-band">What This Form Builds</h2>
-    <p>A group contingency makes a consequence for the group depend on behavior, and the three kinds differ in whose behavior. Litow and Pumroy (1975) named them: in an <b>independent</b> group-oriented contingency the same rule applies to every student but each earns on their own behavior; in a <b>dependent</b> one the whole group earns on the behavior of one student or a few; in an <b>interdependent</b> one the group earns on the group&rsquo;s performance, judged by every member meeting the criterion, by the group&rsquo;s total or mean, or by the score of a single member chosen in advance or at random. Cooper, Heron and Heward (2020) keep the same three terms and the same cautions. The programs with names, the Good Behavior Game, CW-FIT, the mystery motivator, randomized interdependent contingencies and tootling, are interdependent arrangements with particular rules, and the form holds each with its own fields so the rule can be written out, posted, and recorded against.</p>
+    <p>A group contingency makes a consequence for the group depend on behavior, and the three kinds differ in whose behavior. Litow and Pumroy (1975) named them: in an <b>independent</b> group-oriented contingency the same rule applies to every student but each earns on their own behavior; in a <b>dependent</b> one the whole group earns on the behavior of one student or a few; in an <b>interdependent</b> one the group earns on the group&rsquo;s performance, judged by every member meeting the criterion, by the group&rsquo;s total or mean, or by the score of a member drawn at random after the period (a reward that rests on members picked in advance is a dependent arrangement). Cooper, Heron and Heward (2020) keep the same three terms and the same cautions. The programs with names, the Good Behavior Game, CW-FIT, the mystery motivator, randomized interdependent contingencies and tootling, are interdependent arrangements with particular rules, and the form holds each with its own fields so the rule can be written out, posted, and recorded against.</p>
     <p>The Good Behavior Game is the oldest and best studied of them. Barrish, Saunders and Wolf (1969) divided a fourth-grade class into two teams, put a mark on the board against a team whenever a member was out of seat or talking out, and let both teams win privileges when both stayed under the criterion; out-of-seat and talking-out fell from most of the intervals to a few, in math and in reading, in a reversal design. Medland and Stachnik (1972) and Harris and Sherman (1973) replicated the effect and examined which parts of the game carried it. Tingstrom, Sterling-Turner and Wilczynski (2006) reviewed the game&rsquo;s first 33 years and found it effective across ages, settings and behaviors; Bowman-Perrott et al. (2016) pooled 21 single-case studies and reported a large effect (TauU = .82), largest for students with or at risk for emotional and behavioral disorders; Joslyn, Donaldson, Austin and Vollmer (2019) summarized the behavior-analytic studies and what is known about its components. Kellam and colleagues (1994, 2008) ran the game in first-grade classrooms in a randomized prevention trial and followed the children into middle school and young adulthood, with lower aggression and lower rates of later problems among the boys who had been most aggressive at the start.</p>
     <p>CW-FIT (Wills et al., 2010; Kamps et al., 2011, 2015) adds to the game what a behavior analyst would add: the skills are taught first (getting the teacher&rsquo;s attention appropriately, following directions, ignoring inappropriate behavior), points are given with praise to every team meeting the expectation when a timer sounds, attention to inappropriate behavior is withheld, and students who need more get self-management cards or help cards. Randomizing the criterion, the behavior, the students or the reward (Kelshaw-Levering, Sterling-Turner, Henry &amp; Skinner, 2000; Theodore, Bray, Kehle &amp; Jenson, 2001) and keeping the reward in a sealed envelope (Moore, Waguespack, Wickstrom, Witt &amp; Gaydos, 1994) are ways to keep every expectation in force all period and to keep a reward from losing its pull. Tootling (Skinner, Cashwell &amp; Skinner, 2000) is a peer-reporting arrangement in which the class earns on the count of classmates&rsquo; prosocial behaviors written down, and the later studies found the disruptive behavior of the class fell while it ran (Cihak, Kirk &amp; Boon, 2009; Lambert, Tingstrom, Sterling, Dufrene &amp; Lynne, 2015).</p>
 
@@ -1200,7 +1206,7 @@ td input,td select{max-width:100%}
     <table class="rt">
       <tr><th style="width:28%">The three kinds, and which to choose</th><td>Litow and Pumroy (1975) reviewed the classroom studies to that date and found support for all three arrangements. Gresham and Gresham (1982) compared them directly in a special class and found the interdependent and dependent arrangements reduced disruption more than the independent one. The reviews since (Maggin, Johnson, Chafouleas, Ruberto &amp; Berggren, 2012; Little, Akin-Little &amp; O&rsquo;Neill, 2015) find group contingencies effective across grades and behaviors, with interdependent arrangements the most studied. The choice on this form is by risk as much as effect: independent where peer pressure would harm a student, dependent only with the safeguards, interdependent with a saboteur rule.</td></tr>
       <tr><th>The Good Behavior Game</th><td>Barrish et al. (1969): two teams, marks for fouls, both teams win under the criterion, privileges as prizes; disruptive behavior fell in a reversal design in a general-education fourth grade. Tingstrom et al. (2006): effective from preschool through high school, in general and special education, with teachers as the implementers in most studies. Bowman-Perrott et al. (2016): across 21 single-case studies the effect was large (TauU = .82) and was largest for students with or at risk for emotional and behavioral disorders. Lannie and McCurdy (2007) ran it in an urban first grade and measured the teacher&rsquo;s behavior too: student on-task behavior rose and disruptions fell while teacher praise barely changed, which is why this form pairs the game with praise rather than assuming it. Pennington and McComas (2017) found the reduction in disruptive behavior was specific to the classroom context in which the game was played, which is why the fading table starts the game in one period and adds the others on purpose.</td></tr>
-      <tr><th>Kindergarten and brief teacher training</th><td>Donaldson, Vollmer, Krous, Downs and Berard (2011) ran the game in five kindergarten classrooms after a brief teacher training; disruptive behavior fell in every class while the game was on, and did not carry over to the periods before or after it. Joslyn et al. (2019) note the same finding across the behavior-analytic studies: the game is simple enough that a short training produces the effect.</td></tr>
+      <tr><th>Kindergarten and brief teacher training</th><td>Donaldson, Vollmer, Krous, Downs and Berard (2011) ran the game in five kindergarten classrooms after a brief teacher training; disruptive behavior fell in every class while the game was on. Donaldson, Wiskow and Soto (2015) found that the reduction held while the game was played and did not carry over to the class period after it, which is one more reason the fading table adds periods on purpose.</td></tr>
       <tr><th>Rule following or rule violation</th><td>Tanol, Johnson, McComas and Cote (2010) compared a version of the game that marks rule violations with one that gives points for rule following in kindergarten; both reduced rule violations, the reinforcement version gave comparable or lower levels, and the teachers preferred the positive version. Wright and McCurdy (2012) compared the game with the Caught Being Good Game and found both effective. The form lets the team choose: a GBG with fouls (lower is better) or a point version (higher is better); the direction is set on the Design sheet and the record follows it.</td></tr>
       <tr><th>CW-FIT</th><td>Wills et al. (2010) describe the program and its first results; Kamps et al. (2011) ran it in six urban elementary classrooms with a multiple-baseline design and found on-task behavior rose and disruptions fell for the class and for the students at risk; Kamps et al. (2015) reported a randomized trial across schools with the same direction of effects. The skills, the timer, the praise and the ignoring are the parts; the form holds each.</td></tr>
       <tr><th>Randomized components</th><td>Kelshaw-Levering et al. (2000) randomized the criterion, the target behaviors and the reward in a second-grade class and found disruption fell under randomized interdependent contingencies, and that randomizing the behavior and criterion kept students from working to a known minimum. Theodore et al. (2001) randomized the contingency and the reward with adolescents in a self-contained class and found disruptive behavior fell. Moore et al. (1994) used the mystery motivator, a reward sealed in an envelope with a chart marking the days it is available, and reduced disruption in a general-education class with little teacher time.</td></tr>
@@ -1212,11 +1218,12 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
     <table class="rt">
       <tr><th style="width:28%">Met</th><td>What a cell holds, and when it is met, follows the arrangement (Litow &amp; Pumroy, 1975). Most arrangements: the team&rsquo;s or the class&rsquo;s count, met at or under the criterion (fouls, disruptions) or at or over it (points, tootles, percent), by the direction set on the Design sheet; a team with its own criterion (a team of one, or a student playing under the criterion in their plan) is scored against that. Interdependent, every student meets the criterion: the number of students over the criterion, met at 0. Independent: the students present and the students who earned, met when the share earning reaches the share set on the Design sheet (80% unless another is written). Dependent: the target student&rsquo;s or students&rsquo; score. A day is met when every column with a value is met. A row with no criterion is baseline and is never met.</td></tr>
-      <tr><th>Baseline mean and suggested criterion</th><td>The mean of every value in phase B rows. The suggested starting criterion is about half the baseline mean for a ceiling (the game reduces fouls sharply from the first day, so a ceiling at baseline asks nothing of the class, and the original game used a criterion far below baseline), or the mean rounded up for a floor; the team edits it. The Design sheet warns when a ceiling is under a quarter of the baseline mean or above it, or when a floor is more than a quarter above the mean. All of this is a working convention.</td></tr>
+      <tr><th>Baseline and suggested criterion</th><td>The baseline is the first run of phase B days; a later run of B days (a return to baseline) and probe days without the game are not pooled into it. The suggested starting criterion is a level the class already reaches on its better baseline days: the best quarter of the baseline team-days (for a ceiling, the count a quarter of them were at or under; for a floor, at or over), so the class wins often from the start and contacts the reward quickly; beside it, how many baseline team-days would have met it. No suggestion is given from fewer than three baseline days, and a baseline that moves by a quarter of its mean or more across its days is flagged as trending. The Design sheet warns when the starting criterion was met on no baseline team-day, or on every one. The criterion then steps on the decision rules. All of this is a working convention; TD-1&rsquo;s group-contingency component gives the same rule.</td></tr>
       <tr><th>Decision rules (working conventions)</th><td>Only the game days played at the current criterion and in the current phase count, from the day that criterion began, so a step is held until the class performs steadily at it (Hartmann &amp; Hall, 1976). No step is taken until three of them have been played. Met on three of the last four of them (or on all of the first three), tighten the criterion by the step toward the terminal value; met on fewer than two of the last four, relax it by one step and check fidelity and the reward; otherwise hold. At the terminal value the game moves to the next fading phase when the criterion is met on 5 game days in a row in phase 1, and on 6 in a row in phases 2 and 3, as the fading table says. Any step waits for a fidelity check at 80% or more since the criterion began. The numbers come from the Design sheet: the days before a change, and the &ldquo;N of the last M&rdquo; in the tighten and relax rows when they are written that way. Each verdict reports the ones it used.</td></tr>
       <tr><th>Winner (fewest fouls wins)</th><td>With a Good Behavior Game won by the fewest fouls, the team or teams with the lowest score that day win (ties both win); under the option that also pays any team at or under the criterion, those teams win as well. An interdependent arrangement in teams where the best team wins is scored the same way. Met still reads every team against the criterion, which is what the criterion rules use. The scoreboard&rsquo;s winning line follows the same choice.</td></tr>
       <tr><th>Tootling total</th><td>The game days&rsquo; counts are added in order; the day the total reaches the cumulative goal is met and the count starts again at zero. The decision reads progress to the goal: the goal reached in the current count, raise it by the step toward the terminal value; the mean tootles per game day and the days still needed at that rate are shown; no goal reached in ten game days, lower it or revisit the reward (working conventions).</td></tr>
       <tr><th>The graph</th><td>One series per team (or one for the class), with a different color and marker for each; the criterion as a stepped line; phase changes as dashed vertical lines. The y-axis scales to the data and the criterion.</td></tr>
+      <tr><th>Agreement on the tallies</th><td>Total-count agreement for one team (or the class) on one game period: the smaller count over the larger, times 100; both zero is 100%. 80% or more is the working convention; the Record lists the latest check and notes a step taken without a check since the criterion began.</td></tr>
       <tr><th>Fidelity percent</th><td>Yes divided by (Yes plus No) over the common steps and the chosen arrangement&rsquo;s own; N/A is excluded. Praise and a neutral voice for fouls are scored as two steps, because the game does not bring praise on its own (Lannie &amp; McCurdy, 2007). At or over 90 the game ran as written; 80 to 89 is a note to the teacher; under 80 the record from that period is not a test of the system, and the Record takes no step while the latest check since the criterion began is missing or under 80 (working conventions).</td></tr>
     </table>
 
@@ -1224,7 +1231,7 @@ td input,td select{max-width:100%}
     <table class="rt">
       <tr><th style="width:28%">Dependent contingencies</th><td>One student carries the class. The arrangement is used only with the student&rsquo;s agreement, with a criterion the student already meets on a good day, with peers taught to encourage and never to pressure, and with an exit rule the teacher applies the same day if the student is blamed. The poster names the student, or shows the student&rsquo;s goal, only when the student agreed and the parent agreed in writing (Yes, with its date, on the Design sheet); until then it says &ldquo;our class goal&rdquo; and names no one. Where the student&rsquo;s plan already has its own reinforcement, the two should not conflict: the student is not made to lose twice.</td></tr>
       <tr><th>Interdependent contingencies</th><td>Peer pressure is the mechanism and the hazard. The teacher keeps the score, peers do not report on each other, and a student who repeatedly costs the group, whether from an inability to meet the criterion or because the group&rsquo;s reaction is itself reinforcing, is moved to a team of one with the same rule and the same prize rather than left to be the reason the class lost. A student with a BIP in the room competes under the criterion in their plan, not the class criterion, when the two differ.</td></tr>
-      <tr><th>Fouls and marks</th><td>A mark against a team is information, recorded in a neutral voice without a lecture, and marks are never removed as a reward or added as a punishment for something outside the rules. The game does not take away anything the class already had. A losing team gets no consequence beyond not earning.</td></tr>
+      <tr><th>Fouls and marks</th><td>Marking fouls is a response-cost arrangement: Tanol et al. (2010) call that version of the game GBG-response cost, and found the rule-following version (points for following the rules) gave the same or fewer rule violations and was the one the teachers preferred, so the points version is offered first and reinforcement comes before response cost. When fouls are used, a mark against a team is recorded in a neutral voice without a lecture, and marks are never removed as a reward or added as a punishment for something outside the rules. The game does not take away anything the class already had. A losing team gets no consequence beyond not earning.</td></tr>
       <tr><th>Rewards</th><td>Activities and privileges the class chose; edibles only with family agreement and as the last choice. Nothing on the menu is something students are entitled to anyway (recess, lunch, a bathroom break).</td></tr>
       <tr><th>Fading</th><td>A game that runs every period forever is a sign that the expectations were never taught; the fading table moves the game to intermittent and the reward to delayed on a rule, with the data saying when.</td></tr>
     </table>
@@ -1232,13 +1239,14 @@ td input,td select{max-width:100%}
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
     <h2 class="noprint nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p class="noprint">Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated class is a second-grade Good Behavior Game with two teams, four baseline days, sixteen game days in phase 1 with the criterion stepped from 5 to 4 to 3 to the terminal value of 2, each step taken after the rule was met and a fidelity check, then three game days in phase 2, the poster, five fidelity observations and the decision rules applied.</p>
+    <p class="noprint">Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated class is a second-grade Good Behavior Game with two teams, four baseline days, nineteen game days in phase 1 starting at the level the class reached on its better baseline days (9 fouls per team) and stepped by 2 to 7, 5, 3 and the terminal value of 2, each step taken after the rule was met and a fidelity check, then three game days in phase 2, the poster, six fidelity observations, four agreement checks on the tallies and the decision rules applied.</p>
     <p class="hint" id="gcRefs" style="margin-top:10px"><b>Reference list.</b>
     Barrish, H. H., Saunders, M., &amp; Wolf, M. M. (1969). Good behavior game: Effects of individual contingencies for group consequences on disruptive behavior in a classroom. <em>Journal of Applied Behavior Analysis, 2</em>(2), 119&ndash;124. https://doi.org/10.1901/jaba.1969.2-119 &bull;
     Bowman-Perrott, L., Burke, M. D., Zaini, S., Zhang, N., &amp; Vannest, K. (2016). Promoting positive behavior using the Good Behavior Game: A meta-analysis of single-case research. <em>Journal of Positive Behavior Interventions, 18</em>(3), 180&ndash;190. &bull;
     Cihak, D. F., Kirk, E. R., &amp; Boon, R. T. (2009). Effects of classwide positive peer &ldquo;tootling&rdquo; to reduce the disruptive classroom behaviors of elementary students with and without disabilities. <em>Journal of Behavioral Education, 18</em>(4), 267&ndash;278. &bull;
     Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
     Donaldson, J. M., Vollmer, T. R., Krous, T., Downs, S., &amp; Berard, K. P. (2011). An evaluation of the Good Behavior Game in kindergarten classrooms. <em>Journal of Applied Behavior Analysis, 44</em>(3), 605&ndash;609. https://doi.org/10.1901/jaba.2011.44-605 &bull;
+    Donaldson, J. M., Wiskow, K. M., &amp; Soto, P. L. (2015). Immediate and distal effects of the Good Behavior Game. <em>Journal of Applied Behavior Analysis, 48</em>(3), 685&ndash;689. https://doi.org/10.1002/jaba.229 &bull;
     Embry, D. D. (2002). The Good Behavior Game: A best practice candidate as a universal behavioral vaccine. <em>Clinical Child and Family Psychology Review, 5</em>(4), 273&ndash;297. &bull;
     Gresham, F. M., &amp; Gresham, G. N. (1982). Interdependent, dependent, and independent group contingencies for controlling disruptive behavior. <em>The Journal of Special Education, 16</em>(1), 101&ndash;110. &bull;
     Harris, V. W., &amp; Sherman, J. A. (1973). Use and analysis of the &ldquo;Good Behavior Game&rdquo; to reduce disruptive classroom behavior. <em>Journal of Applied Behavior Analysis, 6</em>(3), 405&ndash;417. https://doi.org/10.1901/jaba.1973.6-405 &bull;
@@ -1339,9 +1347,10 @@ function fidMigrate(a){if(!Array.isArray(a))return null;if(a.length===FID.length
 
 /* ---------------- state ---------------- */
 /* v22.37 (review F279): v 2, a file saved after other students' details moved to the class sheet */
-function blank(){return{v:2,meta:{},chk:{},type:'',exp:[],menu:[],teams:[],fade:FADE.map(()=>({crit:'',date:''})),log:[],fid:FID.map(()=>({in:'',note:''})),fl:[]};}
+function blank(){return{v:2,meta:{},chk:{},type:'',exp:[],menu:[],teams:[],fade:FADE.map(()=>({crit:'',date:''})),log:[],fid:FID.map(()=>({in:'',note:''})),fl:[],agr:[]};}
 let S=blank();
 function ensure(){
+  if(!Array.isArray(S.agr))S.agr=[];   /* v22.75 (review I144) */
   if(!Array.isArray(S.exp))S.exp=[];if(!Array.isArray(S.menu))S.menu=[];if(!Array.isArray(S.teams))S.teams=[];if(!Array.isArray(S.log))S.log=[];if(!Array.isArray(S.fl))S.fl=[];
   if(!Array.isArray(S.fade)||S.fade.length!==FADE.length)S.fade=FADE.map(()=>({crit:'',date:''}));
   if(!Array.isArray(S.fid)||S.fid.length!==FID.length)S.fid=fidMigrate(S.fid)||FID.map(()=>({in:'',note:''}));
@@ -1401,21 +1410,36 @@ function tootGoal(){return num(S.meta.t_goaln);}
 function tootCum(){const g=tootGoal();let cum=0;return S.log.map(r=>{if(r.ph==='B')return null;const x=num(r.v[0]);if(x==null)return null;cum+=x;const reached=g!=null&&g>0&&cum>=g;const o={cum,reached:g!=null&&g>0?reached:null};if(reached)cum=0;return o;});}
 function rowMet(r){if(tootMode()){const c=tootCum()[S.log.indexOf(r)];return c?c.reached:null;}let any=false,all=true;for(let i=0;i<nser();i++){const m=cellMet(r,i);if(m===null)continue;any=true;if(!m)all=false;}return any?all:null;}
 function vals(r){const o=[];for(let i=0;i<nser();i++){const v=serVal(r,i);if(v!=null)o.push(v);}return o;}
-function baseStats(){const B=S.log.filter(r=>r.ph==='B'),xs=[];B.forEach(r=>xs.push(...vals(r)));
+/* v22.75 (review F286): the baseline is the first run of phase B days; a later run (a return to baseline) and probe days
+   (P, or phase 4) are not pooled into it. (F285): one rule for the starting criterion, the same on the Setup sheet, the
+   Design sheet, the Guide and TD-1: a level the class already reaches on its better baseline days, the best quarter of
+   the baseline team-days, so the class wins often from the start; with how many baseline team-days would have met it.
+   No suggestion from fewer than 3 baseline days; a baseline trending by a quarter of its mean or more is flagged. */
+function isProbe(r){return r.ph==='P'||r.ph==='4';}
+function baseRows(){const i0=S.log.findIndex(r=>r.ph==='B');if(i0<0)return [];let k=i0;while(k<S.log.length&&S.log[k].ph==='B')k++;return S.log.slice(i0,k);}
+function critMeets(v,c){return dir()==='low'?v<=c:v>=c;}
+function baseStats(){const B=baseRows(),xs=[];B.forEach(r=>xs.push(...vals(r)));const later=S.log.filter(r=>r.ph==='B').length-B.length;
   const mean=xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:null;
-  const sug=mean==null||recMode()!=='std'?null:(dir()==='low'?Math.max(1,Math.round(mean/2)):Math.ceil(mean));
-  return{days:B.length,n:xs.length,mean,min:xs.length?Math.min(...xs):null,max:xs.length?Math.max(...xs):null,sug};}
+  let sug=null,sugMet=0,trend=null;
+  if(recMode()==='std'&&B.length>=3&&xs.length){const so=xs.slice().sort((a,b)=>a-b),k=Math.max(1,Math.ceil(xs.length/4));
+    sug=dir()==='low'?so[k-1]:so[so.length-k];sugMet=xs.filter(v=>critMeets(v,sug)).length;}
+  if(B.length>=3&&mean){const dm=B.map(r=>{const v=vals(r);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}).map((v,i)=>[i,v]).filter(x=>x[1]!=null);
+    if(dm.length>=3){const n=dm.length,mx=dm.reduce((a,x)=>a+x[0],0)/n,my=dm.reduce((a,x)=>a+x[1],0)/n,sxx=dm.reduce((a,x)=>a+(x[0]-mx)**2,0),sl=sxx?dm.reduce((a,x)=>a+(x[0]-mx)*(x[1]-my),0)/sxx:0,ch=sl*(dm[n-1][0]-dm[0][0]);
+      if(Math.abs(ch)>=Math.abs(mean)/4)trend={from:Math.round((my-sl*(mx-dm[0][0]))*10)/10,to:Math.round((my+sl*(dm[n-1][0]-mx))*10)/10};}}
+  return{days:B.length,later,n:xs.length,mean,min:xs.length?Math.min(...xs):null,max:xs.length?Math.max(...xs):null,sug,sugMet,trend,xs};}
 function unitWord(){return S.meta.unit||(dir()==='low'?'fouls':'points');}
 /* v22.74 (review F280, F281): the current criterion is the last game day's (before any game day, the Starting
    criterion, then phase 1's on the fading table). The decision window is the run of game days at that criterion and in
    that phase, from the day it began: days played under the old criterion no longer count. */
-function gameDays(){return S.log.filter(r=>r.ph!=='B');}
+function gameDays(){return S.log.filter(r=>r.ph!=='B'&&!isProbe(r));}
+/* v22.75 (review F286): the phase the class is in: the last day that is not baseline and not a probe within a phase (P) */
+function curPhase(){for(let k=S.log.length-1;k>=0;k--){const p=S.log[k].ph;if(p!=='B'&&p!=='P')return p;}return '';}
 function curCrit(){const L=gameDays().filter(r=>num(r.crit)!=null);if(L.length)return num(L[L.length-1].crit);const c=num(S.meta.crit);return c!=null?c:num(S.fade[0]&&S.fade[0].crit);}
 function curRun(){const L=gameDays().filter(r=>num(r.crit)!=null);if(!L.length)return {rows:[],scored:[],crit:curCrit(),ph:'',since:''};
   const last=L[L.length-1],c=num(last.crit),ph=last.ph;let k=L.length-1;while(k>0&&num(L[k-1].crit)===c&&L[k-1].ph===ph)k--;
   const rows=L.slice(k);return {rows,scored:rows.filter(r=>rowMet(r)!==null),crit:c,ph,since:rows[0].date||''};}
 function critSince(){const L=gameDays().filter(r=>num(r.crit)!=null);if(!L.length)return '';const c=num(L[L.length-1].crit);let k=L.length-1;while(k>0&&num(L[k-1].crit)===c)k--;return L[k].date||'';}
-function critChanges(){const out=[];let pc=null,pp=null;gameDays().forEach(r=>{const c=num(r.crit);if(c==null)return;if(c!==pc||r.ph!==pp)out.push({date:gcIso(r.date),ph:r.ph,crit:c});pc=c;pp=r.ph;});return out.slice(-12);}
+function critChanges(){const out=[];let pc=null,pp=null;S.log.filter(r=>r.ph!=='B'&&r.ph!=='P').forEach(r=>{const c=num(r.crit);if(c==null&&r.ph===pp)return;if(r.ph!==pp||(c!=null&&c!==pc))out.push({date:gcIso(r.date),ph:r.ph,crit:c});if(c!=null)pc=c;pp=r.ph;});return out.slice(-12);}
 /* the Design sheet's rows decide the numbers when they are written as "N of the last M"; the relax row reads as "met on
    fewer than N" (or "missed on N", turned into met on fewer than M-N+1) */
 function ruleN(txt,def){const m=String(txt||'').match(/(\d+)\s+of\s+the\s+last\s+(\d+)/i);if(!m)return def;const n=+m[1],w=+m[2];return n>0&&w>=n&&w<=20?[n,w]:def;}
@@ -1432,6 +1456,9 @@ function gcIso(s){const n=pdate(s);if(n==null)return String(s||'').trim();const 
 /* v22.74 (review F283): the latest fidelity check since the criterion began decides whether a step may be taken */
 function fidSince(since){const d0=pdate(since),L=S.fl.map((f,i)=>({f,i,d:pdate(f.date)}));
   const inW=d0==null?L:L.filter(x=>x.d!=null&&x.d>=d0);if(!inW.length)return null;inW.sort((a,b)=>(a.d==null?-1:a.d)-(b.d==null?-1:b.d)||a.i-b.i);return inW[inW.length-1].f;}
+/* phase 3 moves on only with at least 2 probe days (P) since it began, the last two at or under the terminal value */
+function probeShort(run){const i0=run.rows.length?S.log.indexOf(run.rows[0]):-1;if(i0<0)return '';const P=S.log.slice(i0).filter(r=>r.ph==='P'&&rowMet(r)!==null);
+  if(P.length<2)return P.length+' so far; enter at least 2 (phase P, the terminal criterion in the Criterion column)';const l2=P.slice(-2);if(!l2.every(r=>rowMet(r)))return 'the last two probes did not both meet it; hold and probe again';return '';}
 function fidGate(run){const x=fidSince(run.since);
   if(!x)return 'no fidelity check is logged since the criterion became '+run.crit+(run.since?' on '+esc(run.since):'')+' (Fidelity sheet)';
   const p=num(x.pct);if(p==null||p<80)return 'the latest fidelity check since then ('+esc(x.date||'no date')+', '+(p==null?'no percent':p+'%')+') is under 80%, so the days at this criterion are not a test of the system';
@@ -1479,7 +1506,7 @@ function renderL(){
   const cum=tootMode()?tootCum():null;
   $('#lTbl tbody').innerHTML=S.log.map((r,i)=>{const m=rowMet(r);
     return `<tr><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td>
-    <td><select data-r="log" data-i="${i}" data-f="ph" aria-label="Phase on day ${i+1}">${['B','1','2','3','4'].map(p=>`<option value="${p}"${r.ph===p?' selected':''}>${p==='B'?'B (baseline)':p}</option>`).join('')}</select></td>
+    <td><select data-r="log" data-i="${i}" data-f="ph" aria-label="Phase on day ${i+1}">${['B','1','2','3','4','P'].map(p=>`<option value="${p}"${r.ph===p?' selected':''}>${p==='B'?'B (baseline)':p==='4'?'4 (probes)':p==='P'?'P (probe)':p}</option>`).join('')}</select></td>
     <td><input data-r="log" data-i="${i}" data-f="crit" value="${esc(r.crit)}" style="text-align:center"${r.ph==='B'?' disabled placeholder="—"':''}></td>
     ${Array.from({length:n},(_,k)=>`<td><input data-r="log" data-i="${i}" data-f="v${k}" value="${esc(r.v[k])}" style="text-align:center" aria-label="${esc(inName(k))} on day ${i+1}"></td>`).join('')}
     ${md==='indep'?`<td class="num shr">${serVal(r,0)==null?'—':serVal(r,0)+'%'}</td>`:''}${cum?`<td class="num tot">${cum[i]?cum[i].cum+(tootGoal()?' of '+tootGoal():''):'—'}</td>`:''}<td class="met ${m===true?'y':m===false?'n':''}">${m===true?'Yes':m===false?'No':'—'}</td>${winMode()?`<td class="won">${esc(winners(r).map(colName).join(' and ')||'—')}</td>`:''}
@@ -1489,6 +1516,14 @@ function renderL(){
 function renderFid(){
   $('#fidTbl tbody').innerHTML=fidSteps().map(({s,i},k)=>`<tr${s.for?' class="gc-own-step"':''}><td class="num">${k+1}</td><td>${s.t}${s.for&&k===fidSteps().findIndex(x=>x.s.for)?' <span class="hint">(this arrangement&rsquo;s own steps from here)</span>':''}</td><td><select data-r="fid" data-i="${i}" data-f="in" aria-label="Step ${k+1} seen"><option value=""></option>${['Yes','No','N/A'].map(o=>`<option${S.fid[i].in===o?' selected':''}>${o}</option>`).join('')}</select></td><td><input data-r="fid" data-i="${i}" data-f="note" value="${esc(S.fid[i].note)}"></td></tr>`).join('');
 }
+/* v22.75 (review I144): a check's Record count is the cell of the day with the same date, for the team chosen */
+function agrRow(a){const d=String(a.date||'').trim();if(!d)return null;const n=pdate(d);return S.log.find(r=>String(r.date||'').trim()===d)||(n==null?null:S.log.find(r=>pdate(r.date)===n))||null;}
+function agrPct(a){const r=agrRow(a),k=+a.col||0,x=num(a.val),y=r?num(r.v[k]):null;if(x==null||y==null)return null;return x===0&&y===0?100:Math.round(1000*Math.min(x,y)/Math.max(x,y))/10;}
+function agrSince(since){const d0=pdate(since);return S.agr.filter(a=>agrPct(a)!=null&&(d0==null||(pdate(a.date)!=null&&pdate(a.date)>=d0)));}
+function renderAgr(){const tb=$('#agrTbl tbody');if(!tb)return;const n=ncol();
+  tb.innerHTML=S.agr.length?S.agr.map((a,i)=>{const r=agrRow(a),p=agrPct(a);return `<tr><td class="num">${i+1}</td><td><input data-r="agr" data-i="${i}" data-f="date" value="${esc(a.date)}" aria-label="Date of check ${i+1}"></td><td><input data-r="agr" data-i="${i}" data-f="who" value="${esc(a.who)}" aria-label="Second observer, check ${i+1}"></td>
+    <td><select data-r="agr" data-i="${i}" data-f="col" aria-label="Team, check ${i+1}">${Array.from({length:n},(_,k)=>`<option value="${k}"${String(a.col||'0')===String(k)?' selected':''}>${esc(colName(k))}</option>`).join('')}</select></td>
+    <td><input data-r="agr" data-i="${i}" data-f="val" value="${esc(a.val)}" inputmode="numeric" style="text-align:center" aria-label="Their count, check ${i+1}"></td><td class="num">${r?esc(String(r.v[+a.col||0]||'—')):'no such day'}</td><td class="num agr-p">${p==null?'—':p+'%'}</td>${delCell('agr',i,'check')}</tr>`;}).join(''):'<tr><td colspan="8" class="hint">No agreement checks yet.</td></tr>';}
 function renderFl(){
   $('#flTbl tbody').innerHTML=S.fl.length?S.fl.map((r,i)=>`<tr><td class="num">${i+1}</td><td>${esc(r.date)}</td><td>${esc(r.who)}</td><td class="num">${esc(r.pct)}${r.pct===''?'':'%'}</td><td>${esc(r.missed)||'none'}</td>${delCell('fl',i,'log entry')}</tr>`).join(''):'<tr><td colspan="6" class="hint">No observations logged yet.</td></tr>';
 }
@@ -1498,6 +1533,7 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'){
     const r=el.dataset.r,i=+el.dataset.i,f=el.dataset.f;
     if(r==='log'&&/^v\d$/.test(f))S.log[i].v[+f.slice(1)]=el.value;else S[r][i][f]=el.value;
+    if(r==='agr'){const tr=el.closest('tr'),p=agrPct(S.agr[i]),c=tr&&tr.querySelector('.agr-p');if(c)c.textContent=p==null?'—':p+'%';if(f==='date'&&tr){const rr=agrRow(S.agr[i]);tr.children[5].textContent=rr?String(rr.v[+S.agr[i].col||0]||'—'):'no such day';}renderRecord();return;}
     if(r==='log'){if(tootMode()){const cum=tootCum();$$('#lTbl tbody tr').forEach((tr,k)=>{const c=cum[k],m=S.log[k]&&rowMet(S.log[k]),td=tr.querySelector('td.met'),tt=tr.querySelector('td.tot');if(tt)tt.textContent=c?c.cum+(tootGoal()?' of '+tootGoal():''):'—';if(td){td.className='met '+(m===true?'y':m===false?'n':'');td.textContent=m===true?'Yes':m===false?'No':'—';}});}else paintRow(el.closest('tr'),i);renderRecord();renderBase();renderRule();renderPosterSoon();}
     else if(r==='exp'){renderExp();renderPoster();renderRule();}
     else if(r==='menu'){renderMenu();}
@@ -1512,8 +1548,8 @@ document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){
     const r=el.dataset.r,i=+el.dataset.i,f=el.dataset.f;
     if(el.type==='checkbox')S[r][i][f]=el.checked;else if(!(r==='log'&&/^v\d$/.test(f)))S[r][i][f]=el.value;
-    if(r==='log'){if(f==='ph'){renderL();}renderRecord();renderBase();renderRule();renderPosterSoon();}
-    if(r==='fid')renderFidelity();if(r==='menu')renderMenu();
+    if(r==='log'){if(f==='ph'){renderL();}renderRecord();renderBase();renderRule();renderPosterSoon();renderAgr();}
+    if(r==='fid')renderFidelity();if(r==='menu')renderMenu();if(r==='agr'){renderAgr();renderRecord();}
     return;}
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderRule();renderPoster();}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderRule();renderPoster();renderRecord();renderBase();renderL();}
@@ -1528,6 +1564,7 @@ $('#addL').addEventListener('click',()=>{const last=S.log[S.log.length-1];const 
 $('#delL').addEventListener('click',async ()=>{if(!S.log.length)return;const r=S.log[S.log.length-1];if((r.date||r.v.some(x=>x))&&!(await nbhUI.confirm('Remove the last day?\nIts date and scores are deleted from the Record.',{ok:'Remove',danger:true})))return;S.log.pop();renderL();renderRecord();renderBase();});
 $('#fidAdd').addEventListener('click',()=>{const f=fidStats();if(f.n===0){alert('Score at least one step first.');return;}
   S.fl.push({date:S.meta.f_date||'',who:S.meta.f_who||'',pct:String(Math.round(f.pct)),missed:f.missed.join(', ')});renderFl();renderRecord();});
+$('#addA').addEventListener('click',()=>{const last=gameRows().slice(-1)[0];S.agr.push({date:last?last.date:'',who:'',col:'0',val:'',note:''});renderAgr();});
 $('#flDel').addEventListener('click',async ()=>{if(!S.fl.length)return;if(!(await nbhUI.confirm('Remove the last log entry?\nThe fidelity check it holds is deleted.',{ok:'Remove',danger:true})))return;S.fl.pop();renderFl();renderRecord();});
 async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
   if(r==='exp'){if((row.text||row.looks||row.nex)&&!(await nbhUI.confirm('Delete this row?\nThe expectation it holds is deleted.',{ok:'Delete',danger:true})))return;S.exp.splice(i,1);if(!S.exp.length)S.exp.push({text:'',looks:'',nex:''});renderE();renderExp();renderRule();renderPoster();}
@@ -1537,6 +1574,7 @@ async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
     S.teams.splice(i,1);S.log.forEach(x=>{x.v.splice(i,1);x.v.push('');});renderTm();renderL();renderRule();renderPoster();renderRecord();renderBase();}
   else if(r==='log'){if((row.date||row.note||row.v.some(x=>x))&&!(await nbhUI.confirm('Delete this row?\nThe day it holds is deleted from the Record.',{ok:'Delete',danger:true})))return;S.log.splice(i,1);renderL();renderRecord();renderBase();}
   else if(r==='fl'){if(!(await nbhUI.confirm('Delete this row?\nThe fidelity check it holds is deleted.',{ok:'Delete',danger:true})))return;S.fl.splice(i,1);renderFl();renderRecord();}
+  else if(r==='agr'){if((row.date||row.val)&&!(await nbhUI.confirm('Delete this row?\nThe agreement check it holds is deleted.',{ok:'Delete',danger:true})))return;S.agr.splice(i,1);renderAgr();renderRecord();}
 }
 $('#gcPngBtn').addEventListener('click',()=>svgToPng($('#logPlot'),graphFile('GC-1',S.meta.cls)));
 let poT=0;function renderPosterSoon(){clearTimeout(poT);poT=setTimeout(renderPoster,250);}
@@ -1570,7 +1608,9 @@ function renderBase(){
   const b=baseStats(),M=$('#baseMetrics');
   M.innerHTML=`<div class="metric"><b>Baseline days (phase B)</b><div class="val">${b.days||'—'}</div><div class="sub">${b.n} value${b.n===1?'':'s'} on the Record</div></div>
     <div class="metric"><b>Baseline mean</b><div class="val">${fmt1(b.mean)}</div><div class="sub">${b.min!=null?'range '+b.min+' to '+b.max:'enter days as phase B on the Record'} · ${esc(unitWord())}</div></div>
-    <div class="metric"><b>Suggested starting criterion</b><div class="val">${b.sug!=null?b.sug:'—'}</div><div class="sub">${recMode()==='indep'?'set the criterion per student from the students&rsquo; own baseline: here the Record holds the share of students earning':recMode()==='every'?'set the criterion per student from the students&rsquo; own baseline: here the Record holds the number of students over it':dir()==='low'?'about half the baseline mean: the game cuts fouls from the first day, and a ceiling at baseline asks nothing':'the mean, rounded up: just above an average day'} (working convention)</div></div>`;
+    <div class="metric"><b>Suggested starting criterion</b><div class="val">${b.sug!=null?b.sug:'—'}</div><div class="sub">${recMode()==='indep'?'set the criterion per student from the students&rsquo; own baseline: here the Record holds the share of students earning':recMode()==='every'?'set the criterion per student from the students&rsquo; own baseline: here the Record holds the number of students over it':b.days<3?'from 3 baseline days or more: '+b.days+' so far':'met on '+b.sugMet+' of '+b.n+' baseline '+(S.teams.length?'team-':'')+'days: a level the class already reaches on its better days (the best quarter), so it wins often from the start'} (working convention)</div></div>`+
+    (b.trend?`<div class="verdict v-mid" style="grid-column:1/-1"><b>The baseline is trending</b> (from about ${b.trend.from} to ${b.trend.to} ${esc(unitWord())} across ${b.days} days). Take a few more baseline days, or note the trend: a change when the game starts may only continue it.</div>`:'')+
+    (b.later?`<div class="hint" style="grid-column:1/-1">${b.later} later phase B day${b.later===1?'':'s'} (a return to baseline) ${b.later===1?'is':'are'} not pooled into this baseline.</div>`:'');
 }
 
 /* ---------------- the rule ---------------- */
@@ -1651,9 +1691,9 @@ function renderRule(){
   const out=warn.slice(),m=S.meta,c=cc,b=baseStats(),gw=goalWarn();if(gw)out.push(gw);
   if(c==null)out.push('No starting criterion. '+(b.sug!=null?'The baseline suggests '+b.sug+' '+esc(unitWord())+'.':recMode()!=='std'?'Set the criterion per student from the students&rsquo; own baseline.':'Enter baseline days as phase B on the Record and the Setup sheet suggests one.'));
   else if(recMode()!=='std'){}
-  else if(b.mean!=null&&dir()==='low'&&c<b.mean/4)out.push('The criterion ('+c+') is under a quarter of the baseline mean ('+fmt1(b.mean)+'): the class will lose at first. Start near half the mean and tighten on the rule (working convention).');
-  else if(b.mean!=null&&dir()==='low'&&c>b.mean)out.push('The criterion ('+c+') is above the baseline mean ('+fmt1(b.mean)+'): the class meets it without the game. Start near half the mean (working convention).');
-  else if(b.mean!=null&&dir()==='high'&&c>b.mean*1.25)out.push('The criterion ('+c+') is well above the baseline mean ('+fmt1(b.mean)+'): the class will lose at first. Start just above the mean and raise on the rule (working convention).');
+  else if(b.n&&b.days>=3){const k=b.xs.filter(v=>critMeets(v,c)).length,sg=b.sug!=null?' The suggestion is '+b.sug+' (met on '+b.sugMet+' of '+b.n+').':'';   /* v22.75 (review F285) */
+    if(k===0)out.push('The starting criterion ('+c+') was not met on any of the '+b.n+' baseline '+(S.teams.length?'team-':'')+'days: the class may lose at first and not contact the reward.'+sg+' Start there and step on the rule (working convention).');
+    else if(k===b.n)out.push('The starting criterion ('+c+') was met on every baseline '+(S.teams.length?'team-':'')+'day ('+k+' of '+b.n+'): it asks nothing of the class.'+sg+' (working convention)');}
   if(!m.reward&&!(S.type==='gbg'&&m.g_prize))out.push('No reward named. Take one from the menu on the Setup sheet.');
   if(['gbg','cwfit'].includes(S.type)&&S.teams.length<2)out.push('Fewer than two teams; the game needs at least two.');
   if(S.type==='dep'){const need=['dp_agree','dp_reach','dp_peers','dp_exit'].filter(k=>!S.chk[k]);if(need.length)out.push('A dependent contingency needs the first four safeguards ticked before it runs ('+need.length+' missing).');
@@ -1704,17 +1744,17 @@ function renderPoster(){
 }
 
 /* ---------------- the record ---------------- */
-function gameRows(){return S.log.filter(r=>r.ph!=='B'&&rowMet(r)!==null);}
+function gameRows(){return S.log.filter(r=>r.ph!=='B'&&!isProbe(r)&&rowMet(r)!==null);}
 function renderRecord(){
   const v=$('#logVerdict'),M=$('#logMetrics'),RU=$('#logRules');
   /* v22.74 (review F281): the decision window is the run at the current criterion and phase (curRun) */
   const b=baseStats(),G=gameRows(),run=curRun(),TH=thresholds(),RR=run.scored,last=RR.slice(-TH.upW),met=last.filter(r=>rowMet(r)).length;
   const gx=[];G.forEach(r=>gx.push(...vals(r)));const gmean=gx.length?gx.reduce((a,c)=>a+c,0)/gx.length:null;
-  const cur=run.crit,ph=run.ph||(G.length?G[G.length-1].ph:'');
-  const chg=b.mean!=null&&b.mean>0&&gmean!=null?Math.round((gmean/b.mean-1)*100):null;
+  const cur=run.crit,ph=curPhase()||run.ph||(G.length?G[G.length-1].ph:'');
+  const chg=b.mean!=null&&b.mean>0&&gmean!=null?Math.round((gmean/b.mean-1)*100):null,nP=S.log.filter(r=>isProbe(r)&&vals(r).length).length;
   const md=recMode(),metSub=md==='indep'?'a day is met when '+inShare()+'% of the students present earn':md==='every'?'a day is met when no student is over the criterion':'a day is met when every '+(S.teams.length?'team':'column')+' meets it';
   M.innerHTML=`<div class="metric"><b>Baseline mean</b><div class="val">${fmt1(b.mean)}</div><div class="sub">${b.days} day${b.days===1?'':'s'} · ${md==='indep'?'percent of students earning':md==='every'?'students over the criterion':esc(unitWord())}</div></div>
-    <div class="metric"><b>Mean with the game on</b><div class="val">${fmt1(gmean)}</div><div class="sub">${G.length} game day${G.length===1?'':'s'}${chg!=null?' · '+(chg===0?'the same as baseline':Math.abs(chg)+'% '+(chg<0?'below':'above')+' baseline'):''}</div></div>
+    <div class="metric"><b>Mean with the game on</b><div class="val">${fmt1(gmean)}</div><div class="sub">${G.length} game day${G.length===1?'':'s'}${chg!=null?' · '+(chg===0?'the same as baseline':(chg<0?'down ':'up ')+Math.abs(chg)+'% from baseline'):''}${nP?' · '+nP+' probe day'+(nP===1?'':'s')+' apart':''}</div></div>
     <div class="metric"><b>Met at the current criterion</b><div class="val">${last.length?met+' of '+last.length:'—'}</div><div class="sub">${RR.length?(RR.length>last.length?'the last '+last.length+' of ':'')+RR.length+' game day'+(RR.length===1?'':'s')+' at '+esc(String(cur))+(run.since?(critSince()!==run.since?' in phase '+esc(run.ph):'')+' since '+esc(run.since):'')+' · ':''}${metSub}</div></div>
     <div class="metric"><b>Current criterion</b><div class="val">${cur!=null?cur:'—'}</div><div class="sub">${ph?'phase '+esc(ph)+' · ':''}${dir()==='low'?'at most':'at least'} · terminal ${esc(S.meta.cc_end||'—')}</div></div>`;
   if(!S.log.length){v.innerHTML='<div class="verdict v-mid"><b>No days yet.</b> Enter the baseline days as phase B; the Setup sheet will suggest a starting criterion.</div>';RU.innerHTML='';drawLog();return;}
@@ -1735,7 +1775,9 @@ function renderRecord(){
      (FADE need) move the game on; every step waits for a fidelity check at 80% or more since the criterion began */
   const lo=dir()==='low',unit=esc(unitWord());
   const tighten=cur==null?null:lo?(end!=null?Math.max(end,cur-step):cur-step):(end!=null?Math.min(end,cur+step):cur+step);
-  const relaxTo=cur==null?null:lo?cur+step:cur-step;
+  /* v22.75: relaxing steps back to the criterion the class played before this one, when there was one (and it was easier) */
+  const prevC=(()=>{const L=gameDays().filter(r=>num(r.crit)!=null),i0=run.rows.length?L.indexOf(run.rows[0]):-1;for(let k=i0-1;k>=0;k--){const c=num(L[k].crit);if(c!==cur)return c;}return null;})();
+  const relaxTo=cur==null?null:prevC!=null&&(lo?prevC>cur:prevC<cur)?prevC:lo?cur+step:cur-step;
   const atEnd=cur!=null&&end!=null&&(lo?cur<=end:cur>=end);
   const phN=Math.min(4,Math.max(1,parseInt(ph)||1)),need=FADE[phN-1]?FADE[phN-1].need:null;
   let streak=0;for(let k=RR.length-1;k>=0&&rowMet(RR[k]);k--)streak++;
@@ -1745,8 +1787,12 @@ function renderRecord(){
   const at=' at '+esc(String(cur))+' '+unit+(run.since?inPh+esc(run.since):''),gate=cur==null?null:fidGate(run);
   const held=s=>'The rule says '+s+', but hold the criterion: '+gate+'. Score a game period on the Fidelity sheet; at 80% or more, take the step.';
   if(!G.length)rules.push(['mid',b.days+' baseline day'+(b.days===1?'':'s')+' entered'+(b.sug!=null?'; the suggested starting criterion is '+b.sug+' '+unit:'')+'. No game days yet.']);
-  else if(ph==='4')rules.push(['mid','Phase 4: the game is retired. Enter the monthly probe days; the Record holds on them.']);
+  else if(ph==='4'){const P4=S.log.filter(r=>r.ph==='4'&&rowMet(r)!==null),lp=P4[P4.length-1];   /* v22.75 (review F286) */
+    if(!lp)rules.push(['mid','Phase 4: the game is retired. Enter the monthly probe days (phase 4 rows, with the terminal criterion); the Record holds on them.']);
+    else if(rowMet(lp))rules.push(['ok','Phase 4: holding without the game. The probe on '+esc(lp.date||'the last probe day')+' met the terminal criterion ('+P4.filter(r=>rowMet(r)).length+' of '+P4.length+' probes met). Probe again in about a month.']);
+    else rules.push(['no','Phase 4: the probe on '+esc(lp.date||'the last probe day')+' missed the terminal criterion. Bring the game back once or twice a week (phase 3), teach the expectations again, and probe again.']);}
   else if(RR.length<TH.hold)rules.push(['mid',RR.length+' game day'+(RR.length===1?'':'s')+at+': hold. No step until '+TH.hold+' game days have been played at this criterion'+(run.ph?' in phase '+esc(run.ph):'')+' (Design sheet).']);
+  else if(atEnd&&need&&streak>=need&&phN===3&&probeShort(run))rules.push(['mid','Met on '+streak+' game days in a row at the terminal value'+at+'. The fading table also asks for probe days without the game before phase 4: '+probeShort(run)+'.']);
   else if(atEnd&&need&&streak>=need){const s='move to phase '+(phN+1)+' on the fading table ('+lc(FADE[phN].freq)+')';
     rules.push(gate?['mid','Met on '+streak+' game days in a row at the terminal value'+at+'. '+held(s)]:['ok','Met on '+streak+' game days in a row at the terminal value'+at+': '+s+'.']);}
   else if(dnDue){const s='relax the criterion by one step (to '+relaxTo+')';
@@ -1757,12 +1803,15 @@ function renderRecord(){
   else rules.push(['mid','Met on '+met+' of the last '+last.length+' game days'+at+': hold the criterion.']);
   const wL=RR.slice(-4),losing=[];if(md!=='indep')for(let i=0;i<nser();i++){const lost=wL.filter(r=>cellMet(r,i)===false).length;if(lost>=3)losing.push(colName(i));}
   if(losing.length&&S.teams.length)rules.push(['no',esc(losing.join(' and '))+' missed the criterion on 3 or more of the last 4 game days at it: look at who on the team is costing it, teach the expectation again, and consider a team of one before the team gives up.']);
+  {const A=S.agr.filter(a=>agrPct(a)!=null),la=A[A.length-1],stepDue=rules.length&&/tighten the criterion|relax the criterion|move to phase/.test(rules[0][1]);   /* v22.75 (review I144) */
+    if(la){const lo=A.filter(a=>agrPct(a)<80);rules.push([lo.length&&lo[lo.length-1]===la?'no':'mid','Agreement on the tallies: '+agrPct(la)+'% on '+esc(la.date)+' ('+esc(colName(+la.col||0))+')'+(A.length>1?'; '+A.length+' checks, mean '+fmt1(A.reduce((s,a)=>s+agrPct(a),0)/A.length)+'%':'')+(agrPct(la)<80?'. Under 80%: go over the definitions and the tally with the scorer before relying on these counts.':'.')]);}
+    if(stepDue&&cur!=null&&!agrSince(run.since).length)rules.push(['mid','No agreement check on the tallies since the criterion became '+cur+(run.since?' on '+esc(run.since):'')+': a second observer&rsquo;s count of one game period makes this step defensible (working convention).']);}
   const nd=G.slice(-4).filter(r=>r.rw==='Earned, not delivered').length;if(nd)rules.push(['no','A reward earned and not delivered on '+nd+' of the last 4 days: the game stops working when the prize does not come.']);
   v.innerHTML='<div class="verdict '+(rules.some(r=>r[0]==='no')?'v-no':rules.some(r=>r[0]==='ok')?'v-ok':'v-mid')+'"><b>'+(ph?'Phase '+esc(ph)+' · ':'')+S.log.length+' day'+(S.log.length===1?'':'s')+' recorded ('+G.length+' with the game on).</b> '+rules[0][1]+'</div>';
-  RU.innerHTML='<ul style="font-family:var(--sans);font-size:12.5px;margin:4px 0 4px 18px">'+rules.map(r=>'<li>'+r[1]+'</li>').join('')+'</ul><p class="hint">Used here: only the game days at the current criterion and phase count; at least '+TH.hold+' of them before any change; tighten on '+TH.upN+' of the last '+TH.upW+'; relax on fewer than '+TH.dnN+' of the last '+TH.dnW+'; a step of '+step+'; at the terminal value, '+FADE.filter(f=>f.need).map(f=>f.need).join(', ')+' game days in a row to leave phases 1, 2 and 3; a fidelity check at 80% or more since the criterion began. These are working conventions; the days before a change, the step and the N of the last M are read from the Design sheet&rsquo;s rows.</p>';
+  RU.innerHTML='<ul style="font-family:var(--sans);font-size:12.5px;margin:4px 0 4px 18px">'+rules.map(r=>'<li>'+r[1]+'</li>').join('')+'</ul><p class="hint">Used here: only the game days at the current criterion and phase count; at least '+TH.hold+' of them before any change; tighten on '+TH.upN+' of the last '+TH.upW+'; relax on fewer than '+TH.dnN+' of the last '+TH.dnW+'; a step of '+step+'; at the terminal value, '+FADE.filter(f=>f.need).map(f=>f.need).join(', ')+' game days in a row to leave phases 1, 2 and 3, and 2 probe days without the game to leave phase 3; a fidelity check at 80% or more since the criterion began. These are working conventions; the days before a change, the step and the N of the last M are read from the Design sheet&rsquo;s rows.</p>';
   drawLog();
 }
-function renderLegend(){const n=nser(),md=recMode();$('#plotLegend').innerHTML=Array.from({length:n},(_,i)=>'<span><i style="background:'+TEAMCOL[i]+'"></i>'+esc(colName(i))+'</span>').join('')+(md==='every'?'<span>0 = every student met it</span>':'<span><i style="background:#9b4e15;height:3px;border-radius:0"></i>'+(md==='indep'?'share needed':'criterion')+'</span>')+'<span><i style="background:#fff;border:1.5px solid #5B6B6B"></i>baseline (hollow)</span>';}
+function renderLegend(){const n=nser(),md=recMode();$('#plotLegend').innerHTML=Array.from({length:n},(_,i)=>'<span><i style="background:'+TEAMCOL[i]+'"></i>'+esc(colName(i))+'</span>').join('')+(md==='every'?'<span>0 = every student met it</span>':'<span><i style="background:#9b4e15;height:3px;border-radius:0"></i>'+(md==='indep'?'share needed':'criterion')+'</span>')+'<span><i style="background:#fff;border:1.5px solid #5B6B6B"></i>baseline (hollow)</span>'+(S.log.some(isProbe)?'<span><i style="background:#d6d6d6;border:1.5px solid #5B6B6B"></i>probe, game off (gray)</span>':'');}
 function marker(i,x,y,fill,stroke){const r=4.5;
   if(i===0)return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"/>';
   if(i===1)return '<rect x="'+(x-r)+'" y="'+(y-r)+'" width="'+(2*r)+'" height="'+(2*r)+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"/>';
@@ -1777,12 +1826,12 @@ function drawLog(){
   let s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>';
   for(let v=0;v<=ymax;v+=stepY)s+='<line x1="'+L+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-Rg)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e3e8ea"/><text x="'+(L-6)+'" y="'+(Y(v)+4).toFixed(1)+'" font-size="11" text-anchor="end" fill="#5B6B6B" font-family="system-ui,sans-serif">'+v+'</text>';
   s+='<line x1="'+L+'" y1="'+Y(0)+'" x2="'+(W-Rg)+'" y2="'+Y(0)+'" stroke="#182e43"/><line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+Y(0)+'" stroke="#182e43"/>';
-  let prev=null;R.forEach((r,i)=>{if(prev!==null&&r.ph!==prev){const x=X(i)-(W-L-Rg)/n/2;s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+Y(0)+'" stroke="#182e43" stroke-dasharray="4 4"/><text x="'+(x+4).toFixed(1)+'" y="'+(T+12)+'" font-size="11" fill="#182e43" font-family="system-ui,sans-serif">'+(r.ph==='B'?'baseline':'phase '+esc(r.ph))+'</text>';}prev=r.ph;});
+  let prev=null;R.forEach((r,i)=>{if(r.ph==='P')return;if(prev!==null&&r.ph!==prev){const x=X(i)-(W-L-Rg)/n/2;s+='<line x1="'+x.toFixed(1)+'" y1="'+T+'" x2="'+x.toFixed(1)+'" y2="'+Y(0)+'" stroke="#182e43" stroke-dasharray="4 4"/><text x="'+(x+4).toFixed(1)+'" y="'+(T+12)+'" font-size="11" fill="#182e43" font-family="system-ui,sans-serif">'+(r.ph==='B'?'baseline':r.ph==='4'?'phase 4 (probes)':'phase '+esc(r.ph))+'</text>';}prev=r.ph;});
   let gp='';R.forEach((r,i)=>{const c=md==='std'?rowCrit(r):md==='indep'&&r.ph!=='B'?inShare():null;if(c!=null){const x0=X(i)-(W-L-Rg)/n/2,x1=X(i)+(W-L-Rg)/n/2;gp+='M'+x0.toFixed(1)+' '+Y(c).toFixed(1)+' L'+x1.toFixed(1)+' '+Y(c).toFixed(1)+' ';}});
   if(gp)s+='<path d="'+gp+'" stroke="#9b4e15" stroke-width="2" fill="none"/>';
-  for(let k=0;k<cols;k++){let d='';R.forEach((r,i)=>{const v=serVal(r,k);if(v==null||(i>0&&R[i-1].ph!==r.ph)){d+='|';}if(v==null)return;d+=(d&&!d.endsWith('|')?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';});
+  for(let k=0;k<cols;k++){let d='',lp=null;R.forEach((r,i)=>{const v=serVal(r,k);if(isProbe(r)){d+='|';return;}if(v==null||(lp!==null&&lp!==r.ph)){d+='|';}lp=r.ph;if(v==null)return;d+=(d&&!d.endsWith('|')?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';});
     d.split('|').forEach(seg=>{if(seg.trim())s+='<path d="'+seg+'" fill="none" stroke="'+TEAMCOL[k]+'" stroke-width="2"/>';});}
-  R.forEach((r,i)=>{for(let k=0;k<cols;k++){const v=serVal(r,k);if(v==null)continue;s+=marker(k,+X(i).toFixed(1),+Y(v).toFixed(1),r.ph==='B'?'#fff':TEAMCOL[k],TEAMCOL[k]);}
+  R.forEach((r,i)=>{for(let k=0;k<cols;k++){const v=serVal(r,k);if(v==null)continue;s+=marker(k,+X(i).toFixed(1),+Y(v).toFixed(1),r.ph==='B'?'#fff':isProbe(r)?'#d6d6d6':TEAMCOL[k],TEAMCOL[k]);}
     s+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(0)+14)+'" font-size="10" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+esc(String(r.date||i+1).slice(0,6))+'</text>';});
   s+='<text x="'+((L+W-Rg)/2)+'" y="'+(H-6)+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+(md==='indep'?'percent of students earning':md==='every'?'students over the criterion':esc(unitWord()))+' by day (hollow in baseline) · '+(md==='indep'?'share needed':md==='every'?'0 = met':'criterion')+(md==='every'?'':' (brown)')+' · dashed lines mark phase changes</text>';
   $('#logPlot').innerHTML=s;
@@ -1798,7 +1847,7 @@ function renderFidelity(){const f=fidStats();
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();bindMeta();setType(S.type);renderE();renderM();renderTm();renderFade();renderL();renderFid();renderFl();renderExp();renderMenu();renderBase();renderRule();renderPoster();renderRecord();renderFidelity();renderClass();}
+function renderAll(){ensure();bindMeta();setType(S.type);renderAgr();renderE();renderM();renderTm();renderFade();renderL();renderFid();renderFl();renderExp();renderMenu();renderBase();renderRule();renderPoster();renderRecord();renderFidelity();renderClass();}
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -1826,6 +1875,7 @@ function fromFile(d){
   o.log=arr('log',['date','ph','crit','v','rw','note'],400)||[];o.log.forEach(r=>{if(!['B','1','2','3','4'].includes(r.ph))r.ph='1';});
   const fid=fidMigrate(arr('fid',['in','note'],50));if(fid)o.fid=fid;   /* v22.74 (review F283) the ten old steps are mapped */
   o.fl=arr('fl',['date','who','pct','missed'],100)||[];
+  o.agr=arr('agr',['date','who','col','val','note'],100)||[];
   return o;
 }
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
@@ -1892,18 +1942,18 @@ async function loadSim(){
   const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
   const D=n=>fmt(step(n,-1)),Y=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();S.type='gbg';
-  S.meta={cls:'SIMULATED – Room 12',teacher:'Ms. K.',grade:'2',nstud:'22',site:'Elementary school',when:'Math block, 9:15 to 9:45',runs:'The teacher, with a paraeducator keeping the score',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(27),start:Y(21),review:Y(0),
+  S.meta={cls:'SIMULATED – Room 12',teacher:'Ms. K.',grade:'2',nstud:'22',site:'Elementary school',when:'Math block, 9:15 to 9:45',runs:'The teacher, with a paraeducator keeping the score',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(30),start:Y(24),review:Y(0),
     tier:'Class-wide support around one or more students with a BIP',
     problem:'Talking out and out-of-seat behavior through the math block, from most of the class; the teacher stops the lesson 10 to 15 times in half an hour. Two students have individual plans; the rest copy them.',
     plan_me:'D.R. (TD-1, escape; break card). D.R. plays on the Cardinals under the team rule, keeps the break card, and a break is not a foul.',plans_n:'1',plans_chk:'Each plan was checked against this system in that student’s own case',
     goal_txt:'The class works through the math block with the teacher stopping fewer than three times, and raised hands instead of calling out.',
-    measure:'Fouls per team per game period',b_who:'J. Ellis and the paraeducator (interobserver agreement 92% on day 2)',b_dates:D(25)+' to '+D(22),b_def:'Talking without a hand up (any audible word to the class or the teacher); out of seat without permission (bottom off the chair for more than 3 seconds); touching others or their things. Counted per team in the 30-minute block.',b_note:'The para tallied by team on a clipboard so the baseline matches the game’s count.',
-    dir:'low',crit:'5',unit:'fouls per team',mins:'30',reward:'Five minutes of free choice at the end of the day (the class voted)',rw_when:'At the end of the same day',announce:'The para reads the tally at 9:45; the teacher names the winners; the class claps; nothing is said about a team over the goal.',never:'No marks are removed as a reward or added as a punishment for anything outside the three rules; a losing team is not scolded; the game is not stopped early.',
+    measure:'Fouls per team per game period',b_who:'J. Ellis and the paraeducator (interobserver agreement 92% on day 2)',b_dates:D(28)+' to '+D(25),b_def:'Talking without a hand up (any audible word to the class or the teacher); out of seat without permission (bottom off the chair for more than 3 seconds); touching others or their things. Counted per team in the 30-minute block.',b_note:'The para tallied by team on a clipboard so the baseline matches the game’s count.',
+    dir:'low',crit:'9',unit:'fouls per team',mins:'30',reward:'Five minutes of free choice at the end of the day (the class voted)',rw_when:'At the end of the same day',announce:'The para reads the tally at 9:45; the teacher names the winners; the class claps; nothing is said about a team over the goal.',never:'No marks are removed as a reward or added as a punishment for anything outside the three rules; a losing team is not scolded; the game is not stopped early.',
     g_fouls:'Talking without a hand up\nOut of seat without permission\nTouching others or their things',g_win:'Every team with no more than the criterion number of fouls wins (all teams can win)',g_time:'Every day during the math block, 9:15 to 9:45; in phase 2, three days a week in the same block; an afternoon game only once that holds',g_prize:'A victory tag for the day and five minutes of free choice at 2:40; Friday, the week’s winners pick the class game',g_rec:'the paraeducator, with a tally mark on the board under the team name, in a neutral voice, without stopping the lesson',g_fade:'Phase 1 daily; phase 2 three days a week with the prize at the end of the day; phase 3 unannounced games with the prize on Friday; one change at a time',
-    cc_up:'Met by every team on 3 of the last 4 game days at this criterion (working convention)',cc_hold:'3',cc_step:'1',cc_end:'2',cc_down:'Met on fewer than 2 of the last 4 game days at this criterion: step back one, score fidelity, re-vote the menu',
+    cc_up:'Met by every team on 3 of the last 4 game days at this criterion (working convention)',cc_hold:'3',cc_step:'2',cc_end:'2',cc_down:'Met on fewer than 2 of the last 4 game days at this criterion: step back one, score fidelity, re-vote the menu',
     po_title:'Room 12 Expectations',po_days:'5',
-    decision:'Criterion stepped from 5 to 4 on '+D(17)+', to 3 on '+D(13)+' and to the terminal 2 on '+D(10)+', each after the rule was met at the criterion and a fidelity check at 80% or more. Met at 2 on 5 game days in a row; phase 2 (three games a week, the prize at the end of the day) began '+D(4)+', with nothing else changed.',
-    notreach_n:'0',notreach:'D.R. cost the Cardinals 3 of their 5 fouls on '+D(20)+'; the break card was re-taught and the fouls fell. No team of one needed so far.',
+    decision:'Started at 9 fouls per team, the level the class reached on its better baseline days, so both teams won from the first game. Stepped by 2 to 7 on '+D(21)+', to 5 on '+D(17)+', to 3 on '+D(13)+' and to the terminal 2 on '+D(10)+', each after the rule was met at the criterion and a fidelity check at 80% or more. Met at 2 on 5 game days in a row; phase 2 (three games a week, the prize at the end of the day) began '+D(4)+', with nothing else changed.',
+    notreach_n:'0',notreach:'D.R. cost the Cardinals 3 of their 5 fouls on '+D(23)+'; the break card was re-taught and the fouls fell. No team of one needed so far.',
     sv:'The class asks whether the game is on; both teams clap for each other. Two students said the Cardinals “always lose” in week 1; not said since the criterion moved.',
     f_who:'J. Ellis',f_date:D(2),f_per:'Math block',f_min:'30'};
   S.chk={po_exp:false,po_score:false,po_rules:false};
@@ -1912,24 +1962,29 @@ async function loadSim(){
   S.exp=[{text:'Hands up to talk',looks:'hand raised, voice off until called on',nex:'talking without a hand up'},{text:'Stay in your seat',looks:'bottom on the chair, chair on the floor; a break card is permission',nex:'out of seat without permission'},{text:'Hands and feet to yourself',looks:'hands on your own desk and your own work',nex:'touching others or their things'},{text:'Follow directions the first time',looks:'started within 10 seconds of the direction',nex:''}];
   S.menu=[{item:'Five minutes of free choice at the end of the day',kind:'Activity',amt:'5 minutes',how:'class vote, first choice'},{item:'Music during independent work',kind:'Privilege',amt:'one block',how:'class vote'},{item:'Teacher reads an extra chapter',kind:'Social',amt:'10 minutes',how:'class vote'},{item:'Friday class game (the winners choose)',kind:'Activity',amt:'15 minutes',how:'teacher’s offer for the week'}];
   S.teams=[{name:'Blue Jays',members:'rows 1 and 2 (11 students)',crit:''},{name:'Cardinals',members:'rows 3 and 4 (11 students)',crit:''}];
-  S.fade=[{crit:'5',date:D(21)},{crit:'2',date:D(4)},{crit:'2',date:''},{crit:'2',date:''}];
+  S.fade=[{crit:'9',date:D(24)},{crit:'2',date:D(4)},{crit:'2',date:''},{crit:'2',date:''}];
   /* v22.74 (review F281): one change at a time. Each criterion is held for at least 3 game days and stepped only on the
      rule with a fidelity check since it began; the terminal value is met on 5 game days in a row before phase 2, which
      changes only how often the game runs (every other school day here) */
+  /* v22.75 (review F285): the game starts at 9, the level the class reached on its better baseline days (met on 3 of 8
+     baseline team-days), so both teams win the first game; the criterion then steps by 2 to the terminal 2 */
   const days=[['B','',9,10],['B','',11,9],['B','',8,12],['B','',12,11],
-    ['1','5',4,6],['1','5',3,5],['1','5',4,4],['1','5',2,3],
-    ['1','4',3,4],['1','4',5,2],['1','4',2,3],['1','4',3,3],
+    ['1','9',4,6],['1','9',3,5],['1','9',5,6],
+    ['1','7',4,5],['1','7',5,8],['1','7',3,4],['1','7',3,3],
+    ['1','5',2,3],['1','5',4,6],['1','5',3,2],['1','5',2,4],
     ['1','3',2,3],['1','3',1,2],['1','3',3,1],
     ['1','2',2,1],['1','2',1,2],['1','2',0,1],['1','2',2,2],['1','2',1,0],
     ['2','2',1,1],['2','2',0,2],['2','2',2,1]];
   const back=[];{let o=0;for(let i=days.length-1;i>=0;i--){back[i]=o;o+=days[i][0]==='2'?2:1;}}
   S.log=days.map((d,i)=>{const r={date:D(back[i]),ph:d[0],crit:d[1],v:[String(d[2]),String(d[3]),'',''],rw:'',note:''};
     if(d[0]!=='B'){const met=d[2]<=+d[1]&&d[3]<=+d[1];r.rw=met?'Delivered':'Not earned';}
-    if(i===4)r.note='first game; rules reviewed twice';if(i===5)r.note='Cardinals: 3 fouls from D.R.; break card re-taught after';if(i===8)r.note='criterion to 4';if(i===9)r.note='fire drill in the block';if(i===12)r.note='criterion to 3';if(i===15)r.note='criterion to 2 (terminal)';if(i===20)r.note='phase 2: three games a week; nothing else changed';return r;});
+    if(i===4)r.note='first game; rules reviewed twice';if(i===5)r.note='Cardinals: 3 fouls from D.R.; break card re-taught after';if(i===7)r.note='criterion to 7';if(i===8)r.note='fire drill in the block';if(i===11)r.note='criterion to 5';if(i===15)r.note='criterion to 3';if(i===18)r.note='criterion to 2 (terminal)';if(i===23)r.note='phase 2: three games a week; nothing else changed';return r;});
   S.fid=FID.map((f,i)=>({in:f.for?'':i===4?'No':'Yes',note:i===4?'Fouls marked neutrally; no praise to the team under the goal mid-game':i===9?'Free choice at 2:40 for both teams':''}));
-  S.fl=[{date:D(19),who:'J. Ellis',pct:'82',missed:'3, 5'},{date:D(15),who:'J. Ellis',pct:'91',missed:'5'},{date:D(12),who:'J. Ellis',pct:'91',missed:'5'},{date:D(8),who:'J. Ellis',pct:'100',missed:''},{date:D(2),who:'J. Ellis',pct:'91',missed:'5'}];
+  S.fl=[{date:D(23),who:'J. Ellis',pct:'82',missed:'3, 5'},{date:D(19),who:'J. Ellis',pct:'91',missed:'5'},{date:D(15),who:'J. Ellis',pct:'91',missed:'5'},{date:D(12),who:'J. Ellis',pct:'100',missed:''},{date:D(8),who:'J. Ellis',pct:'100',missed:''},{date:D(2),who:'J. Ellis',pct:'91',missed:'5'}];
+  /* v22.75 (review I144): the BCBA's second tallies; none in the week the criterion was 5 */
+  S.agr=[{date:D(23),who:'J. Ellis',col:'1',val:'5',note:''},{date:D(20),who:'J. Ellis',col:'1',val:'7',note:''},{date:D(9),who:'J. Ellis',col:'0',val:'1',note:''},{date:D(2),who:'J. Ellis',col:'1',val:'2',note:''}];
   renderAll();setView('design');
-  nbhUI.toast('Simulation loaded: '+'a simulated second-grade Good Behavior Game with two teams, four baseline days and nineteen game days.',{kind:'ok'});
+  nbhUI.toast('Simulation loaded: '+'a simulated second-grade Good Behavior Game with two teams, four baseline days and twenty-two game days.',{kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
 
@@ -1955,7 +2010,8 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
    DD-1's phase lines, PR-1): the arrangement, the start, the current phase and criterion with the changes, and the
    latest fidelity check. The class sheet and the team members never go out. */
 window.__nbhClasswideFacts=function(){if(!S.type)return null;const run=curRun(),fl=S.fl.filter(x=>x&&(x.date||x.pct)).slice(-1)[0];
-  return {type:S.type,arrangement:TYPES[S.type],start:gcIso(S.meta.start),phase:run.ph||'',crit:run.crit,unit:unitWord(),dir:dir(),since:gcIso(critSince()),
+  const A=S.agr.filter(a=>agrPct(a)!=null),la=A[A.length-1];
+  return {type:S.type,arrangement:TYPES[S.type],start:gcIso(S.meta.start),phase:curPhase()||run.ph||'',agree:la?{date:gcIso(la.date),pct:agrPct(la)}:null,crit:run.crit,unit:unitWord(),dir:dir(),since:gcIso(critSince()),
     changes:critChanges(),fid:fl?{date:gcIso(fl.date),pct:num(fl.pct)}:null,review:gcIso(S.meta.review),gameDays:gameRows().length};};
 const wasOut=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,arguments):null;}catch(e){o=null;}
   let c=null;try{c=window.__nbhClasswideFacts();}catch(e){c=null;}if(!c)return o;o=o||{};o.classwide=c;return o;};

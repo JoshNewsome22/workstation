@@ -9903,6 +9903,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.75: GC-1 starts where the class already is, keeps probes apart, checks the tallies, and shows on the student's graph (review Wave 3)
+
+- **One rule for the starting criterion (F285).** The Setup sheet, the Design sheet, the Guide and TD-1's group-contingency
+  component now give the same rule: start at a level the class already reaches on its better baseline days (the best
+  quarter of the baseline team-days), so the class wins often from the first day and contacts the reward quickly. The
+  suggestion says how many baseline team-days would have met it ("met on 3 of 8 baseline team-days"), waits for three
+  baseline days, and a baseline that moves by a quarter of its mean or more is flagged as trending. The Design sheet warns
+  when the starting criterion was met on no baseline day (the class may lose at first) or on every one (it asks nothing).
+  The Guide no longer compares marks with Barrish et al.'s interval percentages. The worked example now starts at 9 (both
+  teams win the first game) and steps by 2 to 7, 5, 3 and the terminal 2. Relaxing now steps back to the criterion played
+  before, not past it.
+- **Probe days and the baseline (F286).** Only the first run of phase B days is the baseline; a later run (a return to
+  baseline) is shown but not pooled into it. A new phase, **P (probe)**, records a day without the game; phase 4 rows are
+  the monthly probes once the game is retired. Probes are graphed in gray, are not joined to the game days, draw no phase
+  line, and stay out of the baseline, the game-day mean and the step rules. Phase 3 moves on only after 2 probe days at
+  the terminal value; in phase 4 the Record says whether the last probe held, or to bring the game back. The change line
+  reads "down 78% from baseline" or "up 30% from baseline", and is left out when the baseline is zero.
+- **The Guide against its sources (F287).** An interdependent contingency judges the group by every member, the total or
+  mean, or a member drawn at random after the period (a reward resting on members picked in advance is dependent). The
+  finding that the game's effect does not carry over to the next period is credited to Donaldson, Wiskow and Soto (2015),
+  now in the reference list; the unchecked Joslyn sentence is gone. The Ethical Cautions call the fouls version response
+  cost (Tanol et al., 2010) and offer the points version first; What the record counts lists points first.
+- **Agreement on the tallies (I144).** The Record has a table for a second observer's count of one team (or the class)
+  on a game day, with the Record's own count beside it and the agreement (smaller over larger). The Record lists the
+  latest check and the mean, flags one under 80%, and notes a step due with no check since the criterion began.
+- **The class system on the student's graph (I142).** Form DD-1 marks, in purple under the top edge, when the class game
+  began and when its phase changed (Form GC-1's case line), with the arrangement, the date and the criterion in the
+  tooltip. They are marks, not conditions: DD-1's own conditions stay as they are.
+- qa/v2275-test.js (18 checks); qa/v2274-test.js follows the new worked example.
+
 ### v22.74: GC-1 scores each arrangement its own way, steps the criterion on its own days, and checks fidelity first (review Wave 3)
 
 - **The poster shows the goal the Record scores (F280).** The scoreboard's goal and its Goal row now take the current

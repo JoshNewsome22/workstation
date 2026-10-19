@@ -6145,6 +6145,17 @@ function ddTiMarks(F,rows){const L=ddTiObs();if(!L.length)return "";const ds=row
   const h=[...document.querySelectorAll("#ddWeekWrap h4")].find(x=>/^Point sheet/.test(x.textContent));if(!h)return;
   const box=document.createElement("div");box.className="wk-ti";box.innerHTML=`<h4>Treatment integrity (Form TI-1)</h4>`+(L.length?`<p>${L.map(o=>`<b>${esc(Math.round(o.pct))}%</b> on ${esc(shortDay(o.date))}${o.type?` (${esc(o.type.toLowerCase())})`:""}`).join(" · ")}</p>`:`<p class="hint">${ddTiObs().length?"No TI-1 observation this week.":"No TI-1 observations in the case. Open Form TI-1 in the workstation to bring them in."}</p>`);
   h.parentNode.insertBefore(box,h);}catch(e){}};}
+/* v22.75 (review I142): the class-wide system on Form GC-1 marked on the graphs: when the class game started and each
+   time its phase changed, as purple ticks under the top edge. They are marks, not conditions: the student's own
+   conditions stay as DD-1 holds them */
+function ddGcMarks(F,rows){const cw=ddCaseFacts&&ddCaseFacts.classwide;const C=cw&&Array.isArray(cw.changes)?cw.changes.filter(c=>c&&ddIsoOk(c.date)):[];if(!C.length)return "";
+  const ds=rows.map(r=>r.date||"");let out="",prev=null;const y=F.top+26;
+  C.forEach((c,k)=>{if(k&&c.ph===prev)return;prev=c.ph;let i=ds.indexOf(c.date);if(i<0){i=ds.findIndex(d=>d&&d>c.date);if(i<0)return;i=Math.max(0,i-0.5);}if(i>F.xEnd)return;
+    const x=F.X(i).toFixed(1),lab=k===0?"Class game":c.ph==="4"?"Class game off":"Class ph "+c.ph,w=lab.length*5.4+8;
+    out+=`<g class="dd-gc"><line x1="${x}" y1="${y}" x2="${x}" y2="${y+9}" stroke="#6B4FA0" stroke-width="2"/><rect x="${(+x-w/2).toFixed(1)}" y="${y+10}" width="${w.toFixed(1)}" height="12" rx="2" fill="#fff" fill-opacity=".85"/><text x="${x}" y="${y+19.5}" font-size="9.5" font-weight="600" fill="#6B4FA0" text-anchor="middle">${esc(lab)}<\/text><title>Form GC-1: ${esc((cw.arrangement||"the class-wide system")+(k===0?" began":c.ph==="4"?" retired (probes only)":", phase "+c.ph)+" on "+shortDay(c.date)+(c.crit!=null?" (criterion "+c.crit+(cw.unit?" "+cw.unit:"")+")":""))}<\/title><\/g>`;});
+  return out;}
+{const fr1=ddFrame;ddFrame=function(rows){const F=fr1.apply(this,arguments);try{F.condLines+=ddGcMarks(F,rows);}catch(e){}return F;};}
+{const fi1=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const g=()=>JSON.stringify(ddCaseFacts&&ddCaseFacts.classwide&&ddCaseFacts.classwide.changes||null),was=g();const r=fi1.apply(this,arguments);try{if(g()!==was&&typeof renderResults==="function")renderResults();}catch(e){}return r;};}
 /* a new reading of the case redraws the graphs (the ticks follow TI-1) */
 {const fi0=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const was=JSON.stringify(ddTiObs());const r=fi0.apply(this,arguments);try{if(JSON.stringify(ddTiObs())!==was&&typeof renderResults==="function")renderResults();}catch(e){}return r;};}
 </script>

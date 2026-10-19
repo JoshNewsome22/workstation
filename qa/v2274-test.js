@@ -23,23 +23,24 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',PR='PR-1_Periodic-Plan-Review_
   const D=await p.evaluate(()=>S.log.map(r=>r.date));
   /* ---------------- F281 the decision rules ---------------- */
   const s0=await p.evaluate(()=>({n:S.log.length,ph:S.log.map(r=>r.ph).join(''),crit:S.log.map(r=>r.crit).join(','),met:S.log.map(r=>rowMet(r)===null?'-':rowMet(r)?'Y':'N').join('')}));
-  ok('1 F281 the worked example: four baseline days, then 5, 4, 3 and the terminal 2 in phase 1, each held at least three days, then phase 2 at 2 (one change at a time)',
-    s0.n===23&&s0.ph==='BBBB1111111111111111222'&&s0.crit===',,,,5,5,5,5,4,4,4,4,3,3,3,2,2,2,2,2,2,2,2'&&s0.met==='----NYYYYNYYYYYYYYYYYYY',s0);
-  const v8=await at(p,8),v9=await at(p,9),v11=await at(p,11),v12=await at(p,12),v15=await at(p,15),v20=await at(p,20),vAll=await txt(p,'#logVerdict');
-  ok('2 F281 four days at 5, three met: tighten from 5 to 4',/Met on 3 of the last 4 game days at 5 fouls per team since [\d/]+: tighten the criterion from 5 to 4 fouls per team \(terminal 2\)\./.test(v8),v8);
-  ok('3 F281 the day after the step: one day at 4, so hold (the days at 5 no longer count)',/1 game day at 4 fouls per team since [\d/]+: hold\. No step until 3 game days have been played at this criterion in phase 1/.test(v9)&&!/tighten/.test(v9),v9);
-  ok('4 F281 three days at 4, two met: hold the criterion',/Met on 2 of the last 3 game days at 4 fouls per team since [\d/]+: hold the criterion\./.test(v11),v11);
-  ok('5 F281 four days at 4, three met: tighten to 3; three days at 3, all met: tighten to the terminal 2',/tighten the criterion from 4 to 3/.test(v12)&&/Met on 3 of the last 3 game days at 3 .*tighten the criterion from 3 to 2/.test(v15),[v12,v15]);
+  /* v22.75 (review F285): the worked example starts at 9, the level the class reached on its better baseline days, and steps by 2 */
+  ok('1 F281 the worked example: four baseline days, then 9, 7, 5, 3 and the terminal 2 in phase 1, each held at least three days, then phase 2 at 2 (one change at a time)',
+    s0.n===26&&s0.ph==='BBBB1111111111111111111222'&&s0.crit===',,,,9,9,9,7,7,7,7,5,5,5,5,3,3,3,2,2,2,2,2,2,2,2'&&s0.met==='----YYYYNYYYNYYYYYYYYYYYYY',s0);
+  const v8=await at(p,7),v9=await at(p,8),v11=await at(p,10),v12=await at(p,11),v15=await at(p,18),v20=await at(p,23),vAll=await txt(p,'#logVerdict');
+  ok('2 F281 three days at 9, all met: tighten from 9 to 7',/Met on 3 of the last 3 game days at 9 fouls per team since [\d/]+: tighten the criterion from 9 to 7 fouls per team \(terminal 2\)\./.test(v8),v8);
+  ok('3 F281 the day after the step: one day at 7, so hold (the days at 9 no longer count)',/1 game day at 7 fouls per team since [\d/]+: hold\. No step until 3 game days have been played at this criterion in phase 1/.test(v9)&&!/tighten/.test(v9),v9);
+  ok('4 F281 three days at 7, two met: hold the criterion',/Met on 2 of the last 3 game days at 7 fouls per team since [\d/]+: hold the criterion\./.test(v11),v11);
+  ok('5 F281 four days at 7, three met: tighten to 5; three days at 3, all met: tighten to the terminal 2',/tighten the criterion from 7 to 5/.test(v12)&&/Met on 3 of the last 3 game days at 3 .*tighten the criterion from 3 to 2/.test(v15),[v12,v15]);
   ok('6 F281 the terminal value met on 5 game days in a row: move to phase 2',/Met on 5 game days in a row at the terminal value at 2 fouls per team since [\d/]+: move to phase 2 on the fading table \(three announced days a week, in the same period/.test(v20),v20);
   ok('7 F281 phase 2: three game days in a row at the terminal value; phase 3 is due after 6 (the fading table)',/Phase 2 .*At the terminal value at 2 fouls per team in phase 2 since [\d/]+: met on 3 game days in a row; phase 3 is due after 6 in a row \(fading table\)\./.test(vAll),vAll);
   /* relax: four misses at 5, then one day met at 6 */
-  const rx=await p.evaluate(()=>{const keep=JSON.stringify(S.log);S.log=S.log.slice(0,8);for(let i=4;i<8;i++)S.log[i].v=['7','8','',''];renderRecord();const a=document.querySelector('#logVerdict').textContent.replace(/\s+/g,' ');
-    S.log.push({date:S.log[7].date,ph:'1',crit:'6',v:['5','4','',''],rw:'',note:''});renderRecord();const b=document.querySelector('#logVerdict').textContent.replace(/\s+/g,' ');S.log=JSON.parse(keep);renderRecord();return [a,b];});
-  ok('8 F281 four misses at 5: relax to 6; one day at 6, met: hold (not relax again to 7)',/Met on 0 of the last 4 game days at 5 .*relax the criterion by one step \(to 6\)/.test(rx[0])&&/1 game day at 6 .*hold/.test(rx[1])&&!/to 7/.test(rx[1]),rx);
+  const rx=await p.evaluate(()=>{const keep=JSON.stringify(S.log);S.log=S.log.slice(0,7);for(let i=4;i<7;i++)S.log[i].v=['10','11','',''];renderRecord();const a=document.querySelector('#logVerdict').textContent.replace(/\s+/g,' ');
+    S.log.push({date:S.log[6].date,ph:'1',crit:'11',v:['9','8','',''],rw:'',note:''});renderRecord();const b=document.querySelector('#logVerdict').textContent.replace(/\s+/g,' ');S.log=JSON.parse(keep);renderRecord();return [a,b];});
+  ok('8 F281 three misses at 9: relax to 11; one day at 11, met: hold (not relax again to 13)',/Met on 0 of the last 3 game days at 9 .*relax the criterion by one step \(to 11\)/.test(rx[0])&&/1 game day at 11 .*hold/.test(rx[1])&&!/to 13/.test(rx[1]),rx);
   /* the Design sheet's numbers */
-  await setM(p,'cc_up','Met by every team on 4 of the last 4 game days at this criterion');const u4=await at(p,8);await setM(p,'cc_up','Met by every team on 3 of the last 4 game days at this criterion (working convention)');
-  await setM(p,'cc_hold','4');const h4=await at(p,15);await setM(p,'cc_hold','3');
-  ok('9 F281 the numbers come from the Design sheet: 4 of the last 4 holds at 3 of 4; 4 days before a change holds after 3 days at 3',/Met on 3 of the last 4 game days at 5 .*hold the criterion/.test(u4)&&/3 game days at 3 .*No step until 4 game days/.test(h4),[u4,h4]);
+  await setM(p,'cc_up','Met by every team on 4 of the last 4 game days at this criterion');const u4=await at(p,11);await setM(p,'cc_up','Met by every team on 3 of the last 4 game days at this criterion (working convention)');
+  await setM(p,'cc_hold','4');const h4=await at(p,18);await setM(p,'cc_hold','3');
+  ok('9 F281 the numbers come from the Design sheet: 4 of the last 4 holds at 3 of 4; 4 days before a change holds after 3 days at 3',/Met on 3 of the last 4 game days at 7 .*hold the criterion/.test(u4)&&/3 game days at 3 .*No step until 4 game days/.test(h4),[u4,h4]);
   const fade=await p.evaluate(()=>[...document.querySelectorAll('#fadeTbl tbody tr')].map(r=>r.children[4].textContent));
   const guide=await txt(p,'#guide');
   ok('10 F281 one fading rule in the table, the Guide and the Record: the terminal value met on 5 game days in a row (phase 1), 6 (phases 2 and 3)',
@@ -47,8 +48,8 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',PR='PR-1_Periodic-Plan-Review_
     /met on 5 game days in a row in phase 1, and on 6 in a row in phases 2 and 3/.test(guide)&&!/has been met on 5 game days \(/.test(guide),fade);
 
   /* ---------------- F283 the fidelity gate and steps ---------------- */
-  const g0=await at(p,8,'none'),g1=await at(p,8,[{date:D[6],who:'x',pct:'60',missed:'5, 6, 9'}]),g2=await at(p,20,[{date:D[16],who:'x',pct:'100',missed:''}]),g3=await at(p,20,[{date:D[14],who:'x',pct:'100',missed:''}]);
-  ok('11 F283 no fidelity check since the criterion began: the rule says tighten, but hold',/The rule says tighten the criterion from 5 to 4 fouls per team \(terminal 2\), but hold the criterion: no fidelity check is logged since the criterion became 5 on [\d/]+ \(Fidelity sheet\)\. Score a game period on the Fidelity sheet; at 80% or more, take the step\./.test(g0),g0);
+  const g0=await at(p,7,'none'),g1=await at(p,7,[{date:D[5],who:'x',pct:'60',missed:'5, 6, 9'}]),g2=await at(p,23,[{date:D[19],who:'x',pct:'100',missed:''}]),g3=await at(p,23,[{date:D[16],who:'x',pct:'100',missed:''}]);
+  ok('11 F283 no fidelity check since the criterion began: the rule says tighten, but hold',/The rule says tighten the criterion from 9 to 7 fouls per team \(terminal 2\), but hold the criterion: no fidelity check is logged since the criterion became 9 on [\d/]+ \(Fidelity sheet\)\. Score a game period on the Fidelity sheet; at 80% or more, take the step\./.test(g0),g0);
   ok('12 F283 a check under 80% since then: hold; a check from before the criterion began does not count for it',/the latest fidelity check since then \([\d/]+, 60%\) is under 80%/.test(g1)&&/: move to phase 2/.test(g2)&&/but hold the criterion: no fidelity check is logged since the criterion became 2/.test(g3),[g1,g2,g3]);
   const steps=t=>p.evaluate(t=>{setType(t);renderAll();return [...document.querySelectorAll('#fidTbl tbody tr')].map(r=>r.children[1].textContent.replace(/\s+/g,' '));},t);
   const fg=await steps('gbg'),ft=await steps('tootle'),fd=await steps('dep'),fs=await steps('selfmon');await p.evaluate(()=>{setType('gbg');renderAll();});
@@ -63,8 +64,8 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',PR='PR-1_Periodic-Plan-Review_
   await p.evaluate(()=>{setView('poster');renderPoster();});
   const po=await p.evaluate(()=>({goal:document.querySelector('.po-goal').textContent,row:[...document.querySelectorAll('.po-score td.crit')].map(x=>x.textContent).join('|'),
     win:[...document.querySelectorAll('#posterOut .po-big')].map(x=>x.textContent).join(' / ')}));
-  ok('15 F280 the scoreboard shows the current criterion (2, since it began), not the Starting criterion (5); the winning line follows the rule',
-    po.goal==='The goal: no more than 2 fouls per team (since '+D[15]+')'&&po.row==='Goal|2|2|2|2|2'&&/Every team at or under the goal wins\./.test(po.win)&&!/5/.test(po.row),po);
+  ok('15 F280 the scoreboard shows the current criterion (2, since it began), not the Starting criterion (9); the winning line follows the rule',
+    po.goal==='The goal: no more than 2 fouls per team (since '+D[18]+')'&&po.row==='Goal|2|2|2|2|2'&&/Every team at or under the goal wins\./.test(po.win)&&!/9/.test(po.row),po);
   await setM(p,'g_win','The team with the fewest fouls wins (ties both win)');await sleep(350);
   const pf=await p.evaluate(()=>({goal:document.querySelector('.po-goal').textContent,row:document.querySelector('.po-score td.crit').textContent,win:[...document.querySelectorAll('#posterOut .po-big')].map(x=>x.textContent).join(' / '),
     card:document.querySelectorAll('#posterOut .po-page')[2].textContent.replace(/\s+/g,' ')}));
@@ -116,8 +117,8 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',PR='PR-1_Periodic-Plan-Review_
   await sim(p);
   const out=await p.evaluate(()=>window.__nbhFactsOut());
   const cw2=out&&out.classwide;
-  ok('26 F284 to the case: the arrangement, the start, phase 2 at 2 with the five changes, and the latest fidelity check; no other student and no class sheet',
-    cw2&&cw2.arrangement==='The Good Behavior Game'&&cw2.phase==='2'&&cw2.crit===2&&cw2.changes.length===5&&cw2.changes.map(c=>c.crit+'/'+c.ph).join(' ')==='5/1 4/1 3/1 2/1 2/2'&&cw2.fid&&cw2.fid.pct===91&&/^\d{4}-\d{2}-\d{2}$/.test(cw2.start)&&/^\d{4}-\d{2}-\d{2}$/.test(cw2.since)&&
+  ok('26 F284 to the case: the arrangement, the start, phase 2 at 2 with the six changes, and the latest fidelity check; no other student and no class sheet',
+    cw2&&cw2.arrangement==='The Good Behavior Game'&&cw2.phase==='2'&&cw2.crit===2&&cw2.changes.length===6&&cw2.changes.map(c=>c.crit+'/'+c.ph).join(' ')==='9/1 7/1 5/1 3/1 2/1 2/2'&&cw2.fid&&cw2.fid.pct===91&&/^\d{4}-\d{2}-\d{2}$/.test(cw2.start)&&/^\d{4}-\d{2}-\d{2}$/.test(cw2.since)&&
     !/M\.A\.|Blue Jays: rows|class sheet/i.test(JSON.stringify(out)),out);
   const menu=await p.evaluate(async()=>{const dl=[...document.querySelectorAll('#gcMenuList option')].map(o=>o.value);S.meta.r_rwjar='';document.querySelector('[data-m="r_rwjar"]').value='';document.getElementById('gcJarMenu').click();await new Promise(r=>setTimeout(r,100));
     return {dl,list:[document.querySelector('[data-m="reward"]').getAttribute('list'),document.querySelector('[data-m="g_prize"]').getAttribute('list')],jar:S.meta.r_rwjar};});
