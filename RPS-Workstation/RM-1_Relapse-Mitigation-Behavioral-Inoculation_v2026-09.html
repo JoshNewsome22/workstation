@@ -881,6 +881,12 @@ td input,td select{max-width:100%}
   .metric,.verdict{break-inside:avoid;page-break-inside:avoid}
 }
 </style>
+<style id="rm1-v2327">
+/* v23.27 (review F308, F317) the phases still open; the print is the record unless the full plan or the Guide is chosen */
+#rmPhaseNote{margin:6px 0 8px}
+#mitTbl tr.phasehead td .rm-rec{font-weight:400;font-style:italic;margin-left:8px}
+</style>
+<style id="rmPrintSel"></style>
 </head>
 <body class="view-setup">
 
@@ -943,10 +949,10 @@ td input,td select{max-width:100%}
           <th style="width:18%">Function (Form FS-1)</th><td><select data-m="fn"><option></option>
             <option>Escape / avoidance (social negative)</option><option>Attention (social positive)</option>
             <option>Tangible / activity (social positive)</option><option>Attention plus tangible</option>
-            <option>Social control</option><option>Automatic (nonsocial)</option><option>Unknown</option></select></td></tr>
+            <option>Social control</option><option>More than one function (multiple)</option><option>Automatic (nonsocial)</option><option>Unknown</option></select></td></tr>
       <tr><th>Treatment in place</th><td colspan="3"><input data-m="tx" placeholder="e.g., FCT with extinction, break card, delay tolerance (Forms TD-1 and DT-1)"></td></tr>
       <tr><th>Alternative response taught</th><td colspan="3"><input data-m="fcr"></td></tr>
-      <tr><th>Baseline level</th><td><input data-m="blLevel" placeholder="mean rate over the last 5 baseline sessions"></td>
+      <tr><th>Baseline level</th><td><input data-m="blLevel" placeholder="mean rate over the last 5 baseline sessions"><div class="hint" style="margin-top:3px">The mean the proportions use: <input type="number" id="blMeanSetup" step="any" min="0" style="width:90px;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:2px 6px" aria-label="Baseline mean for the proportions"> <span id="blAgree"></span></div></td>
           <th>Current treatment level</th><td><input data-m="txLevel"></td></tr>
       <tr><th>Where treatment was developed</th><td><input data-m="ctxA" placeholder="the context extinction was learned in"></td>
           <th>Where it must eventually run</th><td><input data-m="ctxB"></td></tr>
@@ -958,6 +964,7 @@ td input,td select{max-width:100%}
       <tr><th>Baseline reinforcement schedule for the target behavior</th><td><select data-m="blSched"><option></option><option>Dense</option><option>Lean</option><option>Unknown</option></select>
             <input data-m="blSchedVal" placeholder="as actually arranged during assessment; VI or FR value if known" style="margin-top:4px"></td>
           <th>Treatment onset schedule for the alternative response</th><td><input data-m="onsetSched" placeholder="e.g., FR 1 from the first treatment session"></td></tr>
+      <tr><th>Print</th><td colspan="3" class="noprint"><label class="ck" style="margin-right:14px"><input type="checkbox" id="pFull"> every row of the inoculation plan, not only the ticked ones</label><label class="ck"><input type="checkbox" id="pGuide"> the Evidence Guide</label><div class="hint" style="margin-top:3px">The ordinary print is the record: Setup, the risk sheet, the ticked rows of the plan with how, who and by when, the challenge log and the analysis.</div></td></tr>
       <tr><th>Planned thinning start</th><td colspan="3"><input data-m="thinStart" placeholder="session or date; thinning need not wait on a treatment-duration rationale (Mitteer et al., 2026)"></td></tr>
     </table>
     <p class="hint" style="margin-top:8px">This form assesses exposure to relapse and plans against it. It is not a prediction about this student. The base rates quoted on the risk sheet come from published cohorts and are there to size the risk, not to forecast an individual outcome.</p>
@@ -985,6 +992,7 @@ td input,td select{max-width:100%}
       <span><i class="tag e4">Untested</i> derived from theory, not directly tested for relapse</span>
       <span><i class="tag e5">Counter</i> evidence that it makes relapse worse</span>
     </div>
+    <div class="hint" id="rmPhaseNote"></div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Inoculation plan table"><table class="mit" id="mitTbl"></table></div>
 
     <h3 style="margin-top:16px">The Momentum-Informed Strategies in Pooled Clinical Tests</h3>
@@ -1003,11 +1011,11 @@ td input,td select{max-width:100%}
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Working conventions table"><table class="rt" id="bmtRules">
       <thead><tr><th style="text-align:left;width:22%">When</th><th style="text-align:left;width:36%">Convention</th><th style="text-align:left">Basis in the source</th></tr></thead>
       <tbody>
-      <tr><td>Imminent-harm risk is <b>Yes</b> on Setup</td><td>The lean-baseline row carries a caution and is not ticked without a written rationale under &ldquo;How it will be arranged.&rdquo;</td><td>Lean baselines produced a grand mean of 6.30 responses per minute; where tissue damage to self or others is possible, the modification &ldquo;might not outweigh the potential benefit&rdquo; (Mitteer et al., 2026).</td></tr>
-      <tr><td>Imminent-harm risk is <b>No</b> (disruption, vocal protest), or a <b>precursor</b> is the consequated response</td><td>The lean-baseline row is available as a Mixed-evidence option.</td><td>The authors suggest the strategy for behavior that does not pose imminent harm, or when providing consequences for precursor behavior (Mitteer et al., 2026).</td></tr>
+      <!-- v23.27 (review F310, F311) one convention for the lean-baseline row, in three cases, with its condition in a school -->
+      <tr><td>The lean-baseline row, by the imminent-harm risk on Setup</td><td><b>Harm Yes, no precursor consequated:</b> a caution; not ticked without a written rationale under &ldquo;How it will be arranged.&rdquo; <b>Harm Yes, a precursor consequated:</b> available for the precursor only, with a written rationale. <b>Harm No</b> (disruption, vocal protest): available as a Mixed-evidence option. Blank: answer the harm question first. In every case, only inside an arranged functional analysis or baseline the parent consented to (Forms IC-1 and EA-1), before treatment starts; once treatment has started the row only records what was arranged.</td><td>Lean baselines produced a grand mean of 6.30 responses per minute; where tissue damage to self or others is possible, the modification &ldquo;might not outweigh the potential benefit&rdquo;, and the authors suggest the strategy for behavior that does not pose imminent harm, or when providing consequences for precursor behavior (Mitteer et al., 2026). The source studied severe destructive behavior in a clinic, inside consented analyses.</td></tr>
       <tr><td>Extending treatment duration</td><td>Not selected as a resurgence-mitigation procedure, and schedule thinning is not delayed on that rationale.</td><td>&ldquo;Our data do not support deliberately arranging lengthy treatment phases &hellip; as a way to offset later resurgence&rdquo;; progressing to thinning shortly after initial effects does not appear to engender more resurgence (Mitteer et al., 2026).</td></tr>
       <tr><td>Lean reinforcement for the alternative response</td><td>Not selected as a resurgence-mitigation procedure. If it is selected for another reason (for example, reaching the terminal schedule sooner), that reason is written under &ldquo;How it will be arranged.&rdquo;</td><td>&ldquo;Did not appreciably reduce resurgence during the extinction challenge&rdquo;; a dense-to-lean thinning arrangement &ldquo;does not appear to worsen resurgence&rdquo; (Mitteer et al., 2026).</td></tr>
-      <tr><td>The combined package</td><td>Not selected as a package. If the lean baseline is chosen, it is recorded alone.</td><td>&ldquo;It seems premature to suggest that clinicians ought to be packaging lengthy treatment duration and lean alternative reinforcement with lean target reinforcement&rdquo;; the lean baseline may account for the combined effect (Mitteer et al., 2026).</td></tr>
+      <tr><td>The combined package</td><td>Not selected as a package. If the lean baseline is chosen, it is recorded alone. The abstract calls the combined approach the most consistent and robust in reducing resurgence; this form does not select it as a package because two of its parts did little alone and the lean alternative schedule conflicts with progressing treatment. This is the form&rsquo;s judgment, not the authors&rsquo; recommendation.</td><td>&ldquo;It seems premature to suggest that clinicians ought to be packaging lengthy treatment duration and lean alternative reinforcement with lean target reinforcement&rdquo;; the lean baseline may account for the combined effect (Mitteer et al., 2026).</td></tr>
       <tr><td>Any selected procedure</td><td>The challenge log captures raw rates as well as proportion of baseline. A low proportion with a high raw rate is the case for ticking the safety-arrangements row (Phase 3, Untested; Briggs et al., 2018); the form fixes no raw-rate threshold, so the team ticks it from the Analysis sheet.</td><td>&ldquo;Researchers should generally consider raw response rates for any strategy that appears promising with transformed data&rdquo;; on proportion of baseline alone, how high rates of severe behavior run in the test condition can be obscured (Mitteer et al., 2026).</td></tr>
       <tr><td>Multiple-schedule S<sup>&Delta;</sup> (Applied, above)</td><td>Remains the procedure this source points to.</td><td>Embedding the discriminative stimuli of a multiple schedule in FCT reduced proportion of baseline and &ldquo;often generated minimal raw response rates that would be clinically acceptable&rdquo; (Fisher et al., 2020; Fuhrman et al., 2016, as read in Mitteer et al., 2026).</td></tr>
       </tbody></table></div>
@@ -1027,7 +1035,8 @@ td input,td select{max-width:100%}
       <button class="tool" id="addCh">Add challenge</button><button class="tool" id="delCh">Remove last</button>
       <span class="hint" style="margin-left:10px">Baseline mean for proportions:</span>
       <input type="number" id="blMean" step="any" min="0" style="width:90px;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:3px 6px">
-      <span class="hint">in the unit of the rates below (for example, per day) &mdash; mean of the last five baseline sessions</span>
+      <span class="hint">mean of the last five baseline sessions; the rates below are</span>
+      <input data-m="unit" placeholder="per day" aria-label="The unit of the rates" style="width:120px;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:3px 6px">
     </div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Treatment challenge log table"><table class="rt" id="chTbl"><thead><tr>
       <th style="width:38px">#</th><th style="width:8%">Date</th><th style="width:12%">Type</th><th style="width:7%">Planned</th>
@@ -1050,7 +1059,7 @@ td input,td select{max-width:100%}
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Relapse by type table"><table class="rt" id="typeTbl"></table></div>
     <h3 style="margin-top:14px">Against the Published Base Rates</h3>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Published base rates table"><table class="rt" id="baseTbl"></table></div>
-    <p class="hint" style="margin-top:6px">Each published rate is compared only with the challenges recorded as the same type. The resurgence figures come from schedule thinning during FCT (Briggs et al., 2018); the renewal figures come from context changes in an outpatient clinic (Muething et al., 2020) and an inpatient program (Falligant et al., 2021). Both were scored with the rule used on the challenge log.</p>
+    <p class="hint" style="margin-top:6px">Each published rate is compared only with the challenges recorded as the same type. The resurgence figures come from schedule thinning during FCT (Briggs et al., 2018); the renewal figures come from context changes in an outpatient clinic (Muething et al., 2020) and an inpatient program (Falligant et al., 2021). Both were scored with the rule used on the challenge log, but on short clinic sessions run by trained therapists; this student&rsquo;s rows are in the log&rsquo;s own unit (a school day, for example), so the percentages size the risk rather than match it.</p>
     <table class="rt" style="margin-top:14px">
       <tr><th style="width:24%">Did the mitigation procedures hold?</th><td><textarea data-m="held" rows="3" placeholder="Which selected procedures were in place at each challenge, and whether the challenges where they were absent went worse"></textarea></td></tr>
       <tr><th>Changes to the plan</th><td><textarea data-m="changes" rows="3"></textarea></td></tr>
@@ -1098,7 +1107,7 @@ td input,td select{max-width:100%}
     <h2 class="noprint nbh-band" style="margin-top:16px">About the simulation</h2>
     <p class="noprint hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated case loaded: exposure rated across all four relapse types, eleven mitigation procedures selected, and nine treatment challenges scored against the published detection criterion.</p>
     <p class="hint">These are the empirical and theoretical sources. The exposure indicators, risk bands, and evidence tags on this form are a working convention for organizing that literature into a plan; they are not themselves findings, and no model listed above currently accounts for the full pattern of results.</p>
-    <p class="hint" id="rmRefs"><b>Reference list.</b>
+    <p class="hint" id="rmRefs"><b>Selected references.</b>
     Athens, E. S., &amp; Vollmer, T. R. (2010). An investigation of differential reinforcement of alternative behavior without extinction. <em>Journal of Applied Behavior Analysis, 43</em>(4), 569&ndash;589. &bull;
     Banerjee, I., Lambert, J. M., Copeland, B. A., Paranczak, J. L., Bailey, K. M., &amp; Standish, C. M. (2022). Extending functional communication training to multiple language contexts in bilingual learners with challenging behavior. <em>Journal of Applied Behavior Analysis, 55</em>(1), 80&ndash;100. &bull;
     Bernal-Gamboa, R., Mason, T. A., Nieto, J., &amp; G&aacute;mez, A. M. (2022). An analysis of extinction-cue features in the reduction of operant behavior relapse. <em>The Psychological Record, 72</em>(1), 65&ndash;73. &bull;
@@ -1118,6 +1127,7 @@ td input,td select{max-width:100%}
     Fisher, W. W., Greer, B. D., Fuhrman, A. M., &amp; Querim, A. C. (2015). Using multiple schedules during functional communication training to promote rapid transfer of treatment effects. <em>Journal of Applied Behavior Analysis, 48</em>(4), 713&ndash;733. &bull;
     Fisher, W. W., Greer, B. D., Fuhrman, A. M., Saini, V., &amp; Simmons, C. A. (2018). Minimizing resurgence of destructive behavior using behavioral momentum theory. <em>Journal of Applied Behavior Analysis, 51</em>(4), 831&ndash;853. https://doi.org/10.1002/jaba.499 &bull;
     Fisher, W. W., Saini, V., Greer, B. D., Sullivan, W. E., Roane, H. S., Fuhrman, A. M., Craig, A. R., &amp; Kimball, R. T. (2019). Baseline reinforcement rate and resurgence of destructive behavior. <em>Journal of the Experimental Analysis of Behavior, 111</em>(1), 75&ndash;93. https://doi.org/10.1002/jeab.488 &bull;
+    Fuhrman, A. M., Fisher, W. W., &amp; Greer, B. D. (2016). A preliminary investigation on improving functional communication training by mitigating resurgence of destructive behavior. <em>Journal of Applied Behavior Analysis, 49</em>(4), 884&ndash;899. &bull;
     Fuhrman, A. M., Lambert, J. M., &amp; Greer, B. D. (2022). A brief review of expanded-operant treatments for mitigating resurgence. <em>The Psychological Record, 72</em>(2), 319&ndash;323. &bull;
     Greer, B. D., Fisher, W. W., Retzlaff, B. J., &amp; Fuhrman, A. M. (2020). A preliminary evaluation of treatment duration on the resurgence of destructive behavior. <em>Journal of the Experimental Analysis of Behavior, 113</em>(1), 251&ndash;262. https://doi.org/10.1002/jeab.567 &bull;
     Greer, B. D., &amp; Shahan, T. A. (2019). Resurgence as Choice: Implications for promoting durable behavior change. <em>Journal of Applied Behavior Analysis, 52</em>(3), 816&ndash;846. &bull;
@@ -1138,6 +1148,8 @@ td input,td select{max-width:100%}
     Lambert, J. M., Pericozzi, H. G., Bailey, K. M., Standish, C. M., &amp; Perry, E. C. (2020). Evaluating duration of baseline as a moderator of resurgence following serial training. <em>Behavioral Development, 25</em>(2), 52&ndash;65. &bull;
     Laureano, B., Ringdahl, J., &amp; Falligant, J. M. (2024). Examination of clinical variables affecting resurgence: A reanalysis of 46 applications. <em>Journal of Applied Behavior Analysis, 57</em>(3), 742&ndash;750. https://doi.org/10.1002/jaba.1091 &bull;
     Lattal, K. A., &amp; Miles, A. K. (2024). Resurgence and behavioral contrast, compared and contrasted. <em>Perspectives on Behavior Science, 47</em>(2), 315&ndash;334. &bull;
+    Lerman, D. C., &amp; Iwata, B. A. (1995). Prevalence of the extinction burst and its attenuation during treatment. <em>Journal of Applied Behavior Analysis, 28</em>(1), 93&ndash;94. &bull;
+    Marsteller, T. M., &amp; St. Peter, C. C. (2014). Effects of fixed-time reinforcement schedules on resurgence of problem behavior. <em>Journal of Applied Behavior Analysis, 47</em>. https://doi.org/10.1002/jaba.134 &bull;
     Mitteer, D. R., Greer, B. D., Randall, K. R., &amp; Haney, S. D. (2022). On the scope and characteristics of relapse when treating severe destructive behavior. <em>Journal of Applied Behavior Analysis, 55</em>(3), 688&ndash;703. &bull;
     Mitteer, D. R., Fisher, W. W., Greer, B. D., &amp; Helvey, C. I. (2026). Relative effects of four resurgence-mitigation strategies informed by behavioral momentum theory. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70083. https://doi.org/10.1002/jaba.70083 &bull;
     Muething, C., Call, N., Pavlov, A., Ringdahl, J., Gillespie, S., Clark, S., &amp; Mevers, J. L. (2020). Prevalence of renewal of problem behavior during context changes. <em>Journal of Applied Behavior Analysis, 53</em>(3), 1485&ndash;1493. &bull;
@@ -1152,9 +1164,14 @@ td input,td select{max-width:100%}
     Shahan, T. A., &amp; Craig, A. R. (2017). Resurgence as Choice. <em>Behavioural Processes, 141</em>(Pt. 1), 100&ndash;127. &bull;
     Shahan, T. A., &amp; Sweeney, M. M. (2011). A model of resurgence based on behavioral momentum theory. <em>Journal of the Experimental Analysis of Behavior, 95</em>, 91&ndash;108. &bull;
     Smith, S. W., &amp; Greer, B. D. (2022). Phase duration and resurgence. <em>Journal of the Experimental Analysis of Behavior, 117</em>(1), 91&ndash;104. &bull;
+    St. Peter Pipkin, C., Vollmer, T. R., &amp; Sloman, K. N. (2010). Effects of treatment integrity failures during differential reinforcement of alternative behavior: A translational model. <em>Journal of Applied Behavior Analysis, 43</em>(1), 47&ndash;70. &bull;
+    Stokes, T. F., &amp; Baer, D. M. (1977). An implicit technology of generalization. <em>Journal of Applied Behavior Analysis, 10</em>(2), 349&ndash;367. &bull;
     Todd, T. P., Winterbauer, N. E., &amp; Bouton, M. E. (2012). Effects of the amount of acquisition and contextual generalization on the renewal of instrumental behavior after extinction. <em>Learning &amp; Behavior, 40</em>(2), 145&ndash;157. &bull;
     Trask, S., &amp; Bouton, M. E. (2016). Discriminative properties of the reinforcer can be used to attenuate the renewal of extinguished operant behavior. <em>Learning &amp; Behavior, 44</em>, 151&ndash;161. &bull;
-    Wilson, A. N., Glassford, T. S., &amp; Koerkenmeier, S. M. (2016). Effects of response effort on resurgence. <em>Behavior Analysis in Practice, 9</em>(2), 174&ndash;178.</p>
+    Vollmer, T. R., Progar, P. R., Lalli, J. S., Van Camp, C. M., Sierp, B. J., Wright, C. S., Nastasi, J., &amp; Eisenschink, K. J. (1998). Fixed-time schedules attenuate extinction-induced phenomena in the treatment of severe aberrant behavior. <em>Journal of Applied Behavior Analysis, 31</em>(4), 529&ndash;542. &bull;
+    Wilson, A. N., Glassford, T. S., &amp; Koerkenmeier, S. M. (2016). Effects of response effort on resurgence. <em>Behavior Analysis in Practice, 9</em>(2), 174&ndash;178. &bull;
+    Winterbauer, N. E., &amp; Bouton, M. E. (2010). Mechanisms of resurgence of an extinguished instrumental behavior. <em>Journal of Experimental Psychology: Animal Behavior Processes, 36</em>(3), 343&ndash;353. &bull;
+    Winterbauer, N. E., Lucke, S., &amp; Bouton, M. E. (2013). Some factors modulating the strength of resurgence after extinction of an instrumental behavior. <em>Learning and Motivation, 44</em>(1), 60&ndash;71.</p>
   </section>
 </main>
 
@@ -1276,7 +1293,7 @@ function blank(){return{meta:{},ind:{},mit:{},ch:[],blMean:''};}
 let S=blank();
 function ensure(){ if(!S.ch.length)S.ch.push(newCh()); }
 function newCh(){return{date:'',type:'',planned:'',what:'',a:'',b:'',resp:''};}
-const nums=s=>String(s||'').split(/[,\s]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x));
+const nums=s=>String(s||'').split(/[,;\s]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x));   /* v23.27 (review F316) semicolons separate too */
 
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
@@ -1319,19 +1336,32 @@ document.addEventListener('change',e=>{const el=e.target;
 /* Working conventions drawn from Mitteer et al. (2026); the evidence fixes no threshold. The lean-baseline row is
    gated by the imminent-harm and precursor entries on Setup; the other three rows say what a tick must be
    accompanied by. */
+/* v23.27 (review F308) treatment has started once a challenge is logged */
+function rmStarted(){return (S.ch||[]).some(c=>c&&(String(c.date||'').trim()||nums(c.a).length||nums(c.b).length));}
+/* v23.27 (review F317) the record print, unless the full plan or the Guide is chosen */
+function rmPrintSel(){const e=document.getElementById('rmPrintSel');if(!e)return;const full=S.meta.pFull==='1',guide=S.meta.pGuide==='1';
+  e.textContent='@media print{'+(full?'':'#mitTbl tr:not(.picked):not(.phasehead),#mitTbl tr.phasehead.none{display:none!important}')+(guide?'':'html body section.only-guide{display:none!important}')+'}';
+  const a=document.getElementById('pFull'),b=document.getElementById('pGuide');if(a)a.checked=full;if(b)b.checked=guide;}
 function ruleNote(m,st){
   if(!m.k)return '';
   const how=String(st.how||'').trim(), harm=S.meta.harm||'', pre=S.meta.precursor||'';
   const note=(tag,cls,txt)=>`<div class="winnote">${tag?`<span class="tag ${cls}">${tag}</span> `:''}${txt}</div>`;
   if(m.k==='leanBl'){
     let out='';
-    if(harm==='Yes'){
-      out+=note('Caution','e5','Imminent-harm risk is recorded as Yes on Setup. Working convention: not ticked without a written rationale under How it will be arranged. The lean baseline produced a grand mean of 6.30 responses per minute, and the authors say the modification \u201cmight not outweigh the potential benefit\u201d (Mitteer et al., 2026).');
+    /* v23.27 (review F310, F311) one convention in three cases; the harm question answered first; the condition in a school; and once
+       treatment has started, the row only records what was arranged */
+    const COND=' Only inside an arranged functional analysis or baseline the parent consented to (Forms IC-1 and EA-1), before treatment starts; record the schedule arranged there.';
+    if(rmStarted())out+=note('Record only','e4','Treatment has started (a challenge is logged): this row records what was arranged during assessment and baseline.');
+    if(!harm){
+      out+=note('','','Record the imminent-harm risk on Setup before choosing this row; it gates the row.');
+    } else if(harm==='Yes'&&pre!=='Yes'){
+      out+=note('Caution','e5','Imminent-harm risk is recorded as Yes on Setup, and no precursor is consequated. Working convention: not ticked without a written rationale under How it will be arranged. The lean baseline produced a grand mean of 6.30 responses per minute, and the authors say the modification “might not outweigh the potential benefit” (Mitteer et al., 2026).'+COND);
       if(st.on&&!how)out+=note('Rationale missing','e5','Ticked with imminent-harm risk recorded and nothing written under How it will be arranged.');
-    } else if(harm==='No'||pre==='Yes'){
-      out+=note('Available','e3',(harm==='No'?'Imminent-harm risk is recorded as No':'A precursor is the consequated response')+' on Setup: available as a Mixed-evidence option (Mitteer et al., 2026). Record the baseline schedule actually arranged on Setup.');
+    } else if(harm==='Yes'){
+      out+=note('For the precursor only','e3','Imminent-harm risk is Yes and a precursor is the consequated response: available for the precursor only, not the dangerous behavior, with a written rationale under How it will be arranged (Mitteer et al., 2026).'+COND);
+      if(st.on&&!how)out+=note('Rationale missing','e5','Ticked with imminent-harm risk recorded and nothing written under How it will be arranged.');
     } else {
-      out+=note('','','Record the imminent-harm risk and any precursor on Setup before choosing this row; they gate it.');
+      out+=note('Available','e3','Imminent-harm risk is recorded as No on Setup: available as a Mixed-evidence option (Mitteer et al., 2026).'+COND);
     }
     return out;
   }
@@ -1344,7 +1374,7 @@ function ruleNote(m,st){
       (st.on&&!how?note('Reason missing','e5','Ticked with no reason written.'):'');
   }
   if(m.k==='combined'){
-    return note('Convention','e4','Not selected as a package. If the lean baseline is chosen, tick that row alone (Mitteer et al., 2026).')+
+    return note('Convention','e4','Not selected as a package. If the lean baseline is chosen, tick that row alone. The abstract calls the combined approach the most consistent and robust; not selecting it is this form\u2019s judgment, not the authors\u2019 recommendation (Mitteer et al., 2026).')+
       (st.on?note('Record the lean baseline alone','e5','The package is ticked; the convention is to untick it and tick the lean-baseline row on its own, with its rationale.'):'');
   }
   return '';
@@ -1355,8 +1385,10 @@ function renderMit(){
     <th class="k-how">How it will be arranged</th><th class="k-who">Who</th><th class="k-by">By when</th></tr></thead><tbody>`;
   let cur=-1;
   /* rows are shown by phase; each keeps its own index in MIT, which is what S.mit and saved files are keyed by */
+  const PK={};MIT.forEach((m,i)=>{if((S.mit[i]||{}).on)PK[m.p]=1;});   /* v23.27 (review F317) a phase with no ticked row is left off the record print */
+  {const e=$('#rmPhaseNote');if(e)e.textContent=rmStarted()?'Treatment has started (a challenge is logged): Phase 1 records what was arranged during assessment and baseline; Phases 2 to 4 are still open.':'Phase 1 is arranged during assessment and baseline, so this plan is made before treatment starts, with Forms TD-1 and SR-1; Phases 2 to 4 follow during treatment, at the challenges and around the people running the plan.';}
   MIT.map((m,i)=>({m,i})).sort((a,b)=>a.m.p-b.m.p).forEach(({m,i})=>{
-    if(m.p!==cur){cur=m.p;h+=`<tr class="phasehead"><td colspan="8">${esc(PHASES[cur])}</td></tr>`;}
+    if(m.p!==cur){cur=m.p;h+=`<tr class="phasehead${PK[cur]?'':' none'}"><td colspan="8">${esc(PHASES[cur])}${cur===0&&rmStarted()?'<span class="rm-rec">treatment has started: record what was arranged</span>':''}</td></tr>`;}
     const st=S.mit[i]||{};
     h+=`<tr class="${st.on?'picked':''}">
       <td class="c"><input type="checkbox" data-mi="${i}" data-f="on"${st.on?' checked':''}></td>
@@ -1401,7 +1433,7 @@ function renderCh(){
     const relCell=!s.ok?'<span class="hint">\u2014</span>'
       :(s.rel?'<span class="tag e5">Yes</span>':'<span class="tag e1">No</span>')+
        /* v21.16 audit (F2): the row says when values beyond the scored sessions were entered */
-       (s.nA>5||s.nB>3?`<div class="winnote">Scored: ${[s.nA>5?'last 5 of '+s.nA+' A':'',s.nB>3?'first 3 of '+s.nB+' B':''].filter(Boolean).join('; ')}</div>`:'');
+       `<div class="winnote">Scored: ${s.nA>5?'last 5 of '+s.nA+' A':Math.min(5,s.nA)+' A'}, ${s.nB>3?'first 3 of '+s.nB+' B':Math.min(3,s.nB)+' B'}</div>`;   /* v23.27 (review F316) on every row */
     const atBl=s.ok&&s.pB!=null&&s.pB>=1;
     return `<tr>
       <td style="text-align:center;font-weight:600">${i+1}</td>
@@ -1431,7 +1463,7 @@ $('#delCh').addEventListener('click',async()=>{if(S.ch.length>1){const c=S.ch[S.
 $('#chTbl').addEventListener('click',async e=>{const b=e.target.closest('.rowDel');if(!b)return;const i=+b.dataset.del,c=S.ch[i];if(!c)return;
   if(Object.values(c).some(v=>String(v==null?'':v).trim())&&!(await nbhUI.confirm('Delete challenge '+(i+1)+'?\nIts entries will be deleted.',{ok:'Delete',danger:true})))return;
   S.ch.splice(i,1);ensure();renderCh();renderAn();});
-['change','input'].forEach(ev=>$('#blMean').addEventListener(ev,e=>{S.blMean=e.target.value;renderCh();renderAn();}));
+['change','input'].forEach(ev=>$('#blMean').addEventListener(ev,e=>{S.blMean=e.target.value;renderCh();renderAn();if(typeof rmBl==='function')rmBl();}));
 
 /* ---------------- analysis ---------------- */
 function renderAn(){
@@ -1472,6 +1504,8 @@ function renderAn(){
   else {cls='v-mid';txt=`Relapse met the criterion at ${rel.length} of ${n} challenges (${pct(rel.length,n)}). None reached the baseline mean.`;}
   if(resC.length)txt+=` Resurgence: ${cnt(resRel.length,resC.length)} met it (${pct(resRel.length,resC.length)}), against 42% of dense-to-lean schedule-thinning transitions in Briggs et al. (2018), where resurgence occurred at least once in 76% of applications.`;
   if(renC.length)txt+=` Renewal: ${cnt(renRel.length,renC.length)} met it (${pct(renRel.length,renC.length)}), against 42.3% of context changes in an outpatient clinic (Muething et al., 2020) and 24% in an inpatient program (Falligant et al., 2021).`;
+  /* v23.27 (review F312) the published figures are per clinic session; this student's are in the log's unit */
+  if(resC.length||renC.length){const u=String(S.meta.unit||'').trim();txt+=` The published figures are per clinic session and this student\u2019s rows are ${u?esc(u):'in the log\u2019s own unit'}: the percentages size the risk and are not a like-for-like comparison.`+(/day/i.test(u)?' On a whole school day a single extra instance meets the rule.':'');}
   $('#anVerdict').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
 
   /* proportion and raw rate together (Mitteer et al., 2026) */
@@ -1497,7 +1531,7 @@ function renderAn(){
   const once=g=>!g.length?'\u2014':g.some(x=>x.s.rel)?'Yes':'No';
   const row=(m,v,p,s)=>`<tr><td>${m}</td><td style="text-align:center">${v}</td><td style="text-align:center">${p}</td><td>${s}</td></tr>`;
   const B18='Briggs et al. (2018)', REN='Muething et al. (2020); Falligant et al. (2021)';
-  $('#baseTbl').innerHTML='<thead><tr><th style="text-align:left">Measure</th><th style="width:20%">This student</th><th style="width:34%">Published</th><th style="width:22%">Source</th></tr></thead><tbody>'+
+  $('#baseTbl').innerHTML='<thead><tr><th style="text-align:left">Measure</th><th style="width:20%">This student'+(String(S.meta.unit||'').trim()?' ('+esc(String(S.meta.unit).trim())+')':'')+'</th><th style="width:34%">Published (per clinic session)</th><th style="width:22%">Source</th></tr></thead><tbody>'+
     row('Resurgence challenges meeting the criterion',pct(resRel.length,resC.length),'42% of dense-to-lean transitions',B18)+
     row('Resurgence at least once during thinning',once(resC),'76% of applications',B18)+
     row('Mean proportion of baseline before, resurgence episodes',f2(mean(resRel.map(x=>x.s.pA).filter(v=>v!=null))),'0.13',B18)+
@@ -1546,8 +1580,13 @@ function drawRel(scored){
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
   el.value=S.meta[k]||'';
   if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
-    el.addEventListener(ev,()=>{S.meta[k]=el.value;if(k==='harm'||k==='precursor')renderMit();});}});}
-function renderAll(){ensure();renderRisk();renderMit();renderCh();renderAn();bindMeta();$('#blMean').value=S.blMean||'';}
+    el.addEventListener(ev,()=>{S.meta[k]=el.value;if(k==='harm'||k==='precursor')renderMit();if(k==='blLevel')rmBl();if(k==='unit')renderAn();});}});}
+function renderAll(){ensure();renderRisk();renderMit();renderCh();renderAn();bindMeta();$('#blMean').value=S.blMean||'';rmBl();rmPrintSel();}
+/* v23.27 (review F309) one baseline value: the number the proportions use shows on Setup and on the log, and Setup says when its level reads otherwise */
+function rmBl(){const a=$('#blMeanSetup');if(a&&document.activeElement!==a)a.value=S.blMean||'';const g=$('#blAgree');if(!g)return;const m=/(\d+(?:\.\d+)?)/.exec(String(S.meta.blLevel||'')),b=parseFloat(S.blMean);
+  g.textContent=m&&isFinite(b)&&Math.abs(parseFloat(m[1])-b)>1e-9?'The level above reads '+m[1]+'; the proportions use '+b+': make them agree.':'';}
+['change','input'].forEach(ev=>$('#blMeanSetup').addEventListener(ev,e=>{S.blMean=e.target.value;$('#blMean').value=S.blMean;renderCh();renderAn();rmBl();}));
+['pFull','pGuide'].forEach(id=>$('#'+id).addEventListener('change',e=>{S.meta[id]=e.target.checked?'1':'';rmPrintSel();}));
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -1647,7 +1686,7 @@ async function loadSim(){
   pick(20,'Fifteen-minute briefing and a one-page card for any substitute, covering what to do while the behavior is resurging. Integrity re-checked on Form TI-1 within ten school days of any substitute week.','J. Ellis',D(36));
   pick(21,'Team told at the outset that a temporary increase is likely at some steps, with the Briggs figures given (42% of transitions; at least once in 76% of applications) so it is read as ordinary rather than as failure.','J. Ellis',D(102));
 
-  S.blMean='4.2';
+  S.blMean='4.2';S.meta.unit='per day';
   /* v21.16 audit (F6b, F6c): counts per school day, the unit of the shared case (M 4.2 per day), and one row for every
      step of the thinning plan; the "after" sessions of one challenge and the "before" sessions of the next agree */
   S.ch=[
@@ -2810,7 +2849,24 @@ window.__nbhFactsOut=function(){try{
   const md=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:(d||'');},rel=list.filter(x=>x.rel),last=list[list.length-1];
   const line=rel.length+' of '+list.length+' challenge'+(list.length===1?'':'s')+' showed relapse'+(rel.length?' ('+rel.map(x=>(x.type||'type not named')+(x.date?' '+md(x.date):'')).join('; ')+')':'')
     +(list.length>1?'; the last'+(last.date?', '+md(last.date):'')+(last.what?' ('+last.what+')':'')+': '+(last.rel?'relapse':'no relapse'):(last.what?' ('+last.what+')':''))+' (Form RM-1)';
-  return {relapse:{src:'RM-1',n:list.length,rel:rel.length,list,line}};}catch(e){return null;}};
+  const out={src:'RM-1',n:list.length,rel:rel.length,list,line};if(T(S.meta.caregiver))out.caregiverDo=T(S.meta.caregiver);if(T(S.meta.unit))out.unit=T(S.meta.unit);   /* v23.27 (review F309) */
+  return {relapse:out};}catch(e){return null;}};
+/* v23.27 (review F309) the case, in, into empty fields only: the behavior and the function as the workstation's generic fill does; the
+   alternative response and the treatment in place from Form TD-1's plan; the baseline mean for the proportions from Form DD-1's record
+   (its baseline condition, or the whole record while it holds one condition); and, while no indicator is ticked, Form TI-1's integrity
+   record decides the reinstatement line "integrity has not been measured" */
+window.__nbhFactsIn=function(f){let n=0;const T=v=>String(v==null?'':v).trim(),notes=[];f=f||{};
+  try{if(window.nbhCase&&nbhCase.generic)n+=(nbhCase.generic(f,false).filled||0);}catch(e){}
+  try{const P=f.plan||{};if(T(P.rep)&&!T(S.meta.fcr)){S.meta.fcr=T(P.rep);n++;}
+    const tx=[].concat(P.teach||[],P.sched||[]).map(T).filter(Boolean);if(tx.length&&!T(S.meta.tx)){S.meta.tx=tx.join('; ')+' (Form TD-1)';n++;}
+    const d=f.data;if(d&&!T(S.blMean)){const B=d.behaviors||[],beh=T(S.meta.beh).toLowerCase(),x=B.find(y=>T(y.name).toLowerCase()===beh)||(B.length===1?B[0]:null);
+      const whole=(d.conds||[]).length<2,st=x?(whole?(x.days?{days:x.days,mean:x.mean}:null):x.base):null;
+      if(st&&st.days&&isFinite(+st.mean)){S.blMean=String(Math.round(st.mean*100)/100);n++;if(!T(S.meta.unit))S.meta.unit=x.measure==='count'?'per day':(T(x.unit)?T(x.unit):'');notes.push('the baseline mean from Form DD-1 ('+st.days+' day'+(st.days===1?'':'s')+')');}}
+    const rk='rei_'+TYPES.find(t=>t.k==='rei').ind.findIndex(x=>/integrity has not been measured/i.test(x));
+    if(!Object.keys(S.ind||{}).some(k=>S.ind[k])&&f.plan){if(!f.integrity){S.ind[rk]=true;n++;notes.push('no integrity record on Form TI-1 yet');}}
+  }catch(e){}
+  if(n){try{renderAll();}catch(e){}}
+  return {filled:n,note:notes.join('; ')};};
 </script>
 <script id="nbh-field-care" src="nbh-field-care.js"></script>
 <style id="nbh-design-css">

@@ -9903,6 +9903,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.27: RM-1 is made at plan time, takes the case's plan and baseline, scores the lean-baseline row in one convention, and prints the record without the literature (review Wave 3)
+
+- **At plan time (F308).** The case map lists RM-1 under Plan, after SR-1: the exposure to relapse and the inoculation plan,
+  before the first thinning step. It stays under Review for the challenge log and its analysis.
+  - The plan says which phases are still open.
+  - Once a challenge is logged, Phase 1 and the lean-baseline row say they record what was arranged.
+- **From and to the case (F309).**
+  - The behavior and the function come in as before.
+  - The alternative response and the treatment in place come from Form TD-1's plan.
+  - The baseline mean for the proportions comes from Form DD-1's record, with its unit.
+  - The reinstatement line "integrity has not been measured" is ticked when there is no Form TI-1 record.
+  - The baseline mean shows on Setup and on the log as one value, and Setup says when its typed level reads otherwise.
+  - What caregivers are told to do goes to the case, and Form CT-1 takes it when its own line is empty.
+- **The lean-baseline row (F310, F311).** One convention in three cases: harm Yes, a caution; harm Yes with a precursor
+  consequated, for the precursor only; harm No, available. The harm question comes first. Every case adds the condition: only
+  inside an analysis or baseline the parent consented to (Forms IC-1 and EA-1), before treatment starts.
+- **The log's unit (F312).** The log has a unit field. The analysis says the published figures are per clinic session, and
+  that on a school day a single extra instance meets the rule.
+- **The combined package (F313)** is shown as the form's judgment, beside the abstract's conclusion.
+- **References (F314).** The list is "Selected references". Eight works the plan and the Guide cite are added, each checked
+  against its published record: Fuhrman et al. (2016), Lerman and Iwata (1995), Marsteller and St. Peter (2014), St. Peter
+  Pipkin et al. (2010), Stokes and Baer (1977), Vollmer et al. (1998), and Winterbauer et al. (2010, 2013). About seventeen
+  more are still to add.
+- **"More than one function" (F315)** is an option, so FS-1's conclusion lands.
+- **Semicolons (F316)** separate rates, and every row says how many sessions were scored.
+- **The print (F317).** The ordinary print is the record: Setup, the risk sheet, the ticked plan rows, the log and the
+  analysis. "Every row of the inoculation plan" and "the Evidence Guide" add them back. The simulation prints 12 pages, not 18.
+- qa/rm1-w3-test.js (12 checks).
+
 ### v23.26: VS-1 puts PA-1's reinforcers on with their own pictures, asks before a file's pictures stay on the device, prints the plan's own break card, and says what each countdown square is for (review Wave 3)
 
 - **Reinforcers with their own pictures (F288).**

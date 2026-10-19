@@ -1903,6 +1903,10 @@ document.getElementById('ctEmergBtn').addEventListener('click',()=>{const el=doc
   el.dispatchEvent(new Event('input',{bubbles:true}));el.focus();});
 /* the case, in: kept for the risk check and the crisis box */
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ctCaseF=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;try{renderSum();}catch(e){}return r;};}
+/* v23.27 (RM-1 review F309) what Form RM-1 says caregivers do if the behavior returns fills an empty "What the caregiver does when it returns" */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{const R=f&&f.relapse,t=R&&String(R.caregiverDo||'').trim();if(t&&!String(S.meta.relapseDo||'').trim()){S.meta.relapseDo=t;k++;renderAll();}}catch(e){}
+  if(!k)return r;const o=Object.assign({},r||{});o.filled=((r&&r.filled)||0)+k;o.note=[r&&r.note,'what the caregiver does when it returns, from Form RM-1'].filter(Boolean).join('; ');return o;};}
 /* what is due (the shell's Today list): the next follow-up probe only; the dates of follow-up probes already run are not deadlines.
    v22.73: for each adult in the home; and the booster rehearsal before the next thinning step (I178) */
 window.__nbhDue=function(){const out=[];const L=S.house?S.house.list:[null];if(S.house)cgStore();
