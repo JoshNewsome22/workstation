@@ -1,4 +1,4 @@
-/* v22.8x Form MS-1, medication side-effect monitoring, review Wave 3 (simulated data only).
+/* v23.08 Form MS-1, medication side-effect monitoring, review Wave 3 (simulated data only).
    F438  no release of information on file: the report says not to send it, at the top and above the signatures (printed).
    F439  a red-flag row carries its instruction on paper; rated from blank, it says what to do now and takes the call into
          the notes; an emergency item says emergency services first.

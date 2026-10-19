@@ -817,6 +817,31 @@ td input,td select{max-width:100%}
   #guide h3.sub{margin:12px 0 5px}
 }
 </style>
+<style id="ms1-w3-css">
+/* v23.08 review Wave 3 */
+td.rowlab small.rfo{color:#9b4e15;font-weight:600}
+@media print{td.rowlab small.rfo{font-size:8.5px;line-height:1.15}}
+#grid th.ms-off{color:#8a96a0;text-decoration:line-through}
+#rfNote .rf-row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:6px;font-family:var(--sans);font-size:12px}
+#rfNote input{flex:1 1 240px;min-width:0;font:inherit;padding:4px 6px;border:1px solid #c9b8b8;border-radius:3px;background:#fff}
+#rpTbl td:last-child{white-space:nowrap}
+#rpRoiSig:empty{display:none}
+#rpRoiSig{margin-top:14px;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink)}
+#rpRoiSig.no{color:#a92a2a}
+.ms-over{color:#a92a2a}
+body.view-brief #brief{display:block}
+.brief-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:6px 10px;margin:6px 0}
+.brief-item{border:1px solid var(--rule-2);border-left:3px solid var(--rule);padding:6px 10px;font-size:12.5px;break-inside:avoid;page-break-inside:avoid}
+@media print{.brief-list{grid-template-columns:1fr 1fr}.brief-item{padding:4px 8px;font-size:11.5px}}
+.brief-item.flag{border-left-color:#9b4e15}
+.brief-item small{color:var(--ink-soft)}
+table.grid.anchors td,table.grid.anchors th{font-size:11.5px}
+@media print{
+  body:not(.print-brief) #brief{display:none!important}
+  body.print-brief .sheet:not(#brief),body.print-brief .sim-banner{display:none!important}
+  body.print-brief #brief{page-break-before:auto}
+}
+</style>
 </head>
 
 <body class="view-plan">
@@ -844,6 +869,7 @@ td input,td select{max-width:100%}
       <div class="seg" id="viewSeg">
         <button data-view="plan" aria-pressed="true">Medications &amp; plan</button>
         <button data-view="track" aria-pressed="false">Tracking grid</button>
+        <button data-view="brief" aria-pressed="false">Rater brief</button><!-- v23.08 (review I223) -->
         <button data-view="eps" aria-pressed="false">EPS screen</button>
         <button data-view="vitals" aria-pressed="false">Metabolic &amp; vitals</button>
         <button data-view="report" aria-pressed="false">Prescriber report</button>
@@ -873,6 +899,7 @@ td input,td select{max-width:100%}
     <span>Sheet actions</span>
     <div class="row">
       <button class="primary" id="printBtn">Print / Save as PDF</button>
+      <button id="briefPrint" title="Prints the rater brief alone: the page the person rating the grid keeps beside it">Print rater brief</button><!-- v23.08 (review I223) -->
       <button id="saveBtn">Save data</button>
       <button id="loadBtn">Open data</button>
       <button id="clearBtn">Clear all</button>
@@ -905,7 +932,7 @@ td input,td select{max-width:100%}
   <div class="warn"><b>Applied guidance</b>The library flags the red-flag items for each medication (rash, toxicity pattern, overheating, breathing or swallowing difficulty, fainting, statements of self-harm, jaundice, unusual bleeding, severe abdominal pain). Any red-flag observation, at any rating, is reported at once, whatever the reporting schedule: to the school nurse, who reaches the parent and the prescriber; an item marked emergency, or any difficulty breathing or swallowing, is a call to emergency services first. Behavioral side effects (irritability, activation, disinhibition) are recorded alongside the BIP data so the prescriber can see whether the target behavior changed in step with a dose change. A change in step with a dose change is a correlation in time, not proof that the medication caused it.</div>
 
   <h3 class="sub">4. Recording Conventions</h3>
-  <div class="warn"><b>Applied guidance</b>The tracking grid uses the scatter-plot convention (Touchette, MacDonald, &amp; Langer, 1985) adapted to severity: blank = not observed; slash = mild or questionable; light = moderate (clearly present, not interfering); dark = marked (interfering with the day or needing a response). Red-flag items shade orange at any rating. One row per watched side effect, one column per school day, plus rows for whether the dose was given and for the BIP target behavior at the same severity scale so the two can be read together. Vitals are entered on the vitals sheet on the ADA/APA schedule; BMI is computed. The report sheet summarizes each watched item by week, lists AIMS results against the Schooler-Kane criteria, and lists every red-flag entry with its date.</div>
+  <div class="warn"><b>Applied guidance</b>The tracking grid uses the scatter-plot convention (Touchette, MacDonald, &amp; Langer, 1985) adapted to severity: blank = not observed; slash = mild or questionable; light = moderate (clearly present, not interfering); dark = marked (interfering with the day or needing a response). Red-flag items shade orange at any rating. One row per watched side effect, one column per school day, each rating the highest severity seen that day with the time of the worst period written under the date, plus rows for whether the dose was given and for the BIP target behavior at the same severity scale so the two can be read together. Vitals are entered on the vitals sheet on the ADA/APA schedule; BMI is computed. The report sheet summarizes each watched item by week, lists AIMS results against the Schooler-Kane criteria, and lists every red-flag entry with its date.</div>
   <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
   <p class="method noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
   <div class="cite">Extrapyramidal descriptions and scale conventions after Guy (1976), Barnes (1989), Simpson and Angus (1970), and Schooler and Kane (1982). Metabolic schedule after the ADA/APA/AACE/NAASO consensus (2004) and the AACAP practice parameter (2011). Medication side-effect lists compiled from FDA prescribing information and the drug information of MedlinePlus and Mayo Clinic (accessed September 2026); verify against the current label. Nothing on this form is medical advice.</div>
@@ -938,7 +965,7 @@ td input,td select{max-width:100%}
   </div>
 
   <h3 class="sub">Medications</h3>
-  <p class="method" style="margin-top:0"><span class="noprint">Set the number of medications in the toolbar.</span> Choose each from the library; its documented side effects appear with the red-flag items marked. Check the items the team will observe; each checked item becomes a row on the tracking grid. Items the school cannot observe (laboratory values) are listed for the nurse and prescriber and do not become grid rows; items marked (reported) are rated from what the student or parent reports.</p>
+  <p class="method" style="margin-top:0"><span class="noprint">Set the number of medications in the toolbar.</span> Choose each from the library; its documented side effects appear with the red-flag items marked. Check the items the team will observe; each becomes a grid row. Measured items (weight, height, blood pressure, pulse) go on the vitals sheet; laboratory values are listed for the nurse and prescriber. Items marked (reported) are rated from what the student or parent reports.</p>
   <div id="medWrap"></div>
   <div class="cite">Library entries summarize FDA prescribing information and the drug information of MedlinePlus and Mayo Clinic; brand names are given for recognition only. Off-label uses are listed because they are common in this population, not as recommendations. Verify each list against the current label and the prescriber's own guidance.</div>
 </div>
@@ -951,11 +978,24 @@ td input,td select{max-width:100%}
   </div>
   <div class="bar nbh-band">Side-Effect Tracking Grid</div>
   <div class="sumhead"><div><b>Student</b><span class="hd-client"></span></div><div><b>Medications</b><span id="hdMeds"></span></div><div><b>Observer(s)</b><input name="t.obs" style="border:0;border-bottom:1px solid var(--rule-2);width:100%;font:inherit;font-size:13px;background:transparent"></div></div>
-  <p class="method" style="margin:0 0 6px"><span class="noprint">Click a cell to move it blank → slash → light → dark (0 → 1 → 2 → 3); keys 0–3 set a cell directly.</span> The dose row takes only 0 (not given or unknown) and 3 (given). Enter the date at the top of each column and the time of observation below it (or &ldquo;absent&rdquo;). Note dose changes in the notes box below, by date. Days &ge;1 counts the columns rated 1 or more; Mean is the average over all the columns shown, a blank counting as 0.</p>
+  <p class="method" style="margin:0 0 6px"><span class="noprint">Click a cell to move it blank → slash → light → dark (0 → 1 → 2 → 3); keys 0–3 set a cell directly.</span> Rate each item at its <b>highest severity that day</b>; under the date write the time of the worst, or &ldquo;absent&rdquo;. Dose row: 0 not given or unknown, 3 given; note dose changes below. Days &ge;1: days rated 1 or more; Mean: over the days observed (dated or rated, not absent).</p><!-- v23.08 (review F443, F440, F439) -->
+  <div class="alert noprint" id="rfNote" role="alert" hidden></div>
   <div class="gridwrap"><table class="scatter" id="grid"></table></div>
   <div class="keyrow"><span><i></i>0 not observed</span><span><i class="s1"></i>1 mild / questionable</span><span><i class="s2"></i>2 moderate: clearly present</span><span><i class="s3"></i>3 marked: interferes or needs a response</span><span><i class="sf1"></i><i class="sf"></i>red-flag item at any rating (orange): report at once</span></div>
   <div class="defs" style="margin-top:10px"><div class="drow"><div class="dlab">Notes by date (dose changes, illness, missed doses, context)</div><div class="dval"><textarea name="t.notes" class="tall"></textarea></div></div></div>
   <div class="cite">Grid convention adapted from the scatter plot of Touchette, MacDonald, and Langer (1985) with a four-level severity code in place of the occurrence code; the severity anchors are this form's, chosen to follow the mild and moderate steps of the AIMS global items (Guy, 1976); the top step is called marked rather than the AIMS's severe.</div>
+</div>
+
+<!-- ================================================================ RATER BRIEF (v23.08, review I223) -->
+<div class="sheet" id="brief">
+  <div class="nbh-print-head">
+    <img class="nbh-print-logo" data-nbh-logo="1" alt="Royal Palm School">
+    <div class="nbh-print-meta"><div class="nbh-print-title">Medication Side-Effect Monitoring</div><div>Form MS-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+  </div>
+  <div class="bar nbh-band">Rater Brief: Rating the Tracking Grid</div>
+  <div class="sumhead"><div><b>Student</b><span class="hd-client"></span></div><div><b>Medications</b><span id="brMeds"></span></div><div><b>School nurse</b><span id="brNurse"></span></div></div>
+  <div id="briefBody"></div>
+  <div class="cite noprint">For the person who rates the grid (teacher, paraprofessional, nurse). It prints alone with <b>Print rater brief</b>; it is not part of the record&rsquo;s printout.</div>
 </div>
 
 <!-- ================================================================ EPS -->
@@ -995,8 +1035,14 @@ td input,td select{max-width:100%}
     <div class="nbh-print-meta"><div class="nbh-print-title">Medication Side-Effect Monitoring</div><div>Form MS-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">Metabolic and Vital-Signs Log</div>
-  <p class="method" style="margin:0 0 8px">Recorded by the school nurse where available. ADA/APA (2004) schedule for second-generation antipsychotics: weight (BMI), waist, blood pressure, fasting glucose, and lipids at baseline; weight at 4, 8, and 12 weeks, then quarterly; blood pressure, fasting glucose, and lipids at 12 weeks, then blood pressure and glucose annually and a normal lipid profile every 5 years (glucose and lipids per the prescriber). For a child, height is measured with weight and BMI is read as a percentile for age and sex. Laboratory values are entered only when the prescriber shares them. BMI is computed from the height on the plan sheet.</p>
-  <div class="ms-scroll"><table class="grid" id="vitTbl"><thead><tr><th class="c" style="width:30px">#</th><th style="width:78px">Date</th><th class="c">Weight (kg)</th><th class="c">BMI</th><th class="c">Waist (cm)</th><th class="c">BP</th><th class="c">Pulse</th><th class="c">Sleep (h, reported)</th><th class="c">Appetite (0–3)</th><th>Labs / notes (from prescriber)</th></tr></thead><tbody id="vitBody"></tbody></table></div>
+  <p class="method" style="margin:0 0 8px">Recorded by the school nurse where available. ADA/APA (2004) schedule for second-generation antipsychotics: weight (BMI), waist, blood pressure, fasting glucose, and lipids at baseline; weight at 4, 8, and 12 weeks, then quarterly; blood pressure, fasting glucose, and lipids at 12 weeks, then blood pressure and glucose annually and a normal lipid profile every 5 years (glucose and lipids per the prescriber). For a child, height is measured with weight and BMI is read as a percentile for age and sex. Laboratory values are entered only when the prescriber shares them. BMI is computed from each row&rsquo;s height (the last height entered carries forward; before any, the plan sheet&rsquo;s) and is the raw value: for a child it is read as a percentile for age and sex on the nurse&rsquo;s growth chart. Weight, height, blood pressure and pulse items checked on the plan are recorded here, not rated on the grid, and every column that holds a value is quoted in the report.</p><!-- v23.08 (review F441, F446) -->
+  <div class="ident" style="grid-template-columns:repeat(4,1fr);margin:0 0 8px"><!-- v23.08 (review F441) the nurse's range for this student -->
+    <div class="f"><label for="mPLo">Alert if pulse below</label><input id="mPLo" name="m.pulseLo" data-vit="1" inputmode="numeric"></div>
+    <div class="f"><label for="mPHi">Alert if pulse above</label><input id="mPHi" name="m.pulseHi" data-vit="1" inputmode="numeric"></div>
+    <div class="f"><label for="mSLo">Alert if systolic BP below</label><input id="mSLo" name="m.sysLo" data-vit="1" inputmode="numeric"></div>
+    <div class="f"><label for="mSHi">Alert if systolic BP above</label><input id="mSHi" name="m.sysHi" data-vit="1" inputmode="numeric"></div>
+  </div>
+  <div class="ms-scroll"><table class="grid" id="vitTbl"><thead><tr><th class="c" style="width:30px">#</th><th style="width:78px">Date</th><th class="c">Weight (kg)</th><th class="c">Height (cm)</th><th class="c" title="From this row&rsquo;s height; for a child, read it as a percentile for age and sex on the nurse&rsquo;s growth chart">BMI (raw)</th><th class="c">Waist (cm)</th><th class="c">BP</th><th class="c">Pulse</th><th class="c">Sleep (h, reported)</th><th>Labs / notes (from prescriber)</th></tr></thead><tbody id="vitBody"></tbody></table></div>
   <div class="figure" id="vitFig"></div>
   <div class="cite">Monitoring schedule after the American Diabetes Association, American Psychiatric Association, American Association of Clinical Endocrinologists, and North American Association for the Study of Obesity consensus statement (2004); youth weight-gain findings after Correll et al. (2009). Weight change of 7% or more from baseline is the threshold the labels use for "clinically significant" weight gain and is marked on the graph; for pediatric patients the labels add that weight gain should be assessed against that expected for normal growth.</div>
 </div>
@@ -1008,23 +1054,25 @@ td input,td select{max-width:100%}
     <div class="nbh-print-meta"><div class="nbh-print-title">Medication Side-Effect Monitoring</div><div>Form MS-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">Report to the Prescriber</div>
-  <div class="sumhead"><div><b>Student</b><span class="hd-client"></span></div><div><b>Prescriber</b><span id="rpDoc"></span></div><div><b>Report date</b><span id="rpDate"></span></div></div>
+  <div class="sumhead"><div><b>Student</b><span class="hd-client"></span></div><div><b>Prescriber</b><span id="rpDoc"></span></div><div><b>Report date</b><input name="r.date" id="rpDate" aria-label="Report date" placeholder="M/D/YYYY" style="border:0;border-bottom:1px solid var(--rule-2);width:100%;font:inherit;font-size:13px;background:transparent"></div></div>
+  <p class="method" id="rpPeriod" style="margin:0 0 8px"></p><!-- v23.08 (review F442) the period covered -->
   <div class="warn" style="margin-top:0"><b>Purpose</b>School-based observations of possible medication effects, recorded by staff trained in the observation codes below, for the prescriber's review. Observations are described, not diagnosed. Ratings: 0 not observed, 1 mild or questionable, 2 moderate, 3 marked. The behavior-plan target is shown on the same scale for comparison; its own measure (count, rate, or duration) is in the BIP data. When a change coincides with a dose change, that is a correlation in time, not evidence that the medication caused it: a BIP change, the setting, illness, or sleep can produce the same pattern.</div>
   <div id="rpAlerts"></div>
   <div class="ms-keep"><h3 class="sub">Medications and Watched Effects</h3>
   <div id="rpMeds"></div></div>
   <div class="ms-keep"><h3 class="sub">Summary by Week</h3>
-  <p class="method" style="margin:0 0 6px">Weeks are consecutive groups of five grid columns (school days). Each cell gives the days rated 1 or more and the mean rating for that week, a blank counting as 0 (not observed), so a day without an observation lowers the mean. Trend compares the last week&rsquo;s mean with the first week&rsquo;s: rising or falling when they differ by more than 0.4, otherwise stable. A trend shows when a change happened, not what caused it.</p>
+  <p class="method" style="margin:0 0 6px">Weeks are five grid columns (school days), headed by their dates; in brackets, the days observed (a day with a date or a rating, not marked absent). Each cell: days rated 1 or more / mean over the days observed. Trend compares the last two weeks with three or more days observed (rising or falling when the means differ by more than 0.4); a red-flag item adds its last rating. Dose: days given of days present. A trend shows when a change happened, not what caused it.</p><!-- v23.08 (review F440) -->
   <div class="ms-scroll" tabindex="0" role="region" aria-label="Summary by week"><table class="grid" id="rpTbl"></table></div></div>
   <div class="figure" id="rpFig"></div>
   <div class="legendrow" id="rpLegend"></div>
   <div class="ms-keep"><h3 class="sub">Extrapyramidal Screen and Vitals</h3>
   <div id="rpEps"></div></div>
   <div class="defs" style="margin-top:8px">
-    <div class="drow"><div class="dlab">Team observations and questions for the prescriber</div><div class="dval"><textarea name="r.note" class="tall" placeholder="e.g., Drowsiness is heaviest in the hour after the 8:00 dose and has not changed over three weeks; BIP target fell 60% after the 9/10 increase; the team asks whether timing could be adjusted."></textarea></div></div>
+    <div class="drow"><div class="dlab">Team observations and questions for the prescriber</div><div class="dval"><textarea name="r.note" class="tall" placeholder="e.g., Drowsiness is heaviest in the hour after the 8:00 dose and has not changed over three weeks; the BIP target fell 60% after the 9/10 increase. (What the team saw; any change to the medication is the prescriber&rsquo;s decision.)"></textarea></div></div>
     <div class="drow"><div class="dlab">Sent by / date / method</div><div class="dval"><textarea name="r.sent" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Prescriber response and any change (date)</div><div class="dval"><textarea name="r.resp" class="nbh-line" rows="1"></textarea></div></div>
   </div>
+  <div id="rpRoiSig"></div><!-- v23.08 (review F438) -->
   <div class="sig"><div>BCBA signature / date</div><div>School nurse / date</div><div>Parent or guardian acknowledged / date</div></div>
   <div class="cite">The report puts into practice the recommendation of Li and Poling (2018) that behavior analysts foster collaboration with psychiatrists and other physicians. Threshold rules on this page (red-flag reporting, the AIMS movement criterion, 7% weight change) are stated in the guide and on the EPS and vitals sheets; the prescriber's judgment governs any change to treatment.</div>
 </div>
@@ -1078,8 +1126,8 @@ const SE={
  nightm:{l:'Vivid dreams / nightmares (reported)',c:'Sleep',o:'Parent report'},
  appdown:{l:'Decreased appetite',c:'Appetite / weight',o:'Leaves most of lunch, refuses snack'},
  appup:{l:'Increased appetite / food seeking',c:'Appetite / weight',o:'Asks for more, takes others\' food, eats quickly'},
- wtgain:{l:'Weight gain',c:'Appetite / weight',o:'Weigh on the vitals sheet; clothes tight'},
- wtloss:{l:'Weight loss',c:'Appetite / weight',o:'Weigh on the vitals sheet'},
+ wtgain:{l:'Weight gain',c:'Measured (vitals sheet)',o:'Nurse weighs; vitals sheet'},
+ wtloss:{l:'Weight loss',c:'Measured (vitals sheet)',o:'Nurse weighs; vitals sheet'},
  thirst:{l:'Excess thirst / urination',c:'Appetite / weight',o:'Frequent drinks and bathroom trips'},
  nausea:{l:'Nausea / stomach ache',c:'GI',o:'Holds stomach, reports feeling sick, refuses food'},
  vomit:{l:'Vomiting',c:'GI',o:'Any episode',f:1},
@@ -1106,8 +1154,8 @@ const SE={
  fever:{l:'Fever with sore throat or mouth sores',c:'Other physical',o:'Report immediately (blood-count warning)',f:1},
  nms:{l:'Fever with severe stiffness, confusion, sweating',c:'Movement (EPS)',o:'Neuroleptic malignant syndrome pattern: emergency',f:1},
  faint:{l:'Fainting / very slow pulse',c:'Cardiovascular',o:'Report immediately',f:1},
- hr:{l:'Fast heartbeat / palpitations (reported)',c:'Cardiovascular',o:'Pulse on vitals sheet; reports heart racing'},
- bp:{l:'Blood pressure change',c:'Cardiovascular',o:'Nurse measures; enter on vitals sheet'},
+ hr:{l:'Fast heartbeat / palpitations (reported)',c:'Measured (vitals sheet)',o:'Nurse takes the pulse; vitals sheet'},
+ bp:{l:'Blood pressure change',c:'Measured (vitals sheet)',o:'Nurse measures; vitals sheet'},
  breath:{l:'Difficulty breathing or swallowing',c:'Cardiovascular',o:'Emergency',f:1},
  irrit:{l:'Irritability / anger (new or worse)',c:'Behavior / mood',o:'Compare with BIP data'},
  activation:{l:'Agitation / activation / restlessness with talkativeness',c:'Behavior / mood',o:'Increased motor activity, impulsivity, giddiness'},
@@ -1122,12 +1170,14 @@ const SE={
  paresth:{l:'Tingling in hands or feet (reported)',c:'Other physical',o:'Student report'},
  taste:{l:'Taste change / soda tastes flat (reported)',c:'Other physical',o:'Student report'},
  kidney:{l:'Flank pain or blood in urine (reported)',c:'Other physical',o:'Kidney-stone warning: report',f:1},
- growth:{l:'Growth slowing (height)',c:'Appetite / weight',o:'Height on plan sheet; nurse tracks'},
+ growth:{l:'Growth slowing (height)',c:'Measured (vitals sheet)',o:'Nurse measures height; vitals sheet'},
  seizure:{l:'Seizure or new seizure-like event',c:'Other physical',o:'Emergency; district protocol',f:1},
  urinret:{l:'Difficulty urinating (reported)',c:'Other physical',o:'Nurse report'},
  heat:{l:'Heat intolerance / flushing',c:'Other physical',o:'Flushed, overheated (anticholinergic)'},
  labs:{l:'Laboratory monitoring (prescriber)',c:'Laboratory',o:'Not observable at school; entered from the prescriber'}
 };
+/* v23.08 (review F441): weight, height, blood pressure and pulse are measured by the nurse on the vitals sheet: no grid row */
+const MEAS='Measured (vitals sheet)';
 /* ---------- medication library ---------- */
 const MEDS=[
  {n:'Risperidone',b:'Risperdal',cls:'Second-generation antipsychotic',use:'FDA: irritability associated with autism (5–17), schizophrenia, bipolar mania. Off-label: aggression, disruptive behavior in ID.',se:['sedation','appup','wtgain','prolactin','enuresis','tremor','rigid','akathisia','drool','dizzy','constip','nausea','headache','td','dystonia','nms','labs'],box:'Increased mortality in elderly patients with dementia-related psychosis.'},
@@ -1182,7 +1232,7 @@ const MEDS=[
 ];
 
 /* ---------- views ---------- */
-function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));if(v==='track')renderGrid();if(v==='vitals')renderVitals();if(v==='report')renderReport();if(v==='eps'){renderEpsTables();}window.scrollTo({top:0});}
+function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));if(v==='track')renderGrid();if(v==='vitals')renderVitals();if(v==='report')renderReport(true);if(v==='brief')renderBrief();if(v==='eps'){renderEpsTables();}window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 document.addEventListener('input',e=>{if(e.target.dataset.hd)$$('.hd-client').forEach(x=>x.textContent=e.target.value);});
 
@@ -1221,30 +1271,54 @@ document.addEventListener('change',e=>{if(e.target.dataset.med!=null&&e.target.t
 document.addEventListener('input',e=>{if(e.target.dataset.med!=null&&e.target.tagName==='INPUT'){const i=+e.target.dataset.med;$('#medTtl'+i).textContent=medTitle(i);}});
 function medList(){return $$('#medWrap .card').map(c=>{const i=+c.dataset.med;const k=val(`md[${i}].lib`);const m=k!==''?MEDS[+k]:null;const name=m&&m.se.length?m.n:(val(`md[${i}].name`)||(m?m.n:''));return {i,name,dose:val(`md[${i}].dose`),m,watched:Object.keys(SE).filter(s=>document.querySelector(`[name="md[${i}].w.${s}"]`)?.checked)};}).filter(x=>x.name);}
 /* v21.16 audit (F7): laboratory monitoring is listed for the prescriber and is not a grid row */
-function watchedRows(){const rows=[];const seen={};medList().forEach(md=>md.watched.filter(s=>SE[s].c!=='Laboratory').forEach(s=>{if(!seen[s]){seen[s]={key:s,meds:[]};rows.push(seen[s]);}seen[s].meds.push(md.name);}));return rows;}
+function watchedRows(){const rows=[];const seen={};medList().forEach(md=>md.watched.filter(s=>SE[s].c!=='Laboratory'&&SE[s].c!==MEAS).forEach(s=>{if(!seen[s]){seen[s]={key:s,meds:[]};rows.push(seen[s]);}seen[s].meds.push(md.name);}));return rows;}
 
 /* ---------- tracking grid ---------- */
 let cellState={};/* key: `${rowkey}|${col}` -> 0..3 */
+/* v23.08 (review F440): a day is observed when it is not marked absent and has a date, or a rating; a blank day not yet
+   dated (a grid set longer than the days entered) and an absence are left out of every mean, not scored 0 */
+function msObs(c,dates,times){if(/absent/i.test(String(times[c]||'')))return false;if(String(dates[c]||'').trim())return true;
+ return Object.keys(cellState).some(k=>k.split('|')[1]===String(c)&&cellState[k]>0);}
+function msObsList(){const n=+$('#nDays').value,d=Array.from({length:n},(_,c)=>val(`g.date.${c}`)),t=Array.from({length:n},(_,c)=>val(`g.time.${c}`));return Array.from({length:n},(_,c)=>msObs(c,d,t));}
 function renderGrid(keep){const n=+$('#nDays').value;const rows=watchedRows();const g=$('#grid');
  $('#hdMeds').textContent=medList().map(m=>m.name+(m.dose?' '+m.dose:'')).join('; ');
  const dates=Array.from({length:n},(_,c)=>val(`g.date.${c}`));const times=Array.from({length:n},(_,c)=>val(`g.time.${c}`));
- let h='<thead><tr><th class="corner rowlab">Watched item</th>'+Array.from({length:n},(_,c)=>`<th>D${c+1}</th>`).join('')+'<th>Days ≥1</th><th>Mean</th></tr></thead><tbody>';
+ const obs=Array.from({length:n},(_,c)=>msObs(c,dates,times)),nObs=obs.filter(Boolean).length;   /* v23.08 (F440) */
+ let h='<thead><tr><th class="corner rowlab">Watched item</th>'+Array.from({length:n},(_,c)=>`<th${/absent/i.test(times[c])?' class="ms-off" title="Absent: not counted"':''}>D${c+1}</th>`).join('')+'<th>Days ≥1</th><th>Mean</th></tr></thead><tbody>';
  h+='<tr><td class="rowlab"><small>Date</small></td>'+Array.from({length:n},(_,c)=>`<td class="dateline"><input name="g.date.${c}" value="${esc(dates[c])}" placeholder="m/d" aria-label="Date, D${c+1}"></td>`).join('')+'<td class="tot"></td><td class="tot"></td></tr>';
- h+='<tr><td class="rowlab"><small>Time observed</small></td>'+Array.from({length:n},(_,c)=>`<td class="dateline"><input name="g.time.${c}" value="${esc(times[c])}" placeholder="hh:mm" aria-label="Time observed, D${c+1}"></td>`).join('')+'<td class="tot"></td><td class="tot"></td></tr>';
+ h+='<tr><td class="rowlab"><small>Time of the worst</small></td>'+Array.from({length:n},(_,c)=>`<td class="dateline"><input name="g.time.${c}" value="${esc(times[c])}" placeholder="hh:mm" title="The time of the worst period that day, or absent" aria-label="Time of the worst, D${c+1} (or absent)"></td>`).join('')+'<td class="tot"></td><td class="tot"></td></tr>';   /* v23.08 (F443) */
  const fixed=[{key:'_dose',l:'Dose given as scheduled',sub:'0 = not given / unknown, 3 = given',fixed:true},{key:'_bip',l:val('m.bip')||'BIP target behavior',sub:'same 0–3 scale from the day\'s data'}];
  const all=[...rows.map(r=>({key:r.key,l:SE[r.key].l,sub:r.meds.join(', '),flag:!!SE[r.key].f})),...fixed];
  if(!rows.length)h+=`<tr><td class="rowlab" colspan="${n+3}" style="text-align:center;color:var(--ink-soft);padding:10px">Check side effects on the plan sheet to create rows.</td></tr>`;
  /* v21.16 audit (F9, F12). Each cell names its item, day, and rating for a screen reader (the rating was shown only by
     shading and a slash); the dose row is given or not given, so it has no mean. */
  const LV=['0, not observed','1, mild or questionable','2, moderate','3, marked'];
- all.forEach((r,ri)=>{const vals=Array.from({length:n},(_,c)=>cellState[r.key+'|'+c]||0);const present=vals.filter(v=>v>0).length;const mean=vals.length?(vals.reduce((a,b)=>a+b,0)/n):0;
-  h+=`<tr class="${ri%2?'band':''}"><td class="rowlab">${esc(r.l)}<small>${esc(r.sub)}</small></td>`+vals.map((v,c)=>`<td class="mark"><button type="button" class="cell${r.flag?' flagged':''}" data-key="${esc(r.key)}" data-col="${c}" data-state="${v}" tabindex="0" aria-label="${esc(r.l+', D'+(c+1)+(dates[c]?' ('+dates[c]+')':'')+': '+(r.key==='_dose'?(v?'given':'not given or unknown'):(LV[v]||v))+(r.flag?', red-flag item':''))}"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="3" y1="97" x2="97" y2="3"/></svg><span class="glyph" aria-hidden="true">${v>=2?v:''}</span></button></td>`).join('')+`<td class="tot">${present}</td><td class="tot">${r.key==='_dose'?'&mdash;':mean.toFixed(2)}</td></tr>`;});
+ all.forEach((r,ri)=>{const vals=Array.from({length:n},(_,c)=>cellState[r.key+'|'+c]||0);const present=vals.filter(v=>v>0).length;
+  const ov=vals.filter((v,c)=>obs[c]),mean=ov.length?ov.reduce((a,b)=>a+b,0)/ov.length:null;   /* v23.08 (F440) over the days observed */
+  const rf=r.flag&&SE[r.key]?`<small class="rfo">\u2691 ${esc(SE[r.key].o)}${/report|emergenc|immediately|protocol/i.test(SE[r.key].o)?'':': report at once'}</small>`:'';   /* v23.08 (F439) the instruction travels with the paper grid */
+  h+=`<tr class="${ri%2?'band':''}"><td class="rowlab">${esc(r.l)}<small>${esc(r.sub)}</small>${rf}</td>`+vals.map((v,c)=>`<td class="mark"><button type="button" class="cell${r.flag?' flagged':''}" data-key="${esc(r.key)}" data-col="${c}" data-state="${v}" tabindex="0" aria-label="${esc(r.l+', D'+(c+1)+(dates[c]?' ('+dates[c]+')':'')+': '+(r.key==='_dose'?(v?'given':'not given or unknown'):(LV[v]||v))+(r.flag?', red-flag item':''))}"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="3" y1="97" x2="97" y2="3"/></svg><span class="glyph" aria-hidden="true">${v>=2?v:''}</span></button></td>`).join('')+`<td class="tot">${present}</td><td class="tot">${r.key==='_dose'?(nObs?vals.filter((v,c)=>obs[c]&&v>0).length+' of '+nObs:'&mdash;'):(mean==null?'&mdash;':mean.toFixed(2))}</td></tr>`;});
  g.innerHTML=h+'</tbody>';}
 /* v21.16 audit (F9, F12). The dose row is given (3) or not given (0): a click toggles it and keys 1-3 mark it given (a
    slash or a light shade read as a partial dose and was counted as given). After a rating the same cell keeps the
    keyboard focus; the redraw had dropped it out of the grid. */
-function msRate(b,v){const key=b.dataset.key,col=b.dataset.col;cellState[key+'|'+col]=v;renderGrid();
- const nb=document.querySelector(`#grid .cell[data-key="${key}"][data-col="${col}"]`);if(nb)nb.focus({preventScroll:true});}
+function msRate(b,v){const key=b.dataset.key,col=b.dataset.col,was=cellState[key+'|'+col]||0;cellState[key+'|'+col]=v;renderGrid();
+ const nb=document.querySelector(`#grid .cell[data-key="${key}"][data-col="${col}"]`);if(nb)nb.focus({preventScroll:true});
+ if(SE[key]&&SE[key].f&&v>=1&&!was)rfShow(key,+col,v);}
+/* v23.08 (review F439): a red-flag item rated from blank says at once what to do, from the item's own description (an
+   emergency item: emergency services first), and takes a line on who was called and when into the notes, by date */
+function rfShow(key,c,v){const box=$('#rfNote');if(!box)return;const s=SE[key],d=val(`g.date.${c}`)||('D'+(c+1)),em=/emergenc/i.test(s.o)||key==='breath',nurse=val('m.nurse');
+ const step=em?'Emergency item: call emergency services first, then the school nurse, and follow the district protocol.':'Red-flag item: call the school nurse now; the nurse reaches the parent and the prescriber. Do not wait for the report.';
+ box.innerHTML=`<b>${em?'Emergency':'Red flag'}: act now</b>${esc(s.l)}, ${esc(d)}, rated ${v}. ${esc(s.o)}. ${esc(step)}${nurse?' School nurse: '+esc(nurse)+'.':''}`
+  +`<div class="rf-row"><label for="rfWho">Who was called, and when</label><input id="rfWho" autocomplete="off" placeholder="e.g., nurse called 10:35; parent reached 10:50"><button type="button" class="tool" id="rfAdd">Add to the notes</button><button type="button" class="tool" id="rfClose">Close</button></div>`;
+ box.hidden=false;box.dataset.key=key;box.dataset.col=String(c);box.dataset.v=String(v);
+ try{nbhUI.toast(step,{kind:'warn',ms:12000});}catch(e){}}
+document.addEventListener('click',e=>{const box=$('#rfNote');if(!box)return;
+ if(e.target.closest('#rfClose')){box.hidden=true;return;}
+ if(!e.target.closest('#rfAdd'))return;const key=box.dataset.key,c=+box.dataset.col,s=SE[key];if(!s)return;
+ const who=String(($('#rfWho')||{}).value||'').trim(),t=document.querySelector('[name="t.notes"]');if(!t)return;
+ const line=(val(`g.date.${c}`)||('D'+(c+1)))+': '+s.l+' rated '+box.dataset.v+' (red flag): '+(who||'[who was called, and when]');
+ t.value=(t.value.trim()?t.value.replace(/\s+$/,'')+'\n':'')+line;t.dispatchEvent(new Event('input',{bubbles:true}));box.hidden=true;
+ try{nbhUI.toast('Added to the notes by date.',{kind:'ok'});}catch(x){}});
 document.addEventListener('click',e=>{const b=e.target.closest('.cell');if(!b)return;const v=cellState[b.dataset.key+'|'+b.dataset.col]||0;msRate(b,b.dataset.key==='_dose'?(v?0:3):(v+1)%4);});
 document.addEventListener('keydown',e=>{const b=e.target.closest?.('.cell');if(!b)return;if(/^[0-3]$/.test(e.key)){msRate(b,b.dataset.key==='_dose'&&+e.key?3:+e.key);e.preventDefault();}});
 
@@ -1274,12 +1348,19 @@ const MDYs=d=>(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
 /* the earliest start date of an antipsychotic on the plan */
 function apStart(){let best=null,name='';$$('#medWrap .card').forEach(card=>{const i=+card.dataset.med,k=+val(`md[${i}].lib`),m=MEDS[k];if(!m||!/antipsychotic/i.test(m.cls||''))return;
  const d=msDate(val(`md[${i}].start`));if(d&&(!best||d<best)){best=d;name=m.n;}});return best?{d:best,name}:null;}
-function renderScreenDue(){const el=$('#screenDue');if(!el)return;const st=apStart();
- if(!st){el.innerHTML='<b>Schedule</b>No antipsychotic with a start date is on the plan; the schedule applies when one is.';return;}
- const logged=occ=>screenLog.filter(r=>r.occ===occ&&msDate(r.date)).map(r=>msDate(r.date)).sort((a,b)=>a-b);
- const mark=(occ,due)=>{const l=logged(occ);const near=l.find(d=>Math.abs(d-due)<=45*864e5);return near?' (logged '+MDYs(near)+')':(due<new Date()?' (not logged)':'');};
- const three=addMonths(st.d,3);const sixes=logged('6-month review');let next=addMonths(three,6);if(sixes.length){const last=sixes[sixes.length-1];next=addMonths(last,6);}
- el.innerHTML=`<b>Schedule</b>From the start of ${esc(st.name)} on ${MDYs(st.d)}: baseline ${MDYs(st.d)}${mark('Baseline',st.d)}; 3 months ${MDYs(three)}${mark('3 months',three)}; then every 6 months${sixes.length?', last logged '+MDYs(sixes[sixes.length-1]):''}, next due ${MDYs(next)}. Screen again whenever the grid shows new movement signs.`;}
+/* v23.08 (review F447): a screen of any occasion within 45 days of a due date counts for it; the 6-month screens run from
+   the latest screen logged after the 3-month one (of any occasion), and a date passed says overdue. The same schedule
+   goes to the workstation's due list (window.__nbhDue, F445). */
+function screenSchedule(){const st=apStart();if(!st)return null;const D45=45*864e5;
+ const all=screenLog.map(r=>msDate(r.date)).filter(Boolean).sort((a,b)=>a-b);
+ const near=due=>all.filter(d=>Math.abs(d-due)<=D45).pop()||null;
+ const three=addMonths(st.d,3),after=all.filter(d=>d>=new Date(three.getTime()-D45));
+ const lastSix=after.length?after[after.length-1]:null,next=lastSix?addMonths(lastSix,6):addMonths(three,6);
+ return {st,items:[{what:'baseline',due:st.d,done:near(st.d)},{what:'3 months',due:three,done:near(three)}],lastSix,next,overdue:next<new Date()};}
+function renderScreenDue(){const el=$('#screenDue');if(!el)return;const S=screenSchedule();
+ if(!S){el.innerHTML='<b>Schedule</b>No antipsychotic with a start date is on the plan; the schedule applies when one is.';return;}
+ const now=new Date(),mk=it=>it.done?' (logged '+MDYs(it.done)+')':(it.due<now?' (not logged)':'');
+ el.innerHTML=`<b>Schedule</b>From the start of ${esc(S.st.name)} on ${MDYs(S.st.d)}: baseline ${MDYs(S.items[0].due)}${mk(S.items[0])}; 3 months ${MDYs(S.items[1].due)}${mk(S.items[1])}; then every 6 months${S.lastSix?', last screen '+MDYs(S.lastSix):''}, next due ${MDYs(S.next)}${S.overdue?' <b class="ms-over">(overdue)</b>':''}. A screen of any occasion within 45 days of a due date counts for it. Screen again whenever the grid shows new movement signs.`;}
 function renderScreens(){const tb=$('#screenTbl tbody');if(!tb)return;if(!screenLog.length)screenLog.push(scrBlank());
  tb.innerHTML=screenLog.map((r,i)=>`<tr><td><input class="txt" data-sl="${i}" data-k="date" value="${esc(r.date)}" placeholder="M/D/YYYY"></td><td><select data-sl="${i}" data-k="occ"><option value=""></option>${OCC.map(o=>`<option${r.occ===o?' selected':''}>${o}</option>`).join('')}</select></td><td><input class="txt" data-sl="${i}" data-k="rater" value="${esc(r.rater)}"></td><td class="c"><input class="txt" data-sl="${i}" data-k="total" value="${esc(r.total)}" style="text-align:center"></td><td><input class="txt" data-sl="${i}" data-k="sk" value="${esc(r.sk)}" placeholder="meets / below"></td><td><input class="txt" data-sl="${i}" data-k="obs" value="${esc(r.obs)}"></td><td><input class="txt" data-sl="${i}" data-k="note" value="${esc(r.note)}"></td><td class="c noprint"><button type="button" class="tool" data-sldel="${i}" title="Delete this row" aria-label="Delete screen row ${i+1}">&times;</button></td></tr>`).join('');
  renderScreenDue();}
@@ -1301,9 +1382,13 @@ function msScreens(v){return Array.isArray(v)?v.filter(r=>r&&typeof r==='object'
 renderScreens();
 
 /* ---------- vitals ---------- */
-function vitRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="v[${i}].d" data-vit="1"></td><td class="c"><input class="num" name="v[${i}].wt" data-vit="1"></td><td class="c calc" id="bmi${i}"></td><td class="c"><input class="num" name="v[${i}].waist" data-vit="1"></td><td class="c"><input class="num" name="v[${i}].bp" data-vit="1" placeholder="120/80"></td><td class="c"><input class="num" name="v[${i}].pulse" data-vit="1"></td><td class="c"><input class="num" name="v[${i}].sleep" data-vit="1"></td><td class="c"><input class="num" name="v[${i}].app" data-vit="1"></td><td><input class="txt" name="v[${i}].n"></td></tr>`;return tr;}
+function vitRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="v[${i}].d" data-vit="1"></td><td class="c"><input class="num" name="v[${i}].wt" data-vit="1"></td><td class="c"><input class="num" name="v[${i}].ht" data-vit="1" placeholder="cm"></td><td class="c calc" id="bmi${i}"></td><td class="c"><input class="num" name="v[${i}].waist" data-vit="1"></td><td class="c"><input class="num" name="v[${i}].bp" data-vit="1" placeholder="120/80"></td><td class="c"><input class="num" name="v[${i}].pulse" data-vit="1"></td><td class="c"><input class="num" name="v[${i}].sleep" data-vit="1"></td><td><input class="txt" name="v[${i}].n"></td></tr>`;return tr;}
 function renderVitRows(){const n=+$('#nVit').value,b=$('#vitBody');while(b.children.length>n)b.lastChild.remove();for(let i=b.children.length;i<n;i++)b.appendChild(vitRow(i));}
-function vitData(){const ht=num('m.ht');const rows=[];$$('#vitBody tr').forEach((tr,i)=>{const wt=num(`v[${i}].wt`);const bmi=(wt&&ht)?wt/((ht/100)**2):null;const cell=$('#bmi'+i);if(cell)cell.textContent=bmi?bmi.toFixed(1):'';if(wt!=null||num(`v[${i}].pulse`)!=null)rows.push({x:i+1,d:val(`v[${i}].d`),wt,bmi,pulse:num(`v[${i}].pulse`),sleep:num(`v[${i}].sleep`),app:num(`v[${i}].app`)});});return rows;}
+/* v23.08 (review F446, F441): each row's BMI from its own height (the last height entered carries forward; before any, the
+   plan sheet's), and every column with a value: waist, blood pressure (systolic and diastolic read), pulse, sleep */
+function vitData(){let ht=num('m.ht');const rows=[];$$('#vitBody tr').forEach((tr,i)=>{const h=num(`v[${i}].ht`);if(h!=null)ht=h;const wt=num(`v[${i}].wt`);const bmi=(wt&&ht)?wt/((ht/100)**2):null;const cell=$('#bmi'+i);if(cell)cell.textContent=bmi?bmi.toFixed(1):'';
+ const bp=val(`v[${i}].bp`),m=/^(\d{2,3})\s*\/\s*(\d{2,3})$/.exec(bp),pulse=num(`v[${i}].pulse`),waist=num(`v[${i}].waist`),sleep=num(`v[${i}].sleep`);
+ if(wt!=null||pulse!=null||bp||waist!=null||sleep!=null||h!=null)rows.push({x:i+1,d:val(`v[${i}].d`),wt,ht:h!=null?h:(wt!=null?ht:null),htOwn:h!=null,bmi,pulse,bp,sys:m?+m[1]:null,waist,sleep});});return rows;}
 function renderVitals(){renderVitRows();const rows=vitData();const el=$('#vitFig');const w=rows.filter(r=>r.wt!=null);if(w.length<2){el.innerHTML=w.length?'<h3>Weight</h3><div class="empty">Enter at least two weights to graph.</div>':'';return;}
  const W=560,H=220,L=44,R=14,T=18,B=34,pw=W-L-R,ph=H-T-B;const base=w[0].wt;const ys=w.map(r=>r.wt);const ymin=Math.floor(Math.min(...ys,base*0.93)-1),ymax=Math.ceil(Math.max(...ys,base*1.07)+1);const X=i=>L+i/(Math.max(1,w.length-1))*pw,Y=v=>T+ph-((v-ymin)/(ymax-ymin))*ph;
  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;for(let k=0;k<=4;k++){const v=ymin+(ymax-ymin)*k/4,yy=Y(v);s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}"/><text class="tick" x="${L-5}" y="${yy+3}" text-anchor="end">${v.toFixed(1)}</text>`;}
@@ -1314,42 +1399,84 @@ function renderVitals(){renderVitRows();const rows=vitData();const el=$('#vitFig
 document.addEventListener('input',e=>{if(e.target.dataset.vit)renderVitals();});
 
 /* ---------- report ---------- */
-function renderReport(){$('#rpDoc').textContent=val('m.doc');$('#rpDate').textContent=new Date().toLocaleDateString();
- const n=+$('#nDays').value;const rows=watchedRows();const meds=medList();
- $('#rpMeds').innerHTML=meds.length?meds.map(m=>`<div class="rec"><div class="rh"><b>${esc(m.name)}</b><span class="tag na">${esc(m.dose||'dose not entered')}</span></div><p>Watched: ${m.watched.map(s=>SE[s].l).join('; ')||'none'}.${val(`md[${m.i}].change`)?' Last change: '+esc(val(`md[${m.i}].change`))+'.':''}</p></div>`).join(''):'<div class="empty">No medications entered.</div>';
+/* v23.08 (review F438): the release of information is a date in the plan's box (M/D/YYYY, M/D/YY or ISO; words may follow) */
+function roiDate(x){x=String(x||'');const m=/(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/.exec(x);if(m){const y=m[3].length===2?2000+(+m[3]):+m[3];return new Date(y,+m[1]-1,+m[2],12);}
+ const i=/(\d{4})-(\d{2})-(\d{2})/.exec(x);return i?new Date(+i[1],+i[2]-1,+i[3],12):null;}
+const isoD=d=>d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'';
+function renderReport(show){$('#rpDoc').textContent=val('m.doc');
+ /* v23.08 (review F442): the report's date is kept with the record: today's when it is first shown or printed, then as set */
+ const rd=$('#rpDate');if(show&&rd&&!String(rd.value||'').trim())rd.value=MDYs(new Date());
+ const n=+$('#nDays').value;const rows=watchedRows();const meds=medList();const obs=msObsList(),dts=Array.from({length:n},(_,c)=>val(`g.date.${c}`));
+ const od=dts.filter((d,c)=>obs[c]&&d),nObs=obs.filter(Boolean).length;
+ $('#rpPeriod').innerHTML=nObs?`<b>Period covered:</b> ${esc(od[0]||'')}${od.length>1?' – '+esc(od[od.length-1]):''}, ${nObs} school day${nObs===1?'':'s'} observed`+(n>nObs?` (${n-nObs} of the ${n} grid days not observed: absent, or not yet dated)`:'')+'.':'<b>Period covered:</b> no day observed yet.';
+ $('#rpMeds').innerHTML=meds.length?meds.map(m=>`<div class="rec"><div class="rh"><b>${esc(m.name)}</b><span class="tag na">${esc(m.dose||'dose not entered')}</span></div><p>Watched: ${m.watched.map(s=>SE[s].l+(SE[s].c===MEAS?' (measured on the vitals sheet)':'')).join('; ')||'none'}.${val(`md[${m.i}].change`)?' Last change: '+esc(val(`md[${m.i}].change`))+'.':''}</p></div>`).join(''):'<div class="empty">No medications entered.</div>';
  /* v21.16 audit (F4, F5). A red-flag item is listed at any rating (the guide: any red-flag observation is reported),
     apart from the measures that crossed a threshold (the AIMS criterion, a 7% weight change), which are for the
     prescriber's review rather than for action the same day. */
  const red=[],thr=[];rows.forEach(r=>{for(let c=0;c<n;c++){const v=cellState[r.key+'|'+c]||0;if(SE[r.key].f&&v>=1)red.push(`${SE[r.key].l}: rated ${v} on ${val(`g.date.${c}`)||'day '+(c+1)}`);}});
  if(num('eps.4')>=1)red.push('Acute dystonia rated present on the observer screen');
  const a=aimsSummary();if(a&&a.pos)thr.push('AIMS meets the Schooler-Kane movement criterion');
- const vw=vitData().filter(r=>r.wt!=null);if(vw.length>=2){const ch=(vw[vw.length-1].wt-vw[0].wt)/vw[0].wt;if(Math.abs(ch)>=0.07)thr.push(`Weight ${ch>0?'gain':'loss'} of ${Math.round(100*Math.abs(ch))}% from the first recorded weight (the 7% line; in a child, judged against expected growth)`);}
- $('#rpAlerts').innerHTML=(red.length?`<div class="alert"><b>Red-flag entries: each is reported at once when seen, not held for this report</b>${red.map(x=>esc(x)).join('<br>')}</div>`:'<div class="warn"><b>Red-flag items</b>None recorded in this period.</div>')
+ const vd=vitData(),vw=vd.filter(r=>r.wt!=null);if(vw.length>=2){const ch=(vw[vw.length-1].wt-vw[0].wt)/vw[0].wt;if(Math.abs(ch)>=0.07)thr.push(`Weight ${ch>0?'gain':'loss'} of ${Math.round(100*Math.abs(ch))}% from the first recorded weight (the 7% line; in a child, judged against expected growth)`);}
+ /* v23.08 (review F441): a pulse or a systolic pressure outside the range the nurse entered for the student */
+ const pLo=num('m.pulseLo'),pHi=num('m.pulseHi'),sLo=num('m.sysLo'),sHi=num('m.sysHi'),rg=(lo,hi)=>(lo!=null?lo:'')+'–'+(hi!=null?hi:'');
+ vd.forEach(r=>{const when=r.d||'row '+r.x;
+  if(r.pulse!=null&&((pLo!=null&&r.pulse<pLo)||(pHi!=null&&r.pulse>pHi)))thr.push(`Pulse ${r.pulse} on ${when}, outside the nurse's range for the student (${rg(pLo,pHi)})`);
+  if(r.sys!=null&&((sLo!=null&&r.sys<sLo)||(sHi!=null&&r.sys>sHi)))thr.push(`Blood pressure ${r.bp} on ${when}, systolic outside the nurse's range for the student (${rg(sLo,sHi)})`);});
+ /* v23.08 (review F438): with no release of information on file the report says not to send it, at the top and above the signatures */
+ const roi=roiDate(val('m.roi'));
+ $('#rpAlerts').innerHTML=(roi?'':`<div class="alert" id="rpRoi"><b>No release of information on file: do not send this report</b>The plan sheet has no date for a release of information signed by the parent or guardian. Sharing these observations with the prescriber is a disclosure from the education record and needs a signed, dated consent (FERPA, 34 CFR 99.30). Enter its date on the plan sheet once it is on file.</div>`)
+  +(red.length?`<div class="alert"><b>Red-flag entries: each is reported at once when seen, not held for this report</b>${red.map(x=>esc(x)).join('<br>')}</div>`:'<div class="warn"><b>Red-flag items</b>None recorded in this period.</div>')
   +(thr.length?`<div class="warn"><b>Measures past a threshold, for the prescriber&rsquo;s review</b>${thr.map(x=>esc(x)).join('<br>')}</div>`:'');
- /* weekly summary */
- const weeks=Math.ceil(n/5);const items=[...rows.map(r=>({key:r.key,l:SE[r.key].l})),{key:'_bip',l:val('m.bip')||'BIP target behavior'},{key:'_dose',l:'Dose given (days)'}];
- let h='<thead><tr><th class="lab">Item</th>'+Array.from({length:weeks},(_,w)=>`<th class="c">Wk ${w+1}<br><span style="font-weight:400">days ≥1 / mean</span></th>`).join('')+'<th class="c">Trend</th></tr></thead><tbody>';
- const series=[];
- items.forEach((it,idx)=>{const wk=[];for(let w=0;w<weeks;w++){const vals=[];for(let c=w*5;c<Math.min(n,w*5+5);c++)vals.push(cellState[it.key+'|'+c]||0);wk.push({p:vals.filter(v=>v>0).length,m:vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0});}
-  const first=wk[0].m,last=wk[weeks-1].m;const trend=weeks>1?(last-first>0.4?'rising':first-last>0.4?'falling':'stable'):'—';
-  if(it.key!=='_dose')series.push({name:it.l,vals:wk.map(w=>w.m)});
-  h+=`<tr><td class="lab">${esc(it.l)}</td>${wk.map(w=>`<td class="c">${it.key==='_dose'?w.p:w.p+' / '+w.m.toFixed(1)}</td>`).join('')}<td class="c">${it.key==='_dose'?'—':trend}</td></tr>`;});
+ const sg=$('#rpRoiSig');if(sg){sg.className=roi?'':'no';sg.textContent=roi?'Release of information on file: '+MDYs(roi)+'.':'No release of information on file: do not send this report.';}
+ /* weekly summary: v23.08 (review F440, F442) the days observed, the weeks' dates, the trend over weeks with three days observed */
+ const weeks=Math.ceil(n/5),W=Array.from({length:weeks},(_,w)=>{const cs=[];for(let c=w*5;c<Math.min(n,w*5+5);c++)cs.push(c);const ds=cs.map(c=>dts[c]).filter(Boolean);return {cs,oc:cs.filter(c=>obs[c]),from:ds[0]||'',to:ds[ds.length-1]||''};});
+ const items=[...rows.map(r=>({key:r.key,l:SE[r.key].l,f:!!SE[r.key].f})),{key:'_bip',l:val('m.bip')||'BIP target behavior'},{key:'_dose',l:'Dose given (days present)'}];
+ let h='<thead><tr><th class="lab">Item</th>'+W.map((w,i)=>`<th class="c">Wk ${i+1} (${w.oc.length})<br><span style="font-weight:400">${w.from?esc(w.from)+(w.to&&w.to!==w.from?'\u2013'+esc(w.to):''):''}</span></th>`).join('')+'<th class="c">Trend</th></tr></thead><tbody>';
+ const series=[],lastObs=obs.lastIndexOf(true);
+ items.forEach(it=>{const wk=W.map(w=>{const vals=w.oc.map(c=>cellState[it.key+'|'+c]||0);return {p:vals.filter(v=>v>0).length,m:vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:null,o:vals.length};});
+  const q=wk.filter(x=>x.o>=3);let trend='—';
+  if(it.key!=='_dose'&&q.length>=2){const x=q[q.length-2].m,y=q[q.length-1].m;trend=y-x>0.4?'rising':x-y>0.4?'falling':'stable';}
+  if(it.f&&lastObs>=0)trend+='; last '+(cellState[it.key+'|'+lastObs]||0)+(dts[lastObs]?' ('+dts[lastObs]+')':'');
+  if(it.key!=='_dose')series.push({name:it.l,vals:wk.map(x=>x.m)});
+  h+=`<tr><td class="lab">${esc(it.l)}</td>${wk.map(x=>`<td class="c">${!x.o?'—':it.key==='_dose'?x.p+' of '+x.o:x.p+' / '+x.m.toFixed(1)}</td>`).join('')}<td class="c">${esc(it.key==='_dose'?'—':trend)}</td></tr>`;});
  $('#rpTbl').innerHTML=h+'</tbody>';
- /* chart: mean severity per week */
- const el=$('#rpFig');if(!series.length||weeks<1){el.innerHTML='';$('#rpLegend').innerHTML='';return;}
- const W=560,H=220,L=40,R=14,T=18,B=34,pw=W-L-R,ph=H-T-B;const X=i=>L+i/(Math.max(1,weeks-1))*pw,Y=v=>T+ph-(v/3)*ph;
- let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;for(let k=0;k<=3;k++){const yy=Y(k);s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}"/><text class="tick" x="${L-5}" y="${yy+3}" text-anchor="end">${k}</text>`;}
- s+=`<line class="axis" x1="${L}" x2="${L}" y1="${T}" y2="${T+ph}"/><line class="axis" x1="${L}" x2="${W-R}" y1="${T+ph}" y2="${T+ph}"/>`;for(let w=0;w<weeks;w++)s+=`<text class="tick" x="${X(w)}" y="${T+ph+12}" text-anchor="middle">Wk ${w+1}</text>`;
- s+=`<text class="lbl" transform="translate(11,${T+ph/2}) rotate(-90)" text-anchor="middle">Mean severity (0–3)</text>`;
- series.forEach((sr,si)=>{const col=COLORS[si%COLORS.length];s+=`<path class="series" stroke="${col}" d="${sr.vals.map((v,i)=>(i?'L':'M')+X(i)+','+Y(v)).join('')}"/>`+sr.vals.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="3.5" fill="${col}"/>`).join('');});
- s+='</svg>';el.innerHTML=`<h3>Mean severity by week</h3>${s}`;$('#rpLegend').innerHTML=series.map((sr,si)=>`<span><i style="background:${COLORS[si%COLORS.length]}"></i>${esc(sr.name)}</span>`).join('');
- /* eps + vitals text */
+ /* chart: mean severity per week, over the days observed (a week with none is left out) */
+ const el=$('#rpFig');if(!series.length||weeks<1){el.innerHTML='';$('#rpLegend').innerHTML='';}
+ else{const Wd=560,H=220,L=40,R=14,T=18,B=34,pw=Wd-L-R,ph=H-T-B;const X=i=>L+i/(Math.max(1,weeks-1))*pw,Y=v=>T+ph-(v/3)*ph;
+ let sv=`<svg viewBox="0 0 ${Wd} ${H}" xmlns="http://www.w3.org/2000/svg">`;for(let k=0;k<=3;k++){const yy=Y(k);sv+=`<line class="grid" x1="${L}" x2="${Wd-R}" y1="${yy}" y2="${yy}"/><text class="tick" x="${L-5}" y="${yy+3}" text-anchor="end">${k}</text>`;}
+ sv+=`<line class="axis" x1="${L}" x2="${L}" y1="${T}" y2="${T+ph}"/><line class="axis" x1="${L}" x2="${Wd-R}" y1="${T+ph}" y2="${T+ph}"/>`;for(let w=0;w<weeks;w++)sv+=`<text class="tick" x="${X(w)}" y="${T+ph+12}" text-anchor="middle">Wk ${w+1}</text>`;
+ sv+=`<text class="lbl" transform="translate(11,${T+ph/2}) rotate(-90)" text-anchor="middle">Mean severity (0–3)</text>`;
+ series.forEach((sr,si)=>{const col=COLORS[si%COLORS.length];let d='',pen=false;sr.vals.forEach((v,i)=>{if(v==null){pen=false;return;}d+=(pen?'L':'M')+X(i)+','+Y(v);pen=true;});
+  sv+=`<path class="series" stroke="${col}" d="${d}"/>`+sr.vals.map((v,i)=>v==null?'':`<circle cx="${X(i)}" cy="${Y(v)}" r="3.5" fill="${col}"/>`).join('');});
+ sv+='</svg>';el.innerHTML=`<h3>Mean severity by week</h3>${sv}`;$('#rpLegend').innerHTML=series.map((sr,si)=>`<span><i style="background:${COLORS[si%COLORS.length]}"></i>${esc(sr.name)}</span>`).join('');}
+ /* eps + vitals text: v23.08 (review F441, F446) every vitals column that holds a value, the BMI raw */
  const parts=[];if(a)parts.push(`AIMS (${val('e.date')||'date not entered'}): items 1–7 total ${a.total}; ${a.pos?'meets':'below'} the Schooler-Kane movement criterion.`);
  const er=EPS.map((r,i)=>({n:r[0],v:num(`eps.${i}`)})).filter(x=>x.v!=null&&x.v>0);if(er.length)parts.push('Observer ratings above 0: '+er.map(x=>`${x.n} ${x.v}`).join('; ')+'.');
- if(vw.length)parts.push(`Weight: ${vw.map(r=>`${r.d||'#'+r.x} ${r.wt} kg${r.bmi?' (BMI '+r.bmi.toFixed(1)+')':''}`).join('; ')}.`);
- const vp=vitData().filter(r=>r.pulse!=null);if(vp.length)parts.push(`Pulse: ${vp.map(r=>`${r.d||'#'+r.x} ${r.pulse}`).join('; ')}.`);
+ const at=r=>r.d||'#'+r.x;
+ if(vw.length)parts.push(`Weight: ${vw.map(r=>`${at(r)} ${r.wt} kg${r.htOwn?' at '+r.ht+' cm':''}${r.bmi?' (BMI '+r.bmi.toFixed(1)+', raw)':''}`).join('; ')}.`);
+ const vh=vd.filter(r=>r.htOwn);if(vh.length)parts.push(`Height: ${vh.map(r=>`${at(r)} ${r.ht} cm`).join('; ')}.`);
+ const vwa=vd.filter(r=>r.waist!=null);if(vwa.length)parts.push(`Waist: ${vwa.map(r=>`${at(r)} ${r.waist} cm`).join('; ')}.`);
+ const vb=vd.filter(r=>r.bp);if(vb.length)parts.push(`Blood pressure: ${vb.map(r=>`${at(r)} ${r.bp}`).join('; ')}.`);
+ const vp=vd.filter(r=>r.pulse!=null);if(vp.length)parts.push(`Pulse: ${vp.map(r=>`${at(r)} ${r.pulse}`).join('; ')}.`);
+ const vs=vd.filter(r=>r.sleep!=null);if(vs.length)parts.push(`Sleep (reported): ${vs.map(r=>`${at(r)} ${r.sleep} h`).join('; ')}.`);
+ const meas=[...new Set(meds.flatMap(m=>m.watched.filter(s=>SE[s].c===MEAS)))];if(meas.length)parts.push('Checked on the plan and measured on the vitals sheet: '+meas.map(s=>SE[s].l).join('; ')+'.');
  $('#rpEps').innerHTML=parts.length?`<div class="warn"><b>Screens and measures</b>${parts.map(esc).join('<br>')}</div>`:'<div class="empty">No EPS screen or vitals entered.</div>';}
 
+/* v23.08 (review I223): the rater brief: each watched item with what to look for, the 0-3 anchors with an example, the
+   red-flag steps and who to call; printed alone (Print rater brief), never with the record */
+function renderBrief(){const box=$('#briefBody');if(!box)return;const meds=medList(),rows=watchedRows(),nurse=val('m.nurse'),doc=val('m.doc'),fax=val('m.docfax');
+ $('#brMeds').textContent=meds.map(m=>m.name+(m.dose?' '+m.dose:'')).join('; ');$('#brNurse').textContent=nurse;
+ let h=`<div class="warn"><b>How to rate</b>Rate each item once a day at the <b>highest severity you saw that day</b>, and write the time of the worst period under the date; write &ldquo;absent&rdquo; when the student was not there. Describe what you see; do not diagnose. Every decision about the medication is the prescriber&rsquo;s.</div>`
+  +`<table class="grid anchors"><thead><tr><th style="width:22%">Rating</th><th>Means</th><th style="width:42%">For example: drowsiness</th></tr></thead><tbody>`
+  +`<tr><td>0 not observed</td><td>Not seen that day</td><td>Alert all day</td></tr><tr><td>1 mild / questionable</td><td>Seen briefly, or you are not sure</td><td>Yawning, head resting once in the morning</td></tr>`
+  +`<tr><td>2 moderate</td><td>Clearly present, not interfering with the day</td><td>Head down for part of a lesson; works when prompted</td></tr><tr><td>3 marked</td><td>Interferes with the day or needs a response</td><td>Falls asleep in class; cannot be kept awake to work</td></tr></tbody></table>`;
+ h+='<h3 class="sub">The items to rate</h3>'+(rows.length?'<div class="brief-list">'+rows.map(r=>{const se=SE[r.key],em=/emergenc/i.test(se.o)||r.key==='breath';
+   return `<div class="brief-item${se.f?' flag':''}"><b>${esc(se.l)}</b>${se.f?' <span class="tag no">red flag</span>':''} <small>${esc(r.meds.join(', '))}</small><br>${esc(se.o)}.`
+    +(se.f?`<br><b>${em?'Emergency: call emergency services first, then the school nurse.':'At any rating: call the school nurse now.'}</b> Then note who was called, and when.`:'')+`</div>`;}).join('')+'</div>':'<div class="empty">Check side effects on the plan sheet to list them here.</div>');
+ const meas=[...new Set(meds.flatMap(m=>m.watched.filter(s=>SE[s].c===MEAS)))];
+ if(meas.length)h+=`<p class="method">Not rated on the grid: ${esc(meas.map(s=>SE[s].l).join('; '))}, measured by the nurse on the vitals sheet.</p>`;
+ h+=`<div class="warn"><b>Who to call</b>School nurse: ${esc(nurse||'(not entered on the plan)')}. Prescriber: ${esc(doc||'(not entered on the plan)')}${fax?', '+esc(fax):''}, reached through the nurse or the parent. Difficulty breathing or swallowing, a seizure, or fever with severe stiffness and confusion: call emergency services first.</div>`;
+ box.innerHTML=h;}
 /* ---------- toolbar ---------- */
 /* v21.16 audit (F8). Lowering a count deleted the medications, grid days, or vitals rows past it, with everything entered
    in them, without a question, and a count such as 2.5 drew three cards while the box read 2.5. A count is now a whole
@@ -1427,7 +1554,7 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated monitoring
  Object.keys(sc.grid).forEach(k=>sc.grid[k].forEach((v,c)=>{cellState[k+'|'+c]=v;}));sc.bip.forEach((v,c)=>{cellState['_bip|'+c]=v;});for(let c=0;c<n;c++)cellState['_dose|'+c]=sc.miss.includes(c)||sc.absent.includes(c)?0:3;
  setv('t.obs','Teacher and paraprofessional (simulated)');setv('t.notes',fill(sc.notes)+' (Simulated.)');
  renderGrid();
- $('#nVit').value=Math.max(4,sc.wts.length);renderVitRows();sc.wts.forEach((w,i)=>{setv(`v[${i}].d`,MD(SD(sc.wd[i])));setv(`v[${i}].wt`,String(w));setv(`v[${i}].pulse`,String(78+Math.round(rnd()*12)));setv(`v[${i}].bp`,'104/66');setv(`v[${i}].sleep`,String(8+Math.round(rnd()*2)));setv(`v[${i}].app`,String(1+Math.round(rnd()*2)));});renderVitals();
+ $('#nVit').value=Math.max(4,sc.wts.length);renderVitRows();sc.wts.forEach((w,i)=>{setv(`v[${i}].d`,MD(SD(sc.wd[i])));setv(`v[${i}].wt`,String(w));setv(`v[${i}].pulse`,String(78+Math.round(rnd()*12)));setv(`v[${i}].bp`,'104/66');setv(`v[${i}].sleep`,String(8+Math.round(rnd()*2)));});renderVitals();
  renderEpsTables();if(sc.eps){setv('e.rater','BCBA, trained rater (simulated)');setv('e.date',MDY(T));(sc.eps.aims||[]).forEach((v,i)=>setv(`aims.${i}`,String(v)));(sc.eps.eps||[]).forEach((v,i)=>setv(`eps.${i}`,String(v)));renderEpsVerdict();}
  /* v21.37: two screens on file: the baseline at the first medication's start, and the screen on the sheet */
  screenLog=[{date:MDY(SD(sc.meds[0].start)),occ:'Baseline',rater:'BCBA, trained rater (simulated)',total:'0',sk:'below',obs:'none above 0',note:'Baseline screen before the first dose (simulated)'}];
@@ -1459,8 +1586,12 @@ function msCells(c,days){const out={};if(!c||typeof c!=='object'||Array.isArray(
   if(m&&(m[1]==='_dose'||m[1]==='_bip'||Object.prototype.hasOwnProperty.call(SE,m[1]))&&+m[2]<days&&Number.isInteger(v)&&v>=0&&v<=3)out[k]=v;});return out;}
 function msFields(f){const out={};if(!f||typeof f!=='object'||Array.isArray(f))return out;
  Object.keys(f).forEach(k=>{const v=f[k];if(typeof v==='string'||typeof v==='boolean'||(typeof v==='number'&&isFinite(v)))out[k]=v;});return out;}
+/* v23.08 (review F441): the vitals sheet's appetite column (0-3) is gone, the grid rates appetite; a value in an earlier
+   file is kept in that row's notes */
+function msAppToNotes(f){Object.keys(f).forEach(k=>{const m=/^v\[(\d+)\]\.app$/.exec(k);if(!m)return;const v=String(f[k]).trim();delete f[k];if(!v)return;const nk='v['+m[1]+'].n';
+ f[nk]=(String(f[nk]||'').trim()?String(f[nk]).trim()+'; ':'')+'Appetite '+v+' (0–3, from the vitals sheet of an earlier version)';});}
 function restore(d){d=d&&typeof d==='object'?d:{};reset();const c=d.counts&&typeof d.counts==='object'?d.counts:{};
- $('#nMed').value=msCount(c.med,'med');$('#nDays').value=msCount(c.days,'days');$('#nVit').value=msCount(c.vit,'vit');const f=msFields(d.fields);
+ $('#nMed').value=msCount(c.med,'med');$('#nDays').value=msCount(c.days,'days');$('#nVit').value=msCount(c.vit,'vit');const f=msFields(d.fields);msAppToNotes(f);
  pendW={};Object.keys(f).forEach(k=>{const m=/^md\[(\d)\]\.w\.([A-Za-z_]+)$/.exec(k);if(m&&f[k]===true&&Object.prototype.hasOwnProperty.call(SE,m[2]))(pendW[m[1]]=pendW[m[1]]||[]).push(m[2]);});
  renderMeds();applyFields(f);$$('#medWrap .card').forEach(card=>renderMedInfo(+card.dataset.med));pendW=null;applyFields(f);cellState=msCells(d.cells,+$('#nDays').value);renderGrid();renderEpsTables();renderVitRows();applyFields(f);$$('.hd-client').forEach(x=>x.textContent=val('m.client'));renderVitals();renderEpsVerdict();screenLog=msScreens(d.screens);renderScreens();renderReport();}
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));/* v21.16 audit (F2): the file is named with the local date; the UTC date named an evening's save tomorrow */
@@ -1481,9 +1612,11 @@ $('#fileIn').addEventListener('change',e=>{const file=e.target.files[0];if(!file
  try{restore(d);$('#simBanner').hidden=!(typeof d.fields['m.client']==='string'&&/^SIMULATED/.test(d.fields['m.client']));}
  catch(err){try{restore(prev);}catch(e2){}$('#simBanner').hidden=banner;alert('That file could not be read as a saved MS-1 record. Nothing was changed.');}};
  rd.readAsText(file);e.target.value='';});
-$('#printBtn').addEventListener('click',()=>window.print());
+$('#printBtn').addEventListener('click',()=>{document.body.classList.remove('print-brief');window.print();});
+$('#briefPrint').addEventListener('click',()=>{renderBrief();document.body.classList.add('print-brief');setTimeout(()=>window.print(),60);});   /* v23.08 (I223) */
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-brief'));
 $('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;restore({counts:{}});$('#simBanner').hidden=true;setView('plan');});
-window.addEventListener('beforeprint',()=>{renderGrid();renderVitals();renderEpsVerdict();renderReport();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
+window.addEventListener('beforeprint',()=>{renderGrid();renderVitals();renderEpsVerdict();renderReport(true);renderBrief();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 restore({counts:{}});
 /* v21.78 the case: In. The medications Form DM-1 lists go into the empty medication cards (matched to the library by
@@ -1508,9 +1641,39 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
   if(i==null){const e=$('#nMed');if(+e.value>=+e.max)return;e.value=+e.value+1;renderMeds();i=+e.value-1;}
   const k=msLib(m.name);setv(`md[${i}].lib`,String(k>=0?k:MEDS.length-1));if(k<0)setv(`md[${i}].name`,String(m.name).trim());renderMedInfo(i);
   setv(`md[${i}].dose`,[m.dose,m.times].filter(x=>String(x||'').trim()).join(', '));last=document.querySelector(`[name="md[${i}].dose"]`);n++;});
+ /* v23.08 (review F444): each medication's start and last-change dates from Form DM-1 (m.start, m.chg), into a card's empty
+    boxes, so the EPS schedule runs from them; DM-1 does not send them yet (proposed in the notes) */
+ const dm=x=>{x=String(x||'').trim();const i=/^(\d{4})-(\d{2})-(\d{2})$/.exec(x);return i?(+i[2])+'/'+(+i[3])+'/'+i[1]:x;};let dated=0;
+ (Array.isArray(H.meds)?H.meds:[]).forEach(m=>{if(!m||!String(m.name||'').trim())return;const t=msTok(m.name)[0];if(!t)return;
+  const card=$$('#medWrap .card').map(c=>+c.dataset.med).find(i=>msTok(medTitle(i)).includes(t));if(card==null)return;
+  [['start',m.start],['change',m.chg||m.change]].forEach(([k,v])=>{if(String(v||'').trim()&&!val(`md[${card}].${k}`)){setv(`md[${card}].${k}`,dm(v));last=document.querySelector(`[name="md[${card}].${k}"]`);dated++;}});});
+ if(dated)renderScreenDue();
  if(last){renderGrid(true);renderReport();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
- return {filled:n+(g&&g.filled||0),note:n?(n>(roi?1:0)?'Medications, prescriber and history from Form DM-1':'')+(roi?(n>1?'; ':'')+'the release date from Form IC-1':''):''};};
+ return {filled:n+dated+(g&&g.filled||0),note:n?(n>(roi?1:0)?'Medications, prescriber and history from Form DM-1':'')+(roi?(n>1?'; ':'')+'the release date from Form IC-1':''):(dated?'the medications\u2019 start and change dates from Form DM-1':'')};};
+/* v23.08 (review F445) the case: out, and what is due. Due (read by the workstation's due list): the AIMS screens the plan
+   calls for and the next prescriber report on the chosen schedule. Out: medmon = {meds:[{name, dose, start, change, changeDate,
+   school, watched}], flags:[{date, item, rating}], report:{date, sent, response}, roi, bip}; the workstation and DD-1 do not
+   read it yet (proposed in the notes). */
+const gridDay=x=>{x=String(x||'').trim();const m=/^(\d{1,2})\/(\d{1,2})$/.exec(x);if(!m)return roiDate(x);const now=new Date();let d=new Date(now.getFullYear(),+m[1]-1,+m[2],12);if(d-now>60*864e5)d=new Date(now.getFullYear()-1,+m[1]-1,+m[2],12);return d;};
+function nextReport(){const sch=val('m.sched');if(!sch)return null;const n=+$('#nDays').value;
+ const first=Array.from({length:n},(_,c)=>gridDay(val(`g.date.${c}`))).filter(Boolean).sort((a,b)=>a-b)[0]||null;
+ const sent=val('r.sent')?(roiDate(val('r.sent'))||roiDate(val('r.date'))):null,base=sent||first;if(!base)return null;
+ const plus=(d,days)=>new Date(d.getTime()+days*864e5);let next;
+ if(/weekly for 4 weeks/i.test(sch))next=(!first||plus(first,28)>base)?plus(base,7):addMonths(base,1);
+ else if(/every 2 weeks/i.test(sch))next=plus(base,14);else next=addMonths(base,1);
+ return {d:next,sent:!!sent};}
+window.__nbhDue=function(){const out=[],S=screenSchedule(),now=new Date();
+ if(S){S.items.forEach(it=>{if(!it.done&&it.due>new Date(now.getTime()-90*864e5))out.push({what:'AIMS screen ('+it.what+')',date:MDYs(it.due)});});out.push({what:'AIMS screen (every 6 months)',date:MDYs(S.next)});}
+ const r=nextReport();if(r)out.push({what:'Report to the prescriber'+(r.sent?'':' (first)'),date:MDYs(r.d)});
+ return out;};
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+ const meds=medList().map(m=>{const ch=val(`md[${m.i}].change`);return {name:m.name,dose:m.dose,start:val(`md[${m.i}].start`),change:ch,changeDate:isoD(gridDay((/(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/.exec(ch)||[])[1]||'')),school:val(`md[${m.i}].school`),watched:m.watched.map(s=>SE[s].l)};});
+ if(!meds.length)return r;
+ const n=+$('#nDays').value,flags=[];watchedRows().forEach(rw=>{if(!SE[rw.key].f)return;for(let c=0;c<n;c++){const v=cellState[rw.key+'|'+c]||0;if(v>=1)flags.push({date:val(`g.date.${c}`),item:SE[rw.key].l,rating:v});}});
+ const roi=roiDate(val('m.roi'));
+ return Object.assign({},r||{},{medmon:{form:'MS-1',meds,flags,report:{date:val('r.date'),sent:val('r.sent'),response:val('r.resp')},roi:isoD(roi),bip:val('m.bip')}});};}
+window.__ms1={schedule:()=>screenSchedule(),nextReport:()=>nextReport()};   /* for the tests */
 })();
 </script>
 
@@ -1520,8 +1683,8 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
    identifiers get retyped into every one. This adds a small shared file that
    carries them once. It fills only fields that exist on this form and are
    currently empty, so it can never overwrite work already entered.
-   Nothing is stored in the browser; the packet is an ordinary file you save
-   to the district drive alongside the forms. ============================= */
+   The packet is an ordinary file you save to the district drive alongside the
+   forms (Autosave keeps a safety copy on the device, as the masthead says). == */
 (function(){
   var MAP={
     client:['[data-m="client"]','[name="m.client"]','[name="s_name"]','[data-meta="client"]',

@@ -9903,6 +9903,31 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.08: MS-1 checks the release before a report goes out, acts on a red flag as it is rated, counts only the days observed, moves measured items to the vitals sheet, and gives raters a one-page brief (review Wave 3)
+
+- **The report checks the release.** With no release-of-information date on the plan, the report says, at the top and
+  above the signatures, not to send it. It has its own report date, saved with the record, and states the period it
+  covers.
+- **Red flags on the grid.** A flagged row prints its instruction under its name. Rating a red-flag item from blank opens
+  a notice with the steps: the nurse now, or emergency services first for an emergency item. Its line for who was called
+  goes into the Notes by date.
+- **Only observed days count.** A day counts when it is dated and not marked absent.
+  - The grid's mean, the weekly summary and the trend use those days. Each week shows its dates and the days observed.
+  - The dose row reads "given on n of m days present".
+  - Rate the highest severity seen that day, and write the time of the worst under the date.
+- **Measured items go on the vitals sheet.** Weight, height, blood pressure and pulse are measured by the nurse and are
+  no longer grid rows.
+  - The vitals sheet has a height column, which each row's BMI uses.
+  - The appetite column is gone: the grid's appetite row holds it, and an earlier file's values move to that row's
+    notes.
+  - The nurse can enter a pulse and blood-pressure range for the student. A reading outside it is flagged on the
+    report, which now quotes every vitals column.
+- **The AIMS schedule** counts any screen within 45 days of a due date, runs the 6-month date from the latest screen, and
+  says when a screen is overdue. The screens and the next report reach the workstation's due list.
+- **Rater brief.** One page for the teacher, paraprofessional or nurse who rates the grid: the rule, the 0–3 steps with
+  examples, each watched item, and the red-flag steps. **Print rater brief** prints it alone.
+- qa/ms1-w3-test.js (29 checks). qa/sprint-a2-test.js expects an earlier file's appetite values in the row's notes.
+
 ### v23.07: MT-1 asks for the interval and keeps each session whole: the log, the graph's measure and criterion, two observers' files, and a blank sheet that keeps the marks (review Wave 3)
 
 - **Choose the interval.** The data sheet asks for the interval length and the observation length, and the number of
