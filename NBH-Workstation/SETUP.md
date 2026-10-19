@@ -9903,6 +9903,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.05: SP-1 says how to mark it on every sheet, gives each behavior its own cutoff, keeps "not observed" apart from none, sends every behavior and its flagged times to the case, and checks agreement with a second observer (review Wave 3)
+
+- **How to mark, on every sheet.** The legend and the corner of every grid give the rule with the behavior's own
+  numbers: a slash for 1 up to one less than the cutoff, shaded for the cutoff or more, X for not observed. **Marking
+  guide** (Sheet actions) adds a page after the first sheet, its back when printed two-sided. It holds each behavior's
+  definition, examples and rule, what to do when the student is not observed, and a line a day to initial.
+- **A cutoff for each behavior.** The High-rate cutoff on screen is the chosen behavior's. Each behavior's summary and
+  control chart use its own. A record saved before keeps its one cutoff for every behavior.
+- **Not observed is not "none".**
+  - Tap the ✕ beside a day's name for a day the student was absent or there was no sheet.
+  - Use **X: not observed** (or the X key, or X typed in a count box) for an interval the student was pulled out.
+  - Neither is counted. The summary says "Observed on 14 of 15 days", and the control chart uses the days observed.
+- **Every behavior goes to the case**, each with its own figures, so Form FS-1 sees all of them. The intervals the
+  control chart flags go too, as times to observe, and Forms OB-1 and ABC-1 show them.
+- **By weekday.** With dates over more than one week, the summary sets Mondays beside Mondays and names a weekday that
+  stands out.
+- **An activity column** on the Entry sheet: what happens in each interval, printed beside the times and named in the
+  summary.
+- **DD-1's incidents** are placed only where asked when a day already has marks, so an incident marked by hand is not
+  counted twice.
+- **A second observer.** Tap **Second observer**, pick the days you both kept the sheet, and enter the second
+  observer's marks. The form computes the agreement and shows where you differed. **Use it** makes it the behavior's
+  agreement.
+- A new sheet opens on the school day, Monday to Friday, and the dates line reads "Dates covered".
+- qa/sp1-w3-test.js (37 checks).
+
 ### v23.04: TD-1 runs demand fading without extinction where the setting cannot tolerate the behavior, builds thinning ladders that never shorten, holds thinning without the replacement's data, says where the function came from, and stops seeding session intervals from a school-day rate (review Wave 3)
 
 - **Demand fading without extinction (F178).** On the Select sheet, "Can the environment tolerate any problem
