@@ -2763,7 +2763,11 @@ function addComp(code,at){const L=LIB[code];if(!L)return;const i=(at!=null&&!$('
  <b style="font-family:var(--sans);font-size:11px">Implementation steps (edit to the student; each becomes an integrity item)</b>
  <ol class="steps">${L.steps.map((s,k)=>`<li><textarea name="cp[${i}].s${k}" rows="1" data-auto="1">${esc(s)}</textarea></li>`).join('')}</ol>
  <div class="defs" style="margin-top:6px"><div class="drow"><div class="dlab">Data collected</div><div class="dval"><input name="cp[${i}].data" placeholder="e.g., target per min; mands per min and % independent; compliance; breaks delivered"></div></div><div class="drow"><div class="dlab">Materials and cues</div><div class="dval"><input name="cp[${i}].mat" placeholder="e.g., work card, break card on switch, timer, schedule signal cards"></div></div></div>`;
- $('#compWrap').appendChild(d);autosize(d);eeSoon();}   /* v21.44 (B3): any card can carry escape extinction or hands-on help */
+ $('#compWrap').appendChild(d);autosize(d);eeSoon();if(code==='EE'||code==='C_CSA')try{window.tdCsaCards();}catch(e){}}   /* v21.44 (B3): any card can carry escape extinction or hands-on help */
+/* v22.7x (review F118): the enrichment card's matched stimuli and the competing-stimulus card's items take PA-1's competing
+   stimulus assessment from the case (window.__tdCsa), into empty boxes only; a file opened later puts its own values back */
+window.tdCsaCards=function(){const c=window.__tdCsa;if(!c)return;const put=(nm,v)=>{const e=document.querySelector('[name="'+nm+'"]');if(e&&v&&!String(e.value||'').trim()){e.value=v;['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));}};
+  $$('#compWrap .card').forEach(d=>{const i=d.dataset.i;if(d.dataset.code==='EE')put('cp['+i+'].p0',c.list+' (Form PA-1)');if(d.dataset.code==='C_CSA'){put('cp['+i+'].p0',c.assessed+' (Form PA-1)');put('cp['+i+'].p2',c.list);}});};
 function autosize(root){(root||document).querySelectorAll('textarea[data-auto]').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px';});}
 document.addEventListener('input',e=>{if(e.target.dataset.auto){e.target.style.height='auto';e.target.style.height=(e.target.scrollHeight+2)+'px';}});
 $('#addCompBtn').addEventListener('click',()=>{const c=$('#addComp').value;if(c)addComp(c);
@@ -3236,7 +3240,19 @@ window.__nbhFactsOut=function(){
        reinforcer; an item RA-1 found no effect for is left out and named (v22.59, Roscoe, Iwata, & Kahng, 1999) */
     const mi=(window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(f.menu||[]).filter(m=>m&&T(m.name)&&m.tier!=='LP'));
     const menu=mi.slice().sort((a,b)=>(a.rank==null?1e9:a.rank)-(b.rank==null?1e9:b.rank));
-    if(menu.length)P('m.pref',menu.slice(0,6).map(m=>T(m.name)+(m.tier==='LP'&&m.ra==='Confirmed'?' (low preference, a reinforcer in RA-1)':'')).join(', ')+' (Form PA-1, most preferred first)'+((mi.gone||[]).length?'; left out: '+mi.gone.join(', ')+' (no reinforcing effect in Form RA-1)':''),'the preferred stimuli (PA-1, RA-1)');
+    /* v22.7x (review F118): PA-1's competing stimulus assessment, when it was run, comes first: the items that reached the
+       criterion (HC, HC with prompting, HC with disruption), with the condition and the reduction; an item the behavior rose
+       with is left out and says so. For an automatic function the enrichment or NCR component takes these, not the
+       preference order. */
+    const cv=v=>String(v||'').replace(/^HC \((prompting|repeated free access)\)$/,'HC with $1');
+    const cr=m=>({'HC':0,'HC (prompting)':1,'HC (repeated free access)':1,'HC with disruption':2})[m.csa.verdict]??3;
+    const comp=(mi.competing||[]).slice().sort((a,b)=>cr(a)-cr(b)).map(m=>T(m.name)+' ('+cv(m.csa.verdict)+', '+m.csa.red+'% reduction'+(m.csa.cond&&m.csa.cond!=='Free access'?' in '+T(m.csa.cond).toLowerCase():'')+')');
+    window.__tdCsa=comp.length?{list:comp.join(', '),assessed:(f.menu||[]).filter(m=>m&&m.csa).map(m=>T(m.name)).join(', ')}:null;
+    const why=mi.goneWhy||{},gR=(mi.gone||[]).filter(g=>why[g]!=='csa'),gC=(mi.gone||[]).filter(g=>why[g]==='csa');
+    if(menu.length||comp.length)P('m.pref',(comp.length?'Competing items (Form PA-1, competing stimulus assessment): '+comp.join(', ')+'; ':'')+
+      (menu.length?menu.slice(0,6).map(m=>T(m.name)+(m.tier==='LP'&&m.ra==='Confirmed'?' (low preference, a reinforcer in RA-1)':m.tier==='LP'&&m.keep==='csa'?' (low preference, competing in PA-1)':'')).join(', ')+' (Form PA-1, most preferred first)':'')+
+      (gR.length?'; left out: '+gR.join(', ')+' (no reinforcing effect in Form RA-1)':'')+(gC.length?'; left out: '+gC.join(', ')+' (the behavior rose with '+(gC.length>1?'them':'it')+' in Form PA-1\u2019s competing stimulus assessment)':''),'the preferred stimuli (PA-1, RA-1)');
+    try{window.tdCsaCards();}catch(e){}
     /* the reinforcer and the EO: FS-1's antecedent and consequence for this behavior, else its summary statement */
     const eo=fs1?[T(fs1.ant)?'EO: '+T(fs1.ant):'',T(fs1.cons)?'Reinforcer: '+T(fs1.cons):''].filter(Boolean).join('; '):'';
     P('m.reinf',eo||T(((f.fn&&f.fn.statements)||[]).filter(Boolean)[0]),'the reinforcer and EO (FS-1)');
