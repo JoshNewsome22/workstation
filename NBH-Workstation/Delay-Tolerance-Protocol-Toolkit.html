@@ -1000,6 +1000,7 @@ td input,td select{max-width:100%}
   <div class="grid g4">
     <div><label class="f">Date</label><input type="date" name="dd_date"></div>
     <div><label class="f">Reward type</label><input type="text" name="dd_type" placeholder="e.g., preferred edible; iPad minutes"></div>
+    <div><label class="f">Delivery rule</label><select name="dd_rule"><option value=""></option><option>Hypothetical: no outcome delivered</option><option>Real outcome on randomly drawn trials</option><option>Real outcome on every trial</option></select></div>   <!-- v22.92 (review F407) -->
     <div><label class="f">Delayed amount (A)</label><input type="number" id="ddA" name="dd_A" step="any" value="5"></div>
     <div><label class="f">Units</label><input type="text" name="dd_units" placeholder="items / minutes"></div>
   </div>
@@ -1037,6 +1038,7 @@ td input,td select{max-width:100%}
 <div class="grid g4">
   <div><label class="f">Date</label><input type="date" name="pd_date"></div>
   <div><label class="f">Reward type</label><input type="text" name="pd_type" placeholder="same reward as the delay probe where possible"></div>
+  <div><label class="f">Delivery rule</label><select name="pd_rule"><option value=""></option><option>Hypothetical: no outcome delivered</option><option>Real outcome on randomly drawn trials</option><option>Real outcome on every trial</option></select></div>   <!-- v22.92 (review F407) -->
   <div><label class="f">Uncertain amount (A)</label><input type="number" id="pdA" name="pd_A" step="any" value="5"></div>
   <div><label class="f">Units</label><input type="text" name="pd_units"></div>
 </div>
@@ -1133,9 +1135,16 @@ td input,td select{max-width:100%}
       <div><label class="f">Step back after</label><input type="text" name="back_rule" value="Two consecutive sessions below criterion; return to the last mastered step"></div>
     </div>
     <div class="grid g2">
-      <div><label class="f">Session criterion</label><input type="text" name="step_crit" value="At least 80% self-control choice and delay completed on all delay trials"></div>
+      <div><label class="f">Session criterion</label><input type="text" name="step_crit" value="Delay completed (requirement met, reinforcer delivered) on at least 80% of delay trials"></div>
       <div><label class="f">Stop-and-review trigger</label><input type="text" name="stop_rule" value="Any injurious behavior, or collateral behavior on two consecutive sessions"></div>
     </div>
+    <!-- v22.92 (review F398): what staff do when the student hits, sweeps or leaves during the delay, and what happens to the demand
+         when a session is stopped, written here so the integrity check scores what was written -->
+    <div class="grid g2">
+      <div><label class="f">Problem behavior during the delay</label><select name="pb_during"><option value=""></option><option>Extinction: the delay runs on; the behavior does not end the wait or bring the reinforcer</option><option>Block as the crisis plan stage says (Form CR-1), then the delay runs on</option><option>As the behavior plan writes it (Form TD-1)</option></select></div>
+      <div><label class="f">If a session is stopped</label><input type="text" name="stop_demand" value="The demand in progress is finished (with guidance as Form TD-1 writes it) before the student leaves; nothing else is delivered"></div>
+    </div>
+    <p class="small">When the behavior is escape-maintained, ending the session on it can deliver the very escape the plan withholds. Finish the demand in progress before the student leaves, as Form TD-1's escape-extinction guidance says, and follow the crisis plan (Form CR-1) for anything dangerous.</p>
   </fieldset>
 
   <h3>Step 5. Optional Components</h3>
@@ -1166,13 +1175,14 @@ td input,td select{max-width:100%}
     <div><label class="f">Session length (min)</label><input type="number" name="ss_len" min="0" step="any"></div>
     <div><label class="f">Second observer present</label><select name="ss_ioa"><option value=""></option><option>Yes</option><option>No</option></select></div>
   </div>
-  <table><caption>Trial record. SC = self-control (larger-later) option; IMP = impulsive (smaller-sooner) option; IMM = immediate-reinforcement trial (no delay programmed). On an IMM trial, Choice, Latency, TR and Engaged are left blank: there is no delay to choose, start or wait through.</caption>
-    <thead><tr><th class="num" style="width:5%">#</th><th style="width:9%">Trial type</th><th style="width:9%">Choice</th><th class="num" style="width:8%">Prog. delay (s)</th><th class="num" style="width:8%">Obt. delay (s)</th><th class="num" style="width:8%">Latency (s)</th><th style="width:9%">TR</th><th style="width:9%">Engaged</th><th class="num" style="width:7%">Prob. beh.</th><th class="num" style="width:7%">Collat.</th><th>Notes</th></tr></thead>
+  <table><caption>Trial record. SC = self-control (larger-later) option; IMP = impulsive (smaller-sooner) option; IMM = immediate-reinforcement trial (no delay programmed). On an IMM trial, Choice, Latency, TR and Engaged are left blank: there is no delay to choose, start or wait through. Delivered = the requirement was met and the reinforcer given: a delay trial is completed when it was, whatever the clock read (under a contingency-based delay the delay ends when the requirement is met). A wait that ended in problem behavior with no reinforcer is No response, Delivered No, never an impulsive choice.</caption>
+    <thead><tr><th class="num" style="width:5%">#</th><th style="width:9%">Trial type</th><th style="width:9%">Choice</th><th class="num" style="width:8%">Prog. delay (s)</th><th class="num" style="width:8%">Obt. delay (s)</th><th class="num" style="width:8%">Latency (s)</th><th style="width:9%">TR</th><th style="width:9%">Engaged</th><th class="num" style="width:7%">Prob. beh.</th><th class="num" style="width:7%">Collat.</th><th style="width:8%" title="The requirement was met and the reinforcer delivered: what makes a delay trial completed, whatever the clock read">Delivered</th><th>Notes</th></tr></thead>
     <tbody id="tbTrials"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbTrials">Add trial</button><button class="tool" id="btnTrials10">Add 10 trials</button><button class="tool" id="btnCarry">Carry this session to Progress and Delay accuracy</button></div>
   <div class="readout">
     <div><span>Self-control choices, delay trials</span><strong id="oSC">&mdash;</strong></div>
-    <div><span>Delay trials completed</span><strong id="oDone">&mdash;</strong></div>
+    <div><span>Delay trials completed (reinforcer delivered)</span><strong id="oDone">&mdash;</strong></div>
+    <div><span>Ended without reinforcement</span><strong id="oEnd">&mdash;</strong></div>
     <div><span>Mean obtained delay (s)</span><strong id="oObt">&mdash;</strong></div>
     <div><span>Mean delay differential (s)</span><strong id="oDiff">&mdash;</strong></div>
     <div><span>Mean latency (s)</span><strong id="oLat">&mdash;</strong></div>
@@ -1221,14 +1231,14 @@ td input,td select{max-width:100%}
       <tr><td>Tolerance response prompted per hierarchy and not reinforced with the terminal reinforcer</td><td><input type="radio" name="ti6" value="y"></td><td><input type="radio" name="ti6" value="n"></td><td><input type="radio" name="ti6" value="na"></td></tr>
       <tr><td>Intervening activity presented or student's activity choice honored</td><td><input type="radio" name="ti7" value="y"></td><td><input type="radio" name="ti7" value="n"></td><td><input type="radio" name="ti7" value="na"></td></tr>
       <tr><td>Delay requirement enforced per the reset rule (pause vs. restart)</td><td><input type="radio" name="ti8" value="y"></td><td><input type="radio" name="ti8" value="n"></td><td><input type="radio" name="ti8" value="na"></td></tr>
-      <tr><td>Problem and collateral behavior handled as written (extinction; blocking only where specified)</td><td><input type="radio" name="ti9" value="y"></td><td><input type="radio" name="ti9" value="n"></td><td><input type="radio" name="ti9" value="na"></td></tr>
+      <tr><td>Problem and collateral behavior handled as written on Tab 4 (problem behavior during the delay; a stopped session's demand finished)</td><td><input type="radio" name="ti9" value="y"></td><td><input type="radio" name="ti9" value="n"></td><td><input type="radio" name="ti9" value="na"></td></tr>
       <tr><td>Reinforcer delivered immediately at end of delay with the stated phrase</td><td><input type="radio" name="ti10" value="y"></td><td><input type="radio" name="ti10" value="n"></td><td><input type="radio" name="ti10" value="na"></td></tr>
       <tr><td>Token delivered within the maximum lag set in Tab 1, if tokens used</td><td><input type="radio" name="ti11" value="y"></td><td><input type="radio" name="ti11" value="n"></td><td><input type="radio" name="ti11" value="na"></td></tr>
       <tr><td>Delay step advanced or stepped back only per the written rule</td><td><input type="radio" name="ti12" value="y"></td><td><input type="radio" name="ti12" value="n"></td><td><input type="radio" name="ti12" value="na"></td></tr>
     </tbody></table>
   <div class="rowbtns"><button class="tool" id="btnTI">Score integrity</button></div>
   <div class="readout"><div><span>Steps correct</span><strong id="oTI">&mdash;</strong></div><div><span>Applicable steps</span><strong id="oTIn">&mdash;</strong></div><div><span>Integrity</span><strong id="oTIpct">&mdash;</strong></div></div>
-  <p class="small">90% or better before a delay step is advanced or the student&rsquo;s data are read. Below 90%, retrain the implementer on the missed steps before the next session rather than interpreting the student&rsquo;s data. This is the integrity criterion TI-1, TD-1 and PR-1 use.</p>
+  <p class="small">90% or better before a delay step is advanced or the student&rsquo;s data are read. Below 90%, retrain the implementer on the missed steps before the next session rather than interpreting the student&rsquo;s data. This is this protocol's rule (Form PR-1 uses 90% too). Form TI-1 reads 80&ndash;89% as a band that calls for a re-check; here it means re-check and retrain, not advance.</p>
 
   <h3>B. Delay Accuracy (Obtained vs. Programmed)</h3>
   <p class="lede">Copy the mean obtained delay from each session sheet. Leon et al. reported the mean obtained delay and the mean differential for every phase. Alex's 10-s phase in their food analysis ran at a mean of 17.2 s, a 7.2-s differential, which is the kind of drift that makes a fading step meaningless.</p>
@@ -1257,7 +1267,7 @@ td input,td select{max-width:100%}
 
   <h3>A. Generalization Probe Plan</h3>
   <p class="lede">Program at least one probe on each dimension below. Probe format should be identical to the naturalistic baseline in Tab 2D so results are comparable (the Dunkel-Jackson et al., 2016 model). Passage et al. (2012) probed with a novel intervening activity; Bloh (2010) probed with novel reinforcers in a novel setting.</p>
-  <table><thead><tr><th style="width:15%">Dimension</th><th style="width:26%">Trained condition</th><th style="width:26%">Probe condition</th><th style="width:11%">Date</th><th class="num" style="width:9%">% SC</th><th class="num" style="width:9%">Delay (s)</th><th style="width:4%"></th></tr></thead><tbody id="tbGen"></tbody></table>
+  <table><thead><tr><th style="width:15%">Dimension</th><th style="width:26%">Trained condition</th><th style="width:26%">Probe condition</th><th style="width:11%">Date</th><th class="num" style="width:8%">% SC</th><th class="num" style="width:8%">Delay (s)</th><th class="num" style="width:8%">PB / min</th><th style="width:8%">Stop rule met</th><th style="width:4%"></th></tr></thead><tbody id="tbGen"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbGen">Add probe</button></div>
   <p class="small">Suggested dimensions: setting, implementer (teacher, paraprofessional, parent), reinforcer, intervening activity, delay cue wording, task materials, contingency type (positive to negative or the reverse), and an unsignaled delay with no activity offered.</p>
 
@@ -1638,12 +1648,12 @@ const templates={
   tbPD:()=>T(n(),n(),calc(),calc(),txt(),del()),
   tbDDlog:()=>T(dt(),txt(),n(),n(),txt()),
   tbFade:()=>T(calc(),n(),calc(),dt(),txt()),
-  tbTrials:()=>T(calc(),sel(['Delay','IMM']),sel(['SC','IMP','No response']),n(),n(),n(),sel(['Indep.','Prompted','None']),sel(['Yes','Partial','No']),n(),n(),txt()),
+  tbTrials:()=>T(calc(),sel(['Delay','IMM']),sel(['SC','IMP','No response']),n(),n(),n(),sel(['Indep.','Prompted','None']),sel(['Yes','Partial','No']),n(),n(),sel(['Yes','No']),txt()),   /* v22.92 (review F400) Delivered */
   tbProg:()=>T(n('1'),dt(),txt(),n(),n(),n(),n(),n(),txt(),del()),
   tbDA:()=>T(dt(),txt(),n(),n(),calc(),txt()),
   tbIOA:()=>T(calc(),n(),n(),calc(),del()),
   tbQlog:()=>T(dt(),txt(),txt(),n(),n(),txt()),
-  tbGen:()=>T(sel(['Setting','Implementer','Reinforcer','Activity','Cue wording','Materials','Contingency type','Unsignaled, no activity']),txt(),txt(),dt(),n(),n(),del()),
+  tbGen:()=>T(sel(['Setting','Implementer','Reinforcer','Activity','Cue wording','Materials','Contingency type','Unsignaled, no activity']),txt(),txt(),dt(),n(),n(),n(),sel(['No','Yes']),del()),   /* v22.92 (review F406) PB / min, stop rule met */
   tbMaint:()=>T(txt(),dt(),dt(),n(),n(),n(),txt())
 };
 function addRow(id,vals){const tb=document.getElementById(id);const tr=document.createElement('tr');tr.innerHTML=templates[id]();tb.appendChild(tr);if(vals){const f=tr.querySelectorAll('input,select');vals.forEach((v,i)=>{if(f[i])f[i].value=v})}recalc(id);return tr}
@@ -1816,24 +1826,30 @@ function summarizeTrials(){
      differential are read on the delay trials the student waited through (SC with an obtained delay): an IMP
      choice runs no programmed delay, and its 0 had counted as a full-length shortfall in the delay the
      implementer ran. */
-  const delayTrials=R.filter(v=>v[0]==='Delay');const choiceTrials=delayTrials.filter(v=>v[1]==='SC'||v[1]==='IMP');
+  /* v22.92 (review F400) a delay trial is completed when the requirement was met and the reinforcer delivered (the Delivered
+     column), whatever the clock read; a row saved before the column counts as completed when the obtained delay reached the
+     programmed one. Every delay trial is in the self-control denominator, a No response too, and a wait that ended without
+     the reinforcer is counted on its own. The obtained-minus-programmed differential is read only under a time-based delay:
+     under a contingency-based one the delay ends when the requirement is met */
+  const delayTrials=R.filter(v=>v[0]==='Delay');const choiceTrials=delayTrials;
   const sc=choiceTrials.filter(v=>v[1]==='SC').length;
-  const ran=delayTrials.filter(v=>v[1]==='SC'&&num(v[3])!=null);
-  const done=ran.filter(v=>num(v[2])!=null&&num(v[3])>=num(v[2])).length;
-  const obt=ran.map(v=>num(v[3])),diff=ran.map(v=>{const p=num(v[2]),o=num(v[3]);return p!=null?o-p:null}).filter(x=>x!=null);
+  const deliv=v=>v[9]==='Yes'?true:v[9]==='No'?false:null,isDone=v=>{const d=deliv(v);return d!==null?d:(v[1]==='SC'&&num(v[2])!=null&&num(v[3])!=null&&num(v[3])>=num(v[2]));};
+  const ran=delayTrials.filter(v=>isDone(v)&&num(v[3])!=null),ended=delayTrials.filter(v=>deliv(v)===false||(deliv(v)===null&&v[1]==='No response')).length;
+  const done=delayTrials.filter(isDone).length,cb=(document.querySelector('[name=delaytype]:checked')||{}).value==='cbpd';
+  const obt=ran.map(v=>num(v[3])),diff=cb?[]:ran.map(v=>{const p=num(v[2]),o=num(v[3]);return p!=null?o-p:null}).filter(x=>x!=null);
   const lat=delayTrials.map(v=>num(v[4])).filter(x=>x!=null);
   const trs=delayTrials.filter(v=>v[5]);const trI=trs.filter(v=>v[5]==='Indep.').length;
   const eng=delayTrials.filter(v=>v[6]);const engY=eng.filter(v=>v[6]==='Yes').length;
   const pb=R.reduce((s,v)=>s+(num(v[7])||0),0);const len=num($('[name=ss_len]').value);
   const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
   $('#oSC').textContent=choiceTrials.length?`${sc}/${choiceTrials.length} (${pct(sc,choiceTrials.length)})`:'\u2014';
-  $('#oDone').textContent=delayTrials.length?`${done}/${delayTrials.length}`:'\u2014';
-  $('#oObt').textContent=fmt(mean(obt),1);$('#oDiff').textContent=fmt(mean(diff),1);$('#oLat').textContent=fmt(mean(lat),1);
+  $('#oDone').textContent=delayTrials.length?`${done}/${delayTrials.length} (${pct(done,delayTrials.length)})`:'\u2014';$('#oEnd').textContent=delayTrials.length?String(ended):'\u2014';
+  $('#oObt').textContent=fmt(mean(obt),1);$('#oDiff').textContent=cb&&ran.length?'not read (contingency-based)':fmt(mean(diff),1);$('#oLat').textContent=fmt(mean(lat),1);
   $('#oTR').textContent=trs.length?pct(trI,trs.length):'\u2014';$('#oEng').textContent=eng.length?pct(engY,eng.length):'\u2014';
   $('#oPB').textContent=R.length?`${pb}${len?' / '+fmt(pb/len,2):''}`:'\u2014';
   /* v21.37: the figures the Progress table and the Delay accuracy log carry, as the Progress note defines them */
-  const completed=ran.filter(v=>num(v[2])!=null&&num(v[3])>=num(v[2])).map(v=>num(v[3]));
-  return {trials:R.length,delay:delayTrials.length,sc:choiceTrials.length?100*sc/choiceTrials.length:null,obt:mean(obt),achieved:mean(completed),pbm:(R.length&&len)?pb/len:null,eng:eng.length?100*engY/eng.length:null};
+  const completed=ran.map(v=>num(v[3]));
+  return {done,ended,trials:R.length,delay:delayTrials.length,sc:choiceTrials.length?100*sc/choiceTrials.length:null,obt:mean(obt),achieved:mean(completed),pbm:(R.length&&len)?pb/len:null,eng:eng.length?100*engY/eng.length:null};
 }
 $('[name=ss_len]').addEventListener('input',summarizeTrials);
 /* v21.37: one press carries the session sheet's figures to the Progress table (% SC on delay trials, the delay achieved as the
@@ -1919,7 +1935,7 @@ function restore(o){
     else el.value=el.defaultValue;});
   $$('#tbSV input').forEach(i=>{i.value=i.defaultValue;});
   $$('input[name],select[name],textarea[name]').forEach(el=>{if(el.closest('tbody')&&templates[el.closest('tbody').id])return;const v=o.fields[el.name];if(v===undefined)return;if(el.type==='radio')el.checked=(el.value===v);else if(el.type==='checkbox')el.checked=!!v;else el.value=v});
-  Object.keys(templates).forEach(id=>{const tb=document.getElementById(id);tb.innerHTML='';(Array.isArray(T[id])?T[id]:[]).forEach(r=>addRow(id,r))});
+  Object.keys(templates).forEach(id=>{const tb=document.getElementById(id);tb.innerHTML='';(Array.isArray(T[id])?T[id]:[]).forEach(r=>addRow(id,id==='tbTrials'&&Array.isArray(r)&&r.length===10?r.slice(0,9).concat([''],r.slice(9)):r))});   /* v22.92 (review F400) a trial saved before the Delivered column */
   ['tbSV','tbTI'].forEach(id=>{const ins=Array.from(document.getElementById(id).querySelectorAll('input'));(Array.isArray(X[id])?X[id]:[]).forEach((v,i)=>{if(!ins[i])return;if(ins[i].type==='radio')ins[i].checked=!!v;else ins[i].value=v})});
   renderAvGrid(Array.isArray(o.avr)&&o.avr.length?o.avr.map(r=>Array.isArray(r)?r.map(v=>v==null?'':String(v)):[]):[[],[],[],[],[]]);
   recalcAll();
@@ -1981,7 +1997,11 @@ async function loadSim(){
     ho_bip:'Yes \u2013 the BIP names delay tolerance as the thinning procedure',
     ho_staff:'Both aides trained to 90% integrity on two consecutive sessions before running trials',
     ho_care:'Parent briefed and consented; home is not running the protocol yet',
-    stop_rule:'Stop the session at the second instance of aggression and return to the last mastered delay'
+    stop_rule:'Stop the session at the second instance of aggression and return to the last mastered delay',
+    /* v22.92 (review F398) the example's stop rule departs from the default on purpose (aggression without injury in this
+       student is frequent in baseline), so what happens to the demand is written beside it: stopping never ends the work */
+    pb_during:'Extinction: the delay runs on; the behavior does not end the wait or bring the reinforcer',
+    stop_demand:'The two problems in progress are finished with guidance (Form TD-1) before he leaves the table; nothing else is delivered, and the next session starts at the last mastered delay'
   });
 
   /* ---------------- tab 2: preassessment ---------------- */
@@ -2043,7 +2063,9 @@ async function loadSim(){
      steps of 30, 15, 8 and 4, so the fifth offer is one of 3, 11, 19 ... 109, 117. Each note gives that delay's
      offers. The old points (118, 96, 74, 48, 12) could not come out of it. The probability probe ran the next
      school day, as its comparison note says. */
-  Object.assign(F,{ dd_date:D(26), dd_type:'Hypothetical choice, classroom adaptation \u2013 tablet minutes',
+  /* v22.92 (review F407) the example's probes deliver the chosen outcome on randomly drawn trials, as the walkthrough describes:
+     equivalence of hypothetical and real rewards has not been shown for students with intellectual disability */
+  Object.assign(F,{ dd_date:D(26), dd_type:'Experienced choice, classroom adaptation \u2013 tablet minutes',dd_rule:'Real outcome on randomly drawn trials',
                     dd_A:'120', dd_units:'seconds of tablet access' });
   o.tables.tbDD=[
     ['0','117','Offers 60, 90, 105, 113, 117: took the full amount every time'],
@@ -2053,7 +2075,7 @@ async function loadSim(){
     ['120','27','Offers 60, 30, 15, 23, 27: took the immediate amount down to 30'],
     ['300','11','Offers 60, 30, 15, 7, 11: took the immediate amount down to 15']
   ];
-  Object.assign(F,{pd_date:D(25),pd_type:'Hypothetical choice, classroom adaptation \u2013 tablet minutes',
+  Object.assign(F,{pd_date:D(25),pd_type:'Experienced choice, classroom adaptation \u2013 tablet minutes',pd_rule:'Real outcome on randomly drawn trials',
     pd_A:'120',pd_units:'seconds of tablet access',
     pd_compare:'Delay and probability were probed with the same reward a day apart. Delay: AUC 0.29, log k \u22121.65. Probability: AUC 0.31, h \u2248 1.0. Both are discounted steeply. Note that the two AUC figures are computed on different x-axes \u2014 delay in seconds, probability in odds against \u2014 so they are not directly comparable as numbers; read each against its own curve and against re-measurement after treatment, not against each other. Green and Myerson (2004) treat delay and probability discounting as distinct processes, and the pair describes the problem better than either alone.',
     pd_use:'Both dimensions matter for this student, so the plan addresses both: the delay is faded systematically (Tab 4), and every break-card request is honoured to keep the probability of delivery at 1. Had probability been discounted shallowly while delay was steep, the reliability of delivery would have mattered less and the whole effort could have gone into the fading ladder.'});
@@ -2133,16 +2155,16 @@ async function loadSim(){
     ss_notes:'Session 22 at 90 s. Five of six delay trials completed; one aggression, on trial 7 (the first instance; the stop rule is the second). Second consecutive session at criterion at this step: advance to 180 s next session.'
   });
   o.tables.tbTrials=[
-    ['Delay','SC','90','91','3','Indep.','Yes','0','0',''],
-    ['IMM','','0','0','','','','0','0','Request honored at once'],
-    ['Delay','SC','90','92','4','Indep.','Yes','0','0',''],
-    ['Delay','SC','90','101','6','Prompted','Partial','0','1','Looked away 11 s: timer paused, one gestural prompt, resumed (cumulative rule)'],
-    ['IMM','','0','0','','','','0','0','Request honored at once'],
-    ['Delay','SC','90','91','3','Indep.','Yes','0','0',''],
-    ['Delay','IMP','90','','2','None','No','1','1','Aggression at 40 s: timer paused; did not return to the problems, so no break (no delay completed)'],
-    ['IMM','','0','0','','','','0','0','Request honored at once'],
-    ['Delay','SC','90','93','5','Indep.','Yes','0','0','Started without a prompt after trial 7'],
-    ['IMM','','0','0','','','','0','0','Request honored at once']
+    ['Delay','SC','90','91','3','Indep.','Yes','0','0','Yes',''],
+    ['IMM','','0','0','','','','0','0','Yes','Request honored at once'],
+    ['Delay','SC','90','92','4','Indep.','Yes','0','0','Yes',''],
+    ['Delay','SC','90','101','6','Prompted','Partial','0','1','Yes','Looked away 11 s: timer paused, one gestural prompt, resumed (cumulative rule)'],
+    ['IMM','','0','0','','','','0','0','Yes','Request honored at once'],
+    ['Delay','SC','90','91','3','Indep.','Yes','0','0','Yes',''],
+    ['Delay','No response','90','','2','None','No','1','1','No','Aggression at 40 s: timer paused; he did not return to the problems, so no break (the wait ended without the reinforcer)'],
+    ['IMM','','0','0','','','','0','0','Yes','Request honored at once'],
+    ['Delay','SC','90','93','5','Indep.','Yes','0','0','Yes','Started without a prompt after trial 7'],
+    ['IMM','','0','0','','','','0','0','Yes','Request honored at once']
   ];
 
   /* ---------------- tab 6: progress ---------------- */
@@ -2182,11 +2204,11 @@ async function loadSim(){
   /* v21.16 audit (F2): probes at the 90-s step, on the days after it was met; each % is a share of that probe's
      delay trials (5 of 6, 4 of 5 ...). No delay has yet been run with no activity and no adult present. */
   o.tables.tbGen=[
-    ['Implementer','Aide A','Aide B',D(5),'83.3','90'],
-    ['Setting','Room 12 desk','Library table',D(4),'80','90'],
-    ['Activity','Maintenance math problems','Independent writing',D(3),'66.7','90'],
-    ['Cue wording','\u201cFinish these two, then break\u201d','\u201cAlmost time for your break\u201d',D(2),'83.3','90'],
-    ['Unsignaled, no activity','Timer visible, activity available','No timer, no activity',D(1),'50','90']
+    ['Implementer','Aide A','Aide B',D(5),'83.3','90','0','No'],
+    ['Setting','Room 12 desk','Library table',D(4),'80','90','0','No'],
+    ['Activity','Maintenance math problems','Independent writing',D(3),'66.7','90','0.1','No'],
+    ['Cue wording','\u201cFinish these two, then break\u201d','\u201cAlmost time for your break\u201d',D(2),'83.3','90','0','No'],
+    ['Unsignaled, no activity','Timer visible, activity available','No timer, no activity',D(1),'50','90','0.4','No']
   ];
   o.tables.tbMaint=[
     ['2 weeks',D(-10),'','','','',''],
@@ -4261,9 +4283,9 @@ const F=(base,...over)=>Object.assign({},base,...over);
     {w:'B. Choice baseline, after session 2',f:F(ST.base[7],{does:'1 of 6 self-control choices at 30 s; ended at the second aggression'}),q:'At a 30-second delay, the student chose the larger option on 1 of 6 trials before the session ended at the second aggression (the stop rule). What is the next session?',o:[
       ['Jump to 60 seconds to find the ceiling.',0],['Run 30 seconds again to replicate, then one session back at 0 seconds.',1],['Start training at 30 seconds tomorrow.',0]],
       why:'<b>One session is not a switch point.</b> Replicate it, then return to 0 s: if allocation and behavior recover, the delay is what controls them, and 30 s is the switch point that training starts below. That is the reversal the example ran.'},
-    {w:'B. Choice baseline',f:F(ST.base[4],{does:'Second aggression of the session'}),q:'The stop rule says end the session at the second instance of aggression. This is the second.',o:[
-      ['Finish the ten trials so the sheet is complete.',0],['End the session, deliver nothing extra, write the row as it stands.',1],['Switch the rest of the trials to 0 seconds.',0]],
-      why:'<b>Stop rules are followed on the day they are needed.</b> A partial session is data; a session that continued past its own rule is not. Nothing extra is delivered on the way out.'},
+    {w:'B. Choice baseline',f:F(ST.base[4],{does:'Second aggression of the session'}),q:'The stop rule written on Tab 4 says end the session at the second instance of aggression. This is the second.',o:[
+      ['Finish the ten trials so the sheet is complete.',0],['Finish the demand in progress as Tab 4 writes it, then end the session; deliver nothing extra and write the row as it stands.',1],['End the session at once and let him go.',0]],
+      why:'<b>Stop rules are followed on the day they are needed, and stopping is not a way out.</b> A partial session is data; a session that continued past its own rule is not. The demand in progress is finished first, so ending the session does not deliver the escape the plan withholds; nothing extra is delivered on the way out.'},
     {w:'C. Waiting assessment',f:F(ST.wait[2],{does:'Looks at you: \u201chow long?\u201d'}),q:'You said \u201cWait, please\u201d and started the clock. The student asks how long.',o:[
       ['Say \u201cjust a little longer.\u201d',0],['Say nothing; the clock runs.',1],['Repeat \u201cWait, please.\u201d',0]],
       why:'<b>One instruction.</b> Anything after it changes what is being measured: reassurance is a delay cue, repeating it is a prompt. The sheet records the instruction verbatim for exactly this reason.'},

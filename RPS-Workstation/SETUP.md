@@ -9903,6 +9903,44 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.92: DT-1 writes what staff do when the student hits during the delay, scores a delay by the reinforcer delivered, and records problem behavior in its probes (review Wave 3)
+
+- **Problem behavior during the delay, and a stopped session (F398).** Step 4 now has two fields beside the stop rule:
+  - **Problem behavior during the delay**: extinction, a block as the crisis plan stage says (Form CR-1), or as the
+    behavior plan writes it (Form TD-1).
+  - **If a session is stopped**: by default, the demand in progress is finished (with guidance as Form TD-1 writes it)
+    before the student leaves, and nothing else is delivered.
+
+  A note says why: for escape-maintained behavior, ending the session on it can deliver the very escape the plan
+  withholds. The integrity item scores what Tab 4 writes.
+
+  The example keeps its stop rule (the second aggression) but writes the consequence and the demand beside it. The drill
+  question about the stop rule now expects the demand to be finished first, and nothing extra delivered.
+- **A delay trial is completed when the reinforcer is delivered (F400).** The trial record has a **Delivered** column:
+  the requirement was met and the reinforcer given.
+  - A delay trial counts as completed when it was delivered, whatever the clock read. Under a contingency-based delay, a
+    student who finishes the two problems at 70 s of a 90-s step has completed the trial, and no shortfall is read.
+  - Every delay trial is in the self-control denominator. A wait that ended in aggression with no break is "No response,
+    Delivered No", counted as "Ended without reinforcement", and never an impulsive choice.
+  - The default session criterion reads "Delay completed (requirement met, reinforcer delivered) on at least 80% of delay
+    trials".
+  - The example's failed wait is coded that way.
+  - A file saved before the column opens with its notes in place, and its trials are completed by the clock as before.
+- **The integrity criterion (F405).** The 90% note is stated as this protocol's own rule. Form TI-1's 80–89% band means
+  re-check and retrain here, not advance. The claim that Forms TI-1 and TD-1 use the same criterion is gone.
+- **Generalization probes (F406).** The table records problem behavior per minute and whether the stop rule was met.
+- **The probe's delivery rule (F407).** Both discounting probes have a **Delivery rule**: hypothetical, a real outcome on
+  randomly drawn trials, or a real outcome on every trial. The example's probes are experienced choices with real
+  outcomes on drawn trials, because the form itself says hypothetical rewards are unproven for this population.
+- **Already done:** the consent and assent lines (F401) shipped in v22.37.
+- **Next (part 2):**
+  - F399 and I201: the arrangement drives the sheet.
+  - F402 and I202: the protocol sent to the case.
+  - F403 and I203: session and probe logs.
+  - F404: the figures carried instead of retyped.
+  - I204 and I205.
+- qa/dt1-w3-test.js (12 checks).
+
 ### v22.91: DD-1 records a second observer, marks a day the student was absent, keeps the effect sizes off paper, and shows four weeks (review Wave 3)
 
 - **A second observer (F104).** The graph page cites the design standard that makes interobserver agreement a condition
