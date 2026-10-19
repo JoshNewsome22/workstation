@@ -2112,7 +2112,7 @@ let prCase=null;
 const prT=v=>String(v==null?'':v).trim();
 const prMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
 const prR=x=>x==null?'':String(Math.round(x*10)/10);
-function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null,cg=f.caregiver||null,cw=f.classwide||null,sn=f.sv&&Array.isArray(f.sv.named)&&f.sv.named.length?f.sv.named:null;if(!d&&!pts&&!ti&&!cg&&!cw&&!sn)return '';
+function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null,cg=f.caregiver||null,cw=f.classwide||null,sn=f.sv&&Array.isArray(f.sv.named)&&f.sv.named.length?f.sv.named:null,br=f.brief&&f.brief.ctx?f.brief:null;if(!d&&!pts&&!ti&&!cg&&!cw&&!sn&&!br)return '';
   const conds=(d&&d.conds)||[],cur=conds.length?conds[conds.length-1]:null,from=cur&&cur.from?cur.from:(d&&d.from)||'',to=(d&&d.to)||'';
   const inP=x=>x&&(!from||x>=from)&&(!to||x<=to);const L=[];
   if(from)L.push((cur&&conds.length>1?'Since '+prMd(from)+' ('+cur.name+', ':'From '+prMd(from)+' to '+prMd(to)+' (')+((cur&&cur.days)||(d&&d.days)||0)+' school days with data):');
@@ -2149,6 +2149,9 @@ function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||n
   /* v22.81 (review I114) what the consumers named on Form SV-1 that the plan does not measure, and the side effects they named */
   if(sn){const un=sn.filter(x=>x&&x.tag==='unmeasured'),se=sn.filter(x=>x&&x.tag==='side'),q=x=>'\u201c'+prT(x.text)+'\u201d ('+prT(x.role).toLowerCase()+', '+(x.round==='pre'?'pre':'post')+' round)';
     if(un.length)L.push('Named by the consumers on Form SV-1 and not measured: '+un.map(q).join('; ')+'.');if(se.length)L.push('Side effects named on Form SV-1: '+se.map(q).join('; ')+'.');}
+  /* v22.82 (review I191) the brief given to limited-contact staff (Form EB-1), and whether the plan has moved on since */
+  if(br){const pv=f.plan&&f.plan.adoption&&+f.plan.adoption.version||null;
+    L.push('The brief for limited-contact staff (Form EB-1): '+prT(br.ctx)+(br.roles?' ('+prT(br.roles)+')':'')+(br.date?', issued '+prMd(br.date):'')+(br.ver?', built from the plan '+prT(br.ver):'')+(pv&&br.vn&&+br.vn<pv?'; the plan is now version '+pv+': give out a new brief':'')+'.');}
   return L.join('\n');}
 function prCaseBar(){let b=document.getElementById('prCaseBar');const f=prCase||{},d=f.data,t=f.integrity,framed=window.parent!==window;
   if(!b){const at=document.querySelector('.nbh-band');if(!at)return;b=document.createElement('div');b.id='prCaseBar';b.className='pr-casebar noprint';b.setAttribute('role','status');at.parentNode.insertBefore(b,at);}

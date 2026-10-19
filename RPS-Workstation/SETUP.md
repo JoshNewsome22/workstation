@@ -9903,6 +9903,46 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.82: EB-1 says what to do at the first sign, knows its plan version, takes the student profile, and gives asking the better deal (review Wave 3)
+
+- **What to do at the earliest sign (F381).** The brief named the earliest sign but never what to do about it, although the
+  plan holds it. A new line, **When you see it**, takes the plan's response to the precursor (Form TD-1), else the crisis
+  plan's early stage (Form CR-1), marked to rewrite, and prints under the earliest sign. The Guide (section 3) says why: the
+  first sign is the best moment for staff who see the student briefly (Fritz, Iwata, Hammond, & Bloom, 2013).
+- **The plan's version, and its changes (F382).** **Built from the plan** records the version the brief was made from
+  ("version 2, revised 10/6/2026"), filled from Form TD-1, and prints in the footer and on the signed page with the issue
+  date, so a signed page shows which brief was given. When the plan is revised, **The plan has changed here** lists each
+  field whose plan text has changed since it was placed, rewritten or not, with **Use the plan's words** and **Keep mine**;
+  nothing is overwritten unasked, and the brief is marked as built from the new version only when asked. A brief with no
+  issue date is listed, with **Use today**.
+- **The worked example gives asking the better deal (F383).** In the example, a hit got at least what asking got (the card,
+  time alone, and the other student moved). Now the card is held up at the first sign; asking earns three minutes with
+  headphones and no talk; after a hit nothing extra happens, the card is not offered right then, and the other student is
+  moved at the next safe stop. The Guide adds: when safety means the behavior still gets some of what it wants, make the
+  request pay more (Athens & Vollmer, 2010).
+- **The student profile in the brief (F384).** **How the student shows no, stop or pain** is filled from Form DM-1 and
+  prints under What You Will See; DM-1's "what to avoid" is offered for Never Do This; the safety precautions ticked on DM-1
+  that the brief does not mention are named ("DM-1 flags Elopement, Traffic; this brief mentions none of them"), and the
+  physical management restrictions are always pointed out.
+- **Out of students' sight (F385).** The footer says to keep the brief where students cannot see it (not on the visor, a
+  clipboard or an open sub folder), and the brief no longer prints the student ID.
+- **The case by every route (F387).** "Who to ask" takes the BCBA from the bar; **Import from case file** gives the brief
+  what the workstation would (the profile, the crisis plan, the other targets, the plan's version); the plan's other
+  targets are offered for What You Will See, to use only where they happen in this setting.
+- **The brief to the case (I191).** The brief's setting, roles, issue date and plan version go to the case; Form PR-1's
+  "Also in the review period" names it, and says to give out a new brief when the plan has moved on.
+- **The student's photo, only with permission (I193).** With photo permission on Form DM-1, the student's photo (the one
+  the workstation holds) prints at the top of the brief, so a substitute or a bus attendant knows the student; **Student
+  photo on the brief** turns it off.
+- **Starters for each setting (I194).** Choosing the setting offers starters, marked to rewrite: the bus (the driver stays
+  seated, act at the next safe stop), specials, the cafeteria (with a line for choking or pica when DM-1 flags it),
+  hallways, substitutes and the front office.
+- **Show and try (I195).** Each signature block on the acknowledgment has a line for "Shown how, and tried once: honoring
+  the request, making the call" (turn it off under **Show and try**).
+- Not done: I192 (a report back from bus and lunchroom staff into DD-1's incident log) needs the district's rules for
+  phone entry; it stays on the list.
+- qa/eb1-w3-test.js (15 checks).
+
 ### v22.81: SV-1 tells the case what it decides, needs the consumers, prints a team copy, reads PR-1's sign, keeps every review's round, and asks in Spanish and with faces (review Wave 3)
 
 - **What the case is told is what the form decides (F218).** Form SV-1 sent the case one mean pooled over every rating, so two

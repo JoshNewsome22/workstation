@@ -868,6 +868,10 @@ body.view-guide .pane[data-pane="guide"]{display:block}
 .eb-ack{page-break-before:always;break-before:page}
 .eb-sig{border:1px solid var(--rule-2);border-radius:3px;padding:10px 12px;margin:9px 0}
 .eb-sigline{display:flex;gap:18px;margin:14px 0 0}
+/* v22.82 (review I195, I193, F382) the show-and-try line, the student's photo, the plan's change notice */
+.eb-sigline.eb-try div{border-bottom:0;padding-bottom:0;font-size:10.5px;color:var(--ink)}
+.eb-photo{float:right;width:0.95in;height:0.95in;object-fit:cover;border-radius:6px;border:1px solid var(--rule);margin:0 0 6px 10px}
+#ebChange .eb-check button{margin:4px 6px 0 0}
 .eb-sigline div{flex:1;border-bottom:1px solid var(--rule);padding-bottom:20px;font-size:10px;color:var(--ink-soft)}
 </style>
 <style id="eb1-audit-css">
@@ -936,6 +940,8 @@ body.view-guide .pane[data-pane="guide"]{display:block}
 <div class="eb-f"><label for="f_roles">Roles receiving it</label><input id="f_roles" name="e.roles" placeholder="e.g. bus driver and bus attendant, route 214"></div>
 <div class="eb-f"><label for="f_contact">Time with the student</label><input id="f_contact" name="e.contact" placeholder="e.g. 25 minutes twice a day"></div>
 <div class="eb-f"><label for="f_date">Date issued</label><input id="f_date" type="date" name="e.date"></div>
+<div class="eb-f"><label for="f_planver">Built from the plan</label><input id="f_planver" name="e.planver" placeholder="e.g. version 2, revised 10/6/2026 (filled from Form TD-1 in the workstation)"></div>
+<div class="eb-f"><label for="f_photo">Student photo on the brief</label><select id="f_photo" name="e.photo"><option value="yes">Yes, when the student profile (Form DM-1) records photo permission</option><option value="no">No</option></select></div>
 
 <h3 class="sub">Plan Content Carried Over</h3>
 <div id="planState" class="warn"><b>No plan data loaded.</b> Open this form in the
@@ -947,6 +953,7 @@ actually uses. A bus attendant should not have to decode &ldquo;differential rei
 alternative behavior&rdquo; at 6:50 in the morning.</p>
 <p class="noprint"><button id="applyPlan" class="tool">Bring the plan text in</button></p>
 <div class="noprint" id="ebPlanSug" hidden></div>
+<div class="noprint" id="ebChange" hidden></div>
 </section>
 
 <!-- ============ BRIEF ============ -->
@@ -959,6 +966,8 @@ person cannot run is a brief they will stop reading.</p>
 <h3 class="sub">What You Will See <span id="p_see"></span></h3>
 <div class="eb-f"><label for="f_see">The behavior, in plain words</label><textarea id="f_see" name="e.see" placeholder="e.g. hits or kicks the person next to him, hard enough to hurt"></textarea></div>
 <div class="eb-f"><label for="f_early">The earliest sign</label><textarea id="f_early" name="e.early" placeholder="e.g. goes quiet, pulls his hood up, pushes his bag off the seat"></textarea></div>
+<div class="eb-f"><label for="f_earlydo">When you see it <span id="p_earlydo"></span></label><textarea id="f_earlydo" name="e.earlydo" placeholder="e.g. hold up the blue card next to him and say nothing else"></textarea></div>
+<div class="eb-f"><label for="f_signals">How the student shows no, stop or pain <span id="p_signals"></span></label><textarea id="f_signals" name="e.signals" placeholder="e.g. pushes things away for no; covers his ears for stop; holds his stomach or goes unusually quiet when something hurts"></textarea></div>
 
 <h3 class="sub">What Helps Before It Starts <span id="p_prev"></span></h3>
 <div class="eb-lines" id="prevWrap"></div>
@@ -985,7 +994,7 @@ wrong by omitting something; they go wrong by doing the one thing that makes it 
 <div class="eb-f"><label for="f_after">After it is over <span id="p_after"></span></label><textarea id="f_after" name="e.after" placeholder="e.g. carry on the route as normal; tell the school at drop-off, not in front of him"></textarea></div>
 
 <h3 class="sub">Contact</h3>
-<div class="eb-f"><label for="f_cname">Who to ask</label><input id="f_cname" name="e.cname"></div>
+<div class="eb-f"><label for="f_cname">Who to ask</label><input id="f_cname" name="e.cname" data-m="bcba"></div>
 <div class="eb-f"><label for="f_crole">Role</label><input id="f_crole" name="e.crole" placeholder="e.g. Board Certified Behavior Analyst"></div>
 <div class="eb-f"><label for="f_cphone">Reach them at</label><input id="f_cphone" name="e.cphone"></div>
 <div class="eb-f"><label for="f_extra">Anything specific to this setting</label><textarea id="f_extra" name="e.extra"></textarea></div>
@@ -1006,6 +1015,7 @@ questioned, and what tells you who still needs it.</p>
 <div class="eb-f"><label for="f_ackn">How many signature blocks</label>
   <select id="f_ackn" name="e.ackn"><option>2</option><option>3</option><option>4</option><option>6</option></select></div>
 <div class="eb-f"><label for="f_ackby">Reviewed with staff by</label><input id="f_ackby" name="e.ackby"></div>
+<div class="eb-f"><label for="f_acktry">Show and try</label><select id="f_acktry" name="e.acktry"><option value="yes">A line on each signature block: shown how, and tried once</option><option value="no">No such line</option></select></div>
 </section>
 
 <!-- ============ OUTPUT ============ -->
@@ -1052,6 +1062,13 @@ bus is on extinction on the bus, and when a request taught by functional communi
 training stops working, the problem behavior it replaced tends to return (Volkert et al.,
 2009). If that behavior then gets the student what the request would have, it is being
 reinforced again. Say so on the page, in plain words: every time, even the third time.</p>
+<p>The earliest sign is the best moment to act. Staff who see the student only briefly do most good by prompting the
+request when they see the first sign, before the behavior: precursors reliably come before severe behavior, and treating
+them reduces it (Fritz, Iwata, Hammond, &amp; Bloom, 2013). So the brief says what to do when you see it, not only what it
+looks like. And when safety means the behavior still gets some of what it wants (the other student has to be moved), make
+the request pay more: a longer or better break, given sooner, so asking stays the better deal (Athens &amp; Vollmer, 2010).
+Do not offer the card straight after the behavior, which can teach the chain behavior, card, break; offer it again at the
+next earliest sign.</p>
 
 <h3 class="sub">4. Write for the Setting, Not for the Chart</h3>
 <p>A driver cannot leave the seat. A music teacher has thirty other students and no
@@ -1072,7 +1089,8 @@ so you know who holds a copy.</p>
 <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
 <p class="noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print. <b>Concise</b> keeps every fact in fewer words, which suits a brief that has to fit a page.</p><!-- /writing help -->
 <p class="method" id="ebSources"><b>Sources.</b> Volkert et al. (2009) on the return of problem
-behavior when a communication response is placed on extinction (section 3); &sect; 1003.573, Florida
+behavior when a communication response is placed on extinction, Fritz et al. (2013) on acting on precursors, and Athens
+and Vollmer (2010) on making the request pay more when the behavior cannot be put on extinction (section 3); &sect; 1003.573, Florida
 Statutes, on physical restraint and seclusion (section 2); the FERPA regulations, 34 CFR Part 99
 (&sect;&sect; 99.3 and 99.31), on education records and school officials with a legitimate educational
 interest (section 6, and the footer of the brief). The rest of this Guide is practice guidance, not
@@ -1240,7 +1258,10 @@ $('#planIn').addEventListener('change', e => {
       alert('That case file does not contain Form TD-1, which is where the plan text is kept.'); return;
     }
     PLAN = Object.assign({ __src: 'the case file' }, fromCase(d.forms['TD-1'].snap));
-    if (d.packet) { setv('m.client', d.packet.client || ''); setv('m.sid', d.packet.sid || ''); setv('e.cname', d.packet.bcba || ''); }
+    if (d.packet) { setv('m.client', d.packet.client || ''); setv('m.sid', d.packet.sid || ''); setv('e.cname', d.packet.bcba || ''); if (typeof d.packet.photo === 'string' && /^data:image\//.test(d.packet.photo)) EB_PHOTO = d.packet.photo; }
+    /* v22.82 (review F387) a case file that carries the case's facts gives the brief what the workstation would: the profile, the
+       crisis plan, the other targets, the plan's version */
+    if (d.facts && typeof d.facts === 'object' && window.__nbhFactsIn) { try { window.__nbhFactsIn(d.facts); } catch (err) {} }
     showPlan();
     alert('Plan text read from the case file. Press "Bring the plan text in" to place it.');
   };
@@ -1250,9 +1271,14 @@ $('#planIn').addEventListener('change', e => {
    could not say what was still to rewrite. It now stays while the field still holds the plan's words, goes when
    they are rewritten, and the words placed are kept in the saved file. */
 let PULLED = {};
-const PULL_AT = { 'e.see': 'p_see', 'e.ask': 'p_ask', 'e.after': 'p_after', 'e.callwhen': 'p_callwhen', resp: 'p_resp', never: 'p_never', prev: 'p_prev' };   /* v22.42 (F378) Call when too */
+const PULL_AT = { 'e.see': 'p_see', 'e.ask': 'p_ask', 'e.after': 'p_after', 'e.callwhen': 'p_callwhen', resp: 'p_resp', never: 'p_never', prev: 'p_prev', 'e.earlydo': 'p_earlydo', 'e.signals': 'p_signals' };   /* v22.82 (F381, F384) */   /* v22.42 (F378) Call when too */
 const PULL_NAME = { 'e.see': 'What You Will See', 'e.ask': 'How the Student Asks', 'e.after': 'After It Is Over', 'e.callwhen': 'Call when',
-  resp: 'If the Behavior Happens', never: 'Never Do This', prev: 'What Helps Before It Starts' };
+  resp: 'If the Behavior Happens', never: 'Never Do This', prev: 'What Helps Before It Starts', 'e.earlydo': 'When you see it', 'e.signals': 'How the student shows no, stop or pain' };
+/* v22.82 where a placed text came from (the plan, the student profile, a starter for the setting): the mark names it */
+let PULL_SRC = {};
+/* v22.82 (review F382) the plan text each field was given, kept after it is rewritten, so a changed plan is noticed; and the
+   student profile and photo the case carries (F384, I193) */
+let PLACED = {}, EB_PROFILE = null, EB_PHOTO = null;
 function pulledNow() {
   const out = {};
   Object.keys(PULLED).forEach(k => {
@@ -1264,7 +1290,7 @@ function pulledNow() {
 function markPulled() {
   const now = pulledNow();
   Object.keys(PULL_AT).forEach(k => {
-    const el = $('#' + PULL_AT[k]); if (el) el.innerHTML = now[k] ? '<span class="eb-pull">from the plan &mdash; rewrite</span>' : '';
+    const el = $('#' + PULL_AT[k]); if (el) el.innerHTML = now[k] ? '<span class="eb-pull">' + ({ profile: 'from the student profile', starter: 'a starter' }[PULL_SRC[k]] || 'from the plan') + ' &mdash; rewrite</span>' : '';
   });
 }
 $('#applyPlan').addEventListener('click', () => {
@@ -1295,7 +1321,7 @@ const JARGON = ['reinforcement', 'reinforcer', 'reinforce', 'extinction', 'diffe
   /* v22.42 (review F379) the words a behavior plan most often carries into a brief */
   'FCR', 'planned ignoring', 'redirect', 'escape', 'tangible', 'SIB', 'elopement', 'pairing', 'neutralizing routine'];
 function briefText() {
-  return [val('e.see'), val('e.early'), val('e.ask'), val('e.askdo'), val('e.callwhen'),
+  return [val('e.see'), val('e.early'), val('e.earlydo'), val('e.signals'), val('e.ask'), val('e.askdo'), val('e.callwhen'),
     val('e.after'), val('e.extra')].concat(lines('prev'), lines('resp'), lines('never')).join(' ');
 }
 /* v21.16 audit (F7). The page count was a guess from words and lines (words / 320 + lines / 26), and the
@@ -1391,8 +1417,26 @@ function checks() {
     '. The Guide (section 2) says both belong on every brief, whatever the setting.</div>';
   if (left.length) h += '<div class="eb-check" data-check="plan"><b>Still in the plan&rsquo;s words:</b> ' + left.join('; ') +
     '. Rewrite ' + (left.length === 1 ? 'it' : 'them') + ' in the words this audience uses before the brief goes out.</div>';
+  /* v22.82 (review F381) the earliest sign is the moment to act; (F382) the issue date names the brief the signed page is for */
+  if (val('e.early') && !val('e.earlydo')) h += '<div class="eb-check" data-check="earlydo"><b>When you see it</b> is empty: the earliest sign is the best moment to act, so say what to do then (usually: offer the request, and nothing else). Guide, section 3.</div>';
+  if (!val('e.date')) h += '<div class="eb-check" data-check="date"><b>Date issued</b> is empty, so the signed page cannot show which brief was given. <button type="button" class="tool" id="ebToday">Use today</button></div>';
+  /* (F384) each safety precaution ticked on the student profile that the brief does not mention */
+  const fl = EB_PROFILE && EB_PROFILE.flags, saf = fl && Array.isArray(fl.safety) ? fl.safety : [];
+  if (saf.length) {
+    const T = briefText().toLowerCase(), KW = { 'Elopement': /elope|run(s|ning)? (off|away|out)|leav(e|es|ing) (the|his|her|their)|bolt|door|exit/, 'Traffic': /traffic|road|street|car park|parking|crossing|cars?\b/,
+      'Pica': /pica|in(to)? (his|her|their) mouth|mouth|non-food/, 'Choking': /chok|swallow|bite-size|food/, 'Water': /water|pool|drown/, 'Goes with strangers': /stranger/,
+      'Medical emergency': /medical|seizure|nurse|911|emergency|inhaler|epipen|epi-pen/, 'Self-injury': /self-injur|hits? (him|her|them)self|head[- ]bang|bites? (his|her|their) (hand|arm)/,
+      'Aggression': /\bhit|kick|bite|scratch|push|hurt/, 'Climbing / falls': /climb|fall/ };
+    const gap = saf.filter(x => KW[x] && !KW[x].test(T)), restr = saf.indexOf('Physical management restrictions') > -1;
+    if (gap.length) h += '<div class="eb-check" data-check="safety"><b>The student profile (Form DM-1) flags ' + gap.map(esc).join(', ') + ';</b> this brief mentions ' + (gap.length === 1 ? 'it' : 'none of them') + '. Say what this setting does about ' + (gap.length === 1 ? 'it' : 'them') + ', or note why ' + (gap.length === 1 ? 'it does' : 'they do') + ' not arise here.</div>';
+    if (restr) h += '<div class="eb-check" data-check="restr"><b>Physical management restrictions</b> are recorded on Form DM-1. Read them before this brief goes out; it never asks these staff to hold the student.</div>';
+  }
   ['#ebWarn', '#ebChecks'].forEach(s => { const el = $(s); if (el) el.innerHTML = h; });
 }
+document.addEventListener('click', e => { if (!e.target.closest || !e.target.closest('#ebToday')) return;
+  const d = new Date(), el = $('[name="e.date"]'); if (!el) return;
+  el.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  el.dispatchEvent(new Event('input', { bubbles: true })); changed(); });
 
 document.addEventListener('click', e => { if (!e.target.closest || !e.target.closest('#ebAfterLine')) return;
   const t = 'If anyone held the student or anyone was hurt, tell the school office the same day.';
@@ -1419,18 +1463,23 @@ function firstName(nm) {
 }
 /* v21.16 audit (F13, F14). Block titles are in title case, like every heading on the form, and a title is escaped
    once (blk escapes it; the name in "How ... Asks" was escaped twice, so "Anne & Bo" printed as "Anne &amp; Bo"). */
+/* v22.82 (review I193) the student's photo, only when the student profile (Form DM-1) records photo permission */
+function ebPhoto() { const fl = EB_PROFILE && EB_PROFILE.flags; return val('e.photo') !== 'no' && EB_PHOTO && fl && /^yes/i.test(String(fl.photo || '')) ? EB_PHOTO : ''; }
 function handoutHTML(nm, withAck) {
   const ctx = ebCtx();
   let h = '<div class="eb-sheet">';
-  h += '<div class="eb-top"><h2>Behavior Plan &mdash; The Essentials</h2><div class="eb-who">' +
-    '<div class="eb-wide"><b>Student</b><span>' + esc(nm) + (val('m.sid') ? ' &middot; ID ' + esc(val('m.sid')) : '') + '</span></div>' +
+  const ph = ebPhoto();
+  h += '<div class="eb-top">' + (ph ? '<img class="eb-photo" alt="' + esc(nm) + '" src="' + esc(ph) + '">' : '') + '<h2>Behavior Plan &mdash; The Essentials</h2><div class="eb-who">' +
+    '<div class="eb-wide"><b>Student</b><span>' + esc(nm) + '</span></div>' +   /* v22.82 (review F385) the reader needs the name, the setting and (with permission) a photo, not the ID */
     (ctx ? '<div><b>Setting</b><span>' + esc(ctx) + '</span></div>' : '') +
     (val('e.contact') ? '<div><b>Time together</b><span>' + esc(val('e.contact')) + '</span></div>' : '') +
     (val('e.roles') ? '<div class="eb-wide"><b>For</b><span>' + esc(val('e.roles')) + '</span></div>' : '') +
     '</div></div>';
 
   h += blk('What You Will See', para(val('e.see')) +
-    (val('e.early') ? '<p class="eb-p2"><b>Earliest sign:</b> ' + esc(val('e.early')) + '</p>' : ''));
+    (val('e.early') ? '<p class="eb-p2"><b>Earliest sign:</b> ' + esc(val('e.early')) + '</p>' : '') +
+    (val('e.earlydo') ? '<p class="eb-p2"><b>When you see it:</b> ' + esc(val('e.earlydo')) + '</p>' : '') +
+    (val('e.signals') ? '<p class="eb-p2"><b>How ' + esc(firstName(nm)) + ' shows no, stop or pain:</b> ' + esc(val('e.signals')) + '</p>' : ''));
   h += blk('What Helps Before It Starts', ul(lines('prev')));
   h += blk('How ' + firstName(nm) + ' Asks for What Is Needed',
     para(val('e.ask')) + (val('e.askdo') ? '<p class="eb-p2"><b>When it happens:</b> ' + esc(val('e.askdo')) + '</p>' : ''));
@@ -1451,7 +1500,9 @@ function handoutHTML(nm, withAck) {
     'written for this setting. It is not the whole plan and is not a substitute for it. ' +
     'It comes from the student&rsquo;s education record, which FERPA keeps confidential, and it is only ' +
     'for staff who work with this student. Do not copy it or pass it on, and return it or destroy it ' +
-    'when you no longer work with this student. Anything on it that does not match what you are seeing, ask.' +
+    'when you no longer work with this student. Keep it where students cannot see it: not on the visor, a clipboard or an open ' +
+    'sub folder. Anything on it that does not match what you are seeing, ask.' +
+    (val('e.planver') ? ' Built from the behavior plan, ' + esc(val('e.planver')) + '.' : '') +
     (val('e.date') ? ' Issued ' + esc(fmtDate(val('e.date'))) + '.' : '') + '</div>';
   h += '</div>';
 
@@ -1461,10 +1512,12 @@ function handoutHTML(nm, withAck) {
     for (let i = 0; i < n; i++) {
       rows += '<div class="eb-sig"><div class="eb-sigline">' +
         '<div>Name (print)</div><div>Role</div><div>Date</div></div>' +
-        '<div class="eb-sigline"><div>Signature</div></div></div>';
+        '<div class="eb-sigline"><div>Signature</div></div>' +
+        (val('e.acktry') !== 'no' ? '<div class="eb-sigline eb-try"><div>Shown how, and tried once: &#9744; honoring the request &nbsp; &#9744; making the call</div></div>' : '') + '</div>';   /* v22.82 (review I195) */
     }
     h += '<div class="eb-ack"><div class="eb-top"><h2>Acknowledgment</h2><div class="eb-who">' +
       '<div class="eb-wide"><b>Student</b><span>' + esc(nm) + '</span></div>' + (ctx ? '<div class="eb-wide"><b>Setting</b><span>' + esc(ctx) + '</span></div>' : '') +
+      (val('e.date') || val('e.planver') ? '<div class="eb-wide"><b>Brief</b><span>' + [val('e.date') ? 'issued ' + esc(fmtDate(val('e.date'))) : '', val('e.planver') ? 'built from the plan, ' + esc(val('e.planver')) : ''].filter(Boolean).join(' &middot; ') + '</span></div>' : '') +   /* v22.82 (review F382) */
       '</div></div>' +
       '<p style="font-size:12.5px;line-height:1.6">By signing below I confirm that I have been given ' +
       'this brief, that it was gone through with me, that I had the chance to ask questions, and that ' +
@@ -1541,6 +1594,8 @@ function collect() {
   const o = { form: 'EB-1', rev: '2026-09', saved: new Date().toISOString(), seq: Object.assign({}, SEQ), f: {} };
   $$('main.sheet [name]').forEach(e => { if (String(e.value || '').trim()) o.f[e.name] = e.value; });
   const p = pulledNow(); if (Object.keys(p).length) o.pulled = p;
+  if (Object.keys(PLACED).length) o.placed = Object.assign({}, PLACED);   /* v22.82 (review F382) */
+  const ps = {}; Object.keys(p).forEach(k => { if (PULL_SRC[k]) ps[k] = PULL_SRC[k]; }); if (Object.keys(ps).length) o.pullsrc = ps;
   return o;
 }
 $('#saveBtn').addEventListener('click', () => {
@@ -1590,8 +1645,10 @@ function ebRecord(d) {
     if (e.tagName === 'SELECT') { if (Array.prototype.some.call(e.options, o => o.value === v)) e.value = v; }
     else e.value = v;
   });
-  PULLED = {};
+  PULLED = {}; PLACED = {}; PULL_SRC = {};
   if (d.pulled && typeof d.pulled === 'object') Object.keys(PULL_AT).forEach(k => { if (typeof d.pulled[k] === 'string') PULLED[k] = d.pulled[k]; });
+  if (d.placed && typeof d.placed === 'object') Object.keys(PULL_AT).forEach(k => { if (typeof d.placed[k] === 'string') PLACED[k] = d.placed[k]; });
+  if (d.pullsrc && typeof d.pullsrc === 'object') Object.keys(PULL_AT).forEach(k => { if (/^(plan|profile|starter)$/.test(d.pullsrc[k])) PULL_SRC[k] = d.pullsrc[k]; });
 }
 $('#fileIn').addEventListener('change', e => {
   const file = e.target.files[0]; if (!file) return; e.target.value = '';
@@ -1610,7 +1667,7 @@ $('#clearBtn').addEventListener('click', async () => {
      used "yes" and "2"), and the plan-wording marks go with the text they marked */
   ebReset();
   ['prev', 'resp', 'never'].forEach(k => { $('#' + k + 'Wrap').innerHTML = ''; SEQ[k] = 0; });
-  PLAN = null; PULLED = {};
+  PLAN = null; PULLED = {}; PLACED = {}; PULL_SRC = {};
   showPlan(); start(); ctxSync(); review(); buildQuiet();
 });
 
@@ -1627,7 +1684,7 @@ $('#clearBtn').addEventListener('click', async () => {
 $('#simBtn').addEventListener('click', async () => {
   const held = $$('main.sheet [name]').some(e => e.tagName !== 'SELECT' && String(e.value || '').trim()) || !!val('e.ctx');
   if (held && !(await nbhUI.confirm('Load a simulated case?\nIt replaces everything on this form.', {ok:'Replace'}))) return;
-  ebReset(); PULLED = {};
+  ebReset(); PULLED = {}; PLACED = {}; PULL_SRC = {};
   ['prev', 'resp', 'never'].forEach(k => { $('#' + k + 'Wrap').innerHTML = ''; SEQ[k] = 0; });
   const set = (n, v) => { const e = $('[name="' + n + '"]'); if (e) e.value = v; };
   const day = new Date(); day.setHours(12, 0, 0, 0);
@@ -1639,14 +1696,18 @@ $('#simBtn').addEventListener('click', async () => {
   set('e.date', day.getFullYear() + '-' + String(day.getMonth() + 1).padStart(2, '0') + '-' + String(day.getDate()).padStart(2, '0'));
   set('e.see', 'Hits or kicks the person sitting next to him, hard enough to leave a mark (simulated).');
   set('e.early', 'Goes quiet, pulls his hood up, pushes his bag onto the floor.');
+  /* v22.82 (review F381, F383) the card at the first sign; asking pays more than hitting; nothing for the behavior itself */
+  set('e.earlydo', 'Hold up the blue card next to him and say nothing else.');
+  set('e.signals', 'Pushes things away for no; covers his ears for stop; holds his stomach or goes unusually quiet when something hurts.');
+  set('e.planver', 'version 1 (simulated), adopted ' + (day.getMonth() + 1) + '/' + day.getDate() + '/' + day.getFullYear());
   ['Let him sit in the front seat on his own, same seat every day.',
    'Tell him how many stops are left when he boards, and again halfway.',
    'Keep the radio low and the lights off in the afternoon.'].forEach((x, i) => { add('prev'); $$('#prevWrap [name]')[i].value = x; });
   set('e.ask', 'Holds up the blue card clipped to his bag, or says \u201cbreak\u201d.');
-  set('e.askdo', 'Say yes straight away, every time \u2014 even the third time in one trip. For the next two minutes, nobody talks to him or asks anything of him.');
-  ['Say nothing about the behavior. Keep driving or keep talking to the other students as normal.',
-   'Move the other student, not him.',
-   'Offer the blue card once, then leave him alone.'].forEach((x, i) => { add('resp'); $$('#respWrap [name]')[i].value = x; });
+  set('e.askdo', 'Say yes straight away, every time \u2014 even the third time in one trip. He gets three minutes with his headphones on, and nobody talks to him or asks anything of him.');
+  ['Say nothing about the behavior. Keep driving, or keep talking to the other students as normal.',
+   'The attendant moves between them; at the next safe stop, move the other student, not him.',
+   'Do not offer the card or time alone right then; hold up the card again at the next earliest sign.'].forEach((x, i) => { add('resp'); $$('#respWrap [name]')[i].value = x; });
   ['Do not tell him he will lose the bus, or lose anything else, if he does it again.',
    'Do not argue, reason with him, or ask him why.',
    'Do not hold him or restrain him; if someone is about to be hurt, move the other student away and call.'].forEach((x, i) => { add('never'); $$('#neverWrap [name]')[i].value = x; });
@@ -1677,18 +1738,52 @@ start(); showPlan(); review(); buildQuiet();
    plan's antecedent arrangements, when no line is written), and Calling for Help (the crisis plan's peak stage, CR-1). */
 let EB_SUG=[];
 function ebSugPaint(){const box=$('#ebPlanSug');if(!box)return;if(!EB_SUG.length){box.hidden=true;box.innerHTML='';return;}box.hidden=false;
-  box.innerHTML='<div class="eb-check" data-check="plansug"><b>In the plan (for you, not for the page).</b> Form TD-1 says this for the classroom. Pick only what this setting can run, and rewrite it in its words.'+
+  box.innerHTML='<div class="eb-check" data-check="plansug"><b>In the plan (for you, not for the page).</b> Form TD-1 says this for the classroom; what comes from the student profile (Form DM-1) or is a starter for this setting is named. Pick only what this setting can run, and rewrite it in its words.'+
     EB_SUG.map((x,i)=>'<div style="margin-top:6px"><b>'+esc(x.lab)+':</b> '+x.list.map(t=>esc(t)).join(' &middot; ')+' <button type="button" class="tool" data-ebsug="'+i+'">Use as a starting point</button></div>').join('')+'</div>';}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-ebsug]');if(!b)return;const x=EB_SUG[+b.dataset.ebsug];if(!x)return;
-  if(x.k==='e.after'){if(!val('e.after')){setv('e.after',x.list[0]);PULLED['e.after']=val('e.after');}}
+  if(x.k==='e.after'){if(!val('e.after')){setv('e.after',x.list[0]);PULLED['e.after']=val('e.after');PLACED['e.after']=val('e.after');}}
+  /* v22.82 a single field (the plan's other targets for What You Will See, a starter for this setting): placed when empty, else added */
+  else if(/^e\./.test(x.k)){const cur=val(x.k),more=x.list.filter(t=>cur.toLowerCase().indexOf(t.toLowerCase())<0);
+    if(!cur){setv(x.k,more.join('; '));PULLED[x.k]=val(x.k);PLACED[x.k]=val(x.k);}
+    else if(more.length){const el=$('[name="'+x.k+'"]');if(el){el.value=cur.replace(/[.;\s]*$/,'')+'; '+more.join('; ');try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(err){}}}}
   else{x.list.forEach(t=>{if(lines(x.k).indexOf(t)>-1)return;let el=$$('#'+x.k+'Wrap [name]').find(y=>!String(y.value).trim());if(!el){add(x.k);el=$$('#'+x.k+'Wrap [name]').find(y=>!String(y.value).trim());}
     if(el){el.value=t;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(err){}}});PULLED[x.k]=x.list[0];}
+  if(x.src)PULL_SRC[x.k]=x.src;
   EB_SUG.splice(+b.dataset.ebsug,1);ebSugPaint();changed();});
+/* v22.82 (review F382) the plan's version, as the brief prints it ("version 2, revised 10/6/2026"), and the fields whose plan text
+   has changed since it was placed: "The plan has changed here", with Use the plan's words and Keep mine */
+let EB_CHG=[],EB_VER='';
+function ebVerText(plan){const ad=plan&&plan.adoption,V=plan&&Array.isArray(plan.versions)?plan.versions:[];if(!(ad&&ad.version)&&!V.length)return '';
+  const last=V.length?V[V.length-1]:null,n=(ad&&+ad.version)||(last&&+last.v)||V.length,d=String((last&&last.date)||(ad&&ad.date)||'');
+  const md=/^\d{4}-\d{2}-\d{2}/.test(d)?(+d.slice(5,7))+'/'+(+d.slice(8,10))+'/'+d.slice(0,4):'';return 'version '+n+(n>1?', revised':', adopted')+(md?' '+md:'');}
+function ebChangePaint(){const box=$('#ebChange');if(!box)return;const pv=val('e.planver'),verDiff=!!(EB_VER&&pv&&pv!==EB_VER);
+  if(!EB_CHG.length&&!verDiff){box.hidden=true;box.innerHTML='';return;}box.hidden=false;
+  box.innerHTML='<div class="eb-check" data-check="changed"><b>The plan has changed here'+(verDiff?' (this brief was built from the plan '+esc(pv)+'; the plan is now '+esc(EB_VER)+')':'')+'.</b>'+
+    EB_CHG.map((c,i)=>'<div style="margin-top:6px"><b>'+esc(PULL_NAME[c.k]||c.k)+'</b> now reads “'+esc(c.now)+'”. <button type="button" class="tool" data-ebchg="use" data-i="'+i+'">Use the plan’s words</button><button type="button" class="tool" data-ebchg="keep" data-i="'+i+'">Keep mine</button></div>').join('')+
+    (verDiff&&!EB_CHG.length?'<div style="margin-top:6px">Check the brief against the plan, then <button type="button" class="tool" data-ebchg="ver">Mark it built from the plan '+esc(EB_VER)+'</button>, print it and give it out again.</div>':'')+'</div>';}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-ebchg]');if(!b)return;const k=b.dataset.ebchg;
+  if(k==='ver'){const el=$('[name="e.planver"]');if(el){el.value=EB_VER;el.dispatchEvent(new Event('input',{bubbles:true}));}ebChangePaint();changed();return;}
+  const c=EB_CHG[+b.dataset.i];if(!c)return;
+  if(k==='use'){const el=$('[name="'+c.k+'"]');if(el){el.value=c.now;el.dispatchEvent(new Event('input',{bubbles:true}));}PULLED[c.k]=c.now;PULL_SRC[c.k]=c.k==='e.signals'?'profile':'plan';}
+  PLACED[c.k]=c.now;EB_CHG.splice(+b.dataset.i,1);ebChangePaint();changed();});
+/* v22.82 (review I194) starters for the setting, marked as starters to rewrite; a cafeteria brief for a student flagged for
+   choking or pica on the student profile gets a line for it */
+const EB_START={'School bus and transportation':[['prev','The driver stays in the driver’s seat; the attendant is the one who acts on this brief.'],['resp','If something has to be done, do it at the next safe stop, never while the bus is moving.']],
+  'Specials — art, music, or PE':[['prev','Give the student a set place and a set first job as the lesson starts; with a whole class, you cannot follow one student round the room.']],
+  'Cafeteria and lunch':[['prev','Seat the student at the end of a table, away from the line and the noisiest corner.']],
+  'Hallways and transitions':[['prev','Before the student sets off, say where they are going and how long it takes.']],
+  'Substitute or occasional coverage':[['e.extra','Where the break card is kept: ____. Who covers the room if you need to step out: ____.']],
+  'Front office or clinic':[['prev','A student who comes in holding part of the body, or unusually quiet, is treated as in pain or ill first: call the nurse.']]};
+function ebStarters(){EB_SUG=EB_SUG.filter(x=>x.src!=='starter');const ctx=ebCtx(),L=(EB_START[ctx]||[]).slice(),fl=EB_PROFILE&&EB_PROFILE.flags,saf=fl&&Array.isArray(fl.safety)?fl.safety:[];
+  if(/^Cafeteria/.test(ctx)&&saf.some(x=>/Choking|Pica/.test(x)))L.push(['e.extra','The student profile lists '+saf.filter(x=>/Choking|Pica/.test(x)).join(' and ').toLowerCase()+': watch what goes into the student’s mouth, and know where the nearest trained adult is.']);
+  const NM={prev:'What Helps Before It Starts',resp:'If the Behavior Happens','e.extra':'Specific to This Setting'};
+  L.forEach(([k,t])=>{if(/^e\./.test(k)?val(k).indexOf(t)>-1:lines(k).indexOf(t)>-1)return;EB_SUG.push({k,lab:NM[k]+' (a starter for this setting)',list:[t],src:'starter'});});}
+$('#f_ctx').addEventListener('change',()=>{ebStarters();ebSugPaint();});
 (function(){
   const T=v=>String(v==null?'':v).trim(),one=v=>T(v).replace(/\s*[\r\n]+\s*/g,' ');
   window.__nbhFactsIn=function(f){
-    f=f||{};const plan=f.plan||null,cr=f.crisis||null,r=(plan&&plan.respond)||{},placed=[];let n=0;
-    const put=(k,v,lab,mark)=>{if(val(k)||!T(v))return;setv(k,T(v));if(mark)PULLED[k]=val(k);n++;placed.push(lab);};
+    f=f||{};const plan=f.plan||null,cr=f.crisis||null,r=(plan&&plan.respond)||{},placed=[];let n=0;EB_SUG=[];
+    const put=(k,v,lab,mark,src)=>{if(val(k)||!T(v))return;setv(k,T(v));if(mark){PULLED[k]=val(k);PLACED[k]=val(k);if(src)PULL_SRC[k]=src;}n++;placed.push(lab);};
     /* lines: only when the block has no line written; empty rows are used first, then rows are added */
     const putLines=(kind,list,lab,mark)=>{list=list.map(one).filter(Boolean);if(!list.length||lines(kind).length)return;
       list.forEach(t=>{let e=$$('#'+kind+'Wrap [name]').find(x=>!T(x.value));if(!e){add(kind);e=$$('#'+kind+'Wrap [name]').find(x=>!T(x.value));}
@@ -1703,6 +1798,22 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
       EB_SUG=[];const offer=(k,lab,list)=>{list=(list||[]).map(one).filter(Boolean);if(list.length)EB_SUG.push({k,lab,list});};
       offer('resp','If the Behavior Happens',[r.target]);offer('e.after','After It Is Over',[r.after]);offer('never','Never Do This',[r.not]);
       offer('prev','What Helps Before It Starts',(plan.ant||[]).slice(0,5));ebSugPaint();}
+    /* v22.82 (review F381) what to do at the earliest sign: the plan's response to the precursor, else the crisis plan's early stage */
+    const early=(cr&&Array.isArray(cr.stages)?cr.stages:[]).find(x=>x&&/early|precursor|first sign|trigger/i.test(T(x.s)));
+    put('e.earlydo',(r&&r.prec)||(early&&early.do),'what to do at the earliest sign',1,'plan');
+    /* (F384) the student profile (Form DM-1): how the student shows no, stop or pain; what to avoid, offered for Never Do This */
+    EB_PROFILE=f.profile||null;const pf=EB_PROFILE||{};
+    put('e.signals',pf.signals,'how the student shows no, stop or pain',1,'profile');
+    const sugg=(k,lab,list,src)=>{list=(list||[]).map(one).filter(Boolean);if(list.length)EB_SUG.push({k,lab,list,src});};
+    sugg('never','Never Do This (the student profile: what to avoid)',[pf.avoid],'profile');
+    /* (F387) the plan's other targets, each offered for What You Will See: use only those that happen in this setting */
+    const tg=(Array.isArray(f.behaviors)?f.behaviors:[]).map(b=>one(b&&(b.label||b.beh))).filter(Boolean);
+    if(tg.length>1)tg.forEach(t=>{if(val('e.see').toLowerCase().indexOf(t.toLowerCase())<0)sugg('e.see','What You Will See (another target in the plan; use it only if it happens in this setting)',[t],'plan');});
+    ebStarters();ebSugPaint();
+    /* (F382) the version the brief is built from, and the fields whose plan text changed since it was placed */
+    EB_VER=ebVerText(plan);if(EB_VER&&!val('e.planver'))setv('e.planver',EB_VER);
+    const nowT={'e.see':plan&&plan.beh,'e.ask':plan&&plan.rep,'e.earlydo':(r&&r.prec)||(early&&early.do),'e.signals':pf.signals};
+    EB_CHG=Object.keys(nowT).filter(k=>PLACED[k]&&T(nowT[k])&&one(nowT[k])!==one(PLACED[k])).map(k=>({k,now:T(nowT[k])}));ebChangePaint();
     put('e.early',(plan&&plan.prec)||(cr&&cr.precursor),'the earliest sign');
     /* v22.42 (review F378) calling for help: early, at the first sign, never at the crisis plan's peak (where the plan decides on
        restraint); the crisis team who would hold is not carried, so Call who and How are left for this setting's own number */
@@ -2976,6 +3087,16 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="eb1-v2282">
+/* v22.82 (review I193) the student's photo travels with the packet; the brief shows it only with photo permission on Form DM-1.
+   (I191) The brief to the case: its setting, roles, issue date and the plan version it was built from, so Form PR-1 can say
+   which brief to give out again when the plan changes. */
+{const was=window.__nbhApplyPacket;if(was)window.__nbhApplyPacket=function(p){try{if(p&&typeof p.photo==='string'&&/^data:image\//.test(p.photo)){EB_PHOTO=p.photo;setTimeout(buildQuiet,60);}}catch(e){}return was.apply(this,arguments);};}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const ctx=ebCtx();if(!val('m.client')||!ctx)return r;const pv=val('e.planver'),m=/version\s+(\d+)/i.exec(pv),b={ctx};
+    if(val('e.roles'))b.roles=val('e.roles');if(val('e.date'))b.date=val('e.date');if(pv)b.ver=pv;if(m)b.vn=+m[1];
+    const o=r&&typeof r==='object'?r:{};o.brief=b;return o;}catch(e){return r;}};}
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
