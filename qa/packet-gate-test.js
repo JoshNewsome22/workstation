@@ -32,7 +32,8 @@
    The clock is held at 2026-10-14 10:00 so the worked examples' dates, and so the page counts, are the same every run.
    Simulated data only. About 3 minutes.
    usage: node qa/packet-gate-test.js     (WS_PRINT_CHANGED=all or TD-1,SM-1 when a release changes paper on purpose;
-          GATE_FORMS=DM-1,TK-1 for a smaller packet while working (page counts not compared, no baseline written); GATE_UPDATE=1 rewrites the baseline) */
+          GATE_FORMS=DM-1,TK-1 for a smaller packet while working (page counts not compared, no baseline written); GATE_UPDATE=1 rewrites the baseline;
+          GATE_DEVICE=ipad builds it as an upright iPad does) */
 const L=require(__dirname+'/lib.js');const {execFileSync}=require('child_process');
 const OUT=__dirname+'/out/packet-gate';L.fs.mkdirSync(OUT,{recursive:true});
 const BASEFILE=__dirname+'/packet-gate-baseline.json';
@@ -40,13 +41,17 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
 const CHANGED=(process.env.WS_PRINT_CHANGED||'').split(',').map(s=>s.trim()).filter(Boolean);
 const ONLY=(process.env.GATE_FORMS||'').split(',').map(s=>s.trim()).filter(Boolean);
 const FLOOR=6;
+/* GATE_DEVICE=ipad: the workstation as an iPad held upright lays it out (820 x 1180, touch, an iPad's user agent); its print
+   window measures the packet the same way. Page counts are compared on a laptop's run only. */
+const IPAD=process.env.GATE_DEVICE==='ipad';
 const BAR={client:'Mateo Rivera',sid:'4471823',site:'Royal Palm School (simulated)',grade:'5',bcba:'Jordan Ellis, M.A., BCBA (simulated)'};
 /* the student's case: every form but the staff records (RS-1 is not part of a student's case; Save case leaves it out) */
 const FORMS=L.forms().filter(f=>f.id!=='RS-1'&&(!ONLY.length||ONLY.includes(f.id)));
 const SIGS='.td85-card,.sigblock,.ic-signpart,.eb-sig,.sig,.hs-sig,.cn-sig';
 (async()=>{const br=await L.chromium.launch();const errs=[];
   try{
-  const ctx=await br.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+  const ctx=await br.newContext(IPAD?{viewport:{width:820,height:1180},hasTouch:true,serviceWorkers:'block',
+    userAgent:'Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'}:{viewport:{width:1280,height:900},serviceWorkers:'block'});
   /* the workstation keeps 8 forms loaded and puts the rest away (filled again when collected); this case keeps every one */
   await ctx.addInitScript(()=>{window.print=function(){};try{localStorage.setItem('nbh.frames.cap','60');}catch(e){}});
   await ctx.clock.setFixedTime(new Date('2026-10-14T10:00:00'));
@@ -161,10 +166,10 @@ const SIGS='.td85-card,.sigblock,.ic-signpart,.eb-sig,.sig,.hs-sig,.cn-sig';
   /* 8 page counts */
   const now={};Object.entries(R.perSec).forEach(([id,r])=>{now[id]=r.pages;});
   const was=(base&&base.pages)||{},diff=[],meant=[];
-  Object.keys(now).forEach(id=>{if(was[id]===undefined||was[id]===now[id]||ONLY.length)return;   /* a smaller packet compares none: a form fed by others' facts (TD-1) prints fewer pages without them */(CHANGED.includes('all')||CHANGED.includes(id)?meant:diff).push(id+' '+was[id]+' > '+now[id]);});
+  Object.keys(now).forEach(id=>{if(was[id]===undefined||was[id]===now[id]||ONLY.length||IPAD)return;   /* a smaller packet compares none: a form fed by others' facts (TD-1) prints fewer pages without them */(CHANGED.includes('all')||CHANGED.includes(id)?meant:diff).push(id+' '+was[id]+' > '+now[id]);});
   const fresh=Object.keys(now).filter(id=>was[id]===undefined);
   if(meant.length)console.log('   (paper changed on purpose, WS_PRINT_CHANGED: '+meant.join(', ')+')');
-  if(ONLY.length)console.log('   (8: a smaller packet; page counts are compared on the full packet only)');
+  if(ONLY.length||IPAD)console.log('   (8: '+(IPAD?'an iPad\'s run; page counts are compared on a laptop\'s':'a smaller packet; page counts are compared on the full packet only')+')');
   else ok('8 every form prints the pages the baseline holds'+(base?'':' (no baseline yet: written now)'),!diff.length,diff);
   /* ---- I241: the packet check in the print window ---- */
   const C=await win.evaluate(()=>({chk:window.__nbhCheck,printed:window.__printed,est:window.__nbhPages||{},fit:window.__nbhFitBy||{},
@@ -271,8 +276,8 @@ print(json.dumps({'a':len(A),'b':len(B),'n':len(d),'diff':d[:10]}))`,pdfFile,pdf
   }
   /* the app installed on an iPad opens the print window inside itself (an iframe over the page, its own Print and Close): the
      list shows there, the dialog waits, and a fix reaches the workstation through the page around it */
-  {const IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-    const ictx=await br.newContext({viewport:{width:1180,height:820},userAgent:IPAD,hasTouch:true,serviceWorkers:'block'});
+  {const UA='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
+    const ictx=await br.newContext({viewport:{width:1180,height:820},userAgent:UA,hasTouch:true,serviceWorkers:'block'});
     await ictx.addInitScript(()=>{Object.defineProperty(Navigator.prototype,'standalone',{get:()=>true,configurable:true});try{localStorage.setItem('nbh.ws.autosave.on','off');localStorage.setItem('nbh.ws.autosave.v2','off');}catch(e){}});
     const ip=await ictx.newPage();let pops=0;ictx.on('page',()=>pops++);ip.on('pageerror',e=>errs.push('installed app: '+e.message));
     await ip.goto(L.BASE+'/NBH-Workstation/index.html');await L.sleep(1500);
@@ -289,7 +294,7 @@ print(json.dumps({'a':len(A),'b':len(B),'n':len(d),'diff':d[:10]}))`,pdfFile,pdf
   KNOWN.forEach(k=>console.log('KNOWN '+k));
   if(!errs.length)ok('12 no page errors',true);else ok('12 no page errors',false,errs.slice(0,4));
   /* the baseline: written when there is none, for the forms changed on purpose, or on GATE_UPDATE=1; never from a smaller packet */
-  if(!ONLY.length&&(!base||meant.length||fresh.length||process.env.GATE_UPDATE)&&!diff.length){
+  if(!ONLY.length&&!IPAD&&(!base||meant.length||fresh.length||process.env.GATE_UPDATE)&&!diff.length){
     const pages=Object.assign({},was,now);const nb={about:(base&&base.about)||'qa/packet-gate-test.js: the page count of each form in the simulated full packet, and the faults the packet had before the gate.',
       packet:{forms:FORMS.length,pages:N,cover:R.coverPages},pages,known:(base&&base.known)||{}};
     if(process.env.GATE_UPDATE){const k={};const add=(id,kind,v)=>{(k[id]=k[id]||{})[kind]=v;};

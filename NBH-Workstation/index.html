@@ -3087,7 +3087,7 @@ function mpCheckWin(){
   var box=document.getElementById('mpCheck'),data=document.getElementById('mpCheckData');if(!box||!data)return;
   var t0=window.performance?performance.now():0,D={};try{D=JSON.parse(data.textContent);}catch(e){}
   var items=(D.items||[]).slice(),fit=window.__nbhFitBy||{},est=window.__nbhPages||{},usual=D.usual||{},F=function(id){return 'Form '+id;};
-  Object.keys(fit).forEach(function(id){if(fit[id]<70)items.push({text:F(id)+': a table or chart prints at '+fit[id]+'% of its size to fit the page, so its print is small.',fixes:[['open',id,'Open '+F(id)]]});});
+  Object.keys(fit).forEach(function(id){if(fit[id]<60)items.push({text:F(id)+': a table or chart prints at '+fit[id]+'% of its size to fit the page, so its print is small.',fixes:[['open',id,'Open '+F(id)]]});});
   Object.keys(est).forEach(function(id){var u=usual[id];if(u&&est[id]>=Math.max(2*u,u+8))items.push({text:F(id)+' runs to about '+est[id]+' pages; with its full worked example it takes '+u+'.',fixes:[['open',id,'Open '+F(id)],['untick',id,'Leave it out']]});});
   var ids=function(sel,mk){return [].map.call(document.querySelectorAll(sel),function(e){return mk?(e.getAttribute('data-mk')||'').replace('NBHTOC:','').replace(';',''):e.id.replace('sec-','');}).join(',');};
   if(ids('.mp-cover ol > li',1)!==ids('.mp-sec'))items.push({text:'The contents on the cover do not match the forms printed after it.',fixes:[]});
@@ -3261,6 +3261,10 @@ async function masterRun(chosen,opt){opt=opt||{};
        that prints as a grey block wherever content stops short of the page */
     .mp-sec,.mp-sec .nbh-page{background:#fff!important}
     .mp-sec{page-break-before:always;break-before:page}
+    /* v22.7x (found with the packet gate, I242): a form's own named page (Form TK-1's turned sheets on an iPad, page:tkport)
+       took its sheets off the section's page, so they printed without the section's running head; its @page rule is
+       already left out (v22.15), and here every part of a section stays on the section's page */
+    .mp-sec *{page:auto!important}
     .mp-sec:first-of-type{page-break-before:auto;break-before:auto}
     /* a form built as a run of pages keeps those page breaks inside the packet */
     .mp-sec .nbh-page+.nbh-page{page-break-before:always;break-before:page}
@@ -3411,12 +3415,16 @@ async function masterRun(chosen,opt){opt=opt||{};
        t = (t || '').trim().toLowerCase();
        if (!t || t === 'all') return true;
        return t.split(',').some(function(q){
-         q = q.trim(); var neg = /^not\s/.test(q); q = q.replace(/^(not|only)\s+/, '');
-         var ok = q.split(/\s+and\s+/).every(function(part){
+         /* v22.7x (found with the packet gate, I242): this script is written out of a template literal, which drops a lone
+            backslash, so these patterns reached the window with "a space" read as the letter s: "screen and (pointer:coarse)"
+            and every width query were asked of the screen, not the page, and on an upright iPad the touch sizes and the iPad
+            text rules were measured as if they printed. The backslashes are doubled to arrive whole. */
+         q = q.trim(); var neg = /^not\\s/.test(q); q = q.replace(/^(not|only)\\s+/, '');
+         var ok = q.split(/\\s+and\\s+/).every(function(part){
            part = part.trim();
            if (!part || part === 'print' || part === 'all') return true;
            if (/^(screen|speech|tv|projection|handheld)$/.test(part)) return false;
-           var m = /^\(\s*(min|max)-width\s*:\s*([\d.]+)\s*([a-z]*)\s*\)$/.exec(part);
+           var m = /^\\(\\s*(min|max)-width\\s*:\\s*([\\d.]+)\\s*([a-z]*)\\s*\\)$/.exec(part);
            if (m) { var u = { px:1, 'in':96, cm:96/2.54, mm:96/25.4, pt:96/72, em:16, rem:16 }[m[3] || 'px'] || 1;
              var v = parseFloat(m[2]) * u; return m[1] === 'max' ? PAGE <= v : PAGE >= v; }
            try { return window.matchMedia(part).matches; } catch (e) { return true; }

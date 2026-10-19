@@ -34,7 +34,7 @@ for pn in range(N):
     if abs(W - 612) > 1 or abs(H - 792) > 1: out['odd'].append([no, round(W), round(H)])
     D = page.get_text('dict')
     slots = {'tl': [], 'tc': [], 'tr': [], 'bl': [], 'br': []}
-    body, imgs, marks, heads = [], 0, [], []
+    body, imgs, marks, heads, turned = [], 0, [], [], []
     for b in D['blocks']:
         if b['type'] != 0:
             imgs += 1; x0, y0, x1, y1 = b['bbox']
@@ -48,7 +48,7 @@ for pn in range(N):
                 if not t: continue
                 x0, y0, x1, y1 = s['bbox']
                 if s['color'] == 0xffffff: marks.append((t, y0)); continue
-                if rot: out['rotated'].append([no, t[:40]]); continue
+                if rot: out['rotated'].append([no, t[:40]]); turned.append(s); continue
                 if y1 <= TOP - 1 or y0 >= H - TOP + 1:
                     row = 't' if y1 <= TOP - 1 else 'b'
                     col = 'l' if x0 < W * 0.25 else ('r' if x1 > W * 0.75 else 'c')
@@ -73,9 +73,9 @@ for pn in range(N):
         x0, y0, x1, y1 = s['bbox']
         if x0 < SIDE - TOL or x1 > W - SIDE + TOL or y0 < TOP - TOL or y1 > H - TOP + TOL:
             out['margins'].append([no, 'text', [round(v, 1) for v in s['bbox']], s['text'].strip()[:40]])
-    # what the page holds
-    chars = sum(len(s['text'].strip()) for s in body)
-    lines = len({round(s['bbox'][3] / 3) for s in body})
+    # what the page holds (a turned line is content too: TK-1's book printed sideways on an upright iPad)
+    chars = sum(len(s['text'].strip()) for s in body + turned)
+    lines = len({round(s['bbox'][3] / 3) for s in body}) + len(turned)
     draws = len(page.get_drawings()) if imgs == 0 and chars < 200 else 99
     band = lambda t: re.match(r'^(SECTION \d+ OF \d+|FORM [A-Z]{2,3}-\d)$', t) or re.match(r'^Form [A-Z]{2,3}-\d · ', t)
     headish = lambda s: (s['flags'] & 16) or s['size'] >= 12 or band(s['text'].strip())
@@ -87,8 +87,8 @@ for pn in range(N):
     for rx in FORBID:
         g = rx.search(whole)
         if g and not (sec in ('REFS', 'cover') and 'References' in rx.pattern): out['forbid'].append([no, sec, whole[max(0, g.start() - 30):g.end() + 30]])
-    if not body and imgs == 0: out['blank'].append([no, sec, draws])
-    elif imgs == 0 and draws <= 12 and chars < 200 and all(headish(s) for s in body): out['heading'].append([no, sec, sample])
+    if not body and not turned and imgs == 0: out['blank'].append([no, sec, draws])
+    elif imgs == 0 and draws <= 12 and chars < 200 and not turned and all(headish(s) for s in body): out['heading'].append([no, sec, sample])
     elif imgs == 0 and draws <= 12 and lines <= 1 and chars < 60: out['stray'].append([no, sec, sample])
     # the smallest print a form puts on paper (a span with a letter or a figure in it)
     for s in body:
