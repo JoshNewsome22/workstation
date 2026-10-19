@@ -9903,6 +9903,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.20: OB-1 observes up to three target behaviors on one record and times episodes of a duration behavior (review Wave 3)
+
+- **Several targets on one record (F74).** A student with two or three Form TB-1 targets can be observed on one record.
+  - Each other behavior has its own row of tiles (keys 5 and Shift+5), its own rows on the sheet and its own columns in
+    the CSV.
+  - Each has its own sentences in the summary and in the statement sent to Form FS-1.
+  - The case's targets arrive, excluding the replacement: the first goes in the behavior box, the others on Setup, three
+    at most.
+  - An older file opens as one behavior.
+- **Episodes timed (I38).** For a behavior measured by duration, the Student tile starts an episode and the next tap ends
+  it.
+  - At End, an episode still going is timed to the end, and Undo opens the last one again.
+  - The record keeps the episodes, their total minutes and the longest.
+  - In a partial-interval sample, every interval an episode runs into is marked.
+  - A first target whose TB-1 dimension is duration is timed.
+- qa/ob1-w3b-test.js (31 checks).
+
 ### v23.19: CF-1 waits to ask item 21 until the plan has run, keeps a complete round as the case's figure, dates round 2, and files respondents by role (review Wave 3)
 
 - **Item 21 waits for the plan to run (F208).** "I have seen enough of this plan working to keep running it on a hard day"
