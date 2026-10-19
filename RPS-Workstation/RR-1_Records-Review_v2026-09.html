@@ -924,6 +924,10 @@ table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-wei
   #removals .rl-empty,#removals .rl-note{font-size:10px;margin-bottom:8px}
 }
 </style>
+<style id="rr1-v2329">
+/* v23.29 (review I14) a record Form IC-1 names, still to review */
+#srcTbl td.lab .rr-ic1{margin-left:6px}
+</style>
 </head>
 <body class="view-sources">
 
@@ -1053,6 +1057,8 @@ table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-wei
     <div class="f"><label for="hSystems">Systems searched</label><input id="hSystems" name="h.systems" placeholder="e.g., district SIS, ESE system, cumulative folder, nurse log"></div>
   </div>
   <div class="readout" id="srcReadout"></div>
+  <!-- v23.29 (review I14) the records Form IC-1 names as already held -->
+  <input type="hidden" name="src.ic1"><p class="hint" id="srcIc1" hidden></p>
   <div class="gridwrap rrwrap"><table class="grid" id="srcTbl">
     <thead><tr><th class="c" style="width:66px">Reviewed</th><th style="width:190px">Record</th><th class="c" style="width:110px">Date of record</th><th style="width:150px">Where found</th><th>What it contributed (or "not available")</th></tr></thead>
     <tbody></tbody>
@@ -2028,6 +2034,59 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
  if(last){refresh();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
  return {filled:n+(g&&g.filled||0),note:n?'Consent, health record and program from the case (Forms IC-1 and DM-1)':''};};
+/* v23.29 (review I14) the inventory and the restraint history from the case, each only where this form's field is empty.
+   The records Form IC-1 names as already held ("the information we already have and will review") are marked to review on
+   the Sources sheet, and are not ticked: Reviewed is the BCBA's record that the document was examined. A record IC-1 names
+   that is none of the inventory's types goes in the Other row's name. The restraint and seclusion counts, their period and
+   the most recent come from Form CR-1's restraint log (this semester), or from Form DD-1's incident record when CR-1 has no
+   count; whether the crisis plan on file is current comes from CR-1's plan and review dates. */
+const RR_IC1=[['prog',/progress reports?|IEP progress/i],['piep',/\b(prior|previous|past|old|earlier)\b[^.]*\bIEPs?\b/i],['md',/manifestation/i],
+ ['bipdata',/\bBIPs?\b[^.]*\b(data|graphs?)\b|\bdata sheets?\b|\bbehaviou?r data\b/i],['bip',/\bBIPs?\b|behaviou?r(al)? (intervention|support) plans?|behaviou?r plans?/i],
+ ['iep',/\bIEPs?\b/i],['elig',/eligibility|evaluation|psycho-?educational|psychological (report|eval)/i],['fba',/\bFBAs?\b|functional behaviou?r(al)? assessments?/i],
+ ['inc',/incident|restraint|seclusion/i],['odr',/discipline|office referrals?|\bODRs?\b|referrals?/i],['att',/attendance|tard(y|ies)|absences?/i],
+ ['grades',/report cards?|grades|progress monitoring/i],['meds',/medication/i],['health',/health|nurse|medical record/i],
+ ['parent',/parent (input|forms?|e-?mails?|notes|interview)/i],['outside',/outside|private (provider|therap)|psychiatr|neurolog|\bABA\b|pediatric|medical reports?/i],
+ ['transfer',/transfer|(prior|previous) school|other district/i],['comm',/communication logs?|daily notes?|home-?school (notes?|logs?)|teacher (notes|logs?)/i],
+ ['mtss',/\bMTSS\b|\bPBIS\b|\bRtI\b|school-?wide|\btier [123]\b/i]];
+function rrIc1Parse(t){const keys=[],other=[];String(t||'').split(/[,;\n\/&]|\band\b/i).map(x=>x.replace(/\((simulated|date)\)/ig,'').replace(/[.\s]+$/,'').trim()).filter(Boolean).forEach(x=>{
+  const r=RR_IC1.find(([k,re])=>re.test(x));if(r){if(!keys.includes(r[0]))keys.push(r[0]);}else if(x.length>2)other.push(x);});return {keys,other};}
+function rrIc1Mark(){const h=document.querySelector('[name="src.ic1"]'),ks=h&&h.value?h.value.split(',').filter(Boolean):[],left=[];
+  $$('#srcTbl tbody tr').forEach(tr=>{const cb=tr.querySelector('input[type=checkbox]'),k=cb&&(/^src\.(\w+)\.r$/.exec(cb.name)||[])[1];let tag=tr.querySelector('.rr-ic1');
+    const on=!!(k&&ks.includes(k)&&!cb.checked);if(on){left.push(k);if(!tag){tag=document.createElement('span');tag.className='tag mid rr-ic1';tag.textContent='To review (named on Form IC-1)';tr.querySelector('td.lab').appendChild(tag);}}
+    else if(tag)tag.remove();});
+  const ro=document.getElementById('srcIc1');if(ro){ro.hidden=!left.length;ro.textContent=left.length?'Form IC-1 names '+left.length+' record'+(left.length===1?'':'s')+' as already held and to be reviewed, marked below. Tick each once it has been examined.':'';}}
+{const rf0=refresh;refresh=function(){const r=rf0.apply(this,arguments);try{rrIc1Mark();}catch(e){}return r;};
+ const af0=applyFields;applyFields=function(){const r=af0.apply(this,arguments);try{rrIc1Mark();}catch(e){}return r;};
+ document.addEventListener('change',()=>{try{rrIc1Mark();}catch(e){}});}
+/* the crisis plan on file: current while its next review is not past and it was dated or reviewed within the year */
+function rrCrisisState(C,today){const pd=rrISO(C.planDate),rl=rrISO(C.revLast),rn=rrISO(C.revNext);if(!pd)return '';
+  if(rn&&rn<today)return 'Yes, outdated';const last=[pd,rl].filter(Boolean).sort().pop(),y=new Date(today+'T12:00:00');y.setFullYear(y.getFullYear()-1);
+  return last<y.toISOString().slice(0,10)?'Yes, outdated':'Yes, current';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let n=0,last=null;const said=[];
+  try{if(!f||typeof f!=='object')return r;const T=v=>String(v==null?'':v).trim(),E=k=>{const e=document.querySelector('[name="'+k+'"]');return e&&!T(e.value)?e:null;};
+   const put=(k,v)=>{const e=E(k);v=T(v);if(!e||!v)return false;if(e.type==='date'){v=rrISO(v);if(!v)return false;}e.value=v;last=e;n++;return true;};
+   const mdy=v=>{const i=rrISO(v);return i?(+i.slice(5,7))+'/'+(+i.slice(8,10))+'/'+i.slice(0,4):T(v);};
+   /* the records Form IC-1 names */
+   const C=f.consent||{},h=document.querySelector('[name="src.ic1"]');
+   if(T(C.records)&&h&&!T(h.value)){const P=rrIc1Parse(C.records),ks=P.keys.filter(k=>{const c=document.querySelector('[name="src.'+k+'.r"]');return c&&!c.checked;});
+    if(P.other.length&&put('src.other.name',P.other.join('; ')))ks.push('other');
+    if(ks.length){h.value=ks.join(',');last=h;n++;said.push('the records Form IC-1 names');}}
+   /* the restraint history */
+   const X=f.crisis||{},R=X.restraints||null,DI=(f.data&&Array.isArray(f.data.incidentList))?f.data.incidentList:[];
+   if(E('c.restr')&&E('c.secl')&&E('c.period')){
+    if(R&&+R.semester>0){put('c.restr',String(+R.semester));if(+X.seclusions>0)put('c.secl',String(+X.seclusions));
+     const sm=X.sem||{};put('c.period','This semester'+(T(sm.from)||T(sm.to)?', '+[mdy(sm.from),mdy(sm.to)].filter(Boolean).join(' to '):'')+' (Form CR-1)');put('c.last',R.last);said.push('the restraint log (Form CR-1)');}
+    else{const hr=DI.filter(i=>i&&i.hold==='restraint'&&rrISO(i.date)),hs=DI.filter(i=>i&&i.hold==='seclusion'&&rrISO(i.date));
+     if(hr.length||hs.length){const ds=DI.map(i=>i&&rrISO(i.date)).filter(Boolean).sort(),hd=hr.concat(hs).map(i=>rrISO(i.date)).sort();
+      put('c.restr',String(hr.length));if(hs.length)put('c.secl',String(hs.length));put('c.period',mdy(ds[0])+' to '+mdy(ds[ds.length-1])+' (Form DD-1’s incident record)');put('c.last',hd[hd.length-1]);
+      said.push('the incident record (Form DD-1)');}}}
+   /* whether the crisis plan on file is current */
+   {const e=E('c.crisis'),st=X.src==='CR-1'?rrCrisisState(X,ymd(new Date())):'';if(e&&st){e.value=st;last=e;n++;said.push('the crisis plan (Form CR-1)');}}
+   if(last){refresh();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+  }catch(e){}
+  const note=said.length?'The inventory and the restraint history from '+said.join(', '):'';
+  return {filled:(r&&r.filled||0)+n,note:[r&&r.note,note].filter(Boolean).join('; ')};};}
 window.__nbhFactsOut=function(){try{const C=lgCompute(),E=1e-9,cy=lgSY(ymd(new Date()));
  const o=C.years.find(y=>y.y===cy),rows=C.rows.filter(x=>x.by[cy]>E||x.sy===cy);
  const list=rows.map(x=>{const it={date:x.r.s,days:Math.round((x.by[cy]!=null?x.by[cy]:x.days)*100)/100,kind:lgLab(LG_TYPES,x.r.t)||''};if(x.r.e&&x.r.e!==x.r.s)it.to=x.r.e;it.counted=LG_CNT[x.r.c]||'';return it;});

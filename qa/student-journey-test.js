@@ -148,7 +148,10 @@ function diffSnap(a,b,factsTxt){const oa=ownOf(a),ob=ownOf(b),useOwn=!!(oa&&ob);
     const sv=v=>JSON.stringify(v===undefined?'(none)':v).slice(0,140);let kind;
     if(blankV(y))kind='lost';else if(!blankV(x))kind='changed';
     else if(typeof y==='string'&&before.has(y.trim()))kind='duplicated';
-    else if(factsTxt&&typeof y==='string'&&y.trim().length>3&&factsTxt.indexOf(JSON.stringify(y.trim()).slice(1,-1))>=0)kind='filled';else kind='new';
+    else if(factsTxt&&typeof y==='string'&&y.trim().length>3&&factsTxt.indexOf(JSON.stringify(y.trim()).slice(1,-1))>=0)kind='filled';
+    /* v23.29 (RR-1 review I14) RR-1's restraint history is composed from CR-1's restraint count (the count, "This semester (Form
+       CR-1)", the most recent, the plan's state), so its words are not in the facts as written */
+    else if(factsTxt&&/^own\.fields\.c\.(restr|secl|period|last|crisis)$/.test(k)&&factsTxt.indexOf('"restraints"')>=0)kind='filled';else kind='new';
     L.push({kind,t:kind+' '+k+': '+sv(x)+' -> '+sv(y)});});return L;}
 const bad=L=>L.filter(x=>x.kind!=='filled');
 /* Save case, Close case, Open case from the file, every form opened and saved again: nothing lost or changed */

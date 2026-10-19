@@ -2628,6 +2628,9 @@ window.__nbhFactsOut=function(){
       if(notices.length)c.notices=notices;
       if(ev.length>evR.length)c.seclusions=ev.length-evR.length;
       c.prone=T(m.prone);c.hPhys=T(m.hPhys);c.hAlert=T(m.hAlert);
+      /* v23.29 (RR-1 review I14) the plan's date, its review dates and the semester the count covers, for Form RR-1's history */
+      const crIso=v=>{v=T(v);let x=/^(\d{4})-(\d\d)-(\d\d)/.exec(v);if(x)return x[0];x=/^(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/.exec(v);return x?(x[3].length===2?'20'+x[3]:x[3])+'-'+x[1].padStart(2,'0')+'-'+x[2].padStart(2,'0'):v;};   /* a date as ISO when it reads as one */
+      c.planDate=crIso(m.date);c.revLast=crIso(m.revLast);c.revNext=crIso(m.revNext);if(T(m.semFrom)||T(m.semTo))c.sem={from:T(m.semFrom),to:T(m.semTo)};
       return o;
     }catch(e){return o;}
   };

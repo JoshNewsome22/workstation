@@ -9903,6 +9903,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.29: RR-1 takes its records inventory and restraint history from the case: the records IC-1 names, CR-1's restraint log and plan dates, DD-1's incident record (review Wave 3)
+
+- **The records Form IC-1 names (I14).** IC-1's "Information we already have and will review" now travels with the
+  consent. RR-1's Sources sheet marks each record it names "To review (named on Form IC-1)", with a note counting them.
+  - They are not ticked. The Reviewed column is the BCBA's record that the document was examined, and IC-1 lists what
+    will be reviewed.
+  - Ticking a record takes its mark away. The marks are saved with the file.
+  - A record that is none of the inventory's types goes in the Other row's name.
+- **The restraint history (I14).** Into RR-1's empty fields:
+  - from Form CR-1's restraint log: the semester's restraint and seclusion counts, the semester's dates as the period,
+    and the most recent;
+  - when CR-1 has no count, from Form DD-1's incident record: the restraints and seclusions it records, the period
+    the record covers, and the most recent.
+  - A count typed on RR-1 keeps the history as typed.
+- **The crisis plan on file (I14).** CR-1 now sends its plan date and its review dates. RR-1 calls the plan current
+  when it was dated or reviewed within the year and its next review is not past, and outdated otherwise. An undated
+  plan is left for the BCBA.
+- **Next:** I12 (a timeline figure).
+- qa/rr1-w3c-test.js (12 checks).
+
 ### v23.28: TD-1 lists the BCBA's assessments apart from the staff steps, and leaves an empty session log out of the IEP packet (review Wave 3)
 
 - **The BCBA's assessments (F183).** Ten cards are assessments or target selection the BCBA completes once or at review:
