@@ -48,7 +48,7 @@ const OUT=__dirname+'/out/sprint-a3/';
 const F=forms(ED),OB=F.find(f=>f.id==='OB-1');
 if(!OB){console.error('FAIL no OB-1 in '+ED);process.exit(1);}
 const FORM=BASE+'/'+ED+'/'+OB.file,SHELL=BASE+'/'+ED+'/index.html';
-const A3_BASE=process.env.A3_BASE||'b23b5564';   /* v22.23 re-baselined to v22.10, which put the student and "Page N of M" on every page of a form printed on its own (review F477), on purpose. v21.97 re-baselined: v21.96 took OB-1's simulation note off the paper on purpose */
+const A3_BASE=process.env.A3_BASE||'06ee8f25';   /* v22.81 re-baselined to v22.49, the last change to OB-1's print on purpose (v22.41 its restraint flags, F70; v22.49 the simulated BCBA); the observation sheets print the same since. v22.23 re-baselined to v22.10, which put the student and "Page N of M" on every page of a form printed on its own (review F477), on purpose. v21.97 re-baselined: v21.96 took OB-1's simulation note off the paper on purpose */
 /* a record in the shape OB-1 saved it in v21.24: ivUsed on each observation, no second-observer fields, narrative times typed
    as h:mm (1:09 is after lunch); A3_OLD can name a real earlier file as well */
 const A3_OLD=process.env.A3_OLD||'';
