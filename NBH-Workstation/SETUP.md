@@ -9903,6 +9903,56 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.88: AD-1 stops a session that turns dangerous, names the rows it cannot read, keeps its evidence guide out of the student's record, and reads IOA by arrangement (review Wave 3)
+
+- **Stop rules (F408).** The comparison withholds the reinforcer on purpose (baseline, the accumulated wait, the removal
+  probes), and the form had no written permission to stop.
+  - Tab 3E now holds **Session stops when** and **Evaluation stops when**. With the case open, the session rule starts
+    from the crisis plan's dangerous behavior (Form CR-1) when it is empty.
+  - Every arrangement's script ends with the rule ("Stop the session if …. Follow the crisis plan (Form CR-1) and mark
+    the row Stopped early"). Until it is written, the scripts carry a general one (the student or an adult at risk of
+    injury).
+  - The session log has a **Stopped early** column. A stopped session stays on the log and the graph, marked, and is left
+    out of the comparison, the means and the decision's figures, so it is not read as a short session. The comparison
+    and the decision list the stopped sessions by arrangement, and say when more than one session of an arrangement met
+    the rule.
+  - The session runner has **Stop: stop rule met**. It ends the session at once with its clocks as they stand, and the
+    row is written marked Stopped early.
+  - The integrity checklist adds a step: the session was stopped when the rule was met, and not ended early for any
+    other reason.
+  - The job aids and the practice answer about stretching a unit say the same.
+  - A file saved before this release opens with its rows in place.
+- **The timing rule's rate (F411).** v22.61 already let the total-time rule pick responses per minute of total session.
+  Under the work-time rule, a row with responses and no work minutes is now marked, and the comparison names the
+  sessions. When sessions exist but no figure on the primary measure can be computed, the decision says so ("No
+  responses per minute of work could be computed (work minutes missing on 4 rows)") instead of leaving Efficacy out.
+- **The evidence guide (F413).** The six-study evidence guide is a literature review, not the student's record.
+  - It no longer prints with the form unless **Print the evidence guide with this form** is ticked.
+  - **Print the evidence guide alone** prints it by itself.
+  - The References still print with the form.
+  - In the workstation, Packet options lists AD-1 among the forms with a Guide, and the packet leaves it out unless it is
+    kept.
+- **Tab 7 from Tab 3 (F414).** The plan's reinforcer, amount per response, work requirement, exchange routine and how
+  access ends show Tab 3's values as placeholders. Choosing the decision writes them into the plan fields that are still
+  empty, and Token board when the decision uses tokens. The work response in Tab 3 takes Tab 1's when it is empty. Typed
+  text is never replaced.
+- **The graph follows the question (F415).** The graph opens on the question's primary measure: problem behavior for
+  the escape question, the percentage for skill acquisition and the classroom, the work-time or total-time rate
+  otherwise. A measure picked by hand stays picked, also when the file is saved and opened again.
+- **IOA (F416).**
+  - Each mean shows its range, and every check under 80% is named with its measure and session.
+  - Coverage is shown for each arrangement, from each IOA row's session number in the log, and an arrangement checked
+    on fewer than a third of its sessions is named.
+  - The decision reports the range, the lowest check and the arrangements short of a third ("IOA 75.0–100.0% (mean
+    97.3%) across 10 checks, 35% of sessions; lowest 75.0% (problem behavior, session 9), under 80%").
+- **The function the case carries (F417).** When the function recorded on Tab 1 (filled from Form FS-1) names escape and
+  the question chosen is not the escape question, the learner flags carry Fulton et al.'s and Frank-Crawford et al.'s
+  caution, and suggest the compliance question may fit better.
+- **Already done:** the consent line from Form IC-1 (F409) shipped in v22.37.
+- **Next:** F410 (an integrity log, one row per observation, by arrangement) and F412 (the decision sent to the case for
+  SR-1, TE-1, TK-1 and QS-1) are part 2.
+- qa/ad1-w3-test.js (15 checks). qa/v2262-test.js reads the runner's row without the new column.
+
 ### v22.87: TI-1 fails a critical or consequence step done wrongly, reads its observations by date, tells the case its own verdict, and calls for the incident report when a safety step is broken (review Wave 3)
 
 - **A critical or consequence step done wrongly fails the verdict (F238).** A commission error on a critical step, or on

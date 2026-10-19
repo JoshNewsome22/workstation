@@ -396,6 +396,13 @@ table.cc-log{min-width:900px}
 #adRun[data-st="removed"] #adrMsg,#adRun[data-st="exchange"] #adrMsg,#adRun[data-st="done"] #adrMsg{font-weight:600}
 #adRun #adrMsg{font-size:13.5px;margin:8px 0 4px}
 @media print{#adRun{display:none!important}}
+/* v22.88 (review F408, F411) a session stopped under the stop rule; a row with responses and no work minutes */
+#tbSess tr.ad-stopped td{background:#FBEFE6}#tbSess tr.ad-nowork td:nth-child(8) input{border-color:#B4541A;background:#FFF6EE}
+/* v22.88 (review F413) the evidence guide prints only when asked: with the form (the tick), or alone */
+@media print{#adGuide.pr-skip{display:none!important}body.ad-guide-printing .panel:not(#p9),body.ad-guide-printing nav.tabs{display:none!important}
+  body.ad-guide-printing #adGuide{display:block!important}body.ad-guide-printing #p9{page-break-before:auto!important}
+  #p9{page-break-before:auto!important}#adGuide:not(.pr-skip){page-break-before:always}}   /* the References alone do not start a page; in the packet, where they go to the appendix, Tab 9 leaves no blank page */
+.ad-gp{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:6px 0 10px}.ad-gp label{display:inline-flex;gap:6px;align-items:center;font-size:13px}
 </style>
 <style id="nbh-brand">
 /* ===== Newsome Behavioral Health — shared form system ===== */
@@ -1117,6 +1124,12 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
     <div><label class="f">Mastery: consecutive sessions</label><input type="number" name="d_mastn" min="1" step="1"></div>
   </div>
   <div><label class="f">Switch rule if an arrangement is not working</label><input type="text" name="d_switch"></div>
+  <!-- v22.88 (review F408): written permission to stop a session that turns dangerous, and the point at which the evaluation ends -->
+  <div class="grid g2">
+    <div><label class="f">Session stops when</label><input type="text" name="d_term" placeholder="e.g., any hit with contact; three screams in a minute; the student asks to stop"></div>
+    <div><label class="f">Evaluation stops when</label><input type="text" name="d_stop" placeholder="e.g., an injury; the crisis plan used; three sessions of one arrangement stopped early"></div>
+  </div>
+  <p class="small">The comparison withholds the reinforcer on purpose (baseline, the accumulated wait, the removal probes), so problem behavior can rise. A session that meets the stop rule ends at once, the crisis plan is followed (Form CR-1), and the row is marked Stopped early in Tab 4: it is left out of the comparison rather than read as a short session. Every script below carries the rule; Form EA-1 asks for the same before an analysis.</p>
   <p class="small">Mandel (2021) required 100% independent correct across three consecutive sessions and at least two days; if an arrangement had not produced mastery after twice the sessions the first-mastered arrangement needed, and responding was not increasing, the target was switched to that arrangement (pp. 31–32). Frank-Crawford et al. (2021) called a condition ineffective when mean problem behavior was 50% or more of the baseline mean, with no decreasing trend, and not because of one elevated session (p. 1578); Tab 4 applies the first part of that test and leaves the other two to visual analysis.</p>
   <h4>Preference assessment plan (Tab 5)</h4>
   <div class="grid g4">
@@ -1160,6 +1173,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
       <button type="button" class="tool" id="adrPB" disabled>Problem behavior</button>
       <button type="button" class="tool" id="adrNext" disabled>Next task presented</button>
       <button type="button" class="tool" id="adrEnd" disabled>End session</button>
+      <button type="button" class="tool nbh-btn-danger" id="adrStop" disabled title="The stop rule (Tab 3E) is met: end now, follow the crisis plan">Stop: stop rule met</button>
       <button type="button" class="tool nbh-btn-primary" id="adrWrite" disabled>Write the row to the log</button>
       <button type="button" class="tool nbh-btn-danger" id="adrDiscard" disabled>Discard</button>
     </div>
@@ -1168,7 +1182,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
     </div>
   </details>
   <div class="log-wrap" tabindex="0" role="region" aria-label="Session log"><table class="log"><caption id="sessCap">Opportunities = tasks, instructions or trials presented. Responses = the work unit (completions, compliance, or independent correct). Resumes = mean seconds from removal of the reinforcer to the next response (distributed and intermediate sessions).</caption>
-    <thead><tr><th style="width:3%">#</th><th style="width:9%">Date</th><th style="width:4%">Phase</th><th style="width:13%">Condition</th><th class="num" id="thOpp">Opp.</th><th class="num" id="thResp">Resp.</th><th class="num">Prob. beh.</th><th class="num">Work (min)</th><th class="num">Access (s)</th><th class="num">Total (min)</th><th class="num">Resumes (s)</th><th class="num">Rate /work min</th><th class="num">%</th><th class="num">Prob. beh. /min</th><th class="num">Resp. /total min</th><th style="width:3%"></th></tr></thead>
+    <thead><tr><th style="width:3%">#</th><th style="width:9%">Date</th><th style="width:4%">Phase</th><th style="width:13%">Condition</th><th class="num" id="thOpp">Opp.</th><th class="num" id="thResp">Resp.</th><th class="num">Prob. beh.</th><th class="num">Work (min)</th><th class="num">Access (s)</th><th class="num">Total (min)</th><th class="num">Resumes (s)</th><th style="width:7%">Stopped early</th><th class="num">Rate /work min</th><th class="num">%</th><th class="num">Prob. beh. /min</th><th class="num">Resp. /total min</th><th style="width:3%"></th></tr></thead>
     <tbody id="tbSess"></tbody></table></div>
   <div class="rowbtns"><button class="tool" data-add="tbSess">Add row</button><button class="tool" id="btnSess5">Add 5 rows</button></div>
   <div class="grid g3" style="align-items:end">
@@ -1330,7 +1344,11 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 
 <!-- ===== 9 EVIDENCE GUIDE ===== -->
 <section class="panel" id="p9" role="tabpanel" data-panel="p9">
+  <!-- v22.88 (review F413): the guide is a literature review, not the student's record: it prints only when asked, and the
+       workstation's packet leaves it out unless kept (Packet options); the References below print with the form -->
+  <div id="adGuide" data-pane="guide" class="pr-skip">
   <h2 class="nbh-band">Evidence Guide</h2>
+  <p class="noprint ad-gp"><label><input type="checkbox" id="adGuidePr"> Print the evidence guide with this form</label><button type="button" class="tool" id="adGuideAlone">Print the evidence guide alone</button></p>
   <p class="lede">What the six works in this packet found, kept apart from what their authors made of it and from this form’s own guidance. Page numbers are the journal’s printed pages, or the thesis’s or dissertation’s printed pages. Quotations are verbatim.</p>
   <div class="evkey"><span><b class="tagx find">Finding</b> what was observed, with the numbers the authors reported</span><span><b class="tagx expl">Explanation</b> an account the authors offered; not tested</span><span><b class="tagx auth">Authors</b> an applied implication the authors drew</span><span><b class="tagx nbh">NBH</b> this form’s synthesis or guidance</span></div>
 
@@ -1484,6 +1502,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 
   <!-- writing help (v21.43) --><h3 class="nbh-wh">Writing Help</h3>
   <p class="nbh-wide nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
+  </div>
   <h3>References</h3>
   <ul class="refs">
     <li>DeLeon, I. G., Chase, J. A., Frank-Crawford, M. A., Carreau-Webster, A. B., Triggs, M. M., Bullock, C. E., &amp; Jennett, H. K. (2014). Distributed and accumulated reinforcement arrangements: Evaluations of efficacy and preference. <i>Journal of Applied Behavior Analysis, 47</i>(2), 293–313. https://doi.org/10.1002/jaba.116</li>
@@ -1711,7 +1730,7 @@ const templates={
   tbTokTr:()=>idx()+n('1')+n()+n()+calc()+calc()+del(),
   tbDisc:()=>sel(CONDS)+txt()+dt()+sel(['Pass','Fail','Not run'])+txt()+del(),
   tbRem:()=>idx()+txt()+n()+n()+n()+n()+dt()+del(),
-  tbSess:()=>idx()+dt()+txt()+sel(CONDS)+n()+n()+n()+n()+n()+n()+n()+calc()+calc()+calc()+calc()+del(),
+  tbSess:()=>idx()+dt()+txt()+sel(CONDS)+n()+n()+n()+n()+n()+n()+n()+sel(['Stopped'])+calc()+calc()+calc()+calc()+del(),   /* v22.88 (review F408) Stopped early */
   tbCC:()=>idx()+dt()+sel(['Forced','Choice'])+sel(['Standard','Cards reversed','Tasks reversed'])+sel(CONDS.concat(['No selection']))+sel(['Left','Center-left','Center','Center-right','Right'])+sel(['Completed','Partial','Not completed'])+n()+txt()+del(),
   tbIOA:()=>txt()+sel(['Responses','Problem behavior','Opportunities','Choices','Work time','Access time','On-task intervals'])+sel(['Total count','Trial-by-trial','Total duration'])+n()+n()+n()+n()+calc()+del(),
   tbStep:()=>idx()+n('1')+txt()+calc()+txt()+txt()+del(),
@@ -1745,7 +1764,8 @@ const TI_ITEMS=[
  'Tokens: the exchange happened at the programmed point, as written.',
  'Problem behavior received the programmed consequence and nothing else.',
  'Responses that do not qualify (for example, prompted responses when only independent ones earn) did not earn a unit.',
- 'Work time, access time and total time were recorded for the session.'];
+ 'Work time, access time and total time were recorded for the session.',
+ 'The session was stopped at once when the stop rule (Tab 3E) was met, and not ended early for any other reason.'];   /* v22.88 (review F408) */
 $('#tbTI').innerHTML=TI_ITEMS.map((t,i)=>{const k='ti'+(i+1);return '<tr><td>'+(i+1)+'</td><td>'+t+'</td>'+['y','n','na'].map(v=>'<td class="num"><input type="radio" name="'+k+'" value="'+v+'" aria-label="'+(v==='y'?'Yes':v==='n'?'No':'Not applicable')+', step '+(i+1)+'"></td>').join('')+'</tr>'}).join('');
 const SV_ITEMS=[
  'The evaluation procedures were acceptable for this student.',
@@ -1774,6 +1794,9 @@ function learner(){
   if(/Single|AAC|Nonvocal/.test(vb))L.push('<b>Verbal repertoire: '+esc(vb.toLowerCase())+'.</b> DeLeon et al. (2014) questioned generality “beyond individuals with relatively sophisticated verbal repertoires” (p. 311); in Frank-Crawford et al. (2021), several participants did not pass the card discrimination test (p. 1583). Keep cards simple and run Tab 2D.');
   if(/\bADH?D\b/i.test(val('l_dx')))L.push('<b>ADHD or ADD.</b> In Robinson and St. Peter (2019), accumulated reinforcement was the most effective arrangement for all three students, yet two preferred distributed; the authors considered impulsive choice among the explanations (pp. 1085–1086).');
   if(val('q_type')==='esc')L.push('<b>Escape-maintained problem behavior.</b> Accumulated tablet breaks lowered problem behavior for two of three children in Fulton et al. (2020); accumulated breaks without leisure items were never more effective than distributed reinforcement in Frank-Crawford et al. (2021, p. 1581), and they propose combining the break with activities as one way to strengthen it (pp. 1582–1583).');
+  /* v22.88 (review F417) the function recorded (Tab 1, filled from Form FS-1), not only the question chosen */
+  {const fnT=String(val('s_function')||'').trim(),fc=(()=>{try{return window.nbhCase&&nbhCase.fn?nbhCase.fn():null}catch(e){return null}})();
+   if(val('q_type')!=='esc'&&(/escape|avoid/i.test(fnT)||(fc&&/escape/i.test(String(fc.key||fc.label||'')))))L.push('<b>The function recorded names escape</b>'+(fnT?' (“'+esc(fnT)+'”)':' (Form FS-1)')+'. Breaks from the work are then in play, and the compliance question (Fulton et al., 2020; Frank-Crawford et al., 2021) may fit better than the one chosen above. Accumulated breaks without leisure items were never more effective than distributed reinforcement in Frank-Crawford et al. (2021, p. 1581); the authors propose combining the break with activities as one way to strengthen it (pp. 1582–1583).');}
   if(String(val('l_meds')).trim()&&!/^none/i.test(String(val('l_meds')).trim()))L.push('<b>Medication change recorded.</b> Frank-Crawford et al. (2021) raise a medication started during their study as a possible motivating operation (p. 1576); mark the date as a phase line in Tab 4.');
   const box=$('#learnerFlags');
   box.innerHTML=L.length?'<p><b>Authors’ explanations that apply to this student</b> (none tested as a moderator):</p><ul>'+L.map(x=>'<li>'+x+'</li>').join('')+'</ul>':(a||tk||dl||vb?'<p>No flags from the variables recorded. Test both arrangements anyway; no learner variable has been shown to predict which one works.</p>':'<p>Complete the date of birth and the three selections above to see which of the authors’ explanations apply to this student.</p>');
@@ -1867,12 +1890,16 @@ function scripts(){
     int:[esc(card('int')),say('int'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and mark one unit '+w+'.','After every '+kk+' responses: count the '+kk+' units, set the timer, and give '+esc(item)+' for the banked amount.'+rs,'When the time is up: '+esc(endR)+'; the next task follows at once.','Problem behavior: '+esc(pb)+'.','Record as for distributed, including return times.']
   };
   if(bothMode)['dis','int'].forEach(k=>S[k].splice(S[k].length-2,0,'End the session at '+esc(req)+'.'));
+  /* v22.88 (review F408) every script carries the stop rule: written permission to stop a session that turns dangerous */
+  const stopR=val('d_term')?'<b>Stop the session</b> if '+esc(lc(String(val('d_term')).trim().replace(/[.\s]+$/,'')))+'. Follow the crisis plan (Form CR-1) and mark the row Stopped early.'
+    :'<b>Stop the session</b> if the student or an adult is at risk of injury, and follow the crisis plan (Form CR-1); mark the row Stopped early. Write the stop rule in Section E.';
+  Object.keys(S).forEach(k=>S[k].splice(S[k].length-1,0,stopR));
   $('#scriptOut').innerHTML=inc.map(k=>'<div class="script-card" style="--c:'+COL[k]+'"><h4>'+NAME[k]+'</h4><ol>'+S[k].map(x=>'<li>'+x+'</li>').join('')+'</ol></div>').join('');
 }
 
 /* ---------- tab 4: sessions ---------- */
 function sessData(){
-  return rows('tbSess').map((tr,i)=>{const v=vals(tr);const o={i:i+1,tr,date:v[0],phase:v[1],c:KEY[v[2]]||null,opp:num(v[3]),resp:num(v[4]),pb:num(v[5]),work:num(v[6]),acc:num(v[7]),tot:num(v[8]),res:num(v[9])};
+  return rows('tbSess').map((tr,i)=>{const v=vals(tr);const o={i:i+1,tr,date:v[0],phase:v[1],c:KEY[v[2]]||null,opp:num(v[3]),resp:num(v[4]),pb:num(v[5]),work:num(v[6]),acc:num(v[7]),tot:num(v[8]),res:num(v[9]),stop:v[10]==='Stopped'};
     o.rate=(o.resp!=null&&o.work)?o.resp/o.work:null;o.pct=(o.resp!=null&&o.opp)?100*o.resp/o.opp:null;
     const den=o.tot||o.work;o.pbm=(o.pb!=null&&den)?o.pb/den:null;o.eff=(o.resp!=null&&o.tot)?o.resp/o.tot:null;o.totm=o.tot;return o});
 }
@@ -1887,9 +1914,14 @@ function stats(S){
 function mastery(list){const crit=num(val('d_mastery'))??100,nn=Math.max(1,Math.round(num(val('d_mastn'))||3));let run=0;for(let i=0;i<list.length;i++){if(list[i].pct!=null&&list[i].pct>=crit){run++;if(run>=nn)return i+1}else run=0}return null}
 function sessions(){
   const S=sessData();
-  S.forEach(s=>{const c=s.tr.cells;c[0].textContent=s.i;c[11].textContent=fmt(s.rate,2);c[12].textContent=s.pct==null?'—':fmt(s.pct,0)+'%';c[13].textContent=fmt(s.pbm,2);c[14].textContent=fmt(s.eff,2)});
-  const st=stats(S);const keys=ORDER.filter(k=>st[k]);
-  if(!keys.length){$('#sumOut').innerHTML='';$('#cmpOut').innerHTML='';drawEff(S,st);return {S,st,keys}}
+  /* v22.88 (review F411) under the work-time rule a row with responses and no work minutes has no rate: it is marked and
+     counted. (review F408) a session stopped under the stop rule is not a short session: it stays on the log and the
+     graph, marked, and is left out of the comparison */
+  const nw=s=>!!(s.c&&!s.stop&&s.resp!=null&&!s.work&&primary()==='rate');
+  S.forEach(s=>{const c=s.tr.cells;c[0].textContent=s.i;c[12].textContent=fmt(s.rate,2);c[13].textContent=s.pct==null?'—':fmt(s.pct,0)+'%';c[14].textContent=fmt(s.pbm,2);c[15].textContent=fmt(s.eff,2);
+    s.tr.classList.toggle('ad-stopped',!!s.stop);s.tr.classList.toggle('ad-nowork',nw(s));});
+  const stopped=S.filter(s=>s.stop&&s.c),noWork=S.filter(nw),st=stats(S.filter(s=>!s.stop));const keys=ORDER.filter(k=>st[k]);
+  if(!keys.length){$('#sumOut').innerHTML='';$('#cmpOut').innerHTML=stopLine(stopped);drawEff(S,st);return {S,st,keys,stopped,noWork}}
   const acq=val('q_type')==='acq',P1=MEAS[primary()].f,pm1=f=>P1===f?'<br><span class="small">primary</span>':'',pieces=val('r_utype')==='pieces',u0=num(val('r_unit'));
   /* v22.61 access earned a session: the Access column in minutes, or responses times the amount for pieces */
   const earned=s=>{if(pieces){const a=s.list.filter(x=>x.resp!=null).map(x=>x.resp*u0);return u0&&a.length?mean(a):null}return s.acc.m!=null?s.acc.m/60:null};
@@ -1914,9 +1946,14 @@ function sessions(){
   const Nq=num(val('w_req'));if(Nq&&val('w_mode')!=='time'&&val('clock_rule')!=='total'){const tc=keys.filter(k=>k!=='bl').map(k=>{const a=st[k].list.filter(x=>x.resp!=null&&x.resp>=Nq&&x.work).map(x=>x.work);return a.length?{k,m:mean(a),n:a.length}:null}).filter(Boolean);
     if(tc.length>1)C.push('<b>Work time to complete all '+Nq+'</b> (sessions that completed all '+Nq+'; access and exchange time left out): '+tc.slice().sort((a,b)=>a.m-b.m).map(x=>NAME[x.k]+' '+fmt(x.m,1)+' min ('+plural(x.n,'session')+')').join(', ')+'. DeLeon et al. (2014) compared the arrangements by this time in Experiment 2 (p. 308).')}
   const mn=num(val('d_minsess'));if(mn)keys.forEach(k=>{if(st[k].n<mn)C.push(NAME[k]+': '+st[k].n+' of the planned minimum '+mn+' sessions.')});
-  $('#cmpOut').innerHTML=C.map(x=>'<li>'+x+'</li>').join('');
-  drawEff(S,st);return {S,st,keys};
+  if(noWork.length)C.push('<b>No work minutes</b> on '+plural(noWork.length,'row')+' with responses (session'+(noWork.length===1?' ':'s ')+noWork.map(s=>s.i).join(', ')+'): under the work-time rule (Tab 3B) the rate per minute of work cannot be computed for '+(noWork.length===1?'it':'them')+'. Enter the work minutes, or choose the total-time rule if the clock ran through reinforcement.');
+  $('#cmpOut').innerHTML=C.map(x=>'<li>'+x+'</li>').join('')+stopLine(stopped);
+  drawEff(S,st);return {S,st,keys,stopped,noWork};
 }
+/* v22.88 (review F408) the sessions stopped under the stop rule, by arrangement */
+function stopLine(stopped){if(!stopped||!stopped.length)return '';const by={};stopped.forEach(s=>{(by[s.c]=by[s.c]||[]).push(s.i)});const ks=ORDER.filter(k=>by[k]);
+  return '<li><b>Stopped early</b> under the stop rule (Tab 3E): '+ks.map(k=>NAME[k]+', session'+(by[k].length===1?' ':'s ')+by[k].join(', ')).join('; ')+'. Left out of the comparison and the means above, and marked on the graph.'+
+    (ks.some(k=>by[k].length>1)?' More than one session of '+ks.filter(k=>by[k].length>1).map(k=>NAME[k].toLowerCase()).join(' and ')+' met the stop rule: check the Evaluation stops when rule before running it again.':'')+'</li>';}
 function axis(m){if(!(m>0))return {max:1,step:0.25,d:2};const raw=m/4,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;const st=(f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p;return {max:Math.ceil(m/st-1e-9)*st,step:st,d:st>=1?0:st>=0.1?1:2}}
 function drawEff(S,st){
   const svg=$('#effPlot');const mk=$('#gMeasure').value||'rate';const M=MEAS[mk];
@@ -1932,6 +1969,7 @@ function drawEff(S,st){
   const keys=ORDER.filter(k=>P.some(o=>o.c===k));
   keys.forEach(k=>{let d='',ph=null;P.filter(o=>o.c===k).forEach(o=>{d+=(ph===null||o.phase!==ph?'M':'L')+px(o.i).toFixed(1)+' '+py(o[M.f]).toFixed(1)+' ';ph=o.phase});s+='<path d="'+d+'" fill="none" stroke="'+COL[k]+'" stroke-width="1.6"'+(k==='bl'?' stroke-dasharray="4 3"':'')+'/>'});
   P.forEach(o=>{s+=mark(o.c,px(o.i).toFixed(1),py(o[M.f]).toFixed(1))});
+  P.filter(o=>o.stop).forEach(o=>{s+='<text x="'+px(o.i).toFixed(1)+'" y="'+Math.max(T+8,py(o[M.f])-8).toFixed(1)+'" font-size="9" text-anchor="middle" fill="#8A3B12">stopped</text>'});   /* v22.88 (review F408) */
   svg.innerHTML=s;$('#effKey').innerHTML=keyHTML(keys);
 }
 $('#btnPlot').addEventListener('click',()=>refresh());
@@ -1983,11 +2021,20 @@ function integrity(){
   const R=rows('tbIOA').map(tr=>{const v=vals(tr);const a=num(v[3]),b=num(v[4]),ag=num(v[5]),tn=num(v[6]);let p=null;
     if(v[2]==='Trial-by-trial'){if(ag!=null&&tn)p=100*ag/tn}else if(a!=null&&b!=null){p=(a===0&&b===0)?100:100*Math.min(a,b)/Math.max(a,b)}
     tr.cells[7].textContent=p==null?'—':fmt(p,1)+'%';return {s:v[0],m:v[1],p}}).filter(r=>r.p!=null);
-  const S=rows('tbSess').length;const cov=new Set(R.map(r=>num(r.s)).filter(x=>x!=null)).size;
+  /* v22.88 (review F416) each mean with its range, every check under 80% named, and the third of sessions checked in each
+     arrangement, each IOA row's session number looked up in the log */
+  const S=rows('tbSess').length,SD=sessData();const cov=new Set(R.map(r=>num(r.s)).filter(x=>x!=null)).size;
   if(!R.length){$('#ioaOut').innerHTML='';return {ti:p,crit,ioa:null}}
   const by={};R.forEach(r=>{(by[r.m||'Other']=by[r.m||'Other']||[]).push(r.p)});
-  $('#ioaOut').innerHTML='<div class="readout"><div><span>IOA, all checks</span><strong>'+fmt(mean(R.map(r=>r.p)),1)+'%</strong></div>'+Object.keys(by).map(m=>'<div><span>'+esc(m)+' ('+by[m].length+')</span><strong>'+fmt(mean(by[m]),1)+'%</strong></div>').join('')+'<div><span>Sessions with IOA</span><strong>'+cov+(S?' of '+S+' ('+fmt(100*cov/S,0)+'%)':'')+'</strong></div></div>'+(S&&cov/S<1/3?'<p class="small">Coverage is below a third of sessions.</p>':'');
-  return {ti:p,crit,ioa:mean(R.map(r=>r.p)),cov:S?cov/S:null,n:R.length};
+  const rg=a=>a.length>1?' <span class="small">('+fmt(Math.min(...a),1)+'–'+fmt(Math.max(...a),1)+')</span>':'';
+  const low=R.filter(r=>r.p<80).sort((a,b)=>a.p-b.p).map(r=>({p:r.p,lab:String(r.m||'measure').toLowerCase()+(num(r.s)!=null?', session '+num(r.s):r.s?', '+String(r.s).toLowerCase():'')}));
+  const arr=ORDER.map(k=>{const ids=new Set(SD.filter(s=>s.c===k).map(s=>s.i));if(!ids.size)return null;return {k,n:new Set(R.map(r=>num(r.s)).filter(x=>ids.has(x))).size,of:ids.size}}).filter(Boolean),thin=arr.filter(a=>a.n/a.of<1/3);
+  $('#ioaOut').innerHTML='<div class="readout"><div><span>IOA, all checks</span><strong>'+fmt(mean(R.map(r=>r.p)),1)+'%'+rg(R.map(r=>r.p))+'</strong></div>'+Object.keys(by).map(m=>'<div><span>'+esc(m)+' ('+by[m].length+')</span><strong>'+fmt(mean(by[m]),1)+'%'+rg(by[m])+'</strong></div>').join('')+'<div><span>Sessions with IOA</span><strong>'+cov+(S?' of '+S+' ('+fmt(100*cov/S,0)+'%)':'')+'</strong></div></div>'+
+    (arr.length?'<p class="small" id="ioaArr">Sessions with IOA by arrangement: '+arr.map(a=>NAME[a.k]+' '+a.n+' of '+a.of+' ('+fmt(100*a.n/a.of,0)+'%)').join('; ')+'.</p>':'')+
+    (low.length?'<p class="caution" id="ioaLow"><b>Under 80%:</b> '+low.map(x=>fmt(x.p,1)+'% ('+esc(x.lab)+')').join('; ')+'. Go over the definition with both observers and check again before the results are read.</p>':'')+
+    (thin.length?'<p class="small">Under a third of sessions in '+thin.map(a=>NAME[a.k].toLowerCase()).join(', ')+': collect IOA on at least a third of sessions in each arrangement.</p>':(S&&cov/S<1/3?'<p class="small">Coverage is below a third of sessions.</p>':''));
+  const all=R.map(r=>r.p);
+  return {ti:p,crit,ioa:mean(all),lo:Math.min(...all),hi:Math.max(...all),low:low[0]||null,thin,cov:S?cov/S:null,n:R.length};
 }
 
 /* ---------- tab 7 ---------- */
@@ -2004,10 +2051,13 @@ function decision(sx,pf,ig,sv){
       L.push('<b>Efficacy (Tab 4).</b> On '+pm.lab.toLowerCase()+', '+NAME[best]+' was best ('+fmt(st[best][pm.f].m,pm.d)+')'+tr.filter(k=>k!==best).map(k=>'; '+NAME[k].toLowerCase()+' '+fmt(st[k][pm.f].m,pm.d)).join('')+'.');
       if(pm.f!=='pbm'){const p=tr.filter(k=>st[k].pbm.m!=null);if(p.length){const lo=p.reduce((a,b)=>st[a].pbm.m<=st[b].pbm.m?a:b);L.push('<b>Problem behavior.</b> Lowest with '+NAME[lo].toLowerCase()+' ('+fmt(st[lo].pbm.m,2)+' per min)'+(st.bl&&st.bl.pbm.m!=null?'; baseline '+fmt(st.bl.pbm.m,2):'')+'.')}}
       const t=tr.filter(k=>st[k].totm.m!=null);if(t.length>1)L.push('<b>Time per session.</b> '+t.map(k=>NAME[k]+' '+fmt(st[k].totm.m,1)+' min').join(', ')+'.');
-      L.best=best;}}
-  else L.push('<b>Efficacy (Tab 4).</b> No sessions entered yet.');
+      L.best=best;}
+    /* v22.88 (review F411) sessions entered, but no figure on the primary measure: said, with the reason when it is known */
+    else L.push('<b>Efficacy (Tab 4).</b> No '+pm.lab.toLowerCase()+' could be computed'+(pm.f==='rate'&&sx.noWork&&sx.noWork.length?' (work minutes missing on '+plural(sx.noWork.length,'row')+')':'')+'.');}
+  else L.push(sx&&sx.stopped&&sx.stopped.length?'<b>Efficacy (Tab 4).</b> Every session entered was stopped early under the stop rule; none can be compared.':'<b>Efficacy (Tab 4).</b> No sessions entered yet.');
+  if(sx&&sx.stopped&&sx.stopped.length){const by={};sx.stopped.forEach(s=>{by[s.c]=(by[s.c]||0)+1});L.push('<b>Stopped early (Tab 3E).</b> '+ORDER.filter(k=>by[k]).map(k=>plural(by[k],NAME[k].toLowerCase()+' session')).join(', ')+' ended under the stop rule and '+(sx.stopped.length===1?'is':'are')+' left out of the comparison.');}
   if(pf&&pf.top){L.push('<b>Preference (Tab 5).</b> '+NAME[pf.top]+' chosen on '+pf.cnt[pf.top]+' of '+pf.n+' choice trials ('+fmt(100*pf.cnt[pf.top]/pf.n,0)+'%); '+(pf.met?'stopping rule met.':'stopping rule not yet met.'))}else L.push('<b>Preference (Tab 5).</b> No choice trials entered yet.');
-  if(ig){const a=[];if(ig.ti!=null)a.push('integrity '+fmt(ig.ti,1)+'% ('+(ig.ti>=ig.crit?'meets':'below')+' '+ig.crit+'%)');if(ig.ioa!=null)a.push('IOA mean '+fmt(ig.ioa,1)+'% across '+plural(ig.n,'check')+(ig.cov!=null?', '+fmt(100*ig.cov,0)+'% of sessions':''));if(a.length)L.push('<b>Data quality (Tab 6).</b> '+a.join('; ')+'.')}
+  if(ig){const a=[];if(ig.ti!=null)a.push('integrity '+fmt(ig.ti,1)+'% ('+(ig.ti>=ig.crit?'meets':'below')+' '+ig.crit+'%)');if(ig.ioa!=null)a.push('IOA '+(ig.n>1&&ig.lo!==ig.hi?fmt(ig.lo,1)+'–'+fmt(ig.hi,1)+'% (mean '+fmt(ig.ioa,1)+'%)':fmt(ig.ioa,1)+'%')+' across '+plural(ig.n,'check')+(ig.cov!=null?', '+fmt(100*ig.cov,0)+'% of sessions':'')+(ig.low?'; lowest '+fmt(ig.low.p,1)+'% ('+esc(ig.low.lab)+'), under 80%':'')+(ig.thin&&ig.thin.length?'; under a third of sessions checked in '+ig.thin.map(x=>NAME[x.k].toLowerCase()).join(', '):''));   /* v22.88 (review F416) */if(a.length)L.push('<b>Data quality (Tab 6).</b> '+a.join('; ')+'.')}
   if(sv!=null)L.push('<b>Acceptability (Tab 8).</b> Mean rating '+fmt(sv,1)+' of 5.');
   if(L.best&&pf&&pf.top)L.push(L.best===pf.top?'<b>Agreement.</b> The most effective and the most chosen arrangement are the same: '+NAME[L.best]+'.':'<b>Disagreement.</b> Most effective: '+NAME[L.best]+'; most chosen: '+NAME[pf.top]+'. See step 3 of the decision guide.');
   $('#decSummary').innerHTML=L.map(x=>'<li>'+x+'</li>').join('');
@@ -2023,9 +2073,23 @@ function labels(){const cls=val('q_type')==='cls';
   $('#thOpp').textContent=cls?'Intervals':'Opp.';$('#thResp').textContent=cls?'On-task':'Resp.';
   $('#sessCap').textContent=cls?'Intervals = intervals observed in the timed check. On-task = intervals scored on task (the percentage is intervals on task over intervals observed). Resumes = mean seconds from removal of the reinforcer to the next response (distributed and intermediate sessions).':'Opportunities = tasks, instructions or trials presented. Responses = the work unit (completions, compliance, or independent correct). Resumes = mean seconds from removal of the reinforcer to the next response (distributed and intermediate sessions).';
   MEAS.pct.lab=cls?'Percentage of intervals on task':'Percentage of opportunities';
-  const o=$('#gMeasure option[value="pct"]');if(o)o.textContent=cls?'Percentage of intervals on task':'Percentage (responses / opportunities)';}
+  const o=$('#gMeasure option[value="pct"]');if(o)o.textContent=cls?'Percentage of intervals on task':'Percentage (responses / opportunities)';
+  $('#sessCap').textContent+=' Stopped early = the session ended under the stop rule (Tab 3E); it is left out of the comparison.';   /* v22.88 (review F408) */
+  /* v22.88 (review F415) the graph opens on the question's primary measure until someone picks another */
+  const g=$('#gMeasure');if(g&&!gTouched){const pm=primary();if(g.value!==pm)g.value=pm;}}
+var gTouched=false;$('#gMeasure').addEventListener('change',()=>{gTouched=true;});
+/* v22.88 (review F414) Tab 7's plan starts from what Tab 3 holds: shown as the placeholder, and written into the empty
+   fields when a decision is chosen; typed text is never replaced */
+function planPairs(){const u=val('r_unit'),pieces=val('r_utype')==='pieces';
+  return [['pl_rf',val('r_item')],['pl_unit',u?u+(pieces?' pieces':' s')+' per response':''],['pl_req',val('w_req')],['pl_exch',val('exch_note')],['pl_end',val('end_note')||val('end_routine')],
+    ['pl_bank',/tokens/i.test(val('dec_arr'))?'Token board':'']];}
+function planHints(){planPairs().forEach(([n,v])=>{const e=F(n);if(e&&e.tagName!=='SELECT')e.placeholder=v?'from Tab 3: '+v:'';});const w=F('w_unit');if(w)w.placeholder=val('s_task')?'from Tab 1: '+val('s_task'):'';}
+function planFill(){let k=0;planPairs().forEach(([n,v])=>{const e=F(n);if(!e||!v||String(e.value||'').trim())return;
+  if(e.tagName==='SELECT'){const o=[...e.options].find(o=>o.value===v);if(!o)return;e.value=o.value;}else e.value=v;k++;});return k;}
+F('dec_arr').addEventListener('change',()=>{if(val('dec_arr')&&!/^Continue/i.test(val('dec_arr'))&&planFill())refresh();});
+F('s_task').addEventListener('change',()=>{const w=F('w_unit');if(w&&!String(w.value||'').trim()&&String(val('s_task')).trim())w.value=val('s_task');});
 /* ---------- refresh everything ---------- */
-function refresh(){try{labels();learner();rfProfile();const pre=recalcPre();projection(pre);scripts();const sx=sessions();const pf=preference();const ig=integrity();stepCalc();const sv=validity();decision(sx,pf,ig,sv)}catch(e){console.error(e)}}
+function refresh(){try{labels();planHints();learner();rfProfile();const pre=recalcPre();projection(pre);scripts();const sx=sessions();const pf=preference();const ig=integrity();stepCalc();const sv=validity();decision(sx,pf,ig,sv)}catch(e){console.error(e)}}
 window.adRefresh=refresh;
 
 /* ---------- v22.62 the session runner (DeLeon et al., 2014): a work clock that stops during access and exchange and
@@ -2079,7 +2143,7 @@ window.adRefresh=refresh;
     B('adrBank').textContent=live&&(c.k==='acc'||c.k==='tok'||c.k==='int')?R.bank+(c.u?' ('+unitAmt(R.bank)+')':''):'—';
     const run=R.st==='work'||R.st==='removed'||R.st==='access'||R.st==='block'||R.st==='exchange';
     B('adrStart').disabled=R.st!=='ready';B('adrResp').disabled=!(R.st==='work'||R.st==='removed');B('adrMiss').disabled=B('adrResp').disabled;
-    B('adrPB').disabled=!run;B('adrEnd').disabled=!run;B('adrWrite').disabled=R.st!=='done';B('adrDiscard').disabled=R.st==='ready';
+    B('adrPB').disabled=!run;B('adrEnd').disabled=!run;B('adrStop').disabled=!run;B('adrWrite').disabled=R.st!=='done';B('adrDiscard').disabled=R.st==='ready';
     B('adrCond').disabled=R.st!=='ready';B('adrPhase').disabled=R.st!=='ready';
     const nx=B('adrNext');let lab='Next task presented',on=false;
     if(R.st==='removed')on=true;
@@ -2112,16 +2176,21 @@ window.adRefresh=refresh;
     if(R.st==='work'||R.st==='removed'){if(!(await nbhUI.confirm('End the work now?'+(R.bank>0?'\nThe banked '+unitAmt(R.bank)+' is delivered as the block.':''),{ok:'End now'})))return;if(R.st==='work'||R.st==='removed')endWork();return;}
     if(R.st==='access'||R.st==='block'){R.ended=true;R.bank=0;R.accMs+=T()-R.from;R.from=T();R.st='exchange';}
     done();}
+  /* v22.88 (review F408) the stop rule met: the session ends at once with its clocks as they stand, and the row is marked
+     Stopped early */
+  function stopNow(){if(R.st==='ready'||R.st==='done')return;const t=T();
+    if(R.st==='removed'&&R.remAt)R.workMs+=t-R.remAt;if(R.st==='access'||R.st==='block')R.accMs+=t-R.from;if(R.st!=='work')R.st='ended';
+    R.stopped=true;done(t);say('Stopped under the stop rule: follow the crisis plan (Form CR-1). '+B('adrMsg').textContent.replace(/^Session over/,'Session stopped')+' The row is marked Stopped early.');}
   function write(){if(R.st!=='done')return;const d=R.date,ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     const res=R.res.length?fmt(mean(R.res)/1000,1):'';
-    const tr=addRow('tbSess',[ds,B('adrPhase').value.trim(),NAME[R.c.k],String(R.opp),String(R.n),String(R.pb),fmt(R.workMs/60000,2),String(Math.round(R.accMs/1000)),fmt(tot()/60000,2),res]);
+    const tr=addRow('tbSess',[ds,B('adrPhase').value.trim(),NAME[R.c.k],String(R.opp),String(R.n),String(R.pb),fmt(R.workMs/60000,2),String(Math.round(R.accMs/1000)),fmt(tot()/60000,2),res,R.stopped?'Stopped':'']);
     try{const f=tr.querySelector('input');if(f)f.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
     refresh();R={st:'ready'};box.dataset.st='ready';paint();fill();say('Row '+rows('tbSess').length+' written to the session log. Start the next session when ready.');}
   async function discard(){if(R.st==='ready')return;if(!(await nbhUI.confirm('Discard this session?\nNothing from it is written to the log.',{ok:'Discard',danger:true})))return;
     clearInterval(tick);tick=null;R={st:'ready'};box.dataset.st='ready';paint();fill();say('Session discarded. Nothing was written to the log.');}
   B('adrStart').addEventListener('click',start);B('adrResp').addEventListener('click',resp);B('adrMiss').addEventListener('click',miss);
   B('adrPB').addEventListener('click',()=>{if(R.st==='ready'||R.st==='done')return;R.pb++;paint();});
-  B('adrNext').addEventListener('click',next);B('adrEnd').addEventListener('click',endNow);B('adrWrite').addEventListener('click',write);B('adrDiscard').addEventListener('click',discard);
+  B('adrNext').addEventListener('click',next);B('adrStop').addEventListener('click',stopNow);B('adrEnd').addEventListener('click',endNow);B('adrWrite').addEventListener('click',write);B('adrDiscard').addEventListener('click',discard);
   /* the runner's fields are out of the page while it is closed (a closed details keeps its fields' boxes in Chrome, but
      they cannot take the cursor, and Focus counted them) */
   box.addEventListener('toggle',()=>{B('adrBody').hidden=!box.open;fill();});document.addEventListener('change',e=>{if(R.st==='ready'&&e.target&&e.target.id!=='adrCond')fill();});
@@ -2145,6 +2214,7 @@ function restore(o){
   if(!o||!o.fields||!/^AD-1/.test(o.version||''))throw new Error('Not an AD-1 file');
   $$('input[name],select[name],textarea[name]').forEach(el=>{const v=o.fields[el.name];if(el.type==='radio')el.checked=(v!==undefined&&el.value===v);else if(el.type==='checkbox')el.checked=!!v;else el.value=v===undefined?(el.tagName==='SELECT'?(el.options[0]?el.options[0].value:''):''):v});
   Object.keys(templates).forEach(id=>{const tb=document.getElementById(id);tb.innerHTML='';(o.tables[id]||[]).forEach(r=>addRow(id,id==='tbCC'&&Array.isArray(r)&&r.length===7?r.slice(0,2).concat([''],r.slice(2)):r))   /* v22.61 a file saved before the Phase column */});
+  gTouched=!!val('g_measure')&&val('g_measure')!==primary();   /* v22.88 (review F415) a graph picked by hand stays picked */
   refresh();
 }
 $('#btnSave').addEventListener('click',()=>{const name=(val('s_name')||'student').replace(/[^\w-]+/g,'_');const blob=new Blob([JSON.stringify(serialize(),null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='AD1_'+name+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
@@ -2173,7 +2243,7 @@ function loadSim(){
     say_bl:'This time you are not working for tablet. Let’s do ten problems.',say_dis:'Every problem you finish, you get 30 seconds of tablet right away.',say_acc:'Every problem you finish earns 30 seconds. After ten, you get all your tablet time at once.',say_tok:'Every problem earns a token. Each token is 30 seconds. After ten, you trade them for all your time.',
     end_routine:'Visible timer counts down; item removed at zero',end_note:'Timer on the desk; at zero say “Time’s up,” hold out a hand, wait 5 s, then take the tablet',exch_note:'Ten-space board; count the tokens aloud, set the timer to the earned time, hand over the tablet',
     x_rate:'2.2',x_handle:'15',x_resume:'18.6',x_exch:'10',design:'Multielement with a control condition, after baseline',d_order:'Block randomization: each condition once per block, order drawn fresh each block',d_minsess:'5',d_perday:'4',
-    d_switch:'Drop an arrangement that stays at the Frank-Crawford et al. (2021) ineffective level for three sessions',cc_forced:'One per card (four) before the first choice trial',cc_perday:'4',cc_rule:'run5',cc_max:'15',
+    d_switch:'Drop an arrangement that stays at the Frank-Crawford et al. (2021) ineffective level for three sessions',d_term:'Any hit to an adult with contact, three screams within a minute, or the student asks to stop (honored at once)',d_stop:'An injury, the crisis plan used, three sessions of one arrangement stopped early, or consent withdrawn',cc_forced:'One per card (four) before the first choice trial',cc_perday:'4',cc_rule:'run5',cc_max:'15',
     g_measure:'rate',p4_notes:'Stable baseline (0.2–0.4 per min). In the multielement phase both accumulated arrangements separated from distributed immediately and stayed separated: no overlap on rate across 10 accumulated sessions. Problem behavior under distributed stayed near baseline and clustered at removals.',
     cc_opts:'Amber (distributed), teal (accumulated), navy (tokens), white (control); positions rotated each trial',nw_n:'6',nw_big:'6',
     p5_concl:'Accumulated + tokens chosen on 7 of 10 choice trials, five in a row (choices 6–10), which met the stopping rule. Distributed was chosen twice, both early, each time with problem behavior in the terminal link.',
@@ -2187,7 +2257,7 @@ function loadSim(){
     sv_r1:'Teacher',sv_r2:'Paraprofessional',sv_r3:'Parent',sv_student:'At the end, all at once',sv_scomment:'“The long race is better.”',
     sv9_1:'Most effective',sv9_2:'Decide case by case',sv9_3:'Most chosen'};
   const svv=[[5,3,5,4,5,5,4,5],[5,3,4,4,4,5,4,4],[5,4,5,4,4,5,5,5]];svv.forEach((a,r)=>a.forEach((v,i)=>{f['sv'+(i+1)+'_'+(r+1)]=String(v)}));
-  const ti=['y','y','y','na','na','na','y','y','n','y','y','y','na','y'];ti.forEach((v,i)=>{f['ti'+(i+1)]=v});
+  const ti=['y','y','y','na','na','na','y','y','n','y','y','y','na','y','na'];ti.forEach((v,i)=>{f['ti'+(i+1)]=v});
   const t={};
   t.tbRf=[['Tablet: racing game','Activity','Has an end (episode, level, build)','15','Problem behavior at removal','Primary'],['Building bricks','Activity','Open-ended','20','Delays or protests','Alternate'],['Pretzel pieces','Edible','Consumed at once','0','Gives it up easily','Not used']];
   t.tbPref=[['Tablet: racing game','Activity','Paired stimulus','87.5','2026-09-02'],['Building bricks','Activity','Paired stimulus','62.5','2026-09-02'],['Drawing','Activity','Paired stimulus','37.5','2026-09-02'],['Pretzel pieces','Edible','MSWO','83','2026-09-03']];
@@ -2215,6 +2285,11 @@ function loadSim(){
 }
 /* the enhancement sprint (A2): asks every time, with the question the other forms use (it asked only once session rows
    existed, so typed details were replaced without a word); Cancel changes nothing */
+/* v22.88 (review F413) the evidence guide prints with the form only when ticked, or alone */
+(function(){const g=document.getElementById('adGuide'),t=document.getElementById('adGuidePr'),b=document.getElementById('adGuideAlone');if(!g)return;
+  if(t)t.addEventListener('change',()=>g.classList.toggle('pr-skip',!t.checked));
+  if(b)b.addEventListener('click',()=>{document.body.classList.add('ad-guide-printing');const done=()=>{document.body.classList.remove('ad-guide-printing');window.removeEventListener('afterprint',done);};
+    window.addEventListener('afterprint',done);setTimeout(()=>{window.print();setTimeout(done,1500);},80);});})();
 $('#btnSim').addEventListener('click',async ()=>{if(!(await nbhUI.confirm('Load the simulated case?\nEvery tab is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;loadSim()});
 refresh();
 /* v21.78 the case: in. The form kept the shared fill (the problem behavior and function fields), and the reinforcer
@@ -2247,8 +2322,13 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
   if(C&&C.consent&&ce&&!String(ce.value||'').trim()){const kc=C.consent(f);
     if(kc.known){ce.value=kc.word+(!kc.on?'':!kc.covered?'; the procedures it covers are not listed (an older Form IC-1)':C.covers('arrange',f)?'; covers the reinforcer arrangement comparison':'; does not cover the reinforcer arrangement comparison (not ticked on Form IC-1)');
       ce.dispatchEvent(new Event('input',{bubbles:true}));c=1;}}
+  /* v22.88 (review F408) the stop rule starts from the crisis plan (Form CR-1) when the case carries one; filled when empty */
+  let t=0;const tm=document.querySelector('[name="d_term"]'),cr=f.crisis;
+  if(tm&&cr&&!String(tm.value||'').trim()&&(String(cr.beh||'').trim()||(cr.stages||[]).length)){const b=String(cr.beh||'').trim().replace(/^(any|an?)\s+/i,'').replace(/[.\s]+$/,'');
+    tm.value=(b?'Any '+b.charAt(0).toLowerCase()+b.slice(1)+' (the dangerous behavior on Form CR-1), or the student or an adult at risk of injury':'The student or an adult at risk of injury (the crisis plan, Form CR-1)');
+    tm.dispatchEvent(new Event('input',{bubbles:true}));t=1;}
   adConsentNote();
-  return {filled:n+k+c,note:[k?'reinforcers from Form PA-1':((r&&r.note)||''),c?'the consent from Form IC-1':''].filter(Boolean).join('; ')};};
+  return {filled:n+k+c+t,note:[k?'reinforcers from Form PA-1':((r&&r.note)||''),c?'the consent from Form IC-1':'',t?'the stop rule from Form CR-1':''].filter(Boolean).join('; ')};};
 })();
 /* v22.37 (review F409) a screen-only line on Tab 1 when the case holds no consent date */
 function adConsentNote(){const e=document.getElementById('adConsentNote');if(!e)return;const C=window.nbhCase;
@@ -4217,7 +4297,7 @@ const ST=window.NBHStories;const F=(base,...over)=>Object.assign({},base,...over
   const Q=[
     {w:'A. Distributed session',f:F(ST.dis[3],{say:'',does:'“One more minute!”'}),q:'The 30 s ends while the student is mid-race and asks for one more minute.',o:[
       ['Give one more minute this time; it avoids problem behavior.',0],['End access with the written routine; the unit is the same length every time.',1],['Let the race finish, then end it.',0]],
-      why:'<b>The programmed amount is the variable.</b> Stretching a unit changes what is being compared, and it teaches that protest extends access. End it the written way and record any problem behavior at removal.'},
+      why:'<b>The programmed amount is the variable.</b> Stretching a unit changes what is being compared, and it teaches that protest extends access. End it the written way and record any problem behavior at removal; only the stop rule (Tab 3E) ends a session early.'},
     {w:'A. Distributed session',f:ST.dis[5],q:'After the tablet goes back, the student sits for 18 s before starting the next problem. Does that count as work time?',o:[
       ['No; stop the clock until the student starts.',0],['Yes; the clock stops only during access, so the pause counts as work time, and it also goes in Resumes.',1],['Leave it out of every measure.',0]],
       why:'<b>Timing rule.</b> The pause after each removal is part of what the distributed arrangement costs. Robinson and St. Peter (2019) wrote that the accumulated arrangement’s higher rates “seemed to be due, at least in part, to elimination of pauses and problem behavior that occurred after the removal of the reinforcer” (p. 1087).'},
@@ -4294,7 +4374,7 @@ const ST=window.NBHStories;const F=(base,...over)=>Object.assign({},base,...over
     const parts=[];
     parts.push('<section><div class="jp-band"><div class="jp-when">Form AD-1 · companion</div><h1>Job aids: running the arrangement comparison</h1></div>'+
       '<p>One sheet per procedure, for the person at the table and the person with the clipboard: the setup, the steps as they look, the exact words, what goes on the sheet, the decision the sheet leads to, and an integrity checklist the observer ticks. The student in the drawings is this form’s simulated example.</p>'+
-      '<h2>Before any of them</h2><ul><li>Two adults where possible: one runs the session, one keeps the clock and the counts. Integrity at the Tab 6 criterion before the results are read.</li><li>The reinforcer is confirmed first (Tab 2), and the cards are discriminated before any choice trial.</li><li>Everything except the timing of reinforcement is the same across arrangements: task, prompts, consequence for problem behavior, and the ending of access.</li><li>One fixed sentence per arrangement, said once. Nothing is shortened or extended because of behavior.</li><li>Every session’s row is written before the next one begins.</li></ul></section>');
+      '<h2>Before any of them</h2><ul><li>Two adults where possible: one runs the session, one keeps the clock and the counts. Integrity at the Tab 6 criterion before the results are read.</li><li>The reinforcer is confirmed first (Tab 2), and the cards are discriminated before any choice trial.</li><li>Everything except the timing of reinforcement is the same across arrangements: task, prompts, consequence for problem behavior, and the ending of access.</li><li>One fixed sentence per arrangement, said once. Nothing is shortened or extended because of behavior, except under the stop rule (Tab 3E): a session that meets it stops at once, the crisis plan is followed, and the row is marked Stopped early.</li><li>Every session’s row is written before the next one begins.</li></ul></section>');
     KEYS.forEach(key=>{
       const sec=document.getElementById('wk-'+key);const frames=window.NBHStories[key];
       const title=sec.querySelector('.band h2').textContent,when=sec.querySelector('.band .when').textContent,lead=sec.querySelector('p.lead').textContent;
