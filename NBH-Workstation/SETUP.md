@@ -9903,6 +9903,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.69: VI-1 fills from the case, names its views, and tests all eight candidates (review Wave 3, part 3a)
+
+- **Evidence Already Collected fills from the case (F164).** Each form the case holds fills its row: Form SP-1, the
+  narrative observation (Form OB-1, now named on its row), Form ABC-1, Form DD-1, and the interviews and rating scales
+  (Forms IA-1 and IN-1 on one row). A row gives the dates, how much (days, observations, incidents, school days,
+  informants, interviews) and what the form suggests (the function and its strength, or the first clause of its summary),
+  ending with the form it came from. **Current level** takes the mean, in Form DD-1's current condition, of the case's
+  behavior, with its days and dates. A row or level the case wrote follows the case; one typed here is kept.
+- **Views, not tab numbers (F165).** The text pointed to "Tab 4", "Tab 7" and so on, and most of the numbers were one
+  high (they counted the Guide as the first tab). Every reference now names its view: Agreement, Difference, Concomitant
+  variation, Contingency, Synthesis & decision. A consequence's joint-method row reads **Consequence: see
+  Contingency**.
+- **A joint-method row for each of the eight candidates (F167).** The joint method summary had six rows for the
+  ledger's eight columns; it has eight. The two new rows are saved apart, so a file saved before them opens field for
+  field, and its rows 7 and 8 take register rows 7 and 8. The register says that its rows 9 to 12 have no ledger column.
+- **The checklist fills the register (I82).** Ticking an item in the candidate checklist puts it in the first empty
+  register row with a short label and its class (setting event or MO, antecedent, consequence). Unticked, a row the
+  form added is cleared while it is unchanged and nothing is coded under it.
+- **Replication in place of analogy (I85).** The causal confidence rating's last criterion, Hill's analogy (is the
+  relation in the literature), is met for every common function and separates none of them; it is now **Replicated on
+  a second sample**, on the same 0 to 2 scale, so the total and the bands are unchanged. The naturally occurring
+  response-allocation table is hidden: matching appears even with attention that does not reinforce the behavior
+  (St. Peter et al., 2005), so it cannot point to a function. A file that holds counts in it still shows it.
+
+Checked by `qa/v2269-test.js` (15); `qa/v2267-test.js` reads the view names.
+
 ### v22.68: VI-1's results reach EA-1 and FS-1 (review Wave 3, part 2)
 
 - **What VI-1 found goes on to the next assessment (F161).** VI-1's part of the case now carries the conditions the next

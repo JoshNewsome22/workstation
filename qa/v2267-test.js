@@ -1,7 +1,7 @@
 /* v22.67 Form VI-1, review Wave 3 part 1: a setting event or MO is retained, never eliminated by agreement (F158); a
-   consequence is tested by its contingency in Tab 6, not by matched non-occurrences (F159); the treatment-as-test confirms
+   consequence is tested by its contingency in the Contingency view, not by matched non-occurrences (F159); the treatment-as-test confirms
    without withdrawing treatment, and a step that arranges conditions needs the consent that covers it and a stop rule,
-   read from the case's consent (Form IC-1) (F160); Tab 6 says what ABC-1 supplies, and the antecedent rows give the odds
+   read from the case's consent (Form IC-1) (F160); the Contingency view says what ABC-1 supplies, and the antecedent rows give the odds
    ratio and Yule's Q, which classify incident-plus-sample counts (F163). Simulated data only.
    usage: node qa/v2267-test.js */
 const L=require(__dirname+'/lib.js');const {sleep}=L;const fs=require('fs');
@@ -16,16 +16,16 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const joint=()=>p.evaluate(()=>Object.fromEntries([...document.querySelectorAll('#jointTbl tbody tr')].map(tr=>{const f=[...tr.querySelectorAll('input,select')].map(x=>x.value);return [f[0],f.slice(1).join(' | ')];}).filter(x=>x[0])));
   let j=await joint();
   ok('1 F158 setting events are retained, not eliminated: poor sleep and the substitute adult',j['Poor sleep']==='No | Mostly | 0 | Retained: setting event or MO'&&j['Substitute adult']==='No | Mostly | 0 | Retained: setting event or MO',j);
-  ok('2 F159 a consequence reads n/a on the non-occurrence side and is tested by its contingency: escape and attention',j['Escape delivered']==='Yes | n/a |  | Consequence: see Tab 6'&&j['Attention delivered']==='No | n/a |  | Consequence: see Tab 6',j);
+  ok('2 F159 a consequence reads n/a on the non-occurrence side and is tested by its contingency: escape and attention',j['Escape delivered']==='Yes | n/a |  | Consequence: see Contingency'&&j['Attention delivered']==='No | n/a |  | Consequence: see Contingency',j);
   ok('3 antecedents as before: the independent demand implicated by difference, the denied tangible eliminated',j['Independent demand']==='Yes | Mostly | 7 | Implicated (difference only)'&&j['Denied tangible']==='No | Mostly | 0 | Eliminated',j);
   const hd=await p.evaluate(()=>[...document.querySelectorAll('#nonTbl thead th.v')].map(th=>th.textContent+(th.classList.contains('vi-cons')?' [cons]':'')));
-  ok('4 the non-occurrence ledger marks the consequences\' columns (Tab 6)',hd[1]==='Escape delivered · Tab 6 [cons]'&&hd[3]==='Attention delivered · Tab 6 [cons]'&&hd[0]==='Independent demand',hd);
+  ok('4 the non-occurrence ledger marks the consequences\' columns (Contingency)',hd[1]==='Escape delivered · Contingency [cons]'&&hd[3]==='Attention delivered · Contingency [cons]'&&hd[0]==='Independent demand',hd);
   /* the class decides: the same candidate classed as an antecedent is eliminated */
   const reclass=v=>p.evaluate(v=>{const tr=[...document.querySelectorAll('#registerTbl tbody tr')].find(t=>t.querySelector('td:nth-child(2) input').value==='Poor sleep');const s=tr.querySelector('td:nth-child(3) select');s.value=v;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}));},v);
   await reclass('Antecedent / SD');await sleep(150);const j2=await joint();await reclass('Setting event / MO');await sleep(150);
   ok('5 the register\'s class decides: poor sleep classed as an antecedent is eliminated, as a setting event retained',/Eliminated$/.test(j2['Poor sleep'])&&/Retained: setting event/.test((await joint())['Poor sleep']),j2['Poor sleep']);
   const body=await p.evaluate(()=>document.body.textContent.replace(/\s+/g,' '));
-  ok('6 the rule as written: the joint method for an antecedent; a consequence by its contingency (Martens et al., 2008); a setting event by concomitant variation',/That holds for an antecedent\. A consequence follows the behavior by definition, so it cannot be present in a period without the behavior and the joint method says nothing about it: test it by its contingency in Tab 6 \(Martens et al\., 2008\)\. A setting event or motivating operation raises the odds on the days it is present/.test(body));
+  ok('6 the rule as written: the joint method for an antecedent; a consequence by its contingency (Martens et al., 2008); a setting event by concomitant variation',/That holds for an antecedent\. A consequence follows the behavior by definition, so it cannot be present in a period without the behavior and the joint method says nothing about it: test it by its contingency in the Contingency view \(Martens et al\., 2008\)\. A setting event or motivating operation raises the odds on the days it is present/.test(body));
   /* F160 the decision */
   const dec1=await p.evaluate(()=>document.querySelector('label[for="dec1"]').textContent.replace(/\s+/g,' '));
   ok('7 decision 1 confirms without withdrawing treatment; a reversal needs the consent an FA needs and a stop rule',/Confirm the hypothesis without withdrawing treatment: a brief embedded probe, or a multiple baseline across tasks or settings/.test(dec1)&&/A reversal that withdraws treatment so the behavior returns is an experimental manipulation: it needs the consent an FA needs and a written stop rule/.test(dec1),dec1);
@@ -51,7 +51,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('11 consented: the line is replaced (the case wrote it), the parent\'s stop rule fills the empty box, and the caution clears',c2.c==='Form IC-1: the experimental analysis is consented (9/1/2026)'&&c2.s==='Two hits in one session, or any injury (simulated) (Form IC-1)'&&w6==='',{c2,w6});
   await setv('dec_consent','Typed by the BCBA: consent on the district form (simulated)');await p.evaluate(f=>window.__nbhFactsIn(f),exc);await sleep(150);
   ok('12 a consent line the BCBA typed is kept',await p.evaluate(()=>document.querySelector('[name="dec_consent"]').value)==='Typed by the BCBA: consent on the district form (simulated)');
-  /* F163 Tab 6 */
+  /* F163 the Contingency view */
   const ant=()=>p.evaluate(()=>[...document.querySelectorAll('.antRow')].slice(0,3).map(r=>({ratio:r.querySelector('.o3').textContent,cls:r.querySelector('.o4').textContent.replace(/\s+/g,' ')})));
   const a1=await ant();
   await p.evaluate(()=>{const s=document.getElementById('cKind');s.value='abc';s.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(150);const a2=await ant();
