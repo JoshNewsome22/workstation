@@ -29,6 +29,7 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',HD='HD-1_Home-Data-Sheets_v202
   await g.evaluate(()=>document.querySelector('#simBtn').click());await sleep(500);
   await g.evaluate(()=>{setType('dep');['dp_agree','dp_reach','dp_peers','dp_exit'].forEach(k=>{S.chk[k]=true;});renderAll();});
   await setM(g,'dp_who','M.R.');await setM(g,'dp_beh','hand raised before speaking in 8 of 10 opportunities, from the student’s plan');
+  await setM(g,'crit','8');   /* v22.74 (review F280): the number the Record scores agrees with the written goal, or the Design sheet warns */
   await setM(g,'dp_named','No: the class is told that one or more classmates will earn for everyone (names not given)');await sleep(400);
   let po=await txt(g,'#posterOut');
   ok('1 GC-1 dependent, not named: the poster has no initials and no goal, and says "our class goal"',!/M\.R\.|hand raised before speaking|names not given/.test(po)&&/our class goal/.test(po),po.slice(0,400));
@@ -70,7 +71,7 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',HD='HD-1_Home-Data-Sheets_v202
   ok('16 the Guide section is the packet’s #guide (left out of the master print)',await g.evaluate(()=>document.querySelector('section.only-guide').id==='guide'));
   await g.evaluate(()=>document.querySelector('#clearBtn').click());await sleep(300);
   await g.evaluate(()=>nbhCase.apply({behaviors:[{label:'Calling out',def:'speaking to the class without a hand up'}],fn:{key:'attention',label:'Attention'},goals:{red:[{text:'Calling out at or below 2 per math block for 3 weeks'}],acq:[]}}));await sleep(300);
-  ok('16b this student’s plan comes from the case when it is empty',await g.evaluate(()=>S.meta.plan_me==='Calling out; function: Attention; goal: Calling out at or below 2 per math block for 3 weeks (from the case)'&&!clHas()),await g.evaluate(()=>S.meta.plan_me));
+  ok('16b this student’s plan comes from the case when it is empty',await g.evaluate(()=>S.meta.plan_me==='Calling out; function: Attention; plan goal: Calling out at or below 2 per math block for 3 weeks (from the case)'&&!clHas()),await g.evaluate(()=>S.meta.plan_me));
   await g.close();
 
   /* ---- GC-1 inside the workstation: what it hands over ---- */

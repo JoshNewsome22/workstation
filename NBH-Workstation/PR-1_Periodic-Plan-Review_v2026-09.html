@@ -2112,7 +2112,7 @@ let prCase=null;
 const prT=v=>String(v==null?'':v).trim();
 const prMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
 const prR=x=>x==null?'':String(Math.round(x*10)/10);
-function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null,cg=f.caregiver||null;if(!d&&!pts&&!ti&&!cg)return '';
+function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null,cg=f.caregiver||null,cw=f.classwide||null;if(!d&&!pts&&!ti&&!cg&&!cw)return '';
   const conds=(d&&d.conds)||[],cur=conds.length?conds[conds.length-1]:null,from=cur&&cur.from?cur.from:(d&&d.from)||'',to=(d&&d.to)||'';
   const inP=x=>x&&(!from||x>=from)&&(!to||x<=to);const L=[];
   if(from)L.push((cur&&conds.length>1?'Since '+prMd(from)+' ('+cur.name+', ':'From '+prMd(from)+' to '+prMd(to)+' (')+((cur&&cur.days)||(d&&d.days)||0)+' school days with data):');
@@ -2138,6 +2138,11 @@ function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||n
     L.push('The home plan (Form CT-1): '+(cg.name?cg.name+(cg.rel?' ('+cg.rel.toLowerCase()+')':'')+', ':'')+(cg.stand||'in training')+
       (cg.probe&&cg.probe.pct!=null?'; in-home probe '+(cg.probe.date?'on '+prMd(cg.probe.date)+' ':'')+prR(cg.probe.pct)+'% of steps correct':'')+
       (fu?'; follow-up probe on '+prMd(fu.date)+' '+prR(fu.pct)+'%':'')+(cg.due&&!fu?'; follow-up probe due '+prMd(cg.due):'')+'.');}
+  /* v22.74 (review F284) the class-wide system running around the plan (Form GC-1) */
+  if(cw&&cw.arrangement){const ch=Array.isArray(cw.changes)?cw.changes:[],ph=ch.filter(c=>c&&c.ph===cw.phase)[0];
+    L.push('The class-wide system (Form GC-1): '+cw.arrangement+(cw.start?' since '+prMd(cw.start):'')+(cw.phase?'; phase '+cw.phase+(ph&&ph.date&&ch.indexOf(ph)>0?' since '+prMd(ph.date):''):'')+
+      (cw.crit!=null?', criterion '+cw.crit+(cw.unit?' '+cw.unit:'')+(cw.since?' since '+prMd(cw.since):''):'')+
+      (cw.fid&&cw.fid.pct!=null?'; latest fidelity check '+prR(cw.fid.pct)+'%'+(cw.fid.date?' on '+prMd(cw.fid.date):''):'; no fidelity check logged')+'.');}
   return L.join('\n');}
 function prCaseBar(){let b=document.getElementById('prCaseBar');const f=prCase||{},d=f.data,t=f.integrity,framed=window.parent!==window;
   if(!b){const at=document.querySelector('.nbh-band');if(!at)return;b=document.createElement('div');b.id='prCaseBar';b.className='pr-casebar noprint';b.setAttribute('role','status');at.parentNode.insertBefore(b,at);}

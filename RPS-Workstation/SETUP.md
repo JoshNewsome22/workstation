@@ -9903,6 +9903,59 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.74: GC-1 scores each arrangement its own way, steps the criterion on its own days, and checks fidelity first (review Wave 3)
+
+- **The poster shows the goal the Record scores (F280).** The scoreboard's goal and its Goal row now take the current
+  criterion, the last game day's on the Record (the Starting criterion before the first game day), with the date it
+  began ("The goal: no more than 2 fouls per team (since 10/5)"), and they redraw when a day is entered. The winning
+  line follows the rule: "Every team at or under the goal wins", "The team with the fewest fouls wins. Ties both win."
+  (the goal then reads as a target), or "The class wins when every student is at or under the goal". The rules card
+  says the same. For CW-FIT, self-monitoring, tootling, independent and dependent arrangements, the poster takes the
+  number, and the Design sheet warns when the written goal on the arrangement's rows does not hold the number the Record
+  scores.
+- **The decision rules count only the days at the current criterion (F281).** The Record now reads the run of game days
+  played at the current criterion and in the current phase, from the day it began, so the day after a step it holds
+  instead of tightening again, and after a relax the old misses no longer count. No step is taken until 3 game days
+  have been played at a criterion (a new row on the Design sheet); then 3 of the last 4 met tightens and fewer than 2 of
+  the last 4 relaxes, and the "N of the last M" in the Design sheet's tighten and relax rows are used when they are
+  written that way. The fading rule is one rule in the table, the Guide and the Record: the terminal criterion met on 5
+  game days in a row to leave phase 1, and 6 in a row to leave phases 2 and 3. Phase 2 now changes only how often the
+  game runs; a second period is added once that holds. The worked example steps 5, 4, 3 and the terminal 2, each held
+  at least three days and taken after a fidelity check, meets 2 on five days in a row, then starts phase 2 with nothing
+  else changed. The change line no longer reads "Infinity%" or "-32% below baseline".
+- **Met follows the arrangement (F282).** Interdependent, every student meets the criterion: each cell holds the number
+  of students over the criterion that day, met at 0 (a class total is no longer compared with a per-student
+  criterion). Independent: the day holds the students present and the students who earned, with the share shown, and is
+  met when the share earning reaches the share on the Design sheet (80% unless another is written). Dependent: the
+  column is the target student's score. A team can carry its own criterion (a team of one, or a student playing under
+  the criterion in their plan), shown in its heading and scored against it. "The score of the lowest student" now reads
+  "the student who did least well (the most fouls, or the fewest points)", and a file saved with the old wording opens
+  with the new. Teams in an interdependent arrangement where the best team wins get the Won column. A line over the
+  Record says what each cell holds.
+- **Fidelity fits the arrangement, and the Record waits for it (F283).** Praise and a neutral voice for fouls are two
+  steps now (the game does not bring praise on its own), and each arrangement adds its own steps: tootle cards collected
+  and screened, the self-monitoring cue on time and a sample checked, CW-FIT's skills and timer, independent point cards
+  marked, the draw made after the period, the dependent student not named or blamed and the exit rule used, the saboteur
+  rule applied. A tighten, relax or fading step waits for a fidelity check at 80% or more since the criterion began, and
+  the Record says so ("The rule says tighten ..., but hold the criterion: no fidelity check is logged since the
+  criterion became 5"). A file saved before this keeps its answers: the old step 5 is copied to both new steps with a
+  note to check it.
+- **The case fills this student's plan line, not the class's definition (F284).** Opening GC-1 in a case no longer
+  writes the student's own target behaviors into the class's definition of a disruption. It fills "This student's plan"
+  when it is empty: the target behaviors, the function, the replacement behavior and the plan goal. The Setup and Design
+  sheets flag a foul that would count the student's replacement behavior against the team (for example "out of seat
+  without permission" when the replacement is a break request), until the exception is written in ("a break card is
+  permission"), and any foul or definition naming self-injury, aggression or elopement. GC-1 now gives the case the
+  class system: the arrangement, the start, the phase and the criterion with their changes, and the latest fidelity
+  check, never the class sheet or another student; the workstation's case line shows it and Form PR-1 adds a line
+  ("The class-wide system (Form GC-1): The Good Behavior Game since 9/18; phase 2 since 10/13, criterion 2 fouls per team
+  since 10/5; latest fidelity check 91% on 10/15."). The class menu feeds the Design sheet's reward and prize boxes as a
+  list to pick from, and **Fill from the menu** fills the reward jar.
+- **CT-1's Caregiver list** is wide enough again for a name like "1. Mother — Simulated parent" (the layout check found
+  it cut by a few pixels in v22.73).
+- qa/v2274-test.js (31 checks); qa/v2178-c2-test.js now checks that the class definition is left alone and the plan line
+  is filled.
+
 ### v22.73: CT-1 trains every adult in the home, prints a family card, and fills HD-1's checklist (review Wave 3, part 2)
 
 - **Several caregivers in one record (F354).** **+ Caregiver** in the toolbar adds another adult in the home; the

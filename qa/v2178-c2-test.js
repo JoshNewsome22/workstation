@@ -111,10 +111,11 @@ const CASE={behaviors:[
     ok('MT-1: a typed definition is kept',await mv(p,'def')==='Out of the seat at the moment of the look (typed)');await ctx.close();}
 
   /* ---------- GC-1 ---------- */
-  {let {p,ctx}=await open(FILES.GC);const a=await apply(p,CASE),v=await mv(p,'b_def');
-    ok('GC-1: the definition of a disruption names each target behavior with its definition, not the replacement',v==='Elopement: '+CASE.behaviors[0].def+'; Physical aggression: '+CASE.behaviors[1].def&&!/break/i.test(v)&&await p.evaluate(v=>S.meta.b_def===v,v)&&a.inp>0,v);await ctx.close();
-    ({p,ctx}=await open(FILES.GC));await typeM(p,{b_def:'Talking out (typed)'});await apply(p,CASE);
-    ok('GC-1: a typed definition is kept',await mv(p,'b_def')==='Talking out (typed)');await ctx.close();}
+  /* v22.74 (review F284): the case no longer writes the class's definition of a disruption; it fills this student's plan line */
+  {let {p,ctx}=await open(FILES.GC);const a=await apply(p,CASE),v=await mv(p,'b_def'),pm=await mv(p,'plan_me');
+    ok('GC-1: the class definition of a disruption is left empty; this student\u2019s plan line takes the target behaviors',v===''&&/^Elopement and Physical aggression/.test(pm)&&/\(from the case\)$/.test(pm)&&a.inp>0,[v,pm]);await ctx.close();
+    ({p,ctx}=await open(FILES.GC));await typeM(p,{plan_me:'Typed plan line'});await apply(p,CASE);
+    ok('GC-1: a typed plan line is kept',await mv(p,'plan_me')==='Typed plan line');await ctx.close();}
 
   ok('no page errors',errs.length===0,errs);
   await br.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);console.log('RESULT: 1 failure(s)');process.exit(1);});
