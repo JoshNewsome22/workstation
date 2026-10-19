@@ -52,6 +52,13 @@ function nbhGbSkills(all,list){
 }
 window.__nbhFactsIn=function(f){
   let n=0;const behs=f.behaviors||[];
+  /* v22.84 (review F195) the annual IEP review date the case holds (Form DM-1, or RR-1) fills an empty review date and is the
+     default target date of each objective with none */
+  {const iep=String((f.profile&&f.profile.dates&&f.profile.dates.iep)||(f.records&&f.records.iep)||'').slice(0,10),src=f.profile&&f.profile.dates&&f.profile.dates.iep?'the student profile (Form DM-1)':'the records review (Form RR-1)';
+    window.__gbIep=/^\d{4}-\d{2}-\d{2}$/.test(iep)?{date:iep,src}:null;
+    if(window.__gbIep){const e=$('[name="m.review"]');if(e&&!e.value){setv('m.review',iep);n++;}
+      ['red','acq'].forEach(k=>$$('#'+k+'Wrap .card').forEach(c=>{const i=idxOf(c,k),e2=$('[name="'+k+'['+i+'].date"]');if(i>=0&&e2&&!e2.value&&val(k+'['+i+'].beh')){setv(k+'['+i+'].date',iep);n++;}}));
+      const h=$('#gbIepSrc');if(h)h.textContent='The annual IEP review in the case: '+fmtDate(iep)+', from '+src+'.';}}
   /* only when no objective names a behavior yet: a half-written sheet is left as it is */
   const anyRed=$$('#redWrap .card').some(c=>val('red['+idxOf(c,'red')+'].beh'));
   if(behs.length&&!anyRed){

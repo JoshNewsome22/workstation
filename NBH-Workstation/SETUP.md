@@ -9903,6 +9903,66 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.84: GB-1's progress report reads its own period, never calls a treatment step "met", keeps every report, and takes DD-1's rate per hour into a per-minute goal (review Wave 3)
+
+- **Met means the objective's own target (F188, I97).** The suggested code used to be Mastered whenever DD-1's own aim line
+  was held. DD-1's aim is a treatment step the BCBA raises as it is held, and it often sits above the annual target, so a
+  report could tell a parent "your child has met this goal" beside numbers that said otherwise.
+  - Mastered is now suggested only when the period's last days with data are at or better than the objective's own
+    target, in the objective's unit, for the objective's own number of measurements in a row.
+  - DD-1's aim held is said in the reason ("DD-1's current step (20 per hour) has been held 7 days in a row: a treatment
+    step, not this objective's target").
+  - The family sentence says "has met this goal" only when the period's figures meet the target.
+  - Mastered chosen by hand against the figures gets a warning on screen. Its sentence says the team will look at whether
+    the goal is met at the next review.
+  - Today's aim line says the aim is a treatment step, and whether the IEP goal is met is judged on GB-1.
+- **The period's own level (F191).** "Current level" was the mean of the whole treatment condition whenever it overlapped
+  the period, so a nine-week report carried an eight-month mean. Now it is the mean of the days with data inside the
+  reporting period, with their number, dates and range, and the whole phase's mean as a second figure.
+  - DD-1 now hands the case every day with data (up to a school year and a half), as `data.daily`, beside the last 30
+    days (`byDay`).
+  - Only when DD-1 sent no day inside the period does the level fall back to the whole phase, and then it says so.
+  - The Home note keeps its own window (DD-1's last 20 school days) and says so in its own words.
+- **Choices belong to a period (F192).** A code chosen or a sentence rewritten for one period used to come back in the
+  next.
+  - They are now kept with their period: another period starts clean, the report says the earlier choices are kept with
+    their period, and going back finds them again.
+  - A choice made while the period is the rolling "last nine weeks" fixes the period's dates, so it is still there the
+    next day.
+  - A file saved before keeps its choices with the period showing when it is opened.
+- **Every report kept (I96).** **Print the report**, **Copy the report** and the new **Keep this report** each keep the
+  report in the form's file: the period, each goal's level, the code and the sentence for the family.
+  - **Reports kept** lists them, each with **Show** and **Remove**.
+  - The next report shows the last one beside each goal ("Last report (August 11 to October 9): ...; Mastered"), on
+    screen, on paper and in the copied text.
+- **DD-1's rate per hour into a per-minute goal (F193).** **Current level from DD-1** used to refuse a per-minute
+  objective, although DD-1 and the progress report both convert. It now writes "0.83 per minute (50 per hour on DD-1,
+  baseline: mean of 3 days, range 45–55 per hour)". No other unit is converted. A current level and a target level in
+  different units get a Check line.
+- **Sentences that announce no decision (F190).** "Progress, may not meet the goal" no longer adds "so the team is
+  looking at what to adjust". "Little or no progress" says "the team will review this goal at the next meeting" instead
+  of "the team is changing how this goal is taught". Changing the goal is the IEP team's decision with the parent.
+- **The goal document without the Guide (F194).** The Guide, both "Format Used Here" blocks and the source notes no
+  longer print with the goals or in the IEP packet. The Guide prints from its own view. The template reads "(Student)",
+  not "(Consumer name)".
+- **The IEP date from the case (F195).** The annual IEP review date the case holds fills an empty "IEP / plan review
+  date", with its source shown under the field: Form DM-1's date, or else RR-1's. It also fills the target date of each
+  objective that has none; a typed date is kept.
+- **Sources stated as they are (F196, F197).**
+  - The template paragraph is marked as adapted from unpublished course material (Florida Institute of Technology ABA
+    instructional series, 2019), which is now in the reference list. The FLDOE paper (2004) is named as the published
+    basis.
+  - Florida *permits* benchmarks or short-term objectives for other students at the IEP team's discretion; the Guide no
+    longer says Florida *requires* them.
+  - The rule is cited as 6A-6.03028(3)(h). The item numbers could not be checked against the current rule text, so they
+    are dropped.
+- Not done:
+  - I98 in full: one shared converter for TD-1, GB-1 and DD-1, with per-school-day conversion from the observation
+    length. GB-1 converts per hour to per minute only.
+  - I100: district progress codes as settings.
+  - I99: a trend-based suggestion, which needs a source for the decision rule.
+- qa/gb1-w3-test.js (21 checks).
+
 ### v22.83: PD-1 is a supervision record, sends low integrity to "find out why", offers TI-1's figure instead of writing it in, and names the instrument as published (review Wave 3)
 
 - **A supervision record, not the student's (F248).** PD-1 is about an adult's working conditions. The masthead, the

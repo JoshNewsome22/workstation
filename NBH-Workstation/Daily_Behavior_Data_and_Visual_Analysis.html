@@ -6910,6 +6910,8 @@ function ddCsvTags(text){const R=ddCsvRecs(text),q=v=>`"${String(v==null?"":v).r
     if(!o&&!dated.some(ddTagged))return o;if(!o)o={data:{from:"",to:"",days:0,behaviors:[],incidents:0,src:"DD-1"}};if(!o.data)return o;const d=o.data;
     const vd=dated.filter(has).slice(-30);
     if(vd.length)d.byDay=vd.map(r=>{const vals={};B.forEach(b=>{const v=plotValue(r,b);vals[b.name||""]=v===null?null:Math.round(v*100)/100;});return {date:r.date,vals};});
+    /* v22.84 (GB-1 review F191) every day with data, up to a school year and a half, so a progress report reads its own period */
+    {const va=dated.filter(has).slice(-270);if(va.length>vd.length)d.daily=va.map(r=>{const vals={};B.forEach(b=>{const v=plotValue(r,b);vals[b.name||""]=v===null?null:Math.round(v*100)/100;});return {date:r.date,vals};});}
     const marked=dated.filter(r=>ddAsOk(r.assent));
     if(marked.length){const c=(L,k)=>L.filter(r=>r.assent===k).length,l10=dated.filter(r=>has(r)||ddTagged(r)).slice(-10).filter(r=>ddAsOk(r.assent));
       d.assent={days:marked.length,refused:c(marked,"refused"),withdrew:c(marked,"withdrew"),last10:{days:l10.length,refused:c(l10,"refused"),withdrew:c(l10,"withdrew")},

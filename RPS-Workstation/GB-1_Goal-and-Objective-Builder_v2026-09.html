@@ -834,12 +834,18 @@ body.view-acq   .pane[data-pane="acq"],
 body.view-sheet .pane[data-pane="sheet"],
 body.view-prog .pane[data-pane="prog"],
 body.view-guide .pane[data-pane="guide"]{display:block}
-@media print{ .pane{display:block!important} .pane+.pane{page-break-before:always;break-before:page} }
+@media print{ .pane{display:block!important} .pane+.pane{page-break-before:always;break-before:page}
+  /* v22.84 (review F194) the Guide, the format blocks and the source notes print only from the Guide view */
+  body:not(.view-guide) .pane[data-pane="guide"],body:not(.view-guide) main.sheet>.cite,.gb-fmt{display:none!important} }
 /* v21.78 the progress report: it prints with the form once an objective is written, or alone from its own Print */
 .gp-head{font-family:var(--sans);font-size:12.5px;margin:0 0 8px}.gp-head h3{margin:0 0 4px;font-size:15px}
 table.rt.gp td select{border:1px solid var(--rule-2);border-radius:3px;min-height:32px}
 table.rt.gp td textarea{border:1px solid var(--rule-2);border-radius:3px;padding:4px 6px}
 .gp-code,.gp-say{display:none}
+.gp-since{margin-top:5px;font-size:11.5px;color:var(--ink-soft,#54676f)}
+.gp-warn{margin-top:4px;font-size:11.5px;color:#8E2A2A;font-weight:600}
+.gp-kept{margin:10px 0;font-family:var(--sans);font-size:12.5px;line-height:1.9}.gp-kept .gp-k{display:inline-block;margin-right:12px}
+table.rt.gp-old{margin-top:6px;font-size:12px}
 .prog-tools{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;margin:0 0 10px}
 .prog-tools label{display:flex;flex-direction:column;font-family:var(--sans);font-size:11.5px;gap:2px}
 @media (max-width:700px){table.rt.gp,table.rt.gp tbody,table.rt.gp tr,table.rt.gp td{display:block;width:auto!important}table.rt.gp thead{display:none}table.rt.gp tr{border:1px solid var(--rule-2);margin:0 0 8px}table.rt.gp td{border:0;border-top:1px solid var(--rule-2)}}
@@ -943,7 +949,7 @@ ol.gs .gs-id{font-family:var(--sans);font-weight:600;margin-right:3px}
   <div class="drow"><div class="dlab">Setting / classroom</div><div class="dval"><textarea name="m.setting" class="nbh-line" rows="1"></textarea></div></div>
   <div class="drow"><div class="dlab">Author</div><div class="dval"><textarea name="m.assessor" class="nbh-line" rows="1"></textarea></div></div>
   <div class="drow"><div class="dlab">Date written</div><div class="dval"><input type="date" name="m.date"></div></div>
-  <div class="drow"><div class="dlab">IEP / plan review date</div><div class="dval"><input type="date" name="m.review"></div></div>
+  <div class="drow"><div class="dlab">IEP / plan review date</div><div class="dval"><input type="date" name="m.review"><div class="hint noprint" id="gbIepSrc"></div></div></div>
   <div class="drow"><div class="dlab">Progress reports</div><div class="dval"><textarea name="m.progress" class="nbh-line" rows="1" aria-label="Progress reports" placeholder="e.g. quarterly, with report cards"></textarea></div></div>
 </div>
 
@@ -1007,13 +1013,15 @@ change, the response measure, the target behavior, the current level and the tar
 level &mdash; and rendered into the template paragraph, which adds the context, the
 success criterion and the target date.</p>
 <div class="rules">
-  <p><b>(Consumer name)</b> will <b>(direction of change)</b> their <b>(response measure)</b>
+  <p><b>(Student)</b> will <b>(direction of change)</b> their <b>(response measure)</b>
   of <b>(target behavior)</b> from <b>(current level)</b> to no <b>(more/less)</b> than
   <b>(target level)</b> in/at <b>(context/environment)</b> over <b>(success criterion)</b>
   # measurements by <b>(target date)</b>.</p>
 </div>
-<p class="method">Source: short-term objective components and template paragraph,
-Florida Institute of Technology ABA instructional series (2019).</p>
+<p class="method">Source: the components and the template paragraph are adapted from unpublished course material
+(Florida Institute of Technology ABA instructional series, 2019), which cannot be retrieved. The published basis for a
+measurable objective (the behavior, its conditions and its criterion) is the Florida Department of Education&rsquo;s
+technical assistance paper (2004) in the reference list.</p>
 <p>The sentence on this form adds three things to the template. It writes &ldquo;in&rdquo;
 before the context unless the context begins with its own word (at, on, during,
 across&hellip;). It counts the success criterion in <b>consecutive</b> measurements, the
@@ -1054,13 +1062,14 @@ is not measurable, because two people will arrange the opportunity differently.<
 including academic and functional goals&rdquo; and, &ldquo;For children with disabilities
 who take alternate assessments aligned to alternate academic achievement standards, a
 description of benchmarks or short-term objectives&rdquo; (34 CFR 300.320(a)(2)). Florida
-also requires benchmarks or short-term objectives for &ldquo;Any other student with a
-disability, at the discretion of the IEP Team&rdquo; (Rule 6A-6.03028(3)(h)3., F.A.C.).
+permits benchmarks or short-term objectives for any other student with a disability, at the
+discretion of the IEP Team; they are not required for that student (Rule 6A-6.03028(3)(h), F.A.C.;
+check the item number against the current rule text before citing it).
 The IEP must also contain a description of &ldquo;How the child's progress toward meeting the
 annual goals described in paragraph (2) of this section will be measured&rdquo; and &ldquo;When
 periodic reports on the progress the child is making toward meeting the annual goals (such as
 through the use of quarterly or other periodic reports, concurrent with the issuance of report
-cards) will be provided&rdquo; (34 CFR 300.320(a)(3); Rule 6A-6.03028(3)(h)7., F.A.C.), which is
+cards) will be provided&rdquo; (34 CFR 300.320(a)(3); Rule 6A-6.03028(3)(h), F.A.C.), which is
 why every objective here ends with its measurement method and the goal sheet prints the
 progress-report schedule entered on Setup.
 Confirm the wording your district's IEP system expects before transferring these.</p>
@@ -1087,7 +1096,9 @@ Confirm the wording your district's IEP system expects before transferring these
 <button type="button" class="tool" id="progPrint">Print the report</button>
 <button type="button" class="tool" id="progCopy">Copy the report</button>
 <span id="progMsg" class="bip-msg" role="status" aria-live="polite"></span>
+<button type="button" class="tool" id="progKeep">Keep this report</button>
 <input type="hidden" name="pr.picks">
+<input type="hidden" name="pr.history">
 </div>
 <div id="progOut"></div>
 </section>
@@ -1167,8 +1178,10 @@ field, and only where the objective&rsquo;s response measure is the one DD-1 rec
 (DD-1&rsquo;s rate), frequency per school day (a
 count over the entire school day), total duration per session in minutes (a duration recorded per
 session or over a single period) or percentage of intervals. An objective with no response measure
-yet takes DD-1&rsquo;s. A level in another unit is never converted or written: a rate per minute is
-not DD-1&rsquo;s rate per hour, and a latency in seconds is not DD-1&rsquo;s latency in minutes.
+yet takes DD-1&rsquo;s. A rate per minute is written from DD-1&rsquo;s rate per hour divided by 60, with DD-1&rsquo;s
+own figure beside it (&ldquo;0.83 per minute (50 per hour on DD-1, baseline: mean of 3 days)&rdquo;). No other unit is
+converted: a latency in seconds is not DD-1&rsquo;s latency in minutes. A current level and a target level in
+different units get a Check line.
 Each objective left empty is named with the reason (a different unit, no days in the baseline, or
 no behavior of that name on DD-1). TD-1&rsquo;s <b>Apply to empty fields</b> still fills the first
 reduction objective on the form from the plan, its current level as a rate per minute, when that one was left
@@ -1179,13 +1192,14 @@ DD-1 closed, it reads a file DD-1 saved with Save data, or a case file that hold
 </section>
 
 <div class="cite">
-  <p>Short-term objective components and the template paragraph follow the Florida
-  Institute of Technology ABA instructional series (2019). What the IEP must contain
+  <p>The short-term objective components and the template paragraph are adapted from unpublished course material
+  (Florida Institute of Technology ABA instructional series, 2019); the published basis is the FLDOE paper (2004). What the IEP must contain
   is quoted under Acquisition Objectives from 34 CFR 300.320(a)(2)&ndash;(3)
   and Rule 6A-6.03028(3)(h), F.A.C.</p>
   <p id="gbRefs"><b>Reference list.</b>
   Definition of individualized education program, 34 C.F.R. &sect; 300.320 (2026). &bull;
   Florida Department of Education, Bureau of Exceptional Education and Student Services. (2004). <em>Making annual goals, short-term objectives, and benchmarks measurable</em> (Technical Assistance Paper No. FY 2005-2). &bull;
+  Florida Institute of Technology. (2019). <em>ABA instructional series</em> [Unpublished course material; the source of the template paragraph]. &bull;
   Provision of free appropriate public education (FAPE) and development of individual educational plans for students with disabilities, Fla. Admin. Code r. 6A-6.03028 (2024).</p>
 </div>
 </main>
@@ -1488,6 +1502,10 @@ function redChecks(i) {
      days, range 8-12)" is in the unit of "2 per school day" */
   const lv = s => { const m = /^\s*(\d+(?:\.\d+)?)\s*(.*?)\s*$/.exec(s); return m ? { n: +m[1], u: m[2].replace(/\s*\(.*$/, '').toLowerCase() } : null; };
   const c = lv(g('cur')), t = lv(g('tgt'));
+  /* v22.84 (review F193) a current level and a target level in different units cannot be compared */
+  const nu = u => u.replace(/\b(school|times?|a|an|each|every)\b/g, ' ').replace(/(\w)s\b/g, '$1').replace(/\s+/g, ' ').trim();
+  if (c && t && c.u && t.u && nu(c.u) !== nu(t.u))
+    out.push('the current level (' + esc(g('cur')) + ') and the target level (' + esc(g('tgt')) + ') are in different units: write both in the objective&rsquo;s response measure' + (meas ? ' (' + esc(meas) + ')' : '') + '.');
   if (c && t && c.u === t.u && (down ? t.n >= c.n : up && t.n <= c.n))
     out.push('the target level (' + esc(g('tgt')) + ') is not ' + (down ? 'below' : 'above') + ' the current level (' +
       esc(g('cur')) + '), so the objective is met before anything changes.');
@@ -2088,6 +2106,10 @@ function gbDdLevel(s, meas, cond) {
   return gbFix(s.mean) + (GB_DD_UNIT[meas] || '') + ' (DD-1 ' + (/^baseline$/i.test(cond) ? 'baseline' : cond) + ': ' +
     (s.n === 1 ? '1 day' : 'mean of ' + s.n + ' days, range ' + gbFix(s.min) + '\u2013' + gbFix(s.max)) + ')';
 }
+function gbDdLevelMin(s, cond) {
+  return gbFix(s.mean / 60) + ' per minute (' + gbFix(s.mean) + ' per hour on DD-1, ' + (/^baseline$/i.test(cond) ? 'baseline' : cond) + ': ' +
+    (s.n === 1 ? '1 day' : 'mean of ' + s.n + ' days, range ' + gbFix(s.min) + '\u2013' + gbFix(s.max) + ' per hour') + ')';
+}
 /* every reduction objective that names a behavior: filled, left empty with the reason, or kept as it was */
 function gbDdFill(R) {
   const base = R.conds[0], out = [];
@@ -2098,7 +2120,9 @@ function gbDdFill(R) {
     const b = gbDdFind(R, beh);
     if (!b) { out.push({ id, beh, how: 'left', noName: true, why: 'DD-1 has no behavior of that name.' }); return; }
     const has = gbDdMeas(b), meas = g('meas');
-    if (meas && meas !== has) {
+    /* v22.84 (review F193, I98) a rate per minute takes DD-1's rate per hour divided by 60, with DD-1's own figure beside it */
+    const toMin = meas === 'rate per minute' && has === 'rate per hour';
+    if (meas && meas !== has && !toMin) {
       out.push({ id, beh, how: 'left', why: 'DD-1 records it as ' + gbDdWhat(b) + ', and this objective is measured in ' + meas + '.' +
         (has ? ' Choose \u201c' + has + '\u201d as its response measure to use DD-1\u2019s figures.' : '') }); return;
     }
@@ -2107,7 +2131,7 @@ function gbDdFill(R) {
     if (!s.n) { out.push({ id, beh, how: 'left', why: 'DD-1 has no days with data for it in its baseline, \u201c' + base.name + '\u201d.' }); return; }
     const setMeas = !meas;
     if (setMeas) setv('red[' + i + '].meas', has);
-    const text = gbDdLevel(s, has, base.name);
+    const text = toMin ? gbDdLevelMin(s, base.name) : gbDdLevel(s, has, base.name);
     setv('red[' + i + '].cur', text);
     out.push({ id, beh, how: 'filled', text, meas: setMeas ? has : '' });
   });
@@ -2339,6 +2363,13 @@ function nbhGbSkills(all,list){
 }
 window.__nbhFactsIn=function(f){
   let n=0;const behs=f.behaviors||[];
+  /* v22.84 (review F195) the annual IEP review date the case holds (Form DM-1, or RR-1) fills an empty review date and is the
+     default target date of each objective with none */
+  {const iep=String((f.profile&&f.profile.dates&&f.profile.dates.iep)||(f.records&&f.records.iep)||'').slice(0,10),src=f.profile&&f.profile.dates&&f.profile.dates.iep?'the student profile (Form DM-1)':'the records review (Form RR-1)';
+    window.__gbIep=/^\d{4}-\d{2}-\d{2}$/.test(iep)?{date:iep,src}:null;
+    if(window.__gbIep){const e=$('[name="m.review"]');if(e&&!e.value){setv('m.review',iep);n++;}
+      ['red','acq'].forEach(k=>$$('#'+k+'Wrap .card').forEach(c=>{const i=idxOf(c,k),e2=$('[name="'+k+'['+i+'].date"]');if(i>=0&&e2&&!e2.value&&val(k+'['+i+'].beh')){setv(k+'['+i+'].date',iep);n++;}}));
+      const h=$('#gbIepSrc');if(h)h.textContent='The annual IEP review in the case: '+fmtDate(iep)+', from '+src+'.';}}
   /* only when no objective names a behavior yet: a half-written sheet is left as it is */
   const anyRed=$$('#redWrap .card').some(c=>val('red['+idxOf(c,'red')+'].beh'));
   if(behs.length&&!anyRed){
@@ -2435,8 +2466,27 @@ const gbpN=s=>{const m=/(-?\d+(?:\.\d+)?)/.exec(String(s==null?'':s));return m?+
 const gbpR=x=>x==null?'':String(Math.round(x*100)/100);
 function gbpPeriod(){const t=new Date();t.setHours(12,0,0,0);const f=new Date(t);f.setDate(f.getDate()-63);
   const a=val('pr.from')||gbpIso(f),b=val('pr.to')||gbpIso(t);return a<=b?{from:a,to:b}:{from:b,to:a};}
-function gbpPicks(){try{const o=JSON.parse(val('pr.picks')||'{}');return {code:o.code||{},say:o.say||{}};}catch(e){return {code:{},say:{}};}}
-function gbpSetPicks(p){const e=$('[name="pr.picks"]');if(!e)return;const empty=!Object.keys(p.code).length&&!Object.keys(p.say).length;e.value=empty?'':JSON.stringify(p);e.dispatchEvent(new Event('input',{bubbles:true}));}
+/* v22.84 (review F192, I96) the codes chosen and the sentences rewritten belong to one reporting period: changing the period
+   starts clean, and going back to it finds them again. Every printed, copied or kept report is kept in the form's file with its
+   period, figures, codes and sentences, and the next report shows the last one beside each goal. */
+const gbpKey=P=>P.from+'|'+P.to;
+function gbpAll(){let o={};try{o=JSON.parse(val('pr.picks')||'{}')||{};}catch(e){o={};}
+  if(!o.periods){const old={code:o.code||{},say:o.say||{}};o={periods:{}};if(Object.keys(old.code).length||Object.keys(old.say).length)o.periods[gbpKey(gbpPeriod())]=old;}   /* saved before v22.84: the period showing */
+  return o;}
+function gbpPicks(){const p=gbpAll().periods[gbpKey(gbpPeriod())]||{};return {code:p.code||{},say:p.say||{}};}
+function gbpSetPicks(p){const e=$('[name="pr.picks"]');if(!e)return;const o=gbpAll(),k=gbpKey(gbpPeriod());
+  if(!Object.keys(p.code).length&&!Object.keys(p.say).length)delete o.periods[k];else o.periods[k]={code:p.code,say:p.say};
+  e.value=Object.keys(o.periods).length?JSON.stringify(o):'';e.dispatchEvent(new Event('input',{bubbles:true}));}
+/* a choice made while the period is the rolling last nine weeks fixes the period, so the choice is still there tomorrow */
+function gbpFix(){const P=gbpPeriod();[['pr.from',P.from],['pr.to',P.to]].forEach(([n,v])=>{const e=$('[name="'+n+'"]');if(e&&!e.value){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}});}
+function gbpHist(){try{const h=JSON.parse(val('pr.history')||'[]');return Array.isArray(h)?h.filter(x=>x&&x.from&&x.to&&Array.isArray(x.rows)):[];}catch(e){return [];}}
+function gbpSetHist(h){const e=$('[name="pr.history"]');if(!e)return;e.value=h.length?JSON.stringify(h):'';e.dispatchEvent(new Event('input',{bubbles:true}));}
+function gbpKeep(){const P=gbpPeriod(),L=gbpRows();if(!L.length)return null;gbpFix();const h=gbpHist().filter(x=>!(x.from===P.from&&x.to===P.to));
+  const e={from:P.from,to:P.to,kept:gbpIso(new Date()),rows:L.map(R=>({key:R.key,label:R.label,beh:R.beh,level:R.level,code:R.chosen,say:R.say}))};
+  h.push(e);h.sort((a,b)=>a.from<b.from?-1:a.from>b.from?1:0);gbpSetHist(h);return e;}
+/* the report before this one: the latest kept that ends before this period starts */
+function gbpLast(P){const h=gbpHist().filter(x=>x.to<P.from);return h.length?h[h.length-1]:null;}
+function gbpPrev(last,R){if(!last)return null;return last.rows.find(x=>x.key===R.key&&gbpSame(x.beh,R.beh))||last.rows.find(x=>gbpSame(x.beh,R.beh)>=5)||null;}
 /* the student as the family reads the sentence: the first name ("Mateo Rivera", "Rivera, Mateo"), or "your child" */
 function gbpWho(){let n=val('m.client').replace(/^\s*SIMULATED\s*[–—-]\s*/i,'').trim();if(!n||/^sample student$/i.test(n))return 'your child';
   if(n.indexOf(',')>0)n=n.split(',')[1].trim();return n.split(/\s+/)[0];}
@@ -2456,10 +2506,17 @@ const gbpWords=s=>nbhGbWords(String(s||'').replace(/\([^)]*\)/g,' '));
 function gbpSame(a,b){const x=gbNameKey(String(a||'').replace(/\([^)]*\)/g,'')),y=gbNameKey(String(b||'').replace(/\([^)]*\)/g,''));if(!x||!y)return 0;if(x===y)return 9;
   if(Math.min(x.length,y.length)>=4&&(x.indexOf(y)>=0||y.indexOf(x)>=0))return 5;const A=gbpWords(a),B=gbpWords(b),n=A.filter(w=>B.indexOf(w)>=0).length;return n>=2||(n===1&&Math.min(A.length,B.length)===1)?n:0;}
 function gbpBest(list,name,key){let best=null,s=0;(list||[]).forEach(x=>{const k=Math.max(...key(x).map(v=>gbpSame(name,v)));if(k>s){s=k;best=x;}});return best;}
-/* the figure DD-1 gives for the period: its current condition when that overlaps the period, else its last 20 school days */
-function gbpDd(b,d,P){const conds=(d&&d.conds)||[],lc=conds.length?conds[conds.length-1]:null;
-  if(b.cur&&b.cur.mean!=null&&lc&&lc.from&&lc.from<=P.to&&(lc.to||lc.from)>=P.from)return {now:b.cur.mean,days:b.cur.days,from:lc.from,to:lc.to,cond:b.curName||lc.name};
-  if(b.mean!=null&&d.from&&d.from<=P.to&&d.to>=P.from)return {now:b.mean,days:b.days,from:d.from,to:d.to,cond:''};return null;}
+/* v22.84 (review F191) the figure is the period's own: the mean, range and number of the days with data inside the reporting
+   period (DD-1's day-by-day figures, f.data.daily or f.data.byDay), with the whole condition's mean as a second figure. Only
+   when DD-1 sent no day inside the period does the level fall back to the whole condition (or DD-1's last days), and it says so. */
+function gbpDays(b,d,P){const L=(d&&(d.daily||d.byDay))||[];
+  return L.filter(x=>x&&x.date>=P.from&&x.date<=P.to&&x.vals&&x.vals[b.name]!=null&&x.vals[b.name]!==''&&isFinite(x.vals[b.name])).map(x=>({date:x.date,v:+x.vals[b.name]})).sort((a,c)=>a.date<c.date?-1:1);}
+function gbpDd(b,d,P){const conds=(d&&d.conds)||[],lc=conds.length?conds[conds.length-1]:null,days=gbpDays(b,d,P);
+  const inCond=!!(b.cur&&b.cur.mean!=null&&lc&&lc.from&&lc.from<=P.to&&(lc.to||lc.from)>=P.from);
+  if(days.length){const vs=days.map(x=>x.v),mean=vs.reduce((a,c)=>a+c,0)/vs.length;
+    return {now:mean,days:days.length,from:days[0].date,to:days[days.length-1].date,min:Math.min(...vs),max:Math.max(...vs),list:days,inPeriod:true,cond:'',condMean:inCond?b.cur.mean:null,condName:inCond?(b.curName||lc.name||''):''};}
+  if(inCond)return {now:b.cur.mean,days:b.cur.days,from:lc.from,to:lc.to,cond:b.curName||lc.name,whole:true};
+  if(b.mean!=null&&d.from&&d.from<=P.to&&d.to>=P.from)return {now:b.mean,days:b.days,from:d.from,to:d.to,cond:'',whole:true};return null;}
 function gbpTimeShare(goalDate,P){const a=gbpDate(val('m.date')),z=gbpDate(goalDate),t=gbpDate(P.to);if(!a||!z||!t||z<=a)return null;return Math.max(0,Math.min(1,(t-a)/(z-a)));}
 function gbpByShare(share,time){const need=Math.max(0.25,time==null?0.5:time-0.15);return share>=need?1:share>=0.1?2:3;}
 /* one objective: what the case says, the code it suggests and why */
@@ -2467,20 +2524,29 @@ function gbpGoal(kind,i){const g=n=>val(kind+'['+i+'].'+n),f=gbCase||{},d=f.data
   R.label=(kind==='red'?'R':'A')+(i+1);R.ml=g('ml');R.text=bipPlain(kind==='red'?redSentence(i):acqSentence(i)).replace(/\[[^\]]*\]/g,'[...]');
   const imp=+((f.review&&f.review.rules&&f.review.rules.improvePct)||25),time=gbpTimeShare(R.date,P);
   const ddPick=up=>{if(!d)return null;const L=(d.behaviors||[]).filter(b=>up?(/replacement|acquisition|skill/i.test(b.kind||'')||b.direction==='increase'):!/replacement|acquisition|skill/i.test(b.kind||''));return gbpBest(L.length?L:d.behaviors,R.beh,b=>[b.name]);};
-  const fromDd=(b,up)=>{const x=gbpDd(b,d,P),U=gbpUnit(b.unit);R.src='Form DD-1, '+b.name;
+  const fromDd=(b,up)=>{const x=gbpDd(b,d,P),U=gbpUnit(b.unit),u=b.unit||'';R.src='Form DD-1, '+b.name;
     if(!x){R.why='DD-1 holds no figures inside this period (its record runs '+gbpMd(d.from)+' to '+gbpMd(d.to)+').';return;}
     const conv=gbpConv(g('meas'),b.unit),cur=gbpN(g('cur')),tgt=gbpN(kind==='red'?g('tgt'):g('crit')),now=x.now*(conv||1);
-    R.fig={now,unit:conv&&kind==='red'?gbpUnit(g('meas')):U,start:conv?cur:null,tgt:conv||/^%/.test(b.unit||'')?tgt:null,from:x.from,to:x.to};
-    R.level=gbpR(x.now)+' '+(b.unit||'')+' on average across '+x.days+' school day'+(x.days===1?'':'s')+' with data ('+gbpMd(x.from)+' to '+gbpMd(x.to)+(x.cond?', '+x.cond:'')+')'+(conv&&conv!==1?' = '+gbpR(now)+' '+g('meas').replace(/^rate /,''):'');
+    R.fig={now,unit:conv&&kind==='red'?gbpUnit(g('meas')):U,start:conv?cur:null,tgt:conv||/^%/.test(b.unit||'')?tgt:null,from:x.from,to:x.to,whole:!!x.whole};
+    R.level=x.inPeriod?gbpR(x.now)+' '+u+' on average across '+x.days+' school day'+(x.days===1?'':'s')+' with data in this period ('+gbpMd(x.from)+(x.days>1?' to '+gbpMd(x.to)+'; range '+gbpR(x.min)+'–'+gbpR(x.max):'')+')'+(x.condMean!=null?'; the whole '+x.condName+' phase: '+gbpR(x.condMean)+' '+u:'')
+      :gbpR(x.now)+' '+u+' on average across '+(x.cond?'the whole '+x.cond+' phase':'DD-1’s last '+x.days+' school days with data')+' ('+x.days+' school day'+(x.days===1?'':'s')+', '+gbpMd(x.from)+' to '+gbpMd(x.to)+'); DD-1 sent no day-by-day figures inside this period';
+    if(conv&&conv!==1)R.level+=' = '+gbpR(now)+' '+g('meas').replace(/^rate /,'');
     const conds=d.conds||[];if(conds.length===1&&/baseline/i.test(conds[0].name||'')){R.code=GBP_CODES[4];R.why='DD-1 records only a baseline so far.';return;}
-    const down=kind==='red'&&g('dir')!=='increase';
-    if(b.aimMet){R.code=GBP_CODES[0];R.why='DD-1: at the aim for '+b.run+' days in a row ('+b.need+' asked).';return;}
+    const down=kind==='red'&&g('dir')!=='increase';R.down=down;
+    /* v22.84 (review F188, I97) DD-1's aim is a treatment step: held, it is said, but it never makes the goal met */
+    const aimNote=b.aimMet?' DD-1’s current step'+(b.aim!=null?' ('+gbpR(b.aim)+' '+u+')':'')+' has been held '+b.run+' days in a row: a treatment step, not this objective’s target.':'';
     if(R.fig.tgt!=null&&(R.fig.start!=null||!down)){const st=R.fig.start!=null?R.fig.start:0,span=down?st-R.fig.tgt:R.fig.tgt-st;
       const at=down?now<=R.fig.tgt:now>=R.fig.tgt,share=span>0?(down?st-now:now-st)/span:(at?1:0),need=Math.max(1,Math.round(gbpN(g(kind==='red'?'crit':'n'))||3));
-      const c=at?1:gbpByShare(share,time);R.code=GBP_CODES[c];R.why=(at?'At the target level; not yet shown held for '+need+' measurements.':Math.round(Math.max(0,share)*100)+'% of the way from '+gbpR(st)+' to '+gbpR(R.fig.tgt))+(time!=null?'; '+Math.round(time*100)+'% of the time to the target date has gone.':'.');return;}
+      /* the run: the period's last days with data in a row at the target, in the objective's unit */
+      let run=null;if(x.list){run=0;for(let k=x.list.length-1;k>=0;k--){const v=x.list[k].v*(conv||1);if(down?v<=R.fig.tgt:v>=R.fig.tgt)run++;else break;}}
+      R.fig.run=run;R.fig.need=need;R.fig.met=run!=null&&run>=need;
+      const c=R.fig.met?0:at?1:gbpByShare(share,time);R.code=GBP_CODES[c];
+      R.why=(R.fig.met?'At or better than the target on the last '+run+' days with data in a row ('+need+' asked).'
+        :at?'At the target level on average'+(run!=null?'; '+run+' day'+(run===1?'':'s')+' in a row at it so far, '+need+' asked':'; not shown held for '+need+' measurements in a row yet')+'.'
+        :Math.round(Math.max(0,share)*100)+'% of the way from '+gbpR(st)+' to '+gbpR(R.fig.tgt)+(time!=null?'; '+Math.round(time*100)+'% of the time to the target date has gone.':'.'))+aimNote;return;}
     if(b.base&&b.base.mean){const ch=(down?b.base.mean-x.now:x.now-b.base.mean)/b.base.mean*100;R.fig.base=b.base.mean;R.fig.ch=ch;
-      R.code=GBP_CODES[ch>=60?1:ch>=imp?2:3];R.why=Math.round(ch)+'% '+(ch>=0?'better':'worse')+' than DD-1’s '+(b.baseName||'first condition')+' ('+gbpR(b.base.mean)+'); the levels are not in the objective’s unit, so PR-1’s figures are used ('+imp+'% counts as progress, 60% as sufficient).';return;}
-    R.why='The objective’s levels are not in DD-1’s unit and DD-1 has no earlier condition to compare with: choose the code.';};
+      R.code=GBP_CODES[ch>=60?1:ch>=imp?2:3];R.why=Math.round(ch)+'% '+(ch>=0?'better':'worse')+' than DD-1’s '+(b.baseName||'first condition')+' ('+gbpR(b.base.mean)+'); the levels are not in the objective’s unit, so PR-1’s figures are used ('+imp+'% counts as progress, 60% as sufficient; mastery is not suggested).'+aimNote;return;}
+    R.why='The objective’s levels are not in DD-1’s unit and DD-1 has no earlier condition to compare with: choose the code.'+aimNote;};
   if(kind==='red'){const b=ddPick(false);if(b){fromDd(b,false);R.target=(g('ml')==='less'?'no less than ':'no more than ')+(g('tgt')||'[target]');}else if(d){R.code=GBP_CODES[4];R.why='DD-1 records no behavior by this name, so no data has been taken on it.';}else R.why='No data in the case: open this form in the workstation with Form DD-1, or choose the code.';return R;}
   R.target=g('crit')+(g('n')?' across '+g('n')+' consecutive '+(g('unit')||''):'');
   const p=gbpBest(f.skills&&f.skills.programs,R.beh,x=>[x.target,x.name]);
@@ -2495,9 +2561,11 @@ function gbpGoal(kind,i){const g=n=>val(kind+'['+i+'].'+n),f=gbCase||{},d=f.data
   const b=ddPick(true);if(b&&gbpSame(R.beh,b.name)){fromDd(b,true);return R;}
   if(f.skills||d){R.code=GBP_CODES[4];R.why='No SA-1 program or DD-1 behavior in the case matches this skill, so no data has been taken on it.';}else R.why='No data in the case: open this form in the workstation with Form SA-1 or DD-1, or choose the code.';return R;}
 /* the sentence for the family: what the figures say and what the code means, in everyday words */
-function gbpSay(R,code){const w=gbpWho(),W=gbpCap(w),by=R.date?fmtDate(R.date):'the end of the IEP year',x=R.fig;
-  const end={[GBP_CODES[0]]:w+' has met this goal',[GBP_CODES[1]]:w+' is on track to meet this goal by '+by,[GBP_CODES[2]]:w+' is making progress but may not meet this goal by '+by+' at this pace, so the team is looking at what to adjust',
-    [GBP_CODES[3]]:'there has been little or no change so far, so the team is changing how this goal is taught',[GBP_CODES[4]]:'work on this goal has not started yet'}[code]||'';
+function gbpSay(R,code){const w=gbpWho(),W=gbpCap(w),by=R.date?fmtDate(R.date):'the end of the IEP year',x=R.fig,met=gbpMet(R);
+  /* v22.84 (review F188) "has met this goal" only when this period's figures meet the objective's target; (F190) what the
+     data show and what happens next, never a decision the IEP team has not made */
+  const end={[GBP_CODES[0]]:met===false?'the team will look at whether this goal is met at the next review':w+' has met this goal',[GBP_CODES[1]]:w+' is on track to meet this goal by '+by,[GBP_CODES[2]]:w+' is making progress but may not meet this goal by '+by+' at this pace',
+    [GBP_CODES[3]]:'there has been little or no change so far; the team will review this goal at the next meeting',[GBP_CODES[4]]:'work on this goal has not started yet'}[code]||'';
   if(R.kind==='red'){const b=gbpName(R.beh)||'this behavior';
     if(!x)return gbpCap(code===GBP_CODES[4]?'work on '+gbpPoss(w)+' goal about '+b+' has not started yet.':gbpPoss(w)+' '+b+' was not measured in this period.');
     const lv=gbpR(x.now)+x.unit,goal=x.tgt==null?'':x.tgt===0&&R.ml!=='less'?' (the goal is none at all)':' (the goal is no '+(R.ml==='less'?'less':'more')+' than '+gbpR(x.tgt)+x.unit+')';
@@ -2507,40 +2575,53 @@ function gbpSay(R,code){const w=gbpWho(),W=gbpCap(w),by=R.date?fmtDate(R.date):'
   if(!x||x.now==null)return W+learn+s+(end?'; '+end:'')+'.';
   const lv=x.skill?'did it without help in '+gbpR(x.now)+'% of tries in the latest session':'used it about '+gbpR(x.now)+x.unit+' between '+gbpMd(x.from)+' and '+gbpMd(x.to);
   return W+learn+s+' and '+lv+(x.tgt!=null?' (the goal is '+gbpR(x.tgt)+'%)':'')+(end?'; '+end:'')+'.';}
+/* whether this period's figures meet the objective's target: true, false, or null when there is nothing to compare */
+function gbpMet(R){const x=R.fig;if(!x||x.tgt==null||x.now==null)return null;if(x.met)return true;const down=R.kind==='red'&&val('red['+R.i+'].dir')!=='increase';return down?x.now<=x.tgt:x.now>=x.tgt;}
 function gbpRows(){const P=[];$$('#redWrap .card').forEach(c=>{const i=idxOf(c,'red');if(i>=0&&val('red['+i+'].beh'))P.push(gbpGoal('red',i));});
   $$('#acqWrap .card').forEach(c=>{const i=idxOf(c,'acq');if(i>=0&&val('acq['+i+'].beh'))P.push(gbpGoal('acq',i));});
-  const pk=gbpPicks();P.forEach(R=>{R.chosen=pk.code[R.key]||R.code;R.say=pk.say[R.key]||gbpSay(R,R.chosen);R.edited=!!pk.say[R.key];});return P;}
+  const pk=gbpPicks(),last=gbpLast(gbpPeriod());P.forEach(R=>{R.chosen=pk.code[R.key]||R.code;R.say=pk.say[R.key]||gbpSay(R,R.chosen);R.edited=!!pk.say[R.key];
+    R.warn=R.chosen===GBP_CODES[0]&&gbpMet(R)===false?'Mastered is chosen, but this period’s figures are not at the objective’s target.':'';
+    const pv=gbpPrev(last,R);R.since=pv?{from:last.from,to:last.to,level:pv.level||'',code:pv.code||''}:null;});return P;}
 function gbProgRender(){const out=$('#progOut');if(!out)return;const P=gbpPeriod(),F=$('[name="pr.from"]'),T=$('[name="pr.to"]');
   if(F&&!F.value)F.placeholder=P.from;if(T&&!T.value)T.placeholder=P.to;
   const L=gbpRows(),f=gbCase||{},src=[f.data?'Form DD-1 ('+gbpMd(f.data.from)+' to '+gbpMd(f.data.to)+')':'',f.skills?'Form SA-1 ('+((f.skills.programs||[]).length)+' program'+((f.skills.programs||[]).length===1?'':'s')+')':''].filter(Boolean);
   $('#progPane').classList.toggle('gb-empty',!L.length);
+  {let raw=val('pr.picks');if(raw){try{if(!JSON.parse(raw).periods)gbpSetPicks(gbpPicks());}catch(e){}}}   /* v22.84 an older file's choices, kept with the period showing */
+  const others=Object.keys(gbpAll().periods).filter(k=>k!==gbpKey(P)).map(k=>k.split('|').map(fmtDate).join(' to ')),H=gbpHist();
   if(!L.length){out.innerHTML='<p class="method">Write an objective first; each one on the Reduction and Acquisition sheets is reported here.</p>';return;}
   out.innerHTML='<div class="gp-head"><h3>Progress Report on Annual Goals</h3><div>'+esc(val('m.client')||'Student not named')+(val('m.sid')?' &middot; ID '+esc(val('m.sid')):'')+'</div>'+
     '<div>Reporting period: '+esc(fmtDate(P.from))+' to '+esc(fmtDate(P.to))+(val('m.progress')?' &middot; Reports: '+esc(val('m.progress')):'')+'</div>'+
-    '<div class="hint noprint">'+(src.length?'Figures from the case: '+esc(src.join(' and '))+'.':'No figures from the case: inside the workstation, Forms DD-1 and SA-1 supply them. Choose each code by hand.')+'</div></div>'+
+    '<div class="hint noprint">'+(src.length?'Figures from the case: '+esc(src.join(' and '))+'.':'No figures from the case: inside the workstation, Forms DD-1 and SA-1 supply them. Choose each code by hand.')+'</div>'+
+    (others.length?'<div class="hint noprint">Codes and sentences chosen for '+esc(others.join('; '))+' are kept with that period, not used here.</div>':'')+'</div>'+
     '<table class="rt gp"><thead><tr><th style="width:24%">Goal</th><th style="width:22%">Current level</th><th style="width:15%">Goal asks</th><th style="width:17%">Progress</th><th>For the family</th></tr></thead><tbody>'+
-    L.map(R=>'<tr data-key="'+R.key+'"><td><b>'+R.label+'.</b> '+esc(R.text)+'</td><td>'+(R.level?esc(R.level):'<span class="gap">[no figures in this period]</span>')+(R.src?'<div class="hint">'+esc(R.src)+'</div>':'')+'</td><td>'+esc(R.target)+'</td>'+
+    L.map(R=>'<tr data-key="'+R.key+'"><td><b>'+R.label+'.</b> '+esc(R.text)+'</td><td>'+(R.level?esc(R.level):'<span class="gap">[no figures in this period]</span>')+(R.src?'<div class="hint">'+esc(R.src)+'</div>':'')+(R.since?'<div class="gp-since">Last report ('+esc(fmtDate(R.since.from))+' to '+esc(fmtDate(R.since.to))+'): '+esc(R.since.level||'no figures')+(R.since.code?'; '+esc(R.since.code):'')+'</div>':'')+'</td><td>'+esc(R.target)+'</td>'+
       '<td><select data-pk="'+R.key+'" aria-label="Progress code for '+R.label+'"><option value="">Choose&hellip;</option>'+GBP_CODES.map(c=>'<option'+(c===R.chosen?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select>'+
-      '<div class="hint noprint">'+(R.code?(R.chosen===R.code?'Suggested from the data. ':'Suggested: '+esc(R.code)+'. '):'')+esc(R.why)+'</div><div class="gp-code">'+esc(R.chosen)+'</div></td>'+
+      '<div class="hint noprint">'+(R.code?(R.chosen===R.code?'Suggested from the data. ':'Suggested: '+esc(R.code)+'. '):'')+esc(R.why)+'</div>'+(R.warn?'<div class="gp-warn noprint">'+esc(R.warn)+'</div>':'')+'<div class="gp-code">'+esc(R.chosen)+'</div></td>'+
       '<td><textarea data-say="'+R.key+'" rows="3" aria-label="Sentence for the family for '+R.label+'">'+esc(R.say)+'</textarea><div class="gp-say">'+esc(R.say)+'</div>'+(R.edited?'<button type="button" class="tool noprint" data-sayreset="'+R.key+'">Back to the written sentence</button>':'')+'</td></tr>').join('')+
-    '</tbody></table><p class="hint">The codes: Mastered; Sufficient progress to meet the goal; Progress, may not meet the goal; Little or no progress; Not yet introduced. The suggestion is this form&rsquo;s working convention (the Guide), read from the case’s figures; the team decides the code.</p>';}
+    '</tbody></table>'+
+    (H.length?'<div class="gp-kept noprint"><b>Reports kept</b> (each printed, copied or kept report, with its figures, codes and sentences): '+H.map((h,i)=>'<span class="gp-k">'+esc(fmtDate(h.from))+' to '+esc(fmtDate(h.to))+' <span class="hint">(kept '+esc(fmtDate(h.kept))+')</span> <button type="button" class="tool" data-hshow="'+i+'">Show</button> <button type="button" class="tool" data-hdel="'+i+'">Remove</button></span>').join(' ')+'<div id="gpHist"></div></div>':'')+
+    '<p class="hint">The codes: Mastered; Sufficient progress to meet the goal; Progress, may not meet the goal; Little or no progress; Not yet introduced. The suggestion is this form&rsquo;s working convention (the Guide), read from the case’s figures; the team decides the code.</p>';}
 function gbpText(){const P=gbpPeriod(),L=gbpRows();return bipCompose([[null,'PROGRESS REPORT ON ANNUAL GOALS',bipHead([['Student',val('m.client')],['ID',val('m.sid')]]),'Reporting period: '+fmtDate(P.from)+' to '+fmtDate(P.to)]].concat(
-  L.map(R=>[null,R.label+'. '+R.text,bipLine('Current level',R.level+(R.src?' ('+R.src+')':'')),bipLine('Progress',R.chosen),bipLine('For the family',R.say)])));}
+  L.map(R=>[null,R.label+'. '+R.text,bipLine('Current level',R.level+(R.src?' ('+R.src+')':'')),R.since?bipLine('Last report ('+fmtDate(R.since.from)+' to '+fmtDate(R.since.to)+')',(R.since.level||'no figures')+(R.since.code?'; '+R.since.code:'')):'',bipLine('Progress',R.chosen),bipLine('For the family',R.say)].filter(x=>x!==''))));}
 function gbpCopy(){const t=gbpText(),msg=$('#progMsg'),say=s=>{if(msg){msg.textContent=s;clearTimeout(msg._t);msg._t=setTimeout(()=>{msg.textContent='';},6000);}};
   const fail=()=>{let a=$('#progCopyBox');if(!a){a=document.createElement('textarea');a.id='progCopyBox';a.className='noprint';a.rows=12;a.readOnly=true;a.setAttribute('aria-label','Progress report text');a.style.width='100%';$('#progOut').after(a);}
     a.value=t;a.focus();a.select();say('The clipboard was refused: the text is selected below to copy by hand.');};
   try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>say('Copied: the progress report is on the clipboard.'),fail);else fail();}catch(e){fail();}}
-window.__gbProgress=()=>gbpRows().map(R=>({key:R.key,label:R.label,beh:R.beh,level:R.level,src:R.src,code:R.code,chosen:R.chosen,why:R.why,say:R.say}));
+window.__gbProgress=()=>gbpRows().map(R=>({key:R.key,label:R.label,beh:R.beh,level:R.level,src:R.src,code:R.code,chosen:R.chosen,why:R.why,say:R.say,since:R.since,warn:R.warn}));
+window.__gbProgHistory=gbpHist;
 window.__gbProgText=gbpText;
 document.addEventListener('change',e=>{const t=e.target;if(!t||!t.dataset)return;
-  if(t.dataset.pk){const p=gbpPicks(),R=gbpRows().find(x=>x.key===t.dataset.pk);if(R&&t.value&&t.value!==R.code)p.code[R.key]=t.value;else if(R)delete p.code[R.key];gbpSetPicks(p);gbProgRender();}});
+  if(t.dataset.pk){gbpFix();const p=gbpPicks(),R=gbpRows().find(x=>x.key===t.dataset.pk);if(R&&t.value&&t.value!==R.code)p.code[R.key]=t.value;else if(R)delete p.code[R.key];gbpSetPicks(p);gbProgRender();}});
 document.addEventListener('input',e=>{const t=e.target;if(!t)return;
-  if(t.dataset&&t.dataset.say){const p=gbpPicks(),v=t.value.trim();if(v)p.say[t.dataset.say]=t.value;else delete p.say[t.dataset.say];gbpSetPicks(p);const s=t.parentNode.querySelector('.gp-say');if(s)s.textContent=t.value;return;}
-  if(t.name==='pr.picks')return;if(document.body.classList.contains('view-prog')||t.name==='pr.from'||t.name==='pr.to'){clearTimeout(gbProgRender._t);gbProgRender._t=setTimeout(gbProgRender,250);}});
+  if(t.dataset&&t.dataset.say){gbpFix();const p=gbpPicks(),v=t.value.trim();if(v)p.say[t.dataset.say]=t.value;else delete p.say[t.dataset.say];gbpSetPicks(p);const s=t.parentNode.querySelector('.gp-say');if(s)s.textContent=t.value;return;}
+  if(t.name==='pr.picks'||t.name==='pr.history')return;if(document.body.classList.contains('view-prog')||t.name==='pr.from'||t.name==='pr.to'){clearTimeout(gbProgRender._t);gbProgRender._t=setTimeout(gbProgRender,250);}});
 document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
   if(t.closest('[data-sayreset]')){const p=gbpPicks();delete p.say[t.closest('[data-sayreset]').dataset.sayreset];gbpSetPicks(p);gbProgRender();return;}
-  if(t.closest('#progPrint')){gbProgRender();document.body.classList.add('gb-print-prog');const off=()=>{document.body.classList.remove('gb-print-prog');window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);return;}
-  if(t.closest('#progCopy')){gbpCopy();return;}
+  if(t.closest('#progKeep')){const e=gbpKeep();gbProgRender();const m=$('#progMsg');if(m){m.textContent=e?'Kept: the report for '+fmtDate(e.from)+' to '+fmtDate(e.to)+' is in this form’s file.':'Write an objective first.';clearTimeout(m._t);m._t=setTimeout(()=>{m.textContent='';},6000);}return;}
+  if(t.closest('[data-hshow]')){const h=gbpHist()[+t.closest('[data-hshow]').dataset.hshow],o=$('#gpHist');if(h&&o)o.innerHTML='<table class="rt gp gp-old"><thead><tr><th>Goal</th><th>Level</th><th>Code</th><th>For the family</th></tr></thead><tbody>'+h.rows.map(r=>'<tr><td>'+esc(r.label)+'. '+esc(r.beh)+'</td><td>'+esc(r.level||'')+'</td><td>'+esc(r.code||'')+'</td><td>'+esc(r.say||'')+'</td></tr>').join('')+'</tbody></table>';return;}
+  if(t.closest('[data-hdel]')){const i=+t.closest('[data-hdel]').dataset.hdel,h=gbpHist();if(h[i]&&confirm('Remove the kept report for '+fmtDate(h[i].from)+' to '+fmtDate(h[i].to)+'?')){h.splice(i,1);gbpSetHist(h);gbProgRender();}return;}
+  if(t.closest('#progPrint')){gbpKeep();gbProgRender();document.body.classList.add('gb-print-prog');const off=()=>{document.body.classList.remove('gb-print-prog');window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);return;}
+  if(t.closest('#progCopy')){gbpKeep();gbProgRender();gbpCopy();return;}
   if(t.closest('#progNine')){const a=$('[name="pr.from"]'),b=$('[name="pr.to"]');a.value='';b.value='';a.dispatchEvent(new Event('input',{bubbles:true}));gbProgRender();return;}
   if(t.closest('#viewSeg button[data-view="prog"]'))gbProgRender();});
 gbProgRender();
