@@ -23,12 +23,16 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('Strengths: the profile\'s strengths and interests, said and on the card, nothing left to write',!row('Strengths').todo&&/strengths: warm, funny/i.test(row('Strengths').say)&&/enjoys tablet videos/i.test(row('Strengths').say)&&/• Warm/.test(row('Strengths').body),row('Strengths'));
   ok('Communication: how the student communicates and signals, what helps and what to avoid',!row('Communication').todo&&/Expressive communication: 2-3 word phrases/.test(row('Communication').say)&&/What to avoid:/.test(row('Communication').say)&&/^Says: /.test(row('Communication').body),row('Communication'));
   ok('Proactive: the plan\'s antecedent strategies',!row('Proactive').todo&&row('Proactive').say.includes(F.plan.ant[0].replace(/[.]+$/,''))&&row('Proactive').body.split('\n').length>=2,row('Proactive'));
-  ok('Reinforcement: the replacement behavior and how it is reinforced, from the plan',!row('Works For').todo&&row('Works For').say.includes(F.plan.rep),row('Works For'));
+  /* v23.06 (review F359): the simulated plan thins the schedule (the request card's thinning, a multiple schedule, delay and denial
+     tolerance), so the video does not say "every time": it leaves the step the plan is at for the BCBA, in brackets */
+  ok('Reinforcement: the replacement behavior and how it is reinforced, from the plan; the plan thins the schedule, so the step it is at is left to write',row('Works For').say.includes(F.plan.rep)&&/The plan thins the schedule over time/.test(row('Works For').say)&&/\[Right now: how the request is honored at this step/.test(row('Works For').say)&&!/Honor it every time/.test(row('Works For').say),row('Works For'));
   ok('Response: the steps for the precursor, the behavior, afterwards and what staff do not do',!row('Steps').todo&&row('Steps').say.includes(F.plan.respond.prec.replace(/[.]+$/,''))&&/What staff do not do:/.test(row('Steps').say)&&/^1\. First sign: /.test(row('Steps').body),row('Steps'));
   ok('Safety: the crisis plan\'s five stages, said in order and numbered on the card',/crisis plan takes over/.test(row('Safety').say)&&row('Safety').body.split('\n').length===5&&/^1\. Prevention/.test(row('Safety').body)&&row('Safety').lay==='full',row('Safety'));
-  ok('Remember: the takeaways from the plan',!row('Remember').todo&&/things matter most/.test(row('Remember').say),row('Remember'));
+  ok('Remember: the takeaways from the plan (the replacement as the plan says at its current step)',/things matter most/.test(row('Remember').say)&&!/Honor it every time/.test(row('Remember').say),row('Remember'));
   const left=d.rows.filter(r=>r.todo).map(r=>r.title);
-  ok('only what no form holds is left to write (the presenter, typed on Setup, on the presenter and closing cards, and the terms)',left.join()==='Presenter,Terms,Thank you',left);
+  /* v23.06 (review F359, F362): also the hypothesis statements Form FS-1 has not written (elopement, arranging and ordering) and the
+     step the thinning plan is at (Works For, Remember) */
+  ok('only what no form holds is left to write (the presenter, typed on Setup, on the presenter and closing cards, the terms, the hypotheses not written, the step the plan is at)',left.join()==='Presenter,Hypothesis,Works For,Remember,Terms,Thank you',left);
   ok('the draft puts in the next-card marks: one for each step after a paragraph\'s first',d.cues>0&&d.cues===d.steps,{cues:d.cues,steps:d.steps});
   const bad=log.filter(l=>l.type==='pageerror'||(l.type==='error'&&!/favicon|ERR_FILE/.test(l.text)));
   ok('no errors',!bad.length,bad);
