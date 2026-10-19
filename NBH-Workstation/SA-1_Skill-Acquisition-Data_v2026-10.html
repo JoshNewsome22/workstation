@@ -1517,7 +1517,8 @@ window.__nbhFactsIn=function(f){
   const m=S.meta;let n=0;const acq=((f.goals&&f.goals.acq)||[])[0],b=(f.behaviors||[])[0];
   if(acq){if(!m.skill){m.skill=acq.beh;n++;}if(!m.goal){m.goal='Form GB-1 acquisition objective: '+acq.text;n++;}if(!m.sd&&acq.cond){m.sd=acq.cond;n++;}}
   else if(b&&b.rep&&!m.skill){m.skill=b.rep;n++;}
-  if(!m.reinforcer&&(f.menu||[]).length){m.reinforcer=nbhCase.menuLine(f.menu,3)+' (ranked on Form PA-1)';n++;}
+  /* v22.7x (review F134): the menu by the shared rule (nbhCase.menuItems), so Form RA-1's verdicts count */
+  if(!m.reinforcer&&(f.menu||[]).length){const ln=nbhCase.menuLine((nbhCase.menuItems?nbhCase.menuItems(f):f.menu),3);if(ln){m.reinforcer=ln+(f.reinf?' (ranked on Form PA-1, checked on RA-1)':' (ranked on Form PA-1)');n++;}}
   if(n)renderAll();return {filled:n};
 };
 window.__nbhFactsPick=function(sel){
