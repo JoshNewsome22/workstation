@@ -9903,6 +9903,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.32: IA-1 takes from the case what it asked to have typed again: each target's urgency, the health record, the analysis's outcome, and the informants by choice (review Wave 3)
+
+- **Facts the case holds (F45).** Into IA-1's empty Setup fields:
+  - each target's TB-1 urgency, for the target on screen and in the others' records, and its frequency when TB-1
+    gives a candidate's rate in those words;
+  - the medications from Form DM-1, under "Current treatments and medications noted";
+  - DM-1's health conditions and allergies, under "Medical screen", marked as the health record.
+  - Form EA-1's outcome, its design and its last date, under "FA outcome", in a file of one target. With several
+    targets the BCBA chooses which one the analysis tested.
+  - What is typed is kept, and a replacement behavior is not a target.
+  - The Instrument Plan rows are left as typed for now: the worksheets hold who scored each instrument.
+- **Informants from the case (I21).** Under the Informants heading, a list on the screen only. It names Form DM-1's
+  family contact and team, and the staff on Form ST-1, each once, with role, email and a home language other than
+  English.
+  - The ticked people go into empty informant rows with their role and email. The informant count grows to fit,
+    twelve at most, and a typed row is kept.
+  - Nothing is sent until the BCBA sends it, so an address is not typed by hand on the one form that sends mail.
+  - DM-1 now sends its team: each member's name and role, and the email when the contact holds one.
+- **The family's language (I21).** A respondent page is made for an instrument, not for one informant. So when the
+  family's home language is Spanish, the dialog says so beside the page's language until Español is chosen, rather
+  than choosing it.
+- **Next:** I22 and F44, IN-1's interview on IA-1's interview cards, counted once on FS-1.
+- qa/ia1-w3b-test.js (12 checks).
+
 ### v23.31: CR-1 hands on what it knows: the debriefings' changes reach PR-1's actions and Today, and DM-1's crisis-plan status follows CR-1's dates (review Wave 3)
 
 - **The debriefings' changes (I175).** What each restraint's debriefing decided under "What changes as a result" now

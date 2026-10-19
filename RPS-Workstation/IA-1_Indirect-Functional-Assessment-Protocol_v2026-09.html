@@ -1124,6 +1124,12 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
 #fast .fast-credit a{color:inherit}
 @media print{#walk{display:none!important}}
 </style>
+<style id="ia1-v2332">
+/* v23.32 (review I21) the informants from the case */
+#iaInfCase{margin:0 0 8px;padding:8px 10px;border:1px solid var(--rule-2,#c9d3cf);border-radius:3px;font-family:var(--sans);font-size:12.5px}
+#iaInfCase .ia-infc{display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}
+#iaInfCase button{margin:2px 6px 0 0}
+</style>
 </head>
 <body class="view-setup">
 
@@ -1341,6 +1347,8 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
   </div>
 
   <h3 class="sub">Informants</h3>
+  <!-- v23.32 (review I21) the people the case holds, to add as informants -->
+  <div class="noprint" id="iaInfCase" hidden></div>
   <p class="noprint method" style="margin-top:0">Set the number of informants in the toolbar (1 to 12). The same informant codes are used on every worksheet. If informants answered on a Google Form, <b>Import Google Forms responses</b> in the toolbar fills the worksheet and this table from the responses spreadsheet. <b>Respondent pages</b> makes a one-page questionnaire per instrument (a file to attach, or a link when the workstation is on a website) that an informant answers on any phone or computer; Send opens an email to you with the answers as a code, and <b>Collect responses</b> reads the codes back onto the worksheet and into this table. The pages carry the instrument's wording pasted once on the Setup sheet, show the student by initials only, and send nothing anywhere but the email the informant chooses to send. Record contact so that disagreements can be weighed against exposure (McIntosh et al., 2008) and training so that expert and caregiver reports can be compared (Dracobly et al., 2018). Administer to all informants within 2 to 3 days of one another, as in Iwata et al. (2013), and record each informant's date in the table. One file for every target behavior of the student (v21.64): each target has its own worksheets, switched with the toolbar's Target behavior list; the informants are shared (the Send-outs sheet can leave one out for a target), and the respondent pages and Collect responses sort responses by target.</p>
   <p class="method" id="infDateNote" hidden style="margin:0 0 6px;color:var(--nbh-flag)"></p>
   <div class="nbh-scrollx"><table class="rank cmp" id="infTbl">
@@ -7395,6 +7403,65 @@ OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
     try{const q=f&&f.records&&Array.isArray(f.records.questions)?f.records.questions.map(x=>String(x).trim()).filter(Boolean):[];
       if(q.length&&q.join('\n')!==st.value){st.value=q.join('\n');st.dispatchEvent(new Event('input',{bubbles:true}));}paint();}catch(e){}return r;};
   st.addEventListener('input',paint);st.addEventListener('change',paint);paint();})();
+</script>
+<script id="ia1-v2332">
+/* v23.32 (review F45, I21) facts the case holds, not typed again on the Setup sheet, each into an empty field: each target's urgency
+   from Form TB-1 (and its frequency, when TB-1 gives a candidate's rate in those words); the medications and the health conditions
+   from Form DM-1; the functional analysis's outcome, design and date from Form EA-1 (a one-target file). The informants come from
+   the case by choice: "Informants from the case" lists Form DM-1's family contact and
+   team and the staff on Form ST-1, each with its role and email, and the ticked ones go into empty informant rows (the count
+   grows to fit, twelve at most). When the family's home language is Spanish, the respondent page dialog says so beside the
+   page's language, since a page is made for an instrument, not for one informant. */
+(function(){const T=v=>String(v==null?'':v).trim(),q=n=>document.querySelector('[name="'+n+'"]'),E=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let PEOPLE=[],HOME='';
+ const FREQ=r=>/hour/i.test(r)?'Hourly':/\bday\b|daily/i.test(r)?'Daily':/week/i.test(r)?'Weekly':/month|less often|rare/i.test(r)?'Less often':'';
+ const fire=e=>{try{e.dispatchEvent(new Event(e.tagName==='SELECT'?'change':'input',{bubbles:true}));}catch(x){}};
+ function perTarget(bs){const A=window.__ia1Targets;if(!A)return 0;let n=0;try{A.store();}catch(e){}const cur=A.cur();
+  (Array.isArray(bs)?bs:[]).forEach(b=>{if(!b||!T(b.label)||b.isRep||/replacement|alternative/i.test(b.type||''))return;const low=T(b.label).toLowerCase(),r=A.list().find(x=>T(x.label).toLowerCase()===low);if(!r)return;
+   const set=(k,v)=>{if(!v)return;if(r.id===cur){const e=q(k);if(!e||T(e.value))return;if(e.tagName==='SELECT'&&![...e.options].some(o=>o.value===v))return;e.value=v;fire(e);n++;}else if(!T(r.fields[k])){r.fields[k]=v;n++;}};
+   if(/^[1-4]$/.test(T(b.urg)))set('m.freq',T(b.urg));set('m.freqcat',FREQ(T(b.rate)));});
+  return n;}
+ /* the functional analysis's outcome, its design and its last date from Form EA-1, into an empty FA outcome (the one target of a
+    one-target file; with several targets the BCBA chooses which the analysis tested) */
+ const FA_D=d=>/multi.?element/i.test(d)?'Multielement (Iwata et al., 1982/1994)':/single/i.test(d)?'Single-function test with control':/trial/i.test(d)?'Trial-based':/latency/i.test(d)?'Latency-based':d?'Other':'';
+ function faOut(ev){const A=window.__ia1Targets;if(!A||!ev||A.list().length!==1)return 0;const e=q('fa.out');if(!e||T(e.value))return 0;
+  const k=T(ev.fnKey),v=/^(attention|tangible|escape|automatic|multiple)$/.test(k)?k:/^Undifferentiated/.test(T(ev.fn))?'undiff':'';if(!v)return 0;e.value=v;fire(e);
+  const d=q('fa.date'),m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(T(ev.to));if(d&&!T(d.value)&&m){d.value=(+m[2])+'/'+(+m[3])+'/'+m[1];fire(d);}
+  const g=q('fa.design'),dv=FA_D(T(ev.design));if(g&&!T(g.value)&&dv){g.value=dv;fire(g);}return 1;}
+ function health(P){let n=0;const H=(P&&P.health)||{},meds=(Array.isArray(H.meds)?H.meds:[]).filter(m=>m&&T(m.name));
+  const tx=q('m.tx');if(tx&&!T(tx.value)&&meds.length){tx.value=meds.map(m=>{const d=[T(m.dose),T(m.times)].filter(Boolean).join(', ');return T(m.name)+(d?' '+d:'');}).join('; ')+' (Form DM-1)';fire(tx);n++;}
+  const md=q('m.med'),cond=[T(H.conditions)?'conditions: '+T(H.conditions):'',T(H.allergies)?'allergies: '+T(H.allergies):''].filter(Boolean);
+  if(md&&!T(md.value)&&cond.length){md.value='Health record (Form DM-1): '+cond.join('; ');fire(md);n++;}
+  return n;}
+ function people(f){const L=[],add=(name,role,email,lang,src)=>{name=T(name);if(!name)return;const k=name.toLowerCase(),x=L.find(p=>p.k===k);
+   if(x){if(!x.email&&T(email))x.email=T(email);if(!x.role&&T(role))x.role=T(role);return;}L.push({k,name,role:T(role),email:T(email),lang:T(lang),src});};
+  const P=(f&&f.profile)||{},h=P.home||{};
+  if(T(h.name))add(h.name,T(h.rel)||'parent',h.email,h.lang||(P.language||{}).home,'Form DM-1');
+  (Array.isArray(P.team)?P.team:[]).forEach(t=>t&&add(t.name,t.role,t.email,'','Form DM-1'));
+  ((f&&f.staff&&Array.isArray(f.staff.people))?f.staff.people:[]).forEach(p=>p&&add(p.name,p.role,'','','Form ST-1'));
+  return L;}
+ function paint(){const box=document.getElementById('iaInfCase');if(!box)return;const have=new Set();for(let i=0;i<12;i++){const e=q('inf['+i+'].name');if(e&&T(e.value))have.add(T(e.value).toLowerCase());}
+  const L=PEOPLE.filter(p=>!have.has(p.k));box._L=L;box.hidden=!L.length;if(!L.length){box.innerHTML='';return;}
+  box.innerHTML='<b>Informants from the case</b> <span class="rp-hint">Tick the people who will answer. Each goes into an empty informant row with its role and email; nothing is sent until you send it.</span><div class="ia-infc">'+
+   L.map((p,i)=>'<label><input type="checkbox" data-ip="'+i+'"> '+E(p.name)+(p.role?' ('+E(p.role)+')':'')+(p.email?' &middot; '+E(p.email):'')+(p.lang&&!/^english$/i.test(p.lang)?' &middot; '+E(p.lang):'')+' <span class="rp-hint">'+E(p.src)+'</span></label>').join('')+
+   '</div><button type="button" class="tool" id="iaInfAdd">Add the ticked people</button><span id="iaInfMsg" class="rp-hint"></span>';}
+ function langNote(){const sel=document.getElementById('rpLang');if(!sel||!sel.parentElement)return;let el=document.getElementById('iaLangCase');
+  if(!el){el=document.createElement('div');el.id='iaLangCase';el.className='rp-hint';sel.parentElement.appendChild(el);}
+  const es=/span|espa/i.test(HOME);el.hidden=!es||sel.value==='es';el.textContent=es?'The family’s home language is '+HOME+' (Form DM-1): choose Español for the page the parent answers.':'';}
+ document.addEventListener('click',async e=>{const b=e.target&&e.target.closest?e.target.closest('#iaInfAdd'):null;if(!b)return;const box=document.getElementById('iaInfCase'),L=box._L||[];
+  const pick=[...box.querySelectorAll('input[data-ip]:checked')].map(c=>L[+c.dataset.ip]).filter(Boolean);const say=t=>{const m=document.getElementById('iaInfMsg');if(m)m.textContent=' '+t;};
+  if(!pick.length){say('Tick the people to add first.');return;}
+  const nEl=document.getElementById('nInf');let n=+nEl.value;const empty=()=>{const out=[];for(let i=0;i<n;i++){const x=q('inf['+i+'].name');if(x&&!T(x.value))out.push(i);}return out;};
+  let free=empty();if(free.length<pick.length&&n<12){nEl.value=String(Math.min(12,n+pick.length-free.length));nEl.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,80));n=+nEl.value;free=empty();}
+  let k=0;pick.forEach(p=>{const i=free.shift();if(i===undefined)return;const put=(fl,v)=>{const el=q('inf['+i+'].'+fl);if(el&&T(v)&&!T(el.value)){el.value=T(v);fire(el);}};put('name',p.name);put('role',p.role);put('email',p.email);k++;});
+  paint();const left=pick.length-k,msg=k?k+' informant'+(k===1?'':'s')+' added'+(left?'; '+left+' left out: twelve informants at most':'')+'.':'No informant row is free: twelve informants at most.';
+  say(msg);if(box.hidden&&window.nbhUI&&nbhUI.toast){try{nbhUI.toast(msg);}catch(x){}}});
+ document.addEventListener('input',e=>{if(e.target&&/^inf\[\d+\]\.name$/.test(e.target.name||''))paint();});
+ document.addEventListener('change',e=>{if(e.target&&e.target.id==='rpLang')langNote();});
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}let n=0;
+  try{if(f&&typeof f==='object'){n+=perTarget(f.behaviors);n+=health(f.profile);n+=faOut(f.evidence&&f.evidence['EA-1']);PEOPLE=people(f);const P=f.profile||{};HOME=T((P.language||{}).home||(P.home||{}).lang);paint();langNote();}}catch(e){}
+  if(!n)return r;return {filled:((r&&r.filled)||0)+n,note:[(r&&r.note)||'','the targets’ urgency, the health record and the analysis’s outcome from the case'].filter(Boolean).join('; ')};};
+})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
