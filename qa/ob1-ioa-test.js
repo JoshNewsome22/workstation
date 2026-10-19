@@ -87,10 +87,12 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  const [dl]=await Promise.all([page.waitForEvent('download'),page.evaluate(()=>document.querySelector('#csvBtn').click())]);
  const csv=fs.readFileSync(await dl.path(),'utf8').split('\n').map(l=>l.match(/"((?:[^"]|"")*)"/g).map(c=>c.slice(1,-1).replace(/""/g,'"')));
  const H=csv[0];
- ok('CSV header: four new columns at the end, earlier order kept',H.slice(-4).join('|')==='Student count (obs 2)|Peer count (obs 2)|Count IOA (%)|Interval IOA (%)'&&H.slice(0,23).join('|')==='Date|Start|End|Minutes|Setting|Activity|Arrangement|Announced|Count|Per hour|Peer count|Intervals scored|Peer intervals|Intervals sampled|Conditions present|What followed|Conclusion|Peer per hour|Interval method|Interval length (s)|Second observer|Agreement (%)|Limits on this record',H);
+ /* v23.20 (review F74) each other target behavior's columns follow the four agreement columns */
+ const i0=H.indexOf('Student count (obs 2)');
+ ok('CSV header: the four agreement columns together after the earlier ones, earlier order kept',i0>=23&&H.slice(i0,i0+4).join('|')==='Student count (obs 2)|Peer count (obs 2)|Count IOA (%)|Interval IOA (%)'&&H.slice(0,23).join('|')==='Date|Start|End|Minutes|Setting|Activity|Arrangement|Announced|Count|Per hour|Peer count|Intervals scored|Peer intervals|Intervals sampled|Conditions present|What followed|Conclusion|Peer per hour|Interval method|Interval length (s)|Second observer|Agreement (%)|Limits on this record',H);
  const col=n=>H.indexOf(n);
  ok('CSV obs 2 row carries the second record and the IOA',csv[2][col('Student count (obs 2)')]==='2'&&csv[2][col('Peer count (obs 2)')]==='0'&&csv[2][col('Count IOA (%)')]===String(sim.hand.count)&&csv[2][col('Interval IOA (%)')]===String(sim.hand.iv)&&csv[2][col('Agreement (%)')]===String(sim.hand.count)&&csv[2][col('Second observer')]==='Paraprofessional',csv[2].slice(-5));
- ok('CSV obs 1 and 3 rows: new columns blank, typed agreement kept',csv[1].slice(-4).join('')===''&&csv[3].slice(-4).join('')===''&&csv[1][col('Agreement (%)')]==='90'&&csv[3][col('Agreement (%)')]==='',[csv[1].slice(-5),csv[3].slice(-5)]);
+ ok('CSV obs 1 and 3 rows: the agreement columns blank, typed agreement kept',csv[1].slice(i0,i0+4).join('')===''&&csv[3].slice(i0,i0+4).join('')===''&&csv[1][col('Agreement (%)')]==='90'&&csv[3][col('Agreement (%)')]==='',[csv[1].slice(i0,i0+4),csv[3].slice(i0,i0+4)]);
  /* print: observer-2 rows and the line print on sheet 2 only; the checkbox never */
  await page.emulateMedia({media:'print'});await sleep(200);
  const pr=await page.evaluate(()=>{const pgs=document.querySelectorAll('.obs-page');const d=e=>e?getComputedStyle(e).display:'none';return {chk:d(pgs[1].querySelector('.obs2chk')),row:d(pgs[1].querySelector('th.o2')),line:d(pgs[1].querySelector('p.ioa')),iv2:d(pgs[1].querySelector('button.iv[data-field="iv2"]')),s1:pgs[0].querySelectorAll('input[data-field="count2"],p.ioa,button.iv[data-field="iv2"]').length};});
@@ -113,11 +115,12 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  /* print page counts: blank against the pre-edit file */
  const p2=await ctx.newPage();wire(p2,log);
  const count=async url=>{await p2.goto(url);await sleep(600);await p2.emulateMedia({media:'print'});await sleep(300);const n=pages(await p2.pdf({preferCSSPageSize:true,printBackground:true}));await p2.emulateMedia({media:'screen'});return n;};
- /* the pre-edit copy lived in the working session; without it the v22.98 counts (blank 6, simulation 10) stand in */
+ /* the pre-edit copy lived in the working session; without it the v23.20 counts stand in (blank 7: the Guide's section on
+    several behaviors and timed episodes; simulation 13: the worked example observes a second behavior, timed) */
  const havePre=fs.existsSync(PRE.replace('file://',''));
- const blankNow=await count(URL),blankPre=havePre?await count(PRE):6;
+ const blankNow=await count(URL),blankPre=havePre?await count(PRE):7;
  await p2.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});await p2.evaluate(()=>document.querySelector('#simBtn').click());await sleep(600);
- await p2.emulateMedia({media:'print'});await sleep(300);const simPre=havePre?pages(await p2.pdf({preferCSSPageSize:true,printBackground:true})):10;
+ await p2.emulateMedia({media:'print'});await sleep(300);const simPre=havePre?pages(await p2.pdf({preferCSSPageSize:true,printBackground:true})):13;
  console.log('print pages: blank now',blankNow,'blank pre-edit',blankPre,'| simulation now',simPages,'simulation pre-edit',simPre);
  ok('blank form print page count unchanged',blankNow===blankPre,{now:blankNow,pre:blankPre});
  ok('simulation print grew by at most the lines added',simPages<=simPre+1,{now:simPages,pre:simPre});

@@ -41,7 +41,8 @@ OTHER.profile.health={meds:[{name:'Sertraline',dose:'25 mg'}],prescriber:'Dr. Ot
   ok('DM-1: prescriber, allergies, conditions',/Dr\. Sample/.test(h.prescriber)&&h.allergies==='None known'&&/Seizure/.test(h.conditions),h);
   ok('DM-1: dates.iep (annual review) and dates.reeval, ISO',/^\d{4}-\d{2}-\d{2}$/.test(dd.iep||'')&&/^\d{4}-\d{2}-\d{2}$/.test(dd.reeval||''),dd);
   await p.evaluate(()=>{const e=document.querySelector('[name="p.annual"]');e.value='';const r=document.querySelector('[name="p.iepdate"]');r.value='2026-05-12';});
-  ok('DM-1: dates.iep falls back to the current IEP date',(await p.evaluate(()=>window.__nbhFactsOut().profile.dates.iep))==='2026-05-12');
+  /* v23.00 (RR-1 review F23) the date the IEP was held goes as iepHeld, never as the annual review */
+  {const dd2=await p.evaluate(()=>window.__nbhFactsOut().profile.dates);ok('DM-1: with no annual review date, the date the IEP was held goes as iepHeld, not as the review',!dd2.iep&&dd2.iepHeld==='2026-05-12',dd2);}
   await p.close();
 
   /* 2. RR-1 in and out */
