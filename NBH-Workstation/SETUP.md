@@ -9903,6 +9903,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.06: TV-1 keeps the training video to the plan and to who may watch it: where it is kept, the plan's own schedule, staff or family, each behavior's function, the crisis plan, and who watched (review Wave 3)
+
+- **Where the video goes, and who may watch it.** Before You Record asks where the finished video is kept and who may
+  watch it: the district drive or video service for the student's team, a district link for the family, or wider than
+  the team.
+  - It shows the consent on file from Form IC-1, with its recording and sharing decisions.
+  - Until a restricted place is chosen, the YouTube chapters and the captions ask first.
+  - A video for viewers wider than the team turns **Initials only** on. With initials, the shared files and the printed
+    headers use them too.
+- **The plan's own schedule.** The video says "honor it every time, right away" only while the plan's schedule is
+  continuous. When the plan thins it (a delay, a multiple or chained schedule, a waiting target), the video leaves a line
+  in brackets for the step the plan is at. Write it on Setup ("How the replacement behavior is honored right now"), and
+  the video and the quiz both use it.
+- **Staff or a family.** "Who the training is for" is read as whole words, so "the homeroom teachers" or "the team at
+  Foster Elementary" get the staff video, with the crisis plan. A family's video says the school has a crisis plan and
+  the family has its copy, and Setup names what it leaves out.
+- **The function, behavior by behavior.** Each behavior's function and replacement come from Forms TB-1 and FS-1, with a
+  line in brackets where none is written. The quiz asks about each, and every function the case names is a right answer.
+- **The crisis plan.** The video names who does each stage. Only the staff the crisis plan names as trained use a
+  physical procedure, and that stage is shown whole, for them, with the health limits. The video says it is not that
+  training.
+- **Where things stand.** The plan's own behaviors, the replacement and the skills, each as the average since the plan
+  began and last week, and a line for a target with no daily data.
+- **The rehearsal steps** go to Form ST-1 whole, in the case's own words, each with its part of the plan and who it is
+  for. The physical crisis stages are left out. Form CT-1 takes only the steps for the family at home.
+- **The plan's date.** The closing card says which plan the video teaches. When the case changes, Setup says what
+  changed and drafts those segments again.
+- **Who watched** it, which version, and the quiz items missed go to the case. Watching is the instruction step, not
+  competency.
+- **Short version:** about two minutes for staff who see the student now and then, from the quick start. **Print the
+  cards** puts them on one page. The presenter comes from the Case BCBA when none is typed.
+- qa/tv1-w3-test.js (38 checks).
+
 ### v23.05: SP-1 says how to mark it on every sheet, gives each behavior its own cutoff, keeps "not observed" apart from none, sends every behavior and its flagged times to the case, and checks agreement with a second observer (review Wave 3)
 
 - **How to mark, on every sheet.** The legend and the corner of every grid give the rule with the behavior's own
