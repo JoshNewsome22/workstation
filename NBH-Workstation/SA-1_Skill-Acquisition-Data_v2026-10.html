@@ -732,7 +732,21 @@ body.view-guide .only-setup,body.view-guide .only-trials,body.view-guide .only-s
   body.sa-print-trial .bsheet .bs-title,body.sa-print-ta .bsheet .bs-title{font-size:15px;margin-bottom:3px}
   body.sa-print-trial .bsheet .bs-foot,body.sa-print-ta .bsheet .bs-foot{margin-top:5px;font-size:10px}
   /* the landscape @page rule is added by the button's script while it prints, so the whole-form print is untouched */
+  /* v23.21 (review F207) the ordinary print is the record: the blank clipboard sheets print from their own buttons, and the
+     Guide only when "with the Guide" is ticked beside the print button */
+  body:not(.sa-print-trial) #trialSheet,body:not(.sa-print-ta) #taSheet,body:not(.sa-print-trial):not(.sa-print-ta) .bs-h{display:none!important}
+  body:not(.sa-print-guide) .only-guide{display:none!important}
+  /* the probe page's last two rows stay with it (the blank form spilled one row onto a page of its own) */
+  .only-probes>p.hint{font-size:10px;line-height:1.3;margin:2px 0 6px}
+  .only-probes table.rt:last-of-type{break-inside:avoid}
+  #saPlot.sa-empty{max-height:1.5in}
 }
+/* v23.21 (review F202) the program switcher; (F205, F198) checks on the page */
+.toolbar select#progSel{max-width:240px}
+.toolbar label.tck{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:#e6eef0}
+.toolbar label.tck input{width:auto;margin:0}
+.sa-bad{color:#8E2A2A;font-weight:600;font-size:11px}
+table.tg td.ioa{font-variant-numeric:tabular-nums}
 
 /* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
 table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
@@ -858,7 +872,7 @@ td input,td select{max-width:100%}
   <div class="nbh-mast-inner">
     <div class="nbh-brandrow">
       <img class="nbh-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
-      <div class="nbh-formmeta"><span class="nbh-formid">Form SA-1</span><span>Revised September 2026</span><span>Confidential student record</span></div>
+      <div class="nbh-formmeta"><span class="nbh-formid">Form SA-1</span><span>Revised October 2026</span><span>Confidential student record</span></div>
     </div>
     <div class="nbh-titlerow">
       <div class="nbh-titleblock">
@@ -880,6 +894,11 @@ td input,td select{max-width:100%}
       <button data-view="probes" aria-pressed="false">Probes</button>
       <button data-view="guide" aria-pressed="false">Guide</button>
     </div></div></div>
+  <div class="tgroup"><span>Program</span><div class="row"><!-- v23.21 (review F202): several programs in one file -->
+    <select id="progSel" aria-label="Program shown"></select>
+    <button id="progAdd">Add a program</button>
+    <button id="progDel">Remove this program</button>
+  </div></div>
   <div class="tgroup"><span>Blank sheets</span><div class="row">
     <button id="trialSheetBtn">Print the trial sheet</button>
     <button id="taSheetBtn">Print the task-analysis sheet</button>
@@ -887,6 +906,7 @@ td input,td select{max-width:100%}
   <div class="tgroup"><span>Sheet actions</span><div class="row">
     <button id="simBtn">Load simulation</button>
     <button class="primary" id="printBtn">Print / Save as PDF</button>
+    <label class="tck"><input type="checkbox" id="printGuide"> with the Guide</label><!-- v23.21 (review F207) -->
     <button id="saveBtn">Save data</button>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
@@ -898,7 +918,7 @@ td input,td select{max-width:100%}
 <main class="sheet">
   <div class="nbh-print-head">
     <img class="nbh-print-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
-    <div class="nbh-print-meta"><div class="nbh-print-title">Skill Acquisition Data</div><div>Form SA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+    <div class="nbh-print-meta"><div class="nbh-print-title">Skill Acquisition Data</div><div>Form SA-1 &middot; Revised October 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
 
   <!-- ===================== SETUP ===================== -->
@@ -940,6 +960,7 @@ td input,td select{max-width:100%}
     <div class="ckrow"><label class="ck"><input type="checkbox" data-c="mc_first"> Also require the first trial of each of those sessions to be independent (the first-trial check; see the Guide)</label></div>
     <p class="hint">The default of 90% independent across 3 consecutive sessions with 2 instructors is this form&rsquo;s working convention. The evidence behind it: sets taught to a higher criterion maintained better than sets taught to 50% or 80% (Fuller &amp; Fienup, 2018), and a criterion of 100% held across three sessions maintained best in Richling, Williams and Carr (2019), where 80% across three sessions often did not maintain. Set the level per skill and write the reason here.</p>
     <table class="rt"><tr><th style="width:26%">Reason for this criterion</th><td><input data-m="mc_why" placeholder="e.g., a safety skill: 100% across 3 sessions; a tact set: 90% across 3"></td></tr></table>
+    <div id="objNote"></div><!-- v23.21 (review F198) the criterion against the GB-1 objective -->
 
     <h2 class="nbh-band" style="margin-top:18px">Teaching Format and Prompting</h2>
     <div class="fieldgrid">
@@ -990,8 +1011,8 @@ td input,td select{max-width:100%}
     <div class="tools"><button class="tool" id="addS">Add a session</button><button class="tool" id="delS">Remove last</button></div>
     <div class="grid-wrap"><table class="tg" id="trTbl"></table></div>
     <div class="metrics" id="trMetrics"></div>
-    <h3 style="margin-top:14px">Blank Trial Sheet for the Clipboard</h3>
-    <p class="noprint hint">Printed from the toolbar button on one landscape page: the student, the program, the S<sup>D</sup>, the definition, the codes key, a column per session with date, instructor and phase lines, a row per trial with the first trial shaded, and the totals rows. The ordinary print button prints the whole form with this sheet on its own page.</p>
+    <h3 class="bs-h" style="margin-top:14px">Blank Trial Sheet for the Clipboard</h3>
+    <p class="noprint hint">Printed from the toolbar button on one landscape page: the student, the program, the S<sup>D</sup>, the definition, the codes key, a column per session with date, instructor and phase lines, a row per trial with the first trial shaded, and the totals rows. The ordinary print button prints the record without it (v23.21).</p>
     <div class="bsheet" id="trialSheet"></div>
   </section>
 
@@ -1011,7 +1032,7 @@ td input,td select{max-width:100%}
     <div class="tools"><button class="tool" id="addTS">Add a session</button><button class="tool" id="delTS">Remove last</button></div>
     <div class="grid-wrap"><table class="tg" id="taTbl"></table></div>
     <div class="metrics" id="taMetrics"></div>
-    <h3 style="margin-top:14px">Blank Task-Analysis Sheet</h3>
+    <h3 class="bs-h" style="margin-top:14px">Blank Task-Analysis Sheet</h3>
     <p class="noprint hint">Printed from the toolbar button: the steps down the left, a column per session, the codes key, and the percent-of-steps-independent row at the bottom.</p>
     <div class="bsheet" id="taSheet"></div>
   </section>
@@ -1021,7 +1042,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Percent Independent by Session</h2>
     <div class="fieldgrid">
       <div><label>Data graphed</label><select data-m="g_src"><option value="">Follow the teaching format (trial grid, or the task analysis for chaining)</option><option value="trials">Trial grid</option><option value="steps">Task analysis</option></select></div>
-      <div><label style="margin-bottom:6px">Also show</label><div class="ckrow"><label class="ck"><input type="checkbox" data-c="showCorrect"> percent correct, prompted responses included</label><label class="ck"><input type="checkbox" data-c="showFirst"> first-trial result per session</label></div></div>
+      <div><label style="margin-bottom:6px">Also show</label><div class="ckrow"><label class="ck"><input type="checkbox" data-c="showCorrect"> percent correct, prompted responses included</label><label class="ck"><input type="checkbox" data-c="showFirst"> first-trial result per session</label><label class="ck"><input type="checkbox" data-c="showLevel"> the prompt level or delay</label></div></div>
     </div>
     <div id="graphVerdict"></div>
     <div class="metrics" id="graphMetrics"></div>
@@ -1085,12 +1106,15 @@ td input,td select{max-width:100%}
       <tr><th>Percent of steps independent (task analysis)</th><td>Steps coded independent &divide; steps scored in the session &times; 100, over the steps listed.</td></tr>
       <tr><th>Step status and current training step</th><td>A step is mastered when it was independent on the last two sessions in which it was scored (working convention). Forward chaining: the current training step is the first step not mastered; backward chaining: the last; total-task: every step. An entry in the override field replaces the computed step.</td></tr>
       <tr><th>Mastery rule</th><td>The last N teaching-phase sessions (N from the criterion) all at or above the criterion percent, with at least the set number of different instructor initials among them (and, if ticked, an independent first trial in each). Maintenance-phase and baseline-phase sessions are not counted.</td></tr>
-      <tr><th>No-change rule</th><td>At least five teaching sessions, none of the last five at criterion, and the last of the five fewer than 10 percentage points above the first of the five: the form says to change the procedure. The five-session window and the 10-point margin are working conventions.</td></tr>
-      <tr><th>Error rule</th><td>When the last three teaching sessions average under 50% correct (prompted included) under a least-to-most hierarchy, the form suggests a most-to-least or delayed-prompt arrangement (Libby et al., 2008; Touchette &amp; Howard, 1984). The 50% figure is a working convention.</td></tr>
-      <tr><th>Time-delay rule</th><td>Under constant or progressive time delay the Delay row under the trial grid says the delay each session ran, and the form reads the latest teaching session: a 0-s session with every trial correct moves to the delay, a delayed session with more than 20% of trials in error returns to 0 s for a session, and under progressive delay a session at or above the criterion percent correct with no error lengthens the delay by its next step (working conventions after Wolery, Ault, &amp; Doyle, 1992).</td></tr>
+      <tr><th>No-change rule</th><td>At least five teaching sessions, none of the last five at criterion, and the last of the five fewer than 10 percentage points above the first of the five: the form says to change the procedure. The five-session window and the 10-point margin are working conventions. Under most-to-least prompting or graduated guidance, or when the five sessions all ran at a 0-s delay, independent responding is near 0 by design until the prompt is faded, so the rule reads the Delay/level row instead (a delay in seconds, or the prompt level by its code or a word of its meaning; without it, the prompt codes in the session&rsquo;s cells): a level that falls or a delay that grows is progress, and no change in it over the five sessions means the prompt is not being faded (v23.21).</td></tr>
+      <tr><th>Error rule</th><td>Under least-to-most a trial is coded at the level that finally worked, so the errors made at the lighter levels go in the row <i>Trials with an error before the prompt</i> under the grid. When the last three teaching sessions average 30% or more such trials, or under 50% correct even with prompts, the form suggests a most-to-least or delayed-prompt arrangement (Libby et al., 2008; Touchette &amp; Howard, 1984). Both figures are working conventions.</td></tr>
+      <tr><th>Time-delay rule</th><td>Under constant or progressive time delay the Delay row under the trial grid says the delay each session ran, and the form reads the latest teaching session: a 0-s session with every trial correct moves to the delay, a delayed session with more than 20% of trials in error (counted from <i>Trials with an error before the prompt</i> when that row is filled in: an error made before the prompt is the one the delay is about) returns to 0 s for a session, and under progressive delay a session at or above the criterion percent correct with no error lengthens the delay by its next step (working conventions after Wolery, Ault, &amp; Doyle, 1992).</td></tr>
       <tr><th>Maintenance rule</th><td>A maintenance-phase session or a maintenance probe below the criterion percent calls for booster sessions.</td></tr>
-      <tr><th>Probe result</th><td>Independent &divide; trials &times; 100, passed at or above the criterion percent (working convention). The metrics count maintenance probes passed, the generalization dimensions probed and passed, and the settings or material sets passed against the number on the Setup page: a passed generalization probe whose dimension is Setting or Materials counts once per distinct condition.</td></tr>
-      <tr><th>Instructor count</th><td>Distinct non-blank initials in the instructor row of the sessions in the mastery window. Blank initials count as no instructor, so the mastery verdict says when initials are missing.</td></tr>
+      <tr><th>Probe result</th><td>Independent &divide; trials &times; 100, passed at or above the criterion percent (working convention); a probe with more independent responses than trials is not scored, and its % cell says to check it. The metrics count maintenance probes passed, the generalization dimensions probed and passed, and the settings or material sets passed against the number on the Setup page: a passed generalization probe whose dimension is Setting or Materials counts once per distinct condition.</td></tr>
+      <tr><th>Instructor count</th><td>Distinct non-blank initials in the instructor row of the sessions in the mastery window, read without capitals, spaces or points (jn, JN and J.N. are one instructor; v23.21). Blank initials count as no instructor, so the mastery verdict says when initials are missing. The initials in brackets in &ldquo;Who teaches&rdquo; are offered in the instructor row.</td></tr>
+      <tr><th>Agreement (IOA)</th><td>For a session a second observer coded independently (their codes typed in the row Observer 2 under the grid, in trial or step order), the trials or steps both coded with the same code &divide; the trials or steps both coded &times; 100 (trial-by-trial agreement; Cooper, Heron &amp; Heward, 2020). The metrics give the sessions with agreement and the mean; the rules say when none of the last 10 sessions had one (working convention). The second observer&rsquo;s codes are not graphed.</td></tr>
+      <tr><th>Criterion from the objective</th><td>When the case carries the Form GB-1 objective, its percentage and its count fill the Setup criterion when it is empty. When the Setup criterion is below the objective, the Setup page and the Graph say so, and the case calls the program mastered (for GB-1&rsquo;s progress report) only when the objective&rsquo;s numbers are met too.</td></tr>
+      <tr><th>Maintenance probes due</th><td>From the mastery date (the session that first completed the mastery window) and the schedule on the Probes page (&ldquo;1 week, 2 weeks, 1 month&rdquo;, the default), the next maintenance probe is on the workstation&rsquo;s due list; a maintenance probe dated within 3 days before a due date, or after it, counts for it.</td></tr>
     </table>
 
     <h2 class="nbh-band" style="margin-top:16px">Running the Sheet</h2>
@@ -1099,7 +1123,7 @@ td input,td select{max-width:100%}
       <tr><th>Baseline before teaching</th><td>Two probe sessions under the probe rule (working convention) before any prompting, so the graph shows what teaching added. A baseline already at criterion means a harder target.</td></tr>
       <tr><th>Two instructors early</th><td>The criterion asks for two instructors; the second one should start running sessions before the end, not after it, so that generalization across people is being taught rather than tested.</td></tr>
       <tr><th>Fade on the data</th><td>The fading rule on the Setup page is applied after each session; the session note records the level used. A prompt level that stays for many sessions is itself a reason to look at the reinforcer.</td></tr>
-      <tr><th>Keep the sheet with the program</th><td>Save the data file with the program name in it; the CSV export carries every session, step and probe into a spreadsheet; the PDF print is the record for the file.</td></tr>
+      <tr><th>Keep the sheet with the program</th><td>Save the data file with the program name in it; the CSV export carries every session, step and probe into a spreadsheet; the PDF print is the record for the file. A student taught two or more skills keeps them in one file: <b>Add a program</b> in the toolbar, and choose the one shown beside it. Each program has its own setup, sessions, steps and probes; the student details are shared; the case holds every program and Form GB-1 reads each. The print and the blank sheets are of the program shown (v23.21).</td></tr>
     </table>
 
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
@@ -1158,6 +1182,17 @@ const PRDIMS=['Same as training','People','Setting','Materials','Time of day','I
 /* ---------------- state ---------------- */
 function blank(){return{meta:{},chk:{},codes:CODES.map(x=>({c:x.c,label:x.label,kind:x.kind})),sess:[],steps:[],tas:[],probes:[]};}
 let S=blank();
+/* v23.21 (review F202) several programs in one file: P.list holds each program in the shape S has always had, S is the one
+   shown (P.list[P.cur]), and the student details are shared. A file with one program is saved exactly as before; with more,
+   the file also carries programs[] and cur, and a reader that knows only S still finds the program that was shown. */
+let P={list:[S],cur:0};
+const SHARED=['client','sid','grade','bcba','dob'];
+const syncP=()=>{if(P.list[P.cur]!==S)P.list[P.cur]=S;return S;};
+const progName=(x,i)=>String((x&&x.meta&&(x.meta.program||x.meta.skill))||'').trim()||'Program '+(i+1);
+function renderProgSel(){const sel=$('#progSel');if(!sel)return;syncP();sel.innerHTML=P.list.map((x,i)=>'<option value="'+i+'"'+(i===P.cur?' selected':'')+'>'+(i+1)+' · '+esc(progName(x,i).slice(0,40))+'</option>').join('');$('#progDel').disabled=P.list.length<2;}
+function switchProg(k){syncP();if(k===P.cur||!P.list[k])return;P.cur=k;S=P.list[k];renderAll();}
+/* run f with each program as S in turn (the export, the due list and the CSV read every program) */
+function eachProg(f){syncP();const keep=S,out=[];try{P.list.forEach((x,i)=>{S=x;out.push(f(x,i));});}finally{S=keep;}return out;}
 function ensure(){
   if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||typeof S.chk!=='object')S.chk={};
   if(!Array.isArray(S.codes))S.codes=[];if(!Array.isArray(S.sess))S.sess=[];if(!Array.isArray(S.steps))S.steps=[];if(!Array.isArray(S.tas))S.tas=[];if(!Array.isArray(S.probes))S.probes=[];
@@ -1168,6 +1203,25 @@ function ensure(){
 const ntr=()=>Math.max(1,Math.min(50,Math.round(num(S.meta.ntr)??10)));
 const mc=()=>({pct:num(S.meta.mc_pct)??90,n:Math.max(1,Math.round(num(S.meta.mc_n)??3)),inst:Math.max(1,Math.round(num(S.meta.mc_inst)??2))});
 function kindOf(c){if(!c)return '';const k=S.codes.find(x=>x.c===c);return k?k.kind:'pr';}
+/* v23.21 (review F204) initials read without capitals, spaces or points: jn, JN and J.N. are one instructor */
+const normI=v=>String(v==null?'':v).toUpperCase().replace(/[^A-Z0-9]/g,'');
+/* v23.21 (review F200, I104) the Delay/level row as a number: a delay in seconds ("0", "2 s"), or a prompt level by its code
+   or a word of its meaning ("F", "partial", "verbal"); a level's rank is its place among the prompt codes, the least intrusive
+   first (independent is 0) */
+function lvlOf(v){v=String(v==null?'':v).trim();if(!v)return null;const m=/^(\d+(?:\.\d+)?)\s*(s|sec|secs|seconds?)?$/i.exec(v);if(m)return{delay:+m[1]};
+  const pr=S.codes.filter(c=>c.kind==='pr'&&c.c),tok=v.split(/[\s,;\/]+/)[0].toLowerCase();
+  let k=pr.findIndex(c=>c.c.toLowerCase()===tok);
+  if(k<0&&tok.length>=3)k=pr.findIndex(c=>String(c.label||'').toLowerCase().split(/[^a-z]+/).some(w=>w&&w.startsWith(tok)));
+  if(k>=0)return{lv:k+1,code:pr[k].c};
+  const ind=S.codes.find(c=>c.kind==='ind'&&c.c&&(c.c.toLowerCase()===tok||(tok.length>=3&&String(c.label||'').toLowerCase().startsWith(tok))));return ind?{lv:0,code:ind.c}:null;}
+/* the session's prompt level from its own codes: the mean rank of the codes scored (independent 0; errors left out), which is
+   what a most-to-least session's cells already say */
+function lvMean(cells){const pr=S.codes.filter(c=>c.kind==='pr'&&c.c).map(c=>c.c);let t=0,k=0;cells.forEach(c=>{if(!c)return;const kd=kindOf(c);if(kd==='ind'){k++;}else if(kd==='pr'){const r=pr.indexOf(c);if(r>=0){t+=r+1;k++;}}});return k?t/k:null;}
+const lvCode=v=>{if(v==null)return '?';const r=Math.round(v),pr=S.codes.filter(c=>c.kind==='pr'&&c.c);if(r<=0)return (S.codes.find(c=>c.kind==='ind')||{c:'I'}).c;return pr[Math.min(pr.length,r)-1].c;};
+/* v23.21 (review I102) a second observer's codes for a session, in trial (or step) order: "IIVP–I", or separated by spaces;
+   a hyphen is read as the error dash. Agreement: the trials both coded with the same code / the trials both coded */
+const ioCodes=v=>{v=String(v==null?'':v).trim();if(!v)return [];return (/[\s,;]/.test(v)?v.split(/[\s,;]+/).filter(Boolean):Array.from(v)).map(c=>c==='-'?'–':c);};
+function ioAgree(cells,io){const o=ioCodes(io);if(!o.length)return null;let both=0,same=0;for(let k=0;k<cells.length;k++){const a=(cells[k]||'')==='-'?'–':(cells[k]||''),b=o[k]||'';if(!a||!b)continue;both++;if(a===b)same++;}return both?{both,same,pct:same/both*100}:null;}
 
 /* ---------------- views ---------------- */
 function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
@@ -1175,11 +1229,13 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
 
 /* ---------------- statistics ---------------- */
 function sessStats(s){const n=ntr();let sc=0,ind=0,cor=0;for(let i=0;i<n;i++){const c=s.tr[i]||'';if(!c)continue;sc++;const k=kindOf(c);if(k==='ind'){ind++;cor++;}else if(k==='pr')cor++;}
-  const f=s.tr[0]||'';return{sc,ind,cor,err:sc-cor,dl:String(s.dl||''),pi:sc?ind/sc*100:null,pc:sc?cor/sc*100:null,first:f,firstInd:kindOf(f)==='ind'};}
+  const f=s.tr[0]||'',eu0=num(s.eu),eu=eu0!=null&&eu0>=0&&eu0<=sc?eu0:null;   /* v23.21 (F201) trials with an error before the prompt; (I102) the agreement */
+  return{sc,ind,cor,err:sc-cor,eu,dl:String(s.dl||''),pi:sc?ind/sc*100:null,pc:sc?cor/sc*100:null,first:f,firstInd:kindOf(f)==='ind',ioa:ioAgree(s.tr.slice(0,n),s.io),lvm:lvMean(s.tr.slice(0,n))};}
 /* v21.37: the Delay row under the trial grid is shown under a time-delay procedure, or when the Setup page names a delay */
-const tdOn=()=>S.meta.hier==='ctd'||S.meta.hier==='ptd'||!!String(S.meta.delay||'').trim();
+const tdOn=()=>['ctd','ptd','mtl','gg'].includes(S.meta.hier)||!!String(S.meta.delay||'').trim();   /* v23.21 (F200) also most-to-least and graduated guidance: the row holds the prompt level */
+const euOn=()=>['ltm','ctd','ptd'].includes(S.meta.hier);   /* v23.21 (F201) */
 function taStats(s){let sc=0,ind=0,cor=0;S.steps.forEach((st,i)=>{const c=s.lv[i]||'';if(!c)return;sc++;const k=kindOf(c);if(k==='ind'){ind++;cor++;}else if(k==='pr')cor++;});
-  return{sc,ind,cor,pi:sc?ind/sc*100:null,pc:sc?cor/sc*100:null,first:'',firstInd:false};}
+  return{sc,ind,cor,pi:sc?ind/sc*100:null,pc:sc?cor/sc*100:null,first:'',firstInd:false,ioa:ioAgree(S.steps.map((st,i)=>s.lv[i]||''),s.io),lvm:lvMean(S.steps.map((st,i)=>s.lv[i]||''))};}
 function stepMastered(i){const scored=S.tas.filter(s=>s.lv[i]);if(scored.length<2)return false;const last=scored.slice(-2);return last.every(s=>kindOf(s.lv[i])==='ind');}
 function stepLast(i){const scored=S.tas.filter(s=>s.lv[i]);return scored.length?scored[scored.length-1].lv[i]:'';}
 function curStep(){const o=num(S.meta.ta_cur);if(o!=null&&o>=1&&o<=S.steps.length)return{i:Math.round(o)-1,how:'set by hand'};
@@ -1188,7 +1244,7 @@ function curStep(){const o=num(S.meta.ta_cur);if(o!=null&&o>=1&&o<=S.steps.lengt
   if(t==='backward'){for(let i=m.length-1;i>=0;i--)if(!m[i])return{i,how:'backward chaining: the last step not yet mastered'};return{i:-2,how:'every step mastered'};}
   for(let i=0;i<m.length;i++)if(!m[i])return{i,how:(t==='forward'?'forward chaining: ':'')+'the first step not yet mastered'};return{i:-2,how:'every step mastered'};}
 function srcIsTA(){const g=S.meta.g_src;if(g==='steps')return true;if(g==='trials')return false;return S.meta.format==='ta';}
-function series(){const ta=srcIsTA();const arr=ta?S.tas:S.sess;return arr.map((s,i)=>{const st=ta?taStats(s):sessStats(s);return{i,date:s.date||'',ph:s.ph||'',inst:(s.inst||'').trim(),note:s.note||'',dl:String(s.dl||''),...st};});}
+function series(){const ta=srcIsTA();const arr=ta?S.tas:S.sess;return arr.map((s,i)=>{const st=ta?taStats(s):sessStats(s);return{i,date:s.date||'',ph:s.ph||'',inst:normI(s.inst),note:s.note||'',dl:String(s.dl||''),...st};});}   /* v23.21 (F204) inst normalized */
 
 /* ---------------- codes ---------------- */
 function renderCodes(){
@@ -1205,7 +1261,7 @@ function headRows(arr,r,label){const n=arr.length;
   let h='<thead><tr><th class="lk">Session</th>'+arr.map((s,i)=>'<th>'+(i+1)+' <button type="button" class="rowDel noprint" data-del="'+r+'" data-i="'+i+'" title="Delete this session" aria-label="Delete session '+(i+1)+'" style="padding:1px 4px;font-size:14px">&times;</button></th>').join('')+'</tr></thead><tbody>';
   h+='<tr><td class="lk">Date</td>'+arr.map((s,i)=>`<td><input class="dt" data-r="${r}" data-i="${i}" data-f="date" value="${esc(s.date)}" aria-label="${label} ${i+1} date" placeholder="m/d"></td>`).join('')+'</tr>';
   h+='<tr><td class="lk">Phase</td>'+arr.map((s,i)=>`<td><select data-r="${r}" data-i="${i}" data-f="ph" aria-label="${label} ${i+1} phase"><option value=""></option>${PHASES.map(p=>`<option value="${p[0]}"${s.ph===p[0]?' selected':''}>${p[0]}</option>`).join('')}</select></td>`).join('')+'</tr>';
-  h+='<tr><td class="lk">Instructor</td>'+arr.map((s,i)=>`<td><input data-r="${r}" data-i="${i}" data-f="inst" value="${esc(s.inst)}" aria-label="${label} ${i+1} instructor" placeholder="JN"></td>`).join('')+'</tr>';
+  h+='<tr><td class="lk">Instructor</td>'+arr.map((s,i)=>`<td><input data-r="${r}" data-i="${i}" data-f="inst" value="${esc(s.inst)}" aria-label="${label} ${i+1} instructor" placeholder="JN" list="saInits"></td>`).join('')+'</tr>';
   return h;}
 function renderTr(){
   const t=$('#trTbl'),n=ntr();if(!S.sess.length){t.innerHTML='<tbody><tr><td class="lk">No sessions yet. Add a session; the first two are usually baseline probes (phase B).</td></tr></tbody>';return;}
@@ -1216,15 +1272,23 @@ function renderTr(){
   h+='<tr class="sum"><td class="lk">% independent</td>'+st.map(x=>'<td>'+pct(x.pi)+'</td>').join('')+'</tr>';
   h+='<tr class="sum"><td class="lk">% correct (any prompt)</td>'+st.map(x=>'<td>'+pct(x.pc)+'</td>').join('')+'</tr>';
   h+='<tr class="sum"><td class="lk">First trial</td>'+st.map(x=>'<td'+(x.first?' class="k-'+kindOf(x.first)+'"':'')+'>'+(x.first?esc(x.first):'—')+'</td>').join('')+'</tr>';
-  if(tdOn())h+='<tr><td class="lk">Delay (s) or level</td>'+S.sess.map((s,i)=>`<td><input data-r="sess" data-i="${i}" data-f="dl" value="${esc(s.dl||'')}" aria-label="Session ${i+1} delay or prompt level" placeholder="0, 2, 4"></td>`).join('')+'</tr>';   /* v21.37 */
-  h+='<tr><td class="lk">Note</td>'+S.sess.map((s,i)=>`<td class="note"><input data-r="sess" data-i="${i}" data-f="note" value="${esc(s.note)}" aria-label="Session ${i+1} note" placeholder="prompt level, delay, change"></td>`).join('')+'</tr></tbody>';
-  t.innerHTML=h;
+  if(tdOn())h+='<tr><td class="lk">Delay (s) or level</td>'+S.sess.map((s,i)=>`<td><input data-r="sess" data-i="${i}" data-f="dl" value="${esc(s.dl||'')}" aria-label="Session ${i+1} delay or prompt level" placeholder="${['mtl','gg'].includes(S.meta.hier)?'F, P, V':'0, 2, 4'}"></td>`).join('')+'</tr>';   /* v21.37 */
+  if(euOn())h+='<tr><td class="lk">Trials with an error before the prompt</td>'+S.sess.map((s,i)=>`<td><input data-r="sess" data-i="${i}" data-f="eu" value="${esc(s.eu||'')}" aria-label="Session ${i+1} trials with an error before the prompt" inputmode="numeric" placeholder="0"></td>`).join('')+'</tr>';   /* v23.21 (F201) */
+  h+='<tr><td class="lk">Note</td>'+S.sess.map((s,i)=>`<td class="note"><input data-r="sess" data-i="${i}" data-f="note" value="${esc(s.note)}" aria-label="Session ${i+1} note" placeholder="prompt level, delay, change"></td>`).join('')+'</tr>';
+  h+=ioRows(S.sess,'sess','Session')+'</tbody>';   /* v23.21 (I102) */
+  t.innerHTML=h;renderInits();
   const M=$('#trMetrics'),T=st.filter((x,i)=>S.sess[i].ph==='T'&&x.pi!=null),last=st.filter(x=>x.pi!=null).slice(-1)[0],f5=st.filter(x=>x.first).slice(-5),fi=f5.filter(x=>x.firstInd).length;
-  M.innerHTML=`<div class="metric"><b>Sessions</b><div class="val">${S.sess.length}</div><div class="sub">${S.sess.filter(s=>s.ph==='B').length} baseline · ${S.sess.filter(s=>s.ph==='T').length} teaching · ${S.sess.filter(s=>s.ph==='M').length} maintenance</div></div>
+  M.innerHTML=ioaTile(st)+`<div class="metric"><b>Sessions</b><div class="val">${S.sess.length}</div><div class="sub">${S.sess.filter(s=>s.ph==='B').length} baseline · ${S.sess.filter(s=>s.ph==='T').length} teaching · ${S.sess.filter(s=>s.ph==='M').length} maintenance</div></div>
     <div class="metric"><b>Latest session</b><div class="val">${last?pct(last.pi):'—'}</div><div class="sub">independent${last?' · '+pct(last.pc)+' correct with prompts':''}</div></div>
     <div class="metric"><b>Teaching mean</b><div class="val">${T.length?pct(T.reduce((a,x)=>a+x.pi,0)/T.length):'—'}</div><div class="sub">${T.length} teaching session${T.length===1?'':'s'}</div></div>
     <div class="metric"><b>First trial independent</b><div class="val">${f5.length?fi+' of '+f5.length:'—'}</div><div class="sub">last ${f5.length||5} sessions with a first trial scored</div></div>`;
 }
+/* v23.21 (I102) the second observer's row and its agreement; (F204) the initials from "Who teaches" offered in the instructor row */
+function ioRows(arr,r,label){return '<tr><td class="lk">Observer 2 (IOA)</td>'+arr.map((s,i)=>`<td><input data-r="${r}" data-i="${i}" data-f="io" value="${esc(s.io||'')}" aria-label="${label} ${i+1} second observer's codes" placeholder="codes" style="font-size:11px"></td>`).join('')+'</tr>'+
+  '<tr class="sum"><td class="lk">Agreement</td>'+arr.map((s,i)=>{const a=r==='sess'?sessStats(s).ioa:taStats(s).ioa;return '<td class="ioa" data-ioa="'+r+':'+i+'">'+(a?pct(a.pct):'')+'</td>';}).join('')+'</tr>';}
+function ioaTile(st){const a=st.map(x=>x.ioa).filter(Boolean);return '<div class="metric"><b>Agreement (IOA)</b><div class="val">'+(a.length?pct(a.reduce((x,y)=>x+y.pct,0)/a.length):'—')+'</div><div class="sub">'+(a.length?a.length+' session'+(a.length===1?'':'s')+' with a second observer':'no session with a second observer yet')+'</div></div>';}
+function renderInits(){let dl=$('#saInits');if(!dl){dl=document.createElement('datalist');dl.id='saInits';document.body.appendChild(dl);}
+  const I=[...new Set((String(S.meta.teachers||'').match(/\(([^)]{1,6})\)/g)||[]).map(x=>normI(x)).filter(Boolean))];dl.innerHTML=I.map(x=>'<option value="'+esc(x)+'">').join('');}
 $('#addS').addEventListener('click',()=>{if(S.sess.length>=60)return;const prev=S.sess[S.sess.length-1];S.sess.push({date:'',ph:prev?prev.ph:'B',inst:prev?prev.inst:'',tr:[],dl:'',note:''});renderTr();renderGraph();});
 $('#delS').addEventListener('click',async ()=>{if(!S.sess.length)return;const s=S.sess[S.sess.length-1];if((s.date||s.tr.some(x=>x))&&!(await nbhUI.confirm('Remove the last session?\nIts date and scores are deleted.',{ok:'Remove',danger:true})))return;S.sess.pop();renderTr();renderGraph();});
 
@@ -1240,10 +1304,11 @@ function renderSteps(){
     h+='<tr class="sum"><td class="st">Steps independent</td>'+x.map(y=>'<td>'+(y.sc?y.ind+'/'+y.sc:'—')+'</td>').join('')+'</tr>';
     h+='<tr class="sum"><td class="st">% of steps independent</td>'+x.map(y=>'<td>'+pct(y.pi)+'</td>').join('')+'</tr>';
     h+='<tr class="sum"><td class="st">% correct (any prompt)</td>'+x.map(y=>'<td>'+pct(y.pc)+'</td>').join('')+'</tr>';
-    h+='<tr><td class="st">Note</td>'+S.tas.map((s,i)=>`<td class="note"><input data-r="tas" data-i="${i}" data-f="note" value="${esc(s.note)}" aria-label="TA session ${i+1} note" placeholder="training step, prompt level"></td>`).join('')+'</tr></tbody>';
+    h+='<tr><td class="st">Note</td>'+S.tas.map((s,i)=>`<td class="note"><input data-r="tas" data-i="${i}" data-f="note" value="${esc(s.note)}" aria-label="TA session ${i+1} note" placeholder="training step, prompt level"></td>`).join('')+'</tr>';
+    h+=ioRows(S.tas,'tas','TA session').replace(/<td class="lk">/g,'<td class="st">')+'</tbody>';   /* v23.21 (I102) */
     t.innerHTML=h;}
   const x=S.tas.map(taStats),last=x.filter(y=>y.pi!=null).slice(-1)[0],mast=S.steps.filter((s,i)=>stepMastered(i)).length;
-  $('#taMetrics').innerHTML=`<div class="metric"><b>Steps</b><div class="val">${S.steps.length}</div><div class="sub">${mast} mastered (independent on the last two scored sessions)</div></div>
+  $('#taMetrics').innerHTML=ioaTile(x)+`<div class="metric"><b>Steps</b><div class="val">${S.steps.length}</div><div class="sub">${mast} mastered (independent on the last two scored sessions)</div></div>
     <div class="metric"><b>Current training step</b><div class="val">${cs.i>=0?cs.i+1:cs.i===-1?'all':cs.i===-2?'done':'—'}</div><div class="sub">${esc(cs.how)}</div></div>
     <div class="metric"><b>Latest session</b><div class="val">${last?pct(last.pi):'—'}</div><div class="sub">of steps independent${last?' · '+pct(last.pc)+' correct with prompts':''}</div></div>
     <div class="metric"><b>Sessions</b><div class="val">${S.tas.length}</div><div class="sub">${S.tas.filter(s=>s.ph==='B').length} baseline · ${S.tas.filter(s=>s.ph==='T').length} teaching · ${S.tas.filter(s=>s.ph==='M').length} maintenance</div></div>`;
@@ -1254,15 +1319,16 @@ $('#addTS').addEventListener('click',()=>{if(S.tas.length>=60)return;const prev=
 $('#delTS').addEventListener('click',async ()=>{if(!S.tas.length)return;const s=S.tas[S.tas.length-1];if((s.date||s.lv.some(x=>x))&&!(await nbhUI.confirm('Remove the last session?\nIts date and step scores are deleted.',{ok:'Remove',danger:true})))return;S.tas.pop();renderSteps();renderGraph();});
 
 /* ---------------- probes ---------------- */
-function probeRows(){const m=mc();return S.probes.map(p=>{const n=num(p.n),k=num(p.k);const pc=n&&k!=null?k/n*100:null;return{...p,nn:n,kk:k,pc,pass:pc==null?null:pc>=m.pct};});}
+function probeRows(){const m=mc();return S.probes.map(p=>{const n=num(p.n),k=num(p.k);const bad=n!=null&&k!=null&&(k>n||n<=0||k<0);   /* v23.21 (F205) more independent than trials is a slip, not a pass */
+  const pc=!bad&&n&&k!=null?k/n*100:null;return{...p,nn:n,kk:k,pc,bad,pass:pc==null?null:pc>=m.pct};});}
 function renderPr(){
   $('#prTbl tbody').innerHTML=probeRows().map((p,i)=>`<tr><td class="num">${i+1}</td><td><input data-r="probes" data-i="${i}" data-f="date" value="${esc(p.date)}" aria-label="Probe ${i+1} date"></td>
     <td><select data-r="probes" data-i="${i}" data-f="type" aria-label="Probe ${i+1} type"><option value=""></option>${PRTYPES.map(t=>`<option${p.type===t?' selected':''}>${t}</option>`).join('')}</select></td>
     <td><select data-r="probes" data-i="${i}" data-f="dim" aria-label="Probe ${i+1} dimension"><option value=""></option>${PRDIMS.map(t=>`<option${p.dim===t?' selected':''}>${t}</option>`).join('')}</select></td>
     <td><input data-r="probes" data-i="${i}" data-f="desc" value="${esc(p.desc)}" aria-label="Probe ${i+1} condition"></td>
-    <td><input data-r="probes" data-i="${i}" data-f="n" value="${esc(p.n)}" style="text-align:center" aria-label="Probe ${i+1} trials"></td>
-    <td><input data-r="probes" data-i="${i}" data-f="k" value="${esc(p.k)}" style="text-align:center" aria-label="Probe ${i+1} independent"></td>
-    <td class="num">${pct(p.pc)}</td><td class="num">${p.pass==null?'—':p.pass?'<span style="color:#2F6B37;font-weight:600">pass</span>':'<span style="color:#8E2A2A;font-weight:600">below</span>'}</td>
+    <td><input data-r="probes" data-i="${i}" data-f="n" value="${esc(p.n)}" style="text-align:center" inputmode="numeric" aria-label="Probe ${i+1} trials"></td>
+    <td><input data-r="probes" data-i="${i}" data-f="k" value="${esc(p.k)}" style="text-align:center" inputmode="numeric" aria-label="Probe ${i+1} independent"></td>
+    <td class="num">${p.bad?'<span class="sa-bad">check: more independent than trials</span>':pct(p.pc)}</td><td class="num">${p.pass==null?'—':p.pass?'<span style="color:#2F6B37;font-weight:600">pass</span>':'<span style="color:#8E2A2A;font-weight:600">below</span>'}</td>
     <td><input data-r="probes" data-i="${i}" data-f="note" value="${esc(p.note)}" aria-label="Probe ${i+1} note"></td>${delCell('probes',i,'probe')}</tr>`).join('');
   const R=probeRows(),m=mc(),mt=R.filter(p=>p.type==='Maintenance'&&p.pc!=null),gn=R.filter(p=>p.type==='Generalization'&&p.pc!=null);
   const dims={};gn.forEach(p=>{const d=p.dim||'Other';if(!dims[d])dims[d]={n:0,pass:0};dims[d].n++;if(p.pass)dims[d].pass++;});
@@ -1305,36 +1371,53 @@ function renderGraph(){
   const win=T.slice(-m.n),atCrit=win.length>=m.n&&win.every(r=>r.pi>=m.pct),insts=new Set(win.map(r=>r.inst).filter(Boolean));
   const firstOk=!S.chk.mc_first||ta||win.every(r=>r.firstInd);
   const rules=[];let state='mid';
+  $('#saPlot').classList.toggle('sa-empty',!scored.length);   /* v23.21 (review F207) an empty graph prints smaller */
   if(!scored.length){v.innerHTML='<div class="verdict v-mid"><b>No sessions scored yet.</b> Enter the baseline probes as phase B and the teaching sessions as phase T; the graph and the rules read the '+(ta?'task-analysis':'trial')+' grid.</div>';M.innerHTML='';RU.innerHTML='';draw(R,m);return;}
   if(bm!=null&&bm>=m.pct&&!T.length){rules.push(['no','Baseline mean '+pct(bm)+' is already at the criterion: the skill is in the repertoire under these conditions. Choose a harder target or move this one to maintenance.']);state='no';}
   if(atCrit&&insts.size>=m.inst&&firstOk){rules.push(['ok','Mastered: '+m.n+' consecutive teaching sessions at or above '+m.pct+'% with '+insts.size+' instructor'+(insts.size===1?'':'s')+' ('+[...insts].join(', ')+'). Move to the maintenance phase, thin the reinforcement schedule as written on the Setup page, and run the probes.']);state='ok';}
   else if(atCrit&&!firstOk){rules.push(['mid','The last '+m.n+' teaching sessions are at criterion but not every one began with an independent first trial, which the criterion requires. Continue until the first trials hold.']);}
   else if(atCrit){rules.push(['mid','The last '+m.n+' teaching sessions are at criterion with '+(insts.size?insts.size+' instructor'+(insts.size===1?'':'s'):'no instructor initials entered')+'; the criterion asks for '+m.inst+'. '+(insts.size?'A session run by a second instructor is needed before the skill is called mastered.':'Enter the initials in the instructor row.')]);}
   else if(T.length>=5){const l5=T.slice(-5),gain=l5[4].pi-l5[0].pi,any=l5.some(r=>r.pi>=m.pct);
-    if(!any&&gain<10){rules.push(['no','No change over the last 5 teaching sessions ('+l5.map(r=>pct(r.pi)).join(', ')+'): change the procedure rather than continue it. Options in order: check the reinforcer (Form PA-1), change the prompt level or delay, change the error correction, cut the trials per session or the target set. Write the change on the session note.']);state='no';}
-    else rules.push(['mid','Progressing: the last 5 teaching sessions ran '+l5.map(r=>pct(r.pi)).join(', ')+'. Continue; '+(m.n-win.filter(r=>r.pi>=m.pct).length>0?'the criterion needs '+m.n+' consecutive sessions at '+m.pct+'%.':'the criterion is within reach.')]);}
+    /* v23.21 (review F200) under most-to-least prompting or graduated guidance, or five sessions at a 0-s delay, independent
+       responding stays near 0 by design until the prompt is faded or delayed: the rule reads the prompt level or the delay in
+       the Delay/level row, not the percent independent */
+    const L5=l5.map(r=>lvlOf(r.dl)),D5=L5.map(x=>x&&x.delay!=null?x.delay:null),V5=l5.map((r,k)=>L5[k]&&L5[k].lv!=null?L5[k].lv:r.lvm);
+    const hasDl=D5.every(v=>v!=null),hasLv=V5.every(v=>v!=null),at0=hasDl&&D5.every(v=>v===0),fadeM=['mtl','gg'].includes(S.meta.hier)||at0,td=S.meta.hier==='ctd'||S.meta.hier==='ptd';
+    if(any||gain>=10)rules.push(['mid','Progressing: the last 5 teaching sessions ran '+l5.map(r=>pct(r.pi)).join(', ')+'. Continue; '+(m.n-win.filter(r=>r.pi>=m.pct).length>0?'the criterion needs '+m.n+' consecutive sessions at '+m.pct+'%.':'the criterion is within reach.')]);
+    else if(!fadeM){rules.push(['no','No change over the last 5 teaching sessions ('+l5.map(r=>pct(r.pi)).join(', ')+'): change the procedure rather than continue it. Options in order: check the reinforcer (Form PA-1), change the prompt level or delay, change the error correction, cut the trials per session or the target set. Write the change on the session note.']);state='no';}
+    else if(hasLv&&V5[4]<V5[0]-0.25)rules.push(['mid','Fading: the prompt level moved from '+lvCode(V5[0])+' to '+lvCode(V5[4])+' over the last 5 teaching sessions ('+pct(l5[4].pc)+' correct with prompts in the latest). Independent responses come once the prompt is faded: continue under the fading rule on the Setup page.']);
+    else if(hasDl&&!at0&&D5[4]>D5[0])rules.push(['mid','Fading: the delay rose from '+D5[0]+' s to '+D5[4]+' s over the last 5 teaching sessions: continue under the fading rule on the Setup page.']);
+    else if(at0&&td)rules.push(['mid','Time delay: the last 5 teaching sessions all ran at 0 s, where every trial is prompted by design, so percent independent cannot rise: move to the delay as the time-delay rule below says.']);
+    else if(hasLv||hasDl){rules.push(['no','No change in the prompt '+(hasLv?'level ('+V5.map(lvCode).join(', ')+')':'delay ('+D5.map(x=>x+' s').join(', ')+')')+' over the last 5 teaching sessions: the prompt is not being faded. Apply the fading rule on the Setup page, or change the procedure: check the reinforcer (Form PA-1), change the error correction, cut the trials per session or the target set.']);state='no';}
+    else rules.push(['mid',({mtl:'Most-to-least prompting',gg:'Graduated guidance'}[S.meta.hier]||'A 0-s delay')+': percent independent stays near 0 until the prompt is faded, so the no-change rule does not read it. Score the trials with the prompt codes, or write the prompt level (F, P, V) or the delay each session ran in the Delay/level row, and the rule reads the fading.']);}
   else if(T.length)rules.push(['mid',T.length+' teaching session'+(T.length===1?'':'s')+' so far: no decision until five.']);
   else rules.push(['mid','Baseline only ('+B.length+' probe'+(B.length===1?'':'s')+', mean '+pct(bm)+'). Begin teaching when two probes are in (working convention).']);
-  if(T.length>=3&&S.meta.hier==='ltm'){const l3=T.slice(-3),pcm=l3.reduce((a,r)=>a+(r.pc||0),0)/3;if(pcm<50){rules.push(['no','Errors: the last 3 teaching sessions average '+pct(pcm)+' correct even with prompts under least-to-most prompting. Consider most-to-least or a delayed prompt (Libby et al., 2008; Touchette & Howard, 1984).']);if(state!=='ok')state='no';}}
+  if(T.length>=3&&S.meta.hier==='ltm'){const l3=T.slice(-3),pcm=l3.reduce((a,r)=>a+(r.pc||0),0)/3;if(pcm<50){rules.push(['no','Errors: the last 3 teaching sessions average '+pct(pcm)+' correct even with prompts under least-to-most prompting. Consider most-to-least or a delayed prompt (Libby et al., 2008; Touchette & Howard, 1984).']);if(state!=='ok')state='no';}
+    /* v23.21 (review F201) the errors made at the lighter levels, from their own row: a trial coded at the level that worked hides them */
+    else{const e3=l3.filter(r=>r.eu!=null&&r.sc);if(e3.length===3){const eur=e3.reduce((a,r)=>a+r.eu/r.sc,0)/3*100;if(eur>=30){rules.push(['no','Errors before the prompt: in the last 3 teaching sessions '+pct(eur)+' of trials on average had an error at a lighter prompt level before the one that worked (least-to-most prompting). Consider most-to-least or a delayed prompt (Libby et al., 2008; Touchette & Howard, 1984).']);if(state!=='ok')state='no';}}}}
   /* v21.37: the time-delay rule reads the Delay row of the latest teaching session (working conventions after Wolery, Ault, & Doyle, 1992) */
-  if(!ta&&(S.meta.hier==='ctd'||S.meta.hier==='ptd')&&T.length){const ptd=S.meta.hier==='ptd',lt=T[T.length-1],d=num(lt.dl),err=lt.sc-lt.cor,ep=lt.sc?err/lt.sc*100:0;
+  if(!ta&&(S.meta.hier==='ctd'||S.meta.hier==='ptd')&&T.length){const ptd=S.meta.hier==='ptd',lt=T[T.length-1],d=num(lt.dl),err=lt.sc-lt.cor,ep=lt.sc?(lt.eu!=null&&d!==0?lt.eu:err)/lt.sc*100:0;   /* v23.21 (F201) at a delay, the errors before the prompt when counted */
     if(d==null)rules.push(['mid','Time delay: write the delay the latest teaching session ran (seconds) in the Delay row under the trial grid; the time-delay rule reads it.']);
     else if(d===0)rules.push(err===0&&lt.sc?['ok','Time delay: the latest session ran at 0 s with every trial correct; the next session runs at the '+(ptd?'first ':'')+'delay (working convention).']:['mid','Time delay: at 0 s with '+err+' error'+(err===1?'':'s')+': stay at 0 s until a session has every trial correct.']);
     else if(ep>20){rules.push(['no','Time delay: '+pct(ep)+' of trials in error at the '+d+'-s delay: return to 0 s for a session, then resume the delay (working convention).']);if(state!=='ok')state='no';}
     else if(ptd&&err===0&&lt.pc!=null&&lt.pc>=m.pct)rules.push(['ok','Time delay: at '+d+' s with no error and '+pct(lt.pc)+' correct: lengthen the delay by the next step.']);
     else rules.push(['mid','Time delay: at '+d+' s, '+pct(lt.pi)+' independent and '+pct(ep)+' in error: continue at this delay.']);}
   if(MT.length){const lm=MT[MT.length-1];if(lm.pi<m.pct){rules.push(['no','Maintenance session on '+(lm.date||'?')+' at '+pct(lm.pi)+', below the criterion: run booster teaching sessions and re-probe.']);if(state!=='ok')state='no';}else rules.push(['ok','Maintenance holding: latest maintenance session '+pct(lm.pi)+'.']);}
+  /* v23.21 (review I102) no second observer in the last 10 sessions */
+  {const s10=scored.slice(-10);if(s10.length>=10&&!s10.some(r=>r.ioa))rules.push(['mid','Agreement: none of the last 10 sessions had a second observer. Have one code a session independently (the Observer 2 row) so the data the decisions rest on can be checked (Cooper, Heron & Heward, 2020).']);}
   if(!ta){const f=T.filter(r=>r.first).slice(-5);if(f.length>=3){const fi=f.filter(r=>r.firstInd).length;rules.push([fi>=f.length-1?'ok':'mid','First-trial check: '+fi+' of the last '+f.length+' teaching sessions began with an independent response'+(fi<f.length-1?'; the first-trial record would say the skill is weaker than the full record does.':'.')]);}}
   M.innerHTML=`<div class="metric"><b>Baseline mean</b><div class="val">${pct(bm)}</div><div class="sub">${B.length} probe session${B.length===1?'':'s'}</div></div>
     <div class="metric"><b>Teaching mean</b><div class="val">${pct(tm)}</div><div class="sub">${T.length} session${T.length===1?'':'s'} · latest ${T.length?pct(T[T.length-1].pi):'—'}</div></div>
     <div class="metric"><b>At criterion</b><div class="val">${win.filter(r=>r.pi>=m.pct).length} of ${m.n}</div><div class="sub">last ${m.n} teaching sessions at ${m.pct}%</div></div>
     <div class="metric"><b>Instructors in the window</b><div class="val">${insts.size}</div><div class="sub">of ${m.inst} required${insts.size?' · '+[...insts].join(', '):''}</div></div>`;
-  v.innerHTML='<div class="verdict v-'+state+'"><b>'+scored.length+' session'+(scored.length===1?'':'s')+' scored ('+(ta?'task analysis':'trial grid')+').</b> '+esc(rules[0][1])+'</div>';
+  v.innerHTML='<div class="verdict v-'+state+'"><b>'+scored.length+' session'+(scored.length===1?'':'s')+' scored ('+(ta?'task analysis':'trial grid')+').</b> '+esc(rules[0][1])+'</div>'+objNoteHTML();   /* v23.21 (F198) */
   RU.innerHTML='<ul style="font-family:var(--sans);font-size:12.5px;margin:4px 0 4px 18px">'+rules.map(r=>'<li>'+esc(r[1])+'</li>').join('')+'</ul><p class="hint">The rules (criterion of '+m.pct+'% across '+m.n+' sessions and '+m.inst+' instructors; no change over 5 sessions with less than a 10-point gain; 50% correct under least-to-most; the time-delay rule under a delay procedure; booster when maintenance falls below criterion) are this form’s working conventions, set on the Setup page and in the Guide.</p>';
   draw(R,m);
 }
 function draw(R,m){
-  const W=900,H=350,L=56,Rg=20,T=22,B=70,n=Math.max(R.length,10);const X=i=>L+(i+0.5)*(W-L-Rg)/n,Y=v=>T+(H-T-B)*(1-v/100);
+  /* v23.21 (review I104) the prompt level or the delay, from the Delay/level row, as a dashed step line on a right-hand axis */
+  const LV=S.chk.showLevel?R.map(r=>lvlOf(r.dl)):[],useLv=LV.filter(x=>x&&x.lv!=null).length>=2,useDl=!useLv&&LV.filter(x=>x&&x.delay!=null).length>=2;
+  const W=900,H=350,L=56,Rg=useLv||useDl?46:20,T=22,B=70,n=Math.max(R.length,10);const X=i=>L+(i+0.5)*(W-L-Rg)/n,Y=v=>T+(H-T-B)*(1-v/100);
   let s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>';
   [0,25,50,75,100].forEach(p=>{s+='<line x1="'+L+'" y1="'+Y(p)+'" x2="'+(W-Rg)+'" y2="'+Y(p)+'" stroke="#e3e8ea"/><text x="'+(L-6)+'" y="'+(Y(p)+4)+'" font-size="11" text-anchor="end" fill="#5B6B6B" font-family="system-ui,sans-serif">'+p+'%</text>';});
   s+='<line x1="'+L+'" y1="'+Y(0)+'" x2="'+(W-Rg)+'" y2="'+Y(0)+'" stroke="#182e43"/><line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+Y(0)+'" stroke="#182e43"/>';
@@ -1345,6 +1428,10 @@ function draw(R,m){
   if(R.length&&R[0].ph)s+='<text x="'+(L+4)+'" y="'+(T+12)+'" font-size="11" fill="#182e43" font-family="system-ui,sans-serif">'+esc(PHNAME[R[0].ph]||R[0].ph)+'</text>';
   const path=(key,color,w)=>{let d='';R.forEach((r,i)=>{if(r[key]==null||(i>0&&R[i-1].ph!==r.ph&&r.ph)){if(r[key]!=null){d+='|M'+X(i).toFixed(1)+' '+Y(r[key]).toFixed(1)+' ';}else d+='|';return;}d+=(d&&!d.endsWith('|')?'L':'M')+X(i).toFixed(1)+' '+Y(r[key]).toFixed(1)+' ';});
     d.split('|').forEach(seg=>{if(seg.trim())s+='<path d="'+seg+'" fill="none" stroke="'+color+'" stroke-width="'+w+'"/>';});};
+  if(useLv||useDl){const prC=S.codes.filter(c=>c.kind==='pr'&&c.c),top=useLv?Math.max(1,prC.length):Math.max(1,...LV.map(x=>x&&x.delay!=null?x.delay:0)),Yl=v=>T+(H-T-B)*(1-v/top);
+    for(let k=0;k<=(useLv?top:Math.min(top,6));k++){const v=useLv?k:Math.round(top*k/Math.min(top,6)*10)/10;s+='<text x="'+(W-Rg+5)+'" y="'+(Yl(v)+4).toFixed(1)+'" font-size="10" fill="#9B4E15" font-family="system-ui,sans-serif">'+esc(useLv?(k===0?'I':prC[k-1].c):v+'s')+'</text>';}
+    let d='';R.forEach((r,i)=>{const x=LV[i],v=x?(useLv?x.lv:x.delay):null;if(v==null||(useLv&&x.lv==null)||(useDl&&x.delay==null)){d+='|';return;}d+=(d&&!d.endsWith('|')?'L':'M')+X(i).toFixed(1)+' '+Yl(v).toFixed(1)+' ';});
+    d.split('|').forEach(seg=>{if(seg.trim())s+='<path d="'+seg+'" fill="none" stroke="#9B4E15" stroke-width="1.6" stroke-dasharray="5 3"/>';});}
   if(S.chk.showCorrect)path('pc','#9aa9ad',1.5);
   path('pi','#2f5568',2);
   R.forEach((r,i)=>{if(r.pi!=null)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(r.pi).toFixed(1)+'" r="4.5" fill="'+(r.ph==='B'?'#fff':r.pi>=m.pct?'#2F6B37':'#2f5568')+'" stroke="#2f5568" stroke-width="1.5"/>';
@@ -1352,7 +1439,7 @@ function draw(R,m){
     if(S.chk.showFirst&&r.first)s+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(0)+26)+'" font-size="10" text-anchor="middle" fill="'+(r.firstInd?'#2F6B37':'#8E2A2A')+'" font-family="system-ui,sans-serif">'+esc(r.first)+'</text>';
     s+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(0)+14)+'" font-size="10" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+esc(String(r.date||r.i+1).slice(0,6))+'</text>';});
   s+='<text x="'+((L+W-Rg)/2)+'" y="'+(H-18)+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">Percent independent per session: filled green at or above the mastery line, hollow in baseline; dashed verticals mark phase changes</text>';
-  s+='<text x="'+((L+W-Rg)/2)+'" y="'+(H-5)+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+(S.chk.showCorrect?'Gray squares: percent correct with prompts included. ':'')+(S.chk.showFirst?'Code under each date: the first trial of that session.':'')+'</text>';
+  s+='<text x="'+((L+W-Rg)/2)+'" y="'+(H-5)+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+(S.chk.showCorrect?'Gray squares: percent correct with prompts included. ':'')+(S.chk.showFirst?'Code under each date: the first trial of that session. ':'')+(useLv?'Orange dashes: the prompt level (right axis, I = independent at the bottom).':useDl?'Orange dashes: the delay in seconds (right axis).':'')+'</text>';
   $('#saPlot').innerHTML=s;
 }
 
@@ -1366,10 +1453,10 @@ function sheetHead(title,ta){const m=S.meta;
 function sheetFoot(){return '<div class="bs-foot"><span>Score the response to the S<sup>D</sup> before any correction. Phase: B baseline/probe, T teaching, M maintenance.</span><span>Form SA-1 · '+esc(S.meta.program||'')+'</span></div>';}
 function renderTrialSheet(){const cols=Math.max(1,Math.min(20,Math.round(num(S.meta.bs_cols)??10))),n=ntr();
   let h=sheetHead('Trial Sheet')+'<table class="bs"><thead><tr><th class="l">Session</th>'+Array.from({length:cols},(_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr></thead><tbody>';
-  ['Date','Instructor','Phase'].concat(tdOn()?['Delay (s) or level']:[]).forEach(l=>{h+='<tr class="hd"><td class="l">'+l+'</td>'+'<td></td>'.repeat(cols)+'</tr>';});
+  ['Date','Instructor','Phase'].concat(tdOn()?['Delay (s) or level']:[],euOn()?['Errors before prompt']:[]).forEach(l=>{h+='<tr class="hd"><td class="l">'+l+'</td>'+'<td></td>'.repeat(cols)+'</tr>';});
   for(let k=0;k<n;k++)h+='<tr'+(k===0?' class="first"':'')+'><td class="l">Trial '+(k+1)+'</td>'+'<td></td>'.repeat(cols)+'</tr>';
   ['Independent','% independent','% correct'].forEach(l=>{h+='<tr class="sum"><td class="l">'+l+'</td>'+'<td></td>'.repeat(cols)+'</tr>';});
-  h+='<tr class="hd"><td class="l">Note</td>'+'<td></td>'.repeat(cols)+'</tr></tbody></table>'+sheetFoot();
+  h+='<tr class="hd"><td class="l">Note</td>'+'<td></td>'.repeat(cols)+'</tr><tr class="hd"><td class="l">Observer 2 (IOA)</td>'+'<td></td>'.repeat(cols)+'</tr></tbody></table>'+sheetFoot();   /* v23.21 (I102) */
   $('#trialSheet').innerHTML=h;}
 function renderTaSheet(){const cols=Math.max(1,Math.min(16,Math.round(num(S.meta.ta_cols)??8)));
   let h=sheetHead('Task-Analysis Sheet',true)+'<table class="bs"><thead><tr><th class="step">Step</th>'+Array.from({length:cols},(_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr></thead><tbody>';
@@ -1379,8 +1466,14 @@ function renderTaSheet(){const cols=Math.max(1,Math.min(16,Math.round(num(S.meta
   h+='</tbody></table>'+sheetFoot();
   $('#taSheet').innerHTML=h;}
 
+/* ---------------- v23.21 (review F198) the criterion against the GB-1 objective ---------------- */
+function objNoteHTML(){const m=S.meta,op=num(m.obj_pct),on=num(m.obj_n),c=mc();if(op==null&&on==null)return '';
+  const lo=(op!=null&&c.pct<op)||(on!=null&&c.n<on),hi=!lo&&((op!=null&&c.pct>op)||(on!=null&&c.n>on));
+  const obj=(op!=null?op+'%':'')+(on!=null?(op!=null?' across ':'')+on+' sessions':'');
+  return lo?'<div class="verdict v-no"><b>The Setup criterion ('+c.pct+'% across '+c.n+') is below the GB-1 objective ('+esc(obj)+').</b> The graph calls the skill mastered on the Setup criterion, but the case (Form GB-1&rsquo;s progress report) calls it mastered only when the objective is met too. Raise the Setup criterion to the objective, or write why on the Reason line.</div>'
+    :hi?'<div class="verdict v-mid"><b>The Setup criterion ('+c.pct+'% across '+c.n+') is above the GB-1 objective ('+esc(obj)+').</b> The objective may be met before this form calls the skill mastered; Form GB-1&rsquo;s progress report says Mastered only when this form&rsquo;s rule is met.</div>':'';}
 /* ---------------- setup verdict ---------------- */
-function renderSetup(){const m=S.meta,miss=[];
+function renderSetup(){const m=S.meta,miss=[];{const o=$('#objNote');if(o)o.innerHTML=objNoteHTML();}
   if(!m.skill)miss.push('the target skill');if(!m.def)miss.push('the definition of a correct response');if(!m.sd)miss.push('the S<sup>D</sup>');if(!m.format)miss.push('the teaching format');if(!m.hier&&m.format!=='ta')miss.push('the prompt hierarchy');if(!m.ec)miss.push('the error-correction procedure');if(!m.sr)miss.push('the reinforcement schedule');if(!m.mc_pct&&!m.mc_n)miss.push('the mastery criterion (defaults of 90% and 3 sessions apply)');
   const v=$('#setupVerdict');if(!m.skill&&!m.sd&&!m.format){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The blank sheets print what is entered here, so write the S<sup>D</sup> and the definition before the first session.</div>';return;}
   v.innerHTML=miss.length?'<div class="verdict v-mid"><b>Still missing:</b> '+miss.join(', ')+'. Two instructors cannot run the same trial until these are written.</div>':'<div class="verdict v-ok"><b>The program is written.</b> Criterion '+mc().pct+'% across '+mc().n+' sessions with '+mc().inst+' instructors; '+({dtt:'discrete-trial',net:'natural environment',ta:'task-analysis'}[m.format]||'')+' teaching'+(m.hier?' with '+({ltm:'least-to-most',mtl:'most-to-least',gg:'graduated guidance',ctd:'constant time delay',ptd:'progressive time delay'}[m.hier])+' prompting':'')+'. Print the blank sheet and start with two baseline probes.</div>';}
@@ -1391,11 +1484,13 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'){const r=el.dataset.r,i=+el.dataset.i,f=el.dataset.f;
     if(r==='tr'){S.sess[i].tr[+f]=el.value;return;}if(r==='lv'){S.tas[i].lv[+f]=el.value;return;}
     S[r][i][f]=el.value;
+    if(f==='io'&&(r==='sess'||r==='tas')){const a=(r==='sess'?sessStats(S.sess[i]):taStats(S.tas[i])).ioa,c=document.querySelector('td[data-ioa="'+r+':'+i+'"]');if(c)c.textContent=a?pct(a.pct):'';return;}   /* v23.21 (I102) */
     if(r==='codes'){renderCodes();}
     if(r==='probes'&&(f==='n'||f==='k')){renderPrSoon();}
     if(r==='steps'){renderTaSheetSoon();}
     return;}
   if(el.dataset.m!==undefined){const k=el.dataset.m;S.meta[k]=el.value;$$('[data-m="'+k+'"]').forEach(x=>{if(x!==el)x.value=el.value;});
+    if(SHARED.includes(k)){syncP();P.list.forEach(x=>{x.meta[k]=el.value;});}if(k==='program'||k==='skill')renderProgSel();if(k==='teachers')renderInits();   /* v23.21 (F202, F204) */
     if(k==='ntr'||k==='bs_cols'||k==='ta_cols'||k==='ta_cur'){renderSoon();}else if(/^(mc_|format|hier|delay|ch_type|skill|def|sd|lat|ec|sr|client|program|goal)/.test(k)){renderSheetsSoon();}}
 });
 document.addEventListener('change',e=>{const el=e.target;
@@ -1407,7 +1502,7 @@ document.addEventListener('change',e=>{const el=e.target;
     if(r==='sess'){renderTrSoon();}if(r==='tas'){renderTaSoon();}if(r==='codes'){renderCodes();renderGrids();}if(r==='probes'){renderPr();}
     return;}
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderGraph();}
-  if(el.dataset.m!==undefined){const k=el.dataset.m;S.meta[k]=el.value;$$('[data-m="'+k+'"]').forEach(x=>{if(x!==el)x.value=el.value;});renderSetup();renderGraph();if(k==='format'||k==='ch_type'||k==='hier'||k==='g_src'){renderSteps();renderTrialSheet();renderTaSheet();}}
+  if(el.dataset.m!==undefined){const k=el.dataset.m;S.meta[k]=el.value;$$('[data-m="'+k+'"]').forEach(x=>{if(x!==el)x.value=el.value;});if(SHARED.includes(k)){syncP();P.list.forEach(x=>{x.meta[k]=el.value;});}renderSetup();renderGraph();if(k==='hier')renderTr();if(k==='format'||k==='ch_type'||k==='hier'||k==='g_src'){renderSteps();renderTrialSheet();renderTaSheet();}}
 });
 let tA=0,tB=0,tC=0,tD=0,tE=0;
 function renderTrSoon(){clearTimeout(tA);tA=setTimeout(()=>{renderTr();renderGraph();},200);}
@@ -1419,10 +1514,19 @@ function renderTaSheetSoon(){clearTimeout(tE);tE=setTimeout(()=>{renderTaSheet()
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();bindMeta();renderCodes();renderTr();renderSteps();renderPr();renderTrialSheet();renderTaSheet();renderSetup();renderGraph();}
+function renderAll(){ensure();bindMeta();renderCodes();renderTr();renderSteps();renderPr();renderTrialSheet();renderTaSheet();renderSetup();renderGraph();renderProgSel();}
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
+/* v23.21 (review F207) the Guide prints only when asked; the tick is not saved */
+{const pg=$('#printGuide');if(pg){const on=()=>document.body.classList.toggle('sa-print-guide',pg.checked);pg.addEventListener('change',on);on();}}
+/* v23.21 (review F202) the programs */
+$('#progSel').addEventListener('change',e=>switchProg(+e.target.value));
+$('#progAdd').addEventListener('click',()=>{syncP();if(P.list.length>=8){nbhUI.toast('This file holds 8 programs, the most it keeps.',{kind:'warn'});return;}const np=blank();SHARED.forEach(k=>{if(S.meta[k])np.meta[k]=S.meta[k];});
+  P.list.push(np);P.cur=P.list.length-1;S=np;renderAll();setView('setup');nbhUI.toast('Program '+P.list.length+' added to this file. Write its skill and criterion on the Setup page; the student details are shared. Choose the program shown from the toolbar.',{kind:'ok'});});
+$('#progDel').addEventListener('click',async ()=>{syncP();if(P.list.length<2)return;const nm=progName(S,P.cur);
+  if(!(await nbhUI.confirm('Remove program '+(P.cur+1)+' ('+nm+') from this file?\nIts setup, sessions, steps and probes are deleted; the other programs stay.',{ok:'Remove',danger:true})))return;
+  P.list.splice(P.cur,1);P.cur=Math.max(0,P.cur-1);S=P.list[P.cur];renderAll();});
 function printSheet(cls){document.body.classList.add(cls);
   const st=document.createElement('style');st.id='saSheetPage';st.textContent='@media print{@page{size:letter landscape;margin:0.5in}}';document.head.appendChild(st);
   const off=()=>{document.body.classList.remove(cls);st.remove();window.removeEventListener('afterprint',off);};
@@ -1431,7 +1535,7 @@ $('#trialSheetBtn').addEventListener('click',()=>printSheet('sa-print-trial'));
 $('#taSheetBtn').addEventListener('click',()=>{if(!S.steps.some(s=>s.text)){alert('Write the steps of the task analysis first; the sheet lists them.');return;}printSheet('sa-print-ta');});
 $('#saveBtn').addEventListener('click',()=>{
   const nm=((S.meta.client||'student')+'_'+(S.meta.program||'program')).replace(/[^\w-]+/g,'_');const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'SA-1',rev:'2026-10',saved:new Date().toISOString(),S},null,1)],{type:'application/json'}));
+  syncP();a.href=URL.createObjectURL(new Blob([JSON.stringify(Object.assign({form:'SA-1',rev:'2026-10',saved:new Date().toISOString(),S},P.list.length>1?{programs:P.list,cur:P.cur}:{}),null,1)],{type:'application/json'}));   /* v23.21 (F202) */
   const t=new Date(),ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
   a.download=`SA-1_${nm}_${ymd}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
@@ -1441,27 +1545,34 @@ function fromFile(d){
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
   const strs=(a,n)=>Array.isArray(a)?a.slice(0,n).map(str):[];
   o.codes=Array.isArray(s.codes)?s.codes.slice(0,10).map(x=>({c:str(x&&x.c),label:str(x&&x.label),kind:['ind','pr','err'].includes(x&&x.kind)?x.kind:'pr'})):[];
-  o.sess=Array.isArray(s.sess)?s.sess.slice(0,60).map(x=>({date:str(x&&x.date),ph:['B','T','M'].includes(x&&x.ph)?x.ph:'',inst:str(x&&x.inst),tr:strs(x&&x.tr,50),...(x&&x.dl!=null?{dl:str(x.dl)}:{}),note:str(x&&x.note)})):[];   /* v21.78: the Delay row (v21.37) is kept, as a string */
+  o.sess=Array.isArray(s.sess)?s.sess.slice(0,60).map(x=>({date:str(x&&x.date),ph:['B','T','M'].includes(x&&x.ph)?x.ph:'',inst:str(x&&x.inst),tr:strs(x&&x.tr,50),...(x&&x.dl!=null?{dl:str(x.dl)}:{}),note:str(x&&x.note),...(x&&x.eu!=null?{eu:str(x.eu)}:{}),...(x&&x.io!=null?{io:str(x.io)}:{})})):[];   /* v21.78: the Delay row (v21.37) is kept, as a string; v23.21 (F201, I102) eu and io the same way */
   o.steps=Array.isArray(s.steps)?s.steps.slice(0,30).map(x=>({text:str(x&&x.text)})):[];
-  o.tas=Array.isArray(s.tas)?s.tas.slice(0,60).map(x=>({date:str(x&&x.date),ph:['B','T','M'].includes(x&&x.ph)?x.ph:'',inst:str(x&&x.inst),lv:strs(x&&x.lv,30),note:str(x&&x.note)})):[];
+  o.tas=Array.isArray(s.tas)?s.tas.slice(0,60).map(x=>({date:str(x&&x.date),ph:['B','T','M'].includes(x&&x.ph)?x.ph:'',inst:str(x&&x.inst),lv:strs(x&&x.lv,30),note:str(x&&x.note),...(x&&x.io!=null?{io:str(x.io)}:{})})):[];
   o.probes=Array.isArray(s.probes)?s.probes.slice(0,60).map(x=>({date:str(x&&x.date),type:str(x&&x.type),dim:str(x&&x.dim),desc:str(x&&x.desc),n:str(x&&x.n),k:str(x&&x.k),note:str(x&&x.note)})):[];
   return o;
 }
+/* v23.21 (review F202) every program of a file: programs[] when the file has several, else the one in S */
+function fromFileAll(d){const one=fromFile(d);if(!one)return null;if(!Array.isArray(d.programs)||d.programs.length<2)return {list:[one],cur:0};
+  const list=d.programs.slice(0,8).map(x=>fromFile({form:'SA-1',S:x})).filter(Boolean);if(!list.length)return {list:[one],cur:0};
+  return {list,cur:Math.max(0,Math.min(list.length-1,Math.round(+d.cur||0)))};}
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{let d=null;try{d=JSON.parse(r.result);}catch(err){d=null;}
     const other=d&&typeof d==='object'&&typeof d.form==='string'&&d.form!=='SA-1'?d.form:'';
-    const next=other?null:fromFile(d);
+    const next=other?null:fromFileAll(d);
     if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved SA-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form SA-1. Nothing was changed.':'That file could not be read as a saved SA-1 form. Nothing was changed.');return;}
-    const prev=S;S=next;try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved SA-1 form. Nothing was changed.');}};
+    const prev=S,prevP=P;P=next;S=P.list[P.cur];try{renderAll();}catch(err){P=prevP;S=prev;renderAll();alert('That file could not be read as a saved SA-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const out=[['Sheet','#','Date','Phase or type','Instructor or dimension','Condition','Codes','Scored','Independent','% independent','% correct','First trial','Note']];
-  S.sess.forEach((s,i)=>{const x=sessStats(s);out.push(['Trials',i+1,s.date,s.ph,s.inst,'',s.tr.slice(0,ntr()).join(' '),x.sc,x.ind,x.pi==null?'':x.pi.toFixed(1),x.pc==null?'':x.pc.toFixed(1),x.first,s.note]);});
-  S.tas.forEach((s,i)=>{const x=taStats(s);out.push(['Task analysis',i+1,s.date,s.ph,s.inst,'',S.steps.map((st,k)=>s.lv[k]||'').join(' '),x.sc,x.ind,x.pi==null?'':x.pi.toFixed(1),x.pc==null?'':x.pc.toFixed(1),'',s.note]);});
-  probeRows().forEach((p,i)=>{out.push(['Probe',i+1,p.date,p.type,p.dim,p.desc,'',p.n,p.k,p.pc==null?'':p.pc.toFixed(1),'',p.pass==null?'':p.pass?'pass':'below',p.note]);});
+  /* v23.21 (review F202, F201, I102) every program, its name in the last column; the errors before the prompt, the second
+     observer's codes and the agreement after the note */
+  const out=[['Sheet','#','Date','Phase or type','Instructor or dimension','Condition','Codes','Scored','Independent','% independent','% correct','First trial','Note','Errors before the prompt','Observer 2 codes','Agreement %','Program']];
+  eachProg((x0,pi)=>{const pn=progName(S,pi),ia=a=>a?a.pct.toFixed(1):'';
+  S.sess.forEach((s,i)=>{const x=sessStats(s);out.push(['Trials',i+1,s.date,s.ph,s.inst,'',s.tr.slice(0,ntr()).join(' '),x.sc,x.ind,x.pi==null?'':x.pi.toFixed(1),x.pc==null?'':x.pc.toFixed(1),x.first,s.note,s.eu||'',s.io||'',ia(x.ioa),pn]);});
+  S.tas.forEach((s,i)=>{const x=taStats(s);out.push(['Task analysis',i+1,s.date,s.ph,s.inst,'',S.steps.map((st,k)=>s.lv[k]||'').join(' '),x.sc,x.ind,x.pi==null?'':x.pi.toFixed(1),x.pc==null?'':x.pc.toFixed(1),'',s.note,'',s.io||'',ia(x.ioa),pn]);});
+  probeRows().forEach((p,i)=>{out.push(['Probe',i+1,p.date,p.type,p.dim,p.desc,'',p.n,p.k,p.pc==null?'':p.pc.toFixed(1),'',p.pass==null?'':p.pass?'pass':p.bad?'check':'below',p.note,'','','',pn]);});});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='SA-1_'+(S.meta.program||'program').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost'+(P.list.length>1?', in all '+P.list.length+' programs':'')+'.',{ok:'Clear all',danger:true})){S=blank();P={list:[S],cur:0};renderAll();setView('setup');}});
 
 /* ---------------- simulation ---------------- */
 async function loadSim(){
@@ -1470,13 +1581,13 @@ async function loadSim(){
     return !(w%6)||(m===0&&(d<=2||(w===1&&n===3)))||(m===1&&w===1&&n===3)||(m===4&&w===1&&last)||(m===5&&d===19)||(m===6&&d===4)||(m===8&&w===1&&n===1)||(m===10&&(d===11||(w===4&&n===4)||(w===5&&d>=23&&d<=29)))||(m===11&&d>=24);};
   const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
   const D=n=>fmt(step(n,-1)),Y=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
-  S=blank();
+  S=blank();P={list:[S],cur:0};
   S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',program:'Break request (FCT), Program 2',goal:'GB-1 goal 3: asks for a break with the card on 90% of opportunities across 3 sessions and 2 adults',
     plan:'BIP dated '+Y(28)+' (Form TD-1): replacement skill 1, the break card replaces leaving the area',setting:'Resource room table; general education classroom from the probes on',teachers:'J. Ellis (JE); Ms. R., classroom teacher (MR); paraeducator (KP) for probes',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(27),start:Y(26),review:Y(0),
     skill:'Hands the break card to the adult when a non-preferred task is presented',def:'Within 5 s of the task being placed and the instruction given, picks up the card and places it in the adult’s hand or on the adult’s side of the table. Reaching for the card without releasing it, pushing the task away, or no response within 5 s is scored as an error.',
     sd:'The adult places the task on the desk, with the break card at the top right corner, and says “Time to work.”',lat:'within 5 s of the instruction',materials:'Break card (laminated, 3 by 5 in., red border); three non-preferred tasks (cutting, tracing, sorting); timer',prereq:'Attends to the adult at the table; tolerates the task on the table for 10 s; picks up and releases a card on request (probed '+Y(27)+')',
     mc_pct:'90',mc_n:'3',mc_inst:'2',mc_sets:'2',mc_why:'A communication skill the plan depends on: 90% across 3 sessions with both adults, then probed with the paraeducator',
-    format:'dtt',ch_type:'forward',ntr:'10',hier:'mtl',delay:'0 for sessions 1 to 3 of teaching, then 2 s',iti:'3 to 5 s',
+    format:'dtt',ch_type:'forward',ntr:'10',hier:'mtl',delay:'0 for teaching sessions 1 and 2, then 2 s',iti:'3 to 5 s',
     fade:'Most-to-least: full physical, partial physical, verbal model, then independent. Drop one level after a session at or above 80% correct at the current level; go back one level after two sessions under 50% (working conventions). From the verbal level on, wait 2 s before the prompt.',
     probe_rule:'No prompts, no error correction; the task stays for 10 s and is then removed; praise for sitting only; 10 trials',
     ec:'Remove the materials, re-present the Sᴰ, prompt the correct response, then move on',ec_note:'The prompt is at the level last used; the corrected trial keeps its original code; a 30-s break follows the prompted hand-over',
@@ -1484,15 +1595,19 @@ async function loadSim(){
     sr_prompt:'Praise and a 30-s break, so the independent hand-over pays more than the prompted one',reinforcer:'Escape from the task, the function identified on Form FS-1; a short break is the reinforcer the behavior already earned',mix:'Two mastered tacts (“cup”, “ball”) interspersed each session as easy trials',
     gen_plan:'Two instructors from teaching session 4 (JN and MR alternate); three task sets rotated; the card moved to the student’s desk pocket after mastery; probes with the paraeducator in the classroom, in the afternoon, and with a new worksheet (Stokes & Baer, 1977: sufficient exemplars and common stimuli)',
     bs_cols:'10',ta_cols:'8',ta_cur:'',g_src:'',
-    decision:Y(2)+': mastered (sessions 9 to 11 at 90, 90 and 100% with JN and MR). Moved to maintenance; schedule thinned as written; probes begun.',change:'2-s delay added before the verbal prompt from teaching session 7 (the note on session 9 is the first session fully at the delayed level)',next:'GB-1 goal 3, objective 2: the card used in the classroom during independent work with Ms. R., then the paraeducator',
+    decision:Y(2)+': mastered (sessions 9 to 11 at 90, 90 and 100% with JN and MR). Moved to maintenance; schedule thinned as written; probes begun.',change:'2-s delay added before the prompt from teaching session 3 (session 5 on the sheet); the verbal model from teaching session 4',next:'GB-1 goal 3, objective 2: the card used in the classroom during independent work with Ms. R., then the paraeducator',
     mt_sched:'1 week, 2 weeks, 1 month after mastery, then monthly (working convention)',gen_dims:'People: paraeducator (KP), parent. Settings: classroom desk, cafeteria table. Materials: new worksheets, the iPad task. Time: afternoon block.',
     pr_fail:'Teach in the probed condition with the same procedure for up to 3 sessions; add the condition to the training rotation; re-probe a week after it reaches criterion',closed:''};
-  S.chk={mc_first:false,showCorrect:true,showFirst:true};
-  const tr=['––––––––––','–––I––––––','FFIFPFPIFP','PIPFIPPIPP','PIIPVIIPIV','IVIIPIVIIV','IIVIIVIIIV','IIIVIIIVII','IIIIVIIIII','IIIIIIII–I','IIIIIIIIII','IIIII–IIII'];
+  S.chk={mc_first:false,showCorrect:true,showFirst:true,showLevel:true};
+  /* v23.21 (review F206) at a 0-s delay every trial is prompted (sessions 3 and 4), independent responses appear once the 2-s
+     delay starts (session 5), and the notes, the delay field and the change line say the same */
+  const tr=['––––––––––','–––I––––––','FFFFFFFFFF','PFPPPPFPPP','PIIPPIIPIP','IVIIPIVIIV','IIVIIVIIIV','IIIVIIIVII','IIIIVIIIII','IIIIIIII–I','IIIIIIIIII','IIIII–IIII'];
   const ph=['B','B','T','T','T','T','T','T','T','T','T','M'],inst=['JE','JE','JE','JE','JE','MR','JE','MR','JE','MR','JE','MR'];
-  const notes=['probe: card on the table, no prompts','probe','full physical from the start (most-to-least)','partial physical','partial physical; verbal model on the last trials','faded to verbal model; MR’s first session','verbal model with a 2-s delay','2-s delay','first session at criterion','at criterion with MR','mastered: 3 sessions at or above 90% with JN and MR','maintenance, 1 week after mastery; break shortened to 1 minute'];
-  const dls=['','','0','0','0','0','2','2','2','2','2','2'];   /* v21.37: the delay row, as the notes already describe it */
+  const notes=['probe: card on the table, no prompts','probe','full physical with the instruction (0-s delay, most-to-least)','partial physical with the instruction','partial physical after a 2-s delay; first independent hand-overs','faded to verbal model after the 2-s delay; MR’s first session','verbal model, 2-s delay','2-s delay','first session at criterion','at criterion with MR','mastered: 3 sessions at or above 90% with JN and MR','maintenance, 1 week after mastery; break shortened to 1 minute'];
+  const dls=['','','0','0','2','2','2','2','2','2','2','2'];   /* v21.37: the delay row, as the notes already describe it */
   S.sess=tr.map((t,i)=>({date:D(tr.length-1-i+2),ph:ph[i],inst:inst[i],tr:Array.from(t),dl:dls[i],note:notes[i]}));
+  /* v23.21 (review I102) the paraeducator coded two teaching sessions independently */
+  S.sess[6].io='IIVIIVIIIV';S.sess[9].io='IIIIIIIV–I';
   S.steps=['Turns on the water','Wets both hands','Pumps the soap once','Rubs hands together for 10 s (front, back, between fingers)','Rinses both hands','Turns off the water','Pulls one paper towel','Dries hands and drops the towel in the bin'].map(t=>({text:t}));
   const lv=['–I––I–––','PIFFIFPF','VIFFIFPF','IIPFIFPF','IIVFIFPF','IIIPIFPF','IIIVIVPF','IIIIIVPF'];
   const tph=['B','T','T','T','T','T','T','T'],tin=['JE','JE','MR','JE','MR','JE','MR','JE'];
@@ -1514,11 +1629,31 @@ renderAll();
    acquisition objective on Form GB-1 (or the paired replacement named on Form TB-1), and the reinforcer
    line from the ranked menu on Form PA-1; the picker puts a chosen objective or behavior in their place. */
 window.__nbhFactsIn=function(f){
-  const m=S.meta;let n=0;const acq=((f.goals&&f.goals.acq)||[])[0],b=(f.behaviors||[])[0];
-  if(acq){if(!m.skill){m.skill=acq.beh;n++;}if(!m.goal){m.goal='Form GB-1 acquisition objective: '+acq.text;n++;}if(!m.sd&&acq.cond){m.sd=acq.cond;n++;}}
-  else if(b&&b.rep&&!m.skill){m.skill=b.rep;n++;}
+  /* v23.21 (review F202) with several programs, the program shown takes the first GB-1 objective no other program has taken */
+  syncP();const nk=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(),others=P.list.filter(x=>x!==S).map(x=>nk(x.meta.skill)).filter(Boolean);
+  const m=S.meta;let n=0;const acq=((f.goals&&f.goals.acq)||[]).find(a=>a&&!others.includes(nk(a.beh)))||null,b=(f.behaviors||[])[0],rWas=String(m.reinforcer||'').trim();
+  if(acq){if(!m.skill){m.skill=acq.beh;n++;}if(!m.goal){m.goal='Form GB-1 acquisition objective: '+acq.text;n++;}if(!m.sd&&acq.cond){m.sd=acq.cond;n++;}
+    /* v23.21 (review F198) the objective's own numbers: its percentage and its count fill an empty Setup criterion and are
+       kept (obj_pct, obj_n), so the form says when the two differ and the case's mastered follows the objective */
+    const op=(String(acq.crit||'').match(/(\d+(?:\.\d+)?)\s*%/)||[])[1],on=(String(acq.n||'').match(/\d+/)||[])[0];
+    if(op!=null){m.obj_pct=op;if(!String(m.mc_pct||'').trim()){m.mc_pct=op;n++;}}
+    if(on!=null){m.obj_n=on;if(!String(m.mc_n||'').trim()){m.mc_n=on;n++;}}}
+  else if(b&&b.rep&&!m.skill&&!others.includes(nk(b.rep))){m.skill=b.rep;n++;}
+  /* v23.21 (review F203) the plan on Form TD-1, into empty lines only: the replacement skill names the plan line (and the skill
+     when no objective gave one); its reinforcer and schedules the reinforcement line; its rule for prompted responses the
+     prompted line; its prompt hierarchy (by name), fading rule and error correction when TD-1 sends them */
+  {const pl=f.plan&&typeof f.plan==='object'?f.plan:{},T0=v=>String(v==null?'':v).trim();
+    if(T0(pl.rep)){if(!m.plan){m.plan='BIP (Form TD-1): replacement skill: '+T0(pl.rep);n++;}if(!m.skill){m.skill=T0(pl.rep);n++;}}
+    const sch=Array.isArray(pl.sched)?pl.sched.filter(Boolean):[];if(!m.sr&&(T0(pl.reinf)||sch.length)){m.sr=[T0(pl.reinf),sch.join(', ')].filter(Boolean).join('; ')+' (Form TD-1)';n++;}
+    if(!m.sr_prompt&&T0(pl.prompted)){m.sr_prompt=T0(pl.prompted)+' (Form TD-1)';n++;}
+    if(!m.hier&&T0(pl.hier)){const t=T0(pl.hier).toLowerCase(),h=/least.?to.?most|least prompts/.test(t)?'ltm':/most.?to.?least/.test(t)?'mtl':/graduated guidance/.test(t)?'gg':/progressive (time )?delay/.test(t)?'ptd':/time delay|constant delay/.test(t)?'ctd':'';if(h){m.hier=h;n++;}}
+    if(!m.fade&&T0(pl.fade)){m.fade=T0(pl.fade)+' (Form TD-1)';n++;}
+    if(!m.ec&&T0(pl.ec)){const t=T0(pl.ec).toLowerCase(),o=[...document.querySelectorAll('[data-m="ec"] option')].map(x=>x.value).filter(Boolean),k=/multiple response|several|repetition/.test(t)?4:/re-?present.*prompt.*fade|prompt faded/.test(t)?3:/\bmodel/.test(t)?2:/remove the materials|single prompted|prompted correct/.test(t)?1:/error statement|\bno\b|try again/.test(t)?0:-1;
+      if(k>=0&&o[k]){m.ec=o[k];n++;}else if(!m.ec_note){m.ec_note=T0(pl.ec)+' (Form TD-1)';n++;}}}
   /* v22.79 (review F134): the menu by the shared rule (nbhCase.menuItems), so Form RA-1's verdicts count */
   if(!m.reinforcer&&(f.menu||[]).length){const ln=nbhCase.menuLine((nbhCase.menuItems?nbhCase.menuItems(f):f.menu),3);if(ln){m.reinforcer=ln+(f.reinf?' (ranked on Form PA-1, checked on RA-1)':' (ranked on Form PA-1)');n++;}}
+  /* v23.21 (review F203) the function from Form FS-1 heads a reinforcer line the case wrote (never one typed by hand) */
+  {const fl=f.fn&&String(f.fn.label||f.fn.key||'').trim();if(fl&&!rWas){m.reinforcer='The function on Form FS-1: '+fl+(m.reinforcer?'; '+m.reinforcer:'');if(!String(m.reinforcer).includes('ranked'))n++;}}
   if(n)renderAll();return {filled:n};
 };
 window.__nbhFactsPick=function(sel){
@@ -1536,7 +1671,10 @@ function isoOf(t){t=String(t||'').trim();let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1
   m=t.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);if(!m)return '';const now=new Date();let y=m[3]?(m[3].length===2?2000+(+m[3]):+m[3]):now.getFullYear();
   if(!m[3]&&new Date(y,+m[1]-1,+m[2])>new Date(now.getFullYear(),now.getMonth(),now.getDate()+7))y--;   /* a month/day without a year is the latest such date not in the future */
   return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}
-window.__nbhFactsOut=function(){
+/* v23.21 (review F202) every program; (F198) mastered for the case only when the GB-1 objective's numbers are met too, with
+   masteredRule (this form's rule), atObjective, the criterion's numbers and the objective in words */
+window.__nbhFactsOut=function(){const ps=eachProg(()=>progOut()).filter(Boolean);return ps.length?{skills:{programs:ps}}:null;};
+function progOut(){
   const M=S.meta||{},R=series(),m=mc(),scored=R.filter(r=>r.pi!=null);if(!(M.program||M.skill||scored.length))return null;
   const T=scored.filter(r=>r.ph==='T'),win=T.slice(-m.n),insts=new Set(win.map(r=>r.inst).filter(Boolean)),ta=srcIsTA();
   const mastered=win.length>=m.n&&win.every(r=>r.pi>=m.pct)&&insts.size>=m.inst&&(!S.chk.mc_first||ta||win.every(r=>r.firstInd));
@@ -1544,8 +1682,26 @@ window.__nbhFactsOut=function(){
   const p={name:String(M.program||M.skill||'').trim(),target:String(M.skill||'').trim(),criterion:m.pct+'% independent across '+m.n+' consecutive teaching sessions'+(m.inst>1?' with '+m.inst+' instructors':''),
     current:lastS?Math.round(lastS.pi):null,unit:ta?'% of steps independent':'% of trials independent',mastered:!!mastered,phase:lastS?(PHNAME[lastS.ph]||''):''};
   if(lastD)p.last=lastD;if(M.goal)p.goal=String(M.goal);
-  return {skills:{programs:[p]}};
-};
+  const op=num(M.obj_pct),on=num(M.obj_n);p.pct=m.pct;p.n=m.n;p.inst=m.inst;p.masteredRule=!!mastered;
+  if(op!=null||on!=null){const nn=on!=null?Math.max(1,Math.round(on)):m.n,pp=op!=null?op:m.pct,w=T.slice(-nn);p.atObjective=w.length>=nn&&w.every(r=>r.pi>=pp);p.mastered=!!mastered&&p.atObjective;
+    p.objective=(op!=null?op+'%':'')+(on!=null?(op!=null?' across ':'')+on+' sessions':'');}
+  return p;
+}
+/* v23.21 (review I105) what is due, for the workstation: per program, the next maintenance probe after mastery (from the
+   session that first completed the mastery window and the Probes page's schedule, default 1 week, 2 weeks, 1 month; a
+   maintenance probe dated within 3 days before a due date, or after it, counts for it) and the first review date */
+function mtDue(){const m=mc(),T=series().filter(r=>r.pi!=null&&r.ph==='T');let md=null;
+  for(let j=m.n-1;j<T.length;j++){const w=T.slice(j-m.n+1,j+1);if(w.every(r=>r.pi>=m.pct)&&new Set(w.map(r=>r.inst).filter(Boolean)).size>=m.inst&&isoOf(T[j].date)){md=isoOf(T[j].date);break;}}
+  if(!md||String(S.meta.closed||'').trim())return null;const base=new Date(md+'T12:00:00'),txt=String(S.meta.mt_sched||'').trim()||'1 week, 2 weeks, 1 month';
+  const offs=[];txt.replace(/(\d+)\s*(day|week|month)s?/gi,(x,k,u)=>{offs.push([+k,u.toLowerCase()]);return x;});if(!offs.length)return null;
+  const at=([k,u])=>{const d=new Date(base);if(u==='month')d.setMonth(d.getMonth()+k);else d.setDate(d.getDate()+k*(u==='week'?7:1));return d;};
+  const done=probeRows().filter(p=>p.type==='Maintenance'&&isoOf(p.date)).map(p=>new Date(isoOf(p.date)+'T12:00:00')).sort((a,b)=>a-b);
+  for(const o of offs){const d=at(o),k=done.findIndex(x=>x>=new Date(d.getTime()-3*864e5));if(k>=0){done.splice(0,k+1);continue;}return {d,label:o[0]+' '+o[1]+(o[0]===1?'':'s')};}
+  return null;}
+window.__nbhDue=function(){const out=[],md=d=>(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+  eachProg((x,i)=>{const nm=progName(S,i).slice(0,28),q=mtDue();if(q)out.push({what:'Maintenance probe, '+q.label+' after mastery: '+nm,date:md(q.d)});
+    const rv=String(S.meta.review||'').trim();if(/\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2}/.test(rv))out.push({what:'First review date: '+nm,date:rv});});
+  return out;};
 </script>
 
 <script>
