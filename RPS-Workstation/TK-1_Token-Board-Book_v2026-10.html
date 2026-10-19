@@ -5119,7 +5119,14 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;if(S.meta[k
    link block), so the shell's status, snapshots and autosave carry it */
 function syncState(){if(S.meta&&S.meta.lk)lkBoard();const t=$('#tkState');if(t)t.value=JSON.stringify(S);}
 function restoreState(v){let d=null;try{d=JSON.parse(v);}catch(e){d=null;}const next=d&&fromFile({form:'TK-1',S:d});if(next){S=next;renderAll();}}
-function renderAll(){ensure();if(MINE)NBHPIC.absorb(S.photos);bindMeta();renderTbls();renderOut();lkPaint();}
+/* v23.33 (as Form VS-1, review F289) a file's pictures that came from another device's My pictures join this device's only when
+   the BCBA says so (No on a shared device: they stay in this student's file); asked once for each picture */
+const PIC_ASKED=new Set();let picAsking=false;
+function picAbsorb(){if(!MINE||picAsking)return;const cand=(S.photos||[]).filter(p=>p&&typeof p.lib==='string'&&p.lib&&!PIC_ASKED.has(p.lib));if(!cand.length)return;picAsking=true;
+  Promise.resolve(NBHPIC.ready()).then(()=>NBHPIC.all()).then(()=>{const pend=cand.filter(p=>!NBHPIC.get(p.lib));cand.forEach(p=>PIC_ASKED.add(p.lib));if(!pend.length)return;
+    return nbhUI.confirm('This file carries '+(pend.length===1?'a picture':pend.length+' pictures')+' from another device\u2019s My pictures.\nAdd '+(pend.length===1?'it':'them')+' to this device\u2019s My pictures, for every student? On a shared device, choose No: '+(pend.length===1?'it stays':'they stay')+' in this student\u2019s file only.',{ok:'Add to this device',cancel:'No, this file only'}).then(y=>{if(y)NBHPIC.absorb(pend);});})
+  .catch(()=>{}).then(()=>{picAsking=false;});}
+function renderAll(){ensure();picAbsorb();bindMeta();renderTbls();renderOut();lkPaint();}
 
 /* ---------------- printing ---------------- */
 $('#printBtn').addEventListener('click',()=>{setView('preview');setTimeout(()=>{fitAll();window.print();},80);});

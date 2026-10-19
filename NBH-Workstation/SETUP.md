@@ -9903,6 +9903,16 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.33: TK-1 and TV-1 ask before a file's pictures join this device's My pictures, as VS-1 does
+
+- **My pictures on a shared device.** A file whose pictures came from another device's My pictures now asks on TK-1
+  and TV-1 before they join this device's, as VS-1 has done since v23.26. Before, they joined silently.
+  - No keeps them in the student's file only, which is the right answer on a shared device.
+  - Each picture is asked about once, however often the form redraws.
+  - A picture already on this device is not asked about.
+- SM-1 never added a file's pictures to My pictures, so it is unchanged.
+- qa/pic-ask-test.js (7 checks).
+
 ### v23.32: IA-1 takes from the case what it asked to have typed again: each target's urgency, the health record, the analysis's outcome, and the informants by choice (review Wave 3)
 
 - **Facts the case holds (F45).** Into IA-1's empty Setup fields:
