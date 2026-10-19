@@ -9903,6 +9903,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.21: SA-1 takes one mastery criterion from the objective, reads a faded prompt as fading, records errors before the prompt, and holds several programs in one file (review Wave 3)
+
+- **One mastery criterion (F198).** The GB-1 objective's percentage and sessions fill an empty Setup criterion.
+  - A Setup criterion that differs from the objective is flagged on the Setup page and the graph.
+- **The no-change rule (F200).** A most-to-least program whose prompts are fading as designed reads "Fading", not "change
+  the procedure". So does a time delay running at its planned steps. A least-to-most program keeps the percent rule.
+- **Errors before the prompt (F201).** A row records the trials with an error before the prompt, so the least-to-most
+  error rule and the time-delay step-back rule can fire.
+- **Several programs in one file (F202).** A second program can be added with the student's details, chosen from a
+  switcher, saved, and sent to the case with the first. A file with one program is saved as before.
+- **From Form TD-1 (F203).** The plan's prompt hierarchy, fading rule and error correction fill SA-1. TD-1 now sends them
+  with the plan.
+- **Smaller fixes.**
+  - Initials are matched however they are written (F204).
+  - More independent responses than trials is questioned (F205).
+  - The worked example's time delay starts at 0 s (F206).
+  - The ordinary print leaves out the blank sheets and the Guide, and "with the Guide" adds it back (F207).
+  - The masthead says October 2026.
+- **Improvements.**
+  - A second coder's agreement is shown when one coded the same sessions (I102).
+  - The prompt level or the delay is drawn on the graph (I104).
+  - The program's review date and, after mastery, the next maintenance probe reach the due list (I105).
+- qa/sa1-w3-test.js.
+
 ### v23.20: OB-1 observes up to three target behaviors on one record and times episodes of a duration behavior (review Wave 3)
 
 - **Several targets on one record (F74).** A student with two or three Form TB-1 targets can be observed on one record.
