@@ -2926,7 +2926,10 @@ function staticize(html){
 /* v21.96 the packet as a report. What it leaves out and gathers is chosen in Packet options and kept in this browser: a form's
    Guide stays out unless kept for that form; the references go to one list at the end (or stay with each form, or stay out);
    Form ABC-1's incident log prints compact; the empty boxes meant for handwriting stay out of a form that holds data. */
-const MP_GUIDE_FORMS=['DM-1','EA-1','EB-1','GB-1','IA-1','IC-1','MS-1','OB-1','PA-1','QS-1','RR-1','RA-1','TB-1','TD-1'];
+const MP_GUIDE_FORMS=['DM-1','EA-1','EB-1','GB-1','IA-1','IC-1','MS-1','OB-1','PA-1','QS-1','RR-1','RA-1','TB-1','TD-1',
+  /* v22.7x (I242) the forms whose Guide is their Guide view (.only-guide), left out of the packet now unless kept here */
+  'BC-1','CF-1','CN-1','CR-1','CT-1','DA-1','FS-1','GC-1','HD-1','IM-1','IN-1','MT-1','PD-1','PR-1','RM-1','SA-1','SI-1','SM-1','SR-1','ST-1','SV-1',
+  'TE-1','TI-1','TK-1','TV-1','VS-1'];
 function packetOpts(){let o={};try{o=JSON.parse(localStorage.getItem('nbh.packet')||'{}')||{};}catch(e){}
   return {refs:/^(end|form|none)$/.test(o.refs)?o.refs:'end',abc:o.abc==='full'?'full':'compact',blanks:!!o.blanks,order:o.order==='list'?'list':'case',guides:Object.assign({},o.guides||{})};}
 /* v22.39 (review F466) the packet in the case's order: consent, assessment, the FBA, the plan, then the data record (DD-1 and the
@@ -2973,8 +2976,10 @@ function packetShape(x,i,mo,bag){
      student, the page numbers and the FERPA line. Each is scoped to this section like the collected styles, which drops
      @page, so the packet's own page rule holds for every page. */
   root.querySelectorAll('style').forEach(s=>{try{s.textContent=scopeCSS(s.textContent,'.mp-'+i);}catch(e){}});
-  /* the Guide */
-  const guides=new Set();root.querySelectorAll('#guide,[data-pane="guide"]').forEach(e=>guides.add(e));
+  /* the Guide. v22.7x (review I242, found by the packet gate): a form's Guide view (.only-guide, what the form shows when
+     Guide is picked) is its Guide too: the Guide pages of 22 forms (Form IN-1's "Why Interview", Form CR-1's summary of the
+     statute, Form VS-1's research table) printed in every packet, with no way to leave them out */
+  const guides=new Set();root.querySelectorAll('#guide,[data-pane="guide"],.only-guide').forEach(e=>guides.add(e));
   root.querySelectorAll('.sheet,section.pane').forEach(sh=>{if(/^Guide\b/.test(titleOf(sh)))guides.add(sh);});
   const keepGuide=!!(mo.guides&&mo.guides[id]);
   guides.forEach(g=>{if(keepGuide){g.classList.remove('pr-skip');g.removeAttribute('hidden');}else drop(g);});
@@ -3195,6 +3200,13 @@ async function masterRun(chosen,opt){opt=opt||{};
     /* a card that must not split is laid out as one atomic box: under a named page Chromium 141 stretched Form TD-1's
        parent-signature card across two pages when its break-inside:avoid fell at a page end */
     .mp-sec .td85-card{display:inline-block;width:100%;box-sizing:border-box;vertical-align:top}   /* v22.09 every card, not only the parent's (review F476) */
+    /* v22.7x (review F476 again, found by the packet gate, I242): the sign-in cards are the items of a grid (two columns on
+       paper), and a grid item is laid out as a block whatever display it is given, so the rule above never reached them: a
+       card at a page end still stretched over two pages, its signature printed above the next person's name. Here the list
+       is a run of lines, two cards to a line, each an inline box that a page break cannot cut. */
+    .mp-sec #td85Block .td85-list{display:block!important}
+    .mp-sec #td85Block .td85-list>.td85-card{width:48.5%;margin:0 3% 8px 0}
+    .mp-sec #td85Block .td85-list>.td85-card:nth-child(2n){margin-right:0}
     .mp-sec .sigblock,.mp-sec .ic-sigs,.mp-sec .ic-signpart,.mp-sec .td85-card,.mp-sec .twoup,.mp-sec .figure,.mp-sec .dd-keep,.mp-sec .warn.verdict,.mp-sec .mp-refblk{break-inside:avoid;page-break-inside:avoid}
     .mp-band{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid #cfdad8;margin:0 0 10px;padding:0 0 4px;
       font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#54676f;break-after:avoid;page-break-after:avoid}
