@@ -5329,7 +5329,7 @@ window.__nbhFactsIn=function(f){
   const red=behs.filter(b=>!b.isRep);
   if(!S.meta.t_reduce&&red.length){S.meta.t_reduce=red.map(b=>b.label+(b.rep?' (replaced by '+b.rep+')':'')).join('; ');n++;}
   if(!S.meta.func&&f.fn){const v=nbhCase.optionFor(document.querySelector('[data-m="func"]'),f.fn.key||f.fn.label);if(v){S.meta.func=v;n++;}}
-  if(!S.meta.menu&&(f.menu||[]).length){S.meta.menu=nbhCase.menuLine(f.menu,5);n++;}
+  if(!S.meta.menu&&(f.menu||[]).length){const ln=nbhCase.menuLine((nbhCase.menuItems?nbhCase.menuItems(f):f.menu),5);if(ln){S.meta.menu=ln;n++;}}   /* v22.7x (review F134): by the shared rule, Form RA-1's verdicts included */
   if(n)renderAll();return {filled:n};
 };
 /* v21.74 out: the Record's days (the share of the points earned, the goal, whether it was met), for Form DD-1's week summary.

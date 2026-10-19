@@ -100,7 +100,7 @@ function exampleState(){const X=blank();X.n=3;X.sessMin=5;X.nSess=16;X.nCoSess=1
     response:'Places one block in the bin from the tray; counted when the block lands in the bin',
     materials:'Tray of 50 blocks, bin 20 cm to the right; for concurrent operants, three identical bins 40 cm apart',
     magnitude:'20 s access delivered within 2 s of the response; edible: one piece',control:'Same materials, responses produce nothing; assessor present and neutral',
-    mo:'No access to tested items for 3 h before the session; sessions at 9:30 daily; never within 30 min of snack',signal:'Colored placemat per condition; the item is shown once before the session starts',
+    mo:'No tablet or fruit chews for 3 h before the session; praise as usual through the day, none from the assessor in the 5 min before; sessions at 9:30 daily; never within 30 min of snack',signal:'Colored placemat per condition; the item is shown once before the session starts',
     d_so:true,d_co:true,d_pr:true,prcap:'20',pbdef:'Any forceful contact with an adult or the materials, or leaving the table for more than 10 s',stoprule:'End the session at the first instance of aggression; record the session as terminated',
     soDesign:'Multielement',coOpts:'3',planRatio:'5',coMode:'st',ioa:'Second observer on 33% of sessions across all three conditions; mean 96% on responses per session',
     recs:'Tablet access is the reinforcer of record for independent work. Fruit chew is a usable back-up. Praise alone did not function as a reinforcer.',schedule:'FR 5 with 20-s tablet access; break points of 15–17 support thinning to FR 8 over two weeks'};
@@ -453,7 +453,7 @@ function compose(D){
     const tf=Math.max(tc+.5,K.t+K.d-4);camTo(tf,tf+1.2,pad(uni([wrel(prRank),wrel(prFig)]),12));return K.d;};
   /* ---- at the table ---- */
   SC.rules=K=>{const t=K.t;panelShow(t,false);veil(t,K.t+K.d+.2,.88);
-    const tips=[['Deliver immediately','a fixed magnitude, no added praise'],['A no-consequence control','the same materials, the assessor neutral'],['Restrict access before','a few hours; record any access there was'],['Problem behavior every session','and the stop rule'],['A second observer','about one session in three, when the result goes into a plan']];
+    const tips=[['Deliver immediately','a fixed magnitude, no added praise'],['A no-consequence control','the same materials, the assessor neutral'],['Restrict access before','items a few hours, praise a few minutes'],['Problem behavior every session','and the stop rule'],['A second observer','about one session in three, when the result goes into a plan']];
     const c=card('smw-tips raw-tips','<h3>For every design</h3>'+tips.map((x,i)=>'<div class="tp" data-i="'+i+'"><b>'+(i+1)+'</b><p><strong>'+esc(x[0])+'</strong> '+esc(x[1])+'</p></div>').join(''),{x:180,y:28,w:920},t+.3,K.t+K.d+.2);
     const rs=[...c.el.querySelectorAll('.tp')].map(e=>sub(e,{o:.35,h:0}));const at=[['Deliver the stimulus',.1],['no-consequence control',.36],['Restrict access',.5],['Record problem behavior',.72],['second observer',.84]].map((a,i)=>Math.max(t+.9+i*.5,K.at(a[0],a[1])-.2));
     rs.forEach((fx,i)=>{fx.tr.move(at[i],at[i]+.35,{o:1,h:1});fx.tr.move((at[i+1]||K.t+K.d)-.05,(at[i+1]||K.t+K.d)+.3,{h:0});});return K.d+.3;};
