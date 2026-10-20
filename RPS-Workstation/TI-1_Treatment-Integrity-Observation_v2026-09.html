@@ -3634,6 +3634,24 @@ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.cl
 /* v22.94 (DT-1 review F402) the case's delay-tolerance protocol, heard last so the plan's own step list cannot pass it by */
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){try{tiDelay=(f&&f.delay)||null;tiDelayBtn();}catch(e){}return was?was.apply(this,arguments):null;};}
 </script>
+<script id="ti1-v2346">
+/* v23.46 (review I139) Form SR-1's schedule card as steps: "Add Form SR-1's schedule card" adds the card's rule and its "What
+   never happens" lines not yet on the list (f.schedule.items), named "Schedule (Form SR-1): ...", each with its component and
+   critical mark; added beside the steps already written, never in place of them, as DT-1's delay-training steps are. */
+(function(){let sched=null;const K=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
+ const list=()=>((sched&&Array.isArray(sched.items))?sched.items:[]).filter(x=>x&&String(x.d||'').trim()).map(x=>({d:'Schedule (Form SR-1): '+String(x.d).trim(),cmp:/^(con|ant|safe)$/.test(x.cmp)?x.cmp:'',crit:!!x.crit||x.cmp==='safe'}));
+ function add(){const L=list(),have=new Set(S.steps.map(st=>K(st.d)));let n=0;
+  L.forEach(x=>{if(have.has(K(x.d)))return;let i=S.steps.findIndex(st=>!String(st.d||'').trim());if(i<0){addBlankStep();i=S.steps.length-1;}
+   S.steps[i].d=x.d;S.steps[i].cmp=x.cmp;S.steps[i].crit=x.crit;have.add(K(x.d));n++;});return n;}
+ function btn(){let b=document.getElementById('addSched');const n=list().length;
+  if(!b){const at=document.getElementById('addDelay')||document.getElementById('addQuick')||document.getElementById('delStep');if(!at)return;
+   b=document.createElement('button');b.className='tool';b.id='addSched';b.type='button';b.textContent='Add Form SR-1’s schedule card';at.parentNode.insertBefore(b,at.nextSibling);
+   b.addEventListener('click',()=>{const k=add();renderAll();nbhUI.toast(k?k+' step'+(k===1?'':'s')+' from Form SR-1’s schedule card added, tagged by component.':'Every line of Form SR-1’s schedule card is already a step.',k?{kind:'ok'}:undefined);});}
+  b.style.display=n?'':'none';b.title=n?n+' step'+(n===1?'':'s')+' on Form SR-1’s schedule card':'';}
+ window.__tiSchedAdd=add;
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){try{sched=(f&&f.schedule)||null;btn();}catch(e){}return was?was.apply(this,arguments):null;};
+ btn();})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

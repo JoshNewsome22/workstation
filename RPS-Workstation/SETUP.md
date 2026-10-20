@@ -9903,6 +9903,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.46: Form SR-1's schedule card becomes Form TI-1's integrity steps (review I139, first part)
+
+- **The card as steps.** Form SR-1 sends the card's rule and its "What never happens" lines with the schedule, each tagged
+  with its component: follows the card's rule (a consequence step, critical); runs the step in force today and takes no step
+  the data have not called for (when the card has a step table); the behavior is not argued with, lectured about or given
+  the reinforcer by accident (consequence, critical); takes nothing already earned away; keeps the schedule as it is for the
+  day; and, on an escape or chained schedule, no one holds the student to the work (a safety step, always critical).
+- **Form TI-1** offers **Add Form SR-1's schedule card** when the case holds one: the lines not yet on the list are added
+  beside the steps already written, named "Schedule (Form SR-1): ...", with their components and critical marks, as Form
+  DT-1's delay-training steps are. Nothing is added unless asked for.
+- The card's home version for the family, in English and Spanish (the second part of I139), waits for the BCBA's
+  read-through.
+- qa/sr1-ti1-card-test.js (8 checks).
+
 ### v23.45: Form IC-1: the prior written notice, the parent's language, Method and Status apart, and facts from DM-1 and SI-1 (review F12, F14-F18)
 
 - **The prior written notice (F12).** Part 6 has **Prior written notice given** beside the safeguards date. Consent taken on
