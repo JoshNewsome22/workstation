@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.81: Form TB-1's candidate behaviors as cards on an iPad and a laptop
+
+- **Each candidate is a card.** On an iPad the sheet is scaled to fit the screen, which leaves each candidate row about
+  as much room as a printed page: on two lines its nine answers' labels wrapped onto three lines, the boxes of the first
+  line did not line up with the behavior box, and the delete button floated beside them as a box of its own. Each
+  candidate now has a card of its own: its number in a badge, the behavior box across the card with a plain remove
+  button beside it, then its answers in the table's order, four to a line (who reported it, the rate, the urgency,
+  social significance; then natural reinforcement, the cusp and the decision), each under its label on one line and
+  every box of a line along one foot.
+- **Narrower and wider.** In a window narrower than the sheet the answers go three to a line; where the sheet has more
+  room (900 px and more for the list), six to a line. A phone keeps the table, as before.
+
+Paper prints the table as before, and no label's wording changed. Nothing to set up. Tested: `qa/tb1-cards-test.js` (an
+iPad Pro landscape and upright, in the workstation, a narrow window, a wide sheet, paper and a phone).
+
 ### v23.80: The release check's four remarks: two columns on paper, and two things it now knows are meant; Send the targets waits for the case
 
 - **Form TB-1 on paper: the agreement pilot's dates print whole.** A date written in full (2026-10-05) was cut by a few

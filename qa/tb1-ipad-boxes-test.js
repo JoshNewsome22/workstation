@@ -3,8 +3,8 @@
    1. every box in the candidate list (the behavior, who reported it, the rate, the four answers) has a border and a white
       fill: it can be seen;
    2. the same in the agreement pilot (Quality check);
-   3. with type wider than Chromium's (as Safari's is), no label on the second line runs past its column, and no two
-      columns overlap;
+   3. with type wider than Chromium's (as Safari's is), no label runs past its answer's place, no two places overlap, and
+      the boxes of a line line up along their foot (v23.81: each candidate a card, its answers four to a line);
    4. on a laptop the boxes show too; on a phone the table is a table, as before;
    5. paper is as before: the boxes print without a border, as they did;
    6. no page errors. Simulated data only.  usage: node qa/tb1-ipad-boxes-test.js */
@@ -30,10 +30,12 @@ const boxes=sel=>{const out=[];document.querySelectorAll(sel+' tbody td input:no
   await p.evaluate(()=>{const b=[...document.querySelectorAll('[role=tab],#viewSeg button,.tabs button')].find(x=>/Select/.test(x.textContent));if(b)b.click();});await sleep(400);
   /* Safari's type is wider than Chromium's: set the labels in a wide face (DejaVu Sans) and see that every column still holds its own */
   await p.addStyleTag({content:'#candTbl tbody td::before{font-family:"DejaVu Sans",sans-serif!important}'});await sleep(300);
-  const lay=await p.evaluate(()=>{const tr=document.querySelector('#candTbl tbody tr');const tds=[...tr.children].slice(4,9);
-    const r=tds.map(td=>{const b=td.getBoundingClientRect();return {l:b.left,r:b.right,over:td.scrollWidth-td.clientWidth};});
-    return {r,overlap:r.slice(1).some((x,i)=>x.l<r[i].r-0.5),over:r.filter(x=>x.over>1).length,rowOver:tr.scrollWidth-tr.clientWidth};});
-  ok('3 with wider type (as Safari\'s), no second-line label runs past its column and no columns overlap',!lay.overlap&&!lay.over&&lay.rowOver<=1,lay);
+  const lay=await p.evaluate(()=>{const tr=document.querySelector('#candTbl tbody tr');const tds=[...tr.children].slice(1,9);
+    const r=tds.map(td=>{const b=td.getBoundingClientRect(),c=td.querySelector('input,select,textarea').getBoundingClientRect();return {l:b.left,r:b.right,t:b.top,b:b.bottom,foot:Math.round(c.bottom),over:td.scrollWidth-td.clientWidth};});
+    const hit=(x,y)=>x.l<y.r-0.5&&y.l<x.r-0.5&&x.t<y.b-0.5&&y.t<x.b-0.5,lines={};r.slice(1).forEach(x=>{const k=Math.round(x.t/8);(lines[k]=lines[k]||[]).push(x.foot);});
+    return {r,overlap:r.some((x,i)=>r.some((y,j)=>j>i&&hit(x,y))),over:r.filter(x=>x.over>1).length,rowOver:tr.scrollWidth-tr.clientWidth,
+      feet:Object.values(lines).filter(f=>Math.max(...f)-Math.min(...f)>1).length};});
+  ok('3 with wider type (as Safari\'s), no label runs past its answer\'s place, no two places overlap, and each line\'s boxes line up along their foot',!lay.overlap&&!lay.over&&lay.rowOver<=1&&!lay.feet,lay);
   /* in the workstation, as the BCBA uses it */
   const w=await ctx.newPage();w.on('pageerror',e=>errs.push('shell: '+e.message));await w.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(900);
   await w.evaluate(async()=>{openForm('TB-1');const t0=performance.now();while(!state.status['TB-1']&&performance.now()-t0<20000)await new Promise(r=>setTimeout(r,60));});await sleep(1500);

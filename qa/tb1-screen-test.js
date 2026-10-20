@@ -27,9 +27,12 @@ const fits=()=>{const c=document.createElement('canvas').getContext('2d'),out=[]
   ok('1 on an iPad Pro at Fit 150% every answer in the first three candidates fits its box (urgency, Yes and No, the decision, who reported it, the rate)',/150%/.test(z)&&a.length===21&&!cut.length,{z,cut});
   const g=await f.evaluate(()=>{const tr=document.querySelector('#candBody tr'),td=[...tr.children],r=e=>e.getBoundingClientRect(),beh=tr.querySelector('textarea');
     const lh=parseFloat(getComputedStyle(beh).lineHeight)||20;
-    return {two:r(td[4]).top>r(td[1]).bottom-2&&Math.abs(r(td[4]).top-r(td[8]).top)<40,lines:Math.round((beh.scrollHeight-parseFloat(getComputedStyle(beh).paddingTop)-parseFloat(getComputedStyle(beh).paddingBottom))/lh),
+    const top=i=>Math.round(r(td[i]).top);
+    return {two:top(2)>r(td[1]).bottom-2&&[3,4,5].every(i=>Math.abs(top(i)-top(2))<2)&&top(6)>r(td[2]).bottom-2&&[7,8].every(i=>Math.abs(top(i)-top(6))<2)&&r(td[3]).left>r(td[2]).left&&r(td[8]).left>r(td[7]).left,lines:Math.round((beh.scrollHeight-parseFloat(getComputedStyle(beh).paddingTop)-parseFloat(getComputedStyle(beh).paddingBottom))/lh),
       label:getComputedStyle(td[5],'::before').content,head:getComputedStyle(document.querySelector('#candTbl thead')).display,behW:Math.round(r(beh).width),wide:Math.round(r(document.getElementById('candTbl')).width)};});
-  ok('2 each candidate is two lines: the behavior across (one line here), then the urgency, the three questions and the decision, each under its label',g.two&&g.lines<=2&&g.label==='"Socially significant?"'&&g.head==='none'&&g.behW>g.wide*0.5,g);
+  /* v23.81 each candidate is a card: the behavior across, then its answers four to a line in the table's order (who reported it,
+     the rate, the urgency, social significance; then the other two questions and the decision) */
+  ok('2 each candidate is a card: the behavior across (one line here), then its answers four to a line in the table\'s order, each under its label',g.two&&g.lines<=2&&g.label==='"Socially significant?"'&&g.head==='none'&&g.behW>g.wide*0.5,g);
   /* the selected targets and the agreement pilot, with the simulation */
   await f.evaluate(()=>{nbhUI.confirm=async()=>true;document.getElementById('simBtn').click();});await sleep(1500);
   const sel=await f.evaluate(()=>{const c=document.createElement('canvas').getContext('2d'),out=[];document.querySelectorAll('#selTbl select').forEach(el=>{const cs=getComputedStyle(el);c.font=cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;

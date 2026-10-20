@@ -741,37 +741,39 @@ th.tb1-xh{width:34px}
 @media print{textarea{resize:none}}
 </style>
 <style id="tb1-v2334">
-/* v23.34 the candidate table on a screen wider than a phone: each candidate on two lines, each answer under its own label (the
-   header row says them once, over nine columns too narrow for their answers). Line 1: #, the behavior, who reported it, the
-   rate, delete. Line 2: the urgency, the three questions, the decision. Paper prints the table as before. */
+/* v23.34 the candidate table on a screen wider than a phone: each answer under its own label (the header row says them once,
+   over nine columns too narrow for their answers); since v23.81 each candidate a card. Paper prints the table as before. */
 @media screen and (min-width:601px){
+  /* v23.81 (the BCBA's iPad) each candidate is a card: on an iPad the sheet is scaled to fit, so a row had about 700 px of the
+     sheet's own width for nine answers, and their labels wrapped onto three lines. Line 1: the number in a badge, the behavior
+     across the card, remove. Then the six short answers and the decision, four to a line (three where the card is narrower
+     than 640 px, 900 px and more the six on one line). The card's width decides: a container query, since the sheet's zoom
+     hides it from a media query. */
+  .tb1-scroll:has(> #candTbl){container-type:inline-size;container-name:tb1cand}
   #candTbl{display:block;width:100%;border:0}
   #candTbl thead{display:none}
-  #candTbl tbody{display:block}
-  /* v23.69 the second line's columns are at least as wide as their labels' longest word (Safari's type is wider) */
-  #candTbl tbody tr{display:grid;grid-template-columns:2em minmax(min-content,4.6em) minmax(min-content,6em) minmax(min-content,6.8em) minmax(min-content,4.6em) minmax(4em,1fr) 11em minmax(min-content,5em) 34px;
-    column-gap:8px;row-gap:4px;align-items:start;padding:6px 6px 8px;border-bottom:1px solid var(--rule-2,#c9d3cf)}
-  #candTbl tbody tr:first-child{border-top:1px solid var(--rule-2,#c9d3cf)}
-  #candTbl tbody td{display:block;border:0!important;padding:0!important;min-width:0;background:none}
-  #candTbl tbody td:nth-child(1){grid-column:1;grid-row:1 / span 2;padding-top:18px!important;font-weight:600;text-align:left}
-  #candTbl tbody td:nth-child(2){grid-column:2 / 7;grid-row:1}
-  #candTbl tbody td:nth-child(3){grid-column:7;grid-row:1}
-  #candTbl tbody td:nth-child(4){grid-column:8;grid-row:1}
-  #candTbl tbody td:nth-child(10){grid-column:9;grid-row:1;padding-top:16px!important;text-align:center}
-  #candTbl tbody td:nth-child(5){grid-column:2;grid-row:2;text-align:left}
-  #candTbl tbody td:nth-child(6){grid-column:3;grid-row:2}
-  #candTbl tbody td:nth-child(7){grid-column:4;grid-row:2}
-  #candTbl tbody td:nth-child(8){grid-column:5;grid-row:2}
-  #candTbl tbody td:nth-child(9){grid-column:6 / 9;grid-row:2}
+  #candTbl tbody{display:flex;flex-direction:column;gap:10px}
+  #candTbl tbody tr{display:grid;grid-template-columns:28px repeat(3,minmax(0,1fr)) 44px;column-gap:12px;row-gap:10px;align-items:end;
+    padding:12px 10px 14px 12px;border:1px solid var(--rule-2,#c9d3cf);border-radius:8px;background:#fff}
+  #candTbl tbody td{display:flex;flex-direction:column;justify-content:flex-end;border:0!important;padding:0!important;min-width:0;
+    background:none!important;text-align:left}
+  #candTbl tbody td:nth-child(1){grid-column:1;grid-row:1;align-self:start;flex-direction:row;align-items:center;justify-content:center;
+    width:28px;height:28px;margin-top:16px;border-radius:50%;background:var(--nbh-mist,#eaf2f0)!important;color:var(--nbh-navy,#182e43);
+    font-family:var(--sans);font-size:13px;font-weight:700;text-align:center}
+  #candTbl tbody td:nth-child(2){grid-column:2 / 5;grid-row:1}
+  #candTbl tbody td:nth-child(10){grid-column:5;grid-row:1;align-self:start;margin-top:16px;align-items:center}
+  #candTbl tbody td:nth-child(3){grid-column:2;grid-row:2}
+  #candTbl tbody td:nth-child(4){grid-column:3;grid-row:2}
+  #candTbl tbody td:nth-child(5){grid-column:4;grid-row:2}
+  #candTbl tbody td:nth-child(6){grid-column:2;grid-row:3}
+  #candTbl tbody td:nth-child(7){grid-column:3;grid-row:3}
+  #candTbl tbody td:nth-child(8){grid-column:4;grid-row:3}
+  #candTbl tbody td:nth-child(9){grid-column:2 / 4;grid-row:4}
   #candTbl tbody td::before{display:block;font-family:var(--sans);font-size:10.5px;font-weight:600;line-height:1.25;color:var(--ink-soft,#46606b);
     margin:0 0 3px}
-  /* the second line's boxes line up along their foot, whatever their labels' length */
-  #candTbl tbody td:nth-child(n+5):nth-child(-n+9){align-self:end}
   #candTbl tbody td:nth-child(2)::before{content:'Behavior as reported (plain language)'}
   #candTbl tbody td:nth-child(3)::before{content:'Reported by'}
   #candTbl tbody td:nth-child(4)::before{content:'Est. rate (per day)'}
-  /* v23.35 the first line's two short labels take two lines' room, so their boxes line up */
-  #candTbl tbody td:nth-child(3)::before,#candTbl tbody td:nth-child(4)::before{min-height:2.5em;display:flex;align-items:flex-end}
   #candTbl tbody td:nth-child(5)::before{content:'Urgency'}
   #candTbl tbody td:nth-child(6)::before{content:'Socially significant?'}
   #candTbl tbody td:nth-child(7)::before{content:'Contacts natural reinforcement?'}
@@ -779,7 +781,38 @@ th.tb1-xh{width:34px}
   #candTbl tbody td:nth-child(9)::before{content:'Decision'}
   #candTbl tbody td input,#candTbl tbody td select,#candTbl tbody td textarea{width:100%!important;min-width:0!important;max-width:100%;box-sizing:border-box}
   /* the wording button sits in the box's corner: the words stop short of it */
-  #candTbl tbody td:nth-child(2) textarea{padding-right:44px!important;min-height:2.6em}
+  #candTbl tbody td:nth-child(2) textarea{padding:6px 44px 6px 8px!important;min-height:2.6em}
+  /* remove: a plain button the size of a finger beside the behavior, not a box of its own */
+  #candTbl .tb1-del{width:44px;height:44px;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;font-size:22px;line-height:1}
+  #candTbl .tb1-del:hover{background:#fbf2f2;border-color:#ecd3d3}
+  /* the width a sheet has on an iPad or a laptop (about 700 px): four to a line, in the table's order, the decision across two;
+     the first is wide enough for "Contacts natural reinforcement?" and for who reported it */
+  @container tb1cand (min-width:640px){
+    #candTbl tbody tr{grid-template-columns:28px minmax(0,1.5fr) repeat(3,minmax(0,1fr)) 44px}
+    #candTbl tbody td:nth-child(2){grid-column:2 / 6}
+    #candTbl tbody td:nth-child(10){grid-column:6}
+    #candTbl tbody td:nth-child(n+3):nth-child(-n+6){grid-row:2}
+    #candTbl tbody td:nth-child(3){grid-column:2}
+    #candTbl tbody td:nth-child(4){grid-column:3}
+    #candTbl tbody td:nth-child(5){grid-column:4}
+    #candTbl tbody td:nth-child(6){grid-column:5}
+    #candTbl tbody td:nth-child(7){grid-column:2;grid-row:3}
+    #candTbl tbody td:nth-child(8){grid-column:3;grid-row:3}
+    #candTbl tbody td:nth-child(9){grid-column:4 / 6;grid-row:3}
+  }
+  @container tb1cand (min-width:900px){
+    #candTbl tbody tr{grid-template-columns:28px repeat(6,minmax(0,1fr)) 44px}
+    #candTbl tbody td:nth-child(2){grid-column:2 / 8}
+    #candTbl tbody td:nth-child(10){grid-column:8}
+    #candTbl tbody td:nth-child(n+3):nth-child(-n+8){grid-row:2}
+    #candTbl tbody td:nth-child(3){grid-column:2}
+    #candTbl tbody td:nth-child(4){grid-column:3}
+    #candTbl tbody td:nth-child(5){grid-column:4}
+    #candTbl tbody td:nth-child(6){grid-column:5}
+    #candTbl tbody td:nth-child(7){grid-column:6}
+    #candTbl tbody td:nth-child(8){grid-column:7}
+    #candTbl tbody td:nth-child(9){grid-column:2 / 5;grid-row:3}
+  }
 
   /* the agreement pilot (Quality check), the same way: the target as a heading; then the date, the observers, the minutes and
      the index; then A, B, the agreement and the disagreements, each under its label */
