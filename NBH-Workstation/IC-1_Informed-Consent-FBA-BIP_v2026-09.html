@@ -1095,12 +1095,16 @@ ul.ic-conf li{margin:2px 0}
       <option value="sign">Signed on this form</option>
       <option value="reeval">Obtained through the district reevaluation process (district Consent for Reevaluation on file)</option>
       <option value="initial">Obtained through the district initial-evaluation process (district Consent for Evaluation on file)</option>
-      <option value="declined">Parent declined consent</option>
-      <option value="noresp">No response after reasonable efforts (see Consent record)</option>
-      <option value="revoked">Consent revoked</option>
+      <!-- v23.45 (review F18) kept for a record saved before this version: it opens with these moved to Status -->
+      <option value="declined" hidden disabled>Parent declined consent</option>
+      <option value="noresp" hidden disabled>No response after reasonable efforts (see Consent record)</option>
+      <option value="revoked" hidden disabled>Consent revoked</option>
     </select></div>
     <div class="f"><label for="cDate">Date consent obtained</label><input id="cDate" name="c.date" type="date"></div>
     <div class="f"><label for="cSafeg">Safeguards notice given</label><input id="cSafeg" name="c.safeg" type="date"></div>
+    <div class="f"><label for="cPwn">Prior written notice given</label><input id="cPwn" name="c.pwn" type="date"></div>
+    <div class="f ic-wide"><label for="cStatus">Status</label><select id="cStatus" name="c.status"><option value="">As decided in part 5</option><option value="declined">Parent declined consent</option><option value="noresp">No response after reasonable efforts (see Consent record)</option><option value="revoked">Consent revoked</option></select></div>
+    <div class="f" id="cStatusDateF" hidden><label for="cStatusDate">Date</label><input id="cStatusDate" name="c.statusdate" type="date"></div>
   </div>
   <div class="defs" id="districtBlock" hidden>
     <div class="drow"><div class="dlab">District form (name / number)</div><div class="dval"><textarea name="c.dform" placeholder="e.g., Consent for Reevaluation, PBSD form no." class="nbh-line" rows="1"></textarea></div></div>
@@ -1145,6 +1149,7 @@ ul.ic-conf li{margin:2px 0}
     <div class="f"><label for="sIntName">Interpreter (if used)</label><input id="sIntName" name="s.int.name"></div>
     <div class="f"><label for="sIntLang">Language</label><input id="sIntLang" name="s.int.lang"></div>
     <div class="f"><label for="sIntDate">Date</label><input id="sIntDate" name="s.int.date" type="date"></div>
+    <div class="f"><label for="cTranslLang">Translated consent form used (language)</label><input id="cTranslLang" name="c.transllang" placeholder="none"></div>
   </div>
   <div class="warn ic-lang noprint" id="icLangWarn2" role="status" hidden></div>   <!-- v23.09 (review F1) -->
   </div>
@@ -1436,10 +1441,15 @@ $$('[data-sigtype]').forEach(b=>b.addEventListener('click',()=>pads[b.dataset.si
 
 /* ---------- consent method ---------- */
 const METHOD={sign:'Signed on this form',reeval:'District reevaluation process',initial:'District initial-evaluation process',declined:'Declined',noresp:'No response after reasonable efforts',revoked:'Revoked'};
-function methodUI(){const m=val('c.method');const dist=(m==='reeval'||m==='initial');$('#districtBlock').hidden=!dist;
+/* v23.45 (review F18) a record saved before this version held its outcome in Method: it moves to Status, with its date */
+function icLegacy(){const m=val('c.method');if(!/^(declined|noresp|revoked)$/.test(m))return;
+ if(!val('c.status'))setv('c.status',m);if(m!=='noresp'&&!val('c.statusdate')&&val('c.date')){setv('c.statusdate',val('c.date'));setv('c.date','');}setv('c.method','');}
+function methodUI(){icLegacy();const m=val('c.method'),st=val('c.status');const dist=(m==='reeval'||m==='initial');$('#districtBlock').hidden=!dist;
+ const sf=$('#cStatusDateF');if(sf)sf.hidden=!st;const sl=$('label[for="cStatusDate"]');if(sl)sl.textContent=st==='declined'?'Date declined':st==='revoked'?'Date revoked':st==='noresp'?'Status as of':'Date';
  const n=$('#methodNote');
- n.textContent=m==='sign'?'Parent or guardian signature and date are required below.':dist?'Signature below is optional; the district form on file is the consent instrument. Confirm the FBA is listed on it.':m==='declined'?'Record the date and who received the decision; no assessment beyond the current IEP proceeds.':m==='noresp'?'Document each attempt on the Consent record sheet. Proceeding without consent is possible only for a reevaluation, after reasonable efforts and no response (34 CFR \u00a7300.300(c)(2)), and is a district decision; for an initial evaluation the district may pursue consent through mediation or due process (\u00a7300.300(a)(3)).':m==='revoked'?'Enter the revocation date; assessment stops from that date forward.':'';}
+ n.textContent=st==='declined'?'Record the date and who received the decision; no assessment beyond the current IEP proceeds.':st==='noresp'?'Document each attempt on the Consent record sheet. Proceeding without consent is possible only for a reevaluation, after reasonable efforts and no response (34 CFR \u00a7300.300(c)(2)), and is a district decision; for an initial evaluation the district may pursue consent through mediation or due process (\u00a7300.300(a)(3)).':st==='revoked'?'Enter the revocation date; assessment stops from that date forward.'+(dist?' The district form stays on record above.':''):m==='sign'?'Parent or guardian signature and date are required below.':dist?'Signature below is optional; the district form on file is the consent instrument. Confirm the FBA is listed on it.':'';}
 $('#cMethod').addEventListener('change',()=>{methodUI();refresh();});
+$('#cStatus').addEventListener('change',()=>{methodUI();refresh();});
 
 /* ---------- status ---------- */
 /* v21.16 audit (F7). The verdicts claimed more than the record showed: "Current" with no decision recorded; "The file
@@ -1477,20 +1487,29 @@ function decIssues(){const out=[],miss=(ks,ls)=>ks.map((k,i)=>val(k)?'':ls[i]).f
  const un=DECS.filter(([k])=>{const v=val(k+'.dec');return (v==='yes'||v==='no')&&(!val(k+'.init')||!val(k+'.date'));}).map(d=>d[1]);
  if(un.length)out.push('Initial and date each decision on the Specific procedures sheet: '+un.join(', ')+'.');
  return out;}
-function status(){const m=val('c.method'),dec=val('c.decision'),date=val('c.date');
+/* v23.45 (review F15) the consent is informed in the parent's language: a home language other than English (here or on Form DM-1),
+   or DM-1's interpreter need, asks for the interpreter or the translated form */
+function icLangIssue(){const lang=val('c.lang'),L=window.__icLang||{},home=String(L.home||'').trim(),en=t=>/^english\b/i.test(t);
+ const other=lang?!en(lang):(!!home&&!en(home)),need=L.interpreter===true;if(!other&&!need)return '';
+ if((val('s.int.name')&&val('s.int.lang'))||val('c.transllang'))return '';
+ const w=(lang||home).replace(/;.*$/,'').trim();
+ return (w&&!en(w)?'The home language is '+w+': ':'Form DM-1 says the family needs an interpreter: ')+'record the interpreter (name and language, under the signatures) or the language of the translated form used. Consent is informed in the parent\u2019s native language or other mode of communication (34 CFR \u00a7300.9(a)).';}
+function status(){icLegacy();const m=val('c.method'),stv=val('c.status'),sd=val('c.statusdate'),dec=val('c.decision');let date=val('c.date');
  const procs=PROCS.filter(p=>val('p.'+p));
  const dist=(m==='reeval'||m==='initial');
  const sig=!!val('s.par.sig'),sigDate=val('s.par.date');
  let state='',sub='',issues=[];
- if(!m)state='Not recorded';
- else if(m==='declined'){state='Declined';sub=date?'on '+fmt(date):'date missing';
-  if(!date)issues.push('Enter the date the parent declined consent (part 6).');
-  if(dec==='yes'||dec==='except')issues.push('Part 5 records consent, but the method in part 6 is \u201cParent declined consent\u201d; correct one of them.');}
- else if(m==='revoked'){state='Revoked';sub=date?'on '+fmt(date):'date missing';
-  if(!date)issues.push('Enter the date the revocation was received (part 6).');}
- else if(m==='noresp'){state='Pending';sub='no parent response';
+ if(!m&&!stv)state='Not recorded';
+ else if(stv==='declined'){const dd=sd||(dec==='no'?date:'');date=dd;state='Declined';sub=dd?'on '+fmt(dd):'date missing';
+  if(!dd)issues.push('Enter the date the parent declined consent (part 6).');
+  if(dec==='yes'||dec==='except')issues.push('Part 5 records consent, but the status in part 6 is \u201cParent declined consent\u201d; correct one of them.');}
+ else if(stv==='revoked'){const ob=date;date=sd;state='Revoked';sub=sd?'on '+fmt(sd):'date missing';
+  if(!sd)issues.push('Enter the date the revocation was received (part 6).');
+  else if(ob&&sd<ob)issues.push('The revocation is dated before the consent it revokes; check the dates in part 6.');}
+ else if(stv==='noresp'){state='Pending';sub='no parent response';
   if(!attempts())issues.push('Document each attempt to obtain consent on the Consent record sheet (34 CFR \u00a7300.300(d)(5)).');
-  if(dec)issues.push('Part 5 records a decision, but the method in part 6 is \u201cNo response after reasonable efforts\u201d; correct one of them.');}
+  if(dec)issues.push('Part 5 records a decision, but the status in part 6 is \u201cNo response after reasonable efforts\u201d; correct one of them.');}
+ else if(!m)state='Not recorded';
  else{state=!dec?'Decision not recorded':dec==='no'?'Declined':dec==='except'?'Current, with exceptions':'Current';
   sub=date?(dec==='no'?'on ':dec?'obtained ':'dated ')+fmt(date):'date missing';
   if(!date)issues.push(dec==='no'?'Enter the date of the parent\u2019s decision (part 6).':'Enter the date consent was obtained.');
@@ -1506,12 +1525,16 @@ function status(){const m=val('c.method'),dec=val('c.decision'),date=val('c.date
    decIssues().forEach(i=>issues.push(i));
    if(!val('a.resp'))issues.push('Student assent has not been recorded.');}
   if(!val('c.safeg'))issues.push('Enter the date the procedural-safeguards notice was given.');
+  /* v23.45 (review F12) consent is taken after the district's prior written notice (34 CFR 300.300(a)(1)(i), (c)(1)(i); 300.503) */
+  if(dec!=='no'){const pw=val('c.pwn');if(!pw)issues.push('Enter the date the district\u2019s prior written notice was given (34 CFR \u00a7300.503): consent is taken after it (\u00a7300.300(a)(1)(i)).');
+   else if(date&&pw>date)issues.push('The prior written notice is dated after the consent; consent is taken after the notice (34 CFR \u00a7300.300(a)(1)(i)). Check the dates in part 6.');}
+  {const li=icLangIssue();if(li)issues.push(li);}
   if(!val('s.st.name'))issues.push('Enter the staff member who obtained consent.');}
- if(m)whoIssues(m,date).forEach(i=>issues.push(i));
+ if(m||stv)whoIssues(m,date).forEach(i=>issues.push(i));
  const decs=DECS.map(([k,l])=>({l,v:val(k+'.dec')}));const decided=decs.filter(d=>d.v).length;
  const current=state==='Current'||state==='Current, with exceptions';
  const covered=current?procs.filter(p=>p!=='fa'||val('fa.dec')==='yes'):[];
- return {m,dec,date,procs,covered,current,state,sub,issues,decs,decided,dist,sig};}
+ return {m,stv,dec,date,procs,covered,current,state,sub,issues,decs,decided,dist,sig};}
 window.__ic1={status:()=>status(),val:k=>val(k)};   /* v22.37 for the case's consent record (ic1-case, below) */
 
 function refresh(){const s=status();
@@ -1519,11 +1542,11 @@ function refresh(){const s=status();
  /* v21.16 audit (F8): the date in part 6 is the date of whatever the method records, so its label, and the label of
     the date at the top of the other sheets, name it */
  const ev=s.state==='Declined'?'declined':s.state==='Revoked'?'revoked':'obtained';
- const dl=$('label[for="cDate"]');if(dl)dl.textContent='Date consent '+ev;
+ const dl=$('label[for="cDate"]');if(dl)dl.textContent='Date consent '+(s.dec==='no'&&!s.stv?'declined':'obtained');   /* v23.45 the outcome's date is under Status */
  $$('.hd-datelab').forEach(x=>x.textContent=ev==='obtained'?'Consent date':'Consent '+ev);
  /* consent sheet status box */
  const box=$('#statusBox');
- if(!s.m){box.innerHTML='<b>Consent status</b>Select how consent was obtained.';}
+ if(!s.m&&!s.stv){box.innerHTML='<b>Consent status</b>Select how consent was obtained.';}
  else{box.innerHTML='<b>Consent status: '+esc(s.state)+(s.sub?' ('+esc(s.sub)+')':'')+'</b>'+(s.issues.length?'<ul class="rules">'+s.issues.map(i=>'<li>'+esc(i)+'</li>').join('')+'</ul>':'The file is complete for this consent event. Record it on the Consent record sheet.');}
  /* record sheet stats */
  $('#stStatus').textContent=s.state||'\u2014';$('#stStatusSub').textContent=s.sub;
@@ -1533,7 +1556,7 @@ function refresh(){const s=status();
  $('#stProcSub').textContent=s.current?'of '+PROCS.length+' listed'+(s.procs.indexOf('fa')>=0&&s.covered.indexOf('fa')<0?'; experimental analysis awaits its own decision':''):(s.procs.length?s.procs.length+' proposed; ':'')+'none covered: '+none;
  $('#stDec').textContent=s.decided+' of '+DECS.length;$('#stDecSub').textContent=s.decs.filter(d=>d.v==='no').map(d=>d.l+': no').join('; ')||(s.decs.filter(d=>d.v==='yes').length?'all recorded decisions are yes or not proposed':'');
  const rv=$('#recVerdict'),more=s.issues.length?' '+s.issues.length+' item(s) still incomplete on the Consent sheet.':'';
- if(!s.m)rv.innerHTML='<b>Verdict</b>No consent event recorded. Assessment beyond the current IEP should not begin.';
+ if(!s.m&&!s.stv)rv.innerHTML='<b>Verdict</b>No consent event recorded. Assessment beyond the current IEP should not begin.';
  else if(s.state==='Decision not recorded')rv.innerHTML='<b>Verdict</b>Consent is not established: the parent\u2019s decision in part 5 is not recorded. Assessment beyond the current IEP should not begin.'+more;
  else if(s.state==='Declined'||s.state==='Revoked')rv.innerHTML='<b>Verdict</b>Consent is '+s.state.toLowerCase()+(s.date?' as of '+fmt(s.date):'')+'. Stop any assessment activity that is not part of the current IEP and notify the ESE contact.'+(s.state==='Revoked'?' Data collected under valid consent before this date remain in the record.':'')+more;
  else if(s.state==='Pending')rv.innerHTML='<b>Verdict</b>No response yet. '+attempts()+' contact attempt(s) documented. A decision to proceed with a reevaluation without consent belongs to the district after reasonable efforts are shown.'+more;
@@ -1551,7 +1574,7 @@ function refresh(){const s=status();
    consent read back without it was recorded on the September 2026 revision, before part 4's "What we keep private,
    and when we must share" and card E were added, and the Consent sheet says so, on screen and on paper. */
 var IC_REV='2026-10',icRecWas=false;
-function icRecorded(){const m=val('c.method');return !!m&&m!=='noresp'&&(!!val('c.decision')||m==='declined'||m==='revoked');}
+function icRecorded(){const m=val('c.method'),st=val('c.status');return (!!m||!!st)&&st!=='noresp'&&m!=='noresp'&&(!!val('c.decision')||st==='declined'||st==='revoked'||m==='declined'||m==='revoked');}
 ['input','change'].forEach(t=>document.addEventListener(t,e=>{if(!e.isTrusted||icRecWas||val('c.formrev'))return;if(icRecorded())setv('c.formrev',IC_REV);},true));
 function icRevNote(){const rec=icRecorded(),old=rec&&val('c.formrev')!==IC_REV,el=document.getElementById('icRevNote');icRecWas=rec;if(!el)return;el.hidden=!old;
  if(!old){el.innerHTML='';return;}
@@ -1634,7 +1657,7 @@ function simCase(key){
  const SY=SCH.syOf(R),S0=SCH.start(SY),B=n=>SCH.back(R,n),D=d=>ymd(d),F=d=>fmt(ymd(d)),t=SIM_DAYS[key];
  const Q=B(t[0]),W=Math.min(8,Math.floor((SCH.count(S0,Q)-1)/5)),due=SCH.fwd(R,30);
  /* a fifth grader is 10 on 1 September */
- const BASE={'c.client':'SIMULATED \u2013 Sample Student','c.sid':'SIM-000','c.dob':D(SCH.at(SY-10,2,14)),'c.setting':'Royal Palm School, Rm 12 (simulated)','c.grade':'5','c.parent':'Sample Parent (simulated)','c.phone':'(000) 000-0000 (simulated)','c.lang':'English','c.ese':'ESE contact (simulated)','c.iepdue':D(due),'c.reqdate':D(Q),'c.safeg':D(Q),
+ const BASE={'c.client':'SIMULATED \u2013 Sample Student','c.sid':'SIM-000','c.dob':D(SCH.at(SY-10,2,14)),'c.setting':'Royal Palm School, Rm 12 (simulated)','c.grade':'5','c.parent':'Sample Parent (simulated)','c.phone':'(000) 000-0000 (simulated)','c.lang':'English','c.ese':'ESE contact (simulated)','c.iepdue':D(due),'c.reqdate':D(Q),'c.safeg':D(Q),'c.pwn':D(Q),
   'c.behav':'Hitting and pushing other students during transitions; leaving the classroom without permission. (Simulated.)','c.why':'The current plan has not reduced the behavior over '+W+' weeks of daily data; the IEP team asked for an updated FBA. (Simulated.)','c.records':'Current IEP and BIP, daily behavior data (DD-1) since '+F(SCH.back(Q,5*W))+', discipline referrals, prior FBA ('+(SY-2)+').',
   'c.who':'Jordan Ellis, M.A., BCBA (simulated), with the classroom teacher and behavior resource staff','c.where':'Classroom, hallway transitions, cafeteria, PE; assessment room for structured sessions','c.dur':'4','c.share':'Written report and IEP team meeting within 30 school days; parent receives a copy of the FBA',
   's.st.name':'Jordan Ellis, M.A., BCBA (simulated)',
@@ -1646,28 +1669,28 @@ function simCase(key){
   'ed.allergy':'None reported; confirmed with nurse '+F(SCH.back(C,1)),'ed.items':'Goldfish crackers, fruit snacks, juice; no candy','ed.limits':'One small serving per session; not within 30 minutes of lunch','ed.dec':'yes','ed.init':'SP','ed.date':D(C),
   'up.how':'Text','up.freq':'Weekly','up.best':'After 4:00 pm','r.copy':1,'r.copydate':D(C),'r.copyhow':'Handed at meeting',
   'a.by':'Jordan Ellis, M.A., BCBA (simulated)','a.date':D(A),'a.mode':'Spoken language','a.support':'Visual schedule of the session; showed the materials','a.adult':'No','a.script':'"Mr. Ellis is going to watch in class and sometimes work with you in the small room. You can pick things you like. If you want to stop, you can say stop and we will stop." (Simulated.)','a.resp':'yes','a.how':'Said "okay," took the schedule card, walked to the room; no dissent behaviors','a.conf':1,'d.say':1,'d.move':1,'d.push':1,'d.escal':1,'d.othertxt':'Precursors from the BIP: growling, fists clenched','d.plan':'End the trial and offer a break; re-offer once after 2 minutes; end the session on a second dissent and note it; two sessions ended by dissent in one day = call parent. (Simulated.)','a.recheck':'Re-sought at the start of each structured session'});
- const req=[[Q,'Request for consent sent','Sent home; phone call','JN'],[Q,'Procedural safeguards given','Attached','JN']];
+ const req=[[Q,'Request for consent sent','Sent home; phone call','JN'],[Q,'Prior written notice given','District notice of the proposed evaluation, with the request','JN'],[Q,'Procedural safeguards given','Attached','JN']];
  if(key==='signed'){const C=B(t[1]),A=B(t[2]);
   return {desc:'Parent met with the BCBA, reviewed each procedure, consented to the full assessment including a functional analysis with a stop rule, and signed on this form.',
    set:Object.assign(BASE,PARENT(C,A),{'c.method':'sign','c.date':D(C),'s.par.name':'Sample Parent','s.par.rel':'Parent','s.par.date':D(C),'fa.beh':'Hitting and pushing; elopement','fa.stop':'Any hit that leaves a mark; 3 instances in one minute; student says stop','fa.plan':'Assessment room; BCBA plus 1 trained staff; up to 15 sessions over 2 weeks','fa.med':'Nurse notified '+F(A),'fa.dec':'yes','fa.init':'SP','fa.date':D(C),'rec.dec':'yes','rec.init':'SP','rec.date':D(C)}),procs:PROCSETS.full,sig:['par','st'],
-   log:[[Q,'Request for consent sent','Letter and this form sent home with the student; phone call to explain','JN'],[Q,'Procedural safeguards given','Notice attached to the request','JN'],[C,'Limits of confidentiality explained','Part 4 read with the parent','JN'],[C,'Consent signed on this form','Meeting in person; all procedures reviewed; FA stop rule agreed','JN'],[C,'Copy of signed form given to parent','Handed at meeting','JN'],[A,'Assent obtained from student','Visual schedule; student agreed','JN']]};}
+   log:[[Q,'Request for consent sent','Letter and this form sent home with the student; phone call to explain','JN'],[Q,'Prior written notice given','District notice of the proposed evaluation, with the request','JN'],[Q,'Procedural safeguards given','Notice attached to the request','JN'],[C,'Limits of confidentiality explained','Part 4 read with the parent','JN'],[C,'Consent signed on this form','Meeting in person; all procedures reviewed; FA stop rule agreed','JN'],[C,'Copy of signed form given to parent','Handed at meeting','JN'],[A,'Assent obtained from student','Visual schedule; student agreed','JN']]};}
  if(key==='reeval'){const M=B(t[1]),A=B(t[2]);
   return {desc:'Consent for the FBA was obtained on the district Consent for Reevaluation form at the three-year reevaluation meeting, where the parent also reviewed this form\'s procedure checklist and initialed the specific-procedure decisions; this form records that detail and the student\'s assent.',
    set:Object.assign(BASE,PARENT(M,A),{'c.method':'reeval','c.date':D(M),'c.dform':'Consent for Reevaluation (district ESE form) (simulated)','c.ddate':D(M),'c.dfba':1,'c.dfile':'ESE cumulative folder; uploaded to district ESE system '+F(SCH.fwd(M,1)),'c.dby':'ESE contact (simulated)','fa.dec':'na','rec.dec':'na','r.reviewnote':'End of the reevaluation'}),procs:PROCSETS.nofa,sig:['st'],
-   log:[[Q,'Request for consent sent','Reevaluation meeting scheduled; notice of evaluation procedures listed the FBA','ESE'],[Q,'Procedural safeguards given','With the meeting notice','ESE'],[M,'Consent obtained on district form (reevaluation)','Signed at the reevaluation meeting; FBA listed as a procedure','ESE'],[M,'Other','Form IC-1 procedure checklist and specific-procedure decisions reviewed with the parent at the meeting and initialed; no exceptions','JN'],[M,'Copy of signed form given to parent','Handed at meeting','JN'],[A,'Assent obtained from student','Visual schedule; student agreed','JN']]};}
+   log:[[Q,'Request for consent sent','Reevaluation meeting scheduled; notice of evaluation procedures listed the FBA','ESE'],[Q,'Prior written notice given','Notice of the proposed reevaluation, with the meeting notice','ESE'],[Q,'Procedural safeguards given','With the meeting notice','ESE'],[M,'Consent obtained on district form (reevaluation)','Signed at the reevaluation meeting; FBA listed as a procedure','ESE'],[M,'Other','Form IC-1 procedure checklist and specific-procedure decisions reviewed with the parent at the meeting and initialed; no exceptions','JN'],[M,'Copy of signed form given to parent','Handed at meeting','JN'],[A,'Assent obtained from student','Visual schedule; student agreed','JN']]};}
  if(key==='except'){const C=B(t[1]),A=B(t[2]);
   return {desc:'Parent consented to the assessment but declined the experimental analysis and any recording; the decision is recorded as consent with exceptions and the FA row is unchecked.',
    set:Object.assign(BASE,PARENT(C,A),{'c.method':'sign','c.date':D(C),'c.decision':'except','c.except':'No experimental analysis; no video or audio recording; call me before any session outside the classroom. (Simulated.)','s.par.name':'Sample Parent','s.par.rel':'Legal guardian','s.par.date':D(C),'fa.dec':'no','fa.init':'SP','fa.date':D(C),'rec.dec':'no','rec.init':'SP','rec.date':D(C)}),procs:PROCSETS.nofa,sig:['par','st'],
-   log:[req[0],req[1],[C,'Consent with exceptions recorded','In person; parent declined FA and recording; plan revised to descriptive assessment plus variable isolation','JN'],[C,'Copy of signed form given to parent','Handed at meeting','JN'],[A,'Assent obtained from student','Visual schedule; student agreed','JN']]};}
+   log:[req[0],req[1],req[2],[C,'Consent with exceptions recorded','In person; parent declined FA and recording; plan revised to descriptive assessment plus variable isolation','JN'],[C,'Copy of signed form given to parent','Handed at meeting','JN'],[A,'Assent obtained from student','Visual schedule; student agreed','JN']]};}
  if(key==='noresp'){const P=B(t[1]),H=B(t[2]),wk=Math.max(1,Math.round((H-Q)/6048e5));
   return {desc:'Three documented attempts over '+wk+' week'+(wk>1?'s':'')+' with no response; the record shows the reasonable-efforts log and the pending status. The decision to proceed is left to the district.',
-   set:Object.assign(BASE,{'c.method':'noresp'}),procs:PROCSETS.nofa,sig:[],
-   log:[[Q,'Request for consent sent','Form and notice sent home; certified letter','JN'],[Q,'Procedural safeguards given','With the request','JN']],
+   set:Object.assign(BASE,{'c.status':'noresp'}),procs:PROCSETS.nofa,sig:[],
+   log:[[Q,'Request for consent sent','Form and notice sent home; certified letter','JN'],[Q,'Prior written notice given','With the request','JN'],[Q,'Procedural safeguards given','With the request','JN']],
    att:[[Q,'Letter sent home','Sent home with student and by certified mail; no return','JN'],[P,'Phone call','Two numbers on file; voicemail left; no callback','JN'],[H,'Home visit','Attempted with the school social worker; no answer; notice left at door','SW']]};}
  const C=B(t[1]),A=B(t[2]),V=B(1),days=Math.round((V-C)/864e5);
  return {desc:'Consent was signed, assessment began, and the parent revoked consent in writing '+days+' days later; the status shows revoked, the date, and the instruction to stop.',
-  set:Object.assign(BASE,PARENT(C,A),{'c.method':'revoked','c.date':D(V),'s.par.name':'Sample Parent','s.par.rel':'Parent','s.par.date':D(C),'fa.dec':'yes','fa.beh':'Hitting and pushing','fa.stop':'Any hit that leaves a mark; 3 instances in one minute','fa.plan':'Assessment room; BCBA plus 1 staff','fa.med':'Nurse notified '+F(A),'fa.init':'SP','fa.date':D(C),'rec.dec':'no','rec.init':'SP','rec.date':D(C),'r.review':'','r.reviewnote':''}),procs:PROCSETS.full,sig:['par','st'],
-  log:[req[0],req[1],[C,'Consent signed on this form','In person; full assessment','JN'],[C,'Copy of signed form given to parent','Handed at meeting','JN'],[A,'Assent obtained from student','Visual schedule','JN'],[V,'Consent revoked in writing','Email from parent received 8:15 am; assessment stopped the same day; ESE contact notified; data collected before the revocation remain in the record; no further assessment','JN']]};}
+  set:Object.assign(BASE,PARENT(C,A),{'c.method':'sign','c.date':D(C),'c.status':'revoked','c.statusdate':D(V),'s.par.name':'Sample Parent','s.par.rel':'Parent','s.par.date':D(C),'fa.dec':'yes','fa.beh':'Hitting and pushing','fa.stop':'Any hit that leaves a mark; 3 instances in one minute','fa.plan':'Assessment room; BCBA plus 1 staff','fa.med':'Nurse notified '+F(A),'fa.init':'SP','fa.date':D(C),'rec.dec':'no','rec.init':'SP','rec.date':D(C),'r.review':'','r.reviewnote':''}),procs:PROCSETS.full,sig:['par','st'],
+  log:[req[0],req[1],req[2],[C,'Consent signed on this form','In person; full assessment','JN'],[C,'Copy of signed form given to parent','Handed at meeting','JN'],[A,'Assent obtained from student','Visual schedule','JN'],[V,'Consent revoked in writing','Email from parent received 8:15 am; assessment stopped the same day; ESE contact notified; data collected before the revocation remain in the record; no further assessment','JN']]};}
 /* v21.16 audit (F4): loading a case replaces every entry, so it asks first when the form holds any */
 const hasEntries=()=>$$('[name]').some(e=>e.type==='checkbox'||e.type==='radio'?e.checked:String(e.value).trim()!=='');
 async function loadSim(){if(hasEntries()&&!(await nbhUI.confirm('Load a simulated case?\nIt replaces every entry on every sheet; unsaved work will be lost.',{ok:'Replace'})))return;
@@ -1675,7 +1698,7 @@ async function loadSim(){if(hasEntries()&&!(await nbhUI.confirm('Load a simulate
  Object.keys(sc.set).forEach(k=>setv(k,sc.set[k]));setv('c.bcba',val('c.bcba')||'Jordan Ellis, M.A., BCBA (simulated)');
  sc.procs.forEach(p=>setv('p.'+p,true));
  (sc.sig||[]).forEach(k=>pads[k].typed());
- renderLog();sc.log.forEach((r,i)=>{setv(`log[${i}].d`,ymd(r[0]));setv(`log[${i}].ev`,r[1]);setv(`log[${i}].t`,r[2]+' (simulated)');setv(`log[${i}].s`,r[3]);});
+ $('#nLog').value=String(Math.max(+$('#nLog').value||6,sc.log.length));renderLog();sc.log.forEach((r,i)=>{setv(`log[${i}].d`,ymd(r[0]));setv(`log[${i}].ev`,r[1]);setv(`log[${i}].t`,r[2]+' (simulated)');setv(`log[${i}].s`,r[3]);});
  renderAtt();(sc.att||[]).forEach((r,i)=>{setv(`att[${i}].d`,ymd(r[0]));setv(`att[${i}].m`,r[1]);setv(`att[${i}].r`,r[2]+' (simulated)');setv(`att[${i}].s`,r[3]);});
  methodUI();refresh();$('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;setView('consent');}
 $('#simBtn').addEventListener('click',loadSim);
@@ -2983,10 +3006,10 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
    consent is on file: a revocation ends that too). date and parent
    keep their old meaning only while consent is on file, so a form that reads them alone never takes a refusal as consent. */
 window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById(id);return e?String(e.value||'').trim():'';};const c=v('cDate'),p=v('sParDate');
-  const I=window.__ic1,st=I?I.status():null,val=I?I.val:()=>'',m=val('c.method');
-  if(!st||(!m&&!c&&!p))return c||p?{consent:{date:c,parent:p,src:'IC-1'}}:null;
+  const I=window.__ic1,st=I?I.status():null,val=I?I.val:()=>'',m=val('c.method'),stv=val('c.status');
+  if(!st||(!m&&!stv&&!c&&!p))return c||p?{consent:{date:c,parent:p,src:'IC-1'}}:null;
   const g=k=>String(val(k)||'').trim(),on=!!st.current,dist=m==='reeval'||m==='initial';
-  const ended=(st.state==='Declined'||st.state==='Revoked')?c:'';
+  const ended=(st.state==='Declined'||st.state==='Revoked')?(st.date||c):'';   /* v23.45 the date under Status */
   const D={fa:{dec:g('fa.dec'),beh:g('fa.beh'),stop:g('fa.stop'),plan:g('fa.plan'),med:g('fa.med'),date:g('fa.date')},
     ed:{dec:g('ed.dec'),items:g('ed.items'),allergy:g('ed.allergy'),limits:g('ed.limits'),date:g('ed.date')},
     rec:{dec:g('rec.dec'),what:g('rec.what'),who:g('rec.who'),del:g('rec.del'),date:g('rec.date')},
@@ -2994,7 +3017,7 @@ window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById
     ij:{dec:g('ij.dec'),when:g('ij.when'),who:g('ij.who'),date:g('ij.date')}};
   let bip='';document.querySelectorAll('#logTbl tbody tr').forEach(tr=>{const d=tr.querySelector('input[type=date]'),e=tr.querySelector('select');
     if(d&&d.value&&e&&/^Consent to implement the BIP/.test(e.value)&&d.value>bip)bip=d.value;});
-  return {consent:{src:'IC-1',state:st.state,on,method:m,kind:m==='reeval'?'reeval':m==='initial'?'initial':'',
+  return {consent:{src:'IC-1',state:st.state,on,method:m,status:stv,pwn:g('c.pwn'),kind:m==='reeval'?'reeval':m==='initial'?'initial':'',
     obtained:on?(dist?(g('c.ddate')||c):(c||p)):'',ended,date:on?c:'',parent:on?p:'',
     exceptions:st.dec==='except'?g('c.except'):'',procs:st.procs.slice(),covered:st.covered.slice(),dec:D,bip:on?bip:'',records:g('c.records'),v:2}};   /* v23.29 (RR-1 review I14) the records already held, for RR-1's inventory */}catch(e){return null;}};
 /* v21.78 in: the behaviors of concern from Form TB-1 (each label with its definition, one to a line) when the field is
@@ -3002,7 +3025,7 @@ window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById
 (function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   let n=0;try{const el=document.querySelector('[name="c.behav"]'),B=(f&&Array.isArray(f.behaviors)?f.behaviors:[]).filter(b=>b&&String(b.label||'').trim());
     if(el&&B.length&&!String(el.value||'').trim()){const def=el.tagName==='TEXTAREA';
-      el.value=B.map(b=>{const l=String(b.label).trim(),d=String(b.def||'').trim();return def&&d?l+': '+d:l;}).join(def?'\n':'; ');n++;
+      el.value=B.filter(b=>!b.isRep).map(b=>String(b.label).trim()).join('; ');n++;   /* v23.45 (review F16) the names, in plain words; the definitions stay on Form TB-1 */
       ['input','change'].forEach(t=>{try{el.dispatchEvent(new Event(t,{bubbles:true}));}catch(e){}});}}catch(e){}
   let g=null;if(!was){try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}}
   return {filled:n+(r&&r.filled||0)+(g&&g.filled||0),note:n?'Behaviors of concern from Form TB-1':(r&&r.note)||''};};})();
@@ -3027,9 +3050,39 @@ window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById
       if(put('c.lang',lang)){n++;got.push('the home language');}
       if(put('s.par.rel',R.signer)){n++;got.push('the signer\u2019s relationship');}
       if(R.name&&put('s.par.name',R.name)){n++;got.push('the signer\u2019s name');}
+      /* v23.45 (review F14) the parent, the phone and email, the ESE contact and the next IEP or reevaluation date */
+      const H=P.home||{},DT=P.dates||{},TM=Array.isArray(P.team)?P.team:[],td=(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date());
+      if(put('c.parent',R.name||H.name)){n++;got.push('the parent');}
+      if(put('c.phone',[H.phone,H.email].map(T).filter(Boolean).join(' / '))){n++;got.push('the phone and email');}
+      const ese=TM.find(t=>t&&/\bESE\b|exceptional|case manager|staffing/i.test(T(t.role)));if(ese&&put('c.ese',T(ese.name)+(T(ese.role)?' ('+T(ese.role)+')':''))){n++;got.push('the ESE contact');}
+      const due=[T(DT.reeval),T(DT.iep)].filter(x=>/^\d{4}-\d\d-\d\d$/.test(x)&&x>=td).sort()[0];if(due&&put('c.iepdue',due)){n++;got.push('the next IEP or reevaluation date');}
       window.icLangPaint();}catch(e){}
     return n?{filled:(r&&r.filled||0)+n,note:[(r&&r.note)||'','from Form DM-1: '+got.join(', ')].filter(Boolean).join('; ')}:r;};
   document.addEventListener('input',e=>{if(e.target&&/^(c\.lang|s\.int\.(lang|name))$/.test(e.target.name||''))window.icLangPaint();});})();
+</script>
+<script id="ic1-v2345">
+/* v23.45 (review F17) the student's assent, from Form SI-1 (f.student: assent, assentPlan, stop), each into an empty field: the
+   response (given: indicated agreement; refused: indicated refusal), how the student shows it (what assent looks like on SI-1),
+   the dissent signs (each to its box, the rest under Other) and what staff do. SI-1 keeps the session-by-session log, so it is
+   the home; this sheet takes what it holds, and nothing goes back. */
+(function(){const T=v=>String(v==null?'':v).trim(),q=n=>document.querySelector('[name="'+n+'"]');
+ const fire=e=>['input','change'].forEach(t=>{try{e.dispatchEvent(new Event(t,{bubbles:true}));}catch(x){}});
+ const put=(n,v)=>{const e=q(n);v=T(v);if(!e||!v||T(e.value))return false;if(e.tagName==='SELECT'&&![...e.options].some(o=>o.value===v))return false;e.value=v;fire(e);return true;};
+ const BOX=[['d.say',/\b(no|stop|done|all done|finished)\b/i],['d.card',/\b(card|device|break)\b/i],['d.move',/\b(moves?|walks?|runs?|goes) (away|off|out)\b|\bleaves? the (room|table|area|materials)/i],
+  ['d.push',/\bpush|\bturns? away/i],['d.cry',/\bcr(y|ies|ying)\b|whimper|covers? (the |his |her |their )?face/i],['d.freeze',/\bgoes still\b|\bdrops? to the floor|refuses to move|freez/i]];
+ const ALL=['d.say','d.card','d.move','d.push','d.cry','d.freeze','d.escal','d.other'];
+ function fill(S){let n=0;const P=(S.assentPlan&&typeof S.assentPlan==='object')?S.assentPlan:{},stop=(S.stop&&typeof S.stop==='object')?S.stop:{};
+  const resp={given:'yes',refused:'no'}[T(S.assent)];if(resp&&put('a.resp',resp))n++;
+  if(put('a.how',P.assent))n++;
+  const signs=T(P.withdrawal||stop.signs).split(/\s*;\s*/).filter(Boolean);
+  if(signs.length&&!ALL.some(k=>{const e=q(k);return e&&e.checked;})){const rest=[];
+   signs.forEach(x=>{const b=BOX.find(y=>y[1].test(x));const e=b&&q(b[0]);if(e){if(!e.checked){e.checked=true;fire(e);}}else rest.push(x);});
+   if(rest.length){const o=q('d.other');if(o&&!o.checked){o.checked=true;fire(o);}put('d.othertxt',rest.join('; '));}n++;}
+  if(put('d.plan',P.steps||stop.steps))n++;
+  return n;}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let n=0;try{if(f&&f.student&&typeof f.student==='object')n=fill(f.student);}catch(e){n=0;}
+  return n?{filled:(r&&r.filled||0)+n,note:[(r&&r.note)||'','the student\u2019s assent from Form SI-1'].filter(Boolean).join('; ')}:r;};})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

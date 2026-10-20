@@ -9903,6 +9903,29 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.45: Form IC-1: the prior written notice, the parent's language, Method and Status apart, and facts from DM-1 and SI-1 (review F12, F14-F18)
+
+- **The prior written notice (F12).** Part 6 has **Prior written notice given** beside the safeguards date. Consent taken on
+  this form or through the district process asks for it before the file can be complete, and says so when the notice is
+  dated after the consent: consent is taken after the notice (34 CFR 300.300(a)(1)(i) and (c)(1)(i); 300.503). The
+  simulations log it.
+- **The parent's language (F15).** A home language other than English (on this form or on Form DM-1), or DM-1's interpreter
+  need, asks for the interpreter (name and language, under the signatures) or the language of a translated consent form
+  (a new box beside the interpreter) before the file can be complete (34 CFR 300.9(a)).
+- **Method and Status apart (F18).** Method says how consent was obtained (on this form, or the district reevaluation or
+  initial-evaluation process). **Status** says what has happened since: as decided in part 5, the parent declined, no
+  response after reasonable efforts, or revoked, with its own date. A district consent that is later revoked keeps its
+  district form, date and filing place on record. A record saved before this version opens with its outcome moved from
+  Method to Status, and reads the same.
+- **From Form DM-1 (F14):** the parent's name, the phone and email, the ESE contact (the team member whose role names ESE or
+  the case manager) and the next IEP or reevaluation date still ahead, each into an empty field.
+- **Behaviors of concern (F16)** takes the targets' names only, in plain words; the definitions stay on Form TB-1, and a
+  replacement behavior is not a behavior of concern.
+- **The student's assent from Form SI-1 (F17),** which keeps the session-by-session log: the student's response, how the
+  student shows assent, the dissent signs (each to its box on the Student assent sheet, the rest under Other) and what staff
+  do, each only where nothing is written.
+- qa/ic1-w4-test.js (14 checks).
+
 ### v23.44: Form PD-1 is kept in a file of its own, never in the student's case (review F248)
 
 The BCBA's decision: PD-1 is a supervision record about a staff member, so the whole checklist is kept in a staff-side
