@@ -140,6 +140,10 @@ html{touch-action:manipulation}
   html.nbh-hc input:not([type=checkbox]):not([type=radio]):not([type=range]),html.nbh-hc select,html.nbh-hc textarea{border-color:#4d6562}
   html.nbh-hc ::placeholder{color:#4a585e;opacity:1}
   html.nbh-hc :focus-visible{outline:3px solid #0a4f75 !important;outline-offset:2px}
+  /* v23.67 (review I245) low light: the page turned dark (a form on its own turns itself; in the workstation the window is
+     turned, the form with it), the pictures turned back to their own colours */
+  html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}
+  html.nbh-dark img,html.nbh-dark video,html.nbh-dark svg image{filter:invert(1) hue-rotate(180deg)}
 }
 </style>
 <script id="nbh-ui">
@@ -1495,7 +1499,7 @@ try { (function(){
    form opened on its own reads too), told to the form as it loads and when it changes */
 try { (function(){
   var R = document.documentElement, KEY = 'nbh.view';
-  function apply(v){ v = v || {}; R.classList.toggle('nbh-tx-1', v.t === 1); R.classList.toggle('nbh-tx-2', v.t === 2); R.classList.toggle('nbh-hc', !!v.hc); }
+  function apply(v){ v = v || {}; R.classList.toggle('nbh-tx-1', v.t === 1); R.classList.toggle('nbh-tx-2', v.t === 2); R.classList.toggle('nbh-hc', !!v.hc); R.classList.toggle('nbh-dark', !!v.dark); }
   function read(){ try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } }
   apply(read());
   window.addEventListener('storage', function(e){ if (e.key === KEY) apply(read()); });

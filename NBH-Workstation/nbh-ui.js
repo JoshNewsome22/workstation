@@ -1351,7 +1351,7 @@ try { (function(){
    form opened on its own reads too), told to the form as it loads and when it changes */
 try { (function(){
   var R = document.documentElement, KEY = 'nbh.view';
-  function apply(v){ v = v || {}; R.classList.toggle('nbh-tx-1', v.t === 1); R.classList.toggle('nbh-tx-2', v.t === 2); R.classList.toggle('nbh-hc', !!v.hc); }
+  function apply(v){ v = v || {}; R.classList.toggle('nbh-tx-1', v.t === 1); R.classList.toggle('nbh-tx-2', v.t === 2); R.classList.toggle('nbh-hc', !!v.hc); R.classList.toggle('nbh-dark', !!v.dark); }
   function read(){ try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } }
   apply(read());
   window.addEventListener('storage', function(e){ if (e.key === KEY) apply(read()); });

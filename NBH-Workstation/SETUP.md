@@ -9905,6 +9905,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.67: A low-light screen for evening work (review I245)
+
+- **Help, Side by side, fullscreen and the screen**: *Screen*, Normal or Low light (also in the command box), kept on this
+  device with the text size and contrast, for the workstation and every form. Low light turns the white pages dark and the
+  dark text light, in every form alike: the forms paint many of their own colours, so the page is turned rather than
+  repainted form by form. Photographs, pictures, the picture cards and videos keep their own colours; charts and drawings
+  turn with the page.
+- The workstation turns its whole window, the forms in it with it (never twice); a form opened on its own turns itself.
+- Paper is never changed: the screen only.
+- qa/i245-low-light-test.js (7 checks).
+
 ### v23.66: The staff quick start in large print (review I243)
 
 - **Form QS-1, The Quick Start, As It Prints**: *On paper*, Regular print or Large print. Large print sets the handout about
