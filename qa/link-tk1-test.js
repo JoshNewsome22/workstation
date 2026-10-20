@@ -583,7 +583,8 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     const kase=JSON.parse(caseText),ownTK=JSON.parse(kase.forms['TK-1'].snap.own),ownTE=JSON.parse(kase.forms['TE-1'].snap.own);
     ok('19 Save case: both link records are in the case file',ownTK.S.meta.lk===lkTK&&ownTE.S.meta.lk===lkTE&&JSON.parse(kase.forms['TK-1'].snap.data['#tkState']).meta.lk===lkTK);
     await sh.evaluate(async t=>{state.restoring=true;try{await loadCase(JSON.parse(t),'file');}finally{state.restoring=false;}},caseText);await sleep(1500);
-    let tk2=frameOf(TKF),te2=frameOf(TEF);
+    /* v23.57 a case opens to one form, the others loading when opened: both are opened, as the BCBA would */
+    let tk2=frameOf(TKF)||await openF('TK-1',TKF),te2=frameOf(TEF)||await openF('TE-1',TEF);
     ok('19 Open case: both link records come back',(await tk2.evaluate(()=>S.meta.lk))===lkTK&&(await te2.evaluate(()=>S.meta.lk))===lkTE);
     ok('19 Open case: the panels read them',await tk2.evaluate(()=>nbhLink.state().on&&!nbhLink.state().table)&&await te2.evaluate(()=>nbhLink.state().on));
     /* v21.44 the autosave keeps this tab's copy in nbhCopies (IndexedDB); read it back as the case shape it restores from */
@@ -600,7 +601,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     const auto=await sh.evaluate(async()=>{const r=(await nbhCopies.list()).find(x=>x.key===state.auto.key);return r?JSON.stringify(await nbhCopies.unpack(r)):null;});
     ok('19 the autosave holds both records',changed&&!!auto&&JSON.parse(JSON.parse(auto).forms['TK-1'].snap.own).S.meta.lk===lkTK&&JSON.parse(JSON.parse(auto).forms['TE-1'].snap.own).S.meta.lk===lkTE2,{changed,auto:!!auto,same:lkTE2===lkTE});
     await sh.evaluate(async t=>{state.restoring=true;try{await loadCase(JSON.parse(t),'autosave');}finally{state.restoring=false;}},auto);await sleep(1500);
-    tk2=frameOf(TKF);te2=frameOf(TEF);
+    tk2=frameOf(TKF)||await openF('TK-1',TKF);te2=frameOf(TEF)||await openF('TE-1',TEF);
     ok('19 an autosave restore brings both back',(await tk2.evaluate(()=>S.meta.lk))===lkTK&&(await te2.evaluate(()=>S.meta.lk))===lkTE2);
     /* a Keep is a change the case notices: TK-1's status signature moves */
     await tk2.evaluate(()=>{window.confirm=()=>true;});

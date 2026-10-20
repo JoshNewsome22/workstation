@@ -18,6 +18,10 @@ const pages=buf=>{const m=buf.toString('latin1').match(/\/Type\s*\/Page(?![s])/g
  /* master session: 1 min at 20x, consequence 10 s, targets at ~5, 20 and 35 s (the third inside a period: no delivery) */
  await page.evaluate(()=>{const s=document.querySelector('#eaCond');s.value='0';s.dispatchEvent(new Event('change'));});await sleep(100);
  const d0=await page.evaluate(()=>({mode:eaMode.value,cons:eaCons.value,ncr:eaNcr.value}));
+ /* v23.55 the progress dots are counted once the page has been still for 1.1 s (a page-wide measure, ~0.15 s in EA-1's
+    949 fields): on the runner's 20-times clock that pause, landing just after Start, would be 3 s; the session starts
+    once the page is still, as it would in use */
+ await sleep(1600);
  await page.evaluate(()=>{eaMin.value='1';eaCons.value='10';eaStart.click();});
  const at=async s=>{await page.waitForFunction(s=>eaRunner.elapsed()>=s*1000,s,{timeout:20000});await page.evaluate(()=>eaTarget.click());};
  await at(5);await at(20);await at(24);await at(35);
