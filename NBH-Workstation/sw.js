@@ -1,7 +1,7 @@
 /* sw.js: the workstation's offline copy (v21.43).
 
    What it does. The first time the workstation opens from the website, this worker saves its files on the device: the
-   shell, the 44 forms, the picture library, the respondent page and its library, the PDF tools, the manifest and the
+   shell, every form its FORMS list names, the picture library, the respondent page and its library, the PDF tools, the manifest and the
    icons (FILES below). From then on every one of those files is served from that copy at once, online or not, so the
    workstation opens and works without the internet. Nothing a person types ever passes through here: the copy holds
    the workstation's own files and nothing else, and the forms still save cases as files.
@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = 'b1ab69ed80d8';
+const VERSION = '41e432a417d6';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',

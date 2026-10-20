@@ -1,18 +1,20 @@
 # Start here
 
-This file is the workstation's release notes, oldest first, from September 2026 on; most of it is history. What is true
-now:
+This file is the workstation's release notes, from September 2026 on: oldest first up to v22.14, newest first from there
+(each release's notes go in above the last one's). Find a release by searching for its version, for example `### v23.58`.
+Most of it is history. **START-HERE.md** is the current guide, for a new or covering BCBA and for the person who looks
+after the website. What is true now:
 
 - **The folder** (`NBH-Workstation`, or `RPS-Workstation` for the school edition): `index.html` (the workstation), the
   47 forms, the shared `nbh-*.js` files every form loads (letterhead, Autosave, writing help, dictation and the rest),
   `respond.html` and `staff-data.html` (the pages families and staff answer on), the offline files (`sw.js`,
-  `release.json`, `manifest.json`), and README.txt, HOSTING.md and this file. Keep them together: a form away from the
+  `release.json`, `manifest.json`), and START-HERE.md, README.txt, HOSTING.md and this file. Keep them together: a form away from the
   `nbh-*.js` files loses its letterhead and Autosave.
-- **Which version is running:** **Help** (in the bar) and Diagnostics say it, for example v22.11. The newest release
-  is at the end of this file.
-- **Putting it on the website, updating it, and Google sign-in** (Sheets, Gmail, Drive): HOSTING.md.
+- **Which version is running:** **Help** (in the bar) and Diagnostics say it, for example v23.58.
+- **Putting it on the website and updating it:** HOSTING.md. **Google** (Sheets, Gmail, Drive, a case shared with you):
+  Help, *Google, set up once*.
 - **Where a student's information goes:** Help, *Where the student's data goes* (the same table is in HOSTING.md).
-- **How to use it:** Help, in the workstation. README.txt is the short version.
+- **How to use it:** START-HERE.md, then Help, in the workstation. README.txt is a longer tour of the features.
 
 Everything below this line was written at the time of each release and is kept as it was.
 
@@ -9902,6 +9904,26 @@ case holds DD-1's record now waits for it (it read it once and could miss it by 
 Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the 46 forms filled from its own saved file,
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
+
+### v23.58: Start here, and the notes say what the app does (review I261, I264, F508, F516)
+
+- **START-HERE.md** (new, in the folder of both editions): the guide as the workstation is now, apart from the release
+  notes. Opening it (the website, Add to Home Screen, which release is running), the first hour for a new or covering
+  BCBA (Help and the case map, the simulated student, the bar, Save case, Caseload and Today, the packet), where a
+  student's information goes, working with a colleague (Share for editing, Share in Drive, a shared iPad), Google, when
+  something does not work, and what the person who looks after the website does (upload, update, the reply box, Google's
+  web address, the check after an upload).
+- **SETUP.md's opening** says what the file is: release notes, oldest first up to v22.14 and newest first from there (it
+  said oldest first, with the newest at the end); a release is found by searching for its version. Google is set up from
+  Help, *Google, set up once*; START-HERE.md is the guide.
+- **HOSTING.md's Google section** names the fourth feature, a case a colleague shared with you in Drive (the Google Picker
+  API and an API key), and says the keys can be kept from Help.
+- **The counts**: the offline copy's notes in sw.js said 44 forms, the repository README and tools/README.md 46; they now
+  say 47, or every form the FORMS list names.
+- qa/docs-match-test.js (9 checks): every "N forms" in the guides and in the workstation is the number it lists; every
+  button START-HERE.md names is in the workstation, every Help section a guide names is one of Help's, every HOSTING.md
+  section it names is a heading there; Help says the version running and SETUP.md has its notes; no guide says nothing
+  leaves the device, and Help's table of where the student's data goes has a row for each feature that sends something.
 
 ### v23.57: A case opens to the one form you came for (review I239, F469)
 

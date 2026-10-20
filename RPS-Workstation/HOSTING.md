@@ -149,14 +149,16 @@ offline copy finishes sooner. It changes nothing in the forms or in what they sa
 
 ## Google sign-in (once, for Sheets, Gmail and Drive)
 
-Three features use Google with your school account: Form DD-1 reading the team's Google Sheet, sending questionnaires
-from your school Gmail, and keeping the caseload in your school Google Drive. All three use **one** Google Cloud project
-and **one** sign-in key (the Client ID). Set up only what you will use; each part can be added later to the same project.
+Four features use Google with your school account: Form DD-1 reading the team's Google Sheet, sending questionnaires
+from your school Gmail, keeping the caseload in your school Google Drive, and opening a case a colleague shared with you
+there (v23.54). All four use **one** Google Cloud project and **one** sign-in key (the Client ID); the fourth also needs
+an API key. The same checklist is in the workstation: Help, *Google, set up once*. Set up only what you will use; each part can be added later to the same project.
 
 1. **The project.** Go to console.cloud.google.com and sign in (with the school account if it may create projects;
    otherwise a personal Google account). Create one project, for example "FBA-BIP Workstation".
 2. **The APIs.** *APIs & Services > Library*: find and *Enable* each one you will use:
-   **Google Sheets API** (DD-1's sheet link), **Gmail API** (sending questionnaires), **Google Drive API** (the caseload in Drive).
+   **Google Sheets API** (DD-1's sheet link), **Gmail API** (sending questionnaires), **Google Drive API** (the caseload in Drive),
+   **Google Picker API** (a case shared with you).
 3. **The sign-in screen.** *Google Auth Platform* (formerly *OAuth consent screen*): an app name and a support email.
    Audience: *Internal* if the project belongs to the school's Google organization; otherwise *External*, and add your
    school address under *Test users*.
@@ -167,13 +169,15 @@ and **one** sign-in key (the Client ID). Set up only what you will use; each par
    | `.../auth/spreadsheets.readonly` | Read the sheet you link; it cannot change it | DD-1's sheet link |
    | `.../auth/gmail.send` | Send email you press Send for; it cannot read your mail | Questionnaires |
    | `.../auth/userinfo.email` | Your address, to say which account sends and syncs | Gmail and Drive |
-   | `.../auth/drive.file` | Only the files the workstation itself made in your Drive | The caseload in Drive |
+   | `.../auth/drive.file` | Only the files the workstation itself made in your Drive, or that you pick for it | The caseload in Drive, a case shared with you |
 
 5. **The key.** *Clients > Create client > Web application*. Under *Authorized JavaScript origins* add
    `https://newsomebh.com` (one origin covers both editions). *Create*, and copy the **Client ID**: it ends in
    `.apps.googleusercontent.com` and is not a secret.
-6. **On each device**, paste the Client ID once, where it is first asked for: Form DD-1's *Link a Google Sheet*, or
-   *Caseload > Use Google Drive*. The same key serves all three features on that device.
+6. **On each device**, paste the Client ID once: in Help, *Google, set up once* (v23.56), or where it is first asked for
+   (Form DD-1's *Link a Google Sheet*, or *Caseload > Use Google Drive*). The same key serves every feature on that device.
+   **The API key**, only to open a case shared with you: *Credentials > Create credentials > API key*, limited to the
+   Google Picker API and to the workstation's web address; keep it in the same place in Help.
 7. **If Google says "Access blocked"** or that your administrator has not approved the app, the school's IT can allow it:
    *Admin console > Security > Access and data control > API controls > Manage third-party app access > Add app >
    OAuth App Name Or Client ID*, paste the Client ID, and set it to *Trusted* (or *Limited* to the Google services above).

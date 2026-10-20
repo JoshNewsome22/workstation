@@ -94,14 +94,14 @@ made in every form (by its patcher) and reaches the rebuilt forms through CF-1.
 
     python3 tools/blocks/patch-ui.py tools/blocks/nbh-ui.html NBH-Workstation/[A-Z]*.html
 
-The glob `[A-Z]*.html` is the 46 forms without `index.html`. Each patcher prints
+The glob `[A-Z]*.html` is every form, without `index.html`. Each patcher prints
 `patched` or `already` per form. The case block's refresh is a replacement of the text
 between `<style id="nbh-case-css">` and `<style id="nbh-guard-css">` (see `patch-case.py`).
 
 ## The shared scripts: one file beside the forms (v21.84)
 
 Until v21.83 every form carried the same script blocks byte for byte: 21.5 of the 34.8 MB of forms were those
-copies (the writing help alone 11.6 MB), and a change to one rewrote all 46 forms, so every iPad downloaded the whole
+copies (the writing help alone 11.6 MB), and a change to one rewrote every form, so every iPad downloaded the whole
 set again. Each of these is now ONE file beside the forms, and a form carries only its loader, a classic synchronous
 `<script id="..." src="..."></script>` in the place the inline block held (so the order the form's scripts run in is
 unchanged):
@@ -130,7 +130,7 @@ form) and the blocks that differ between forms.
   forms: inside the one-file edition a form opens from srcdoc (or a blob, in its own tab), where a relative `src`
   loads nothing. Its output, and so the case files written from it, are what they were before v21.84.
 - After changing any of these files, run `pwa-sw.py` and build the editions as usual. A change to one of them is now
-  one small file per release, not 46 forms.
+  one small file per release, not every form.
 
 ## The writing help in every form
 
@@ -193,7 +193,7 @@ and stops if the source changed shape.
 - `tools/blocks/nbh-pwa-save.js` + `tools/blocks/patch-pwa.py` — the block that, in the app
   installed on an iPad or iPhone, sends saved files to the share sheet, opens a window the page makes
   for itself (the master print, a respondent page's preview) inside the app, and says how to print
-  when the print options do not appear. The patcher puts one copy after the `<title>` of the 46 forms
+  when the print options do not appear. The patcher puts one copy after the `<title>` of every form
   and `index.html`, replaces an existing copy, refuses a second, and has `--check`; re-run it (then
   `pwa-sw.py`) after a merge or a rebuilt form.
 - `build-single.py` leaves the `nbh-pwa-head` block of `index.html` out of the one-file editions.
@@ -205,7 +205,7 @@ and stops if the source changed shape.
 `bip4-test`, `u-test`, `u-check`, `shell-ui-test`, `logo-test`, `xlsx-test`, `single-check`,
 the nine form tests (`sm1-test`, `sa1-test`, `gc1-test`, `si1-test`, `da1-test`, `hd1-test`,
 `cn1-test`, `sr1-test`, `vs1-test`) and `a11y.js` (needs `axe-core` in `qa/node_modules`).
-The writing help: `wording-rollout-test` (all 46 forms against the commit before the rollout),
+The writing help: `wording-rollout-test` (every form against the commit before the rollout),
 `wording-client-test`, `wording-rules-test` and the relay's `tools/relay/tests/run.sh`.
 `cn1-test`, `sr1-test`, `vs1-test`), `pwa-test` (the offline copy and the installed app) and
 `a11y.js` (needs `axe-core` in `qa/node_modules`).

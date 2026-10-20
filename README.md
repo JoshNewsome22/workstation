@@ -1,10 +1,11 @@
 # FBA and BIP Workstation
 
-Two editions of the same workstation, 46 forms each, and the tools that build them.
+Two editions of the same workstation, 47 forms each, and the tools that build them. `NBH-Workstation/START-HERE.md` is
+the guide for a new BCBA and for the person who looks after the website.
 
 | Folder | What it is |
 |---|---|
-| `NBH-Workstation/` | The Newsome Behavioral Health edition: `index.html`, the 46 forms, the PDF tools, the picture library (`nbh-pictos.js`), the offline copy and the installable app (`sw.js`, `manifest.json`, the icons; v21.43), and the documentation (`README.txt`, `SETUP.md`, `HOSTING.md`). This is the folder that is edited. |
+| `NBH-Workstation/` | The Newsome Behavioral Health edition: `index.html`, the 47 forms, the PDF tools, the picture library (`nbh-pictos.js`), the offline copy and the installable app (`sw.js`, `manifest.json`, the icons; v21.43), and the documentation (`START-HERE.md`, `README.txt`, `SETUP.md`, `HOSTING.md`). This is the folder that is edited. |
 | `RPS-Workstation/` | The Royal Palm School edition, generated from the NBH folder by `tools/build-rps.py`. Never edited by hand. |
 | `deliver/` | The one-file editions (`NBH-Workstation.html`, `RPS-Workstation.html`): the whole workstation, forms inside, built by `tools/build-single.py`. |
 | `tools/` | The build scripts, `polish/`, the screen polish every form carries (applied by `tools/apply-polish.py`), and `relay/`, the writing help's rewrite service for newsomebh.com (its own upload zip and README). |
