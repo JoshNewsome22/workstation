@@ -9905,6 +9905,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.82: Form GB-1's objective bank: starting acquisition objectives from peer-reviewed studies
+
+- **The objective bank.** On the Acquisition objectives sheet, above the objectives, the Objective bank holds 56
+  starting acquisition objectives written from peer-reviewed studies (the Journal of Applied Behavior Analysis,
+  Behavior Analysis in Practice, the Journal of the Experimental Analysis of Behavior and other peer-reviewed
+  journals), in ten kinds of skill: functional communication; tolerance and waiting; following instructions and
+  transitions; classroom engagement and work; self-management and coping; social and conversation; daily living;
+  safety; vocational and transition; leisure and play. Search by words, by kind of skill, or by the function of the
+  problem behavior a skill replaces (one function, or this case's functions from Form FS-1).
+- **Each entry in full.** The objective's parts (the skill, the condition, the criterion, the sessions and the
+  measurement, on the workstation's own forms), the objective as it will read, how the studies taught it, a clinical
+  note where one matters, the forms that help, and the full references with their DOIs. The panel's "How the entries are
+  written" says how the criteria were set and that the entries are starting points to adapt.
+- **Loading.** Load into A1, A2 ..., or Add an acquisition objective and load: only the empty fields are filled (tick
+  Replace text already typed to take the bank's text for every field), the Note names the entry and its sources, and
+  Undo puts the objective back as it was. The target date and the paired reduction objective are left to you.
+  "Add from the objective bank" beside the buttons that add objectives opens it.
+
+Every reference was checked against the publisher's page, PubMed or ERIC, or read from the article itself (the BCBA's
+volumes of Behavior Analysis in Practice, 2008 to 2013). The entries' wording is new: it is for the BCBA's
+read-through. Nothing to set up; the bank is never printed and keeps no record data. Tested: `qa/gb1-bank-test.js`.
+
 ### v23.81: Form TB-1's candidate behaviors as cards on an iPad and a laptop
 
 - **Each candidate is a card.** On an iPad the sheet is scaled to fit the screen, which leaves each candidate row about
