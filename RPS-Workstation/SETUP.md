@@ -9903,6 +9903,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.44: Form PD-1 is kept in a file of its own, never in the student's case (review F248)
+
+The BCBA's decision: PD-1 is a supervision record about a staff member, so the whole checklist is kept in a staff-side
+file of its own; the student's case gets only its neutral note.
+
+- **Out of every copy of the case.** Save case (the file, the one-file case, Google Drive), the copy kept on this device
+  (which the hand-over and Drive take from), the case's history, Back up the caseload and the caseload's Save file all
+  leave PD-1 out. A case saved before this version, with PD-1 in it, is written without it from now on. PD-1's note for the
+  student's file (the plan component, how often it was delivered, the domain found leading, the changes, the reassessment)
+  still goes into the case, as before. The safety copy of the open tab still holds PD-1, so closing the tab by mistake loses
+  nothing.
+- **Save case asks first** when PD-1 holds entries not yet in its own file: **Save its own file, then the case** (the file
+  PD-1's Save data writes, named after the staff member and the date), **Save the case only**, or **Cancel**. With nothing
+  else open it offers Save its own file or Cancel, and no case file is written. Close case asks the same, since it saves
+  first. To work on a PD-1 again, open Form PD-1 and press Open data.
+- qa/pd1-staff-side-test.js (13 checks).
+
 ### v23.43: One interview, one write-up: Form IN-1 owns an interview (review I22, F44)
 
 The BCBA's decision: an interview is recorded once, on Form IN-1. Form IA-1 takes it from there, and Form FS-1 counts it once.

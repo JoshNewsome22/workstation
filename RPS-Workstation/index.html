@@ -1445,6 +1445,13 @@ const gradeWords=g=>{g=String(g||'').trim();return !g?'':/grade|^k$|^pre|kinder/
 /* v22.30 forms that are a staff record, not a student's: a case of these alone is saved under the record's name, with no
    student asked for; kept in a student's case, it is asked about once (it would go wherever the student's file goes) */
 const STAFF_ONLY={'RS-1':'RBT Supervision Log'};
+/* v23.44 (review F248; the BCBA's decision, October 2026) a staff-side record: Form PD-1 is about a staff member, not the
+   student, so it is kept in a file of its own (what its Save data writes), never in the student's case: Save case, the copy on
+   this device (and so Drive and the hand-over), the case's history and the backup leave it out. Its note for the student's
+   file goes into the case through the facts, as before. The safety copy of the open tab still holds it. */
+const STAFF_SIDE={'PD-1':'Performance Diagnostic Checklist'};
+function sideOut(r){try{const d=r&&parseCase(r.text);if(!d||!d.forms||!Object.keys(STAFF_SIDE).some(id=>d.forms[id]))return r;
+  const f=Object.assign({},d.forms);Object.keys(STAFF_SIDE).forEach(id=>{delete f[id];});return Object.assign({},r,{text:JSON.stringify(Object.assign({},d,{forms:f}))});}catch(e){return r;}}
 const caseIds=()=>[...new Set(Object.keys(state.frames).concat(Object.keys(state.pending)))];
 function staffOnlyName(){const ids=caseIds();return ids.length&&ids.every(id=>STAFF_ONLY[id])?STAFF_ONLY[ids[0]]:'';}
 function caseName(p){return (p.client||staffOnlyName()||'case').replace(/[^\w-]+/g,'_');}
@@ -1658,7 +1665,7 @@ function setPending(id,title,snap,copy){state.pending[id]={title:title||'',snap:
 const caseClean=()=>!!(state.lastSig&&state.lastSig===caseSig());
 const sigBut=id=>caseSig().split('|').filter(x=>x.split(':')[0]!==id).join('|');   /* v21.81 the case's fingerprint without one form */
 /* the case's forms in the order of the file, then any opened since */
-function orderCase(f){const o={};state.caseOrder.concat(Object.keys(f)).forEach(id=>{if(f[id]&&!o[id])o[id]=f[id];});return o;}
+function orderCase(f){const o={};state.caseOrder.concat(Object.keys(f)).forEach(id=>{if(f[id]&&!o[id]&&!STAFF_SIDE[id])o[id]=f[id];});return o;}   /* v23.44 a staff-side record stays out */
 function makeFrame(id,rec){
   const fr=document.createElement('iframe');
   fr.title=rec[1]+' (Form '+id+')';
@@ -2265,7 +2272,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.43';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.44';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5279,7 +5286,7 @@ async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}:
     if(P){forms[id]={title:P.title,snap:P.snap};continue;}
     if(state.frames[id]){const r=await grab(id,'snapshot',null,15000);if(r&&r.snap){forms[id]={title:r.title,snap:r.snap};stat[id]=r.status||state.status[id];}else if(!late.includes(id))late.push(id);}
   }
-  for(let i=late.length-1;i>=0;i--){if(forms[late[i]])late.splice(i,1);}
+  for(let i=late.length-1;i>=0;i--){if(forms[late[i]]||STAFF_SIDE[late[i]])late.splice(i,1);}
   forms=orderCase(forms);
   /* v21.80 the case facts the file carries are read from the forms as they are now, not as at the last read: a case opened
      again then has the facts its forms give, and the forms that load quietly are not sent changed facts that fill them anew */
@@ -5613,7 +5620,7 @@ function clSummary(){let items=[];try{items=todayItems().map(x=>({k:x.k,t:clStri
   return {items,lastData:f.data&&f.data.to||'',forms:Object.keys(state.frames).concat(Object.keys(state.pending)).filter((v,i,a)=>a.indexOf(v)===i).length};}
 async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);if(!key)return;
   try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
-  if(late&&late.length){try{const old=(await clList()||[]).find(r=>r.key===key),od=old&&parseCase(old.text);forms=Object.assign({},forms);late.forEach(id=>{if(od&&od.forms&&od.forms[id]&&!forms[id])forms[id]=od.forms[id];});}catch(e){}}
+  if(late&&late.length){try{const old=(await clList()||[]).find(r=>r.key===key),od=old&&parseCase(old.text);forms=Object.assign({},forms);late.forEach(id=>{if(od&&od.forms&&od.forms[id]&&!forms[id]&&!STAFF_SIDE[id])forms[id]=od.forms[id];});}catch(e){}}
   let mp={forms,photoSrc:state.photoSrc||undefined};try{mp=await mediaPackParts(forms,state.photoSrc||undefined);}catch(e){}   /* v22.57 the pictures in the store, references here */
   const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:mp.photoSrc,forms:mp.forms,facts:state.facts||undefined,cur:state.cur||undefined});
   const rec={key,scope:clScope(),client:String(p.client||(!String(p.sid||'').trim()&&staffOnlyName())||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
@@ -6118,7 +6125,7 @@ clBackup=async function(){const L=await clList();if(!L||!L.length){alert('No stu
     if(pass===null)return;
     if(pass){const again=await wsUI.prompt('Type the passphrase again',{ok:'Back up',password:true,placeholder:'The same passphrase'});if(again===null)return;if(again!==pass){alert('The two passphrases are not the same. Nothing was saved.');return;}}}
   const t=new Date(),ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-  const LX=await Promise.all(L.map(async r=>Object.assign({},r,{text:await mediaOut(r.text||'')})));   /* v22.56 the sounds and pictures back in */
+  const LX=await Promise.all(L.map(sideOut).map(async r=>Object.assign({},r,{text:await mediaOut(r.text||'')})));   /* v23.44 without a staff-side record */   /* v22.56 the sounds and pictures back in */
   const plain=JSON.stringify({form:'CASELOAD',rev:'2026-10',saved:t.toISOString(),cases:LX});
   let body=plain,nm='CASELOAD_'+ds+'.json';
   if(pass){try{body=JSON.stringify(await clLock(plain,pass));nm='CASELOAD_'+ds+'_locked.json';}catch(e){alert('The backup could not be locked ('+(e&&e.message||e)+'). Nothing was saved.');return;}}
@@ -6159,7 +6166,7 @@ async function caseKeepOnly(){const p=packet();if(!clKey(p)||clOff())return fals
   const r=(await clList()||[]).find(x=>x.key===clKey(p));if(!r)return false;r.unfiled=true;await clTx('readwrite',st=>st.put(r));return true;}
 async function clSaveFile(key){const r=(await clList()||[]).find(x=>x.key===key);if(!r)return;
   const t=new Date(),ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r.text],{type:'application/json'}));a.download='CASE_'+String(r.client||'case').replace(/[^\w-]+/g,'_')+'_'+ds+'.json';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([sideOut(r).text],{type:'application/json'}));a.download='CASE_'+String(r.client||'case').replace(/[^\w-]+/g,'_')+'_'+ds+'.json';
   document.body.appendChild(a);a.click();a.remove();const how=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';if(how==='cancelled')return;
   r.unfiled=false;await clTx('readwrite',st=>st.put(r));wsUI.toast(clName(r)+': case file written.',{kind:'ok'});caseloadOpen();}
 /* the caseload's deadlines as one calendar file: initials only, an all-day event each, the same id each time so a newer file updates */
@@ -9253,5 +9260,35 @@ document.addEventListener('change',e=>{if(e.target&&e.target.id==='dhKeep'){drvL
 })();
 </script>
 <style id="nbh-v2247-css">.dh-tbl td{vertical-align:top}.dh-tbl button{margin:2px 0}.dh-ul{margin:4px 0 8px;padding-left:20px}.dh-ul li{margin:0 0 4px}</style>
+<script id="nbh-v2344">
+/* v23.44 (review F248; the BCBA's decision, October 2026) Save case with Form PD-1 open: PD-1 is a supervision record, kept in a
+   file of its own, so with entries not yet in that file it asks first: Save its own file, then the case / Save the case only /
+   Cancel (nothing else open: Save its own file / Cancel). Its own file is the one PD-1's Save data writes, named as PD-1 names it;
+   the case is then saved without it (orderCase), as Close case saves it. Wrapped last. */
+(function(){const T=v=>String(v==null?'':v).trim();
+ const done={};   /* what was last written to each record's own file in this session (the record, not its saved time) */
+ const ymd=()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
+ async function side(id){let own=null,st=state.status[id]||{};const P=state.pending[id];
+  if(P){own=P.snap&&P.snap.own||null;st=P.status||st;}
+  else if(state.frames[id]){const r=await grab(id,'snapshot',null,8000);if(!r||!r.snap)return {id,none:true,work:(st.filled||0)>3||!!st.edited};own=r.snap.own||null;st=r.status||st;}
+  if(!own)return null;let d=null;try{d=JSON.parse(own);}catch(e){}
+  const body=d&&d.S?JSON.stringify(d.S):own,staff=T(d&&d.S&&d.S.meta&&d.S.meta.staff);
+  return {id,own,body,work:(st.filled||0)>3||!!st.edited,name:id+'_'+(staff||'staff').replace(/[^\w-]+/g,'_')+'_'+ymd()+'.json'};}
+ async function write(x){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([x.own],{type:'application/json'}));a.download=x.name;
+  document.body.appendChild(a);a.click();a.remove();try{if(typeof PWA!=='undefined'&&PWA.shareHow)await PWA.shareHow(a);}catch(e){}done[x.id]=x.body;}
+ const sc=saveCase;
+ saveCase=async function(o){const ids=caseIds().filter(id=>STAFF_SIDE[id]);if(!ids.length)return sc.apply(this,arguments);
+  const others=caseIds().filter(id=>!STAFF_SIDE[id]),p=packet(),whose=T(p.client)?T(p.client)+'’s':'the student’s';
+  for(const id of ids){const x=await side(id);
+   if(x&&x.none){if(x.work)wsUI.toast('Form '+id+' did not answer, so its own file was not saved: press Save data in Form '+id+'.',{kind:'warn',ms:9000});continue;}
+   if(!x||!x.work||done[id]===x.body)continue;
+   const c=await wsUI.choose('Form '+id+' is a supervision record about a staff member. It is saved in a file of its own, not in '+whose+' case; its note for the student’s file goes into the case.',
+     others.length?[{v:'both',label:'Save its own file, then the case',kind:'primary'},{v:'case',label:'Save the case only'},{v:'',label:'Cancel'}]:[{v:'both',label:'Save its own file',kind:'primary'},{v:'',label:'Cancel'}],
+     'Its own file holds the whole checklist: keep it with your supervision records, not in the student’s folder. To work on it again, open Form '+id+' and press Open data.'+(others.length?' Save the case only: what is entered in Form '+id+' is kept only while the form stays open.':''));
+   if(!c)return false;if(c==='both')await write(x);}
+  if(!others.length){wsUI.toast('Form '+ids.join(', ')+' is kept in a file of its own, and nothing else is open: there is no case to save.',{ms:8000});return true;}
+  return sc.apply(this,arguments);};
+})();
+</script>
 </body>
 </html>
