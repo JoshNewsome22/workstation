@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.63: Text size and contrast, on the screen (review I249)
+
+- **Help, Side by side, fullscreen and the screen**: *Text size* (Normal, Larger, Largest) and *Contrast* (Normal, High);
+  also in the command box (Text size: larger, High contrast). Kept on this device for every form, as Focus is: the open
+  forms change at once, a form opened later as it loads, and a form opened on its own reads it too.
+- **Larger and Largest** enlarge the form, its text and its grids, by 15 and 30 per cent, inside the form only (the
+  workstation's dialogs with it); the form lays itself out for the width that leaves, as it does on a narrower screen.
+  Every form was checked at Largest on an upright iPad's width: none scrolls sideways.
+- **High contrast** makes the text black and darkens the grey notes, the field borders and the focus ring, in the forms
+  and the workstation.
+- **Paper is never changed**: all of it is for the screen only; a form prints exactly as with the setting off.
+- **Form OB-1**: the checkbox of *Time each episode* was stretched across the row, so its words sat past the sheet's
+  edge; it keeps its own size now, its words beside it.
+- qa/i249-view-test.js (8 checks).
+
 ### v23.62: The packet is built sooner, and its window is lighter (review I240)
 
 - **Two forms at a time.** Build master print loads, fills and collects two forms at a time, in the packet's order (it

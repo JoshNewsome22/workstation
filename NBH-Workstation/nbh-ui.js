@@ -1347,3 +1347,14 @@ try { (function(){
 
 
 })(); } catch (e) {}
+/* v23.63 (review I249) text size and contrast, on screen only: the workstation's choice (localStorage nbh.view, which a
+   form opened on its own reads too), told to the form as it loads and when it changes */
+try { (function(){
+  var R = document.documentElement, KEY = 'nbh.view';
+  function apply(v){ v = v || {}; R.classList.toggle('nbh-tx-1', v.t === 1); R.classList.toggle('nbh-tx-2', v.t === 2); R.classList.toggle('nbh-hc', !!v.hc); }
+  function read(){ try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } }
+  apply(read());
+  window.addEventListener('storage', function(e){ if (e.key === KEY) apply(read()); });
+  window.addEventListener('message', function(e){ var d = e.data; if (d && d.nbh === 'view' && e.source === window.parent) apply(d.v); });
+  (window.nbhUI || (window.nbhUI = {})).view = { apply: apply, read: read };
+})(); } catch (e) {}

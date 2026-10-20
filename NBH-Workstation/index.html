@@ -597,6 +597,12 @@
   --sans:"Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;
   --rail:322px; --radius:6px;
 }
+/* v23.63 (review I249) text size (the dialogs; the forms enlarge themselves) and high contrast, on screen only */
+@media screen{html.nbh-tx-1 #dlg{zoom:1.15} html.nbh-tx-2 #dlg{zoom:1.3}
+  html.nbh-hc{--ink:#000;--muted:#263238;--rule:#5e7673;--rule2:#3f5654;--focus:#0a4f75}
+  html.nbh-hc body{color:#000} html.nbh-hc .hint{color:#263238} html.nbh-hc :focus-visible{outline:3px solid #0a4f75 !important;outline-offset:2px}
+  .hp-view{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;margin:6px 0 10px} .hp-view [role=group]{display:inline-flex;gap:4px;align-items:center}
+  .hp-view button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{font-family:var(--sans);color:var(--ink);background:var(--paper);display:flex;flex-direction:column;overflow:hidden;
@@ -2585,7 +2591,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.62';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.63';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -4229,6 +4235,7 @@ $('#help').addEventListener('click',()=>{
      '<p>This '+HERE+' keeps, until you remove them: the caseload (each student’s last save), History’s restore points, and the Autosave copies (14 days). They are protected by the '+HERE+'’s passcode, not by the workstation. In <b>Caseload</b>: <b>Forget a student not saved for</b> removes students left unsaved for that long, a card’s <b>Remove</b> takes one student off this '+HERE+', and <b>Remove all student data from this '+HERE+'</b> clears the caseload, History, the Autosave copies and the sounds and pictures kept for them at once. Before handing the '+HERE+' to someone else, save each case and use that last button.</p>')+
    fold('Side by side, fullscreen and the screen',
      '<p><b>Side by side</b> shows two or three open forms as columns, each working on its own (OB-1, MT-1 and ABC-1 together for an observation). <b>Fullscreen</b> puts away the heading, the bar and the list; <kbd>Esc</kbd> or <b>Exit</b> brings them back. This device remembers it: after a reload, or the next time, the next form you open comes up in fullscreen until you leave it. On a wide window the list can be hidden from its own corner. Once a student is loaded the bar folds to one line; <b>Edit details</b> opens it.</p>'+
+     '<p><b>Text size and contrast</b>, on the screen only (paper is never changed); kept on this '+HERE+' for every form:</p><div class="hp-view">'+viewControls()+'</div>'+
      '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper. When you correct the name, ID or grade on the bar, the strip offers to put the correction into the forms that still hold the earlier one (<b>Use … in these forms</b>); it lists what it changed and changes nothing else. A name whose letters changed could be another student’s, so the warning stays and you are asked first; a name the bar never held, one that is not a small correction, or one whose ID says another student, is not offered.</p>')+
    fold('Keyboard',
      '<p><kbd>⌘K</kbd> (or <kbd>Ctrl K</kbd>) opens a box to jump to any form or run any command. <kbd>↑</kbd> and <kbd>↓</kbd> on the list of forms move between forms, <kbd>⌘S</kbd> saves the case, <kbd>⌘P</kbd> prints the open form, <kbd>⌘⇧P</kbd> builds the master print, <kbd>Ctrl⇧F</kbd> is fullscreen.</p>')+
@@ -6979,6 +6986,8 @@ const CMDS=[
   {k:'hand over handover ready check close case missing consent definitions crisis photo',n:'Hand-over check: what the case is missing',s:'command',go:()=>handoverOpen()},
   {k:'print check safari ipad paper orientation landscape backgrounds pdf',n:'Print check: before printing from Safari',s:'command',go:()=>printCheck()},
   {k:'focus one part section at a time large next step mode',n:'Focus: one part of a form at a time',s:'view',go:()=>focusSet(!focusOn())},   /* v21.91 */
+  {k:'text size larger bigger font zoom read',n:'Text size: larger',s:'view',go:()=>viewSet({t:1})},{k:'text size largest biggest font zoom read',n:'Text size: largest',s:'view',go:()=>viewSet({t:2})},
+  {k:'text size normal smaller font',n:'Text size: normal',s:'view',go:()=>viewSet({t:0})},{k:'high contrast dark text low vision bright',n:'High contrast: on or off',s:'view',go:()=>viewSet({hc:!viewGet().hc})},   /* v23.63 */
   {k:'fullscreen focus only the form',n:'Fullscreen: only the form',s:'view',go:()=>setFull(!fullOn())},
   {k:'side by side two three forms split columns at once',n:'Side by side: two or three forms at once',s:'view',go:()=>$('#splitBtn').click()},
   {k:'hide show form list sidebar',n:'Show or hide the form list',s:'view',go:()=>{if(NARROW.matches)setRail(!document.body.classList.contains('rail-open'),true);else setRailHidden(!railHidden(),true);}},
@@ -9970,6 +9979,29 @@ document.addEventListener('click',e=>{if(!(e.target.closest&&e.target.closest('#
   if(id&&!/\.apps\.googleusercontent\.com$/.test(id)){wsUI.toast('A sign-in key (Client ID) ends in .apps.googleusercontent.com.',{kind:'warn'});return;}
   if(id)kvSet('nbh.google.client',id);if(key)kvSet('nbh.google.apikey',key);
   wsUI.toast(id||key?'Kept on this '+HERE+'.':'Nothing to keep: paste a key first.',{kind:id||key?'ok':'warn'});});
+</script>
+<script id="nbh-v2363">
+/* v23.63 (review I249) text size and contrast, on screen only, kept on this device (localStorage nbh.view: t 0 normal, 1
+   larger, 2 largest; hc high contrast) for every form: the open forms are told at once, a form opened later as it loads,
+   and a form opened on its own reads it itself (nbh-ui.js). The workstation's dialogs follow the text size; its contrast
+   follows the setting too. */
+const VIEWKEY='nbh.view';
+function viewGet(){try{const v=JSON.parse(localStorage.getItem(VIEWKEY)||'{}')||{};return {t:[0,1,2].includes(v.t)?v.t:0,hc:!!v.hc};}catch(e){return {t:0,hc:false};}}
+function viewApply(v){const R=document.documentElement;R.classList.toggle('nbh-tx-1',v.t===1);R.classList.toggle('nbh-tx-2',v.t===2);R.classList.toggle('nbh-hc',!!v.hc);
+  document.querySelectorAll('[data-view-t]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.viewT===v.t)));
+  document.querySelectorAll('[data-view-hc]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.viewHc==='1')===!!v.hc)));}
+function viewTell(fr,v){try{fr.contentWindow.postMessage({nbh:'view',v},'*');}catch(e){}}
+function viewSet(ch){const v=Object.assign(viewGet(),ch||{});try{if(!v.t&&!v.hc)localStorage.removeItem(VIEWKEY);else localStorage.setItem(VIEWKEY,JSON.stringify(v));}catch(e){}
+  viewApply(v);Object.values(state.frames).forEach(fr=>viewTell(fr,v));
+  say('Text size '+['normal','larger','largest'][v.t]+', contrast '+(v.hc?'high':'normal')+', on the screen.');}
+function viewControls(){const v=viewGet(),b=(a,n,on)=>'<button type="button" '+a+' aria-pressed="'+on+'">'+n+'</button>';
+  return '<span role="group" aria-label="Text size">Text size '+b('data-view-t="0"','Normal',v.t===0)+b('data-view-t="1"','Larger',v.t===1)+b('data-view-t="2"','Largest',v.t===2)+'</span>'+
+    '<span role="group" aria-label="Contrast">Contrast '+b('data-view-hc="0"','Normal',!v.hc)+b('data-view-hc="1"','High',v.hc)+'</span>';}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-view-t],[data-view-hc]');if(!b)return;
+  if(b.dataset.viewT!==undefined)viewSet({t:+b.dataset.viewT});else viewSet({hc:b.dataset.viewHc==='1'});});
+document.addEventListener('load',ev=>{const fr=ev.target;if(fr&&fr.tagName==='IFRAME'){const v=viewGet();if(v.t||v.hc)viewTell(fr,v);}},true);
+window.addEventListener('storage',e=>{if(e.key!==VIEWKEY)return;const v=viewGet();viewApply(v);Object.values(state.frames).forEach(fr=>viewTell(fr,v));});
+viewApply(viewGet());
 </script>
 </body>
 </html>
