@@ -27,7 +27,7 @@ const measure=()=>{const vis=e=>{const r=e.getBoundingClientRect();return r.widt
     const z=parseFloat(getComputedStyle(p.closest('.sheet')||document.body).zoom)||1;return p.getBoundingClientRect().width/z>81*ch/z+1;}).map(p=>(p.textContent||'').trim().slice(0,40));
   return {fields:F.length,ul,box:box.length,was,bad:bad.slice(0,4),labs:labs.length,labMin:labs.length?Math.min(...labs):null,small:small.length,prose:prose.length,wide:wide.slice(0,3),wideN:wide.length};};
 const pdfText=(shell,buf)=>shell.evaluate(async b64=>{const lib=await pdfjsLoad();const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const pdf=await lib.getDocument({data:bytes}).promise;const out=[];
-  for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();out.push(tc.items.filter(t=>t.str&&t.str.trim()).map(t=>{let s=t.str.trim();if(/\bSeries \d: control\b|randomized order/.test(s))s=s.replace(/Item \d+/g,'Item n');/* PA-1 draws a random item order on every open */return s+'@'+Math.round(t.transform[4])+','+Math.round(t.transform[5]);}).join('|'));}
+  for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();out.push(tc.items.filter(t=>t.str&&t.str.trim()).map(t=>{let s=t.str.trim();if(/\bSeries \d: control\b|randomized order/.test(s))s=s.replace(/Item \d+/g,'Item n');/* PA-1 draws a random item order on every open */s=s.replace(/\b\d{1,2}:\d{2}\s?(AM|PM)\b/g,'H:MM $1');/* the time a page was printed (CR-1's statuses) may turn over a minute between the two prints */return s+'@'+Math.round(t.transform[4])+','+Math.round(t.transform[5]);}).join('|'));}
   return out;},Buffer.from(buf).toString('base64'));
 (async()=>{const br=await chromium.launch();
   try{
