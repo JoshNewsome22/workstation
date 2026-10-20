@@ -1089,6 +1089,7 @@ dialog tr:nth-child(even) td{background:#fafcfb}
 #dlg .sh-sum{margin:6px 0 10px;padding-left:20px}#dlg .sh-sum li{margin:2px 0}#dlg .sh-pick{min-height:32px}
 #dlg .sh-both{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 4px}
 #dlg .sh-c{border-top:1px solid var(--line,#d5dde3);padding:8px 0}#dlg .sh-c-h{margin-bottom:4px}
+#dlg .sh-drv{border:1px solid var(--line,#d5dde3);border-radius:8px;padding:6px 10px;margin:4px 0 8px}
 #dlg .sh-c label{display:flex;gap:8px;align-items:flex-start;min-height:36px;padding:2px 0;word-break:break-word}
 #dlg .hp-data{width:100%;border-collapse:collapse;margin:6px 0 10px}#dlg .hp-data th,#dlg .hp-data td{vertical-align:top;text-align:left;font-size:13px;line-height:1.45;padding:6px 8px;border-top:1px solid var(--rule,#dfe6e4)}#dlg .hp-steps{margin:0 0 12px;padding-left:22px}#dlg .hp-steps li{margin:4px 0}
 #dlg details{border:1px solid var(--rule);border-radius:6px;padding:6px 12px;margin:6px 0;background:#fff}
@@ -2566,7 +2567,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.53';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.54';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -4140,6 +4141,7 @@ function dataWhere(){
     ['The caseload, its history (restore points) and Autosave copies','This browser on this '+HERE+', protected by its passcode','Until you remove them, or the time set in Caseload (<i>Forget a student not saved for</i>); Autosave copies 14 days. <b>Remove all student data from this '+HERE+'</b> clears them'],
     ['Sound tracks, pictures and the student photo (the media store)','This browser on this '+HERE+', protected by its passcode','While a caseload record, a restore point, an Autosave copy or the case on screen refers to them; a student removed takes the ones only they used. <b>Remove all student data from this '+HERE+'</b> clears them'],
     ['Case files (<b>Save case</b>, or <b>Save case to a file</b> with Google Drive on)','Where you save them: the district drive','As the district keeps records'],
+    ['<b>Share in Drive</b> (only when you use it, with Google Drive on)','The student\u2019s case file in your school Google Drive, opened to the colleague\u2019s school account (that one file); their workstation keeps a copy on their '+HERE+'','Until you press <b>Stop sharing</b>; their copy until they remove it'],
     ['<b>Share for editing</b> (only when you use it)','The file you send (through school email or AirDrop): the forms you tick and what you and the colleague last had in common; on this '+HERE+', that starting point for the next file','On this '+HERE+': until the student leaves the caseload here, or <b>Remove all student data from this '+HERE+'</b>; the colleague takes their copy off their '+HERE+' (Caseload, the student\u2019s card, Remove)'],
     ['<b>Use Google Drive</b> (only if you turn it on, in Caseload)','Each student\u2019s case, in your school Google Drive (the folder '+DRV_FOLDER+'); the workstation sees only the files it made there','Until removed, then 30 days in Drive\u2019s trash; a copy not kept in a clash (Replaced copies) '+(typeof drvKeepDays==='function'?drvKeepDays():30)+' days'],
     ['Questionnaires sent by email (only when you press Send)','One email per person from your school account through Gmail; the link names the student by initials and the behavior asked about','In your Gmail Sent folder'],
@@ -4170,6 +4172,7 @@ $('#help').addEventListener('click',()=>{
    fold('Working on a case with a colleague',   /* v23.52 */
      '<p><b>More</b>, <b>Share for editing</b> writes a copy of the case for a colleague who is helping with it: the forms you tick, in a file named for the student and the colleague. Send it through your school email or AirDrop. They open it with <b>Open case</b> in the workstation (the website: nothing to install), work in the forms as usual, and send it back with <b>More</b>, <b>Share for editing</b>. You can both keep working while the file is away.</p>'+
      '<p>When their file comes back, open it with <b>Open case</b>. It does not replace your case: the workstation puts the two together. What only they changed is taken, what only you changed stays, entries either of you added are all kept, and an entry one of you removed goes (unless the other changed it). Where you both changed the same thing, the two are shown side by side and you choose (yours until you do). A summary says what came in; then <b>Save case</b> as usual. The next file you send starts from what you both had, so it is put together the same way at their end.</p>'+
+     '<p><b>Through Google Drive</b> (with Google Drive on, Caseload): in <b>Share for editing</b>, give the colleague\u2019s school email and press <b>Share in Drive</b>. Google lets their account open that one case file and nothing else of yours. In their workstation, with Google Drive on and their school account: Caseload, <b>Open a case shared with me</b>, and pick it in Google\u2019s window. From then on there is no file to send: each <b>Save case</b>, yours or theirs, goes to that one file in your Drive, and the next sync on the other side puts the two together the same way. <b>Stop sharing</b> (in Share for editing) takes them off it; their copy stays on their '+HERE+' until they remove it (their Remove takes it off their '+HERE+' only). Google\u2019s window needs a Google API key on their '+HERE+': in Google Cloud, the project of the sign-in key, APIs &amp; Services, Library, turn on the Google Picker API; then Credentials, Create credentials, API key, limited to the Google Picker API and the workstation\u2019s web address; the workstation asks for it the first time.</p>'+
      '<p>The file is the student\u2019s record: send it only through school accounts or AirDrop, and when the colleague is done they take it off their '+HERE+' (Caseload, the student\u2019s card, Remove). This '+HERE+' keeps what you and the colleague last had in common, until the student leaves the caseload here.</p>')+
    fold('Printing and the PDF',
      '<p>Tick the forms this student needs and press <b>Build master print</b>: one document that reads as a report: a cover with the contents, then each form as a section with its own running head, its letterhead once and its sheets running on; the forms’ guides, reference lists and on-screen notes stay out, the references gathered in a last section. <b>Packet options</b> (under the list of forms) keeps a form’s Guide, puts the references with each form or leaves them out, prints Form ABC-1’s log in full, and prints the empty boxes meant for handwriting. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
@@ -6896,6 +6899,7 @@ const CMDS=[
   {k:'finish pdf bookmark outline sidebar page numbers contents',n:'Finish a packet PDF',s:'command',go:()=>$('#bookmarkPdf').click()},
   {k:'save case',n:'Save case',s:'command',go:()=>$('#saveCase').click()},
   {k:'open case',n:'Open case',s:'command',go:()=>$('#openCase').click()},
+  {k:'shared with me google drive colleague open',n:'Open a case shared with me (Google Drive)',s:'command',go:()=>drvShOpen()},
   {k:'share edit colleague helper send back together merge relay',n:'Share for editing: a copy of the case for a colleague, put back together when it returns',s:'command',go:()=>$('#shareEdit').click()},
   {k:'close case next student finish',n:'Close case: save it, then clear for the next student',s:'command',go:()=>$('#closeCase').click()},
   {k:'spreadsheet excel numbers xlsx csv export the case as data workbook',n:'Case as spreadsheet (.xlsx)',s:'command',go:()=>$('#caseXlsx').click()},
@@ -7136,7 +7140,7 @@ async function drvList(){const fid=await drvFolder();
 function drvMultipart(meta,body){const b='nbh-'+Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>x.toString(16).padStart(2,'0')).join('');
   return {headers:{'Content-Type':'multipart/related; boundary='+b},body:'--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+body+'\r\n--'+b+'--'};}
 const drvName=r=>(String(r.client||'').trim()||'Case')+(r.sid?' ('+String(r.sid).trim()+')':'')+'.json';
-const drvBody=async r=>JSON.stringify({nbh:'case-sync',v:1,rec:{client:r.client||'',sid:r.sid||'',site:r.site||'',grade:r.grade||'',bcba:r.bcba||'',saved:r.saved||'',sum:r.sum||{items:[]},dev:r.dev||drvDev(),read:r.read||undefined},text:await mediaOut(r.text||'')});   /* v22.56 the sounds and pictures travel with the case */
+const drvBody=async r=>JSON.stringify({nbh:'case-sync',v:1,rec:{client:r.client||'',sid:r.sid||'',site:r.site||'',grade:r.grade||'',bcba:r.bcba||'',saved:r.saved||'',sum:r.sum||{items:[]},dev:r.dev||drvDev(),read:r.read||undefined,by:drvAcct()||undefined},text:await mediaOut(r.text||'')});   /* v23.54 by: the account it came from */   /* v22.56 the sounds and pictures travel with the case */
 /* v21.97 Google's multipart upload takes a body of 5 MB at most; a larger case goes up the resumable way (the metadata first,
    Google answers with an address for the content, the content goes to that address in one PUT). Under DRV_BIG bytes the one
    multipart request stays, as before. */
@@ -7236,7 +7240,8 @@ async function drvSync(opt){opt=opt||{};if(!drvOn())return null;
       drvLs('nbh.drive.tidy',String(Date.now()));}}catch(e){}
     const remote=await drvList(),L=await clList()||[],skip=drvSkip(),byK={},here={};
     remote.forEach(f=>{const k=f.appProperties&&f.appProperties.k;if(!k)return;const o=byK[k];if(!o||String(f.modifiedTime)>String(o.modifiedTime))byK[k]=f;});
-    for(const r of L){const k=drvKey(r);if(k)here[await drvHash(k)]=r;}
+    const shin=typeof drvShIn==='function'?await drvShIn():new Map();   /* v23.54 a case shared with this account: synced through its own file, below */
+    for(const r of L){const k=drvKey(r);if(k&&!shin.has(r.key))here[await drvHash(k)]=r;}
     for(const k of Object.keys(byK)){const f=byK[k],r=here[k],gone=f.appProperties.nbh==='gone';
       if(!r){if(gone||(k in skip&&skip[k]===String(f.version)))continue;const n=await drvBring(f,null);if(n){res.got++;res.names.push(clName(n));res.from.push({who:drvIni(n),dev:n.dev||''});}continue;}
       const d=r.drv||{dirty:true};
@@ -7252,6 +7257,7 @@ async function drvSync(opt){opt=opt||{};if(!drvOn())return null;
       await drvClash(r,f,k,opt,res);}
     /* here and not in Drive (new here, or its file was taken out of the folder): it goes up as a new file */
     for(const k of Object.keys(here)){if(byK[k])continue;await drvPut(here[k],'',k);res.sent++;res.up.push(drvIni(here[k]));}
+    if(shin.size&&typeof drvShSync==='function')await drvShSync(shin,L,opt,res);   /* v23.54 */
     try{await pplDrv();}catch(e){if(e&&(e.signin||e.net))throw e;}   /* v22.35 the staff directory's file, merged */
     Object.keys(DRV.conf).forEach(key=>{if(!L.some(r=>r.key===key))delete DRV.conf[key];});
   }catch(e){DRV.err=e&&e.signin?'':String(e&&e.message||e);if(e&&e.net)DRV.err='Google Drive could not be reached.';}
@@ -7335,7 +7341,7 @@ function drvBoxHtml(){if(!drvAvail())return '';
   const tok=drvTok(),nc=Object.keys(DRV.conf).length;
   return '<div class="cl-drive on" id="drvBox"><b>Google Drive<\/b> <span>'+esc(drvAcct())+' · this device: <b>'+esc(drvDev())+'<\/b> <button type="button" class="sm" id="drvRename">Rename<\/button><\/span>'+
     '<span class="hint" id="drvState">'+(nc?nc+' student'+(nc===1?'':'s')+' to decide (tap Sync now). ':'')+(DRV.wait?DRV.wait+' waiting to go up. ':'')+(DRV.err?esc(DRV.err)+' ':'')+(!tok?'Signed out (Google’s sign-in lasts an hour). ':DRV.last?'Last sync '+esc(new Date(DRV.last).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}))+'. ':'')+'<\/span>'+
-    ' <button type="button" class="primary" id="drvNow">'+(tok?'Sync now':'Sign in and sync')+'<\/button> <button type="button" id="drvHolds">What Drive holds<\/button> <button type="button" id="drvAct">Sync activity<\/button> <button type="button" id="drvOff">Stop using Drive here<\/button><\/div>';}
+    ' <button type="button" class="primary" id="drvNow">'+(tok?'Sync now':'Sign in and sync')+'<\/button> <button type="button" id="drvShOpen">Open a case shared with me<\/button> <button type="button" id="drvHolds">What Drive holds<\/button> <button type="button" id="drvAct">Sync activity<\/button> <button type="button" id="drvOff">Stop using Drive here<\/button><\/div>';}
 {const co9=caseloadOpen;caseloadOpen=async function(){const out=await co9.apply(this,arguments);
   try{const b=$('#dlgBody');if(!b||b.querySelector('#drvBox'))return out;const h=b.querySelector('.hp-lead');
     const kp=b.querySelector('#clKeep');if(kp&&(Object.keys(DRV.conf||{}).length||DRV.err))kp.open=true;   /* v21.92 */
@@ -9787,7 +9793,7 @@ async function drvMerge(r,f,k,j,opt,res){let base,mine,theirs,tt;
   try{base=parseCase(r.drv.base);mine=parseCase(r.text);tt=await mediaPackText(j.text);theirs=parseCase(tt);}catch(e){return false;}
   if(!base||!mine||!theirs||!mine.forms||!theirs.forms)return false;
   const M=nbhMerge.mergeCase(base,mine,theirs),rd=(j.rec&&j.rec.dev)||(f.appProperties&&f.appProperties.dev)||'other device',
-    who=(j.rec&&j.rec.by)?String(j.rec.by):'the '+rd,rs=(j.rec&&j.rec.saved)||f.modifiedTime;
+    who=(j.rec&&j.rec.by&&j.rec.by!==drvAcct())?drvPerson(j.rec.by):'the '+rd,rs=(j.rec&&j.rec.saved)||f.modifiedTime;
   if(M.conflicts.length){if(!opt.interactive){DRV.conf[r.key]=1;return true;}
     if(!(await shReview(M,{from:who,drive:true},clName(r)))){DRV.conf[r.key]=1;return true;}
     delete DRV.conf[r.key];}
@@ -9802,6 +9808,99 @@ async function drvMerge(r,f,k,j,opt,res){let base,mine,theirs,tt;
 {const ds=drvSync;drvSync=async function(){const res=await ds.apply(this,arguments);
   try{if(res&&res.merged&&res.merged.length)wsUI.toast(res.merged.join(', ')+': the two copies were put together; the work from both is kept.',{kind:'ok',ms:8000});}catch(e){}
   return res;};}
+</script>
+<script id="nbh-v2354">
+/* v23.54 a case shared in Google Drive with a colleague's school account (see the header of this release in SETUP.md) */
+function drvPerson(email){email=String(email||'');try{const L=JSON.parse(localStorage.getItem(PPL)||'null');const p=L&&(L.list||[]).find(x=>String(x.email||'').toLowerCase()===email.toLowerCase());if(p&&p.name)return p.name;}catch(e){}return email;}
+/* every case shared with this account, a lost one too: never uploaded as a case of this account's own (SHIN: the same, at hand for a tap) */
+const SHIN=new Set();
+async function drvShIn(){const m=new Map();for(const r of await shAll())if(r.kind==='drive'&&r.role==='helper'&&r.caseKey)m.set(r.caseKey,r);SHIN.clear();m.forEach((v,k)=>SHIN.add(k));return m;}
+setTimeout(()=>{drvShIn().catch(()=>{});},500);
+/* the colleague's side: each case shared with them, through its own file (not their folder) */
+async function drvShSync(shin,L,opt,res){
+  for(const [key,sh] of shin){const r=L.find(x=>x.key===key);if(!r||sh.lost)continue;let f;
+    try{f=await drvJson(DAPI+'/'+encodeURIComponent(sh.fileId)+'?fields=id,version,modifiedTime,appProperties,trashed');}
+    catch(e){if(e&&(e.gone||e.status===403)){sh.lost=new Date().toISOString();await shPut(sh);wsUI.toast(clName(r)+'’s case is no longer shared with you'+(sh.owner?' by '+drvPerson(sh.owner):'')+'. Your copy stays on this '+HERE+' until you remove it.',{kind:'warn',ms:12000});continue;}throw e;}
+    if(f.trashed){sh.lost=new Date().toISOString();await shPut(sh);wsUI.toast(clName(r)+'’s case was removed from '+(sh.owner?drvPerson(sh.owner)+'’s':'its')+' Google Drive. Your copy stays on this '+HERE+' until you remove it.',{kind:'warn',ms:12000});continue;}
+    const k=await drvHash(drvKey(r)),d=r.drv||{dirty:true};
+    if(!d.dirty){if(d.id===f.id&&String(d.ver)===String(f.version))continue;const n=await drvBring(f,r);if(n){res.got++;res.names.push(clName(r));res.from.push({who:drvIni(r),dev:n.dev||''});}continue;}
+    if(d.id===f.id&&String(d.ver)===String(f.version)){await drvPut(r,f.id,k);res.sent++;res.up.push(drvIni(r));continue;}
+    await drvClash(r,f,k,opt,res);}}
+/* the BCBA's side: Share in Drive, from Share for editing */
+async function drvShWith(){const k=clKey(packet());return (await shAll()).filter(r=>r.kind==='drive'&&r.role==='owner'&&r.caseKey===k);}
+async function drvShPaint(){const db=$('#dlgBody');if(!db||!db.querySelector('#shGoOut')||db.querySelector('#shDrv'))return;
+  if(!drvOn()||/^Send back/.test($('#dlgTitle').textContent))return;
+  const L=await drvShWith(),w=[].concat(...L.map(r=>(r.with||[]).map(x=>Object.assign({fileId:r.fileId},x))));
+  const box=document.createElement('div');box.id='shDrv';box.className='sh-drv';
+  box.innerHTML='<p><b>Through Google Drive</b>: nothing to send. Each Save case, yours or theirs, goes to this student’s file in your Drive and is put together at the other side’s next sync. Their workstation needs Google Drive on, with their school account.</p>'+
+    '<div class="sh-row"><label for="shDrvMail">Their school email</label><input id="shDrvMail" type="email" autocomplete="off" list="shPplMail" placeholder="name@school"><datalist id="shPplMail"></datalist><button type="button" class="primary" id="shDrvGo">Share in Drive</button></div>'+
+    (w.length?'<p class="hint">Shared in Drive with: '+w.map(x=>esc(drvPerson(x.email))+' <button type="button" class="sm" data-shstop="'+esc(x.perm)+'" data-shfile="'+esc(x.fileId)+'">Stop sharing</button>').join(' · ')+'</p>':'')+
+    '<p class="hint" style="margin-top:10px"><b>Or as a file you send</b>:</p>';
+  db.insertBefore(box,db.querySelector('.sh-row'));
+  try{const ppl=((await pplLoad())||{}).list||[];$('#shPplMail').innerHTML=ppl.filter(x=>x.email).map(x=>'<option value="'+esc(x.email)+'">'+esc(x.name||'')+'</option>').join('');}catch(e){}}
+{const so=shOpen;shOpen=async function(){const out=await so.apply(this,arguments);try{await drvShPaint();}catch(e){}return out;};}
+async function drvShShare(email){
+  email=String(email||'').trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){wsUI.toast('Their school email, please.',{kind:'warn'});return;}
+  if(drvAcct()&&email.toLowerCase()===drvAcct().toLowerCase()){wsUI.toast('That is your own account.',{kind:'warn'});return;}
+  const p=packet(),k=clKey(p);if(!k){alert('Put the student’s name on the bar first.');return;}
+  if(!drvTok()){try{await drvAsk();}catch(e){alert('Google did not sign in: '+(e&&e.message||e));return;}}
+  let r=await drvLocal(k);
+  if(!r||!r.drv||!r.drv.id||r.drv.dirty){if(!(await saveCase()))return;await drvIdle();await drvSync({interactive:true});await drvIdle();r=await drvLocal(k);}
+  if(!r||!r.drv||!r.drv.id){alert('The case is not in your Google Drive yet. Save case, let it sync (the Drive chip), then share it.');return;}
+  let perm;try{perm=await drvJson(DAPI+'/'+encodeURIComponent(r.drv.id)+'/permissions?sendNotificationEmail=false&fields=id',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:'writer',type:'user',emailAddress:email})});}
+  catch(e){alert('Google Drive did not share it: '+(e&&e.message||e));return;}
+  const id='drive:'+r.drv.id,sh=(await shGet(id))||{id,kind:'drive',role:'owner',fileId:r.drv.id,caseKey:k,client:p.client,with:[]};
+  sh.with=(sh.with||[]).filter(x=>x.email.toLowerCase()!==email.toLowerCase()).concat([{email,perm:perm&&perm.id||'',at:new Date().toISOString()}]);await shPut(sh);
+  try{$('#dlg').close();}catch(e){}
+  await wsUI.alert(clName(r)+'’s case is shared with '+drvPerson(email)+' in your Google Drive.\nIn their workstation, with Google Drive on and their school account: Caseload, Open a case shared with me, and pick it. From then on, each Save case, yours or theirs, is put together at the other side’s next sync. Stop sharing is in Share for editing.');}
+async function drvShStop(fileId,perm){
+  if(!(await wsUI.confirm('Stop sharing this case?\nTheir account can no longer open the file in your Drive. Their copy stays on their device until they remove it.',{ok:'Stop sharing',danger:true})))return;
+  try{await drvFetch(DAPI+'/'+encodeURIComponent(fileId)+'/permissions/'+encodeURIComponent(perm),{method:'DELETE'});}catch(e){if(!(e&&e.gone)){alert('Google Drive did not stop it: '+(e&&e.message||e));return;}}
+  const sh=await shGet('drive:'+fileId);if(sh){sh.with=(sh.with||[]).filter(x=>x.perm!==perm);if(sh.with.length)await shPut(sh);else await shDel(sh.id);}
+  try{$('#dlg').close();}catch(e){}wsUI.toast('Sharing stopped.',{kind:'ok'});}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#shDrvGo,[data-shstop],#drvShOpen');if(!t)return;
+  if(t.id==='shDrvGo'){drvShShare($('#shDrvMail').value);return;}
+  if(t.dataset.shstop){drvShStop(t.dataset.shfile,t.dataset.shstop);return;}
+  if(t.id==='drvShOpen'){drvShOpen();return;}});
+/* the colleague's side: Open a case shared with me, through Google's file picker */
+function drvPickerLoad(){return new Promise((res,rej)=>{if(window.google&&google.picker){res();return;}
+  const go=()=>{try{gapi.load('picker',{callback:()=>res(),onerror:()=>rej(new Error('Google’s file window did not load.'))});}catch(e){rej(e);}};
+  if(window.gapi){go();return;}const sc=document.createElement('script');sc.src='https://apis.google.com/js/api.js';sc.onload=go;sc.onerror=()=>rej(new Error('Google’s file window could not be reached.'));document.head.appendChild(sc);});}
+async function drvApiKey(){let key=kvGet('nbh.google.apikey');if(key)return key;
+  dialog('Google API key','<p class="hp-lead">Google’s window for choosing a shared file needs an API key from the same Google Cloud project as the sign-in key.</p>'+
+    '<p>In Google Cloud: APIs &amp; Services, Library, turn on the <b>Google Picker API</b>. Then Credentials, Create credentials, <b>API key</b>; limit it to the Google Picker API and to the workstation’s web address. Paste it here once; it stays on this '+HERE+'.</p>'+
+    '<div class="sh-row"><label for="shKey">API key</label><input id="shKey" autocomplete="off" spellcheck="false"></div><div class="sh-foot"><button type="button" id="shKeyNo">Cancel</button><button type="button" class="primary" id="shKeyGo">Keep it</button></div>');
+  return await new Promise(res=>{const db=$('#dlgBody');const on=e=>{if(e.target.closest('#shKeyGo')){const v=$('#shKey').value.trim();if(!v){$('#shKey').focus();return;}kvSet('nbh.google.apikey',v);fin(v);}else if(e.target.closest('#shKeyNo'))fin('');};
+    let over=false;const fin=v=>{if(over)return;over=true;db.removeEventListener('click',on);try{$('#dlg').close();}catch(e){}res(v);};db.addEventListener('click',on);$('#dlg').addEventListener('close',()=>fin(''),{once:true});});}
+async function drvShOpen(){
+  if(!drvOn()){alert('Turn Google Drive on first (Caseload, Use Google Drive), with your school account.');return;}
+  if(!drvTok()){try{await drvAsk();}catch(e){alert('Google did not sign in: '+(e&&e.message||e));return;}}
+  const key=await drvApiKey();if(!key)return;
+  try{await drvPickerLoad();}catch(e){alert(e&&e.message||String(e));return;}
+  const P=google.picker,app=String(clGid()||'').split('-')[0];
+  const fileId=await new Promise(res=>{try{const v=new P.DocsView(P.ViewId.DOCS).setOwnedByMe(false).setMimeTypes('application/json').setIncludeFolders(false);
+    new P.PickerBuilder().addView(v).setOAuthToken(drvTok().tok).setDeveloperKey(key).setAppId(app).setTitle('A case shared with you').setCallback(d=>{
+      if(d.action===P.Action.PICKED)res(d.docs&&d.docs[0]&&d.docs[0].id||'');else if(d.action===P.Action.CANCEL)res('');}).build().setVisible(true);}catch(e){alert('Google’s file window: '+(e&&e.message||e));res('');}});
+  if(fileId)await drvShTake(fileId);}
+async function drvShTake(fileId){let f,j;
+  try{f=await drvJson(DAPI+'/'+encodeURIComponent(fileId)+'?fields=id,version,modifiedTime,appProperties,owners(emailAddress,displayName)');j=await drvRead(fileId);}
+  catch(e){alert(e&&e.gone?'That file could not be opened: it may no longer be shared with you.':'That file could not be opened: '+(e&&e.message||e));return;}
+  if(j.nbh!=='case-sync'){alert('That file is not a workstation case.');return;}
+  const x=j.rec||{},key=clKey({client:x.client||'',sid:x.sid||''}),owner=(f.owners&&f.owners[0]&&f.owners[0].emailAddress)||x.by||'';
+  if(!key){alert('That case has no student name.');return;}
+  const old=await drvLocal(key);
+  if(old&&!(await wsUI.confirm(clName(old)+' is on this '+HERE+' already.\nThe shared case takes its place here (your copy goes to Replaced copies in your Drive first, so nothing is lost).',{ok:'Use the shared case'})))return;
+  if(old){try{await drvKeepOld(old,'before a shared copy took its place');}catch(e){}}
+  const rec=await drvBring(f,old||null,j);if(!rec){alert('The shared case could not be kept on this '+HERE+'. Try again in a moment.');return;}
+  await shPut({id:'drive:'+fileId,kind:'drive',role:'helper',fileId,caseKey:key,client:x.client||'',owner,at:new Date().toISOString()});await drvShIn();
+  wsUI.toast(clName(rec)+'’s case, shared by '+drvPerson(owner)+', is on this '+HERE+'. Save case sends your work to it; theirs comes here at each sync.',{kind:'ok',ms:10000});
+  try{$('#dlg').close();}catch(e){}await caseloadGo(key,'');}
+/* the colleague's Remove: off this device only (the file is the BCBA's); on the window, so it comes before Drive's own Remove */
+window.addEventListener('click',async e=>{const d=e.target.closest&&e.target.closest('[data-cldel]');if(!d||!SHIN.has(d.dataset.cldel))return;e.stopImmediatePropagation();e.preventDefault();
+  const sh=(await drvShIn()).get(d.dataset.cldel);if(!sh)return;
+  const r=await drvLocal(d.dataset.cldel);if(!r)return;
+  if(!(await wsUI.confirm('Take '+clName(r)+' off this '+HERE+'?\nThe case stays in '+drvPerson(sh.owner||'the owner')+'’s Google Drive; ask them to stop sharing it when your part is done.',{ok:'Remove',danger:true})))return;
+  try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}await shDel(sh.id);await drvShIn();caseloadOpen();},true);
 </script>
 </body>
 </html>

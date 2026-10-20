@@ -9903,6 +9903,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.54: A case shared in Google Drive with a colleague's school account: no file to send, both people's work put together
+
+The BCBA asked for it (October 2026), after the file relay.
+
+- **Share in Drive** (Share for editing, with Google Drive on): the colleague's school email (the staff directory offers
+  it), and Google lets their account open that one student's case file in the BCBA's Drive, nothing else. Google sends no
+  email; the workstation says where the colleague opens it. **Stop sharing** is in the same place.
+- **The colleague**, with Google Drive on and their school account: Caseload, **Open a case shared with me** (also a
+  command), and pick it in Google's window. The case opens on their device. Their Save case goes to that one file (never a
+  copy of their own in their Drive), and their next sync brings the BCBA's work; two changed copies are put together
+  (v23.53), and an answer both changed is shown side by side naming the person (the account it came from, or their name in
+  the staff directory), not "the iPad".
+- **When sharing stops** (or the file is removed), the colleague is told once at their next sync; their copy stays on
+  their device until they remove it, and it is never uploaded to their own Drive. Their **Remove** takes it off their
+  device only; the BCBA's file is untouched.
+- **Google's window** needs a Google API key on the colleague's device, from the same Google Cloud project as the sign-in
+  key (Google Picker API turned on; an API key limited to it and to the workstation's address). The workstation asks for it
+  the first time and keeps it on the device. Help, Working on a case with a colleague, says how; Where the student's data
+  goes has a row for it.
+- qa/drive-share-test.js (14 checks: two accounts on one simulated Google Drive, the picker simulated).
+
 ### v23.53: Google Drive puts two changed copies of a student together, instead of asking which one to keep
 
 - **Two copies, both changed** (the iPad and the laptop, each saved without the other's latest): the workstation now puts
