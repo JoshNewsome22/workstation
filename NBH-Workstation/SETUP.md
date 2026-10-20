@@ -9903,6 +9903,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.57: A case opens to the one form you came for (review I239, F469)
+
+- **Open DD-1** (or any Open on a student's caseload card, in What needs you, in Find, or Log it now) opens the student's
+  case with that form loaded first, and alone. It used to load the form that was open when the case was saved, wait for it
+  (up to 12 seconds), and only then the one asked for. A form the case does not hold yet opens on its own, as before.
+- **The case's other forms load when they are opened**, not in the background. Each is filled from the case file the first
+  time it is opened, in about a second. On the 15-form simulated case the background loading cost 12 to 13 seconds of work,
+  about 35 MB and some 94,000 page elements at every student switch on an iPad. A device can keep the old way: localStorage
+  `nbh.warm` set to `on`.
+- **Due dates go into the case file with each form**, so Today's Due list holds the forms not loaded yet; before, it held
+  only the loaded forms' (at most eight). A form not loaded keeps what the file says it has due; a loaded one says it again.
+- Help says each of the case's other forms loads when it is opened.
+- qa/i239-one-form-test.js (13 checks); qa/case-open-test.js checks the background loading on a device that keeps it.
+
 ### v23.56: Help covers the workstation as it is, and Google is set up from one place (review F513, F514, I263)
 
 - **Help, The staff directory, questionnaires and the rest** (F513: Help said nothing of them): the staff directory and @

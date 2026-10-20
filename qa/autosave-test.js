@@ -152,7 +152,10 @@ S.taps = async br => {
   await reload(page);
   const txt = await offerText(page);
   SAY(txt && /Unsaved work found/.test(txt) && ids.every(id => txt.includes(id)), 'reload: the offer lists the copy with MT-1, PA-1, SP-1', (txt || '').slice(0, 200));
-  await clickRow(page, 'MT-1', 'r'); await waitFrames(page, 3);
+  await clickRow(page, 'MT-1', 'r'); await waitFrames(page, 1);
+  /* v23.57 (review I239) the copy's other forms are listed and load when opened, not in the background: each is opened */
+  for (const id of ids) await page.evaluate(id => { openForm(id); return settled(id, 20000); }, id);
+  await sleep(1500);
   for (const id of ids) { const fr = frameOf(page, id); const after = fr ? await ownText(fr) : null; SAY(after === before[id], id + ': taps came back after reload and Restore', { len: [before[id].length, after && after.length] }); }
   SAY(!log.some(l => /pageerror/.test(l)), 'taps: no script errors', log.filter(l => /pageerror/.test(l)));
   await ctx.close();

@@ -6,6 +6,8 @@
    4. Save case right after Open case writes every form, the ones not loaded exactly as the file held them, with the form to open first.
    5. Close case clears the waiting forms too; a file without cur opens its first form; an edit marks the case unsaved, Save case
       clears it, and the forms that load quietly afterwards do not mark it unsaved again. No page errors.
+   v23.57 (review I239) the quiet loading is kept only on a device that asks for it (nbh.warm = on), as this test does;
+   qa/i239-one-form-test.js checks that without it nothing loads in the background.
    usage: node qa/case-open-test.js   (WS_URL as in qa/lib.js) */
 const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
@@ -13,7 +15,7 @@ const OUT=__dirname+'/out/case-open/';fs.mkdirSync(OUT,{recursive:true});
 const same=(x,y)=>{const ks=Object.keys(x||{});if(!ks.length)return 0;let eq=0;ks.forEach(k=>{if(String(x[k])===String((y||{})[k]))eq++;});return eq/ks.length;};
 (async()=>{const br=await chromium.launch();const page=await br.newPage({viewport:{width:1300,height:900}});const log=[];wire(page,log);
   await page.goto(BASE+'/NBH-Workstation/index.html',{waitUntil:'load'});await sleep(800);
-  await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};try{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};}catch(e){}});   /* wsUI is a script constant, not a window property */
+  await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};try{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};}catch(e){}try{localStorage.setItem('nbh.warm','on');}catch(e){}});   /* wsUI is a script constant, not a window property */
   /* a case of six filled forms, made from the simulations through the shell's own snapshots; TB-1 first in the file, RA-1 the form that was open */
   const IDS=['TB-1','FS-1','PA-1','RA-1','DD-1','OB-1'];
   let made=await page.evaluate(async IDS=>{const forms={};for(const id of IDS){openForm(id);const fr=state.frames[id];await new Promise(r=>{fr.addEventListener('load',r,{once:true});setTimeout(r,20000);});
