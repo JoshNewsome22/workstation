@@ -30,7 +30,9 @@ const IDS=['DM-1','TB-1','FS-1','DD-1','GB-1','TD-1','TK-1','ST-1'];
     return {max:window.__max,len:s.length,big:u.length,twice:Object.values(c).filter(n=>n>1).length,frames:Object.keys(state.frames).length,cap:FRAME_CAP,dirty:caseDirty(),order:ALL.filter(([id])=>IDS.includes(id)).map(x=>x[0])};},IDS);
   const shown=await w.evaluate(()=>({secs:[...document.querySelectorAll('section.mp-sec')].map(x=>x.id.replace(/^sec-/,'')),imgs:document.images.length,
     broken:[...document.images].filter(i=>!i.complete||!i.naturalWidth).map(i=>(i.className||i.alt||'').slice(0,30)),svg:[...document.querySelectorAll('image')].filter(x=>!x.getAttribute('href')&&!x.getAttribute('xlink:href')).length,left:document.querySelectorAll('[data-mp-pic]').length}));
-  ok('1 two forms load and fill at a time, never more ('+r.max+'), and the sections are in the list\'s order',before.frames.length===1&&r.max===2&&shown.secs.join()===r.order.join(),{max:r.max,secs:shown.secs,order:r.order,before});
+  /* the forms' references close the packet in a section of their own (Master print options, References: at the end) */
+  const forms=shown.secs.filter(x=>x!=='REFS'),refsLast=!shown.secs.includes('REFS')||shown.secs[shown.secs.length-1]==='REFS';
+  ok('1 two forms load and fill at a time, never more ('+r.max+'), and the sections are in the list\'s order (the references last)',before.frames.length===1&&r.max===2&&forms.join()===r.order.join()&&refsLast,{max:r.max,secs:shown.secs,order:r.order,before});
   ok('2 each picture is written once ('+r.big+' pictures of 4 KB or more in '+Math.round(r.len/1024)+' KB), every one shows ('+shown.imgs+' images), none left waiting for its place',
     r.big>0&&r.twice===0&&shown.imgs>8&&!shown.broken.length&&!shown.svg&&!shown.left,{r,shown});
   ok('3 the case is still as saved, and no more forms stay loaded than the workstation keeps',!r.dirty&&!before.dirty&&r.frames<=r.cap,{dirty:r.dirty,frames:r.frames,cap:r.cap});
