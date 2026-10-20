@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.76: Form DM-1, the diagnoses: the DSM-5-TR list, searchable, and Good to know
+
+- **The diagnosis rows search the DSM-5-TR list**: type part of a name, a short name (ADHD, OCD, ASD) or a code, and a
+  list opens under the row with the name, its ICD-10-CM code and the manual's page. Picking one fills the name and the
+  code (a parent-reported diagnosis keeps its code blank, as before). The list holds 1,083 diagnoses and codes from the
+  DSM-5-TR classification, with the medical conditions of the earlier list. It works on the iPad (the browser's own list
+  did not open there). Anything typed that is not on the list is kept as typed.
+- **Good to know**, under the table, on screen only (not printed): for each diagnosis in the table, the chapter and page
+  of the DSM-5-TR where it is described, and notes for the FBA and BIP in our own words from published research (what
+  is often seen at school, what to look at in the FBA and BIP, who to work with, the forms here that help), each with
+  its sources. "Look up a diagnosis" shows the same for any name or code without adding it to the table.
+- **No text from the DSM-5-TR is included**: the criteria, the descriptions and the specifiers are the manual's, under
+  copyright; the card gives the page to read in your copy. A note on scope: behavior analysts record a diagnosis as the
+  qualified professional made it and do not diagnose (BACB Ethics Code 1.05, 2.12).
+
+Nothing to set up. Tested: `qa/dx-library-test.js` (the search, a pick, the code rule, Good to know, the lookup, the
+keyboard, the iPad width, paper and axe).
+
 ### v23.75: Refresh all, on the start screen: every student's data in, without opening anyone's case
 
 - **Refresh all**, under "Your caseload on this iPad", brings in for every student kept here, without opening anyone's
