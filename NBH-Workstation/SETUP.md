@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.72: Form MS-1's medication library: searched as you type, and close to complete for five classes
+
+- On each medication card the **library box is a search**: type a few letters and the medications whose name, or one of
+  whose brands, starts with them appear ("valp" finds divalproex / valproate; "conc" finds methylphenidate by Concerta);
+  or tap the arrow for the whole list by class (antipsychotics, mood stabilizers, anticonvulsants, anxiolytics, ADHD
+  medications, antidepressants, other). Arrow keys, Enter and Escape work; a tap picks; Other (enter manually) is always
+  last and moves on to the name box. What is saved is as before; on paper the chosen name prints.
+- The library gains the antipsychotics, mood stabilizers, anticonvulsants and anxiolytics marketed in the United States
+  that it lacked (49 entries before, 96 now), the methylphenidate patch (Daytrana) and serdexmethylphenidate / dexmethyl-
+  phenidate (Azstarys); every brand and form of methylphenidate finds it. Each entry gives its class, its FDA uses with
+  the labeled ages, its boxed warning (or "None" with the label's main warnings), and the side effects to observe, from
+  the FDA labels (DailyMed). New side effects: gum overgrowth, swelling of the hands or feet, patch-site redness or
+  skin lightening.
+- The new entries come after Other in the list, so the medication a saved record holds is unchanged.
+- qa/ms1-library-test.js (9 checks).
+
 ### v23.71: What's due on the start screen, by when
 
 - The start screen's list of what is due is laid out by when: **Needs you now** (a restraint notice, an injury),

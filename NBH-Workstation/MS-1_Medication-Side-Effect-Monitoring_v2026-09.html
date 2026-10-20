@@ -757,6 +757,14 @@ td.tot{font-size:10px;text-align:center;color:var(--ink-soft);font-variant-numer
 .selist label.flag{color:#9b4e15}
 .selist label small{color:var(--ink-soft)}
 .medcard .chd .tag{white-space:normal}
+/* v23.72 the library searched as you type */
+.ms-combo{position:relative}.ms-combo .ms-pick-in{width:100%;box-sizing:border-box;padding-right:36px!important}
+.ms-pick-btn{position:absolute;right:2px;top:50%;transform:translateY(-50%);border:0;background:none;padding:4px 9px;font-size:14px;color:var(--nbh-ink,#1a2933);cursor:pointer;min-height:0}
+.ms-opts{position:absolute;z-index:60;left:0;top:100%;width:max(100%,330px);margin:2px 0 0;padding:4px 0;list-style:none;background:#fff;border:1px solid #b7c8c5;border-radius:8px;box-shadow:0 10px 26px rgba(24,46,67,.2);max-height:340px;overflow:auto;-webkit-overflow-scrolling:touch;text-align:left}
+.ms-opt{padding:7px 12px;cursor:pointer;line-height:1.3;font-size:13.5px}.ms-opt small{display:block;font-size:11px;color:var(--ink-soft,#5b6876)}
+.ms-opt[aria-selected="true"],.ms-opt:hover{background:#e6f0f2}.ms-b{font-size:12px;color:var(--ink-soft,#5b6876)}.ms-hit{font-size:12px;font-weight:600;color:#2f6b74}
+.ms-grp{padding:9px 12px 3px;font:700 10.5px var(--sans,system-ui,sans-serif);letter-spacing:.06em;text-transform:uppercase;color:var(--slate,#46606b)}.ms-none{padding:8px 12px;font-size:13px;color:var(--ink-soft,#5b6876)}
+.ms-lib-sel{display:none}@media print{.ms-combo{display:none!important}.ms-lib-sel{display:block!important}}
 .boxed{font-size:11.5px;color:#7a3a10;background:var(--nbh-flag-soft);border-left:3px solid var(--nbh-flag);padding:5px 9px;margin:6px 0}
 table.grid td.c input.num{width:54px;text-align:center;border:0;background:transparent;font:inherit;font-size:11.5px;padding:2px 0;font-variant-numeric:tabular-nums}
 table.grid td input.txt{width:100%;border:0;background:transparent;font:inherit;font-size:11.5px;padding:2px 3px}
@@ -1174,6 +1182,10 @@ const SE={
  seizure:{l:'Seizure or new seizure-like event',c:'Other physical',o:'Emergency; district protocol',f:1},
  urinret:{l:'Difficulty urinating (reported)',c:'Other physical',o:'Nurse report'},
  heat:{l:'Heat intolerance / flushing',c:'Other physical',o:'Flushed, overheated (anticholinergic)'},
+ /* v23.72 for the medications added to the library */
+ gums:{l:'Gum swelling or overgrowth (reported)',c:'Other physical',o:'Swollen, overgrown or bleeding gums; nurse or parent report'},
+ swell:{l:'Swelling of the hands, feet or ankles',c:'Other physical',o:'Shoes or rings tight, puffy ankles; nurse report'},
+ patch:{l:'Patch-site redness or lighter skin patches',c:'Skin',o:'Redness, itching or blisters where the patch was; lighter patches of skin anywhere: report'},
  labs:{l:'Laboratory monitoring (prescriber)',c:'Laboratory',o:'Not observable at school; entered from the prescriber'}
 };
 /* v23.08 (review F441): weight, height, blood pressure and pulse are measured by the nurse on the vitals sheet: no grid row */
@@ -1230,6 +1242,80 @@ const MEDS=[
  {n:'Desmopressin',b:'DDAVP',cls:'Antidiuretic',use:'FDA: nocturnal enuresis (6+).',se:['headache','nausea','hallu','seizure','labs'],box:'None boxed on the tablets used for enuresis; hyponatremia warning with fluid restriction (the injection carries a boxed hyponatremia warning).'},
  {n:'Other (enter manually)',b:'',cls:'',use:'',se:[],box:''}
 ];
+/* v23.72 (the BCBA's request) the library made close to complete for the antipsychotics, mood stabilizers, anticonvulsants
+   and anxiolytics marketed in the United States, and every form of methylphenidate. Added after "Other" so a saved record's
+   medication (kept by its place in this list) is the same medication. From the FDA labels (DailyMed); ages are the
+   labeled pediatric ages; "Boxed warning: None" names the label's warnings that are not boxed. */
+const BZ_BOX='Risks from concomitant opioid use; abuse, misuse, and addiction; dependence and withdrawal reactions.';
+const BZ_SE=['sedation','ataxia','dizzy','fatigue','disinhib','irrit','cogslow','breath','mood','suicid'];
+const AP_BOX='Increased mortality in elderly dementia-related psychosis.';
+const AP_DEP=' Suicidal thoughts and behaviors in pediatric and young adult patients (it is also an antidepressant treatment).';
+const FGA_SE=['rigid','tremor','akathisia','dystonia','drool','sedation','drymouth','constip','vision','td','nms','labs'];
+const STIM_SE=['appdown','wtloss','insomnia','nausea','headache','irrit','anxiety','tics','hr','bp','growth','mood','activation','hallu'];
+MEDS.push(
+ /* antipsychotics */
+ {n:'Asenapine',b:'Saphris, Secuado',cls:'Second-generation antipsychotic',use:'FDA: bipolar I mania or mixed episodes (10–17, under-the-tongue tablet), schizophrenia (adults; Secuado is a skin patch). Nothing to eat or drink for 10 minutes after the tablet.',se:['sedation','dizzy','akathisia','tremor','rigid','dystonia','taste','appup','wtgain','nausea','td','nms','labs'],box:AP_BOX},
+ {n:'Brexpiprazole',b:'Rexulti',cls:'Second-generation antipsychotic',use:'FDA: schizophrenia (13+), add-on for major depressive disorder (adults), agitation with Alzheimer dementia (adults).',se:['akathisia','appup','wtgain','sedation','headache','tremor','rigid','anxiety','insomnia','td','nms','suicid','labs'],box:AP_BOX+AP_DEP},
+ {n:'Cariprazine',b:'Vraylar',cls:'Second-generation antipsychotic',use:'FDA: schizophrenia, bipolar I mania and depression, add-on for major depressive disorder (adults). Very long-acting: effects of a change can appear, or linger, for weeks.',se:['akathisia','rigid','tremor','insomnia','nausea','vomit','sedation','constip','appup','wtgain','td','nms','suicid','labs'],box:AP_BOX+AP_DEP},
+ {n:'Iloperidone',b:'Fanapt',cls:'Second-generation antipsychotic',use:'FDA: schizophrenia, bipolar I mania (adults).',se:['dizzy','faint','hr','sedation','drymouth','nausea','wtgain','fatigue','rigid','td','nms','labs'],box:AP_BOX},
+ {n:'Lumateperone',b:'Caplyta',cls:'Second-generation antipsychotic',use:'FDA: schizophrenia, bipolar depression (adults).',se:['sedation','dizzy','drymouth','nausea','fatigue','td','nms','suicid','labs'],box:AP_BOX+AP_DEP},
+ {n:'Olanzapine / samidorphan',b:'Lybalvi',cls:'Second-generation antipsychotic (with an opioid blocker)',use:'FDA: schizophrenia, bipolar I disorder (adults). Not taken with opioids: it blocks them and can bring on withdrawal.',se:['appup','wtgain','sedation','dizzy','drymouth','constip','tremor','rigid','akathisia','td','nms','labs'],box:AP_BOX},
+ {n:'Olanzapine / fluoxetine',b:'Symbyax',cls:'Second-generation antipsychotic with an SSRI',use:'FDA: bipolar I depression (10+), treatment-resistant depression (adults).',se:['appup','wtgain','sedation','fatigue','drymouth','tremor','activation','anxiety','mood','td','nms','suicid','labs'],box:'Suicidal thoughts and behaviors in children, adolescents, and young adults; increased mortality in elderly dementia-related psychosis.'},
+ {n:'Pimavanserin',b:'Nuplazid',cls:'Atypical antipsychotic (serotonin 5-HT2A)',use:'FDA: hallucinations and delusions of Parkinson disease psychosis (adults). Rare in schools.',se:['swell','hallu','nausea','constip','ataxia','dizzy','labs'],box:AP_BOX},
+ {n:'Xanomeline / trospium',b:'Cobenfy',cls:'Antipsychotic (muscarinic agonist with a peripheral blocker)',use:'FDA: schizophrenia (adults). Taken on an empty stomach.',se:['nausea','vomit','constip','diarrhea','hr','bp','dizzy','urinret','eyepain','labs'],box:'None; urinary retention, fast heart rate and narrow-angle glaucoma are warnings.'},
+ {n:'Fluphenazine',b:'Prolixin (former brand), fluphenazine decanoate (injection)',cls:'First-generation antipsychotic',use:'FDA: psychotic disorders.',se:FGA_SE,box:AP_BOX},
+ {n:'Perphenazine',b:'Trilafon (former brand); with amitriptyline (Etrafon)',cls:'First-generation antipsychotic',use:'FDA: schizophrenia (12+), severe nausea and vomiting (adults).',se:FGA_SE,box:AP_BOX},
+ {n:'Trifluoperazine',b:'Stelazine (former brand)',cls:'First-generation antipsychotic',use:'FDA: schizophrenia; short-term non-psychotic anxiety (adults, not first choice).',se:FGA_SE,box:AP_BOX},
+ {n:'Thioridazine',b:'Mellaril (former brand)',cls:'First-generation antipsychotic',use:'FDA: schizophrenia that has not responded to other antipsychotics (kept for that use because of the heart risk; ECG and potassium first).',se:['sedation','dizzy','faint','hr','drymouth','constip','vision','urinret','rigid','tremor','td','nms','labs'],box:'QT prolongation and sudden death; increased mortality in elderly dementia-related psychosis.'},
+ {n:'Thiothixene',b:'Navane (former brand)',cls:'First-generation antipsychotic',use:'FDA: schizophrenia (12+).',se:FGA_SE,box:AP_BOX},
+ {n:'Loxapine',b:'Loxitane (former brand), Adasuve (inhaled)',cls:'First-generation antipsychotic',use:'FDA: schizophrenia (adults); Adasuve inhaled: acute agitation in schizophrenia or bipolar I (adults, in a supervised health care setting).',se:['sedation','dizzy','rigid','tremor','akathisia','dystonia','drymouth','constip','vision','breath','td','nms','labs'],box:'Increased mortality in elderly dementia-related psychosis; Adasuve (inhaled): bronchospasm (available only through a restricted program).'},
+ {n:'Pimozide',b:'Orap',cls:'First-generation antipsychotic',use:'FDA: tics of Tourette disorder that have not responded to standard treatment (12+). ECG before starting and during dose changes; many drug (and grapefruit) interactions.',se:['sedation','rigid','tremor','akathisia','dystonia','drymouth','constip','vision','faint','hr','td','nms','labs'],box:'Increased mortality in elderly dementia-related psychosis (the warning for every antipsychotic); QT prolongation and sudden death are warnings.'},
+ {n:'Molindone',b:'Moban (former brand)',cls:'First-generation antipsychotic',use:'FDA: schizophrenia.',se:FGA_SE,box:AP_BOX},
+ {n:'Prochlorperazine',b:'Compazine, Compro (rectal)',cls:'First-generation antipsychotic (mostly for nausea)',use:'FDA: severe nausea and vomiting, schizophrenia, short-term non-psychotic anxiety. Not for children under 2 years or 20 lb.',se:['sedation','dizzy','rigid','akathisia','dystonia','tremor','drymouth','vision','td','nms','labs'],box:AP_BOX},
+ /* anticonvulsants */
+ {n:'Acetazolamide',b:'Diamox (former brand)',cls:'Anticonvulsant (carbonic anhydrase inhibitor)',use:'FDA: epilepsy (with other drugs), glaucoma, altitude sickness, edema.',se:['paresth','taste','appdown','fatigue','sedation','nausea','diarrhea','thirst','kidney','rash','fever','bruise','labs'],box:'None.'},
+ {n:'Brivaracetam',b:'Briviact',cls:'Anticonvulsant',use:'FDA: partial-onset seizures (1 month+).',se:['sedation','dizzy','fatigue','irrit','mood','anxiety','nausea','vomit','ataxia','suicid'],box:'None; behavioral and psychiatric reactions are warnings.'},
+ {n:'Cenobamate',b:'Xcopri',cls:'Anticonvulsant',use:'FDA: partial-onset seizures (adults).',se:['sedation','dizzy','fatigue','ataxia','vision','headache','nausea','cogslow','rash','fever','suicid','labs'],box:'None; a severe drug reaction with rash and fever (DRESS) and QT shortening are warnings.'},
+ {n:'Clorazepate',b:'Tranxene',cls:'Benzodiazepine (anxiolytic, anticonvulsant)',use:'FDA: anxiety; add-on for partial seizures (9+); alcohol withdrawal (adults).',se:BZ_SE,box:BZ_BOX},
+ {n:'Diazepam',b:'Valium, Diastat (rectal gel), Valtoco (nasal spray), Libervant (buccal film)',cls:'Benzodiazepine (anxiolytic, anticonvulsant)',use:'FDA: anxiety, muscle spasm, alcohol withdrawal; seizure clusters as a rescue medicine (Diastat 2+, Valtoco 2+, Libervant 2–5). Tablets: not for infants under 6 months.',se:BZ_SE,box:BZ_BOX},
+ {n:'Eslicarbazepine',b:'Aptiom',cls:'Anticonvulsant',use:'FDA: partial-onset seizures (4+).',se:['dizzy','sedation','nausea','headache','vision','vomit','fatigue','ataxia','tremor','rash','suicid','labs'],box:'None; serious rash, low sodium and drug reactions are warnings.'},
+ {n:'Ethosuximide',b:'Zarontin',cls:'Anticonvulsant (succinimide)',use:'FDA: absence seizures.',se:['nausea','vomit','appdown','wtloss','sedation','headache','dizzy','irrit','mood','rash','fever','bruise','suicid','labs'],box:'None; blood-count problems, a lupus-like illness and serious rash are warnings.'},
+ {n:'Ethotoin',b:'Peganone',cls:'Anticonvulsant (hydantoin)',use:'FDA: tonic-clonic and complex partial seizures.',se:['dizzy','sedation','ataxia','nausea','vomit','vision','rash','fever','bruise','suicid','labs'],box:'None.'},
+ {n:'Felbamate',b:'Felbatol',cls:'Anticonvulsant',use:'FDA: severe epilepsy not responding to other drugs: partial seizures (adults), Lennox-Gastaut syndrome (children, add-on). The label asks for a signed acknowledgment of the risks.',se:['appdown','wtloss','insomnia','nausea','vomit','headache','dizzy','sedation','irrit','fever','bruise','jaundice','suicid','labs'],box:'Aplastic anemia and hepatic failure (blood counts and liver tests).'},
+ {n:'Fenfluramine',b:'Fintepla',cls:'Anticonvulsant',use:'FDA: seizures of Dravet syndrome and Lennox-Gastaut syndrome (2+). Echocardiograms before, every 6 months during, and after treatment; available only through a restricted program.',se:['appdown','wtloss','sedation','fatigue','diarrhea','vomit','fever','breath','bp','labs'],box:'Valvular heart disease and pulmonary arterial hypertension (echocardiograms; restricted program).'},
+ {n:'Ganaxolone',b:'Ztalmy',cls:'Anticonvulsant (neurosteroid)',use:'FDA: seizures of CDKL5 deficiency disorder (2+).',se:['sedation','fever','drool','fatigue','suicid'],box:'None.'},
+ {n:'Lacosamide',b:'Vimpat, Motpoly XR',cls:'Anticonvulsant',use:'FDA: partial-onset seizures (1 month+), add-on for primary generalized tonic-clonic seizures (4+).',se:['dizzy','headache','nausea','vision','vomit','fatigue','ataxia','tremor','sedation','faint','suicid','labs'],box:'None; heart rhythm (PR prolongation) and dizziness with falls are warnings.'},
+ {n:'Methsuximide',b:'Celontin',cls:'Anticonvulsant (succinimide)',use:'FDA: absence seizures not controlled by other drugs.',se:['nausea','vomit','appdown','sedation','dizzy','ataxia','headache','irrit','rash','fever','bruise','suicid','labs'],box:'None.'},
+ {n:'Midazolam (nasal)',b:'Nayzilam',cls:'Benzodiazepine (anticonvulsant rescue)',use:'FDA: seizure clusters, as a rescue medicine (12+).',se:['sedation','headache','breath','cogslow','disinhib','suicid'],box:BZ_BOX},
+ {n:'Perampanel',b:'Fycompa',cls:'Anticonvulsant',use:'FDA: partial-onset seizures (4+), add-on for primary generalized tonic-clonic seizures (12+).',se:['dizzy','sedation','irrit','activation','mood','ataxia','fatigue','wtgain','nausea','headache','suicid'],box:'Serious psychiatric and behavioral reactions: aggression, hostility, irritability, anger, homicidal thoughts and threats.'},
+ {n:'Phenobarbital',b:'Sezaby (injection, newborns)',cls:'Anticonvulsant (barbiturate)',use:'Seizures, sedation. Tablets and elixir are an older drug sold without FDA approval; Sezaby (injection) is approved for seizures in newborns. In children it can cause hyperactivity rather than drowsiness.',se:['sedation','activation','irrit','cogslow','ataxia','disinhib','mood','rash','fever','suicid','labs'],box:'None.'},
+ {n:'Phenytoin',b:'Dilantin, Phenytek',cls:'Anticonvulsant (hydantoin)',use:'FDA: tonic-clonic and focal seizures; seizures with neurosurgery (injection).',se:['ataxia','vision','dizzy','sedation','cogslow','gums','nausea','rash','fever','bruise','suicid','labs'],box:'Cardiovascular risk with rapid infusion (the injection only).'},
+ {n:'Pregabalin',b:'Lyrica, Lyrica CR',cls:'Anticonvulsant (gabapentinoid)',use:'FDA: add-on for partial-onset seizures (1 month+), nerve pain and fibromyalgia (adults). Off-label: anxiety.',se:['dizzy','sedation','appup','wtgain','swell','vision','ataxia','cogslow','drymouth','suicid'],box:'None; swelling of the face or throat (angioedema) and breathing problems with opioids or other sedating drugs are warnings.'},
+ {n:'Primidone',b:'Mysoline',cls:'Anticonvulsant (related to barbiturates)',use:'FDA: tonic-clonic, complex partial and focal seizures. Off-label: essential tremor. In children it can cause excitement rather than drowsiness.',se:['ataxia','dizzy','sedation','nausea','vomit','appdown','irrit','activation','vision','rash','suicid','labs'],box:'None.'},
+ {n:'Rufinamide',b:'Banzel',cls:'Anticonvulsant',use:'FDA: add-on for seizures of Lennox-Gastaut syndrome (1+).',se:['sedation','vomit','headache','fatigue','dizzy','nausea','ataxia','appdown','rash','fever','suicid','labs'],box:'None; QT shortening and a severe drug reaction (DRESS) are warnings.'},
+ {n:'Stiripentol',b:'Diacomit',cls:'Anticonvulsant',use:'FDA: seizures of Dravet syndrome, taken with clobazam (6 months+ and at least 7 kg).',se:['sedation','appdown','wtloss','ataxia','activation','tremor','insomnia','fatigue','labs'],box:'None; low blood counts are a warning.'},
+ {n:'Tiagabine',b:'Gabitril',cls:'Anticonvulsant',use:'FDA: add-on for partial seizures (12+).',se:['dizzy','fatigue','sedation','anxiety','tremor','cogslow','nausea','mood','irrit','seizure','suicid'],box:'None; new seizures in people without epilepsy are a warning.'},
+ {n:'Vigabatrin',b:'Sabril, Vigadrone, Vigafyde, Vigpoder',cls:'Anticonvulsant',use:'FDA: refractory complex partial seizures (2+, add-on), infantile spasms (1 month to 2 years). Vision testing at the start and every 3 months; available only through a restricted program.',se:['vision','sedation','fatigue','wtgain','irrit','activation','tremor','labs'],box:'Permanent vision loss (vision testing; restricted program).'},
+ /* anxiolytics */
+ {n:'Alprazolam',b:'Xanax, Xanax XR',cls:'Benzodiazepine (anxiolytic)',use:'FDA: generalized anxiety, panic disorder (adults).',se:BZ_SE,box:BZ_BOX},
+ {n:'Chlordiazepoxide',b:'Librium',cls:'Benzodiazepine (anxiolytic)',use:'FDA: anxiety (6+), alcohol withdrawal (adults).',se:BZ_SE,box:BZ_BOX},
+ {n:'Oxazepam',b:'Serax (former brand)',cls:'Benzodiazepine (anxiolytic)',use:'FDA: anxiety, alcohol withdrawal (adults; not for children under 6).',se:BZ_SE,box:BZ_BOX},
+ {n:'Meprobamate',b:'Miltown (former brand)',cls:'Anxiolytic (carbamate)',use:'FDA: anxiety (6+). Habit-forming; seldom used now.',se:['sedation','dizzy','ataxia','headache','cogslow','faint','rash'],box:'None; dependence and abuse are warnings.'},
+ /* methylphenidate */
+ {n:'Methylphenidate patch',b:'Daytrana',cls:'Stimulant',use:'FDA: ADHD (6–17). Put on 2 hours before the effect is needed and taken off 9 hours later; skin lightening (chemical leukoderma) is a warning.',se:['patch'].concat(STIM_SE),box:'Abuse, misuse, and addiction.'},
+ {n:'Serdexmethylphenidate / dexmethylphenidate',b:'Azstarys',cls:'Stimulant',use:'FDA: ADHD (6+). Once daily in the morning.',se:STIM_SE,box:'Abuse, misuse, and addiction.'}
+);
+/* the place of "Other (enter manually)": the last entry before v23.72, and where a saved record still finds it */
+const MS_OTHER=MEDS.findIndex(m=>m.n==='Other (enter manually)');
+/* other names to find a medication by: its other brands and forms (search only; the card shows the main brand) */
+const MS_ALT={'Risperidone':'Risperdal M-Tab, Risperdal Consta, Perseris, Uzedy, Rykindo','Aripiprazole':'Abilify MyCite, Abilify Maintena, Abilify Asimtufii, Aristada',
+ 'Quetiapine':'Seroquel XR','Olanzapine':'Zyprexa Zydis, Zyprexa Relprevv','Paliperidone':'Invega Sustenna, Invega Trinza, Invega Hafyera, Erzofri','Clozapine':'FazaClo, Versacloz',
+ 'Haloperidol':'Haldol Decanoate','Lithium':'lithium carbonate, lithium citrate','Divalproex / valproate':'Depakote ER, Depakote Sprinkle, Depakene, valproic acid',
+ 'Carbamazepine':'Tegretol XR, Carbatrol, Equetro, Epitol','Oxcarbazepine':'Oxtellar XR','Lamotrigine':'Lamictal XR, Lamictal ODT, Subvenite',
+ 'Topiramate':'Trokendi XR, Qudexy XR, Eprontia','Levetiracetam':'Keppra XR, Spritam','Zonisamide':'Zonisade','Gabapentin':'Gralise','Clobazam':'Sympazan',
+ 'Lorazepam':'Loreev XR','Methylphenidate':'Ritalin LA, Methylin, Metadate CD, Relexxii, Aptensio XR, Jornay PM, QuilliChew ER, Quillivant XR, Cotempla XR-ODT, Adhansia XR',
+ 'Dexmethylphenidate':'Focalin XR','Amphetamine / mixed salts':'Adderall XR, Mydayis, Adzenys, Dyanavel','Guanfacine ER':'guanfacine, Tenex','Clonidine ER':'clonidine, Catapres'};
+MEDS.forEach(m=>{m.a=MS_ALT[m.n]||'';});
 
 /* ---------- views ---------- */
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));if(v==='track')renderGrid();if(v==='vitals')renderVitals();if(v==='report')renderReport(true);if(v==='brief')renderBrief();if(v==='eps'){renderEpsTables();}window.scrollTo({top:0});}
@@ -1239,7 +1325,7 @@ document.addEventListener('input',e=>{if(e.target.dataset.hd)$$('.hd-client').fo
 /* ---------- medication cards ---------- */
 function medCard(i){const d=document.createElement('div');d.className='card medcard';d.dataset.med=i;
  d.innerHTML=`<div class="chd"><span class="tag ok">Medication ${i+1}</span><span class="chdt" id="medTtl${i}">Not selected</span></div>
- <div class="ident c3"><div class="f"><label>Medication (library)</label><select name="md[${i}].lib" data-med="${i}"><option value=""></option>${MEDS.map((m,k)=>`<option value="${k}">${esc(m.n)}${m.b?' ('+esc(m.b)+')':''}</option>`).join('')}</select></div><div class="f"><label>Name as prescribed (if other)</label><input name="md[${i}].name" data-med="${i}"></div><div class="f"><label>Dose and schedule</label><input name="md[${i}].dose" placeholder="e.g., 0.5 mg 8:00 and 15:00"></div>
+ <div class="ident c3"><div class="f"><label for="msPick${i}">Medication (library)</label><div class="ms-combo"><input id="msPick${i}" class="ms-pick-in" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="msOpts${i}" data-pick="${i}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type a name or brand"><button type="button" class="ms-pick-btn" data-pickall="${i}" tabindex="-1" aria-label="Show the whole list">&#9662;</button><ul class="ms-opts" id="msOpts${i}" role="listbox" aria-label="Medications" hidden></ul></div><select name="md[${i}].lib" data-med="${i}" class="ms-lib-sel" aria-hidden="true" tabindex="-1"><option value=""></option>${MEDS.map((m,k)=>`<option value="${k}">${esc(msLabel(m))}</option>`).join('')}</select></div><div class="f"><label>Name as prescribed (if other)</label><input name="md[${i}].name" data-med="${i}"></div><div class="f"><label>Dose and schedule</label><input name="md[${i}].dose" placeholder="e.g., 0.5 mg 8:00 and 15:00"></div>
  <div class="f"><label>Start date</label><input name="md[${i}].start"></div><div class="f"><label>Last change (date, what)</label><input name="md[${i}].change"></div><div class="f"><label>Given at school?</label><select name="md[${i}].school"><option value=""></option><option>Yes, by nurse</option><option>No, at home</option><option>Both</option></select></div></div>
  <div id="medInfo${i}"></div>`;
  return d;}
@@ -1251,7 +1337,7 @@ function renderMeds(){const n=+$('#nMed').value,w=$('#medWrap');while(w.children
    The card title is the library name, or for a medication entered manually the name as prescribed; typing in the
    name box had set the title to any text, for a library medication too, and emptying the box left its last letter. */
 let pendW=null;
-function medTitle(i){const k=val(`md[${i}].lib`),m=k!==''?MEDS[+k]:null;return m?(m.n===MEDS[MEDS.length-1].n?(val(`md[${i}].name`)||'Other'):m.n):(val(`md[${i}].name`)||'Not selected');}
+function medTitle(i){const k=val(`md[${i}].lib`),m=k!==''?MEDS[+k]:null;return m?(m.n===MEDS[MS_OTHER].n?(val(`md[${i}].name`)||'Other'):m.n):(val(`md[${i}].name`)||'Not selected');}
 function renderMedInfo(i){const k=val(`md[${i}].lib`);const box=$('#medInfo'+i);const m=k!==''?MEDS[+k]:null;
  $('#medTtl'+i).textContent=medTitle(i);
  const instr=val(`md[${i}].instr`);
@@ -1270,6 +1356,60 @@ document.addEventListener('change',e=>{if(e.target.dataset.med!=null&&e.target.t
 /* v21.16 audit (F15): the card title follows one rule while the name is typed and when a file is opened */
 document.addEventListener('input',e=>{if(e.target.dataset.med!=null&&e.target.tagName==='INPUT'){const i=+e.target.dataset.med;$('#medTtl'+i).textContent=medTitle(i);}});
 function medList(){return $$('#medWrap .card').map(c=>{const i=+c.dataset.med;const k=val(`md[${i}].lib`);const m=k!==''?MEDS[+k]:null;const name=m&&m.se.length?m.n:(val(`md[${i}].name`)||(m?m.n:''));return {i,name,dose:val(`md[${i}].dose`),m,watched:Object.keys(SE).filter(s=>document.querySelector(`[name="md[${i}].w.${s}"]`)?.checked)};}).filter(x=>x.name);}
+/* v23.72 (the BCBA's request) the library is searched as you type: the medications whose name, or a brand, starts with
+   the letters typed (a word inside the name counts: "valp" finds divalproex / valproate), names first, then brands; or
+   the whole list by class with the arrow. The choice goes into the card's library box as before (it is what is saved). */
+const MS_GROUPS=[['Antipsychotics',/antipsychotic/i],['Mood stabilizers',/mood stabilizer|^Lithium$/i],['Anticonvulsants',/anticonvulsant/i],['Anxiolytics',/anxiolytic|^Benzodiazepine$/i],
+ ['ADHD medications',/stimulant|ADHD|alpha-2/i],['Antidepressants',/antidepressant|SSRI/i],['Other medications',/./]];
+const msGroupsOf=m=>{const g=MS_GROUPS.filter(([,rx],j)=>j<MS_GROUPS.length-1&&(rx.test(m.cls)||rx.test(m.n))).map(x=>x[0]);return g.length?g:['Other medications'];};
+const msWords=s=>String(s||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+const msFirstB=m=>String(m.b||'').split(/,\s*/)[0].replace(/\s*\(.*$/,'');
+const msLabel=m=>m.n+(m.b?' ('+msFirstB(m)+')':'');
+/* the entries matching what was typed, best first: the name starts with it, a word of the name does, a brand does */
+function msFind(q){q=String(q||'').trim().toLowerCase();if(!q)return [];const out=[];
+  MEDS.forEach((m,k)=>{if(k===MS_OTHER)return;const n=m.n.toLowerCase(),bs=(m.b+', '+m.a).split(/,\s*/).filter(Boolean);
+    let r=-1,hit='';
+    if(n.startsWith(q))r=0;else if(msWords(m.n).some(w=>w.startsWith(q)))r=1;
+    else{const b=bs.find(x=>x.toLowerCase().startsWith(q)||msWords(x).some(w=>w.startsWith(q)));if(b){r=2;hit=b.replace(/\s*\(.*$/,'');}}
+    if(r>=0)out.push({k,r,hit});});
+  return out.sort((a,b)=>a.r-b.r||MEDS[a.k].n.localeCompare(MEDS[b.k].n));}
+function msOpts(i,q){const ul=document.getElementById('msOpts'+i),inp=document.getElementById('msPick'+i);if(!ul||!inp)return;
+  let html='';const opt=(k,j,extra)=>`<li role="option" id="msO${i}_${j}" data-k="${k}" class="ms-opt" aria-selected="false">${esc(MEDS[k].n)}${extra}<small>${esc(MEDS[k].cls)}</small></li>`;
+  let j=0;
+  if(String(q||'').trim()){const f=msFind(q);
+    html=f.length?f.map(x=>opt(x.k,j++,x.r===2?` <span class="ms-hit">${esc(x.hit)}</span>`:(MEDS[x.k].b?` <span class="ms-b">${esc(msFirstB(MEDS[x.k]))}</span>`:''))).join('')
+      :`<li class="ms-none" role="presentation">No medication in the library starts with &ldquo;${esc(q)}&rdquo;.</li>`;}
+  else MS_GROUPS.forEach(([g])=>{const ks=MEDS.map((m,k)=>k).filter(k=>k!==MS_OTHER&&msGroupsOf(MEDS[k]).includes(g)).sort((a,b)=>MEDS[a].n.localeCompare(MEDS[b].n));
+    if(ks.length)html+=`<li class="ms-grp" role="presentation">${esc(g)}</li>`+ks.map(k=>opt(k,j++,MEDS[k].b?` <span class="ms-b">${esc(msFirstB(MEDS[k]))}</span>`:'')).join('');});
+  html+=opt(MS_OTHER,j++,'');   /* always last: a medication not in the library */
+  ul.innerHTML=html;ul.hidden=false;inp.setAttribute('aria-expanded','true');msActive(i,-1);}
+function msClose(i){const ul=document.getElementById('msOpts'+i),inp=document.getElementById('msPick'+i);if(ul)ul.hidden=true;if(inp){inp.setAttribute('aria-expanded','false');inp.removeAttribute('aria-activedescendant');delete inp.dataset.typing;}}
+function msActive(i,j){const ul=document.getElementById('msOpts'+i),inp=document.getElementById('msPick'+i);if(!ul)return;const os=[...ul.querySelectorAll('.ms-opt')];
+  os.forEach((o,x)=>o.setAttribute('aria-selected',String(x===j)));const o=os[j];if(o){inp.setAttribute('aria-activedescendant',o.id);o.scrollIntoView({block:'nearest'});}else inp.removeAttribute('aria-activedescendant');ul.dataset.act=String(j);}
+function msChoose(i,k){const sel=document.querySelector(`[name="md[${i}].lib"]`);if(!sel)return;msClose(i);
+  if(sel.value!==String(k)){sel.value=String(k);sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}));}else msSync(i);
+  if(k===MS_OTHER){const n=document.querySelector(`[name="md[${i}].name"]`);if(n)n.focus();}}
+/* the box shows the medication chosen, whatever chose it (a tap, a file opened, the simulator, another form), except
+   while letters are being typed in it */
+function msSync(i){const sel=document.querySelector(`[name="md[${i}].lib"]`),inp=document.getElementById('msPick'+i);if(!sel||!inp||inp.dataset.typing==='1')return;
+  const m=sel.value!==''?MEDS[+sel.value]:null;inp.value=m?msLabel(m):'';}
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('ms-pick-in')){t.dataset.typing='1';msOpts(+t.dataset.pick,t.value);}});
+document.addEventListener('focusin',e=>{const t=e.target;if(t.classList&&t.classList.contains('ms-pick-in')){t.select();msOpts(+t.dataset.pick,'');}});
+document.addEventListener('focusout',e=>{const t=e.target;if(!(t.classList&&t.classList.contains('ms-pick-in')))return;const i=+t.dataset.pick;
+  setTimeout(()=>{const c=t.closest('.ms-combo');if(c&&c.contains(document.activeElement))return;msClose(i);msSync(i);},150);});
+document.addEventListener('keydown',e=>{const t=e.target;if(!(t.classList&&t.classList.contains('ms-pick-in')))return;const i=+t.dataset.pick,ul=document.getElementById('msOpts'+i);
+  const os=ul?[...ul.querySelectorAll('.ms-opt')]:[];let j=ul?+ul.dataset.act:-1;if(isNaN(j))j=-1;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(ul.hidden)msOpts(i,t.value);const n=[...ul.querySelectorAll('.ms-opt')].length;if(!n)return;j=e.key==='ArrowDown'?Math.min(n-1,j+1):Math.max(0,j-1);msActive(i,j);}
+  else if(e.key==='Enter'){if(!ul||ul.hidden)return;e.preventDefault();const o=os[j>=0?j:0];if(o&&!(j<0&&!t.value.trim()))msChoose(i,+o.dataset.k);}
+  else if(e.key==='Escape'){if(ul&&!ul.hidden){e.preventDefault();msClose(i);msSync(i);}}});
+document.addEventListener('mousedown',e=>{const o=e.target.closest&&e.target.closest('.ms-opt,.ms-grp,.ms-none');if(o)e.preventDefault();});   /* the box keeps the focus while you pick */
+document.addEventListener('click',e=>{const o=e.target.closest&&e.target.closest('.ms-opt');if(o){const i=+o.closest('.ms-opts').id.replace('msOpts','');msChoose(i,+o.dataset.k);return;}
+  const b=e.target.closest&&e.target.closest('[data-pickall]');if(b){const i=+b.dataset.pickall,inp=document.getElementById('msPick'+i),ul=document.getElementById('msOpts'+i);
+    if(ul&&!ul.hidden){msClose(i);return;}if(inp){inp.focus();msOpts(i,'');}}});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.med!=null&&t.tagName==='SELECT')msSync(+t.dataset.med);});
+/* for the form's tests: the library as it stands, and the search */
+window.msLibrary={MEDS,SE,OTHER:MS_OTHER,find:msFind,groupsOf:msGroupsOf,GROUPS:MS_GROUPS.map(g=>g[0])};
+{const was=renderMedInfo;renderMedInfo=function(i){const r=was.apply(this,arguments);try{msSync(i);}catch(e){}return r;};}   /* v23.72 */
 /* v21.16 audit (F7): laboratory monitoring is listed for the prescriber and is not a grid row */
 function watchedRows(){const rows=[];const seen={};medList().forEach(md=>md.watched.filter(s=>SE[s].c!=='Laboratory'&&SE[s].c!==MEAS).forEach(s=>{if(!seen[s]){seen[s]={key:s,meds:[]};rows.push(seen[s]);}seen[s].meds.push(md.name);}));return rows;}
 
@@ -1627,7 +1767,7 @@ const msMDY=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||'').trim());ret
 function msDates(i,m){let k=0;const put=(f,v)=>{const e=document.querySelector(`[name="md[${i}].${f}"]`);if(e&&v&&!String(e.value||'').trim()){e.value=v;k++;}};
  const ch=m.change||m.chg;put('start',msMDY(m.start));put('change',ch?msMDY(ch)+' (Form DM-1)':'');return k;}   /* v23.09 m.chg as well, the key Form MS-1's review proposed */
 const msTok=s=>String(s||'').toLowerCase().split(/[^a-z]+/).filter(w=>w.length>2&&!/^(er|xr|cr|sr|la|xl|otc|and|enter|manually|other)$/.test(w));
-const msLib=name=>{const t=msTok(name)[0];if(!t)return -1;return MEDS.findIndex((x,k)=>k<MEDS.length-1&&(msTok(x.n).includes(t)||msTok(x.b).includes(t)));};
+const msLib=name=>{const t=msTok(name)[0];if(!t)return -1;return MEDS.findIndex((x,k)=>k!==MS_OTHER&&(msTok(x.a).some(w=>w===t)||msTok(x.n).includes(t)||msTok(x.b).includes(t)));};
 window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note:''};let n=0,last=null;
  const put=(k,v)=>{const e=document.querySelector('[name="'+k+'"]');v=String(v==null?'':v).trim();if(!e||!v||String(e.value||'').trim())return false;e.value=v;last=e;n++;return true;};
  const H=(f.profile&&f.profile.health)||{};
@@ -1642,7 +1782,7 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
  const emptyCard=i=>['lib','name','dose','start','change'].every(k=>!val(`md[${i}].${k}`));
  medsIn.forEach(m=>{let i=$$('#medWrap .card').map(c=>+c.dataset.med).find(emptyCard);
   if(i==null){const e=$('#nMed');if(+e.value>=+e.max)return;e.value=+e.value+1;renderMeds();i=+e.value-1;}
-  const k=msLib(m.name);setv(`md[${i}].lib`,String(k>=0?k:MEDS.length-1));if(k<0)setv(`md[${i}].name`,String(m.name).trim());renderMedInfo(i);
+  const k=msLib(m.name);setv(`md[${i}].lib`,String(k>=0?k:MS_OTHER));if(k<0)setv(`md[${i}].name`,String(m.name).trim());renderMedInfo(i);
   setv(`md[${i}].dose`,[m.dose,m.times].filter(x=>String(x||'').trim()).join(', '));last=document.querySelector(`[name="md[${i}].dose"]`);n++;
   msDates(i,m);});
  /* v23.09 (review F3) the start and last-change dates Form DM-1 records go into a card's empty Start date and Last change boxes,
