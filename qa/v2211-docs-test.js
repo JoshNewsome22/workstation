@@ -38,7 +38,7 @@ const root=ROOT||path.join(__dirname,'..');const rd=(ed,f)=>fs.readFileSync(path
     const src=rd(ed,'index.html');
     ok('5 '+tag+': the Client ID prompt says where to make one',/Paste the Client ID from Google Cloud[^']*HOSTING\.md, Google sign-in/.test(src));
     const dd=rd(ed,'Daily_Behavior_Data_and_Visual_Analysis.html');
-    ok('6 '+tag+': DD-1\'s Google key box says where to make one',/how to make one: HOSTING\.md, Google sign-in/.test(dd)&&!/Setup: the Google Sheets link/.test(dd));
+    ok('6 '+tag+': DD-1\'s Google key box says where to make one (v23.56: the workstation\'s Help, Google, set up once)',/how to make one: the workstation’s Help, Google, set up once/.test(dd)&&!/HOSTING\.md, Google sign-in/.test(dd)&&!/Setup: the Google Sheets link/.test(dd));
     const ho=rd(ed,'HOSTING.md');const sec=(ho.split('## Google sign-in (once, for Sheets, Gmail and Drive)')[1]||'').split('\n## ')[0];
     const must=['Google Sheets API','Gmail API','Google Drive API','spreadsheets.readonly','gmail.send','userinfo.email','drive.file','Authorized JavaScript origins','https://newsomebh.com','Test users','Manage third-party app access'];
     ok('7 '+tag+': HOSTING.md has one Google sign-in checklist: the three APIs, the four scopes, the origin, test users and the IT step',!!sec&&must.every(m=>sec.includes(m)),{missing:must.filter(m=>!sec.includes(m))});

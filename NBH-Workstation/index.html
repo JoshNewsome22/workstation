@@ -2127,7 +2127,7 @@ async function unloadForm(id,force){const fr=state.frames[id];if(!fr||state.pend
 let capBusy=false;
 async function capFrames(){if(capBusy)return;capBusy=true;
   try{for(let g=0;g<60&&Object.keys(state.frames).length>FRAME_CAP;g++){
-    const keep=new Set([state.cur].concat(state.split||[])),seen=state.seen||[];
+    const keep=new Set([state.cur].concat(state.split||[],[...(state.mpBusy||[])])),seen=state.seen||[];
     const cand=Object.keys(state.frames).filter(id=>!keep.has(id)&&!state.pending[id]&&state.status[id]).sort((a,b)=>seen.indexOf(a)-seen.indexOf(b));
     if(!cand.length||!(await unloadForm(cand[0])))break;}}
   finally{capBusy=false;}}
@@ -2585,7 +2585,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.61';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.62';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3512,6 +3512,17 @@ function mpCheckFix(kind,id,w){
 
 /* v21.75 the packet is built by masterRun: Build master print gives it the ticked forms; the end of the week gives it Form
    DD-1 (asked for its week: the summary and next week's blank sheet) and Form SM-1, under its own title */
+/* v23.62 (review I240) a picture the packet holds more than once (the letterhead on every form, a token or card picture on
+   several pages) is written once, in a list at the end of the page, and put in each place there as the page is read,
+   before anything prints: the packet's page is lighter for the browser to read and lay out (1.9 MB of 6.9 MB on the
+   12-form simulated case). Only an <img src> or an SVG <image href> of 4 KB or more; the packet looks the same. */
+function mpPicsOnce(doc){const re=/(<img\b[^>]*?\ssrc=|<image\b[^>]*?\shref=)"(data:image\/[a-z+]+;base64,[A-Za-z0-9+\/=]{4000,})"/g,n={};
+  let m;while((m=re.exec(doc)))n[m[2]]=(n[m[2]]||0)+1;
+  const L=Object.keys(n).filter(u=>n[u]>1);if(!L.length)return doc;const at={};L.forEach((u,i)=>{at[u]=i;});
+  const out=doc.replace(re,(all,pre,u)=>u in at?pre.replace(/(src|href)=$/,'data-mp-pic='+at[u]+' $1=')+'""':all);
+  const js='<script>(function(){var P='+JSON.stringify(L)+';var e=document.querySelectorAll("[data-mp-pic]");for(var i=0;i<e.length;i++){var x=e[i],u=P[+x.getAttribute("data-mp-pic")];'+
+    'if(x.tagName.toLowerCase()==="img")x.src=u;else x.setAttribute("href",u);x.removeAttribute("data-mp-pic");}})();<\/script>';
+  const k=out.indexOf('<!--mp-pics-->');return k<0?out:out.slice(0,k)+js+out.slice(k+14);}   /* before the page's own scripts, which measure it */
 async function masterRun(chosen,opt){opt=opt||{};
   if(!chosen.length){try{if(opt.win)opt.win.close();}catch(e){}alert('Tick at least one form in the list first.');return;}
   const notOpen=chosen.filter(([id])=>!inCase(id));   /* v21.61 a form of the case not loaded yet is loaded below, filled from the file */
@@ -3536,7 +3547,9 @@ async function masterRun(chosen,opt){opt=opt||{};
     chosen.length+' form'+(chosen.length===1?'':'s')+'\u2026<\/body><\/html>');}catch(e){}
   $('#masterPrint').textContent='Collecting\u2026';
   const parts=[];
-  for(const [id,name] of chosen){
+  /* v23.62 (review I240) two forms at a time, each loaded, filled from the file and collected, in the packet's order: the
+     two in hand stay loaded while they are (state.mpBusy, capFrames); never more than two, for an older iPad's memory */
+  const prep=async id=>{
     let fr=state.frames[id];
     if(state.pending[id]){fr=await warmForm(id);}   /* v21.61 one of the case's forms: loaded and filled now, and kept */
     let temp=false;
@@ -3547,10 +3560,15 @@ async function masterRun(chosen,opt){opt=opt||{};
       await new Promise(r=>fr.addEventListener('load',()=>setTimeout(r,700),{once:true}));
       pushPacketTo(fr);await new Promise(r=>setTimeout(r,250));
     }
-    const payload=await grab(id,'collect',(opt.extra||{})[id],4000,fr);
-    if(payload)parts.push(payload);
-    if(temp)fr.remove();else capFrames();   /* v21.81 not left loaded behind the screen */
-  }
+    return {fr,temp};};
+  const got=new Array(chosen.length);let nextI=0;state.mpBusy=new Set();
+  const work=async()=>{while(nextI<chosen.length){const i=nextI++,id=chosen[i][0];state.mpBusy.add(id);
+    try{const {fr,temp}=await prep(id);
+      got[i]=await grab(id,'collect',(opt.extra||{})[id],4000,fr);
+      if(temp)fr.remove();else capFrames();   /* v21.81 not left loaded behind the screen */
+    }finally{state.mpBusy.delete(id);}}};
+  try{await Promise.all([work(),work()]);}finally{state.mpBusy=null;}
+  got.forEach(x=>{if(x)parts.push(x);});
   $('#masterPrint').textContent='Build master print';
   if(!parts.length){try{w.close();}catch(e){}alert('Nothing could be collected from the ticked forms.');return;}
 
@@ -3790,7 +3808,7 @@ async function masterRun(chosen,opt){opt=opt||{};
     @media print{.mp-check{display:none!important}}
     ${pageCss}
    </style><style>${css}</style><\/head>
-   <body>${chk}${head}${body}
+   <body>${chk}${head}${body}<!--mp-pics-->
    <script>
    /* A form laid out wider than the page makes the browser shrink the WHOLE
       document to fit it, so one wide sheet shrinks every page in the packet -
@@ -3942,7 +3960,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   /* the window was opened at the click; if it has since been closed, try again */
   if(!w||w.closed)w=window.open('','_blank');
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
-  w.document.open();w.document.write(docM);w.document.close();
+  w.document.open();w.document.write(mpPicsOnce(docM));w.document.close();   /* v23.62 (review I240) each picture once */
   /* v22.77 (I241) with anything on the packet check, the print dialog waits for Print as it is, so the list is read first */
   setTimeout(()=>{let n=0;try{n=(w.__nbhCheck||{}).n||0;}catch(e){}try{w.focus();if(!n)w.print();}catch(e){}},900);
   /* v21.90 Safari prints the packet without its page header and footer; saved as PDF, Finish PDF adds them */

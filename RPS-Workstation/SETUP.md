@@ -9905,6 +9905,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.62: The packet is built sooner, and its window is lighter (review I240)
+
+- **Two forms at a time.** Build master print loads, fills and collects two forms at a time, in the packet's order (it
+  did one after the other): the case's forms not loaded yet, and a ticked form not open. Never more than two, for an
+  older iPad's memory; the two in hand stay loaded while they are. On the 12-form simulated case the packet is ready in
+  7.8 seconds instead of 10.9.
+- **Each picture once.** A picture the packet holds more than once (the letterhead on every form, a token or card picture
+  on several pages) is written into the packet's page once and put in each place as the page opens, before anything is
+  measured or printed. The 12-form packet's page is 5.1 MB instead of 6.9. The packet looks the same.
+- qa/i240-packet-test.js (4 checks); qa/v2211-docs-test.js follows v23.56's wording (DD-1's key box points to Help,
+  Google, set up once).
+
 ### v23.61: Speed and size checks in the release run (review I237)
 
 - **qa/budget-test.js** keeps the workstation as light as it is now, so a slowdown is seen in the release run instead
