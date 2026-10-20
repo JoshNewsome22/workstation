@@ -9905,6 +9905,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.64: Today's numbers from a caseload card, without opening the case (review I236, F471)
+
+- **Today's numbers** on every student's card (Caseload and the start screen), in Today and in the command box: a sheet
+  with the student's Form DD-1 targets, a count for each counted target (+ and − beside it), correct and not correct for
+  a percent, the minutes observed if the day has none yet, who recorded it and a note. A count takes three taps: Today's
+  numbers, +, Save. The sheet shows what the day already holds.
+- **The student on screen**: their Form DD-1 takes the numbers (loaded first if it is not); Save case keeps them.
+  **Any other student kept on this device**: their Form DD-1 takes them out of sight and their kept copy is written back,
+  as Log it now does; the case on screen is not touched and nothing is left half saved. A copy saved again meanwhile (in
+  another tab, or through Google Drive) is not written over: the sheet says so, and the numbers can be entered again.
+- **Form DD-1 places them the way it places a staff phone's entry**, so its rules hold: a count is added to the day's
+  total, correct and not correct to the day's percent; who recorded it goes in the day's Collected by and the note after
+  the day's notes. A day and target the team's Google Sheet writes is not entered (the sheet counts those), nor a record
+  kept in intervals; the sheet says what went in and what did not, and why. Durations, latencies and interval targets are
+  entered on Form DD-1 itself.
+- qa/i236-numbers-test.js (11 checks).
+
 ### v23.63: Text size and contrast, on the screen (review I249)
 
 - **Help, Side by side, fullscreen and the screen**: *Text size* (Normal, Larger, Largest) and *Contrast* (Normal, High);

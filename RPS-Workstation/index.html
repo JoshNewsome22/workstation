@@ -1419,6 +1419,8 @@ body:not(.has-form) #focusBtn{display:none}
 #dlg .ln input:focus,#dlg .ln select:focus,#dlg .ln textarea:focus{outline:none;border-color:#2f6f8f;box-shadow:0 0 0 3px rgba(47,111,143,.18)}
 #dlg .ln .td-more{margin:4px 0 0}
 #blank .card #blLog{font-weight:600}
+#dlg .dy-t{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0 8px}#dlg .dy-t th,#dlg .dy-t td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--rule)}   /* v23.64 */
+#dlg .dy-n{display:inline-flex;align-items:center;gap:4px}#dlg .dy-n input{width:64px;text-align:center}#dlg .dy-pm{min-width:44px;min-height:44px;font-size:20px;line-height:1}
 #dlg .ln #lnDict[aria-pressed="true"]{background:#f3c94f;border-color:#f3c94f;color:var(--navy)}
 </style>
 <style id="ws-v2195">
@@ -2591,7 +2593,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.63';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.64';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -10001,6 +10003,104 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 document.addEventListener('load',ev=>{const fr=ev.target;if(fr&&fr.tagName==='IFRAME'){const v=viewGet();if(v.t||v.hc)viewTell(fr,v);}},true);
 window.addEventListener('storage',e=>{if(e.key!==VIEWKEY)return;const v=viewGet();viewApply(v);Object.values(state.frames).forEach(fr=>viewTell(fr,v));});
 viewApply(viewGet());
+</script>
+<script id="nbh-v2364">
+/* ================= v23.64 (review I236, F471) Today's numbers, from a caseload card =================
+   A sheet with a student's Form DD-1 targets (read from the case as kept on this device, or from the open form): a count
+   for each counted target, correct and not correct for a percent, the minutes observed and a note; Save. For the student
+   on screen their Form DD-1 takes it (loaded first if it is not); for another student kept here their DD-1 takes it out of
+   sight and their kept copy is written back (as Log it now does), unless that copy was saved again meanwhile. Form DD-1
+   places the numbers by its own rules (ddDayEntry): what went in and what was held, and why, is said. */
+REPLY['day-targets']='day-targets-are';REPLY['day-entry']='day-entered';
+['day-targets-are','day-entered'].forEach(kind=>window.addEventListener('message',ev=>{const d=ev.data||{};if(!d||d.nbh!==kind||!d.id)return;const q=pending[d.id+'|'+kind];if(q&&q.length){const i=q.findIndex(f=>!f.src||f.src===ev.source);if(i>=0)q[i](d);}}));
+const DY={busy:false};
+const DY_HELD={sheet:'the team’s Google Sheet writes this day for it (add it on the sheet)',iv:'Form DD-1 keeps its record in intervals: enter it on the form',measure:'it is measured another way: enter it on Form DD-1',gone:'it is no longer one of Form DD-1’s targets',future:'the day is still to come',overlap:'it overlaps an episode already logged'};
+function dyToday(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());}
+/* the targets as the kept case holds them (Form DD-1's own record), when the form is not open */
+function dyFromSnap(snap,date){let S=null;try{S=JSON.parse(snap&&snap.own||'null');}catch(e){S=null;}if(!S||!Array.isArray(S.behaviors))return null;
+  const row=(S.rows||[]).find(r=>r&&r.date===date)||null,K=m=>(m==='count'||m==='rate')?'n':(m==='duration'||m==='pdur')?'d':(m==='opps'||m==='trials')?'p':(/^(interval|mts|pint|wint)$/.test(m||''))?'i':'';
+  const ord={target:0,replacement:1,acquisition:2};
+  return {ok:true,date,interval:!!(S.settings&&S.settings.entryMode==='interval'),obsMin:row?String(row.obsMin||''):'',
+    targets:S.behaviors.slice().sort((a,b)=>(ord[a.kind]||0)-(ord[b.kind]||0)).map(b=>({id:b.id,name:String(b.name||''),kind:b.kind||'',measure:b.measure,k:K(b.measure),two:b.measure==='trials',v:row&&row.values&&row.values[b.id]!=null?String(row.values[b.id]):'',o:row&&row.values&&row.values[b.id+'::opp']!=null?String(row.values[b.id+'::opp']):''}))};}
+async function dyTargets(key,date){const p=packet();
+  if(p.client&&key===clKey(p)){
+    if(state.frames['DD-1']&&!state.pending['DD-1']){const r=await grab('DD-1','day-targets',{date},6000);if(r&&r.ok)return r;}
+    if(state.pending['DD-1'])return dyFromSnap(state.pending['DD-1'].snap,date);
+    return state.frames['DD-1']?null:{none:true};}
+  const r=(await clList()||[]).find(x=>x.key===key);let d=null;try{d=r&&parseCase(r.text);}catch(e){}
+  if(!(d&&d.forms&&d.forms['DD-1']&&d.forms['DD-1'].snap))return {none:true};
+  return dyFromSnap(d.forms['DD-1'].snap,date);}
+async function dayNumbersOpen(key){
+  const p=packet(),me=p.client?clKey(p):'';let who=[];
+  if(p.client)who.push({key:me,name:p.client,here:true});
+  (await clList()||[]).filter(r=>!isStaffRec(r)).sort((a,b)=>String(a.client||'').localeCompare(String(b.client||''))).forEach(r=>{if(r.key!==me)who.push({key:r.key,name:clName(r)});});
+  if(!who.length){wsUI.toast('Name the student in the bar first, or keep a student on this '+HERE+'.',{kind:'warn',ms:7000});return;}
+  const k=key&&who.some(w=>w.key===key)?key:who[0].key;
+  dialog('Today’s numbers','<form id="dyForm" class="ln" novalidate>'+
+    (who.length>1?'<label class="ln-f"><span>Student<\/span><select id="dyWho">'+who.map(w=>'<option value="'+esc(w.key)+'"'+(w.key===k?' selected':'')+'>'+esc(w.name)+(w.here?' (on screen)':'')+'<\/option>').join('')+'<\/select><\/label>':'<input type="hidden" id="dyWho" value="'+esc(k)+'">')+
+    '<label class="ln-f"><span>Day<\/span><input type="date" id="dyDate" value="'+dyToday()+'"><\/label>'+
+    '<div id="dyRows" aria-live="polite"><p class="hint">Reading the targets…<\/p><\/div>'+
+    '<div class="ln-g"><label class="ln-f"><span>Minutes observed (if the day has none yet)<\/span><input id="dyMin" type="number" inputmode="numeric" min="0" max="1440"><\/label>'+
+    '<label class="ln-f"><span>Recorded by<\/span><input id="dyBy" value="'+esc(p.bcba||'')+'"><\/label><\/div>'+
+    '<label class="ln-f"><span>Note for the day (optional)<\/span><textarea id="dyNote" rows="2"><\/textarea><\/label>'+
+    '<p class="td-more"><button type="submit" class="primary" id="dySave">Save<\/button><\/p>'+
+    '<p class="hint">The numbers are added to what Form DD-1 already holds for the day, as a staff phone’s are: a count to the day’s total, correct and not correct to its percent. Durations, latencies and interval records are entered on Form DD-1 itself.<\/p><\/form>');
+  dyPaint();}
+async function dyPaint(){const box=$('#dyRows');if(!box)return;const key=String(($('#dyWho')||{}).value||''),date=String(($('#dyDate')||{}).value||dyToday());
+  const t=await dyTargets(key,date);if(!$('#dyRows'))return;
+  if(!t||t.none){box.innerHTML='<p>Form DD-1 is not in this student’s case yet.<\/p><p class="td-more"><button type="button" data-clopen="'+esc(key)+'" data-clform="DD-1">Open DD-1<\/button><\/p>';return;}
+  const rows=t.targets.filter(b=>b.k==='n'||b.k==='p'),other=t.targets.filter(b=>!(b.k==='n'||b.k==='p')).map(b=>b.name).filter(Boolean);
+  if(t.interval){box.innerHTML='<p>Form DD-1 keeps this student’s record in intervals: enter the day on the form.<\/p><p class="td-more"><button type="button" data-clopen="'+esc(key)+'" data-clform="DD-1">Open DD-1<\/button><\/p>';return;}
+  if(!rows.length){box.innerHTML='<p>None of this student’s Form DD-1 targets is counted (each is a duration, a latency or intervals): enter them on the form.<\/p>';return;}
+  const num=(id,lab,val)=>'<span class="dy-n"><button type="button" class="dy-pm" data-dy="'+id+'" data-d="-1" aria-label="One fewer: '+esc(lab)+'">−<\/button><input type="number" inputmode="numeric" min="0" max="9999" id="'+id+'" value="'+val+'" aria-label="'+esc(lab)+'"><button type="button" class="dy-pm" data-dy="'+id+'" data-d="1" aria-label="One more: '+esc(lab)+'">+<\/button><\/span>';
+  box.innerHTML='<table class="dy-t"><tr><th>Target<\/th><th>Add today<\/th><th>The day holds<\/th><\/tr>'+rows.map((b,i)=>'<tr data-dyt="'+esc(b.id)+'" data-dyk="'+b.k+'"><td>'+esc(b.name||'Target '+(i+1))+'<\/td><td>'+
+    (b.k==='n'?num('dyN'+i,b.name+', '+(b.measure==='rate'?'count':'occurrences'),''):num('dyP'+i,b.name+', correct','')+' correct '+num('dyM'+i,b.name+', not correct','')+' not')+
+    '<\/td><td>'+(b.v===''?'—':esc(b.v)+(b.two||b.k==='p'?(b.o!==''?' of '+esc(b.o):''):''))+(b.sheet?' <span class="hint">(the Google Sheet writes it)<\/span>':'')+'<\/td><\/tr>').join('')+'<\/table>'+
+    (other.length?'<p class="hint">On Form DD-1 itself: '+other.map(esc).join(', ')+'.<\/p>':'');
+  if(t.obsMin)$('#dyMin').placeholder='the day has '+t.obsMin;}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.dy-pm');if(b){const i=document.getElementById(b.dataset.dy);if(i){const v=Math.max(0,Math.min(9999,(parseInt(i.value,10)||0)+(+b.dataset.d)));i.value=v||'';}return;}
+  const c=e.target.closest&&e.target.closest('[data-clday]');if(c){e.preventDefault();e.stopPropagation();dayNumbersOpen(c.dataset.clday);return;}
+  if(e.target.closest&&e.target.closest('#blDay,#tdDay'))dayNumbersOpen('');},true);
+document.addEventListener('change',e=>{if(e.target&&(e.target.id==='dyWho'||e.target.id==='dyDate'))dyPaint();});
+async function dyAway(r,d,entry){if(CLX.busy)return {ok:false,why:'Caseload is reading sheets or replies; try again in a moment'};CLX.busy=true;let fr=null;
+  try{fr=await clFrameFor('DD-1');if(!fr)return {ok:false,why:'Form DD-1 did not load'};
+    const rs=await grab('DD-1','restore',{snap:d.forms['DD-1'].snap,copy:false},20000,fr);if(!rs)return {ok:false,why:'Form DD-1 did not take their saved record'};
+    await new Promise(z=>setTimeout(z,250));
+    const g=await grab('DD-1','day-entry',{entry},10000,fr);if(!g||!g.ok)return g||{ok:false,why:'Form DD-1 did not answer'};
+    if(!g.placed.length&&!(+entry.obsMin>0))return Object.assign({},g,{away:clName(r)});
+    const sn=await grab('DD-1','snapshot',null,10000,fr);if(!(sn&&sn.snap))return {ok:false,why:'Form DD-1 did not give the record back'};
+    const fo=await grab('DD-1','facts?',null,5000,fr);
+    const now=(await clList()||[]).find(k=>k.key===r.key);if(now&&now.saved!==r.saved)return {ok:false,why:'their case was saved again meanwhile (another tab, or Google Drive); enter the numbers once more'};
+    d.forms['DD-1']=Object.assign({},d.forms['DD-1'],{snap:sn.snap});clMergeOut(d,'DD-1',fo&&fo.facts);
+    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);if(typeof drvDirty==='function')drvDirty(r);await clTx('readwrite',st=>st.put(r));
+    return Object.assign({},g,{away:clName(r)});}
+  catch(e){return {ok:false,why:String(e&&e.message||e)};}
+  finally{CLX.busy=false;window.__clRfWin=null;if(fr)fr.remove();}}
+async function dyDeliver(key,entry){const p0=packet();
+  if(!(p0.client&&key===clKey(p0))){const r=(await clList()||[]).find(x=>x.key===key);let d=null;try{d=r&&parseCase(r.text);}catch(e){}
+    if(d&&d.forms&&d.forms['DD-1']&&d.forms['DD-1'].snap)return dyAway(r,d,entry);return {ok:false,why:'Form DD-1 is not in their case yet'};}
+  if(state.pending['DD-1'])await warmForm('DD-1');else if(!state.frames['DD-1'])return {ok:false,why:'Form DD-1 is not in this case yet'};
+  if(!(await lnWait('DD-1',30000)))return {ok:false,why:'Form DD-1 did not open'};
+  const r=await grab('DD-1','day-entry',{entry},10000);return r||{ok:false,why:'Form DD-1 did not answer'};}
+document.addEventListener('submit',async e=>{if(!e.target||e.target.id!=='dyForm')return;e.preventDefault();if(DY.busy)return;
+  const key=String(($('#dyWho')||{}).value||''),date=String(($('#dyDate')||{}).value||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){wsUI.toast('Give the day.',{kind:'warn'});return;}
+  const d={};document.querySelectorAll('#dyRows tr[data-dyt]').forEach((tr,i)=>{const id=tr.dataset.dyt,v=x=>parseInt((tr.querySelector(x)||{}).value,10)||0;
+    if(tr.dataset.dyk==='n'){const n=v('[id^="dyN"]');if(n>0)d[id]={n};}else{const a=v('[id^="dyP"]'),m=v('[id^="dyM"]');if(a+m>0)d[id]={p:a,m};}});
+  const obsMin=parseInt(($('#dyMin')||{}).value,10)||0,note=String(($('#dyNote')||{}).value||'').trim().slice(0,300),w=String(($('#dyBy')||{}).value||'').trim().slice(0,60)||'the workstation';
+  if(!Object.keys(d).length&&!obsMin){wsUI.toast('Nothing to save yet: give a number.',{kind:'warn'});return;}
+  DY.busy=true;const b=$('#dySave');if(b){b.disabled=true;b.textContent='Saving…';}
+  let r;try{r=await dyDeliver(key,{date,d,obsMin,note,w});}catch(x){r={ok:false,why:String(x&&x.message||x)};}finally{DY.busy=false;const b2=$('#dySave');if(b2){b2.disabled=false;b2.textContent='Save';}}
+  if(!r||!r.ok){wsUI.toast('Nothing was saved: '+((r&&r.why)||'Form DD-1 did not answer')+'.',{kind:'warn',ms:9000});return;}
+  const went=r.placed.map(x=>x.name+' '+x.what).join(', '),held=r.held.map(x=>(x.name||'a target')+': '+(DY_HELD[x.why]||x.why)).join('; ');
+  try{$('#dlg').close();}catch(x){}
+  wsUI.toast((r.away?r.away+': ':'')+(went?'on Form DD-1 for '+date+': '+went+'.':'the minutes observed are on Form DD-1.')+(held?' Not entered: '+held+'.':'')+(r.away?' Their case on this '+HERE+' holds it.':' Save case keeps it.'),{kind:held?'warn':'ok',ms:held?12000:7000});
+  if($('#dlg').open===false&&typeof paintBlank==='function'){try{paintBlank();}catch(x){}}});
+/* the buttons: each student's card, the start screen, Today, the command box */
+{const cc=clCard;clCard=function(r,w){const h=cc.apply(this,arguments);if(isStaffRec(r))return h;
+  return h.replace(/(<div class="cl-card-acts"><button type="button" class="primary" data-clopen="[^"]*"[^>]*>Open<\/button>)/,'$1<button type="button" data-clday="'+esc(r.key)+'" aria-label="Today’s numbers for '+esc(clName(r))+'">Today’s numbers<\/button>');};}
+{const pb7=paintBlank;paintBlank=async function(){const r=await pb7.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blDay'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blDay">Today’s numbers<\/button>');}catch(e){}return r;};}
+{const to7=todayOpen;todayOpen=async function(){const r=await to7.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdDay')){const l=row.querySelector('#tdLog');if(l)l.insertAdjacentHTML('afterend',' <button type="button" id="tdDay">Today’s numbers<\/button>');else row.insertAdjacentHTML('afterbegin','<button type="button" id="tdDay">Today’s numbers<\/button> ');}}catch(e){}return r;};}
+CMDS.push({k:'today numbers data count tally record day staff',n:'Today’s numbers: counts into Form DD-1',s:'command',go:()=>dayNumbersOpen('')});
 </script>
 </body>
 </html>

@@ -9780,6 +9780,29 @@ try{stClean();stPanel();stPaint();}catch(e){}
 /* collects when the form opens, every five minutes while it is on screen, and on coming back to it */
 setInterval(()=>{if(document.visibilityState==="visible"&&stReady()&&S.staff.links.length)stCollect(true);},ST_EVERY);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&stReady()&&S.staff.links.length&&Date.now()-stAt>ST_EVERY)stCollect(true);});
+/* v23.64 (review I236) today's numbers from the workstation (a caseload card, Today, the start screen): the targets and
+   what the day holds, then the numbers placed the way a staff phone's entry is placed (stPlace), so the form's rules hold:
+   a count is added to the day's total, correct and not correct to the day's percent; a day and target the team's Google
+   Sheet writes, and a record kept in intervals, are held and said. Not kept in the Staff phones log: it did not come from
+   a phone. The workstation asks (day-targets, day-entry); a test calls ddDayTargets and ddDayEntry. */
+function ddDayTargets(date){const iso=/^\d{4}-\d{2}-\d{2}$/.test(String(date||""))?date:localISO(new Date()),row=S.rows.find(r=>r.date===iso)||null;
+  return {ok:true,date:iso,interval:S.settings.entryMode==="interval",obsMin:row?String(row.obsMin||""):"",
+    targets:orderedBehaviors().map(b=>({id:b.id,name:String(b.name||""),kind:b.kind||"",measure:b.measure,k:ST_KIND(b.measure),two:!!(MEASURES[b.measure]||{}).two,unit:(MEASURES[b.measure]||{}).unit||"",
+      v:row&&row.values&&row.values[b.id]!=null?String(row.values[b.id]):"",o:row&&row.values&&row.values[OPP(b.id)]!=null?String(row.values[OPP(b.id)]):"",sheet:row?!!ddGsOwns(row,b.id):false}))};}
+function ddDayEntry(e){if(!e||!/^\d{4}-\d{2}-\d{2}$/.test(String(e.date||"")))return {ok:false,why:"the day is not a date"};
+  const hex=Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,"0")).join("");
+  const o=stEntryNorm({kind:"nbh-staff",form:"DD-1",id:hex,c:"",w:String(e.w||"the workstation"),date:e.date,made:"",d:e.d||{},note:String(e.note||"")});
+  if(!o||!Object.keys(o.d).length)return {ok:false,why:"no number to enter"};
+  const r=stPlace(o,true),row=S.rows.find(x=>x.date===e.date)||null;
+  const om=Math.round(Number(e.obsMin));if(row&&isFinite(om)&&om>0&&om<=1440&&!String(row.obsMin||"").trim())row.obsMin=String(om);
+  const placed=Object.keys(r.placed).map(k=>({id:k,name:r.placed[k].name,what:r.placed[k].what})),held=Object.keys(r.held).map(k=>{const b=S.behaviors.find(x=>x.id===k);return {id:k,name:b?b.name:"",why:r.held[k]};});
+  if(placed.length||om>0||(r.lab&&r.lab!=="labels")){renderAll();gsEdited();}
+  return {ok:true,date:e.date,placed,held};}
+window.ddDayTargets=ddDayTargets;window.ddDayEntry=ddDayEntry;
+window.addEventListener("message",ev=>{const m=ev.data||{};if(!m||(m.nbh!=="day-targets"&&m.nbh!=="day-entry"))return;if(window.parent===window||ev.source!==window.parent)return;
+  let r;try{r=m.nbh==="day-targets"?ddDayTargets(m.date):ddDayEntry(m.entry);}catch(err){r={ok:false,why:String(err&&err.message||err).slice(0,80)};}
+  r.nbh=m.nbh==="day-targets"?"day-targets-are":"day-entered";r.id="DD-1";try{if(window.nbhBridge&&nbhBridge.formId)r.id=nbhBridge.formId();}catch(e){}
+  try{ev.source.postMessage(r,"*");}catch(e){}});
 </script>
 <style id="dd-v2185-css">
 .dd-staff .st-make{border:1px solid var(--rule-soft,#dce3e7);border-radius:3px;padding:10px 12px;margin:8px 0 12px;background:#f8fafb}
