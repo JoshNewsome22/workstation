@@ -9903,6 +9903,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.55: Zoom works, typing does not freeze, and Help counts 47 forms (review F488, F473, F517)
+
+- **Zoom (F488).** The workstation and the 47 forms no longer stop zoom in their own markup. On an iPad or iPhone only,
+  the cap is put back by script: there Safari lets pinch zoom work anyway, and the cap is what keeps it from zooming into a
+  field when it is tapped (as since v21.75). A laptop, a Chromebook or an Android phone can zoom.
+- **Typing (F473).** The view tabs' progress dots are counted once typing pauses, and catch up a moment after the last key:
+  counting them could redraw the map of every view, which held a keystroke for up to half a second in IA-1 and PA-1 while
+  their rows were drawn again. A field drawn again under the same name now takes its old one's place in that map, which is
+  made again only when a field cannot be found that way. IA-1 finds each field by its name once and remembers it while it
+  stays on the page (it asked the whole page for each of several hundred fields at every keystroke). Measured here while
+  typing with the simulation loaded: IA-1's longest freeze from 0.59 s to under 0.2 s, PA-1's slowest keystroke from 0.26 s
+  to 0.09 s.
+- **Help (F517)** says 47 forms (the one-file edition, and the note on a form opened on its own).
+- qa/w4-zoom-typing-test.js (7 checks); qa/v2175-test.js 7f follows the zoom rule.
+
 ### v23.54: A case shared in Google Drive with a colleague's school account: no file to send, both people's work put together
 
 The BCBA asked for it (October 2026), after the file relay.

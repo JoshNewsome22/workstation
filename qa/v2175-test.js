@@ -129,8 +129,10 @@ const FACTS={data:{from:'2026-09-14',to:'2026-10-09',days:20,src:'DD-1',
   await page.goto(W+'Variable_Isolation_Protocol.html',{waitUntil:'load'});await sleep(900);await page.evaluate(stub);
   const vi=await page.evaluate(f=>{window.__nbhFactsIn(f);return {m:document.querySelector('[name="s_measure"]').value,d:document.querySelector('[name="s_def"]').value};},TB);
   ok('7e VI-1 takes the measurement as well as the definition from the case',vi.m==='Frequency / rate'&&/Hitting or kicking staff/.test(vi.d),vi);
-  const vp=await page.evaluate(async()=>{const r=await fetch('index.html');const t=await r.text();return /maximum-scale=1/.test(t)&&/maximum-scale=1/.test(document.querySelector('meta[name=viewport]').content);});
-  ok('7f the workstation and the forms keep iPad Safari from zooming into a field on tap (maximum-scale=1; pinch zoom still works)',vp);
+  const vp=await page.evaluate(async()=>{const r=await fetch('index.html');const t=await r.text();const m=/<meta name="viewport" content="([^"]*)"/.exec(t);return {shell:m&&m[1],here:document.querySelector('meta[name=viewport]').content};});
+  const ipad=await br.newPage({viewport:{width:1024,height:1366},userAgent:'Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'});
+  await ipad.goto(W+'Variable_Isolation_Protocol.html',{waitUntil:'load'});await sleep(600);const vpi=await ipad.evaluate(()=>document.querySelector('meta[name=viewport]').content);await ipad.close();
+  ok('7f zoom (v23.55, review F488): the workstation and the forms no longer stop it; on an iPad only, maximum-scale=1 keeps Safari from zooming into a tapped field (pinch zoom works there anyway)',!!vp.shell&&!/maximum-scale/.test(vp.shell)&&!/maximum-scale/.test(vp.here)&&/maximum-scale=1/.test(vpi),{vp,vpi});
   await page.close();
 
   /* ---------- 6. the workstation ---------- */

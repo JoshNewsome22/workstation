@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FBA and BIP Workstation · Newsome Behavioral Health</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -303,6 +303,7 @@
 <!-- /nbh-pwa-head -->
 <!-- v21.67 Read a document: the readers it loads only when asked for, saved for offline use with the rest (tools/pwa-sw.py reads this) -->
 <meta name="nbh-offline" content="nbh-doc/pdf.min.js nbh-doc/pdf.worker.min.js nbh-ocr/tesseract.min.js nbh-ocr/worker.min.js nbh-ocr/tesseract-core-simd-lstm.wasm.js nbh-ocr/eng.traineddata.gz nbh-dictate.js nbh-media.js">
+<script>/* v23.55 (review F488) zoom: an iPad or iPhone only keeps Safari from zooming into a tapped field; pinch zoom works there anyway */(function(){try{var ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(!ios)return;var m=document.querySelector('meta[name=viewport]');if(m&&!/maximum-scale/.test(m.content))m.content+=', maximum-scale=1';}catch(e){}})();</script>
 <script src="nbh-media.js"></script>   <!-- v22.56 the media store: sounds and pictures kept once on this device, out of the case file -->
 <script id="nbh-merge">
 /* nbh-merge (v23.52): a case worked on by two people, put back together. Three versions of the case: the one both last
@@ -1674,7 +1675,7 @@ const ALL=FORMS.flatMap(g=>g[1]);
 const state={cur:null,ticked:{},status:{},frames:{},mismatch:{},savedAt:null,lastSig:'',pending:{},caseOrder:[],lastInput:0,warm:null};   /* v21.61 pending: the case's forms not loaded yet, as the file holds them */
 
 /* ================= the one-file edition =================
-   build-single.py packs the 46 forms, the PDF tools and a copy of this page
+   build-single.py packs the 47 forms, the PDF tools and a copy of this page
    into this one file, gzip-compressed and base64-encoded in text blocks at
    the end of the body. When those blocks are present the forms are opened
    from them, and a case is kept as one HTML file: this page, the same blocks,
@@ -2567,7 +2568,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.54';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.55';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -4201,10 +4202,10 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Install it</b> to open it from its own icon: on an iPad, in Safari, <b>Share</b>, then <b>Add to Home Screen</b>; on a Mac, in Safari, <b>File</b>, then <b>Add to Dock</b>; in Chrome or Edge, the install icon in the address bar. Each device keeps its own copy. Installed on an iPad, a file you save opens the share sheet: choose <b>Save to Files</b>; the master print and a respondent page\u2019s preview open inside the app, with Print and Close, and <b>Own tab</b> shows the form full-window.</p>'+
      '<p>The website only hands the workstation\u2019s files to the device; what you type is not sent back to it. Where a student\u2019s information can go is listed under <b>Where the student\u2019s data goes</b>, below.</p>'):'')+
    (EMBED?fold('The one-file edition',
-     '<p>All 46 forms are inside this file. <b>Save case</b> writes the case as a file of its own, <i>CASE_Student_date.json</i> (the same file the website edition writes, a few hundred KB); <b>Open case</b> in this file opens it again. Keep that file with the student’s records.</p>'+
+     '<p>All 47 forms are inside this file. <b>Save case</b> writes the case as a file of its own, <i>CASE_Student_date.json</i> (the same file the website edition writes, a few hundred KB); <b>Open case</b> in this file opens it again. Keep that file with the student’s records.</p>'+
      '<p>For someone who does not have the workstation, <b>More</b>, <b>Save a case that opens on its own</b> writes <i>Student.case.html</i>: the whole workstation (about 21 MB) with the case in it, which opens when it is double-clicked. A <i>.case.html</i> saved before v22.22 opens as before, and Save case writes back into it.</p>'):'')+
    fold('Where the student\u2019s data goes',dataWhere())+
-   '<div class="note">Each of the 46 forms also works on its own, opened directly from this folder, with the shared nbh-*.js files beside it: it saves, opens and prints as it does here. A single form file sent somewhere else, away from those files, opens without its letterhead, writing help and Autosave; for one file that carries everything, use the one-file edition. Nothing the workstation does changes the form files.</div>');
+   '<div class="note">Each of the 47 forms also works on its own, opened directly from this folder, with the shared nbh-*.js files beside it: it saves, opens and prints as it does here. A single form file sent somewhere else, away from those files, opens without its letterhead, writing help and Autosave; for one file that carries everything, use the one-file edition. Nothing the workstation does changes the form files.</div>');
 });
 
 /* ================= bookmarking a saved packet =================
@@ -8153,7 +8154,7 @@ $('#readDoc').addEventListener('click',drOpen);
 </script>
 <script id="nbh-pwa">
 /* ================= the offline copy and the installed app (v21.43) =================
-   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 46 forms, the
+   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 47 forms, the
    picture library, the respondent page, the PDF tools, the manifest and icons), so everything opens without the
    internet; see the comment at the top of sw.js. This part of the page registers it, on https or on this computer
    (localhost) only, never from a drive and never in the one-file edition, which needs none. The chip beside Autosave

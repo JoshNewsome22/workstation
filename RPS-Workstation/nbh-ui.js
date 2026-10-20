@@ -110,7 +110,10 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
   U.progress = function(){
     /* (v21.43) a form that draws its rows again (the same number of fields, so the count below does not change) leaves
        the old ones out of the page: the map is made again, or the dots would count only what was not redrawn */
-    if (MAP && Object.keys(MAP).some(function(k){ return MAP[k].some(function(e){ return !e.isConnected; }); })) MAP = null;
+    /* v23.55 (review F473) a field drawn again under the same name takes its old one's place; the map of every view is
+       made again (a page-wide measure) only when a field cannot be found that way */
+    if (MAP && !Object.keys(MAP).every(function(k){ return MAP[k].every(function(e, i){ if (e.isConnected) return true; var n = e.name || e.id, sel = e.name ? '[name="' + e.name + '"]' : e.id ? '#' + e.id : '';
+      var x = null; try { x = sel && document.querySelector(e.tagName.toLowerCase() + sel); } catch (er) { x = null; } if (!x || !n) return false; MAP[k][i] = x; return true; }); })) MAP = null;
     if (!MAP) MAP = buildMap();
     if (!MAP) return null;
     var out = {}, own = typeof window.__nbhViewFill === 'function' ? window.__nbhViewFill : null;
@@ -132,13 +135,18 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     return out;
   };
   U.remap = function(){ MAP = null; U.progress(); };
-  function soon(ms){ clearTimeout(timer); timer = setTimeout(function(){ try { U.progress(); } catch (e) {} }, ms || 400); }
-  document.addEventListener('input', function(){ soon(500); }, true);
+  /* v23.55 (review F473) the dots are counted once typing pauses: their count can redraw the map of every view, which
+     held a keystroke up to half a second in IA-1 and PA-1; a key in the last 1.1 s puts it off again */
+  var typed = 0;
+  function quiet(f){ var w = 1100 - (Date.now() - typed); if (w > 0) { setTimeout(function(){ quiet(f); }, w); return; } f(); }
+  function soon(ms){ clearTimeout(timer); timer = setTimeout(function(){ quiet(function(){ try { U.progress(); } catch (e) {} }); }, ms || 400); }
+  document.addEventListener('input', function(){ typed = Date.now(); soon(500); }, true);
+  document.addEventListener('keydown', function(){ typed = Date.now(); }, true);
   document.addEventListener('change', function(){ soon(300); }, true);
   var remapTimer = null, lastCount = -1;
   function maybeRemap(){
     clearTimeout(remapTimer);
-    remapTimer = setTimeout(function(){ var n = document.querySelectorAll('input,select,textarea').length; if (n !== lastCount) { lastCount = n; MAP = null; } try { U.progress(); } catch (e) {} }, 900);
+    remapTimer = setTimeout(function(){ quiet(function(){ var n = document.querySelectorAll('input,select,textarea').length; if (n !== lastCount) { lastCount = n; MAP = null; } try { U.progress(); } catch (e) {} }); }, 900);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });

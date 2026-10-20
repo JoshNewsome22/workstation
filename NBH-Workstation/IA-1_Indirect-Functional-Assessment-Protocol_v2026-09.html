@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Form IA-1 · Indirect Functional Assessment Protocol · Newsome Behavioral Health</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -3975,7 +3975,9 @@ if(!window.NBH_RESPOND){window.NBH_RESPOND_MISSING=true;}
 (function(){
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value).trim():''};
+/* v23.55 (review F473) a field found by its name once, and remembered while it stays on the page */
+const NMC=new Map(),byNm=n=>{let e=NMC.get(n);if(e&&e.isConnected&&e.name===n)return e;e=document.querySelector('[name="'+n+'"]');if(e)NMC.set(n,e);else NMC.delete(n);return e;};
+const val=n=>{const e=byNm(n);return e?String(e.value).trim():''};
 const CODES=['A','B','C','D','E','F','G','H','I','J','K','L'];   /* v22.36 up to twelve informants (a whole team, school and home) */
 const nInf=()=>+$('#nInf').value;
 const infName=i=>{const nm=val(`inf[${i}].name`);return CODES[i]+(nm?' · '+nm:'');};

@@ -8,6 +8,9 @@
    the workstation, Escape and the fullscreen key are passed up to it.
    Nothing here touches what prints: the marks are classes the print styles
    never mention. */
+/* v23.55 (review F488) zoom: the forms no longer stop it; an iPad or iPhone only keeps Safari from zooming into a
+   tapped field (pinch zoom works there anyway) */
+(function(){try{var ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(!ios)return;var m=document.querySelector('meta[name=viewport]');if(m&&!/maximum-scale/.test(m.content))m.content+=', maximum-scale=1';}catch(e){}})();
 (function () {
   var SKIP = '.toolbar,.nbh-mast,.nbh-tabs,nav.tabs,dialog,.nbh-pm';
   function alpha(c) { var m = /rgba?\(([^)]+)\)/.exec(c || ''); if (!m) return c === 'transparent' ? 0 : 1; var p = m[1].split(','); return p.length > 3 ? parseFloat(p[3]) : 1; }
