@@ -9905,6 +9905,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.59: One naming routine for every form (review I247, F486)
+
+- **The names a screen reader announces** for each control of a form (a field in a table by its row and column, a list
+  by its question) come from one routine in `nbh-ui.js`, written from `tools/blocks/nbh-ui.html`, which every form
+  loads. Each of the 47 forms carried its own copy (6.3 KB each, about 295 KB in all), so a fix had to be made 47 times;
+  it is now made once and reaches every form. The names are the same as before in every form (each control of the 47
+  forms, with their simulations loaded, compared before and after).
+- **A chart drawn as an image** with no name of its own is named after the heading of the card it sits in, in every form
+  (Form ABC-1's copy alone did this).
+- qa/i247-names-test.js (7 checks); qa/v2209-names-test.js checks the names in every form.
+
 ### v23.58: Start here, and the notes say what the app does (review I261, I264, F508, F516)
 
 - **START-HERE.md** (new, in the folder of both editions): the guide as the workstation is now, apart from the release
