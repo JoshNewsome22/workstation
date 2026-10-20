@@ -2092,6 +2092,28 @@ function snapSig(snap){let h=5381;const s=JSON.stringify((snap&&snap.data)||{});
 function setPending(id,title,snap,copy){state.pending[id]={title:title||'',snap:snap||{total:0,data:{}},copy:!!copy,status:{filled:filledOf(snap),sig:snapSig(snap)}};}
 const caseClean=()=>!!(state.lastSig&&state.lastSig===caseSig());
 const sigBut=id=>caseSig().split('|').filter(x=>x.split(':')[0]!==id).join('|');   /* v21.81 the case's fingerprint without one form */
+/* v23.77 the case as saved, with one form's part as it is now: every other form keeps its part as saved (a form opened
+   since, and not in the saved mark, never matches), in the order caseSig gives them; marks that are not a form's stay */
+function sigWith(id){const M={},rest=[];String(state.lastSig||'').split('|').forEach(x=>{const k=x.split(':')[0];if(!k)return;if(k[0]==='~')rest.push(x);else M[k]=x;});
+  return caseSig().split('|').map(e=>{const k=e.split(':')[0];return k===id?e:(k in M?M[k]:k+':~unsaved');}).concat(rest).join('|');}
+function sigTake(id){state.lastSig=sigWith(id);if(state.lastSig===caseSig())state.autoSig=state.lastSig;if(typeof paintSave==='function')paintSave();}
+/* v23.77 what a form's own fingerprint is for a record, as nbh-autosave works it out (its times left out) */
+function ownHash(t){t=String(t).replace(/"(saved|exported|savedAt|exportedAt)"\s*:\s*"[^"]*"/g,'');let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return (h>>>0).toString(36)+'-'+t.length.toString(36);}
+/* v23.77 a form just filled from the case counts its fields, and works out what it saves, a moment later (v23.55; on a
+   busy device later than the form itself allows for, so it may even call itself edited). For twenty seconds, until the
+   case is saved or opened again: while what the form saves is the very record the file holds, it is as saved, whatever
+   it counts or calls itself; otherwise its count is taken while no tap or key has been made in it and it is not edited */
+function settleSig(id){const w=state.settle&&state.settle[id];if(!w)return;
+  if(Date.now()>w.until||w.at!==state.savedAt||!state.lastSig){delete state.settle[id];return;}
+  const st=state.status[id];if(!st)return;const e=caseSig().split('|').find(x=>x.split(':')[0]===id)||'',v=e.split(':')[2]||'',o=v.indexOf('.')<0?null:v.slice(v.indexOf('.')+1);
+  if(w.own&&o===w.own){sigTake(id);return;}
+  if(!w.touched&&typeof st.edited==='boolean'&&!st.edited)sigTake(id);}
+/* v23.77 a tap or a key in a form: from then on a change in it is a change, whatever the form has counted yet (a form tells
+   it has been edited only once it has counted, a second or so after the last key): only its very record as the file
+   holds it is still as saved, and the case opened or saved a moment ago is not taken as saved over it (autoBaseline) */
+function touchHook(id,fr){try{const doc=fr.contentDocument;if(!doc||doc.__nbhTouch)return;doc.__nbhTouch=1;
+  const hit=e=>{if(!e.isTrusted)return;state.touchAt=Date.now();const w=state.settle&&state.settle[id];if(w)w.touched=true;};
+  ['click','keydown','input','change'].forEach(t=>doc.addEventListener(t,hit,true));}catch(e){}}
 /* the case's forms in the order of the file, then any opened since */
 function orderCase(f){const o={};state.caseOrder.concat(Object.keys(f)).forEach(id=>{if(f[id]&&!o[id]&&!STAFF_SIDE[id])o[id]=f[id];});
   /* v23.57 (review I239) what each form has due, as it last said, goes with it */
@@ -2102,7 +2124,7 @@ function makeFrame(id,rec){
   fr.title=rec[1]+' (Form '+id+')';
   fr.__settle=new Promise(res=>{fr.__settleRes=res;});
   loadFrame(fr,rec[2]);
-  fr.addEventListener('load',()=>{ fr.dataset.loaded='1'; afterLoad(id,fr); setTimeout(()=>{ pushPacketTo(fr); ask(fr,'status'); },500); setTimeout(()=>pushFactsTo(fr),1100); });
+  fr.addEventListener('load',()=>{ fr.dataset.loaded='1'; touchHook(id,fr); afterLoad(id,fr); setTimeout(()=>{ pushPacketTo(fr); ask(fr,'status'); },500); setTimeout(()=>pushFactsTo(fr),1100); });
   $('#frames').appendChild(fr);
   state.frames[id]=fr;
   return fr;
@@ -2130,6 +2152,7 @@ async function afterLoad(id,fr){try{if(clGid())fr.contentWindow.NBH_GID=clGid();
        and this form now holds what the file held for it */
     const lastBut=String(state.lastSig||'').split('|').filter(x=>x.split(':')[0]!==id).join('|');
     if(r&&state.lastSig&&sigBut(id)===lastBut){state.lastSig=caseSig();state.autoSig=caseSig();}
+    if(r&&state.lastSig){sigTake(id);(state.settle=state.settle||{})[id]={until:Date.now()+20000,at:state.savedAt,own:P.snap&&P.snap.own?ownHash(P.snap.own):null,touched:false};touchHook(id,fr);}   /* v23.77 its own part, and its count to come */
     if(id==='TD-1')['GB-1','EB-1'].forEach(k=>{if(state.frames[k])pushPlanTo(k);});
     renderRail();if(typeof paintSave==='function')paintSave();
     if(rep.notes.length&&(!state.restoring||!r))wsUI.toast('Form '+id+', filled from the case: '+rep.notes.join('; '),{kind:'warn',ms:r?9000:20000});
@@ -2711,7 +2734,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.76';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.77';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3181,7 +3204,7 @@ window.addEventListener('message',ev=>{
   /* the file check loads forms in hidden frames; their replies are not real status */
   if(state.probing&&!state.frames[d.id])return;
   if(d.nbh==='pong'||d.nbh==='status'){
-    state.status[d.id]=d.status;
+    state.status[d.id]=d.status;settleSig(d.id);   /* v23.77 */
     if(FACT_SRC[d.id])noteFactSource(d.id,d.status);   /* v21.31 the case */
     if(state.dueSig===undefined)state.dueSig={};const dsig=(d.status&&d.status.sig)||'';if(state.dueSig[d.id]!==dsig){state.dueSig[d.id]=dsig;noteDue();}   /* v21.35 due */
     if(d.details){state.details=state.details||{};state.details[d.id]=d.details;}
@@ -3189,7 +3212,7 @@ window.addEventListener('message',ev=>{
     renderRail();
     if(state.cur===d.id)$('#crumbStatus').textContent=d.status.filled+' fields filled';
   } else if(d.nbh==='payload'||d.nbh==='snapshot'||d.nbh==='restored'||d.nbh==='facts-out'||d.nbh==='facts-applied'||d.nbh==='csv-out'||d.nbh==='fill-applied'){
-    if(d.nbh!=='payload'&&d.status){state.status[d.id]=d.status;noteWho(d.id,d.who);renderRail();}
+    if(d.nbh!=='payload'&&d.status){state.status[d.id]=d.status;settleSig(d.id);noteWho(d.id,d.who);renderRail();}   /* v23.77 */
     /* answered in the order asked, per form and per kind of answer. v21.43: only by the frame that was asked, so
        one form cannot answer for another (the relay hands a snapshot on to the asking form as the partner's) */
     const q=pending[d.id+'|'+d.nbh];
@@ -5035,9 +5058,9 @@ async function autoFold(oldKey){
   }catch(e){}
 }
 /* a case file just opened is in a file: once the forms have settled, and if none has been changed, that is the saved state */
-function autoBaseline(){
+function autoBaseline(){const t0=Date.now();   /* v23.77 not over a tap or a key in a form since (touchHook) */
   setTimeout(()=>Object.values(state.frames).forEach(fr=>ask(fr,'status')),4300);
-  setTimeout(()=>{if(!Object.values(state.status).some(s=>s&&s.edited)){state.lastSig=caseSig();state.autoSig=caseSig();}},5200);
+  setTimeout(()=>{if(!Object.values(state.status).some(s=>s&&s.edited)&&!(state.touchAt>=t0)){state.lastSig=caseSig();state.autoSig=caseSig();}},5200);
 }
 /* the tab is being closed or reloaded: the store's write would not finish, so the forms are read directly (same page
    origin) and the whole copy is stashed at once; it is folded into the store when the workstation next opens */

@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.77: A form opened from a saved case leaves it as saved; a word typed in the first seconds still counts
+
+- **Opening a form of a saved case no longer marks the case as changed.** Since v23.57 a form takes its saved work when
+  it is first opened, and since v23.55 it counts its fields a second or two later, once the page is still; the case was
+  marked as saved before that count came, so it could read as changed with nothing changed (Form GB-1 every time, and the
+  meeting packet, which opens forms two at a time). Now each form's own part of the mark is taken when it has its work,
+  the other forms keep theirs as saved, and its count a moment later is taken too, until a tap or a key in it.
+- **A word typed just after a case was opened or saved counts.** Five seconds after a case is opened or saved the
+  workstation takes what the forms then say as the saved state; a word typed in a form a moment before, that the form had
+  not counted yet, could be taken in with it, so closing did not ask to save it. A tap or a key in a form now keeps that
+  from happening. (This was older than v23.55; found while testing the first part.)
+
+Nothing to set up. Tested: `qa/lazy-clean-test.js` (a simulated case of eight forms opened one after another; a word
+typed in GB-1 as it opens; a word typed in TD-1, then GB-1 opened) and `qa/i240-packet-test.js` (the packet leaves the
+case as saved).
+
 ### v23.76: Form DM-1, the diagnoses: the DSM-5-TR list, searchable, and Good to know
 
 - **The diagnosis rows search the DSM-5-TR list**: type part of a name, a short name (ADHD, OCD, ASD) or a code, and a
