@@ -9905,6 +9905,14 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.73: After Close, the form viewed before comes back
+
+- Since v23.57 a case opens to one form and the others load when they are opened, and a form viewed a while ago is put
+  away to save memory. Closing a form then could leave an empty screen when the form viewed before it was not loaded.
+  It is loaded again and shown, with its work, as before v23.57.
+
+Nothing to set up. Tested: `qa/v2181-test.js` (3b: after Close, the form viewed before it is shown, not an empty screen).
+
 ### v23.72: Form MS-1's medication library: searched as you type, and close to complete for five classes
 
 - On each medication card the **library box is a search**: type a few letters and the medications whose name, or one of
