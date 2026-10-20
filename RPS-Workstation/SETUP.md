@@ -9903,6 +9903,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.41: the BCBA's answers: the sound meter's wording, rate estimates, VI-1's measure, RM-1's references, CR-1's Florida reporting rule and DA-1's stop rule
+
+- **Form ABC-1's sound level meter: wording approved by the BCBA.** The note on the Record tab and the Analysis card's
+  text are approved as written, less the note's last sentence (the consent reminder), which is gone. Both are marked
+  approved in the form.
+- **Form TB-1's estimate columns are "Est. rate (per day)".** The BCBA: count and frequency are one thing; rate is the
+  count divided by time. The estimate is a number per day, so it is a rate. v23.35 had renamed these columns with the
+  dimension list. The list keeps "Count / frequency" and "Rate" as two choices. TB-1's clustering rule ("comparable rates",
+  "estimated rates five or more times apart") already says rate, and stays.
+- **Form VI-1's primary measure: "Count / frequency" and "Rate" are two choices,** as on TB-1. A record saved with the old
+  "Frequency / rate" keeps its answer and shows Count / frequency. A behavior from the case takes the matching choice.
+- **Form RM-1's references: fifteen sources the text cites now have their entry** in Selected references, each
+  confirmed by search (authors, year, title, journal, volume, pages). Lattal (1968), found only as an unpublished manuscript
+  on behavioral contrast, waits for the BCBA.
+- **Form CR-1's Does This Need a Report? names Florida's rule (review F342), worded as the BCBA approved:** When cites
+  s. 39.201, F.S. in place of "your state's law"; a Where line gives the Florida Abuse Hotline, 1-800-96-ABUSE
+  (1-800-962-2873), 24 hours, online through DCF, the reporter's name kept confidential, and 911 for immediate danger; the
+  To whom box and the printed report record say the same.
+- **Form DA-1's stop rule (review F146), as approved:** after 2 stops on a task, its later instructions are scored as
+  usual (by Compliance counted as), not all as not complied with.
+- qa/vi1-measure-test.js (6 checks), qa/cr1-report-fl-test.js (4 checks); qa/tb1-dim-test.js follows the estimate column's
+  name; qa/da1-w3-test.js and qa/policy-td1-test.js follow the stop rule's new words; qa/policy-safety-test.js follows the
+  report question's Florida rule.
+
 ### v23.40: Form SP-1: every sheet takes its behavior's definition from the case
 
 - **The BCBA's report:** on the Scatterplot, behaviors 2 and 3 showed their names but no operational definition, example

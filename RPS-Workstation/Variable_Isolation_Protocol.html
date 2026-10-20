@@ -667,7 +667,7 @@ td input,td select{max-width:100%}
   <div><label class="f">Operational definition (topography, onset, offset, examples, non-examples)</label><textarea name="s_def"></textarea></div>
   <div class="grid g3">
     <div><label class="f">Primary measure</label>
-      <select name="s_measure"><option></option><option>Frequency / rate</option><option>Duration</option><option>Latency</option><option>Partial-interval</option><option>Momentary time sample</option><option>Intensity / severity scale</option><option>Episode count</option></select></div>
+      <select name="s_measure"><option></option><option value="Frequency / rate">Count / frequency</option><option>Rate</option><option>Duration</option><option>Latency</option><option>Partial-interval</option><option>Momentary time sample</option><option>Intensity / severity scale</option><option>Episode count</option></select></div>
     <div><label class="f">Current level (with dates of data)</label><input type="text" name="s_level"></div>
     <div><label class="f">Identified precursor(s), if any</label><input type="text" name="s_precursor" placeholder="e.g., vocal protest precedes aggression by ~15 s"></div>
   </div>
@@ -2976,8 +2976,9 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;let n=0;
   const b=((f&&f.behaviors)||[]).find(x=>!(x.isRep||/replacement|alternative/i.test(x.type||'')));
   const el=document.querySelector('[name="s_measure"]');
-  if(b&&el&&!el.value){const d=String(b.dim||'').toLowerCase();const want=/freq|count|rate/.test(d)?'Frequency / rate':/dur/.test(d)?'Duration':/laten/.test(d)?'Latency':/intens|magn/.test(d)?'Intensity':'';
-    const o=want&&[...el.options].find(x=>x.textContent.indexOf(want)===0);if(o){el.value=o.value||o.textContent;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));n++;}}
+  if(b&&el&&!el.value){const d=String(b.dim||'').toLowerCase();/* v23.41 Rate is its own choice; a choice is found by its stored value or the start of its words */
+    const want=/^rate$/.test(d.trim())?'Rate':/freq|count|rate/.test(d)?'Frequency / rate':/dur/.test(d)?'Duration':/laten/.test(d)?'Latency':/intens|magn/.test(d)?'Intensity':'';
+    const o=want&&[...el.options].find(x=>x.value===want||x.textContent.indexOf(want)===0);if(o){el.value=o.value||o.textContent;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));n++;}}
   return n?{filled:((g&&g.filled)||0)+n,note:(g&&g.note)||''}:g;};
 </script>
 <script id="v2267-consent">

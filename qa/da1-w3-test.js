@@ -88,7 +88,7 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
     return {site:document.querySelector('[data-m="site"]').value,setting:document.querySelector('[data-m="setting"]').value,rule:[...document.querySelectorAll('#pgRule li')].map(l=>l.textContent).find(t=>/^After 2 stops/.test(t))||''};});
   ok('F145 the packet\'s school goes to the School field; "Setting(s) assessed" stays empty',PK.site==='Sample Elementary (simulated)'&&PK.setting==='',PK);
   /* F146's new wording waits for the BCBA: the bullet keeps the wording approved in October 2026 */
-  ok('F146 the stop rule keeps the wording the BCBA approved until a new one is approved',/count them as not complied with, and tell the BCBA the same day/.test(PK.rule),PK.rule);
+  ok('F146 the stop rule scores the later instructions as usual, as the BCBA approved (v23.41)',/score each one as usual \(by “Compliance counted as” above\), and tell the BCBA the same day/.test(PK.rule)&&!/count them as not complied with/.test(PK.rule),PK.rule);
 
   /* ---------- F143 in: the earlier assessments and the assent plan ---------- */
   const IN=await p.evaluate(()=>{const r=window.__nbhFactsIn({evidence:{'IA-1':{fn:'Escape from academic demands',strength:'Moderate'},'OB-1':{fn:'Escape'}},student:{stop:{signs:'says stop, pushes the work away.'}}});

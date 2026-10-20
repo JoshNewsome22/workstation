@@ -1209,7 +1209,9 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <label class="chk"><input type="checkbox" data-mc="rpR6"> Anything else gives someone a reason to suspect abuse or neglect.</label>
       <ul>
         <li><b>Who reports:</b> the person who suspects it. Telling a supervisor, the nurse or the BCBA does not take the place of your own report. Your agency may ask you to tell them as well.</li>
-        <li><b>When:</b> right away, as soon as you suspect it. Do not wait for a meeting or the end of the day. Your state&rsquo;s law and your agency&rsquo;s policy set the exact rule.</li>
+        <!-- v23.41 (review F342) Florida's rule and the hotline. Wording approved by the BCBA, October 2026. -->
+        <li><b>When:</b> right away, as soon as you suspect it. Do not wait for a meeting or the end of the day. Florida law (&sect; 39.201, F.S.) requires anyone who knows or has reasonable cause to suspect that a child is abused, abandoned or neglected to report it immediately.</li>
+        <li><b>Where:</b> the Florida Abuse Hotline, 1-800-96-ABUSE (1-800-962-2873), 24 hours a day, or online through the Department of Children and Families. School staff give their name when they report, and it is kept confidential. If a child is in immediate danger, call 911.</li>
         <li><b>Do not investigate.</b> You do not need proof. Do not press the student for details, do not examine further, and do not contact the person you suspect. Write down what you saw, and what was said in the words used.</li>
         <li>If abuse or neglect is suspected, your agency&rsquo;s policy says who tells the parent or guardian, and when.</li>
       </ul>
@@ -1218,7 +1220,7 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
         <tr><th style="width:26%">Do you suspect abuse or neglect? <span class="rp-q">You do not need proof. If you are not sure, report.</span></th><td><select data-m="rpNeed" data-calc="1" aria-label="Do you suspect abuse or neglect?"><option value=""></option><option value="yes">Yes: a report is being made</option><option value="no">No: say why</option></select></td></tr>
         <tr><th>If no, why not</th><td><input data-m="rpWhy" data-calc="1" placeholder="A few words"></td></tr>
         <tr><th>Report made on (date and time)</th><td><input data-m="rpWhen" data-calc="1"></td></tr>
-        <tr><th>To whom</th><td><input data-m="rpTo" data-calc="1" placeholder="The agency or hotline, the person who took the report, any reference number"></td></tr>
+        <tr><th>To whom</th><td><input data-m="rpTo" data-calc="1" placeholder="Florida Abuse Hotline (or 911), the person who took the report, the reference number"></td></tr>
         <tr><th>By whom</th><td><input data-m="rpBy" data-calc="1" placeholder="Name and role of the person who made the report"></td></tr>
         <tr><th>Others told, as your agency&rsquo;s policy says</th><td><input data-m="rpTold" placeholder="School nurse, administrator; who told the parent or guardian, and when"></td></tr>
       </table>
@@ -1685,7 +1687,7 @@ function crRepRecordHTML(){const m=S.meta,t=k=>String(m[k]==null?'':m[k]).trim()
     '<tr><th>Reasons marked</th><td>'+RP_KEYS.map((k,i)=>'<div class="rpRecR">'+bx(m[k]==='1')+' '+esc(tx[i])+'</div>').join('')+'</td></tr>'+
     '<tr><th>Do you suspect abuse or neglect?</th><td>'+esc(t('rpNeed')==='yes'?'Yes: a report is being made':t('rpNeed')==='no'?'No':'')+'</td></tr>'+
     '<tr><th>If no, why not</th><td>'+esc(t('rpWhy'))+'</td></tr><tr><th>Answered on</th><td>'+esc(t('rpOn'))+'</td></tr>'+
-    '<tr><th>Report made on (date and time)</th><td>'+esc(t('rpWhen'))+'</td></tr><tr><th>To whom</th><td>'+esc(t('rpTo'))+'</td></tr>'+
+    '<tr><th>Report made on (date and time)</th><td>'+esc(t('rpWhen'))+'</td></tr><tr><th>To whom</th><td>'+(t('rpTo')?esc(t('rpTo')):'<span style="color:#5b6876">Florida Abuse Hotline (or 911), the person who took the report, the reference number</span>')+'</td></tr>'+
     '<tr><th>By whom</th><td>'+esc(t('rpBy'))+'</td></tr><tr><th>Others told</th><td>'+esc(t('rpTold'))+'</td></tr></table>'+
     '<p class="hint">Printed '+esc(crToday())+'.</p>';}
 window.__crRepRecord=crRepRecordHTML;

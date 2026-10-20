@@ -86,8 +86,8 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     const rp=await text(page,'#crRep');
     check((await page.$$('#crRep input[type=checkbox][data-mc]')).length===6,'six reasons to tick (private area and pattern apart)');
     ['Any of these can be a reason to suspect abuse or neglect','An injury is in a private area (genitals, buttocks, breasts).','An injury has a pattern','Do you suspect abuse or neglect?','You do not need proof. If you are not sure, report.','the person who suspects it','does not take the place of your own report',
-     'right away, as soon as you suspect it','Do not wait for a meeting or the end of the day',"Your state’s law and your agency’s policy set the exact rule",'Do not investigate','To whom','By whom','One debriefing at a time'].forEach(p=>check(rp.includes(p),'report question says: '+p,rp.slice(0,200)));
-    check(!/§|F\.S\.|Fla\. Stat|the same day|A report is needed if/.test(rp),'the report question cites no statute and states no legal conclusion');
+     'right away, as soon as you suspect it','Do not wait for a meeting or the end of the day','Florida law (§ 39.201, F.S.) requires anyone who knows or has reasonable cause to suspect','the Florida Abuse Hotline','Do not investigate','To whom','By whom','One debriefing at a time'].forEach(p=>check(rp.includes(p),'report question says: '+p,rp.slice(0,200)));
+    check((rp.match(/§/g)||[]).length===1&&!/Fla\. Stat|the same day|A report is needed if/.test(rp),'the report question cites only Florida’s reporting rule (s. 39.201, v23.41) and states no legal conclusion');
     check(await page.evaluate(()=>[...document.querySelectorAll('[data-m="rpNeed"] option')].map(o=>o.textContent).join('|'))==='|Yes: a report is being made|No: say why','the answers read "Yes: a report is being made" and "No: say why"');
     check(/Not answered yet/.test(await text(page,'#rpVerdict')),'blank: not answered yet');
     await tick(page,'[data-mc="rpR1"]',true);await sleep(100);

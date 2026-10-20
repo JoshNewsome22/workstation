@@ -1,5 +1,5 @@
 /* Form TB-1's measurement words (v23.35): the dimension "Count / frequency", with Rate a category of its own; the estimate
-   columns "Est. count / frequency"; a file saved with the old "Count / rate" keeps its answer and shows Count / frequency; the
+   columns "Est. rate (per day)" (v23.41: a number per day is a rate); a file saved with the old "Count / rate" keeps its answer and shows Count / frequency; the
    case and the library picker say Count / frequency; the cluster check keeps count and rate members apart.
    Simulated data only. usage: node qa/tb1-dim-test.js */
 const L=require(__dirname+'/lib.js');const {sleep}=L;
@@ -13,7 +13,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const p=await open();
   const a=await p.evaluate(()=>{const sel=document.querySelector('[name="tgt[0].dim"]');return {opts:[...sel.options].map(o=>o.text),heads:[...document.querySelectorAll('#candTbl thead th,table.rank thead th')].map(t=>t.textContent).filter(t=>/Est\./.test(t))};});
   ok('1 the dimension list offers Count / frequency and Rate as separate choices, and no "Count / rate"',a.opts.includes('Count / frequency')&&a.opts.includes('Rate')&&a.opts.indexOf('Rate')===a.opts.indexOf('Count / frequency')+1&&!a.opts.some(o=>/Count \/ rate/.test(o)),a.opts);
-  ok('2 the candidate list’s and the cluster builder’s estimate columns are "Est. count / frequency"',a.heads.length>=2&&a.heads.every(t=>t==='Est. count / frequency'),a.heads);
+  ok('2 the candidate list’s and the cluster builder’s estimate columns are "Est. rate (per day)": a number per day is a rate (v23.41)',a.heads.length>=2&&a.heads.every(t=>t==='Est. rate (per day)'),a.heads);
   /* an older file, saved with the old words */
   const saved=await p.evaluate(()=>new Promise(res=>{const s=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
     s('tgt[0].lab','Hitting (simulated)');s('tgt[0].def','Striking another person with an open or closed hand (simulated).');s('tgt[0].dim','Count / rate');s('tgt[1].lab','Calling out (simulated)');s('tgt[1].dim','Rate');
