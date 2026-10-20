@@ -66,6 +66,8 @@ const read=p=>p.evaluate(()=>{const b=document.querySelector('#blankCl .due-boar
   ok('8a on an iPad a row is one line across: the date, the student, what is due, the buttons',lay.flat,lay);
   const ph=await br.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,userAgent:IPAD.replace('iPad','iPhone')});const q=await ph.newPage();q.on('pageerror',x=>errs.push(x.message));
   await q.clock.install({time:new Date(2026,9,20,9,0,0)});await q.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(1500);await KEEP(q,false);
+  /* v23.74 on a phone the rows by date are a tap away (By date) */
+  await q.evaluate(()=>{const b=document.getElementById('duePh');if(b&&b.getAttribute('aria-expanded')!=='true')b.click();});await sleep(500);
   const pl=await q.evaluate(()=>{const r=document.querySelector('#blankCl .due-row.od');const w=document.documentElement.scrollWidth;const k=[...r.children].map(x=>Math.round(x.getBoundingClientRect().top));return {w,stack:Math.max(...k)-Math.min(...k)>30,wide:[...document.querySelectorAll('#blankCl .due-row')].some(x=>x.getBoundingClientRect().right>392)};});
   ok('8b on a phone a row stacks and nothing is wider than the screen',pl.stack&&!pl.wide&&pl.w<=392,pl);
   await ph.close();

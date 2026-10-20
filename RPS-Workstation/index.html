@@ -1468,6 +1468,94 @@ body:not(.has-form) #focusBtn{display:none}
 #dlg .cm-t td.n{text-align:center;white-space:nowrap}
 #dlg .cm-t td.hot{color:#9b2c2c;font-weight:700}
 #dlg #cmMonth{font:inherit;font-size:14px;padding:6px 8px;border:1px solid #c7d0d4;border-radius:8px;min-height:40px}
+/* v23.74 (the BCBA's iPhone) at a phone's width (600 px and less) the workstation is laid out as a phone app is: one slim
+   row at the top, Forms, Caseload, Today and More along the bottom within reach of the thumb, where you left off in one
+   row, and a card a student. The iPad and the laptop are as they were. */
+.phbar,.ph-only,.cl-due,.bl-pick{display:none}
+@media (max-width:600px){
+  header.top{padding:6px 12px;gap:8px;min-height:0}
+  header.top #logo{height:26px;width:auto}
+  #barToggle{min-height:44px;padding:4px 10px}
+  .pwabar.tip{flex-wrap:nowrap;align-items:center;gap:8px;padding:6px 12px;font-size:12.5px;line-height:1.35}
+  .pwabar.tip .sp{display:none}
+  .pwabar.tip #tipHide{flex:none;min-height:44px;padding:2px 10px}
+  /* the form's own row: its name, Save and Close; the rest is under More */
+  body:not(.has-form) .crumb{display:none}
+  .crumb{flex-wrap:nowrap;gap:6px;padding:4px 10px 4px 14px;min-height:0}
+  .crumb #crumbTitle{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16px}
+  .crumb .sp,.crumb #railToggle,.crumb #crumbId,.crumb #crumbFile,.crumb #crumbStatus,.crumb .acts #caseloadBtn,.crumb .acts #todayBtn,
+  .crumb .acts #printOne,.crumb .acts #popOut,.crumb .acts #focusBtn,.crumb .acts #splitBtn,.crumb .acts #fullBtn,.crumb .acts #fillBtn{display:none}
+  .crumb .acts{flex:0 0 auto;flex-wrap:nowrap;gap:6px}
+  .crumb .acts button{min-width:44px;min-height:44px}
+  /* the bar along the bottom */
+  .phbar{display:flex;flex:0 0 auto;gap:2px;padding:4px 6px max(4px,env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--rule);position:relative;z-index:30}
+  body.ws-full .phbar{display:none}
+  .phbar button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:50px;padding:4px 0;
+    border:0;border-radius:10px;background:none;color:var(--slate);font:600 11.5px/1.2 var(--sans);position:relative;box-shadow:none}
+  .phbar button svg{width:22px;height:22px;flex:none}
+  .phbar button[aria-expanded="true"]{background:var(--mist);color:var(--navy)}
+  .phbar .tbadge{top:1px;right:auto;left:calc(50% + 5px)}
+  #wsToasts{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+  body.ws-full #wsToasts{bottom:22px}
+  /* the start screen, edge to edge */
+  #blank{padding:0}
+  #blank .card{border:0;border-radius:0;box-shadow:none;margin:0;max-width:none;padding:10px 16px 28px}
+  #blankCl h2{font-size:20px;margin:6px 0 8px}
+  #blankDrv p{margin:0 0 6px}
+  #blankDrv .bl-drv{font-size:13px;line-height:1.35}
+  #blankDrv .bl-drv button{min-height:44px;padding:4px 10px;font-size:13px}
+  #blankDrv .bl-last{display:none}
+  .bl-pick{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 10px;width:100%;min-height:52px;margin:0 0 8px;padding:8px 12px;
+    border:1px solid var(--rule);border-radius:10px;background:var(--shade);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  .bl-pk-l{grid-column:1;font:700 11px/1.3 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--slate)}
+  .bl-pk-n{grid-column:1;font-size:14.5px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ph-go{grid-column:2;grid-row:1 / span 2;font-size:22px;line-height:1;color:var(--rule2)}
+  /* What's due: the counts; the rows by date one tap away (each card below has its own) */
+  .due-board{margin:2px 0 6px}
+  .due-board:not(.ph-open)>:not(.due-head){display:none}
+  .due-head{align-items:center;flex-wrap:wrap}
+  .due-head .due-sum{order:3;flex:1 1 100%}
+  .ph-only{display:inline-flex}
+  #duePh{order:2;margin-left:auto;min-height:44px;padding:2px 12px;font-size:13px}
+  .due-board.ph-open .due-row{cursor:pointer}
+  /* a card a student: the name once, what needs you most, the rest under "+N more" */
+  #blankCl .cl-cards{display:flex;flex-direction:column;gap:0;margin:6px -16px 14px}
+  #blankCl .cl-card{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px 12px;border-left:0;border-right:0;border-radius:0;box-shadow:none;padding:12px 16px}
+  #blankCl .cl-card>*{grid-column:1 / -1}
+  #blankCl .cl-card>.cl-card-acts{grid-column:1;margin:0}
+  #blankCl .cl-card>.cl-saved{grid-column:2;order:1;text-align:right}
+  #blankCl .cl-card .cl-who{display:block}
+  #blankCl .cl-card .cl-nm{display:block}
+  #blankCl .cl-card .cl-sub,#blankCl .cl-card .cl-sid{display:inline;font-size:12.5px}
+  #blankCl .cl-card .cl-sub+.cl-sid::before{content:" · "}
+  #blankCl .cl-card+.cl-card{border-top:0}
+  #blankCl .cl-card.ph-hot{box-shadow:inset 4px 0 0 #b03a2e}
+  #blankCl .cl-card .cl-ph,#blankCl .cl-card .cl-pin{display:none}
+  #blankCl .cl-card .cl-top{cursor:pointer}
+  #blankCl .cl-card .cl-nm{font-size:17px}
+  #blankCl .cl-card .cl-tw:has(.cl-trend.none){display:none}
+  #blankCl .cl-card.ph-has .cl-next{display:none}
+  #blankCl .cl-due{display:block}
+  #blankCl .cl-card-acts button{min-height:44px}
+  .ph-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;width:100%;min-height:44px;margin:0;padding:8px 10px;
+    border:0;border-radius:8px;background:var(--shade);color:var(--ink);font:inherit;font-size:13.5px;line-height:1.4;text-align:left;cursor:pointer}
+  .ph-row+.ph-row{margin-top:6px}
+  .ph-row.now,.ph-row.od{background:#fbeeec}
+  .ph-when{grid-column:1;font-size:12.5px;color:var(--muted)}
+  .ph-when b{color:var(--ink)}
+  .ph-row.now .ph-rel,.ph-row.od .ph-rel{color:#b03a2e;font-weight:600}
+  .ph-what{grid-column:1;overflow-wrap:anywhere}
+  .ph-what .due-f{font-size:12px;color:var(--muted)}
+  .ph-more{margin-top:6px}
+  .ph-more>summary{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;font-size:13.5px;font-weight:600;color:var(--slate);cursor:pointer}
+  .ph-more[open]>summary{margin-bottom:4px}
+}
+/* More on a phone: each group's buttons, one a row */
+.ph-mh{margin:14px 0 6px;font:700 11.5px var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--slate)}
+.ph-mh:first-child{margin-top:0}
+.ph-ml{display:flex;flex-direction:column;gap:6px}
+.ph-ml button{min-height:46px;text-align:left;justify-content:flex-start}
+@media print{.phbar{display:none!important}}
 </style>
 </head>
 <body>
@@ -2613,7 +2701,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.73';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.74';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -10189,6 +10277,85 @@ document.addEventListener('submit',async e=>{if(!e.target||e.target.id!=='dyForm
 {const pb7=paintBlank;paintBlank=async function(){const r=await pb7.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blDay'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blDay">Today’s numbers<\/button>');}catch(e){}return r;};}
 {const to7=todayOpen;todayOpen=async function(){const r=await to7.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdDay')){const l=row.querySelector('#tdLog');if(l)l.insertAdjacentHTML('afterend',' <button type="button" id="tdDay">Today’s numbers<\/button>');else row.insertAdjacentHTML('afterbegin','<button type="button" id="tdDay">Today’s numbers<\/button> ');}}catch(e){}return r;};}
 CMDS.push({k:'today numbers data count tally record day staff',n:'Today’s numbers: counts into Form DD-1',s:'command',go:()=>dayNumbersOpen('')});
+/* ================= v23.74 (the BCBA's iPhone) a phone app's layout at a phone's width =================
+   The top a third of the screen before anything to read, two buttons without words, each item of what is due on a row of
+   its own, one deadline four times. At 600 px and less: Forms, Caseload, Today and More along the bottom; the form's own
+   row only while a form is open; where you left off in one row; What's due as its counts, the rows by date a tap away; a
+   card a student with what needs you most (each deadline once, its days from today) and the rest under "+N more", every
+   row opened by a tap anywhere on it. The buttons in the bar run the workstation's own; the iPad and the laptop are as
+   they were. */
+const PH_MQ=window.matchMedia('(max-width:600px)'),phOn=()=>PH_MQ.matches;
+const PH={fromBar:false};
+const PH_DOTS='<svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>';
+{const nav=document.createElement('nav');nav.className='phbar';nav.id='phoneBar';nav.setAttribute('aria-label','The workstation');
+  const ico=id=>{const s=document.querySelector('#'+id+' svg');return s?s.outerHTML:'';};
+  nav.innerHTML='<button type="button" id="phForms" aria-controls="railNav" aria-expanded="false">'+ico('railToggle')+'<span>Forms<\/span><\/button>'+
+    '<button type="button" id="phCaseload">'+ico('caseloadBtn')+'<span>Caseload<\/span><\/button>'+
+    '<button type="button" id="phToday">'+ico('todayBtn')+'<span>Today<\/span><span class="tbadge" aria-hidden="true" hidden><\/span><\/button>'+
+    '<button type="button" id="phMore" aria-haspopup="dialog">'+PH_DOTS+'<span>More<\/span><\/button>';
+  const m=document.querySelector('main');m.parentNode.insertBefore(nav,m.nextSibling);
+  nav.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.id==='phForms'){PH.fromBar=true;$('#railToggle').click();}
+    else if(b.id==='phCaseload')$('#caseloadBtn').click();
+    else if(b.id==='phToday')$('#todayBtn').click();
+    else if(b.id==='phMore')phMore();});
+  /* Forms shows whether the list is open; when the list closes, the focus comes back to Forms (its own button is not shown) */
+  new MutationObserver(()=>{const on=$('#railToggle').getAttribute('aria-expanded')==='true';$('#phForms').setAttribute('aria-expanded',String(on));
+    if(!on&&PH.fromBar){PH.fromBar=false;if(phOn()){const a=document.activeElement;if(!a||a===document.body||a.id==='railToggle'||!a.offsetParent)$('#phForms').focus();}}})
+    .observe($('#railToggle'),{attributes:true,attributeFilter:['aria-expanded']});}
+/* Today's count on the bar, as on its own button */
+function phBadge(){const s=$('#todayBtn .tbadge'),d=$('#phToday .tbadge'),b=$('#phToday');if(!d||!b)return;
+  d.textContent=s?s.textContent:'';d.hidden=!s||s.hidden;d.classList.toggle('red',!!s&&s.classList.contains('red'));
+  b.setAttribute('aria-label',($('#todayBtn').getAttribute('aria-label')||'Today'));}
+{const pb=paintBadge;paintBadge=function(){const r=pb.apply(this,arguments);try{phBadge();}catch(e){}return r;};}
+setTimeout(()=>{try{phBadge();}catch(e){}},1200);
+/* More: what the form's row, the packet bar and the list hold on a wider screen, each running the workstation's own button */
+const PH_MORE=[['This form',[['printOne','Print this form'],['focusBtn','Focus: one part of the form at a time'],['fullBtn','Fullscreen: only the form'],['popOut','Open in its own tab'],['closeForm','Close this form']]],
+  ['The case',[['saveCase','Save case'],['openCase','Open case'],['closeCase','Close case'],['readDoc','Read a document'],['masterPrint','Build master print'],['caseMap','Case map']]],
+  ['The workstation',[['railFind','Find a form or command'],['dirBtn','Staff directory'],['help','Help']]]];
+function phMore(){const form=document.body.classList.contains('has-form');
+  const can=id=>{const b=document.getElementById(id);return !!b&&!b.hidden&&!b.disabled;};
+  const html=PH_MORE.filter(([g])=>g!=='This form'||form).map(([g,L])=>{const its=L.filter(([id])=>can(id));if(!its.length)return '';
+    return '<h3 class="ph-mh">'+g+'<\/h3><div class="ph-ml">'+its.map(([id,n])=>{const p=document.getElementById(id).getAttribute('aria-pressed')==='true';
+      return '<button type="button" data-phmore="'+id+'"'+(p?' aria-pressed="true"':'')+'>'+n+(p?' (on)':'')+'<\/button>';}).join('')+'<\/div>';}).join('');
+  dialog('More',html);}
+$('#dlgBody').addEventListener('click',e=>{const b=e.target.closest('[data-phmore]');if(!b)return;const t=document.getElementById(b.dataset.phmore);
+  try{$('#dlg').close();}catch(x){}if(t)setTimeout(()=>t.click(),0);});
+/* a student's card: what needs you, in the order of What's due (now, overdue, this week, coming up, to look at), each
+   deadline once with its days counted from today; the first shown, the rest under "+N more" */
+function phDueRows(r){let G;try{G=dueGroups([r]);}catch(e){return [];}const out=[];
+  G.now.forEach(x=>out.push({c:'now',x,p:1}));G.od.forEach(x=>out.push({c:'od',x}));G.wk.forEach(x=>out.push({c:'wk',x}));G.up.forEach(x=>out.push({c:'up',x}));G.look.forEach(x=>out.push({c:'look',x,p:1}));
+  return out;}
+function phRow(o,key){const x=o.x,f=(x.forms&&x.forms[0])||'';
+  const when=o.p?'<span class="td-k">'+esc(x.k)+'<\/span>':'<b>'+esc(dueDateTxt(x.d))+'<\/b> <span class="ph-rel">'+esc(dueRel(x.n))+'<\/span>';
+  const what=o.p?esc(x.t):Object.values(x.ev).map(e=>esc(e.what)+(e.forms.length?' <span class="due-f">'+esc(e.forms.join(', '))+'<\/span>':'')).join(' · ');
+  return '<button type="button" class="ph-row '+o.c+'" data-clopen="'+esc(key)+'" data-clform="'+esc(f)+'"'+(f?' title="Open Form '+esc(f)+'"':'')+'><span class="ph-when">'+when+'<\/span><span class="ph-what">'+what+'<\/span><span class="ph-go" aria-hidden="true">›<\/span><\/button>';}
+{const cc=clCard;clCard=function(r,w){const h=cc.apply(this,arguments);if(w!=='bl'||isStaffRec(r))return h;
+  const R=phDueRows(r);if(!R.length)return h;
+  const more=R.length>1?'<details class="ph-more"><summary>+'+(R.length-1)+' more<\/summary>'+R.slice(1).map(o=>phRow(o,r.key)).join('')+'<\/details>':'';
+  const cls='cl-card ph-has'+(/^(now|od)$/.test(R[0].c)?' ph-hot':'');
+  return h.replace('<article class="cl-card','<article data-phrank="'+['now','od','wk','up','look'].indexOf(R[0].c)+'" class="'+cls)
+    .replace('<p class="cl-saved"','<div class="cl-due">'+phRow(R[0],r.key)+more+'<\/div><p class="cl-saved"');};}
+/* the start screen on a phone: where you left off in one row; What's due folded to its counts; the cards most urgent first */
+const phDueOpen=()=>{try{return sessionStorage.getItem('nbh.due.ph')==='1';}catch(e){return false;}};
+{const pb=paintBlank;paintBlank=async function(){const out=await pb.apply(this,arguments);
+  try{const y=$('#blankDrv'),last=y&&y.querySelector('.bl-last [data-clopen]');
+    if(y&&last){const L=await clList()||[],r=L.find(q=>q.key===last.dataset.clopen);
+      if(r&&!y.querySelector('.bl-pick'))y.insertAdjacentHTML('beforeend','<button type="button" class="bl-pick" data-clopen="'+esc(r.key)+'"><span class="bl-pk-l">Pick up where you left off<\/span><span class="bl-pk-n"><b>'+esc(clName(r))+'<\/b> · '+esc(drvWhen(r.saved))+'<\/span><span class="ph-go" aria-hidden="true">›<\/span><\/button>');}
+    const b=$('#blankCl .due-board');
+    if(b){const o=phDueOpen();b.classList.toggle('ph-open',o);const hd=b.querySelector('.due-head');
+      if(hd&&!hd.querySelector('#duePh'))hd.insertAdjacentHTML('beforeend','<button type="button" id="duePh" class="ph-only" aria-expanded="'+o+'">'+(o?'Hide the dates':'By date')+'<\/button>');}
+    const cs=$('#blankCl .cl-cards');
+    if(cs&&phOn()){const P=clPins(),k=c=>(P.includes(c.dataset.clrow)?0:10)+(c.dataset.phrank!=null?+c.dataset.phrank:5);
+      [...cs.children].map((c,i)=>({c,i})).sort((a,b)=>k(a.c)-k(b.c)||a.i-b.i).forEach(({c})=>cs.appendChild(c));}}catch(e){}
+  return out;};}
+$('#blank').addEventListener('click',e=>{
+  if(e.target.closest('#duePh')){try{sessionStorage.setItem('nbh.due.ph',phDueOpen()?'0':'1');}catch(x){}paintBlank().then(()=>{const b=$('#duePh');if(b)b.focus();});return;}
+  if(!phOn()||e.target.closest('button,a,input,select,textarea,summary,label'))return;
+  /* a tap anywhere on a row of What's due, or on a student's name, opens it, as its button does */
+  const row=e.target.closest('.due-row'),top=e.target.closest('#blankCl .cl-card .cl-top');
+  const b=row?row.querySelector('button[data-clopen]'):top?top.closest('.cl-card').querySelector('.cl-card-acts [data-clopen]'):null;if(b)b.click();});
+PH_MQ.addEventListener('change',()=>{try{paintBlank();}catch(e){}});
 </script>
 </body>
 </html>

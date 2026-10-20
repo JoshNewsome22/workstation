@@ -9905,6 +9905,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.74: The workstation on an iPhone, laid out as a phone app
+
+At a phone's width (600 px and less) the workstation is laid out for the thumb. The iPad and the laptop are as they were.
+
+- **Along the bottom: Forms, Caseload, Today and More**, each with its word. Forms opens and closes the list of forms;
+  Caseload and Today open their windows (Today's count is on its button); **More** holds the rest: for the form open,
+  Print, Focus, Fullscreen, its own tab and Close; for the case, Save, Open and Close case, Read a document, Build master
+  print and the case map; and Find a form or command, the staff directory and Help.
+- **The top is one slim row** (the logo and Packet). The form's own row shows only while a form is open: its name, Save
+  and Close, on one line.
+- **Pick up where you left off**: the student saved last and when, one row; a tap anywhere on it opens the case.
+- **What's due** shows its counts; **By date** shows the rows by date, and a tap anywhere on a row opens it.
+- **A card a student**, the most urgent first: the name once, then what needs you most (each deadline once, with its
+  days counted from today: a reevaluation in Forms RR-1 and DM-1 on the same day is one row), the rest under
+  "+N more"; a tap on a row opens that form, a tap on the name opens the case; Open and Today's numbers on the card.
+  The cards run edge to edge.
+
+Nothing to set up. Tested: `qa/iphone-layout-test.js` (an iPhone's window; the iPad and the laptop as before).
+
 ### v23.73: After Close, the form viewed before comes back
 
 - Since v23.57 a case opens to one form and the others load when they are opened, and a form viewed a while ago is put

@@ -41,7 +41,9 @@ async function open(page,id){await page.evaluate(id=>openForm(id),id);await page
 const railState=page=>page.evaluate(()=>{const n=document.getElementById('railNav'),cs=getComputedStyle(n),r=n.getBoundingClientRect(),b=document.getElementById('blank').getBoundingClientRect(),sc=document.getElementById('railScrim');
   const tg=document.getElementById('railToggle'),lbl=tg.querySelector('.lbl');
   return {open:document.body.classList.contains('rail-open'),pos:cs.position,vis:cs.visibility,x:[Math.round(r.left),Math.round(r.right)],blankLeft:Math.round(b.left),scrim:sc&&!sc.hidden&&getComputedStyle(sc).display!=='none',
-    toggle:getComputedStyle(tg).display!=='none',label:!!lbl&&getComputedStyle(lbl).display!=='none',edge:getComputedStyle(document.getElementById('railEdge')).display!=='none'};});
+    toggle:getComputedStyle(tg).display!=='none',label:!!lbl&&getComputedStyle(lbl).display!=='none',edge:getComputedStyle(document.getElementById('railEdge')).display!=='none',
+    /* v23.74 on a phone, Forms is in the bar along the bottom */
+    bar:(()=>{const f=document.getElementById('phForms');return !!f&&!!f.offsetParent&&f.textContent.trim()==='Forms';})()};});
 /* the toolbar of a form: its height, how many rows its groups and its view tabs take, the fade mark, the two screen controls */
 const toolbar=fr=>fr.evaluate(()=>{const t=document.querySelector('.toolbar'),v=document.getElementById('viewSeg');const rows=a=>{const T=a.filter(e=>e.offsetParent).map(e=>e.getBoundingClientRect().top).sort((x,y)=>x-y);let n=0,last=-99;T.forEach(y=>{if(y-last>8)n++;last=y;});return n;};
   const g=[...t.querySelectorAll(':scope > .tgroup')],cs=v&&getComputedStyle(v);
@@ -136,7 +138,7 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     ok('26 no page errors (iPad upright)',!errs.length,errs.slice(0,3));await ctx.close();}
   /* ---- 3. a phone ---- */
   {const {ctx,page,errs}=await shell(br,{width:390,height:844},UA.iphone,true,true);
-    const a=await railState(page);ok('27 a phone, nothing open: the list closed, the Forms button with its word',!a.open&&a.toggle&&a.label,a);
+    const a=await railState(page);ok('27 a phone, nothing open: the list closed, the Forms button with its word (in the bar along the bottom, v23.74)',!a.open&&a.bar,a);
     await page.evaluate(()=>todayOpen());await sleep(900);
     const td=await page.evaluate(()=>{const b=document.getElementById('dlgBody'),li=b.querySelector('.td-list li');return {li:!!li,row:li&&getComputedStyle(li).display,pill:li&&getComputedStyle(li.querySelector('.td-k')).borderRadius,db:getComputedStyle(b).fontSize,sw:b.scrollWidth-b.clientWidth};});
     ok('28 Today on a phone: rows with pills, 14 px, nothing wider than the box',td.li&&td.row==='flex'&&td.pill==='999px'&&td.db==='14px'&&td.sw<=1,td);

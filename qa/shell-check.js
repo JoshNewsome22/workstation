@@ -56,7 +56,8 @@ const DIR=L.path.join(__dirname,'shots',label); L.fs.mkdirSync(DIR,{recursive:tr
   await pp.evaluate(()=>openForm('DD-1')); await pp.waitForFunction(()=>!!state.status['DD-1'],null,{timeout:20000}).catch(()=>{});
   const pf=pp.frames().find(x=>x.url().includes('Daily_')); if(pf){await L.loadSim(pf);await L.sleep(1200);}
   await pp.screenshot({path:L.path.join(DIR,'shell-phone-DD-1.png')});
-  await pp.click('#fullBtn'); await L.sleep(400); await pp.screenshot({path:L.path.join(DIR,'shell-phone-DD-1-full.png')});
+  /* v23.74 on a phone, Fullscreen is under More in the bar along the bottom */
+  await pp.click('#phMore'); await L.sleep(300); await pp.click('#dlgBody [data-phmore="fullBtn"]'); await L.sleep(400); await pp.screenshot({path:L.path.join(DIR,'shell-phone-DD-1-full.png')});
   await p.close();
   await browser.close();
   console.log('errors:',JSON.stringify(log.slice(0,10)));
