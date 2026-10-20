@@ -1118,6 +1118,22 @@ td input,td select{max-width:100%}
       <div><label>Data sheet used (blank: the workstation form named on the card)</label><input data-m="cd_data" placeholder="Form DD-1 for counts and intervals per session; SM-1 for the interlocking session sheet; MT-1 for interval samples"></div>
       <div><label>Review date</label><input data-m="cd_review"></div>
     </div>
+    <!-- v23.47 (review I138) the step helper: the card's rule in numbers, read against Form DD-1; on screen only -->
+    <div class="noprint" id="srDecide" style="margin:10px 0 4px">
+      <h3 class="sub" style="margin:6px 0 2px">The step helper (reads Form DD-1)</h3>
+      <p class="hint" style="margin:0 0 6px">In the workstation, Today and Form PR-1 say when a step up is due, or a step back, from the days on Form DD-1 since the step began. Write the card&rsquo;s rule in numbers here; the card keeps its own words. Set the step in force and its date each time a step is taken.</p>
+      <div class="fieldgrid">
+        <div><label>Form DD-1 row (blank: the behavior named on the design)</label><input data-m="sd_row"></div>
+        <div><label>Step in force</label><input data-m="sd_step" placeholder="e.g., 2"></div>
+        <div><label>In force since</label><input data-m="sd_since" type="date"></div>
+        <div><label>Step up when the row is</label><select data-m="sd_upop"><option value="">at or below</option><option value="ge">at or above</option></select></div>
+        <div><label>this value in a day</label><input data-m="sd_upv" type="number" min="0" step="any"></div>
+        <div><label>on this many days with data in a row</label><input data-m="sd_upn" type="number" min="1" step="1"></div>
+        <div><label>Step back when the row is</label><select data-m="sd_backop"><option value="">at or above</option><option value="le">at or below</option></select></div>
+        <div><label>this value in a day</label><input data-m="sd_backv" type="number" min="0" step="any"></div>
+        <div><label>on this many days with data in a row</label><input data-m="sd_backn" type="number" min="1" step="1"></div>
+      </div>
+    </div>
     <div id="cardOut"></div>
   </section>
 
@@ -3248,6 +3264,16 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
    if(o.id==='chain'||(m.func==='Escape or avoidance'&&['thin','ncr','dro','drl'].includes(o.id)))
     L.push({d:'No one holds the student, guides hand over hand, blocks a doorway or stands over the desk to keep the work in place',cmp:'safe',crit:true});
    sc.items=L;}catch(e){}
+  return r;};})();
+</script>
+<script id="sr1-v2347">
+/* v23.47 (review I138) the step helper's rule for the case (schedule.decide): the DD-1 row, the step in force and since when,
+   and the rule in numbers (op: le at or below, ge at or above; v the value in a day; n the days with data in a row). Wrapped. */
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const sc=r&&r.schedule;if(!sc)return r;const m=S.meta,T=v=>String(v==null?'':v).trim(),N=v=>T(v)!==''&&isFinite(+T(v))?+T(v):null;
+   const R=(op,v,n,dflt)=>{const a=N(v),b=N(n);return a!==null&&b!==null&&b>0?{op:T(op)||dflt,v:a,n:Math.round(b)}:null;};
+   const up=R(m.sd_upop,m.sd_upv,m.sd_upn,'le'),back=R(m.sd_backop,m.sd_backv,m.sd_backn,'ge');
+   if(up||back){const d={};if(T(m.sd_row))d.row=T(m.sd_row);if(T(m.sd_step))d.step=T(m.sd_step);if(/^\d{4}-\d\d-\d\d$/.test(T(m.sd_since)))d.since=T(m.sd_since);if(up)d.up=up;if(back)d.back=back;sc.decide=d;}}catch(e){}
   return r;};})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>

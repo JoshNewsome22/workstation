@@ -9903,6 +9903,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.47: A schedule step decided on the data: Form SR-1's step helper, read on Today and Form PR-1 (review I138)
+
+- **The card's rule in numbers.** On Form SR-1's Card page, on screen only (the printed card is unchanged), the step helper
+  holds: the Form DD-1 row it reads (blank: the behavior named on the design), the step in force and the date it began, and
+  the rule: step up when the row is at or below (or at or above) a value in a day on so many days with data in a row; step
+  back when it is at or above (or at or below) a value on so many days in a row. The card keeps its own words.
+- **Form DD-1** sends each behavior's series with the case: the last 30 days with data, each day's date and value.
+- **Today and Form PR-1** say "a step up is due" or "step back", with the reason ("Hitting was at or below 1 on each of the
+  last 3 days with data on Form DD-1 since the step began on 10/5/2026"), when the days since the step began meet the rule.
+  Step back is checked first. Today's line opens Form SR-1; PR-1 says it under Current schedule. Set the step in force and its
+  date on Form SR-1 each time a step is taken.
+- qa/sr1-step-helper-test.js (9 checks).
+
 ### v23.46: Form SR-1's schedule card becomes Form TI-1's integrity steps (review I139, first part)
 
 - **The card as steps.** Form SR-1 sends the card's rule and its "What never happens" lines with the schedule, each tagged

@@ -11916,6 +11916,15 @@ document.addEventListener("click",e=>{const b=e.target&&e.target.closest&&e.targ
       if(ch>before){i.rep=rp;if(rp.wn&&i.parent!=="yes"){i.parent="yes";if(!rsT(i.parentWhen)){i.parentWhen="written notice "+rsMd(rp.wn)+" (Form CR-1)";i.parentAuto=true;}}}});
     if(ch){ddEdited();ddIncRender();}}catch(e){}return r;};}
 </script>
+<script id="dd1-v2347">
+/* v23.47 (SR-1 review I138) each behavior's series for the case, the last 30 days with data (d: the date, v: the day's value),
+   so Form SR-1's step helper can read the days since a step began. Wrapped; the rest of the record is unchanged. */
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+  try{if(!o||!o.data||!Array.isArray(o.data.behaviors))return o;const rows=sortedRows().filter(r=>r.date),B=orderedBehaviors();
+   o.data.behaviors.forEach((b,i)=>{const x=B.find(y=>(y.name||'')===b.name)||B[i];if(!x)return;
+     const v=rows.map(r=>({d:r.date,v:plotValue(r,x)})).filter(p=>p.v!==null).slice(-30);if(v.length)b.series=v;});}catch(e){}
+  return o;};})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

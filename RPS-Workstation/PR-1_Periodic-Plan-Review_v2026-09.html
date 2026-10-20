@@ -3695,6 +3695,25 @@ td > textarea.nbh-cell:focus{background:var(--wash,#EEF3F2);outline:none}
     if(f&&f.relapse&&f.relapse.line)put('relapse',f.relapse.line);}catch(e){}
   if(n&&r&&typeof r==='object'&&typeof r.filled==='number')r.filled+=n;return r;};})();
 </script>
+<script id="pr1-v2347">
+/* v23.47 (SR-1 review I138) under "Current schedule": a step up or a step back that Form SR-1's rule and Form DD-1's days call for */
+(function(){function srStepDue(sch,data){const D=sch&&sch.decide;if(!D||!data||!Array.isArray(data.behaviors))return null;
+  const K=s=>String(s||'').trim().toLowerCase(),row=K(D.row||sch.beh);if(!row)return null;
+  const b=data.behaviors.find(x=>K(x.name)===row)||data.behaviors.find(x=>K(x.name)&&(row.indexOf(K(x.name))>=0||K(x.name).indexOf(row)>=0));
+  if(!b||!Array.isArray(b.series))return null;
+  const P=b.series.filter(p=>p&&p.v!==null&&p.v!==''&&isFinite(+p.v)&&(!D.since||String(p.d)>=D.since));
+  const run=(R,dflt)=>{if(!R||!(+R.n>0)||R.v===''||R.v==null||!isFinite(+R.v)||P.length<+R.n)return false;const ge=(R.op||dflt)==='ge';return P.slice(-R.n).every(p=>ge?+p.v>=+R.v:+p.v<=+R.v);};
+  const say=(R,dflt)=>((R.op||dflt)==='ge'?'at or above ':'at or below ')+R.v+' on each of the last '+R.n+' day'+(+R.n===1?'':'s')+' with data on Form DD-1';
+  const md=s=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(s||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(s||'');};
+  const head='Form SR-1\u2019s schedule'+(sch.nota?' ('+sch.nota+(D.step?', step '+D.step:'')+')':D.step?' (step '+D.step+')':'');
+  const since=D.since?' since the step began on '+md(D.since):'';
+  if(run(D.back,'ge'))return {how:'back',t:head+': step back. '+b.name+' was '+say(D.back,'ge')+since+'. Go back one step, as the card says, and set the step in force on Form SR-1.'};
+  if(run(D.up,'le'))return {how:'up',t:head+': a step up is due. '+b.name+' was '+say(D.up,'le')+since+'. Take the next step on the card, write the date it was reached, and set the step in force on Form SR-1.'};
+  return null;}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
+  try{const h=document.getElementById('prSchedSrc'),x=f&&srStepDue(f.schedule,f.data);if(h&&x){h.hidden=false;h.textContent=(h.textContent?h.textContent+' ':'')+x.t;}}catch(e){}
+  return r;};})();
+</script>
 <script id="nbh-field-care" src="nbh-field-care.js"></script>
 <style id="nbh-design-css">
 /* ---- design pass: rules every form shares -------------------------------------
