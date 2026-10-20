@@ -8,7 +8,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   try{
   const fs=require('fs'),dir=L.ROOT+'/NBH-Workstation/',file=pre=>fs.readdirSync(dir).find(f=>f.startsWith(pre));
   const ctx=await br.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
-  const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(L.BASE+'/NBH-Workstation/'+file('RR-1_'));await sleep(900);
+  /* the simulations date the record back from the last school day; the dates below are those of Saturday 17 October 2026 */
+  const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.clock.setFixedTime(new Date(2026,9,17,12,0,0));await p.goto(L.BASE+'/NBH-Workstation/'+file('RR-1_'));await sleep(900);
   await p.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};nbhUI.confirm=async()=>true;nbhUI.toast=()=>{};});
   const sim=async k=>{await p.evaluate(k=>{document.getElementById('simScenario').value=k;document.getElementById('simBtn').click();},k);await sleep(900);};
   const look=()=>p.evaluate(()=>{const svg=document.querySelector('#rrTl svg');const q=s=>svg?[...svg.querySelectorAll(s)]:[];

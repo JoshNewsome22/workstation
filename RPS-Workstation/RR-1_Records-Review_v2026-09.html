@@ -2074,8 +2074,8 @@ function rrIc1Mark(){const h=document.querySelector('[name="src.ic1"]'),ks=h&&h.
  document.addEventListener('change',()=>{try{rrIc1Mark();}catch(e){}});}
 /* the crisis plan on file: current while its next review is not past and it was dated or reviewed within the year */
 function rrCrisisState(C,today){const pd=rrISO(C.planDate),rl=rrISO(C.revLast),rn=rrISO(C.revNext);if(!pd)return '';
-  if(rn&&rn<today)return 'Yes, outdated';const last=[pd,rl].filter(Boolean).sort().pop(),y=new Date(today+'T12:00:00');y.setFullYear(y.getFullYear()-1);
-  return last<y.toISOString().slice(0,10)?'Yes, outdated':'Yes, current';}
+  if(rn&&rn<today)return 'Yes, outdated';const last=[pd,rl].filter(Boolean).sort().pop(),y=(+today.slice(0,4)-1)+today.slice(4);   /* a year before, from the date's own string */
+  return last<y?'Yes, outdated':'Yes, current';}
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   let n=0,last=null;const said=[];
   try{if(!f||typeof f!=='object')return r;const T=v=>String(v==null?'':v).trim(),E=k=>{const e=document.querySelector('[name="'+k+'"]');return e&&!T(e.value)?e:null;};
@@ -2106,9 +2106,9 @@ function rrCrisisState(C,today){const pd=rrISO(C.planDate),rl=rrISO(C.revLast),r
    below) and the absence dates, when the record gives them. A medication started long before the rest is named at the left
    edge rather than stretching the axis. Under it, the incidents on record in the 14 days before and the 14 days from each
    medication change and dated event. Display only; nothing here is saved. */
-const rrDay=86400000,rrMs=d=>Date.parse(d+'T12:00:00Z'),rrIsoOf=ms=>new Date(ms).toISOString().slice(0,10);
+const rrDay=86400000,rrMs=d=>Date.parse(d+'T12:00:00Z'),rrIsoOf=ms=>{const d=new Date(ms);return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');};   /* the UTC-noon days of rrMs, by their UTC parts */
 const rrMDY=d=>d?(+d.slice(5,7))+'/'+(+d.slice(8,10))+'/'+d.slice(0,4):'';
-function rrDates(t,refs){t=String(t||'');const out=[],R=(refs||[]).filter(Boolean).sort(),mid=R.length?R[Math.floor(R.length/2)]:rrIsoOf(Date.now());
+function rrDates(t,refs){t=String(t||'');const out=[],R=(refs||[]).filter(Boolean).sort(),mid=R.length?R[Math.floor(R.length/2)]:ymd(new Date());
   t.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g,(m,y,mo,d)=>{out.push(y+'-'+mo+'-'+d);return '';}).replace(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{4}|\d{2}))?\b/g,(m,mo,d,y)=>{
     if(+mo<1||+mo>12||+d<1||+d>31)return m;const pad=x=>String(x).padStart(2,'0');let yr=y?(y.length===2?'20'+y:y):'';
     if(!yr){const y0=+mid.slice(0,4);yr=String([y0-1,y0,y0+1].map(c=>[c,Math.abs(rrMs(c+'-'+pad(mo)+'-'+pad(d))-rrMs(mid))]).sort((a,b)=>a[1]-b[1])[0][0]);}

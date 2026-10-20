@@ -2206,7 +2206,10 @@ function tvUnit(b){const u=String(b&&b.unit||'').toLowerCase(),pct=/%/.test(u)||
 function tvDataList(f){const d=f&&f.data;if(!d||!Array.isArray(d.behaviors))return [];
   /* v23.06 (review F364): the plan's own targets first, then the replacement and the skills, up to four */
   return tvDataPick(f).map(b=>{const cv=b.cur&&b.cur.mean!=null?b.cur.mean:b.mean,bv=b.base&&b.base.mean!=null?b.base.mean:null,wk=d.week&&Array.isArray(d.week.rows)?d.week.rows.find(r=>r&&r.name===b.name):null;
-    return {name:String(b.name),kind:b.kind||'target',bv:typeof bv==='number'?bv:null,cv:typeof cv==='number'?cv:null,cd:b.cur&&+b.cur.days||0,aim:typeof b.aim==='number'?b.aim:null,met:!!b.aimMet,u:tvUnit(b),wk};}).filter(x=>x.cv!=null).slice(0,4);}
+    return {name:String(b.name),kind:b.kind||'target',bv:typeof bv==='number'?bv:null,cv:typeof cv==='number'?cv:null,cd:b.cur&&+b.cur.days||0,aim:typeof b.aim==='number'?b.aim:null,met:!!b.aimMet,u:tvUnit(b),wk,wl:tvWeekLab(d.week)};}).filter(x=>x.cv!=null).slice(0,4);}
+/* DD-1's latest week is "this week so far" through its Friday, "last week" once it is over */
+const tvWeekLab=w=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(w&&w.mon||''));if(!m)return 'Last week';const fri=new Date(+m[1],+m[2]-1,+m[3]+4),t=new Date();t.setHours(0,0,0,0);
+  const n=+w.days||0;return fri>=t&&n?'This week so far ('+n+' school day'+(n===1?'':'s')+')':'Last week';};
 const tvDay=iso=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(iso||''));return m?new Date(+m[1],+m[2]-1,+m[3],12).toLocaleDateString('en-US',{month:'long',day:'numeric'}):'';};
 /* the chart: a panel a behavior (up to four), the bar before the plan and the bar now, on its own scale, the goal dashed;
    kept as the picture 'tvchart', so it shows in every look, in the graphics window and in the saved file */
@@ -2229,7 +2232,7 @@ function tvChart(L){const W=1200,H=720,n=L.length,cols=n===1?1:2,rws=Math.ceil(n
 function tvDraftData(f,add,seg,fam){const L=tvDataList(f);if(!L.length)return;const d=f.data||{},two=L.some(x=>x.bv!=null),ph=tvChart(L);
   /* v23.06 (review F364): "since the plan began" is an average of its school days, said as one; the latest week beside it; a target
      with no daily data said so */
-  const said=L.map(x=>{const nm=cap1(lc1(x.name)),avg='an average of about '+fmtN(x.cv)+x.u.say+(x.cd?' over the '+x.cd+' school day'+(x.cd===1?'':'s')+' since the plan began':' since the plan began'),wk=x.wk&&str(x.wk.now)?' Last week: '+str(x.wk.now)+(str(x.wk.change)?', '+str(x.wk.change)+' on the week before':'')+'.':'';
+  const said=L.map(x=>{const nm=cap1(lc1(x.name)),avg='an average of about '+fmtN(x.cv)+x.u.say+(x.cd?' over the '+x.cd+' school day'+(x.cd===1?'':'s')+' since the plan began':' since the plan began'),wk=x.wk&&str(x.wk.now)?' '+(x.wl||'Last week')+': '+str(x.wk.now)+(str(x.wk.change)?', '+str(x.wk.change)+' on the week before':'')+'.':'';
     return (x.bv!=null?nm+': about '+fmtN(x.bv)+x.u.say+' before the plan, and '+avg+'.':nm+': '+avg+'.')+wk;}).join(' ')+tvDataMissing(f).map(b=>' [No daily data for '+lc1(b)+'.]').join('');
   const met=L.filter(x=>x.met).map(x=>lc1(x.name));
   const open=fam?'Here is how things are going, from the numbers the school team keeps every day.':'Here is where things stand, from the daily data'+(d.from&&d.to?', '+tvDay(d.from)+' to '+tvDay(d.to):'')+'.';

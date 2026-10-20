@@ -7,7 +7,7 @@
       target named only "(replacement)" names no replacement.
    B. TB-1's simulation in the workstation, then DD-1, TK-1, SM-1, SR-1, FS-1, GB-1 and HD-1 opened fresh: DD-1 has 6
       behavior rows (not 9), one "Break request" row paired with Aggression and holding target 4's definition; TK-1's
-      targets and printed target cards have no "(see" text and one break card; SM-1 has no repeated row; SR-1's
+      targets and printed target cards have no "(see" text and leave out the taught Break request (v23.25); SM-1 has no repeated row; SR-1's
       alternative response has no "(see target 4)"; FS-1 has 4 target rows, and its "From the case" list will not take
       the replacement target as a problem behavior.
    C. A GB-1 objective of 5 consecutive measurements gives a fresh DD-1 a criterion of 5 days (aim and days on the
@@ -162,10 +162,11 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   const liveN=await dd.evaluate(()=>S.behaviors.length);
   ok('B: DD-1\'s data sheet has one column per row ('+liveN+')',liveN===6);
   const tk=await fresh(page,'TK-1');
-  const tg=await tk.evaluate(()=>S.tg.filter(o=>o.l||o.k).map(o=>({l:o.l,k:o.k})));
-  ok('B: TK-1\'s targets: one break card and no "(see" text',tg.filter(o=>o.k==='break').length===1&&tg.every(o=>!NOTE.test(o.l))&&tg.length===2,tg);
+  /* v23.25 (review F298) a request the plan teaches stays off the token board: the Break request is named in the note instead */
+  const tg=await tk.evaluate(()=>({tg:S.tg.filter(o=>o.l||o.k).map(o=>({l:o.l,k:o.k})),note:(document.getElementById('tkReqOut')||{}).textContent||''}));
+  ok('B: TK-1\'s targets: no "(see" text, and the Break request (a taught request) is left off and named in the note',tg.tg.length===1&&!tg.tg.some(o=>o.k==='break'||/Break request/.test(o.l))&&tg.tg.every(o=>!NOTE.test(o.l))&&/^Not put on the Targets page from the case: Break request\./.test(tg.note),tg);
   const cards=await tk.evaluate(()=>{const ps=[...document.querySelectorAll('#book .pg[data-label^="Card sheet: the targets"]')];return {n:ps.length,text:ps.map(p=>p.innerText.replace(/\s+/g,' ')).join(' | ')};});
-  ok('B: TK-1\'s printed target cards show no "(see" text and one "Break request" card',cards.n>=1&&!NOTE.test(cards.text)&&(cards.text.match(/Break request/g)||[]).length===1,cards);
+  ok('B: TK-1\'s printed target cards show no "(see" text and no "Break request" card',cards.n>=1&&!NOTE.test(cards.text)&&!/Break request/.test(cards.text),cards);
   const sm=await fresh(page,'SM-1');
   const smr=await sm.evaluate(()=>({tg:S.tg.map(t=>t.word).filter(Boolean),red:S.meta.t_reduce}));
   ok('B: SM-1 has no repeated row and no staff note',smr.tg.length===new Set(smr.tg).size&&smr.tg.every(w=>!NOTE.test(w))&&JSON.stringify(smr.tg)===JSON.stringify(['Break request','Engages with a competing item from the A-CSA list']),smr.tg);

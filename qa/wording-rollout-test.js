@@ -312,6 +312,9 @@ async function shell(browser, f, R, pages){
   const where = (x, y) => { const dk = Object.keys(x.data).filter(k => J(x.data[k]) !== J(y.data[k])); const oa = x.own || '', ob = y.own || '';
     let at = 0; while (at < oa.length && oa[at] === ob[at]) at++;
     return {fields: dk.slice(0, 6), own: oa === ob ? 'same' : {at, before: oa.slice(Math.max(0, at - 60), at + 60), after: ob.slice(Math.max(0, at - 60), at + 60)}}; };
+  /* v23.39 each form's round starts from no case facts: the forms simulated before it leave theirs in the workstation, and a form
+     fills an empty field from them when the panel's edit brings the case in (DT-1's assent line from SI-1's, QS-1's and AD-1's rows) */
+  for (const pg of [pages.old, pages.new]) await pg.evaluate(() => { try { state.facts = null; } catch (e) {} });
   /* before the rollout */
   let fr = await openIn(pages.old, f);
   if (!fr) { R.snap = 'FAIL the pre-rollout form did not open'; return; }
