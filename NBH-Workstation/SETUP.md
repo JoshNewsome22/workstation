@@ -9905,6 +9905,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.69: Form TB-1's candidate list on an iPad: its boxes are drawn, its labels kept apart
+
+- On an iPad (and a laptop) the Select & prioritize list showed its labels but none of its boxes: since v23.34 each
+  candidate is two lines without the table's cell borders, and the boxes in them were drawn borderless, as for a ruled
+  table. They are boxes now (a border, a white fill): the behavior, who reported it, the rate and the four answers, and
+  the agreement pilot's on the Quality check tab. Paper, and the list on a phone, are as before.
+- The second line's columns are at least as wide as their labels' longest word, so "Socially significant?" and
+  "Contacts natural reinforcement?" no longer run into the next label in Safari's wider type; the Urgency cell takes its
+  column's width (it kept the table's 46 px).
+- Checked in every form at iPad size: TB-1's was the only list whose boxes could not be seen.
+- qa/tb1-ipad-boxes-test.js (8 checks).
+
 ### v23.68: Form SP-1's definitions on every sheet
 
 - A data sheet after the first (sheet 2 of 2, and on) now carries the behavior's **operational definition, example and

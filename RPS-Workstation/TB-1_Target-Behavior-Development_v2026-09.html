@@ -746,7 +746,8 @@ th.tb1-xh{width:34px}
   #candTbl{display:block;width:100%;border:0}
   #candTbl thead{display:none}
   #candTbl tbody{display:block}
-  #candTbl tbody tr{display:grid;grid-template-columns:2em 4.6em 6em 6.8em 4.6em minmax(4em,1fr) 11em 5em 34px;
+  /* v23.69 the second line's columns are at least as wide as their labels' longest word (Safari's type is wider) */
+  #candTbl tbody tr{display:grid;grid-template-columns:2em minmax(min-content,4.6em) minmax(min-content,6em) minmax(min-content,6.8em) minmax(min-content,4.6em) minmax(4em,1fr) 11em minmax(min-content,5em) 34px;
     column-gap:8px;row-gap:4px;align-items:start;padding:6px 6px 8px;border-bottom:1px solid var(--rule-2,#c9d3cf)}
   #candTbl tbody tr:first-child{border-top:1px solid var(--rule-2,#c9d3cf)}
   #candTbl tbody td{display:block;border:0!important;padding:0!important;min-width:0;background:none}
@@ -783,7 +784,7 @@ th.tb1-xh{width:34px}
   #ioaTbl{display:block;width:100%;border:0}
   #ioaTbl thead{display:none}
   #ioaTbl tbody{display:block}
-  #ioaTbl tbody tr{display:grid;grid-template-columns:4.2em 4.2em 5em minmax(0,1fr) 4.5em minmax(0,1fr);column-gap:8px;row-gap:4px;
+  #ioaTbl tbody tr{display:grid;grid-template-columns:minmax(min-content,4.2em) minmax(min-content,4.2em) minmax(min-content,5em) minmax(0,1fr) minmax(min-content,4.5em) minmax(0,1fr);column-gap:8px;row-gap:4px;
     align-items:end;padding:6px 6px 8px;border-bottom:1px solid var(--rule-2,#c9d3cf)}
   #ioaTbl tbody tr:first-child{border-top:1px solid var(--rule-2,#c9d3cf)}
   #ioaTbl tbody td{display:block;border:0!important;padding:0!important;min-width:0;text-align:left!important}
@@ -806,6 +807,13 @@ th.tb1-xh{width:34px}
   #ioaTbl tbody td:nth-child(8)::before{content:'Agree %'}
   #ioaTbl tbody td:nth-child(9)::before{content:'Disagreements and edits made'}
   #ioaTbl tbody td input{width:100%!important;min-width:0!important;box-sizing:border-box}
+  /* v23.69 (the BCBA's iPad) the boxes are drawn: the form draws them borderless for a bordered table, and since the rows
+     became two lines (v23.34) their cells have no borders either, so the boxes could not be seen */
+  #candTbl tbody td input:not([type=checkbox]):not([type=radio]),#candTbl tbody td select,#candTbl tbody td textarea,
+  #ioaTbl tbody td input:not([type=checkbox]):not([type=radio]),#ioaTbl tbody td select,#ioaTbl tbody td textarea{
+    border:1px solid #b7c8c5;border-radius:6px;background-color:#fff}
+  /* v23.69 a cell takes its column's width (the table's numeric cells are 46px wide, and the Urgency label ran out of its own) */
+  #candTbl tbody td,#ioaTbl tbody td{width:auto}
 
   /* the selected targets: the Type column has the room its choices need ("Cluster (multiple topographies)"), and its boxes draw
      the small arrow the candidate rows do, so the platform's wide one takes none of it */
