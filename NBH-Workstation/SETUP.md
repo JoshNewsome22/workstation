@@ -9905,6 +9905,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.61: Speed and size checks in the release run (review I237)
+
+- **qa/budget-test.js** keeps the workstation as light as it is now, so a slowdown is seen in the release run instead
+  of on an iPad in the middle of a school day. Counts and bytes first, against `qa/budget.json` (each about a quarter
+  above what this release measured, with the measurement beside it): the workstation page, each form, the 47 forms
+  together, the shared scripts every form loads, and the folder without the speech recogniser. Then: a form with
+  recorded narration loads none of it (about 9 MB in all) until its walkthrough plays; a case of six forms opened from the
+  caseload loads one form, under 8,000 page elements; and the workstation, a form and the case open well inside generous
+  limits (about four times what they took here: 0.2 s, 0.8 s and 0.6 s).
+- A budget is raised only with a reason written beside it in `qa/budget.json`.
+
 ### v23.60: An accessibility check in the release run (review I246)
 
 - **qa/a11y-release-test.js** runs axe-core's WCAG 2.1 A and AA rules on 53 pages: the workstation (empty, with a form
