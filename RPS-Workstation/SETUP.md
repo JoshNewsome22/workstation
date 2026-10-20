@@ -9905,6 +9905,14 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.78: The BCBA's approval of the wording of v23.64–v23.76 recorded
+
+- The wording of Today's numbers, the staff kit, What's due, Form MS-1's library entries, the iPhone layout, Refresh
+  all and Form DM-1's Good to know is approved by the BCBA (October 2026) and marked so where it is written, so it is not
+  changed without the BCBA. Nothing changes on screen or on paper.
+
+Nothing to set up.
+
 ### v23.77: A form opened from a saved case leaves it as saved; a word typed in the first seconds still counts
 
 - **Opening a form of a saved case no longer marks the case as changed.** Since v23.57 a form takes its saved work when

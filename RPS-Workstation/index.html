@@ -2734,7 +2734,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.77';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.78';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5933,6 +5933,7 @@ async function todayOpen(){await gatherFacts(false);try{await gatherDue();}catch
       :'<p>'+(f?'Nothing needs you today in this case.':'Nothing to go on yet: open the case’s forms (Form DD-1, TI-1, GB-1 and the rest) and this list fills from them.')+'</p>')+
     '<p class="td-more"><button type="button" class="primary" id="tdWeek">End of the week: print the packet</button> <button type="button" id="tdKit">Staff kit for next week</button> <button type="button" id="tdHand">Hand-over check</button> <button type="button" id="tdCaseload">Caseload</button></p>'+
     '<p class="hint">The end of the week prints, in one go, Form DD-1’s week summary, next week’s blank sheet and Form SM-1’s point sheets. The staff kit prints what the staff use next week: Form DD-1’s blank sheet, Form SM-1’s student sheet for each day and Form QS-1’s quick start.</p>');}
+/* v23.78 the lines of the staff kit below (v23.65). Wording approved by the BCBA, October 2026. */
 /* v23.65 (review I244) the staff kit for next week, in one tap: Form DD-1's blank sheet for next week, Form SM-1's student sheet
    for each school day and Form QS-1's quick start, each in its own print layout, as one print with the packet's cover */
 function kitMonday(){const d=new Date();d.setHours(12,0,0,0);while(d.getDay()!==1)d.setDate(d.getDate()+1);return d;}
@@ -6817,6 +6818,7 @@ $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clExpire'){try{loc
 {const to5=todayOpen;todayOpen=async function(){await to5.apply(this,arguments);try{const b=$('#dlgBody'),p=b&&b.querySelector('.td-more');if(p&&!b.querySelector('#tdIep'))p.insertAdjacentHTML('beforeend',' <button type="button" id="tdIep">IEP meeting packet<\/button> <button type="button" id="tdChanges">What changed since the last save<\/button>');
   const unf=(await clList()||[]).filter(r=>r.unfiled&&r.key!==clKey(packet()));if(unf.length&&b&&!b.querySelector('#tdFiles')){const li='<li id="tdFiles"><span class="td-k">Files<\/span> <span>'+unf.length+' student'+(unf.length===1?'':'s')+' kept on this '+HERE+' but not saved to a file: '+esc(unf.map(clName).join(', '))+'<\/span> <button type="button" id="tdCaseload">Caseload<\/button><\/li>';
     const ul=b.querySelector('.td-list');if(ul)ul.insertAdjacentHTML('afterbegin',li);else{const h=b.querySelector('.hp-lead');(h||b).insertAdjacentHTML(h?'afterend':'afterbegin','<ul class="td-list">'+li+'<\/ul>');}}}catch(e){}};}
+/* v23.78 the labels and lines of What's due below (v23.71). Wording approved by the BCBA, October 2026. */
 /* v23.71 (the BCBA's iPad) What's due, by when: what needs you now, what is overdue, this week, coming up, and what has
    no date. One row a student and a date, each deadline once with every form that holds it (a reevaluation in Forms RR-1
    and DM-1 is one row, not three); the days counted from today, not from the student's last save (a summary saved on the
@@ -10214,6 +10216,7 @@ window.addEventListener('storage',e=>{if(e.key!==VIEWKEY)return;const v=viewGet(
 viewApply(viewGet());
 </script>
 <script id="nbh-v2364">
+/* v23.78 the lines of Today's numbers below (v23.64). Wording approved by the BCBA, October 2026. */
 /* ================= v23.64 (review I236, F471) Today's numbers, from a caseload card =================
    A sheet with a student's Form DD-1 targets (read from the case as kept on this device, or from the open form): a count
    for each counted target, correct and not correct for a percent, the minutes observed and a note; Save. For the student
@@ -10310,6 +10313,7 @@ document.addEventListener('submit',async e=>{if(!e.target||e.target.id!=='dyForm
 {const pb7=paintBlank;paintBlank=async function(){const r=await pb7.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blDay'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blDay">Today’s numbers<\/button>');}catch(e){}return r;};}
 {const to7=todayOpen;todayOpen=async function(){const r=await to7.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdDay')){const l=row.querySelector('#tdLog');if(l)l.insertAdjacentHTML('afterend',' <button type="button" id="tdDay">Today’s numbers<\/button>');else row.insertAdjacentHTML('afterbegin','<button type="button" id="tdDay">Today’s numbers<\/button> ');}}catch(e){}return r;};}
 CMDS.push({k:'today numbers data count tally record day staff',n:'Today’s numbers: counts into Form DD-1',s:'command',go:()=>dayNumbersOpen('')});
+/* v23.78 the iPhone layout's labels below (v23.74). Wording approved by the BCBA, October 2026. */
 /* ================= v23.74 (the BCBA's iPhone) a phone app's layout at a phone's width =================
    The top a third of the screen before anything to read, two buttons without words, each item of what is due on a row of
    its own, one deadline four times. At 600 px and less: Forms, Caseload, Today and More along the bottom; the form's own
@@ -10389,6 +10393,7 @@ $('#blank').addEventListener('click',e=>{
   const row=e.target.closest('.due-row'),top=e.target.closest('#blankCl .cl-card .cl-top');
   const b=row?row.querySelector('button[data-clopen]'):top?top.closest('.cl-card').querySelector('.cl-card-acts [data-clopen]'):null;if(b)b.click();});
 PH_MQ.addEventListener('change',()=>{try{paintBlank();}catch(e){}});
+/* v23.78 the lines of Refresh all below (v23.75). Wording approved by the BCBA, October 2026. */
 /* ================= v23.75 (the BCBA's iPad) Refresh all, from the start screen =================
    A student's card showed their numbers as at the last time their case was opened: the days staff sent from their phones
    and the days in a linked Google Sheet came in when that student's Form DD-1 was opened, or from Caseload's own buttons
