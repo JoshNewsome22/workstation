@@ -807,6 +807,14 @@ async function shellPart(sh, f, log, where) {
     const cf = path.join(OUT, 'case', f.id + '.case.json'); await dl.saveAs(cf);
     const text = fs.readFileSync(cf, 'utf8'); let C = null;
     try { const d = JSON.parse(text); C = d.forms && d.forms[f.id] && d.forms[f.id].snap; R.caseFile = Object.keys(d.forms || {}).join(',') + ', ' + text.length + ' B'; } catch (e) { R.caseFile = 'unreadable: ' + firstLine(e); }
+    /* v23.44 a staff-side record (Form PD-1) is never in a student's case: Save case writes the form's own file instead, which the
+       form's Open data takes back (the alone part's round trip); here the file must be that own file and hold no case */
+    if (await sh.evaluate(id => typeof STAFF_SIDE !== 'undefined' && !!STAFF_SIDE[id], f.id).catch(() => false)) {
+      let d = null, o = null; try { d = JSON.parse(text); o = JSON.parse(A && A.own); } catch (e) {}
+      R.staffSide = {ownFile: !!(d && o && d.form === f.id && d.S && J(d.S) === J(o.S)), inCase: !!(d && d.forms && d.forms[f.id])};   /* the record, not its saved time */
+      R.frameErrorsA = await fr.evaluate(() => __sw.errs.slice()).catch(() => []);
+      return R;
+    }
     R.frameErrorsA = await fr.evaluate(() => __sw.errs.slice()).catch(() => []);
     where.at = 'shell: clearCase';
     await sh.evaluate(() => clearCase()); await sleep(700);
@@ -930,6 +938,7 @@ function verdict(R) {
     if (R.frame) fail.push(R.frame);
     if (R.caseFile && /^no file|^unreadable/.test(R.caseFile)) fail.push('Save case: ' + R.caseFile);
     if (R.reopened === false) fail.push('the form did not open from the case');
+    if (R.staffSide && (!R.staffSide.ownFile || R.staffSide.inCase)) fail.push('a staff-side record: Save case ' + (R.staffSide.inCase ? 'put it in the case' : 'did not write its own file'));
     const d = R.diff;
     if (d && d.missing) fail.push('no snapshot (' + d.missing + ')');
     if (d && d.fields && d.fields.length) fail.push(d.fields.length + ' field' + (d.fields.length > 1 ? 's' : '') + ' differ after the case round trip (' + d.fields[0].key + ': ' + d.fields[0].before.slice(0, 30) + ' -> ' + d.fields[0].after.slice(0, 30) + ')');
