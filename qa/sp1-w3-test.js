@@ -26,7 +26,11 @@ const URL_=BASE+'/NBH-Workstation/Scatterplot_Pattern_Analysis.html';
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
 const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupdf.open(sys.argv[1]).page_count)',f]).toString().trim();
 (async()=>{const br=await chromium.launch();const errs=[];
-  const ctx=await br.newContext({viewport:{width:1280,height:900},serviceWorkers:'block',acceptDownloads:true});const p=await ctx.newPage();
+  const ctx=await br.newContext({viewport:{width:1280,height:900},serviceWorkers:'block',acceptDownloads:true});
+  /* the simulated record is drawn at random; a fixed draw keeps every run the same (one draw met no control-chart
+     criterion, and the check that the criteria name the activity had nothing to read) */
+  await ctx.addInitScript(()=>{let a=20261020;Math.random=function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};});
+  const p=await ctx.newPage();
   p.on('pageerror',e=>errs.push(e.message));await p.goto(URL_);await sleep(1200);
   await p.evaluate(()=>{nbhUI.confirm=async()=>true;window.confirm=()=>true;window.alert=()=>{};});
   /* ---------- F89: a blank sheet ---------- */
