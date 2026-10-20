@@ -680,6 +680,10 @@ button.rowDel{font:inherit;font-size:14px;line-height:1;border:1px solid var(--r
 
 /* ---- the handout ---- */
 .qs-page{font-family:var(--sans);color:#1c2733;font-size:10.5px;line-height:1.38;break-after:page;page-break-after:always;position:relative}
+/* v23.66 (review I243) large print: the handout about a third larger on paper than its regular print (1.24), its pages
+   reflowing; the flow sheet stays one glance, one page */
+@media print{.qs-lp .qs-page:not(.qs-flow){zoom:1.65}}
+.qs-lpw{margin:4px 0 8px}.qs-lpw select{margin-left:6px}
 .qs-page:last-child{break-after:auto;page-break-after:auto}
 .qs-page *{box-sizing:border-box}
 .qs-band{background:#182e43;color:#fff;padding:13px 18px 12px;margin:0 0 12px;border-radius:2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -1037,6 +1041,8 @@ td input,td select{max-width:100%}
 <section class="pane" data-pane="out">
 <div class="bar nbh-band noprint">The Quick Start, As It Prints</div>
 <p class="method noprint">Letter pages, portrait. Every page is rebuilt from the fields as they change and again at the moment of printing, so what prints is always what the fields hold. The letterhead prints once at the top of the first page, as on every form.</p>
+<!-- v23.66 (review I243) large print, kept with the form -->
+<p class="qs-lpw noprint"><label for="qsLp">On paper</label> <select id="qsLp" data-k="lp"><option value="">Regular print</option><option value="large">Large print: about a third larger, a few pages more</option></select></p>
 <div id="outReview" class="qs-review noprint"></div>
 <div class="qs-prev" id="out" tabindex="0" role="region" aria-label="The Quick Start, as it prints"></div>
 </section>
@@ -1098,7 +1104,7 @@ const row=k=>{const o={};ROW[k].forEach(f=>{o[f]='';});return o;};
    in the consented plan (F396), the reading check (I200), and S.ok: the plan's words the BCBA has reviewed and kept (F390). */
 function blank(){const S={meta:{client:'',sid:'',grade:'',school:'',bcba:'',program:'',first:'',pron:'he',start:'',plan:'',issued:'',issueNo:''},
   who:'',goal:'',statnote:'',when:'',may:'',gets:'',health:'',title2:'',spotHead:'',spotText:'',chips:'',newline:'',title3:'',readnote:'',mustknow:'',stop:'',
-  consLead:'',consRules:'',consSay:'',consOk:'',title4:'',recnote:'',onevoice:'',flowOn:'yes',flowCalm:'',flowCall:'',askName:'',flowHonor:'',flowThen:'',callCrisis:'',
+  consLead:'',consRules:'',consSay:'',consOk:'',title4:'',recnote:'',onevoice:'',flowOn:'yes',lp:'',flowCalm:'',flowCall:'',askName:'',flowHonor:'',flowThen:'',callCrisis:'',
   checkOn:'no',changes:'',holders:'',pulled:{},changed:{},ok:{}};
   Object.keys(ROW).forEach(k=>{S[k]=[];for(let i=0;i<START[k];i++)S[k].push(row(k));});return S;}
 let S=blank();
@@ -1418,6 +1424,7 @@ function pageCss(){let st=$('#qsPageCss');if(!st){st=document.createElement('sty
   const t=(draftN()?'DRAFT: not yet reviewed \u00B7 ':'')+(il?cap(il)+' \u00B7 ':'')+'The plan governs where this differs \u00B7 Confidential (FERPA): keep it out of students\u2019 sight; do not copy or pass it on';
   st.textContent='@media print{@page{@bottom-left{content:"'+q(t)+'"!important;color:#9b2c1f!important;font-size:8pt!important}}}';}
 function build(){ensure();pageCss();const html=handoutHTML();$('#out').innerHTML=html;$('#flowPrev').innerHTML=flowPage(5,5);
+  {const lp=S.lp==='large';$('#out').classList.toggle('qs-lp',lp);$('#flowPrev').classList.toggle('qs-lp',lp);const sel=$('#qsLp');if(sel&&sel.value!==(lp?'large':''))sel.value=lp?'large':'';}   /* v23.66 (review I243) */
   const r=reviewHTML(html);$('#review').innerHTML=r;$('#outReview').innerHTML=r;const k=$('#qsKey');if(k)k.innerHTML=keyHTML();renderMarks();}
 function buildSoon(ms){clearTimeout(buildT);buildT=setTimeout(build,ms||0);}
 window.addEventListener('beforeprint',build);

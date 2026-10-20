@@ -9905,6 +9905,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.66: The staff quick start in large print (review I243)
+
+- **Form QS-1, The Quick Start, As It Prints**: *On paper*, Regular print or Large print. Large print sets the handout about
+  a third larger than its regular print, for a paraprofessional or a substitute who reads it in a hurry, a photocopy of a
+  photocopy, or a reader who needs it; the day cards and the tables reflow (the simulated handout goes from 7 pages to 11,
+  nothing cut at the side), and the one-glance flow sheet stays one page. The choice is kept with the form, so the master
+  print and the staff kit print it the same way. The screen preview is unchanged.
+- The other handouts already print large: Form HD-1's home sheets are set in large plain type, one sheet to a page, and the
+  student's sheets of Forms SM-1, TK-1 and VS-1 are drawn for the student at their own sizes.
+- qa/i243-large-print-test.js (7 checks).
+
 ### v23.65: The staff data kit for next week, in one tap (review I244)
 
 - **Today, Staff kit for next week** (also in the command box): one print with what the staff use in the week to come,
