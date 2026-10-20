@@ -9903,6 +9903,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.49: Form SR-1's schedule card has a version for the family, in English and Spanish, printed by Form HD-1 (review I139)
+
+Wording approved by the BCBA, October 2026.
+
+- **The family's version.** On Form SR-1's Card page, on screen only, one paragraph for home is written from the card: what
+  the schedule is, what the student earns, and what the family can do the same way. There is one for each schedule that has
+  a home side (DRO, DRL, NCR, a token economy, thinning after FCT, a chained schedule, a limited hold, a lag schedule, a VI or
+  VR series; a VT series reads as NCR). A progressive ratio (an assessment) and an interlocking schedule (a session sheet)
+  have none.
+- **Spanish.** The Spanish paragraph is complete once the card's words it uses are written in Spanish; only those boxes are
+  shown (the behavior, the reinforcer, the request, the waiting signal, the token, the back-ups, the response that earns).
+  Until then, none goes home in Spanish. A box for each language takes the BCBA's own words in place of the draft. Have a
+  Spanish speaker read the Spanish before it goes home.
+- **Form HD-1** has a sheet to tick, **The school's plan, at home**: the Spanish first and the English after it when the
+  family's language is Spanish (HD-1's Language at home, else the case's), else the English. When Spanish is needed and
+  SR-1 has none yet, a line on screen says which words to write. Nothing on it is filled in or sent back.
+- qa/sr1-home-test.js (11 checks).
+
 ### v23.48: Form IC-1: practice with waiting for a reward is its own item, and the food card says what the data show (review F19, F20)
 
 - **Two items where there was one (F19).** "Analysis of specific variables" (Form VI-1) now says plainly that nothing new is

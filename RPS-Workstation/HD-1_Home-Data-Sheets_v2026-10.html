@@ -979,6 +979,7 @@ td input,td select{max-width:100%}
       <label class="ck"><input type="checkbox" data-c="check"> Routine checklist (yes or no per step, per routine, per day)</label>
       <label class="ck"><input type="checkbox" data-c="abc"> ABC note sheet (tick boxes for before and after, one free line)</label>
       <label class="ck"><input type="checkbox" data-c="sleep"> Sleep and arousal log (bedtime, time asleep, night wakings, wake time)</label>
+      <label class="ck"><input type="checkbox" data-c="sched"> The school&rsquo;s plan, at home (one page from Form SR-1&rsquo;s schedule card, in Spanish too when that is the family&rsquo;s language)</label>
     </div>
     <!-- v22.53 (review F374) baseline sheets: no plan yet, so the sheets carry no plan lines -->
     <div class="ckrow" style="margin-top:6px"><label class="ck"><input type="checkbox" data-c="base"> <span><b>Baseline sheets</b> (no plan yet): in place of the plan lines, the sheets say &ldquo;Respond the way you usually do; keep everyone safe.&rdquo; Printing plan responses during a baseline changes what the baseline records.</span></label></div>
@@ -3251,6 +3252,30 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="hd1-v2349">
+/* v23.49 (SR-1 review I139) "The school's plan, at home": one page from Form SR-1's schedule card (f.schedule.home), wording
+   approved by the BCBA, October 2026. In Spanish first, then English, when the family's home language is Spanish (this form's
+   Language at home, else the case's); else in English. Nothing to fill in or send back. */
+(function(){let H=null,lang='';
+ const e=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const spanish=()=>/span|espa/i.test(String(S.meta.lang||'').trim()||lang);
+ function sheet(){const out=document.getElementById('sheetOut');if(!out||!S.chk.sched)return;
+  const hint=out.querySelector(':scope > p.hint');if(hint)hint.remove();
+  let body='';const es=spanish();
+  if(!H||!H.en)body='<p class="noprint hint">The case holds no schedule card yet: design the schedule on Form SR-1, and its family&rsquo;s version comes here.</p>';
+  else{const sp=es&&H.es?'<div class="hs-box" lang="es"><b>El plan de la escuela, en casa</b>'+e(H.es)+'</div>':'';
+   const miss=es&&!H.es?'<p class="noprint nbh-lang-flag">The family&rsquo;s language is Spanish, and Form SR-1 has no Spanish version yet: write '+e((H.need||[]).join(', ')||'the words')+' in Spanish on SR-1&rsquo;s Card page.</p>':'';
+   body=miss+sp+'<div class="hs-box" lang="en"><b>The school&rsquo;s plan, at home</b>'+e(H.en)+'</div>';}
+  out.insertAdjacentHTML('beforeend','<div class="hs" data-sheet="sched">'+hsHead(spanish()&&H&&H.es?'El plan de la escuela, en casa \u00b7 The School\u2019s Plan, at Home':'The School\u2019s Plan, at Home',S.meta.cg||'')+body+
+   '<p class="hs-note" style="font-size:12.5px;color:#444">From the schedule card, Form SR-1. Questions: ask '+e(S.meta.bcba||'the BCBA')+'.</p></div>');
+  try{if(typeof renderCost==='function')renderCost();}catch(x){}}
+ {const r0=renderSheets;renderSheets=function(){r0.apply(this,arguments);try{sheet();}catch(x){}};}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
+  try{H=(f&&f.schedule&&f.schedule.home)||null;const L=(f&&f.profile&&f.profile.language)||{};lang=String(L.home||'');renderSheets();}catch(x){}
+  return r;};
+ window.__hdSched=()=>({H,lang});
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

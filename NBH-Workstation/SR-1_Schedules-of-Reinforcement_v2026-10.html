@@ -1134,6 +1134,25 @@ td input,td select{max-width:100%}
         <div><label>on this many days with data in a row</label><input data-m="sd_backn" type="number" min="1" step="1"></div>
       </div>
     </div>
+    <!-- v23.49 (review I139) the family's version, for Form HD-1: wording approved by the BCBA, October 2026; on screen only -->
+    <div class="noprint" id="srHome" style="margin:10px 0 4px">
+      <h3 class="sub" style="margin:6px 0 2px">The family&rsquo;s version (for Form HD-1)</h3>
+      <p class="hint" style="margin:0 0 6px">One paragraph for home, written from the card: what the schedule is, what the student earns, and what the family can do the same way. Form HD-1 prints it on &ldquo;The school&rsquo;s plan, at home&rdquo;, in Spanish too when that is the family&rsquo;s language. Have a Spanish speaker read the Spanish before it goes home.</p>
+      <div id="srHomeOut"></div>
+      <div class="fieldgrid" id="srHomeEs">
+        <div data-es="beh"><label>In Spanish: the behavior</label><input data-m="es_beh" placeholder="e.g., pegar"></div>
+        <div data-es="earn"><label>In Spanish: the response that earns</label><input data-m="es_earn" placeholder="e.g., tocar la tarjeta"></div>
+        <div data-es="sr"><label>In Spanish: the reinforcer</label><input data-m="es_sr" placeholder="e.g., unos minutos para dibujar"></div>
+        <div data-es="alt"><label>In Spanish: the request</label><input data-m="es_alt" placeholder="e.g., la tarjeta de descanso"></div>
+        <div data-es="sig"><label>In Spanish: the waiting signal</label><input data-m="es_sig" placeholder="e.g., la tarjeta roja"></div>
+        <div data-es="tok"><label>In Spanish: the token</label><input data-m="es_tok" placeholder="e.g., estrella"></div>
+        <div data-es="backs"><label>In Spanish: the back-ups</label><input data-m="es_backs" placeholder="e.g., tiempo en la tableta o un juego"></div>
+      </div>
+      <div class="fieldgrid">
+        <div><label>Your own words, in English (blank: the draft)</label><textarea data-m="home_en" rows="3"></textarea></div>
+        <div><label>Your own words, in Spanish (blank: the draft)</label><textarea data-m="home_es" rows="3"></textarea></div>
+      </div>
+    </div>
     <div id="cardOut"></div>
   </section>
 
@@ -3275,6 +3294,74 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
    const up=R(m.sd_upop,m.sd_upv,m.sd_upn,'le'),back=R(m.sd_backop,m.sd_backv,m.sd_backn,'ge');
    if(up||back){const d={};if(T(m.sd_row))d.row=T(m.sd_row);if(T(m.sd_step))d.step=T(m.sd_step);if(/^\d{4}-\d\d-\d\d$/.test(T(m.sd_since)))d.since=T(m.sd_since);if(up)d.up=up;if(back)d.back=back;sc.decide=d;}}catch(e){}
   return r;};})();
+</script>
+<script id="sr1-v2349">
+/* v23.49 (review I139) the family's version of the card, wording approved by the BCBA, October 2026: a paragraph per schedule,
+   filled from the card, in English and (with the card's words written in Spanish) in Spanish; the BCBA's own words in place of
+   either when written. Out: schedule.home {en, es, need: the Spanish words still to write}. */
+(function(){const T=v=>String(v==null?'':v).replace(/<[^>]+>/g,' ').replace(/&[a-z]+;/g,' ').replace(/\s+/g,' ').trim();
+ const lc=t=>t&&t.length>1&&t[1]===t[1].toLowerCase()?t[0].toLowerCase()+t.slice(1):t;
+ const clean=t=>T(t).replace(/\s*\((?:[^()]*\bForms?\b[^()]*)\)/g,'').trim();
+ function first(){let c=T(S.meta.client).replace(/^SIMULATED\s*[\u2013-]\s*/i,'');const m=/^([^,]+),\s*(.+)$/.exec(c);c=(m?m[2]:c).split(/\s+/)[0]||'';return c;}
+ function home(){const m=S.meta,o=design();if(!o)return null;let id=o.id;if(id==='vi'&&(m.vi_kind||'vi')==='vt')id='vt';
+  if(!['dro','drl','ncr','token','thin','chain','lh','lag','vi','vt'].includes(id))return null;
+  const C=first(),Ce=C||'your child',Cs=C||'su hijo o hija';
+  const B=lc(clean(nm(m.beh,m.behs,'')))||'the behavior',E=lc(clean(nm(m.earn,m.earns,'')||nm(m.alt,m.alts,'')))||'the response that earns',
+    R=lc(clean(nm(m.sr,m.srs,'')))||'the reward',A=lc(clean(nm(m.alt,m.alts,'')))||'the request';
+  const es={beh:T(m.es_beh),earn:T(m.es_earn),sr:T(m.es_sr),alt:T(m.es_alt),sig:T(m.es_sig),tok:T(m.es_tok),backs:T(m.es_backs)};
+  const need=new Set(),use=new Set(),X=k=>{use.add(k);if(!es[k])need.add(k);return es[k]||'['+k+']';};
+  const k=Math.max(1,Math.round(+T(m.sd_step)||1)),row=o.steps&&o.steps.length?(o.steps[Math.min(k,o.steps.length)-1]||o.steps[0]):null;
+  const cell=i=>row?T(row[i]).replace(/\s*\(terminal\)\s*/,''):'';
+  let en='',sp='';
+  if(id==='dro'){const t=cell(1);
+   en='At school, '+Ce+' earns '+R+' for stretches of time without '+B+'. Right now a stretch is '+t+', and it grows as '+Ce+' succeeds. At home you can do the same: notice the times without '+B+', praise them, and give something '+Ce+' likes. If '+B+' happens, stay calm, say little, and start the stretch again. Nothing '+Ce+' has already earned is taken away.';
+   sp='En la escuela, '+Cs+' gana '+X('sr')+' por ratos sin '+X('beh')+'. Ahora cada rato es de '+t+', y se alarga a medida que '+Cs+' lo logra. En casa pueden hacer lo mismo: f\u00edjense en los ratos sin '+X('beh')+', felic\u00edtenle y denle algo que le guste. Si ocurre '+X('beh')+', mantengan la calma, hablen poco y empiecen el rato de nuevo. No se le quita nada que '+Cs+' ya haya ganado.';}
+  if(id==='drl'){const lim=cell(1);let a=/^at most (\d+) in the (\d+)-minute session$/.exec(lim),b=/^at most (\d+) per (\d+)-minute interval$/.exec(lim),c=/^at least (.+) since the last response$/.exec(lim);
+   const pe=a?'the '+a[2]+'-minute session':b?'each '+b[2]+'-minute stretch':'',ps=a?'la sesi\u00f3n de '+a[2]+' minutos':b?'cada rato de '+b[2]+' minutos':'',n=a?a[1]:b?b[1]:'';
+   const ce=c?Ce+' earns '+R+' when it comes at least '+c[1]+' after the last time.':Ce+' earns '+R+' when it happens no more than '+n+' times in '+pe+'.';
+   const cs=c?Cs+' gana '+X('sr')+' cuando ocurre por lo menos '+c[1]+' despu\u00e9s de la \u00faltima vez.':Cs+' gana '+X('sr')+' cuando ocurre no m\u00e1s de '+n+' veces en '+ps+'.';
+   en='At school, '+Ce+' is learning to do '+B+' less often, not to stop it altogether. '+ce+' At home you can do the same: tell '+Ce+' the limit ahead of time, help '+Ce+' keep count, and praise staying within it.';
+   sp='En la escuela, '+Cs+' est\u00e1 aprendiendo a hacer '+X('beh')+' con menos frecuencia, no a dejarlo del todo. '+cs+' En casa pueden hacer lo mismo: d\u00edganle a '+Cs+' el l\u00edmite antes de empezar, ay\u00fadenle a llevar la cuenta y felic\u00edtenle cuando se mantenga dentro del l\u00edmite.';}
+  if(id==='ncr'||id==='vt'){const t=id==='vt'?Math.round(+T(m.vi_mean)||0)+' s':cell(1);
+   en='At school, '+Ce+' gets '+R+' on a regular schedule, about every '+t+', whatever '+Ce+' is doing, so '+Ce+' does not need '+B+' to get it. Over time the wait between grows. At home you can do the same: during the times '+B+' usually happens, give '+R+' often and freely, before '+B+' starts.';
+   sp='En la escuela, '+Cs+' recibe '+X('sr')+' con regularidad, m\u00e1s o menos cada '+t+', sin importar lo que est\u00e9 haciendo, para que no necesite '+X('beh')+' para conseguirlo. Con el tiempo, la espera entre una vez y otra se alarga. En casa pueden hacer lo mismo: en los momentos en que suele ocurrir '+X('beh')+', denle '+X('sr')+' a menudo y sin condiciones, antes de que empiece.';}
+  if(id==='token'){const K=lc(T(m.tk_what))||'token',p=Math.round(+String(m.tk_prod||'').replace(/[^\d.]/g,'')||1),x=Math.round(+T(m.tk_exch)||10);
+   const bk=(m.tk_backs||'').split('\n').map(l=>{const q=l.split(',');return q.length>=2?T(q.slice(0,-1).join(',')):T(l);}).filter(Boolean).slice(0,3).map(lc);
+   const be=bk.length?bk.join(' or '):'a reward';
+   en='At school, '+Ce+' earns a '+K+' for '+E+(p>1?' ('+p+' times earn one)':'')+'. When '+Ce+' has '+x+', '+Ce+' trades them for '+be+', which '+Ce+' chose. At home you can do the same: give a token or a check mark right away for '+E+', and let '+Ce+' trade them for something '+Ce+' chose. A token already earned is never taken away.';
+   sp='En la escuela, '+Cs+' gana una ficha ('+X('tok')+') por '+X('earn')+(p>1?' (cada '+p+' veces, una ficha)':'')+'. Cuando junta '+x+', las cambia por '+X('backs')+', que '+Cs+' eligi\u00f3. En casa pueden hacer lo mismo: denle una ficha o una marca enseguida por '+X('earn')+', y dejen que las cambie por algo que haya elegido. Nunca se le quita una ficha que ya gan\u00f3.';}
+  if(id==='thin'){const G=lc(T(m.th_sminus))||'the waiting signal';
+   en='At school, '+Ce+' is learning to use '+A+' to ask for '+R+', instead of '+B+'. At first every request was answered right away. Now some times are waiting times, shown by '+G+': during them '+Ce+' practices waiting, and asking works again as soon as the signal changes. At home: answer '+Ce+'\u2019s request every time it is made the way '+Ce+' was taught, and do not give '+R+' after '+B+'.';
+   sp='En la escuela, '+Cs+' est\u00e1 aprendiendo a usar '+X('alt')+' para pedir '+X('sr')+', en lugar de '+X('beh')+'. Al principio, cada petici\u00f3n se atend\u00eda enseguida. Ahora hay ratos de espera, que se marcan con '+X('sig')+': durante esos ratos '+Cs+' practica esperar, y pedir vuelve a funcionar en cuanto cambia la se\u00f1al. En casa: atiendan la petici\u00f3n de '+Cs+' cada vez que la haga como se le ense\u00f1\u00f3, y no le den '+X('sr')+' despu\u00e9s de '+X('beh')+'.';}
+  if(id==='chain'){
+   en='At school, '+Ce+' does a small amount of work, then gets '+R+'. The amount of work grows a little at a time, as '+Ce+' is ready. No one holds '+Ce+' to the work. At home you can do the same: start with a small, easy part of the task, then give '+R+', and add a little more only when that part goes well.';
+   sp='En la escuela, '+Cs+' hace una peque\u00f1a parte del trabajo y luego recibe '+X('sr')+'. La cantidad de trabajo aumenta poco a poco, cuando '+Cs+' est\u00e1 listo. Nadie sujeta a '+Cs+' para que siga trabajando. En casa pueden hacer lo mismo: empiecen con una parte peque\u00f1a y f\u00e1cil de la tarea, luego denle '+X('sr')+', y a\u00f1adan un poco m\u00e1s solo cuando esa parte salga bien.';}
+  if(id==='lh'){const h=Math.round(+T(m.lh_hold)||10)+' seconds',hs=Math.round(+T(m.lh_hold)||10)+' segundos';
+   en='At school, when it is time for '+E+', '+Ce+' has '+h+' to start; starting within that time earns '+R+'. At home you can do the same: give one clear reminder, wait the same short time, and praise and reward starting on time.';
+   sp='En la escuela, cuando llega el momento de '+X('earn')+', '+Cs+' tiene '+hs+' para empezar; si empieza en ese tiempo, gana '+X('sr')+'. En casa pueden hacer lo mismo: denle un aviso claro, esperen ese mismo rato y feliciten y premien que empiece a tiempo.';}
+  if(id==='lag'){
+   en='At school, '+Ce+' earns '+R+' for trying something different from the last few times, for example a new answer or a new way to play. At home you can do the same: praise '+Ce+' for trying something new, and let the same answer as last time pass without a reward.';
+   sp='En la escuela, '+Cs+' gana '+X('sr')+' cuando prueba algo distinto de las \u00faltimas veces, por ejemplo una respuesta nueva o una forma nueva de jugar. En casa pueden hacer lo mismo: feliciten a '+Cs+' cuando pruebe algo nuevo, y dejen pasar sin premio la misma respuesta de la vez anterior.';}
+  if(id==='vi'){
+   en='At school, '+Ce+' earns '+R+' for '+E+'. At first it came every time; now it comes every few times, so '+Ce+' keeps going without needing it each time. At home you can do the same: praise often, and give '+R+' now and then, not every time.';
+   sp='En la escuela, '+Cs+' gana '+X('sr')+' por '+X('earn')+'. Al principio lo recib\u00eda cada vez; ahora lo recibe cada pocas veces, para que siga sin necesitarlo cada vez. En casa pueden hacer lo mismo: feliciten a menudo y denle '+X('sr')+' de vez en cuando, no cada vez.';}
+  const ownEn=T(m.home_en),ownEs=T(m.home_es);
+  return {en:ownEn||en,es:ownEs||(need.size?'':sp),draftEs:sp,need:ownEs?[]:[...need],used:[...use]};}
+ window.srHome=home;
+ const LAB={beh:'the behavior',earn:'the response that earns',sr:'the reinforcer',alt:'the request',sig:'the waiting signal',tok:'the token',backs:'the back-ups'};
+ function paint(){const box=document.getElementById('srHomeOut');if(!box)return;let h=null;try{h=home();}catch(e){h=null;}
+  const es=document.getElementById('srHomeEs');
+  if(!h){box.innerHTML='<p class="hint">'+(design()?'This schedule has no home version (an assessment or a session sheet).':'Design a schedule first.')+'</p>';if(es)es.hidden=true;return;}
+  if(es){es.hidden=false;const want=new Set(h.used.concat(h.need));[...es.children].forEach(d=>{d.hidden=!want.has(d.dataset.es);});}
+  const e=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  box.innerHTML='<div class="readout" style="margin:0 0 6px"><b>English</b> '+e(h.en)+'</div>'+
+   '<div class="readout" style="margin:0 0 6px"><b>Espa\u00f1ol</b> '+(h.es?e(h.es):'<span class="hint">Write '+h.need.map(k=>LAB[k]).join(', ')+' in Spanish below; the Spanish version goes home once it is complete.</span>')+'</div>';}
+ window.srHomePaint=paint;
+ {const rc=renderCard;renderCard=function(){rc.apply(this,arguments);try{paint();}catch(e){}};}
+ const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const sc=r&&r.schedule;const h=sc?home():null;if(h){sc.home={en:h.en,es:h.es,need:h.need.map(k=>LAB[k])};}}catch(e){}
+  return r;};
+ try{paint();}catch(e){}})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
