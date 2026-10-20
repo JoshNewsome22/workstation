@@ -9905,6 +9905,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.60: An accessibility check in the release run (review I246)
+
+- **qa/a11y-release-test.js** runs axe-core's WCAG 2.1 A and AA rules on 53 pages: the workstation (empty, with a form
+  open, Help, Caseload), every form with its simulation loaded, and the pages families and staff answer on
+  (`respond.html`, `staff-data.html`). The release run fails on any critical or serious problem that
+  `qa/a11y-known.json` does not accept with a reason (it accepts none). The moderate and minor ones are counted in
+  `qa/out/a11y/summary.txt`. It also checks that every test the review's accessibility findings were fixed with is still
+  in the release list. It needs axe-core: `npm install` in `qa` (qa/package.json names it).
+- **The one problem it found**: Form QS-1's two previews of the handout scroll inside the page, and a keyboard could not
+  reach them to scroll (WCAG 2.1.1). Each is now a named region a Tab reaches.
+
 ### v23.59: One naming routine for every form (review I247, F486)
 
 - **The names a screen reader announces** for each control of a form (a field in a table by its row and column, a list
