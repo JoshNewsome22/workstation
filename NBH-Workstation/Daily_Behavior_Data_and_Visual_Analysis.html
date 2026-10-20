@@ -6276,7 +6276,7 @@ function gsSignIn(){return new Promise((res,rej)=>{const id=gsClientId();if(!id)
 function gsIdOf(v){v=String(v||"").trim();const m=/\/spreadsheets\/d\/([A-Za-z0-9_-]{20,})/.exec(v);return m?m[1]:(/^[A-Za-z0-9_-]{30,}$/.test(v)?v:"");}
 async function gsGet(path){const r=await fetch("https://sheets.googleapis.com/v4/spreadsheets/"+path,{headers:{Authorization:"Bearer "+gsTok}});
   if(r.status===401){gsTok=null;gsExp=0;try{sessionStorage.removeItem("nbh.google.tok");}catch(e){}throw new Error("signin");}
-  if(r.status===403)throw new Error("Google refused (403): this account cannot open the sheet, or the district has not allowed the workstation to read Google Sheets. What to ask the school's IT: HOSTING.md, Google sign-in.");
+  if(r.status===403)throw new Error("Google refused (403): this account cannot open the sheet, or the district has not allowed the workstation to read Google Sheets. What to ask the school's IT: the workstation's Help, Google, set up once (step 7).");
   if(r.status===404)throw new Error("Google could not find that sheet (404). Check the link, and that this account can open it.");
   if(!r.ok){let m="";try{const j=await r.json();m=(j&&j.error&&j.error.message)||"";}catch(e){}throw new Error(gsSaid(r.status,m));}return r.json();}
 /* v21.98b Google's own words, in plain words: an Excel or CSV file opened in Sheets, a tab smaller than the block asked for */
@@ -6546,7 +6546,7 @@ document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
 function gsDlg(){let d=document.getElementById("dlgGs");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog gs-dlg";d.id="dlgGs";d.setAttribute("aria-labelledby","gsT");
   d.innerHTML=`<h2 id="gsT">Link a Google Sheet</h2>
   <p class="hint">The sheet is read from Google straight into this record, on this device, read-only; nothing goes to any other website. The sheet wins for the days it holds; what was typed here for those days is kept aside and comes back when <b>Use the sheet’s data</b> is off.</p>
-  <div id="gsKeyRow"><label class="field"><span>Google sign-in key (OAuth client ID, set up once for this device; how to make one: HOSTING.md, Google sign-in)</span><input id="gsKey" placeholder="1234567890-abc.apps.googleusercontent.com" autocomplete="off" spellcheck="false"></label></div>
+  <div id="gsKeyRow"><label class="field"><span>Google sign-in key (OAuth client ID, set up once for this device; how to make one: the workstation’s Help, Google, set up once)</span><input id="gsKey" placeholder="1234567890-abc.apps.googleusercontent.com" autocomplete="off" spellcheck="false"></label></div>
   <label class="field"><span>The student’s sheet (its link from the address bar, or Share › Copy link)</span><input id="gsUrl" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off" spellcheck="false"></label>
   <div class="dd-actions" style="justify-content:flex-start"><button type="button" class="btn" id="gsFind">Sign in and find the tabs</button><span class="hint" id="gsMsg" role="status" style="margin:0 0 0 8px"></span></div>
   <div id="gsTabs"></div><div id="gsPrev"></div>
@@ -6560,7 +6560,7 @@ function gsOpen(){const d=gsDlg(),g=S.gs;gsDlgState=null;
   gsLoadLib().catch(e=>gsMsg(e.message,true));try{d.showModal();}catch(e){d.setAttribute("open","");}}
 async function gsFind(){const d=gsDlg(),key=d.querySelector("#gsKey").value.trim(),url=d.querySelector("#gsUrl").value.trim(),id=gsIdOf(url);
   if(key&&key!==gsClientId())gsSetClientId(key);
-  if(!gsClientId()){d.querySelector("#gsKeyRow").hidden=false;gsMsg("Give the Google sign-in key first (how to make one: HOSTING.md, Google sign-in).",true);return;}
+  if(!gsClientId()){d.querySelector("#gsKeyRow").hidden=false;gsMsg("Give the Google sign-in key first (how to make one: the workstation’s Help, Google, set up once).",true);return;}
   if(!id){gsMsg("That is not a Google Sheets link.",true);return;}
   try{if(!gsSigned()){gsMsg("Signing in to Google…");await gsSignIn();}
     gsMsg("Reading the sheet’s tabs…");const meta=await gsMetaOf(id),T=gsTabsOf(meta),tabs=T.map(t=>t.title),grid=gsGridOf(T);

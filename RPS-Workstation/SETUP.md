@@ -9903,6 +9903,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.56: Help covers the workstation as it is, and Google is set up from one place (review F513, F514, I263)
+
+- **Help, The staff directory, questionnaires and the rest** (F513: Help said nothing of them): the staff directory and @
+  names, questionnaires and Email it, Back up the caseload and Restore, Save and Open packet, walkthroughs, Diagnostics.
+- **Help, Google, set up once** (F514, I263): one checklist for the four Google features (Form DD-1's sheet, questionnaires
+  by Gmail, the caseload in Drive, a case shared with you): the project, the four APIs, the sign-in screen, what it may do
+  (the scopes), the sign-in key and the API key, and what the school's IT does when Google says "Access blocked". Two boxes
+  keep the keys on this device (a sign-in key that does not end in .apps.googleusercontent.com is refused). Before, the
+  set-up was spread over three release notes, and the app pointed to HOSTING.md, which it cannot open.
+- Form DD-1, the caseload and the questionnaires' send now point to Help, Google, set up once.
+- qa/w4-help-google-test.js (6 checks).
+
 ### v23.55: Zoom works, typing does not freeze, and Help counts 47 forms (review F488, F473, F517)
 
 - **Zoom (F488).** The workstation and the 47 forms no longer stop zoom in their own markup. On an iPad or iPhone only,

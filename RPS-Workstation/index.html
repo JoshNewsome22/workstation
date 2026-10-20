@@ -1081,6 +1081,7 @@ dialog tr:nth-child(even) td{background:#fafcfb}
 .td-list{list-style:none;margin:6px 0 12px;padding:0}.td-list li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:9px 0;border-top:1px solid var(--rule,#dfe6e4);line-height:1.45;text-align:left}.td-list li:first-child{border-top:0}.td-list .td-k{display:inline-block;min-width:0;padding:2px 9px;border-radius:999px;background:var(--mist,#eaf2f0);color:var(--slate,#254657);font-size:12px;letter-spacing:0;text-transform:none;font-weight:600;line-height:1.3}.td-list .td-k.hot,.td-list li.hot .td-k{background:#b03a2e;color:#fff}.td-list li>span:not(.td-k){flex:1 1 220px;min-width:0}.td-list li>button{margin-left:auto;flex:0 0 auto}.td-list button{margin-left:6px}.td-more button{margin:4px 6px 4px 0}
 .pc-list{margin:6px 0 10px 20px;padding:0}.pc-list li{margin:0 0 7px;line-height:1.4}.pc-list label{display:block;cursor:pointer}.pc-list input{margin-right:4px;transform:scale(1.2)}.pc-list span{display:block;color:var(--muted,#54676f);font-size:13px;margin-left:24px}.pc-open button{margin:2px 4px 2px 0}.pc-done{color:#2F6B37}
 #dlg .hp-lead{font-size:15px;color:var(--ink);margin:0 0 10px}
+#dlg .hp-keys{border:1px solid var(--line,#d5dde3);border-radius:8px;padding:6px 10px;margin:8px 0}   /* v23.56 */
 /* v23.52 Share for editing, and the changes from a colleague */
 #dlg .sh-row{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:8px 0}#dlg .sh-row label{flex:0 0 220px;font-weight:600}
 #dlg .sh-row input{flex:1 1 220px;min-height:40px;font:inherit;padding:6px 8px;border:1px solid var(--line,#c9d3da);border-radius:6px}
@@ -2568,7 +2569,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.55';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.56';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -4203,6 +4204,24 @@ $('#help').addEventListener('click',()=>{
    (EMBED?fold('The one-file edition',
      '<p>All 47 forms are inside this file. <b>Save case</b> writes the case as a file of its own, <i>CASE_Student_date.json</i> (the same file the website edition writes, a few hundred KB); <b>Open case</b> in this file opens it again. Keep that file with the student’s records.</p>'+
      '<p>For someone who does not have the workstation, <b>More</b>, <b>Save a case that opens on its own</b> writes <i>Student.case.html</i>: the whole workstation (about 21 MB) with the case in it, which opens when it is double-clicked. A <i>.case.html</i> saved before v22.22 opens as before, and Save case writes back into it.</p>'):'')+
+   fold('The staff directory, questionnaires and the rest',   /* v23.56 (review F513) */
+     '<p><b>Staff directory</b> (the top bar; also Go to): the school staff you send forms to, typed once for the whole caseload: name, role, the groups they belong to (<i>Member of</i>), email, phone, school and a note. <b>Add a person</b>, or <b>Paste a list</b> (rows copied from a spreadsheet, an email’s To line, or a group’s members page); <b>Save to a file</b> writes a CSV and <b>Open a file</b> reads one back. The forms offer it wherever a staff member is named, and in any other text box <b>@</b> and the first letters of a name or a role write the name in. With Google Drive on, the directory is kept there too, and each device’s changes are merged.</p>'+
+     '<p><b>Questionnaires</b> (Forms IA-1, IN-1, SV-1 and CF-1): each respondent gets a page of their own, a link; <b>Email it</b> sends it from your school Gmail (Google, set up once, below) or opens your Mail app. The answers come back into the form, through the reply box where it is set up. Only the student’s initials and the behavior asked about travel in the link.</p>'+
+     '<p><b>Back up the caseload</b> (Caseload) writes one file holding every student kept on this '+HERE+', locked with a passphrase if you choose one; <b>Restore</b> puts a backup back, keeping the newer copy of each student. <b>Save packet</b> and <b>Open packet</b> (More) carry the student’s details and photo to another device or another case; <b>Fill open forms</b> (Go to) puts them into the forms open now.</p>'+
+     '<p><b>Walkthroughs</b>: a form with a <b>Walkthrough</b> button shows, with narration and captions, how it is filled in. <b>Diagnostics</b> (More) shows the version, this '+HERE+'’s storage and what its browser supports: the place to look first when something does not work.</p>')+
+   fold('Google, set up once',   /* v23.56 (review F514, I263) one checklist, and the keys kept here */
+     '<p>Four parts of the workstation use Google with your school account: Form DD-1 reading the team’s Google Sheet, sending questionnaires from your school Gmail, keeping the caseload in your school Google Drive, and opening a case a colleague shared with you there. All four use one Google Cloud project and one sign-in key. Set up only what you will use; each part can be added later to the same project.</p>'+
+     '<ol class="hp-steps"><li><b>The project.</b> At console.cloud.google.com (with the school account if it may create projects), create one project, for example “FBA-BIP Workstation”.</li>'+
+     '<li><b>The APIs.</b> APIs &amp; Services, Library: turn on (Enable) each one you will use: <b>Google Sheets API</b> (DD-1’s sheet), <b>Gmail API</b> (questionnaires), <b>Google Drive API</b> (the caseload in Drive), <b>Google Picker API</b> (a case shared with you).</li>'+
+     '<li><b>The sign-in screen.</b> Google Auth Platform (formerly OAuth consent screen): an app name and a support email. Audience: <i>Internal</i> if the project belongs to the school’s Google organization; otherwise <i>External</i>, with your school address under Test users.</li>'+
+     '<li><b>What it may do.</b> Google Auth Platform, Data access, Add or remove scopes: <i>spreadsheets.readonly</i> (read the sheet you link; it cannot change it), <i>gmail.send</i> (send what you press Send for; it cannot read your mail), <i>userinfo.email</i> (your address, to say which account sends and syncs), <i>drive.file</i> (only the files the workstation makes, or that you pick for it).</li>'+
+     '<li><b>The sign-in key.</b> Clients, Create client, Web application; under Authorized JavaScript origins add the workstation’s web address (for example https://newsomebh.com). Copy the <b>Client ID</b>: it ends in .apps.googleusercontent.com and is not a secret. Keep it on each device, below.</li>'+
+     '<li><b>The API key</b>, only for a case shared with you: Credentials, Create credentials, API key; limit it to the Google Picker API and to the workstation’s web address. Keep it below on the devices that open shared cases.</li>'+
+     '<li><b>If Google says “Access blocked”</b> or that your administrator has not approved the app, the school’s IT can allow it: Admin console, Security, Access and data control, API controls, Manage third-party app access, Add app, OAuth App Name Or Client ID; paste the Client ID and set it to <i>Trusted</i> (or <i>Limited</i> to the services above).</li></ol>'+
+     '<p>Google may say it has not verified the app: it is your own; continue. Google renames these screens from time to time; the steps stay the same.</p>'+
+     '<div class="hp-keys"><div class="sh-row"><label for="hpGid">Sign-in key (Client ID) on this '+HERE+'</label><input id="hpGid" autocomplete="off" spellcheck="false" value="'+esc(clGid()||'')+'"></div>'+
+     '<div class="sh-row"><label for="hpApiKey">API key on this '+HERE+' (shared cases)</label><input id="hpApiKey" autocomplete="off" spellcheck="false" value="'+esc(kvGet('nbh.google.apikey')||'')+'"></div>'+
+     '<button type="button" class="primary" id="hpKeysSave">Keep them on this '+HERE+'</button></div>')+
    fold('Where the student\u2019s data goes',dataWhere())+
    '<div class="note">Each of the 47 forms also works on its own, opened directly from this folder, with the shared nbh-*.js files beside it: it saves, opens and prints as it does here. A single form file sent somewhere else, away from those files, opens without its letterhead, writing help and Autosave; for one file that carries everything, use the one-file edition. Nothing the workstation does changes the form files.</div>');
 });
@@ -6304,7 +6323,7 @@ async function clRestoreText(text){let d=null;try{d=JSON.parse(text);}catch(e){}
 $('#dlgBody').addEventListener('click',e=>{
   if(e.target.closest('#clRead')){
     if(EMBED){wsUI.alert('Reading the sheets works in the website edition (the workstation opened from its web address), where Google’s sign-in is allowed.');return;}
-    if(!clTok()){if(!clGid()){wsUI.alert('The Google sign-in key is not set on this '+HERE+' yet. Open a student’s Form DD-1, Google Sheet, and give the key there once (Setup: the Google Sheets link).');return;}
+    if(!clTok()){if(!clGid()){wsUI.alert('The Google sign-in key is not set on this '+HERE+' yet. Open a student’s Form DD-1, Google Sheet, and give the key there once, or keep it in Help, Google, set up once.');return;}
       clSignIn().then(()=>clRefreshAll()).catch(err=>{CLX.note=err.message==='nokey'?'The Google sign-in key is not set on this '+HERE+'.':err.message;caseloadOpen();});return;}
     clRefreshAll();return;}
   if(e.target.closest('#clBk')||e.target.closest('#tdBk')){clBackup();return;}
@@ -6681,7 +6700,7 @@ async function mailFor(ev,d){const src=ev.source,from=(src===window&&d.self)?Str
   const L=(Array.isArray(d.messages)?d.messages:[]).slice(0,60).filter(m=>m&&gmOk(m.to));
   if(!L.length){answer({unavailable:true,why:'No email address to send to.'});return;}
   if(EMBED){answer({unavailable:true,why:'The one-file edition cannot sign in to Google; use the website edition to send from your school account.'});return;}
-  if(!clGid()){answer({unavailable:true,why:'The Google sign-in key is not set on this '+HERE+' (Form DD-1, Google Sheet, gives it once).'});return;}
+  if(!clGid()){answer({unavailable:true,why:'The Google sign-in key is not set on this '+HERE+' (Help, Google, set up once, keeps it; or Form DD-1, Google Sheet).'});return;}
   if(GM.busy){answer({unavailable:true,why:'Another set of emails is being sent; try again in a moment.'});return;}
   clGsiLoad().catch(()=>{});
   const go=await new Promise(res=>{const dlg=$('#cfDlg');$('#cfTitle').textContent='Send '+L.length+' email'+(L.length===1?'':'s')+' from your school account?';
@@ -9902,6 +9921,14 @@ window.addEventListener('click',async e=>{const d=e.target.closest&&e.target.clo
   const r=await drvLocal(d.dataset.cldel);if(!r)return;
   if(!(await wsUI.confirm('Take '+clName(r)+' off this '+HERE+'?\nThe case stays in '+drvPerson(sh.owner||'the owner')+'’s Google Drive; ask them to stop sharing it when your part is done.',{ok:'Remove',danger:true})))return;
   try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}await shDel(sh.id);await drvShIn();caseloadOpen();},true);
+</script>
+<script id="nbh-v2356">
+/* v23.56 (review F514, I263) Help, Google, set up once: the two keys kept on this device */
+document.addEventListener('click',e=>{if(!(e.target.closest&&e.target.closest('#hpKeysSave')))return;
+  const id=String(($('#hpGid')||{}).value||'').trim(),key=String(($('#hpApiKey')||{}).value||'').trim();
+  if(id&&!/\.apps\.googleusercontent\.com$/.test(id)){wsUI.toast('A sign-in key (Client ID) ends in .apps.googleusercontent.com.',{kind:'warn'});return;}
+  if(id)kvSet('nbh.google.client',id);if(key)kvSet('nbh.google.apikey',key);
+  wsUI.toast(id||key?'Kept on this '+HERE+'.':'Nothing to keep: paste a key first.',{kind:id||key?'ok':'warn'});});
 </script>
 </body>
 </html>
