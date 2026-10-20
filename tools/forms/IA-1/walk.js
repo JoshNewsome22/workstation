@@ -269,9 +269,9 @@ function compose(D,ex){
     agrCells.forEach((td,i)=>glow(wrel(td),ts+.3+i*.03,1.6,1));return Math.max(K.d,ts+2.2-K.t);};
   const naCell=ansCells.find(a=>(a.sp&&a.sp.textContent||'').trim()==='NA');
   SC.na=K=>{const r=naCell?wrel(naCell.td):null;const v=r?uni([r,wrel(rows[Math.max(0,naCell.i-3)]),wrel(rows[Math.min(15,naCell.i+3)])]):R.grid;camTo(K.t+.1,K.t+1,v);
-    if(r){glow(r,K.t+1,K.t+K.d-K.t-1,3);note(r,'NA: not seen',K.t+1.3,Math.max(K.t+1.4,K.at('left out',.5)-.2));
+    if(r){glow(r,K.t+1,K.t+K.d-K.t-1,3);note(r,'NA: not sure, or not seen',K.t+1.3,Math.max(K.t+1.4,K.at('left out',.5)-.2));
       const ag=agrCells[naCell.i]?wrel(agrCells[naCell.i]):null;const tl=Math.max(K.t+3,K.at('left out',.5)-.1);if(ag){glow(ag,tl,K.t+K.d-tl,3);note(ag,'Left out of the pair’s agreement',tl+.2,K.t+K.d-.2,'below');}}
-    else{const c=card('iaw-card','<h3>NA</h3><p>The informant has not seen that situation and cannot say. An item that either informant answered NA is left out of that pair’s agreement.</p>',{x:300,y:150,w:680},K.t+.6,K.t+K.d);}
+    else{const c=card('iaw-card','<h3>NA</h3><p>The informant was not sure, or has not seen that situation. An item that either informant answered NA is left out of that pair’s agreement.</p>',{x:300,y:150,w:680},K.t+.6,K.t+K.d);}
     return K.d;};
   /* scoring */
   SC.totals=K=>{camTo(K.t+.1,K.t+1.1,pad(R.tot,10));
@@ -360,8 +360,8 @@ function compose(D,ex){
     penAway(PS,t+.1);note(R.grid?{x:R.grid.x-74,y:R.grid.y+70,w:0,h:0}:null,'Your answers',Math.max(K.t+1.2,K.at('choose yes',.15)-.2),K.t+3.5);
     const ts=Math.max(t+.2,K.at('actually seen',.75)-.2);camTo(ts-.4,ts+.5,uni([R.head,catRows(0),catRows(1)]));note(R.grid?{x:R.grid.x+R.grid.w/2,y:R.grid.y+40,w:0,h:0}:null,'What you have seen, not a guess',ts,K.t+K.d+.2);return Math.max(K.d,t+.6-K.t);};
   SC.i_na=K=>{const r=naCell&&naCell.r===0?wrel(naCell.td):null;const v=r?uni([r,wrel(rows[Math.max(0,naCell.i-3)]),wrel(rows[Math.min(15,naCell.i+3)])]):R.grid;camTo(K.t+.1,K.t+1,v);
-    if(r){glow(r,K.t+1,K.t+K.d-K.t-1,3);note(r,'NA: never in that situation',Math.max(K.t+1.3,K.at('N A',.3)-.3),K.t+K.d-.2);}
-    else{veil(K.t+.5,K.t+K.d,.4);card('iaw-card','<h3>NA: not applicable</h3><p>You have never been in that situation with the student. It is a better answer than a guess, and it is left out of the scoring.</p>',{x:300,y:150,w:680},K.t+.6,K.t+K.d);}return K.d;};
+    if(r){glow(r,K.t+1,K.t+K.d-K.t-1,3);note(r,'NA: not sure of the answer',Math.max(K.t+1.3,K.at('N A',.3)-.3),K.t+K.d-.2);}
+    else{veil(K.t+.5,K.t+K.d,.4);card('iaw-card','<h3>NA: not applicable</h3><p>You are not sure of the answer. It is a better answer than a guess, and it is left out of the scoring.</p>',{x:300,y:150,w:680},K.t+.6,K.t+K.d);}return K.d;};
   SC.i_own=K=>{const v=uni([R.infT].concat(R.chk));camTo(K.t+.1,K.t+1.2,v||R.setupBar);if(R.chk[0])glow(R.chk[0],Math.max(K.t+1.2,K.at('on your own',.05)-.1),4,4);
     const ts=Math.max(K.t+7,K.at('open-ended section',.5)-.4);if(R.s1Rows.length){camTo(ts,ts+1.2,pad(uni(R.s1Rows),10));[0,1,2].forEach(i=>glow(R.s1Rows[i],Math.max(ts+1.2,K.at('when and where',.65)-.2),2.4,2));[6,7].forEach(i=>glow(R.s1Rows[i],Math.max(ts+3,K.at('before and after',.9)-.3),K.t+K.d-ts-3,2));}
     return K.d;};

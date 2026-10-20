@@ -9903,6 +9903,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.42: Form IA-1's FAST walkthrough says NA in the BCBA's approved words
+
+- **The two NA lines are voiced again, with the same voice, in the words the BCBA approved (October 2026).** On the
+  worksheet: "N A means the informant was not sure, or has not seen that situation. An item that either informant
+  answered N A is left out of that pair's agreement, as the original analysis did." For the informants: "If you are not
+  sure of an answer, choose N A, not applicable, as the FAST asks. That is a better answer than a guess, and it is left
+  out of the scoring." Both are marked approved in tools/forms/IA-1/walk-script.json. The two clips come out at -16.1
+  LUFS, as the rest; every other line keeps its recording.
+- **The captions say the same:** the notes on the worksheet ("NA: not sure, or not seen"; for informants, "NA: not sure
+  of the answer"), the two NA cards, and the informant walkthrough's description ("NA when they are not sure of an
+  answer").
+- **Form TV-1's "Script: the FAST"** reads the worksheet's NA line in the same words.
+- qa/ia1-na-words-test.js (8 checks).
+
 ### v23.41: the BCBA's answers: the sound meter's wording, rate estimates, VI-1's measure, RM-1's references, CR-1's Florida reporting rule and DA-1's stop rule
 
 - **Form ABC-1's sound level meter: wording approved by the BCBA.** The note on the Record tab and the Analysis card's
