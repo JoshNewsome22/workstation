@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.71: What's due on the start screen, by when
+
+- The start screen's list of what is due is laid out by when: **Needs you now** (a restraint notice, an injury),
+  **Overdue**, **This week**, **Coming up**, and **To look at** (no data lately, a decision to make), each with its count,
+  and the counts at the top.
+- **One row a student and a date**: the date and the days to it (or past it), the student, what is due, and a button for
+  each form that holds it. A deadline held by more than one form is one row naming them all: the reevaluation in Forms
+  RR-1 and DM-1 and the review in DM-1 on the same day were four rows; they are one.
+- **The days are counted from today.** The list is made from each student's summary at their last save, and its words
+  were too: a summary saved on the 13th said "in 5 days" for the 18th, and still said it on the 20th. The date is read
+  from the summary and the days counted afresh. Each student's card (on the start screen and in Caseload) counts its
+  first line's days from today too.
+- A date more than a year past is set aside under its own line (most likely done, or no longer applying), not at the
+  top of Overdue.
+- The first rows of each group show; **Show all** opens the rest in place (it was "and 91 more in Caseload").
+- On a phone each row stacks: the date and the student, then what is due, then the buttons.
+- qa/due-board-test.js (12 checks); v2185-test reads the new rows.
+
 ### v23.70: Form ABC-1's sound in detail: pitch bands and loud moments
 
 - With the **Sound level meter** on, Form ABC-1 also splits the sound into eight pitch bands (octaves, from 63 Hz and below

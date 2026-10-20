@@ -693,7 +693,23 @@ body.bar-folded #barSum{display:flex}
 }
 /* v21.85 the start screen's caseload, Today's count, the IEP packet's text */
 #todayBtn{position:relative}.tbadge{position:absolute;top:-5px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:#5b6b75;color:#fff;font:700 11px/18px Inter,system-ui,sans-serif;padding:0 5px;text-align:center;pointer-events:none}.tbadge.red{background:#c0392b}.tbadge[hidden]{display:none}
-#blankCl h2{margin-top:0}.bl-st{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.bl-stu{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:150px;min-height:52px;padding:8px 12px;border:1px solid var(--rule,#cfd8dc);border-radius:10px;background:#fff;cursor:pointer;font:inherit;text-align:left}.bl-stu span{font-size:12.5px;color:var(--muted,#5b6b75)}.bl-hr{border:0;border-top:1px solid var(--rule,#cfd8dc);margin:14px 0}
+#blankCl h2{margin-top:0}
+/* v23.71 What's due, by when: a row a student and a date (its date and days, the student, what is due, the forms) */
+.due-board{margin:4px 0 16px}.due-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:0 0 2px}
+.due-head h3{margin:0;font-size:19px}.due-sum{font-size:13.5px;color:var(--ink-soft,#46606b)}.due-sum b{color:var(--ink,#1c2733)}.due-sum .now b,.due-sum .od b{color:#b03a2e}
+.due-grp{display:flex;align-items:center;gap:8px;margin:14px 0 0;padding-bottom:4px;font:700 11.5px var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:var(--slate,#46606b);border-bottom:1px solid var(--rule,#dfe6e4)}
+.due-grp span{font-weight:600;letter-spacing:0;color:var(--ink-soft,#46606b)}.due-grp.now,.due-grp.od{color:#b03a2e}
+.due-rows{list-style:none;margin:0;padding:0}
+.due-row{display:grid;grid-template-columns:8.2em minmax(8em,13em) minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:9px 4px 9px 12px;border-bottom:1px solid var(--rule,#dfe6e4);text-align:left}
+.due-row.now,.due-row.od{box-shadow:inset 3px 0 0 #b03a2e}
+.due-date b{display:block;font-variant-numeric:tabular-nums}.due-date span{font-size:12.5px;color:var(--ink-soft,#46606b)}
+.due-row.od .due-date span{color:#b03a2e;font-weight:600}.due-row.wk .due-date span{color:#8a5a00;font-weight:600}
+.due-date .td-k{display:inline-block;padding:1px 6px;border-radius:4px;background:var(--mist,#e8eeec);color:var(--slate,#46606b);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.due-row.now .due-date .td-k{background:#b03a2e;color:#fff}
+.due-who{font-weight:700;overflow-wrap:anywhere}.due-what{line-height:1.4}.due-f{font-size:12px;color:var(--ink-soft,#46606b);white-space:nowrap}.due-sep{color:var(--ink-faint,#8a99ad)}
+.due-act{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.due-act button{white-space:nowrap}
+.due-long{margin:10px 0 0;font-size:13px;color:var(--ink-soft,#46606b)}.due-long summary{cursor:pointer}.due-more{margin:10px 0 0}.due-note{margin:6px 0 0}
+@media (max-width:760px){.due-row{grid-template-columns:auto minmax(0,1fr)}.due-what,.due-act{grid-column:1 / -1}.due-act{justify-content:flex-start}}.bl-st{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.bl-stu{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:150px;min-height:52px;padding:8px 12px;border:1px solid var(--rule,#cfd8dc);border-radius:10px;background:#fff;cursor:pointer;font:inherit;text-align:left}.bl-stu span{font-size:12.5px;color:var(--muted,#5b6b75)}.bl-hr{border:0;border-top:1px solid var(--rule,#cfd8dc);margin:14px 0}
 .iep-t{white-space:pre-line;background:#f6f9fa;border:1px solid var(--rule,#dde5e8);border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.5}.td-more button.danger{color:#a8321e;border-color:#e2b5ab}
 /* v21.83 room for the form on the iPad: the buttons used now and then go into More */
 .more-btn{display:none}
@@ -2596,7 +2612,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.70';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.71';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -6680,16 +6696,74 @@ $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clExpire'){try{loc
 {const to5=todayOpen;todayOpen=async function(){await to5.apply(this,arguments);try{const b=$('#dlgBody'),p=b&&b.querySelector('.td-more');if(p&&!b.querySelector('#tdIep'))p.insertAdjacentHTML('beforeend',' <button type="button" id="tdIep">IEP meeting packet<\/button> <button type="button" id="tdChanges">What changed since the last save<\/button>');
   const unf=(await clList()||[]).filter(r=>r.unfiled&&r.key!==clKey(packet()));if(unf.length&&b&&!b.querySelector('#tdFiles')){const li='<li id="tdFiles"><span class="td-k">Files<\/span> <span>'+unf.length+' student'+(unf.length===1?'':'s')+' kept on this '+HERE+' but not saved to a file: '+esc(unf.map(clName).join(', '))+'<\/span> <button type="button" id="tdCaseload">Caseload<\/button><\/li>';
     const ul=b.querySelector('.td-list');if(ul)ul.insertAdjacentHTML('afterbegin',li);else{const h=b.querySelector('.hp-lead');(h||b).insertAdjacentHTML(h?'afterend':'afterbegin','<ul class="td-list">'+li+'<\/ul>');}}}catch(e){}};}
+/* v23.71 (the BCBA's iPad) What's due, by when: what needs you now, what is overdue, this week, coming up, and what has
+   no date. One row a student and a date, each deadline once with every form that holds it (a reevaluation in Forms RR-1
+   and DM-1 is one row, not three); the days counted from today, not from the student's last save (a summary saved on the
+   13th said "in 5 days" for the 18th long after the 18th had passed); a date more than a year past set aside (most
+   likely done, or no longer applying). From each student's summary at their last save. */
+const DUE_RX=/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s*\((?:in (\d+) days?|(today)|(tomorrow)|(\d+) days? overdue)\)/;
+function dueDay(base,n){const d=new Date(base);d.setDate(d.getDate()+n);return d;}
+/* the date of an item, from its text: the month and day, its year the one nearest what the text said at the save */
+function dueWhen(t,saved){const m=DUE_RX.exec(t);if(!m)return null;
+  const s=new Date(String(saved||'')),base=isNaN(s)?new Date():s;base.setHours(0,0,0,0);
+  const off=m[4]!=null?+m[4]:m[5]?0:m[6]?1:-(+m[7]),ref=dueDay(base,off);let d;
+  if(m[3]){let y=+m[3];if(y<100)y+=2000;d=new Date(y,+m[1]-1,+m[2]);}
+  else[-1,0,1].forEach(k=>{const c=new Date(ref.getFullYear()+k,+m[1]-1,+m[2]);if(!d||Math.abs(c-ref)<Math.abs(d-ref))d=c;});
+  return {d,at:m.index,len:m[0].length};}
+/* what the item is, without its date: "DM-1 Reevaluation due 10/18 (in 5 days)" is "Reevaluation"; a date inside the
+   sentence stays, its count of days goes */
+function dueWhat(t,w){const rest=t.slice(w.at+w.len);let s;
+  if(/^[\s).,;:]*$/.test(rest))s=t.slice(0,w.at).replace(/\s+(?:is\s+)?(?:due|on|by)\s*$/i,'').replace(/[\s,:;(]+$/,'');
+  else s=t.slice(0,w.at)+t.slice(w.at,w.at+w.len).replace(/\s*\([^)]*\)$/,'')+rest;
+  s=s.replace(/^\s*[A-Z]{2,3}-\d+\s+/,'').replace(/\s*\(Form [A-Z]{2,3}-\d+\)/g,'').replace(/^the\s+/i,'').trim();   /* the form is named beside it */return s?s[0].toUpperCase()+s.slice(1):t;}
+const dueKey=s=>String(s).toLowerCase().replace(/\b(?:form\s+)?[a-z]{2,3}-\d+\b/g,' ').replace(/\b(?:the|is|due|a|an|of|on|by|for)\b/g,' ').replace(/[^a-z0-9]+/g,' ').trim();
+const dueRel=n=>n<0?(-n)+' day'+(n===-1?'':'s')+' overdue':n===0?'today':n===1?'tomorrow':'in '+n+' days';
+function dueDateTxt(d){const y=d.getFullYear()!==new Date().getFullYear()?'/'+String(d.getFullYear()).slice(2):'';
+  return d.toLocaleDateString('en-US',{weekday:'short'})+' '+(d.getMonth()+1)+'/'+d.getDate()+y;}
+/* an item's words with its days counted from today (a student's card said "in 5 days" under a board saying 2 days overdue) */
+function dueNow(t,saved){t=String(t||'');const w=dueWhen(t,saved);if(!w)return t;const today=new Date();today.setHours(0,0,0,0);
+  const n=Math.round((w.d-today)/864e5),m=t.slice(w.at,w.at+w.len).replace(/\((?:in \d+ days?|today|tomorrow|\d+ days? overdue)\)$/,'('+dueRel(n)+')');
+  return t.slice(0,w.at)+m+t.slice(w.at+w.len);}
+const DUE_LIM={now:6,od:8,wk:8,up:5,look:5};
+const dueAllOn=()=>{try{return sessionStorage.getItem('nbh.due.all')==='1';}catch(e){return false;}};
+/* the students' items in their groups (each student's card on a phone uses it for one student) */
+function dueGroups(L){const today=new Date();today.setHours(0,0,0,0);const rows={},flat=[];
+  L.forEach(r=>{((r.sum&&r.sum.items)||[]).forEach(i=>{const t=String(i.t||''),w=dueWhen(t,r.saved),f0=/^\s*([A-Z]{2,3}-\d+)\s/.exec(t),forms=[i.open,f0&&f0[1]].filter(Boolean);
+    if(!w){flat.push({who:clName(r),key:r.key,k:i.k,t,forms});return;}
+    const iso=tdISO(w.d),id=r.key+'|'+iso,row=rows[id]||(rows[id]={who:clName(r),key:r.key,d:w.d,n:Math.round((w.d-today)/864e5),ev:{},forms:[],hot:false});
+    const what=dueWhat(t,w),k=dueKey(what)||what,e=row.ev[k]||(row.ev[k]={what,forms:[],due:i.k==='Due'});
+    if(i.k==='Due'&&!e.due){e.what=what;e.due=true;}   /* the form's own words are the shorter */
+    forms.forEach(f=>{if(!e.forms.includes(f))e.forms.push(f);if(!row.forms.includes(f))row.forms.push(f);});
+    if(TD_HOT.test(i.k))row.hot=true;});});
+  const R=Object.values(rows),by=(a,b)=>a.d-b.d||a.who.localeCompare(b.who);
+  const G={now:flat.filter(x=>TD_HOT.test(x.k)),od:R.filter(x=>x.n<0&&x.n>=-365).sort(by),wk:R.filter(x=>x.n>=0&&x.n<=7).sort(by),
+    up:R.filter(x=>x.n>7).sort(by),look:flat.filter(x=>!TD_HOT.test(x.k)).sort((a,b)=>clRank(a.k)-clRank(b.k)),long:R.filter(x=>x.n<-365).sort(by)};
+  return G;}
+function dueBoard(L){const G=dueGroups(L);
+  const total=G.now.length+G.od.length+G.wk.length+G.up.length+G.look.length;
+  if(!total&&!G.long.length)return '<p>Nothing needs you in the students kept here, as at their last save.<\/p>';
+  const all=dueAllOn(),btns=(key,forms)=>(forms.length?forms.slice(0,3):['']).map(f=>'<button type="button" data-clopen="'+esc(key)+'" data-clform="'+esc(f)+'">Open'+(f?' '+esc(f):'')+'<\/button>').join('');
+  const dated=(x,cls)=>'<li class="due-row '+cls+'"><div class="due-date"><b>'+esc(dueDateTxt(x.d))+'<\/b><span>'+esc(dueRel(x.n))+'<\/span><\/div><div class="due-who">'+esc(x.who)+'<\/div>'+
+    '<div class="due-what">'+Object.values(x.ev).map(e=>esc(e.what)+(e.forms.length?' <span class="due-f">'+esc(e.forms.join(', '))+'<\/span>':'')).join('<span class="due-sep"> · <\/span>')+'<\/div><div class="due-act">'+btns(x.key,x.forms)+'<\/div><\/li>';
+  const plain=(x,cls)=>'<li class="due-row '+cls+'"><div class="due-date"><span class="td-k">'+esc(x.k)+'<\/span><\/div><div class="due-who">'+esc(x.who)+'<\/div><div class="due-what">'+esc(x.t)+'<\/div><div class="due-act">'+btns(x.key,x.forms)+'<\/div><\/li>';
+  let hid=0;const sec=(g,title,cls,fn)=>{const list=G[g];if(!list.length)return '';const show=all?list:list.slice(0,DUE_LIM[g]);hid+=list.length-show.length;
+    return '<h4 class="due-grp '+cls+'">'+title+' <span>'+list.length+'<\/span><\/h4><ul class="due-rows">'+show.map(x=>fn(x,cls)).join('')+'<\/ul>';};
+  const body=sec('now','Needs you now','now',plain)+sec('od','Overdue','od',dated)+sec('wk','This week','wk',dated)+sec('up','Coming up','up',dated)+sec('look','To look at','look',plain);
+  const sum=[[G.now.length,'need you now','now'],[G.od.length,'overdue','od'],[G.wk.length,'this week',''],[G.up.length,'coming up',''],[G.look.length,'to look at','']].filter(x=>x[0]).map(x=>'<span class="'+x[2]+'"><b>'+x[0]+'<\/b> '+x[1]+'<\/span>').join('<span class="due-sep"> · <\/span>');
+  const long=G.long.length?'<details class="due-long"><summary>'+G.long.length+' date'+(G.long.length===1?'':'s')+' over a year past, set aside: most likely done, or no longer applying. Clear '+(G.long.length===1?'it':'them')+' in the form.<\/summary><ul class="due-rows">'+G.long.map(x=>dated(x,'long')).join('')+'<\/ul><\/details>':'';
+  return '<section class="due-board" aria-label="What is due"><div class="due-head"><h3>What&rsquo;s due<\/h3><span class="due-sum">'+sum+'<\/span><\/div>'+body+long+
+    (hid||all?'<p class="due-more"><button type="button" id="dueAll" aria-expanded="'+all+'">'+(all?'Show fewer':'Show all '+total)+'<\/button><\/p>':'')+
+    '<p class="hint due-note">As at each student&rsquo;s last save; the days are counted from today.<\/p><\/section>';}
 /* the start screen with no case open: the caseload, what needs you, a new student */
 async function paintBlank(){const card=$('#blank .card');if(!card)return;let x=card.querySelector('#blankCl');if(!x){x=document.createElement('div');x.id='blankCl';card.insertBefore(x,card.firstChild);}
   const L=await clList();if(!L||!L.length){x.innerHTML='';x.hidden=true;card.classList.remove('has-cl');return;}
   L.sort((a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved)));
-  const all=[];L.forEach(r=>((r.sum&&r.sum.items)||[]).forEach(i=>all.push(Object.assign({who:clName(r),key:r.key},i))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
   x.hidden=false;card.classList.add('has-cl');
-  x.innerHTML='<h2>Your caseload on this '+HERE+'<\/h2>'+(all.length?'<ul class="td-list">'+all.slice(0,6).map(i=>'<li'+(TD_HOT.test(i.k)?' class="hot"':'')+'><span class="td-k">'+esc(i.k)+'<\/span> <span><b>'+esc(i.who)+'<\/b>: '+esc(i.t)+'<\/span> <button type="button" data-clopen="'+esc(i.key)+'" data-clform="'+esc(i.open||'')+'">Open'+(i.open?' '+esc(i.open):'')+'<\/button><\/li>').join('')+'<\/ul>'+(all.length>6?'<p class="hint">and '+(all.length-6)+' more in Caseload<\/p>':''):'<p>Nothing needs you in the students kept here, as at their last save.<\/p>')+
+  x.innerHTML='<h2>Your caseload on this '+HERE+'<\/h2>'+dueBoard(L)+   /* v23.71 What's due, by when */
     clCards(L,'bl')+   /* v21.91 the search and a card each (nbh-find) */
     '<p class="td-more"><button type="button" class="primary" id="blNew">New student<\/button> <button type="button" id="blRead">Read a document<\/button> <button type="button" id="blOpen">Open case<\/button> <button type="button" id="blStaff">RBT Supervision Log<\/button> <button type="button" id="blCl">Caseload<\/button><\/p><hr class="bl-hr">';}
 $('#blank').addEventListener('click',e=>{const o=e.target.closest('[data-clopen]');if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
+  if(e.target.closest('#dueAll')){try{sessionStorage.setItem('nbh.due.all',dueAllOn()?'0':'1');}catch(x){}paintBlank().then(()=>{const b=$('#dueAll');if(b)b.focus();});return;}   /* v23.71 */
   if(e.target.closest('#blNew')){if(Object.keys(state.frames).length||Object.keys(state.pending).length){$('#closeCase').click();return;}foldBar(false);const i=$('#pClient');if(i){i.focus();try{i.select();}catch(x){}}return;}
   if(e.target.closest('#blRead')){$('#readDoc').click();return;}if(e.target.closest('#blOpen')){$('#openCase').click();return;}if(e.target.closest('#blStaff')){staffStart();return;}if(e.target.closest('#blCl')){caseloadOpen();return;}});
 {const cc5=clearCase;clearCase=async function(){const r=await cc5.apply(this,arguments);try{paintBlank();}catch(e){}return r;};}
@@ -8829,7 +8903,7 @@ function clCard(r,w){const it=((r.sum&&r.sum.items)||[]).slice().sort((a,b)=>clR
   return '<article class="cl-card'+(hot?' hot':'')+'" data-clrow="'+esc(r.key)+'" data-clwhere="'+w+'"'+(fix?' data-clfix="1"':'')+' aria-label="'+esc(nm)+'">'+
     '<div class="cl-top"><span class="cl-ph" aria-hidden="true">'+clPhoto(r)+'<\/span><div class="cl-who"><b class="cl-nm">'+esc(nm)+'<\/b>'+(sub?'<span class="cl-sub">'+sub+'<\/span>':'')+(r.sid&&!ini?'<span class="cl-sid">ID '+esc(r.sid)+'<\/span>':'')+'<\/div>'+clPinBtn(r.key,nm)+'<\/div>'+
     (isStaffRec(r)?'<p class="cl-saved">Form RS-1: the supervision of your RBTs<\/p>':clTrendHtml(r))+   /* v22.30 no student data on the staff record */
-    (top?'<div class="cl-next'+(hot?' hot':'')+'"><span class="cl-nt"><span class="td-k">'+esc(top.k)+'<\/span> '+esc(top.t)+(it.length>1?' <span class="cl-more">and '+(it.length-1)+' more<\/span>':'')+'<\/span><button type="button" data-clopen="'+esc(r.key)+'" data-clform="'+esc(top.open||'')+'">Open'+(top.open?' '+esc(top.open):'')+'<\/button><\/div>'
+    (top?'<div class="cl-next'+(hot?' hot':'')+'"><span class="cl-nt"><span class="td-k">'+esc(top.k)+'<\/span> '+esc(dueNow(top.t,r.saved))+(it.length>1?' <span class="cl-more">and '+(it.length-1)+' more<\/span>':'')+'<\/span><button type="button" data-clopen="'+esc(r.key)+'" data-clform="'+esc(top.open||'')+'">Open'+(top.open?' '+esc(top.open):'')+'<\/button><\/div>'
       :'<div class="cl-next calm"><span class="cl-nt">Nothing needs you, as at the last save.<\/span><\/div>')+
     '<p class="cl-saved" title="'+esc(typeof drvWhen==='function'?drvWhen(r.saved):'')+'">'+esc(clWhere(r))+'<\/p>'+
     '<div class="cl-card-acts"><button type="button" class="primary" data-clopen="'+esc(r.key)+'" aria-label="Open '+esc(nm)+'’s case">Open<\/button>'+(w==='dlg'?'<button type="button" data-cldel="'+esc(r.key)+'" aria-label="Remove '+esc(nm)+'">Remove<\/button>':'')+'<\/div><\/article>';}

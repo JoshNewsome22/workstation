@@ -24,7 +24,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     await clTx('readwrite',st=>st.put(mk({client:'SIMULATED – Old Kept',sid:'SIM-OLD'},{src:{}},new Date(Date.now()-60*864e5).toISOString(),{unfiled:true})));},D);
   /* 1. the start screen */
   await page.evaluate(()=>paintBlank());await sleep(500);
-  const bl=await page.evaluate(()=>{const x=document.getElementById('blankCl');return {vis:!!x&&!x.hidden&&x.offsetParent!==null,stu:[...document.querySelectorAll('#blankCl .cl-card .cl-nm')].map(b=>b.textContent),items:document.querySelectorAll('#blankCl .td-list li').length,btns:!!document.getElementById('blNew')&&!!document.getElementById('blRead')};});
+  const bl=await page.evaluate(()=>{const x=document.getElementById('blankCl');return {vis:!!x&&!x.hidden&&x.offsetParent!==null,stu:[...document.querySelectorAll('#blankCl .cl-card .cl-nm')].map(b=>b.textContent),items:document.querySelectorAll('#blankCl .td-list li,#blankCl .due-row').length,btns:!!document.getElementById('blNew')&&!!document.getElementById('blRead')};});
   ok('1 with no case open, the start screen shows the caseload: the students, what needs you, New student and Read a document',bl.vis&&bl.stu.includes('Mateo Rivera')&&bl.items>=1&&bl.btns,bl);
   /* 2. Find a form or command finds a student */
   await page.evaluate(()=>palOpen());await sleep(400);await page.fill('#palIn','Mat');await page.evaluate(()=>palDraw());await sleep(200);
