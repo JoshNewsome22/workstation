@@ -9903,6 +9903,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.50: Form RM-1's sources say only what can be checked: Lattal (1968) is cited for behavioral contrast, and an unchecked figure is gone
+
+- **Gradual leaning.** "Gradual leaning still produces resurgence eventually" cites Ho et al. (2018) and Jarmolowicz and
+  Lattal (2014). Lattal (1968), an unpublished experiment, is cited for what it found, behavioral contrast in the
+  unchanged component of a multiple schedule as the other was leaned one reinforcer a session to extinction, as cited in
+  Lattal and Miles (2024), which is in the References. It had been cited for resurgence.
+- **Programming common stimuli.** The figure "reported in only 29% of FCT studies" could not be checked against Neely et
+  al. (2018) and is gone; the line now points to that review for how FCT studies have tested generalization and
+  maintenance.
+- qa/rm1-sources-test.js (4 checks).
+
 ### v23.49: Form SR-1's schedule card has a version for the family, in English and Spanish, printed by Form HD-1 (review I139)
 
 Wording approved by the BCBA, October 2026.
