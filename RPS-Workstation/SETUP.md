@@ -9903,6 +9903,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.48: Form IC-1: practice with waiting for a reward is its own item, and the food card says what the data show (review F19, F20)
+
+- **Two items where there was one (F19).** "Analysis of specific variables" (Form VI-1) now says plainly that nothing new is
+  done with the child. **Practice with waiting for a reward** (Form DT-1) is its own row in part 2, with its own card on the
+  Specific procedures sheet (F: how many waits and the longest, the stop rule from DT-1's plan, the decision, initials and
+  date; the update card becomes G). Waiting practice is covered only with its own yes, and the Consent sheet says what is
+  missing. The case's consent record is now version 3. Form DT-1 reads the new item; a consent recorded before this version
+  still covers waiting practice through "Analysis of specific variables", as that item said then, and DT-1 names it so.
+- **Food items (F20).** Card B no longer says food is "the most reliable way" to find what a student will work for. It says
+  what the data show: many students choose small amounts of food or drink over toys and activities when both are offered
+  (DeLeon, Iwata & Roscoe, 1997, added to the References).
+- Wording read and approved by the BCBA before release.
+- qa/ic1-w4b-test.js (10 checks); qa/v2237-consent-test.js counts 15 procedures; qa/policy-safety-test.js finds the
+  contact preferences at G and six decisions on the record.
+
 ### v23.47: A schedule step decided on the data: Form SR-1's step helper, read on Today and Form PR-1 (review I138)
 
 - **The card's rule in numbers.** On Form SR-1's Card page, on screen only (the printed card is unchanged), the step helper

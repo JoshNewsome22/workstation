@@ -30,7 +30,7 @@ const EXC={src:'IC-1',state:'Current, with exceptions',on:true,method:'sign',kin
   c=await ic.evaluate(()=>window.__nbhFactsOut().consent);
   ok('4 IC-1 signed, with "Consent to implement the BIP" logged: on file, the analysis covered, the BIP consent date',c.on&&c.covered.indexOf('fa')>=0&&c.bip==='2026-11-02',c);
   const procs=await ic.evaluate(()=>({n:document.getElementById('stProcSub').textContent,ad:!!document.querySelector('[name="p.arrange"]'),da:!!document.querySelector('[name="p.demand"]')}));
-  ok('5 IC-1 lists the reinforcer arrangement comparison (AD-1) and the demand assessment (DA-1): 14 procedures',procs.ad&&procs.da&&/14 listed/.test(procs.n),procs);
+  ok('5 IC-1 lists the reinforcer arrangement comparison (AD-1) and the demand assessment (DA-1): 15 procedures (v23.48: practice with waiting, DT-1, apart)',procs.ad&&procs.da&&/15 listed/.test(procs.n),procs);
   /* the shell */
   const page=await ctx.newPage();page.on('pageerror',e=>errs.push('shell: '+e.message));await page.goto(U('index.html'));await sleep(1200);
   await page.evaluate(()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};});

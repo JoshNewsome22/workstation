@@ -288,9 +288,11 @@
       : state === 'Decision not recorded' ? 'Consent not established: the parent’s decision is not recorded (Form IC-1)'
       : 'No consent on file (Form IC-1)';
     return { known:true, legacy:legacy, on:on, state:state, date:date, ended:ended, kind:c.kind || '', exceptions:c.exceptions || '',
-      covered: Array.isArray(c.covered) ? c.covered : null, dec: c.dec || {}, bip: c.bip || '', word:word };
+      covered: Array.isArray(c.covered) ? c.covered : null, dec: c.dec || {}, bip: c.bip || '', v: +c.v || 0, word:word };
   };
-  C.covers = function(p, f){ var k = C.consent(f); if (!k.on) return false; return !k.covered || k.covered.indexOf(p) >= 0; };
+  C.covers = function(p, f){ var k = C.consent(f); if (!k.on) return false; if (!k.covered || k.covered.indexOf(p) >= 0) return true;
+    /* v23.48 waiting practice was part of "Analysis of specific variables" until Form IC-1 listed it apart (its record v3) */
+    return p === 'wait' && !(k.v >= 3) && k.covered.indexOf('var') >= 0; };
   var CONSENT_FORMS = { 'OB-1':['abc','direct observation'], 'ABC-1':['abc','ABC recording'], 'SP-1':['scatter','the scatter plot'],
     'IA-1':['indirect','interviews and rating scales'], 'IN-1':['indirect','interviews'], 'SI-1':['indirect','the student interview'],
     'EA-1':['fa','the experimental analysis'], 'DA-1':['demand','the demand assessment'], 'AD-1':['arrange','the reinforcer arrangement comparison'],

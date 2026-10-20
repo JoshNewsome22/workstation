@@ -2412,7 +2412,7 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
      protocol: waiting practice is part of IC-1's "Analysis of specific variables" item (key var); an older IC-1 lists no items */
   const C=window.nbhCase,ce=document.querySelector('[name="s_consent"]');
   if(C&&C.consent&&ce&&!String(ce.value||'').trim()){const kc=C.consent(f);
-    if(kc.on&&(!kc.covered||C.covers('var',f))){ce.value=(kc.covered?'Analysis of specific variables (waiting practice): ':'')+kc.word+(kc.covered?'':'; the item is not listed (an older Form IC-1)');
+    if(kc.on&&(!kc.covered||C.covers('wait',f))){ce.value=(kc.covered?(kc.covered.indexOf('wait')>=0?'Practice with waiting for a reward: ':'Analysis of specific variables (waiting practice): '):'')+kc.word+(kc.covered?'':'; the item is not listed (an older Form IC-1)');
       ce.dispatchEvent(new Event('input',{bubbles:true}));k++;got.push('the consent from Form IC-1');}}
   /* v22.94 (review I204) the student's assent from Form SI-1, and the rule for problem behavior during the delay from Form TD-1,
      each only where empty: Form TD-1's own words for the behavior are shown under the choice */
@@ -2438,7 +2438,7 @@ document.addEventListener('change',e=>{if(e.target&&e.target.name==='pb_during')
 function dtConsentNote(){const e=document.getElementById('dtConsentNote'),ce=document.querySelector('[name="s_consent"]');if(!e||!ce)return;
   const on=!String(ce.value||'').trim();if(e.hidden===on)e.hidden=!on;if(!on)return;
   const C=window.nbhCase,kc=C&&C.facts&&C.consent?C.consent():null;
-  e.firstChild.textContent=kc&&kc.on&&kc.covered&&!C.covers('var')?'Form IC-1 does not cover this protocol: \u201cAnalysis of specific variables\u201d (which includes waiting practice) is not ticked. Get the parent\u2019s consent before the first session.'
+  e.firstChild.textContent=kc&&kc.on&&kc.covered&&!C.covers('wait')?'Form IC-1 does not cover this protocol: \u201cPractice with waiting for a reward\u201d is not ticked, or not consented to on its card (Specific procedures, F). Get the parent\u2019s consent before the first session.'
     :kc&&kc.known&&!kc.on?kc.word+'. Record the parent\u2019s consent for this protocol on Form IC-1 before the first session.'
     :'Parent consent for this protocol is not recorded: enter the Form IC-1 item and date before the first session.';}
 document.addEventListener('input',e=>{if(e.target&&e.target.name==='s_consent')dtConsentNote();});

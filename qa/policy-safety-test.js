@@ -401,11 +401,11 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     await view(page,'proc');
     const ij=await text(page,'#icInjury');
     ['E. Checking for injuries','Two adults, always','Your child is asked first','No one holds a child still for a check','Staff write down that it was not done, and why','What may be looked at','the side of the hip above the waistband, and the chest only at the collar','Private areas are never examined by staff','genitals, buttocks or breasts','help with toileting or changing','At a home visit, the parent or guardian can be the second adult'].forEach(p=>check(ij.includes(p),'injury checks: '+p));
-    check(/^F\. How you would like to be kept informed/.test(await page.evaluate(()=>[...document.querySelectorAll('#proc .chdt')].pop().textContent)),'the contact preferences are part F');
+    check(/^G\. How you would like to be kept informed/.test(await page.evaluate(()=>[...document.querySelectorAll('#proc .chdt')].pop().textContent)),'the contact preferences are part G (v23.48: waiting practice is F)');
     check(await page.evaluate(()=>document.querySelector('[name="ij.dec"]').getAttribute('aria-label'))==='Decision: Checking for injuries','the decision is named for its card');
     await view(page,'assent');
     check(await shown(page,'[name="a.conf"]')&&/Told the student, in words for their age, who will hear what they say and what cannot be kept private/.test(await text(page,'#icAssentConf'))&&/Form SI-1/.test(await text(page,'#icAssentConf')),'the Student Assent sheet: the limits told at the outset, with a tick, pointing to SI-1');
-    await view(page,'record');check(/of 5$/.test(await text(page,'#stDec')),'the record counts five specific decisions',await text(page,'#stDec'));
+    await view(page,'record');check(/of 6$/.test(await text(page,'#stDec')),'the record counts six specific decisions (v23.48: waiting practice)',await text(page,'#stDec'));
     check(await page.evaluate(()=>[...document.querySelector('[name="log[0].ev"]').options].some(o=>o.text==='Limits of confidentiality explained')),'the consent record logs the explanation of the limits');
     /* a consent recorded now, by a person, is recorded on this revision */
     await view(page,'consent');await page.selectOption('#cMethod','sign');await page.click('[name="c.decision"][value="yes"]');await sleep(150);
