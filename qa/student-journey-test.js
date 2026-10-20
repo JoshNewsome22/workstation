@@ -156,6 +156,11 @@ function diffSnap(a,b,factsTxt){const oa=ownOf(a),ob=ownOf(b),useOwn=!!(oa&&ob);
 const bad=L=>L.filter(x=>x.kind!=='filled');
 /* Save case, Close case, Open case from the file, every form opened and saved again: nothing lost or changed */
 async function roundTrip(tag){
+  /* v23.57 a case opens to one form and the others load when opened, so a form not open while another changed the case
+     (DM-1 and RR-1 while CR-1 wrote the crisis plan) catches up when it is next opened. Every form is opened first, as the
+     BCBA reviewing the case would, so the file compared holds each form as it stands with the case. */
+  const all0=await shell(()=>[...new Set(Object.keys(state.frames).concat(Object.keys(state.pending||{})))].filter(id=>inCase(id)));
+  for(const id of all0)await openF(id);
   const f1=await saveCaseFile(tag+'-a');const c1=readCase(f1);
   const ids=Object.keys(c1.forms);const facts1=await facts();
   /* Close case: it asks, saves again, then clears */
