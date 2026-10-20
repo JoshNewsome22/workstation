@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.70: Form ABC-1's sound in detail: pitch bands and loud moments
+
+- With the **Sound level meter** on, Form ABC-1 also splits the sound into eight pitch bands (octaves, from 63 Hz and below
+  to 8 kHz and up), each band's own level in dB, finds the pitch of what stands out from the room, and keeps each **loud
+  moment** (10 dB or more above the room's median of the last two minutes, A-weighted or across all the bands, so a deep
+  rumble counts) with its time, length, peak, loudest band, pitch and a plain word for its range: high-pitched (600 Hz and
+  above: the pitch of a scream, shriek or squeal, a high cry, or a whistle or alarm), in the pitch of a voice, low-pitched,
+  a deep rumble or thud, high and harsh, hiss or static, sharp and brief. The form hears ranges, not sources.
+- Only numbers are kept, never the sound, and nothing leaves the device. Every 10 seconds: the level, its quietest and
+  loudest tenth of a second, and each band's average and loudest.
+- **Each incident** keeps the seconds before it in detail (average, range, bands, loud moments) and, new, **its own sound**
+  from Incident starting to Incident over (or to saving it while it runs); each **background check** its scored seconds.
+  The detail shows under the Sound level box; the incident list adds the level during the incident.
+- **Analysis**: a card, *The sound in detail: pitch bands and loud moments*: the observed time's average, range and
+  loudest band; a chart and a table of the eight bands (what is usually heard in each, its average, its loudest, its loud
+  moments); before incidents and at the checks band by band, the band most louder before incidents named; each incident's
+  sound before and during; the loudest 12 moments of each of the last three days, each one near an incident marked. Its
+  cautions: the meter hears pitch and loudness, not what made a sound; the pitch ranges, from published research:
+  speaking pitch (Hillenbrand et al., 1995; Lee et al., 1999), screams (Pisanski et al., 2020; Engelberg et al., 2021;
+  Arnal et al., 2015), "s" and "sh" (Jongman et al., 2000), hearing (ISO 226:2003); the bands are not A-weighted, which
+  understates low-frequency sound (Leventhall, 2004). All eight are in the References, and Mace (1991) now comes before
+  Martens (2008) there. The high-pitched line is 600 Hz: about twice a child's speaking pitch, below the average pain
+  scream (about 680 Hz) and well below the average fear scream (about 1,430 Hz).
+- The meter's note says what is kept now (the BCBA approved the new wording).
+- A record kept before this release opens and analyses as before (no new card).
+- qa/abc-sound-detail-test.js (20 checks; the microphone is made of test sounds).
+
 ### v23.69: Form TB-1's candidate list on an iPad: its boxes are drawn, its labels kept apart
 
 - On an iPad (and a laptop) the Select & prioritize list showed its labels but none of its boxes: since v23.34 each

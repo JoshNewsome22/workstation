@@ -1256,8 +1256,8 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
         <span class="obs-gap"></span>
         <button type="button" id="sndCal">Set against a meter&hellip;</button>
       </div>
-      <!-- v23.41 the sound level meter's note. Wording approved by the BCBA, October 2026. -->
-      <p class="note snd-note" id="sndNote"><b>Sound level meter (optional).</b> The iPad&rsquo;s microphone measures how loud the room is while you observe: only the level is kept, every 10 seconds, never the sound, and nothing leaves this device. Each incident gets the level of the seconds just before you press <b>Incident starting</b> (ending 2 seconds before, so the behavior&rsquo;s own sound is left out), and each background check the level of its scored seconds; the Analysis tab compares the two. Until the iPad is set against a sound level meter its numbers are on its own scale: they compare with each other, not with a meter&rsquo;s dB. Keep the iPad in one place, screen on. <b>With a sound level meter instead</b> (or as well), type its dBA reading in the <b>Sound level</b> box: on an incident, the reading just before the behavior began; on a background check, the reading at the check.</p>
+      <!-- v23.70 the sound level meter's note, with what is kept now. Wording approved by the BCBA, October 2026. -->
+      <p class="note snd-note" id="sndNote"><b>Sound level meter (optional).</b> The iPad&rsquo;s microphone measures how loud the room is while you observe: only levels are kept, never the sound, and nothing leaves this device. Every 10 seconds it keeps the level, its quietest and loudest tenth of a second, and the level in each of eight pitch bands; for each loud moment, its time, length, loudness and pitch. Each incident gets the level of the seconds just before you press <b>Incident starting</b> (ending 2 seconds before, so the behavior&rsquo;s own sound is left out), and its own sound when you press <b>Incident over</b>; each background check the level of its scored seconds; the Analysis tab compares the two and shows the sound in detail. Until the iPad is set against a sound level meter its numbers are on its own scale: they compare with each other, not with a meter&rsquo;s dB. Keep the iPad in one place, screen on. <b>With a sound level meter instead</b> (or as well), type its dBA reading in the <b>Sound level</b> box: on an incident, the reading just before the behavior began; on a background check, the reading at the check.</p>
       <div class="obs-msg" id="obsMsg" aria-live="polite"></div>
       <p class="note">At each check the timer alerts you. If the target behavior occurred in the window since the last check, the check is skipped: that window is already an incident, and the timer skips it by itself when an incident was logged in it. Otherwise press <b>Record the window</b>; Background samples opens with the date, time and the seconds scored filled in: the conditions in place now, and the events in the last few seconds, the consequence window. Checks run on the clock, not on what the student is doing, which is what keeps the samples response-independent. Random checks are spread from half to one and a half times the average gap; for a session with a second observer, use a fixed schedule so both of you check at the same moments.</p>
       <table class="obs-log" id="obsLog" hidden><thead><tr><th>Check</th><th>Window</th><th>Minutes</th><th>Result</th></tr></thead><tbody></tbody></table>
@@ -3152,6 +3152,7 @@ function renderAnalysis(){
   if(seSt.length) html += settingEventSection(seSt, N, M);
   if(staffSt) html += staffSection(staffSt);
   if(window.abcNoiseSection) html += abcNoiseSection(S);
+  if(window.abcSoundDetail) html += abcSoundDetail(S);   /* v23.70 */
   html += acSection(S.coded, N);
   html += eoSection(eo, N);
 
@@ -3576,25 +3577,32 @@ function renderMethods(){
   card("References", "",
     `<div class="body refs">
       <ul>
+        <li><span class="r">Arnal, L. H., Flinker, A., Kleinschmidt, A., Giraud, A.-L., &amp; Poeppel, D. (2015). Human screams occupy a privileged niche in the communication soundscape. <i>Current Biology, 25</i>, 2051&ndash;2056.</span></li>
         <li><span class="r">Bijou, S. W., Peterson, R. F., &amp; Ault, M. H. (1968). A method to integrate descriptive and experimental field studies at the level of data and empirical concepts. <i>Journal of Applied Behavior Analysis, 1</i>, 175&ndash;191.</span></li>
         <li><span class="r">Borrero, C. S. W., &amp; Borrero, J. C. (2008). Descriptive and experimental analyses of potential precursors to problem behavior. <i>Journal of Applied Behavior Analysis, 41</i>, 83&ndash;96.</span></li>
         <li><span class="r">Camp, E. M., Iwata, B. A., Hammond, J. L., &amp; Bloom, S. E. (2009). Antecedent versus consequent events as predictors of problem behavior. <i>Journal of Applied Behavior Analysis, 42</i>, 469&ndash;483.</span></li>
         <li><span class="r">Carr, E. G., Taylor, J. C., &amp; Robinson, S. (1991). The effects of severe behavior problems in children on the teaching behavior of adults. <i>Journal of Applied Behavior Analysis, 24</i>, 523&ndash;535.</span></li>
         <li><span class="r">Eckert, T. L., Martens, B. K., &amp; DiGennaro, F. D. (2005). Describing antecedent&ndash;behavior&ndash;consequence relations using conditional probabilities and the general operant contingency space: A preliminary investigation. <i>School Psychology Review, 34</i>, 520&ndash;528.</span></li>
+        <li><span class="r">Engelberg, J. W. M., Schwartz, J. W., &amp; Gouzoules, H. (2021). The emotional canvas of human screams: Patterns and acoustic cues in the perceptual categorization of a basic call type. <i>PeerJ, 9</i>, e10990.</span></li>
         <li><span class="r">Fahmie, T. A., Iwata, B. A., Harper, J. M., &amp; Querim, A. C. (2013). Evaluation of the divided attention condition during functional analyses. <i>Journal of Applied Behavior Analysis, 46</i>, 71&ndash;78.</span></li>
         <li><span class="r">Fritz, J. N., Iwata, B. A., Hammond, J. L., &amp; Bloom, S. E. (2013). Experimental analysis of precursors to severe problem behavior. <i>Journal of Applied Behavior Analysis, 46</i>, 101&ndash;129.</span></li>
         <li><span class="r">Ghaemmaghami, M., Hanley, G. P., &amp; Jessel, J. (2016). Contingencies promote delay tolerance. <i>Journal of Applied Behavior Analysis, 49</i>, 548&ndash;575.</span></li>
         <li><span class="r">Hall, G. A., &amp; Sundberg, M. L. (1987). Teaching mands by manipulating conditioned establishing operations. <i>The Analysis of Verbal Behavior, 5</i>, 41&ndash;53.</span></li>
         <li><span class="r">Hanley, G. P., Iwata, B. A., &amp; McCord, B. E. (2003). Functional analysis of problem behavior: A review. <i>Journal of Applied Behavior Analysis, 36</i>, 147&ndash;185.</span></li>
         <li><span class="r">Hanley, G. P., Jin, C. S., Vanselow, N. R., &amp; Hanratty, L. A. (2014). Producing meaningful improvements in problem behavior of children with autism via synthesized analyses and treatments. <i>Journal of Applied Behavior Analysis, 47</i>, 16&ndash;36.</span></li>
+        <li><span class="r">Hillenbrand, J., Getty, L. A., Clark, M. J., &amp; Wheeler, K. (1995). Acoustic characteristics of American English vowels. <i>Journal of the Acoustical Society of America, 97</i>, 3099&ndash;3111.</span></li>
         <li><span class="r">Horner, R. H., Vaughn, B. J., Day, H. M., &amp; Ard, W. R., Jr. (1996). The relationship between setting events and problem behavior. In L. K. Koegel, R. L. Koegel, &amp; G. Dunlap (Eds.), <i>Positive behavioral support: Including people with difficult behavior in the community</i> (pp. 381&ndash;402). Paul H. Brookes.</span></li>
+        <li><span class="r">International Organization for Standardization. (2003). <i>Acoustics: Normal equal-loudness-level contours</i> (ISO 226:2003).</span></li>
         <li><span class="r">Iwata, B. A., Dorsey, M. F., Slifer, K. J., Bauman, K. E., &amp; Richman, G. S. (1994). Toward a functional analysis of self-injury. <i>Journal of Applied Behavior Analysis, 27</i>, 197&ndash;209. (Reprinted from <i>Analysis and Intervention in Developmental Disabilities, 2</i>, 3&ndash;20, 1982.)</span></li>
+        <li><span class="r">Jongman, A., Wayland, R., &amp; Wong, S. (2000). Acoustic characteristics of English fricatives. <i>Journal of the Acoustical Society of America, 108</i>, 1252&ndash;1263.</span></li>
         <li><span class="r">Kennedy, C. H., &amp; Meyer, K. A. (1996). Sleep deprivation, allergy symptoms, and negatively reinforced problem behavior. <i>Journal of Applied Behavior Analysis, 29</i>, 133&ndash;135.</span></li>
+        <li><span class="r">Lee, S., Potamianos, A., &amp; Narayanan, S. (1999). Acoustics of children&rsquo;s speech: Developmental changes of temporal and spectral parameters. <i>Journal of the Acoustical Society of America, 105</i>, 1455&ndash;1468.</span></li>
         <li><span class="r">Lerman, D. C., &amp; Iwata, B. A. (1993). Descriptive and experimental analyses of variables maintaining self-injurious behavior. <i>Journal of Applied Behavior Analysis, 26</i>, 293&ndash;319.</span></li>
+        <li><span class="r">Leventhall, H. G. (2004). Low frequency noise and annoyance. <i>Noise &amp; Health, 6</i>, 59&ndash;72.</span></li>
         <li><span class="r">Lloyd, B. P., Kennedy, C. H., &amp; Yoder, P. J. (2013). Quantifying contingent relations from direct observation data: Transitional probability comparisons versus Yule's Q. <i>Journal of Applied Behavior Analysis, 46</i>, 479&ndash;497.</span></li>
         <li><span class="r">Lloyd, B. P., Yoder, P. J., Tapp, J., &amp; Staubitz, J. L. (2016). The relative accuracy and interpretability of five sequential analysis methods: A simulation study. <i>Behavior Research Methods, 48</i>, 1482&ndash;1491.</span></li>
-        <li><span class="r">Martens, B. K., DiGennaro, F. D., Reed, D. D., Szczech, F. M., &amp; Rosenthal, B. D. (2008). Contingency space analysis: An alternative method for identifying contingent relations from observational data. <i>Journal of Applied Behavior Analysis, 41</i>, 69&ndash;81.</span></li>
         <li><span class="r">Mace, F. C., &amp; Lalli, J. S. (1991). Linking descriptive and experimental analyses in the treatment of bizarre speech. <i>Journal of Applied Behavior Analysis, 24</i>, 553&ndash;562.</span></li>
+        <li><span class="r">Martens, B. K., DiGennaro, F. D., Reed, D. D., Szczech, F. M., &amp; Rosenthal, B. D. (2008). Contingency space analysis: An alternative method for identifying contingent relations from observational data. <i>Journal of Applied Behavior Analysis, 41</i>, 69&ndash;81.</span></li>
         <li><span class="r">McCord, B. E., Iwata, B. A., Galensky, T. L., Ellingson, S. A., &amp; Thomson, R. J. (2001). Functional analysis and treatment of problem behavior evoked by noise. <i>Journal of Applied Behavior Analysis, 34</i>, 447&ndash;462.</span></li>
         <li><span class="r">McCord, B. E., Thomson, R. J., &amp; Iwata, B. A. (2001). Functional analysis and treatment of self-injury associated with transitions. <i>Journal of Applied Behavior Analysis, 34</i>, 195&ndash;210.</span></li>
         <li><span class="r">McKerchar, P. M., &amp; Thompson, R. H. (2004). A descriptive analysis of potential reinforcement contingencies in the preschool classroom. <i>Journal of Applied Behavior Analysis, 37</i>, 431&ndash;444.</span></li>
@@ -3602,6 +3610,7 @@ function renderMethods(){
         <li><span class="r">Michael, J. (1993). Establishing operations. <i>The Behavior Analyst, 16</i>, 191&ndash;206.</span></li>
         <li><span class="r">Michael, J. (2000). Implications and refinements of the establishing operation concept. <i>Journal of Applied Behavior Analysis, 33</i>, 401&ndash;410.</span></li>
         <li><span class="r">Pence, S. T., Roscoe, E. M., Bourret, J. C., &amp; Ahearn, W. H. (2009). Relative contributions of three descriptive methods: Implications for behavioral assessment. <i>Journal of Applied Behavior Analysis, 42</i>, 425&ndash;446.</span></li>
+        <li><span class="r">Pisanski, K., Raine, J., &amp; Reby, D. (2020). Individual differences in human voice pitch are preserved from speech to screams, roars and pain cries. <i>Royal Society Open Science, 7</i>, 191642.</span></li>
         <li><span class="r">Rosenthal, J. A. (1996). Qualitative descriptors of strength of association and effect size. <i>Journal of Social Service Research, 21</i>, 37&ndash;59.</span></li>
         <li><span class="r">Schmidt, J. D., Kranak, M. P., Goetzel, A. L., Kaur, J., &amp; Rooker, G. W. (2020). A clinical demonstration of correlational and experimental analyses of precursor behavior. <i>Behavior Analysis in Practice, 13</i>, 966&ndash;971.</span></li>
         <li><span class="r">Skinner, B. F. (1953). <i>Science and human behavior</i>. Macmillan.</span></li>
@@ -4101,6 +4110,7 @@ document.addEventListener("DOMContentLoaded", init);
   /* v21.37: the consequence window from the header, named as the incident is coded */
   function cwin(){const w=+((byId('h-window')||{}).value||0);return w>0?' and record the consequence within the '+w+'-second window':'';}
   function swStop(say){if(!SW.on)return;const ms=Date.now()-SW.t0;SW.on=false;clearInterval(SW.iv);
+    try{window.dispatchEvent(new CustomEvent('abc-incident-over',{detail:{from:SW.t0,to:SW.t0+ms}}));}catch(e){}   /* v23.70 the incident's own sound */
     setVal('e-dur',String(Math.max(1,Math.round(ms/60000))));
     if(say)note('Incident lasted '+fmt(ms)+'; duration set to '+byId('e-dur').value+' min (whole minutes, as the sheet records it).');swPaint();sched();}
   function swPaint(){
@@ -6510,6 +6520,32 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
   if(!state.noise || !Array.isArray(state.noise.runs)) state.noise = { runs: [] };
   const CAL = 'nbh.abc.sndCal', NOMINAL = 100, BLOCK = 10000, KEEP = 12 * 60000;
   const M = { on:false, ctx:null, stream:null, iv:0, an:null, buf:null, ring:[], run:null, blk:null, paused:false, checks:{}, agc:null, wtd:false, shown:0 };
+  /* v23.70 the pitch bands: eight octaves (their edges in Hz), what is usually heard in each, and the words for a loud
+     moment's range. The form hears ranges, not sources: the words say what usually sounds there. The pitches are from
+     published research (the card's caution names it): speaking pitch, Hillenbrand et al. (1995) and Lee et al. (1999);
+     screams, Engelberg et al. (2021); s and sh, Jongman et al. (2000); hearing, ISO 226:2003. */
+  const EDGE = [0, 90, 180, 355, 710, 1400, 2800, 5600], NB = 8, LOUD = 10;
+  const BAND = ['63 Hz and below', '125 Hz', '250 Hz', '500 Hz', '1 kHz', '2 kHz', '4 kHz', '8 kHz and up'];
+  const BAND_TICK = ['63 Hz', '125', '250', '500', '1k', '2k', '4k', '8k+'];
+  const BAND_SAYS = ['deep rumble: thunder, heavy traffic, fans and machinery, music bass',
+    'hums, thuds and stomping; a man&rsquo;s speaking pitch (about 130 Hz on average)',
+    'speaking pitch: a woman&rsquo;s (about 220 Hz) and a child&rsquo;s (about 235&ndash;275 Hz)',
+    'voices: vowels, a raised voice, crying; the pitch of pain screams (about 680 Hz)',
+    'voices: talking, shouting and crying; higher screams',
+    'high: the pitch of fear screams (about 1,430 Hz), shrieks and squeals; whistles',
+    'high: shrieks, squeals and alarms; the hiss of &ldquo;sh&rdquo;; where hearing is most sensitive',
+    'hiss and static: the hiss of &ldquo;s&rdquo;, air from vents, running water, rustling paper'];
+  const KIND = {
+    hi:{ short:'high-pitched', long:'high-pitched: the pitch of a scream, shriek or squeal, a high cry, or a whistle or alarm' },
+    vo:{ short:'voice-pitched', long:'in the pitch of a voice: like talking, shouting or crying' },
+    lo:{ short:'low-pitched', long:'low-pitched: like a deep voice, a hum or music' },
+    ru:{ short:'deep rumble or thud', long:'deep, with no clear pitch: a rumble or thud, like thunder, a truck, banging or stomping' },
+    br:{ short:'noise without a clear pitch', long:'no clear pitch, in the middle range: like clatter, chatter, a crowd or a harsh voice' },
+    hr:{ short:'high and harsh', long:'high, with no steady pitch: like a harsh scream or shriek, a chair or brakes squealing, or clatter' },
+    hs:{ short:'hiss or static', long:'very high, with no pitch: hiss or static, like air from a vent, running water, rustling or a speaker&rsquo;s static' },
+    bg:{ short:'sharp and brief', long:'sharp and brief: like a bang, clap, slam or something dropped' } };
+  const mid = a => { if(!a.length) return null; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+  Object.assign(M, { anZ:null, tz:null, fq:null, bmap:null, dec:null, nsdf:null, fz:[], moAll:[], moPend:[], cur:null, bg:null, bgU:null, bgAt:0, during:null });
   const calGet = () => { try{ const j = JSON.parse(localStorage.getItem(CAL) || 'null'); return j && isFinite(j.off) ? j : null; }catch(e){ return null; } };
   const offNow = () => { const c = calGet(); return c ? c.off : NOMINAL; };
   const dB = e => 10 * Math.log10(Math.max(e, 1e-12));
@@ -6538,6 +6574,8 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
     const bi = Math.floor(t / BLOCK);
     if(!M.blk || M.blk.i !== bi){ flush(); M.blk = { i:bi, e:0, n:0 }; }
     M.blk.e += e; M.blk.n++;
+    /* v23.70 the block's quietest and loudest tenth of a second */
+    const a = dB(e); if(M.blk.lo == null || a < M.blk.lo) M.blk.lo = a; if(M.blk.hi == null || a > M.blk.hi) M.blk.hi = a;
   }
   function flush(){
     const b = M.blk; M.blk = null; if(!b || b.n < 20) return;   /* under 2 seconds heard in the block: not kept */
@@ -6547,6 +6585,12 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
     const k = b.i - run.b0; if(k < 0) return;
     while(run.v.length < k) run.v.push(null);
     run.v[k] = r1(dB(b.e / b.n));
+    /* v23.70 the block's range and its bands (each band's average and its loudest tenth of a second, whole dB), and the
+       loud moments heard since the last block */
+    const pad = a => { while(a.length < k) a.push(null); return a; };
+    if(b.lo != null){ pad(run.lo || (run.lo = []))[k] = Math.round(b.lo); pad(run.hi || (run.hi = []))[k] = Math.round(b.hi); }
+    if(b.nz >= 20){ pad(run.z || (run.z = []))[k] = b.z.map(x => Math.round(dB(x / b.nz))); pad(run.zp || (run.zp = []))[k] = b.zp.map(x => Math.round(x)); }
+    if(M.moPend.length){ run.mo = (run.mo || []).concat(M.moPend); M.moPend = []; }
   }
   /* the level (the iPad's raw scale) from..to, or null when under half of it was heard */
   function level(from, to){
@@ -6554,14 +6598,115 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
     for(let i = 0; i < ring.length; i += 2){ const t = ring[i]; if(t >= from && t < to){ e += ring[i + 1]; n++; } }
     return n && n >= (to - from) / 100 * 0.5 ? dB(e / n) : null;
   }
-  function rec(raw, w){ const c = calGet(); return { v:r1(raw + (c ? c.off : NOMINAL)), cal:!!c, src:'mic', w }; }
+  function rec(raw, w, from, to){ const c = calGet(), off = c ? c.off : NOMINAL, r = { v:r1(raw + off), cal:!!c, src:'mic', w };
+    const d = from != null ? detail(from, to, off) : null; if(d) r.d = d;   /* v23.70 the seconds in detail */
+    return r; }
+
+  /* ---- v23.70 the sound in detail: eight pitch bands, the pitch, the loud moments ----
+     A second ear, not A-weighted, splits each tenth of a second into eight octave bands (each band's own level, in dB)
+     and finds its pitch when it stands out from the room. A loud moment is a stretch at least 10 dB above the room's
+     median of the last two minutes, A-weighted or not (a deep rumble barely moves the A-weighted level), for 0.3 seconds
+     or more (or a brief sound 15 dB above); it is kept with its time,
+     length, peak, loudest band, pitch and a plain word for its range. Only these numbers are kept, never the sound. */
+  function bandMap(){ const an = M.anZ, n = an.frequencyBinCount, hz = M.ctx.sampleRate / an.fftSize, m = new Uint8Array(n);
+    for(let k = 0; k < n; k++){ const f = k * hz; let b = 0; while(b < NB - 1 && f >= EDGE[b + 1]) b++; m[k] = b; } return m; }
+  /* the pitch of the frame (McLeod's normalized square difference, on the sound at half the rate), or 0 when it has none */
+  function pitchOf(x, fs){
+    const W = x.length >> 1, y = M.dec && M.dec.length === W ? M.dec : (M.dec = new Float32Array(W));
+    for(let i = 0; i < W; i++) y[i] = (x[2 * i] + x[2 * i + 1]) / 2;
+    const sr = fs / 2, tm = Math.min(Math.floor(sr / 70), W >> 1), n = M.nsdf && M.nsdf.length === tm + 2 ? M.nsdf : (M.nsdf = new Float32Array(tm + 2));
+    for(let t = 1; t <= tm + 1; t++){ let ac = 0, m = 0; for(let i = 0, L = W - t; i < L; i++){ const a = y[i], b = y[i + t]; ac += a * b; m += a * a + b * b; } n[t] = m > 0 ? 2 * ac / m : 0; }
+    let t = 1; while(t <= tm && n[t] > 0) t++;
+    const pk = [];
+    while(t <= tm){ while(t <= tm && n[t] <= 0) t++; let v = -1, at = 0; while(t <= tm && n[t] > 0){ if(n[t] > v){ v = n[t]; at = t; } t++; } if(at) pk.push([at, v]); }
+    if(!pk.length) return 0;
+    const top = Math.max(...pk.map(p => p[1])), best = pk.find(p => p[1] >= 0.9 * top);
+    if(best[1] < 0.75) return 0;
+    const at = best[0], a = n[at - 1], b = n[at], c = n[at + 1], dd = a - 2 * b + c, f = sr / (at + (dd ? 0.5 * (a - c) / dd : 0));
+    return f >= 70 && f <= 2600 ? f : 0;
+  }
+  /* one tenth of a second from the second ear: the unweighted energy shared out over the bands as the spectrum shares it */
+  function zFrame(t, eA){
+    const an = M.anZ; if(!an || !M.ctx) return;
+    const N = an.fftSize, x = M.tz || (M.tz = new Float32Array(N)), F = M.fq || (M.fq = new Float32Array(an.frequencyBinCount)), map = M.bmap || (M.bmap = bandMap());
+    an.getFloatTimeDomainData(x); an.getFloatFrequencyData(F);
+    let ez = 0; for(let i = 0; i < N; i++) ez += x[i] * x[i]; ez /= N;
+    const s = new Float64Array(NB); let tot = 0;
+    for(let k = 1; k < F.length; k++){ const v = F[k]; if(!(v > -250)) continue; const p = Math.pow(10, v / 10); s[map[k]] += p; tot += p; }
+    const z = Array.from(s, v => tot > 0 ? ez * v / tot : 0);
+    /* the pitch only when the frame stands out from the room (it is the iPad's heaviest sum) */
+    const f = M.bg == null || dB(eA) >= M.bg + 6 || dB(ez) >= M.bgU + 6 ? pitchOf(x, M.ctx.sampleRate) : 0;
+    zIngest(t, eA, z, f);
+  }
+  function zIngest(t, e, z, f){
+    const a = dB(e), u = z ? dB(z.reduce((x, y) => x + y, 0)) : null, fz = M.fz; fz.push({ t, a, u, z, f });
+    if(fz.length > 600 && fz[0].t < t - KEEP - 60000){ let i = 0; while(i < fz.length && fz[i].t < t - KEEP) i++; fz.splice(0, i); }
+    const b = M.blk;
+    if(b && z){ if(!b.z){ b.z = new Array(NB).fill(0); b.zp = new Array(NB).fill(-Infinity); b.nz = 0; }
+      for(let i = 0; i < NB; i++){ b.z[i] += z[i]; const v = dB(z[i]); if(v > b.zp[i]) b.zp[i] = v; } b.nz++; }
+    /* the room: the median of the last two minutes, once a second (after 3 seconds heard) */
+    if(t - M.bgAt >= 1000 || t < M.bgAt){ M.bgAt = t; const v = [], w = [];
+      for(let i = fz.length - 1; i >= 0 && fz[i].t > t - 120000; i--){ v.push(fz[i].a); if(fz[i].u != null) w.push(fz[i].u); }
+      M.bg = v.length >= 30 ? mid(v) : null; M.bgU = w.length >= 30 ? mid(w) : null; }
+    if(M.cur && t - M.cur.t1 > 400) zEnd();   /* quiet again, or a pause between */
+    if(M.bg == null || !(a >= M.bg + LOUD || (u != null && M.bgU != null && u >= M.bgU + LOUD))) return;
+    const m = M.cur || (M.cur = { t0:t, t1:t, n:0, e:0, pk:-Infinity, pu:-Infinity, z:new Array(NB).fill(0), nz:0, fs:[], bg:M.bg, bgU:M.bgU });
+    m.t1 = t; m.n++; m.e += e; if(a > m.pk) m.pk = a; if(u != null && u > m.pu) m.pu = u; if(f) m.fs.push(f);
+    if(z){ m.nz++; for(let i = 0; i < NB; i++) m.z[i] += z[i]; }
+  }
+  /* a moment as it is kept (the iPad's raw scale): start, seconds, peak, average, loudest band, pitch, bands, its range */
+  function view(m){
+    const z = m.nz ? m.z.map(s => s / m.nz) : null, f = m.fs.length >= Math.max(2, m.n * 0.5) ? Math.round(mid(m.fs)) : 0;
+    let b = -1; if(z){ b = 0; z.forEach((v, i) => { if(v > z[b]) b = i; }); }
+    const o = { t:m.t0, d:r1((m.t1 - m.t0) / 1000 + 0.1), pk:r1(m.pk), av:r1(dB(m.e / m.n)), b, f, z:z ? z.map(v => Math.round(dB(v))) : null };
+    o.k = o.f ? (o.f >= 600 ? 'hi' : o.f >= 150 ? 'vo' : 'lo') : o.d < 0.4 ? 'bg' : o.b < 0 ? 'br' : o.b <= 1 ? 'ru' : o.b <= 4 ? 'br' : o.b <= 6 ? 'hr' : 'hs';
+    return o;
+  }
+  function zEnd(){ const m = M.cur; M.cur = null; if(!m) return;
+    const o = view(m); if(!(o.d >= 0.3 || m.pk >= m.bg + 15 || (m.bgU != null && m.pu >= m.bgU + 15))) return;
+    M.moAll.push(o); M.moPend.push(o); if(M.moAll.length > 3000) M.moAll.splice(0, M.moAll.length - 3000); }
+  /* the seconds from..to in detail, on the scale given: average, quietest and loudest tenth of a second, each band's
+     average and loudest, the pitch heard most, and the loud moments in it (seconds from its start); null under 2 seconds heard */
+  function detail(from, to, off){
+    let n = 0, e = 0, lo = Infinity, hi = -Infinity, nz = 0; const z = new Array(NB).fill(0), zp = new Array(NB).fill(-Infinity), fs = [];
+    for(const fr of M.fz){ if(fr.t < from || fr.t >= to) continue;
+      n++; e += Math.pow(10, fr.a / 10); if(fr.a < lo) lo = fr.a; if(fr.a > hi) hi = fr.a; if(fr.f) fs.push(fr.f);
+      if(fr.z){ nz++; for(let i = 0; i < NB; i++){ z[i] += fr.z[i]; const v = dB(fr.z[i]); if(v > zp[i]) zp[i] = v; } } }
+    if(n < 20) return null;
+    const ms = M.moAll.concat(M.cur ? [view(M.cur)] : []).filter(m => m.t < to && m.t + m.d * 1000 > from);
+    return { avg:r1(dB(e / n) + off), lo:Math.round(lo + off), hi:Math.round(hi + off), s:r1(n / 10),
+      z:nz ? z.map(s => Math.round(dB(s / nz) + off)) : null, zp:nz ? zp.map(v => Math.round(v + off)) : null,
+      f:fs.length >= 10 ? Math.round(mid(fs)) : 0,
+      mo:ms.slice(-8).map(m => ({ s:r1(Math.max(0, m.t - from) / 1000), d:m.d, pk:Math.round(m.pk + off), b:m.b, f:m.f, k:m.k })) };
+  }
+  const hzWord = f => (Math.round(f / 10) * 10).toLocaleString('en-US') + ' Hz';
+  const topBand = z => { let b = 0; z.forEach((v, i) => { if(v > z[b]) b = i; }); return b; };
+  function detWords(d, cal){
+    if(!d || !isFinite(d.avg)) return '';
+    let t = `average ${Math.round(d.avg)}, ${d.lo} to ${d.hi}${cal ? ' dBA' : ''}`;
+    if(d.z){ const b = topBand(d.z); t += `; most in the ${BAND[b]} band (${d.z[b]}${cal ? ' dB' : ''})`; }
+    if(d.f) t += `; pitch about ${hzWord(d.f)}`;
+    const mo = d.mo || [];
+    if(mo.length) t += `; ${mo.length} loud moment${mo.length === 1 ? '' : 's'}: ` + mo.slice(0, 3).map(m => KIND[m.k].short + (m.f ? ' (about ' + hzWord(m.f) + ')' : '')).join(', ');
+    return t;
+  }
+  /* under the boxes: the window in detail, and for an incident its own sound once Incident over is pressed */
+  function showDet(){
+    [['e-noise', true], ['bg-noise', false]].forEach(([id, inc]) => {
+      const inp = byId(id); if(!inp) return; const lab = inp.closest('label') || inp.parentNode;
+      let sp = lab.querySelector('.snd-det'); if(!sp){ sp = document.createElement('span'); sp.className = 'snd-det'; lab.appendChild(sp); }
+      const r = take(inp), parts = [];
+      if(r && r.d) parts.push((inc ? 'Before: ' : '') + detWords(r.d, r.cal));
+      if(inc && M.during) parts.push('During: ' + detWords(M.during, M.during.cal));
+      sp.textContent = parts.join('. '); sp.hidden = !parts.length; });
+  }
 
   function frame(){
     if(!M.an) return;
     const b = M.buf || (M.buf = new Float32Array(M.an.fftSize)); M.an.getFloatTimeDomainData(b);
     let e = 0; for(let i = 0; i < b.length; i++) e += b[i] * b[i]; e /= b.length;
     if(M.paused || dictating() || document.visibilityState !== 'visible'){ paint(); return; }
-    ingest(Date.now(), e); paint();
+    const t = Date.now(); ingest(t, e); zFrame(t, e); paint();
   }
   function paint(){
     const bar = byId('obsBarSnd'), btn = byId('sndBtn');
@@ -6589,21 +6734,23 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
       const src = ac.createMediaStreamSource(stream); let node = src;
       const w = aWeight(ac); if(w) w.forEach(f => { node.connect(f); node = f; });
       const an = ac.createAnalyser(); an.fftSize = 4096; an.smoothingTimeConstant = 0; node.connect(an);
-      const mute = ac.createGain(); mute.gain.value = 0; an.connect(mute); mute.connect(ac.destination);   /* Safari reads only what reaches the output */
+      /* v23.70 a second ear, not A-weighted, for the pitch bands and the pitch */
+      const anZ = ac.createAnalyser(); anZ.fftSize = 4096; anZ.smoothingTimeConstant = 0; src.connect(anZ);
+      const mute = ac.createGain(); mute.gain.value = 0; an.connect(mute); anZ.connect(mute); mute.connect(ac.destination);   /* Safari reads only what reaches the output */
       if(ac.state === 'suspended') await ac.resume().catch(() => {});
       const tr = stream.getAudioTracks()[0], st = tr && tr.getSettings ? tr.getSettings() : {};
       M.agc = st.autoGainControl === true || st.echoCancellation === true ? true : (st.autoGainControl === false ? false : null);
       if(tr) tr.addEventListener('ended', () => { if(M.on){ stop(); say('The microphone stopped (another app or a setting took it). Turn the meter on again.', true); } });
-      Object.assign(M, { on:true, ctx:ac, stream, an, buf:null, wtd:!!w, run:null, blk:null, paused:false, shown:0 });
+      Object.assign(M, { on:true, ctx:ac, stream, an, buf:null, wtd:!!w, run:null, blk:null, paused:false, shown:0, anZ, tz:null, fq:null, bmap:null, cur:null });
       M.iv = setInterval(frame, 100);
       paint();
     }catch(e){ try{ stream.getTracks().forEach(t => t.stop()); ac.close(); }catch(x){} say('The sound level could not be measured on this device.', true); }
   }
   function stop(){
-    clearInterval(M.iv); M.iv = 0; flush();
+    clearInterval(M.iv); M.iv = 0; zEnd(); flush();
     try{ M.stream && M.stream.getTracks().forEach(t => t.stop()); }catch(e){}
     try{ M.ctx && M.ctx.close(); }catch(e){}
-    Object.assign(M, { on:false, ctx:null, stream:null, an:null, run:null, blk:null, paused:false });
+    Object.assign(M, { on:false, ctx:null, stream:null, an:null, run:null, blk:null, paused:false, anZ:null });
     paint(); say('');
   }
   byId('sndBtn').addEventListener('click', () => { if(M.on) stop(); else start(); });
@@ -6625,32 +6772,35 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
 
   /* the timer's moments */
   window.addEventListener('abc-obs', e => { const s = e.detail && e.detail.state;
-    if(s === 'pause'){ M.paused = true; flush(); } else if(s === 'run') M.paused = false;
+    if(s === 'pause'){ M.paused = true; zEnd(); flush(); } else if(s === 'run') M.paused = false;
     else if(s === 'ended' && M.on){ stop(); say('The meter stopped with the observation.'); } paint(); });
   window.addEventListener('abc-check', e => { const d = e.detail || {}; if(d.outcome !== 'open') return;
-    const raw = level(d.at - d.win * 1000, d.at + 1); if(raw != null) M.checks[d.k] = rec(raw, d.win); });
+    const raw = level(d.at - d.win * 1000, d.at + 1); if(raw != null) M.checks[d.k] = rec(raw, d.win, d.at - d.win * 1000, d.at + 1); });
   /* with the meter off, a box is left as it is (a level typed from a meter stays) */
   window.addEventListener('abc-record-window', e => { const d = e.detail || {};
-    let r = M.checks[d.k]; if(!r){ if(!M.on) return; const raw = level(d.at - d.win * 1000, d.at + 1); r = raw == null ? null : rec(raw, d.win); }
+    let r = M.checks[d.k]; if(!r){ if(!M.on) return; const raw = level(d.at - d.win * 1000, d.at + 1); r = raw == null ? null : rec(raw, d.win, d.at - d.win * 1000, d.at + 1); }
     put(byId('bg-noise'), r); });
   window.addEventListener('abc-incident-start', e => { const d = e.detail || {}; if(!M.on) return;
     const end = d.at - 2000, raw = level(end - d.win * 1000, end);
-    put(byId('e-noise'), raw == null ? null : rec(raw, d.win)); });
+    M.during = null; put(byId('e-noise'), raw == null ? null : rec(raw, d.win, end - d.win * 1000, end)); });
+  /* v23.70 Incident over (or saving the incident while it runs): the incident's own sound, from its start */
+  window.addEventListener('abc-incident-over', e => { const d = e.detail || {}; if(!M.on) return;
+    const c = calGet(), dd = detail(d.from, d.to + 1, c ? c.off : NOMINAL); if(dd){ dd.cal = !!c; M.during = dd; showDet(); } });
 
   /* the boxes: a level the meter put there is kept with its scale; one typed (from a meter) is dBA */
-  function put(inp, r){ if(!inp) return; if(!r){ inp.value = ''; inp.removeAttribute('data-snd'); return; }
+  function put(inp, r){ if(!inp) return; if(!r){ inp.value = ''; inp.removeAttribute('data-snd'); showDet(); return; }
     inp.value = String(Math.round(r.v)); inp.setAttribute('data-snd', JSON.stringify(r));
-    inp.title = r.cal ? 'From the meter, in dBA' : 'From the meter, on the iPad’s own scale'; }
+    inp.title = r.cal ? 'From the meter, in dBA' : 'From the meter, on the iPad’s own scale'; showDet(); }
   function take(inp){ if(!inp || inp.value === '') return null; const v = Number(inp.value); if(!isFinite(v)) return null;
     let r = null; try{ r = JSON.parse(inp.getAttribute('data-snd') || 'null'); }catch(e){}
     if(r && String(Math.round(r.v)) === inp.value) return r;
     return { v, cal:true, src:'typed' }; }
-  ['e-noise', 'bg-noise'].forEach(id => { const n = byId(id); if(n) n.addEventListener('input', ev => { if(ev.isTrusted){ n.removeAttribute('data-snd'); n.title = ''; } }); });
+  ['e-noise', 'bg-noise'].forEach(id => { const n = byId(id); if(n) n.addEventListener('input', ev => { if(ev.isTrusted){ n.removeAttribute('data-snd'); n.title = ''; showDet(); } }); });
 
   /* the incident's level goes with it, comes back on Edit and is cleared with the form */
-  if(typeof readForm === 'function'){ const was = readForm; window.readForm = readForm = function(){ const e = was.apply(this, arguments); const r = take(byId('e-noise')); if(r) e.noise = r; else delete e.noise; return e; }; }
-  if(typeof clearForm === 'function'){ const was = clearForm; window.clearForm = clearForm = function(){ const o = was.apply(this, arguments); put(byId('e-noise'), null); return o; }; }
-  if(typeof loadIntoForm === 'function'){ const was = loadIntoForm; window.loadIntoForm = loadIntoForm = function(entry){ const o = was.apply(this, arguments); put(byId('e-noise'), entry && entry.noise && isFinite(entry.noise.v) ? entry.noise : null); return o; }; }
+  if(typeof readForm === 'function'){ const was = readForm; window.readForm = readForm = function(){ const e = was.apply(this, arguments); const r = take(byId('e-noise')); if(r) e.noise = r; else delete e.noise; if(M.during) e.noiseIn = M.during; else delete e.noiseIn; return e; }; }
+  if(typeof clearForm === 'function'){ const was = clearForm; window.clearForm = clearForm = function(){ const o = was.apply(this, arguments); M.during = null; put(byId('e-noise'), null); return o; }; }
+  if(typeof loadIntoForm === 'function'){ const was = loadIntoForm; window.loadIntoForm = loadIntoForm = function(entry){ const o = was.apply(this, arguments); M.during = entry && entry.noiseIn && isFinite(entry.noiseIn.avg) ? entry.noiseIn : null; put(byId('e-noise'), entry && entry.noise && isFinite(entry.noise.v) ? entry.noise : null); return o; }; }
   /* a background sample takes the level in its box when it is saved */
   let n0 = -1, ed = null;
   document.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('#bg-save')){ n0 = state.samples.length; ed = state.bgEditingId || null; } }, true);
@@ -6668,6 +6818,99 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
 
   /* the tables */
   window.abcNoiseLine = r => (r && r.noise && isFinite(r.noise.v)) ? `<div class="snd-line">sound ${Math.round(r.noise.v)}${r.noise.cal ? ' dBA' : ' <span class="snd-sc">(iPad scale)</span>'}</div>` : '';
+
+  /* v23.70 the tables: an incident's own sound (its detail is on the Analysis tab and in the box) */
+  { const was = window.abcNoiseLine;
+    window.abcNoiseLine = r => { const di = r && r.noiseIn;
+      return was(r) + (di && isFinite(di.avg) ? `<div class="snd-line">during ${Math.round(di.avg)}${di.cal ? ' dBA' : ' <span class="snd-sc">(iPad scale)</span>'}</div>` : ''); }; }
+
+  /* v23.70 the sound in detail on the Analysis tab: the observed time by pitch band, before incidents and at the checks
+     band by band, each incident's sound before and during, the loud moments */
+  window.abcSoundDetail = function(S){
+    const inDay = day => !(S.f.from && day < S.f.from) && !(S.f.to && day > S.f.to);
+    let runs = (state.noise.runs || []).filter(r => Array.isArray(r.z) && r.z.some(Boolean));
+    let incD = S.coded.filter(e => e.noise && e.noise.d && e.noise.d.z), incIn = S.coded.filter(e => e.noiseIn && isFinite(e.noiseIn.avg)), chkD = S.samples.filter(s => s.noise && s.noise.d && s.noise.d.z);
+    if(!runs.length && !incD.length && !incIn.length && !chkD.length) return '';
+    /* one scale, as above */
+    const isCal = { run:r => r.off != null, inc:e => !!e.noise.cal, inn:e => !!e.noiseIn.cal, chk:s => !!s.noise.cal };
+    const nCal = runs.filter(isCal.run).length + incD.filter(isCal.inc).length + incIn.filter(isCal.inn).length + chkD.filter(isCal.chk).length;
+    const nAll = runs.length + incD.length + incIn.length + chkD.length, useCal = nCal >= nAll - nCal;
+    runs = runs.filter(r => isCal.run(r) === useCal); incD = incD.filter(e => isCal.inc(e) === useCal); incIn = incIn.filter(e => isCal.inn(e) === useCal); chkD = chkD.filter(s => isCal.chk(s) === useCal);
+    const dropped = nAll - (runs.length + incD.length + incIn.length + chkD.length), unit = useCal ? ' dBA' : '', bu = useCal ? ' dB' : '';
+    const P = v => Math.pow(10, v / 10), tm = t => { const d = new Date(t); return [d.getHours(), d.getMinutes(), d.getSeconds()].map((x, i) => i ? String(x).padStart(2, '0') : String(x)).join(':'); };
+    /* the observed time: every 10-second block in the date filter */
+    let E = 0, n = 0, lo = Infinity, hi = -Infinity, nz = 0; const zE = new Array(NB).fill(0), zP = new Array(NB).fill(-Infinity), mos = [];
+    runs.forEach(run => { const off = run.off == null ? NOMINAL : run.off;
+      run.v.forEach((v, k) => { if(v == null) return; const t = (run.b0 + k) * BLOCK; if(!inDay(localISO(new Date(t)))) return;
+        E += P(v + off); n++;
+        if(run.lo && run.lo[k] != null){ lo = Math.min(lo, run.lo[k] + off); hi = Math.max(hi, run.hi[k] + off); }
+        const z = run.z[k], zp = run.zp && run.zp[k]; if(z){ nz++; z.forEach((x, i) => { zE[i] += P(x + off); if(zp) zP[i] = Math.max(zP[i], zp[i] + off); }); } });
+      (run.mo || []).forEach(m => { if(inDay(localISO(new Date(m.t)))) mos.push(Object.assign({}, m, { pk:m.pk + off, z:m.z ? m.z.map(x => x + off) : null })); }); });
+    const zAvg = nz ? zE.map(e => dB(e / nz)) : null, R = Math.round;
+    let body = '';
+    if(n && zAvg){
+      const top = topBand(zAvg), cnt = i => mos.filter(m => m.b === i).length;
+      const yMin = Math.floor((Math.min(...zAvg) - 5) / 10) * 10, yMax = Math.ceil((Math.max(...zP.filter(isFinite), ...zAvg) + 2) / 10) * 10;
+      const W = 960, H = 210, L = 46, Rt = 12, T = 16, B = 46, bw = (W - L - Rt) / NB, y = v => T + (yMax - v) / Math.max(1, yMax - yMin) * (H - T - B);
+      let g = ''; for(let v = yMin; v <= yMax; v += 10) g += `<line x1="${L}" x2="${W - Rt}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="#e3e8ee"/><text x="${L - 6}" y="${(y(v) + 4).toFixed(1)}" font-size="10.5" text-anchor="end" fill="#5b6876">${v}</text>`;
+      const bars = zAvg.map((v, i) => { const x = L + i * bw + bw * 0.2, w = bw * 0.6, yp = isFinite(zP[i]) ? y(zP[i]) : null;
+        return `<rect x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, H - B - y(v)).toFixed(1)}" fill="${i === top ? '#3d4f6b' : '#8a99ad'}"/>` +
+          `<text x="${(x + w / 2).toFixed(1)}" y="${(y(v) - 4).toFixed(1)}" font-size="11" text-anchor="middle" fill="#22303c">${R(v)}</text>` +
+          (yp != null ? `<line x1="${(x - 3).toFixed(1)}" x2="${(x + w + 3).toFixed(1)}" y1="${yp.toFixed(1)}" y2="${yp.toFixed(1)}" stroke="#a5452f" stroke-width="2"/>` : '') +
+          `<text x="${(x + w / 2).toFixed(1)}" y="${H - B + 15}" font-size="11" text-anchor="middle" fill="#22303c">${BAND_TICK[i]}</text>`; }).join('');
+      const grp = [[0, 1, 'deep'], [2, 4, 'voices'], [5, 6, 'high: screams, shrieks'], [7, 7, 'hiss']].map(([a, b, w]) => { const x0 = L + a * bw + 6, x1 = L + (b + 1) * bw - 6;
+        return `<line x1="${x0.toFixed(1)}" x2="${x1.toFixed(1)}" y1="${H - B + 24}" y2="${H - B + 24}" stroke="#b9c3cf"/><text x="${((x0 + x1) / 2).toFixed(1)}" y="${H - B + 38}" font-size="10.5" text-anchor="middle" fill="#5b6876">${w}</text>`; }).join('');
+      body += `<div class="metrics">
+          <div class="metric"><div class="v">${R(dB(E / n))}${unit}</div><div class="k">average level over the ${R(n / 6)} minutes observed</div></div>
+          <div class="metric"><div class="v">${isFinite(lo) ? R(lo) + '&ndash;' + R(hi) : '&mdash;'}${unit}</div><div class="k">range: the quietest to the loudest tenth of a second</div></div>
+          <div class="metric"><div class="v">${BAND[top]}</div><div class="k">the loudest band on average (${R(zAvg[top])}${bu})</div></div>
+          <div class="metric"><div class="v">${mos.length}</div><div class="k">loud moments (${mos.filter(m => m.k === 'hi').length} high-pitched, ${mos.filter(m => m.k === 'ru').length} deep, ${mos.filter(m => m.k === 'hs').length} hiss or static)</div></div>
+        </div>` +
+        `<div class="chartbox"><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Average and loudest level in each pitch band">${g}${bars}${grp}</svg>` +
+        `<div class="legend"><span><i style="background:#8a99ad"></i>each band&rsquo;s average</span><span><i style="background:#a5452f;height:3px"></i>its loudest tenth of a second</span></div></div>` +
+        `<div class="snd-day" style="padding:4px 16px 0">The observed time, band by band</div>` +
+        `<div class="matrix-wrap"><table><thead><tr><th>Pitch band</th><th>Usually heard there</th><th class="num">Average</th><th class="num">Loudest</th><th class="num">Loud moments</th></tr></thead><tbody>` +
+        zAvg.map((v, i) => `<tr><td style="white-space:nowrap">${BAND[i]}</td><td>${BAND_SAYS[i]}</td><td class="num">${R(v)}${bu}</td><td class="num">${isFinite(zP[i]) ? R(zP[i]) + bu : '&mdash;'}</td><td class="num">${cnt(i)}</td></tr>`).join('') +
+        `</tbody></table></div>`;
+    }
+    /* before incidents and at the checks, band by band */
+    if(incD.length >= 3 && chkD.length >= 5){
+      const md = rs => Array.from({ length:NB }, (_, i) => mid(rs.map(r => r.noise.d.z[i]))), mi = md(incD), mc = md(chkD);
+      const df = mi.map((v, i) => v - mc[i]), big = topBand(df), sg = v => { const r = R(v); return (r > 0 ? '+' : r < 0 ? '&minus;' : '') + Math.abs(r) + ' dB'; };
+      body += `<div class="snd-day" style="padding:4px 16px 0">Before incidents and at the background checks, band by band (the median of ${incD.length} incidents and ${chkD.length} checks)</div>` +
+        `<div class="matrix-wrap"><table><thead><tr><th>Pitch band</th><th class="num">Before incidents</th><th class="num">At checks</th><th class="num">Difference</th></tr></thead><tbody>` +
+        mi.map((v, i) => `<tr><td style="white-space:nowrap">${BAND[i]}</td><td class="num">${R(v)}${bu}</td><td class="num">${R(mc[i])}${bu}</td><td class="num"${i === big && df[i] >= 5 ? ' style="font-weight:700"' : ''}>${sg(df[i])}</td></tr>`).join('') +
+        `</tbody></table></div>` +
+        gate(df[big] >= 5 ? `<b>The ${BAND[big]} band was ${R(df[big])} dB louder before incidents than at the background checks</b> (the median of ${incD.length} incidents against ${chkD.length} checks). Sound usually heard there: ${BAND_SAYS[big]}. A band that is louder before the behavior than in the room as sampled is worth asking about and testing directly; this record cannot show that the sound evokes the behavior.`
+          : `<b>No band was 5 dB or more louder before incidents than at the background checks</b> (the median of ${incD.length} incidents against ${chkD.length} checks).`);
+    }
+    /* each incident's sound, before and during */
+    const each = S.coded.filter(e => incD.includes(e) || incIn.includes(e)).sort((a, b) => ((b.date || '') + (b.time || '')).localeCompare((a.date || '') + (a.time || ''))).slice(0, 15).reverse();   /* the last 15, in time order */
+    if(each.length) body += `<div class="snd-day" style="padding:4px 16px 0">Each incident&rsquo;s sound${each.length === 15 ? ' (the last 15)' : ''}</div>` +
+      `<div class="matrix-wrap"><table><thead><tr><th>Incident</th><th>The seconds before it</th><th>During it (Incident starting to Incident over)</th></tr></thead><tbody>` +
+      each.map(e => `<tr><td style="white-space:nowrap">${esc(e.date || '')} ${esc(e.time || '')}</td><td>${incD.includes(e) ? esc(detWords(e.noise.d, useCal)) : '&mdash;'}</td><td>${incIn.includes(e) ? esc(detWords(e.noiseIn, useCal)) : '&mdash;'}</td></tr>`).join('') +
+      `</tbody></table></div>`;
+    /* the loud moments, day by day: the loudest twelve of each of the last three days, in time order */
+    const byDay = {}; mos.forEach(m => { const k = localISO(new Date(m.t)); (byDay[k] || (byDay[k] = [])).push(m); });
+    Object.keys(byDay).sort().slice(-3).forEach(day => {
+      const all = byDay[day], ms = all.slice().sort((a, b) => b.pk - a.pk).slice(0, 12).sort((a, b) => a.t - b.t);
+      const inc = S.coded.filter(e => e.date === day && e.time).map(e => ({ m:+e.time.slice(0, 2) * 60 + +e.time.slice(3, 5), dur:Math.max(1, +e.duration || 1), at:e.time }));
+      const near = t => { const d = new Date(t), m = d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+        const a = inc.find(i => m >= i.m && m < i.m + i.dur); if(a) return 'during an incident (' + esc(a.at) + ')';
+        const b = inc.find(i => m >= i.m - 2 && m < i.m); return b ? 'just before an incident (' + esc(b.at) + ')' : ''; };
+      body += `<div class="snd-day" style="padding:4px 16px 0">${esc(day)}: ${all.length > ms.length ? 'the 12 loudest of ' + all.length + ' loud moments' : all.length + ' loud moment' + (all.length === 1 ? '' : 's')}, in time order</div>` +
+        `<div class="matrix-wrap"><table><thead><tr><th>Time</th><th class="num">Seconds</th><th class="num">Peak</th><th>Loudest band</th><th>What it was like</th><th>Near an incident</th></tr></thead><tbody>` +
+        ms.map(m => `<tr><td>${tm(m.t)}</td><td class="num">${m.d}</td><td class="num" style="white-space:nowrap">${R(m.pk)}${unit}</td><td style="white-space:nowrap">${m.b >= 0 ? BAND[m.b] + (m.z ? ' (' + R(m.z[m.b]) + bu + ')' : '') : '&mdash;'}</td><td>${m.f ? 'About ' + hzWord(m.f) + ': ' : ''}${KIND[m.k].long}</td><td>${near(m.t)}</td></tr>`).join('') +
+        `</tbody></table></div>`;
+    });
+    if(!body) return '';
+    const mix = dropped ? gate(`<b>${dropped} log${dropped === 1 ? ' or level is' : 's or levels are'} on the other scale</b> (${useCal ? 'the iPad&rsquo;s own scale' : 'dBA'}) and left out: the two scales are not compared.`) : '';
+    return card('The sound in detail: pitch bands and loud moments', `${mos.length} loud moments; ${incD.length + incIn.length ? (new Set(incD.concat(incIn))).size + ' incidents' : 'no incidents'} with detail`,
+      body + mix +
+      caveat(`<b>The meter hears pitch and loudness, not what made a sound.</b> A high-pitched moment can be a scream or a whistle, a deep one thunder or a slammed door. Use the moments to point you to what to ask about and watch for, and record what you saw and heard in the incident itself.`) +
+      caveat(`<b>The pitch ranges, from published research.</b> Speaking pitch averages about 130 Hz for men, 220 Hz for women and 235 Hz for children of 10 to 12 (Hillenbrand, Getty, Clark, &amp; Wheeler, 1995), and about 265 to 275 Hz at 7 (Lee, Potamianos, &amp; Narayanan, 1999). In a scream the pitch can rise as much as tenfold over the same person&rsquo;s speaking pitch (Pisanski, Raine, &amp; Reby, 2020); in one set of recordings fear screams averaged about 1,430 Hz and pain screams about 680 Hz (Engelberg, Schwartz, &amp; Gouzoules, 2021), and screams have a rough, harsh quality that sets them apart from speech (Arnal, Flinker, Kleinschmidt, Giraud, &amp; Poeppel, 2015). So a moment is called high-pitched at 600 Hz and above, about twice a child&rsquo;s speaking pitch. The hiss of &ldquo;s&rdquo; lies higher than that of &ldquo;sh&rdquo; (Jongman, Wayland, &amp; Wong, 2000). Hearing is most sensitive at about 2 to 5 kHz (International Organization for Standardization, 2003).`) +
+      caveat(`<b>Each band is its own level in dB, not A-weighted.</b> A-weighting counts the deepest sounds less, as the ear does, and so understates low-frequency sound, about 10 to 200 Hz (Leventhall, 2004): a deep band can read higher than the overall ${useCal ? 'dBA' : 'level'}. An iPad&rsquo;s microphone may hear the deepest band (63 Hz and below) less fully than a sound level meter. A <b>loud moment</b> is at least 10 dB above the room&rsquo;s median of the last two minutes (A-weighted, or across all the bands, so a deep rumble counts), for 0.3 seconds or more, or a brief sound 15 dB above it. The observed time follows the date filter; the incidents and checks follow every filter.`));
+  };
 
   /* ---- the analysis ---- */
   const med = a => q(a, .5);
@@ -6751,11 +6994,15 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
   css.textContent = '.snd-ctl{margin-top:8px}.snd-ctl .snd-tog[aria-pressed="true"]{background:#e4eef0;border-color:var(--nbh-teal,#2f7f86)}.snd-ctl .snd-tog[aria-pressed="true"]::before{content:"\\25CF\\00a0";color:#b4412e}' +
     '.snd-now{font:600 13px var(--nbh-sans,system-ui,sans-serif);color:var(--ink-soft,#46606b);font-variant-numeric:tabular-nums}.snd-now.snd-warn{color:#a5452f}.snd-note{margin-top:6px}' +
     '#bg-table tr.bg-editing td{background:#fff7e6}.obs-bar .obs-snd{font-variant-numeric:tabular-nums;white-space:nowrap}.snd-line{font-size:11.5px;color:var(--ink-faint)}.snd-sc{white-space:nowrap}.snd-day{font-size:12px;color:var(--ink-soft,#46606b);margin:0 0 4px}' +
-    '@media print{.snd-ctl,.snd-note,.obs-snd{display:none!important}}';
+    '@media print{.snd-ctl,.snd-note,.obs-snd{display:none!important}}' +
+    /* v23.70 */ '.snd-det{display:block;font-size:11.5px;font-weight:400;color:var(--ink-faint);margin-top:3px;line-height:1.35;max-width:46ch}.snd-det[hidden]{display:none}.snd-rg{white-space:nowrap}';
   (document.head || document.documentElement).appendChild(css);
 
   /* for the form's tests: readings as the meter would take them (the time in ms, the level on the raw scale) */
-  window.abcNoise = { on:() => M.on, feed:(t0, t1, raw) => { for(let t = t0; t < t1; t += 100) ingest(t, Math.pow(10, raw / 10)); }, flush, level:(a, b) => level(a, b), stop };
+  window.abcNoise = { on:() => M.on, feed:(t0, t1, raw) => { for(let t = t0; t < t1; t += 100) ingest(t, Math.pow(10, raw / 10)); }, flush, level:(a, b) => level(a, b), stop,
+    /* v23.70 frames with their bands (dB, the raw scale) and pitch; the moments; the detail of a stretch */
+    feedZ:(t0, t1, raw, z, f) => { for(let t = t0; t < t1; t += 100){ const e = Math.pow(10, raw / 10); ingest(t, e); zIngest(t, e, z.map(v => Math.pow(10, v / 10)), f || 0); } },
+    end:zEnd, moments:() => M.moAll.slice(), detail:(a, b) => detail(a, b, NOMINAL), during:() => M.during, frames:() => M.fz.length };
   if((state.entries || []).some(has) || (state.samples || []).some(has)){ try{ renderIncidents(); renderSamples(); }catch(e){} }
 })();
 </script>
