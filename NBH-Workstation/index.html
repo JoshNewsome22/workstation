@@ -2566,7 +2566,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.52';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.53';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -7168,15 +7168,15 @@ async function drvPut(r,id,k){const base=r.drv&&r.drv.ver||null,text=r.text;
      (v22.06 read and written in one transaction, so a save in between is not overwritten) */
   await clTx('readwrite',st=>{const g=st.get(r.key);g.onsuccess=()=>{const cur=g.result;if(!cur)return;
     const same=cur.text===text;cur.drv=Object.assign({},cur.drv||{},{id:f.id,at:new Date().toISOString()});
-    if(same){cur.drv.ver=String(f.version);cur.drv.dirty=false;}else if(String(cur.drv.ver||'')===String(base||''))cur.drv.ver=String(f.version);
+    if(same){cur.drv.ver=String(f.version);cur.drv.dirty=false;cur.drv.base=text;}else if(String(cur.drv.ver||'')===String(base||'')){cur.drv.ver=String(f.version);cur.drv.base=text;}   /* v23.53 base: the text at that version */
     st.put(cur);};});
-  if(r.key===clKey(packet())&&String(state.drvBase||'')===String(base||'')){state.drvBase=String(f.version);state.drvKey=r.key;}
+  if(r.key===clKey(packet())&&String(state.drvBase||'')===String(base||'')){state.drvBase=String(f.version);state.drvKey=r.key;state.drvBaseText=text;}
   return f;}
 /* Drive's copy comes here */
 async function drvBring(f,r,j){j=j||await drvRead(f.id);const x=j.rec||{};
   const key=clKey({client:x.client||'',sid:x.sid||''});if(!key)return null;
   const rec=Object.assign({},r||{},{key,scope:clScope(),client:x.client||'',sid:x.sid||'',site:x.site||'',grade:x.grade||'',bcba:x.bcba||'',saved:x.saved||f.modifiedTime,
-    sum:x.sum||{items:[]},text:await mediaPackText(j.text),dev:x.dev||'',read:x.read,unfiled:false,drv:{id:f.id,ver:String(f.version),dirty:false,at:new Date().toISOString()}});
+    sum:x.sum||{items:[]},text:await mediaPackText(j.text),dev:x.dev||'',read:x.read,unfiled:false,drv:{id:f.id,ver:String(f.version),dirty:false,at:new Date().toISOString()}});rec.drv.base=rec.text;   /* v23.53 */
   if(!(await drvPutIf(rec,r))){DRV.again=DRV.again||true;return null;}return rec;}
 /* v22.06 written only over the copy the sync read: a Save case made here while the sync was busy is not replaced (it waits
    for Drive, and the next pass sends it or asks which copy to keep). Read and write in one transaction. */
@@ -7190,6 +7190,7 @@ function drvDelIf(r){return clTx('readwrite',st=>{const o={result:false},g=st.ge
 async function drvClash(r,f,k,opt,res){const j=await drvRead(f.id);
   if(j.nbh!=='case-sync'){await drvPut(r,f.id,k);res.sent++;res.up.push(drvIni(r));return;}
   if(j.text===r.text||await mediaSameText(j.text,r.text)){if(!(await drvPutIf(Object.assign({},r,{drv:Object.assign({},r.drv||{},{id:f.id,ver:String(f.version),dirty:false})}),r)))DRV.again=DRV.again||true;return;}
+  if(r.drv&&r.drv.base&&typeof drvMerge==='function'&&await drvMerge(r,f,k,j,opt,res))return;   /* v23.53 put together from the version both stood on */
   const rs=(j.rec&&j.rec.saved)||f.modifiedTime,rd=(j.rec&&j.rec.dev)||(f.appProperties&&f.appProperties.dev)||'other device';
   /* the first time this device joins: the newer save stays, the other goes to Replaced copies */
   if(opt.first&&!(r.drv&&r.drv.id)){if(Date.parse(r.saved)>=Date.parse(rs)){await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'older copy from the '+rd);await drvPut(r,f.id,k);res.sent++;res.up.push(drvIni(r));}
@@ -7264,7 +7265,7 @@ let drvT=0;
 function drvSoon(interactive,ms){clearTimeout(drvT);drvT=setTimeout(()=>{drvSync({interactive:!!interactive});},ms==null?400:ms);drvPaint();}
 /* what Save case and the other writes call */
 function drvStamp(rec,old){rec.dev=drvDev();const od=old&&old.drv||null;
-  rec.drv={id:od&&od.id||'',ver:(state.drvKey===rec.key?state.drvBase:(od?od.ver:null))||null,dirty:true};
+  {const scr=state.drvKey===rec.key;rec.drv={id:od&&od.id||'',ver:(scr?state.drvBase:(od?od.ver:null))||null,dirty:true,base:(scr?state.drvBaseText:(od?od.base:null))||null};}   /* v23.53 base: the text of that version */
   const k=drvKey(rec);if(k)drvHash(k).then(h=>{const s=drvSkip();if(h in s){delete s[h];drvSkipSet(s);}}).catch(()=>{});}
 function drvDirty(r){r.drv=Object.assign({id:'',ver:null},r.drv||{},{dirty:true});if(drvOn())drvSoon(false,1500);}
 const drvSaveMode=()=>drvOn();
@@ -7296,11 +7297,11 @@ async function drvNewerPaint(){const bar=$('#drvBar');if(!bar)return;const k=clK
   bar.dataset.key=k;bar.dataset.ver=r.drv.ver;}
 /* the student on screen: the version of Drive it stands on */
 {const oc9=openCaseText;openCaseText=async function(text,handle,opt){const out=await oc9.apply(this,arguments);
-  try{let d=null;try{d=parseCase(text);}catch(e){}const k=clKey(packet()),rec=k&&await drvLocal(k);state.drvBase=null;state.drvKey=k||'';state.drvOpenAt=Date.now();
+  try{let d=null;try{d=parseCase(text);}catch(e){}const k=clKey(packet()),rec=k&&await drvLocal(k);state.drvBase=null;state.drvBaseText=null;state.drvKey=k||'';state.drvOpenAt=Date.now();
     if(rec&&rec.drv&&d){let rd=null;try{rd=parseCase(rec.text);}catch(e){}
-      if(rec.text===text||(rd&&d.saved&&rd.saved&&Math.abs(Date.parse(rd.saved)-Date.parse(d.saved))<120000))state.drvBase=rec.drv.ver||null;}}catch(e){}
+      if(rec.text===text||(rd&&d.saved&&rd.saved&&Math.abs(Date.parse(rd.saved)-Date.parse(d.saved))<120000)){state.drvBase=rec.drv.ver||null;state.drvBaseText=rec.drv.base||null;}}}catch(e){}
   drvNewerPaint();return out;};}
-{const cc9=clearCase;clearCase=async function(){const r=await cc9.apply(this,arguments);state.drvBase=null;state.drvKey='';drvNewerPaint();return r;};}
+{const cc9=clearCase;clearCase=async function(){const r=await cc9.apply(this,arguments);state.drvBase=null;state.drvBaseText=null;state.drvKey='';drvNewerPaint();return r;};}
 /* opening a student gets their newest copy first */
 const drvIdle=async()=>{for(let i=0;i<300&&DRV.busy;i++)await new Promise(r=>setTimeout(r,100));};
 {const cg9=caseloadGo;caseloadGo=async function(key,form){
@@ -9778,6 +9779,30 @@ async function shSweep(){if(clOff())return;const L=await clList();if(!L)return;c
 async function shWipe(){for(const r of await shAll())await shDel(r.id);}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-cldel]'))setTimeout(()=>shSweep().catch(()=>{}),4000);},true);
 setTimeout(()=>shSweep().catch(()=>{}),20000);
+</script>
+<script id="nbh-v2353">
+/* v23.53 two changed copies of a student in Google Drive, put together (drvClash calls this when the version both stood on
+   is known here). Returns true when it dealt with them: put together and sent, or left for later (Decide later, or a field
+   both changed found by a sync that may not ask). */
+async function drvMerge(r,f,k,j,opt,res){let base,mine,theirs,tt;
+  try{base=parseCase(r.drv.base);mine=parseCase(r.text);tt=await mediaPackText(j.text);theirs=parseCase(tt);}catch(e){return false;}
+  if(!base||!mine||!theirs||!mine.forms||!theirs.forms)return false;
+  const M=nbhMerge.mergeCase(base,mine,theirs),rd=(j.rec&&j.rec.dev)||(f.appProperties&&f.appProperties.dev)||'other device',
+    who=(j.rec&&j.rec.by)?String(j.rec.by):'the '+rd,rs=(j.rec&&j.rec.saved)||f.modifiedTime;
+  if(M.conflicts.length){if(!opt.interactive){DRV.conf[r.key]=1;return true;}
+    if(!(await shReview(M,{from:who,drive:true},clName(r)))){DRV.conf[r.key]=1;return true;}
+    delete DRV.conf[r.key];}
+  const out=M.finish();out.saved=new Date().toISOString();
+  /* the copy whose value was not kept, to Replaced copies (nothing is lost by a choice) */
+  if(M.conflicts.some(c=>c.pick==='theirs'))await drvKeepOld(r,'before it was put together, from this '+drvDev());
+  if(M.conflicts.some(c=>c.pick!=='theirs'))await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'before it was put together, from '+who);
+  const r2=Object.assign({},r,{text:JSON.stringify(out),saved:out.saved,drv:Object.assign({},r.drv||{},{id:f.id,ver:String(f.version),base:tt,dirty:true})});
+  if(!(await drvPutIf(r2,r))){DRV.again=DRV.again||true;return true;}
+  await drvPut(r2,f.id,k);res.sent++;res.up.push(drvIni(r));(res.merged=res.merged||[]).push(clName(r));
+  return true;}
+{const ds=drvSync;drvSync=async function(){const res=await ds.apply(this,arguments);
+  try{if(res&&res.merged&&res.merged.length)wsUI.toast(res.merged.join(', ')+': the two copies were put together; the work from both is kept.',{kind:'ok',ms:8000});}catch(e){}
+  return res;};}
 </script>
 </body>
 </html>

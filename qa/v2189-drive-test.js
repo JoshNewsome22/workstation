@@ -1,7 +1,8 @@
 /* v21.89 the caseload in Google Drive: an iPad and a laptop share one caseload through a (simulated) school Google Drive.
    Use Google Drive on each; Save case keeps the case here and sends it (no file downloaded); the other device gets it and opens
    the newest copy; the case on screen told when a newer copy came from the other device; a copy changed on both without the
-   other asks which to keep and puts the other in Replaced copies; a save with the sign-in over waits and goes at the next one;
+   other is put together from the version both stood on (v23.53): a field both changed is asked about side by side, and the
+   copy that loses a value goes to Replaced copies; a save with the sign-in over waits and goes at the next one;
    Remove everywhere and Remove only here; a personal account warned; a different account refused; the Drive API not turned on
    said plainly; Save case to a file still writes one; a case over 5 MB goes by the resumable upload (v21.97); a device whose Safari
    refuses its settings store keeps the key and the Drive settings in the workstation's own store (v21.98); the staff directory
@@ -83,6 +84,7 @@ const rec=(page,client)=>page.evaluate(async c=>{const r=(await clList()||[]).fi
 const idle=page=>page.waitForFunction(()=>!DRV.busy,null,{timeout:20000}).then(()=>sleep(250));
 /* a choice box of the workstation: its title and buttons; press the one whose label matches */
 const dlgOf=page=>page.evaluate(()=>{const d=document.getElementById('cfDlg');return {open:d.open,t:document.getElementById('cfTitle').textContent,b:document.getElementById('cfBody').textContent,btns:[...document.querySelectorAll('#cfFoot button')].map(x=>x.textContent)};});
+const rv=page=>page.evaluate(()=>({open:document.getElementById('dlg').open,t:document.getElementById('dlgTitle').textContent,b:document.getElementById('dlgBody').textContent,n:document.querySelectorAll('#dlgBody .sh-c').length}));   /* v23.53 Changes from ... */
 const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...document.querySelectorAll('#cfFoot button')].find(x=>re.test(x.textContent));if(b)b.click();return !!b;},re.source);
 (async()=>{const br=await chromium.launch();
   try{
@@ -134,12 +136,12 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   await B.page.evaluate(()=>document.getElementById('saveCase').click());await sleep(2500);await idle(B.page);
   /* 13 the iPad signs in from the chip: two different copies, asked */
   await A.page.evaluate(()=>{window.__gsFail='';document.getElementById('drvChip').click();});await sleep(1500);
-  const q=await dlgOf(A.page);
-  ok('13 the iPad signs in: “Mateo Rivera: two different copies”, each device and time named, the choice offered',q.open&&/Mateo Rivera: two different copies/.test(q.t)&&/This iPad saved it today at/.test(q.b)&&/The Mac saved it today at/.test(q.b)&&/Replaced copies/.test(q.b)&&q.btns.includes('Keep this iPad’s')&&q.btns.includes('Keep the Mac’s'),q);
-  await press(A.page,/Keep the Mac’s/);await sleep(1500);await idle(A.page);
+  await A.page.waitForSelector('#shGo',{timeout:15000}).catch(()=>{});const q=await rv(A.page);
+  ok('13 the iPad signs in: both copies changed the same answer; Changes from the Mac puts it side by side (this iPad\'s until chosen)',q.open&&/^Changes from the Mac$/.test(q.t)&&q.n===1&&/Yours: No court involvement \(simulated, iPad\)\./.test(q.b)&&/The Mac’s: Court date pending \(simulated, laptop\)\./.test(q.b),q);
+  await A.page.evaluate(()=>{document.querySelector('.sh-c input[value="theirs"]').checked=true;document.getElementById('shGo').click();});await sleep(1500);await idle(A.page);
   const k=await A.page.evaluate(async()=>{const r=(await clList()||[])[0];return {dirty:r.drv.dirty,laptop:/Court date pending/.test(r.text),bar:!document.getElementById('drvBar').hidden};});
   const ol=olds();
-  ok('14 Keep the Mac’s: the iPad’s copy is the laptop’s, the iPad’s own goes to Replaced copies in Drive, the bar offers the kept copy',!k.dirty&&k.laptop&&k.bar&&ol.length===1&&/simulated, iPad/.test(ol[0].content)&&/not kept, from this iPad/.test(ol[0].name),{k,old:ol.map(f=>f.name)});
+  ok('14 the Mac’s answer chosen: the iPad’s copy holds it and is sent, the iPad’s own copy goes to Replaced copies in Drive, the bar offers the case as put together',!k.dirty&&k.laptop&&k.bar&&ol.length===1&&/simulated, iPad/.test(ol[0].content)&&/before it was put together, from this iPad/.test(ol[0].name),{k,old:ol.map(f=>f.name)});
   await A.page.evaluate(()=>document.getElementById('drvBarOpen').click());await sleep(2500);
   /* 15 a second student on the laptop; Remove only here on the iPad, then a new save on the laptop brings it back */
   await B.page.evaluate(()=>clearCase());await sleep(700);
@@ -294,15 +296,15 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   await setField(G.dm,'s.living','SECOND iPad words, typed after the Mac saved (simulated).');await sleep(600);
   D.slow=3000;await G.page.evaluate(()=>{drvSync({});});await sleep(700);const busy=await G.page.evaluate(()=>DRV.busy);
   await G.page.evaluate(()=>document.getElementById('saveCase').click());await sleep(1500);
-  const askOrIdle=()=>G.page.waitForFunction(()=>document.getElementById('cfDlg').open||!DRV.busy,null,{timeout:30000});   /* a question about two copies holds the sync until it is answered */
+  const askOrIdle=()=>G.page.waitForFunction(()=>document.getElementById('cfDlg').open||document.getElementById('dlg').open||!DRV.busy,null,{timeout:30000});   /* a question about two copies holds the sync until it is answered */
   await askOrIdle();D.slow=0;await sleep(2500);await askOrIdle();
   const keyG=await G.page.evaluate(st=>clKey(st),ST);
-  const mid33=await G.page.evaluate(async k=>{const r=(await clList()||[]).find(x=>x.key===k);return {second:/SECOND iPad/.test(r.text),mac:/MAC words/.test(r.text),dirty:r.drv.dirty,conf:!!DRV.conf[k],dlg:document.getElementById('cfDlg').open};},keyG);
-  if(!mid33.dlg){await G.page.evaluate(()=>{drvSync({interactive:true});});await G.page.waitForFunction(()=>document.getElementById('cfDlg').open,null,{timeout:15000}).catch(()=>{});}
-  const ask33=await dlgOf(G.page);await press(G.page,/Keep this iPad/);await sleep(1500);await askOrIdle();await sleep(500);await idle(G.page);
+  const mid33=await G.page.evaluate(async k=>{const r=(await clList()||[]).find(x=>x.key===k);return {second:/SECOND iPad/.test(r.text),mac:/MAC words/.test(r.text),dirty:r.drv.dirty,conf:!!DRV.conf[k],dlg:!!document.getElementById('shGo')};},keyG);
+  if(!mid33.dlg){await G.page.evaluate(()=>{drvSync({interactive:true});});await G.page.waitForSelector('#shGo',{timeout:15000}).catch(()=>{});}
+  const ask33=await rv(G.page);await G.page.evaluate(()=>{const b=document.getElementById('shGo');if(b)b.click();});await sleep(1500);await askOrIdle();await sleep(500);await idle(G.page);
   const end33={drive:/SECOND iPad/.test(stF().content),old:olds().some(o=>/MAC words/.test(o.content)&&/SIM-0003/.test(o.content)),local:(await rec(G.page,ST.client))};
-  ok('33 Save case while a sync brings the Mac’s newer copy: the iPad’s save is kept and waits (not replaced); asked which copy, Keep this iPad’s sends it to Drive and the Mac’s copy goes to Replaced copies',
-    v33mac&&busy&&mid33.second&&!mid33.mac&&mid33.dirty&&/two different copies/.test(ask33.t+ask33.b)&&end33.drive&&end33.old&&/SECOND iPad/.test(end33.local.text)&&!end33.local.drv.dirty,{v33mac,busy,mid33,ask:ask33.t,end:{drive:end33.drive,old:end33.old,dirty:end33.local&&end33.local.drv.dirty}});
+  ok('33 Save case while a sync brings the Mac’s newer copy: the iPad’s save is kept and waits (not replaced); the answer both changed is asked side by side, this iPad’s kept goes to Drive and the Mac’s copy goes to Replaced copies',
+    v33mac&&busy&&mid33.second&&!mid33.mac&&mid33.dirty&&/^Changes from the Mac$/.test(ask33.t)&&ask33.n===1&&end33.drive&&end33.old&&/SECOND iPad/.test(end33.local.text)&&!end33.local.drv.dirty,{v33mac,busy,mid33,ask:ask33.t,n:ask33.n,end:{drive:end33.drive,old:end33.old,dirty:end33.local&&end33.local.drv.dirty}});
   /* 34-35 (v22.35) the staff directory in Drive: one file in the cases folder, each device's changes merged person by person */
   const pf=()=>[...D.files.values()].filter(f=>f.appProperties&&f.appProperties.nbh==='people'&&!f.trashed);
   const syncd=async X=>{await sleep(1800);await idle(X.page);await X.page.evaluate(()=>{drvSync({});});await sleep(400);await idle(X.page);await sleep(300);await idle(X.page);};

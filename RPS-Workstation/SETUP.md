@@ -9903,6 +9903,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.53: Google Drive puts two changed copies of a student together, instead of asking which one to keep
+
+- **Two copies, both changed** (the iPad and the laptop, each saved without the other's latest): the workstation now puts
+  them together from the version both stood on, the same way a colleague's file is (v23.52). What only one device changed
+  is taken; entries either added are all kept; an entry one removed goes, unless the other changed it. Nothing is asked
+  unless both changed the same answer: then **Changes from the Mac** shows the two side by side under the answer's own label
+  (this device's until chosen; Keep all of mine, Take all of theirs; Decide later leaves it for the Drive chip, as before).
+  A toast says which students were put together.
+- **Nothing lost**: the copy whose answer was not kept goes to Replaced copies in Drive (named "before it was put together"),
+  as the copy not kept did before. With nothing asked, nothing is lost and no copy is made.
+- Each device keeps, beside its copy of a student, the text of the Drive version it stands on (after it sends, after it
+  brings, and for the case on screen the version it was opened from). A copy saved before this release, or a device
+  joining for the first time, has none yet: those are asked about as before (which copy to keep).
+- qa/v2189-drive-test.js follows: scenarios 13-14 and 33 now see the answer both changed side by side, and the copy that
+  lost it in Replaced copies.
+
 ### v23.52: Working on a case with a colleague: Share for editing, and the file that comes back put together with the case
 
 The BCBA asked for it (October 2026): a colleague helping with an FBA works in the same case, and both people's work is kept.
