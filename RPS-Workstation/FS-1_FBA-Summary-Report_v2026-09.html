@@ -3129,9 +3129,12 @@ const fsEvNames=(r,id)=>new RegExp('(^|[^A-Za-z0-9-])'+id.replace('-','\\-')+'(?
 function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
   const ids=fsEvOrder.concat(Object.keys(E).filter(k=>fsEvOrder.indexOf(k)<0));
   ids.forEach(id=>{const e=E[id];if(!e||typeof e!=='object')return;
-    if(S.src.some(r=>fsEvT(r.form)===id||(!fsEvT(r.form)&&formOf(r.method)===id)||fsEvNames(r,id)))return;
+    if(S.src.some(r=>fsEvT(r.form)===id||(!fsEvT(r.form)&&(formOf(r.method)===id||fsEvNames(r,id)))))return;   /* v23.43 a row placed for another form (IA-1's names IN-1) does not list this one */
     const method=fsEvMethod(id,e);if(!method)return;
-    const contrib=[fsEvT(e.method)+(e.n!=null&&e.n!==''?' ('+e.n+' '+(fsEvUnit[id]||'')+')':''),fsEvT(e.statement)].filter(Boolean).join('. ').replace(/\.\./g,'.');
+    /* v23.43 (review I22) each interview counted once: Form IA-1's interviews from Form IN-1 are counted on IN-1's row */
+    const in1=id==='IA-1'&&e.interviews&&+e.interviews.in1>0?+e.interviews.in1:0;
+    const paren=[e.n!=null&&e.n!==''?e.n+' '+(fsEvUnit[id]||''):'',in1?(in1===1?'its interview from Form IN-1 is counted on that form\u2019s row':'its '+in1+' interviews from Form IN-1 are counted on that form\u2019s row'):''].filter(Boolean).join('; ');
+    const contrib=[fsEvT(e.method)+(paren?' ('+paren+')':''),fsEvT(e.statement)].filter(Boolean).join('. ').replace(/\.\./g,'.');
     const row={form:id,method,dates:fsEvT(e.dates),who:fsEvT(e.by),contrib,fn:fsEvFn(e,method),str:STR.indexOf(e.strength)>0?e.strength:'',tgt:fsEvTgt(e)};
     const slot=S.src.find(r=>!rowHas(r));if(slot)Object.assign(slot,row);else S.src.push(row);put.push(id);n++;});
   /* v22.36 Form IA-1's analyses by group (all informants, school, home, a named group) that were ticked "In the case": a row

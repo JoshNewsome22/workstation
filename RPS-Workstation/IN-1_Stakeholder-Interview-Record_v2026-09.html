@@ -3013,6 +3013,41 @@ const rp0=rpPayload;rpPayload=function(){return kit.withBox(rp0.apply(this,argum
 window.__rp.payload=rpPayload;window.__rp.kit=kit;
 })();
 </script>
+<script id="in1-v2343">
+(function(){"use strict";
+/* v23.43 (review I22, F44) one interview, one write-up: Form IN-1 owns an interview. The evidence carries each one (a named
+   respondent, not the student, not answered in writing) with the answers Form IA-1's interview cards ask for, so IA-1 fills a
+   card from it instead of the interview being written up twice. With no hypothesis yet the evidence still goes, its function,
+   strength and statement empty, as the family's part does (v21.82). Wrapped last. */
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+/* the function key from the respondent's words: the words of v21.78's key, physical / pain added (IA-1 has that choice) */
+const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/,physical:/\bpain\b|physical discomfort|medical/};
+  const h=Object.keys(R).filter(x=>R[x].test(t));return h.length>1?'multiple':h.length?h[0]:'';};
+function cell(i,k){const list=qs(i),j=list.findIndex(q=>q.k===k);if(j<0)return '';const note=T((S.ans||{})[akey(i,j)]);
+  if(!list[j].mx)return note;
+  const v=(S.mx||{})[akey(i,j)]||[],it=m=>m.endsWith('?')?m.slice(0,-1):m,pick=w=>list[j].mx.filter((m,ri)=>v[ri]===w).map(it),p=[];
+  const yes=pick('Yes'),some=pick('Sometimes');if(yes.length)p.push('Yes: '+yes.join('; '));if(some.length)p.push('Sometimes: '+some.join('; '));if(note)p.push(note);
+  return p.join(' ');}
+function interviews(){const m=S.meta||{};
+  return (S.resp||[]).map((r,i)=>({r,i})).filter(x=>x.r&&T(x.r.n)&&x.r.role!=='Student'&&!/^Written/.test(T(x.r.fmt))).map(x=>{const a=k=>cell(x.i,k);
+    const got=[['Gets',a('get')],['Gets out of',a('escape')],['Loses',a('lose')]].filter(g=>g[1]).map(g=>g[0]+': '+g[1]).join('; ');
+    const o={name:T(x.r.n),role:x.r.role,rel:T(x.r.rel),d:T(x.r.d),beh:T(m.beh),most:a('most'),least:a('least'),trigger:a('trigger'),
+      se:[a('se'),a('cond'),a('setting')].filter(Boolean).join('; '),after:a('after')||got,fnView:a('fn')};
+    o.fnKey=K(o.fnView);return o;}).filter(o=>o.most||o.least||o.trigger||o.se||o.after||o.fnView);}
+const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let L=[];try{L=interviews();}catch(e){L=[];}if(!L.length)return r;
+  let ev=r&&r.evidence;
+  if(!ev){const resp=(S.resp||[]).filter(x=>x&&T(x.n)),wr=resp.filter(x=>/^Written/.test(T(x.fmt))).length;
+    const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+      return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2):'';};
+    const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+    const d=resp.map(x=>ISO(x.d)).filter(Boolean).sort(),dates=d.length?(d[0]===d[d.length-1]?MDY(d[0]):MDY(d[0])+'–'+MDY(d[d.length-1])):'';
+    ev={form:'IN-1',method:wr?'Stakeholder interviews (indirect): '+(resp.length-wr)+' interviewed, '+wr+' answered in writing':'Stakeholder interviews (indirect)',fn:'',fnKey:'',strength:'',statement:'',dates,n:resp.length||null};
+    if(d.length){ev.from=d[0];ev.to=d[d.length-1];}}
+  return Object.assign({},r||{},{evidence:Object.assign({},ev,{interviews:L})});};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

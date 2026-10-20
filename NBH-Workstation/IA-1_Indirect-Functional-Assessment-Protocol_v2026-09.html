@@ -1561,8 +1561,8 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
     <div class="nbh-print-meta"><div class="nbh-print-title">Indirect Functional Assessment Protocol</div><div>Form IA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">Structured Interviews: FACTS, FAI, and Open-Ended</div>
-  <p class="method" style="margin:0 0 10px">One card per interview. Record the routine analysis and the summary statement in the FACTS format (setting event; antecedent; behavior; maintaining consequence) and the informant's confidence rating. For an open-ended interview, record the idiosyncratic antecedents and consequences the informant described and the synthesized contingency they suggest; these feed the design of test conditions rather than a conclusion (Hanley, 2012). <span class="noprint">Set the number of interview cards in the toolbar.</span></p>
-  <div id="intWrap"></div>
+  <p class="method" style="margin:0 0 10px">One card per interview. Record the routine analysis and the summary statement in the FACTS format (setting event; antecedent; behavior; maintaining consequence) and the informant's confidence rating. For an open-ended interview, record the idiosyncratic antecedents and consequences the informant described and the synthesized contingency they suggest; these feed the design of test conditions rather than a conclusion (Hanley, 2012). <span class="noprint">An interview recorded on Form IN-1 is written up there, once: in the workstation it fills a card here, marked from Form IN-1, and still counts toward the informants&rsquo; agreement. Set the number of interview cards in the toolbar.</span></p>
+  <div id="intWrap"></div><input type="hidden" name="hyp.in1">
   <div class="cite">FACTS after March et al. (2000) and McIntosh et al. (2008, <em>JPBI, 10</em>, 33&ndash;45); Functional Assessment Interview after O'Neill et al. (2015); open-ended interview after Hanley (2012, <em>Behavior Analysis in Practice, 5</em>, 54&ndash;72). Confidence rating (1 to 6) is the FACTS item; it records the informant's certainty, not the validity of the statement.</div>
 </div>
 
@@ -4192,8 +4192,8 @@ window.addEventListener('message',e=>{if(e.data&&e.data.nbh==='collect'){clearTi
 
 /* ---------- interviews ---------- */
 function intCard(i){const d=document.createElement('div');d.className='card';d.dataset.int=i;
- d.innerHTML=`<div class="chd"><span class="tag ok">Interview ${i+1}</span><span class="chdt">Routine analysis and summary statement</span></div>
- <div class="ident c3"><div class="f"><label>Instrument</label><select aria-label="Interview ${i+1}: instrument" name="int[${i}].inst"><option value=""></option><option>FACTS</option><option>FAI (O'Neill)</option><option>Open-ended (Hanley)</option><option>Other</option></select></div><div class="f"><label>Informant code</label><select aria-label="Interview ${i+1}: informant code" name="int[${i}].who">${'<option value=""></option>'+CODES.map(c=>`<option>${c}</option>`).join('')}</select></div><div class="f"><label>Date</label><input aria-label="Interview ${i+1}: date" name="int[${i}].d"></div></div>
+ d.innerHTML=`<div class="chd"><span class="tag ok">Interview ${i+1}</span><span class="chdt">Routine analysis and summary statement</span><span class="tag na int-src" style="display:none">from Form IN-1</span><input type="hidden" name="int[${i}].src"></div>
+ <div class="ident c3"><div class="f"><label>Instrument</label><select aria-label="Interview ${i+1}: instrument" name="int[${i}].inst"><option value=""></option><option>FACTS</option><option>FAI (O'Neill)</option><option>Open-ended (Hanley)</option><option>Stakeholder interview (Form IN-1)</option><option>Other</option></select></div><div class="f"><label>Informant code</label><select aria-label="Interview ${i+1}: informant code" name="int[${i}].who">${'<option value=""></option>'+CODES.map(c=>`<option>${c}</option>`).join('')}</select></div><div class="f"><label>Date</label><input aria-label="Interview ${i+1}: date" name="int[${i}].d"></div></div>
  <div class="defs">
   <div class="drow"><div class="dlab">Routines: highest problem</div><div class="dval"><input name="int[${i}].routine" placeholder="e.g., independent math work, 10:15–10:45; transition from recess"></div></div>
   <div class="drow"><div class="dlab">Routines: lowest problem</div><div class="dval"><input name="int[${i}].routineLow"></div></div>
@@ -4210,7 +4210,7 @@ function renderInt(){const n=+$('#nInt').value,w=$('#intWrap');while(w.children.
 function nameDefs(){$$('.defs .drow').forEach(r=>{const l=r.querySelector('.dlab');if(!l)return;const t=l.textContent.replace(/\s+/g,' ').trim();r.querySelectorAll('.dval > input,.dval > textarea,.dval > select').forEach(e=>{if(!e.hasAttribute('aria-label'))e.setAttribute('aria-label',t);});});}
 
 /* ---------- summary ---------- */
-function renderSummary(){$('#sumClient').textContent=val('m.client');$('#sumBeh').textContent=val('m.beh');$('#sumAssessor').textContent=val('m.assessor');
+function renderSummary(){if(window.__ia1SrcPaint)try{__ia1SrcPaint();}catch(e){}$('#sumClient').textContent=val('m.client');$('#sumBeh').textContent=val('m.beh');$('#sumAssessor').textContent=val('m.assessor');
  infDates();
  const n=nInf();const rows=[];const counts={};COMMON.forEach(c=>counts[c]=0);let valid=0,spN=0;
  /* v21.40 (2): consensus is counted by informant. Each row is still one informant's outcome on one instrument, but the
@@ -7330,8 +7330,9 @@ const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function()
    assessment never demonstrates control). The function itself is still never filled from the case. */
 OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
   const rows=[...document.querySelectorAll('#convTbl tbody tr')].filter(r=>r.cells.length>=6);if(!v&&!rows.length)return null;
-  const inst=[...new Set(rows.map(r=>T(r.cells[0].textContent)).filter(Boolean))].map(x=>/open-ended/i.test(x)?'open-ended interview':x);
-  const inf=new Set(rows.filter(r=>/counted/.test(r.cells[5].textContent)).map(r=>T(r.cells[1].textContent)));
+  const IN1=r=>/Form IN-1/.test(T(r.cells[0].textContent)),in1=rows.filter(r=>IN1(r)&&/counted/.test(r.cells[5].textContent)).length;   /* v23.43 (review I22) */
+  const inst=[...new Set(rows.filter(r=>!IN1(r)).map(r=>T(r.cells[0].textContent)).filter(Boolean))].map(x=>/open-ended/i.test(x)?'open-ended interview':x);
+  const inf=new Set(rows.filter(r=>!IN1(r)&&/counted/.test(r.cells[5].textContent)).map(r=>T(r.cells[1].textContent)));
   const tag=document.querySelector('#convVerdict .tag'),L=tag?[...tag.childNodes].filter(n=>n.nodeType===3).map(n=>T(n.textContent)).filter(Boolean):[];
   const cons=L[0]&&/informant/.test(L[0])?L[0]:'',m=/(\d+) of (\d+) informants \((\d+)%\)/.exec(cons),cat=K(cons.split(/[:(]/)[0]);
   const key={attention:'attention',tangible:'tangible',escape:'escape',automatic:'automatic',multiple:'multiple',undetermined:'unclear'}[v]||'';
@@ -7339,7 +7340,7 @@ OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
   const strength=!v||key==='unclear'?'':(key&&m&&+m[1]>=3&&+m[3]>=80&&cat===key)?'Moderate':'Weak';
   const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};
   const list=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
-  return EV(Object.assign({form:'IA-1',method:(inst.length?list(inst):'Rating scales and interviews')+' (indirect)'},SPAN([val('m.date')]),{n:inf.size||null,fn,fnKey:key,strength,by:val('m.assessor'),
+  return EV(Object.assign({form:'IA-1',method:(inst.length?list(inst):in1?'Interviews from Form IN-1':'Rating scales and interviews')+' (indirect)'},SPAN([val('m.date')]),in1?{interviews:{in1}}:{},{n:inf.size||null,fn,fnKey:key,strength,by:val('m.assessor'),
     statement:'Indirect hypothesis carried to the packet: '+(fn||'not yet chosen')+'.'+(cons?(/no consensus possible/.test(cons)?' Informant outcomes: ':' Informant consensus: ')+cons+(L[1]?'; '+L[1]:'')+'.':'')}));});   /* v23.22 (review F43) */
 })();
 </script>
@@ -7461,6 +7462,60 @@ OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}let n=0;
   try{if(f&&typeof f==='object'){n+=perTarget(f.behaviors);n+=health(f.profile);n+=faOut(f.evidence&&f.evidence['EA-1']);PEOPLE=people(f);const P=f.profile||{};HOME=T((P.language||{}).home||(P.home||{}).lang);paint();langNote();}}catch(e){}
   if(!n)return r;return {filled:((r&&r.filled)||0)+n,note:[(r&&r.note)||'','the targets’ urgency, the health record and the analysis’s outcome from the case'].filter(Boolean).join('; ')};};
+})();
+</script>
+<script id="ia1-v2343">
+/* v23.43 (review I22, F44; the BCBA's decision, October 2026) one interview, one write-up: Form IN-1 owns an interview. Each
+   interview IN-1 records (f.evidence['IN-1'].interviews) fills an interview card of the target it is about (the targets whose
+   name IN-1's target behavior holds, else the one open), marked "from Form IN-1": its own card again (empty fields only), else
+   an empty card, else a new one (five at most). The informant is the one of that name, else an empty informant row with no
+   scores, else a new row (twelve at most). Instrument, informant, date, routines (most and least likely), setting events,
+   triggers, what happens afterwards and the respondent's view of function, each only into an empty field; a card removed is
+   not placed again (hyp.in1 keeps what was placed). The card still counts toward the informants' agreement; the evidence
+   leaves it out of the instruments and the informant count, and FS-1 counts it on IN-1's row. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),q=n=>document.querySelector('[name="'+n+'"]');
+ const CODES='ABCDEFGHIJKL'.split(''),LAB='Stakeholder interview (Form IN-1)',FLD=['inst','who','d','routine','routineLow','se','a','c','idio','summary','fn','conf','src'];
+ const fire=e=>{try{e.dispatchEvent(new Event(e.tagName==='SELECT'?'change':'input',{bubbles:true}));}catch(x){}};
+ const FN=/^(attention|tangible|escape|automatic|physical|multiple)$/;
+ window.__ia1SrcPaint=function(){document.querySelectorAll('#intWrap .card').forEach(c=>{const s=c.querySelector('input[name$="].src"]'),t=c.querySelector('.int-src');if(t)t.style.display=s&&T(s.value)?'':'none';});};
+ const scored=i=>['fast','qabf','mas','pbq','wefa'].some(k=>[...document.querySelectorAll('[name^="'+k+'['+i+']"]')].some(e=>T(e.value)));
+ const ROLE=x=>T(x.rel)||({'Teacher':'teacher','Parent or guardian':'parent','Staff member':'staff','Related service provider':'related service provider'})[x.role]||'';
+ function code(x){const nEl=document.getElementById('nInf');let n=+nEl.value;const low=T(x.name).toLowerCase();
+  for(let i=0;i<n;i++){const e=q('inf['+i+'].name');if(e&&T(e.value).toLowerCase()===low)return CODES[i];}
+  let at=-1;for(let i=0;i<n;i++){const e=q('inf['+i+'].name');if(e&&!T(e.value)&&!scored(i)){at=i;break;}}
+  if(at<0){if(n>=12)return '';nEl.value=String(n+1);nEl.dispatchEvent(new Event('change',{bubbles:true}));if(+nEl.value!==n+1)return '';at=n;}
+  const ne=q('inf['+at+'].name'),re=q('inf['+at+'].role');if(!ne)return '';ne.value=T(x.name);fire(ne);if(re&&!T(re.value)&&ROLE(x)){re.value=ROLE(x);fire(re);}
+  return CODES[at];}
+ /* one target's cards: the open one on the sheet, any other in its record */
+ function place(r,cur,L,left){let k=0;const get=f=>{if(cur){const e=q(f);return e?T(e.value):'';}return T(r.fields[f]);};
+  const set=(f,v,force)=>{v=T(v);if(!v)return false;if(cur){const e=q(f);if(!e||(T(e.value)&&!force))return false;if(e.tagName==='SELECT'&&![...e.options].some(o=>o.value===v))return false;e.value=v;fire(e);return true;}
+   if(T(r.fields[f])&&!force)return false;r.fields[f]=v;return true;};
+  let n=cur?+document.getElementById('nInt').value:(+r.int||0);let done=[];try{done=JSON.parse(get('hyp.in1')||'[]');}catch(e){done=[];}if(!Array.isArray(done))done=[];
+  L.forEach(x=>{const key=T(x.name).toLowerCase()+'|'+T(x.d);let i=-1,nw=false;for(let j=0;j<n;j++)if(get('int['+j+'].src')===key){i=j;break;}
+   if(i<0){if(done.indexOf(key)>=0)return;nw=true;
+    for(let j=0;j<n;j++)if(FLD.every(f=>!get('int['+j+'].'+f))){i=j;break;}
+    if(i<0){if(n>=5){left.push(T(x.name));return;}
+     if(cur){const e=document.getElementById('nInt');e.value=String(n+1);e.dispatchEvent(new Event('change',{bubbles:true}));if(+e.value!==n+1){left.push(T(x.name));return;}}else r.int=n+1;
+     i=n;n++;}
+    set('int['+i+'].src',key,true);done.push(key);}
+   const p='int['+i+'].';let w=0;
+   if(set(p+'inst',LAB))w++;const c=code(x);if(c&&set(p+'who',c))w++;if(set(p+'d',x.d))w++;if(set(p+'routine',x.most))w++;if(set(p+'routineLow',x.least))w++;
+   if(set(p+'se',x.se))w++;if(set(p+'a',x.trigger))w++;if(set(p+'c',x.after))w++;if(FN.test(T(x.fnKey))&&set(p+'fn',T(x.fnKey)))w++;
+   if(nw||w)k++;});
+  if(cur){const e=q('hyp.in1');if(e)e.value=JSON.stringify(done);}else r.fields['hyp.in1']=JSON.stringify(done);
+  return k;}
+ function fromIn1(ev){const L=ev&&Array.isArray(ev.interviews)?ev.interviews.filter(x=>x&&T(x.name)):[];const A=window.__ia1Targets;if(!L.length||!A)return {n:0};
+  try{A.store();}catch(e){}const list=A.list(),cur=A.cur(),left=[];let n=0;
+  const by={};L.forEach(x=>{const b=T(x.beh).toLowerCase();const hit=b?list.filter(r=>{const l=T(r.label).toLowerCase();return l&&(b.indexOf(l)>=0||l.indexOf(b)>=0);}):[];
+   (hit.length?hit:list.filter(r=>r.id===cur)).forEach(r=>{(by[r.id]=by[r.id]||[]).push(x);});});
+  list.forEach(r=>{if(by[r.id])n+=place(r,r.id===cur,by[r.id],left);});
+  window.__ia1SrcPaint();
+  return {n,left:[...new Set(left)]};}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let o={n:0,left:[]};try{if(f&&f.evidence)o=fromIn1(f.evidence['IN-1']);}catch(e){o={n:0,left:[]};}
+  const bits=[];if(o.n)bits.push((o.n===1?'an interview':o.n+' interviews')+' from Form IN-1 on the Interviews sheet');
+  if(o.left&&o.left.length)bits.push('no interview card free for '+o.left.join(', ')+' (five at most)');
+  if(!bits.length)return r;return {filled:((r&&r.filled)||0)+o.n,note:[(r&&r.note)||''].concat(bits).filter(Boolean).join('; ')};};
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>

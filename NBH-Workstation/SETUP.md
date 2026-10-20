@@ -9903,6 +9903,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.43: One interview, one write-up: Form IN-1 owns an interview (review I22, F44)
+
+The BCBA's decision: an interview is recorded once, on Form IN-1. Form IA-1 takes it from there, and Form FS-1 counts it once.
+
+- **Form IN-1** sends each interview with its result (a named respondent, not the student, not a page answered in writing):
+  who, role, date, the target behavior IN-1 names, and the answers IA-1's interview cards ask for (when the behavior is most
+  and least likely, what triggers it, setting events and contributing factors, what happens afterwards, and the
+  respondent's view of function). With no hypothesis chosen yet, the result still goes, its function, strength and statement
+  empty, as the family's part already did.
+- **Form IA-1** fills an interview card from each one, marked "from Form IN-1", on the target IN-1 names (else the one
+  open): an empty card, or a new one (five at most). The informant is the one of that name; otherwise the interview goes into
+  an empty informant row with no scores, or a new row (twelve at most), with the respondent's relationship as the role. Only
+  empty fields are filled, so typed words stay; the same interview is never placed twice, and a card you remove is not put
+  back. The card still counts toward the informants' agreement on the convergence table. The Interviews sheet says so.
+- **IA-1's result in the case** leaves the interviews from IN-1 out of its instruments and its informant count (an
+  informant with a rating scale still counts), and says how many there were.
+- **Form FS-1's evidence table**: IA-1's row says "its N interviews from Form IN-1 are counted on that form's row", and
+  IN-1's row counts them, so the report counts each interview once. An interview written up on IA-1 only is counted on
+  IA-1's row, once, as before. (A row placed for one form no longer keeps another form's row out by naming it.)
+- qa/i22-interview-once-test.js (14 checks).
+
 ### v23.42: Form IA-1's FAST walkthrough says NA in the BCBA's approved words
 
 - **The two NA lines are voiced again, with the same voice, in the words the BCBA approved (October 2026).** On the
