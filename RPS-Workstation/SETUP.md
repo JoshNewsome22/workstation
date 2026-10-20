@@ -9903,6 +9903,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.40: Form SP-1: every sheet takes its behavior's definition from the case
+
+- **The BCBA's report:** on the Scatterplot, behaviors 2 and 3 showed their names but no operational definition, example
+  or non-example from Form TB-1. The case filled a sheet's definitions only when the form opened with one empty sheet, or
+  for the first behavior ticked in From the case.
+- **Now a sheet named after one of the case's target behaviors takes its definition, examples and non-examples at once.**
+  The name can be typed, or picked from the list the Target behavior box now offers. A sheet opened that is named after one
+  and lacks them gets them too, so a record made before this release fills as its tabs are opened.
+- **From the case puts every ticked behavior on a sheet of its own:** the sheet already named after it, else an empty
+  one, else a new one (twelve at most). Ticking them again changes nothing.
+- A definition, example or non-example already on a sheet is never written over.
+- qa/sp1-case-defs-test.js (8 checks).
+
 ### v23.39: Form ABC-1: a saved background sample can be edited
 
 - **Edit on each background sample (the BCBA's ask, from an iPad),** as each incident has. Its answers go back into the

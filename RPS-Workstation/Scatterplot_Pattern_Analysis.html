@@ -5075,6 +5075,62 @@ OUT(function(){if(typeof commitBeh==='function')commitBeh();const m=state.meta||
   return ev;});
 })();
 </script>
+<script id="sp1-v2340">
+/* v23.40 each sheet takes its behavior's definition from the case (Form TB-1), not only the first: a sheet named after a
+   target behavior of the case (typed, or picked from the Target behavior box's list) takes its definition, examples and
+   non-examples into the fields that are empty; so does a sheet opened that is named after one and lacks them; and From the
+   case puts every ticked behavior on a sheet of its own. Nothing already written on a sheet is replaced. */
+(function(){
+  if(typeof state !== 'object' || !document.getElementById('mBehavior')) return;
+  const T = v => String(v || '').trim(), K = s => T(s).toLowerCase().replace(/\s+/g, ' ');
+  const behs = () => ((typeof spCase !== 'undefined' && spCase && spCase.behaviors) || []).filter(b => b && T(b.label));
+  const FIELDS = [['definition', 'def'], ['example', 'ex'], ['nonexample', 'nex']];
+  function fill(meta, b){ let n = 0; if(!T(meta.behavior)){ meta.behavior = T(b.label); n++; }
+    FIELDS.forEach(([k, f]) => { if(T(b[f]) && !T(meta[k])){ meta[k] = T(b[f]); n++; } }); return n; }
+  function show(){ const c = state.behaviors[state.cur]; if(c) BKEYS.forEach(k => { state.meta[k] = c.meta[k] || ''; }); renderMeta(); renderBehBar(); render(); }
+  /* the sheet on screen, from the case behavior it is named after */
+  function fillCur(say){
+    const b = behs().find(x => K(x.label) === K(state.meta.behavior)); if(!b) return 0;
+    commitBeh(); const c = state.behaviors[state.cur]; if(!c) return 0;
+    const n = fill(c.meta, b); if(!n) return 0;
+    show();
+    if(say && window.nbhUI && nbhUI.toast) nbhUI.toast('The definition, examples and non-examples of “' + T(b.label) + '” came from Form TB-1.', { kind:'ok' });
+    return n;
+  }
+  /* the Target behavior box lists the case's behaviors */
+  function list(){
+    const inp = document.getElementById('mBehavior'), L = behs(); let dl = document.getElementById('spCaseBehs');
+    if(!L.length){ if(inp.getAttribute('list') === 'spCaseBehs') inp.removeAttribute('list'); return; }
+    if(!dl){ dl = document.createElement('datalist'); dl.id = 'spCaseBehs'; inp.parentNode.appendChild(dl); }
+    dl.innerHTML = ''; L.forEach(b => { const o = document.createElement('option'); o.value = T(b.label); dl.appendChild(o); });
+    inp.setAttribute('list', 'spCaseBehs');
+  }
+  const inp = document.getElementById('mBehavior');
+  inp.addEventListener('change', () => fillCur(true));
+  inp.addEventListener('input', () => { if(behs().some(x => K(x.label) === K(inp.value))) fillCur(true); });
+  { const was = useBeh; useBeh = function(){ const r = was.apply(this, arguments); try{ fillCur(false); }catch(e){} return r; }; }
+  { const was = window.__nbhFactsIn; window.__nbhFactsIn = function(f){ const r = was ? was.apply(this, arguments) : null; try{ list(); fillCur(false); }catch(e){} return r; }; }
+  /* From the case: every ticked behavior on a sheet of its own */
+  window.__nbhFactsPick = function(sel){
+    const L = ((sel && sel.behaviors) || []).filter(b => b && T(b.label));
+    let n = 0, added = 0, note = '';
+    if(L.length){
+      commitBeh();
+      const empty = o => !T(o.meta && o.meta.behavior) && !(typeof spMarked === 'function' && spMarked(o));
+      L.forEach(b => {
+        let o = state.behaviors.find(x => K(x.meta && x.meta.behavior) === K(b.label)) || state.behaviors.find(empty);
+        if(!o){ if(state.behaviors.length >= 12){ note = 'Twelve sheets at most: ' + T(b.label) + ' was not placed.'; return; }
+          o = { meta:{ threshold:String(Math.max(1, +state.meta.threshold || +state.cfg.threshold || 2)) }, cells:{} }; state.behaviors.push(o); added++; }
+        n += fill(o.meta, b);
+      });
+      show();
+    }
+    if(sel && sel.fn && window.nbhCase && nbhCase.generic){ const g = nbhCase.generic({ behaviors:[], fn:sel.fn }, true); if(g && g.filled) n += g.filled; }
+    return { filled:n, note:note || (L.length > 1 ? 'Each ticked behavior is on a sheet of its own' + (added ? ' (' + added + ' added)' : '') + '.' : '') };
+  };
+  try{ list(); }catch(e){}
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
