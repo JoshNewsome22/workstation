@@ -123,6 +123,8 @@ const host=t=>`#tgtWrap .card[data-tgt="${t}"] .tb1lib-host`;
   const row=await tb.evaluate(()=>getComputedStyle(document.querySelector('#sendRow')).display);
   await tb.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};try{nbhUI.confirm=async()=>true;}catch(e){}document.querySelector('#simBtn').click();});await sleep(800);   /* the sample asks with the form's own dialog (v21.34) */
   await tb.evaluate(()=>{document.querySelector('#viewSeg button[data-view="define"]').click();document.querySelector('#sendTgt').click();});await sleep(2500);
+  /* v23.80 on a busy machine the answer can take longer than 2.5 s: wait for it, up to 10 s more */
+  for(let t=0;t<40&&/^Sending/.test(await tb.evaluate(()=>document.querySelector('#sendNote').textContent));t++)await sleep(250);
   const sent=await tb.evaluate(()=>document.querySelector('#sendNote').textContent);
   const got=await hd.evaluate(()=>S.bh.map(b=>b.name).filter(Boolean));
   check('G1 in the workstation the Send row shows; Send the targets reads the case and the other open form takes the targets; the note says so',row==='flex'&&/Sent to 1 other open form\./.test(sent)&&got.length>=3,row+' | '+sent.slice(0,80)+' | '+got.join(', '));

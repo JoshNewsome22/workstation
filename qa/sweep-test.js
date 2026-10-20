@@ -361,6 +361,8 @@ function swHelpers() {
       /* a region drawn inside another in one picture (IM-1's eye inside the eye area, the nose on the face) or a marker
          placed on a region: the outer one is reached around the inner one */
       if (it.e instanceof SVGElement && hit instanceof SVGElement && it.e.ownerSVGElement && it.e.ownerSVGElement === (hit.ownerSVGElement || hit)) continue;
+      /* v23.80 a control laid over a field on purpose, saying so (SP-1's Dates covered calendar, data-overlay-for) */
+      const ov = hit.closest('[data-overlay-for]'); if (ov && it.e.id && ov.getAttribute('data-overlay-for') === it.e.id) continue;
       const rec = {el: desc(it.e), by: desc(hit), byCtrl: !!(hc && !related(it.e, hc)), y: Math.round(it.y)};
       if (fixedAnc(hit)) { if (cur >= maxY - 1 && y > H / 2 && R.underBars.length < 10) { rec.atEnd = true; R.underBars.push(rec); } continue; }
       if (R.covered.length < 30) R.covered.push(rec);
@@ -686,6 +688,10 @@ async function roundtrip(browser, f, R, where, log) {
       const B = await ownSave(pB, f.id + '-B');
       RT.saveB = B.err || B.how + ', ' + B.text.length + ' B';
       if (!B.err) RT.fileDiffs = fileDiff(A.text, B.text);
+      /* v23.80 a field a form stamps with today when it is first shown (MS-1's report date, data-stamp): empty in the first
+         file and dated in the second only because the sweep showed every view in between */
+      if (RT.fileDiffs) { const st = await pB.evaluate(() => [...document.querySelectorAll('[data-stamp][name]')].map(e => e.getAttribute('name'))).catch(() => []);
+        RT.fileDiffs.forEach(d => { if (d.kind === 'value' && d.a === '""' && st.some(n => d.path === '.fields.' + n)) d.kind = 'stamped'; }); }
       RT.asked = await pB.evaluate(() => __sw.asks.map(x => x.k + ' "' + x.t.slice(0, 80) + '" -> ' + x.a)).catch(() => []);
     } finally { await ctxB.close(); }
   } finally { await ctxA.close(); }

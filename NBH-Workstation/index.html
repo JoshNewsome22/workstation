@@ -2734,7 +2734,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.79';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.80';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3109,7 +3109,12 @@ function setFacts(f,push){state.facts=hasFacts(f)?f:null;state.factsSig=factsSig
 function pushFactsTo(fr){if(!state.facts||!fr)return;ask(fr,'facts',{facts:state.facts});}
 function pushFactsToAll(){factsPushes++;Object.values(state.frames).forEach(pushFactsTo);}
 /* v21.63 a form (TB-1) asks for the case to be read and sent now; it hears back how many other open forms took it */
-async function sendFactsFor(ev){const src=ev.source;if(!relayFrom(src))return;await gatherFacts(false);const ok=!!state.facts;if(ok)pushFactsToAll();
+/* v23.80 a Send while the case is being read waited for nothing: the read already running was left to finish on its own and
+   the answer came from the case as it was before it ("Nothing was sent" with targets labeled). It now waits for that read,
+   up to 10 s, and reads again. */
+async function sendFactsFor(ev){const src=ev.source;if(!relayFrom(src))return;
+  for(let t=0;factsBusy&&t<100;t++)await new Promise(r=>setTimeout(r,100));
+  await gatherFacts(false);const ok=!!state.facts;if(ok)pushFactsToAll();
   const n=Object.values(state.frames).filter(fr=>{try{return fr.contentWindow!==src;}catch(e){return true;}}).length,p=Object.keys(state.pending).length;
   try{src.postMessage({nbh:'facts-sent',ok,n,pending:p},'*');}catch(e){}}
 function paintFacts(){

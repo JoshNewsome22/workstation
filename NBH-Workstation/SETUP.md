@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.80: The release check's four remarks: two columns on paper, and two things it now knows are meant; Send the targets waits for the case
+
+- **Form TB-1 on paper: the agreement pilot's dates print whole.** A date written in full (2026-10-05) was cut by a few
+  pixels in its narrow column; on paper those dates are now a size smaller, with a narrower margin inside the box.
+- **Form DT-1 on paper: the trial record's Trial type prints whole.** "Delay" was cut in its column: a choice on paper
+  has no arrow, so it no longer keeps room for one.
+- **The release check knows two things are meant.** Form SP-1's Dates covered calendar lies over its field so that a
+  tap on the field opens it; Form MS-1's report is dated with today the first time it is shown or printed. Each now
+  says so, and the check that every release runs on every form no longer reports them.
+- **Send the targets waits for the case.** On Form TB-1 in the workstation, Send the targets tapped while the
+  workstation was reading the case answered from the case as it was before that read, and could say "Nothing was sent"
+  with targets labeled. It now waits for the read, then reads again.
+
+Nothing to set up. Tested: the forms' own tests, the print checks and the release sweep on TB-1, DT-1, SP-1 and MS-1.
+
 ### v23.79: Form SP-1 on paper: taller grid rows that fill each sheet, and the fields at the top printed whole
 
 - **The rows take the room the page has.** The grid's row height was set from an estimate of everything else on the
