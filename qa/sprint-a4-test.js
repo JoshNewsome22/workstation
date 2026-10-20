@@ -344,10 +344,14 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
    const t0=Date.now();let shown='',dd=null;
    while(Date.now()-t0<25000&&!shown){
      dd=page.frames().find(x=>decodeURIComponent(x.url()).includes(FILE['DD-1']));
+     /* v23.57 a case opens to one form; DD-1 restores (and says so) when it is opened */
+     if(!dd&&Date.now()-t0>3000)await page.evaluate(()=>{if(!state.frames['DD-1']&&$('#openCase').textContent==='Open case')openForm('DD-1');}).catch(()=>{});
      if(dd)shown=await dd.evaluate(()=>{const t=document.querySelector('#toast.show');return t?t.textContent:'';}).catch(()=>'');
      await sleep(120);}
    await page.waitForFunction(()=>$('#openCase').textContent==='Open case',null,{timeout:180000}).catch(()=>{});
    await sleep(1500);
+   /* v23.57 a case opens to one form; the others load when opened */
+   await page.evaluate(async()=>{if(!state.frames['DD-1']){openForm('DD-1');const t0=performance.now();while(!state.status['DD-1']&&performance.now()-t0<20000)await new Promise(r=>setTimeout(r,60));}});await sleep(1500);
    dd=page.frames().find(x=>decodeURIComponent(x.url()).includes(FILE['DD-1']));
    const ag=await dd.evaluate(()=>({b:S.behaviors.map(b=>b.name+'|'+b.critDays+'|'+b.aim),rows:S.rows.length}));
    const want=was.behaviors.map(b=>b.name+'|'+(b.name==='Aggression'?5:b.critDays)+'|'+b.aim);
