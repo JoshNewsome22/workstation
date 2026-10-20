@@ -9905,6 +9905,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.65: The staff data kit for next week, in one tap (review I244)
+
+- **Today, Staff kit for next week** (also in the command box): one print with what the staff use in the week to come,
+  from the case's forms: Form DD-1's blank sheet for next week (Monday to Friday, the targets and the definitions, nothing
+  filled but the minutes the observation window plans), Form SM-1's student sheet for each school day (five, each on a
+  page of its own, as Print the student sheet draws it, home note and weekly bar included), and Form QS-1's quick start for
+  whoever covers. Each in the form's own print layout, with the packet's cover, running heads and page numbers. A form
+  the case does not hold is left out. Same kit every week, without assembling it form by form.
+- Form DD-1 and Form SM-1 give their kit pages only when the kit asks; their own prints and the master print are as before.
+- qa/i244-kit-test.js (9 checks).
+
 ### v23.64: Today's numbers from a caseload card, without opening the case (review I236, F471)
 
 - **Today's numbers** on every student's card (Caseload and the start screen), in Today and in the command box: a sheet

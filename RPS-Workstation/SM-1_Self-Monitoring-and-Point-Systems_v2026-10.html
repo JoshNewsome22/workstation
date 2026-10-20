@@ -1789,6 +1789,7 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 td input,td select{max-width:100%}
 </style>
+<style id="sm-kit-css">/* v23.65 the staff kit: each school day's copy of the student's sheet on a page of its own */@media print{.sm-kit-day+.sm-kit-day{break-before:page;page-break-before:always}}</style>
 </head>
 <body class="view-setup">
 
@@ -5326,6 +5327,14 @@ function printAlone(cls,orient){document.body.classList.add(cls);
   const off=()=>{document.body.classList.remove(cls);st.remove();window.removeEventListener('afterprint',off);};
   window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);}
 $('#sheetPrintBtn').addEventListener('click',()=>{if(!S.sys){alert('Choose a system first; there is no sheet yet.');return;}printAlone('sm-sheet-only',sheetOrientation());});
+/* v23.65 (review I244) the staff kit for next week ({nbh:'collect', kit:true}): the student's sheet, a copy for each school day,
+   as Print the student sheet prints it; with no system chosen yet, the form prints as it always does */
+let smPackKit=false;
+window.addEventListener('message',e=>{const d=e.data;if(d&&typeof d==='object'&&d.nbh==='collect'&&d.kit===true){smPackKit=true;setTimeout(()=>{smPackKit=false;},0);}});
+{const pn0=window.nbhPrintNodes;window.nbhPrintNodes=function(){if(smPackKit&&S.sys){try{const head=document.querySelector('.nbh-print-head'),out=[head];
+  for(let i=0;i<5;i++){const pg=document.createElement('div');pg.className='sm-kit-day';const a=document.getElementById('sheetOut'),x=document.getElementById('smExtraOut');
+    if(a)pg.appendChild(a.cloneNode(true));if(x&&x.childNodes.length)pg.appendChild(x.cloneNode(true));pg.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));out.push(pg);}
+  return out;}catch(e){}}return pn0?pn0():[];};}
 $('#bcPrintBtn').addEventListener('click',()=>{renderBc();printAlone('sm-bc-only','portrait');});
 $('#saveBtn').addEventListener('click',()=>{
   const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');

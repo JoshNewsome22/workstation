@@ -6241,6 +6241,16 @@ function ddWeekPack(){const keepWeek=ddWeek,keepBlank=ddBlank,head=document.quer
   const box=document.createElement("div");box.className="dd-pack";box.appendChild(w);const pg=document.createElement("div");pg.className="dd-pack-blank";pg.appendChild(b);box.appendChild(pg);
   return [head,box];}
 {const pn0=window.nbhPrintNodes;window.nbhPrintNodes=function(){if(ddPackWeek){try{return ddWeekPack();}catch(e){}}return pn0?pn0():[];};}
+/* v23.65 (review I244) the staff kit for next week ({nbh:'collect', kit:true}): next week's blank sheet alone, the days and the
+   targets with nothing filled; what is on the screen is put back as it was */
+let ddPackKit=false;
+window.addEventListener("message",e=>{const d=e.data;if(d&&typeof d==="object"&&d.nbh==="collect"&&d.kit===true){ddPackKit=true;setTimeout(()=>{ddPackKit=false;},0);}});
+function ddKitPack(){const keepWeek=ddWeek,keepBlank=ddBlank,head=document.querySelector(".nbh-print-head");if(keepWeek)ddWeekOff();
+  ddBlankOn(ddWeekOfDefault(),5);const panel=document.getElementById("sheetTop").closest(".panel");const b=panel.cloneNode(true);
+  b.querySelectorAll("h2,p.hint,.inline-controls,#ivSettings,#pasteNote,#ddBlankNote,#ddInc,.noprint,.no-print").forEach(x=>x.remove());
+  ddBlank=keepBlank;if(keepWeek)ddWeekOn(keepWeek);else renderData();
+  const pg=document.createElement("div");pg.className="dd-pack-blank dd-kit";pg.appendChild(b);return [head,pg];}
+{const pn1=window.nbhPrintNodes;window.nbhPrintNodes=function(){if(ddPackKit){try{return ddKitPack();}catch(e){}}return pn1?pn1():[];};}
 </script>
 <script id="dd-gsheets">
 /* ===================================================================================================
