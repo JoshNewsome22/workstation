@@ -9905,6 +9905,15 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.68: Form SP-1's definitions on every sheet
+
+- A data sheet after the first (sheet 2 of 2, and on) now carries the behavior's **operational definition, example and
+  non-example** under its Client / Target behavior / days line, as sheet 1 does, so a sheet read on its own, or handed to
+  staff for the second week, has the definition in front of whoever marks it. On screen they follow what is typed on
+  sheet 1; each behavior's sheets carry its own; empty, they print as lines to write on.
+- Long definitions still leave each sheet one page, the definitions whole.
+- qa/sp1-sheet2-defs-test.js (7 checks).
+
 ### v23.67: A low-light screen for evening work (review I245)
 
 - **Help, Side by side, fullscreen and the screen**: *Screen*, Normal or Low light (also in the command box), kept on this

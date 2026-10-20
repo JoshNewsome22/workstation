@@ -663,6 +663,8 @@ body.view-summary #spPages,body.view-control #spPages{display:none}
 /* A continuation sheet is another page of the same data sheet: it starts a new
    piece of paper and repeats just enough of the header to identify itself. */
 .sheet.sp-page{page-break-before:always;break-before:page}
+/* v23.68 the definitions on a sheet after the first: text (they are typed on sheet 1), at least a line to write on each */
+.sp-defrep .sp-dtext{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12.5px;line-height:1.4;padding:5px 10px;min-height:1.4em;color:var(--ink)}
 .sp-rep{display:flex;flex-wrap:wrap;gap:4px 26px;margin:0 0 10px;font-size:12px;
   color:var(--ink-soft);font-family:var(--sans)}
 .sp-rep b{color:var(--ink);font-weight:600}
@@ -1548,6 +1550,7 @@ function render(){
     + "<div class='sp-rep'><span><b>Client</b> "+esc(state.meta.client||"\u2014")+"</span>"
     + "<span><b>Target behavior</b> "+esc(state.meta.behavior||"\u2014")+"</span>"
     + "<span><b>"+esc(dayRangeLabel(c0,c1))+"</b></span></div>"
+    + defRepHTML()   /* v23.68 the definitions on this sheet too */
     + "<div class='gridwrap'><table class='scatter'></table></div>";
     body.querySelector("table").innerHTML = gridHTML(c0,c1);
     while(body.firstChild) pg.appendChild(body.firstChild);
@@ -1629,8 +1632,16 @@ function renderReadout(){
     + (peak > 0 ? " \u00b7 densest interval" + (tops.length > 1 ? "s" : "") + ": " + listOf(tops)
         + " (" + peak + " of " + nObs + " days" + (nObs < nC ? " observed" : "") + (tops.length > 1 ? " each" : "") + ")" : "");
 }
+/* v23.68 (the BCBA's request) a sheet after the first carries the behavior's definition, example and non-example, as
+   sheet 1 does: a sheet read on its own has the definition in front of whoever marks it. They follow sheet 1's boxes. */
+const SP_DEFS = [["definition","Operational definition"],["example","Example"],["nonexample","Non-example"]];
+function defRepHTML(){
+  return "<div class='defs sp-defrep'>" + SP_DEFS.map(([k, lab]) =>
+    "<div class='drow'><div class='dlab'>"+lab+"</div><div class='dval'><div class='sp-dtext' data-rep='"+k+"'>"+esc(state.meta[k]||"")+"</div></div></div>").join("") + "</div>";
+}
 /* v21.16 audit (F16): sheets after the first name the client and behavior in their header; they follow typing */
 function renderReps(){
+  $$("#spPages .sp-defrep .sp-dtext").forEach(d => { d.textContent = state.meta[d.dataset.rep] || ""; });   /* v23.68 */
   $$("#spPages .sp-rep").forEach(rep => {
     const sp = rep.querySelectorAll(":scope > span");
     if(sp[0]) sp[0].innerHTML = "<b>Client</b> " + esc(state.meta.client || "\u2014");
@@ -1836,7 +1847,7 @@ onGrids("keydown", e => {
 $$("[data-meta]").forEach(i => i.addEventListener("input", () => {
   state.meta[i.dataset.meta] = i.value;
   if(i.dataset.meta === "behavior") renderBehBar();
-  if(i.dataset.meta === "client" || i.dataset.meta === "behavior") renderReps();
+  if(["client","behavior","definition","example","nonexample"].includes(i.dataset.meta)) renderReps();   /* v23.68 the definitions too */
   renderSummary();
   renderControl();
 }));
