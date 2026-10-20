@@ -647,6 +647,16 @@ html.sp-one .lg-slash{display:none}
   /* v22.31 the definitions as text, whole, a size smaller than the sheet */
   .sp-printed .defs .sp-dtext{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:15px;padding:3px 7px;color:var(--ink)}
   .sp-printed .defs .dlab{font-size:10px}
+  /* v23.79 the six fields at the top: three to a row in every browser (the 900 px rule took the paper's width in one and
+     laid them two to a row: the rule below is the more particular), each entry as text that wraps rather than a box that cut it off, its label kept whole */
+  .sp-printed .ident{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .sp-printed .ident .f label{flex:none}
+  .sp-printed .ident .sp-wkbox{flex:1 1 0;min-width:0}
+  .sp-printed .ident .sp-ftext{display:block;flex:1 1 0;min-width:0;font-size:14px;line-height:17px;min-height:17px;padding:1px 2px;
+    border-bottom:1px solid var(--rule-2);color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}
+  .sp-printed .ident .sp-wkbox .sp-ftext{width:100%;box-sizing:border-box}
+  /* v23.79 the Date line keeps its own height, as the totals do: its empty total cell took the rows' */
+  table.scatter thead td.tot{height:24px}
 }
 /* the Date line and the totals rows are labels, not intervals: they keep their
    own height rather than growing with the rows */
@@ -2235,33 +2245,104 @@ function rowHeight(nR, mode){
   /* a letter page less its margins: the packet's are deeper than the form's own */
   /* v22.31 Safari on an iPad or iPhone prints its own line (the address, the date, the page number) at the foot of every
      page, inside the page: the sheet leaves room for it */
-  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const page = (m === "packet" ? 937 : 964) - (ios && m !== "packet" ? 48 : 0);
-  /* everything on a sheet that is not a row, as measured on paper with one-line
-     entries: letterhead and band; identity fields, definitions and the code key
-     (first sheet only); column headings, totals and the gap under the grid;
-     legend and citation (last sheet only). Entries that wrap add a line each. */
-  const meta = state.meta || {}, one = oneLevel();
-  const HEAD = 66 + 42, GRID = 53 + (one ? 24 : 48) + 8, FOOT = (one ? 29 : 52) + 61;
-  let top = 81 + 103 + (state.cfg.codes ? 50 : 0);
-  ["definition","example","nonexample"].forEach(k => { top += (linesOf(meta[k], 96) - 1) * 15; });   /* v22.31 11 px text, 15 px lines */
-  [["client","observer"],["week","setting"],["behavior","sheet"]].forEach(pr => {
-    top += (Math.max(linesOf(meta[pr[0]], 38), linesOf(meta[pr[1]], 38)) - 1) * 20; });
-  const multi = pageRanges().length > 1;
-  const fixed = multi ? Math.max(HEAD + top + GRID, HEAD + 30 + GRID + FOOT)
-                      : HEAD + top + GRID + FOOT;
-  const free  = page - fixed - 10;
+  const page = spPage(m);
+  const multi = pageRanges().length > 1, kinds = multi ? (pageRanges().length > 2 ? ["first","cont","last"] : ["first","last"]) : ["only"];
+  /* v23.79 each kind of sheet is sized on its own (spRowsOf); the page's own rows here are the tightest sheet's */
+  const fit = Math.min(...kinds.map(k => spFit(k, nR, page)));
   /* v21.16 audit (F12). The floors of 16, 14 and 12 px were more than the page could give a school day in 15-min
      intervals or a 24-hour sheet, and on paper a row did not shrink below its 15 px line of text anyway, so those
      sheets sent their legend, or their whole grid, to a page of its own. A row now keeps the height it is given
      (the print rules in sp1-audit-css), down to 12 px, which still holds a time, a count or a code. A sheet that
      would need smaller rows runs its grid over two pages instead, the column headings repeated, with rows sized
      to fill both. */
-  const fit = Math.floor(free / Math.max(1, nR)) - 1;   // -1: the row's border
   spSplit = fit < 12;
-  if(!spSplit) return Math.min(34, fit);
+  if(!spSplit) return Math.min(SP_ROWMAX, fit);
+  const free = page - Math.max(...kinds.map(spFixed)) - 10;
   return Math.max(12, Math.min(34, Math.floor((free + page - 70) / Math.max(1, nR)) - 1));
 }
+/* v23.79 (the BCBA's printout) everything on a printed sheet that is not a row, in px of the 729 px paper layout, as
+   measured on paper (Safari on an iPad and Chromium agree): the letterhead and band 108; the definitions, their lines
+   measured at their printed size and width; the grid's own rows (the caption, the days, the dates, the totals) and the
+   gap under it, 77 and its title line, with a high-rate total 101; sheet 1 the six fields (their lines measured) and the code key when
+   codes are on; a later sheet the line naming the student and the days; the last sheet the legend and the citation.
+   The estimate before counted a definition's line every 96 letters (a printed line holds about 115) and a field's every
+   38 (on paper a field was one line, cut off), and a later sheet without its definitions. */
+const SP_ROWMAX = 44;   // a row a writing hand can use; more is only blank paper
+function spPage(mode){
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  return (mode === "packet" ? 937 : 964) - (ios && mode !== "packet" ? 48 : 0);
+}
+let spMeasureBox = null;
+/* how many lines a text takes at a size, a weight and a width, laid out by this browser in the sheet's own font */
+function spBox(px, lh, weight){
+  if(!spMeasureBox){
+    spMeasureBox = document.createElement("div");spMeasureBox.setAttribute("aria-hidden", "true");
+    spMeasureBox.style.cssText = "position:absolute;left:-10000px;top:0;visibility:hidden;overflow-wrap:anywhere;padding:0;border:0;margin:0;letter-spacing:normal";
+  }
+  if(!spMeasureBox.isConnected) document.body.appendChild(spMeasureBox);
+  const b = spMeasureBox.style;
+  b.fontFamily = getComputedStyle(document.getElementById("sheet") || document.body).fontFamily;
+  b.fontSize = px + "px";b.lineHeight = lh + "px";b.fontWeight = weight || "400";
+  return b;
+}
+function spLines(text, px, lh, width, weight){
+  const t = String(text || "");
+  if(!t.trim()) return 1;
+  const b = spBox(px, lh, weight);b.whiteSpace = "pre-wrap";b.width = width + "px";spMeasureBox.textContent = t;
+  const h = spMeasureBox.getBoundingClientRect().height;
+  return h > 0 ? Math.max(1, Math.round(h / lh)) : linesOf(t, Math.round(width / (px * 0.52)));   // not laid out: the length
+}
+function spWidth(text, px, weight){
+  const b = spBox(px, px, weight);b.whiteSpace = "nowrap";b.width = "auto";spMeasureBox.textContent = String(text || "");
+  const w = spMeasureBox.getBoundingClientRect().width;
+  return w > 0 ? w : String(text || "").length * px * 0.55;
+}
+function spDefsH(){
+  const meta = state.meta || {};
+  return ["definition","example","nonexample"].reduce((h, k) => h + spLines(meta[k], 11, 15, 585) * 15 + 6, 0) + 4 + 9;   // 11 px text on 15 px lines, 585 px wide
+}
+function spIdentH(){
+  const meta = state.meta || {};
+  const F = [["client","Client"],["observer","Observer"],["week","Dates covered"],["setting","Setting"],["behavior","Target behavior"],["sheet","Sheet no."]];
+  const ln = ([k, lab]) => spLines(meta[k], 14, 17, Math.max(40, 231 - Math.ceil(spWidth(lab, 11.5)) - 6 - 4));   // a third of the sheet, less the label, the gap and the padding
+  const row = a => Math.max(...a.map(ln)) - 1;
+  return 2 * 20 + 1 + 7 + (row(F.slice(0, 3)) + row(F.slice(3))) * 17;   // two rows of one line, the gap between, the margin under
+}
+/* the grid's title line (the student, the behavior, the days), 12 px semibold on 18 px lines across the sheet */
+function spCapH(kind){
+  const caps = $$("#spPages table.scatter caption");
+  const c = kind === "first" || kind === "only" ? document.querySelector("#grid caption") : caps[caps.length - 1];
+  return (c ? spLines(c.textContent.replace(/\s+/g, " ").trim(), 12, 18, 729, "600") : 1) * 18 + 4;
+}
+/* a later sheet's line naming the student, the behavior and the days: its parts side by side, 26 px apart, a new line when
+   one does not fit (12 px, the labels bold) */
+function spRepH(){
+  const meta = state.meta || {};
+  const w = [["Client", meta.client || "—"], ["Target behavior", meta.behavior || "—"], ["Days 11–20", "10/19–10/30"]]
+    .map(([lab, v]) => Math.min(729, spWidth(lab, 12, "600") + spWidth(" " + v, 12) + 2));
+  let lines = 1, x = 0;
+  w.forEach(v => { if(x && x + 26 + v > 729){ lines++; x = v; } else x += (x ? 26 : 0) + v; });
+  return lines * 18 + (lines - 1) * 4 + 10;
+}
+/* the last sheet's legend (one line or two at either level) and the citation, 10 px on 13.5 px lines across the sheet */
+function spFootH(){
+  const cite = document.getElementById("sheetCite");
+  const c = cite ? spLines(cite.textContent.replace(/\s+/g, " ").trim(), 10, 13.5, 729) : 3;
+  return 42 + 10 + 7 + c * 13.5;
+}
+function spFixed(kind){
+  /* the letterhead and band; the definitions; the grid's days, dates and totals with its title line */
+  let h = 108 + spDefsH() + (oneLevel() ? 77 : 101) + spCapH(kind);
+  if(kind === "only" || kind === "first") h += spIdentH() + (state.cfg.codes ? 55 : 0);
+  else h += spRepH();
+  /* a sheet that ends at its grid: the gap under it falls past the page; one sheet's legend sits in its footer, 10 px down */
+  if(kind === "only" || kind === "last") h += (kind === "only" ? 10 : 8) + spFootH();
+  return Math.round(h);
+}
+const spFit = (kind, nR, page) => Math.floor((page - spFixed(kind) - 12) / Math.max(1, nR)) - 1;   // 12: room to spare; -1: the row's border
+/* less: what the page holds above the sheet (in the meeting packet, the form's first sheet sits under the packet's band for
+   the form, 29 px with its gap) */
+function spRowsOf(kind, nR, mode, less){ return Math.max(12, Math.min(SP_ROWMAX, spFit(kind, nR, spPage(mode) - (less || 0)))); }
 function fitForPrint(on){
   spPrinting = on ? "print" : "";
   document.documentElement.style.setProperty("--rowh",
@@ -2293,6 +2374,9 @@ function staticClone(node){
     }else b.setAttribute("value", a.value);
   }
   clone.querySelectorAll(".noprint,.readout").forEach(e => e.remove());
+  /* v23.79 the six fields at the top as text: on paper a box cut off an entry longer than itself (several observers) */
+  clone.querySelectorAll(".ident .f input").forEach(i => {
+    const sp = document.createElement("span"); sp.className = "sp-ftext"; sp.textContent = i.getAttribute("value") || ""; i.replaceWith(sp); });
   /* v22.51 on paper the grid's mark buttons and count boxes are plain text, which every browser prints at the row's height */
   clone.querySelectorAll("table.scatter button.cell").forEach(b => {
     const sp = document.createElement("span"); sp.className = b.className;
@@ -2339,9 +2423,11 @@ function buildPrintSet(mode){
   commitBeh();
   state.behaviors.forEach((b, i) => {
     useBeh(i, true);
-    out.push(staticClone($("#sheet")));
+    /* v23.79 each data sheet's rows take what its own page has left: sheet 1 has the fields, the last the legend */
+    const nR = rowLabels().length, pgs = $$("#spPages .sp-page"), own = (el, k, less) => { if(!spSplit) el.style.setProperty("--rowh", spRowsOf(k, nR, spPrinting, less) + "px"); return el; };
+    out.push(own(staticClone($("#sheet")), pgs.length ? "first" : "only", i === 0 && mode === "packet" ? 32 : 0));
     if(i === 0 && state.cfg.guide && mode !== "packet") out.push(spGuide());   /* v23.05 (review I50) on the back of the first sheet */
-    $$("#spPages .sp-page").forEach(p => out.push(staticClone(p)));
+    pgs.forEach((p, k) => out.push(own(staticClone(p), k === pgs.length - 1 ? "last" : "cont")));
     if(summaryData().marked > 0){
       out.push(staticClone($("#summary")));
       out.push(staticClone($("#control")));

@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.79: Form SP-1 on paper: taller grid rows that fill each sheet, and the fields at the top printed whole
+
+- **The rows take the room the page has.** The grid's row height was set from an estimate of everything else on the
+  sheet, and the estimate counted far too much: a long definition with its examples left the rows about a sixth of an
+  inch tall and a band of blank paper under the grid. The definitions' lines are now measured as they print, and each
+  sheet's rows take what its own page leaves (sheet 1 has the fields at the top; the last sheet the legend and the
+  citation), up to about half an inch. On an iPad, a sheet with a long definition and six examples now has rows about a
+  quarter of an inch tall, down to just above Safari's own line at the foot of the page.
+- **The six fields at the top print whole.** Observer, Target behavior and the rest printed as one-line boxes that cut
+  off a longer entry (several observers); they now print as text that wraps, three to a row in every browser, each label
+  whole.
+
+Nothing to set up. Tested: `qa/sp1-rows-test.js` (eight setups, on an iPad and a laptop: every data sheet one page,
+30 px or less left under it).
+
 ### v23.78: The BCBA's approval of the wording of v23.64–v23.76 recorded
 
 - The wording of Today's numbers, the staff kit, What's due, Form MS-1's library entries, the iPhone layout, Refresh
