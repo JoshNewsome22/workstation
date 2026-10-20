@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.75: Refresh all, on the start screen: every student's data in, without opening anyone's case
+
+- **Refresh all**, under "Your caseload on this iPad", brings in for every student kept here, without opening anyone's
+  case: the latest from Google Drive (when it is on and signed in), each Google Sheet linked in a student's Form DD-1
+  (Google's sign-in opens with the tap when it has lapsed), and what came back to the reply boxes (the staff phones'
+  entries, questionnaires). Each student's copy here takes it and their card is drawn again with the new days. The line
+  beside it says when it last ran and what came in; a notice names each student with something new, and any not reached
+  and why.
+- **By itself every 30 minutes** while the start screen shows with no case open (and when the iPad wakes, if it has been
+  longer), with what needs no new sign-in; it stops when a case is opened and finishes at the next refresh.
+- It reads only what the forms read when they are open (the same as Caseload's Read every linked sheet and Collect
+  replies); nothing else leaves this device.
+
+Nothing to set up. Tested: `qa/refresh-all-test.js` (a reply box run with php -S; a simulated staff phone).
+
 ### v23.74: The workstation on an iPhone, laid out as a phone app
 
 At a phone's width (600 px and less) the workstation is laid out for the thumb. The iPad and the laptop are as they were.

@@ -1556,6 +1556,16 @@ body:not(.has-form) #focusBtn{display:none}
 .ph-ml{display:flex;flex-direction:column;gap:6px}
 .ph-ml button{min-height:46px;text-align:left;justify-content:flex-start}
 @media print{.phbar{display:none!important}}
+/* v23.75 Refresh all, under the caseload's heading on the start screen */
+.bl-rf{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:2px 0 14px;text-align:left}
+#blRefresh{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:6px 14px}
+#blRefresh svg{width:17px;height:17px;flex:none}
+#blRefresh[aria-busy="true"] svg{animation:rfSpin 1.1s linear infinite}
+@keyframes rfSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#blRefresh[aria-busy="true"] svg{animation:none}}
+.bl-rf-note{font-size:13px;line-height:1.4;color:var(--muted)}
+.bl-rf-note.warn{color:#8a4b00}
+@media print{.bl-rf{display:none}}
 </style>
 </head>
 <body>
@@ -2701,7 +2711,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.74';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.75';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -10357,6 +10367,75 @@ $('#blank').addEventListener('click',e=>{
   const row=e.target.closest('.due-row'),top=e.target.closest('#blankCl .cl-card .cl-top');
   const b=row?row.querySelector('button[data-clopen]'):top?top.closest('.cl-card').querySelector('.cl-card-acts [data-clopen]'):null;if(b)b.click();});
 PH_MQ.addEventListener('change',()=>{try{paintBlank();}catch(e){}});
+/* ================= v23.75 (the BCBA's iPad) Refresh all, from the start screen =================
+   A student's card showed their numbers as at the last time their case was opened: the days staff sent from their phones
+   and the days in a linked Google Sheet came in when that student's Form DD-1 was opened, or from Caseload's own buttons
+   (Read every linked sheet, Collect replies), which the start screen did not show. Refresh all brings in, for every
+   student kept here and without opening anyone's case: the latest from Google Drive (when it is on and signed in), each
+   linked Google Sheet (Google's sign-in opens with the tap when it is needed) and what came back to the reply boxes (staff
+   phones, questionnaires). Each student's copy here takes it, as Caseload's buttons do, and the cards are drawn again.
+   It also runs by itself every 30 minutes while the start screen shows with no case open, with what needs no new
+   sign-in. It reads only what the forms read when they are open; nothing else leaves this device. */
+const RF={busy:false,stop:false,sheets:0},RF_MS=30*60e3,RF_K='nbh.caseload.refresh';
+const rfLast=()=>{try{return localStorage.getItem(RF_K)||'';}catch(e){return '';}};
+const rfCaseOpen=()=>!!(Object.keys(state.frames).length||Object.keys(state.pending).length);
+const rfWhen=iso=>{const d=new Date(iso);return isNaN(d)?'':clAgo(iso)+' at '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}).toLowerCase();};
+const RF_SVG='<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2.5v3.2h-3.2"/></svg>';
+function rfLine(t,warn){const n=$('#blRfNote');if(n){n.textContent=t;n.classList.toggle('warn',!!warn);}}
+/* the line under the button when nothing is running: when it last ran, and what it could not reach without a tap */
+function rfIdle(){const last=rfLast(),bits=[last?'Last refreshed '+rfWhen(last):'Not refreshed yet on this '+HERE];
+  if(RF.sheets&&!clTok()&&!EMBED)bits.push('the Google Sheets are read when you tap it (Google’s sign-in)');
+  if(drvOn()&&!drvTok())bits.push('Google Drive is signed out');
+  return bits.join(' · ')+'.';}
+async function rfAll(auto){if(RF.busy||CLX.busy)return null;
+  if(auto&&(EMBED||Date.now()-(Date.parse(rfLast())||0)<RF_MS||rfCaseOpen()||document.visibilityState!=='visible'||navigator.onLine===false||clOff()||document.body.classList.contains('has-form')))return null;
+  RF.busy=true;CLX.busy=true;RF.stop=false;const b0=$('#blRefresh');if(b0){b0.disabled=true;b0.setAttribute('aria-busy','true');}
+  const res={drive:null,sheets:[],replies:[],stopped:false,started:new Date().toISOString()};
+  try{
+    /* the latest from Google Drive first: a student saved on another device is refreshed from that copy */
+    if(drvOn()&&drvTok()&&navigator.onLine!==false){rfLine('Getting the latest from Google Drive…');try{res.drive=await drvSync({interactive:false});}catch(e){}}
+    const me=clKey(packet()),L=await clList()||[],todo=[];
+    if(clTok()&&!EMBED)L.forEach(r=>{const l=clLinkOf(r);if(l&&l.gs.on!==false)todo.push({r,sheet:true});});
+    L.forEach(r=>clBoxForms(r).forEach(([id,fn])=>todo.push({r,id,fn})));
+    let k=0;
+    for(const x of todo){if(RF.stop||(auto&&(rfCaseOpen()||document.body.classList.contains('has-form')))){res.stopped=true;break;}
+      k++;rfLine('Refreshing '+k+' of '+todo.length+': '+clName(x.r)+(x.sheet?', the Google Sheet':', Form '+x.id)+'…');
+      /* each step reads the latest copy: an earlier one may have just written it */
+      const r=(await clList()||[]).find(y=>y.key===x.r.key);if(!r)continue;
+      if(x.sheet){if(r.key===me&&rfCaseOpen()){res.sheets.push({r,g:{err:'open now: Form DD-1 reads its sheet when you open it'}});continue;}
+        const l=clLinkOf(r);if(!l)continue;const g=await clRefreshOne(r,l);res.sheets.push({r,g});if(g&&g.signin)break;}
+      else{let d=null;try{d=parseCase(r.text);}catch(e){}if(!d)continue;res.replies.push({r,id:x.id,g:await clReplyOne(r,x.id,x.fn,d)||{}});}}
+    try{const t=new Date().toISOString();localStorage.setItem(RF_K,t);if(res.sheets.length)localStorage.setItem('nbh.caseload.read',t);if(res.replies.length)localStorage.setItem('nbh.caseload.replies',t);}catch(e){}}
+  finally{RF.busy=false;CLX.busy=false;}
+  /* what came in, by student */
+  const by={};const add=(r,t)=>{(by[r.key]=by[r.key]||{n:clName(r),t:[]}).t.push(t);};
+  res.sheets.forEach(o=>{if(o.g&&o.g.ok)add(o.r,(o.g.days||0)+' day'+(o.g.days===1?'':'s')+' from the Google Sheet');});
+  res.replies.forEach(o=>{const g=o.g;if(g.ok&&(+g.placed||+g.held))add(o.r,(+g.placed||0)+' placed on Form '+o.id+(+g.held?', '+g.held+' held to check':''));});
+  const bad=res.sheets.filter(o=>!(o.g&&o.g.ok)).map(o=>clName(o.r)+' (Google Sheet: '+((o.g&&(o.g.err||(o.g.signin&&'Google asked for the sign-in again')))||'not read')+')')
+    .concat(res.replies.filter(o=>!o.g.ok).map(o=>clName(o.r)+' (Form '+o.id+': '+(o.g.err||'no answer')+')'));
+  const got=Object.values(by),drvGot=res.drive&&(+res.drive.got||0);
+  const sum=(got.length?got.map(x=>x.n+': '+x.t.join('; ')).join(' — '):'Nothing new')+(drvGot?'. From Google Drive: '+drvGot+' student'+(drvGot===1?'':'s')+' saved on another device':'')+
+    (bad.length?'. Not reached: '+bad.join('; '):'')+(res.stopped?'. Stopped when a case was opened; the rest at the next refresh':'')+'.';
+  RF.note=sum;
+  try{await paintBlank();}catch(e){}try{paintBadge();}catch(e){}
+  rfLine('Refreshed '+rfWhen(rfLast())+': '+(got.length?got.length+' student'+(got.length===1?'':'s')+' with something new':'nothing new')+(bad.length?'; '+bad.length+' not reached':'')+'.',!!bad.length);
+  if(!auto||got.length||drvGot)try{wsUI.toast((auto?'Refreshed by itself: ':'')+sum,{kind:bad.length?'warn':got.length?'ok':'',ms:got.length||bad.length?12000:5000});}catch(e){}
+  return res;}
+/* the button and its line, under the caseload's heading */
+{const pb=paintBlank;paintBlank=async function(){const out=await pb.apply(this,arguments);
+  try{const x=$('#blankCl'),h=x&&x.querySelector('h2');if(h&&!x.querySelector('.bl-rf')){const L=await clList()||[];
+      RF.sheets=L.filter(r=>{const l=clLinkOf(r);return l&&l.gs.on!==false;}).length;
+      h.insertAdjacentHTML('afterend','<div class="bl-rf"><button type="button" id="blRefresh"'+(RF.busy?' disabled aria-busy="true"':'')+' aria-describedby="blRfNote">'+RF_SVG+'<span>Refresh all<\/span><\/button>'+
+        '<span class="bl-rf-note" id="blRfNote">'+esc(RF.busy?'Refreshing…':rfIdle())+'<\/span><\/div>');}}catch(e){}
+  return out;};}
+$('#blank').addEventListener('click',e=>{if(!e.target.closest('#blRefresh')||RF.busy)return;
+  if(CLX.busy){rfLine('Caseload is bringing replies in already; tap again in a moment.');return;}
+  /* Google's sign-in opens in the tap itself, before anything is awaited, when a sheet is linked and the sign-in has lapsed */
+  if(RF.sheets&&!clTok()&&!EMBED&&clGid()){clSignIn().catch(err=>{rfLine('The Google Sheets were not read: '+(err&&err.message||err),true);}).then(()=>rfAll(false));return;}
+  rfAll(false);});
+/* by itself: every 30 minutes while the start screen shows with no case open */
+setInterval(()=>rfAll(true),60e3);   /* it runs only when 30 minutes have passed since the last refresh */
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>rfAll(true),4000);});
 </script>
 </body>
 </html>
