@@ -161,7 +161,7 @@ const FACTS={data:{from:'2026-09-14',to:'2026-10-09',days:20,src:'DD-1',
     await endOfWeek();await new Promise(r=>setTimeout(r,1500));window.open=wo;
     return {title:/<h1>The Week: the Summary, Next Week’s Sheet and the Point Sheets<\/h1>/.test(html),wk:/wk-tab/.test(html),blank:/dd-pack-blank/.test(html),sm:/sec-SM-1/.test(html),dd:/sec-DD-1/.test(html),len:html.length};});
   ok('6e the end of the week is one print: the week summary and next week’s blank sheet from DD-1, then SM-1’s sheets, under its own title',ew.title&&ew.wk&&ew.blank&&ew.sm&&ew.dd,ew);
-  const pc=await page.evaluate(()=>CMDS.filter(c=>/^Today|^End of the week|^Hand-over check/.test(c.n)).length);
+  const pc=await page.evaluate(()=>CMDS.filter(c=>/^Today:|^End of the week|^Hand-over check/.test(c.n)).length);
   ok('6f the command box has Today, the end of the week and the hand-over check',pc===3,pc);
   const errs=log.filter(l=>l.type==='pageerror');
   ok('6g no page errors anywhere',errs.length===0,errs);

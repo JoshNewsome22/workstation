@@ -56,7 +56,9 @@ async function openIn(page,id){
   await page.waitForFunction(id=>!!state.status[id],id,{timeout:15000});
   return fr;
 }
-const frameOf=async(page,id)=>(await page.waitForSelector(`iframe[title*="Form ${id})"]`,{state:'attached',timeout:20000})).contentFrame();
+/* v23.57 a case opens to one form; the others load when opened */
+const frameOf=async(page,id)=>{await page.evaluate(id=>{if(!state.frames[id]&&typeof openForm==='function')openForm(id);},id).catch(()=>{});
+  return (await page.waitForSelector(`iframe[title*="Form ${id})"]`,{state:'attached',timeout:20000})).contentFrame();};
 /* FS-1's simulation in the workstation, until the shell carries its function */
 async function fs1Sim(page){
   const fs1=await openIn(page,'FS-1');

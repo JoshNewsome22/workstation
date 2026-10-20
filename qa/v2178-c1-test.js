@@ -112,7 +112,7 @@ OTHER.profile.health={meds:[{name:'Sertraline',dose:'25 mg'}],prescriber:'Dr. Ot
   p=await open(IC);
   r=await p.evaluate(c=>window.nbhCase.apply(c),CASE);
   const iv=await p.evaluate(()=>document.querySelector('[name="c.behav"]').value);
-  ok('IC-1 in: behaviors of concern with definitions, one to a line',iv.split('\n').length===3&&/^Elopement: Leaving the assigned area/.test(iv)&&/Physical aggression: Hitting/.test(iv)&&r&&r.filled>=1,{iv,r});
+  ok('IC-1 in: the behaviors of concern by name, in plain words (v23.45: the definitions stay on Form TB-1)',/^Elopement; Physical aggression$/.test(iv)&&r&&r.filled>=1,{iv,r});
   await p.evaluate(()=>{document.querySelector('[name="c.behav"]').value='Typed by the parent meeting';});
   await p.evaluate(c=>window.__nbhFactsIn(c),OTHER);
   ok('IC-1 in: typed words are not overwritten',(await p.evaluate(()=>document.querySelector('[name="c.behav"]').value))==='Typed by the parent meeting');

@@ -18,7 +18,9 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const sim=async id=>page.evaluate(async id=>{openForm(id);const fr=state.frames[id];await new Promise(r=>{if(fr.dataset.loaded)r();fr.addEventListener('load',r,{once:true});setTimeout(r,20000);});
     const t=performance.now();while(!state.status[id]&&performance.now()-t<10000)await new Promise(r=>setTimeout(r,50));
     try{const w=fr.contentWindow;w.confirm=()=>true;w.alert=()=>{};if(w.nbhUI)w.nbhUI.confirm=async()=>true;const b=w.document.querySelector('#simBtn,#btnSim,#load-demo,#btnLoadExample');if(b){b.click();await new Promise(r=>setTimeout(r,1800));}}catch(e){}
-    await new Promise(r=>setTimeout(r,800));return (state.status[id]||{}).filled||0;},id);
+    /* the count the form reports once its simulation is in (the status comes on its own beat) */
+    {const t2=performance.now();await new Promise(r=>setTimeout(r,800));while(((state.status[id]||{}).filled||0)<=20&&performance.now()-t2<10000)await new Promise(r=>setTimeout(r,250));}
+    return (state.status[id]||{}).filled||0;},id);
   /* a case: Mateo with TB-1, CN-1 and DD-1 */
   await page.fill('#pClient','Mateo Rivera');await page.dispatchEvent('#pClient','input');await page.fill('#pSid','4471823');
   const f0={};for(const id of ['TB-1','CN-1','DD-1'])f0[id]=await sim(id);
