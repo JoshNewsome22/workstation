@@ -9903,6 +9903,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.51: Form CR-1's statute summary is checked against the 2026 text of s. 1003.573: the 2021 breathing sentence is no longer in it (review F343)
+
+Approved by the BCBA, October 2026: the summary follows what the statute currently says.
+
+- **Checked against the 2026 text.** The summary says when: last amended in 2023 (History: ch. 2021-140, ch. 2022-20,
+  ch. 2023-8), checked against the 2026 text in October 2026.
+- **Breathing and blood flow.** The row says the 2021 sentence (straitjackets, zip ties, handcuffs or tie-downs used in ways
+  that may restrict breathing or blood flow, or facedown with the hands restrained behind the back) is not in the current
+  text, which bars school personnel from mechanical restraint outright (since 2022) and says nothing about breathing. The
+  guide and the plan's source line no longer say Florida law bars restraint that restricts breathing; the form's breathing
+  rule rests, as before, on the U.S. Department of Education (2012), principle 7, and the district's policy. The rule
+  itself is unchanged.
+- **Today.** On the second restraint in a semester the line reads: the school must develop a crisis intervention plan
+  (s. 1003.573(6)(a), F.S.), and the IEP or 504 team meets to consider developing or reviewing it (Policy 5.181, 9c).
+- qa/cr1-statute-2026-test.js (7 checks, including that every pinpoint citation of the section in the forms names a
+  paragraph the 2026 text has); qa/policy-safety-test.js follows the corrected text.
+
 ### v23.50: Form RM-1's sources say only what can be checked: Lattal (1968) is cited for behavioral contrast, and an unchecked figure is gone
 
 - **Gradual leaning.** "Gradual leaning still produces resurgence eventually" cites Ho et al. (2018) and Jarmolowicz and

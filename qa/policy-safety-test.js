@@ -67,7 +67,7 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     const signs=await page.$$eval('#crSigns li',l=>l.map(x=>x.textContent));
     check(signs.length===9,'nine danger signs listed',signs);
     [/struggles to breathe/,/cannot breathe/,/suddenly fights the hold harder, or suddenly goes quiet or still/,/gurgling or rasping/,/changes color/,/vomits/,/seizure/,/stops responding/,/goes limp/].forEach(re=>check(signs.some(s=>re.test(s)),'danger sign: '+re.source));
-    check(/Florida law also bars restraint that may restrict breathing or blood flow/.test(b)&&/This rule goes further/.test(b)&&/Restraint and Seclusion: Resource Document/.test(b)&&/district/.test(b)&&!/form.s own/.test(b),'the source line names Florida law, then the federal guidance and the district',b.slice(-400));
+    check(!/Florida law also bars/.test(b)&&/This rule follows the U\.S\. Department of Education/.test(b)&&/Restraint and Seclusion: Resource Document/.test(b)&&/district/.test(b)&&!/form.s own/.test(b),'the source line names the federal guidance and the district (v23.51: s. 1003.573 no longer names breathing)',b.slice(-400));
     check(/restricts breathing/.test(await page.evaluate(()=>document.querySelector('.prohib').textContent)),'the prohibited list names breathing');
     check(/any hold that restricts breathing/.test(await page.evaluate(()=>document.querySelector('[data-m="hAvoid"]').closest('td').textContent)),'positions and holds to avoid: the breathing rule is always ruled out');
     check(/breathing rule/.test(await page.evaluate(()=>document.querySelector('#pbisTbl').closest('.grid-wrap').nextElementSibling.textContent)),'the intervention sequence points to the breathing rule');
@@ -175,8 +175,8 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     /* the Guide (the Statute sheet) */
     await view(page,'guide');
     const g=await text(page,'section.only-guide');
-    check(g.includes('Breathing and blood flow')&&/may not be used in ways that may obstruct or restrict breathing or blood flow/.test(g)&&/facedown position/.test(g),'the statute summary carries Florida’s breathing clause');
-    check(g.includes('No Hold May Restrict Breathing')&&g.includes('principle 7')&&/The Breathing and blood flow row of the statute summary above was added in October 2026 from published summaries of the law; check it against the current text\./.test(g)&&!/as retrieved; your district|checked in October 2026/.test(g),'the Guide explains the breathing rule, its sources, and how the statute row was checked');
+    check(g.includes('Breathing and blood flow')&&/Not in the current text\. A sentence added in 2021 barred/.test(g)&&/says nothing about breathing/.test(g),'the statute summary says the 2021 breathing clause is not in the current text (v23.51, review F343)');
+    check(g.includes('No Hold May Restrict Breathing')&&g.includes('principle 7')&&/Section 1003\.573 as it now stands does not mention breathing/.test(g)&&!/published summaries of the law|Florida law bars restraint/.test(g)&&/checked against the 2026 text in October 2026/.test(g),'the Guide explains the breathing rule and its sources, and the summary says when it was checked');
     check(/Keep the answers for this debriefing/.test(g)&&/Write about a report only in this question: the rest of the debriefing prints with the plan\./.test(g),'the Guide explains keeping the answers, and where a report is written');
     check(g.includes('Does This Need a Report?')&&/person who suspects/.test(g)&&/Print the report record/.test(g)&&/only that the question was answered, and when/.test(g),'the Guide explains the report question and its record');
     /* the simulation fills the new lines */

@@ -2272,7 +2272,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.50';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.51';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5543,7 +5543,7 @@ function rsUnlogged(f){const ev=f.evidence||{},inc=((f.data||{}).incidentList||[
 function tdSafety(f){const L=[],cr=f.crisis||{},inj=f.injury||{},rd=((f.data||{}).restraint)||{},rc=rd.counts||{};
   rsDl(f).filter(x=>x&&!x.done&&x.due).forEach(x=>{const n=tdLeft(x.due);if(n!==null&&n<=3)L.push({k:n<0?'Overdue':'Safety',t:(n<0?'<b>':'')+esc(x.what)+(n<0?'</b>':'')+': due '+esc(tdMd(String(x.due).slice(0,10)))+(String(x.due).length>10?' '+esc(String(x.due).slice(11,16)):'')+' ('+tdWhen(x.due)+')'+(x.open==='DD-1'&&!inCase('CR-1')?' (counted on Form DD-1’s restraint record)':''),open:x.open==='CR-1'&&inCase('CR-1')?'CR-1':'DD-1'});});
   const sem=Math.max(+((cr.restraints||{}).semester)||0,+rc.semester||0);
-  if(sem>=2)L.push({k:'Safety',t:sem+' restraints this semester: on the second, the IEP or 504 team meets to consider developing or reviewing a crisis intervention plan (s. 1003.573, F.S.; Policy 5.181, 9c)',open:'CR-1'});
+  if(sem>=2)L.push({k:'Safety',t:sem+' restraints this semester: on the second, the school must develop a crisis intervention plan (s. 1003.573(6)(a), F.S.), and the IEP or 504 team meets to consider developing or reviewing it (Policy 5.181, 9c)',open:'CR-1'});
   if(+rc.month>3)L.push({k:'Safety',t:rc.month+' restraints within a month: the team meets to consider an FBA and a BIP (Policy 5.181, 9d)',open:'FS-1'});
   if(+rc.year>3)L.push({k:'Safety',t:rc.year+' restraints this school year: the team addresses their frequency and duration (Policy 5.181, 9d)',open:'DD-1'});
   if(+rc.seclusion)L.push({k:'Safety',t:rc.seclusion+' seclusion'+(+rc.seclusion===1?'':'s')+' recorded this school year: seclusion is prohibited (s. 1003.573, F.S.; Policy 5.181), and it is counted apart from restraint',open:'DD-1'});
