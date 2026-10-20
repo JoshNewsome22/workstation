@@ -9903,6 +9903,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.52: Working on a case with a colleague: Share for editing, and the file that comes back put together with the case
+
+The BCBA asked for it (October 2026): a colleague helping with an FBA works in the same case, and both people's work is kept.
+
+- **Share for editing** (More; also a command). A copy of the case for a colleague who is helping: the forms ticked, the
+  student's details, and what the two of you last had in common, in one file named for the student and the colleague
+  (CASE_Student_for-Colleague_date.json). The person sends it through school email or AirDrop; the workstation sends
+  nothing. A staff record (RS-1, PD-1) is never in it.
+- **The colleague** opens it with Open case in the workstation (the website: nothing to install). The first time, it opens
+  as a case of theirs, after one question that names who shared it and the forms. They work and Save case as usual, and
+  send it back with More, Share for editing, which then reads Send back to the BCBA, their names filled in.
+- **A file that comes back** is not opened in place of the case: it is put together with it. What only one person changed
+  is taken; what both changed the same way is kept once; entries either person added are all kept (by their id where an
+  entry has one, else by content); an entry one person removed goes, unless the other changed it; a list of ticks or a
+  row of cells is put together place by place; a form's numbered fields ("log[2].ev") row by row, its row counts never
+  fewer. Where both changed the same thing, **Changes from (name)** shows the two side by side under the field's own label
+  and the person chooses (theirs, or mine: mine until chosen; Keep all of mine, Take all of theirs). A summary says what came
+  in, by form (entries added, items changed, removed). A form not in their file is never taken out. Then Save case, as usual.
+- **The next file** to the same colleague starts from what came back last, so it is put together the same way at their end,
+  and an entry is never doubled.
+- **On the device**, each share keeps its starting point (what the two last had in common) in a store of its own, until the
+  student leaves the caseload here; Remove all student data clears it. Help: Working on a case with a colleague; Where the
+  student's data goes has a row for it.
+- The merge (nbh-merge) is checked against every form's own save data: each form's data comes back exactly through the
+  merge, and with each side editing a different field (and a row added) both are kept and nothing is asked (434 checks).
+- qa/share-relay-test.js (13 checks: two browsers as two people, two rounds).
+
 ### v23.51: Form CR-1's statute summary is checked against the 2026 text of s. 1003.573: the 2021 breathing sentence is no longer in it (review F343)
 
 Approved by the BCBA, October 2026: the summary follows what the statute currently says.

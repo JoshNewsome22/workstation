@@ -304,6 +304,289 @@
 <!-- v21.67 Read a document: the readers it loads only when asked for, saved for offline use with the rest (tools/pwa-sw.py reads this) -->
 <meta name="nbh-offline" content="nbh-doc/pdf.min.js nbh-doc/pdf.worker.min.js nbh-ocr/tesseract.min.js nbh-ocr/worker.min.js nbh-ocr/tesseract-core-simd-lstm.wasm.js nbh-ocr/eng.traineddata.gz nbh-dictate.js nbh-media.js">
 <script src="nbh-media.js"></script>   <!-- v22.56 the media store: sounds and pictures kept once on this device, out of the case file -->
+<script id="nbh-merge">
+/* nbh-merge (v23.52): a case worked on by two people, put back together. Three versions of the case: the one both last
+   had (base), this device's (mine) and the one that came back (theirs). What only one side changed is taken from that
+   side; what both changed the same way is kept once; entries either side added are all kept; an entry one side removed
+   goes, unless the other changed it (then it stays, and the summary says so); what both changed differently is a
+   conflict, kept as mine until the person chooses. Each form's own save data (snap.own) is merged as data: lists of
+   entries by their id where they have one, else by content (a diff3), lists of the same length place by place, and a
+   flat field list with numbered rows ("log[2].ev", "fast[0][3]") row by row; a form's "saved" stamp and its row
+   counts never conflict. Pure functions: no page, no storage. */
+(function (root) {
+  'use strict';
+  var STAMP = /^(saved|exported|savedAt|exportedAt)$/, FLAT = '\u0001flat', ROWS = '\u0000rows:', CELL = '\u0000v', CLASH = '\u0000clash';
+  function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
+  function canon(v) {
+    if (Array.isArray(v)) return '[' + v.map(canon).join(',') + ']';
+    if (isObj(v)) return '{' + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ':' + canon(v[k]); }).join(',') + '}';
+    return v === undefined ? 'undefined' : JSON.stringify(v);
+  }
+  function eq(a, b) { return a === b || canon(a) === canon(b); }
+  function clone(v) { return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
+
+  /* ---- a flat field list with numbered rows, taken apart into rows (and put back) */
+  var ROWKEY = /^([^\[\]]+)\[(\d+)\](.*)$/;
+  function unflat(fields) {
+    var out = {};
+    Object.keys(fields).forEach(function (k) {
+      var m = ROWKEY.exec(k);
+      if (!m) { out[k] = fields[k]; return; }
+      var g = ROWS + m[1], arr = out[g] || (out[g] = []), i = +m[2], rest = m[3];
+      while (arr.length <= i) arr.push({});
+      if (!rest) { arr[i][CELL] = fields[k]; return; }
+      if (rest.charAt(0) === '.') rest = rest.slice(1); else rest = '\u0002' + rest;   /* "fast[0][3]": a cell of a cell */
+      var sub = {}; sub[rest] = fields[k]; into(arr[i], unflat(sub));
+    });
+    return out;
+  }
+  function into(dst, src) {   /* one more field put into a row already holding others */
+    Object.keys(src).forEach(function (x) {
+      if (x.indexOf(ROWS) === 0 && Array.isArray(dst[x])) src[x].forEach(function (r, j) { if (isObj(r) && Object.keys(r).length) dst[x][j] = into(isObj(dst[x][j]) ? dst[x][j] : {}, r); else if (dst[x][j] === undefined) dst[x][j] = r; });
+      else dst[x] = src[x];
+    });
+    return dst;
+  }
+  function reflat(tree, prefix, out) {
+    Object.keys(tree).forEach(function (k) {
+      if (k.indexOf(ROWS) === 0) {
+        var g = k.slice(ROWS.length).replace(/^\u0002/, ''), joint = k.slice(ROWS.length).charAt(0) === '\u0002' ? '' : (prefix && prefix.slice(-1) !== '.' ? '.' : '');
+        (tree[k] || []).forEach(function (row, i) {
+          var p = prefix + joint + g + '[' + i + ']';
+          if (!isObj(row)) { out[p] = row; return; }
+          Object.keys(row).forEach(function (x) {
+            if (x === CELL) out[p] = row[x];
+            else if (x.indexOf(ROWS) === 0) { var t = {}; t[x] = row[x]; reflat(t, p, out); }
+            else out[p + (x.charAt(0) === '\u0002' ? x.slice(1) : '.' + x)] = row[x];
+          });
+        });
+      } else out[prefix ? prefix + '.' + k : k] = tree[k];
+    });
+    return out;
+  }
+  function flatten(tree) { return reflat(tree, '', {}); }
+  function rowLens(tree) { var c = {}; Object.keys(tree).forEach(function (k) { if (k.indexOf(ROWS) === 0) c[k.slice(ROWS.length).replace(/^\u0002/, '')] = (tree[k] || []).length; }); return c; }
+  function isFlat(v) { return isObj(v) && Object.keys(v).some(function (k) { return ROWKEY.test(k); }) && Object.keys(v).every(function (k) { var x = v[k]; return x === null || typeof x !== 'object'; }); }
+  /* every flat field list anywhere in a form's data, marked so the merge goes row by row */
+  function prep(v) {
+    if (Array.isArray(v)) return v.map(prep);
+    if (!isObj(v)) return v;
+    if (isFlat(v)) { var o = {}; o[FLAT] = unflat(v); return o; }
+    var r = {}; Object.keys(v).forEach(function (k) { r[k] = prep(v[k]); }); return r;
+  }
+  function unprep(v) {
+    if (Array.isArray(v)) return v.map(unprep);
+    if (!isObj(v)) return v;
+    if (FLAT in v) return flatten(v[FLAT]);
+    var r = {}; Object.keys(v).forEach(function (k) { r[k] = unprep(v[k]); });
+    /* a list's row count beside it: no fewer than the rows that hold something */
+    if (isObj(r.counts)) Object.keys(v).forEach(function (k) {
+      if (isObj(v[k]) && FLAT in v[k]) { var L = rowLens(v[k][FLAT]); Object.keys(L).forEach(function (g) { if (typeof r.counts[g] === 'number') r.counts[g] = Math.max(r.counts[g], L[g]); }); }
+    });
+    return r;
+  }
+
+  /* ---- lists: diff3 over rows matched by content; a run of changed rows of the same length read as edits */
+  function lcs(a, b) {
+    var n = a.length, m = b.length, A = a.map(canon), B = b.map(canon), i, j, L = [];
+    for (i = 0; i <= n; i++) L.push(new Int32Array(m + 1));
+    for (i = n - 1; i >= 0; i--) for (j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    var pairs = []; i = 0; j = 0;
+    while (i < n && j < m) { if (A[i] === B[j]) { pairs.push([i, j]); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+    return pairs;
+  }
+  function edits(base, side) {
+    var n = base.length, ops = new Array(n), ins = [], k; for (k = 0; k <= n; k++) ins.push([]);
+    var bi = 0, si = 0;
+    lcs(base, side).concat([[n, side.length]]).forEach(function (p) {
+      var bRun = [], sRun = [];
+      for (; bi < p[0]; bi++) bRun.push(bi);
+      for (; si < p[1]; si++) sRun.push(side[si]);
+      var pair = Math.min(bRun.length, sRun.length), x;
+      for (x = 0; x < bRun.length; x++) ops[bRun[x]] = x < pair ? { mod: sRun[x] } : 'del';
+      for (x = pair; x < sRun.length; x++) ins[bRun.length ? bRun[bRun.length - 1] + 1 : p[0]].push(sRun[x]);
+      if (p[0] < n) { ops[p[0]] = 'keep'; bi = p[0] + 1; si = p[1] + 1; }
+    });
+    return { ops: ops, ins: ins };
+  }
+  function idKey(lists) {
+    var all = [].concat.apply([], lists);
+    if (!all.length || !all.every(isObj)) return '';
+    var ks = ['id', 'uid', 'key'];
+    for (var i = 0; i < ks.length; i++) {
+      var k = ks[i];
+      if (lists.every(function (arr) { var seen = {}; return arr.every(function (o) { var v = o[k]; if (v === undefined || v === null || v === '' || seen['_' + v]) return false; seen['_' + v] = 1; return true; }); })) return k;
+    }
+    return '';
+  }
+  function mergeKeyed(base, mine, theirs, k, path, ctx) {
+    var B = {}, M = {}, T = {}, out = [];
+    base.forEach(function (o) { B['_' + o[k]] = o; }); mine.forEach(function (o) { M['_' + o[k]] = o; }); theirs.forEach(function (o) { T['_' + o[k]] = o; });
+    mine.forEach(function (o) {
+      var id = '_' + o[k];
+      if (!(id in T) && id in B) { if (eq(B[id], o)) { ctx.note(path, 'removed'); return; } ctx.note(path, 'kept', 'removed by them, changed here'); out.push(o); return; }
+      out.push(id in T ? merge(B[id], o, T[id], path.concat([o[k]]), ctx) : o);
+    });
+    theirs.forEach(function (o) {
+      var id = '_' + o[k]; if (id in M) return;
+      if (id in B) { if (!eq(B[id], o)) { ctx.note(path, 'kept', 'removed here, changed by them'); out.push(clone(o)); } return; }
+      ctx.note(path, 'added'); out.push(clone(o));
+    });
+    return out;
+  }
+  function mergeList(base, mine, theirs, path, ctx) {
+    var k = idKey([base, mine, theirs]);
+    if (k) return mergeKeyed(base, mine, theirs, k, path, ctx);
+    var out = [], i;
+    /* the same length on all three and not a list of entries: place by place (a row of cells, a list of ticks) */
+    if (base.length === mine.length && mine.length === theirs.length && !mine.concat(theirs).every(isObj)) {
+      for (i = 0; i < mine.length; i++) out.push(merge(base[i], mine[i], theirs[i], path.concat([i]), ctx));
+      return out;
+    }
+    var em = edits(base, mine), et = edits(base, theirs), n = base.length;
+    function put(j) {
+      var mi = em.ins[j], ti = et.ins[j];
+      mi.forEach(function (r) { out.push(r); });
+      ti.forEach(function (r) { if (!mi.some(function (x) { return eq(x, r); })) { ctx.note(path, 'added'); out.push(clone(r)); } });
+    }
+    for (i = 0; i < n; i++) {
+      put(i);
+      var a = em.ops[i], b = et.ops[i];
+      if (a === 'keep' && b === 'keep') out.push(base[i]);
+      else if (a === 'keep' && b === 'del') ctx.note(path, 'removed');
+      else if (a === 'del' && (b === 'keep' || b === 'del')) { /* removed here */ }
+      else if (a === 'keep') { ctx.note(path, 'changed'); out.push(clone(b.mod)); }
+      else if (b === 'keep') out.push(a.mod);
+      else if (a === 'del') { ctx.note(path, 'kept', 'removed here, changed by them'); out.push(clone(b.mod)); }
+      else if (b === 'del') { ctx.note(path, 'kept', 'removed by them, changed here'); out.push(a.mod); }
+      else out.push(merge(base[i], a.mod, b.mod, path.concat([out.length]), ctx));
+    }
+    put(n);
+    return out;
+  }
+  /* row counts: the larger, never a question */
+  function maxOf(m, t) {
+    if (typeof m === 'number' && typeof t === 'number') return Math.max(m, t);
+    if (Array.isArray(m) && Array.isArray(t)) { var o = []; for (var i = 0; i < Math.max(m.length, t.length); i++) o.push(maxOf(m[i], t[i])); return o; }
+    if (isObj(m) && isObj(t)) { var r = clone(m); Object.keys(t).forEach(function (k) { r[k] = k in m ? maxOf(m[k], t[k]) : clone(t[k]); }); return r; }
+    return m === undefined ? clone(t) : m;
+  }
+  /* ---- one value */
+  function merge(base, mine, theirs, path, ctx) {
+    if (eq(mine, theirs)) return mine;
+    if (eq(base, mine)) { ctx.took(path, base, theirs); return clone(theirs); }
+    if (eq(base, theirs)) return mine;
+    var last = path[path.length - 1];
+    if (typeof last === 'string' && STAMP.test(last)) return String(mine) >= String(theirs) ? mine : clone(theirs);
+    if (last === 'counts') return maxOf(mine, theirs);
+    if (isObj(mine) && isObj(theirs)) {
+      var b = isObj(base) ? base : {}, out = {}, keys = Object.keys(mine);
+      Object.keys(theirs).forEach(function (x) { if (keys.indexOf(x) < 0) keys.push(x); });
+      keys.forEach(function (x) {
+        var inM = x in mine, inT = x in theirs, inB = x in b;
+        if (inM && inT) out[x] = merge(b[x], mine[x], theirs[x], path.concat([x]), ctx);
+        else if (inM) { if (inB && eq(b[x], mine[x])) ctx.note(path.concat([x]), 'removed'); else out[x] = mine[x]; }
+        else if (!(inB && eq(b[x], theirs[x]))) { ctx.took(path.concat([x]), b[x], theirs[x]); out[x] = clone(theirs[x]); }
+      });
+      return out;
+    }
+    if (Array.isArray(mine) && Array.isArray(theirs)) return mergeList(Array.isArray(base) ? base : [], mine, theirs, path, ctx);
+    return ctx.clash(path, base, mine, theirs);
+  }
+
+  /* ---- a whole case: { packet, photoSrc, forms: { id: { title, snap: { total, data, own } } }, facts, ... } */
+  function parse(t) { if (typeof t !== 'string') return { ok: false }; try { return { ok: true, v: JSON.parse(t) }; } catch (e) { return { ok: false }; } }
+  function mergeQuiet(b, m, t) {   /* the form's generic field map, read only when its own data cannot be: mine where both changed */
+    b = isObj(b) ? b : {}; var out = {};
+    Object.keys(m).forEach(function (k) { out[k] = m[k]; });
+    Object.keys(t).forEach(function (k) { if (!(k in m)) { if (!(k in b)) out[k] = t[k]; } else if (eq(b[k], m[k])) out[k] = t[k]; });
+    return out;
+  }
+  function mergeCase(base, mine, theirs) {
+    base = isObj(base) ? base : {}; var conflicts = [], notes = [], cur = '';
+    var ctx = {
+      note: function (path, kind, why) { notes.push({ form: cur, path: path.slice(), kind: kind, why: why || '' }); },
+      took: function (path, b, t) { describe(b, t, path); },   /* what came in, said item by item: a field filled or changed, an entry added or removed */
+      clash: function (path, b, m, t) { conflicts.push({ form: cur, path: path.slice(), base: b, mine: m, theirs: t, pick: 'mine' }); var o = {}; o[CLASH] = conflicts.length - 1; return o; }
+    };
+    function describe(b, t, path) {
+      var last = path[path.length - 1];
+      if (typeof last === 'string' && (STAMP.test(last) || last === 'counts')) return;
+      var prim = function (a) { return (a || []).every(function (x) { return !isObj(x) && !Array.isArray(x); }); };   /* a list of words or ticks is one item */
+      if (Array.isArray(t) && (Array.isArray(b) || b === undefined) && !(prim(t) && prim(b))) {
+        var e = edits(b || [], t);
+        e.ops.forEach(function (op) { if (op === 'del') notes.push({ form: cur, path: path.slice(), kind: 'removed' }); else if (op && op.mod !== undefined) notes.push({ form: cur, path: path.slice(), kind: 'changed' }); });
+        e.ins.forEach(function (rows) { rows.forEach(function () { notes.push({ form: cur, path: path.slice(), kind: 'added' }); }); });
+        return;
+      }
+      if (isObj(t) && (isObj(b) || b === undefined)) { var bb = b || {}; Object.keys(t).forEach(function (k) { if (!eq(bb[k], t[k])) describe(bb[k], t[k], path.concat([k])); }); return; }
+      if (!eq(b, t)) notes.push({ form: cur, path: path.slice(), kind: 'changed' });
+    }
+    var out = {}, skip = { forms: 1, facts: 1, saved: 1 };
+    Object.keys(mine).forEach(function (k) { if (!skip[k]) { cur = ''; out[k] = merge(base[k], mine[k], k in theirs ? theirs[k] : base[k], [k], ctx); } });
+    Object.keys(theirs).forEach(function (k) { if (!skip[k] && !(k in mine) && !(k in base)) out[k] = clone(theirs[k]); });
+    out.saved = new Date().toISOString();
+    if (mine.facts || theirs.facts) out.facts = clone(mine.facts || theirs.facts);
+    var bf = base.forms || {}, mf = mine.forms || {}, tf = theirs.forms || {}, forms = {}, ids = Object.keys(mf), formNotes = {}, owns = {};
+    Object.keys(tf).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
+    ids.forEach(function (id) {
+      cur = id;
+      var b = bf[id], m = mf[id], t = tf[id];
+      if (m && !t) { forms[id] = m; return; }   /* a form not in their file (not sent, or closed there) is never taken out here */
+      if (t && !m) { if (b && eq(b.snap, t.snap)) return; formNotes[id] = 'added'; forms[id] = clone(t); return; }
+      var bs = (b && b.snap) || {}, ms = m.snap || {}, ts = t.snap || {};
+      if (eq(ms, ts) || eq(bs, ts)) { forms[id] = m; return; }
+      if (eq(bs, ms)) { formNotes[id] = 'theirs'; forms[id] = clone(t); var pb0 = parse(bs.own), pt0 = parse(ts.own); if (pb0.ok && pt0.ok) describe(prep(pb0.v), prep(pt0.v), []); return; }
+      var pb = parse(bs.own), pm = parse(ms.own), pt = parse(ts.own), snap = { total: Math.max(+ms.total || 0, +ts.total || 0) };
+      snap.data = isObj(ms.data) && isObj(ts.data) ? mergeQuiet(bs.data, ms.data, ts.data) : ms.data;
+      if (pm.ok && pt.ok) owns[id] = merge(pb.ok ? prep(pb.v) : undefined, prep(pm.v), prep(pt.v), [], ctx);
+      else { snap.own = ms.own; conflicts.push({ form: id, path: [], whole: true, mine: m, theirs: t, pick: 'mine' }); }
+      forms[id] = { title: m.title || t.title, snap: snap };
+      formNotes[id] = 'merged';
+    });
+    out.forms = forms;
+    var done = false;
+    return { merged: out, conflicts: conflicts, notes: notes, formNotes: formNotes,
+      /* the choices made (each conflict's pick: 'mine' | 'theirs'), the case to open */
+      finish: function () {
+        if (done) return out; done = true;
+        function fix(v) {
+          if (Array.isArray(v)) { for (var i = 0; i < v.length; i++) v[i] = fix(v[i]); return v; }
+          if (isObj(v)) {
+            if (CLASH in v) { var c = conflicts[v[CLASH]]; return clone(c.pick === 'theirs' ? c.theirs : c.mine); }
+            Object.keys(v).forEach(function (k) { v[k] = fix(v[k]); }); return v;
+          }
+          return v;
+        }
+        Object.keys(out).forEach(function (k) { if (k !== 'forms') out[k] = fix(out[k]); });
+        Object.keys(owns).forEach(function (id) { forms[id].snap.own = JSON.stringify(unprep(fix(owns[id]))); });
+        conflicts.forEach(function (c) { if (c.whole && c.pick === 'theirs') forms[c.form] = clone(c.theirs); });
+        return out;
+      } };
+  }
+  /* a conflict's place, said plainly: "log, row 3, ev" */
+  function where(path) {
+    return path.filter(function (p) { return p !== FLAT; }).map(function (p) {
+      if (typeof p === 'number') return 'row ' + (p + 1);
+      p = String(p); if (p.indexOf(ROWS) === 0) return p.slice(ROWS.length).replace(/^\u0002/, ''); if (p === CELL) return ''; return p.replace(/^\u0002/, '');
+    }).filter(Boolean).join(', ');
+  }
+  /* the flat field name a conflict stands for, when it is one ("log[2].ev"), to find its label on the form */
+  function fieldName(path) {
+    var i = path.indexOf(FLAT); if (i < 0) return path.length ? String(path[path.length - 1]) : '';
+    var s = '', rest = path.slice(i + 1);
+    for (var j = 0; j < rest.length; j++) {
+      var p = rest[j];
+      if (typeof p === 'number') s += '[' + p + ']';
+      else if (String(p).indexOf(ROWS) === 0) { var g = String(p).slice(ROWS.length); s += g.charAt(0) === '\u0002' ? g.slice(1) : (s ? '.' : '') + g; }
+      else if (p !== CELL) s += (s ? '.' : '') + p;
+    }
+    return s;
+  }
+  var api = { mergeCase: mergeCase, merge: merge, canon: canon, eq: eq, prep: prep, unprep: unprep, unflat: unflat, flatten: flatten, where: where, fieldName: fieldName };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.nbhMerge = api;
+})(this);
+</script>
 <style>
 :root{
   --navy:#182e43; --slate:#254657; --teal:#76a2a3; --mist:#eaf2f0; --shade:#f5f8f7;
@@ -797,6 +1080,16 @@ dialog tr:nth-child(even) td{background:#fafcfb}
 .td-list{list-style:none;margin:6px 0 12px;padding:0}.td-list li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:9px 0;border-top:1px solid var(--rule,#dfe6e4);line-height:1.45;text-align:left}.td-list li:first-child{border-top:0}.td-list .td-k{display:inline-block;min-width:0;padding:2px 9px;border-radius:999px;background:var(--mist,#eaf2f0);color:var(--slate,#254657);font-size:12px;letter-spacing:0;text-transform:none;font-weight:600;line-height:1.3}.td-list .td-k.hot,.td-list li.hot .td-k{background:#b03a2e;color:#fff}.td-list li>span:not(.td-k){flex:1 1 220px;min-width:0}.td-list li>button{margin-left:auto;flex:0 0 auto}.td-list button{margin-left:6px}.td-more button{margin:4px 6px 4px 0}
 .pc-list{margin:6px 0 10px 20px;padding:0}.pc-list li{margin:0 0 7px;line-height:1.4}.pc-list label{display:block;cursor:pointer}.pc-list input{margin-right:4px;transform:scale(1.2)}.pc-list span{display:block;color:var(--muted,#54676f);font-size:13px;margin-left:24px}.pc-open button{margin:2px 4px 2px 0}.pc-done{color:#2F6B37}
 #dlg .hp-lead{font-size:15px;color:var(--ink);margin:0 0 10px}
+/* v23.52 Share for editing, and the changes from a colleague */
+#dlg .sh-row{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:8px 0}#dlg .sh-row label{flex:0 0 220px;font-weight:600}
+#dlg .sh-row input{flex:1 1 220px;min-height:40px;font:inherit;padding:6px 8px;border:1px solid var(--line,#c9d3da);border-radius:6px}
+#dlg .sh-forms{border:1px solid var(--line,#d5dde3);border-radius:8px;padding:6px 10px;margin:10px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:2px 12px}
+#dlg .sh-forms label{display:flex;gap:6px;align-items:center;min-height:36px}#dlg .sh-forms legend{font-weight:600;padding:0 4px}
+#dlg .sh-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:12px}#dlg .sh-foot button{min-height:44px;padding:0 16px}
+#dlg .sh-sum{margin:6px 0 10px;padding-left:20px}#dlg .sh-sum li{margin:2px 0}#dlg .sh-pick{min-height:32px}
+#dlg .sh-both{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 4px}
+#dlg .sh-c{border-top:1px solid var(--line,#d5dde3);padding:8px 0}#dlg .sh-c-h{margin-bottom:4px}
+#dlg .sh-c label{display:flex;gap:8px;align-items:flex-start;min-height:36px;padding:2px 0;word-break:break-word}
 #dlg .hp-data{width:100%;border-collapse:collapse;margin:6px 0 10px}#dlg .hp-data th,#dlg .hp-data td{vertical-align:top;text-align:left;font-size:13px;line-height:1.45;padding:6px 8px;border-top:1px solid var(--rule,#dfe6e4)}#dlg .hp-steps{margin:0 0 12px;padding-left:22px}#dlg .hp-steps li{margin:4px 0}
 #dlg details{border:1px solid var(--rule);border-radius:6px;padding:6px 12px;margin:6px 0;background:#fff}
 #dlg details[open]{background:var(--shade)}
@@ -1198,6 +1491,7 @@ body:not(.has-form) #focusBtn{display:none}
     <button id="closeCase" title="Save this case, then clear every form and the student&rsquo;s details for the next case">Close case</button>
     <button id="saveFile" class="rare" hidden title="Write the case to a file as well (Save case keeps it on this device and in Google Drive)">Save case to a file</button>
     <button id="saveWhole" class="rare" hidden title="A copy of the case inside the whole workstation (about 21 MB): it opens on its own with a double-click, for handing a case to someone without the workstation">Save a case that opens on its own</button>
+    <button id="shareEdit" class="rare" hidden title="A copy of the case for a colleague who is helping with it; when their file comes back, Open case puts their work together with yours">Share for editing</button>
     <button id="caseXlsx" class="rare" title="Every open form into one spreadsheet: a sheet per form, from its own CSV export where it has one, else every field by name">Case as spreadsheet</button></span>
     <input type="file" id="caseFile" accept="application/json,.json,text/html,.html" hidden>
     <span class="pair"><button id="caseMap" title="Which form when, from referral to exit, and what carries forward between them">Case map</button>
@@ -2272,7 +2566,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.51';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.52';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3846,6 +4140,7 @@ function dataWhere(){
     ['The caseload, its history (restore points) and Autosave copies','This browser on this '+HERE+', protected by its passcode','Until you remove them, or the time set in Caseload (<i>Forget a student not saved for</i>); Autosave copies 14 days. <b>Remove all student data from this '+HERE+'</b> clears them'],
     ['Sound tracks, pictures and the student photo (the media store)','This browser on this '+HERE+', protected by its passcode','While a caseload record, a restore point, an Autosave copy or the case on screen refers to them; a student removed takes the ones only they used. <b>Remove all student data from this '+HERE+'</b> clears them'],
     ['Case files (<b>Save case</b>, or <b>Save case to a file</b> with Google Drive on)','Where you save them: the district drive','As the district keeps records'],
+    ['<b>Share for editing</b> (only when you use it)','The file you send (through school email or AirDrop): the forms you tick and what you and the colleague last had in common; on this '+HERE+', that starting point for the next file','On this '+HERE+': until the student leaves the caseload here, or <b>Remove all student data from this '+HERE+'</b>; the colleague takes their copy off their '+HERE+' (Caseload, the student\u2019s card, Remove)'],
     ['<b>Use Google Drive</b> (only if you turn it on, in Caseload)','Each student\u2019s case, in your school Google Drive (the folder '+DRV_FOLDER+'); the workstation sees only the files it made there','Until removed, then 30 days in Drive\u2019s trash; a copy not kept in a clash (Replaced copies) '+(typeof drvKeepDays==='function'?drvKeepDays():30)+' days'],
     ['Questionnaires sent by email (only when you press Send)','One email per person from your school account through Gmail; the link names the student by initials and the behavior asked about','In your Gmail Sent folder'],
     ['Questionnaire answers and staff phone entries (with the reply box)','Locked on the sender\u2019s phone so only the form\u2019s file can open them; the practice website holds the locked copy','Until the form collects and removes it, or 60 days'],
@@ -3872,6 +4167,10 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Save case</b> writes every open form and the student details into one file; <b>Open case</b> lists its forms at once and fills each from the file as you open it (the form you were on opens first; the rest load quietly behind it). <b>Close case</b> saves the case the same way, then closes every form and clears the student’s details, so the next student’s case can start without leaving the workstation. Each form’s own <b>Save data</b> button still works on its own. The button above the form carries a dot while the case holds work not yet in a file and pulses after twenty minutes of it.</p>'+
      '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the '+HERE+'\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
+   fold('Working on a case with a colleague',   /* v23.52 */
+     '<p><b>More</b>, <b>Share for editing</b> writes a copy of the case for a colleague who is helping with it: the forms you tick, in a file named for the student and the colleague. Send it through your school email or AirDrop. They open it with <b>Open case</b> in the workstation (the website: nothing to install), work in the forms as usual, and send it back with <b>More</b>, <b>Share for editing</b>. You can both keep working while the file is away.</p>'+
+     '<p>When their file comes back, open it with <b>Open case</b>. It does not replace your case: the workstation puts the two together. What only they changed is taken, what only you changed stays, entries either of you added are all kept, and an entry one of you removed goes (unless the other changed it). Where you both changed the same thing, the two are shown side by side and you choose (yours until you do). A summary says what came in; then <b>Save case</b> as usual. The next file you send starts from what you both had, so it is put together the same way at their end.</p>'+
+     '<p>The file is the student\u2019s record: send it only through school accounts or AirDrop, and when the colleague is done they take it off their '+HERE+' (Caseload, the student\u2019s card, Remove). This '+HERE+' keeps what you and the colleague last had in common, until the student leaves the caseload here.</p>')+
    fold('Printing and the PDF',
      '<p>Tick the forms this student needs and press <b>Build master print</b>: one document that reads as a report: a cover with the contents, then each form as a section with its own running head, its letterhead once and its sheets running on; the forms’ guides, reference lists and on-screen notes stay out, the references gathered in a last section. <b>Packet options</b> (under the list of forms) keeps a form’s Guide, puts the references with each form or leaves them out, prints Form ABC-1’s log in full, and prints the empty boxes meant for handwriting. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
      '<p><b>Printing from Safari on the iPad?</b> <button type="button" id="hpPrintCheck">Print check</button> lists what to look at in the print window first: paper, orientation, backgrounds, the page count. For the master print, save it as PDF (the print window\u2019s <b>Share</b>, then <b>Save to Files</b>) and run <b>Finish PDF</b>: it adds the page header and footer Safari leaves out, the bookmarks and the page numbers.</p>'+
@@ -6078,7 +6377,7 @@ $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdReady'))ready
    each runs the bar's own button, which stays where it was on a wider screen */
 if(EMBED){const w=document.getElementById('saveWhole');if(w)w.hidden=false;}   /* v22.22 the one-file edition only */
 {const M=document.createElement('div');M.id='moreMenu';M.setAttribute('role','menu');M.hidden=true;document.body.appendChild(M);
-  const ITEMS=[['saveFile','Save case to a file'],['saveWhole','Save a case that opens on its own'],['savePacket','Save packet'],['openPacket','Open packet'],['caseXlsx','Case as spreadsheet (.xlsx)'],['bookmarkPdf','Finish a packet PDF'],['diag','Diagnostics']];
+  const ITEMS=[['saveFile','Save case to a file'],['saveWhole','Save a case that opens on its own'],['shareEdit','Share for editing'],['savePacket','Save packet'],['openPacket','Open packet'],['caseXlsx','Case as spreadsheet (.xlsx)'],['bookmarkPdf','Finish a packet PDF'],['diag','Diagnostics']];
   const shut=()=>{M.hidden=true;$('#moreBtn').setAttribute('aria-expanded','false');};
   $('#moreBtn').addEventListener('click',e=>{e.stopPropagation();if(!M.hidden){shut();return;}
     M.innerHTML=ITEMS.filter(([id])=>{const b=document.getElementById(id);return !(b&&b.hidden&&(id==='saveFile'||id==='saveWhole'));}).map(([id,n])=>'<button type="button" role="menuitem" data-more="'+id+'">'+n+'</button>').join('');
@@ -6150,6 +6449,7 @@ async function clRemoveAll(){const L=await clList()||[];
   for(const r of L)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   try{if(CP&&CP.clear)await CP.clear();}catch(e){}try{autoWipe();}catch(e){}try{await hxWipe();}catch(e){}   /* v21.91 every point of case history too */
   try{clearTimeout(mediaSweepT);await mediaSweep({all:true});}catch(e){}   /* v22.56 every sound and picture kept in the store, but those the case on screen holds */
+  try{if(typeof shWipe==='function')await shWipe();}catch(e){}   /* v23.52 what each share last had in common */
   try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');sessionStorage.removeItem('nbh.google.mail');}catch(e){}
   wsUI.toast('Every student’s data is removed from this '+HERE+'. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
   if($('#dlg').open)caseloadOpen();paintBlank();}
@@ -6596,6 +6896,7 @@ const CMDS=[
   {k:'finish pdf bookmark outline sidebar page numbers contents',n:'Finish a packet PDF',s:'command',go:()=>$('#bookmarkPdf').click()},
   {k:'save case',n:'Save case',s:'command',go:()=>$('#saveCase').click()},
   {k:'open case',n:'Open case',s:'command',go:()=>$('#openCase').click()},
+  {k:'share edit colleague helper send back together merge relay',n:'Share for editing: a copy of the case for a colleague, put back together when it returns',s:'command',go:()=>$('#shareEdit').click()},
   {k:'close case next student finish',n:'Close case: save it, then clear for the next student',s:'command',go:()=>$('#closeCase').click()},
   {k:'spreadsheet excel numbers xlsx csv export the case as data workbook',n:'Case as spreadsheet (.xlsx)',s:'command',go:()=>$('#caseXlsx').click()},
   {k:'save packet',n:'Save packet',s:'command',go:()=>$('#savePacket').click()},
@@ -9306,6 +9607,176 @@ function srStepDue(sch,data){const D=sch&&sch.decide;if(!D||!data||!Array.isArra
   if(run(D.up,'le'))return {how:'up',t:head+': a step up is due. '+b.name+' was '+say(D.up,'le')+since+'. Take the next step on the card, write the date it was reached, and set the step in force on Form SR-1.'};
   return null;}
 {const t0=todayItems;todayItems=function(){const L=t0.apply(this,arguments);try{const f=state.facts||{},x=srStepDue(f.schedule,f.data);if(x)L.push({k:'Schedule',t:esc(x.t),open:'SR-1'});}catch(e){}return L;};}
+</script>
+<script id="nbh-v2352">
+/* v23.52 a case shared for editing, as a file passed back and forth. More, Share for editing writes a copy of the case for
+   a colleague: the forms ticked, the student's details, and what the two of you last had in common (share.base). The
+   colleague opens it with Open case, works as usual, and sends it back the same way. A file that comes back is not opened
+   in place of the case: nbhMerge puts the two together (what only one of you changed is taken, entries either added are
+   all kept, where you both changed the same thing the person chooses, mine until then), a summary says what came in, and
+   the case is then saved as usual. Each device keeps, per share, what it last had from the other side (the next file's
+   starting point), in a store of its own; a student taken off the caseload here takes their shares with them, and Remove
+   all student data clears the store. Nothing is sent by the workstation: the person sends the file. */
+const SH={db:null};
+function shDb(){if(SH.db)return SH.db;SH.db=new Promise((res,rej)=>{let r;try{r=indexedDB.open('nbh-share',1);}catch(e){rej(e);return;}
+  r.onupgradeneeded=()=>{try{r.result.createObjectStore('shares',{keyPath:'id'});}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+  SH.db.catch(()=>{SH.db=null;});return SH.db;}
+async function shTx(mode,f){const db=await shDb();return await new Promise((res,rej)=>{const tx=db.transaction('shares',mode),st=tx.objectStore('shares');let out;
+  try{const q=f(st);if(q)q.onsuccess=()=>{out=q.result;};}catch(e){rej(e);return;}tx.oncomplete=()=>res(out);tx.onerror=()=>rej(tx.error);});}
+const shGet=id=>shTx('readonly',st=>st.get(id)).catch(()=>null);
+const shAll=()=>shTx('readonly',st=>st.getAll()).then(a=>a||[]).catch(()=>[]);
+const shPut=r=>shTx('readwrite',st=>st.put(r)).catch(()=>{});
+const shDel=id=>shTx('readwrite',st=>st.delete(id)).catch(()=>{});
+const shName=id=>((ALL.find(x=>x[0]===id)||[])[1]||id);
+const shDay=()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
+/* the forms a share can hold: a staff record (RS-1, PD-1) is never part of a student's case */
+const shIds=()=>caseIds().filter(id=>!STAFF_ONLY[id]&&!(typeof STAFF_SIDE!=='undefined'&&STAFF_SIDE[id]));
+/* the case as it is now, read from the open forms (as Save case reads them) */
+async function shCollect(ids){const forms={},late=[];
+  for(const id of ids){const P=state.pending[id];if(P){forms[id]={title:P.title,snap:P.snap};continue;}
+    if(!state.frames[id])continue;let r=await grab(id,'snapshot',null,15000);if(r&&r.snap)forms[id]={title:r.title,snap:r.snap};else late.push(id);}
+  return {forms:orderCase(forms),late};}
+/* pictures and sounds as references on this device, so the same picture reads the same on both sides */
+async function shRefs(c){try{return mediaHas(c)?await mediaIn(c,'file'):c;}catch(e){return c;}}
+async function shMine(){const p=packet(),k=clKey(p);return (await shAll()).filter(r=>(state.caseId&&r.caseId===state.caseId)||(k&&r.caseKey===k));}
+async function shWrite(text,fn){
+  if(EMBED&&window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:fn,types:[{description:'Workstation case',accept:{'application/json':['.json']}}]});await writeCase(h,text,fn,'application/json',true);return h.name||fn;}
+    catch(e){if(e&&e.name==='AbortError')return '';}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();
+  const sh=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';return sh==='cancelled'?'':fn;}
+
+/* ---- More, Share for editing (or Send back, for a case that came from a colleague) */
+async function shOpen(){
+  const p=packet();
+  if(!String(p.client||'').trim()){alert('Put the student’s name on the bar first: the file is named for the student.');return;}
+  const ids=shIds();if(!ids.length){alert('No form is open yet. A shared case holds the forms you have open.');return;}
+  const mine=await shMine(),back=mine.find(r=>r.role==='helper'),before=mine.filter(r=>r.role==='owner');
+  let ppl=[];try{ppl=((await pplLoad())||{}).list||[];}catch(e){}
+  let me='';try{me=localStorage.getItem('nbh.share.me')||'';}catch(e){}
+  me=(back&&back.me)||me||String(p.bcba||'').trim();
+  const who=back?back.peer:'';
+  dialog(back?'Send back to '+esc(back.peer):'Share for editing',
+    '<p class="hp-lead">'+(back?'Your work goes back to <b>'+esc(back.peer)+'</b> in a file. When they open it, the workstation puts it together with theirs; you can keep working meanwhile.':
+      'A copy of '+esc(p.client)+'’s case for a colleague who is helping with it. They open it in the workstation, work as usual, and send it back; when it comes back, Open case puts their work together with yours.')+'</p>'+
+    '<div class="sh-row"><label for="shPeer">'+(back?'Send to':'Who will work on it')+'</label><input id="shPeer" list="shPpl" autocomplete="off" value="'+esc(who)+'" placeholder="Their name"><datalist id="shPpl">'+ppl.map(x=>'<option value="'+esc(x.name)+'">'+esc(x.role||'')+'</option>').join('')+'</datalist></div>'+
+    (before.length&&!back?'<p class="hint">Shared before with: '+before.map(r=>'<button type="button" class="sh-pick" data-shpeer="'+esc(r.peer)+'">'+esc(r.peer)+'</button>').join(' ')+' (the next file starts from what you both had).</p>':'')+
+    '<div class="sh-row"><label for="shMe">Your name, as they will see it</label><input id="shMe" autocomplete="off" value="'+esc(me)+'"></div>'+
+    '<fieldset class="sh-forms"><legend>The forms in the file</legend>'+ids.map(id=>'<label><input type="checkbox" data-shform="'+esc(id)+'" checked> '+esc(id)+' <span class="hint">'+esc(shName(id))+'</span></label>').join('')+'</fieldset>'+
+    '<p class="hint">The file is the student’s record. Send it only through your school email or AirDrop. When the work is done, the colleague takes it off their device (Caseload, the student’s card, Remove).</p>'+
+    '<div class="sh-foot"><button type="button" id="shNo">Cancel</button><button type="button" class="primary" id="shGoOut">Save the file</button></div>');
+  const db=$('#dlgBody');
+  const on=async e=>{
+    const pk=e.target.closest('[data-shpeer]');if(pk){$('#shPeer').value=pk.dataset.shpeer;return;}
+    if(e.target.closest('#shNo')){db.removeEventListener('click',on);$('#dlg').close();return;}
+    if(!e.target.closest('#shGoOut'))return;
+    const peer=$('#shPeer').value.replace(/\s+/g,' ').trim(),my=$('#shMe').value.replace(/\s+/g,' ').trim();
+    const pick=[...db.querySelectorAll('[data-shform]')].filter(x=>x.checked).map(x=>x.dataset.shform);
+    if(!peer){$('#shPeer').focus();wsUI.toast('Who will work on it? Their name goes on the file.',{kind:'warn'});return;}
+    if(!pick.length){wsUI.toast('Tick at least one form.',{kind:'warn'});return;}
+    db.removeEventListener('click',on);$('#dlg').close();
+    const rec=back&&peer===back.peer?back:before.find(r=>r.peer.toLowerCase()===peer.toLowerCase())||null;
+    await shSend({peer,me:my||'your colleague',ids:pick,rec});};
+  db.addEventListener('click',on);
+  $('#dlg').addEventListener('close',()=>db.removeEventListener('click',on),{once:true});
+  setTimeout(()=>{const f=$('#shPeer');if(f&&!f.value)f.focus();},50);
+}
+async function shSend(o){
+  const {forms,late}=await shCollect(o.ids);
+  if(late.length){alert('Form'+(late.length>1?'s ':' ')+late.join(', ')+' did not answer in time, so nothing was written. Try again in a moment.');return;}
+  const now=caseData(packet(),forms,state.caseId||(state.caseId=caseUid()));delete now.facts;
+  const rec=o.rec;
+  const base=rec&&rec.base?JSON.parse(rec.base):JSON.parse(JSON.stringify(now));
+  const share={v:1,id:rec?rec.id:'s'+caseUid(),case:state.caseId,from:o.me,to:o.peer,round:(rec?+rec.round||0:0)+1,forms:o.ids,sent:new Date().toISOString(),base};
+  const text=await mediaOut(JSON.stringify(Object.assign({},now,{share}),null,1));
+  const safe=s=>String(s).replace(/[^\w-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'colleague';
+  const fn='CASE_'+caseName(packet())+'_for-'+safe(o.peer)+'_'+shDay()+'.json';
+  let where='';try{where=await shWrite(text,fn);}catch(e){alert('The file could not be written: '+(e&&e.message||e));return;}
+  if(!where)return;
+  const r=rec||{id:share.id,role:'owner',peer:o.peer,caseId:state.caseId,caseKey:clKey(packet()),client:packet().client,base:JSON.stringify(base),round:0};
+  r.me=o.me;r.peer=o.peer;r.round=share.round;r.sent=share.sent;await shPut(r);
+  try{localStorage.setItem('nbh.share.me',o.me);}catch(e){}
+  await wsUI.alert('The file for '+o.peer+' is saved: '+where+'.\n'+o.ids.length+' form'+(o.ids.length===1?'':'s')+' in it. Send it to '+o.peer+' through your school email or AirDrop. '+
+    (r.role==='helper'?'When you are done helping, take the case off this '+HERE+': Caseload, the student’s card, Remove.':'When their file comes back, open it with Open case: their work is put together with yours.'));
+}
+
+/* ---- a file from a colleague, opened with Open case */
+async function shLoad(d,id,merged){
+  await autoSeal();state.restoring=true;const notes=await loadCase(d,'file');state.restoring=false;
+  state.savedAt=merged?null:new Date();state.lastSig=merged?'':caseSig();autoBaseline();state.caseHandle=null;state.caseId=id||d.id||null;
+  try{paintSave();}catch(e){}return notes;}
+const shVal=v=>{if(v===undefined||v===null||v==='')return '(empty)';if(v===true)return 'ticked';if(v===false)return 'not ticked';
+  if(typeof v==='object')return JSON.stringify(v).replace(/[{}"\u0000\u0001\u0002]/g,'').replace(/,/g,', ').slice(0,160)||'(empty)';return String(v).slice(0,200);};
+function shLabel(c){if(c.whole)return 'the whole form (its saved work could not be read item by item)';
+  let lab='';try{const fr=state.frames[c.form],doc=fr&&fr.contentDocument,nm=nbhMerge.fieldName(c.path);
+    if(doc&&nm){const q=s=>{try{return doc.querySelector(s);}catch(e){return null;}};const el=q('[name="'+CSS.escape(nm)+'"]')||q('[data-m="'+CSS.escape(nm)+'"]')||doc.getElementById(nm);
+      if(el){lab=el.getAttribute('aria-label')||(el.labels&&el.labels[0]&&el.labels[0].textContent)||'';if(!lab){const tr=el.closest('tr'),th=tr&&tr.querySelector('th');if(th)lab=th.textContent;}}}}catch(e){}
+  lab=String(lab||'').replace(/\s+/g,' ').trim().slice(0,90);return lab||nbhMerge.where(c.path)||'(an item)';}
+function shReview(r,s,name){return new Promise(res=>{   /* name: the student, when the case is not the one on screen (a Drive sync) */
+  const from=s.from||'your colleague',From=from.charAt(0).toUpperCase()+from.slice(1),by={};   /* "the Mac" in a title, "The Mac" to begin a sentence */
+  r.notes.forEach(n=>{const f=n.form||'';const b=by[f]||(by[f]={added:0,changed:0,removed:0,kept:0});b[n.kind]=(b[n.kind]||0)+1;});
+  const forms=[...new Set(Object.keys(by).concat(Object.keys(r.formNotes)))].filter(Boolean);
+  const line=f=>{const b=by[f]||{},w=r.formNotes[f],bits=[];
+    if(w==='added')bits.push('a form they started');if(w==='theirs')bits.push('changed only by them: taken as theirs');
+    if(b.added)bits.push(b.added+' added');if(b.changed)bits.push(b.changed+' changed');if(b.removed)bits.push(b.removed+' removed');
+    if(b.kept)bits.push(b.kept+' kept that one of you removed and the other changed');
+    return '<li><b>'+esc(f)+'</b> '+esc(shName(f))+(bits.length?': '+esc(bits.join(', ')):'')+'</li>';};
+  const packetNotes=by['']?'<li><b>The student’s details</b>: '+((by[''].changed||0)+(by[''].added||0))+' changed</li>':'';
+  const cl=r.conflicts.map((c,i)=>'<div class="sh-c" role="group" aria-label="'+esc(c.form?c.form+', '+shLabel(c):shLabel(c))+'"><div class="sh-c-h"><b>'+esc(c.form||'Student details')+'</b> · '+esc(shLabel(c))+'</div>'+
+    '<label><input type="radio" name="shc'+i+'" value="mine" checked> <span>Yours: '+esc(c.whole?'your copy of the form':shVal(c.mine))+'</span></label>'+
+    '<label><input type="radio" name="shc'+i+'" value="theirs"> <span>'+esc(From)+'’s: '+esc(c.whole?'their copy of the form':shVal(c.theirs))+'</span></label></div>').join('');
+  dialog('Changes from '+esc(from),
+    '<p class="hp-lead">'+esc(From)+'’s '+(s.drive?'copy':'file')+' is put together with '+esc(name||packet().client||'the case')+'’s case here: what only one of you changed is taken, entries either of you added are all kept.'+(r.conflicts.length?' You both changed '+r.conflicts.length+' thing'+(r.conflicts.length===1?'':'s')+'; choose which to keep (yours until you choose).':'')+'</p>'+
+    (forms.length||packetNotes?'<ul class="sh-sum">'+packetNotes+forms.map(line).join('')+'</ul>':'<p>Nothing new came in: the case here already has all of it.</p>')+
+    (r.conflicts.length?'<div class="sh-both"><b>Changed by both of you</b> <button type="button" id="shAllMine" class="sm">Keep all of mine</button> <button type="button" id="shAllTheirs" class="sm">Take all of theirs</button></div>'+cl:'')+
+    '<p class="hint">Save case afterwards, as usual. The next file you send them starts from what you both have now.</p>'+
+    '<div class="sh-foot"><button type="button" id="shNo">Cancel</button><button type="button" class="primary" id="shGo">Put them together</button></div>');
+  const db=$('#dlgBody');let over=false;
+  const fin=v=>{if(over)return;over=true;db.removeEventListener('click',on);try{$('#dlg').close();}catch(e){}res(v);};
+  const on=e=>{
+    if(e.target.closest('#shGo')){r.conflicts.forEach((c,i)=>{const x=db.querySelector('input[name="shc'+i+'"]:checked');c.pick=x?x.value:'mine';});fin(true);}
+    else if(e.target.closest('#shNo'))fin(false);
+    else if(e.target.closest('#shAllMine'))db.querySelectorAll('.sh-c input[value="mine"]').forEach(x=>{x.checked=true;});
+    else if(e.target.closest('#shAllTheirs'))db.querySelectorAll('.sh-c input[value="theirs"]').forEach(x=>{x.checked=true;});};
+  db.addEventListener('click',on);$('#dlg').addEventListener('close',()=>fin(false),{once:true});
+});}
+async function shReceive(d){
+  const s=d.share;d=Object.assign({},d);delete d.share;
+  const rec=await shGet(s.id),key=clKey(d.packet||{}),from=s.from||'A colleague';
+  const onScreen=!!(caseIds().length&&((state.caseId&&state.caseId===s.case)||(key&&clKey(packet())===key)));
+  let kept=null;if(!onScreen){try{kept=(await clList()||[]).find(r=>r.key===key)||null;}catch(e){}}
+  const nm=(d.packet&&d.packet.client)||'a student',ids=Object.keys(d.forms||{}),open=caseIds().length;
+  if(!rec&&!onScreen&&!kept){
+    if(!(await wsUI.confirm(from+' shared '+nm+'’s case with you for editing.\n'+ids.length+' form'+(ids.length===1?'':'s')+': '+ids.join(', ')+'. Work in it as usual, Save case as usual, and when you are done, More, Share for editing sends your work back to '+from+'.'+(open?'\n\nWhat is open now is replaced.':''),{ok:'Open the case'})))return;
+    const theirs=await shRefs(d);
+    const notes=await shLoad(d,s.case,false);
+    await shPut({id:s.id,role:'helper',peer:from,me:s.to||'',caseId:s.case||state.caseId,caseKey:key,client:nm,base:JSON.stringify(theirs),round:+s.round||1,got:new Date().toISOString()});
+    wsUI.toast(nm+': '+ids.length+' form'+(ids.length===1?'':'s')+' from '+from+'.'+(notes.length?' Worth knowing: '+notes.join('; '):''),{kind:notes.length?'warn':'ok',ms:9000});
+    return;}
+  let mine;
+  if(onScreen){const c=await shCollect(caseIds());if(c.late.length){alert('Form'+(c.late.length>1?'s ':' ')+c.late.join(', ')+' did not answer in time, so nothing was put together. Try again in a moment.');return;}
+    mine=caseData(packet(),c.forms,state.caseId);}
+  else if(kept){if(open&&!(await wsUI.confirm(from+'’s file is for '+nm+', kept on this '+HERE+'.\nTheir case opens, put together with '+from+'’s work; what is open now is replaced.',{ok:'Continue'})))return;
+    try{mine=parseCase(kept.text);}catch(e){mine=null;}}
+  if(!mine)mine={form:'CASE',rev:'2026-09',packet:d.packet,forms:{}};
+  const theirs=await shRefs(d);let base=s.base||(rec&&rec.base?JSON.parse(rec.base):null);if(base)base=await shRefs(base);
+  const r=nbhMerge.mergeCase(base,mine,theirs);window.__shLast={notes:r.notes,formNotes:r.formNotes,n:r.conflicts.length};   /* for qa */
+  if(!(await shReview(r,s)))return;
+  const merged=r.finish(),id=state.caseId&&onScreen?state.caseId:(mine.id||s.case||null);merged.id=id||undefined;delete merged.cur;
+  const notes=await shLoad(merged,id,true);
+  const r2=rec||{id:s.id,role:'owner',caseId:id,caseKey:key,client:nm};
+  r2.peer=from;r2.base=JSON.stringify(theirs);r2.round=Math.max(+r2.round||0,+s.round||0);r2.got=new Date().toISOString();await shPut(r2);
+  wsUI.toast(nm+': '+from+'’s work is in the case. Save case to keep it.'+(notes.length?' Worth knowing: '+notes.join('; '):''),{kind:'ok',ms:9000});
+}
+{const oc=openCaseText;openCaseText=async function(text,handle,opt){let d=null;try{d=parseCase(text);}catch(e){}
+  if(d&&d.share&&d.forms&&!(opt&&opt.plain))return shReceive(d);
+  return oc.apply(this,arguments);};}
+$('#shareEdit').addEventListener('click',()=>shOpen());
+/* a student taken off the caseload here takes their shares with them; Remove all clears the store */
+async function shSweep(){if(clOff())return;const L=await clList();if(!L)return;const keys=new Set(L.map(r=>r.key));
+  for(const r of await shAll())if(r.caseKey&&!keys.has(r.caseKey)&&(!state.caseId||r.caseId!==state.caseId))await shDel(r.id);}
+async function shWipe(){for(const r of await shAll())await shDel(r.id);}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-cldel]'))setTimeout(()=>shSweep().catch(()=>{}),4000);},true);
+setTimeout(()=>shSweep().catch(()=>{}),20000);
 </script>
 </body>
 </html>
