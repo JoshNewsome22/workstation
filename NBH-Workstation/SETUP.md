@@ -9905,6 +9905,44 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.86: Forms GB-1 and TD-1's banks: objectives and protocols from the BCBA's journal volumes, 1968 to 2017
+
+- **168 starting objectives in GB-1** (80 before), now also written from the BCBA's volumes of the Journal of Applied
+  Behavior Analysis (1968 to 1977, every issue), The Analysis of Verbal Behavior (1982 to 1993), Behavioral Residential
+  Treatment, later Behavioral Interventions (1986 to 1994), and Behavior Analysis in Practice, Volume 10 (2017). New
+  entries include staying within reach of the adult on a store trip, counting out coins to make an amount, leaving the
+  building when the fire alarm sounds, treating a small cut or burn, calming self-talk and problem-solving steps when
+  angry, asking for items with manual signs, choosing between two foods at lunch, following a written checklist for a
+  job task, responding kindly when someone is happy, frustrated or hurt, and taking a city bus with a map app. Many
+  existing objectives gain further sources from the same volumes; a study that repeats an objective already in the bank
+  is added to it as a source rather than as a second entry.
+- **346 treatment protocols in TD-1** (81 before), from the same volumes: differential reinforcement, functional
+  communication and request training, chaining and prompting, schedules, self-management, peer-mediated and group
+  programs, relaxation and problem solving, sensory extinction and the rest, each as a card of its component.
+- **Snacks and health routines.** Where a study used a snack earned with tokens or praise, the protocol or objective
+  keeps it, and its note says the team decides whether a snack suits the student (diet, allergies, family wishes); a
+  meal is never earned or held back. Objectives and protocols for health routines and medical-procedure tolerance (a
+  medical diet or fluid limit, a vision test, a breathing treatment, medicine reminders, scheduled toilet sits with a
+  bowel plan) are included, and each says it is planned with the family, the prescribing doctor and the school nurse.
+- **What is left out.** As before, nothing in either bank uses contingent electric shock, aversive stimulation, slaps or
+  shaking, restraint as a consequence, seclusion, or limits on food or drink, and a study whose results rest on one of
+  them is not a source. Where a study's package also used response cost, time-out, reprimands, overcorrection, loss of
+  privileges or physical guidance through a demand, those parts are left out of the steps and the note says so; escape
+  extinction or physical guidance needs the consent on TD-1's Responding to behavior sheet first. Studies only of adults
+  on hospital wards or in prisons are left out. The procedures set aside are kept on a list for the BCBA, for a later
+  form on punishment and its assessment.
+- **References cited alike.** Two works by the same authors in the same year now carry a and b (Kazdin, 1977a; Kazdin,
+  1977b), and works whose citations would otherwise read alike name as many authors as tell them apart (APA 7, 8.18 and
+  8.19).
+
+- **The protocol bank is a file of its own.** TD-1's protocols now sit in `nbh-td1-bank.js` beside the forms, so TD-1
+  stays well under the size an iPad can be sent safely; it is saved for offline use and carried inside the one-file
+  editions like the picture library.
+
+Every reference was read from the article itself. The new entries' and protocols' wording is for the BCBA's read-through.
+To set up: upload the new file `nbh-td1-bank.js` with the forms (the whole folder, as usual). Neither bank is printed or
+keeps record data. Tested: `qa/gb1-bank-test.js`, `qa/td1-bank-test.js`.
+
 ### v23.85: Form TD-1's protocol bank: treatment protocols from the BCBA's journal articles
 
 - **The protocol bank.** On the Build sheet, between "+ Add" and the component cards, the Protocol bank holds 81

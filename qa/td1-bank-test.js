@@ -42,7 +42,7 @@ const F=L.forms().find(x=>x.id==='TD-1');
   const T=await p.evaluate(()=>{const P=TD1_BANK.protocols,L=c=>window.__tdLibOf(c);const t=P.find(x=>x.steps.length!==L(x.code).steps.length&&Object.keys(x.params||{}).length&&x.data)||P.find(x=>x.steps.length!==L(x.code).steps.length)||P[0];
     return {id:t.id,code:t.code,lab:t.lab,n:t.steps.length,def:L(t.code).steps.length,word:t.lab.split(/\s+/).find(w=>w.length>5).replace(/[^A-Za-z-]/g,''),kind:window.__tdBank.kindOf(t.id)};});
   const S=await p.evaluate(T=>{const s=(q,k,f)=>window.__tdBank.search(q,k,f),B=TD1_BANK;
-    return {w:s(T.word),none:s('xylophone zebra'),kind:s('',T.kind).length,kindAll:B.protocols.filter(x=>window.__tdBank.kindOf(x.id)===T.kind).length,
+    return {w:s(T.word),none:s('qzxv vxqz'),kind:s('',T.kind).length,kindAll:B.protocols.filter(x=>window.__tdBank.kindOf(x.id)===T.kind).length,
       esc:s('','','escape'),escOk:s('','','escape').every(id=>{const x=window.__tdBank.entry(id);return !x.fn.length||x.fn.includes('escape');})};},T);
   await p.evaluate(()=>{const e=document.querySelector('[name="m.fn"]');e.value='escape';['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));});await sleep(300);
   const C=await p.evaluate(()=>{const f=R().querySelector('.fn'),o=[...f.options].map(x=>x.value+'|'+x.textContent);f.value='plan';f.dispatchEvent(new Event('change'));

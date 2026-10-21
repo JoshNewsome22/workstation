@@ -27,7 +27,7 @@ const F=L.forms().find(x=>x.id==='GB-1');
   await p.evaluate(()=>{const s=document.querySelector('[name="m.client"]');s.value='Mateo Rivera (simulated)';s.dispatchEvent(new Event('input',{bubbles:true}));
     document.querySelector('#viewSeg button[data-view="acq"]').click();if(!document.querySelector('#acqWrap .card'))document.getElementById('addAcq').click();});await sleep(500);
   const A=await p.evaluate(()=>{const h=document.getElementById('gbBankHost'),d=h.shadowRoot.querySelector('details'),B=GB1_BANK,REF=B.refs;
-    const bad=B.entries.filter(e=>!(e.beh&&e.cond&&e.crit&&e.n&&e.unit&&e.meth&&e.teach&&e.src&&e.src.length&&e.src.every(k=>REF[k]&&/\(\d{4}\)/.test(REF[k].apa)))).map(e=>e.id);
+    const bad=B.entries.filter(e=>!(e.beh&&e.cond&&e.crit&&e.n&&e.unit&&e.meth&&e.teach&&e.src&&e.src.length&&e.src.every(k=>REF[k]&&/\(\d{4}[a-z]?\)/.test(REF[k].apa)))).map(e=>e.id);
     const units=[...document.querySelector('[name="acq[0].unit"]').options].map(o=>o.value);
     const cites=Object.values(REF).map(r=>r.cite),dup=cites.filter((c,i)=>cites.indexOf(c)!==i);
     return {before:!!(h.compareDocumentPosition(document.getElementById('acqWrap'))&Node.DOCUMENT_POSITION_FOLLOWING),open:d.open,n:B.entries.length,sum:d.querySelector('summary').textContent,bad,dup,
