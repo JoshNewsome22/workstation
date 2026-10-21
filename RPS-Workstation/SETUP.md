@@ -9905,6 +9905,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.84: Form GB-1's objective bank: four objectives from the first issue of the Journal of Applied Behavior Analysis (1968)
+
+- **80 starting objectives.** The Objective bank now holds 80 entries (76 before). The 4 new ones are written from the
+  BCBA's copy of the Journal of Applied Behavior Analysis, Volume 1, Issue 1 (1968): staying on task during seatwork with
+  teacher praise for working (Hall, Lund & Jackson; Thomas, Becker & Armstrong), playing cooperatively with a peer (Hart
+  et al.), copying an action an adult shows (Risley), and trying an activity briefly and then choosing to join it (Ayllon
+  & Azrin). Classwide engagement (the group contingency entry) adds Bushell, Wrobel & Michaelis (1968) to its sources.
+- **What is left out.** Several studies in that issue used procedures that are not part of current practice (contingent
+  electric shock, shouting and shaking, timeout in a latched room). No entry uses them: the imitation entry takes only the
+  study's reinforcement-based teaching, and its note says so plainly. A study whose results rest on such a procedure is not
+  listed as a source.
+- **How the entries are written.** The panel's note now also cites Baer, Wolf and Risley (1968): each entry names a
+  socially important skill that is measured directly, and its generality is planned rather than assumed.
+
+Every reference was read from the article itself, with its DOI. The new entries' wording is for the BCBA's read-through.
+Nothing to set up. Tested: `qa/gb1-bank-test.js`.
+
 ### v23.83: Form GB-1's objective bank: 20 more objectives, from the BCBA's volumes of Behavior Analysis in Practice to 2016
 
 - **76 starting objectives.** The Objective bank on the Acquisition objectives sheet now holds 76 entries (56 before).
