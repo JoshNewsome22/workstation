@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.85: Form TD-1's protocol bank: treatment protocols from the BCBA's journal articles
+
+- **The protocol bank.** On the Build sheet, between "+ Add" and the component cards, the Protocol bank holds 81
+  treatment protocols written from published studies in the BCBA's volumes of Behavior Analysis in Practice (2008 to 2016,
+  with the 2017 and 2018 articles in the 2016 volume) and the first issue of the Journal of Applied Behavior Analysis
+  (1968). Each protocol is one of this form's components (functional communication training, noncontingent escape,
+  high-probability requests, differential reinforcement, chaining, schedule thinning and the rest). Search by words, by
+  kind of component (antecedent strategies; replacement behavior and skills; prompting and error correction;
+  reinforcement schedules; when problem behavior occurs), or by the function of the problem behavior the study treated
+  (one function, or this plan's function from Setup).
+- **Each protocol in full.** Who the study taught and where, the settings for the card's boxes, the steps for staff, what
+  was recorded, the materials, what happened in the study, a clinical note where one matters, and the full references
+  with their DOIs where the article prints one. The panel's "How the protocols are written" says how they were written
+  and what they leave to the plan.
+- **Add to the plan.** A protocol becomes a card of its component, with the study's steps (as many as the study has, each
+  an integrity item as usual), its settings, data and materials; the card names the study. The final plan names the
+  study beside the component's own sources and lists the protocols' references at its end, and the text for the BIP
+  names the study. Undo removes the card until one of its fields is edited. "Add from the protocol bank" beside "+ Add"
+  opens it. Save data keeps a bank card's steps, and Open data rebuilds it as saved; a file saved before this version
+  opens as before.
+- **What is left out.** No protocol uses contingent electric shock, aversive stimulation, restraint as a consequence,
+  seclusion, or limits on food or drink. Where a study's package also used time-out, response cost, reprimands or
+  physical guidance through a demand, the protocol's note says so: escape extinction or physical guidance needs the
+  consent on the Responding to behavior sheet first, and a restrictive procedure needs review and consent under the
+  district's rules before use. Several studies were left out for these reasons.
+
+Every reference was read from the article itself. The protocols' wording is new: it is for the BCBA's read-through.
+Nothing to set up; the bank is never printed and keeps no record data. Tested: `qa/td1-bank-test.js`.
+
 ### v23.84: Form GB-1's objective bank: four objectives from the first issue of the Journal of Applied Behavior Analysis (1968)
 
 - **80 starting objectives.** The Objective bank now holds 80 entries (76 before). The 4 new ones are written from the
