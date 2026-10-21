@@ -9905,6 +9905,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.83: Form GB-1's objective bank: 20 more objectives, from the BCBA's volumes of Behavior Analysis in Practice to 2016
+
+- **76 starting objectives.** The Objective bank on the Acquisition objectives sheet now holds 76 entries (56 before).
+  The 20 new ones are written from the BCBA's volumes of Behavior Analysis in Practice for 2014 to 2016 (the 2016 volume
+  also held articles printed in 2017 and 2018): asking a person about themselves, making a guess, telling the class
+  about a classmate's kind act; reading new sight words, reading a passage aloud after hearing it, matching and picking
+  out named pictures; using one word to ask for, name and talk about an item, asking someone to stop instead of lashing
+  out; approaching a dog calmly; getting ready for and riding the van or bus; feeding oneself, eating at a slow and safe
+  pace, household chores from a video model, changing a pad during a period; pretend play, a board game with a peer, a
+  group game by its rules, basketball with a team, skating; assembling a multi-part item.
+- **More studies for 17 entries.** Further studies from those volumes are added to the sources of 17 entries already in
+  the bank (among them Ask for a break, Follow an adult's instruction, Accept and swallow bites of new foods and Say no
+  and get away from a stranger's lure). Point to the picture the teacher names has a new caution in its note, on moving
+  the named picture nearer as a prompt.
+- **Citations.** When two first authors share a surname (J. A. Leaf and J. B. Leaf, for example), their citations
+  carry their initials, as APA style asks, and a family name of more than one word (Van Der Hijde) is cited in full.
+
+Every reference was read from the article itself (the BCBA's volumes, 2008 to 2016) or checked against the publisher's
+page, PubMed or ERIC. The new entries' wording is for the BCBA's read-through. Nothing to set up; the bank is still
+never printed and keeps no record data. Tested: `qa/gb1-bank-test.js` (it now also checks that no two references are
+cited alike).
+
 ### v23.82: Form GB-1's objective bank: starting acquisition objectives from peer-reviewed studies
 
 - **The objective bank.** On the Acquisition objectives sheet, above the objectives, the Objective bank holds 56

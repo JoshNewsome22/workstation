@@ -2,6 +2,7 @@
    Pro (touch, Fit on), with a simulated student:
    1. the Acquisition objectives sheet has the bank above the objectives, closed, with its count; every entry has the
       objective's parts, a teaching summary and at least one reference with its year; every reference an entry names exists;
+      no two references share a citation (v23.83: first authors with one surname are told apart by their initials);
    2. each entry's skill reads in the objective's sentence as written (after "will"), and its unit is one of the sheet's;
    3. the search finds by words ("break", "wait", "greet"), by kind of skill and by function; a word in no entry lists none;
       with this case's function (escape, from FS-1 through the case) the case's choice lists the escape skills and those for
@@ -28,9 +29,10 @@ const F=L.forms().find(x=>x.id==='GB-1');
   const A=await p.evaluate(()=>{const h=document.getElementById('gbBankHost'),d=h.shadowRoot.querySelector('details'),B=GB1_BANK,REF=B.refs;
     const bad=B.entries.filter(e=>!(e.beh&&e.cond&&e.crit&&e.n&&e.unit&&e.meth&&e.teach&&e.src&&e.src.length&&e.src.every(k=>REF[k]&&/\(\d{4}\)/.test(REF[k].apa)))).map(e=>e.id);
     const units=[...document.querySelector('[name="acq[0].unit"]').options].map(o=>o.value);
-    return {before:!!(h.compareDocumentPosition(document.getElementById('acqWrap'))&Node.DOCUMENT_POSITION_FOLLOWING),open:d.open,n:B.entries.length,sum:d.querySelector('summary').textContent,bad,
+    const cites=Object.values(REF).map(r=>r.cite),dup=cites.filter((c,i)=>cites.indexOf(c)!==i);
+    return {before:!!(h.compareDocumentPosition(document.getElementById('acqWrap'))&Node.DOCUMENT_POSITION_FOLLOWING),open:d.open,n:B.entries.length,sum:d.querySelector('summary').textContent,bad,dup,
       units:B.entries.filter(e=>!units.includes(e.unit)).map(e=>e.id),will:B.entries.filter(e=>gbWill(e.beh,'Mateo Rivera (simulated)')!==e.beh).map(e=>[e.id,gbWill(e.beh,'Mateo Rivera (simulated)')])};});
-  ok('1 the bank is above the objectives, closed, with its count; every entry is whole, each with a dated reference ('+A.n+' entries)',A.before&&!A.open&&A.n>=30&&/\(\d+ starting objectives/.test(A.sum)&&!A.bad.length,A);
+  ok('1 the bank is above the objectives, closed, with its count; every entry is whole, each with a dated reference, no two references cited alike ('+A.n+' entries)',A.before&&!A.open&&A.n>=30&&/\(\d+ starting objectives/.test(A.sum)&&!A.bad.length&&!A.dup.length,A);
   ok('2 each entry\'s skill reads in the sentence as written, and its unit is one of the sheet\'s',!A.will.length&&!A.units.length,{will:A.will,units:A.units});
   const S=await p.evaluate(()=>{const s=(q,dm,f)=>window.__gbBank.search(q,dm,f);
     const esc=GB1_BANK.entries.filter(e=>!e.fn.length||e.fn.includes('escape')).map(e=>e.id).sort();
