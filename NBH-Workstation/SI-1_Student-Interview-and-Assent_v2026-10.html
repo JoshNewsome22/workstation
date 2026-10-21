@@ -2434,6 +2434,46 @@ html{touch-action:manipulation}
   html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}
   html.nbh-dark img,html.nbh-dark video,html.nbh-dark svg image{filter:invert(1) hue-rotate(180deg)}
 }
+/* v23.87 (the BCBA's iPad review) every sheet in sight on a touch screen: the sheet tabs wrap onto as many lines as they
+   need, instead of one line scrolling sideways under the other controls (its fade at the edge was easy to miss: on an iPad
+   Air held sideways 8 of TD-1's 13 sheets were out of sight, and 17 forms hid at least one). A phone (under 700 px) keeps
+   its one scrolling row with the fade (v23.74): thirteen tabs wrapped there would fill the screen */
+@media screen and (pointer:coarse) and (min-width:700px){
+  html .toolbar #viewSeg{flex:1 1 0px;min-width:0;flex-wrap:wrap;overflow:visible;row-gap:6px}   /* a basis of 0: the strip takes what its row has left beside the controls and wraps its tabs inside */
+  html .toolbar #viewSeg[data-nbh-more]{-webkit-mask-image:none;mask-image:none}
+  /* held upright, or a form in the workstation on a 1024 px screen (up to 1024 px: the 10-inch and 11-inch iPads upright, and a form filling a 1024 px workstation),
+     the strip takes the whole width and the controls go on one row below it: three rows for TD-1's thirteen sheets rather
+     than four beside the controls */
+  html .toolbar .row:has(> #viewSeg){flex-wrap:wrap}
+  @media (max-width:1024px){html .toolbar{flex-wrap:wrap}html .toolbar > .tgroup:has(#viewSeg > button:nth-child(8)),html .toolbar .row:has(> #viewSeg > button:nth-child(8)){display:contents}html .toolbar #viewSeg:has(> button:nth-child(8)){flex-basis:100%}}   /* a strip of eight tabs or more; the controls share one row under it. Fewer tabs stay beside the controls, as before */
+  /* the folded toolbar (while the form is read down or typed in, html.nbh-fold) keeps its one scrolling row with the fade:
+     folding is for room, and a swipe up or the Tools button brings every tab back in sight */
+}
+/* v23.87 the student's details at the top of a form: a label sits with its own box, not midway between two rows (the row
+   gap was the 3 px the label-to-box gap is); the screen only */
+@media screen{.ident:not(.c1){row-gap:10px}}
+/* v23.87 on a touch screen the fields read as they should (the script nbhFields below): a hint the box cannot show in full
+   goes on a line under the box, or under the row's label; an example number reads "e.g. 10"; a yes/no choice is tap
+   buttons, the dropdown kept for the record and for paper; a label in a row of boxes sits level with its box */
+@media screen and (pointer:coarse){
+  .nbh-hint{display:block;font-family:var(--sans,system-ui,sans-serif);font-size:11px;line-height:1.35;color:var(--nbh-muted,var(--muted,#5f6f78));margin:3px 0 0;font-weight:400;white-space:normal}
+  .dlab .nbh-hint{margin-top:5px;color:var(--nbh-muted,var(--muted,#5f6f78))}
+  .nbh-eg{display:inline-block;font-family:var(--sans,system-ui,sans-serif);font-size:11px;color:var(--nbh-muted,var(--muted,#5f6f78));margin-left:5px;white-space:nowrap;font-weight:400}
+  .nbh-seg{display:inline-flex;flex-wrap:wrap;gap:6px;vertical-align:middle;margin:2px 0}
+  .nbh-seg button.nbh-segb{appearance:none;-webkit-appearance:none;font-family:var(--sans,system-ui,sans-serif);font-size:13px;line-height:1.2;min-height:38px;min-width:52px;padding:6px 14px;border:1px solid var(--nbh-field,#9aa9b1);border-radius:8px;background:#fff;color:var(--ink,#1d2b36);cursor:pointer;margin:0}
+  .nbh-seg button.nbh-segb[aria-pressed="true"]{background:var(--nbh-ink,var(--ink,#1d2b36));border-color:var(--nbh-ink,var(--ink,#1d2b36));color:#fff;font-weight:600}
+  .nbh-seg button.nbh-segb:focus-visible{outline:2px solid var(--nbh-focus,#0a4f75);outline-offset:2px}
+  .nbh-seg button.nbh-segb:disabled{opacity:.5;cursor:default}
+  /* the class four times: a form's own important width on a table's selects (PR-1: .sheet table.rt:not(.pr-grid) select) must not win */
+  select.nbh-seg-src.nbh-seg-src.nbh-seg-src.nbh-seg-src{position:absolute!important;width:1px!important;max-width:1px!important;height:1px!important;min-height:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+  /* a label cell level with its single-line box: a table row with no tall box is centred, and a definition row's label
+     starts level with the box on its first line */
+  .sheet table tr:not(:has(textarea)) > th,.sheet table tr:not(:has(textarea)) > td{vertical-align:middle}
+  .defs .drow:has(> .dval > input:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > select:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > label:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > .nbh-seg):not(:has(textarea)) > .dlab{padding-top:16px}
+  .sheet label:has(> input:not([type="checkbox"]):not([type="radio"])):not(.ck):not(.chk):not(.ind),.sheet label:has(> select):not(.ck):not(.chk):not(.ind){display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 6px}
+  .sheet label > input[type="checkbox"],.sheet label > input[type="radio"]{vertical-align:middle;margin-top:-2px}
+}
+@media print{.nbh-hint,.nbh-eg,.nbh-seg{display:none!important}}
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 

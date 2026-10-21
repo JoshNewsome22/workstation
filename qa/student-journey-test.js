@@ -51,6 +51,12 @@ const frameOf=id=>page.frames().find(f=>f!==page.mainFrame()&&f.url().indexOf('/
 async function tapShell(sel){
   let el=page.locator(sel).first();
   if(!(await el.isVisible().catch(()=>false))&&await shell(()=>document.body.classList.contains('bar-folded'))){await page.locator('#barEdit').tap().catch(()=>{});await sleep(200);}
+  /* v23.87: on a touch screen the bars fold away while the form is read; the Save beside the form stands in for the bar's, and
+     scrolling the form back to the top brings the bars back */
+  if(!(await el.isVisible().catch(()=>false))&&await shell(()=>document.body.classList.contains('ws-fold'))){
+    if(sel==='#saveCase'){const q=page.locator('#saveQuick');if(await q.isVisible().catch(()=>false)){await q.tap();return;}}
+    for(let i=0;i<2&&await shell(()=>document.body.classList.contains('ws-fold'));i++){for(const f of page.frames()){if(f!==page.mainFrame())await f.evaluate(()=>{window.scrollTo(0,0);window.dispatchEvent(new Event('scroll'));}).catch(()=>{});}await sleep(900);}
+    el=page.locator(sel).first();}
   if(!(await el.isVisible().catch(()=>false))){const more=page.locator('#moreBtn');if(await more.isVisible().catch(()=>false)){await more.tap();await sleep(250);
     const item=page.locator('#moreMenu [data-more="'+sel.replace(/^#/,'')+'"]');if(await item.isVisible().catch(()=>false)){await item.tap();return;}}}
   await el.tap({timeout:8000});

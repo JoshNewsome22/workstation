@@ -1998,7 +1998,7 @@ Object.assign(LIB,{ /* ---- schedules ---- */
  R_PB:{name:'Consequence protocol for problem behavior',fn:ALL,src:'Iwata, Pace, Cowdery, & Miltenberger (1994); Lerman, Iwata, & Wallace (1999); Tiger et al. (2008)',steps:['On the precursor: prompt the replacement response immediately and reinforce it; keep the EO in place.','On the target behavior: deliver the function-matched extinction step (see the respond sheet) with a neutral face and no discussion.','Block or protect only as written in the safety plan; blocking is neutral and brief.','After the episode: re-present the EO within a few seconds and reinforce the next replacement response.','Record the episode, the step used, and whether the reinforcer was contacted (integrity error).','Crisis procedure applies only when the safety trigger is met and is documented separately.'],params:[['Extinction form','auto-filled from function'],['Blocking rule',''],['Crisis trigger','']]},
  TA_CHAIN:{name:'Task analysis and chaining (forward, backward, total task)',fn:['escape','attention','tangible','automatic'],src:'Cooper, Heron, & Heward (2020); Slocum & Tiger (2011); Spooner (1984); Walls, Zane, & Ellis (1981); Jerome, Frantino, & Sturmey (2007)',
   steps:['Write the task analysis before teaching anything: observe a competent performer, or perform the chain yourself, and record each discriminable step in order. Validate it by having a second person run the chain from the written steps alone.','Set the step size to the learner, not to the task. Split a step whenever it is failed on consecutive opportunities for a reason other than motivation.','Run a single-opportunity or multiple-opportunity baseline probe to find which steps are already in the repertoire, and teach only the steps that are not.','Choose the chaining format: total task (prompt every step every trial, fading prompts independently per step) suits learners with most component skills and keeps the whole sequence in contact with the terminal reinforcer; backward chaining (teach the last step first, working backward) puts the terminal reinforcer immediately after the taught step and suits learners with few component skills; forward chaining teaches step 1 to criterion, then steps 1–2, and so on.','Consider backward chaining with leaps ahead when several steps are already mastered: probe the mastered steps periodically rather than teaching them, to cut instructional time.','Attach a prompting and error-correction procedure per step from the sheets above rather than using one rule for the whole chain.','Deliver the terminal reinforcer at the end of the chain; during acquisition, reinforce completion of the taught step and complete the remainder with the least intrusive prompt needed.','Record step-by-step data every session so mastery is judged per step. A percentage-of-steps figure hides which step is failing and is not sufficient to make a teaching decision.','Fade the prompts, then fade the written task analysis toward a picture or text activity schedule the learner runs independently.'],
-  params:[['Chain taught','e.g., hand the break card, start the activity, wait for the timer, take the break'],['Number of steps',''],['Chaining format','total task / backward / forward / backward with leaps'],['Prompt procedure per step',''],['Mastery criterion per step','e.g., independent on 3 consecutive opportunities'],['Terminal reinforcer',''],['Data','step-by-step, every session']]},
+  params:[['Chain taught','e.g., hand the break card, start the activity, wait for the timer, take the break'],['Steps in the student\'s task analysis','how many (the list below)'],['Chaining format','total task / backward / forward / backward with leaps'],['Prompt procedure per step',''],['Mastery criterion per step','e.g., independent on 3 consecutive opportunities'],['Terminal reinforcer',''],['Data','step-by-step, every session']]},
  SHAPE:{name:'Shaping by successive approximation',fn:['escape','attention','tangible','automatic'],src:'Cooper, Heron, & Heward (2020); Galbicka (1994); Skinner (1953)',
   steps:['Define the terminal behavior in observable form, including the dimension being shaped (topography, duration, latency, force, or rate). Shaping moves one dimension at a time.','Identify the current approximation the learner already emits, from direct observation rather than from report.','Write the intermediate approximations in advance so the criterion is not raised by impression in the moment. Percentile schedules are an option where a formal rule is wanted (Galbicka, 1994).','Reinforce the current approximation on a dense schedule until it is occurring reliably.','Raise the criterion only when the current approximation is stable, and raise it by an amount the learner meets on most opportunities. A criterion raised too fast produces extinction and its side effects; raised too slowly it produces a stuck approximation that is hard to move.','Stop reinforcing the previous approximation once the new one is established, but return to it briefly if responding breaks down rather than waiting through an extinction burst.','Combine with differential reinforcement, not with prompting, where the target form has no reliable prompt — shaping is the procedure of choice when you cannot prompt the behavior into existence.','Record the criterion in force at every session, so the graph shows the shaping steps and not only the response measure.'],
   params:[['Terminal behavior',''],['Dimension shaped','topography / duration / latency / force / rate'],['Starting approximation',''],['Criterion-raising rule','e.g., advance after 80% across 2 sessions'],['Reinforcer',''],['Return rule if responding breaks down','']]},
@@ -2790,6 +2790,7 @@ function addComp(code,at,ns){const L=LIB[code];if(!L)return;
  d.innerHTML=`<div class="chd"><span class="tag ok">${code}</span><span class="chdt">${esc(L.name)}</span><button type="button" class="rm noprint" data-rm="1" style="margin-left:auto">Remove</button></div>
  <p class="method" style="margin:0 0 6px">Source: ${esc(L.src)}</p><p class="method td-bank-src" style="margin:0 0 6px" hidden></p><input type="hidden" name="cp[${i}].bank"><input type="hidden" name="cp[${i}].bsrc">${L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:''}
  <div class="param">${L.params.map((p,k)=>`<div class="f"><label>${esc(p[0])}</label><input name="cp[${i}].p${k}" value="${esc(p[1]==='SEED_IRT'?seedTxt:'')}" placeholder="${esc(p[1]==='SEED_IRT'?(dayRate?'from a session baseline: the rate on Setup is a school-day rate (Form DD-1)':''):p[1])}"></div>`).join('')}</div>
+ ${code==='TA_CHAIN'?`<div class="td-ta"><label for="cpta${i}"><b>Student’s task analysis</b> <span>the steps the student performs, in order, one a line (numbers optional: the plan numbers them). A protocol from the bank brings the study’s list where the article prints it; adjust it to this student. A list in parts: a name ending in a colon above each part.</span></label><textarea id="cpta${i}" name="cp[${i}].ta" rows="2" data-auto="1" placeholder="One step a line, in order"></textarea></div>`:''}
  <b style="font-family:var(--sans);font-size:11px">Implementation steps (edit to the student; each becomes an integrity item)</b>
  <ol class="steps">${SS.map((s,k)=>`<li><textarea name="cp[${i}].s${k}" rows="1" data-auto="1">${esc(s)}</textarea></li>`).join('')}</ol>
  <div class="defs" style="margin-top:6px"><div class="drow"><div class="dlab">Data collected</div><div class="dval"><input name="cp[${i}].data" placeholder="e.g., target per min; mands per min and % independent; compliance; breaks delivered"></div></div><div class="drow"><div class="dlab">Materials and cues</div><div class="dval"><input name="cp[${i}].mat" placeholder="e.g., work card, break card on switch, timer, schedule signal cards"></div></div></div>`;
@@ -2808,7 +2809,14 @@ document.addEventListener('click',e=>{if(e.target.dataset.rm){e.target.closest('
 /* v23.28 (review F183) the assessment and target-selection cards: done by the BCBA once or at review, not staff steps */
 const TD_ASSESS=new Set(['C_CSA','C_ACSA','C_HELMET','C_MEDREF','P_ASSESS','E_ASSESS','VBMAPP','EFL','AFLS','PEAK']);
 const tdIsAssess=c=>TD_ASSESS.has(c&&c.code!==undefined?c.code:c);
-function comps(){return $$('#compWrap .card').map(c=>({code:c.dataset.code,i:+c.dataset.i,name:LIB[c.dataset.code].name,steps:[...c.querySelectorAll('ol.steps textarea')].filter(t=>/\.s\d+$/.test(t.name)).map(t=>val(t.name)).filter(Boolean),bank:val(`cp[${c.dataset.i}].bank`),bsrc:val(`cp[${c.dataset.i}].bsrc`)}));}
+function comps(){return $$('#compWrap .card').map(c=>({code:c.dataset.code,i:+c.dataset.i,name:LIB[c.dataset.code].name,steps:[...c.querySelectorAll('ol.steps textarea')].filter(t=>/\.s\d+$/.test(t.name)).map(t=>val(t.name)).filter(Boolean),bank:val(`cp[${c.dataset.i}].bank`),bsrc:val(`cp[${c.dataset.i}].bsrc`),ta:val(`cp[${c.dataset.i}].ta`)}));}
+/* v23.87 the student's task analysis on a chaining card (cp[i].ta): its lines as lists, a line ending in a colon naming the part
+   that follows, a leading number or bullet dropped; printed in the final plan as its own numbered list, apart from the staff steps */
+function tdTaLists(t){const out=[];let cur=null;String(t||'').split(/\r?\n/).forEach(l=>{l=l.trim();if(!l)return;const m=/^(?:\d+[.)]|[-*\u2022])\s*(.*)$/.exec(l);
+  if(!m&&/:$/.test(l)&&l.length<=120){cur={name:l.replace(/:$/,'').trim(),steps:[]};out.push(cur);return;}
+  if(!cur){cur={name:'',steps:[]};out.push(cur);}const x=(m?m[1]:l).trim();if(x)cur.steps.push(x);});return out.filter(x=>x.steps.length);}
+function tdTaHtml(t){const ls=tdTaLists(t);if(!ls.length)return '';return `<div class="plan-ta"><div class="plan-ta-h"><b>Student’s task analysis</b> <small>the chain the student performs, numbered on its own; the steps below are how staff teach it</small></div>${ls.map(l=>`${l.name?`<div class="plan-ta-n">${esc(l.name)}</div>`:''}<ol>${l.steps.map(x=>'<li>'+esc(x)+'</li>').join('')}</ol>`).join('')}</div>`;}
+function tdTaLines(t){const o=[];tdTaLists(t).forEach(l=>{o.push('Student’s task analysis'+(l.name?' – '+l.name:'')+':');l.steps.forEach((x,k)=>o.push('   ('+(k+1)+') '+x));});return o;}
 /* v23.85 the protocol bank (TD1_BANK, the script element "td1-pbank"): a card added from it names its study (cp[i].bsrc); the
    panel ("td1-pbank-ui") adds cards through __tdAddComp and reads the components through __tdLibOf and __tdGroups */
 const tdBank=()=>(typeof TD1_BANK!=='undefined'&&TD1_BANK&&Array.isArray(TD1_BANK.protocols))?TD1_BANK:null;
@@ -2957,6 +2965,7 @@ function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={esca
    out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b><small>${esc(L.src)}</small>${c.bsrc?`<small class="td-bank-from">Protocol from ${esc(c.bsrc)}</small>`:''}</div>`;
    if(params.length||mat)out+=`<div class="plan-set">${params.map(x=>`<b>${esc(x[0])}:</b> ${esc(x[1])}`).join(' &nbsp;·&nbsp; ')}${mat?(params.length?' &nbsp;·&nbsp; ':'')+'<b>Materials:</b> '+esc(mat):''}</div>`;
    if(L.caution)out+=`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`;
+   if(c.ta)out+=tdTaHtml(c.ta);   /* v23.87 the student's task analysis, its own list */
    c.steps.forEach(s=>{n++;out+=stepRow(n,s);});
    if(data)out+=`<div class="plan-set"><b>Record:</b> ${esc(data)}</div>`;out+='</div>';});});
  const rest=cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`;c.steps.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});}
@@ -3153,7 +3162,7 @@ function bipText(){
     ind?'Replacement behavior: at least '+ind+'% independent':'',fid?'Integrity criterion: '+fid+'% of steps in each observed session':'']);
   let n=0;
   const comp=(c,h)=>{const L=LIB[c.code],lines=[h,'Component: '+c.name,c.bsrc?'Protocol from '+c.bsrc:null];L.params.forEach((p,k)=>{const v=c.code==='EXT'&&k===1?eeP1Out(c.i):val(`cp[${c.i}].p${k}`);if(v)lines.push(p[0]+': '+v);});
-    const mat=val(`cp[${c.i}].mat`);if(mat)lines.push('Materials and cues: '+mat);if(L.caution)lines.push('Caution: '+L.caution);c.steps.forEach(s=>{n++;lines.push(n+'. '+s);});
+    const mat=val(`cp[${c.i}].mat`);if(mat)lines.push('Materials and cues: '+mat);if(L.caution)lines.push('Caution: '+L.caution);if(c.ta)lines.push(...tdTaLines(c.ta));c.steps.forEach(s=>{n++;lines.push(n+'. '+s);});
     const data=val(`cp[${c.i}].data`);if(data)lines.push('Record: '+data);return lines;};
   const used=new Set();
   GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c));inG.forEach((c,k)=>{used.add(c.code);B.push(comp(c,k?null:title.toUpperCase()));});});
@@ -4878,6 +4887,46 @@ html{touch-action:manipulation}
   html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}
   html.nbh-dark img,html.nbh-dark video,html.nbh-dark svg image{filter:invert(1) hue-rotate(180deg)}
 }
+/* v23.87 (the BCBA's iPad review) every sheet in sight on a touch screen: the sheet tabs wrap onto as many lines as they
+   need, instead of one line scrolling sideways under the other controls (its fade at the edge was easy to miss: on an iPad
+   Air held sideways 8 of TD-1's 13 sheets were out of sight, and 17 forms hid at least one). A phone (under 700 px) keeps
+   its one scrolling row with the fade (v23.74): thirteen tabs wrapped there would fill the screen */
+@media screen and (pointer:coarse) and (min-width:700px){
+  html .toolbar #viewSeg{flex:1 1 0px;min-width:0;flex-wrap:wrap;overflow:visible;row-gap:6px}   /* a basis of 0: the strip takes what its row has left beside the controls and wraps its tabs inside */
+  html .toolbar #viewSeg[data-nbh-more]{-webkit-mask-image:none;mask-image:none}
+  /* held upright, or a form in the workstation on a 1024 px screen (up to 1024 px: the 10-inch and 11-inch iPads upright, and a form filling a 1024 px workstation),
+     the strip takes the whole width and the controls go on one row below it: three rows for TD-1's thirteen sheets rather
+     than four beside the controls */
+  html .toolbar .row:has(> #viewSeg){flex-wrap:wrap}
+  @media (max-width:1024px){html .toolbar{flex-wrap:wrap}html .toolbar > .tgroup:has(#viewSeg > button:nth-child(8)),html .toolbar .row:has(> #viewSeg > button:nth-child(8)){display:contents}html .toolbar #viewSeg:has(> button:nth-child(8)){flex-basis:100%}}   /* a strip of eight tabs or more; the controls share one row under it. Fewer tabs stay beside the controls, as before */
+  /* the folded toolbar (while the form is read down or typed in, html.nbh-fold) keeps its one scrolling row with the fade:
+     folding is for room, and a swipe up or the Tools button brings every tab back in sight */
+}
+/* v23.87 the student's details at the top of a form: a label sits with its own box, not midway between two rows (the row
+   gap was the 3 px the label-to-box gap is); the screen only */
+@media screen{.ident:not(.c1){row-gap:10px}}
+/* v23.87 on a touch screen the fields read as they should (the script nbhFields below): a hint the box cannot show in full
+   goes on a line under the box, or under the row's label; an example number reads "e.g. 10"; a yes/no choice is tap
+   buttons, the dropdown kept for the record and for paper; a label in a row of boxes sits level with its box */
+@media screen and (pointer:coarse){
+  .nbh-hint{display:block;font-family:var(--sans,system-ui,sans-serif);font-size:11px;line-height:1.35;color:var(--nbh-muted,var(--muted,#5f6f78));margin:3px 0 0;font-weight:400;white-space:normal}
+  .dlab .nbh-hint{margin-top:5px;color:var(--nbh-muted,var(--muted,#5f6f78))}
+  .nbh-eg{display:inline-block;font-family:var(--sans,system-ui,sans-serif);font-size:11px;color:var(--nbh-muted,var(--muted,#5f6f78));margin-left:5px;white-space:nowrap;font-weight:400}
+  .nbh-seg{display:inline-flex;flex-wrap:wrap;gap:6px;vertical-align:middle;margin:2px 0}
+  .nbh-seg button.nbh-segb{appearance:none;-webkit-appearance:none;font-family:var(--sans,system-ui,sans-serif);font-size:13px;line-height:1.2;min-height:38px;min-width:52px;padding:6px 14px;border:1px solid var(--nbh-field,#9aa9b1);border-radius:8px;background:#fff;color:var(--ink,#1d2b36);cursor:pointer;margin:0}
+  .nbh-seg button.nbh-segb[aria-pressed="true"]{background:var(--nbh-ink,var(--ink,#1d2b36));border-color:var(--nbh-ink,var(--ink,#1d2b36));color:#fff;font-weight:600}
+  .nbh-seg button.nbh-segb:focus-visible{outline:2px solid var(--nbh-focus,#0a4f75);outline-offset:2px}
+  .nbh-seg button.nbh-segb:disabled{opacity:.5;cursor:default}
+  /* the class four times: a form's own important width on a table's selects (PR-1: .sheet table.rt:not(.pr-grid) select) must not win */
+  select.nbh-seg-src.nbh-seg-src.nbh-seg-src.nbh-seg-src{position:absolute!important;width:1px!important;max-width:1px!important;height:1px!important;min-height:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+  /* a label cell level with its single-line box: a table row with no tall box is centred, and a definition row's label
+     starts level with the box on its first line */
+  .sheet table tr:not(:has(textarea)) > th,.sheet table tr:not(:has(textarea)) > td{vertical-align:middle}
+  .defs .drow:has(> .dval > input:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > select:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > label:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > .nbh-seg):not(:has(textarea)) > .dlab{padding-top:16px}
+  .sheet label:has(> input:not([type="checkbox"]):not([type="radio"])):not(.ck):not(.chk):not(.ind),.sheet label:has(> select):not(.ck):not(.chk):not(.ind){display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 6px}
+  .sheet label > input[type="checkbox"],.sheet label > input[type="radio"]{vertical-align:middle;margin-top:-2px}
+}
+@media print{.nbh-hint,.nbh-eg,.nbh-seg{display:none!important}}
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 
@@ -5379,6 +5428,23 @@ function tdSrFill(){const s=tdSched;if(!s||!['thin','chain'].includes(s.id))retu
       const x={hier:g('pr.hier'),fade:g('pr.fade'),ec:g('teach.chosen')};Object.keys(x).forEach(k=>{if(x[k]&&!r.plan[k])r.plan[k]=x[k];});}}catch(e){}
     return r;};})();
 </script>
+<style id="td87-css">
+/* v23.87 (the BCBA's question on the chaining protocols) a chaining card's box for the student's task analysis, apart
+   from the steps for staff; the final plan prints it as its own numbered list under the card's settings */
+.td-ta{margin:2px 0 10px}
+.td-ta label{display:block;font-family:var(--sans);font-size:11px;line-height:1.4;margin:0 0 3px;white-space:normal}
+.td-ta label b{font-weight:600}
+.td-ta label span{color:var(--ink-soft);font-weight:400}
+.td-ta textarea{width:100%;display:block;min-height:46px;border:1px solid var(--rule-2);background:#fff;font:inherit;font-size:12.5px;line-height:1.45;padding:4px 6px;color:var(--ink);resize:none;overflow:hidden}
+.td-ta textarea:focus{background:var(--wash);outline:none}
+.plan-ta{margin:4px 0 6px;padding:5px 8px 6px;border:1px solid var(--rule-2);font-size:12px;line-height:1.5}
+.plan-ta-h{font-family:var(--sans);font-size:11px;line-height:1.4;margin:0 0 2px}
+.plan-ta-h b{font-weight:600}
+.plan-ta-h small{color:var(--ink-soft)}
+.plan-ta-n{font-weight:600;margin:4px 0 0;page-break-after:avoid;break-after:avoid}
+.plan-ta ol{margin:2px 0 2px 1.4em;padding:0}
+.plan-ta li{margin:1px 0}
+</style>
 <style id="td1-pbank-css">
 /* v23.85 the protocol bank's place (its own styles are in its shadow root); never printed */
 .td-bank-host{display:block;min-width:0;max-width:100%;margin:10px 0 14px}
@@ -5476,6 +5542,11 @@ details.about>p{margin:6px 0 0;padding:8px 12px;border-left:3px solid var(--nbh-
 @media (pointer:coarse){.rep{min-height:44px}.rep input{width:22px;height:22px}}
 .same{flex:1 1 100%;font-size:12.5px;line-height:1.5;color:var(--nbh-muted,#54676f)}
 .rows+.rows{margin-top:8px}
+/* v23.87 the study's task analysis: the name of each part, its steps, and what the BCBA should know about it */
+.tx.hint{font-size:12px;color:var(--nbh-muted,#54676f)}
+.tan{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--nbh-navy,#182e43)}
+.steps.ta{margin-top:3px}
+.tanote{font-size:12px;color:var(--nbh-muted,#54676f);border-left:3px solid var(--nbh-teal,#76a2a3);padding:4px 10px;margin-top:8px}
 `;
 /* v23.85 (the BCBA's request) the protocol bank: treatment protocols written from published studies (the BCBA's volumes of
    Behavior Analysis in Practice and the Journal of Applied Behavior Analysis). TD1_BANK (the script element "td1-pbank")
@@ -5483,8 +5554,9 @@ details.about>p{margin:6px 0 0;padding:8px 12px;border-left:3px solid var(--nbh-
    component, by the function of the problem behavior the study treated), shows one in full (the study, the settings, the
    steps for staff, what was recorded, what happened, a clinical note and the sources) and adds it to the plan as a card of
    its component: the card carries the study's steps (as many as the study has), its settings, data and materials, and
-   names the study, on the card, in the final plan (with the full references) and in the text for the BIP. The add can be
-   undone until a field it filled is edited. As on Forms TB-1 and GB-1, the panel lives in a shadow root: the save file,
+   names the study, on the card, in the final plan (with the full references) and in the text for the BIP; a chaining
+   protocol whose article prints the task analysis brings it, reworded, into the card's own box for the student's steps
+   (v23.87). The add can be undone until a field it filled is edited. As on Forms TB-1 and GB-1, the panel lives in a shadow root: the save file,
    the view dots, the unsaved-work guard and the shell's change fingerprint read every input, select and textarea in the
    document, and the bank's search box holds no record data. The panel is never printed. */
 (function(){
@@ -5508,8 +5580,11 @@ const cites=p=>(p.src||[]).map(k=>REF[k]&&REF[k].cite).filter(Boolean);
 const fnWords=p=>!p.fn||!p.fn.length?'any function':p.fn.map(k=>FN[k]||k).join(', ').toLowerCase();
 const comp=p=>(LIBOF[p.code]||{}).name||p.code;
 const pv=p=>Object.keys(p.params||{}).map(k=>k+' '+p.params[k]).join(' ');
+/* v23.87 a chaining protocol's task analysis (p.ta, where the article prints it): the student's steps, apart from the staff's */
+const taWords=p=>(p.ta||[]).map(l=>l.name+' '+l.steps.join(' ')).join(' ');
+const taText=p=>(p.ta||[]).map(l=>(l.name?l.name+':\n':'')+l.steps.map((s,k)=>(k+1)+'. '+s).join('\n')).join('\n\n');
 const H={};ok.forEach(p=>{H[p.id]={top:words([p.lab,p.kw,p.beh,comp(p),p.code].join(' ')),
-  all:words([p.lab,p.kw,p.beh,comp(p),p.code,kindOf(p.code),(p.steps||[]).join(' '),p.result,p.note,p.data,p.mat,pv(p),fnWords(p),cites(p).join(' ')].join(' '))};});
+  all:words([p.lab,p.kw,p.beh,comp(p),p.code,kindOf(p.code),(p.steps||[]).join(' '),p.result,p.note,p.data,p.mat,pv(p),taWords(p),fnWords(p),cites(p).join(' ')].join(' '))};});
 const has=(list,w)=>list.some(x=>x.startsWith(w));
 /* search: every word in the title, the key words, the study or the component, then every word anywhere, then any word */
 function search(q,kind,fn){const ws=words(q),pool=ok.filter(p=>(!kind||kindOf(p.code)===kind)&&fnOk(p,fn));
@@ -5559,6 +5634,7 @@ function show(id){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
 <div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div>
 <div class="vh">Steps for staff</div><ol class="steps">${(p.steps||[]).map(s=>'<li>'+esc(s)+'</li>').join('')}</ol>
+${p.ta&&p.ta.length?`<div class="vh">The student’s task analysis, as the study taught it</div><p class="tx hint">The study’s list, reworded: adjust it to this student. It goes on the card in its own box, apart from the steps for staff, and the plan prints it as its own list.</p>${p.ta.map(l=>`${l.name?`<div class="tan">${esc(l.name)}</div>`:''}<ol class="steps ta">${l.steps.map(s=>'<li>'+esc(s)+'</li>').join('')}</ol>`).join('')}${p.ta_note?`<p class="tx tanote">${esc(p.ta_note)}</p>`:''}`:p.code==='TA_CHAIN'?`<div class="vh">The student’s task analysis</div><p class="tx hint">The article does not print its steps (the setting above gives the count); write the list for this student in the card’s box.</p>`:''}
 <div class="rows">${row('Data collected',p.data)}${row('Materials and cues',p.mat)}</div>
 <div class="vh">What happened in the study</div><p class="tx">${esc(p.result)}</p>
 ${p.note?`<div class="cn"><div class="cnh">Clinical note <span>shown here only: not added, not printed</span></div><div class="ct">${esc(p.note)}</div></div>`:''}
@@ -5573,7 +5649,7 @@ function add(p){const L=LIBOF[p.code],c=window.__tdAddComp(p.code,(p.steps||[]).
   const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el||v==null||v==='')return;el.value=v;put[n]=el.value;fire(el);};
   (p.steps||[]).forEach((s,k)=>set('cp['+i+'].s'+k,s));
   L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});
-  set('cp['+i+'].data',p.data);set('cp['+i+'].mat',p.mat);
+  set('cp['+i+'].data',p.data);set('cp['+i+'].mat',p.mat);set('cp['+i+'].ta',taText(p));
   set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',p.lab+' ('+cites(p).join('; ')+')');
   try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}
   return {c,i,put};}

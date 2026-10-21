@@ -14,7 +14,13 @@
       component's own steps; a file saved before the bank (no counts.ns) still opens as before;
    7. "Add from the protocol bank" opens the bank at its search;
    8. the bank keeps no record data (the save file is the same with it open and searched), and it is not printed;
-   9. no page errors. Simulated data only.  usage: node qa/td1-bank-test.js */
+   9. no page errors;
+  10. (v23.87) a chaining protocol whose article prints the task analysis shows it in the panel, apart from the steps for
+      staff, and Add fills the card's own box for the student's task analysis with it; the card's setting reads "Steps in the
+      student's task analysis" (not "Number of steps"); the final plan prints the list as its own numbered list, not as
+      integrity steps, and the text for the BIP carries it; Save data and Open data keep the box; a chaining protocol whose
+      article prints no list says so; a chaining card from the menu has the box, empty. Simulated data only.
+   usage: node qa/td1-bank-test.js */
 const L=require(__dirname+'/lib.js');const {sleep}=L;const fs=require('fs'),path=require('path'),os=require('os');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
 const IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
@@ -99,6 +105,26 @@ const F=L.forms().find(x=>x.id==='TD-1');
   const g2=await save();const strip=o=>{const c=JSON.parse(JSON.stringify(o));delete c.saved;return c;};
   await p.emulateMedia({media:'print'});await sleep(200);const pr=await p.evaluate(()=>getComputedStyle(document.getElementById('tdBankHost')).display);await p.emulateMedia({media:'screen'});
   ok('8 the bank keeps no record data (the save file the same with it open and searched), and is not printed',JSON.stringify(strip(g1))===JSON.stringify(strip(g2))&&pr==='none',{pr,diff:Object.keys(g2.fields).filter(k=>g1.fields[k]!==g2.fields[k])});
+  /* 10. the student's task analysis on a chaining card (v23.87) */
+  const X=await p.evaluate(()=>{const P=TD1_BANK.protocols,t=P.find(x=>x.code==='TA_CHAIN'&&x.ta&&x.ta.length&&x.ta.some(l=>l.steps.length>=5)),z=P.find(x=>x.code==='TA_CHAIN'&&!(x.ta&&x.ta.length));
+    const old=P.filter(x=>Object.keys(x.params||{}).includes('Number of steps')).map(x=>x.id),lib=window.__tdLibOf('TA_CHAIN').params.map(q=>q[0]);
+    document.querySelector('#viewSeg button[data-view="build"]').click();window.__tdBank.show(t.id);const d=R().querySelector('.detail'),tx=d.innerText;
+    const pan={head:/the student.s task analysis, as the study taught it/i.test(tx),n:d.querySelectorAll('ol.steps.ta li').length,want:t.ta.reduce((a,l)=>a+l.steps.length,0),steps:t.ta.every(l=>l.steps.every(s=>tx.includes(s))),names:t.ta.every(l=>!l.name||tx.includes(l.name)),staff:d.querySelectorAll('ol.steps:not(.ta) li').length===t.steps.length};
+    R().querySelector('.add').click();const c=document.querySelector('#compWrap').lastElementChild,i=c.dataset.i,box=c.querySelector('textarea[name="cp['+i+'].ta"]');
+    const lines=box?box.value.split('\n').map(s=>s.replace(/^\d+\.\s*/,'').replace(/:$/,'')).filter(Boolean):[];
+    const card={box:!!box,lines:t.ta.every(l=>(!l.name||lines.includes(l.name))&&l.steps.every(s=>lines.includes(s))),outside:box&&!box.closest('ol.steps'),lab:[...c.querySelectorAll('.param .f label')].map(l=>l.textContent),staff:c.querySelectorAll('ol.steps textarea').length===t.steps.length,staffN:c.querySelectorAll('ol.steps textarea').length};
+    document.querySelector('#viewSeg button[data-view="final"]').click();const fb=document.getElementById('finalBody'),ta=fb.querySelector('.plan-ta'),comp=ta&&ta.closest('.plan-comp');
+    const fin={ta:!!ta,n:ta?ta.querySelectorAll('li').length:0,rows:comp?comp.querySelectorAll('.plan-step').length:-1,inRows:comp?[...comp.querySelectorAll('.plan-step .t')].some(e=>t.ta[0].steps.includes(e.textContent)):true,
+      bip:(()=>{const b=window.__bipText();return /Student.s task analysis/.test(b)&&t.ta.every(l=>l.steps.every(s=>b.includes(s)));})()};
+    window.__tdBank.show(z.id);const none=/does not print its steps/.test(R().querySelector('.detail').innerText);
+    const s=document.getElementById('addComp');s.value='TA_CHAIN';document.getElementById('addCompBtn').click();const m=document.querySelector('#compWrap').lastElementChild,mb=m.querySelector('textarea[name="cp['+m.dataset.i+'].ta"]');
+    return {t:t.id,z:z.id,old,lib,pan,card,fin,none,menu:{box:!!mb,empty:!!mb&&mb.value===''},i};});
+  const f2=await save();const tmp2=path.join(os.tmpdir(),'td1-bank-ta-'+process.pid+'.json');fs.writeFileSync(tmp2,JSON.stringify(f2));
+  const v0=f2.fields['cp['+X.i+'].ta'];await p.evaluate(()=>{document.getElementById('compWrap').innerHTML='';});await p.setInputFiles('#fileIn',tmp2);await sleep(900);try{fs.unlinkSync(tmp2);}catch(e){}
+  const back=await p.evaluate(i=>{const b=document.querySelector('textarea[name="cp['+i+'].ta"]');return b?b.value:null;},X.i);
+  ok('10 a chaining protocol\'s task analysis ('+X.t+'): shown in the panel apart from the staff steps, filled into the card\'s own box, its setting named "Steps in the student\'s task analysis", printed as its own list (not integrity steps), in the BIP text, saved and opened; a protocol with no printed list says so; a menu card has the box, empty',
+    !X.old.length&&X.lib.includes("Steps in the student's task analysis")&&!X.lib.includes('Number of steps')&&X.pan.head&&X.pan.n===X.pan.want&&X.pan.steps&&X.pan.names&&X.pan.staff&&X.card.box&&X.card.lines&&X.card.outside&&X.card.staff&&X.card.lab.includes("Steps in the student's task analysis")
+    &&X.fin.ta&&X.fin.n===X.pan.want&&X.fin.rows===X.card.staffN&&!X.fin.inRows&&X.fin.bip&&X.none&&X.menu.box&&X.menu.empty&&!!v0&&v0.length>100&&back===v0,{X,v0:(v0||'').slice(0,80),back:(back||'').slice(0,80)});
   ok('9 no page errors',!errs.length,errs.slice(0,4));
   }catch(e){fails++;console.log('FAIL exception',e&&e.stack||e);}
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

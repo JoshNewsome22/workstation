@@ -38,7 +38,9 @@ async function printSig(p){
 /* every element and its attributes (what Focus off must give back exactly). Left out: inline styles and the insides of drawings,
    which the forms set to fit the room they have (a sticky bar's offset, a walkthrough's picture; Focus writes neither, and the
    page's own element is checked on its own below), the accessible names a form adds as it goes, and the progress dots */
-const snap=p=>p.evaluate(()=>{const out=[];for(const e of document.documentElement.getElementsByTagName('*')){if(e.closest('#nbhToasts')||(e.matches('body > a[download]')))continue;   /* a file being saved: there for a moment */
+/* v23.87: on a touch screen the shared block dresses the fields in sight (hints, example numbers, yes/no buttons); Focus
+   brings parts into sight, so the dressing is taken off before each snapshot (it is not Focus's trace) */
+const snap=p=>p.evaluate(()=>{try{if(window.nbhUI&&nbhUI.fields)nbhUI.fields.reset();}catch(e){}const out=[];for(const e of document.documentElement.getElementsByTagName('*')){if(e.closest('#nbhToasts')||(e.matches('body > a[download]')))continue;   /* a file being saved: there for a moment */
   if(e.ownerSVGElement){out.push(e.tagName);continue;}
   const a=[...e.attributes].filter(x=>!(e===document.documentElement&&x.name==='class')&&x.name!=='style'&&!(e.closest('#viewSeg')&&/^(data-nbh-fill|title)$/.test(x.name))&&!/^(aria-label|role)$/.test(x.name)).map(x=>x.name+'='+(x.name==='class'?x.value.trim().split(/\s+/).join(' '):x.value)).sort().join(' ');
   out.push(e.tagName+'['+a+']');}return out;});

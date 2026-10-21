@@ -145,6 +145,46 @@ html{touch-action:manipulation}
   html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}
   html.nbh-dark img,html.nbh-dark video,html.nbh-dark svg image{filter:invert(1) hue-rotate(180deg)}
 }
+/* v23.87 (the BCBA's iPad review) every sheet in sight on a touch screen: the sheet tabs wrap onto as many lines as they
+   need, instead of one line scrolling sideways under the other controls (its fade at the edge was easy to miss: on an iPad
+   Air held sideways 8 of TD-1's 13 sheets were out of sight, and 17 forms hid at least one). A phone (under 700 px) keeps
+   its one scrolling row with the fade (v23.74): thirteen tabs wrapped there would fill the screen */
+@media screen and (pointer:coarse) and (min-width:700px){
+  html .toolbar #viewSeg{flex:1 1 0px;min-width:0;flex-wrap:wrap;overflow:visible;row-gap:6px}   /* a basis of 0: the strip takes what its row has left beside the controls and wraps its tabs inside */
+  html .toolbar #viewSeg[data-nbh-more]{-webkit-mask-image:none;mask-image:none}
+  /* held upright, or a form in the workstation on a 1024 px screen (up to 1024 px: the 10-inch and 11-inch iPads upright, and a form filling a 1024 px workstation),
+     the strip takes the whole width and the controls go on one row below it: three rows for TD-1's thirteen sheets rather
+     than four beside the controls */
+  html .toolbar .row:has(> #viewSeg){flex-wrap:wrap}
+  @media (max-width:1024px){html .toolbar{flex-wrap:wrap}html .toolbar > .tgroup:has(#viewSeg > button:nth-child(8)),html .toolbar .row:has(> #viewSeg > button:nth-child(8)){display:contents}html .toolbar #viewSeg:has(> button:nth-child(8)){flex-basis:100%}}   /* a strip of eight tabs or more; the controls share one row under it. Fewer tabs stay beside the controls, as before */
+  /* the folded toolbar (while the form is read down or typed in, html.nbh-fold) keeps its one scrolling row with the fade:
+     folding is for room, and a swipe up or the Tools button brings every tab back in sight */
+}
+/* v23.87 the student's details at the top of a form: a label sits with its own box, not midway between two rows (the row
+   gap was the 3 px the label-to-box gap is); the screen only */
+@media screen{.ident:not(.c1){row-gap:10px}}
+/* v23.87 on a touch screen the fields read as they should (the script nbhFields below): a hint the box cannot show in full
+   goes on a line under the box, or under the row's label; an example number reads "e.g. 10"; a yes/no choice is tap
+   buttons, the dropdown kept for the record and for paper; a label in a row of boxes sits level with its box */
+@media screen and (pointer:coarse){
+  .nbh-hint{display:block;font-family:var(--sans,system-ui,sans-serif);font-size:11px;line-height:1.35;color:var(--nbh-muted,var(--muted,#5f6f78));margin:3px 0 0;font-weight:400;white-space:normal}
+  .dlab .nbh-hint{margin-top:5px;color:var(--nbh-muted,var(--muted,#5f6f78))}
+  .nbh-eg{display:inline-block;font-family:var(--sans,system-ui,sans-serif);font-size:11px;color:var(--nbh-muted,var(--muted,#5f6f78));margin-left:5px;white-space:nowrap;font-weight:400}
+  .nbh-seg{display:inline-flex;flex-wrap:wrap;gap:6px;vertical-align:middle;margin:2px 0}
+  .nbh-seg button.nbh-segb{appearance:none;-webkit-appearance:none;font-family:var(--sans,system-ui,sans-serif);font-size:13px;line-height:1.2;min-height:38px;min-width:52px;padding:6px 14px;border:1px solid var(--nbh-field,#9aa9b1);border-radius:8px;background:#fff;color:var(--ink,#1d2b36);cursor:pointer;margin:0}
+  .nbh-seg button.nbh-segb[aria-pressed="true"]{background:var(--nbh-ink,var(--ink,#1d2b36));border-color:var(--nbh-ink,var(--ink,#1d2b36));color:#fff;font-weight:600}
+  .nbh-seg button.nbh-segb:focus-visible{outline:2px solid var(--nbh-focus,#0a4f75);outline-offset:2px}
+  .nbh-seg button.nbh-segb:disabled{opacity:.5;cursor:default}
+  /* the class four times: a form's own important width on a table's selects (PR-1: .sheet table.rt:not(.pr-grid) select) must not win */
+  select.nbh-seg-src.nbh-seg-src.nbh-seg-src.nbh-seg-src{position:absolute!important;width:1px!important;max-width:1px!important;height:1px!important;min-height:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+  /* a label cell level with its single-line box: a table row with no tall box is centred, and a definition row's label
+     starts level with the box on its first line */
+  .sheet table tr:not(:has(textarea)) > th,.sheet table tr:not(:has(textarea)) > td{vertical-align:middle}
+  .defs .drow:has(> .dval > input:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > select:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > label:first-child):not(:has(textarea)) > .dlab,.defs .drow:has(> .dval > .nbh-seg):not(:has(textarea)) > .dlab{padding-top:16px}
+  .sheet label:has(> input:not([type="checkbox"]):not([type="radio"])):not(.ck):not(.chk):not(.ind),.sheet label:has(> select):not(.ck):not(.chk):not(.ind){display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 6px}
+  .sheet label > input[type="checkbox"],.sheet label > input[type="radio"]{vertical-align:middle;margin-top:-2px}
+}
+@media print{.nbh-hint,.nbh-eg,.nbh-seg{display:none!important}}
 </style>
 <script id="nbh-ui">
 /* ===================== the form's own messages, touch targets and view progress (v21.34) =====================
@@ -1505,5 +1545,152 @@ try { (function(){
   window.addEventListener('storage', function(e){ if (e.key === KEY) apply(read()); });
   window.addEventListener('message', function(e){ var d = e.data; if (d && d.nbh === 'view' && e.source === window.parent) apply(d.v); });
   (window.nbhUI || (window.nbhUI = {})).view = { apply: apply, read: read };
+})(); } catch (e) {}
+/* v23.87 (the BCBA's iPad review) a form inside the workstation on a touch screen tells it which way it is being scrolled,
+   so the workstation's bars can fold away while the form is read and come back when it is scrolled up */
+try { if (window.parent !== window && window.matchMedia && matchMedia('(pointer:coarse)').matches) (function(){
+  var last = window.scrollY || 0, raf = 0;
+  window.addEventListener('scroll', function(){ if (raf) return; raf = requestAnimationFrame(function(){ raf = 0;
+    var y = window.scrollY || 0, dy = y - last; if (Math.abs(dy) < 12 && y > 0) return; last = y;
+    try { window.parent.postMessage({ nbh: 'scroll', y: y, dy: dy }, '*'); } catch (e) {} }); }, { passive: true });
+})(); } catch (e) {}
+/* v23.87 (the BCBA's iPad review) on a touch screen the fields read as they should, on the screen only (never the record,
+   never paper: the hints and buttons are screen elements, the dropdown stays the field):
+   - a hint the box cannot show in full (an iPad sweep found 346 in 38 forms) goes on a line under the box, or under the
+     row's label in a definition row, the box keeping its first words;
+   - an example number alone in a box ("4", "10": 88 of them read as entries) reads "e.g. 4", or sits beside a box too
+     narrow for that;
+   - a yes/no choice (652 dropdowns whose answers are Y/N, Yes/No/N/A and the like) is a row of tap buttons: one tap, and
+     the answer shows without opening anything; the dropdown keeps the value for the record, Save and Open, and paper;
+   - a box another form fills ("Target behavior (TB-1)") says so when it is empty and had no hint.
+   Rows a form draws later are done when added; a turn of the iPad does the measuring again. */
+try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function(){
+  var D = document, SKIP = '.toolbar,#viewSeg,.nbh-seg,.nbh-hint,.nbh-eg,.td-bank-host,[data-nbh-skip],.nbh-mast,.nbh-pagenav,#nbhCaseDlg,dialog';
+  var cv = D.createElement('canvas'), cx = cv.getContext ? cv.getContext('2d') : null, timer = 0, pend = [], DONE = 'data-nbh-fld';
+  function num(v){ v = parseFloat(v); return isFinite(v) ? v : 0; }
+  function width(s, el){ if (!cx) return s.length * 7; var cs = getComputedStyle(el); cx.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; return cx.measureText(s).width; }
+  function room(el){ var cs = getComputedStyle(el); return el.clientWidth - num(cs.paddingLeft) - num(cs.paddingRight) - 8; }
+  function txt(n){ var s = ''; for (var c = n && n.firstChild; c; c = c.nextSibling) if (c.nodeType === 3) s += c.nodeValue; return s.replace(/\s+/g, ' ').trim(); }
+  function labelOf(el){
+    try { if (el.labels && el.labels.length) return (el.labels[0].textContent || '').replace(/\s+/g, ' ').trim(); } catch (e) {}
+    var a = el.getAttribute('aria-label'); if (a) return a;
+    var p = el.parentNode; if (p && p.tagName === 'LABEL') return txt(p);
+    var r = el.closest('.drow'); if (r) { var l = r.querySelector('.dlab'); if (l) return txt(l) || (l.textContent || '').trim(); }
+    var q = el.closest('.qt'); if (q) return txt(q);
+    var tr = el.closest('tr'); if (tr) { var c = tr.querySelector('th,td'); if (c && !c.contains(el)) return (c.textContent || '').replace(/\s+/g, ' ').trim(); }
+    var s = el.previousElementSibling; if (s && s.tagName === 'LABEL') return (s.textContent || '').replace(/\s+/g, ' ').trim();
+    var f = el.closest('.f'); if (f) { var fl = f.querySelector('label'); if (fl) return (fl.textContent || '').replace(/\s+/g, ' ').trim(); }
+    return '';
+  }
+  function shorten(s, el, w){ var lo = 0, hi = s.length; if (width(s, el) <= w) return s;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (width(s.slice(0, mid) + '…', el) <= w) lo = mid; else hi = mid - 1; }
+    var cut = s.slice(0, lo), sp = cut.lastIndexOf(' '); if (sp > 8) cut = cut.slice(0, sp); return cut.replace(/[\s,;:(]+$/, '') + '…'; }
+  function hint(el, text, inline){
+    var h = D.createElement(inline ? 'span' : 'div'); h.className = 'nbh-hint noprint' + (inline ? ' nbh-eg' : ''); h.textContent = text; h.setAttribute('aria-hidden', 'true');
+    var row = el.closest('.drow'), lab = row && row.querySelector(':scope > .dlab');
+    if (!inline && lab && row.contains(el) && !lab.contains(el)) { lab.appendChild(h); return h; }
+    el.parentNode.insertBefore(h, el.nextSibling); return h;
+  }
+  /* 2 and 3: the hint text */
+  function fixHint(el){
+    var ph = el.getAttribute('placeholder'); if (ph == null) return; ph = ph.trim(); if (!ph) return;
+    var w = room(el); if (!(w > 20)) return;
+    if (/^-?\d+([.,]\d+)?%?$/.test(ph)) {   /* an example number alone */
+      var eg = 'e.g. ' + ph; if (!el.hasAttribute('data-nbh-ph')) el.setAttribute('data-nbh-ph', ph);
+      if (width(eg, el) <= w) el.setAttribute('placeholder', eg);
+      else { el.setAttribute('placeholder', ''); if (!el.getAttribute('aria-label') && !(el.labels && el.labels.length)) { el.setAttribute('data-nbh-al', '1'); el.setAttribute('aria-label', labelOf(el) || ('example ' + ph)); } hint(el, eg, true); }
+      return;
+    }
+    if (el.tagName === 'TEXTAREA') {   /* a one-line box grows to show its whole hint, up to five lines */
+      var cs = getComputedStyle(el), lh = num(cs.lineHeight) || num(cs.fontSize) * 1.4, lines = Math.ceil(width(ph, el) / Math.max(w, 40));
+      if (lines > 1) { var vis = Math.max(1, Math.round((el.clientHeight - num(cs.paddingTop) - num(cs.paddingBottom)) / lh));
+        if (lines > vis && !el.hasAttribute('data-nbh-mh')) el.setAttribute('data-nbh-mh', el.style.getPropertyValue('min-height') || '');
+        if (lines > vis) el.style.setProperty('min-height', Math.round(Math.min(lines, 5) * lh + num(cs.paddingTop) + num(cs.paddingBottom) + 2) + 'px', 'important'); }
+      return;
+    }
+    if (width(ph, el) <= w) return;
+    var inRow = !!el.closest('.drow'), inLabel = el.parentNode && el.parentNode.tagName === 'LABEL';
+    if (!el.hasAttribute('data-nbh-ph')) el.setAttribute('data-nbh-ph', ph);
+    if (inRow || w >= 140 || inLabel) { el.setAttribute('placeholder', shorten(ph, el, w)); hint(el, ph, inLabel && !inRow); }
+    else { el.setAttribute('placeholder', shorten(ph, el, w)); if (!el.title) { el.setAttribute('data-nbh-ti', '1'); el.title = ph; } }
+  }
+  /* 5: a box another form fills */
+  var FORM = /\(([^)]*\b[A-Z]{2,3}-1\b[^)]*)\)/;
+  function fixFrom(el){
+    if (el.getAttribute('placeholder') || el.value || el.getAttribute(DONE + '-from')) return;
+    var l = labelOf(el), m = l && FORM.exec(l); if (!m) return;
+    var forms = m[1].match(/\b[A-Z]{2,3}-1\b/g) || []; if (!forms.length) return;
+    el.setAttribute(DONE + '-from', '1'); if (!el.hasAttribute('data-nbh-ph')) el.setAttribute('data-nbh-ph', '');
+    el.setAttribute('placeholder', 'From Form ' + forms.join(' / ') + ' (the case fills it where it can), or type it here');
+    fixHint(el);
+  }
+  /* 4: yes/no tap buttons */
+  function ynOptions(sel){
+    var o = sel.options; if (!o || o.length < 3 || o.length > 5 || (o[0].value || '').trim() || (o[0].textContent || '').trim()) return null;
+    var out = [], yn = false;
+    for (var i = 1; i < o.length; i++) { var t = (o[i].textContent || '').trim(); if (!t || t.length > 18) return null; if (/^(y|n|yes|no)$/i.test(t)) yn = true; out.push({ v: o[i].value, t: t }); }
+    return yn ? out : null;
+  }
+  function paint(sel){ var g = sel.nbhSeg; if (!g) return; var v = sel.value; var bs = g.querySelectorAll('button');
+    for (var i = 0; i < bs.length; i++) { bs[i].setAttribute('aria-pressed', bs[i].getAttribute('data-v') === v && v !== '' ? 'true' : 'false'); bs[i].disabled = !!sel.disabled; } }
+  function fixSelect(sel){
+    if (sel.nbhSeg || sel.multiple || sel.closest(SKIP)) return; var opts = ynOptions(sel); if (!opts) return;
+    /* the buttons need the room: in a narrow table cell the dropdown stays (a column of stacked buttons is worse) */
+    var box = sel.parentNode, need = 0; opts.forEach(function(o){ need += width(o.t, sel) + 34; }); need += (opts.length - 1) * 6;
+    while (box && box.nodeType === 1 && getComputedStyle(box).display.indexOf('inline') === 0 && box.tagName !== 'TD' && box.tagName !== 'TH') box = box.parentNode;
+    if (box && box.nodeType === 1 && box.clientWidth && box.clientWidth - 8 < need) return;
+    var g = D.createElement('span'); g.className = 'nbh-seg noprint'; g.setAttribute('role', 'group'); var name = labelOf(sel); if (name) g.setAttribute('aria-label', name.slice(0, 120));
+    opts.forEach(function(o){ var b = D.createElement('button'); b.type = 'button'; b.className = 'nbh-segb'; b.textContent = o.t; b.setAttribute('data-v', o.v); b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', function(){ if (sel.disabled) return; var nv = sel.value === o.v ? '' : o.v; sel.value = nv; ['input', 'change'].forEach(function(t){ try { sel.dispatchEvent(new Event(t, { bubbles: true })); } catch (e) {} }); paint(sel); });
+      g.appendChild(b); });
+    sel.nbhSeg = g; sel.classList.add('nbh-seg-src'); sel.setAttribute('tabindex', '-1'); sel.setAttribute('aria-hidden', 'true');
+    sel.parentNode.insertBefore(g, sel.nextSibling); paint(sel);
+    /* measured in place: buttons that still break onto a second line give the dropdown back */
+    var bs = g.querySelectorAll('button'), top = bs[0].getBoundingClientRect().top, one = true;
+    for (var k = 1; k < bs.length; k++) if (Math.abs(bs[k].getBoundingClientRect().top - top) > 2) one = false;
+    if (!one) { unseg(sel); return; }
+    sel.addEventListener('change', function(){ paint(sel); }); sel.addEventListener('input', function(){ paint(sel); });
+  }
+  /* the dropdown back as it was (its value is its own); on a resize every row of buttons is given back and made again where it fits */
+  var printing = false;
+  function unseg(sel){ var g = sel.nbhSeg; if (!g) return; if (g.parentNode) g.parentNode.removeChild(g); sel.nbhSeg = null;
+    sel.classList.remove('nbh-seg-src'); sel.removeAttribute('tabindex'); sel.removeAttribute('aria-hidden'); }
+  function run(root){
+    if (!root || root.nodeType !== 1 || !root.isConnected) return;
+    try { if (printing || matchMedia('print').matches) return; } catch (e) {}   /* paper: nothing is dressed while printing */
+    var list = root.matches('input,select,textarea') ? [root] : Array.prototype.slice.call(root.querySelectorAll('input,select,textarea'));
+    for (var i = 0; i < list.length; i++) { var el = list[i];
+      if (el.hasAttribute(DONE) || el.closest(SKIP) || el.type === 'hidden' || el.type === 'checkbox' || el.type === 'radio' || el.type === 'file' || el.type === 'range' || el.type === 'color') continue;
+      if (!el.offsetParent) continue;   /* out of sight (a closed sheet): measured, and given its buttons, when shown */
+      el.setAttribute(DONE, '1');
+      try { if (el.tagName === 'SELECT') fixSelect(el); else { fixFrom(el); fixHint(el); } } catch (e) {}
+    }
+  }
+  function reset(){
+    Array.prototype.forEach.call(D.querySelectorAll('.nbh-hint'), function(h){ h.parentNode && h.parentNode.removeChild(h); });
+    Array.prototype.forEach.call(D.querySelectorAll('[data-nbh-al]'), function(el){ el.removeAttribute('aria-label'); el.removeAttribute('data-nbh-al'); });
+    Array.prototype.forEach.call(D.querySelectorAll('[data-nbh-ti]'), function(el){ el.removeAttribute('title'); el.removeAttribute('data-nbh-ti'); });
+    Array.prototype.forEach.call(D.querySelectorAll('[data-nbh-mh]'), function(el){ var mh = el.getAttribute('data-nbh-mh'); if (mh) el.style.setProperty('min-height', mh); else el.style.removeProperty('min-height'); el.removeAttribute('data-nbh-mh'); });
+    Array.prototype.forEach.call(D.querySelectorAll('[' + DONE + ']'), function(el){ el.removeAttribute(DONE); if (el.tagName === 'SELECT') { unseg(el); return; } var ph = el.getAttribute('data-nbh-ph'); if (ph != null) { if (ph) el.setAttribute('placeholder', ph); else el.removeAttribute('placeholder'); el.removeAttribute('data-nbh-ph'); } el.removeAttribute(DONE + '-from'); });
+  }
+  function all(){ if (D.body) run(D.body); }
+  function later(){ timer = 0; var r = pend; pend = []; r.forEach(run); }
+  try { new MutationObserver(function(recs){
+    recs.forEach(function(m){ for (var i = 0; i < m.addedNodes.length; i++) { var n = m.addedNodes[i]; if (n.nodeType === 1 && !(n.matches && n.matches(SKIP))) pend.push(n); } });
+    if (pend.length && !timer) timer = setTimeout(later, 350);
+  }).observe(D.documentElement, { childList: true, subtree: true }); } catch (e) {}
+  /* a sheet shown later: its boxes are measured on the first tap into it; the dropdowns' buttons follow their values */
+  D.addEventListener('click', function(){ setTimeout(all, 60); }, true);
+  setInterval(function(){ Array.prototype.forEach.call(D.querySelectorAll('select.nbh-seg-src'), paint); }, 1500);
+  var rt = 0, lastW = window.innerWidth; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(function(){ if (window.innerWidth === lastW) return; lastW = window.innerWidth; reset(); all(); }, 350); });   /* the width: a keyboard changes only the height */
+  /* paper must not change: before printing every placeholder, grown box and dropdown goes back as it was (the hints and
+     buttons are not printed anyway); after printing the screen gets them again */
+  function paper(on){ on = !!on; if (!on) { try { if (matchMedia('print').matches) return; } catch (e) {} }   /* still printing: no screen dressing yet */
+    if (on === printing) return; printing = on; if (on) reset(); else setTimeout(all, 60); }
+  window.addEventListener('beforeprint', function(){ paper(true); }); window.addEventListener('afterprint', function(){ paper(false); });
+  try { var pm = matchMedia('print'); (pm.addEventListener ? pm.addEventListener('change', function(e){ paper(e.matches); }) : pm.addListener(function(e){ paper(e.matches); })); } catch (e) {}
+  if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', all); else all();
+  window.addEventListener('load', function(){ setTimeout(all, 450); });
+  (window.nbhUI || (window.nbhUI = {})).fields = { run: all, reset: reset };
 })(); } catch (e) {}
 </script>

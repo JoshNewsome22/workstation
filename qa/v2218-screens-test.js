@@ -1,6 +1,6 @@
 /* v22.18 the forms' toolbar on an iPad held upright, the view dots, and 400% zoom (review F480, F493, F494). On an iPad
    held upright (820 px, touch) a form's view tabs get a row of their own in the toolbar, so the form's pages show, not one
-   or two of them; on the iPad held sideways (1180 px) the toolbar stays one row. Each view's dot says how filled it is by
+   or two of them; on the iPad held sideways (1180 px) every tab is whole and in sight (since v23.87 the tabs wrap as they need). Each view's dot says how filled it is by
    shape as well as colour (a ring for nothing yet, half filled for some, full for most), and on the light toolbar the
    amber and green stand out from white (3:1 or more). At 400% zoom (320 px wide) no view of SM-1, PA-1, TD-1 or EA-1 makes
    the page scroll sideways, and a field in a table keeps room for a few characters (not 14 px). Simulated student only.
@@ -27,7 +27,8 @@ const tabs=fr=>fr.evaluate(()=>{const seg=document.getElementById('viewSeg'),bar
   ok('1 an iPad held upright: IA-1\'s view tabs have a row of their own across the toolbar, and show '+(t&&t.whole)+' of its '+(t&&t.n)+' pages whole',!!t&&t.segW>=t.barW*0.6&&t.whole>=Math.min(t.n,4)&&t.othersTop.every(y=>y>t.grpTop+10),t);
   errs.push(...P.errs);await P.ctx.close();
   const W=await shellForm(br,{width:1180,height:820},'IA-1');const tw=await tabs(W.fr);
-  ok('2 held sideways (1180 px) the toolbar keeps its tabs and controls on one row',!!tw&&tw.othersTop.some(y=>Math.abs(y-tw.grpTop)<12),tw);
+  /* v23.87: on a touch screen the tabs wrap onto as many rows as they need, so every sheet is in sight; the controls stay in the toolbar beside them */
+  ok('2 held sideways (1180 px) every tab is whole and in sight (the tabs wrap as they need, v23.87) and the controls stay in the toolbar beside them',!!tw&&tw.whole===tw.n&&tw.othersTop.every(y=>y>=tw.grpTop-12&&y<=tw.grpTop+tw.barH),tw);
   /* F493: the dots by shape, and their colours on the light toolbar */
   const d=await W.fr.evaluate(async()=>{const L=[...document.querySelectorAll('#viewSeg button[data-nbh-fill]')];const one=st=>L.find(b=>b.dataset.nbhFill===st&&b.getAttribute('aria-pressed')!=='true');
     const look=b=>{if(!b)return null;const s=getComputedStyle(b,'::after');return {img:s.backgroundImage,bg:s.backgroundColor,border:s.borderTopColor,w:s.width,disp:s.display};};

@@ -16,7 +16,9 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const a0=await view();
   await p.evaluate(()=>{const s=document.getElementById('viewSeg');s.scrollLeft=0;s.style.maxWidth='300px';});await sleep(400);
   const a1=await view();
-  ok('1 on a touch screen, when the strip grows narrower the open tab is brought back into view',coarse&&a1.over&&a1.inView&&a1.sl>0,{coarse,a0,a1});
+  /* v23.87: on a touch screen 700px and wider the strip wraps instead of scrolling, so narrowing it leaves no overflow; the open tab
+     must still be in view either way, and scrolled into view where the strip does overflow */
+  ok('1 on a touch screen, when the strip grows narrower the open tab is brought back into view',coarse&&a1.inView&&(!a1.over||a1.sl>0),{coarse,a0,a1});
   await p.evaluate(()=>{const s=document.getElementById('viewSeg');s.style.maxWidth='';});await sleep(300);
   const a2=await view();
   ok('2 and when it widens again the open tab stays in view',a2.inView,a2);

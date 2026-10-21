@@ -76,13 +76,14 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     ok('7 a finger: the bar’s buttons are 44 px tall',bar.minH>=44,bar.minH);
     /* the form's toolbar on a touch screen: one row, "More" */
     const tb=await toolbar(fr);
-    ok('8 DM-1 on the iPad sideways: the toolbar is one row (groups in a row, a label beside its controls; at most 64 px), with "More" and "Fit", 44 px buttons',tb.groupRows===1&&tb.h<=64&&tb.dir==='row'&&tb.moreBtn==='More'&&tb.minH>=44,tb);
+    /* v23.87: on a touch screen the view tabs wrap so every sheet is in sight; the toolbar is as tall as the rows the tabs need */
+    ok('8 DM-1 on the iPad sideways: every view tab in sight (nothing scrolls sideways; the tabs wrap as they need, v23.87), the groups in a row, with "More" and "Fit", 44 px buttons',tb.sw<=tb.cw+1&&tb.h<=64+50*Math.max(0,tb.tabRows-1)&&tb.dir==='row'&&tb.moreBtn==='More'&&tb.minH>=44,tb);
     const td=await open(page,'TD-1');const t2=await toolbar(td);
-    ok('9 TD-1 (many tabs): the view tabs are one row that scrolls sideways, a fade at the right says there is more, the toolbar still one row',t2.tabRows===1&&t2.wrap==='nowrap'&&t2.sw>t2.cw+40&&t2.more==='r'&&t2.groupRows===1&&t2.h<=64,t2);
+    ok('9 TD-1 (many tabs): the view tabs wrap onto the rows they need, nothing scrolls sideways and no fade is needed (v23.87)',t2.tabRows>=2&&t2.wrap==='wrap'&&t2.sw<=t2.cw+1&&!t2.more&&t2.h<=64+50*(t2.tabRows-1),t2);
     /* the last tab chosen: the row scrolls so it is in sight, the fade moves to the left */
     const t3=await td.evaluate(async()=>{const v=document.getElementById('viewSeg'),bs=[...v.querySelectorAll('button')],last=bs[bs.length-1];last.click();await new Promise(r=>setTimeout(r,300));
       const a=last.getBoundingClientRect(),s=v.getBoundingClientRect();return {inView:a.left>=s.left-1&&a.right<=s.right+1,more:v.getAttribute('data-nbh-more'),pressed:last.getAttribute('aria-pressed')};});
-    ok('10 the last tab tapped comes into view (the row scrolled), and the fade is now at the left',t3.inView&&t3.pressed==='true'&&t3.more==='l',t3);
+    ok('10 the last tab tapped is in view and pressed (no scrolling needed, v23.87)',t3.inView&&t3.pressed==='true'&&!t3.more,t3);
     /* a finger's tap, not a script's click: every tab of the row reached by a real tap switches to its view (scroll snap once moved the last tab out from under the tap) */
     const tapped=[];for(const v of await td.evaluate(()=>[...document.querySelectorAll('#viewSeg button[data-view]')].map(b=>b.dataset.view))){
       const h=await td.evaluateHandle(v=>document.querySelector('#viewSeg button[data-view="'+v+'"]'),v);let err='';try{await h.asElement().tap({timeout:2500});}catch(e){err=String(e.message).split('\n')[0].slice(0,50);}await sleep(350);
@@ -107,7 +108,7 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     const fr=await open(page,'DM-1');await page.evaluate(()=>{try{foldBar(true);}catch(e){}});await sleep(400);
     const bar=await page.evaluate(()=>Math.round(document.getElementById('bar').getBoundingClientRect().height));
     ok('16 folded, the bar stays within 120 px (the v21.89 check) with 44 px buttons',bar<=120,bar);
-    const tb=await toolbar(fr);ok('17 DM-1 upright: the toolbar two rows at most, the view tabs on one of their own (v22.18, qa/v2218-screens-test.js), at most 120 px (it was 134)',tb.groupRows<=2&&tb.h<=120&&tb.tabRows===1,tb);
+    const tb=await toolbar(fr);ok('17 DM-1 upright: the view tabs on rows of their own with every tab in sight (v22.18, then v23.87: they wrap), the toolbar no taller than those rows need',tb.sw<=tb.cw+1&&tb.h<=70+50*tb.tabRows,tb);
     /* a toast's × is a 44 px target, and the toast no taller for it */
     const tt=await fr.evaluate(async()=>{nbhUI.toast('A short message for the check.',{ms:4000});await new Promise(r=>setTimeout(r,250));const t=document.querySelector('#nbhToasts .nbh-toast'),b=t&&t.querySelector('button');if(!b)return null;const q=b.getBoundingClientRect(),r=t.getBoundingClientRect();return {w:Math.round(q.width),h:Math.round(q.height),toast:Math.round(r.height)};});
     ok('18 a form’s toast: the × is a 44 px target and the toast stays a short strip (under 60 px)',!!tt&&tt.w>=44&&tt.h>=44&&tt.toast<60,tt);

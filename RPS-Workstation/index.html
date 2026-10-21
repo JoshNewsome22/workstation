@@ -956,6 +956,14 @@ body:not(.has-form) #printOne,body:not(.has-form) #popOut,body:not(.has-form) #c
 body.ws-full header.top,body.ws-full .bar,body.ws-full nav.rail,body.ws-full .rail-scrim,body.ws-full #railToggle{display:none!important}
 body.ws-full .crumb .fs-logo{display:block}
 body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
+/* v23.87 (the BCBA's iPad review) on a touch screen the bars above the form fold away while the form is scrolled down to be
+   read, as in fullscreen, and come back when it is scrolled up or closed: the form gets the room (ws-fold, set below) */
+body.ws-fold header.top,body.ws-fold .bar{display:none!important}
+body.ws-fold .crumb .fs-logo{display:block}
+/* v23.87 one Save case at a time: the bar's, with the mark for unsaved work; the one beside the form shows only when the
+   bar is out of sight (fullscreen, folded, or a phone, where the bar is not shown) */
+@media (min-width:720.02px){body.has-form:not(.ws-full):not(.ws-fold) .crumb #saveQuick{display:none}}
+#saveCase.dirty::after{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#c9742a;margin-left:6px;vertical-align:middle}
 
 /* ---- the list can be put away on a wide window ---- */
 @media (min-width:1180.02px){
@@ -2569,11 +2577,24 @@ function paintSave(){
   if(!d){state.dirtySince=null;state.nudged=false;}
   const min=state.dirtySince?Math.round((Date.now()-state.dirtySince)/60000):0;
   b.classList.toggle('dirty',d);
+  {const t0=$('#saveCase');if(t0)t0.classList.toggle('dirty',d);}   /* v23.87 the bar's Save case carries the mark too */
   b.title=d?('Save the case to a file: it holds work not yet saved'+(min?' ('+min+' min)':'')):'Save the case to a file'+(state.savedAt?' (last saved '+state.savedAt.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+')':'');
   if(d&&min>=NUDGE_MIN&&!state.nudged){state.nudged=true;b.classList.add('nudge');setTimeout(()=>b.classList.remove('nudge'),6000);
     say('The case has had unsaved work for '+min+' minutes. Save case writes it to a file.');}
 }
 $('#saveQuick').addEventListener('click',()=>$('#saveCase').click());
+/* v23.87 (the BCBA's iPad review) the bars fold while the open form is read on a touch screen: the form says which way it
+   is scrolled (nbh-ui.js); down past the top folds them, up again or near the top brings them back, and closing the form,
+   or a form that is not the one in front, never leaves them folded. A short quiet time after each change keeps the form's
+   own resize from undoing it. */
+(()=>{let quiet=0;const coarse=matchMedia('(pointer:coarse)');
+  const fold=on=>{on=!!on&&!!state.cur&&coarse.matches;if(on===document.body.classList.contains('ws-fold'))return;document.body.classList.toggle('ws-fold',on);quiet=Date.now()+450;
+    if(on)setTimeout(()=>{try{const fr=state.cur&&state.frames[state.cur];if(fr&&fr.contentWindow.scrollY<80)fold(false);}catch(e){}},480);};   /* a flick back to the top within the quiet time still brings the bars back */
+  window.addEventListener('message',ev=>{const d=ev.data;if(!d||d.nbh!=='scroll'||typeof d.y!=='number')return;
+    const fr=state.cur&&state.frames[state.cur];if(!fr||fr.contentWindow!==ev.source||Date.now()<quiet)return;
+    if(d.y<80)fold(false);else if(d.dy>0&&d.y>160)fold(true);else if(d.dy<-40)fold(false);});
+  new MutationObserver(()=>{if(!document.body.classList.contains('has-form'))fold(false);}).observe(document.body,{attributes:true,attributeFilter:['class']});
+})();
 setInterval(paintSave,5000);
 
 /* ================= side by side (v21.32) =================
@@ -2736,7 +2757,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.86';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.87';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];

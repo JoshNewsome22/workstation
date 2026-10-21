@@ -9905,6 +9905,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.87: Every form reads well on the iPad; TD-1's chaining cards carry the student's task analysis
+
+- **Every sheet in sight.** On an iPad the sheet tabs now wrap onto as many lines as they need instead of one line
+  scrolling sideways under the other controls (on an iPad Air held sideways 8 of TD-1's 13 sheets were out of sight,
+  and 17 forms hid at least one). Held upright, a form with eight sheets or more gives its tabs the whole width and
+  puts the controls on one row under them; a form with fewer keeps them beside the controls. The toolbar folded while reading down or typing keeps its one scrolling row (a swipe up or Tools shows them all),
+  and a phone keeps its one scrolling row with the fade, as in v23.74.
+- **The bars fold while a form is read.** On a touch screen the workstation's bars above a form fold away as the form is
+  scrolled down to be read, as in fullscreen, and come back when it is scrolled up or closed. There is one Save case at
+  a time: the bar's, with the orange mark for unsaved work; the one beside the form shows only when the bar is out of
+  sight.
+- **Fields on a touch screen.** A hint a box cannot show in full goes on a line under the box, or under the row's label
+  (346 boxes in 38 forms); an example number alone reads "e.g. 10", so it is not taken for an answer (88 boxes); a
+  yes/no choice is a row of tap buttons, the dropdown kept for the record and for paper (652); a box another form
+  fills says so when it is empty (52 rows); the student's details at the top of a form sit with their own boxes; and a
+  label sits level with its single-line box in tables and definition rows. Paper and print are unchanged: before a
+  page prints, every placeholder, grown box and dropdown goes back as it was, and the screen gets them again after.
+- **TD-1's chaining cards: the student's task analysis.** The setting "Number of steps" is now "Steps in the student's
+  task analysis": it counted the student's steps, not the staff's, so a card could read "16 steps" above 9 steps for
+  staff. A chaining card has a box of its own for the student's task analysis (one step a line; a name ending in a
+  colon heads each part of a list in parts), apart from the steps for staff, and the final plan and the text for the
+  BIP print it as its own numbered list. Where the article prints the task analysis (22 of the bank's 30 chaining
+  protocols), the protocol shows it, reworded, and Add to the plan puts it in the box, to adjust to this student;
+  where the article gives only the count, the protocol says so. Five settings that spelled the steps out now give the
+  count.
+
+To set up: upload the whole folder as usual (`nbh-ui.js`, `nbh-td1-bank.js`, TD-1 and the workstation change). Tested:
+`qa/ipad-layout-test.js` (new), `qa/td1-bank-test.js`; the tests that asserted the one-row tab strip, the bars staying put or
+the old field dressing were brought in line (`v2218-screens`, `v2192-design`, `v2191-focus`, `tabs-touch`, `student-journey`).
+
 ### v23.86: Forms GB-1 and TD-1's banks: objectives and protocols from the BCBA's journal volumes, 1968 to 2017
 
 - **168 starting objectives in GB-1** (80 before), now also written from the BCBA's volumes of the Journal of Applied
