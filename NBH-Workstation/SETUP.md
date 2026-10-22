@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.93: Show me: a bank card's steps, drawn and read aloud (Form TD-1)
+(the BCBA's go of 10/22, after the proof)
+
+- **Show me.** A protocol in TD-1's bank can carry a scene script: one drawn scene a step, with the student, the adults,
+  the phone, the help card, the words the card gives ("Touch the door", "I'm lost") and the rule of the step in a note
+  (the 5-second wait, FR 1 then VR 2, 4 of 5 = 80%). Such a protocol shows **Show me** in the bank panel beside Add to
+  the plan, and the plan card built from it shows Show me beside Remove. The player steps through the scenes (Play,
+  Previous, Next, the numbered steps), reads each step aloud with the device's own voice (Voice off keeps it quiet), and
+  closes with Close or Escape. It is a walkthrough of the card as written, not the student: every step is still adapted
+  on the card.
+- **The first script** is the cell-phone-and-help-card chain for a student separated from staff in the community
+  (Hoch et al., 2009), ten scenes. Scripts for the other chaining and safety cards follow in volumes, as the cards did.
+- Nothing of the walkthrough enters the save file, the packet or the print; the script travels with the bank's data file.
+
+Not changed: the plan, the other forms, the saved files.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and TD-1 changed). Tested: `qa/td93-scenes-test.js`,
+`qa/td1-bank-test.js`, `qa/td88-redesign-test.js`.
+
 ### v23.92: The picky-eater protocol (Whelan & Penrod, BAP 2018) joins TD-1's bank with its cautions
 (the BCBA's decision of 10/22: "add the protocol but include those cautions")
 

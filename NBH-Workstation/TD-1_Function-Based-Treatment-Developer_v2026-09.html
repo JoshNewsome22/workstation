@@ -5593,6 +5593,30 @@ table.td-glance{width:100%;border-collapse:collapse;font-size:12.5px;margin:0 0 
 .plan-ta ol{margin:2px 0 2px 1.4em;padding:0}
 .plan-ta li{margin:1px 0}
 </style>
+<style id="td1-scenes-css" data-nbh-screen>
+#tdScenes{position:fixed;inset:0;z-index:9000;background:rgba(20,30,40,.55);display:flex;align-items:center;justify-content:center;padding:12px}
+#tdScenes[hidden]{display:none}
+#tdScenes .sc-box{background:#f3f6f5;border-radius:14px;width:min(100%,980px);max-height:100%;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.35);font:16px/1.45 -apple-system,Helvetica,Arial,sans-serif;color:#1f2f3f}
+#tdScenes .sc-hd{display:flex;align-items:center;gap:10px;padding:10px 14px 4px}
+#tdScenes .sc-hd h3{margin:0;font:600 17px Georgia,serif;flex:1;min-width:0}
+#tdScenes .sc-stage{margin:6px 12px;background:#fff;border:1px solid #c9d6d4;border-radius:12px;overflow:hidden}
+#tdScenes svg{display:block;width:100%;height:auto}
+#tdScenes .sc-fig,#tdScenes .sc-prop{transition:transform 1.3s ease-in-out,opacity .8s}
+#tdScenes .sc-hide{opacity:0}#tdScenes .sc-dim{opacity:.35}
+#tdScenes .sc-cap{margin:6px 12px;background:#fff;border:1px solid #c9d6d4;border-radius:12px;padding:10px 14px;min-height:70px}
+#tdScenes .sc-cap b{display:block;font-size:13px;letter-spacing:.04em;color:#2f6f73;text-transform:uppercase;margin-bottom:3px}
+#tdScenes .sc-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 12px 14px}
+#tdScenes button{font:inherit;padding:8px 14px;border:1px solid #c9d6d4;border-radius:10px;background:#fff;color:#1f2f3f;min-height:44px}
+#tdScenes button.sc-primary{background:#2f6f73;color:#fff;border-color:#2f6f73}
+#tdScenes .sc-steps{display:flex;gap:4px;flex-wrap:wrap}#tdScenes .sc-steps button{min-width:38px;padding:8px 0}#tdScenes .sc-steps button.sc-on{background:#1f2f3f;color:#fff;border-color:#1f2f3f}
+#tdScenes .sc-credit{margin:0 14px 12px;font-size:12px;color:#667}
+@keyframes sc-ring{0%{opacity:0;r:10}60%{opacity:.9}100%{opacity:0;r:34}}
+#tdScenes .sc-wave{fill:none;stroke:#d9822b;stroke-width:3;animation:sc-ring 1s infinite}#tdScenes .sc-wave.w2{animation-delay:.33s}#tdScenes .sc-wave.w3{animation-delay:.66s}
+@keyframes sc-hand{0%,100%{transform:translate(0,0)}50%{transform:translate(-10px,0)}}#tdScenes .sc-handp{animation:sc-hand 1s infinite}
+@keyframes sc-pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}#tdScenes .sc-star{transform-origin:center;transform-box:fill-box;animation:sc-pop .6s}
+.td-sc-btn{margin-left:auto}
+@media print{#tdScenes{display:none!important}}
+</style>
 <style id="td1-pbank-css">
 /* v23.85 the protocol bank's place (its own styles are in its shadow root); never printed */
 .td-bank-host{display:block;min-width:0;max-width:100%;margin:10px 0 14px}
@@ -5783,7 +5807,7 @@ function show(id){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
   det.innerHTML=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>
-<div class="load"><div class="btns"><button type="button" class="add primary">Add to the plan</button></div><div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
+<div class="load"><div class="btns"><button type="button" class="add primary">Add to the plan</button>${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}</div><div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
 <div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div>
 <div class="vh">Steps for staff</div><ol class="steps">${(p.steps||[]).map(s=>'<li>'+esc(s)+'</li>').join('')}</ol>
@@ -5837,7 +5861,7 @@ q.addEventListener('input',draw);kind.addEventListener('change',draw);fn.addEven
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});
 listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);
   try{($p('.load')||det).scrollIntoView({block:'nearest',behavior:'smooth'});}catch(x){}});
-det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add'))doAdd();});
+det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add'))doAdd();else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);});
 /* the function choices follow the plan's function; the note on cards already in the plan follows the cards */
 document.addEventListener('change',ev=>{if(ev.target&&ev.target.name==='m.fn'){fnFill();draw();}});
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(){const r=was?was.apply(this,arguments):null;try{fnFill();draw();}catch(x){}return r;};}
@@ -5849,6 +5873,77 @@ draw();
 window.__tdBank={search:(s,k,f)=>search(s,k||'',f||'').list.map(p=>p.id),entry:id=>byId[id]||null,show:id=>{d.open=true;show(id);},n:N,kindOf:id=>byId[id]?kindOf(byId[id].code):''};
 })();
 </script>
+<script id="td1-scenes">
+/* v23.93 Show me: a drawn walkthrough of a bank card's steps (the scene script travels with the bank entry; nothing of it is saved) */
+(function(){
+const B=(typeof TD1_BANK!=='undefined')?TD1_BANK:window.TD1_BANK;if(!B||!B.protocols)return;const byId={};B.protocols.forEach(p=>{if(p.scenes&&p.scenes.length)byId[p.id]=p;});
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const PERSON='<circle cx="0" cy="-62" r="18" fill="#f1c9a5" stroke="#8a6a4f" stroke-width="2"/><rect x="-20" y="-42" width="40" height="58" rx="12" fill="COL"/><rect x="-16" y="14" width="13" height="40" rx="6" fill="#3d4d6b"/><rect x="3" y="14" width="13" height="40" rx="6" fill="#3d4d6b"/><circle cx="-6" cy="-66" r="2" fill="#333"/><circle cx="6" cy="-66" r="2" fill="#333"/><path d="M-6 -56 q6 5 12 0" fill="none" stroke="#333" stroke-width="1.5"/>';
+const fig=(id,col,lab,extra,sc)=>`<g id="sc-${id}" class="sc-fig"><g${sc?' transform="scale(.85)"':''}>${PERSON.replace('COL',col)}</g>${extra||''}<text y="${sc?72:78}" font-size="15" text-anchor="middle" fill="#445">${lab}</text></g>`;
+const STAGE=`<svg viewBox="0 0 960 540" aria-label="the scene">
+<g id="sc-school"><rect width="960" height="540" fill="#eef3f8"/><rect y="380" width="960" height="160" fill="#d9d2c4"/><g fill="#b9c7d6" stroke="#8ea3b8"><rect x="40" y="140" width="60" height="240"/><rect x="104" y="140" width="60" height="240"/><rect x="168" y="140" width="60" height="240"/><rect x="232" y="140" width="60" height="240"/></g><rect x="700" y="120" width="110" height="260" fill="#9fb8a8" stroke="#5e7a69" stroke-width="3"/><rect x="820" y="120" width="110" height="260" fill="#9fb8a8" stroke="#5e7a69" stroke-width="3"/><text x="755" y="110" font-size="18" text-anchor="middle" fill="#5e7a69">Room 12</text><text x="875" y="110" font-size="18" text-anchor="middle" fill="#5e7a69">Office</text></g>
+<g id="sc-store" class="sc-hide"><rect width="960" height="540" fill="#fbf6ee"/><rect y="380" width="960" height="160" fill="#cfc7bb"/><rect x="30" y="120" width="300" height="260" fill="#d8c9a8" stroke="#a08a5a" stroke-width="3"/><g fill="#a08a5a"><rect x="30" y="190" width="300" height="6"/><rect x="30" y="260" width="300" height="6"/><rect x="30" y="330" width="300" height="6"/></g><g><rect x="50" y="150" width="30" height="38" fill="#e76f51"/><rect x="95" y="155" width="26" height="33" fill="#2a9d8f"/><rect x="140" y="148" width="34" height="40" fill="#e9c46a"/><rect x="200" y="152" width="28" height="36" fill="#457b9d"/><rect x="250" y="222" width="30" height="36" fill="#e76f51"/><rect x="60" y="226" width="40" height="32" fill="#8ab17d"/><rect x="130" y="292" width="30" height="36" fill="#457b9d"/><rect x="200" y="296" width="40" height="32" fill="#e9c46a"/></g><rect x="640" y="250" width="290" height="130" rx="8" fill="#8d6e53" stroke="#5a4634" stroke-width="3"/><rect x="800" y="190" width="70" height="60" rx="6" fill="#5c6b73" stroke="#2e3a40" stroke-width="2"/><text x="785" y="235" font-size="16" text-anchor="middle" fill="#fff">REGISTER</text><text id="sc-storeName" x="480" y="70" font-size="28" text-anchor="middle" fill="#7a6a55" font-family="Georgia,serif"></text></g>
+<g id="sc-outline" class="sc-prop sc-hide"><circle cx="0" cy="-62" r="18" fill="none" stroke="#999" stroke-dasharray="5 4"/><rect x="-20" y="-42" width="40" height="58" rx="12" fill="none" stroke="#999" stroke-dasharray="5 4"/><text y="40" font-size="14" text-anchor="middle" fill="#888">out of sight</text></g>
+${fig('C','#8d99ae','adult in the building')}${fig('E','#2a9d8f','employee')}${fig('A','#7b5ea7','second adult')}${fig('T','#1d5c63','teacher','<rect x="14" y="-50" width="12" height="22" rx="3" fill="#222"/>')}
+${fig('S','#e07a5f','student','<rect id="sc-sphone" x="10" y="-6" width="11" height="20" rx="3" fill="#222" class="sc-prop sc-hide"/><rect id="sc-scard" x="-22" y="-4" width="16" height="11" fill="#fff" stroke="#555" class="sc-prop sc-hide"/>',1)}
+<g id="sc-ringS" class="sc-hide"><circle class="sc-wave"/><circle class="sc-wave w2"/><circle class="sc-wave w3"/></g><g id="sc-ringT" class="sc-hide"><circle class="sc-wave"/><circle class="sc-wave w2"/><circle class="sc-wave w3"/></g>
+<g id="sc-hand" class="sc-hide"><path class="sc-handp" d="M0 0 l-30 0 m0 0 l8 -8 m-8 8 l8 8" fill="none" stroke="#7b5ea7" stroke-width="5" stroke-linecap="round"/><text id="sc-handLbl" y="-112" x="-30" font-size="15" text-anchor="middle" fill="#7b5ea7"></text></g>
+<g id="sc-card" class="sc-prop sc-hide"><rect width="30" height="20" fill="#fff" stroke="#555"/><text x="15" y="14" font-size="9" text-anchor="middle">I am lost</text></g>
+<g id="sc-star" class="sc-hide"><polygon class="sc-star" points="0,-22 6,-7 22,-7 9,3 14,19 0,9 -14,19 -9,3 -22,-7 -6,-7" fill="#f4b942" stroke="#b7791f" stroke-width="2"/></g>
+<g id="sc-timer" class="sc-hide"><circle r="26" fill="#fff" stroke="#999" stroke-width="3"/><text id="sc-timerTxt" y="6" font-size="14" text-anchor="middle"></text></g>
+<g id="sc-eye" class="sc-hide"><text font-size="14" fill="#7b5ea7" text-anchor="middle">keeps the student in view</text></g>
+<g id="sc-bubT" class="sc-hide"><rect rx="10" fill="#fff" stroke="#1d5c63" stroke-width="2"/><text font-size="17" fill="#1d5c63"></text></g>
+<g id="sc-bubS" class="sc-hide"><rect rx="10" fill="#fff" stroke="#e07a5f" stroke-width="2"/><text font-size="17" fill="#8a3b28"></text></g>
+<g id="sc-note" class="sc-hide"><rect rx="8" fill="#fffbe6" stroke="#d9c36a"/><text font-size="16" fill="#5a4a00"></text></g></svg>`;
+let box=null,P=null,SC=[],i=0,playing=false,voice=true,token=0,tmr=null;const pos={};
+const $=id=>box.querySelector('#'+id);
+function build(){box=document.createElement('div');box.id='tdScenes';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','Show me: the steps, drawn');
+ box.innerHTML=`<div class="sc-box"><div class="sc-hd"><h3 id="sc-title"></h3><button type="button" id="sc-close">Close</button></div><div class="sc-stage">${STAGE}</div><div class="sc-cap"><b id="sc-capHead"></b><span id="sc-capText"></span></div><div class="sc-bar"><button type="button" id="sc-play" class="sc-primary">Play</button><button type="button" id="sc-prev">‹ Previous</button><button type="button" id="sc-next">Next ›</button><button type="button" id="sc-voice">Voice: on</button><div class="sc-steps" id="sc-stepBtns"></div></div><p class="sc-credit" id="sc-credit"></p></div>`;
+ document.body.appendChild(box);
+ $('sc-close').addEventListener('click',close);box.addEventListener('click',ev=>{if(ev.target===box)close();});
+ $('sc-play').addEventListener('click',()=>{playing=!playing;$('sc-play').textContent=playing?'Pause':'Play';if(playing)show(i,true);else{token++;hush();}});
+ $('sc-prev').addEventListener('click',()=>show(i-1,playing));$('sc-next').addEventListener('click',()=>show(i+1,playing));
+ $('sc-voice').addEventListener('click',()=>{voice=!voice;$('sc-voice').textContent='Voice: '+(voice?'on':'off');if(!voice)hush();});
+ document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&box&&!box.hidden)close();});}
+function hush(){try{speechSynthesis.cancel();}catch(e){}}
+function speak(t){hush();if(!voice)return;try{const u=new SpeechSynthesisUtterance(t);u.rate=.95;speechSynthesis.speak(u);}catch(e){}}
+function at(id,x,y,op){const e=$('sc-'+id);if(!e)return;pos[id]=[x,y];e.setAttribute('transform','translate('+x+' '+y+')');e.classList.toggle('sc-hide',op===0);e.classList.toggle('sc-dim',op===.35);}
+function fx(id,on,x,y){const e=$('sc-'+id);if(!e)return;e.classList.toggle('sc-hide',!on);if(on&&x!=null)e.setAttribute('transform','translate('+x+' '+y+')');}
+function label(id,on,text,x,y,w0,h0,yy){const g=$('sc-'+id);if(!g)return;g.classList.toggle('sc-hide',!on);if(!on)return;const t=g.querySelector('text');t.textContent=text;const w=text.length*w0+24;g.querySelector('rect').setAttribute('width',w);g.querySelector('rect').setAttribute('height',h0);t.setAttribute('x',12);t.setAttribute('y',yy);g.setAttribute('transform','translate('+(x-w/2)+' '+y+')');}
+function bubble(who,text,x,y){const p=pos[who]||[480,330];const id=who==='S'?'bubS':'bubT';label(id,1,text,x!=null?x:Math.min(800,Math.max(160,p[0])),y!=null?y:200,9.2,34,23);}
+function reset(){['ringS','ringT','hand','card','star','timer','eye','bubT','bubS','note','outline'].forEach(k=>{const e=$('sc-'+k);if(e)e.classList.add('sc-hide');});}
+const wait=ms=>new Promise(r=>{tmr=setTimeout(r,ms);});
+async function run(sc,my){$('sc-school').classList.toggle('sc-hide',sc.set!=='school');$('sc-store').classList.toggle('sc-hide',sc.set!=='store');if(sc.name)$('sc-storeName').textContent=sc.name;
+ Object.keys(sc.pos||{}).forEach(k=>{const v=sc.pos[k];at(k,v[0],v[1],v[2]);});
+ for(const a of sc.acts||[]){if(my!==token)return;const k=a[0];
+  if(k==='wait')await wait(a[1]);else if(k==='move')at(a[1],a[2],a[3],a[4]);else if(k==='bubble')bubble(a[1],a[2],a[3],a[4]);
+  else if(k==='note')label('note',1,a[1],480,110,8.6,32,22);else if(k==='ring'){const p=pos[a[1]]||[480,330];fx('ring'+a[1],a[2],a[1]==='T'?p[0]+15:p[0]+12,a[1]==='T'?p[1]-50:p[1]);}
+  else if(k==='hand'){if(a[1]===0)fx('hand',0);else{fx('hand',1,a[1],a[2]);$('sc-handLbl').textContent=a[3]||'';}}
+  else if(k==='card'){if(a[1]===0)fx('card',0);else fx('card',1,a[1],a[2]);}else if(k==='give'){$('sc-sphone').classList.remove('sc-hide');$('sc-scard').classList.remove('sc-hide');}
+  else if(k==='star')fx('star',1,a[1],a[2]);else if(k==='timer'){if(a[1]===0)fx('timer',0);else{fx('timer',1,a[1],a[2]);$('sc-timerTxt').textContent=a[3]||'';}}
+  else if(k==='outline'){if(a[1]===0)fx('outline',0);else fx('outline',1,a[1],a[2]);}else if(k==='eye')fx('eye',1,a[1],a[2]);}}
+async function show(n,auto){token++;const my=token;clearTimeout(tmr);i=Math.max(0,Math.min(SC.length-1,n));reset();const steps=P.steps||[];
+ $('sc-capHead').textContent='Step '+(i+1)+' of '+SC.length+(SC[i].h?' · '+SC[i].h:'');$('sc-capText').textContent=steps[i]||SC[i].t||'';
+ box.querySelectorAll('#sc-stepBtns button').forEach((b,k)=>b.classList.toggle('sc-on',k===i));speak($('sc-capText').textContent);
+ await run(SC[i],my);if(my!==token)return;
+ if(auto&&playing){let speaking=true;try{speaking=speechSynthesis.speaking;}catch(e){speaking=false;}
+  if(speaking){await new Promise(r=>{const c=setInterval(()=>{let s=false;try{s=speechSynthesis.speaking;}catch(e){}if(!s||my!==token){clearInterval(c);r();}},200);});}
+  if(my!==token)return;await wait(900);if(my!==token)return;if(i<SC.length-1)show(i+1,true);else{playing=false;$('sc-play').textContent='Play again';}}}
+function play(id){const p=byId[id];if(!p)return;if(!box)build();P=p;SC=p.scenes;i=0;playing=false;voice=true;$('sc-voice').textContent='Voice: on';$('sc-play').textContent='Play';
+ $('sc-title').textContent=p.lab;$('sc-credit').textContent='Drawn from the card’s steps for staff ('+(p.src||[]).map(k=>(B.refs&&B.refs[k]&&B.refs[k].apa)||k).map(a=>a.split('.')[0]).join('; ')+'). A walkthrough, not the student: adapt every step to this plan.';
+ const sb=$('sc-stepBtns');sb.innerHTML='';SC.forEach((s,k)=>{const b=document.createElement('button');b.type='button';b.textContent=k+1;b.addEventListener('click',()=>show(k,playing));sb.appendChild(b);});
+ ['sphone','scard'].forEach(k=>$('sc-'+k).classList.add('sc-hide'));box.hidden=false;show(0,false);setTimeout(()=>{try{$('sc-play').focus();}catch(e){}},50);}
+function close(){token++;clearTimeout(tmr);playing=false;hush();if(box)box.hidden=true;}
+/* the plan's cards: a card built from a bank protocol with a scene script gets Show me beside Remove */
+function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=inp&&inp.value;const has=!!(id&&byId[id]);let b=c.querySelector('.td-sc-btn');
+ if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-sc-btn';b.textContent='Show me';b.addEventListener('click',()=>play(inp.value));const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
+ else if(!has&&b)b.remove();});}
+try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true,subtree:true});}catch(e){}
+document.addEventListener('change',ev=>{if(ev.target&&/\]\.bank$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
+window.__tdScenes={has:id=>!!byId[id],play,close,count:()=>Object.keys(byId).length};
+})();
+</script>
+
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
