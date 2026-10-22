@@ -9905,6 +9905,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.89: Forms TD-1 and GB-1's banks audited against the quality standard and the BCBA's rules; open-access additions
+(PART 2 step 4; the BCBA's three source choices and six default rulings of 10/21)
+
+- **410 treatment protocols in TD-1** (346 before) and **197 starting objectives in GB-1** (168 before). The additions
+  are written from open-access articles (PubMed Central and Europe PMC, the open-access subset only): 68 protocols
+  and 33 objectives with 72 further sources for objectives already in the bank, each read from the article's
+  full text. The sources include, as the BCBA allowed, studies of children on inpatient units, studies of adults with
+  intellectual or developmental disability in school, clinic or community settings, and Behavior Modification.
+- **The audit.** Every protocol and objective was read against the standard (PART 2 step 1) and the BCBA's rules. 90
+  protocol notes and 10 objective notes were rewritten or extended so each says what its evidence is (how many
+  participants, where, for how long, with what follow-up), what to adapt for a school student, and where a snack or food
+  was the reinforcer, that the team decides whether food is used for this student, with the family and the nurse where
+  health or diet is in question. Eleven objectives' criteria were brought to the standard (a number, consecutive
+  measurements and a method naming a form); the three safety skills (crossing a street, when lost, a stranger
+  approaching) are set at 100% from the start, as the BCBA directed. One objective's behavior was reworded as something
+  one can see and count.
+- **Set aside.** Four protocols and four objectives were taken out by the BCBA's rules (the evidence is adults on a
+  hospital ward or in an institution: spaced eating for rumination, backward-chained fire evacuation, reinforcer
+  sampling, requests at a meeting; joining a group with a script, suggesting an activity, cleaning a room, a fire drill
+  with no school evidence); four open-access protocols are assessment or reactive-strategy components the bank refuses
+  by design (two augmented competing-stimulus assessments, a competing-attention assessment, non-aversive reactive
+  strategies), which belong to TD-1's own cards. All are kept on the set-aside list for the BCBA.
+- **References.** 50 references that had no DOI now carry one (confirmed by the DOI's own record); the four open-access
+  volumes' references are read from the articles.
+
+Not changed: the forms themselves (the banks' panels are as in v23.88), the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js` (the bank's replace/add flow), `qa/gb88-card-test.js`, the bank counts
+(bankcheck).
+
 ### v23.88: The sheets of a form on an iPad (a rail sideways, a Sheets menu upright, sheet arrows); Forms TD-1 and GB-1 redesigned
 
 - **Sideways: a rail of sheets.** The view tabs leave the toolbar for a rail down the left side, the form's name above
