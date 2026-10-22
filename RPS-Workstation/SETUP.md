@@ -9905,6 +9905,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.97: Readings discussed in supervision (Form RS-1), from the workstation's own references; the record emailed as an attached page
+(the BCBA's request of 10/22)
+
+- **Readings discussed, on each supervision contact.** Add a reading from the workstation's own references: every
+  article Forms TD-1 and GB-1 cite (about 620), each with a short summary in the workstation's words (the volume's
+  own where the reading was drafted from the article, else the objective's or the protocol's study summary). Search by
+  a word of the title, an author or a topic; the summary comes onto the contact, to edit as you like, with two boxes of
+  your own: **What we discussed** and **Follow-up for the RBT**. A reading not in the list is typed once and kept the
+  same way. Readings are supervision content, not the article: the reference and the DOI link travel, never the paper.
+- **Where they show.** Under the contact on the monthly record (so the emailed record carries them), on the RBT record
+  as **Readings This Year** with what was discussed and the follow-up, and counted on the year summary.
+- **The emailed record is an attached page.** The email is a short note with the record attached as a page named for
+  the RBT and the month, so the signatures arrive as drawn in every mail program (Gmail does not show pictures embedded
+  in an email's body). The workstation's mail sending gains attachments for this.
+
+Not changed: the record's figures and checks, the saved files (a contact's readings are kept with it), the printing.
+To set up: upload the whole folder as usual (RS-1, `nbh-readings.js` new, both editions' `index.html`, the one-file
+editions). Tested: `qa/rs97-test.js` (11), `qa/rs94-share-test.js`, `qa/rs96-test.js`, `qa/rs1-test.js`.
+
 ### v23.96: The RBT supervision record keeps its layout in the email and the file
 (found while showing the BCBA the email as the RBT receives it, 10/22)
 

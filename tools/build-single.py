@@ -80,6 +80,8 @@ pdf = {fn: open(os.path.join(SRC, fn), encoding='utf-8').read() for fn in ('pdf-
 pictos = open(os.path.join(SRC, 'nbh-pictos.js'), encoding='utf-8').read()
 # v23.86: Form TD-1's protocol bank (its <script id="td1-pbank" src>) travels once too
 td1bank = open(os.path.join(SRC, 'nbh-td1-bank.js'), encoding='utf-8').read()
+# v23.97: Form RS-1's readings (its <script id="rs-readings" src>) travel once too
+readings = open(os.path.join(SRC, 'nbh-readings.js'), encoding='utf-8').read()
 # v21.62: My pictures (Forms VS-1, SM-1, TK-1 and TV-1 load nbh-pictures.js by <script src>) travels once too
 pictures = open(os.path.join(SRC, 'nbh-pictures.js'), encoding='utf-8').read()
 # v22.56: the media store (the workstation and Form TV-1 load nbh-media.js by <script src>) travels once too
@@ -112,7 +114,7 @@ if back != forms or wback != wording or any('@@NBH-LOGO@@' not in back[fn] or ba
                                              back[fn].replace('@@NBH-LOGO@@', logo).replace(WHOLE, wback) != files_in[fn] for fn in files):
     sys.exit('the packed forms do not unpack to the files, each with its one copy of the writing help')
 blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', packed) + block('nbh-embed-wording', pwording) +
-          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-td1bank', pack(td1bank)) + block('nbh-embed-pictures', pack(pictures)) + block('nbh-embed-media', pack(media)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-narration', pack(narration)) + block('nbh-embed-video', pack(video)) + block('nbh-embed-narration-sm1', pack(narration_sm1)) + block('nbh-embed-narration-dd1', pack(narration_dd1)) + block('nbh-embed-narration-tk1bus', pack(narration_tk1bus)) + block('nbh-embed-narration-ia1', pack(narration_ia1)) + block('nbh-embed-narration-ra1', pack(narration_ra1)) + block('nbh-embed-shell', pack(idx)))
+          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-td1bank', pack(td1bank)) + block('nbh-embed-readings', pack(readings)) + block('nbh-embed-pictures', pack(pictures)) + block('nbh-embed-media', pack(media)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-narration', pack(narration)) + block('nbh-embed-video', pack(video)) + block('nbh-embed-narration-sm1', pack(narration_sm1)) + block('nbh-embed-narration-dd1', pack(narration_dd1)) + block('nbh-embed-narration-tk1bus', pack(narration_tk1bus)) + block('nbh-embed-narration-ia1', pack(narration_ia1)) + block('nbh-embed-narration-ra1', pack(narration_ra1)) + block('nbh-embed-shell', pack(idx)))
 # v22.56 the workstation's own <script src="nbh-media.js"> goes inline (no file beside a one-file edition)
 MEDIA_TAG = '<script src="nbh-media.js"></script>'
 if MEDIA_TAG not in idx:

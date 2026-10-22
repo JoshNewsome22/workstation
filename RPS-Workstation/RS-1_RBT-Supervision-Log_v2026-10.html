@@ -1190,7 +1190,10 @@ td input,td select{max-width:100%}
     <div id="goalList"></div>
     <div class="tools"><button class="tool" type="button" id="addGoal">Add a goal</button><span class="hint" id="goalCount"></span></div>
 
-    <h2 class="nbh-band" style="margin-top:18px">The Credential</h2>
+    <h2 class="nbh-band" style="margin-top:18px">Readings This Year</h2>
+     <p class="hint">Every reading discussed in a supervision contact this school year, with what was discussed and the RBT&rsquo;s follow-up. Readings are added on the Month page, on the contact.</p>
+     <div id="readList"></div>
+     <h2 class="nbh-band" style="margin-top:18px">The Credential</h2>
     <div id="credPanel"></div>
     <div id="renewBox">
       <h3>2026 recertification with the Recertification Competency Assessment</h3>
@@ -1572,7 +1575,7 @@ function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Num
       '<span class="lbl">How it was taught (behavior skills training)</span><div class="rs-chips">'+BST.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('b'+j)+'" data-c="'+id+'" data-arr="bst" value="'+esc(t)+'"'+((c.bst||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
       '<div class="two"><div class="field"><label for="'+F('feedback')+'">Feedback given</label><textarea id="'+F('feedback')+'" data-c="'+id+'" data-f="feedback" rows="3" placeholder="what went well, one thing to change, and how">'+esc(c.feedback)+'</textarea></div>'+
       '<div class="field"><label for="'+F('follow')+'">The RBT&rsquo;s follow-up or goal for next time</label><textarea id="'+F('follow')+'" data-c="'+id+'" data-f="follow" rows="3" placeholder="what the RBT practises before the next contact">'+esc(c.follow)+'</textarea></div></div>'+
-      '<div class="rs-ck" data-ckbox="'+id+'"'+(c.obs==='yes'?'':' hidden')+'><h4><span>Observation checklist (optional)</span><span id="'+F('score')+'">'+ckText(c)+'</span></h4>'+
+      rdBlock(c,id)+'<div class="rs-ck" data-ckbox="'+id+'"'+(c.obs==='yes'?'':' hidden')+'><h4><span>Observation checklist (optional)</span><span id="'+F('score')+'">'+ckText(c)+'</span></h4>'+
         CHECK.map((t,j)=>{const v=(c.ck||{})[j]||'',nm='ck_'+id+'_'+j;return '<div class="rs-ckrow"><span class="t" id="'+nm+'_t">'+(j+1)+'. '+t+'</span><span class="yn" role="radiogroup" aria-labelledby="'+nm+'_t">'+
           [['y','Yes'],['n','No'],['na','N/A']].map(([v2,l])=>'<label class="'+v2+'"><input type="radio" name="'+nm+'" id="'+nm+'_'+v2+'" data-c="'+id+'" data-ck="'+j+'" value="'+v2+'"'+(v===v2?' checked':'')+'>'+l+'</label>').join('')+'</span></div>';}).join('')+'</div>'+
       '<div class="rs-cfoot"><span class="hint" id="'+F('issues')+'">'+issuesText(is,c)+'</span><button class="tool" type="button" data-cdel="'+id+'">Delete this contact</button></div>'+
@@ -1645,7 +1648,7 @@ function ckChart(A,paper,cw){const W=cw||720,H=paper?150:190,L=40,R=10,T=24,B=24
   return g+'</svg>';}
 
 /* ---------------- goals and the credential ---------------- */
-function renderRbt(){
+function renderRbt(){rdListPaint();
   $('#goalList').innerHTML=S.goals.map((g,i)=>{const id=esc(g.id),F=f=>'g_'+id+'_'+f;const late=g.status!=='Met'&&g.target&&g.target<todayISO();
     return '<div class="rs-goal" data-gid="'+id+'"><div class="gh"><span>Goal '+(i+1)+(late?' · <b style="color:#8E2A2A">past its target date</b>':g.status==='Met'?' · <b style="color:#2F6B37">met</b>':'')+'</span><button type="button" class="rowDel" data-del="goal" data-i="'+id+'" title="Delete this goal" aria-label="Delete goal '+(i+1)+'">&times;</button></div>'+
       '<div class="field"><label for="'+F('goal')+'">The goal</label><textarea id="'+F('goal')+'" data-g="'+id+'" data-f="goal" rows="2" placeholder="e.g., delivers praise within 3 seconds of the target skill in 9 of 10 opportunities">'+esc(g.goal)+'</textarea></div>'+
@@ -1712,7 +1715,7 @@ function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today
       '<tr><td colspan="3"><b>'+s.daysServed+' day'+(s.daysServed===1?'':'s')+' of service</b></td><td class="n"><b>'+hrs(s.rbtMin)+'</b></td><td></td></tr></tbody></table>':'<p class="p-empty">No service days recorded.</p>')+
     '<h4>Supervision contacts</h4>'+(C.length?'<table class="p-t"><thead><tr><th style="width:11%">Date</th><th style="width:13%">Time</th><th style="width:6%">Min</th><th style="width:17%">Supervisor</th><th style="width:13%">Format and mode</th><th style="width:9%">Observed with client</th><th>Activities, content, method</th><th style="width:8%">Checklist</th></tr></thead><tbody>'+
       C.map(x=>{const c=x.c,sp=supById(c.sup),mo=modeOf(c.mode),sc=c.obs==='yes'?ckScore(c):null;return '<tr><td>'+esc(mdy(c.date))+'</td><td>'+esc(fmtHM(c.start))+(c.end?'–'+esc(fmtHM(c.end)):'')+'</td><td class="n">'+(x.min==null?'—':x.min)+'</td><td>'+esc(supLabel(sp))+'</td><td>'+(c.format==='group'?'Small group'+(num(c.group)?' ('+num(c.group)+' RBTs)':''):'Individual')+'; '+esc(mo?mo[1]:'')+'</td><td>'+(c.obs==='yes'?'Yes'+(c.client?', '+esc(c.client):''):c.obs==='no'?'No':'')+'</td><td>'+esc((c.sact||[]).join('; '))+((c.sact||[]).length&&(c.acts||[]).length?'<br>':'')+esc((c.acts||[]).join('; '))+((c.bst||[]).length?'<br><i>'+esc(c.bst.join(', '))+'</i>':'')+'</td><td class="n">'+(sc?Math.round(sc.pct)+'%':'—')+'</td></tr>'+
-        ((c.feedback||c.follow||!x.counts)?'<tr class="sub"><td colspan="8">'+(c.feedback?'<b>Feedback:</b> '+esc(c.feedback)+' ':'')+(c.follow?'<b>Next:</b> '+esc(c.follow)+' ':'')+(!x.counts?'<b class="p-no">Not counted:</b> '+esc(x.is.map(i=>i.t).join('; ')||'planned'):'')+'</td></tr>':'');}).join('')+'</tbody></table>':'<p class="p-empty">No supervision contacts recorded.</p>')+
+        ((c.feedback||c.follow||!x.counts)?'<tr class="sub"><td colspan="8">'+(c.feedback?'<b>Feedback:</b> '+esc(c.feedback)+' ':'')+(c.follow?'<b>Next:</b> '+esc(c.follow)+' ':'')+(!x.counts?'<b class="p-no">Not counted:</b> '+esc(x.is.map(i=>i.t).join('; ')||'planned'):'')+'</td></tr>':'')+rdRow(c);}).join('')+'</tbody></table>':'<p class="p-empty">No supervision contacts recorded.</p>')+
     '<div class="p-keep"><h4>Totals and compliance</h4><div class="p-two"><table class="p-t"><tbody>'+
       '<tr><td>Days the RBT provided services</td><td class="n">'+s.daysServed+'</td></tr><tr><td>Real-time (face-to-face) contacts</td><td class="n">'+s.cnt.length+'</td></tr><tr><td>Observations with a client</td><td class="n">'+s.obs+'</td></tr>'+
       '<tr><td>Total RBT hours</td><td class="n">'+hrs(s.rbtMin)+'</td></tr><tr><td>Supervision hours</td><td class="n">'+hrs(s.supMin)+'</td></tr><tr><td><b>Percent supervised (minimum '+rule('pct')+'%)</b></td><td class="n"><b>'+pctTxt(s.pct)+'</b></td></tr></tbody></table>'+
@@ -1739,7 +1742,7 @@ function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent
   $$('[data-sg]').forEach(el=>{el.value=sg[el.dataset.sg]||'';});
   const sp=S.sups.find(s=>s.name&&credOK(s.cred));$('#sgSup').placeholder=sp?supLabel(sp):'name, credential';$('#sgRbt').placeholder=S.setup.rbt_name?(S.setup.rbt_name+', '+(S.setup.rbt_cred||'RBT')):'name, RBT';
   $$('canvas.rs-pad').forEach(cv=>padDraw(cv,sg[cv.dataset.pad]));}
-function renderPrint(){month(curKey);renderSign();renderMonthOut();renderYearOut();renderConcernOut();}
+function renderPrint(){month(curKey);renderSign();renderMonthOut();renderYearOut();rdYear();rdListPaint();renderConcernOut();}
 
 /* the signature pads: a finger or a stylus draws; the drawing is kept with the month as an image, which the record prints */
 function padDraw(cv,src){const x=cv.getContext&&cv.getContext('2d');if(!x)return;x.clearRect(0,0,cv.width,cv.height);if(src&&/^data:image\/png;base64,/.test(src)){const im=new Image();im.onload=()=>{x.clearRect(0,0,cv.width,cv.height);x.drawImage(im,0,0);};im.src=src;}}
@@ -1763,6 +1766,46 @@ function moveTo(list,x){const k=keyOf(x.date);if(!x.date||k===curKey||!yearKeys(
   nbhUI.toast((list==='days'?'The day':'The contact')+' of '+mdy(x.date)+' was moved from '+was+' to '+keyLabel(k)+', its month.',{kind:'ok'});
   const e=$((list==='days'?'#d_':'#c_')+x.id+'_date');if(e){e.scrollIntoView({block:'center'});}return true;}
 function findDay(id){return month(curKey).days.find(d=>d.id===id);}
+/* ---------------- v23.97 Readings discussed: the workstation's references, a short summary, what was discussed, the follow-up ---------------- */
+function RD(){try{return NBH_READINGS||[];}catch(e){return window.NBH_READINGS||[];}}
+function rdAll(){const L=[];Object.keys(S.months||{}).forEach(k=>{(S.months[k].contacts||[]).forEach(c=>{(c.readings||[]).forEach(r=>L.push({c,r,k}));});});return L.sort((a,b)=>String(a.c.date||'9').localeCompare(String(b.c.date||'9')));}
+function rdDoi(r){return r.doi?' <a href="https://doi.org/'+esc(r.doi)+'" target="_blank" rel="noopener noreferrer">doi</a>':'';}
+function rdBlock(c,id){const L=c.readings||[];
+  return '<div class="rs-read" data-rdbox="'+id+'"><h4><span>Readings discussed</span><span class="hint">the workstation&rsquo;s references, with a short summary; add what was discussed and the RBT&rsquo;s follow-up</span></h4>'+
+    L.map(r=>{const rid=esc(r.id);return '<div class="rs-rd" data-rdid="'+rid+'"><div class="rd-apa">'+esc(r.apa)+rdDoi(r)+'</div>'+
+      '<div class="field"><label for="rd_'+rid+'_sum">Summary (the workstation&rsquo;s; edit as you like)</label><textarea id="rd_'+rid+'_sum" data-rd="'+rid+'" data-rc="'+id+'" data-f="sum" rows="3">'+esc(r.sum||'')+'</textarea></div>'+
+      '<div class="two"><div class="field"><label for="rd_'+rid+'_disc">What we discussed</label><textarea id="rd_'+rid+'_disc" data-rd="'+rid+'" data-rc="'+id+'" data-f="disc" rows="3" placeholder="the point of the article for this RBT&rsquo;s work, and how it applies">'+esc(r.disc||'')+'</textarea></div>'+
+      '<div class="field"><label for="rd_'+rid+'_next">Follow-up for the RBT</label><textarea id="rd_'+rid+'_next" data-rd="'+rid+'" data-rc="'+id+'" data-f="next" rows="3" placeholder="what to read or practise before the next contact">'+esc(r.next||'')+'</textarea></div></div>'+
+      '<div class="tools"><button type="button" class="tool" data-rdrm="'+rid+'" data-rc="'+id+'">Remove this reading</button></div></div>';}).join('')+
+    '<div class="tools"><button type="button" class="tool" data-rdadd="'+id+'">Add a reading</button>'+(L.length?'<span class="hint">'+L.length+(L.length===1?' reading':' readings')+'</span>':'')+'</div></div>';}
+function rdRow(c){const L=c.readings||[];if(!L.length)return '';
+  return '<tr class="sub"><td colspan="8"><b>Readings discussed:</b>'+L.map(r=>'<div style="margin:3px 0 5px 10px">'+esc(r.apa)+(r.doi?' <span style="color:#444">https://doi.org/'+esc(r.doi)+'</span>':'')+(r.disc?'<br><b>Discussed:</b> '+esc(r.disc):'')+(r.next?'<br><b>Follow-up:</b> '+esc(r.next):'')+'</div>').join('')+'</td></tr>';}
+function rdListPaint(){const el=$('#readList');if(!el)return;const L=rdAll();
+  el.innerHTML=L.length?L.map(x=>'<div class="rs-rd"><div class="rd-apa"><b>'+esc(mdy(x.c.date)||keyLabel(x.k))+'</b> &middot; '+esc(x.r.apa)+rdDoi(x.r)+'</div>'+(x.r.disc?'<div><b>Discussed:</b> '+esc(x.r.disc)+'</div>':'')+(x.r.next?'<div><b>Follow-up:</b> '+esc(x.r.next)+'</div>':'')+'</div>').join(''):'<p class="hint">No readings yet this year.</p>';}
+function rdYear(){const y=setupYear(),n=rdAll().filter(x=>yearKeys(y).indexOf(x.k)>=0).length,box=$('#yearOut .p-foot');if(!box)return;
+  box.insertAdjacentHTML('beforebegin','<p class="p-att"><b>Readings discussed in supervision this year:</b> '+n+(n?' (each listed on the RBT record with what was discussed and the follow-up)':'')+'</p>');}
+let rdFor=null;
+function rdPick(cid){rdFor=cid;let d=$('#rdPick');
+  if(!d){document.body.insertAdjacentHTML('beforeend','<dialog id="rdPick" class="rs-rdpick" aria-label="Add a reading"><div class="in"><h3>Add a reading</h3>'+
+    '<p class="hint" style="margin:0 0 6px">The workstation&rsquo;s references, each with a short summary; search by a word of the title, an author or a topic.</p>'+
+    '<input type="search" id="rdQ" placeholder="e.g., functional communication, Hanley, token" autocomplete="off"><div class="rd-list" id="rdList"></div>'+
+    '<details class="rd-own"><summary>A reading not in the list</summary><div class="field"><label for="rdOwnRef">The reference (as it will print)</label><textarea id="rdOwnRef" rows="2" placeholder="Author, A. (Year). Title. Journal, volume(issue), pages."></textarea></div>'+
+    '<div class="field"><label for="rdOwnSum">A short summary</label><textarea id="rdOwnSum" rows="3"></textarea></div><div class="tools"><button type="button" class="tool" id="rdOwnAdd">Add this reading</button></div></details>'+
+    '<div class="tools"><button type="button" class="tool" id="rdClose">Close</button></div></div></dialog>');d=$('#rdPick');
+    $('#rdQ').addEventListener('input',rdDraw);$('#rdClose').addEventListener('click',()=>d.close());
+    $('#rdList').addEventListener('click',e=>{const b=e.target.closest('.rd-it');if(!b)return;const R=RD().find(x=>x.k===b.dataset.k);if(R)rdAdd({k:R.k,apa:R.apa,doi:R.doi||'',sum:R.sum||''});});
+    $('#rdOwnAdd').addEventListener('click',()=>{const ref=$('#rdOwnRef').value.trim();if(!ref){$('#rdOwnRef').focus();return;}rdAdd({k:'',apa:ref,doi:'',sum:$('#rdOwnSum').value.trim()});$('#rdOwnRef').value='';$('#rdOwnSum').value='';});}
+  $('#rdQ').value='';rdDraw();try{d.showModal();}catch(e){d.setAttribute('open','');}setTimeout(()=>{try{$('#rdQ').focus();}catch(e){}},60);}
+function rdDraw(){const q=($('#rdQ').value||'').toLowerCase().split(/\s+/).filter(Boolean),all=RD();
+  let L=all;if(q.length){L=all.map(r=>{const a=r.apa.toLowerCase(),t=a+' '+r.sum.toLowerCase();if(!q.every(w=>t.indexOf(w)>=0))return null;return {r,n:q.filter(w=>a.indexOf(w)>=0).length};}).filter(Boolean).sort((a,b)=>b.n-a.n||b.r.y-a.r.y).map(x=>x.r);}
+  else L=all.slice().sort((a,b)=>b.y-a.y);
+  $('#rdList').innerHTML=(all.length?'':'<div class="rd-it">The references file (nbh-readings.js) did not load: type the reading below.</div>')+L.slice(0,40).map(r=>'<button type="button" class="rd-it" data-k="'+esc(r.k)+'"><b>'+esc(r.apa)+'</b><span>'+esc((r.sum||'').slice(0,200))+((r.sum||'').length>200?'…':'')+'</span></button>').join('')+(L.length>40?'<div class="rd-it" style="color:#667">'+(L.length-40)+' more: add a word to narrow the list.</div>':'')+(!L.length&&all.length?'<div class="rd-it" style="color:#667">Nothing matches. Try another word, or add the reading below.</div>':'');}
+function rdAdd(r){const c=findC(rdFor);if(!c)return;c.readings=c.readings||[];c.readings.push({id:uid(),k:r.k||'',apa:r.apa,doi:r.doi||'',sum:r.sum||'',disc:'',next:''});openC.add(c.id);
+  const d=$('#rdPick');if(d&&d.open)d.close();renderContacts();changed();const t=$('#rd_'+c.readings[c.readings.length-1].id+'_disc');if(t){t.scrollIntoView({block:'center'});t.focus();}}
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.rd===undefined)return;const c=findC(el.dataset.rc);const r=c&&(c.readings||[]).find(x=>x.id===el.dataset.rd);if(!r)return;r[el.dataset.f]=el.value;});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-rdadd]');if(a){rdPick(a.dataset.rdadd);return;}
+  const rm=e.target.closest('[data-rdrm]');if(rm){const c=findC(rm.dataset.rc);if(!c)return;c.readings=(c.readings||[]).filter(x=>x.id!==rm.dataset.rdrm);openC.add(c.id);renderContacts();changed();}});
+window.__rsReadings={all:rdAll,pick:rdPick,add:rdAdd};
 function findC(id){return month(curKey).contacts.find(c=>c.id===id);}
 function onField(el,ev){
   const v=el.type==='checkbox'?el.checked:el.value;
@@ -3264,6 +3307,28 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<style id="rs97-css">
+.rs-read{margin:12px 0 4px;border-top:1px dashed var(--rule-2);padding-top:8px}
+.rs-read h4{font-family:var(--sans);font-size:13px;margin:0 0 6px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.rs-read h4 .hint{font-weight:400}
+.rs-rd{border:1px solid var(--rule-2);border-radius:4px;padding:8px 10px;margin:6px 0;background:#fbfcfc}
+.rs-rd .rd-apa{font-size:13px;line-height:1.4;margin-bottom:6px}
+.rs-rd .rd-apa a{margin-left:6px;font-size:12px}
+.rs-rdpick{border:1px solid var(--rule-2);border-radius:8px;padding:0;width:min(96vw,760px);max-height:90vh}
+.rs-rdpick::backdrop{background:rgba(20,30,40,.45)}
+.rs-rdpick .in{padding:14px 16px;font-family:var(--sans);font-size:14px}
+.rs-rdpick h3{margin:0 0 8px;font-size:16px}
+.rs-rdpick input[type=search]{width:100%;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--rule-2);border-radius:4px;min-height:44px}
+.rs-rdpick .rd-list{max-height:48vh;overflow:auto;margin:8px 0;border:1px solid var(--rule-2);border-radius:4px}
+.rs-rdpick .rd-it{display:block;width:100%;text-align:left;font:inherit;padding:8px 10px;border:0;border-bottom:1px solid var(--rule-2);background:#fff;color:inherit;cursor:pointer}
+.rs-rdpick .rd-it:hover,.rs-rdpick .rd-it:focus{background:#eef4f4}
+.rs-rdpick .rd-it b{display:block;font-weight:600;font-size:13px}
+.rs-rdpick .rd-it span{display:block;font-size:12.5px;color:#445;margin-top:2px}
+.rs-rdpick .rd-own{margin-top:8px}
+.rs-rdpick .rd-own textarea{width:100%;font:inherit;font-size:14px;border:1px solid var(--rule-2);border-radius:4px;padding:6px 8px}
+.rs-rdpick .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+@media print{.rs-read{display:none}}
+</style>
 <style id="rs94-css" data-nbh-screen>
 @media screen{.only-setup p.hint,.only-month p.hint,.only-year p.hint,.only-record p.hint,.only-print p.hint,.only-guide p,p.hint.nbh-wide.nbh-wide.nbh-wide,.hint.nbh-wide.nbh-wide.nbh-wide,.only-guide p.nbh-wide.nbh-wide.nbh-wide{max-width:none!important}}
 .fieldgrid>div{display:flex;flex-direction:column;justify-content:flex-end}
@@ -3271,6 +3336,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-share .hint{margin:0}
 #shNote:empty{display:none}
 </style>
+<script id="rs-readings" src="nbh-readings.js"></script>
 <script id="rs94-share">
 /* v23.94 Share the record: the month's record or the year summary, as it prints, by email through the workstation (the
    school Google account) or as a file to attach; the concerns are never part of it */
@@ -3290,6 +3356,10 @@ function say(t,kind){const el=$('#shNote');if(!el)return;el.textContent=t;el.sty
 function saveFile(kind){const pg=page(kind);if(!pg){say('Nothing to save yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return false;}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pg.html],{type:'text/html'}));a.download=(pg.title.replace(/[\\/:*?"<>|]+/g,' ').trim())+'.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);return true;}
 function recipients(){const L=[];const r=($('#shRbt')||{}).value||'',o=($('#shOther')||{}).value||'';if(r.trim())L.push({to:r.trim(),name:rbt()});if(o.trim())L.push({to:o.trim(),name:''});return L;}
+function b64u(t){const u=new TextEncoder().encode(t);let b='';for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(b);}
+function fileName(pg){return pg.title.replace(/[\\/:*?"<>|]+/g,' ').trim()+'.html';}
+function noteText(pg){return pg.title+'\n\nThe record is attached as a page ('+fileName(pg)+'): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.\n\nSent from the FBA and BIP Workstation, Form RS-1.';}
+function noteHtml(pg){return '<div style="font:15px/1.5 -apple-system,Helvetica,Arial,sans-serif;color:#111"><p><b>'+esc(pg.title)+'<\/b><\/p><p>The record is attached as a page (<i>'+esc(fileName(pg))+'<\/i>): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.<\/p><p style="font-size:12px;color:#555">Sent from the FBA and BIP Workstation, Form RS-1.<\/p><\/div>';}
 function send(kind){const pg=page(kind);if(!pg){say('Nothing to send yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return;}
   const L=recipients();if(!L.length){say('Enter the RBT’s email (kept on Setup) or another reader’s email first.','warn');return;}
   if(window.parent===window){say('On its own this page cannot send email. Open it inside the workstation to send from the school account; the record is saved as a file to attach instead.','warn');saveFile(kind);return;}
@@ -3299,10 +3369,10 @@ function send(kind){const pg=page(kind);if(!pg){say('Nothing to send yet: the '+
     const sent=d.sent!=null?d.sent:(d.ok!=null?(d.ok?L.length:0):L.length),failed=d.failed||[];
     say(sent?('Sent to '+L.slice(0,sent).map(m=>m.to).join(', ')+'.'+(failed.length?' Not sent: '+failed.map(f=>f.to||f).join(', ')+'.':'')):'Not sent: '+(d.why||'the workstation did not send it.'),sent?'':'warn');};
   window.addEventListener('message',on);
-  try{window.parent.postMessage({nbh:'mail',req,messages:L.map(m=>({to:m.to,name:m.name,subject:pg.title,text:pg.text,html:pg.html}))},'*');}catch(e){window.removeEventListener('message',on);say('The workstation did not answer. The record is saved as a file to attach instead.','warn');saveFile(kind);}
+  try{window.parent.postMessage({nbh:'mail',req,messages:L.map(m=>({to:m.to,name:m.name,subject:pg.title,text:noteText(pg),html:noteHtml(pg),attachments:[{name:fileName(pg),type:'text/html',b64:b64u(pg.html)}]}))},'*');}catch(e){window.removeEventListener('message',on);say('The workstation did not answer. The record is saved as a file to attach instead.','warn');saveFile(kind);}
   setTimeout(()=>{window.removeEventListener('message',on);if(($('#shNote')||{}).textContent==='Sending…')say('The workstation did not answer. The record is saved as a file to attach instead.','warn');},20000);}
 $('#shMonth').addEventListener('click',()=>send('month'));$('#shYear').addEventListener('click',()=>send('year'));$('#shFile').addEventListener('click',()=>{if(saveFile('month'))say('The month’s record is saved as a file: attach it to an email, or send it from a device where the workstation is signed in.');});
-window.__rsShare={page,recipients,subject};
+window.__rsShare={page,recipients,subject,noteText,noteHtml,fileName};
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
