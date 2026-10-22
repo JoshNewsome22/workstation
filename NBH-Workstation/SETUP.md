@@ -9905,6 +9905,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.92: The picky-eater protocol (Whelan & Penrod, BAP 2018) joins TD-1's bank with its cautions
+(the BCBA's decision of 10/22: "add the protocol but include those cautions")
+
+- **One protocol added to TD-1** (459 in all): the preferred dish served only after the nonpreferred serving is
+  eaten, one bite growing to a full serving. It had been set aside under the rule that a meal is never earned or held
+  back; it is now in the bank with that departure stated plainly in the note, a first step that requires the parent's
+  written consent, the district's review and a plan agreed with the family, the prescribing doctor and the school
+  nurse (intake and weight watched, a stop rule), and a last step that serves the next snack or meal as usual. The
+  study's hour-long restriction of other food stays out as food deprivation.
+
+Not changed: the forms, the saved files, the printing, GB-1.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` changed). Tested: `qa/td1-bank-test.js`,
+`qa/td88-redesign-test.js`, the bank counts (bankcheck).
+
 ### v23.91: Journal of Applied Behavior Analysis 1978 (the BCBA's four issues) read into the TD-1 and GB-1 banks
 (the BCBA's four Issue zips of 10/22; 61 articles screened by title, 28 read in full)
 
