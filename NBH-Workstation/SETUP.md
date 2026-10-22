@@ -9905,6 +9905,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.90: Behavior Analysis in Practice 2018 (the BCBA's parts 1 and 2) read into the TD-1 and GB-1 banks
+(the BCBA's two zips of 10/22; 120 articles screened by title, 51 read in full)
+
+- **35 treatment protocols in TD-1** (445 in all) and **22 starting objectives in GB-1** (219 in all), with 27 further
+  sources for objectives already in the bank, each written from the article's full text. Of the 51 articles read, 12 gave
+  no protocol or objective (staff-training and assessment studies, and studies of staff or parents rather than a
+  student) and are listed with the reason; the rest gave at least one card.
+- **Volume 12 papers.** Most of the files in the "2018" zips are Volume 12 (2019) articles published online in 2018.
+  They are cited as printed (2019, volume 12); every reference was confirmed by its DOI against the publisher's record
+  and the issue numbers were filled from it.
+- **Set aside.** One protocol (a preferred main dish served after a nonpreferred serving is eaten, for a picky eater)
+  is kept on the set-aside list under the rule that a meal is never earned or held back; its study stays as a further
+  source for the "eats a new food" objective. The BCBA may put it in the bank.
+- **Notes for the team.** As in the earlier volumes, each card's note says what its evidence is, what to adapt for a
+  school student, where a snack was the reinforcer (the team decides, with the family and the nurse where diet is in
+  question), and where a study's criterion is under the standard. One protocol (functional communication training with
+  planned ignoring in the package) is marked as needing district review and consent.
+
+Not changed: the forms themselves (the banks' panels are as in v23.88), the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, the bank counts (bankcheck).
+
 ### v23.89: Forms TD-1 and GB-1's banks audited against the quality standard and the BCBA's rules; open-access additions
 (PART 2 step 4; the BCBA's three source choices and six default rulings of 10/21)
 
