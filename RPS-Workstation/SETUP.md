@@ -9905,6 +9905,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.96: The RBT supervision record keeps its layout in the email and the file
+(found while showing the BCBA the email as the RBT receives it, 10/22)
+
+- **What was wrong.** v23.94's Share the record copied the record's styles from the form, but the form keeps them inside
+  a screen-only block, which the copy skipped; the emailed record showed as plain text without its tables and header.
+- **Now.** The page sent carries every one of the record's screen styles (never the print ones), and the tables, the
+  header and the signature lines carry their styles inline as well, for mail programs that drop a style block. The
+  record arrives as it prints: the header, the service days, the contacts with their feedback, the totals and the
+  compliance checks side by side, the verification lines.
+
+Not changed: what is sent and to whom, the record itself, the saved files.
+To set up: upload the whole folder as usual (RS-1 changed). Tested: `qa/rs96-test.js`, `qa/rs94-share-test.js`.
+
 ### v23.95: The website's password is asked for once, when you choose Sign in, not every few minutes
 (the BCBA's screenshot of 10/22: the sign-in box on the iPad while working)
 
