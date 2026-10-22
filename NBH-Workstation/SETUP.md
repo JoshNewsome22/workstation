@@ -9905,6 +9905,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.91: Journal of Applied Behavior Analysis 1978 (the BCBA's four issues) read into the TD-1 and GB-1 banks
+(the BCBA's four Issue zips of 10/22; 61 articles screened by title, 28 read in full)
+
+- **13 treatment protocols in TD-1** (458 in all) and **10 starting objectives in GB-1** (229 in all), with 12 further
+  sources for objectives already in the bank, each written from the article's full text; 22 articles are cited. Of the
+  28 read, ten gave no protocol (staff- and parent-training studies, an assessment study, an adult class, and the
+  Favell restraint study) and are listed with the reason. The rest of the 61 were methods papers, editorials, a book
+  review, and adult-only or community studies, dropped at the title screen.
+- **Set aside.** Five protocols are kept on the set-aside list for the BCBA under the rules: the time-out ribbon
+  (a time-out procedure, restrictive) with its reinforcement-only phase (weak in the study), and three protocols whose
+  evidence is adults in a 1978 state institution (clothing colors, tracing letters, vocal imitation); one objective and
+  three further sources went with them. The Favell restraint and lemon-juice study was skipped outright.
+- **1978 evidence.** Each card's note says how old and small the evidence is (one child, a hospital classroom, no
+  follow-up), what to adapt for a school student, where a snack was the reinforcer (the team decides, with the family
+  and the nurse where diet is in question), and where a 1978 package carried a reprimand or point loss (district review
+  and consent). Every reference was confirmed by its DOI against the publisher's record; the three one-page abstracts
+  are cited by their page.
+- **Shared with the earlier volumes.** The cards use current, person-first language; the 1978 titles are cited exactly
+  as printed.
+
+Not changed: the forms themselves (the banks' panels are as in v23.88), the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, the bank counts (bankcheck).
+
 ### v23.90: Behavior Analysis in Practice 2018 (the BCBA's parts 1 and 2) read into the TD-1 and GB-1 banks
 (the BCBA's two zips of 10/22; 120 articles screened by title, 51 read in full)
 
