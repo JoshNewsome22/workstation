@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.94: Form RS-1 (the RBT Supervision Log) on the iPad, and the record shared with the RBT or another BCBA
+(the BCBA's two screenshots and request of 10/22)
+
+- **The text runs the width of its column.** The explanatory text under each section (the service days, the contacts,
+  the setup) no longer stops at 80 characters on screen, as the masthead has since v23.88. Paper keeps its measure.
+- **A row of fields keeps its boxes on one line.** Where a label wraps to two lines (Usual time not in RBT services), its
+  box sat lower than its neighbours; the boxes of a row now sit on one line.
+- **Share the record** (Sign and print). This month's record or the year summary goes by email from the school Google
+  account the workstation is signed in to, exactly as the page prints, to the RBT (their email is now kept with the RBT
+  on Setup) and, for one send, to another reader such as a second BCBA. The concerns and corrective action are never
+  part of it. Where email is not set up, or the form is open on its own, **Save the record as a file** gives the same
+  page to attach. A colleague who should work on the file with you still uses the bar's Share for editing.
+
+Not changed: the record itself, the figures, the printing, the saved files (the RBT's email is one new field).
+To set up: upload the whole folder as usual (RS-1 changed). Tested: `qa/rs94-share-test.js` (8), `qa/rs1-test.js`.
+
 ### v23.93: Show me: a bank card's steps, drawn and read aloud (Form TD-1)
 (the BCBA's go of 10/22, after the proof)
 

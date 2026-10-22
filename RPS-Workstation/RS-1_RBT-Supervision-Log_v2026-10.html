@@ -1093,6 +1093,7 @@ td input,td select{max-width:100%}
       <div><label for="sExp">Current expiration date</label><input id="sExp" type="date" data-s="rbt_exp"></div>
       <div><label for="sSupStart">Supervision started (BACB portal)</label><input id="sSupStart" type="date" data-s="sup_start"></div>
       <div><label for="sPath">Recertification path</label><select id="sPath" data-s="path"><option value=""></option><option value="renewal">2026 recertification with competency assessment</option><option value="recert">Two-year cycle with PDUs</option></select></div>
+      <div><label for="sEmail">RBT&rsquo;s email (for the record sent to them)</label><input id="sEmail" type="email" data-s="rbt_email" autocomplete="off" placeholder="e.g., jlee@district.org"></div>
       <div><label for="sEmp">Employer</label><input id="sEmp" data-s="employer" placeholder="e.g., the school district or agency"></div>
       <div><label for="sSite">Site (school or program)</label><input id="sSite" data-s="site" data-m="site" placeholder="e.g., Simulated Elementary"></div>
       <div><label for="sClients">Client code(s), separated by commas</label><input id="sClients" data-s="clients" placeholder="e.g., SIM-0002, SIM-0005" autocomplete="off" spellcheck="false"></div>
@@ -1246,6 +1247,14 @@ td input,td select{max-width:100%}
       </div>
     </div>
     <div class="tools noprint"><button class="tool" type="button" id="printMonth2">Print this month</button><button class="tool" type="button" id="printYear2">Print the year</button></div>
+    <h2 class="nbh-band noprint" id="rs-share" style="margin-top:18px">Share the Record</h2>
+    <p class="hint noprint">The record goes by email from the school Google account the workstation is signed in to, exactly as the page prints: this month&rsquo;s record or the year summary, never the concerns. The RBT&rsquo;s address is the one kept on Setup; another reader (a second BCBA, the clinical director) can be added for this one send. A colleague who should work on this file with you uses the bar&rsquo;s <b>Share for editing</b> instead. Where email is not set up on this device, <b>Save the record as a file</b> gives the same page to attach.</p>
+    <div class="fieldgrid noprint rs-share">
+      <div><label for="shRbt">The RBT&rsquo;s email</label><input id="shRbt" type="email" data-s="rbt_email" autocomplete="off" placeholder="kept with the RBT on Setup"></div>
+      <div><label for="shOther">Another reader&rsquo;s email (this send only)</label><input id="shOther" type="email" autocomplete="off" placeholder="e.g., a second BCBA"></div>
+    </div>
+    <div class="tools noprint"><button class="tool" type="button" id="shMonth">Email this month&rsquo;s record</button><button class="tool" type="button" id="shYear">Email the year summary</button><button class="tool" type="button" id="shFile">Save the record as a file</button></div>
+    <div id="shNote" class="hint noprint" aria-live="polite"></div>
     <h2 class="nbh-band noprint" style="margin-top:14px">The Monthly Record as It Prints</h2>
     <div class="rs-paper" id="monthOut"></div>
     <h2 class="nbh-band noprint" style="margin-top:18px">The Year Summary as It Prints</h2>
@@ -3255,6 +3264,46 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<style id="rs94-css" data-nbh-screen>
+@media screen{.only-setup p.hint,.only-month p.hint,.only-year p.hint,.only-record p.hint,.only-print p.hint,.only-guide p,p.hint.nbh-wide.nbh-wide.nbh-wide,.hint.nbh-wide.nbh-wide.nbh-wide,.only-guide p.nbh-wide.nbh-wide.nbh-wide{max-width:none!important}}
+.fieldgrid>div{display:flex;flex-direction:column;justify-content:flex-end}
+.fieldgrid>div>label{flex:0 0 auto}
+.rs-share .hint{margin:0}
+#shNote:empty{display:none}
+</style>
+<script id="rs94-share">
+/* v23.94 Share the record: the month's record or the year summary, as it prints, by email through the workstation (the
+   school Google account) or as a file to attach; the concerns are never part of it */
+(function(){
+const $=s=>document.querySelector(s);const n={req:0};
+function paperCss(){let out='';try{for(const sh of document.styleSheets){let rules=[];try{rules=sh.cssRules||[];}catch(e){continue;}for(const r of rules){if(r.selectorText&&/^\.rs-paper/.test(r.selectorText)&&!(r.parentRule&&r.parentRule.media))out+=r.cssText+'\n';}}}catch(e){}return out;}
+function which(kind){const el=$(kind==='year'?'#yearOut':'#monthOut');try{renderPrint();}catch(e){}const inner=el?el.innerHTML.trim():'';return inner;}
+function page(kind){const inner=which(kind);if(!inner)return null;const title=subject(kind);
+  const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc(title)+'<\/title><style>body{margin:16px;font-family:-apple-system,Helvetica,Arial,sans-serif;color:#111}.rs-paper{max-width:760px}'+paperCss()+'<\/style><\/head><body><div class="rs-paper">'+inner+'<\/div><p style="font-size:11px;color:#555">Sent from the FBA and BIP Workstation, Form RS-1. The record is as it prints; concerns and corrective action are kept apart and are not part of it.<\/p><\/body><\/html>';
+  const tmp=document.createElement('div');tmp.innerHTML=inner;const text=title+'\n\n'+tmp.textContent.replace(/\s+\n/g,'\n').replace(/[ \t]+/g,' ').trim();
+  return {title,html,text};}
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function rbt(){const e=$('#sName');return e&&e.value.trim()||'the RBT';}
+function subject(kind){const m=($('#monthTitle')||{}).textContent||'';const mon=m.replace(/:.*$/,'').trim();return kind==='year'?'RBT supervision, the year summary: '+rbt():'RBT supervision record, '+(mon||'this month')+': '+rbt();}
+function say(t,kind){const el=$('#shNote');if(!el)return;el.textContent=t;el.style.color=kind==='warn'?'#8E2A2A':'';}
+function saveFile(kind){const pg=page(kind);if(!pg){say('Nothing to save yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return false;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pg.html],{type:'text/html'}));a.download=(pg.title.replace(/[\\/:*?"<>|]+/g,' ').trim())+'.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);return true;}
+function recipients(){const L=[];const r=($('#shRbt')||{}).value||'',o=($('#shOther')||{}).value||'';if(r.trim())L.push({to:r.trim(),name:rbt()});if(o.trim())L.push({to:o.trim(),name:''});return L;}
+function send(kind){const pg=page(kind);if(!pg){say('Nothing to send yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return;}
+  const L=recipients();if(!L.length){say('Enter the RBT’s email (kept on Setup) or another reader’s email first.','warn');return;}
+  if(window.parent===window){say('On its own this page cannot send email. Open it inside the workstation to send from the school account; the record is saved as a file to attach instead.','warn');saveFile(kind);return;}
+  const req='rs'+(++n.req);say('Sending…');
+  const on=ev=>{const d=ev.data||{};if(d.nbh!=='mail-result'||d.req!==req)return;window.removeEventListener('message',on);
+    if(d.unavailable){say((d.declined?'Not sent.':(d.why||'The workstation could not send it.'))+' The record is saved as a file to attach instead.','warn');if(!d.declined)saveFile(kind);return;}
+    const sent=d.sent!=null?d.sent:(d.ok!=null?(d.ok?L.length:0):L.length),failed=d.failed||[];
+    say(sent?('Sent to '+L.slice(0,sent).map(m=>m.to).join(', ')+'.'+(failed.length?' Not sent: '+failed.map(f=>f.to||f).join(', ')+'.':'')):'Not sent: '+(d.why||'the workstation did not send it.'),sent?'':'warn');};
+  window.addEventListener('message',on);
+  try{window.parent.postMessage({nbh:'mail',req,messages:L.map(m=>({to:m.to,name:m.name,subject:pg.title,text:pg.text,html:pg.html}))},'*');}catch(e){window.removeEventListener('message',on);say('The workstation did not answer. The record is saved as a file to attach instead.','warn');saveFile(kind);}
+  setTimeout(()=>{window.removeEventListener('message',on);if(($('#shNote')||{}).textContent==='Sending…')say('The workstation did not answer. The record is saved as a file to attach instead.','warn');},20000);}
+$('#shMonth').addEventListener('click',()=>send('month'));$('#shYear').addEventListener('click',()=>send('year'));$('#shFile').addEventListener('click',()=>{if(saveFile('month'))say('The month’s record is saved as a file: attach it to an email, or send it from a device where the workstation is signed in.');});
+window.__rsShare={page,recipients,subject};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
