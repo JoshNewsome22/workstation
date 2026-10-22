@@ -122,7 +122,7 @@ async function shellCase(br,W,H,bar,chip){
   const frame=await page.evaluate(()=>{const f=[...document.querySelectorAll('iframe')].find(x=>!x.hidden&&x.getBoundingClientRect().height>0);const r=f.getBoundingClientRect();
     return {top:Math.round(r.top),h:Math.round(r.height),bottom:Math.round(r.bottom),vh:innerHeight};});
   ok(tag+': the bar is '+(bar==='fold'?'folded':'open')+', the form fills the rest of the screen',folded===(bar==='fold')&&frame.bottom<=frame.vh+0.5,{folded,frame});
-  await fr.tap('#viewSeg [data-view="obs"]');await sleep(500);
+  await fr.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(500);
   const m0=await reach(fr);
   ok(tag+': as the Observations view opens, every recorder control is in view',!m0.bad.length,{frameTop:frame.top,visible:[m0.top,m0.vh],bad:m0.bad});
   layoutChecks(tag,m0,W>H);
@@ -154,7 +154,7 @@ async function aloneCase(br,W,H){
   const ctx=await br.newContext({viewport:{width:W,height:H},hasTouch:true,isMobile:true});await ctx.addInitScript(()=>{window.print=function(){};});
   const page=await ctx.newPage();watch(page,tag);page.on('dialog',d=>d.accept().catch(()=>{}));
   await page.goto(FORM);await sleep(800);
-  await page.tap('#viewSeg [data-view="obs"]');await sleep(300);await pillScroll(page.mainFrame());await sleep(200);
+  await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(300);await pillScroll(page.mainFrame());await sleep(200);
   const m=await reach(page.mainFrame());
   ok(tag+': scrolled to the recorder, every recorder control is in view',!m.bad.length,{visible:[m.top,m.vh],bad:m.bad});
   layoutChecks(tag,m,W>H);
@@ -173,7 +173,7 @@ async function pillCase(br,W,H,bar,chip){
   if(bar==='fold'){if(await page.isVisible('#barFold'))await page.tap('#barFold');}else if(await page.isVisible('#barEdit'))await page.tap('#barEdit');
   if(chip)await page.evaluate(()=>{const c=document.getElementById('autoChip');if(c)c.textContent='Autosaved 12:59 PM';});
   await sleep(400);
-  await fr.tap('#viewSeg [data-view="obs"]');await sleep(400);await fr.tap('#obrStart');await sleep(600);
+  await fr.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(400);await fr.tap('#obrStart');await sleep(600);
   await fr.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));await sleep(500);
   const shown=await fr.isVisible('#obrPill');
   if(shown)await fr.tap('#obrPill');await sleep(400);
@@ -207,7 +207,7 @@ async function sampleCase(br,W,H){
      at 212, not 260); v21.92: folded, the student line and the case buttons share one row, so the form starts at 173 on a
      touch screen; either way the controls below must be in view */
   ok(tag+': the bar is folded with the Autosaved chip (the form starts at 173 since v21.92; 212, or 260 where the bar wraps, before)',frameTop>=165&&frameTop<=270,{frameTop});
-  await fr.tap('#viewSeg [data-view="obs"]');await sleep(500);
+  await fr.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(500);
   await fr.tap('#obrStart');await sleep(500);
   const y0=await fr.evaluate(()=>scrollY),m0=await reach(fr,MARKS);
   await fr.tap('#obrSample');await sleep(500);
@@ -246,7 +246,7 @@ async function endedCase(br,where,W,H,sample,firstInView){
   if(where==='shell'){({ctx,fr}=await shellOpen(br,W,H,'fold',true,tag));if(!fr){ok(tag+': OB-1 opens in the workstation',false);await ctx.close();return;}}
   else{ctx=await br.newContext({viewport:{width:W,height:H},hasTouch:true,isMobile:true});await ctx.addInitScript(()=>{window.print=function(){};});
     const page=await ctx.newPage();watch(page,tag);page.on('dialog',d=>d.accept().catch(()=>{}));await page.goto(FORM);await sleep(800);fr=page.mainFrame();}
-  await fr.tap('#viewSeg [data-view="obs"]');await sleep(400);
+  await fr.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(400);
   await fr.tap('#obrStart');await sleep(400);if(sample){await fr.tap('#obrSample');await sleep(300);}
   await fr.tap('#obrTapS');await sleep(250);
   const at=()=>fr.evaluate(()=>{const r=document.getElementById('obrSave').getBoundingClientRect();return [Math.round(scrollY),Math.round(r.left),Math.round(r.top)];});
@@ -284,7 +284,7 @@ async function endedCase(br,where,W,H,sample,firstInView){
 async function pillBand(br,W,H,sample){
   const tag=`pill band, shell ${W}x${H}${sample?', a sample running':''}`;
   const {ctx,fr}=await shellOpen(br,W,H,'fold',true,tag);
-  await fr.tap('#viewSeg [data-view="obs"]');await sleep(400);await fr.tap('#obrStart');await sleep(400);
+  await fr.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(400);await fr.tap('#obrStart');await sleep(400);
   if(sample){await fr.tap('#obrSample');await sleep(400);}
   const end=await fr.evaluate(()=>Math.round(document.getElementById('obRec').getBoundingClientRect().bottom+scrollY));
   const bad=[];let n=0,shownAt=null;
@@ -308,7 +308,7 @@ async function steady(br,W,H,where,plan){
   const tag=`steady, ${where} ${W}x${H}${plan?', planned length '+plan+' min':''}`;
   let ctx,fr;
   /* 'desktop': a mouse and no touch, where Pause and Resume show the Space hint */
-  const mouse=where==='desktop',press=sel=>mouse?fr.click(sel):fr.tap(sel);
+  const mouse=where==='desktop',press=sel=>/^#viewSeg/.test(sel)?fr.evaluate(s=>document.querySelector(s).click(),sel):mouse?fr.click(sel):fr.tap(sel);   /* v23.88: a tab through the DOM (hidden in the Sheets menu) */
   if(where==='shell')({ctx,fr}=await shellOpen(br,W,H,'fold',true,tag));
   else{ctx=await br.newContext(mouse?{viewport:{width:W,height:H}}:{viewport:{width:W,height:H},hasTouch:true,isMobile:true});await ctx.addInitScript(()=>{window.print=function(){};});
     const page=await ctx.newPage();watch(page,tag);page.on('dialog',d=>d.accept().catch(()=>{}));await page.goto(FORM);await sleep(800);fr=page.mainFrame();}
@@ -340,7 +340,7 @@ async function liveRun(br){
     const f=F.find(x=>x.id===id).file;return page.frames().find(x=>x.url().includes(f)||x.url().includes(encodeURIComponent(f)));};
   let fr=await open('TB-1');await fr.evaluate(()=>{window.confirm=()=>true;document.querySelector('#simBtn').click();});await sleep(6000);
   fr=await open('OB-1');
-  await fr.tap('#viewSeg [data-view="obs"]');await sleep(600);
+  await fr.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(600);
   const y0=await fr.evaluate(()=>scrollY);const where=[];
   const tap=async id=>{const m=await fr.evaluate(i=>{const e=document.getElementById(i),r=e.getBoundingClientRect(),tb=document.querySelector('.toolbar').getBoundingClientRect();
       return r.top>=tb.bottom-0.5&&r.bottom<=innerHeight+0.5;},id);

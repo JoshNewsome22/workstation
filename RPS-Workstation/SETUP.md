@@ -9905,6 +9905,81 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.88: The sheets of a form on an iPad (a rail sideways, a Sheets menu upright, sheet arrows); Forms TD-1 and GB-1 redesigned
+
+- **Sideways: a rail of sheets.** The view tabs leave the toolbar for a rail down the left side, the form's name above
+  them, every sheet with its mark and the open one highlighted; the rail stays while the form scrolls, so any sheet is
+  one tap away anywhere in the form, and the form has the whole height. The toolbar keeps its buttons on one row. This
+  replaces v23.87's wrap of the tab strip into rows. Inside the workstation the form's frame starts under the
+  workstation's bars, so where the full rail would not fit the height (13 sheets at 1180 x 820) the rail goes compact:
+  the form's name left off (the bar above names it) and 36 px rows, so every sheet stays in sight; a rail that still
+  does not fit scrolls itself, with the open sheet kept in view. Beside the rail the sheet's Fit zoom counts the width
+  left to it (about 110% on an iPad Air sideways, where 136% filled the whole window), so nothing runs past the right
+  edge.
+- **Upright: a Sheets menu.** A form whose tabs do not fit one row (eight or more sheets, or wider than the row) shows
+  one button, "Sheets ▾ <open sheet> n of N", which opens a menu of every sheet with its mark; a form whose tabs fit
+  keeps its row. A phone gets the same menu. The toolbar keeps one row: where a long sheet name would wrap it, the name
+  in the Sheets button and the next arrow's label are shortened in steps, then the label left off. The menu stays open
+  through a click made in code (TD-1's autosave clicks Save data); a tap outside, a sheet, or Escape closes it.
+- **‹ and › sheet arrows** beside the Sheets button (upright) or beside Focus (sideways) open the previous or the next
+  sheet of the same form, one tap; the next arrow names the sheet it goes to; the first and last sheet grey out the
+  arrow with nowhere to go.
+- **The masthead runs the width.** The masthead's paragraph and the Autosave note run the form's width on screen
+  (their 76-character measure made a ragged block beside the full-width sheets); paper keeps its measure. A mouse never
+  sees any of this, and printing puts the tabs back where they were.
+- **TD-1, Select treatment (A).** Each recommendation is a choice with a tick; the core of the plan is ticked first (the
+  model's first recommendation for a question, escape extinction where the model lists it, a component-FA
+  recommendation, protective procedures, and the consequence protocol, which every plan has); the rest are optional.
+  "Add the N ticked components to Build" adds those; "Show the other components the sheets suggest" lists the four
+  question sheets' recommendations with their own ticks. The ticks are saved with the form (sel.picks); a file saved
+  before this opens with the core ticked. Above the recommendations and above the cards: "This plan so far: N
+  components · M staff steps · about P pages for staff", whether a plan staff can run (up to 7 components, 60 steps),
+  and the duplicates.
+- **TD-1, Build components (B).** Every card says who runs it, when and where (Run by / When / Where). Every step has a
+  "set-up" tick: a set-up step is done once by the BCBA or the teacher and is not an integrity item; the library's
+  set-up steps (confirm, identify, assess, select, train the staff, prepare...) are ticked for you and a protocol from
+  the bank follows the same rule. A tick is read from the step's wording; only a tick you change is saved (so a file
+  opens as it was saved, with no unsaved mark). A second card of a component says so.
+- **TD-1, the protocol bank (E).** Adding a protocol whose component is already a card asks: replace that card's steps
+  and settings (its number, who/when/where, Data and Materials kept; Undo offered), add a second card, or cancel. With
+  nothing searched, the list puts the protocols for this plan's function and behavior first and says so.
+- **TD-1, Final plan (C), first page:** a notice of what is not ready (escape extinction's consent, physical guidance,
+  the assent plan, the team's agreement, the criteria, duplicates, a plan too long to run) that prints until it is
+  cleared; a summary statement composed from Setup (the student, the behavior, the function and its source, the
+  reinforcer and establishing operation, the precursor, the setting events); the definitions with the replacement
+  behavior's present level; the baseline; the criterion for the target and for the replacement (or their gaps); the
+  review schedule; the plan at a glance (one row per staff component: what it does, who and when, how many steps; the
+  thinning ladder); the least restrictive review with escape extinction's consent status, physical guidance's status,
+  what is not used, and the crisis procedure kept separate; its first row is still what was considered (the typed
+  punishment review). An empty form has no notice. The "Components in this plan" wall is gone. The steps
+  follow as before, with who/when under each card's title and its set-up steps apart and unnumbered; the step numbers
+  count the every-session steps only, so the integrity checklist (TI-1, ST-1, TV-1) takes only those. The text for
+  the BIP carries the same.
+- **TD-1, Setup:** "Replacement behavior (defined)" and "Present level" are two boxes (a file saved before this keeps
+  its words in the first); "Review" (the schedule for reading the data and reviewing the plan).
+- **GB-1 (D).** An acquisition card has four new boxes: Present level; Across people, settings, materials; Maintenance
+  check; Why this objective, and who agreed. The sentence carries the generalization, the present level and the
+  maintenance check; the criterion's example reads 90%. Under each acquisition objective, the checks against the
+  standard: A1 a behavior one can see and count (a non-behavior is refused), A2 a condition, A3 a criterion with a
+  number, consecutive measurements and a method naming a form, A4 the mastery level against the 90% default (a lower
+  level shows the note with the maintenance evidence; a safety skill is set at 100%), A7 generalization and a
+  maintenance check, A8 the present level. The goal sheet prints the checks not met and the why line, and leaves an
+  empty card out. A reduction objective reads a short behavior name "(as defined on TB-1)" when the name carries its
+  definition, and the baseline as its number with the source printed apart; the context hint asks for the
+  classroom's name.
+
+Not changed: the paper of every other sheet (TD-1's Setup and final plan print as above, on purpose); saved files open
+as before (new boxes empty). PART 2 step 3, screens A to E, approved on 10/21.
+To set up: upload the whole folder as usual (every form carries the shared block; TD-1 and GB-1 changed most). Tested:
+`qa/td88-redesign-test.js` (new), `qa/gb88-card-test.js` (new), `qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, the five
+simulated students' saved files open in both forms; the layout tests that asserted the tab row (`ipad-layout`,
+`v2192-design`, `v2218-screens`, `v2189-layout`, `v2183-n`, `tabs-touch`), three touch tests that tapped a tab, the sweep
+(a sheet opened through the Sheets menu upright; a drawn mark outside its drawing is not a tap), `student-journey` (six tries for a
+signature stroke instead of three: the pad takes a stroke once it is in sight, but the test's own scrolling meets the
+workstation's fold and the form's unfolded toolbar, and its F4 check can still miss the parent's pad; v23.87's run needed two tries), `v2246` (a set-up step is no longer a numbered line), `sprint-a5` (GB-1's
+baseline source apart), `tb1-screen` (the Fit beside the rail) and the packet gate's baseline (TD-1 46 pages) were brought
+in line; `sprint-a6` takes this release as its layout base in a commit of its own.
+
 ### v23.87: Every form reads well on the iPad; TD-1's chaining cards carry the student's task analysis
 
 - **Every sheet in sight.** On an iPad the sheet tabs now wrap onto as many lines as they need instead of one line

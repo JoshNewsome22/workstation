@@ -29,12 +29,13 @@ const TD1='/NBH-Workstation/TD-1_Function-Based-Treatment-Developer_v2026-09.htm
   ok('4c escape extinction as one step: one critical step names its lines, at its first line\u2019s number',one.length===1&&one[0].crit&&/least help first/.test(one[0].d)&&/never force/.test(one[0].d)&&Array.isArray(one[0].ns)&&g.steps.length===S.length-S.filter(s=>/^Escape extinction/.test(s.grp)).length+1&&g.prev===g.steps.length&&/"ee":"one"/.test(g.fld),{n:g.steps.length,one,fld:g.fld});
   ok('4d back to separate steps restores the list',g.back===a.rev&&!g.fld2,{back:g.back,a:a.rev,fld2:g.fld2});
   /* the BCBA adds a library step and unmarks a critical one */
+  /* v23.88: "Select the mand" is a set-up step, printed apart and unnumbered, so the first library step still out of the list is added instead */
   const b=await p.evaluate(()=>{const rows=[...document.querySelectorAll('#finalBody .plan-step')];
-    rows.find(r=>/^Select the mand/.test(r.querySelector('.t').textContent)).querySelector('.td46-in-b').click();
+    const add=rows.find(r=>!r.classList.contains('td46-in')&&r.querySelector('.td46-in-b'));const addT=add.querySelector('.t').textContent.trim();add.querySelector('.td46-in-b').click();
     [...document.querySelectorAll('#finalBody .plan-step')].find(r=>/^Staff do not/.test(r.querySelector('.t').textContent)).querySelector('.td46-crit').click();
-    const pl=__nbhFactsOut().plan;return {steps:pl.steps,rev:pl.stepsRev,fld:document.querySelector('[name="fin.steps"]').value};});
+    const pl=__nbhFactsOut().plan;return {addT,steps:pl.steps,rev:pl.stepsRev,fld:document.querySelector('[name="fin.steps"]').value};});
   const saved=await p.evaluate(()=>new Promise(res=>{const o=URL.createObjectURL;URL.createObjectURL=b=>{b.text().then(t=>{URL.createObjectURL=o;res(t);});return o(b);};document.querySelector('#saveBtn').click();setTimeout(()=>res(''),3000);}));
-  ok('6 Add to the list and Critical change the list and its fingerprint, and are kept in the form’s fields',b.steps.some(s=>/^Select the mand/.test(s.d))&&b.steps.some(s=>/^Staff do not/.test(s.d)&&!s.crit)&&b.rev!==a.rev&&/select the mand/.test(b.fld)&&/fin\.steps/.test(saved),{rev:[a.rev,b.rev],fld:b.fld});
+  ok('6 Add to the list and Critical change the list and its fingerprint, and are kept in the form’s fields',b.steps.some(s=>s.d===b.addT)&&b.steps.some(s=>/^Staff do not/.test(s.d)&&!s.crit)&&b.rev!==a.rev&&b.fld.toLowerCase().includes(b.addT.slice(0,24).toLowerCase())&&/fin\.steps/.test(saved),{rev:[a.rev,b.rev],fld:b.fld,addT:b.addT});
   const p2=await open();await p2.setInputFiles('#fileIn',{name:'td1.json',mimeType:'application/json',buffer:Buffer.from(saved||'{}')});await sleep(800);
   await p2.evaluate(()=>{[...document.querySelectorAll('button')].filter(b=>b.offsetParent&&/^(Open|Replace|OK|Continue)$/.test(b.textContent.trim())).forEach(b=>b.click());});await sleep(900);
   const c=await p2.evaluate(()=>{const b=[...document.querySelectorAll('[data-view]')].find(x=>x.dataset.view==='final');if(b)b.click();const pl=(__nbhFactsOut()||{}).plan||{};return {rev:pl.stepsRev,n:(pl.steps||[]).length};});

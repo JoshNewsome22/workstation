@@ -31,7 +31,7 @@ async function open(br,vp,setup){const page=await br.newPage({viewport:vp||{widt
   await page.evaluate(()=>document.querySelectorAll('.nbh-toast,[class*="toast"]').forEach(e=>e.remove()));
   await page.addScriptTag({content:PROBE});return{page,log};}
 const sim=()=>{document.querySelector('#simBtn').click();};
-const pdfPages=async page=>{await page.click('#viewSeg button[data-view="preview"]');await sleep(200);await page.emulateMedia({media:'print'});await page.evaluate(()=>fitAll());
+const pdfPages=async page=>{await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="preview"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(200);await page.emulateMedia({media:'print'});await page.evaluate(()=>fitAll());
   const buf=await page.pdf({printBackground:true,preferCSSPageSize:true});await page.emulateMedia({media:'screen'});return(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).length;};
 
 async function timeline(page,label){
@@ -94,9 +94,9 @@ async function states(page,label,r){
 (async()=>{const br=await chromium.launch();
   /* ---- the simulator's book: terminal token off ---- */
   {const {page,log}=await open(br,null,sim);
-    await page.click('#viewSeg button[data-view="preview"]');await sleep(300);
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="preview"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(300);
     const before=await page.evaluate(()=>JSON.stringify(S));const pp0=await pdfPages(page);
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(500);
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(500);
     check('the Walkthrough button opens the view',await page.evaluate(()=>document.body.classList.contains('view-walk')&&getComputedStyle(document.querySelector('section.only-walk')).display!=='none'));
     check('the other views are hidden in the Walkthrough view',await page.evaluate(()=>['setup','choices','targets','board','backs','preview','guide'].every(v=>{const s=document.querySelector('section.only-'+v);return !s||getComputedStyle(s).display==='none';})));
     const r=await timeline(page,'simulator');await states(page,'simulator',r);
@@ -118,7 +118,7 @@ async function states(page,label,r){
     check('the buttons are big touch targets (40 px or more)',sizes.every(v=>v>=40),Math.min(...sizes).toFixed(0)+' px smallest');
     /* play, chapters, leaving the view pauses */
     await page.click('#wkSnd');const snd=await page.evaluate(()=>document.getElementById('wkSnd').getAttribute('aria-pressed'));check('Sound toggles off',snd==='false');
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(200);
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(200);
     await page.click('#wkChaps button[data-ch="session"]');await sleep(100);
     const ch=await page.evaluate(()=>({t:TKWALK.time,want:TKWALK.chapters.find(c=>c.id==='session').start,cur:(document.querySelector('#wkChaps button[aria-current="step"]')||{}).dataset}));
     check('a chapter button jumps to its chapter and is shown as current',Math.abs(ch.t-ch.want)<.05&&ch.cur&&ch.cur.ch==='session');
@@ -126,9 +126,9 @@ async function states(page,label,r){
     check('Play plays (the clock runs, the button says Pause)',pl.p&&pl.t>ch.want+.4&&pl.lbl==='Pause',pl.t.toFixed(2)+' s');
     await page.keyboard.press('Space');await sleep(150);const sp=await page.evaluate(()=>TKWALK.playing);await page.keyboard.press('Space');await sleep(300);const sp2=await page.evaluate(()=>TKWALK.playing);
     check('Space pauses and plays',!sp&&sp2);
-    await page.click('#viewSeg button[data-view="setup"]');await sleep(150);const t1=await page.evaluate(()=>({p:TKWALK.playing,t:TKWALK.time}));await sleep(500);const t2=await page.evaluate(()=>TKWALK.time);
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="setup"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(150);const t1=await page.evaluate(()=>({p:TKWALK.playing,t:TKWALK.time}));await sleep(500);const t2=await page.evaluate(()=>TKWALK.time);
     check('leaving the view pauses the walkthrough',!t1.p&&Math.abs(t2-t1.t)<1e-6);
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(300);const back=await page.evaluate(()=>({p:TKWALK.playing,t:TKWALK.time}));
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(300);const back=await page.evaluate(()=>({p:TKWALK.playing,t:TKWALK.time}));
     check('coming back keeps the place, paused',!back.p&&Math.abs(back.t-t1.t)<.05);
     await page.click('#wkCc');const cc=await page.evaluate(()=>[document.getElementById('wkCc').getAttribute('aria-pressed'),getComputedStyle(document.querySelector('#wkStage .wk-cap')).display]);
     check('Captions turn off',cc[0]==='false'&&cc[1]==='none');await page.click('#wkCc');
@@ -136,7 +136,7 @@ async function states(page,label,r){
     const pp1=await pdfPages(page);check('the print page count is unchanged by the walkthrough',pp0===pp1&&pp0>0,pp0+' and '+pp1+' sheets');
     const after2=await page.evaluate(()=>JSON.stringify(S));check('the book (S) is still unchanged after playing and printing',before===after2);
     /* reduced motion: each cue cuts to its end state; the captions keep the real time */
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(200);await page.emulateMedia({reducedMotion:'reduce'});
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(200);await page.emulateMedia({reducedMotion:'reduce'});
     const rm=await page.evaluate(()=>{const c=TKWALK.cues.find(q=>q.id==='ch_pick'),d=TKWALK.cues.find(q=>q.id==='tok_first');
       const a=__wkTf(c.start+c.dur*.3),b=__wkTf(c.start+c.dur*.7),e=__wkTf(c.start+c.dur-.02),f=__wkTf(d.start+d.dur*.4),g=__wkTf(d.start+d.dur-.02);return{red:TKWALK.reduced,same:a===b&&b===e&&f===g};});
     check('reduced motion: no tweening, each cue shows its end state throughout',rm.red&&rm.same);
@@ -149,17 +149,17 @@ async function states(page,label,r){
     await page.evaluate(([m,n])=>{S.meta.term=m;S.meta.n=n;ensure();recaps(true);renderAll();},[mode,n]);await sleep(300);
     await page.evaluate(()=>document.querySelectorAll('.nbh-toast,[class*="toast"]').forEach(e=>e.remove()));
     const before=await page.evaluate(()=>JSON.stringify(S));
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(500);
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(500);
     const label='terminal '+mode+', '+n+' tokens';const r=await timeline(page,label);await states(page,label,r);
     if(mode==='pic'){await page.evaluate(()=>{const b=document.getElementById('wkBig');if(b)b.style.visibility='hidden';});const c=r.cues.find(q=>q.id==='tok_last_term');
       await page.evaluate(t=>TKWALK.renderAt(t),c.start+c.dur/2);await sleep(40);await (await page.$('#wkFrame')).screenshot({path:SHOTS+'/cue-tok_last_term.png'});}
     check(label+': the book (S) is unchanged',before===await page.evaluate(()=>JSON.stringify(S)));
     check(label+': no console errors',errorsOf(log).length===0,JSON.stringify(errorsOf(log)).slice(0,300));await page.close();}
   /* ---- a blank book (sample pictures, noted) and a Rules-row book (noted, drawn First-Then) ---- */
-  {const {page,log}=await open(br);await page.click('#viewSeg button[data-view="walk"]');await sleep(500);
+  {const {page,log}=await open(br);await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(500);
     const b=await page.evaluate(()=>({note:document.getElementById('wkNote').textContent,n:document.querySelectorAll('#wkStage .wk-page[data-pg="ch"] .wk-in').length,S:JSON.stringify(S),blank:S.ch.every(o=>!o.k&&!o.ph)}));
     check('blank book: sample pictures on the six boxes, and the note says so',b.n===6&&/sample pictures/.test(b.note)&&b.blank,b.note.slice(0,80));
-    await page.evaluate(()=>{S.meta.layout='rules';S.meta.pagesize='11';renderAll();});await page.click('#viewSeg button[data-view="setup"]');await page.click('#viewSeg button[data-view="walk"]');await sleep(400);
+    await page.evaluate(()=>{S.meta.layout='rules';S.meta.pagesize='11';renderAll();});await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="setup"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(400);
     const rr=await page.evaluate(()=>({note:document.getElementById('wkNote').textContent,ft:!!document.querySelector('#wkStage .wk-page[data-pg="bd"] .bx.ft.green'),lay:S.meta.layout,ps:S.meta.pagesize}));
     check('Rules-row book: drawn First-Then for the walkthrough, with a note, the book keeps its Rules row and page size',rr.ft&&/Rules row/.test(rr.note)&&rr.lay==='rules'&&rr.ps==='11');
     check('blank and Rules-row books: no console errors',errorsOf(log).length===0,JSON.stringify(errorsOf(log)).slice(0,300));await page.close();}
@@ -173,7 +173,7 @@ async function states(page,label,r){
       await page.addInitScript(L=>{window.WALK_AUDIO={voice:'test',speed:1,lines:L};},lines);}
     await page.goto(URL);await sleep(500);await page.evaluate(()=>{nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);
     await page.evaluate(()=>document.querySelectorAll('.nbh-toast,[class*="toast"]').forEach(e=>e.remove()));
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(400);
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(400);
     const lens=await page.evaluate(()=>{const L=WALK_AUDIO.lines;return TKWALK.cues.every(c=>Math.abs(c.narr-L[c.id].d)<1e-9&&c.text===L[c.id].t);});
     check('narration'+(built?'':' (test tones)')+': each cue takes its length and its caption from WALK_AUDIO',lens);
     if(built){const um=await page.evaluate(()=>TKWALK.unmeasured);check('narration: every recorded line has its measured phrase timings (captions and actions follow the voice; a re-voiced line needs measuring again)',um.length===0,um.join(',')||'all lines');
@@ -198,7 +198,7 @@ async function states(page,label,r){
         else Object.defineProperty(navigator,'wakeLock',{value:{request(){window.__wl++;return Promise.resolve({release:async()=>{},addEventListener(){}});}}});}catch(e){}});
     await page.goto(URL);await sleep(500);await page.evaluate(()=>{window.confirm=()=>true;nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);
     await page.evaluate(()=>document.querySelectorAll('.nbh-toast,[class*="toast"]').forEach(e=>e.remove()));
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(400);await page.addScriptTag({content:PROBE});
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(400);await page.addScriptTag({content:PROBE});
     /* the content */
     const c1=await page.evaluate(()=>{const ex=TKWALK.cues.find(c=>c.id==='exchange');TKWALK.renderAt(ex.start+ex.dur*.6);
       return{lbl:(document.querySelector('#wkStage .wk-ilbl')||{}).textContent||'',h3:document.querySelectorAll('#wkTx h3').length,h4:document.querySelectorAll('#wkTx h4').length,
@@ -221,7 +221,7 @@ async function states(page,label,r){
     check('praise names a target that is not an -ing word ("Great job: raise hand!"), and rebuilding follows renderAll while the view is open',pr.b.length&&pr.b.every(x=>/raise hand/i.test(x)),pr.b[0]);
     const pr2=await page.evaluate(()=>{S.tg[2].l='Writing';renderAll();return{b:[...document.querySelectorAll('#wkStage .wk-bub')].map(e=>e.textContent)[0],chip:(document.querySelector('#wkStage .wk-c1')||{}).textContent};});
     check('the demo target is an ongoing (-ing) behavior when the book has one',/writing/i.test(pr2.b)&&/writing/i.test(pr2.chip),pr2.b);
-    await page.evaluate(()=>{nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);await page.click('#viewSeg button[data-view="setup"]');await page.click('#viewSeg button[data-view="walk"]');await sleep(300);
+    await page.evaluate(()=>{nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="setup"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(300);
     /* the seek bar: keys skip five seconds, End while playing ends (does not start again), it follows playback */
     const k1=await page.evaluate(async()=>{TKWALK.seek(30);const s=document.getElementById('wkSeek');s.focus();s.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true,cancelable:true}));const a=TKWALK.time;
       s.dispatchEvent(new KeyboardEvent('keydown',{key:'PageUp',bubbles:true,cancelable:true}));const b=TKWALK.time;return{a,b};});
@@ -230,7 +230,7 @@ async function states(page,label,r){
     const f1=await page.evaluate(()=>getComputedStyle(document.querySelector('#wkSeek .wk-sthumb')).left);await sleep(1500);const f2=await page.evaluate(()=>getComputedStyle(document.querySelector('#wkSeek .wk-sthumb')).left);
     check('the seek bar follows playback while it has focus',f1!==f2,f1+' -> '+f2);
     /* the Walkthrough button again, with the book unchanged, does not stop playback */
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(200);check('tapping Walkthrough again while playing keeps playing',await page.evaluate(()=>TKWALK.playing));
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(200);check('tapping Walkthrough again while playing keeps playing',await page.evaluate(()=>TKWALK.playing));
     /* the system takes the sound: the player pauses and says so */
     const it=await page.evaluate(async()=>{const c=window.__ctxs[window.__ctxs.length-1];await c.suspend();await new Promise(r=>setTimeout(r,1500));return{p:TKWALK.playing,lbl:document.getElementById('wkPlay').getAttribute('aria-label'),m:(document.querySelector('#wkFrame .wk-msg')||{}).textContent||''};});
     check('an interrupted audio context pauses the player and says so',!it.p&&it.lbl==='Play'&&/interrupted/.test(it.m),JSON.stringify(it));
@@ -250,7 +250,7 @@ async function states(page,label,r){
   if(fs.existsSync(__dirname+'/../tools/forms/TK-1/walk-audio.js')){const page=await br.newPage({viewport:{width:1180,height:820}});const log=[];wire(page,log);
     await page.goto(URL);await sleep(500);await page.evaluate(()=>{nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);
     await page.evaluate(()=>document.querySelectorAll('.nbh-toast,[class*="toast"]').forEach(e=>e.remove()));
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(400);
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(400);
     const v=await page.evaluate(async()=>{const AC=window.OfflineAudioContext||window.webkitOfflineAudioContext;const bad=[];let pieces=0;
       for(const c of TKWALK.cues){const L=WALK_AUDIO.lines[c.id];if(!L||!L.a)continue;
         const ab=Uint8Array.from(atob(L.a.slice(L.a.indexOf(',')+1)),ch=>ch.charCodeAt(0)).buffer;const buf=await new AC(1,24000,24000).decodeAudioData(ab);const x=buf.getChannelData(0),sr=buf.sampleRate,hop=Math.round(sr*.01);
@@ -295,7 +295,7 @@ async function states(page,label,r){
     await ctx.close();}
   /* ---- no sideways scroll on the iPad (both ways) and a phone ---- */
   for(const vp of [{width:820,height:1180},{width:1180,height:820},{width:390,height:844}]){const {page,log}=await open(br,vp,sim);
-    await page.click('#viewSeg button[data-view="walk"]');await sleep(500);
+    await page.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="walk"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(500);
     const o=await page.evaluate(()=>{const p=document.getElementById('wkPlayer').getBoundingClientRect(),f=document.getElementById('wkFrame').getBoundingClientRect();
       const kids=[...document.querySelectorAll('#wkPlayer .wk-bar>*,#wkPlayer .wk-chaps>*')].map(e=>e.getBoundingClientRect());
       return{sw:document.documentElement.scrollWidth,iw:innerWidth,pr:p.right,fw:f.width,fh:f.height,kids:kids.every(r=>r.right<=p.right+1&&r.left>=p.left-1)};});

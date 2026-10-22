@@ -24,7 +24,7 @@ const fits=()=>{const c=document.createElement('canvas').getContext('2d'),out=[]
   await f.evaluate(fill);await sleep(800);
   const a=await f.evaluate(fits);const z=await f.evaluate(()=>(document.getElementById('nbhFitBtn')||{}).textContent);
   const cut=a.filter(x=>x.w>x.room);
-  ok('1 on an iPad Pro at Fit 150% every answer in the first three candidates fits its box (urgency, Yes and No, the decision, who reported it, the rate)',/150%/.test(z)&&a.length===21&&!cut.length,{z,cut});
+  ok('1 on an iPad Pro at Fit 150% (132% beside the sheets rail, v23.88) every answer in the first three candidates fits its box (urgency, Yes and No, the decision, who reported it, the rate)',/1(3\d|4\d|50)%/.test(z)&&a.length===21&&!cut.length,{z,cut});
   const g=await f.evaluate(()=>{const tr=document.querySelector('#candBody tr'),td=[...tr.children],r=e=>e.getBoundingClientRect(),beh=tr.querySelector('textarea');
     const lh=parseFloat(getComputedStyle(beh).lineHeight)||20;
     const top=i=>Math.round(r(td[i]).top);

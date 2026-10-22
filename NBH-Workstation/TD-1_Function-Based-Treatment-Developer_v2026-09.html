@@ -1020,11 +1020,12 @@ td input,td select{max-width:100%}
     <div hidden><textarea name="m.fnsrc" readonly tabindex="-1" aria-label="Where the function came from"></textarea><textarea name="m.ratesrc" readonly tabindex="-1" aria-label="Where the baseline rate came from"></textarea></div>
     <div class="drow"><div class="dlab">Baseline level (from EA-1 / ABC-1)<span class="hint" id="tdRateSrc" style="display:block;font-weight:400"></span></div><div class="dval" style="display:flex;gap:14px;padding:3px 8px;font-size:12.5px;flex-wrap:wrap"><label>Rate per min <input name="m.rate" class="inline" style="width:60px" data-calc="1"></label><label>Mean IRT (s) <span id="irtOut" style="font-weight:600">—</span></label><label>Session length (min) <input name="m.sessmin" class="inline" style="width:50px" placeholder="10"></label><label>% intervals (if used) <input name="m.pct" class="inline" style="width:50px"></label></div></div>
     <div class="drow"><div class="dlab">Precursor (TB-1)</div><div class="dval"><textarea name="m.prec" class="nbh-line" rows="1"></textarea></div></div>
-    <div class="drow"><div class="dlab">Replacement behavior already in repertoire?</div><div class="dval" style="padding:4px 8px"><select name="m.rep" class="inline"><option value=""></option><option value="yes">Yes: a recognizable request exists but does not occur under the EO</option><option value="partial">Partly: vocal or gestural approximations</option><option value="no">No recognizable request for this reinforcer</option></select> <label style="margin-left:14px">Replacement behavior <input name="m.repdesc" class="inline" style="width:260px" placeholder="e.g., hand an adult the break card"></label></div></div>
+    <div class="drow"><div class="dlab">Replacement behavior already in repertoire?</div><div class="dval" style="padding:4px 8px"><select name="m.rep" class="inline"><option value=""></option><option value="yes">Yes: a recognizable request exists but does not occur under the EO</option><option value="partial">Partly: vocal or gestural approximations</option><option value="no">No recognizable request for this reinforcer</option></select> <label style="margin-left:14px">Replacement behavior (defined) <input name="m.repdesc" class="inline" style="width:260px" placeholder="e.g., hand an adult the break card within 5 s of a demand"></label> <label style="margin-left:14px">Present level <input name="m.replevel" class="inline" style="width:260px" placeholder="e.g., says break when prompted; not yet on their own"></label></div></div>
     <div class="drow"><div class="dlab">Preferred stimuli (PA-1 / RA-1)</div><div class="dval"><textarea name="m.pref" placeholder="Top items and their reinforcer-assessment result; matched-stimulation candidates for automatic functions" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Curriculum and instruction review</div><div class="dval"><textarea name="m.curr" placeholder="Task difficulty relative to current skills; prompting method; trial rate; session length; task preference and functionality; positive reinforcement density during instruction (Dunlap & Kern, 1996)"></textarea></div></div>
     <div class="drow"><div class="dlab">Setting constraints</div><div class="dval"><textarea name="m.constraints" placeholder="Staff ratio; who can implement; whether breaks away from the group are feasible; tolerance for any problem behavior; whether the reinforcer can be withheld; classroom disruption limits"></textarea></div></div>
     <div class="drow"><div class="dlab">Severity and safety</div><div class="dval"><textarea name="m.safety" placeholder="TB-1 urgency level; injury history; size and physical management; medical clearance" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Review</div><div class="dval"><textarea name="m.review" placeholder="e.g., data read weekly by the BCBA; plan reviewed after 10 school days at or above criterion, or by [date]" class="nbh-line" rows="1"></textarea></div></div>
   </div>
   <!-- v21.83 (M): every reduction target in the case, each with its function and the parts of this plan that address it
        (td-v2183). Filled from the case while empty; editable; saved in tg.rows; printed here and on the final plan. -->
@@ -1079,8 +1080,11 @@ td input,td select{max-width:100%}
   <div class="bar nbh-band">Select the Treatment</div>
   <p class="method" style="margin:0 0 8px">Choose the function on the setup sheet; the matching model appears here. Answer each question in order. Recommendations update as you answer and can be sent to the build sheet as component cards.</p>
   <div id="modelWrap"></div>
+  <div id="selMeter" class="noprint"></div>
   <div id="selRec"></div>
-  <div class="ident" style="margin-top:12px"><div class="f"><label for="selChosen">Components chosen (codes)</label><input id="selChosen" name="sel.chosen" placeholder="e.g., FCT, EXT, CHOICE"></div><div class="f"><label for="selWhy">Rationale</label><input id="selWhy" name="sel.why"></div><div class="f"><label>&nbsp;</label><button class="tool noprint" id="sendBuild" style="margin:0">Send recommended components to build sheet</button></div></div>
+  <div class="noprint" style="margin:8px 0"><button type="button" class="tool" id="selOthersBtn" style="margin:0">Show the other components the sheets suggest</button></div>
+  <div id="selOthers" hidden></div>
+  <div class="ident" style="margin-top:12px"><div class="f"><label for="selChosen">Components chosen (codes)</label><input id="selChosen" name="sel.chosen" placeholder="e.g., FCT, EXT, CHOICE"></div><div class="f"><label for="selWhy">Rationale</label><input id="selWhy" name="sel.why"></div><div class="f"><label>&nbsp;</label><button class="tool noprint" id="sendBuild" style="margin:0">Add the ticked components to Build</button></div></div>
   <div class="cite">Escape questions and options after Geiger, Carr, and LeBlanc (2010, Figure). Attention/tangible and automatic frameworks are practice rules assembled from Tiger et al. (2008), Hagopian et al. (1998), Vollmer et al. (1993), Athens and Vollmer (2010), Hagopian et al. (2015), and Piazza et al. (2000); see the guide for the evidence behind each branch.</div>
 </div>
 
@@ -1094,6 +1098,7 @@ td input,td select{max-width:100%}
   <p class="method" style="margin:0 0 8px">One card per component. Add from the menu or send them from the selection sheet. Each card carries the procedure's implementation steps (editable), its parameters, and its source. Parameters seeded from baseline are marked; check them against the student's data.</p>
   <div class="psctl noprint"><label>Add component <select id="addComp"><option value=""></option></select></label><button class="tool" id="addCompBtn" style="margin:0">+ Add</button></div>
   <div class="td-bank-host noprint" id="tdBankHost"></div>
+  <div id="buildMeter" class="noprint"></div>
   <div id="compWrap"></div>
   <div class="cite">Step lists paraphrase the procedures described in the sources named on each card; edit them to the student's plan. Reinforcement-parameter guidance after Horner and Day (1991) and Athens and Vollmer (2010); thinning after Hanley et al. (2001), Fisher et al. (2000), Lalli et al. (1995), and Hagopian et al. (2011).</div>
 </div>
@@ -2136,12 +2141,47 @@ function renderLOD(){const o=$('#lodOut');if(!o)return;const play=num('auto.play
  o.innerHTML=`<b>Level of differentiation</b><span class="tag ${few?'na':st==='Subtype 1'?'ok':'mid'}">${few?'Not classified (fewer than three series)':st}: LOD ${lod.toFixed(1)}%</span><ul class="rules" style="margin-top:6px">${lines.map(x=>`<li>${x}</li>`).join('')}</ul>`;
  const q=document.querySelector('[name="q.automatic.0"]');if(q){if(!few){q.value=st;renderRec();}else if(q.value){q.value='';renderRec();}}}
 document.addEventListener('input',e=>{if(e.target.dataset.lod)renderLOD();});
+/* v23.88 (PART 2 step 3, screens A and B) the recommendations as choices, the core ticked first; the ticks kept in sel.picks;
+   the plan's size in sight; a step marked set-up is the BCBA's or the teacher's, done once, not an integrity item */
+const TD88_SETUP=/^(confirm|identify|assess|select|choose|define|decide|train (the )?(staff|adults|teacher)|prepare|collect (the )?baseline|run (a|the) (preference|competing)|arrange|obtain|write|plan|schedule the|set up|list|gather|establish)\b/i;
+const tdPicksEl=()=>{let e=document.querySelector('[name="sel.picks"]');if(!e){const at=$('#selRec');if(!at)return null;e=document.createElement('input');e.type='hidden';e.name='sel.picks';at.parentNode.insertBefore(e,at);}return e;};
+function tdPicks(){const e=tdPicksEl();try{const o=JSON.parse((e&&e.value)||'{}');return o&&typeof o==='object'?o:{};}catch(x){return {};}}
+function tdPick(key,on){const e=tdPicksEl();if(!e)return;const o=tdPicks();o[key]=on?1:0;e.value=JSON.stringify(o);e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));}
+/* the core: the model's first recommendation, escape extinction where the model lists it, a component-FA recommendation,
+   protective procedures, and the consequence protocol */
+function tdCore(recs){const core=new Set();recs.forEach(([c],i)=>{if(i===0||c==='EXT'||c==='FCT_CFA'||c==='SAFE'||c==='R_PB')core.add(c);});return core;}
+function tdPicked(prefix,recs){const picks=tdPicks(),core=tdCore(recs);return recs.map(r=>r[0]).filter(c=>{const k=prefix+':'+c;return k in picks?!!picks[k]:core.has(c);});}
+function tdRecRows(recs,prefix,extra){const picks=tdPicks(),core=tdCore(recs);
+  return recs.map(([c,whys],i)=>{const key=prefix+':'+c,on=key in picks?!!picks[key]:core.has(c),L=LIB[c];
+    return `<div class="rec td-rec${on?' on':''}"><label class="td-pk noprint"><input type="checkbox" class="td-pick" data-key="${esc(key)}" aria-label="${esc((L?L.name:c)+': in the plan')}"${on?' checked':''}><span>${on?'In the plan':'Not in the plan'}</span></label><div class="rt"><div class="rh"><span class="tag ${i===0?'ok':'mid'}">${c}</span><b>${esc(L?L.name:c)}</b><span class="td-chip ${core.has(c)?'core':'opt'}">${core.has(c)?'core':'optional'}</span>${tdIsAssess(c)?'<span class="td-chip set">BCBA / teacher set-up</span>':''}</div>${whys.map(w=>`<p>${esc(w)}</p>`).join('')}${extra?extra(c):''}${L?`<p style="color:var(--ink-soft)">Source: ${esc(L.src)}</p>`:''}</div></div>`;}).join('');}
+function tdMeter(){const cs=comps().filter(c=>!tdIsAssess(c));const n=cs.length,steps=cs.reduce((a,c)=>a+c.steps.length,0);
+  let extra=0;try{extra=finalExtras().reduce((a,x)=>a+x[1].length,0);}catch(e){}
+  const pages=n?1+Math.ceil((steps+extra)/18):0;const m={};comps().forEach(c=>{m[c.code]=(m[c.code]||0)+1;});const dup=Object.keys(m).filter(k=>m[k]>1).map(k=>k+' ×'+m[k]);
+  const ok=n<=7&&steps<=60;
+  return {n,steps,pages,dup,ok,html:`<div class="td-meter"><span>This plan so far: <b>${n}</b> component${n===1?'':'s'} · <b>${steps}</b> staff step${steps===1?'':'s'}${n?` · about <b>${pages}</b> page${pages===1?'':'s'} for staff`:''}</span><span class="${ok?'ok':'warn'}">${ok?'A plan staff can run (up to 7 components, 60 steps)':'More than staff can run (up to 7 components, 60 steps): untick optional components, or remove cards'}</span><span class="dup">Duplicates: ${dup.length?esc(dup.join(', ')):'none'}</span></div>`};}
+function tdMeters(){const m=tdMeter();['#selMeter','#buildMeter'].forEach(x=>{const e=$(x);if(e)e.innerHTML=m.html;});tdSendLabel();}
+function tdSendLabel(){const b=$('#sendBuild');if(!b)return;const n=tdPicked('sel',window._recs||[]).length;b.textContent='Add the '+n+' ticked component'+(n===1?'':'s')+' to Build';}
+let tdMeterT=null;function tdMeterSoon(){clearTimeout(tdMeterT);tdMeterT=setTimeout(tdMeters,250);}
+document.addEventListener('input',tdMeterSoon);document.addEventListener('change',tdMeterSoon);
+document.addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('td-pick'))return;tdPick(t.dataset.key,t.checked);
+  const row=t.closest('.td-rec');if(row)row.classList.toggle('on',t.checked);const sp=t.nextElementSibling;if(sp)sp.textContent=t.checked?'In the plan':'Not in the plan';tdSendLabel();});
+/* the other sheets' suggestions, in one list with their own ticks */
+function tdOthers(){const box=$('#selOthers');if(!box)return;const Q=window._qrecs||{};const names={rf:'Reinforcers and schedules: reinforcer selection',pa:'Reinforcers and schedules: preference assessment',sch:'Reinforcers and schedules: schedule',pr:'Prompting and errors: prompting',ec:'Prompting and errors: error correction',sbt:'Skills and tolerance: skill-based treatment',skb:'Skills and tolerance: skills',ant:'Antecedents'};
+  let h='',n=0;Object.keys(Q).forEach(pf=>{const recs=(Q[pf]||[]).filter(r=>LIB[r[0]]);if(!recs.length)return;n+=recs.length;h+=`<h3 class="sub">${esc(names[pf]||pf)}</h3>`+tdRecRows(recs,pf);});
+  box.innerHTML=n?h+`<div class="noprint" style="margin:8px 0"><button type="button" class="tool" id="selOthersAdd" style="margin:0">Add the ticked ones to Build</button></div>`:'<p class="method">The four question sheets have no recommendations yet: answer their questions first.</p>';box.hidden=false;}
+document.addEventListener('click',e=>{if(e.target.id==='selOthersBtn'){const box=$('#selOthers');if(box&&!box.hidden){box.hidden=true;e.target.textContent='Show the other components the sheets suggest';}else{tdOthers();e.target.textContent='Hide the other components';}}
+  if(e.target.id==='selOthersAdd'){sendRecs(Object.keys(window._qrecs||{}),null);}});
+window.__tdSetupTicks=c=>{let ov={};try{ov=JSON.parse((c.querySelector('input.td-suov')||{}).value||'{}')||{};}catch(x){ov={};}c.querySelectorAll('ol.steps li').forEach((li,k)=>{const t=li.querySelector('textarea'),cb=li.querySelector('input.td-su');if(t&&cb)cb.checked=(k in ov)?!!ov[k]:TD88_SETUP.test(String(t.value||'').trim());});};
+/* a set-up tick is derived from the step's wording (the library's and the bank's set-up steps are ticked for you); only a tick the BCBA changes is saved (cp[i].suov), so a saved file opens as it was saved */
+document.addEventListener('change',e=>{const cb=e.target;if(!cb||!cb.classList||!cb.classList.contains('td-su')||cb.type!=='checkbox')return;const card=cb.closest('.card'),h=card&&card.querySelector('input.td-suov');if(!h)return;let ov={};try{ov=JSON.parse(h.value||'{}')||{};}catch(x){ov={};}ov[cb.dataset.k]=cb.checked?1:0;h.value=JSON.stringify(ov);h.dispatchEvent(new Event('input',{bubbles:true}));h.dispatchEvent(new Event('change',{bubbles:true}));});
 function renderRec(){const fn=val('m.fn');if(!MODELS[fn])return;const m=MODELS[fn];const a=m.q.map((q,i)=>val(`q.${fn}.${i}`));const raw=m.route(a);const recs=[];raw.forEach(([c,why])=>{const ex=recs.find(r=>r[0]===c);if(ex)ex[1].push(why);else recs.push([c,[why]]);});
  const answered=a.filter(Boolean).length;
- $('#selRec').innerHTML=recs.length?'<h3 class="sub">Recommended components</h3>'+recs.map(([c,whys],i)=>`<div class="rec"><div class="rh"><span class="tag ${i===0?'ok':'mid'}">${c}</span><b>${esc(LIB[c].name)}</b></div>${whys.map(w=>`<p>${esc(w)}</p>`).join('')}${/* v21.44 (B3) */c==='EXT'&&(fn==='escape'||fn==='multiple')?'<p class="ee-rec"><b>Before it is used:</b> '+(fn==='multiple'?'if escape is one of the functions, ':'')+'the Responding sheet records whether staff may guide the student&rsquo;s hands, the stop rule for a student who resists, the student&rsquo;s assent plan, and the parent&rsquo;s and the team&rsquo;s agreement to escape extinction as its own item.</p>':''}<p style="color:var(--ink-soft)">Source: ${esc(LIB[c].src)}</p></div>`).join('')+(fn==='escape'?'<p class="method">Asterisked options in the model: consider extinction if viable. Do not combine NCE with FCT while the NCE schedule is rich; sequence them (a rule of this form, after Goh et al., 2000, who found that a dense NCR schedule interfered with acquisition of mands).</p>':''):(answered?'<div class="empty">Answer the next question to reach a recommendation.</div>':'');
- window._recs=recs;}
+ if(recs.length&&LIB.R_PB&&!recs.some(r=>r[0]==='R_PB'))recs.push(['R_PB',['Every plan: what staff do on the precursor, on the behavior, after it, and never.']]);
+ const eeNote=c=>c==='EXT'&&(fn==='escape'||fn==='multiple')?'<p class="ee-rec"><b>Before it is used:</b> '+(fn==='multiple'?'if escape is one of the functions, ':'')+'the Responding sheet records whether staff may guide the student&rsquo;s hands, the stop rule for a student who resists, the student&rsquo;s assent plan, and the parent&rsquo;s and the team&rsquo;s agreement to escape extinction as its own item.</p>':'';
+ $('#selRec').innerHTML=recs.length?'<h3 class="sub">Recommended components <span class="td-sub noprint">tick what goes in the plan; the core is ticked for you</span></h3>'+tdRecRows(recs,'sel',eeNote)+(fn==='escape'?'<p class="method">Asterisked options in the model: consider extinction if viable. Do not combine NCE with FCT while the NCE schedule is rich; sequence them (a rule of this form, after Goh et al., 2000, who found that a dense NCR schedule interfered with acquisition of mands).</p>':''):(answered?'<div class="empty">Answer the next question to reach a recommendation.</div>':'');
+ window._recs=recs;tdSendLabel();}
 document.addEventListener('change',e=>{if(e.target.dataset.q)renderRec();});
-$('#sendBuild').addEventListener('click',()=>{const recs=window._recs||[];if(!recs.length){alert('No recommendations yet.');return;}recs.forEach(([c])=>{if(!$$('#compWrap .card').some(k=>k.dataset.code===c))addComp(c);});setv('sel.chosen',recs.map(r=>r[0]).join(', '));setView('build');});
+$('#sendBuild').addEventListener('click',()=>{const recs=window._recs||[];const codes=tdPicked('sel',recs);if(!codes.length){alert(recs.length?'Nothing is ticked yet.':'No recommendations yet.');return;}codes.forEach(c=>{if(!$$('#compWrap .card').some(k=>k.dataset.code===c))addComp(c);});setv('sel.chosen',codes.join(', '));setView('build');});
 
 
 /* ---------- generic question-model renderer ---------- */
@@ -2149,13 +2189,13 @@ function qModel(prefix,el,recEl,title,qs,route,intro){const cur=qs.map((q,i)=>va
  el.innerHTML=(title?`<p class="method" style="margin:0 0 4px"><b>${esc(title)}</b>${intro?' '+intro:''}</p>`:'')+qs.map((q,i)=>`<div class="qrow"><div class="qn">${i+1}</div><div class="qt">${esc(q[0])}<br><select name="${prefix}.${i}" class="inline" data-qm="${prefix}"><option value=""></option>${q.slice(1).map(o=>`<option value="${esc(o)}">${esc(o.charAt(0).toUpperCase()+o.slice(1))}</option>`).join('')}</select></div></div>`).join('');
  cur.forEach((v,i)=>setv(`${prefix}.${i}`,v));qRec(prefix,recEl,qs,route);}
 function qRec(prefix,recEl,qs,route){const a=qs.map((q,i)=>val(`${prefix}.${i}`));const raw=route(a)||[];const recs=[];raw.forEach(([c,why])=>{const ex=recs.find(r=>r[0]===c);if(ex)ex[1].push(why);else recs.push([c,[why]]);});
- recEl.innerHTML=recs.length?recs.map(([c,whys],i)=>`<div class="rec"><div class="rh"><span class="tag ${i===0?'ok':'mid'}">${c}</span><b>${esc(LIB[c]?LIB[c].name:c)}</b></div>${whys.map(w=>`<p>${esc(w)}</p>`).join('')}${LIB[c]?`<p style="color:var(--ink-soft)">Source: ${esc(LIB[c].src)}</p>`:''}</div>`).join(''):(a.some(Boolean)?'<div class="empty">Answer the next question to reach a recommendation.</div>':'');
+ recEl.innerHTML=recs.length?tdRecRows(recs,prefix):(a.some(Boolean)?'<div class="empty">Answer the next question to reach a recommendation.</div>':'');
  window._qrecs=window._qrecs||{};window._qrecs[prefix]=recs;}
 const QMODELS={};
 function registerQ(prefix,elId,recId,title,qs,route,intro){QMODELS[prefix]={elId,recId,title,qs,route,intro};}
 function renderQ(prefix){const m=QMODELS[prefix];qModel(prefix,$('#'+m.elId),$('#'+m.recId),m.title,m.qs,m.route,m.intro);}
 document.addEventListener('change',e=>{const p=e.target.dataset.qm;if(p&&QMODELS[p]){const m=QMODELS[p];qRec(p,$('#'+m.recId),m.qs,m.route);}});
-function sendRecs(prefixes,chosenName){const codes=[];prefixes.forEach(p=>((window._qrecs||{})[p]||[]).forEach(([c])=>{if(LIB[c]&&!codes.includes(c))codes.push(c);}));if(!codes.length){alert('No recommendations yet.');return;}codes.forEach(c=>{if(!$$('#compWrap .card').some(k=>k.dataset.code===c))addComp(c);});if(chosenName)setv(chosenName,codes.join(', '));setView('build');}
+function sendRecs(prefixes,chosenName){const codes=[];prefixes.forEach(p=>{const recs=(window._qrecs||{})[p]||[];tdPicked(p,recs).forEach(c=>{if(LIB[c]&&!codes.includes(c))codes.push(c);});});if(!codes.length){alert('Nothing is ticked yet: tick a recommendation, or answer the questions first.');return;}codes.forEach(c=>{if(!$$('#compWrap .card').some(k=>k.dataset.code===c))addComp(c);});if(chosenName)setv(chosenName,codes.join(', '));setView('build');}
 
 /* ---------- reinforcer selection (DeLeon et al., 2014, Fig. 11.3) ---------- */
 registerQ('rf','rfModel','rfRec','Reinforcer selection flowchart',[
@@ -2788,11 +2828,11 @@ function addComp(code,at,ns){const L=LIB[code];if(!L)return;
  /* v23.04 (review F184) a rate from DD-1's school day is not a session interresponse time (Vollmer et al., 1993): no seed from it */
  const dayRate=val('m.ratesrc')==='DD-1',seed=dayRate?null:irt();const seedTxt=seed?`${fmtS(Math.round(seed*0.8))} (80% of mean IRT ${fmtS(seed)})`:dayRate?'':'enter baseline rate on setup';
  d.innerHTML=`<div class="chd"><span class="tag ok">${code}</span><span class="chdt">${esc(L.name)}</span><button type="button" class="rm noprint" data-rm="1" style="margin-left:auto">Remove</button></div>
- <p class="method" style="margin:0 0 6px">Source: ${esc(L.src)}</p><p class="method td-bank-src" style="margin:0 0 6px" hidden></p><input type="hidden" name="cp[${i}].bank"><input type="hidden" name="cp[${i}].bsrc">${L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:''}
+ <p class="method" style="margin:0 0 6px">Source: ${esc(L.src)}</p><p class="method td-bank-src" style="margin:0 0 6px" hidden></p>${$$('#compWrap .card').some(k=>k.dataset.code===code)?'<p class="method td-dup">A second card of this component: keep the one that fits this student, or say in its steps why both run.</p>':''}<div class="td-who"><label>Run by <input name="cp[${i}].who" placeholder="e.g., classroom staff (names)"></label><label>When <input name="cp[${i}].when" placeholder="e.g., every work period, from the first demand"></label><label>Where <input name="cp[${i}].where" placeholder="e.g., the ESE classroom, then specials"></label></div><input type="hidden" name="cp[${i}].bank"><input type="hidden" name="cp[${i}].bsrc">${L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:''}
  <div class="param">${L.params.map((p,k)=>`<div class="f"><label>${esc(p[0])}</label><input name="cp[${i}].p${k}" value="${esc(p[1]==='SEED_IRT'?seedTxt:'')}" placeholder="${esc(p[1]==='SEED_IRT'?(dayRate?'from a session baseline: the rate on Setup is a school-day rate (Form DD-1)':''):p[1])}"></div>`).join('')}</div>
  ${code==='TA_CHAIN'?`<div class="td-ta"><label for="cpta${i}"><b>Student’s task analysis</b> <span>the steps the student performs, in order, one a line (numbers optional: the plan numbers them). A protocol from the bank brings the study’s list where the article prints it; adjust it to this student. A list in parts: a name ending in a colon above each part.</span></label><textarea id="cpta${i}" name="cp[${i}].ta" rows="2" data-auto="1" placeholder="One step a line, in order"></textarea></div>`:''}
- <b style="font-family:var(--sans);font-size:11px">Implementation steps (edit to the student; each becomes an integrity item)</b>
- <ol class="steps">${SS.map((s,k)=>`<li><textarea name="cp[${i}].s${k}" rows="1" data-auto="1">${esc(s)}</textarea></li>`).join('')}</ol>
+ <b style="font-family:var(--sans);font-size:11px">Implementation steps (edit to the student; each becomes an integrity item unless it is marked set-up: done once by the BCBA or the teacher)</b>
+ <ol class="steps">${SS.map((s,k)=>`<li><textarea name="cp[${i}].s${k}" rows="1" data-auto="1">${esc(s)}</textarea><label class="td-su noprint"><input type="checkbox" class="td-su" data-k="${k}"${TD88_SETUP.test(String(s||'').trim())?' checked':''}> set-up</label></li>`).join('')}</ol><input type="hidden" name="cp[${i}].suov" class="td-suov">
  <div class="defs" style="margin-top:6px"><div class="drow"><div class="dlab">Data collected</div><div class="dval"><input name="cp[${i}].data" placeholder="e.g., target per min; mands per min and % independent; compliance; breaks delivered"></div></div><div class="drow"><div class="dlab">Materials and cues</div><div class="dval"><input name="cp[${i}].mat" placeholder="e.g., work card, break card on switch, timer, schedule signal cards"></div></div></div>`;
  $('#compWrap').appendChild(d);if(code==='DF')tdDfSync();autosize(d);eeSoon();if(code==='EE'||code==='C_CSA')try{window.tdCsaCards();}catch(e){}}   /* v21.44 (B3): any card can carry escape extinction or hands-on help */
 /* v22.78 (review F118): the enrichment card's matched stimuli and the competing-stimulus card's items take PA-1's competing
@@ -2809,7 +2849,9 @@ document.addEventListener('click',e=>{if(e.target.dataset.rm){e.target.closest('
 /* v23.28 (review F183) the assessment and target-selection cards: done by the BCBA once or at review, not staff steps */
 const TD_ASSESS=new Set(['C_CSA','C_ACSA','C_HELMET','C_MEDREF','P_ASSESS','E_ASSESS','VBMAPP','EFL','AFLS','PEAK']);
 const tdIsAssess=c=>TD_ASSESS.has(c&&c.code!==undefined?c.code:c);
-function comps(){return $$('#compWrap .card').map(c=>({code:c.dataset.code,i:+c.dataset.i,name:LIB[c.dataset.code].name,steps:[...c.querySelectorAll('ol.steps textarea')].filter(t=>/\.s\d+$/.test(t.name)).map(t=>val(t.name)).filter(Boolean),bank:val(`cp[${c.dataset.i}].bank`),bsrc:val(`cp[${c.dataset.i}].bsrc`),ta:val(`cp[${c.dataset.i}].ta`)}));}
+/* v23.88 steps: the every-session steps (the integrity items); setup: the steps marked set-up; who, when, where */
+function comps(){return $$('#compWrap .card').map(c=>{const i=+c.dataset.i;const rows=[...c.querySelectorAll('ol.steps li')].map(li=>{const t=li.querySelector('textarea'),cb=li.querySelector('input.td-su');return t&&/\.s\d+$/.test(t.name)?{s:val(t.name),su:!!(cb&&cb.checked)}:null;}).filter(r=>r&&r.s);
+ return {code:c.dataset.code,i,name:LIB[c.dataset.code].name,steps:rows.filter(r=>!r.su).map(r=>r.s),setup:rows.filter(r=>r.su).map(r=>r.s),bank:val(`cp[${i}].bank`),bsrc:val(`cp[${i}].bsrc`),ta:val(`cp[${i}].ta`),who:val(`cp[${i}].who`),when:val(`cp[${i}].when`),where:val(`cp[${i}].where`)};});}
 /* v23.87 the student's task analysis on a chaining card (cp[i].ta): its lines as lists, a line ending in a colon naming the part
    that follows, a leading number or bullet dropped; printed in the final plan as its own numbered list, apart from the staff steps */
 function tdTaLists(t){const out=[];let cur=null;String(t||'').split(/\r?\n/).forEach(l=>{l=l.trim();if(!l)return;const m=/^(?:\d+[.)]|[-*\u2022])\s*(.*)$/.exec(l);
@@ -2823,6 +2865,7 @@ const tdBank=()=>(typeof TD1_BANK!=='undefined'&&TD1_BANK&&Array.isArray(TD1_BAN
 const tdBankOf=id=>{const B=tdBank();return B&&id?B.protocols.find(x=>x.id===id)||null:null;};
 function tdBankSync(){$$('#compWrap .card').forEach(d=>{const n=d.querySelector('.td-bank-src');if(!n)return;const t=val('cp['+d.dataset.i+'].bsrc');n.hidden=!t;n.textContent=t?'Protocol from the protocol bank: '+t:'';d.classList.toggle('td-from-bank',!!t);});}
 window.__tdBankSync=tdBankSync;
+window.__tdComps=comps;window.__tdIsAssess=tdIsAssess;window.__tdBipText=()=>bipText();   /* v23.88 for the tests */
 window.__tdAddComp=(code,ns)=>{if(!LIB[code])return null;addComp(code,null,ns);const d=$('#compWrap').lastElementChild;return d&&d.dataset.code===code?d:null;};
 window.__tdLibOf=code=>{const L=LIB[code];return L?JSON.parse(JSON.stringify({name:L.name,fn:L.fn,src:L.src,steps:L.steps,params:L.params})):null;};
 window.__tdGroups=()=>GROUPS.map(g=>[g[0],g[1].slice()]);
@@ -2956,19 +2999,63 @@ function tdFnHead(){const src=val('m.fnsrc');return src==='EA-1'||(!src&&val('m.
   :src==='FS-1'?'Hypothesized function (Form FS-1, descriptive assessment)':'Function (as chosen on this form)';}
 function tdFnNote(){const src=val('m.fnsrc'),ea=src==='EA-1'||(!src&&val('m.eadesign'));if(ea||!val('m.fn'))return '';
   return comps().some(c=>c.code==='EXT')||val('rb.3')==='yes'?'The function is a hypothesis no analysis has tested, and extinction is planned on it: the first weeks of data are the test of the hypothesis (see the evaluation design).':'';}
+/* v23.88 (PART 2 step 3, screen C) the final plan's first page: the notice, the summary statement, the definitions and
+   criteria, the plan at a glance, the least-restrictive review; the steps follow with who/when and the set-up steps apart */
+const TD88_FN={escape:'escape from the task or demand (social negative reinforcement)',attention:'attention (social positive reinforcement)',tangible:'access to a preferred item or activity (social positive reinforcement)',automatic:'the stimulation the behavior itself produces (automatic reinforcement)',multiple:'more than one reinforcer (multiple control)'};
+function tdStrip(h){const d=document.createElement('div');d.innerHTML=h;return d.textContent.replace(/\s+/g,' ').trim();}
+function tdSummaryHtml(){const who=val('m.client')||'The student',beh=val('m.beh'),fn=val('m.fn'),reinf=val('m.reinf'),prec=val('m.prec'),se=val('ant.se');if(!beh&&!fn)return '';
+  const src=(()=>{const x=val('m.fnsrc'),d=val('m.eadesign');return x==='EA-1'||(!x&&d)?'EA-1'+(d?', '+d.replace(/\s*\(simulated\)$/,''):''):x==='FS-1'?'a hypothesis from Form FS-1, no analysis yet':'as chosen on this form';})();
+  const short=(()=>{const m=/^([^:]{2,60}):\s+\S/.exec(beh||'');return m?m[1].trim():beh;})();   /* a name with its definition reads as its name; the definition is in the table below */
+  return `<div class="td-stmt"><b>${esc(who)}</b>${short?'’s '+esc(short):'’s target behavior'} is maintained by <b>${esc(TD88_FN[fn]||'a function not yet chosen')}</b> (${esc(src)}).${reinf?' Reinforcer and establishing operation: '+esc(reinf)+'.':''}${prec?' Precursor: '+esc(prec)+'.':''}${se?' Setting events: '+esc(se)+'.':''}</div>`;}
+function tdCrit(){const crit=val('mon.crit'),n=val('mon.n')||'3',ind=val('mon.ind');
+  return {target:crit?'At or below '+esc(crit)+' per minute for '+esc(n)+' consecutive sessions':'',rep:ind?'Independent in at least '+esc(ind)+'% of opportunities across '+esc(n)+' consecutive sessions':''};}
+function tdNotReady(cs){const out=[];if(!cs.length&&!val('m.fn'))return out;   /* an empty form has nothing to be ready */try{const S=eeScan(),em=eeMode(S);if(em)eeIssues(em,S).forEach(x=>out.push(x.t));}catch(e){}
+  const c=tdCrit();if(!c.target)out.push('No criterion for the target behavior is set (Integrity & progress sheet: target at or below ... per minute, for ... sessions).');
+  if(!c.rep)out.push('No independence criterion for the replacement behavior is set (Integrity & progress sheet).');
+  const m=tdMeter();if(m.dup.length)out.push('Duplicate components: '+m.dup.join(', ')+'. Keep one card of each, or say in the steps why both run.');
+  if(!m.ok)out.push('More than staff can run: '+m.n+' components and '+m.steps+' staff steps (the form’s limit is 7 and 60). Untick optional components or remove cards.');
+  return out;}
+function tdGlance(cs){const L=cs.filter(c=>!tdIsAssess(c));if(!L.length)return '';
+  const what=c=>{if(c.bsrc)return c.bsrc.replace(/\s*\([^()]*\)\s*$/,'');const Lb=LIB[c.code];for(let k=0;k<Lb.params.length;k++){const v=k===1&&c.code==='EXT'?eeP1Out(c.i):val(`cp[${c.i}].p${k}`);if(v)return Lb.params[k][0]+': '+v;}return c.steps[0]||'—';};
+  const consent=(()=>{try{const S=eeScan(),em=eeMode(S);return em&&!/^(pg|nopg)$/.test(val('ee.consent'));}catch(e){return false;}})();
+  const thin=$$('#thinTbl tbody tr').map(tr=>[...tr.children].map(td=>td.textContent.trim())).filter(r=>r.length===4);
+  return `<h4 class="td-h">The plan at a glance</h4><table class="td-glance"><thead><tr><th>Component</th><th>What it does</th><th>Run by · when</th><th>Steps</th></tr></thead><tbody>${L.map(c=>`<tr><td><b>${esc(c.name)}</b>${c.code==='EXT'&&consent?' <i>(not yet consented)</i>':''}</td><td>${esc(what(c))}</td><td>${esc([c.who,c.when].filter(Boolean).join(' · ')||'—')}</td><td>${c.steps.length}</td></tr>`).join('')}${thin.length?`<tr><td><b>Thinning ladder</b></td><td>${esc(thin.map(r=>r[1]).join(' → '))}; advance when ${esc((thin[0][2]||'').replace(/^Advance when /i,''))}</td><td>The BCBA decides · staff run the level in effect</td><td>—</td></tr>`:''}</tbody></table>`;}
+function tdLeast(cs){const rows=[];const pun=String(val('rb.punish')||'').trim();rows.push(['What was considered',pun||'punishment was not proposed; the function-based options came first.']);const S=(()=>{try{return eeScan();}catch(e){return null;}})();const em=S?eeMode(S):'';const c=val('ee.consent'),pg=val('ee.pg');
+  if(em==='ee'||cs.some(x=>x.code==='EXT')){rows.push([c==='pg'||c==='nopg'?'Agreed':c==='no'?'Declined':'Not yet consented',c==='no'?'Escape extinction: the parent or guardian did not agree. Take it out of the plan.':'Escape extinction: the parent’s and the team’s agreement recorded on the Responding sheet before it starts'+(val('ee.cwho')?' ('+val('ee.cwho')+')':'')+'.']);}
+  if(em){rows.push([pg==='yes'?'Allowed, under the stop rule':pg==='no'?'Not used':'Not decided',pg==='yes'?'Physical guidance through a demand: gentle guidance only, under the stop rule and with the parent’s separate agreement.':pg==='no'?'Physical guidance through a demand: staff do not guide the student’s hands.':'Physical guidance through a demand: staff do not guide until the question is answered (Responding sheet).']);}
+  const names=cs.map(x=>x.name.toLowerCase()).join(' | ')+' | '+val('rb.punish').toLowerCase();const R=[['time-out',/time-?out/],['response cost',/response cost/],['overcorrection',/overcorrection/],['reprimands',/reprimand/],['restraint',/restraint/],['seclusion',/seclusion/],['protective equipment',/protective (equipment|procedure)|helmet/]];
+  const used=R.filter(r=>r[1].test(names)).map(r=>r[0]),not=R.filter(r=>!r[1].test(names)).map(r=>r[0]);
+  if(used.length)rows.push(['In the plan, with review',used.join(', ')+': restrictive or protective; each needs review and consent under district rules, and is kept to what safety needs.']);
+  if(not.length)rows.push(['Not used',not.join(', ')+'.']);
+  rows.push(['Separate','Crisis procedure (Form CR-1) applies only at the safety trigger and is never a consequence.']);
+  return `<h4 class="td-h">Least restrictive review</h4><div class="td-lr">${rows.map(r=>`<div class="row"><div class="st ${/^(Not yet|Not decided|Declined)/.test(r[0])?'no':/^(Agreed|Not used|Separate)/.test(r[0])?'ok':''}">${esc(r[0])}</div><div>${esc(r[1])}</div></div>`).join('')}</div>`;}
+function tdPage1(cs,fnLabel){const nr=tdNotReady(cs),cr=tdCrit();const rate=val('m.rate'),sess=val('m.sessmin'),pct=val('m.pct'),rsrc=val('m.ratesrc');
+  const base=[rate?rate+' per minute'+(sess?' in sessions of '+sess+' minutes':'')+(rsrc?' ('+rsrc+')':''):'',pct?pct+'% of intervals':''].filter(Boolean).join('; ');
+  const row=(k,v,gap)=>`<div class="drow"><div class="dlab">${k}</div><div class="dval" style="padding:5px 8px">${v||'<span class="td-gap">'+(gap||'—')+'</span>'}</div></div>`;
+  return (nr.length?`<div class="td-notice"><b>Not ready to start: ${nr.length} item${nr.length===1?'':'s'}.</b> The plan prints with this notice until they are done.<ul>${nr.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></div>`:'')
+   +`<div class="sumhead"><div><b>Student</b><span>${esc(val('m.client'))}</span></div><div><b>${esc(tdFnHead())}</b><span>${esc(fnLabel)}</span></div><div><b>Prepared by / date</b><span>${esc(val('m.assessor'))} · ${esc(val('m.date'))||new Date().toLocaleDateString()}</span></div></div>${tdFnNote()?`<p class="method" style="margin:4px 0 0">${esc(tdFnNote())}</p>`:''}`
+   +`<h4 class="td-h">Summary statement</h4>`+(tdSummaryHtml()||'<p class="method">Name the target behavior and the function on Setup.</p>')
+   +`<div class="defs">${row('Target behavior (TB-1)',esc(val('m.beh')),'not named on Setup')}${row('Replacement behavior',esc(val('m.repdesc'))+(val('m.replevel')?' <i>Present level:</i> '+esc(val('m.replevel')):''),'see the teaching steps below')}${row('Baseline',esc(base),'no baseline on Setup')}${row('Criterion for the target',cr.target,'not set: Integrity & progress sheet')}${row('Criterion for the replacement',cr.rep,'not set: Integrity & progress sheet')}${row('Review',esc(val('m.review')),'not set on Setup')}</div>`
+   +tdGlance(cs)+tdLeast(cs);}
+function tdWhoHtml(c){return ((c.who||c.when||c.where)?`<div class="plan-who">${esc([c.who&&'Run by: '+c.who,c.when&&'When: '+c.when,c.where&&'Where: '+c.where].filter(Boolean).join(' · '))}</div>`:'')+(c.setup&&c.setup.length?`<div class="plan-setup"><b>Set-up (the BCBA or the teacher, once; not integrity items)</b><ol>${c.setup.map(x=>'<li>'+esc(x)+'</li>').join('')}</ol></div>`:'');}
+function tdPage1Lines(cs){const L=[];const st=tdStrip(tdSummaryHtml());if(st)L.push(['SUMMARY STATEMENT',st]);
+  const nr=tdNotReady(cs);if(nr.length)L.push(['NOT READY TO START ('+nr.length+')'].concat(nr.map(x=>'- '+x)));
+  const g=cs.filter(c=>!tdIsAssess(c));if(g.length)L.push(['THE PLAN AT A GLANCE'].concat(g.map(c=>'- '+c.name+(c.who||c.when?' — '+[c.who,c.when].filter(Boolean).join(' · '):'')+' — '+c.steps.length+' staff step'+(c.steps.length===1?'':'s'))));
+  const lr=tdStrip(tdLeast(cs).replace(/<div class="row">/g,'\n- ').replace(/<\/div><div>/g,': '));if(lr&&(cs.length||val('m.fn')))L.push(['LEAST RESTRICTIVE REVIEW'].concat(lr.replace(/^Least restrictive review\s*/,'').split(/\s*- /).filter(Boolean).map(x=>'- '+x.trim())));
+  return L;}
 function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'}[fn]||'—';
- $('#finalHead').innerHTML=`<div class="sumhead"><div><b>Student</b><span>${esc(val('m.client'))}</span></div><div><b>Target behavior</b><span>${esc(val('m.beh'))}</span></div><div><b>${esc(tdFnHead())}</b><span>${esc(fnLabel)}</span></div></div>${tdFnNote()?`<p class="method" style="margin:4px 0 0">${esc(tdFnNote())}</p>`:''}
- <div class="defs"><div class="drow"><div class="dlab">Reinforcer and establishing operation</div><div class="dval" style="padding:5px 8px">${esc(val('m.reinf'))||'—'}</div></div><div class="drow"><div class="dlab">Replacement behavior</div><div class="dval" style="padding:5px 8px">${esc(val('m.repdesc'))||'See the teaching steps below'}</div></div><div class="drow"><div class="dlab">Components in this plan</div><div class="dval" style="padding:5px 8px">${cs.map(c=>esc(c.name)).join('; ')||'None selected yet.'}</div></div><div class="drow"><div class="dlab">Prepared by / date</div><div class="dval" style="padding:5px 8px">${esc(val('m.assessor'))} · ${esc(val('m.date'))||new Date().toLocaleDateString()}</div></div></div>`;
+ $('#finalHead').innerHTML=tdPage1(cs,fnLabel);
  let n=0;let out='';const used=new Set();
  GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c));if(!inG.length)return;out+=`<div class="plan-group">${esc(title)}</div>`;
   inG.forEach(c=>{used.add(c.code);const L=LIB[c.code];const params=L.params.map((p,k)=>[p[0],c.code==='EXT'&&k===1?eeP1Out(c.i):val(`cp[${c.i}].p${k}`)]).filter(x=>x[1]);const data=val(`cp[${c.i}].data`),mat=val(`cp[${c.i}].mat`);
    out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b><small>${esc(L.src)}</small>${c.bsrc?`<small class="td-bank-from">Protocol from ${esc(c.bsrc)}</small>`:''}</div>`;
    if(params.length||mat)out+=`<div class="plan-set">${params.map(x=>`<b>${esc(x[0])}:</b> ${esc(x[1])}`).join(' &nbsp;·&nbsp; ')}${mat?(params.length?' &nbsp;·&nbsp; ':'')+'<b>Materials:</b> '+esc(mat):''}</div>`;
    if(L.caution)out+=`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`;
+   out+=tdWhoHtml(c);   /* v23.88 who, when, where; the set-up steps apart, unnumbered */
    if(c.ta)out+=tdTaHtml(c.ta);   /* v23.87 the student's task analysis, its own list */
    c.steps.forEach(s=>{n++;out+=stepRow(n,s);});
    if(data)out+=`<div class="plan-set"><b>Record:</b> ${esc(data)}</div>`;out+='</div>';});});
- const rest=cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`;c.steps.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});}
+ const rest=cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`+tdWhoHtml(c);c.steps.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});}
  const extras=finalExtras();
  extras.forEach(([title,lines,tail])=>{out+=`<div class="plan-group">${esc(title)}</div><div class="plan-comp">`;lines.forEach(s=>{n++;out+=stepRow(n,s);});out+=(tail||'')+'</div>';});
  /* v23.28 (review F183) the BCBA's assessments, under their own heading and not numbered as staff steps */
@@ -3101,7 +3188,7 @@ function cardIdx(c,f){const n=(c.comps||[]).length;if(!n)return null;
  if(Array.isArray(c.idx)&&c.idx.length===n&&c.idx.every(x=>Number.isInteger(+x)&&+x>=0)&&new Set(c.idx.map(Number)).size===n)return c.idx.map(Number);
  const seen=[...new Set(Object.keys(f||{}).map(k=>(/^cp\[(\d+)\]\./.exec(k)||[])[1]).filter(x=>x!=null).map(Number))].sort((a,b)=>a-b);
  return seen.length===n?seen:null;}
-function restore(d){reset();const c=d.counts||{};$('#nMon').value=c.mon||24;$('#nHp').value=c.hp||4;renderHpRows();const f=d.fields||{};applyFields(f);fillAddMenu();renderModel();const at=cardIdx(c,f);(c.comps||[]).forEach((code,k)=>addComp(code,at?at[k]:null,Array.isArray(c.ns)&&c.ns.length===c.comps.length?c.ns[k]:null));applyFields(f);renderRec();renderMonRows();applyFields(f);$('#irtOut').textContent=fmtS(irt());autosize();renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();applyFields(f);renderPlan();renderMon();renderHp();rbNote();rbOpened();eeRender();eeOpened();guidePrint();try{tdBankSync();}catch(e){}if(window.__td82Sync)window.__td82Sync();}   /* v21.82 (I): the adoption record's revision rows */
+function restore(d){reset();const c=d.counts||{};$('#nMon').value=c.mon||24;$('#nHp').value=c.hp||4;renderHpRows();const f=d.fields||{};applyFields(f);fillAddMenu();renderModel();const at=cardIdx(c,f);(c.comps||[]).forEach((code,k)=>addComp(code,at?at[k]:null,Array.isArray(c.ns)&&c.ns.length===c.comps.length?c.ns[k]:null));applyFields(f);renderRec();renderMonRows();applyFields(f);$('#irtOut').textContent=fmtS(irt());autosize();renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();applyFields(f);$$('#compWrap .card').forEach(k=>{try{window.__tdSetupTicks(k);}catch(x){}});renderPlan();renderMon();renderHp();rbNote();rbOpened();eeRender();eeOpened();guidePrint();try{tdBankSync();}catch(e){}if(window.__td82Sync)window.__td82Sync();}   /* v21.82 (I): the adoption record's revision rows */
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`TD-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='TD-1')throw 0;restore(d);$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form TD-1.');}};rd.readAsText(f);e.target.value='';});
@@ -3155,14 +3242,15 @@ function bipText(){
   const fnLabel={escape:'Escape / avoidance (social negative)',attention:'Attention (social positive)',tangible:'Tangible / activity (social positive)',automatic:'Automatic (nonsocial)',multiple:'Multiple control'}[fn]||'';
   const B=[[null,'FORM TD-1 · FUNCTION-BASED TREATMENT PLAN',bipHead([['Student',val('m.client')],['ID',val('m.sid')],['Date',val('m.date')]])]];
   B.push(['TARGET BEHAVIOR AND FUNCTION',bipLine('Target behavior',val('m.beh')),bipLine(tdFnHead(),fnLabel),bipLine('EA-1 design',val('m.fnsrc')==='FS-1'?'':val('m.eadesign')),tdFnNote()?'- '+tdFnNote():null,bipLine('Reinforcer and establishing operation',val('m.reinf')),
-    bipLine('Precursor',val('m.prec')),bipLine('Replacement behavior',val('m.repdesc')),bipLine('Setting / classroom',val('m.setting')),bipLine('BCBA',val('m.assessor')),bipLine('Severity and safety',val('m.safety'))]);
+    bipLine('Precursor',val('m.prec')),bipLine('Replacement behavior',val('m.repdesc')),bipLine('Present level',val('m.replevel')),bipLine('Setting / classroom',val('m.setting')),bipLine('BCBA',val('m.assessor')),bipLine('Severity and safety',val('m.safety')),bipLine('Review',val('m.review'))]);
+  tdPage1Lines(cs).forEach(b=>B.push(b));   /* v23.88 the first page's blocks */
   const rate=val('m.rate'),sess=val('m.sessmin'),pct=val('m.pct'),crit=val('mon.crit'),nn=val('mon.n'),ind=val('mon.ind'),fid=val('mon.fid'),ioa=val('t.ioa');
   B.push(['BASELINE AND CRITERIA',rate?'Baseline: '+rate+' per minute'+(sess?' in sessions of '+sess+' minutes':'')+(irt()?' (mean interresponse time '+fmtS(irt())+')':''):bipLine('Session length',sess?sess+' minutes':''),
     pct?'Baseline, percentage of intervals: '+pct+'%':'',crit?'Criterion for the target behavior: at or below '+crit+' per minute for '+(nn||'3')+' consecutive sessions':'',
     ind?'Replacement behavior: at least '+ind+'% independent':'',fid?'Integrity criterion: '+fid+'% of steps in each observed session':'']);
   let n=0;
   const comp=(c,h)=>{const L=LIB[c.code],lines=[h,'Component: '+c.name,c.bsrc?'Protocol from '+c.bsrc:null];L.params.forEach((p,k)=>{const v=c.code==='EXT'&&k===1?eeP1Out(c.i):val(`cp[${c.i}].p${k}`);if(v)lines.push(p[0]+': '+v);});
-    const mat=val(`cp[${c.i}].mat`);if(mat)lines.push('Materials and cues: '+mat);if(L.caution)lines.push('Caution: '+L.caution);if(c.ta)lines.push(...tdTaLines(c.ta));c.steps.forEach(s=>{n++;lines.push(n+'. '+s);});
+    const mat=val(`cp[${c.i}].mat`);if(mat)lines.push('Materials and cues: '+mat);if(L.caution)lines.push('Caution: '+L.caution);if(c.who||c.when||c.where)lines.push([c.who&&'Run by: '+c.who,c.when&&'When: '+c.when,c.where&&'Where: '+c.where].filter(Boolean).join(' · '));(c.setup||[]).forEach(x=>lines.push('Set-up (once, not an integrity item): '+x));if(c.ta)lines.push(...tdTaLines(c.ta));c.steps.forEach(s=>{n++;lines.push(n+'. '+s);});
     const data=val(`cp[${c.i}].data`);if(data)lines.push('Record: '+data);return lines;};
   const used=new Set();
   GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c));inG.forEach((c,k)=>{used.add(c.code);B.push(comp(c,k?null:title.toUpperCase()));});});
@@ -4927,6 +5015,43 @@ html{touch-action:manipulation}
   .sheet label > input[type="checkbox"],.sheet label > input[type="radio"]{vertical-align:middle;margin-top:-2px}
 }
 @media print{.nbh-hint,.nbh-eg,.nbh-seg{display:none!important}}
+
+/* v23.88 (the sheets of a form on an iPad, the BCBA's choice): the rail sideways, the Sheets menu upright, the sheet arrows;
+   the masthead's text runs the form's width on screen. Screen and touch only; paper keeps its layout. */
+@media screen{.nbh-mast .nbh-sub,.nbh-mast .nbh-savenote,.nbh-savenote,.nbh-mast .nbh-sub.nbh-wide.nbh-wide.nbh-wide,.nbh-mast .nbh-savenote.nbh-wide.nbh-wide.nbh-wide,.nbh-savenote.nbh-wide.nbh-wide.nbh-wide{max-width:none!important}}
+@media screen and (pointer:coarse){
+  #nbhRail{position:fixed;left:0;top:0;bottom:0;width:222px;box-sizing:border-box;background:var(--nbh-navy,#182e43);color:#fff;padding:10px 10px 12px;overflow:auto;z-index:60;-webkit-overflow-scrolling:touch}
+  html.nbh-rail body{padding-left:222px!important}
+  #nbhRail .nbh-railh{color:#9fb6c3;font:600 10.5px/1.2 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;margin:2px 10px 8px}
+  #nbhRail .nbh-railh b{display:block;color:#fff;font:600 12.5px/1.25 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:0;text-transform:none;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html #nbhRail #viewSeg{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;gap:2px;width:auto!important;max-width:none!important;overflow:visible!important;-webkit-mask-image:none!important;mask-image:none!important;background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important;margin:0!important}
+  html #nbhRail #viewSeg > button,html #nbhRail #viewSeg > [role="tab"]{display:flex!important;align-items:center;justify-content:space-between;gap:8px;text-align:left;width:100%;min-height:40px;height:auto!important;padding:7px 10px!important;border-radius:7px;background:transparent!important;color:#dbe6ea!important;border:0!important;box-shadow:none!important;font-size:13px!important;line-height:1.25;white-space:normal!important;margin:0!important;flex:0 0 auto!important}
+  html #nbhRail #viewSeg > button[aria-pressed="true"],html #nbhRail #viewSeg > button[aria-selected="true"],html #nbhRail #viewSeg > .active,html #nbhRail #viewSeg > .on{background:#fff!important;color:var(--nbh-navy,#182e43)!important;font-weight:600}
+  #nbhRail .nbh-railn{display:none}
+  html #nbhRail.nbh-compact .nbh-railh{margin:0 10px 6px}html #nbhRail.nbh-compact .nbh-railh b{display:none}html #nbhRail.nbh-compact #viewSeg{gap:1px}
+  html #nbhRail.nbh-compact #viewSeg > button,html #nbhRail.nbh-compact #viewSeg > [role="tab"]{min-height:36px!important;padding:4px 10px!important;font-size:12.5px!important}
+  .toolbar .nbh-sheets{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--nbh-navy,#182e43);border-radius:8px;padding:0 12px;min-height:44px;font:600 13.5px/1 var(--nbh-sans,-apple-system,sans-serif);border:0;white-space:nowrap;flex:0 0 auto;max-width:100%}
+  .toolbar .nbh-sheets b{overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+  .toolbar .nbh-sheets small{font-weight:400;color:var(--nbh-muted,#54676f);font-size:12px}
+  html.nbh-menu .toolbar #viewSeg{display:none!important}
+  html.nbh-menu .toolbar .row:has(> .nbh-sheets){flex-wrap:wrap;min-width:0;max-width:100%}
+  .toolbar .nbh-arrows{display:inline-flex;gap:6px;flex:0 0 auto;align-items:center}
+  .toolbar .nbh-arrows button{min-width:44px;min-height:44px;border-radius:8px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;font-size:22px;line-height:1;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:0}
+  .toolbar .nbh-arrows button[disabled]{opacity:.35}
+  .toolbar .nbh-arrows button small{font-size:12px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.nbh-fold .toolbar .nbh-fk > .nbh-sheets.nbh-sheets.nbh-sheets,html.nbh-fold .toolbar .nbh-fk > .nbh-arrows.nbh-arrows.nbh-arrows,html.nbh-fold .toolbar .nbh-arrows.nbh-fseg{display:inline-flex!important}
+  #nbhSheets{position:fixed;left:16px;right:16px;max-height:calc(100vh - 120px);overflow:auto;background:#fff;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-rule,#cfdad8);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:10px;z-index:70;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;box-sizing:border-box}
+  #nbhSheets .nbh-sheetsh{grid-column:1/-1;font:600 11px/1 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--nbh-muted,#54676f);padding:4px 10px 8px}
+  #nbhSheets .nbh-sheet{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:14px;text-align:left;color:inherit;width:100%;font-family:inherit}
+  #nbhSheets .nbh-sheet.on{background:var(--nbh-navy,#182e43);color:#fff;font-weight:600}
+  @media (max-width:520px){#nbhSheets{grid-template-columns:1fr}.toolbar .nbh-arrows button small{display:none}.toolbar .nbh-sheets{max-width:58vw}.toolbar .nbh-sheets b{max-width:30vw}}
+  .toolbar .nbh-sheets{min-width:0;overflow:hidden}
+  html.nbh-menu .toolbar.nbh-t1 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t1 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t2 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t2 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t3 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t3 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t4 .nbh-sheets b{max-width:12ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.nbh-menu .toolbar.nbh-t2 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t2 .nbh-arrows button small{max-width:10ch}
+  html.nbh-menu .toolbar.nbh-t3 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t3 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t4 .nbh-sheets b{max-width:8ch}html.nbh-menu .toolbar.nbh-t4 .nbh-arrows button small{display:none}
+}
+@media print{#nbhRail,#nbhSheets,.nbh-sheets,.nbh-arrows{display:none!important}html.nbh-rail body{padding-left:0!important}}
+
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 
@@ -4997,7 +5122,7 @@ html{touch-action:manipulation}
   function fit() {
     clear();
     if (!fitOn()) { label(); return; }
-    var design = designWidth(), avail = root.clientWidth;
+    var design = designWidth(), rail = document.getElementById('nbhRail'), avail = root.clientWidth - (rail ? rail.offsetWidth : 0);   /* v23.88 less the sheets rail (its width only: the body's own padding is in the gutter) */
     if (!design || !avail) { label(); return; }
     var z = Math.min(MAX, avail / (design + GUTTER * 2));
     if (z <= 1.02 || over()) { clear(); label(); return; }
@@ -5013,6 +5138,7 @@ html{touch-action:manipulation}
     label();
   }
 
+  window.nbhFitScreen = { fit: fit, clear: clear };   /* v23.88 the sheets rail re-fits the sheet */
   function label() {
     var b = document.getElementById('nbhFitBtn');
     if (b) {
@@ -5428,6 +5554,28 @@ function tdSrFill(){const s=tdSched;if(!s||!['thin','chain'].includes(s.id))retu
       const x={hier:g('pr.hier'),fade:g('pr.fade'),ec:g('teach.chosen')};Object.keys(x).forEach(k=>{if(x[k]&&!r.plan[k])r.plan[k]=x[k];});}}catch(e){}
     return r;};})();
 </script>
+<style id="td88-css">
+/* v23.88 the recommendations as choices, the plan's size, who/when/where and the set-up ticks on a card, the first page of the plan */
+.td-rec{display:flex;gap:12px;align-items:flex-start}.td-rec .rt{flex:1;min-width:0}.td-rec:not(.on) .rt{opacity:.62}
+.td-pk{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 62px;font-size:10.5px;color:var(--ink-soft);text-align:center;padding-top:2px}.td-pk input{width:22px;height:22px;margin:0}
+.td-chip{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:4px;padding:2px 6px;margin-left:6px;vertical-align:middle}
+.td-chip.core{background:var(--navy,#182e43);color:#fff}.td-chip.opt{border:1px solid var(--rule2,#93aead);color:var(--ink-soft)}.td-chip.set{background:#e3efe9;color:#1f5e3a}
+.td-sub{font-weight:400;font-size:11.5px;color:var(--ink-soft);margin-left:8px}
+.td-meter{display:flex;gap:16px;flex-wrap:wrap;align-items:center;border:1px solid var(--rule,#cfdad8);border-radius:8px;padding:8px 12px;background:var(--shade,#f5f8f7);margin:0 0 10px;font-size:12.5px}
+.td-meter .ok{color:#2f7d4f;font-weight:600}.td-meter .warn{color:#9b2c2c;font-weight:600}.td-meter .dup{color:var(--ink-soft)}
+.td-who{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 8px}.td-who label{font-size:11px;color:var(--ink-soft);display:flex;flex-direction:column;gap:2px;flex:1 1 180px}.td-who input{font-size:13px}
+.td-dup{color:#8a4a12}
+ol.steps li{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap}ol.steps li textarea{flex:1 1 240px}.td-su{font-size:11px;color:var(--ink-soft);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;padding-top:6px}.td-su input{width:16px;height:16px;margin:0}
+.td-askrow{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.td-ask{border:1px solid var(--rule2,#93aead);border-radius:6px;padding:7px 10px;background:#fff;font-weight:600}.td-ask.primary{background:var(--navy,#182e43);color:#fff}.td-asknote{font-size:11.5px;color:var(--ink-soft)}
+.td-notice{border:2px solid #c9742a;background:#fff7ee;border-radius:8px;padding:8px 12px;margin:0 0 12px}.td-notice ul{margin:4px 0 0 18px;padding:0}
+.td-h{font:600 14px/1.3 var(--serif,Georgia,serif);color:var(--navy,#182e43);margin:12px 0 6px}
+.td-stmt{font-size:14px;line-height:1.5;border-left:4px solid var(--navy,#182e43);background:var(--shade,#f5f8f7);padding:8px 12px;margin:0 0 10px}
+.td-gap{color:#9b2c2c}
+table.td-glance{width:100%;border-collapse:collapse;font-size:12.5px;margin:0 0 10px}table.td-glance th,table.td-glance td{border:1px solid var(--rule,#cfdad8);padding:5px 8px;text-align:left;vertical-align:top}table.td-glance th{background:var(--shade,#f5f8f7)}
+.td-lr{border:1px solid var(--rule,#cfdad8);padding:4px 10px;margin:0 0 10px;font-size:12.5px}.td-lr .row{display:flex;gap:10px;padding:4px 0;border-bottom:1px dotted var(--rule,#cfdad8)}.td-lr .row:last-child{border-bottom:0}.td-lr .st{flex:0 0 150px;font-weight:600}.td-lr .st.no{color:#9b2c2c}.td-lr .st.ok{color:#2f7d4f}
+.plan-who{font-size:12px;color:var(--ink-soft);margin:2px 0 4px}.plan-setup{font-size:12px;margin:2px 0 6px;padding:4px 8px;background:var(--shade,#f5f8f7);border-left:3px solid var(--rule2,#93aead)}.plan-setup ol{margin:2px 0 0 18px;padding:0}
+@media print{.td-pk,.td-su,.td-meter,.td-sub,#selOthers,.td-askrow,.td-asknote{display:none!important}.td-rec .rt{opacity:1}.td-notice{break-inside:avoid}}
+</style>
 <style id="td87-css">
 /* v23.87 (the BCBA's question on the chaining protocols) a chaining card's box for the student's task analysis, apart
    from the steps for staff; the final plan prints it as its own numbered list under the card's settings */
@@ -5587,10 +5735,15 @@ const H={};ok.forEach(p=>{H[p.id]={top:words([p.lab,p.kw,p.beh,comp(p),p.code].j
   all:words([p.lab,p.kw,p.beh,comp(p),p.code,kindOf(p.code),(p.steps||[]).join(' '),p.result,p.note,p.data,p.mat,pv(p),taWords(p),fnWords(p),cites(p).join(' ')].join(' '))};});
 const has=(list,w)=>list.some(x=>x.startsWith(w));
 /* search: every word in the title, the key words, the study or the component, then every word anywhere, then any word */
+/* v23.88 (screen E) ranked for this plan: protocols for this plan's function whose words match the target behavior first, then this
+   function's, then the rest, each tier in the bank's order */
+const planBeh=()=>words([val('m.beh'),val('m.prec')].join(' ')).filter(w=>w.length>3&&!/^(student|behavior|behaviour|with|that|this|when|than|from|into|after|before|other|their)$/.test(w));
+function rankPlan(list){const pf=planFn(),bw=planBeh();if(!pf&&!bw.length)return list;const sc=p=>{let n=0;if(pf&&p.fn&&p.fn.includes(pf))n+=2;if(bw.length&&bw.some(w=>has(H[p.id].top,w)))n+=1;return n;};
+  return list.map((p,i)=>[p,sc(p),i]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]).map(x=>x[0]);}
 function search(q,kind,fn){const ws=words(q),pool=ok.filter(p=>(!kind||kindOf(p.code)===kind)&&fnOk(p,fn));
-  if(!ws.length)return {list:pool,tier:1};
-  let l=pool.filter(p=>ws.every(w=>has(H[p.id].top,w)));if(l.length)return {list:l,tier:1};
-  l=pool.filter(p=>ws.every(w=>has(H[p.id].all,w)));if(l.length)return {list:l,tier:2};
+  if(!ws.length)return {list:rankPlan(pool),tier:1};
+  let l=pool.filter(p=>ws.every(w=>has(H[p.id].top,w)));if(l.length)return {list:rankPlan(l),tier:1};
+  l=pool.filter(p=>ws.every(w=>has(H[p.id].all,w)));if(l.length)return {list:rankPlan(l),tier:2};
   const sc=p=>ws.filter(w=>has(H[p.id].all,w)).length;l=pool.filter(p=>sc(p)>0).sort((a,b)=>sc(b)-sc(a));return {list:l,tier:3};}
 /* the function filter: one function, this plan's function (Setup), or any; a protocol for any function matches them all */
 const planFn=()=>{const f=val('m.fn');return FN[f]?f:'';};
@@ -5618,7 +5771,7 @@ function fnFill(){const v=fn.value,pf=planFn();
 fnFill();
 let cur='',lastQ=null;
 function draw(){const r=search(q.value,kind.value,fn.value),list=r.list;
-  cntEl.textContent=(list.length===N?N+' protocols':list.length+' of '+N+' protocols')+(!list.length?'':r.tier===2?', found in the protocols’ text':r.tier===3?': no protocol has every word, so the closest are listed':'');
+  cntEl.textContent=(list.length===N?N+' protocols':list.length+' of '+N+' protocols')+(!list.length?'':r.tier===2?', found in the protocols’ text':r.tier===3?': no protocol has every word, so the closest are listed':'')+(list.length&&(planFn()||planBeh().length)?'; the ones for this plan’s function and behavior first':'');
   let h='';groups(list).forEach(([g,L])=>{h+=`<div class="grp" role="group" aria-label="${esc(g)}"><div class="gh" aria-hidden="true">${esc(g)}</div>`+
     L.map(p=>`<button type="button" class="it" data-id="${esc(p.id)}" aria-pressed="${p.id===cur?'true':'false'}"><span class="l">${esc(p.lab)}</span><span class="m">${esc([comp(p),fnWords(p)==='any function'?'Any function':'Function: '+fnWords(p),p.age,(cites(p)[0]||'')].filter(Boolean).join(' · '))}</span></button>`).join('')+'</div>';});
   listEl.innerHTML=h||'<div class="none">Nothing matches. Try another word, All kinds of component, or Any function.</div>';
@@ -5641,31 +5794,44 @@ ${p.note?`<div class="cn"><div class="cnh">Clinical note <span>shown here only: 
 <div class="vh">Sources</div><ul class="refs">${refs.map(r=>`<li>${esc(r.apa)}${r.doi?` <a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener noreferrer">https://doi.org/${esc(r.doi)}</a>`:''}</li>`).join('')}</ul>`;
   sameNote();}
 function sameNote(){const p=byId[cur],box=$p('.same');if(!p||!box)return;const n=sameCards(p).length;box.hidden=!n;
-  box.textContent=n?'This plan already has '+(n===1?'a':n)+' '+comp(p)+' card'+(n===1?'':'s')+'. The protocol is added as another one: keep the card that fits this student and remove the other.':'';}
+  box.textContent=n?'This plan already has '+(n===1?'a':n)+' '+comp(p)+' card'+(n===1?'':'s')+'. Add to the plan asks whether to replace that card’s steps and settings or to add a second card.':'';}
+/* v23.88 (screen E) a protocol for a component already in the plan: replace that card's steps and settings (its number, who/when/where,
+   Data and Materials kept) or add a second card; Undo puts the replaced words back */
+function replaceInto(p,c){const L=LIBOF[p.code],i=c.dataset.i,put={},was={};const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el)return;was[n]=el.value;el.value=v==null?'':v;put[n]=el.value;fire(el);};
+  const lis=c.querySelectorAll('ol.steps li');const steps=p.steps||[];steps.forEach((s,k)=>{if(k<lis.length)set('cp['+i+'].s'+k,s);});for(let k=steps.length;k<lis.length;k++)set('cp['+i+'].s'+k,'');
+  L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});if(p.ta)set('cp['+i+'].ta',taText(p));set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',p.lab+' ('+cites(p).join('; ')+')');
+  {const sh=c.querySelector('input.td-suov');if(sh&&sh.value){sh.value='';sh.dispatchEvent(new Event('change',{bubbles:true}));}}try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}return {c,i,put,was,replaced:true};}
+function askSame(p,then){const box=$p('.same');if(!box)return then('add');const n=sameCards(p).length;
+  box.hidden=false;box.innerHTML='';const b=document.createElement('b');b.textContent='This plan already has '+(n===1?'a':n)+' '+comp(p)+' card. Add the protocol '+p.lab+' as:';box.appendChild(b);
+  const mk=(t,v,primary)=>{const x=document.createElement('button');x.type='button';x.className='lnk td-ask'+(primary?' primary':'');x.textContent=t;x.addEventListener('click',()=>{box.innerHTML='';then(v);});return x;};
+  const wrap=document.createElement('div');wrap.className='td-askrow';wrap.append(mk('Replace that card’s steps and settings','replace',true),mk('Add a second '+comp(p)+' card','add'),mk('Cancel','cancel'));box.appendChild(wrap);
+  const note=document.createElement('div');note.className='td-asknote';note.textContent='Replacing keeps the card’s number, its who/when/where line and anything typed in Data and Materials; Undo is offered.';box.appendChild(note);}
 /* an add: a new card of the protocol's component, with the study's steps (as many as the study has), settings, data,
    materials and the study's name; Undo removes the card unless a field it filled has been edited since */
 let undoRec=null;
 function add(p){const L=LIBOF[p.code],c=window.__tdAddComp(p.code,(p.steps||[]).length);if(!c)return null;const i=c.dataset.i,put={};
   const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el||v==null||v==='')return;el.value=v;put[n]=el.value;fire(el);};
-  (p.steps||[]).forEach((s,k)=>set('cp['+i+'].s'+k,s));
+  (p.steps||[]).forEach((s,k)=>set('cp['+i+'].s'+k,s));try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}
   L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});
   set('cp['+i+'].data',p.data);set('cp['+i+'].mat',p.mat);set('cp['+i+'].ta',taText(p));
   set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',p.lab+' ('+cites(p).join('; ')+')');
   try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}
   return {c,i,put};}
-function undo(){if(!undoRec)return false;const {c,put}=undoRec;undoRec=null;if(!c.isConnected)return true;
+function undo(){if(!undoRec)return false;const {c,put,was,replaced}=undoRec;undoRec=null;if(!c.isConnected)return true;
+  if(replaced){if(Object.keys(put).some(n=>{const el=document.querySelector('[name="'+n+'"]');return el&&el.value!==put[n];}))return false;Object.keys(was).forEach(n=>{const el=document.querySelector('[name="'+n+'"]');if(el){el.value=was[n];fire(el);}});try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}return true;}
   if(Object.keys(put).some(n=>{const el=document.querySelector('[name="'+n+'"]');return el&&el.value!==put[n];}))return false;
   const rm=c.querySelector('[data-rm]');if(rm)rm.click();else c.remove();return true;}
 function say(node){const s=$p('.st');if(!s)return;s.hidden=false;s.textContent='';s.append(...node);}
 function goTo(c){try{c.scrollIntoView({block:'start',behavior:'smooth'});}catch(x){c.scrollIntoView();}
   const el=c.querySelector('textarea');if(el)setTimeout(()=>{try{el.focus({preventScroll:true});}catch(x){}},350);}
-function doAdd(){const p=byId[cur];if(!p)return;const r=add(p);
+function doAdd(){const p=byId[cur];if(!p)return;const same=sameCards(p);if(same.length&&!doAdd.how){askSame(p,how=>{if(how==='cancel'){sameNote();return;}doAdd.how=how;try{doAdd();}finally{doAdd.how='';}});return;}
+  const how=doAdd.how||'add';const r=how==='replace'?replaceInto(p,same[0]):add(p);
   if(!r){say([document.createTextNode('This protocol could not be added: its component is not on this form.')]);return;}
   undoRec=r;sameNote();
-  const b=document.createElement('b');b.textContent='Added to the plan: '+p.lab+', as a '+comp(p)+' card.';
+  const b=document.createElement('b');b.textContent=(r.replaced?'Replaced the steps and settings of the '+comp(p)+' card with: ':'Added to the plan: ')+p.lab+(r.replaced?'.':', as a '+comp(p)+' card.');
   const go=document.createElement('button');go.type='button';go.className='lnk';go.textContent='Go to the card';go.addEventListener('click',()=>goTo(r.c));
-  const u=document.createElement('button');u.type='button';u.className='lnk';u.textContent='Undo the add';
-  u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?'Undone: the card is removed.':'The card has been edited since it was added, so it is kept; remove it with its Remove button if it is not wanted.']);});
+  const u=document.createElement('button');u.type='button';u.className='lnk';u.textContent=r.replaced?'Undo the replace':'Undo the add';
+  u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.']);});
   say([b,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u]);}
 q.addEventListener('input',draw);kind.addEventListener('change',draw);fn.addEventListener('change',draw);
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});

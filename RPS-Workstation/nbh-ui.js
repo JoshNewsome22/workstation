@@ -212,6 +212,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     function find(){
       if (tb && tb.isConnected && seg && seg.isConnected && btn && btn.isConnected) return tb;
       tb = null; seg = document.getElementById('viewSeg') || document.querySelector('.toolbar [role="tablist"],.nbh-toolbar [role="tablist"]');
+      if (seg && !seg.closest('.toolbar')) seg = document.querySelector('.toolbar .nbh-arrows') || seg;   /* v23.88 the tabs in the rail: the sheet arrows stand for the strip */
       var t = seg && seg.closest('.toolbar'); if (!t) return null;
       btn = document.getElementById('nbhFoldBtn');
       if (!btn) {
@@ -1505,3 +1506,84 @@ try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function
   window.addEventListener('load', function(){ setTimeout(all, 450); });
   (window.nbhUI || (window.nbhUI = {})).fields = { run: all, reset: reset };
 })(); } catch (e) {}
+
+/* v23.88 (the sheets of a form on an iPad, the BCBA's choice after the examples): sideways, the view tabs sit in a rail down
+   the left; upright, a form whose tabs do not fit one row gets a "Sheets" button and a menu; previous / next sheet arrows
+   in the toolbar in both. The tabs themselves are the form's own buttons, moved, so every handler keeps working; printing
+   puts them back. Touch screens only; nothing here runs with a mouse. */
+try { if (window.matchMedia) (function(){
+  var R = document.documentElement, coarse = matchMedia('(pointer:coarse)'), mode = '', rail = null, menuBtn = null, pop = null, arrows = null, home = null, homeNext = null, printing = false;
+  function seg(){ return document.getElementById('viewSeg'); }
+  function tabs(){ var s = seg(); return s ? [].slice.call(s.querySelectorAll('button,[role="tab"]')).filter(function(b){ return !b.hidden && getComputedStyle(b).display !== 'none'; }) : []; }
+  function on(b){ return b.getAttribute('aria-pressed') === 'true' || b.getAttribute('aria-selected') === 'true' || b.classList.contains('active') || b.classList.contains('on'); }
+  function cur(){ var t = tabs(); for (var i = 0; i < t.length; i++) if (on(t[i])) return i; return 0; }
+  function label(b){ var c = b.cloneNode(true), ds = c.querySelectorAll('[aria-hidden="true"],.dot,.st,.mark'); for (var i = 0; i < ds.length; i++) ds[i].parentNode.removeChild(ds[i]); return (c.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function dot(b){ var d = b.querySelector('[aria-hidden="true"],.dot,.st,.mark'); return d ? d.cloneNode(true) : null; }
+  function title(){ var h = document.querySelector('.nbh-mast h1'), m = /\b([A-Z]{2,4}-\d)\b/.exec(document.title || ''); return { code: m ? m[1] : '', name: h ? h.textContent.replace(/\s+/g, ' ').trim() : '' }; }
+  function row(){ var s = seg(); return s ? (s.closest('.row') || s.parentElement) : null; }
+  function wide(){ var w = window.innerWidth; try { if (window.top !== window) w = Math.max(w, window.top.innerWidth || 0); } catch (e) {} return w; }
+  function want(){ var s = seg(); if (!s || printing || !coarse.matches || window.__nbhNoSheets) return ''; var n = tabs().length; if (n < 2) return '';
+    if (wide() >= 1000 && window.innerWidth >= 1100) return 'rail';
+    return (n >= 8 || s.scrollWidth > s.clientWidth + 2 || s.scrollHeight > 52) ? 'menu' : ''; }
+  function mkArrows(){ var a = document.createElement('span'); a.className = 'nbh-arrows noprint';
+    a.innerHTML = '<button type="button" class="nbh-prev" aria-label="Previous sheet">‹</button><button type="button" class="nbh-next" aria-label="Next sheet"><span aria-hidden="true">›</span><small></small></button>';
+    a.querySelector('.nbh-prev').addEventListener('click', function(ev){ ev.stopPropagation(); go(-1); });
+    a.querySelector('.nbh-next').addEventListener('click', function(ev){ ev.stopPropagation(); go(1); });
+    return a; }
+  function go(d){ var t = tabs(), i = cur() + d; if (i < 0 || i >= t.length) return; t[i].click(); setTimeout(paint, 30); try { window.scrollTo(0, 0); } catch (e) {} }
+  function paint(){ var t = tabs(), i = cur();
+    if (arrows) { var p = arrows.querySelector('.nbh-prev'), n = arrows.querySelector('.nbh-next'), nx = t[i + 1];
+      p.disabled = i <= 0; n.disabled = !nx; n.querySelector('small').textContent = nx ? label(nx) : ''; n.setAttribute('aria-label', 'Next sheet' + (nx ? ': ' + label(nx) : '')); }
+    if (menuBtn) { menuBtn.querySelector('b').textContent = t[i] ? label(t[i]) : ''; menuBtn.querySelector('small').textContent = (i + 1) + ' of ' + t.length; tight(); }
+    if (rail && t[i] && i !== lastIdx) { lastIdx = i; var b = t[i], top = b.offsetTop, bot = top + b.offsetHeight; if (top < rail.scrollTop) rail.scrollTop = Math.max(0, top - 8); else if (bot > rail.scrollTop + rail.clientHeight) rail.scrollTop = bot - rail.clientHeight + 8; }   /* the rail scrolls itself, never the page */
+    if (!rail) lastIdx = -1; }
+  var lastIdx = -1;
+  function undo(){ if (!mode) return; var s = seg();
+    if (mode === 'rail') { if (s && home && home.isConnected) home.insertBefore(s, homeNext && homeNext.parentNode === home ? homeNext : null); if (rail) rail.parentNode.removeChild(rail); rail = null; R.classList.remove('nbh-rail'); }
+    if (mode === 'menu') { closePop(); if (menuBtn) menuBtn.parentNode.removeChild(menuBtn); menuBtn = null; R.classList.remove('nbh-menu'); var tb0 = s && s.closest('.toolbar'); if (tb0) tb0.classList.remove('nbh-t1', 'nbh-t2', 'nbh-t3', 'nbh-t4'); }
+    if (arrows) arrows.parentNode.removeChild(arrows); arrows = null; mode = ''; redress(); refit(); }
+  function apply(m){ if (m === mode) return; undo(); var s = seg(); if (!m || !s) return; var r = row(); if (!r) return;
+    if (m === 'rail') { home = s.parentNode; homeNext = s.nextSibling;
+      rail = document.createElement('nav'); rail.id = 'nbhRail'; rail.className = 'noprint'; rail.setAttribute('aria-label', 'Sheets of this form');
+      var t = title(), h = document.createElement('div'); h.className = 'nbh-railh'; if (t.code) { var c = document.createElement('span'); c.textContent = 'Form ' + t.code; h.appendChild(c); } var b = document.createElement('b'); b.textContent = t.name; h.appendChild(b); rail.appendChild(h);
+      rail.appendChild(s); var n = document.createElement('div'); n.className = 'nbh-railn'; n.textContent = tabs().length + ' sheets. Tap one to open it.'; rail.appendChild(n);
+      document.body.appendChild(rail); R.classList.add('nbh-rail'); arrows = mkArrows(); r.insertBefore(arrows, r.firstChild); fit(); }
+    if (m === 'menu') { menuBtn = document.createElement('button'); menuBtn.type = 'button'; menuBtn.className = 'nbh-sheets noprint'; menuBtn.setAttribute('aria-haspopup', 'dialog'); menuBtn.setAttribute('aria-expanded', 'false');
+      menuBtn.innerHTML = 'Sheets ▾ <b></b> <small></small>'; menuBtn.addEventListener('click', function(ev){ ev.stopPropagation(); if (pop) closePop(); else openPop(); });
+      r.insertBefore(menuBtn, s); arrows = mkArrows(); r.insertBefore(arrows, s); R.classList.add('nbh-menu'); }
+    mode = m; paint(); redress(); refit(); }
+  /* upright, the toolbar keeps one row: a long sheet name in the Sheets button or in the next arrow is capped, then the arrow's label hidden */
+  function tight(){ var s = seg(), tb = s && s.closest('.toolbar'); if (!tb || mode !== 'menu' || R.classList.contains('nbh-fold')) return;
+    tb.classList.remove('nbh-t1', 'nbh-t2', 'nbh-t3', 'nbh-t4'); var L = ['nbh-t1', 'nbh-t2', 'nbh-t3', 'nbh-t4'];
+    for (var k = 0; k < L.length && tb.offsetHeight > 64; k++) { if (k) tb.classList.remove(L[k - 1]); tb.classList.add(L[k]); } }
+  /* a rail taller than the frame (the workstation's bars above the form take the height) goes compact: every sheet in sight */
+  function fit(){ if (!rail) return; rail.classList.remove('nbh-compact'); if (rail.scrollHeight > rail.clientHeight + 1) rail.classList.add('nbh-compact'); }
+  /* the fields' dressing (v23.87) measured the room before the rail took its 222 px: measured again */
+  function redress(){ try { var F = window.nbhUI && nbhUI.fields; if (F && F.reset && F.run) { F.reset(); F.run(); } } catch (e) {} }
+  /* the sheet's Fit zoom (nbh-fit-screen) measured the window before the rail took its width: fitted again */
+  function refit(){ try { var F = window.nbhFitScreen; if (F && F.fit) F.fit(); } catch (e) {} }
+  function openPop(){ closePop(); var t = tabs(), i = cur(), tt = title(); pop = document.createElement('div'); pop.id = 'nbhSheets'; pop.className = 'noprint'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Sheets of this form');
+    var h = document.createElement('div'); h.className = 'nbh-sheetsh'; h.textContent = 'Sheets' + (tt.code ? ' of Form ' + tt.code : ''); pop.appendChild(h);
+    t.forEach(function(b, k){ var it = document.createElement('button'); it.type = 'button'; it.className = 'nbh-sheet' + (k === i ? ' on' : ''); if (k === i) it.setAttribute('aria-current', 'true');
+      var n = document.createElement('span'); n.textContent = (k + 1) + '. ' + label(b); it.appendChild(n); var d = dot(b); if (d) it.appendChild(d);
+      it.addEventListener('click', function(ev){ ev.stopPropagation(); closePop(); b.click(); setTimeout(paint, 30); try { window.scrollTo(0, 0); } catch (e) {} }); pop.appendChild(it); });
+    var tb = seg() && seg().closest('.toolbar'), rect = tb ? tb.getBoundingClientRect() : { bottom: 60 }; pop.style.top = Math.max(8, rect.bottom + 8) + 'px';
+    document.body.appendChild(pop); if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+    setTimeout(function(){ document.addEventListener('click', outside, true); document.addEventListener('keydown', esc, true); }, 0);
+    var f = pop.querySelector('.on') || pop.querySelector('button'); if (f) try { f.focus({ preventScroll: true }); } catch (e) {} }
+  function outside(e){ if (!e.isTrusted) return; if (pop && !pop.contains(e.target) && e.target !== menuBtn && !(menuBtn && menuBtn.contains(e.target))) closePop(); }
+  function esc(e){ if (e.key === 'Escape') { closePop(); if (menuBtn) try { menuBtn.focus(); } catch (x) {} } }
+  function closePop(){ if (!pop) return; pop.parentNode.removeChild(pop); pop = null; document.removeEventListener('click', outside, true); document.removeEventListener('keydown', esc, true); if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false'); }
+  function run(){ if (mode === 'menu' && window.innerWidth < 1000) { var s = seg(); if (s && tabs().length < 8) { undo(); } } apply(want()); fit(); paint(); }
+  var rt = 0, W = window.innerWidth; window.addEventListener('resize', function(){ if (window.innerWidth === W) return; W = window.innerWidth; clearTimeout(rt); rt = setTimeout(run, 120); });
+  window.addEventListener('orientationchange', function(){ setTimeout(run, 250); });
+  function paper(on){ if (!on) { try { if (matchMedia('print').matches) return; } catch (e) {} } if (on === printing) return; printing = on; if (on) undo(); else setTimeout(run, 60); }
+  window.addEventListener('beforeprint', function(){ paper(true); }); window.addEventListener('afterprint', function(){ paper(false); });
+  try { matchMedia('print').addEventListener('change', function(e){ paper(e.matches); }); } catch (e) {}
+  document.addEventListener('click', function(e){ var s = seg(); if (s && e.target && s.contains(e.target)) setTimeout(paint, 30); }, true);
+  try { var s0 = seg(); if (s0) new MutationObserver(function(){ paint(); }).observe(s0, { attributes: true, subtree: true, attributeFilter: ['aria-pressed', 'aria-selected', 'class'] }); } catch (e) {}
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(run, 50); }); else setTimeout(run, 50);
+  window.addEventListener('load', function(){ setTimeout(run, 300); });
+  window.nbhSheets = { run: run, undo: undo, mode: function(){ return mode; }, open: openPop, close: closePop };
+})(); } catch (e) {}
+

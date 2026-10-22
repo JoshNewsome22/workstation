@@ -40,14 +40,21 @@ const M=()=>{const t=document.querySelector('.toolbar'),r=t.getBoundingClientRec
       const Y=await p.evaluate(()=>{const t=document.querySelector('.toolbar');const y=Math.min(t.getBoundingClientRect().top+scrollY+700,document.documentElement.scrollHeight-innerHeight-400);scrollTo(0,Math.max(0,y));return scrollY;});await sleep(400);
       const u=await p.evaluate(M);
       ok(tag+' ('+view+' view): a script\'s scroll leaves the bar unfolded and pinned ('+u.h+' px)',!u.fold&&u.top===0,{u,Y});
+      /* v23.88: with the sheets in the rail (sideways) or the Sheets menu (upright) the toolbar is already one row: nothing to fold */
+      const mode=await p.evaluate(()=>window.nbhSheets?nbhSheets.mode():'');
+      if(mode&&u.h<=60){const o=await p.evaluate(()=>({sw:document.documentElement.scrollWidth,iw:innerWidth,btn:!!document.querySelector('.toolbar .nbh-sheets, .toolbar .nbh-arrows')}));
+        ok(tag+': the bar is already one row ('+mode+', '+u.h+' px): nothing to fold (v23.88); the sheet controls in the bar; no sideways scroll',o.btn&&o.sw<=o.iw+1,{mode,u,o});await ctx.close();continue;}
       /* a swipe down folds it; the content under the bar is not moved */
       const anchor=await p.evaluate(()=>{const e=document.elementFromPoint(innerWidth/2,innerHeight*0.7);e.setAttribute('data-anc','1');return Math.round(e.getBoundingClientRect().top+scrollY);});
       await swipe(p,cdp,160);
       const b=await p.evaluate(M);const anc2=await p.evaluate(()=>{const e=document.querySelector('[data-anc]');return Math.round(e.getBoundingClientRect().top+scrollY);});
       const gain=u.bot-b.bot,need=Math.min(60,u.h-44);
+      const hMax=(mode==='menu'||mode==='rail')?56:44;   /* v23.88 in the Sheets menu the folded strip is the Sheets button and the arrows (50 px) */
       ok(tag+': a swipe down folds the bar to a '+b.h+' px strip with Tools, the content starts '+gain+' px higher than unfolded ('+(a.bot-b.bot)+' px higher than at the top)',
-        b.fold&&b.st===1&&b.h>=36&&b.h<=44&&b.top===0&&gain>=need&&a.bot-b.bot>=60&&b.tools,{a,u,b,gain,need});
-      ok(tag+': the view buttons stay in sight on the strip',b.seg.top>=0&&b.seg.bot<=b.bot+1&&b.seg.bot-b.seg.top>=34&&b.seg.w>=120,b.seg);
+        b.fold&&b.st===1&&b.h>=36&&b.h<=hMax&&b.top===0&&gain>=need&&a.bot-b.bot>=60&&b.tools,{a,u,b,gain,need,mode});
+      if(mode==='menu'||mode==='rail'){const sb=await p.evaluate(m=>{const e=document.querySelector(m==='menu'?'.toolbar .nbh-sheets':'.toolbar .nbh-arrows');const r=e&&e.getBoundingClientRect();return r?{top:Math.round(r.top),bot:Math.round(r.bottom),w:Math.round(r.width)}:null;},mode);
+        ok(tag+': the sheet controls stay in sight on the strip (v23.88, '+mode+')',!!sb&&sb.top>=0&&sb.bot<=b.bot+1&&sb.w>=80,sb);}
+      else ok(tag+': the view buttons stay in sight on the strip',b.seg.top>=0&&b.seg.bot<=b.bot+1&&b.seg.bot-b.seg.top>=34&&b.seg.w>=120,b.seg);
       ok(tag+': nothing on the page moved when it folded',Math.abs(anc2-anchor)<=1,{anchor,anc2});
       ok(tag+': no sideways scroll, folded',b.sw<=b.iw+1,{sw:b.sw,iw:b.iw});
       /* a swipe up unfolds it */
@@ -74,7 +81,7 @@ const M=()=>{const t=document.querySelector('.toolbar'),r=t.getBoundingClientRec
       else{await sleep(350);const fr=await p.evaluate(()=>{const r=document.querySelector('[data-ff]').getBoundingClientRect();return {x:r.left+Math.min(20,r.width/2),y:r.top+r.height/2};});
         await p.touchscreen.tap(fr.x,fr.y);await sleep(400);
         const g=await p.evaluate(M);const foc=await p.evaluate(()=>!!(document.activeElement&&document.activeElement.hasAttribute('data-ff')));
-        ok(tag+': a tap in a text field ('+fx.tag+' '+String(fx.name).slice(0,24)+') folds the bar to '+g.h+' px',foc&&g.fold&&g.st===2&&g.h<=44,{g,foc,fx});
+        ok(tag+': a tap in a text field ('+fx.tag+' '+String(fx.name).slice(0,24)+') folds the bar to '+g.h+' px',foc&&g.fold&&g.st===2&&g.h<=(mode==='menu'||mode==='rail'?56:44),{g,foc,fx,mode});
         await swipe(p,cdp,-90);const g2=await p.evaluate(M);ok(tag+': it stays folded while the field has focus',g2.fold,g2);
         await p.evaluate(()=>document.activeElement.blur());await sleep(300);const h=await p.evaluate(M);
         ok(tag+': leaving the field unfolds it',!h.fold&&h.st===0,h);}

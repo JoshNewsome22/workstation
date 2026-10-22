@@ -784,6 +784,10 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 td input,td select{max-width:100%}
 </style>
+<style id="gb88-css">
+/* v23.88 the checks against the standard under an acquisition objective */
+.gb-chk.gb-ok{color:#2f7d4f}.gb-chk.gb-note{color:#8a4a12}.gb-chk.gb-no{color:#9b2c2c}
+</style>
 </head>
 <body class="view-setup">
 <header class="nbh-mast">
@@ -1388,7 +1392,7 @@ function addRed() {
       field('Current level', 'red[' + i + '].cur', { ph: 'e.g. 1.4 per minute' }) +
       field('No more / no less', 'red[' + i + '].ml', { options: ['more', 'less'] }) +
       field('Target level', 'red[' + i + '].tgt', { ph: 'e.g. 0.2 per minute' }) +
-      field('Context / environment', 'red[' + i + '].ctx', { ph: 'e.g. the self-contained ESE classroom' }) +
+      field('Context / environment', 'red[' + i + '].ctx', { ph: 'the classroom\u2019s name, e.g. the self-contained ESE classroom' }) +
       field('Success criterion (# measurements)', 'red[' + i + '].crit', { ph: 'e.g. 3' }) +
       field('Measured by', 'red[' + i + '].meth', { ph: 'e.g. a frequency count in each 10-minute session, recorded on DD-1' }) +
       field('Target date', 'red[' + i + '].date', { date: true }) +
@@ -1410,12 +1414,17 @@ function addAcq() {
     '<div class="param">' +
       field('Skill / replacement behavior', 'acq[' + i + '].beh', { ph: 'observable, e.g. hand the break card to an adult' }) +
       field('Given (condition)', 'acq[' + i + '].cond', { ph: 'e.g. a demand presented and the break card within reach' }) +
-      field('Criterion', 'acq[' + i + '].crit', { ph: 'e.g. independently in at least 80% of opportunities' }) +
+      field('Criterion (a number)', 'acq[' + i + '].crit', { ph: 'e.g. independently in at least 90% of opportunities' }) +
       field('Across (number)', 'acq[' + i + '].n', { ph: 'e.g. 3' }) +
       field('Consecutive', 'acq[' + i + '].unit', { options: UNITS }) +
       field('As measured by', 'acq[' + i + '].meth', { ph: 'e.g. trial-by-trial mand data on DD-1' }) +
       field('Target date', 'acq[' + i + '].date', { date: true }) +
       field('Paired reduction objective', 'acq[' + i + '].pair', { ph: 'which behavior it replaces' }) +
+      /* v23.88 (screen D) the present level, generalization, the maintenance check, and why */
+      field('Present level', 'acq[' + i + '].level', { ph: 'e.g. says break only when prompted; 0 independent requests in 10 probe days' }) +
+      field('Across people, settings, materials', 'acq[' + i + '].gen', { ph: 'e.g. two adults; the ESE classroom, art and the cafeteria; written and hands-on tasks' }) +
+      field('Maintenance check', 'acq[' + i + '].maint', { ph: 'e.g. a probe 2 and 4 weeks after mastery, then monthly' }) +
+      field('Why this objective, and who agreed', 'acq[' + i + '].why', { ph: 'e.g. replaces hitting (R1) for the same reinforcer; the student chose the card; parent agreed on (date)' }) +
     '</div>' +
     '<div class="f"><label for="n_a' + i + '">Note</label><input id="n_a' + i + '" name="acq[' + i + '].note"></div>' +
     '<div class="out" data-out="acq' + i + '"></div>';
@@ -1477,12 +1486,18 @@ function gbPhrase(s) {
   const low = GB_LINK.has(l0) || ((GB_CTXW.has(l0) || GB_CTXW.has(l0.split('-')[0])) && !/^[0-9A-Z]/.test(nx));
   return low ? w0.charAt(0).toLowerCase() + t.slice(1) : t;
 }
+/* v23.88 (screen D) a target behavior named with its definition ("Aggression: hitting, kicking...") reads as its name "(as
+   defined on TB-1)"; a level with its source in brackets ("0.31 per minute (EA-1 escape condition)") reads as the number, the
+   source printed apart (gbLevelSrc) */
+function gbShortBeh(b) { const m = /^([^:]{2,60}):\s+\S/.exec(b || ''); return m ? m[1].trim() + ' (as defined on TB-1)' : b; }
+function gbLevelNum(v) { return String(v || '').replace(/\s*\([^()]*\)\s*$/, '').trim(); }
+function gbLevelSrc(v) { const m = /\(([^()]*)\)\s*$/.exec(String(v || '')); return m ? m[1].trim() : ''; }
 function redSentence(i) {
   const g = n => val('red[' + i + '].' + n), crit = g('crit');
   return gap(val('m.client'), 'student') + ' will ' + gap(g('dir'), 'direction of change') +
-    ' their ' + gap(g('meas'), 'response measure') + ' of ' + gap(g('beh'), 'target behavior') +
-    ' from ' + gap(g('cur'), 'current level') + ' to no ' + gap(g('ml'), 'more/less') +
-    ' than ' + gap(g('tgt'), 'target level') + ' ' + ctxPhrase(g('ctx')) +
+    ' their ' + gap(g('meas'), 'response measure') + ' of ' + gap(gbShortBeh(g('beh')), 'target behavior') +
+    ' from ' + gap(gbLevelNum(g('cur')), 'current level') + ' to no ' + gap(g('ml'), 'more/less') +
+    ' than ' + gap(gbLevelNum(g('tgt')), 'target level') + ' ' + ctxPhrase(g('ctx')) +
     ' over ' + gap(crit, 'number') + (/\bconsecutive\b/i.test(crit) ? '' : ' consecutive') +
     ' measurements by ' + gap(fmtDate(g('date')), 'target date') +
     ', as measured by ' + gap(g('meth'), 'measurement method') + '.';
@@ -1521,7 +1536,33 @@ function acqSentence(i) {
   return 'By ' + gap(fmtDate(g('date')), 'target date') + ', ' + condPhrase(g('cond')) +
     ', ' + gap(val('m.client'), 'student') + ' will ' + beh +
     ' ' + gap(g('crit'), 'criterion') + ' across ' + gap(g('n'), 'number') + ' consecutive ' +
-    gap(g('unit'), 'unit') + ', as measured by ' + gap(g('meth'), 'measurement method') + '.';
+    gap(g('unit'), 'unit') + (g('gen') ? ', with ' + esc(g('gen')) : '') + ', as measured by ' + gap(g('meth'), 'measurement method') +
+    (g('level') ? '; present level: ' + esc(g('level')) : '') + (g('maint') ? '; maintenance check: ' + esc(g('maint')) : '') + '.';
+}
+/* v23.88 (screen D) the checks against the standard (the BCBA's, approved 10/21): A1 a behavior one can see and count; A2 a
+   condition; A3 a criterion with a number, consecutive measurements, a method naming a form; A4 the mastery level against
+   the 90% default (Fuller & Fienup, 2018; Richling, Williams, & Carr, 2019; Wong et al., 2022); A7 generalization and a
+   maintenance check (Stokes & Baer, 1977); A8 the present level. Each is [state, text]: 'ok', 'note' or 'no'. */
+const GB_NOTBEH = /^(?:will\s+)?(?:not\b|won't|refrain|stop\b|avoid\b|no\s)|\b(understand|know|knows|feel|feels|aware|appreciate|comprehend|be able to|learn to|try to)\b/i;
+function acqChecks(i) {
+  const g = n => val('acq[' + i + '].' + n), out = [];
+  const beh = g('beh'), cond = g('cond'), crit = g('crit'), n = g('n'), unit = g('unit'), meth = g('meth');
+  if (beh) out.push(GB_NOTBEH.test(beh) ? ['no', 'A1: \u201c' + esc(beh.slice(0, 60)) + (beh.length > 60 ? '\u2026' : '') + '\u201d is not a behavior one can see and count: name what the student does (\u201chand the break card\u2026\u201d), not a state or a non-behavior.'] : ['ok', 'A1: a behavior one can see and count.']);
+  else out.push(['no', 'A1: the skill is empty.']);
+  out.push(cond ? ['ok', 'A2: a condition (what is in place when the skill is expected).'] : ['no', 'A2: no condition: say what is in place when the skill is expected (34 CFR 300.320).']);
+  const parts = [crit && /\d/.test(crit) ? '' : 'a criterion with a number', n && /^\d+$/.test(n) ? '' : 'a count of consecutive measurements', unit ? '' : 'the unit', meth && /\b(DD-1|SA-1|MT-1|OB-1|ABC-1|PR-1|Form)\b/i.test(meth) ? '' : 'a measurement method naming a form'].filter(Boolean);
+  out.push(parts.length ? ['no', 'A3: missing ' + parts.join(', ') + ' (34 CFR 300.320).'] : ['ok', 'A3: criterion with a number, consecutive measurements, measurement method (34 CFR 300.320).']);
+  const pm = /(\d+(?:\.\d+)?)\s*%/.exec(crit || '');
+  if (pm) { const lv = parseFloat(pm[1]);
+    out.push(lv >= 90 ? ['ok', 'A4: mastery level ' + pm[1] + '%' + (n ? ' across ' + esc(n) + ' consecutive ' + esc(unit || 'measurements') : '') + ': in line with the maintenance evidence (Richling et al., 2019; Wong et al., 2022).']
+      : ['note', 'A4: mastery level ' + pm[1] + '%: the workstation\u2019s standard is 90% across 3 consecutive sessions (Fuller & Fienup, 2018; Richling et al., 2019); a lower level needs its reason in the note. A safety skill is set at 100%.']); }
+  const gen = g('gen'), maint = g('maint');
+  out.push(gen && maint ? ['ok', 'A7: generalization and a maintenance check are in the objective (Stokes & Baer, 1977).'] : ['note', 'A7: ' + (!gen && !maint ? 'add the people, settings and materials the skill must hold across, and a maintenance check' : !gen ? 'add the people, settings and materials the skill must hold across' : 'add a maintenance check') + ' (Stokes & Baer, 1977).']);
+  out.push(g('level') ? ['ok', 'A8: the present level says where the student starts.'] : ['note', 'A8: add the present level (where the student starts), so progress has a baseline.']);
+  return out;
+}
+function acqCheckLines(list, sheet) {
+  return list.filter(c => !sheet || c[0] !== 'ok').map(c => '<div class="gb-chk gb-' + c[0] + '">' + (c[0] === 'ok' ? '\u2713 ' : c[0] === 'note' ? '\u25cf ' : '\u2717 ') + c[1] + '</div>').join('');
 }
 
 /* ---------- v21.44 (A5) the words of a skill in a sentence ----------
@@ -1839,7 +1880,7 @@ function render() {
   });
   $$('#acqWrap .card').forEach(c => {
     const i = idxOf(c, 'acq'); if (i < 0) return;
-    c.querySelector('[data-out]').innerHTML = '<b>Objective as written:</b> ' + acqSentence(i);
+    c.querySelector('[data-out]').innerHTML = '<b>Objective as written:</b> ' + acqSentence(i) + acqCheckLines(acqChecks(i));
   });
   if (sheetOn) buildSheet(true);
 }
@@ -1848,9 +1889,11 @@ document.addEventListener('change', render);
 
 /* ---------- goal sheet ---------- */
 function buildSheet(quiet) {
-  const reds = $$('#redWrap .card').map(c => idxOf(c, 'red')).filter(i => i >= 0);
-  const acqs = $$('#acqWrap .card').map(c => idxOf(c, 'acq')).filter(i => i >= 0);
-  if (!reds.length && !acqs.length) { if (quiet) $('#sheetOut').innerHTML = ''; else alert('Add at least one objective first.'); return; }
+  /* v23.88 a card with nothing in it stays off the sheet */
+  const filled = (k, i) => ['beh', 'cond', 'crit', 'meth', 'cur', 'tgt'].some(f => val(k + '[' + i + '].' + f));
+  const reds = $$('#redWrap .card').map(c => idxOf(c, 'red')).filter(i => i >= 0 && filled('red', i));
+  const acqs = $$('#acqWrap .card').map(c => idxOf(c, 'acq')).filter(i => i >= 0 && filled('acq', i));
+  if (!reds.length && !acqs.length) { if (quiet) $('#sheetOut').innerHTML = ''; else alert('Fill in at least one objective first.'); return; }
   sheetOn = true;
   let h = '<div class="gs-head"><h3>Goals and Objectives</h3>' +
     '<div>' + esc(val('m.client') || 'Student not named') +
@@ -1861,6 +1904,7 @@ function buildSheet(quiet) {
     h += '<h3 class="sub">Reduction Objectives</h3><ol class="gs">' + reds.map(i => {
       const note = val('red[' + i + '].note'), pair = val('red[' + i + '].pair');
       return '<li><span class="gs-id">R' + (i + 1) + '.</span> ' + redSentence(i) + checkLines(redChecks(i)) +
+        (gbLevelSrc(val('red[' + i + '].cur')) ? '<div class="gs-note">Baseline source: ' + esc(gbLevelSrc(val('red[' + i + '].cur'))) + '</div>' : '') +
         (pair ? '<div class="gs-pair">Paired with: ' + esc(pair) + '</div>' : '') +
         (note ? '<div class="gs-note">' + esc(note) + '</div>' : '') + '</li>';
     }).join('') + '</ol>';
@@ -1868,7 +1912,8 @@ function buildSheet(quiet) {
   if (acqs.length) {
     h += '<h3 class="sub">Acquisition Objectives</h3><ol class="gs">' + acqs.map(i => {
       const note = val('acq[' + i + '].note'), pair = val('acq[' + i + '].pair');
-      return '<li><span class="gs-id">A' + (i + 1) + '.</span> ' + acqSentence(i) +
+      return '<li><span class="gs-id">A' + (i + 1) + '.</span> ' + acqSentence(i) + acqCheckLines(acqChecks(i), true) +
+        (val('acq[' + i + '].why') ? '<div class="gs-note">Why, and who agreed: ' + esc(val('acq[' + i + '].why')) + '</div>' : '') +
         (pair ? '<div class="gs-pair">Replaces: ' + esc(pair) + '</div>' : '') +
         (note ? '<div class="gs-note">' + esc(note) + '</div>' : '') + '</li>';
     }).join('') + '</ol>';
@@ -3599,6 +3644,43 @@ html{touch-action:manipulation}
   .sheet label > input[type="checkbox"],.sheet label > input[type="radio"]{vertical-align:middle;margin-top:-2px}
 }
 @media print{.nbh-hint,.nbh-eg,.nbh-seg{display:none!important}}
+
+/* v23.88 (the sheets of a form on an iPad, the BCBA's choice): the rail sideways, the Sheets menu upright, the sheet arrows;
+   the masthead's text runs the form's width on screen. Screen and touch only; paper keeps its layout. */
+@media screen{.nbh-mast .nbh-sub,.nbh-mast .nbh-savenote,.nbh-savenote,.nbh-mast .nbh-sub.nbh-wide.nbh-wide.nbh-wide,.nbh-mast .nbh-savenote.nbh-wide.nbh-wide.nbh-wide,.nbh-savenote.nbh-wide.nbh-wide.nbh-wide{max-width:none!important}}
+@media screen and (pointer:coarse){
+  #nbhRail{position:fixed;left:0;top:0;bottom:0;width:222px;box-sizing:border-box;background:var(--nbh-navy,#182e43);color:#fff;padding:10px 10px 12px;overflow:auto;z-index:60;-webkit-overflow-scrolling:touch}
+  html.nbh-rail body{padding-left:222px!important}
+  #nbhRail .nbh-railh{color:#9fb6c3;font:600 10.5px/1.2 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;margin:2px 10px 8px}
+  #nbhRail .nbh-railh b{display:block;color:#fff;font:600 12.5px/1.25 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:0;text-transform:none;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html #nbhRail #viewSeg{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;gap:2px;width:auto!important;max-width:none!important;overflow:visible!important;-webkit-mask-image:none!important;mask-image:none!important;background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important;margin:0!important}
+  html #nbhRail #viewSeg > button,html #nbhRail #viewSeg > [role="tab"]{display:flex!important;align-items:center;justify-content:space-between;gap:8px;text-align:left;width:100%;min-height:40px;height:auto!important;padding:7px 10px!important;border-radius:7px;background:transparent!important;color:#dbe6ea!important;border:0!important;box-shadow:none!important;font-size:13px!important;line-height:1.25;white-space:normal!important;margin:0!important;flex:0 0 auto!important}
+  html #nbhRail #viewSeg > button[aria-pressed="true"],html #nbhRail #viewSeg > button[aria-selected="true"],html #nbhRail #viewSeg > .active,html #nbhRail #viewSeg > .on{background:#fff!important;color:var(--nbh-navy,#182e43)!important;font-weight:600}
+  #nbhRail .nbh-railn{display:none}
+  html #nbhRail.nbh-compact .nbh-railh{margin:0 10px 6px}html #nbhRail.nbh-compact .nbh-railh b{display:none}html #nbhRail.nbh-compact #viewSeg{gap:1px}
+  html #nbhRail.nbh-compact #viewSeg > button,html #nbhRail.nbh-compact #viewSeg > [role="tab"]{min-height:36px!important;padding:4px 10px!important;font-size:12.5px!important}
+  .toolbar .nbh-sheets{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--nbh-navy,#182e43);border-radius:8px;padding:0 12px;min-height:44px;font:600 13.5px/1 var(--nbh-sans,-apple-system,sans-serif);border:0;white-space:nowrap;flex:0 0 auto;max-width:100%}
+  .toolbar .nbh-sheets b{overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+  .toolbar .nbh-sheets small{font-weight:400;color:var(--nbh-muted,#54676f);font-size:12px}
+  html.nbh-menu .toolbar #viewSeg{display:none!important}
+  html.nbh-menu .toolbar .row:has(> .nbh-sheets){flex-wrap:wrap;min-width:0;max-width:100%}
+  .toolbar .nbh-arrows{display:inline-flex;gap:6px;flex:0 0 auto;align-items:center}
+  .toolbar .nbh-arrows button{min-width:44px;min-height:44px;border-radius:8px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;font-size:22px;line-height:1;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:0}
+  .toolbar .nbh-arrows button[disabled]{opacity:.35}
+  .toolbar .nbh-arrows button small{font-size:12px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.nbh-fold .toolbar .nbh-fk > .nbh-sheets.nbh-sheets.nbh-sheets,html.nbh-fold .toolbar .nbh-fk > .nbh-arrows.nbh-arrows.nbh-arrows,html.nbh-fold .toolbar .nbh-arrows.nbh-fseg{display:inline-flex!important}
+  #nbhSheets{position:fixed;left:16px;right:16px;max-height:calc(100vh - 120px);overflow:auto;background:#fff;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-rule,#cfdad8);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:10px;z-index:70;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;box-sizing:border-box}
+  #nbhSheets .nbh-sheetsh{grid-column:1/-1;font:600 11px/1 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--nbh-muted,#54676f);padding:4px 10px 8px}
+  #nbhSheets .nbh-sheet{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:14px;text-align:left;color:inherit;width:100%;font-family:inherit}
+  #nbhSheets .nbh-sheet.on{background:var(--nbh-navy,#182e43);color:#fff;font-weight:600}
+  @media (max-width:520px){#nbhSheets{grid-template-columns:1fr}.toolbar .nbh-arrows button small{display:none}.toolbar .nbh-sheets{max-width:58vw}.toolbar .nbh-sheets b{max-width:30vw}}
+  .toolbar .nbh-sheets{min-width:0;overflow:hidden}
+  html.nbh-menu .toolbar.nbh-t1 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t1 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t2 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t2 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t3 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t3 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t4 .nbh-sheets b{max-width:12ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.nbh-menu .toolbar.nbh-t2 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t2 .nbh-arrows button small{max-width:10ch}
+  html.nbh-menu .toolbar.nbh-t3 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t3 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t4 .nbh-sheets b{max-width:8ch}html.nbh-menu .toolbar.nbh-t4 .nbh-arrows button small{display:none}
+}
+@media print{#nbhRail,#nbhSheets,.nbh-sheets,.nbh-arrows{display:none!important}html.nbh-rail body{padding-left:0!important}}
+
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 
@@ -3669,7 +3751,7 @@ html{touch-action:manipulation}
   function fit() {
     clear();
     if (!fitOn()) { label(); return; }
-    var design = designWidth(), avail = root.clientWidth;
+    var design = designWidth(), rail = document.getElementById('nbhRail'), avail = root.clientWidth - (rail ? rail.offsetWidth : 0);   /* v23.88 less the sheets rail (its width only: the body's own padding is in the gutter) */
     if (!design || !avail) { label(); return; }
     var z = Math.min(MAX, avail / (design + GUTTER * 2));
     if (z <= 1.02 || over()) { clear(); label(); return; }
@@ -3685,6 +3767,7 @@ html{touch-action:manipulation}
     label();
   }
 
+  window.nbhFitScreen = { fit: fit, clear: clear };   /* v23.88 the sheets rail re-fits the sheet */
   function label() {
     var b = document.getElementById('nbhFitBtn');
     if (b) {

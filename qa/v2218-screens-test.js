@@ -18,17 +18,20 @@ async function shellForm(br,vp,id){const ctx=await br.newContext({viewport:vp,ha
   return {ctx,page,fr,errs};}
 const tabs=fr=>fr.evaluate(()=>{const seg=document.getElementById('viewSeg'),bar=document.querySelector('.toolbar');if(!seg||!bar)return null;const sr=seg.getBoundingClientRect(),br=bar.getBoundingClientRect();
   const btns=[...seg.querySelectorAll('button')],whole=btns.filter(b=>{const r=b.getBoundingClientRect();return r.width>0&&r.left>=sr.left-1&&r.right<=sr.right+1;}).length;
-  const grp=seg.closest('.tgroup'),gr=grp.getBoundingClientRect(),others=[...bar.children].filter(g=>g!==grp&&g.offsetParent).map(g=>g.getBoundingClientRect().top);
-  return {n:btns.length,whole,segW:Math.round(sr.width),barW:Math.round(br.width),grpTop:Math.round(gr.top),othersTop:others.map(Math.round),barH:Math.round(br.height)};});
+  const grp=seg.closest('.tgroup')||seg.parentElement,gr=grp.getBoundingClientRect(),others=[...bar.children].filter(g=>g!==grp&&g.offsetParent).map(g=>g.getBoundingClientRect().top);
+  /* v23.88 sideways the tabs sit in the rail; upright a long strip is the Sheets menu */
+  const rail=!!seg.closest('#nbhRail'),menu=document.documentElement.classList.contains('nbh-menu'),mb=document.querySelector('.toolbar .nbh-sheets');let items=0;if(mb&&mb.offsetParent){mb.click();items=document.querySelectorAll('#nbhSheets .nbh-sheet').length;mb.click();}
+  const inWin=btns.filter(b=>{const r=b.getBoundingClientRect();return r.width>0&&r.top>=0&&r.bottom<=innerHeight;}).length;
+  return {n:btns.length,whole,inWin,rail,menu,items,segW:Math.round(sr.width),barW:Math.round(br.width),grpTop:Math.round(gr.top),othersTop:others.map(Math.round),barH:Math.round(br.height)};});
 (async()=>{const br=await L.chromium.launch();const errs=[];
   try{
   /* F480 */
   const P=await shellForm(br,{width:820,height:1180},'IA-1');const t=await tabs(P.fr);
-  ok('1 an iPad held upright: IA-1\'s view tabs have a row of their own across the toolbar, and show '+(t&&t.whole)+' of its '+(t&&t.n)+' pages whole',!!t&&t.segW>=t.barW*0.6&&t.whole>=Math.min(t.n,4)&&t.othersTop.every(y=>y>t.grpTop+10),t);
+  ok('1 an iPad held upright: IA-1\'s '+(t&&t.n)+' sheets are the Sheets menu, every one listed (v23.88)',!!t&&t.menu&&t.items===t.n,t);
   errs.push(...P.errs);await P.ctx.close();
   const W=await shellForm(br,{width:1180,height:820},'IA-1');const tw=await tabs(W.fr);
   /* v23.87: on a touch screen the tabs wrap onto as many rows as they need, so every sheet is in sight; the controls stay in the toolbar beside them */
-  ok('2 held sideways (1180 px) every tab is whole and in sight (the tabs wrap as they need, v23.87) and the controls stay in the toolbar beside them',!!tw&&tw.whole===tw.n&&tw.othersTop.every(y=>y>=tw.grpTop-12&&y<=tw.grpTop+tw.barH),tw);
+  ok('2 held sideways (1180 px) every tab sits in the rail, whole and in sight (v23.88)',!!tw&&tw.rail&&tw.inWin===tw.n,tw);
   /* F493: the dots by shape, and their colours on the light toolbar */
   const d=await W.fr.evaluate(async()=>{const L=[...document.querySelectorAll('#viewSeg button[data-nbh-fill]')];const one=st=>L.find(b=>b.dataset.nbhFill===st&&b.getAttribute('aria-pressed')!=='true');
     const look=b=>{if(!b)return null;const s=getComputedStyle(b,'::after');return {img:s.backgroundImage,bg:s.backgroundColor,border:s.borderTopColor,w:s.width,disp:s.display};};

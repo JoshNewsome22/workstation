@@ -35,8 +35,8 @@ const H=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);return e
     ok('6 iPad 1024: the crumb gives the form’s name at least 200 px (it had 98)',t>=200,t);
     await fr.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});try{await loadSim(fr);}catch(e){}await sleep(800);
     const tb=await fr.evaluate(()=>{const t=document.querySelector('.toolbar'),v=document.getElementById('viewSeg');const tops=v?new Set([...v.querySelectorAll('button')].filter(b=>b.offsetParent).map(b=>Math.round(b.getBoundingClientRect().top))).size:0;
-      return {h:Math.round(t.getBoundingClientRect().height),rows:tops};});
-    ok('7 TD-1: the view tabs take the toolbar’s width: at most 3 rows and a toolbar under 230 px (it was 6 rows, 295 px)',tb.rows<=3&&tb.h<230,tb);
+      return {h:Math.round(t.getBoundingClientRect().height),rows:tops,rail:!!document.getElementById('nbhRail'),menu:document.documentElement.classList.contains('nbh-menu')};});
+    ok('7 TD-1: the view tabs are the rail or the Sheets menu (v23.88), else at most 3 rows and a toolbar under 230 px (it was 6 rows, 295 px)',tb.rail||tb.menu||(tb.rows<=3&&tb.h<230),tb);
     ok('8 no page errors (iPad 1024)',!errs.length,errs.slice(0,3));await ctx.close();}
   /* the iPad sideways: a 12-inch page and DD-1 */
   {const {ctx,page,errs}=await shell(br,{width:1180,height:820},true,IPAD);let fr=await open(page,'SM-1');

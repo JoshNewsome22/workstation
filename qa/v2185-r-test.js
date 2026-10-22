@@ -67,7 +67,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   ok('1h the printed note carries its service line',/Service60 min, observation, with teacher, paraeducator, student/.test(head),head.slice(0,400));
   /* 2: the IEP's minutes from the case */
   const fin=await p.evaluate(()=>window.__nbhFactsIn({profile:{services:{minutes:120,per:'month',kind:'consult',note:'Behavior consultation to the classroom team'}}}));
-  await p.click('#viewSeg button[data-view="svc"]');await sleep(300);
+  await p.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="svc"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(300);
   const m=await p.evaluate(()=>({min:S.meta.iep_min,per:S.meta.iep_per,kind:S.meta.iep_kind,note:S.meta.iep_note,fld:document.getElementById('iepMin').value,iep:document.getElementById('svcIep').textContent.replace(/\s+/g,' '),met:document.getElementById('svcMetrics').textContent.replace(/\s+/g,' '),tot:[...document.querySelectorAll('#svcTot tr')].map(tr=>[...tr.cells].map(c=>c.textContent.trim()).join(' ')).join(' | ')}));
   ok('2a the IEP\'s minutes from DM-1 fill the empty fields',fin.filled>=4&&m.min==='120'&&m.per==='month'&&m.kind==='consult'&&m.fld==='120'&&/IEP service minutes/.test(fin.note),{fin,m});
   ok('2b against the IEP: 120 of 120 minutes this month (every kind but direct)',/120 of 120/.test(m.iep)&&/minutes this month/.test(m.iep),m.iep);
@@ -122,7 +122,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   await p.setInputFiles('#fileIn',{name:'CN-1_old.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(oldFile))});await sleep(500);
   const oldE=await p.evaluate(()=>({n:svcEntries().length,k:S.notes[0].svc_kind,e:svcEntries().find(e=>e.i===2)}));
   ok('5e an older file without the service fields opens; entries come from the times and the types',oldE.n===5&&oldE.k===''&&oldE.e.min===45&&oldE.e.kind==='training',oldE);
-  await p.setViewportSize({width:390,height:800});await p.click('#viewSeg button[data-view="svc"]').catch(()=>{});await sleep(300);
+  await p.setViewportSize({width:390,height:800});await p.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="svc"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */.catch(()=>{});await sleep(300);
   const sw=await p.evaluate(()=>[document.documentElement.scrollWidth,document.documentElement.clientWidth]);
   ok('5f the Service log page fits a phone (no sideways scroll of the page)',sw[0]<=sw[1]+1,sw);
   await p.close();
@@ -160,7 +160,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   const setT=(n,x)=>t.evaluate(([n,x])=>{const e=document.querySelector('[name="'+n+'"]');e.value=x;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},[n,x]);
   const setId=(id,x)=>t.evaluate(([id,x])=>{const e=document.getElementById(id);e.value=x;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},[id,x]);
   ok('7a an empty TD-1 sends no signatures',await t.evaluate(()=>{const o=window.__nbhFactsOut();return !(o&&o.plan&&o.plan.adoption&&o.plan.adoption.signatures);}));
-  await t.click('#viewSeg button[data-view="final"]');await sleep(300);
+  await t.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="final"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(300);
   await setT('ad.date','2026-10-08');await setT('ad.team','Ms. R. (ESE teacher); Mr. L. (LEA representative); Jordan Ellis (BCBA); general education teacher');await setT('ad.parent','yes');
   await t.click('#td85Team');await sleep(300);
   const r0=await t.evaluate(()=>JSON.parse(document.querySelector('[name="ad.sigs"]').value));
@@ -211,7 +211,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   ok('8e an image that is not a PNG or JPEG data address is dropped (the pad comes back)',bk2.imgs.length===2&&bk2.imgs.every(s=>s.indexOf('data:image/png')===0)&&bk2.pad0,bk2);
   await t.setInputFiles('#fileIn',{name:'TD-1_Mateo_Rivera.json',mimeType:'application/json',buffer:Buffer.from(tsave.t)});await sleep(1400);
   /* 9: printed and copied */
-  await t.click('#viewSeg button[data-view="final"]');await sleep(300);
+  await t.evaluate(s=>document.querySelector(s).click(),'#viewSeg button[data-view="final"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(300);
   await t.evaluate(()=>{window.dispatchEvent(new Event('beforeprint'));document.body.classList.add('print-final');});await t.emulateMedia({media:'print'});
   const pr=await t.evaluate(()=>{const B=document.getElementById('td85Block'),r=B.getBoundingClientRect();return {shown:getComputedStyle(document.getElementById('final')).display!=='none'&&r.height>150,
     imgs:[...B.querySelectorAll('img.td85-img')].filter(i=>getComputedStyle(i).display!=='none'&&i.getBoundingClientRect().height>20).length,

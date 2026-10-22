@@ -10676,6 +10676,43 @@ html{touch-action:manipulation}
   .sheet label > input[type="checkbox"],.sheet label > input[type="radio"]{vertical-align:middle;margin-top:-2px}
 }
 @media print{.nbh-hint,.nbh-eg,.nbh-seg{display:none!important}}
+
+/* v23.88 (the sheets of a form on an iPad, the BCBA's choice): the rail sideways, the Sheets menu upright, the sheet arrows;
+   the masthead's text runs the form's width on screen. Screen and touch only; paper keeps its layout. */
+@media screen{.nbh-mast .nbh-sub,.nbh-mast .nbh-savenote,.nbh-savenote,.nbh-mast .nbh-sub.nbh-wide.nbh-wide.nbh-wide,.nbh-mast .nbh-savenote.nbh-wide.nbh-wide.nbh-wide,.nbh-savenote.nbh-wide.nbh-wide.nbh-wide{max-width:none!important}}
+@media screen and (pointer:coarse){
+  #nbhRail{position:fixed;left:0;top:0;bottom:0;width:222px;box-sizing:border-box;background:var(--nbh-navy,#182e43);color:#fff;padding:10px 10px 12px;overflow:auto;z-index:60;-webkit-overflow-scrolling:touch}
+  html.nbh-rail body{padding-left:222px!important}
+  #nbhRail .nbh-railh{color:#9fb6c3;font:600 10.5px/1.2 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;margin:2px 10px 8px}
+  #nbhRail .nbh-railh b{display:block;color:#fff;font:600 12.5px/1.25 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:0;text-transform:none;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html #nbhRail #viewSeg{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;gap:2px;width:auto!important;max-width:none!important;overflow:visible!important;-webkit-mask-image:none!important;mask-image:none!important;background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important;margin:0!important}
+  html #nbhRail #viewSeg > button,html #nbhRail #viewSeg > [role="tab"]{display:flex!important;align-items:center;justify-content:space-between;gap:8px;text-align:left;width:100%;min-height:40px;height:auto!important;padding:7px 10px!important;border-radius:7px;background:transparent!important;color:#dbe6ea!important;border:0!important;box-shadow:none!important;font-size:13px!important;line-height:1.25;white-space:normal!important;margin:0!important;flex:0 0 auto!important}
+  html #nbhRail #viewSeg > button[aria-pressed="true"],html #nbhRail #viewSeg > button[aria-selected="true"],html #nbhRail #viewSeg > .active,html #nbhRail #viewSeg > .on{background:#fff!important;color:var(--nbh-navy,#182e43)!important;font-weight:600}
+  #nbhRail .nbh-railn{display:none}
+  html #nbhRail.nbh-compact .nbh-railh{margin:0 10px 6px}html #nbhRail.nbh-compact .nbh-railh b{display:none}html #nbhRail.nbh-compact #viewSeg{gap:1px}
+  html #nbhRail.nbh-compact #viewSeg > button,html #nbhRail.nbh-compact #viewSeg > [role="tab"]{min-height:36px!important;padding:4px 10px!important;font-size:12.5px!important}
+  .toolbar .nbh-sheets{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--nbh-navy,#182e43);border-radius:8px;padding:0 12px;min-height:44px;font:600 13.5px/1 var(--nbh-sans,-apple-system,sans-serif);border:0;white-space:nowrap;flex:0 0 auto;max-width:100%}
+  .toolbar .nbh-sheets b{overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+  .toolbar .nbh-sheets small{font-weight:400;color:var(--nbh-muted,#54676f);font-size:12px}
+  html.nbh-menu .toolbar #viewSeg{display:none!important}
+  html.nbh-menu .toolbar .row:has(> .nbh-sheets){flex-wrap:wrap;min-width:0;max-width:100%}
+  .toolbar .nbh-arrows{display:inline-flex;gap:6px;flex:0 0 auto;align-items:center}
+  .toolbar .nbh-arrows button{min-width:44px;min-height:44px;border-radius:8px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;font-size:22px;line-height:1;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:0}
+  .toolbar .nbh-arrows button[disabled]{opacity:.35}
+  .toolbar .nbh-arrows button small{font-size:12px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.nbh-fold .toolbar .nbh-fk > .nbh-sheets.nbh-sheets.nbh-sheets,html.nbh-fold .toolbar .nbh-fk > .nbh-arrows.nbh-arrows.nbh-arrows,html.nbh-fold .toolbar .nbh-arrows.nbh-fseg{display:inline-flex!important}
+  #nbhSheets{position:fixed;left:16px;right:16px;max-height:calc(100vh - 120px);overflow:auto;background:#fff;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-rule,#cfdad8);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:10px;z-index:70;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;box-sizing:border-box}
+  #nbhSheets .nbh-sheetsh{grid-column:1/-1;font:600 11px/1 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--nbh-muted,#54676f);padding:4px 10px 8px}
+  #nbhSheets .nbh-sheet{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:14px;text-align:left;color:inherit;width:100%;font-family:inherit}
+  #nbhSheets .nbh-sheet.on{background:var(--nbh-navy,#182e43);color:#fff;font-weight:600}
+  @media (max-width:520px){#nbhSheets{grid-template-columns:1fr}.toolbar .nbh-arrows button small{display:none}.toolbar .nbh-sheets{max-width:58vw}.toolbar .nbh-sheets b{max-width:30vw}}
+  .toolbar .nbh-sheets{min-width:0;overflow:hidden}
+  html.nbh-menu .toolbar.nbh-t1 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t1 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t2 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t2 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t3 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t3 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t4 .nbh-sheets b{max-width:12ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.nbh-menu .toolbar.nbh-t2 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t2 .nbh-arrows button small{max-width:10ch}
+  html.nbh-menu .toolbar.nbh-t3 .nbh-sheets b,html.nbh-menu .toolbar.nbh-t3 .nbh-arrows button small,html.nbh-menu .toolbar.nbh-t4 .nbh-sheets b{max-width:8ch}html.nbh-menu .toolbar.nbh-t4 .nbh-arrows button small{display:none}
+}
+@media print{#nbhRail,#nbhSheets,.nbh-sheets,.nbh-arrows{display:none!important}html.nbh-rail body{padding-left:0!important}}
+
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 
@@ -10746,7 +10783,7 @@ html{touch-action:manipulation}
   function fit() {
     clear();
     if (!fitOn()) { label(); return; }
-    var design = designWidth(), avail = root.clientWidth;
+    var design = designWidth(), rail = document.getElementById('nbhRail'), avail = root.clientWidth - (rail ? rail.offsetWidth : 0);   /* v23.88 less the sheets rail (its width only: the body's own padding is in the gutter) */
     if (!design || !avail) { label(); return; }
     var z = Math.min(MAX, avail / (design + GUTTER * 2));
     if (z <= 1.02 || over()) { clear(); label(); return; }
@@ -10762,6 +10799,7 @@ html{touch-action:manipulation}
     label();
   }
 
+  window.nbhFitScreen = { fit: fit, clear: clear };   /* v23.88 the sheets rail re-fits the sheet */
   function label() {
     var b = document.getElementById('nbhFitBtn');
     if (b) {

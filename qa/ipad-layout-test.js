@@ -19,9 +19,14 @@ const FORMS=L.forms().filter(f=>/id="nbh-ui-css"/.test(fs.readFileSync(path.join
 const TD=FORMS.find(f=>f.id==='TD-1');
 const tabs=()=>{const seg=document.querySelector('#viewSeg');if(!seg)return {n:0,out:0,scroll:0};
   const bs=[...seg.querySelectorAll('button')].filter(b=>!b.hidden&&getComputedStyle(b).display!=='none');
-  const out=bs.filter(b=>{const r=b.getBoundingClientRect();return r.width<2||r.right>innerWidth+1||r.left<-1;}).length;
+  /* v23.88: sideways the tabs sit in the rail (in sight when inside the window); upright a long strip is the Sheets menu (its button in
+     sight, every sheet listed when it opens); a short strip keeps its row */
+  const rail=!!seg.closest('#nbhRail'),menu=document.documentElement.classList.contains('nbh-menu');let out=0;
+  if(rail)out=bs.filter(b=>{const r=b.getBoundingClientRect();return r.width<2||r.bottom>innerHeight+1||r.top<-1;}).length;
+  else if(menu){const btn=document.querySelector('.toolbar .nbh-sheets');if(!btn||!btn.offsetParent)out=bs.length;else{btn.click();const items=document.querySelectorAll('#nbhSheets .nbh-sheet').length;out=items===bs.length?0:bs.length;btn.click();}}
+  else out=bs.filter(b=>{const r=b.getBoundingClientRect();return r.width<2||r.right>innerWidth+1||r.left<-1;}).length;
   const broken=[...document.querySelectorAll('.nbh-seg')].filter(s=>{const bs=[...s.querySelectorAll('button')];const r=bs.map(b=>Math.round(b.getBoundingClientRect().top));return bs.length&&new Set(r).size>1&&s.offsetParent;}).length;
-  return {n:bs.length,out,scroll:Math.max(0,seg.scrollWidth-seg.clientWidth-1),broken,segs:document.querySelectorAll('.nbh-seg').length};};
+  return {n:bs.length,out,scroll:(rail||menu)?0:Math.max(0,seg.scrollWidth-seg.clientWidth-1),broken,segs:document.querySelectorAll('.nbh-seg').length,mode:rail?'rail':menu?'menu':'row'};};
 (async()=>{const br=await L.chromium.launch();const errs=[];
   try{
   /* 1. every form, both ways up */

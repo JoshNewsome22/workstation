@@ -447,7 +447,15 @@ async function goView(page, v, tap) {
   const h = await page.evaluateHandle(v => document.querySelector('#viewSeg button[data-view="' + CSS.escape(v) + '"]'), v);
   const el = h.asElement(); let err = null;
   if (!el) return 'no button';
-  if (tap) { try { await el.tap({timeout: 2500}); } catch (e) { err = firstLine(e); await el.evaluate(b => b.click()).catch(() => {}); } }
+  /* v23.88 upright, a form's tabs live in the Sheets menu: the tap goes to the menu's item, as a person's would */
+  const menu = tap && await page.evaluate(() => !!(window.nbhSheets && nbhSheets.mode() === 'menu')).catch(() => false);
+  if (menu) {
+    try { const k = await el.evaluate(b => [...b.parentNode.querySelectorAll('button')].indexOf(b));
+      await page.tap('.toolbar .nbh-sheets', {timeout: 2500}); await sleep(350);
+      const items = await page.$$('#nbhSheets button.nbh-sheet'); if (!items[k]) throw new Error('no menu item ' + k);
+      await items[k].tap({timeout: 2500}); }
+    catch (e) { err = firstLine(e); await page.evaluate(() => { try { nbhSheets.close(); } catch (x) {} }).catch(() => {}); await el.evaluate(b => b.click()).catch(() => {}); } }
+  else if (tap) { try { await el.tap({timeout: 2500}); } catch (e) { err = firstLine(e); await el.evaluate(b => b.click()).catch(() => {}); } }
   else await el.evaluate(b => b.click()).catch(() => {});
   await sleep(450);
   const on = await curView(page);
@@ -495,6 +503,10 @@ async function press(page, f, view, b, where, ev, log) {
   const h = await page.evaluateHandle(k => __sw.find(k), b.key).catch(() => null);
   const el = h && h.asElement();
   if (!el) { rec.gone = true; return rec; }
+  /* v23.88 a drawn mark whose box lies outside its own drawing (IM-1's marks for a figure not shown collapse to the page's
+     corner) is not there for a person to tap: gone, not a missed tap (before the sheets rail, the corner's own marks took
+     the tap for them) */
+  if (await el.evaluate(x => { if (!(x instanceof SVGElement) || !x.ownerSVGElement) return false; const a = x.getBoundingClientRect(), b = x.ownerSVGElement.getBoundingClientRect(); return !(a.width && a.height) || a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom; }).catch(() => false)) { rec.gone = true; return rec; }
   /* a tap is Playwright's touchstart, then its own scroll to the button: the toolbar's fold (nbh-ui.js, v21.83) reads that as
      a person's swipe and folds, so a button that moved under the tap is tapped once more when the bar has settled */
   const tapIt = async () => { try { await el.tap({timeout: 2500}); } catch (e) { if (!/not stable/.test(String(e && e.message))) throw e; await sleep(900); await el.tap({timeout: 2500}); } };

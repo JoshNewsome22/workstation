@@ -109,7 +109,7 @@ async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.wai
   check(L1&&L1.unit===' per school day'&&L1.cond==='baseline','R1 filled, labelled with DD-1, the baseline, the days, the mean and the range: '+pa.cur);
   check(L1&&same(L1.mean,fa.mean)&&L1.n===fa.n&&same(L1.min,fa.min)&&same(L1.max,fa.max),'R1 equals DD-1’s own Baseline figures (mean '+fa.mean+', '+fa.n+' days, range '+fa.min+'–'+fa.max+')',{L1,fa});
   check(pa.meas==='frequency per school day','R1 had no response measure and took DD-1’s: '+pa.meas);
-  check(/from [\d.]+ per school day \(DD-1 baseline: mean of 6 days, range [\d.]+–[\d.]+\) to no/.test(pa.out),'R1’s sentence carries the level and its source',pa.out.slice(0,200));
+  check(/from [\d.]+ per school day to no/.test(pa.out)&&/DD-1 baseline: mean of 6 days, range [\d.]+–[\d.]+/.test(pa.cur||''),'R1’s sentence carries the level, its source apart (v23.88)',{out:pa.out.slice(0,200),cur:pa.cur});
   const os=by('Out of seat'),L7=parseLevel(os.cur),fo=F['Out of seat']||{};
   check(L7&&L7.unit===' per hour'&&same(L7.mean,fo.mean)&&L7.n===fo.n&&same(L7.min,fo.min)&&same(L7.max,fo.max),'Out of seat (rate per hour) equals DD-1’s Baseline figures: '+os.cur,{L7,fo});
   check(!by('Self-injury').cur&&/R2 \(Self-injury\) was left empty: DD-1 records it as a count of occurrences over the entire school day, and this objective is measured in rate per minute/.test(rep.text),'a different unit (rate per minute against DD-1’s count) is left empty, and the reason given');

@@ -48,6 +48,7 @@ const railState=page=>page.evaluate(()=>{const n=document.getElementById('railNa
 const toolbar=fr=>fr.evaluate(()=>{const t=document.querySelector('.toolbar'),v=document.getElementById('viewSeg');const rows=a=>{const T=a.filter(e=>e.offsetParent).map(e=>e.getBoundingClientRect().top).sort((x,y)=>x-y);let n=0,last=-99;T.forEach(y=>{if(y-last>8)n++;last=y;});return n;};
   const g=[...t.querySelectorAll(':scope > .tgroup')],cs=v&&getComputedStyle(v);
   return {h:Math.round(t.getBoundingClientRect().height),groupRows:rows(g),tabRows:rows([...v.querySelectorAll('button')]),wrap:cs&&cs.flexWrap,more:v.getAttribute('data-nbh-more'),sw:v.scrollWidth,cw:v.clientWidth,
+    rail:!!(v&&v.closest('#nbhRail')),railAll:!!v&&[...v.querySelectorAll('button')].every(b=>{const r=b.getBoundingClientRect();return r.width>0&&r.top>=0&&r.bottom<=innerHeight;}),menu:document.documentElement.classList.contains('nbh-menu'),sheets:!!document.querySelector('.toolbar .nbh-sheets'),
     moreBtn:(document.getElementById('nbhMoreBtn')||{}).textContent,dir:g[0]&&getComputedStyle(g[0]).flexDirection,minH:Math.min(...[...t.querySelectorAll('button')].filter(b=>b.offsetParent).map(b=>Math.round(b.getBoundingClientRect().height)))};});
 /* the text of a printed form, page by page, read in the workstation with its own pdf.js (as qa/v2190-ipad-pdf-test.js does) */
 const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pdfjsLoad();const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const pdf=await lib.getDocument({data:bytes}).promise;const out=[];
@@ -79,7 +80,7 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     /* v23.87: on a touch screen the view tabs wrap so every sheet is in sight; the toolbar is as tall as the rows the tabs need */
     ok('8 DM-1 on the iPad sideways: every view tab in sight (nothing scrolls sideways; the tabs wrap as they need, v23.87), the groups in a row, with "More" and "Fit", 44 px buttons',tb.sw<=tb.cw+1&&tb.h<=64+50*Math.max(0,tb.tabRows-1)&&tb.dir==='row'&&tb.moreBtn==='More'&&tb.minH>=44,tb);
     const td=await open(page,'TD-1');const t2=await toolbar(td);
-    ok('9 TD-1 (many tabs): the view tabs wrap onto the rows they need, nothing scrolls sideways and no fade is needed (v23.87)',t2.tabRows>=2&&t2.wrap==='wrap'&&t2.sw<=t2.cw+1&&!t2.more&&t2.h<=64+50*(t2.tabRows-1),t2);
+    ok('9 TD-1 (many tabs), sideways: the view tabs sit in the rail, every one in sight, nothing scrolls sideways (v23.88)',t2.rail&&t2.railAll&&t2.sw<=t2.cw+1&&!t2.more,t2);
     /* the last tab chosen: the row scrolls so it is in sight, the fade moves to the left */
     const t3=await td.evaluate(async()=>{const v=document.getElementById('viewSeg'),bs=[...v.querySelectorAll('button')],last=bs[bs.length-1];last.click();await new Promise(r=>setTimeout(r,300));
       const a=last.getBoundingClientRect(),s=v.getBoundingClientRect();return {inView:a.left>=s.left-1&&a.right<=s.right+1,more:v.getAttribute('data-nbh-more'),pressed:last.getAttribute('aria-pressed')};});
@@ -145,7 +146,7 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     ok('28 Today on a phone: rows with pills, 14 px, nothing wider than the box',td.li&&td.row==='flex'&&td.pill==='999px'&&td.db==='14px'&&td.sw<=1,td);
     await page.evaluate(()=>{try{$('#dlg').close();}catch(e){}});
     const fr=await open(page,'TD-1');const tb=await toolbar(fr);
-    ok('29 TD-1 on a phone: the view tabs one scrolling row with the fade; the toolbar two rows at most (the tabs, then the controls), under 120 px (it was 354)',tb.tabRows===1&&tb.wrap==='nowrap'&&tb.more==='r'&&tb.groupRows<=2&&tb.h<120,tb);
+    ok('29 TD-1 on a phone: the view tabs become the Sheets menu (v23.88); the toolbar two rows at most, under 120 px (it was 354)',tb.menu&&tb.sheets&&tb.groupRows<=2&&tb.h<120,tb);
     ok('30 no page errors (phone)',!errs.length,errs.slice(0,3));await ctx.close();}
   /* ---- 4. the laptop (a mouse): the form's toolbar as it was; the start screen's list sits left; the list's names a size larger ---- */
   {const {ctx,page,errs}=await shell(br,{width:1440,height:900},UA.mac,false,true);
@@ -192,7 +193,7 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     ok('40 the bar\u2019s labels at 12.5 px, the caseload options at 13; the browser is asked not to remember what is typed in the student bar',x.lbl==='12.5px'&&x.opt==='13px'&&x.ac.every(a=>a==='off'),{lbl:x.lbl,opt:x.opt,ac:x.ac});
     await page.evaluate(()=>{try{$('#dlg').close();}catch(e){}});await setBar(page);
     const fr=await open(page,'TD-1');
-    const v=await fr.evaluate(()=>{const g=document.getElementById('viewSeg').closest('.tgroup'),sp=g.querySelector(':scope > span');return {lbl:sp?getComputedStyle(sp).display:'none',others:[...document.querySelectorAll('.toolbar > .tgroup > span')].filter(e=>e.offsetParent).length};});
+    const v=await fr.evaluate(()=>{const g0=document.getElementById('viewSeg'),g=g0&&g0.closest('.tgroup'),sp=g&&g.querySelector(':scope > span');return {lbl:sp?getComputedStyle(sp).display:'none',others:[...document.querySelectorAll('.toolbar > .tgroup > span')].filter(e=>e.offsetParent).length};});
     ok('41 on a touch screen the tabs carry no "View" label (the tabs say what they are; the room goes to them)',v.lbl==='none',v);
     const fx=await fr.evaluate(async()=>{nbhUI.focus.set(true);await new Promise(r=>setTimeout(r,800));const b=document.querySelector('#nbhFxBar .nbh-fx-where b'),cs=b&&getComputedStyle(b),out=b?{tt:cs.textTransform,fs:cs.fontSize,t:b.textContent}:null;nbhUI.focus.set(false);return out;});
     ok('42 the focus bar says "Part 1 of \u2026" in sentence case at 12 px (it was small capitals)',!!fx&&fx.tt==='none'&&fx.fs==='12px'&&/^Part 1 of \d/.test(fx.t),fx);
