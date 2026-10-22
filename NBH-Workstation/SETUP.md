@@ -9905,6 +9905,16 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.99: "Print a sample" in sight on every screen (Form SP-1)
+(the BCBA's request of 10/22)
+
+- **Print a sample, beside Save data.** On a tablet the toolbar's groups fold under More controls, which hid the new
+  "Print a sample sheet" button. A copy now sits beside the quick Save data, left of More controls, on every screen; the
+  one under More stays. A tap prints the sample pages as before (every page SAMPLE, the student's marks untouched).
+
+Not changed: anything else. To set up: upload the whole folder as usual (SP-1, the one-file editions).
+Tested: `qa/sp99-test.js` (6), `qa/sp98-test.js`, `qa/sp1-rows-test.js`.
+
 ### v23.98: A sample scatterplot to print for staff, and a how-to video's QR code on the sheet (Form SP-1)
 (the BCBA's request of 10/22)
 

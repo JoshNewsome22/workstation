@@ -4956,6 +4956,20 @@ function spQRPaint(){
 { const render0 = render; render = function(){ const r = render0.apply(this, arguments); spQRPaint(); return r; }; }
 $("#spVideo").addEventListener("input", e => { state.cfg.video = e.target.value.trim(); spQRPaint(); });
 window.spQRPaint = spQRPaint;
+/* v23.99 (sp99) the sample button in sight: the toolbar's groups fold under More controls on a tablet, so a copy of
+   "Print a sample sheet" sits beside the quick Save data, left of More controls, on every screen */
+(function(){
+  let n = 0;
+  const t = setInterval(() => {
+    const more = document.getElementById("nbhMoreBtn");
+    if(more && more.parentNode && (document.getElementById("nbhSaveQuick") || n > 12) && !document.getElementById("spSampleQuick")){
+      const q = document.createElement("button"); q.type = "button"; q.id = "spSampleQuick"; q.textContent = "Print a sample";
+      q.title = "Prints this student\u2019s data sheet with made-up marks, every page watermarked SAMPLE, to keep beside the blank sheet. The marks on screen are not changed.";
+      q.addEventListener("click", spPrintSample);
+      more.parentNode.insertBefore(q, more); clearInterval(t);
+    }else if(++n > 40) clearInterval(t);
+  }, 250);
+})();
 
 $("#printBtn").addEventListener("click", () => {
   preparePrint();
