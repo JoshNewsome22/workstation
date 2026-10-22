@@ -9905,6 +9905,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.98: A sample scatterplot to print for staff, and a how-to video's QR code on the sheet (Form SP-1)
+(the BCBA's request of 10/22)
+
+- **Print a sample sheet.** Beside Print (under More controls), **Print a sample sheet** prints this student's own
+  data sheet (the behaviors, definitions, cutoffs, times, days, activities and codes as set up) with made-up marks,
+  so staff can see what a filled-in sheet looks like beside the blank one. Every page is watermarked SAMPLE across the
+  grid, bannered at the top (*Example marks on this student's sheet… Not the student's data: do not count or copy
+  it*) and titled "— SAMPLE"; the summary and control chart are left out. The marks put most of the behavior in the
+  sheet's demand intervals (the activity column, when it names them: math, writing, transitions, pack up; fixed
+  intervals when it does not), one X for an interval not observed and a few stray marks, so the sheet reads as a week
+  with a pattern. The marks on screen and in the record are not touched.
+- **How-to video, as a QR code on the paper.** A **How-to video** field (under More controls, beside *marking
+  guide*) takes a web link; it prints as a QR code with "Scan to watch how to fill out this sheet" in the head of
+  every data sheet, the sample included. The link is kept with the record (Save data). The code is drawn in the
+  form, so the offline copy prints it too. The link must be one staff can open without a password (YouTube or a
+  shared Google Drive file); the workstation's own website folder is password-protected.
+
+Not changed: the ordinary print, the saved files (a record without a link reads as before), the marking guide.
+To set up: upload the whole folder as usual (SP-1, the one-file editions). Tested: `qa/sp98-test.js` (11),
+`qa/sp1-rows-test.js`, `qa/v2231-sp1-print-test.js`, `qa/sp1-case-defs-test.js`, `qa/sp1-sheet2-defs-test.js`.
+
 ### v23.97: Readings discussed in supervision (Form RS-1), from the workstation's own references; the record emailed as an attached page
 (the BCBA's request of 10/22)
 
