@@ -2757,7 +2757,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.94';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v23.95';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -8704,10 +8704,17 @@ const PWA=(()=>{
     const u=unsaved();
     if(u&&!(await wsUI.confirm('Sign in now?\nThe page loads again from the website to ask for the password. '+(u==='typed'?'The open forms hold work that is not in a case file yet; it will be lost.':'Anything entered in the open forms since the last Save case will be lost.'),{ok:'Load the page',danger:true})))return;
     P.reloading=true;state.pwaReload=true;
+    try{sessionStorage.setItem('nbh.pwa.cred','1');}catch(e){}
     location.href=P.scope+'?nbh-online=signin';
   }
   /* this folder's worker asks for a file past itself: its own requests met the website's password, which this page's
      requests carry. Only that worker, only a file of this folder, only a GET; the bytes go back to it and nowhere else. */
+  /* v23.95 the session's sign-in: held once the page was loaded through Sign in or a fetch answered 200, lost on a 401 */
+  function pwaInstalled(){try{if(window.__nbhStandalone!=null)return !!window.__nbhStandalone;return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches;}catch(e){return false;}}
+  /* held: granted by Sign in or a 200; in a browser tab one try a session is allowed (the browser may keep the password); the installed app never keeps it, so no try without Sign in */
+  function credHeld(){try{if(sessionStorage.getItem('nbh.pwa.cred')==='1')return true;if(pwaInstalled())return false;if(sessionStorage.getItem('nbh.pwa.tried')==='1')return false;sessionStorage.setItem('nbh.pwa.tried','1');return true;}catch(e){return !pwaInstalled();}}
+  function credNote(s){try{if(s===401)sessionStorage.removeItem('nbh.pwa.cred');else if(s===200)sessionStorage.setItem('nbh.pwa.cred','1');}catch(e){}}
+  try{if(/[?&]nbh-online=signin(?:&|$)/.test(location.search))sessionStorage.setItem('nbh.pwa.cred','1');}catch(e){}
   function relay(e){
     const d=e.data||{};
     if(d.nbh!=='offline'||d.type!=='fetch')return false;
@@ -8716,6 +8723,8 @@ const PWA=(()=>{
     let u=null;try{u=new URL(d.url);}catch(x){}
     const name=u?u.href.slice(P.scope.length):'';
     if(!u||u.origin!==location.origin||u.href.indexOf(P.scope)!==0||u.search||u.hash||!/^[A-Za-z0-9][A-Za-z0-9._-]*(?:\/[A-Za-z0-9][A-Za-z0-9._-]*)?\.[A-Za-z0-9]+$/.test(name)){port.postMessage({ok:false});return true;}   /* v21.67 a file in a folder of the folder (nbh-doc/, nbh-ocr/) too */
+    /* v23.95 only while this session holds the website's sign-in: a fetch without it raises the browser's sign-in box */
+    if(!credHeld()){port.postMessage({ok:false});return true;}
     port.postMessage({ack:true});
     const h={},q=d.headers||{};
     if(q['If-None-Match'])h['If-None-Match']=String(q['If-None-Match']);
@@ -8724,6 +8733,7 @@ const PWA=(()=>{
     fetch(u.href,{credentials:'include',cache:'no-store',redirect:'follow',headers:h}).then(async r=>{
       const b=r.status===200?await r.arrayBuffer():null,hd={};
       for(const k of ['ETag','Last-Modified','Content-Type'])if(r.headers.get(k))hd[k]=r.headers.get(k);
+      credNote(r.status);
       port.postMessage({ok:true,status:r.status,redirected:r.redirected,headers:hd,body:b},b?[b]:[]);
     }).catch(()=>{try{port.postMessage({ok:false});}catch(x){}});
     return true;
@@ -8738,6 +8748,7 @@ const PWA=(()=>{
     if(bar.dataset.mode==='auth'){P.authLater=true;paint();return;}
     P.later=upKey();paint();say('The new version waits for the next start, or for Reload in the Offline copy notice.');});
   $('#pwaSign').addEventListener('click',signIn);
+  window.__nbhRelay=relay;
   $('#pwaSave').addEventListener('click',()=>$('#saveCase').click());
   /* a file the share sheet did not keep (the installed app on an iPad): the case is not saved after all */
   window.addEventListener('nbh-share-save',e=>{

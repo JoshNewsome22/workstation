@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v23.95: The website's password is asked for once, when you choose Sign in, not every few minutes
+(the BCBA's screenshot of 10/22: the sign-in box on the iPad while working)
+
+- **What happened.** The offline copy looks for updates when the workstation starts and every few minutes while it is in
+  front. On a website whose folder has a password (cPanel Directory Privacy), the copy's own requests cannot carry the
+  sign-in on an iPad, so it asked the open workstation window to fetch the file, and that request raised the iPad's
+  sign-in box each time, because the installed app keeps no password between launches.
+- **Now.** Installed on an iPad or iPhone (opened from its icon), the window fetches for the offline copy only after
+  the page was loaded through **Sign in** (the strip, or the Offline copy notice), or once a fetch of this session
+  answered; a 401 ends it. Otherwise the check simply records that the website asked for its password, and the strip
+  shows it with Sign in and Later; nothing asks on its own. In a browser tab, where the browser may keep the
+  password, one try a session is allowed as before; a 401 ends that too. The workstation works either way, from its
+  offline copy.
+- **What to do on the iPad.** Tap **Sign in** on the strip when you want the update check (after an upload); type the
+  password once; the session then holds it. Later hides the strip for the session. Where the folder has no password, or
+  a browser keeps it (Safari and Chrome on a computer), nothing changes.
+
+Not changed: what the offline copy saves, the case files, the forms.
+To set up: upload the whole folder as usual (`index.html` of both editions changed). Tested: `qa/pw95-test.js` (6), `qa/pwa-test.js`.
+
 ### v23.94: Form RS-1 (the RBT Supervision Log) on the iPad, and the record shared with the RBT or another BCBA
 (the BCBA's two screenshots and request of 10/22)
 
