@@ -9905,6 +9905,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.03: The student's photo from the case on the scatterplot, the head's layout, the last drifting highlight (Form SP-1)
+(the BCBA's second look at the Walkthrough on the iPad, 10/23)
+
+- **The photo comes from the case.** The photo on the workstation's bar now goes onto the data sheet by itself, as it does
+  on Form DD-1, and follows the bar when it changes. Under More controls, Printing, *Student's photo on the sheet*: *on
+  the sheet* ticks it off and on; *Change the photo* takes one with the camera or chooses one, kept with this record as
+  the form's own; *Use the case's photo* goes back to the bar's. Form DM-1's photo/media permission still gates it.
+- **The head's layout.** The photo has a column of its own beside Client, Observer and Dates covered, so the fields are
+  not crowded. The *Sheet no.* box is gone: the band already says "sheet 1 of 2". The walkthrough's narration says so
+  ("the sheet number is printed for you"; one line re-voiced).
+- **The last drifting highlight.** The glow on the guide page's initials table sat above it: the page's text wrapped
+  after the walkthrough was built, and the table moved. Every glow now remembers what it points at and is placed again
+  when a page's layout changes.
+
+Not changed: the marks, the summary and the chart, the saved files (a record's own photo stays its own; `sheet` in an
+old file is kept, unused). To set up: upload the whole folder as usual (SP-1, `nbh-sp1-narration.js`, the one-file
+editions). Tested: `qa/sp103-test.js` (10), `qa/sp102-test.js`, `qa/sp101-test.js`, `qa/sp100-walk-test.js`,
+`qa/v2221-narration-test.js`, the SP-1 sheet tests.
+
 ### v24.02: The scatterplot's walkthrough highlights, the student's photo on the sheet, the activity setting (Form SP-1)
 (the BCBA's first look at the Walkthrough on the iPad, 10/23)
 

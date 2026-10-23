@@ -1,5 +1,5 @@
 /* ===== walk-script.json: the narration's words (read when the recorded narration is not beside the form) ===== */
-window.SP_WALK_SCRIPT=[{"id": "intro", "text": "This is the scatterplot data sheet. It records when a behavior happens across the school day, so the team can see the pattern. Here is how to fill it out."}, {"id": "head", "text": "At the top, write your name as the observer, the setting, and the sheet number when there is more than one sheet. The student, the target behavior and the dates are printed for you."}, {"id": "defs", "text": "Below that is the definition of the behavior, with an example and a non-example. Read it before you start. Only what fits the definition is marked."}, {"id": "grid", "text": "The grid is the school day. Each row is one interval of time, with the activity printed beside it. Each column is one day. Write the date at the top of each day's column."}, {"id": "low", "text": "At the end of each interval, mark its cell. If the behavior happened once, draw a slash through the cell."}, {"id": "high", "text": "If it happened two or more times, shade the whole cell. The cutoff is printed in the legend at the bottom of your sheet; use the number printed there."}, {"id": "blank", "text": "If you watched the interval and the behavior did not happen, leave the cell blank. A blank means you watched, and there was none."}, {"id": "count", "text": "At the end of each interval, write the number of times the behavior happened in its cell. Leave the cell blank when you watched and there was none. The legend at the bottom tells the team which numbers count as high rate; you only write the number."}, {"id": "mark", "text": "At the end of each interval, mark its cell. If the behavior happened in that interval, once or many times, shade the whole cell. There is no slash on this sheet; a cell is either blank or shaded."}, {"id": "blank1", "text": "If you watched the interval and the behavior did not happen, leave the cell blank. A blank means you watched, and there was none. The legend at the bottom of your sheet shows both marks."}, {"id": "x", "text": "If you did not observe the student during an interval, because they were pulled out, at lunch in another room, or absent, write an X in that cell. For a whole day, write an X at the top of the day's column. An X is left out of every count."}, {"id": "codes", "text": "If your sheet has a code key, write the code letter in the marked cell. If the activity in an interval was not the one printed, write what it was."}, {"id": "daily", "text": "At the end of each day, initial that day's line on the back of the sheet, and note anything unusual, like a fire drill or a substitute. The totals at the bottom are for the behavior analyst; you can leave them."}, {"id": "sample", "text": "A sheet marked SAMPLE may be attached. It shows what a filled-in sheet looks like. It is not the student's data: do not count it, and do not copy from it. Mark the blank sheet."}, {"id": "outro", "text": "Return the sheet to the behavior analyst at the end of the week. Thank you for marking it carefully."}];
+window.SP_WALK_SCRIPT=[{"id": "intro", "text": "This is the scatterplot data sheet. It records when a behavior happens across the school day, so the team can see the pattern. Here is how to fill it out."}, {"id": "head", "text": "At the top, write your name as the observer, and the setting. The student, the target behavior, the dates, and the sheet number are printed for you."}, {"id": "defs", "text": "Below that is the definition of the behavior, with an example and a non-example. Read it before you start. Only what fits the definition is marked."}, {"id": "grid", "text": "The grid is the school day. Each row is one interval of time, with the activity printed beside it. Each column is one day. Write the date at the top of each day's column."}, {"id": "low", "text": "At the end of each interval, mark its cell. If the behavior happened once, draw a slash through the cell."}, {"id": "high", "text": "If it happened two or more times, shade the whole cell. The cutoff is printed in the legend at the bottom of your sheet; use the number printed there."}, {"id": "blank", "text": "If you watched the interval and the behavior did not happen, leave the cell blank. A blank means you watched, and there was none."}, {"id": "count", "text": "At the end of each interval, write the number of times the behavior happened in its cell. Leave the cell blank when you watched and there was none. The legend at the bottom tells the team which numbers count as high rate; you only write the number."}, {"id": "mark", "text": "At the end of each interval, mark its cell. If the behavior happened in that interval, once or many times, shade the whole cell. There is no slash on this sheet; a cell is either blank or shaded."}, {"id": "blank1", "text": "If you watched the interval and the behavior did not happen, leave the cell blank. A blank means you watched, and there was none. The legend at the bottom of your sheet shows both marks."}, {"id": "x", "text": "If you did not observe the student during an interval, because they were pulled out, at lunch in another room, or absent, write an X in that cell. For a whole day, write an X at the top of the day's column. An X is left out of every count."}, {"id": "codes", "text": "If your sheet has a code key, write the code letter in the marked cell. If the activity in an interval was not the one printed, write what it was."}, {"id": "daily", "text": "At the end of each day, initial that day's line on the back of the sheet, and note anything unusual, like a fire drill or a substitute. The totals at the bottom are for the behavior analyst; you can leave them."}, {"id": "sample", "text": "A sheet marked SAMPLE may be attached. It shows what a filled-in sheet looks like. It is not the student's data: do not count it, and do not copy from it. Mark the blank sheet."}, {"id": "outro", "text": "Return the sheet to the behavior analyst at the end of the week. Thank you for marking it carefully."}];
 /* (v24.00) Form SP-1, the Walkthrough view: a narrated walkthrough of the paper scatterplot data sheet for the staff who
    mark it, played like a video. The worked example is a simulated student (nothing from this record is in it): the sheet is
    put into the form, drawn as the Data sheet draws it, copied as the paper prints, and the record put back in the same turn.
@@ -109,6 +109,12 @@ function demoPages(){
   finally{Object.assign(state,keep);renderMeta();if(typeof renderCodes==='function')renderCodes();render();if(ioa)spIoaSet(true);composing=false;}
   return {sheet,guide};}
 const stateKey=()=>(+state.cfg.levels===1?1:2)+'|'+(state.cfg.mode==='count'?'count':'tap');
+/* a rect in the paper's own space: from the layout offsets up to the page (v24.02: not from the screen rectangles, which the
+   form's Fit zoom and the stage's scale distort on an iPad), plus the page's offset from the paper's left */
+function prelOf(el,P){if(!el||!P)return null;let x=0,y=0,n=el;while(n&&n!==P){x+=n.offsetLeft;y+=n.offsetTop;n=n.offsetParent;}
+  if(n!==P)return null;return{x:x+P.offsetLeft,y,w:el.offsetWidth,h:el.offsetHeight};}
+function boxTo(e,r,p){e.style.left=f2(r.x-p)+'px';e.style.top=f2(r.y-p)+'px';e.style.width=f2(r.w+2*p)+'px';e.style.height=f2(r.h+2*p)+'px';}
+let RO=null;
 
 function compose(D){
   const st=D.stage;st.innerHTML='';
@@ -125,10 +131,11 @@ function compose(D){
   const page=(el,x)=>{const w=div('spw-pg');w.style.left=x+'px';if(el){el.removeAttribute('id');el.querySelectorAll('button,.noprint,select,input,#codeTable').forEach(e=>e.remove());w.appendChild(el);}paper.appendChild(w);return w;};
   const P1=page(pg.sheet,0),P2=page(pg.guide,PW+GAP);
   const PH=Math.max(300,(P1.firstElementChild&&P1.firstElementChild.offsetHeight)||P1.offsetHeight);
-  /* a rect in the paper's own space: from the layout offsets up to the page (v24.02: not from the screen rectangles, which
-     the form's Fit zoom and the stage's scale distort on an iPad), plus the page's offset from the paper's left */
-  const prel=(el,P)=>{if(!el)return null;P=P||P1;let x=0,y=0,n=el;while(n&&n!==P){x+=n.offsetLeft;y+=n.offsetTop;n=n.offsetParent;}
-    if(n!==P)return null;return{x:x+P.offsetLeft,y,w:el.offsetWidth,h:el.offsetHeight};};
+  const prel=(el,P)=>prelOf(el,P||P1);
+  /* v24.03 a glow remembers what it points at: when a page's size changes after the build (a font arriving, a line wrapping),
+     every glow is placed again from the sheet's layout (B.relayout, read by renderAt) */
+  const glows=[];
+  try{if(RO)RO.disconnect();RO=new ResizeObserver(()=>{if(B)B.relayout=true;});RO.observe(P1);RO.observe(P2);}catch(e){}
   const uni=rs=>{rs=rs.filter(Boolean);if(!rs.length)return null;const x=Math.min(...rs.map(r=>r.x)),y=Math.min(...rs.map(r=>r.y));return{x,y,w:Math.max(...rs.map(r=>r.x+r.w))-x,h:Math.max(...rs.map(r=>r.y+r.h))-y};};
   const q=(s,P)=>(P||P1).querySelector(s),qa=(s,P)=>[...(P||P1).querySelectorAll(s)];
   const byText=(sel,text,up,P)=>{const e=qa(sel,P).find(x=>x.textContent.trim().startsWith(text));return e?(up?e.closest(up):e):null;};
@@ -143,7 +150,9 @@ function compose(D){
     const fx={el:e,tr:new Track(Object.assign({o:0,s:1,dy:0,dx:0},init||{}))};fxs.push(fx);return fx;};
   const pulse=(fx,t0,dur)=>{fx.tr.move(t0,t0+.3,{o:1});fx.tr.move(t0+Math.max(.35,dur-.4),t0+dur,{o:0});};
   /* a glow on the paper (it moves with the camera) */
-  const glow=(r,t0,dur,pad)=>{if(!r)return;const p=pad||5;const g=mkFx('wk-glow spw-glow','',{x:r.x-p,y:r.y-p,w:r.w+2*p,h:r.h+2*p},null,paper);pulse(g,t0,dur);};
+  const glow=(r,t0,dur,pad,el,P)=>{if(!r)return;const p=pad||5;const g=mkFx('wk-glow spw-glow','',{x:r.x-p,y:r.y-p,w:r.w+2*p,h:r.h+2*p},null,paper);pulse(g,t0,dur);if(el)glows.push({fx:g,el,P:P||P1,pad:p});return g;};
+  /* a glow on an element of the sheet (placed again when the page's layout changes) */
+  const glowEl=(el,t0,dur,pad,P)=>glow(prel(el,P),t0,dur,pad,el,P);
   /* the marks: a cell of the grid changes at a moment (set as attributes and a class, so Save as video's painter sees it) */
   const marks=[];
   const rows=qa('table.scatter tbody tr'),ths=qa('table.scatter thead tr:first-child th');
@@ -155,6 +164,8 @@ function compose(D){
   const absent=(t,ci)=>{const th=ths[ci+2],col=rows.map(tr=>tr.querySelectorAll('td.mark')[ci]).filter(Boolean);
     marks.push({t,on:false,apply(on){if(on===this.on)return;this.on=on;if(th)th.classList.toggle('sp-absent',on);col.forEach(td=>setCell(td,on?'x':'0',''));}});};
   /* the parts of the sheet the scenes point at */
+  const E={photo:q('.sp-photo'),observer:byText('.ident .f label','Observer','.f'),setting:byText('.ident .f label','Setting','.f'),client:byText('.ident .f label','Client','.f'),behavior:byText('.ident .f label','Target','.f'),dates:byText('.ident .f label','Dates','.f'),
+    defs:q('.defs'),def:byText('.defs .dlab','Operational','.drow'),ex:byText('.defs .dlab','Example','.drow'),nonex:byText('.defs .dlab','Non-example','.drow')};
   const R={head:prel(q('.nbh-print-head')),photo:prel(q('.sp-photo')),band:prel(q('.bar')),ident:prel(q('.ident')),
     observer:prel(byText('.ident .f label','Observer','.f')),setting:prel(byText('.ident .f label','Setting','.f')),sheetno:prel(byText('.ident .f label','Sheet no','.f')),
     client:prel(byText('.ident .f label','Client','.f')),behavior:prel(byText('.ident .f label','Target','.f')),dates:prel(byText('.ident .f label','Dates','.f')),
@@ -167,24 +178,24 @@ function compose(D){
   const cellsR=(r0,r1)=>uni([prel(tdAt(r0,0)),prel(tdAt(r1,4))]);
   const colR=ci=>{const th=prel(ths[ci+2]);if(!th||!R.table)return null;return{x:th.x,y:th.y,w:th.w,h:R.table.y+R.table.h-th.y};};
   const SC={};
-  SC.intro=K=>{cam.set(K.t,HOME);glow(R.band,K.at('scatterplot',.05),2.4,8);return K.d;};
-  SC.head=K=>{camTo(K.t,K.t+.9,uni([R.head,R.ident]),1.3);glow(R.observer,K.at('observer',.12),3);glow(R.setting,K.at('setting',.28),3);glow(R.sheetno,K.at('sheet number',.4),3);
-    const t=K.at('student',.62);glow(R.photo,t-.1,4.1);glow(R.client,t,4);glow(R.behavior,t+.3,3.7);glow(R.dates,t+.6,3.4);return K.d;};
-  SC.defs=K=>{camTo(K.t,K.t+.9,R.defs,1.3);glow(R.def||R.defs,K.at('definition',.1),3.2);glow(R.ex,K.at('example',.3),2.6);glow(R.nonex,K.at('non-example',.45),2.6);glow(R.defs,K.at('read it',.6),3);return K.d;};
-  SC.grid=K=>{camTo(K.t,K.t+.9,R.table,1.1);glow(R.row3,K.at('each row',.2),3.4);glow(colR(1),K.at('each column',.55),3);glow(R.dateline,K.at('write the date',.75),3.2);return K.d;};
-  SC.low=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);const t=K.at('draw a slash',.55);mark(t,tdAt(2,1),'1');glow(prel(tdAt(2,1)),t-.3,Math.max(2,K.d-(t-K.t)+.2),3);return K.d;};
-  SC.high=K=>{const t=K.at('shade',.12);mark(t,tdAt(3,1),'2');glow(prel(tdAt(3,1)),t-.3,3.2,3);camTo(K.at('legend',.55)-.3,K.at('legend',.55)+.6,R.legend,1.4);glow(R.lgSlash,K.at('legend',.55)+.5,3);glow(R.lgShaded,K.at('legend',.55)+.8,3);return K.d;};
-  SC.blank=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);glow(prel(tdAt(2,2)),K.at('leave',.2),Math.max(2.5,K.d-1),3);return K.d;};
-  SC.count=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);const t=K.at('write the number',.1);mark(t,tdAt(2,1),'1','1');mark(t+.9,tdAt(3,1),'2','3');glow(prel(tdAt(2,1)),t-.3,2.2,3);glow(prel(tdAt(3,1)),t+.6,2.2,3);
-    glow(prel(tdAt(2,2)),K.at('leave the cell blank',.4),2.6,3);const tl=K.at('legend',.66);camTo(tl-.3,tl+.6,R.legend,1.4);glow(R.legend,tl+.5,3.2);return K.d;};
-  SC.mark=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);const t=K.at('shade',.3);mark(t,tdAt(2,1),'2');mark(t+.8,tdAt(3,1),'2');glow(prel(tdAt(2,1)),t-.3,2.4,3);glow(prel(tdAt(3,1)),t+.5,2.4,3);
+  SC.intro=K=>{cam.set(K.t,HOME);glowEl(q('.bar'),K.at('scatterplot',.05),2.4,8);return K.d;};
+  SC.head=K=>{camTo(K.t,K.t+.9,uni([R.head,R.ident]),1.3);glowEl(E.observer,K.at('observer',.12),3);glowEl(E.setting,K.at('setting',.3),3);
+    const t=K.at('student',.5);glowEl(E.photo,t-.1,4.6);glowEl(E.client,t,4.5);glowEl(E.behavior,t+.3,4.2);glowEl(E.dates,t+.6,3.9);glowEl(q('.bar'),K.at('sheet number',.8),2.6,8);return K.d;};
+  SC.defs=K=>{camTo(K.t,K.t+.9,R.defs,1.3);glowEl(E.def||E.defs,K.at('definition',.1),3.2);glowEl(E.ex,K.at('example',.3),2.6);glowEl(E.nonex,K.at('non-example',.45),2.6);glowEl(E.defs,K.at('read it',.6),3);return K.d;};
+  SC.grid=K=>{camTo(K.t,K.t+.9,R.table,1.1);glowEl(rows[2],K.at('each row',.2),3.4);glow(colR(1),K.at('each column',.55),3);glow(R.dateline,K.at('write the date',.75),3.2);return K.d;};
+  SC.low=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);const t=K.at('draw a slash',.55);mark(t,tdAt(2,1),'1');glowEl(tdAt(2,1),t-.3,Math.max(2,K.d-(t-K.t)+.2),3);return K.d;};
+  SC.high=K=>{const t=K.at('shade',.12);mark(t,tdAt(3,1),'2');glowEl(tdAt(3,1),t-.3,3.2,3);camTo(K.at('legend',.55)-.3,K.at('legend',.55)+.6,R.legend,1.4);glowEl(q('.legend .lgrow.lg-slash'),K.at('legend',.55)+.5,3);glowEl(byText('.legend .lgrow span','Shaded','.lgrow'),K.at('legend',.55)+.8,3);return K.d;};
+  SC.blank=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);glowEl(tdAt(2,2),K.at('leave',.2),Math.max(2.5,K.d-1),3);return K.d;};
+  SC.count=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);const t=K.at('write the number',.1);mark(t,tdAt(2,1),'1','1');mark(t+.9,tdAt(3,1),'2','3');glowEl(tdAt(2,1),t-.3,2.2,3);glowEl(tdAt(3,1),t+.6,2.2,3);
+    glowEl(tdAt(2,2),K.at('leave the cell blank',.4),2.6,3);const tl=K.at('legend',.66);camTo(tl-.3,tl+.6,R.legend,1.4);glowEl(q('.legend'),tl+.5,3.2);return K.d;};
+  SC.mark=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);const t=K.at('shade',.3);mark(t,tdAt(2,1),'2');mark(t+.8,tdAt(3,1),'2');glowEl(tdAt(2,1),t-.3,2.4,3);glowEl(tdAt(3,1),t+.5,2.4,3);
     const t2=K.at('no slash',.7);glow(uni([prel(tdAt(2,1)),prel(tdAt(3,1))]),t2,Math.max(2,K.d-(t2-K.t)),4);return K.d;};
-  SC.blank1=K=>{glow(prel(tdAt(2,2)),K.at('leave',.1),3,3);const tl=K.at('legend',.62);camTo(tl-.3,tl+.6,R.legend,1.4);glow(R.lgBlank,tl+.5,3);glow(R.lgShaded,tl+.8,3);return K.d;};
-  SC.x=K=>{camTo(K.t,K.t+.9,uni([prel(ths[2]),cellsR(0,9)]),1.25);const t=K.at('write an x',.42);mark(t,tdAt(6,2),'x');glow(prel(tdAt(6,2)),t-.3,3,3);
-    const t2=K.at('whole day',.6);absent(t2+.5,3);glow(colR(3),t2+.4,3.2,3);glow(R.lgX,K.at('left out',.85),2.5);return K.d;};
-  SC.codes=K=>{camTo(K.t,K.t+.9,R.codes,1.4);glow(R.codekey||R.codes,K.at('code key',.08),2.8);const t=K.at('write the code letter',.3);camTo(t-.4,t+.4,cellsR(0,7),1.4);mark(t+.3,tdAt(3,1),count?'2':'2','A');glow(prel(tdAt(3,1)),t,3,3);
-    const t2=K.at('activity',.6);camTo(t2-.3,t2+.5,uni([prel(rows[3]),prel(rows[3])]),1.5);glow(R.act3,t2+.3,Math.max(2,K.d-(t2-K.t)),3);return K.d;};
-  SC.daily=K=>{camTo(K.t,K.t+1,R.ginit||R.gpage,1.2);glow(R.ginit,K.t+.9,4);const t=K.at('totals',.62);camTo(t-.4,t+.5,R.tfoot,1.4);glow(R.tfoot,t+.4,Math.max(2,K.d-(t-K.t)),3);return K.d;};
+  SC.blank1=K=>{glowEl(tdAt(2,2),K.at('leave',.1),3,3);const tl=K.at('legend',.62);camTo(tl-.3,tl+.6,R.legend,1.4);glowEl(byText('.legend .lgrow span','Blank','.lgrow'),tl+.5,3);glowEl(byText('.legend .lgrow span','Shaded','.lgrow'),tl+.8,3);return K.d;};
+  SC.x=K=>{camTo(K.t,K.t+.9,uni([prel(ths[2]),cellsR(0,9)]),1.25);const t=K.at('write an x',.42);mark(t,tdAt(6,2),'x');glowEl(tdAt(6,2),t-.3,3,3);
+    const t2=K.at('whole day',.6);absent(t2+.5,3);glow(colR(3),t2+.4,3.2,3);glowEl(byText('.legend .lgrow span','X','.lgrow'),K.at('left out',.85),2.5);return K.d;};
+  SC.codes=K=>{camTo(K.t,K.t+.9,R.codes,1.4);glowEl(q('.codekey')||q('.codes'),K.at('code key',.08),2.8);const t=K.at('write the code letter',.3);camTo(t-.4,t+.4,cellsR(0,7),1.4);mark(t+.3,tdAt(3,1),count?'2':'2','A');glowEl(tdAt(3,1),t,3,3);
+    const t2=K.at('activity',.6);camTo(t2-.3,t2+.5,uni([prel(rows[3]),prel(rows[3])]),1.5);glowEl(rows[3]&&rows[3].querySelector('td.act'),t2+.3,Math.max(2,K.d-(t2-K.t)),3);return K.d;};
+  SC.daily=K=>{camTo(K.t,K.t+1,R.ginit||R.gpage,1.2);glowEl(q('.sp-ginit',P2),K.t+.9,4,5,P2);const t=K.at('totals',.62);camTo(t-.4,t+.5,R.tfoot,1.4);glowEl(q('table.scatter tfoot'),t+.4,Math.max(2,K.d-(t-K.t)),3);return K.d;};
   SC.sample=K=>{cam.move(K.t,K.t+.9,HOME);
     const w=mkFx('spw-sampw','<div class="spw-samp">SAMPLE</div>',{x:0,y:PH*.42,w:PW,h:160},null,paper);w.tr.move(K.t+.4,K.t+1,{o:1});w.tr.move(K.t+K.d-.3,K.t+K.d+.3,{o:0});
     const c=mkFx('spw-card spw-sampc','<b>SAMPLE</b>Example marks, to show how the sheet is filled in. Not the student’s data: do not count it or copy it. Mark the blank sheet.',{x:290,y:40,w:700});
@@ -200,7 +211,7 @@ function compose(D){
     cues.push({id,start:T0,dur,narr:ln.d,text:ln.t,chapter:CHOF[id]||'sheet',chunks:chunks(id,ln.t,T0,on),a:ln.a});T+=dur;});
   cam.move(T-1.2,T-.2,HOME);
   const chapters=CHAPS.map(([id,label])=>{const c=cues.find(q=>q.chapter===id);return c?{id,label,start:c.start}:null;}).filter(Boolean);
-  return{D:T,cues,chapters,cam,paper,fxs,marks,cap,notes,key:stateKey()};
+  return{D:T,cues,chapters,cam,paper,fxs,marks,cap,notes,glows,key:stateKey(),relayout:false};
 }
 /* captions: a line in pieces of up to two caption lines; each piece shows a moment before the voice reaches its first word */
 const CAPLEAD=.12;
@@ -214,6 +225,7 @@ let RMQ=null;const reduced=()=>{try{RMQ=RMQ||window.matchMedia('(prefers-reduced
 function cueAt(t){if(!B)return null;const c=B.cues;let lo=0,hi=c.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(c[m].start<=t)lo=m;else hi=m-1;}return c[lo];}
 function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=cueAt(t);
   const v=reduced()&&cue?Math.min(B.D,cue.start+cue.dur-.02):t;
+  if(B.relayout){B.relayout=false;for(const g of B.glows){const r=prelOf(g.el,g.P);if(r)boxTo(g.fx.el,r,g.pad);}}
   const c=B.cam.at(v);css(B.paper,'transform','translate('+f2(c.x)+'px,'+f2(c.y)+'px) scale('+c.s.toFixed(4)+')');
   for(const fx of B.fxs){const s=fx.tr.at(v);css(fx.el,'opacity',f2(s.o));css(fx.el,'visibility',s.o>.001?'visible':'hidden');css(fx.el,'transform',s.dy||s.dx||s.s!==1?'translate('+f2(s.dx||0)+'px,'+f2(s.dy)+'px) scale('+s.s.toFixed(4)+')':'none');}
   for(const mk of B.marks)mk.apply(v>=mk.t);
