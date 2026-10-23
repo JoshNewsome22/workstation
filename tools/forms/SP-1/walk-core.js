@@ -7,11 +7,13 @@ function demoState(){const one=+state.cfg.levels===1,count=state.cfg.mode==='cou
   const meta={client:'A. Student (sample)',observer:'',setting:'Room 12',sheet:'',behavior:'Aggression',
     definition:'Hits, kicks, or pushes another person with enough force to be felt.',
     example:'Slaps a peer on the arm; kicks the teacher’s leg under the table.',nonexample:'Bumping into someone in line; a high-five.',
-    threshold:'2',week:'October 19, 2026 – October 23, 2026',date0:'2026-10-19',date1:'2026-10-20',date2:'2026-10-21',date3:'2026-10-22',date4:'2026-10-23'};
+    threshold:'2',week:'October 19, 2026 – October 23, 2026',date0:'2026-10-19',date1:'2026-10-20',date2:'2026-10-21',date3:'2026-10-22',date4:'2026-10-23',photo:DEMO_PHOTO,photoOn:'1'};
   const cfg={startMin:7*60+30,spanH:8,interval:30,days:5,dayStart:1,mode:count?'count':'tap',codes:true,threshold:2,perSheet:10,levels:one?1:2,actOn:true,guide:true,video:'',
     activity:['Arrival','Morning meeting','Independent math','Independent math','Specials','Specials','Lunch','Recess','Transition back','Writing','Group reading','Centers','Science','Snack','Pack up','Dismissal']};
   const cells={};
   return {meta,cfg,codes:[{k:'A',d:'Demand / work given'},{k:'B',d:'Transition'},{k:'C',d:'Attention to others'},{k:'D',d:'Alone, low attention'}],cells,behaviors:[{meta:Object.assign({},meta),cells}],cur:0};}
+/* the worked example's photo slot: a drawn placeholder (a plain silhouette), so the sheet shows where a student's photo goes */
+const DEMO_PHOTO='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#dfe8ea"/><circle cx="50" cy="38" r="17" fill="#8aa0a8"/><path d="M18 92c3-20 16-30 32-30s29 10 32 30z" fill="#8aa0a8"/></svg>');
 let composing=false;
 function demoPages(){
   const keep={meta:state.meta,cfg:state.cfg,codes:state.codes,cells:state.cells,behaviors:state.behaviors,cur:state.cur};
@@ -38,9 +40,10 @@ function compose(D){
   const page=(el,x)=>{const w=div('spw-pg');w.style.left=x+'px';if(el){el.removeAttribute('id');el.querySelectorAll('button,.noprint,select,input,#codeTable').forEach(e=>e.remove());w.appendChild(el);}paper.appendChild(w);return w;};
   const P1=page(pg.sheet,0),P2=page(pg.guide,PW+GAP);
   const PH=Math.max(300,(P1.firstElementChild&&P1.firstElementChild.offsetHeight)||P1.offsetHeight);
-  /* a rect in the paper's own space (the page's offset from the paper's left, the stage's scale taken out) */
-  const prel=(el,P)=>{if(!el)return null;P=P||P1;const r=el.getBoundingClientRect(),c=P.getBoundingClientRect();const k=c.width/(P.offsetWidth||1)||1;
-    return{x:(r.left-c.left)/k+P.offsetLeft,y:(r.top-c.top)/k,w:r.width/k,h:r.height/k};};
+  /* a rect in the paper's own space: from the layout offsets up to the page (v24.02: not from the screen rectangles, which
+     the form's Fit zoom and the stage's scale distort on an iPad), plus the page's offset from the paper's left */
+  const prel=(el,P)=>{if(!el)return null;P=P||P1;let x=0,y=0,n=el;while(n&&n!==P){x+=n.offsetLeft;y+=n.offsetTop;n=n.offsetParent;}
+    if(n!==P)return null;return{x:x+P.offsetLeft,y,w:el.offsetWidth,h:el.offsetHeight};};
   const uni=rs=>{rs=rs.filter(Boolean);if(!rs.length)return null;const x=Math.min(...rs.map(r=>r.x)),y=Math.min(...rs.map(r=>r.y));return{x,y,w:Math.max(...rs.map(r=>r.x+r.w))-x,h:Math.max(...rs.map(r=>r.y+r.h))-y};};
   const q=(s,P)=>(P||P1).querySelector(s),qa=(s,P)=>[...(P||P1).querySelectorAll(s)];
   const byText=(sel,text,up,P)=>{const e=qa(sel,P).find(x=>x.textContent.trim().startsWith(text));return e?(up?e.closest(up):e):null;};
@@ -67,7 +70,7 @@ function compose(D){
   const absent=(t,ci)=>{const th=ths[ci+2],col=rows.map(tr=>tr.querySelectorAll('td.mark')[ci]).filter(Boolean);
     marks.push({t,on:false,apply(on){if(on===this.on)return;this.on=on;if(th)th.classList.toggle('sp-absent',on);col.forEach(td=>setCell(td,on?'x':'0',''));}});};
   /* the parts of the sheet the scenes point at */
-  const R={head:prel(q('.nbh-print-head')),band:prel(q('.bar')),ident:prel(q('.ident')),
+  const R={head:prel(q('.nbh-print-head')),photo:prel(q('.sp-photo')),band:prel(q('.bar')),ident:prel(q('.ident')),
     observer:prel(byText('.ident .f label','Observer','.f')),setting:prel(byText('.ident .f label','Setting','.f')),sheetno:prel(byText('.ident .f label','Sheet no','.f')),
     client:prel(byText('.ident .f label','Client','.f')),behavior:prel(byText('.ident .f label','Target','.f')),dates:prel(byText('.ident .f label','Dates','.f')),
     defs:prel(q('.defs')),def:prel(byText('.defs .dlab','Operational','.drow')||byText('.defs .dlab','Operational',null)),
@@ -81,7 +84,7 @@ function compose(D){
   const SC={};
   SC.intro=K=>{cam.set(K.t,HOME);glow(R.band,K.at('scatterplot',.05),2.4,8);return K.d;};
   SC.head=K=>{camTo(K.t,K.t+.9,uni([R.head,R.ident]),1.3);glow(R.observer,K.at('observer',.12),3);glow(R.setting,K.at('setting',.28),3);glow(R.sheetno,K.at('sheet number',.4),3);
-    const t=K.at('student',.62);glow(R.client,t,4);glow(R.behavior,t+.3,3.7);glow(R.dates,t+.6,3.4);return K.d;};
+    const t=K.at('student',.62);glow(R.photo,t-.1,4.1);glow(R.client,t,4);glow(R.behavior,t+.3,3.7);glow(R.dates,t+.6,3.4);return K.d;};
   SC.defs=K=>{camTo(K.t,K.t+.9,R.defs,1.3);glow(R.def||R.defs,K.at('definition',.1),3.2);glow(R.ex,K.at('example',.3),2.6);glow(R.nonex,K.at('non-example',.45),2.6);glow(R.defs,K.at('read it',.6),3);return K.d;};
   SC.grid=K=>{camTo(K.t,K.t+.9,R.table,1.1);glow(R.row3,K.at('each row',.2),3.4);glow(colR(1),K.at('each column',.55),3);glow(R.dateline,K.at('write the date',.75),3.2);return K.d;};
   SC.low=K=>{camTo(K.t,K.t+.9,cellsR(0,7),1.4);const t=K.at('draw a slash',.55);mark(t,tdAt(2,1),'1');glow(prel(tdAt(2,1)),t-.3,Math.max(2,K.d-(t-K.t)+.2),3);return K.d;};

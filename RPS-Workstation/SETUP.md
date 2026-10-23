@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.02: The scatterplot's walkthrough highlights, the student's photo on the sheet, the activity setting (Form SP-1)
+(the BCBA's first look at the Walkthrough on the iPad, 10/23)
+
+- **The highlights sit on what the narrator names.** On the iPad the glows had drifted below the fields, the date line
+  and the marked cells: they were placed from screen rectangles, which the form's Fit zoom and the stage's scale
+  distorted. They are now placed from the sheet's own layout, and the Walkthrough view is never zoomed by Fit.
+- **The student's photo on the data sheet.** Under More controls, Printing: *Choose or take a photo* (the camera or the
+  photos; kept with this record at 320 px), shown in the head of the data sheet beside the client's name, printed when
+  *on the sheet* is ticked, *Remove the photo* to take it out. While Form DM-1's photo/media permission on file is No
+  (the case passes it in), the photo stays in the record but is not shown or printed, and a note says so. The
+  walkthrough's example shows the slot with a drawn placeholder, never a real picture.
+- **Activity beside each time** is its own setting under Time and days, with what it does, so the activity column is
+  found when the sheet is set up (it had been a small checkbox in the Entry row).
+
+Not changed: the marks, the summary and the chart, the saved files (a record without a photo reads as before).
+To set up: upload the whole folder as usual (SP-1, the one-file editions). Tested: `qa/sp102-test.js` (11),
+`qa/sp100-walk-test.js`, `qa/sp101-test.js`, the SP-1 sheet tests.
+
 ### v24.01: The scatterplot's toolbar as a settings panel (Form SP-1)
 (the BCBA's request of 10/23)
 
