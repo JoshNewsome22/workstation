@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = 'd885df8ed5c2';
+const VERSION = '57d34b752c8e';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -137,6 +137,7 @@ const FILES = [
   'nbh-polish.js',
   'nbh-ia1-narration.js',
   'nbh-tk1-video.js',
+  'nbh-abc1-narration.js',
   'nbh-sp1-narration.js',
   'nbh-dd1-narration.js',
   'nbh-ra1-narration.js',

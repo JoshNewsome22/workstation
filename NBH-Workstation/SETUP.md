@@ -9905,6 +9905,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.05: Form ABC-1's Walkthrough view opens with a narrated walkthrough video of the paper sheets and the analysis
+(the BCBA's request of 10/23: "a similar walkthrough type of video that shows how to fill out the ABC data sheet, the background sample analysis, etc.")
+
+- **A narrated walkthrough at the top of the Walkthrough view**, played in the form with Form TK-1's player (captions,
+  chapters, full screen, Save as video), as Form SP-1's is (v24.00). Seventeen lines in five chapters: *The sheet*
+  (the fields at the top, adult within view and peak intensity, the consequence window and check interval printed from
+  the record, the three coded columns); *An incident* (a setting event, the antecedent, the behavior and what preceded
+  it, the consequence, the brief description written in sentence by sentence, the outcome boxes, hand it in); *A
+  background check* (why the background sample is taken, the check filled in, leave every box blank when none
+  applied); *The analysis* (how the record puts the two sheets together: demand before 9 of 12 incidents against 4 of
+  20 checks, the hypotheses ranked, contingency strength once 10 samples are on file); *Sample and hand-in*. The drawn
+  step-by-step stories (S to E) stay below it.
+- **Built from the form's own paper sheets.** The worked example is a simulated student: the v24.04 incident sheet and
+  background sample sheet are built by the form's own paper-sheet code with the example's header and a drawn
+  placeholder photo, and a third page shows the analysis reading. The record is never touched (the sheet functions take
+  an optional example header; each tick box now carries its option id). Every tick, written value and sentence appears
+  at its moment in the narration and is gone again when the video is scrubbed back; the glows follow the sheet's layout
+  (placed from the layout offsets, re-placed when a page reflows).
+- **The narration beside the forms** as `nbh-abc1-narration.js` (both editions' folders, 1.2 MB, read the first time
+  the view opens, as the other walkthroughs are); the one-file editions carry it (index.html's embed NARTAG8 and
+  `tools/build-single.py`). Sources in `tools/forms/ABC-1/`: `walk-script.json` (the words), `make-narration.py`
+  (the voice), `walk-core.js` / `walk-render.js` / `walk-view.js` (the scenes), `walk-abc.css`, and `build-walk.py`,
+  which assembles `walk.js` around Form SM-1's player.
+- Checks: `qa/abc105-walk-test.js` (the player above the stories, the lazy narration read once, the build from the
+  example with the record untouched, the frames, Save as video's painter, leaving the view pauses, the paper sheets
+  still print the record's header, the shell's embed). `qa/v2221-narration-test.js` and `qa/pwa-test.js` name the new
+  narration file.
+
 ### v24.04: Form ABC-1 brought up to the scatterplot's standard: paper data sheets, a settings panel, full-width text, the case's photo
 (the BCBA's request of 10/23)
 
