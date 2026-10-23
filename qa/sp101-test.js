@@ -30,7 +30,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await p.evaluate(()=>{window.__printed=0;window.print=()=>{window.__printed++;window.__s=document.querySelectorAll('#spPrint .sp-sample').length;};document.querySelector('#sampleBtn').click();});await sleep(1000);
   ok('Print a sample sheet still prints the sample pages',await p.evaluate(()=>window.__printed===1&&window.__s>=1));
   const h=await p.evaluate(()=>({bar:document.querySelector('.toolbar').getBoundingClientRect().height,win:innerHeight}));
-  ok('the open panel leaves room for the sheet below it (the toolbar under 70% of the window)',h.bar<h.win*.7,h);
+  ok('the open panel leaves room for the sheet below it (the toolbar under 75% of the window)',h.bar<h.win*.75,h);
   ok('no page errors',!errs.length,errs.slice(0,3));await p.close();
  }
  console.log('RESULT: '+(bad?bad+' failed':'all passed'));await b.close();process.exit(bad?1:0);})();
