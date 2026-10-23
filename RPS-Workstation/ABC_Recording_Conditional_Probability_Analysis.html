@@ -1196,7 +1196,8 @@ html.nbh-compact .toolbar .abc-panel{display:none}
 @media print{
   html.abc-paper body > :not(#abcPaper){display:none!important}
   html.abc-paper #abcPaper{display:block!important;box-shadow:none;margin:0;padding:0;width:auto;max-width:none}
-  html.abc-paper #abcPaper .ap{width:auto}
+  html.abc-paper #abcPaper .ap{width:7.6in;margin:0}   /* v24.09 (abc109): a fixed width, whatever the frame's */
+  html.abc-paper body{margin:0;padding:0}
   html.abc-paper #abcPaper .ap + .ap{page-break-before:always;break-before:page}
 }
 </style>
@@ -9871,19 +9872,28 @@ function sampleIncident(){
     narrative:"10:14 Teacher put the math sheet on the desk: “Start with number one.” Student said “No, I’m not doing it” and pushed the sheet away. 10:15 Student screamed and cried, about four minutes, still in the seat. Teacher took the sheet back and moved to the next student. Screaming stopped within a minute of the sheet leaving the desk. No peers reacted." };
 }
 let printing = false;
+/* v24.09 on iOS the print is the frame as laid out on the screen, scaled to the paper: inside the workstation the frame is
+   narrower than a page, so the host is zoomed to the frame's width first and the scaled print comes out at the sheet's size */
+const iosPrint = (() => { try{ return CSS.supports("-webkit-touch-callout", "none"); }catch(e){ return false; } })();
+function paperFit(force){
+  const host = q("#abcPaper"); if(!host) return 1;
+  const w = document.documentElement.clientWidth || window.innerWidth || 0, k = w > 0 ? Math.min(1, w / (7.6 * 96)) : 1;
+  host.style.zoom = (force || iosPrint) && k < .999 ? String(Math.round(k * 1000) / 1000) : "";
+  return host.style.zoom ? +host.style.zoom : 1;
+}
 function paperPrint(kind){
   if(printing) return; printing = true;
   const host = q("#abcPaper");
   host.innerHTML = kind === "bg" ? bgSheet() : incidentSheet(kind === "sample" ? sampleIncident() : null);
-  document.documentElement.classList.add("abc-paper");
-  const done = () => { if(!printing) return; printing = false; document.documentElement.classList.remove("abc-paper"); host.innerHTML = ""; };
+  document.documentElement.classList.add("abc-paper"); paperFit(false);
+  const done = () => { if(!printing) return; printing = false; document.documentElement.classList.remove("abc-paper"); host.innerHTML = ""; host.style.zoom = ""; };
   window.addEventListener("afterprint", done, { once:true });
   try{ window.print(); } finally { setTimeout(done, 1500); }
 }
 q("#abcBlankBtn").addEventListener("click", () => paperPrint("blank"));
 q("#abcSampleBtn").addEventListener("click", () => paperPrint("sample"));
 q("#abcBgBtn").addEventListener("click", () => paperPrint("bg"));
-window.abcPaper = { html:(kind, demo) => kind === "bg" ? bgSheet(demo) : incidentSheet(kind === "sample" ? (demo && demo.sample || sampleIncident()) : null, demo), print:paperPrint, paint:paintPhoto };
+window.abcPaper = { fit:paperFit, html:(kind, demo) => kind === "bg" ? bgSheet(demo) : incidentSheet(kind === "sample" ? (demo && demo.sample || sampleIncident()) : null, demo), print:paperPrint, paint:paintPhoto };
 /* ---- the toolbar as a settings panel (as Form SP-1's) ---- */
 const BAR = document.querySelector(".toolbar"); if(!BAR) return;
 const byId = id => document.getElementById(id), made = {};

@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.09: Form ABC-1's paper sheet printed from an iPad inside the workstation comes out at its own size, one page
+(the BCBA's prints of 10/23, still two pages after v24.07, both from the workstation on an iPad)
+
+- **What was happening.** The workstation's own print style prints a note, not the form, so an iPad print of the form
+  is iOS printing the form's frame as it is laid out on the screen, scaled to the paper. Held upright inside the
+  workstation that frame is about 600 px wide; the paper sheet filled it, and the print was the sheet scaled up by about
+  a fifth: head fields wrapping, two pages. (Not text autosizing, as v24.07 supposed; that change is harmless and stays.)
+- **The fix.** For print the sheet is a fixed 7.6 in wide (it no longer fills whatever frame it is in), and on iOS
+  (`-webkit-touch-callout` supported) the print host is zoomed to the frame's width before printing, so the frame scaled
+  to the paper comes out at the sheet's own size, one page. A frame wider than the sheet is never zoomed up (the print
+  is then a little smaller than full size rather than wider than the page). On a desktop browser nothing changes; the
+  zoom is computed by `abcPaper.fit`, which the check calls with the iOS behavior forced in a 600 px frame.
+- Checks: `qa/abc109-test.js` (the 730 px sheet in a 600 px frame zoomed to 0.82; no zoom on a desktop; each sheet one
+  page at 7.6 in).
+
 ### v24.08: Form ABC-1's paper sheet keeps a short coded list under the student's defined target behaviors
 (the BCBA's request of 10/23: with the defined targets coming through, drop most of the preselected non-target behaviors and leave some and Other, to save room in the middle column)
 
