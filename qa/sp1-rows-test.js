@@ -56,8 +56,9 @@ const CASES={long:{},short:{short:true},two:{levels:2},codes:{levels:2,codes:tru
     lg[0].kind==='first'&&lg[0].rowh>=24&&R.short.sheets[0].rowh>lg[0].rowh&&all.every(s=>s.rowh<=44&&s.rowh>=12),{long:lg.map(s=>[s.kind,s.rowh]),short:R.short.sheets.map(s=>[s.kind,s.rowh])});
   ok('3 a later sheet is counted with its definitions, legend and citation (a middle sheet without the legend gets taller rows)',
     lg[1].kind==='last'&&R.long.page-lg[1].h>=0&&R.three.sheets.some(s=>s.kind==='cont')&&R.three.sheets.find(s=>s.kind==='cont').rowh>R.three.sheets.find(s=>s.kind==='last').rowh,R.three.sheets.map(s=>[s.kind,s.rowh,R.three.page-s.h]));
-  const nf=R.names.sheets[0].f,obs=nf.find(x=>x.lab==='Observer'),beh=nf.find(x=>x.lab==='Target behavior'),tops=[...new Set(nf.map(x=>x.top))];
-  ok('4 the six fields print whole as text that wraps, three to a row, each label whole',R.names.sheets[0].inputs===0&&obs&&obs.text===OBS&&obs.lines>=2&&beh&&beh.text===BEH&&
+  /* v24.03 the Sheet no. box is gone from the paper (the band names the sheet): the five printed fields, in two rows */
+  const nf=R.names.sheets[0].f.filter(x=>x.top>0||x.lines>0),obs=nf.find(x=>x.lab==='Observer'),beh=nf.find(x=>x.lab==='Target behavior'),tops=[...new Set(nf.map(x=>x.top))];
+  ok('4 the five printed fields print whole as text that wraps, three to a row, each label whole',R.names.sheets[0].inputs===0&&obs&&obs.text===OBS&&obs.lines>=2&&beh&&beh.text===BEH&&
     tops.length===2&&nf.every(x=>x.labW>=x.labNeed-1)&&R.names.pdf.join(' ').includes('Jordan Ellis (simulated)'),{nf,tops});
   ok('5 the Date line keeps its 24 px whatever the rows\' height',all.every(s=>s.date>=23&&s.date<=26),all.map(s=>[s.case,s.kind,s.rowh,s.date]));
   const bad=Object.entries(R).flatMap(([n,r])=>{const pg=r.pdf.filter(t=>/Scatterplot Data Sheet/.test(t));return pg.length===r.sheets.length+(r.sheets.length?0:0)&&pg.every(t=>/Intervals marked/.test(t))?[]:[{n,pages:pg.length,sheets:r.sheets.length}];});
