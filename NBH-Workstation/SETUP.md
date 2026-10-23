@@ -9905,6 +9905,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.04: Form ABC-1 brought up to the scatterplot's standard: paper data sheets, a settings panel, full-width text, the case's photo
+(the BCBA's request of 10/23)
+
+- **A one-page paper ABC data sheet.** Under More controls, Printing: *Print a blank data sheet* prints one page for the
+  folder with the observation header (student, observer, setting, target behavior, consequence window and check
+  interval filled from the record), one incident's details (date, start, duration, activity, staff, adult within view,
+  peak intensity), the setting events, the three coded columns with every antecedent (grouped, with its EO class),
+  every behavior and precursor, and every consequence (withheld ones marked) as boxes to tick, six lines for the brief
+  description, and the outcome boxes. *Print a sample sheet* prints the same sheet with a made-up incident ticked and
+  described, every page watermarked and bannered SAMPLE. *Print a background sample sheet* prints two background checks
+  a page to fill in by hand (what was in place at the check, events in the seconds scored, lower-intensity responses,
+  setting events). Each prints on its own, one page, the record untouched.
+- **The toolbar as a settings panel.** The top row keeps the views, Focus, Dictate, the case, Save data, Print a blank
+  sheet, More controls and Fit; More controls opens three labeled columns: Printing (the record; the paper sheets),
+  Files (the student's photo, the how-to video link, Save and Open data, the CSV exports, the packet) and Simulation and
+  reset. The controls are the same elements, moved.
+- **Full-width text.** The masthead's description, the Autosave note and every note on the tabs ran out at 76 characters;
+  they now run the width of the page.
+- **The student's photo and the how-to video.** The photo on the workstation's bar goes onto the paper sheet's head by
+  itself and follows the bar (Form DM-1's photo permission still gates it); *Change the photo* takes or chooses one as the
+  form's own, *Use the case's photo* goes back. A how-to video link prints as a QR code in the sheet's head. Both are kept
+  in the record's header (Save data, the packet, Autosave).
+
+Not changed: the record's incidents, samples and analysis, the existing printing of the record, the saved files (a file
+without the new header fields reads as before). To set up: upload the whole folder as usual (ABC-1, the one-file
+editions). Tested: `qa/abc104-test.js` (10), `qa/abc-noise-test.js`, `qa/abc-edit-sample-test.js`,
+`qa/abc-sound-detail-test.js`, `qa/v2178-a-test.js`.
+
 ### v24.03: The student's photo from the case on the scatterplot, the head's layout, the last drifting highlight (Form SP-1)
 (the BCBA's second look at the Walkthrough on the iPad, 10/23)
 
