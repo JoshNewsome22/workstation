@@ -1453,6 +1453,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 .ap-grp h5 .ap-tbh{font-style:italic;font-weight:400;color:#2f6b6d;margin-left:5px;font-size:6.4pt}
 </style>
 <style id="abc107-css">
+/* abc108: the short coded list under defined targets (v24.08) */
 /* v24.07 the paper sheet printed from an iPad: no text autosizing (iOS Safari inflated the small text when printing, and the
    sheet ran to two pages); the narrative's ruled lines as elements (a gradient printed as black bars there) */
 html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!important;text-size-adjust:none!important}
@@ -9827,7 +9828,11 @@ function incidentSheet(sample, demo){
   const h = demo && demo.header ? demo.header : readHeader(), on = sample ? sample : {}, has = id => !!(on.ids && on.ids.includes(id));
   const photo = demo ? (demo.photo || "") : (state.sheet.photo && state.sheet.photoOn !== "0" && photoOK() ? state.sheet.photo : "");
   /* v24.06 the defined targets (Form TB-1's, or the walkthrough example's own; never the record's in the example) print first */
-  const TB = demo ? (demo.targets || []).map(t => Object.assign({ caseT:true }, t)) : BEHAVIORS.filter(b => b.caseT), BEH = TB.concat(BEHAVIORS.filter(b => !b.caseT));
+  const TB = demo ? (demo.targets || []).map(t => Object.assign({ caseT:true }, t)) : BEHAVIORS.filter(b => b.caseT);
+  /* v24.08 under defined targets, a short coded list (seven common codes and Other) so the column takes less room; a sheet
+     with no defined targets keeps the whole list; a code named like a defined target is left out */
+  const SHORT = ["b_agg_staff", "b_agg_peer", "b_nssi", "b_elope", "b_prop_others", "b_disrupt", "b_lowcomp", "b_other"], norm = v => String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(), tbl = TB.map(t => norm(t.label));
+  const BEH = TB.concat(BEHAVIORS.filter(b => !b.caseT && (!TB.length || SHORT.includes(b.id)) && !tbl.includes(norm(b.label))));
   let x = '<div class="ap' + (sample ? " ap-sample" : "") + '">' + head("ABC Recording & Conditional Probability Analysis");
   x += '<div class="ap-band">ABC Incident Data Sheet <small>one incident a sheet · coded + narrative</small></div>';
   if(sample) x += '<div class="ap-sambar"><b>SAMPLE</b><span>Example marks on this student’s sheet, to show how it is filled in. Not the student’s data: do not count or copy it. Fill in a blank sheet.</span></div>';

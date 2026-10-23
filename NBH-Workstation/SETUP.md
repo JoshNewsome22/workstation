@@ -9905,6 +9905,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.08: Form ABC-1's paper sheet keeps a short coded list under the student's defined target behaviors
+(the BCBA's request of 10/23: with the defined targets coming through, drop most of the preselected non-target behaviors and leave some and Other, to save room in the middle column)
+
+- **Under defined targets, seven common codes and Other.** When the sheet carries target behaviors defined on Form
+  TB-1 (v24.06), the coded list under them is now Physical aggression to staff, Physical aggression to peers,
+  Self-injurious behavior (NSSI), Elopement, Property destruction: others', General disruption, Low rate of compliance,
+  and Other. A code named
+  like a defined target (a TB-1 target called Elopement) is left out. The middle column is about half as tall.
+- **A sheet with no defined targets keeps the whole coded list**, as the Record tab and the analysis do: the short list
+  is only for paper, where the defined targets carry the record's codes; the behavior analyst enters an Other as the
+  proper code.
+- The walkthrough's example (its own defined target) prints the short list too. Checks: `qa/abc108-test.js`; the
+  v24.06 check counts the short list.
+
 ### v24.07: Form ABC-1's paper sheet as an iPad prints it: one page, the ruled lines drawn, the check interval its own field
 (the BCBA's print of 10/23 from iPad Safari: two pages, the narrative's lines as black bars)
 

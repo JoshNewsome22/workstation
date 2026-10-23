@@ -39,14 +39,14 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
    TKWALK.renderAt(1);out.home=tf();out.cap0=st.querySelector('.wk-cap').textContent.slice(0,30);out.obs0=fld('Observer');out.narr0=P[0].querySelector('.ap-lines').textContent.length;
    {const H=at('head');TKWALK.renderAt(H.start+H.dur*.4);out.glows=[...st.querySelectorAll('.abw-glow')].filter(e=>e.style.visibility==='visible').length;}end('head');out.head=tf();out.obs=fld('Observer');out.date=fld('Date');
    end('rules');out.adult=P[0].querySelector('.ap-f:nth-child(1) .ap-opt')&&[...P[0].querySelectorAll('.ap-f')].find(f=>f.textContent.startsWith('Adult')).querySelector('.ap-opt').classList.contains('on');
-   const A=at('ante');TKWALK.renderAt(A.start+.3);out.anteBefore=on('a_acad');end('ante');out.ante=[on('a_acad'),on('a_difficult'),on('b_scream')];
+   const A=at('ante');TKWALK.renderAt(A.start+.3);out.anteBefore=on('a_acad');end('ante');out.ante=[on('a_acad'),on('a_difficult'),on('b_disrupt')];
    end('beh');out.beh=[on('tb_sample'),on('p_refuse'),on('p_push')];end('cons');out.cons=on('c_dem_rem');
    end('narr');out.narr=P[0].querySelector('.ap-lines').textContent;end('after');out.after=[on('i_stopped'),on('r_bip')];
    end('bgmark');out.bgCam=tf();out.bg=[on('a_acad',1),[...P[1].querySelectorAll('.ap-f')].find(f=>f.textContent.startsWith('Time')).querySelector('span').textContent];
    end('analysis');out.anCam=tf();out.anGlow=[...st.querySelectorAll('.abw-glow')].filter(e=>e.style.visibility==='visible').length;
    const Sm=at('sample');TKWALK.renderAt(Sm.start+Sm.dur-.6);out.samp=[...st.querySelectorAll('.abw-samp')].some(e=>e.closest('.wk-o').style.visibility==='visible');
    TKWALK.renderAt(TKWALK.duration-.1);out.end=tf();out.endCap=st.querySelector('.wk-cap').textContent;
-   TKWALK.renderAt(0);out.reset=[on('a_acad'),on('b_scream'),on('i_stopped'),on('a_acad',1),fld('Observer'),P[0].querySelector('.ap-lines').textContent.length];return out;});
+   TKWALK.renderAt(0);out.reset=[on('a_acad'),on('b_disrupt'),on('i_stopped'),on('a_acad',1),fld('Observer'),P[0].querySelector('.ap-lines').textContent.length];return out;});
  ok('the frames: the camera leaves home for the head and comes back at the end; glows show; the observer and the date are written in the head line; the adult tick, the antecedent, behavior, precursor and consequence ticks, the narrative and the after ticks appear in their lines; the background check is ticked on its own page; the analysis page is visited; the SAMPLE word shows; all of it is gone again at 0',
    fr.home!==fr.head&&fr.obs0===''&&fr.narr0===0&&fr.obs==='J. Lee'&&fr.date==='10/19/2026'&&fr.glows>=1&&fr.adult&&!fr.anteBefore&&fr.ante.join()==='true,true,false'&&fr.beh.join()==='true,true,true'&&fr.cons&&/Teacher put the math sheet/.test(fr.narr)&&/No peers reacted/.test(fr.narr)&&fr.after.join()==='true,true'
    &&fr.bgCam!==fr.head&&fr.bg[0]&&fr.bg[1]==='10:40 AM'&&fr.anCam!==fr.bgCam&&fr.anGlow>=1&&fr.samp&&/Thank you|Hand your sheets/.test(fr.endCap)&&fr.reset.join()==='false,false,false,false,,0',fr);
