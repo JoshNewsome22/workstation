@@ -9905,6 +9905,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.06: Form ABC-1 prints the student's defined target behaviors first on the paper sheet, and keeps them out of the walkthrough
+(the BCBA's question of 10/23: do the target behavior names from Form TB-1 come over to the ABC data sheet so the specific target can be checked?)
+
+- **They did already reach the form, and now they are marked on paper.** A target behavior defined on Form TB-1 joins
+  the Record tab's Target behavior list when the case opens (tagged TB-1, its definition in the tooltip, kept in the
+  data file). The v24.04 paper sheet printed them as unmarked boxes among the coded list. Now the Behavior column prints
+  the defined targets first, in bold, tagged TB-1, with each definition on a line under the name, and the heading reads
+  *Target behavior, defined on Form TB-1 first*. The coded list follows as before. Still one Letter page.
+- **The walkthrough never shows a record's targets.** The v24.05 example was built from the same list, so a record's
+  target names could appear in the "simulated" walkthrough and in Save as video. The example now carries its own defined
+  target (Screaming and crying, with a definition) and never the record's; the example's target never reaches the record
+  or its paper sheet. The behavior line of the narration is re-voiced to say that the student's own targets, defined on
+  Form TB-1, print first with their definitions, and the example ticks its defined target.
+- Checks: `qa/abc106-test.js` (the targets first on the sheet, tagged and defined, one page; the walkthrough free of the
+  record's names and carrying its own; the example's target not in the record); `qa/abc105-walk-test.js` follows the
+  example's own target.
+
 ### v24.05: Form ABC-1's Walkthrough view opens with a narrated walkthrough video of the paper sheets and the analysis
 (the BCBA's request of 10/23: "a similar walkthrough type of video that shows how to fill out the ABC data sheet, the background sample analysis, etc.")
 

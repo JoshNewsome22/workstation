@@ -4,9 +4,9 @@ const CREDIT_WALK='Created by Joshua Newsome, BCBA';
    built for a made-up student from the form's own paper-sheet code (window.abcPaper, v24.04) with the example's header, so
    the record is not touched at all. */
 const DEMO_PHOTO='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#dfe8ea"/><circle cx="50" cy="38" r="17" fill="#8aa0a8"/><path d="M18 92c3-20 16-30 32-30s29 10 32 30z" fill="#8aa0a8"/></svg>');
-function demoHeader(){return{client:'A. Student (sample)',observer:'',location:'Room 12',target:'Screaming/yelling/crying',window:'20',checks:'fixed:10',start:'',end:'',minutes:''};}
+function demoHeader(){return{client:'A. Student (sample)',observer:'',location:'Room 12',target:'Screaming and crying',window:'20',checks:'fixed:10',start:'',end:'',minutes:''};}
 function demoIncident(){return{date:'10/19/2026',time:'10:15 AM',dur:'4',activity:'Independent math',staff:'Ms. R., Mr. D.',observer:'J. Lee',location:'Room 12',staffPresent:'yes',intensity:3,
-  ids:['se_sleep','a_acad','a_difficult','b_scream','p_refuse','p_push','c_dem_rem','i_stopped','r_bip'],
+  ids:['se_sleep','a_acad','a_difficult','tb_sample','p_refuse','p_push','c_dem_rem','i_stopped','r_bip'],
   narrative:'10:14 Teacher put the math sheet on the desk: “Start with number one.” Student said “No, I’m not doing it” and pushed the sheet away. 10:15 Student screamed and cried, about four minutes, still in the seat. Teacher took the sheet back and moved to the next student. Screaming stopped within a minute of the sheet leaving the desk. No peers reacted.'};}
 /* the analysis reading: made-up counts, the shape of the record's Analysis tab (conditional probabilities, then the ranking) */
 function analysisCard(){
@@ -22,7 +22,8 @@ function analysisCard(){
 let composing=false;
 function demoPages(){
   const P=window.abcPaper;if(!P||typeof P.html!=='function')return{inc:null,bg:null};
-  const demo={header:demoHeader(),photo:DEMO_PHOTO,sample:demoIncident()};
+  /* the example's own defined target (as Form TB-1's print first on a real sheet); the record's targets never reach the example */
+  const demo={header:demoHeader(),photo:DEMO_PHOTO,sample:demoIncident(),targets:[{id:'tb_sample',label:'Screaming and crying',def:'Vocalizing above conversation level, or crying, for 10 seconds or more.'}]};
   composing=true;let inc=null,bg=null;
   try{inc=div('',P.html('sample',demo)).firstElementChild;bg=div('',P.html('bg',demo)).firstElementChild;}
   finally{composing=false;}
@@ -107,8 +108,8 @@ function compose(D){
   SC.columns=K=>{camTo(K.t,K.t+.9,prel(E.cols),1.2);glowEl(E.col[0],K.at('antecedent',.2),2.4,3);glowEl(E.col[1],K.at('behavior',.28),2.4,3);glowEl(E.col[2],K.at('consequence',.36),2.4,3);glowEl(E.cols,K.at('tick what you saw',.5),3.2,6);return K.d;};
   SC.setev=K=>{camTo(K.t,K.t+.9,prel(E.row),2);const t=K.at('short of sleep',.5);tick(t+.3,O('se_sleep'));glowEl(O('se_sleep'),t,3.4,3);return K.d;};
   SC.ante=K=>{camTo(K.t,K.t+.9,prel(E.col[0]),1.6);const a=K.at('academic demand',.62);tick(a+.3,O('a_acad'));glowEl(O('a_acad'),a,3,3);const b=K.at('difficult task',.78);tick(b+.3,O('a_difficult'));glowEl(O('a_difficult'),b,3,3);return K.d;};
-  SC.beh=K=>{camTo(K.t,K.t+.9,prel(E.col[1]),1.6);const t=K.at('tick the target',.1);tick(t+.4,O('b_scream'));glowEl(O('b_scream'),t,3,3);
-    const r=K.at('refused',.62);tick(r+.3,O('p_refuse'));glowEl(O('p_refuse'),r,2.4,3);const p=K.at('pushed',.75);tick(p+.3,O('p_push'));glowEl(O('p_push'),p,2.4,3);glowEl(O('b_scream'),K.at('then screamed',.9),2.4,3);return K.d;};
+  SC.beh=K=>{camTo(K.t,K.t+.9,prel(E.col[1]),1.6);glowEl(E.col[1].querySelector('.ap-grp'),K.at('tick the target',.05),2.6,3);const f=K.at('printed first',.3);glowEl(O('tb_sample'),f,4,3);
+    tick(K.at('screaming and crying',.48)+.3,O('tb_sample'));const r=K.at('refused',.75);tick(r+.3,O('p_refuse'));glowEl(O('p_refuse'),r,2.4,3);const p=K.at('pushed',.88);tick(p+.3,O('p_push'));glowEl(O('p_push'),p,2.4,3);return K.d;};
   SC.cons=K=>{camTo(K.t,K.t+.9,prel(E.col[2]),1.6);const t=K.at('demand removed',.68);tick(t+.3,O('c_dem_rem'));glowEl(O('c_dem_rem'),t,3.4,3);return K.d;};
   SC.narr=K=>{camTo(K.t,K.t+.9,prel(E.narr),1.5);prose(E.lines,K.at('in order',.14),K.at('how it ended',.6)+.5);glowEl(E.narr,K.t+.9,2.4,4);return K.d;};
   SC.after=K=>{camTo(K.t,K.t+.9,prel(E.out),1.8);const t=K.at('right after',.14);tick(t+.3,O('i_stopped'));glowEl(E.outs[0]||E.out,t,2.6,3);const r=K.at('resolved',.4);tick(r+.3,O('r_bip'));glowEl(E.outs[1]||E.out,r,2.6,3);

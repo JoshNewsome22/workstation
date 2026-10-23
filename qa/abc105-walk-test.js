@@ -40,7 +40,7 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
    {const H=at('head');TKWALK.renderAt(H.start+H.dur*.4);out.glows=[...st.querySelectorAll('.abw-glow')].filter(e=>e.style.visibility==='visible').length;}end('head');out.head=tf();out.obs=fld('Observer');out.date=fld('Date');
    end('rules');out.adult=P[0].querySelector('.ap-f:nth-child(1) .ap-opt')&&[...P[0].querySelectorAll('.ap-f')].find(f=>f.textContent.startsWith('Adult')).querySelector('.ap-opt').classList.contains('on');
    const A=at('ante');TKWALK.renderAt(A.start+.3);out.anteBefore=on('a_acad');end('ante');out.ante=[on('a_acad'),on('a_difficult'),on('b_scream')];
-   end('beh');out.beh=[on('b_scream'),on('p_refuse'),on('p_push')];end('cons');out.cons=on('c_dem_rem');
+   end('beh');out.beh=[on('tb_sample'),on('p_refuse'),on('p_push')];end('cons');out.cons=on('c_dem_rem');
    end('narr');out.narr=P[0].querySelector('.ap-lines').textContent;end('after');out.after=[on('i_stopped'),on('r_bip')];
    end('bgmark');out.bgCam=tf();out.bg=[on('a_acad',1),[...P[1].querySelectorAll('.ap-f')].find(f=>f.textContent.startsWith('Time')).querySelector('span').textContent];
    end('analysis');out.anCam=tf();out.anGlow=[...st.querySelectorAll('.abw-glow')].filter(e=>e.style.visibility==='visible').length;
