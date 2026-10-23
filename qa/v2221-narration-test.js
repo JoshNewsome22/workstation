@@ -38,7 +38,7 @@ const FORMS=[['IA-1',['nbh-ia1-narration.js']],['DD-1',['nbh-dd1-narration.js']]
   const idx=L.fs.readFileSync(R+'/NBH-Workstation/index.html','utf8');
   const tagRes=[...idx.matchAll(/const NARTAG\d?=(\/.*?\/);/g)].map(m=>eval(m[1]));
   const lazyTags=FORMS.flatMap(([,fs])=>fs).map(f=>'<script type="text/x-nbh-narration" data-src="'+f+'"></script>');
-  ok('5 the one-file edition puts each narration inside its form from the new tag ('+tagRes.length+' patterns)',tagRes.length===6&&lazyTags.every(t=>tagRes.some(re=>re.test(t))),{n:tagRes.length});
+  ok('5 the one-file edition puts each narration inside its form from the new tag ('+tagRes.length+' patterns)',tagRes.length===7&&lazyTags.every(t=>tagRes.some(re=>re.test(t))),{n:tagRes.length});
   ok('6 no page errors',!errs.length,errs.slice(0,4));
   }catch(e){ok('crashed',false,String(e.stack||e));}
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
