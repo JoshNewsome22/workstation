@@ -1829,7 +1829,7 @@ const EMBED=(()=>{
   }
   /* v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1) is one block, put into a form's <script src> as it opens;
      v21.43: so is the writing help, which every form carries (build-single.py keeps one copy, not 45) */
-  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.narration=await inflate('nbh-embed-narration').catch(()=>null)||'';E.video=await inflate('nbh-embed-video').catch(()=>null)||'';E.media=await inflate('nbh-embed-media').catch(()=>null)||'';E.narration2=await inflate('nbh-embed-narration-sm1').catch(()=>null)||'';E.narration3=await inflate('nbh-embed-narration-dd1').catch(()=>null)||'';E.narration4=await inflate('nbh-embed-narration-tk1bus').catch(()=>null)||'';E.narration5=await inflate('nbh-embed-narration-ia1').catch(()=>null)||'';E.narration6=await inflate('nbh-embed-narration-ra1').catch(()=>null)||'';E.pictures=await inflate('nbh-embed-pictures').catch(()=>null)||'';E.td1bank=await inflate('nbh-embed-td1bank').catch(()=>null)||'';E.readings=await inflate('nbh-embed-readings').catch(()=>null)||'';E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
+  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.narration=await inflate('nbh-embed-narration').catch(()=>null)||'';E.video=await inflate('nbh-embed-video').catch(()=>null)||'';E.media=await inflate('nbh-embed-media').catch(()=>null)||'';E.narration2=await inflate('nbh-embed-narration-sm1').catch(()=>null)||'';E.narration3=await inflate('nbh-embed-narration-dd1').catch(()=>null)||'';E.narration4=await inflate('nbh-embed-narration-tk1bus').catch(()=>null)||'';E.narration5=await inflate('nbh-embed-narration-ia1').catch(()=>null)||'';E.narration6=await inflate('nbh-embed-narration-ra1').catch(()=>null)||'';E.narration7=await inflate('nbh-embed-narration-sp1').catch(()=>null)||'';E.pictures=await inflate('nbh-embed-pictures').catch(()=>null)||'';E.td1bank=await inflate('nbh-embed-td1bank').catch(()=>null)||'';E.readings=await inflate('nbh-embed-readings').catch(()=>null)||'';E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
   const PICTAG=/<script src="nbh-pictos\.js"><\/script>/;
   const PICTAG2=/<script src="nbh-pictures\.js"><\/script>/;
   const TD1TAG=/<script id="td1-pbank" src="nbh-td1-bank\.js"><\/script>/;
@@ -1844,6 +1844,7 @@ const EMBED=(()=>{
   const NARTAG4=/<script (?:src="nbh-tk1-bus-narration\.js" defer|type="text\/x-nbh-narration" data-src="nbh-tk1-bus-narration\.js")><\/script>/;   /* v21.49: Form TK-1's bus ride narration */
   const NARTAG5=/<script (?:src="nbh-ia1-narration\.js" defer|type="text\/x-nbh-narration" data-src="nbh-ia1-narration\.js")><\/script>/;   /* v21.56: Form IA-1's FAST walkthrough narration */
   const NARTAG6=/<script (?:src="nbh-ra1-narration\.js" defer|type="text\/x-nbh-narration" data-src="nbh-ra1-narration\.js")><\/script>/;   /* v21.60: Form RA-1's reinforcer assessment walkthrough narration */
+  const NARTAG7=/<script (?:src="nbh-sp1-narration\.js" defer|type="text\/x-nbh-narration" data-src="nbh-sp1-narration\.js")><\/script>/;   /* v24.00: Form SP-1's scatterplot walkthrough narration */
   E.form=file=>{let h=E.forms&&E.forms[file];if(!h)return null;h=h.split('@@NBH-LOGO@@').join(E.logo).split('@@NBH-WORDING@@').join(E.wording||'');
     if(PICTAG.test(h))h=h.replace(PICTAG,()=>E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
     if(RDTAG.test(h))h=h.replace(RDTAG,()=>E.readings?'<script id="rs-readings">'+E.readings.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script id="rs-readings">const NBH_READINGS=[];/* the references are not inside this file */<\/script>');
@@ -1856,6 +1857,7 @@ const EMBED=(()=>{
     if(NARTAG4.test(h))h=h.replace(NARTAG4,()=>E.narration4?'<script>'+E.narration4.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
     if(NARTAG5.test(h))h=h.replace(NARTAG5,()=>E.narration5?'<script>'+E.narration5.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
     if(NARTAG6.test(h))h=h.replace(NARTAG6,()=>E.narration6?'<script>'+E.narration6.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
+    if(NARTAG7.test(h))h=h.replace(NARTAG7,()=>E.narration7?'<script>'+E.narration7.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
     if(NARTAG.test(h))h=h.replace(NARTAG,()=>E.narration?'<script>'+E.narration.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
     if(RSPTAG.test(h))h=h.replace(RSPTAG,()=>E.respond?'<script>'+E.respond.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the respondent-page library is not inside this file */<\/script>');
     return h;};
@@ -2759,7 +2761,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v23.99';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.00';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];

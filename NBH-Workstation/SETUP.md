@@ -9905,6 +9905,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.00: A Walkthrough view on the scatterplot (Form SP-1)
+(the BCBA's request of 10/23)
+
+- **Walkthrough, beside Data sheet, Pattern summary and Control chart.** A narrated walkthrough of the paper data sheet
+  for the staff who mark it, played in the form as Forms TK-1, SM-1, RA-1, IA-1 and DD-1 play theirs: the fields at the
+  top, the definition, the grid and the dates, how a cell is marked, the X for an interval or a day not observed, the
+  code key and the activity column, initialing each day on the back, and the SAMPLE sheet. Captions, chapters, sound
+  on or off, full screen, a transcript, and **Save as video (MP4)** made on the device.
+- **It follows this record's marking setup.** A sheet with the cutoff plays the slash-and-shade lines; a shade-only
+  sheet ("Occurred") plays the shade-only lines; a count sheet plays the count line. Change the setup in Tools and the
+  walkthrough rebuilds.
+- **The example is a simulated student.** The sheet shown is the form's worked example, drawn as the paper prints,
+  put into the form and taken out again in the same turn: the record on the Data sheet is untouched, and nothing from
+  it is in the walkthrough or its video, so both can be shown to staff.
+- **The narration beside the form.** `nbh-sp1-narration.js` (0.8 MB, the Kokoro voice, 15 lines) is read the first
+  time the Walkthrough is opened, not when the form opens; without it the device's own voice reads the captions. The
+  one-file editions carry it.
+
+Not changed: the sheets, the print, the saved files, the How-to video field and its QR code (the saved video, once on
+the district drive or YouTube, is what that field links to). To set up: upload the whole folder as usual (SP-1,
+`nbh-sp1-narration.js` new, both editions' `index.html`, the one-file editions). Sources: `tools/forms/SP-1/`.
+Tested: `qa/sp100-walk-test.js` (11), `qa/v2221-narration-test.js`, `qa/pwa-test.js`, `qa/sp98-test.js`,
+`qa/sp99-test.js`, the SP-1 sheet tests.
+
 ### v23.99: "Print a sample" in sight on every screen (Form SP-1)
 (the BCBA's request of 10/22)
 

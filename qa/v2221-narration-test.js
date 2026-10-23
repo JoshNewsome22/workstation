@@ -7,7 +7,7 @@
    usage: node qa/v2221-narration-test.js */
 const L=require(__dirname+'/lib.js');const {execFileSync}=require('child_process');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
-const FORMS=[['IA-1',['nbh-ia1-narration.js']],['DD-1',['nbh-dd1-narration.js']],['RA-1',['nbh-ra1-narration.js']],['SM-1',['nbh-sm1-narration.js']],['TK-1',['nbh-tk1-narration.js','nbh-tk1-bus-narration.js']]];
+const FORMS=[['IA-1',['nbh-ia1-narration.js']],['DD-1',['nbh-dd1-narration.js']],['RA-1',['nbh-ra1-narration.js']],['SM-1',['nbh-sm1-narration.js']],['SP-1',['nbh-sp1-narration.js']],['TK-1',['nbh-tk1-narration.js','nbh-tk1-bus-narration.js']]];
 (async()=>{const br=await L.chromium.launch();const errs=[];
   try{
   const ctx=await br.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
