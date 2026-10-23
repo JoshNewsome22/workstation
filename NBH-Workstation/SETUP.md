@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.01: The scatterplot's toolbar as a settings panel (Form SP-1)
+(the BCBA's request of 10/23)
+
+- **One row, then a panel.** The top row keeps what is needed all the time: the views, Dictate, the case, Save data,
+  Print a sample, More controls and Fit. More controls opens a white panel of three labeled columns instead of eleven
+  loose rows: **Time and days** (the sheet preset, start, end and interval, total days, sheets, week starting);
+  **Entry and marking** (tap or type, codes, activity column, X not observed, low/high rate or shaded, the cutoff,
+  the summary chart); **Printing, files and reset** (Print / Save as PDF, Print a sample sheet, marking guide; the
+  How-to video link on its own line; Save data, Open data, Export CSV, Open packet, Save packet; Load simulation and
+  Clear all). On a phone the columns stack.
+- **Nothing moved underneath.** The controls are the same elements, so every setting, shortcut and saved file works as
+  before; the panel folds under More controls on a tablet as before.
+
+Not changed: the sheets, the print, the saved files. To set up: upload the whole folder as usual (SP-1, the one-file
+editions). Tested: `qa/sp101-test.js` (14), `qa/sp100-walk-test.js`, `qa/sp99-test.js`, `qa/sp98-test.js`, the SP-1 sheet tests.
+
 ### v24.00: A Walkthrough view on the scatterplot (Form SP-1)
 (the BCBA's request of 10/23)
 

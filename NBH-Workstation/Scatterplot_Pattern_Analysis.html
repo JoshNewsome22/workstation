@@ -1211,6 +1211,29 @@ body.view-walk #sheet,body.view-walk #spPages,body.view-walk #summary,body.view-
 .spw-pg .codes h3{display:none}
 
 </style>
+<style id="sp101-css">
+/* v24.01 the toolbar's settings panel: three labeled columns under More controls */
+.toolbar .sp-panel{flex:1 1 100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 28px;padding:12px 18px 14px;margin:0;box-sizing:border-box;
+  background:#fff;color:var(--nbh-navy,#182e43);border:1px solid var(--nbh-rule,#c9d3d8);border-radius:10px;box-shadow:0 1px 3px rgba(20,35,50,.08)}
+html.nbh-compact .toolbar .sp-panel{display:none}
+.sp-panel .sp-col{min-width:0}
+.sp-panel h4{margin:0 0 8px;padding:0 0 6px;border-bottom:1px solid var(--nbh-rule,#c9d3d8);font:600 12px/1.2 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);letter-spacing:.05em;text-transform:uppercase;color:var(--nbh-navy,#182e43)}
+.toolbar .sp-panel .tgroup{display:block!important;flex:none;margin:0 0 9px;min-width:0;max-width:none}
+.toolbar .sp-panel .tgroup>span{display:block;visibility:visible;font-size:11px!important;letter-spacing:.03em;color:var(--nbh-muted,#54676f);margin:0 0 3px}
+.toolbar .sp-panel .tgroup .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.toolbar .sp-panel label{color:var(--nbh-navy,#182e43)}
+.toolbar .sp-panel select,.toolbar .sp-panel input[type=number],.toolbar .sp-panel input[type=date],.toolbar .sp-panel input[type=url]{background:#fff;color:var(--nbh-navy,#182e43);border:1px solid var(--nbh-field,#b7c8c5);max-width:100%}
+.toolbar .sp-panel button{background:#fff;color:var(--nbh-navy,#182e43);border:1px solid var(--nbh-field,#b7c8c5);white-space:nowrap}
+.toolbar .sp-panel button.primary{background:var(--nbh-navy,#182e43);color:#fff;border-color:var(--nbh-navy,#182e43)}
+.toolbar .sp-panel button#clearBtn{color:var(--nbh-red,#8e2a2a);border-color:#d9bcbc}
+.toolbar .sp-panel .seg{background:var(--nbh-slate,#54676f)}
+.toolbar .sp-panel #preset,.toolbar .sp-panel #spVideo{width:100%;flex:1 1 100%}
+.toolbar .sp-panel .sp-hint{flex:1 1 100%;font-size:11px;color:var(--nbh-muted,#54676f);margin:1px 0 0}
+.toolbar .sp-panel .sp-muted{color:var(--nbh-muted,#54676f)}
+@media (max-width:1180px){.toolbar .sp-panel{gap:6px 18px;padding:10px 14px 12px}}
+@media (max-width:940px){.toolbar .sp-panel{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:720px){.toolbar .sp-panel{grid-template-columns:1fr;padding:10px 12px 12px}}
+</style>
 </head>
 <body>
 
@@ -8326,6 +8349,48 @@ window.TKWALK={build,renderAt,play,pause,seek,toggle,
 })();
 </script>
 <script src="nbh-tk1-video.js" defer></script>
+<script id="sp101-bar">
+/* v24.01 the toolbar's controls into a settings panel of three labeled columns (the elements move; nothing is remade) */
+(function(){
+  var BAR=document.querySelector('.toolbar');if(!BAR)return;
+  var COLS=[['Time and days',['preset','startHour','days','perSheet','weekStart']],['Entry and marking',['modeSeg','levelSeg','threshold','chartSeg']],['Printing, files and reset',[]]];
+  var byId=function(id){return document.getElementById(id);};
+  var groupOf=function(id){var e=byId(id);return e&&e.closest('.toolbar .tgroup');};
+  var made={};
+  function mk(key,label){if(made[key])return made[key];var g=document.createElement('div');g.className='tgroup sp-made';g.innerHTML='<span></span><div class="row"></div>';g.firstChild.textContent=label;made[key]=g;return g;}
+  function into(g,el){if(el&&el.parentNode!==g.lastChild)g.lastChild.appendChild(el);}
+  function build(){
+    var panel=BAR.querySelector('.sp-panel');
+    if(!panel){panel=document.createElement('div');panel.className='sp-panel';
+      COLS.forEach(function(c){var s=document.createElement('section');s.className='sp-col';var h=document.createElement('h4');h.textContent=c[0];s.appendChild(h);panel.appendChild(s);});
+      var ctl=BAR.querySelector('.tg-ctl');BAR.insertBefore(panel,ctl||null);}
+    var cols=panel.querySelectorAll('.sp-col');
+    /* the Sheet actions group, split: printing; the how-to video link; files (its own row keeps the packet buttons); reset */
+    var sa=BAR.querySelector('.sp-files')||groupOf('fileIn')||groupOf('printBtn');
+    if(sa&&!sa.classList.contains('sp-files')){sa.classList.add('sp-files');sa.firstElementChild.textContent='Files';}
+    var pr=mk('print','Printing');into(pr,byId('printBtn'));into(pr,byId('sampleBtn'));var go=byId('guideOn');if(go)into(pr,go.closest('label')||go);
+    var vid=mk('video','How-to video link (prints as a QR code on every data sheet)');var sv=byId('spVideo');
+    if(sv){var lab=sv.closest('label');into(vid,sv);if(lab&&!lab.querySelector('input'))lab.remove();}
+    /* the packet's buttons and its hidden file input land in the last .row of the toolbar, which was the video link's label: emptied here */
+    if(sa){var fr0=sa.querySelector('.row');Array.prototype.slice.call(sa.querySelectorAll('label')).forEach(function(l){if(l.querySelector('input:not([hidden]),select,button,textarea'))return;
+      Array.prototype.slice.call(l.querySelectorAll('input[hidden]')).forEach(function(i){fr0.appendChild(i);});l.remove();});}
+    var rs=mk('reset','Simulation and reset');into(rs,byId('simBtn'));into(rs,byId('clearBtn'));
+    if(sa){var fr=sa.querySelector('.row');['saveBtn','loadBtn','csvBtn'].forEach(function(id){var e=byId(id);if(e&&e.parentNode!==fr)fr.appendChild(e);});
+      Array.prototype.slice.call(BAR.querySelectorAll('button')).forEach(function(b){var t=b.textContent.trim();if((t==='Open packet'||t==='Save packet')&&b.parentNode!==fr)fr.appendChild(b);});}
+    /* each group to its column, in order */
+    var order=[[0,['preset','startHour','days','perSheet','weekStart'].map(groupOf)],[1,['modeSeg','levelSeg','threshold','chartSeg'].map(groupOf)],[2,[pr,vid,sa,rs]]];
+    order.forEach(function(o){o[1].forEach(function(g){if(g&&g.parentNode!==cols[o[0]])cols[o[0]].appendChild(g);});});
+    /* a group another script adds later goes to the last column, unless it asks to stay in the top row */
+    Array.prototype.slice.call(BAR.children).forEach(function(g){if(g.classList.contains('tgroup')&&!g.classList.contains('tg-keep')&&!g.classList.contains('tg-ctl'))cols[2].appendChild(g);});
+    /* the case's group keeps the top row, before the screen controls */
+    var cg=BAR.querySelector(':scope > .nbh-case-grp'),ctl2=BAR.querySelector(':scope > .tg-ctl');if(cg&&ctl2&&cg.nextElementSibling!==ctl2&&cg!==ctl2.previousElementSibling)BAR.insertBefore(cg,ctl2);
+    var span=byId('spanOut');if(span)span.classList.add('sp-muted');var sc=byId('sheetCount');if(sc)sc.classList.add('sp-muted');
+  }
+  var busy=false;function run(){if(busy)return;busy=true;try{build();}catch(e){}finally{busy=false;}}
+  function start(){run();setTimeout(run,400);setTimeout(run,1500);try{new MutationObserver(function(ms){for(var i=0;i<ms.length;i++)if(ms[i].addedNodes.length){run();return;}}).observe(BAR,{childList:true});}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
