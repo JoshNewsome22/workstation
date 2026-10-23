@@ -1452,6 +1452,17 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 .ap-def{display:block;color:#54676f;font-size:6.4pt;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .ap-grp h5 .ap-tbh{font-style:italic;font-weight:400;color:#2f6b6d;margin-left:5px;font-size:6.4pt}
 </style>
+<style id="abc107-css">
+/* v24.07 the paper sheet printed from an iPad: no text autosizing (iOS Safari inflated the small text when printing, and the
+   sheet ran to two pages); the narrative's ruled lines as elements (a gradient printed as black bars there) */
+html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!important;text-size-adjust:none!important}
+.ap .ap-lines{background:none;position:relative;padding:0;height:75px;overflow:hidden}
+.ap-lines .ap-ln{display:block;height:14px;border-bottom:1px solid #c9d3d8}
+.ap-lines .ap-txt{position:absolute;left:2px;right:2px;top:0;height:75px;line-height:15px;white-space:pre-wrap;overflow:hidden}
+.ap .ap-id.ap-id2{grid-template-columns:1fr 1.6fr 0.95fr 1.05fr}
+.ap-f .ap-lg{color:#54676f;white-space:nowrap}
+.ap-f .ap-opt{white-space:nowrap}
+</style>
 </head>
 <body>
 <header class="nbh-mast">
@@ -9810,7 +9821,7 @@ const f = (lab, val) => '<div class="ap-f"><b>' + esc(lab) + '</b><span>' + esc(
 /* v24.06 a target behavior defined on Form TB-1 (or the walkthrough example's own): bold, tagged, its definition under it */
 const optTB = (it, on) => '<span class="ap-opt ap-tb' + (on ? " on" : "") + '" data-id="' + esc(it.id) + '"><span class="ap-box"></span><span><b>' + esc(it.label) + '</b><i class="ap-tbtag">TB-1</i>' + (it.def ? '<small class="ap-def">' + esc(it.def) + '</small>' : "") + '</span></span>';
 const yn = (lab, v) => '<div class="ap-f"><b>' + esc(lab) + '</b><span>' + opt({label:"Yes"}, v === "yes") + ' ' + opt({label:"No"}, v === "no") + '</span></div>';
-const scale = (lab, v) => '<div class="ap-f"><b>' + esc(lab) + '</b><span>' + [1,2,3,4,5].map(n => opt({label:String(n)}, v === n)).join(" ") + ' <small style="color:#54676f">1 minimal … 5 crisis</small></span></div>';
+const scale = (lab, v) => '<div class="ap-f"><b>' + esc(lab) + '</b><span>' + [1,2,3,4,5].map(n => opt({label:String(n)}, v === n)).join(" ") + ' <small class="ap-lg">1 minimal … 5 crisis</small></span></div>';
 /* the sheet: blank, or the sample's made-up incident on this record's header */
 function incidentSheet(sample, demo){
   const h = demo && demo.header ? demo.header : readHeader(), on = sample ? sample : {}, has = id => !!(on.ids && on.ids.includes(id));
@@ -9824,14 +9835,14 @@ function incidentSheet(sample, demo){
     f("Date", on.date || "") + f("Start time", on.time || "") + f("Duration (min)", on.dur || "") +
     f("Activity / routine", on.activity || "") + f("Staff names", on.staff || "") + f("Target behavior", h.target) +
     (photo ? '<div class="ap-photo"><img src="' + photo + '" alt=""></div>' : "") + '</div>';
-  x += '<div class="ap-id no-photo" style="margin-bottom:5px">' + yn("Adult within view", on.staffPresent) + scale("Peak intensity", on.intensity) + f("Consequence window", (h.window ? h.window + " s" : "____ s") + "  ·  Check interval: " + (checksLabel(h.checks) || "________")) + '</div>';
+  x += '<div class="ap-id ap-id2 no-photo" style="margin-bottom:5px">' + yn("Adult within view", on.staffPresent) + scale("Peak intensity", on.intensity) + f("Consequence window", h.window ? h.window + " s" : "____ s") + f("Check interval", checksLabel(h.checks) || "") + '</div>';
   x += '<div class="ap-row"><b>Setting events earlier in the day:</b>' + SETTING_EVENTS.map(it => opt(it, has(it.id))).join("") + '</div>';
   x += '<div class="ap-cols">';
   x += '<div class="ap-col"><div class="ap-colh">Antecedent<small>what was in place right before the behavior</small></div>' + ANTECEDENTS.map(g => { const eo = (g.items.find(i => !i.other) || {}).eo || "other"; return '<div class="ap-grp"><h5>' + esc(g.group) + '<i class="' + eo + '">' + esc(CLASS_LABEL[eo]) + ' EO</i></h5>' + g.items.map(it => opt(it, has(it.id))).join("") + '</div>'; }).join("") + '</div>';
   x += '<div class="ap-col"><div class="ap-colh">Behavior<small>the target behavior, and what came just before it</small></div><div class="ap-grp"><h5>Target behavior' + (TB.length ? '<i class="ap-tbh">defined on Form TB-1 first</i>' : "") + '</h5>' + BEH.map(it => it.caseT ? optTB(it, has(it.id)) : opt(it, has(it.id))).join("") + '</div><div class="ap-grp"><h5>Preceded by… <i>lower-intensity, seconds before</i></h5>' + PRECURSORS.map(it => opt(it, has(it.id))).join("") + '</div></div>';
   x += '<div class="ap-col"><div class="ap-colh">Consequence<small>what followed, within the consequence window</small></div>' + CONSEQUENCES.map(g => '<div class="ap-grp"><h5>' + esc(g.group) + '</h5>' + g.items.map(it => opt(it, has(it.id))).join("") + '</div>').join("") + '</div>';
   x += '</div>';
-  x += '<div class="ap-narr"><h5>Brief incident description<small>observable events in order: right before · what the student did · what adults and peers did next · what happened to the demand or the item · how it ended</small></h5><div class="ap-lines">' + esc(on.narrative || "") + '</div></div>';
+  x += '<div class="ap-narr"><h5>Brief incident description<small>observable events in order: right before · what the student did · what adults and peers did next · what happened to the demand or the item · how it ended</small></h5><div class="ap-lines"><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><span class="ap-txt">' + esc(on.narrative || "") + '</span></div></div>';
   x += '<div class="ap-out"><div><h5>Immediately after the consequence</h5>' + IMMEDIATE.map(it => opt(it, has(it.id))).join(" ") + '</div><div><h5>Resolution</h5>' + RESOLUTION.map(it => opt(it, has(it.id))).join(" ") + '</div></div>';
   x += '<div class="ap-foot"><b>One incident a sheet.</b> Tick what you saw, not what you think the student wanted. The antecedent is what was in place right before; the consequence is what adults and peers did within the window, whether or not it was meant. Leave a box blank when it did not apply. Hand the sheet to the behavior analyst, who enters it in the record. · Confidential student record.</div>';
   return x + '</div>';
@@ -10078,7 +10089,7 @@ function compose(D){
     const c={n:0},show=()=>{el.textContent=parts.slice(0,c.n).join('');};   /* the sentences shown are a count, so seeking back takes them off in any order */
     parts.forEach((s,i)=>{const t=t0+(t1-t0)*i/Math.max(1,parts.length);step(t,()=>{c.n++;show();},()=>{c.n--;show();});});};
   /* the parts of the sheets the scenes point at */
-  const E={band:q('.ap-band'),head:q('.ap-head'),id:q('.ap-id'),id2:qa('.ap-id')[1],photo:q('.ap-photo'),cols:q('.ap-cols'),col:qa('.ap-col'),row:q('.ap-row'),narr:q('.ap-narr'),lines:q('.ap-lines'),out:q('.ap-out'),outs:qa('.ap-out > div'),foot:q('.ap-foot'),
+  const E={band:q('.ap-band'),head:q('.ap-head'),id:q('.ap-id'),id2:qa('.ap-id')[1],photo:q('.ap-photo'),cols:q('.ap-cols'),col:qa('.ap-col'),row:q('.ap-row'),narr:q('.ap-narr'),lines:q('.ap-lines .ap-txt')||q('.ap-lines'),out:q('.ap-out'),outs:qa('.ap-out > div'),foot:q('.ap-foot'),
     client:field('Student'),target:field('Target'),observer:field('Observer'),setting:field('Setting'),date:field('Date'),time:field('Start'),dur:field('Duration'),act:field('Activity'),staff:field('Staff'),
     adult:field('Adult'),peak:field('Peak'),win:field('Consequence window'),
     bgBand:q('.ap-band',P2),bg1:q('.ap-bg',P2),bg2:qa('.ap-bg',P2)[1],bgFoot:q('.ap-foot',P2),

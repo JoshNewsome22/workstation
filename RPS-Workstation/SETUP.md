@@ -9905,6 +9905,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.07: Form ABC-1's paper sheet as an iPad prints it: one page, the ruled lines drawn, the check interval its own field
+(the BCBA's print of 10/23 from iPad Safari: two pages, the narrative's lines as black bars)
+
+- **Text autosizing off on the paper sheet.** iOS Safari inflates small text when it prints a page (text autosizing), so
+  the 7.5-point sheet grew by about a quarter and ran to two pages. The sheet, its host and the printing page now carry
+  `-webkit-text-size-adjust: none`, so the sheet prints at its own size on an iPad as it does on a desktop.
+- **The narrative's ruled lines are elements.** They were a repeating gradient with transparent bands, which Safari
+  printed as solid black bars; now five ruled lines are drawn as elements with the narrative text laid over them (the
+  sample's and the walkthrough's narrative still fill them sentence by sentence).
+- **The head's second row** prints the check interval as its own field beside the consequence window (they shared one
+  field and overflowed), and the peak intensity legend stays on one line.
+- Checks: `qa/abc107-test.js` (the lines, the fields, the declared autosizing rule, one page with two defined targets and a
+  long target, the walkthrough's narrative). The earlier ABC-1 checks pass unchanged.
+
 ### v24.06: Form ABC-1 prints the student's defined target behaviors first on the paper sheet, and keeps them out of the walkthrough
 (the BCBA's question of 10/23: do the target behavior names from Form TB-1 come over to the ABC data sheet so the specific target can be checked?)
 

@@ -88,7 +88,7 @@ function compose(D){
     const c={n:0},show=()=>{el.textContent=parts.slice(0,c.n).join('');};   /* the sentences shown are a count, so seeking back takes them off in any order */
     parts.forEach((s,i)=>{const t=t0+(t1-t0)*i/Math.max(1,parts.length);step(t,()=>{c.n++;show();},()=>{c.n--;show();});});};
   /* the parts of the sheets the scenes point at */
-  const E={band:q('.ap-band'),head:q('.ap-head'),id:q('.ap-id'),id2:qa('.ap-id')[1],photo:q('.ap-photo'),cols:q('.ap-cols'),col:qa('.ap-col'),row:q('.ap-row'),narr:q('.ap-narr'),lines:q('.ap-lines'),out:q('.ap-out'),outs:qa('.ap-out > div'),foot:q('.ap-foot'),
+  const E={band:q('.ap-band'),head:q('.ap-head'),id:q('.ap-id'),id2:qa('.ap-id')[1],photo:q('.ap-photo'),cols:q('.ap-cols'),col:qa('.ap-col'),row:q('.ap-row'),narr:q('.ap-narr'),lines:q('.ap-lines .ap-txt')||q('.ap-lines'),out:q('.ap-out'),outs:qa('.ap-out > div'),foot:q('.ap-foot'),
     client:field('Student'),target:field('Target'),observer:field('Observer'),setting:field('Setting'),date:field('Date'),time:field('Start'),dur:field('Duration'),act:field('Activity'),staff:field('Staff'),
     adult:field('Adult'),peak:field('Peak'),win:field('Consequence window'),
     bgBand:q('.ap-band',P2),bg1:q('.ap-bg',P2),bg2:qa('.ap-bg',P2)[1],bgFoot:q('.ap-foot',P2),
