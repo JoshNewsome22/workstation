@@ -9905,6 +9905,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.16: Form ABC-1 navigation from the 10/25 review: the Analysis's jump links with the reading first, the Record tab's header folded once the observation runs, Save incident in the observation bar
+(the BCBA, 10/25: "look over abc form and see if any enhancements should be made" ... "Okay do it")
+
+- **The Analysis opens with a row of jump links** to its cards ("On this page", short names), each card carries a Contents
+  link back to the row, and **"Reading the record as a whole"**, the ranking of hypotheses, **comes first**, the figures it
+  ranks below it. Thirteen cards ran to 16,000 px on a desktop with the reading last and no way to jump. Neither the row
+  nor the links print.
+- **The Observation header folds to one line when the observation starts** (student, observer, setting, target, window,
+  checks), with Show, or a tap on the line, to open it; the header and the Timer card both have Hide/Show at any time. On an
+  iPad the Record tab ran to 5,700 px with the header and timer above every new incident.
+- **Save incident in the observation bar**, with the saved count (or the save's own message, "Check at least one behavior
+  before saving") shown beside it for a few seconds, so an incident is saved from the top of the page.
+- Checks: `qa/abc116-test.js`.
+
 ### v24.15: Form ABC-1 printing from the 10/25 review: Print / Save as PDF prints the record from any tab, the analysis cards break between their blocks, the narrative across its own row
 (the BCBA, 10/25: "look over abc form and see if any enhancements should be made" ... "Okay do it")
 

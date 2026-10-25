@@ -1506,6 +1506,27 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
   #inc-table tr.inc-narr-row{break-before:avoid;page-break-before:avoid}
 }
 </style>
+<style id="abc116-css">
+/* v24.16 the Analysis's jump links and reading-first order; the Record tab's folding cards; Save incident in the observation bar */
+.an-nav{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:0 0 14px;padding:10px 12px;background:#fff;border:1px solid var(--rule-soft,#e3ebe9);border-radius:6px;scroll-margin-top:6px}
+.an-nav .an-navl{font:700 11px var(--nbh-sans,system-ui,sans-serif);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-right:4px}
+.an-nav a{display:inline-block;font-size:12.5px;line-height:1.2;padding:5px 10px;border:1px solid var(--nbh-rule,#c9d3dc);border-radius:14px;color:var(--nbh-navy,#182e43);background:#f6f9fa;text-decoration:none;white-space:nowrap}
+.an-nav a:hover{background:#eaf2f0;border-color:#76a2a3}
+.an-nav a.an-first{font-weight:700;border-color:#76a2a3}
+#analysis-out > .card{scroll-margin-top:6px}
+#analysis-out .card > header.nbh-band .an-up{margin-left:auto;font:600 11.5px var(--nbh-sans,system-ui,sans-serif);color:var(--nbh-muted,#4f5f6d);text-decoration:none;white-space:nowrap}
+#analysis-out .card > header.nbh-band .an-up:hover{color:var(--nbh-navy,#182e43);text-decoration:underline}
+#analysis-out .card.an-verdict{border-left:4px solid var(--nbh-teal,#76a2a3)}
+.abc-fold{margin-left:auto;font:600 12px var(--nbh-sans,system-ui,sans-serif);padding:4px 11px;border:1px solid var(--nbh-rule,#c9d3dc);border-radius:4px;background:#fff;color:var(--nbh-navy,#182e43);cursor:pointer;min-height:28px}
+.card.abc-folded > .body,.card.abc-folded > .btnrow,.card.abc-folded > .sw{display:none}
+.abc-foldsum{padding:9px 14px;font-size:13px;line-height:1.5;color:var(--ink-soft);cursor:pointer}
+.abc-foldsum[hidden]{display:none}
+.abc-foldsum b{color:var(--ink);font-weight:600}
+.abc-foldsum i{font-style:normal;color:var(--ink-faint);margin:0 6px}
+.obs-saved{font-size:12.5px;font-weight:600;color:var(--nbh-navy,#182e43)}
+.obs-saved.bad{color:#8E2A2A}
+@media print{.an-nav,.an-up,.abc-fold,.abc-foldsum{display:none!important}.card.abc-folded > .body{display:block}}
+</style>
 </head>
 <body>
 <header class="nbh-mast">
@@ -1560,6 +1581,7 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
   <span class="obs-bmsg" id="obsBarMsg" aria-live="polite"></span>
   <span class="obs-sp"></span>
   <button type="button" id="obsBarInc">Incident starting</button>
+  <button type="button" id="obsBarSave" class="obs-save">Save incident</button><span class="obs-saved" id="obsBarSaved" aria-live="polite"></span>
   <button type="button" id="obsBarPause">Pause</button>
 </div>
 
@@ -1577,8 +1599,9 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
 <section class="panel" id="panel-record" role="tabpanel" aria-labelledby="tab-record" data-panel="record">
   <p class="wk-go-line noprint"><a href="#wk-incident" class="wk-go" data-go="incident">See it at the table in the walkthrough <span aria-hidden="true">&rarr;</span></a></p>
 
-  <div class="card">
-    <header class="nbh-band"><h2>Observation header</h2><span class="hint">Applies to every incident you log in this file</span></header>
+  <div class="card" id="abcHdrCard">
+    <header class="nbh-band"><h2>Observation header</h2><span class="hint">Applies to every incident you log in this file</span><button type="button" class="abc-fold noprint" id="abcHdrFold" aria-expanded="true" aria-controls="abcHdrCard">Hide</button></header>
+    <div class="abc-foldsum noprint" id="abcHdrSum" hidden title="Show the header"></div>
     <div class="body">
       <div class="session-grid">
         <label class="field">Student / client<input id="h-client" type="text" placeholder="Initials or ID"></label>
@@ -1603,7 +1626,7 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
   </div>
 
   <div class="card obs-card noprint" id="obsCard">
-    <header class="nbh-band"><h2>Observation Timer</h2><span class="hint">Runs the observation and schedules the background checks</span></header>
+    <header class="nbh-band"><h2>Observation Timer</h2><span class="hint">Runs the observation and schedules the background checks</span><button type="button" class="abc-fold noprint" id="abcTmrFold" aria-expanded="true" aria-controls="obsCard">Hide</button></header>
     <div class="body">
       <div class="obs-top">
         <div>
@@ -10491,6 +10514,79 @@ window.abcPrintRecord = function(){
   window.addEventListener("afterprint", off);
   setTimeout(() => { try{ window.print(); }finally{ setTimeout(off, 2000); } }, 30);
 };
+</script>
+<script id="abc116">
+/* v24.16 (the 10/25 review): the Analysis's jump links, each card's Contents link and the reading first; the Record tab's
+   Observation header folded to a line once the observation runs; Save incident in the observation bar. */
+(function(){
+  const byId = id => document.getElementById(id);
+  const SHORT = { "What is in this analysis":"Overview", "Is the classroom arranging a therapeutic contingency":"Therapeutic contingency",
+    "Behaviors recorded":"Behaviors", "Precursors to the target behavior":"Precursors",
+    "Conditional probability of each consequence, given the behavior":"Consequences", "Contingency space and contingency strength":"Contingency strength",
+    "By reinforcer class":"Reinforcer classes", "Adjusted for opportunity":"Opportunity", "Antecedent conditions preceding the behavior":"Antecedents",
+    "Which conditions actually predict the behavior":"Predictive conditions", "Setting events":"Setting events", "With an adult in view and without one":"Adult in view",
+    "Antecedent to consequence":"Antecedent to consequence", "Motivating condition and matching reinforcer":"Motivating conditions",
+    "Did the consequence stop the behavior in the moment":"Stopped in the moment", "The same record read three ways":"Three methods",
+    "Reading the record as a whole":"The reading", "Background checks from an older file":"Older checks" };
+  const h2 = c => { const h = c.querySelector(":scope > header h2"); return h ? h.textContent.trim() : ""; };
+  const go = el => { if(!el) return; const d = Math.abs(el.getBoundingClientRect().top); el.scrollIntoView({ behavior: d < 2500 ? "smooth" : "auto", block:"start" }); };
+  function decorate(){
+    const out = byId("analysis-out"); if(!out) return;
+    const old = out.querySelector(":scope > .an-nav"); if(old) old.remove();
+    let cards = Array.prototype.slice.call(out.querySelectorAll(":scope > .card"));
+    if(cards.length < 3) return;
+    const v = cards.find(c => /^Reading the record as a whole/.test(h2(c)));
+    if(v && v !== out.firstElementChild){ out.insertBefore(v, out.firstElementChild); }
+    if(v) v.classList.add("an-verdict");
+    cards = Array.prototype.slice.call(out.querySelectorAll(":scope > .card"));
+    cards.forEach((c, i) => { if(!c.id) c.id = "an-c" + (i + 1); });
+    const nav = document.createElement("nav"); nav.className = "an-nav noprint"; nav.id = "anNav"; nav.setAttribute("aria-label", "The analysis's cards");
+    nav.innerHTML = '<span class="an-navl">On this page</span>' + cards.map((c, i) => { const t = h2(c); const lab = SHORT[t] || (/^Activity contains/.test(t) ? "Activity filter" : t);
+      return '<a href="#' + c.id + '"' + (i === 0 ? ' class="an-first"' : "") + '>' + lab.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</a>"; }).join("");
+    nav.addEventListener("click", e => { const a = e.target.closest("a[href^='#']"); if(!a) return; e.preventDefault(); go(byId(a.getAttribute("href").slice(1))); });
+    out.insertBefore(nav, out.firstChild);
+    cards.forEach(c => { const h = c.querySelector(":scope > header"); if(!h || h.querySelector(".an-up")) return;
+      const a = document.createElement("a"); a.className = "an-up noprint"; a.href = "#anNav"; a.textContent = "Contents"; a.title = "Back to the list of cards";
+      a.addEventListener("click", e => { e.preventDefault(); go(nav); }); h.appendChild(a); });
+  }
+  if(typeof renderAnalysis === "function"){ const ra = renderAnalysis; window.renderAnalysis = function(){ const r = ra.apply(this, arguments); try{ decorate(); }catch(e){} return r; }; }
+  window.abcAnalysisNav = decorate;
+  /* ---- the Record tab's folding cards */
+  function fold(card, btn, sum, on){
+    card.classList.toggle("abc-folded", on); btn.textContent = on ? "Show" : "Hide"; btn.setAttribute("aria-expanded", on ? "false" : "true");
+    if(sum){ sum.hidden = !on; if(on) summary(sum); }
+  }
+  function summary(sum){
+    let h = {}; try{ h = readHeader(); }catch(e){}
+    const esc = t => String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    const parts = [["Student", h.client], ["Observer", h.observer], ["Setting", h.location], ["Target", h.target], ["Window", h.window ? h.window + " s" : ""],
+      ["Checks", (typeof checksLabel === "function" ? checksLabel(h.checks) : h.checks) || ""]].filter(x => String(x[1] || "").trim());
+    sum.innerHTML = parts.length ? parts.map(x => esc(x[0]) + " <b>" + esc(x[1]) + "</b>").join("<i>\u00b7</i>") + ' <span style="margin-left:8px;color:var(--ink-faint)">Tap to open</span>'
+                                 : "Nothing entered in the header yet. Tap to open it.";
+  }
+  const hdr = byId("abcHdrCard"), hb = byId("abcHdrFold"), hs = byId("abcHdrSum"), tmr = byId("obsCard"), tb = byId("abcTmrFold");
+  if(hdr && hb && hs){
+    hb.addEventListener("click", () => { const on = !hdr.classList.contains("abc-folded"); fold(hdr, hb, hs, on); if(!on) hdr.dataset.userOpen = "1"; });
+    hs.addEventListener("click", () => { fold(hdr, hb, hs, false); hdr.dataset.userOpen = "1"; });
+    hdr.addEventListener("input", () => { if(hdr.classList.contains("abc-folded")) summary(hs); });
+    hdr.addEventListener("change", () => { if(hdr.classList.contains("abc-folded")) summary(hs); });
+    window.addEventListener("abc-obs", e => { const st = e.detail && e.detail.state;
+      if(st === "run" && !hdr.dataset.userOpen) fold(hdr, hb, hs, true);
+      if(st === "ended") delete hdr.dataset.userOpen; });
+  }
+  if(tmr && tb) tb.addEventListener("click", () => fold(tmr, tb, null, !tmr.classList.contains("abc-folded")));
+  /* ---- Save incident from the observation bar */
+  const sv = byId("obsBarSave"), msg = byId("obsBarSaved"); let tm = 0;
+  if(sv && msg) sv.addEventListener("click", () => {
+    const count = () => { try{ return state.entries.length; }catch(e){ return 0; } };
+    const before = count(), btn = byId("save-entry"); if(!btn) return;
+    btn.click();
+    const after = count(), st = byId("save-status");
+    const ok = after > before, text = ok ? "Saved \u00b7 " + after + " on file" : (st && st.textContent.trim()) || "Not saved";
+    msg.textContent = text; msg.classList.toggle("bad", !ok); clearTimeout(tm); tm = setTimeout(() => { msg.textContent = ""; }, 5000);
+  });
+  window.abcFold = { header:on => hdr && fold(hdr, hb, hs, on), timer:on => tmr && fold(tmr, tb, null, on) };
+})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
