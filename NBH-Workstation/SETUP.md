@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.15: Form ABC-1 printing from the 10/25 review: Print / Save as PDF prints the record from any tab, the analysis cards break between their blocks, the narrative across its own row
+(the BCBA, 10/25: "look over abc form and see if any enhancements should be made" ... "Okay do it")
+
+- **Print / Save as PDF prints the record, whichever tab is open**: the letterhead and header, the incident log, the
+  background samples and the analysis, as the packet prints it. From the Record tab it printed the empty entry form across
+  five pages, which the paper sheets (v24.04) had made pointless. The Incidents and Analysis tabs' own Print buttons still
+  print that tab alone. The group's label under More controls says what the button prints.
+- **The analysis cards break between their blocks on paper.** Kept whole, a card that did not fit jumped to a new page, and
+  the printout ran to 20 pages with four of them under half full. A card now breaks between its chart (with its legend), its
+  table and its notes, each kept whole, with the card's heading kept with what follows and a table's heading row repeated.
+  No page but the last is now under half full; the printout is a page shorter (19), the charts themselves filling it.
+- **The incident log prints each narrative in full across its own row** under the coded row. On screen the Behavior column
+  keeps its first 220 characters; on paper that column ran the 46-incident log to twelve pages (ten now).
+- Checks: `qa/abc115-test.js`.
+
 ### v24.14: Form ABC-1 polish from the 10/25 review: the Data file tab's tools, the wide table's scroll cue, the legend, the bar labels, the TB-1 definitions on screen, More controls
 (the BCBA, 10/25: "look over abc form and see if any enhancements should be made" ... "Okay do it")
 

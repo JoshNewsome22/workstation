@@ -1484,6 +1484,28 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
   .matrix-wrap.can-scroll + .matrix-swipe{display:block}
 }
 </style>
+<style id="abc115-css">
+/* v24.15 printing: the record from any tab; analysis cards break between their blocks; the narrative across its own row */
+#inc-table tr.inc-narr-row{display:none}
+@media print{
+  body.abc-print-record #panel-record,body.abc-print-record #panel-data,body.abc-print-record #panel-walk,body.abc-print-record #panel-methods{display:none!important}
+  body.abc-print-record #panel-incidents,body.abc-print-record #panel-background,body.abc-print-record #panel-analysis{display:block!important}
+  body.abc-print-record #panel-background .card > .body:not(#bg-table),body.abc-print-record #panel-background .card > .btnrow{display:none!important}
+  body.abc-print-record.abc-has-data #panel-analysis{break-before:page;page-break-before:always}
+  #panel-analysis .card{break-inside:auto!important;page-break-inside:auto!important}
+  #panel-analysis .card > header{break-after:avoid;page-break-after:avoid;break-inside:avoid;page-break-inside:avoid}
+  #panel-analysis .chartbox,#panel-analysis .metrics,#panel-analysis .gate,#panel-analysis .caveat,#panel-analysis .legend,#panel-analysis .srcline,#panel-analysis tr{break-inside:avoid;page-break-inside:avoid}
+  #panel-analysis .legend{break-before:avoid;page-break-before:avoid}
+  #panel-analysis table thead{display:table-header-group}
+  #inc-table .inc-narr{display:none!important}
+  #inc-table tr.inc-narr-row{display:table-row}
+  #inc-table tr.inc-narr-row td{font-family:var(--serif);font-size:10.5pt;line-height:1.4;color:#333;padding:0 8px 8px}
+  #inc-table tr.inc-narr-row td b{font-family:var(--sans,system-ui,sans-serif);font-size:8.5pt;font-weight:700;color:#4b5765;margin-right:6px}
+  #inc-table tbody tr{break-inside:avoid;page-break-inside:avoid}
+  .empty{break-inside:avoid;page-break-inside:avoid}
+  #inc-table tr.inc-narr-row{break-before:avoid;page-break-before:avoid}
+}
+</style>
 </head>
 <body>
 <header class="nbh-mast">
@@ -2515,7 +2537,7 @@ function renderIncidents(){
           ${(e.settingEvents||[]).length?`<div style="margin-top:3px;font-size:11px;color:var(--ink-faint)">setting: ${(e.settingEvents||[]).map(id=>esc(SE_BY_ID[id]?SE_BY_ID[id].label:id)).join("; ")}</div>`:""}</td>
       <td class="noprint"><button class="btn quiet" data-edit="${esc(e.id)}" style="padding:4px 10px;font-size:12px;min-height:28px">Edit</button>
           <button class="btn danger" data-del="${esc(e.id)}" style="padding:4px 10px;font-size:12px;min-height:28px;margin-top:4px">Delete</button></td>
-    </tr>`).join("")}
+    </tr>${e.narrative ? `<tr class="inc-narr-row"><td colspan="7"><b>Narrative</b> ${esc(e.narrative)}</td></tr>` : ""}`).join("")}
     </tbody></table>`;
 }
 
@@ -4326,7 +4348,7 @@ function init(){
       state.entries = []; refreshAll();
     }
   });
-  $("#printBtn").addEventListener("click", () => window.print());
+  $("#printBtn").addEventListener("click", () => { if(window.abcPrintRecord) abcPrintRecord(); else window.print(); });   /* v24.15 the record, whichever tab is open */
   $("#print-record").addEventListener("click", () => window.print());
   $("#print-analysis").addEventListener("click", () => window.print());
   window.addEventListener("beforeprint", fillPrintHeader);
@@ -9940,7 +9962,7 @@ function build(){
   const cols = panel.querySelectorAll(".abc-col");
   const sa = BAR.querySelector(".abc-files") || (byId("file-input") && byId("file-input").closest(".toolbar .tgroup"));
   if(sa && !sa.classList.contains("abc-files")){ sa.classList.add("abc-files"); sa.firstElementChild.textContent = "Files"; }
-  const pr = mk("print", "The record"); into(pr, byId("printBtn"));
+  const pr = mk("print", "The record: the header, the incident log, the background samples and the analysis, whichever tab is open"); into(pr, byId("printBtn"));
   const pp = mk("paper", "Paper data sheets, for the folder"); into(pp, byId("abcBlankBtn")); into(pp, byId("abcSampleBtn")); into(pp, byId("abcBgBtn"));
   const ph = mk("photo", "Student’s photo on the paper sheet"); into(ph, byId("abcPhotoPick")); into(ph, byId("abcPhotoOff")); const pl = byId("abcPhotoOnLab"); if(pl) into(ph, pl); const pf = byId("abcPhotoFrom"); if(pf) into(ph, pf); const pn = byId("abcPhotoNote"); if(pn) into(ph, pn);
   const vd = mk("video", "How-to video link (prints as a QR code on the paper sheet)"); into(vd, byId("abcVideo"));
@@ -10456,6 +10478,19 @@ window.TKWALK={build,renderAt,play,pause,seek,toggle,
   window.abcMatrixCue = all;
   document.addEventListener("click", e => { const b = e.target.closest("#panel-data [data-for]"); if(!b) return; const t = document.getElementById(b.dataset.for); if(t) t.click(); });
 })();
+</script>
+<script id="abc115">
+/* v24.15 Print / Save as PDF prints the record (the header, the incident log, the background samples, the analysis)
+   whichever tab is open; from the Record tab it printed the empty entry form across five pages. */
+window.abcPrintRecord = function(){
+  const B = document.body; B.classList.add("abc-print-record");
+  try{ if(typeof fillPrintHeader === "function") fillPrintHeader(); }catch(e){}
+  try{ if(typeof renderAnalysis === "function") renderAnalysis(); }catch(e){}
+  B.classList.toggle("abc-has-data", !!(window.state && state.entries && state.entries.length));
+  const off = () => { B.classList.remove("abc-print-record"); B.classList.remove("abc-has-data"); window.removeEventListener("afterprint", off); };
+  window.addEventListener("afterprint", off);
+  setTimeout(() => { try{ window.print(); }finally{ setTimeout(off, 2000); } }, 30);
+};
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
