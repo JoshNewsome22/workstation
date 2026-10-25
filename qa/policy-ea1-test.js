@@ -175,7 +175,7 @@ const STUB=()=>{window.confirm=()=>true;window.alert=()=>{};};
    /* by design: the alone-type cards' wording, the trial-based Ignore card's wording, and the new fields */
    /* v22.49: the samples' BCBA is the simulated Jordan Ellis; the review's new fields (the blind second reading, the function
       for the report, the treatment goal), which the automatic worked examples set to automatic */
-   const expected=k=>!(k in a.f)&&/^(d2\.\w+|d\.fnkey|t\.goal|m\.vicond|m\.viconf)$/.test(k)||   /* v22.68: the two lines VI-1 fills *//^s\.alone/.test(k)||k==='m.assessor'&&/^Jordan Ellis\b.*\(simulated\)$/.test(b.f[k]||'')||/^c\[\d+\]\.(eo|sd|beh)$/.test(k)&&(()=>{const i=/\d+/.exec(k)[0];const nm=b.f['c['+i+'].name'];return /^(Alone \/ No interaction|Alone \/ No interaction \(screen\)|No interaction|Ignore)$/.test(nm);})();
+   const expected=k=>!(k in a.f)&&/^(d2\.\w+|d\.fnkey|t\.goal|m\.vicond|m\.viconf|pl\.\w+|m\.question)$/.test(k)||   /* v24.13: the Plan sheet's answers and the question */   /* v22.68: the two lines VI-1 fills *//^s\.alone/.test(k)||k==='m.assessor'&&/^Jordan Ellis\b.*\(simulated\)$/.test(b.f[k]||'')||/^c\[\d+\]\.(eo|sd|beh)$/.test(k)&&(()=>{const i=/\d+/.exec(k)[0];const nm=b.f['c['+i+'].name'];return /^(Alone \/ No interaction|Alone \/ No interaction \(screen\)|No interaction|Ignore)$/.test(nm);})();
    const bad=diff.filter(k=>!expected(k));
    console.log('NOTE simulation "'+key+'": '+Object.keys(b.f).length+' fields compared; changed by design: '+diff.filter(expected).join(', '));
    ok('simulation "'+key+'": every field the same as before except the alone-type cards and the new fields',bad.length===0,{bad:bad.map(k=>[k,a.f[k],b.f[k]])});
