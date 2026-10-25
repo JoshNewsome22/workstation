@@ -9905,6 +9905,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.19: Form TD-1 printing from the 10/25 review: Print the staff packet; a sheet's last lines stay with their sheet
+(the BCBA, 10/25: "look at the treatment development and see if any enhancements should be made" ... "Okay.")
+
+- **Print the staff packet** (beside Print final plan only): the Final plan, then the treatment integrity checklist and
+  the staff flowchart from the Implementation plan, as one printout for the people running the plan. The flowchart is
+  built first if it is empty; the plan's readiness question is asked first, as it is for the final plan.
+- **The whole-form printout keeps a sheet's last lines with the sheet.** A sheet's closing citation and last paragraph
+  stay with what precedes them, paragraphs keep three lines together, and a question row, a definition row and a
+  recommendation print whole; the integrity checklist breaks between its rows with its heading row repeated instead of jumping whole to a new page. The worked example's printout had a page holding two lines (the Select sheet's rationale) and the log's last lines on a page of their own; both stay with their sheets now, a page saved.
+- Checks: `qa/td119-test.js`.
+
 ### v24.18: Form TD-1 navigation from the 10/25 review: Build's component list and folding cards, Package Summary links, the planners folded while not in use, the Final plan's section links
 (the BCBA, 10/25: "look at the treatment development and see if any enhancements should be made" ... "Okay.")
 

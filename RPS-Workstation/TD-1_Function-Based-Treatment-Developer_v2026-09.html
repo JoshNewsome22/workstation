@@ -892,6 +892,21 @@ td input,td select{max-width:100%}
 }
 @media print{.td-complist,.td-finnav,.td-foldsum,.td-cfold,.td-plfold{display:none!important}}
 </style>
+<style id="td119-css">
+/* v24.19 the staff packet; a sheet's last lines stay with their sheet */
+@media print{
+  body.print-packet .sheet:not(#final):not(#plan){display:none!important}
+  body.print-packet .sim-banner{display:none!important}
+  body.print-packet #plan > *:not(.nbh-print-head):not(.bar):not(#fidHead):not(#fidTbl):not(#tdFidNote):not(#flowBlock){display:none!important}
+  body.print-packet #plan > .bar::after{content:": the integrity checklist and the staff flowchart"}
+  .sheet > .cite,.sheet > p:last-child,.sheet > .method:last-child,.sheet > .defs:last-of-type{break-before:avoid;page-break-before:avoid}
+  p,.method,li,.cite{orphans:3;widows:3}
+  .qrow,.rec,.defs .drow,.td-glance tr,table.grid tr,.ident,.f,.psctl{break-inside:avoid;page-break-inside:avoid}
+  #fidTbl{break-inside:auto!important;page-break-inside:auto!important}
+  body.print-packet #flowBlock{break-before:page;page-break-before:always}
+  #fidTbl thead{display:table-header-group}
+}
+</style>
 </head>
 
 <body class="view-setup">
@@ -955,6 +970,7 @@ td input,td select{max-width:100%}
     <div class="row">
       <button class="primary" id="printBtn">Print / Save as PDF</button>
       <button id="printFinalBtn">Print final plan only</button>
+      <button id="printPacketBtn" title="The final plan, then the treatment integrity checklist and the staff flowchart: one printout for the people running the plan">Print the staff packet</button>
       <label class="pr-guide" title="Off: the printout (and the workstation's master print) leaves out the Guide's literature review and the References"><input type="checkbox" id="printGuide" name="opt.printGuide"> Include the guide and references</label>
       <button id="saveBtn">Save data</button>
       <button id="bipBtn" title="Compose the plan text from this form and copy it to the clipboard, to paste into the BIP">Copy for the BIP</button><span id="bipMsg" class="bip-msg noprint" role="status" aria-live="polite"></span>
@@ -1458,7 +1474,7 @@ td input,td select{max-width:100%}
   </tbody></table>
   <div class="defs"><div class="drow"><div class="dlab">Coaching visit routine</div><div class="dval"><textarea name="p.visit" placeholder="Per visit: implementer describes the week; questions answered; procedures explained and demonstrated; implementer runs sessions with in-session prompts and feedback; graphs reviewed; next-week objectives set (Harding et al., 2009, Table 2)"></textarea></div></div></div>
 
-  <h3 class="sub">Treatment Integrity Checklist</h3>
+  <h3 class="sub" id="fidHead">Treatment Integrity Checklist</h3>
   <p class="method" style="margin-top:0">Generated from the steps on the build sheet; each is scored on the monitoring sheet. Integrity criterion: 90% of steps per observed session; errors that reinforce the problem behavior are flagged separately (St. Peter Pipkin et al., 2010).</p>
   <table class="rank cmp" id="fidTbl"><thead><tr><th class="n" style="width:6%">#</th><th style="width:18%">Component</th><th>Step</th></tr></thead><tbody></tbody></table>
   <p class="hint" id="tdFidNote" hidden></p>
@@ -3124,6 +3140,16 @@ function printFinal(){renderPlan();renderFinal();document.body.classList.add('pr
 /* v21.44 (A1): a plan whose own words do not follow question 4 asks first; (B3) so does one whose escape extinction is
    not ready (planAsk) */
 $('#printFinalBtn').addEventListener('click',()=>{if(!planAsks()){printFinal();return;}planAsk('Print the final plan','Print anyway').then(go=>{if(go)printFinal();});});
+/* v24.19 the staff packet: the Final plan first, then the integrity checklist and the flowchart from the Implementation plan */
+function printPacket(){renderPlan();renderFinal();const fb=$('#flowBlock');if(fb&&!fb.textContent.trim()){try{$('#flowBtn').click();}catch(e){}}
+  const fin=$('#final'),plan=$('#plan');const par=fin&&plan&&fin.parentNode===plan.parentNode?fin.parentNode:null;const finNext=par?fin.nextSibling:null;
+  /* the Final plan first; on the Implementation plan the checklist before the flowchart (the flowchart is a page of its own) */
+  const note=$('#tdFidNote'),flowNext=fb?fb.nextSibling:null,flowPar=fb?fb.parentNode:null;
+  if(par)par.insertBefore(fin,plan);if(fb&&note&&note.parentNode===flowPar)note.after(fb);document.body.classList.add('print-packet');
+  const done=()=>{document.body.classList.remove('print-packet');if(par&&fin.parentNode===par)par.insertBefore(fin,finNext);if(fb&&flowPar&&fb.parentNode===flowPar)flowPar.insertBefore(fb,flowNext);window.removeEventListener('afterprint',done);};
+  window.addEventListener('afterprint',done);setTimeout(()=>{try{window.print();}finally{setTimeout(done,2000);}},50);}
+$('#printPacketBtn').addEventListener('click',()=>{if(!planAsks()){printPacket();return;}planAsk('Print the staff packet','Print anyway').then(go=>{if(go)printPacket();});});
+window.td119={printPacket};
 
 
 /* ---------- simulator ---------- */
