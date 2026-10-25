@@ -70,7 +70,7 @@ const tabs=()=>{const seg=document.querySelector('#viewSeg');if(!seg)return {n:0
   const w=await c2.newPage();w.on('pageerror',e=>errs.push(e.message));await w.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(900);
   await w.evaluate(()=>openForm('TD-1'));await w.waitForFunction(()=>!!state.status['TD-1']);await sleep(1500);
   const fr=w.frames().find(f=>f!==w.mainFrame()&&/TD-1/.test(f.url()));
-  const st=()=>w.evaluate(()=>({fold:document.body.classList.contains('ws-fold'),hdr:getComputedStyle(document.querySelector('header.top')).display,quick:getComputedStyle(document.querySelector('#saveQuick')).display,save:getComputedStyle(document.querySelector('#saveCase')).display}));
+  const st=()=>w.evaluate(()=>({fold:document.body.classList.contains('ws-fold'),hdr:(()=>{const h=document.querySelector('header.top');return getComputedStyle(h).display==='none'||h.getBoundingClientRect().height<1?'none':'flex';})(),quick:getComputedStyle(document.querySelector('#saveQuick')).display,save:getComputedStyle(document.querySelector('#saveCase')).display}));
   const F={start:await st()};
   for(let i=0;i<8;i++){await fr.evaluate(()=>window.scrollBy(0,120));await sleep(120);}await sleep(700);F.down=await st();
   for(let i=0;i<2;i++){await fr.evaluate(()=>window.scrollBy(0,-60));await sleep(150);}await sleep(700);F.up=await st();

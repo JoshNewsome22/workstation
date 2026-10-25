@@ -9905,6 +9905,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.11: The iPad review of 10/25: the form rail can be put away, the Sheets menu at five sheets, the toolbar's groups, a smoother fold, ABC-1's note
+(the BCBA's screenshots: "Make the side bar here collapsible", DM-1's tabs in a column, IA-1's toolbar "layout needs to be better", "very jerky as the page layout changes", ABC-1's note "needs to be made to be the full length")
+
+- **The form rail can be put away.** Sideways on an iPad the sheets sit in a rail down the left; a ‹ button in its head
+  hides it and a tab at the left edge brings it back. The choice is kept on the device, and the ‹ › sheet arrows in the
+  toolbar still turn the sheets while it is away.
+- **Five or more sheets: the Sheets menu when the rail does not fit.** Form DM-1's six tabs stood in a column inside
+  the toolbar (the strip had measured as one row before Dictate, The case and Save data joined the bar, and shared the
+  width with them). A form with five or more sheets now gets the Sheets menu upright or in a narrow frame, and the
+  toolbar is watched, so a strip that wraps later goes to the menu too.
+- **The toolbar's groups.** The view strip takes the room; a group of one select or one button (the target behavior,
+  The case) keeps its own width. Form IA-1's target behavior select, + Target and Remove stay on one line (Remove fell
+  under the select).
+- **A smoother fold.** Scrolling down an open form folds the workstation's bars away; they vanished at once and the
+  form's frame grew in a jump, which read as a jerk. They now shrink away over a third of a second. The form's own
+  toolbar fold no longer slides, and scroll anchoring is off while it folds, so the browser and the fold do not both
+  correct the page.
+- **Form ABC-1's note under the incident description** runs the full width.
+- The script carries its own CSS from now on (nbh-ui.js), so every form has these without a change to its own styles.
+- Checks: `qa/v2411-test.js` (ABC-1's note; DM-1 at 900 px in the menu, at 1300 px in the rail, put away and brought
+  back, kept over a reload; IA-1's target group on one line; the shells' fold rule).
+
 ### v24.10: Form SP-1's printed data sheet: a compact top, so a behavior's definitions and its grid share one page
 (the BCBA's 18-page print of 10/23: the fields and definitions filled page 1 and the grid went to page 2; "the photo is taking up too much space", "the date can be in a different format", "each target behavior and the grid should fit on one sheet even with the student picture")
 

@@ -958,7 +958,9 @@ body.ws-full .crumb .fs-logo{display:block}
 body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
 /* v23.87 (the BCBA's iPad review) on a touch screen the bars above the form fold away while the form is scrolled down to be
    read, as in fullscreen, and come back when it is scrolled up or closed: the form gets the room (ws-fold, set below) */
-body.ws-fold header.top,body.ws-fold .bar{display:none!important}
+/* v24.11 the bars shrink away over a third of a second (they vanished, and the form's frame grew in a jump that read as a jerk) */
+body.has-form header.top,body.has-form .bar{max-height:420px;transition:max-height .32s ease,opacity .2s ease,padding .32s ease}
+body.ws-fold header.top,body.ws-fold .bar{max-height:0!important;min-height:0!important;overflow:hidden!important;opacity:0;pointer-events:none;padding-top:0!important;padding-bottom:0!important;border-top-width:0!important;border-bottom-width:0!important;margin-top:0!important;margin-bottom:0!important}
 body.ws-fold .crumb .fs-logo{display:block}
 /* v23.87 one Save case at a time: the bar's, with the mark for unsaved work; the one beside the form shows only when the
    bar is out of sight (fullscreen, folded, or a phone, where the bar is not shown) */
@@ -2763,7 +2765,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.10';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.11';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
