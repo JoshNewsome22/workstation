@@ -173,7 +173,7 @@ const PA='PA-1_Preference-Assessment-Protocol_v2026-09.html',TD='TD-1_Function-B
   p=await open('EA-1_Experimental-Analysis-Protocol_v2026-09.html');
   await L.loadSim(p);await sleep(900);
   const ea=await p.evaluate(()=>{const o=window.__nbhFactsOut();return o&&o.evidence?{term:o.evidence.term||''}:null;});
-  ok('25 EA-1 hands its session termination criteria to the case with its result (for PA-1)',ea&&/^Any tissue damage; 3 head hits within 10 s; student requests to stop \(simulated\)$/.test(ea.term),ea);
+  ok('25 EA-1 hands its session termination criteria to the case with its result (for PA-1)',ea&&/^Any aggression that leaves a mark or injures anyone; three aggressive responses within one minute; the student asks or signs to stop \(simulated\)$/.test(ea.term)   /* v24.20: the simulation's criteria fit the behavior */,ea);
   await p.close();
   }catch(x){console.log('FAIL exception '+(x&&x.stack||x));fails++;}
   ok('26 no page errors',errs.length===0,errs);

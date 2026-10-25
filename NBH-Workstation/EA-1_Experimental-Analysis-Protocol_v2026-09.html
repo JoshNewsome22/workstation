@@ -1185,6 +1185,37 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
 #walk #wk-aids > section{page-break-after:always;break-after:page}
 #walk #wk-aids > section:last-child{page-break-after:auto;break-after:auto}
 </style>
+<style id="ea120-css">
+/* v24.20 the review's integrity and safety work: invalid cells, the agreement marks, the criteria while a session runs, the observer's sheet */
+.ea-bad{outline:2px solid #b3261e!important;outline-offset:-2px;background:#fff1f0!important}
+.ea-low{color:#b3261e;font-weight:600}
+#eaIoaNeed{font-size:12px;line-height:1.4}
+.ea-obsrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.ea-term{margin:8px 0 0;padding:8px 10px;border-left:4px solid #b3261e;background:#fff6f5;font-size:12.5px;line-height:1.45;color:var(--ink)}
+.ea-term[hidden]{display:none}
+#eaGateDlg .ea-nc-b{margin:6px 0 10px 18px;font-size:13px;line-height:1.5}
+#eaGateDlg p.ea-nc-b{margin-left:0}
+#eaObsSheet[hidden]{display:none}
+.ea-obs{font-size:12px;color:#000;line-height:1.4;max-width:7.4in;margin:0 auto}
+.ea-obs-page{break-after:page;page-break-after:always;padding:0.1in 0}
+.ea-obs-page:last-child{break-after:auto;page-break-after:auto}
+.ea-obs-head{display:flex;justify-content:space-between;gap:10px;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:6px;flex-wrap:wrap}
+.ea-obs-sim{border:1px solid #000;padding:0 6px;font-weight:700}
+.ea-obs-line{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0}
+.ea-obs h2{font-size:18px;margin:8px 0 4px;color:#000}
+.ea-obs-dl{display:grid;grid-template-columns:120px 1fr;gap:3px 10px;margin:6px 0}
+.ea-obs-dl dt{font-weight:700}.ea-obs-dl dd{margin:0}
+.ea-obs-cap{font-size:11px;margin:6px 0 2px}
+.ea-obs-grid{width:100%;border-collapse:collapse;table-layout:fixed;margin:4px 0 8px}
+.ea-obs-grid th{border:1px solid #000;font-size:10px;padding:2px;font-weight:600}.ea-obs-grid td{border:1px solid #000;height:64px}
+.ea-obs-ioa{display:flex;flex-wrap:wrap;gap:16px;margin:8px 0;font-weight:600}
+.ea-obs-stop{border:1px solid #000;padding:5px 8px;margin-top:6px}
+@media print{
+  body.print-obs > :not(#eaObsSheet){display:none!important}
+  body.print-obs #eaObsSheet{display:block!important}
+  .ea-exmark{fill:#000}
+}
+</style>
 </head>
 
 <body class="view-setup">
@@ -1291,7 +1322,7 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
 
   <h3 class="sub">4. Interpretation</h3>
   <div class="warn ev"><b>Evidence</b>Hagopian et al. (1997) found low agreement among three predoctoral interns interpreting multielement analyses (M = .46), developed structured criteria that reproduced an expert panel's interpretations (exact agreement .94), and after training in the criteria the interns' mean agreement rose to .81. The criteria draw an upper and a lower criterion line one standard deviation above and below the mean of the control condition and count test-condition points outside them. Roane, Fisher, Kelley, Mevers, and Bouxsein (2013) generalized the rule to analyses of any length: a test condition is differentiated when the number of points above the upper line minus the number below the lower line is at least half the points in that condition, with additional rules for trends, low magnitude, and multiple control; the lower line is set at zero when the standard deviation exceeds the control mean. Saini, Fisher, and Retzlaff (2018) applied the criteria on an ongoing basis, series by series, to existing analyses: the interim interpretations predicted the final post hoc interpretations with a very high degree of accuracy and identified function after 19 sessions on average instead of 32.</div>
-  <div class="warn"><b>Applied guidance</b>The interpretation sheet computes the criterion lines and the Roane rule from the sessions log and flags trend and low-magnitude patterns for visual review. For latency measures the rule is inverted (points below the lower line count as evidence), an adaptation of this form; Sunde, Briggs, and Mitteer (2022) published structured criteria adapted for latency-based analyses, and those should be applied on visual review. A function is reported only when the rule is met and the pattern survives visual inspection for trend and consistency; otherwise the analysis continues or a variant is chosen.</div>
+  <div class="warn"><b>Applied guidance</b>The interpretation sheet computes the criterion lines and the Roane rule from the sessions log and flags trend and low-magnitude patterns for visual review. For latency measures the rule is inverted (points below the lower line count as evidence), an adaptation of this form; Sunde, Briggs, and Mitteer (2022) published structured criteria adapted for latency-based analyses, and those should be applied on visual review. A function is reported only when the rule is met and the pattern survives visual inspection for trend and consistency; otherwise the analysis continues or a variant is chosen. Sessions that ended on a termination criterion or on assent withdrawn, and sessions under half the planned length, are left out of the criterion by default and listed under the table (they stay on the graph, marked ×); the criterion lines use the population standard deviation (÷ n), this form's convention, and the sample SD is shown beside it. Agreement is scored per condition against the plan on Setup &amp; safety, and a differentiated condition short of it flags the outcome.</div>
 
   <div class="warn"><b>On this form</b>The function handed to Form FS-1 is the one under <b>Function for the report</b>, which starts as the outcome reads and can be set by hand after visual review. A condition that meets u &minus; l but not the magnitude rule reads &ldquo;rule met, magnitude low&rdquo; and is left out of the outcome. A second analyst can read the analysis blind under <b>Second Analyst&rsquo;s Reading</b>: the graph without the condition names, the criterion lines or the outcome, then the comparison (Hagopian et al., 1997).</div>
   <h3 class="sub">5. Single-Subject Designs for the Treatment That Follows</h3>
@@ -1508,6 +1539,7 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
       <label class="ea-wide" for="eaYoke" id="eaYokeL" hidden title="A yoked control: this session delivers the reinforcer at the times a master session earned it, whatever the student is doing">Replay deliveries from<select id="eaYoke"><option value="">None: the consequence follows the response</option></select></label>
     </div>
     <div class="ea-script" id="eaScript"></div>
+    <div class="ea-term" id="eaRunTerm" role="status" hidden></div>
     <div class="ea-main">
       <div class="ea-clock">
         <div class="ea-big" id="eaLeft">10:00</div>
@@ -1542,6 +1574,7 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
   </div>
   <div class="ea-flash" id="eaFlash" aria-hidden="true"></div>
   <button type="button" class="ea-pill noprint" id="eaPill" hidden>Session running</button>
+  <div class="ea-obsrow noprint"><button type="button" class="tool" id="eaObsBtn" title="One page per condition for the second observer: the signal, what the therapist does, the consequence, a tally grid by the minute and the agreement box">Print the observer's sheet</button><span id="eaIoaNeed" class="ea-low" role="status" hidden></span></div>
   <table class="grid" id="sessTbl"><thead><tr><th class="c" style="width:32px">#</th><th style="width:74px">Date</th><th style="width:19%">Condition</th><th style="width:11%">Phase</th><th class="c" style="width:52px">Min</th><th class="c" style="width:56px" id="thVal">Count</th><th class="c" style="width:56px">Rate</th><th class="c" style="width:52px">IOA %</th><th class="c" style="width:40px">Term.</th><th>Notes</th></tr></thead><tbody id="sessBody"></tbody></table>
   <div class="figure" id="sessFig"></div>
 <div id="lodPanel" style="display:none;margin-top:14px">
@@ -1586,10 +1619,11 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
     <div><b>Variant / design</b><span id="sumVar"></span></div>
   </div>
   <h3 class="sub" style="margin-top:0">Structured Visual-Inspection Criteria (Hagopian et al., 1997; Roane et al., 2013)</h3>
-  <div class="ident" style="margin-bottom:8px"><div class="f"><label for="critPhase">Phase to interpret</label><select id="critPhase" name="d.phase" data-ph="1"><option value="">All phases</option></select></div><div class="f"><label for="critRule">Criterion applied</label><select id="critRule" name="d.crit" data-ph="1"><option value="">Roane rule: u − l ≥ n / 2 with this form's magnitude floor</option><option value="svi">SVI quotient ≥ .50: points beyond one SD of the control mean ÷ n (as applied by Bann &amp; Morris, 2026; no trend rules)</option></select></div><div class="f"><label for="critTrend">Trend rules applied on visual review</label><select id="critTrend" name="d.trend" data-ph="1"><option value=""></option><option>Yes: Roane et al. (2013) trend rules applied</option><option>No: quotient only, trends noted in the flags</option></select></div></div>
+  <div class="ident" style="margin-bottom:8px"><div class="f"><label for="critPhase">Phase to interpret</label><select id="critPhase" name="d.phase" data-ph="1"><option value="">All phases</option></select></div><div class="f"><label for="critExcl">Terminated and short sessions</label><select id="critExcl" name="d.excl" data-ph="1" title="A session that ended on a termination criterion or on assent withdrawn, or one under half the planned length"><option value="">Left out of the criterion (marked × on the graph)</option><option value="count">Counted (not recommended)</option></select></div><div class="f"><label for="critRule">Criterion applied</label><select id="critRule" name="d.crit" data-ph="1"><option value="">Roane rule: u − l ≥ n / 2 with this form's magnitude floor</option><option value="svi">SVI quotient ≥ .50: points beyond one SD of the control mean ÷ n (as applied by Bann &amp; Morris, 2026; no trend rules)</option></select></div><div class="f"><label for="critTrend">Trend rules applied on visual review</label><select id="critTrend" name="d.trend" data-ph="1"><option value=""></option><option>Yes: Roane et al. (2013) trend rules applied</option><option>No: quotient only, trends noted in the flags</option></select></div></div>
   <p class="method" style="margin:0 0 6px;font-size:11.5px">Interpret each phase on its own when the design changed (e.g., a pairwise test after an undifferentiated multielement). The quotient option reproduces the criterion Bann and Morris (2026) used for their multielement analyses; they did not apply the Roane et al. trend rules, so state here whether trend rules were applied.</p>
-  <p class="method" style="margin-top:0">Criterion lines are drawn at one standard deviation above and below the control mean (lower line at zero when the deviation exceeds the mean). For each test condition: u = points above the upper line, l = points below the lower line, n = points in the condition. Differentiated when u − l ≥ n / 2 and the condition mean passes this form's magnitude rule: at least 1.5 times the control mean and 0.1 above it, at least a quarter of the highest test condition, and about one response a session when the control is at zero (latency: at most two-thirds of the control latency). The rule stands in for the published low-magnitude rules, which should also be checked on visual review; a condition below it reads “rule met, magnitude low” and is neither reported nor handed to Form FS-1. Trend and multiple-control patterns are flagged.</p>
+  <p class="method" style="margin-top:0">Criterion lines are drawn at one standard deviation (the population SD, ÷ n: this form's convention) above and below the control mean (lower line at zero when the deviation exceeds the mean). A session that ended on a termination criterion or on assent withdrawn, and a session under half the planned length, stays on the graph marked × and is left out of the criterion unless counted above. For each test condition: u = points above the upper line, l = points below the lower line, n = points in the condition. Differentiated when u − l ≥ n / 2 and the condition mean passes this form's magnitude rule: at least 1.5 times the control mean and 0.1 above it, at least a quarter of the highest test condition, and about one response a session when the control is at zero (latency: at most two-thirds of the control latency). The rule stands in for the published low-magnitude rules, which should also be checked on visual review; a condition below it reads “rule met, magnitude low” and is neither reported nor handed to Form FS-1. Trend and multiple-control patterns are flagged.</p>
   <table class="grid" id="critTbl"></table>
+  <div class="method" id="critNote" style="display:none;margin:4px 0 8px;font-size:11.5px"></div>
   <div class="warn verdict" id="critVerdict"><b>Outcome</b>Enter sessions to compute.</div>
   <div class="figure" id="critFig"></div>
 <div id="cfaRead" style="display:none;margin-top:14px">
@@ -1881,9 +1915,9 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
   </div>
   <div class="script">
     <div><h4>What You Say and Do</h4><ul><li>Supervised: no materials and no interaction. The door stays open, or the student stays in the shared room; sit or stand at a distance where you can see and hear the student, never in the doorway.</li><li>No social consequences: no talk, eye contact, touch, scolding, comfort or items, whatever the student does.</li><li>Never keep the student in. If they walk out, let them go: End early. The adult named under Staffing follows, close enough to keep the student safe.</li><li>Ignore, for aggression: the therapist present, facing away, not interacting; blocking only by the plan&rsquo;s blocking rules.</li><li>True alone, only when it is set on Setup &amp; safety: watch and listen without a break through the window or on video, and step in exactly as the stop rule says.</li><li>Stepping in means blocking, moving the danger away or ending the session. A hold is a physical restraint, used only as the crisis plan allows.</li><li>Apply the termination criteria exactly as written, in this condition as in every other; End early marks the session terminated.</li></ul></div>
-    <div><h4>What Goes on the Sheet</h4><ul><li>Setup &amp; safety: Alone or no-interaction condition, Supervised by default. True alone only after the four steps: the policy check, the stop-or-step-in rule, how the student is watched, and the parent&rsquo;s agreement.</li><li>A terminated session: Term. checked and the runner&rsquo;s note in Notes. A student who walked out: End early, and &ldquo;left the room&rdquo; in Notes. Interpretation counts the two on separate lines.</li><li>The extended-alone screen: five 5-min sessions, each with the phase label Ext. alone.</li></ul></div>
+    <div><h4>What Goes on the Sheet</h4><ul><li>Setup &amp; safety: Alone or no-interaction condition, Supervised by default. True alone only after the four steps: the policy check, the stop-or-step-in rule, how the student is watched, and the parent&rsquo;s agreement.</li><li>A terminated session: Term. checked and the runner&rsquo;s note in Notes. A student who walked out: End early, and &ldquo;left the room&rdquo; in Notes. Interpretation lists the two on separate lines and leaves both out of the criterion (the means, the SD and the u and l counts); they stay on the graph, marked ×.</li><li>The extended-alone screen: five 5-min sessions, each with the phase label Ext. alone.</li></ul></div>
   </div>
-  <div class="decide"><b>Decision.</b> Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013). When sessions keep ending on the termination criteria, the Interpretation view notes that latency or precursor measures may be more appropriate. Sessions that ended because the student left the room, or said or showed stop, are counted on their own line as assent withdrawn: the analysis pauses and the team reviews assent (Form SI-1) before any further session.</div>
+  <div class="decide"><b>Decision.</b> Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013). When sessions keep ending on the termination criteria, the Interpretation view notes that latency or precursor measures may be more appropriate. Sessions that ended because the student left the room, or said or showed stop, are listed on their own line as assent withdrawn and left out of the criterion: the analysis pauses and the team reviews assent (Form SI-1) before any further session.</div>
   <h4 class="flowhead">The Screen&rsquo;s Card, Word for Word</h4>
   <div class="card4">
     <div class="pm-none"><b>Alone / No interaction (screen)</b><i>Establishing operation</i>No materials and no interaction; five consecutive 5-min sessions. Supervised: the door stays open or the student stays in the shared room; an adult watches from a distance, able to see and hear the student the whole time; the student may leave at any time.<i>Signal</i>Door open, no materials; adult at a distance, not interacting<i>Session duration</i>5 min × 5<i>After a target</i>None<i>Note the template adds to Rationale</i>Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013).</div>
@@ -2173,7 +2207,7 @@ function renderVariant(){extPanels();const r=Object.fromEntries(Object.keys(REC)
  if(hyp==='idio'){add('cfa',1,'a synthesized function is indicated when the behavior occurs only under two or more operations together (Bann & Morris, 2026)');}
  if(hyp==='idio'){add('iisca',3,'idiosyncratic or combined contingencies reported (Hanley et al., 2014; Slaton et al., 2017)');add('standard',1,'standard conditions can be individualized from the interview (Iwata & Dozier, 2008)');}
  if(hyp==='none')add('standard',1,'no strong prior: test all common contingencies');
- if(cq==='no'){add('antecedent',4,'consequence delivery unacceptable: manipulate antecedents only (Anderson & Long, 2002)');add('standard',-2,'programmed consequences not permitted');add('iisca',-2,'programmed consequences not permitted');}
+ if(cq==='no'){add('antecedent',6,'consequence delivery unacceptable: manipulate antecedents only (Anderson & Long, 2002)');['standard','iisca','trial','latency','brief','pairwise'].forEach(k=>add(k,-3,'its test condition delivers the hypothesized consequence on purpose, which the team has ruled out'));add('precursor',0,'the consequence would follow the precursor only; offered only if the team accepts that');}   /* v24.20 (R-083) */
  if(hist==='undiff'){add('alone',3,'undifferentiated result: extended alone series first (Vollmer et al., 1995)');add('pairwise',2,'then pairwise test of the strongest candidate (Vollmer et al., 1993; Iwata et al., 1994)');add('iisca',1,'synthesized analysis after isolated modifications fail (a practice rule of this form; Hanley, 2012, recommends an interview-informed test and matched control from the outset)');add('standard',-2,'repeating the same analysis is unlikely to help');}
  const ranked=Object.keys(r).map(k=>({k,w:r[k].w,why:r[k].why})).filter(x=>x.why.length).sort((a,b)=>b.w-a.w);
  const el=$('#varRec');if(!ranked.length){el.innerHTML='';return;}
@@ -2334,18 +2368,34 @@ window.eaAlone={mode:alMode,watch:alWatch,rule:()=>({when:val('s.aloneWhen'),max
   return '';}};
 
 /* ---------- sessions ---------- */
-function sessRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="s[${i}].d"></td><td class="c"><select class="cond" name="s[${i}].c" data-sess="1"></select></td><td><input class="txt" name="s[${i}].p" data-sess="1" placeholder="FA"></td><td class="c"><input class="num" name="s[${i}].m" data-sess="1"></td><td class="c"><input class="num" name="s[${i}].v" data-sess="1"></td><td class="c calc" id="sRate${i}"></td><td class="c"><input class="num" name="s[${i}].ioa" data-sess="1"></td><td class="c"><input type="checkbox" name="s[${i}].t" data-sess="1" title="Session terminated per criteria"></td><td><input class="txt" name="s[${i}].n"><input type="text" class="yk" name="s[${i}].y" hidden aria-hidden="true" tabindex="-1" title="delivery times kept for a yoked session"></td>`;return tr;}
+function sessRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="s[${i}].d"></td><td class="c"><select class="cond" name="s[${i}].c" data-sess="1"></select></td><td><input class="txt" name="s[${i}].p" data-sess="1" placeholder="FA"></td><td class="c"><input class="num" name="s[${i}].m" data-sess="1" inputmode="decimal"></td><td class="c"><input class="num" name="s[${i}].v" data-sess="1" inputmode="decimal"></td><td class="c calc" id="sRate${i}"></td><td class="c"><input class="num" name="s[${i}].ioa" data-sess="1" inputmode="decimal"></td><td class="c"><input type="checkbox" name="s[${i}].t" data-sess="1" title="Session terminated per criteria"></td><td><input class="txt" name="s[${i}].n"><input type="text" class="yk" name="s[${i}].y" hidden aria-hidden="true" tabindex="-1" title="delivery times kept for a yoked session"></td>`;return tr;}
 function renderSess(){const n=+$('#nSess').value,b=$('#sessBody');while(b.children.length>n)b.lastChild.remove();for(let i=b.children.length;i<n;i++)b.appendChild(sessRow(i));refreshCondNames();
  const mz=val('m.measure');$('#thVal').textContent=mz==='latency'?'Latency s':mz==='pct'?'% int.':mz==='count'?'Count':mz==='trial'?'0/1':'Count';renderGraph();}
-function sessData(){const mz=val('m.measure');const rows=[];$$('#sessBody tr').forEach((tr,i)=>{const c=val(`s[${i}].c`);const v=num(`s[${i}].v`);if(c===''||v==null)return;const m=num(`s[${i}].m`)||num('m.sessmin')||10;let y=v;if(mz==='rate')y=m?v/m:v;
- const cell=$('#sRate'+i);if(cell)cell.textContent=mz==='rate'?y.toFixed(2):(mz==='latency'?v+' s':v);
- rows.push({i,c:+c,y,phase:val(`s[${i}].p`)||'FA',ioa:num(`s[${i}].ioa`),term:!!document.querySelector(`[name="s[${i}].t"]`)?.checked});});return rows;}
+/* v24.20 (the 10/25 review: R-001, R-004) each row is read with its reasons. A count below 0, minutes at or below 0, an entry that is not
+   a number or an IOA outside 0 to 100 marks the cell, clears the rate and keeps the row out (listed under the criterion table). A session
+   marked Term., one whose notes say assent withdrawn or left the room, or one under half the planned length stays on the graph, marked,
+   and out of the criterion (the condition means, SD and the u and l counts) unless the analyst chooses to count them. */
+let SESS_BAD=[];
+function sessMark(i,k,bad){const e=document.querySelector(`[name="s[${i}].${k}"]`);if(!e)return;e.classList.toggle('ea-bad',!!bad);if(bad){e.setAttribute('aria-invalid','true');e.title=bad;}else{e.removeAttribute('aria-invalid');e.removeAttribute('title');}}
+function sessData(){const mz=val('m.measure');const rows=[];const plan=parseFloat(val('m.sessmin'))||10;SESS_BAD=[];
+ $$('#sessBody tr').forEach((tr,i)=>{const c=val(`s[${i}].c`),vRaw=val(`s[${i}].v`),mRaw=val(`s[${i}].m`),iRaw=val(`s[${i}].ioa`),v=num(`s[${i}].v`),mIn=num(`s[${i}].m`),io=num(`s[${i}].ioa`);const cell=$('#sRate'+i);
+  const bv=vRaw!==''&&(v==null?'not a number':v<0?'a count or value is 0 or more':(mz==='pct'&&v>100)?'a percentage is 100 or less':''),bm=mRaw!==''&&(mIn==null?'not a number':mIn<=0?'minutes are more than 0':''),bi=iRaw!==''&&(io==null?'not a number':(io<0||io>100)?'IOA is 0 to 100':'');
+  sessMark(i,'v',bv);sessMark(i,'m',bm);sessMark(i,'ioa',bi);
+  if(bv||bm){SESS_BAD.push({i,why:[bv?'value '+JSON.stringify(vRaw)+': '+bv:'',bm?'minutes '+JSON.stringify(mRaw)+': '+bm:''].filter(Boolean).join('; ')});if(cell)cell.textContent='';return;}
+  if(c===''||vRaw===''){if(cell)cell.textContent='';return;}
+  const m=mIn!=null?mIn:plan;let y=v;if(mz==='rate')y=v/m;
+  if(cell)cell.textContent=mz==='rate'?y.toFixed(2):(mz==='latency'?v+' s':v);
+  const term=!!document.querySelector(`[name="s[${i}].t"]`)?.checked,notes=val(`s[${i}].n`);
+  const ex=/assent withdrawn/i.test(notes)?'assent withdrawn':/left the room/i.test(notes)?'the student left the room':term?'terminated':(mz!=='latency'&&mIn!=null&&mIn<0.5*plan)?'under half the planned length ('+mIn+' of '+plan+' min)':'';
+  rows.push({i,c:+c,y,m,phase:val(`s[${i}].p`)||'FA',ioa:bi?null:io,term,ex});});return rows;}
+function critRows(rows){return val('d.excl')==='count'?rows:rows.filter(r=>!r.ex);}
+function sessIssues(){return SESS_BAD.slice();}
 document.addEventListener('input',e=>{if(e.target.dataset.sess)renderGraph();if(e.target.dataset.re){renderSess();}});
 document.addEventListener('change',e=>{if(e.target.dataset.sess)renderGraph();if(e.target.dataset.re)renderSess();});
 function marker(shape,x,y,col,fill){const s=4.2;if(shape==='square')return `<rect x="${x-s}" y="${y-s}" width="${2*s}" height="${2*s}" fill="${fill}" stroke="${col}" stroke-width="1.2"/>`;if(shape==='triangle')return `<polygon points="${x},${y-s-1} ${x+s+1},${y+s} ${x-s-1},${y+s}" fill="${fill}" stroke="${col}" stroke-width="1.2"/>`;if(shape==='diamond')return `<polygon points="${x},${y-s-1} ${x+s+1},${y} ${x},${y+s+1} ${x-s-1},${y}" fill="${fill}" stroke="${col}" stroke-width="1.2"/>`;return `<circle cx="${x}" cy="${y}" r="${s}" fill="${fill}" stroke="${col}" stroke-width="1.2"/>`;}
 function lineGraph(el,legendEl,o){ /* o: title, cap, points:[{x,y,series,phase}], seriesNames:[], yLabel, refs:[{y,label,dash}], phases:true */
  if(!el)return;const pts=o.points;if(!pts.length){el.innerHTML=`<h3>${esc(o.title)}</h3><p class="cap">${o.cap||''}</p><div class="empty">No data yet.</div>`;if(legendEl)legendEl.innerHTML='';return;}
- const W=640,H=270,L=46,R=14,T=22,B=40,pw=W-L-R,ph=H-T-B;const xs=pts.map(p=>p.x);const xmax=Math.max(...xs,5);const ymaxData=Math.max(...pts.map(p=>p.y),...(o.refs||[]).map(r=>r.y||0));const nice=v=>{if(v<=0)return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const m=v/e;const c=m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10;return c*e;};const ymax=o.ymax||nice(ymaxData*1.1);
+ const W=640,H=270,L=46,R=14,T=22,B=40,pw=W-L-R,ph=H-T-B;const xs=pts.map(p=>p.x);const xmax=Math.max(...xs,5);const inPts=pts.filter(p=>!p.ex),ymaxData=Math.max(...(inPts.length?inPts:pts).map(p=>p.y),...(o.refs||[]).map(r=>r.y||0));   /* v24.20 a session left out does not set the axis (it is drawn at the top edge, marked) */const nice=v=>{if(v<=0)return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const m=v/e;const c=m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10;return c*e;};const ymax=o.ymax||nice(ymaxData*1.1);
  const X=x=>L+(x-1)/(Math.max(1,xmax-1))*pw,Y=y=>T+ph-(Math.min(y,ymax)/ymax)*ph;
  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
  for(let k=0;k<=5;k++){const v=ymax*k/5,yy=Y(v);s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}"/><text class="tick" x="${L-5}" y="${yy+3}" text-anchor="end">${v>=10?Math.round(v):v.toFixed(v<1?2:1)}</text>`;}
@@ -2357,7 +2407,7 @@ function lineGraph(el,legendEl,o){ /* o: title, cap, points:[{x,y,series,phase}]
   const ph2={};pts.forEach(p=>{if(!ph2[p.phase])ph2[p.phase]={min:p.x,max:p.x};ph2[p.phase].max=Math.max(ph2[p.phase].max,p.x);});Object.keys(ph2).forEach(k=>{s+=`<text class="lbl" x="${(X(ph2[k].min)+X(ph2[k].max))/2}" y="${T-9}" text-anchor="middle">${esc(k)}</text>`;});}
  o.seriesNames.forEach((nm,si)=>{const sp=pts.filter(p=>p.series===si);if(!sp.length)return;const col=COLORS[si%COLORS.length],fill=si===o.hollow?'#fff':col;
   let path='';let prev=null;sp.forEach(p=>{if(prev&&p.phase===prev.phase)path+=`L${X(p.x)},${Y(p.y)}`;else path+=`M${X(p.x)},${Y(p.y)}`;prev=p;});
-  s+=`<path class="series" d="${path}" stroke="${col}"/>`+sp.map(p=>marker(MARK[si%MARK.length],X(p.x),Y(p.y),col,fill)).join('');});
+  s+=`<path class="series" d="${path}" stroke="${col}"/>`+sp.map(p=>marker(MARK[si%MARK.length],X(p.x),Y(p.y),col,fill)+(p.ex?`<text class="ea-exmark" x="${X(p.x)}" y="${Y(p.y)-7}" text-anchor="middle" font-size="11" font-weight="700" fill="#b3261e"><title>${esc(p.ex)}: see under the criterion table</title>×</text>`:'')).join('');});
  s+='</svg>';el.innerHTML=`<h3>${esc(o.title)}</h3>${o.cap?`<p class="cap">${o.cap}</p>`:''}${s}`;
  if(legendEl)legendEl.innerHTML=o.seriesNames.map((nm,si)=>`<span><i style="background:${si===o.hollow?'#fff':COLORS[si%COLORS.length]};border-color:${COLORS[si%COLORS.length]}"></i>${esc(nm)}</span>`).join('');}
 function yLabelFor(){const mz=val('m.measure');return mz==='rate'?'Responses per minute':mz==='latency'?'Latency to first response (s)':mz==='pct'?'% of intervals':mz==='trial'?'Trial outcome':'Count per session';}
@@ -2376,7 +2426,7 @@ function lodCompute(){
   const alone=findCond(/alone|no[\s-]?interaction|\bnis\b/i,false);
   const play =findCond(/play|control/i,true);
   if(!alone||!play){panel.style.display='none';return;}
-  const of=c=>rows.filter(r=>r.c===c.i).map(r=>r.y);
+  const of=c=>critRows(rows).filter(r=>r.c===c.i).map(r=>r.y);   /* v24.20 */
   const A=of(alone), P=of(play);
   if(!A.length||!P.length){panel.style.display='none';return;}
   panel.style.display='';
@@ -2430,8 +2480,8 @@ function lodCompute(){
 document.addEventListener('input',e=>{if(e.target.dataset&&e.target.dataset.lod)lodCompute();});
 document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.lod)lodCompute();});
 
-function renderGraph(){const rows=sessData();try{lodCompute();}catch(e){}try{rrbRead();cfaCompute();}catch(e){}const cn=condNames();const ctrl=cn.findIndex(c=>c.type==='control');
- lineGraph($('#sessFig'),$('#sessLegend'),{title:'Experimental analysis: '+(val('m.beh')||'target behavior'),cap:'Each condition is one series; the control condition is drawn hollow. Vertical dashed lines mark phase changes.',points:rows.map(r=>({x:r.i+1,y:r.y,series:cn.findIndex(c=>c.i===r.c),phase:r.phase})),seriesNames:cn.map(c=>c.name),yLabel:yLabelFor(),hollow:ctrl});}
+function renderGraph(){const rows=sessData();try{ioaNeedLine(rows);}catch(e){}try{lodCompute();}catch(e){}try{rrbRead();cfaCompute();}catch(e){}const cn=condNames();const ctrl=cn.findIndex(c=>c.type==='control');
+ lineGraph($('#sessFig'),$('#sessLegend'),{title:'Experimental analysis: '+(val('m.beh')||'target behavior'),cap:'Each condition is one series; the control condition is drawn hollow. Vertical dashed lines mark phase changes.'+(rows.some(r=>r.ex)?' × marks a session left out of the criterion (terminated, assent withdrawn or short).':''),points:rows.map(r=>({x:r.i+1,y:r.y,series:cn.findIndex(c=>c.i===r.c),phase:r.phase,ex:r.ex})),seriesNames:cn.map(c=>c.name),yLabel:yLabelFor(),hollow:ctrl});}
 
 /* ---------- trial-based ---------- */
 function renderTrials(keep){const n=+$('#nTrial').value,cn=condNames(),t=$('#trialTbl');const snap=keep?snapshotPrefix('tr['):{};
@@ -2455,7 +2505,7 @@ function slope(a){const n=a.length;if(n<2)return 0;const xm=(n-1)/2,ym=a.reduce(
    magnitude rule. The magnitude rule is at least 1.5 times the control mean and 0.1 above it, at least a quarter of the highest
    test condition, and, when the control is at zero, about one response a session (rate: 1 ÷ the session length; count: 1). A
    condition below it reads "rule met, magnitude low" and is not counted as met. Latency inverts the rule as before. */
-function critAll(rows){const cn=condNames(),mz=val('m.measure'),inv=mz==='latency',svi=val('d.crit')==='svi';const ctrl=cn.find(c=>c.type==='control');
+function critAll(rows){rows=critRows(rows);const cn=condNames(),mz=val('m.measure'),inv=mz==='latency',svi=val('d.crit')==='svi';const ctrl=cn.find(c=>c.type==='control');
  if(!ctrl)return {ctrl:null,results:[]};const cs=stats(rows.filter(r=>r.c===ctrl.i).map(r=>r.y));if(!cs.n)return {ctrl,cs,results:[]};
  const UCL=cs.mean+cs.sd,LCL=cs.sd>cs.mean?0:cs.mean-cs.sd;
  const tests=cn.filter(c=>c.type!=='control'),testMeans=tests.map(c=>stats(rows.filter(r=>r.c===c.i).map(r=>r.y)).mean),topMean=Math.max(0,...testMeans);
@@ -2470,7 +2520,7 @@ function critAll(rows){const cn=condNames(),mz=val('m.measure'),inv=mz==='latenc
   if(ruleMet&&lowQ)flags.push('low magnitude: mean under one-quarter of the highest test condition (this form\'s rule)');
   if(ruleMet&&lowZ)flags.push('low magnitude: the control is at zero and this is under about one response a session (this form\'s rule)');
   if(st.n<3)flags.push('fewer than 3 exposures');
-  if(Math.abs(sl)>0.15*Math.max(st.mean,0.01)&&st.n>=4)flags.push(sl>0?'upward trend':'downward trend');
+  if(Math.abs(sl)>0.15*Math.max(st.mean,0.01)&&st.n>=4){const last=ys[ys.length-1],prev=ys[ys.length-2];const rev=sl>0?last<prev:last>prev;if(!rev)flags.push((sl>0?'upward':'downward')+' trend (this form\'s slope rule; apply the Roane et al. trend rules on visual review)');}   /* v24.20 (R-082) */
   if(met&&cs.sd>cs.mean)flags.push('variable control: LCL set at 0');
   return {name:c.name,c:c.i,n:st.n,mean:st.mean,u,l,ruleMet,met,flags,svi};});
  return {ctrl,cs,UCL,LCL,results};}
@@ -2484,6 +2534,17 @@ function safeLines(rows){const L=[];const left=rows.filter(r=>/left the room/i.t
   if(hold.length)L.push(`A hold was used in session${hold.length>1?'s':''} ${hold.map(r=>r.i+1).join(', ')}. A hold is a restraint: record each on Form DD-1’s restraint record the same day and notify as the district’s procedure requires, then review the safety plan before the next session.`);
   if(inj.length)L.push(`Injury in session${inj.length>1?'s':''} ${inj.map(r=>r.i+1).join(', ')}: record it on Form IM-1, check the termination criteria were followed, and review the safety plan before the next session.`);}
  return L;}
+/* v24.20 (R-007, E-31) the agreement plan from Setup (its first number; 20% when none) and the conditions under it */
+function ioaPlanPct(){const m=String(val('m.ioaplan')).match(/(\d+(?:\.\d+)?)/);const p=m?parseFloat(m[1]):20;return p>0&&p<=100?p:20;}
+function ioaShort(rows){const thr=ioaPlanPct();return condNames().map(c=>{const rs=rows.filter(r=>r.c===c.i),w=rs.filter(r=>r.ioa!=null).length,n=rs.length,pct=n?Math.round(100*w/n):0;return {c:c.i,name:c.name,n,w,pct,thr,low:n>0&&pct<thr};}).filter(x=>x.low);}
+function ioaNeedLine(rows){const el=$('#eaIoaNeed');if(!el)return;const sh=ioaShort(rows);el.textContent=sh.length?`IOA under the plan (≥ ${ioaPlanPct()}% of sessions in every condition): ${sh.map(x=>`${x.name} ${x.w} of ${x.n}`).join(', ')}. The next session in each needs the second observer.`:'';el.hidden=!sh.length;}
+/* v24.20 (R-001, R-004, R-082) under the criterion table: the SD convention, the sessions left out, the rows not read */
+function critNote(all,kr,cs,cy){const el=$('#critNote');if(!el)return;const L=[];
+ if(cs&&cs.n>1){const sm=cy.reduce((a,b)=>a+b,0)/cy.length,ssd=Math.sqrt(cy.reduce((a,b)=>a+(b-sm)**2,0)/(cy.length-1));L.push(`Standard deviation: the population SD (÷ n), this form's convention. The sample SD (÷ n − 1) is ${ssd.toFixed(2)}, which would put the lines at UCL ${(sm+ssd).toFixed(2)} · LCL ${(ssd>sm?0:sm-ssd).toFixed(2)}.`);}
+ const ex=all.filter(r=>r.ex),cnt=val('d.excl')==='count',cn=condNames(),nm=i=>{const c=cn.find(c=>c.i===i);return c?c.name:'';};
+ if(ex.length)L.push((cnt?'Counted in the criterion by your choice (the default leaves them out): ':'Left out of the criterion (they stay on the graph, marked ×): ')+ex.map(r=>`session ${r.i+1}, ${esc(nm(r.c))}, ${esc(r.ex)}${/under half/.test(r.ex)?'':' ('+(Math.round(r.m*100)/100)+' min)'}`).join('; ')+'.');
+ const bad=sessIssues();if(bad.length)L.push('Rows not read: '+bad.map(b=>`row ${b.i+1} (${esc(b.why)})`).join('; ')+'. A count is 0 or more, minutes more than 0, IOA 0 to 100.');
+ el.innerHTML=L.map(x=>`<div>${x}</div>`).join('');el.style.display=L.length?'':'none';}
 function safeList(rows){const L=safeLines(rows);return L.length?`<ul class="rules" style="margin-top:6px">${L.map(x=>`<li>${x}</li>`).join('')}</ul>`:'';}
 function renderAnalysis(){$('#sumClient').textContent=val('m.client');$('#sumBeh').textContent=val('m.beh');$('#sumVar').textContent=[REC[val('v.chosen')]?.t,val('v.design')].filter(Boolean).join(' · ');
  const allRows=sessData();const phases=[];allRows.forEach(r=>{if(!phases.includes(r.phase))phases.push(r.phase);});const sel=$('#critPhase');const cur=sel.value;sel.innerHTML='<option value="">All phases</option>'+phases.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');sel.value=phases.includes(cur)?cur:'';
@@ -2492,6 +2553,7 @@ function renderAnalysis(){$('#sumClient').textContent=val('m.client');$('#sumBeh
     candidate when its test percentage exceeds its control by 20 points or more over at least 10 trials, this form's convention
     (no numeric criterion has been published: Bloom et al., 2011); the reading goes to Form FS-1 as moderate evidence */
  if(val('m.measure')==='trial'){$('#critFig').innerHTML='';const st=trialStats().filter(c=>c.ctl.run||c.tst.run);
+  $('#ioaStat').innerHTML='<div><b>Sessions with IOA</b><span>—</span><em>a trial-based analysis has no timed sessions; agreement is scored per trial on the trial-based log</em></div>';   /* v24.20 the block no longer keeps another analysis' figures */
   if(!st.length){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">No trials logged yet: the trial-based log is on the sessions sheet.</span>';return;}
   let th='<thead><tr><th class="lab">Condition</th><th class="c">Trials</th><th class="c">Control segments</th><th class="c">Test segments</th><th class="c">Difference</th><th class="c">Reading</th></tr></thead><tbody>';const cand=[];
   st.forEach(c=>{const n=Math.min(c.ctl.run,c.tst.run),d=c.tst.pct!=null&&c.ctl.pct!=null?c.tst.pct-c.ctl.pct:null,is=d!=null&&n>=10&&d>=20;if(is)cand.push(c);
@@ -2502,15 +2564,15 @@ function renderAnalysis(){$('#sumClient').textContent=val('m.client');$('#sumBeh
   {const o=$('#dFnAuto');if(o){const k=fnFromNames(cand.map(c=>c.name),!cand.length);o.textContent='As the outcome reads'+(k?': '+FN_WORD[k]:'');}}
   return;}
  if(!ctrl){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">Mark one condition as the control on the conditions sheet.</span>'+safeList(rows);return;}
- const cy=rows.filter(r=>r.c===ctrl.i).map(r=>r.y);const cs=stats(cy);if(!cs.n){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">No control-condition sessions logged yet.</span>'+safeList(rows);return;}
+ const kr=critRows(rows),cy=kr.filter(r=>r.c===ctrl.i).map(r=>r.y);const cs=stats(cy);   /* v24.20 (R-001) */if(!cs.n){tbl.innerHTML='';v.innerHTML='<b>Outcome</b><span class="tag mid">No control-condition sessions logged yet.</span>'+safeList(rows);return;}
  const UCL=cs.mean+cs.sd,LCL=cs.sd>cs.mean?0:cs.mean-cs.sd;
  let h=`<thead><tr><th class="lab">Condition</th><th class="c">n</th><th class="c">Mean</th><th class="c">Above UCL (u)</th><th class="c">Below LCL (l)</th><th class="c">u − l</th><th class="c">n / 2</th><th class="c">Rule</th><th>Flags for visual review</th></tr></thead><tbody>`;
- h+=`<tr><td class="lab">${esc(ctrl.name)}${/control/i.test(ctrl.name)?'':' (control)'}</td><td class="c">${cs.n}</td><td class="c">${cs.mean.toFixed(2)}</td><td class="c" colspan="5" style="color:var(--ink-soft)">SD ${cs.sd.toFixed(2)} · UCL ${UCL.toFixed(2)} · LCL ${LCL.toFixed(2)}</td><td></td></tr>`;
+ h+=`<tr><td class="lab">${esc(ctrl.name)}${/control/i.test(ctrl.name)?'':' (control)'}</td><td class="c">${cs.n}</td><td class="c">${cs.mean.toFixed(2)}</td><td class="c" colspan="5" style="color:var(--ink-soft)">SD ${cs.sd.toFixed(2)} (population SD, ÷ n) · UCL ${UCL.toFixed(2)} · LCL ${LCL.toFixed(2)}</td><td></td></tr>`;
  /* v22.49 (review F151, F152) the per-condition reading comes from critAll(), which the subtype panel uses too */
  const A=critAll(rows),results=A.results.filter(r=>r.n);
  A.results.forEach(r=>{if(!r.n){h+=`<tr><td class="lab">${esc(r.name)}</td><td class="c">0</td><td colspan="7" style="color:var(--ink-soft)">no sessions</td></tr>`;return;}
   h+=`<tr><td class="lab">${esc(r.name)}</td><td class="c">${r.n}</td><td class="c">${r.mean.toFixed(2)}</td><td class="c">${r.u}</td><td class="c">${r.l}</td><td class="c">${r.u-r.l}</td><td class="c">${(r.n/2).toFixed(1)}</td><td class="c"><span class="tag ${r.met?'ok':r.ruleMet?'mid':'na'}">${r.met?'met':r.ruleMet?'rule met, magnitude low':'not met'}</span></td><td style="font-size:10.5px">${r.svi?'SVI quotient '+(r.u/r.n).toFixed(2)+(r.flags.length?'; ':''):''}${r.flags.join('; ')||(r.svi?'':'—')}</td></tr>`;});
- tbl.innerHTML=h+'</tbody>';
+ tbl.innerHTML=h+'</tbody>';critNote(rows,kr,cs,cy);
  const met=results.filter(r=>r.met);const lines=[];let tag='na',head='';const low=results.filter(r=>r.n&&r.ruleMet&&!r.met);
  if(!results.length)head='No test conditions logged.';
  else if(!met.length){tag='mid';head='Undifferentiated by the structured criteria.';lines.push('Follow the sequence on the guide, a practice rule of this form drawing on Vollmer et al. (1995) and Iwata & Dozier (2008): extended alone screen, pairwise test, EO modification, then a synthesized analysis.');
@@ -2525,15 +2587,19 @@ function renderAnalysis(){$('#sumClient').textContent=val('m.client');$('#sumBeh
  /* the enhancement sprint (B2): a session the student ended by walking out ("left the room" in Notes) is counted on its own line, not with the safety stops */
  const left=rows.filter(r=>/left the room/i.test(val(`s[${r.i}].n`))),stopped=rows.filter(r=>r.term&&!left.includes(r));
  if(stopped.length)lines.push(`${stopped.length} session(s) terminated per the safety criteria; latency or precursor measures may be more appropriate.`);
+ {const exr=rows.filter(r=>r.ex);if(exr.length)lines.push(val('d.excl')==='count'?`${exr.length} session(s) terminated, ended on assent withdrawn or under half the planned length are counted in the criterion by your choice above; the default leaves them out.`:`${exr.length} session(s) left out of the criterion (terminated, assent withdrawn or under half the planned length): they stay on the graph, marked ×, and are listed under the table.`);}
+ /* v24.20 (R-007) agreement in the differentiated condition against the plan on Setup */
+ {const thr=ioaPlanPct(),sh=ioaShort(rows),gap=met.map(m=>sh.find(x=>x.c===m.c)).filter(Boolean);window.__eaIoaGap='';
+  if(gap.length){const t=gap.map(x=>x.w?`${x.name} has IOA on ${x.w} of ${x.n} sessions (${x.pct}%)`:`${x.name} has no IOA session${x.n?' of '+x.n:''}`).join('; ');window.__eaIoaGap=`Agreement is short in the differentiated condition: ${t}; the plan is at least ${thr}% of sessions in every condition. Collect it before reporting.`;lines.push('Review flags before reporting: '+window.__eaIoaGap);}}
  lines.push(...safeLines(rows));   /* v22.49 (F156, I79) */
- const exposures=cn.map(c=>rows.filter(r=>r.c===c.i).length).filter(n=>n>0);const exp=exposures.length?Math.min(...exposures):0;if(exp<3)lines.push(`Fewest exposures to any condition: ${exp}. Saini et al. (2018) applied the criteria from three pairs onward; interpret provisionally before that.`);
+ const exposures=cn.map(c=>kr.filter(r=>r.c===c.i).length).filter(n=>n>0);const exp=exposures.length?Math.min(...exposures):0;if(exp<3)lines.push(`Fewest exposures to any condition: ${exp}. Saini et al. (2018) applied the criteria from three pairs onward; interpret provisionally before that.`);
  v.innerHTML=`<b>Outcome</b><span class="tag ${tag}">${head}</span>${lines.length?`<ul class="rules" style="margin-top:6px">${lines.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}`;
  {const o=$('#dFnAuto');if(o){const k=fnFromNames(met.map(m=>m.name),!met.length&&results.length);o.textContent='As the outcome reads'+(k?': '+FN_WORD[k]:'');}}   /* v22.49 (F153) */
- lineGraph($('#critFig'),null,{title:'Analysis with criterion lines',cap:'Dashed lines: upper and lower criterion lines from the control condition (Hagopian et al., 1997; Roane et al., 2013).',points:rows.map(r=>({x:r.i+1,y:r.y,series:cn.findIndex(c=>c.i===r.c),phase:r.phase})),seriesNames:cn.map(c=>c.name),yLabel:yLabelFor(),hollow:cn.findIndex(c=>c.type==='control'),refs:[{y:UCL,label:'UCL'},{y:LCL,label:'LCL',dash:'2 3'}]});
+ lineGraph($('#critFig'),null,{title:'Analysis with criterion lines',cap:'Dashed lines: upper and lower criterion lines from the control condition (Hagopian et al., 1997; Roane et al., 2013).'+(rows.some(r=>r.ex)?' × marks a session terminated, ended on assent withdrawn or under half the planned length: left out of the criterion unless counted above.':''),points:rows.map(r=>({x:r.i+1,y:r.y,series:cn.findIndex(c=>c.i===r.c),phase:r.phase,ex:r.ex})),seriesNames:cn.map(c=>c.name),yLabel:yLabelFor(),hollow:cn.findIndex(c=>c.type==='control'),refs:[{y:UCL,label:'UCL'},{y:LCL,label:'LCL',dash:'2 3'}]});
  /* IOA stats */
- const withIoa=rows.filter(r=>r.ioa!=null);const perCond=cn.map(c=>{const rs=rows.filter(r=>r.c===c.i);const w=rs.filter(r=>r.ioa!=null);return `${esc(c.name)}: ${rs.length?Math.round(100*w.length/rs.length):0}%`;});
+ const withIoa=rows.filter(r=>r.ioa!=null),thr=ioaPlanPct();const perCond=cn.map(c=>{const rs=rows.filter(r=>r.c===c.i);const w=rs.filter(r=>r.ioa!=null);const pc=rs.length?Math.round(100*w.length/rs.length):0,low=rs.length>0&&pc<thr;return `<span class="${low?'ea-low':''}" style="font-size:inherit">${esc(c.name)}: ${pc}%${low?' (under plan)':''}</span>`;});   /* v24.20 (R-007) */
  try{rrbRead();cfaCompute();}catch(e){}
- $('#ioaStat').innerHTML=`<div><b>Sessions with IOA</b><span>${rows.length?Math.round(100*withIoa.length/rows.length):0}%</span><em>${withIoa.length} of ${rows.length}; standard ≥ 20% per condition</em></div><div><b>Mean IOA</b><span>${withIoa.length?(withIoa.reduce((a,r)=>a+r.ioa,0)/withIoa.length).toFixed(1)+'%':'—'}</span><em>standard ≥ 80%</em></div><div><b>By condition</b><span style="font-size:11px">${perCond.join(' · ')}</span><em>share of sessions with IOA</em></div>`;}
+ $('#ioaStat').innerHTML=`<div><b>Sessions with IOA</b><span>${rows.length?Math.round(100*withIoa.length/rows.length):0}%</span><em>${withIoa.length} of ${rows.length}; plan ≥ ${thr}% in every condition (Setup &amp; safety)</em></div><div><b>Mean IOA</b><span>${withIoa.length?(withIoa.reduce((a,r)=>a+r.ioa,0)/withIoa.length).toFixed(1)+'%':'—'}</span><em>standard ≥ 80%</em></div><div><b>By condition</b><span style="font-size:11px">${perCond.join(' · ')}</span><em>share of sessions with IOA</em></div>`;}
 
 /* v22.49 (review F153) the function key from the conditions that meet the rule, by their names */
 var FN_WORD={attention:'Attention',escape:'Escape',tangible:'Tangible',automatic:'Automatic',multiple:'Multiple control',unclear:'Undetermined'};
@@ -2686,7 +2752,7 @@ document.addEventListener('change',e=>{if(e.target.dataset&&(e.target.dataset.cf
 const rnd=()=>Math.random();const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
 const pois=m=>{let L=Math.exp(-m),k=0,p=1;do{k++;p*=rnd();}while(p>L);return k-1;};
 const SIMS={
- escape:{desc:'Demand condition elevated across four series; play, attention, and alone near zero. Treatment: FCT for break requests with escape extinction in an A-B-A-B withdrawal.',variant:'standard',v:{risk:'mod',prec:'no',setting:'room',rate:'high',hyp:'escape',conseq:'ok',hist:'first'},beh:'Aggression toward staff (simulated)',means:[0.4,9,0.3,0.6],series:4,design:'abab',iv:'FCT (break card) + escape extinction',dv:'Aggression per min',tx:[[8.5,1.2,5],[1.4,0.8,5],[7.5,1.2,5],[0.6,0.5,5]],txPh:['A1','B1','A2','B2']},
+ escape:{desc:'Demand condition elevated across four series; play, attention, and alone near zero. Treatment: FCT for break requests with escape extinction in an A-B-A-B withdrawal.',variant:'standard',v:{risk:'mod',prec:'no',setting:'room',rate:'high',hyp:'escape',conseq:'ok',hist:'first'},beh:'Aggression toward staff (simulated)',means:[0.3,2.4,0.2,0.4],series:4,design:'abab',iv:'FCT (break card) + escape extinction',dv:'Aggression per min',tx:[[2.3,0.6,5],[0.5,0.3,5],[2.1,0.6,5],[0.3,0.2,5]],txPh:['A1','B1','A2','B2']},
  attention:{desc:'Attention condition elevated; a strong social-positive result. Treatment: NCR attention plus FCT, evaluated in a multiple baseline across three settings.',variant:'standard',v:{risk:'none',prec:'no',setting:'room',rate:'high',hyp:'social',conseq:'ok',hist:'first'},beh:'Loud vocal disruption (simulated)',means:[10,0.4,0.3,0.6],series:4,design:'mbs',iv:'NCR attention (60 s) + FCT ("talk to me" card)',dv:'Disruptions per min',mb:true},
  automatic:{desc:'Responding elevated in every condition including alone; the extended-alone series persists, indicating automatic reinforcement. Treatment: noncontingent matched stimulation in a reversal.',variant:'standard',v:{risk:'none',prec:'no',setting:'room',rate:'high',hyp:'auto',conseq:'ok',hist:'first'},beh:'Hand mouthing (simulated)',means:[7,7,7,7],series:4,extra:'alone5',design:'rev',iv:'Noncontingent access to matched (oral) stimulation',dv:'Hand mouthing % of intervals',tx:[[70,8,5],[22,7,5],[65,8,5],[18,6,5]],txPh:['A','B1','C (NCR)','B2']},
  undiff:{desc:'Three undifferentiated series, then a five-session alone screen in which responding extinguishes (social function), then a pairwise attention test versus noncontingent attention that separates. Treatment: FCT in an A-B-A-B.',variant:'standard',v:{risk:'mod',prec:'no',setting:'room',rate:'mod',hyp:'none',conseq:'ok',hist:'first'},beh:'Property destruction (simulated)',means:[3,3,3,3],series:4,extra:'undiff',design:'abab',iv:'FCT (attention request) + extinction',dv:'Property destruction per min',tx:[[3,0.8,5],[0.5,0.4,5],[2.8,0.8,5],[0.3,0.3,5]],txPh:['A1','B1','A2','B2']},
@@ -2707,10 +2773,13 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\
  const key=$('#simScenario').value,sc=SIMS[key];restore({counts:{}});
  setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Assessment room 3 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
  setv('m.beh',sc.beh);setv('m.def','Simulated definition; see TB-1 for the real target.');setv('m.prec',sc.variant==='precursor'?'Screaming: vocalization above conversational level lasting ≥ 1 s (simulated)':'');setv('m.hyp','Simulated hypothesis carried in from IA-1: '+(sc.v.hyp==='escape'?'escape from demands':sc.v.hyp==='social'?'attention or tangible':sc.v.hyp==='auto'?'automatic':sc.v.hyp==='idio'?'synthesized escape-to-tangible with attention':'unclear'));setv('m.urg',sc.v.risk==='high'?'4':sc.v.risk==='mod'?'3':'2');
- setv('s.med','Nurse consulted (simulated); no restrictions');setv('s.term','Any tissue damage; 3 head hits within 10 s; student requests to stop (simulated)');setv('s.pe','Arm guards available; therapist blocks per plan (simulated)');setv('s.staff','Therapist, data collector, crisis-trained observer (simulated)');setv('s.consent','Parent consent on file (simulated)');setv('s.stop','Structured criteria met, or 5 series without differentiation (simulated)');
+ setv('s.med','Nurse consulted (simulated); no restrictions');setv('s.term',simTerm(sc.beh));setv('s.pe','Arm guards available; therapist blocks per plan (simulated)');setv('s.staff','Therapist, data collector, crisis-trained observer (simulated)');setv('s.consent','Parent consent on file (simulated)');setv('s.stop','Structured criteria met, or 5 series without differentiation (simulated)');
  setv('m.sessmin',/^(iisca|rrb|cfa)$/.test(sc.variant)?'5':'10');setv('m.interval','10');setv('m.ioaplan','≥ 25% per condition');setv('m.ioaindex','Interval-by-interval');setv('m.fidelity','Checklist per condition; 25% of sessions');
  Object.keys(sc.v).forEach(k=>setv('v.'+k,sc.v[k]));renderVariant();setv('v.chosen',sc.variant);loadTpl(true);setv('v.rationale',(val('v.rationale')?val('v.rationale')+' ':'')+'Simulated case.');
  const cn=condNames();const rows=[];let sess=0;
+ /* v24.20 (R-080) the Plan's answers and the Setup rows the simulation left empty */
+ setv('pl.goal','fn');setv('pl.done','1');setv('pl.step','10');setv('m.question','Does the '+sc.beh.replace(/\s*\(simulated\)$/,'').toLowerCase()+' keep happening to get out of demands, to get attention, to get an item, or on its own? (simulated)');
+ setv('m.vicond','Compare '+cn.map(c=>c.name).join(', ')+' (simulated)');setv('m.viconf','Variables that occurred together in the descriptive record are separated by the conditions above (simulated)');
  const push=(c,phase,v,m)=>{rows.push({c,phase,v,m});};
  const mz=val('m.measure');const faPh=sc.phase||'FA';
  if(sc.extra==='alonePre'){const al=cn.find(c=>/alone|no[\s-]?interaction/i.test(c.name));for(let k=0;k<5;k++)push(al.i,'Ext. alone',pois(12),5);}
@@ -2722,7 +2791,7 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\
    /* pairwise: reuse attention as test, play as control */
    const at=cn.find(c=>/attention/i.test(c.name)),pl=cn.find(c=>c.type==='control');for(let k=0;k<4;k++){push(at.i,'Pairwise',pois(60),10);push(pl.i,'Pairwise',pois(6),10);}}}
  if(mz==='pct'){/* not used */}
- if(rows.length){$('#nSess').value=Math.max(8,Math.min(80,rows.length+4));renderSess();rows.forEach((r,i)=>{setv(`s[${i}].c`,String(r.c));setv(`s[${i}].p`,r.phase);setv(`s[${i}].m`,String(r.m));setv(`s[${i}].v`,String(r.v));setv(`s[${i}].d`,new Date(Date.now()-(rows.length-i)*864e5).toLocaleDateString());if(i%4===0)setv(`s[${i}].ioa`,String(85+Math.round(rnd()*14)));if(mz==='latency'&&r.v<600&&rnd()<0.3)setv(`s[${i}].t`,true);});}
+ if(rows.length){const seen={};$('#nSess').value=Math.max(8,Math.min(80,rows.length+4));renderSess();rows.forEach((r,i)=>{setv(`s[${i}].c`,String(r.c));setv(`s[${i}].p`,r.phase);setv(`s[${i}].m`,String(r.m));setv(`s[${i}].v`,String(r.v));setv(`s[${i}].d`,schoolDay(-(rows.length-i)));{const k=r.c+'|'+r.phase;if((seen[k]=(seen[k]||0)+1)%4===1)setv(`s[${i}].ioa`,String(85+Math.round(rnd()*14)));}});}   /* v24.20 (R-007, R-081): IOA in every condition and phase (the block reads one phase at a time), school days, no random terminations */
  if(sc.variant==='automatic'||key==='automatic')setv('d.alone',true);
  /* v22.49 (F152) the worked examples that conclude automatic say so under Function for the report, as a BCBA would after visual review */
  if(key==='automatic'||key==='rrb')setv('d.fnkey','automatic');
@@ -2745,13 +2814,52 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\
  else if(sc.cc){const crit=[2,4,6,8,6,10];let s=0;tx.push({p:'BL',v:1,tier:''},{p:'BL',v:2,tier:''},{p:'BL',v:1,tier:''},{p:'BL',v:2,tier:''},{p:'BL',v:1,tier:''});crit.forEach((c,ci)=>{const lab=ci===4?'C2 return':'C'+(ci<4?ci+1:4);for(let k=0;k<3;k++)tx.push({p:lab,v:Math.max(0,Math.round(c+gauss()*0.6)),tier:''});});}
  else if(sc.atd){for(let s=0;s<12;s++){const which=s%2?'Picture exchange':'Vocal request';tx.push({p:'ATD',v:Math.max(0,+((which==='Vocal request'?4.5:1.2)+gauss()*0.8).toFixed(1)),tier:which});}for(let s=0;s<5;s++)tx.push({p:'Best',v:Math.max(0,+(1+gauss()*0.6).toFixed(1)),tier:'Picture exchange'});}
  $('#nTx').value=Math.max(8,Math.min(80,tx.length+3));renderTxRows();
- tx.forEach((r,i)=>{setv(`tx[${i}].p`,r.p);setv(`tx[${i}].v`,String(r.v));setv(`tx[${i}].tier`,r.tier);setv(`tx[${i}].d`,new Date(Date.now()+i*864e5).toLocaleDateString());if(i%4===0){setv(`tx[${i}].ioa`,String(86+Math.round(rnd()*13)));setv(`tx[${i}].fid`,String(90+Math.round(rnd()*10)));}});
+ tx.forEach((r,i)=>{setv(`tx[${i}].p`,r.p);setv(`tx[${i}].v`,String(r.v));setv(`tx[${i}].tier`,r.tier);setv(`tx[${i}].d`,schoolDay(i));if(i%4===0){setv(`tx[${i}].ioa`,String(86+Math.round(rnd()*13)));setv(`tx[${i}].fid`,String(90+Math.round(rnd()*10)));}});
  refreshCondNames();renderGraph();renderTrialFig();renderAnalysis();if(sc.extra==='undiff'){$('#critPhase').value='Pairwise';renderAnalysis();}if(key==='rrb'||key==='cfa'){$('#critPhase').value=key==='cfa'?'MEFA':'FA';renderAnalysis();}renderTx();extPanels();cfaCompute();rrbRead();
- $('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;
+ simDecision(key,sc);
+ $('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc+' Counts are drawn fresh at each load; the pattern is fixed.';
  /* opened through its button, so the session runner reads the new cards (it also reads them 60 ms after a press of
     Load simulation, which the question above can outlast) */
  const vb=$('#viewSeg [data-view="sessions"]');if(vb)vb.click();else setView('sessions');}
 $('#simBtn').addEventListener('click',loadSim);
+/* v24.20 (R-081) the simulation's dates fall on school days, its termination criteria fit the behavior, and its Decision is complete */
+function schoolDay(k){const d=new Date();d.setHours(12,0,0,0);const step=k<0?-1:1;let n=Math.abs(k);while(n>0){d.setDate(d.getDate()+step);if(d.getDay()%6)n--;}while(d.getDay()%6===0)d.setDate(d.getDate()+step);return d.toLocaleDateString();}
+function simTerm(beh){const b=String(beh||'');
+ if(/head hit|self-injur|hand mouth/i.test(b))return /hand mouth/i.test(b)?'Any skin break or bleeding; the student asks or signs to stop; the therapist or observer calls a stop (simulated)':'Any tissue damage; 3 head hits within 10 s; the student asks or signs to stop (simulated)';
+ if(/aggress/i.test(b))return 'Any aggression that leaves a mark or injures anyone; three aggressive responses within one minute; the student asks or signs to stop (simulated)';
+ if(/vocal|scream/i.test(b))return 'Screaming that continues for 2 min without a pause; any aggression or self-injury; the student asks or signs to stop (simulated)';
+ if(/property|destruct/i.test(b))return 'Any object thrown toward a person; any broken item that could cut; the student asks or signs to stop (simulated)';
+ if(/grab/i.test(b))return 'Any aggression toward a peer or adult; the student asks or signs to stop (simulated)';
+ return 'Any injury or damage; the student asks or signs to stop; the therapist or observer calls a stop (simulated)';}
+function simDecision(key,sc){if(val('d.func'))return;const D={
+ escape:['Social negative reinforcement (escape from demands): the Demand condition met the structured criteria in every series; attention, alone and play stayed near zero (simulated)','FCT for a break request with escape extinction, then demand fading; see Form TD-1 (simulated)'],
+ attention:['Social positive reinforcement (attention): the Attention condition met the structured criteria; demand, alone and play stayed near zero (simulated)','Noncontingent attention on a schedule plus FCT for an attention request; see Form TD-1 (simulated)'],
+ automatic:['Automatic reinforcement: responding was elevated and undifferentiated across conditions and persisted across the five alone sessions (simulated)','Noncontingent access to matched (oral) stimulation, with competing items from Form PA-1; see Form TD-1 (simulated)'],
+ undiff:['Social positive reinforcement (attention): the multielement series were undifferentiated, responding extinguished across the alone screen, and the pairwise test separated attention from noncontingent attention (simulated)','FCT for an attention request with extinction; see Form TD-1 (simulated)'],
+ latency:['Social negative reinforcement (escape): short latencies in Demand, the ceiling elsewhere (simulated)','Demand fading with FCT for a break and escape extinction in a changing-criterion design; see Form TD-1 (simulated)'],
+ trial:['Social positive reinforcement (tangible): the tangible test segments evoked the behavior and the control segments did not (simulated)','FCT for an item request, compared across two response forms; see Form TD-1 (simulated)'],
+ iisca:['Synthesized contingency (escape to tangible with attention): the synthesized test exceeded the matched control in every pair (simulated)','Synthesized FCT ("my way, please") with extinction, then delay and denial tolerance; see Form TD-1 (simulated)'],
+ precursor:['Social negative reinforcement (escape), read from the precursor: screaming was elevated in Demand and the severe behavior stayed rare (simulated)','FCT for a break request with escape extinction, taught at the precursor; see Form TD-1 (simulated)']};
+ const d=D[key];if(!d)return;setv('d.fn',true);setv('d.func',d[0]);setv('d.tx',d[1]);if(!val('d.trend'))setv('d.trend','Applied on visual review: no trend in the elevated condition and none in the control (simulated)');}
+/* v24.20 (E-31) the observer's sheet: one page per condition for the second observer, from the condition cards */
+function obsSheet(){let el=$('#eaObsSheet');if(!el){el=document.createElement('section');el.id='eaObsSheet';el.className='ea-obs';el.hidden=true;document.body.appendChild(el);}
+ const cards=$$('#condWrap .card').map(c=>{const i=+c.dataset.cond,g=k=>val(`c[${i}].${k}`);return {i,name:g('name')||('Condition '+(i+1)),type:g('type'),sd:g('sd'),beh:g('beh'),cons:g('cons'),mat:g('mat'),eo:g('eo'),dur:g('dur')};});
+ const plan=parseFloat(val('m.sessmin'))||10,mins=Math.min(20,Math.max(1,Math.round(plan)));const who=val('m.client'),sid=val('m.sid'),beh=val('m.beh'),def=val('m.def'),term=val('s.term');
+ const sim=/^SIMULATED/i.test(who)?'<span class="ea-obs-sim">SIMULATED</span>':'';
+ el.innerHTML=cards.map(c=>`<div class="ea-obs-page"><div class="ea-obs-head"><b>Form EA-1 · Observer's sheet (second observer)</b>${sim}<span>Student ${esc(who)}${sid?' · ID '+esc(sid):''}</span></div>
+  <div class="ea-obs-line"><span>Date ____________</span><span>Session # ______</span><span>Observer ______________________</span><span>Start ____:____</span><span>End ____:____</span></div>
+  <h2>${esc(c.name)}${/control|test/i.test(c.name)?'':(c.type==='control'?' (control)':' (test)')}</h2>
+  <div class="ea-obs-def"><b>Target:</b> ${esc(beh||'(not named on Setup)')}${def?' — '+esc(def):''}</div>
+  <dl class="ea-obs-dl">${c.sd?`<dt>Signal</dt><dd>${esc(c.sd)}</dd>`:''}${c.eo?`<dt>Before and during</dt><dd>${esc(c.eo)}</dd>`:''}${c.beh?`<dt>Therapist</dt><dd>${esc(c.beh)}</dd>`:''}${c.cons?`<dt>After a target</dt><dd>${esc(c.cons)}</dd>`:''}${c.mat?`<dt>Materials</dt><dd>${esc(c.mat)}</dd>`:''}</dl>
+  <div class="ea-obs-cap">Tally each target in the minute it happens; record independently of the primary observer. Session length ${esc(c.dur||plan+' min')}.</div>
+  <table class="ea-obs-grid"><tr>${Array.from({length:mins},(_,k)=>`<th>${k+1}</th>`).join('')}</tr><tr>${Array.from({length:mins},()=>'<td></td>').join('')}</tr></table>
+  <div class="ea-obs-ioa"><span>Observer's count ________</span><span>Primary count ________</span><span>Agreement: smaller ÷ larger × 100 = ________ %</span><span>Fidelity: steps done ____ of ____</span></div>
+  <div class="ea-obs-stop"><b>Stop the session when:</b> ${esc(term||'(no termination criteria written: write them on Setup & safety before any session)')}</div>
+  <div class="ea-obs-stop"><b>Assent:</b> if the student says or shows stop, or leaves, the session ends at once; the primary presses Assent withdrawn.</div></div>`).join('');
+ return el;}
+function printObs(){const el=obsSheet();el.hidden=false;document.body.classList.add('print-obs');const off=()=>{document.body.classList.remove('print-obs');el.hidden=true;window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);setTimeout(()=>{try{window.print();}finally{setTimeout(off,2000);}},50);}
+$('#eaObsBtn').addEventListener('click',printObs);
+window.ea120={obsSheet,printObs,critRows,sessIssues,ioaShort,ioaPlanPct,schoolDay,simTerm};
 
 /* ---------- toolbar counts ---------- */
 function bindNum(id,fn){const e=$('#'+id);e.addEventListener('change',()=>{let v=+e.value;if(!isFinite(v)||v<+e.min||v>+e.max){v=Math.min(+e.max,Math.max(+e.min,v||+e.min));e.value=v;}fn();});}
@@ -2766,7 +2874,7 @@ function reset(){$('#condWrap').innerHTML='';$('#sessBody').innerHTML='';$('#tri
 function restore(d){reset();const c=d.counts||{};$('#nCond').value=c.cond||4;$('#nSess').value=c.sess||24;$('#nTrial').value=c.trial||10;$('#nTx').value=c.tx||30;
  renderConds();renderSess();for(let i=0;i<(c.phases||0);i++)$('#phaseBody').appendChild(phaseRow(i));renderTxRows();
  const f=d.fields||{};applyFields(f);refreshCondNames();applyFields(f);renderTrials(true);applyFields(f);renderSess();renderVariant();renderTrialFig();renderGraph();renderTx();
- const k=val('t.design');if(DESIGNS[k])$('#dsgnNote').innerHTML='<b>Design requirements</b>'+DESIGNS[k].note;extPanels();cfaCompute();rrbRead();alAfterRestore(d);}
+ const k=val('t.design');if(DESIGNS[k])$('#dsgnNote').innerHTML='<b>Design requirements</b>'+DESIGNS[k].note;extPanels();cfaCompute();rrbRead();alAfterRestore(d);try{document.dispatchEvent(new CustomEvent('ea:restored',{detail:d}));}catch(e){}if(window.eaPlan&&window.eaPlan.landing)window.eaPlan.landing();}   /* v24.20 (R-137, R-080) */
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`EA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='EA-1')throw 0;restore(d);$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form EA-1.');}};rd.readAsText(f);e.target.value='';});
@@ -2844,7 +2952,8 @@ cfaInit();restore({counts:{}});
   function script(){const c=R.c;if(!c){byId('eaScript').innerHTML='';return;}
     const row=(k,v)=>v?'<dt>'+k+'</dt><dd>'+v.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</dd>':'';
     byId('eaScript').innerHTML='<dl>'+row('Condition',c.name+(/control|test/i.test(c.name)?'':(c.type==='control'?' (control)':' (test)')))+row('How it is run',window.eaAlone?window.eaAlone.runLine(c.name):'')+row('Check this card',window.eaAlone&&window.eaAlone.runFlag?window.eaAlone.runFlag(c):'')+row('Before and during',c.eo)+row('Signal',c.sd)+row('Materials',c.mat)
-      +row('Therapist',c.beh)+row({pre:'After a precursor',any:'After a precursor or a target'}[byId('eaFollow').value]||'After a target',c.cons)+row('Other behavior',c.other)+row('Fidelity',c.fid)+'</dl>';}   /* v22.49 (F150) */
+      +row('Therapist',c.beh)+row({pre:'After a precursor',any:'After a precursor or a target'}[byId('eaFollow').value]||'After a target',c.cons)+row('Other behavior',c.other)+row('Fidelity',c.fid)+row('Agreement',ioaLine(c))+'</dl>';}
+  function ioaLine(c){try{const sh=window.ea120.ioaShort(window.eaAPI.sessData()),x=sh.find(x=>x.c===c.i);return x?('IOA so far '+x.w+' of '+x.n+' session'+(x.n===1?'':'s')+' ('+x.pct+'%; plan ≥ '+x.thr+'%): bring the second observer to this session'):'';}catch(e){return '';}}   /* v24.20 (E-31) */   /* v22.49 (F150) */
 
   /* ---- sound, flash, vibration ---- */
   function ctx(){try{if(!R.ac){const A=window.AudioContext||window.webkitAudioContext;if(A)R.ac=new A();}if(R.ac&&R.ac.state==='suspended')R.ac.resume().catch(()=>{});}catch(e){}return R.ac;}
@@ -2868,7 +2977,7 @@ cfaInit();restore({counts:{}});
   }
 
   /* ---- run ---- */
-  function reset(quiet){stop();Object.assign(R,{state:'ready',acc:0,ev:[],pre:[],consUntil:0,consN:0,ncrNext:0,ncrN:0,prNext:0,prN:0,del:[],yoke:null,yokeI:0,yokeN:0,yokeHit:0,term:false,why:'',seg:'',segAt:0,ctl:null,tst:null,nc:''});
+  function reset(quiet){stop();Object.assign(R,{state:'ready',acc:0,ev:[],pre:[],consUntil:0,consN:0,ncrNext:0,ncrN:0,prNext:0,prN:0,del:[],yoke:null,yokeI:0,yokeN:0,yokeHit:0,term:false,why:'',seg:'',segAt:0,ctl:null,tst:null,nc:'',gap:''});
     byId('eaSum').hidden=true;if(!quiet)R.msg='';lock(false);paint();}
   function lock(on){['eaCond','eaMode','eaMin','eaFollow','eaYoke'].forEach(id=>byId(id).disabled=on);}
   function start(){
@@ -2994,7 +3103,7 @@ cfaInit();restore({counts:{}});
     if(i<0){const ns=byId('nSess');if(+ns.value<+(ns.max||80)){ns.value=String(+ns.value+1);ns.dispatchEvent(new Event('input',{bubbles:true}));ns.dispatchEvent(new Event('change',{bubbles:true}));i=emptyRow();}}
     if(i<0){note('The log is full (80 rows).',true);return;}
     const notes=[];if(prePrimary()&&measure()!=='latency')notes.push('targets '+r.n);else if(r.pre)notes.push('precursors '+r.pre);if(measure()!=='latency'&&r.lat!=null)notes.push('latency '+Math.round(r.lat)+' s');
-    if(R.term)notes.push(R.why);if(R.mode==='latency'&&!R.ev.length)notes.push('no target: latency is the session length');
+    if(R.term)notes.push(R.why);if(R.mode==='latency'&&!R.ev.length)notes.push('no target: latency is the session length');if(R.gap)notes.push(R.gap);   /* v24.20 (R-008) */
     /* v22.49 (review I79) an injury, or a hold used, is written into the row in fixed words the case and Form PR-1 read */
     if(byId('eaInj').checked)notes.push('injury: record it on Form IM-1');if(byId('eaHoldUsed').checked)notes.push('hold used: a restraint, record it today on Form DD-1');byId('eaInj').checked=false;byId('eaHoldUsed').checked=false;
     if(R.yoke)notes.push('yoked to session '+(R.yoke.k+1)+': '+R.yokeN+' of '+R.yoke.t.length+' deliveries replayed, '+R.yokeHit+' within 3 s of a target');
@@ -3015,7 +3124,7 @@ cfaInit();restore({counts:{}});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&R.state==='run'){wakeOn();step();}});
 
   /* ---- paint ---- */
-  function paint(){
+  function paint(){if(R.state!==R._ts){R._ts=R.state;try{termLine();}catch(e){}}
     const e=el(),run=R.state==='run'||R.state==='pause',trial=byId('eaMode').value==='trial';
     const segLeft=R.mode==='trial'&&run?R.dur-(e-R.segAt):null;
     setText('eaLeft',R.state==='ready'?fmt(Math.max(0.5,num('eaMin'))*60000):segLeft!=null?down(segLeft):down(R.dur-Math.min(e,R.dur)));
@@ -3069,7 +3178,23 @@ cfaInit();restore({counts:{}});
     if(d.showModal)d.showModal();else d.setAttribute('open','');t.focus();});}
   async function ncGate(){const gap=window.__eaConsentGap?window.__eaConsentGap():'';if(!gap||R.nc)return true;
     const v=await ncAsk(gap);if(v==null){note('Not started: Form IC-1 does not cover the experimental analysis.',true);return false;}R.nc=v;R.ncLast=v;return true;}
-  byId('eaStart').addEventListener('click',async()=>{if(R.state==='ready'&&!(await ncGate()))return;start();});
+  /* v24.20 (the 10/25 review: R-008, R-136) before a session starts, the conditions are named, and consent, the termination criteria and,
+     at urgency 3 or 4, medical clearance are on file; Start anyway (BCBA) writes what was missing into the row. The criteria show while it runs. */
+  function condsNamed(){const cs=conds();if(!cs.length||!R.c||!V('c['+R.c.i+'].name')){note('Name the conditions on the Conditions sheet first (Load condition templates fills them), then pick one here.',true);return false;}return true;}
+  function gateMissing(){const m=[];if(!V('s.consent'))m.push('the consent line (Consent and notification)');if(!V('s.term'))m.push('session termination criteria');if(window.eaClearGap&&window.eaClearGap())m.push('medical clearance (urgency level 3 or 4)');return m;}
+  function gateAsk(miss){return new Promise(res=>{let d=byId('eaGateDlg');
+    if(!d){d=document.createElement('dialog');d.id='eaGateDlg';d.className='noprint';d.setAttribute('aria-labelledby','eaGateH');
+      d.innerHTML='<div class="ea-nc-h" id="eaGateH">Not on file for this analysis</div><ul class="ea-nc-b" id="eaGateL"></ul><p class="ea-nc-b">Write them on Setup &amp; safety before any session. A session run without them is recorded as such in its row.</p><div class="ea-nc-f"><button type="button" id="eaGateNo">Cancel</button><button type="button" id="eaGateGo">Go to Setup &amp; safety</button><button type="button" class="ea-go" id="eaGateOk">Start anyway (BCBA)</button></div>';
+      document.body.appendChild(d);}
+    byId('eaGateL').innerHTML=miss.map(x=>'<li>'+x.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</li>').join('');
+    const done=v=>{try{d.close();}catch(e){}d.removeAttribute('open');res(v);};
+    byId('eaGateOk').onclick=()=>done('go');byId('eaGateNo').onclick=()=>done(null);
+    byId('eaGateGo').onclick=()=>{done(null);const b=q('[data-view="setup"]');if(b)b.click();setTimeout(()=>{const t=q('[name="'+(V('s.consent')?'s.term':'s.consent')+'"]');if(t){t.scrollIntoView({block:'center'});t.focus({preventScroll:true});}},80);};
+    d.oncancel=ev=>{ev.preventDefault();done(null);};if(d.showModal)d.showModal();else d.setAttribute('open','');});}
+  async function gateOK(){const miss=gateMissing();if(!miss.length){R.gap='';return true;}const v=await gateAsk(miss);if(!v){note('Not started: '+miss.join('; ')+' not on file (Setup & safety).',true);return false;}R.gap='started without '+miss.join(', ')+' on file';return true;}
+  function termLine(){const el=byId('eaRunTerm');if(!el)return;const t=V('s.term');if(R.state==='run'||R.state==='pause'||R.state==='done'){el.hidden=false;el.innerHTML='<b>Stop the session when:</b> '+(t?t.replace(/&/g,'&amp;').replace(/</g,'&lt;'):'<em>no termination criteria written</em>')+' &middot; <b>Assent:</b> the student says or shows stop, or leaves: press Assent withdrawn.';}else el.hidden=true;}
+  document.addEventListener('ea:restored',()=>setTimeout(()=>{R.c=null;refresh();},0));   /* v24.20 (R-137) the card is read again after a file is opened */
+  byId('eaStart').addEventListener('click',async()=>{if(R.state==='ready'){if(!R.c)pick();if(!condsNamed())return;if(!(await gateOK()))return;if(!(await ncGate()))return;}start();termLine();});
   byId('eaEnd').addEventListener('click',endEarly);byId('eaAssentEnd').addEventListener('click',assentEnd);   /* v22.49 (F156) */
   byId('eaSave').addEventListener('click',async()=>{if(R.state==='done'&&!(await ncGate()))return;save();});
   byId('eaDiscard').addEventListener('click',async()=>{if(R.state!=='done'&&!(await nbhUI.confirm('Discard this session?\nNothing from it is written to the log.',{ok:'Discard',danger:true})))return;reset(false);note('Session discarded.');});
@@ -5725,7 +5850,7 @@ OUT(function(){const val=n=>{const e=document.querySelector('[name="'+n+'"]');re
   const lp=document.getElementById('lodPanel'),lt=lp&&lp.style.display!=='none'?document.querySelector('#lodOutEA .tag'):null,sub=lt?/^(Subtype [123])\b/.exec(T(lt.textContent)):null;
   return EV(Object.assign({form:'EA-1',method:'Functional analysis'+(variant||design?' ('+[variant,design].filter(Boolean).join(', ')+')':''),design:design||variant},
     SPAN(sd.length?sd:[val('m.date')]),{n:rows.length||trialN||null,fn,fnKey:key,strength,by:val('m.assessor'),safety:eaSafety(rows),txDesign:window.__eaTxVerdict||undefined,term:val('s.term')||undefined,subtype:sub?sub[1]:undefined,
-    statement:(func?'Function(s) identified: '+func+'. ':'')+(head?head+(/[.]$/.test(head)?'':'.'):'')}));});
+    statement:(func?'Function(s) identified: '+func+'. ':'')+(head?head+(/[.]$/.test(head)?'':'.'):'')+(window.__eaIoaGap?' '+window.__eaIoaGap:'')}));});
 
 /* v21.78 the FBA chain, in: what the analysis is built on, when the field is empty (never over what is typed): "Hypothesis
    carried in" and "Prior hypothesis (IA-1 / ABC-1)" from the evidence of Forms IA-1, IN-1, ABC-1 and OB-1 (a line per form
@@ -5950,8 +6075,9 @@ function ranked(){const out=[];document.querySelectorAll('#varRec .rec').forEach
 function recommend(){const a=answers();if(a.goal==='var')return {k:'antecedent',why:['One variable present against absent: an antecedent-only (structural) analysis, consequences held constant (Anderson & Long, 2002).']};
   if(a.goal==='tx')return {k:'',why:['A treatment comparison: the Treatment design sheet, with the treatments alternating.']};
   const rs=ranked();if(rs.length)return {k:rs[0].k,why:rs[0].why,all:rs};return {k:'standard',why:['No strong prior: the standard multielement analysis tests the common contingencies.']};}
-function card(){const w=$1('#plWrap');if(!w)return;const L=live();if(step>=L.length)step=L.length-1;if(step<0)step=0;const q=L[step],a=answers();put('pl.step',String(step));
-  let h='<div class="pl-card"><div class="pl-prog">Question '+(step+1)+' of '+L.length+'</div><h3 class="pl-q">'+esc(q.q)+'</h3>'+(q.help?'<p class="pl-help">'+esc(q.help)+'</p>':'');
+function card(){const w=$1('#plWrap');if(!w)return;const L=live();if(step>=L.length)step=L.length-1;if(step<0)step=0;const q=L[step],a=answers();if(step>0||g('pl.step')!=='')put('pl.step',String(step));   /* v24.20 a fresh landing on Plan writes nothing, so the form is not marked unsaved */
+  const Lf=a.goal?L:Q.filter(x=>!x.when||x.when(Object.assign({},a,{goal:'fn'})));   /* v24.20 (R-080) the final count from the first card */
+  let h='<div class="pl-card"><div class="pl-prog">Question '+(step+1)+' of '+Lf.length+'</div><h3 class="pl-q">'+esc(q.q)+'</h3>'+(q.help?'<p class="pl-help">'+esc(q.help)+'</p>':'');
   if(q.kind==='summary'){const r=recommend();const t=r.k&&A.TPL&&A.TPL[r.k];const conds=t?(t.conds||A.TPL.standard.conds).map(c=>c.name):[];
     const lines=[];if(g('m.question'))lines.push(['The question',g('m.question')]);
     if(a.goal==='var'&&a.var)lines.push(['The variable',a.var+(a.expect==='more'?' (expected to make the behavior more likely)':a.expect==='less'?' (expected to make it less likely)':'')]);
@@ -5960,6 +6086,7 @@ function card(){const w=$1('#plWrap');if(!w)return;const L=live();if(step>=L.len
     lines.push(['Sessions',(g('m.sessmin')||'10')+' min, '+($1('#nSess')?$1('#nSess').value:'24')+' rows']);
     h+='<div class="pl-sum">'+lines.map(([k,v])=>'<div class="pl-row"><b>'+esc(k)+'</b><span>'+esc(v)+'</span></div>').join('')+'</div>';
     if(r.why&&r.why.length)h+='<div class="pl-why">'+r.why.slice(0,3).map(x=>'<p>'+esc(x)+'</p>').join('')+'</div>';
+    if(a.conseq==='no'&&a.goal==='fn')h+='<div class="pl-why pl-noconseq"><p>The trial-based, latency-based and standard analyses are not offered first: their test conditions deliver the hypothesized consequence on purpose, which the team has ruled out. A precursor analysis would deliver it for the precursor only.</p></div>';   /* v24.20 (R-083) */
     if(r.all&&r.all.length>1)h+='<label class="pl-alt">Or choose another indicated variant <select id="plAlt"><option value="">'+esc(A.REC[r.k].t)+' (recommended)</option>'+r.all.slice(1).map(x=>'<option value="'+esc(x.k)+'">'+esc(x.t)+'</option>').join('')+'</select></label>';
     h+='<div class="pl-btns"><button type="button" class="tool pl-back">Back</button><button type="button" class="tool primary pl-set">Set it up</button><span class="pl-note">Loads the condition templates on the Conditions sheet (replacing any there), sets the design and the measure, and keeps every answer with the file.</span></div>';}
   else{const A=q.a;
@@ -5973,7 +6100,7 @@ function card(){const w=$1('#plWrap');if(!w)return;const L=live();if(step>=L.len
     h+='<div class="pl-btns">'+(step>0?'<button type="button" class="tool pl-back">Back</button>':'')+'<button type="button" class="tool primary pl-next">'+(step===L.length-2?'See the plan':'Next')+'</button>'+(A.kind==='radio'?'<button type="button" class="tool pl-skip">Skip</button>':'')+'</div>';}
   h+='</div>';w.innerHTML=h;}
 function take(){const w=$1('#plWrap');w.querySelectorAll('.pl-in').forEach(i=>{const n=i.dataset.name;if(n[0]==='#'){const e=$1(n);if(e){e.value=i.value;try{e.dispatchEvent(new Event('change',{bubbles:true}));}catch(x){}}}else put(n,i.value);});}
-function setup(){take();const a=answers(),r=recommend();const alt=$1('#plAlt');const k=(alt&&alt.value)||r.k;
+function setup(){take();const a=answers(),r=recommend();if(!g('m.urg')&&a.risk)put('m.urg',a.risk==='high'?'4':a.risk==='mod'?'3':'2');   /* v24.20 (R-083) */const alt=$1('#plAlt');const k=(alt&&alt.value)||r.k;
   if(a.goal==='var'&&a.var){put('m.vicond',(g('m.vicond')?g('m.vicond')+'\n':'')+'Plan: '+a.var+' present against absent, everything else the same'+(a.expect==='more'?'; expected more likely when present':a.expect==='less'?'; expected less likely when present':'')+'.');}
   if(a.goal==='tx'){if(a.tx)put('t.iv',a.tx);const d=$1('#dsgn');if(d){const o=[...d.options].find(o=>/alternating/i.test(o.textContent));if(o)d.value=o.value||o.textContent;}put('pl.done','1');try{A.setView('design');}catch(e){}return;}
   if(k){put('v.chosen',k);try{const p=A.loadTpl(true);if(p&&p.then)p.then(after);else after();}catch(e){after();}}else after();
@@ -5985,7 +6112,12 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   if(t.classList.contains('pl-back')){take();step--;card();return;}
   if(t.classList.contains('pl-set')){setup();return;}});
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#viewSeg button[data-view="plan"]');if(b)setTimeout(()=>{step=+g('pl.step')||0;card();},0);});
-window.eaPlan={card:()=>card(),step:()=>step,go:n=>{step=n;card();},recommend,setup};
+/* v24.20 (R-080) an empty form opens on Plan; a form with data opens on Setup & safety */
+function landing(){const has=['m.client','m.beh','pl.done','c[0].name','s[0].c','s[0].v','m.question','v.chosen'].some(n=>g(n));const cur=(document.body.className.match(/view-(\w+)/)||[])[1];
+  if(!has){if(cur!=='plan'){try{A.setView('plan');}catch(e){}}step=+g('pl.step')||0;card();}
+  else if(cur==='plan'){try{A.setView('setup');}catch(e){}}}
+window.eaPlan={card:()=>card(),step:()=>step,go:n=>{step=n;card();},recommend,setup,landing};
+setTimeout(landing,0);
 /* the question's row on the Setup sheet prints only when it has words */
 (function(){const row=document.querySelector('.ea-qrow'),ta=row&&row.querySelector('textarea');if(!row||!ta)return;const upd=()=>row.setAttribute('data-empty',ta.value.trim()?'0':'1');ta.addEventListener('input',upd);ta.addEventListener('change',upd);window.addEventListener('beforeprint',upd);document.addEventListener('nbh:restored',upd);setTimeout(upd,500);upd();})();
 if(document.body.classList.contains('view-plan'))card();

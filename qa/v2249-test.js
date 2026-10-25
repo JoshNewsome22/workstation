@@ -81,7 +81,8 @@ const SEQ=play=>[0,1,2,3].flatMap(k=>[[0,[4,2,5,3][k]],[1,[86,102,83,95][k]],[2,
   const f156=await e.evaluate(()=>{__nbhFactsIn({student:{assent:'partial',stop:{signs:'pushes the materials away; says "stop"',steps:'Say okay and stop the task'}}});
     return {term:document.querySelector('[name="s.term"]').value,run:document.getElementById('eaRunAssent').textContent,shown:!document.getElementById('eaRunAssent').hidden};});
   ok('18 F156 the assent plan becomes a session termination line and its status shows in the runner',/Assent withdrawn when the student pushes the materials away; says "stop" \(Form SI-1\): the session ends\./.test(f156.term)&&f156.shown&&/partial/.test(f156.run),f156);
-  const run1=await e.evaluate(async()=>{eaAPI.setView('sessions');const s=document.getElementById('eaCond');s.value='1';s.dispatchEvent(new Event('change',{bubbles:true}));
+  const run1=await e.evaluate(async()=>{{const c=document.querySelector('[name="s.consent"]');c.value='Parent consent on file (test)';c.dispatchEvent(new Event('change',{bubbles:true}));}   /* v24.20: the runner's safety gate */
+    eaAPI.setView('sessions');const s=document.getElementById('eaCond');s.value='1';s.dispatchEvent(new Event('change',{bubbles:true}));
     const go=async(fn)=>{document.getElementById('eaStart').click();await new Promise(r=>setTimeout(r,400));fn();await new Promise(r=>setTimeout(r,200));document.getElementById('eaSave').click();await new Promise(r=>setTimeout(r,200));};
     await go(()=>document.getElementById('eaAssentEnd').click());
     await go(()=>{document.getElementById('eaHoldUsed').checked=true;document.getElementById('eaEnd').click();});await new Promise(r=>setTimeout(r,400));

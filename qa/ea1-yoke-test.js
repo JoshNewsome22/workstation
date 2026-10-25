@@ -11,6 +11,8 @@ const pages=buf=>{const m=buf.toString('latin1').match(/\/Type\s*\/Page(?![s])/g
  /* the yoked variant: its three cards */
  await page.evaluate(()=>{const v=document.querySelector('[name="v.chosen"]');const o=[...v.options].find(o=>/yoked/i.test(o.textContent+' '+o.value));v.value=o.value;v.dispatchEvent(new Event('change',{bubbles:true}));v.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(200);
  await page.evaluate(()=>document.querySelector('#loadTpl').click());await sleep(500);
+ /* v24.20: the runner's safety gate asks for the consent line and the termination criteria before a session */
+ await page.evaluate(()=>{for(const [n,v] of [['s.consent','Parent consent on file (test)'],['s.term','Any injury; the student asks to stop (test)']]){const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});
  const cards=await page.evaluate(()=>[...document.querySelectorAll('#condWrap .card')].map(c=>c.querySelector('[name$=".name"]').value));
  ok('yoked template loads its cards',/master/i.test(cards[0])&&/yoked/i.test(cards[1]),cards);
  const condOpts=await page.evaluate(()=>[...document.querySelector('#eaCond').options].map(o=>o.textContent));

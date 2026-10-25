@@ -9905,6 +9905,45 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.20: Form EA-1 from the independent review: the criterion leaves out stopped and short sessions; the log reads its entries; agreement by condition; the safety gate before a session
+(the independent review of 10/25, EA-1 findings R-001, R-004, R-007, R-008, R-080 to R-083, R-136, R-137; enhancements E-21 and E-31; the BCBA: "All of them")
+
+- **A session that ended on a termination criterion, on assent withdrawn or because the student left, and a session under
+  half the planned length, stays on the graph (marked ×) and is left out of the criterion**: the condition means, the SD and
+  the u and l counts. They are listed under the criterion table, and the Outcome says how many were left out. A selector on
+  the Interpretation sheet counts them instead when the analyst chooses; the guide says so. (A two-second Demand session saved
+  at 50 a minute no longer doubles the Demand mean; a walk-out in the control condition no longer lifts the criterion lines.)
+- **The session log reads each entry.** A count below 0, minutes at or below 0, an entry that is not a number, or an IOA
+  outside 0 to 100 marks the cell (red outline, aria-invalid, the reason in its tooltip), clears the rate and keeps the row out,
+  with the rows not read listed under the criterion table. The count, minutes and IOA cells open the number keyboard.
+- **Agreement is scored per condition against the plan on Setup & safety** (its first number; 20% when none is written; the
+  Interpretation sheet no longer carries its own 20%). Conditions under the plan are marked in the IOA block; a differentiated
+  condition short of it adds a review flag to the Outcome and to the function handed to Form FS-1 (the strength reads Moderate);
+  the session log shows which conditions need the second observer next, and the runner's card says so when that condition is
+  picked.
+- **The observer's sheet**: Print the observer's sheet, above the session log, prints one page per condition for the second
+  observer (the signal, what the therapist does, the consequence, the materials, a tally grid by the minute, the agreement and
+  fidelity boxes, the termination criteria and the assent rule).
+- **Before a session starts**, the conditions must be named (a blank form says so instead of saving nothing), and consent, the
+  session termination criteria and, at urgency level 3 or 4, medical clearance must be on file: a dialog lists what is missing
+  with Go to Setup & safety and Start anyway (BCBA), which writes "started without … on file" into the row. The termination
+  criteria and the assent rule show under the runner's script while a session runs.
+- **The criterion lines name their standard deviation** (the population SD, ÷ n, this form's convention) and the sample SD with
+  the lines it would give is shown under the table. The trend flag names itself as this form's slope rule, asks for the Roane et
+  al. trend rules on visual review, and is not raised when the last point reverses the direction.
+- **Plan**: an empty form opens on Plan (a form with data opens on Setup & safety); the counter reads the final count from the
+  first card; when the team has ruled out delivering the consequence, the antecedent-only analysis ranks first and the last card
+  says why the trial-based, latency-based and standard analyses are not offered; Set it up writes the risk answer into the TB-1
+  urgency level when it is empty.
+- **The simulation**: IOA falls in every condition (one session in four), session and treatment dates fall on school days, the
+  termination criteria fit the behavior (aggression for the escape example), the escape example's aggression runs at one to
+  three a minute, the Plan's answers and Setup's question, conditions and confounds rows are filled, the Decision is ticked
+  with the function and the treatment implication written, latency sessions are no longer marked terminated at random, and the
+  banner says counts are drawn fresh at each load.
+- **After a file is opened**, the session runner reads its condition card again, so Consequence period (s) is right without
+  re-picking the condition.
+- Checks: `qa/ea120-test.js`.
+
 ### v24.19: Form TD-1 printing from the 10/25 review: Print the staff packet; a sheet's last lines stay with their sheet
 (the BCBA, 10/25: "look at the treatment development and see if any enhancements should be made" ... "Okay.")
 
