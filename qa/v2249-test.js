@@ -45,7 +45,7 @@ const SEQ=play=>[0,1,2,3].flatMap(k=>[[0,[4,2,5,3][k]],[1,[86,102,83,95][k]],[2,
   await e.close();
   /* ---- F151, F152, F153 on the worked example ---- */
   e=await open('EA-1',EA);await tpl(e,'standard');await fill(e,SEQ([0,0,0,0]));await sleep(300);
-  const f151=await e.evaluate(()=>({head:document.querySelector('#critVerdict .tag').textContent,verdict:document.getElementById('critVerdict').textContent,tbl:document.getElementById('critTbl').textContent,ev:__nbhFactsOut().evidence,lod:document.getElementById('lodOutEA').textContent,auto:document.getElementById('dFnAuto').textContent}));
+  const f151=await e.evaluate(()=>{eaAPI.setv('d.fn',true);/* v24.21: the function flows once the Decision is ticked */return {head:document.querySelector('#critVerdict .tag').textContent,verdict:document.getElementById('critVerdict').textContent,tbl:document.getElementById('critTbl').textContent,ev:__nbhFactsOut().evidence,lod:document.getElementById('lodOutEA').textContent,auto:document.getElementById('dFnAuto').textContent};});
   ok('7 F151 with the control at zero, Attention and Alone beside Demand read "rule met, magnitude low" and the outcome is Demand alone',/^Differentiated: Demand meets the rule/.test(f151.head)&&(f151.tbl.match(/rule met, magnitude low/g)||[]).length===2&&/Check on visual review: Attention, Alone/.test(f151.verdict),{head:f151.head,verdict:f151.verdict.slice(0,500)});
   ok('8 F151 Form FS-1 is handed escape, not "Attention and Escape and Automatic"',f151.ev&&f151.ev.fnKey==='escape'&&/Escape/.test(f151.ev.fn)&&!/Attention/.test(f151.ev.fn),f151.ev);
   ok('9 F152 the subtype panel says it does not apply when the analysis shows a social function',/Not applicable: the analysis shows a social function \(Demand\)/.test(f151.lod)&&!/Subtype 1/.test(f151.lod),f151.lod);
@@ -103,7 +103,7 @@ const SEQ=play=>[0,1,2,3].flatMap(k=>[[0,[4,2,5,3][k]],[1,[86,102,83,95][k]],[2,
   await e.close();
   /* ---- F154 the trial-based reading ---- */
   e=await open('EA-1',EA);await tpl(e,'trial');
-  const f154=await e.evaluate(()=>{eaAPI.$('#nTrial').value='10';eaAPI.renderTrials(true);const hits={0:[2,3],1:[1,8],2:[0,1],3:[2,2]};
+  const f154=await e.evaluate(()=>{eaAPI.setv('d.fn',true);/* v24.21 */eaAPI.$('#nTrial').value='10';eaAPI.renderTrials(true);const hits={0:[2,3],1:[1,8],2:[0,1],3:[2,2]};
     Object.keys(hits).forEach(c=>{for(let k=0;k<10;k++){eaAPI.setv(`tr[${c}].ctl[${k}]`,k<hits[c][0]?'1':'0');eaAPI.setv(`tr[${c}].tst[${k}]`,k<hits[c][1]?'1':'0');}});
     eaAPI.renderAnalysis();return {head:document.querySelector('#critVerdict .tag').textContent,tbl:document.getElementById('critTbl').textContent,ev:(__nbhFactsOut()||{}).evidence};});
   ok('23 F154 the trial-based analysis gets a reading: Demand is the candidate (test 80% against control 10% over 10 trials)',/^Trial-based reading: Demand \(candidate/.test(f154.head)&&/candidate/.test(f154.tbl),f154.head);

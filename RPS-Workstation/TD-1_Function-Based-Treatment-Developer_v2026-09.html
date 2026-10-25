@@ -907,6 +907,14 @@ td input,td select{max-width:100%}
   #fidTbl thead{display:table-header-group}
 }
 </style>
+<style id="td121-css">
+/* v24.21 the plan names one function; the log's invalid cells */
+.td-fnwarn{border-left:4px solid #b3261e;background:#fff1f0;color:var(--ink);padding:8px 12px;margin:6px 0 10px;font-size:12.5px;line-height:1.5}
+.td-fnwarn[hidden]{display:none!important}
+.td-bad{outline:2px solid #b3261e!important;outline-offset:-2px;background:#fff1f0!important}
+#tdFnProv:empty{display:none!important}
+@media print{.td-fnwarn{border:2px solid #000;background:#fff;break-inside:avoid}}
+</style>
 </head>
 
 <body class="view-setup">
@@ -1059,10 +1067,11 @@ td input,td select{max-width:100%}
   </div>
   <div class="defs">
     <div class="drow"><div class="dlab">Target behavior (TB-1)</div><div class="dval"><textarea name="m.beh" class="nbh-line" rows="1"></textarea></div></div>
-    <div class="drow"><div class="dlab">Function (EA-1 outcome)</div><div class="dval" style="padding:4px 8px"><select name="m.fn" class="inline" data-fn="1"><option value=""></option><option value="escape">Escape / avoidance (social negative)</option><option value="attention">Attention (social positive)</option><option value="tangible">Tangible / activity (social positive)</option><option value="automatic">Automatic (nonsocial)</option><option value="multiple">Multiple control (build a component per function)</option></select> <label style="margin-left:14px">EA-1 design used <input name="m.eadesign" class="inline" style="width:200px" placeholder="e.g., multielement, 4 series"></label></div></div>
+    <div class="drow"><div class="dlab">Function (EA-1 outcome)</div><div class="dval" style="padding:4px 8px"><select name="m.fn" class="inline" data-fn="1"><option value=""></option><option value="escape">Escape / avoidance (social negative)</option><option value="attention">Attention (social positive)</option><option value="tangible">Tangible / activity (social positive)</option><option value="automatic">Automatic (nonsocial)</option><option value="multiple">Multiple control (build a component per function)</option></select> <label style="margin-left:14px">EA-1 design used <input name="m.eadesign" class="inline" style="width:200px" placeholder="e.g., multielement, 4 series"></label><span class="hint" id="tdFnProv" style="display:block;font-weight:400;margin-top:3px"></span></div></div>
+    <div class="warn td-fnwarn" id="tdFnWarnSetup" hidden></div>
     <div class="drow"><div class="dlab">Specific reinforcer and EO</div><div class="dval"><textarea name="m.reinf" placeholder="e.g., break from multi-step math worksheets; adult attention when teacher helps peers; tablet; hand-to-mouth stimulation" class="nbh-line" rows="1"></textarea></div></div>
     <!-- v23.04 (review F181, F184) where the function and the baseline rate came from: EA-1, FS-1 or typed; DD-1's school-day rate -->
-    <div hidden><textarea name="m.fnsrc" readonly tabindex="-1" aria-label="Where the function came from"></textarea><textarea name="m.ratesrc" readonly tabindex="-1" aria-label="Where the baseline rate came from"></textarea></div>
+    <div hidden><textarea name="m.fnsrc" readonly tabindex="-1" aria-label="Where the function came from"></textarea><textarea name="m.ratesrc" readonly tabindex="-1" aria-label="Where the baseline rate came from"></textarea><textarea name="m.fnprov" readonly tabindex="-1" aria-label="What stands behind the function (EA-1)"></textarea></div>
     <div class="drow"><div class="dlab">Baseline level (from EA-1 / ABC-1)<span class="hint" id="tdRateSrc" style="display:block;font-weight:400"></span></div><div class="dval" style="display:flex;gap:14px;padding:3px 8px;font-size:12.5px;flex-wrap:wrap"><label>Rate per min <input name="m.rate" class="inline" style="width:60px" data-calc="1"></label><label>Mean IRT (s) <span id="irtOut" style="font-weight:600">—</span></label><label>Session length (min) <input name="m.sessmin" class="inline" style="width:50px" placeholder="10"></label><label>% intervals (if used) <input name="m.pct" class="inline" style="width:50px"></label></div></div>
     <div class="drow"><div class="dlab">Precursor (TB-1)</div><div class="dval"><textarea name="m.prec" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Replacement behavior already in repertoire?</div><div class="dval" style="padding:4px 8px"><select name="m.rep" class="inline"><option value=""></option><option value="yes">Yes: a recognizable request exists but does not occur under the EO</option><option value="partial">Partly: vocal or gestural approximations</option><option value="no">No recognizable request for this reinforcer</option></select> <label style="margin-left:14px">Replacement behavior (defined) <input name="m.repdesc" class="inline" style="width:260px" placeholder="e.g., hand an adult the break card within 5 s of a demand"></label> <label style="margin-left:14px">Present level <input name="m.replevel" class="inline" style="width:260px" placeholder="e.g., says break when prompted; not yet on their own"></label></div></div>
@@ -1405,6 +1414,7 @@ td input,td select{max-width:100%}
     <div class="nbh-print-meta"><div class="nbh-print-title">Function-Based Treatment Developer</div><div>Form TD-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">Responding to Problem Behavior</div>
+  <div class="warn td-fnwarn" id="tdFnWarnRespond" hidden></div>
   <p class="method" style="margin:0 0 8px">Builds the consequence protocol staff follow when the target behavior, its precursor, or a dangerous escalation occurs. Steps are matched to the function on the setup sheet; the crisis procedure is written separately so it is not delivered as a consequence that could reinforce the behavior. Punishment is considered only after the function-based options and is governed by district policy and the BACB code.</p>
   <div id="rbModel"></div>
   <div id="rbRec"></div>
@@ -1475,7 +1485,7 @@ td input,td select{max-width:100%}
   <div class="defs"><div class="drow"><div class="dlab">Coaching visit routine</div><div class="dval"><textarea name="p.visit" placeholder="Per visit: implementer describes the week; questions answered; procedures explained and demonstrated; implementer runs sessions with in-session prompts and feedback; graphs reviewed; next-week objectives set (Harding et al., 2009, Table 2)"></textarea></div></div></div>
 
   <h3 class="sub" id="fidHead">Treatment Integrity Checklist</h3>
-  <p class="method" style="margin-top:0">Generated from the steps on the build sheet; each is scored on the monitoring sheet. Integrity criterion: 90% of steps per observed session; errors that reinforce the problem behavior are flagged separately (St. Peter Pipkin et al., 2010).</p>
+  <p class="method" style="margin-top:0">The Final plan's step list, numbered as there (a critical step marked), and, where escape extinction or physical guidance is planned, its safety items: the observer scores these on the monitoring sheet, so Steps observed is their count. The BCBA's set-up lines are not scored. Integrity criterion: 90% of steps per observed session; errors that reinforce the problem behavior are flagged separately (St. Peter Pipkin et al., 2010). <span id="tdFidCount"></span></p>
   <table class="rank cmp" id="fidTbl"><thead><tr><th class="n" style="width:6%">#</th><th style="width:18%">Component</th><th>Step</th></tr></thead><tbody></tbody></table>
   <p class="hint" id="tdFidNote" hidden></p>
 
@@ -1515,6 +1525,7 @@ td input,td select{max-width:100%}
   </div>
   <div class="bar nbh-band">Final Treatment Plan: Step by Step</div>
   <p class="method noprint" style="margin:0 0 8px">Compiled from every component card and selection in the form, in the order staff will use them. Edit the steps on the build sheet; this sheet re-reads them when opened or printed. Use "Print final plan only" in the toolbar to print just this sheet.</p>
+  <div class="warn td-fnwarn" id="tdFnWarnFinal" hidden></div>
   <div id="finalHead"></div>
   <div id="td83Final"></div>   <!-- v21.83 (M): every target in the plan, its definition, function and the parts that address it -->
   <input type="hidden" name="fin.steps">   <!-- v22.46 (I232): the BCBA's changes to the step list (Final plan) -->
@@ -2081,8 +2092,10 @@ Object.assign(LIB,{ /* ---- schedules ---- */
 });
 const CODES=Object.keys(LIB);
 function fillAddMenu(){const fn=val('m.fn');$('#addComp').innerHTML='<option value=""></option>'+CODES.filter(c=>!fn||fn==='multiple'||LIB[c].fn.includes(fn)).map(c=>`<option value="${c}">${c} · ${esc(LIB[c].name)}</option>`).join('');}
-document.addEventListener('change',e=>{if(e.target.dataset.fn){fillAddMenu();renderModel();}});
-document.addEventListener('input',e=>{if(e.target.dataset.calc){$('#irtOut').textContent=fmtS(irt());}});
+document.addEventListener('change',e=>{if(e.target.dataset.fn){fillAddMenu();renderModel();
+  /* v24.21 (td121, R-003) the Responding sheet's first question follows Setup, as Reinforcers B.4 does */
+  if(e.target.name==='m.fn'&&val('m.fn')){setv('rb.0',val('m.fn'));if(QMODELS.rb)renderQ('rb');}}});
+document.addEventListener('input',e=>{if(e.target.dataset.calc){$('#irtOut').textContent=fmtS(irt());const r=$('[name="m.rate"]');if(r){const v=parseFloat(r.value),bad=r.value.trim()!==''&&(isNaN(v)||v<0);r.classList.toggle('td-bad',bad);if(bad){r.setAttribute('aria-invalid','true');$('#irtOut').textContent='—';}else r.removeAttribute('aria-invalid');}}});   /* v24.21 (R-111) */
 
 /* ---------- selection models ---------- */
 const CFA_REC=t=>['FCT_CFA','Function identified by a component FA ('+t.replace('yes, ','')+'): FCT then DRA keyed to the confirmed reinforcer'+(/synth/.test(t)?', both reinforcers delivered together for the response':'')+'. The component-FA probabilities are initial support only; the function must be confirmed by an extended multielement FA (Bann & Morris, 2026), where FCT + DRA built on the identified function reduced behavior by 95–100% relative to the MEFA test condition.'];
@@ -2971,16 +2984,26 @@ function thinText(c,lv,j){if(!['NCE','NCR','DRO'].includes(c.code))return lv[1];
  return pre+' \u00d7 '+Math.pow(2,j)+' ('+fmtS(v)+(v>=T?', the terminal interval':'')+')';}
 function renderPlan(){const cs=comps();$('#planSummary').innerHTML='<b>Components</b>'+(cs.length?cs.map(c=>`<a href="#tdcard-${c.i}" class="td-pkglink" data-i="${c.i}" title="Open this card on Build"><span class="tag ok" style="margin-right:6px">${c.code}</span>${esc(c.name)}</a>`).join('<br>'):'None yet.');
  const fb=$('#fidTbl tbody');let k=0;{const ax=cs.filter(tdIsAssess),fn=$('#tdFidNote');if(fn){fn.hidden=!ax.length;fn.textContent=ax.length?'Not scored here: '+ax.map(c=>c.name).join('; ')+'. The BCBA completes them; they are not staff steps.':'';}}
- fb.innerHTML=cs.filter(c=>!tdIsAssess(c)).flatMap(c=>c.steps.map(s=>`<tr><td class="n">${++k}</td><td>${c.code}</td><td style="font-size:11.5px">${esc(s)}</td></tr>`)).join('')
+ /* v24.21 (td121, R-024, E-13) the checklist is the Final plan's step list, numbered as there (a critical step marked), then the safety items; the monitoring sheet's Steps observed shows their count */
+ const SL=(()=>{try{return window.__td46Steps?window.__td46Steps():null;}catch(e){return null;}})();
+ fb.innerHTML=(SL&&SL.length?SL.map(x=>{k=Math.max(k,x.one?x.ns[1]:x.n);return `<tr${x.crit?' class="crit"':''}><td class="n">${x.one?x.ns.join('–'):x.n}</td><td>${esc(x.comp||x.grp||'')}</td><td style="font-size:11.5px">${esc(x.d)}${x.crit?' <span class="tag ok" style="font-size:9px;margin-left:4px">critical</span>':''}</td></tr>`;}).join('')
+   :cs.filter(c=>!tdIsAssess(c)).flatMap(c=>c.steps.map(s=>`<tr><td class="n">${++k}</td><td>${c.code}</td><td style="font-size:11.5px">${esc(s)}</td></tr>`)).join(''))
   /* v21.44 (B3): the safety items of escape extinction (or physical guidance), scored like the steps */
-  +(eeMode()?EE_FID[val('ee.pg')==='yes'?'yes':'no']:[]).map(s=>`<tr><td class="n">${++k}</td><td>Safety</td><td style="font-size:11.5px">${esc(s)}</td></tr>`).join('');
+  +(eeMode()?EE_FID[val('ee.pg')==='yes'?'yes':'no']:[]).map((s,j)=>`<tr><td class="n">S${j+1}</td><td>Safety</td><td style="font-size:11.5px">${esc(s)}</td></tr>`).join('');
+ {const n=fb.querySelectorAll('tr').length;$$('#monBody [name$=".so"]').forEach(e=>e.placeholder=n?String(n):'');const h=$('#tdFidCount');if(h)h.textContent=n?n+' item'+(n===1?'':'s')+' to score each observed session.':'';}
  const tb=$('#thinTbl tbody');const crit=val('mon.crit'),n=val('mon.n')||'3',ind=val('mon.ind')||'80';
  tb.innerHTML=cs.filter(c=>THIN[c.code]).flatMap(c=>THIN[c.code].map((lv,j)=>`<tr><td class="n">${c.code} ${lv[0]}</td><td>${esc(thinText(c,lv,j))}</td><td style="font-size:11px">${j<THIN[c.code].length-1?`${crit?`Target ≤ ${esc(crit)}/min`:'Target at or below the criterion set on the monitoring sheet'} and alternative ≥ ${esc(ind)}% independent for ${esc(n)} consecutive sessions at this level`:'Maintain; monthly probes'}</td><td style="font-size:11px">${j?'Two consecutive sessions above criterion at this level':'—'}</td></tr>`)).join('')||'<tr><td colspan="4" class="empty2">No components with a thinning plan yet.</td></tr>';}
 
 /* ---------- monitoring ---------- */
 function monRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="mo[${i}].d"></td><td><input class="txt" name="mo[${i}].p" data-mon="1" placeholder="BL / Tx"></td><td class="c"><input class="num" name="mo[${i}].lv" data-mon="1"></td><td class="c"><input class="num" name="mo[${i}].t" data-mon="1"></td><td class="c"><input class="num" name="mo[${i}].a" data-mon="1"></td><td class="c"><input class="num" name="mo[${i}].ind" data-mon="1"></td><td class="c"><input class="num" name="mo[${i}].sc" data-mon="1"></td><td class="c"><input class="num" name="mo[${i}].so" data-mon="1"></td><td class="c"><input type="checkbox" name="mo[${i}].err" data-mon="1"></td><td><input class="txt" name="mo[${i}].n"></td>`;return tr;}
 function renderMonRows(){const n=+$('#nMon').value,b=$('#monBody');while(b.children.length>n)b.lastChild.remove();for(let i=b.children.length;i<n;i++)b.appendChild(monRow(i));}
-function monData(){const rows=[];$$('#monBody tr').forEach((tr,i)=>{const t=num(`mo[${i}].t`);if(t==null)return;const sc=num(`mo[${i}].sc`),so=num(`mo[${i}].so`);rows.push({x:i+1,t,a:num(`mo[${i}].a`),ind:num(`mo[${i}].ind`),fid:(sc!=null&&so)?100*sc/so:null,phase:val(`mo[${i}].p`)||'Tx',lv:num(`mo[${i}].lv`),err:!!document.querySelector(`[name="mo[${i}].err"]`)?.checked});});return rows;}
+/* v24.21 (td121, R-111) the log reads its entries: a negative rate, steps correct above steps observed, steps observed at 0 or a percentage outside 0 to 100 marks the cell and stays out */
+function monMark(i,k,bad){const e=document.querySelector(`[name="mo[${i}].${k}"]`);if(!e)return;e.classList.toggle('td-bad',!!bad);if(bad){e.setAttribute('aria-invalid','true');e.title=bad;}else{e.removeAttribute('aria-invalid');e.removeAttribute('title');}}
+function monData(){const rows=[];$$('#monBody tr').forEach((tr,i)=>{const t=num(`mo[${i}].t`),a=num(`mo[${i}].a`),ind=num(`mo[${i}].ind`),sc=num(`mo[${i}].sc`),so=num(`mo[${i}].so`);
+  const bt=t!=null&&t<0?'a rate is 0 or more':'',ba=a!=null&&a<0?'a rate is 0 or more':'',bi=ind!=null&&(ind<0||ind>100)?'a percentage is 0 to 100':'';
+  const bs=(sc!=null&&so!=null)?(so<=0?'steps observed are more than 0':sc<0||sc>so?'steps correct are 0 to the steps observed':''):(sc!=null&&so==null)?'enter the steps observed':'';
+  monMark(i,'t',bt);monMark(i,'a',ba);monMark(i,'ind',bi);monMark(i,'sc',bs);monMark(i,'so',so!=null&&bs?bs:'');
+  if(t==null||bt)return;rows.push({x:i+1,t,a:ba?null:a,ind:bi?null:ind,fid:(!bs&&sc!=null&&so)?100*sc/so:null,phase:val(`mo[${i}].p`)||'Tx',lv:num(`mo[${i}].lv`),err:!!document.querySelector(`[name="mo[${i}].err"]`)?.checked});});return rows;}
 function marker(x,y,col,fill){return `<circle cx="${x}" cy="${y}" r="4" fill="${fill}" stroke="${col}" stroke-width="1.2"/>`;}
 /* v23.04 (review F180) the cards that teach a replacement response */
 const tdHasRep=()=>comps().some(c=>/^(FCT|FCT_CFA|DRA|DRI|DNRA|DRAAUTO)$|^(SBT_|MAND_)/.test(c.code));
@@ -2989,7 +3012,12 @@ const tdRule=(crit,ind,nn)=>'Advance one thinning level when the target is at or
   +(tdHasRep()?'; with no percent-independent data, hold':' (no replacement response in this plan: the rate criterion only)')+'; step back after two consecutive sessions above criterion at that level.';
 /* v23.28 (review F182) an empty log is marked, so the IEP packet leaves it out */
 function tdMonMark(){const mk=document.getElementById('monitor');if(mk)mk.classList.toggle('td-empty',!monData().length);}
-function renderMon(){renderMonRows();const rows=monData();tdMonMark();const el=$('#monFig'),lg=$('#monLegend');const base=num('m.rate');
+function renderMon(){renderMonRows();const rows=monData();tdMonMark();const el=$('#monFig'),lg=$('#monLegend');
+ /* v24.21 (td121, R-112, E-22) the 90% benchmark is read against the log's own baseline when it has one, named; else the Setup rate, named; the criterion placeholder is seeded from it */
+ const isBL=p=>/^(?:bl|a)\d*(?![a-z])|^base/i.test(p);const tx0=rows.find(r=>!isBL(r.phase));const bl1=rows.filter(r=>isBL(r.phase)&&(!tx0||r.x<tx0.x));
+ const setupRate=num('m.rate');const base=bl1.length?bl1.reduce((a,r)=>a+r.t,0)/bl1.length:(setupRate!=null&&setupRate>=0?setupRate:null);
+ const baseSrc=bl1.length?`the logged baseline (the mean of ${bl1.length} session${bl1.length===1?'':'s'})`:base!=null?'the Setup rate'+(val('m.ratesrc')==='DD-1'?' from Form DD-1':val('m.eadesign')?' from Form EA-1':'')+'; no baseline phase is logged yet':'';
+ {const c=$('[name="mon.crit"]');if(c)c.placeholder=base?String(+(base*0.1).toFixed(2)):'0.2';}
  if(!rows.length){el.innerHTML='<h3>Progress</h3><div class="empty">No data yet.</div>';lg.innerHTML='';$('#monVerdict').innerHTML='<b>Decision</b>Enter sessions to evaluate.';return;}
  const W=640,H=270,L=46,R=46,T=22,B=40,pw=W-L-R,ph=H-T-B;const xmax=Math.max(...rows.map(r=>r.x),5);
  const nice=v=>{if(v<=0)return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const m=v/e;return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*e;};
@@ -3012,7 +3040,7 @@ function renderMon(){renderMonRows();const rows=monData();tdMonMark();const el=$
     BL, BL2, A, A1 or Baseline ("Blocking" or "Attention NCR" are treatment). No problem-behavior criterion is
     assumed. Integrity is judged per observed session. The burst note needs a baseline rate. */
  const crit=num('mon.crit'),n=num('mon.n')??3,indC=num('mon.ind')??80,fidC=num('mon.fid')??90;
- const isBL=p=>/^(?:bl|a)\d*(?![a-z])|^base/i.test(p);const tx=rows.filter(r=>!isBL(r.phase));const lines=[];
+ const tx=rows.filter(r=>!isBL(r.phase));const lines=[];
  const end=rows[rows.length-1],run=[];if(!isBL(end.phase))for(let k=rows.length-1;k>=0;k--){const r=rows[k];if(isBL(r.phase)||r.phase!==end.phase||r.lv!==end.lv)break;run.unshift(r);}
  const last=run.slice(-n),at=end.lv!=null?' at level '+end.lv:' in this phase';
  const fidRows=rows.filter(r=>r.fid!=null);const errs=rows.filter(r=>r.err).length;
@@ -3023,10 +3051,15 @@ function renderMon(){renderMonRows();const rows=monData();tdMonMark();const el=$
  else{const okT=last.length>=n&&last.every(r=>r.t<=crit),hasInd=last.some(r=>r.ind!=null),okA=last.every(r=>r.ind==null||r.ind>=indC);const recent=run.slice(-2);const above=recent.length===2&&recent.every(r=>r.t>crit);
   /* v23.04 (review F180) with a replacement in the plan, the rule needs its percent-independent data before a level is advanced */
   if(okT&&okA&&!hasInd&&tdHasRep()){tag='mid';head=`Hold: the target is at criterion, but the last ${n} sessions${at} have no percent-independent data for the replacement, and the rule needs them before thinning.`;}
-  else if(okT&&okA){tag='ok';head=`Advance one thinning level: target ≤ ${crit}/min${hasInd?` and alternative ≥ ${indC}% independent`:' (no replacement response in this plan: the rate criterion only)'} for the last ${n} sessions${at}.`;}
+  else if(okT&&okA){const wf=last.filter(r=>r.fid!=null),lowF=wf.filter(r=>r.fid<fidC),wErr=last.filter(r=>r.err);
+   /* v24.21 (td121, R-023) the decision reads the integrity and the reinforcement errors of its own window: thin only on effects obtained at criterion integrity */
+   if(lowF.length||wErr.length){tag='mid';head=`Hold: retrain first. The target is at or below ${crit}/min for the last ${n} sessions${at}, but ${[lowF.length?`integrity was below ${fidC}% in ${lowF.length} of the ${wf.length} observed`:'',wErr.length?`${wErr.length} of them had a reinforcement error`:''].filter(Boolean).join(' and ')}: thin only on effects obtained at criterion integrity (St. Peter Pipkin et al., 2010).`;}
+   else{tag='ok';head=`Advance one thinning level: target ≤ ${crit}/min${hasInd?` and alternative ≥ ${indC}% independent`:' (no replacement response in this plan: the rate criterion only)'} for the last ${n} sessions${at}${wf.length?`; integrity ${Math.round(wf.reduce((a,r)=>a+r.fid,0)/wf.length)}% in the ${wf.length} observed`:'; no integrity observation in them'}.`;}}
   else if(above){tag='no';head=`Step back one level: the last two sessions${at} are above criterion.`;}
   else{tag='mid';head='Hold the current level'+(run.length<n?`: ${run.length} session${run.length===1?'':'s'}${at} so far; the rule needs ${n}.`:'.');}}
- if(base&&last.length){const mean=last.reduce((a,r)=>a+r.t,0)/last.length;lines.push(`Recent mean ${mean.toFixed(2)}/min = ${Math.round(100*(1-mean/base))}% reduction from baseline ${base}/min (90% benchmark: Hagopian et al., 1998; Harding et al., 2009).`);}
+ if(base&&last.length){const mean=last.reduce((a,r)=>a+r.t,0)/last.length;lines.push(`Recent mean ${mean.toFixed(2)}/min = ${Math.round(100*(1-mean/base))}% reduction from baseline ${+base.toFixed(2)}/min, ${baseSrc} (90% benchmark: Hagopian et al., 1998; Harding et al., 2009).`);}
+ if(crit==null&&base&&tx.length)lines.push(`Criterion not set: the 90% benchmark from ${baseSrc} is ${(base*0.1).toFixed(2)}/min, shown as the placeholder below the graph.`);
+ {const bl2=tx0?rows.filter(r=>isBL(r.phase)&&r.x>tx0.x):[];if(bl2.length>=2&&bl1.length&&base>0){const m2=bl2.reduce((a,r)=>a+r.t,0)/bl2.length;if(m2<0.5*base)lines.push(`The second baseline (${esc(bl2[0].phase)}, mean ${m2.toFixed(2)}/min over ${bl2.length} sessions) did not return toward the first (${+base.toFixed(2)}/min): the reversal has not yet shown control; see the evaluation design.`);}}
  if(fidRows.length){const lf=fidRows[fidRows.length-1],below=fidRows.filter(r=>r.fid<fidC).length,fm=fidRows.reduce((a,r)=>a+r.fid,0)/fidRows.length;
   lines.push(`Integrity ${lf.fid.toFixed(1)}% in the most recent observed session (#${lf.x}); ${below} of ${fidRows.length} observed session${fidRows.length===1?'':'s'} below the ${fidC}% criterion; mean ${fm.toFixed(1)}%${lf.fid<fidC?': retrain before attributing effects to the procedure':''}.`);}
  else lines.push('No integrity observations logged.');
@@ -3072,10 +3105,32 @@ function tdFnNote(){const src=val('m.fnsrc'),ea=src==='EA-1'||(!src&&val('m.eade
    criteria, the plan at a glance, the least-restrictive review; the steps follow with who/when and the set-up steps apart */
 const TD88_FN={escape:'escape from the task or demand (social negative reinforcement)',attention:'attention (social positive reinforcement)',tangible:'access to a preferred item or activity (social positive reinforcement)',automatic:'the stimulation the behavior itself produces (automatic reinforcement)',multiple:'more than one reinforcer (multiple control)'};
 function tdStrip(h){const d=document.createElement('div');d.innerHTML=h;return d.textContent.replace(/\s+/g,' ').trim();}
+/* v24.21 (td121, R-002) the provenance in the summary statement, short: the strength, then what stands behind it (the outcome sentence is on Setup) */
+function tdProvShort(){const p=val('m.fnprov');if(!p)return '';const parts=p.split(' · ');if(parts.length<3)return p;return parts[0]+': '+parts.slice(2).join(' · ');}
 function tdSummaryHtml(){const who=val('m.client')||'The student',beh=val('m.beh'),fn=val('m.fn'),reinf=val('m.reinf'),prec=val('m.prec'),se=val('ant.se');if(!beh&&!fn)return '';
   const src=(()=>{const x=val('m.fnsrc'),d=val('m.eadesign');return x==='EA-1'||(!x&&d)?'EA-1'+(d?', '+d.replace(/\s*\(simulated\)$/,''):''):x==='FS-1'?'a hypothesis from Form FS-1, no analysis yet':'as chosen on this form';})();
   const short=(()=>{const m=/^([^:]{2,60}):\s+\S/.exec(beh||'');return m?m[1].trim():beh;})();   /* a name with its definition reads as its name; the definition is in the table below */
-  return `<div class="td-stmt"><b>${esc(who)}</b>${short?'’s '+esc(short):'’s target behavior'} is maintained by <b>${esc(TD88_FN[fn]||'a function not yet chosen')}</b> (${esc(src)}).${reinf?' Reinforcer and establishing operation: '+esc(reinf)+'.':''}${prec?' Precursor: '+esc(prec)+'.':''}${se?' Setting events: '+esc(se)+'.':''}</div>`;}
+  return `<div class="td-stmt"><b>${esc(who)}</b>${short?'’s '+esc(short):'’s target behavior'} is maintained by <b>${esc(TD88_FN[fn]||'a function not yet chosen')}</b> (${esc(src)}${tdProvShort()?'; '+esc(tdProvShort()):''}).${reinf?' Reinforcer and establishing operation: '+esc(reinf)+'.':''}${prec?' Precursor: '+esc(prec)+'.':''}${se?' Setting events: '+esc(se)+'.':''}</div>`;}
+/* v24.21 (td121, R-002, R-003, E-14) what stands behind the function, on Setup; and the plan names one function: Setup, the Responding sheet's
+   first question, the extinction card's form of extinction and the "On the target behavior" line must agree, else a banner on Setup, Responding
+   and the Final plan (printed too) says where they differ */
+function tdFnProvPaint(){const el=$('#tdFnProv');if(!el)return;const p=val('m.fnprov'),src=val('m.fnsrc');el.textContent=p?'EA-1: '+p:src==='FS-1'?'A hypothesis from Form FS-1: no analysis has tested it.':src==='typed'&&val('m.fn')?'Chosen on this form; no analysis result is attached.':'';}
+window.tdFnProvPaint=tdFnProvPaint;
+const TD121_FNW=[['escape',/\bescape\b|\bbreak\b|\bdemand\b|\bguided compliance\b/i],['attention',/\battention\b/i],['tangible',/\btangible\b|\bitem\b/i],['automatic',/\bautomatic\b|\bsensory\b/i]];
+function tdFnOf(t){t=String(t||'').trim();if(!t)return '';const m=/^(escape|attention|tangible|automatic|multiple)\b/i.exec(t);if(m)return m[1].toLowerCase();const hits=TD121_FNW.filter(w=>w[1].test(t)).map(w=>w[0]);return hits.length===1?hits[0]:hits.length>1?'multiple':'';}
+function tdFnCheck(){const fn=val('m.fn');if(!fn||fn==='multiple')return {ok:true,lines:[],fn};const L=[];const lab=k=>({escape:'escape',attention:'attention',tangible:'tangible',automatic:'automatic',multiple:'more than one function'})[k]||k;
+ const rb0=val('rb.0');if(rb0&&rb0!==fn)L.push(`the Responding sheet's first question says ${lab(rb0)}`);
+ const tgt=val('rb.target');{const f=tdFnOf(tgt);if(f&&f!==fn)L.push(`the Responding sheet's "On the target behavior" line reads as ${lab(f)}`);}
+ $$('#compWrap .card').forEach(c=>{const i=c.dataset.i,code=c.dataset.code,p0=val(`cp[${i}].p0`);
+  if(code==='EXT'){const f=tdFnOf(p0);if(f&&f!==fn)L.push(`the Extinction card's form of extinction reads as ${lab(f)}`);}
+  if(code==='R_PB'&&p0&&p0!==tgt){const f=tdFnOf(p0);if(f&&f!==fn)L.push(`the consequence protocol card's "On the target behavior" line reads as ${lab(f)}`);}});
+ return {ok:!L.length,lines:L,fn};}
+function tdFnBanner(){const r=tdFnCheck();const lab={escape:'escape',attention:'attention',tangible:'tangible',automatic:'automatic'}[r.fn]||r.fn;
+ ['#tdFnWarnSetup','#tdFnWarnRespond','#tdFnWarnFinal'].forEach(sel=>{const el=$(sel);if(!el)return;el.hidden=r.ok;el.innerHTML=r.ok?'':`<b>The plan names more than one function.</b> Setup says ${esc(lab)}, but ${r.lines.map(esc).join('; ')}. Fix the function on Setup or the protocol before this plan is printed or run: a consequence protocol written for another function delivers the reinforcer.`;});return r;}
+window.td121={check:tdFnCheck,banner:tdFnBanner,fnOf:tdFnOf,prov:tdFnProvPaint};
+document.addEventListener('change',e=>{const n=e.target&&e.target.name||'';if(n==='m.fn'||/^rb\./.test(n)||/^cp\[\d+\]\.p0$/.test(n))setTimeout(tdFnBanner,0);});
+window.addEventListener('beforeprint',tdFnBanner);document.addEventListener('nbh:restored',()=>setTimeout(()=>{tdFnBanner();tdFnProvPaint();},0));
+setTimeout(()=>{try{tdFnBanner();tdFnProvPaint();}catch(e){}},400);
 function tdCrit(){const crit=val('mon.crit'),n=val('mon.n')||'3',ind=val('mon.ind');
   return {target:crit?'At or below '+esc(crit)+' per minute for '+esc(n)+' consecutive sessions':'',rep:ind?'Independent in at least '+esc(ind)+'% of opportunities across '+esc(n)+' consecutive sessions':''};}
 function tdNotReady(cs){const out=[];if(!cs.length&&!val('m.fn'))return out;   /* an empty form has nothing to be ready */try{const S=eeScan(),em=eeMode(S);if(em)eeIssues(em,S).forEach(x=>out.push(x.t));}catch(e){}
@@ -3112,7 +3167,7 @@ function tdPage1Lines(cs){const L=[];const st=tdStrip(tdSummaryHtml());if(st)L.p
   const g=cs.filter(c=>!tdIsAssess(c));if(g.length)L.push(['THE PLAN AT A GLANCE'].concat(g.map(c=>'- '+c.name+(c.who||c.when?' — '+[c.who,c.when].filter(Boolean).join(' · '):'')+' — '+c.steps.length+' staff step'+(c.steps.length===1?'':'s'))));
   const lr=tdStrip(tdLeast(cs).replace(/<div class="row">/g,'\n- ').replace(/<\/div><div>/g,': '));if(lr&&(cs.length||val('m.fn')))L.push(['LEAST RESTRICTIVE REVIEW'].concat(lr.replace(/^Least restrictive review\s*/,'').split(/\s*- /).filter(Boolean).map(x=>'- '+x.trim())));
   return L;}
-function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'}[fn]||'—';
+function renderFinal(){try{tdFnBanner();tdFnProvPaint();}catch(e){}const cs=comps();const fn=val('m.fn');const fnLabel={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'}[fn]||'—';
  $('#finalHead').innerHTML=tdPage1(cs,fnLabel);
  let n=0;let out='';const used=new Set();
  GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c));if(!inG.length)return;out+=`<div class="plan-group">${esc(title)}</div>`;
@@ -3122,9 +3177,9 @@ function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={esca
    if(L.caution)out+=`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`;
    out+=tdWhoHtml(c);   /* v23.88 who, when, where; the set-up steps apart, unnumbered */
    if(c.ta)out+=tdTaHtml(c.ta);   /* v23.87 the student's task analysis, its own list */
-   c.steps.forEach(s=>{n++;out+=stepRow(n,s);});
+   c.steps.forEach(s0=>{const s=tdStepText(c,s0);n++;out+=stepRow(n,s);});
    if(data)out+=`<div class="plan-set"><b>Record:</b> ${esc(data)}</div>`;out+='</div>';});});
- const rest=cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`+tdWhoHtml(c);c.steps.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});}
+ const rest=cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`+tdWhoHtml(c);c.steps.forEach(s0=>{const s=tdStepText(c,s0);n++;out+=stepRow(n,s);});out+='</div>';});}
  const extras=finalExtras();
  extras.forEach(([title,lines,tail])=>{out+=`<div class="plan-group">${esc(title)}</div><div class="plan-comp">`;lines.forEach(s=>{n++;out+=stepRow(n,s);});out+=(tail||'')+'</div>';});
  /* v23.28 (review F183) the BCBA's assessments, under their own heading and not numbered as staff steps */
@@ -3155,7 +3210,7 @@ window.td119={printPacket};
 /* ---------- simulator ---------- */
 const rnd=()=>Math.random();const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
 const SIMS={
- escape_fct:{desc:'Escape-maintained aggression; curriculum appropriate, some compliance, breaks tolerable, communication the priority → FCT with escape extinction and a chained work requirement (Harding et al., 2009 pattern), evaluated in A-B-A-B.',fn:'escape',beh:'Aggression toward staff (simulated)',rate:1.2,reinf:'Break from multi-step math worksheets (demand condition elevated on EA-1)',rep:'no',ans:['yes','yes','yes','yes','Communication'],comps:['FCT','EXT'],phases:[['BL',5,1.2,0.3,0,null],['Tx L1',6,0.6,0.35,1.0,60],['Tx L1',4,0.15,0.1,1.1,85],['Tx L2',5,0.1,0.08,1.0,95],['BL',3,0.9,0.3,0.1,null],['Tx L2',5,0.1,0.08,1.0,95],['Tx L3',6,0.08,0.06,0.8,95]]},
+ escape_fct:{desc:'Escape-maintained aggression; curriculum appropriate, some compliance, breaks tolerable, communication the priority → FCT with escape extinction and a chained work requirement (Harding et al., 2009 pattern), evaluated in A-B-A-B.',fn:'escape',beh:'Aggression toward staff (simulated)',rate:1.2,reinf:'Break from multi-step math worksheets (demand condition elevated on EA-1)',rep:'no',ans:['yes','yes','yes','yes','Communication'],comps:['FCT','EXT'],phases:[['BL',5,1.2,0.3,0,null],['Tx L1',6,0.6,0.35,1.0,60],['Tx L1',4,0.15,0.1,1.1,85],['Tx L2',5,0.1,0.08,1.0,95],['BL',3,0.9,0.3,0.1,null],['Tx L2',5,0.1,0.08,1.0,95],['Tx L3',6,0.05,0.03,0.8,95]]},
  sbt:{desc:'Synthesized escape-to-tangible function from an IISCA; skill-based treatment: simple then complex FCR ("my way"), tolerance response to unpredictable denial, and contextually appropriate behaviors in lengthening chains; B-A-B evaluation.',fn:'escape',beh:'Aggression + precursor screaming (simulated)',rate:1.8,reinf:'Synthesized: escape from demands + tablet + attention',rep:'no',ans:['yes','yes','yes','yes','Communication'],comps:['FCT','EXT'],sbt:true,design:'bab',iv:'Skill-based treatment (FCR → TR → CABs)',dv:'Aggression + precursor per min',phases:[['B1',6,0.3,0.25,1.2,80],['A',5,1.6,0.5,0.1,null],['B2',8,0.15,0.12,1.4,95]]},
  escape_nce:{desc:'Escape-maintained self-injury, no current compliance, environment cannot tolerate the behavior → demand fading with noncontingent escape, then FCT after thinning.',fn:'escape',beh:'Self-injury: head hitting (simulated)',rate:2.5,reinf:'Escape from any adult instruction',rep:'no',ans:['yes','no'],comps:['DF','NCE','SAFE'],phases:[['BL',4,2.5,0.5,0,null],['Tx L1',5,0.2,0.15,0,90],['Tx L2',5,0.25,0.15,0,90],['Tx L3',5,0.35,0.2,0,85],['Tx L4',6,0.15,0.1,0,92]]},
  attention_ncr:{desc:'Attention-maintained vocal disruption; extinction feasible; immediate suppression needed → NCR attention with extinction, thinned, then FCT with a signaled multiple schedule.',fn:'attention',beh:'Loud vocal disruption (simulated)',rate:3,reinf:'Adult attention when the teacher helps other students',rep:'no',ans:['yes','yes'],comps:['NCR','EXT','FCT'],phases:[['BL',5,3,0.6,0,null],['Tx L1',5,0.5,0.3,0,90],['Tx L2',5,0.6,0.3,0,90],['Tx L3',5,0.4,0.25,0,95],['FCT L1',6,0.5,0.3,1.5,80],['FCT L2',6,0.2,0.12,1.2,95]]},
@@ -3183,7 +3238,7 @@ const SIMV={
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated case?\nEvery sheet is filled with a worked example of the scenario chosen beside the button. Anything already entered will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=SIMS[key],X=SIMV[key]||{},pick=(k,d)=>k in X?X[k]:d;restore({counts:{}});const fcr=!!sc.sbt||sc.comps.some(c=>c==='FCT'||c==='DRA');   /* the plan has a functional communication response (v21.16) */
  setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
- setv('m.beh',sc.beh);setv('m.fn',sc.fn);setv('m.fnsrc','EA-1');setv('m.eadesign',sc.sbt?'IISCA: synthesized test vs. control, multielement (simulated)':'Multielement, 4 series (simulated)');setv('m.reinf',sc.reinf);setv('m.rate',String(sc.rate));setv('m.sessmin','10');setv('m.rep',sc.rep);/* v21.21 cross-form (X4b): m.repdesc is the replacement behavior (the plan summary and the flowchart show it as
+ setv('m.beh',sc.beh);setv('m.fn',sc.fn);setv('m.fnsrc','EA-1');setv('m.fnprov',sc.sbt?'Moderate · Differentiated: Synthesized test meets the rule (u − l = 5 of n = 5). · Roane rule met: Synthesized test u − l = 5 of 5 · IOA on 40% of sessions (Synthesized test 40%) · second reading: agreed · Decision ticked (Function identified) (simulated)':'Strong · Differentiated: '+(sc.fn==='escape'?'Demand':sc.fn==='attention'?'Attention':sc.fn==='tangible'?'Tangible':'Alone / No interaction')+' meets the rule (u − l = 4 of n = 4). · Roane rule met: '+(sc.fn==='escape'?'Demand':sc.fn==='attention'?'Attention':sc.fn==='tangible'?'Tangible':'Alone / No interaction')+' u − l = 4 of 4 · IOA on 25% of sessions (every condition 25%) · second reading: agreed · Decision ticked (Function identified) (simulated)');   /* v24.21 (R-002) the worked example shows what stands behind its function */setv('m.eadesign',sc.sbt?'IISCA: synthesized test vs. control, multielement (simulated)':'Multielement, 4 series (simulated)');setv('m.reinf',sc.reinf);setv('m.rate',String(sc.rate));setv('m.sessmin','10');setv('m.rep',sc.rep);/* v21.21 cross-form (X4b): m.repdesc is the replacement behavior (the plan summary and the flowchart show it as
    that, GB-1 writes it after "will", EB-1 under "What the request looks like"); the simulation filled it with
    a description of the student's current repertoire. Whether the behavior is already in the repertoire is
    the answer beside it (m.rep). */
@@ -3196,7 +3251,7 @@ setv('m.repdesc',({escape_fct:'press the break card (simulated)',sbt:'say "my wa
  setv('tr[0].who','Classroom teacher (simulated)');['i','m','r','f'].forEach(k=>setv('tr[0].'+k,'✓'));setv('tr[1].who','Paraprofessional (simulated)');['i','m','r'].forEach(k=>setv('tr[1].'+k,'✓'));
  setv('p.visit','Weekly: review the week; answer questions; demonstrate; observe two sessions with in-session prompts; review graph; set next-week objective (simulated).');setv('p.pre','Cafeteria, specials, bus line: baseline probes 9/8–9/12 (simulated)');setv('p.gen','Second trainer added at level 2; classroom materials used in training; sequential modification if probes fail (simulated)');setv('p.post','Probe each context after level 3; monthly maintenance probes (simulated)');setv('p.complex',pick('complex','Vocal "break please" after card is reliable (simulated)'));setv('p.design',sc.design==='bab'?'B-A-B: treatment, a brief return to baseline, then treatment again (simulated)':'A-B-A-B: a brief return to baseline once the treatment effect is stable, then treatment again (simulated)');
  [['Teacher, pre-treatment','6','5','2'],['Parent, pre-treatment','6','6','2'],['Teacher, post-treatment','7','7','1'],['Student preference','—','—','—']].forEach((r,i)=>{setv(`sv[${i}].who`,r[0]);setv(`sv[${i}].a`,r[1]);setv(`sv[${i}].e`,r[2]);setv(`sv[${i}].s`,r[3]);});
- setv('mon.crit',String(+(sc.rate*0.15).toFixed(2)));setv('mon.n','3');setv('mon.ind','80');setv('mon.fid','90');
+ setv('mon.crit',String(+(sc.rate*0.10).toFixed(2)));   /* v24.21 (E-22) the 90% benchmark */setv('mon.n','3');setv('mon.ind','80');setv('mon.fid','90');
  const rows=[];sc.phases.forEach(([p,n,m,sd,alt,fid])=>{for(let k=0;k<n;k++)rows.push({p,t:Math.max(0,+(m+gauss()*sd).toFixed(2)),a:alt?Math.max(0,+(alt+gauss()*0.3).toFixed(2)):null,ind:alt?Math.min(100,Math.max(0,Math.round((fid>=90?85:55)+gauss()*10))):null,fid});});
  $('#nMon').value=Math.max(8,Math.min(80,rows.length+3));renderMonRows();
  /* v21.16: sessions on school days, the last one today; days[0] is the school day before the first session */
@@ -3258,7 +3313,7 @@ setv('m.repdesc',({escape_fct:'press the break card (simulated)',sbt:'say "my wa
  {const rd=new Date();rd.setDate(rd.getDate()+30);setv('m.review','Data read weekly by the BCBA; plan reviewed after 10 school days at or above criterion, or by '+rd.toLocaleDateString()+' (simulated)');}
  if(MODELS[sc.fn]){const last=MODELS[sc.fn].q.length-1;if(!val(`q.${sc.fn}.${last}`))setv(`q.${sc.fn}.${last}`,'no');}renderRec();
  setv('sel.chosen',$$('#compWrap .card').map(k=>k.dataset.code).filter((c,i,a)=>a.indexOf(c)===i).join(', '));tdSyncPicks();
- renderHp();renderPlan();renderMon();$('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;setView('select');}
+ renderHp();renderPlan();renderMon();$('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;try{tdFnBanner();tdFnProvPaint();}catch(e){}setView('select');}
 $('#simBtn').addEventListener('click',loadSim);
 
 /* ---------- save / open / clear ---------- */
@@ -3402,10 +3457,14 @@ const EE_INFO=/^(Escape is one of|Why hands-on guidance|Teaching prompts|The stu
 function extraIn(title,line){if(/^Prompt hierarchy/.test(title)&&/^Fading rule:/.test(line))return false;return EEX(title)?!EE_INFO.test(line):/^(Positioning|Prompt hierarchy|Responding)/.test(title);}
 function extraCrit(title,line){if(/^Responding/.test(title))return /^(On the target behavior|Staff do not):/.test(line)||(/^On the precursor:/.test(line)&&/reinforc/i.test(line));
   if(EEX(title))return /^(Stop guiding|Never force|If distress goes on|If the student withdraws assent|The rule staff follow)/.test(line);return false;}
+/* v24.21 (td121, E-13) the extinction card's "match the form" step carries only the chosen function's clause */
+function tdStepText(c,s){if(!c||c.code!=='EXT'||!/^Match the form to the function:/.test(s))return s;const e=document.querySelector('[name="m.fn"]'),fn=e?T(e.value):'';if(!fn||fn==='multiple')return s;
+  const parts=s.replace(/^Match the form to the function:\s*/,'').split(/;\s*/);const mine=parts.find(p=>new RegExp('^'+fn+'\\s*→','i').test(p.trim()));
+  return mine?'Match the form to the function ('+fn+'): '+mine.trim().replace(/^\w+\s*→\s*/,'').replace(/\.?$/,'.'):s;}
 /* every line, in the order and with the numbers renderFinal prints; inList and crit after the BCBA's changes */
 function planLines(){const cs=comps(),L=[],used=new Set(),O=over();
   const push=(d,grp,comp,cmp,kind,sIn,sCrit,card)=>{d=T(d);L.push({n:L.length+1,d,grp,comp,cmp,kind,sIn:!kind&&!!sIn,sCrit:!kind&&(!!sCrit||(cmp==='con'&&CONSEQ.test(d))),card:!!card});};
-  GROUPS.forEach(([title,codes],gi)=>{cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c)).forEach(c=>{used.add(c.code);c.steps.forEach(s=>push(s,title,c.name,GIVE.test(s)?'con':GCMP[gi]||'','',(gi===1||gi===3)&&GIVE.test(s),gi===4||REIN.test(s),true));});});
+  GROUPS.forEach(([title,codes],gi)=>{cs.filter(c=>codes.includes(c.code)&&!tdIsAssess(c)).forEach(c=>{used.add(c.code);c.steps.forEach(s0=>{const s=tdStepText(c,s0);push(s,title,c.name,GIVE.test(s)?'con':GCMP[gi]||'','',(gi===1||gi===3)&&GIVE.test(s),gi===4||REIN.test(s),true);});});});
   cs.filter(c=>!used.has(c.code)&&!tdIsAssess(c)).forEach(c=>c.steps.forEach(s=>push(s,'Other components',c.name,'','',false,REIN.test(s),true)));
   finalExtras().forEach(([title,lines])=>lines.forEach(s=>{const kd=extraKind(title,s);push(s,title,'',kd?'':extraCmp(title,s),kd,extraIn(title,s),extraCrit(title,s),false);}));
   /* a plan with no lines of its own for staff: the cards' reinforcement and extinction steps are suggested instead */
@@ -3521,7 +3580,11 @@ window.__nbhFactsOut=function(){
     /* the analysis (EA-1): its function, when it names one of the select's, and the design it used */
     const ea=f.evidence&&f.evidence['EA-1'];
     if(ea&&typeof ea==='object'){const k=fnKeyOf(ea.fnKey)||fnKeyOf(ea.fn);if(k)P('m.fn',k,'the function (EA-1)');
-      P('m.eadesign',[T(ea.method),ea.n?ea.n+' sessions':'',T(ea.dates)].filter(Boolean).join(', '),'the EA-1 design');}
+      P('m.eadesign',[T(ea.method),ea.n?ea.n+' sessions':'',T(ea.dates)].filter(Boolean).join(', '),'the EA-1 design');
+      /* v24.21 (td121, R-002) what stands behind the function: EA-1's strength, its outcome statement and its provenance line, kept while the function is EA-1's */
+      {const pv=fld('m.fnprov'),mf=fld('m.fn');const line=[T(ea.strength),T(ea.statement),T(ea.provenance)].filter(Boolean).join(' · ');
+       if(pv&&mf&&k&&mf.value===k&&pv.value!==line){pv.value=line;['input','change'].forEach(t=>pv.dispatchEvent(new Event(t,{bubbles:true})));}
+       try{window.tdFnProvPaint&&tdFnProvPaint();}catch(e){}}}
     /* the replacement behavior */
     const rep=(reps[0]&&T(reps[0].label))||T((prob.find(b=>T(b.rep))||{}).rep)||T((fsb.find(b=>T(b.alt))||{}).alt);
     P('m.repdesc',rep,'the replacement behavior');
@@ -5595,7 +5658,7 @@ function tdSrFill(){const s=tdSched;if(!s||!['thin','chain'].includes(s.id))retu
   const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const fn0=g('m.fn'),r0=g('m.rate'),r=was?was.apply(this,arguments):null;
     try{const fn=g('m.fn');if(fn&&!fn0){const ea=f&&f.evidence&&f.evidence['EA-1'];put('m.fnsrc',ea&&(String(ea.fnKey||'')===fn||new RegExp(fn,'i').test(String(ea.fn||'')))?'EA-1':'FS-1');}
       if(g('m.rate')&&!r0&&f&&f.data)put('m.ratesrc','DD-1');rateNote();}catch(e){}return r;};
-  document.addEventListener('change',e=>{if(!e.isTrusted||!e.target)return;if(e.target.name==='m.fn')put('m.fnsrc',e.target.value?'typed':'');});
+  document.addEventListener('change',e=>{if(!e.isTrusted||!e.target)return;if(e.target.name==='m.fn'){put('m.fnsrc',e.target.value?'typed':'');const pv=document.querySelector('[name="m.fnprov"]');if(pv&&pv.value){pv.value='';['input','change'].forEach(t=>pv.dispatchEvent(new Event(t,{bubbles:true})));}try{window.tdFnProvPaint&&tdFnProvPaint();}catch(x){}}});   /* v24.21 a function typed here has no analysis result behind it */
   document.addEventListener('input',e=>{if(!e.isTrusted||!e.target)return;if(e.target.name==='m.rate'){put('m.ratesrc','');rateNote();}});
   rateNote();})();
 </script>

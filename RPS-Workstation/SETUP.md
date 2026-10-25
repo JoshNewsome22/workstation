@@ -9905,6 +9905,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.21: The EA-1 to TD-1 joint and TD-1's plan consistency, from the independent review: the function flows with what stands behind it; the plan names one function; one integrity list; the thinning decision reads its own window
+(the independent review of 10/25, findings R-002, R-003, R-023, R-024, R-111, R-112 and part of R-115; enhancements E-09, E-13, E-14, E-22; the BCBA: "Banner instead of refuse", "All of them")
+
+- **EA-1 hands on the function only once it is decided**: the Decision's "Function identified" ticked (or "Analysis stopped for
+  safety", which flows as a hypothesis), or the function written in words. The dropdown alone no longer sends a function to the
+  case; the statement says the Decision is not yet ticked. The result carries a provenance line: the criterion result (which
+  condition met the Roane rule, u − l of n), IOA on what share of sessions and in the differentiated condition against the plan,
+  whether the second analyst's blind reading agreed, and the decision.
+- **TD-1 keeps it with the function**: under "Function (EA-1 outcome)" on Setup ("EA-1: Strong · Differentiated: Demand meets
+  the rule … · IOA on 25% of sessions (Demand 25%) · second reading: agreed · Decision ticked"), and in the Final plan's summary
+  statement. A function typed on TD-1 says "Chosen on this form; no analysis result is attached"; one from FS-1 says it is a
+  hypothesis no analysis has tested. The worked example shows the line.
+- **The plan names one function.** Setup, the Responding sheet's first question, the Extinction card's form of extinction and
+  the "On the target behavior" line (on the Responding sheet and on the consequence protocol card) must agree. Where they differ,
+  a banner on Setup, on Responding and at the top of the Final plan says which disagree and why it matters (a protocol written
+  for another function delivers the reinforcer); it prints with the plan. The Responding sheet's first question now follows
+  Setup when the function changes, as Reinforcers B.4 does. (The BCBA chose a banner over refusing to compile.)
+- **One integrity list.** The Implementation plan's Treatment Integrity Checklist is the Final plan's step list (the lines the
+  BCBA keeps in it, numbered as there, a critical step marked) plus the safety items of escape extinction or physical guidance
+  (S1, S2 …), so the observer, the trainer and the training video score the same steps; the BCBA's set-up lines are not scored.
+  The monitoring sheet's Steps observed shows the count as its placeholder. The Extinction card's "Match the form to the
+  function" step carries only the chosen function's clause on the Final plan and the checklist.
+- **The thinning decision reads its own window.** Advance is withheld, and the box reads "Hold: retrain first", when integrity
+  was below the criterion in any observed session of the sessions the rule is read from, or any of them had a reinforcement
+  error; the behavior criterion is reported as met pending integrity (St. Peter Pipkin et al., 2010). Advance names the window's
+  integrity.
+- **The monitoring log reads its entries**: a negative rate, steps correct above steps observed, steps observed at 0, or a
+  percentage outside 0 to 100 marks the cell (red outline, the reason in its tooltip) and keeps the figure out of the mean; a
+  negative Setup rate is marked and gives no IRT.
+- **The 90% benchmark names its baseline**: the log's own baseline phase when it has one ("the logged baseline, the mean of 5
+  sessions"), else the Setup rate, named with where it came from; the graph's benchmark line uses the same. The criterion box's
+  placeholder is seeded from the benchmark when it is empty, with a line saying so; the simulation sets its criterion at the
+  benchmark and its worked example meets it. When the second baseline of a reversal does not return toward the first, the box
+  says so.
+- Checks: `qa/td121-test.js`.
+
 ### v24.20: Form EA-1 from the independent review: the criterion leaves out stopped and short sessions; the log reads its entries; agreement by condition; the safety gate before a session
 (the independent review of 10/25, EA-1 findings R-001, R-004, R-007, R-008, R-080 to R-083, R-136, R-137; enhancements E-21 and E-31; the BCBA: "All of them")
 

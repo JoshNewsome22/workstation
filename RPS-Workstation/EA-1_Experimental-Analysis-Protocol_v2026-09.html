@@ -5824,6 +5824,14 @@ const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function()
    demand or escape, attention, tangible, alone or no interaction for automatic), the variant and design used, the session
    dates and count (the sessions logged with a condition and a value). Strength: one condition meeting the rule without flags Strong; with flags, or several, Moderate;
    undifferentiated names no function. */
+/* v24.21 (td121, R-002) what stands behind the function: the criterion result, IOA by condition, the second reading, the decision */
+function eaProvenance(met,decided,stopped){const P=[];try{const A=window.eaAPI,rows=A.sessData(),C=A.critAll(rows),cn=A.condNames();
+  const m=C.results.filter(r=>r.met);P.push(m.length?'Roane rule met: '+m.map(r=>r.name+' u − l = '+(r.u-r.l)+' of '+r.n).join('; '):rows.length?'criterion not met':'no sessions logged');
+  if(rows.length){const w=rows.filter(r=>r.ioa!=null).length,thr=window.ea120?ea120.ioaPlanPct():20;const by=cn.filter(c=>m.some(r=>r.c===c.i)).map(c=>{const rs=rows.filter(r=>r.c===c.i),k=rs.filter(r=>r.ioa!=null).length,pc=rs.length?Math.round(100*k/rs.length):0;return c.name+' '+pc+'%'+(rs.length&&pc<thr?' (under the '+thr+'% plan)':'');});
+    P.push('IOA on '+Math.round(100*w/rows.length)+'% of sessions'+(by.length?' ('+by.join(', ')+')':''));}
+  const ag=val2('d2.agree');P.push('second reading: '+(ag==='agree'?'agreed':ag==='disagree'?'disagreed':'not done'));
+  P.push(decided?'Decision ticked (Function identified)':stopped?'analysis stopped for safety: a hypothesis':'Decision not ticked');}catch(e){}return P.join(' · ');
+  function val2(n){const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';}}
 OUT(function(){const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};
   const txt=n=>{const e=document.querySelector('[name="'+n+'"]');return e&&e.tagName==='SELECT'&&e.selectedIndex>0?T(e.options[e.selectedIndex].textContent):'';};
   const rows=[...document.querySelectorAll('#sessBody tr')].map((tr,i)=>i).filter(i=>val('s['+i+'].c')!==''&&val('s['+i+'].v')!=='');const func=val('d.func');
@@ -5840,17 +5848,20 @@ OUT(function(){const val=n=>{const e=document.querySelector('[name="'+n+'"]');re
   const fn=func||(found.length?found.join(' and '):undiff?'Undifferentiated':'');
   /* v22.49 (review F153) the key: the function chosen for the report, else the outcome's conditions, else the words */
   const pick=val('d.fnkey'),fromOut=window.eaFnFromNames?eaFnFromNames(met,undiff):'';
-  const key=pick||fromOut||K(func)||(undiff?'unclear':'');
+  let key=pick||fromOut||K(func)||(undiff?'unclear':'');
   if(func&&!strength)strength=document.querySelector('[name="d.fn"]:checked')?'Strong':'Moderate';
   if(!key||key==='unclear')strength='';
+  /* v24.21 (td121, R-002) the function flows once the Decision is ticked (Function identified; or Analysis stopped for safety, as a hypothesis) or written in words */
+  const decided=!!document.querySelector('[name="d.fn"]:checked'),stoppedS=!!document.querySelector('[name="d.stop"]:checked'),flows=decided||stoppedS||!!func;
+  const prov=eaProvenance(met,decided,stoppedS);if(!flows){key='';strength='';}else if(stoppedS&&!decided&&strength)strength='Hypothesis';
   const variant=txt('v.chosen'),design=val('v.design');
   const sd=rows.map(i=>val('s['+i+'].d')).filter(Boolean);
   /* v22.78 (review F119, F123, PA-1) the session termination criteria and the self-injury subtype (when the level-of-differentiation
      panel computed one), for Form PA-1's competing stimulus trials */
   const lp=document.getElementById('lodPanel'),lt=lp&&lp.style.display!=='none'?document.querySelector('#lodOutEA .tag'):null,sub=lt?/^(Subtype [123])\b/.exec(T(lt.textContent)):null;
   return EV(Object.assign({form:'EA-1',method:'Functional analysis'+(variant||design?' ('+[variant,design].filter(Boolean).join(', ')+')':''),design:design||variant},
-    SPAN(sd.length?sd:[val('m.date')]),{n:rows.length||trialN||null,fn,fnKey:key,strength,by:val('m.assessor'),safety:eaSafety(rows),txDesign:window.__eaTxVerdict||undefined,term:val('s.term')||undefined,subtype:sub?sub[1]:undefined,
-    statement:(func?'Function(s) identified: '+func+'. ':'')+(head?head+(/[.]$/.test(head)?'':'.'):'')+(window.__eaIoaGap?' '+window.__eaIoaGap:'')}));});
+    SPAN(sd.length?sd:[val('m.date')]),{n:rows.length||trialN||null,fn:flows?fn:'',fnKey:key,strength,provenance:prov,decided:flows,by:val('m.assessor'),safety:eaSafety(rows),txDesign:window.__eaTxVerdict||undefined,term:val('s.term')||undefined,subtype:sub?sub[1]:undefined,
+    statement:(func?'Function(s) identified: '+func+'. ':'')+(head?head+(/[.]$/.test(head)?'':'.'):'')+(window.__eaIoaGap?' '+window.__eaIoaGap:'')+(flows?'':' Not yet decided on EA-1: tick the Decision (Function identified) before the function is used.')}));});
 
 /* v21.78 the FBA chain, in: what the analysis is built on, when the field is empty (never over what is typed): "Hypothesis
    carried in" and "Prior hypothesis (IA-1 / ABC-1)" from the evidence of Forms IA-1, IN-1, ABC-1 and OB-1 (a line per form
