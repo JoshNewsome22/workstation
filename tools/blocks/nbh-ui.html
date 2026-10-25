@@ -1749,13 +1749,36 @@ try { if (window.matchMedia) (function(){
   function wide(){ var w = window.innerWidth; try { if (window.top !== window) w = Math.max(w, window.top.innerWidth || 0); } catch (e) {} return w; }
   function want(){ var s = seg(); if (!s || printing || !coarse.matches || window.__nbhNoSheets) return ''; var n = tabs().length; if (n < 2) return '';
     if (wide() >= 1000 && window.innerWidth >= 1100) return 'rail';
-    return (n >= 8 || s.scrollWidth > s.clientWidth + 2 || s.scrollHeight > 52) ? 'menu' : ''; }
+    return (n >= 5 || s.scrollWidth > s.clientWidth + 2 || s.scrollHeight > 52) ? 'menu' : ''; }   /* v24.11 five or more sheets: the menu (six stood in a column) */
   function mkArrows(){ var a = document.createElement('span'); a.className = 'nbh-arrows noprint';
     a.innerHTML = '<button type="button" class="nbh-prev" aria-label="Previous sheet">‹</button><button type="button" class="nbh-next" aria-label="Next sheet"><span aria-hidden="true">›</span><small></small></button>';
     a.querySelector('.nbh-prev').addEventListener('click', function(ev){ ev.stopPropagation(); go(-1); });
     a.querySelector('.nbh-next').addEventListener('click', function(ev){ ev.stopPropagation(); go(1); });
     return a; }
-  function go(d){ var t = tabs(), i = cur() + d; if (i < 0 || i >= t.length) return; t[i].click(); setTimeout(paint, 30); try { window.scrollTo(0, 0); } catch (e) {} }
+  /* v24.11 (the BCBA's iPad review) the rail can be put away: a button in its head hides it, a tab at the left edge brings
+         it back, the choice is kept on the device; the sheet arrows in the toolbar still turn the sheets. The script's own
+         CSS (the rail's button and tab, the toolbar's groups, the fold) goes in from here, so every form has it. */
+      var CSS111 = '@media screen{html.nbh-rail.nbh-railoff #nbhRail{display:none!important}html.nbh-rail.nbh-railoff body{padding-left:0!important}'
+        + '#nbhRail .nbh-railh{position:relative;padding-right:36px}'
+        + '#nbhRailHide{position:absolute;right:0;top:-3px;width:30px;height:30px;border:1px solid rgba(255,255,255,.35);border-radius:7px;background:transparent;color:#fff;font:400 20px/1 var(--nbh-sans,-apple-system,sans-serif);cursor:pointer;padding:0}'
+        + '#nbhRailTab{position:fixed;left:0;top:132px;z-index:61;width:28px;height:60px;border:1px solid #c9d4d2;border-left:0;border-radius:0 9px 9px 0;background:#fff;color:#182e43;font:400 22px/1 var(--nbh-sans,-apple-system,sans-serif);box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;padding:0}'
+        + 'html:not(.nbh-rail) #nbhRailTab,html:not(.nbh-railoff) #nbhRailTab{display:none}'
+        + 'html.nbh-compact .toolbar > .tgroup.tg-keep:not(.tg-ctl):not(:has(#viewSeg)){flex:0 1 auto;min-width:0}'
+        + 'html.nbh-compact .toolbar #tgtGroup .row{flex-wrap:nowrap}html.nbh-compact .toolbar #tgtGroup #tgtSel{max-width:min(300px,30vw)}'
+        + '@keyframes nbhFoldIn{from{opacity:.6}to{opacity:1}}html.nbh-fold,html.nbh-unfolding{overflow-anchor:none}}'
+        + '@media print{#nbhRailTab,#nbhRailHide{display:none!important}}';
+      var cssEl = null, railTab = null;
+      function cssIn(){ if (cssEl && cssEl.isConnected) return; cssEl = document.createElement('style'); cssEl.id = 'nbh-ui-111'; cssEl.setAttribute('data-nbh-screen', ''); cssEl.textContent = CSS111; (document.head || R).appendChild(cssEl); }
+      function mkHide(){ var hb = document.createElement('button'); hb.type = 'button'; hb.id = 'nbhRailHide'; hb.className = 'noprint'; hb.setAttribute('aria-label', 'Hide the list of sheets'); hb.title = 'Hide the list of sheets; the arrows in the toolbar still turn them';
+        hb.innerHTML = '&#8249;'; hb.addEventListener('click', function(ev){ ev.stopPropagation(); railOff(true); }); return hb; }
+      function railPref(){ try { return localStorage.getItem('nbh.railoff') === '1'; } catch (e) { return false; } }
+      function railOff(on, keep){ cssIn(); R.classList.toggle('nbh-railoff', !!on); if (!keep) try { localStorage.setItem('nbh.railoff', on ? '1' : ''); } catch (e) {}
+        if (on) { if (!railTab) { railTab = document.createElement('button'); railTab.type = 'button'; railTab.id = 'nbhRailTab'; railTab.className = 'noprint'; railTab.setAttribute('aria-label', 'Show the list of sheets'); railTab.title = 'Show the list of sheets';
+            railTab.innerHTML = '&#8250;'; railTab.addEventListener('click', function(ev){ ev.stopPropagation(); railOff(false); }); }
+          document.body.appendChild(railTab); }
+        else if (railTab && railTab.parentNode) railTab.parentNode.removeChild(railTab);
+        if (!keep) { redress(); refit(); } }
+      function go(d){ var t = tabs(), i = cur() + d; if (i < 0 || i >= t.length) return; t[i].click(); setTimeout(paint, 30); try { window.scrollTo(0, 0); } catch (e) {} }
   function paint(){ var t = tabs(), i = cur();
     if (arrows) { var p = arrows.querySelector('.nbh-prev'), n = arrows.querySelector('.nbh-next'), nx = t[i + 1];
       p.disabled = i <= 0; n.disabled = !nx; n.querySelector('small').textContent = nx ? label(nx) : ''; n.setAttribute('aria-label', 'Next sheet' + (nx ? ': ' + label(nx) : '')); }
@@ -1764,15 +1787,15 @@ try { if (window.matchMedia) (function(){
     if (!rail) lastIdx = -1; }
   var lastIdx = -1;
   function undo(){ if (!mode) return; var s = seg();
-    if (mode === 'rail') { if (s && home && home.isConnected) home.insertBefore(s, homeNext && homeNext.parentNode === home ? homeNext : null); if (rail) rail.parentNode.removeChild(rail); rail = null; R.classList.remove('nbh-rail'); }
+    if (mode === 'rail') { if (s && home && home.isConnected) home.insertBefore(s, homeNext && homeNext.parentNode === home ? homeNext : null); if (rail) rail.parentNode.removeChild(rail); rail = null; R.classList.remove('nbh-rail'); R.classList.remove('nbh-railoff'); if (railTab && railTab.parentNode) railTab.parentNode.removeChild(railTab); }
     if (mode === 'menu') { closePop(); if (menuBtn) menuBtn.parentNode.removeChild(menuBtn); menuBtn = null; R.classList.remove('nbh-menu'); var tb0 = s && s.closest('.toolbar'); if (tb0) tb0.classList.remove('nbh-t1', 'nbh-t2', 'nbh-t3', 'nbh-t4'); }
     if (arrows) arrows.parentNode.removeChild(arrows); arrows = null; mode = ''; redress(); refit(); }
   function apply(m){ if (m === mode) return; undo(); var s = seg(); if (!m || !s) return; var r = row(); if (!r) return;
     if (m === 'rail') { home = s.parentNode; homeNext = s.nextSibling;
       rail = document.createElement('nav'); rail.id = 'nbhRail'; rail.className = 'noprint'; rail.setAttribute('aria-label', 'Sheets of this form');
-      var t = title(), h = document.createElement('div'); h.className = 'nbh-railh'; if (t.code) { var c = document.createElement('span'); c.textContent = 'Form ' + t.code; h.appendChild(c); } var b = document.createElement('b'); b.textContent = t.name; h.appendChild(b); rail.appendChild(h);
+      var t = title(), h = document.createElement('div'); h.className = 'nbh-railh'; if (t.code) { var c = document.createElement('span'); c.textContent = 'Form ' + t.code; h.appendChild(c); } var b = document.createElement('b'); b.textContent = t.name; h.appendChild(b); h.appendChild(mkHide()); rail.appendChild(h);
       rail.appendChild(s); var n = document.createElement('div'); n.className = 'nbh-railn'; n.textContent = tabs().length + ' sheets. Tap one to open it.'; rail.appendChild(n);
-      document.body.appendChild(rail); R.classList.add('nbh-rail'); arrows = mkArrows(); r.insertBefore(arrows, r.firstChild); fit(); }
+      document.body.appendChild(rail); R.classList.add('nbh-rail'); arrows = mkArrows(); r.insertBefore(arrows, r.firstChild); fit(); railOff(railPref(), true); }
     if (m === 'menu') { menuBtn = document.createElement('button'); menuBtn.type = 'button'; menuBtn.className = 'nbh-sheets noprint'; menuBtn.setAttribute('aria-haspopup', 'dialog'); menuBtn.setAttribute('aria-expanded', 'false');
       menuBtn.innerHTML = 'Sheets ▾ <b></b> <small></small>'; menuBtn.addEventListener('click', function(ev){ ev.stopPropagation(); if (pop) closePop(); else openPop(); });
       r.insertBefore(menuBtn, s); arrows = mkArrows(); r.insertBefore(arrows, s); R.classList.add('nbh-menu'); }
@@ -1809,7 +1832,10 @@ try { if (window.matchMedia) (function(){
   try { var s0 = seg(); if (s0) new MutationObserver(function(){ paint(); }).observe(s0, { attributes: true, subtree: true, attributeFilter: ['aria-pressed', 'aria-selected', 'class'] }); } catch (e) {}
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(run, 50); }); else setTimeout(run, 50);
   window.addEventListener('load', function(){ setTimeout(run, 300); });
-  window.nbhSheets = { run: run, undo: undo, mode: function(){ return mode; }, open: openPop, close: closePop };
+      /* v24.11 the toolbar fills in after the first look (Dictate, The case, Save data, Fit): a strip that has wrapped by then goes to the Sheets menu */
+      try { var tb1 = seg() && seg().closest('.toolbar'), ro1 = 0; if (tb1 && window.ResizeObserver) new ResizeObserver(function(){ clearTimeout(ro1); ro1 = setTimeout(function(){ if (!mode && !printing && want()) run(); }, 160); }).observe(tb1); } catch (e) {}
+      cssIn();
+      window.nbhSheets = { run: run, undo: undo, mode: function(){ return mode; }, open: openPop, close: closePop, railOff: railOff };
 })(); } catch (e) {}
 
 </script>
