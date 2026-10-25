@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.10: Form SP-1's printed data sheet: a compact top, so a behavior's definitions and its grid share one page
+(the BCBA's 18-page print of 10/23: the fields and definitions filled page 1 and the grid went to page 2; "the photo is taking up too much space", "the date can be in a different format", "each target behavior and the grid should fit on one sheet even with the student picture")
+
+- **The six fields print one line each**, 12.5 px, an entry longer than its column ending in an ellipsis (several
+  observers wrapped to two lines; the long dates to three). The target behavior takes two columns, so it seldom needs
+  one. The dates print short (10/12/26 – 11/6/26) when they are the form's own long form; dates typed by hand print as
+  typed. The setting stays (it costs nothing on the second row). The photo is 0.62 in (was 0.9 in) beside the two rows.
+- **The example and the non-example print side by side**, each half the sheet, at 10.5 px on 14 px lines; the definition
+  runs across the sheet above them. With six lines of each (the BCBA's record) the block is about 250 px instead of 400.
+- **The rows then take what the page has left:** the estimates of the fixed parts that size the rows (spIdentH, now a
+  constant; spDefsH, the two columns) follow the new layout, so a behavior's first sheet holds its grid.
+- The screen is unchanged; the walkthrough's example (built from the same print copy) shows the compact top.
+- Checks: `qa/sp110-test.js` (the BCBA's record: long definitions, four observers, four weeks on two sheets, the photo;
+  the fields, the dates, the pair; every sheet within its page; a PDF of the set is three pages: sheet 1 with its grid,
+  the guide, sheet 2). `qa/sp1-rows-test.js` follows (one line a field; a sheet at the 44 px row cap may leave more room).
+
 ### v24.09: Form ABC-1's paper sheet printed from an iPad inside the workstation comes out at its own size, one page
 (the BCBA's prints of 10/23, still two pages after v24.07, both from the workstation on an iPad)
 

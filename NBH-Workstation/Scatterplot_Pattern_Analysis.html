@@ -1252,6 +1252,26 @@ html.nbh-compact .toolbar .sp-panel{display:none}
 .ident .sp-photo{grid-column:4;grid-row:1/3;float:none;margin:0 0 0 6px;align-self:center;width:0.9in;height:0.9in}
 .ident .f.sp-nosheet{display:none}
 </style>
+<style id="sp110-css">
+/* v24.10 the printed sheet's top, compact: one line a field, short dates, a small photo, example and non-example side by side */
+.sp-printed .ident.sp-ident2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr);gap:2px 16px;margin-bottom:8px;align-items:start}
+.sp-printed .ident.sp-ident2.has-photo{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr) auto}
+.sp-printed .ident.sp-ident2 .f:nth-child(5){grid-column:2/4}
+.sp-printed .ident.sp-ident2 .sp-photo{grid-column:4;grid-row:1/3;width:0.62in;height:0.62in;margin:0 0 0 4px;align-self:center}
+.sp-printed .ident.sp-ident2 .f{min-width:0;align-items:baseline}
+.sp-printed .ident.sp-ident2 .f label{font-size:10.5px}
+.sp-printed .ident.sp-ident2 .sp-ftext{font-size:12.5px;line-height:16px;min-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the observers may be several: up to three lines, then an ellipsis */
+.sp-printed .ident.sp-ident2 .f:nth-child(2) .sp-ftext{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow-wrap:anywhere}
+.sp-printed .defs > .drow > .dlab{flex:0 0 128px}
+.sp-printed .defs .sp-defpair{display:flex;border-bottom:1px solid var(--rule-2)}
+.sp-printed .defs .sp-defpair:last-child{border-bottom:0}
+.sp-printed .defs .sp-defpair .drow{flex:1 1 0;min-width:0;border-bottom:0}
+.sp-printed .defs .sp-defpair .drow + .drow{border-left:1px solid var(--rule-2)}
+.sp-printed .defs .sp-defpair .dlab{flex:0 0 74px}
+.sp-printed .defs .sp-dtext{font-size:10.5px;line-height:14px;padding:2px 6px}
+.sp-printed .defs .dlab{font-size:9.5px;padding:2px 6px}
+</style>
 </head>
 <body>
 
@@ -4925,16 +4945,23 @@ function spWidth(text, px, weight){
   const w = spMeasureBox.getBoundingClientRect().width;
   return w > 0 ? w : String(text || "").length * px * 0.55;
 }
+/* v24.10 the dates covered, short on paper (10/12/26 – 11/6/26) when they are the form's own long form; anything else as typed */
+function spShortWeek(t){
+  const m = /^\s*([A-Z][a-z]+ \d{1,2}, \d{4})\s*[\u2013-]\s*([A-Z][a-z]+ \d{1,2}, \d{4})\s*$/.exec(String(t || "")); if(!m) return t;
+  const sd = x => { const d = new Date(x); return isNaN(d) ? x : (d.getMonth()+1) + "/" + d.getDate() + "/" + String(d.getFullYear()).slice(2); };
+  return sd(m[1]) + " \u2013 " + sd(m[2]);
+}
 function spDefsH(){
-  const meta = state.meta || {};
-  return ["definition","example","nonexample"].reduce((h, k) => h + spLines(meta[k], 11, 15, 585) * 15 + 6, 0) + 4 + 9;   // 11 px text on 15 px lines, 585 px wide
+  /* v24.10 the definition across the sheet, the example and the non-example side by side: 10.5 px text on 14 px lines */
+  const meta = state.meta || {}, L = (k, w) => spLines(meta[k], 10.5, 14, w);
+  return (L("definition", 585) + Math.max(L("example", 278), L("nonexample", 278))) * 14 + 2 * 4 + 2 + 4 + 9;
 }
 function spIdentH(){
-  const meta = state.meta || {};
-  const F = [["client","Client"],["observer","Observer"],["week","Dates covered"],["setting","Setting"],["behavior","Target behavior"],["sheet","Sheet no."]];
-  const ln = ([k, lab]) => spLines(meta[k], 14, 17, Math.max(40, 231 - Math.ceil(spWidth(lab, 11.5)) - 6 - 4));   // a third of the sheet, less the label, the gap and the padding
-  const row = a => Math.max(...a.map(ln)) - 1;
-  return 2 * 20 + 1 + 7 + (row(F.slice(0, 3)) + row(F.slice(3))) * 17;   // two rows of one line, the gap between, the margin under
+  /* v24.10 two rows of one line each (an entry longer than its column ends in an ellipsis; the observers may take three lines),
+     the photo 0.62 in beside them when it is on */
+  const photo = !!document.querySelector("#sheet .ident.has-photo"), meta = state.meta || {};
+  const ol = Math.min(3, spLines(meta.observer, 12.5, 16, photo ? 176 : 198));
+  return Math.max(40 + (ol - 1) * 16, photo ? 60 : 0) + 10;
 }
 /* the grid's title line (the student, the behavior, the days), 12 px semibold on 18 px lines across the sheet */
 function spCapH(kind){
@@ -5005,6 +5032,9 @@ function staticClone(node){
   /* v23.79 the six fields at the top as text: on paper a box cut off an entry longer than itself (several observers) */
   clone.querySelectorAll(".ident .f input").forEach(i => {
     const sp = document.createElement("span"); sp.className = "sp-ftext"; sp.textContent = i.getAttribute("value") || ""; i.replaceWith(sp); });
+  /* v24.10 the top of the sheet, compact: the fields one line each (sp110-css), the dates short, example and non-example side by side */
+  { const idn = clone.querySelector(".ident"); if(idn){ idn.classList.add("sp-ident2"); const wk = idn.querySelector(".sp-wkbox .sp-ftext"); if(wk) wk.textContent = spShortWeek(wk.textContent); }
+    const dr = clone.querySelectorAll(".defs > .drow"); if(dr.length === 3){ const pair = document.createElement("div"); pair.className = "sp-defpair"; dr[1].before(pair); pair.append(dr[1], dr[2]); } }
   /* v22.51 on paper the grid's mark buttons and count boxes are plain text, which every browser prints at the row's height */
   clone.querySelectorAll("table.scatter button.cell").forEach(b => {
     const sp = document.createElement("span"); sp.className = b.className;

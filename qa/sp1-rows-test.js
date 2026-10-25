@@ -1,7 +1,7 @@
 /* Form SP-1 (v23.79, the BCBA's printout): on paper the grid's rows take the height their page has left.
    A simulated record, two weeks to a sheet, 9:00 to 3:30 in half hours, printed on Letter as an iPad prints it (and once
    as a laptop does), with long definitions, short ones, two rates, codes, one sheet, three sheets and long entries:
-   1. every printed data sheet is one page: its height is within the page, and the room left under it is 30 px at most;
+   1. every printed data sheet is one page: its height is within the page, and the room left under it is 30 px at most (unless its rows are at their 44 px cap, v24.10);
    2. the rows are those the page leaves (a long definition and its examples: about 24 px on sheet 1, against about 16 before);
    3. a later sheet, which repeats the definitions and carries the legend and the citation, is counted with them;
    4. the six fields print whole as text that wraps (several observers, a long target behavior), three to a row, each
@@ -50,7 +50,7 @@ const CASES={long:{},short:{short:true},two:{levels:2},codes:{levels:2,codes:tru
   }
   const all=Object.entries(R).flatMap(([n,r])=>r.sheets.map(s=>Object.assign({case:n,page:r.page,left:r.page-s.h},s)));
   ok('1 every printed data sheet is within its page, and leaves 30 px at most under it ('+all.length+' sheets, '+Object.keys(R).length+' setups)',
-    all.length>=16&&all.every(s=>s.left>=0&&s.left<=30),all.filter(s=>s.left<0||s.left>30).map(s=>({c:s.case,k:s.kind,h:s.h,page:s.page,rowh:s.rowh})));
+    all.length>=16&&all.every(s=>s.left>=0&&(s.left<=30||s.rowh>=44)),all.filter(s=>s.left<0||(s.left>30&&s.rowh<44)).map(s=>({c:s.case,k:s.kind,h:s.h,page:s.page,rowh:s.rowh})));
   const lg=R.long.sheets;
   ok('2 a long definition and its examples: sheet 1\'s rows are what the page leaves (24 px or more on an iPad), short ones taller still, up to 44',
     lg[0].kind==='first'&&lg[0].rowh>=24&&R.short.sheets[0].rowh>lg[0].rowh&&all.every(s=>s.rowh<=44&&s.rowh>=12),{long:lg.map(s=>[s.kind,s.rowh]),short:R.short.sheets.map(s=>[s.kind,s.rowh])});
@@ -58,7 +58,7 @@ const CASES={long:{},short:{short:true},two:{levels:2},codes:{levels:2,codes:tru
     lg[1].kind==='last'&&R.long.page-lg[1].h>=0&&R.three.sheets.some(s=>s.kind==='cont')&&R.three.sheets.find(s=>s.kind==='cont').rowh>R.three.sheets.find(s=>s.kind==='last').rowh,R.three.sheets.map(s=>[s.kind,s.rowh,R.three.page-s.h]));
   /* v24.03 the Sheet no. box is gone from the paper (the band names the sheet): the five printed fields, in two rows */
   const nf=R.names.sheets[0].f.filter(x=>x.top>0||x.lines>0),obs=nf.find(x=>x.lab==='Observer'),beh=nf.find(x=>x.lab==='Target behavior'),tops=[...new Set(nf.map(x=>x.top))];
-  ok('4 the five printed fields print whole as text that wraps, three to a row, each label whole',R.names.sheets[0].inputs===0&&obs&&obs.text===OBS&&obs.lines>=2&&beh&&beh.text===BEH&&
+  ok('4 the five printed fields print whole as text, one line each but the observers (three, v24.10; an entry longer than that ends in an ellipsis), three to a row, each label whole',R.names.sheets[0].inputs===0&&obs&&obs.text===OBS&&obs.lines<=3&&beh&&beh.text===BEH&&
     tops.length===2&&nf.every(x=>x.labW>=x.labNeed-1)&&R.names.pdf.join(' ').includes('Jordan Ellis (simulated)'),{nf,tops});
   ok('5 the Date line keeps its 24 px whatever the rows\' height',all.every(s=>s.date>=23&&s.date<=26),all.map(s=>[s.case,s.kind,s.rowh,s.date]));
   const bad=Object.entries(R).flatMap(([n,r])=>{const pg=r.pdf.filter(t=>/Scatterplot Data Sheet/.test(t));return pg.length===r.sheets.length+(r.sheets.length?0:0)&&pg.every(t=>/Intervals marked/.test(t))?[]:[{n,pages:pg.length,sheets:r.sheets.length}];});
