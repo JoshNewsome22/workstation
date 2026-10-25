@@ -523,7 +523,7 @@ svg.chart{display:block;width:100%;height:auto;font-family:var(--sans)}
 svg text{fill:var(--ink)}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);padding:2px 14px 10px}
 .legend span{display:inline-flex;align-items:center;gap:5px}
-.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.legend span > i:first-child{width:10px;height:10px;border-radius:2px;display:inline-block;font-style:normal}
 .gate{
   margin:14px 16px;padding:12px 14px;border-left:3px solid var(--slate);
   background:var(--slate-tint);font-size:13px;color:var(--ink-soft);
@@ -1469,6 +1469,21 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
 /* v24.11 the note under the incident description runs the full width */
 .narr-guide,.narr-guide.nbh-wide.nbh-wide.nbh-wide{max-width:none!important}
 </style>
+<style id="abc114-css">
+/* v24.14 the Data file tab's tools; a wide analysis table's scroll cue; the TB-1 definition on the Record tab */
+.abc-dtools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 6px}
+#panel-data .hint{font-size:12px;color:var(--ink-soft);margin:6px 0 0}
+.abc-tbdef{display:block;font-weight:400;font-size:11.5px;line-height:1.3;color:var(--ink-soft);margin-top:1px}
+.opt.checked label .abc-tbdef{font-weight:400}
+@media screen{
+  .matrix-wrap{position:relative}
+  .matrix-wrap.can-scroll{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 48px),rgba(0,0,0,.12));mask-image:linear-gradient(90deg,#000 calc(100% - 48px),rgba(0,0,0,.12))}
+  .matrix-wrap.can-scroll.at-end{-webkit-mask-image:none;mask-image:none}
+  .matrix-wrap.can-scroll table.matrix th.rowh,.matrix-wrap.can-scroll table.matrix td:first-child{position:sticky;left:0;z-index:2;background:#fff;box-shadow:inset -1px 0 0 #e6eaf0}
+  .matrix-swipe{display:none;margin:-8px 16px 12px;font-size:11.5px;color:var(--ink-soft)}
+  .matrix-wrap.can-scroll + .matrix-swipe{display:block}
+}
+</style>
 </head>
 <body>
 <header class="nbh-mast">
@@ -1810,6 +1825,12 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
     <header class="nbh-band"><h2>Save, reopen, and export</h2><span class="hint">Nothing leaves this file unless you export it</span></header>
     <div class="body">
       <p class="note lead">The record is the file you save. Download the data file at the end of every observation session and keep it with the rest of the assessment record; opening this page fresh starts an empty file unless you load one back in. Autosave keeps a safety copy in this browser, on this device, for up to 14 days: on a shared iPad, delete it from the Autosave box before you hand the device on. Handle exports as protected student records.</p>
+      <div class="abc-dtools" id="abcDataTools">
+        <button type="button" class="btn" data-for="dl-json">Save data</button>
+        <button type="button" class="btn ghost" data-for="up-json">Open data</button>
+        <button type="button" class="btn ghost" data-for="dl-csv">Export incidents CSV</button>
+        <button type="button" class="btn ghost" data-for="dl-matrix">Export analysis CSV</button>
+      </div>
       <p class="note" id="data-status" aria-live="polite"></p>
     </div>
   </div>
@@ -1817,6 +1838,11 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
     <header class="nbh-band"><h2>Try it with simulated data</h2><span class="hint">For training and calibration only</span></header>
     <div class="body">
       <p class="note lead">Loads 46 fabricated incidents and 60 background samples built around a known escape-maintained pattern, so you can see what every graph does before you take the sheet into a classroom. These are not real observations and must never be presented as student data.</p>
+      <div class="abc-dtools" id="abcSimTools">
+        <button type="button" class="btn" data-for="load-demo">Load simulation</button>
+        <button type="button" class="btn ghost" data-for="clear-all">Clear all</button>
+      </div>
+      <p class="hint">Load simulation asks first and replaces whatever is entered; Clear all empties the page. Neither touches a saved file.</p>
     </div>
   </div>
 </section>
@@ -3169,7 +3195,10 @@ function hBar(rows, opt={}){
       const gw = Math.max(0, plot*(r.ghost/max));
       s += `<line x1="${(L+gw).toFixed(1)}" y1="${y-2}" x2="${(L+gw).toFixed(1)}" y2="${y+rowH+2}" stroke="#161d26" stroke-width="2" stroke-dasharray="3 2"/>`;
     }
-    s += `<text x="${(L+bw+7).toFixed(1)}" y="${y+rowH*0.72}" font-size="11" fill="#4b5765" font-weight="600">${r.note ?? fmt(r.value)}</text>`;
+    /* v24.14 a label that would sit on the dashed marker (the bar shorter than the marker) starts past it */
+    let lx = L+bw+7; const note = r.note ?? fmt(r.value);
+    if(r.ghost != null){ const mx = L+Math.max(0, plot*(r.ghost/max)); if(mx > L+bw-2 && mx < lx+String(note).length*6.4+4) lx = mx+6; }
+    s += `<text x="${lx.toFixed(1)}" y="${y+rowH*0.72}" font-size="11" fill="#4b5765" font-weight="600">${note}</text>`;
   });
   return s + "</svg>";
 }
@@ -6872,7 +6901,7 @@ OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)r
     g.innerHTML = '<div class="glabel"><span>Target behavior</span></div>' + BEHAVIORS.map(i => optRow(i, "b", null)).join("");
     g.querySelectorAll("input").forEach(i => { if(!(i.id in keep)) return; if(i.type === "checkbox"){ i.checked = keep[i.id]; i.closest(".opt").classList.toggle("checked", i.checked); } else i.value = keep[i.id]; });
     BEHAVIORS.filter(b => b.caseT).forEach(b => { const o = g.querySelector('[data-opt="b-' + b.id + '"]'); if(!o) return; if(b.def) o.title = b.def;
-      const l = o.querySelector("label"); if(l) l.insertAdjacentHTML("beforeend", ' <span class="abc-tb" title="A target behavior defined on Form TB-1">TB-1</span>'); });
+      const l = o.querySelector("label"); if(l) l.insertAdjacentHTML("beforeend", ' <span class="abc-tb" title="A target behavior defined on Form TB-1">TB-1</span>' + (b.def ? '<small class="abc-tbdef">' + esc(b.def) + '</small>' : "")); });
   }
   window.abcAddTargets = function(list){
     let added = 0;
@@ -9906,7 +9935,7 @@ function into(g, el){ if(el && el.parentNode !== g.lastChild) g.lastChild.append
 function build(){
   let panel = BAR.querySelector(".abc-panel");
   if(!panel){ panel = document.createElement("div"); panel.className = "abc-panel";
-    ["Printing", "Files", "Simulation and reset"].forEach(t => { const c = document.createElement("section"); c.className = "abc-col"; const h = document.createElement("h4"); h.textContent = t; c.appendChild(h); panel.appendChild(c); });
+    ["Printing and the paper sheets", "Files", "Simulation and reset"].forEach(t => { const c = document.createElement("section"); c.className = "abc-col"; const h = document.createElement("h4"); h.textContent = t; c.appendChild(h); panel.appendChild(c); });
     const ctl = BAR.querySelector(".tg-ctl"); BAR.insertBefore(panel, ctl || null); }
   const cols = panel.querySelectorAll(".abc-col");
   const sa = BAR.querySelector(".abc-files") || (byId("file-input") && byId("file-input").closest(".toolbar .tgroup"));
@@ -9915,11 +9944,11 @@ function build(){
   const pp = mk("paper", "Paper data sheets, for the folder"); into(pp, byId("abcBlankBtn")); into(pp, byId("abcSampleBtn")); into(pp, byId("abcBgBtn"));
   const ph = mk("photo", "Student’s photo on the paper sheet"); into(ph, byId("abcPhotoPick")); into(ph, byId("abcPhotoOff")); const pl = byId("abcPhotoOnLab"); if(pl) into(ph, pl); const pf = byId("abcPhotoFrom"); if(pf) into(ph, pf); const pn = byId("abcPhotoNote"); if(pn) into(ph, pn);
   const vd = mk("video", "How-to video link (prints as a QR code on the paper sheet)"); into(vd, byId("abcVideo"));
-  const rs = mk("reset", "Simulation and reset"); into(rs, byId("load-demo")); into(rs, byId("clear-all"));
+  const rs = mk("reset", "The worked example, or starting over"); into(rs, byId("load-demo")); into(rs, byId("clear-all"));
   if(sa){ const fr = sa.querySelector(".row"); ["dl-json","up-json","dl-csv","dl-matrix"].forEach(id => { const e = byId(id); if(e && e.parentNode !== fr) fr.appendChild(e); });
     Array.prototype.slice.call(BAR.querySelectorAll("button")).forEach(b => { const t = b.textContent.trim(); if((t === "Open packet" || t === "Save packet") && b.parentNode !== fr) fr.appendChild(b); });
     Array.prototype.slice.call(sa.querySelectorAll("label")).forEach(l => { if(l.querySelector("input:not([hidden]),select,button,textarea")) return; Array.prototype.slice.call(l.querySelectorAll("input[hidden]")).forEach(i => fr.appendChild(i)); l.remove(); }); }
-  [[0, [pr, pp]], [1, [ph, vd, sa]], [2, [rs]]].forEach(o => o[1].forEach(g => { if(g && g.parentNode !== cols[o[0]]) cols[o[0]].appendChild(g); }));
+  [[0, [pr, pp, ph, vd]], [1, [sa]], [2, [rs]]].forEach(o => o[1].forEach(g => { if(g && g.parentNode !== cols[o[0]]) cols[o[0]].appendChild(g); }));
   Array.prototype.slice.call(BAR.children).forEach(g => { if(g.classList.contains("tgroup") && !g.classList.contains("tg-keep") && !g.classList.contains("tg-ctl")) cols[2].appendChild(g); });
   const cg = BAR.querySelector(":scope > .nbh-case-grp"), ctl2 = BAR.querySelector(":scope > .tg-ctl"); if(cg && ctl2 && cg.nextElementSibling !== ctl2) BAR.insertBefore(cg, ctl2);
   /* the quick blank sheet, beside the quick Save data, left of More controls */
@@ -10408,6 +10437,26 @@ window.TKWALK={build,renderAt,play,pause,seek,toggle,
 })();
 </script>
 <script src="nbh-tk1-video.js" defer></script>
+<script id="abc114">
+/* v24.14 (the 10/25 review): the Data file tab's tools press the toolbar's own buttons; a wide analysis table fades at its
+   right edge while there is more to the right and says so, its row labels in place (the 13-column antecedent-to-consequence
+   table on an iPad showed six columns and nothing to say the rest were there). */
+(function(){
+  const P = document.getElementById("panel-analysis");
+  function cue(w){
+    const can = w.scrollWidth > w.clientWidth + 4; w.classList.toggle("can-scroll", can);
+    w.classList.toggle("at-end", w.scrollLeft + w.clientWidth >= w.scrollWidth - 3);
+    const n = w.nextElementSibling;
+    if(!(n && n.classList.contains("matrix-swipe"))){ const e = document.createElement("p"); e.className = "matrix-swipe"; e.textContent = "Scroll sideways for the other columns; the row labels stay in place."; w.after(e); }
+    if(!w.__cued){ w.__cued = 1; w.addEventListener("scroll", () => cue(w), { passive:true }); try{ new ResizeObserver(() => cue(w)).observe(w); }catch(e){} }
+  }
+  function all(){ if(P) P.querySelectorAll(".matrix-wrap").forEach(cue); }
+  if(P){ try{ new MutationObserver(all).observe(P, { childList:true, subtree:true }); }catch(e){} }
+  window.addEventListener("resize", all); all();
+  window.abcMatrixCue = all;
+  document.addEventListener("click", e => { const b = e.target.closest("#panel-data [data-for]"); if(!b) return; const t = document.getElementById(b.dataset.for); if(t) t.click(); });
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

@@ -9905,6 +9905,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.14: Form ABC-1 polish from the 10/25 review: the Data file tab's tools, the wide table's scroll cue, the legend, the bar labels, the TB-1 definitions on screen, More controls
+(the BCBA, 10/25: "look over abc form and see if any enhancements should be made" ... "Okay do it")
+
+- **The Data file tab holds the tools its cards describe.** Save data, Open data and the two CSV exports in the first card;
+  Load simulation and Clear all in the second. They press the toolbar's own buttons, which stay under More controls. The
+  empty states on Incidents and Analysis and the walkthrough send staff to "Load simulation on the Data file tab", and the
+  tab had nothing to press.
+- **A wide analysis table says that it scrolls.** The 13-column antecedent-to-consequence table on an iPad showed six
+  columns and nothing to say the rest were there. While there is more to the right the table fades at its right edge and a
+  line under it says "Scroll sideways for the other columns"; the row labels stay in place while it scrolls. The same
+  for any analysis table wider than the screen.
+- **A legend's italic word is a word again.** The legend's swatch rule styled every `<i>`, so the italic "without" in the
+  Motivating condition legend printed as a colour box over the text.
+- **A bar's value label no longer sits on the dashed base-rate marker.** When the bar is shorter than the marker (Precursors
+  4%, By reinforcer class 9%, Setting events 2%) the label starts past the marker.
+- **A target behavior defined on Form TB-1 shows its definition on the Record tab**, under its name, as the paper sheet
+  does. It was a tooltip, which an iPad cannot show.
+- **More controls**: the paper sheet's photo and video-link groups join Printing ("Printing and the paper sheets"), Files
+  holds the files and the packet, and the Simulation and reset column's group has its own label instead of repeating the
+  column's.
+- Checks: `qa/abc114-test.js`; `qa/abc104-test.js` follows the new columns.
+
 ### v24.13: Form EA-1's Plan sheet: the experimental analysis set up one question at a time
 (the BCBA, 10/25: "a form or a page on an existing form that walks you through setting up an experimental analysis ... one question at a time. Like what are you attempting to discover? What variable would you like to see if it has an effect, etc.")
 

@@ -13,7 +13,7 @@ const PNG='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAA
      packet:[...panel.querySelectorAll('button')].filter(x=>/packet/.test(x.textContent)).map(x=>x.closest('.tgroup').firstElementChild.textContent),quick:!!document.getElementById('abcBlankQuick'),caseTop:!!bar.querySelector(':scope > .nbh-case-grp'),
      widths:[getComputedStyle(document.querySelector('.nbh-mast .nbh-sub')).maxWidth,getComputedStyle(document.querySelector('#panel-record p.note')).maxWidth]};});
  ok('the toolbar is a settings panel: Printing (the record; the paper sheets), Files (photo, video link, the files and the packet), Simulation and reset; a quick blank-sheet button; the case in the top row',
-   panel.heads.join('|')==='Printing|Files|Simulation and reset'&&panel.print===0&&panel.blank===0&&panel.sample===0&&panel.bg===0&&panel.photo===1&&panel.video===1&&panel.save===1&&panel.csv===1&&panel.sim===2&&panel.clear===2&&panel.packet.every(x=>x==='Files')&&panel.quick,panel);
+   panel.heads.join('|')==='Printing and the paper sheets|Files|Simulation and reset'&&panel.print===0&&panel.blank===0&&panel.sample===0&&panel.bg===0&&panel.photo===0&&panel.video===0&&panel.save===1&&panel.csv===1&&panel.sim===2&&panel.clear===2&&panel.packet.every(x=>x==='Files')&&panel.quick,panel);
  ok('the masthead\'s text and the notes run the width of the page',panel.widths.every(w=>w==='none'),panel.widths);
  /* the paper sheets */
  await fr.evaluate(()=>{document.querySelector('#h-client').value='Test Student (simulated)';document.querySelector('#h-observer').value='R. Smith';document.querySelector('#h-target').value='Elopement';document.querySelector('#h-window').value='10';document.querySelector('#h-checks').value='fixed:10';});
