@@ -865,6 +865,10 @@ td input,td select{max-width:100%}
 /* v23.28 (review F183) the BCBA's assessments, listed apart from the staff steps */
 .plan-assess{margin:3px 0 4px 1.2em;padding:0}.plan-assess li{margin:1px 0}
 </style>
+<style id="td117-css">
+/* v24.17 a selector row whose component is on the Build sheet */
+.td-rec.td-onb .td-pk span{color:var(--nbh-teal,#2f6b6d);font-weight:600}
+</style>
 </head>
 
 <body class="view-setup">
@@ -2152,21 +2156,30 @@ function tdPick(key,on){const e=tdPicksEl();if(!e)return;const o=tdPicks();o[key
 /* the core: the model's first recommendation, escape extinction where the model lists it, a component-FA recommendation,
    protective procedures, and the consequence protocol */
 function tdCore(recs){const core=new Set();recs.forEach(([c],i)=>{if(i===0||c==='EXT'||c==='FCT_CFA'||c==='SAFE'||c==='R_PB')core.add(c);});return core;}
-function tdPicked(prefix,recs){const picks=tdPicks(),core=tdCore(recs);return recs.map(r=>r[0]).filter(c=>{const k=prefix+':'+c;return k in picks?!!picks[k]:core.has(c);});}
+function tdOnBuild(c){return $$('#compWrap .card').some(k=>k.dataset.code===c);}   /* v24.17 */
+function tdPickLabel(onB,on){return onB?'On the Build sheet':on?'Ticked to add':'Not in the plan';}
+function tdPicked(prefix,recs){const picks=tdPicks(),core=tdCore(recs);return recs.map(r=>r[0]).filter(c=>{const k=prefix+':'+c;return tdOnBuild(c)||(k in picks?!!picks[k]:core.has(c));});}
 function tdRecRows(recs,prefix,extra){const picks=tdPicks(),core=tdCore(recs);
-  return recs.map(([c,whys],i)=>{const key=prefix+':'+c,on=key in picks?!!picks[key]:core.has(c),L=LIB[c];
-    return `<div class="rec td-rec${on?' on':''}"><label class="td-pk noprint"><input type="checkbox" class="td-pick" data-key="${esc(key)}" aria-label="${esc((L?L.name:c)+': in the plan')}"${on?' checked':''}><span>${on?'In the plan':'Not in the plan'}</span></label><div class="rt"><div class="rh"><span class="tag ${i===0?'ok':'mid'}">${c}</span><b>${esc(L?L.name:c)}</b><span class="td-chip ${core.has(c)?'core':'opt'}">${core.has(c)?'core':'optional'}</span>${tdIsAssess(c)?'<span class="td-chip set">BCBA / teacher set-up</span>':''}</div>${whys.map(w=>`<p>${esc(w)}</p>`).join('')}${extra?extra(c):''}${L?`<p style="color:var(--ink-soft)">Source: ${esc(L.src)}</p>`:''}</div></div>`;}).join('');}
+  return recs.map(([c,whys],i)=>{const key=prefix+':'+c,onB=tdOnBuild(c),on=onB||(key in picks?!!picks[key]:core.has(c)),L=LIB[c];
+    return `<div class="rec td-rec${on?' on':''}${onB?' td-onb':''}" data-code="${esc(c)}"><label class="td-pk noprint"><input type="checkbox" class="td-pick" data-key="${esc(key)}" aria-label="${esc((L?L.name:c)+': in the plan')}"${on?' checked':''}><span>${tdPickLabel(onB,on)}</span></label><div class="rt"><div class="rh"><span class="tag ${i===0?'ok':'mid'}">${c}</span><b>${esc(L?L.name:c)}</b><span class="td-chip ${core.has(c)?'core':'opt'}">${core.has(c)?'core':'optional'}</span>${tdIsAssess(c)?'<span class="td-chip set">BCBA / teacher set-up</span>':''}</div>${whys.map(w=>`<p>${esc(w)}</p>`).join('')}${extra?extra(c):''}${L?`<p style="color:var(--ink-soft)">Source: ${esc(L.src)}</p>`:''}</div></div>`;}).join('');}
 function tdMeter(){const cs=comps().filter(c=>!tdIsAssess(c));const n=cs.length,steps=cs.reduce((a,c)=>a+c.steps.length,0);
   let extra=0;try{extra=finalExtras().reduce((a,x)=>a+x[1].length,0);}catch(e){}
   const pages=n?1+Math.ceil((steps+extra)/18):0;const m={};comps().forEach(c=>{m[c.code]=(m[c.code]||0)+1;});const dup=Object.keys(m).filter(k=>m[k]>1).map(k=>k+' ×'+m[k]);
   const ok=n<=7&&steps<=60;
   return {n,steps,pages,dup,ok,html:`<div class="td-meter"><span>This plan so far: <b>${n}</b> component${n===1?'':'s'} · <b>${steps}</b> staff step${steps===1?'':'s'}${n?` · about <b>${pages}</b> page${pages===1?'':'s'} for staff`:''}</span><span class="${ok?'ok':'warn'}">${ok?'A plan staff can run (up to 7 components, 60 steps)':'More than staff can run (up to 7 components, 60 steps): untick optional components, or remove cards'}</span><span class="dup">Duplicates: ${dup.length?esc(dup.join(', ')):'none'}</span></div>`};}
 function tdMeters(){const m=tdMeter();['#selMeter','#buildMeter'].forEach(x=>{const e=$(x);if(e)e.innerHTML=m.html;});tdSendLabel();}
-function tdSendLabel(){const b=$('#sendBuild');if(!b)return;const n=tdPicked('sel',window._recs||[]).length;b.textContent='Add the '+n+' ticked component'+(n===1?'':'s')+' to Build';}
+function tdSendLabel(){const b=$('#sendBuild');if(!b)return;const picked=tdPicked('sel',window._recs||[]);const there=picked.filter(tdOnBuild).length,n=picked.length-there;b.textContent='Add the '+n+' ticked component'+(n===1?'':'s')+' to Build'+(there?' \u00b7 '+there+' already there':'');}
 let tdMeterT=null;function tdMeterSoon(){clearTimeout(tdMeterT);tdMeterT=setTimeout(tdMeters,250);}
 document.addEventListener('input',tdMeterSoon);document.addEventListener('change',tdMeterSoon);
 document.addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('td-pick'))return;tdPick(t.dataset.key,t.checked);
-  const row=t.closest('.td-rec');if(row)row.classList.toggle('on',t.checked);const sp=t.nextElementSibling;if(sp)sp.textContent=t.checked?'In the plan':'Not in the plan';tdSendLabel();});
+  /* v24.17 unticking a component that is on the Build sheet removes its card; every row then says where its component stands */
+  const code=(t.dataset.key||'').split(':').pop();
+  if(!t.checked&&tdOnBuild(code)){$$('#compWrap .card').filter(k=>k.dataset.code===code).forEach(k=>k.remove());if(code==='EXT'&&typeof eeRender==='function')setTimeout(eeRender,0);}
+  tdSyncPicks();tdSendLabel();});
+function tdSyncPicks(){const picks=tdPicks();$$('.td-pick').forEach(t=>{const key=t.dataset.key||'',code=key.split(':').pop(),onB=tdOnBuild(code),row=t.closest('.td-rec');const core=!!(row&&row.querySelector('.td-chip.core'));const on=onB||(key in picks?!!picks[key]:core);
+  t.checked=on;if(row){row.classList.toggle('on',on);row.classList.toggle('td-onb',onB);}const sp=t.nextElementSibling;if(sp)sp.textContent=tdPickLabel(onB,on);});tdSendLabel();}
+try{new MutationObserver(()=>{clearTimeout(window.__tdSyncT);window.__tdSyncT=setTimeout(tdSyncPicks,60);}).observe(document.getElementById('compWrap'),{childList:true});}catch(e){}
+window.td117={meter:tdMeter,onBuild:tdOnBuild,sync:tdSyncPicks,val,setv,comps,add:addComp,models:()=>MODELS};   /* for the checks */
 /* the other sheets' suggestions, in one list with their own ticks */
 function tdOthers(){const box=$('#selOthers');if(!box)return;const Q=window._qrecs||{};const names={rf:'Reinforcers and schedules: reinforcer selection',pa:'Reinforcers and schedules: preference assessment',sch:'Reinforcers and schedules: schedule',pr:'Prompting and errors: prompting',ec:'Prompting and errors: error correction',sbt:'Skills and tolerance: skill-based treatment',skb:'Skills and tolerance: skills',ant:'Antecedents'};
   let h='',n=0;Object.keys(Q).forEach(pf=>{const recs=(Q[pf]||[]).filter(r=>LIB[r[0]]);if(!recs.length)return;n+=recs.length;h+=`<h3 class="sub">${esc(names[pf]||pf)}</h3>`+tdRecRows(recs,pf);});
@@ -2223,7 +2236,7 @@ registerQ('pa','paModel','paRec','Preference-assessment method',[
  ['Can the student visually scan an array of two or more items and make an approach response?','yes','can approach but cannot scan an array','limited motor control; cannot approach'],
  ['Is a position bias present (selects by location, e.g., always left)?','no','yes, training to overcome it failed','yes, not yet trained'],
  ['Is time limited?','ample time','limited'],
- ['Function of the problem behavior (from EA-1)','none or automatic','tangible','attention'],
+ ['Function of the problem behavior (filled from Setup; escape and automatic count as "none or automatic" here)','none or automatic','tangible','attention'],
  ['Are complex stimuli (activities, outings) to be assessed by picture or by name?','no','yes, student passes visual matching (pictures)','yes, student passes auditory matching (verbal)','yes, but matching skills not established']],
  a=>{const out=[];
   if(a[0]==='yes'){if(a[3]==='tangible')out.push(['PA_FO','Problem behavior maintained by tangibles: free-operant assessment avoids removing items (Kang et al., 2011; Roane et al., 1998).']);
@@ -2273,7 +2286,9 @@ registerQ('sch','schModel','schRec','Schedule selector',[
 function renderSchRef(){const rows=[['Fixed ratio (FR)','Reinforcer after a fixed number of responses','FR 5: every fifth correct answer earns a token','S_FR'],['Variable ratio (VR)','After a number of responses varying around a mean','VR 3: after 2, 4, 3, 5, 1 responses','S_VR'],['Random ratio (RR)','Each response reinforced with a fixed probability','RR 4 (p = .25): a spinner or a random-number app decides each response; Form SR-1 writes the procedure','S_RR'],['Fixed interval (FI)','First response after a fixed time','FI 2 min: first on-task check after 2 min earns praise','S_FI'],['Variable interval (VI)','First response after a time varying around a mean','VI 3 min','S_VI'],['DRL / DRH','Reinforcement for low (spaced) or high rates','DRL: break only if ≤ 4 requests per period','S_DRL'],['Multiple','A during signal A alternates with B during signal B','mult FR 1 EXT: mands reinforced under the red card, not under the white','S_MULT'],['Mixed','A and B alternate without correlated signals','mix DRL FI','S_MIX'],['Chained','Completing A during its signal produces signal B; completing B produces the reinforcer','chain FR 4 FR 1: finish 4 problems → break card → mand → break','S_CHAIN'],['Tandem','Same as chained without signals','tand VR DRH','S_TAND'],['Concurrent','A for one response; B for another, at the same time','conc FR 1 FR 3: mand on FR 1, task on FR 3','S_CONC'],['Conjoint','A and B operate independently for a single response','conjt VI FR: praise on VI and tokens on FR for on-task work','S_CONJ'],['Second order','Completing A is reinforced according to B','FR 5 (FR 3): every third correct earns a token; five tokens earn the backup','S_SO'],['Alternative','Reinforcer for completing either A or B','altern FR 10 FI 5 min','S_ALT'],['Conjunctive','Reinforcer for completing both A and B','conjunc FR 10 FI 5 min','S_CONJUNC'],['Interlocking','Reinforcer depends on a combined function of A and B','interl FR FT: responses required fall as time elapses','S_INTL'],['Progressive','A parameter changes systematically across reinforcers','PR: FR 1, 2, 4, 6, 8 … to breakpoint','S_PR'],['Lag','Reinforcer only if the response differs from the previous n','Lag 1 for varied play actions','S_LAG']];
  $('#schRef').innerHTML='<thead><tr><th style="width:16%">Schedule</th><th style="width:36%">Definition (paraphrased)</th><th>Applied example</th><th class="n" style="width:10%">Card</th></tr></thead><tbody>'+rows.map(r=>`<tr><td><b>${esc(r[0])}</b></td><td style="font-size:11.5px">${esc(r[1])}</td><td style="font-size:11.5px">${esc(r[2])}</td><td class="n"><button class="tool noprint" data-addsch="${r[3]}" style="margin:0;padding:2px 8px">+ Add</button></td></tr>`).join('')+'</tbody>';}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-addsch]');if(b){addComp(b.dataset.addsch);setView('build');}});
-function renderReinf(){renderQ('rf');renderQ('pa');renderQ('sch');renderSchRef();}
+const paFnMap=f=>f==='tangible'||f==='attention'?f:f?'none or automatic':'';   /* v24.17 the preference-assessment question's reading of the function */
+function renderReinf(){if(!val('pa.3')&&val('m.fn'))setv('pa.3',paFnMap(val('m.fn')));renderQ('rf');renderQ('pa');renderQ('sch');renderSchRef();}
+document.addEventListener('change',e=>{if(e.target&&e.target.name==='m.fn'&&!val('pa.3')&&val('m.fn')){setv('pa.3',paFnMap(val('m.fn')));if(QMODELS.pa)renderQ('pa');}});
 $('#sendReinf').addEventListener('click',()=>sendRecs(['rf','pa','sch'],'sch.chosen'));
 
 /* ---------- prompting selector ---------- */
@@ -3166,7 +3181,9 @@ setv('m.repdesc',({escape_fct:'press the break card (simulated)',sbt:'say "my wa
  setv('ant.ecs.prod','na');setv('ant.ecs.prodnote','Process-maintained on the process-versus-product analysis; placement not applicable (simulated)');setv('ant.ecs.untested','Not planned: supplemental edible reinforcement; FCT with schedule thinning; thinning of ECS access (named, not tested, in Fergus et al., 2026) (simulated)');
  for(let k=0;k<10;k++)setv(`ant.ecs.f[${k}].in`,'yes');setv('ant.ecs.f[8].n','Blocking withdrawn at the first PE-only session (simulated)');
  rows.forEach((r,i)=>{if(/^Tx/.test(r.p))setv(`mo[${i}].n`,(/L1/.test(r.p)?'blocks '+[1,0,0,2,1,0][i%6]+'; ':'blocks 0 (withdrawn); ')+'prompts '+[0,1,0,0,0,1][i%6]+'; emotional responses 0 (simulated)');});}
- renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();[...(sc.fn==='escape'?['A_PROX','A_HIGHP']:[]),'A_RAPPORT','A_SCHEDULE','A_SETEVENT',...(sc.fn==='attention'?['A_NCA']:[]),...(sc.fn==='automatic'?['A_EXERCISE']:[]),...(sc.sbt?['SBT_FCR','SBT_TR','SBT_CAB']:fcr?['DT_PROG']:[]),'MAND_CONT','VBMAPP',...(fcr?['S_MULT']:[]),'P_MTL','E_MODEL','R_PB'].forEach(c=>{if(!$$('#compWrap .card').some(k=>k.dataset.code===c))addComp(c);});
+ renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();/* v24.17 a plan staff can run (the form's own limit: 7 components, 60 staff steps): the scenario's own components, the consequence protocol and protective procedures, then one example of each sheet's kind, each kept only while the plan stays within the limit */
+ {const want=['R_PB',...(val('rb.2')==='yes'?['SAFE']:[]),...(sc.fn==='escape'?['A_HIGHP']:sc.fn==='attention'?['A_NCA']:sc.fn==='automatic'?['A_EXERCISE']:[]),'A_SETEVENT',...(sc.sbt?['SBT_FCR','SBT_TR','SBT_CAB']:fcr?['DT_PROG']:[]),'P_MTL',...(fcr?['S_MULT']:[]),'A_PROX','MAND_CONT','VBMAPP','E_MODEL','A_RAPPORT','A_SCHEDULE'];
+  want.forEach(c=>{if(!LIB[c]||$$('#compWrap .card').some(k=>k.dataset.code===c))return;addComp(c);if(!tdMeter().ok&&c!=='R_PB'){const k=$$('#compWrap .card').find(x=>x.dataset.code===c);if(k)k.remove();}});}
  /* v23.04 (review F178) with extinction not feasible, the consequence protocol starts without its generic extinction step, as one
     added by hand does */
  {const pb=$('#compWrap .card[data-code="R_PB"]');if(pb&&val('rb.3')==='no')rbCardSync(null,pb);}
@@ -3174,6 +3191,11 @@ setv('m.repdesc',({escape_fct:'press the break card (simulated)',sbt:'say "my wa
  if(key==='escape_fct'){/* the trial sheet: four sessions, the third high-p instruction slipping in session 2 */
   $('#nHp').value=4;renderHpRows();const T=[['1-2-3',[['y','y','y','n'],['y','y','y','n'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y']]],['2-3-1',[['y','y','n',''],['y','y','y','y'],['y','y','y','n'],['y','y','n',''],['y','y','y','y']]],['3-1-2',[['y','y','y','y'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y'],['y','y','y','y']]],['1-3-2',[['y','y','y','y'],['y','y','y','y'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y']]]];
   T.forEach((sess,s)=>{setv(`ant.hp.t[${s}].d`,days[Math.min(days.length-1,s+1)].toLocaleDateString());setv(`ant.hp.t[${s}].o`,sess[0]);sess[1].forEach((t,k)=>{['h1','h2','h3','lp'].forEach((f,i)=>setv(`ant.hp.t[${s}].k[${k}].${f}`,t[i]));});});}
+ /* v24.17 who runs each component, when and where; the review line; the model's last question; the components chosen are the cards on Build */
+ $$('#compWrap .card').forEach(card=>{const i=card.dataset.i;if(!val(`cp[${i}].who`))setv(`cp[${i}].who`,'Classroom teacher; paraprofessional for breaks (simulated)');if(!val(`cp[${i}].when`))setv(`cp[${i}].when`,'Every work period, from the first demand (simulated)');if(!val(`cp[${i}].where`))setv(`cp[${i}].where`,'Room 12; specials from week 3 (simulated)');});
+ {const rd=new Date();rd.setDate(rd.getDate()+30);setv('m.review','Data read weekly by the BCBA; plan reviewed after 10 school days at or above criterion, or by '+rd.toLocaleDateString()+' (simulated)');}
+ if(MODELS[sc.fn]){const last=MODELS[sc.fn].q.length-1;if(!val(`q.${sc.fn}.${last}`))setv(`q.${sc.fn}.${last}`,'no');}renderRec();
+ setv('sel.chosen',$$('#compWrap .card').map(k=>k.dataset.code).filter((c,i,a)=>a.indexOf(c)===i).join(', '));tdSyncPicks();
  renderHp();renderPlan();renderMon();$('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;setView('select');}
 $('#simBtn').addEventListener('click',loadSim);
 

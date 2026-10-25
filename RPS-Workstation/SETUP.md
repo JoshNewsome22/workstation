@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.17: Form TD-1 correctness from the 10/25 review: the selectors' ticks follow the Build sheet, the worked example is a plan staff can run, Reinforcers B.4 fills from Setup
+(the BCBA, 10/25: "look at the treatment development and see if any enhancements should be made" ... "Okay.")
+
+- **The selectors' ticks follow the Build sheet.** "In the plan" on the Antecedents, Reinforcers, Prompting, Skills and
+  Responding selectors (and the Select sheet's own list) was a stored tick, so a component could read "Not in the plan"
+  while its card sat on Build and in the Final plan. A row now reads **On the Build sheet** when its card is there,
+  **Ticked to add** when ticked and not yet sent, **Not in the plan** otherwise. Unticking a component that is on Build
+  removes its card; the rows follow the cards as they are added or removed on Build; the Select sheet's button says how
+  many ticked components are left to add and how many are already there.
+- **The worked example (Load simulation) is a plan staff can run.** It added every sheet's example component, 13 in the
+  escape scenario, and the Final plan opened with the form's own "Not ready to start" notice. Each scenario now loads its
+  own components, the consequence protocol, protective procedures where the behavior can injure, then one example of each
+  sheet's kind as far as the form's limit allows (7 components, 60 staff steps). Every card says who runs it, when and
+  where; Setup has its review line; the selection model's last question is answered; Components chosen lists the cards on
+  Build.
+- **Reinforcers B.4** (the preference-assessment method's "Function of the problem behavior") fills from Setup when it is
+  empty, escape and automatic counting as "none or automatic" (the question is whether items or attention maintain the
+  behavior), and its label says so. It said "from EA-1" and had to be chosen by hand.
+- Checks: `qa/td117-test.js`.
+
 ### v24.16: Form ABC-1 navigation from the 10/25 review: the Analysis's jump links with the reading first, the Record tab's header folded once the observation runs, Save incident in the observation bar
 (the BCBA, 10/25: "look over abc form and see if any enhancements should be made" ... "Okay do it")
 
