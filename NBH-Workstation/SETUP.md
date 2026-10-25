@@ -9905,6 +9905,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.13: Form EA-1's Plan sheet: the experimental analysis set up one question at a time
+(the BCBA, 10/25: "a form or a page on an existing form that walks you through setting up an experimental analysis ... one question at a time. Like what are you attempting to discover? What variable would you like to see if it has an effect, etc.")
+
+- **A Plan sheet, first among EA-1's sheets.** One question a card, with Back, Next and Skip: what the analysis is
+  for (why the behavior keeps happening; whether one specific variable makes it more or less likely; which of two or
+  more treatments works better), in the analyst's own words; what the assessment so far points to (Form IA-1's and
+  ABC-1's hypotheses shown under the choices when the case carried them); the variable, and what is expected of it;
+  the treatments; the risk; a reliable precursor; the setting; the rate; whether the consequence can be delivered;
+  the history; the session length and the rows planned; the stopping rules (a suggestion for the risk level fills an
+  empty box).
+- **Every answer goes into the form's own fields as it is given** (the Variant sheet's questions, Measurement, Safety,
+  a new "The question" line under Setup), so the Variant sheet's ranking of the studies' decision rules is the
+  recommendation. The last card shows the recommended variant and why, the design, the conditions it will load and the
+  sessions, with any other indicated variant to choose instead; **Set it up** chooses the variant, loads its condition
+  templates (replacing the cards), sets the design and the measure, and opens Conditions. For one variable the
+  antecedent-only (structural) analysis is set up with the test and control conditions named after the variable and
+  the comparison noted under Conditions to compare; for a treatment comparison the treatments go to the Treatment
+  design sheet.
+- The answers are saved with the file (pl.*) and the sheet reopens at the question it was on.
+- Checks: `qa/ea113-test.js` (the two paths through the questions; the fields filled as answered; the standard analysis
+  recommended and loaded for an escape case in a separate room; the variable's conditions named).
+
 ### v24.12: Form TD-1's protocol steps refer to this student: the pronouns on Form DM-1, or the first name
 (the BCBA, 10/25: "the pronouns in the steps used in the treatment plan for the client should be based on the pronouns listed in the student form ... or it can say the client's name")
 

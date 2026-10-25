@@ -543,7 +543,7 @@ table.grid.inner td{height:24px}
 
 /* ---- Form RA-1 additions ---- */
 body[class^="view-"] .sheet{display:none}
-body.view-guide #guide,body.view-setup #setup,body.view-variant #variant,body.view-conditions #conditions,body.view-sessions #sessions,body.view-analysis #analysis,body.view-design #design,body.view-refs #refs{display:block}
+body.view-guide #guide,body.view-setup #setup,body.view-variant #variant,body.view-conditions #conditions,body.view-sessions #sessions,body.view-analysis #analysis,body.view-design #design,body.view-refs #refs,body.view-plan #plan{display:block}
 .chkrow{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;margin:4px 0}
 .chkrow label{display:flex;gap:6px;align-items:center}
 table.grid td.c input.dt{width:74px;text-align:center;border:0;background:transparent;font:inherit;font-size:11px;padding:2px 0}
@@ -1210,6 +1210,7 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
     <span>View</span>
     <div class="row">
       <div class="seg" id="viewSeg">
+        <button data-view="plan" aria-pressed="false">Plan</button><!-- v24.13 -->
         <button data-view="setup" aria-pressed="true">Setup &amp; safety</button>
         <button data-view="variant" aria-pressed="false">Select variant</button>
         <button data-view="conditions" aria-pressed="false">Conditions</button>
@@ -1308,6 +1309,13 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
 </div>
 
 <!-- ================================================================ SETUP -->
+<!-- ===================== PLAN (v24.13): the analysis set up one question at a time ===================== -->
+<section class="sheet" id="plan">
+  <div class="bar nbh-band">Plan the Analysis: One Question at a Time</div>
+  <p class="method">Answer each question; the answers go into Setup &amp; safety and Select variant as you go, and the last card shows the variant this form recommends, the conditions it loads and the design. Nothing is replaced until you choose Set it up.</p>
+  <div class="pl-wrap" id="plWrap"></div>
+  <div class="pl-store" hidden><input name="pl.goal"><input name="pl.var"><input name="pl.expect"><input name="pl.tx"><input name="pl.step"><input name="pl.done"></div>
+</section>
 <div class="sheet" id="setup">
   <div class="nbh-print-head">
     <img class="nbh-print-logo" data-nbh-logo="1" alt="Royal Palm School">
@@ -1323,6 +1331,7 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
     <div class="f"><label for="mDate">Start date</label><input id="mDate" name="m.date"></div>
   </div>
   <div class="defs">
+    <div class="drow ea-qrow" data-empty="1"><div class="dlab">The question (Plan sheet)</div><div class="dval"><textarea name="m.question" placeholder="In your own words: what this analysis is to find out" class="nbh-line" rows="1"></textarea></div></div><!-- v24.13 -->
     <div class="drow"><div class="dlab">Target behavior (TB-1 label)</div><div class="dval"><textarea name="m.beh" placeholder="One operationally defined target; do not aggregate topographies (Beavers & Iwata, 2011)" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Operational definition</div><div class="dval"><textarea name="m.def"></textarea></div></div>
     <div class="drow"><div class="dlab">Precursor (if analyzed)</div><div class="dval"><textarea name="m.prec" placeholder="TB-1 precursor label and definition; from ABC-1 conditional probabilities" class="nbh-line" rows="1"></textarea></div></div>
@@ -2532,7 +2541,7 @@ function fnOfName(s){return AUTO_RX.test(s)?'automatic':/demand|escape|task/i.te
 function fnFromNames(names,undiff){const k=[...new Set(names.map(fnOfName).filter(Boolean))];return k.length>1?'multiple':k.length?k[0]:undiff?'unclear':'';}
 window.eaFnFromNames=fnFromNames;
 /* v22.49 the helpers the other script blocks use (this script is wrapped in a function) */
-window.eaAPI={setv,val,$,renderTxRows,renderTx,sessData,condNames,lineGraph,critAll,yLabelFor,trialStats,renderTrials,renderAnalysis,renderGraph,renderSess,loadTpl,setView};
+window.eaAPI={setv,val,$,renderTxRows,renderTx,sessData,condNames,lineGraph,critAll,yLabelFor,trialStats,renderTrials,renderAnalysis,renderGraph,renderSess,loadTpl,setView,TPL,REC,renderVariant,refreshCondNames};   /* v24.13 the Plan sheet reads the templates and the ranking */
 document.addEventListener('change',e=>{if(e.target&&e.target.name==='d.fnkey')try{lodCompute();}catch(x){}});
 /* ---------- treatment design ---------- */
 const DESIGNS={
@@ -5905,6 +5914,114 @@ window.eaPaintConsent=function(){const g=window.__eaConsentGap(),e=s=>String(s).
     return r;};
 })();
 </script>
+<script id="ea113">
+/* v24.13 the Plan sheet: the analysis set up one question at a time. Each answer is written into the form's own fields
+   (v.risk … v.hist, m.sessmin, #nSess, s.term, s.stop, m.question, m.vicond), so the Variant sheet's ranking (renderVariant)
+   is the recommendation; Set it up chooses the variant, loads its condition templates (loadTpl) and opens Conditions. */
+(function(){
+'use strict';
+const A=window.eaAPI||{};
+const $1=s=>document.querySelector(s),g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||''):'';},put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){e.value=v==null?'':v;try{e.dispatchEvent(new Event('change',{bubbles:true}));}catch(x){}}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const R=(name,opts)=>({kind:'radio',name,opts});
+const Q=[
+ {id:'goal',q:'What are you trying to find out?',help:'The answer decides the kind of analysis.',a:R('pl.goal',[['fn','Why the behavior keeps happening','Which consequence maintains it: attention, escape, something tangible, or the behavior itself (its function).'],['var','Whether one specific thing makes it more or less likely','A demand, a task, a person, a place, noise, an item: the analysis compares that variable present against absent.'],['tx','Which of two or more treatments works better','The treatments alternate and their effects are compared.']]),
+  extra:{kind:'text',name:'m.question',label:'In your own words',ph:'e.g., Does the screaming happen to get out of math work, or to get attention?'}},
+ {id:'hyp',when:a=>a.goal==='fn',q:'What does the assessment so far point to?',help:'Form IA-1’s convergence and Form ABC-1’s conditional probabilities, when they are in the case, are shown under the choices.',a:R('v.hyp',[['none','Unclear or conflicting'],['social','Attention or something tangible: strong consensus'],['escape','Escape from demands: strong consensus'],['auto','Automatic reinforcement or stereotypy suspected'],['rrb','Arranging or ordering (a higher-level RRB), automatic suspected'],['idio','Idiosyncratic or combined contingencies described in the interviews']]),carried:'m.hyp'},
+ {id:'var',when:a=>a.goal==='var',q:'Which variable?',help:'Name it as staff would see it in the room. The analysis will compare it present against absent, with everything else the same.',a:{kind:'text',name:'pl.var',label:'The variable',ph:'e.g., written math worksheets; a particular peer at the table; the hallway noise at dismissal'}},
+ {id:'expect',when:a=>a.goal==='var',q:'What do you expect?',a:R('pl.expect',[['more','The behavior is more likely when it is present'],['less','The behavior is less likely when it is present'],['unsure','Not sure']])},
+ {id:'tx',when:a=>a.goal==='tx',q:'Which treatments?',help:'Two or three, each named as the team will run it.',a:{kind:'text',name:'pl.tx',label:'The treatments, one a line',ph:'A: Noncontingent attention every 2 min\nB: Differential reinforcement of asking for a break',multi:true}},
+ {id:'risk',q:'How risky is the behavior?',help:'Form TB-1’s urgency level.',a:R('v.risk',[['none','No injury or damage likely','TB-1 level 1–2'],['mod','Property damage or minor injury possible','level 3'],['high','Tissue damage or serious injury likely','level 4']])},
+ {id:'prec',q:'Is there a reliable precursor?',help:'A milder behavior that reliably comes before the severe form (Form ABC-1). With one, the analysis can stop at the precursor.',a:R('v.prec',[['yes','Yes, ABC-1 shows one'],['no','No precursor identified']])},
+ {id:'setting',q:'Where and how can sessions be run?',a:R('v.setting',[['room','A separate room, a trained therapist and an observer'],['class','The classroom only: the teacher or a para must run it and the student cannot leave'],['brief','One visit of about 90 minutes']])},
+ {id:'rate',q:'How often does the behavior occur?',a:R('v.rate',[['high','Many times an hour'],['mod','Daily, but not in every session'],['low','Low rate or episodic (less than daily)']])},
+ {id:'conseq',when:a=>a.goal!=='tx',q:'Can the hypothesized consequence be delivered safely?',help:'In a test condition the consequence follows the behavior on purpose. If the team cannot allow that, the analysis changes antecedents only.',a:R('v.conseq',[['ok','Yes, it can be delivered safely'],['no','No: unsafe, or unacceptable to the team']])},
+ {id:'hist',q:'Has this behavior been analyzed before?',a:R('v.hist',[['first','No, this is the first analysis'],['undiff','Yes, and the result was undifferentiated']])},
+ {id:'sessions',q:'How long is a session, and how many?',help:'Ten minutes is the usual session (Wallace & Iwata, 1999); the rows are the sessions planned for the graph.',a:{kind:'nums',items:[['m.sessmin','Session length (min)','10'],['#nSess','Session rows planned','24']]}},
+ {id:'stop',q:'When does a session end early, and when does the whole analysis stop?',help:'Write the rules before the first session; a suggestion for this risk level is filled in when the box is empty.',a:{kind:'texts',items:[['s.term','Session termination criteria'],['s.stop','Analysis termination criteria']]}},
+ {id:'done',q:'The plan',kind:'summary'}];
+const TERM={high:'Any tissue damage; three responses of the severe form in a session; the student asks or signs to stop; the therapist or observer calls a stop.',mod:'Three responses that could cause injury or damage in a session; the student asks or signs to stop; the therapist or observer calls a stop.',none:'The student asks or signs to stop; the therapist or observer calls a stop; any response that could cause injury.'};
+const STOP='Structured visual-inspection criteria met across two consecutive series; or 12 sessions a condition without differentiation (then an extended alone or pairwise follow-up); or a safety stop.';
+let step=0;
+const answers=()=>({goal:g('pl.goal'),var:g('pl.var'),expect:g('pl.expect'),tx:g('pl.tx'),hyp:g('v.hyp'),risk:g('v.risk'),prec:g('v.prec'),setting:g('v.setting'),rate:g('v.rate'),conseq:g('v.conseq'),hist:g('v.hist')});
+const live=()=>{const a=answers();return Q.filter(q=>!q.when||q.when(a));};
+function topRec(){try{if(typeof A.renderVariant==='function')A.renderVariant();const b=document.querySelector('#varRec .rec b');if(!b)return '';const t=b.textContent.trim();return Object.keys(A.REC||{}).find(k=>A.REC[k]&&A.REC[k].t===t)||'';}catch(e){return '';}}
+function ranked(){const out=[];document.querySelectorAll('#varRec .rec').forEach(r=>{const t=(r.querySelector('b')||{}).textContent||'';const k=Object.keys(A.REC||{}).find(k=>A.REC[k]&&A.REC[k].t===t.trim());if(k)out.push({k,t:t.trim(),first:/First choice/.test(r.textContent),why:[...r.querySelectorAll('p')].map(p=>p.textContent)});});return out;}
+function recommend(){const a=answers();if(a.goal==='var')return {k:'antecedent',why:['One variable present against absent: an antecedent-only (structural) analysis, consequences held constant (Anderson & Long, 2002).']};
+  if(a.goal==='tx')return {k:'',why:['A treatment comparison: the Treatment design sheet, with the treatments alternating.']};
+  const rs=ranked();if(rs.length)return {k:rs[0].k,why:rs[0].why,all:rs};return {k:'standard',why:['No strong prior: the standard multielement analysis tests the common contingencies.']};}
+function card(){const w=$1('#plWrap');if(!w)return;const L=live();if(step>=L.length)step=L.length-1;if(step<0)step=0;const q=L[step],a=answers();put('pl.step',String(step));
+  let h='<div class="pl-card"><div class="pl-prog">Question '+(step+1)+' of '+L.length+'</div><h3 class="pl-q">'+esc(q.q)+'</h3>'+(q.help?'<p class="pl-help">'+esc(q.help)+'</p>':'');
+  if(q.kind==='summary'){const r=recommend();const t=r.k&&A.TPL&&A.TPL[r.k];const conds=t?(t.conds||A.TPL.standard.conds).map(c=>c.name):[];
+    const lines=[];if(g('m.question'))lines.push(['The question',g('m.question')]);
+    if(a.goal==='var'&&a.var)lines.push(['The variable',a.var+(a.expect==='more'?' (expected to make the behavior more likely)':a.expect==='less'?' (expected to make it less likely)':'')]);
+    if(a.goal==='tx'&&a.tx)lines.push(['The treatments',a.tx]);
+    lines.push(['Recommended variant',r.k&&A.REC&&A.REC[r.k]?A.REC[r.k].t:'Treatment comparison (Treatment design sheet)']);if(t)lines.push(['Design',t.design]);if(conds.length)lines.push(['Conditions loaded',conds.join(' · ')]);
+    lines.push(['Sessions',(g('m.sessmin')||'10')+' min, '+($1('#nSess')?$1('#nSess').value:'24')+' rows']);
+    h+='<div class="pl-sum">'+lines.map(([k,v])=>'<div class="pl-row"><b>'+esc(k)+'</b><span>'+esc(v)+'</span></div>').join('')+'</div>';
+    if(r.why&&r.why.length)h+='<div class="pl-why">'+r.why.slice(0,3).map(x=>'<p>'+esc(x)+'</p>').join('')+'</div>';
+    if(r.all&&r.all.length>1)h+='<label class="pl-alt">Or choose another indicated variant <select id="plAlt"><option value="">'+esc(A.REC[r.k].t)+' (recommended)</option>'+r.all.slice(1).map(x=>'<option value="'+esc(x.k)+'">'+esc(x.t)+'</option>').join('')+'</select></label>';
+    h+='<div class="pl-btns"><button type="button" class="tool pl-back">Back</button><button type="button" class="tool primary pl-set">Set it up</button><span class="pl-note">Loads the condition templates on the Conditions sheet (replacing any there), sets the design and the measure, and keeps every answer with the file.</span></div>';}
+  else{const A=q.a;
+    if(q.carried&&g(q.carried))h+='<div class="pl-carried"><b>Carried in from the assessment</b><div>'+esc(g(q.carried))+'</div></div>';
+    if(A.kind==='radio'){const cur=g(A.name);h+='<div class="pl-opts" role="radiogroup">'+A.opts.map(o=>'<button type="button" class="pl-opt'+(cur===o[0]?' on':'')+'" data-name="'+esc(A.name)+'" data-v="'+esc(o[0])+'" aria-pressed="'+(cur===o[0])+'"><b>'+esc(o[1])+'</b>'+(o[2]?'<span>'+esc(o[2])+'</span>':'')+'</button>').join('')+'</div>';}
+    if(A.kind==='text'){h+='<label class="pl-f"><span>'+esc(A.label)+'</span>'+(A.multi?'<textarea class="pl-in" data-name="'+esc(A.name)+'" rows="3" placeholder="'+esc(A.ph||'')+'">'+esc(g(A.name))+'</textarea>':'<input class="pl-in" data-name="'+esc(A.name)+'" value="'+esc(g(A.name))+'" placeholder="'+esc(A.ph||'')+'">')+'</label>';}
+    if(q.extra){const X=q.extra;h+='<label class="pl-f"><span>'+esc(X.label)+'</span><textarea class="pl-in" data-name="'+esc(X.name)+'" rows="2" placeholder="'+esc(X.ph||'')+'">'+esc(g(X.name))+'</textarea></label>';}
+    if(A.kind==='nums'){h+='<div class="pl-nums">'+A.items.map(([n,l,d])=>{const v=n[0]==='#'?($1(n)?$1(n).value:d):(g(n)||'');return '<label class="pl-f"><span>'+esc(l)+'</span><input class="pl-in" type="number" min="1" data-name="'+esc(n)+'" value="'+esc(v||d)+'"></label>';}).join('')+'</div>';}
+    if(A.kind==='texts'){if(!g('s.term')&&TERM[a.risk])put('s.term',TERM[a.risk]);if(!g('s.stop'))put('s.stop',STOP);
+      h+=A.items.map(([n,l])=>'<label class="pl-f"><span>'+esc(l)+'</span><textarea class="pl-in" data-name="'+esc(n)+'" rows="3">'+esc(g(n))+'</textarea></label>').join('');}
+    h+='<div class="pl-btns">'+(step>0?'<button type="button" class="tool pl-back">Back</button>':'')+'<button type="button" class="tool primary pl-next">'+(step===L.length-2?'See the plan':'Next')+'</button>'+(A.kind==='radio'?'<button type="button" class="tool pl-skip">Skip</button>':'')+'</div>';}
+  h+='</div>';w.innerHTML=h;}
+function take(){const w=$1('#plWrap');w.querySelectorAll('.pl-in').forEach(i=>{const n=i.dataset.name;if(n[0]==='#'){const e=$1(n);if(e){e.value=i.value;try{e.dispatchEvent(new Event('change',{bubbles:true}));}catch(x){}}}else put(n,i.value);});}
+function setup(){take();const a=answers(),r=recommend();const alt=$1('#plAlt');const k=(alt&&alt.value)||r.k;
+  if(a.goal==='var'&&a.var){put('m.vicond',(g('m.vicond')?g('m.vicond')+'\n':'')+'Plan: '+a.var+' present against absent, everything else the same'+(a.expect==='more'?'; expected more likely when present':a.expect==='less'?'; expected less likely when present':'')+'.');}
+  if(a.goal==='tx'){if(a.tx)put('t.iv',a.tx);const d=$1('#dsgn');if(d){const o=[...d.options].find(o=>/alternating/i.test(o.textContent));if(o)d.value=o.value||o.textContent;}put('pl.done','1');try{A.setView('design');}catch(e){}return;}
+  if(k){put('v.chosen',k);try{const p=A.loadTpl(true);if(p&&p.then)p.then(after);else after();}catch(e){after();}}else after();
+  function after(){if(a.goal==='var'&&a.var){put('c[0].name',a.var+' present (test)');put('c[1].name',a.var+' absent (control)');try{A.refreshCondNames&&A.refreshCondNames();A.renderSess&&A.renderSess();}catch(e){}}
+    if(!g('v.rationale'))put('v.rationale','Chosen on the Plan sheet'+(a.goal==='var'?': one variable, present against absent':'')+'.');put('pl.done','1');try{A.setView('conditions');}catch(e){}}}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#plWrap button');if(!t)return;
+  if(t.classList.contains('pl-opt')){put(t.dataset.name,t.dataset.v);t.parentNode.querySelectorAll('.pl-opt').forEach(b=>{b.classList.toggle('on',b===t);b.setAttribute('aria-pressed',String(b===t));});return;}
+  if(t.classList.contains('pl-next')||t.classList.contains('pl-skip')){take();step++;card();window.scrollTo(0,0);return;}
+  if(t.classList.contains('pl-back')){take();step--;card();return;}
+  if(t.classList.contains('pl-set')){setup();return;}});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#viewSeg button[data-view="plan"]');if(b)setTimeout(()=>{step=+g('pl.step')||0;card();},0);});
+window.eaPlan={card:()=>card(),step:()=>step,go:n=>{step=n;card();},recommend,setup};
+/* the question's row on the Setup sheet prints only when it has words */
+(function(){const row=document.querySelector('.ea-qrow'),ta=row&&row.querySelector('textarea');if(!row||!ta)return;const upd=()=>row.setAttribute('data-empty',ta.value.trim()?'0':'1');ta.addEventListener('input',upd);ta.addEventListener('change',upd);window.addEventListener('beforeprint',upd);document.addEventListener('nbh:restored',upd);setTimeout(upd,500);upd();})();
+if(document.body.classList.contains('view-plan'))card();
+})();
+</script>
+<style id="ea113-css">
+#plan{display:none}
+.pl-card{max-width:860px;margin:0 auto;padding:4px 0 20px}
+.pl-prog{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--nbh-muted,#54676f);margin:0 0 6px}
+.pl-q{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:22px;color:var(--nbh-navy,#182e43);margin:0 0 6px}
+.pl-help{color:var(--nbh-muted,#54676f);margin:0 0 14px;font-size:13.5px}
+.pl-carried{border-left:3px solid var(--nbh-teal,#76a2a3);background:var(--nbh-mist,#eaf2f0);padding:8px 12px;margin:0 0 14px;font-size:13px;white-space:pre-wrap}
+.pl-carried b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--nbh-navy,#182e43);margin:0 0 3px}
+.pl-opts{display:grid;gap:8px;margin:0 0 14px}
+.pl-opt{display:block;width:100%;text-align:left;padding:12px 16px;border:1px solid var(--nbh-rule2,#93aead);border-radius:10px;background:#fff;color:var(--nbh-ink,#1a2933);cursor:pointer;font:inherit;min-height:46px}
+.pl-opt b{display:block;font-weight:600;font-size:15px}
+.pl-opt span{display:block;font-size:13px;color:var(--nbh-muted,#54676f);margin-top:2px}
+.pl-opt:hover{background:var(--nbh-mist,#eaf2f0)}
+.pl-opt.on{border-color:var(--nbh-navy,#182e43);box-shadow:inset 0 0 0 2px var(--nbh-navy,#182e43);background:#f4f8f8}
+.pl-f{display:block;margin:0 0 12px}
+.pl-f span{display:block;font-size:12.5px;color:var(--nbh-muted,#54676f);margin:0 0 4px}
+.pl-f .pl-in{width:100%;box-sizing:border-box;font:inherit;padding:8px 10px;border:1px solid var(--nbh-field,#b7c8c5);border-radius:6px;min-height:40px}
+.pl-nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pl-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.pl-btns .tool{min-height:40px}
+.pl-note{font-size:12.5px;color:var(--nbh-muted,#54676f);flex:1 1 260px}
+.pl-sum{border:1px solid var(--nbh-rule,#cfdad8);border-radius:8px;overflow:hidden;margin:0 0 12px}
+.pl-row{display:grid;grid-template-columns:180px 1fr;gap:12px;padding:8px 12px;border-bottom:1px solid var(--nbh-rule,#cfdad8);font-size:13.5px}
+.pl-row:last-child{border-bottom:0}
+.pl-row b{color:var(--nbh-navy,#182e43);font-weight:600}
+.pl-why p{margin:0 0 6px;font-size:13px;color:var(--nbh-ink,#1a2933)}
+.pl-alt{display:block;margin:8px 0 12px;font-size:13px}
+.pl-alt select{font:inherit;margin-left:8px;min-height:36px}
+@media (max-width:640px){.pl-row{grid-template-columns:1fr}.pl-nums{grid-template-columns:1fr}}
+@media print{#plan{display:none!important}.ea-qrow[data-empty="1"]{display:none!important}}   /* an empty question stays off the paper */
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
