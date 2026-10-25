@@ -869,6 +869,29 @@ td input,td select{max-width:100%}
 /* v24.17 a selector row whose component is on the Build sheet */
 .td-rec.td-onb .td-pk span{color:var(--nbh-teal,#2f6b6d);font-weight:600}
 </style>
+<style id="td118-css">
+/* v24.18 the Build sheet's component list and folding cards; the planners folded while not in use; the Final plan's section links */
+.td-complist,.td-finnav{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:0 0 12px;padding:8px 10px;background:#fff;border:1px solid var(--rule-2,#e3ebe9);border-radius:6px}
+.td-complist[hidden]{display:none}
+.td-navl{font:700 11px var(--sans,system-ui,sans-serif);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-right:4px}
+.td-complist a,.td-finnav a{display:inline-block;font-size:12.5px;line-height:1.2;padding:4px 9px;border:1px solid var(--rule,#c9d3dc);border-radius:14px;color:var(--ink);background:#f6f9fa;text-decoration:none}
+.td-complist a:hover,.td-finnav a:hover{background:#eaf2f0;border-color:#76a2a3}
+.td-complist a b{font-family:var(--mono,ui-monospace,monospace);font-size:11px;color:var(--ink-soft);font-weight:600;margin-right:3px}
+.td-complist .td-navsp{flex:1 1 8px}
+.td-complist button.tool,.td-cfold,.td-plfold button.tool{margin:0;padding:3px 9px;font-size:12px;min-height:28px}
+.td-foldsum{font-size:12.5px;color:var(--ink-soft);margin:-4px 0 2px;cursor:pointer;line-height:1.4}
+.td-foldsum:hover{color:var(--ink)}
+#compWrap .card,.plan-group,.td-planner{scroll-margin-top:8px}
+.td-pkglink{color:inherit;text-decoration:none}
+.td-pkglink:hover{text-decoration:underline}
+.td-plfold{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--ink-soft);margin:4px 0 10px}
+@media screen{
+  .card.td-fold > :not(.chd):not(.td-foldsum){display:none}
+  .td-planner[data-empty="1"]:not(.td-open) > :not(h3.sub):not(.td-plfold){display:none}
+  .td-planner[data-empty="0"] > .td-plfold,.td-planner.td-open > .td-plfold{display:none}
+}
+@media print{.td-complist,.td-finnav,.td-foldsum,.td-cfold,.td-plfold{display:none!important}}
+</style>
 </head>
 
 <body class="view-setup">
@@ -1105,6 +1128,7 @@ td input,td select{max-width:100%}
   <div class="psctl noprint"><label>Add component <select id="addComp"><option value=""></option></select></label><button class="tool" id="addCompBtn" style="margin:0">+ Add</button></div>
   <div class="td-bank-host noprint" id="tdBankHost"></div>
   <div id="buildMeter" class="noprint"></div>
+  <nav class="td-complist noprint" id="tdCompList" aria-label="Components on this sheet" hidden></nav>
   <div id="compWrap"></div>
   <div class="cite">Step lists paraphrase the procedures described in the sources named on each card; edit them to the student's plan. Reinforcement-parameter guidance after Horner and Day (1991) and Athens and Vollmer (2010); thinning after Hanley et al. (2001), Fisher et al. (2000), Lalli et al. (1995), and Hagopian et al. (2011).</div>
 </div>
@@ -1866,7 +1890,7 @@ const num=n=>{const v=parseFloat(val(n));return isNaN(v)?null:v;};
 const setv=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}};
 const COLORS=['#182e43','#76a2a3','#9b4e15','#54676f'];
 
-function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));if(v==='select')renderModel();if(v==='antecedent')renderAnt();if(v==='reinf')renderReinf();if(v==='skills')renderSkills();if(v==='final'){renderPlan();renderFinal();}if(v==='teach')renderTeach();if(v==='respond')renderRespond();if(v==='plan')renderPlan();if(v==='monitor')renderMon();window.scrollTo({top:0});}
+function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));if(v==='select')renderModel();if(v==='antecedent'){renderAnt();try{tdPlanners();}catch(e){}}if(v==='reinf')renderReinf();if(v==='skills')renderSkills();if(v==='final'){renderPlan();renderFinal();}if(v==='teach')renderTeach();if(v==='respond')renderRespond();if(v==='plan')renderPlan();if(v==='monitor')renderMon();window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
 /* ---------- component library ---------- */
@@ -2180,6 +2204,18 @@ function tdSyncPicks(){const picks=tdPicks();$$('.td-pick').forEach(t=>{const ke
   t.checked=on;if(row){row.classList.toggle('on',on);row.classList.toggle('td-onb',onB);}const sp=t.nextElementSibling;if(sp)sp.textContent=tdPickLabel(onB,on);});tdSendLabel();}
 try{new MutationObserver(()=>{clearTimeout(window.__tdSyncT);window.__tdSyncT=setTimeout(tdSyncPicks,60);}).observe(document.getElementById('compWrap'),{childList:true});}catch(e){}
 window.td117={meter:tdMeter,onBuild:tdOnBuild,sync:tdSyncPicks,val,setv,comps,add:addComp,models:()=>MODELS};   /* for the checks */
+/* v24.18 a Package Summary entry opens its card on Build */
+document.addEventListener('click',e=>{const a=e.target.closest('.td-pkglink');if(!a)return;e.preventDefault();setView('build');setTimeout(()=>{const c=document.getElementById('tdcard-'+a.dataset.i);if(!c)return;if(window.tdCardFold)tdCardFold(c,false);c.scrollIntoView({block:'start'});},60);});
+/* v24.18 the Final plan's section links */
+function tdFinNav(){const body=$('#finalBody'),sheet=$('#final');if(!body||!sheet)return;const old=sheet.querySelector('#tdFinNav');if(old)old.remove();
+  const groups=$$('#final .plan-group');if(groups.length<2)return;groups.forEach((g,i)=>{if(!g.id)g.id='tdfg-'+i;});
+  const nav=document.createElement('nav');nav.id='tdFinNav';nav.className='td-finnav noprint';nav.setAttribute('aria-label','Sections of the final plan');
+  nav.innerHTML='<span class="td-navl">On this sheet</span>'+groups.map(g=>`<a href="#${g.id}">${esc(g.textContent.trim())}</a>`).join('');
+  nav.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();const t=document.getElementById(a.getAttribute('href').slice(1));if(t)t.scrollIntoView({block:'start'});});
+  body.parentNode.insertBefore(nav,body);}
+try{new MutationObserver(()=>{clearTimeout(window.__tdFinT);window.__tdFinT=setTimeout(tdFinNav,80);}).observe($('#finalBody'),{childList:true});}catch(e){}
+try{new MutationObserver(()=>{clearTimeout(window.__tdPlT);window.__tdPlT=setTimeout(()=>{try{tdPlanners();}catch(e){}},80);}).observe($('#compWrap'),{childList:true});}catch(e){}
+window.td118={planners:tdPlanners,setView,renderPlan,finNav:tdFinNav};
 /* the other sheets' suggestions, in one list with their own ticks */
 function tdOthers(){const box=$('#selOthers');if(!box)return;const Q=window._qrecs||{};const names={rf:'Reinforcers and schedules: reinforcer selection',pa:'Reinforcers and schedules: preference assessment',sch:'Reinforcers and schedules: schedule',pr:'Prompting and errors: prompting',ec:'Prompting and errors: error correction',sbt:'Skills and tolerance: skill-based treatment',skb:'Skills and tolerance: skills',ant:'Antecedents'};
   let h='',n=0;Object.keys(Q).forEach(pf=>{const recs=(Q[pf]||[]).filter(r=>LIB[r[0]]);if(!recs.length)return;n+=recs.length;h+=`<h3 class="sub">${esc(names[pf]||pf)}</h3>`+tdRecRows(recs,pf);});
@@ -2841,10 +2877,10 @@ function tdDfSync(){const no=tdNoExt();$$('#compWrap .card[data-code="DF"]').for
 document.addEventListener('change',e=>{const n=e.target&&e.target.name;if(n==='q.escape.1'||n==='rb.3'||n==='m.fn'){tdDfSync();try{renderPlan();}catch(err){}}});
 function addComp(code,at,ns){const L=LIB[code];if(!L)return;
  /* v23.85 a protocol from the protocol bank brings its own number of steps (ns); a card added from the menu has the component's */
- const SS=(ns!=null&&Number.isInteger(+ns)&&+ns>0)?Array.from({length:+ns},(x,k)=>L.steps[k]||''):L.steps;const i=(at!=null&&!$('#compWrap .card[data-i="'+at+'"]'))?+at:compSeq;compSeq=Math.max(compSeq,i+1);const d=document.createElement('div');d.className='card';d.dataset.code=code;d.dataset.i=i;
+ const SS=(ns!=null&&Number.isInteger(+ns)&&+ns>0)?Array.from({length:+ns},(x,k)=>L.steps[k]||''):L.steps;const i=(at!=null&&!$('#compWrap .card[data-i="'+at+'"]'))?+at:compSeq;compSeq=Math.max(compSeq,i+1);const d=document.createElement('div');d.className='card';d.dataset.code=code;d.dataset.i=i;d.id='tdcard-'+i;
  /* v23.04 (review F184) a rate from DD-1's school day is not a session interresponse time (Vollmer et al., 1993): no seed from it */
  const dayRate=val('m.ratesrc')==='DD-1',seed=dayRate?null:irt();const seedTxt=seed?`${fmtS(Math.round(seed*0.8))} (80% of mean IRT ${fmtS(seed)})`:dayRate?'':'enter baseline rate on setup';
- d.innerHTML=`<div class="chd"><span class="tag ok">${code}</span><span class="chdt">${esc(L.name)}</span><button type="button" class="rm noprint" data-rm="1" style="margin-left:auto">Remove</button></div>
+ d.innerHTML=`<div class="chd"><span class="tag ok">${code}</span><span class="chdt">${esc(L.name)}</span><button type="button" class="tool td-cfold noprint" data-fold="1" style="margin-left:auto" aria-expanded="true">Hide steps</button><button type="button" class="rm noprint" data-rm="1">Remove</button></div>
  <p class="method" style="margin:0 0 6px">Source: ${esc(L.src)}</p><p class="method td-bank-src" style="margin:0 0 6px" hidden></p>${$$('#compWrap .card').some(k=>k.dataset.code===code)?'<p class="method td-dup">A second card of this component: keep the one that fits this student, or say in its steps why both run.</p>':''}<div class="td-who"><label>Run by <input name="cp[${i}].who" placeholder="e.g., classroom staff (names)"></label><label>When <input name="cp[${i}].when" placeholder="e.g., every work period, from the first demand"></label><label>Where <input name="cp[${i}].where" placeholder="e.g., the ESE classroom, then specials"></label></div><input type="hidden" name="cp[${i}].bank"><input type="hidden" name="cp[${i}].bsrc">${L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:''}
  <div class="param">${L.params.map((p,k)=>`<div class="f"><label>${esc(p[0])}</label><input name="cp[${i}].p${k}" value="${esc(p[1]==='SEED_IRT'?seedTxt:'')}" placeholder="${esc(p[1]==='SEED_IRT'?(dayRate?'from a session baseline: the rate on Setup is a school-day rate (Form DD-1)':''):p[1])}"></div>`).join('')}</div>
  ${code==='TA_CHAIN'?`<div class="td-ta"><label for="cpta${i}"><b>Student’s task analysis</b> <span>the steps the student performs, in order, one a line (numbers optional: the plan numbers them). A protocol from the bank brings the study’s list where the article prints it; adjust it to this student. A list in parts: a name ending in a colon above each part.</span></label><textarea id="cpta${i}" name="cp[${i}].ta" rows="2" data-auto="1" placeholder="One step a line, in order"></textarea></div>`:''}
@@ -2917,7 +2953,7 @@ function thinText(c,lv,j){if(!['NCE','NCR','DRO'].includes(c.code))return lv[1];
  if(v<=p)return 'Hold at '+fmtS(p)+': '+(tm?'the card\u2019s terminal interval':'the terminal interval (5 min until the card names one)')+' is reached';
  if(j===4)return 'Terminal interval: '+fmtS(v)+(tm?'':' (until the card names one)')+cite;
  return pre+' \u00d7 '+Math.pow(2,j)+' ('+fmtS(v)+(v>=T?', the terminal interval':'')+')';}
-function renderPlan(){const cs=comps();$('#planSummary').innerHTML='<b>Components</b>'+(cs.length?cs.map(c=>`<span class="tag ok" style="margin-right:6px">${c.code}</span>${esc(c.name)}`).join('<br>'):'None yet.');
+function renderPlan(){const cs=comps();$('#planSummary').innerHTML='<b>Components</b>'+(cs.length?cs.map(c=>`<a href="#tdcard-${c.i}" class="td-pkglink" data-i="${c.i}" title="Open this card on Build"><span class="tag ok" style="margin-right:6px">${c.code}</span>${esc(c.name)}</a>`).join('<br>'):'None yet.');
  const fb=$('#fidTbl tbody');let k=0;{const ax=cs.filter(tdIsAssess),fn=$('#tdFidNote');if(fn){fn.hidden=!ax.length;fn.textContent=ax.length?'Not scored here: '+ax.map(c=>c.name).join('; ')+'. The BCBA completes them; they are not staff steps.':'';}}
  fb.innerHTML=cs.filter(c=>!tdIsAssess(c)).flatMap(c=>c.steps.map(s=>`<tr><td class="n">${++k}</td><td>${c.code}</td><td style="font-size:11.5px">${esc(s)}</td></tr>`)).join('')
   /* v21.44 (B3): the safety items of escape extinction (or physical guidance), scored like the steps */
@@ -6023,6 +6059,31 @@ paint();
 })();
 </script>
 <style id="td112-css">.ident .f.td-refer select{min-width:0;flex:1 1 auto;max-width:100%}.ident .f.td-refer-note{grid-column:1/-1}.ident .f.td-refer-note .hint{font-size:12px;color:var(--muted,#54676f);margin:0}@media print{.td-refer{display:none!important}}</style>
+<script id="td118">
+/* v24.18 (the 10/25 review): the Build sheet's list of components and folding cards; a planner folded while not in use. */
+(function(){
+  const byId=id=>document.getElementById(id);
+  const wrap=byId('compWrap'),nav=byId('tdCompList');if(!wrap||!nav)return;
+  function sum(card){const i=card.dataset.i;const v=n=>{const e=card.querySelector('[name="cp['+i+'].'+n+'"]');return e?String(e.value||'').trim():'';};const steps=card.querySelectorAll('ol.steps li').length;
+    const params=Array.prototype.slice.call(card.querySelectorAll('.param .f')).map(f=>{const l=f.querySelector('label'),e=f.querySelector('input');return e&&e.value.trim()?l.textContent.trim()+': '+e.value.trim():'';}).filter(Boolean).slice(0,3);
+    return [steps+' step'+(steps===1?'':'s'),v('who')?'run by '+v('who'):'no one named yet',v('when')?'when: '+v('when'):''].filter(Boolean).join(' \u00b7 ')+(params.length?' \u2014 '+params.join(' \u00b7 '):'');}
+  function fold(card,on){card.classList.toggle('td-fold',on);const b=card.querySelector('.td-cfold');if(b){b.textContent=on?'Show steps':'Hide steps';b.setAttribute('aria-expanded',on?'false':'true');}
+    let s=card.querySelector(':scope > .td-foldsum');if(on){if(!s){s=document.createElement('div');s.className='td-foldsum noprint';s.title='Open this card';s.addEventListener('click',()=>fold(card,false));const h=card.querySelector('.chd');if(h)h.after(s);else card.prepend(s);}s.textContent=sum(card);}else if(s)s.remove();}
+  window.tdCardFold=fold;
+  document.addEventListener('click',e=>{const b=e.target.closest('.td-cfold');if(b){const c=b.closest('.card');fold(c,!c.classList.contains('td-fold'));return;}
+    const a=e.target.closest('#tdCompList a[data-i]');if(a){e.preventDefault();const c=byId('tdcard-'+a.dataset.i);if(c){fold(c,false);c.scrollIntoView({block:'start'});}return;}
+    const all=e.target.closest('#tdCompList button[data-all]');if(all){Array.prototype.forEach.call(wrap.querySelectorAll('.card'),c=>fold(c,all.dataset.all==='fold'));}});
+  function list(){const cards=Array.prototype.slice.call(wrap.querySelectorAll('.card'));nav.hidden=cards.length<2;if(nav.hidden){nav.innerHTML='';return;}
+    nav.innerHTML='<span class="td-navl">On this sheet</span>'+cards.map(c=>{const code=(c.querySelector('.chd .tag')||{}).textContent||c.dataset.code||'',name=(c.querySelector('.chdt')||{}).textContent||'';
+      return '<a href="#'+c.id+'" data-i="'+c.dataset.i+'"><b>'+code+'</b>'+name.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</a>';}).join('')+'<span class="td-navsp"></span><button type="button" class="tool" data-all="fold">Fold all</button><button type="button" class="tool" data-all="open">Open all</button>';}
+  try{new MutationObserver(()=>{clearTimeout(window.__tdListT);window.__tdListT=setTimeout(list,60);}).observe(wrap,{childList:true});}catch(e){}
+  list();window.tdBuildList=list;
+  /* a planner folded while not in use */
+  Array.prototype.forEach.call(document.querySelectorAll('.td-planner'),w=>{if(w.querySelector('.td-plfold'))return;const h=w.querySelector('h3.sub');const d=document.createElement('div');d.className='td-plfold noprint';
+    d.innerHTML='<span>Not in this plan yet: its component is not on Build and nothing is entered here.</span><button type="button" class="tool td-plshow">Show the planner</button>';if(h)h.after(d);else w.prepend(d);});
+  document.addEventListener('click',e=>{const b=e.target.closest('.td-plshow');if(!b)return;const w=b.closest('.td-planner');if(w)w.classList.add('td-open');});
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

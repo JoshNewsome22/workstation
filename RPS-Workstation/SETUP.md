@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.18: Form TD-1 navigation from the 10/25 review: Build's component list and folding cards, Package Summary links, the planners folded while not in use, the Final plan's section links
+(the BCBA, 10/25: "look at the treatment development and see if any enhancements should be made" ... "Okay.")
+
+- **Build opens with a list of the components on it**, each a link to its card, with Fold all and Open all. **Each card
+  folds** (Hide steps / Show steps, or a tap on its summary line) to its title and one line: its steps, who runs it, when,
+  and its first parameters. The list follows cards as they are added and removed. Fourteen cards ran to 12,700 px with
+  no way to move between them.
+- **The Implementation plan's Package Summary entries link to their cards** on Build.
+- **A planner on Antecedents folds while it is not in use**: the high-probability sequence planner and the competing-
+  stimulus package planner show their heading and a "not in this plan yet" line until their component is on Build or
+  something is entered in them (the rule the printout already used), with Show the planner to open one anyway; a planner
+  opens by itself when its card arrives. The high-p planner ran to most of a 14,400 px sheet whether or not it was in the
+  plan.
+- **The Final plan opens with links to its sections**: the component groups, the least-restrictive review, data and exit,
+  student and family considerations, adoption, the sign-in and the parent's signature.
+- None of it prints; a folded card prints whole.
+- Checks: `qa/td118-test.js`.
+
 ### v24.17: Form TD-1 correctness from the 10/25 review: the selectors' ticks follow the Build sheet, the worked example is a plan staff can run, Reinforcers B.4 fills from Setup
 (the BCBA, 10/25: "look at the treatment development and see if any enhancements should be made" ... "Okay.")
 
