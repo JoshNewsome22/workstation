@@ -1010,6 +1010,8 @@ td input,td select{max-width:100%}
     <div class="f"><label for="mDob">Date of birth</label><input id="mDob" name="m.dob"></div>
     <div class="f"><label for="mSetting">Setting / classroom</label><input id="mSetting" name="m.setting"></div>
     <div class="f"><label for="mAssessor">BCBA</label><input id="mAssessor" name="m.assessor" placeholder="e.g. Jordan Ellis, M.A., BCBA"></div>
+    <div class="f td-refer"><label for="tdRefer">Refer to the student as</label><select id="tdRefer" name="m.refer"><option value="">From the case (the pronouns on Form DM-1)</option><option value="he">he / him</option><option value="she">she / her</option><option value="they">they / them</option><option value="name">by first name</option><option value="student">the student</option></select></div>
+    <div class="f td-refer td-refer-note"><div class="hint" id="tdReferNote"></div></div>
     <div class="f"><label for="mDate">Date</label><input id="mDate" name="m.date"></div>
   </div>
   <div class="defs">
@@ -5775,6 +5777,9 @@ function fnOk(p,fn){if(!fn)return true;const want=fn==='plan'?planFn():fn;if(!wa
 const kinds=()=>{const m=new Map();KIND.forEach(k=>m.set(k,0));ok.forEach(p=>{const k=kindOf(p.code);m.set(k,(m.get(k)||0)+1);});return [...m].filter(x=>x[1]);};
 const groups=list=>{const m=new Map();kinds().forEach(([k])=>m.set(k,[]));list.forEach(p=>m.get(kindOf(p.code)).push(p));return [...m].filter(x=>x[1].length);};
 function fire(el){['input','change'].forEach(t=>{try{el.dispatchEvent(new Event(t,{bubbles:true}));}catch(x){}});}
+/* v24.12 the steps, data and materials are written for this student (td112: tdRefer); the study's own words stay in In the study and What happened */
+const tdW=s=>{try{return window.tdRefer&&typeof tdRefer.word==='function'?tdRefer.word(s):s;}catch(e){return s;}};
+function tdWhoNote(){try{const l=window.tdRefer&&tdRefer.label();return l?'<p class="tx hint td-whonote">'+esc(l)+'</p>':'';}catch(e){return '';}}
 
 const R=host.attachShadow({mode:'open'}),st=document.createElement('style');st.textContent=TD_BANK_CSS;R.appendChild(st);
 const N=ok.length,d=document.createElement('details');d.className='pan';
@@ -5810,19 +5815,20 @@ function show(id){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
 <div class="load"><div class="btns"><button type="button" class="add primary">Add to the plan</button>${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}</div><div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
 <div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div>
-<div class="vh">Steps for staff</div><ol class="steps">${(p.steps||[]).map(s=>'<li>'+esc(s)+'</li>').join('')}</ol>
+<div class="vh">Steps for staff</div>${tdWhoNote()}<ol class="steps">${(p.steps||[]).map(s=>'<li>'+esc(tdW(s))+'</li>').join('')}</ol>
 ${p.ta&&p.ta.length?`<div class="vh">The student’s task analysis, as the study taught it</div><p class="tx hint">The study’s list, reworded: adjust it to this student. It goes on the card in its own box, apart from the steps for staff, and the plan prints it as its own list.</p>${p.ta.map(l=>`${l.name?`<div class="tan">${esc(l.name)}</div>`:''}<ol class="steps ta">${l.steps.map(s=>'<li>'+esc(s)+'</li>').join('')}</ol>`).join('')}${p.ta_note?`<p class="tx tanote">${esc(p.ta_note)}</p>`:''}`:p.code==='TA_CHAIN'?`<div class="vh">The student’s task analysis</div><p class="tx hint">The article does not print its steps (the setting above gives the count); write the list for this student in the card’s box.</p>`:''}
-<div class="rows">${row('Data collected',p.data)}${row('Materials and cues',p.mat)}</div>
+<div class="rows">${row('Data collected',tdW(p.data))}${row('Materials and cues',tdW(p.mat))}</div>
 <div class="vh">What happened in the study</div><p class="tx">${esc(p.result)}</p>
 ${p.note?`<div class="cn"><div class="cnh">Clinical note <span>shown here only: not added, not printed</span></div><div class="ct">${esc(p.note)}</div></div>`:''}
 <div class="vh">Sources</div><ul class="refs">${refs.map(r=>`<li>${esc(r.apa)}${r.doi?` <a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener noreferrer">https://doi.org/${esc(r.doi)}</a>`:''}</li>`).join('')}</ul>`;
   sameNote();}
+window.__tdBankRedraw=()=>{if(cur)show(cur);};window.__tdBankShow=id=>{show(id);};
 function sameNote(){const p=byId[cur],box=$p('.same');if(!p||!box)return;const n=sameCards(p).length;box.hidden=!n;
   box.textContent=n?'This plan already has '+(n===1?'a':n)+' '+comp(p)+' card'+(n===1?'':'s')+'. Add to the plan asks whether to replace that card’s steps and settings or to add a second card.':'';}
 /* v23.88 (screen E) a protocol for a component already in the plan: replace that card's steps and settings (its number, who/when/where,
    Data and Materials kept) or add a second card; Undo puts the replaced words back */
 function replaceInto(p,c){const L=LIBOF[p.code],i=c.dataset.i,put={},was={};const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el)return;was[n]=el.value;el.value=v==null?'':v;put[n]=el.value;fire(el);};
-  const lis=c.querySelectorAll('ol.steps li');const steps=p.steps||[];steps.forEach((s,k)=>{if(k<lis.length)set('cp['+i+'].s'+k,s);});for(let k=steps.length;k<lis.length;k++)set('cp['+i+'].s'+k,'');
+  const lis=c.querySelectorAll('ol.steps li');const steps=p.steps||[];steps.forEach((s,k)=>{if(k<lis.length)set('cp['+i+'].s'+k,tdW(s));});for(let k=steps.length;k<lis.length;k++)set('cp['+i+'].s'+k,'');
   L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});if(p.ta)set('cp['+i+'].ta',taText(p));set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',p.lab+' ('+cites(p).join('; ')+')');
   {const sh=c.querySelector('input.td-suov');if(sh&&sh.value){sh.value='';sh.dispatchEvent(new Event('change',{bubbles:true}));}}try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}return {c,i,put,was,replaced:true};}
 function askSame(p,then){const box=$p('.same');if(!box)return then('add');const n=sameCards(p).length;
@@ -5835,9 +5841,9 @@ function askSame(p,then){const box=$p('.same');if(!box)return then('add');const 
 let undoRec=null;
 function add(p){const L=LIBOF[p.code],c=window.__tdAddComp(p.code,(p.steps||[]).length);if(!c)return null;const i=c.dataset.i,put={};
   const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el||v==null||v==='')return;el.value=v;put[n]=el.value;fire(el);};
-  (p.steps||[]).forEach((s,k)=>set('cp['+i+'].s'+k,s));try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}
+  (p.steps||[]).forEach((s,k)=>set('cp['+i+'].s'+k,tdW(s)));try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}
   L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});
-  set('cp['+i+'].data',p.data);set('cp['+i+'].mat',p.mat);set('cp['+i+'].ta',taText(p));
+  set('cp['+i+'].data',tdW(p.data));set('cp['+i+'].mat',tdW(p.mat));set('cp['+i+'].ta',taText(p));
   set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',p.lab+' ('+cites(p).join('; ')+')');
   try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}
   return {c,i,put};}
@@ -5944,6 +5950,57 @@ window.__tdScenes={has:id=>!!byId[id],play,close,count:()=>Object.keys(byId).len
 })();
 </script>
 
+<script id="td112">
+/* v24.12 the protocol's steps refer to this student. Form DM-1 sends the student's first name, preferred name, pronouns and sex
+   in the profile facts; Setup's "Refer to the student as" chooses: from the case (the pronouns on DM-1, else the sex in the
+   record, else the first name), or he/him, she/her, they/them, by first name, the student. tdRefer.word(text) rewrites a
+   study's step: she/he and him as the chosen forms, her as an object or a possessive by the word after it, hers, herself and
+   himself, the girl/the boy as the student; by name, a subject right after the name reads "that Jordan"; after they, the verb
+   agrees (is/are, has/have, does/do, starts/start). The study's own paragraphs are never rewritten. */
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+let who={};
+const clean=n=>String(n||'').trim().replace(/[^\p{L}\p{M}'’.-]/gu,'');
+function first(){const w=who||{};let n=clean(w.pref)||clean(w.first);
+  if(!n){const c=$('#mClient'),v=c?String(c.value||'').trim():'';if(v)n=clean(v.includes(',')?v.split(',')[1].trim().split(/\s+/)[0]:v.split(/\s+/)[0]);}return n;}
+const pronOf=t=>{t=String(t||'').toLowerCase();if(/\bthey\b|\bthem\b|\btheir\b/.test(t))return 'they';if(/\bshe\b|\bher\b|\bhers\b/.test(t))return 'she';if(/\bhe\b|\bhim\b|\bhis\b/.test(t))return 'he';return '';};
+function mode(){const sel=$('#tdRefer'),v=sel?sel.value:'';if(v)return v;const p=pronOf(who.pron);if(p)return p;const sx=String(who.sex||'').toLowerCase();if(sx==='male')return 'he';if(sx==='female')return 'she';return first()?'name':'student';}
+function source(){const sel=$('#tdRefer'),v=sel?sel.value:'';if(v)return 'chosen under Setup';if(pronOf(who.pron))return 'the pronouns on Form DM-1';const sx=String(who.sex||'').toLowerCase();if(sx==='male'||sx==='female')return 'the sex in the record on Form DM-1 (no pronouns there)';return first()?'the first name (no pronouns on Form DM-1)':'no name or pronouns on file';}
+function label(){const m=mode(),n=first();const w={he:'he / him',she:'she / her',they:'they / them',name:n?'by name ('+n+')':'by name',student:'the student'}[m]||m;
+  return 'Written for this student: '+w+', from '+source()+'. In the study and What happened keep the study’s own words.';}
+const P={he:{s:'he',o:'him',p:'his',pp:'his',r:'himself'},she:{s:'she',o:'her',p:'her',pp:'hers',r:'herself'},they:{s:'they',o:'them',p:'their',pp:'theirs',r:'themselves'}};
+const OBJ=/^(and|or|nor|to|for|with|from|at|in|on|by|of|that|if|when|as|after|before|until|while|a|an|the|so|but|then|again|next|back|up|down|out|off|over|away|too|also|alone|there|here|what|which|how|where|why|whether|not|no|is|was|does|do|did|has|have|had|will|would|can|could|should|may|might|must|about|into|onto|through|toward|towards|once|twice|now|later|this|these|those|another|one|two|three|some|any|each|every|more|most|only|just|very|enough|immediately|briefly|calmly|firmly|gently|quietly|directly|she|he|they|it|i|you|we|her|him|his|hers|them|their|herself|himself|themselves)$/i;
+/* her before one of these common verbs is an object (let her finish, help her start), not a possessive (her effort) */
+const VERBS=/^(finish|start|stop|begin|continue|complete|go|come|sit|stand|wait|try|choose|pick|point|say|answer|respond|return|leave|stay|play|eat|drink|rest|calm|know|see|look|take|get|put|use|do|make|have|keep|hold|walk|run|move|turn|open|close|wash|clean|brush|carry|bring|follow|listen|watch|read|write|draw|count|sort|match|repeat|practice|practise|show|help|ask|tell|talk|speak|sign|request|hand|give|reach|press|tap|push|pull|place|join|enter|exit|transition|comply|earn|lose|win|cry|scream|hit|bite|kick|throw|engage|participate|attend|remain|become|feel|want|need|like|prefer|decide|select|identify|describe|explain|succeed|fail|notice|understand|remember|learn|rejoin|resume|lie|lay|settle|relax|breathe|ignore|accept|refuse|grab|hug|touch|wave|nod|smile|laugh|climb|jump|dance|sing|sleep|nap|dress|undress|toilet|shower|bathe|cook|clear|set|load|unload|fold|sweep|wipe|wake)$/i;
+const ADV='(?:always|never|often|usually|also|still|then|just|only|first|rarely|sometimes|quickly|immediately|calmly|briefly|already|soon|later|again|simply|generally|typically|consistently)';
+const VERB={is:'are',was:'were',has:'have',does:'do',"doesn't":"don't","isn't":"aren't","wasn't":"weren't","hasn't":"haven't"};
+const NOTVERB=/^(always|as|this|thus|yes|plus|bus|us|its|perhaps|towards|unless|less|sometimes|besides|across|series|whereas|nonetheless|regardless|various|previous|obvious|famous|serious|continuous|numerous|hers|theirs|ours|yours|is|was|has|does|gas|class|glass|grass|pass|miss|loss|boss|dress|stress|process|access|success|address|progress|focus|minus|versus|census|status|bonus|campus|circus|virus|basis|crisis|analysis|emphasis|hypothesis|thesis|tennis|iris|lens|means|news|mathematics|physics|politics|ethics|species|headphones|scissors|pants|clothes|goods|thanks|stairs|upstairs|downstairs|outdoors|indoors|afterwards|sideways|forwards|backwards)$/i;
+const cap=(w,src)=>{const c=src.charAt(0);return c===c.toUpperCase()&&c!==c.toLowerCase()?w.charAt(0).toUpperCase()+w.slice(1):w;};
+function theyVerb(v){const low=v.toLowerCase();if(VERB[low])return cap(VERB[low],v);if(NOTVERB.test(low)||low.length<4)return v;
+  if(/ies$/.test(low)&&!/eies$/.test(low))return v.slice(0,-3)+'y';if(/(sses|shes|ches|xes|zes|oes)$/.test(low))return v.slice(0,-2);if(/[^s]s$/.test(low))return v.slice(0,-1);return v;}
+function word(text,force){const m=force||mode();if(!text||!m)return text;const n=first();let T;
+  if(m==='name'){if(!n)return text;T={s:n,o:n,p:n+'\u2019s',pp:n+'\u2019s',r:n,name:true};}
+  else if(m==='student')T={s:'the student',o:'the student',p:'the student\u2019s',pp:'the student\u2019s',r:'the student'};
+  else T=P[m];if(!T)return text;
+  let out=String(text).replace(/\b(the girl|the boy|girl\u2019s|girl's|boy\u2019s|boy's)\b/gi,(w)=>{const low=w.toLowerCase();return cap(/'s|\u2019s/.test(low)?T.p:(T.name?T.s:'the student'),w);});
+  let lastEnd=-1;
+  out=out.replace(/\b(she|he|her|him|his|hers|herself|himself)\b(?=([^\w\u2019']*)([\w\u2019']*))/gi,(w,_1,gap,next,off,str)=>{const low=w.toLowerCase();let r;
+    const adjacent=!!T.name&&lastEnd>=0&&str.slice(lastEnd,off).trim()==='';
+    if(low==='she'||low==='he'){r=T.s;if(adjacent)r='that '+T.s;}
+    else if(low==='him')r=T.o;else if(low==='his')r=T.p;else if(low==='hers')r=T.pp;else if(low==='herself'||low==='himself')r=T.r;
+    else r=(!next||OBJ.test(next)||VERBS.test(next))?T.o:T.p;
+    lastEnd=off+w.length;return cap(r,w);});
+  if(m==='they')out=out.replace(new RegExp('\\b(they|They)\\s+('+ADV+'\\s+)?([A-Za-z\']+)\\b','g'),(w,t,a,v)=>t+' '+(a||'')+theyVerb(v));
+  return out;}
+window.tdRefer={mode,word,label,first,who:()=>who};
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r;try{r=was?was.apply(this,arguments):undefined;}catch(e){}try{if(f&&f.profile&&f.profile.who)who=f.profile.who;}catch(e){}paint();return r;};})();
+function paint(){const n=$('#tdReferNote');if(n)n.textContent=label();try{window.__tdBankRedraw&&window.__tdBankRedraw();}catch(e){}}
+const sel=$('#tdRefer');if(sel)sel.addEventListener('change',paint);const c=$('#mClient');if(c)c.addEventListener('input',paint);
+paint();
+})();
+</script>
+<style id="td112-css">.ident .f.td-refer select{min-width:0;flex:1 1 auto;max-width:100%}.ident .f.td-refer-note{grid-column:1/-1}.ident .f.td-refer-note .hint{font-size:12px;color:var(--muted,#54676f);margin:0}@media print{.td-refer{display:none!important}}</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

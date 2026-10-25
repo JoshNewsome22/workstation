@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.12: Form TD-1's protocol steps refer to this student: the pronouns on Form DM-1, or the first name
+(the BCBA, 10/25: "the pronouns in the steps used in the treatment plan for the client should be based on the pronouns listed in the student form ... or it can say the client's name")
+
+- **Refer to the student as**, under Setup: from the case (the pronouns on Form DM-1; failing those, the sex in the
+  record; failing that, the first name), or he/him, she/her, they/them, by first name, the student. A line under it says
+  what is in effect and where it came from. The choice is saved with the plan.
+- **Form DM-1 sends the student's first name, preferred name, pronouns and sex** in the profile facts (they stay in the
+  case on this device, as the rest of the profile does).
+- **A card's Steps for staff, Data collected and Materials are written for this student** as the card is shown and as
+  Add to the plan (or Replace) copies them: she/he and him become the chosen forms; her becomes an object or a possessive
+  by the word after it (praise her → praise him; her effort → his effort; let her finish → let him finish); hers, herself
+  and himself follow; the girl and the boy become the student. By name, a subject right after the name reads "that
+  Jordan" (Tell Jordan that Jordan has two minutes), the possessive Jordan's. After they, the verb agrees (does/do,
+  has/have, is/are, starts/start), an adverb between allowed. In the study, What happened in the study and the clinical
+  note keep the study's own words, so the source stays readable as published.
+- Checks: `qa/td112-test.js` (the rewriting in each form of address; the facts from DM-1 choosing he/him; a card shown
+  and added with he/him and the study's paragraph kept; the Setup choice redrawing the card and saved; DM-1's facts).
+
 ### v24.11: The iPad review of 10/25: the form rail can be put away, the Sheets menu at five sheets, the toolbar's groups, a smoother fold, ABC-1's note
 (the BCBA's screenshots: "Make the side bar here collapsible", DM-1's tabs in a column, IA-1's toolbar "layout needs to be better", "very jerky as the page layout changes", ABC-1's note "needs to be made to be the full length")
 
