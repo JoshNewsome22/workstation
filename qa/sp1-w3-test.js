@@ -50,8 +50,8 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
     useBeh(0);const d1b=summaryData(),c1b=controlData();o.b1b={high:d1b.high,flag:[...c1b.flagged].join(','),thr:thr()};o.bar=[...document.querySelectorAll('#behSeg button')].map(b=>b.textContent);
     /* the print: each behavior's sheets carry its own numbers */
     const set=buildPrintSet();o.printed=set.map(n=>(n.querySelector('#lgShaded,.legend .lgrow:nth-child(3) span')||{}).textContent||'').filter(Boolean);
-    o.pr=set.filter(n=>n.querySelector('.legend')).map(n=>[...n.querySelectorAll('.legend .lgrow')].map(x=>x.textContent.replace(/\s+/g,' ').trim()).join(' | '));
-    o.keys=set.filter(n=>n.querySelector('table.scatter')).map(n=>n.querySelector('th.corner .sp-key').innerHTML.replace(/<br>/g,' '));
+    o.pr=set.filter(n=>n.querySelector('.legend')&&!n.querySelector('.sp-obs2bar')).map(n=>[...n.querySelectorAll('.legend .lgrow')].map(x=>x.textContent.replace(/\s+/g,' ').trim()).join(' | '));
+    o.keys=set.filter(n=>n.querySelector('table.scatter')&&!n.querySelector('.sp-obs2bar')).map(n=>n.querySelector('th.corner .sp-key').innerHTML.replace(/<br>/g,' '));
     /* the case: every behavior */
     const cur=state.cur,cells=state.cells,ev=window.__nbhFactsOut().evidence;o.ev={st:ev.statement,n:ev.n,per:ev.perBehavior,back:state.cur===cur&&state.cells===cells&&thr()===2};
     return o;});
@@ -163,7 +163,7 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
   /* ---------- I49: observation windows for OB-1 and ABC-1 ---------- */
   const E=await p.evaluate(()=>{const ev=window.__nbhFactsOut().evidence;return {w:ev.windows,ctl:(document.querySelector('#ctlBody .sp-win')||{}).textContent||''};});
   ok('I49 the intervals the control chart flags go to the case as observation windows, by behavior, with times, activity and criteria; the control chart says so',
-    Array.isArray(E.w)&&E.w.length>0&&E.w.every(w=>/\(simulated\)$/.test(w.behavior)&&/^\d{1,2}:\d\d [AP]M$/.test(w.from)&&/^\d{1,2}:\d\d [AP]M$/.test(w.to)&&w.end>w.start&&w.criteria.length&&w.activity)&&/^Observation windows, sent with the case to Forms OB-1 and ABC-1: \d/.test(E.ctl),E);
+    Array.isArray(E.w)&&E.w.length>0&&E.w.every(w=>/\(simulated\)$/.test(w.behavior)&&/^\d{1,2}:\d\d [AP]M$/.test(w.from)&&/^\d{1,2}:\d\d [AP]M$/.test(w.to)&&w.end>w.start&&(w.criteria.length||(w.why&&w.why.length))&&w.activity)&&/^Observation windows, sent with the case to Forms OB-1 and ABC-1: \d/.test(E.ctl),E);
   const OBS={evidence:{'SP-1':{form:'SP-1',dates:'9/21/2026–10/9/2026',windows:[{behavior:'Aggression toward staff (simulated)',from:'9:00 AM',to:'10:00 AM',activity:'independent math'},{behavior:'Elopement from assigned area (simulated)',from:'11:00 AM',to:'11:30 AM'}]}}};
   const note=async file=>{const q=await ctx.newPage();q.on('pageerror',e=>errs.push(file+': '+e.message));await q.goto(BASE+'/NBH-Workstation/'+file);await sleep(1000);
     const o=await q.evaluate(f=>{window.__nbhFactsIn(f);const el=document.getElementById('spWinNote');const r={t:el&&el.textContent,np:!!el&&el.classList.contains('noprint'),vis:!!el&&el.offsetParent!==null};window.__nbhFactsIn({});r.gone=!document.getElementById('spWinNote');return r;},OBS);await q.close();return o;};
@@ -215,7 +215,7 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
   const q2r=await q2.evaluate(()=>({rows:rowLabels().length,act:document.querySelectorAll('#spPrint th.actcol').length}));
   await q2.pdf({path:path.join(out,'act15.pdf'),format:'Letter',printBackground:true,preferCSSPageSize:true});await q2.close();
   const pb=pages(path.join(out,'blank.pdf')),ps=pages(path.join(out,'sim.pdf')),pg=pages(path.join(out,'simg.pdf')),pa=pages(path.join(out,'act15.pdf'));
-  ok('the blank sheet prints on one page, the simulation\'s two behaviors on 10 (as before)',pb===1&&ps===10,{pb,ps});
-  ok('with the marking guide, 11; a blank 15-min school day (32 rows) with the activity column, one page',pg===11&&pa===1&&q2r.rows===32&&q2r.act===1,{pg,pa,q2r});
+  ok('the blank sheet prints on one page, the simulation\'s two behaviors on 13 (10 as before, and v24.26 the second observer\'s blank copies)',pb===1&&ps===13,{pb,ps});
+  ok('with the marking guide, 11; a blank 15-min school day (32 rows) with the activity column, one page',pg===14&&pa===1&&q2r.rows===32&&q2r.act===1,{pg,pa,q2r});
   ok('no page errors',!errs.length,errs.slice(0,3));
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);process.exit(1);});

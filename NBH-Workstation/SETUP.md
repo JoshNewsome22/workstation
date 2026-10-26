@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.26: Form SP-1 from the independent review: the control chart on a short record, the windows sent, and the file guard
+(the independent review of 10/25, SP-1 findings R-015, R-016, R-066, R-068, R-069, R-132, R-133; enhancements E-16, E-17, E-43 the sheets)
+
+- **The control chart says when the Kahng criteria do not apply.** With an interval at the maximum (marked at the top level on
+  every day observed), or the +2 SD line at or above it, the headline reads "Criteria not applicable" and names the intervals,
+  the criteria rows read "not applicable on this record", and every interval above +2 SD that no rule reached is named. The
+  sample-SD option is greyed, with a sentence, when +2 SD by it would sit above the ceiling. (Three intervals marked on every one
+  of 15 days no longer sit under "NO CRITERION WAS MET".)
+- **A short-record screen** under the chart: each interval's days marked against the record's base rate by a one-sided binomial
+  test at α = .05, labeled a screening convention, and a one-sentence **pattern verdict** the run rules cannot contradict.
+- **The windows sent to OB-1 and ABC-1 come from a picker**: the rule-flagged intervals, those above +2 SD with no rule, those at
+  the maximum, and those marked on 80% or more of the days observed, each ticked, with why; the analyst unticks any; the ticks are
+  saved with the record and the case line says why each window is there. (The after-lunch interval reaches the observer.)
+- **Open data reads the file for what it is**: a file saved by another form, or one that is not a scatter plot, is refused with
+  the toast the other forms use and nothing on screen changes; a same-form file asks before replacing a record with marks. A
+  saved file names its form.
+- **Count mode on a keyboard**: a count cell selects its number on focus, so a typed digit replaces it; left and right move the
+  cell from the ends of the number; an arrow on a header date no longer steps its year (down goes into the column); the legend
+  describes count mode.
+- **Paper**: Setting wraps to two lines; an activity wraps to two lines, or prints the short form written after a bar
+  ("math – independent | math"); the not-observed ✕ is 24 px (32 px on a touch screen); the settings checkboxes are 18 px in a
+  24 px row.
+- The weekday rule reads as one sentence and calls itself a screening convention; Load simulation stays on the data sheet the
+  toast describes; a second observer on the record prints a blank, labeled copy of the same sheet; the sample sheet prints with an
+  answer key per behavior.
+- Checks: `qa/sp126-test.js`.
+
 ### v24.25: Form TB-1 from the independent review: the sign-off sheet reads the card, and the simulation stays out of a student's case
 (the independent review of 10/25, TB-1 findings R-012 to R-014, R-034, R-035, R-038 to R-041, R-126 to R-128; enhancements E-04 in part and E-25)
 

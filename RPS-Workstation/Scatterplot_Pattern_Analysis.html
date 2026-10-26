@@ -445,7 +445,7 @@ td.mark{width:var(--cellw);padding:0;position:relative;background:#fff}
 .cell[data-state="x"] .glyph{color:#5b6b78;font-weight:700}
 td.mark.lvlx input.count{color:#5b6b78;font-weight:700}
 th.sp-absent{color:#8a96a0;text-decoration:line-through}
-button.sp-abs{margin-left:3px;padding:0 3px;min-width:0;height:16px;line-height:14px;font-size:9px;border:1px solid #c5ced5;border-radius:3px;background:#fff;color:#5b6b78;cursor:pointer;vertical-align:middle}
+button.sp-abs{position:relative;margin-left:3px;padding:0 4px;min-width:24px;height:16px;line-height:14px;font-size:10px;border:1px solid #c5ced5;border-radius:3px;background:#fff;color:#5b6b78;cursor:pointer;vertical-align:middle}
 button.sp-abs[aria-pressed="true"]{background:#5b6b78;color:#fff;border-color:#5b6b78}
 .swatch.sp-xsw{display:inline-flex;align-items:center;justify-content:center;font:700 10px/1 var(--sans,Arial,sans-serif);color:#5b6b78;background:repeating-linear-gradient(135deg,#eef1f4 0 3px,#fff 3px 6px)}
 #xTool[aria-pressed="true"]{background:#5b6b78;color:#fff}
@@ -1272,6 +1272,24 @@ html.nbh-compact .toolbar .sp-panel{display:none}
 .sp-printed .defs .sp-dtext{font-size:10.5px;line-height:14px;padding:2px 6px}
 .sp-printed .defs .dlab{font-size:9.5px;padding:2px 6px}
 </style>
+<style id="sp126-css">
+/* v24.26 the short-record screen and verdict, the window picker, the greyed sample-SD note, the second observer's bar, the answer key,
+   the not-observed button and settings checkboxes (R-069), Setting and the activities on paper (R-068) */
+.sp-screen{margin:4px 0 10px}.sp-screen .sp-verdict{color:var(--ink)}
+.sp-winpick{margin:10px 0 4px;padding:8px 10px;border:1px solid var(--rule-2,#c9d3cf);border-radius:6px;font-family:var(--sans);font-size:12px;line-height:1.35}
+.sp-winpick label{display:inline-flex;align-items:center;gap:6px;margin:4px 12px 0 0;min-height:24px;cursor:pointer}.sp-winpick label small{color:var(--ink-soft)}
+.sp-winpick input[type=checkbox]{width:18px;height:18px;margin:0}
+.sp-sddead{display:block;margin-top:4px;color:var(--ink-soft)}
+.sp-obs2bar{border-color:#254657;color:#254657}
+.sp-keyt{font-size:10px}.sp-keyt th,.sp-keyt td{padding:2px 4px}
+.toolbar .tgroup .row input[type="checkbox"]{width:18px;height:18px;min-width:18px}
+.toolbar .tgroup label.row{min-height:24px}
+.sp-printed .ident.sp-ident2 .f:has(> label[for="mSetting"]) .sp-ftext{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere;line-height:14px;max-height:28px}
+.sp-printed .sp-acttext{white-space:normal;line-height:1.05;max-height:min(2.15em,calc(var(--rowh,20px) - 3px));overflow:hidden;text-overflow:clip;max-width:none}
+button.sp-abs::before{content:'';position:absolute;left:-3px;right:-3px;top:-5px;bottom:-5px}   /* the hit area is 26 px tall without moving the header row */
+@media (pointer:coarse){button.sp-abs{min-width:32px}button.sp-abs::before{left:-4px;right:-4px;top:-8px;bottom:-8px}}
+@media print{.sp-winpick,.sp-sddead{display:none!important}}
+</style>
 </head>
 <body>
 
@@ -1390,7 +1408,7 @@ html.nbh-compact .toolbar .sp-panel{display:none}
       <label class="row" style="gap:5px">
         <input type="checkbox" id="useCodes"> codes
       </label>
-      <label class="row" style="gap:5px" title="A column beside the times for the activity in each interval (math, specials, lunch): it prints, and the summary and the control chart name it"><input type="checkbox" id="actOn"> activity column</label><!-- v23.05 (review I46) -->
+      <label class="row" style="gap:5px" title="A column beside the times for the activity in each interval (math, specials, lunch): it prints, and the summary and the control chart name it. A short form for paper goes after a bar: math – independent | math"><input type="checkbox" id="actOn"> activity column</label><!-- v23.05 (review I46) -->
       <button type="button" id="xTool" aria-pressed="false" title="Mark intervals not observed (the student was pulled out, lunch in another room): while this is on, a tap marks or clears an X; a whole day is switched with the \u2715 beside its name">X: not observed</button><!-- v23.05 (review F91) -->
     </div>
   </div>
@@ -3948,7 +3966,14 @@ const $$ = s => Array.from(document.querySelectorAll(s));
 function key(r,c){ return r+"_"+c; }
 /* v23.05 (review F90) the cutoff of the behavior on the sheet */
 /* v23.05 (review I46) an interval's activity, when the sheet has the activity column */
-function spAct(r){ return state.cfg.actOn && Array.isArray(state.cfg.activity) ? String(state.cfg.activity[r] || "").trim() : ""; }
+function spAct(r){ return state.cfg.actOn && Array.isArray(state.cfg.activity) ? String(state.cfg.activity[r] || "").replace(/\s*\|.*$/, "").trim() : ""; }
+/* v24.26 (sp126, R-068) an activity written "math – independent | math" prints its short form after the bar */
+/* v24.26 (sp126, R-068) on paper the Setting field wraps to a second line when its text is longer than the field; the first page's
+   row budget gives that line its room (the printed field is about 175 px wide at 12.5 px) */
+function spSetExtra(){ try{ const t = String(state.meta.setting || "").trim(); if(!t) return 0; const c = document.createElement("canvas").getContext("2d");
+  const f = getComputedStyle(document.getElementById("mSetting") || document.body).fontFamily; c.font = "12.5px " + f; return c.measureText(t).width > 175 ? 9 : 0; }catch(e){ return 0; } }
+function spActRaw(r){ return state.cfg.actOn && Array.isArray(state.cfg.activity) ? String(state.cfg.activity[r] || "").trim() : ""; }
+function spActShort(v){ const m = /^(.*?)\s*\|\s*(\S.*)$/.exec(String(v || "")); return m ? m[2].trim() : String(v || "").trim(); }
 function thr(){ const t = +state.meta.threshold || +state.cfg.threshold || 2; return Math.max(1, t); }
 /* v23.05 (review F91) not observed: a day (absent, a field trip, no sheet: state.meta.absent{day}, shared by every
    behavior, as the dates are) or one interval (pulled out, lunch in another room: cell.x) is kept out of every count
@@ -4120,7 +4145,7 @@ function gridHTML(c0, c1){
     h += "<tr"+(band ? " class='band'" : "")+">";
     h += "<td class='time"+(peak > 0 && rowTot[r] === peak ? " peak" : "")+"'>"
        + rows[r] + "</td>";
-    if(act) h += "<td class='act'><input class='sp-act' data-act='"+r+"' name='sp.act."+r+"' value='"+esc(spAct(r))+"' aria-label='Activity, "+rows[r]+"' placeholder='\u2014'></td>";
+    if(act) h += "<td class='act'><input class='sp-act' data-act='"+r+"' name='sp.act."+r+"' value='"+esc(spActRaw(r))+"' aria-label='Activity, "+rows[r]+"' placeholder='\u2014'></td>";   /* v24.26 the box keeps the short form after the bar */
     for(let c=c0;c<c1;c++){
       const cell = cellOf(r,c), no = !cellObs(r,c), lv = no ? 0 : level(cell);
       if(state.cfg.mode === "count"){
@@ -4474,7 +4499,11 @@ function focusCell(r,c,tapped){
   el.focus(); if(el.scrollIntoView) el.scrollIntoView({block:"nearest"});
 }
 
+/* v24.26 (sp126, R-066) a count cell selects its number on focus, so a typed digit replaces it */
+onGrids("focusin", e => { const i = e.target; if(i && i.classList && i.classList.contains("count") && !i.readOnly) setTimeout(() => { try{ i.select(); }catch(x){} }, 0); });
 onGrids("keydown", e => {
+  { const dt = e.target.closest("input[data-date]");   /* v24.26 (sp126, R-066) an arrow on a header date does not step its year: down goes into the column */
+    if(dt && (e.key === "ArrowDown" || e.key === "ArrowUp")){ e.preventDefault(); if(e.key === "ArrowDown") focusCell(0, +dt.dataset.date); return; } }
   const el = e.target.closest("[data-r]");
   if(!el) return;
   const r = +el.dataset.r, c = +el.dataset.c;
@@ -4487,6 +4516,11 @@ onGrids("keydown", e => {
   if(e.key === "ArrowUp")    return go(-1,0);
   if(e.key === "ArrowRight" && el.tagName === "BUTTON") return go(0,1);
   if(e.key === "ArrowLeft"  && el.tagName === "BUTTON") return go(0,-1);
+  if(el.tagName === "INPUT" && el.classList.contains("count")){   /* v24.26 (sp126, R-066) left and right move the cell from the ends of the number, or with it selected */
+    const all = el.selectionStart === 0 && el.selectionEnd === el.value.length;
+    if(e.key === "ArrowRight" && (all || el.selectionEnd === el.value.length)) return go(0,1);
+    if(e.key === "ArrowLeft" && (all || el.selectionStart === 0)) return go(0,-1);
+  }
   if(el.tagName === "BUTTON" && /^[xX]$/.test(e.key) && !dayAbsent(c)){   /* v23.05 (review F91) X: not observed */
     e.preventDefault();
     const cell = cellOf(r,c); if(cell.x) delete cell.x; else cell.x = 1;
@@ -4784,6 +4818,7 @@ function loadBehaviors(d){
   if(list && list.length){
     state.behaviors = list.map(b => { const o = {meta: Object.assign({}, (b && b.meta) || {}), cells: (b && b.cells) || {}};
       if(b && b.obs2 && typeof b.obs2 === "object") o.obs2 = b.obs2;   /* v23.05 (I48) */
+      if(b && b.win && typeof b.win === "object") o.win = b.win;   /* v24.26 (E-16) the windows ticked */
       return o; });
     state.cur = Math.max(0, Math.min(state.behaviors.length-1, +d.cur || 0));
   }else{
@@ -4806,7 +4841,7 @@ function serialize(){
   /* v21.16 audit (F15): the date helpers travel with the record: "Add a sheet" dates new days from them */
   const cfg = Object.assign({}, state.cfg, { weekStart: $("#weekStart").value || "",
                                              mfOnly: !!$("#mfOnly").checked });
-  return { meta: state.meta, cfg: cfg, codes: state.codes,
+  return { form: "SP-1", meta: state.meta, cfg: cfg, codes: state.codes,   /* v24.26 (R-016) the file names its form */
            behaviors: state.behaviors, cur: state.cur };
 }
 function takeHelpers(c){
@@ -4866,7 +4901,9 @@ function renderLegendText(){
     ? "Shaded \u2014 the behavior occurred in this interval, any number of times."
     : cnt ? "Shaded \u2014 high rate: a count of " + t + " or more." : "Shaded \u2014 high rate: " + t + " or more in the interval.";
   const lx = $("#lgX"); if(lx) lx.textContent = "X \u2014 not observed (absent, pulled out, no sheet): left out of every count.";
-  const how = $("#lgHow"); if(how) how.textContent = one
+  const how = $("#lgHow"); if(how) how.textContent = cnt   /* v24.26 (sp126, R-066) the legend says what count mode does */
+    ? "Type the count in a cell (the number already there is replaced); X marks an interval not observed. Arrow keys move between cells, left and right from the ends of the number."
+    : one
     ? "Click a cell to switch it blank \u2194 shaded. Arrow keys move between cells; 0 clears a cell and 1 shades it."
     : "Click a cell to move it blank \u2192 slash \u2192 shaded. Arrow keys move between cells; 0, 1 and 2 set a cell directly.";
   const cm = $("#citeMode"); if(cm) cm.textContent = one ? CITE_ONE : CITE_TWO;
@@ -5041,7 +5078,7 @@ function staticClone(node){
     ["data-state","data-r","data-c"].forEach(a => { if(b.hasAttribute(a)) sp.setAttribute(a, b.getAttribute(a)); });
     sp.innerHTML = b.innerHTML; b.replaceWith(sp); });
   clone.querySelectorAll("table.scatter input.sp-act").forEach(i => {   /* v23.05 (I46) the activity as text on paper */
-    const sp = document.createElement("span"); sp.className = "sp-acttext"; sp.textContent = i.getAttribute("value") || ""; i.replaceWith(sp); });
+    const sp = document.createElement("span"); sp.className = "sp-acttext"; sp.textContent = spActShort(i.getAttribute("value") || ""); i.replaceWith(sp); });   /* v24.26 (R-068) */
   clone.querySelectorAll("table.scatter input.count").forEach(i => {
     const sp = document.createElement("span"); sp.className = "count"; sp.textContent = i.getAttribute("value") || ""; i.replaceWith(sp); });
   /* v22.31 the definition, examples and non-examples print whole: a text box prints at the height it has on screen, so on
@@ -5065,6 +5102,10 @@ function staticClone(node){
   clone.querySelectorAll("[id]:not([data-sp-keep])").forEach(e => e.removeAttribute("id"));
   clone.removeAttribute("id");
   clone.classList.add("sp-printed");
+  if(spBlank2){   /* v24.26 (sp126, E-43) the second observer's copy says whose it is */
+    const bar = document.createElement("div"); bar.className = "sp-sambar sp-obs2bar";
+    bar.innerHTML = "<b>SECOND OBSERVER</b><span>" + esc(spBlank2) + ": mark this copy on your own, from the written definition, on the same days; the two sheets are compared afterwards.</span>";
+    const band = clone.querySelector(".bar.nbh-band"); if(band) band.insertAdjacentElement("afterend", bar); else clone.insertBefore(bar, clone.firstChild); }
   /* v21.16 audit (F12): a grid too long for one page may break between rows, its headings repeated */
   if(spPrinting && spSplit && clone.querySelector("table.scatter")) clone.classList.add("sp-split");
   /* the row and column sizes live on <html>, which the packet does not carry */
@@ -5087,9 +5128,17 @@ function buildPrintSet(mode){
     useBeh(i, true);
     /* v23.79 each data sheet's rows take what its own page has left: sheet 1 has the fields, the last the legend */
     const nR = rowLabels().length, pgs = $$("#spPages .sp-page"), own = (el, k, less) => { if(!spSplit) el.style.setProperty("--rowh", spRowsOf(k, nR, spPrinting, less) + "px"); return el; };
-    out.push(own(staticClone($("#sheet")), pgs.length ? "first" : "only", (i === 0 && mode === "packet" ? 32 : 0) + sm));
+    out.push(own(staticClone($("#sheet")), pgs.length ? "first" : "only", (i === 0 && mode === "packet" ? 32 : 0) + sm + spSetExtra()));   /* v24.26 (R-068) a Setting on two lines takes its room from the rows */
     if(i === 0 && state.cfg.guide && mode !== "packet") out.push(spGuide());   /* v23.05 (review I50) on the back of the first sheet */
     pgs.forEach((p, k) => out.push(own(staticClone(p), k === pgs.length - 1 ? "last" : "cont", sm)));
+    /* v24.26 (sp126, E-43) a second observer on this record: a blank, labeled copy of the same sheet for them; the sample sheet: an answer key */
+    if(!real && b.obs2 && Object.keys(b.obs2).length){
+      const keepC = b.cells; b.cells = {}; state.cells = b.cells; spBlank2 = String(state.meta.ioaObs || "").trim() || "the second observer";
+      try{ render(); out.push(own(staticClone($("#sheet")), pgs.length ? "first" : "only", sm + 45 + spSetExtra()));   /* the bar takes its 45 px from the rows */
+        Array.from(document.querySelectorAll("#spPages .sp-page")).forEach((p, k, arr) => out.push(own(staticClone(p), k === arr.length - 1 ? "last" : "cont", sm + 45))); }
+      finally{ b.cells = keepC; state.cells = b.cells; spBlank2 = ""; render(); }
+    }
+    if(real) out.push(spSampleKey(i));
     if(summaryData().marked > 0){
       out.push(staticClone($("#summary")));
       out.push(staticClone($("#control")));
@@ -5224,6 +5273,21 @@ $("#addSheet").addEventListener("click", () => {
    activity column, when it names them; fixed intervals when it does not), one X for an interval not observed, a few
    stray marks elsewhere, so the sheet reads as a week with a pattern, not a wall of marks. */
 let spSampleOn = false;
+let spBlank2 = "";   /* v24.26 (sp126, E-43) the second observer's name while their blank copy is drawn */
+/* v24.26 (sp126, E-43) the answer key for the sample sheet: the sample's marks, interval by interval, for whoever checks a practice copy */
+function spSampleKey(bi){
+  const pg = document.createElement("div"); pg.className = "sheet sp-printed sp-samplekey";
+  const head = document.querySelector("#sheet .nbh-print-head"); if(head) pg.appendChild(head.cloneNode(true));
+  const rows = rowLabels(), cols = dayLabels(), b = state.behaviors[bi] || {meta:{}}, cells = spSampleCells(bi), cnt = state.cfg.mode === "count", one = oneLevel();
+  const nm = (b.meta && b.meta.behavior) || ("Behavior " + (bi+1));
+  let h = "<div class='bar nbh-band'>Answer Key for the Sample Sheet</div><p class='cap'>" + esc(nm) + ": the marks on the SAMPLE sheet, interval by interval, for the trainer who checks a practice copy. Not the student\u2019s data.</p>"
+    + "<table class='rank sp-keyt'><thead><tr><th>Interval</th>" + cols.map(c => "<th class='n'>" + esc(c) + "</th>").join("") + "</tr></thead><tbody>";
+  rows.forEach((lab, r) => { h += "<tr><th scope='row'>" + esc(lab) + "</th>" + cols.map((c, ci) => { const x = cells[r + "_" + ci]; const lv = x ? level(x) : 0;
+    const t = !x ? "" : cnt ? String(x.n == null ? "" : x.n) : (one || lv === 2) ? "\u25a0" : lv === 1 ? "/" : ""; return "<td class='n'>" + t + "</td>"; }).join("") + "</tr>"; });
+  h += "</tbody></table><p class='cap'>" + (cnt ? "A number is the count written in the cell" + (one ? "" : "; " + thr() + " or more is high rate") : one ? "\u25a0 shaded: the behavior occurred" : "/ a slash: low rate; \u25a0 shaded: high rate") + "; an empty cell is blank.</p>";
+  const body = document.createElement("div"); body.innerHTML = h; while(body.firstChild) pg.appendChild(body.firstChild);
+  return pg;
+}
 function spSampleRows(){
   const nR = rowLabels().length, hot = [], act = Array.isArray(state.cfg.activity) ? state.cfg.activity : [];
   const HOT = /transition|independent|math|writing|work|demand|arriv|return|pack|seat|group/i;
@@ -5253,7 +5317,7 @@ const SP_SAMPLE_NOTE = "Example marks on this student’s sheet, to show how it 
 function spSamplePages(){
   spSampleOn = true; let out = [];
   try{ out = buildPrintSet(); } finally { spSampleOn = false; }
-  out = out.filter(n => n.querySelector("table.scatter") && !n.classList.contains("sp-guide"));   /* the data sheets only */
+  out = out.filter(n => (n.querySelector("table.scatter") && !n.classList.contains("sp-guide")) || n.classList.contains("sp-samplekey"));   /* the data sheets, and the answer key (v24.26) */
   out.forEach(n => {
     n.classList.add("sp-sample");
     const t = n.querySelector(".nbh-print-title"); if(t) t.textContent = t.textContent.replace(/\s*— SAMPLE$/, "") + " — SAMPLE";
@@ -5482,9 +5546,9 @@ async function loadSim(){
     const R = spIoa(); state.meta.ioa = String(R.total); state.meta.ioaNote = spIoaText(R, true); commitBeh(); }
 
   syncToolbar(); renderCodes(); renderMeta(); renderBehBar(); render();
-  const seg=document.querySelector('#viewSeg button[data-view="summary"]');
-  if(seg) seg.dispatchEvent(new MouseEvent("click",{bubbles:true}));
-  nbhUI.toast('Simulation loaded: ' + 'two simulated behaviors, aggression and elopement, each on its own data sheet.', {kind:'ok'});
+  { const seg=document.querySelector('#viewSeg button[data-view="sheet"]');   /* v24.26 (sp126, R-133) the view stays on the sheet the toast describes */
+    if(seg) seg.dispatchEvent(new MouseEvent("click",{bubbles:true})); }
+  nbhUI.toast('Simulation loaded: two simulated behaviors, aggression and elopement, each on its own data sheet; the Pattern summary and Control chart tabs read them.', {kind:'ok'});
 }
 
 $("#simBtn").addEventListener("click", loadSim);
@@ -5510,9 +5574,21 @@ $("#loadBtn").addEventListener("click", () => $("#fileIn").click());
 $("#fileIn").addEventListener("change", e => {
   const f = e.target.files[0]; if(!f) return;
   const rd = new FileReader();
-  rd.onload = () => {
+  rd.onload = async () => {
+    /* v24.26 (sp126, R-016) the file is read for what it is before anything on screen changes: a file another form saved, or one
+       that is not a scatter plot, is refused as the other forms refuse; a record with marks asks before it is replaced */
+    let d = null; try{ d = JSON.parse(rd.result); }catch(err){ d = null; }
+    const obj = d && typeof d === "object" ? d : null;
+    const other = obj ? (obj.packet ? "PACKET" : (obj.form && obj.form !== "SP-1" ? String(obj.form) : (obj.meta && obj.meta.form && obj.meta.form !== "SP-1" ? String(obj.meta.form) : ""))) : "";
+    const isSp = !!obj && !other && (Array.isArray(obj.behaviors) || (obj.cells && typeof obj.cells === "object"));
+    if(!isSp){
+      nbhUI.toast(other === "PACKET" ? "That file is a student packet, not a saved scatter plot; open it in the workstation. Nothing was changed."
+        : other ? "That file was saved by Form " + other + ", not by Form SP-1. Nothing was changed."
+        : "That file could not be read as a saved scatter plot. Nothing was changed.", {kind:"warn"});
+      e.target.value = ""; return; }
+    const held = (state.behaviors || []).reduce((n, b) => n + Object.keys((b && b.cells) || {}).filter(k => { const x = b.cells[k]; return x && (x.s > 0 || x.n > 0 || x.x); }).length, 0);
+    if(held && !(await nbhUI.confirm("Replace the record on screen (" + held + " marked cell" + (held === 1 ? "" : "s") + ") with the file\u2019s?\nThe marks on screen are not kept.", {ok:"Replace"}))){ e.target.value = ""; return; }
     try{
-      const d = JSON.parse(rd.result);
       state.meta = Object.assign({}, d.meta || {});
       Object.assign(state.cfg,  d.cfg  || {});
       if(!d.cfg || d.cfg.levels === undefined) state.cfg.levels = 2;
@@ -5967,12 +6043,67 @@ function controlData(){
     ? y.reduce((a,v) => a + (v-mean)*(v-mean), 0) / (k-1) : 0;
   const sSD = Math.sqrt(varc);
 
-  const sigma = (state.cfg.sigma === "sd") ? sSD : sMR;
+  /* v24.26 (sp126, R-015) the sample SD is not used where +2 SD by it sits at or above the highest sum an interval can reach */
+  const top = (oneLevel() ? 1 : 2) * nObs, sdDead = mean + 2*sSD >= top - 1e-9;
+  const sigma = (state.cfg.sigma === "sd" && !sdDead) ? sSD : sMR;
   const hits = sigma > 0 ? detectSignals(y, mean, sigma) : [];
   const flagged = new Set();
   hits.forEach(h => h.idx.forEach(i => flagged.add(i)));
 
-  return {d, n: nObs, nAll: n, scaled, k, y, total, mean, sigma, sMR, sSD, hits, flagged};
+  return {d, n: nObs, nAll: n, scaled, k, y, total, mean, sigma, sMR, sSD, hits, flagged, top, sdDead};
+}
+/* ---------- v24.26 (sp126, R-015, E-16, E-17) what the run rules cannot see on a short record ---------- */
+function spCeiling(a){
+  const top = a.top != null ? a.top : (oneLevel() ? 1 : 2) * a.n, atTop = [], lonely = [], lim2 = a.mean + 2*a.sigma;
+  a.y.forEach((v, i) => { if(v >= top - 1e-9) atTop.push(i); if(v > lim2 && !a.flagged.has(i)) lonely.push(i); });
+  return {top, atTop, lonely, lim2, na: atTop.length > 0 || lim2 >= top - 1e-9, sdDead: a.mean + 2*a.sSD >= top - 1e-9};
+}
+/* P(X >= k) for X ~ Binomial(n, p): the chance of k or more days marked by the base rate alone */
+function spBinomTail(n, k, p){
+  if(k <= 0) return 1; if(p <= 0) return 0; if(p >= 1) return 1;
+  let q = Math.pow(1-p, n), s = 0;
+  for(let i=0;i<=n;i++){ if(i >= k) s += q; q = q * (n - i) / (i + 1) * p / (1 - p); }
+  return Math.min(1, Math.max(0, s));
+}
+function spScreenData(a){
+  const d = a.d, p = d.cellsObs ? d.marked / d.cellsObs : 0, rows = [];
+  for(let r=0;r<d.nR;r++){ const o = d.perRow[r].obs, m = d.perRow[r].low + d.perRow[r].high; if(!o) continue;
+    const P = spBinomTail(o, m, p); rows.push({r, o, m, P, flag: m >= 2 && m/o > p && P < 0.05}); }
+  return {p, rows, flagged: rows.filter(x => x.flag)};
+}
+function spScreen(a){
+  const S = spScreenData(a), d = a.d, pct = v => Math.round(v*100) + "%";
+  const pf = P => P < 0.001 ? "p < .001" : "p = " + P.toFixed(3).replace(/^0/, "");
+  const one = x => d.rows[x.r] + " (" + x.m + " of " + x.o + " days, " + pf(x.P) + ")";
+  return "<div class='sp-screen'><h3 style='font-family:var(--sans);font-size:11.5px;margin:0 0 4px'>Short-record screen</h3>"
+    + "<p class='cap'>For each interval, the days it was marked against the record\u2019s base rate (" + d.marked + " of " + d.cellsObs
+    + " cells marked, " + pct(S.p) + "), by a one-sided binomial test at \u03b1 = .05: a screening convention for a record shorter than the study\u2019s, "
+    + "not one of the Kahng criteria. " + (S.flagged.length ? "Marked on more days than the base rate predicts: " + esc(S.flagged.map(one).join("; ")) + "."
+    : "No interval is marked on more days than the base rate predicts.") + "</p>"
+    + "<p class='cap sp-verdict'><b>Pattern verdict:</b> " + (S.flagged.length
+      ? "the behavior clusters in " + S.flagged.length + " interval" + (S.flagged.length === 1 ? "" : "s") + " \u2014 " + esc(S.flagged.map(x => d.rows[x.r]).join("; "))
+        + " \u2014 whatever the run rules below say: they were built for 30-day, all-day records and cannot see a one- or two-interval pattern on a short one."
+      : "no interval stands out from the day\u2019s base rate on this record; a quiet chart below agrees.") + "</p></div>";
+}
+function spWinCands(a){
+  const X = spCeiling(a), S = spScreenData(a), by = {};
+  const add = (i, why) => { (by[i] = by[i] || []).push(why); };
+  a.hits.forEach(h => h.idx.forEach(i => add(i, "criterion " + h.c)));
+  X.lonely.forEach(i => { const x = S.rows.find(r => r.r === i); if(x && x.m >= Math.max(2, 0.5 * x.o)) add(i, "above +2 SD, no rule"); });   /* a lone mark on a quiet record is named above, not sent */
+  X.atTop.forEach(i => add(i, "at the maximum, every day observed"));
+  S.rows.forEach(x => { if(x.o >= 3 && x.m / x.o >= 0.8 && !(by[x.r] || []).some(w => /maximum/.test(w))) add(x.r, "marked on " + x.m + " of " + x.o + " days"); });
+  return Object.keys(by).map(Number).sort((p, q) => p - q).map(i => ({i, why: by[i].filter((w, k, arr) => arr.indexOf(w) === k)}));
+}
+function spWinBeh(){ return (state.behaviors || []).find(x => x && x.cells === state.cells) || state.behaviors[state.cur] || {}; }
+function spWinOn(i){ const w = spWinBeh().win || {}; return w[i] === undefined ? true : !!w[i]; }
+function spWinPick(a){
+  const C = spWinCands(a); if(!C.length) return "";
+  const W = spWindows();
+  return "<div class='sp-winpick noprint'><b>Send these windows</b> to Forms OB-1 and ABC-1 with the case (untick one to keep it back):"
+    + C.map(c => "<label><input type='checkbox' data-win='" + c.i + "'" + (spWinOn(c.i) ? " checked" : "") + "> " + esc(a.d.rows[c.i]) + " <small>" + esc(c.why.join("; ")) + "</small></label>").join("") + "</div>"
+    + "<p class='cap sp-win'>Observation windows, sent with the case to Forms OB-1 and ABC-1: " + (W.length
+      ? esc(W.map(w => w.from + " \u2013 " + w.to + (w.activity ? " (" + w.activity + ")" : "") + " [" + w.why.join("; ") + "]").join("; ")) + "."
+      : "none ticked.") + "</p>";
 }
 
 function detectSignals(y, mean, sigma){
@@ -6093,14 +6224,17 @@ function spanLabel(a, h){
    flagged intervals with its times, the activity when the sheet has the column, and the criteria it met; they go to the
    case with the evidence (windows), by behavior */
 function spWindows(){
-  const a = controlData(); if(!a.hits.length) return [];
-  const idx = Array.from(a.flagged).sort((x, y) => x - y), runs = [];
-  idx.forEach(i => { const r = runs[runs.length - 1]; if(r && i === r[1] + 1) r[1] = i; else runs.push([i, i]); });
+  /* v24.26 (sp126, E-16) the windows are the ticked candidates: rule-flagged, above +2 SD with no rule, at the maximum, or marked on
+     80% or more of the days observed; each run carries why it is there */
+  const a = controlData(); if(!a.total) return [];
+  const C = spWinCands(a).filter(c => spWinOn(c.i)); if(!C.length) return [];
+  const runs = [];
+  C.forEach(c => { const r = runs[runs.length - 1]; if(r && c.i === r.to + 1){ r.to = c.i; c.why.forEach(w => { if(!r.why.includes(w)) r.why.push(w); }); } else runs.push({from: c.i, to: c.i, why: c.why.slice()}); });
   const iv = state.cfg.interval, s0 = state.cfg.startMin;
-  return runs.map(([f, t]) => {
-    const acts = []; for(let r=f;r<=t;r++){ const x = spAct(r); if(x && !acts.includes(x)) acts.push(x); }
+  return runs.map(r => {
+    const f = r.from, t = r.to, acts = []; for(let k=f;k<=t;k++){ const x = spAct(k); if(x && !acts.includes(x)) acts.push(x); }
     const o = {from: fmt(s0 + f*iv), to: fmt(s0 + (t+1)*iv), start: s0 + f*iv, end: s0 + (t+1)*iv,
-               criteria: Array.from(new Set(a.hits.filter(h => h.idx.some(i => i >= f && i <= t)).map(h => h.c))).sort()};
+               criteria: Array.from(new Set(a.hits.filter(h => h.idx.some(i => i >= f && i <= t)).map(h => h.c))).sort(), why: r.why};
     if(acts.length) o.activity = acts.join(", ");
     return o;
   });
@@ -6218,14 +6352,17 @@ function renderControl(){
     + "one of the four criteria below. Lower limits are not drawn, following the paper, because "
     + "the scatter plot is used to find periods of high responding.</p>"
     + chartBox(xmrChart(a), "Control chart, sum of interval values across days") + "</div>";
+  html += spScreen(a);   /* v24.26 (sp126, E-17) */
 
   html += "<div class='noprint' style='margin:-8px 0 16px;font-family:var(--sans);"
     + "font-size:11.5px;color:var(--ink-soft)'>Sigma estimated from "
     + "<select id='sigmaSel' style='font:inherit'>"
     + "<option value='mr'"+(state.cfg.sigma!=="sd"?" selected":"")
     + ">the average moving range (Wheeler)</option>"
-    + "<option value='sd'"+(state.cfg.sigma==="sd"?" selected":"")
-    + ">the sample standard deviation</option></select></div>";
+    + "<option value='sd'"+(state.cfg.sigma==="sd"?" selected":"")+(a.sdDead?" disabled":"")
+    + ">the sample standard deviation</option></select>"
+    + (a.sdDead ? " <span class='sp-sddead'>The sample-SD option is greyed: with it, +2 SD (" + (a.mean + 2*a.sSD).toFixed(1) + ") would sit above the highest sum an interval can reach ("
+      + a.top + "), so it could flag nothing on this record.</span>" : "") + "</div>";   /* v24.26 (sp126, R-015) */
 
   /* v21.16 audit (F12): the criteria heading, table and the note under them print as one block */
   html += "<div class='sp-crit'><h3 style='font-family:var(--sans);font-size:11.5px;margin:0 0 6px'>"
@@ -6237,25 +6374,33 @@ function renderControl(){
     html += "<tr><td>"+CRITERIA[c].label+"</td><td>"+CRITERIA[c].text+"</td><td>"
       + (got.length
           ? got.map(h => esc(pointsLabel(a, h.idx))).join("<br>")
-          : "<span style='color:var(--ink-soft)'>not met</span>")
+          : "<span style='color:var(--ink-soft)'>" + (spCeiling(a).na ? "not applicable on this record" : "not met") + "</span>")
       + "</td></tr>";
   });
   html += "</tbody></table>";
 
+  const X = spCeiling(a);   /* v24.26 (sp126, R-015) */
+  if(X.lonely.length) html += "<p class='cap sp-lonely'>Above +2 SD but no rule fires (no neighbor above the limit): " + esc(X.lonely.map(i => a.d.rows[i]).join("; ")) + ".</p>";
+  if(X.na){
+    html += "<div class='warn sp-na' style='margin-top:12px'><b>CRITERIA NOT APPLICABLE</b>"
+      + (X.atTop.length ? X.atTop.length + " interval" + (X.atTop.length === 1 ? "" : "s") + " at the maximum (" + esc(X.atTop.map(i => a.d.rows[i]).join("; ")) + ": "
+          + (oneLevel() ? "an occurrence" : "a high rate") + " on every day observed). "
+        : "The +2 SD line (" + X.lim2.toFixed(1) + ") sits at or above the highest sum an interval can reach (" + X.top + "). ")
+      + "The run rules were built for 30-day, all-day records and cannot tell such intervals apart from the day; read the pattern summary and the short-record screen above"
+      + (a.hits.length ? " (the rule that fired is listed in the table)" : "") + "." + ceilingNote(a) + "</div>";
+  }
   if(a.hits.length){
     html += "<p class='cap' style='margin-top:9px'>These intervals are out of statistical control: "
       + "more behavior falls there than the day as a whole would predict. Cross-reference them "
       + "against the schedule — the activity, the staff member, the demand, the transition — and "
       + "test what you find.</p>";
-    const W = spWindows();   /* v23.05 (review I49) */
-    if(W.length) html += "<p class='cap sp-win'>Observation windows, sent with the case to Forms OB-1 and ABC-1: "
-      + esc(W.map(w => w.from + " \u2013 " + w.to + (w.activity ? " (" + w.activity + ")" : "")).join("; ")) + ".</p>";
-  }else{
+  }else if(!X.na){
     html += "<div class='warn' style='margin-top:12px'><b>NO CRITERION WAS MET</b>"
       + "Three of the 15 records in the study also met none of the criteria. This is not "
       + "evidence that the behavior has no pattern in <em>time of day</em>: it means no interval stood out "
       + "by these criteria at this interval length and record length." + ceilingNote(a) + "</div>";
   }
+  html += spWinPick(a);   /* v24.26 (sp126, E-16) the windows, ticked, sent with the case */
 
   html += "</div>";
   body.innerHTML = html;
@@ -6266,6 +6411,9 @@ function renderControl(){
     state.cfg.sigma = e.target.value;
     renderControl();
   });
+  /* v24.26 (sp126, E-16) a tick on a window is kept with the behavior */
+  Array.from(document.querySelectorAll("#ctlBody [data-win]")).forEach(cb => cb.addEventListener("change", e => {
+    const b = state.behaviors[state.cur]; if(!b) return; b.win = b.win || {}; b.win[+e.target.dataset.win] = e.target.checked; renderControl(); }));
 }
 
 function methodNote(a){
@@ -6353,8 +6501,8 @@ function weekdayTable(d){
     + L.map(o => "<th class='n' scope='col'>" + DAYNAMES[o.w] + " (" + o.days + ")</th>").join("") + "</tr></thead><tbody>"
     + row("Marked a day", o => spF1(o.per)) + (one ? "" : row("High rate a day", o => spF1(o.hiPer)))
     + (cnt ? row("Occurrences a day", o => spF1(o.occPer)) : "") + "</tbody></table>"
-    + "<p class='cap sp-wkrule'>Per day observed. The first line names a weekday that, over two of its days or more, averages half as many "
-    + "intervals marked again as the lightest, and at least one more.</p></div>";
+    + "<p class='cap sp-wkrule'>Per day observed. A weekday is flagged when, over at least two of its days, it averages at least 1.5 times the lightest "
+    + "weekday\u2019s intervals marked, and at least one more interval. This is a screening convention, not a test.</p></div>";
 }
 function summaryLine(d){
   const cells = d.cellsObs;

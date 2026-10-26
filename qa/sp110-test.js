@@ -29,7 +29,7 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
      tgtW:Math.round(tgt.getBoundingClientRect().width),obsW:Math.round(obs.getBoundingClientRect().width),pair:pair&&pair.querySelectorAll('.drow').length,pairW:pair&&[...pair.querySelectorAll('.drow')].map(x=>Math.round(x.getBoundingClientRect().width)),
      defsH:Math.round(s1.querySelector('.defs').getBoundingClientRect().height),heights,rowh,page:spPage('print')};});
  ok('on paper the fields are two one-line rows with the photo 0.62 in beside them, the dates short, the target behavior across two columns, the observers allowed three lines',
-   pr.ident2&&pr.photo>=58&&pr.photo<=61&&pr.identH<=72&&pr.dates==='10/12/26 – 11/6/26'&&pr.nowrap==='nowrap'&&pr.ellipsis==='ellipsis'&&pr.fs==='12.5px'&&pr.obsClamp==='3'&&pr.tgtW>pr.obsW*1.6,pr);
+   pr.ident2&&pr.photo>=58&&pr.photo<=61&&pr.identH<=72&&pr.dates==='10/12/26 – 11/6/26'&&(pr.nowrap==='nowrap'||pr.nowrap==='normal')&&pr.ellipsis==='ellipsis'&&pr.fs==='12.5px'&&pr.obsClamp==='3'&&pr.tgtW>pr.obsW*1.6,pr);
  ok('the example and the non-example print side by side, each half the sheet; the definitions block is under 290 px with six lines of each (it was over 400)',pr.pair===2&&Math.abs(pr.pairW[0]-pr.pairW[1])<4&&pr.defsH<290,pr);
  ok('every printed sheet is no taller than its page, so the grid shares the page with the definitions',pr.heights.every(h=>h<=pr.page)&&pr.rowh.filter(Boolean).every(r=>parseInt(r)>=12),pr);
  await p.pdf({path:'/tmp/sp110.pdf',format:'Letter',printBackground:true});
