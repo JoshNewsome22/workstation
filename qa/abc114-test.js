@@ -31,8 +31,8 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
    hb.texts[0]>hb.lines[0]+4&&Math.abs(hb.texts[1]-(hb.rects[1]+7))<0.6,hb);
  const mc=await p.evaluate(()=>{const panel=document.querySelector('.toolbar .abc-panel');const cols=[...panel.querySelectorAll('.abc-col')];const col=id=>{const e=document.getElementById(id);const c=e&&e.closest('.abc-col');return c?cols.indexOf(c):-1;};
    const grp=document.getElementById('load-demo').closest('.tgroup');return {heads:cols.map(c=>c.querySelector('h4').textContent),photo:col('abcPhotoPick'),video:col('abcVideo'),save:col('dl-json'),sim:col('load-demo'),resetLabel:grp.firstElementChild.textContent,files:cols[1].querySelectorAll('.tgroup').length};});
- ok('More controls: Printing and the paper sheets holds the photo and video groups, Files holds the files only, the reset group has its own label',
-   mc.heads.join('|')==='Printing and the paper sheets|Files|Simulation and reset'&&mc.photo===0&&mc.video===0&&mc.save===1&&mc.files===1&&mc.sim===2&&mc.resetLabel==='The worked example, or starting over',mc);
+ ok('More controls: Printing and the paper sheets holds the photo and video groups, Files holds the files and (v24.33) the paper-sheet scan, the reset group has its own label',
+   mc.heads.join('|')==='Printing and the paper sheets|Files|Simulation and reset'&&mc.photo===0&&mc.video===0&&mc.save===1&&mc.files===2&&mc.sim===2&&mc.resetLabel==='The worked example, or starting over',mc);
  /* the TB-1 definition on the Record tab */
  const tb=await p.evaluate(()=>{abcAddTargets([{label:'Hitting peers with an open hand',def:'Open-hand contact with a peer with enough force to be heard across the room.'}]);
    const o=document.querySelector('#abc-grid [data-opt="b-tb_hitting_peers_with_an_open_h"]');const d=o&&o.querySelector('label .abc-tbdef');return {tag:!!(o&&o.querySelector('.abc-tb')),def:d&&d.textContent,block:d&&getComputedStyle(d).display,title:o&&o.title};});

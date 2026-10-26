@@ -9905,6 +9905,41 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.33: Form ABC-1 reads a completed paper sheet from a photo
+(asked for on 10/26 with the Scatterplot scan: "maybe the same thing for the abc data sheet")
+
+- **On paper, the incident sheet and the classroom sheet now carry** four small black square rings at the sheet's corners
+  (two beside the head; on the incident sheet two at the ends of the outcome row, on the classroom sheet two in the foot),
+  a square code in the head between the logo and the title, and a few words in the band ("from a photo: Scan a paper
+  sheet on the workstation"). The code names the student box, the kind of sheet and a short signature of the box layout
+  as it was printed; the SAMPLE sheet's code says it is the sample. The sheets stay one page (the incident sheet grows
+  by two pixels in the head). The background sample sheet is unchanged (its checks are entered by hand).
+- **Every box on the printed sheet now has an id** (the Yes/No of Adult within view and the 1–5 of Peak intensity included),
+  and when a sheet is printed its layout (where every box sits on the paper) is kept with the record, the newest six
+  layouts, in the record's header beside the photo and the video link. So a sheet printed before the record's Form TB-1
+  targets or the classroom sheet's codes changed is still read afterwards; a sheet whose layout the record does not hold
+  is read when the record as it stands prints the same layout, and refused otherwise, with the reason.
+- **Scan a paper sheet** (toolbar, under More controls beside Files) takes a photo with the camera or from the camera
+  roll. On the device, with no server, the form reads the code, finds the four corner rings (the two beside the code
+  first, then the two far ones from the turn and scale those give), straightens the sheet, registers every
+  box on its own printed rule (a phone's lens bends the sheet a little) and reads the middle of it: any mark is a tick.
+  It draws what it read over the photo (green ticked, amber unsure, red the corners), lists the boxes it is unsure of with
+  a choice for each, and on **Tick the incident editor** clears the editor and ticks the boxes: the antecedents, the
+  behavior (a Form TB-1 target among them), what came before, the setting events, the consequences, the outcome and the
+  resolution, Adult within view and the intensity; the Record tab opens with a note to add the date, time, activity and
+  the description, then Save incident. An editor holding unsaved entries is replaced only after a further yes. The photo
+  is not kept.
+- **What it refuses, and says why:** a photo with no sheet code; the SAMPLE sheet; another student's sheet (the student
+  box, matched without regard to case); the background sample sheet; a code of another form; a sheet printed from a
+  different set-up that the record no longer holds; a photo in which fewer than four corner rings can be found. When
+  more than a quarter of the boxes are unsure it asks for a better photo.
+- The decoder is jsQR 1.4.0 (Apache License 2.0, tools/vendor/jsqr, inlined as in Form SP-1). The corner marks are rings
+  (a black square with a white middle) so that a filled box, a logo shape or a code's finder pattern is never taken for
+  one; a small code is sought in the whole picture and then in each half at twice the size.
+- Tests: qa/abc133-test.js (the printed sheets' rings, code and kept layout; one page each; a photo of a ticked sheet, a
+  pen's ticks drawn on it, skewed and softened, read back at 97% or better with few unsure boxes; Tick the incident
+  editor; the replace question; the refusals; a sheet printed before a new TB-1 target still read).
+
 ### v24.32: Form SP-1 reads a completed paper sheet from a photo
 (asked for on 10/26: a code on the paper sheet so a photo of the filled-in sheet enters the marks for that student, behavior and date range)
 
