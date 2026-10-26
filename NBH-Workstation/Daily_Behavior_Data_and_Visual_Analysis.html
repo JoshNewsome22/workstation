@@ -533,6 +533,8 @@ td input,td select{max-width:100%}
 .sd-key{margin-top:9px;padding-top:7px;border-top:1px solid var(--rule-soft);font-size:11px;color:var(--ink-soft);line-height:1.45}
 .sd-only .sd-key{margin-top:0;padding-top:0;border-top:0}
 .sheet .pdate{display:none}
+/* v24.35 (E-38) the graphs alone: each behavior's heading, definition, graph and key; the analysis tables, the across-condition cards and the sources stay off the paper */
+@media print{body.dd-pr-graphs #resultsOut .behavior-report .dd-keep:not(:first-child),body.dd-pr-graphs #resultsOut .behavior-report > .sec-title,body.dd-pr-graphs #resultsOut .cmp-card,body.dd-pr-graphs #ddSources,body.dd-pr-graphs #resultsOut .behavior-report .dd-keep:first-child > .hint{display:none!important}}
 /* v24.34 the entry from a photo: corner rings, the sheet's code and the row marks print; on screen none of it shows */
 .dd-fid,.dd-code,.dd-rc,tfoot.dd-scanfoot{display:none}
 #ddScanDlg{border:1px solid #c9d4d2;border-radius:6px;padding:0;max-width:1100px;width:calc(100% - 32px);font-family:var(--sans,system-ui,sans-serif);font-size:13px;color:#16242e;background:#fff}
@@ -1932,6 +1934,9 @@ document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest
         <label class="field" style="margin-left:auto"><span>Page</span>
           <select id="p_orient"><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select>
         </label>
+        <label class="field"><span>Print</span>
+          <select id="p_what" title="The whole report, or the graphs alone (one behavior by the Behavior choice above)"><option value="">Graphs and the analysis</option><option value="graphs">Graphs only</option></select>
+        </label><!-- v24.35 -->
         <button class="btn" id="btnPrint">Print / Save as PDF</button>
       </div>
     </div>
@@ -4838,7 +4843,8 @@ $("#r_imm").addEventListener("change",e=>{S.settings.imm=parseInt(e.target.value
 $("#r_behavior").addEventListener("change",renderResults);
 [["#c_env","showEnv"],["#c_level","showLevel"],["#c_trend","showTrend"],["#c_tlab","trendLabels"],["#c_cond","showCond"],["#c_labels","showLabels"],["#c_tod","showTod"],["#c_heat","showHeat"]]
   .forEach(([sel,key])=>$(sel).addEventListener("change",e=>{S.settings[key]=e.target.checked; renderResults();}));
-$("#btnPrint").addEventListener("click",()=>printTab("Graphs and visual analysis"));
+$("#btnPrint").addEventListener("click",()=>{const g=$("#p_what")&&$("#p_what").value==="graphs";document.body.classList.toggle("dd-pr-graphs",g);printTab(g?"Graphs":"Graphs and visual analysis");});   /* v24.35 (E-38) */
+window.addEventListener("afterprint",()=>document.body.classList.remove("dd-pr-graphs"));
 
 // files
 // header actions (same set on every NBH form)

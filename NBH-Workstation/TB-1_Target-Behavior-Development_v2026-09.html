@@ -567,6 +567,13 @@ table.grid td.c input[type=number]{width:56px}
 @media print{.figure{page-break-inside:avoid}table.grid#prTbl{font-size:9.5px}}
 /* v23.17 (review F39, F35) */
 @media print{#rrbTpl[data-used="0"]{display:none!important}body.tb-defs-only #guide,body.tb-defs-only #refs{display:none!important}}
+#tbStaff{display:none}
+@media print{body.tb-staff-only .sheet:not(#tbStaff){display:none!important}body.tb-staff-only #tbStaff{display:block!important}
+  #tbStaff .tbs-lead{margin:0 0 8px}
+  #tbStaff .tbs-card{break-inside:avoid;border-left:4px solid #182e43;padding:3px 8px 4px;margin:0 0 6px;font-size:9.5pt;line-height:1.25}
+  #tbStaff .tbs-card h3{margin:0 0 3px;font-size:12pt}#tbStaff .tbs-card h3 small{font-weight:400;font-size:9pt;color:#54676f;margin-left:8px}
+  #tbStaff .tbs-row{display:grid;grid-template-columns:118px 1fr;gap:0 8px;margin:0 0 2px}#tbStaff .tbs-row b{color:#54676f;font-weight:600;font-size:8.8pt}
+  #tbStaff .tbs-sig{display:flex;gap:24px;margin-top:14px}#tbStaff .tbs-sig span{flex:1;border-top:1px solid #54676f;padding-top:3px;font-size:9pt;color:#54676f}}
 #ioaBody tr.ioa-low td{background:#FBE9E5}#ioaBody tr.ioa-low input[name$=".a"]{color:#9B2C1C;font-weight:700}
 
 .method b{display:inline;margin:0;font-size:inherit;font-family:inherit;color:var(--ink)}
@@ -936,7 +943,7 @@ th.tb1-xh{width:34px}
     <div class="row">
       <button id="simBtn">Load simulation</button>
       <button class="primary" id="printBtn">Print / Save as PDF</button>
-      <select id="tbPrintWhat" aria-label="What to print" style="font:inherit;font-size:12px"><option value="">The whole form</option><option value="defs">The definitions only (sheets 2 to 5)</option></select>
+      <select id="tbPrintWhat" aria-label="What to print" style="font:inherit;font-size:12px"><option value="">The whole form</option><option value="defs">The definitions only (sheets 2 to 5)</option><option value="staff">Definitions for staff (one page)</option></select>
       <button id="saveBtn">Save data</button>
       <button id="loadBtn">Open data</button>
       <button id="clearBtn">Clear all</button>
@@ -2050,8 +2057,26 @@ const tbcSoon=()=>{if(tbcOn)return;clearTimeout(tbcT);tbcT=setTimeout(()=>{tbcOn
 function tbTplUsed(){const w=$('#rrbTpl');if(!w)return;const used=$$('#rrbTpl [name]').some(e=>e.type==='checkbox'?e.checked:String(e.value||'').trim()!=='')
   ||$$('#tgtWrap [name$=".def"]').some(e=>/^RRB episode\b/i.test(String(e.value||'').trim()));w.dataset.used=used?'1':'0';}
 ['loadRrb','fillRrb'].forEach(id=>{const b=document.getElementById(id);if(b)b.addEventListener('click',()=>setTimeout(tbTplUsed,0));});
-window.addEventListener('beforeprint',()=>{try{tbTplUsed();}catch(e){}const w=document.getElementById('tbPrintWhat');document.body.classList.toggle('tb-defs-only',!!(w&&w.value==='defs'));});
-window.addEventListener('afterprint',()=>document.body.classList.remove('tb-defs-only'));
+window.addEventListener('beforeprint',()=>{try{tbTplUsed();}catch(e){}const w=document.getElementById('tbPrintWhat');document.body.classList.toggle('tb-defs-only',!!(w&&w.value==='defs'));
+  const st=!!(w&&w.value==='staff');document.body.classList.toggle('tb-staff-only',st);if(st){try{tbStaffSheet();}catch(e){}}});   /* v24.35 */
+window.addEventListener('afterprint',()=>{document.body.classList.remove('tb-defs-only','tb-staff-only');const sh=document.getElementById('tbStaff');if(sh)sh.remove();});
+/* v24.35 (E-04, R-037) Definitions for staff: one sheet, each target's name, measure, definition, examples, non-examples, onset and
+   offset, exclusions and borderline cases as the Define sheet holds them, in a face that reads at the copier */
+function tbStaffSheet(){
+  let sh=document.getElementById('tbStaff');if(sh)sh.remove();
+  const n=Math.max(0,+(document.getElementById('nTgt')||{}).value||0),esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const dimName=t=>{const e=document.querySelector('[name="tgt['+t+'].dim"]');if(!e)return '';const o=e.options&&e.options[e.selectedIndex];return (o&&o.textContent)||e.value||'';};
+  const row=(l,v)=>v?'<div class="tbs-row"><b>'+esc(l)+'</b><span>'+esc(v).replace(/\n+/g,'<br>')+'</span></div>':'';
+  let cards='';for(let t=0;t<n;t++){const lab=val('tgt['+t+'].lab');if(!lab)continue;
+    cards+='<div class="tbs-card"><h3>'+esc(lab)+(dimName(t)?'<small>'+esc(dimName(t))+(val('tgt['+t+'].unit')?' · '+esc(val('tgt['+t+'].unit')):'')+'</small>':'')+'</h3>'
+      +row('Definition',val('tgt['+t+'].def'))+row('Counts (examples)',val('tgt['+t+'].ex'))+row('Does not count (non-examples)',val('tgt['+t+'].nex'))
+      +row('Starts when',val('tgt['+t+'].on'))+row('Ends when',val('tgt['+t+'].off'))+row('Not counted',val('tgt['+t+'].excl'))+row('Borderline cases',val('tgt['+t+'].border'))+'</div>';}
+  sh=document.createElement('div');sh.className='sheet';sh.id='tbStaff';
+  const head=document.querySelector('#define > .nbh-print-head');
+  sh.innerHTML=(head?head.outerHTML:'')+'<div class="bar nbh-band">Target Behavior Definitions for Staff</div><p class="method tbs-lead">What to count and what not to count, as defined on Form TB-1. Score what you see; when a case is borderline, follow the line for it here, and ask the behavior analyst when it is not covered.</p>'
+    +(cards||'<p class="method">No target is named on the Define sheet yet.</p>')+'<div class="sig tbs-sig"><span>Staff member</span><span>Date</span><span>Behavior analyst</span></div>';
+  const refs=document.getElementById('refs');(refs&&refs.parentNode?refs.parentNode:document.body).insertBefore(sh,refs||null);
+}
 /* ---------- save / open / clear / print ---------- */
 function collect(){const f={};$$('[name]').forEach(el=>{f[el.name]=el.type==='checkbox'?el.checked:el.value;});Object.assign(f,qcState,ioaState);
  return {form:'TB-1',rev:'2026-09',saved:new Date().toISOString(),counts:{cand:candN,tgt:+$('#nTgt').value,clus:$$('#clusWrap .card').map(c=>$$('#clusBody'+c.dataset.clus+' tr').length)},fields:f};}

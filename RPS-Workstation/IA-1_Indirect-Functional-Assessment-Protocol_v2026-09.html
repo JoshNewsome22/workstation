@@ -1202,6 +1202,7 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
     <span>Sheet actions</span>
     <div class="row">
       <button class="primary" id="printBtn">Print / Save as PDF</button>
+      <select id="iaPrintWhat" aria-label="What to print" title="What Print / Save as PDF prints: the whole form, or the short report" style="font:inherit;font-size:12px"><option value="">The whole form</option><option value="scores">The scores and convergence (the Summary sheet)</option></select><!-- v24.35 -->
       <button id="saveBtn">Save data</button>
       <button id="loadBtn">Open data</button>
       <button id="gfBtn" title="Fill a worksheet from the responses spreadsheet of a Google Form">Import Google Forms responses</button>
@@ -7499,6 +7500,10 @@ OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
   if(!bits.length)return r;return {filled:((r&&r.filled)||0)+o.n,note:[(r&&r.note)||''].concat(bits).filter(Boolean).join('; ')};};
 })();
 </script>
+<style id="ia135-css">@media print{body.ia-pr-scores .sheet:not(#summary){display:none!important}}</style>
+<script id="ia135">/* v24.35 (R-042) the short print: the Summary sheet alone (the scores by instrument and informant, the convergence, the hypothesis and the decision) */
+window.addEventListener('beforeprint',()=>{const w=document.getElementById('iaPrintWhat');document.body.classList.toggle('ia-pr-scores',!!(w&&w.value==='scores'));});
+window.addEventListener('afterprint',()=>document.body.classList.remove('ia-pr-scores'));</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

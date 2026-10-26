@@ -9905,6 +9905,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.35: The short report prints: IA-1 scores and convergence, PA-1 Summary and hierarchies, DA-1 Results, TB-1 Definitions for staff, DD-1 graphs only
+(review V12, part 2: R-042, R-030, R-079, R-037 with E-04, R-098 with E-38)
+
+- **What to print**, a choice beside Print / Save as PDF on five forms (TB-1 already had one). It applies to that print only;
+  the whole form stays the default, and the workstation's packet is unchanged.
+- **IA-1: the scores and convergence** prints the Summary sheet alone: the outcomes by instrument and informant, the
+  convergence, the hypothesis statement and the decision (five pages in the worked example, where the whole form is 28).
+- **PA-1: the Summary and the hierarchies with data** prints the Summary, then each run method's hierarchy (its rank table
+  and figure) and nothing else of its sheet; a method with no data stays out by the shared blank-sheet choice (eight pages
+  in the example, where the whole form is 26).
+- **DA-1: the Results alone** prints the ranked tasks, the metrics, the verdict and the recommendations (five pages of 12).
+- **TB-1: Definitions for staff** prints a sheet drawn from the Define sheet at print time: each named target's name,
+  measure, definition, what counts, what does not count, when it starts and ends, what is not counted and the borderline
+  cases, in a face that reads at the copier, with a line for the staff member, the date and the analyst. Two or three
+  targets fit a page; the five-target example takes three.
+- **DD-1: Graphs only** (the Results tab's print bar) prints each behavior's heading, definition, graph and key and leaves
+  the within- and across-condition analysis and the sources off the paper; with one behavior chosen above, that behavior's
+  graph alone.
+- Tests: qa/pp135-test.js (each short print read back from its PDF with the simulation loaded: fewer pages than the whole
+  form, the parts asked for present, the rest absent; TB-1's staff sheet removed after the print; the whole form unchanged).
+
 ### v24.34: Form DD-1 enters a completed daily data sheet from a photo
 (asked for on 10/26 after the Scatterplot and ABC-1 scans: "Also add a DD scan as well")
 

@@ -1222,6 +1222,7 @@ body.view-walk #walk{display:block}
     <span>Sheet actions</span>
     <div class="row">
       <button class="primary" id="printBtn">Print / Save as PDF</button>
+      <select id="paPrintWhat" aria-label="What to print" title="What Print / Save as PDF prints: the whole form, or the short report" style="font:inherit;font-size:12px"><option value="">The whole form</option><option value="summary">The Summary and the hierarchies with data</option></select><!-- v24.35 -->
       <button id="saveBtn">Save data</button>
       <button id="loadBtn">Open data</button>
       <button id="clearBtn">Clear all</button>
@@ -6694,6 +6695,15 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
 })();
 </script>
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<style id="pa135-css">@media print{
+body.pa-pr-summary .sheet:not(#summary):not(#ss):not(#ps):not(#mswo):not(#fo):not(#csa){display:none!important}
+body.pa-pr-summary #ss > *:not(.nbh-print-head):not(.bar):not(table.rank):not(.figure):not(h3.sub:has(+ table.rank)):not(h3.sub:has(+ .figure)),body.pa-pr-summary #ps > *:not(.nbh-print-head):not(.bar):not(table.rank):not(.figure):not(h3.sub:has(+ table.rank)):not(h3.sub:has(+ .figure)),body.pa-pr-summary #mswo > *:not(.nbh-print-head):not(.bar):not(table.rank):not(.figure):not(h3.sub:has(+ table.rank)):not(h3.sub:has(+ .figure)),body.pa-pr-summary #fo > *:not(.nbh-print-head):not(.bar):not(table.rank):not(.figure):not(h3.sub:has(+ table.rank)):not(h3.sub:has(+ .figure)){display:none!important}
+body.pa-pr-summary #csa > *:not(.nbh-print-head):not(.bar):not(#csaReadout):not(#csaOrdLine):not(#csaFig):not(#csaAugReadout){display:none!important}
+body.pa-pr-summary #ss,body.pa-pr-summary #ps,body.pa-pr-summary #mswo,body.pa-pr-summary #fo,body.pa-pr-summary #csa{break-before:auto}
+}</style>
+<script id="pa135">/* v24.35 (R-030) the short print: the Summary, then each run method's hierarchy (its rank table and figure) and nothing else of its sheet; a method with no data stays out by the shared blank-sheet choice */
+window.addEventListener('beforeprint',()=>{const w=document.getElementById('paPrintWhat');document.body.classList.toggle('pa-pr-summary',!!(w&&w.value==='summary'));});
+window.addEventListener('afterprint',()=>document.body.classList.remove('pa-pr-summary'));</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
