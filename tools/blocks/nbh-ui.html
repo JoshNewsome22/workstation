@@ -320,7 +320,8 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       return m;
     }
     /* measure: each view's class on the body, in turn, and the fields it shows; fields shown by every view are shared and left out */
-    var body = document.body, was = body.className, seen = {}, fx = U.fxHold ? U.fxHold() : null;   /* v21.91 Focus's folded parts are measured open */
+    var body = document.body, was = body.className, seen = {}, fx = U.fxHold ? U.fxHold() : null;
+    var sx = window.scrollX, sy = window.scrollY;   /* v24.48 the scroll the measure below can move (a shorter view clamps it) */   /* v21.91 Focus's folded parts are measured open */
     keys.forEach(function(k){
       var cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + k); body.className = cls.join(' ');
       var out = fields(document).filter(vis);
@@ -329,6 +330,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     });
     body.className = was;
     if (fx) fx();
+    if (window.scrollX !== sx || window.scrollY !== sy) window.scrollTo(sx, sy);
     keys.forEach(function(k){ m[k] = m[k].filter(function(e){ return seen[e.__nbhId] < keys.length; }); });
     return m;
   }

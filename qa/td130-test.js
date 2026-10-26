@@ -63,7 +63,7 @@ const brief=P=>P.map(x=>x.n+':'+x.ink+'%').join(' ');
  await p.evaluate(()=>{document.querySelector('#viewSeg [data-view="final"]').click();});await sleep(800);await p.evaluate(()=>document.querySelector('#viewSeg [data-view="setup"]').click());await sleep(300);
  const ALL=pdfPages(await PDF(),'td130-all.pdf');
  const selPg=ALL.find(x=>/Escape questions and options after Geiger/.test(x.text)),monPg=ALL.find(x=>/Reinforcement errors \(the problem behavior contacted the reinforcer\) are tracked separately/.test(x.text));
- ok('the whole-form print is no longer than before (46 pages; the simulation now fills five more boxes) and the staff card is not in it',ALL.length<=46&&!ALL.some(x=>/Staff card: SIMULATED/.test(x.text)),{pages:ALL.length});
+ ok('the whole-form print is no longer than before (46 pages; the simulation now fills five more boxes; 48 with the relapse safeguards of v24.48) and the staff card is not in it',ALL.length<=48&&!ALL.some(x=>/Staff card: SIMULATED/.test(x.text)),{pages:ALL.length});
  ok('the Select sheet\'s closing citation shares its page with the Select cards and Components chosen (page 4 held the citation alone)',!!selPg&&/Components chosen/.test(selPg.text)&&/R_PB/.test(selPg.text)&&selPg.ink>=18,selPg&&{n:selPg.n,ink:selPg.ink});
  ok('the monitor\'s closing citation shares its page with the verdict (the last page held the citation alone)',!!monPg&&/observed session/.test(monPg.text)&&monPg.ink>=18,monPg&&{n:monPg.n,ink:monPg.ink});
  const lightAll=ALL.slice(0,-1).filter(x=>x.ink<12);

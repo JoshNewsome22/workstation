@@ -9905,6 +9905,64 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.48: Relapse and its mitigation (Kimball, Greer, Fuhrman & Lambert, 2023): Form RS-1's readings, Form TD-1's relapse safeguards
+- **Form RS-1, Readings discussed.** The reading you sent is in the picker (search "relapse", "resurgence" or "Kimball"),
+  with its DOI and a summary written for the RBT: the four ways problem behavior a plan brought down can come back
+  (resurgence, renewal, reinstatement, spontaneous recovery) and what staff can do about each. Like every reading, it goes
+  on the contact, the monthly record, the RBT record and the year summary.
+- **Form TD-1, Relapse Safeguards** (Implementation plan, after Generalization and Maintenance). This part is built on
+  BCBA Test Content Outline (6th ed.) item H.5, "plan for and attempt to mitigate possible relapse of the target
+  behavior". It has three pieces:
+  - **The four moments relapse comes from**, with the review's numbers. Resurgence was seen in 76%–91% of cases during
+    schedule thinning after FCT. Renewal was seen with 59%–67% of clinic participants, at 24%–42% of changes of therapist
+    or room. Each moment is marked where this plan meets it: a replacement response or a thinning ladder means
+    resurgence, and extinction means reinstatement.
+  - **Ten safeguards to tick**, each with the evidence the review gives for it (clinical studies, early studies, mixed
+    results, not yet tested, or practice):
+    - signals for "now" and "not now"
+    - treatment that looks like the everyday setting
+    - several adults and settings before a new one
+    - a replacement response that pays more and costs less
+    - more than one way to ask
+    - a replacement response at the core, not DRO alone
+    - a short history of reinforced problem behavior
+    - slips that pay off problem behavior caught
+    - free access around a known challenge
+    - watching the first days back
+
+    A "fits this plan" mark shows where the plan's own components call for one.
+  - **A line for the changes ahead**, and who watches for relapse.
+
+  The ticked safeguards print on the plan and with the Final plan, worded for staff, so they travel in the staff packet.
+  They also go to the case. On paper, a plan with none ticked leaves the part out. The simulation ticks the safeguards its
+  plans use. A link opens Form RM-1 for the fuller risk review.
+- **Form SR-1.** The momentum entry now gives how often resurgence happens at thinning. The multiple schedule entry
+  notes that keeping the "not now" signal present reduced resurgence, so it is worth keeping in new settings. Both cite
+  the review.
+- **Form RM-1.** Item H.5 is stated beside the definitions, and the BACB outline is in the references. The 29% figure
+  for programming common stimuli (Neely et al., 2018), which was left open earlier, now reads as the review reports it.
+- **A page jump fixed in every form with view buttons.** A moment after you add or remove something, the workstation
+  recounts the fields behind each view's progress dot. To do that it shows each view in turn, so it can see which
+  fields belong to which. When one of those views was shorter than where you were reading, the page could end up
+  somewhere else, as far away as the end of the Final plan. The page now stays where it was. (Found by td118's
+  section-link check once TD-1's plan grew.)
+- Tests: qa/rel148-test.js checks the following:
+  - **Form RS-1:** the reading in its place, with its DOI and a summary of 460 characters or fewer. It is found by
+    title, by kinds of relapse and by author, and it reaches the monthly record, the RBT record and the year summary.
+  - **Form TD-1, the part itself:** the part's place in the plan and item H.5; the ten safeguards and their evidence;
+    the four moments, none marked on an empty plan; the RM-1 link.
+  - **Form TD-1, filled in:** the simulation's ticks and the moments marked for its plan. The Final plan's staff lines
+    and the changes ahead. On paper, only the ticked items show, and nothing shows when none is ticked. The case's
+    plan.relapse. A save and reopen. A tick by hand.
+  - **Form TD-1, the RM-1 link inside the workstation:** it asks the shell to open RM-1 beside TD-1, and opens a tab
+    when the shell does not answer.
+  - **Forms SR-1 and RM-1:** the notes and references.
+  Updated checks:
+  - qa/td119-test.js, qa/td130-test.js and qa/pp131-test.js: the worked example's whole-form printout of TD-1 may run
+    48 pages, up from 46. The two new pages are the relapse safeguards the example ticks, on the plan and in the Final
+    plan.
+  - qa/rm1-sources-test.js: the 29% figure is accepted only in the wording that credits Kimball et al. (2023).
+
 ### v24.47: The bars above a form fold and come back without moving the page (from the BCBA's screen recordings of 10/26)
 - **The page no longer jumps under your finger.** On an iPad the workstation's bars (the header, the packet bar) fold
   away while a form is read, so the form gets about a quarter more of the screen. They used to shrink out of the layout,

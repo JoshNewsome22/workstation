@@ -22,8 +22,9 @@ const FORMS={'TB-1':'TB-1_Target-Behavior-Development_v2026-09.html','IA-1':'IA-
  'RA-1':'Reinforcer_Assessment_Protocol.html','EA-1':'EA-1_Experimental-Analysis-Protocol_v2026-09.html','DA-1':'DA-1_Demand-Assessment_v2026-10.html','DD-1':'Daily_Behavior_Data_and_Visual_Analysis.html',
  'SM-1':'SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html','SP-1':'Scatterplot_Pattern_Analysis.html','ABC-1':'ABC_Recording_Conditional_Probability_Analysis.html','OB-1':'OB-1_Direct-Observation-Record_v2026-09.html',
  'TD-1':'TD-1_Function-Based-Treatment-Developer_v2026-09.html','TK-1':'TK-1_Token-Board-Book_v2026-10.html','RS-1':'RS-1_RBT-Supervision-Log_v2026-10.html'};
-/* the whole-form printouts before v24.31 (the 10/26 survey, each simulation loaded); TD-1 is given 46: its monitor's verdict and criterion note now take a page of their own rather than splitting */
-const BEFORE={'TB-1':22,'IA-1':33,'PA-1':29,'RA-1':16,'EA-1':22,'DA-1':18,'DD-1':16,'SM-1':30,'SP-1':14,'ABC-1':17,'OB-1':13,'TD-1':46,'TK-1':13,'RS-1':3};
+/* the whole-form printouts before v24.31 (the 10/26 survey, each simulation loaded); TD-1 is given 46: its monitor's verdict and criterion note now take a page of their own rather than splitting;
+   48 from v24.48, the relapse safeguards the example ticks (on the plan and in the Final plan) */
+const BEFORE={'TB-1':22,'IA-1':33,'PA-1':29,'RA-1':16,'EA-1':22,'DA-1':18,'DD-1':16,'SM-1':30,'SP-1':14,'ABC-1':17,'OB-1':13,'TD-1':48,'TK-1':13,'RS-1':3};
 const GUIDE_SHEETS=['TB-1','IA-1','PA-1','RA-1','EA-1','OB-1'],GUIDE_SECTIONS=['SM-1','DA-1'];
 (async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});const ctx=await b.newContext({viewport:{width:1300,height:950}});
  const open=async(F)=>{const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));await p.goto(BASE+'/NBH-Workstation/'+FORMS[F]);await sleep(1500);
