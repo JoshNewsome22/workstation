@@ -11,8 +11,9 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  const read=()=>p.evaluate(()=>{const rows=id=>[...document.querySelectorAll(id+' tbody tr')].map(tr=>[...tr.querySelectorAll('td')].map(td=>td.textContent.trim()));
    const ps=rows('#psRank').map(r=>({n:r[1],p:parseFloat(r[4])})),ms=rows('#msRank').map(r=>({n:r[1],p:parseFloat(r[4])}));const flags=[...document.querySelectorAll('#sumFlags li')].map(l=>l.textContent.slice(0,80));
    return {seed:nbhSim.state.seed,scn:document.getElementById('simScenario').value,ps,ms,flags,desc:(document.getElementById('simDesc')||{}).textContent||''};});
- await p.evaluate(()=>{document.getElementById('simScenario').value='clear';document.getElementById('simBtn').click();});await sleep(2500);
- const runs=[await read()];for(let k=0;k<4;k++){await p.evaluate(()=>document.querySelector('.nbh-sim-new').click());await sleep(2500);runs.push(await read());}
+ const settled=async()=>{for(let i=0;i<40;i++){if(await p.evaluate(()=>!(window.nbhSim&&nbhSim.state.busy)))break;await sleep(250);}await sleep(400);};   /* v24.42: wait for the reload itself, not a fixed pause (a loaded machine read the previous example) */
+ await p.evaluate(()=>{document.getElementById('simScenario').value='clear';document.getElementById('simBtn').click();});await sleep(2500);await settled();
+ const runs=[await read()];for(let k=0;k<4;k++){const was=runs[runs.length-1].seed;await sleep(1200);await p.evaluate(()=>document.querySelector('.nbh-sim-new').click());   /* a new seed comes from the clock's second */for(let i=0;i<40;i++){if(await p.evaluate(s=>nbhSim.state.seed!==s,was))break;await sleep(250);}await settled();runs.push(await read());}
  const seeds=runs.map(r=>r.seed);
  ok('PA-1: the clear scenario loaded five times, the standard example (seed 1) then four New examples with seeds of their own',runs.every(r=>r.scn==='clear')&&seeds[0]===1&&new Set(seeds).size===5,{seeds});
  const agree=runs.map(r=>({seed:r.seed,psTop:r.ps[0]&&r.ps[0].n,msTop:r.ms[0]&&r.ms[0].n,ps2:r.ps.slice(0,2).map(x=>x.n).sort().join('+'),ms2:r.ms.slice(0,2).map(x=>x.n).sort().join('+'),gap:r.ps[0]&&r.ps[1]?r.ps[0].p-r.ps[1].p:null}));

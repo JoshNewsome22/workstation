@@ -2765,7 +2765,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.41';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.42';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2994,13 +2994,18 @@ async function relay(ev,d){
 const OPEN_PAIR={'TK-1':'TE-1','TE-1':'TK-1'};
 /* v22.83 (review F249) Form TI-1's Find out why opens Form PD-1, which takes TI-1's part of the case as it opens */
 const OPEN_ALSO={'TI-1':['PD-1'],'PD-1':['ST-1','QS-1','TI-1','DD-1','CN-1']};   /* v22.83 (review I127) a PD-1 plan row opens the form that carries it out */
+/* v24.42 (review E-24) Form RA-1 and Form TD-1 open Form PA-1 at a place it names: {nbh:'open', want:'PA-1', beside:true, at:'quick-mswo'};
+   the shell opens PA-1 as above and sets its hash to at (a short token), as it loads or at once if it is open; PA-1 reads the hash */
+const OPEN_AT={'RA-1':['PA-1'],'TD-1':['PA-1']};
+function openAt(id,at){const fr=state.frames[id];if(!fr)return;const go=()=>{try{const w=fr.contentWindow;if(w.location.hash==='#'+at)w.location.hash='';w.location.hash=at;}catch(e){}};
+  if(fr.dataset.loaded)go();else fr.addEventListener('load',go,{once:true});}
 /* v22.83 (review F248) forms ticked into the master print only by hand, after this question */
 const MP_ASK={'PD-1':'Form PD-1 is a supervision record about a staff member, kept by the BCBA. It is not part of the student\u2019s file, and parents can ask to see what is in the packet.\n\nPrint it with this student\u2019s packet anyway?'};
 function openFor(ev,d){
   const from=relayFrom(ev.source),want=typeof d.want==='string'?d.want:'',
         reply=m=>{try{ev.source.postMessage(Object.assign({nbh:'opened',want},m),'*');}catch(e){}};
   if(!from){relayNote('',want,'open ignored: not a form frame');return;}
-  if((OPEN_PAIR[from]!==want&&!(OPEN_ALSO[from]||[]).includes(want))||!ALL.some(f=>f[0]===want)){relayNote(from,want,'open ignored: not its pair');return;}
+  if((OPEN_PAIR[from]!==want&&!(OPEN_ALSO[from]||[]).includes(want)&&!(OPEN_AT[from]||[]).includes(want))||!ALL.some(f=>f[0]===want)){relayNote(from,want,'open ignored: not its pair');return;}
   if(state.restoring){relayNote(from,want,'open refused: restoring');reply({ok:false,why:'busy'});return;}
   const t=Date.now(),o=state.openAt||(state.openAt={});
   if(t-(o[from]||0)<1000){relayNote(from,want,'open ignored: too soon');return;}
@@ -3008,6 +3013,7 @@ function openFor(ev,d){
   /* three columns showing: the partner takes the column next to the asker, not the asker's own */
   if(splitOn()&&!state.split.includes(want)&&state.split.length>=3){const k=state.split.indexOf(from);if(k>=0)state.cur=state.split[k<state.split.length-1?k+1:k-1];}
   openForm(want,true);
+  if((OPEN_AT[from]||[]).includes(want)&&typeof d.at==='string'&&/^[a-z][a-z0-9-]{0,30}$/.test(d.at))openAt(want,d.at);   /* v24.42 (E-24) */
   /* side by side only where there is room: on a phone the partner opens in place of the asker, and so it does on an
      upright iPad (v21.43), where side by side stacks the two forms and each shows only a few lines under its toolbar */
   let wide=true;try{wide=window.matchMedia('(min-width:700px) and (orientation:landscape)').matches;}catch(e){}

@@ -1381,6 +1381,8 @@ td input,td select{max-width:100%}
   <h3 class="sub">B. Preference-Assessment Method (DeLeon Et Al., 2014, Recommendations 1–9)</h3>
   <div id="paModel"></div>
   <div id="paRec"></div>
+  <!-- v24.42 (review E-24) -->
+  <p class="noprint" style="margin:4px 0 10px;font-size:13px"><a class="ra-quick" href="PA-1_Preference-Assessment-Protocol_v2026-09.html#quick-mswo" target="_blank" rel="noopener">Run a brief MSWO now (Form PA-1, three sessions)</a> <span style="color:var(--ink-soft,#54676f)">when the selector asks for a current preference check; the result goes to PA-1&rsquo;s Monitoring log</span></p>
 
   <h3 class="sub">C. Reinforcement Parameters to Set (DeLeon Et Al., 2014)</h3>
   <div class="chkrow" style="display:block">
@@ -3400,6 +3402,13 @@ setv('m.repdesc',({escape_fct:'press the break card (simulated)',sbt:'say "my wa
  renderHp();renderPlan();renderMon();$('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;try{tdFnBanner();tdFnProvPaint();}catch(e){}setView('select');}
 /* v24.39 (review R-121, R-122, E-02) the simulation seeded and marked: the same example at every load, New example for another */
 {const sim0=loadSim;loadSim=async function(){if(window.nbhSim)nbhSim.begin();let r;try{r=await sim0.apply(this,arguments);}finally{try{if(window.nbhSim)nbhSim.after(loadSim);}catch(e){}}return r;};}
+/* v24.42 (review E-24) the link to Form PA-1's brief MSWO: inside the workstation the shell opens PA-1 beside this form at
+   the hash the link names (and the link itself is the fallback when the shell does not answer); standalone it opens a new tab */
+document.addEventListener('click',e=>{const a=e.target.closest('a.ra-quick');if(!a||window.parent===window)return;e.preventDefault();
+  const href=a.getAttribute('href'),at=(href.split('#')[1]||'').trim();let t=0;
+  const h=ev=>{const d=ev.data;if(d&&d.nbh==='opened'&&d.want==='PA-1'){clearTimeout(t);window.removeEventListener('message',h);}};
+  window.addEventListener('message',h);t=setTimeout(()=>{window.removeEventListener('message',h);try{window.open(href,'_blank','noopener');}catch(x){}},1500);
+  try{window.parent.postMessage({nbh:'open',want:'PA-1',beside:true,at},'*');}catch(x){clearTimeout(t);}});
 $('#simBtn').addEventListener('click',loadSim);
 
 /* ---------- save / open / clear ---------- */
@@ -5282,6 +5291,7 @@ html{touch-action:manipulation}
   .toolbar .nbh-arrows button small{font-size:12px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   html.nbh-fold .toolbar .nbh-fk > .nbh-sheets.nbh-sheets.nbh-sheets,html.nbh-fold .toolbar .nbh-fk > .nbh-arrows.nbh-arrows.nbh-arrows,html.nbh-fold .toolbar .nbh-arrows.nbh-fseg{display:inline-flex!important}
   #nbhSheets{position:fixed;left:16px;right:16px;max-height:calc(100vh - 120px);overflow:auto;background:#fff;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-rule,#cfdad8);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:10px;z-index:70;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;box-sizing:border-box}
+  #nbhSheets .nbh-sheetsf{grid-column:1/-1;display:flex;align-items:center;gap:8px;font:400 13px/1.3 var(--nbh-sans,-apple-system,sans-serif);padding:0 10px 8px;color:var(--nbh-ink,#1a2933);cursor:pointer}#nbhSheets .nbh-sheetsf input{width:20px;height:20px;margin:0}#nbhSheets .nbh-sheetsf small{color:var(--nbh-muted,#54676f)}   /* v24.42 (PA-1 E-44) */
   #nbhSheets .nbh-sheetsh{grid-column:1/-1;font:600 11px/1 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--nbh-muted,#54676f);padding:4px 10px 8px}
   #nbhSheets .nbh-sheet{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:14px;text-align:left;color:inherit;width:100%;font-family:inherit}
   #nbhSheets .nbh-sheet.on{background:var(--nbh-navy,#182e43);color:#fff;font-weight:600}

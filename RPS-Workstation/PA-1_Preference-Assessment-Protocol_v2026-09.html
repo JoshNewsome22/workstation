@@ -697,6 +697,8 @@ td input,td select{max-width:100%}
 </style>
 <style id="pa-run-css">
 /* ============ PA-1 assessment runners (v21.16) ============ */
+/* v24.42 (review R-070, E-44) the method's rank beside its percentage on the Summary */
+.pa-rk{color:var(--nbh-muted,#54676f);font-size:10.5px;white-space:nowrap}
 .pa-run{border:1px solid var(--nbh-rule,#cfdad8);border-left:5px solid var(--nbh-teal,#76a2a3);border-radius:6px;background:#fff;padding:10px 12px 9px;margin:2px 0 16px;box-shadow:0 2px 10px rgba(24,46,67,.08);font-family:var(--nbh-sans,system-ui,sans-serif);color:var(--nbh-navy,#182e43);line-height:1.35;font-size:13px}
 .pa-run *{box-sizing:border-box}
 .pa-run [hidden]{display:none!important}
@@ -1225,6 +1227,7 @@ body.view-walk #walk{display:block}
       <select id="paPrintWhat" aria-label="What to print" title="What Print / Save as PDF prints: the whole form, or the short report" style="font:inherit;font-size:12px"><option value="">The whole form</option><option value="summary">The Summary and the hierarchies with data</option></select><!-- v24.35 -->
       <button id="saveBtn">Save data</button>
       <button id="loadBtn">Open data</button>
+      <button id="paQuickBtn" title="A brief MSWO: three sessions on the Monitoring sheet, the top three logged">Brief MSWO</button>   <!-- v24.42 (E-24) -->
       <button id="clearBtn">Clear all</button>
       <input type="file" id="fileIn" accept="application/json" hidden>
     </div>
@@ -1507,7 +1510,7 @@ body.view-walk #walk{display:block}
   </div>
 
   <div class="warn"><b>Procedure</b>
-    Every stimulus is paired with every other stimulus. Present the pair, one item on each side, and prompt "pick one." Score which side was selected, <b>Neither</b> if no selection within 30 s (remove both), or <b>Both</b> if the student reached for both (block and re-present; the re-presentation is a new trial). Deliver the selected item for the access duration and remove the other. The trial list below is generated from the stimulus pool with sides counterbalanced and order shuffled; use the seed to reproduce a list. <b>Three times</b> (PS presentations) runs three administrations, each in its own order, and the hierarchy combines them: DeLeon et al. (2009) ran the paired-stimulus assessment three times. <b>Sample both, then again</b> (PS no selection) does not score a pair with no selection at once: the student samples each item briefly (a touch, or a small taste of an edible) and the pair is presented again; only no selection the second time is scored Neither (Fisher et al., 1992; Piazza et al., 1996).</div>
+    Every stimulus is paired with every other stimulus. Present the pair, one item on each side, and prompt "pick one." Score which side was selected, <b>Neither</b> if no selection within 30 s (remove both), or <b>Both</b> if the student reached for both (block and re-present; the re-presentation is a new trial). Deliver the selected item for the access duration and remove the other. The 30-s window, and scoring <b>Neither</b> at once when it passes, are this practice's conventions, as the category bands on every sheet are: Fisher et al. (1992) allowed 5 s and, on no approach, prompted the student to sample each item before presenting the pair again, which <b>Sample both, then again</b> reproduces.   <!-- v24.42 (review R-071) --> The trial list below is generated from the stimulus pool with sides counterbalanced and order shuffled; use the seed to reproduce a list. <b>Three times</b> (PS presentations) runs three administrations, each in its own order, and the hierarchy combines them: DeLeon et al. (2009) ran the paired-stimulus assessment three times. <b>Sample both, then again</b> (PS no selection) does not score a pair with no selection at once: the student samples each item briefly (a touch, or a small taste of an edible) and the pair is presented again; only no selection the second time is scored Neither (Fisher et al., 1992; Piazza et al., 1996).</div>
   <div class="row psctl noprint">
     <label>Seed <input type="number" id="psSeed" value="1" min="1" max="9999"></label>
     <button class="tool" id="psGen">Generate trial list</button>
@@ -1928,8 +1931,17 @@ body.view-walk #walk{display:block}
   <div class="warn"><b>Why monitor</b>
     Preferences stay stable for some individuals and shift for others over months (Zhou, Iwata, Goff, &amp; Shore, 2001; Hanley, Iwata, &amp; Roscoe, 2006), and reinforcer effectiveness and preference shift with satiation and deprivation (Vollmer &amp; Iwata, 1991; Gottschalk, Libby, &amp; Graff, 2000; McAdam et al., 2005). Murphy, McSweeney, Smith, and McComas (2003) note that reinforcers lose their effectiveness when they are presented repeatedly and argue that habituation describes this better than satiation and gives specific guidance on maintaining a reinforcer's effectiveness. The earliest signs are not in the hierarchy; they are in the student's behavior toward the item: longer latency to approach or select it, shorter engagement once it is delivered, lower response rates under the schedule, rejections, and shifts toward other items. Two logs below capture both: a brief MSWO log tracks the hierarchy, and a reinforcer-use log tracks the item's effect each time it is used.</div>
 
+  <!-- v24.42 (E-24) a brief MSWO run here: three sessions, scored as the MSWO sheet scores, the top three logged in A -->
+  <div class="pa-run noprint" id="paQuick" hidden role="region" aria-labelledby="paQuickH">
+    <div class="pa-run-hd"><h3 class="pa-run-title" id="paQuickH">Brief MSWO (three sessions)</h3><span class="pa-run-hint">A quick check of the hierarchy, not the full assessment: three MSWO sessions (Carr, Nicolson, &amp; Higbee, 2000), scored as the MSWO sheet scores (DeLeon &amp; Iwata, 1996), and the top three logged in A below. The full MSWO sheet is not touched.</span></div>
+    <div class="row psctl"><label>Date <input type="date" id="paQuickDate" class="dt"></label><label>Note <input id="paQuickNote" class="inline" placeholder="MO, time since meal or last access, setting" style="min-width:260px"></label></div>
+    <div class="gridwrap"><table class="grid" id="paQuickTbl"></table></div>
+    <div class="readout" id="paQuickOut"></div>
+    <div class="row psctl"><button class="primary" id="paQuickLog">Log the top three</button><button id="paQuickClear">Clear the run</button><button id="paQuickClose">Close</button></div>
+  </div>
   <h3 class="sub">A. Brief MSWO Log (Top Three by Date)</h3>
   <p class="method" style="margin-top:0">Record the top three from each brief (three-session) MSWO. Daily before sessions for edibles, weekly or at plan review for leisure items. The graph plots each item's rank across dates; an item that falls off the top three or a new item entering it is a shift.</p>
+  <div class="row psctl noprint"><button id="paQuickOpen">Run a brief MSWO here (three sessions)</button></div>   <!-- v24.42 (E-24) -->
   <div class="gridwrap"><table class="grid" id="stabTbl">
     <thead><tr><th class="c" style="width:96px">Date</th><th>#1</th><th>#2</th><th>#3</th><th class="c" style="width:62px">Sessions</th><th class="c" style="width:56px">PB</th><th>Note (MO, time since meal or last access, setting)</th></tr></thead>
     <tbody></tbody>
@@ -1981,7 +1993,7 @@ body.view-walk #walk{display:block}
   <ul class="flags" id="sumFlags"></ul>
   <p class="method sum-csa" id="sumCsa" hidden></p>   <!-- v22.78 (review F118) -->
   <div class="figure" id="sumFig"></div>
-  <p class="method">Composite rank is the mean of each stimulus's rank across the direct methods completed (indirect rank is shown for comparison only). Composite categories are working conventions: <b>HP</b> mean rank within the top third of the items assessed, <b>MP</b> middle third, <b>LP</b> bottom third; with fewer than three items assessed, or under half of the pool, the composite is not cut into thirds. Disagreement between methods for a stimulus is a reason to run a reinforcer assessment on that stimulus, not to average the disagreement away. <b>Fit</b> is the contextual-fit score from the Ecological sheet, a percentage of all seven attributes (it reads Incomplete, with the number rated, until all seven are): a high-preference item with poor fit goes into the plan under a restricted-access rule, not out of it.</p>
+  <p class="method">Composite rank is the mean of each stimulus's rank across the direct methods completed (indirect rank is shown for comparison only). Items tied on a method share its rank (shown =2 for a tie from position 2) and count as the average of the positions the tie spans; single stimulus breaks a tie by % engagement and MSWO by mean position, paired stimulus has no tie-break; items with the same mean rank share a composite tier.   <!-- v24.42 (review R-070) --> Composite categories are working conventions: <b>HP</b> mean rank within the top third of the items assessed, <b>MP</b> middle third, <b>LP</b> bottom third; with fewer than three items assessed, or under half of the pool, the composite is not cut into thirds. Disagreement between methods for a stimulus is a reason to run a reinforcer assessment on that stimulus, not to average the disagreement away. <b>Fit</b> is the contextual-fit score from the Ecological sheet, a percentage of all seven attributes (it reads Incomplete, with the number rated, until all seven are): a high-preference item with poor fit goes into the plan under a restricted-access rule, not out of it.</p>
 
   <div class="ident" style="grid-template-columns:repeat(2,1fr);margin-top:14px">
     <div class="f"><label for="mIoa">Interobserver agreement (method, sessions, %)</label><input id="mIoa" data-meta="ioa"></div>
@@ -2284,7 +2296,7 @@ body.view-walk #walk{display:block}
     <div><dt>Free operant</dt><dd>The whole pool within reach for a session (5 min standard), prompts and attention withheld, nothing removed; the seconds engaged with each item are recorded.</dd></div>
     <div><dt>Single-stimulus engagement</dt><dd>A duration measure: one item at a time for the set duration (2 min standard), each item twice in rotated order, seconds engaged recorded.</dd></div>
     <div><dt>HP, MP, LP</dt><dd>High, moderate and low preference, by working conventions that differ by sheet: selection percentages HP ≥ 80%, MP 40–79%, LP &lt; 40%; duration HP ≥ 50%, MP 20–49%, LP &lt; 20% of the session; on the Summary, the top, middle and bottom third of the pool.</dd></div>
-    <div><dt>Mean rank and composite</dt><dd>On the Summary, the mean of a stimulus’s ranks across the direct methods completed, and its third of the pool. The informant’s rank is not included.</dd></div>
+    <div><dt>Mean rank and composite</dt><dd>On the Summary, the mean of a stimulus’s ranks across the direct methods completed, and its third of the pool. The informant’s rank is not included. Items tied on a method share its rank (=2) and count as the average of the positions the tie spans; the same mean rank is the same tier.</dd></div>
     <div><dt>Contextual fit</dt><dd>The Ecological sheet’s score of an item’s practical attributes, as a percentage of 7: Good ≥ 75%, Fair 50–74%, Poor &lt; 50%. A working convention with no empirical validation.</dd></div>
     <div><dt>Restricted access (closed economy)</dt><dd>The remedy for a preferred item that is freely available elsewhere or fits poorly: it goes into the plan under a rule that restricts access to it, rather than being dropped.</dd></div>
     <div><dt>In-context observation</dt><dd>Free time in natural settings with no prompts: what the student approaches, for how long, and who initiated. Items outside the pool are candidates for the next pool.</dd></div>
@@ -2359,6 +2371,13 @@ function ensure(){
     S.csa.ord[k]=o.map(a=>{const ok=Array.isArray(a)&&a.length===n&&a.every(v=>Number.isInteger(+v)&&+v>=0&&+v<n)&&new Set(a.map(Number)).size===n;return ok?a.map(Number):csaShuffle(n);});});
   ['csaValItem','csaValHP','csaValNon'].forEach(k=>{if(S.meta[k]!=null&&S.meta[k]!==''&&!inPool(S.meta[k]))S.meta[k]='';});
   if(!S.stab)S.stab=[];S.nStab=S.nStab||8;while(S.stab.length<S.nStab)S.stab.push({date:'',r1:'',r2:'',r3:'',ses:'',pb:false,note:''});S.stab.length=S.nStab;
+  /* v24.42 (E-24) the brief MSWO run in progress on the Monitoring sheet; (E-24) "Twice, sides reversed" is the paired-stimulus
+     default for a pool of six or fewer until the analyst picks, or a trial list exists */
+  if(!S.quick||!Array.isArray(S.quick.sel))S.quick={date:'',note:'',sel:[[],[],[]],pb:[false,false,false]};
+  while(S.quick.sel.length<3)S.quick.sel.push([]);S.quick.sel.length=3;S.quick.sel.forEach(a=>{while(a.length<n)a.push('');a.length=n;});
+  S.quick.sel.forEach(a=>{for(let t=0;t<a.length;t++)if(!(a[t]===''||a[t]==='none'||inPool(a[t])))a[t]='';});
+  if(!Array.isArray(S.quick.pb))S.quick.pb=[false,false,false];
+  if(!S.psRepUser&&!S.ps.trials.length)S.psRep=S.n<=6?2:1;
   if(!S.mon)S.mon=[];S.nMon=S.nMon||12;while(S.mon.length<S.nMon)S.mon.push({date:'',item:'',ctx:'',lat:'',eng:'',rate:'',rej:false,sign:'',note:''});S.mon.length=S.nMon;
   if(!S.ioa)S.ioa=[];while(S.ioa.length<7)S.ioa.push({s:'',a:'',d:''});S.ioa.length=7;
   S.stab.forEach(r=>{['r1','r2','r3'].forEach(f=>{if(r[f]!==''&&+r[f]>=n)r[f]='';});});
@@ -2426,11 +2445,19 @@ function ssStats(){
     const eng=done.filter(c=>c.a==='A'&&c.e!=='').map(c=>+c.e);const me=eng.length?eng.reduce((a,b)=>a+b,0)/eng.length:null;
     return {i,trials:done.length,ap,pa:pct(ap,done.length),me,pe:me==null?null:Math.round(100*me/S.access),pb:+row.pb||0};});
 }
+/* v24.42 (review R-070, E-44) tied percentages share a rank: the items of a tie show the first position the tie spans (=2 for
+   three items tied at positions 2, 3 and 4) and count as the average of those positions (3) in the composite */
+function rankTies(arr,same){let k=0;while(k<arr.length){let e=k+1;while(e<arr.length&&same(arr[k],arr[e]))e++;const avg=(k+1+e)/2;for(let j=k;j<e;j++){arr[j].rk=avg;arr[j].rkTie=e-k>1;arr[j].rkTxt=(e-k>1?'=':'')+(k+1);}k=e;}return arr;}
+const TIE={ss:(a,b)=>a.pa===b.pa&&(a.pe||0)===(b.pe||0),ps:(a,b)=>a.p===b.p,ms:(a,b)=>a.p===b.p&&(a.mp||99)===(b.mp||99),fo:(a,b)=>(a.fp??a.sp)===(b.fp??b.sp),fp:(a,b)=>a.fp===b.fp,sp:(a,b)=>a.sp===b.sp};
+const rkCell=s=>`<td class="n"${s.rkTie?' title="Tied: counts as '+s.rk+' in the composite"':''}>${s.rkTxt}</td>`;
+const rkSmall=r=>r==null?'':' <small class="pa-rk">'+(r.t.charAt(0)==='='?r.t:'#'+r.t)+'</small>';
+/* the composite tier of the item at pos: items with the same mean rank share the tier of the middle of their run */
+function tierAt(withData,pos,third){if(third==null||pos<0||!withData[pos])return '';const m=withData[pos].mean;let a=pos,b=pos;while(a>0&&withData[a-1].mean===m)a--;while(b<withData.length-1&&withData[b+1].mean===m)b++;const q=(a+b)/2;return q<third?'HP':q<2*third?'MP':'LP';}
 function computeSS(){
   const st=ssStats();const done=st.filter(s=>s.trials);
   $('#ssReadout').textContent=done.length?`${done.length} of ${S.n} stimuli have data; ${st.reduce((a,s)=>a+s.trials,0)} trials scored; access ${S.access} s.`:'No trials scored yet.';
-  const ranked=st.filter(s=>s.trials).sort((a,b)=>(b.pa-a.pa)||((b.pe||0)-(a.pe||0)));
-  $('#ssRank tbody').innerHTML=ranked.map((s,r)=>`<tr><td class="n">${r+1}</td><td>${esc(name(s.i))}</td><td class="n">${s.trials}</td><td class="n">${fmtP(s.pa)}</td><td class="n">${s.me==null?'&mdash;':s.me.toFixed(1)}</td><td class="n">${fmtP(s.pe)}</td><td class="n">${s.pb||''}</td><td>${cat(s.pa,80,40)}</td></tr>`).join('')||'<tr><td colspan="8" class="empty2">No data.</td></tr>';
+  const ranked=rankTies(st.filter(s=>s.trials).sort((a,b)=>(b.pa-a.pa)||((b.pe||0)-(a.pe||0))),TIE.ss);   /* v24.42 (review R-070) */
+  $('#ssRank tbody').innerHTML=ranked.map((s,r)=>`<tr>${rkCell(s)}<td>${esc(name(s.i))}</td><td class="n">${s.trials}</td><td class="n">${fmtP(s.pa)}</td><td class="n">${s.me==null?'&mdash;':s.me.toFixed(1)}</td><td class="n">${fmtP(s.pe)}</td><td class="n">${s.pb||''}</td><td>${cat(s.pa,80,40)}</td></tr>`).join('')||'<tr><td colspan="8" class="empty2">No data.</td></tr>';
   return ranked;
 }
 function cat(p,hi,mid){if(p==null)return'';return p>=hi?'<span class="tag ok">HP</span>':p>=mid?'<span class="tag mid">MP</span>':'<span class="tag no">LP</span>';}
@@ -2453,7 +2480,7 @@ function genPS(){
 }
 $('#psGen').addEventListener('click',async()=>{if(S.ps.trials.some(t=>t.sel)&&!(await nbhUI.confirm('Regenerate the trial list?\nThe scored trials on this sheet are cleared.',{ok:'Regenerate',danger:true})))return;S.ps.seed=+$('#psSeed').value||1;genPS();renderPS();});
 function renderPS(){
-  $('#psSeed').value=S.ps.seed;
+  $('#psSeed').value=S.ps.seed;syncSeg('psRepSeg','rep','psRep');   /* v24.42 the default follows the pool size */
   const tr=S.ps.trials;const np=S.n*(S.n-1)/2;
   $('#psInfo').textContent=`${np} pairs × ${S.psRep} = ${np*S.psRep} trials for ${S.n} stimuli.`+(S.psRep===3?` Three administrations of ${np} trials (1–${np}, ${np+1}–${2*np}, ${2*np+1}–${3*np}), each in its own order; the hierarchy combines them (DeLeon et al., 2009).`:'');
   if(!tr.length){$('#psTbl').innerHTML='<tbody><tr><td class="empty2">Generate the trial list to begin.</td></tr></tbody>';computePS();return;}
@@ -2475,8 +2502,8 @@ function psStats(){
 function computePS(){
   const {st,L,R,scored,neither}=psStats();
   $('#psReadout').textContent=scored?`${scored} of ${S.ps.trials.length} trials scored; ${neither} with no selection.`:'No trials scored yet.';
-  const ranked=st.filter(s=>s.pres).sort((a,b)=>b.p-a.p);
-  $('#psRank tbody').innerHTML=ranked.map((s,r)=>`<tr><td class="n">${r+1}</td><td>${esc(name(s.i))}</td><td class="n">${s.pres}</td><td class="n">${s.sel}</td><td class="n">${fmtP(s.p)}</td><td class="n">${s.pb||''}</td><td>${cat(s.p,80,40)}</td></tr>`).join('')||'<tr><td colspan="7" class="empty2">No data.</td></tr>';
+  const ranked=rankTies(st.filter(s=>s.pres).sort((a,b)=>b.p-a.p),TIE.ps);   /* v24.42 (review R-070) */
+  $('#psRank tbody').innerHTML=ranked.map((s,r)=>`<tr>${rkCell(s)}<td>${esc(name(s.i))}</td><td class="n">${s.pres}</td><td class="n">${s.sel}</td><td class="n">${fmtP(s.p)}</td><td class="n">${s.pb||''}</td><td>${cat(s.p,80,40)}</td></tr>`).join('')||'<tr><td colspan="7" class="empty2">No data.</td></tr>';
   const sides=L+R,lp=pct(L,sides),bias=sides>=6&&(lp>=75||lp<=25);
   $('#psStat').innerHTML=`<div><b>Left selections</b><span>${fmtP(lp)}</span><em>${L} of ${sides}</em></div><div><b>Right selections</b><span>${fmtP(sides?100-lp:null)}</span><em>${R} of ${sides}</em></div><div><b>Side bias</b><span>${sides<6?'&mdash;':bias?'Suspected':'None'}</span><em>${bias?'hierarchy may reflect position':'&ge; 75% to one side flags bias'}</em></div><div><b>No selection</b><span>${scored?fmtP(pct(neither,scored)):'&mdash;'}</span><em>of scored trials</em></div>`;
   return ranked;
@@ -2513,8 +2540,8 @@ function msStats(){
 function computeMS(){
   const {st,sessions}=msStats();
   $('#msReadout').textContent=sessions?`${sessions} of ${S.msSessions} sessions scored.`:'No sessions scored yet.';
-  const ranked=st.filter(s=>s.avail).sort((a,b)=>(b.p-a.p)||((a.mp||99)-(b.mp||99)));
-  $('#msRank tbody').innerHTML=ranked.map((s,r)=>`<tr><td class="n">${r+1}</td><td>${esc(name(s.i))}</td><td class="n">${s.avail}</td><td class="n">${s.sel}</td><td class="n">${fmtP(s.p)}</td><td class="n">${s.mp==null?'&mdash;':s.mp.toFixed(1)}</td><td class="n">${s.pb||''}</td><td>${cat(s.p,80,40)}</td></tr>`).join('')||'<tr><td colspan="8" class="empty2">No data.</td></tr>';
+  const ranked=rankTies(st.filter(s=>s.avail).sort((a,b)=>(b.p-a.p)||((a.mp||99)-(b.mp||99))),TIE.ms);   /* v24.42 (review R-070) */
+  $('#msRank tbody').innerHTML=ranked.map((s,r)=>`<tr>${rkCell(s)}<td>${esc(name(s.i))}</td><td class="n">${s.avail}</td><td class="n">${s.sel}</td><td class="n">${fmtP(s.p)}</td><td class="n">${s.mp==null?'&mdash;':s.mp.toFixed(1)}</td><td class="n">${s.pb||''}</td><td>${cat(s.p,80,40)}</td></tr>`).join('')||'<tr><td colspan="8" class="empty2">No data.</td></tr>';
   return ranked;
 }
 
@@ -2541,13 +2568,13 @@ function computeFO(){
   st.forEach(s=>{$('#foM'+s.i).innerHTML=fmtP(s.fp);$('#ssdM'+s.i).innerHTML=fmtP(s.sp);});
   const fos=st.filter(s=>s.fon);const tot=fos.reduce((a,s)=>a+s.fp,0);
   $('#foReadout').textContent=fos.length?`${fos.length} stimuli with free-operant data; session ${S.foLen} s.${fos.some(s=>s.fp>=70)?' One item consumed most of the session: treat the remainder of this hierarchy as unassessed.':''}`:'No free-operant data yet.';
-  const ranked=st.filter(s=>s.fon||s.sdn).sort((a,b)=>((b.fp??b.sp)-(a.fp??a.sp)));
-  $('#foRank tbody').innerHTML=ranked.map((s,r)=>`<tr><td class="n">${r+1}</td><td>${esc(name(s.i))}</td><td class="n">${s.fon||''}</td><td class="n">${fmtP(s.fp)}</td><td class="n">${s.sdn||''}</td><td class="n">${fmtP(s.sp)}</td><td>${cat(s.fp??s.sp,50,20)}</td></tr>`).join('')||'<tr><td colspan="7" class="empty2">No data.</td></tr>';
+  const ranked=rankTies(st.filter(s=>s.fon||s.sdn).sort((a,b)=>((b.fp??b.sp)-(a.fp??a.sp))),TIE.fo);   /* v24.42 (review R-070) */
+  $('#foRank tbody').innerHTML=ranked.map((s,r)=>`<tr>${rkCell(s)}<td>${esc(name(s.i))}</td><td class="n">${s.fon||''}</td><td class="n">${fmtP(s.fp)}</td><td class="n">${s.sdn||''}</td><td class="n">${fmtP(s.sp)}</td><td>${cat(s.fp??s.sp,50,20)}</td></tr>`).join('')||'<tr><td colspan="7" class="empty2">No data.</td></tr>';
   return ranked;
 }
 
 /* ---------------- summary ---------------- */
-function rankMap(ranked,key){const m={};ranked.forEach((s,r)=>{if(s[key]!=null)m[s.i]=r+1;});return m;}
+function rankMap(ranked,key){const m={};ranked.forEach((s,r)=>{if(s[key]!=null)m[s.i]={rk:s.rk,t:s.rkTxt};});return m;}   /* v24.42 (review R-070) the averaged rank and its text */
 /* v22.78 (review F121): the composite thirds are thirds of the items assessed (as DeLeon & Iwata's percentages are per item
    assessed), not of the pool, and a pool with fewer than three items assessed, or under half of its named items, is not cut
    into thirds at all: null, and the Summary says how many were assessed */
@@ -2558,21 +2585,21 @@ function compThird(nData,nPool){return nData>=3&&2*nData>=nPool?nData/3:null;}
 function fitHTML(s){if(s.fit==null)return '';return s.fk<7?`${s.fit}% <small>(${s.fk}/7)</small> <span class="tag mid">Incomplete</span>`:`${s.fit}% ${s.fit>=75?'<span class="tag ok">Good</span>':s.fit>=50?'<span class="tag mid">Fair</span>':'<span class="tag no">Poor</span>'}`;}
 function renderSummary(){
   const ss=ssStats(),ps=psStats().st,ms=msStats().st,fo=foStats();
-  const rSS=rankMap(ss.filter(s=>s.trials).sort((a,b)=>(b.pa-a.pa)||((b.pe||0)-(a.pe||0))),'pa');
-  const rPS=rankMap(ps.filter(s=>s.pres).sort((a,b)=>b.p-a.p),'p');
-  const rMS=rankMap(ms.filter(s=>s.avail).sort((a,b)=>(b.p-a.p)||((a.mp||99)-(b.mp||99))),'p');
-  const rFO=rankMap(fo.filter(s=>s.fon).sort((a,b)=>b.fp-a.fp),'fp');
-  const rSD=rankMap(fo.filter(s=>s.sdn).sort((a,b)=>b.sp-a.sp),'sp');
+  const rSS=rankMap(rankTies(ss.filter(s=>s.trials).sort((a,b)=>(b.pa-a.pa)||((b.pe||0)-(a.pe||0))),TIE.ss),'pa');   /* v24.42 (review R-070) ties averaged */
+  const rPS=rankMap(rankTies(ps.filter(s=>s.pres).sort((a,b)=>b.p-a.p),TIE.ps),'p');
+  const rMS=rankMap(rankTies(ms.filter(s=>s.avail).sort((a,b)=>(b.p-a.p)||((a.mp||99)-(b.mp||99))),TIE.ms),'p');
+  const rFO=rankMap(rankTies(fo.filter(s=>s.fon).sort((a,b)=>b.fp-a.fp),TIE.fp),'fp');
+  const rSD=rankMap(rankTies(fo.filter(s=>s.sdn).sort((a,b)=>b.sp-a.sp),TIE.sp),'sp');
   const methods=[];if(Object.keys(rSS).length)methods.push('Single stimulus');if(Object.keys(rPS).length)methods.push('Paired stimulus');if(Object.keys(rMS).length)methods.push(S.msMode.toUpperCase());if(Object.keys(rFO).length)methods.push('Free operant');if(Object.keys(rSD).length)methods.push('SS engagement');
-  const rows=S.stim.map((s,i)=>{const rs=[rSS[i],rPS[i],rMS[i],rFO[i],rSD[i]].filter(v=>v!=null);const mean=rs.length?rs.reduce((a,b)=>a+b,0)/rs.length:null;
+  const rows=S.stim.map((s,i)=>{const rs=[rSS[i],rPS[i],rMS[i],rFO[i],rSD[i]].filter(v=>v!=null).map(v=>v.rk);const mean=rs.length?rs.reduce((a,b)=>a+b,0)/rs.length:null;
     return {i,ir:s.rank,pa:ss[i].pa,ps:ps[i].p,ms:ms[i].p,fo:fo[i].fp,sd:fo[i].sp,mean,k:rs.length};});
   const eco=ecoStats();
   const withData=rows.filter(r=>r.mean!=null).sort((a,b)=>a.mean-b.mean);
   const nPool=paPoolN(),third=compThird(withData.length,nPool);
   $('#sumMethods').textContent=(methods.join(', ')||'none yet')+(methods.length?' · '+withData.length+' of '+nPool+' stimuli assessed':'');
-  const comp=r=>{if(r.mean==null)return '';if(third==null)return '<small>not tiered</small>';const pos=withData.indexOf(r);return pos<third?'<span class="tag ok">HP</span>':pos<2*third?'<span class="tag mid">MP</span>':'<span class="tag no">LP</span>';};
+  const comp=r=>{if(r.mean==null)return '';if(third==null)return '<small>not tiered</small>';const t=tierAt(withData,withData.indexOf(r),third);return t==='HP'?'<span class="tag ok">HP</span>':t==='MP'?'<span class="tag mid">MP</span>':'<span class="tag no">LP</span>';};   /* v24.42 (review R-070) a tie shares a tier */
   const order=[...withData,...rows.filter(r=>r.mean==null)];
-  $('#sumTbl tbody').innerHTML=order.map(r=>`<tr><td>${esc(name(r.i))}</td><td class="n">${esc(r.ir)||'&mdash;'}</td><td class="n">${fmtP(r.pa)}</td><td class="n">${fmtP(r.ps)}</td><td class="n">${fmtP(r.ms)}</td><td class="n">${fmtP(r.fo)}</td><td class="n">${fmtP(r.sd)}</td><td class="n">${r.mean==null?'&mdash;':r.mean.toFixed(1)+' <small>('+r.k+')</small>'}</td><td>${comp(r)}</td><td class="n">${eco[r.i].fit==null?'&mdash;':fitHTML(eco[r.i])}</td></tr>`).join('');
+  $('#sumTbl tbody').innerHTML=order.map(r=>`<tr><td>${esc(name(r.i))}</td><td class="n">${esc(r.ir)||'&mdash;'}</td><td class="n">${fmtP(r.pa)}${rkSmall(rSS[r.i])}</td><td class="n">${fmtP(r.ps)}${rkSmall(rPS[r.i])}</td><td class="n">${fmtP(r.ms)}${rkSmall(rMS[r.i])}</td><td class="n">${fmtP(r.fo)}${rkSmall(rFO[r.i])}</td><td class="n">${fmtP(r.sd)}${rkSmall(rSD[r.i])}</td><td class="n">${r.mean==null?'&mdash;':r.mean.toFixed(1)+' <small>('+r.k+')</small>'}</td><td>${comp(r)}</td><td class="n">${eco[r.i].fit==null?'&mdash;':fitHTML(eco[r.i])}</td></tr>`).join('');
   /* v22.64 what the hierarchy alone cannot say, from the reinforcer-assessment literature */
   {const F=[],nm=i=>esc(name(i)),sel=r=>[r.ps,r.ms].filter(v=>v!=null);
     if(withData.length&&third==null)F.push('<b>Not tiered</b>: '+withData.length+' of '+nPool+' stimuli assessed. The composite is cut into thirds only when at least three, and at least half of the pool, have data; until then it lists the items in their mean-rank order without HP, MP or LP, and the case carries no tier.');   /* v22.78 (review F121) */
@@ -2580,7 +2607,9 @@ function renderSummary(){
     if(zero.length)F.push('<b>Never selected</b>: '+zero.map(r=>nm(r.i)).join(', ')+'. A never-selected item is a weak candidate: in Glover et al. (2008) such items did not consistently maintain responding, while a low-but-selected item may still reinforce when presented alone (Francisco et al., 2008).');
     const by=k=>rows.filter(r=>r[k]!=null).sort((a,b)=>b[k]-a[k]);
     for(const k of ['ps','ms']){const t=by(k);if(t.length<2)continue;
-      if(t[0][k]-t[1][k]<=10)F.push('<b>The top two are close</b> on '+(k==='ps'?'paired stimulus':(S.msMode==='mswo'?'MSWO':'MSW'))+': '+nm(t[0].i)+' '+fmtP(t[0][k])+', '+nm(t[1].i)+' '+fmtP(t[1][k])+'. Stimuli chosen about equally often can separate as the work requirement rises: test both in Form RA-1 (progressive ratio) before choosing (Roane et al., 2001).');
+      /* v24.42 (review R-134) every item within ten points of the leader is named, not the first two: Form RA-1 compares them all */
+      const close=t.filter(x=>t[0][k]-x[k]<=10),cnt=['','','two','three','four','five','six'][close.length]||String(close.length);
+      if(close.length>=2)F.push('<b>The top '+cnt+' are close</b> on '+(k==='ps'?'paired stimulus':(S.msMode==='mswo'?'MSWO':'MSW'))+': '+close.map(x=>nm(x.i)+' '+fmtP(x[k])).join(', ')+'. Stimuli chosen about equally often can separate as the work requirement rises: test '+(close.length===2?'both':'all '+cnt)+' in Form RA-1 (progressive ratio) before choosing (Roane et al., 2001).');
       break;}
     const sp=rows.filter(r=>r.pa!=null&&r.pa>=80&&((r.ps!=null&&r.ps<40)||(r.ps==null&&r.ms!=null&&r.ms<40)));
     if(sp.length)F.push('<b>Approached alone, rarely chosen in pairs</b>: '+sp.map(r=>nm(r.i)+' (single stimulus '+fmtP(r.pa)+', '+(r.ps!=null?'paired '+fmtP(r.ps):'MSWO '+fmtP(r.ms))+')').join(', ')+'. Such an item may reinforce when delivered alone (Roscoe et al., 1999) but persist less as the requirement rises (Penrod et al., 2008): test it in Form RA-1 (single operant, then progressive ratio) before it goes into a thin schedule.');
@@ -2869,7 +2898,7 @@ function computeIOA(){S.ioa.forEach((r,k)=>{const a=+r.a||0,d=+r.d||0;const p=(a
 const LEIS=['Tablet (video)','Bubbles','Squeeze ball','Picture book','Musical toy','Blocks'],EDIB=['Goldfish crackers','Fruit snack','Pretzel','Apple juice','Cheese puff','Graham cracker'],MIXED=['Goldfish crackers','Fruit snack','Tablet (video)','Bubbles','Squeeze ball','Picture book'];
 const rnd=()=>(window.nbhSim?nbhSim.rnd():Math.random());   /* v24.39 seeded */const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const dAgo=n=>{/* v21.21 cross-form (X1): local date, not UTC */const t=new Date();t.setDate(t.getDate()-n);return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
 function simBase(names,types,w,opts={}){
-  S=blank();S.n=names.length;ensure();
+  S=blank();S.n=names.length;ensure();S.psRep=1;S.psRepUser=true;   /* v24.42 the worked example keeps each pair once */
   S.meta={client:'SIMULATED \u2013 Sample Student',sid:'SIM-000',dob:'4/18/2017',setting:'Room 12 (simulated)',assessor:'Jordan Ellis, M.A., BCBA (simulated)',date:fmtD(dAgo(10)),purpose:opts.purpose||'Identify reinforcers for the BIP (simulated)',pool:opts.pool||'Leisure items / toys',selresp:'Touches or picks up the item within 5 s',restrict:'No allergies listed (simulated)',informant:'Classroom teacher (simulated)',pictFormat:'Tangible only',ecoDate:fmtD(dAgo(9)),ecoBy:'JN',monSince:fmtD(dAgo(28)),ssDate:fmtD(dAgo(9)),ssBy:'JN',psDate:fmtD(dAgo(8)),psBy:'JN',msDate:fmtD(dAgo(7)),msBy:'JN',foDate:fmtD(dAgo(6)),foBy:'JN',foDef:'Hands on item or oriented toward screen'};
   S.raisd=['Goldfish, fruit snacks, juice','Asks for them at snack; cries when bag is empty','Tablet, bubbles, squeeze ball','Reaches for tablet; protests when it is removed','Videos on tablet','','Musical toy, singing','Smiles, rocks','Squeeze ball','','Praise from teacher','Looks up, smiles briefly','Computer time','','Tablet, snack','Protests removal of tablet strongly'];
   names.forEach((nm,i)=>{S.stim[i]={name:nm,type:types[i],src:'Teacher interview (simulated)',rank:String([...w].map((v,k)=>k).sort((a,b)=>w[b]-w[a]).indexOf(i)+1),note:''};});
@@ -2929,6 +2958,55 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated assessment
 {const sim0=loadSim;loadSim=async function(){if(window.nbhSim)nbhSim.begin();let r;try{r=await sim0.apply(this,arguments);}finally{try{if(window.nbhSim)nbhSim.after(loadSim);}catch(e){}}return r;};}
 $('#simBtn').addEventListener('click',loadSim);
 
+/* v24.42 (E-24) a brief MSWO: three sessions on the Monitoring sheet, scored as the MSWO sheet is (DeLeon & Iwata, 1996), its
+   top three logged as a row of the brief-MSWO log; the full MSWO sheet is untouched. Opened from the toolbar, the sheet, the
+   URL (#quick-mswo), a hand-off flag another form sets (localStorage nbh.pa1.quick, within ten minutes), or a message from
+   the workstation ({nbh:'quick', what:'mswo'} from the parent window). */
+function quickTally(){const st=S.stim.map((_,i)=>({i,avail:0,sel:0,pos:[]}));let sessions=0;
+  S.quick.sel.forEach(picks=>{const firstBlank=picks.findIndex(v=>v==='');const end=firstBlank===-1?picks.length:firstBlank;if(end===0)return;sessions++;
+    const stop=picks.slice(0,end).findIndex(v=>v==='none');const trials=stop===-1?end:stop+1;const chosen=new Set();
+    for(let t=0;t<trials;t++){const v=picks[t];if(v==='none')break;const i=+v;if(chosen.has(i))continue;st[i].sel++;st[i].avail+=t+1;st[i].pos.push(t+1);chosen.add(i);}
+    st.forEach((x,i)=>{if(!chosen.has(i))x.avail+=trials;});});
+  st.forEach(x=>{x.p=pct(x.sel,x.avail);x.mp=x.pos.length?x.pos.reduce((a,b)=>a+b,0)/x.pos.length:null;});
+  return {st,sessions,ranked:rankTies(st.filter(x=>x.avail).sort((a,b)=>(b.p-a.p)||((a.mp||99)-(b.mp||99))),TIE.ms)};}
+function quickRender(){const q=S.quick,n=S.n;if(!$('#paQuick'))return;
+  $('#paQuickDate').value=q.date||'';$('#paQuickNote').value=q.note||'';
+  let h=`<thead><tr><th class="lab">Trial</th>${q.sel.map((_,k)=>`<th class="c">Session ${k+1}</th>`).join('')}</tr></thead><tbody>`;
+  for(let t=0;t<n;t++){h+=`<tr><td class="lab">${t+1}</td>${q.sel.map((a,k)=>`<td class="c"><select data-items data-qs="${k}" data-t="${t}" aria-label="Session ${k+1}, trial ${t+1}"><option value=""></option>${S.stim.map((_,i)=>`<option value="${i}"${String(a[t])===String(i)?' selected':''}>${esc(name(i))}</option>`).join('')}<option value="none"${a[t]==='none'?' selected':''}>No selection</option></select></td>`).join('')}</tr>`;}
+  h+=`<tr><td class="lab">PB in session</td>${q.pb.map((v,k)=>`<td class="c"><input type="checkbox" data-qs="${k}" data-f="pb" aria-label="Problem behavior in session ${k+1}"${v?' checked':''}></td>`).join('')}</tr></tbody>`;
+  $('#paQuickTbl').innerHTML=h;quickOut();}
+function quickOut(){const {sessions,ranked}=quickTally(),out=$('#paQuickOut');if(!out)return;const top=ranked.slice(0,3);
+  if(!sessions){out.innerHTML=`No sessions scored yet. Place all ${S.n} items in a line, prompt "pick one," give access for ${esc(S.access)} s, remove the selected item, rotate the rest, and re-present; a session ends when every item has been chosen or no selection occurs within 30 s.`;return;}
+  out.innerHTML=`<b>${sessions} of 3 sessions scored.</b> Top three: ${top.map(x=>esc(name(x.i))+' '+fmtP(x.p)+(x.rkTie?' (tied)':'')).join(', ')||'none'}.`+(sessions<3?' Run all three before logging.':'')+(top.some(x=>x.rkTie)?' Tied items share the rank; the log keeps them in mean-position order.':'');}
+const quickToday=()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
+async function quickLog(){const {sessions,ranked}=quickTally();if(!sessions){nbhUI.toast('Score a session first.',{kind:'warn'});return;}
+  if(sessions<3&&!(await nbhUI.confirm('Log '+sessions+' of 3 sessions?\nA brief MSWO is three sessions; the row will say '+sessions+'.',{ok:'Log'})))return;
+  const top=ranked.slice(0,3);let k=S.stab.findIndex(r=>!r.date&&r.r1===''&&r.r2===''&&r.r3==='');
+  if(k<0){S.nStab=Math.min(20,S.stab.length+1);if(S.stab.length>=S.nStab){nbhUI.toast('The brief-MSWO log is full (20 rows).',{kind:'warn'});return;}S.stab.push({date:'',r1:'',r2:'',r3:'',ses:'',pb:false,note:''});k=S.stab.length-1;syncToolbar();}
+  S.stab[k]={date:$('#paQuickDate').value||quickToday(),r1:top[0]?String(top[0].i):'',r2:top[1]?String(top[1].i):'',r3:top[2]?String(top[2].i):'',ses:String(sessions),pb:S.quick.pb.some(Boolean),note:$('#paQuickNote').value||''};
+  S.quick={date:'',note:'',sel:[[],[],[]],pb:[false,false,false]};ensure();renderStab();quickRender();renderSummary();
+  nbhUI.toast('Logged in the brief-MSWO log: '+top.map(x=>name(x.i)).join(', ')+'.',{kind:'ok'});}
+function quickOpen(){setView('monitor');const el=$('#paQuick');if(!el)return;el.hidden=false;quickRender();
+  setTimeout(()=>{try{el.scrollIntoView({block:'start'});const f=el.querySelector('select');if(f)f.focus({preventScroll:true});}catch(e){}},50);}
+{const tbl=$('#paQuickTbl');if(tbl){tbl.addEventListener('input',e=>{const el=e.target;if(el.dataset.qs==null)return;const k=+el.dataset.qs;if(el.dataset.f==='pb')S.quick.pb[k]=el.checked;else S.quick.sel[k][+el.dataset.t]=el.value;quickOut();});
+  $('#paQuickDate').addEventListener('input',e=>{S.quick.date=e.target.value;});$('#paQuickNote').addEventListener('input',e=>{S.quick.note=e.target.value;});
+  $('#paQuickLog').addEventListener('click',quickLog);$('#paQuickClose').addEventListener('click',()=>{$('#paQuick').hidden=true;});
+  $('#paQuickClear').addEventListener('click',async()=>{if(quickTally().sessions&&!(await nbhUI.confirm('Clear the brief MSWO run?\nIts three sessions are cleared; the log is not touched.',{ok:'Clear',danger:true})))return;S.quick={date:'',note:'',sel:[[],[],[]],pb:[false,false,false]};ensure();quickRender();});
+  $('#paQuickBtn').addEventListener('click',quickOpen);$('#paQuickOpen').addEventListener('click',quickOpen);
+  const wantQuick=()=>/^#quick-mswo$/i.test(location.hash||'');
+  const flag=()=>{try{const v=JSON.parse(localStorage.getItem('nbh.pa1.quick')||'null');if(v&&v.what==='mswo'&&Date.now()-(+v.t||0)<600000){localStorage.removeItem('nbh.pa1.quick');return true;}}catch(e){}return false;};
+  setTimeout(()=>{if(wantQuick()||flag())quickOpen();},0);
+  window.addEventListener('hashchange',()=>{if(wantQuick())quickOpen();});
+  window.addEventListener('storage',e=>{if(e.key==='nbh.pa1.quick'&&e.newValue&&flag())quickOpen();});
+  window.addEventListener('message',ev=>{let d=ev.data;try{if(ev.source!==window.parent||!d||d.nbh!=='quick'||d.what!=='mswo')return;}catch(e){return;}quickOpen();});}}
+/* v24.42 (E-44) which sheets hold data, for the Sheets menu's "Only sheets with data" (nbh-ui.js) */
+window.__nbhSheetData=function(){const has={},txt=v=>String(v==null?'':v).trim();
+  has.indirect=S.stim.some(x=>x&&txt(x.name))||(S.raisd||[]).some(v=>txt(v))||(S.prereq||[]).some(a=>(a||[]).some(v=>txt(v)));
+  has.ss=ssStats().some(x=>x.trials);has.ps=psStats().scored>0;has.mswo=msStats().sessions>0;has.fo=foStats().some(x=>x.fon||x.sdn);
+  has.eco=S.eco.settings.some(x=>txt(x.name))||S.eco.obs.some(o=>txt(o.date))||S.eco.attrs.some(a=>Object.values(a||{}).some(v=>txt(v)));
+  has.csa=(S.csa.ctrl||[]).some(v=>txt(v))||(S.csa.rows||[]).some(r=>r&&Object.values(r).some(v=>txt(v)));
+  has.monitor=S.stab.some(r=>txt(r.date))||S.mon.some(r=>txt(r.date))||quickTally().sessions>0;has.summary=has.ss||has.ps||has.mswo||has.fo;return has;};
+
 /* ---------------- orchestration ---------------- */
 function computeAll(){computeSS();computePS();computeMS();computeFO();computeEco();computeCSA();computeStab();computeMon();renderSummary();}
 function renderAll(){ensure();syncToolbar();renderPrereq();renderPool();renderSS();renderPS();renderMS();renderFO();renderEco();renderCSA();renderStab();renderMon();renderIOA();renderSummary();bindMeta();}
@@ -2941,6 +3019,7 @@ bindNum('ssTrials','ssTrials',renderSS);
 bindNum('msSessions','msSessions',renderMS);
 bindNum('foLen','foLen',renderFO);
 bindNum('ssdLen','ssdLen',renderFO);
+$$('#psRepSeg button').forEach(b=>b.addEventListener('click',()=>{S.psRepUser=true;}));   /* v24.42 (E-24) a choice made by hand is kept */
 bindSeg('psRepSeg','rep','psRep',async()=>{if(S.ps.trials.length){if(await nbhUI.confirm('Change the presentations?\nThe paired-stimulus trial list is regenerated and its scores are cleared.',{ok:'Change',danger:true}))genPS();else{syncSeg('psRepSeg','rep','psRep');}}renderPS();});
 bindSeg('msModeSeg','mode','msMode',renderMS);
 bindSeg('psNoneSeg','none','psNone',()=>renderPS());   /* v22.64 */
@@ -2965,16 +3044,16 @@ renderAll();
 window.__nbhFactsOut=function(){
   try{
     const ss=ssStats(),ps=psStats().st,ms=msStats().st,fo=foStats();
-    const rSS=rankMap(ss.filter(s=>s.trials).sort((a,b)=>(b.pa-a.pa)||((b.pe||0)-(a.pe||0))),'pa');
-    const rPS=rankMap(ps.filter(s=>s.pres).sort((a,b)=>b.p-a.p),'p');
-    const rMS=rankMap(ms.filter(s=>s.avail).sort((a,b)=>(b.p-a.p)||((a.mp||99)-(b.mp||99))),'p');
-    const rFO=rankMap(fo.filter(s=>s.fon).sort((a,b)=>b.fp-a.fp),'fp');
-    const rSD=rankMap(fo.filter(s=>s.sdn).sort((a,b)=>b.sp-a.sp),'sp');
-    const rows=S.stim.map((s,i)=>{const rs=[rSS[i],rPS[i],rMS[i],rFO[i],rSD[i]].filter(v=>v!=null);const mean=rs.length?rs.reduce((a,b)=>a+b,0)/rs.length:null;
+    const rSS=rankMap(rankTies(ss.filter(s=>s.trials).sort((a,b)=>(b.pa-a.pa)||((b.pe||0)-(a.pe||0))),TIE.ss),'pa');   /* v24.42 (review R-070) ties averaged */
+    const rPS=rankMap(rankTies(ps.filter(s=>s.pres).sort((a,b)=>b.p-a.p),TIE.ps),'p');
+    const rMS=rankMap(rankTies(ms.filter(s=>s.avail).sort((a,b)=>(b.p-a.p)||((a.mp||99)-(b.mp||99))),TIE.ms),'p');
+    const rFO=rankMap(rankTies(fo.filter(s=>s.fon).sort((a,b)=>b.fp-a.fp),TIE.fp),'fp');
+    const rSD=rankMap(rankTies(fo.filter(s=>s.sdn).sort((a,b)=>b.sp-a.sp),TIE.sp),'sp');
+    const rows=S.stim.map((s,i)=>{const rs=[rSS[i],rPS[i],rMS[i],rFO[i],rSD[i]].filter(v=>v!=null).map(v=>v.rk);const mean=rs.length?rs.reduce((a,b)=>a+b,0)/rs.length:null;
       return {i,name:String(s.name||'').trim(),type:s.type,ir:s.rank,mean,k:rs.length};}).filter(r=>r.name);
     const withData=rows.filter(r=>r.mean!=null).sort((a,b)=>a.mean-b.mean);const third=compThird(withData.length,paPoolN());   /* v22.78 (review F121) */
     const menu=[...withData,...rows.filter(r=>r.mean==null)].map(r=>{const pos=withData.indexOf(r);
-      const o={name:r.name,type:r.type,rank:r.mean==null?null:pos+1,tier:r.mean==null||third==null?'':pos<third?'HP':pos<2*third?'MP':'LP',mean:r.mean,methods:r.k,informant:r.ir,src:'PA-1'};
+      const o={name:r.name,type:r.type,rank:r.mean==null?null:pos+1,tier:r.mean==null?'':tierAt(withData,pos,third),mean:r.mean,methods:r.k,informant:r.ir,src:'PA-1'};
       /* v22.78 (review F118): the competing stimulus verdict rides on the item (the shell carries the menu as it is), and an item
          the behavior rose with is marked contra, so the forms that take the menu leave it out (nbhCase.menuItems) */
       const c=csaPlanOf(r.i);if(c){o.csa=c;if(c.contra)o.contra=true;}
@@ -4749,6 +4828,7 @@ html{touch-action:manipulation}
   .toolbar .nbh-arrows button small{font-size:12px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   html.nbh-fold .toolbar .nbh-fk > .nbh-sheets.nbh-sheets.nbh-sheets,html.nbh-fold .toolbar .nbh-fk > .nbh-arrows.nbh-arrows.nbh-arrows,html.nbh-fold .toolbar .nbh-arrows.nbh-fseg{display:inline-flex!important}
   #nbhSheets{position:fixed;left:16px;right:16px;max-height:calc(100vh - 120px);overflow:auto;background:#fff;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-rule,#cfdad8);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:10px;z-index:70;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;box-sizing:border-box}
+  #nbhSheets .nbh-sheetsf{grid-column:1/-1;display:flex;align-items:center;gap:8px;font:400 13px/1.3 var(--nbh-sans,-apple-system,sans-serif);padding:0 10px 8px;color:var(--nbh-ink,#1a2933);cursor:pointer}#nbhSheets .nbh-sheetsf input{width:20px;height:20px;margin:0}#nbhSheets .nbh-sheetsf small{color:var(--nbh-muted,#54676f)}   /* v24.42 (PA-1 E-44) */
   #nbhSheets .nbh-sheetsh{grid-column:1/-1;font:600 11px/1 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--nbh-muted,#54676f);padding:4px 10px 8px}
   #nbhSheets .nbh-sheet{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:14px;text-align:left;color:inherit;width:100%;font-family:inherit}
   #nbhSheets .nbh-sheet.on{background:var(--nbh-navy,#182e43);color:#fff;font-weight:600}

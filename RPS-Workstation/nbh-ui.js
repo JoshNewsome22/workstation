@@ -1587,9 +1587,17 @@ try { if (window.matchMedia) (function(){
   function refit(){ try { var F = window.nbhFitScreen; if (F && F.fit) F.fit(); } catch (e) {} }
   function openPop(){ closePop(); var t = tabs(), i = cur(), tt = title(); pop = document.createElement('div'); pop.id = 'nbhSheets'; pop.className = 'noprint'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Sheets of this form');
     var h = document.createElement('div'); h.className = 'nbh-sheetsh'; h.textContent = 'Sheets' + (tt.code ? ' of Form ' + tt.code : ''); pop.appendChild(h);
+    /* v24.42 (PA-1 review E-44) a form that says which of its sheets hold data (window.__nbhSheetData, keyed by the view button's
+       data-view) gets a filter, "Only sheets with data"; the open sheet always stays; the choice is kept on the device */
+    var hasD = null; try { if (typeof window.__nbhSheetData === 'function') hasD = window.__nbhSheetData() || {}; } catch (e) { hasD = null; }
+    var only = false, items = [], fl = null; if (hasD) { try { only = localStorage.getItem('nbh.sheets.data') === '1'; } catch (e) {} }
+    function sift(){ var n = 0; items.forEach(function(x){ var hide = only && !x.on && !x.has; x.el.hidden = hide; if (!hide) n++; }); if (fl) fl.querySelector('small').textContent = only ? n + ' of ' + items.length : ''; }
+    if (hasD) { fl = document.createElement('label'); fl.className = 'nbh-sheetsf'; fl.innerHTML = '<input type="checkbox"> Only sheets with data <small></small>'; var cb = fl.querySelector('input'); cb.checked = only;
+      cb.addEventListener('change', function(){ only = cb.checked; try { localStorage.setItem('nbh.sheets.data', only ? '1' : ''); } catch (e) {} sift(); }); fl.addEventListener('click', function(ev){ ev.stopPropagation(); }); pop.appendChild(fl); }
     t.forEach(function(b, k){ var it = document.createElement('button'); it.type = 'button'; it.className = 'nbh-sheet' + (k === i ? ' on' : ''); if (k === i) it.setAttribute('aria-current', 'true');
       var n = document.createElement('span'); n.textContent = (k + 1) + '. ' + label(b); it.appendChild(n); var d = dot(b); if (d) it.appendChild(d);
-      it.addEventListener('click', function(ev){ ev.stopPropagation(); closePop(); b.click(); setTimeout(paint, 30); try { window.scrollTo(0, 0); } catch (e) {} }); pop.appendChild(it); });
+      it.addEventListener('click', function(ev){ ev.stopPropagation(); closePop(); b.click(); setTimeout(paint, 30); try { window.scrollTo(0, 0); } catch (e) {} }); pop.appendChild(it); items.push({ el: it, on: k === i, has: !!(hasD && hasD[b.getAttribute('data-view') || b.id || '']) }); });
+    sift();   /* v24.42 */
     var tb = seg() && seg().closest('.toolbar'), rect = tb ? tb.getBoundingClientRect() : { bottom: 60 }; pop.style.top = Math.max(8, rect.bottom + 8) + 'px';
     document.body.appendChild(pop); if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
     setTimeout(function(){ document.addEventListener('click', outside, true); document.addEventListener('keydown', esc, true); }, 0);

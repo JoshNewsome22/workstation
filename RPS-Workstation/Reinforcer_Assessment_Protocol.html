@@ -516,6 +516,17 @@ table.rank td.empty2{text-align:center;color:var(--ink-soft);padding:12px}
 .tag.mid{background:#f3f5f4;color:var(--ink-soft)}
 .tag.no{background:#faf0e6;color:#9b4e15}
 .tag.na{background:#f3f5f4;color:var(--ink-soft)}
+/* v24.42 (review R-073, E-34, E-24) the short-session mark, the designs to run and the quick-MSWO link */
+.ra-short{font-size:10px;padding:1px 5px;vertical-align:1px}
+#soShort{margin:8px 0 0}
+.ra-designs{margin:10px 0 4px;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:#fbfcfb}
+.ra-designs .chk{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 0}
+.ra-designs .chk label{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.ra-designs .ra-one{font-size:12px;padding:5px 9px;margin:2px 6px 2px 0}
+.ra-designs .sub2{color:var(--ink-soft);font-size:12px}
+#so.ra-off,#co.ra-off,#pr.ra-off{display:none!important}
+.ra-quick-line{margin:4px 0 0;font-size:13px}
+@media print{.ra-designs .ra-one,.ra-quick-line{display:none}}
 .inline{border:0;border-bottom:1px solid var(--rule-2);background:transparent;font:inherit;font-size:13px;padding:1px 2px;color:var(--ink);min-width:80px}
 .inline:focus{background:var(--wash);outline:none;border-bottom-color:var(--rule)}
 .sumhead span .inline{border-bottom:0}
@@ -1811,7 +1822,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   </div>
   <div class="defs">
     <div class="drow"><div class="dlab">Question the plan needs answered</div><div class="dval"><textarea data-meta="question" placeholder="e.g., will tablet access maintain sorting on FR 5 during independent work?" class="nbh-line" rows="1"></textarea></div></div>
-    <div class="drow"><div class="dlab">Preference assessment source</div><div class="dval"><textarea data-meta="pasrc" placeholder="e.g., Form PA-1, MSWO 5 sessions, 9/8/2026; top 3 HP" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Preference assessment source</div><div class="dval"><textarea data-meta="pasrc" placeholder="e.g., Form PA-1, MSWO 5 sessions, 9/8/2026; top 3 HP" class="nbh-line" rows="1"></textarea><p class="noprint ra-quick-line"><a class="ra-quick" href="PA-1_Preference-Assessment-Protocol_v2026-09.html#quick-mswo" target="_blank" rel="noopener">Run a brief MSWO now (Form PA-1, three sessions)</a> <span class="sub2">to pick or re-check the stimuli before the sessions; it writes to PA-1&rsquo;s Monitoring log</span></p></div></div>
     <div class="drow"><div class="dlab">Response (operational definition)</div><div class="dval"><textarea data-meta="response" placeholder="e.g., places one block in the bin from the tray; counted when it lands in the bin" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Materials and position</div><div class="dval"><textarea data-meta="materials" placeholder="e.g., tray of 50 blocks, bin 20 cm to the right; for concurrent: two identical bins 40 cm apart" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Consequence magnitude and timing</div><div class="dval"><textarea data-meta="magnitude" placeholder="e.g., 20 s access delivered within 2 s; edible: one piece" class="nbh-line" rows="1"></textarea></div></div>
@@ -1820,6 +1831,13 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <!-- v22.37 (review F135): the parent's food-item decision, the allergies and the limits, before any edible is delivered -->
     <div class="drow"><div class="dlab">Food items: approved, allergies or diet, limits (Form IC-1)</div><div class="dval"><textarea data-meta="food" placeholder="e.g., Goldfish crackers and fruit snacks approved; no peanut; one small serving per session (Form IC-1, Specific procedures B)" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Session signal (multielement only)</div><div class="dval"><textarea data-meta="signal" placeholder="e.g., colored placemat per condition; item shown before session" class="nbh-line" rows="1"></textarea></div></div>
+  </div>
+  <!-- v24.42 (review E-34) the designs to run: one design at a time when that is the question; a sheet not chosen folds away
+       on screen, on paper and in the Sheets menu until it is chosen again (opening it from the walkthrough brings it back) -->
+  <div class="ra-designs" id="raDesigns">
+    <div><b>Designs to run</b> <span class="sub2">Quick start: one design, with the other two sheets folded away until you tick them. The Summary reads whatever was run.</span></div>
+    <div class="chk"><label><input type="checkbox" id="raRun-so" checked> Single operant</label><label><input type="checkbox" id="raRun-co" checked> Concurrent operants</label><label><input type="checkbox" id="raRun-pr" checked> Progressive ratio</label></div>
+    <div class="noprint"><button type="button" class="ra-one" data-one="so">Just the single operant</button><button type="button" class="ra-one" data-one="co">Just concurrent operants</button><button type="button" class="ra-one" data-one="pr">Just the progressive ratio</button></div>
   </div>
   <!-- v22.54 how to choose the response, from the responses the studies used -->
   <details class="noprint method ra-resp-guide" id="raRespGuide">
@@ -2008,7 +2026,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   <div class="figure co-st-only"><h3>Proportion of Responses Allocated to Each Option</h3><p class="cap">One line per option; the control option, when used, is dashed. A stimulus option that stays above the control across position rotations is preferred relative to the alternatives in that session.</p><svg id="coPlot" viewBox="0 0 640 220"></svg></div>
   <h3 class="sub co-st-only">Allocation Summary</h3>
   <table class="rank co-st-only" id="coRank"><thead><tr><th>Option</th><th class="n">Sessions</th><th class="n">Total responses</th><th class="n">Mean % allocation</th><th class="n">Sessions with most responses</th><th class="n">Position effect</th><th>Relative standing</th></tr></thead><tbody></tbody></table>
-  <p class="method co-st-only">Verdict labels are working conventions, applied in this order: <b>Preferred</b> = mean allocation &ge; 60% and the most responses (or a tie for the most) in more than half the sessions; <b>Comparable</b> = not Preferred, and mean allocation within 20 percentage points of the highest mean allocation, so a leading option under 60% is Comparable; <b>Not chosen</b> = mean allocation &lt; 20%; <b>Lower</b> = any other option: 20% or more of the responses, but more than 20 points below the leader. "Position effect" is computed for Option A, whose position the sheet records: Suspected when its mean allocation differs by more than 40 points between positions, None otherwise (&mdash; until it has been scored in two positions; n/a for the other options). A stimulus that is "not chosen" here can still be a reinforcer; that is the single-operant question.</p>
+  <p class="method co-st-only">Verdict labels are working conventions, applied in this order: <b>Preferred</b> = mean allocation &ge; 60% and the most responses (or a tie for the most) in more than half the sessions; <b>Comparable</b> = not Preferred, and mean allocation within 20 percentage points of the highest mean allocation, so a leading option under 60% is Comparable; <b>Not chosen</b> = mean allocation &lt; 20%; <b>Lower</b> = any other option: 20% or more of the responses, but more than 20 points below the leader. "Position effect" is computed for every option from where its station stood: Suspected when its mean allocation differs by more than 40 points between positions, None otherwise (&mdash; until it has been scored in two positions). The sheet records Option A&rsquo;s position; with two stations Option B took the other side, and with three, Option B&rsquo;s own column names its place, or blank, the next after A in the rotation (L, M, R, then L again), the third station taking the place left. A stimulus that is "not chosen" here can still be a reinforcer; that is the single-operant question.</p>
   <div class="cite co-st-only">Concurrent-operants arrangement after Fisher et al. (1992, <em>JABA, 25</em>, 491&ndash;498) and Piazza, Fisher, Hagopian, Bowman, and Toole (1996, <em>JABA, 29</em>, 1&ndash;9), who used it to show that high-preference stimuli functioned as reinforcers relative to lower-preference ones; they measured the share of session time spent with each stimulus (in a square or a chair), and the response-count stations here follow Roscoe et al. (1999). Concurrent ratio schedules tend to produce near-exclusive choice (maximizing): the arrangement shows which stimulus is preferred, not by how much (Fisher et al., 1992, p. 497). Roscoe et al. (1999) and Francisco, Borrero, and Sy (2008, <em>JABA, 41</em>, 189&ndash;202) showed the arrangement measures relative value and can mask absolute effects.</div>
   <!-- ======== Condition comparison (COA, duration) mode, v21.22: Randall & Kranak (2026) ======== -->
   <div class="co-coa-only" id="coaBlock">
@@ -2193,7 +2211,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <tbody></tbody>
   </table>
   <p class="warn ra-sumnote" id="sumNote" role="status" hidden></p>   <!-- v22.79 (review F132, F133) -->
-  <p class="method">The reinforcer verdict is a working convention, applied in this order: <b>Conflicting</b>, first, when one design gives its negative label (single-operant None, potency Low) and another its positive one (Clear, High, or Preferred under concurrent operants): the note under the table names them, to be resolved under Reinforcer(s) selected and why; <b>Confirmed</b> when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the single-operant verdict is Probable and the potency Moderate (Moderate alone never confirms, plan ratio or not); <b>Relative only</b> when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; <b>Probable</b> when the single-operant verdict is Probable or the potency is Moderate; <b>Not supported</b> when the single-operant verdict is None or the potency is Low; <b>Untested</b> when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</p>
+  <p class="method">The reinforcer verdict is a working convention, applied in this order: <b>Conflicting</b>, first, when one design gives its negative label (single-operant None, potency Low) and another its positive one (Clear, High, or Preferred under concurrent operants): the note under the table names them, to be resolved under Reinforcer(s) selected and why; <b>Confirmed</b> when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the single-operant verdict is Probable and the potency Moderate (Moderate alone never confirms, plan ratio or not); <b>Confirmed (PR only)</b> when High potency is the only positive result and no plan ratio is entered: the no-consequence control ends at FR 1 by construction, so a High label on its own is weaker evidence, and the note under the table says what would make it Confirmed; <b>Relative only</b> when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; <b>Probable</b> when the single-operant verdict is Probable or the potency is Moderate; <b>Not supported</b> when the single-operant verdict is None or the potency is Low; <b>Untested</b> when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</p>
   <p class="method">The design columns carry each sheet&rsquo;s labels. SO verdict: <b>Clear</b> = ratio to control &ge; 2 and no overlap across at least 3 sessions per condition; <b>Probable</b> = ratio &ge; 1.5 or overlap &le; 25%; both with the stimulus mean at least the smallest difference that counts (Setup) above the control&rsquo;s; <b>None</b> otherwise; <b>Too few</b> with fewer than 3 sessions in either condition. CO standing: <b>Preferred</b>, <b>Comparable</b> and <b>Not chosen</b> as defined on the concurrent-operants sheet; <b>Lower</b> = 20% or more of the responses, but more than 20 points below the leading option. PR potency: <b>High</b>, <b>Moderate</b> and <b>Low</b> as defined on the progressive-ratio sheet.</p>
 
   <div class="co-coa-only" id="sumCoaBlock">
@@ -2327,7 +2345,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   </div>
   <div class="script">
     <div><h4>What You Say and Do</h4><ul><li>Before each session: one prompted response at every station, the control included, each followed by its consequence. The runner does not count these.</li><li>Then the session without prompts: each response produces its station’s consequence within 2–3 s; nothing follows at the control station.</li><li>Data collector: set Option A position, press Start session, and tap the button of the option the student responds at (keys 1 to 3).</li></ul></div>
-    <div><h4>What Goes on the Sheet</h4><ul><li>Save to the sheet writes Date, Option A position, the responses at each option and PB.</li><li>Total and each option’s share are computed.</li><li>The Allocation Summary: Mean % allocation, Sessions with most responses, Position effect, Relative standing.</li></ul></div>
+    <div><h4>What Goes on the Sheet</h4><ul><li>Save to the sheet writes Date, Option A position (with three stations the sheet also takes Option B&rsquo;s, blank when the stations rotate as a block), the responses at each option and PB.</li><li>Total and each option’s share are computed.</li><li>The Allocation Summary: Mean % allocation, Sessions with most responses, Position effect, Relative standing.</li></ul></div>
   </div>
   <div class="decide"><b>Decision.</b> RA-1’s working conventions, applied in this order: Preferred = mean allocation ≥ 60% and the most responses (or a tie for the most) in more than half the sessions; Comparable = not Preferred, and mean allocation within 20 percentage points of the highest mean allocation, so a leading option under 60% is Comparable; Not chosen = mean allocation &lt; 20%; Lower = any other option: 20% or more of the responses, but more than 20 points below the leader. A stimulus that is “not chosen” here can still be a reinforcer; that is the single-operant question.</div>
   <h4 class="flowhead">A Second Example: the Condition-Comparison (COA) Mode</h4>
@@ -2370,7 +2388,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div><h4>What You Say and Do</h4><ul><li>Enter the plan ratio before reading potency; it applies the plan-ratio criterion.</li><li>Read each stimulus across its row: SO verdict, CO standing, PR potency, then the reinforcer verdict.</li><li>Compare the verdicts with the PA-1 rank or percentage, and note where they part.</li></ul></div>
     <div><h4>What Goes on the Sheet</h4><ul><li>Plan ratio / schedule.</li><li>Reinforcer(s) selected and why; Schedule and magnitude supported by the data; Reinforcers to rotate or reserve; Conditions not tested (delay, task type, setting, staff); Re-test trigger.</li><li>Interobserver agreement (design, sessions, %); Problem behavior across sessions (summary); the signatures.</li></ul></div>
   </div>
-  <div class="decide"><b>Decision.</b> The reinforcer verdict is a working convention, applied in this order: Conflicting, first, when one design gives its negative label (single-operant None, potency Low) and another its positive one (Clear, High, or Preferred under concurrent operants); Confirmed when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the single-operant verdict is Probable and the potency Moderate (Moderate alone never confirms); Relative only when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; Probable when the single-operant verdict is Probable or the potency is Moderate; Not supported when the single-operant verdict is None or the potency is Low; Untested when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</div>
+  <div class="decide"><b>Decision.</b> The reinforcer verdict is a working convention, applied in this order: Conflicting, first, when one design gives its negative label (single-operant None, potency Low) and another its positive one (Clear, High, or Preferred under concurrent operants); Confirmed when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the single-operant verdict is Probable and the potency Moderate (Moderate alone never confirms); Confirmed (PR only) when High potency is the only positive result and no plan ratio is entered, since the no-consequence control ends at FR 1 by construction; Relative only when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; Probable when the single-operant verdict is Probable or the potency is Moderate; Not supported when the single-operant verdict is None or the potency is Low; Untested when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</div>
 </section>
 
 <section class="proc" id="wk-stop" aria-labelledby="wk-stop-h">
@@ -2420,7 +2438,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div><dt>Reinforcement effect</dt><dd>Clear = ratio ≥ 2 and no overlap across at least 3 sessions per condition; Probable = ratio ≥ 1.5 or overlap ≤ 25%; both with the stimulus mean at least the smallest difference that counts above the control; None otherwise; Too few sessions under 3 in either condition. Working conventions, confirmed by visual analysis of the plot.</dd></div>
     <div><dt>Station and Option A position</dt><dd>Identical response stations, one per option, equally spaced. The positions rotate every session, and the sheet records where Option A stood: L, M or R.</dd></div>
     <div><dt>Mean % allocation</dt><dd>An option’s share of each session’s responses, averaged across sessions. Sessions with most responses counts the sessions in which it led.</dd></div>
-    <div><dt>Position effect</dt><dd>Computed for Option A, whose position the sheet records: Suspected when its mean allocation differs by more than 40 points between positions; n/a for the other options.</dd></div>
+    <div><dt>Position effect</dt><dd>Computed for every option from where its station stood (Option A as recorded; B the other side with two stations, or its own column with three, blank meaning the next place after A in the rotation): Suspected when its mean allocation differs by more than 40 points between positions.</dd></div>
     <div><dt>Relative standing</dt><dd>Applied in this order: Preferred = mean allocation ≥ 60% and the most responses (or a tie for the most) in more than half the sessions; Comparable = not Preferred, and within 20 percentage points of the highest mean allocation; Not chosen = under 20%; Lower = any other option, 20% or more but more than 20 points below the leader.</dd></div>
     <div><dt>Progression and starting ratio</dt><dd>The step by which the ratio grows after each reinforcer: +1, +2, +5, ×2, or 1, 2, 5, 10, 20 …; each session begins at the starting ratio. Set on the toolbar.</dd></div>
     <div><dt>Stop interval</dt><dd>The seconds without a response that end a progressive-ratio session: 120 in the example. The runner restarts it with each response and at the end of each access period, and holds it during access.</dd></div>
@@ -2428,7 +2446,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div><dt>Break point</dt><dd>The last completed ratio. A ratio still in progress when the session ends is not ticked and does not count.</dd></div>
     <div><dt>Responses and Ratios completed</dt><dd>Responses counts the responses in the completed ratios; Ratios completed counts the ticked ratios: in a stimulus session each one produced a reinforcer, and a control session delivers none.</dd></div>
     <div><dt>Potency labels and the plan ratio</dt><dd>Steps are counted along the sheet’s progression, with each mean placed at the first ratio at or above it. High = mean break point at least 3 steps above the control mean and, once a plan ratio is entered on the summary sheet, above the plan ratio; Moderate = at least 1 step above the control mean but not High; Low = less than 1 step above the control mean; no label until the stimulus and the control each have 2 sessions. The plan ratio is typed as a number or as FR n.</dd></div>
-    <div><dt>Reinforcer verdict</dt><dd>Conflicting, Confirmed, Relative only, Probable, Not supported or Untested, tested in that order as the summary defines them. Untested when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen.</dd></div>
+    <div><dt>Reinforcer verdict</dt><dd>Conflicting, Confirmed, Confirmed (PR only), Relative only, Probable, Not supported or Untested, tested in that order as the summary defines them. Confirmed (PR only): High potency with no other positive result and no plan ratio entered, weaker evidence because the no-consequence control ends at FR 1 by construction. Untested when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen.</dd></div>
     <div><dt>Run This Session</dt><dd>The runner at the top of each assessment sheet: it times the session, counts responses, cues each reinforcer and times its access, shows a Session Summary, and with Save to the sheet writes the next empty row.</dd></div>
     <div><dt>IOA</dt><dd>Agreement between the data collector’s record and a second observer’s independent record, on at least one session per condition when the result will be written into a plan.</dd></div>
     <div><dt>Re-test trigger</dt><dd>The condition, written on the summary, under which the team tests the stimulus again: for example, a falling response rate, or each new schedule step.</dd></div>
@@ -2459,7 +2477,7 @@ function ensure(){
   const n=S.n;
   while(S.stim.length<n)S.stim.push({name:'',type:'',pa:'',mag:''});S.stim.length=n;
   while(S.so.length<S.nSess)S.so.push({date:'',cond:'',resp:'',min:'',acc:'',tot:'',pb:false,phase:false});S.so.length=S.nSess;
-  while(S.co.length<S.nCoSess)S.co.push({date:'',pos:'',cond:'',r:['','',''],pb:false});S.co.length=S.nCoSess;
+  while(S.co.length<S.nCoSess)S.co.push({date:'',pos:'',posB:'',cond:'',r:['','',''],pb:false});S.co.length=S.nCoSess;   /* v24.42 (E-34) posB */
   const prN=Math.max(3,n*3+3);while(S.pr.length<prN)S.pr.push({date:'',cond:'',done:[],pb:false,resp:'',min:'',all:''});S.pr.length=prN;
   ensureCoa();
   if(!Array.isArray(S.ioa))S.ioa=[];
@@ -2473,6 +2491,26 @@ const planRatio=()=>{const m=/^\s*(?:(?:FR|VR)\s*)?(\d+(?:\.\d+)?)/i.exec(S.meta
 /* views + toolbar */
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+/* v24.42 (review E-34) the designs to run (Setup): S.meta.designsOff names the sheets folded away; a folded sheet is hidden
+   on screen and on paper and leaves the view buttons (the Sheets menu and the arrows follow them); choosing it brings it back */
+const RA_DESIGNS=['so','co','pr'];
+function raOff(){return String(S.meta.designsOff||'').split(',').filter(v=>RA_DESIGNS.includes(v));}
+function raDesigns(){const off=raOff();RA_DESIGNS.forEach(v=>{const o=off.includes(v);const b=document.querySelector('#viewSeg [data-view="'+v+'"]');if(b)b.hidden=o;
+  const sh=document.getElementById(v);if(sh)sh.classList.toggle('ra-off',o);const c=document.getElementById('raRun-'+v);if(c)c.checked=!o;});
+  if(off.includes((document.body.className.match(/view-([a-z]+)/)||[])[1]))setView('setup');}
+function raSetOff(list){S.meta.designsOff=RA_DESIGNS.filter(v=>list.includes(v)).join(',');if(!S.meta.designsOff)delete S.meta.designsOff;raDesigns();}
+RA_DESIGNS.forEach(v=>{const c=document.getElementById('raRun-'+v);if(c)c.addEventListener('change',()=>{const off=raOff().filter(x=>x!==v);if(!c.checked)off.push(v);raSetOff(off);});});
+$$('.ra-designs .ra-one').forEach(b=>b.addEventListener('click',()=>{const one=b.dataset.one;raSetOff(RA_DESIGNS.filter(v=>v!==one));setView(one);}));
+{const sv0=setView;setView=function(v){if(RA_DESIGNS.includes(v)&&raOff().includes(v))raSetOff(raOff().filter(x=>x!==v));return sv0(v);};}
+window.raDesigns=raDesigns;
+/* v24.42 (review E-24) the link to Form PA-1's brief MSWO: inside the workstation the shell opens PA-1 beside this form at
+   the hash the link names (and the link itself is the fallback when the shell does not answer); standalone it opens a new tab */
+document.addEventListener('click',e=>{const a=e.target.closest('a.ra-quick');if(!a||window.parent===window)return;e.preventDefault();
+  const href=a.getAttribute('href'),at=(href.split('#')[1]||'').trim();let t=0;
+  const h=ev=>{const d=ev.data;if(d&&d.nbh==='opened'&&d.want==='PA-1'){clearTimeout(t);window.removeEventListener('message',h);}};
+  window.addEventListener('message',h);t=setTimeout(()=>{window.removeEventListener('message',h);try{window.open(href,'_blank','noopener');}catch(x){}},1500);
+  try{window.parent.postMessage({nbh:'open',want:'PA-1',beside:true,at},'*');}catch(x){clearTimeout(t);}});
+
 function bindNum(id,key,after){const e=$('#'+id);e.addEventListener('change',()=>{const v=+e.value;if(!isFinite(v)||v<+e.min||v>+e.max){e.value=S[key];return;}S[key]=v;ensure();after();renderSummary();});}
 function syncToolbar(){['nStim:n','sessMin:sessMin','nSess:nSess','nCoSess:nCoSess','prStart:prStart','prStop:prStop'].forEach(p=>{const [id,k]=p.split(':');$('#'+id).value=S[k];});$('#prStep').value=S.prStep;$('#prRep').value=String(S.prRep===2?2:1);}
 
@@ -2496,7 +2534,9 @@ function renderSO(){
   $('#soTbl').innerHTML=h+'</tbody>';computeSO();
 }
 $('#soTbl').addEventListener('input',e=>{const el=e.target,k=+el.dataset.k;if(isNaN(k))return;S.so[k][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;computeSO();renderSummary();});
-function soRows(){return S.so.map((s,k)=>{const m=s.min!==''?+s.min:S.sessMin;const rate=(s.cond!==''&&s.resp!==''&&m>0)?(+s.resp)/m:null;return {k,cond:s.cond,rate,pb:s.pb,phase:s.phase};});}
+function soRows(){return S.so.map((s,k)=>{const m=s.min!==''?+s.min:S.sessMin;const rate=(s.cond!==''&&s.resp!==''&&m>0)?(+s.resp)/m:null;
+  const short=rate!=null&&s.min!==''&&S.sessMin>0&&m<0.5*S.sessMin;   /* v24.42 (review R-073) under half the planned length */
+  return {k,cond:s.cond,rate,pb:s.pb,phase:s.phase,short,min:m};});}
 /* v22.79 (review F131) the smallest difference over the control that counts, responses a minute (Setup; 1 when blank) */
 const raMinDiff=()=>{const v=parseFloat(S.meta.minDiff);return isFinite(v)&&v>=0?v:1;};
 /* the ratio as the tables show it: with the control at zero, the difference instead of an infinite ratio */
@@ -2506,10 +2546,13 @@ const raRatioTxt=s=>s.ratio==null?'&mdash;':s.cm===0?'&mdash; (+'+(Math.round(10
 function soStats(){
   const rows=soRows().filter(r=>r.rate!=null);const ctl=rows.filter(r=>r.cond==='ctl').map(r=>r.rate);
   const cm=mean(ctl),cmax=ctl.length?Math.max(...ctl):null;
-  const out={ctl:{n:ctl.length,mean:cm,min:ctl.length?Math.min(...ctl):null,max:cmax,pb:rows.filter(r=>r.cond==='ctl'&&r.pb).length},stim:[]};
+  const out={ctl:{n:ctl.length,mean:cm,min:ctl.length?Math.min(...ctl):null,max:cmax,pb:rows.filter(r=>r.cond==='ctl'&&r.pb).length,short:rows.filter(r=>r.cond==='ctl'&&r.short).length},stim:[]};   /* v24.42 (R-073) short */
   S.stim.forEach((_,i)=>{const rs=rows.filter(r=>String(r.cond)===String(i));const v=rs.map(r=>r.rate);const m=mean(v);
     const ratio=(m!=null&&cm!=null)?(cm>0?m/cm:(m>0?Infinity:null)):null;
     const ov=(v.length&&cmax!=null)?v.filter(x=>x<=cmax).length/v.length:null;
+    /* v24.42 (review R-073) the short sessions, and the ratio to control the full-length sessions alone would give */
+    const nShort=rs.filter(r=>r.short).length,vF=rs.filter(r=>!r.short).map(r=>r.rate),cF=rows.filter(r=>r.cond==='ctl'&&!r.short).map(r=>r.rate),mF=mean(vF),cmF=mean(cF);
+    const ratioF=(nShort||out.ctl.short)&&mF!=null&&cmF!=null?(cmF>0?mF/cmF:(mF>0?Infinity:null)):null;
     /* v22.79 (review F130, F131): every label needs 3 sessions in each condition (fewer: "few", no verdict), and Clear and
        Probable also need the stimulus mean at least the difference floor (Setup, a working convention) over the control's, so
        a control at zero no longer makes any responding at all a Clear effect */
@@ -2517,16 +2560,22 @@ function soStats(){
     let verdict='';if(m!=null&&cm!=null){if(v.length<3||ctl.length<3)verdict='few';else if(ratio>=2&&ov===0&&diff>=floor)verdict='clear';else if((ratio>=1.5||(ov!=null&&ov<=.25))&&diff>=floor)verdict='probable';else verdict='none';}
     /* v22.79 (review I67): the schedule the stimulus's sessions ran (the session record's FR, FR 1 when none) */
     const frs=rs.map(r=>soFR(r.k)),frLo=frs.length?Math.min(...frs):null,frHi=frs.length?Math.max(...frs):null;
-    out.stim.push({i,n:v.length,mean:m,min:v.length?Math.min(...v):null,max:v.length?Math.max(...v):null,ratio,ov,diff,cm,verdict,frLo,frHi,pb:rs.filter(r=>r.pb).length});});
+    out.stim.push({i,n:v.length,mean:m,min:v.length?Math.min(...v):null,max:v.length?Math.max(...v):null,ratio,ov,diff,cm,verdict,frLo,frHi,pb:rs.filter(r=>r.pb).length,short:nShort,ratioF});});
   return out;
 }
 function computeSO(){
-  soRows().forEach(r=>{$('#soR'+r.k).innerHTML=r.rate==null?'':r.rate.toFixed(1);});
+  soRows().forEach(r=>{$('#soR'+r.k).innerHTML=r.rate==null?'':r.rate.toFixed(1)+(r.short?' <span class="tag na ra-short" title="Under half the planned session length: counted at its rate">short</span>':'');});   /* v24.42 (R-073) */
   const st=soStats();const scored=soRows().filter(r=>r.rate!=null).length;
+  /* v24.42 (review R-073) the short sessions named under the Condition Summary, with the ratio the full sessions alone would give */
+  {let n=document.getElementById('soShort');if(!n){n=document.createElement('p');n.id='soShort';n.className='warn';n.setAttribute('role','status');const rk=$('#soRank');rk.parentNode.insertBefore(n,rk.nextSibling);}
+    const sh=st.ctl.short+st.stim.reduce((a,x)=>a+x.short,0);
+    if(!sh){n.hidden=true;n.textContent='';}
+    else{const parts=st.stim.filter(x=>x.n&&(x.short||st.ctl.short)&&x.ratio!=null).map(x=>esc(name(x.i))+' '+raRatioTxt(x).replace(/<[^>]+>/g,'')+(x.ratioF==null?' (no full-length sessions to compare)':' now, '+(x.ratioF===Infinity?'\u221e':x.ratioF.toFixed(2))+' without them'));
+      n.hidden=false;n.innerHTML='<b>'+sh+' short session'+(sh===1?'':'s')+'</b> (Minutes under half the '+esc(String(S.sessMin))+'-minute session length) count at their rate, so a few responses in a few seconds read as a high rate and move the ratio to control'+(parts.length?': '+parts.join('; ')+'.':'.')+' Re-run them, or clear a row to leave it out.';}}
   $('#soReadout').textContent=scored?`${scored} sessions scored; ${st.ctl.n} control.`:'No sessions scored yet.';
   const tagV=v=>v==='clear'?'<span class="tag ok">Clear</span>':v==='probable'?'<span class="tag mid">Probable</span>':v==='none'?'<span class="tag no">None</span>':v==='few'?'<span class="tag na">Too few sessions</span>':'';
-  let h=`<tr><td>Control</td><td class="n">${st.ctl.n||''}</td><td class="n">${f1(st.ctl.mean)}</td><td class="n">${st.ctl.n?f1(st.ctl.min)+'&ndash;'+f1(st.ctl.max):'&mdash;'}</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">${st.ctl.pb||''}</td><td></td></tr>`;
-  h+=st.stim.map(s=>`<tr><td>${esc(name(s.i))}</td><td class="n">${s.n||''}</td><td class="n">${f1(s.mean)}</td><td class="n">${s.n?f1(s.min)+'&ndash;'+f1(s.max):'&mdash;'}</td><td class="n">${raRatioTxt(s)}</td><td class="n">${s.ov==null?'&mdash;':Math.round(100*s.ov)+'%'}</td><td class="n">${s.pb||''}</td><td>${tagV(s.verdict)}${raSchedTxt(s)}</td></tr>`).join('');
+  let h=`<tr><td>Control</td><td class="n">${st.ctl.n||''}${st.ctl.short?' <small>('+st.ctl.short+' short)</small>':''}</td><td class="n">${f1(st.ctl.mean)}</td><td class="n">${st.ctl.n?f1(st.ctl.min)+'&ndash;'+f1(st.ctl.max):'&mdash;'}</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">${st.ctl.pb||''}</td><td></td></tr>`;
+  h+=st.stim.map(s=>`<tr><td>${esc(name(s.i))}</td><td class="n">${s.n||''}${s.short?' <small>('+s.short+' short)</small>':''}</td><td class="n">${f1(s.mean)}</td><td class="n">${s.n?f1(s.min)+'&ndash;'+f1(s.max):'&mdash;'}</td><td class="n">${raRatioTxt(s)}</td><td class="n">${s.ov==null?'&mdash;':Math.round(100*s.ov)+'%'}</td><td class="n">${s.pb||''}</td><td>${tagV(s.verdict)}${raSchedTxt(s)}</td></tr>`).join('');
   $('#soRank tbody').innerHTML=h;plotSO();return st;
 }
 const SHAPES=['circle','square','diamond','triangle'];
@@ -2628,18 +2677,22 @@ window.raAssentPaint=function(){const a=window.__raAssent||{};['so','co','pr'].f
   n.hidden=false;n.innerHTML='<b>Assent (Form SI-1):</b> '+(a.status?esc(a.status):'not recorded')+(a.signs?'. Stop signals: '+esc(a.signs)+'. When you see one, press Student withdrew: the session ends at once, and it is counted apart from problem behavior.':'.')+(a.refused?' <b>The student refused: do not run a session; review assent with the team first.</b>':'');});};
 function renderCO(){
   const opts=coOptList();
-  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c" title="Baseline: no consequence at any station">Condition</th><th class="c">Option A position</th>${opts.map((o,j)=>`<th class="c">${esc(o.label)}<br><span class="sub2">responses</span></th>`).join('')}<th class="c">Total</th>${opts.map(o=>`<th class="c">% ${esc(o.label)}</th>`).join('')}<th class="c">PB</th></tr></thead><tbody>`;
-  S.co.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select data-k="${k}" data-f="cond"><option value="">Reinforcement</option><option value="bl"${s.cond==='bl'?' selected':''}>Baseline</option></select></td><td class="c"><select data-k="${k}" data-f="pos"><option value=""></option><option${s.pos==='L'?' selected':''}>L</option><option${s.pos==='M'?' selected':''}>M</option><option${s.pos==='R'?' selected':''}>R</option></select></td>${opts.map((o,j)=>`<td class="c"><input type="number" min="0" data-k="${k}" data-j="${j}" data-f="r" value="${esc(s.r[j])}"></td>`).join('')}<td class="c calc" id="coT${k}"></td>${opts.map((o,j)=>`<td class="c calc" id="coP${k}_${j}"></td>`).join('')}<td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td></tr>`;});
+  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c" title="Baseline: no consequence at any station">Condition</th><th class="c">Option A position</th>${opts.length>=3?'<th class="c" title="Blank: the stations rotate as a block, so Option B stands next after A (L, M, R, then L again) and the third station takes the place left">Option B position</th>':''}${opts.map((o,j)=>`<th class="c">${esc(o.label)}<br><span class="sub2">responses</span></th>`).join('')}<th class="c">Total</th>${opts.map(o=>`<th class="c">% ${esc(o.label)}</th>`).join('')}<th class="c">PB</th></tr></thead><tbody>`;
+  S.co.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select data-k="${k}" data-f="cond"><option value="">Reinforcement</option><option value="bl"${s.cond==='bl'?' selected':''}>Baseline</option></select></td><td class="c"><select data-k="${k}" data-f="pos"><option value=""></option><option${s.pos==='L'?' selected':''}>L</option><option${s.pos==='M'?' selected':''}>M</option><option${s.pos==='R'?' selected':''}>R</option></select></td>${opts.length>=3?`<td class="c"><select data-k="${k}" data-f="posB" title="Blank: rotation (next after A)"><option value="">rot.</option><option${s.posB==='L'?' selected':''}>L</option><option${s.posB==='M'?' selected':''}>M</option><option${s.posB==='R'?' selected':''}>R</option></select></td>`:''}${opts.map((o,j)=>`<td class="c"><input type="number" min="0" data-k="${k}" data-j="${j}" data-f="r" value="${esc(s.r[j])}"></td>`).join('')}<td class="c calc" id="coT${k}"></td>${opts.map((o,j)=>`<td class="c calc" id="coP${k}_${j}"></td>`).join('')}<td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td></tr>`;});
   $('#coTbl').innerHTML=h+'</tbody>';computeCO();
 }
 $('#coTbl').addEventListener('input',e=>{const el=e.target,k=+el.dataset.k;if(isNaN(k))return;if(el.dataset.f==='r')S.co[k].r[+el.dataset.j]=el.value;else S.co[k][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;computeCO();renderSummary();});
 function coStats(){
-  const opts=coOptList();const rows=S.co.map((s,k)=>{const r=opts.map((_,j)=>s.r[j]===''?null:+s.r[j]);const done=r.every(v=>v!=null);const tot=done?r.reduce((a,b)=>a+b,0):null;return {k,r,tot,p:done&&tot>0?r.map(v=>100*v/tot):null,pos:s.pos,pb:s.pb,bl:s.cond==='bl'};});
+  const opts=coOptList();const rows=S.co.map((s,k)=>{const r=opts.map((_,j)=>s.r[j]===''?null:+s.r[j]);const done=r.every(v=>v!=null);const tot=done?r.reduce((a,b)=>a+b,0):null;return {k,r,tot,p:done&&tot>0?r.map(v=>100*v/tot):null,pos:s.pos,posB:s.posB||'',pb:s.pb,bl:s.cond==='bl'};});
+  /* v24.42 (review E-34) where each option's station stood: Option A as recorded; with two stations B took the other side;
+     with three, B as recorded or, blank, next after A in the rotation (L, M, R, L), and the third the place left */
+  const CYC=['L','M','R'],posOf=(r,j)=>{const a=r.pos;if(!CYC.includes(a))return '';if(j===0)return a;if(opts.length<3)return a==='L'?'R':a==='R'?'L':'';
+    const b=CYC.includes(r.posB)&&r.posB!==a?r.posB:CYC[(CYC.indexOf(a)+1)%3];return j===1?b:(CYC.find(x=>x!==a&&x!==b)||'');};
   const scored=rows.filter(r=>r.p&&!r.bl);   /* v22.65 the preference figures use the reinforcement sessions; baseline apart */
   const st=opts.map((o,j)=>{const ps=scored.map(r=>r.p[j]);const m=mean(ps);const wins=scored.filter(r=>Math.max(...r.p)===r.p[j]&&r.p[j]>0).length;
     const tot=scored.reduce((a,r)=>a+r.r[j],0);
-    // position effect: for option A (j=0) use pos field; compare means by position
-    let posEff=null;if(j===0&&scored.some(r=>r.pos)){const byPos={};scored.forEach(r=>{if(r.pos)(byPos[r.pos]=byPos[r.pos]||[]).push(r.p[0]);});const ms=Object.values(byPos).map(mean);if(ms.length>=2)posEff=Math.max(...ms)-Math.min(...ms);}
+    // position effect, for every option (v24.42, review E-34): its mean share by where its station stood
+    let posEff=null;{const byPos={};scored.forEach(r=>{const q=posOf(r,j);if(q)(byPos[q]=byPos[q]||[]).push(r.p[j]);});const ms=Object.values(byPos).map(mean);if(ms.length>=2)posEff=Math.max(...ms)-Math.min(...ms);}
     return {j,key:o.key,label:o.label,ctl:o.ctl,n:ps.length,mean:m,wins,tot,posEff};});
   const lead=Math.max(...st.map(s=>s.mean??-1));
   st.forEach(s=>{if(s.mean==null){s.stand='';return;}if(s.mean>=60&&s.wins>scored.length/2)s.stand='preferred';else if(lead-s.mean<=20)s.stand='comparable';else if(s.mean<20)s.stand='notchosen';else s.stand='lower';});
@@ -2661,7 +2714,7 @@ function computeCO(){
     let el=document.getElementById('coNotes');if(!el){el=document.createElement('ul');el.id='coNotes';el.className='flags co-st-only';const ro=document.getElementById('coReadout');ro.parentNode.insertBefore(el,ro.nextSibling);}
     el.innerHTML=notes.map(x=>'<li>'+esc(x)+'</li>').join('');}
   const tagS=s=>s==='preferred'?'<span class="tag ok">Preferred</span>':s==='comparable'?'<span class="tag mid">Comparable</span>':s==='notchosen'?'<span class="tag no">Not chosen</span>':s==='lower'?'<span class="tag na">Lower</span>':'';
-  $('#coRank tbody').innerHTML=st.map(s=>`<tr><td>${esc(s.label)}</td><td class="n">${s.n||''}</td><td class="n">${s.n?s.tot:''}</td><td class="n">${s.mean==null?'&mdash;':Math.round(s.mean)+'%'}</td><td class="n">${s.n?s.wins+' of '+s.n:''}</td><td class="n">${s.posEff==null?(s.j===0?'&mdash;':'n/a'):(s.posEff>40?'<span class="tag no">Suspected</span>':'None')}</td><td>${tagS(s.stand)}</td></tr>`).join('');
+  $('#coRank tbody').innerHTML=st.map(s=>`<tr><td>${esc(s.label)}</td><td class="n">${s.n||''}</td><td class="n">${s.n?s.tot:''}</td><td class="n">${s.mean==null?'&mdash;':Math.round(s.mean)+'%'}</td><td class="n">${s.n?s.wins+' of '+s.n:''}</td><td class="n">${s.posEff==null?'&mdash;':(s.posEff>40?'<span class="tag no">Suspected</span>':'None')}</td><td>${tagS(s.stand)}</td></tr>`).join('');
   plotCO(st,rows);return st;
 }
 function plotCO(st,rows){
@@ -3072,17 +3125,22 @@ function plotCum(st){const box=$('#prCum');if(!box)return;const C=['#24313C','#2
 /* v22.79 (review F130 to F133) the reinforcer verdict, one rule for the Summary and the case, in this order: Untested; Conflicting
    when one design gives its negative label (SO None, PR Low) and another its positive one (SO Clear, PR High, CO Preferred);
    Confirmed (SO Clear, PR High, or SO Probable with PR Moderate: Moderate alone never confirms, plan ratio or not); Relative
-   only; Probable; Not supported; Untested (a design with too few sessions has no label) */
+   only; Probable; Not supported; Untested (a design with too few sessions has no label).
+   v24.42 (review R-072): the no-consequence control ends at FR 1 by construction, so High potency on its own, with no other
+   positive result and no plan ratio entered, reads Confirmed (PR only); with a plan ratio entered High already means a break
+   point above it, and another design's positive result (SO Clear or Probable, CO Preferred) makes it Confirmed */
 function raVerdict(i,so,co,pr){const a=so.stim[i]||{verdict:''},c=co.st.find(x=>x.key===String(i)),p=pr.st.find(x=>x.key===String(i));
   const tested=(a.verdict!=='')||(c&&c.stand!=='')||(p&&p.pot!=='');if(!tested)return 'Untested';
   const neg=a.verdict==='none'||(p&&p.pot==='low'),pos=a.verdict==='clear'||(p&&p.pot==='high')||(c&&c.stand==='preferred');
   if(neg&&pos)return 'Conflicting';
-  if(a.verdict==='clear'||(p&&p.pot==='high')||(a.verdict==='probable'&&p&&p.pot==='moderate'))return 'Confirmed';
+  if(a.verdict==='clear'||(p&&p.pot==='high')||(a.verdict==='probable'&&p&&p.pot==='moderate')){
+    if(p&&p.pot==='high'&&a.verdict!=='clear'&&a.verdict!=='probable'&&!(c&&c.stand==='preferred')&&planRatio()==null)return 'Confirmed (PR only)';   /* v24.42 (R-072) */
+    return 'Confirmed';}
   if(c&&(c.stand==='preferred'||c.stand==='comparable')&&a.verdict!=='none'&&(!p||p.pot!=='low'))return 'Relative only';
   if(a.verdict==='probable'||(p&&p.pot==='moderate'))return 'Probable';
   if(a.verdict==='none'||(p&&p.pot==='low'))return 'Not supported';
   return 'Untested';}
-const RA_VTAG={Confirmed:'ok','Relative only':'mid',Probable:'mid','Not supported':'no',Conflicting:'no',Untested:'na'};
+const RA_VTAG={Confirmed:'ok','Confirmed (PR only)':'mid','Relative only':'mid',Probable:'mid','Not supported':'no',Conflicting:'no',Untested:'na'};
 function renderSummary(){
   const so=soStats(),co=S.meta.coMode==='coa'?coaSumStats():coStats(),pr=prStats();
   const tagV=v=>v==='clear'?'<span class="tag ok">Clear</span>':v==='probable'?'<span class="tag mid">Probable</span>':v==='none'?'<span class="tag no">None</span>':v==='few'?'<span class="tag na">Too few</span>':'&mdash;';
@@ -3095,13 +3153,15 @@ function renderSummary(){
     /* v22.79 (review I67): a Confirmed stimulus never tested at or above the plan ratio */
     if(vw==='Confirmed'&&plan!=null&&!((a.frHi||0)>=plan&&a.verdict==='clear')&&!(p&&p.pot==='high'))notes.push('<b>'+esc(name(i))+'</b>: Confirmed at FR '+(a.frHi||1)+'; the plan ratio is FR '+plan+' and no session tested it there. Test it at the plan ratio (the single-operant runner\u2019s Test at the plan ratio) or in the progressive ratio before the plan relies on it.');
     if(vw==='Confirmed'&&plan==null&&p&&p.pot==='high'&&a.verdict!=='clear')notes.push('<b>'+esc(name(i))+'</b>: High potency against the control only, since no plan ratio is entered above.');
+    /* v24.42 (review R-072) */
+    if(vw==='Confirmed (PR only)')notes.push('<b>'+esc(name(i))+'</b>: Confirmed on the progressive ratio alone. The no-consequence control ends at FR 1 by construction, so High potency against it shows that responding held up under a rising requirement, weaker evidence than a single-operant effect. Enter the plan ratio above (High then also means a break point above it), or run the single-operant or concurrent-operants design, before the plan relies on this stimulus.');
     return `<tr><td>${esc(name(i))}</td><td class="n">${esc(s.pa)||'&mdash;'}</td><td class="n">${a.ratio==null?'&mdash;':raRatioTxt(a)}</td><td class="n">${tagV(a.verdict)}${raSchedTxt(a)}</td><td class="n">${c&&c.mean!=null?Math.round(c.mean)+'%':'&mdash;'}</td><td class="n">${c?(c.coaTag||tagS(c.stand)):'&mdash;'}</td><td class="n">${p?f1(p.mean):'&mdash;'}</td><td class="n">${p?tagP(p.pot):'&mdash;'}</td><td>${v}</td></tr>`;}).join('');
   {const n=$('#sumNote');if(n){n.hidden=!notes.length;n.innerHTML=notes.join(' ');}}   /* v22.79 (review F132, F133) */
   renderSumCoa();
 }
 
 function computeAll(){computeSO();computeCO();computePR();renderSummary();}
-function renderAll(){ensure();syncToolbar();renderStim();renderSO();renderCO();renderCOA();renderPR();renderIOA();renderRec();renderSummary();bindMeta();$('#coOpts').value=S.meta.coOpts||'2';applyCoMode();}
+function renderAll(){ensure();syncToolbar();renderStim();renderSO();renderCO();renderCOA();renderPR();renderIOA();renderRec();renderSummary();bindMeta();$('#coOpts').value=S.meta.coOpts||'2';applyCoMode();raDesigns();}   /* v24.42 (E-34) */
 bindNum('nStim','n',()=>{renderStim();renderSO();renderCO();renderCOA();renderPR();renderSummary();});
 bindNum('sessMin','sessMin',()=>{renderSO();computeCOA();});
 bindNum('nSess','nSess',renderSO);
@@ -4486,6 +4546,8 @@ window.__nbhFactsOut=function(){try{
       rows.push(['Minutes on the sheet',r.min+(c.clock==='run'?' (minutes run)':' (minutes the response was available)')],['Rate',r1(r.rate)+' per minute']);
       /* v22.79 (review F129): with the clock running through access, the stimulus's rate is capped by the access time */
       if(c.clock==='run'&&!c.ctl&&r.accMs)rows.push(['Caution','The clock ran through '+up(r.accMs)+' of access, so this rate is capped by the access time and reads low against the control. Compare conditions with the clock paused (the default).']);
+      /* v24.42 (review R-073) */
+      {const plan=(c.dur||sessMs())/60000;if(plan>0&&r.min<0.5*plan)rows.push(['Short session','Under half the planned length ('+r.min+' of '+r2(plan)+' min): saved, it counts at its rate and is marked short on the sheet. Save asks first.']);}
       if(!c.ctl)rows.push(['Reinforcers',String(r.sr)]);
       if(r.accMs)rows.push(['Access time',up(r.accMs)]);
       if(r.during)rows.push(['Responses during access',r.during+' ('+durTxt+')']);
@@ -4536,7 +4598,11 @@ window.__nbhFactsOut=function(){try{
       extra=' Setup had no session cap, so the '+c.cap+'-min cap used was entered there.';}
     if(r.over)extra+=' The sheet shows FR '+c.lad[c.sheetN-1]+' as the break point (its last column); the session reached FR '+r.bp+'.';
     return{k,extra};}
-  function save(R){if(R.state!=='done'||!R.cfg)return;
+  async function save(R){if(R.state!=='done'||!R.cfg)return;
+    /* v24.42 (review R-073) a single-operant session under half the planned length is saved only after a yes, once */
+    if(R.v==='so'&&R.shortOK!==R.acc){const r=results(R),plan=(R.cfg.dur||sessMs())/60000;
+      if(r&&plan>0&&r.min<0.5*plan){const ok=await nbhUI.confirm('This session ran '+r.min+' of the '+r2(plan)+' planned minutes, under half.\nSaved, it counts at its rate: '+r.n+' response'+(r.n===1?'':'s')+' in '+r.min+' min is '+r1(r.rate)+' a minute, which can move the ratio to control. The row is marked short on the sheet. Save it anyway?',{ok:'Save'});
+        if(!ok)return;R.shortOK=R.acc;if(R.state!=='done'||!R.cfg)return;}}
     const res=R.v==='so'?saveSO(R):R.v==='co'?saveCO(R):savePR(R);if(res===-1||!res)return;
     /* v22.79 (review I69, I68, I67) the session record: the time it started, the schedule (single operant) and how it ended */
     try{const d=R.date||new Date(),c=R.cfg||{},END={ended:'Ended early',withdrew:'Student withdrew',stop:'Stop rule (no response)',cap:'Session cap'};
@@ -5619,6 +5685,7 @@ html{touch-action:manipulation}
   .toolbar .nbh-arrows button small{font-size:12px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   html.nbh-fold .toolbar .nbh-fk > .nbh-sheets.nbh-sheets.nbh-sheets,html.nbh-fold .toolbar .nbh-fk > .nbh-arrows.nbh-arrows.nbh-arrows,html.nbh-fold .toolbar .nbh-arrows.nbh-fseg{display:inline-flex!important}
   #nbhSheets{position:fixed;left:16px;right:16px;max-height:calc(100vh - 120px);overflow:auto;background:#fff;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-rule,#cfdad8);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:10px;z-index:70;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;box-sizing:border-box}
+  #nbhSheets .nbh-sheetsf{grid-column:1/-1;display:flex;align-items:center;gap:8px;font:400 13px/1.3 var(--nbh-sans,-apple-system,sans-serif);padding:0 10px 8px;color:var(--nbh-ink,#1a2933);cursor:pointer}#nbhSheets .nbh-sheetsf input{width:20px;height:20px;margin:0}#nbhSheets .nbh-sheetsf small{color:var(--nbh-muted,#54676f)}   /* v24.42 (PA-1 E-44) */
   #nbhSheets .nbh-sheetsh{grid-column:1/-1;font:600 11px/1 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--nbh-muted,#54676f);padding:4px 10px 8px}
   #nbhSheets .nbh-sheet{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:14px;text-align:left;color:inherit;width:100%;font-family:inherit}
   #nbhSheets .nbh-sheet.on{background:var(--nbh-navy,#182e43);color:#fff;font-weight:600}
@@ -6809,7 +6876,7 @@ S.co=[
   cap:'Before the next session the stations rotate; the runner’s Option A position suggests the next position in the rotation, M, and the sheet records it. Rotation is how a position bias shows up: RA-1 computes a Position effect for Option A, Suspected when its mean allocation differs by more than 40 points between positions.',
   rec:[['Option A position','M']]}),
  F(BRD,{board:'alloc',does:'Preferred, Not chosen, Not chosen',
-  cap:'Reading relative responding: the Allocation Summary. Tablet (video): 79% of responses, the most in 6 of 6 sessions: Preferred. Fruit chew: 17%: Not chosen. Control: 4%. No position effect for Option A. A stimulus that is “not chosen” here can still be a reinforcer; that is the single-operant question, and there the fruit chew was Clear.',
+  cap:'Reading relative responding: the Allocation Summary. Tablet (video): 79% of responses, the most in 6 of 6 sessions: Preferred. Fruit chew: 17%: Not chosen. Control: 4%. No position effect at any station. A stimulus that is “not chosen” here can still be a reinforcer; that is the single-operant question, and there the fruit chew was Clear.',
   rec:[['Mean % allocation','79%','17%','4%'],['Relative standing','Preferred','Not chosen','Not chosen']]})
 ];
 
@@ -7135,7 +7202,7 @@ const Q=[
   {w:'B · Position',f:F(H.BRD,{board:'posb',does:'Option A: 90% left, 62% middle, 30% right'}),
     q:'Option A takes 90% of responses when its station is on the left, 62% in the middle and 30% on the right. What does that mean for its standing?',o:[
     ['The Allocation Summary flags Position effect: Suspected; allocation follows the position, so the standing is read with care',1],['Nothing: with a mean near 60%, Option A is simply Preferred',0],['Nothing: position cannot matter when the stations are identical',0]],
-    why:'<b>Position bias must be checked.</b> RA-1 rotates the station positions every session and records the position of Option A. Its Position effect “is computed for Option A, whose position the sheet records: Suspected when its mean allocation differs by more than 40 points between positions.” Here it changes by 60.'},
+    why:'<b>Position bias must be checked.</b> RA-1 rotates the station positions every session and records the position of Option A, from which every station&rsquo;s place follows. Its Position effect “is computed for every option from where its station stood: Suspected when its mean allocation differs by more than 40 points between positions.” Here it changes by 60.'},
   {w:'B · Relative value',f:S.co[8],
     q:'Under concurrent operants the fruit chew got 17% of responses, Not chosen, while the tablet was available. Is the fruit chew a reinforcer?',o:[
     ['This test cannot say; that is the single-operant question, and there the fruit chew was Clear',1],['No: a stimulus that is not chosen is not a reinforcer',0],['Yes: it was ranked second on PA-1',0]],

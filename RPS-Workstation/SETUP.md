@@ -9905,6 +9905,106 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.42: Forms PA-1, RA-1 and DA-1 polished (review V15: R-070 to R-073, R-076 to R-078, R-134, R-135; E-24, E-34, E-35, E-44)
+- **Form PA-1: tied percentages share a rank.** On every hierarchy table (single stimulus, paired stimulus, MSWO, free
+  operant) items with the same percentage share a rank, shown as =2 for a tie that starts at position 2, and count as the
+  average of the positions the tie spans in the composite (three items tied from position 2 count as 3). Single stimulus
+  breaks a tie by % engagement and MSWO by mean position, as before; paired stimulus has no tie-break, so the informant's
+  order no longer decides which tied item lands on which side of the HP/MP line: items with the same mean rank share a
+  composite tier (the tier of the middle of their run), on the Summary and in the case's reinforcer menu alike. The
+  Summary shows each method's rank beside its percentage (100% #1, 60% =2), and the Summary note and the Guide name the
+  tie rule (review R-070, E-44).
+- **"The top two are close" names every item within ten points of the leader**, so a three-way tie reads "The top three
+  are close ... test all three in Form RA-1" (review R-134).
+- **The paired-stimulus procedure labels its conventions**: the 30-s window and the immediate Neither are this practice's,
+  as the category bands on every sheet are; Fisher et al. (1992) allowed 5 s and prompted the student to sample each item
+  before presenting the pair again, which the "Sample both, then again" setting reproduces (review R-071).
+- **A brief MSWO on the Monitoring sheet** (Brief MSWO in the toolbar, or Run a brief MSWO here above the brief-MSWO log):
+  three sessions of the pool's items, scored as the MSWO sheet scores (DeLeon & Iwata, 1996), the top three shown as they
+  are entered, and Log the top three writes today's row to the brief-MSWO log (date, #1 to #3, sessions, PB, the note) and
+  clears the run; the full MSWO sheet is not touched. The panel also opens when the form is opened with #quick-mswo in its
+  address, when the address changes to #quick-mswo while the form is open (Form RA-1's and TD-1's links open Form PA-1 that way:
+  beside the form in the workstation, in a new tab when the form is opened on its own), when another form has set the
+  hand-off flag (nbh.pa1.quick, within ten minutes), or on a {nbh:'quick', what:'mswo'} message from the workstation (E-24;
+  Carr, Nicolson, & Higbee, 2000).
+- **"Twice, sides reversed" is the paired-stimulus default for a pool of six or fewer** (each pair once above six), until
+  the analyst picks a setting by hand or a trial list exists; the simulation keeps each pair once, its worked example. The
+  BCBA is to confirm the Fisher et al. (1992) presentation count the default rests on (E-24).
+- **The Sheets menu offers "Only sheets with data"** on a form that says which of its sheets hold data (Form PA-1 does); the
+  open sheet always stays, the count reads 8 of 11, and the choice is kept on the device (E-44; tools/blocks/nbh-ui.html,
+  nbh-ui.js and every form's copy of the block's style).
+- Tests: qa/pa142-test.js (the tie ranks, titles, Summary ranks and tiers and the case menu from a 30-trial paired-stimulus
+  list; the three-way close bullet; the conventions; the brief MSWO scored, logged and cleared; the three openers; the
+  presentations default and a kept choice; the simulation unchanged; the Sheets menu filter); qa/pa140-test.js and
+  qa/pa1-w3-test.js unchanged in what they assert.
+- **Form RA-1 (reinforcer assessment), the verdict a progressive ratio earns on its own (R-072).** A no-consequence control
+  ends at FR 1 by construction, so a stimulus reaching a high break point was "High" against it, and "High" alone made the
+  stimulus "Confirmed". When High potency is the only positive result and no plan ratio is entered, the Summary now reads
+  **Confirmed (PR only)**, and the note under the table says why that is weaker evidence and what makes it Confirmed: the
+  plan ratio entered on the Summary (High then also means a break point above it), or the single-operant or
+  concurrent-operants design agreeing. The Summary's rule, the walkthrough's decision text and the terms carry the new
+  label; the case facts carry it to Form TE-1's RA-1 column ("Yes (PR only)"). The standard example is unchanged (it enters
+  the plan ratio and runs every design).
+- **A short single-operant session is seen (R-073).** A session saved under half the planned length (a 3-response,
+  4-second session reads 42.9 a minute) moved the ratio to control with no warning. The runner's Session Summary now
+  carries a caution for it, Save to the sheet asks once before writing it, the rate on the sheet is marked **short**, the
+  Condition Summary counts the short sessions beside each condition's session count, and a note under it gives the ratio
+  to control the full-length sessions alone would give. Short sessions still count (nothing is dropped without the
+  assessor); re-run them or clear the row.
+- **The position effect for every option (E-34).** The Allocation Summary computed it for Option A alone ("n/a" for the
+  others). It is now computed for every option from where its station stood: Option A as recorded; with two stations
+  Option B took the other side; with three, the sheet has an **Option B position** column (blank means the stations
+  rotated as a block, so B stood next after A in L, M, R order, and the third station took the place left). The sheet
+  method, the terms and the walkthrough say so.
+- **One design at a time (E-34).** Setup carries **Designs to run** with three quick starts ("Just the single operant",
+  "Just concurrent operants", "Just the progressive ratio"): the sheets not chosen fold away on screen, on paper and in the
+  view buttons (so the Sheets menu and the arrows skip them) until ticked again; choosing a folded sheet's view brings it
+  back. The choice is kept in the record; the Summary reads whatever was run.
+- **A brief MSWO from RA-1 and TD-1 (E-24, this side).** Under Setup's Preference assessment source, and under Form TD-1's
+  preference-assessment selector, "Run a brief MSWO now (Form PA-1, three sessions)" opens Form PA-1 at its quick mode.
+  Inside the workstation the shell opens PA-1 beside the asking form with the hash #quick-mswo set (its open verb now
+  takes an `at`, allowed from RA-1 and TD-1 to PA-1 only); a form opened on its own opens PA-1 in a new tab. PA-1's side
+  (the mode itself, which writes to its Monitoring log) is in the PA-1 note.
+- Tests: qa/ra142-test.js (the PR-only verdict on the Summary, in the note and in the case facts, and Confirmed again
+  with the plan ratio; the short session marked, counted and explained, and the runner's one question; the position
+  effect at every station from the rotation and from Option B's column; the designs folded and brought back, on screen
+  and on paper; the links in RA-1 and TD-1; the shell opening PA-1 beside RA-1 with the hash set, and again on a second
+  click).
+- **Form DA-1, a task with no problem behavior reads "none in 3" (none in its sessions) on the Results sheet** (review R-076):
+  in the ranked table, the Least evocative card, the latency-based verdict and the demand-condition list, where the page
+  that prints for the team used to show "300", the session-length floor, as if it had been observed. The floor is kept only
+  where a number is needed and is labeled as one: the Assessment sheet's "with floor" column (beside the observed latency,
+  as before) and the latency chart, whose caption now says a session with none counts as its full length. The Guide says so.
+- **Fewer sessions per task than the Inventory sheet plans make the verdict provisional, and it says so first** (review
+  R-077): "Provisional (1 of 3 sessions per task). Differentiated: …" (or "1 to 2 of 3" when the tasks differ), with "Add
+  sessions until every task has its 3" on the verdict, a bold line on the first recommendation box, the same qualifier on the
+  draft plan's verdict and demand-condition lines, and the qualifier carried into the case for Forms EA-1 and TD-1. Three
+  sessions on every task, as the simulation has, carry no qualifier.
+- **"Stop the session when" joins the Inventory sheet's working conventions** (review R-078): a count or an intensity of
+  the target behavior itself, the rule Forms EA-1 and RA-1 already carry, where the stop rule used to cover only guidance,
+  assent and danger. It fills from the case when empty (Form EA-1's session termination criteria; else the parent's stop
+  rule for the analysis on Form IC-1; else the dangerous behavior the crisis plan names, Form CR-1); a rule typed by hand
+  stays. It prints on the Assessment sheet's procedure ("Stop the session when: …", flagged in red while unset) and on the
+  presenter sheet, goes to the case with the other conventions, and the simulation carries one.
+- **The Results sheet's two explanatory paragraphs use the width of the page** (review R-135): the ranking rule and the
+  explanation of the two questions sit in one block above the ranked table, in two reading columns on screen (one on a
+  narrow screen; the page's own measure on paper), instead of a half-width column followed by a full-width table.
+- **The presenter sheet** (E-35): "The presenter sheet (one page)" beside Print prints one page for the person presenting
+  the tasks: the target behavior, the session length and pacing, the prompting sequence (with the light-touch rule and the
+  two-stops limit when the sequence ends in physical guidance), what follows problem behavior, what counts as compliance,
+  the stop rule, how the student says stop (Form SI-1), today's order (the sessions not yet run, in order), and a row per
+  task with cells for the figures and two boxes to tally guidance stops ("then no guidance"). Lines not yet set print in
+  red. Nothing of the form prints with it, and the next print is the whole form again.
+- **Task-order and carry-over warnings under the trial record** (E-35; Smith, Iwata, Goh & Shore, 1995): a task that
+  follows itself (what the second session evokes carries over from the first) and a task that holds the same place in every
+  round of the order are named in a line under the order buttons, with the fix; the alternating order the form writes
+  raises neither. The Guide's Cautions explain the order effect.
+- Tests: qa/da142-test.js (13: the "none in 3" wording in the table, the card and the verdict; the provisional verdict with
+  1 and with 1 to 2 of 3 sessions, in the recommendations, the plan draft and the case; the stop rule filled from EA-1, IC-1
+  and CR-1 in turn, kept when typed, shown and flagged on the procedure, printed on the Assessment sheet; the presenter sheet
+  one page with its lines and the whole form unchanged afterwards; the prose block's two columns across the table's width;
+  the two order warnings and the clean order). Unchanged: qa/da1-test.js, qa/da1-w3-test.js (page counts), qa/pp135-test.js.
+
 ### v24.41: Form TD-1's Build cards on the iPad (from the BCBA's screenshot of 10/26)
 - **The settings line up.** A card filled from the protocol bank lays its settings one a row (the bank's values are long), and
   each label sat inline before its box, so the boxes started at seven different places down the card. On screen such a card

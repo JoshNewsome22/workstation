@@ -698,6 +698,31 @@ tr.da-safe{display:none}
 .reclist{font-family:var(--sans);font-size:12.5px;margin:4px 0 8px 18px;padding:0}
 .reclist li{margin:3px 0}
 .recbox{border:1px solid var(--rule-2);border-radius:2px;padding:8px 12px;margin:8px 0;background:#fff}
+/* v24.42 (review R-135) the Results sheet's two explanatory paragraphs use the width of the page above the ranked table: two
+   reading columns on screen (one on a narrow screen), the page's own measure on paper */
+.res-prose{margin:6px 0 8px}
+@media screen{.res-prose{columns:2;column-gap:28px;column-fill:balance}.res-prose p{margin:0 0 8px}.res-prose p.nbh-wide{max-width:none!important}}
+@media screen and (max-width:760px){.res-prose{columns:1}}
+#rankRule:empty{display:none}
+/* v24.42 (review R-078) the stop rule for the target behavior on the Assessment sheet's procedure, flagged while unset */
+#daStopTxt.unset{color:#8E2A2A;font-weight:600}
+/* v24.42 (E-35) task-order and carry-over warnings under the trial record */
+.da-ordwarn{display:block;width:100%;color:#9B4E15}
+.da-ordwarn:empty{display:none}
+/* v24.42 (E-35) the presenter sheet: one page, printed in place of the form when chosen beside Print */
+#daPS{display:none}
+@media print{
+  body.da-pr-presenter > *:not(#daPS){display:none!important}
+  body.da-pr-presenter #daPS{display:block!important;font-family:var(--sans);font-size:10pt;color:#111;line-height:1.35}
+  #daPS h1{font-size:15pt;margin:0 0 2px}#daPS .ps-sub{font-size:9.5pt;color:#444;margin:0 0 8px}
+  #daPS table{width:100%;border-collapse:collapse;margin:0 0 8px}#daPS th{text-align:left;vertical-align:top;font-size:9pt;padding:4px 6px;background:#eef3f2;border:1px solid #b9c7c4;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #daPS td{vertical-align:top;padding:4px 6px;border:1px solid #b9c7c4;white-space:pre-wrap;font-size:9.5pt}#daPS .ps-flag{color:#8e2a2a;font-weight:700}
+  #daPS table.ps-set th{width:24%}
+  #daPS table.ps-tally th{text-align:center}#daPS table.ps-tally td{height:0.42in}#daPS table.ps-tally td.ps-tk{white-space:normal}
+  #daPS .ps-tally .ps-box{display:inline-block;width:0.16in;height:0.16in;border:1px solid #444;margin:1px 3px 0 0;vertical-align:middle}
+  #daPS .ps-foot{margin-top:8px;font-size:9pt;color:#8e2a2a;font-weight:600}
+  #daPS .ps-note{font-size:9pt;color:#333;margin:0 0 6px}
+}
 .recbox h4{margin:0 0 4px;font-family:var(--sans);font-size:12.5px;color:var(--nbh-navy)}
 #daChart{width:100%;height:auto;display:block;border:1px solid var(--rule-2);background:#fff}
 .chartbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 6px;font-family:var(--sans);font-size:12px}
@@ -877,7 +902,7 @@ td input,td select{max-width:100%}
   <div class="tgroup"><span>Sheet actions</span><div class="row">
     <button id="simBtn">Load simulation</button>
     <button class="primary" id="printBtn">Print / Save as PDF</button>
-      <select id="daPrintWhat" aria-label="What to print" title="What Print / Save as PDF prints: the whole form, or the short report" style="font:inherit;font-size:12px"><option value="">The whole form</option><option value="results">The Results alone</option></select><!-- v24.35 -->
+      <select id="daPrintWhat" aria-label="What to print" title="What Print / Save as PDF prints: the whole form, or the short report" style="font:inherit;font-size:12px"><option value="">The whole form</option><option value="results">The Results alone</option><option value="presenter">The presenter sheet (one page)</option></select><!-- v24.35; v24.42 (E-35) the presenter sheet -->
     <button id="saveBtn">Save data</button>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
@@ -914,6 +939,8 @@ td input,td select{max-width:100%}
       <div><label>Prompting sequence</label><select data-m="prompt"><option></option><option>Three-step: vocal, then model, then physical guidance, about 5 seconds apart</option><option>Two-step: vocal, then model (no physical guidance)</option><option>Vocal instruction only, repeated once</option></select></div>
       <div><label>What happens after problem behavior in a session</label><select data-m="conseq"><option></option><option>Brief escape: materials removed for 30 seconds, then the task resumes (the demand-condition contingency)</option><option>No programmed consequence; the session continues (latency measure only)</option><option>Session ends at the first problem behavior (latency-based session)</option></select></div>
       <div style="grid-column:1/-1"><label>Compliance counted as</label><input data-m="compdef" placeholder="the step is started within 5 seconds of the vocal instruction or the model, before physical guidance (working convention)"></div>
+      <!-- v24.42 (review R-078) the termination rule on the target behavior itself, as Forms EA-1 and RA-1 carry; fills from the case -->
+      <div style="grid-column:1/-1"><label for="daStopRule">Stop the session when (the target behavior itself: a count or an intensity)</label><input id="daStopRule" data-m="stoprule" placeholder="e.g., at the first hit or kick that makes contact; the third throw in a session; any injury. Form EA-1's session termination criteria or the crisis plan's rule (Form CR-1); enter the minutes actually run"></div>
     </div>
     <!-- v21.44 (B3): the physical prompt follows the rule Form TD-1 sets for escape extinction with physical guidance; shown
          while the prompting sequence, or a task's prompting, ends in physical guidance. Wording approved by the BCBA, October 2026. -->
@@ -961,13 +988,14 @@ td input,td select{max-width:100%}
       <ol>
         <li>Present each task in brief sessions of the length on the Inventory sheet (2 to 5 minutes as a working convention; Roscoe et al. (2009) and Call et al. (2009) used sessions of this order), with the same materials and the same person presenting as in the classroom when that is possible.</li>
         <li>Deliver instructions on the pacing chosen and use the prompting sequence chosen, vocal then model then physical guidance about 5 seconds apart (the sequence of the demand condition in Iwata, Dorsey, Slifer, Bauman &amp; Richman, 1982/1994). Praise compliance briefly. <!-- v21.44 (B3). Wording approved by the BCBA, October 2026. -->Physical guidance is a light touch, never force: let go at once if the student resists or shows distress, keep the task in place, and give the instruction again from the vocal step after a short calm pause; after 2 stops on one task, do not guide it again that session (the stop rule on the Inventory sheet).</li>
+        <li id="daStopLi"><b>Stop the session when:</b> <span id="daStopTxt"></span></li><!-- v24.42 (review R-078) the rule on the target behavior itself; the minutes run and the stop go on the record as the rule above says -->
         <li>Record, per session: the instructions delivered and the ones complied with, the latency in seconds from the first instruction to the first problem behavior (leave blank when none occurred), the count of problem behaviors, and the student&rsquo;s affect on the 1 to 5 scale (1 distressed or avoiding, 3 neutral, 5 calm and engaged).</li>
         <li>Run the tasks in alternating order so that one task never follows the same task, and give each task the number of sessions set on the Inventory sheet (3 as a working convention). <span class="noprint">The button below writes the order; sessions can also be added one at a time.</span></li>
         <li>Optional: between sessions, offer two tasks side by side and record which the student picks. The choice probes are a preference measure for the same tasks and feed the Results sheet.</li>
       </ol>
       <p>What follows problem behavior inside a session is a decision made on the Inventory sheet and held constant across tasks. If the demand-condition contingency is used, the count and the latency are read as they would be in Form EA-1; if nothing is programmed, the latency is the cleaner measure and the count may rise across the session.</p>
     </div>
-    <div class="tools"><button class="tool" id="genOrder">Write the alternating order</button><button class="tool" id="addSess">Add a session</button><button class="tool" id="delSess">Remove last</button><span class="hint" id="orderHint"></span></div>
+    <div class="tools"><button class="tool" id="genOrder">Write the alternating order</button><button class="tool" id="addSess">Add a session</button><button class="tool" id="delSess">Remove last</button><span class="hint" id="orderHint"></span><span class="hint da-ordwarn" id="orderWarn" aria-live="polite"></span></div><!-- v24.42 (E-35) order warnings -->
     <div class="grid-wrap"><table class="rt wide" id="sessTbl"><thead><tr>
       <th style="width:3%">#</th><th style="width:16%">Task</th><th style="width:6%">Date</th><th style="width:5%">Minutes</th><th style="width:6%">Instructions given</th><th style="width:6%">Complied</th><th style="width:6%">Compliance</th><th style="width:7%">Latency to first PB (s)</th><th style="width:5%">PB count</th><th style="width:6%">PB per min</th><th style="width:9%">Affect (1 to 5)</th><th style="width:5%" class="da-sc">Guidance stops</th><th style="width:9%" class="da-sc">Stopped early: why</th><th style="width:6%" class="da-sc">Hold or injury: reported</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3>Per-Task Means</h3>
@@ -1000,12 +1028,13 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Ranked Tasks</h2>
     <div class="metrics" id="resMetrics"></div>
     <div id="resVerdict"></div>
-    <p class="hint"><!-- v23.15 (review F138, F140) -->Ranked from the task most likely to evoke problem behavior to the least: by mean rate of problem behavior, then by mean latency (shorter first); when the sessions are latency-based (no programmed consequence, or the session ends at the first problem behavior, on the Inventory sheet), by mean latency first, then rate (Call et al., 2009). Two separate questions: a task <b>evokes problem behavior</b> when it occurred in at least half of its sessions, and those are the tasks for the demand condition; by compliance, a task is a <b>high-probability demand</b> when mean compliance was 80% or above and problem behavior occurred in no more than a quarter of its sessions, a <b>low-probability demand</b> when mean compliance was 40% or below (the lines Mace et al. (1988) used to sort requests), and otherwise <b>mixed</b>, which places it in the fading plan. Low compliance alone says the student does not do the task, not that the task evokes the behavior. All the cutoffs are working conventions.</p>
+    <div class="res-prose"><!-- v24.42 (review R-135) --><p class="hint" id="rankRule"></p>
+    <p class="hint"><!-- v23.15 (review F138, F140) -->Ranked from the task most likely to evoke problem behavior to the least: by mean rate of problem behavior, then by mean latency (shorter first); when the sessions are latency-based (no programmed consequence, or the session ends at the first problem behavior, on the Inventory sheet), by mean latency first, then rate (Call et al., 2009). Two separate questions: a task <b>evokes problem behavior</b> when it occurred in at least half of its sessions, and those are the tasks for the demand condition; by compliance, a task is a <b>high-probability demand</b> when mean compliance was 80% or above and problem behavior occurred in no more than a quarter of its sessions, a <b>low-probability demand</b> when mean compliance was 40% or below (the lines Mace et al. (1988) used to sort requests), and otherwise <b>mixed</b>, which places it in the fading plan. Low compliance alone says the student does not do the task, not that the task evokes the behavior. All the cutoffs are working conventions.</p></div>
     <div class="grid-wrap"><table class="rt wide" id="rankTbl"><thead><tr>
       <th style="width:4%">Rank</th><th>Task</th><th style="width:8%">Mean PB per min</th><th style="width:8%">Mean latency (s)</th><th style="width:8%">Sessions with PB</th><th style="width:8%">Mean compliance</th><th style="width:7%">Mean affect</th><th style="width:8%">Chosen when offered</th><th style="width:8%">Informant rating</th><th style="width:8%">Evokes problem behavior</th><th style="width:8%">Compliance class</th><th style="width:12%">Features</th></tr></thead><tbody></tbody></table></div>
 
     <h2 class="nbh-band" style="margin-top:16px">Problem Behavior by Task</h2>
-    <div class="chartbar"><label for="chartSel">Chart shows</label><select id="chartSel" data-m="chart"><option value="rate">Mean problem behavior per minute</option><option value="lat">Mean latency to the first problem behavior (seconds)</option><option value="comp">Mean compliance (percent)</option></select><span class="hint">Bars in rank order; blue bars are tasks that evoke problem behavior, hatched orange bars high-probability demands, grey bars neither.</span></div>
+    <div class="chartbar"><label for="chartSel">Chart shows</label><select id="chartSel" data-m="chart"><option value="rate">Mean problem behavior per minute</option><option value="lat">Mean latency to the first problem behavior (seconds; a session with none counts as its full length)</option><option value="comp">Mean compliance (percent)</option></select><span class="hint">Bars in rank order; blue bars are tasks that evoke problem behavior, hatched orange bars high-probability demands, grey bars neither.</span></div>
     <svg id="daChart" viewBox="0 0 900 340" role="img" aria-label="Bar chart of problem behavior by task"></svg>
 
     <h2 class="nbh-band" style="margin-top:16px">Recommendations</h2>
@@ -1043,12 +1072,12 @@ td input,td select{max-width:100%}
     <table class="rt">
       <tr><th style="width:28%">Compliance</th><td>Instructions complied with divided by instructions given, per session, as a percent; the per-task figure is the mean of the session percents. What counts as complied is the definition on the Inventory sheet.</td></tr>
       <tr><th>Rate of problem behavior</th><td>Problem behaviors counted divided by the session&rsquo;s minutes; the per-task figure is the mean of the session rates.</td></tr>
-      <tr><th>Latency</th><td>Seconds from the first instruction to the first problem behavior. A session with no problem behavior is entered as the session&rsquo;s full length in seconds (a floor, not an observation); the per-task figure is the mean, used for the ranking. &ldquo;Sessions with PB&rdquo; shows how often the floor was used. The modification rules use the observed latency, the mean over only the sessions with problem behavior.</td></tr>
+      <tr><th>Latency</th><td>Seconds from the first instruction to the first problem behavior. A session with no problem behavior is entered as the session&rsquo;s full length in seconds (a floor, not an observation); the per-task figure is the mean, used for the ranking. &ldquo;Sessions with PB&rdquo; shows how often the floor was used. A task in which problem behavior never occurred reads &ldquo;none in 3&rdquo; (none in its sessions) on the Results sheet rather than the floor; the Assessment sheet&rsquo;s &ldquo;with floor&rdquo; column and the latency chart keep the number.<!-- v24.42 (review R-076) --> The modification rules use the observed latency, the mean over only the sessions with problem behavior.</td></tr>
       <tr><th>Affect</th><td>Mean of the 1 to 5 session ratings.</td></tr>
       <tr><th>Chosen when offered</th><td>Across the choice probes, the number of times the task was picked divided by the number of probes in which it was offered.</td></tr>
       <tr><th>Ranking</th><td>Tasks are sorted by mean rate, highest first; ties are broken by mean latency, shortest first, then by mean compliance, lowest first. With latency-based sessions (Inventory sheet), by mean latency first, then rate. A task with no sessions is unranked.</td></tr>
       <tr><th>Evokes problem behavior; compliance class</th><td>A task evokes problem behavior when it occurred in at least 50% of its sessions. Separately, by compliance: high-probability demand, mean compliance at or above 80% with problem behavior in at most 25% of sessions; low-probability demand, mean compliance at or below 40%; otherwise mixed. Working conventions; the 80 and 40 are from Mace et al. (1988).</td></tr>
-      <tr><th>Differentiation verdict</th><td>Differentiated when a task evokes problem behavior and the top-ranked task&rsquo;s mean rate is at least twice the bottom-ranked task&rsquo;s (or the bottom is zero and the top is not; with latency-based sessions, the bottom&rsquo;s mean latency at least twice the top&rsquo;s); weak when the spread is smaller; undifferentiated when no task evokes it. Working convention.</td></tr>
+      <tr><th>Differentiation verdict</th><td>Differentiated when a task evokes problem behavior and the top-ranked task&rsquo;s mean rate is at least twice the bottom-ranked task&rsquo;s (or the bottom is zero and the top is not; with latency-based sessions, the bottom&rsquo;s mean latency at least twice the top&rsquo;s); weak when the spread is smaller; undifferentiated when no task evokes it. Working convention. While any task has fewer sessions than the Inventory sheet plans, the verdict opens &ldquo;Provisional (n of m sessions per task)&rdquo; and the draft plan carries the qualifier.<!-- v24.42 (review R-077) --></td></tr>
       <tr><th>Tasks for the demand condition</th><td>Up to three tasks that evoke problem behavior, in rank order; compliance alone never names one. When there are none, the form says so and points to longer sessions, a different pacing or presentation, or the possibility that the function is not escape from these demands.</td></tr>
       <tr><th>Starting tasks for demand fading</th><td>The high-probability demands in reverse rank order (least evocative first), followed by the mixed tasks that do not evoke problem behavior; the tasks that evoke it, and the low-probability demands, are the terminal steps. When no task qualifies as high-probability, the lowest-ranked task is offered with a note that fading should start from no demands at all (Pace et al., 1993).</td></tr>
       <tr><th>Antecedent modifications</th><td>Proposed per low-probability or mixed task from its inventory features and its session data: easier materials or prerequisite teaching when difficulty is above skill or the student cannot do the task; shorten the task or schedule breaks when the observed latency is at least half the session (behavior arrives late); choice and interspersal when the observed latency is short (the demand&rsquo;s onset is the problem); pre-teaching when the task is novel; reduce the response effort when the task is high effort; shorten the usual block when the task normally runs 15 minutes or more; change the presentation or prompt when the task is low effort, within the student&rsquo;s skills and still evokes problem behavior; use the task as a choice option when it was chosen in at least half the probes in which it was offered. The cutoffs are working conventions.</td></tr>
@@ -1060,7 +1089,8 @@ td input,td select{max-width:100%}
       <tr><th style="width:28%">It is not a functional analysis</th><td>The assessment shows which demands evoke the behavior; it does not show that escape maintains it. That is Form EA-1&rsquo;s job, with these tasks in the demand condition and the other conditions for comparison.</td></tr>
       <tr><th>Few sessions, floored latencies</th><td>Three sessions a task is a working convention chosen to keep the assessment to a morning. Means from three sessions move a lot with one session; read the sessions-with-PB column alongside them, and add sessions for tasks that are close in rank when the decision depends on the order.</td></tr>
       <tr><th>The consequence inside a session shapes the count</th><td>With brief escape after each problem behavior, the count is a measure under the escape contingency; with nothing programmed, the count can climb within a session. Either is fine when it is the same for every task. The latency is unaffected by what follows the first response.</td></tr>
-      <tr><th>Safety</th><td>Stop a session when the behavior reaches the stopping rule in the crisis plan (Form CR-1); enter the minutes actually run so the rate is right, and note the stop.</td></tr>
+      <tr><th>Safety</th><td>Stop a session when the behavior reaches the stop rule written on the Inventory sheet (&ldquo;Stop the session when&rdquo;: a count or an intensity of the target behavior, from Form EA-1&rsquo;s session termination criteria or the crisis plan, Form CR-1); enter the minutes actually run so the rate is right, and note the stop under &ldquo;Stopped early: why&rdquo;.<!-- v24.42 (review R-078) --></td></tr>
+      <tr><th>The order of the tasks</th><td>Smith, Iwata, Goh and Shore (1995) found that what a demand evokes depends on what came before it and how long and fast the work is. The trial record warns when a task follows itself (the second session carries the first over) and when a task holds the same place in every round of the order; the alternating order the form writes avoids the first and the presenter sheet shows the order for the day.<!-- v24.42 (E-35) --></td></tr>
       <!-- v21.44 (B3). Wording approved by the BCBA, October 2026. -->
       <tr><th>Physical guidance</th><td>The physical step of the prompting sequence is a light touch that helps the student move, never force and never a hold. Staff let go at once when the student pulls away, pushes against the adult&rsquo;s hand, or goes stiff, or at any sign of distress; the task stays in place, and after a short calm pause the instruction is given again from the vocal step. After 2 stops on one task in a session, the task is not guided again that session, and the BCBA is told the same day. A withdrawal of assent, as the student&rsquo;s assent plan (Form SI-1) describes it, or distress that outlasts the calm pause, ends the session. Holding a student to make them do the task is restraint, and in a Florida public school restraint may not be used to correct noncompliance (&sect;&nbsp;1003.573(3), F.S.; Form CR-1). If a hold happens anyway, or the student is hurt, the session stops, the BCBA and the school administrator are told at once, the hold is reported as the crisis plan sets out, and anyone who suspects abuse reports it right away to the Florida Abuse Hotline. The rule is based on the one Form TD-1 sets for escape extinction with physical guidance; the Inventory sheet shows it whenever the prompting ends in physical guidance.</td></tr>
     </table>
@@ -1102,6 +1132,10 @@ const num=v=>{const n=parseFloat(String(v==null?'':v).replace('%',''));return is
 const pct=v=>v==null?'—':(Math.round(v*10)/10).toFixed(0)+'%';
 const f1=v=>v==null?'—':(Math.round(v*100)/100).toFixed(2);
 const f0=v=>v==null?'—':String(Math.round(v));
+/* v24.42 (review R-076) a task's mean latency for the page: "none in 3" when problem behavior never occurred (the floor is the
+   session length, not an observation); the number otherwise */
+const latTxt=o=>o&&o.n&&!o.pbN?'none in '+o.n:f0(o&&o.lat);
+const latSub=o=>o&&o.n&&!o.pbN?'no problem behavior in '+o.n+' session'+(o.n===1?'':'s'):'latency '+f0(o&&o.lat)+' s';
 const mean=a=>{const b=a.filter(x=>x!=null);return b.length?b.reduce((s,x)=>s+x,0)/b.length:null;};
 
 /* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
@@ -1175,7 +1209,9 @@ function renderPgRule(){const el=$('#pgRule');if(!el)return;
 function renderPreFirst(){const el=$('#preFirst');if(!el)return;const m=S.meta;
   const on=!$('#pgRule').hidden||/^Brief escape/i.test(m.conseq||'')||['preConsent','preAdmin','preCrisis','preAssent'].some(k=>String(m[k]||'').trim());
   if(el.hidden===on)el.hidden=!on;}
-function renderInv(){renderPgRule();renderPreFirst();
+/* v24.42 (review R-078) the stop rule on the Assessment sheet's procedure and the presenter sheet */
+function renderStop(){const el=$('#daStopTxt');if(!el)return;const t=String(S.meta.stoprule||'').trim();el.textContent=t?t.replace(/[.\s]+$/,'')+'.':'not set: enter it on the Inventory sheet under the working conventions (Form EA-1’s session termination criteria, or the crisis plan’s rule, Form CR-1).';el.classList.toggle('unset',!t);}
+function renderInv(){renderPgRule();renderPreFirst();renderStop();
   const el=$('#invVerdict');const T=S.tasks.filter(t=>t.name);
   if(!T.length){el.innerHTML='<div class="verdict v-mid"><b>No tasks yet.</b> List the demands from the schedule; six to eight is a usual set (working convention).</div>';return;}
   const easy=T.filter(t=>num(t.rating)!=null&&num(t.rating)<=2).length,hard=T.filter(t=>num(t.rating)!=null&&num(t.rating)>=4).length;
@@ -1225,8 +1261,18 @@ function renderSess(){
     <td class="chk da-sc"><input type="checkbox" data-r="sess" data-i="${i}" data-f="hold"${r.hold?' checked':''} aria-label="Hold or injury: reported, session ${i+1}"></td>
     <td><input data-r="sess" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('sess',i,'session')}</tr>${daSafeRow(r,i)}`;}).join('');
   const n=S.sess.length;$('#orderHint').textContent=n?n+' session'+(n===1?'':'s')+' · '+S.sess.filter(s=>num(s.given)!=null||num(s.pb)!=null||s.lat).length+' with data':'';
+  {const w=$('#orderWarn');if(w)w.textContent=orderWarnings().join(' ');}   /* v24.42 (E-35) */
   renderIoa();
 }
+/* v24.42 (E-35) task-order and carry-over warnings (Smith, Iwata, Goh & Shore, 1995: the order and spacing of demands change
+   what a session evokes): a task that follows itself, and a task that holds the same place in every block of the order */
+function orderWarnings(){const out=[],T=S.sess.map(s=>String(s.t)).map((t,i)=>({t,i})).filter(x=>x.t!=='');if(T.length<2)return out;
+  const rep=[];for(let k=1;k<T.length;k++)if(T[k].t===T[k-1].t)rep.push('sessions '+(T[k-1].i+1)+' and '+(T[k].i+1)+' ('+taskName(+T[k].t)+')');
+  if(rep.length)out.push('A task follows itself in '+rep.slice(0,3).join(', ')+(rep.length>3?' and '+(rep.length-3)+' more':'')+': what the second session evokes carries over from the first (Smith et al., 1995). Put another task between them.');
+  const names=[...new Set(T.map(x=>x.t))];if(names.length>=2){const B=names.length,nb=Math.floor(T.length/B);
+    if(nb>=2){const fixed=names.filter(t=>{const pos=[];for(let b=0;b<nb;b++){const blk=T.slice(b*B,(b+1)*B);const k=blk.findIndex(x=>x.t===t);if(k<0)return false;pos.push(k);}return pos.every(x=>x===pos[0]);});
+      if(fixed.length&&fixed.length<names.length)out.push(fixed.map(t=>taskName(+t)).join(', ')+(fixed.length===1?' holds':' hold')+' the same place in every round of the order, so '+(fixed.length===1?'its':'their')+' figures carry the effect of what comes before '+(fixed.length===1?'it':'them')+' (Smith et al., 1995). Vary the order across rounds.');}}
+  return out;}
 function updateSessRow(i){const tr=$('#sessTbl tbody tr[data-s="'+i+'"]:not(.da-safe)');if(!tr)return;const c=sessCalc(S.sess[i]);tr.children[6].textContent=pct(c.comp);tr.children[9].textContent=f1(c.rate);}
 function renderProbes(){
   $('#probeTbl tbody').innerHTML=S.probes.map((r,i)=>`<tr><td class="num">${i+1}</td><td>${taskOpts('probes',i,'a',r.a,'Task A, probe '+(i+1))}</td><td>${taskOpts('probes',i,'b',r.b,'Task B, probe '+(i+1))}</td>
@@ -1268,10 +1314,15 @@ function recommend(R){
     :(top.rate!=null&&bot.rate!=null&&((bot.rate===0&&top.rate>0)||(bot.rate>0&&top.rate>=2*bot.rate)));
   const evN=ev.length+' task'+(ev.length===1?' evokes':'s evoke')+' problem behavior';
   if(!ev.length)rec.verdict=['no','Undifferentiated: no task evoked problem behavior in at least half of its sessions.','Before running a demand condition with these tasks, try longer sessions, faster pacing or the classroom presentation, or check whether the behavior is escape from something other than these demands (Smith et al., 1995).'+(lowC.length?' '+lowC.map(o=>esc(o.name)).join(', ')+(lowC.length===1?' has':' have')+' low compliance without problem behavior: the student does not do '+(lowC.length===1?'it':'them')+', a question of skill or motivation for Form TD-1, not a task for the demand condition.':'')];
-  else if(spread)rec.verdict=['ok',(LM?'Differentiated: '+esc(top.name)+' evoked problem behavior soonest (mean latency '+f0(top.lat)+' s, problem behavior in '+top.pbN+' of '+top.n+' sessions); '+esc(bot.name)+' the latest ('+f0(bot.lat)+' s).'
+  else if(spread)rec.verdict=['ok',(LM?'Differentiated: '+esc(top.name)+' evoked problem behavior soonest (mean latency '+f0(top.lat)+' s, problem behavior in '+top.pbN+' of '+top.n+' sessions); '+esc(bot.name)+' the latest ('+(bot.pbN?f0(bot.lat)+' s':'none in '+bot.n+' sessions')+').'
       :'Differentiated: '+esc(top.name)+' evoked the most problem behavior ('+f1(top.rate)+' per minute, mean latency '+f0(top.lat)+' s); '+esc(bot.name)+' the least ('+f1(bot.rate)+' per minute).'),
     evN+'; '+high.length+' high-probability demand'+(high.length===1?'':'s')+' by compliance.'];
   else rec.verdict=['mid','Weak differentiation: '+evN+', but '+(LM?'the bottom task’s mean latency is less than twice the top task’s.':'the top task’s rate is less than twice the bottom task’s.'),'Add sessions for the tasks that are close in rank, or widen the set with an easier task, before the ranking is used for fading.'];
+  /* v24.42 (review R-077) fewer sessions per task than the Inventory sheet plans: the verdict is provisional, and says so first;
+     the qualifier travels with the verdict into the plan draft and the case */
+  {const ns=R.ranked.map(o=>o.n),lo=Math.min(...ns),hi=Math.max(...ns),m=nPer();
+    if(lo<m){rec.prov='Provisional ('+(lo===hi?lo:lo+' to '+hi)+' of '+m+' sessions per task)';rec.verdict[1]=rec.prov+'. '+rec.verdict[1];
+      rec.verdict[2]+=' Add sessions until every task has its '+m+' before the ranking fixes the demand condition or the fading order.';}}
   rec.fa=ev.slice(0,3);
   /* fading starts from the high-probability demands, then the mixed tasks that do not evoke problem behavior (least evocative
      first); the tasks that evoke it, and the ones with low compliance, are the terminal steps */
@@ -1300,17 +1351,18 @@ function renderResults(){
   const nS=S.sess.filter(s=>s.t!==''&&sessCalc(s).has).length,top=R.ranked[0],bot=R.ranked[R.ranked.length-1],LM=latMode(),I=ioaStats();
   M.innerHTML=`<div class="metric"><b>Tasks assessed</b><div class="val">${R.ranked.length}</div><div class="sub">of ${S.tasks.filter(t=>t.name).length} on the inventory</div></div>
     <div class="metric"><b>Sessions</b><div class="val">${nS}</div><div class="sub">${S.probes.length} choice probe${S.probes.length===1?'':'s'}${I.n?' · second observer on '+I.n:''}</div></div>
-    <div class="metric"><b>Most evocative</b><div class="val" style="font-size:16px">${top?esc(top.name):'—'}</div><div class="sub">${top?(LM?'latency '+f0(top.lat)+' s · '+f1(top.rate)+' per min':f1(top.rate)+' per min · latency '+f0(top.lat)+' s'):''}</div></div>
-    <div class="metric"><b>Least evocative</b><div class="val" style="font-size:16px">${bot?esc(bot.name):'—'}</div><div class="sub">${bot?f1(bot.rate)+' per min · compliance '+pct(bot.comp):''}</div></div>`;
+    <div class="metric"><b>Most evocative</b><div class="val" style="font-size:16px">${top?esc(top.name):'—'}</div><div class="sub">${top?(LM?latSub(top)+' · '+f1(top.rate)+' per min':f1(top.rate)+' per min · '+latSub(top)):''}</div></div>
+    <div class="metric"><b>Least evocative</b><div class="val" style="font-size:16px">${bot?esc(bot.name):'—'}</div><div class="sub">${bot?f1(bot.rate)+' per min · '+(bot.pbN?'compliance '+pct(bot.comp):latSub(bot)+' · compliance '+pct(bot.comp)):''}</div></div>`;   /* v24.42 (R-076) */
   /* v23.15 (review F140, F144) the rule the ranking used, and the agreement, under the verdict */
-  V.innerHTML='<div class="verdict v-'+rec.verdict[0]+'"><b>'+rec.verdict[1]+'</b> '+rec.verdict[2]+'</div>'
-    +(R.ranked.length?'<p class="hint" id="rankRule">'+(LM?'Ranked by mean latency, shortest first, then rate: the sessions are latency-based ('+esc(S.meta.conseq)+').':'Ranked by mean rate, highest first, then latency'+(S.meta.conseq?' ('+esc(S.meta.conseq)+')':'')+'.')+(I.n?' '+esc(ioaText(I)):'')+'</p>':'');
+  V.innerHTML='<div class="verdict v-'+rec.verdict[0]+'"><b>'+rec.verdict[1]+'</b> '+rec.verdict[2]+'</div>';
+  /* v24.42 (review R-135) the ranking rule in the prose block beside the explanation, not under the verdict alone */
+  $('#rankRule').innerHTML=R.ranked.length?(LM?'Ranked by mean latency, shortest first, then rate: the sessions are latency-based ('+esc(S.meta.conseq)+').':'Ranked by mean rate, highest first, then latency'+(S.meta.conseq?' ('+esc(S.meta.conseq)+')':'')+'.')+(I.n?' '+esc(ioaText(I)):''):'';
   const clsName={low:'Low-p',high:'High-p',mixed:'Mixed'},clsLong={low:'low-probability by compliance',high:'high-probability demand',mixed:'mixed'};
-  TB.innerHTML=R.ranked.map(o=>`<tr class="${o.ev?'top':o.cls==='high'?'hp':''}"><td class="num">${o.rank}</td><td>${esc(o.name)}</td><td class="num">${f1(o.rate)}</td><td class="num">${f0(o.lat)}</td><td class="num">${o.pbN} of ${o.n}</td><td class="num">${pct(o.comp)}</td><td class="num">${o.aff==null?'—':(Math.round(o.aff*10)/10).toFixed(1)}</td><td class="num">${o.offered?o.picked+' of '+o.offered:'—'}</td><td class="num">${esc(o.t.rating||'—')}</td><td class="num">${o.ev?'Yes':'No'}</td><td class="num">${clsName[o.cls]||''}</td><td>${esc(o.feat.join(', '))}</td></tr>`).join('')+
+  TB.innerHTML=R.ranked.map(o=>`<tr class="${o.ev?'top':o.cls==='high'?'hp':''}"><td class="num">${o.rank}</td><td>${esc(o.name)}</td><td class="num">${f1(o.rate)}</td><td class="num">${latTxt(o)}</td><td class="num">${o.pbN} of ${o.n}</td><td class="num">${pct(o.comp)}</td><td class="num">${o.aff==null?'—':(Math.round(o.aff*10)/10).toFixed(1)}</td><td class="num">${o.offered?o.picked+' of '+o.offered:'—'}</td><td class="num">${esc(o.t.rating||'—')}</td><td class="num">${o.ev?'Yes':'No'}</td><td class="num">${clsName[o.cls]||''}</td><td>${esc(o.feat.join(', '))}</td></tr>`).join('')+
     R.all.filter(o=>!o.n&&o.t.name).map(o=>`<tr><td class="num">—</td><td>${esc(o.name)}</td><td class="num" colspan="10">no sessions</td></tr>`).join('');
   if(!R.ranked.length){O.innerHTML='';drawChart(R);return;}
   let h='<div class="recbox"><h4>1. Tasks for the demand condition of Form EA-1</h4>';
-  h+=rec.fa.length?'<ul class="reclist">'+rec.fa.map(o=>'<li><b>'+esc(o.name)+'</b>: '+(LM?'mean latency '+f0(o.lat)+' s, '+f1(o.rate)+' per minute':f1(o.rate)+' per minute, mean latency '+f0(o.lat)+' s')+', problem behavior in '+o.pbN+' of '+o.n+' sessions, compliance '+pct(o.comp)+'.</li>').join('')+'</ul><p class="hint">Use these in the demand condition with the pacing, prompting and consequence used here, so the condition tests escape from demands the student does escape from (Roscoe et al., 2009; Call et al., 2009). If more than one is listed, run the condition with the first, or rotate them across sessions and note which was used.</p>':'<p class="hint">None. No task evoked problem behavior in at least half of its sessions; see the verdict above.</p>';
+  h+=rec.fa.length?'<ul class="reclist">'+rec.fa.map(o=>'<li><b>'+esc(o.name)+'</b>: '+(LM?'mean latency '+latTxt(o)+' s, '+f1(o.rate)+' per minute':f1(o.rate)+' per minute, mean latency '+latTxt(o)+' s')+', problem behavior in '+o.pbN+' of '+o.n+' sessions, compliance '+pct(o.comp)+'.</li>').join('')+'</ul><p class="hint">Use these in the demand condition with the pacing, prompting and consequence used here, so the condition tests escape from demands the student does escape from (Roscoe et al., 2009; Call et al., 2009). If more than one is listed, run the condition with the first, or rotate them across sessions and note which was used.'+(rec.prov?' <b>'+rec.prov+':</b> add sessions before these are fixed in the plan.':'')+'</p>':'<p class="hint">None. No task evoked problem behavior in at least half of its sessions; see the verdict above.</p>';
   h+='</div><div class="recbox"><h4>2. Starting tasks for demand fading (Form TD-1)</h4>';
   h+=rec.fadeNote?'<p class="hint">'+rec.fadeNote+'</p>':'';
   h+='<ul class="reclist">'+rec.fade.map((o,k)=>'<li>Step '+(k+1)+': <b>'+esc(o.name)+'</b> ('+clsLong[o.cls]+'; '+f1(o.rate)+' per minute, compliance '+pct(o.comp)+')</li>').join('')+(rec.terminal.length?'<li>Terminal steps, in order: '+rec.terminal.map(o=>'<b>'+esc(o.name)+'</b>').join(', ')+', each introduced in a short block with the modifications below, and the step held until problem behavior stays low (Pace et al., 1993; Zarcone et al., 1994).</li>':'')+'</ul>';
@@ -1325,7 +1377,7 @@ async function draftPlan(){
   const strip=stripH,I=ioaStats();
   const L=[];L.push('Demand assessment, '+(S.meta.client||'student')+(S.meta.dates?', sessions '+S.meta.dates:'')+'. '+R.ranked.length+' tasks, '+S.sess.filter(s=>s.t!=='').length+' sessions of '+sessLen()+' min, ranked by '+(latMode()?'mean latency (latency-based sessions)':'mean rate')+'. Verdict: '+strip(rec.verdict[1]));
   if(I.n)L.push('Agreement: '+ioaText(I));   /* v23.15 (review F144) */
-  L.push('Demand condition (EA-1): '+(rec.fa.length?rec.fa.map(o=>strip(o.name)).join('; '):'no task evoked problem behavior in at least half of its sessions; see the Results sheet')+'.');
+  L.push('Demand condition (EA-1): '+(rec.fa.length?rec.fa.map(o=>strip(o.name)).join('; '):'no task evoked problem behavior in at least half of its sessions; see the Results sheet')+'.'+(rec.prov?' '+rec.prov+': add sessions before these are fixed.':''));   /* v24.42 (R-077) */
   L.push('Demand fading (TD-1): start with '+rec.fade.map(o=>strip(o.name)).join(', then ')+(rec.terminal.length?'; terminal steps '+rec.terminal.map(o=>strip(o.name)).join(', then ')+'. Hold each step until problem behavior stays low across sessions (working convention: three consecutive sessions at or below 0.2 per minute) before the next step.':'.'));
   rec.mods.forEach(x=>L.push(strip(x.o.name)+': '+x.m.map(strip).join(' ')));
   if(rec.flags.length)L.push('Informant disagreement: '+rec.flags.map(strip).join(' '));
@@ -1362,7 +1414,7 @@ document.addEventListener('input',e=>{const el=e.target;
     if(el.dataset.r==='sess'){updateSessRow(+el.dataset.i);updateIoaRow(+el.dataset.i);daSafeSync(el);}
     if(el.dataset.r==='tasks'&&el.dataset.f==='name'){$$('#sessTbl select[data-f="t"],#probeTbl select[data-f="a"],#probeTbl select[data-f="b"]').forEach(s=>{const o=s.options[+el.dataset.i+1];if(o)o.textContent=(+el.dataset.i+1)+' · '+(el.value||('Task '+(+el.dataset.i+1)));});}
     renderResultsSoon();if(el.dataset.r==='tasks')renderInv();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=cv(el);if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='len')renderResultsSoon();}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=cv(el);if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='len')renderResultsSoon();if(el.dataset.m==='stoprule')renderStop();if(el.dataset.m==='nper')renderResultsSoon();}   /* v24.42 (R-077, R-078) */
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=cv(el);if(el.dataset.r==='tasks')renderInv();if(el.dataset.r==='sess'){if(el.dataset.f==='t')renderIoa();else updateIoaRow(+el.dataset.i);}renderResultsSoon();return;}
@@ -1480,6 +1532,7 @@ async function loadSim(){
     hyp:'Escape from academic demands; IA-1 and OB-1 both point to written work in math and language arts, with recess and specials clear',informants:'Ms. R. (classroom teacher); Mr. D. (paraeducator); parent by phone',runner:'J. Ellis (BCBA) recording; Ms. R. presenting the tasks',
     bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(6),dates:Y(3)+' and '+Y(2),len:'5',nper:'3',pace:'Next instruction as soon as the last is completed or prompted through',prompt:'Three-step: vocal, then model, then physical guidance, about 5 seconds apart',
     conseq:'Brief escape: materials removed for 30 seconds, then the task resumes (the demand-condition contingency)',compdef:'The step is started within 5 seconds of the vocal instruction or the model, before physical guidance',chart:'rate',
+    stoprule:'First hit or kick that makes contact, or the third throw in a session (Form CR-1; simulated)',   /* v24.42 (R-078) */
     decision:'EA-1 scheduled for next week with the subtraction worksheet in the demand condition; TD-1 to open with fading from the sorting and clean-up tasks',notes:'Session 6 (reading aloud) stopped at 4 minutes under the CR-1 rule; the minutes are entered as run. Mr. D. rated the worksheet a 3; Ms. R. a 5; the 5 is entered.'};
   S.tasks=[
     {name:'Subtraction worksheet with regrouping',where:'Classroom, 10:00 math block',len:'20',effort:'High',diff:'Above skills',nov:'Familiar',prompt:'Vocal, model, physical',pres:'Page handed over',cando:'With help',rating:'5',note:'The worst block of the day by both informants; 20 problems on a page'},
@@ -1525,6 +1578,13 @@ window.__nbhFactsIn=function(f){
     const L=['IA-1','IN-1','OB-1','ABC-1','SP-1'].filter(id=>E[id]&&T(E[id].fn)).map(id=>id+': '+T(E[id].fn)+(T(E[id].strength)?' ('+T(E[id].strength).toLowerCase()+')':''));
     if(L.length){m.hyp=L.join('; ');n++;}}
   {const st=f.student||{},sg=st.stop&&String(st.stop.signs||'').trim();if(sg&&!String(m.preAssent||'').trim()){m.preAssent=sg.replace(/[.\s]+$/,'')+' (Form SI-1)';n++;}}
+  /* v24.42 (review R-078) the stop rule on the target behavior, when none is written: Form EA-1's session termination criteria,
+     else the parent's stop rule for the analysis (Form IC-1, Specific procedures A), else the dangerous behavior the crisis plan
+     names (Form CR-1); a line typed by hand stays */
+  if(!String(m.stoprule||'').trim()){const T=v=>String(v==null?'':v).trim().replace(/[.;\s]+$/,'');const E=f.evidence||{},ea=E['EA-1']&&T(E['EA-1'].term);
+    const k=f.consent&&typeof f.consent==='object'&&nbhCase.consent?nbhCase.consent(f):null,ic=k&&k.dec&&k.dec.fa&&T(k.dec.fa.stop);const cr=f.crisis&&typeof f.crisis==='object'&&T(f.crisis.beh);
+    const line=ea?ea+' (Form EA-1, session termination criteria)':ic?ic+' (Form IC-1, Specific procedures A)':cr?'At the first instance of '+cr+': the session ends and the crisis plan applies (Form CR-1)':'';
+    if(line){m.stoprule=line;n++;}}
   /* v22.37 (review F141) "Before the first session": the consent as IC-1 records it, and whether it covers the demand
      assessment (a line the case wrote before is replaced as the case changes; one typed by hand stays); the crisis plan box
      ticked when the case holds Form CR-1's plan. */
@@ -1549,7 +1609,7 @@ window.__nbhFactsPick=function(sel){
   const t=o=>({name:o.name,rank:o.rank,rate:rd(o.rate,2),lat:rd(o.lat,0),latObs:rd(o.latObs,0),pb:o.pbN+' of '+o.n,comp:rd(o.comp,0),evokes:o.ev,cls:o.cls});
   return Object.assign({},r||{},{demands:{form:'DA-1',dates:m.dates||'',rule:rec.rule,verdict:stripH(rec.verdict[1]),fa:rec.fa.map(t),high:R.ranked.filter(o=>o.cls==='high').map(t),
     fade:rec.fade.map(t),terminal:rec.terminal.map(t),mods:rec.mods.map(x=>({task:x.o.name,lines:x.m.map(stripH)})),
-    conventions:{len:m.len||'',nper:m.nper||'',pace:m.pace||'',prompt:m.prompt||'',conseq:m.conseq||'',compdef:m.compdef||''},
+    conventions:{len:m.len||'',nper:m.nper||'',pace:m.pace||'',prompt:m.prompt||'',conseq:m.conseq||'',compdef:m.compdef||'',stop:m.stoprule||''},provisional:rec.prov||'',   /* v24.42 (R-077, R-078) */
     ioa:I.n?{sessions:I.n,of:I.of,count:rd(I.all.cnt,0),complied:rd(I.all.cmp,0),latency:I.all.latN+' of '+I.all.latOf}:null,decision:m.decision||''}});};}
 </script>
 
@@ -2423,6 +2483,7 @@ html{touch-action:manipulation}
   .toolbar .nbh-arrows button small{font-size:12px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   html.nbh-fold .toolbar .nbh-fk > .nbh-sheets.nbh-sheets.nbh-sheets,html.nbh-fold .toolbar .nbh-fk > .nbh-arrows.nbh-arrows.nbh-arrows,html.nbh-fold .toolbar .nbh-arrows.nbh-fseg{display:inline-flex!important}
   #nbhSheets{position:fixed;left:16px;right:16px;max-height:calc(100vh - 120px);overflow:auto;background:#fff;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-rule,#cfdad8);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:10px;z-index:70;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;box-sizing:border-box}
+  #nbhSheets .nbh-sheetsf{grid-column:1/-1;display:flex;align-items:center;gap:8px;font:400 13px/1.3 var(--nbh-sans,-apple-system,sans-serif);padding:0 10px 8px;color:var(--nbh-ink,#1a2933);cursor:pointer}#nbhSheets .nbh-sheetsf input{width:20px;height:20px;margin:0}#nbhSheets .nbh-sheetsf small{color:var(--nbh-muted,#54676f)}   /* v24.42 (PA-1 E-44) */
   #nbhSheets .nbh-sheetsh{grid-column:1/-1;font:600 11px/1 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--nbh-muted,#54676f);padding:4px 10px 8px}
   #nbhSheets .nbh-sheet{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:14px;text-align:left;color:inherit;width:100%;font-family:inherit}
   #nbhSheets .nbh-sheet.on{background:var(--nbh-navy,#182e43);color:#fff;font-weight:600}
@@ -2784,6 +2845,34 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 <script id="da135">/* v24.35 (R-079) the short print: the Results section alone (the ranked tasks, the metrics, the verdict and the recommendations) */
 window.addEventListener('beforeprint',()=>{const w=document.getElementById('daPrintWhat');document.body.classList.toggle('da-pr-results',!!(w&&w.value==='results'));});
 window.addEventListener('afterprint',()=>document.body.classList.remove('da-pr-results'));</script>
+<script id="da142">/* v24.42 (E-35) the presenter sheet: one page for the person presenting the tasks (pacing, prompting sequence, consequence,
+   compliance rule, stop rule, assent signals, today's order, a row per task with a tally for guidance stops), printed in place of the
+   form when chosen beside Print; the figures are entered on the Assessment sheet afterwards */
+function daPresenterHtml(){const m=S.meta,x=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'),T=v=>String(v==null?'':v).trim();
+  const row=(k,val,flag)=>'<tr><th>'+k+'</th><td'+(flag?' class="ps-flag"':'')+'>'+val+'</td></tr>';
+  const phys=/then physical guidance/i.test(m.prompt||'')||S.tasks.some(t=>/\bphysical\b/i.test(t.prompt||'')&&!/\bno physical\b/i.test(t.prompt||''));
+  const tasks=S.tasks.map((t,i)=>({t,i})).filter(o=>T(o.t.name));
+  const todo=S.sess.filter(s=>s.t!==''&&!sessCalc(s).has).map(s=>+s.t);
+  let h='<h1>Presenter sheet: demand assessment</h1><p class="ps-sub">Form DA-1 &middot; '+x(T(m.client)||'Student')+(T(m.sid)?' &middot; ID '+x(m.sid):'')+(T(m.runner)?' &middot; '+x(m.runner):'')+' &middot; Session date ____________ &middot; Presenter ____________</p>';
+  h+='<table class="ps-set"><tbody>';
+  h+=row('Target behavior',x(T(m.target)||'(not written: Inventory sheet)'),!T(m.target));
+  h+=row('Each session',(sessLen())+' minutes. '+x(T(m.pace)||'Pacing not chosen on the Inventory sheet.'),!T(m.pace));
+  h+=row('Prompting sequence',x(T(m.prompt)||'(not chosen: Inventory sheet)')+(phys?'\nPhysical guidance is a light touch, never force and never a hold. Let go at once if the student pulls away, pushes, goes stiff, cries, screams or shakes; keep the task in place; after a short calm pause give the instruction again from the vocal step. After 2 stops on one task in this session, give that task with the vocal step and the model only, and tell the BCBA today.':''),!T(m.prompt));
+  h+=row('After problem behavior',x(T(m.conseq)||'(not chosen: Inventory sheet)'),!T(m.conseq));
+  h+=row('Compliance counts when',x(T(m.compdef)||'the step is started within 5 seconds of the vocal instruction or the model, before physical guidance (working convention)'));
+  h+=row('Stop the session when',x(T(m.stoprule)||'NOT SET: write the stop rule on the Inventory sheet before the session (Form EA-1’s termination criteria or the crisis plan’s rule, Form CR-1).')+'\nThen enter the minutes actually run.',!T(m.stoprule));
+  h+=row('The student says stop (Form SI-1)',x(T(m.preAssent)||'Not recorded: agree before the session how this student says no or stop, and end the session when they do.'),!T(m.preAssent));
+  h+=row('Order today',todo.length?todo.map(i=>(i+1)+' '+x(taskName(i))).join(' &middot; ')+'. One task never follows itself; keep the order as written (Smith et al., 1995).':'Alternate the tasks so that one never follows itself (the Assessment sheet writes the order); '+nPer()+' session'+(nPer()===1?'':'s')+' per task.');
+  h+='</tbody></table>';
+  h+='<p class="ps-note">A row per task. Tally each guidance stop in its boxes as it happens; after two on a task, no more guidance on it this session. Write the figures here and enter them on the Assessment sheet the same day.</p>';
+  h+='<table class="ps-tally"><thead><tr><th style="width:4%">#</th><th>Task</th><th style="width:9%">Instructions given</th><th style="width:8%">Complied</th><th style="width:10%">Latency to first PB (s)</th><th style="width:8%">PB count</th><th style="width:13%">Guidance stops</th><th style="width:20%">Stopped early: why</th></tr></thead><tbody>';
+  (tasks.length?tasks:[{t:{name:''},i:0}]).slice(0,12).forEach(o=>{h+='<tr><td class="ps-tk" style="text-align:center">'+(o.i+1)+'</td><td class="ps-tk">'+x(o.t.name)+'</td><td></td><td></td><td></td><td></td><td><span class="ps-box"></span><span class="ps-box"></span> <span style="font-size:8pt;color:#8e2a2a">then no guidance</span></td><td></td></tr>';});
+  h+='</tbody></table><p class="ps-foot">Confidential student record (FERPA). For the people at this session only; enter the figures on Form DA-1 and shred this sheet.</p>';
+  return h;}
+window.addEventListener('beforeprint',()=>{const w=document.getElementById('daPrintWhat');const on=!!(w&&w.value==='presenter');
+  let box=document.getElementById('daPS');if(on){if(!box){box=document.createElement('div');box.id='daPS';document.body.appendChild(box);}box.innerHTML=daPresenterHtml();}
+  document.body.classList.toggle('da-pr-presenter',on);});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('da-pr-presenter');const box=document.getElementById('daPS');if(box)box.innerHTML='';});</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

@@ -211,6 +211,7 @@ html{touch-action:manipulation}
   .toolbar .nbh-arrows button small{font-size:12px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   html.nbh-fold .toolbar .nbh-fk > .nbh-sheets.nbh-sheets.nbh-sheets,html.nbh-fold .toolbar .nbh-fk > .nbh-arrows.nbh-arrows.nbh-arrows,html.nbh-fold .toolbar .nbh-arrows.nbh-fseg{display:inline-flex!important}
   #nbhSheets{position:fixed;left:16px;right:16px;max-height:calc(100vh - 120px);overflow:auto;background:#fff;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-rule,#cfdad8);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.22);padding:10px;z-index:70;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;box-sizing:border-box}
+  #nbhSheets .nbh-sheetsf{grid-column:1/-1;display:flex;align-items:center;gap:8px;font:400 13px/1.3 var(--nbh-sans,-apple-system,sans-serif);padding:0 10px 8px;color:var(--nbh-ink,#1a2933);cursor:pointer}#nbhSheets .nbh-sheetsf input{width:20px;height:20px;margin:0}#nbhSheets .nbh-sheetsf small{color:var(--nbh-muted,#54676f)}   /* v24.42 (PA-1 E-44) */
   #nbhSheets .nbh-sheetsh{grid-column:1/-1;font:600 11px/1 var(--nbh-sans,-apple-system,sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--nbh-muted,#54676f);padding:4px 10px 8px}
   #nbhSheets .nbh-sheet{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:14px;text-align:left;color:inherit;width:100%;font-family:inherit}
   #nbhSheets .nbh-sheet.on{background:var(--nbh-navy,#182e43);color:#fff;font-weight:600}
@@ -1812,9 +1813,17 @@ try { if (window.matchMedia) (function(){
   function refit(){ try { var F = window.nbhFitScreen; if (F && F.fit) F.fit(); } catch (e) {} }
   function openPop(){ closePop(); var t = tabs(), i = cur(), tt = title(); pop = document.createElement('div'); pop.id = 'nbhSheets'; pop.className = 'noprint'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Sheets of this form');
     var h = document.createElement('div'); h.className = 'nbh-sheetsh'; h.textContent = 'Sheets' + (tt.code ? ' of Form ' + tt.code : ''); pop.appendChild(h);
+    /* v24.42 (PA-1 review E-44) a form that says which of its sheets hold data (window.__nbhSheetData, keyed by the view button's
+       data-view) gets a filter, "Only sheets with data"; the open sheet always stays; the choice is kept on the device */
+    var hasD = null; try { if (typeof window.__nbhSheetData === 'function') hasD = window.__nbhSheetData() || {}; } catch (e) { hasD = null; }
+    var only = false, items = [], fl = null; if (hasD) { try { only = localStorage.getItem('nbh.sheets.data') === '1'; } catch (e) {} }
+    function sift(){ var n = 0; items.forEach(function(x){ var hide = only && !x.on && !x.has; x.el.hidden = hide; if (!hide) n++; }); if (fl) fl.querySelector('small').textContent = only ? n + ' of ' + items.length : ''; }
+    if (hasD) { fl = document.createElement('label'); fl.className = 'nbh-sheetsf'; fl.innerHTML = '<input type="checkbox"> Only sheets with data <small></small>'; var cb = fl.querySelector('input'); cb.checked = only;
+      cb.addEventListener('change', function(){ only = cb.checked; try { localStorage.setItem('nbh.sheets.data', only ? '1' : ''); } catch (e) {} sift(); }); fl.addEventListener('click', function(ev){ ev.stopPropagation(); }); pop.appendChild(fl); }
     t.forEach(function(b, k){ var it = document.createElement('button'); it.type = 'button'; it.className = 'nbh-sheet' + (k === i ? ' on' : ''); if (k === i) it.setAttribute('aria-current', 'true');
       var n = document.createElement('span'); n.textContent = (k + 1) + '. ' + label(b); it.appendChild(n); var d = dot(b); if (d) it.appendChild(d);
-      it.addEventListener('click', function(ev){ ev.stopPropagation(); closePop(); b.click(); setTimeout(paint, 30); try { window.scrollTo(0, 0); } catch (e) {} }); pop.appendChild(it); });
+      it.addEventListener('click', function(ev){ ev.stopPropagation(); closePop(); b.click(); setTimeout(paint, 30); try { window.scrollTo(0, 0); } catch (e) {} }); pop.appendChild(it); items.push({ el: it, on: k === i, has: !!(hasD && hasD[b.getAttribute('data-view') || b.id || '']) }); });
+    sift();   /* v24.42 */
     var tb = seg() && seg().closest('.toolbar'), rect = tb ? tb.getBoundingClientRect() : { bottom: 60 }; pop.style.top = Math.max(8, rect.bottom + 8) + 'px';
     document.body.appendChild(pop); if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
     setTimeout(function(){ document.addEventListener('click', outside, true); document.addEventListener('keydown', esc, true); }, 0);
