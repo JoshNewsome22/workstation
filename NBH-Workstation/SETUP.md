@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.54: Form RS-1's PDF looks like the printed record: the masthead, and the year summary with its chart (the BCBA, 10/26)
+- **The masthead.** The PDF now starts the way the printed record does: the logo, "RBT Supervision Log", the form,
+  its revision and the printed date, above the month's record.
+- **The year summary after the month.** The month's PDF (Email this month's record, Save the record as a file) goes on to
+  the year summary through that month on a page of its own, after the signatures, as Print gives it: the table by month
+  and the "Percent supervised by month" chart. Email the year summary gives the summary alone, with the masthead.
+- The record's titles are set in a serif type, as on paper.
+- **The signer is named.** The August PDF read "RBT:" with no name: the name box only showed the RBT's name from Setup
+  as a suggestion. Now a signature given with its name or date box empty fills them with the name the box shows and
+  today's date (the day it was signed). A name or date already typed in is kept. A record signed that way before names
+  the signer from Setup on the printed record and the PDF.
+- Tests: qa/rsp154-test.js (signing with empty boxes fills the name and today's date; typed ones are kept; an older record
+  names the signer; the month's PDF opens with the masthead, the logo as a picture and the month's record, and has the
+  year summary on a page of its own after the signatures, with its table and chart; the year summary's PDF has the
+  masthead).
+
 ### v24.53: Autosave gives pictures back as they were: signatures kept through a restore on an iPad (the BCBA, 10/26)
 - **What happened.** After the update, Form RS-1 came back from the Autosave copy with its days, contacts, names and
   dates, but without the two signatures signed earlier that day. The copy keeps each picture (a signature, a photo) as a

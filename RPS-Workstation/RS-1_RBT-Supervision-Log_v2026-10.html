@@ -1856,8 +1856,8 @@ function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today
       (m.records?'<p style="margin:2px 0 0"><b>Other records:</b> '+esc(m.records)+'</p>':'')+
       (m.note?'<p style="margin:2px 0 0"><b>Notes:</b> '+esc(m.note)+'</p>':'')+'</div>'+
     '<div class="p-keep"><h4>Verification</h4><p class="p-att">We verify that this record is accurate: the service days and hours, and each supervision contact, took place as recorded.</p>'+
-      '<div class="p-sig"><div><div class="sl">'+sigImg(sg.sup_img)+'</div><div class="cap"><span>Supervisor: '+esc(sg.sup_name||'')+'</span><span>Date: '+esc(mdy(sg.sup_date))+'</span></div>'+sigHow(sg,'sup')+'</div>'+
-      '<div><div class="sl">'+sigImg(sg.rbt_img)+'</div><div class="cap"><span>RBT: '+esc(sg.rbt_name||'')+'</span><span>Date: '+esc(mdy(sg.rbt_date))+'</span></div>'+sigHow(sg,'rbt')+'</div></div></div>'+
+      '<div class="p-sig"><div><div class="sl">'+sigImg(sg.sup_img)+'</div><div class="cap"><span>Supervisor: '+esc(sg.sup_name||(sg.sup_img?((sp=>sp?supLabel(sp):'')(S.sups.find(x=>x.name&&credOK(x.cred)))):''))+'</span><span>Date: '+esc(mdy(sg.sup_date))+'</span></div>'+sigHow(sg,'sup')+'</div>'+
+      '<div><div class="sl">'+sigImg(sg.rbt_img)+'</div><div class="cap"><span>RBT: '+esc(sg.rbt_name||(sg.rbt_img&&S.setup.rbt_name?S.setup.rbt_name+', '+(S.setup.rbt_cred||'RBT'):''))+'</span><span>Date: '+esc(mdy(sg.rbt_date))+'</span></div>'+sigHow(sg,'rbt')+'</div></div></div>'+
     '<div class="p-foot"><span>Keep this record for at least 7 years, also after the supervision ends; in an audit the BACB typically allows 14 days to submit it. Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks.</span><span>Form RS-1 · '+keyLabel(k)+'</span></div></div>';}
 /* v24.50 (the BCBA's printed September record, 10/26) each supervision contact prints whole: its row, its feedback and
    next steps and its readings are one block that moves to the next page rather than split, and the heading and the
@@ -1906,7 +1906,7 @@ $$('canvas.rs-pad').forEach(cv=>{const x=cv.getContext&&cv.getContext('2d');if(!
   const pos=e=>{const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*cv.width/r.width,y:(e.clientY-r.top)*cv.height/r.height};};
   cv.addEventListener('pointerdown',e=>{on=true;drew=false;last=pos(e);try{cv.setPointerCapture(e.pointerId);}catch(err){}e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(!on)return;const p=pos(e);x.lineWidth=2.4;x.lineCap='round';x.lineJoin='round';x.strokeStyle='#1a2933';x.beginPath();x.moveTo(last.x,last.y);x.lineTo(p.x,p.y);x.stroke();last=p;drew=true;e.preventDefault();});
-  const end=()=>{if(!on)return;on=false;if(!drew)return;const sg=month(curKey).sig,w=cv.dataset.pad.replace('_img','');sg[cv.dataset.pad]=cv.toDataURL('image/png');sg[w+'_how']='drawn';sg[w+'_at']=new Date().toISOString();renderMonthOut();changed();};
+  const end=()=>{if(!on)return;on=false;if(!drew)return;const sg=month(curKey).sig,w=cv.dataset.pad.replace('_img','');sg[cv.dataset.pad]=cv.toDataURL('image/png');sg[w+'_how']='drawn';sg[w+'_at']=new Date().toISOString();signFill(w);renderMonthOut();changed();};
   cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);});
 $$('[data-padclear]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.padclear,w=k.replace('_img',''),sg=month(curKey).sig;delete sg[k];delete sg[w+'_how'];delete sg[w+'_at'];renderSign();renderMonthOut();changed();}));
 /* v24.50 (the BCBA, 10/26) type the signature and adopt it: the name is written into the signature box in a handwriting
@@ -1920,8 +1920,13 @@ document.addEventListener('focusin',e=>{const k=(e.target.dataset||{}).tsname;if
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tsgo]');if(!b||b.disabled)return;const k=b.dataset.tsgo,box=b.closest('.ts-in'),nm=box.querySelector('[data-tsname]').value.trim();if(!nm)return;
   const cv=document.querySelector('canvas.rs-pad[data-pad="'+k+'"]'),x=cv&&cv.getContext&&cv.getContext('2d');if(!x)return;x.clearRect(0,0,cv.width,cv.height);x.fillStyle='#1a2933';x.textBaseline='middle';
   let fs=76;do{x.font='italic '+fs+'px '+SIGF;fs-=4;}while(x.measureText(nm).width>cv.width-60&&fs>20);x.fillText(nm,30,cv.height/2+4);
-  const sg=month(curKey).sig,w=k.replace('_img','');sg[k]=cv.toDataURL('image/png');sg[w+'_how']='typed';sg[w+'_at']=new Date().toISOString();
+  const sg=month(curKey).sig,w=k.replace('_img','');sg[k]=cv.toDataURL('image/png');sg[w+'_how']='typed';sg[w+'_at']=new Date().toISOString();signFill(w);
   box.querySelector('[data-tsok]').checked=false;tsState(k);const d=box.closest('details');if(d)d.open=false;renderMonthOut();changed();});
+/* v24.54 (the BCBA's August PDF read "RBT:" with no name: the box showed the name from Setup only as a suggestion) a
+   signature given with its name or date box empty takes the name the box shows and today's date, the day it was signed */
+function signFill(w){const sg=month(curKey).sig,nm=$(w==='sup'?'#sgSup':'#sgRbt'),dt=$(w==='sup'?'#sgSupDate':'#sgRbtDate');
+  if(!sg[w+'_name']&&nm&&nm.placeholder&&!/^name/.test(nm.placeholder)){sg[w+'_name']=nm.placeholder;nm.value=nm.placeholder;}
+  if(!sg[w+'_date']){sg[w+'_date']=todayISO();if(dt)dt.value=sg[w+'_date'];}}
 /* a drawing lives in the saved data, not in a field: tell the workstation's autosave something changed */
 function changed(){try{document.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
 
@@ -3580,7 +3585,7 @@ const RPDF=(()=>{const W=612,H=792,M=36,FT=18,K=0.75,CW=(W-2*M)/K,CH=(H-2*M-FT)/
     o+=(c===40||c===41||c===92)?'\\'+String.fromCharCode(c):(c<32||c>126)?'\\'+c.toString(8).padStart(3,'0'):String.fromCharCode(c);}return '('+o+')';};
   const rgb=s=>{const m=/rgba?\(([^)]+)\)/.exec(s||'');if(!m)return null;const v=m[1].split(/[\s,\/]+/).filter(Boolean).map(Number);if(v.length>3&&v[3]===0)return null;return v.slice(0,3).map(x=>(x/255).toFixed(3)).join(' ');};
   const font=cs=>{const b=parseInt(cs.fontWeight,10)>=600||cs.fontWeight==='bold',i=/italic|oblique/.test(cs.fontStyle),f0=String(cs.fontFamily).split(',')[0].toLowerCase();
-    if(/mono|courier/.test(f0))return 'F8';if(/georgia|times|serif/.test(f0)&&!/sans/.test(f0))return b?'F6':'F5';return b?(i?'F4':'F2'):(i?'F3':'F1');};
+    if(/mono|courier/.test(f0))return 'F8';if(/georgia|times|serif|palatino|iowan|charter/.test(f0)&&!/sans/.test(f0))return b?'F6':'F5';return b?(i?'F4':'F2'):(i?'F3':'F1');};
   const bytes=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;};
   const latin=s=>{const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i)&255;return u;};
   const jpeg=(src,w,h)=>new Promise(res=>{const im=new Image();im.onload=()=>{try{const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w));c.height=Math.max(1,Math.round(h));
@@ -3618,7 +3623,10 @@ const RPDF=(()=>{const W=612,H=792,M=36,FT=18,K=0.75,CW=(W-2*M)/K,CH=(H-2*M-FT)/
       const total=Math.max(host.scrollHeight,1),keep=[];
       host.querySelectorAll('tr,.p-keep,.p-cgrp,.p-sig,p,li,img,svg,.p-head,.p-title').forEach(el=>{if(el.tagName.toLowerCase()!=='svg'&&el.closest('svg'))return;const r=el.getBoundingClientRect();if(r.height)keep.push([r.top-oy,r.bottom-oy]);});
       host.querySelectorAll('h4').forEach(h=>{const r=h.getBoundingClientRect(),nx=h.nextElementSibling;let b=r.bottom;if(nx){const fr=nx.matches('table')?(nx.querySelector('tbody tr')||nx):nx;b=Math.max(b,Math.min(fr.getBoundingClientRect().bottom,r.top+CH));}keep.push([r.top-oy,b-oy]);});
-      const cuts=[0];let y0=0;while(y0+CH<total-1){let end=y0+CH;const cross=keep.filter(([a,b])=>a>y0+1&&a<end&&b>end+0.5&&b-a<=CH);if(cross.length)end=Math.min(...cross.map(k=>k[0]));if(end<=y0+24)end=y0+CH;cuts.push(end);y0=end;}cuts.push(total);
+      const brk=[...host.querySelectorAll('.rs-pdf-break')].map(e=>e.getBoundingClientRect().top-oy).filter(t=>t>1&&t<total-1).sort((a,b)=>a-b);   /* v24.54 a page ends where the record says, too */
+      const cuts=[0];let y0=0;while(y0+CH<total-1||brk.some(t=>t>y0+1)){let end=y0+CH;const f=brk.find(t=>t>y0+1&&t<=end+0.5);
+        if(f!==undefined)end=f;else{const cross=keep.filter(([a,b])=>a>y0+1&&a<end&&b>end+0.5&&b-a<=CH);if(cross.length)end=Math.min(...cross.map(k=>k[0]));if(end<=y0+24)end=y0+CH;}
+        cuts.push(end);y0=end;}cuts.push(total);
       const IM=await Promise.all(imgs.map(i=>i.p)),pages=[];for(let i=0;i<cuts.length-1;i++)if(cuts[i+1]>cuts[i]+0.5)pages.push([cuts[i],cuts[i+1]]);
       const N=pages.length,f2=v=>(+v).toFixed(2),tx=x=>M+x*K;
       const streams=pages.map((p,pi)=>{const ty=y=>H-M-(y-p[0])*K,inP=(a,b)=>b>p[0]&&a<p[1];let s='q '+M+' '+(M+FT)+' '+(W-2*M)+' '+(H-2*M-FT)+' re W n\n';
@@ -3644,7 +3652,21 @@ const RPDF=(()=>{const W=612,H=792,M=36,FT=18,K=0.75,CW=(W-2*M)/K,CH=(H-2*M-FT)/
     }finally{host.remove();}}
   const b64=u=>{let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);};
   return {build,b64};})();
-async function pdfOf(kind){const inner=which(kind);if(!inner)return null;const title=subject(kind),r=await RPDF.build(inner,title);return {title,bytes:r.bytes,pages:r.pages,b64:RPDF.b64(r.bytes)};}
+/* v24.54 (the BCBA, 10/26: the PDF beside the printed samples) the masthead the record prints with: the logo, the form's title,
+   its revision and the printed date */
+function pdfHead(){const h=$('.nbh-print-head');if(!h)return '';const c=h.cloneNode(true);
+  c.style.cssText='display:flex;justify-content:space-between;align-items:flex-end;gap:18px;border-bottom:2px solid #182e43;padding:0 0 8px;margin:0 0 12px';
+  const lg=c.querySelector('img'),src=h.querySelector('img');
+  if(lg){if(src&&src.complete&&src.naturalWidth&&src.naturalHeight&&src.currentSrc){lg.setAttribute('src',src.currentSrc);lg.style.cssText='height:44px;width:'+Math.round(44*src.naturalWidth/src.naturalHeight)+'px;display:block';}else lg.remove();}
+  const mt=c.querySelector('.nbh-print-meta');if(mt)mt.style.cssText='text-align:right;font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:11.3px;line-height:1.4;color:#54676f';
+  const tt=c.querySelector('.nbh-print-title');if(tt)tt.style.cssText='font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:18.7px;font-weight:600;color:#182e43;margin-bottom:2px';
+  c.querySelectorAll('.nbh-print-date').forEach(e=>{e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});});
+  return c.outerHTML;}
+/* the month's PDF is the record as Print gives it: the month, then the year summary through that month (its table and chart)
+   on a page of its own */
+async function pdfOf(kind){const inner=which(kind);if(!inner)return null;let html=pdfHead()+inner;
+  if(kind==='month'){const yr=which('year');if(yr)html+='<div class="rs-pdf-break"></div>'+yr;}
+  const title=subject(kind),r=await RPDF.build(html,title);return {title,bytes:r.bytes,pages:r.pages,b64:RPDF.b64(r.bytes)};}
 
 function noteText(pg){return pg.title+'\n\nThe record is attached as a PDF ('+fileName(pg,'pdf')+'): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.\n\nSent from the FBA and BIP Workstation, Form RS-1.';}
 function noteHtml(pg){return '<div style="font:15px/1.5 -apple-system,Helvetica,Arial,sans-serif;color:#111"><p><b>'+esc(pg.title)+'<\/b><\/p><p>The record is attached as a PDF (<i>'+esc(fileName(pg,'pdf'))+'<\/i>): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.<\/p><p style="font-size:12px;color:#555">Sent from the FBA and BIP Workstation, Form RS-1.<\/p><\/div>';}

@@ -17,8 +17,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  ok('the setup\'s explanatory text runs the width of its column (no 80-character cap on screen)',w.cap==='none'&&w.hint>=w.col-4&&w.hint>700,w);
  const sh=await p.evaluate(()=>({h2:!!document.querySelector('#rs-share'),rbt:document.querySelector('#shRbt').value,btns:['#shMonth','#shYear','#shFile'].every(s=>document.querySelector(s))}));
  ok('Share the record sits on Sign and print, with the RBT\'s email from Setup and the three buttons',sh.h2&&sh.rbt==='jlee@example.org'&&sh.btns,sh);
- await p.evaluate(()=>{const h=[...document.querySelectorAll('h2')].find(h=>/Concerns and Corrective/.test(h.textContent));const sec=h.closest('section');const b=[...sec.querySelectorAll('button')].find(b=>/^Add/.test(b.textContent.trim()));if(b)b.click();});await sleep(300);
- await p.evaluate(()=>{const h=[...document.querySelectorAll('h2')].find(h=>/Concerns and Corrective/.test(h.textContent));const sec=h.closest('section');const t=sec.querySelector('textarea')||sec.querySelector('input[type=text],input:not([type])');t.value='This text is confidential and must not travel';t.dispatchEvent(new Event('input',{bubbles:true}));t.dispatchEvent(new Event('change',{bubbles:true}));});
+ /* a concern entered (v24.54: set in the record itself; the first box of that page section is the credential's notes, which
+    the year summary prints, and the month's PDF now carries the year summary) */
+ await p.evaluate(()=>{S.concerns=[{id:'q1',date:'2026-10-01',concern:'This text is confidential and must not travel',investigated:'',decision:'',plan:'',outcome:'',outcome_date:''}];renderAll();});
  const pg=await p.evaluate(()=>{const pg=window.__rsShare.page('month');return pg&&{title:pg.title,hasConc:/must not travel/.test(pg.html),hasRbt:/Jordan Lee/.test(pg.html),css:/\.rs-paper/.test(pg.html),recips:window.__rsShare.recipients().map(r=>r.to)};});
  ok('the page to send is the month\'s record as it prints, with its styles, the RBT named, and no concerns text',pg&&pg.hasRbt&&pg.css&&!pg.hasConc&&/RBT supervision record/.test(pg.title)&&pg.recips.join()==='jlee@example.org',pg);
  const [dl]=await Promise.all([p.waitForEvent('download',{timeout:8000}),p.evaluate(()=>document.querySelector('#shFile').click())]);const path=await dl.path();const txt=fs.readFileSync(path,'latin1');
