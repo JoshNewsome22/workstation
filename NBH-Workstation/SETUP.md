@@ -9905,6 +9905,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.52: Form RS-1 emails the record as a PDF (the BCBA, 10/26: the emailed record opened as page code in Gmail on the iPad)
+- **The record goes as a PDF.** Email this month's record, Email the year summary, Save the record as a file and Save the
+  RBT's copy now give a PDF instead of a web page (.html). Gmail on the iPad showed the page's code; a PDF opens in
+  every mail app, prints, and is easy to keep. The note in the email says "The record is attached as a PDF (…)".
+- **Made on the device, nothing sent anywhere else.** The form lays out the record as it prints and places each word,
+  line, shading, the signatures as drawn or typed, and the year summary's chart into letter pages. Each page has the record's title and
+  "Page n of N" at its foot. Pages break between rows and between whole blocks, so a supervision contact (its row and
+  its feedback), the totals and the signatures are never split, and a heading stays with what follows it. The PDF uses the
+  standard PDF fonts, with each word fitted to its place, so it reads the same on any device.
+- **The file name uses plain characters.** The RBT's copy used to download as "download" in some browsers (the curly
+  apostrophe in "RBT’s"); the names now use a plain apostrophe and hyphen.
+- If a PDF cannot be made on a device, the record goes as a page, as before.
+- Concerns and corrective action stay out of every copy, as before.
+- Tests: qa/rspdf152-test.js (a stand-in host answers the mail request: each reader's message carries a PDF and the
+  note says so; the PDF is well formed (objects where the cross-reference table says, letter pages, the foot on each
+  page); twelve simulated contacts over three or more pages, none split; no concerns text; the year summary one page
+  with its chart; Save and the RBT's copy give PDFs; without a PDF the page as before). rs94-share-test, rs97-test and
+  rs129-test follow the PDF.
+
 ### v24.51: Form RS-1's Month page easier to read and check: one-line days, the days that are not the usual hours marked (the BCBA, 10/26)
 - **Each service day on one line.** On an iPad the weekday stood above the date, so each day took two lines and a month
   ran about three screens. The weekday and the date now share a line, and the start, end, minutes and hours columns are a

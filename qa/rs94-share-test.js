@@ -21,11 +21,11 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await p.evaluate(()=>{const h=[...document.querySelectorAll('h2')].find(h=>/Concerns and Corrective/.test(h.textContent));const sec=h.closest('section');const t=sec.querySelector('textarea')||sec.querySelector('input[type=text],input:not([type])');t.value='This text is confidential and must not travel';t.dispatchEvent(new Event('input',{bubbles:true}));t.dispatchEvent(new Event('change',{bubbles:true}));});
  const pg=await p.evaluate(()=>{const pg=window.__rsShare.page('month');return pg&&{title:pg.title,hasConc:/must not travel/.test(pg.html),hasRbt:/Jordan Lee/.test(pg.html),css:/\.rs-paper/.test(pg.html),recips:window.__rsShare.recipients().map(r=>r.to)};});
  ok('the page to send is the month\'s record as it prints, with its styles, the RBT named, and no concerns text',pg&&pg.hasRbt&&pg.css&&!pg.hasConc&&/RBT supervision record/.test(pg.title)&&pg.recips.join()==='jlee@example.org',pg);
- const [dl]=await Promise.all([p.waitForEvent('download',{timeout:8000}),p.evaluate(()=>document.querySelector('#shFile').click())]);const path=await dl.path();const txt=fs.readFileSync(path,'utf8');
- ok('Save the record as a file downloads the record page (an .html named after the RBT and the month)',/\.html$/.test(dl.suggestedFilename())&&/Jordan Lee/.test(txt)&&!/must not travel/.test(txt),dl.suggestedFilename());
+ const [dl]=await Promise.all([p.waitForEvent('download',{timeout:8000}),p.evaluate(()=>document.querySelector('#shFile').click())]);const path=await dl.path();const txt=fs.readFileSync(path,'latin1');
+ ok('Save the record as a file downloads the record (v24.52: a PDF named after the RBT and the month, no concerns text)',/\.pdf$/.test(dl.suggestedFilename())&&/^%PDF-/.test(txt)&&/\(Jordan\)/.test(txt)&&!/\(travel\)/.test(txt),dl.suggestedFilename());
  const [dl2]=await Promise.all([p.waitForEvent('download',{timeout:8000}),p.evaluate(()=>document.querySelector('#shMonth').click())]);
  const note=await p.evaluate(()=>document.querySelector('#shNote').textContent);
- ok('on its own the page cannot send: it says so and gives the file instead',/cannot send email/.test(note)&&/\.html$/.test(dl2.suggestedFilename()),note);
+ ok('on its own the page cannot send: it says so and gives the file instead',/cannot send email/.test(note)&&/\.pdf$/.test(dl2.suggestedFilename()),note);
  /* inside the workstation: the request reaches the shell, which answers (no Google key here: unavailable, with its reason) */
  const p2=await ctx.newPage();const errs2=[];p2.on('pageerror',e=>errs2.push(String(e)));await p2.goto(URL+'/NBH-Workstation/index.html');await sleep(1300);
  await p2.evaluate(()=>openForm('RS-1'));await p2.waitForFunction(()=>!!state.status['RS-1'],null,{timeout:40000});await sleep(1500);

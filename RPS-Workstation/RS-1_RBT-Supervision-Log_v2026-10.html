@@ -3554,27 +3554,110 @@ function rbt(){const e=$('#sName');return e&&e.value.trim()||'the RBT';}
 function subject(kind){const m=($('#monthTitle')||{}).textContent||'';const mon=m.replace(/:.*$/,'').trim();return kind==='year'?'RBT supervision, the year summary: '+rbt():'RBT supervision record, '+(mon||'this month')+': '+rbt()+(kind==='rbt'?' (the RBT\u2019s copy)':'');}
 function say(t,kind){const el=$('#shNote');if(!el)return;el.textContent=t;el.style.color=kind==='warn'?'#8E2A2A':'';}
 function saveFile(kind){const pg=page(kind);if(!pg){say('Nothing to save yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return false;}
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pg.html],{type:'text/html'}));a.download=(pg.title.replace(/[\\/:*?"<>|]+/g,' ').trim())+'.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);return true;}
+  /* v24.52 a PDF; the page as before if a PDF cannot be made on this device */
+  const give=(blob,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);};
+  const asPage=()=>give(new Blob([pg.html],{type:'text/html'}),fileName(pg));
+  pdfOf(kind).then(r=>{if(r)give(new Blob([r.bytes],{type:'application/pdf'}),fileName(pg,'pdf'));else asPage();}).catch(asPage);return true;}
 function recipients(){const L=[],seen=new Set(),put=(to,name)=>{to=String(to||'').trim();const k=to.toLowerCase();if(!to||seen.has(k))return;seen.add(k);L.push({to,name});};   /* v24.49 the RBT, then up to five other readers, each once */
   put(($('#shRbt')||{}).value,rbt());document.querySelectorAll('.rs-cc input[type=email]').forEach(e=>put(e.value,''));return L;}
 function b64u(t){const u=new TextEncoder().encode(t);let b='';for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(b);}
-function fileName(pg){return pg.title.replace(/[\\/:*?"<>|]+/g,' ').trim()+'.html';}
-function noteText(pg){return pg.title+'\n\nThe record is attached as a page ('+fileName(pg)+'): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.\n\nSent from the FBA and BIP Workstation, Form RS-1.';}
-function noteHtml(pg){return '<div style="font:15px/1.5 -apple-system,Helvetica,Arial,sans-serif;color:#111"><p><b>'+esc(pg.title)+'<\/b><\/p><p>The record is attached as a page (<i>'+esc(fileName(pg))+'<\/i>): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.<\/p><p style="font-size:12px;color:#555">Sent from the FBA and BIP Workstation, Form RS-1.<\/p><\/div>';}
-function send(kind){const pg=page(kind);if(!pg){say('Nothing to send yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return;}
+function fileName(pg,ext){return pg.title.replace(/[‘’]/g,"'").replace(/[–—]/g,'-').replace(/[^ -~]+/g,' ').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim()+'.'+(ext||'html');}   /* v24.52 plain characters: a browser gives a curly apostrophe's file the name "download" */
+/* v24.52 (the BCBA, 10/26: the emailed record opened as page code in Gmail on the iPad) the record as a PDF, made here with
+   nothing sent anywhere: the record is laid out off screen at the width of a letter page, and each word, line, shading
+   and picture is placed in the PDF where the page has it. Pages break between rows and between whole blocks (a contact,
+   the totals, the signatures), and a heading stays with what follows it; each page has the title and "Page n of N" at its
+   foot. Standard PDF fonts (Helvetica, Times for the titles), so the file opens on any device. */
+const RPDF=(()=>{const W=612,H=792,M=36,FT=18,K=0.75,CW=(W-2*M)/K,CH=(H-2*M-FT)/K;
+  const WIN={0x2013:150,0x2014:151,0x2018:145,0x2019:146,0x201C:147,0x201D:148,0x2022:149,0x2026:133,0x20AC:128,0x2122:153,0x2212:45,0x00A0:32,0x2009:32,0x202F:32};
+  const DING={0x2713:'4',0x2714:'4',0x2715:'8',0x2716:'8',0x2717:'8',0x2718:'8'};
+  const pstr=t=>{let o='';for(const ch of String(t).replace(/≥/g,'>=').replace(/≤/g,'<=')){let c=ch.codePointAt(0);if(c>255||c===0xA0)c=WIN[c]||63;
+    o+=(c===40||c===41||c===92)?'\\'+String.fromCharCode(c):(c<32||c>126)?'\\'+c.toString(8).padStart(3,'0'):String.fromCharCode(c);}return '('+o+')';};
+  const rgb=s=>{const m=/rgba?\(([^)]+)\)/.exec(s||'');if(!m)return null;const v=m[1].split(/[\s,\/]+/).filter(Boolean).map(Number);if(v.length>3&&v[3]===0)return null;return v.slice(0,3).map(x=>(x/255).toFixed(3)).join(' ');};
+  const font=cs=>{const b=parseInt(cs.fontWeight,10)>=600||cs.fontWeight==='bold',i=/italic|oblique/.test(cs.fontStyle),f0=String(cs.fontFamily).split(',')[0].toLowerCase();
+    if(/mono|courier/.test(f0))return 'F8';if(/georgia|times|serif/.test(f0)&&!/sans/.test(f0))return b?'F6':'F5';return b?(i?'F4':'F2'):(i?'F3':'F1');};
+  const bytes=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;};
+  const latin=s=>{const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i)&255;return u;};
+  const jpeg=(src,w,h)=>new Promise(res=>{const im=new Image();im.onload=()=>{try{const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w));c.height=Math.max(1,Math.round(h));
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);res({w:c.width,h:c.height,data:bytes(c.toDataURL('image/jpeg',0.92).split(',')[1])});}catch(e){res(null);}};
+    im.onerror=()=>res(null);im.src=src;});
+  async function build(html,title){const host=document.createElement('div');host.className='rs-paper';host.setAttribute('aria-hidden','true');
+    host.style.cssText='position:absolute;left:-30000px;top:0;width:'+CW+'px;max-width:none;padding:0;margin:0;border:0;background:#fff;overflow:visible;box-shadow:none';
+    host.innerHTML=html;document.body.appendChild(host);
+    try{const R0=host.getBoundingClientRect(),ox=R0.left,oy=R0.top,boxes=[],texts=[],imgs=[];
+      const vis=el=>{if(el.closest('.noprint'))return false;const cs=getComputedStyle(el);return cs.display!=='none'&&cs.visibility!=='hidden';};
+      for(const el of host.querySelectorAll('*')){const tag=el.tagName.toLowerCase();if(tag!=='svg'&&el.closest('svg'))continue;if(!vis(el))continue;const cs=getComputedStyle(el),r=el.getBoundingClientRect();if(!r.width&&!r.height)continue;
+        const x=r.left-ox,y=r.top-oy,bg=rgb(cs.backgroundColor);if(bg&&!/^1\.000 1\.000 1\.000$/.test(bg))boxes.push({x,y,w:r.width,h:r.height,c:bg});
+        /* in a table whose borders collapse, a shared line is drawn once (by the cell before it or the row above) */
+        const cell=(tag==='td'||tag==='th')&&el.closest('table')&&getComputedStyle(el.closest('table')).borderCollapse==='collapse',
+          skip=cell?[!!(el.parentElement.previousElementSibling||(el.parentElement.parentElement.previousElementSibling&&el.parentElement.parentElement.previousElementSibling.rows&&el.parentElement.parentElement.previousElementSibling.rows.length)),false,false,!!el.previousElementSibling]:[false,false,false,false];
+        ['Top','Right','Bottom','Left'].forEach((s,i)=>{if(skip[i])return;const bw=parseFloat(cs['border'+s+'Width'])||0;if(!bw||cs['border'+s+'Style']==='none'||cs['border'+s+'Style']==='hidden')return;const c=rgb(cs['border'+s+'Color']);if(!c)return;
+          boxes.push(i===0?{x,y,w:r.width,h:bw,c}:i===1?{x:x+r.width-bw,y,w:bw,h:r.height,c}:i===2?{x,y:y+r.height-bw,w:r.width,h:bw,c}:{x,y,w:bw,h:r.height,c});});
+        if(tag==='img'&&el.getAttribute('src'))imgs.push({x,y,w:r.width,h:r.height,p:jpeg(el.src,r.width*2.5,r.height*2.5)});
+        else if(tag==='svg'){let s=new XMLSerializer().serializeToString(el);if(!/xmlns=/.test(s))s=s.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
+          imgs.push({x,y,w:r.width,h:r.height,p:jpeg('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s),r.width*2.5,r.height*2.5)});}}
+      /* the PDF's fonts are not the page's: each word is stretched or narrowed to the width the page gives it, so words keep
+         their places and never run into the next column */
+      const mc=document.createElement('canvas').getContext('2d'),FAM={F5:'"Times New Roman",Times,"Liberation Serif",serif',F6:'"Times New Roman",Times,"Liberation Serif",serif',F8:'"Courier New",Courier,"Liberation Mono",monospace'};
+      const fit=(t,f,fpx,w)=>{if(/[✓-✘]/.test(t)||!w)return 100;mc.font=(f==='F3'||f==='F4'?'italic ':'')+(f==='F2'||f==='F4'||f==='F6'?'bold ':'')+fpx+'px '+(FAM[f]||'Helvetica,Arial,"Liberation Sans",sans-serif');
+        const pw=mc.measureText(t).width;if(!pw)return 100;const z=Math.max(55,Math.min(125,100*w/pw));return Math.abs(z-100)<1.5?100:Math.round(z);};
+      const tw=document.createTreeWalker(host,NodeFilter.SHOW_TEXT),rg=document.createRange();let n;
+      while((n=tw.nextNode())){const pe=n.parentElement;if(!pe||pe.closest('svg')||!vis(pe)||!/\S/.test(n.data))continue;
+        const cs=getComputedStyle(pe),fpx=parseFloat(cs.fontSize)||12,f=font(cs),c=rgb(cs.color)||'0 0 0',up=cs.textTransform==='uppercase';const re=/\S+/g;let m;
+        const put=(a,b)=>{rg.setStart(n,a);rg.setEnd(n,b);const r=rg.getBoundingClientRect();if(!r.width)return;const t0=n.data.slice(a,b),t=up?t0.toUpperCase():t0;
+          texts.push({x:r.left-ox,y:r.bottom-oy-fpx*0.22,top:r.top-oy,s:fpx*K,f,c,t,z:fit(t,f,fpx,r.width)});};
+        while((m=re.exec(n.data))){const a=m.index,b=a+m[0].length;rg.setStart(n,a);rg.setEnd(n,b);if(rg.getClientRects().length<2){put(a,b);continue;}
+          /* a word the page broke over two lines (at a hyphen or dash): each line's part goes where it is */
+          let st=a,top=null;for(let i=a;i<b;i++){rg.setStart(n,i);rg.setEnd(n,i+1);const q=rg.getBoundingClientRect().top;if(top!==null&&Math.abs(q-top)>fpx*0.5){put(st,i);st=i;}top=q;}put(st,b);}}
+      /* where a page may end: not inside a row, a block kept whole, a line of text or a picture; a heading goes with what follows it */
+      const total=Math.max(host.scrollHeight,1),keep=[];
+      host.querySelectorAll('tr,.p-keep,.p-cgrp,.p-sig,p,li,img,svg,.p-head,.p-title').forEach(el=>{if(el.tagName.toLowerCase()!=='svg'&&el.closest('svg'))return;const r=el.getBoundingClientRect();if(r.height)keep.push([r.top-oy,r.bottom-oy]);});
+      host.querySelectorAll('h4').forEach(h=>{const r=h.getBoundingClientRect(),nx=h.nextElementSibling;let b=r.bottom;if(nx){const fr=nx.matches('table')?(nx.querySelector('tbody tr')||nx):nx;b=Math.max(b,Math.min(fr.getBoundingClientRect().bottom,r.top+CH));}keep.push([r.top-oy,b-oy]);});
+      const cuts=[0];let y0=0;while(y0+CH<total-1){let end=y0+CH;const cross=keep.filter(([a,b])=>a>y0+1&&a<end&&b>end+0.5&&b-a<=CH);if(cross.length)end=Math.min(...cross.map(k=>k[0]));if(end<=y0+24)end=y0+CH;cuts.push(end);y0=end;}cuts.push(total);
+      const IM=await Promise.all(imgs.map(i=>i.p)),pages=[];for(let i=0;i<cuts.length-1;i++)if(cuts[i+1]>cuts[i]+0.5)pages.push([cuts[i],cuts[i+1]]);
+      const N=pages.length,f2=v=>(+v).toFixed(2),tx=x=>M+x*K;
+      const streams=pages.map((p,pi)=>{const ty=y=>H-M-(y-p[0])*K,inP=(a,b)=>b>p[0]&&a<p[1];let s='q '+M+' '+(M+FT)+' '+(W-2*M)+' '+(H-2*M-FT)+' re W n\n';
+        boxes.forEach(b=>{if(inP(b.y,b.y+b.h))s+=b.c+' rg '+f2(tx(b.x))+' '+f2(ty(b.y+b.h))+' '+f2(b.w*K)+' '+f2(b.h*K)+' re f\n';});
+        imgs.forEach((im,k)=>{if(IM[k]&&inP(im.y,im.y+im.h))s+='q '+f2(im.w*K)+' 0 0 '+f2(im.h*K)+' '+f2(tx(im.x))+' '+f2(ty(im.y+im.h))+' cm /Im'+k+' Do Q\n';});
+        texts.forEach(t=>{if(!(t.top>=p[0]-0.5&&t.top<p[1]-0.5))return;const at=' '+f2(tx(t.x))+' '+f2(ty(t.y))+' Td ';
+          if(/^[✓-✘]+$/.test(t.t))s+='BT /F7 '+f2(t.s*0.85)+' Tf '+t.c+' rg'+at+'('+[...t.t].map(ch=>DING[ch.codePointAt(0)]||'4').join('')+') Tj ET\n';
+          else{const tt=t.t.replace(/[✓-✘]/g,'');if(tt)s+='BT /'+t.f+' '+f2(t.s)+' Tf '+t.z+' Tz '+t.c+' rg'+at+pstr(tt)+' Tj ET\n';}});
+        const pg='Page '+(pi+1)+' of '+N;
+        return s+'Q\nBT /F1 7.5 Tf 0.35 0.35 0.35 rg '+M+' '+(M+3)+' Td '+pstr(title)+' Tj ET\nBT /F1 7.5 Tf 0.35 0.35 0.35 rg '+f2(W-M-pg.length*4.1)+' '+(M+3)+' Td '+pstr(pg)+' Tj ET\n';});
+      const FONTS=['Helvetica','Helvetica-Bold','Helvetica-Oblique','Helvetica-BoldOblique','Times-Roman','Times-Bold','ZapfDingbats','Courier'];
+      let id=3;const fid=FONTS.map(()=>id++),iid=IM.map(()=>id++),pid=pages.map(()=>{const a=id;id+=2;return a;});
+      const res='<< /Font << '+FONTS.map((f,i)=>'/F'+(i+1)+' '+fid[i]+' 0 R').join(' ')+' >> /XObject << '+IM.map((im,k)=>im?'/Im'+k+' '+iid[k]+' 0 R':'').join(' ')+' >> >>';
+      const chunks=[],offs=[];let len=0;const put=x=>{const u=typeof x==='string'?latin(x):x;chunks.push(u);len+=u.length;};
+      const obj=(k,body)=>{offs[k]=len;put(k+' 0 obj\n'+body+'\nendobj\n');};
+      put('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,'<< /Type /Pages /Kids ['+pid.map(i=>i+' 0 R').join(' ')+'] /Count '+N+' >>');
+      FONTS.forEach((f,i)=>obj(fid[i],'<< /Type /Font /Subtype /Type1 /BaseFont /'+f+(f==='ZapfDingbats'?'':' /Encoding /WinAnsiEncoding')+' >>'));
+      IM.forEach((im,k)=>{if(!im){obj(iid[k],'null');return;}offs[iid[k]]=len;put(iid[k]+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+im.w+' /Height '+im.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+im.data.length+' >>\nstream\n');put(im.data);put('\nendstream\nendobj\n');});
+      pages.forEach((p,i)=>{obj(pid[i],'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Resources '+res+' /Contents '+(pid[i]+1)+' 0 R >>');obj(pid[i]+1,'<< /Length '+streams[i].length+' >>\nstream\n'+streams[i]+'endstream');});
+      const xref=len;put('xref\n0 '+id+'\n0000000000 65535 f \n');for(let i=1;i<id;i++)put(String(offs[i]||0).padStart(10,'0')+' 00000 n \n');
+      put('trailer\n<< /Size '+id+' /Root 1 0 R /Info << /Title '+pstr(title)+' /Producer (FBA and BIP Workstation, Form RS-1) >> >>\nstartxref\n'+xref+'\n%%EOF\n');
+      const out=new Uint8Array(len);let o=0;chunks.forEach(c=>{out.set(c,o);o+=c.length;});return {bytes:out,pages:N};
+    }finally{host.remove();}}
+  const b64=u=>{let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);};
+  return {build,b64};})();
+async function pdfOf(kind){const inner=which(kind);if(!inner)return null;const title=subject(kind),r=await RPDF.build(inner,title);return {title,bytes:r.bytes,pages:r.pages,b64:RPDF.b64(r.bytes)};}
+
+function noteText(pg){return pg.title+'\n\nThe record is attached as a PDF ('+fileName(pg,'pdf')+'): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.\n\nSent from the FBA and BIP Workstation, Form RS-1.';}
+function noteHtml(pg){return '<div style="font:15px/1.5 -apple-system,Helvetica,Arial,sans-serif;color:#111"><p><b>'+esc(pg.title)+'<\/b><\/p><p>The record is attached as a PDF (<i>'+esc(fileName(pg,'pdf'))+'<\/i>): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.<\/p><p style="font-size:12px;color:#555">Sent from the FBA and BIP Workstation, Form RS-1.<\/p><\/div>';}
+async function send(kind){const pg=page(kind);if(!pg){say('Nothing to send yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return;}
   const L=recipients();if(!L.length){say('Enter the RBT’s email (kept on Setup) or another reader’s email first.','warn');return;}
   if(window.parent===window){say('On its own this page cannot send email. Open it inside the workstation to send from the school account; the record is saved as a file to attach instead.','warn');saveFile(kind);return;}
+  say('Making the PDF…');let att;   /* v24.52 the record as a PDF (the page as before if a PDF cannot be made here) */
+  try{const r=await pdfOf(kind);att={name:fileName(pg,'pdf'),type:'application/pdf',b64:r.b64};}catch(e){att={name:fileName(pg),type:'text/html',b64:b64u(pg.html)};}
   const req='rs'+(++n.req);say('Sending…');
   const on=ev=>{const d=ev.data||{};if(d.nbh!=='mail-result'||d.req!==req)return;window.removeEventListener('message',on);
     if(d.unavailable){say((d.declined?'Not sent.':(d.why||'The workstation could not send it.'))+' The record is saved as a file to attach instead.','warn');if(!d.declined)saveFile(kind);return;}
     const sent=d.sent!=null?d.sent:(d.ok!=null?(d.ok?L.length:0):L.length),failed=d.failed||[];
     say(sent?('Sent to '+L.slice(0,sent).map(m=>m.to).join(', ')+'.'+(failed.length?' Not sent: '+failed.map(f=>f.to||f).join(', ')+'.':'')):'Not sent: '+(d.why||'the workstation did not send it.'),sent?'':'warn');};
   window.addEventListener('message',on);
-  try{window.parent.postMessage({nbh:'mail',req,messages:L.map(m=>({to:m.to,name:m.name,subject:pg.title,text:noteText(pg),html:noteHtml(pg),attachments:[{name:fileName(pg),type:'text/html',b64:b64u(pg.html)}]}))},'*');}catch(e){window.removeEventListener('message',on);say('The workstation did not answer. The record is saved as a file to attach instead.','warn');saveFile(kind);}
+  try{window.parent.postMessage({nbh:'mail',req,messages:L.map(m=>({to:m.to,name:m.name,subject:pg.title,text:noteText(pg),html:noteHtml(pg),attachments:[att]}))},'*');}catch(e){window.removeEventListener('message',on);say('The workstation did not answer. The record is saved as a file to attach instead.','warn');saveFile(kind);}
   setTimeout(()=>{window.removeEventListener('message',on);if(($('#shNote')||{}).textContent==='Sending…')say('The workstation did not answer. The record is saved as a file to attach instead.','warn');},20000);}
-$('#shRbtCopy').addEventListener('click',()=>{if(saveFile('rbt'))say('The RBT\u2019s copy was saved: this month\u2019s record and the goals, no concerns.');});   /* v24.29 (E-41) */
-$('#shMonth').addEventListener('click',()=>send('month'));$('#shYear').addEventListener('click',()=>send('year'));$('#shFile').addEventListener('click',()=>{if(saveFile('month'))say('The month’s record is saved as a file: attach it to an email, or send it from a device where the workstation is signed in.');});
-window.__rsShare={page,recipients,subject,noteText,noteHtml,fileName};
+$('#shRbtCopy').addEventListener('click',()=>{if(saveFile('rbt'))say('The RBT\u2019s copy was saved as a PDF: this month\u2019s record and the goals, no concerns.');});   /* v24.29 (E-41) */
+$('#shMonth').addEventListener('click',()=>send('month'));$('#shYear').addEventListener('click',()=>send('year'));$('#shFile').addEventListener('click',()=>{if(saveFile('month'))say('The month’s record is saved as a PDF: attach it to an email, or send it from a device where the workstation is signed in.');});
+window.__rsShare={page,recipients,subject,noteText,noteHtml,fileName,pdfOf};
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
