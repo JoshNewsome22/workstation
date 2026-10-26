@@ -215,7 +215,7 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
   const q2r=await q2.evaluate(()=>({rows:rowLabels().length,act:document.querySelectorAll('#spPrint th.actcol').length}));
   await q2.pdf({path:path.join(out,'act15.pdf'),format:'Letter',printBackground:true,preferCSSPageSize:true});await q2.close();
   const pb=pages(path.join(out,'blank.pdf')),ps=pages(path.join(out,'sim.pdf')),pg=pages(path.join(out,'simg.pdf')),pa=pages(path.join(out,'act15.pdf'));
-  ok('the blank sheet prints on one page, the simulation\'s two behaviors on 13 (10 as before, and v24.26 the second observer\'s blank copies)',pb===1&&ps===13,{pb,ps});
-  ok('with the marking guide, 11; a blank 15-min school day (32 rows) with the activity column, one page',pg===14&&pa===1&&q2r.rows===32&&q2r.act===1,{pg,pa,q2r});
+  ok('the blank sheet prints on one page, the simulation\'s two behaviors on 12 (10 as before, v24.26 the second observer\'s blank copies, v24.31 the method essay printed once)',pb===1&&ps===12,{pb,ps});
+  ok('with the marking guide, 13; a blank 15-min school day (32 rows) with the activity column, one page',pg===13&&pa===1&&q2r.rows===32&&q2r.act===1,{pg,pa,q2r});
   ok('no page errors',!errs.length,errs.slice(0,3));
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);process.exit(1);});

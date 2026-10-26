@@ -9905,6 +9905,31 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.32: Form SP-1 reads a completed paper sheet from a photo
+(asked for on 10/26: a code on the paper sheet so a photo of the filled-in sheet enters the marks for that student, behavior and date range)
+
+- **On paper, every data sheet now carries** four small black squares in the corners of its grid (in the corner cell, the Total
+  header, and the ends of the Intervals marked row) and, under the grid, a square code with the scan instructions. The code
+  names the student ID, the behavior, the sheet and its days, the number of rows, the activity column and the row height
+  on that paper; the SAMPLE sheet's code says it is the sample, the second observer's copy says it is the copy. On screen
+  none of this shows. The printed grid now uses fixed column widths (the time column, the activity column and the Total
+  column as before; the days share the rest equally), so the sheet reads the same on any paper size.
+- **Scan a paper sheet** (toolbar) takes a photo with the camera or from the camera roll. On the device, with no server, the
+  form reads the code, finds the four squares, straightens the grid and reads every cell of that sheet's days: a filled cell
+  as high, a slash as low, an X as not observed, a blank as clear. It draws what it read over the photo (green high, blue
+  low, grey X, amber unsure), lists the cells it is unsure of with a choice for each, and fills the sheet's days only on
+  **Fill the sheet**. A day that already holds marks on the form is replaced only after a further yes. The photo is not kept.
+- **What it refuses, and says why:** a photo with no sheet code; the SAMPLE sheet; the second observer's copy (entered by
+  hand); a sheet printed for another student ID or another behavior; a sheet whose layout is not the record's (rows, days,
+  activity column); a record that counts the behavior in numbers (the scan reads shaded cells only); a photo in which fewer
+  than four corner squares can be found. When more than a quarter of the cells are unsure it asks for a better photo.
+- The code is decoded by jsQR 1.4.0 (Apache License 2.0), vendored under tools/vendor/jsqr and inlined in the form as the QR
+  encoder already was. Everything else is the form's own code (the perspective map from four points, the square finder, the
+  cell reading).
+- Tests: qa/sp132-test.js (the printed sheet's squares, code and geometry against the real layout; a photo of the worked
+  example's sheet, skewed and softened, read back at 97% or better with few unsure cells; Fill the sheet; the replace
+  question; the SAMPLE flag). Form ABC-1's paper sheet follows in the next release.
+
 ### v24.31: one print policy for the set, from the independent review: the record first, the Guide behind a choice, no closing line alone on a page
 (the independent review of 10/25, the print theme R-031 and E-01 with R-029, R-030, R-037, R-042, R-057, R-062, R-067, R-075, R-079, R-098, R-102; in the shared polish script, so every form follows it)
 
