@@ -83,7 +83,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('7 F35 a pilot under 80% is marked and its checklist row is unticked and held until a pilot reaches 80%',
     e2[0].a==='70'&&e2[0].low&&e2[0].qd&&!e2[0].qc&&e3[0].a==='95'&&!e3[0].low&&!e3[0].qd&&!e3[0].qc&&e4[2].low&&e4[2].qd,{e2:e2[0],e3:e3[0],e4:e4[2]});
   const fo=await s.evaluate(()=>window.__nbhFactsOut().behaviors.map(b=>b.ioa));
-  ok('8 F35 each target\'s pilot goes to the case: date, index, percentage and whether it reached 80%',fo.length>=4&&fo[0]&&fo[0].pct===95&&fo[0].met===true&&/exact count/.test(fo[0].index)&&!!fo[0].date&&fo[2].pct===75&&fo[2].met===false,fo);
+  ok('8 F35 each target\'s pilot goes to the case: date, index, percentage and whether it reached 80%',fo.length>=4&&fo[0]&&fo[0].pct===95&&fo[0].met===true&&/exact count/i.test(fo[0].index)&&!!fo[0].date&&fo[2].pct===75&&fo[2].met===false,fo);
   /* ---- F38 ---- */
   const src=await s.evaluate(()=>[...document.querySelectorAll('#qcBody tr')].map(tr=>tr.children[1].textContent));
   ok('9 F38 the checklist names the form\'s own conventions as such',src[5]==='Form convention (Guide section 4); cf. Kazdin, 2011'&&src[6]===src[5]&&/^Form convention \(Guide section 2\); cf\. Johnston & Pennypacker, 2009/.test(src.find(x=>/Guide section 2/.test(x))||''),src.slice(4,12));

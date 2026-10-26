@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.25: Form TB-1 from the independent review: the sign-off sheet reads the card, and the simulation stays out of a student's case
+(the independent review of 10/25, TB-1 findings R-012 to R-014, R-034, R-035, R-038 to R-041, R-126 to R-128; enhancements E-04 in part and E-25)
+
+- **Load simulation is blocked while a student is on the form** (the case bar's student), and the notice says why: the five
+  simulated targets would go into the case under that name, every form that reads the case (OB-1, ABC-1, IA-1, SP-1, DD-1, TD-1)
+  would fill from them with nothing marking them simulated, and Save case would write them into the record. On an empty form the
+  question names that consequence (the targets appear under SIMULATED – Sample Student).
+- **The Quality check reads the card.** Examples and non-examples at three, borderline text, onset and offset for a duration,
+  latency or interresponse-time dimension, a counting unit, and the three wording rows (no inferred state or label, no function
+  words, no motivating-operation language, from the wording checker on the definition) are ticked by the form and locked; an open
+  row says what is missing. The cluster, precursor and force rows offer n/a. A **verdict row** per target ("Ready for baseline" or
+  "6 rows open") prints. The card shows a dimension hint from the type, the label and the library, and says when onset and
+  offset are required. (A definition with "frustrated" and "because he wants to escape" and one example can no longer be signed off.)
+- **On a touch screen** every checklist cell is a 44 px tap area (the cell toggles its box, the box is 24 px) and the cluster
+  table's controls are at least 32 px tall.
+- **The distance threshold** is labeled for video-coded or session-room observation, written "about 6 in." (15.24 cm in the
+  source), and left out of the simulated classroom cards; the library entries keep the source's wording. The simulated Elopement
+  card times the departures (count and duration, as the guide prescribes).
+- **The simulation's text and the published templates carry no wording flags**: a few simulated lines are reworded, and sentences
+  still as the RRB template or the collateral list wrote them are left alone by the checker, as the library's are. The RRB pilot
+  row is consistent (1,056 of 1,200 one-second bins in a 20-minute session).
+- **Lowering the target count** names the targets in the question and keeps the removed cards for the session: set the number back
+  up and they return with their examples, checks and pilot.
+- **The pilot's Index is a select** (Total count, Interval, Exact count, Trial by trial); A and B are labeled from it (observer
+  totals, or agreements and intervals or trials scored); "Min" reads "Minutes"; a file saved with a free-text index opens as its kind.
+- The definition box and the other card boxes are named by their row label (the writing recipe is the placeholder); a chip row at
+  the top of Definitions jumps to each target, the template and the thresholds; the Selected Targets label and replacement cells wrap.
+- Checks: `qa/tb125-test.js`.
+
 ### v24.24: Form SM-1 from the independent review: a partial day, the sheet at readable size, the Record's columns, a PIN
 (the independent review of 10/25, SM-1 findings R-011, R-021, R-099, R-101, R-103, R-104, R-143; enhancements E-18, E-19, E-20; R-105 is left for a reproduction)
 
