@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.29: Form RS-1 from the independent review: a phone contact is a note, the cross-RBT table, the plan's checklist on a contact
+(the independent review of 10/25, RS-1 findings R-026, R-027, R-116, R-117, R-118, R-120, R-147, R-149, R-150; enhancements E-03, E-41)
+
+- **A contact by phone, email, recording or monitoring is noted, never counted, and never fails the month.** The contacts check
+  reads "N of 2 (M noted, not counted)", the mode row is a note (no red mark), the card and the printed record say "noted, not
+  counted", and the totals list the noted contacts. A month whose counting contacts fall short still goes red after it ends. (A
+  logged 30-minute phone check-in had flipped a compliant month to "Needs attention" and the Year table to "No".)
+- **The Every supervisee table follows the month block**: it re-renders on every change that re-renders the month and on an RBT
+  switch (it had kept last session's figures). An open month that meets every check reads **on track** in the table, the picker
+  and the month bar; "met" only after the month ends. "3 (2 needed)" replaces "3 of 2". A **Still needed this month** column
+  (minutes, contacts, observations, individual). The RBT's name is a real 44-px button; no row carries a button role.
+- **A contact can score the plan's integrity checklist.** When the case holds a Form TD-1 plan and the contact's client code is
+  the student ID the case names, the contact offers "Score this plan's integrity checklist (N items, Form TD-1)" beside the
+  generic ten, which is now labeled an observation checklist, not the plan's integrity. The plan's items (critical steps marked)
+  are copied onto the contact, scored on their own, and saved with the record; the scored observation goes with the case and
+  **Form TD-1 enters it in its integrity log** (date, steps correct of the items observed, a note naming the source), once. TD-1
+  sends its checklist (the Final plan's step list and the safety items) with the plan; the workstation carries the supervision
+  facts (RS-1).
+- **Add a contact like the last one** no longer copies "Observed the RBT with a client?": the card says "observation not
+  answered" until it is (the contact still counts as a contact).
+- **Save without concerns** (toolbar): the same file, every supervisee, with no Concerns and Corrective Action entries, for a
+  colleague or a shared device; the Concerns panel says where they live and that Share the Record never sends them.
+- **A BCaBA supervisor records the BCBA who supervises them** (name and certification number): pending on the Setup page until
+  filled, printed in the record's head.
+- **Save the RBT's copy** (Share the Record): this month's record and the goals as a page, with no concerns.
+- The autosave copy is labeled with the RBT's name, not "Student not named". The Requirements in Brief name the handbook edition
+  and the 2026 lines to re-read against the edition in hand.
+- Checks: `qa/rs129-test.js`; `qa/rs1-test.js` follows the noted-not-counted rule.
+
 ### v24.28: Form ABC-1 from the independent review: one topography at a time, honest ratios, the row as a card, the classroom sheet
 (the independent review of 10/25, ABC-1 findings R-025, R-059, R-060, R-061, R-129, R-130; enhancements E-26, E-27 the sheet, E-45)
 

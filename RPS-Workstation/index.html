@@ -2765,7 +2765,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.28';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.29';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3037,7 +3037,7 @@ async function openAlsoFacts(from,want){const k=FACT_SRC[from];if(!k)return;cons
 /* (v21.52) and for Form TV-1's draft: the profile (DM-1), the plan developed (TD-1) and the crisis plan's stages (CR-1) */
 /* v21.74 also the day-by-day record (DD-1), the point sheet (SM-1) and the quick start's rules and tiers (QS-1); v21.75 the
    treatment integrity observations (TI-1) */
-const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent','TV-1':'training',
+const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent','TV-1':'training','RS-1':'supervision',   /* v24.29 (E-03) */
   /* v21.78 */ 'PR-1':'review','RR-1':'records','HD-1':'home','IM-1':'injury','SA-1':'skills','IA-1':'evidence','IN-1':'evidence','OB-1':'evidence','ABC-1':'evidence','SP-1':'evidence','VI-1':'evidence','EA-1':'evidence',
   /* v21.82 */ 'SV-1':'sv','CF-1':'fit','SI-1':'student','ST-1':'staff',
   /* v21.85 the service log */ 'CN-1':'service',
@@ -3052,7 +3052,7 @@ const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-
   /* v22.94 (DT-1 review F402) the delay-tolerance protocol: the ladder and the step in training, the tolerance response, the
      cues, the activity, the rules and the integrity steps */ 'DT-1':'delay',
   /* v23.12 (review I136, F326) the schedule designed on SR-1; what RM-1's challenges showed */ 'SR-1':'schedule','RM-1':'relapse'};
-const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1','TE-1','RA-1','CT-1','GC-1','EB-1','PD-1','AD-1','DT-1','SR-1','RM-1'];
+const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1','TE-1','RA-1','CT-1','GC-1','EB-1','PD-1','AD-1','DT-1','SR-1','RM-1','RS-1'];
 /* ---- v23.14 (review F433, I216) Form BC-1's verdict joins the case as "contrast" (one block; nothing else in this file changes):
    it counts as part of the case and of its signature, and Today names a rise in the untreated setting (consistent with positive
    contrast, or induction with a rise) and, when BC-1 has not said so itself on the due list, a re-check due within a week ---- */
@@ -3096,7 +3096,7 @@ async function factsFlush(){
 }
 function hasFacts(f){return !!(f&&((f.student&&f.student.name)||f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
   (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||f.token||f.reinf||f.caregiver||f.classwide||f.brief||f.perf||f.arrangement||f.delay||f.schedule||f.relapse||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
-function factsSig(f){return f?JSON.stringify([f.student,f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide,f.brief,f.perf,f.arrangement,f.delay,f.schedule,f.relapse]):'';}
+function factsSig(f){return f?JSON.stringify([f.student,f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide,f.brief,f.perf,f.arrangement,f.delay,f.schedule,f.relapse,f.supervision]):'';}   /* v24.29 */
 /* v23.15 (review F143, I71) Form DA-1 joins the case as 'demands' (the tasks that evoke problem behavior for EA-1's demand
    condition, where TD-1's demand fading starts, the modifications by task): one block, so the lists above stay as they are */
 FACT_SRC['DA-1']='demands';FACT_GEN.push('DA-1');

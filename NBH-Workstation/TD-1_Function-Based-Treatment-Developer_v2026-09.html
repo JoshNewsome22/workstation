@@ -2948,6 +2948,8 @@ const tdBankOf=id=>{const B=tdBank();return B&&id?B.protocols.find(x=>x.id===id)
 function tdBankSync(){$$('#compWrap .card').forEach(d=>{const n=d.querySelector('.td-bank-src');if(!n)return;const t=val('cp['+d.dataset.i+'].bsrc');n.hidden=!t;n.textContent=t?'Protocol from the protocol bank: '+t:'';d.classList.toggle('td-from-bank',!!t);});}
 window.__tdBankSync=tdBankSync;
 window.__tdComps=comps;window.__tdIsAssess=tdIsAssess;window.__tdBipText=()=>bipText();   /* v23.88 for the tests */
+/* v24.29 (E-03) the safety items the integrity checklist carries (escape extinction or physical guidance), for the checklist sent with the plan */
+window.__tdSafetyItems=()=>{try{return eeMode()?EE_FID[val('ee.pg')==='yes'?'yes':'no'].slice():[];}catch(e){return [];}};
 window.__tdAddComp=(code,ns)=>{if(!LIB[code])return null;addComp(code,null,ns);const d=$('#compWrap').lastElementChild;return d&&d.dataset.code===code?d:null;};
 window.__tdLibOf=code=>{const L=LIB[code];return L?JSON.parse(JSON.stringify({name:L.name,fn:L.fn,src:L.src,steps:L.steps,params:L.params})):null;};
 window.__tdGroups=()=>GROUPS.map(g=>[g[0],g[1].slice()]);
@@ -3545,6 +3547,11 @@ restore({counts:{}});
 /* v21.31 the case: hooks. (v21.52) Out: the plan this form developed, for Form TV-1's draft: the target and replacement
    behaviors, the antecedent arrangements (the Antecedent sheet and the cards before sessions), the teaching and the
    reinforcement (the cards and the schedule), and the response to the precursor and to the behavior. */
+/* v24.29 (E-03) the integrity checklist as the Final plan lists it (a critical step marked), then the safety items */
+function tdChecklistItems(){let SL=null;try{SL=window.__td46Steps?window.__td46Steps():null;}catch(e){SL=null;}
+  const L=(SL&&SL.length)?SL.map(x=>({t:String(x.d||'').trim(),crit:!!x.crit,comp:String(x.comp||x.grp||'')})):[];
+  try{(window.__tdSafetyItems?window.__tdSafetyItems():[]).forEach(t=>L.push({t:String(t),crit:true,comp:'Safety'}));}catch(e){}
+  return L.filter(x=>x.t);}
 window.__nbhFactsOut=function(){
   try{
     const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';};
@@ -3557,6 +3564,7 @@ window.__nbhFactsOut=function(){
     const plan={beh:g('m.beh'),fn:g('m.fn'),rep:g('m.repdesc'),reinf:g('m.reinf'),pref:g('m.pref'),prec:g('m.prec'),
       ant:['ant.pos','ant.seat','ant.att','ant.se'].map(g).filter(Boolean),antCards:grp(0),teach:grp(1),sched:grp(3),prompted:g('pr.reinf'),
       respond:{prec:g('rb.prec'),target:g('rb.target'),after:g('rb.after'),not:g('rb.not'),crisis:g('rb.crisis')},src:'TD-1'};
+    try{plan.checklist=tdChecklistItems();}catch(e){}   /* v24.29 (E-03) the integrity checklist, for Form RS-1's observation contacts */
     const any=plan.beh||plan.rep||plan.ant.length||plan.antCards.length||plan.teach.length||Object.values(plan.respond).some(Boolean);
     return any?{plan}:null;
   }catch(e){return null;}
@@ -6177,6 +6185,24 @@ paint();
     d.innerHTML='<span>Not in this plan yet: its component is not on Build and nothing is entered here.</span><button type="button" class="tool td-plshow">Show the planner</button>';if(h)h.after(d);else w.prepend(d);});
   document.addEventListener('click',e=>{const b=e.target.closest('.td-plshow');if(!b)return;const w=b.closest('.td-planner');if(w)w.classList.add('td-open');});
 })();
+</script>
+<script id="td129-obs">
+/* v24.29 (E-03, R-116) a supervision observation scored on this plan's checklist (Form RS-1, through the case) enters the integrity log:
+   the date, steps correct of the items observed (the denominator is what was scored), and a note naming the source; once each */
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const L=(f&&f.supervision&&Array.isArray(f.supervision.integrityObs))?f.supervision.integrityObs:[];if(!L.length)return r;
+    const q=(i,k)=>document.querySelector('[name="mo['+i+'].'+k+'"]'),v=(i,k)=>{const e=q(i,k);return e?String(e.value||'').trim():'';};
+    const mdyOf=d=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(d||'');};
+    let n=document.querySelectorAll('#monBody tr').length,added=0;
+    const notes=()=>Array.from({length:n},(_,i)=>v(i,'n'));
+    L.forEach(o=>{if(!o||!o.date||!((+o.y||0)+(+o.n||0)>0))return;const tag='Supervision observation (Form RS-1) '+mdyOf(o.date)+(o.client?' '+o.client:'');
+      if(notes().some(x=>x.indexOf(tag)===0))return;
+      let i=-1;for(let k=0;k<n;k++){if(!v(k,'d')&&!v(k,'t')&&!v(k,'n')){i=k;break;}}
+      if(i<0){const nm=document.getElementById('nMon');if(!nm||+nm.value>=80)return;nm.value=String(+nm.value+1);try{renderMonRows();}catch(e){}n=document.querySelectorAll('#monBody tr').length;i=n-1;if(i<0)return;}
+      const put=(k,val)=>{const e=q(i,k);if(!e)return;e.value=val;e.dispatchEvent(new Event('input',{bubbles:true}));};
+      put('d',mdyOf(o.date));put('sc',String(+o.y||0));put('so',String((+o.y||0)+(+o.n||0)));put('n',tag+(o.sup?' \u00b7 '+String(o.sup):'')+' \u00b7 '+(o.pct!=null?o.pct+'%':''));added++;});
+    if(added){try{renderMon();}catch(e){}try{nbhUI.toast(added+' supervision observation'+(added===1?'':'s')+' from Form RS-1 entered in the integrity log: steps correct of the items observed.',{kind:'ok'});}catch(e){}}
+  }catch(e){}return r;};})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

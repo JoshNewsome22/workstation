@@ -750,6 +750,16 @@ details.rs-contact > summary b{color:var(--nbh-navy,#182e43)}
 .rs-pill{display:inline-block;padding:2px 9px;border-radius:11px;background:var(--nbh-mist,#eaf2f0);font-size:12px;color:var(--ink);white-space:nowrap}
 .rs-pill.warn{background:#F6E0E0;color:#6e1f1f;font-weight:600}
 .rs-pill.obs{background:#E3EFE0;color:#1f4d26}
+.rs-pill.note{background:#eef1f3;color:#54676f}.rs-pill.ask{background:#fbf3e4;color:#6b4a12}   /* v24.29 */
+.issues li.ask{color:#6b4a12}
+.rs-who-btn{background:none;border:0;padding:6px 4px;min-height:44px;font:inherit;font-weight:inherit;color:var(--nbh-navy,#182e43);text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left}
+.rs-who-btn[aria-current="true"]{font-weight:700;text-decoration:none}
+table.rs-who-t td.rs-need{font-size:12px;color:var(--ink-soft)}
+.rs-cksrc{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px}
+.rs-cksrc .tool[aria-pressed="true"]{background:var(--nbh-navy,#182e43);color:#fff;border-color:var(--nbh-navy,#182e43)}
+.rs-ckrow.crit .t{font-weight:600}
+.rs-crit{font-style:normal;font-size:10px;font-weight:700;background:var(--nbh-navy,#182e43);color:#fff;border-radius:7px;padding:0 6px;margin-left:4px;vertical-align:middle}
+.rs-comp{color:var(--ink-soft);margin-left:4px}
 .rs-cbody{padding:4px 14px 12px;border-top:1px solid #eef2f1}
 .rs-cbody .fieldgrid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
 .rs-cbody .lbl{display:block;font-family:var(--sans);font-size:12px;color:var(--ink-soft);margin:10px 0 0}
@@ -1057,7 +1067,7 @@ td input,td select{max-width:100%}
   </div></div>
   <div class="tgroup"><span>Sheet actions</span><div class="row">
     <button id="simBtn">Load simulation</button>
-    <button id="saveBtn">Save data</button>
+    <button id="saveBtn">Save data</button><button id="saveNoConcernsBtn" title="The same file with no Concerns and Corrective Action entries, for a colleague or a shared device">Save without concerns</button>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
     <button id="csvBtn">Export CSV</button>
@@ -1179,7 +1189,7 @@ td input,td select{max-width:100%}
     <div class="grid-wrap"><table class="rt rs-year-t" id="yearTbl"></table></div>
     <h3 style="margin-top:16px">Percent of service hours supervised, by month</h3>
     <div class="rs-chart" id="yearChart"></div>
-    <h3 style="margin-top:16px">Observation checklist, average by month</h3>
+    <h3 style="margin-top:16px">Checklist average by month</h3>
     <div class="rs-chart" id="ckChart"></div>
   </section>
 
@@ -1222,7 +1232,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band" style="margin-top:18px">Concerns and Corrective Action (confidential)</h2>
     <div class="instr">When the supervisor becomes aware of a potential ethics violation by the RBT, they investigate and document it. A <b>Notice of Alleged Violation</b> goes to the BACB when the concern involves abuse or neglect of a client; results in the RBT being charged with or convicted of a violation of the law; violates RBT Ethics Code (2.0) standard 1.03, 1.05, 3.01, 3.02, 3.03, 3.04 or 3.05; or has occurred repeatedly despite reasonable attempts to address it. Otherwise the supervisor develops and carries out an individualized corrective-action plan and documents the outcome (BCBA Handbook). This part is <b>not</b> on the monthly record; it prints only from its own button.</div>
     <div id="concernList"></div>
-    <div class="tools"><button class="tool" type="button" id="addConcern">Record a concern</button><button class="tool" type="button" id="printConcerns">Print the concerns (confidential)</button></div>
+    <div class="tools"><button class="tool" type="button" id="addConcern">Record a concern</button><button class="tool" type="button" id="printConcerns">Print the concerns (confidential)</button><span class="hint" id="concernWhere" style="flex:1 1 100%">Where these live: in this form\u2019s file (Save data), with every supervisee in it. Save without concerns writes the same file with no concern entries, for a colleague or a shared device; Share the Record never sends them.</span></div>
   </section>
 
   <!-- ===================== SIGN AND PRINT ===================== -->
@@ -1256,7 +1266,7 @@ td input,td select{max-width:100%}
       <div><label for="shRbt">The RBT&rsquo;s email</label><input id="shRbt" type="email" data-s="rbt_email" autocomplete="off" placeholder="kept with the RBT on Setup"></div>
       <div><label for="shOther">Another reader&rsquo;s email (this send only)</label><input id="shOther" type="email" autocomplete="off" placeholder="e.g., a second BCBA"></div>
     </div>
-    <div class="tools noprint"><button class="tool" type="button" id="shMonth">Email this month&rsquo;s record</button><button class="tool" type="button" id="shYear">Email the year summary</button><button class="tool" type="button" id="shFile">Save the record as a file</button></div>
+    <div class="tools noprint"><button class="tool" type="button" id="shMonth">Email this month&rsquo;s record</button><button class="tool" type="button" id="shYear">Email the year summary</button><button class="tool" type="button" id="shFile">Save the record as a file</button><button class="tool" type="button" id="shRbtCopy" title="This month\u2019s record and the goals, with no concerns, as a page for the RBT">Save the RBT\u2019s copy</button></div>
     <div id="shNote" class="hint noprint" aria-live="polite"></div>
     <h2 class="nbh-band noprint" style="margin-top:14px">The Monthly Record as It Prints</h2>
     <div class="rs-paper" id="monthOut"></div>
@@ -1413,15 +1423,27 @@ function fillMonth(k,force){const m=month(k),st=S.setup;if(!force&&(m.filled||m.
 function brkWhy(d){const a=toMin(d.start),b=toMin(d.end),t=String(d.brk==null?'':d.brk).trim();if(t==='')return '';const v=Number(t);if(!isFinite(v))return 'not a number';if(v<0)return 'minutes not in services are 0 or more';if(a!=null&&b!=null&&b>a&&v>=b-a)return 'minutes not in services cannot reach the day\'s length ('+(b-a)+' min)';return '';}
 function dayMin(d){if(d.none)return 0;const a=toMin(d.start),b=toMin(d.end);if(a==null||b==null||b<=a)return null;if(brkWhy(d))return null;const v=b-a-(num(d.brk)||0);return v>0?v:null;}
 function cMin(c){const a=toMin(c.start),b=toMin(c.end);if(a==null||b==null||b<=a)return null;return b-a;}
-function ckScore(c){const v=Object.values(c.ck||{});const y=v.filter(x=>x==='y').length,n=v.filter(x=>x==='n').length;return y+n?{pct:y/(y+n)*100,y,n,na:v.filter(x=>x==='na').length}:null;}
+/* v24.29 (E-03, R-116) a contact scores the generic observation list, or the integrity checklist of the Form TD-1 plan the case holds for
+   the contact's client code (the student ID the case names): the items are copied onto the contact so the record stands alone */
+const ckActive=c=>c.ckSrc==='plan'?(c.ckp||{}):(c.ck||{});
+function ckItems(c){if(c.ckSrc==='plan'&&Array.isArray(c.ckItems)&&c.ckItems.length)return c.ckItems.map(x=>({t:String(x.t||''),crit:!!x.crit,comp:String(x.comp||'')}));return CHECK.map(t=>({t,crit:false,comp:''}));}
+function rsPlanFor(c){const C=window.__rsCase;if(!C||!C.plan)return null;const id=String(C.student&&C.student.id||'').trim().toLowerCase(),cc=String(c.client||'').trim().toLowerCase();return (id&&cc&&id===cc)?C.plan:null;}
+function ckBlock(c,id){const F=f=>'c_'+id+'_'+f,pl=rsPlanFor(c),onPlan=c.ckSrc==='plan',items=ckItems(c),A=ckActive(c);
+  const src=onPlan?'Integrity checklist from the plan (Form TD-1): '+items.length+' item'+(items.length===1?'':'s')+(c.ckPlanSrc?' \u00b7 '+esc(c.ckPlanSrc):''):'Observation checklist (the generic ten; not the plan\u2019s integrity)';
+  const sw=(pl||onPlan)?'<div class="rs-cksrc" role="group" aria-label="Which checklist this contact scores"><button type="button" class="tool" data-cksrc="plan" data-lc="'+id+'" aria-pressed="'+onPlan+'"'+(pl||onPlan?'':' disabled')+'>Score this plan\u2019s integrity checklist'+(pl?' ('+pl.checklist.length+' items, Form TD-1)':'')+'</button><button type="button" class="tool" data-cksrc="gen" data-lc="'+id+'" aria-pressed="'+(!onPlan)+'">The generic ten</button></div>':'';
+  return '<div class="rs-ck" data-ckbox="'+id+'"'+(c.obs==='yes'?'':' hidden')+'><h4><span>'+src+'</span><span id="'+F('score')+'">'+ckText(c)+'</span></h4>'+sw+
+    items.map((it,j)=>{const v=A[j]||'',nm='ck_'+id+'_'+j;return '<div class="rs-ckrow'+(it.crit?' crit':'')+'"><span class="t" id="'+nm+'_t">'+(j+1)+'. '+esc(it.t)+(it.crit?' <i class="rs-crit">critical</i>':'')+(it.comp?' <small class="rs-comp">'+esc(it.comp)+'</small>':'')+'</span><span class="yn" role="radiogroup" aria-labelledby="'+nm+'_t">'+
+      [['y','Yes'],['n','No'],['na','N/A']].map(([v2,l])=>'<label class="'+v2+'"><input type="radio" name="'+nm+'" id="'+nm+'_'+v2+'" data-c="'+id+'" data-ck="'+j+'" value="'+v2+'"'+(v===v2?' checked':'')+'>'+l+'</label>').join('')+'</span></div>';}).join('')+'</div>';}
+function ckScore(c){const v=Object.values(ckActive(c));const y=v.filter(x=>x==='y').length,n=v.filter(x=>x==='n').length;return y+n?{pct:y/(y+n)*100,y,n,na:v.filter(x=>x==='na').length}:null;}
 /* why a contact does not count (fail: it can never count; pending: something still to fill in) */
 function cIssues(c,k){const out=[],sp=supById(c.sup),mo=modeOf(c.mode),min=cMin(c);
-  if(mo&&!mo[2])out.push({lvl:'fail',t:'By '+MODEWHY[c.mode]+': does not count'});
+  if(mo&&!mo[2])out.push({lvl:'note',t:'By '+MODEWHY[c.mode]+': noted, not counted'});   /* v24.29 (R-026) a note on the record, never a failure */
   if(c.format==='group'){const n=num(c.group),mx=rule('grpmax');if(n!=null&&n>mx)out.push({lvl:'fail',t:'A group of '+n+' RBTs: more than '+mx+', does not count'});else if(n==null||n<2)out.push({lvl:'pending',t:'Enter the number of RBTs in the group (2 to '+mx+')'});}
   if(!c.sup||!sp)out.push({lvl:'pending',t:'Choose the supervisor'});else if(!credOK(sp.cred))out.push({lvl:'fail',t:(sp.name||'The supervisor')+' is not listed as a BCBA or BCaBA'});
   if(!mo)out.push({lvl:'pending',t:'Choose how the contact happened'});
   if(!c.date)out.push({lvl:'pending',t:'Enter the date'});else if(keyOf(c.date)!==k)out.push({lvl:'pending',t:'The date is not in '+keyLabel(k)});
   if(min==null)out.push({lvl:'pending',t:'Enter the start and end times'});
+  if(c.obs!=='yes'&&c.obs!=='no')out.push({lvl:'ask',t:'Observed the RBT with a client? not answered'});   /* v24.29 (R-118) asked, not blocking */
   return out;}
 const cPlanned=c=>c.date&&c.date>todayISO();
 /* what a supervisor still lacks on the record (fail: may not supervise; pending: to confirm) */
@@ -1432,6 +1454,7 @@ function supIssues(s){const out=[],hasRC=S.sups.some(x=>x.name&&isRC(x));
   if((!hasRC||isRC(s))&&s.portal!=='yes')out.push({lvl:'pending',t:(hasRC?'As Requirements Coordinator, must list':'Must list')+' the RBT in the BACB portal'});
   if(!s.norel)out.push({lvl:'pending',t:'Relationship check not confirmed'});
   if(isSupRole(s)&&s.oversight!=='employed'&&s.oversight!=='contract')out.push({lvl:'pending',t:'Supervisor\u2013client oversight not recorded'});
+  if(s.cred==='BCaBA'&&!String(s.bcba||'').trim())out.push({lvl:'ask',t:'Supervised by a BCBA: the BCBA\u2019s name and certification number not recorded (a BCaBA who supervises RBTs is supervised by a BCBA)'});   /* v24.29 (R-147) asked on the Setup page; it does not fail a month */
   return out;}
 function stats(k){
   const m=peek(k),[y,mo]=k.split('-').map(Number),first=iso(y,mo,1),last=iso(y,mo,lastDay(y,mo)),today=todayISO();
@@ -1441,10 +1464,10 @@ function stats(k){
   const served=m.noservice?[]:m.days.filter(d=>inM(d)&&!d.none&&d.date<=today&&dayMin(d)>0);
   const rbtMin=served.reduce((s,d)=>s+dayMin(d),0);
   const plannedMin=m.noservice?0:m.days.filter(d=>inM(d)&&!d.none&&dayMin(d)>0).reduce((s,d)=>s+dayMin(d),0);
-  const C=m.contacts.map(c=>{const is=cIssues(c,k);return {c,min:cMin(c),is,counts:!is.length&&!cPlanned(c)};});
+  const C=m.contacts.map(c=>{const is=cIssues(c,k);return {c,min:cMin(c),is,counts:!is.some(i=>i.lvl!=='ask')&&!cPlanned(c)};});   /* v24.29 an unanswered question does not stop the count */
   const cnt=C.filter(x=>x.counts),supMin=cnt.reduce((s,x)=>s+x.min,0);
   const indiv=cnt.filter(x=>x.c.format!=='group').length,obs=cnt.filter(x=>x.c.obs==='yes').length;
-  const badMode=C.filter(x=>x.is.some(i=>i.lvl==='fail'&&/^By /.test(i.t))).length,badCred=C.filter(x=>{const s=supById(x.c.sup);return s&&!credOK(s.cred);}).length,noSup=C.filter(x=>!supById(x.c.sup)).length;
+  const badMode=C.filter(x=>x.is.some(i=>i.lvl==='note')).length,badCred=C.filter(x=>{const s=supById(x.c.sup);return s&&!credOK(s.cred);}).length,noSup=C.filter(x=>!supById(x.c.sup)).length;
   const P=rule('pct')/100,pct=rbtMin?supMin/rbtMin*100:null;
   const need=rbtMin?Math.max(0,Math.ceil(rbtMin*P-supMin-1e-9)):0,needPlanned=plannedMin?Math.max(0,Math.ceil(plannedMin*P-supMin-1e-9)):0;
   const bigGroup=C.filter(x=>x.c.format==='group'&&num(x.c.group)!=null&&num(x.c.group)>rule('grpmax')).length;
@@ -1456,11 +1479,11 @@ function stats(k){
   const st=(met,hard)=>met?'ok':hard?'fail':ended?'fail':'pending';
   const checks=[
     {k:'pct',t:'At least '+rule('pct')+'% of service hours supervised',d:hasService?pctTxt(pct)+' ('+supMin+' of '+rbtMin+' minutes)':'no service hours recorded yet',s:hasService?st(supMin>=rbtMin*P-1e-9):'na'},
-    {k:'contacts',t:'At least '+rule('contacts')+' real-time contact'+(rule('contacts')===1?'':'s'),d:cnt.length+' of '+rule('contacts'),s:any?st(cnt.length>=rule('contacts')):'na'},
+    {k:'contacts',t:'At least '+rule('contacts')+' real-time contact'+(rule('contacts')===1?'':'s'),d:cnt.length+' of '+rule('contacts')+(badMode?' ('+badMode+' noted, not counted)':''),s:any?st(cnt.length>=rule('contacts')):'na'},
     {k:'indiv',t:'At least '+rule('indiv')+' individual contact'+(rule('indiv')===1?'':'s'),d:indiv+' of '+rule('indiv'),s:any?st(indiv>=rule('indiv')):'na'},
     {k:'obs',t:'At least '+rule('obs')+' observing the RBT with a client',d:obs+' of '+rule('obs'),s:any?st(obs>=rule('obs')):'na'},
     {k:'cred',t:'Every supervisor is a BCBA or BCaBA',d:badCred?badCred+' contact'+(badCred===1?'':'s')+' with a supervisor without one':noSup?noSup+' contact'+(noSup===1?'':'s')+' without a supervisor chosen':m.contacts.length?'all listed supervisors qualify':'no contacts yet',s:!m.contacts.length?'na':badCred?'fail':noSup?(ended?'fail':'pending'):'ok'},
-    {k:'mode',t:'No contact by phone, email, recording or monitoring alone',d:badMode?badMode+' such contact'+(badMode===1?'':'s')+' (not counted)':m.contacts.length?'every contact was in real time':'no contacts yet',s:!m.contacts.length?'na':badMode?'fail':'ok'},
+    {k:'mode',t:'A contact by phone, email, recording or monitoring alone is noted, not counted',d:badMode?badMode+' noted this month':m.contacts.length?'none this month':'no contacts yet',s:'na'},   /* v24.29 (R-026) a note, never a red mark */
     {k:'group',t:'No group of more than '+rule('grpmax')+' RBTs',d:bigGroup?bigGroup+' such contact'+(bigGroup===1?'':'s')+' (not counted)':m.contacts.some(c=>c.format==='group')?'every group within the limit':'no group contacts',s:!m.contacts.length?'na':bigGroup?'fail':'ok'},
     {k:'req',t:'Supervisor requirements on record',d:reqMiss.length?reqMiss.join('; '):usedSups.length?'training, portal, relationship and client oversight recorded':'no supervisor yet',s:!usedSups.length?'na':reqMiss.length?(ended?'fail':'pending'):'ok'}];
   if(m.noservice)checks.forEach(c=>{c.s='na';c.d='not applicable: no services this month';});
@@ -1469,6 +1492,12 @@ function stats(k){
   if(!m.noservice&&!hasService&&status==='pending'&&ended)status=live.some(c=>c.s==='fail')?'fail':'none';
   return {k,first,last,ended,started,served,daysServed:new Set(served.map(d=>d.date)).size,rbtMin,plannedMin,C,cnt,supMin,indiv,obs,badMode,badCred,noSup,pct,need,needPlanned,ck,ckN:sc.length,checks,status,hasService,obsDates,usedSups,noservice:!!m.noservice,planned:m.days.some(d=>inM(d)&&!d.none&&d.date>today)};}
 const STW={ok:'met',pending:'open',fail:'not met',none:'—',na:'n/a'};
+const stw=s=>s.status==='ok'&&!s.ended?'on track':STW[s.status];   /* v24.29 (R-120) an open month is on track, not met */
+/* v24.29 (R-149, E-41) the supervisee table's words */
+function cntTxt(s){const n=s.cnt.length,need=rule('contacts');return n>=need?n+' ('+need+' needed)':n+' of '+need+' needed';}
+function needTxt(s){if(s.noservice)return 'no services';if(!s.hasService&&!s.C.length)return '\u2014';const L=[];if(s.need>0)L.push(s.need+' min');
+  const c=rule('contacts')-s.cnt.length;if(c>0)L.push(c+' contact'+(c===1?'':'s'));const o=rule('obs')-s.obs;if(o>0)L.push(o+' observation'+(o===1?'':'s'));const i=rule('indiv')-s.indiv;if(i>0)L.push(i+' individual');
+  return L.length?L.join(' \u00b7 '):(s.ended?'\u2014':'nothing more');}
 const ICO={ok:'✓',pending:'!',fail:'✕',na:'–'};
 
 /* ---------------- views ---------------- */
@@ -1505,12 +1534,13 @@ function renderSups(){
         '<div><label for="'+F('portal')+'">Lists the RBT in the BACB portal</label><select id="'+F('portal')+'" data-sup="'+id+'" data-f="portal">'+opts([['yes','Yes'],['no','No']],s.portal,true)+'</select></div>'+
         '<div><label for="'+F('oversight')+'">Supervisor&ndash;client oversight</label><select id="'+F('oversight')+'" data-sup="'+id+'" data-f="oversight">'+opts(OVERS,s.oversight,true)+'</select></div>'+
         '<div><label for="'+F('oversight_note')+'">Oversight note</label><input id="'+F('oversight_note')+'" data-sup="'+id+'" data-f="oversight_note" value="'+esc(s.oversight_note)+'" placeholder="e.g., both employed by the district"></div>'+
+        '<div data-bcba="'+id+'"'+(s.cred==='BCaBA'?'':' hidden')+'><label for="'+F('bcba')+'">Supervised by (the BCBA\u2019s name and certification number)</label><input id="'+F('bcba')+'" data-sup="'+id+'" data-f="bcba" value="'+esc(s.bcba||'')+'" placeholder="a BCaBA who supervises RBTs is supervised by a BCBA" autocomplete="off"></div>'+   /* v24.29 (R-147) */
       '</div>'+
       '<label class="chip wide"><input type="checkbox" id="'+F('norel')+'" data-sup="'+id+'" data-f="norel"'+(s.norel?' checked':'')+'> Confirmed: the RBT is not related to, not superior to, not an employer of, and not in a multiple relationship with this supervisor</label>'+
       '<ul class="issues" id="'+F('issues')+'">'+supIssuesHTML(s)+'</ul></div>';}).join('');
   supLists();}
 function supIssuesHTML(s){const is=supIssues(s);return is.length?is.map(x=>'<li class="'+x.lvl+'">'+(x.lvl==='fail'?'✕ ':'• ')+esc(x.t)+'</li>').join(''):'<li class="ok">✓ Everything the handbook asks about this supervisor is recorded.</li>';}
-function supRefresh(){S.sups.forEach(s=>{const u=document.getElementById('sup_'+s.id+'_issues');if(u)u.innerHTML=supIssuesHTML(s);const card=u&&u.closest('.rs-sup');if(card){const is=supIssues(s);card.classList.toggle('bad',is.some(x=>x.lvl==='fail'));card.classList.toggle('warn',!is.some(x=>x.lvl==='fail')&&is.length>0);}});}
+function supRefresh(){S.sups.forEach(s=>{const u=document.getElementById('sup_'+s.id+'_issues');if(u)u.innerHTML=supIssuesHTML(s);const card=u&&u.closest('.rs-sup');if(card){const is=supIssues(s);const bf=card.querySelector('[data-bcba]');if(bf)bf.hidden=s.cred!=='BCaBA';card.classList.toggle('bad',is.some(x=>x.lvl==='fail'));card.classList.toggle('warn',!is.some(x=>x.lvl==='fail')&&is.length>0);}});}
 function supLists(){$('#supNames').innerHTML=S.sups.filter(s=>s.name).map(s=>'<option value="'+esc(supLabel(s))+'"></option>').join('');
   $('#clientCodes').innerHTML=clientCodes().map(c=>'<option value="'+esc(c)+'"></option>').join('');}
 function renderReq(){const h='<ul>'+
@@ -1524,13 +1554,13 @@ function renderReq(){const h='<ul>'+
   '<li><b>Recertification:</b> an RBT who recertifies in 2026 does so one last time with a <b>Recertification Competency Assessment</b> (no more than '+rule('remind')+' days before the expiration date, overseen by a qualified RBT supervisor). After it, a <b>two-year cycle with '+rule('pdu')+' PDUs</b> begins. The 40-hour training follows the <b>RBT Test Content Outline (3rd ed.)</b>. Reinstatement is possible for 30 days after the expiration date, with a late fee; meanwhile the RBT is inactive and may not practise or bill.</li>'+
   '<li><b>Self-reporting:</b> certain events within 30 days of becoming aware of them; supervision noncompliance in a timely manner; personal information changes within 30 days.</li>'+
   '<li><b>Documentation:</b> the days and times of service, the dates, duration and format of supervision, the dates of observations with a client, the supervisors&rsquo; names, proof of the supervisor&rsquo;s relationship to the client, and other records where records disagree. Keep it at least <b>7 years</b>, also after the relationship ends; in an audit the BACB typically allows 14 days to submit it.</li></ul>'+
-  '<div class="check"><b>Check against the current BACB RBT Handbook.</b> Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks. The numbers above come from the Rules panel.</div>';
+  '<div class="check"><b>Check against the current BACB RBT Handbook.</b> Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks. The numbers above come from the Rules panel. The lines that changed for 2026 (the one-time recertification competency assessment, the two-year cycle with PDUs, the Supervisor Training Curriculum Outline 2.0, the BCaBA supervisor\u2019s own BCBA) are the ones to re-read against the edition in hand.</div>';
   $('#reqBox').innerHTML=h;$('#reqBox2').innerHTML=h;
   const changed=Object.keys(RULES0).filter(k=>rule(k)!==RULES0[k]);$('#rulesNote').textContent=changed.length?'Changed from the 2026 defaults: '+changed.length+'.':'The 2026 defaults.';}
 
 /* ---------------- the month ---------------- */
 function renderMonthBar(){const ks=yearKeys(setupYear());
-  $('#monthBar').innerHTML=ks.map(k=>{const s=stats(k),[y,m]=k.split('-');return '<button type="button" data-month="'+k+'" aria-pressed="'+(k===curKey)+'" aria-label="'+keyLabel(k)+': '+(s.status==='none'?'nothing recorded':STW[s.status])+'">'+MON[+m-1].slice(0,3)+'<small><i class="st st-'+s.status+'"></i>'+STW[s.status]+'</small></button>';}).join('');}
+  $('#monthBar').innerHTML=ks.map(k=>{const s=stats(k),[y,m]=k.split('-');return '<button type="button" data-month="'+k+'" aria-pressed="'+(k===curKey)+'" aria-label="'+keyLabel(k)+': '+(s.status==='none'?'nothing recorded':stw(s))+'">'+MON[+m-1].slice(0,3)+'<small><i class="st st-'+s.status+'"></i>'+stw(s)+'</small></button>';}).join('');}
 function renderMonth(){if(!yearKeys(setupYear()).includes(curKey))curKey=defaultKey();
   const filled=fillMonth(curKey);const m=month(curKey);
   renderMonthBar();
@@ -1552,9 +1582,10 @@ function renderDays(){const m=month(curKey),[y,mo]=curKey.split('-').map(Number)
 function dayTotals(){const s=stats(curKey);$('#dayCount').textContent=s.daysServed+' day'+(s.daysServed===1?'':'s')+' served, '+hrs(s.rbtMin)+' RBT hours'+(s.plannedMin>s.rbtMin?' so far ('+hrs(s.plannedMin)+' with the planned days)':'');}
 function cSummary(c,k){const sp=supById(c.sup),mi=cMin(c),is=cIssues(c,k),sc=c.obs==='yes'?ckScore(c):null,mo=modeOf(c.mode);
   return '<b>'+(c.date?wdOf(c.date)+' '+md(c.date):'No date')+'</b><span>'+(mi!=null?mi+' min':'— min')+'</span><span>'+esc(sp?sp.name||'(no name)':'no supervisor')+'</span>'+
-    '<span class="rs-pill">'+(c.format==='group'?'Small group'+(num(c.group)?' of '+num(c.group):''):'Individual')+'</span>'+(mo?'<span class="rs-pill'+(mo[2]?'':' warn')+'">'+esc(mo[1].replace(/ \(does not count\)/,''))+'</span>':'')+
+    '<span class="rs-pill">'+(c.format==='group'?'Small group'+(num(c.group)?' of '+num(c.group):''):'Individual')+'</span>'+(mo?'<span class="rs-pill'+(mo[2]?'':' note')+'">'+esc(mo[1].replace(/ \(does not count\)/,''))+'</span>':'')+
     (c.obs==='yes'?'<span class="rs-pill obs">Observed with client'+(sc?' · '+Math.round(sc.pct)+'%':'')+'</span>':'')+(cPlanned(c)?'<span class="rs-pill">planned</span>':'')+
-    (is.some(i=>i.lvl==='fail')?'<span class="rs-pill warn">does not count</span>':'');}
+    (is.some(i=>i.lvl==='fail')?'<span class="rs-pill warn">does not count</span>':is.some(i=>i.lvl==='note')?'<span class="rs-pill note">noted, not counted</span>':'')+
+    (is.some(i=>i.lvl==='ask')?'<span class="rs-pill ask">observation not answered</span>':'');}   /* v24.29 */
 function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Number),mn=iso(y,mo,1),mx=iso(y,mo,lastDay(y,mo)),sups=S.sups.filter(s=>s.name||s.cred);
   m.contacts.sort((a,b)=>String(a.date||'9').localeCompare(String(b.date||'9'))||String(a.start).localeCompare(String(b.start)));
   $('#contactList').innerHTML=m.contacts.map((c,i)=>{const id=esc(c.id),F=f=>'c_'+id+'_'+f,is=cIssues(c,curKey);
@@ -1577,9 +1608,7 @@ function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Num
       '<span class="lbl">How it was taught (behavior skills training)</span><div class="rs-chips">'+BST.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('b'+j)+'" data-c="'+id+'" data-arr="bst" value="'+esc(t)+'"'+((c.bst||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
       '<div class="two"><div class="field"><label for="'+F('feedback')+'">Feedback given</label><textarea id="'+F('feedback')+'" data-c="'+id+'" data-f="feedback" rows="3" placeholder="what went well, one thing to change, and how">'+esc(c.feedback)+'</textarea></div>'+
       '<div class="field"><label for="'+F('follow')+'">The RBT&rsquo;s follow-up or goal for next time</label><textarea id="'+F('follow')+'" data-c="'+id+'" data-f="follow" rows="3" placeholder="what the RBT practises before the next contact">'+esc(c.follow)+'</textarea></div></div>'+
-      rdBlock(c,id)+'<div class="rs-ck" data-ckbox="'+id+'"'+(c.obs==='yes'?'':' hidden')+'><h4><span>Observation checklist (optional)</span><span id="'+F('score')+'">'+ckText(c)+'</span></h4>'+
-        CHECK.map((t,j)=>{const v=(c.ck||{})[j]||'',nm='ck_'+id+'_'+j;return '<div class="rs-ckrow"><span class="t" id="'+nm+'_t">'+(j+1)+'. '+t+'</span><span class="yn" role="radiogroup" aria-labelledby="'+nm+'_t">'+
-          [['y','Yes'],['n','No'],['na','N/A']].map(([v2,l])=>'<label class="'+v2+'"><input type="radio" name="'+nm+'" id="'+nm+'_'+v2+'" data-c="'+id+'" data-ck="'+j+'" value="'+v2+'"'+(v===v2?' checked':'')+'>'+l+'</label>').join('')+'</span></div>';}).join('')+'</div>'+
+      rdBlock(c,id)+ckBlock(c,id)+
       '<div class="rs-cfoot"><span class="hint" id="'+F('issues')+'">'+issuesText(is,c)+'</span><button class="tool" type="button" data-cdel="'+id+'">Delete this contact</button></div>'+
     '</div></details>';}).join('')||'<p class="hint">No contacts recorded for '+keyLabel(curKey)+' yet.</p>';
   $('#contactCount').textContent=m.contacts.length?m.contacts.length+' contact'+(m.contacts.length===1?'':'s')+' this month':'';}
@@ -1588,7 +1617,7 @@ const LENS=[30,45,60,90,120];
 const lenLab=n=>n<60?n+' min':n%60?Math.floor(n/60)+'\u00bd h':(n/60)+' h';
 function lenTxt(c){const m=cMin(c);return m==null?'':m+' min ('+hrs(m)+' h)';}
 function ckText(c){const s=ckScore(c);return s?Math.round(s.pct)+'% ('+s.y+' of '+(s.y+s.n)+' scored'+(s.na?', '+s.na+' N/A':'')+')':'not scored';}
-function issuesText(is,c){return is.length?is.map(x=>(x.lvl==='fail'?'✕ ':'')+esc(x.t)).join(' · '):cPlanned(c)?'Planned: counts once the date has passed.':'Counts toward the month.';}
+function issuesText(is,c){return is.length?is.map(x=>(x.lvl==='fail'?'✕ ':x.lvl==='ask'?'• ':'')+esc(x.t)).join(' · '):cPlanned(c)?'Planned: counts once the date has passed.':'Counts toward the month.';}
 function refreshContact(c){const card=$('details.rs-contact[data-cid="'+c.id+'"]');if(!card)return;const is=cIssues(c,curKey);
   card.querySelector('summary').innerHTML=cSummary(c,curKey);card.classList.toggle('bad',is.some(x=>x.lvl==='fail'));
   const g=card.querySelector('[data-grp]');if(g)g.hidden=c.format!=='group';const ck=card.querySelector('[data-ckbox]');if(ck)ck.hidden=c.obs!=='yes';
@@ -1606,13 +1635,15 @@ function renderComp(){const s=stats(curKey),P=rule('pct');
     '<table aria-label="Monthly totals"><tbody>'+
       '<tr><td>Days the RBT provided services</td><td class="n" id="tDays">'+s.daysServed+'</td></tr>'+
       '<tr><td>Real-time (face-to-face) contacts</td><td class="n" id="tContacts">'+s.cnt.length+'</td></tr>'+
+      (s.badMode?'<tr><td>Noted, not counted (phone, email, recording, monitoring)</td><td class="n" id="tNoted">'+s.badMode+'</td></tr>':'')+
       '<tr><td>Observations with a client</td><td class="n" id="tObs">'+s.obs+'</td></tr>'+
       '<tr><td>Total RBT hours</td><td class="n" id="tRbt">'+hrs(s.rbtMin)+'</td></tr>'+
       '<tr><td>Supervision hours</td><td class="n" id="tSup">'+hrs(s.supMin)+'</td></tr>'+
       '<tr><td>Percent supervised (minimum '+P+'%)</td><td class="n" id="tPct">'+pctTxt(s.pct)+'</td></tr>'+
-      (s.ck!=null?'<tr><td>Observation checklist, average</td><td class="n">'+Math.round(s.ck)+'%</td></tr>':'')+
-    '</tbody></table><div class="fine">Amber: not yet, the month is still open. Red: not met after the month ended, or a contact that cannot count. Check against the current BACB RBT Handbook (updated 06/2026).</div></div>';
-  const b=$('#monthBar button[data-month="'+curKey+'"]');if(b){b.querySelector('small').innerHTML='<i class="st st-'+s.status+'"></i>'+STW[s.status];}}
+      (s.ck!=null?'<tr><td>Checklist average (the observation list, or the plan\u2019s integrity items)</td><td class="n">'+Math.round(s.ck)+'%</td></tr>':'')+
+    '</tbody></table><div class="fine">Amber: not yet, the month is still open. Red: not met after the month ended. A contact by phone, email, recording or monitoring is noted on the record and never counted; it does not fail the month. Check against the current BACB RBT Handbook (updated 06/2026).</div></div>';
+  const b=$('#monthBar button[data-month="'+curKey+'"]');if(b){b.querySelector('small').innerHTML='<i class="st st-'+s.status+'"></i>'+stw(s);}
+  try{renderWho();}catch(e){}}   /* v24.29 (R-027) the Every supervisee table follows the month block */
 
 /* ---------------- the year ---------------- */
 function renderYear(){const y=setupYear(),ks=yearKeys(y),A=ks.map(stats);
@@ -1704,7 +1735,7 @@ function renderConcernOut(){$('#concernOut').innerHTML='<div class="p-inner"><di
 function headHTML(k){const st=S.setup,sp=S.sups.filter(s=>s.name&&isSupRole(s)),rc=S.sups.filter(s=>s.name&&isRC(s));
   return '<div class="p-head"><div><b>Supervisee</b>'+esc(st.rbt_name||'')+(st.rbt_cred?', '+esc(st.rbt_cred):'')+'</div><div><b>BACB no.</b>'+esc(st.rbt_cert||'')+'</div><div><b>Expires</b>'+esc(mdy(st.rbt_exp))+'</div>'+
     '<div><b>Employer</b>'+esc(st.employer||'')+'</div><div><b>Site</b>'+esc(st.site||'')+'</div><div><b>'+(k?'Month':'School year')+'</b>'+(k?keyLabel(k):setupYear()+'–'+(setupYear()+1))+'</div>'+
-    '<div style="grid-column:1/-1"><b>RBT Supervisors</b>'+(sp.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')+(s.cert?' ('+esc(s.cert)+')':'')+(s.trained==='yes'?', supervisor training'+(s.trained_date?' '+esc(mdy(s.trained_date)):''):'')).join('; ')||'')+(rc.length?' &nbsp; <b>Requirements Coordinator</b>'+rc.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')).join('; '):'')+'</div>'+
+    '<div style="grid-column:1/-1"><b>RBT Supervisors</b>'+(sp.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')+(s.cert?' ('+esc(s.cert)+')':'')+(s.trained==='yes'?', supervisor training'+(s.trained_date?' '+esc(mdy(s.trained_date)):''):'')+(s.cred==='BCaBA'&&s.bcba?', supervised by '+esc(s.bcba):'')).join('; ')||'')+(rc.length?' &nbsp; <b>Requirements Coordinator</b>'+rc.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')).join('; '):'')+'</div>'+
     '<div style="grid-column:1/-1"><b>Client codes</b>'+esc(clientCodes().join(', '))+'</div></div>';}
 const okTxt=s=>s==='ok'?'<span class="p-ok">✓ met</span>':s==='fail'?'<span class="p-no">✕ not met</span>':s==='pending'?'<span class="p-mid">not yet</span>':'—';
 function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today=todayISO();
@@ -1717,7 +1748,7 @@ function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today
       '<tr><td colspan="3"><b>'+s.daysServed+' day'+(s.daysServed===1?'':'s')+' of service</b></td><td class="n"><b>'+hrs(s.rbtMin)+'</b></td><td></td></tr></tbody></table>':'<p class="p-empty">No service days recorded.</p>')+
     '<h4>Supervision contacts</h4>'+(C.length?'<table class="p-t"><thead><tr><th style="width:11%">Date</th><th style="width:13%">Time</th><th style="width:6%">Min</th><th style="width:17%">Supervisor</th><th style="width:13%">Format and mode</th><th style="width:9%">Observed with client</th><th>Activities, content, method</th><th style="width:8%">Checklist</th></tr></thead><tbody>'+
       C.map(x=>{const c=x.c,sp=supById(c.sup),mo=modeOf(c.mode),sc=c.obs==='yes'?ckScore(c):null;return '<tr><td>'+esc(mdy(c.date))+'</td><td>'+esc(fmtHM(c.start))+(c.end?'–'+esc(fmtHM(c.end)):'')+'</td><td class="n">'+(x.min==null?'—':x.min)+'</td><td>'+esc(supLabel(sp))+'</td><td>'+(c.format==='group'?'Small group'+(num(c.group)?' ('+num(c.group)+' RBTs)':''):'Individual')+'; '+esc(mo?mo[1]:'')+'</td><td>'+(c.obs==='yes'?'Yes'+(c.client?', '+esc(c.client):''):c.obs==='no'?'No':'')+'</td><td>'+esc((c.sact||[]).join('; '))+((c.sact||[]).length&&(c.acts||[]).length?'<br>':'')+esc((c.acts||[]).join('; '))+((c.bst||[]).length?'<br><i>'+esc(c.bst.join(', '))+'</i>':'')+'</td><td class="n">'+(sc?Math.round(sc.pct)+'%':'—')+'</td></tr>'+
-        ((c.feedback||c.follow||!x.counts)?'<tr class="sub"><td colspan="8">'+(c.feedback?'<b>Feedback:</b> '+esc(c.feedback)+' ':'')+(c.follow?'<b>Next:</b> '+esc(c.follow)+' ':'')+(!x.counts?'<b class="p-no">Not counted:</b> '+esc(x.is.map(i=>i.t).join('; ')||'planned'):'')+'</td></tr>':'')+rdRow(c);}).join('')+'</tbody></table>':'<p class="p-empty">No supervision contacts recorded.</p>')+
+        ((c.feedback||c.follow||!x.counts)?'<tr class="sub"><td colspan="8">'+(c.feedback?'<b>Feedback:</b> '+esc(c.feedback)+' ':'')+(c.follow?'<b>Next:</b> '+esc(c.follow)+' ':'')+(!x.counts?((x.is.length&&x.is.every(i=>i.lvl==='note'||i.lvl==='ask'))?'<b>Noted, not counted:</b> ':'<b class="p-no">Not counted:</b> ')+esc(x.is.filter(i=>i.lvl!=='ask').map(i=>i.t).join('; ')||'planned'):'')+'</td></tr>':'')+rdRow(c);}).join('')+'</tbody></table>':'<p class="p-empty">No supervision contacts recorded.</p>')+
     '<div class="p-keep"><h4>Totals and compliance</h4><div class="p-two"><table class="p-t"><tbody>'+
       '<tr><td>Days the RBT provided services</td><td class="n">'+s.daysServed+'</td></tr><tr><td>Real-time (face-to-face) contacts</td><td class="n">'+s.cnt.length+'</td></tr><tr><td>Observations with a client</td><td class="n">'+s.obs+'</td></tr>'+
       '<tr><td>Total RBT hours</td><td class="n">'+hrs(s.rbtMin)+'</td></tr><tr><td>Supervision hours</td><td class="n">'+hrs(s.supMin)+'</td></tr><tr><td><b>Percent supervised (minimum '+rule('pct')+'%)</b></td><td class="n"><b>'+pctTxt(s.pct)+'</b></td></tr></tbody></table>'+
@@ -1825,7 +1856,7 @@ function onField(el,ev){
     else{const h=$('#h_'+d.id);if(h)h.textContent=d.none?'0':hrs(dayMin(d));dayTotals();}renderComp();return;}
   if(el.dataset.c!==undefined){const c=findC(el.dataset.c);if(!c)return;
     if(el.dataset.arr){const a=new Set(c[el.dataset.arr]||[]);el.checked?a.add(el.value):a.delete(el.value);c[el.dataset.arr]=({acts:TCO,bst:BST,sact:SACT}[el.dataset.arr]||[]).filter(x=>a.has(x));}
-    else if(el.dataset.ck!==undefined){if(!c.ck)c.ck={};c.ck[el.dataset.ck]=el.value;}
+    else if(el.dataset.ck!==undefined){if(c.ckSrc==='plan'){if(!c.ckp)c.ckp={};c.ckp[el.dataset.ck]=el.value;}else{if(!c.ck)c.ck={};c.ck[el.dataset.ck]=el.value;}}   /* v24.29 */
     else c[el.dataset.f]=v;
     if(ev==='change'&&el.dataset.f==='date'&&moveTo('contacts',c))return;
     refreshContact(c);renderComp();return;}
@@ -1842,7 +1873,13 @@ document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset)ret
 document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.matches&&d.matches('details.rs-contact')){d.open?openC.add(d.dataset.cid):openC.delete(d.dataset.cid);}},true);
 document.addEventListener('click',e=>{
   const mb=e.target.closest('#monthBar button[data-month]');if(mb){curKey=mb.dataset.month;renderMonth();renderWho();return;}
-  const wr=e.target.closest('tr[data-rbt]');if(wr){pickRbt(+wr.dataset.rbt);return;}
+  const wr=e.target.closest('[data-rbt]');if(wr){pickRbt(+wr.dataset.rbt);return;}
+  /* v24.29 (E-03) which checklist a contact scores */
+  const cs=e.target.closest('button[data-cksrc]');if(cs){const c=findC(cs.dataset.lc);if(!c)return;
+    if(cs.dataset.cksrc==='plan'){const pl=rsPlanFor(c);if(pl){c.ckItems=pl.checklist.map(x=>({t:String(x&&x.t||'').slice(0,400),crit:!!(x&&x.crit),comp:String(x&&x.comp||'').slice(0,40)})).filter(x=>x.t);c.ckPlanSrc=(pl.beh?'the plan for '+String(pl.beh).slice(0,80):'the plan')+(window.__rsCase&&window.__rsCase.student&&window.__rsCase.student.id?', '+String(window.__rsCase.student.id):'');}
+      if(!c.ckItems||!c.ckItems.length)return;c.ckSrc='plan';}
+    else c.ckSrc='';
+    renderContacts();renderComp();changed();return;}
   const go=e.target.closest('[data-go]');if(go){setView(go.dataset.go);return;}
   const tr=e.target.closest('tr[data-open-month]');if(tr){curKey=tr.dataset.openMonth;setView('month');return;}
   const cd=e.target.closest('button[data-cdel]');if(cd){delContact(cd.dataset.cdel);return;}
@@ -1887,9 +1924,9 @@ function addContact(like){const m=month(curKey),t=todayISO(),sp=S.sups.find(s=>s
   const c={id:uid(),date:keyOf(t)===curKey?t:'',start:'',end:'',sup:sp?sp.id:'',format:'indiv',group:'',mode:'person',obs:'',client:clientCodes()[0]||'',acts:[],bst:[],sact:[],feedback:'',follow:'',ck:{}};
   /* like the last one: the same supervisor, format, way, observation, client and boxes ticked;
      the date, the times, the feedback and the checklist are the new contact's own */
-  if(like){['sup','format','group','mode','obs','client'].forEach(k=>{c[k]=like[k]||c[k];});['sact','acts','bst'].forEach(k=>{c[k]=(like[k]||[]).slice();});}
+  if(like){['sup','format','group','mode','client'].forEach(k=>{c[k]=like[k]||c[k];});['sact','acts','bst'].forEach(k=>{c[k]=(like[k]||[]).slice();});}   /* v24.29 (R-118) the observation answer is this contact's own */
   m.contacts.push(c);openC.add(c.id);renderContacts();renderComp();changed();const e=$('#c_'+c.id+'_date');if(e){e.scrollIntoView({block:'center'});if(!c.date)e.focus();else{const s=$('#c_'+c.id+'_start');if(s)s.focus();}}
-  if(like)nbhUI.toast('A new contact like the one of '+(like.date?mdy(like.date):'(no date)')+': the supervisor, format, client and boxes ticked are copied. Enter the date, the times and the feedback.');}
+  if(like)nbhUI.toast('A new contact like the one of '+(like.date?mdy(like.date):'(no date)')+': the supervisor, format, client and boxes ticked are copied; whether the RBT was observed with a client is asked again. Enter the date, the times, the observation answer and the feedback.');}
 $('#addContact').addEventListener('click',()=>addContact(null));
 $('#addLike').addEventListener('click',()=>{const L=lastContact();if(!L){nbhUI.toast('No contact recorded yet for this RBT; use Add a contact.',{kind:'warn'});return;}addContact(L);});
 $('#addSup').addEventListener('click',()=>{if(S.sups.length>=12)return;const n=newSup();S.sups.push(n);renderSups();const r=$('#sup_'+n.id+'_name');if(r)r.focus();changed();});
@@ -1907,12 +1944,12 @@ window.addEventListener('resize',stickTop);
 /* the switcher at the top of every page: each supervisee with the month on screen; with more than one, a table of them all */
 function renderWho(){const k=curKey||defaultKey(),i0=R.indexOf(S);
   const rows=eachRbt((r,i)=>{const s=stats(k);return {i,name:rbtName(r)||'(new RBT, no name yet)',s,exp:r.setup.rbt_exp,d:daysUntil(r.setup.rbt_exp)};});
-  $('#rbtSel').innerHTML=rows.map(x=>'<option value="'+x.i+'"'+(x.i===i0?' selected':'')+'>'+esc(x.name)+(R.length>1?' \u2014 '+keyLabel(k)+': '+STW[x.s.status]:'')+'</option>').join('');
+  $('#rbtSel').innerHTML=rows.map(x=>'<option value="'+x.i+'"'+(x.i===i0?' selected':'')+'>'+esc(x.name)+(R.length>1?' \u2014 '+keyLabel(k)+': '+stw(x.s):'')+'</option>').join('');
   $('#rbtCount').textContent=R.length===1?'1 supervisee in this file':R.length+' supervisees in this file';
   $('#delRbt').disabled=R.length<2;$('#addRbt').disabled=R.length>=RMAX;
   const w=$('#rbtAll');w.hidden=R.length<2;if(R.length<2){w.innerHTML='';return;}
-  w.innerHTML='<table class="rs-who-t"><caption>Every supervisee, '+esc(keyLabel(k))+'</caption><thead><tr><th>RBT</th><th>% supervised</th><th>Contacts that count</th><th>Observed with client</th><th>This month</th><th>Certification expires</th></tr></thead><tbody>'+
-    rows.map(x=>'<tr class="open'+(x.i===i0?' cur':'')+'" data-rbt="'+x.i+'" tabindex="0" role="button" aria-label="Show '+esc(x.name)+'"><td>'+esc(x.name)+'</td><td>'+(x.s.hasService?pctTxt(x.s.pct):'—')+'</td><td>'+x.s.cnt.length+' of '+rule('contacts')+'</td><td>'+x.s.obs+'</td><td><span class="rs-wst rs-wst-'+x.s.status+'">'+STW[x.s.status]+'</span></td><td>'+(x.exp?esc(mdy(x.exp))+(x.d!=null&&x.d>=0&&x.d<=rule('remind2')?' ('+x.d+' days)':x.d!=null&&x.d<0?' (expired)':''):'—')+'</td></tr>').join('')+'</tbody></table>';}
+  w.innerHTML='<table class="rs-who-t"><caption>Every supervisee, '+esc(keyLabel(k))+'</caption><thead><tr><th>RBT</th><th>% supervised</th><th>Contacts that count</th><th>Observed with client</th><th>This month</th><th>Still needed this month</th><th>Certification expires</th></tr></thead><tbody>'+
+    rows.map(x=>'<tr class="open'+(x.i===i0?' cur':'')+'"><td><button type="button" class="rs-who-btn" data-rbt="'+x.i+'" aria-label="Show '+esc(x.name)+'"'+(x.i===i0?' aria-current="true"':'')+'>'+esc(x.name)+'</button></td><td>'+(x.s.hasService?pctTxt(x.s.pct):'—')+'</td><td>'+cntTxt(x.s)+'</td><td>'+x.s.obs+'</td><td><span class="rs-wst rs-wst-'+x.s.status+'">'+stw(x.s)+'</span></td><td class="rs-need">'+esc(needTxt(x.s))+'</td><td>'+(x.exp?esc(mdy(x.exp))+(x.d!=null&&x.d>=0&&x.d<=rule('remind2')?' ('+x.d+' days)':x.d!=null&&x.d<0?' (expired)':''):'—')+'</td></tr>').join('')+'</tbody></table>';}
 function pickRbt(i){if(!R[i]||R[i]===S)return;S=R[i];openC=new Set();renderAll();}
 $('#rbtSel').addEventListener('change',e=>pickRbt(+e.target.value));
 document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const tr=e.target.closest&&e.target.closest('tr[data-rbt]');if(tr)pickRbt(+tr.dataset.rbt);});
@@ -1952,11 +1989,25 @@ window.addEventListener('beforeprint',()=>{try{renderPrint();}catch(e){}});
 /* the workstation's printed packet takes the two records, not the editing pages */
 window.nbhPrintNodes=function(){renderPrint();return [$('#monthOut'),$('#yearOut')];};
 
+/* v24.29 (E-03) the case in: the Form TD-1 plan (its checklist) and the student it names, for the contacts whose client code matches;
+   out: the plan checklists scored at observations, for TD-1's integrity log */
+window.__nbhFactsIn=function(f){f=f||{};const pl=f.plan&&typeof f.plan==='object'&&Array.isArray(f.plan.checklist)&&f.plan.checklist.length?f.plan:null;
+  window.__rsCase={plan:pl,student:f.student&&typeof f.student==='object'?f.student:null};try{renderContacts();}catch(e){}return null;};
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  const L=[];try{R.forEach(rb=>{Object.keys(rb.months||{}).forEach(k=>{(rb.months[k].contacts||[]).forEach(c=>{if(c.ckSrc!=='plan'||!c.date||c.obs!=='yes')return;const sc=ckScore(c);if(!sc)return;const items=ckItems(c),A=ckActive(c);
+    L.push({key:'rs1:'+c.id,date:c.date,client:String(c.client||''),rbt:rbtName(rb),sup:(supById(c.sup)||{}).name||'',y:sc.y,n:sc.n,na:sc.na,pct:Math.round(sc.pct),items:items.map((it,j)=>({t:it.t,v:A[j]||''})),src:'RS-1'});});});});}catch(e){}
+  return L.length?Object.assign({},r||{},{supervision:{form:'RS-1',integrityObs:L}}):r;};}
 /* ---------------- Save data / Open data (the form's own file; the workstation's case file carries the same) ---------------- */
 $('#saveBtn').addEventListener('click',()=>{
   const nm=R.length>1?R.length+'_RBTs':String(S.setup.rbt_name||'RBT').replace(/[^\w-]+/g,'_');const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([(tidy(),JSON.stringify(saveObj(),null,1))],{type:'application/json'}));
   a.download='RS-1_'+nm+'_'+todayISO()+'.json';document.body.appendChild(a);a.click();a.remove();});
+/* v24.29 (R-117) the same file with every supervisee's concerns left out */
+$('#saveNoConcernsBtn').addEventListener('click',()=>{
+  tidy();const o=JSON.parse(JSON.stringify(saveObj()));const strip=x=>{if(x&&typeof x==='object')x.concerns=[];return x;};strip(o.S);if(Array.isArray(o.rbts))o.rbts.forEach(strip);o.noConcerns=true;
+  const nm=R.length>1?R.length+'_RBTs':String(S.setup.rbt_name||'RBT').replace(/[^\w-]+/g,'_');const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,1)],{type:'application/json'}));a.download='RS-1_'+nm+'_'+todayISO()+'_no-concerns.json';document.body.appendChild(a);a.click();a.remove();
+  nbhUI.toast('Saved without the concerns: '+R.length+' supervisee'+(R.length===1?'':'s')+', no Concerns and Corrective Action entries. The full record stays in this form and in Save data.',{kind:'ok'});});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 /* the file: S is the supervisee on screen, with the shared supervisors and rules (a file with one RBT is written as before,
    and an older copy of the form opens S); with more than one, rbts holds every supervisee and cur the one on screen */
@@ -1978,14 +2029,16 @@ function fromFile(d){
   const su=obj(s.setup);Object.keys(su).forEach(k=>{if(k!=='days')o.setup[k]=str(su[k]);});o.setup.days=arr(su.days).map(Number).filter(n=>n>=0&&n<=6);
   ['rbt_orig','rbt_exp','sup_start'].forEach(k=>{if(k in su)o.setup[k]=isoS(su[k]);});['day_start','day_end'].forEach(k=>{if(k in su)o.setup[k]=hm(su[k]);});
   const yn=v=>v==='yes'||v==='no'?v:'';
-  o.sups=arr(s.sups).slice(0,12).map(x=>{x=obj(x);return {id:str(x.id)||uid(),name:str(x.name),cred:CREDS.includes(x.cred)?x.cred:'',cert:str(x.cert),role:ROLES.includes(x.role)?x.role:'',trained:yn(x.trained),trained_date:isoS(x.trained_date),portal:yn(x.portal),norel:!!x.norel,oversight:OVERS.some(o=>o[0]===x.oversight)?x.oversight:'',oversight_note:str(x.oversight_note)};});if(!o.sups.length)o.sups=blank().sups;
+  o.sups=arr(s.sups).slice(0,12).map(x=>{x=obj(x);return {id:str(x.id)||uid(),name:str(x.name),cred:CREDS.includes(x.cred)?x.cred:'',cert:str(x.cert),role:ROLES.includes(x.role)?x.role:'',trained:yn(x.trained),trained_date:isoS(x.trained_date),portal:yn(x.portal),norel:!!x.norel,bcba:str(x.bcba),oversight:OVERS.some(o=>o[0]===x.oversight)?x.oversight:'',oversight_note:str(x.oversight_note)};});if(!o.sups.length)o.sups=blank().sups;
+  o.sups.forEach(x=>{if(!x.bcba)delete x.bcba;});   /* v24.29 the key only when it holds something: a file reads back equal to what was saved */
   const ru=obj(s.rules);Object.keys(RULES0).forEach(k=>{if(ru[k]!=null&&ru[k]!=='')o.rules[k]=str(ru[k]);});
   const ms=obj(s.months);Object.keys(ms).filter(k=>/^\d{4}-\d{2}$/.test(k)).slice(0,240).forEach(k=>{const m=obj(ms[k]),sg=obj(m.sig);
     o.months[k]={filled:!!m.filled,note:str(m.note),records:str(m.records),noservice:!!m.noservice,
       days:arr(m.days).slice(0,62).map(x=>({id:str(x&&x.id)||uid(),date:isoS(x&&x.date),start:hm(x&&x.start),end:hm(x&&x.end),brk:str(x&&x.brk),act:ACTS.includes(x&&x.act)?x.act:'',none:!!(x&&x.none)})),
       contacts:arr(m.contacts).slice(0,60).map(x=>{x=obj(x);const ck={};Object.keys(obj(x.ck)).forEach(i=>{if(+i>=0&&+i<CHECK.length&&['y','n','na'].includes(x.ck[i]))ck[+i]=x.ck[i];});
+        const ckItems=arr(x.ckItems).slice(0,120).map(it=>({t:str(it&&it.t).slice(0,400),crit:!!(it&&it.crit),comp:str(it&&it.comp).slice(0,40)})).filter(it=>it.t);const ckp={};Object.keys(obj(x.ckp)).forEach(i=>{if(+i>=0&&+i<ckItems.length&&['y','n','na'].includes(x.ckp[i]))ckp[+i]=x.ckp[i];});   /* v24.29 */
         return {id:str(x.id)||uid(),date:isoS(x.date),start:hm(x.start),end:hm(x.end),sup:str(x.sup),format:x.format==='group'?'group':'indiv',group:str(x.group),mode:modeOf(x.mode)?x.mode:'',obs:['yes','no'].includes(x.obs)?x.obs:'',client:str(x.client),
-          acts:TCO.filter(t=>arr(x.acts).includes(t)),sact:SACT.filter(t=>arr(x.sact).includes(t)),bst:BST.filter(t=>arr(x.bst).includes(t)),feedback:str(x.feedback),follow:str(x.follow),ck};}),
+          acts:TCO.filter(t=>arr(x.acts).includes(t)),sact:SACT.filter(t=>arr(x.sact).includes(t)),bst:BST.filter(t=>arr(x.bst).includes(t)),feedback:str(x.feedback),follow:str(x.follow),ck,ckp,ckItems,ckSrc:x.ckSrc==='plan'&&ckItems.length?'plan':'',ckPlanSrc:str(x.ckPlanSrc).slice(0,160)};}).map(c=>{if(!c.ckItems.length){delete c.ckItems;delete c.ckSrc;delete c.ckPlanSrc;}if(!Object.keys(c.ckp).length)delete c.ckp;return c;}),
       sig:{sup_name:str(sg.sup_name),sup_date:isoS(sg.sup_date),rbt_name:str(sg.rbt_name),rbt_date:isoS(sg.rbt_date),...(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(String(sg.sup_img||''))&&String(sg.sup_img).length<400000?{sup_img:sg.sup_img}:{}),...(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(String(sg.rbt_img||''))&&String(sg.rbt_img).length<400000?{rbt_img:sg.rbt_img}:{})}};
     if(!o.months[k].sig.sup_img)delete o.months[k].sig.sup_img;if(!o.months[k].sig.rbt_img)delete o.months[k].sig.rbt_img;});
   o.goals=arr(s.goals).slice(0,30).map(x=>({id:str(x&&x.id)||uid(),goal:str(x&&x.goal),set:isoS(x&&x.set),target:isoS(x&&x.target),status:GSTAT.includes(x&&x.status)?x.status:'Not started',notes:str(x&&x.notes)}));
@@ -2024,7 +2077,7 @@ async function loadSim(){
   const now=new Date(),y=schoolYearOf(now),add=(dt,n)=>{const x=new Date(dt);x.setDate(x.getDate()+n);return x;};
   resetAll();openC=new Set();
   const A={id:'simA',name:'Simulated BCBA',cred:'BCBA',cert:'1-00-00000',role:'RBT Supervisor and Requirements Coordinator',trained:'yes',trained_date:isoOf(add(now,-420)),portal:'yes',norel:true,oversight:'employed',oversight_note:'both employed by the simulated district'},
-    B={id:'simB',name:'Simulated BCaBA',cred:'BCaBA',cert:'0-00-00000',role:'RBT Supervisor',trained:'yes',trained_date:isoOf(add(now,-380)),portal:'no',norel:true,oversight:'employed',oversight_note:'both employed by the simulated district'};
+    B={id:'simB',name:'Simulated BCaBA',cred:'BCaBA',cert:'0-00-00000',role:'RBT Supervisor',trained:'yes',trained_date:isoOf(add(now,-380)),portal:'no',norel:true,oversight:'employed',oversight_note:'both employed by the simulated district',bcba:'Simulated BCBA, 1-00-00000'};   /* v24.29 (R-147) */
   S.sups=[A,B];
   S.setup={rbt_name:'Jordan Lee (simulated)',rbt_cred:'RBT',rbt_cert:'RBT-00-000000',rbt_orig:isoOf(add(now,-325)),rbt_exp:isoOf(add(now,40)),path:'renewal',employer:'Simulated School District',site:'Simulated Elementary',clients:'SIM-0002, SIM-0005',year:String(y),days:[1,2,3,4,5],day_start:'08:30',day_end:'14:30',day_break:'30',day_act:'Behavior reduction / BIP implementation'};
   const ACT2=['Behavior reduction / BIP implementation','Discrete-trial teaching','Data collection','Natural-environment teaching','Skill acquisition program'];
@@ -2276,6 +2329,7 @@ window.__nbhDue=function(){const out=[];
      name on the bar, so a form left over from another student is caught before
      it reaches a printed packet. Same selectors the packet applier uses. */
   function who(){
+    var rb = document.getElementById('sName'); if (rb && String(rb.value || '').trim()) return 'RBT ' + String(rb.value).trim();   /* v24.29 (R-149) a personnel record: the RBT's name */
     var sels = ['[data-m="client"]','[name="m.client"]','[name="s_name"]','[data-meta="client"]',
       '#m_client','#mClient','[name="h-client"]','[name="h.client"]','[name="c.client"]',
       '[name="student"]','[name="s.student"]','#h-client','#hClient','#cClient','#sClient',
@@ -3346,7 +3400,10 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 (function(){
 const $=s=>document.querySelector(s);const n={req:0};
 function paperCss(){let out='';const walk=rules=>{for(const r of rules){if(r.media&&r.cssRules){if(!/print/i.test(r.media.mediaText))walk(r.cssRules);}else if(r.selectorText&&/^\.rs-paper/.test(r.selectorText))out+=r.cssText+'\n';}};try{for(const sh of document.styleSheets){let rules=[];try{rules=sh.cssRules||[];}catch(e){continue;}walk(rules);}}catch(e){}return out;} /* rs96: the screen block too, never the print one */
-function which(kind){const el=$(kind==='year'?'#yearOut':'#monthOut');try{renderPrint();}catch(e){}const inner=el?el.innerHTML.trim():'';return inner;}
+function which(kind){const el=$(kind==='year'?'#yearOut':'#monthOut');try{renderPrint();}catch(e){}const inner=el?el.innerHTML.trim():'';
+  /* v24.29 (E-41) the RBT's copy: this month's record and the goals; concerns are never part of it */
+  if(kind==='rbt'&&inner)return inner+'<div class="p-inner"><div class="p-keep"><h4>Goals</h4>'+(S.goals.length?'<table class="p-t"><thead><tr><th>Goal</th><th style="width:12%">Set</th><th style="width:12%">Target</th><th style="width:12%">Status</th></tr></thead><tbody>'+S.goals.map(g=>'<tr><td>'+esc(g.goal)+(g.notes?'<br><i>'+esc(g.notes)+'</i>':'')+'</td><td>'+esc(mdy(g.set))+'</td><td>'+esc(mdy(g.target))+'</td><td>'+esc(g.status||'')+'</td></tr>').join('')+'</tbody></table>':'<p class="p-empty">No goals recorded.</p>')+'</div></div>';
+  return inner;}
 function page(kind){let inner=which(kind);if(!inner)return null;const title=subject(kind);
   inner=inner.replace(/<table class="p-t"/g,'<table class="p-t" style="border-collapse:collapse;width:100%;margin:3px 0"').replace(/<(td|th)(\s[^>]*)?>/g,(m,t,a)=>'<'+t+(a||'')+' style="border:1px solid #999;padding:2px 5px;text-align:left;vertical-align:top;font-size:11.5px'+(t==='th'?';background:#eee;font-weight:600':'')+'">').replace(/<h4>/g,'<h4 style="font:600 12px sans-serif;text-transform:uppercase;letter-spacing:.04em;color:#333;margin:10px 0 3px;border-bottom:1px solid #999;padding-bottom:2px">').replace(/<div class="p-head"/,'<div class="p-head" style="border-top:1.5px solid #111;border-bottom:1.5px solid #111;padding:5px 0;margin:4px 0 8px;line-height:1.5"').replace(/<div><b>/g,'<div><b style="margin-right:6px;color:#444;font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em">').replace(/<div class="p-title"/,'<div class="p-title" style="font:700 18px Georgia,serif;margin:0 0 4px;color:#182e43"').replace(/<div class="sl"/g,'<div class="sl" style="min-height:42px;border-bottom:1px solid #111;margin-top:10px"');
   const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc(title)+'<\/title><style>body{margin:16px;font-family:-apple-system,Helvetica,Arial,sans-serif;color:#111}.rs-paper{max-width:760px}'+paperCss()+'<\/style><\/head><body><div class="rs-paper">'+inner+'<\/div><p style="font-size:11px;color:#555">Sent from the FBA and BIP Workstation, Form RS-1. The record is as it prints; concerns and corrective action are kept apart and are not part of it.<\/p><\/body><\/html>';
@@ -3354,7 +3411,7 @@ function page(kind){let inner=which(kind);if(!inner)return null;const title=subj
   return {title,html,text};}
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function rbt(){const e=$('#sName');return e&&e.value.trim()||'the RBT';}
-function subject(kind){const m=($('#monthTitle')||{}).textContent||'';const mon=m.replace(/:.*$/,'').trim();return kind==='year'?'RBT supervision, the year summary: '+rbt():'RBT supervision record, '+(mon||'this month')+': '+rbt();}
+function subject(kind){const m=($('#monthTitle')||{}).textContent||'';const mon=m.replace(/:.*$/,'').trim();return kind==='year'?'RBT supervision, the year summary: '+rbt():'RBT supervision record, '+(mon||'this month')+': '+rbt()+(kind==='rbt'?' (the RBT\u2019s copy)':'');}
 function say(t,kind){const el=$('#shNote');if(!el)return;el.textContent=t;el.style.color=kind==='warn'?'#8E2A2A':'';}
 function saveFile(kind){const pg=page(kind);if(!pg){say('Nothing to save yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return false;}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pg.html],{type:'text/html'}));a.download=(pg.title.replace(/[\\/:*?"<>|]+/g,' ').trim())+'.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);return true;}
@@ -3374,6 +3431,7 @@ function send(kind){const pg=page(kind);if(!pg){say('Nothing to send yet: the '+
   window.addEventListener('message',on);
   try{window.parent.postMessage({nbh:'mail',req,messages:L.map(m=>({to:m.to,name:m.name,subject:pg.title,text:noteText(pg),html:noteHtml(pg),attachments:[{name:fileName(pg),type:'text/html',b64:b64u(pg.html)}]}))},'*');}catch(e){window.removeEventListener('message',on);say('The workstation did not answer. The record is saved as a file to attach instead.','warn');saveFile(kind);}
   setTimeout(()=>{window.removeEventListener('message',on);if(($('#shNote')||{}).textContent==='Sending…')say('The workstation did not answer. The record is saved as a file to attach instead.','warn');},20000);}
+$('#shRbtCopy').addEventListener('click',()=>{if(saveFile('rbt'))say('The RBT\u2019s copy was saved: this month\u2019s record and the goals, no concerns.');});   /* v24.29 (E-41) */
 $('#shMonth').addEventListener('click',()=>send('month'));$('#shYear').addEventListener('click',()=>send('year'));$('#shFile').addEventListener('click',()=>{if(saveFile('month'))say('The month’s record is saved as a file: attach it to an email, or send it from a device where the workstation is signed in.');});
 window.__rsShare={page,recipients,subject,noteText,noteHtml,fileName};
 })();
