@@ -10588,6 +10588,23 @@ window.abcPrintRecord = function(){
   window.abcFold = { header:on => hdr && fold(hdr, hb, hs, on), timer:on => tmr && fold(tmr, tb, null, on) };
 })();
 </script>
+<script id="abc127-ob1">
+/* v24.27 (E-11, R-058) Form OB-1's narrative lines offered under From the case as coded incidents: the date and time, the observation's ticked
+   antecedents and consequences mapped to this form's codes, the line as the narrative, the case's target as the behavior; accepted by the analyst */
+window.__nbhFactsWants=(window.__nbhFactsWants||[]).concat(['ob1narr']);
+{const AM={demand:'a_gen',difficult:'a_difficult',attn:'a_div_att',denied:'a_denied',transition:'a_trans',unstruct:'a_wait',sensory:'a_noise',peer:'a_unwant_att',alone:'a_alone_nothing'};
+ const CM={redirect:'c_guided',reprimand:'c_reprimand',talk:'c_staff_att',escape:'c_dem_rem',attnGiven:'c_staff_att',item:'c_item',access:'c_item',removal:'c_removed',seclusion:'c_removed',restraint:'c_restraint',none:'c_no_att'};
+ const p0=window.__nbhFactsPick;window.__nbhFactsPick=function(sel){const r=(p0?p0.apply(this,arguments):null)||{filled:0};
+  const L=(sel&&sel.ob1narr)||[];if(!L.length)return r;const f=(sel&&sel.facts)||{},ob=(f.evidence&&f.evidence['OB-1'])||{};
+  const T=v=>String(v==null?'':v).trim();let beh=null;const nm=T(ob.beh).toLowerCase();
+  if(nm)beh=BEHAVIORS.find(b=>b.caseT&&T(b.label).toLowerCase()===nm);if(!beh)beh=BEHAVIORS.find(b=>b.caseT);
+  if(!beh&&nm&&typeof abcAddTargets==='function'){abcAddTargets([{label:T(ob.beh)}]);beh=BEHAVIORS.find(b=>b.caseT);}
+  let n=0;L.forEach(l=>{const key='ob1:'+T(l.date)+'|'+T(l.t)+'|'+T(l.w).slice(0,40);if(state.entries.some(e=>e.srcKey===key))return;
+    const a=[...new Set((l.anteKeys||[]).map(k=>AM[k]).filter(Boolean))],c=[...new Set((l.consKeys||[]).map(k=>CM[k]).filter(Boolean))];
+    state.entries.push({id:uid(),srcKey:key,mode:'both',date:T(l.date),time:T(l.t),duration:null,activity:'',staff:'',staffPresent:'yes',intensity:null,antecedents:a,antecedentOther:{},behaviors:beh?[beh.id]:[],behaviorOther:{},precursors:[],precursorOther:{},settingEvents:[],settingEventOther:{},consequences:c,consequenceOther:{},immediate:'',resolution:[],resolutionOther:{},narrative:T(l.w)+' (Form OB-1'+(T(l.date)?', '+T(l.date):'')+')'});n++;});
+  if(n){try{refreshAll();}catch(e){}r.filled=(r.filled||0)+n;r.note=(r.note?r.note+'; ':'')+n+' incident'+(n===1?'':'s')+' from Form OB-1\u2019s narrative, coded from its ticks';}
+  return r;};}
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

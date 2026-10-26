@@ -4071,9 +4071,19 @@ window.__nbhFactsIn=function(f){let n=0;
     S.stim[i].name=raT(m.name);if(!raT(S.stim[i].pa)&&m.rank)S.stim[i].pa=String(m.rank);if(!raT(S.stim[i].type)){const t=raType(m.type);if(t)S.stim[i].type=t;}n++;});
   const b=((f&&f.behaviors)||[]).find(x=>!(x.isRep||/replacement|alternative/i.test(x.type||''))&&raT(x.def||x.label));
   if(b&&!raT(S.meta.pbdef)){S.meta.pbdef=raT(b.label)+(raT(b.def)?': '+raT(b.def):'');n++;}
+  if(menu.length&&n&&!raT(S.meta.pasrc)){S.meta.pasrc='Form PA-1 reinforcer menu, as the case carries it; the ranks are PA-1\u2019s';}   /* v24.27 (R-017) */
   if(n){renderAll();}
   const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;
   return n?{filled:n+((g&&g.filled)||0),note:'the stimuli from Form PA-1 and the problem behavior from Form TB-1'}:g;};
+/* v24.27 (R-017, E-10) "Use the ticked items here": the ticked menu items fill the empty Stimuli Under Test rows (name, type, PA-1 rank) and
+   the Preference assessment source line; a row with a name is left alone */
+window.__nbhFactsPick=function(sel){let n=0;const items=((sel&&sel.menu)||[]).slice().sort((a,b)=>(+a.rank||99)-(+b.rank||99));
+  items.forEach(m=>{if(!raT(m.name)||S.stim.some(x=>raT(x.name).toLowerCase()===raT(m.name).toLowerCase()))return;const i=S.stim.findIndex(x=>!raT(x.name));if(i<0)return;
+    S.stim[i].name=raT(m.name);if(!raT(S.stim[i].pa)&&m.rank)S.stim[i].pa=String(m.rank)+(m.tier?' ('+m.tier+')':'');if(!raT(S.stim[i].type)){const t=raType(m.type);if(t)S.stim[i].type=t;}n++;});
+  if(items.length&&n&&!raT(S.meta.pasrc)){S.meta.pasrc='Form PA-1 reinforcer menu, as the case carries it; the ranks are PA-1\u2019s';n++;}
+  const g=window.nbhCase&&nbhCase.generic?nbhCase.generic({behaviors:(sel&&sel.behaviors)||[],fn:sel&&sel.fn},true):null;
+  if(n)renderAll();
+  return {filled:n+((g&&g.filled)||0),note:n?'the stimuli from Form PA-1 into the empty rows, with the source line':'every ticked stimulus is on the sheet already, or no row is free'};};
 /* v22.37 (review F135, F13) food items and the parent's decision. The case brings Form IC-1's food-item decision
    (Specific procedures B: Yes with the items approved, allergies or diet and limits; No; Not proposed) and the allergies
    in Form DM-1's health record; they go into Setup's empty Food items line, each marked with its source. Inside a case

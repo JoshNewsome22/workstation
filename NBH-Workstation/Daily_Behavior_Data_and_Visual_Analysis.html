@@ -12002,6 +12002,23 @@ document.addEventListener("click",e=>{const b=e.target&&e.target.closest&&e.targ
      const v=rows.map(r=>({d:r.date,v:plotValue(r,x)})).filter(p=>p.v!==null).slice(-30);if(v.length)b.series=v;});}catch(e){}
   return o;};})();
 </script>
+<script id="dd127-ob1">
+/* v24.27 (E-11, R-058) Form OB-1's observations offered under From the case as baseline rows: the date, the minutes observed and the count for
+   the behavior OB-1 names (or the first target), accepted by the analyst; nothing is written until a row is ticked and used */
+window.__nbhFactsWants=(window.__nbhFactsWants||[]).concat(['ob1obs']);
+{const p0=window.__nbhFactsPick;window.__nbhFactsPick=function(sel){const r=(p0?p0.apply(this,arguments):null)||{filled:0};
+  const L=(sel&&sel.ob1obs)||[];if(!L.length)return r;const f=(sel&&sel.facts)||{},ob=(f.evidence&&f.evidence['OB-1'])||{};
+  const k=nbhDdK(ob.beh||'');let b=k?S.behaviors.find(x=>nbhDdK(x.name)===k):null;if(!b)b=S.behaviors.find(x=>x.kind==='target'&&String(x.name||'').trim())||S.behaviors[0];
+  if(!b)return r;let n=0,made=0;const hadPhase=S.rows.some(x=>x.phaseType&&x.phaseType!=='none');
+  L.forEach(o=>{const d=String(o.date||'').trim();if(!d)return;let row=S.rows.find(x=>x.date===d);if(!row){row=newRow(d);S.rows.push(row);made++;}
+    if(!String(row.values[b.id]||'').trim()&&String(o.count||'').trim()!==''){row.values[b.id]=String(o.count);n++;}
+    if(!String(row.obsMin||'').trim()&&String(o.mins||'').trim()!=='')row.obsMin=String(o.mins);
+    if(!row.notes)row.notes='From Form OB-1'+(o.activity?': '+o.activity:'');});
+  if(made&&!hadPhase){const first=S.rows.filter(x=>L.some(o=>o.date===x.date)).sort((a,c)=>String(a.date).localeCompare(String(c.date)))[0];if(first){first.phaseType='full';first.phaseLabel=S.meta.baseline||'Baseline';}}
+  S.rows.sort((a,c)=>String(a.date).localeCompare(String(c.date)));
+  if(n||made){renderAll();r.filled=(r.filled||0)+n;r.note=(r.note?r.note+'; ':'')+n+' day'+(n===1?'':'s')+' from Form OB-1 as baseline rows ('+b.name+')';}
+  return r;};}
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

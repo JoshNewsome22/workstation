@@ -63,8 +63,11 @@
   /* v22.78 (review F118): an item marked contra (the behavior rose with it on PA-1's competing stimulus assessment) is never
      offered; a low-preference item C.menuItems kept (RA-1 confirmed it, or it competed on the CSA) stays */
   C.menuLine = function(items, n){ C.menuUsed = true; return (items || []).filter(function(m){ return m && !m.contra && (m.tier !== 'LP' || m.keep); }).slice(0, n || 5).map(function(m){ return m.name; }).join(', '); };
+  /* v24.27 (E-11) Form OB-1's observations and narrative lines, for the forms that say they take them (window.__nbhFactsWants) */
+  function obWanted(f){ var W = window.__nbhFactsWants || [], e = f && f.evidence && f.evidence['OB-1']; if (!e) return false;
+    return (W.indexOf('ob1obs') >= 0 && (e.obs || []).length > 0) || (W.indexOf('ob1narr') >= 0 && (e.narr || []).length > 0); }
   C.has = function(f){ f = f || C.facts; return !!(f && ((f.behaviors && f.behaviors.length) || (f.fn && (f.fn.key || f.fn.label)) ||
-    (f.goals && ((f.goals.red || []).length || (f.goals.acq || []).length)) || (f.menu && f.menu.length))); };
+    (f.goals && ((f.goals.red || []).length || (f.goals.acq || []).length)) || (f.menu && f.menu.length) || (f.demands && (f.demands.fa || []).length) || obWanted(f))); };
   /* the fields the packet map names: the first behavior and the function, when the field is empty */
   C.generic = function(f, force){
     var n = 0, b = (f.behaviors || [])[0], be = findField('beh'), fe = findField('fn');
@@ -98,6 +101,25 @@
     var d = C.due(); if (d && d.length) { o = o || {}; o.due = d; }
     return o;
   };
+  /* v24.27 (E-15, R-092) the student the case names, offered inside the form while its own student box is empty: a bar under the
+     toolbar with Fill the student box, which fills the empty student fields the packet map names (name, ID, grade, school) */
+  C.paintStudent = function(f){
+    var st = f && f.student, el = q('#nbhStudentBar'), ce = findField('client');
+    var want = !!(st && st.name && ce && empty(ce) && !C.studentNo);
+    if (!want) { if (el) el.remove(); return; }
+    if (!el) { var host = q('.toolbar') || q('.nbh-actions'); if (!host || !host.parentNode) return;
+      el = document.createElement('div'); el.id = 'nbhStudentBar'; el.className = 'noprint'; el.setAttribute('role', 'status');
+      el.style.cssText = 'border-left:4px solid #254657;background:#eef3f2;color:#16242e;padding:6px 12px;margin:6px auto;max-width:8.5in;box-sizing:border-box;font-size:13px;line-height:1.45;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center';
+      host.parentNode.insertBefore(el, host.nextSibling); }
+    var from = st.src && st.src !== 'packet' ? 'Form ' + st.src : 'the case';
+    var bits = [st.name, st.id ? 'ID ' + st.id : '', st.grade ? 'grade ' + st.grade : '', st.site || ''].filter(Boolean).join(' · ');
+    el.innerHTML = '<span><b>Student from ' + esc(from) + ':</b> ' + esc(bits) + '</span><button type="button" id="nbhStudentUse" class="tool">Fill the student box</button><button type="button" id="nbhStudentNo" class="tool">Not now</button>';
+    el.querySelector('#nbhStudentNo').addEventListener('click', function(){ el.remove(); C.studentNo = true; });
+    el.querySelector('#nbhStudentUse').addEventListener('click', function(){
+      var n = 0; [['client', st.name], ['sid', st.id], ['grade', st.grade], ['site', st.site]].forEach(function(p){ var e = findField(p[0]); if (!e || !p[1] || !empty(e)) return;
+        e.value = p[1]; ['input', 'change'].forEach(function(x){ e.dispatchEvent(new Event(x, {bubbles:true})); }); n++; });
+      el.remove(); if (window.nbhUI && nbhUI.toast) nbhUI.toast(n ? 'Student filled from ' + from + '.' : 'The student box already holds a name.', {kind:'ok'}); });
+  };
   C.apply = function(f){
     if (!f || typeof f !== 'object') return null;
     C.facts = f; var rep = null, hv = holdStart();   /* v22.47 what the case changes on the page leaves the view where it was (holdView) */
@@ -107,7 +129,7 @@
        listed) goes into a form's empty parent name box (IC-1's consent); a text box only */
     try { var hm = f.profile && f.profile.home, pb = document.querySelectorAll('input[name="c.parent"]');
       if (hm && hm.name) for (var pi = 0; pi < pb.length; pi++) { if (!/^(text|)$/.test(pb[pi].type || '') && pb[pi].type !== 'text') continue; if (!String(pb[pi].value || '').trim()) { pb[pi].value = hm.name; pb[pi].dispatchEvent(new Event('input', { bubbles: true })); pb[pi].dispatchEvent(new Event('change', { bubbles: true })); if (rep && typeof rep.filled === 'number') rep.filled++; } } } catch(e) {}
-    C.last = rep; C.paint(); try { C.paintConsent0(); } catch(e) {} try { C.paintStale(); } catch(e) {} holdEnd(hv); return rep;
+    C.last = rep; C.paint(); try { C.paintConsent0(); } catch(e) {} try { C.paintStale(); } catch(e) {} try { C.paintStudent(f); } catch(e) {} holdEnd(hv); return rep;   /* v24.27 */
   };
   /* v22.78 (review I62) a stale reinforcer menu: on a form that took PA-1's menu (C.menuUsed, set by menuItems and menuLine), one
      line when an item on it is marked Shifted on PA-1's Monitoring sheet or the reassessment date has passed; Watch is not
@@ -144,6 +166,7 @@
     var g = f.goals || {}, gn = (g.red || []).length + (g.acq || []).length;
     if (gn) bits.push(gn + (gn === 1 ? ' goal' : ' goals'));
     if (f.menu && f.menu.length) bits.push(f.menu.length + ' reinforcers');
+    if (f.demands && (f.demands.fa || []).length) bits.push(f.demands.fa.length + (f.demands.fa.length === 1 ? ' demand task' : ' demand tasks'));   /* v24.27 (R-018) */
     return bits.join(' · ');
   }
   function srcLine(f){
@@ -204,6 +227,12 @@
   }
   C.open = function(){
     var f = C.facts; if (!C.has(f)) return;
+    /* v24.27 (R-110) a form that takes only some of the case says which forms feed it when the case holds none of that yet */
+    if (window.__nbhCaseFeeds && typeof window.__nbhCaseFeeds.has === 'function' && !window.__nbhCaseFeeds.has(f)) {
+      var FF = window.__nbhCaseFeeds.forms || [];
+      var msg = 'The case holds nothing this form takes yet.' + (FF.length ? ' It is fed by ' + FF.join(', ').replace(/, ([^,]*)$/, ' and $1') + '.' : '');
+      if (window.nbhUI && nbhUI.toast) nbhUI.toast(msg, {kind:'warn'}); else alert(msg);
+      return; }
     var d = dlg(), h = '';
     q('#nbhcSrc').textContent = srcLine(f) + (f.when ? ' · read ' + new Date(f.when).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '');
     if (f.behaviors && f.behaviors.length) {
@@ -227,15 +256,33 @@
         return item('menu', i, (m.rank ? m.rank + '. ' : '') + m.name, sub, m.tier === 'HP');
       }).join('') + '</div>';
     }
+    /* v24.27 (E-10) the demand assessment's tasks; (E-11) Form OB-1's observations and narrative lines, for the forms that take them */
+    var dm = f.demands && Array.isArray(f.demands.fa) ? f.demands.fa : [];
+    if (dm.length) {
+      h += '<div class="nbhc-s"><h4>Demand tasks that evoke problem behavior (Form DA-1' + (f.demands.dates ? ', ' + esc(f.demands.dates) : '') + ')</h4>' + dm.map(function(t, i){
+        var sub = [t.rate != null ? t.rate + ' a min' : '', t.lat != null ? 'latency ' + t.lat + ' s' : '', t.pb ? 'problem behavior in ' + t.pb + ' sessions' : ''].filter(Boolean).join(' · ');
+        return item('dem', i, (t.rank ? t.rank + '. ' : '') + t.name, sub, i === 0); }).join('') + (f.demands.verdict ? '<small class="nbhc-verdict">' + esc(f.demands.verdict) + '</small>' : '') + '</div>';
+    }
+    var ob = f.evidence && f.evidence['OB-1'], W = window.__nbhFactsWants || [];
+    if (ob && W.indexOf('ob1obs') >= 0 && (ob.obs || []).length) {
+      h += '<div class="nbhc-s"><h4>Observations (Form OB-1), as baseline days</h4>' + ob.obs.map(function(o, i){
+        return item('ob1obs', i, (o.date || 'undated') + (o.start ? ' ' + o.start : ''), [o.count !== '' && o.count != null ? o.count + ' in ' + (o.mins || '?') + ' min' : '', o.rate != null ? o.rate + ' an hour' : '', o.activity || ''].filter(Boolean).join(' · '), !!o.date); }).join('') + '</div>';
+    }
+    if (ob && W.indexOf('ob1narr') >= 0 && (ob.narr || []).length) {
+      h += '<div class="nbhc-s"><h4>Narrative lines (Form OB-1), as coded incidents</h4>' + ob.narr.map(function(l, i){
+        return item('ob1narr', i, (l.date || '') + (l.t ? ' ' + l.t : ''), l.w + (l.ante && l.ante.length ? ' — antecedent: ' + l.ante.join(', ') : '') + (l.cons && l.cons.length ? '; consequence: ' + l.cons.join(', ') : ''), !!(l.ante && l.ante.length && l.cons && l.cons.length)); }).join('') + '</div>';
+    }
     q('#nbhcBody').innerHTML = h || '<div class="nbhc-empty">Nothing has been read yet.</div>';
     q('#nbhcDone').hidden = true;
+    /* v24.27 (R-145) the footer says what the menu and the demand tasks do on a form that places them as the case is read */
     q('#nbhcNote').textContent = window.__nbhFactsPick ? 'The ticked items go into this form’s own rows and fields.' :
-      (findField('beh') || findField('fn') ? 'The first ticked behavior and the function go into this form’s behavior and function fields.' : 'This form has no field for these; copy the text instead.');
+      (findField('beh') || findField('fn')) ? (((f.menu && f.menu.length) || dm.length) ? 'The first ticked behavior and the function go into this form’s behavior and function fields; the reinforcer menu' + (dm.length ? ' and the demand tasks' : '') + ' fill their own rows and lines as the case is read.' : 'The first ticked behavior and the function go into this form’s behavior and function fields.')
+      : 'This form has no field for these; copy the text instead.';
     q('#nbhcUse').hidden = !(window.__nbhFactsPick || findField('beh') || findField('fn'));
     d.showModal();
   };
   C.selection = function(){
-    var f = C.facts || {}, sel = { behaviors: [], goals: { red: [], acq: [] }, menu: [], fn: null, facts: f };
+    var f = C.facts || {}, sel = { behaviors: [], goals: { red: [], acq: [] }, menu: [], fn: null, demands: [], ob1obs: [], ob1narr: [], facts: f };   /* v24.27 */
     Array.prototype.forEach.call(document.querySelectorAll('#nbhcBody input:checked'), function(cb){
       var i = +cb.dataset.i, k = cb.dataset.kind;
       if (k === 'beh') sel.behaviors.push(f.behaviors[i]);
@@ -243,6 +290,9 @@
       else if (k === 'red') sel.goals.red.push(f.goals.red[i]);
       else if (k === 'acq') sel.goals.acq.push(f.goals.acq[i]);
       else if (k === 'menu') sel.menu.push(f.menu[i]);
+      else if (k === 'dem') sel.demands.push(f.demands.fa[i]);   /* v24.27 */
+      else if (k === 'ob1obs') sel.ob1obs.push(f.evidence['OB-1'].obs[i]);
+      else if (k === 'ob1narr') sel.ob1narr.push(f.evidence['OB-1'].narr[i]);
     });
     return sel;
   };

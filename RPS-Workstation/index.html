@@ -2765,7 +2765,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.26';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.27';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2898,6 +2898,8 @@ function who(){
     });
     if(seen.size===1){const v=seen.values().next().value;found=v.name;src=v.ids[0];}
   }
+  state.whoFound=found?{name:found,src}:null;   /* v24.27 (E-15) the name a form holds, for the facts */
+  {const k=(p.client||'')+'|'+found+'|'+src;if(state.whoFoundSig!==k){state.whoFoundSig=k;if(typeof gatherFacts==='function')setTimeout(()=>{try{gatherFacts(true);}catch(e){}},80);}}
   nm.textContent=p.client||found||'No student loaded';
   if(typeof paintSum==='function')paintSum();
   nm.classList.toggle('who-found',!p.client&&!!found);
@@ -3092,9 +3094,9 @@ async function factsFlush(){
   try{await gatherFacts(true);}catch(e){}
   if(factsPushes!==n)await new Promise(r=>setTimeout(r,300));
 }
-function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
+function hasFacts(f){return !!(f&&((f.student&&f.student.name)||f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
   (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||f.token||f.reinf||f.caregiver||f.classwide||f.brief||f.perf||f.arrangement||f.delay||f.schedule||f.relapse||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide,f.brief,f.perf,f.arrangement,f.delay,f.schedule,f.relapse]):'';}
+function factsSig(f){return f?JSON.stringify([f.student,f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf,f.caregiver,f.classwide,f.brief,f.perf,f.arrangement,f.delay,f.schedule,f.relapse]):'';}
 /* v23.15 (review F143, I71) Form DA-1 joins the case as 'demands' (the tasks that evoke problem behavior for EA-1's demand
    condition, where TD-1's demand fading starts, the modifications by task): one block, so the lists above stay as they are */
 FACT_SRC['DA-1']='demands';FACT_GEN.push('DA-1');
@@ -3126,6 +3128,9 @@ async function gatherFacts(push){
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
     const now=state.facts;if(now&&(now.src||{}).behaviors==='document'&&(now.behaviors||[]).length&&!(f.behaviors&&f.src.behaviors&&f.src.behaviors!=='document')){f.behaviors=now.behaviors;f.src.behaviors='document';}
+    /* v24.27 (E-15) the student the packet or a form names goes with the facts, so a form whose own student box is empty can offer it */
+    {const st=whoStudentFacts();if(st){f.student=Object.assign({},f.student||{},st);f.src.student=st.src;}
+     else if(f.student){['name','id','grade','site','src'].forEach(k=>{delete f.student[k];});if(!Object.keys(f.student).length){delete f.student;delete f.src.student;}}}
     const sig=factsSig(f);
     if(sig!==state.factsSig){
       state.factsSig=sig;f.when=new Date().toISOString();
@@ -3136,6 +3141,9 @@ async function gatherFacts(push){
     else if(push&&factsOwed){factsOwed=false;pushFactsToAll();}   /* v21.87 a read that did not send saw the change first: the forms are told now */
   }finally{factsBusy=false;if(factsAgain){const p=factsAgainPush;factsAgain=false;factsAgainPush=false;setTimeout(()=>gatherFacts(p),300);}}
 }
+function whoStudentFacts(){try{const p=packet(),wf=state.whoFound||{},det=(wf.src&&state.details&&state.details[wf.src])||{};const name=String(p.client||wf.name||'').trim();if(!name)return null;
+  return {name,id:String(p.sid||det.sid||''),grade:String(p.grade||det.grade||''),site:String(p.site||det.site||''),src:p.client?'packet':(wf.src||'')};}catch(e){return null;}}   /* v24.27 (E-15) */
+window.__nbhStudentFacts=whoStudentFacts;
 function setFacts(f,push){state.facts=hasFacts(f)?f:null;state.factsSig=factsSig(state.facts);paintFacts();if(push)pushFactsToAll();}
 function pushFactsTo(fr){if(!state.facts||!fr)return;ask(fr,'facts',{facts:state.facts});}
 function pushFactsToAll(){factsPushes++;Object.values(state.frames).forEach(pushFactsTo);}
@@ -3183,6 +3191,7 @@ function paintFacts(){
   if(f.training)bits.push('<b>Rehearsal steps:</b> '+(f.training.steps||[]).length+' <i>('+esc(s.training||'')+')</i>');   /* v21.77 Form TV-1, for Form ST-1 */
   if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
   if(f.reinf&&(f.reinf.items||[]).length)bits.push('<b>Reinforcer verdicts:</b> '+f.reinf.items.length+' <i>('+esc(s.reinf||'')+')</i>');   /* v22.54 (F419) */
+  if(f.demands&&(f.demands.fa||[]).length)bits.push('<b>Demands:</b> '+f.demands.fa.length+' task'+(f.demands.fa.length===1?' evokes':'s evoke')+' problem behavior <i>('+esc(s.demands||'DA-1')+')</i>');   /* v24.27 (R-018) */
   if(f.token)bits.push('<b>Token system</b>'+(f.token.step&&f.token.step.n?': step '+(f.token.step.n|0):'')+' <i>('+esc(s.token||'')+')</i>');   /* v22.54 (F421) */
   if(f.caregiver)bits.push('<b>Caregiver training:</b> '+esc(f.caregiver.stand||'in training')+' <i>('+esc(s.caregiver||'')+')</i>');   /* v22.72 (F353) */
   if(f.arrangement)bits.push('<b>Reinforcer arrangement:</b> '+esc(f.arrangement.choice||'')+(f.arrangement.unit?', '+esc(f.arrangement.unit):'')+' <i>('+esc(s.arrangement||'')+')</i>');   /* v22.89 (AD-1 F412) */

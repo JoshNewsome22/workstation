@@ -1375,6 +1375,7 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
   <h3 class="sub">Safety Plan</h3>
   <!-- v22.37 (review F148): on screen only, when the case's Form IC-1 is known and does not cover the experimental analysis -->
   <div class="ea-flag noprint" id="eaConsentFlag" role="status" hidden></div>
+  <div class="ea-flag" id="eaDemandFlag" role="status" hidden></div><!-- v24.27 (R-018) Form DA-1's result, on the sheet and on paper -->
   <div class="ea-flag" id="eaClearFlag" role="status" hidden></div>   <!-- v22.49 (review F149): printed too -->
   <div class="defs">
     <!-- v22.49 (review F149): the health record from Form DM-1 is shown on its own line, read only; Medical clearance is the
@@ -6041,11 +6042,17 @@ window.eaPaintConsent=function(){const g=window.__eaConsentGap(),e=s=>String(s).
       const m=document.querySelector('[name="c['+i+'].mat"]');if(!m)return;const v=T(m.value);if(v===line||!(v===''||TPL.test(v)||MINE.test(v)))return;
       m.value=line;['input','change'].forEach(x=>m.dispatchEvent(new Event(x,{bubbles:true})));ch=true;});
     return ch;};
+  /* v24.27 (R-018, E-10) Form DA-1's result where the analyst plans: the verdict and the first task with its rate and latency */
+  window.eaDemandLine=function(){const d=window.__eaDemands;if(!d||!Array.isArray(d.fa)||!d.fa.length)return '';const t=d.fa[0]||{};
+    const fig=[t.rate!=null?t.rate+' a min':'',t.lat!=null?'latency '+t.lat+' s':''].filter(Boolean).join(', ');
+    return 'Demand assessment (Form DA-1'+(T(d.dates)?', '+T(d.dates):'')+'): '+T(d.verdict)+(d.rule==='latency'?' Ranked by latency.':'')+' The demand condition uses '+T(t.name)+(fig?' ('+fig+')':'')+(d.fa.length>1?'; also '+d.fa.slice(1).map(x=>T(x&&x.name)).filter(Boolean).join(', '):'')+'.';};
+  window.eaPaintDemands=function(){const el=document.getElementById('eaDemandFlag');if(!el)return;const line=window.eaDemandLine();el.hidden=!line;el.textContent=line;};
   let busy=false;const wm=window.eaMenuCards;
   window.eaMenuCards=function(){let r=false;try{r=wm?wm.apply(this,arguments):false;}catch(e){r=false;}if(!busy)try{if(window.eaDemandCards(window.__eaDemands))r=true;}catch(e){}return r;};
   const was=window.__nbhFactsIn;
   window.__nbhFactsIn=function(f){let r=null;busy=true;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}busy=false;
     let ch=false;try{window.__eaDemands=(f&&f.demands)||null;ch=window.eaDemandCards(window.__eaDemands);}catch(e){}
+    try{window.eaPaintDemands();}catch(e){}   /* v24.27 */
     if(ch){r=r&&typeof r==='object'?Object.assign({},r):{filled:0};r.filled=(r.filled||0)+1;r.note=(r.note?r.note+', ':'from the case: ')+'the demand tasks (Form DA-1)';}
     return r;};
 })();
@@ -6102,6 +6109,7 @@ function card(){const w=$1('#plWrap');if(!w)return;const L=live();if(step>=L.len
     h+='<div class="pl-btns"><button type="button" class="tool pl-back">Back</button><button type="button" class="tool primary pl-set">Set it up</button><span class="pl-note">Loads the condition templates on the Conditions sheet (replacing any there), sets the design and the measure, and keeps every answer with the file.</span></div>';}
   else{const A=q.a;
     if(q.carried&&g(q.carried))h+='<div class="pl-carried"><b>Carried in from the assessment</b><div>'+esc(g(q.carried))+'</div></div>';
+    if((q.id==='hyp'||q.id==='conseq')&&window.eaDemandLine&&window.eaDemandLine())h+='<div class="pl-carried pl-da1"><b>From the demand assessment (Form DA-1)</b><div>'+esc(window.eaDemandLine())+'</div></div>';   /* v24.27 (R-018) */
     if(A.kind==='radio'){const cur=g(A.name);h+='<div class="pl-opts" role="radiogroup">'+A.opts.map(o=>'<button type="button" class="pl-opt'+(cur===o[0]?' on':'')+'" data-name="'+esc(A.name)+'" data-v="'+esc(o[0])+'" aria-pressed="'+(cur===o[0])+'"><b>'+esc(o[1])+'</b>'+(o[2]?'<span>'+esc(o[2])+'</span>':'')+'</button>').join('')+'</div>';}
     if(A.kind==='text'){h+='<label class="pl-f"><span>'+esc(A.label)+'</span>'+(A.multi?'<textarea class="pl-in" data-name="'+esc(A.name)+'" rows="3" placeholder="'+esc(A.ph||'')+'">'+esc(g(A.name))+'</textarea>':'<input class="pl-in" data-name="'+esc(A.name)+'" value="'+esc(g(A.name))+'" placeholder="'+esc(A.ph||'')+'">')+'</label>';}
     if(q.extra){const X=q.extra;h+='<label class="pl-f"><span>'+esc(X.label)+'</span><textarea class="pl-in" data-name="'+esc(X.name)+'" rows="2" placeholder="'+esc(X.ph||'')+'">'+esc(g(X.name))+'</textarea></label>';}

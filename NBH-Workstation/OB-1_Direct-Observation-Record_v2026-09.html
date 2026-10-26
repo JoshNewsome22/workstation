@@ -5119,8 +5119,15 @@ OUT(function(){const obs=(state.obs||[]).filter(o=>o&&(T(o.date)||T(o.count)||T(
   const keys=[esc&&'escape',att&&'attention',tan&&'tangible'].filter(Boolean);
   const fn=!names.length?'':names.length===1?names[0].charAt(0).toUpperCase()+names[0].slice(1)+' (a hypothesis to test)':(names.slice(0,-1).join(', ')+' and '+names[names.length-1]).replace(/^./,x=>x.toUpperCase());
   const key=names.length>1?'multiple':keys[0]||'';
-  return EV(Object.assign({form:'OB-1',method:'Direct observation (descriptive)'},SPAN(obs.map(o=>o.date)),{n:obs.length||null,fn,fnKey:key,
-    strength:fn?(w>=3?'Moderate':'Weak'):'',by:T(state.meta&&state.meta.observer),statement:carry||(typeof draft==='function'?T(draft()):'')}));});
+  const ev=EV(Object.assign({form:'OB-1',method:'Direct observation (descriptive)'},SPAN(obs.map(o=>o.date)),{n:obs.length||null,fn,fnKey:key,
+    strength:fn?(w>=3?'Moderate':'Weak'):'',by:T(state.meta&&state.meta.observer),statement:carry||(typeof draft==='function'?T(draft()):'')}));
+  /* v24.27 (E-11, R-058) the observations and the narrative lines, for Form DD-1's baseline rows and Form ABC-1's incidents: offered there, not placed */
+  try{const AL={},CL={};ANTE.forEach(([k,l])=>{AL[k]=l;});CONS.forEach(([k,l])=>{CL[k]=l;});
+    ev.beh=T(state.meta&&state.meta.behavior);
+    ev.obs=obs.map(o=>{let m=null;try{m=minutesOf(o);}catch(e){m=null;}const c=parseFloat(o.count);return {date:T(o.date),start:T(o.start),end:T(o.end),mins:(m!=null&&isFinite(m)&&m>0)?String(Math.round(m*10)/10):'',count:T(o.count),rate:(m>0&&isFinite(c))?Math.round(c/m*600)/10:null,activity:T(o.activity),setting:T(o.setting)};});
+    ev.narr=[].concat(...obs.map(o=>{const ak=Object.keys(o.ante||{}).filter(k=>o.ante[k]),ck=Object.keys(o.cons||{}).filter(k=>o.cons[k]);
+      return (Array.isArray(o.narrative)?o.narrative:[]).filter(l=>l&&T(l.w)).map(l=>({date:T(o.date),t:T(l.t),w:T(l.w),ante:ak.map(k=>AL[k]||k),cons:ck.map(k=>CL[k]||k),anteKeys:ak,consKeys:ck}));}));}catch(e){}
+  return ev;});
 /* v22.99 (review F73) with the FS-1 box empty, the statement is the FS-1 statement the form writes (the observations, minutes, counts, rates
    and agreement), not the summary's advice */
 })();

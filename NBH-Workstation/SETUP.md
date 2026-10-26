@@ -9905,6 +9905,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.27: The hand-offs between forms, from the independent review: the demand tasks, OB-1's observations, PA-1's menu, the student
+(the independent review of 10/25, findings R-017, R-018, R-058, R-092, R-110, R-145; enhancements E-10, E-11, E-15)
+
+- **Form DA-1's result reaches the forms that plan with it.** The case summary and the From the case label count the demand
+  tasks; the dialog lists them (rank, rate a minute, latency, the sessions with problem behavior, the verdict). Form EA-1's Setup
+  & safety and its Plan (the hypothesis and consequence questions) show DA-1's verdict with the first task's rate and latency and
+  the other tasks; Form TD-1's demand-fading ladder names DA-1's fading steps in order after each rung's own level, and the
+  terminal step on the last rung.
+- **Form OB-1's observations travel with its facts** (date, minutes observed, count, rate an hour, activity) and so do its
+  narrative lines, each with the observation's ticked antecedents and consequences. Under From the case, Form DD-1 offers the
+  observations as baseline rows (the count for OB-1's behavior or the first target, the minutes, a note naming OB-1; the first row
+  opens the Baseline phase when the record had none) and Form ABC-1 offers the lines as coded incidents (date and time, the
+  antecedent and consequence codes from the ticks, the case's target, the line as the narrative). The analyst ticks and uses them;
+  a second Use adds nothing twice.
+- **Form RA-1's Use the ticked items** fills the empty Stimuli Under Test rows with the ticked reinforcer-menu items (name, type,
+  PA-1 rank and tier) and writes the Preference assessment source line; a row with a name is left alone.
+- **The student the case names is offered inside a form whose student box is empty**: a one-line status bar under the toolbar
+  (name, ID, grade, school, and where the name came from) with Fill the student box and Not now. The workstation sends the
+  packet's student, else the one form that holds a name.
+- **Forms SM-1 and TK-1 say which forms feed them**: when the case holds nothing they take, From the case says so in a toast
+  that names the feeding forms instead of opening an empty dialog. The dialog footer on every form says that the reinforcer menu
+  and the demand tasks fill their own rows and lines as the case is read.
+- Checks: `qa/ho127-test.js`.
+
 ### v24.26: Form SP-1 from the independent review: the control chart on a short record, the windows sent, and the file guard
 (the independent review of 10/25, SP-1 findings R-015, R-016, R-066, R-068, R-069, R-132, R-133; enhancements E-16, E-17, E-43 the sheets)
 
