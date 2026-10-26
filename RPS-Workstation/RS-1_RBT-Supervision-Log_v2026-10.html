@@ -692,7 +692,7 @@ label.chip:focus-within{outline:2px solid var(--nbh-slate,#254657);outline-offse
 .rs-monthbar button[aria-pressed="true"] small{color:#dfe8ee}
 .rs-monthbar .st{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:3px;vertical-align:0;background:transparent;border:1px solid transparent}
 .st-na{background:#b8c6cc!important}
-.st-ok{background:#2F6B37!important}.st-pending{background:#C9822E!important}.st-fail{background:#8E2A2A!important}.st-none{border-color:#93aead!important}
+.st-entering{background:#6f8796!important}.st-ok{background:#2F6B37!important}.st-pending{background:#C9822E!important}.st-fail{background:#8E2A2A!important}.st-none{border-color:#93aead!important}
 @media (max-width:760px){.rs-monthbar{grid-template-columns:repeat(6,minmax(0,1fr))}}
 
 /* ---- the month: log on the left, compliance on the right (on top when narrow) ---- */
@@ -722,7 +722,9 @@ label.chip:focus-within{outline:2px solid var(--nbh-slate,#254657);outline-offse
 .rs-comp table td{padding:5px 12px;border-top:1px solid #eef2f1}
 .rs-comp table td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 .rs-comp .verdictline{padding:9px 12px;font-weight:600}
-.rs-comp .verdictline.ok{background:#E3EFE0;color:#1f4d26}.rs-comp .verdictline.pending{background:#FBEEDB;color:#6d3a0e}.rs-comp .verdictline.fail{background:#F6E0E0;color:#6e1f1f}.rs-comp .verdictline.na{background:#f1f4f3;color:#54676f}
+.rs-comp .verdictline.ok{background:#E3EFE0;color:#1f4d26}.rs-comp .verdictline.pending{background:#FBEEDB;color:#6d3a0e}.rs-comp .verdictline.fail{background:#F6E0E0;color:#6e1f1f}.rs-comp .verdictline.na{background:#f1f4f3;color:#54676f}.rs-comp .verdictline.entering{background:#E8EEF2;color:#2c4452}
+.rs-catchnudge{margin:8px 12px;font-size:13.5px;color:var(--ink-soft)}.rs-catchnudge .tool{display:block;margin:6px 0 0}
+#enteredChip[hidden]{display:none!important}
 .rs-comp .fine{padding:8px 12px;font-size:11.5px;color:var(--ink-soft);border-top:1px solid var(--rule-2)}
 
 /* ---- the service-day rows ---- */
@@ -1123,8 +1125,10 @@ td input,td select{max-width:100%}
       <div><label for="sEnd">Usual end time</label><input id="sEnd" type="time" data-s="day_end"></div>
       <div><label for="sBreak">Usual time not in RBT services (minutes)</label><input id="sBreak" data-s="day_break" inputmode="numeric" placeholder="e.g., 30 for lunch"></div>
       <div><label for="sAct">Usual primary intervention</label><select id="sAct" data-s="day_act"></select></div>
+      <div><label for="sCatch">Catch-up mode (entering past months)</label><select id="sCatch" data-s="catchup"><option value="">Off</option><option value="on">On</option></select></div>
     </div>
     <div class="rs-days" role="group" aria-label="Usual service days" id="dayChips"></div>
+    <p class="hint" id="catchHint">Catch-up mode is for moving supervision records into the workstation after the fact. A month that has ended reads &ldquo;being entered&rdquo;, not &ldquo;not met&rdquo;, until it is signed or marked &ldquo;All of this month is entered&rdquo;, so a month you have not finished typing in does not look out of compliance. A real problem (a supervisor without a BCBA or BCaBA, a group over the limit) still shows. Turn it off once the records are caught up.</p>
 
     <h2 class="nbh-band" style="margin-top:18px">Rules</h2>
     <p class="hint">The numbers the monthly check uses. The defaults are the BACB&rsquo;s requirements as of 2026; if the BACB changes them, change them here. <b>Check against the current BACB RBT Handbook.</b></p>
@@ -1148,7 +1152,7 @@ td input,td select{max-width:100%}
   <section class="only-month">
     <div class="rs-monthbar" role="group" aria-label="Month of the school year" id="monthBar"></div>
     <div id="setupNudge"></div>
-    <div class="rs-chips"><label class="chip" id="noSvcChip"><input type="checkbox" id="noSvc" data-mo="noservice"> No services this month</label><span class="hint" style="align-self:center">The RBT did not practise this month: monthly supervision is not required, and the month shows as not applicable.</span></div>
+    <div class="rs-chips"><label class="chip" id="noSvcChip"><input type="checkbox" id="noSvc" data-mo="noservice"> No services this month</label><label class="chip" id="enteredChip" hidden><input type="checkbox" id="mEntered" data-mo="entered"> All of this month is entered</label><span class="hint" style="align-self:center">The RBT did not practise this month: monthly supervision is not required, and the month shows as not applicable.</span></div>
     <div class="rs-mgrid">
       <div class="rs-main">
         <h2 class="nbh-band" id="monthTitle">Service Days</h2>
@@ -1232,7 +1236,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band" style="margin-top:18px">Concerns and Corrective Action (confidential)</h2>
     <div class="instr">When the supervisor becomes aware of a potential ethics violation by the RBT, they investigate and document it. A <b>Notice of Alleged Violation</b> goes to the BACB when the concern involves abuse or neglect of a client; results in the RBT being charged with or convicted of a violation of the law; violates RBT Ethics Code (2.0) standard 1.03, 1.05, 3.01, 3.02, 3.03, 3.04 or 3.05; or has occurred repeatedly despite reasonable attempts to address it. Otherwise the supervisor develops and carries out an individualized corrective-action plan and documents the outcome (BCBA Handbook). This part is <b>not</b> on the monthly record; it prints only from its own button.</div>
     <div id="concernList"></div>
-    <div class="tools"><button class="tool" type="button" id="addConcern">Record a concern</button><button class="tool" type="button" id="printConcerns">Print the concerns (confidential)</button><span class="hint" id="concernWhere" style="flex:1 1 100%">Where these live: in this form\u2019s file (Save data), with every supervisee in it. Save without concerns writes the same file with no concern entries, for a colleague or a shared device; Share the Record never sends them.</span></div>
+    <div class="tools"><button class="tool" type="button" id="addConcern">Record a concern</button><button class="tool" type="button" id="printConcerns">Print the concerns (confidential)</button><span class="hint" id="concernWhere" style="flex:1 1 100%">Where these live: in this form&rsquo;s file (Save data), with every supervisee in it. Save without concerns writes the same file with no concern entries, for a colleague or a shared device; Share the Record never sends them.</span></div>
   </section>
 
   <!-- ===================== SIGN AND PRINT ===================== -->
@@ -1259,14 +1263,20 @@ td input,td select{max-width:100%}
         <div class="tools"><button class="tool" type="button" data-padclear="rbt_img">Clear the signature</button></div>
       </div>
     </div>
-    <div class="tools noprint"><button class="tool" type="button" id="printMonth2">Print this month</button><button class="tool" type="button" id="printYear2">Print the year</button></div>
+    <div class="tools noprint"><button class="tool" type="button" id="printMonth2">Print this month</button><button class="tool" type="button" id="printYear2">Print the year</button>
+      <!-- v24.49 (the BCBA, 10/26) the year summary as it stood at the end of a month -->
+      <label class="rs-thru" for="yrThrough">The year summary runs through <select id="yrThrough"></select></label></div>
+    <p class="hint noprint" id="yrThroughHint">Entering an earlier month&rsquo;s record? The year summary stops at that month, as it stood at its end; choose the whole year to include the months after. The printed date is today&rsquo;s.</p>
     <h2 class="nbh-band noprint" id="rs-share" style="margin-top:18px">Share the Record</h2>
-    <p class="hint noprint">The record goes by email from the school Google account the workstation is signed in to, exactly as the page prints: this month&rsquo;s record or the year summary, never the concerns. The RBT&rsquo;s address is the one kept on Setup; another reader (a second BCBA, the clinical director) can be added for this one send. A colleague who should work on this file with you uses the bar&rsquo;s <b>Share for editing</b> instead. Where email is not set up on this device, <b>Save the record as a file</b> gives the same page to attach.</p>
+    <p class="hint noprint">The record goes by email from the school Google account the workstation is signed in to, exactly as the page prints: this month&rsquo;s record or the year summary, never the concerns. The RBT&rsquo;s address is the one kept on Setup; up to five other readers (a second BCBA, the clinical director) are kept with this RBT and get every record sent. Tap an email box to pick from the workstation&rsquo;s staff directory. A colleague who should work on this file with you uses the bar&rsquo;s <b>Share for editing</b> instead. Where email is not set up on this device, <b>Save the record as a file</b> gives the same page to attach.</p>
     <div class="fieldgrid noprint rs-share">
       <div><label for="shRbt">The RBT&rsquo;s email</label><input id="shRbt" type="email" data-s="rbt_email" autocomplete="off" placeholder="kept with the RBT on Setup"></div>
-      <div><label for="shOther">Another reader&rsquo;s email (this send only)</label><input id="shOther" type="email" autocomplete="off" placeholder="e.g., a second BCBA"></div>
+      <div class="rs-cc"><label for="shOther">Other readers&rsquo; emails (kept with this RBT)</label><input id="shOther" type="email" data-s="cc1" autocomplete="off" placeholder="e.g., a second BCBA: tap to pick from the staff directory">
+        <input id="shOther2" type="email" data-s="cc2" autocomplete="off" aria-label="Other reader&rsquo;s email (2)" hidden><input id="shOther3" type="email" data-s="cc3" autocomplete="off" aria-label="Other reader&rsquo;s email (3)" hidden>
+        <input id="shOther4" type="email" data-s="cc4" autocomplete="off" aria-label="Other reader&rsquo;s email (4)" hidden><input id="shOther5" type="email" data-s="cc5" autocomplete="off" aria-label="Other reader&rsquo;s email (5)" hidden>
+        <button type="button" class="tool" id="shAddCc">+ Another reader</button></div>
     </div>
-    <div class="tools noprint"><button class="tool" type="button" id="shMonth">Email this month&rsquo;s record</button><button class="tool" type="button" id="shYear">Email the year summary</button><button class="tool" type="button" id="shFile">Save the record as a file</button><button class="tool" type="button" id="shRbtCopy" title="This month\u2019s record and the goals, with no concerns, as a page for the RBT">Save the RBT\u2019s copy</button></div>
+    <div class="tools noprint"><button class="tool" type="button" id="shMonth">Email this month&rsquo;s record</button><button class="tool" type="button" id="shYear">Email the year summary</button><button class="tool" type="button" id="shFile">Save the record as a file</button><button class="tool" type="button" id="shRbtCopy" title="This month&rsquo;s record and the goals, with no concerns, as a page for the RBT">Save the RBT&rsquo;s copy</button></div>
     <div id="shNote" class="hint noprint" aria-live="polite"></div>
     <h2 class="nbh-band noprint" style="margin-top:14px">The Monthly Record as It Prints</h2>
     <div class="rs-paper" id="monthOut"></div>
@@ -1459,6 +1469,8 @@ function supIssues(s){const out=[],hasRC=S.sups.some(x=>x.name&&isRC(x));
 function stats(k){
   const m=peek(k),[y,mo]=k.split('-').map(Number),first=iso(y,mo,1),last=iso(y,mo,lastDay(y,mo)),today=todayISO();
   const ended=today>last,started=today>=first;
+  /* v24.49 catch-up mode: an ended month not yet signed or marked entered is "being entered", not "not met" */
+  const hold=catchOn()&&ended&&!m.entered&&!signedBoth(m),endedC=ended&&!hold;
   const inM=d=>d.date&&keyOf(d.date)===k;
   /* a month marked "No services" counts no service days, whatever rows it still holds */
   const served=m.noservice?[]:m.days.filter(d=>inM(d)&&!d.none&&d.date<=today&&dayMin(d)>0);
@@ -1476,22 +1488,27 @@ function stats(k){
   const obsDates=cnt.filter(x=>x.c.obs==='yes').map(x=>x.c.date);
   const sc=cnt.map(x=>x.c.obs==='yes'?ckScore(x.c):null).filter(Boolean),ck=sc.length?sc.reduce((s,x)=>s+x.pct,0)/sc.length:null;
   const hasService=rbtMin>0,any=hasService||m.contacts.length>0;
-  const st=(met,hard)=>met?'ok':hard?'fail':ended?'fail':'pending';
+  const st=(met,hard)=>met?'ok':hard?'fail':endedC?'fail':'pending';
   const checks=[
     {k:'pct',t:'At least '+rule('pct')+'% of service hours supervised',d:hasService?pctTxt(pct)+' ('+supMin+' of '+rbtMin+' minutes)':'no service hours recorded yet',s:hasService?st(supMin>=rbtMin*P-1e-9):'na'},
     {k:'contacts',t:'At least '+rule('contacts')+' real-time contact'+(rule('contacts')===1?'':'s'),d:cnt.length+' of '+rule('contacts')+(badMode?' ('+badMode+' noted, not counted)':''),s:any?st(cnt.length>=rule('contacts')):'na'},
     {k:'indiv',t:'At least '+rule('indiv')+' individual contact'+(rule('indiv')===1?'':'s'),d:indiv+' of '+rule('indiv'),s:any?st(indiv>=rule('indiv')):'na'},
     {k:'obs',t:'At least '+rule('obs')+' observing the RBT with a client',d:obs+' of '+rule('obs'),s:any?st(obs>=rule('obs')):'na'},
-    {k:'cred',t:'Every supervisor is a BCBA or BCaBA',d:badCred?badCred+' contact'+(badCred===1?'':'s')+' with a supervisor without one':noSup?noSup+' contact'+(noSup===1?'':'s')+' without a supervisor chosen':m.contacts.length?'all listed supervisors qualify':'no contacts yet',s:!m.contacts.length?'na':badCred?'fail':noSup?(ended?'fail':'pending'):'ok'},
+    {k:'cred',t:'Every supervisor is a BCBA or BCaBA',d:badCred?badCred+' contact'+(badCred===1?'':'s')+' with a supervisor without one':noSup?noSup+' contact'+(noSup===1?'':'s')+' without a supervisor chosen':m.contacts.length?'all listed supervisors qualify':'no contacts yet',s:!m.contacts.length?'na':badCred?'fail':noSup?(endedC?'fail':'pending'):'ok'},
     {k:'mode',t:'A contact by phone, email, recording or monitoring alone is noted, not counted',d:badMode?badMode+' noted this month':m.contacts.length?'none this month':'no contacts yet',s:'na'},   /* v24.29 (R-026) a note, never a red mark */
     {k:'group',t:'No group of more than '+rule('grpmax')+' RBTs',d:bigGroup?bigGroup+' such contact'+(bigGroup===1?'':'s')+' (not counted)':m.contacts.some(c=>c.format==='group')?'every group within the limit':'no group contacts',s:!m.contacts.length?'na':bigGroup?'fail':'ok'},
-    {k:'req',t:'Supervisor requirements on record',d:reqMiss.length?reqMiss.join('; '):usedSups.length?'training, portal, relationship and client oversight recorded':'no supervisor yet',s:!usedSups.length?'na':reqMiss.length?(ended?'fail':'pending'):'ok'}];
+    {k:'req',t:'Supervisor requirements on record',d:reqMiss.length?reqMiss.join('; '):usedSups.length?'training, portal, relationship and client oversight recorded':'no supervisor yet',s:!usedSups.length?'na':reqMiss.length?(endedC?'fail':'pending'):'ok'}];
   if(m.noservice)checks.forEach(c=>{c.s='na';c.d='not applicable: no services this month';});
   const live=checks.filter(c=>c.s!=='na');
   let status=m.noservice?'na':!any?'none':live.some(c=>c.s==='fail')?'fail':live.every(c=>c.s==='ok')&&hasService?'ok':'pending';
-  if(!m.noservice&&!hasService&&status==='pending'&&ended)status=live.some(c=>c.s==='fail')?'fail':'none';
-  return {k,first,last,ended,started,served,daysServed:new Set(served.map(d=>d.date)).size,rbtMin,plannedMin,C,cnt,supMin,indiv,obs,badMode,badCred,noSup,pct,need,needPlanned,ck,ckN:sc.length,checks,status,hasService,obsDates,usedSups,noservice:!!m.noservice,planned:m.days.some(d=>inM(d)&&!d.none&&d.date>today)};}
-const STW={ok:'met',pending:'open',fail:'not met',none:'—',na:'n/a'};
+  if(!m.noservice&&!hasService&&status==='pending'&&ended)status=live.some(c=>c.s==='fail')?'fail':hold?'entering':'none';
+  if(hold&&status==='pending')status='entering';
+  return {k,first,last,ended,started,served,daysServed:new Set(served.map(d=>d.date)).size,rbtMin,plannedMin,C,cnt,supMin,indiv,obs,badMode,badCred,noSup,pct,need,needPlanned,ck,ckN:sc.length,checks,status,hold,hasService,obsDates,usedSups,noservice:!!m.noservice,planned:m.days.some(d=>inM(d)&&!d.none&&d.date>today)};}
+const STW={ok:'met',pending:'open',fail:'not met',none:'—',na:'n/a',entering:'being entered'};
+const catchOn=()=>!!(S&&S.setup&&S.setup.catchup==='on');
+function signedBoth(m){const g=(m&&m.sig)||{};return !!((g.sup_img||(g.sup_name&&g.sup_date))&&(g.rbt_img||(g.rbt_name&&g.rbt_date)));}
+document.addEventListener('click',e=>{if(!(e.target.closest&&e.target.closest('#catchGo')))return;S.setup.catchup='on';renderAll();changed();
+  try{nbhUI.toast('Catch-up mode is on (Setup): a past month you are entering reads being entered until it is signed or marked entered.',{kind:'ok',ms:4200});}catch(x){}});
 const stw=s=>s.status==='ok'&&!s.ended?'on track':STW[s.status];   /* v24.29 (R-120) an open month is on track, not met */
 /* v24.29 (R-149, E-41) the supervisee table's words */
 function cntTxt(s){const n=s.cnt.length,need=rule('contacts');return n>=need?n+' ('+need+' needed)':n+' of '+need+' needed';}
@@ -1508,7 +1525,13 @@ const opts=(list,val,blankOpt)=>(blankOpt?'<option value=""></option>':'')+list.
 const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="rowDel noprint" data-del="'+r+'" data-i="'+esc(i)+'" title="Delete this '+what+'" aria-label="Delete this '+what+'">&times;</button></td>';
 
 /* ---------------- setup ---------------- */
-function renderSetup(){const st=S.setup;
+/* v24.49 the other readers' boxes: each that holds an address shows, and one more with + Another reader (five in all) */
+function ccPaint(open){const B=[2,3,4,5].map(i=>$('#shOther'+i)).filter(Boolean);if(!B.length)return;
+  B.forEach(b=>{if(b.value.trim())b.hidden=false;else if(!open&&document.activeElement!==b)b.hidden=true;});
+  if(open){const nx=B.find(b=>b.hidden);if(nx){nx.hidden=false;nx.focus();}}
+  const a=$('#shAddCc');if(a)a.hidden=B.every(b=>!b.hidden);}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#shAddCc'))ccPaint(true);});
+function renderSetup(){const st=S.setup;setTimeout(()=>ccPaint(false),0);
   $('#sYear').innerHTML=(()=>{const y0=schoolYearOf(new Date()),ys=[];for(let y=y0-3;y<=y0+2;y++)ys.push([String(y),y+'–'+String(y+1).slice(2)+' (Aug '+y+' to Jul '+(y+1)+')']);if(!ys.some(x=>x[0]===String(setupYear())))ys.unshift([String(setupYear()),setupYear()+'–'+String(setupYear()+1).slice(2)]);return opts(ys,String(setupYear()));})();
   $('#sAct').innerHTML=$('#mAct').innerHTML=opts(ACTS,st.day_act,true);
   $$('[data-s]').forEach(el=>{if(el.id==='sYear')return;el.value=st[el.dataset.s]==null?'':st[el.dataset.s];});
@@ -1566,7 +1589,7 @@ function renderMonth(){if(!yearKeys(setupYear()).includes(curKey))curKey=default
   renderMonthBar();
   $('#monthTitle').textContent=keyLabel(curKey)+': Service Days';
   renderMonthNudge();
-  renderDays();renderContacts();$('#monthNote').value=m.note||'';$('#monthRecords').value=m.records||'';$('#noSvc').checked=!!m.noservice;renderComp();
+  renderDays();renderContacts();$('#monthNote').value=m.note||'';$('#monthRecords').value=m.records||'';$('#noSvc').checked=!!m.noservice;{const ce=$('#enteredChip');if(ce){ce.hidden=!(catchOn()&&stats(curKey).ended&&!signedBoth(m))||!!m.noservice;$('#mEntered').checked=!!m.entered;}}renderComp();
   if(filled&&window.nbhUI)nbhUI.toast(keyLabel(curKey)+': '+filled+' usual service day'+(filled===1?'':'s')+' filled in. Mark holidays and absences as No service.');}
 function renderMonthNudge(){const st=S.setup;$('#setupNudge').innerHTML=!st.rbt_name||!S.sups.some(s=>s.name)?'<div class="instr"><b>Start with Setup.</b> Enter the RBT and the supervisors on the Setup page. The RBT&rsquo;s usual hours can be entered there or just below. <button class="tool" type="button" data-go="setup">Go to Setup</button></div>':'';}
 function renderDays(){const m=month(curKey),[y,mo]=curKey.split('-').map(Number),mn=iso(y,mo,1),mx=iso(y,mo,lastDay(y,mo)),today=todayISO();
@@ -1625,13 +1648,15 @@ function refreshContact(c){const card=$('details.rs-contact[data-cid="'+c.id+'"]
   const iss=$('#c_'+c.id+'_issues');if(iss)iss.innerHTML=issuesText(is,c);}
 function renderComp(){const s=stats(curKey),P=rule('pct');
   const fill=s.pct==null?0:Math.min(100,s.pct/(P*2)*100),mark=50;
-  const verdict={ok:s.ended?'Compliant: every check is met.':'On track: every check is met so far.',pending:'In progress: '+s.checks.filter(c=>c.s==='pending').length+' check'+(s.checks.filter(c=>c.s==='pending').length===1?'':'s')+' not met yet.',fail:s.ended?'Not met: see the red marks.':'Needs attention: see the red marks.',none:s.ended?'No service recorded this month. If the RBT did not practise, tick No services this month.':'Nothing recorded yet.',na:'Not applicable: no services this month, so no supervision is required.'}[s.status];
+  const verdict={ok:s.ended?'Compliant: every check is met.':'On track: every check is met so far.',pending:'In progress: '+s.checks.filter(c=>c.s==='pending').length+' check'+(s.checks.filter(c=>c.s==='pending').length===1?'':'s')+' not met yet.',fail:s.ended?'Not met: see the red marks.':'Needs attention: see the red marks.',none:s.ended?'No service recorded this month. If the RBT did not practise, tick No services this month.':'Nothing recorded yet.',na:'Not applicable: no services this month, so no supervision is required.',
+    entering:'Being entered (catch-up mode): '+s.checks.filter(c=>c.s==='pending').length+' check'+(s.checks.filter(c=>c.s==='pending').length===1?'':'s')+' not met yet. The month reads as met or not met once it is signed or marked All of this month is entered.'}[s.status];
   $('#compPanel').innerHTML='<div class="rs-comp" id="compBox" data-status="'+s.status+'"><h3>'+keyLabel(curKey)+'</h3>'+
     '<div class="pctwrap"><div class="pctbig">'+pctTxt(s.pct)+' <small>supervised, of '+P+'% needed</small></div>'+
     '<div class="rs-bar'+(s.pct!=null&&s.pct>=P-1e-9?' ok':'')+'" role="img" aria-label="'+pctTxt(s.pct)+' supervised against '+P+'%"><i style="width:'+fill.toFixed(1)+'%"></i><b style="left:'+mark+'%"></b></div>'+
     '<div class="need" id="needLine">'+(!s.hasService?'Enter the RBT&rsquo;s service days to see the minutes needed.':s.need>0?'<b>'+s.need+' more minute'+(s.need===1?'':'s')+'</b> of supervision needed for the hours so far'+(s.needPlanned>s.need?'; about '+s.needPlanned+' with the planned days':'')+'.':'Enough supervision for the hours so far'+(s.needPlanned>0?'; about '+s.needPlanned+' more minutes with the planned days':'')+'.')+'</div></div>'+
     '<ul>'+s.checks.map(c=>'<li data-check="'+c.k+'" data-s="'+c.s+'"><span class="rs-ico '+c.s+'" aria-hidden="true">'+ICO[c.s]+'</span><span class="what">'+esc(c.t)+'<small>'+esc(c.d)+'</small></span><span class="tag '+c.s+'">'+(c.s==='ok'?'met':c.s==='pending'?'not yet':c.s==='fail'?'not met':'—')+'</span></li>').join('')+'</ul>'+
     '<div class="verdictline '+(s.status==='none'?'na':s.status)+'" id="compVerdict">'+verdict+'</div>'+
+    (s.status==='fail'&&s.ended&&!catchOn()&&!signedBoth(peek(curKey))?'<p class="rs-catchnudge" id="catchNudge">Typing in a past month after the fact? With catch-up mode on, a month you are still entering reads &ldquo;being entered&rdquo;, not &ldquo;not met&rdquo;.<button type="button" class="tool" id="catchGo">Turn on catch-up mode</button></p>':'')+
     '<table aria-label="Monthly totals"><tbody>'+
       '<tr><td>Days the RBT provided services</td><td class="n" id="tDays">'+s.daysServed+'</td></tr>'+
       '<tr><td>Real-time (face-to-face) contacts</td><td class="n" id="tContacts">'+s.cnt.length+'</td></tr>'+
@@ -1648,13 +1673,13 @@ function renderComp(){const s=stats(curKey),P=rule('pct');
 /* ---------------- the year ---------------- */
 function renderYear(){const y=setupYear(),ks=yearKeys(y),A=ks.map(stats);
   $('#yearTitle').textContent='The Year: August '+y+' to July '+(y+1);
-  const rbt=A.reduce((s,a)=>s+a.rbtMin,0),sup=A.reduce((s,a)=>s+a.supMin,0),done=A.filter(a=>a.ended&&a.hasService),okN=done.filter(a=>a.status==='ok').length,cks=A.filter(a=>a.ck!=null);
+  const rbt=A.reduce((s,a)=>s+a.rbtMin,0),sup=A.reduce((s,a)=>s+a.supMin,0),done=A.filter(a=>a.ended&&a.hasService&&a.status!=='entering'),okN=done.filter(a=>a.status==='ok').length,cks=A.filter(a=>a.ck!=null);
   $('#yearMetrics').innerHTML='<div class="metric"><b>RBT hours</b><div class="val">'+hrs(rbt)+'</div><div class="sub">'+A.reduce((s,a)=>s+a.daysServed,0)+' days of service</div></div>'+
     '<div class="metric"><b>Supervision hours</b><div class="val">'+hrs(sup)+'</div><div class="sub">'+A.reduce((s,a)=>s+a.cnt.length,0)+' contacts that count</div></div>'+
     '<div class="metric '+(rbt&&sup/rbt*100>=rule('pct')?'m-ok':rbt?'m-mid':'')+'"><b>Percent supervised</b><div class="val">'+pctTxt(rbt?sup/rbt*100:null)+'</div><div class="sub">across the year; each month must meet '+rule('pct')+'% on its own</div></div>'+
     '<div class="metric '+(done.length?(okN===done.length?'m-ok':'m-no'):'')+'"><b>Months compliant</b><div class="val">'+okN+' of '+done.length+'</div><div class="sub">ended months with service</div></div>'+
     '<div class="metric"><b>Observation checklist</b><div class="val">'+(cks.length?Math.round(cks.reduce((s,a)=>s+a.ck,0)/cks.length)+'%':'—')+'</div><div class="sub">'+(cks.length?'average of '+cks.length+' month'+(cks.length===1?'':'s'):'no checklist scored')+'</div></div>';
-  const stTxt=a=>a.status==='ok'?(a.ended?'Yes':'On track'):a.status==='fail'?'No':a.status==='pending'?'In progress':a.status==='na'?'n/a (no services)':'—';
+  const stTxt=a=>a.status==='ok'?(a.ended?'Yes':'On track'):a.status==='fail'?'No':a.status==='entering'?'Being entered':a.status==='pending'?'In progress':a.status==='na'?'n/a (no services)':'—';
   $('#yearTbl').innerHTML='<thead><tr><th>Month</th><th>Days</th><th>RBT hours</th><th>Supervision hours</th><th>% supervised</th><th>Contacts</th><th>Individual</th><th>Observed with client</th><th>Checklist</th><th>Compliant</th></tr></thead><tbody>'+
     A.map(a=>'<tr class="open'+(a.k===curKey?' cur':'')+'" data-open-month="'+a.k+'" tabindex="0" role="button" aria-label="Open '+keyLabel(a.k)+'"><td>'+keyLabel(a.k)+'</td><td>'+(a.daysServed||'—')+'</td><td>'+(a.rbtMin?hrs(a.rbtMin):'—')+'</td><td>'+(a.supMin?hrs(a.supMin):'—')+'</td><td>'+pctTxt(a.pct)+'</td><td>'+(a.cnt.length||(a.C.length?'0':'—'))+'</td><td>'+(a.C.length?a.indiv:'—')+'</td><td>'+(a.C.length?a.obs:'—')+'</td><td>'+(a.ck!=null?Math.round(a.ck)+'%':'—')+'</td><td><span class="tag '+(a.status==='none'?'na':a.status)+'">'+(a.status==='ok'?'✓ ':a.status==='fail'?'✕ ':'')+stTxt(a)+'</span></td></tr>').join('')+
     '<tr class="tot"><td>The year</td><td>'+A.reduce((s,a)=>s+a.daysServed,0)+'</td><td>'+hrs(rbt)+'</td><td>'+hrs(sup)+'</td><td>'+pctTxt(rbt?sup/rbt*100:null)+'</td><td>'+A.reduce((s,a)=>s+a.cnt.length,0)+'</td><td>'+A.reduce((s,a)=>s+a.indiv,0)+'</td><td>'+A.reduce((s,a)=>s+a.obs,0)+'</td><td></td><td>'+okN+' of '+done.length+'</td></tr></tbody>';
@@ -1699,11 +1724,11 @@ function pduWarn(p){const t=ptOf(p.type),c0=S.cred.cycle_start,c1=S.cred.cycle_e
   if(p.date&&((c0&&p.date<c0)||(c1&&p.date>c1)))return 'Outside the cycle: PDUs count only inside it.';
   if(p.title&&!t)return 'Choose the type.';return '';}
 const pduCounts=p=>{const t=ptOf(p.type),c0=S.cred.cycle_start,c1=S.cred.cycle_end;return !!(t&&t[2])&&!(p.date&&((c0&&p.date<c0)||(c1&&p.date>c1)));};
-function pduTot(){const L=S.pdus.filter(pduCounts);return {u:L.reduce((s,p)=>s+(num(p.units)||0),0),e:L.filter(p=>p.ethics).reduce((s,p)=>s+(num(p.units)||0),0),n:L.length,x:S.pdus.length-L.length};}
+function pduTot(asOf){const L=S.pdus.filter(p=>pduCounts(p)&&!(asOf&&p.date&&p.date>asOf));return {u:L.reduce((s,p)=>s+(num(p.units)||0),0),e:L.filter(p=>p.ethics).reduce((s,p)=>s+(num(p.units)||0),0),n:L.length,x:S.pdus.length-L.length};}
 function pduOut(){const t=pduTot(),need=rule('pdu'),f=Math.min(100,need?t.u/need*100:0);S.pdus.forEach(p=>{const w=document.getElementById('p_'+p.id+'_warn');if(w)w.textContent=pduWarn(p);});
   $('#pduOut').innerHTML='<div class="metric '+(t.u>=need?'m-ok':'m-mid')+'" id="pduMetric" style="max-width:560px"><b>PDUs this cycle</b><div class="val">'+(Math.round(t.u*10)/10)+' of '+need+'</div><div class="rs-bar'+(t.u>=need?' ok':'')+'"><i style="width:'+f.toFixed(1)+'%"></i></div><div class="sub">'+(t.u>=need?'The target is met.':(Math.round((need-t.u)*10)/10)+' to go')+' · '+(Math.round(t.e*10)/10)+' in ethics'+(t.x?' · '+t.x+' entr'+(t.x===1?'y does':'ies do')+' not count':'')+(S.cred.cycle_start?' · cycle '+mdy(S.cred.cycle_start)+(S.cred.cycle_end?' to '+mdy(S.cred.cycle_end):''):'')+'</div></div>';}
 function compWin(){const e=fromIso(S.setup.rbt_exp);if(!e)return null;const a=new Date(e);a.setDate(a.getDate()-rule('remind'));return {from:isoOf(a),to:S.setup.rbt_exp};}
-function credState(){const st=S.setup,d=daysUntil(st.rbt_exp),r1=rule('remind'),r2=rule('remind2'),w=compWin();
+function credState(asOf){const st=S.setup,d=asOf?(()=>{const e=fromIso(st.rbt_exp),b=fromIso(asOf);return e&&b?Math.round((e-b)/86400000):null;})():daysUntil(st.rbt_exp),r1=rule('remind'),r2=rule('remind2'),w=compWin();
   if(d==null)return {lvl:'',t:'Enter the current expiration date on the Setup page to see the days left.'};
   const what=st.path==='renewal'?'the Recertification Competency Assessment (window '+mdy(w.from)+' to '+mdy(w.to)+') and the recertification application':st.path==='recert'?'the recertification ('+rule('pdu')+' PDUs in the cycle)':'the recertification';
   if(d<0)return {lvl:'no',d,t:'The certification expired '+(-d)+' day'+(d===-1?'':'s')+' ago ('+mdy(st.rbt_exp)+'). The RBT is inactive and may not practise or bill; reinstatement is possible for 30 days after the expiration date, with a late fee'+(d<-30?' (that period has passed: check with the BACB)':'')+'.'};
@@ -1752,7 +1777,7 @@ function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today
     '<div class="p-keep"><h4>Totals and compliance</h4><div class="p-two"><table class="p-t"><tbody>'+
       '<tr><td>Days the RBT provided services</td><td class="n">'+s.daysServed+'</td></tr><tr><td>Real-time (face-to-face) contacts</td><td class="n">'+s.cnt.length+'</td></tr><tr><td>Observations with a client</td><td class="n">'+s.obs+'</td></tr>'+
       '<tr><td>Total RBT hours</td><td class="n">'+hrs(s.rbtMin)+'</td></tr><tr><td>Supervision hours</td><td class="n">'+hrs(s.supMin)+'</td></tr><tr><td><b>Percent supervised (minimum '+rule('pct')+'%)</b></td><td class="n"><b>'+pctTxt(s.pct)+'</b></td></tr></tbody></table>'+
-      '<table class="p-t"><tbody>'+s.checks.map(c=>'<tr><td>'+esc(c.t)+'</td><td class="n">'+okTxt(c.s)+'</td></tr>').join('')+'<tr><td><b>The month</b></td><td class="n"><b>'+(s.status==='ok'?(s.ended?'<span class="p-ok">✓ compliant</span>':'<span class="p-ok">on track</span>'):s.status==='fail'?'<span class="p-no">✕ not compliant</span>':s.status==='pending'?'<span class="p-mid">in progress</span>':s.status==='na'?'not applicable (no services)':'no service')+'</b></td></tr></tbody></table></div>'+
+      '<table class="p-t"><tbody>'+s.checks.map(c=>'<tr><td>'+esc(c.t)+'</td><td class="n">'+okTxt(c.s)+'</td></tr>').join('')+'<tr><td><b>The month</b></td><td class="n"><b>'+(s.status==='ok'?(s.ended?'<span class="p-ok">✓ compliant</span>':'<span class="p-ok">on track</span>'):s.status==='fail'?'<span class="p-no">✕ not compliant</span>':s.status==='entering'?'<span class="p-mid">being entered</span>':s.status==='pending'?'<span class="p-mid">in progress</span>':s.status==='na'?'not applicable (no services)':'no service')+'</b></td></tr></tbody></table></div>'+
       '<p style="margin:4px 0 0"><b>Direct observations with a client:</b> '+(s.obsDates.length?s.obsDates.map(mdy).join(', '):'none')+'.</p>'+
       '<p style="margin:2px 0 0"><b>Supervisor&ndash;client oversight:</b> '+(s.usedSups.length?s.usedSups:S.sups.filter(x=>x.name&&isSupRole(x))).map(x=>esc(x.name)+': '+esc((OVERS.find(o=>o[0]===x.oversight)||[0,'not recorded'])[1].toLowerCase())+(x.oversight_note?' ('+esc(x.oversight_note)+')':'')).join('; ')+'.</p>'+
       (m.records?'<p style="margin:2px 0 0"><b>Other records:</b> '+esc(m.records)+'</p>':'')+
@@ -1761,21 +1786,32 @@ function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today
       '<div class="p-sig"><div><div class="sl">'+sigImg(sg.sup_img)+'</div><div class="cap"><span>Supervisor: '+esc(sg.sup_name||'')+'</span><span>Date: '+esc(mdy(sg.sup_date))+'</span></div></div>'+
       '<div><div class="sl">'+sigImg(sg.rbt_img)+'</div><div class="cap"><span>RBT: '+esc(sg.rbt_name||'')+'</span><span>Date: '+esc(mdy(sg.rbt_date))+'</span></div></div></div></div>'+
     '<div class="p-foot"><span>Keep this record for at least 7 years, also after the supervision ends; in an audit the BACB typically allows 14 days to submit it. Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks.</span><span>Form RS-1 · '+keyLabel(k)+'</span></div></div>';}
-function renderYearOut(){const y=setupYear(),A=yearKeys(y).map(stats),st=S.setup,c=credState(),t=pduTot();
+/* v24.49 (the BCBA, 10/26) the month the year summary runs through: the month being signed (auto), a chosen month, or the
+   whole year so far (null); and the date it stands at, that month's last day or today, whichever is earlier */
+function thruKey(){const v=(($('#yrThrough')||{}).value)||'auto',ks=yearKeys(setupYear());if(v==='all')return null;const k=v==='auto'?curKey:v;return ks.includes(k)?k:null;}
+function thruAsOf(k){if(!k)return null;const [y,mo]=k.split('-').map(Number),last=iso(y,mo,lastDay(y,mo)),t=todayISO();return last<t?last:t;}
+function thruPaint(){const sel=$('#yrThrough');if(!sel)return;const ks=yearKeys(setupYear()),now=keyOf(todayISO()),v=sel.value||'auto';
+  const upto=ks.filter(k=>k<=now||k===curKey);
+  sel.innerHTML='<option value="auto">the month being signed ('+esc(keyLabel(curKey))+')</option>'+upto.map(k=>'<option value="'+k+'">'+esc(keyLabel(k))+'</option>').join('')+'<option value="all">the whole year so far</option>';
+  sel.value=[...sel.options].some(o=>o.value===v)?v:'auto';}
+const blankStat=k=>({k,daysServed:0,rbtMin:0,supMin:0,pct:null,C:[],cnt:[],indiv:0,obs:0,ck:null,ckN:0,status:'',ended:false});
+function renderYearOut(){const y=setupYear(),ks=yearKeys(y),tk=thruKey(),cut=tk?ks.indexOf(tk):ks.length-1,asOf=thruAsOf(tk),
+    A=ks.map((k,i)=>i<=cut?stats(k):blankStat(k)),st=S.setup,c=credState(asOf),t=pduTot(asOf),part=tk&&cut<ks.length-1;
   const rbt=A.reduce((s,a)=>s+a.rbtMin,0),sup=A.reduce((s,a)=>s+a.supMin,0);
-  $('#yearOut').innerHTML='<div class="p-inner"><div class="p-title">RBT Supervision: Year Summary, '+y+'–'+(y+1)+'</div>'+headHTML('')+
+  const goals=asOf?S.goals.filter(g=>!g.set||g.set<=asOf):S.goals;
+  $('#yearOut').innerHTML='<div class="p-inner"><div class="p-title">RBT Supervision: Year Summary, '+y+'–'+(y+1)+(part?', through '+esc(keyLabel(tk)):'')+'</div>'+headHTML('')+
     '<h4>By month</h4><table class="p-t"><thead><tr><th>Month</th><th>Days</th><th>RBT hours</th><th>Supervision hours</th><th>% supervised</th><th>Contacts</th><th>Individual</th><th>Observed</th><th>Checklist</th><th>Compliant</th></tr></thead><tbody>'+
-    A.map(a=>'<tr><td>'+keyLabel(a.k)+'</td><td class="n">'+(a.daysServed||'—')+'</td><td class="n">'+(a.rbtMin?hrs(a.rbtMin):'—')+'</td><td class="n">'+(a.supMin?hrs(a.supMin):'—')+'</td><td class="n">'+pctTxt(a.pct)+'</td><td class="n">'+(a.C.length?a.cnt.length:'—')+'</td><td class="n">'+(a.C.length?a.indiv:'—')+'</td><td class="n">'+(a.C.length?a.obs:'—')+'</td><td class="n">'+(a.ck!=null?Math.round(a.ck)+'%':'—')+'</td><td class="n">'+(a.status==='ok'?(a.ended?'<span class="p-ok">✓ yes</span>':'on track'):a.status==='fail'?'<span class="p-no">✕ no</span>':a.status==='pending'?'in progress':a.status==='na'?'n/a (no services)':'—')+'</td></tr>').join('')+
-    '<tr><td><b>The year</b></td><td class="n"><b>'+A.reduce((s,a)=>s+a.daysServed,0)+'</b></td><td class="n"><b>'+hrs(rbt)+'</b></td><td class="n"><b>'+hrs(sup)+'</b></td><td class="n"><b>'+pctTxt(rbt?sup/rbt*100:null)+'</b></td><td class="n"><b>'+A.reduce((s,a)=>s+a.cnt.length,0)+'</b></td><td class="n">'+A.reduce((s,a)=>s+a.indiv,0)+'</td><td class="n">'+A.reduce((s,a)=>s+a.obs,0)+'</td><td></td><td></td></tr></tbody></table>'+
+    A.map(a=>'<tr><td>'+keyLabel(a.k)+'</td><td class="n">'+(a.daysServed||'—')+'</td><td class="n">'+(a.rbtMin?hrs(a.rbtMin):'—')+'</td><td class="n">'+(a.supMin?hrs(a.supMin):'—')+'</td><td class="n">'+pctTxt(a.pct)+'</td><td class="n">'+(a.C.length?a.cnt.length:'—')+'</td><td class="n">'+(a.C.length?a.indiv:'—')+'</td><td class="n">'+(a.C.length?a.obs:'—')+'</td><td class="n">'+(a.ck!=null?Math.round(a.ck)+'%':'—')+'</td><td class="n">'+(a.status==='ok'?(a.ended?'<span class="p-ok">✓ yes</span>':'on track'):a.status==='fail'?'<span class="p-no">✕ no</span>':a.status==='entering'?'being entered':a.status==='pending'?'in progress':a.status==='na'?'n/a (no services)':'—')+'</td></tr>').join('')+
+    '<tr><td><b>'+(part?'Through '+esc(keyLabel(tk)):'The year')+'</b></td><td class="n"><b>'+A.reduce((s,a)=>s+a.daysServed,0)+'</b></td><td class="n"><b>'+hrs(rbt)+'</b></td><td class="n"><b>'+hrs(sup)+'</b></td><td class="n"><b>'+pctTxt(rbt?sup/rbt*100:null)+'</b></td><td class="n"><b>'+A.reduce((s,a)=>s+a.cnt.length,0)+'</b></td><td class="n">'+A.reduce((s,a)=>s+a.indiv,0)+'</td><td class="n">'+A.reduce((s,a)=>s+a.obs,0)+'</td><td></td><td></td></tr></tbody></table>'+
     '<div class="p-keep"><h4>Percent supervised by month</h4>'+pctChart(A,true)+'</div>'+
     '<div class="p-keep"><h4>The credential and the goals</h4><p style="margin:2px 0">'+esc(c.t)+(st.path==='recert'?' PDUs this cycle: '+(Math.round(t.u*10)/10)+' of '+rule('pdu')+' ('+(Math.round(t.e*10)/10)+' in ethics).':st.path==='renewal'?' Competency assessment: '+(S.cred.comp_date?mdy(S.cred.comp_date):'not recorded')+'; application: '+(S.cred.applied?mdy(S.cred.applied):'not submitted')+'.':'')+'</p>'+
-    (S.goals.length?'<table class="p-t"><thead><tr><th>Goal</th><th style="width:12%">Set</th><th style="width:12%">Target</th><th style="width:12%">Status</th></tr></thead><tbody>'+S.goals.map(g=>'<tr><td>'+esc(g.goal)+(g.notes?'<br><i>'+esc(g.notes)+'</i>':'')+'</td><td>'+esc(mdy(g.set))+'</td><td>'+esc(mdy(g.target))+'</td><td>'+esc(g.status||'')+'</td></tr>').join('')+'</tbody></table>':'<p class="p-empty">No goals recorded.</p>')+'</div>'+
-    '<div class="p-foot"><span>Keep supervision records for at least 7 years, also after the supervision ends; in an audit the BACB typically allows 14 days. Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks.</span><span>Form RS-1 · year summary · printed '+mdy(todayISO())+'</span></div></div>';}
+    (goals.length?'<table class="p-t"><thead><tr><th>Goal</th><th style="width:12%">Set</th><th style="width:12%">Target</th><th style="width:12%">Status</th></tr></thead><tbody>'+goals.map(g=>'<tr><td>'+esc(g.goal)+(g.notes?'<br><i>'+esc(g.notes)+'</i>':'')+'</td><td>'+esc(mdy(g.set))+'</td><td>'+esc(mdy(g.target))+'</td><td>'+esc(g.status||'')+'</td></tr>').join('')+'</tbody></table>':'<p class="p-empty">No goals recorded.</p>')+'</div>'+
+    '<div class="p-foot"><span>Keep supervision records for at least 7 years, also after the supervision ends; in an audit the BACB typically allows 14 days. Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks.</span><span>Form RS-1 · year summary'+(part?' through '+esc(keyLabel(tk)):'')+' · printed '+mdy(todayISO())+'</span></div></div>';}
 function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent='Sign the Record for '+keyLabel(curKey);
   $$('[data-sg]').forEach(el=>{el.value=sg[el.dataset.sg]||'';});
   const sp=S.sups.find(s=>s.name&&credOK(s.cred));$('#sgSup').placeholder=sp?supLabel(sp):'name, credential';$('#sgRbt').placeholder=S.setup.rbt_name?(S.setup.rbt_name+', '+(S.setup.rbt_cred||'RBT')):'name, RBT';
   $$('canvas.rs-pad').forEach(cv=>padDraw(cv,sg[cv.dataset.pad]));}
-function renderPrint(){month(curKey);renderSign();renderMonthOut();renderYearOut();rdYear();rdListPaint();renderConcernOut();}
+function renderPrint(){month(curKey);renderSign();thruPaint();renderMonthOut();renderYearOut();rdYear();rdListPaint();renderConcernOut();}
 
 /* the signature pads: a finger or a stylus draws; the drawing is kept with the month as an image, which the record prints */
 function padDraw(cv,src){const x=cv.getContext&&cv.getContext('2d');if(!x)return;x.clearRect(0,0,cv.width,cv.height);if(src&&/^data:image\/png;base64,/.test(src)){const im=new Image();im.onload=()=>{x.clearRect(0,0,cv.width,cv.height);x.drawImage(im,0,0);};im.src=src;}}
@@ -1815,8 +1851,8 @@ function rdRow(c){const L=c.readings||[];if(!L.length)return '';
   return '<tr class="sub"><td colspan="8"><b>Readings discussed:</b>'+L.map(r=>'<div style="margin:3px 0 5px 10px">'+esc(r.apa)+(r.doi?' <span style="color:#444">https://doi.org/'+esc(r.doi)+'</span>':'')+(r.disc?'<br><b>Discussed:</b> '+esc(r.disc):'')+(r.next?'<br><b>Follow-up:</b> '+esc(r.next):'')+'</div>').join('')+'</td></tr>';}
 function rdListPaint(){const el=$('#readList');if(!el)return;const L=rdAll();
   el.innerHTML=L.length?L.map(x=>'<div class="rs-rd"><div class="rd-apa"><b>'+esc(mdy(x.c.date)||keyLabel(x.k))+'</b> &middot; '+esc(x.r.apa)+rdDoi(x.r)+'</div>'+(x.r.disc?'<div><b>Discussed:</b> '+esc(x.r.disc)+'</div>':'')+(x.r.next?'<div><b>Follow-up:</b> '+esc(x.r.next)+'</div>':'')+'</div>').join(''):'<p class="hint">No readings yet this year.</p>';}
-function rdYear(){const y=setupYear(),n=rdAll().filter(x=>yearKeys(y).indexOf(x.k)>=0).length,box=$('#yearOut .p-foot');if(!box)return;
-  box.insertAdjacentHTML('beforebegin','<p class="p-att"><b>Readings discussed in supervision this year:</b> '+n+(n?' (each listed on the RBT record with what was discussed and the follow-up)':'')+'</p>');}
+function rdYear(){const y=setupYear(),ks=yearKeys(y),tk=thruKey(),cut=tk?ks.indexOf(tk):ks.length-1,n=rdAll().filter(x=>{const i=ks.indexOf(x.k);return i>=0&&i<=cut;}).length,box=$('#yearOut .p-foot');if(!box)return;
+  box.insertAdjacentHTML('beforebegin','<p class="p-att"><b>Readings discussed in supervision '+(tk&&cut<ks.length-1?'through '+esc(keyLabel(tk)):'this year')+':</b> '+n+(n?' (each listed on the RBT record with what was discussed and the follow-up)':'')+'</p>');}
 let rdFor=null;
 function rdPick(cid){rdFor=cid;let d=$('#rdPick');
   if(!d){document.body.insertAdjacentHTML('beforeend','<dialog id="rdPick" class="rs-rdpick" aria-label="Add a reading"><div class="in"><h3>Add a reading</h3>'+
@@ -1844,7 +1880,7 @@ function onField(el,ev){
   const v=el.type==='checkbox'?el.checked:el.value;
   if(el.dataset.s!==undefined){if(el.dataset.s==='year'&&ev!=='change')return;S.setup[el.dataset.s]=v;
     $$('[data-s="'+el.dataset.s+'"]').forEach(x=>{if(x!==el&&x.id!=='sYear')x.value=v;});if(/^day_/.test(el.dataset.s)){usualHint();if(ev==='change')renderMonthNudge();}
-    if(el.dataset.s==='year'){curKey=defaultKey();renderMonthBar();}if(el.dataset.s==='clients')supLists();if(el.dataset.s==='path'||el.dataset.s==='rbt_exp')renderCred();if(el.dataset.s==='rbt_name'||el.dataset.s==='rbt_exp')renderWho();return;}
+    if(el.dataset.s==='year'){curKey=defaultKey();renderMonthBar();}if(el.dataset.s==='catchup'){renderAll();return;}if(el.dataset.s==='clients')supLists();if(el.dataset.s==='path'||el.dataset.s==='rbt_exp')renderCred();if(el.dataset.s==='rbt_name'||el.dataset.s==='rbt_exp')renderWho();return;}
   if(el.dataset.wd!==undefined){const d=+el.dataset.wd,set=new Set(S.setup.days||[]);el.checked?set.add(d):set.delete(d);S.setup.days=[...set].sort();
     $$('input[data-wd="'+d+'"]').forEach(x=>{if(x!==el)x.checked=el.checked;});usualHint();return;}
   if(el.dataset.r!==undefined){S.rules[el.dataset.r]=v;renderReq();renderComp();return;}
@@ -1860,7 +1896,7 @@ function onField(el,ev){
     else c[el.dataset.f]=v;
     if(ev==='change'&&el.dataset.f==='date'&&moveTo('contacts',c))return;
     refreshContact(c);renderComp();return;}
-  if(el.dataset.mo!==undefined){month(curKey)[el.dataset.mo]=v;if(el.dataset.mo==='noservice')renderMonth();return;}
+  if(el.dataset.mo!==undefined){month(curKey)[el.dataset.mo]=v;if(el.dataset.mo==='entered'&&!v)delete month(curKey).entered;if(el.dataset.mo==='noservice'||el.dataset.mo==='entered'){renderMonth();renderMonthBar();}return;}
   if(el.dataset.cn!==undefined){const c=S.concerns.find(x=>x.id===el.dataset.cn);if(c)c[el.dataset.f]=v;return;}
   if(el.dataset.g!==undefined){const g=S.goals.find(x=>x.id===el.dataset.g);if(g)g[el.dataset.f]=v;if(ev==='change'&&el.dataset.f!=='goal'&&el.dataset.f!=='notes')renderRbtKeep(el);return;}
   if(el.dataset.p!==undefined){const p=S.pdus.find(x=>x.id===el.dataset.p);if(p)p[el.dataset.f]=v;pduOut();renderCred();return;}
@@ -1986,6 +2022,7 @@ $('#printMonth2').addEventListener('click',()=>printOnly('rs-print-month'));
 $('#yearPrintBtn').addEventListener('click',()=>printOnly('rs-print-year'));
 $('#printYear2').addEventListener('click',()=>printOnly('rs-print-year'));
 window.addEventListener('beforeprint',()=>{try{renderPrint();}catch(e){}});
+$('#yrThrough')&&$('#yrThrough').addEventListener('change',()=>{renderYearOut();rdYear();});   /* v24.49 */
 /* the workstation's printed packet takes the two records, not the editing pages */
 window.nbhPrintNodes=function(){renderPrint();return [$('#monthOut'),$('#yearOut')];};
 
@@ -2033,7 +2070,7 @@ function fromFile(d){
   o.sups.forEach(x=>{if(!x.bcba)delete x.bcba;});   /* v24.29 the key only when it holds something: a file reads back equal to what was saved */
   const ru=obj(s.rules);Object.keys(RULES0).forEach(k=>{if(ru[k]!=null&&ru[k]!=='')o.rules[k]=str(ru[k]);});
   const ms=obj(s.months);Object.keys(ms).filter(k=>/^\d{4}-\d{2}$/.test(k)).slice(0,240).forEach(k=>{const m=obj(ms[k]),sg=obj(m.sig);
-    o.months[k]={filled:!!m.filled,note:str(m.note),records:str(m.records),noservice:!!m.noservice,
+    o.months[k]={filled:!!m.filled,note:str(m.note),records:str(m.records),noservice:!!m.noservice,...(m.entered?{entered:true}:{}),
       days:arr(m.days).slice(0,62).map(x=>({id:str(x&&x.id)||uid(),date:isoS(x&&x.date),start:hm(x&&x.start),end:hm(x&&x.end),brk:str(x&&x.brk),act:ACTS.includes(x&&x.act)?x.act:'',none:!!(x&&x.none)})),
       contacts:arr(m.contacts).slice(0,60).map(x=>{x=obj(x);const ck={};Object.keys(obj(x.ck)).forEach(i=>{if(+i>=0&&+i<CHECK.length&&['y','n','na'].includes(x.ck[i]))ck[+i]=x.ck[i];});
         const ckItems=arr(x.ckItems).slice(0,120).map(it=>({t:str(it&&it.t).slice(0,400),crit:!!(it&&it.crit),comp:str(it&&it.comp).slice(0,40)})).filter(it=>it.t);const ckp={};Object.keys(obj(x.ckp)).forEach(i=>{if(+i>=0&&+i<ckItems.length&&['y','n','na'].includes(x.ckp[i]))ckp[+i]=x.ckp[i];});   /* v24.29 */
@@ -3367,6 +3404,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
 <style id="rs97-css">
 .rs-read{margin:12px 0 4px;border-top:1px dashed var(--rule-2);padding-top:8px}
+.rs-thru{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:13px;color:var(--ink-soft);margin-left:6px}.rs-thru select{font:inherit;font-size:14px;min-height:40px;padding:4px 8px}   /* v24.49 */
 .rs-read h4{font-family:var(--sans);font-size:13px;margin:0 0 6px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
 .rs-read h4 .hint{font-weight:400}
 .rs-rd{border:1px solid var(--rule-2);border-radius:4px;padding:8px 10px;margin:6px 0;background:#fbfcfc}
@@ -3396,6 +3434,8 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .fieldgrid>div.rs-len>.tool{min-width:76px!important;justify-content:center;text-align:center}   /* the shared touch rule sets a minimum with !important */
 .fieldgrid>div.rs-len>.hint{margin:0 4px 0 0}
 .rs-share .hint{margin:0}
+.rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
+.fieldgrid.rs-share{align-items:start!important}.fieldgrid.rs-share>div{justify-content:flex-start!important}
 #shNote:empty{display:none}
 </style>
 <script id="rs-readings" src="nbh-readings.js"></script>
@@ -3420,7 +3460,8 @@ function subject(kind){const m=($('#monthTitle')||{}).textContent||'';const mon=
 function say(t,kind){const el=$('#shNote');if(!el)return;el.textContent=t;el.style.color=kind==='warn'?'#8E2A2A':'';}
 function saveFile(kind){const pg=page(kind);if(!pg){say('Nothing to save yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return false;}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pg.html],{type:'text/html'}));a.download=(pg.title.replace(/[\\/:*?"<>|]+/g,' ').trim())+'.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);return true;}
-function recipients(){const L=[];const r=($('#shRbt')||{}).value||'',o=($('#shOther')||{}).value||'';if(r.trim())L.push({to:r.trim(),name:rbt()});if(o.trim())L.push({to:o.trim(),name:''});return L;}
+function recipients(){const L=[],seen=new Set(),put=(to,name)=>{to=String(to||'').trim();const k=to.toLowerCase();if(!to||seen.has(k))return;seen.add(k);L.push({to,name});};   /* v24.49 the RBT, then up to five other readers, each once */
+  put(($('#shRbt')||{}).value,rbt());document.querySelectorAll('.rs-cc input[type=email]').forEach(e=>put(e.value,''));return L;}
 function b64u(t){const u=new TextEncoder().encode(t);let b='';for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(b);}
 function fileName(pg){return pg.title.replace(/[\\/:*?"<>|]+/g,' ').trim()+'.html';}
 function noteText(pg){return pg.title+'\n\nThe record is attached as a page ('+fileName(pg)+'): open it on any device to read it, with the signatures as drawn. It is the record as it prints; concerns and corrective action are not part of it.\n\nSent from the FBA and BIP Workstation, Form RS-1.';}

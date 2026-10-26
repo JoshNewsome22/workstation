@@ -1017,7 +1017,9 @@ try { (function(){
     { form: 'TD-1', sel: 'input[name^="tr["][name$="].who"]' },
     { form: 'RR-1', sel: 'input[name^="f["][name$="].by"]' },
     { form: 'TB-1', sel: 'input[name^="cand["][name$="].by"]' },
-    { form: 'RS-1', sel: '#sName,input[data-sup][data-f="name"]' }
+    { form: 'RS-1', sel: '#sName,input[data-sup][data-f="name"]' },
+    /* v24.49 (the BCBA, 10/26) RS-1's emails: the RBT's and up to five other readers of the shared record */
+    { form: 'RS-1', sel: '#sEmail,#shRbt,input[id^="shOther"]', field: 'email' }
   ];
   function key(s){ return String(s == null ? '' : s).trim().toLowerCase().replace(/\s+/g, ' '); }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }

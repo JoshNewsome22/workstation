@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.49: Form RS-1: the year summary runs through a chosen month, and a catch-up mode for entering past months, and up to five readers from the staff directory (the BCBA, 10/26)
+- **The year summary stops at the month being signed.** A record for an earlier month, entered later (August's
+  supervision typed and signed in October), printed the year summary with September's and October's figures in the table
+  and the chart, as if it had been written in October. Beside Print the year, "The year summary runs through" now
+  offers the month being signed (the default), any month of the school year up to this one, or the whole year so far.
+- Through a month, the summary is the year as it stood at that month's end: the months after it are left blank in the
+  table and the chart, the totals row reads "Through August 2026" (for example), the title adds ", through August 2026",
+  the credential's days left and the PDUs this cycle are counted at that month's end, and the goals and the readings
+  discussed are those set or read that month or before. The months' own records are unchanged; only the summary is cut.
+- The choice follows the month being signed: open September and the summary runs through September, unless a month or
+  the whole year was chosen. The printed date at the foot stays the real date ("year summary through August 2026 ·
+  printed 10/26/2026"), so the paper shows when it was produced.
+- The months after it stay on the table and the chart, blank, as months that have not happened yet: no figures, no
+  verdict and no "not met" mark.
+- **Catch-up mode** (Setup, "Catch-up mode (entering past months)"), for moving supervision records into the workstation
+  after the fact. A month that has ended reads "being entered", not "not met", until it is signed by both or ticked
+  "All of this month is entered" (beside "No services this month"); then it gives its real verdict. "Being entered"
+  shows on the month bar, the compliance panel (its checks still open read "not yet"), the year table, the chart (no
+  "not met" mark) and the printed records, and such a month is left out of "Months compliant". A real problem still
+  shows in the mode: a supervisor without a BCBA or BCaBA, a group over the limit. Months nothing has been entered for
+  stay blank in either mode. With the mode off, a past month that is not met offers "Turn on catch-up mode" under its
+  verdict. The tick is kept in the file only when set, so files saved before read back the same.
+- **Up to five other readers for the shared record, picked from the staff directory.** Share the Record had one box for
+  "another reader", for that one send only, so the same addresses were typed every month. Now "Other readers' emails
+  (kept with this RBT)" holds up to five: one box shows, and "+ Another reader" opens the next. They are kept with the
+  RBT in the file, so every record sent goes to the RBT and to them, each address once. Tapping any of these boxes, or
+  the RBT's own email (here or on Setup), offers the workstation's staff directory: pick a person and the address fills.
+- Also: three labels on RS-1 (the RBT copy button and its title, "this form's file") and the remove button on SP-1
+  showed an escape code as text (backslash, u, four digits) where an apostrophe or a cross belongs; they now show the
+  character.
+- Tests: qa/rs149-test.js (with the simulation loaded and August signed: the months after August blank in the table and
+  the chart, totals "Through August 2026", credential days left from August 31, readings through August; the printed PDF
+  carries no later month's figures; "the whole year so far" brings them back; the choice follows the month being signed;
+  the printed date is today's; no escape code shows as text on RS-1 or SP-1). qa/rs149-catchup-test.js (an August record
+  half entered in October, simulated: not met with the mode off and the offer to turn it on; "being entered" on the month
+  bar, the panel, the year table, the printed summary and the chart, left out of Months compliant; a supervisor without
+  a credential still not met; ticked entered or signed by both, the real verdict; met once complete; the tick kept in
+  the file only when set; September blank in either mode). qa/rs97-test.js reads "Readings discussed in supervision
+  through <month>", the new default, as well as "this year". qa/rs149-readers-test.js (one reader box and + Another reader; a pick
+  from the staff directory fills the box and is kept; five boxes, then the button goes; a send goes to the RBT and each
+  reader once; kept in the file and shown again, an emptied box not; the RBT's email on Setup picks from the directory;
+  simulated names and addresses).
+
 ### v24.48: Relapse and its mitigation (Kimball, Greer, Fuhrman & Lambert, 2023): Form RS-1's readings, Form TD-1's relapse safeguards
 - **Form RS-1, Readings discussed.** The reading you sent is in the picker (search "relapse", "resurgence" or "Kimball"),
   with its DOI and a summary written for the RBT: the four ways problem behavior a plan brought down can come back
