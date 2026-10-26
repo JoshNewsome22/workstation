@@ -47,10 +47,10 @@ const {chromium,fs,path,ROOT,BASE,forms,sleep}=require(__dirname+'/lib.js');
 const {execFileSync}=require('child_process');
 const ED=process.argv[2]||'NBH-Workstation';
 const OUT=__dirname+'/out/sprint-a6/';
-const A6_BASE=process.env.A6_BASE||'6e2fe576';   /* v23.70: its own release commit (ABC-1's sound in detail: the pitch bands and loud moments on the Record screen and in the summary, on purpose). v23.41: its own release commit (the BCBA's wording of ABC-1's sound meter note, a line shorter). v23.39: its own release commit (ABC-1's Record and Background screens grew on purpose in v23.38 and v23.39: the sound level row and box, Edit on each sample; print unchanged). v23.16: v23.07's own release commit; the MT-1 helper commit it named came from an older base whose TI-1 predated v22.87 and v22.94. v23.07 re-baselined to the MT-1 Wave 3 commit, whose MT-1 changed on purpose (review F109-F116, I56-I60: the identity fields, the interval selector, the observer-2 file and typed marks, the chance agreement under each IOA figure, the log's time, setting and observer, the measure on the graph and the conditions under it), so its taps' agreement text and its printed pages differ from before; TI-1 and ABC-1 are as at v22.81. v22.51 re-baselined to v22.51, whose ABC-1 changed on purpose (review F79-F88, I43-I45: the header's minutes observed and consent line, the background sample's seconds and activity, the summary's wording), so its record, its first printed page and its saved samples differ from before. v22.15 re-baselined to v22.10, which put the student and "Page N of M" on every page of a form printed on its own (review F477), on purpose. v21.97 re-baselined: v21.96 took MT-1's timing row, TI-1's hint and the simulation notes off the paper on purpose */
+const A6_BASE=process.env.A6_BASE||'7c704008';   /* v24.28: its own release commit (the narrative rows under the incidents since v24.15 and the Record header card since v24.16 print differently, on purpose). v23.70: its own release commit (ABC-1's sound in detail: the pitch bands and loud moments on the Record screen and in the summary, on purpose). v23.41: its own release commit (the BCBA's wording of ABC-1's sound meter note, a line shorter). v23.39: its own release commit (ABC-1's Record and Background screens grew on purpose in v23.38 and v23.39: the sound level row and box, Edit on each sample; print unchanged). v23.16: v23.07's own release commit; the MT-1 helper commit it named came from an older base whose TI-1 predated v22.87 and v22.94. v23.07 re-baselined to the MT-1 Wave 3 commit, whose MT-1 changed on purpose (review F109-F116, I56-I60: the identity fields, the interval selector, the observer-2 file and typed marks, the chance agreement under each IOA figure, the log's time, setting and observer, the measure on the graph and the conditions under it), so its taps' agreement text and its printed pages differ from before; TI-1 and ABC-1 are as at v22.81. v22.51 re-baselined to v22.51, whose ABC-1 changed on purpose (review F79-F88, I43-I45: the header's minutes observed and consent line, the background sample's seconds and activity, the summary's wording), so its record, its first printed page and its saved samples differ from before. v22.15 re-baselined to v22.10, which put the student and "Page N of M" on every page of a form printed on its own (review F477), on purpose. v21.97 re-baselined: v21.96 took MT-1's timing row, TI-1's hint and the simulation notes off the paper on purpose */
 /* v21.86 the layout check (part 2) compares with the forms of the last delivered release, not with the forms before this
    package: later releases changed the layout on purpose (ABC-1's analysis table), so the old comparison only drifted */
-const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'49777797';   /* v23.88: its own release commit (the masthead's paragraph runs the width, so every element under it sits higher, on purpose). v23.70: as A6_BASE above. v23.41: as A6_BASE above. v23.39: its own release commit, as A6_BASE above. v23.16: v23.07's own release commit, as A6_BASE above. v23.07 re-baselined to the MT-1 Wave 3 commit (MT-1's sheet and log grew on purpose, as above). v22.51 re-baselined to v22.51 (ABC-1's record, background and analysis tabs grew on purpose, review F79-F88, I43-I45). v22.15 re-baselined to v22.07, whose truer privacy note in every form is one line longer at 1180 px (review F478), so everything under it sits 18 px lower on purpose. v21.97 re-baselined: v21.93's forms pass (boxes everywhere, 80-character lines, 12 px labels) and v21.94's Dictate switch in the toolbar moved the screen layout on purpose */
+const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'7c704008';   /* v24.28: its own release commit (the Record header card v24.16, the analysis selector's topography note and the By topography table v24.28, on purpose). v23.88: its own release commit (the masthead's paragraph runs the width, so every element under it sits higher, on purpose). v23.70: as A6_BASE above. v23.41: as A6_BASE above. v23.39: its own release commit, as A6_BASE above. v23.16: v23.07's own release commit, as A6_BASE above. v23.07 re-baselined to the MT-1 Wave 3 commit (MT-1's sheet and log grew on purpose, as above). v22.51 re-baselined to v22.51 (ABC-1's record, background and analysis tabs grew on purpose, review F79-F88, I43-I45). v22.15 re-baselined to v22.07, whose truer privacy note in every form is one line longer at 1180 px (review F478), so everything under it sits 18 px lower on purpose. v21.97 re-baselined: v21.93's forms pass (boxes everywhere, 80-character lines, 12 px labels) and v21.94's Dictate switch in the toolbar moved the screen layout on purpose */
 const WASL={};
 const COMPARE=ED==='NBH-Workstation'||!!process.env.A6_BASE;
 const A6_OLD=process.env.A6_OLD||'';
@@ -266,6 +266,21 @@ const incReach=t=>t.evaluate(async()=>{const box=document.getElementById('inc-ta
     for(const b of tr.querySelectorAll('[data-edit],[data-del]')){const r=b.getBoundingClientRect(),hit=document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);
       out.push({f,at:Math.round(r.left)+'-'+Math.round(r.right),inBox:r.left>=bb.left-0.5&&r.right<=bb.right+0.5,hit:!!hit&&(hit===b||b.contains(hit))});}}
   box.scrollLeft=0;return {wider:box.scrollWidth>box.clientWidth+1,box:Math.round(box.getBoundingClientRect().left)+'-'+Math.round(box.getBoundingClientRect().right),res:out};});
+/* v24.28 (R-060, E-45) under 900 px the incident list has no Edit and Delete column: a tap on a row opens the incident as a card
+   with Edit and Delete inside; the row takes the tap wherever the list is scrolled sideways */
+const narrowInc=t=>t.evaluate(()=>matchMedia('(max-width:900px)').matches);
+const incCard=t=>t.evaluate(async()=>{const A=window.__a6,box=document.getElementById('inc-table'),tr=box.querySelector('tbody tr');
+  const hidden=[...box.querySelectorAll('[data-edit],[data-del]')].every(e=>!A.vis(e));tr.children[3].click();await new Promise(r=>setTimeout(r,300));
+  const d=document.getElementById('abcIncCard'),open=!!d&&d.style.display==='block';const rep=A.report([...document.querySelectorAll('#abcIncCard [data-edit],#abcIncCard [data-del]')].filter(e=>A.vis(e)));
+  const close=d&&d.querySelector('[data-close]:not([data-edit]):not([data-del])');if(close)close.click();await new Promise(r=>setTimeout(r,100));return Object.assign({hidden,open},rep);});
+const incReachCard=t=>t.evaluate(async()=>{const box=document.getElementById('inc-table'),out=[];box.scrollIntoView({block:'center'});
+  for(const f of [0,0.5,1]){box.scrollLeft=Math.round((box.scrollWidth-box.clientWidth)*f);box.scrollTop=0;await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    const bb=box.getBoundingClientRect(),th=box.querySelector('thead');const top=Math.max(bb.top,th?th.getBoundingClientRect().bottom:bb.top);
+    const tr=[...box.querySelectorAll('tbody tr')].find(t=>{const r=t.getBoundingClientRect();return r.top>=top&&r.bottom<=Math.min(bb.bottom,innerHeight);});
+    if(!tr){out.push({f,err:'no row in view'});continue;}const r=tr.getBoundingClientRect();const x=Math.min(Math.max(bb.left+24,r.left+12),bb.right-24),y=(r.top+r.bottom)/2;
+    const hit=document.elementFromPoint(x,y);if(hit)hit.click();await new Promise(r=>setTimeout(r,250));const d=document.getElementById('abcIncCard');out.push({f,open:!!d&&d.style.display==='block',hit:hit&&hit.tagName});
+    const close=d&&d.querySelector('[data-close]:not([data-edit]):not([data-del])');if(close)close.click();await new Promise(r=>setTimeout(r,100));}
+  box.scrollLeft=0;return {wider:box.scrollWidth>box.clientWidth+1,res:out};});
 async function abcTouch(br,W,H){
   const tag=`touch ${W}x${H}: ABC-1`;const ctx=await fresh(br,{viewport:{width:W,height:H},hasTouch:true});
   const p=await open(ctx,NOW['ABC-1'],tag);await sim(p);
@@ -297,11 +312,15 @@ async function abcTouch(br,W,H){
   ok(tag+': while observing, the bar\'s buttons are at least 44 x 44 px and 4 px apart',bar.n>=2&&!bar.small.length&&bar.near>=4,bar);
   await p.evaluate(()=>document.getElementById('obsEnd').click());await sleep(400);if(await uiDlg(p))await uiPress(p,(await uiDlg(p)).buttons.slice(-1)[0]);await sleep(300);
   await view(p,'incidents');
-  const inc=await p.evaluate(()=>{const A=window.__a6;return A.report([...document.querySelectorAll('#inc-table [data-edit],#inc-table [data-del]')].filter(e=>A.vis(e)));});
+  if(await narrowInc(p)){const card=await incCard(p);
+    ok(tag+': Incidents (narrow): the Edit and Delete column is gone; a tap on a row opens the incident as a card whose Edit and Delete are at least 44 x 44 px and 4 px apart (v24.28)',card.hidden&&card.open&&card.n===2&&!card.small.length&&card.near>=4,card);
+    const reach=await incReachCard(p);
+    ok(tag+': Incidents (narrow): a row takes a tap wherever the list is scrolled sideways and opens its card',reach.res.length>=3&&reach.res.every(r=>r.open),reach);}
+  else{const inc=await p.evaluate(()=>{const A=window.__a6;return A.report([...document.querySelectorAll('#inc-table [data-edit],#inc-table [data-del]')].filter(e=>A.vis(e)));});
   ok(tag+': Incidents: Edit and Delete are at least 44 x 44 px and 4 px apart',inc.n>=40&&!inc.small.length&&inc.near>=4,inc);
   const reach=await incReach(p);
   ok(tag+': Incidents: Edit and Delete are in view in their box and take a tap '+(reach.wider?'wherever the list is scrolled sideways (it is wider than its box)':'(the list fits its box)'),
-    reach.res.length>=6&&reach.res.every(r=>r.inBox&&r.hit),reach);
+    reach.res.length>=6&&reach.res.every(r=>r.inBox&&r.hit),reach);}
   const incOther=await p.evaluate(()=>{const A=window.__a6;return A.report([...document.querySelectorAll('#panel-incidents button.btn:not([data-edit]):not([data-del])')].filter(e=>A.vis(e)));});
   ok(tag+': Incidents: the other buttons are at least 44 px tall',!incOther.small.length,incOther);
   await view(p,'background');
@@ -342,9 +361,12 @@ async function shellTouch(br,W,H){
       for(const a of c)for(const b of c){if(a===b||Math.abs(a.l-b.l)>20)continue;const d=Math.abs(a.m-b.m);if(d>=1&&d<min)min=d;}
       const de=document.documentElement;return {n:ins.length,minPitch:Math.round(min*10)/10,sw:de.scrollWidth,cw:de.clientWidth};});
     ok(tag+': ABC-1: the recording rows sit at least 40 px apart, and nothing runs past the frame',r.n>=80&&r.minPitch>=40&&r.sw<=r.cw,r);
-    await fview(fr,'incidents');const reach=await incReach(fr);
+    await fview(fr,'incidents');
+    if(await narrowInc(fr)){const reach=await incReachCard(fr);
+      ok(tag+': ABC-1: Incidents (narrow): a row takes a tap wherever the list is scrolled sideways and opens its card (v24.28)',reach.res.length>=3&&reach.res.every(r=>r.open),reach);}
+    else{const reach=await incReach(fr);
     ok(tag+': ABC-1: Incidents: Edit and Delete are in view in their box and take a tap '+(reach.wider?'wherever the list is scrolled sideways (it is wider than its box)':'(the list fits its box)'),
-      reach.res.length>=6&&reach.res.every(r=>r.inBox&&r.hit),reach);}
+      reach.res.length>=6&&reach.res.every(r=>r.inBox&&r.hit),reach);}}
   await page.screenshot({path:OUT+'shell-'+W+'x'+H+'.png'});
   await ctx.close();
 }
