@@ -1240,6 +1240,12 @@ td input,td select{max-width:100%}
     <div id="goalList"></div>
     <div class="tools"><button class="tool" type="button" id="addGoal">Add a goal</button><span class="hint" id="goalCount"></span></div>
 
+    <!-- v24.57 (Sellers, Alai-Rosales & MacDonald, 2016, 5.07) whether supervision works, reviewed and written down -->
+    <h2 class="nbh-band" style="margin-top:18px">The Effects of Supervision</h2>
+    <p class="hint">Check now and then that supervision is working, at three levels: the client&rsquo;s progress, the RBT&rsquo;s skills (the plan checklist scores at the contacts, the goals above) and the supervision itself (the RBT&rsquo;s view: is the feedback useful, the time enough, the expectations clear). Note each review: what the RBT says, what the data show, and what will change. Sellers, Alai-Rosales &amp; MacDonald (2016). The reviews print with the year summary.</p>
+    <div id="effList"></div>
+    <div class="tools"><button class="tool" type="button" id="addEff">Add a review</button><span class="hint" id="effCount"></span></div>
+
     <h2 class="nbh-band" style="margin-top:18px">Readings This Year</h2>
      <p class="hint">Every reading discussed in a supervision contact this school year, with what was discussed and the RBT&rsquo;s follow-up. Readings are added on the Month page, on the contact.</p>
      <div id="readList"></div>
@@ -1612,6 +1618,7 @@ function renderSups(){
         '<div><label for="'+F('role')+'">Role</label><select id="'+F('role')+'" data-sup="'+id+'" data-f="role">'+opts(ROLES,s.role,true)+'</select></div>'+
         '<div><label for="'+F('trained')+'">Supervisor training done (Curriculum Outline 2.0)</label><select id="'+F('trained')+'" data-sup="'+id+'" data-f="trained">'+opts([['yes','Yes'],['no','No']],s.trained,true)+'</select></div>'+
         '<div><label for="'+F('trained_date')+'">Training completed on</label><input type="date" id="'+F('trained_date')+'" data-sup="'+id+'" data-f="trained_date" value="'+esc(s.trained_date)+'"></div>'+
+        '<div><label for="'+F('agree')+'">Supervision conditions given in writing on</label><input type="date" id="'+F('agree')+'" data-sup="'+id+'" data-f="agree" value="'+esc(s.agree||'')+'" title="Sellers, Alai-Rosales &amp; MacDonald (2016): at the start, in writing, what supervision covers, how much time, how progress is judged, and when a signature may be withheld"></div>'+   /* v24.57 */
         '<div><label for="'+F('portal')+'">Lists the RBT in the BACB portal</label><select id="'+F('portal')+'" data-sup="'+id+'" data-f="portal">'+opts([['yes','Yes'],['no','No']],s.portal,true)+'</select></div>'+
         '<div><label for="'+F('oversight')+'">Supervisor&ndash;client oversight</label><select id="'+F('oversight')+'" data-sup="'+id+'" data-f="oversight">'+opts(OVERS,s.oversight,true)+'</select></div>'+
         '<div><label for="'+F('oversight_note')+'">Oversight note</label><input id="'+F('oversight_note')+'" data-sup="'+id+'" data-f="oversight_note" value="'+esc(s.oversight_note)+'" placeholder="e.g., both employed by the district"></div>'+
@@ -1795,7 +1802,7 @@ function renderRbt(){rdListPaint();
       '<div class="fieldgrid"><div><label for="'+F('set')+'">Date set</label><input type="date" id="'+F('set')+'" data-g="'+id+'" data-f="set" value="'+esc(g.set)+'"></div><div><label for="'+F('target')+'">Target date</label><input type="date" id="'+F('target')+'" data-g="'+id+'" data-f="target" value="'+esc(g.target)+'"></div>'+
       '<div><label for="'+F('status')+'">Status</label><select id="'+F('status')+'" data-g="'+id+'" data-f="status">'+opts(GSTAT,g.status||'Not started')+'</select></div></div>'+
       '<div class="field"><label for="'+F('notes')+'">Notes</label><textarea id="'+F('notes')+'" data-g="'+id+'" data-f="notes" rows="2" placeholder="progress seen at the contacts; what helped">'+esc(g.notes)+'</textarea></div></div>';}).join('')||'<p class="hint">No goals yet.</p>';
-  const met=S.goals.filter(g=>g.status==='Met').length;$('#goalCount').textContent=S.goals.length?met+' of '+S.goals.length+' met':'';
+  const met=S.goals.filter(g=>g.status==='Met').length;$('#goalCount').textContent=S.goals.length?met+' of '+S.goals.length+' met':'';effPaint();
   $$('[data-cr]').forEach(el=>{el.value=S.cred[el.dataset.cr]||'';});
   renderPdus();renderCred();renderConcerns();}
 function renderPdus(){$('#pduTbl tbody').innerHTML=S.pdus.map((p,i)=>{const id=esc(p.id),F=f=>'p_'+id+'_'+f,w=pduWarn(p);return '<tr data-pid="'+id+'"><td data-l="Date"><input type="date" id="'+F('date')+'" data-p="'+id+'" data-f="date" value="'+esc(p.date)+'" aria-label="PDU '+(i+1)+' date"></td><td data-l="Title"><input id="'+F('title')+'" data-p="'+id+'" data-f="title" value="'+esc(p.title)+'" aria-label="PDU '+(i+1)+' title"><div class="hint" id="'+F('warn')+'" style="color:#8E2A2A">'+esc(w)+'</div></td><td data-l="Type"><select id="'+F('type')+'" data-p="'+id+'" data-f="type" aria-label="PDU '+(i+1)+' type">'+opts(PTYPES.map(t=>[t[0],t[1]]),p.type,true)+'</select></td><td data-l="Provider"><input id="'+F('provider')+'" data-p="'+id+'" data-f="provider" value="'+esc(p.provider)+'" aria-label="PDU '+(i+1)+' provider"></td><td data-l="Units"><input id="'+F('units')+'" data-p="'+id+'" data-f="units" inputmode="decimal" value="'+esc(p.units)+'" aria-label="PDU '+(i+1)+' units"></td><td class="num" data-l="Ethics"><input type="checkbox" id="'+F('ethics')+'" data-p="'+id+'" data-f="ethics"'+(p.ethics?' checked':'')+' aria-label="PDU '+(i+1)+' covers ethics" style="width:24px;height:24px;min-height:0"></td>'+delCell('pdu',p.id,'PDU')+'</tr>';}).join('')||'<tr><td colspan="7" class="hint">No PDUs logged yet.</td></tr>';pduOut();}
@@ -1842,7 +1849,7 @@ function renderConcernOut(){$('#concernOut').innerHTML='<div class="p-inner"><di
 function headHTML(k){const st=S.setup,sp=S.sups.filter(s=>s.name&&isSupRole(s)),rc=S.sups.filter(s=>s.name&&isRC(s));
   return '<div class="p-head"><div><b>Supervisee</b>'+esc(st.rbt_name||'')+(st.rbt_cred?', '+esc(st.rbt_cred):'')+'</div><div><b>BACB no.</b>'+esc(st.rbt_cert||'')+'</div><div><b>Expires</b>'+esc(mdy(st.rbt_exp))+'</div>'+
     '<div><b>Employer</b>'+esc(st.employer||'')+'</div><div><b>Site</b>'+esc(st.site||'')+'</div><div><b>'+(k?'Month':'School year')+'</b>'+(k?keyLabel(k):setupYear()+'–'+(setupYear()+1))+'</div>'+
-    '<div style="grid-column:1/-1"><b>RBT Supervisors</b>'+(sp.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')+(s.cert?' ('+esc(s.cert)+')':'')+(s.trained==='yes'?', supervisor training'+(s.trained_date?' '+esc(mdy(s.trained_date)):''):'')+(s.cred==='BCaBA'&&s.bcba?', supervised by '+esc(s.bcba):'')).join('; ')||'')+(rc.length?' &nbsp; <b>Requirements Coordinator</b>'+rc.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')).join('; '):'')+'</div>'+
+    '<div style="grid-column:1/-1"><b>RBT Supervisors</b>'+(sp.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')+(s.cert?' ('+esc(s.cert)+')':'')+(s.trained==='yes'?', supervisor training'+(s.trained_date?' '+esc(mdy(s.trained_date)):''):'')+(s.agree?', supervision conditions in writing '+esc(mdy(s.agree)):'')+(s.cred==='BCaBA'&&s.bcba?', supervised by '+esc(s.bcba):'')).join('; ')||'')+(rc.length?' &nbsp; <b>Requirements Coordinator</b>'+rc.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')).join('; '):'')+'</div>'+
     '<div style="grid-column:1/-1"><b>Client codes</b>'+esc(clientCodes().join(', '))+'</div></div>';}
 const okTxt=s=>s==='ok'?'<span class="p-ok">✓ met</span>':s==='fail'?'<span class="p-no">✕ not met</span>':s==='pending'?'<span class="p-mid">not yet</span>':'—';
 function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today=todayISO();
@@ -1901,7 +1908,26 @@ function renderYearOut(){const y=setupYear(),ks=yearKeys(y),tk=thruKey(),cut=tk?
     '<div class="p-keep"><h4>Percent supervised by month</h4>'+pctChart(A,true)+'</div>'+
     '<div class="p-keep"><h4>The credential and the goals</h4><p style="margin:2px 0">'+esc(c.t)+(st.path==='recert'?' PDUs this cycle: '+(Math.round(t.u*10)/10)+' of '+rule('pdu')+' ('+(Math.round(t.e*10)/10)+' in ethics).':st.path==='renewal'?' Competency assessment: '+(S.cred.comp_date?mdy(S.cred.comp_date):'not recorded')+'; application: '+(S.cred.applied?mdy(S.cred.applied):'not submitted')+'.':'')+'</p>'+
     (goals.length?'<table class="p-t"><thead><tr><th>Goal</th><th style="width:12%">Set</th><th style="width:12%">Target</th><th style="width:12%">Status</th></tr></thead><tbody>'+goals.map(g=>'<tr><td>'+esc(g.goal)+(g.notes?'<br><i>'+esc(g.notes)+'</i>':'')+'</td><td>'+esc(mdy(g.set))+'</td><td>'+esc(mdy(g.target))+'</td><td>'+esc(g.status||'')+'</td></tr>').join('')+'</tbody></table>':'<p class="p-empty">No goals recorded.</p>')+'</div>'+
+    ((E=>E.length?'<div class="p-keep"><h4>Reviews of the effects of supervision</h4><table class="p-t"><thead><tr><th style="width:12%">Reviewed</th><th>The RBT&rsquo;s view</th><th>What the data show</th><th>What changes</th></tr></thead><tbody>'+
+      E.map(x=>'<tr><td>'+esc(mdy(x.date))+'</td><td>'+esc(x.view||'')+'</td><td>'+esc(x.data||'')+'</td><td>'+esc(x.change||'')+'</td></tr>').join('')+'</tbody></table></div>':'')
+      ((S.effects||[]).filter(x=>x.date&&(!asOf||x.date<=asOf)&&(x.view||x.data||x.change)).sort((a,b)=>a.date.localeCompare(b.date))))+   /* v24.57 */
     '<div class="p-foot"><span>Keep supervision records for at least 7 years, also after the supervision ends; in an audit the BACB typically allows 14 days. Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks.</span><span>Form RS-1 · year summary'+(part?' through '+esc(keyLabel(tk)):'')+' · printed '+mdy(todayISO())+'</span></div></div>';}
+/* v24.57 The Effects of Supervision: each review's date, the RBT's view, what the data show, what changes */
+function effPaint(){const L=$('#effList');if(!L)return;const E=S.effects||[];
+  L.innerHTML=E.map(x=>{const id=esc(x.id),F=f=>'ef_'+id+'_'+f;return '<div class="rs-card rs-eff">'+
+    '<div class="fieldgrid"><div><label for="'+F('date')+'">Reviewed on</label><input type="date" id="'+F('date')+'" data-ef="'+id+'" data-f="date" value="'+esc(x.date)+'"></div></div>'+
+    '<div class="field"><label for="'+F('view')+'">The RBT&rsquo;s view of supervision</label><textarea id="'+F('view')+'" data-ef="'+id+'" data-f="view" rows="2" placeholder="e.g., the feedback after observations helps most; would like it the same day">'+esc(x.view)+'</textarea></div>'+
+    '<div class="field"><label for="'+F('data')+'">What the data show</label><textarea id="'+F('data')+'" data-ef="'+id+'" data-f="data" rows="2" placeholder="e.g., plan checklist 78% to 92% over two months; the client&rsquo;s target behavior down by half">'+esc(x.data)+'</textarea></div>'+
+    '<div class="field"><label for="'+F('change')+'">What changes</label><textarea id="'+F('change')+'" data-ef="'+id+'" data-f="change" rows="2" placeholder="e.g., feedback the same day; one more observation during transitions">'+esc(x.change)+'</textarea></div>'+
+    '<div class="tools"><button type="button" class="tool" data-efdel="'+id+'">Remove this review</button></div></div>';}).join('');
+  const c=$('#effCount');if(c)c.textContent=E.length?E.length+' review'+(E.length===1?'':'s'):'';}
+document.addEventListener('input',e=>{const el=e.target,d=el&&el.dataset;if(!d||!d.ef)return;const x=(S.effects||[]).find(r=>r.id===d.ef);if(x)x[d.f]=el.value;});
+document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d||!d.ef)return;const x=(S.effects||[]).find(r=>r.id===d.ef);if(x)x[d.f]=el.value;});
+document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('#addEff,[data-efdel]');if(!b)return;
+  if(b.id==='addEff'){if(!S.effects)S.effects=[];if(S.effects.length>=60)return;const x={id:uid(),date:todayISO(),view:'',data:'',change:''};S.effects.push(x);effPaint();changed();const t=$('#ef_'+x.id+'_view');if(t)t.focus();return;}
+  const i=(S.effects||[]).findIndex(r=>r.id===b.dataset.efdel);if(i<0)return;const x=S.effects[i];
+  if((x.view||x.data||x.change)&&!(await nbhUI.confirm('Remove this review of the effects of supervision?',{ok:'Remove',danger:true})))return;
+  S.effects.splice(i,1);if(!S.effects.length)delete S.effects;effPaint();changed();});
 function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent='Sign the Record for '+keyLabel(curKey);
   $$('[data-sg]').forEach(el=>{el.value=sg[el.dataset.sg]||'';});
   const sp=S.sups.find(s=>s.name&&credOK(s.cred));$('#sgSup').placeholder=sp?supLabel(sp):'name, credential';$('#sgRbt').placeholder=S.setup.rbt_name?(S.setup.rbt_name+', '+(S.setup.rbt_cred||'RBT')):'name, RBT';
@@ -2186,8 +2212,8 @@ function fromFile(d){
   const su=obj(s.setup);Object.keys(su).forEach(k=>{if(k!=='days')o.setup[k]=str(su[k]);});o.setup.days=arr(su.days).map(Number).filter(n=>n>=0&&n<=6);
   ['rbt_orig','rbt_exp','sup_start'].forEach(k=>{if(k in su)o.setup[k]=isoS(su[k]);});['day_start','day_end'].forEach(k=>{if(k in su)o.setup[k]=hm(su[k]);});
   const yn=v=>v==='yes'||v==='no'?v:'';
-  o.sups=arr(s.sups).slice(0,12).map(x=>{x=obj(x);return {id:str(x.id)||uid(),name:str(x.name),cred:CREDS.includes(x.cred)?x.cred:'',cert:str(x.cert),role:ROLES.includes(x.role)?x.role:'',trained:yn(x.trained),trained_date:isoS(x.trained_date),portal:yn(x.portal),norel:!!x.norel,bcba:str(x.bcba),oversight:OVERS.some(o=>o[0]===x.oversight)?x.oversight:'',oversight_note:str(x.oversight_note)};});if(!o.sups.length)o.sups=blank().sups;
-  o.sups.forEach(x=>{if(!x.bcba)delete x.bcba;});   /* v24.29 the key only when it holds something: a file reads back equal to what was saved */
+  o.sups=arr(s.sups).slice(0,12).map(x=>{x=obj(x);return {id:str(x.id)||uid(),name:str(x.name),cred:CREDS.includes(x.cred)?x.cred:'',cert:str(x.cert),role:ROLES.includes(x.role)?x.role:'',trained:yn(x.trained),trained_date:isoS(x.trained_date),portal:yn(x.portal),norel:!!x.norel,bcba:str(x.bcba),oversight:OVERS.some(o=>o[0]===x.oversight)?x.oversight:'',oversight_note:str(x.oversight_note),agree:isoS(x.agree)};});if(!o.sups.length)o.sups=blank().sups;
+  o.sups.forEach(x=>{if(!x.bcba)delete x.bcba;if(!x.agree)delete x.agree;});   /* v24.29 the key only when it holds something: a file reads back equal to what was saved */
   const ru=obj(s.rules);Object.keys(RULES0).forEach(k=>{if(ru[k]!=null&&ru[k]!=='')o.rules[k]=str(ru[k]);});
   const ms=obj(s.months);Object.keys(ms).filter(k=>/^\d{4}-\d{2}$/.test(k)).slice(0,240).forEach(k=>{const m=obj(ms[k]),sg=obj(m.sig);
     o.months[k]={filled:!!m.filled,note:str(m.note),records:str(m.records),noservice:!!m.noservice,...(m.entered?{entered:true}:{}),...keptOf(m.kept),
@@ -2199,6 +2225,7 @@ function fromFile(d){
       sig:{sup_name:str(sg.sup_name),sup_date:isoS(sg.sup_date),rbt_name:str(sg.rbt_name),rbt_date:isoS(sg.rbt_date),...(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(String(sg.sup_img||''))&&String(sg.sup_img).length<400000?{sup_img:sg.sup_img}:{}),...(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(String(sg.rbt_img||''))&&String(sg.rbt_img).length<400000?{rbt_img:sg.rbt_img}:{}),
         ...['sup','rbt'].reduce((o,w)=>{if(sg[w+'_how']==='typed'||sg[w+'_how']==='drawn')o[w+'_how']=sg[w+'_how'];if(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(String(sg[w+'_at']||'')))o[w+'_at']=sg[w+'_at'];return o;},{})}};   /* v24.50 how and when */
     if(!o.months[k].sig.sup_img)delete o.months[k].sig.sup_img;if(!o.months[k].sig.rbt_img)delete o.months[k].sig.rbt_img;});
+  {const ef=arr(s.effects).slice(0,60).map(x=>({id:str(x&&x.id)||uid(),date:isoS(x&&x.date),view:str(x&&x.view),data:str(x&&x.data),change:str(x&&x.change)}));if(ef.length)o.effects=ef;}   /* v24.57 */
   o.goals=arr(s.goals).slice(0,30).map(x=>({id:str(x&&x.id)||uid(),goal:str(x&&x.goal),set:isoS(x&&x.set),target:isoS(x&&x.target),status:GSTAT.includes(x&&x.status)?x.status:'Not started',notes:str(x&&x.notes)}));
   o.pdus=arr(s.pdus).slice(0,100).map(x=>({id:str(x&&x.id)||uid(),date:isoS(x&&x.date),title:str(x&&x.title),provider:str(x&&x.provider),units:str(x&&x.units),type:ptOf(x&&x.type)?x.type:'',ethics:!!(x&&x.ethics)}));
   o.concerns=arr(s.concerns).slice(0,40).map(x=>{x=obj(x);return {id:str(x.id)||uid(),date:isoS(x.date),concern:str(x.concern),investigated:str(x.investigated),decision:DECIDE.includes(x.decision)?x.decision:'',plan:str(x.plan),outcome:str(x.outcome),outcome_date:isoS(x.outcome_date)};});
@@ -3556,6 +3583,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .fieldgrid>div.rs-len>.hint{margin:0 4px 0 0}
 .rs-share .hint{margin:0}
 .rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
+.rs-eff{margin:0 0 10px}.rs-eff .field{margin-top:8px}
 .fieldgrid.rs-share{align-items:start!important}.fieldgrid.rs-share>div{justify-content:flex-start!important}
 #shNote:empty{display:none}
 #kpNote:empty{display:none}

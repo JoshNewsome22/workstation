@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.57: Form RS-1 and Sellers, Alai-Rosales & MacDonald (2016), the ethics of supervision: the reading, the supervision conditions in writing, and reviews of the effects of supervision (the BCBA, 10/26)
+- **The reading.** Sellers, T. P., Alai-Rosales, S., & MacDonald, R. P. F. (2016). Taking full responsibility: The
+  ethics of supervision in behavior analytic practice. *Behavior Analysis in Practice, 9*, 299–308
+  (doi:10.1007/s40617-016-0144-x) is now among the readings a supervision contact can discuss, with a short summary for
+  the RBT.
+- **Supervision conditions in writing (the article's 5.05).** Each supervisor on Setup takes the date the supervision
+  conditions were given to the RBT in writing: what supervision covers, how much time, how progress is judged, and when a
+  signature may be withheld. The date prints with the supervisor on the record. It is a record, not a BACB requirement
+  the month is checked against.
+- **The Effects of Supervision (the article's 5.07).** A new part of the RBT record: each review of whether supervision
+  is working, with its date, the RBT's view of supervision, what the data show (the plan checklist scores, the client's
+  progress) and what will change. Reviews are kept with the RBT and print with the year summary (up to the month it runs
+  through). Removing a review is asked first.
+- Tests: qa/sup157-test.js.
+
 ### v24.56: Form RS-1 checked again against the RBT Handbook (updated 06/2026): four things it asks, now in the form (the BCBA, 10/26)
 - **Supervisor training comes first.** The handbook says a supervisor completes the supervisor training before providing
   any supervision. A contact dated before the supervisor's training date now does not count, and the contact says why
