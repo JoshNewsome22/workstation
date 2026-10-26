@@ -1,3 +1,4 @@
+/* v24.40: the simulation scores the FAST and the QABF only (review R-049); MAS and PBQ items are entered by hand where their figures are checked */
 /* v21.40: IA-1 audit fixes. FAST margin as a caution (1), consensus by informants (2), QABF endorsement (3), MAS mean and
    incomplete subscales (5), chance lines from the formula (6), m.fn carried to the packet (8), Clear all keeps the pasted
    wording (9), informant dates and the collector (10), the QABF page's X choice (12), the hypothesis draft (15), the
@@ -60,7 +61,9 @@ const QABF=Array.from({length:25},(_,i)=>(i+1)+'. Simulated QABF item '+(i+1)+' 
 
  /* 6: chance lines from the formula, named as chance under uniform responding */
  await sim('attention');
- const caps=await page.evaluate(()=>['fast','qabf','mas','pbq'].map(k=>document.querySelector('#'+k+'Fig2 .cap').textContent));
+ /* v24.40 the simulation scores the FAST and the QABF only; a few MAS and PBQ items are entered here so their figures and captions render */
+ for(const r of [0,1]){await set('mas['+r+'][2]','6');await set('mas['+r+'][6]','6');await set('mas['+r+'][10]','5');await set('pbq['+r+'][1]','5');await set('pbq['+r+'][2]','5');await set('pbq['+r+'][3]','4');}await sleep(300);
+ const caps=await page.evaluate(()=>['fast','qabf','mas','pbq'].map(k=>{const e=document.querySelector('#'+k+'Fig2 .cap');return e?e.textContent:'';}));
  ok('6: QABF caption: 4-point scale, exact 25.0%, within 1 62.5%',/chance under uniform responding on a 4-point scale \(exact 25\.0%, within 1 62\.5%\)/.test(caps[1]),caps[1]);
  ok('6: MAS and PBQ captions: 7-point scale, exact 14.3%, within 1 38.8%',/7-point scale \(exact 14\.3%, within 1 38\.8%\)/.test(caps[2])&&/7-point scale \(exact 14\.3%, within 1 38\.8%\)/.test(caps[3]),caps[2]);
  ok('6: FAST caption: a yes/no item (50%); the Likert captions quote Iwata et al. on the 6-point range as about 50% and draw the exact value',/chance under uniform responding on a yes\/no item \(50%\)/.test(caps[0])&&!/6-point range/.test(caps[0])&&/described within-1 agreement on a 6-point range as about 50% chance/.test(caps[1]),caps);

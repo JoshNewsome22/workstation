@@ -9905,6 +9905,50 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.40: One simulated student across the forms (review V14 part 2: R-028, R-049, R-081, R-115, R-121, E-02)
+- **One student.** The simulated student is the same wherever a form names them: SIMULATED – Sample Student, ID SIM-000, born
+  4/18/2017 (9 years 6 months this school year), grade 4, Example ESE center school (simulated), Room 12; Forms DA-1, SM-1 and
+  FS-1 no longer say grade 3 or 5 or a Sample Elementary, DD-1 gives the age to match, SP-1 carries the ID.
+- **Form IA-1's plan is a caseload week.** The simulation ran five rating instruments with three informants each. It now plans
+  the FAST and one scale (the QABF) with the three informants and the two interviews; the MAS, the PBQ and the WEFA are marked
+  not used and their sheets stay blank (the WEFA asks about elopement; the target is aggression or hand flapping). After the
+  scores are in, the hypothesis is drafted from the convergence sheet and the Decision is ticked with a rationale that fits
+  the scenario (a single-function test for attention or tangible, a functional analysis for escape, a medical referral first
+  for the pain profile, a follow-up interview where the informants split).
+- **Form PA-1.** The "Clear hierarchy: PS and MSWO agree" scenario promised agreement its draws did not keep: paired stimulus and
+  MSWO were independent noisy draws, so in some loads the two leaders differed and the Summary's own caution fired under the
+  banner. The scenario's selections now follow one latent order: a pairing with either of the two leading items goes to the
+  higher-weighted item, a pairing lower down 88 times in 100; the first two MSWO trials take the two leaders, later trials the
+  best remaining item 85 times in 100. The leaders agree at every load and every New example; the items below them still vary.
+  The other scenarios draw as before.
+- **Form RA-1.** The simulation tested a tablet, a fruit chew and praise with "PA-1 rank / %" values (92, 71, 46) PA-1 never
+  produced. It now tests three of PA-1's clear-hierarchy items with the percentages PA-1's standard example gives them on paired
+  stimulus: Tablet (video) 100%, Bubbles 80%, Picture book 40% (MSWO: 100, 50, 25); the source line, recommendations, rotation,
+  motivating operations and the COA materials name them. The sessions' numbers and structure are unchanged (the tablet strongest,
+  bubbles middle, the picture book no better than the control). "Praise as usual through the day" stays in the motivating-
+  operations line (F136). The walkthrough keeps its own worked example (tablet, fruit chew, praise): its drawn stories and
+  narration were made for it, so the loaded simulation and the walkthrough now differ in two stimuli.
+- **Form SM-1's worked example is made of counts.** Three targets rated Yes or No in six periods are 18 ratings a day, two
+  points a matched Yes per target (12 a target, 36 a day). The simulated days were typed as percents that no rated day could
+  produce (30%, 44%, a target at 54%); they are now the teacher's Yes counts a target and the points a target, and every
+  Behavior % is a share of 18, every per-target Yes share a share of 6, every per-target points share a share of 12, as a
+  rated day computes them. The baseline reads 40% of the teacher's ratings (29 of 72); the goal-75 week still meets 4 of 5.
+- **Form EA-1's worked example finishes its Decision.** The function key for the report, the interpretation notes, the
+  undifferentiated steps where that scenario took them (alone screen, pairwise test, EOs), and the blind second reading
+  (who, when, what was read, agreed) are filled for every scenario; Continue and Stopped stay unticked. The analysis
+  sessions are dated 40 school days before the treatment evaluation, which now ends today and names its first date.
+- **Form TD-1's worked example agrees with EA-1.** The escape scenario's baseline is 2.4 a minute (EA-1's demand condition;
+  the 90% benchmark 0.24), the attention scenario's 10 (EA-1's attention condition), hand mouthing 7 and arranging and
+  ordering 2.4 (EA-1's automatic scenarios); Setup names Form EA-1 as the rate's source under the baseline box; the crisis
+  procedure is written, so the consequence and protective-procedure cards carry their trigger, blocking rule, equipment
+  and nursing review. Baseline sessions stay on the school days before the first treatment session.
+- Tests: qa/ia140-test.js (IA-1's plan, blank sheets, hypothesis and Decision in seven scenarios; the student's date of birth,
+  grade and school across eleven forms), qa/pa140-test.js, qa/sm140-test.js; adapted for the intended changes: qa/ia1-wefa-test.js,
+  qa/ia1-audit-test.js, qa/sm1-w3-test.js, qa/td121-test.js.
+- Left as they were: the RA-1 walkthrough keeps its own worked example (tablet, fruit chew, praise: its drawn stories and
+  narration were made for it); TD-1 logs its own baseline sessions on the school days before its first treatment session,
+  after EA-1's analysis.
+
 ### v24.39: The simulation, seeded and marked (review V14 part 1: R-121, R-122, E-02 in part)
 - **The same example at every load.** Every form's Load simulation drew fresh random numbers each time, so the worked
   example changed under the person reading it (Form SP-1's cell counts, PA-1's hierarchies, IA-1's agreement, EA-1's

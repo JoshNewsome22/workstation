@@ -2772,7 +2772,7 @@ const CFA_SIM=[['TAE',0,[1,'',''],[18,'',''],[0,'','']],['AET',0,[0,0,1],['','',
 /* the enhancement sprint (B2): asks first, with the question the other forms use; Cancel changes nothing */
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\nScenario: '+$('#simScenario option:checked').textContent+'. Every sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=SIMS[key];restore({counts:{}});
- setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Assessment room 3 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
+ setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','4/18/2017');setv('m.setting','Assessment room 3 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
  setv('m.beh',sc.beh);setv('m.def','Simulated definition; see TB-1 for the real target.');setv('m.prec',sc.variant==='precursor'?'Screaming: vocalization above conversational level lasting ≥ 1 s (simulated)':'');setv('m.hyp','Simulated hypothesis carried in from IA-1: '+(sc.v.hyp==='escape'?'escape from demands':sc.v.hyp==='social'?'attention or tangible':sc.v.hyp==='auto'?'automatic':sc.v.hyp==='idio'?'synthesized escape-to-tangible with attention':'unclear'));setv('m.urg',sc.v.risk==='high'?'4':sc.v.risk==='mod'?'3':'2');
  setv('s.med','Nurse consulted (simulated); no restrictions');setv('s.term',simTerm(sc.beh));setv('s.pe','Arm guards available; therapist blocks per plan (simulated)');setv('s.staff','Therapist, data collector, crisis-trained observer (simulated)');setv('s.consent','Parent consent on file (simulated)');setv('s.stop','Structured criteria met, or 5 series without differentiation (simulated)');
  setv('m.sessmin',/^(iisca|rrb|cfa)$/.test(sc.variant)?'5':'10');setv('m.interval','10');setv('m.ioaplan','≥ 25% per condition');setv('m.ioaindex','Interval-by-interval');setv('m.fidelity','Checklist per condition; 25% of sessions');
@@ -2792,7 +2792,7 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\
    /* pairwise: reuse attention as test, play as control */
    const at=cn.find(c=>/attention/i.test(c.name)),pl=cn.find(c=>c.type==='control');for(let k=0;k<4;k++){push(at.i,'Pairwise',pois(60),10);push(pl.i,'Pairwise',pois(6),10);}}}
  if(mz==='pct'){/* not used */}
- if(rows.length){const seen={};$('#nSess').value=Math.max(8,Math.min(80,rows.length+4));renderSess();rows.forEach((r,i)=>{setv(`s[${i}].c`,String(r.c));setv(`s[${i}].p`,r.phase);setv(`s[${i}].m`,String(r.m));setv(`s[${i}].v`,String(r.v));setv(`s[${i}].d`,schoolDay(-(rows.length-i)));{const k=r.c+'|'+r.phase;if((seen[k]=(seen[k]||0)+1)%4===1)setv(`s[${i}].ioa`,String(85+Math.round(rnd()*14)));}});}   /* v24.20 (R-007, R-081): IOA in every condition and phase (the block reads one phase at a time), school days, no random terminations */
+ if(rows.length){const seen={};$('#nSess').value=Math.max(8,Math.min(80,rows.length+4));renderSess();rows.forEach((r,i)=>{setv(`s[${i}].c`,String(r.c));setv(`s[${i}].p`,r.phase);setv(`s[${i}].m`,String(r.m));setv(`s[${i}].v`,String(r.v));setv(`s[${i}].d`,schoolDay(-(rows.length-i)-40));   /* v24.40 (R-081) the analysis 40 school days before the treatment evaluation */{const k=r.c+'|'+r.phase;if((seen[k]=(seen[k]||0)+1)%4===1)setv(`s[${i}].ioa`,String(85+Math.round(rnd()*14)));}});}   /* v24.20 (R-007, R-081): IOA in every condition and phase (the block reads one phase at a time), school days, no random terminations */
  if(sc.variant==='automatic'||key==='automatic')setv('d.alone',true);
  /* v22.49 (F152) the worked examples that conclude automatic say so under Function for the report, as a BCBA would after visual review */
  if(key==='automatic'||key==='rrb')setv('d.fnkey','automatic');
@@ -2815,9 +2815,9 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\
  else if(sc.cc){const crit=[2,4,6,8,6,10];let s=0;tx.push({p:'BL',v:1,tier:''},{p:'BL',v:2,tier:''},{p:'BL',v:1,tier:''},{p:'BL',v:2,tier:''},{p:'BL',v:1,tier:''});crit.forEach((c,ci)=>{const lab=ci===4?'C2 return':'C'+(ci<4?ci+1:4);for(let k=0;k<3;k++)tx.push({p:lab,v:Math.max(0,Math.round(c+gauss()*0.6)),tier:''});});}
  else if(sc.atd){for(let s=0;s<12;s++){const which=s%2?'Picture exchange':'Vocal request';tx.push({p:'ATD',v:Math.max(0,+((which==='Vocal request'?4.5:1.2)+gauss()*0.8).toFixed(1)),tier:which});}for(let s=0;s<5;s++)tx.push({p:'Best',v:Math.max(0,+(1+gauss()*0.6).toFixed(1)),tier:'Picture exchange'});}
  $('#nTx').value=Math.max(8,Math.min(80,tx.length+3));renderTxRows();
- tx.forEach((r,i)=>{setv(`tx[${i}].p`,r.p);setv(`tx[${i}].v`,String(r.v));setv(`tx[${i}].tier`,r.tier);setv(`tx[${i}].d`,schoolDay(i));if(i%4===0){setv(`tx[${i}].ioa`,String(86+Math.round(rnd()*13)));setv(`tx[${i}].fid`,String(90+Math.round(rnd()*10)));}});
+ tx.forEach((r,i)=>{setv(`tx[${i}].p`,r.p);setv(`tx[${i}].v`,String(r.v));setv(`tx[${i}].tier`,r.tier);setv(`tx[${i}].d`,schoolDay(i-(tx.length-1)));if(i===0)setv('t.start',schoolDay(-(tx.length-1)));   /* v24.40 the evaluation ends today */if(i%4===0){setv(`tx[${i}].ioa`,String(86+Math.round(rnd()*13)));setv(`tx[${i}].fid`,String(90+Math.round(rnd()*10)));}});
  refreshCondNames();renderGraph();renderTrialFig();renderAnalysis();if(sc.extra==='undiff'){$('#critPhase').value='Pairwise';renderAnalysis();}if(key==='rrb'||key==='cfa'){$('#critPhase').value=key==='cfa'?'MEFA':'FA';renderAnalysis();}renderTx();extPanels();cfaCompute();rrbRead();
- simDecision(key,sc);
+ simDecision(key,sc);simDecisionExtras(key,sc);
  $('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc+' Counts are drawn fresh at each load; the pattern is fixed.';
  /* opened through its button, so the session runner reads the new cards (it also reads them 60 ms after a press of
     Load simulation, which the question above can outlast) */
@@ -2844,6 +2844,28 @@ function simDecision(key,sc){if(val('d.func'))return;const D={
  iisca:['Synthesized contingency (escape to tangible with attention): the synthesized test exceeded the matched control in every pair (simulated)','Synthesized FCT ("my way, please") with extinction, then delay and denial tolerance; see Form TD-1 (simulated)'],
  precursor:['Social negative reinforcement (escape), read from the precursor: screaming was elevated in Demand and the severe behavior stayed rare (simulated)','FCT for a break request with escape extinction, taught at the precursor; see Form TD-1 (simulated)']};
  const d=D[key];if(!d)return;setv('d.fn',true);setv('d.func',d[0]);setv('d.tx',d[1]);if(!val('d.trend'))setv('d.trend','Applied on visual review: no trend in the elevated condition and none in the control (simulated)');}
+/* v24.40 (review R-081) the rest of the worked example's Decision: the function key for the report, the interpretation notes, the
+   undifferentiated steps where the scenario took them, and the blind second reading, so the simulation shows a complete Decision */
+function simDecisionExtras(key,sc){
+ const K={escape:'escape',attention:'attention',automatic:'automatic',undiff:'attention',latency:'escape',trial:'tangible',iisca:'multiple',precursor:'escape',rrb:'automatic',cfa:'tangible'};
+ const N={escape:'Three multielement series, every condition at 3 or more exposures. Demand rose across the series while attention, alone and play stayed near zero; no data path overlapped the control. Screaming preceded most aggressions, so the treatment is taught at the precursor (simulated).',
+  attention:'Attention was elevated from the first series and separated from the control by the third; demand, alone and play stayed near zero. Divided attention in the classroom is the likely establishing operation (simulated).',
+  automatic:'Responding was elevated and undifferentiated across the social conditions and persisted across the five alone sessions, with no downward trend: automatic reinforcement, Subtype 1 (simulated).',
+  undiff:'The multielement series were undifferentiated. The extended alone screen extinguished responding, and the pairwise test (attention against noncontingent attention) separated the conditions in every pair (simulated).',
+  latency:'Latencies in Demand were short in every session; the other conditions reached the ceiling. A latency measure was used because the behavior is dangerous at any rate (simulated).',
+  trial:'Trial-based: the tangible test segments evoked the behavior and the matched control segments did not; attention and escape segments were flat (simulated).',
+  iisca:'The synthesized test exceeded the matched control in every pair; the contingency combines escape from the task with access to the tablet and attention (simulated).',
+  precursor:'Read from the precursor: screaming was elevated in Demand and the severe behavior stayed rare, so the analysis ended before injury (simulated).',
+  rrb:'Arranging and ordering was undifferentiated across attention, escape, no-interaction and play with the room baited, and persisted across the extended no-interaction series (rule 1): automatic (simulated).',
+  cfa:'Component FA: tangible restriction alone was evocative and every combination containing it was; the candidate function is confirmed with the extended multielement analysis before the report (simulated).'};
+ const READ={escape:['Demand elevated','Demand meets the rule'],attention:['Attention elevated','Attention meets the rule'],automatic:['Alone elevated','Alone meets the rule'],undiff:['Undifferentiated','undifferentiated by the structured criteria'],latency:['Demand elevated','Demand meets the rule'],trial:['Tangible elevated','Tangible meets the rule'],iisca:['Synthesized test elevated','Synthesized test meets the rule'],precursor:['Demand elevated','Demand meets the rule'],rrb:['Undifferentiated','undifferentiated by the structured criteria'],cfa:['Tangible elevated','Tangible meets the rule']};
+ if(!val('d.fnkey'))setv('d.fnkey',K[key]||'');
+ if(!val('d.note'))setv('d.note',N[key]||'');
+ if(key==='undiff'){setv('d.alone',true);setv('d.pair',true);setv('d.eo',true);}
+ if(key==='iisca')setv('d.iisca',true);
+ setv('d.cont',false);setv('d.stop',false);
+ if(!val('d2.who')){setv('d2.who','Second analyst, blind to the condition labels (simulated)');setv('d2.date',schoolDay(0));const r=READ[key]||['',''];setv('d2.read',r[0]);setv('d2.outcome',r[1]);setv('d2.agree','agree');}
+}
 /* v24.20 (E-31) the observer's sheet: one page per condition for the second observer, from the condition cards */
 function obsSheet(){let el=$('#eaObsSheet');if(!el){el=document.createElement('section');el.id='eaObsSheet';el.className='ea-obs';el.hidden=true;document.body.appendChild(el);}
  const cards=$$('#condWrap .card').map(c=>{const i=+c.dataset.cond,g=k=>val(`c[${i}].${k}`);return {i,name:g('name')||('Condition '+(i+1)),type:g('type'),sd:g('sd'),beh:g('beh'),cons:g('cons'),mat:g('mat'),eo:g('eo'),dur:g('dur')};});
@@ -6364,4 +6386,5 @@ a{text-underline-offset:2px}
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
+<!-- v24.40h one simulated student -->
 </html>

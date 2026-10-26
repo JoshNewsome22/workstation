@@ -5419,7 +5419,7 @@ async function loadSim(){
   const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
   const D=n=>fmt(step(n,-1)),F=n=>fmt(step(n,1)),Y=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();S.sys='match';
-  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'3',nick:'Sam',plan:'BIP dated '+Y(30)+' (Form TD-1): break card and a 2-minute task start; replacement skills from GB-1',func:'Escape or avoidance',
+  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'4',nick:'Sam',plan:'BIP dated '+Y(30)+' (Form TD-1): break card and a 2-minute task start; replacement skills from GB-1',func:'Escape or avoidance',
     setting:'General education classroom (Ms. R.), specials, lunch and recess',rater:'Ms. R. in class; the paraeducator at specials, lunch and recess',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:Y(16),start:Y(15),review:Y(0),
     r_perf:'Yes: the behavior is in the repertoire',rf_class:'Activities and privileges (free time, a game, a walk, helper)',rf_closed:'No: only through the sheet (closed)',rf_mag:'from phase 3, free time grows from 5 to 10 minutes and Friday adds a game with a friend',r_disc:'With practice (teach first with examples and non-examples)',r_read:'Needs pictures and faces',r_pa:'Yes, menu carried in below',r_base:'4 school days, teacher rating only',
     r_hist:'A clip chart last year, moved down in front of the class; Sam tore up two point sheets in the spring. Nothing with the student rating himself.',
@@ -5449,22 +5449,27 @@ async function loadSim(){
     {word:'I used kind words and hands',def:'No hitting, pushing, grabbing or name-calling; asks for help or a break with the card',cue:'Gentle and respectful',ex:'Asks for a turn; uses the break card',nex:'Pushes a chair; calls a peer a name',icon:'safehands',img:'',goal:'90'}];
   S.per=[{t:'8:30',label:'Arrival',icon:'arrival',img:''},{t:'9:15',label:'Reading',icon:'reading',img:''},{t:'10:00',label:'Math',icon:'math',img:''},{t:'11:00',label:'Specials',icon:'art',img:''},{t:'12:15',label:'Lunch and recess',icon:'lunch',img:''},{t:'1:30',label:'Centers',icon:'centers',img:''}];
   S.fade.forEach((f,i)=>{f.on=i===0;f.note=i===0?'From '+Y(16)+'; every period rated':'';});S.bck.forEach(b=>{b.in='Yes';});
-  S.lad.forEach((l,i)=>{l.on=i===1;l.note=i===0?'Days 1 to 4 ('+Y(20)+' to '+Y(17)+'): the targets met in 41% of the teacher’s ratings; first goal set at 70% of the points (met on 2 of the 4 days)':i===1?'From '+Y(16)+'; agreement 75% in week 1, 88% in week 2, 92% in week 3':'';});
+  S.lad.forEach((l,i)=>{l.on=i===1;l.note=i===0?'Days 1 to 4 ('+Y(20)+' to '+Y(17)+'): the targets met in 40% of the teacher’s ratings; first goal set at 70% of the points (met on 2 of the 4 days)':i===1?'From '+Y(16)+'; agreement 75% in week 1, 88% in week 2, 92% in week 3':'';});
   S.fid.forEach((f,i)=>{f.in='Yes';f.note=i===2?'Ms. R. rates on her clipboard before Sam shows his sheet':i===8?'Returned 9 of 11 days':'';});
   /* v22.80 (review F258, F262): the baseline is four teacher-only days (no points, the share of the teacher's ratings that were
      Yes), and each self-rating day carries the behavior beside the points, with the teacher's Nos and how many Sam matched */
   const g1=70,g2=75,g3=80;
-  const days=[[null,'0',null,30,null,null],[null,'0',null,44,null,null],[null,'0',null,38,null,null],[null,'0',null,52,null,null],
-    [g1,'1',64,40,13,18],[g1,'1',72,50,14,18],[g1,'1',69,46,13,18],[g1,'1',78,60,15,18],[g1,'1',75,56,15,18],
-    [g1,'1',81,64,16,18],[g1,'1',78,60,16,18],[g1,'1',83,68,17,18],[g1,'1',86,74,16,18],[g1,'1',72,52,16,18],
-    [g2,'1',83,68,17,18],[g2,'1',89,80,17,18],[g2,'1',78,62,16,18],[g2,'1',86,76,17,18],[g2,'1',92,86,18,18],
-    [g3,'1',83,70,17,18],[g3,'1',89,80,17,18]];
-  const cl=v=>Math.max(0,Math.min(100,v));
-  S.log=days.map((d,i)=>{const b=d[3],tno=Math.round(18*(1-b/100)),base=d[1]==='0';
-    if(base)return{date:D(days.length-1-i),ph:'0',goal:'',pts:'',poss:'',beh:String(b),m:'',n:'',tno:'',nom:'',sno:'',asm:'',met:false,tgp:'',bgp:[cl(b+10),cl(b-12),cl(b+2)].join(','),note:i===0?'teacher rating only':'',src:''};
-    const pts=Math.round(36*d[2]/100),nom=Math.max(0,tno-(d[5]-d[4]));
-    return{date:D(days.length-1-i),ph:d[1],goal:String(d[0]),pts:String(pts),poss:'36',beh:String(b),m:String(d[4]),n:String(d[5]),tno:String(tno),nom:String(nom),sno:String(nom),asm:'',met:pts/36*100>=d[0],
-      tgp:[cl(d[2]+8),cl(d[2]-10),cl(d[2]+4)].join(','),bgp:[cl(b+10),cl(b-12),cl(b+2)].join(','),note:i===4?'first day rating':i===14?'goal raised to 75':i===19?'goal raised to 80':'',src:''};});
+  /* v24.40 (review R-121) the days as counts: three targets rated Yes or No in six periods (18 ratings a day; a Yes matched by the
+     teacher earns 2 points a target, 12 a target, 36 a day), so every percent is a share of those counts, as a rated day computes them */
+  const yes=[[2,1,2],[3,2,3],[3,1,3],[3,3,3],
+    [3,2,2],[4,2,3],[3,3,2],[4,3,4],[4,3,3],[4,4,4],[4,3,4],[5,3,4],[5,4,4],[4,3,3],
+    [5,3,4],[5,5,4],[4,4,3],[5,4,5],[6,5,5],[5,4,4],[5,5,4]];   /* the teacher's Yes a target, of 6 */
+  const pt=[null,null,null,null,
+    [8,7,8],[9,8,9],[8,8,9],[10,9,9],[9,9,9],[10,10,9],[9,9,10],[10,10,10],[11,10,10],[9,8,9],
+    [10,10,10],[11,11,10],[9,8,9],[11,10,10],[12,11,10],[10,10,10],[11,11,10]];   /* points a target, of 12 */
+  const mm=[null,null,null,null,13,14,13,15,15,16,16,17,16,16,17,17,16,17,18,17,17];   /* the student's ratings that matched the teacher's, of 18 */
+  const goals=[null,null,null,null,g1,g1,g1,g1,g1,g1,g1,g1,g1,g1,g2,g2,g2,g2,g2,g3,g3];
+  const r1=v=>String(Math.round(v*10)/10);
+  S.log=yes.map((y,i)=>{const sum=y[0]+y[1]+y[2],b=sum/18*100,tno=18-sum,base=goals[i]==null,bgp=y.map(k=>r1(k/6*100)).join(',');
+    if(base)return{date:D(yes.length-1-i),ph:'0',goal:'',pts:'',poss:'',beh:r1(b),m:'',n:'',tno:'',nom:'',sno:'',asm:'',met:false,tgp:'',bgp,note:i===0?'teacher rating only':'',src:''};
+    const q=pt[i],pts=q[0]+q[1]+q[2],m=mm[i],nom=Math.max(0,tno-(18-m));
+    return{date:D(yes.length-1-i),ph:'1',goal:String(goals[i]),pts:String(pts),poss:'36',beh:r1(b),m:String(m),n:'18',tno:String(tno),nom:String(nom),sno:String(nom),asm:'',met:pts/36*100>=goals[i],
+      tgp:q.map(k=>r1(k/12*100)).join(','),bgp,note:i===4?'first day rating':i===14?'goal raised to 75':i===19?'goal raised to 80':'',src:''};});
   S.meta.goal='80';
   if(typeof smRSim==='function')smRSim();   /* v21.46 today's first periods rated on the iPad (sm-rate.js) */
   if(typeof mmSim==='function')mmSim(D);   /* v21.66 */
@@ -8567,4 +8572,5 @@ a{text-underline-offset:2px}
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
+<!-- v24.40h one simulated student -->
 </html>

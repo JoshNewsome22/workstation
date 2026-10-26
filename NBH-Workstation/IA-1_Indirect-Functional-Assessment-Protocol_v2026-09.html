@@ -4362,17 +4362,21 @@ async function loadSim(){
  const sc=SIM[$('#simScenario').value];restore({counts:{inf:3,int:2}});
  const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}};
  const T=sc.target;const label={attention:'adult attention',tangible:'access to preferred items',escape:'escape from academic demands',automatic:'automatic (sensory) reinforcement',physical:'pain attenuation / physical discomfort'}[T]||'undetermined';
- set('m.client','SIMULATED – Sample Student');set('m.sid','SIM-000');set('m.dob','—');set('m.setting','Room 12 (simulated)');set('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');set('m.date',new Date().toLocaleDateString());
+ set('m.client','SIMULATED – Sample Student');set('m.sid','SIM-000');set('m.dob','4/18/2017');set('m.setting','Room 12 (simulated)');set('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');set('m.date',new Date().toLocaleDateString());
  set('m.beh',T==='automatic'?'Hand flapping (simulated)':'Aggression toward staff (simulated)');
  set('m.def',T==='automatic'?'Repetitive up-and-down movement of one or both hands at the wrist, 3 or more cycles, not part of a task. Simulated definition.':'Forceful contact of hand, foot, or head with a staff member, audible or leaving a mark. Simulated definition.');
  set('m.freq',T==='automatic'?'1':'4');set('m.freqcat',T==='automatic'?'Hourly':'Daily');set('m.sev',T==='automatic'?'Mild: disruptive, little risk':'Severe: significant threat to health or safety');set('m.tx','None listed (simulated)');
  set('m.med',T==='physical'?'Nurse note: recurrent ear infections; episodes cluster on days of reported discomfort (simulated).':'No active medical concern reported (simulated)');
  const infs=[['Teacher (simulated)','classroom teacher','24','Yes','18','classroom, specials','In-service only'],['Paraprofessional (simulated)','paraprofessional','8','Yes','25','classroom, lunch, bus line','RBT'],['Parent (simulated)','parent','all','No','2','home; school events','None']];
  infs.forEach((x,i)=>{set(`inf[${i}].name`,x[0]);set(`inf[${i}].role`,x[1]);set(`inf[${i}].mo`,x[2]);set(`inf[${i}].daily`,x[3]);set(`inf[${i}].hrs`,x[4]);set(`inf[${i}].set`,x[5]);set(`inf[${i}].train`,x[6]);});
- ['fast','qabf','mas','pbq','wefa','int'].forEach(k=>{set(`plan.${k}.u`,'Yes');set(`plan.${k}.who`,k==='int'?(sc.dissent?'A, '+CODES[sc.dissent.who]:'A, B'):'A, B, C');set(`plan.${k}.mode`,'Interview');set(`plan.${k}.d`,new Date().toLocaleDateString());set(`plan.${k}.n`,'simulated');});
+ /* v24.40 (review R-049) a caseload plan: the FAST and one scale (the QABF) with the three informants, the interviews; the MAS, the PBQ and the WEFA (an
+    elopement instrument; the target is not elopement) not used, their rows left blank */
+ const USED=['fast','qabf','int'];
+ ['fast','qabf','mas','pbq','wefa','int'].forEach(k=>{const u=USED.includes(k);set(`plan.${k}.u`,u?'Yes':'No');set(`plan.${k}.who`,!u?'':k==='int'?(sc.dissent?'A, '+CODES[sc.dissent.who]:'A, B'):'A, B, C');set(`plan.${k}.mode`,u?'Interview':'');set(`plan.${k}.d`,u?new Date().toLocaleDateString():'');set(`plan.${k}.n`,u?'simulated':k==='wefa'?'not used: the target is not elopement (simulated)':'not used (simulated)');});
  set('setup.indep',true);set('setup.samedef',true);set('setup.official',true);
  for(let r=0;r<3;r++){const rel=sc.inf[r];
   Object.keys(INST).forEach(key=>{const d=INST[key];let cats=T?[T]:[];
+   if(!USED.includes(key)){for(let it=1;it<=d.items;it++)set(`${key}[${r}][${it}]`,'');try{simShape(key,r,null);}catch(e){}return;}   /* v24.40 an instrument not in the plan stays blank */
    if(sc.dissent&&sc.dissent.who===r)cats=[sc.dissent.cat];
    if(key==='fast'&&sc.fastOverride)cats=[sc.fastOverride];
    if(key==='pbq'){let mode=sc.pbq;if(sc.dissent&&sc.dissent.who===r&&mode==='adult_esc')mode='adult_att';
@@ -4392,7 +4396,7 @@ async function loadSim(){
  const wd={comm:'verbally; gestures (simulated)',commrel:'Somewhat reliably',seeks:{attention:'social attention (chase, tickles)',tangible:'parks or playgrounds; the tablet',automatic:'water (pools, canals)',escape:'none noted',physical:'none noted'}[T]||'none noted',
   settings:'school: daily; home: weekly; community: monthly (simulated)',school:T==='escape'?'structured environment; transitions':'unstructured environment; hallway',leaves:T==='automatic'?'the grounds, campus or yard':'the room; the safe proximity of an adult',
   when:{attention:'right in front of me',escape:'during a transition; when work is presented',tangible:'when a preferred item is put away',automatic:'in a lapse of supervision; when left alone'}[T]||'in a lapse of supervision',i7:T==='tangible'?'tablet':'none named',i10:T==='tangible'?'playground swing':'none named',i12:T==='escape'?'independent math worksheet':'none named'};
- for(let r=0;r<3;r++)Object.keys(wd).forEach(k=>set(`wefa[${r}].${k}`,wd[k]+(/simulated/.test(wd[k])?'':' (simulated)')));
+ for(let r=0;r<3;r++)Object.keys(wd).forEach(k=>set(`wefa[${r}].${k}`,''));   /* v24.40 the WEFA is not in the plan */
  const intFn=[T||'multiple',(sc.dissent?sc.dissent.cat:T)||'multiple'];
  for(let i=0;i<2;i++){set(`int[${i}].inst`,i?'Open-ended (Hanley)':'FACTS');set(`int[${i}].who`,i?(sc.dissent?CODES[sc.dissent.who]:'B'):'A');set(`int[${i}].d`,new Date().toLocaleDateString());
   set(`int[${i}].routine`,T==='automatic'?'unstructured time 1:30–2:00; arrival':'independent math work 10:15–10:45; transition from recess');set(`int[${i}].routineLow`,'preferred activity with one-to-one staff');
@@ -4403,6 +4407,20 @@ async function loadSim(){
   set(`int[${i}].summary`,intFn[i]==='multiple'?'No consistent routine, antecedent or consequence identified; the informant described several unrelated situations. (Simulated summary statement.)':`During ${T==='automatic'?'unstructured time':'independent work'}, when ${val(`int[${i}].a`)}, the student ${T==='automatic'?'flaps hands':'hits staff'}, and as a result ${val(`int[${i}].c`)}. (Simulated summary statement.)`);
   set(`int[${i}].fn`,intFn[i]);set(`int[${i}].conf`,i?'4':'5');set(`int[${i}].by`,'Assessor (simulated)');}
  renderAllTot();renderSummary();
+ /* v24.40 (review E-02) the hypothesis drafted from the convergence sheet and the Decision ticked, as a finished example reads */
+ ['hyp.c','hyp.alt','hyp.se','hyp.idio','hyp.b','hyp.a'].forEach(k=>set(k,''));
+ try{const toast=window.nbhUI&&nbhUI.toast;if(window.nbhUI)nbhUI.toast=()=>{};try{hypDraft();}finally{if(window.nbhUI)nbhUI.toast=toast;}}catch(e){}
+ if(!val('hyp.c'))set('hyp.c','No leading category across the instruments and informants: no function is hypothesized from the indirect data; a descriptive assessment comes first. (Simulated.)');
+ if(!val('hyp.b'))set('hyp.b','the student engages in '+val('m.beh'));
+ set('hyp.a',{attention:'the teacher turns to other students',tangible:'the tablet or a preferred item is put away',escape:'an independent worksheet is presented',automatic:'no activity is in progress',physical:'the student is unwell'}[T]||'the routines the informants named vary');
+ const DEC={attention:{single:true,abc:true,note:'Three informants agree on adult attention: a single-function test of attention with a matched control (Form EA-1), after a descriptive look at the routines named (Form ABC-1).'},
+  tangible:{single:true,abc:true,note:'Convergence on access to preferred items: a single-function test of tangible with a matched control; the FAST cannot separate this from attention, so the test settles it.'},
+  escape:{fa:true,interview:true,note:'Two informants rate escape and one attention, without consensus: a follow-up interview on the items that split them, then a functional analysis with the crisis plan in place (an escape hypothesis is not acted on from indirect data alone).'},
+  automatic:{fa:true,abc:true,note:'An automatic profile: a descriptive check that the behavior occurs alone and unprompted, then an alone or no-interaction series on Form EA-1.'},
+  physical:{med:true,note:'A pain-attenuation profile with an illness-linked pattern: nursing referral first; the assessment resumes when the medical question is answered.'},
+  flat:{interview:true,abc:true,note:'No leading category: a follow-up interview and a descriptive assessment before any analysis is scheduled.'},
+  split:{interview:true,fa:true,note:'The informants split: a follow-up interview on the items that divide them, then a functional analysis.'}}[$('#simScenario').value]||{abc:true,note:'A descriptive assessment in the routines named.'};
+ ['abc','med','fa','single','interview'].forEach(k=>set('dec.'+k,!!DEC[k]));set('dec.note',DEC.note+' (Simulated rationale.)');
  $('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;
  setView('summary');}
 /* v24.39 (review R-121, R-122, E-02) the simulation seeded and marked: the same example at every load, New example for another */
@@ -7502,7 +7520,11 @@ OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
   if(!bits.length)return r;return {filled:((r&&r.filled)||0)+o.n,note:[(r&&r.note)||''].concat(bits).filter(Boolean).join('; ')};};
 })();
 </script>
-<style id="ia135-css">@media print{body.ia-pr-scores .sheet:not(#summary){display:none!important}}</style>
+<style id="ia135-css">@media print{body.ia-pr-scores .sheet:not(#summary){display:none!important}
+body.ia-skip-fast #fast,body.ia-skip-qabf #qabf,body.ia-skip-mas #mas,body.ia-skip-pbq #pbq,body.ia-skip-wefa #wefa{display:none!important}}</style>
+<script>/* v24.40 (review R-049) an instrument the plan marks not used, with no score on its sheet, prints no sheet: the print policy keeps blank logs off paper */
+(function(){const K=['fast','qabf','mas','pbq','wefa'];function mark(on){K.forEach(k=>{let skip=false;if(on){const u=document.querySelector('[name="plan.'+k+'.u"]');if(u&&u.value==='No'){skip=true;for(const e of document.querySelectorAll('[name^="'+k+'["]')){if(e.value!==''&&e.value!=='NA'){skip=false;break;}}}}document.body.classList.toggle('ia-skip-'+k,skip);});}
+window.addEventListener('beforeprint',()=>mark(true));window.addEventListener('afterprint',()=>mark(false));if(window.matchMedia){try{window.matchMedia('print').addEventListener('change',e=>mark(e.matches));}catch(e){}}window.__iaSkipMark=mark;})();</script>
 <script id="ia135">/* v24.35 (R-042) the short print: the Summary sheet alone (the scores by instrument and informant, the convergence, the hypothesis and the decision) */
 window.addEventListener('beforeprint',()=>{const w=document.getElementById('iaPrintWhat');document.body.classList.toggle('ia-pr-scores',!!(w&&w.value==='scores'));});
 window.addEventListener('afterprint',()=>document.body.classList.remove('ia-pr-scores'));</script>
@@ -7695,4 +7717,5 @@ a{text-underline-offset:2px}
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
+<!-- v24.40h one simulated student -->
 </html>

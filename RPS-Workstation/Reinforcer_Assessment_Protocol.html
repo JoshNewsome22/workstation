@@ -3136,17 +3136,17 @@ async function loadSim(){
   ensure();
 
   S.meta={
-    client:'SIMULATED \u2013 Sample Student', sid:'SIM-000', dob:'\u2014',
+    client:'SIMULATED \u2013 Sample Student', sid:'SIM-000', dob:'4/18/2017',
     setting:'Room 12, small-group table (simulated)',
     assessor:($('#mAssessor')&&$('#mAssessor').value)||'Jordan Ellis, M.A., BCBA (simulated)',
     date:D(0),
-    question:'Do the top three items from the MSWO function as reinforcers for independent block sorting, and which will hold up under a thinned schedule?',
-    pasrc:'Form PA-1, MSWO, 5 sessions, '+D(21)+'; top 3 high-preference items carried forward',
+    question:'Do the top two items of the PA-1 hierarchy, and a low one, function as reinforcers for independent block sorting, and which will hold up under a thinned schedule?',
+    pasrc:'Form PA-1, paired stimulus (MSWO agrees), 5 sessions, '+D(21)+'; the top two items and a low one carried forward',   /* v24.40 (review R-121) PA-1’s own example */
     response:'Places one block in the bin from the tray; counted when the block lands in the bin',
     materials:'Tray of 50 blocks, bin 20 cm to the right; for concurrent operants, two identical bins 40 cm apart',
-    magnitude:'20 s access delivered within 2 s of the response; edible: one piece',
+    magnitude:'20 s access delivered within 2 s of the response',
     control:'Same materials, responses produce nothing; assessor present and neutral',
-    mo:'No tablet or fruit chews for 3 h before the session; praise as usual through the day, none from the assessor in the 5 min before; sessions at 9:30 daily; never within 30 min of snack',   /* v22.79 (review F136) */
+    mo:'No tablet, bubbles or picture books for 3 h before the session; praise as usual through the day, none from the assessor in the 5 min before; sessions at 9:30 daily; never within 30 min of snack',   /* v22.79 (review F136) */
     signal:'Colored placemat per condition; the item is shown once before the session starts',
     d_so:true, d_co:true, d_pr:true,
     prcap:'20',
@@ -3155,17 +3155,18 @@ async function loadSim(){
     soDesign:'Multielement', coOpts:'3', planRatio:'5',
     ioa:'Second observer on 33% of sessions across all three conditions; mean 96% (range 91\u2013100%) on responses per session',
     pbsum:'No aggression in any session. Two brief off-task periods in control sessions, both under 10 s.',
-    recs:'Tablet access is the reinforcer of record for independent work. Fruit chew is a usable back-up. Praise alone did not function as a reinforcer and should not be scheduled as the sole consequence.',
+    recs:'Tablet access is the reinforcer of record for independent work. Bubbles are a usable back-up. The picture book did not function as a reinforcer and should not be scheduled as a consequence.',
     schedule:'FR 5 with 20-s tablet access; break points of 15\u201317 support thinning to FR 8 over two weeks',
-    rotate:'Alternate tablet and fruit chew across sessions to slow satiation; run a brief MSWO each Monday',
+    rotate:'Alternate tablet and bubbles across sessions to slow satiation; run a brief MSWO each Monday',
     untested:'Token board and escape to the beanbag were nominated but not tested in this assessment',
     retest:'Re-test when the response rate falls below 60% of the assessment level for 3 consecutive days, and at each new schedule step'
   };
 
   S.stim=[
-    {name:'Tablet (video)', type:'Leisure item',       pa:'92', mag:'20 s access'},
-    {name:'Fruit chew',     type:'Edible',             pa:'71', mag:'one piece'},
-    {name:'Praise + high five', type:'Social / attention', pa:'46', mag:'brief praise statement'}
+    /* v24.40 (review R-121, E-02) three of PA-1's example items, with the percentages its paired-stimulus hierarchy gives them */
+    {name:'Tablet (video)', type:'Leisure item', pa:'100', mag:'20 s access'},
+    {name:'Bubbles',        type:'Leisure item', pa:'80',  mag:'20 s access'},
+    {name:'Picture book',   type:'Leisure item', pa:'40',  mag:'20 s access'}
   ];
 
   /* ---- single operant: multielement, 16 sessions, 4-condition rotation ---- */
@@ -3180,12 +3181,12 @@ async function loadSim(){
     S.so[k]={date:D(18-day*3), cond:c, resp:String(jit((baseRate[c]+drift)*min,4)),
              min:String(min), pb:false, phase:false};
   }
-  /* praise tracks the control session of the same day, within two responses and at or below it in
+  /* the picture book tracks the control session of the same day, within two responses and at or below it in
      at least two of its four sessions, so its single-operant verdict is None (v21.16) */
   const dl=[-1,0,1,2].sort(()=>SR()-0.5);
   for(let k=3;k<S.nSess;k+=4)S.so[k].resp=String(Math.max(0,+S.so[k-3].resp+dl[((k-3)/4)%4]));
 
-  /* ---- concurrent operants: tablet vs fruit chew vs control, positions counterbalanced ---- */
+  /* ---- concurrent operants: tablet vs bubbles vs control, positions counterbalanced ---- */
   const posSeq=['L','R','M','L','R','M','L','R','M','L'];
   for(let k=0;k<S.nCoSess;k++){
     S.co[k]={date:D(14-k), pos:posSeq[k],
@@ -3195,7 +3196,7 @@ async function loadSim(){
   /* ---- progressive ratio: 3 sessions per condition + control ---- */
   const lad=prLadder();
   /* ratios completed in each condition's three sessions (v21.16): the tablet completes FR 15 or FR 17;
-     the fruit chew FR 7 or FR 9, and FR 9 at least once; praise repeats the control's three sessions in
+     the bubbles FR 7 or FR 9, and FR 9 at least once; the picture book repeats the control's three sessions in
      another order, so its mean break point equals the control's */
   const pick=(a,b)=>SR()<0.5?a:b;
   const stops={'0':[pick(8,9),pick(8,9),pick(8,9)],'1':[pick(4,5),pick(4,5),5].sort(()=>SR()-0.5),
@@ -3226,7 +3227,7 @@ async function loadSim(){
     coa_arr:'Desk, tape down the center',coa_equal:true,coa_sd:'Lettered colored placemats, one per side (blue A, yellow B), swapped with the conditions',
     coa_choice:'Chair and body moved to one side of the desk. Within 3 in of the center line = neither: pause both timers and prompt a choice.',
     coa_impl:'Jordan Ellis (BCBA, simulated): overview, timers, fidelity data',
-    coa_mat:'From PA-1: tablet (HP, displacing item; present only where it is the test variable), fruit chew (MP), picture book (LP, rank 6)'});
+    coa_mat:'From PA-1: tablet (HP, displacing item; present only where it is the test variable), bubbles (MP), picture book (LP, rank 4)'});
   S.coa.conf=[{name:'Ms. Ortiz',role:'Teacher',why:'Suspected reinforcer',bst:true,bstDate:D(12)}];
   const cond=(desc,att,attWho,tan,tanWhat,av,avWhat,purpose,link)=>({desc,att,attWho,tan,tanWhat,av,avWhat,purpose,link});
   S.coa.lib=[
@@ -7519,4 +7520,5 @@ a{text-underline-offset:2px}
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
+<!-- v24.40h one simulated student -->
 </html>

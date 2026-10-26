@@ -1,3 +1,4 @@
+/* v24.40: the simulation leaves the WEFA out of its plan (review R-049); the manual WEFA checks above are unchanged */
 /* v21.41: the WEFA (Wandering and Elopement Functional Assessment Interview) as IA-1's fifth instrument: the sheet, the
    set counts with the form's likelihood labels, items 1 and 8 in two sets, the convergence row, the respondent page
    (True / False, no N/A, the header details as questions), the collector, the Setup wording box, save / reload / open,
@@ -103,16 +104,17 @@ const WEFA=Array.from({length:18},(_,i)=>(i+1)+'. Simulated WEFA statement '+(i+
  const back=await page.evaluate(()=>{const v=n=>document.querySelector('[name="'+n+'"]').value;return {a1:v('wefa[0][1]'),a6:v('wefa[0][6]'),comm:v('wefa[0].comm'),i7:v('wefa[0].i7'),plan:v('plan.wefa.u'),count:document.querySelector('[data-rpw="wefa"]').textContent,row:document.querySelector('#convTbl').textContent.replace(/\s+/g,' ')};});
  ok('open: answers, details, plan and wording count come back; the convergence row recomputes',back.a1==='Y'&&back.a6==='N'&&back.comm==='verbally, gestures'&&back.i7==='tablet'&&back.plan==='Yes'&&/18 pasted/.test(back.count)&&/WEFA[^]*Attention/.test(back.row),back);
 
- /* the simulation fills it to the scenario's target */
+ /* v24.40 (review R-049) the simulation's plan is the FAST and the QABF with three informants: the WEFA is not used (its header asks about
+    elopement; the target is aggression), its plan row says No with the reason, its rows are blank and the convergence sheet has no WEFA row */
  await sim('escape');
- const s1=await page.evaluate(()=>{const rows=[...document.querySelectorAll('#convTbl tbody tr')].filter(tr=>/^WEFA/.test(tr.textContent)).map(tr=>tr.textContent.replace(/\s+/g,' '));const v=n=>document.querySelector('[name="'+n+'"]').value;return {rows,i12:v('wefa[0].i12'),plan:v('plan.wefa.u'),filled:[0,1,2].every(r=>v('wefa['+r+'][1]')!=='')};});
- ok('simulation (escape): three WEFA rows; A and B escape, C (the dissenter) attention; the details follow the target; the plan row is filled',s1.rows.length===3&&/Escape \/ avoidance[^]*counted[^]*Escape/.test(s1.rows[0])&&/Escape \/ avoidance/.test(s1.rows[1])&&/Attention \(access/.test(s1.rows[2])&&/independent math worksheet \(simulated\)/.test(s1.i12)&&s1.plan==='Yes'&&s1.filled,s1);
- for(const [sc,cat] of [['attention','Attention'],['tangible','Tangible'],['automatic','Automatic']]){await sim(sc);
-  const rows=await page.evaluate(()=>[...document.querySelectorAll('#convTbl tbody tr')].filter(tr=>/^WEFA/.test(tr.textContent)).map(tr=>tr.lastElementChild.textContent));
-  ok('simulation ('+sc+'): every WEFA row maps to '+cat,rows.length===3&&rows.every(r=>r===cat),rows);}
+ const s1=await page.evaluate(()=>{const rows=[...document.querySelectorAll('#convTbl tbody tr')].filter(tr=>/^WEFA/.test(tr.textContent)).map(tr=>tr.textContent.replace(/\s+/g,' '));const v=n=>document.querySelector('[name="'+n+'"]').value;return {rows,i12:v('wefa[0].i12'),plan:v('plan.wefa.u'),note:v('plan.wefa.n'),blank:[0,1,2].every(r=>!v('wefa['+r+'][1]')&&!v('wefa['+r+'].comm'))};});
+ ok('simulation (escape): the WEFA is not in the plan (No, "not elopement"), its rows and header details are blank, and the convergence sheet carries no WEFA row',s1.rows.length===0&&s1.plan==='No'&&/elopement/.test(s1.note)&&s1.blank&&!s1.i12,s1);
+ for(const sc of ['attention','tangible','automatic']){await sim(sc);
+  const r=await page.evaluate(()=>({rows:[...document.querySelectorAll('#convTbl tbody tr')].filter(tr=>/^WEFA/.test(tr.textContent)).length,plan:document.querySelector('[name="plan.wefa.u"]').value}));
+  ok('simulation ('+sc+'): no WEFA row, the plan row No',r.rows===0&&r.plan==='No',r);}
  await sim('attention');v=await text('#convVerdict');
- ok('the FAST, QABF, MAS and PBQ still converge as before: 3 of 3 informants, 3 FAST social-positive outcomes',/Attention \(includes 3 FAST social-positive outcomes\): 3 of 3 informants \(100%\)/.test(v),v);
- ok('no NA in the simulated WEFA',await page.evaluate(()=>![...document.querySelectorAll('[name^="wefa["]')].some(e=>e.value==='NA')));
+ ok('the FAST and QABF converge: 3 of 3 informants, 3 FAST social-positive outcomes',/Attention \(includes 3 FAST social-positive outcomes\): 3 of 3 informants \(100%\)/.test(v),v);
+ ok('no NA in the simulated WEFA (it is blank)',await page.evaluate(()=>![...document.querySelectorAll('[name^="wefa["]')].some(e=>e.value==='NA')));
 
  /* Clear all */
  await clearAll();

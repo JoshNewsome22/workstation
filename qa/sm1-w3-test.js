@@ -33,7 +33,7 @@ const wire=(p,errs)=>{p.on('pageerror',e=>errs.push(e.message));p.on('console',m
   const sim=await page.evaluate(()=>{renderRecord();const f=window.__nbhFactsOut().points;return {v:$('#logVerdict').textContent,met:[...document.querySelectorAll('#logMetrics .metric')].map(m=>[...m.children].map(c=>c.textContent).join(' ').replace(/\s+/g,' ')),
     f:{beh:f.beh,src:f.src,n:f.days.length,ph0:f.days.filter(d=>d.ph==='0'),tx:f.days.filter(d=>d.ph!=='0').slice(-1)[0]}};});
   ok('F259 the simulation: 2 school days at 80% in phase 1, hold (the days at 75% do not count)',/2 school days at 80% in phase 1 since [\d/]+: hold\. No change before 3 school days/.test(sim.v),sim.v);
-  ok('F262 the simulation: the baseline is the teacher’s ratings, with the first goal and how many baseline days meet it',/Baseline \(teacher only\) 41% .*suggested first goal 70% of the points, met on 2 of 4/.test(sim.met[0]),sim.met);
+  ok('F262 the simulation: the baseline is the teacher’s ratings, with the first goal and how many baseline days meet it',/Baseline \(teacher only\) 40% .*suggested first goal 70% of the points, met on 2 of 4/   /* v24.40: the days as counts, 29 Yes of 72 */.test(sim.met[0]),sim.met);
   ok('F258 facts out: the behavior with each day, the teacher-only days without points or goal, the source of the behavior',
     sim.f.beh==='teacher'&&sim.f.src==='SM-1'&&sim.f.ph0.length===4&&sim.f.ph0.every(d=>d.pct===null&&typeof d.beh==='number'&&d.goal===null&&d.met===null)&&typeof sim.f.tx.beh==='number'&&typeof sim.f.tx.pct==='number'&&sim.f.tx.goal===80,sim.f);
   const simFacts=await page.evaluate(()=>window.__nbhFactsOut());
