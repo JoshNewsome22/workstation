@@ -9905,6 +9905,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.56: Form RS-1 checked again against the RBT Handbook (updated 06/2026): four things it asks, now in the form (the BCBA, 10/26)
+- **Supervisor training comes first.** The handbook says a supervisor completes the supervisor training before providing
+  any supervision. A contact dated before the supervisor's training date now does not count, and the contact says why
+  ("Before <name>'s supervisor training (<date>)…").
+- **One RBT Requirements Coordinator per organization.** When more than one supervisor is marked as a Requirements
+  Coordinator, each one's requirements say so, to be corrected on Setup.
+- **Self-reporting.** A month that ended not met now adds that the RBT and the supervisor self-report supervision
+  noncompliance to the BACB in a timely manner.
+- **Two lines in the requirements.** An RBT working for more than one organization meets every requirement at each one
+  separately, with a record for each. An RBT who pays for supervision is not the supervisor's employer.
+- **Signatures.** The sign page now states the BACB's Acceptable Signatures Policy: an electronic signature, drawn or
+  typed, is accepted when the right person signs with the intent to sign the record.
+- Everything else the handbook asks of the monthly record was already in the form: 5% of hours each calendar month; two
+  real-time contacts; one individual contact; one observation with a client (video counts, phone, email or monitoring
+  alone do not); groups of 2 to 10; BCBA or BCaBA supervisors (the coordinator a BCBA); the relationship rule; portal
+  listing by structure; supervisor–client oversight; the documentation list and 7 years' retention; non-practicing months;
+  the 2026 recertification and the 12 PDUs per 2-year cycle.
+- Tests: qa/rbh156-test.js.
+
 ### v24.55: Form RS-1: the months on Sign and print, and each month's signed record kept in the form as a PDF (the BCBA, 10/26)
 - **The months on Sign and print.** The school year's months now run across the top of Sign and print, each with its
   status, as on the Month page. A tap shows that month's record to sign, print, email or keep, without going back to the

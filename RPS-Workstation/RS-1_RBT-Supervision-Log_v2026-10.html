@@ -1280,7 +1280,7 @@ td input,td select{max-width:100%}
     <!-- v24.55 (the BCBA, 10/26) the months here too: another month's record to sign and print without going back -->
     <div class="rs-monthbar rs-pmonths noprint" role="group" aria-label="Month to sign and print" id="printMonthBar"></div>
     <h2 class="nbh-band noprint" id="signTitle">Sign the Monthly Record</h2>
-    <p class="hint noprint">The supervisor and the RBT read the record below, type their names and the date, and sign with a finger or a stylus, or type the name and adopt it as the signature (or leave the box empty and sign the paper). The record notes how and when each was signed. <b>Print this month</b> prints the record alone, on letter paper.</p>
+    <p class="hint noprint">The supervisor and the RBT read the record below, type their names and the date, and sign with a finger or a stylus, or type the name and adopt it as the signature (or leave the box empty and sign the paper). The BACB accepts an electronic signature, drawn or typed, when the right person signs with the intent to sign the record (RBT Handbook, Acceptable Signatures Policy). The record notes how and when each was signed. <b>Print this month</b> prints the record alone, on letter paper.</p>
     <div class="rs-sign noprint">
       <div class="rs-sigblock">
         <div class="rs-sigh">Supervisor</div>
@@ -1506,6 +1506,7 @@ function cIssues(c,k){const out=[],sp=supById(c.sup),mo=modeOf(c.mode),min=cMin(
   if(mo&&!mo[2])out.push({lvl:'note',t:'By '+MODEWHY[c.mode]+': noted, not counted'});   /* v24.29 (R-026) a note on the record, never a failure */
   if(c.format==='group'){const n=num(c.group),mx=rule('grpmax');if(n!=null&&n>mx)out.push({lvl:'fail',t:'A group of '+n+' RBTs: more than '+mx+', does not count'});else if(n==null||n<2)out.push({lvl:'pending',t:'Enter the number of RBTs in the group (2 to '+mx+')'});}
   if(!c.sup||!sp)out.push({lvl:'pending',t:'Choose the supervisor'});else if(!credOK(sp.cred))out.push({lvl:'fail',t:(sp.name||'The supervisor')+' is not listed as a BCBA or BCaBA'});
+  else if(c.date&&sp.trained==='yes'&&sp.trained_date&&c.date<sp.trained_date)out.push({lvl:'fail',t:'Before '+(sp.name||'the supervisor')+'\u2019s supervisor training ('+mdy(sp.trained_date)+'): supervision starts after the training, so this contact does not count'});   /* v24.56 RBT Handbook: training before providing any supervision */
   if(!mo)out.push({lvl:'pending',t:'Choose how the contact happened'});
   if(!c.date)out.push({lvl:'pending',t:'Enter the date'});else if(keyOf(c.date)!==k)out.push({lvl:'pending',t:'The date is not in '+keyLabel(k)});
   if(min==null)out.push({lvl:'pending',t:'Enter the start and end times'});
@@ -1516,6 +1517,7 @@ const cPlanned=c=>c.date&&c.date>todayISO();
 function supIssues(s){const out=[],hasRC=S.sups.some(x=>x.name&&isRC(x));
   if(!credOK(s.cred))out.push({lvl:'fail',t:s.cred?'Not a BCBA or BCaBA: may not supervise an RBT':'Choose the credential (BCBA or BCaBA)'});
   if(isRC(s)&&s.cred&&s.cred!=='BCBA')out.push({lvl:'fail',t:'An RBT Requirements Coordinator must be a BCBA'});
+  if(isRC(s)&&S.sups.filter(x=>x.name&&isRC(x)).length>1)out.push({lvl:'pending',t:'More than one RBT Requirements Coordinator is marked: an RBT has one per organization'});   /* v24.56 */
   if(s.trained!=='yes')out.push({lvl:'pending',t:'Supervisor training (Supervisor Training Curriculum Outline 2.0) not marked done'});
   if((!hasRC||isRC(s))&&s.portal!=='yes')out.push({lvl:'pending',t:(hasRC?'As Requirements Coordinator, must list':'Must list')+' the RBT in the BACB portal'});
   if(!s.norel)out.push({lvl:'pending',t:'Relationship check not confirmed'});
@@ -1628,6 +1630,7 @@ function renderReq(){const h='<ul>'+
   '<li>In at least <b>'+rule('obs')+'</b> of them the supervisor <b>observes the RBT providing services with a client</b>.</li>'+
   '<li>At least <b>'+rule('indiv')+'</b> contact is <b>individual</b> (no other RBTs or trainees); the other may be a <b>small group of 2 to '+rule('grpmax')+' RBTs</b> (never more, however many supervisors).</li>'+
   '<li>Supervision is client-focused and separate from professional development: one event cannot count as both.</li>'+
+      '<li>An RBT working for more than one organization meets every requirement at each one separately (not, say, 3% at one and 2% at the other): keep a record for each. An RBT who pays for supervision is not the supervisor\u2019s employer.</li>'+
   '<li><b>Who supervises:</b> an <b>RBT Supervisor</b> is a BCBA or a BCaBA; an <b>RBT Requirements Coordinator</b> is a BCBA and may also supervise. Both first complete training based on the <b>Supervisor Training Curriculum Outline (2.0)</b>, uploaded to their BACB portal. The RBT may not be related to, superior to, an employer of, or in a multiple relationship with them.</li>'+
   '<li><b>Supervisor&ndash;client oversight:</b> every client the RBT works with has a supervisor who is employed by the same organization as the RBT or has a contract with the client.</li>'+
   '<li><b>Recertification:</b> an RBT who recertifies in 2026 does so one last time with a <b>Recertification Competency Assessment</b> (no more than '+rule('remind')+' days before the expiration date, overseen by a qualified RBT supervisor). After it, a <b>two-year cycle with '+rule('pdu')+' PDUs</b> begins. The 40-hour training follows the <b>RBT Test Content Outline (3rd ed.)</b>. Reinstatement is possible for 30 days after the expiration date, with a late fee; meanwhile the RBT is inactive and may not practise or bill.</li>'+
@@ -1727,7 +1730,7 @@ function refreshContact(c){const card=$('details.rs-contact[data-cid="'+c.id+'"]
   const iss=$('#c_'+c.id+'_issues');if(iss)iss.innerHTML=issuesText(is,c);}
 function renderComp(){const s=stats(curKey),P=rule('pct');
   const fill=s.pct==null?0:Math.min(100,s.pct/(P*2)*100),mark=50;
-  const verdict={ok:s.ended?'Compliant: every check is met.':'On track: every check is met so far.',pending:'In progress: '+s.checks.filter(c=>c.s==='pending').length+' check'+(s.checks.filter(c=>c.s==='pending').length===1?'':'s')+' not met yet.',fail:s.ended?'Not met: see the red marks.':'Needs attention: see the red marks.',none:s.ended?'No service recorded this month. If the RBT did not practise, tick No services this month.':'Nothing recorded yet.',na:'Not applicable: no services this month, so no supervision is required.',
+  const verdict={ok:s.ended?'Compliant: every check is met.':'On track: every check is met so far.',pending:'In progress: '+s.checks.filter(c=>c.s==='pending').length+' check'+(s.checks.filter(c=>c.s==='pending').length===1?'':'s')+' not met yet.',fail:s.ended?'Not met: see the red marks. The RBT and the supervisor self-report supervision noncompliance to the BACB in a timely manner (RBT Handbook, Self-Reporting).':'Needs attention: see the red marks.',none:s.ended?'No service recorded this month. If the RBT did not practise, tick No services this month.':'Nothing recorded yet.',na:'Not applicable: no services this month, so no supervision is required.',
     entering:'Being entered (catch-up mode): '+s.checks.filter(c=>c.s==='pending').length+' check'+(s.checks.filter(c=>c.s==='pending').length===1?'':'s')+' not met yet. The month reads as met or not met once it is signed or marked All of this month is entered.'}[s.status];
   $('#compPanel').innerHTML='<div class="rs-comp" id="compBox" data-status="'+s.status+'"><h3>'+keyLabel(curKey)+'</h3>'+
     '<div class="pctwrap"><div class="pctbig">'+pctTxt(s.pct)+' <small>supervised, of '+P+'% needed</small></div>'+
