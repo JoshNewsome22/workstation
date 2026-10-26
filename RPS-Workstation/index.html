@@ -959,12 +959,37 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
 /* v23.87 (the BCBA's iPad review) on a touch screen the bars above the form fold away while the form is scrolled down to be
    read, as in fullscreen, and come back when it is scrolled up or closed: the form gets the room (ws-fold, set below) */
 /* v24.11 the bars shrink away over a third of a second (they vanished, and the form's frame grew in a jump that read as a jerk) */
-body.has-form header.top,body.has-form .bar{max-height:420px;transition:max-height .32s ease,opacity .2s ease,padding .32s ease}
+/* v24.47 (the BCBA's recordings, 10/26) no height animation: the bars slide as one piece (ws-ov, ws-up below) and the
+   layout changes only while the page is held still by a matching scroll */
+body.has-form header.top,body.has-form .bar{max-height:420px;transition:none}
 body.ws-fold header.top,body.ws-fold .bar{max-height:0!important;min-height:0!important;overflow:hidden!important;opacity:0;pointer-events:none;padding-top:0!important;padding-bottom:0!important;border-top-width:0!important;border-bottom-width:0!important;margin-top:0!important;margin-bottom:0!important}
 body.ws-fold .crumb .fs-logo{display:block}
+/* v24.47 the bars over the form: out of the layout (the form's frame takes their room) and drawn where they were; the
+   notices under them and the form's top bar drawn where they were too, so nothing on screen moves until the slide */
+body.ws-ov header.top{position:absolute;left:0;right:0;top:0;z-index:40}
+body.ws-ov .bar{position:absolute;left:0;right:0;top:var(--ws-hh,0px);z-index:40}
+body.ws-ov .alertbar,body.ws-ov .pwabar,body.ws-ov .stagew>.crumb,body.ws-ov #paneBar{transform:translateY(var(--ws-h,0px))}
+/* the list of forms has a transform of its own (the drawer): it moves with translate, which adds to it */
+body.ws-ov main>nav.rail{translate:0 var(--ws-h,0px)}
+/* only a transform: a position or a size here would change the form's frame, and the form would wrap its text again */
+body.ws-ov .stagew>.crumb,body.ws-ov #paneBar{z-index:39}
+body.ws-ov.ws-up header.top,body.ws-ov.ws-up .bar{transform:translateY(calc(-1 * var(--ws-h,0px)))}
+body.ws-ov.ws-up .alertbar,body.ws-ov.ws-up .pwabar,body.ws-ov.ws-up .stagew>.crumb,body.ws-ov.ws-up #paneBar{transform:none}
+body.ws-ov.ws-up main>nav.rail{translate:none}
+body.ws-ov.ws-up .crumb .fs-logo{display:block}
+/* coming back at the top of a form: everything starts a bar's height up and slides down together */
+body.ws-push header.top,body.ws-push .bar,body.ws-push .alertbar,body.ws-push .pwabar,body.ws-push main{transform:translateY(calc(-1 * var(--ws-h,0px)))}
+body.ws-anim header.top,body.ws-anim .bar,body.ws-anim .alertbar,body.ws-anim .pwabar,body.ws-anim main,body.ws-anim .stagew>.crumb,body.ws-anim #paneBar{transition:transform .22s cubic-bezier(.2,.7,.2,1)}
+body.ws-anim main>nav.rail{transition:translate .22s cubic-bezier(.2,.7,.2,1),transform .18s ease}
+@media (prefers-reduced-motion:reduce){body.ws-anim header.top,body.ws-anim .bar,body.ws-anim .alertbar,body.ws-anim .pwabar,body.ws-anim main,body.ws-anim main>nav.rail,body.ws-anim .stagew>.crumb,body.ws-anim #paneBar{transition-duration:.01s}}
+/* the pin: keep the bars in place (a touch screen only; on a desktop they never fold) */
+#pinBars{display:none}
+@media (pointer:coarse){body.has-form:not(.ws-full) #pinBars{display:inline-flex}}
+@media (max-width:600px){body.has-form:not(.ws-full) #pinBars{display:none}}   /* a phone: the pin is under More, the row keeps its name, Save and Close */
+#pinBars[aria-pressed="true"]{background:var(--mist,#eaf2f0);border-color:var(--teal,#76a2a3)}
 /* v23.87 one Save case at a time: the bar's, with the mark for unsaved work; the one beside the form shows only when the
    bar is out of sight (fullscreen, folded, or a phone, where the bar is not shown) */
-@media (min-width:720.02px){body.has-form:not(.ws-full):not(.ws-fold) .crumb #saveQuick{display:none}}
+@media (min-width:720.02px){body.has-form:not(.ws-full):not(.ws-fold):not(.ws-up) .crumb #saveQuick{display:none}}
 #saveCase.dirty::after{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#c9742a;margin-left:6px;vertical-align:middle}
 
 /* ---- the list can be put away on a wide window ---- */
@@ -1711,6 +1736,8 @@ body:not(.has-form) #focusBtn{display:none}
         <button id="saveQuick" class="sm" aria-label="Save case" title="Save the case to a file"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v4h5v-4M5 13.5v-4h6v4"/></svg><span class="lbl">Save case</span><span class="dot" aria-hidden="true"></span></button>
         <button id="printOne" class="sm" aria-label="Print this form" title="Print this form (Ctrl+P)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V2.5h7V6"/><rect x="1.5" y="6" width="13" height="5.5" rx="1"/><path d="M4.5 9.5h7v4h-7z"/></svg><span class="lbl">Print</span></button>
         <button id="popOut" class="sm" aria-label="Open in its own tab" title="Open in its own tab"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M6 3.5H3.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V10"/></svg><span class="lbl">Own tab</span></button>
+        <!-- v24.47 keep the bars in place while scrolling (touch screens) -->
+        <button id="pinBars" class="sm" aria-pressed="false" aria-label="Keep the bars in place while scrolling" title="Keep the bars in place while you scroll (when off, they fold away while you read a form and come back when you scroll up)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1.5h4M7 1.5v4.2L4.5 8.5h7L9 5.7V1.5M8 8.5v6"/></svg><span class="lbl">Pin bars</span></button>
         <button id="focusBtn" class="sm" aria-pressed="false" aria-label="Focus: one part of the form at a time" title="Focus: one part of the form at a time, the next part opening as you finish one"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2.5h10M3 13.5h10"/><rect x="1.5" y="5" width="13" height="6" rx="1.5"/></svg><span class="lbl">Focus</span></button>
         <button id="splitBtn" class="sm" aria-pressed="false" aria-label="Side by side: two or three forms at once" title="Side by side: show two or three open forms at once"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="5.5" height="11" rx="1"/><rect x="9" y="2.5" width="5.5" height="11" rx="1"/></svg><span class="lbl">Side by side</span></button>
         <button id="fullBtn" class="sm" aria-pressed="false" aria-label="Fullscreen: only the form" title="Fullscreen: only the form (Ctrl+Shift+F)"><svg class="i-on" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg><svg class="i-off" viewBox="0 0 16 16" aria-hidden="true" hidden fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5 14 2M6.5 9.5 2 14"/></svg><span class="lbl">Fullscreen</span></button>
@@ -2591,17 +2618,88 @@ function paintSave(){
     say('The case has had unsaved work for '+min+' minutes. Save case writes it to a file.');}
 }
 $('#saveQuick').addEventListener('click',()=>$('#saveCase').click());
-/* v23.87 (the BCBA's iPad review) the bars fold while the open form is read on a touch screen: the form says which way it
-   is scrolled (nbh-ui.js); down past the top folds them, up again or near the top brings them back, and closing the form,
-   or a form that is not the one in front, never leaves them folded. A short quiet time after each change keeps the form's
-   own resize from undoing it. */
-(()=>{let quiet=0;const coarse=matchMedia('(pointer:coarse)');
-  const fold=on=>{on=!!on&&!!state.cur&&coarse.matches;if(on===document.body.classList.contains('ws-fold'))return;document.body.classList.toggle('ws-fold',on);quiet=Date.now()+450;
-    if(on)setTimeout(()=>{try{const fr=state.cur&&state.frames[state.cur];if(fr&&fr.contentWindow.scrollY<80)fold(false);}catch(e){}},480);};   /* a flick back to the top within the quiet time still brings the bars back */
+/* v23.87 (the BCBA's iPad review) the bars fold while the open form is read on a touch screen, and come back when it is
+   scrolled up or closed. v24.47 (the BCBA's recordings of 10/26) without moving the page under the finger:
+   - folding: once a deliberate scroll down (120 px) comes to rest, the bars leave the layout and lie over the form
+     (ws-ov), each form frame scrolls by their height in the same frame (the frame grew by that much upward, so what it
+     shows stays put), and the bars, the notices and the form's top bar slide up together (ws-up); then ws-fold, the
+     same layout without the bars.
+   - coming back: on a clear scroll up (90 px) the bars slide down over the form (ws-ov); once the page is still they
+     take their room again with the matching scroll the other way. At the top of a form (or with less than their height
+     above), the page comes down with them instead (ws-push), so the form's heading is never left under them.
+   - the form's toolbar (nbh-ui.js) folds and opens with them: the workstation tells it ({nbh:'chrome'}).
+   - the pin (#pinBars, kept on the device) keeps them in place. */
+(()=>{const coarse=matchMedia('(pointer:coarse)'),B=document.body,PIN='nbh.ws.pinbars',DOWN=120,UP=90,BOUNCE=30,IDLE=180,DUR=250;   /* a bounce of less than BOUNCE back up keeps a fold that was asked for */
+  let st='shown',busy=false,down=0,up=0,want=false,idleT=0,H=0,cur0=null,tbOnly=false;const told=new WeakSet();
+  const pinned=()=>{try{return localStorage.getItem(PIN)==='1';}catch(e){return false;}};
+  const allowed=()=>!!state.cur&&coarse.matches&&!B.classList.contains('ws-full')&&!pinned();
+  const cw=f=>{try{return f.contentWindow;}catch(e){return null;}};
+  const live=()=>{const ks=state.split&&state.split.length>1?state.split:[state.cur];return ks.map(k=>state.frames[k]).filter(f=>f&&!f.hidden&&cw(f));};
+  const sy=f=>{try{return cw(f).scrollY||0;}catch(e){return 0;}};
+  /* the room the bars take in the layout, measured (their margins and borders included), and where the packet bar sits
+     under the header: the classes are switched and put back in one task, so nothing is drawn in between */
+  const CL=['ws-fold','ws-ov','ws-up','ws-push','ws-anim'];
+  const measure=()=>{const m=document.querySelector('main'),h=document.querySelector('header.top'),b=$('#bar');const had=CL.filter(c=>B.classList.contains(c));
+    B.classList.remove(...had);const inTop=m.getBoundingClientRect().top;const hh=h&&b&&getComputedStyle(b).display!=='none'?b.getBoundingClientRect().top-h.getBoundingClientRect().top:0;
+    B.classList.add('ws-fold');const outTop=m.getBoundingClientRect().top;B.classList.remove('ws-fold');if(had.length)B.classList.add(...had);
+    const d=Math.max(0,inTop-outTop);B.style.setProperty('--ws-hh',hh+'px');B.style.setProperty('--ws-h',d+'px');return d;};
+  /* the frames' own scroll that holds the page still comes back as a scroll message: it is not the reader's */
+  let mute=0;const hold=()=>{mute=Date.now()+260;down=up=0;want=false;};
+  const tell=(f,folded)=>{const w=cw(f);if(!w)return;try{w.postMessage({nbh:'chrome',mode:pinned()?'off':'auto',folded:!!folded},'*');}catch(e){}};
+  const tellAll=()=>Object.values(state.frames||{}).forEach(f=>tell(f,st==='folded'||tbOnly));
+  /* near the top of a form there is no room to give the bars: they stay, and the form's own toolbar folds alone, as it did */
+  const tbFold=on=>{if(tbOnly===on)return;tbOnly=on;live().forEach(f=>tell(f,on));};
+  const settle=fs=>{void B.offsetHeight;fs.forEach(f=>{try{void cw(f).document.documentElement.clientHeight;}catch(e){}});};
+  const twice=fn=>requestAnimationFrame(()=>requestAnimationFrame(fn));
+  const scrollTo=(f,y)=>{const w=cw(f);if(w)try{hold();w.scrollTo(w.scrollX||0,Math.max(0,y));}catch(e){}};
+  const tops=fs=>fs.map(f=>f.getBoundingClientRect().top);
+  function reset(){clearTimeout(idleT);want=false;busy=false;down=up=0;tbFold(false);B.classList.remove('ws-ov','ws-up','ws-anim','ws-fold','ws-push');st='shown';}
+  function hide(){if(st!=='shown'||busy||!allowed())return;const fs=live();if(!fs.length)return;
+    const h=measure();if(h<10)return;const ys=fs.map(sy);if(ys.some(y=>y<h+20)){tbFold(true);return;}   /* near the top there is no room to give: they stay */
+    tbOnly=false;
+    busy=true;H=h;cur0=state.cur;
+    const t0=tops(fs);B.classList.add('ws-ov');settle(fs);const t1=tops(fs);fs.forEach((f,i)=>scrollTo(f,ys[i]-(t0[i]-t1[i])));
+    fs.forEach(f=>tell(f,true));
+    twice(()=>{B.classList.add('ws-anim','ws-up');setTimeout(()=>{B.classList.remove('ws-ov','ws-up','ws-anim');B.classList.add('ws-fold');st='folded';busy=false;hold();},DUR);});}
+  function refold(){if(st!=='over'||busy)return;busy=true;live().forEach(f=>tell(f,true));B.classList.add('ws-anim','ws-up');
+    setTimeout(()=>{B.classList.remove('ws-ov','ws-up','ws-anim');B.classList.add('ws-fold');st='folded';busy=false;hold();},DUR);}
+  function show(){if(st!=='folded'||busy)return;const fs=live();busy=true;cur0=state.cur;
+    const top=!fs.length||fs.some(f=>sy(f)<60);
+    fs.forEach(f=>tell(f,false));
+    if(top){   /* at the top: the page comes down with them */
+      B.classList.remove('ws-fold');H=measure();B.classList.add('ws-push');settle(fs);
+      twice(()=>{B.classList.add('ws-anim');B.classList.remove('ws-push');setTimeout(()=>{B.classList.remove('ws-anim');st='shown';busy=false;hold();},DUR);});return;}
+    B.classList.remove('ws-fold');B.classList.add('ws-ov','ws-up');H=measure();settle(fs);
+    twice(()=>{B.classList.add('ws-anim');B.classList.remove('ws-up');setTimeout(()=>{B.classList.remove('ws-anim');st='over';busy=false;hold();clearTimeout(idleT);idleT=setTimeout(idle,IDLE);},DUR);});}
+  function commit(){if(st!=='over'||busy)return;const fs=live(),ys=fs.map(sy),h=H;busy=true;
+    const near=ys.some(y=>y<h);   /* less than their height above: the page comes down, so its top is not left under them */
+    const t0=tops(fs);B.classList.remove('ws-ov');settle(fs);const t1=tops(fs),mv=fs.length?t1[0]-t0[0]:h;
+    if(!near){fs.forEach((f,i)=>scrollTo(f,ys[i]+(t1[i]-t0[i])));st='shown';busy=false;hold();return;}
+    const fr=$('#frames');fr.style.transform='translateY('+(-mv)+'px)';void fr.offsetHeight;fr.style.transition='transform .22s cubic-bezier(.2,.7,.2,1)';fr.style.transform='';
+    setTimeout(()=>{fr.style.transition='';st='shown';busy=false;hold();},DUR);}
+  function idle(){if(busy){idleT=setTimeout(idle,120);return;}
+    if(state.cur!==cur0&&st!=='shown'){reset();return;}
+    if(st==='shown'&&want){want=false;down=0;hide();}
+    else if(st==='over'){if(want){want=false;down=0;refold();}else commit();}}
   window.addEventListener('message',ev=>{const d=ev.data;if(!d||d.nbh!=='scroll'||typeof d.y!=='number')return;
-    const fr=state.cur&&state.frames[state.cur];if(!fr||fr.contentWindow!==ev.source||Date.now()<quiet)return;
-    if(d.y<80)fold(false);else if(d.dy>0&&d.y>160)fold(true);else if(d.dy<-40)fold(false);});
-  new MutationObserver(()=>{if(!document.body.classList.contains('has-form'))fold(false);}).observe(document.body,{attributes:true,attributeFilter:['class']});
+    const f=live().find(x=>cw(x)===ev.source);if(!f)return;
+    if(!told.has(f)){told.add(f);tell(f,st==='folded'||tbOnly);}
+    if(!allowed()){if(st==='folded'&&!busy)show();return;}
+    if(Date.now()<mute)return;   /* the frames' own scroll that held the page still */
+    if(d.dy>0){down+=d.dy;up=0;}else if(d.dy<0){up-=d.dy;down=0;}
+    if(!busy){
+      if(st==='shown'){if(down>=DOWN)want=true;if(up>=BOUNCE)want=false;if(tbOnly&&(d.y<40||up>=UP)){up=0;tbFold(false);}}
+      else if(st==='folded'){if(d.y<40||up>=UP){up=0;show();}}
+      else if(st==='over'){if(down>=DOWN)want=true;if(up>=BOUNCE)want=false;}}
+    clearTimeout(idleT);idleT=setTimeout(idle,IDLE);});
+  new MutationObserver(()=>{if((!B.classList.contains('has-form')||B.classList.contains('ws-full'))&&st!=='shown'&&!busy)reset();}).observe(B,{attributes:true,attributeFilter:['class']});
+  addEventListener('resize',()=>{if(st!=='shown'&&!busy)reset();});
+  /* the pin */
+  const pin=$('#pinBars');const paint=()=>{if(pin)pin.setAttribute('aria-pressed',pinned()?'true':'false');};paint();
+  if(pin)pin.addEventListener('click',()=>{const on=!pinned();try{localStorage.setItem(PIN,on?'1':'');}catch(e){}paint();tellAll();
+    if(on&&st==='folded')show();
+    try{wsUI.toast(on?'The bars stay in place while you scroll.':'The bars fold away while you read a form and come back when you scroll up.',{kind:'ok',ms:2600});}catch(e){}});
+  window.__wsBars={state:()=>st,pinned,H:()=>H};   /* for the tests */
 })();
 setInterval(paintSave,5000);
 
@@ -2765,7 +2863,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.46';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.47';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -10424,7 +10522,7 @@ function phBadge(){const s=$('#todayBtn .tbadge'),d=$('#phToday .tbadge'),b=$('#
 {const pb=paintBadge;paintBadge=function(){const r=pb.apply(this,arguments);try{phBadge();}catch(e){}return r;};}
 setTimeout(()=>{try{phBadge();}catch(e){}},1200);
 /* More: what the form's row, the packet bar and the list hold on a wider screen, each running the workstation's own button */
-const PH_MORE=[['This form',[['printOne','Print this form'],['focusBtn','Focus: one part of the form at a time'],['fullBtn','Fullscreen: only the form'],['popOut','Open in its own tab'],['closeForm','Close this form']]],
+const PH_MORE=[['This form',[['printOne','Print this form'],['focusBtn','Focus: one part of the form at a time'],['fullBtn','Fullscreen: only the form'],['popOut','Open in its own tab'],['pinBars','Keep the bars in place while scrolling'],['closeForm','Close this form']]],
   ['The case',[['saveCase','Save case'],['openCase','Open case'],['closeCase','Close case'],['readDoc','Read a document'],['masterPrint','Build master print'],['caseMap','Case map']]],
   ['The workstation',[['railFind','Find a form or command'],['dirBtn','Staff directory'],['help','Help']]]];
 function phMore(){const form=document.body.classList.contains('has-form');

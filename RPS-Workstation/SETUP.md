@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.47: The bars above a form fold and come back without moving the page (from the BCBA's screen recordings of 10/26)
+- **The page no longer jumps under your finger.** On an iPad the workstation's bars (the header, the packet bar) fold
+  away while a form is read, so the form gets about a quarter more of the screen. They used to shrink out of the layout,
+  so everything being read moved up by their height at once, and down again when they came back. Now they slide over the
+  form instead: the form's frame takes their room while it scrolls by exactly that much in the same moment, so the line
+  you are reading stays where it is, frame by frame. At the very top of a form they come back the ordinary way, with the
+  page coming down under them, so the form's own heading is never left hidden behind them.
+- **One smooth motion.** The header, the packet bar and the form's top bar (Forms, the title, Close) move as one piece,
+  in about a fifth of a second, with no fade and no see-through frame; they no longer come back in two steps. The form's
+  own toolbar (its fold to "Tools") folds and opens at the same moment as the bars, not on a trigger of its own.
+- **Only on a deliberate scroll.** They fold after a real scroll down (about 120 px), once the page comes to rest, and
+  come back on a clear scroll up (about 90 px) or at the top. Small movements while reading change nothing, and the
+  small bounce back a finger leaves at the end of a scroll down does not cancel it.
+- **Near the top of a form**, where the bars have no room to fold away, they stay, and the form's own toolbar folds
+  alone, as it did before. A toolbar that takes half the form or more under the bars (Form IA-1's with a case open)
+  folds where the page is, rather than cover what is being read, until the bars come back.
+- **Pin bars**, in the form's top bar on a touch screen, keeps the bars (and the form's whole toolbar) in place while
+  you scroll; the choice is kept on the device. Focus and Fullscreen still give the form the whole screen when you want
+  it. On a phone the pin is under More (This form), so the form's row keeps its name, Save and Close. On a desktop with
+  a mouse the bars never fold, as before.
+- Tests: qa/hdr147-test.js (on an iPad in landscape a line of the form is followed frame by frame while the bars fold
+  and come back and does not move; the header passes through the positions between, a slide; nothing changes during a
+  scroll, only once it rests; a 40 px nudge and a 60 px scroll change nothing; a scroll down ending in a 15 px bounce
+  back still folds them; a 120 px scroll up brings them back over
+  the form, then into place; at the top of a form they come back with the page; on an iPad held upright Form RS-1's
+  toolbar folds and opens with them and not on its own 40 px; the pin keeps them through a long scroll and is kept;
+  closing the form brings them back; on a phone the pin is under More, works from there and shows as on; a desktop
+  never folds and shows no pin).
+
 ### v24.46: Reading lines run the width of the card on an iPad; RS-1's quick-length buttons in a row (the BCBA's screenshots of 10/26)
 - **Paragraphs and list items use the card's width on screen.** Since v21.93 every long paragraph and list item on screen
   stopped at about 80 characters, so on an iPad a list such as Form RS-1's "The Requirements in Brief" ended two thirds of

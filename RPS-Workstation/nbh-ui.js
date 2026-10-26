@@ -242,11 +242,14 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       /* a page too short to scroll the bar's spare height out of sight: a field tapped there folds the bar at once and the
          page comes up to the strip (more of the form above the keyboard); elsewhere a fold waits until it is out of sight */
       var my = Math.max(0, (document.scrollingElement || R).scrollHeight - window.innerHeight), shortP = why === 'focus' && pos === 'sticky' && need && my + S < T + need;
+      /* v24.47 the workstation's bars asked for the fold and the toolbar takes half the form or more (IA-1 under a case's
+         bars): it folds where the page is, as for a field tapped on a short page, rather than cover what is being read */
+      var big = why === 'shell' && pos === 'sticky' && full > window.innerHeight * 0.5; if (big) shortP = true;
       if (pos === 'sticky' && need && y + S < T + need && !shortP) { if (why === 'focus') pend = 1; return false; }
       var nx = pos === 'sticky' ? nextIn(t) : null, n0 = nx ? nx.getBoundingClientRect().top + y : 0, bars = pos === 'sticky' ? under(t, full) : [];
       mark(); R.classList.add('nbh-fold');
       var h = t.offsetHeight; D = full - h; need = D;
-      shortP = why === 'focus' && pos === 'sticky' && my + S < T + D;
+      shortP = big || (why === 'focus' && pos === 'sticky' && my + S < T + D);
       if (D < 8 || (pos === 'sticky' && y + S < T + D && !shortP)) { R.classList.remove('nbh-fold'); if (why === 'focus' && D >= 8) pend = 1; return false; }
       if (pos === 'sticky') {
         /* the space given up stays below the bar (out of sight above the screen), so the page under the finger stays put;
@@ -279,15 +282,25 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       if (st === 2) return;
       if (pend) { if (field(document.activeElement) && touch.matches) { if (y + S >= T + need) fold('focus'); } else pend = 0; return; }
       if (st === 1) {
+        if (shellOwn && shellWant) return;   /* v24.47 in the workstation on a touch screen, the workstation says when */
         if (y + S < T + D + 1) { open(); return; }
+        if (shellOwn) return;
         acc = dy < 0 ? Math.min(acc, 0) + dy : 0;
         if (acc < -30) open();
         return;
       }
+      if (shellOwn) { if (shellWant) fold('shell'); return; }   /* told to fold before the page had room: it folds once it has */
       acc = dy > 0 ? Math.max(acc, 0) + dy : 0;
       if (acc > 40 && Date.now() - gest < 1500) fold('scroll');
     }
     window.addEventListener('scroll', function(){ if (!raf) raf = requestAnimationFrame(tick); }, { passive: true });
+    /* v24.47 (the BCBA's recordings, 10/26) inside the workstation on a touch screen the toolbar folds and opens with the
+       workstation's bars, at the same moment, instead of on a trigger of its own; with the bars pinned it stays whole */
+    var shellOwn = false, shellWant = false;
+    window.addEventListener('message', function(e){ var d = e.data; if (!d || d.nbh !== 'chrome' || e.source !== window.parent) return;
+      shellOwn = d.mode === 'auto' || d.mode === 'off';
+      if (d.mode === 'off' || !d.folded) { shellWant = false; if (st === 1) open(); return; }
+      shellWant = true; if (!st) fold('shell'); });
     var now = function(){ gest = Date.now(); };
     document.addEventListener('touchstart', function(){ tapT = gest = Date.now(); }, { passive: true, capture: true });
     document.addEventListener('touchmove', now, { passive: true, capture: true });
