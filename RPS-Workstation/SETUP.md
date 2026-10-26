@@ -9905,6 +9905,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.62: Form RS-1 and the BACB's Supervisor Training Curriculum Outline (2.0): each review of the effects of supervision records what was looked at (the BCBA, 10/26)
+- **The Effects of Supervision:** each review takes eight "Looked at" boxes, in the outline's terms (Supervision of
+  Ongoing Services 4a.vii; Supervision of Trainees 1j and 2c to 2f): the client's data; client and caregiver
+  satisfaction; direct observation of the RBT; the RBT's satisfaction with supervision; fidelity of implementation (the
+  plan checklist); professionalism; the written conditions and goals reviewed; the supervisor's self-rating. The ticked
+  ones print with the review in the year summary; a review with only boxes ticked still prints, and asks before it is
+  removed. The hint names what the outline asks the supervisor to look at.
+- **The written conditions:** the rescheduling box now also covers replies and how to reach each other (the outline's
+  response-time expectations and preferred means of communication).
+- A record, not a BACB check: no verdict changes.
+- Tests: qa/ste162-test.js.
+
 ### v24.61: Form RS-1 and the 2016 supervision articles and Parsons, Rollyson & Reid (2012): what the written supervision conditions cover, the full steps of behavior skills training, and the RBT's view asked in the articles' words (the BCBA, 10/26)
 - **Readings discussed** has five more, each with a summary for the RBT: Sellers, Valentino & LeBlanc (2016), individual
   supervision; Turner, Fischer & Luiselli (2016), competency-based supervision (it names RBTs among the trainees);
