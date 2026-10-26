@@ -1246,6 +1246,12 @@ td input,td select{max-width:100%}
     <div id="effList"></div>
     <div class="tools"><button class="tool" type="button" id="addEff">Add a review</button><span class="hint" id="effCount"></span></div>
 
+    <!-- v24.58 (the BCBA, 10/26) the BACB's two supervision checklists, one list for this RBT -->
+    <h2 class="nbh-band" style="margin-top:18px">The BACB Supervision Checklists</h2>
+    <p class="hint">The BACB encourages the RBT and each supervisor or Requirements Coordinator to work through its Supervision Checklists (for RBTs, 2/2024; for RBT Supervisors and RBT Requirements Coordinators, 6/2026). They are one list here, in their four phases; an item on both is one item. What this form already records shows its state; tick the rest with the date. The reviews every 6 and every 3 months give their next date, also on the workstation&rsquo;s due line.</p>
+    <div id="ckSum" class="rs-cksum"></div>
+    <div id="ckList"></div>
+
     <h2 class="nbh-band" style="margin-top:18px">Readings This Year</h2>
      <p class="hint">Every reading discussed in a supervision contact this school year, with what was discussed and the RBT&rsquo;s follow-up. Readings are added on the Month page, on the contact.</p>
      <div id="readList"></div>
@@ -1802,7 +1808,7 @@ function renderRbt(){rdListPaint();
       '<div class="fieldgrid"><div><label for="'+F('set')+'">Date set</label><input type="date" id="'+F('set')+'" data-g="'+id+'" data-f="set" value="'+esc(g.set)+'"></div><div><label for="'+F('target')+'">Target date</label><input type="date" id="'+F('target')+'" data-g="'+id+'" data-f="target" value="'+esc(g.target)+'"></div>'+
       '<div><label for="'+F('status')+'">Status</label><select id="'+F('status')+'" data-g="'+id+'" data-f="status">'+opts(GSTAT,g.status||'Not started')+'</select></div></div>'+
       '<div class="field"><label for="'+F('notes')+'">Notes</label><textarea id="'+F('notes')+'" data-g="'+id+'" data-f="notes" rows="2" placeholder="progress seen at the contacts; what helped">'+esc(g.notes)+'</textarea></div></div>';}).join('')||'<p class="hint">No goals yet.</p>';
-  const met=S.goals.filter(g=>g.status==='Met').length;$('#goalCount').textContent=S.goals.length?met+' of '+S.goals.length+' met':'';effPaint();
+  const met=S.goals.filter(g=>g.status==='Met').length;$('#goalCount').textContent=S.goals.length?met+' of '+S.goals.length+' met':'';effPaint();ckPaint();
   $$('[data-cr]').forEach(el=>{el.value=S.cred[el.dataset.cr]||'';});
   renderPdus();renderCred();renderConcerns();}
 function renderPdus(){$('#pduTbl tbody').innerHTML=S.pdus.map((p,i)=>{const id=esc(p.id),F=f=>'p_'+id+'_'+f,w=pduWarn(p);return '<tr data-pid="'+id+'"><td data-l="Date"><input type="date" id="'+F('date')+'" data-p="'+id+'" data-f="date" value="'+esc(p.date)+'" aria-label="PDU '+(i+1)+' date"></td><td data-l="Title"><input id="'+F('title')+'" data-p="'+id+'" data-f="title" value="'+esc(p.title)+'" aria-label="PDU '+(i+1)+' title"><div class="hint" id="'+F('warn')+'" style="color:#8E2A2A">'+esc(w)+'</div></td><td data-l="Type"><select id="'+F('type')+'" data-p="'+id+'" data-f="type" aria-label="PDU '+(i+1)+' type">'+opts(PTYPES.map(t=>[t[0],t[1]]),p.type,true)+'</select></td><td data-l="Provider"><input id="'+F('provider')+'" data-p="'+id+'" data-f="provider" value="'+esc(p.provider)+'" aria-label="PDU '+(i+1)+' provider"></td><td data-l="Units"><input id="'+F('units')+'" data-p="'+id+'" data-f="units" inputmode="decimal" value="'+esc(p.units)+'" aria-label="PDU '+(i+1)+' units"></td><td class="num" data-l="Ethics"><input type="checkbox" id="'+F('ethics')+'" data-p="'+id+'" data-f="ethics"'+(p.ethics?' checked':'')+' aria-label="PDU '+(i+1)+' covers ethics" style="width:24px;height:24px;min-height:0"></td>'+delCell('pdu',p.id,'PDU')+'</tr>';}).join('')||'<tr><td colspan="7" class="hint">No PDUs logged yet.</td></tr>';pduOut();}
@@ -1911,6 +1917,8 @@ function renderYearOut(){const y=setupYear(),ks=yearKeys(y),tk=thruKey(),cut=tk?
     ((E=>E.length?'<div class="p-keep"><h4>Reviews of the effects of supervision</h4><table class="p-t"><thead><tr><th style="width:12%">Reviewed</th><th>The RBT&rsquo;s view</th><th>What the data show</th><th>What changes</th></tr></thead><tbody>'+
       E.map(x=>'<tr><td>'+esc(mdy(x.date))+'</td><td>'+esc(x.view||'')+'</td><td>'+esc(x.data||'')+'</td><td>'+esc(x.change||'')+'</td></tr>').join('')+'</tbody></table></div>':'')
       ((S.effects||[]).filter(x=>x.date&&(!asOf||x.date<=asOf)&&(x.view||x.data||x.change)).sort((a,b)=>a.date.localeCompare(b.date))))+   /* v24.57 */
+    '<p style="margin:4px 0 0"><b>The BACB supervision checklists:</b> '+ckSummary(asOf).map(x=>esc(x.t.toLowerCase())+' '+x.n+' of '+x.of).join('; ')+
+      ((d=>d&&(!asOf||d<=asOf)?'; the codes, the handbook and the BACB website last reviewed together '+esc(mdy(d)):'')((S.ckl||{}).review6))+'.</p>'+   /* v24.58 */
     '<div class="p-foot"><span>Keep supervision records for at least 7 years, also after the supervision ends; in an audit the BACB typically allows 14 days. Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks.</span><span>Form RS-1 · year summary'+(part?' through '+esc(keyLabel(tk)):'')+' · printed '+mdy(todayISO())+'</span></div></div>';}
 /* v24.57 The Effects of Supervision: each review's date, the RBT's view, what the data show, what changes */
 function effPaint(){const L=$('#effList');if(!L)return;const E=S.effects||[];
@@ -1928,6 +1936,68 @@ document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.c
   const i=(S.effects||[]).findIndex(r=>r.id===b.dataset.efdel);if(i<0)return;const x=S.effects[i];
   if((x.view||x.data||x.change)&&!(await nbhUI.confirm('Remove this review of the effects of supervision?',{ok:'Remove',danger:true})))return;
   S.effects.splice(i,1);if(!S.effects.length)delete S.effects;effPaint();changed();});
+/* v24.58 the BACB's Supervision Checklists, one list for this RBT (in the workstation's words; 2026 terms) */
+const CKL=[
+ ['before','Before supervision starts',[
+  {k:'rbt_account',who:'RBT',t:'The RBT made their own BACB portal account, keeps its details current, and knows the login and the certification expiration date.'},
+  {k:'rbt_docs',who:'RBT',t:'The RBT has read the RBT Ethics Code (2.0), the RBT Handbook (Ongoing Supervision; Certification Maintenance Requirements) and the RBT Test Content Outline (3rd ed.), and knows an RBT Supervisor from an RBT Requirements Coordinator.'},
+  {k:'sup_docs',who:'Supervisor',t:'The supervisor has read the RBT Handbook’s Ongoing Supervision section, the RBT Ethics Code (2.0), the Ethics Code for Behavior Analysts, and the BCBA or BCaBA Handbook’s section on assessing, training and supervising RBTs.'},
+  {k:'sup_trained',who:'Supervisor',auto:'trained',t:'Each supervisor has completed the 8-hour supervision training and uploaded it to their BACB portal account.'},
+  {k:'sup_volume',who:'Supervisor',t:'The supervisor has looked at their supervisory volume and has the time to supervise and train well.'},
+  {k:'sup_qual',who:'Supervisor',auto:'qual',t:'Each supervisor is qualified under the RBT Handbook’s RBT Supervisor Requirements (credential, relationship, client oversight).'}]],
+ ['first','During the first month',[
+  {k:'roles',who:'Both',auto:'roles',t:'Each supervisor’s role is agreed: RBT Supervisor, RBT Supervisor working under a Requirements Coordinator, or RBT Requirements Coordinator.'},
+  {k:'portal',who:'Both',auto:'portal',t:'The RBT is listed as a supervisee in the BACB portal (by the Requirements Coordinator, or by each supervisor where there is none), and the RBT has checked it.'},
+  {k:'rc_sups',who:'Supervisor',rc:true,t:'The Requirements Coordinator has added the RBT Supervisors in the BACB portal (recommended, not required).'},
+  {k:'expect',who:'Both',t:'Performance expectations discussed (how to communicate, when to ask for guidance, professional boundaries) and how to give each other feedback.'},
+  {k:'skills',who:'Both',t:'The competency assessment, the RBT’s current skills and training needs, and the tasks an RBT can expect to do, discussed.'},
+  {k:'reqs',who:'Both',t:'The supervision requirements discussed: how supervision is documented and kept, when and how they are met, who else supervises and in what role, what to do if they are not met (asking for more, whom to tell and when, when to tell the BACB), and what happens in an audit.'},
+  {k:'maint',who:'Both',t:'Keeping the certification discussed: the portal login and details, the expiration date, the recertification requirements, what makes a certification inactive (no supervisor on record; not recertified in time) and what that means (no practicing, billing or calling oneself an RBT).'},
+  {k:'calendar',who:'Both',auto:'exp',t:'The recertification date is in both calendars; for a 2026 recertification, a reminder 45 days before it for the competency assessment.'},
+  {k:'pdus',who:'RBT',t:'The RBT knows 12 PDUs are needed before each recertification from 2028 on, and that an application in the 30-day reinstatement period costs a $50 late fee.'},
+  {k:'ethics',who:'Both',t:'The RBT Ethics Code (2.0), self-reporting, the ethics resources (e.g., Continuity of Services: Reminders for RBTs), ethical dilemmas and whom to contact, and how ethics will keep being reviewed, discussed.'},
+  {k:'employer',who:'Both',t:'The organization’s own requirements, and how they differ from the certification’s, discussed.'}]],
+ ['ongoing','Each month or quarter',[
+  {k:'five',who:'Both',auto:'five',t:'A way to make sure supervision reaches 5% of each calendar month’s service hours (this form: the Month page counts the minutes still needed).'},
+  {k:'docs',who:'Both',t:'Supervision records kept where both can reach them for 7 years (this form: Save data, Save case, and the signed PDFs kept here).'},
+  {k:'training',who:'Both',last:true,t:'Training needs taken from observations, supervision talks and client needs, and the training given (the RBT asks for it too).'},
+  {k:'effects',who:'Both',auto:'effects',t:'The effects of supervision evaluated (e.g., procedural integrity) and the RBT’s feedback on it asked for (The Effects of Supervision, above).'},
+  {k:'rc_check',who:'Supervisor',rc:true,last:true,t:'The Requirements Coordinator checks in with the supervisors that nothing has changed, and plans around barriers.'},
+  {k:'review6',who:'Both',every:6,t:'Every 6 months: the RBT Ethics Code (2.0), the RBT Handbook (its Version History) and the BACB website reviewed together for updates.'},
+  {k:'codeq',who:'Supervisor',every:3,t:'Every 3 months: the supervisor reviews the Ethics Code for Behavior Analysts for their responsibilities to supervisees.'}]],
+ ['end','At the end of supervision',[
+  {k:'end_talk',who:'Both',t:'Client transitions discussed, the date supervision ends set, and the records put in order and kept by both.'},
+  {k:'end_portal',who:'Both',t:'The supervisor removes the RBT from the BACB portal as soon as the supervision ends, and the RBT has checked it.'},
+  {k:'end_inactive',who:'RBT',t:'The RBT knows the certification is inactive without a supervisor on record, and has looked at Voluntary Inactive Status in case no new supervisor or job is found at once.'}]]];
+const CKKEYS=CKL.flatMap(g=>g[2].map(i=>i.k));
+const addMon=(d,n)=>{const x=new Date(d+'T00:00:00');x.setMonth(x.getMonth()+n);return isoOf(x);};
+/* an item the record already holds: ok or not, and what it says */
+function ckAuto(i){const sp=S.sups.filter(x=>x.name),rc=sp.filter(isRC);
+  if(i.auto==='trained')return sp.length?{ok:sp.every(x=>x.trained==='yes'),d:sp.every(x=>x.trained==='yes')?'recorded on Setup':sp.filter(x=>x.trained!=='yes').length+' not marked done on Setup'}:{ok:false,d:'no supervisor on Setup yet'};
+  if(i.auto==='qual'){const n=sp.filter(x=>supIssues(x).some(y=>y.lvl==='fail'||y.lvl==='pending')).length;return sp.length?{ok:!n,d:n?n+' with items to record on Setup':'every supervisor’s requirements recorded'}:{ok:false,d:'no supervisor on Setup yet'};}
+  if(i.auto==='roles')return sp.length?{ok:sp.every(x=>x.role),d:sp.map(x=>(x.name||'')+': '+(x.role||'role not chosen')).join('; ')}:{ok:false,d:'no supervisor on Setup yet'};
+  if(i.auto==='portal'){const who=rc.length?rc:sp;return sp.length?{ok:who.every(x=>x.portal==='yes'),d:(rc.length?'the Requirements Coordinator':'each supervisor')+(who.every(x=>x.portal==='yes')?' lists the RBT':': not all marked on Setup')}:{ok:false,d:'no supervisor on Setup yet'};}
+  if(i.auto==='exp')return {ok:!!S.setup.rbt_exp,d:S.setup.rbt_exp?'expires '+mdy(S.setup.rbt_exp)+' (on the due line)':'the expiration date is not on Setup'};
+  if(i.auto==='five'){const any=Object.keys(S.months||{}).some(k=>(S.months[k].days||[]).length);return {ok:any,d:any?'tracked here, month by month':'no service days entered yet'};}
+  if(i.auto==='effects'){const E=(S.effects||[]).filter(x=>x.date).map(x=>x.date).sort();return {ok:!!E.length,d:E.length?'last review '+mdy(E[E.length-1]):'no review yet'};}
+  return {ok:false,d:''};}
+function ckOn(i){return !i.rc||S.sups.some(x=>x.name&&isRC(x));}
+function ckState(i,asOf){const d=(S.ckl||{})[i.k];if(i.auto)return ckAuto(i);const done=!!d&&(!asOf||d<=asOf);
+  if(i.every){const next=done?addMon(d,i.every):'';return {ok:done&&next>=todayISO(),done,d,next,late:done&&next<todayISO()};}
+  return {ok:done,done,d};}
+function ckSummary(asOf){return CKL.map(([g,t,L])=>{const I=L.filter(ckOn),n=I.filter(i=>ckState(i,asOf).ok).length;return {g,t,n,of:I.length};});}
+function ckPaint(){const L=$('#ckList');if(!L)return;const today=todayISO();
+  $('#ckSum').innerHTML=ckSummary().map(x=>'<span class="'+(x.n===x.of?'ok':'')+'">'+esc(x.t)+': <b>'+x.n+' of '+x.of+'</b></span>').join('');
+  L.innerHTML=CKL.map(([g,t,I])=>'<div class="rs-ckgrp"><h3>'+esc(t)+'</h3><ul>'+I.filter(ckOn).map(i=>{const st=ckState(i),id='bck_'+i.k;
+    const who='<span class="rs-ckwho">'+esc(i.who==='Both'?'RBT and supervisor':i.who)+'</span>';
+    if(i.auto)return '<li class="auto '+(st.ok?'ok':'')+'" data-ckitem="'+i.k+'"><span class="rs-ckmark" aria-hidden="true">'+(st.ok?'✓':'•')+'</span><div>'+who+esc(i.t)+'<small>'+(st.ok?'':'Not yet: ')+esc(st.d)+'</small></div></li>';
+    return '<li class="'+(st.ok?'ok':st.late?'late':'')+'" data-ckitem="'+i.k+'"><input type="checkbox" id="'+id+'" data-bck="'+i.k+'"'+(st.done?' checked':'')+'><div><label for="'+id+'">'+who+esc(i.t)+'</label>'+
+      (st.done?'<span class="rs-ckd"><label for="'+id+'_d">'+(i.every||i.last?'Last done':'Done on')+'</label><input type="date" id="'+id+'_d" data-bckd="'+i.k+'" value="'+esc(st.d||'')+'">'+
+      (i.every?'<small>'+(st.late?'<b>Due again since '+esc(mdy(st.next))+'</b>':'Next by '+esc(mdy(st.next)))+'</small>':'')+'</span>':i.every?'<small>Every '+i.every+' months; tick when done</small>':'')+'</div></li>';   /* the date once ticked */}).join('')+'</ul></div>').join('');}
+document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d||!(d.bck||d.bckd))return;if(!S.ckl)S.ckl={};
+  if(d.bck){if(el.checked)S.ckl[d.bck]=S.ckl[d.bck]||todayISO();else delete S.ckl[d.bck];}
+  else{if(/^\d{4}-\d{2}-\d{2}$/.test(el.value))S.ckl[d.bckd]=el.value;else delete S.ckl[d.bckd];}
+  if(!Object.keys(S.ckl).length)delete S.ckl;ckPaint();changed();});
 function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent='Sign the Record for '+keyLabel(curKey);
   $$('[data-sg]').forEach(el=>{el.value=sg[el.dataset.sg]||'';});
   const sp=S.sups.find(s=>s.name&&credOK(s.cred));$('#sgSup').placeholder=sp?supLabel(sp):'name, credential';$('#sgRbt').placeholder=S.setup.rbt_name?(S.setup.rbt_name+', '+(S.setup.rbt_cred||'RBT')):'name, RBT';
@@ -2226,6 +2296,7 @@ function fromFile(d){
         ...['sup','rbt'].reduce((o,w)=>{if(sg[w+'_how']==='typed'||sg[w+'_how']==='drawn')o[w+'_how']=sg[w+'_how'];if(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(String(sg[w+'_at']||'')))o[w+'_at']=sg[w+'_at'];return o;},{})}};   /* v24.50 how and when */
     if(!o.months[k].sig.sup_img)delete o.months[k].sig.sup_img;if(!o.months[k].sig.rbt_img)delete o.months[k].sig.rbt_img;});
   {const ef=arr(s.effects).slice(0,60).map(x=>({id:str(x&&x.id)||uid(),date:isoS(x&&x.date),view:str(x&&x.view),data:str(x&&x.data),change:str(x&&x.change)}));if(ef.length)o.effects=ef;}   /* v24.57 */
+  {const ck=obj(s.ckl),c={};Object.keys(ck).forEach(k=>{if(CKKEYS.includes(k)&&isoS(ck[k]))c[k]=isoS(ck[k]);});if(Object.keys(c).length)o.ckl=c;}   /* v24.58 */
   o.goals=arr(s.goals).slice(0,30).map(x=>({id:str(x&&x.id)||uid(),goal:str(x&&x.goal),set:isoS(x&&x.set),target:isoS(x&&x.target),status:GSTAT.includes(x&&x.status)?x.status:'Not started',notes:str(x&&x.notes)}));
   o.pdus=arr(s.pdus).slice(0,100).map(x=>({id:str(x&&x.id)||uid(),date:isoS(x&&x.date),title:str(x&&x.title),provider:str(x&&x.provider),units:str(x&&x.units),type:ptOf(x&&x.type)?x.type:'',ethics:!!(x&&x.ethics)}));
   o.concerns=arr(s.concerns).slice(0,40).map(x=>{x=obj(x);return {id:str(x.id)||uid(),date:isoS(x.date),concern:str(x.concern),investigated:str(x.investigated),decision:DECIDE.includes(x.decision)?x.decision:'',plan:str(x.plan),outcome:str(x.outcome),outcome_date:isoS(x.outcome_date)};});
@@ -2317,6 +2388,7 @@ window.__nbhDue=function(){const out=[];
   eachRbt(()=>{const st=S.setup,who=st.rbt_name?' ('+st.rbt_name+')':'';
   if(st.rbt_exp)out.push({what:'RBT recertification due'+who,date:st.rbt_exp});
   const w=compWin();if(w&&st.path==='renewal'&&!S.cred.comp_date)out.push({what:'RBT competency assessment window opens'+who,date:w.from});
+  ['review6','codeq'].forEach(k=>{const i=CKL.flatMap(g=>g[2]).find(x=>x.k===k),d=(S.ckl||{})[k];if(d)out.push({what:(k==='review6'?'Review the RBT Ethics Code, RBT Handbook and BACB website':'Review the Ethics Code for Behavior Analysts')+who,date:addMon(d,i.every)});});   /* v24.58 */
   (S.goals||[]).forEach(g=>{if(g.status!=='Met'&&g.target&&g.goal)out.push({what:('RBT goal'+(R.length>1&&st.rbt_name?' ('+st.rbt_name+')':'')+': '+g.goal).slice(0,60),date:g.target});});});
   return out;};
 </script>
@@ -3583,7 +3655,16 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .fieldgrid>div.rs-len>.hint{margin:0 4px 0 0}
 .rs-share .hint{margin:0}
 .rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
-.rs-eff{margin:0 0 10px}.rs-eff .field{margin-top:8px}
+.rs-eff{margin:0 0 10px}
+.rs-cksum{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 10px;font-size:14px;color:var(--ink-soft)}.rs-cksum .ok b{color:#2F6B37}
+.rs-ckgrp h3{font-size:16px;margin:12px 0 6px}.rs-ckgrp ul{list-style:none;margin:0;padding:0}
+.rs-ckgrp li{display:grid;grid-template-columns:28px 1fr;gap:4px 8px;align-items:start;padding:8px 6px;border-bottom:1px solid var(--nbh-rule,#d5dfe3);font-size:15px;line-height:1.45}
+.rs-ckgrp li input[type=checkbox]{width:22px;height:22px;margin:2px 0 0}.rs-ckgrp li small{display:block;color:var(--ink-soft);font-size:13px;margin-top:2px}
+.rs-ckgrp li.ok{background:#f3f8f5}.rs-ckgrp li.late{background:#fff7ed}.rs-ckgrp li.late b{color:#7c2d12}
+.rs-ckmark{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:50%;background:#e8eef0;color:#54676f;font-weight:700}.rs-ckgrp li.auto.ok .rs-ckmark{background:#2F6B37;color:#fff}
+.rs-ckwho{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#54676f;margin-right:6px}
+.rs-ckd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px;font-size:13px;color:var(--ink-soft)}.rs-ckd input[type=date]{max-width:190px}
+.rs-ckgrp li:not(.ok):not(.late) .rs-ckd input[type=date]:placeholder-shown{opacity:.7}.rs-eff .field{margin-top:8px}
 .fieldgrid.rs-share{align-items:start!important}.fieldgrid.rs-share>div{justify-content:flex-start!important}
 #shNote:empty{display:none}
 #kpNote:empty{display:none}

@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.58: Form RS-1: the BACB's two Supervision Checklists, as one list kept with each RBT (the BCBA, 10/26)
+- **The checklists.** The BACB encourages the RBT and each supervisor or Requirements Coordinator to work through its
+  Supervision Checklist for RBTs (version 2/2024) and its Supervision Checklist for RBT Supervisors and RBT Requirements
+  Coordinators (version 6/2026). They are now one list on the RBT record (The BACB Supervision Checklists), in the
+  checklists' four phases: before supervision starts, during the first month, each month or quarter, and at the end of
+  supervision. An item on both checklists is one item, marked as being for the RBT and the supervisor. The items are in the
+  workstation's words, using the 2026 terms; the 2/2024 RBT checklist still names the Task List (2nd ed.) and renewal.
+- **What the form already records shows its state:** each supervisor's 8-hour training, their qualifications, their
+  roles, the portal listing (by the Requirements Coordinator, or each supervisor where there is none), the expiration
+  date, the 5% tracking, and the last review of the effects of supervision. The rest are ticked, dated today, and the date
+  can be changed. The Requirements Coordinator's two items show only when there is one.
+- **The recurring reviews:** every 6 months the RBT and the supervisor review the RBT Ethics Code (2.0), the RBT Handbook
+  and the BACB website; every 3 months the supervisor reviews the Ethics Code for Behavior Analysts. Each shows when it is
+  next due (marked once it is past) and is on the workstation's due line.
+- The ticks are kept with the RBT (Save data, Save case, Autosave), and the year summary prints where each phase stands
+  and the last joint review.
+- Tests: qa/ck158-test.js.
+
 ### v24.57: Form RS-1 and Sellers, Alai-Rosales & MacDonald (2016), the ethics of supervision: the reading, the supervision conditions in writing, and reviews of the effects of supervision (the BCBA, 10/26)
 - **The reading.** Sellers, T. P., Alai-Rosales, S., & MacDonald, R. P. F. (2016). Taking full responsibility: The
   ethics of supervision in behavior analytic practice. *Behavior Analysis in Practice, 9*, 299–308
