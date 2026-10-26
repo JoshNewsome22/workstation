@@ -9905,6 +9905,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.61: Form RS-1 and the 2016 supervision articles and Parsons, Rollyson & Reid (2012): what the written supervision conditions cover, the full steps of behavior skills training, and the RBT's view asked in the articles' words (the BCBA, 10/26)
+- **Readings discussed** has five more, each with a summary for the RBT: Sellers, Valentino & LeBlanc (2016), individual
+  supervision; Turner, Fischer & Luiselli (2016), competency-based supervision (it names RBTs among the trainees);
+  Sellers, LeBlanc & Valentino (2016), barriers to supervision; Valentino, LeBlanc & Sellers (2016), group supervision;
+  Parsons, Rollyson & Reid (2012), evidence-based staff training. Cited as the articles print them; the group article's
+  copy prints no pages and Parsons et al. print no DOI, so none is given.
+- **Each supervisor:** under the date the supervision conditions were given in writing, a fold with ten boxes for what
+  they cover (responsibilities; scope and objectives; how performance is judged and when a remedial plan starts;
+  feedback; rescheduling; what happens if either does not keep to it; the employer's agreement; the ethics codes; remote
+  contacts; ending and hand-off). The ticked ones print with the supervisor. A record, not a BACB check.
+- **A contact's behavior skills training** adds the two steps of Parsons et al. (2012) the form lacked: a written
+  description and practice to mastery, with a one-line reminder of the six steps. The four boxes stay where they were.
+- **A group contact** names the meeting practices of Valentino et al. (2016): an objective, an agenda sent ahead, on
+  time, notes sent out after.
+- **The Effects of Supervision** gives the questions the articles print for asking the RBT, the data that show the
+  effects, and what to do when supervision itself runs into trouble (Sellers, LeBlanc & Valentino, 2016), including the
+  supervisor's apology and follow-up when the supervisor is part of the problem.
+- Tests: qa/sv161-test.js.
+
 ### v24.60: Form RS-1 checked against the RBT Ethics Code (2.0) and the Ethics Code for Behavior Analysts: the supervisor's duties named where the form follows them (the BCBA, 10/26)
 - **Checked.** The one list of standards the form cites, for when a concern about an RBT goes to the BACB as a Notice of
   Alleged Violation (RBT Ethics Code 1.03, 1.05, 3.01 to 3.05), is exactly as the BCBA Handbook (p. 55) gives it. The

@@ -1243,6 +1243,8 @@ td input,td select{max-width:100%}
     <!-- v24.57 (Sellers, Alai-Rosales & MacDonald, 2016, 5.07) whether supervision works, reviewed and written down -->
     <h2 class="nbh-band" style="margin-top:18px">The Effects of Supervision</h2>
     <p class="hint">Check now and then that supervision is working, at three levels: the client&rsquo;s progress, the RBT&rsquo;s skills (the plan checklist scores at the contacts, the goals above) and the supervision itself (the RBT&rsquo;s view: is the feedback useful, the time enough, the expectations clear). Note each review: what the RBT says, what the data show, and what will change. Sellers, Alai-Rosales &amp; MacDonald (2016). The Ethics Code for Behavior Analysts asks the same of the supervisor: 4.10, evaluate one&rsquo;s supervision with feedback from others and the client&rsquo;s and the RBT&rsquo;s outcomes, document it and adjust in time; 4.08, document the formal feedback given. The reviews print with the year summary.</p>
+    <p class="hint">To ask the RBT: &ldquo;What do you like best about the supervision activities?&rdquo; and &ldquo;What could we do differently together to enhance the supervisory experience?&rdquo; (Sellers, Valentino &amp; LeBlanc, 2016); at a meeting, &ldquo;Do you feel comfortable with the amount and type of feedback being provided?&rdquo; and &ldquo;Are there any additional supports I could provide?&rdquo; (Sellers, LeBlanc &amp; Valentino, 2016). Data that show the effects: the skills the RBT has mastered, the plan checklist scores, and the number and type of errors in written work such as data sheets.</p>
+    <p class="hint"><b>When supervision itself runs into trouble</b> (Sellers, LeBlanc &amp; Valentino, 2016): meetings often canceled or moved to the phone, deadlines missed, feedback argued with or not used, or the RBT saying less. Treat it as any behavior: define it, note when it happens and what follows it, then plan: model the skill, more practice, smaller steps, a job aid. When the supervisor is part of the problem: apologize, naming what was done, its effect on the RBT and on the relationship, say what will be done instead, and follow up. Note it as a review here.</p>
     <div id="effList"></div>
     <div class="tools"><button class="tool" type="button" id="addEff">Add a review</button><span class="hint" id="effCount"></span></div>
 
@@ -1455,7 +1457,13 @@ const TCOT=[
  {c:'F.10',d:5,t:'Cultural humility and responsiveness'}];
 const tcoSort=L=>TCOT.map(x=>x.c).filter(k=>L.includes(k));
 const TCO=['Data collection and graphing','Behavior assessment','Behavior acquisition','Behavior reduction','Documentation and reporting','Ethics and professional conduct'];
-const BST=['Instruction','Modeling','Rehearsal','Feedback'];
+const BST=['Instruction','Modeling','Rehearsal','Feedback','Written description','Practice to mastery'];   /* v24.61 the last two: Parsons, Rollyson & Reid (2012), Table 1 */
+/* v24.61 what a supervisor's written supervision conditions cover: Sellers, Valentino & LeBlanc (2016); Turner, Fischer & Luiselli (2016) */
+const CVR=[['roles','responsibilities','Each person’s responsibilities'],['scope','scope and objectives','What supervision covers, and its objectives'],
+  ['eval','how performance is judged','How performance is judged, and when a remedial plan starts'],['feedback','feedback','How feedback is given (corrective feedback in private)'],
+  ['resched','rescheduling','Rescheduling and replies (e.g., 24 hours’ notice to reschedule)'],['consq','if either does not keep to it','What happens if either person does not keep to it'],
+  ['employer','the employer’s agreement','The employer’s agreement, where it is needed'],['ethics','the ethics codes','Both follow the ethics codes'],
+  ['remote','remote contacts','Remote contacts: secure software, and who can be reached on site'],['end','ending and hand-off','How supervision ends, and the hand-off to a next supervisor']];
 /* the supervision activities the BACB RBT Handbook lists */
 const SACT=['Developing performance expectations','Observation, BST and performance feedback','Modeling technical, professional and ethical behavior','Guiding problem-solving and ethical decisions','Reviewing written materials (progress notes, data sheets)','Overseeing and evaluating service delivery','Evaluating the effects of supervision'];
 /* a contact counts only in real time: in person or by live two-way video (the last two are kept so a call is on record, not counted) */
@@ -1676,9 +1684,14 @@ function renderSups(){
         '<div><label for="'+F('oversight_note')+'">Oversight note</label><input id="'+F('oversight_note')+'" data-sup="'+id+'" data-f="oversight_note" value="'+esc(s.oversight_note)+'" placeholder="e.g., both employed by the district"></div>'+
         '<div data-bcba="'+id+'"'+(s.cred==='BCaBA'?'':' hidden')+'><label for="'+F('bcba')+'">Supervised by (the BCBA\u2019s name and certification number)</label><input id="'+F('bcba')+'" data-sup="'+id+'" data-f="bcba" value="'+esc(s.bcba||'')+'" placeholder="a BCaBA who supervises RBTs is supervised by a BCBA" autocomplete="off"></div>'+   /* v24.29 (R-147) */
       '</div>'+
+      supCovers(s)+   /* v24.61 */
       '<label class="chip wide"><input type="checkbox" id="'+F('norel')+'" data-sup="'+id+'" data-f="norel"'+(s.norel?' checked':'')+'> Confirmed: the RBT is not related to, not superior to, not an employer of, and not in a multiple relationship with this supervisor</label>'+
       '<ul class="issues" id="'+F('issues')+'">'+supIssuesHTML(s)+'</ul></div>';}).join('');
   supLists();}
+function supCovers(s){const id=esc(s.id),c=s.covers||[];
+  return '<details class="rs-cov" data-covbox="'+id+'"><summary><span class="lbl">The written conditions cover (optional)</span> <span class="hint" data-covn="'+id+'">'+covN(c)+'</span></summary><p class="hint">Sellers, Valentino &amp; LeBlanc (2016); Turner, Fischer &amp; Luiselli (2016). Tick what the written conditions set out.</p><div class="rs-chips">'+
+    CVR.map(x=>'<label class="chip"><input type="checkbox" id="sup_'+id+'_cov_'+x[0]+'" data-cov="'+id+'" value="'+x[0]+'"'+(c.includes(x[0])?' checked':'')+'> '+esc(x[2])+'</label>').join('')+'</div></details>';}
+function covN(c){return (c||[]).length+' of '+CVR.length+' ticked';}
 function supIssuesHTML(s){const is=supIssues(s);return is.length?is.map(x=>'<li class="'+x.lvl+'">'+(x.lvl==='fail'?'✕ ':'• ')+esc(x.t)+'</li>').join(''):'<li class="ok">✓ Everything the handbook asks about this supervisor is recorded.</li>';}
 function supRefresh(){S.sups.forEach(s=>{const u=document.getElementById('sup_'+s.id+'_issues');if(u)u.innerHTML=supIssuesHTML(s);const card=u&&u.closest('.rs-sup');if(card){const is=supIssues(s);const bf=card.querySelector('[data-bcba]');if(bf)bf.hidden=s.cred!=='BCaBA';card.classList.toggle('bad',is.some(x=>x.lvl==='fail'));card.classList.toggle('warn',!is.some(x=>x.lvl==='fail')&&is.length>0);}});}
 function supLists(){$('#supNames').innerHTML=S.sups.filter(s=>s.name).map(s=>'<option value="'+esc(supLabel(s))+'"></option>').join('');
@@ -1762,7 +1775,7 @@ function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Num
         '<div class="rs-len" role="group" aria-label="Set the end time from the length"><span class="hint">Length:</span>'+LENS.map(n=>'<button type="button" class="tool" data-len="'+n+'" data-lc="'+id+'"'+(cMin(c)===n?' aria-pressed="true"':'')+'>'+lenLab(n)+'</button>').join('')+'</div>'+
         '<div><label for="'+F('sup')+'">Supervisor</label><select id="'+F('sup')+'" data-c="'+id+'" data-f="sup">'+opts(sups.map(s=>[s.id,supLabel(s)]),c.sup,true)+'</select></div>'+
         '<div><label for="'+F('format')+'">Format</label><select id="'+F('format')+'" data-c="'+id+'" data-f="format">'+opts([['indiv','Individual'],['group','Small group (2 to '+rule('grpmax')+' RBTs)']],c.format||'indiv')+'</select></div>'+
-        '<div data-grp="'+id+'"'+(c.format==='group'?'':' hidden')+'><label for="'+F('group')+'">Number of RBTs in the group</label><input id="'+F('group')+'" data-c="'+id+'" data-f="group" inputmode="numeric" value="'+esc(c.group)+'"></div>'+
+        '<div data-grp="'+id+'"'+(c.format==='group'?'':' hidden')+'><label for="'+F('group')+'">Number of RBTs in the group</label><input id="'+F('group')+'" data-c="'+id+'" data-f="group" inputmode="numeric" value="'+esc(c.group)+'"><span class="hint">A clear objective, an agenda sent ahead, start and end on time, notes taken and sent out soon after (Valentino, LeBlanc &amp; Sellers, 2016).</span></div>'+
         '<div><label for="'+F('mode')+'">How</label><select id="'+F('mode')+'" data-c="'+id+'" data-f="mode">'+opts(MODES.map(x=>[x[0],x[1]]),c.mode,true)+'</select></div>'+
         '<div><label for="'+F('obs')+'">Observed the RBT with a client?</label><select id="'+F('obs')+'" data-c="'+id+'" data-f="obs">'+opts([['yes','Yes'],['no','No']],c.obs,true)+'</select></div>'+
         '<div><label for="'+F('client')+'">Client code</label><input id="'+F('client')+'" data-c="'+id+'" data-f="client" list="clientCodes" value="'+esc(c.client)+'" spellcheck="false" autocomplete="off" placeholder="a code, not a name"></div>'+
@@ -1770,7 +1783,7 @@ function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Num
       '<span class="lbl">Supervision activities</span><div class="rs-chips">'+SACT.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('s'+j)+'" data-c="'+id+'" data-arr="sact" value="'+esc(t)+'"'+((c.sact||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
       '<span class="lbl">Content covered (RBT Test Content Outline, 3rd ed.)</span><div class="rs-chips">'+TCO.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('a'+j)+'" data-c="'+id+'" data-arr="acts" value="'+esc(t)+'"'+((c.acts||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
       '<div class="rs-tcot" data-tcot="'+id+'">'+tcoTasks(c)+'</div>'+   /* v24.59 */
-      '<span class="lbl">How it was taught (behavior skills training)</span><div class="rs-chips">'+BST.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('b'+j)+'" data-c="'+id+'" data-arr="bst" value="'+esc(t)+'"'+((c.bst||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
+      '<span class="lbl">How it was taught (behavior skills training)</span> <span class="hint">describe the skill, give it in writing, show it, the RBT practices it, feedback after each practice, repeat to mastery; then check it on the job (Parsons, Rollyson &amp; Reid, 2012)</span><div class="rs-chips">'+BST.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('b'+j)+'" data-c="'+id+'" data-arr="bst" value="'+esc(t)+'"'+((c.bst||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
       '<div class="two"><div class="field"><label for="'+F('feedback')+'">Feedback given</label><textarea id="'+F('feedback')+'" data-c="'+id+'" data-f="feedback" rows="3" placeholder="what went well, one thing to change, and how">'+esc(c.feedback)+'</textarea></div>'+
       '<div class="field"><label for="'+F('follow')+'">The RBT&rsquo;s follow-up or goal for next time</label><textarea id="'+F('follow')+'" data-c="'+id+'" data-f="follow" rows="3" placeholder="what the RBT practises before the next contact">'+esc(c.follow)+'</textarea></div></div>'+
       rdBlock(c,id)+ckBlock(c,id)+
@@ -1902,7 +1915,7 @@ function renderConcernOut(){$('#concernOut').innerHTML='<div class="p-inner"><di
 function headHTML(k){const st=S.setup,sp=S.sups.filter(s=>s.name&&isSupRole(s)),rc=S.sups.filter(s=>s.name&&isRC(s));
   return '<div class="p-head"><div><b>Supervisee</b>'+esc(st.rbt_name||'')+(st.rbt_cred?', '+esc(st.rbt_cred):'')+'</div><div><b>BACB no.</b>'+esc(st.rbt_cert||'')+'</div><div><b>Expires</b>'+esc(mdy(st.rbt_exp))+'</div>'+
     '<div><b>Employer</b>'+esc(st.employer||'')+'</div><div><b>Site</b>'+esc(st.site||'')+'</div><div><b>'+(k?'Month':'School year')+'</b>'+(k?keyLabel(k):setupYear()+'–'+(setupYear()+1))+'</div>'+
-    '<div style="grid-column:1/-1"><b>RBT Supervisors</b>'+(sp.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')+(s.cert?' ('+esc(s.cert)+')':'')+(s.trained==='yes'?', supervisor training'+(s.trained_date?' '+esc(mdy(s.trained_date)):''):'')+(s.agree?', supervision conditions in writing '+esc(mdy(s.agree)):'')+(s.cred==='BCaBA'&&s.bcba?', supervised by '+esc(s.bcba):'')).join('; ')||'')+(rc.length?' &nbsp; <b>Requirements Coordinator</b>'+rc.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')).join('; '):'')+'</div>'+
+    '<div style="grid-column:1/-1"><b>RBT Supervisors</b>'+(sp.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')+(s.cert?' ('+esc(s.cert)+')':'')+(s.trained==='yes'?', supervisor training'+(s.trained_date?' '+esc(mdy(s.trained_date)):''):'')+(s.agree?', supervision conditions in writing '+esc(mdy(s.agree)):'')+((s.covers||[]).length?' (covering '+esc(CVR.filter(x=>s.covers.includes(x[0])).map(x=>x[1]).join(', '))+')':'')+(s.cred==='BCaBA'&&s.bcba?', supervised by '+esc(s.bcba):'')).join('; ')||'')+(rc.length?' &nbsp; <b>Requirements Coordinator</b>'+rc.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')).join('; '):'')+'</div>'+
     '<div style="grid-column:1/-1"><b>Client codes</b>'+esc(clientCodes().join(', '))+'</div></div>';}
 const okTxt=s=>s==='ok'?'<span class="p-ok">✓ met</span>':s==='fail'?'<span class="p-no">✕ not met</span>':s==='pending'?'<span class="p-mid">not yet</span>':'—';
 function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today=todayISO();
@@ -2155,6 +2168,8 @@ function onField(el,ev){
   if(el.dataset.wd!==undefined){const d=+el.dataset.wd,set=new Set(S.setup.days||[]);el.checked?set.add(d):set.delete(d);S.setup.days=[...set].sort();
     $$('input[data-wd="'+d+'"]').forEach(x=>{if(x!==el)x.checked=el.checked;});usualHint();return;}
   if(el.dataset.r!==undefined){S.rules[el.dataset.r]=v;renderReq();renderComp();return;}
+  if(el.dataset.cov!==undefined){const s=S.sups.find(x=>x.id===el.dataset.cov);if(!s)return;const a=new Set(s.covers||[]);el.checked?a.add(el.value):a.delete(el.value);
+    s.covers=CVR.map(x=>x[0]).filter(k=>a.has(k));const n=document.querySelector('[data-covn="'+CSS.escape(s.id)+'"]');if(n)n.textContent=covN(s.covers);if(!s.covers.length)delete s.covers;return;}   /* v24.61 */
   if(el.dataset.sup!==undefined){const s=S.sups.find(x=>x.id===el.dataset.sup);if(!s)return;s[el.dataset.f]=v;supRefresh();if(ev==='change'){supLists();renderComp();}return;}
   if(el.dataset.d!==undefined){const d=findDay(el.dataset.d);if(!d)return;d[el.dataset.f]=v;
     if(window.nbhNum&&/^(brk|start|end)$/.test(el.dataset.f)){const be=$('#d_'+d.id+'_brk');if(be)nbhNum.mark(be,brkWhy(d));}   /* v24.22 (R-119) */
@@ -2341,8 +2356,8 @@ function fromFile(d){
   const su=obj(s.setup);Object.keys(su).forEach(k=>{if(k!=='days')o.setup[k]=str(su[k]);});o.setup.days=arr(su.days).map(Number).filter(n=>n>=0&&n<=6);
   ['rbt_orig','rbt_exp','sup_start'].forEach(k=>{if(k in su)o.setup[k]=isoS(su[k]);});['day_start','day_end'].forEach(k=>{if(k in su)o.setup[k]=hm(su[k]);});
   const yn=v=>v==='yes'||v==='no'?v:'';
-  o.sups=arr(s.sups).slice(0,12).map(x=>{x=obj(x);return {id:str(x.id)||uid(),name:str(x.name),cred:CREDS.includes(x.cred)?x.cred:'',cert:str(x.cert),role:ROLES.includes(x.role)?x.role:'',trained:yn(x.trained),trained_date:isoS(x.trained_date),portal:yn(x.portal),norel:!!x.norel,bcba:str(x.bcba),oversight:OVERS.some(o=>o[0]===x.oversight)?x.oversight:'',oversight_note:str(x.oversight_note),agree:isoS(x.agree)};});if(!o.sups.length)o.sups=blank().sups;
-  o.sups.forEach(x=>{if(!x.bcba)delete x.bcba;if(!x.agree)delete x.agree;});   /* v24.29 the key only when it holds something: a file reads back equal to what was saved */
+  o.sups=arr(s.sups).slice(0,12).map(x=>{x=obj(x);return {id:str(x.id)||uid(),name:str(x.name),cred:CREDS.includes(x.cred)?x.cred:'',cert:str(x.cert),role:ROLES.includes(x.role)?x.role:'',trained:yn(x.trained),trained_date:isoS(x.trained_date),portal:yn(x.portal),norel:!!x.norel,bcba:str(x.bcba),oversight:OVERS.some(o=>o[0]===x.oversight)?x.oversight:'',oversight_note:str(x.oversight_note),agree:isoS(x.agree),covers:CVR.map(c=>c[0]).filter(k=>arr(x.covers).includes(k))};});if(!o.sups.length)o.sups=blank().sups;
+  o.sups.forEach(x=>{if(!x.bcba)delete x.bcba;if(!x.agree)delete x.agree;if(!(x.covers||[]).length)delete x.covers;});   /* v24.29 the key only when it holds something: a file reads back equal to what was saved */
   const ru=obj(s.rules);Object.keys(RULES0).forEach(k=>{if(ru[k]!=null&&ru[k]!=='')o.rules[k]=str(ru[k]);});
   const ms=obj(s.months);Object.keys(ms).filter(k=>/^\d{4}-\d{2}$/.test(k)).slice(0,240).forEach(k=>{const m=obj(ms[k]),sg=obj(m.sig);
     o.months[k]={filled:!!m.filled,note:str(m.note),records:str(m.records),noservice:!!m.noservice,...(m.entered?{entered:true}:{}),...keptOf(m.kept),
@@ -3715,6 +3730,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-share .hint{margin:0}
 .rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
 .rs-eff{margin:0 0 10px}
+.rs-cov{margin:8px 0}.rs-cov>summary{cursor:pointer;padding:4px 0}.rs-cov .chip{font-size:13.5px}
 .rs-tcot .lbl{display:block;margin-top:8px}.rs-tcochips .chip{font-size:13.5px}.rs-tcochips .chip b{font-weight:700;margin-right:2px}
 .rs-cksum{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 10px;font-size:14px;color:var(--ink-soft)}.rs-cksum .ok b{color:#2F6B37}
 .rs-ckgrp h3{font-size:16px;margin:12px 0 6px}.rs-ckgrp ul{list-style:none;margin:0;padding:0}
