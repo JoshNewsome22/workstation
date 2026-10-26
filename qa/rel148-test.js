@@ -26,7 +26,7 @@ const dir=L.ROOT+'/NBH-Workstation/',file=pre=>fs.readdirSync(dir).find(f=>f.sta
   await p.evaluate(()=>{const c=month(curKey).contacts[0];c.date=curKey+'-06';c.start='09:00';c.end='10:00';const r=c.readings[0];const e=document.querySelector('[data-rd="'+r.id+'"][data-f="disc"]');e.value='Which of the four the RBT has seen after a break (simulated).';e.dispatchEvent(new Event('input',{bubbles:true}));renderContacts();renderPrint();});await sleep(300);
   const rec=await p.evaluate(()=>{const r=month(curKey).contacts[0].readings[0];return {k:r.k,sum:r.sum.length,month:document.querySelector('#monthOut').textContent,rbt:document.querySelector('#readList').textContent,doi:!!document.querySelector('#readList a[href*="10.1002/jaba.971"]'),year:document.querySelector('#yearOut').textContent};});
   ok('RS-1 added to a contact with its summary; the monthly record, the RBT record (with the DOI) and the year summary carry it',
-    rec.k==='kimball2023'&&rec.sum===rd.sum.length&&/Kimball, R\. T\./.test(rec.month)&&/Kimball, R\. T\./.test(rec.rbt)&&rec.doi&&/four the RBT has seen/.test(rec.rbt)&&/Readings discussed in supervision this year:\s*1/.test(rec.year),{k:rec.k,rbt:rec.rbt.slice(0,300)});
+    rec.k==='kimball2023'&&rec.sum===rd.sum.length&&/Kimball, R\. T\./.test(rec.month)&&/Kimball, R\. T\./.test(rec.rbt)&&rec.doi&&/four the RBT has seen/.test(rec.rbt)&&/Readings discussed in supervision (this year|through [A-Z][a-z]+ \d{4}):\s*1/.test(rec.year),{k:rec.k,rbt:rec.rbt.slice(0,300)});
   await p.close();
   /* ---------------- Form TD-1 ---------------- */
   p=await ctx.newPage();p.on('pageerror',e=>errs.push('TD-1 '+e.message));await p.goto(L.BASE+'/NBH-Workstation/'+file('TD-1_'));await sleep(1500);

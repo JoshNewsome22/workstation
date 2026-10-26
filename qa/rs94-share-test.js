@@ -12,7 +12,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await p.evaluate(()=>{const b=[...document.querySelectorAll('.toolbar button')].find(b=>/^Month/.test(b.textContent.trim()));b&&b.click();});await sleep(500);
  const m=await p.evaluate(()=>{const r=s=>document.querySelector(s).getBoundingClientRect();const a=r('#mStart'),c=r('#mBreak'),l=r('label[for=mBreak]'),la=r('label[for=mStart]');return {row:Math.abs(la.top-l.top)<2,same:Math.abs(a.bottom-c.bottom)<2,lines:l.height>la.height+8,lh:[la.height,l.height],tops:[a.top,c.top]};});
  await p.evaluate(()=>{const b=[...document.querySelectorAll('.toolbar button')].find(b=>/^Setup/.test(b.textContent.trim()));b&&b.click();});await sleep(300);
- ok('on the Month sheet at iPad width the usual-hours boxes sit on one line although one label wraps to two',m.same&&m.lines,m);
+ ok('on the Month sheet at iPad width the usual-hours boxes sit on one line (v24.50: the labels are short enough not to wrap; a wrapped one would not move its box)',m.same,m);
  const w=await p.evaluate(()=>{const h=document.querySelector('.only-setup p.hint'),sec=h.closest('section')||h.parentElement;return {hint:h.getBoundingClientRect().width,col:h.parentElement.getBoundingClientRect().width,cap:getComputedStyle(h).maxWidth};});
  ok('the setup\'s explanatory text runs the width of its column (no 80-character cap on screen)',w.cap==='none'&&w.hint>=w.col-4&&w.hint>700,w);
  const sh=await p.evaluate(()=>({h2:!!document.querySelector('#rs-share'),rbt:document.querySelector('#shRbt').value,btns:['#shMonth','#shYear','#shFile'].every(s=>document.querySelector(s))}));

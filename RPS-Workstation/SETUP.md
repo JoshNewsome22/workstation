@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.50: Form RS-1: the Usual Hours laid out, a typed signature that can be adopted, and each contact printed whole (the BCBA, 10/26)
+- **The usual hours read as one tidy box.** On the Month page the box had four fields of uneven labels: the boxes sat at
+  different heights, the primary intervention was cut off ("Behavior reduction / BIP…"), and the days wrapped with
+  Sunday alone on a second line beside a stray "Usual service days". Now the start time, the end time and the time not
+  in RBT services are three equal boxes on one line (on a phone, the start and end on a line and the time not in services
+  under them), with short labels since the box's heading already says "usual"; the primary intervention has the full
+  width and shows its whole name; and "Usual service days" is a label above the seven days.
+- **The days are one row of seven toggles.** Each day is a button-sized toggle, filled when the RBT usually works that
+  day, so all seven fit on one line on an iPad (beside the compliance panel too) and on a phone. A tap turns a day on or
+  off, as before; the keyboard reaches each day and Space toggles it. The Setup page's days take the same row.
+- **Type the signature instead.** Under each signature box (the supervisor's and the RBT's), "Type the signature
+  instead" takes the full name (it starts from the name already typed, without the credential), shows it in a
+  handwriting style, and once the signer ticks "I adopt this typed name as my electronic signature on this record, with
+  the same intent as signing by hand", Adopt and sign writes it into the signature box. Drawing with a finger or a stylus
+  works as before.
+- **How and when, on the record.** Under each signature line the printed record now says how it was made ("Signed
+  electronically: drawn on the screen" or "typed name adopted as the signature") and when, to the minute; the file keeps
+  both. Clear the signature takes the note away with it.
+- **Each supervision contact prints whole.** On the printed monthly record (the BCBA's September PDF), the first
+  contact started at the foot of page 1 and its activities and Feedback ran onto page 2. Now each contact, with its
+  Feedback, Next and readings, is one block that moves to the next page whole, and the "Supervision contacts" heading and
+  the table's header go with the first contact, so a page never ends with the heading alone or half a contact. The
+  columns stay the same from contact to contact; the emailed and saved record is the same. (It works in iPad Safari's
+  printing too: each contact is its own table of the same columns.)
+- Tests: qa/rsu150-test.js (at 1180, 820 and 390 wide: the three time boxes equal and level, the primary intervention
+  the box's width with its whole name, the days one row of seven under their label, each 44 px tall or more; a tap turns
+  a day on, filled, and the Setup page follows, and off again; Space toggles a day; the Setup page's days in one row; a
+  typed name adopted only once ticked, written into the box and noted with its time; a drawn one noted as drawn; both kept
+  in the file; cleared with the signature). qa/rs94-share-test.js: the usual-hours labels no longer wrap, so its check
+  that the boxes stay on one line no longer needs a wrapped label. qa/rsu150-test.js also prints a simulated September
+  record whose first contact used to split at the page end, and checks the heading, the contact and its Feedback share a
+  page. qa/rel148-test.js reads the year summary's readings line as "through <month>" (the v24.49 default) or "this year".
+
 ### v24.49: Form RS-1: the year summary runs through a chosen month, and a catch-up mode for entering past months, and up to five readers from the staff directory (the BCBA, 10/26)
 - **The year summary stops at the month being signed.** A record for an earlier month, entered later (August's
   supervision typed and signed in October), printed the year summary with September's and October's figures in the table
