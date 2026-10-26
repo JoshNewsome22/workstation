@@ -9905,6 +9905,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.60: Form RS-1 checked against the RBT Ethics Code (2.0) and the Ethics Code for Behavior Analysts: the supervisor's duties named where the form follows them (the BCBA, 10/26)
+- **Checked.** The one list of standards the form cites, for when a concern about an RBT goes to the BACB as a Notice of
+  Alleged Violation (RBT Ethics Code 1.03, 1.05, 3.01 to 3.05), is exactly as the BCBA Handbook (p. 55) gives it. The
+  self-report within 30 days (RBT Ethics Code 3.04) and the RBT never being the supervisor's employer (1.04) agree too.
+- **Named where the form follows them** (Ethics Code for Behavior Analysts, section 4, Responsibility to Supervisees and
+  Trainees):
+  - The Effects of Supervision: 4.10 (evaluate one's supervision with feedback and outcomes, document it, adjust) and
+    4.08 (document the formal feedback given).
+  - The goals: 4.08's improvement plan when a performance problem arises (a goal, with its procedures in the notes).
+  - The checklists: 4.03 at supervisory volume (at the limit, document the self-assessment and tell the employer), 4.11
+    and 4.12 at the end of supervision, and the RBT Ethics Code's 1.06 (services only after the supervisor confirms
+    competence) at the discussion of the RBT's skills.
+- Tests: qa/eth160-test.js.
+
 ### v24.59: Form RS-1 and the RBT Test Content Outline (3rd ed.): the tasks covered at each contact, and the year's coverage (the BCBA, 10/26)
 - **Tasks on a contact.** A supervision contact already recorded the outline's domains it covered. Under the domains
   ticked on it, a contact now also offers that domain's tasks, by code (A.1 to F.10, 43 tasks), to tick the ones covered.
