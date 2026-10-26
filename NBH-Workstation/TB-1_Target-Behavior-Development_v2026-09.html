@@ -1875,7 +1875,7 @@ function pruneQC(n){[qcState,ioaState].forEach(st=>Object.keys(st).forEach(k=>{c
 function buildQC(){const L=tgtLabels();pruneQC(L.length);
  $('#qcHead').innerHTML='<tr><th class="lab">Criterion</th><th style="width:22%">Source</th>'+L.map(x=>`<th class="c" style="width:52px">${esc(x.lab)}</th>`).join('')+'</tr>';
  $('#qcBody').innerHTML=QC.map((r,i)=>`<tr><td>${r[0]}</td><td style="color:var(--ink-soft)">${r[1]}</td>`+L.map(x=>{const n=`qc[${x.t}].${i}`;return `<td class="c"><input type="checkbox" name="${n}" ${qcState[n]?'checked':''} data-qc="1"></td>`}).join('')+'</tr>').join('');
- $('#ioaBody').innerHTML=L.map(x=>{const p=`ioa[${x.t}].`;const f=(k,ph)=>`<input name="${p+k}" value="${esc(ioaState[p+k]||'')}" data-ioa="1" ${ph?`placeholder="${ph}"`:''}>`;return `<tr><td>${esc(x.lab)}</td><td>${f('d')}</td><td>${f('o')}</td><td class="n">${f('m')}</td><td>${f('i','total / interval / exact')}</td><td class="n">${f('x','A total')}</td><td class="n">${f('y','B total')}</td><td class="n">${f('a','%')}</td><td>${f('n')}</td></tr>`}).join('');}
+ $('#ioaBody').innerHTML=L.map(x=>{const p=`ioa[${x.t}].`;const f=(k,ph)=>`<input name="${p+k}" value="${esc(ioaState[p+k]||'')}" data-ioa="1" ${/^[xya]$/.test(k)?'inputmode="decimal"':''} ${ph?`placeholder="${ph}"`:''}>`;return `<tr><td>${esc(x.lab)}</td><td>${f('d')}</td><td>${f('o')}</td><td class="n">${f('m')}</td><td>${f('i','total / interval / exact')}</td><td class="n">${f('x','A total')}</td><td class="n">${f('y','B total')}</td><td class="n">${f('a','%')}</td><td>${f('n')}</td></tr>`}).join('');}
 document.addEventListener('change',e=>{if(e.target.dataset.qc)qcState[e.target.name]=e.target.checked;});
 document.addEventListener('input',e=>{if(e.target.dataset.ioa){ioaState[e.target.name]=e.target.value;tbIoa();}});
 /* v23.17 (review F35) each target's pilot: the percentage from A and B by the index (a total-count index: the smaller total over
@@ -1883,14 +1883,26 @@ document.addEventListener('input',e=>{if(e.target.dataset.ioa){ioaState[e.target
    ("Agreement pilot completed ... 80% or higher") for that target held open until a pilot reaches 80%; a box ticked in a file
    saved before, with no pilot figure, is left as it was */
 const IOA_QC=QC.length-1;
-function ioaPct(t){const g=k=>String(ioaState[`ioa[${t}].${k}`]||'').trim(),x=parseFloat(g('x')),y=parseFloat(g('y')),tot=/total/i.test(g('i'));
-  if(isFinite(x)&&isFinite(y)&&x>=0&&y>=0){if(tot){const hi=Math.max(x,y);return {pct:hi?100*Math.min(x,y)/hi:100,calc:true};}if(y>0&&x<=y)return {pct:100*x/y,calc:true};return {pct:null,bad:true};}
-  const a=parseFloat(g('a'));return {pct:isFinite(a)?a:null,calc:false};}
+/* v24.22 (num122, R-005) the pilot's counts are read with their rules: letters, a negative count, B at 0 or A above B (for an interval or trial
+   index) make the pilot invalid: the Agree % blanks, the counts are marked and the criterion row is unticked and disabled until they are right */
+function ioaPct(t){const g=k=>String(ioaState[`ioa[${t}].${k}`]||'').trim(),xs=g('x'),ys=g('y'),x=parseFloat(xs),y=parseFloat(ys),tot=/total/i.test(g('i'));
+  if(xs!==''||ys!==''){const wx=window.nbhNum?nbhNum.why(xs,{min:0}):'',wy=window.nbhNum?nbhNum.why(ys,{min:0}):'';
+    if(wx||wy||xs===''||ys==='')return {pct:null,bad:true,why:wx||wy||'enter both counts',wx:wx||(xs===''?'enter both counts':''),wy:wy||(ys===''?'enter both counts':'')};
+    if(tot){const hi=Math.max(x,y);return {pct:hi?100*Math.min(x,y)/hi:100,calc:true};}
+    if(y<=0)return {pct:null,bad:true,why:'B (the intervals or trials scored) is more than 0',wy:'B is more than 0'};
+    if(x>y)return {pct:null,bad:true,why:'A (the agreements) cannot be more than B (the intervals or trials scored)',wx:'A cannot be more than B'};
+    return {pct:100*x/y,calc:true};}
+  const as=g('a'),wa=window.nbhNum?nbhNum.why(as,{min:0,max:100}):'';if(wa)return {pct:null,bad:true,why:'Agree % is 0 to 100',wa};
+  const a=parseFloat(as);return {pct:isFinite(a)?a:null,calc:false};}
 function tbIoa(){$$('#ioaBody tr').forEach((tr,k)=>{const L=tgtLabels()[k];if(!L)return;const t=L.t,r=ioaPct(t),a=tr.querySelector(`[name="ioa[${t}].a"]`);
     if(r.calc&&a){const v=String(Math.round(r.pct*10)/10);if(a.value!==v){a.value=v;ioaState[`ioa[${t}].a`]=v;}}
-    if(a)a.readOnly=!!r.calc;tr.classList.toggle('ioa-low',r.pct!=null&&r.pct<80);tr.title=r.bad?'The agreements cannot be more than the intervals or trials scored.':r.pct!=null&&r.pct<80?'Under 80%: revise the definition and run the pilot again before baseline.':'';
+    /* v24.22 (num122, R-005) an invalid pilot blanks a computed Agree % and marks the counts */
+    if(r.bad&&a&&a.readOnly&&a.value!==''){a.value='';ioaState[`ioa[${t}].a`]='';}
+    if(window.nbhNum){nbhNum.mark(tr.querySelector(`[name="ioa[${t}].x"]`),r.wx||'');nbhNum.mark(tr.querySelector(`[name="ioa[${t}].y"]`),r.wy||'');nbhNum.mark(a,r.wa||'');}
+    if(a)a.readOnly=!!r.calc;tr.classList.toggle('ioa-low',r.pct!=null&&r.pct<80);tr.title=r.bad?(r.why||'The agreements cannot be more than the intervals or trials scored.'):r.pct!=null&&r.pct<80?'Under 80%: revise the definition and run the pilot again before baseline.':'';
     const q=document.querySelector(`[name="qc[${t}].${IOA_QC}"]`);if(!q)return;const met=r.pct!=null&&r.pct>=80;
     if(met){q.disabled=false;q.title='';}else if(r.pct!=null){if(q.checked){q.checked=false;qcState[q.name]=false;}q.disabled=true;q.title='The pilot is under 80%: this row is ticked once a pilot reaches 80%.';}
+    else if(r.bad){if(q.checked){q.checked=false;qcState[q.name]=false;}q.disabled=true;q.title='The pilot\u2019s counts are not right: '+(r.why||'check the entry')+'.';}   /* v24.22 (R-005) */
     else if(!q.checked){q.disabled=true;q.title='Ticked once this target\u2019s agreement pilot reaches 80%.';}else{q.disabled=false;q.title='No pilot figure is recorded below for this target.';}});}
 {const b0=buildQC;buildQC=function(){const r=b0.apply(this,arguments);try{tbIoa();}catch(e){}return r;};}
 

@@ -4897,6 +4897,7 @@ function renderFid(){
 /* v22.80 (review F259, F260): the goal-met cell is worked out from the points and that day's goal (the tick stays only for a
    row without points); the On No cell gives how many of the teacher's No ratings the student matched */
 function smMetCell(r,i){const p=num(r.pts),q=num(r.poss),g=num(r.goal);if(String(r.ph||'')==='0')return '<span class="hint" title="A teacher-only day earns no points">—</span>';
+  {const b=smLogBad(r);if(b)return '<span class="hint" title="'+esc(b)+': this day is not counted until the entry is fixed">—</span>';}   /* v24.22 (R-100) */
   if(p!=null&&q&&g!=null)return p/q*100>=g-1e-9?'<b style="color:#2F6B37">yes</b>':'no';
   return '<input type="checkbox" data-r="log" data-i="'+i+'" data-f="met"'+(r.met?' checked':'')+' aria-label="Goal met on day '+(i+1)+'">';}
 function smOnNo(r){const t=num(r.tno),m=num(r.nom);return t!=null?(m||0)+' of '+t:'—';}
@@ -4918,7 +4919,8 @@ function renderWk(){
 }
 document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.value;
-    if(el.dataset.r==='log'){const tr=el.closest('tr');const r=S.log[+el.dataset.i],p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);tr.children[6].textContent=p!=null&&q?pct(p/q*100):'—';tr.children[10].textContent=m!=null&&n?pct(m/n*100):'—';if(el.dataset.f!=='met')tr.children[12].innerHTML=smMetCell(r,+el.dataset.i);renderRecord();}
+    if(el.dataset.r==='log'){const tr=el.closest('tr');const r=S.log[+el.dataset.i],p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);const bad=smLogBad(r);const W=smLogWhy(r);if(window.nbhNum)tr.querySelectorAll('input[data-f]').forEach(e=>{if(e.dataset.f in W)nbhNum.mark(e,W[e.dataset.f]);});   /* v24.22 (R-100) */
+      tr.children[6].textContent=!bad&&p!=null&&q?pct(p/q*100):'—';tr.children[10].textContent=!bad&&m!=null&&n?pct(m/n*100):'—';if(el.dataset.f!=='met')tr.children[12].innerHTML=smMetCell(r,+el.dataset.i);renderRecord();}
     else if(el.dataset.r==='tg'||el.dataset.r==='per'||el.dataset.r==='lv'){renderSheet();renderPoints();if(el.dataset.r==='per'||el.dataset.r==='lv')renderWkSoon();}
     return;}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(il_|iv_|mp_|goal|sh_|nick|client|menu|sm_|t_rem|when|pf_|ci_|smp_)/.test(el.dataset.m)){renderPoints();renderSheet();}if(/^iv_/.test(el.dataset.m))renderCueList();if(/^bc_/.test(el.dataset.m)||el.dataset.m==='client')renderBc();if(/^bc_pen/.test(el.dataset.m))renderBck();if(el.dataset.m==='goal'||el.dataset.m==='r_base')renderRecord();}
@@ -5189,6 +5191,20 @@ function rows(){return S.log.map(r=>({...r,p:num(r.pts),q:num(r.poss),m:num(r.m)
     b:num(r.beh),tno:num(r.tno),nom:num(r.nom),sno:num(r.sno),asm:num(r.asm),bp:String(r.bgp||'').split(',').map(x=>num(x))}))
   .map(r=>{const pc=r.p!=null&&r.q?r.p/r.q*100:null;return {...r,pc,ag:r.m!=null&&r.n?r.m/r.n*100:null,b:r.b!=null?r.b:S.sys==='cico'?pc:null,
     mt:r.ph==='0'?null:pc!=null&&r.g!=null?pc>=r.g-1e-9:!!r.met};});}
+/* v24.22 (num122, R-100) a day of the Record is read with its rules: points 0 to possible, matches 0 to ratings, behavior and goal 0 to 100, a
+   denominator more than 0; a day with an entry outside them is marked, shows "—" for its percent and goal-met, and stays out of the goal-stepping rule */
+function smLogWhy(r){const N=window.nbhNum,w=(v,o)=>N?N.why(v,o):'';const out={};
+  const p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);
+  out.pts=w(r.pts,{min:0})||(p!=null&&q!=null&&p>q?'points earned cannot be more than the points possible':'');
+  out.poss=w(r.poss,{min:0})||(q!=null&&q<=0&&p!=null?'points possible are more than 0':'');
+  out.m=w(r.m,{min:0})||(m!=null&&n!=null&&m>n?'matches cannot be more than the ratings':'');
+  out.n=w(r.n,{min:0})||(n!=null&&n<=0&&m!=null?'ratings are more than 0':'');
+  out.beh=w(r.beh,{min:0,max:100,maxWhy:'a percent is 0 to 100'});out.goal=w(r.goal,{min:0,max:100,maxWhy:'a goal is 0 to 100 percent'});
+  return out;}
+function smLogBad(r){const o=smLogWhy(r);return Object.keys(o).filter(k=>o[k]).map(k=>o[k]).join('; ');}
+function smLogMarks(){if(!window.nbhNum)return;$$('#lTbl tbody tr').forEach((tr,i)=>{const r=S.log[i];if(!r)return;const o=smLogWhy(r);tr.querySelectorAll('input[data-f]').forEach(e=>{if(e.dataset.f in o)nbhNum.mark(e,o[e.dataset.f]);});});}
+{const r0=rows;rows=function(){return r0().map(r=>{const b=smLogBad(r);return b?{...r,pc:null,ag:null,mt:null,b:null,bad:b}:r;});};}
+{const l0=renderL;renderL=function(){const r=l0.apply(this,arguments);try{smLogMarks();}catch(e){}return r;};}
 function smHasT(){return S.sys==='match'||S.sys==='interval'||S.sys==='cico'||(S.sys==='rubric'&&!!S.chk.rubmatch);}
 function smMatched(){return ['match','interval','interlock'].includes(S.sys)||(S.sys==='rubric'&&!!S.chk.rubmatch);}
 const smMean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;

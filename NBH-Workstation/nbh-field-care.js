@@ -335,6 +335,33 @@
     var h = function (e) { if (!e.matches) { clearMirrors(); unfitPrint(); } };
     if (mq.addEventListener) mq.addEventListener('change', h); else if (mq.addListener) mq.addListener(h);
   } catch (e) {}
+  /* v24.22 (num122, the review's E-05) one way to mark a field whose entry cannot be right: a red outline, aria-invalid and
+     the reason as the tooltip; mark(el, '') clears it. Each form decides what counts as wrong and what its figures do with it. */
+  (function () {
+    try {
+      var st = document.createElement('style'); st.id = 'nbh-num-css';
+      st.textContent = '.nbh-bad{outline:2px solid #b3261e!important;outline-offset:-2px;background:#fff1f0!important}';
+      (document.head || document.documentElement).appendChild(st);
+    } catch (e) {}
+    window.nbhNum = {
+      mark: function (el, reason) {
+        if (!el) return false; var bad = !!reason;
+        if (el.classList) el.classList.toggle('nbh-bad', bad);
+        if (bad) { el.setAttribute('aria-invalid', 'true'); el.title = String(reason); }
+        else { el.removeAttribute('aria-invalid'); if (el.title) el.removeAttribute('title'); }
+        return bad;
+      },
+      /* a number read with its rule: {min, max, int} give the reason an entry is wrong, '' when it is right or empty */
+      why: function (raw, o) {
+        o = o || {}; var t = String(raw == null ? '' : raw).trim(); if (t === '') return '';
+        var v = Number(t); if (!isFinite(v)) return 'not a number';
+        if (o.min != null && v < o.min) return o.minWhy || ('this is ' + o.min + ' or more');
+        if (o.max != null && v > o.max) return o.maxWhy || ('this is ' + o.max + ' or less');
+        if (o.int && Math.round(v) !== v) return o.intWhy || 'this is a whole number';
+        return '';
+      }
+    };
+  })();
   window.nbhFieldCare = { grow: growAll, mirrors: buildMirrors, clear: clearMirrors,
     prepare: preparePrint, unfit: unfitPrint, pageWidth: pageWidth,
     fitted: function () { return fitted.map(function (f) {

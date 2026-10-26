@@ -1409,7 +1409,9 @@ function fillMonth(k,force){const m=month(k),st=S.setup;if(!force&&(m.filled||m.
   m.days.sort((a,b)=>String(a.date).localeCompare(String(b.date)));m.filled=true;return n;}
 
 /* ---------------- the month's figures ---------------- */
-function dayMin(d){if(d.none)return 0;const a=toMin(d.start),b=toMin(d.end);if(a==null||b==null||b<=a)return null;const v=b-a-(num(d.brk)||0);return v>0?v:null;}
+/* v24.22 (num122, R-119) minutes not in services are 0 to less than the day's length; outside that the day's hours read "—" and the cell is marked */
+function brkWhy(d){const a=toMin(d.start),b=toMin(d.end),t=String(d.brk==null?'':d.brk).trim();if(t==='')return '';const v=Number(t);if(!isFinite(v))return 'not a number';if(v<0)return 'minutes not in services are 0 or more';if(a!=null&&b!=null&&b>a&&v>=b-a)return 'minutes not in services cannot reach the day\'s length ('+(b-a)+' min)';return '';}
+function dayMin(d){if(d.none)return 0;const a=toMin(d.start),b=toMin(d.end);if(a==null||b==null||b<=a)return null;if(brkWhy(d))return null;const v=b-a-(num(d.brk)||0);return v>0?v:null;}
 function cMin(c){const a=toMin(c.start),b=toMin(c.end);if(a==null||b==null||b<=a)return null;return b-a;}
 function ckScore(c){const v=Object.values(c.ck||{});const y=v.filter(x=>x==='y').length,n=v.filter(x=>x==='n').length;return y+n?{pct:y/(y+n)*100,y,n,na:v.filter(x=>x==='na').length}:null;}
 /* why a contact does not count (fail: it can never count; pending: something still to fill in) */
@@ -1542,7 +1544,7 @@ function renderDays(){const m=month(curKey),[y,mo]=curKey.split('-').map(Number)
     return '<tr data-did="'+esc(d.id)+'" class="'+(d.none?'none':pl?'planned':'')+'"><td class="dt" data-l="Date"><span class="wd">'+(d.date?wdOf(d.date):'')+'</span><input type="date" id="d_'+esc(d.id)+'_date" data-d="'+esc(d.id)+'" data-f="date" min="'+mn+'" max="'+mx+'" value="'+esc(d.date)+'" aria-label="Date, '+esc(lab)+'"></td>'+
       '<td data-l="Start"><input type="time" id="d_'+esc(d.id)+'_start" data-d="'+esc(d.id)+'" data-f="start" value="'+esc(d.start)+'" aria-label="Start, '+esc(lab)+'"></td>'+
       '<td data-l="End"><input type="time" id="d_'+esc(d.id)+'_end" data-d="'+esc(d.id)+'" data-f="end" value="'+esc(d.end)+'" aria-label="End, '+esc(lab)+'"></td>'+
-      '<td data-l="Not in services (min)"><input id="d_'+esc(d.id)+'_brk" data-d="'+esc(d.id)+'" data-f="brk" inputmode="numeric" value="'+esc(d.brk)+'" aria-label="Minutes not in RBT services, '+esc(lab)+'"></td>'+
+      '<td data-l="Not in services (min)"><input id="d_'+esc(d.id)+'_brk" data-d="'+esc(d.id)+'" data-f="brk" inputmode="numeric"'+(brkWhy(d)?' class="nbh-bad" aria-invalid="true" title="'+esc(brkWhy(d))+'"':'')+' value="'+esc(d.brk)+'" aria-label="Minutes not in RBT services, '+esc(lab)+'"></td>'+
       '<td class="num hrs" data-l="Hours" id="h_'+esc(d.id)+'">'+(d.none?'0':hrs(mi))+'</td>'+
       '<td class="act" data-l="Primary intervention"><select id="d_'+esc(d.id)+'_act" data-d="'+esc(d.id)+'" data-f="act" aria-label="Primary intervention, '+esc(lab)+'">'+opts(ACTS,d.act,true)+'</select></td>'+
       '<td class="ck" data-l="No service"><input type="checkbox" id="d_'+esc(d.id)+'_none" data-d="'+esc(d.id)+'" data-f="none"'+(d.none?' checked':'')+' aria-label="No service, '+esc(lab)+'"></td>'+delCell('day',d.id,'day')+'</tr>';}).join('')||'<tr><td colspan="8" class="hint">No service days yet. '+(S.setup.day_start&&S.setup.day_end?'Press Fill the usual days, or Add a day.':'Set the usual days and hours on the Setup page, or Add a day.')+'</td></tr>';
@@ -1817,6 +1819,7 @@ function onField(el,ev){
   if(el.dataset.r!==undefined){S.rules[el.dataset.r]=v;renderReq();renderComp();return;}
   if(el.dataset.sup!==undefined){const s=S.sups.find(x=>x.id===el.dataset.sup);if(!s)return;s[el.dataset.f]=v;supRefresh();if(ev==='change'){supLists();renderComp();}return;}
   if(el.dataset.d!==undefined){const d=findDay(el.dataset.d);if(!d)return;d[el.dataset.f]=v;
+    if(window.nbhNum&&/^(brk|start|end)$/.test(el.dataset.f)){const be=$('#d_'+d.id+'_brk');if(be)nbhNum.mark(be,brkWhy(d));}   /* v24.22 (R-119) */
     if(ev==='change'&&el.dataset.f==='date'&&moveTo('days',d))return;
     if(ev==='change'&&(el.dataset.f==='date'||el.dataset.f==='none')){if(el.dataset.f==='date')month(curKey).days.sort((a,b)=>String(a.date||'9').localeCompare(String(b.date||'9')));renderDays();}
     else{const h=$('#h_'+d.id);if(h)h.textContent=d.none?'0':hrs(dayMin(d));dayTotals();}renderComp();return;}

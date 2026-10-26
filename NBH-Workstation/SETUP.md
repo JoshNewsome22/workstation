@@ -9905,6 +9905,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.22: Shared numeric validation, from the independent review: the forms read their numbers with their rules
+(the independent review of 10/25, the R-032 theme: R-005 TB-1, R-006 and B-51 DD-1, R-100 SM-1, R-119 RS-1; enhancement E-05; EA-1 (v24.20) and TD-1 (v24.21) already read their logs this way)
+
+- **One way to mark a wrong entry, in every form.** The shared field-care script carries nbhNum: a cell whose entry cannot
+  be right gets a red outline, aria-invalid and the reason as its tooltip, cleared when the entry is fixed; a reader
+  (`why`) gives the reason for a number against its rule (a minimum, a maximum, a whole number). Each form decides what
+  counts as wrong and what its figures do with it.
+- **TB-1's agreement pilot**: A above B (for an interval or trial index), letters, a negative count or B at 0 blank the
+  Agree %, mark the counts with the reason, and untick and disable the sign-off row ("Agreement pilot completed …; 80% or
+  higher") until they are right; the counts open the number keyboard. (A typo of 25 for 15 no longer leaves a confident 95
+  and a ticked row.)
+- **DD-1's daily sheet**: counts and opportunities are whole numbers at 0 or more (step 1, min 0, number keyboard); a
+  value below zero is marked, left out of the graph and every index, and the Graphs page says how many entries are below
+  zero; a count with a fraction is marked as a check-the-entry but kept.
+- **SM-1's Record**: points above possible, matches above ratings, a behavior or goal percent outside 0 to 100, or a
+  denominator at 0 mark the cells, show the day's percent, agreement and goal-met as "—", and keep the day out of the
+  goal-stepping rule until fixed.
+- **RS-1's service days**: minutes not in services below 0, or at or past the day's length, are marked and the day's hours
+  read "—"; the day leaves the month's denominator until fixed.
+- Checks: `qa/num122-test.js`.
+
 ### v24.21: The EA-1 to TD-1 joint and TD-1's plan consistency, from the independent review: the function flows with what stands behind it; the plan names one function; one integrity list; the thinning decision reads its own window
 (the independent review of 10/25, findings R-002, R-003, R-023, R-024, R-111, R-112 and part of R-115; enhancements E-09, E-13, E-14, E-22; the BCBA: "Banner instead of refuse", "All of them")
 

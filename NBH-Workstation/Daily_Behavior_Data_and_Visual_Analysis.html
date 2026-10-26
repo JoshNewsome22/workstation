@@ -2171,10 +2171,11 @@ function plotValue(row,beh){
   if(EPISODIC(beh.measure) && episodesCount(row,beh)) return episodeDayValue(row,beh);
   if(MEASURES[beh.measure].two){
     const c=num(row.values[beh.id]), o=num(row.values[OPP(beh.id)]);
+    if(c!==null&&c<0||o!==null&&o<0) return null;   /* v24.22 (R-006) a value below zero is left out */
     return (c===null||o===null||o<=0) ? null : 100*c/o;
   }
   const raw = num(row.values[beh.id]);
-  if(raw===null) return null;
+  if(raw===null||raw<0) return null;   /* v24.22 (R-006) */
   if(beh.measure==="rate"){
     const mins=behObsMin(row,beh);
     if(!mins||mins<=0) return null;
@@ -2603,12 +2604,15 @@ function ddNoteHtml(notes){
   return `<p class="hint dd-numbered">Shown by number on the graph, where the section is too narrow for the label: ${notes.map(n=>`[${n.num}] ${esc(n.name)}${n.date?` (${n.kind==="cond"?"from ":""}${esc(fmtDate(n.date))})`:""}`).join("; ")}.<\/p>`;
 }
 /* (Y) a point the axis cannot reach is drawn on its top edge, and said so */
+/* v24.22 (num122, R-006) the entries below zero, left out of the graph and every index, are counted on the Graphs page */
+function ddBelowZeroHtml(){let n=0;S.rows.forEach(r=>{S.behaviors.forEach(b=>{[b.id,OPP(b.id)].forEach(k=>{const v=num(r.values&&r.values[k]);if(v!==null&&v<0)n++;});});});
+  return n?`<p class="caution">${n} entr${n===1?"y is":"ies are"} below zero on the daily sheet (a count, a duration or a percent cannot be; check the entry) and ${n===1?"is":"are"} left out of the graph and every index.<\/p>`:"";}
 function ddClipHtml(d){
-  if(!d||!d.clipped) return "";
+  if(!d||!d.clipped) return ddBelowZeroHtml();
   const n=d.clipped, one=n===1;
-  return d.rule==="own"
+  return (d.rule==="own"
     ? `<p class="caution">${n} point${one?" is":"s are"} above this behavior's y-axis maximum of ${r1(d.top)} (set on the first tab) and ${one?"is":"are"} drawn on the graph's top edge.<\/p>`
-    : `<p class="caution">${n} point${one?" is":"s are"} above 100% (more than can occur; check the entry) and ${one?"is":"are"} drawn on the graph's top edge.<\/p>`;
+    : `<p class="caution">${n} point${one?" is":"s are"} above 100% (more than can occur; check the entry) and ${one?"is":"are"} drawn on the graph's top edge.<\/p>`)+ddBelowZeroHtml();
 }
 /* (Y) the y-axis maximum on the first tab: a percentage is always graphed from 0 to 100, so the field is set aside */
 function ddYmaxAttrs(b){ return DD_PCT.indexOf(b.measure)>-1
@@ -3013,9 +3017,14 @@ function pctFlag(row,beh){
   const c=num(row.values[beh.id]), o=num(row.values[OPP(beh.id)]);
   return (c!==null&&o!==null&&c>o);
 }
+/* v24.22 (num122, R-006, B-51) a cell is read with its rule: counts and opportunities are whole numbers at 0 or more; a value below zero is marked
+   and left out of the graph and every index; a count with a fraction is marked as a check-the-entry but kept */
+function ddCellRule(key){const b=S.behaviors.find(b=>b.id===String(key).replace("::opp",""));const m=b?b.measure:"";const whole=/::opp$/.test(String(key))||m==="count"||(b&&MEASURES[m]&&MEASURES[m].two);return {whole,min:0};}
+function ddCellWhy(key,raw){const t=String(raw==null?"":raw).trim();if(t==="")return "";const v=Number(t);if(!isFinite(v))return "not a number";if(v<0)return "a count, a duration or a percent cannot be below zero: check the entry";const R=ddCellRule(key);if(R.whole&&Math.round(v)!==v)return "a count is a whole number: check the entry";return "";}
+function ddCellBad(key,raw){const w=ddCellWhy(key,raw);return w&&!/whole number/.test(w)?w:"";}
 function dailyInput(row,key,ph){
-  const v=row.values[key];
-  return `<input type="number" step="any" data-v="${esc(key)}" value="${v===null||v===undefined?"":esc(v)}" ${ph?`placeholder="${ph}" title="${ph==="opps"?"opportunities presented":"independent or correct responses"}"`:""}>`;
+  const v=row.values[key],R=ddCellRule(key),w=ddCellWhy(key,v);
+  return `<input type="number" step="${R.whole?"1":"any"}" min="0" inputmode="${R.whole?"numeric":"decimal"}" data-v="${esc(key)}" value="${v===null||v===undefined?"":esc(v)}"${w?` class="nbh-bad" aria-invalid="true" title="${esc(w)}"`:ph?` placeholder="${ph}" title="${ph==="opps"?"opportunities presented":"independent or correct responses"}"`:""}>`;
 }
 function newRow(date){
   const v={}, iv={}; S.behaviors.forEach(b=>{v[b.id]=""; iv[b.id]={}; v[OPP(b.id)]=""; iv[OPP(b.id)]={};});
@@ -4271,6 +4280,7 @@ $("#dataTable").addEventListener("input",e=>{
   const row=S.rows.find(r=>r.id===tr.dataset.r); if(!row) return;
   if(e.target.dataset.v!==undefined){
     row.values[e.target.dataset.v]=e.target.value;
+    if(window.nbhNum)nbhNum.mark(e.target,ddCellWhy(e.target.dataset.v,e.target.value));   /* v24.22 (R-006) */
     // a total typed while the day's episodes have no length yet is the one to keep
     if(row.typed && row.typed[e.target.dataset.v]!==undefined) row.typed[e.target.dataset.v]=e.target.value;
     const baseId=e.target.dataset.v.replace("::opp","");
