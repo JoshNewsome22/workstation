@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.37: Wide tables on the iPad, part 2 (review V13: R-020 with E-08, R-019 with E-35)
+- **Form DD-1, the day card.** On a screen under 900 px wide (an iPad upright, a phone) the Daily data tab offers two ways
+  to enter the days: the **day card** and the **full sheet**. The card shows one day at a time, the way the paper sheet
+  reads: a row for every behavior with its entry (a count; correct of opportunities with the percent beside; a duration
+  with its episodes), then the day's observed minutes, phase change, condition name or event and daily notes. Arrows and
+  a list of the record's days move between them; the newest day is shown first (today, when the record holds it), and
+  **Add today** adds the day when it is missing. The card writes the same record the sheet does, and marks a wrong value
+  the same way. The choice is kept on the device; a wide screen shows the sheet as before. The blank sheet to print and
+  interval entry keep the sheet.
+- **Form DA-1, the safety columns under each session.** On a screen under 900 px the session record's three safety
+  columns (guidance stops, stopped early: why, hold or injury: reported) leave the table and sit under each session as a
+  Safety line that sums them and opens to the three fields, so the two-stop rule's data is reachable without a sideways
+  scroll. They are the same record fields: a wide screen and paper keep the columns.
+- Tests: qa/ux137-test.js (an 820 px touch screen: the day card in place of the sheet with a row a behavior and every day
+  listed; a value and a note typed on the card reaching the record and the sheet; a value below zero marked; the arrows
+  and the list; Add today; Full sheet with its scroll bar, the choice kept; the blank week and print without the card; a
+  1400 px desktop with the sheet alone; DA-1's columns out and a Safety line under every session, opening to the fields,
+  what is typed there reaching the record and the columns and read back on the line; compliance still recomputed in its
+  row; the columns on paper and on a desktop, the lines not).
+
 ### v24.36: Wide tables on the iPad, part 1 (review V13: R-033 with E-06, R-043, R-054, R-065, R-074)
 - **Sideways scrolling, shown (every form).** A table wider than the screen scrolls in its own box, and until now the box
   gave no sign of it: the columns past the edge were simply not there. Now every such box shows it: a fade at the edge

@@ -1,3 +1,4 @@
+/* v24.37: a session row is found by its number (tr[data-s]), the Safety line under each session being a row of its own */
 const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const OUT=__dirname+'/out/da1/shots';
 fs.mkdirSync(OUT,{recursive:true});
@@ -33,9 +34,9 @@ const URL=BASE+'/NBH-Workstation/DA-1_Demand-Assessment_v2026-10.html';
   await page.selectOption('#chartSel','rate');
   /* edit a session and confirm live recompute */
   await page.click('#viewSeg button[data-view="assessment"]');
-  await page.fill('#sessTbl tbody tr:nth-child(2) input[data-f="pb"]','12');await sleep(300);
-  console.log('after edit, row 2 rate cell:',await page.$eval('#sessTbl tbody tr:nth-child(2) td:nth-child(10)',e=>e.textContent),'subtraction mean rate now',await page.evaluate(()=>stats().ranked[0].rate.toFixed(3)));
-  await page.fill('#sessTbl tbody tr:nth-child(2) input[data-f="pb"]','6');await sleep(300);
+  await page.fill('#sessTbl tbody tr[data-s="1"] input[data-f="pb"]','12');await sleep(300);
+  console.log('after edit, row 2 rate cell:',await page.$eval('#sessTbl tbody tr[data-s="1"] td:nth-child(10)',e=>e.textContent),'subtraction mean rate now',await page.evaluate(()=>stats().ranked[0].rate.toFixed(3)));
+  await page.fill('#sessTbl tbody tr[data-s="1"] input[data-f="pb"]','6');await sleep(300);
   /* generate order adds nper*tasks sessions */
   const before=await page.evaluate(()=>S.sess.length);await page.evaluate(()=>document.querySelector('#genOrder').click());await sleep(200);
   const afterGen=await page.evaluate(()=>S.sess.length);const noRepeat=await page.evaluate(()=>{let ok=true;for(let i=1;i<S.sess.length;i++)if(S.sess[i].t===S.sess[i-1].t)ok=false;return ok;});

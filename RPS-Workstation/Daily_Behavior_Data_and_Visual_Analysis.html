@@ -532,6 +532,35 @@ td input,td select{max-width:100%}
 .sd-m{font-size:11px;color:var(--ink-soft)}
 .sd-key{margin-top:9px;padding-top:7px;border-top:1px solid var(--rule-soft);font-size:11px;color:var(--ink-soft);line-height:1.45}
 .sd-only .sd-key{margin-top:0;padding-top:0;border-top:0}
+/* v24.37 (review R-020, E-08) the day card under 900 px */
+.dd-entryseg{display:none}
+#ddCard{display:none}
+@media screen and (max-width:900px){
+  .dd-entryseg:not([hidden]){display:inline-flex;margin:8px 0 6px;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+  .dd-entryseg button{min-height:38px;padding:0 14px;border:0;background:#fff;font:inherit;font-weight:600;font-size:13px;color:var(--ink-soft);cursor:pointer}
+  .dd-entryseg button+button{border-left:1px solid var(--rule)}
+  .dd-entryseg button.on{background:var(--ink,#182e43);color:#fff}
+  #ddCard:not([hidden]){display:block}
+  #tab-data.dd-cardview #sheetTop,#tab-data.dd-cardview #sheetDefs,#tab-data.dd-cardview .sheet-wrap[aria-label="Daily data sheet"]{display:none}
+  .dd-card{border:1px solid var(--rule);border-radius:6px;background:#fff;padding:10px 12px;margin:0 0 10px}
+  .dd-card .dc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .dd-card .dc-head h3{margin:0 4px 0 0;font-size:15px}
+  .dd-card .dc-nav{min-width:40px;min-height:38px;border:1px solid var(--rule);border-radius:4px;background:#fff;font-size:20px;line-height:1;cursor:pointer}
+  .dd-card .dc-nav[disabled]{opacity:.35;cursor:default}
+  .dd-card .dc-day{min-height:38px;font-size:15px;max-width:60%}
+  .dd-card .dc-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:8px 0 8px 8px;border-top:1px solid var(--rule-soft,#e6eaf0)}
+  .dd-card .dc-name{font-weight:600;min-width:0;overflow-wrap:anywhere}
+  .dd-card .dc-name small{display:block;font-weight:400;color:var(--ink-soft);font-size:12px}
+  .dd-card .dc-in{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .dd-card .dc-in input[type=number]{width:84px;min-height:40px;font-size:16px;text-align:center}
+  .dd-card .dc-pct{min-width:52px;text-align:right;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .dd-card .dc-pct.cell-flag{color:#b3261e;font-weight:600}
+  .dd-card .dc-day-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:8px;border-top:1px solid var(--rule)}
+  .dd-card .dc-day-fields label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink-soft)}
+  .dd-card .dc-day-fields label.wide{grid-column:1/-1}
+  .dd-card .dc-day-fields input,.dd-card .dc-day-fields select{min-height:40px;font-size:15px;color:var(--ink)}
+  .dd-card .dc-empty{color:var(--ink-soft);margin:4px 0}
+}
 .sheet .pdate{display:none}
 /* v24.35 (E-38) the graphs alone: each behavior's heading, definition, graph and key; the analysis tables, the across-condition cards and the sources stay off the paper */
 @media print{body.dd-pr-graphs #resultsOut .behavior-report .dd-keep:not(:first-child),body.dd-pr-graphs #resultsOut .behavior-report > .sec-title,body.dd-pr-graphs #resultsOut .cmp-card,body.dd-pr-graphs #ddSources,body.dd-pr-graphs #resultsOut .behavior-report .dd-keep:first-child > .hint{display:none!important}}
@@ -1797,6 +1826,9 @@ document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest
       </div>
       <div id="pasteNote" class="dd-paste-note no-print" role="status"></div>
       <div class="dd-blank-note noprint no-print" id="ddBlankNote" hidden></div>
+      <!-- v24.37 (review R-020, E-08) under 900 px: the day card, or the full sheet -->
+      <div class="dd-entryseg noprint no-print" id="ddEntrySeg" role="group" aria-label="How the days are entered" hidden><button type="button" data-ev="card" class="on" aria-pressed="true">Day card</button><button type="button" data-ev="sheet" aria-pressed="false">Full sheet</button></div>
+      <section class="dd-card noprint no-print" id="ddCard" aria-labelledby="ddCardTitle" hidden></section>
       <div class="sheet-top" id="sheetTop"></div>
       <div class="sheet-wrap" tabindex="0" role="region" aria-label="Daily data sheet">
         <table class="sheet" id="dataTable">
@@ -6052,6 +6084,68 @@ function ddBlankRows(start,n){const out=[];let d=start,k=0;while(out.length<n&&k
   if(wd!==0&&wd!==6){const r=newRow(d);r.id="blank-"+out.length;out.push(r);}d=ddAddDays(d,1);k++;}return out;}
 function ddBlankOn(start,n){ddWeekOff(true);ddBlank=ddBlankRows(start||ddWeekOfDefault(),n||5);ddBlank.start=start||ddWeekOfDefault();ddBlank.n=n||5;renderData();}
 function ddBlankOff(){if(!ddBlank)return;ddBlank=null;renderData();}
+/* v24.37 (review R-020, E-08) the day card: under 900 px the day's entry as the paper sheet reads, a row a behavior, writing
+   the same record as the sheet; the full sheet stays a tap away and the choice is kept on the device */
+let ddCardOn=true, ddCardDay=null, ddCardT=0;
+function ddCardNarrow(){return !!(window.matchMedia&&window.matchMedia("(max-width:900px)").matches);}
+function ddCardWanted(){return ddCardOn&&!ddBlank&&S.settings.entryMode!=="interval"&&ddCardNarrow();}
+function ddCardRow(){const rows=S.rows;if(!rows.length){ddCardDay=null;return null;}let r=ddCardDay&&rows.find(x=>x.id===ddCardDay);
+  if(!r){const t=localISO(new Date());r=rows.find(x=>x.date===t)||rows[rows.length-1];}ddCardDay=r.id;return r;}
+function ddCardDate(iso){if(!iso)return "(no date)";const p=String(iso).split("-");const d=new Date(+p[0],+p[1]-1,+p[2],12);if(isNaN(d))return iso;
+  return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"});}
+function ddCardRender(){
+  const tab=document.getElementById("tab-data"),card=document.getElementById("ddCard"),seg=document.getElementById("ddEntrySeg");if(!card||!tab)return;
+  const want=ddCardWanted();tab.classList.toggle("dd-cardview",want);card.hidden=!want;
+  if(seg){seg.hidden=!!ddBlank||S.settings.entryMode==="interval";seg.querySelectorAll("button").forEach(b=>{const on=(b.dataset.ev==="card")===ddCardOn;b.classList.toggle("on",on);b.setAttribute("aria-pressed",String(on));});}
+  if(!want)return;
+  const rows=S.rows,r=ddCardRow();
+  if(!r){card.innerHTML='<div class="dc-head"><h3 id="ddCardTitle">Day card</h3></div><p class="dc-empty">No days yet. Pick a start date above and add days, or <button type="button" class="btn ghost sm" data-dc="today">add today</button>.</p>';return;}
+  const i=rows.indexOf(r),today=localISO(new Date()),hasToday=rows.some(x=>x.date===today),obs=orderedBehaviors();
+  const opts=rows.map(x=>`<option value="${esc(x.id)}"${x.id===r.id?" selected":""}>${esc(ddCardDate(x.date))}</option>`).join("");
+  let h=`<div class="dc-head"><h3 id="ddCardTitle">Day card</h3><button type="button" class="dc-nav" data-dc="prev" aria-label="The day before"${i<=0?" disabled":""}>&lsaquo;</button><select class="dc-day" id="ddCardSel" aria-label="The day shown">${opts}</select><button type="button" class="dc-nav" data-dc="next" aria-label="The day after"${i>=rows.length-1?" disabled":""}>&rsaquo;</button>${hasToday?"":'<button type="button" class="btn ghost sm" data-dc="today">Add today</button>'}</div>`;
+  h+=obs.map(b=>{const m=MEASURES[b.measure]||{},nm=b.name||"Untitled";let inp;
+    if(m.two){const pv=plotValue(r,b),bad=pctFlag(r,b);inp=`<span class="dc-in">${dailyInput(r,b.id,"correct")}<span>of</span>${dailyInput(r,OPP(b.id),"opps")}<span class="dc-pct${bad?" cell-flag":""}" data-pct="${esc(b.id)}">${pv===null?"\u2014":r1(pv)+"%"}</span></span>`;}
+    else if(EPISODIC(b.measure)){const st=episodeStats(r,b),n=st?st.n:0,has=episodesCount(r,b),v=has?episodeDayValue(r,b):null,shown=has?(v===null?"":String(Math.round(v*100)/100)):(r.values[b.id]==null?"":r.values[b.id]);
+      inp=`<span class="dc-in"><input type="number" step="any" min="0" inputmode="decimal" data-v="${esc(b.id)}" value="${esc(shown)}"${has?' readonly title="The sum of the logged episodes: change the episodes to change it"':""}><button type="button" class="btn ghost sm" data-dc="episodes" data-b="${esc(b.id)}">${n?n+" episode"+(n===1?"":"s"):"Episodes"}</button></span>`;}
+    else inp=`<span class="dc-in">${dailyInput(r,b.id,"")}</span>`;
+    const unit=m.two?"correct of opportunities":(b.measure==="duration"?"total minutes":(b.measure==="pdur"?"% of the day":(ENTRY_HEAD[b.measure]||m.label||"")));
+    return `<div class="dc-row" style="border-left:4px solid ${esc(b.color)}" data-b="${esc(b.id)}"><div class="dc-name">${esc(nm)}<small>${esc(KINDS[b.kind||"target"]||"")}${unit?" \u00b7 "+esc(unit):""}</small></div>${inp}</div>`;}).join("");
+  const o=num(r.obsMin),wm=windowMinutes();
+  h+=`<div class="dc-day-fields">
+    <label><span>Observed minutes</span><input type="number" step="any" min="0" inputmode="decimal" data-f="obsMin" class="${o===null?"is-default":""}" value="${o!==null?esc(r.obsMin):(wm===null?"":wm)}"></label>
+    <label><span>Phase change</span><select data-f="phaseType"><option value="none"${r.phaseType==="none"?" selected":""}>None</option><option value="full"${r.phaseType==="full"?" selected":""}>Full phase change</option><option value="conditional"${r.phaseType==="conditional"?" selected":""}>Conditional change</option></select></label>
+    <label class="wide"><span>Condition name or event</span><input type="text" data-f="phaseLabel" value="${esc(r.phaseLabel||"")}"></label>
+    <label class="wide"><span>Daily notes</span><input type="text" data-f="notes" value="${esc(r.notes||"")}" placeholder="setting events, absences, staffing"></label>
+  </div>`;
+  card.innerHTML=h;
+  card.querySelectorAll(".dc-row").forEach(row=>{const b=S.behaviors.find(x=>x.id===row.dataset.b),nm=b?(b.name||"Untitled"):"";row.querySelectorAll("input[data-v]").forEach(el=>el.setAttribute("aria-label",nm+(/::opp$/.test(el.dataset.v)?", opportunities":(b&&MEASURES[b.measure]&&MEASURES[b.measure].two?", correct":""))));});
+}
+function ddCardSheetSync(r,el){const tr=document.querySelector(`#dataTable tr[data-r="${CSS.escape(r.id)}"]`);if(!tr)return;
+  const twin=el.dataset.v!==undefined?tr.querySelector(`input[data-v="${CSS.escape(el.dataset.v)}"]`):tr.querySelector(`[data-f="${CSS.escape(el.dataset.f)}"]`);if(twin&&twin!==el)twin.value=el.value;
+  if(el.dataset.v!==undefined){const base=el.dataset.v.replace("::opp",""),b=S.behaviors.find(x=>x.id===base);if(b&&MEASURES[b.measure].two){const cell=tr.querySelector(`td[data-pct="${CSS.escape(base)}"]`);if(cell){const pv=plotValue(r,b);cell.textContent=pv===null?"\u2014":r1(pv)+"%";cell.classList.toggle("none",pv===null);cell.classList.toggle("cell-flag",pctFlag(r,b));}}}}
+(function(){const card=document.getElementById("ddCard");if(!card)return;
+  card.addEventListener("input",e=>{const el=e.target,r=ddCardRow();if(!r)return;
+    if(el.dataset.v!==undefined){r.values[el.dataset.v]=el.value;if(window.nbhNum)nbhNum.mark(el,ddCellWhy(el.dataset.v,el.value));if(r.typed&&r.typed[el.dataset.v]!==undefined)r.typed[el.dataset.v]=el.value;
+      const base=el.dataset.v.replace("::opp",""),b=S.behaviors.find(x=>x.id===base);if(b&&MEASURES[b.measure].two){const c=card.querySelector(`[data-pct="${CSS.escape(base)}"]`);if(c){const pv=plotValue(r,b);c.textContent=pv===null?"\u2014":r1(pv)+"%";c.classList.toggle("cell-flag",pctFlag(r,b));}}
+      ddCardSheetSync(r,el);if(!bulkEdit)renderResults();return;}
+    const f=el.dataset.f;if(!f)return;r[f]=el.value;
+    if(f==="obsMin"){el.classList.remove("is-default");S.behaviors.filter(b=>b.measure==="pdur"&&episodesOf(r,b).length).forEach(b=>{syncEpisodeValue(r,b);const inp=card.querySelector(`input[data-v="${CSS.escape(b.id)}"]`);if(inp)inp.value=r.values[b.id];});}
+    if(f==="phaseType"){renderData();renderIntervalPanel();}else ddCardSheetSync(r,el);
+    renderResults();});
+  card.addEventListener("change",e=>{const el=e.target;if(el.id==="ddCardSel"){ddCardDay=el.value;ddCardRender();return;}if(el.dataset.f==="obsMin"&&el.value===""){renderData();}});
+  card.addEventListener("click",e=>{const b=e.target.closest("[data-dc]");if(!b)return;const rows=S.rows,r=ddCardRow(),i=r?rows.indexOf(r):-1;
+    if(b.dataset.dc==="prev"){if(i>0){ddCardDay=rows[i-1].id;ddCardRender();}}
+    else if(b.dataset.dc==="next"){if(i<rows.length-1){ddCardDay=rows[i+1].id;ddCardRender();}}
+    else if(b.dataset.dc==="today"){const t=localISO(new Date());let x=S.rows.find(y=>y.date===t);if(!x){x=newRow(t);S.rows.push(x);}ddCardDay=x.id;renderData();renderIntervalPanel();renderResults();}
+    else if(b.dataset.dc==="episodes"&&r)openEpisodes(r.id,b.dataset.b);});
+  const seg=document.getElementById("ddEntrySeg");
+  if(seg)seg.addEventListener("click",e=>{const b=e.target.closest("button[data-ev]");if(!b)return;ddCardOn=b.dataset.ev==="card";try{localStorage.setItem("nbh.dd1.entry",ddCardOn?"card":"sheet");}catch(x){}
+    ddCardRender();try{if(window.nbhPolish&&nbhPolish.xscroll)setTimeout(nbhPolish.xscroll,60);}catch(x){}});
+  try{ddCardOn=localStorage.getItem("nbh.dd1.entry")!=="sheet";}catch(x){}
+  window.addEventListener("resize",()=>{clearTimeout(ddCardT);ddCardT=setTimeout(()=>{try{ddCardRender();}catch(e){}},200);});
+  const rd0=renderData;renderData=function(){const r=rd0.apply(this,arguments);try{ddCardRender();}catch(e){}return r;};
+  setTimeout(()=>{try{ddCardRender();}catch(e){}},0);
+})();
 function ddBlankBar(){const el=document.getElementById("ddBlankNote");if(!el)return;document.body.classList.toggle("dd-blank-on",!!ddBlank);
   if(!ddBlank){el.hidden=true;el.innerHTML="";return;}
   el.hidden=false;

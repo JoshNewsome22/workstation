@@ -665,6 +665,25 @@ table.rt tr.hp td{background:#FBEBDC}
 /* v22.37 (review F141) the checkboxes of the "Before the first session" block and the trial record */
 .fieldgrid .pre-chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);padding:4px 0}.fieldgrid .pre-chk input{width:auto;margin:0}
 td.chk{text-align:center}td.chk input{width:auto}
+/* v24.37 (review R-019, E-35) the safety columns under each session on a narrow screen */
+tr.da-safe{display:none}
+@media screen and (max-width:900px){
+  #sessTbl th.da-sc,#sessTbl td.da-sc{display:none}
+  #sessTbl tr.da-safe{display:table-row}
+  #sessTbl tr.da-safe>td{padding:0 6px 8px;border-top:0;background:#fbfcfc}
+  .da-safe-btn{display:flex;align-items:center;gap:8px;width:100%;min-height:36px;padding:4px 8px;border:1px dashed #c9d3d6;border-radius:4px;background:#fff;font:inherit;font-size:12.5px;color:#324a55;text-align:left;cursor:pointer}
+  .da-safe-btn[aria-expanded="true"]{border-style:solid}
+  .da-safe-btn b::after{content:" \25B8"}
+  .da-safe-btn[aria-expanded="true"] b::after{content:" \25BE"}
+  .da-safe-body{display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:8px 2px 2px;text-align:left}
+  .da-safe-body[hidden]{display:none}
+  .da-safe-body label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:#54676f}
+  .da-safe-body input:not([type=checkbox]){width:100%;box-sizing:border-box;border:1px solid #c9d3d6;border-radius:4px;padding:6px 8px;background:#fff;color:#182e43;text-align:left}
+  .da-safe-body label.da-safe-chk{grid-column:1/-1;flex-direction:row;align-items:center;gap:8px;font-size:13px;color:inherit}
+  .da-safe-body input:not([type=checkbox]){min-height:38px;font-size:15px}
+  .da-safe-body input[type=checkbox]{width:22px;height:22px}
+}
+@media print{tr.da-safe{display:none!important}}
 /* v23.15 (review F144, I73) the second observer's switch */
 .ioa-on{display:flex;align-items:center;gap:6px;font-family:var(--sans);font-size:13px;margin:4px 0 8px}.ioa-on input{width:auto;margin:0}
 .instr{border:1px solid var(--rule-2);border-left:3px solid var(--rule);background:#FAFCFC;padding:8px 12px;margin:8px 0 14px;font-family:var(--sans);font-size:12.5px;line-height:1.45}
@@ -950,7 +969,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="tools"><button class="tool" id="genOrder">Write the alternating order</button><button class="tool" id="addSess">Add a session</button><button class="tool" id="delSess">Remove last</button><span class="hint" id="orderHint"></span></div>
     <div class="grid-wrap"><table class="rt wide" id="sessTbl"><thead><tr>
-      <th style="width:3%">#</th><th style="width:16%">Task</th><th style="width:6%">Date</th><th style="width:5%">Minutes</th><th style="width:6%">Instructions given</th><th style="width:6%">Complied</th><th style="width:6%">Compliance</th><th style="width:7%">Latency to first PB (s)</th><th style="width:5%">PB count</th><th style="width:6%">PB per min</th><th style="width:9%">Affect (1 to 5)</th><th style="width:5%">Guidance stops</th><th style="width:9%">Stopped early: why</th><th style="width:6%">Hold or injury: reported</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:3%">#</th><th style="width:16%">Task</th><th style="width:6%">Date</th><th style="width:5%">Minutes</th><th style="width:6%">Instructions given</th><th style="width:6%">Complied</th><th style="width:6%">Compliance</th><th style="width:7%">Latency to first PB (s)</th><th style="width:5%">PB count</th><th style="width:6%">PB per min</th><th style="width:9%">Affect (1 to 5)</th><th style="width:5%" class="da-sc">Guidance stops</th><th style="width:9%" class="da-sc">Stopped early: why</th><th style="width:6%" class="da-sc">Hold or injury: reported</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3>Per-Task Means</h3>
     <p class="hint">Computed from the sessions above. A session with no problem behavior counts toward the mean latency at the full session length, the convention of latency-based analyses in which the session ends when the response occurs or the time runs out (Thomason-Sassi, Iwata, Neidert &amp; Roscoe, 2011); it is a floor on the true latency, so the table also shows in how many sessions problem behavior occurred at all, and the mean over only the sessions in which it occurred (the observed latency, which the modification rules on the Results sheet use).</p>
     <div class="grid-wrap"><table class="rt mid" id="meanTbl"><thead><tr>
@@ -1178,9 +1197,20 @@ function renderInv(){renderPgRule();renderPreFirst();
 const taskOpts=(r,i,f,val,label)=>'<select data-r="'+r+'" data-i="'+i+'" data-f="'+f+'" aria-label="'+esc(label)+'"><option value=""></option>'+S.tasks.map((t,k)=>'<option value="'+k+'"'+(String(k)===String(val)?' selected':'')+'>'+(k+1)+' · '+esc(t.name||('Task '+(k+1)))+'</option>').join('')+'</select>';
 function sessCalc(r){const g=num(r.given),c=num(r.comp),m=num(r.min),p=num(r.pb),l=num(r.lat),has=g!=null||p!=null||l!=null;
   return{has,comp:g!=null&&g>0&&c!=null?Math.max(0,Math.min(100,c/g*100)):null,rate:m!=null&&m>0&&p!=null?p/m:null,lat:l!=null?l:(m!=null&&m>0&&has&&!(p>0)?m*60:null),latObs:l,hadPb:(p!=null&&p>0)||l!=null,aff:num(r.aff)};}
+/* v24.37 (review R-019, E-35) on a narrow screen the three safety columns sit under each session: a line that sums them, opening
+   to the fields; the same record fields as the columns, which a wide screen and paper keep */
+function daSafeSum(r){const s=num(r.stops);return (s!=null?s+' guidance stop'+(s===1?'':'s'):'guidance stops not counted')+' \u00b7 '+(r.why?'stopped early: '+r.why:'not stopped early')+' \u00b7 '+(r.hold?'hold or injury reported':'no hold or injury');}
+function daSafeRow(r,i){return `<tr class="da-safe noprint" data-s="${i}"><td colspan="16"><button type="button" class="da-safe-btn" data-safe="${i}" aria-expanded="false" aria-controls="daSafe${i}"><b>Safety</b> <span class="da-safe-sum">${esc(daSafeSum(r))}</span></button><div class="da-safe-body" id="daSafe${i}" hidden>
+    <label><span>Guidance stops</span><input data-r="sess" data-i="${i}" data-f="stops" value="${esc(r.stops||'')}" inputmode="numeric" aria-label="Guidance stops, session ${i+1}"></label>
+    <label><span>Stopped early: why</span><input data-r="sess" data-i="${i}" data-f="why" value="${esc(r.why||'')}" aria-label="Stopped early: why, session ${i+1}"></label>
+    <label class="da-safe-chk"><input type="checkbox" data-r="sess" data-i="${i}" data-f="hold"${r.hold?' checked':''} aria-label="Hold or injury: reported, session ${i+1}"><span>Hold or injury: reported</span></label></div></td></tr>`;}
+function daSafeSync(el){const i=+el.dataset.i,f=el.dataset.f;if(!/^(stops|why|hold)$/.test(f))return;
+  $$('#sessTbl [data-r="sess"][data-i="'+i+'"][data-f="'+f+'"]').forEach(x=>{if(x===el)return;if(x.type==='checkbox')x.checked=el.checked;else x.value=el.value;});
+  const s=$('#sessTbl tr.da-safe[data-s="'+i+'"] .da-safe-sum');if(s&&S.sess[i])s.textContent=daSafeSum(S.sess[i]);}
+document.addEventListener('click',e=>{const b=e.target.closest('button.da-safe-btn');if(!b)return;const body=document.getElementById('daSafe'+b.dataset.safe);if(!body)return;const open=body.hidden;body.hidden=!open;b.setAttribute('aria-expanded',String(open));});
 function renderSess(){
   $('#sessTbl tbody').innerHTML=S.sess.map((r,i)=>{const c=sessCalc(r);
-    return `<tr><td class="num">${i+1}</td><td>${taskOpts('sess',i,'t',r.t,'Task, session '+(i+1))}</td>
+    return `<tr data-s="${i}"><td class="num">${i+1}</td><td>${taskOpts('sess',i,'t',r.t,'Task, session '+(i+1))}</td>
     <td><input data-r="sess" data-i="${i}" data-f="date" value="${esc(r.date)}"></td>
     <td><input data-r="sess" data-i="${i}" data-f="min" value="${esc(r.min)}" style="text-align:center"></td>
     <td><input data-r="sess" data-i="${i}" data-f="given" value="${esc(r.given)}" style="text-align:center"></td>
@@ -1190,14 +1220,14 @@ function renderSess(){
     <td><input data-r="sess" data-i="${i}" data-f="pb" value="${esc(r.pb)}" style="text-align:center"></td>
     <td class="num">${f1(c.rate)}</td>
     <td>${selV('sess',i,'aff',AFF.map((a,k)=>[k?String(k):'',a]),r.aff,'Affect, session '+(i+1))}</td>
-    <td><input data-r="sess" data-i="${i}" data-f="stops" value="${esc(r.stops||'')}" style="text-align:center" aria-label="Guidance stops, session ${i+1}"></td>
-    <td><input data-r="sess" data-i="${i}" data-f="why" value="${esc(r.why||'')}" aria-label="Stopped early: why, session ${i+1}"></td>
-    <td class="chk"><input type="checkbox" data-r="sess" data-i="${i}" data-f="hold"${r.hold?' checked':''} aria-label="Hold or injury: reported, session ${i+1}"></td>
-    <td><input data-r="sess" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('sess',i,'session')}</tr>`;}).join('');
+    <td class="da-sc"><input data-r="sess" data-i="${i}" data-f="stops" value="${esc(r.stops||'')}" style="text-align:center" aria-label="Guidance stops, session ${i+1}"></td>
+    <td class="da-sc"><input data-r="sess" data-i="${i}" data-f="why" value="${esc(r.why||'')}" aria-label="Stopped early: why, session ${i+1}"></td>
+    <td class="chk da-sc"><input type="checkbox" data-r="sess" data-i="${i}" data-f="hold"${r.hold?' checked':''} aria-label="Hold or injury: reported, session ${i+1}"></td>
+    <td><input data-r="sess" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('sess',i,'session')}</tr>${daSafeRow(r,i)}`;}).join('');
   const n=S.sess.length;$('#orderHint').textContent=n?n+' session'+(n===1?'':'s')+' · '+S.sess.filter(s=>num(s.given)!=null||num(s.pb)!=null||s.lat).length+' with data':'';
   renderIoa();
 }
-function updateSessRow(i){const tr=$('#sessTbl tbody').rows[i];if(!tr)return;const c=sessCalc(S.sess[i]);tr.children[6].textContent=pct(c.comp);tr.children[9].textContent=f1(c.rate);}
+function updateSessRow(i){const tr=$('#sessTbl tbody tr[data-s="'+i+'"]:not(.da-safe)');if(!tr)return;const c=sessCalc(S.sess[i]);tr.children[6].textContent=pct(c.comp);tr.children[9].textContent=f1(c.rate);}
 function renderProbes(){
   $('#probeTbl tbody').innerHTML=S.probes.map((r,i)=>`<tr><td class="num">${i+1}</td><td>${taskOpts('probes',i,'a',r.a,'Task A, probe '+(i+1))}</td><td>${taskOpts('probes',i,'b',r.b,'Task B, probe '+(i+1))}</td>
     <td>${selV('probes',i,'pick',[['',''],['a','Task A'],['b','Task B'],['none','Neither']],r.pick,'Picked, probe '+(i+1))}</td><td><input data-r="probes" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('probes',i,'probe')}</tr>`).join('');
@@ -1329,7 +1359,7 @@ function renderMeans(){const R=stats();
 const cv=el=>el.type==='checkbox'?(el.checked?'1':''):el.value;   /* v22.37 (F141): a checkbox keeps '1' or '' */
 document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=cv(el);
-    if(el.dataset.r==='sess'){updateSessRow(+el.dataset.i);updateIoaRow(+el.dataset.i);}
+    if(el.dataset.r==='sess'){updateSessRow(+el.dataset.i);updateIoaRow(+el.dataset.i);daSafeSync(el);}
     if(el.dataset.r==='tasks'&&el.dataset.f==='name'){$$('#sessTbl select[data-f="t"],#probeTbl select[data-f="a"],#probeTbl select[data-f="b"]').forEach(s=>{const o=s.options[+el.dataset.i+1];if(o)o.textContent=(+el.dataset.i+1)+' · '+(el.value||('Task '+(+el.dataset.i+1)));});}
     renderResultsSoon();if(el.dataset.r==='tasks')renderInv();return;}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=cv(el);if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='len')renderResultsSoon();}
