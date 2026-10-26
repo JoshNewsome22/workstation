@@ -409,6 +409,8 @@ td.time{
   font-variant-numeric:tabular-nums;background:#fff;
 }
 tr.band td.time,tr.band td.tot{background:var(--wash)}
+/* v24.36 (R-065) on screen the time column and the Total column stay in view while the days scroll */
+@media screen{#grid th.timecol,#grid td.time,#grid tfoot td.time{position:sticky;left:0;z-index:3}#grid th.tot,#grid td.tot,#grid tfoot td.tot{position:sticky;right:0;z-index:3}#grid thead th.timecol,#grid thead th.tot{z-index:4}}
 /* v21.89 a phone: the time of day in two short lines, so more days fit beside it (the printed sheet is untouched) */
 @media screen and (max-width:600px){th.timecol{width:62px;min-width:62px}td.time{white-space:normal;line-height:1.15;font-size:10px;padding:0 4px 0 2px}}
 td.dateline input{
@@ -4640,6 +4642,8 @@ function syncPreset(){
                                       && P[k][2] === +c.interval);
   const sel = $("#preset"); if(sel) sel.value = hit || "custom";
 }
+/* v24.36 (R-065) a fresh sheet on a touch screen prints five days a sheet (a file or the worked example brings its own) */
+if(window.matchMedia && window.matchMedia("(pointer:coarse)").matches && !state.meta.sid && !Object.keys(state.cells).length){ state.cfg.perSheet = 5; const ps = $("#perSheet"); if(ps) ps.value = "5"; }
 ["startHour","endHour","interval","days","dayStart","threshold","perSheet"].forEach(id => {
   $("#"+id).addEventListener("change", async () => {
     const prevStart = state.cfg.startMin, prevStep = state.cfg.interval, prevSpan = state.cfg.spanH;
@@ -19040,6 +19044,15 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
    cell in a grid, or a line inside a bordered row), so the polish fits the
    field it is applied to instead of forcing one shape on all of them. */
 @media screen{
+  /* v24.36 (R-033, E-06) sideways scrolling, shown: the bar with the words and the arrows, the fade at the edge with more to see */
+  .nbh-xs-bar{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:0 0 4px;font:12px/1.25 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);color:#54676f}
+  .nbh-xs-bar[hidden]{display:none}
+  .nbh-xs-bar span{margin-right:auto}
+  .nbh-xs-bar button{min-width:38px;min-height:34px;padding:0 8px;border:1px solid #b7c8c5;border-radius:4px;background:#fff;color:#182e43;font-size:20px;line-height:1;cursor:pointer}
+  .nbh-xs-bar button[disabled]{opacity:.35;cursor:default}
+  .nbh-xs:not(.nbh-xs-own).nbh-xs-r:not(.nbh-xs-l){-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 40px),rgba(0,0,0,.14));mask-image:linear-gradient(90deg,#000 calc(100% - 40px),rgba(0,0,0,.14))}
+  .nbh-xs:not(.nbh-xs-own).nbh-xs-l:not(.nbh-xs-r){-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.14),#000 40px);mask-image:linear-gradient(90deg,rgba(0,0,0,.14),#000 40px)}
+  .nbh-xs:not(.nbh-xs-own).nbh-xs-l.nbh-xs-r{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.14),#000 40px,#000 calc(100% - 40px),rgba(0,0,0,.14));mask-image:linear-gradient(90deg,rgba(0,0,0,.14),#000 40px,#000 calc(100% - 40px),rgba(0,0,0,.14))}
 :root{--nbh-focus:#2f7fa8;--nbh-focus-soft:rgba(47,127,168,.26);--nbh-focus-wash:#f2f8fb;
   --nbh-field:#b7c8c5;--nbh-field-hover:#8aa6a3;--nbh-radius:6px;--nbh-zebra:#f6f9f8}
 html{background:var(--nbh-paper)}

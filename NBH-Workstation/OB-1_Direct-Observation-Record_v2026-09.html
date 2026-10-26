@@ -829,6 +829,7 @@ table.grid.oblog th.n{width:28px}table.grid.oblog th.d{width:124px}table.grid.ob
 table.grid.oblog th.s{width:130px}table.grid.oblog th.k{width:52px}table.grid.oblog th.act{width:84px}
 table.grid.oblog td{word-wrap:break-word;vertical-align:top}
 table.grid.oblog td.act button{display:block;width:100%;margin:0 0 4px}
+@media screen{table.grid.oblog th.act,table.grid.oblog td.act{position:sticky;left:0;z-index:2;background:#fff;box-shadow:inset -1px 0 0 #e6eaf0}}   /* v24.36 (R-054) in view while the row scrolls */
 table.grid.oblog input{width:100%;border:0;background:transparent;font:inherit;font-size:12px;padding:3px 4px;color:var(--ink)}
 table.grid.oblog input:focus{background:var(--wash);outline:none}
 table.grid.oblog td.c{text-align:center}
@@ -1838,19 +1839,19 @@ function renderLog(){
   const ivN = state.cfg.ivLen ? Math.max(0, +state.cfg.ivN||0) : 0;
   if(!state.obs.length){ host.innerHTML = '<p class="method">No observation yet. Add one here, or on the Observations page.</p>'; if(stat) stat.textContent = ""; return; }
   const inp = (i, field, type, aria) => '<input' + (type ? ' type="' + type + '"' : '') + ' data-obs="' + i + '" data-field="' + field + '" value="' + esc(state.obs[i][field]||"") + '" aria-label="' + esc(aria) + '">';
-  let h = '<table class="grid oblog"><thead><tr><th class="n">#</th><th class="d">Date</th><th class="t">Start</th><th class="t">End</th><th class="c m">Min</th>'
-    + '<th class="s">Setting</th><th class="s">Activity</th><th class="c k">Count</th><th class="c k">Peer</th>' + (ivN ? '<th class="c k">Intervals</th>' : '') + '<th>Narrative</th><th class="noprint act"></th></tr></thead><tbody>';
+  let h = '<table class="grid oblog"><thead><tr><th class="noprint act"></th><th class="n">#</th><th class="d">Date</th><th class="t">Start</th><th class="t">End</th><th class="c m">Min</th>'
+    + '<th class="s">Setting</th><th class="s">Activity</th><th class="c k">Count</th><th class="c k">Peer</th>' + (ivN ? '<th class="c k">Intervals</th>' : '') + '<th>Narrative</th></tr></thead><tbody>';   /* v24.36 (R-054) the actions lead the row */
   state.obs.forEach((o, i) => {
     const mins = minutesOf(o), lines = o.narrative.filter(r => String(r.w||"").trim()), first = lines[0];
     const k = ivN ? pct(ivCount(o.iv, ivN), ivN) : null;
-    h += '<tr><td class="c">' + (i + 1) + '</td><td>' + inp(i, "date", "date", "Date, observation " + (i+1)) + '</td>'
+    h += '<tr><td class="noprint act"><button type="button" class="logOpen" data-obs="' + i + '">Open</button><button type="button" class="rm delObs" data-obs="' + i + '">Remove</button></td><td class="c">' + (i + 1) + '</td><td>' + inp(i, "date", "date", "Date, observation " + (i+1)) + '</td>'
       + '<td>' + inp(i, "start", "time", "Start, observation " + (i+1)) + '</td><td>' + inp(i, "end", "time", "End, observation " + (i+1)) + '</td>'
       + '<td class="c">' + (mins === null ? "" : mins) + '</td>'
       + '<td>' + inp(i, "setting", "", "Setting, observation " + (i+1)) + '</td><td>' + inp(i, "activity", "", "Activity, observation " + (i+1)) + '</td>'
       + '<td class="c">' + esc(o.count) + '</td><td class="c">' + esc(o.peerCount) + '</td>'
       + (ivN ? '<td class="c">' + (k === null ? "" : k + "%") + '</td>' : '')
       + '<td class="lines">' + lines.length + (lines.length === 1 ? ' line' : ' lines') + (first ? ': ' + esc((first.t ? hm12(first.t) + ' ' : '') + (first.w.length > 70 ? first.w.slice(0, 70) + '\u2026' : first.w)) : '') + '</td>'
-      + '<td class="noprint act"><button type="button" class="logOpen" data-obs="' + i + '">Open</button><button type="button" class="rm delObs" data-obs="' + i + '">Remove</button></td></tr>';
+      + '</tr>';
   });
   host.innerHTML = h + '</tbody></table>';
   if(stat){ const dated = state.obs.filter(o => o.date).length, lines = state.obs.reduce((a, o) => a + o.narrative.filter(r => String(r.w||"").trim()).length, 0);
@@ -5250,6 +5251,15 @@ OUT(function(){const obs=(state.obs||[]).filter(o=>o&&(T(o.date)||T(o.count)||T(
    cell in a grid, or a line inside a bordered row), so the polish fits the
    field it is applied to instead of forcing one shape on all of them. */
 @media screen{
+  /* v24.36 (R-033, E-06) sideways scrolling, shown: the bar with the words and the arrows, the fade at the edge with more to see */
+  .nbh-xs-bar{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:0 0 4px;font:12px/1.25 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);color:#54676f}
+  .nbh-xs-bar[hidden]{display:none}
+  .nbh-xs-bar span{margin-right:auto}
+  .nbh-xs-bar button{min-width:38px;min-height:34px;padding:0 8px;border:1px solid #b7c8c5;border-radius:4px;background:#fff;color:#182e43;font-size:20px;line-height:1;cursor:pointer}
+  .nbh-xs-bar button[disabled]{opacity:.35;cursor:default}
+  .nbh-xs:not(.nbh-xs-own).nbh-xs-r:not(.nbh-xs-l){-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 40px),rgba(0,0,0,.14));mask-image:linear-gradient(90deg,#000 calc(100% - 40px),rgba(0,0,0,.14))}
+  .nbh-xs:not(.nbh-xs-own).nbh-xs-l:not(.nbh-xs-r){-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.14),#000 40px);mask-image:linear-gradient(90deg,rgba(0,0,0,.14),#000 40px)}
+  .nbh-xs:not(.nbh-xs-own).nbh-xs-l.nbh-xs-r{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.14),#000 40px,#000 calc(100% - 40px),rgba(0,0,0,.14));mask-image:linear-gradient(90deg,rgba(0,0,0,.14),#000 40px,#000 calc(100% - 40px),rgba(0,0,0,.14))}
 :root{--nbh-focus:#2f7fa8;--nbh-focus-soft:rgba(47,127,168,.26);--nbh-focus-wash:#f2f8fb;
   --nbh-field:#b7c8c5;--nbh-field-hover:#8aa6a3;--nbh-radius:6px;--nbh-zebra:#f6f9f8}
 html{background:var(--nbh-paper)}

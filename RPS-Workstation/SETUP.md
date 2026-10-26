@@ -9905,6 +9905,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.36: Wide tables on the iPad, part 1 (review V13: R-033 with E-06, R-043, R-054, R-065, R-074)
+- **Sideways scrolling, shown (every form).** A table wider than the screen scrolls in its own box, and until now the box
+  gave no sign of it: the columns past the edge were simply not there. Now every such box shows it: a fade at the edge
+  with more to see, and a line above the box, "More columns to the side: swipe, or use the arrows", with two arrows that
+  move the table a screen at a time (an arrow goes quiet at its edge). The line and the fade go when the table fits, so a
+  desktop sees none of it; the line is screen only. A box with a fade of its own (Form ABC-1's matrix) keeps it and gets
+  the line. The shared polish script and style carry this; it also reaches a results table that scrolls as a block of its
+  own (Form DD-1).
+- **Form IA-1:** the convergence tables scroll in their own box at every width, so the page itself no longer slides
+  sideways on an iPad.
+- **Form OB-1:** in the Log, Open and Remove lead each row and stay in view at the left while the row scrolls.
+- **Form RA-1:** the progressive ratio sheet shows the Break point right after the condition, before the ratio columns.
+- **Form SP-1:** a fresh sheet on a touch screen is set to five days a sheet (a file or the worked example brings its own
+  setting); on screen the time column and the Total column stay in view while the days scroll.
+- Tests: qa/ux136-test.js (an 820 px touch screen: the line and the fade on IA-1, OB-1, RA-1, DA-1, DD-1 and ABC-1, the
+  arrows to the far edge and back, IA-1 and ABC-1 pages as wide as the screen; OB-1's leading column sticky and Open still
+  opening; RA-1's column order and the computed break point; SP-1's touch default and sticky columns; a 1400 px desktop with
+  no line; none under print media).
+
 ### v24.35: The short report prints: IA-1 scores and convergence, PA-1 Summary and hierarchies, DA-1 Results, TB-1 Definitions for staff, DD-1 graphs only
 (review V12, part 2: R-042, R-030, R-079, R-037 with E-04, R-098 with E-38)
 

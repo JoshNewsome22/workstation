@@ -101,7 +101,46 @@
       el.classList.add(fs >= 10 && fs < 11.95 ? 'nbh-lab' : 'nbh-lab-no');
     }
   }
-  function run(root) { try { fields(root); zebra(root); prose(root); labels(root); if (!root) sheets(); } catch (e) {} if (!root) { try { prInject(); } catch (e) {} } }
+  function run(root) { try { fields(root); zebra(root); prose(root); labels(root); if (!root) sheets(); } catch (e) {} if (!root) { try { prInject(); } catch (e) {} xsLater(200); } }
+  /* v24.36 (review R-033, E-06) sideways scrolling, shown. Every box that scrolls sideways (a table wider than the screen)
+     gets a fade at the edge with more to see and, above it, a line with the words and two arrows that move it a screen at a
+     time; both go when the table fits. A box with a fade of its own (ABC-1's matrix, SP-1's grid) keeps it and gets the bar. */
+  var XS_SEL = '.nbh-tscroll,.gridwrap,.grid-wrap,.nbh-scrollx,.sheet-wrap,.matrix-wrap,.logwrap,[data-nbh-xs]';
+  function xsBar(w) {
+    var bar = w.previousElementSibling;
+    if (bar && bar.classList.contains('nbh-xs-bar')) return bar;
+    bar = document.createElement('div'); bar.className = 'nbh-xs-bar noprint'; bar.setAttribute('data-nbh-screen', '');
+    bar.innerHTML = '<span>More columns to the side: swipe, or use the arrows</span><button type="button" data-xs="-1" aria-label="Show the columns to the left">‹</button><button type="button" data-xs="1" aria-label="Show the columns to the right">›</button>';
+    bar.addEventListener('click', function (e) { var b = e.target.closest('[data-xs]'); if (!b) return; var d = +b.getAttribute('data-xs') * Math.max(120, Math.round(w.clientWidth * 0.6)); try { w.scrollBy({ left: d, behavior: 'smooth' }); } catch (x) { w.scrollLeft += d; } setTimeout(function () { xsState(w); }, 400); });
+    w.parentNode.insertBefore(bar, w);
+    w.addEventListener('scroll', function () { xsState(w); }, { passive: true });
+    if (getComputedStyle(w).maskImage && getComputedStyle(w).maskImage !== 'none') w.classList.add('nbh-xs-own');
+    return bar;
+  }
+  function xsState(w) {
+    var can = w.scrollWidth > w.clientWidth + 4, bar = w.previousElementSibling;
+    if (!(bar && bar.classList.contains('nbh-xs-bar'))) bar = null;
+    if (!can) { w.classList.remove('nbh-xs', 'nbh-xs-l', 'nbh-xs-r'); if (bar) bar.hidden = true; return; }
+    if (!bar) bar = xsBar(w);
+    var l = w.scrollLeft > 4, r = w.scrollLeft + w.clientWidth < w.scrollWidth - 4;
+    w.classList.add('nbh-xs'); w.classList.toggle('nbh-xs-l', l); w.classList.toggle('nbh-xs-r', r);
+    bar.hidden = false; bar.querySelector('[data-xs="-1"]').disabled = !l; bar.querySelector('[data-xs="1"]').disabled = !r;
+  }
+  function xscroll() {
+    if (document.documentElement.classList.contains('nbh-plain') || (window.matchMedia && window.matchMedia('print').matches)) return;
+    var seen = [];
+    function one(w) { if (!w || seen.indexOf(w) >= 0) return; seen.push(w); if (!w.offsetParent) { var hb = w.previousElementSibling; if (hb && hb.classList.contains('nbh-xs-bar')) hb.hidden = true; return; } var o = getComputedStyle(w).overflowX; if (o !== 'auto' && o !== 'scroll') return; xsState(w); }
+    Array.prototype.forEach.call(document.querySelectorAll(XS_SEL), one);
+    /* every table that scrolls sideways, in its own box or as a block of its own (DD-1's results tables) */
+    Array.prototype.forEach.call(document.querySelectorAll('table'), function (t) { if (t.closest('.nbh-xs-bar,.nbh-tb,.toolbar,[role="toolbar"]')) return; one(t); var pw = t.parentElement; if (pw && pw.tagName !== 'TD' && pw.tagName !== 'TH' && !pw.closest('.nbh-tb,.toolbar,[role="toolbar"]')) one(pw); });
+  }
+  var xsT = 0; function xsLater(ms) { clearTimeout(xsT); xsT = setTimeout(function () { try { xscroll(); } catch (e) {} }, ms || 250); }
+  document.addEventListener('click', function () { xsLater(350); }, true);
+  window.addEventListener('resize', function () { xsLater(300); });
+  window.addEventListener('load', function () { xsLater(700); });
+  window.addEventListener('afterprint', function () { xsLater(300); });
+  setTimeout(function () { xsLater(50); }, 1400);
+
   /* v22.15 (review F479): on a phone, a table wider than the sheet it sits in (PA-1's MSWO sheet, AD-1, RA-1, EA-1 ...) made the
      whole page, toolbar and all, slide sideways. Such a table is put in a box of its own that scrolls; checked after load,
      after each tap (a view or a row may have changed) and on a turn of the screen. Screen only: print sees no box. */
@@ -117,7 +156,7 @@
       var w = document.createElement('div'); w.className = 'nbh-tscroll'; p.insertBefore(w, t); w.appendChild(t);
     });
   }
-  function tsLater(ms) { clearTimeout(tsT); tsT = setTimeout(function () { try { tscroll(); } catch (e) {} }, ms || 250); }
+  function tsLater(ms) { clearTimeout(tsT); tsT = setTimeout(function () { try { tscroll(); xsLater(120); } catch (e) {} }, ms || 250); }
   document.addEventListener('click', function () { tsLater(300); }, true);
   window.addEventListener('resize', function () { tsLater(300); });
   window.addEventListener('load', function () { tsLater(600); });
@@ -560,5 +599,5 @@
   function prArm() { window.addEventListener('beforeprint', prBefore); window.addEventListener('afterprint', prAfter); }
   if (document.readyState === 'complete') prArm(); else window.addEventListener('load', prArm);
   window.nbhPrint = { before: prBefore, after: prAfter, guideOn: prGuideOn, blankOn: prBlankOn, inject: prInject, set: prSetChoice };
-  window.nbhPolish = { run: run, plain: plain, printHead: printHead, tscroll: tscroll, print: window.nbhPrint };
+  window.nbhPolish = { run: run, plain: plain, printHead: printHead, tscroll: tscroll, xscroll: xscroll, print: window.nbhPrint };
 })();
