@@ -1,7 +1,8 @@
 /* v21.93 the forms pass (the design review's second part) stays built. On screen every form draws its fields the same way:
    a field that was a line to write on is drawn as the box the newer forms use (the polish script marks it nbh-box and
    nbh-was-ul), with a border on all four sides and 36 px tall outside a table; fields inside tables stay compact; bare grid
-   cells stay bare. A reading line is about 80 characters at most: every long paragraph in a sheet is capped (nbh-wide, 80ch).
+   cells stay bare. A reading line is about 80 characters at most: every long paragraph in a sheet is capped (nbh-wide, 80ch); since v24.46
+   text the form left uncapped or at a print measure reads up to about 160 (nbh-wider), the width of a card on an iPad.
    A label that names a field is 12 px at least. None of it is on paper: with the previous release served at WS_PREV_URL (the
    release run does this), every one of the 47 forms prints the same words in the same places from both, with a mouse and with
    a finger (PA-1 draws a random item order on every open; those item numbers are read as the same). Chromium; simulated data
@@ -23,8 +24,8 @@ const measure=()=>{const vis=e=>{const r=e.getBoundingClientRect();return r.widt
   const labs=[...document.querySelectorAll('label.nbh-lab')].filter(vis).map(l=>parseFloat(getComputedStyle(l).fontSize));
   const small=[...document.querySelectorAll('.sheet label')].filter(l=>vis(l)&&!l.closest('table,.toolbar,dialog,.nbh-pm')&&!l.querySelector('input,select,textarea,div,p')&&(l.textContent||'').trim()).map(l=>parseFloat(getComputedStyle(l).fontSize)).filter(f=>f<11.95);
   const prose=[...document.querySelectorAll('.sheet p,.sheet li')].filter(p=>vis(p)&&!p.closest('table,.toolbar,dialog')&&(p.textContent||'').trim().length>120&&![...p.children].some(c=>/^(DIV|TABLE|UL|OL|P|FIGURE)$/.test(c.tagName)));
-  const wide=prose.filter(p=>{const c=getComputedStyle(p);const ch=(()=>{const s=document.createElement('span');s.textContent='0000000000';s.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;font:inherit';p.appendChild(s);const w=s.getBoundingClientRect().width/10;s.remove();return w;})();
-    const z=parseFloat(getComputedStyle(p.closest('.sheet')||document.body).zoom)||1;return p.getBoundingClientRect().width/z>81*ch/z+1;}).map(p=>(p.textContent||'').trim().slice(0,40));
+  const wide=prose.filter(p=>{const c=getComputedStyle(p);if(c.maxWidth==='none'&&p.classList.contains('nbh-wide'))return false;   /* v24.46 a form that lifts the cap on purpose (RS-1's hints since v23.94) is its own choice */const ch=(()=>{const s=document.createElement('span');s.textContent='0000000000';s.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;font:inherit';p.appendChild(s);const w=s.getBoundingClientRect().width/10;s.remove();return w;})();
+    const z=parseFloat(getComputedStyle(p.closest('.sheet')||document.body).zoom)||1;return p.getBoundingClientRect().width/z>(p.classList.contains('nbh-wider')?161:81)*ch/z+1;}   /* v24.46 text left uncapped or at a print measure reads up to about 160 characters */).map(p=>(p.textContent||'').trim().slice(0,40));
   return {fields:F.length,ul,box:box.length,was,bad:bad.slice(0,4),labs:labs.length,labMin:labs.length?Math.min(...labs):null,small:small.length,prose:prose.length,wide:wide.slice(0,3),wideN:wide.length};};
 const pdfText=(shell,buf)=>shell.evaluate(async b64=>{const lib=await pdfjsLoad();const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const pdf=await lib.getDocument({data:bytes}).promise;const out=[];
   for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();out.push(tc.items.filter(t=>t.str&&t.str.trim()).map(t=>{let s=t.str.trim();if(/\bSeries \d: control\b|randomized order/.test(s))s=s.replace(/Item \d+/g,'Item n');/* PA-1 draws a random item order on every open */s=s.replace(/\b\d{1,2}:\d{2}\s?(AM|PM)\b/g,'H:MM $1');/* the time a page was printed (CR-1's statuses) may turn over a minute between the two prints */return s+'@'+Math.round(t.transform[4])+','+Math.round(t.transform[5]);}).join('|'));}
@@ -45,7 +46,7 @@ const pdfText=(shell,buf)=>shell.evaluate(async b64=>{const lib=await pdfjsLoad(
     ok('1 '+tag+': '+n+' forms read; no field is drawn as a line any more (nbh-ul: '+ulN+')',n===list.length&&ulN===0,notes.slice(0,4));
     ok('2 '+tag+': every boxed field outside a table has a border on all four sides and is 36 px tall (bad: '+badN+')',badN===0,notes.filter(x=>x.bad&&x.bad.length).slice(0,4));
     ok('3 '+tag+': no label that names a field is under 12 px (small: '+smallN+')',smallN===0,notes.filter(x=>x.small).slice(0,4));
-    ok('4 '+tag+': no reading line in a sheet is longer than about 80 characters (wide: '+wideN+')',wideN===0,notes.filter(x=>x.wideN).slice(0,4));
+    ok('4 '+tag+': no reading line in a sheet is longer than its cap, about 80 characters or 160 where the form left it uncapped (wide: '+wideN+')',wideN===0,notes.filter(x=>x.wideN).slice(0,4));
     ok('5 '+tag+': no page errors',errsN===0,notes.filter(x=>x.errs&&x.errs.length).slice(0,3));
     await ctx.close();}
   /* ---- 2. the forms that were drawn as lines now show boxes: DM-1 and TB-1 carry fields marked nbh-was-ul ---- */

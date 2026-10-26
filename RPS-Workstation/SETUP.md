@@ -9905,6 +9905,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.46: Reading lines run the width of the card on an iPad; RS-1's quick-length buttons in a row (the BCBA's screenshots of 10/26)
+- **Paragraphs and list items use the card's width on screen.** Since v21.93 every long paragraph and list item on screen
+  stopped at about 80 characters, so on an iPad a list such as Form RS-1's "The Requirements in Brief" ended two thirds of
+  the way across a card whose heading band and source note ran its full width. Text a form left uncapped, or capped at a
+  print measure, now reads up to about 160 characters: the full card on an iPad in landscape, on every form. On a monitor
+  wide enough for a longer line, it still stops at about 160 characters so a line stays readable.
+- Text a form set narrower on purpose (a hint beside a field, a side note) keeps the width it had, and the masthead lines
+  are unchanged. Paper is unchanged: every form prints with its own measure, as before.
+- **Form RS-1's quick-length buttons sit in one row again.** On a contact card, "Length:" and its five buttons (30 min to
+  2 h) had been stacked in a centred column of uneven widths: the rule that lines a card's labels and boxes up across a
+  row (from the iPad changes of v23.94) also reached the button group. They now sit in one row from the left under the
+  computed length, each the same width and 44 px tall.
+- Tests: qa/wide146-test.js (RS-1's quick-length buttons in one row of one width on an iPad; RS-1's requirement items reach the card's width on an iPad in landscape, as its source note
+  does; on 1920 and 2560 monitors each item runs the list's width or 160 characters, whichever is less; on every form no
+  text marked wider runs past its container, and text not given the wider line keeps exactly the cap it had in the
+  previous release; RS-1's printed pages word for word against the previous release). qa/v2193-fields-test.js reads the new cap, and leaves out text a form
+  uncaps on purpose (Form RS-1's hints, full width since v23.94), which it had counted as too long since then.
+  qa/ux136-test.js: since the IA-1 release its tables fit an iPad held upright, so the sideways-scroll bar is checked
+  there as "fits, or shows the bar" and its arrows at 640 px, where the convergence table is wider than its box.
+  qa/v2411-test.js: ABC-1's note under the incident description still runs its block's full width (v24.11); the cap is
+  now a width it does not reach there, rather than none.
+
 ### v24.45: Form TK-1 polished (review V18: R-106 to R-109, R-144; E-39)
 - **The Token Board back and Step 3 of the how-to insert say that an earned token stays** (review R-106, E-39): "A star
   already on the board is never taken away: when the behavior does not happen, there is no star that time, the earned

@@ -67,7 +67,9 @@
       if (!s[i].classList.contains('nbh-flush') && (parseFloat(getComputedStyle(s[i]).paddingTop) || 0) < 8) s[i].classList.add('nbh-flush');
     }
   }
-  /* The forms cap their instruction text at 60 to 80 characters, a print measure
+  /* v24.46: text the form left uncapped or capped at a print measure (520 px or wider) reads up to about 160 characters
+     on screen (nbh-wider), the width of a card on an iPad in landscape; text set narrower on purpose keeps 80.
+     The forms cap their instruction text at 60 to 80 characters, a print measure
      that reads as a narrow column on a wide screen. On screen the cap was lifted
      to what the sheet allows (about 140 characters); since v21.93 (the design
      review) a reading line is about 80 characters at most, so a paragraph the
@@ -82,10 +84,12 @@
       var leaf = true;
       for (var c = el.firstElementChild; c; c = c.nextElementSibling) if (!INLINE.test(c.tagName)) { leaf = false; break; }
       if (!leaf) continue;
-      var mw = getComputedStyle(el).maxWidth;
-      if (/px$/.test(mw)) { var px = parseFloat(mw); if (!(px >= 160 && px <= 1400)) continue; }
+      var mw = getComputedStyle(el).maxWidth, wider = false;
+      if (/px$/.test(mw)) { var px = parseFloat(mw); if (!(px >= 160 && px <= 1400)) continue; wider = px >= 520; }
       else if (!(mw === 'none' && /^(P|LI|DD|BLOCKQUOTE|FIGCAPTION)$/.test(el.tagName) && (el.textContent || '').trim().length > 90)) continue;   /* v21.93 a long paragraph the form left uncapped */
+      else wider = true;
       el.classList.add('nbh-wide');
+      if (wider) el.classList.add('nbh-wider');   /* v24.46 (the BCBA, 10/26) text left uncapped or at a print measure reads the card's width on an iPad */
     }
   }
   /* v21.93 one size for the labels that name a field: a form's label under 12 px (11.5, 11, 10.5) reads at 12 on screen;

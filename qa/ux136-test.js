@@ -16,8 +16,16 @@ const BARS=()=>[...document.querySelectorAll('.nbh-xs-bar')].filter(b=>!b.hidden
  /* ---- IA-1: the page stays put, the convergence table scrolls in its box with the bar ---- */
  let p=await open(ipad,F.ia,true);
   let r=await p.evaluate('('+BARS.toString()+')()').then(bars=>({bars}));const docW=await p.evaluate(()=>document.documentElement.scrollWidth);
- ok('IA-1 (R-043): the page is as wide as the screen and the convergence table scrolls in its own box, with the bar (the words, the right arrow live, the left one not yet) and the fade',
-   docW===820&&r.bars.length>=1&&r.bars.every(x=>x.sw>x.cw&&/More columns to the side/.test(x.text)&&x.l&&!x.r&&x.mask),{docW,bars:r.bars});
+ /* v24.46: since v24.43 (R-050, R-131) IA-1's convergence and analysis tables fit an iPad held upright (820): nothing to
+    scroll and nothing hidden. The bar is checked at 640, where the convergence table is wider than its box. */
+ const fit=await p.evaluate(()=>[...document.querySelectorAll('.nbh-scrollx,.nbh-tscroll')].filter(w=>w.offsetParent&&w.querySelector('table')).map(w=>({sw:w.scrollWidth,cw:w.clientWidth,bar:!!(w.previousElementSibling&&w.previousElementSibling.classList.contains('nbh-xs-bar')&&!w.previousElementSibling.hidden)})));
+ ok('IA-1 (R-043) upright (820): the page is as wide as the screen; every table box either fits its table (nothing hidden) or shows the bar',
+   docW===820&&fit.length>=1&&fit.every(x=>x.sw<=x.cw+1||x.bar),{docW,fit});
+ await p.close();
+ const narrow=await b.newContext({viewport:{width:640,height:1180},hasTouch:true,isMobile:true,deviceScaleFactor:1});
+ p=await open(narrow,F.ia,true);r=await p.evaluate('('+BARS.toString()+')()').then(bars=>({bars}));const docW6=await p.evaluate(()=>document.documentElement.scrollWidth);
+ ok('IA-1 (R-043) at 640: the page is as wide as the screen and a table wider than its box scrolls in it, with the bar (the words, the right arrow live, the left one not yet) and the fade',
+   docW6===640&&r.bars.length>=1&&r.bars.every(x=>x.sw>x.cw&&/More columns to the side/.test(x.text)&&x.l&&!x.r&&x.mask),{docW6,bars:r.bars});
  /* the arrows move it a screen at a time; at the far edge the right arrow goes quiet and the left one wakes */
  const moved=await p.evaluate(async()=>{const bar=[...document.querySelectorAll('.nbh-xs-bar')].find(b=>!b.hidden&&b.offsetParent);const w=bar.nextElementSibling;const s0=w.scrollLeft;bar.querySelector('[data-xs="1"]').click();await new Promise(r=>setTimeout(r,900));
    const s1=w.scrollLeft;const st=[bar.querySelector('[data-xs="-1"]').disabled,bar.querySelector('[data-xs="1"]').disabled,w.classList.contains('nbh-xs-l'),w.classList.contains('nbh-xs-r')];bar.querySelector('[data-xs="-1"]').click();await new Promise(r=>setTimeout(r,900));return {s0,s1,st,s2:w.scrollLeft,max:w.scrollWidth-w.clientWidth};});

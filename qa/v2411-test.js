@@ -12,7 +12,7 @@ const F={abc:'/NBH-Workstation/ABC_Recording_Conditional_Probability_Analysis.ht
  /* 1 ABC-1's note */
  {const [c,p]=await ctx(1300,900);await p.goto(BASE+F.abc);await sleep(1500);
   const r=await p.evaluate(()=>{const g=document.querySelector('.narr-guide');const cs=getComputedStyle(g);return {max:cs.maxWidth,w:g.getBoundingClientRect().width,pw:g.parentElement.getBoundingClientRect().width};});
-  ok('ABC-1’s note under the incident description runs the full width of its block',r.max==='none'&&r.w>=r.pw-40&&r.w>900,r);await c.close();}
+  ok('ABC-1’s note under the incident description runs the full width of its block',(r.max==='none'||/^min\(100%, (\d{4,}|[2-9]\d{2})(\.\d+)?px\)$/.test(r.max))&&r.w>=r.pw-40&&r.w>900,r);await c.close();}
  /* 2 DM-1 at 900 px: the Sheets menu, not a column of tabs */
  {const [c,p]=await ctx(900,900);await p.goto(BASE+F.dm);await sleep(2000);
   const r=await p.evaluate(()=>({mode:window.nbhSheets&&nbhSheets.mode(),strip:getComputedStyle(document.getElementById('viewSeg')).display,menu:!!document.querySelector('.toolbar .nbh-sheets'),css:!!document.getElementById('nbh-ui-111'),tbH:document.querySelector('.toolbar').offsetHeight}));
