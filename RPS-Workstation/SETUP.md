@@ -9905,6 +9905,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.28: Form ABC-1 from the independent review: one topography at a time, honest ratios, the row as a card, the classroom sheet
+(the independent review of 10/25, ABC-1 findings R-025, R-059, R-060, R-061, R-129, R-130; enhancements E-26, E-27 the sheet, E-45)
+
+- **The analysis opens on one topography.** Analyze behavior defaults to the first Form TB-1 target in the record, else the most
+  frequent behavior; "All behaviors pooled" is a choice the analyst makes. A pooled view carries a banner naming the count and
+  TB-1's rule (aggregation masks function: Beavers & Iwata, 2011; Derby et al., 1994); "N topographies in this filter" sits
+  beside the selector; the summary card's hint says pooled. (The simulated record read "escape" over nine topographies with
+  nothing saying so.)
+- **By topography**, under By reinforcer class: one row per behavior with the share of its incidents each class followed
+  (attention, tangible, escape, nothing delivered), Yule's Q with ten or more background samples, which class leads, thin rows
+  (under five incidents) marked, and a line saying whether the topographies agree or which class leads for which behavior.
+- **The consequence table says undefined, not 100% and 138.** An event never seen in a no-behavior check shows "—" for p(B|C) and
+  CP:UP with the reason; such rows and thin rows sort last in every table; the Strongest antecedent–consequence pairings list
+  needs five shared incidents, not three.
+- **Incidents on an iPad held upright**: the Edit and Delete column, which sat over the Consequence column, is gone under 900 px;
+  a tap on a row opens the incident as a card (every field, the narrative, Edit and Delete inside, Escape or Close to leave); the
+  incident and background lists fade at the right edge while there is more to the right and say so.
+- **Print a classroom sheet** (Printing and the paper sheets): one Letter page for the clipboard with the student's initials only,
+  the case's targets (Form TB-1's, else the header's), the antecedent and consequence codes the analyst chose under Choose its
+  codes (the record's most-used eight of each until chosen; the choice travels with the record), 10-pt type, 14-px boxes and
+  seven ruled lines. The full taxonomy sheet stays for the analyst's entry.
+- **The simulation's narratives are written from each incident's own codes** (first antecedent, behaviors, consequences, the
+  outcome) on the incidents recorded as coded + narrative; coded-only incidents carry none. The seeded record is otherwise
+  unchanged.
+- **The EO tags stay on the paper sheet** (R-130, the author's decision: they are kept on the screen and on paper). The sheet's
+  footer now says what they are: the group's name, so the box is found quickly, not a verdict and not a guess about why.
+- Not in this release: handing ABC-1's ranked hypothesis to Form EA-1's guided setup (E-27, second half) is unverified in the
+  review and is left for a later round.
+- Checks: `qa/abc128-test.js`.
+
 ### v24.27: The hand-offs between forms, from the independent review: the demand tasks, OB-1's observations, PA-1's menu, the student
 (the independent review of 10/25, findings R-017, R-018, R-058, R-092, R-110, R-145; enhancements E-10, E-11, E-15)
 

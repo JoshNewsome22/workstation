@@ -1838,6 +1838,7 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
     <div class="filters" style="width:100%;border-bottom:0">
       <label class="field">Analyze behavior
         <select id="a-behavior"><option value="">All behaviors pooled</option></select>
+        <span class="a-topo" id="a-topo" aria-live="polite"></span><!-- v24.28 (R-025) -->
       </label>
       <label class="field">From<input id="a-from" type="date"></label>
       <label class="field">To<input id="a-to" type="date"></label>
@@ -2653,7 +2654,26 @@ function fillBehaviorFilters(){
     el.innerHTML = `<option value="">${allLabel}</option>` +
       present.map(b => `<option value="${b.id}">${esc(b.label)}</option>`).join("");
     if(present.some(b => b.id === cur)) el.value = cur;
+    /* v24.28 (R-025) the analysis opens on one topography: the first case target in the record, else the most frequent; the pool is
+       a choice the analyst makes (state.aPooled), not the default, because aggregation across topographies masks function */
+    if(sel === "#a-behavior" && !state.aPooled && !present.some(b => b.id === cur)){ const d = abcDefaultTopo(present); if(d) el.value = d; }
   });
+  abcTopoNote(present.length);
+}
+function abcDefaultTopo(present){
+  if(!present.length) return "";
+  const caseT = present.find(b => b.caseT); if(caseT) return caseT.id;
+  const counts = behaviorCounts(state.entries.filter(e => e.mode !== "open"));
+  return counts.length ? counts[0].item.id : present[0].id;
+}
+function abcTopoNote(n){
+  const el = document.getElementById("a-topo"); if(!el) return;
+  const v = $("#a-behavior").value;
+  el.textContent = !n ? "" : v ? "1 of " + n + (n === 1 ? " topography" : " topographies") + " in the record" : n > 1 ? "pooled across " + n + " topographies" : "1 topography";
+  el.classList.toggle("pooled", !v && n > 1);
+}
+function pooledGate(n){
+  return gate(`<b>Pooled across ${n} topographies.</b> Every figure below is computed over all of them together. Form TB-1’s guide (section 3) says to read each topography on its own before trusting a pooled verdict: aggregation masks function and manufactures apparent multiple control (Beavers &amp; Iwata, 2011; Derby et al., 1994). Choose one behavior under Analyze behavior; the table <i>By topography</i> under By reinforcer class shows whether they disagree.`).replace('<div class="gate">', '<div class="gate abc-pooled" role="status">');
 }
 
 /* =====================================================================
@@ -2933,8 +2953,10 @@ function consequenceStats(coded, samples){
     /* Second conditional probability of the Lerman & Iwata (1993) method:
        of all the times this event occurred, how often was the behavior there. */
     const pBgivenC = cRest != null && (a+cRest) > 0 ? a/(a+cRest) : null;
+    /* v24.28 (R-059) an event never seen in a no-behavior check has no base rate yet: p(B|C) and CP:UP are undefined, not 100% and 138 */
+    const noBase = usable && c === 0;
     return { item, n:a, pGiven, pBase: usable ? (M ? c/M : null) : null,
-             up, cpup, camp, pBgivenC, stats: t, usable, noTime: usable && M > 0 && !K };
+             up, cpup: noBase ? null : cpup, camp: noBase ? false : camp, pBgivenC: noBase ? null : pBgivenC, stats: t, usable, noBase, noTime: usable && M > 0 && !K };
   });
 }
 
@@ -3432,6 +3454,11 @@ function renderAnalysis(){
   const aStats = antecedentStats(S.coded, S.samples);
   const eo      = eoCorrespondence(S.coded);
   const bCounts = behaviorCounts(S.coded);
+  /* v24.28 (R-025) the pool is named; the per-topography table reads the record without the behavior filter (the dates and activity kept) */
+  const topoBase = S.f.behavior ? filteredEntries(Object.assign({}, S.f, { behavior:"" })).filter(e => e.mode !== "open") : S.coded;
+  const topoAll = behaviorCounts(topoBase);
+  window.__abcPooledN = (!S.f.behavior && bCounts.length > 1) ? bCounts.length : 0;
+  abcTopoNote(topoAll.length);
   const oppSt   = opportunityStats(S.coded);
   const preSt   = precursorStats(S.coded, S.samples);
   const staffSt = staffPresenceStats(S.coded, S.samples);
@@ -3455,6 +3482,7 @@ function renderAnalysis(){
       ${S.narrativeOnly ? `<div class="metric"><div class="v">${S.narrativeOnly}</div><div class="k">narrative-only records from an older file (excluded)</div></div>` : ""}
     </div>` +
     (N < 10 ? gate(`<b>There are ${N} incident${N===1?"":"s"} in this filter.</b> Every proportion below is computed correctly, and none of them means much yet. With ${N} observations a single incident moves a conditional probability by ${pct(1/N,0)}, so read this as a work-in-progress record rather than as a result. Published descriptive analyses rest on an hour or more of observation per participant (e.g., Pence et al., 2009), not a handful of events.`) : "") +
+    (window.__abcPooledN ? pooledGate(window.__abcPooledN) : "") +
     (S.f.behavior ? gate(`<b>A single topography is selected.</b> N counts only incidents that included ${esc(B_BY_ID[S.f.behavior].label.toLowerCase())}, while the ${M} background samples are unchanged &mdash; a base rate describes the environment, not one response form. That is the right comparison, but it does mean the two sides of every 2&times;2 table below were collected at different densities.`) : ""),
     caveat(`<b>Read this before the graphs.</b> Everything below describes what was observed to follow or precede the behavior. A descriptive analysis cannot demonstrate a reinforcement effect, because nothing was manipulated. Agreement between descriptive-analysis outcomes and functional-analysis outcomes has been shown to be partial at best, and a consequence can be frequent without being contingent (Thompson &amp; Iwata, 2007; Vollmer et al., 2001). Use these results to rank hypotheses and design a functional analysis, not to replace one.`));
 
@@ -3481,7 +3509,7 @@ function renderAnalysis(){
   if(preSt.length) html += precursorSection(preSt, N, M);
 
   /* ---------- 3. consequence conditional probabilities ---------- */
-  const cRows = cStats.filter(r => r.n > 0).sort((a,b) => b.pGiven - a.pGiven);
+  const cRows = cStats.filter(r => r.n > 0).sort((a,b) => (Number(!!a.noBase) - Number(!!b.noBase)) || (Number(a.n < 5) - Number(b.n < 5)) || (b.pGiven - a.pGiven));   /* v24.28 (R-059) rows without a base rate, then thin rows, sort last */
   html += card("Conditional probability of each consequence, given the behavior",
     `p(consequence | behavior) across ${N} incidents`,
     `<div class="chartbox">${
@@ -3506,7 +3534,7 @@ function renderAnalysis(){
         <td class="num">${r.pBgivenC==null?"\u2014":pct(r.pBgivenC,0)}</td>
         <td class="num">${r.up==null?"\u2014":pct(r.up,0)}</td>
         <td class="num">${r.cpup==null?"\u2014":num(r.cpup,2)}</td>
-        <td style="font-weight:600;color:${r.camp?"var(--flag)":"var(--ink-faint)"}">${!r.usable ? "no base rate" : r.noTime ? (window.__abcFiltered ? "not with a date or activity filter" : "needs the minutes observed") : r.cpup==null ? "\u2014" : (r.camp?"met":"not met")}</td>
+        <td style="font-weight:600;color:${r.camp?"var(--flag)":"var(--ink-faint)"}">${!r.usable ? "no base rate" : r.noBase ? `<span class="withheld">undefined</span> never seen in a no-behavior check (0 of ${M})` : r.noTime ? (window.__abcFiltered ? "not with a date or activity filter" : "needs the minutes observed") : r.cpup==null ? "\u2014" : (r.camp?"met":"not met")}</td>
       </tr>`).join("")}</tbody></table></div>` +
     gate(`<b>Weighted by time observed.</b> The unconditional probability and p(B|C) count every ${esc(String(+$("#h-window").value||10))}-second span of the ${esc($("#h-minutes").value||"(not recorded)")} minutes observed: the incidents’ spans, and the rest at the event’s share of the background checks. Camp et al. (2009) took them over a continuous record, where how often the behavior occurred set the split; counting the checks instead made the figure move with how many checks were taken, so that with few checks no consequence could meet the criterion.${cStats.some(r=>r.noTime) ? (window.__abcFiltered ? " The minutes observed cover the whole record, so with a date or activity filter these columns are left empty." : " <b>Add the minutes observed in the header</b> (the Observation Timer adds them as each session ends) and these columns fill.") : ""}`) +
     gate(`<b>The three extra columns.</b> p(B|C) is the reverse direction added by the conditional probability method: of all the times this event occurred, the share that involved the behavior (Lerman &amp; Iwata, 1993). An event can follow the behavior often and still be something staff do constantly for other reasons, and this column catches that. CP:UP is the conditional probability divided by the unconditional probability of the event across every sampled unit. In Camp et al. (2009) a retrospective review of the consensus decisions of a panel of twelve behavior analysts showed that they agreed a descriptive record showed a relation only when the conditional probability exceeded .20 <i>and</i> CP:UP was at least 1.23; the last column applies that dual criterion.`) +
@@ -3532,7 +3560,7 @@ function renderAnalysis(){
       `<div class="matrix-wrap"><table>
         <thead><tr><th>Consequence</th><th class="num">a</th><th class="num">b</th><th class="num">c</th><th class="num">d</th>
         <th class="num">p(C|B)</th><th class="num">p(C|noB)</th><th class="num">&Delta;p</th><th class="num">Yule's Q</th><th class="num">&phi;</th><th>Strength</th></tr></thead>
-        <tbody>${usable.sort((a,b)=>(b.stats.q??-2)-(a.stats.q??-2)).map(r => {
+        <tbody>${usable.sort(qSort).map(r => {   /* v24.28 (R-059) thin rows last here too */
           const t = r.stats, st = qStrength(t.q);
           return `<tr>
             <td>${esc(r.item.label)}</td>
@@ -3560,6 +3588,7 @@ function renderAnalysis(){
       })), { max:1, left:250, right:186 })}</div>` +
     (M ? `<div class="legend"><span><i style="background:#161d26"></i>dashed marker shows the no-behavior base rate</span></div>` : "") +
     `<div class="legend"><span>* marks a class meeting both Camp et al. (2009) criteria: p(C|B) above .20 and CP:UP at least 1.23</span></div>` +
+    topoClassTable(topoBase, topoAll, S, M) +
     gate(`<b>Check this against the item-level table above.</b> A reinforcer class delivered through several different codes has its conditional probability split across them, so a class can meet the dual criterion here while none of its individual items does. Escape delivered sometimes as a removed demand, sometimes as a stopped transition, and sometimes as a cancelled change is one contingency wearing three labels, and the class row is the honest denominator for it.`) +
     srcline("A class counts as delivered when at least one delivered item in that class was checked. The final row counts incidents in which no delivered item of any class was recorded."));
 
@@ -3620,6 +3649,29 @@ function renderAnalysis(){
   html += methodsSection(methods, N, M);
   html += summarySection(kStats, cStats, eo, N, M);
   out.innerHTML = html;
+}
+
+/* v24.28 (R-025, E-26) one row per topography: the share of its incidents each reinforcer class followed, and which class leads
+   (on Yule's Q against the base rate with ten or more background samples, else on the conditional probability); a row under five
+   incidents is thin and does not vote on whether the topographies agree */
+function topoClassTable(base, counts, S, M){
+  if(counts.length < 2) return "";
+  const lead = ks => ks.filter(k => k.cls !== "none" && k.n > 0).sort((a,b) => (M >= 10 && a.stats && b.stats) ? ((b.stats.q??-2)-(a.stats.q??-2)) : (b.pGiven-a.pGiven))[0] || null;
+  const rows = counts.map(r => { const sub = base.filter(e => (e.behaviors||[]).includes(r.item.id)); const ks = classStats(sub, S.samples); const K = {}; ks.forEach(k => { K[k.cls] = k; });
+    return { item:r.item, n:sub.length, K, lead:lead(ks), thin: sub.length < 5 }; });
+  const voters = rows.filter(r => !r.thin && r.lead);
+  const byLead = {}; voters.forEach(r => { (byLead[r.lead.cls] = byLead[r.lead.cls] || []).push(r.item.other ? "Other" : r.item.label); });
+  const leads = Object.keys(byLead);
+  const verdict = leads.length > 1
+    ? `<b>The topographies disagree.</b> ${leads.map(cl => `${esc(CLASS_LABEL[cl])} leads for ${esc(byLead[cl].join(", "))}`).join("; ")}. Read each on its own before taking a pooled verdict forward.`
+    : leads.length === 1 ? `The topographies with five or more incidents agree: <b>${esc(CLASS_LABEL[leads[0]])}</b> leads for each (${esc(byLead[leads[0]].join(", "))}).`
+    : `No topography has five incidents yet, so the rows cannot say whether they agree.`;
+  const cell = (r, cl) => { const k = r.K[cl]; if(!k || !r.n) return `<td class="num">\u2014</td>`;
+    const on = r.lead && r.lead.cls === cl; return `<td class="num${on ? " lead" : ""}">${pct(k.pGiven,0)} <span style="color:var(--ink-faint)">(${k.n})</span>${k.stats && k.stats.q != null && M >= 10 ? `<br><small>Q ${num(k.stats.q,2)}</small>` : ""}</td>`; };
+  return `<h4 class="abc-topo-h">By topography</h4>` +
+    `<div class="matrix-wrap"><table class="abc-topo"><thead><tr><th>Topography</th><th class="num">n</th><th class="num">Attention</th><th class="num">Tangible/access</th><th class="num">Escape/avoidance</th><th class="num">Nothing delivered</th><th>Leads</th></tr></thead>
+    <tbody>${rows.map(r => `<tr${r.thin ? ' class="thin"' : ""}><td>${esc(r.item.other ? "Other" : r.item.label)}${r.item.caseT ? ' <span class="tag b">TB-1</span>' : ""}</td><td class="num">${r.n}</td>${cell(r,"attention")}${cell(r,"tangible")}${cell(r,"escape")}${cell(r,"none")}<td>${r.lead ? `<b style="color:${CLASS_COLOR[r.lead.cls]}">${esc(r.lead.label)}</b>` : "\u2014"}${r.thin ? ' <span class="withheld">thin</span>' : ""}</td></tr>`).join("")}</tbody></table></div>` +
+    `<p class="note abc-topo-v">${verdict}</p>`;
 }
 
 /* ---------- therapeutic contingency check ---------- */
@@ -3777,7 +3829,7 @@ function acSection(coded, N){
   const pairs = [];
   m.aItems.forEach((a,i) => m.cItems.forEach((c,j) => {
     const t = m.cells[i][j];
-    if(t.a >= 3 && t.q != null) pairs.push({ a, c, t });
+    if(t.a >= 5 && t.q != null) pairs.push({ a, c, t });   /* v24.28 (R-059) five shared incidents, not three */
   }));
   pairs.sort((x,y) => Math.abs(y.t.q) - Math.abs(x.t.q));
   const top = pairs.slice(0, 12);
@@ -3794,7 +3846,7 @@ function acSection(coded, N){
         <td class="num">${pct(r.t.pNot,0)}</td>
         <td class="num">${r.t.rr==null?"\u2014":num(r.t.rr,2)}</td>
         <td class="num" style="font-weight:700;color:${st.color}">${num(r.t.q,2)}</td>
-      </tr>`;}).join("")}</tbody></table></div>` : gate("No antecedent-consequence pair reached three shared incidents yet, which is the floor this table uses before ranking anything.");
+      </tr>`;}).join("")}</tbody></table></div>` : gate("No antecedent-consequence pair reached five shared incidents yet, which is the floor this table uses before ranking anything.");
 
   return card("Antecedent to consequence", "how the response depended on the situation",
     `<div class="matrix-wrap"><table class="matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>` +
@@ -3833,7 +3885,7 @@ function summarySection(kStats, cStats, eo, N, M){
   /* v22.51 (F87) a correspondence is named only on five incidents or more */
   const topEO = eo.filter(r => r.n >= 5).sort((a,b) => (b.p??0)-(a.p??0))[0];
 
-  return card("Reading the record as a whole", "a ranking of hypotheses, not a conclusion",
+  return card("Reading the record as a whole", "a ranking of hypotheses, not a conclusion" + (window.__abcPooledN ? ` · pooled across ${window.__abcPooledN} topographies` : ""),
     `<div class="body">
       <h3>What the record shows</h3>
       <ol style="margin:6px 0 0;padding-left:20px;font-size:14px">${lines}
@@ -4096,6 +4148,24 @@ function mulberry(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 
    record. After Load that is cleared too: the incident being entered on the Record tab, the sample being entered on
    Background samples (its ticks, date, time, window and adult within view, as a fresh page has them) and the counts in
    the IOA calculator on Methods. */
+/* v24.28 (R-129) a simulated narrative written from the incident's own codes, so the words and the ticks agree; a coded-only
+   incident carries none (the walkthrough teaches staff to check the one against the other) */
+function simNarr(e){
+  const A = { a_acad:"The math worksheet was put on the desk with the direction to start", a_gen:"Staff gave a direction to begin", a_trans:"The class was told to move to the next activity",
+    a_trans_end:"The preferred activity ended", a_trans_move:"The group began moving to another room", a_difficult:"The task was new and long for the student", a_signal:"Staff warned that the work was about to start", a_sched:"The schedule had changed that morning",
+    a_denied:"The student asked for the tablet and was told not now", a_rem_item:"The item in use was taken away for the next activity", a_rem_food:"The snack was put away", a_wait:"The student was told to wait", a_req_ignored:"The student asked twice and was not answered",
+    a_rem_staff_att:"The teacher turned to help another student", a_rem_peer_att:"The peers moved to another table", a_alone_work:"The student was working alone at the desk", a_alone_nothing:"The student was sitting with nothing to do", a_loud:"The room was loud" };
+  const B = { b_scream:"screamed and cried", b_agg_staff:"struck the nearest adult on the arm", b_disrupt:"banged the desk and called out", b_leave_area:"left the seat and walked to the door", b_lowcomp:"turned away and did not start", b_prop_others:"swept the materials to the floor",
+    b_misuse:"threw the pencil across the table", b_steal_peer:"grabbed a peer\u2019s item", b_comment:"made loud comments across the room", b_nssi:"hit the side of the head with an open hand" };
+  const C = { c_dem_rem:"moved the work aside and the demand ended", c_trans_stop:"paused the transition", c_chg_rem:"dropped the change", c_dem_stay:"repeated the direction and kept the work in place", c_staff_att:"came over and talked with the student", c_help:"sat down and helped with the first item",
+    c_reprimand:"corrected the student firmly", c_guided:"guided the student\u2019s hands through the task", c_removed:"walked the student out of the room", c_item:"gave the item", c_no_item:"did not give the item", c_peer_att:"the peers laughed and looked over", c_no_att:"did not respond", c_limited:"kept words to a minimum" };
+  const a = (e.antecedents||[]).map(k => A[k]).filter(Boolean)[0] || "The activity was under way";
+  const b = (e.behaviors||[]).map(k => B[k]).filter(Boolean).join(" and ") || "showed the target behavior";
+  const cs = (e.consequences||[]).map(k => C[k]).filter(Boolean);
+  const c = cs.length ? "Staff " + (cs.length > 1 ? cs.slice(0,-1).join(", ") + ", and " + cs[cs.length-1] : cs[0]) : "No adult responded";
+  const end = e.immediate === "i_stopped" ? "The behavior stopped within a minute." : "The behavior went on after that.";
+  return "Simulated record. " + a + ". The student " + b + ". " + c + ". " + end;
+}
 async function loadDemo(){
   if(!(await nbhUI.confirm("Load the simulated record?\nEvery tab is filled with a worked example: 46 incidents and 60 background samples, with the analysis set to compare against an escape function. Anything already entered will be replaced.", {ok:"Load"}))) return;
   clearForm();
@@ -4177,8 +4247,9 @@ async function loadDemo(){
         ...(chance(0.10) ? ["se_ill"] : []),
         ...(chance(0.08) ? ["se_staff"] : [])
       ], settingEventOther:{},
-      narrative: chance(0.35) ? "Simulated record. Task direction was given, the student pushed the materials away and vocalised loudly; staff repeated the direction once, then moved the work to the side and the episode ended." : ""
+      narrative: (chance(0.35), "")   /* v24.28 (R-129) the draw is kept so the seeded record is unchanged; the words come from the codes below */
     });
+    { const e = entries[entries.length - 1]; if(e.mode === "both") e.narrative = simNarr(e); }
     made++;
   }
 
@@ -4349,10 +4420,12 @@ function init(){
   ["#f-behavior","#f-from","#f-to"].forEach(s => $(s).addEventListener("change", renderIncidents));
   $("#f-reset").addEventListener("click", () => { $("#f-behavior").value=""; $("#f-from").value=""; $("#f-to").value=""; renderIncidents(); });
   ["#a-behavior","#a-from","#a-to"].forEach(s => $(s).addEventListener("change", renderAnalysis));
+  $("#a-behavior").addEventListener("change", () => { state.aPooled = $("#a-behavior").value === ""; });   /* v24.28 the pool is the analyst's choice */
   $("#a-function").addEventListener("change", e => { state.faFunction = e.target.value; renderAnalysis(); });
   $("#a-activity").addEventListener("input", renderAnalysis);
   $("#a-reset").addEventListener("click", () => {
     $("#a-behavior").value=""; $("#a-from").value=""; $("#a-to").value="";
+    state.aPooled = false; fillBehaviorFilters();   /* v24.28 the reset goes back to one topography */
     $("#a-activity").value=""; $("#a-function").value=""; state.faFunction=""; renderAnalysis();
   });
 
@@ -9845,10 +9918,10 @@ var qrcode = function() {
 "use strict";
 const q = s => document.querySelector(s), qa = s => Array.from(document.querySelectorAll(s));
 /* ---- what travels with the record beyond the fields: the photo, whose it is, whether it prints, the video link ---- */
-state.sheet = { photo:"", photoCase:false, photoOn:"1", video:"" };
-const SK = ["photo","photoCase","photoOn","video"];
+state.sheet = { photo:"", photoCase:false, photoOn:"1", video:"", classCodes:[] };
+const SK = ["photo","photoCase","photoOn","video","classCodes"];   /* v24.28 the classroom sheet's codes travel with the record */
 const rh0 = readHeader; readHeader = function(){ const h = rh0.apply(this, arguments); SK.forEach(k => { if(state.sheet[k] !== "" && state.sheet[k] !== false) h[k] = state.sheet[k]; }); return h; };
-const wh0 = writeHeader; writeHeader = function(h){ const r = wh0.apply(this, arguments); if(h){ state.sheet = { photo:typeof h.photo === "string" ? h.photo : "", photoCase:!!h.photoCase, photoOn:h.photoOn === "0" ? "0" : "1", video:typeof h.video === "string" ? h.video : "" }; } paintPhoto(); const v = q("#abcVideo"); if(v) v.value = state.sheet.video || ""; return r; };
+const wh0 = writeHeader; writeHeader = function(h){ const r = wh0.apply(this, arguments); if(h){ state.sheet = { photo:typeof h.photo === "string" ? h.photo : "", photoCase:!!h.photoCase, photoOn:h.photoOn === "0" ? "0" : "1", video:typeof h.video === "string" ? h.video : "", classCodes:Array.isArray(h.classCodes) ? h.classCodes.filter(x => typeof x === "string") : [] }; try{ paintClassNote(); }catch(e){} } paintPhoto(); const v = q("#abcVideo"); if(v) v.value = state.sheet.video || ""; return r; };
 window.__abcCasePhoto = "";
 function photoOK(){ const f = window.__abcFacts, fl = f && f.profile && f.profile.flags; return !(fl && fl.photo === "No"); }
 (function wrap(n){ const C = window.nbhCase; if(C && typeof C.apply === "function"){ if(C.__abc) return; const a0 = C.apply; C.apply = function(f){ window.__abcFacts = f || window.__abcFacts; try{ return a0.apply(this, arguments); } finally { try{ paintPhoto(); }catch(e){} } }; C.__abc = 1; }
@@ -9928,7 +10001,37 @@ function incidentSheet(sample, demo){
   x += '</div>';
   x += '<div class="ap-narr"><h5>Brief incident description<small>observable events in order: right before · what the student did · what adults and peers did next · what happened to the demand or the item · how it ended</small></h5><div class="ap-lines"><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><span class="ap-txt">' + esc(on.narrative || "") + '</span></div></div>';
   x += '<div class="ap-out"><div><h5>Immediately after the consequence</h5>' + IMMEDIATE.map(it => opt(it, has(it.id))).join(" ") + '</div><div><h5>Resolution</h5>' + RESOLUTION.map(it => opt(it, has(it.id))).join(" ") + '</div></div>';
-  x += '<div class="ap-foot"><b>One incident a sheet.</b> Tick what you saw, not what you think the student wanted. The antecedent is what was in place right before; the consequence is what adults and peers did within the window, whether or not it was meant. Leave a box blank when it did not apply. Hand the sheet to the behavior analyst, who enters it in the record. · Confidential student record.</div>';
+  x += '<div class="ap-foot"><b>One incident a sheet.</b> Tick what you saw, not what you think the student wanted. The class tag on each antecedent group (Attention EO, Escape/avoidance EO …) names the group so the box is found quickly; it is not a verdict and asks for no guess about why. The antecedent is what was in place right before; the consequence is what adults and peers did within the window, whether or not it was meant. Leave a box blank when it did not apply. Hand the sheet to the behavior analyst, who enters it in the record. · Confidential student record.</div>';
+  return x + '</div>';
+}
+/* v24.28 (R-061, E-27) the classroom sheet: for the clipboard in the moment. The student's initials, the case's targets (Form TB-1's,
+   else the header's), the antecedent and consequence codes the analyst chose (the record's most-used eight of each until chosen), type
+   at 10 pt, eight narrative lines. The full taxonomy sheet stays for the analyst's entry afterward. */
+const CLASS_DEF_A = ["a_acad","a_gen","a_trans","a_difficult","a_denied","a_rem_item","a_rem_staff_att","a_alone_work"], CLASS_DEF_C = ["c_dem_rem","c_dem_stay","c_help","c_staff_att","c_reprimand","c_item","c_no_item","c_no_att"];
+function abcClassCodes(){
+  const chosen = (state.sheet && Array.isArray(state.sheet.classCodes) ? state.sheet.classCodes : []).filter(id => A_BY_ID[id] || C_BY_ID[id]);
+  if(chosen.length) return { a:chosen.filter(id => A_BY_ID[id]), c:chosen.filter(id => C_BY_ID[id]), chosen:true };
+  const coded = state.entries.filter(e => e.mode !== "open");
+  const top = (items, key, dflt) => { const n = {}; coded.forEach(e => (e[key]||[]).forEach(id => { n[id] = (n[id]||0) + 1; }));
+    const used = items.filter(i => !i.other && n[i.id]).sort((x,y) => n[y.id]-n[x.id]).slice(0, 8).map(i => i.id); return used.length >= 4 ? used : dflt; };
+  return { a:top(A_ITEMS, "antecedents", CLASS_DEF_A), c:top(C_ITEMS, "consequences", CLASS_DEF_C), chosen:false };
+}
+function abcInitials(name){ return String(name || "").split(/[\s,]+/).filter(Boolean).map(w => w[0].toUpperCase()).slice(0, 3).join(""); }
+function classroomSheet(){
+  const h = readHeader(), TB = BEHAVIORS.filter(b => b.caseT), codes = abcClassCodes(), ini = abcInitials(h.client);
+  const grp = (groups, ids, tag) => groups.map(g => { const its = g.items.filter(i => ids.includes(i.id)); if(!its.length) return ""; const eo = tag ? ((g.items.find(i => !i.other) || {}).eo || "other") : "";
+    return '<div class="ap-grp"><h5>' + esc(g.group) + (tag ? '<i class="' + eo + '">' + esc(CLASS_LABEL[eo]) + ' EO</i>' : "") + '</h5>' + its.map(it => opt(it, false)).join("") + '</div>'; }).join("");
+  let x = '<div class="ap ap-class">' + head("ABC Recording & Conditional Probability Analysis");
+  x += '<div class="ap-band">ABC Classroom Sheet <small>one incident a sheet · this student’s targets and the codes the analyst chose</small></div>';
+  x += '<div class="ap-id no-photo">' + f("Student (initials)", ini) + f("Observer (initials)", "") + f("Date", "") + f("Start time", "") + f("Duration (min)", "") + f("Activity / routine", "") + '</div>';
+  x += '<div class="ap-cols">';
+  x += '<div class="ap-col"><div class="ap-colh">Right before<small>what was in place when it started</small></div>' + grp(ANTECEDENTS, codes.a, true) + '<div class="ap-grp">' + opt({ label:"Other", other:true }, false) + '</div></div>';
+  x += '<div class="ap-col"><div class="ap-colh">What the student did<small>the target behavior</small></div><div class="ap-grp">' + (TB.length ? TB.map(it => optTB(it, false)).join("") : (h.target ? optTB({ id:"tb_hdr", label:h.target, def:"" }, false) : "")) + opt({ label:"Other", other:true }, false) + '</div>' +
+    '<div class="ap-grp"><h5>Adult within view</h5>' + opt({ label:"Yes" }, false) + ' ' + opt({ label:"No" }, false) + '</div><div class="ap-grp"><h5>Right after</h5>' + IMMEDIATE.map(it => opt(it, false)).join("") + '</div></div>';
+  x += '<div class="ap-col"><div class="ap-colh">What adults did next<small>within the window, meant or not</small></div>' + grp(CONSEQUENCES, codes.c, false) + '<div class="ap-grp">' + opt({ label:"Other", other:true }, false) + '</div></div>';
+  x += '</div>';
+  x += '<div class="ap-narr"><h5>What happened, in order<small>right before · what the student did · what adults did next · how it ended</small></h5><div class="ap-lines ap-lines-big"><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><i class="ap-ln"></i><span class="ap-txt"></span></div></div>';
+  x += '<div class="ap-foot"><b>One incident a sheet.</b> Tick what you saw, not what you think the student wanted; leave a box blank when it did not apply. Hand the sheet to the behavior analyst, who enters it in the record with the full code list. Initials only on this sheet. · Confidential student record.</div>';
   return x + '</div>';
 }
 function bgSheet(demo){
@@ -9962,16 +10065,36 @@ function paperFit(force){
 function paperPrint(kind){
   if(printing) return; printing = true;
   const host = q("#abcPaper");
-  host.innerHTML = kind === "bg" ? bgSheet() : incidentSheet(kind === "sample" ? sampleIncident() : null);
+  host.innerHTML = kind === "bg" ? bgSheet() : kind === "class" ? classroomSheet() : incidentSheet(kind === "sample" ? sampleIncident() : null);   /* v24.28 */
+  /* v24.28 the classroom sheet carries initials only: the shared running head reads the student box, so it holds the initials while the sheet prints */
+  const hc = kind === "class" ? q("#h-client") : null, full = hc ? hc.value : "";
+  if(hc){ const ini = abcInitials(full); hc.value = ini ? "Student " + ini : ""; }
   document.documentElement.classList.add("abc-paper"); paperFit(false);
-  const done = () => { if(!printing) return; printing = false; document.documentElement.classList.remove("abc-paper"); host.innerHTML = ""; host.style.zoom = ""; };
+  const done = () => { if(!printing) return; printing = false; document.documentElement.classList.remove("abc-paper"); host.innerHTML = ""; host.style.zoom = ""; if(hc) hc.value = full; };
   window.addEventListener("afterprint", done, { once:true });
   try{ window.print(); } finally { setTimeout(done, 1500); }
 }
 q("#abcBlankBtn").addEventListener("click", () => paperPrint("blank"));
+/* v24.28 (R-061) the classroom sheet's button, its code picker and its note */
+function paintClassNote(){ const n = q("#abcClassNote"); if(!n) return; const c = abcClassCodes(); n.textContent = (c.chosen ? "Chosen: " : "Until chosen, the record’s most-used: ") + c.a.length + " antecedent and " + c.c.length + " consequence codes." + (BEHAVIORS.some(b => b.caseT) ? "" : " No Form TB-1 target is in the record yet: the header’s target behavior prints."); }
+function openClassPicker(){
+  let d = q("#abcClassPick"); if(d) d.remove();
+  const cur = abcClassCodes(), on = new Set(cur.a.concat(cur.c));
+  const col = (title, groups) => '<div class="abc-cp-col"><h4>' + title + '</h4>' + groups.map(g => '<h5>' + esc(g.group) + '</h5>' + g.items.filter(i => !i.other).map(i => '<label><input type="checkbox" value="' + esc(i.id) + '"' + (on.has(i.id) ? " checked" : "") + '> ' + esc(i.label) + '</label>').join("")).join("") + '</div>';
+  d = document.createElement("div"); d.id = "abcClassPick"; d.innerHTML = '<div class="abc-ic-back"></div><div class="abc-ic abc-cp" role="dialog" aria-modal="true" aria-labelledby="abcCpTitle"><h3 id="abcCpTitle">Codes on the classroom sheet</h3><p class="note">Eight to ten of each fits the page. The full list stays on the analyst’s sheet.</p><div class="abc-cp-cols">' + col("Right before (antecedent)", ANTECEDENTS) + col("What adults did next (consequence)", CONSEQUENCES) + '</div><div class="abc-ic-btns"><button type="button" class="btn primary" data-cp="save">Use these</button><button type="button" class="btn" data-cp="auto">Back to the record’s most-used</button><button type="button" class="btn quiet" data-close>Cancel</button></div></div>';
+  document.body.appendChild(d);
+  d.addEventListener("click", ev => { const t = ev.target; if(t.classList.contains("abc-ic-back") || t.closest("[data-close]")){ d.remove(); return; }
+    const b = t.closest("[data-cp]"); if(!b) return;
+    if(b.dataset.cp === "save"){ state.sheet.classCodes = Array.prototype.slice.call(d.querySelectorAll("input:checked")).map(i => i.value); }
+    else state.sheet.classCodes = [];
+    paintClassNote(); d.remove(); try{ nbhUI.toast(state.sheet.classCodes.length ? state.sheet.classCodes.length + " codes chosen for the classroom sheet; they are saved with the record." : "The classroom sheet uses the record’s most-used codes again.", { kind:"ok" }); }catch(e){} });
+  d.querySelector("button").focus();
+}
+{ const b0 = q("#abcBlankBtn"); if(b0 && !q("#abcClassBtn")){ const b = document.createElement("button"); b.type = "button"; b.id = "abcClassBtn"; b.textContent = "Print a classroom sheet"; b.title = "One page for the clipboard: this student’s targets, the codes the analyst chose, larger type, initials only."; b0.after(b); b.addEventListener("click", () => paperPrint("class"));
+  const c = document.createElement("button"); c.type = "button"; c.id = "abcClassCodes"; c.textContent = "Choose its codes"; c.addEventListener("click", openClassPicker); const n = document.createElement("span"); n.id = "abcClassNote"; n.className = "sp-hint"; b.after(c); c.after(n); paintClassNote(); } }
 q("#abcSampleBtn").addEventListener("click", () => paperPrint("sample"));
 q("#abcBgBtn").addEventListener("click", () => paperPrint("bg"));
-window.abcPaper = { fit:paperFit, html:(kind, demo) => kind === "bg" ? bgSheet(demo) : incidentSheet(kind === "sample" ? (demo && demo.sample || sampleIncident()) : null, demo), print:paperPrint, paint:paintPhoto };
+window.abcPaper = { fit:paperFit, html:(kind, demo) => kind === "bg" ? bgSheet(demo) : kind === "class" ? classroomSheet() : incidentSheet(kind === "sample" ? (demo && demo.sample || sampleIncident()) : null, demo), print:paperPrint, paint:paintPhoto, codes:abcClassCodes };
 /* ---- the toolbar as a settings panel (as Form SP-1's) ---- */
 const BAR = document.querySelector(".toolbar"); if(!BAR) return;
 const byId = id => document.getElementById(id), made = {};
@@ -9986,14 +10109,15 @@ function build(){
   const sa = BAR.querySelector(".abc-files") || (byId("file-input") && byId("file-input").closest(".toolbar .tgroup"));
   if(sa && !sa.classList.contains("abc-files")){ sa.classList.add("abc-files"); sa.firstElementChild.textContent = "Files"; }
   const pr = mk("print", "The record: the header, the incident log, the background samples and the analysis, whichever tab is open"); into(pr, byId("printBtn"));
-  const pp = mk("paper", "Paper data sheets, for the folder"); into(pp, byId("abcBlankBtn")); into(pp, byId("abcSampleBtn")); into(pp, byId("abcBgBtn"));
+  const pp = mk("paper", "Paper data sheets, for the folder"); into(pp, byId("abcBlankBtn")); into(pp, byId("abcSampleBtn")); into(pp, byId("abcBgBtn")); into(pp, byId("abcClassBtn"));
+  const cc = mk("classcodes", "The classroom sheet: this student’s targets and the codes staff tick"); into(cc, byId("abcClassCodes")); into(cc, byId("abcClassNote"));   /* v24.28 */
   const ph = mk("photo", "Student’s photo on the paper sheet"); into(ph, byId("abcPhotoPick")); into(ph, byId("abcPhotoOff")); const pl = byId("abcPhotoOnLab"); if(pl) into(ph, pl); const pf = byId("abcPhotoFrom"); if(pf) into(ph, pf); const pn = byId("abcPhotoNote"); if(pn) into(ph, pn);
   const vd = mk("video", "How-to video link (prints as a QR code on the paper sheet)"); into(vd, byId("abcVideo"));
   const rs = mk("reset", "The worked example, or starting over"); into(rs, byId("load-demo")); into(rs, byId("clear-all"));
   if(sa){ const fr = sa.querySelector(".row"); ["dl-json","up-json","dl-csv","dl-matrix"].forEach(id => { const e = byId(id); if(e && e.parentNode !== fr) fr.appendChild(e); });
     Array.prototype.slice.call(BAR.querySelectorAll("button")).forEach(b => { const t = b.textContent.trim(); if((t === "Open packet" || t === "Save packet") && b.parentNode !== fr) fr.appendChild(b); });
     Array.prototype.slice.call(sa.querySelectorAll("label")).forEach(l => { if(l.querySelector("input:not([hidden]),select,button,textarea")) return; Array.prototype.slice.call(l.querySelectorAll("input[hidden]")).forEach(i => fr.appendChild(i)); l.remove(); }); }
-  [[0, [pr, pp, ph, vd]], [1, [sa]], [2, [rs]]].forEach(o => o[1].forEach(g => { if(g && g.parentNode !== cols[o[0]]) cols[o[0]].appendChild(g); }));
+  [[0, [pr, pp, cc, ph, vd]], [1, [sa]], [2, [rs]]].forEach(o => o[1].forEach(g => { if(g && g.parentNode !== cols[o[0]]) cols[o[0]].appendChild(g); }));
   Array.prototype.slice.call(BAR.children).forEach(g => { if(g.classList.contains("tgroup") && !g.classList.contains("tg-keep") && !g.classList.contains("tg-ctl")) cols[2].appendChild(g); });
   const cg = BAR.querySelector(":scope > .nbh-case-grp"), ctl2 = BAR.querySelector(":scope > .tg-ctl"); if(cg && ctl2 && cg.nextElementSibling !== ctl2) BAR.insertBefore(cg, ctl2);
   /* the quick blank sheet, beside the quick Save data, left of More controls */
@@ -10605,6 +10729,115 @@ window.__nbhFactsWants=(window.__nbhFactsWants||[]).concat(['ob1narr']);
   if(n){try{refreshAll();}catch(e){}r.filled=(r.filled||0)+n;r.note=(r.note?r.note+'; ':'')+n+' incident'+(n===1?'':'s')+' from Form OB-1\u2019s narrative, coded from its ticks';}
   return r;};}
 </script>
+<script id="abc128-inc">
+/* v24.28 (R-060, E-45) under 900 px the Edit and Delete column is gone from the incident list (it sat over the Consequence column) and
+   a tap on a row opens the incident as a card with Edit and Delete inside; the incident and background lists fade at the right edge
+   while there is more to the right, as the analysis tables do */
+(function(){
+  const narrow = () => window.matchMedia("(max-width:900px)").matches;
+  function closeCard(){ const d = document.getElementById("abcIncCard"); if(d) d.style.display = "none"; }
+  function openCard(id){
+    const e = state.entries.find(x => x.id === id); if(!e) return;
+    let d = document.getElementById("abcIncCard");
+    if(!d){ d = document.createElement("div"); d.id = "abcIncCard"; d.innerHTML = '<div class="abc-ic-back"></div><div class="abc-ic" role="dialog" aria-modal="true" aria-labelledby="abcIcTitle"></div>'; document.body.appendChild(d);
+      d.addEventListener("click", ev => { if(ev.target.classList.contains("abc-ic-back") || ev.target.closest("[data-close]")) closeCard(); });
+      document.addEventListener("keydown", ev => { if(ev.key === "Escape" && d.style.display !== "none") closeCard(); }); }
+    const row = (k, v) => v ? '<div class="abc-ic-row"><b>' + k + '</b><div>' + v + '</div></div>' : "";
+    const box = d.querySelector(".abc-ic");
+    box.innerHTML = '<h3 id="abcIcTitle">' + esc(e.date) + (e.time ? ' · ' + esc(e.time) : "") + (e.duration ? ' · ' + esc(e.duration) + ' min' : "") + '</h3>' +
+      row("Activity", esc(e.activity)) +
+      row("Antecedent", e.mode === "open" ? '<span style="color:var(--ink-faint)">narrative only</span>' : labelsFor(e.antecedents, A_BY_ID, e.antecedentOther, "auto")) +
+      row("Behavior", labelsFor(e.behaviors, B_BY_ID, e.behaviorOther, "b") + ((e.precursors||[]).length ? '<div style="margin-top:3px;font-size:12px;color:var(--ink-faint)">preceded by ' + labelsFor(e.precursors, P_BY_ID, e.precursorOther, "") + '</div>' : "")) +
+      row("Consequence", e.mode === "open" ? "" : labelsFor(e.consequences, C_BY_ID, e.consequenceOther, "auto")) +
+      row("After", (e.immediate ? esc(I_BY_ID[e.immediate] ? I_BY_ID[e.immediate].label : e.immediate) : "") + ((e.resolution||[]).length ? '<div style="margin-top:3px">' + labelsFor(e.resolution, R_BY_ID, e.resolutionOther, "") + '</div>' : "")) +
+      row("Setting events", (e.settingEvents||[]).map(id => esc(SE_BY_ID[id] ? SE_BY_ID[id].label : id)).join("; ")) +
+      row("Narrative", e.narrative ? '<span class="abc-ic-narr">' + esc(e.narrative) + '</span>' : "") +
+      '<div class="abc-ic-btns"><button type="button" class="btn quiet" data-edit="' + esc(e.id) + '" data-close>Edit</button><button type="button" class="btn danger" data-del="' + esc(e.id) + '" data-close>Delete</button><button type="button" class="btn" data-close>Close</button></div>';
+    d.style.display = "block"; const b = box.querySelector("button"); if(b) b.focus();
+  }
+  window.abcOpenIncident = openCard;
+  const T = document.getElementById("inc-table");
+  if(T) T.addEventListener("click", ev => {
+    if(!narrow() || ev.target.closest("button,a,input,select,textarea")) return;
+    let tr = ev.target.closest("tbody tr"); if(!tr) return;
+    if(tr.classList.contains("inc-narr-row")) tr = tr.previousElementSibling;
+    const b = tr && tr.querySelector("[data-edit]"); if(b) openCard(b.dataset.edit);
+  });
+  /* the sideways cue on the two lists */
+  function cue(w){
+    const can = w.scrollWidth > w.clientWidth + 4; w.classList.toggle("can-scroll", can);
+    w.classList.toggle("at-end", w.scrollLeft + w.clientWidth >= w.scrollWidth - 3);
+    const n = w.nextElementSibling;
+    if(!(n && n.classList.contains("matrix-swipe"))){ const e = document.createElement("p"); e.className = "matrix-swipe"; e.textContent = "Scroll sideways for the other columns." + (narrow() ? " Tap a row to open the incident." : ""); w.after(e); }
+    if(!w.__cued){ w.__cued = 1; w.addEventListener("scroll", () => cue(w), { passive:true }); try{ new ResizeObserver(() => cue(w)).observe(w); }catch(e){} }
+  }
+  function all(){ ["inc-table","bg-table"].forEach(id => { const w = document.getElementById(id); if(w) cue(w); }); }
+  ["inc-table","bg-table"].forEach(id => { const w = document.getElementById(id); if(w){ try{ new MutationObserver(all).observe(w, { childList:true }); }catch(e){} } });
+  window.addEventListener("resize", all); all();
+})();
+</script>
+<style id="abc128-css">
+/* v24.28 */
+.a-topo{display:block;font-size:11px;color:var(--ink-faint);margin-top:3px;font-weight:400}
+.a-topo.pooled{color:var(--flag);font-weight:600}
+.gate.abc-pooled{border-left:4px solid var(--flag,#8e2a2a);background:#fbf1ef}
+.abc-topo-h{margin:14px 16px 4px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--nbh-navy,#182e43)}
+table.abc-topo td.lead{font-weight:700}
+table.abc-topo tr.thin td{color:var(--ink-faint)}
+.abc-topo-v{padding:0 16px 10px;margin:4px 0 0}
+#abcIncCard,#abcClassPick{position:fixed;inset:0;z-index:600;display:none}
+#abcClassPick{display:block}
+.abc-ic-back{position:absolute;inset:0;background:rgba(22,36,46,.45)}
+.abc-ic{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,560px);max-height:88vh;overflow:auto;background:#fff;color:var(--nbh-navy,#182e43);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);padding:16px 18px 14px;box-sizing:border-box;font-size:14px}
+.abc-ic h3{margin:0 0 10px;font-size:16px}
+.abc-ic-row{display:grid;grid-template-columns:96px 1fr;gap:4px 10px;padding:6px 0;border-top:1px solid var(--rule,#e3e8ee)}
+.abc-ic-row b{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);padding-top:3px}
+.abc-ic-narr{font-family:var(--serif);white-space:pre-wrap}
+.abc-ic-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;justify-content:flex-end}
+.abc-ic-btns .btn{min-height:44px}
+.abc-cp{width:min(94vw,760px)}
+.abc-cp-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.abc-cp-col h4{margin:8px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.abc-cp-col h5{margin:8px 0 2px;font-size:12px;color:var(--ink-faint)}
+.abc-cp-col label{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:13px;line-height:1.3}
+.abc-cp-col input{width:20px;height:20px;flex:none;margin:0}
+@media (max-width:640px){.abc-cp-cols{grid-template-columns:1fr}}
+@media (max-width:900px){
+  #inc-table td:last-child,#inc-table th:last-child{display:none!important}
+  #inc-table tbody tr{cursor:pointer}
+  #inc-table tbody tr:active td{background:var(--slate-tint,#eef2f6)}
+}
+#inc-table.can-scroll,#bg-table.can-scroll{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 48px),rgba(0,0,0,.12));mask-image:linear-gradient(90deg,#000 calc(100% - 48px),rgba(0,0,0,.12))}
+#inc-table.can-scroll.at-end,#bg-table.can-scroll.at-end{-webkit-mask-image:none;mask-image:none}
+#inc-table + .matrix-swipe,#bg-table + .matrix-swipe{display:none;font-size:12px;color:var(--ink-faint);margin:4px 16px 8px}
+#inc-table.can-scroll + .matrix-swipe,#bg-table.can-scroll + .matrix-swipe{display:block}
+/* the classroom sheet: larger type, fewer boxes */
+.ap.ap-class{font-size:10pt;line-height:1.25}
+.ap.ap-class .ap-band{font-size:13pt}
+.ap.ap-class .ap-id{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 16px;margin-bottom:6px}
+.ap.ap-class .ap-f{min-height:20px}
+.ap.ap-class .ap-f b{font-size:9pt}
+.ap.ap-class .ap-f span{font-size:11pt}
+.ap.ap-class .ap-cols{grid-template-columns:1.1fr 1fr 1.1fr;gap:0 10px;margin-bottom:6px}
+.ap.ap-class .ap-col{padding:4px 7px 5px}
+.ap.ap-class .ap-colh{font-size:12pt;margin-bottom:4px}
+.ap.ap-class .ap-colh small{font-size:8.5pt}
+.ap.ap-class .ap-grp{margin:0 0 4px}
+.ap.ap-class .ap-grp h5{font-size:9.5pt;margin:4px 0 1px}
+.ap.ap-class .ap-grp h5 i{font-size:7.5pt;padding:0 6px}
+.ap.ap-class .ap-opt{gap:6px;line-height:1.25;padding:1px 0}
+.ap.ap-class .ap-box{width:14px;height:14px;margin-top:1px;border-width:1.2px}
+.ap.ap-class .ap-tbtag{font-size:8pt}
+.ap.ap-class .ap-opt .ap-wh{font-size:8pt}
+.ap.ap-class .ap-grp h5 i{font-size:8pt}
+.ap.ap-class .ap-def{font-size:8.5pt}
+.ap.ap-class .ap-other{min-width:90px;height:12px}
+.ap.ap-class .ap-narr{padding:4px 8px 5px}
+.ap.ap-class .ap-narr h5{font-size:12pt}
+.ap.ap-class .ap-narr h5 small{font-size:8.5pt}
+.ap.ap-class .ap-lines-big{height:160px;background:repeating-linear-gradient(to bottom,transparent 0 19px,#c9d3d8 19px 20px);line-height:20px;font-size:10pt}
+.ap.ap-class .ap-foot{font-size:8.5pt;padding-top:4px}
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

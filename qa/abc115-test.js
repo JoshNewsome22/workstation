@@ -27,7 +27,7 @@ const pdfText=buf=>{const t=buf.toString('latin1');return t;};
  await p.evaluate(()=>{window.nbhUI=window.nbhUI||{};nbhUI.confirm=async()=>true;document.getElementById('load-demo').click();});await sleep(1500);
  const rows=await p.evaluate(()=>{document.querySelector('#viewSeg [data-view="incidents"]').click();const t=document.getElementById('inc-table');const narr=[...t.querySelectorAll('tr.inc-narr-row')];
    return {n:state.entries.filter(e=>e.narrative).length,rows:narr.length,hidden:narr.every(r=>getComputedStyle(r).display==='none'),full:narr.every((r,i)=>r.textContent.includes(state.entries.filter(e=>e.narrative)[i].narrative)),del:t.querySelectorAll('[data-del]').length,colspan:narr.length&&narr[0].firstElementChild.getAttribute('colspan')};});
- ok('each incident with a narrative has a hidden full-width narrative row on screen (the row count the buttons see is unchanged)',rows.rows===rows.n&&rows.n>20&&rows.hidden&&rows.full&&rows.del===46&&rows.colspan==='7',rows);
+ ok('each incident with a narrative has a hidden full-width narrative row on screen (the row count the buttons see is unchanged)',rows.rows===rows.n&&rows.n>10&&   /* v24.28 the narratives sit on the coded + narrative incidents only */ rows.hidden&&rows.full&&rows.del===46&&rows.colspan==='7',rows);
  await sleep(400);
  await p.emulateMedia({media:'print'});
  const pv=await p.evaluate(()=>{const t=document.getElementById('inc-table');const r=t.querySelector('tr.inc-narr-row'),c=t.querySelector('.inc-narr');return {row:getComputedStyle(r).display,cell:getComputedStyle(c).display};});
