@@ -9905,6 +9905,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.30: Form TD-1 from the independent review: the staff card, the packet in order, the bank filtered to the plan
+(the independent review of 10/25, TD-1 findings R-022, R-113, R-114; enhancements E-12, E-40; reviewer notes C-22, C-46)
+
+- **The staff card.** One page in large type for the people running the plan, built from Setup, Responding to behavior and the
+  consequence protocol: the behavior and its function, the early sign to watch for, what to teach instead, then four boxes (when
+  you see the early sign, when the behavior happens, after the episode, never), the guidance line with the stop rule and the
+  assent line where escape extinction is planned, and the crisis trigger with the crisis procedure. A line the BCBA has not
+  written yet says so and names the sheet. The type steps down from 15 px until the card fits one Letter page. It sits on the
+  Implementation plan sheet under the flowchart block, with **Print the staff card** there and in the toolbar; it is not part of
+  the whole-form print.
+- **Print the staff packet** is now the staff card, the treatment integrity checklist, then the flowchart on a page of its own.
+  The Final plan is out of the packet (the flowchart repeats its steps; two reviewers found the plan duplicated across pages 8 to
+  17) and prints on its own with Print final plan only. The worked example's packet went from 17 pages to 11, its last page from
+  the crisis instruction alone to the whole stop-and-switch block: the flowchart's "It is escalating beyond this plan" branch
+  (the protective procedures and Stop and switch to the crisis plan) prints whole, and the generated-on line stays with it.
+- **The whole-form print**: the block before a sheet's closing citation moves with it, so no page holds a citation alone (page 4
+  had held the Select sheet's citation with Components chosen, the last page the monitor's criterion note). The Select cards
+  go with Components chosen, the monitor's verdict with the criterion box, the skills cards and the adoption record with their
+  citations. The browser moves a break only to the nearest allowed point, so the rule keeps those blocks whole rather than
+  asking for "avoid" alone.
+- **Add from the protocol bank** opens filtered to this plan's function (Setup) and, when the case names a student with a
+  grade, to that student's grade band (Pre-K and K, 1–2, 3–5, 6–8, 9–12, ages 18–22), marked "(this student)". The count line
+  reads "N of 459 protocols for this plan's function (escape), grades 3–5. Any function and Any grade show the rest." Either
+  choice is one tap away and holds until the bank is reopened. A protocol's age line is the grade band it was studied in; ages
+  above 12 read as the transition years. Protocols already on a card are marked **in this plan** in the list.
+- **The simulation** fills the consequence protocol's Blocking rule and Crisis trigger, the protective card's equipment, nursing
+  review and crisis reference, and the precursor on Setup (they were empty while their steps were ticked), so the worked
+  example's staff card is complete.
+- Tests: qa/td130-test.js (24 checks: the card and its fit, the card print, the packet's pages and ink, the whole form's pages,
+  the bank's filters and marks, the simulation's boxes); qa/td119-test.js follows the new packet order.
+
 ### v24.29: Form RS-1 from the independent review: a phone contact is a note, the cross-RBT table, the plan's checklist on a contact
 (the independent review of 10/25, RS-1 findings R-026, R-027, R-116, R-117, R-118, R-120, R-147, R-149, R-150; enhancements E-03, E-41)
 

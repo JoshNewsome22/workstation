@@ -895,17 +895,57 @@ td input,td select{max-width:100%}
 <style id="td119-css">
 /* v24.19 the staff packet; a sheet's last lines stay with their sheet */
 @media print{
-  body.print-packet .sheet:not(#final):not(#plan){display:none!important}
+  body.print-packet .sheet:not(#plan){display:none!important}
   body.print-packet .sim-banner{display:none!important}
-  body.print-packet #plan > *:not(.nbh-print-head):not(.bar):not(#fidHead):not(#fidTbl):not(#tdFidNote):not(#flowBlock){display:none!important}
+  body.print-packet #plan > *:not(.nbh-print-head):not(#tdCard):not(.bar):not(#fidHead):not(#fidTbl):not(#tdFidNote):not(#flowBlock){display:none!important}
   body.print-packet #plan > .bar::after{content:": the integrity checklist and the staff flowchart"}
-  .sheet > .cite,.sheet > p:last-child,.sheet > .method:last-child,.sheet > .defs:last-of-type{break-before:avoid;page-break-before:avoid}
+  /* v24.30 (R-022) the staff card is page 1; the checklist starts page 2; the Final plan prints on its own */
+  body.print-packet #plan > .bar{break-before:page;page-break-before:always}
+  .sheet > .cite,.sheet > p:last-child,.sheet > .method:last-child,.sheet > .defs:last-of-type,.sheet > .cite:last-child,.sheet > :has(+ .cite:last-child),.sheet > .sigcite:last-child,.sheet > :has(+ .sigcite:last-child){break-before:avoid;page-break-before:avoid}
+  /* v24.30 (R-114) Chromium moves a break only to the nearest allowed point, so the block before a sheet's closing citation is
+     kept whole: the Select cards go with Components chosen, the monitor's verdict with the criterion box, the skills cards and
+     the adoption record with their citations */
+  #selRec,#monVerdict,#plan > table.rank:has(+ .defs + .sigcite),#td85Block,#skbRec,#setup > .warn:has(+ .cite){break-inside:avoid!important;page-break-inside:avoid!important}
+  /* v24.30 (C-46) the flowchart's stop-and-switch block stays with the protective procedures; the generated-on line stays with the last block */
+  #flowBlock .fl-branch.fl-stop{break-inside:avoid!important;page-break-inside:avoid!important}
+  #flowBlock .fl-foot{break-before:avoid;page-break-before:avoid}
   p,.method,li,.cite{orphans:3;widows:3}
   .qrow,.rec,.defs .drow,.td-glance tr,table.grid tr,.ident,.f,.psctl{break-inside:avoid;page-break-inside:avoid}
   #fidTbl{break-inside:auto!important;page-break-inside:auto!important}
   body.print-packet #flowBlock{break-before:page;page-break-before:always}
   #fidTbl thead{display:table-header-group}
 }
+</style>
+<style id="td130-css">
+/* v24.30 (R-022, E-12) the staff card: one page in large type, from Setup, Responding to behavior and the consequence protocol */
+.td-card{max-width:7.7in;margin:6px 0 16px;border:2px solid #182e43;border-radius:6px;padding:14px 18px;font-size:15px;line-height:1.4;color:#16242e;background:#fff;box-sizing:border-box}
+.td-card[data-fit="1"]{font-size:14px}.td-card[data-fit="2"]{font-size:13px}.td-card[data-fit="3"]{font-size:12px}.td-card[data-fit="4"]{font-size:11px;line-height:1.32}
+.td-card .tc-h{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;border-bottom:2px solid #182e43;padding-bottom:6px;margin-bottom:9px}
+.td-card .tc-h h3{margin:0;font-size:1.45em;line-height:1.2;font-family:var(--sans);color:#182e43}
+.td-card .tc-h .tc-meta{font-size:.78em;color:#5b6770;text-align:right}
+.td-card .tc-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;margin:0 0 10px}
+.td-card .tc-top > div{border-left:4px solid #b7c8c5;padding:2px 0 2px 9px;min-width:0;overflow-wrap:anywhere}
+.td-card .tc-top small{color:#5b6770;font-size:.86em}
+.td-card .tc-k{display:block;font-family:var(--sans);font-size:.72em;letter-spacing:.06em;text-transform:uppercase;color:#5b6770;font-weight:600;line-height:1.3}
+.td-card .tc-box{border:1.5px solid #c9d4d2;border-radius:5px;padding:7px 11px;margin:0 0 7px;break-inside:avoid;page-break-inside:avoid;overflow-wrap:anywhere}
+.td-card .tc-box.tc-do{border-color:#2f6f4e;background:#f3faf5}
+.td-card .tc-box.tc-not{border-color:#8e2a2a;background:#fbf1f1}
+.td-card .tc-box.tc-crisis{border-color:#8e2a2a;border-width:2.5px}
+.td-card .tc-box.tc-do .tc-k{color:#2f6f4e}.td-card .tc-box.tc-not .tc-k,.td-card .tc-box.tc-crisis .tc-k{color:#8e2a2a}
+.td-card .tc-t{margin:2px 0 0;font-size:1em;line-height:1.38}
+.td-card .tc-t + .tc-t{margin-top:4px}
+.td-card .tc-miss{color:#8e2a2a;font-style:italic}
+.td-card .tc-two{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+.td-card .tc-foot{font-size:.72em;color:#5b6770;border-top:1px solid #c9d4d2;padding-top:5px;margin-top:4px;line-height:1.35}
+#tdCardNote{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+@media print{
+  #tdCard,#tdCardHead,#tdCardNote{display:none!important}
+  body.print-packet #tdCard,body.print-card #tdCard{display:block!important;max-width:none;break-inside:avoid;page-break-inside:avoid}
+  body.print-card .sheet:not(#plan){display:none!important}
+  body.print-card .sim-banner{display:none!important}
+  body.print-card #plan > *:not(.nbh-print-head):not(#tdCard){display:none!important}
+}
+@media screen and (max-width:640px){.td-card .tc-top,.td-card .tc-two{grid-template-columns:1fr}.td-card{padding:12px 14px}}
 </style>
 <style id="td121-css">
 /* v24.21 the plan names one function; the log's invalid cells */
@@ -978,7 +1018,8 @@ td input,td select{max-width:100%}
     <div class="row">
       <button class="primary" id="printBtn">Print / Save as PDF</button>
       <button id="printFinalBtn">Print final plan only</button>
-      <button id="printPacketBtn" title="The final plan, then the treatment integrity checklist and the staff flowchart: one printout for the people running the plan">Print the staff packet</button>
+      <button id="printPacketBtn" title="The staff card, then the treatment integrity checklist and the staff flowchart: one printout for the people running the plan (the Final plan prints on its own)">Print the staff packet</button>
+      <button id="printCardBtn" title="One page in large type for the people running the plan: the early sign, the behavior, after it, never, the crisis trigger, the stop rule">Print the staff card</button>
       <label class="pr-guide" title="Off: the printout (and the workstation's master print) leaves out the Guide's literature review and the References"><input type="checkbox" id="printGuide" name="opt.printGuide"> Include the guide and references</label>
       <button id="saveBtn">Save data</button>
       <button id="bipBtn" title="Compose the plan text from this form and copy it to the clipboard, to paste into the BIP">Copy for the BIP</button><span id="bipMsg" class="bip-msg noprint" role="status" aria-live="polite"></span>
@@ -1474,6 +1515,10 @@ td input,td select{max-width:100%}
     <span class="method" style="margin-left:8px">A one-page decision tree for the people running the plan, built from the components above.</span>
   </div>
   <div id="flowBlock" hidden></div>
+
+  <h3 class="sub noprint" id="tdCardHead">Staff Card</h3>
+  <p class="method noprint" id="tdCardNote"><span>One page in large type for the people running the plan, built from Setup, Responding to behavior and the consequence protocol: the early sign, the behavior, after it, never, the crisis trigger, the stop rule. It is the first page of the staff packet. Where the card and the plan differ, the plan governs.</span><button id="printCardBtn2" class="tool" type="button" style="margin:0">Print the staff card</button></p>
+  <div id="tdCard" class="td-card" hidden></div>
 
   <h3 class="sub">Staff Training (Behavioral Skills Training)</h3>
   <table class="rank cmp"><thead><tr><th style="width:24%">Implementer</th><th style="width:12%">Instructions</th><th style="width:12%">Model</th><th style="width:12%">Rehearsal</th><th style="width:12%">Feedback</th><th style="width:14%">Criterion met (date)</th><th>Notes</th></tr></thead>
@@ -3202,16 +3247,45 @@ function printFinal(){renderPlan();renderFinal();document.body.classList.add('pr
 /* v21.44 (A1): a plan whose own words do not follow question 4 asks first; (B3) so does one whose escape extinction is
    not ready (planAsk) */
 $('#printFinalBtn').addEventListener('click',()=>{if(!planAsks()){printFinal();return;}planAsk('Print the final plan','Print anyway').then(go=>{if(go)printFinal();});});
-/* v24.19 the staff packet: the Final plan first, then the integrity checklist and the flowchart from the Implementation plan */
+/* v24.30 (R-022, E-12) the staff card: what the people running the plan do, from Setup, Responding to behavior and the
+   consequence protocol (its Crisis trigger box), with escape extinction's stop rule and assent line when it is planned */
+function tdCardData(){const cs=comps(),pb=cs.find(c=>c.code==='R_PB'),sf=cs.find(c=>c.code==='SAFE');
+ const EE=(()=>{try{return window.__td1EE&&window.__td1EE.active()?window.__td1EE.state():null;}catch(e){return null;}})();
+ const FNW={escape:'escape from demands',attention:'attention',tangible:'access to items or activities',automatic:'automatic (sensory) reinforcement',multiple:'more than one function'};
+ return {student:val('m.client'),sid:val('m.sid'),date:val('m.date'),bcba:val('m.assessor'),beh:val('m.beh'),fn:FNW[val('m.fn')]||val('m.fn'),prec:val('m.prec'),rep:val('m.repdesc'),
+  onPrec:val('rb.prec'),onTarget:val('rb.target'),after:val('rb.after'),never:val('rb.not'),crisis:val('rb.crisis'),trigger:pb?val(`cp[${pb.i}].p2`):'',equip:sf?val(`cp[${sf.i}].p0`):'',
+  ee:EE?{pg:EE.pg,stop:EE.stop,withdraw:EE.withdraw,assent:EE.assent}:null};}
+function tdCardHtml(d){const miss=w=>`<span class="tc-miss">not written yet${w?' (on '+w+')':''}</span>`,T=(v,w)=>v?esc(v):miss(w);
+ const box=(cls,k,v,w)=>`<div class="tc-box ${cls}"><span class="tc-k">${k}</span><p class="tc-t">${T(v,w)}</p></div>`;
+ let h=`<div class="tc-h"><h3>Staff card: ${d.student?esc(d.student):'student not named yet'}</h3><div class="tc-meta">${d.sid?'ID '+esc(d.sid)+' · ':''}Form TD-1${d.date?' · plan dated '+esc(d.date):''}</div></div>`;
+ h+=`<div class="tc-top"><div><span class="tc-k">The behavior</span>${T(d.beh,'Setup')}${d.fn?'<br><small>maintained by '+esc(d.fn)+'</small>':''}</div><div><span class="tc-k">Watch for (the early sign)</span>${T(d.prec,'Setup')}</div><div><span class="tc-k">Instead, teach</span>${T(d.rep,'Setup')}</div></div>`;
+ h+=box('tc-do','When you see the early sign',d.onPrec,'Responding to behavior');
+ h+=box('tc-do','When the behavior happens',d.onTarget,'Responding to behavior');
+ h+='<div class="tc-two">'+box('tc-do','After the episode',d.after,'Responding to behavior')+box('tc-not','Never',d.never,'Responding to behavior')+'</div>';
+ if(d.ee){const e=d.ee;h+=`<div class="tc-box"><span class="tc-k">${e.pg==='yes'?'Guiding the student’s hands: yes, only after the least help':'Guiding the student’s hands: no, help stops at a gesture or a model'}</span>`
+  +(e.pg==='yes'?`<p class="tc-t"><b>Stop at once</b> at resistance or any sign of distress: ${T(e.stop,'Responding to behavior')}</p>`:'')
+  +(e.withdraw?`<p class="tc-t"><b>If the student withdraws assent:</b> ${esc(e.withdraw)}${e.assent?' <small>(assent plan: '+esc(e.assent)+')</small>':''}</p>`:'')+'</div>';}
+ h+=`<div class="tc-box tc-crisis"><span class="tc-k">Call for help: the crisis trigger</span><p class="tc-t"><b>When:</b> ${T(d.trigger,'the consequence protocol card, Crisis trigger')}</p><p class="tc-t"><b>Then:</b> ${T(d.crisis,'Responding to behavior')}</p>${d.equip?`<p class="tc-t"><b>Protective equipment:</b> ${esc(d.equip)}</p>`:''}</div>`;
+ h+=`<div class="tc-foot">From Form TD-1${d.bcba?', written by '+esc(d.bcba):''}, generated ${new Date().toLocaleDateString()}. This card summarizes the plan for the people running it and does not replace it; where the card and the plan differ, the plan governs. Rebuild it after any change.</div>`;
+ return h;}
+/* the type steps down (15 to 11 px) until the card fits one Letter page below the sheet's print head; measured on a 7.7-inch copy */
+function renderCard(){const el=$('#tdCard');if(!el)return;const d=tdCardData(),any=!!(d.beh||d.onTarget||d.onPrec||d.never||d.crisis||comps().length);el.hidden=!any;if(!any){el.innerHTML='';el.removeAttribute('data-fit');return;}
+ el.innerHTML=tdCardHtml(d);const m=el.cloneNode(true);m.hidden=false;m.removeAttribute('id');m.removeAttribute('data-fit');m.style.cssText='position:absolute;left:-9999px;top:0;width:7.7in;max-width:none;visibility:hidden';document.body.appendChild(m);
+ try{const LIM=8.6*96;let lvl=0;while(m.scrollHeight>LIM&&lvl<4){lvl++;m.setAttribute('data-fit',String(lvl));}if(lvl)el.setAttribute('data-fit',String(lvl));else el.removeAttribute('data-fit');}finally{m.remove();}}
+{const rp=renderPlan;renderPlan=function(){const r=rp.apply(this,arguments);try{renderCard();}catch(e){}return r;};}
+function printCard(){renderPlan();document.body.classList.add('print-card');const done=()=>{document.body.classList.remove('print-card');window.removeEventListener('afterprint',done);};
+  window.addEventListener('afterprint',done);setTimeout(()=>{try{window.print();}finally{setTimeout(done,2000);}},50);}
+['printCardBtn','printCardBtn2'].forEach(id=>{const b=$('#'+id);if(b)b.addEventListener('click',()=>{if(!planAsks()){printCard();return;}planAsk('Print the staff card','Print anyway').then(go=>{if(go)printCard();});});});
+/* v24.19 the staff packet; v24.30 (R-022) the staff card first, then the integrity checklist, then the flowchart on a page of its
+   own; the Final plan prints on its own (the flowchart repeats its steps) */
 function printPacket(){renderPlan();renderFinal();const fb=$('#flowBlock');if(fb&&!fb.textContent.trim()){try{$('#flowBtn').click();}catch(e){}}
-  const fin=$('#final'),plan=$('#plan');const par=fin&&plan&&fin.parentNode===plan.parentNode?fin.parentNode:null;const finNext=par?fin.nextSibling:null;
-  /* the Final plan first; on the Implementation plan the checklist before the flowchart (the flowchart is a page of its own) */
+  const plan=$('#plan'),card=$('#tdCard'),head=plan?plan.querySelector(':scope > .nbh-print-head'):null,cardNext=card?card.nextSibling:null,cardPar=card?card.parentNode:null;
   const note=$('#tdFidNote'),flowNext=fb?fb.nextSibling:null,flowPar=fb?fb.parentNode:null;
-  if(par)par.insertBefore(fin,plan);if(fb&&note&&note.parentNode===flowPar)note.after(fb);document.body.classList.add('print-packet');
-  const done=()=>{document.body.classList.remove('print-packet');if(par&&fin.parentNode===par)par.insertBefore(fin,finNext);if(fb&&flowPar&&fb.parentNode===flowPar)flowPar.insertBefore(fb,flowNext);window.removeEventListener('afterprint',done);};
+  if(card&&head){card.hidden=false;head.after(card);}if(fb&&note&&note.parentNode===flowPar)note.after(fb);document.body.classList.add('print-packet');
+  const done=()=>{document.body.classList.remove('print-packet');if(card&&cardPar)cardPar.insertBefore(card,cardNext);if(fb&&flowPar&&fb.parentNode===flowPar)flowPar.insertBefore(fb,flowNext);try{renderCard();}catch(e){}window.removeEventListener('afterprint',done);};
   window.addEventListener('afterprint',done);setTimeout(()=>{try{window.print();}finally{setTimeout(done,2000);}},50);}
 $('#printPacketBtn').addEventListener('click',()=>{if(!planAsks()){printPacket();return;}planAsk('Print the staff packet','Print anyway').then(go=>{if(go)printPacket();});});
-window.td119={printPacket};
+window.td119={printPacket,printCard,renderCard};
 
 
 /* ---------- simulator ---------- */
@@ -3244,7 +3318,7 @@ const SIMV={
 /* v21.44 (A1): the simulation asks first, with the question the other forms ask; it replaced every entry without asking */
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated case?\nEvery sheet is filled with a worked example of the scenario chosen beside the button. Anything already entered will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=SIMS[key],X=SIMV[key]||{},pick=(k,d)=>k in X?X[k]:d;restore({counts:{}});const fcr=!!sc.sbt||sc.comps.some(c=>c==='FCT'||c==='DRA');   /* the plan has a functional communication response (v21.16) */
- setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
+ setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.prec','A scream, or a slap on the desk, within 3 s of the demand (simulated)');   /* v24.30 */setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.assessor',val('m.assessor')||'Jordan Ellis, M.A., BCBA (simulated)');setv('m.date',new Date().toLocaleDateString());
  setv('m.beh',sc.beh);setv('m.fn',sc.fn);setv('m.fnsrc','EA-1');setv('m.fnprov',sc.sbt?'Moderate · Differentiated: Synthesized test meets the rule (u − l = 5 of n = 5). · Roane rule met: Synthesized test u − l = 5 of 5 · IOA on 40% of sessions (Synthesized test 40%) · second reading: agreed · Decision ticked (Function identified) (simulated)':'Strong · Differentiated: '+(sc.fn==='escape'?'Demand':sc.fn==='attention'?'Attention':sc.fn==='tangible'?'Tangible':'Alone / No interaction')+' meets the rule (u − l = 4 of n = 4). · Roane rule met: '+(sc.fn==='escape'?'Demand':sc.fn==='attention'?'Attention':sc.fn==='tangible'?'Tangible':'Alone / No interaction')+' u − l = 4 of 4 · IOA on 25% of sessions (every condition 25%) · second reading: agreed · Decision ticked (Function identified) (simulated)');   /* v24.21 (R-002) the worked example shows what stands behind its function */setv('m.eadesign',sc.sbt?'IISCA: synthesized test vs. control, multielement (simulated)':'Multielement, 4 series (simulated)');setv('m.reinf',sc.reinf);setv('m.rate',String(sc.rate));setv('m.sessmin','10');setv('m.rep',sc.rep);/* v21.21 cross-form (X4b): m.repdesc is the replacement behavior (the plan summary and the flowchart show it as
    that, GB-1 writes it after "will", EB-1 under "What the request looks like"); the simulation filled it with
    a description of the student's current repertoire. Whether the behavior is already in the repertoire is
@@ -3311,6 +3385,9 @@ setv('m.repdesc',({escape_fct:'press the break card (simulated)',sbt:'say "my wa
  /* v23.04 (review F178) with extinction not feasible, the consequence protocol starts without its generic extinction step, as one
     added by hand does */
  {const pb=$('#compWrap .card[data-code="R_PB"]');if(pb&&val('rb.3')==='no')rbCardSync(null,pb);}
+ /* v24.30 (C-22) the consequence protocol's Blocking rule and Crisis trigger and the protective card's boxes, which the ticked steps assume */
+ {const pb=$('#compWrap .card[data-code="R_PB"]');if(pb){const i=pb.dataset.i;if(!val(`cp[${i}].p1`))setv(`cp[${i}].p1`,val('rb.2')==='yes'?'Block a hit with an open hand at arm’s length; neutral face, no words; never hold (simulated)':'Not used: no injury risk on the Responding sheet (simulated)');if(!val(`cp[${i}].p2`))setv(`cp[${i}].p2`,'2 hits within 10 s, or any hit that leaves a mark (simulated)');}
+  const sf=$('#compWrap .card[data-code="SAFE"]');if(sf){const i=sf.dataset.i;[['p0','None prescribed; arm’s-length blocking only (simulated)'],['p1','School nurse reads the injury log every Friday; medical clearance on file '+val('m.date')+' (simulated)'],['p2','Form CR-1, dated '+val('m.date')+' (simulated)']].forEach(([k,v])=>{if(!val(`cp[${i}].${k}`))setv(`cp[${i}].${k}`,v);});}}
  {const hc=$('#compWrap .card[data-code="A_HIGHP"]');if(hc){const hi=hc.dataset.i;['Give me five; Touch your nose; Thumbs up','"Pick up your pencil and write your name on the worksheet"','Varied (never the previous trial\'s order)','Drop to 2 high-p instructions after 3 sessions at or above 80% low-p cooperation, then to 1 (simulated)'].forEach((v,k)=>setv(`cp[${hi}].p${k}`,v));}}
  if(key==='escape_fct'){/* the trial sheet: four sessions, the third high-p instruction slipping in session 2 */
   $('#nHp').value=4;renderHpRows();const T=[['1-2-3',[['y','y','y','n'],['y','y','y','n'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y']]],['2-3-1',[['y','y','n',''],['y','y','y','y'],['y','y','y','n'],['y','y','n',''],['y','y','y','y']]],['3-1-2',[['y','y','y','y'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y'],['y','y','y','y']]],['1-3-2',[['y','y','y','y'],['y','y','y','y'],['y','y','y','y'],['y','y','y','n'],['y','y','y','y']]]];
@@ -5788,7 +5865,8 @@ table.td-glance{width:100%;border-collapse:collapse;font-size:12.5px;margin:0 0 
 .card.td-from-bank .param{grid-template-columns:1fr}
 </style>
 <script id="td1-pbank-ui">
-const TD_BANK_CSS=`:host{display:block;font-family:var(--nbh-sans,"Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif);font-size:13px;line-height:1.45;color:var(--nbh-ink,#1a2933)}
+const TD_BANK_CSS=`.inp{display:inline-block;font-size:11px;font-weight:600;color:#1f6b4a;background:#e6f4ec;border-radius:3px;padding:0 6px;margin-left:6px;vertical-align:middle;letter-spacing:.02em}
+:host{display:block;font-family:var(--nbh-sans,"Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif);font-size:13px;line-height:1.45;color:var(--nbh-ink,#1a2933)}
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
 p{margin:0}
@@ -5926,7 +6004,7 @@ const has=(list,w)=>list.some(x=>x.startsWith(w));
 const planBeh=()=>words([val('m.beh'),val('m.prec')].join(' ')).filter(w=>w.length>3&&!/^(student|behavior|behaviour|with|that|this|when|than|from|into|after|before|other|their)$/.test(w));
 function rankPlan(list){const pf=planFn(),bw=planBeh();if(!pf&&!bw.length)return list;const sc=p=>{let n=0;if(pf&&p.fn&&p.fn.includes(pf))n+=2;if(bw.length&&bw.some(w=>has(H[p.id].top,w)))n+=1;return n;};
   return list.map((p,i)=>[p,sc(p),i]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]).map(x=>x[0]);}
-function search(q,kind,fn){const ws=words(q),pool=ok.filter(p=>(!kind||kindOf(p.code)===kind)&&fnOk(p,fn));
+function search(q,kind,fn,band){const ws=words(q),pool=ok.filter(p=>(!kind||kindOf(p.code)===kind)&&fnOk(p,fn)&&ageOk(p,band));
   if(!ws.length)return {list:rankPlan(pool),tier:1};
   let l=pool.filter(p=>ws.every(w=>has(H[p.id].top,w)));if(l.length)return {list:rankPlan(l),tier:1};
   l=pool.filter(p=>ws.every(w=>has(H[p.id].all,w)));if(l.length)return {list:rankPlan(l),tier:2};
@@ -5947,22 +6025,37 @@ d.innerHTML=`<summary><span class="t">Protocol bank</span> <span class="n">(${N}
 <div class="body"><p class="intro">Each protocol is a treatment procedure written from a published study, with the study cited. Tap one to read it, then add it to the plan: it becomes a card of its component with the study’s steps, settings, data and materials, and the study is named on the card and in the plan. Adapt every step to this student and this school.</p>
 <details class="about"><summary>How the protocols are written</summary><p></p></details>
 <div class="row"><input type="search" class="q" placeholder="Search: break card, delay, high-p, token, elopement…" aria-label="Search the protocol bank" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
-<select class="kind" aria-label="Kind of component"></select><select class="fn" aria-label="Function of the problem behavior"></select></div>
+<select class="kind" aria-label="Kind of component"></select><select class="fn" aria-label="Function of the problem behavior"></select><select class="age" aria-label="Grade band"></select></div>
 <div class="cnt" aria-live="polite"></div><div class="list"></div><div class="detail" hidden></div></div>`;
 R.appendChild(d);
-const $p=s=>d.querySelector(s),q=$p('.q'),kind=$p('.kind'),fn=$p('.fn'),cntEl=$p('.cnt'),listEl=$p('.list'),det=$p('.detail');
+const $p=s=>d.querySelector(s),q=$p('.q'),kind=$p('.kind'),fn=$p('.fn'),age=$p('.age'),cntEl=$p('.cnt'),listEl=$p('.list'),det=$p('.detail');
 if(B.note)$p('details.about p').textContent=B.note;else $p('details.about').hidden=true;
 kind.innerHTML=`<option value="">All kinds of component (${N})</option>`+kinds().map(([k,n])=>`<option value="${esc(k)}">${esc(k)} (${n})</option>`).join('');
+/* v24.30 (E-40, R-113) the bank opens filtered to this plan's function and the case student's grade band, until the user changes
+   either; a protocol's age line is the grade band it was studied in (Pre-K, K, grades; ages above 12 read as the transition years) */
+const CASE={student:null};let fnTouched=false,ageTouched=false;
+const AGE_BANDS=[['pk','Pre-K and K',-1,0],['12','Grades 1–2',1,2],['35','Grades 3–5',3,5],['68','Grades 6–8',6,8],['912','Grades 9–12',9,12],['tr','Ages 18–22',13,13]];
+const gradeNum=g=>{g=String(g||'').trim().toLowerCase();if(!g)return null;if(/pre|pk|vpk/.test(g))return -1;if(/^k\b|kinder/.test(g))return 0;const m=g.match(/\d+/);if(!m)return /post|transition|adult/.test(g)?13:null;const n=+m[0];return n>12?13:n;};
+const bandOf=n=>n==null?'':(AGE_BANDS.find(b=>n>=b[2]&&n<=b[3])||[''])[0];
+const ageRange=a=>{a=String(a||'').trim().replace(/pre-?k/ig,'PreK');if(!a)return null;const t=a.split(/[–—-]/).map(x=>x.trim()).filter(Boolean);if(!t.length)return null;
+  const one=x=>/pre/i.test(x)?-1:/^k/i.test(x)?0:/\+$/.test(x)?13:(/\d/.test(x)?+x.replace(/\D/g,''):null);let lo=one(t[0]),hi=t.length>1?one(t[1]):(/\+$/.test(t[0])?13:lo);
+  if(lo==null||hi==null)return null;if(hi>12&&lo>0&&!/\+$/.test(a)){lo=Math.max(lo-5,-1);hi=13;}return [Math.min(lo,hi),Math.max(lo,hi)];};
+function ageOk(p,band){if(!band)return true;const b=AGE_BANDS.find(x=>x[0]===band),r=ageRange(p.age);if(!b||!r)return true;return r[0]<=b[3]&&r[1]>=b[2];}
+const caseBand=()=>bandOf(gradeNum(CASE.student&&CASE.student.grade));
+function ageFill(){const v=age.value,cb=caseBand();age.innerHTML='<option value="">Any grade</option>'+AGE_BANDS.map(b=>`<option value="${b[0]}">${esc(b[1])}${b[0]===cb?' (this student)':''}</option>`).join('');
+  age.value=ageTouched?v:(cb||v||'');}
+const inPlan=()=>new Set($$('#compWrap .card').map(c=>val('cp['+c.dataset.i+'].bank')).filter(Boolean));
 function fnFill(){const v=fn.value,pf=planFn();
   fn.innerHTML='<option value="">Any function</option>'+(pf?`<option value="plan">This plan’s: ${esc(FN[pf].toLowerCase())}</option>`:'')+
     Object.keys(FN).map(k=>`<option value="${k}">${FN[k]}</option>`).join('');
-  fn.value=[...fn.options].some(o=>o.value===v)?v:'';}
-fnFill();
+  const keep=[...fn.options].some(o=>o.value===v)?v:'';fn.value=fnTouched?keep:(pf?'plan':keep);}
+ageFill();fnFill();
 let cur='',lastQ=null;
-function draw(){const r=search(q.value,kind.value,fn.value),list=r.list;
-  cntEl.textContent=(list.length===N?N+' protocols':list.length+' of '+N+' protocols')+(!list.length?'':r.tier===2?', found in the protocols’ text':r.tier===3?': no protocol has every word, so the closest are listed':'')+(list.length&&(planFn()||planBeh().length)?'; the ones for this plan’s function and behavior first':'');
+function draw(){const r=search(q.value,kind.value,fn.value,age.value),list=r.list,IN=inPlan();
+  const fil=[fn.value?(fn.value==='plan'&&planFn()?'this plan’s function ('+FN[planFn()].toLowerCase()+')':FN[fn.value]?FN[fn.value].toLowerCase():''):'',age.value?((AGE_BANDS.find(b=>b[0]===age.value)||[])[1]||'').toLowerCase():''].filter(Boolean);
+  cntEl.textContent=(list.length===N?N+' protocols':list.length+' of '+N+' protocols')+(fil.length?' for '+fil.join(', '):'')+(!list.length?'':r.tier===2?', found in the protocols’ text':r.tier===3?': no protocol has every word, so the closest are listed':'')+(list.length&&!fn.value&&(planFn()||planBeh().length)?'; the ones for this plan’s function and behavior first':'')+(fil.length?'. Any function and Any grade show the rest.':'');
   let h='';groups(list).forEach(([g,L])=>{h+=`<div class="grp" role="group" aria-label="${esc(g)}"><div class="gh" aria-hidden="true">${esc(g)}</div>`+
-    L.map(p=>`<button type="button" class="it" data-id="${esc(p.id)}" aria-pressed="${p.id===cur?'true':'false'}"><span class="l">${esc(p.lab)}</span><span class="m">${esc([comp(p),fnWords(p)==='any function'?'Any function':'Function: '+fnWords(p),p.age,(cites(p)[0]||'')].filter(Boolean).join(' · '))}</span></button>`).join('')+'</div>';});
+    L.map(p=>`<button type="button" class="it" data-id="${esc(p.id)}" aria-pressed="${p.id===cur?'true':'false'}"><span class="l">${esc(p.lab)}${IN.has(p.id)?'<span class="inp">in this plan</span>':''}</span><span class="m">${esc([comp(p),fnWords(p)==='any function'?'Any function':'Function: '+fnWords(p),p.age,(cites(p)[0]||'')].filter(Boolean).join(' · '))}</span></button>`).join('')+'</div>';});
   listEl.innerHTML=h||'<div class="none">Nothing matches. Try another word, All kinds of component, or Any function.</div>';
   const k=q.value+'|'+kind.value+'|'+fn.value;if(k!==lastQ){listEl.scrollTop=0;lastQ=k;}}
 const row=(k,v)=>v?`<div class="r"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`:'';
@@ -6023,20 +6116,21 @@ function doAdd(){const p=byId[cur];if(!p)return;const same=sameCards(p);if(same.
   const u=document.createElement('button');u.type='button';u.className='lnk';u.textContent=r.replaced?'Undo the replace':'Undo the add';
   u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.']);});
   say([b,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u]);}
-q.addEventListener('input',draw);kind.addEventListener('change',draw);fn.addEventListener('change',draw);
+q.addEventListener('input',draw);kind.addEventListener('change',draw);fn.addEventListener('change',()=>{fnTouched=true;draw();});age.addEventListener('change',()=>{ageTouched=true;draw();});
+d.addEventListener('toggle',()=>{if(d.open){try{ageFill();fnFill();draw();}catch(x){}}});   /* v24.30 the filters follow the plan and the case when the bank opens */
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});
 listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);
   try{($p('.load')||det).scrollIntoView({block:'nearest',behavior:'smooth'});}catch(x){}});
 det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add'))doAdd();else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);});
 /* the function choices follow the plan's function; the note on cards already in the plan follows the cards */
 document.addEventListener('change',ev=>{if(ev.target&&ev.target.name==='m.fn'){fnFill();draw();}});
-{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(){const r=was?was.apply(this,arguments):null;try{fnFill();draw();}catch(x){}return r;};}
-try{new MutationObserver(()=>{clearTimeout(sameNote._t);sameNote._t=setTimeout(sameNote,120);}).observe($('#compWrap'),{childList:true});}catch(x){}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.student&&typeof f.student==='object')CASE.student=f.student;ageFill();fnFill();draw();}catch(x){}return r;};}
+try{new MutationObserver(()=>{clearTimeout(sameNote._t);sameNote._t=setTimeout(()=>{sameNote();try{fnFill();draw();}catch(x){}},120);}).observe($('#compWrap'),{childList:true});}catch(x){}
 /* the button beside "+ Add" opens the bank at its search */
 {const a=$('#addCompBtn');if(a&&!$('#tdBankOpen')){a.insertAdjacentHTML('afterend',' <button type="button" id="tdBankOpen" class="tool" style="margin:0">Add from the protocol bank</button>');
   $('#tdBankOpen').addEventListener('click',()=>{d.open=true;try{host.scrollIntoView({block:'start',behavior:'smooth'});}catch(x){host.scrollIntoView();}setTimeout(()=>{try{q.focus({preventScroll:true});}catch(x){}},350);});}}
 draw();
-window.__tdBank={search:(s,k,f)=>search(s,k||'',f||'').list.map(p=>p.id),entry:id=>byId[id]||null,show:id=>{d.open=true;show(id);},n:N,kindOf:id=>byId[id]?kindOf(byId[id].code):''};
+window.__tdBank={search:(s,k,f,a)=>search(s,k||'',f||'',a||'').list.map(p=>p.id),band:()=>age.value,fnSel:()=>fn.value,student:()=>CASE.student,ageOk:(id,b)=>byId[id]?ageOk(byId[id],b):true,ageRange:a=>ageRange(a),entry:id=>byId[id]||null,show:id=>{d.open=true;show(id);},n:N,kindOf:id=>byId[id]?kindOf(byId[id].code):''};
 })();
 </script>
 <script id="td1-scenes">
