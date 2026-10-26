@@ -9905,6 +9905,51 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.45: Form TK-1 polished (review V18: R-106 to R-109, R-144; E-39)
+- **The Token Board back and Step 3 of the how-to insert say that an earned token stays** (review R-106, E-39): "A star
+  already on the board is never taken away: when the behavior does not happen, there is no star that time, the earned
+  stars stay, and the next chance is a fresh one", in the bus-ride guide's own terms and with the book's token name. Taking
+  tokens back is the first thing staff improvise on a board, and nothing on the paper said not to. A bus book's Board back
+  says the same. The Token Economy back is left as it was, because it already prints at its smallest size and one more
+  sentence would add two sheets to every book.
+- **Setup's "Taking a token away"** sits beside "Earns a token" (review R-106, E-39). It defaults to **Never**. When it is
+  set to **Response cost**, the rule the BCBA writes prints on those backs instead of the sentence above. A blank rule
+  prints a line to write it on, and Setup lists it as still open. It is a classroom setting, and a bus book keeps the
+  sentence.
+- A back that still holds the old default text takes the new text when the book is opened. A back you have edited is kept
+  as written. The Backs sheet's markup note names `{rule}` and the new `{keep}`.
+- **Print asks first while nothing says what earns a token** (review R-107). The Board back and Step 3 print the "Earns a
+  token" rule, so every adult gives the token for the same thing. Print offers **Print anyway** or **Fill it in first**,
+  which opens Setup at the field. The card sheets and the spare sheet print without asking.
+- **A token card fits between a slot's two captions** (review R-108, E-39). The token cards were 1.5 in., about the size
+  of a whole slot, so a laminated star covered "Your First Star!" and "Just 3 More!". They now print 1 in. square, centred
+  on the hook-and-loop dot, or 0.8 in. on the smaller slots of a two-row board on a Letter-high page. The larger page
+  sizes scale tokens and slots together. Setup's new **Token size** keeps the old 1.5 in. ("Fills the slot") for anyone who
+  wants it. Beside it, Setup states the size the tokens will print.
+- **The making guide states the sizes** (E-39), at the 8.82 in. page: a picture card 2.07 in., a token 1 in. (0.8 in. and
+  1.5 in. as above), a token slot 1.56 in. and a box on the Tokens page 1.56 in.
+- **A sheet index on the Preview** (E-39): one button for each sheet ("6. Board (back: Token Board)"). Each button brings
+  its sheet into view, and the index does not print. The second page of the how-to insert is named again ("How to use,
+  Step 3"), where it had shown a blank label.
+- **On an iPad**, the reorder arrows on Choices and Targets are 44 by 44 px with 12 px between them, so a near miss no longer
+  moves the wrong card (review R-109). Choose and Change are 44 px high. The sheet arrows ‹ › are 44 px wide on this form.
+- **A label taken from the picture reads in normal ink** with a small "from the picture" tag, so it is not mistaken for an
+  empty box and retyped (review R-144). The tag goes as soon as a label is typed.
+- The form is patched as built, as the recent releases have done. Its parts under tools/forms/TK-1 are
+  not rebuilt, since that would drop those releases' changes.
+- Tests: qa/tk145-test.js (12 checks):
+  - the sentence on the Board back and in Step 3, with the simulated book still at 13 sheets;
+  - an old default back taking the new text, and an edited back kept;
+  - response cost with a rule, with a blank rule, and on a bus book;
+  - Print's question, both answers, and no question once the rule is there;
+  - the token on the page: 1 in. and 0.8 in. between the captions, and 1.5 in. when set to fill the slot;
+  - the tokens measured in the printed PDF at 1.0 in.;
+  - the sizes in the making guide and on Setup;
+  - the sheet index;
+  - 44 px arrows and buttons at iPad width with touch;
+  - the picture's label in ink with its tag.
+- qa/tk1-audit.js checks the print layout over 83 settings combinations and was run on the new and the previous form.
+
 ### v24.44: Form OB-1 polished (review V17: R-052, R-053, R-055, R-056; E-28, E-30)
 - **The Guide says what each interval rule gets wrong** (review R-052, E-28). Section 5 adds that Powell, Martindale and
   Kulp (1975) scored the same behavior by each rule against a continuous record of how long it lasted. Partial interval

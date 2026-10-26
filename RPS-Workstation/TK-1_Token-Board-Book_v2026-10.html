@@ -766,6 +766,15 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 .mv{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
 .mv button{font-size:11px;line-height:1;padding:0;width:30px;height:30px;min-height:0!important;min-width:0!important}
 .mv button:disabled{opacity:.3}
+/* v24.45 (review R-109) on an iPad the reorder arrows and the Choose / Change buttons are 44 px with room between them, the sheet arrows 44 px wide */
+@media screen and (pointer:coarse),screen and (max-width:1199px){.mv{gap:12px;margin-left:8px}.mv button{width:44px!important;height:44px!important;font-size:15px}html body #chTbl .pick button[data-pick],html body #tgTbl .pick button[data-pick]{min-height:44px!important}html body button.nbh-prev,html body button.nbh-next{min-width:44px!important}}
+/* v24.45 (review R-144) a label taken from the picture reads in ink, tagged, until one is typed */
+input.tk-inh::placeholder{color:inherit;opacity:1}
+.tk-inh-tag{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid var(--rule-2,#c9d3d6);border-radius:8px;font-size:11px;line-height:18px;color:var(--ink-soft,#54676f);white-space:nowrap}
+input.tk-inh:not(:placeholder-shown)+.tk-inh-tag{display:none}
+/* v24.45 (E-39) the Preview's sheet index */
+.tk-index{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 10px}.tk-index:empty{display:none}.tk-index .tool{font-size:12px}
+@media print{.tk-index{display:none!important}}
 @media print{.mv{display:none}}
 .bd-photo img,.bd-photo svg{width:100%;height:100%;object-fit:cover;display:block}
 .ftlab{position:absolute;top:calc(79.12pt*var(--s));width:calc(200pt*var(--s));margin-left:calc(-100pt*var(--s));text-align:center;font:400 41.1pt/1 Georgia,"Georgia Pro","Times New Roman",serif;color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
@@ -1440,6 +1449,10 @@ td input,td select{max-width:100%}
       <div><label>Token name (in the captions: &ldquo;Your First Star!&rdquo;)</label><input data-m="tokname" name="m.tokname" placeholder="Star"></div>
       <!-- v23.25 (review F302) what earns a token: prints on the Board and on its back, so every adult gives it for the same thing -->
       <div class="class-only"><label>Earns a token (what, and how much: the schedule)</label><input data-m="tok_rule" name="m.tok_rule" data-nbh-nowording placeholder="3 problems correct; 2 minutes of writing"></div>
+      <!-- v24.45 (review R-106, R-108, E-39) taking a token away: never (the backs say so), or the BCBA's response-cost rule; the token size -->
+      <div class="class-only"><label>Taking a token away</label><select data-m="rcost" name="m.rcost"><option value="">Never: an earned token stays on the board (the backs say so)</option><option value="on">Response cost: the BCBA&rsquo;s rule prints on the backs instead</option></select></div>
+      <div class="class-only" id="rcRow"><label>The response-cost rule (set by the BCBA)</label><input data-m="rc_rule" name="m.rc_rule" data-nbh-nowording placeholder="what loses a token, and how many"></div>
+      <div><label>Token size <span class="hint" id="tokSizeHint"></span></label><select data-m="tok_size" name="m.tok_size"><option value="">Fits between a slot&rsquo;s captions</option><option value="full">Fills the slot (covers the captions)</option></select></div>
       <div><label>The last token (it fills the board; the item comes next)</label><select data-m="term" name="m.term"><option value="none">The same as the others</option><option value="ring">The same picture, with an orange double border</option><option value="pic">Its own picture, with an orange double border</option></select></div>
       <div id="termPicRow"><label>The last token&rsquo;s picture</label><div class="pick" data-r="tokL" data-i="0" id="tokLPick"></div></div>
     </div>
@@ -1528,7 +1541,7 @@ td input,td select{max-width:100%}
   <!-- ===================== BACKS ===================== -->
   <section class="only-backs">
     <h2 class="nbh-band">The Instruction Backs</h2>
-    <p class="hint">The text on the back of each page, in the assessor&rsquo;s words. Markup: <code>**bold**</code>, <code>*italic*</code>, <code>__underlined__</code>, <code>## a centred heading</code>; a blank line starts a paragraph; <code>{n}</code> prints the token count in words (and <code>{n}th</code> its ordinal: the fifth) and <code>{token}</code>, <code>{tokens}</code> and <code>{TOKENS}</code> the token&rsquo;s name; <code>{last}</code> (on the Token Board back and in Step 3) prints one sentence about the last token when Setup makes it look different, and nothing when it does not. Long text is set smaller to fit the page.</p>
+    <p class="hint">The text on the back of each page, in the assessor&rsquo;s words. Markup: <code>**bold**</code>, <code>*italic*</code>, <code>__underlined__</code>, <code>## a centred heading</code>; a blank line starts a paragraph; <code>{n}</code> prints the token count in words (and <code>{n}th</code> its ordinal: the fifth) and <code>{token}</code>, <code>{tokens}</code> and <code>{TOKENS}</code> the token&rsquo;s name; <code>{last}</code> (on the Token Board back and in Step 3) prints one sentence about the last token when Setup makes it look different, and nothing when it does not; <code>{rule}</code> prints what earns a token (Setup, Tokens) and <code>{keep}</code> that a token already on the board is never taken away, or the response-cost rule when Setup sets one. Long text is set smaller to fit the page.</p>
     <div class="fieldgrid" style="grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr))">
       <div><label>Back of the Choices page: Choice Board</label><textarea class="bk" data-nbh-nowording data-b="cb" name="b.cb" spellcheck="true"></textarea></div>
       <div><label>Back of the Targets page: Teaching Targets</label><textarea class="bk" data-nbh-nowording data-b="tt" name="b.tt" spellcheck="true"></textarea></div>
@@ -1551,6 +1564,7 @@ td input,td select{max-width:100%}
   <section class="only-preview">
     <h2 class="nbh-band tkPrev">Preview: the Book as It Prints</h2>
     <p class="hint tkPrev" id="prevLine"></p>
+    <nav class="tkPrev tk-index" id="tkIndex" aria-label="The sheets in this print"></nav>
     <p class="tkPrev" id="wholeRow" style="display:none"><button class="tool" id="wholeBtn" type="button">Show the whole book</button> <span class="hint">The Preview shows only part of the book (the print order on Setup).</span></p>
     <div class="out" id="bookOut"><div class="book" id="book"></div></div>
   </section>
@@ -1589,7 +1603,7 @@ td input,td select{max-width:100%}
     <table class="rt">
       <tr><th style="width:24%">1. Fill the pages</th><td>Setup: the student, the first name as it prints, the photo, the token count and picture (and, if you want one, a last token that looks different: the terminal token), the colours and the QR link. Choices and Targets: six pictures each, from the library or the student&rsquo;s own photos (upload them through the picker). <b>Choose all six pictures at once</b> opens the picker on <b>Several at once</b>: tap the pictures in order (each shows its number), then <b>Put them on the cards</b>; Choose on one row changes that card, and the arrows move a card up or down. The two photos on the Board face each other: the right one is mirrored, as in the samples, or the left one, or neither (Setup). Board: leave First and Then empty for the cards, or set a fixed picture. Backs: the text is the assessor&rsquo;s and can be edited. The simulator on the toolbar fills a sample student so the book can be seen at once.</td></tr>
       <tr><th>2. Print</th><td>Choose the order on Setup. <b>Fronts only</b> gives the four pages; <b>fronts and backs</b> interleaves them for a duplex printer (two-sided, flip on the long edge; test one sheet); <b>card sheets</b> prints the choices, the targets and the tokens with cut lines; <b>all</b> prints everything; <b>a sheet of one card</b> prints spares. Print at 100%. From a computer every page is landscape Letter except the spare sheet, which is portrait. From an iPad or iPhone, Safari prints only portrait, so each book page is printed turned on its side on a portrait sheet at full size, and the card sheets are laid out portrait (cards at the 11 in size can take a second sheet); Setup&rsquo;s <b>Sheets</b> can force either way. In each case the book page (8.82 by 5.82 in, or 11 in wide) is centred with trim marks, and Setup says how much to cut off.</td></tr>
-      <tr><th>3. Laminate and cut</th><td>Laminate the four pages and the card sheets (5 mil or thicker pouches hold up). Cut the cards on the cut lines, rounding the corners a little so they do not catch.</td></tr>
+      <tr><th>3. Laminate and cut</th><td>Laminate the four pages and the card sheets (5 mil or thicker pouches hold up). The sizes, at the 8.82 in page (the larger page sizes scale every card and slot together): a picture card 2.07 in square, for the Choices and Targets boxes; a token 1 in square, so a laminated token sits between a slot&rsquo;s two captions without covering them (0.8 in on a two-row board on a Letter-high page, and 1.5 in when Setup&rsquo;s Token size is set to fill the slot); a token slot 1.56 in, and a box on the Tokens page 1.56 in. Cut the cards on the cut lines, rounding the corners a little so they do not catch.</td></tr>
       <tr><th>4. Hook-and-loop dots</th><td>Put the hook side on every circle guide (the six boxes on Choices and on Targets, the First and Then boxes, the token slots, the token park boxes) and the loop side on the back of every card and token, so the cards do not catch on clothing.</td></tr>
       <tr><th>5. Bind</th><td>Punch and bind along the left edge (spiral or comb) in the order Choices, Targets, Board, Tokens; the backs fall in place. The binding margin is already on the pages.</td></tr>
       <tr><th>6. Teach it</th><td>Make the tokens worth something first, as the Token Economy back says, and keep at it until the student reaches for the token: give a token and exchange it at once for the backup reinforcer (sampling); prompt the target response, give the token and exchange it at once (coaching); give the token right after the target response, exchange it at once, then begin to ask for more tokens before each exchange (conditioning). The check that it worked is that the behavior earning tokens goes up. Decide the schedule before starting (the &ldquo;Not So FAST&rdquo; paragraph on the Token Board back): a token after each response for a new skill, raised a little at a time as the skill holds, and back one step if the behavior falls apart (ratio strain). Keep the item under Then out of reach at other times, or the board loses its pull. The schedules are written on Form TE-1.</td></tr>
@@ -4716,9 +4730,14 @@ const TXT_BUS=(function(){const B={},bus=[['Give the {token} right after the beh
       '__**Not So FAST**__: The checkpoints are the schedule: a {token} at each one when the rules were followed since the last. The first checkpoints should come a little sooner than the student usually rides without breaking a rule, so the first rides earn; space them out, and move to landmarks, only as the rides go well (the fading steps on the ride plan).'],
     ['This page is for selecting which behaviors you target: a replacement behavior from the behavior plan, or a new skill. **This page is where you choose what to teach your learner!**','This page holds the bus rules: two to five, such as seatbelt on, stay in your seat, quiet voice, hands to self. **Choose the rules your learner works on during the ride.**']];
   Object.keys(TXT_RULES).forEach(k=>{B[k]=txtEd(TXT_RULES[k],bus);});return B;})();
+/* v24.45 (review R-106, E-39) {keep}: a token on the board is never taken away (or the BCBA's response-cost rule), on the Token
+   Board back and in Step 3. A back still holding the default text of before takes the new one. */
+const TXT_PREV={ft:Object.assign({},TXT0),rules:Object.assign({},TXT_RULES),bus:Object.assign({},TXT_BUS)};
+(function(){const K=[['a longer wait can be built in later.','a longer wait can be built in later.{keep}'],['your learner gets the item {where}.{last}','your learner gets the item {where}.{last}{keep}']];
+  [TXT0,TXT_RULES,TXT_BUS].forEach(T=>{['tb','h3'].forEach(k=>{T[k]=txtEd(T[k],K);});});})();   /* not the Token Economy back: it is full at the smallest print size */
 const txtKind=()=>S.meta.kind==='bus'?'bus':S.meta.layout==='rules'?'rules':'ft';
 const txtDef=k=>({ft:TXT0,rules:TXT_RULES,bus:TXT_BUS})[txtKind()][k];
-const txtIsDef=(k,v)=>v===TXT_OLD[k]||v===TXT0[k]||v===TXT_RULES[k]||v===TXT_BUS[k];
+const txtIsDef=(k,v)=>v===TXT_OLD[k]||v===TXT0[k]||v===TXT_RULES[k]||v===TXT_BUS[k]||v===TXT_PREV.ft[k]||v===TXT_PREV.rules[k]||v===TXT_PREV.bus[k];   /* v24.45 (review R-106) */
 const CREDIT0='To find more resources and information visit\nwww.Behavior-Charts.com';
 /* v21.44 the avatar a book starts with: the practice's own Boy picture from the library (the drawn boy where the library is
    not beside the form) */
@@ -4824,7 +4843,7 @@ function setView(v){document.body.className=document.body.className.replace(/\bv
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
 /* ---------------- the editing tables ---------------- */
-function rowsTbl(k){const id=k==='ch'?'#chTbl':'#tgTbl';$(id+' tbody').innerHTML=S[k].map((o,i)=>'<tr><td class="num">'+(i+1)+'<span class="mv"><button type="button" data-mv="'+k+':'+i+':-1" aria-label="Move card '+(i+1)+' up"'+(i?'':' disabled')+'>&#9650;</button><button type="button" data-mv="'+k+':'+i+':1" aria-label="Move card '+(i+1)+' down"'+(i<S[k].length-1?'':' disabled')+'>&#9660;</button></span></td><td>'+pickCell(k,i,o)+'</td><td><input data-r="'+k+'" data-i="'+i+'" data-f="l" name="'+k+'.'+i+'.l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph})||'(empty box)')+'" aria-label="Label '+(i+1)+'"></td></tr>').join('');
+function rowsTbl(k){const id=k==='ch'?'#chTbl':'#tgTbl';$(id+' tbody').innerHTML=S[k].map((o,i)=>'<tr><td class="num">'+(i+1)+'<span class="mv"><button type="button" data-mv="'+k+':'+i+':-1" aria-label="Move card '+(i+1)+' up"'+(i?'':' disabled')+'>&#9650;</button><button type="button" data-mv="'+k+':'+i+':1" aria-label="Move card '+(i+1)+' down"'+(i<S[k].length-1?'':' disabled')+'>&#9660;</button></span></td><td>'+pickCell(k,i,o)+'</td><td><input data-r="'+k+'" data-i="'+i+'" data-f="l" name="'+k+'.'+i+'.l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph})||'(empty box)')+'" aria-label="Label '+(i+1)+'"'+(has(o)&&lbl({k:o.k,ph:o.ph})?' class="tk-inh"':'')+'>'+(has(o)&&lbl({k:o.k,ph:o.ph})?'<span class="tk-inh-tag">from the picture</span>':'')+'</td></tr>').join('');
   const sel=$(k==='ch'?'#chSpareSel':'#tgSpareSel'),v=sel.value;sel.innerHTML=S[k].map((o,i)=>'<option value="'+i+'">'+(i+1)+'. '+esc(lbl(o)||'(empty)')+'</option>').join('');if(v)sel.value=v;}
 function renderTbls(){
   rowsTbl('ch');rowsTbl('tg');
@@ -4855,9 +4874,16 @@ document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&
 /* Save as video asks first while the book holds a photo the permission does not cover */
 document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('#wkVideo');const w=tkPerm();if(!b||!tkHasPhoto()||(w!=='No'&&w!=='Unknown')||b.dataset.tkok)return;
   e.preventDefault();e.stopPropagation();if(await nbhUI.confirm('The book holds a photo, and Form DM-1 '+(w==='No'?'records no photo or media permission':'does not know whether there is photo or media permission')+' for this student: the video would show it.\nTake the photo out first (Student photo, No picture), or make the video anyway.',{ok:'Make the video anyway',cancel:'Not now'})){b.dataset.tkok='1';b.click();delete b.dataset.tkok;}},true);
+/* v24.45 (review R-107) Print asks first while nothing says what earns a token: the Board back and Step 3 print it */
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('#printBtn');if(!b||b.dataset.tkok||isBus()||String(S.meta.tok_rule||'').trim())return;
+  const order=S.meta.order||'all';if(order==='cards'||order==='spare')return;
+  e.preventDefault();e.stopImmediatePropagation();const t=tokName().toLowerCase();
+  if(await nbhUI.confirm('Nothing says what earns a '+t+' yet (Setup, Tokens: Earns a token).\nThe Board back and Step 3 print that rule, so every adult gives the '+t+' for the same thing. Without it they print without the rule.',{ok:'Print anyway',cancel:'Fill it in first'})){b.dataset.tkok='1';b.click();delete b.dataset.tkok;}
+  else{try{setView('setup');}catch(x){}setTimeout(()=>{const f=document.querySelector('[data-m="tok_rule"]');if(f){f.scrollIntoView({block:'center'});f.focus();}},120);}},true);
 function renderSetup(){const m=S.meta,v=$('#setupVerdict');tkSetupNotes();const bl=$('#buildLine');if(bl)bl.textContent='This copy of the form: build '+BUILD+'.';const nch=S.ch.filter(has).length,ntg=S.tg.filter(has).length;
   if(!m.client&&!m.first&&!nch&&!ntg){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The student and the first name as it prints, the photo, the tokens; then the Choices and Targets pages.'+lkPhrase()+'</div>';return;}
   const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0])&&tkPerm()!=='No')miss.push('a photo (the '+esc(lbl({k:avKey()})||'avatar').toLowerCase()+' avatar prints instead)');if(tkHasPhoto()&&tkPerm()==='No')miss.push('the book holds a photo, but Form DM-1 records no photo or media permission: take it out (Student photo, No picture)');if(nch<6)miss.push((6-nch)+' of the six choices');if(isBus()){if(ntg<2)miss.push('at least two bus rules on the Targets page');}else if(ntg<1)miss.push('a target on the Targets page');   /* v23.25 (review F298) one target is a finished Targets page */
+  if(rcOn()&&!String(m.rc_rule||'').trim())miss.push('the response-cost rule (Tokens: Taking a token away; or set it back to Never)');   /* v24.45 (review R-106) */
   if(!isBus()&&!String(m.tok_rule||'').trim())miss.push('what earns a '+esc(tokName().toLowerCase())+' (Tokens: Earns a token)');   /* v23.25 (review F302) */
   /* (v21.42i) the same picture twice among the six is usually a slip of the finger in the picker */
   const twice=(k,name)=>{const seen={},d=[];S[k].forEach((o,i)=>{const id=o.ph?'ph:'+o.ph:o.k;if(!id)return;if(seen[id]!==undefined)d.push(name+' '+(seen[id]+1)+' and '+(i+1));else seen[id]=i;});return d;};
@@ -4959,8 +4985,14 @@ function inline(s){s=esc(s);return s.replace(/\*\*\*(.+?)\*\*\*/g,'<b><i>$1</i><
 /* v23.25 (review F301, F302) {n} counts every box of a board with a row for each rule; {goal}, {where} and {rule} as above */
 function tkGoalW(){if(!isBus())return 'when the board is full';const p=busPlan();return p.goal<p.total?'when '+p.goal+' of the '+p.total+' {tokens} are on the board':'when the board is full';}
 function tkWhereW(){return !isBus()?'at once':busReward()==='arrive'?'at the stop, from the adult who meets the bus':'on the bus';}
+/* v24.45 (review R-106, E-39) the sentence {keep} prints: the bus-ride guide's rule (no token that time, the earned ones stay, the next
+   chance is a fresh one), or, when Setup says so, the response-cost rule the BCBA set */
+function rcOn(){return !isBus()&&S.meta.rcost==='on';}
+function tkKeepW(){const t=tokName().toLowerCase(),ts=plural(tokName()).toLowerCase();
+  if(rcOn()){const r=String(S.meta.rc_rule||'').trim().replace(/[\s.;]+$/,'');return r?' Response cost, as the BCBA set it: '+r+'.':' Response cost: the BCBA writes the rule here before a '+t+' is ever taken away: ____________________.';}
+  return ' A '+t+' already on the board is never taken away: when the behavior does not happen, there is no '+t+' that time, the earned '+ts+' stay, and the next chance is a fresh one.';}
 function tkRuleW(){const r=String(S.meta.tok_rule||'').trim().replace(/[\s.;]+$/,'');return r&&!isBus()?' This book\u2019s rule: '+r+' earns one {token}.':'';}
-function fill(t){const n=busEach()?tokTotal():nTok(),tn=tokName();return String(t||'').replace(/\{goal\}/g,tkGoalW()).replace(/\{where\}/g,tkWhereW()).replace(/\{rule\}/g,tkRuleW()).replace(/\{last\}/g,termOn()?' The last {token} looks different from the others, so your learner can see that it finishes the board and '+(txtKind()==='ft'?'the THEN item':'the item')+' comes next.':'').replace(/\{n\}th/g,WORDS[n]==='one'?'first':WORDS[n]==='two'?'second':WORDS[n]==='three'?'third':WORDS[n]==='five'?'fifth':WORDS[n]==='eight'?'eighth':WORDS[n]==='nine'?'ninth':(WORDS[n]||n)+'th').replace(/\{n\}/g,WORDS[n]||String(n)).replace(/\{TOKENS\}/g,plural(tn).toUpperCase()).replace(/\{tokens\}/g,plural(tn)).replace(/\{token\}/g,tn.toLowerCase());}
+function fill(t){const n=busEach()?tokTotal():nTok(),tn=tokName();return String(t||'').replace(/\{goal\}/g,tkGoalW()).replace(/\{where\}/g,tkWhereW()).replace(/\{rule\}/g,tkRuleW()).replace(/\{keep\}/g,tkKeepW()).replace(/\{last\}/g,termOn()?' The last {token} looks different from the others, so your learner can see that it finishes the board and '+(txtKind()==='ft'?'the THEN item':'the item')+' comes next.':'').replace(/\{n\}th/g,WORDS[n]==='one'?'first':WORDS[n]==='two'?'second':WORDS[n]==='three'?'third':WORDS[n]==='five'?'fifth':WORDS[n]==='eight'?'eighth':WORDS[n]==='nine'?'ninth':(WORDS[n]||n)+'th').replace(/\{n\}/g,WORDS[n]||String(n)).replace(/\{TOKENS\}/g,plural(tn).toUpperCase()).replace(/\{tokens\}/g,plural(tn)).replace(/\{token\}/g,tn.toLowerCase());}
 function md(t){return fill(t).replace(/\r/g,'').split(/\n\s*\n/).map(p=>{p=p.trim();if(!p)return '';let h='';if(/^##\s*/.test(p)){const i=p.indexOf('\n');h='<h4>'+inline((i<0?p:p.slice(0,i)).replace(/^##\s*/,''))+'</h4>';p=i<0?'':p.slice(i+1).trim();}return h+(p?'<p>'+inline(p).replace(/\n/g,'<br>')+'</p>':'');}).join('');}
 /* v23.25 (review F302) Form TB-1's definitions of the targets on the page, with examples and non-examples, on the Teaching Targets back */
 function tkDefsHtml(){const D=S.tgdef&&typeof S.tgdef==='object'?S.tgdef:null;if(!D)return '';const on=S.tg.map(o=>String(lbl(o)||'').trim());const k=Object.keys(D).filter(x=>on.includes(x)).slice(0,3);if(!k.length)return '';
@@ -4973,7 +5005,9 @@ function pagesHowto(){return '<div class="pg front" data-kind="how1"><div class=
 /* card sheets: a grid of cards with light grey cut lines in the gaps (the lines sit at the gap centres) */
 function sheetGrid(cols,rows,w,h,gap,pageW,pageH,inner,cls){const W=cols*w+(cols-1)*gap,H=rows*h+(rows-1)*gap;
   return '<div class="cardsheet'+(cls?' '+cls:'')+'" style="left:'+IN((pageW-W)/2)+';top:'+IN(Math.max(.3,(pageH-H)/2))+';width:'+IN(W)+';height:'+IN(H)+';grid-template-columns:repeat('+cols+','+IN(w)+');grid-auto-rows:'+IN(h)+';gap:'+IN(gap)+';background-image:linear-gradient(to right,#c4c4c4 1px,transparent 1px),linear-gradient(to bottom,#c4c4c4 1px,transparent 1px);background-size:'+IN(w+gap)+' '+IN(h+gap)+';background-position:'+IN(w+gap/2)+' '+IN(h+gap/2)+'">'+inner+'</div>';}
-const cardIn=()=>148.88*scl()/72, tokIn=()=>108.01*scl()/72;
+/* v24.45 (review R-108, E-39) a token card fits between a slot's two captions (72 pt, 1 in., on a 110.5 pt slot; 57.6 pt, 0.8 in., on the
+   87 pt slots of a two-row Letter-high board), or fills the slot (108 pt, the size before) when Setup's Token size says so */
+const cardIn=()=>148.88*scl()/72, tokIn=()=>(S.meta.tok_size==='full'?108.01:strip().sz<100?57.6:72)*scl()/72;
 function sheetOpen(kind){return turned()?'<div class="pg port front tsheet'+(scl()!==1?' big':'')+'" data-kind="'+kind+'" style="--s:'+scl().toFixed(4)+'">':'<div class="pg front'+(scl()!==1?' big':'')+'" data-kind="'+kind+'" style="--s:'+scl().toFixed(4)+'">';}
 function sheetDims(){return turned()?[TW,TH,TW-.2,TH-.2]:[11,8.5,10.4,7.9];}
 function sheetCards(kind){const list=S[kind].filter(o=>has(o)||o.l);const ul=kind==='ch';const sz=cardIn();const cards=list.map(o=>cardHtml(o,sz,{ul})).concat([cardHtml(null,sz,{ul,other:true})]);const [pw,ph,aw]=sheetDims();const cols=Math.max(1,Math.floor((aw+.12)/(sz+.12)));
@@ -5032,19 +5066,24 @@ function turnPages(){pageRule();const b=$('#book');if(!b)return;b.classList.togg
       if(cv){cv.style.left=m+'in';cv.style.top=m+'in';}pg.querySelectorAll('.trim').forEach(t=>{t.style.left=(parseFloat(t.style.left)-cx+m)+'in';t.style.top=(parseFloat(t.style.top)-cy+m)+'in';});}
     const W=h+2*m,H=w+2*m,k=Math.min(1,TW/W,TH/H);const wr=document.createElement('div');wr.className='pgw';wr.style.width=(W*k).toFixed(3)+'in';wr.style.height=(H*k).toFixed(3)+'in';
     pg.style.transform='translate(-50%,-50%) rotate('+(pg.classList.contains('back')?-90:90)+'deg)'+(k<1?' scale('+k.toFixed(4)+')':'');pg.parentNode.insertBefore(wr,pg);wr.appendChild(pg);});}
+/* v24.45 (E-39) the Preview's sheet index: one button a sheet, each brings its sheet into view */
+function tkIndex(root){const ix=$('#tkIndex');if(!ix||!root||root.id!=='book')return;const ls=[...root.querySelectorAll('.pglabel')];
+  ix.innerHTML=ls.length?'<b>Sheets:</b> '+ls.map((l,i)=>'<button type="button" class="tool" data-tkix="'+i+'">'+esc(l.textContent.replace(/^Sheet (\d+) of \d+: /,'$1. '))+'</button>').join(''):'';}
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#tkIndex button[data-tkix]');if(!b)return;const l=$('#book').querySelectorAll('.pglabel')[+b.dataset.tkix];if(l)l.scrollIntoView({block:'start',behavior:'smooth'});});
 function relabel(root){root.querySelectorAll('.pglabel').forEach(e=>e.remove());const pgs=[...root.querySelectorAll('.pg')];
-  pgs.forEach((p,i)=>{const l=document.createElement('p');l.className='pglabel';l.textContent='Sheet '+(i+1)+' of '+pgs.length+': '+(p.dataset.label||'');p.insertAdjacentElement('beforebegin',l);});return pgs.length;}
+  pgs.forEach((p,i)=>{const l=document.createElement('p');l.className='pglabel';l.textContent='Sheet '+(i+1)+' of '+pgs.length+': '+(p.dataset.label||(p.dataset.kind==='how2'?'How to use, Step 3':''));   /* v24.45 (E-39) the insert's second page lost its label in the split */p.insertAdjacentElement('beforebegin',l);});return pgs.length;}
 function renderOut(){
   busCalc();
   const pages=bookPages(),order=S.meta.order||'all',mode=pageMode();
   $('#book').innerHTML=pages.map(p=>p.html.replace(/^<div class="pg /,'<div data-label="'+esc(p.label)+'" class="pg ')).join('');
   $('#chOut').innerHTML='<div class="book">'+pageGrid('ch')+'</div>';$('#tgOut').innerHTML='<div class="book">'+pageGrid('tg')+'</div>';$('#bdOut').innerHTML='<div class="book">'+pageBoard()+'</div>';
   $('#bkOut').innerHTML='<div class="book">'+TABS.map(t=>pageBack(t[0])).join('')+pagesHowto()+'</div>';
-  const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);const r=relabel($('#book'));turnPages();return r;});
+  const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);const r=relabel($('#book'));tkIndex($('#book'));turnPages();return r;});   /* v24.45 (E-39) the sheet index */
   const size=mode==='fill'?'the full 8.5 in height':mode==='11'?'the 11 x 7.26 in page centred with trim marks':'the 8.82 x 5.82 in page centred with trim marks';
   $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':turned()?' portrait, each book page turned on its side at full size ('+size.replace(/ centred with trim marks$/,'')+', with trim marks), for Safari on the iPad and iPhone, which prints portrait only':' landscape, '+size)+'; print at 100%. (Form build '+BUILD+'.)'+(tkHasPhoto()&&(tkPerm()==='No'||tkPerm()==='Unknown')?' The book holds a photo, and Form DM-1 '+(tkPerm()==='No'?'records no photo or media permission':'does not know the photo permission')+'.':'');
   const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
   const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
+  {const rr=$('#rcRow');if(rr)rr.style.display=rcOn()?'':'none';const th=$('#tokSizeHint');if(th)th.textContent='(the tokens print '+tokIn().toFixed(2).replace(/0$/,'')+' in. square; a slot is '+((strip().sz+2)*scl()/72).toFixed(2)+' in.)';}   /* v24.45 (review R-106, R-108) */
   const tr=$('#termPicRow');if(tr)tr.style.display=termMode()==='pic'?'':'none';const lk=$('#phLook');if(lk){const one=S.meta.layout==='rules'||isBus();lk.innerHTML=one?photoHtml('r'):photoHtml('l')+photoHtml('r');}
   setTimeout(()=>{scaleBooks();const pl=$('#prevLine'),tc=textCheck();if(pl&&tc&&!/Text check/.test(pl.textContent))pl.textContent+=' Text check '+tc.toFixed(2)+'.';},0);
   syncState();
