@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.51: Form RS-1's Month page easier to read and check: one-line days, the days that are not the usual hours marked (the BCBA, 10/26)
+- **Each service day on one line.** On an iPad the weekday stood above the date, so each day took two lines and a month
+  ran about three screens. The weekday and the date now share a line, and the start, end, minutes and hours columns are a
+  little narrower, so the primary intervention has more room.
+- **The days that are not the usual hours stand out.** A start, an end, minutes not in services or an intervention that
+  differs from the RBT's usual hours is marked in amber (its title gives the usual value), and the row has an amber edge.
+  A line above the table lists them ("2 days not the usual hours: Tue 9/8 start 9:45 am; Wed 9/30 end 3:00 pm"); a tap on
+  a day goes to its row and puts the cursor in the changed value. With every day the usual hours, the line says so. The
+  marks follow a change at once. These are the days to check before signing.
+- **Weeks set apart.** A stronger line marks the first day of each week, so the month reads week by week.
+- The minutes not in services read 0 when empty, and each supervision contact's card shows its time of day beside its
+  minutes ("120 min (10:30 am–12:30 pm)").
+- Tests: qa/rsd151-test.js (simulated September: the weekday and the date on one line; the two unusual days marked, value
+  and row, and listed; a tap goes to the row and the changed value; week lines; 0 for empty minutes; "Every day is the
+  usual hours" when so; a change marked and listed at once; the contact's time of day).
+
 ### v24.50: Form RS-1: the Usual Hours laid out, a typed signature that can be adopted, and each contact printed whole (the BCBA, 10/26)
 - **The usual hours read as one tidy box.** On the Month page the box had four fields of uneven labels: the boxes sat at
   different heights, the primary intervention was cut off ("Behavior reduction / BIP…"), and the days wrapped with

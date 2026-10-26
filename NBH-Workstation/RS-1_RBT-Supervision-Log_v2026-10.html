@@ -732,6 +732,18 @@ table.rs-days-t td{vertical-align:middle}
 table.rs-days-t td.dt{white-space:nowrap}
 table.rs-days-t td.dt .wd{display:inline-block;min-width:2.6em;font-weight:600;font-size:12px;color:var(--ink-soft)}
 table.rs-days-t td.dt input{width:auto;max-width:calc(100% - 3em)}
+/* v24.51 the weekday and the date on one line; the values that are not the usual hours marked; each week set apart */
+table.rs-days-t td.dt .dtw{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}
+table.rs-days-t td.dt .dtw .wd{flex:none;min-width:2.3em}
+table.rs-days-t td.dt .dtw input{flex:1 1 auto;min-width:0;width:auto!important;max-width:none!important;display:block}
+table.rs-days-t td.off input,table.rs-days-t td.off select{font-weight:700;color:#7a420f;border-color:#c9822e!important;background:#fff8ee!important}
+table.rs-days-t tr.offrow td.dt{box-shadow:inset 4px 0 0 #c9822e}
+table.rs-days-t tr.wk td{border-top:2px solid var(--nbh-rule2,#93aead)}
+table.rs-days-t tr.flash td{animation:rsflash 1.6s ease}
+@keyframes rsflash{0%,40%{background:#fdf0dc}100%{background:inherit}}
+@media (prefers-reduced-motion:reduce){table.rs-days-t tr.flash td{animation:none;background:#fdf0dc}}
+.rs-daydiff{margin:2px 0 8px;line-height:1.7}.rs-daydiff .rs-dd{display:inline!important;font:inherit;font-weight:600;color:var(--nbh-slate,#254657);background:none!important;border:0!important;text-decoration:underline dotted;text-underline-offset:3px;padding:0 2px!important;margin:0!important;min-height:0!important;height:auto!important;line-height:inherit!important;box-shadow:none!important;cursor:pointer}
+details.rs-contact > summary .tm{color:var(--ink-soft)}
 table.rs-days-t tr.none td{background:#f6f7f7;color:#6b7a80}
 table.rs-days-t tr.none td input,table.rs-days-t tr.none td select{color:#6b7a80;text-decoration:line-through}
 table.rs-days-t tr.none td input[type=checkbox]{text-decoration:none}
@@ -827,6 +839,7 @@ table.rs-year-t td:first-child{text-align:left;font-weight:600}
   table.rs-stack td.ck input{border:0}
   table.rs-stack tr.tot{border-color:var(--nbh-teal,#76a2a3)}
   table.rs-days-t td.dt input{max-width:none;width:calc(100% - 3.2em)}
+  table.rs-days-t td.dt .dtw input{width:auto!important}
   /* a service day as a compact card: date, then start and end, minutes and hours, the intervention, no service */
   table.rs-days-t tr[data-did]{display:grid;grid-template-columns:1fr 1fr;column-gap:2px}
   table.rs-days-t td.dt{grid-column:1/-1;padding-right:52px}
@@ -1191,8 +1204,8 @@ td input,td select{max-width:100%}
           <div class="rs-days rs-week" role="group" aria-label="Usual service days" id="mDayChips"></div>
           <p class="hint" id="usualHint"></p>
         </div>
-        <div class="tools"><button class="tool" type="button" id="addDay">Add a day</button><button class="tool" type="button" id="fillDays">Fill the usual days and times</button><span class="hint" id="dayCount"></span></div>
-        <div class="grid-wrap"><table class="rt rs-days-t rs-stack" id="dayTbl"><thead><tr><th style="width:21%">Date</th><th style="width:13%">Start</th><th style="width:13%">End</th><th style="width:9%">Not in services (min)</th><th style="width:8%">Hours</th><th>Primary intervention</th><th style="width:8%">No service</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+        <div class="tools"><button class="tool" type="button" id="addDay">Add a day</button><button class="tool" type="button" id="fillDays">Fill the usual days and times</button><!-- v24.51 the days that differ from the usual hours, listed below --><span class="hint" id="dayCount"></span></div>
+        <div class="grid-wrap"><table class="rt rs-days-t rs-stack" id="dayTbl"><thead><tr><th style="width:19%">Date</th><th style="width:12%">Start</th><th style="width:12%">End</th><th style="width:8%">Not in services (min)</th><th style="width:7%">Hours</th><th>Primary intervention</th><th style="width:7%">No service</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
         <h2 class="nbh-band" style="margin-top:18px">Supervision Contacts</h2>
         <p class="hint">Each real-time contact with the supervisor: in person or by live two-way video. In person is preferred; a web camera or video conference is allowed. A phone call, an email, a recording, or video monitoring without real-time interaction and feedback can be noted here but does not count. Supervision is client-focused and is not professional development: one event cannot count as both.</p>
@@ -1625,18 +1638,41 @@ function renderMonth(){if(!yearKeys(setupYear()).includes(curKey))curKey=default
   if(filled&&window.nbhUI)nbhUI.toast(keyLabel(curKey)+': '+filled+' usual service day'+(filled===1?'':'s')+' filled in. Mark holidays and absences as No service.');}
 function renderMonthNudge(){const st=S.setup;$('#setupNudge').innerHTML=!st.rbt_name||!S.sups.some(s=>s.name)?'<div class="instr"><b>Start with Setup.</b> Enter the RBT and the supervisors on the Setup page. The RBT&rsquo;s usual hours can be entered there or just below. <button class="tool" type="button" data-go="setup">Go to Setup</button></div>':'';}
 function renderDays(){const m=month(curKey),[y,mo]=curKey.split('-').map(Number),mn=iso(y,mo,1),mx=iso(y,mo,lastDay(y,mo)),today=todayISO();
+  const off=dayOff(m.days);let wk0='';
   $('#dayTbl tbody').innerHTML=m.days.map((d,i)=>{const mi=dayMin(d),pl=!d.none&&d.date>today;const lab=(d.date?wdOf(d.date)+' '+md(d.date):'row '+(i+1));
-    return '<tr data-did="'+esc(d.id)+'" class="'+(d.none?'none':pl?'planned':'')+'"><td class="dt" data-l="Date"><span class="wd">'+(d.date?wdOf(d.date):'')+'</span><input type="date" id="d_'+esc(d.id)+'_date" data-d="'+esc(d.id)+'" data-f="date" min="'+mn+'" max="'+mx+'" value="'+esc(d.date)+'" aria-label="Date, '+esc(lab)+'"></td>'+
-      '<td data-l="Start"><input type="time" id="d_'+esc(d.id)+'_start" data-d="'+esc(d.id)+'" data-f="start" value="'+esc(d.start)+'" aria-label="Start, '+esc(lab)+'"></td>'+
-      '<td data-l="End"><input type="time" id="d_'+esc(d.id)+'_end" data-d="'+esc(d.id)+'" data-f="end" value="'+esc(d.end)+'" aria-label="End, '+esc(lab)+'"></td>'+
-      '<td data-l="Not in services (min)"><input id="d_'+esc(d.id)+'_brk" data-d="'+esc(d.id)+'" data-f="brk" inputmode="numeric"'+(brkWhy(d)?' class="nbh-bad" aria-invalid="true" title="'+esc(brkWhy(d))+'"':'')+' value="'+esc(d.brk)+'" aria-label="Minutes not in RBT services, '+esc(lab)+'"></td>'+
+    const o=off[d.id]||{},wk=d.date?weekOf(d.date):'',nw=i>0&&wk&&wk0&&wk!==wk0;if(wk)wk0=wk;const oc=f=>o[f]?' class="off" title="Not the usual: '+esc(o[f])+'"':'';
+    return '<tr data-did="'+esc(d.id)+'" class="'+(d.none?'none':pl?'planned':'')+(nw?' wk':'')+(Object.keys(o).length?' offrow':'')+'"><td class="dt" data-l="Date"><div class="dtw"><span class="wd">'+(d.date?wdOf(d.date):'')+'</span><input type="date" id="d_'+esc(d.id)+'_date" data-d="'+esc(d.id)+'" data-f="date" min="'+mn+'" max="'+mx+'" value="'+esc(d.date)+'" aria-label="Date, '+esc(lab)+'"></div></td>'+
+      '<td data-l="Start"'+oc('start')+'><input type="time" id="d_'+esc(d.id)+'_start" data-d="'+esc(d.id)+'" data-f="start" value="'+esc(d.start)+'" aria-label="Start, '+esc(lab)+(o.start?' (not the usual)':'')+'"></td>'+
+      '<td data-l="End"'+oc('end')+'><input type="time" id="d_'+esc(d.id)+'_end" data-d="'+esc(d.id)+'" data-f="end" value="'+esc(d.end)+'" aria-label="End, '+esc(lab)+(o.end?' (not the usual)':'')+'"></td>'+
+      '<td data-l="Not in services (min)"'+oc('brk')+'><input id="d_'+esc(d.id)+'_brk" data-d="'+esc(d.id)+'" data-f="brk" inputmode="numeric" placeholder="0"'+(brkWhy(d)?' class="nbh-bad" aria-invalid="true" title="'+esc(brkWhy(d))+'"':'')+' value="'+esc(d.brk)+'" aria-label="Minutes not in RBT services, '+esc(lab)+'"></td>'+
       '<td class="num hrs" data-l="Hours" id="h_'+esc(d.id)+'">'+(d.none?'0':hrs(mi))+'</td>'+
-      '<td class="act" data-l="Primary intervention"><select id="d_'+esc(d.id)+'_act" data-d="'+esc(d.id)+'" data-f="act" aria-label="Primary intervention, '+esc(lab)+'">'+opts(ACTS,d.act,true)+'</select></td>'+
+      '<td class="act'+(o.act?' off':'')+'" data-l="Primary intervention"'+(o.act?' title="Not the usual: '+esc(o.act)+'"':'')+'><select id="d_'+esc(d.id)+'_act" data-d="'+esc(d.id)+'" data-f="act" aria-label="Primary intervention, '+esc(lab)+'">'+opts(ACTS,d.act,true)+'</select></td>'+
       '<td class="ck" data-l="No service"><input type="checkbox" id="d_'+esc(d.id)+'_none" data-d="'+esc(d.id)+'" data-f="none"'+(d.none?' checked':'')+' aria-label="No service, '+esc(lab)+'"></td>'+delCell('day',d.id,'day')+'</tr>';}).join('')||'<tr><td colspan="8" class="hint">No service days yet. '+(S.setup.day_start&&S.setup.day_end?'Press Fill the usual days, or Add a day.':'Set the usual days and hours on the Setup page, or Add a day.')+'</td></tr>';
   dayTotals();}
-function dayTotals(){const s=stats(curKey);$('#dayCount').textContent=s.daysServed+' day'+(s.daysServed===1?'':'s')+' served, '+hrs(s.rbtMin)+' RBT hours'+(s.plannedMin>s.rbtMin?' so far ('+hrs(s.plannedMin)+' with the planned days)':'');}
+/* v24.51 the days that differ from the RBT's usual hours: for each, which values and the usual ones (for the mark's title) */
+function dayOff(days){const st=S.setup,u={start:st.day_start||'',end:st.day_end||'',brk:String(num(st.day_break)||0),act:st.day_act||''},out={};
+  if(!u.start&&!u.end)return out;
+  (days||[]).forEach(d=>{if(d.none||!d.date)return;const o={};
+    if(u.start&&d.start&&d.start!==u.start)o.start='usually '+fmtHM(u.start);
+    if(u.end&&d.end&&d.end!==u.end)o.end='usually '+fmtHM(u.end);
+    if(String(num(d.brk)||0)!==u.brk)o.brk='usually '+u.brk+' min';
+    if(u.act&&d.act&&d.act!==u.act)o.act='usually '+u.act;
+    if(Object.keys(o).length)out[d.id]=o;});return out;}
+function weekOf(dt){const x=fromIso(dt);if(!x)return '';const m=new Date(x);m.setDate(x.getDate()-((x.getDay()+6)%7));return iso(m.getFullYear(),m.getMonth()+1,m.getDate());}
+function dayDiffPaint(){let el=$('#dayDiff');if(!el){const t=$('#dayCount');if(!t)return;t.closest('.tools').insertAdjacentHTML('afterend','<p class="hint rs-daydiff" id="dayDiff" aria-live="polite"></p>');el=$('#dayDiff');}
+  const m=month(curKey),off=dayOff(m.days),L=m.days.filter(d=>off[d.id]);const W={start:'start',end:'end',brk:'time not in services',act:'intervention'};
+  /* the marks in the rows follow a change at once, without drawing the table again (the cursor stays where it is) */
+  const CELL={start:'td[data-l="Start"]',end:'td[data-l="End"]',brk:'td[data-l="Not in services (min)"]',act:'td.act'};
+  document.querySelectorAll('#dayTbl tr[data-did]').forEach(r=>{const o=off[r.dataset.did]||{};r.classList.toggle('offrow',Object.keys(o).length>0);
+    Object.keys(CELL).forEach(f=>{const td=r.querySelector(CELL[f]);if(!td)return;td.classList.toggle('off',!!o[f]);if(o[f])td.title='Not the usual: '+o[f];else td.removeAttribute('title');});});
+  el.innerHTML=L.length?'<b>'+L.length+' day'+(L.length===1?'':'s')+' not the usual hours</b> (marked below): '+L.map(d=>{const o=off[d.id];
+    return '<button type="button" class="rs-dd" data-ddgo="'+esc(d.id)+'">'+esc(wdOf(d.date)+' '+md(d.date))+'</button> '+Object.keys(o).map(f=>W[f]+' '+esc(f==='brk'?(num(d.brk)||0)+' min':f==='act'?d.act:fmtHM(d[f]))).join(', ');}).join('; ')+'.':
+    (m.days.some(d=>!d.none&&d.date)&&(S.setup.day_start||S.setup.day_end)?'Every day is the usual hours.':'');}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-ddgo]');if(!b)return;const r=document.querySelector('#dayTbl tr[data-did="'+b.dataset.ddgo+'"]');if(!r)return;
+  r.scrollIntoView({block:'center',behavior:'smooth'});r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash');const f=r.querySelector('td.off input,td.off select');if(f)setTimeout(()=>{try{f.focus({preventScroll:true});}catch(x){}},350);});
+function dayTotals(){dayDiffPaint();const s=stats(curKey);$('#dayCount').textContent=s.daysServed+' day'+(s.daysServed===1?'':'s')+' served, '+hrs(s.rbtMin)+' RBT hours'+(s.plannedMin>s.rbtMin?' so far ('+hrs(s.plannedMin)+' with the planned days)':'');}
 function cSummary(c,k){const sp=supById(c.sup),mi=cMin(c),is=cIssues(c,k),sc=c.obs==='yes'?ckScore(c):null,mo=modeOf(c.mode);
-  return '<b>'+(c.date?wdOf(c.date)+' '+md(c.date):'No date')+'</b><span>'+(mi!=null?mi+' min':'— min')+'</span><span>'+esc(sp?sp.name||'(no name)':'no supervisor')+'</span>'+
+  return '<b>'+(c.date?wdOf(c.date)+' '+md(c.date):'No date')+'</b><span>'+(mi!=null?mi+' min':'— min')+(c.start&&c.end?' <span class="tm">('+esc(fmtHM(c.start))+'–'+esc(fmtHM(c.end))+')</span>':'')+'</span><span>'+esc(sp?sp.name||'(no name)':'no supervisor')+'</span>'+
     '<span class="rs-pill">'+(c.format==='group'?'Small group'+(num(c.group)?' of '+num(c.group):''):'Individual')+'</span>'+(mo?'<span class="rs-pill'+(mo[2]?'':' note')+'">'+esc(mo[1].replace(/ \(does not count\)/,''))+'</span>':'')+
     (c.obs==='yes'?'<span class="rs-pill obs">Observed with client'+(sc?' · '+Math.round(sc.pct)+'%':'')+'</span>':'')+(cPlanned(c)?'<span class="rs-pill">planned</span>':'')+
     (is.some(i=>i.lvl==='fail')?'<span class="rs-pill warn">does not count</span>':is.some(i=>i.lvl==='note')?'<span class="rs-pill note">noted, not counted</span>':'')+
