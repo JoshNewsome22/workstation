@@ -234,7 +234,10 @@ const STUB=()=>{window.confirm=()=>true;window.alert=()=>{};};
  let pt=blank.text?flat(blank.text[pageWith(blank.text,/Alone or no-interaction/)]||''):flat(await printDom(p,'#setup'));
  ok('print, supervised: the safety plan names the arrangement, what it means, the walk-out and stepping in, without the true alone steps',/Supervised \(the default\)\. The door stays open/.test(pt)&&/No social consequences: no adult reacts/.test(pt)&&/If the student walks out: no one keeps the student in/.test(pt)&&/Stepping in: blocking/.test(pt)&&!/Check policy first/.test(pt)&&!/Plan a true alone condition/.test(pt)&&!/True alone stays locked/.test(pt),pt.slice(pt.indexOf('Alone or no-interaction'),pt.indexOf('Alone or no-interaction')+900));
  if(blank.text){const mi=pageWith(blank.text,/Measurement and Agreement/);ok('print: the Measurement section is whole on one page',mi>=0&&/Procedural fidelity checks/.test(flat(blank.text[mi]))&&/Wallace and Iwata/.test(flat(blank.text[mi])),mi);}
- const gp=blank.text?flat(blank.text.join(' ')):flat(await printDom(p,'#guide'));ok('print: the Guide carries section 1b',/1b\. The Alone Condition in Schools and Homes/.test(gp)&&/Never kept in/.test(gp)&&/Stepping in/.test(gp),gp.slice(0,80));
+ /* v24.31 the Guide prints only when the shared print choice asks for it: on for this check, off again after */
+ await p.evaluate(()=>window.nbhPrint&&nbhPrint.set('guide',true));const gpdf=await printPdf(p,'guide.pdf');await p.evaluate(()=>window.nbhPrint&&nbhPrint.set('guide',false));
+ ok('print: the Guide stays off the default print',!(blank.text&&/1b\. The Alone Condition in Schools and Homes/.test(flat(blank.text.join(' ')))),blank.n);
+ const gp=gpdf.text?flat(gpdf.text.join(' ')):flat(await printDom(p,'#guide'));ok('print: the Guide carries section 1b',/1b\. The Alone Condition in Schools and Homes/.test(gp)&&/Never kept in/.test(gp)&&/Stepping in/.test(gp),gp.slice(0,80));
  await fill(p);await set(p,'s.alone','true');await sleep(150);
  const tru=await printPdf(p,'true.pdf');
  if(tru.text){const ti=pageWith(tru.text,/Check policy first/);pt=flat(tru.text[ti]||'');
@@ -251,7 +254,7 @@ const STUB=()=>{window.confirm=()=>true;window.alert=()=>{};};
  /* page counts: the blank form grows by the Guide's section 1b and by the safety plan's own page for the Measurement section */
  if(havePre){const q=await open();const count=async u=>{await q.goto(u);await sleep(600);await q.emulateMedia({media:'print'});const n=pages(await q.pdf({preferCSSPageSize:true,printBackground:true}));await q.emulateMedia({media:'screen'});return n;};
   const pre=await count('file://'+PRE),now=await count(URL);console.log('NOTE blank print: '+pre+' pages before, '+now+' now');
-  ok('blank print: at most two pages more than before (the Guide\'s section 1b; the Measurement section on the next page)',now<=pre+2&&now>=pre,{pre,now});await q.close();}
+  ok('blank print: at most two pages more than before (the Guide\'s section 1b; the Measurement section on the next page; v24.31: fewer, since the Guide prints only on request)',now<=pre+2,{pre,now});await q.close();}
 
  /* ---------------- 7. files saved before, and round trips ---------------- */
  p=await open();const old=fs.readFileSync(OLD,'utf8');const oldF=JSON.parse(old).fields;

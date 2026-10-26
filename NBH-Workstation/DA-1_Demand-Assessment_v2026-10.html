@@ -696,7 +696,12 @@ body.view-guide .only-inventory,body.view-guide .only-assessment,body.view-guide
   .sheet{box-shadow:none}
   .only-assessment,.only-results,.only-guide{break-before:page}
   table.rt tr{break-inside:avoid}
-  .metric,.verdict,.recbox{break-inside:avoid}
+  .metric,.verdict{break-inside:avoid}
+  /* v24.31 (R-079) a recommendation box runs across pages an item at a time, its heading with its first item (kept whole, the
+     first box pushed the Recommendations heading onto a page of its own) */
+  .recbox{break-inside:auto}.recbox h4{break-after:avoid;page-break-after:avoid}.recbox li,.recbox p{break-inside:avoid;page-break-inside:avoid}
+  /* the inventory's count line follows the table's last row */
+  .only-inventory table tr:last-child{break-after:avoid;page-break-after:avoid}
   #daChart{max-height:4.2in}
 }
 

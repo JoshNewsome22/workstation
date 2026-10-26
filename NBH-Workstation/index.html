@@ -2765,7 +2765,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.30';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.31';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3517,6 +3517,7 @@ function mpCaseOrder(list){const rank={};CASE_MAP.forEach((st,i)=>st[2].forEach(
   const plan=CASE_MAP.findIndex(st=>/^Train/.test(st[0]));['DD-1','SM-1','HD-1'].forEach((id,j)=>{rank[id]=plan*100+90+j;});
   return list.map((x,k)=>({x,k,r:rank[x[0]]!=null?rank[x[0]]:100000+k})).sort((a,b)=>a.r-b.r||a.k-b.k).map(o=>o.x);}
 function packetOptsSave(o){try{localStorage.setItem('nbh.packet',JSON.stringify(o));}catch(e){}}
+function prChoice(k){try{return localStorage.getItem(k)==='1';}catch(e){return false;}}   /* v24.31 */
 function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>state.ticked[id]),withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id));
   const radio=(name,val,label,hint)=>'<label class="po-row"><input type="radio" name="'+name+'" value="'+val+'"'+(o[name]===val?' checked':'')+'> <b>'+label+'</b>'+(hint?' <span class="po-hint">'+hint+'</span>':'')+'</label>';
   dialog('Packet options',
@@ -3524,6 +3525,10 @@ function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>s
     '<h4 class="po-h">Guides</h4>'+(withGuide.length?'<p class="po-hint">A form’s Guide (its evidence and guidance pages) stays out of the packet unless you keep it here. Ticked forms with a Guide:</p>'+
       withGuide.map(([id,name])=>'<label class="po-row"><input type="checkbox" data-po-guide="'+esc(id)+'"'+(o.guides[id]?' checked':'')+'> Keep the Guide of <b>Form '+esc(id)+'</b> <span class="po-hint">'+esc(name)+'</span></label>').join(''):
       '<p class="po-hint">None of the ticked forms carries a Guide'+(ticked.length?'':' (tick forms in the list first)')+'.</p>')+
+    /* v24.31 (R-031, E-01) a form printed on its own follows the same two choices, kept in this browser for every form */
+    '<h4 class="po-h">A form printed on its own</h4><p class="po-hint">Print / Save as PDF on any form prints the record first; these two choices are read by every form in this browser.</p>'+
+    '<label class="po-row"><input type="checkbox" id="poFormGuide"'+(prChoice('nbh.print.guide')?' checked':'')+'> <b>Include the guide and references</b> <span class="po-hint">after the record (TD-1’s own checkbox is this choice)</span></label>'+
+    '<label class="po-row"><input type="checkbox" id="poFormBlank"'+(prChoice('nbh.print.blank')?' checked':'')+'> <b>Include blank sheets</b> <span class="po-hint">a log or an assessment sheet with nothing entered (EA-1’s trial-based log, PA-1’s unrun method sheets)</span></label>'+
     '<h4 class="po-h">Order</h4>'+radio('order','case','Case order','consent, assessment, the FBA, the plan, the data record, then the review (default)')+radio('order','list','List order','the form list’s order')+
     '<h4 class="po-h">References and sources</h4>'+radio('refs','end','One list at the end','the forms’ citations gathered in a last section, repeats dropped (default)')+radio('refs','form','With each form','as the form prints on its own')+radio('refs','none','Left out','')+
     '<h4 class="po-h">Form ABC-1’s incident log</h4>'+radio('abc','compact','Compact','smaller type and tighter rows (default)')+radio('abc','full','Full','as the form prints on its own')+
@@ -3532,7 +3537,8 @@ function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>s
   const save=()=>{const g={};$('#dlgBody').querySelectorAll('[data-po-guide]').forEach(c=>{if(c.checked)g[c.dataset.poGuide]=true;});
     const v=n=>{const r=$('#dlgBody').querySelector('input[name="'+n+'"]:checked');return r?r.value:'';};
     const next=Object.assign({},o,{guides:Object.assign({},o.guides,g),refs:v('refs')||o.refs,abc:v('abc')||o.abc,order:v('order')||o.order,blanks:!!($('#poBlanks')&&$('#poBlanks').checked)});
-    withGuide.forEach(([id])=>{if(!g[id])delete next.guides[id];});packetOptsSave(next);};
+    withGuide.forEach(([id])=>{if(!g[id])delete next.guides[id];});packetOptsSave(next);
+    try{localStorage.setItem('nbh.print.guide',$('#poFormGuide')&&$('#poFormGuide').checked?'1':'0');localStorage.setItem('nbh.print.blank',$('#poFormBlank')&&$('#poFormBlank').checked?'1':'0');}catch(e){}};
   $('#dlgBody').addEventListener('change',save);$('#poDone').addEventListener('click',()=>{save();try{$('#dlg').close();}catch(e){}});}
 /* the sheets of a form that are documents of their own: they keep a page of their own in the packet */
 const MP_KEEP={'IC-1':['#consent','#proc','#assent','#record'],'TD-1':['#final','#monitor']};

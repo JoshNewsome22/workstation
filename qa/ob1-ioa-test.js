@@ -122,7 +122,7 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  await p2.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});await p2.evaluate(()=>document.querySelector('#simBtn').click());await sleep(600);
  await p2.emulateMedia({media:'print'});await sleep(300);const simPre=havePre?pages(await p2.pdf({preferCSSPageSize:true,printBackground:true})):13;
  console.log('print pages: blank now',blankNow,'blank pre-edit',blankPre,'| simulation now',simPages,'simulation pre-edit',simPre);
- ok('blank form print page count unchanged',blankNow===blankPre,{now:blankNow,pre:blankPre});
+ ok('blank form print page count not grown (v24.31: the Guide prints only on request, so fewer pages than the pre-edit copy)',blankNow<=blankPre,{now:blankNow,pre:blankPre});
  ok('simulation print grew by at most the lines added',simPages<=simPre+1,{now:simPages,pre:simPre});
  ok('no console or page error',log.length===0,log);
  console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');

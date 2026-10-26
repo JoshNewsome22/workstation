@@ -100,7 +100,7 @@
       el.classList.add(fs >= 10 && fs < 11.95 ? 'nbh-lab' : 'nbh-lab-no');
     }
   }
-  function run(root) { try { fields(root); zebra(root); prose(root); labels(root); if (!root) sheets(); } catch (e) {} }
+  function run(root) { try { fields(root); zebra(root); prose(root); labels(root); if (!root) sheets(); } catch (e) {} if (!root) { try { prInject(); } catch (e) {} } }
   /* v22.15 (review F479): on a phone, a table wider than the sheet it sits in (PA-1's MSWO sheet, AD-1, RA-1, EA-1 ...) made the
      whole page, toolbar and all, slide sideways. Such a table is put in a box of its own that scrolls; checked after load,
      after each tap (a view or a row may have changed) and on a turn of the screen. Screen only: print sees no box. */
@@ -444,5 +444,120 @@
   }
   window.addEventListener('beforeprint', printHead);
   window.addEventListener('afterprint', function () { var o = document.getElementById('nbh-print-head'); if (o) o.remove(); });
-  window.nbhPolish = { run: run, plain: plain, printHead: printHead, tscroll: tscroll };
+  /* v24.31 (review R-031, E-01, with R-029, R-030, R-037, R-042, R-057, R-067, R-075, R-079, R-098, R-102) one print policy
+     for the set. The record prints first; the Guide and the References print only when "Include the guide and references" is
+     ticked, and then after the record; a log or an assessment sheet with nothing entered prints only when "Include blank
+     sheets" is ticked; a sheet's closing lines (a citation, a method note, a signature block) stay with the block above them,
+     since the browser moves a page break only to the nearest allowed point; headings keep what follows them; a long table
+     runs across pages a row at a time with its header repeated. The two choices are kept on this device for every form. */
+  var PRK = { g: 'nbh.print.guide', b: 'nbh.print.blank' };
+  function prGet(k) { try { return localStorage.getItem(k) === '1'; } catch (e) { return false; } }
+  function prSet(k, v) { try { localStorage.setItem(k, v ? '1' : '0'); } catch (e) {} }
+  function prGuideEls() { return document.querySelectorAll('#guide,#refs,section.only-guide,[data-nbh-guide]'); }
+  function prOwn() { return document.getElementById('printGuide'); }
+  function prGuideOn() { var g = document.getElementById('nbhPrintGuide') || prOwn(); return g ? !!g.checked : prGet(PRK.g); }
+  function prBlankOn() { var b = document.getElementById('nbhPrintBlank'); return b ? !!b.checked : prGet(PRK.b); }
+  function prScreen() { document.documentElement.classList.toggle('nbh-pr-noguide', !prGuideOn()); }
+  function prStyle() {
+    if (document.getElementById('nbh-print-policy')) return;
+    var st = document.createElement('style'); st.id = 'nbh-print-policy';
+    st.textContent = '.nbh-print-opts{display:inline-flex;gap:4px 12px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:4px}' +
+      '.nbh-print-opts label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;min-height:36px;margin:0;font-weight:400;white-space:nowrap}' +
+      '.nbh-print-opts input{margin:0;width:16px;height:16px}' +
+      'html.nbh-pr-measure .sheet,html.nbh-pr-measure section[class*="only-"]{display:block!important;width:7.3in!important;max-width:7.3in!important;min-width:0!important;box-sizing:border-box}' +
+      '@media print{.nbh-print-opts{display:none!important}' +
+      'html.nbh-pr-noguide #guide,html.nbh-pr-noguide #refs,html.nbh-pr-noguide section.only-guide,html.nbh-pr-noguide [data-nbh-guide]{display:none!important}' +
+      '.nbh-pr-blank{display:none!important}' +
+      '[data-nbh-keep]{break-inside:avoid!important;page-break-inside:avoid!important}' +
+      '[data-nbh-keep="2"]{break-before:avoid!important;page-break-before:avoid!important}' +
+      '[data-nbh-keep="1"]{break-before:auto!important;page-break-before:auto!important}' +
+      '.nbh-keep{display:inline-block;width:100%;vertical-align:top;box-sizing:border-box;break-before:avoid;page-break-before:avoid}' +
+      'h1,h2,h3,h4,.bar,.sumhead{break-after:avoid;page-break-after:avoid}' +
+      '.sheet > h3 + p,.sheet > h3 + .method,.sheet > h3 + .hint,.sheet > .bar + p,.sheet > .bar + .method{break-after:avoid;page-break-after:avoid}' +
+      '.sheet table.rank,.sheet table.grid{break-inside:auto!important;page-break-inside:auto!important}' +
+      '.sheet table.rank tr,.sheet table.grid tr{break-inside:avoid;page-break-inside:avoid}' +
+      '.sheet table.rank thead,.sheet table.grid thead{display:table-header-group}' +
+      'p,li,.method,.cite{orphans:3;widows:3}' +
+      '.sig,.sigcite,.signatures,.sigrow,.sign{break-inside:avoid;page-break-inside:avoid}}';
+    document.head.appendChild(st);
+  }
+  /* the two choices are made once, in the workstation's Packet options (a form's own toolbar stays as it is, so no toolbar
+     grows a row on an iPad); TD-1's own checkbox is the same guide choice */
+  function prInject() {
+    prStyle();
+    var own = prOwn();
+    if (own && !own.dataset.nbhAdopted) { own.dataset.nbhAdopted = '1'; var want = prGet(PRK.g); if (own.checked !== want) { own.checked = want; try { own.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {} }
+      own.addEventListener('change', function () { prSet(PRK.g, own.checked); prScreen(); }); }
+    prScreen();
+  }
+  function prSetChoice(which, on) { var k = which === 'blank' ? PRK.b : PRK.g; prSet(k, !!on); var own = prOwn(); if (k === PRK.g && own && own.checked !== !!on) { own.checked = !!on; try { own.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {} } prScreen(); }
+  var prUndo = [];
+  function prHasData(list) {
+    for (var i = 0; i < list.length; i++) { var e = list[i];
+      var f = e.querySelectorAll('input,select,textarea');
+      for (var j = 0; j < f.length; j++) { var x = f[j]; if (x.closest && x.closest('.noprint')) continue;
+        if (x.type === 'checkbox' || x.type === 'radio') { if (x.checked) return true; }
+        else if (x.tagName === 'SELECT') { if (x.selectedIndex > 0 && String(x.value).trim()) return true; }
+        else if (String(x.value || '').trim()) return true; }
+      /* a results table the form rendered (no fields in it) with a number in a cell; a figure with its labels drawn */
+      var tbs = e.tagName === 'TABLE' ? [e] : e.querySelectorAll('table');
+      for (var k = 0; k < tbs.length; k++) { if (tbs[k].querySelector('input,select,textarea')) continue;
+        var td = tbs[k].querySelectorAll('tbody td'); for (var t = 0; t < td.length; t++) if (/\d/.test(td[t].textContent || '')) return true; }
+      if (e.querySelector('svg text,canvas')) return true; }
+    return false;
+  }
+  /* the last blocks of a sheet stay together, up to about a third of a page, measured on a paper-wide layout; a long block
+     above them stays breakable, and when it is a table its last rows join the chain */
+  var PR_NEED = 340, PR_LONG = 560, PR_MAX = 560;   /* px on paper (a Letter page holds about 980): enough; too long to add whole; the most a chain may hold, so the page it leaves is never emptier than it fills */
+  function prTails() {
+    var TAIL = /\b(cite|method|foot|note|hint|sig|sigcite|src|cap)\b/, HIDE = /\bnoprint\b|\bnbh-pr-blank\b/;
+    var sheets = document.querySelectorAll('.sheet,section[class*="only-"]'), html = document.documentElement, wraps = [];
+    /* a form's own print modes (a packet, one sheet, one tab) arrange their own paper */
+    if (/\bprint-|-only\b|-printing\b|\bsp-printall\b|\bprint\b/.test(document.body.className + ' ' + html.className)) return;
+    html.classList.add('nbh-pr-measure');
+    try {
+      for (var i = 0; i < sheets.length; i++) { var sh = sheets[i];
+        if (sh.classList.contains('nbh-pr-blank') || sh.closest('.nbh-pr-blank')) continue;
+        if ((sh.id === 'guide' || sh.id === 'refs' || sh.classList.contains('only-guide')) && !prGuideOn()) continue;
+        var kids = []; for (var c = sh.lastElementChild; c; c = c.previousElementSibling) { if (c.hidden || HIDE.test(c.className || '') || getComputedStyle(c).display === 'none') continue; kids.push(c); }
+        if (!kids.length) continue; var last = kids[0];
+        if (!(TAIL.test(last.className || '') || last.tagName === 'P' || last.tagName === 'SMALL')) continue;
+        var acc = 0, chain = [];
+        for (var k = 0; k < kids.length; k++) { var el = kids[k], h = el.getBoundingClientRect().height;
+          if (chain.length && (h > PR_LONG || acc + h > PR_MAX)) break;   /* a long block above the tail stays breakable */
+          chain.push(el); acc += h; if (acc >= PR_NEED) break; }
+        if (!chain.length) continue;
+        chain.reverse(); wraps.push(chain); }
+    } finally { html.classList.remove('nbh-pr-measure'); }
+    /* the chain goes into one inline block: the browser never splits an inline block, and it moves whole to the next page when
+       it does not fit (a block wrapper marked break-inside: avoid was split anyway); the wrapper is undone after printing */
+    for (var w = 0; w < wraps.length; w++) (function (list) {
+      var box = document.createElement('div'); box.className = 'nbh-keep'; list[0].parentNode.insertBefore(box, list[0]);
+      for (var i = 0; i < list.length; i++) box.appendChild(list[i]);
+      prUndo.push(function () { if (!box.parentNode) return; while (box.firstChild) box.parentNode.insertBefore(box.firstChild, box); box.remove(); });
+    })(wraps[w]);
+  }
+  function prBefore() {
+    try {
+      prScreen();
+      var g = document.getElementById('guide'), r = document.getElementById('refs');
+      if (prGuideOn() && g && g.classList.contains('sheet') && g.parentNode) {
+        var par = g.parentNode, next = g.nextSibling, all = par.querySelectorAll(':scope > .sheet'), last = all[all.length - 1];
+        var placed = last === g || (r && r.parentNode === par && r === last && g.nextElementSibling === r);
+        if (last && !placed) { if (r && r.parentNode === par && r === last) par.insertBefore(g, r); else par.insertBefore(g, last.nextSibling); prUndo.push(function () { par.insertBefore(g, next); }); }
+      }
+      if (!prBlankOn()) {
+        var groups = {}, els = document.querySelectorAll('[data-nbh-blank]');
+        for (var i = 0; i < els.length; i++) { var k = els[i].getAttribute('data-nbh-blank'); (groups[k] = groups[k] || []).push(els[i]); }
+        for (var key in groups) if (!prHasData(groups[key])) (function (list) { list.forEach(function (e) { e.classList.add('nbh-pr-blank'); }); prUndo.push(function () { list.forEach(function (e) { e.classList.remove('nbh-pr-blank'); }); }); })(groups[key]);
+      }
+      prTails();
+    } catch (e) {}
+  }
+  function prAfter() { while (prUndo.length) { try { prUndo.pop()(); } catch (e) {} } }
+  /* registered once the form's own scripts have run, so the policy sees what they render for paper */
+  function prArm() { window.addEventListener('beforeprint', prBefore); window.addEventListener('afterprint', prAfter); }
+  if (document.readyState === 'complete') prArm(); else window.addEventListener('load', prArm);
+  window.nbhPrint = { before: prBefore, after: prAfter, guideOn: prGuideOn, blankOn: prBlankOn, inject: prInject, set: prSetChoice };
+  window.nbhPolish = { run: run, plain: plain, printHead: printHead, tscroll: tscroll, print: window.nbhPrint };
 })();

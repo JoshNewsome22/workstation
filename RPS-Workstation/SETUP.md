@@ -9905,6 +9905,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.31: one print policy for the set, from the independent review: the record first, the Guide behind a choice, no closing line alone on a page
+(the independent review of 10/25, the print theme R-031 and E-01 with R-029, R-030, R-037, R-042, R-057, R-062, R-067, R-075, R-079, R-098, R-102; in the shared polish script, so every form follows it)
+
+- **The record prints first.** The Guide and the References print only when **Include the guide and references** is ticked, a
+  choice beside Print / Save as PDF on every form that has a guide, kept on the device for all of them (TD-1's own checkbox
+  is the same choice). Ticked, the Guide prints after the record. Page 1 of TB-1, IA-1, PA-1, RA-1 and EA-1 is now the
+  student's first sheet (the Guide had opened them, on pages 1 to 6).
+- **A log or an assessment sheet with nothing entered stays out of the printout** unless **Include blank sheets** is ticked:
+  EA-1's trial-based log (it printed empty on page 14) and PA-1's single-stimulus, paired-stimulus, MSWO, duration and
+  competing-stimulus sheets when they were not run.
+- **A sheet's closing lines stay with the block above them.** The browser moves a page break only to the nearest allowed point
+  and, asked to keep a block whole, still split it; so when a form prints, the polish script measures each sheet on a
+  paper-wide layout and puts its last blocks, up to about a third of a page, into one inline block, which the browser never
+  splits and moves whole when it does not fit. A long block above them stays breakable. Headings keep what follows them, a
+  heading's lead paragraph keeps the block after it, a long table runs across pages a row at a time with its header repeated,
+  and a table is no longer forced onto a fresh page because it was marked to stay whole (that had stranded TB-1's IOA
+  heading on a page of its own).
+- **Form by form.** OB-1's two condition checklists stack under the narrative and no longer take a page of their own for each
+  observation (13 pages to 10 for three observations). SP-1's control-chart essay and references print once, after the last
+  behavior's chart (they had printed for every behavior). SM-1's Print / Save as PDF prints the record; the browser's own
+  Print (Ctrl+P, Share) prints the tab in view, and on the student sheet, the contract and the model sheet it prints what
+  their own buttons print (every tab had printed the same 30 pages). DA-1's recommendation boxes run across pages an item at
+  a time, so the Recommendations heading no longer sits alone before them. IA-1's figures run a figure at a time.
+- The worked examples, printed whole with the Guide off: TB-1 22 pages to 14, IA-1 33 to 28, PA-1 29 to 26, RA-1 16 to 11,
+  EA-1 22 to 13, DA-1 18 to 12, OB-1 13 to 10, SP-1 14 to 13, TD-1 45 to 46 (the monitor's verdict and criterion note now
+  share a page of their own). The fourteen printouts: 291 pages to 226; pages (not a last page) with under 15% of their rows
+  inked: 17 to 2 (IA-1's WEFA note, DA-1's inventory count line).
+- Tests: qa/pp131-test.js (every reviewed form printed whole with its simulation: page counts, light pages, the Guide off and
+  on and after the record, the blank log and the unrun sheet, SP-1's essay once, SM-1's tab print, the choice kept on the
+  device). The packet-gate baseline is re-read, since paper changed on every form.
+
 ### v24.30: Form TD-1 from the independent review: the staff card, the packet in order, the bank filtered to the plan
 (the independent review of 10/25, TD-1 findings R-022, R-113, R-114; enhancements E-12, E-40; reviewer notes C-22, C-46)
 

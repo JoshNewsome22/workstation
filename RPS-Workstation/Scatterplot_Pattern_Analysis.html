@@ -625,6 +625,7 @@ html.sp-one .lg-slash{display:none}
   html.sp-printall body #sheet,html.sp-printall body #spPages,
   html.sp-printall body #summary,html.sp-printall body #control{display:none !important}
   html.sp-printall #spPrint{display:block}
+  html.sp-printall .sp-essay-dup{display:none!important}   /* v24.31 */
   #spPrint > .sheet + .sheet{page-break-before:always;break-before:page}
   /* the legend is one line on paper, so the grid gets the height */
   .legend .lgrows{display:flex;flex-wrap:wrap;gap:4px 18px}
@@ -5144,6 +5145,8 @@ function buildPrintSet(mode){
       out.push(staticClone($("#control")));
     }
   });
+  /* v24.31 (R-067) the control-chart essay (the study, the method, the references) prints once, after the last behavior's chart */
+  {const es = []; out.forEach(n => { try{ n.querySelectorAll(".sp-essay").forEach(e => es.push(e)); }catch(x){} }); es.slice(0, -1).forEach(e => e.classList.add("sp-essay-dup"));}
   if(real) state.behaviors.forEach((b, i) => { b.cells = real[i]; if(i === state.cur) state.cells = b.cells; });   /* v23.98 */
   spPrinting = was;
   useBeh(keep, true);
@@ -6417,7 +6420,7 @@ function renderControl(){
 }
 
 function methodNote(a){
-  return "<div class='method'>"
+  return "<div class='method sp-essay'>"
     + "<b>THE STUDY</b>"
     + "Kahng, Iwata, Fischer, Page, Treadwell, Williams and Smith (1998, <em>Journal of Applied "
     + "Behavior Analysis, 31</em>, 593&ndash;604) recorded problem behavior for 20 people in four "

@@ -777,7 +777,10 @@ table.grid td.agr.pub{color:var(--ink-soft)}
    page, so its axis labels came out at 4pt and the legend text was cut off
    ("Parent (simula"). Stacked, a chart gets the full width and its labels
    print near 8pt; the pair still stays together on one page. */
-@media print{.twoup{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);break-inside:avoid;page-break-inside:avoid}.twoup.figs{grid-template-columns:1fr;gap:10px}table.grid{page-break-inside:avoid}table.rank.glance tr{page-break-inside:avoid}.figure{page-break-inside:avoid}.twoup.figs{page-break-inside:avoid}}
+@media print{.twoup{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);break-inside:avoid;page-break-inside:avoid}
+  /* v24.31 (R-042) the figures of an instrument sheet run across pages a figure at a time (kept whole, the column pushed the
+     sheet's closing note onto a page of its own) */
+  .twoup.figs{display:block!important;break-inside:auto!important;page-break-inside:auto!important}.twoup.figs > .figure{break-inside:avoid;page-break-inside:avoid;margin:0 0 10px}.twoup.figs > .figure:last-child{break-after:avoid;page-break-after:avoid}.twoup.figs{grid-template-columns:1fr;gap:10px}table.grid{page-break-inside:avoid}table.rank.glance tr{page-break-inside:avoid}.figure{page-break-inside:avoid}.twoup.figs{page-break-inside:avoid}}
 
 /* ---- numeric entry: no spinner arrows ----
    They overflow narrow columns, and the scroll wheel can silently change a

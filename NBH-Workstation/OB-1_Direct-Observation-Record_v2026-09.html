@@ -936,7 +936,9 @@ button.iv{min-width:24px}
   .obs-page .defs .dval textarea{font-size:12px;line-height:1.35}
   /* a sheet too long for one page breaks between blocks: the two checklists, and the two closing
      rows, each stay whole */
-  .obs-page .twoup,.obs-page .defs{break-inside:avoid;page-break-inside:avoid}
+  /* v24.31 (R-057) the two checklists stack and follow the narrative, each whole; the closing rows stay whole */
+  .obs-page .twoup{grid-template-columns:1fr;gap:6px;break-inside:auto;page-break-inside:auto}
+  .obs-page .twoup > div,.obs-page .defs{break-inside:avoid;page-break-inside:avoid}
 }
 
 @media print{
