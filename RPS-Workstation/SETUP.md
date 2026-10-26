@@ -9905,6 +9905,51 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.43: Form IA-1 polished (review V16: R-044 to R-051, R-131; E-36, E-37)
+- **The toolbar's target list reads the target's name after any fill** (review R-044). After Load simulation, an opened
+  file or a push from the case, the list said "(untitled target)" on every sheet until a key was pressed in the label; it
+  now follows the label within a second, however the label was filled.
+- **Draft from the convergence sheet writes the Antecedent and says each setting event once** (review R-045). The
+  Antecedent is drafted from the interview cards' antecedents and the FAST's open-ended "what happens before" answer
+  ("When teacher attention directed to peers (interview 1 (A) and interview 2 (B)); or when ..."); a setting event or an
+  idiosyncratic condition two interviews name is written once with both sources. Every simulated scenario shows a
+  finished hypothesis statement, a ticked Decision and a written rationale.
+- **Understood the definition, per informant** (E-36). Under the informants table, each informant's answer to "Do you
+  understand this definition?" before rating: a respondent page brings it back (the most doubtful answer across pages, and
+  which page said it); for a paper or interview administration it is entered by hand. A No or Unsure is named under the
+  table with a note to go over the definition before counting that informant's scores. The table prints only when it
+  holds an answer. The simulation records Yes for its three informants.
+- **One privacy promise** (review R-046). The respondent pages now name the student by initials by default, as Setup
+  promises (a first name only if the analyst types one, with the family's agreement); the photo field says the photo is
+  off unless added and travels inside the page file and every email it is attached to; Setup's line says the same.
+- **"Agree (within 1)"** heads the QABF, MAS and PBQ agreement column on screen and paper (review R-047); the FAST's
+  yes / no column keeps "Agree".
+- **The counted-outcomes tally is secondary** (review R-048). The consensus line leads with informants ("Attention: 3 of 3
+  informants"); the "8 of 8 counted outcomes" line sits under it in smaller type, labeled a tally and not independent
+  evidence (the same informants answer several instruments whose scales overlap); the chart's caption says the same.
+- **Item boxes and charts on an iPad** (review R-050, R-131). Below 1200 px, and on any touch screen, an instrument's item
+  table takes the sheet's width and each informant's column widens so its answer box is at least 44 px wide; the charts
+  sit one to a row on screen (at most 760 px wide) with axis, legend and value text that reads at 12 px or larger on an
+  iPad, and a benchmark label that would sit on another label or on a bar's value moves to the chart's left end, then
+  below. Form ABC-1's analysis charts show no text under 12 px on screen either. Paper is unchanged.
+- **The masthead says which items are printed** (review R-051): the FAST's sixteen items, credited to Iwata, DeLeon and
+  Roscoe (2013), print on its sheet; the QABF, MAS, PBQ and WEFA items are not reproduced.
+- **A minimum instrument set on Setup** (E-36): the FAST and the QABF from each informant and one interview with the adult
+  who knows the routines best, with rough planning times (this form's estimate: FAST about 10 minutes and QABF about 10 to
+  15 minutes per informant; an interview 30 to 45 minutes). "Use the minimum plan" writes it into the plan's Used? column
+  (asking first when it would change an answer already there).
+- **Typed answers** (E-37): in an item box, Y, N or A (NA) on the FAST and WEFA, or a digit on the QABF, MAS and PBQ,
+  enters the answer and moves to the next item for the same informant.
+- **One informant's answers** (E-37): Print offers "Informant B's answers, every instrument": a page with the informant,
+  the definition answer and, for each instrument with answers, every item's answer by category with the category totals,
+  and nothing else of the form; the next print is the whole form again. The Summary sheet carries "Print this summary",
+  which prints the scores and convergence alone (the short print) and leaves the print choice as it was.
+- Tests: qa/ia143-test.js (17: the target list after the simulation and after a fill with no keystroke; the finished
+  hypothesis, Decision and rationale in three scenarios; the drafted Antecedent and the setting event said once; the
+  definition answers recorded and an Unsure flagged; the import carrying the answer; the initials default and the photo
+  line; "Agree (within 1)"; the tally under the consensus; the masthead; the minimum plan; typed answers; the one-informant
+  print; the summary print button; item boxes and charts at 820 px with touch; ABC-1's chart text).
+
 ### v24.42: Forms PA-1, RA-1 and DA-1 polished (review V15: R-070 to R-073, R-076 to R-078, R-134, R-135; E-24, E-34, E-35, E-44)
 - **Form PA-1: tied percentages share a rank.** On every hierarchy table (single stimulus, paired stimulus, MSWO, free
   operant) items with the same percentage share a rank, shown as =2 for a tie that starts at position 2, and count as the
