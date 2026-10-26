@@ -1277,6 +1277,8 @@ td input,td select{max-width:100%}
 
   <!-- ===================== SIGN AND PRINT ===================== -->
   <section class="only-print">
+    <!-- v24.55 (the BCBA, 10/26) the months here too: another month's record to sign and print without going back -->
+    <div class="rs-monthbar rs-pmonths noprint" role="group" aria-label="Month to sign and print" id="printMonthBar"></div>
     <h2 class="nbh-band noprint" id="signTitle">Sign the Monthly Record</h2>
     <p class="hint noprint">The supervisor and the RBT read the record below, type their names and the date, and sign with a finger or a stylus, or type the name and adopt it as the signature (or leave the box empty and sign the paper). The record notes how and when each was signed. <b>Print this month</b> prints the record alone, on letter paper.</p>
     <div class="rs-sign noprint">
@@ -1326,6 +1328,12 @@ td input,td select{max-width:100%}
     </div>
     <div class="tools noprint"><button class="tool" type="button" id="shMonth">Email this month&rsquo;s record</button><button class="tool" type="button" id="shYear">Email the year summary</button><button class="tool" type="button" id="shFile">Save the record as a file</button><button class="tool" type="button" id="shRbtCopy" title="This month&rsquo;s record and the goals, with no concerns, as a page for the RBT">Save the RBT&rsquo;s copy</button></div>
     <div id="shNote" class="hint noprint" aria-live="polite"></div>
+    <!-- v24.55 (the BCBA, 10/26) each month's signed record kept in the form as a PDF, to open again; replaced after a change -->
+    <h2 class="nbh-band noprint" id="rs-kept" style="margin-top:18px">Signed Records Kept in This Form</h2>
+    <p class="hint noprint">Keep a month&rsquo;s record here as a PDF once it is signed, to open again later. It is kept with this RBT in the form&rsquo;s data, so it goes wherever the form&rsquo;s work goes (Save data, Save case, the Autosave copy). Emailing this month&rsquo;s record keeps the PDF that was sent. After a change to a month, keep it again to replace its PDF; the list says when a record has changed since its PDF was kept, and keeps the dates of the copies replaced.</p>
+    <div class="tools noprint"><button class="tool" type="button" id="kpKeep">Keep this month as a PDF</button></div>
+    <div id="kpNote" class="hint noprint" aria-live="polite"></div>
+    <div id="kpList" class="noprint"></div>
     <h2 class="nbh-band noprint" style="margin-top:14px">The Monthly Record as It Prints</h2>
     <div class="rs-paper" id="monthOut"></div>
     <h2 class="nbh-band noprint" style="margin-top:18px">The Year Summary as It Prints</h2>
@@ -1898,7 +1906,7 @@ function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent
   /* v24.53 a signature given here whose picture did not come back (a restore that lost it) is said so, to be signed again */
   $$('[data-siglost]').forEach(el=>{const k=el.dataset.siglost,w=k.replace('_img',''),lost=!!sg[w+'_how']&&!sg[k];el.hidden=!lost;
     el.textContent=lost?'The signature '+(sg[w+'_how']==='typed'?'typed and adopted':'drawn')+' here'+(sg[w+'_at']?' on '+new Date(sg[w+'_at']).toLocaleString('en-US',{month:'numeric',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}):'')+' did not come back with the saved work. Sign again; the record shows no signature until then.':'';});}
-function renderPrint(){month(curKey);renderSign();thruPaint();renderMonthOut();renderYearOut();rdYear();rdListPaint();renderConcernOut();}
+function renderPrint(){month(curKey);renderSign();thruPaint();renderMonthOut();renderYearOut();rdYear();rdListPaint();renderConcernOut();if(typeof window.keptPaint==='function')window.keptPaint();}
 
 /* the signature pads: a finger or a stylus draws; the drawing is kept with the month as an image, which the record prints */
 function padDraw(cv,src){const x=cv.getContext&&cv.getContext('2d');if(!x)return;x.clearRect(0,0,cv.width,cv.height);if(src&&/^data:image\/png;base64,/.test(src)){const im=new Image();im.onload=()=>{x.clearRect(0,0,cv.width,cv.height);x.drawImage(im,0,0);};im.src=src;}}
@@ -2168,6 +2176,10 @@ function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='RS-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v).slice(0,4000),isoS=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v||''))?String(v):'',hm=v=>/^\d{2}:\d{2}$/.test(String(v||''))?String(v):'',arr=v=>Array.isArray(v)?v:[];
   const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:{};
+  /* v24.55 a month's kept PDF: the PDF itself (base64, starting %PDF-), when, pages, the record's fingerprint, signed or not,
+     the dates of copies it replaced */
+  const keptOf=x=>{x=obj(x);const b=String(x.b64||'');if(!/^JVBERi0[A-Za-z0-9+\/]+=*$/.test(b)||b.length>8000000)return {};const at=v=>/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(String(v||''))?String(v):'';
+    return {kept:{at:at(x.at),b64:b,pages:Math.max(1,Math.min(500,parseInt(x.pages,10)||1)),sig:str(x.sig).slice(0,60),signed:!!x.signed,prev:arr(x.prev).map(at).filter(Boolean).slice(0,20)}};};
   const su=obj(s.setup);Object.keys(su).forEach(k=>{if(k!=='days')o.setup[k]=str(su[k]);});o.setup.days=arr(su.days).map(Number).filter(n=>n>=0&&n<=6);
   ['rbt_orig','rbt_exp','sup_start'].forEach(k=>{if(k in su)o.setup[k]=isoS(su[k]);});['day_start','day_end'].forEach(k=>{if(k in su)o.setup[k]=hm(su[k]);});
   const yn=v=>v==='yes'||v==='no'?v:'';
@@ -2175,7 +2187,7 @@ function fromFile(d){
   o.sups.forEach(x=>{if(!x.bcba)delete x.bcba;});   /* v24.29 the key only when it holds something: a file reads back equal to what was saved */
   const ru=obj(s.rules);Object.keys(RULES0).forEach(k=>{if(ru[k]!=null&&ru[k]!=='')o.rules[k]=str(ru[k]);});
   const ms=obj(s.months);Object.keys(ms).filter(k=>/^\d{4}-\d{2}$/.test(k)).slice(0,240).forEach(k=>{const m=obj(ms[k]),sg=obj(m.sig);
-    o.months[k]={filled:!!m.filled,note:str(m.note),records:str(m.records),noservice:!!m.noservice,...(m.entered?{entered:true}:{}),
+    o.months[k]={filled:!!m.filled,note:str(m.note),records:str(m.records),noservice:!!m.noservice,...(m.entered?{entered:true}:{}),...keptOf(m.kept),
       days:arr(m.days).slice(0,62).map(x=>({id:str(x&&x.id)||uid(),date:isoS(x&&x.date),start:hm(x&&x.start),end:hm(x&&x.end),brk:str(x&&x.brk),act:ACTS.includes(x&&x.act)?x.act:'',none:!!(x&&x.none)})),
       contacts:arr(m.contacts).slice(0,60).map(x=>{x=obj(x);const ck={};Object.keys(obj(x.ck)).forEach(i=>{if(+i>=0&&+i<CHECK.length&&['y','n','na'].includes(x.ck[i]))ck[+i]=x.ck[i];});
         const ckItems=arr(x.ckItems).slice(0,120).map(it=>({t:str(it&&it.t).slice(0,400),crit:!!(it&&it.crit),comp:str(it&&it.comp).slice(0,40)})).filter(it=>it.t);const ckp={};Object.keys(obj(x.ckp)).forEach(i=>{if(+i>=0&&+i<ckItems.length&&['y','n','na'].includes(x.ckp[i]))ckp[+i]=x.ckp[i];});   /* v24.29 */
@@ -3543,6 +3555,12 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
 .fieldgrid.rs-share{align-items:start!important}.fieldgrid.rs-share>div{justify-content:flex-start!important}
 #shNote:empty{display:none}
+#kpNote:empty{display:none}
+.rs-pmonths{margin:2px 0 14px}.rs-kpmark{font-size:9.5px;font-weight:700;letter-spacing:.02em;padding:0 3px;border-radius:3px;background:#e4efe9;color:#1f5133}
+.rs-monthbar button[aria-pressed="true"] .rs-kpmark{background:#dfe8ee;color:#182e43}
+.rs-kpwrap{overflow-x:auto}.rs-kptab{width:100%;border-collapse:collapse;font-size:15px}.rs-kptab th,.rs-kptab td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--nbh-rule,#d5dfe3)}
+.rs-kptab th{font-size:13px;color:var(--ink-soft);font-weight:600;background:#f3f6f7}.rs-kptab tr.cur td{background:#f3f8f6}.rs-kptab small{font-size:12.5px;color:var(--ink-soft)}
+.rs-kptab .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.rs-kpwarn{color:#8E2A2A!important}.rs-kpact{white-space:nowrap}.rs-kpact .tool{margin:0 6px 6px 0}#kpKeep.rs-kpchg{border-color:#b45309;color:#7c2d12}
 </style>
 <script id="rs-readings" src="nbh-readings.js"></script>
 <script id="rs94-share">
@@ -3673,19 +3691,55 @@ function noteHtml(pg){return '<div style="font:15px/1.5 -apple-system,Helvetica,
 async function send(kind){const pg=page(kind);if(!pg){say('Nothing to send yet: the '+(kind==='year'?'year summary':'month’s record')+' is empty.','warn');return;}
   const L=recipients();if(!L.length){say('Enter the RBT’s email (kept on Setup) or another reader’s email first.','warn');return;}
   if(window.parent===window){say('On its own this page cannot send email. Open it inside the workstation to send from the school account; the record is saved as a file to attach instead.','warn');saveFile(kind);return;}
-  say('Making the PDF…');let att;   /* v24.52 the record as a PDF (the page as before if a PDF cannot be made here) */
-  try{const r=await pdfOf(kind);att={name:fileName(pg,'pdf'),type:'application/pdf',b64:r.b64};}catch(e){att={name:fileName(pg),type:'text/html',b64:b64u(pg.html)};}
+  say('Making the PDF…');let att,made=null;const k0=curKey;   /* v24.52 the record as a PDF (the page as before if a PDF cannot be made here) */
+  try{const r=await pdfOf(kind);att={name:fileName(pg,'pdf'),type:'application/pdf',b64:r.b64};made={b64:r.b64,pages:r.pages};}catch(e){att={name:fileName(pg),type:'text/html',b64:b64u(pg.html)};}
   const req='rs'+(++n.req);say('Sending…');
   const on=ev=>{const d=ev.data||{};if(d.nbh!=='mail-result'||d.req!==req)return;window.removeEventListener('message',on);
     if(d.unavailable){say((d.declined?'Not sent.':(d.why||'The workstation could not send it.'))+' The record is saved as a file to attach instead.','warn');if(!d.declined)saveFile(kind);return;}
     const sent=d.sent!=null?d.sent:(d.ok!=null?(d.ok?L.length:0):L.length),failed=d.failed||[];
-    say(sent?('Sent to '+L.slice(0,sent).map(m=>m.to).join(', ')+'.'+(failed.length?' Not sent: '+failed.map(f=>f.to||f).join(', ')+'.':'')):'Not sent: '+(d.why||'the workstation did not send it.'),sent?'':'warn');};
+    say(sent?('Sent to '+L.slice(0,sent).map(m=>m.to).join(', ')+'.'+(failed.length?' Not sent: '+failed.map(f=>f.to||f).join(', ')+'.':'')):'Not sent: '+(d.why||'the workstation did not send it.'),sent?'':'warn');
+    if(sent&&kind==='month'&&made&&keepAuto(k0,made))say($('#shNote').textContent+' The PDF sent is kept in the form (Signed Records Kept).');};
   window.addEventListener('message',on);
   try{window.parent.postMessage({nbh:'mail',req,messages:L.map(m=>({to:m.to,name:m.name,subject:pg.title,text:noteText(pg),html:noteHtml(pg),attachments:[att]}))},'*');}catch(e){window.removeEventListener('message',on);say('The workstation did not answer. The record is saved as a file to attach instead.','warn');saveFile(kind);}
   setTimeout(()=>{window.removeEventListener('message',on);if(($('#shNote')||{}).textContent==='Sending…')say('The workstation did not answer. The record is saved as a file to attach instead.','warn');},20000);}
 $('#shRbtCopy').addEventListener('click',()=>{if(saveFile('rbt'))say('The RBT\u2019s copy was saved as a PDF: this month\u2019s record and the goals, no concerns.');});   /* v24.29 (E-41) */
 $('#shMonth').addEventListener('click',()=>send('month'));$('#shYear').addEventListener('click',()=>send('year'));$('#shFile').addEventListener('click',()=>{if(saveFile('month'))say('The month’s record is saved as a PDF: attach it to an email, or send it from a device where the workstation is signed in.');});
-window.__rsShare={page,recipients,subject,noteText,noteHtml,fileName,pdfOf};
+/* ---- v24.55 (the BCBA, 10/26) the months across Sign and print, and each month's signed record kept as a PDF ---- */
+const when=iso=>{const t=new Date(iso);return isNaN(t)?'':t.toLocaleString('en-US',{month:'numeric',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});};
+/* the month's record as kept: its days, contacts, signatures, notes, the RBT and the supervisors (not the readers' emails) */
+function recSig(k){const m=peek(k),u={};Object.keys(S.setup).filter(x=>!/^cc\d|email|catchup/.test(x)).sort().forEach(x=>{u[x]=S.setup[x];});
+  const t=JSON.stringify({d:m.days,c:m.contacts,s:m.sig,n:m.note||'',r:m.records||'',v:!!m.noservice,u,p:S.sups});let h=5381;for(let i=0;i<t.length;i++)h=((h*33)^t.charCodeAt(i))>>>0;return h.toString(36)+'.'+t.length.toString(36);}
+function keepStore(k,b64,pages){const m=month(k),ex=m.kept;m.kept={at:new Date().toISOString(),b64,pages,sig:recSig(k),signed:signedBoth(m),prev:ex?[ex.at].concat(ex.prev||[]).filter(Boolean).slice(0,20):[]};keptPaint();changed();}
+/* after an email: kept unless the same record is kept already */
+function keepAuto(k,r){const ex=peek(k).kept;if(ex&&ex.sig===recSig(k))return false;keepStore(k,r.b64,r.pages);return true;}
+function kpSay(t,kind){const el=$('#kpNote');if(!el)return;el.textContent=t;el.style.color=kind==='warn'?'#8E2A2A':'';}
+function keptBlob(k){const kp=peek(k).kept;if(!kp)return null;const b=atob(kp.b64),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Blob([u],{type:'application/pdf'});}
+function keptName(k){return fileName({title:'RBT supervision record, '+keyLabel(k)+': '+rbt()},'pdf');}
+function keptPaint(){const pb=$('#printMonthBar');
+  if(pb)pb.innerHTML=yearKeys(setupYear()).map(k=>{const s=stats(k),mo=+k.split('-')[1],kp=peek(k).kept;return '<button type="button" data-pmonth="'+k+'" aria-pressed="'+(k===curKey)+'" aria-label="'+keyLabel(k)+': '+(s.status==='none'?'nothing recorded':stw(s))+(kp?', PDF kept':'')+'">'+MON[mo-1].slice(0,3)+'<small><i class="st st-'+s.status+'"></i>'+stw(s)+(kp?' <b class="rs-kpmark">PDF</b>':'')+'</small></button>';}).join('');
+  const b=$('#kpKeep'),cur=peek(curKey).kept,chg=!!cur&&cur.sig!==recSig(curKey);
+  if(b){b.textContent=!cur?'Keep '+keyLabel(curKey)+' as a PDF':chg?'Replace the kept PDF: '+keyLabel(curKey)+' has changed':'Kept '+when(cur.at)+': keep it again';b.classList.toggle('rs-kpchg',chg);}
+  const L=$('#kpList');if(!L)return;const ks=yearKeys(setupYear()).filter(k=>peek(k).kept);
+  L.innerHTML=ks.length?'<div class="rs-kpwrap"><table class="rs-kptab"><thead><tr><th>Month</th><th>Kept</th><th>Pages</th><th>The record since</th><th><span class="sr-only">Open, save or remove</span></th></tr></thead><tbody>'+ks.map(k=>{const kp=peek(k).kept,same=kp.sig===recSig(k);
+    return '<tr'+(k===curKey?' class="cur"':'')+'><td><b>'+esc(keyLabel(k))+'</b>'+(kp.signed?'<br><small>signed by both</small>':'<br><small class="rs-kpwarn">not signed by both when kept</small>')+'</td><td>'+esc(when(kp.at))+(kp.prev&&kp.prev.length?'<br><small>replaced the copy of '+kp.prev.map(when).map(esc).join('; ')+'</small>':'')+'</td><td>'+kp.pages+'</td><td>'+(same?'unchanged':'<b class="rs-kpwarn">changed</b>')+'</td>'+
+      '<td class="rs-kpact"><button type="button" class="tool" data-kpopen="'+k+'">Open</button><button type="button" class="tool" data-kpsave="'+k+'">Save to Files</button><button type="button" class="tool" data-kpdel="'+k+'">Remove</button></td></tr>';}).join('')+'</tbody></table></div>':'<p class="hint">No month is kept as a PDF yet.</p>';}
+window.keptPaint=keptPaint;
+$('#kpKeep').addEventListener('click',async()=>{const k=curKey,m=month(k),ex=m.kept;
+  if(ex&&ex.sig===recSig(k)&&!await nbhUI.confirm(keyLabel(k)+'\u2019s PDF kept '+when(ex.at)+' already holds the record as it is now. Keep it again anyway?',{ok:'Keep it again'}))return;
+  if(ex&&ex.sig!==recSig(k)&&!await nbhUI.confirm('Replace the PDF of '+keyLabel(k)+' kept '+when(ex.at)+' with the record as it is now?\nThe earlier PDF is not kept; the list keeps its date.',{ok:'Replace it'}))return;
+  if(!signedBoth(m)&&!await nbhUI.confirm(keyLabel(k)+' is not signed by both the supervisor and the RBT yet. Keep its PDF anyway?',{ok:'Keep it'}))return;
+  kpSay('Making the PDF…');let r=null;try{r=await pdfOf('month');}catch(e){r=null;}
+  if(!r){kpSay('The PDF could not be made on this device; print the month instead.','warn');return;}
+  keepStore(k,r.b64,r.pages);kpSay((ex?'Replaced: ':'Kept: ')+keyLabel(k)+', '+r.pages+' page'+(r.pages===1?'':'s')+'. It is saved with this RBT in the form\u2019s data.');});
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('[data-pmonth],[data-kpopen],[data-kpsave],[data-kpdel]');if(!t)return;
+  if(t.dataset.pmonth){curKey=t.dataset.pmonth;const mt=$('#monthTitle');if(mt)mt.textContent=keyLabel(curKey)+': Service Days';kpSay('');say('');renderPrint();try{renderWho();}catch(err){}return;}
+  const k=t.dataset.kpopen||t.dataset.kpsave||t.dataset.kpdel;
+  if(t.dataset.kpdel){if(await nbhUI.confirm('Remove the PDF kept for '+keyLabel(k)+'? The month\u2019s record itself stays.',{ok:'Remove the PDF',danger:true})){delete month(k).kept;keptPaint();changed();kpSay('The PDF of '+keyLabel(k)+' was removed; the record stays.');}return;}
+  const bl=keptBlob(k);if(!bl)return;const url=URL.createObjectURL(bl);let w=null;
+  if(t.dataset.kpopen){try{w=window.open(url,'_blank');}catch(err){w=null;}}
+  if(!w){const a=document.createElement('a');a.href=url;a.download=keptName(k);document.body.appendChild(a);a.click();a.remove();}
+  setTimeout(()=>URL.revokeObjectURL(url),120000);});
+window.__rsShare={page,recipients,subject,noteText,noteHtml,fileName,pdfOf,recSig,keepAuto};
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>

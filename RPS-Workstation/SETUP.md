@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.55: Form RS-1: the months on Sign and print, and each month's signed record kept in the form as a PDF (the BCBA, 10/26)
+- **The months on Sign and print.** The school year's months now run across the top of Sign and print, each with its
+  status, as on the Month page. A tap shows that month's record to sign, print, email or keep, without going back to the
+  Month page. A month with a kept PDF shows a small PDF mark.
+- **Signed Records Kept in This Form.** A new section on Sign and print. **Keep this month as a PDF** keeps the month's
+  record, as the PDF is sent (the masthead, the record, the year summary through the month), with this RBT in the form's
+  data. So it goes wherever the form's work goes: Save data, Save case and the Autosave copy. A month not yet signed by both
+  asks first. The list shows each kept month: when it was kept, its pages, whether it was signed by both, and whether the
+  record has changed since. **Open** shows the PDF; **Save to Files** gives it as a file; **Remove** (asked first) removes
+  the PDF and leaves the record.
+- **Replace after a change.** When a month changes after its PDF was kept (a day, a contact, a signature, a note, the RBT's
+  or a supervisor's details), the list says "changed" and the button reads "Replace the kept PDF: <month> has changed".
+  Replacing asks first. The earlier PDF is not kept, but the list keeps the dates of the copies it replaced.
+- **Emailing keeps it too.** Email this month's record keeps the PDF that was sent, unless the same record is kept
+  already, and says so.
+- A file is checked when it is opened: a kept PDF must be a PDF, or it is left out.
+- Tests: qa/rsk155-test.js (the months on Sign and print and a tap to another month; keep, in the file and read back,
+  something else not taken; changed, replace asked and the earlier date kept; Open and Save to Files; a month not signed
+  by both asks; emailing keeps the PDF sent; Remove asked, the record stays).
+
 ### v24.54: Form RS-1's PDF looks like the printed record: the masthead, and the year summary with its chart (the BCBA, 10/26)
 - **The masthead.** The PDF now starts the way the printed record does: the logo, "RBT Supervision Log", the form,
   its revision and the printed date, above the month's record.
