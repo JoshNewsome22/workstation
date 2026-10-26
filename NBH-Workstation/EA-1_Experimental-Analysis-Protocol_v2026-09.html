@@ -2750,7 +2750,7 @@ document.addEventListener('input',e=>{if(e.target.dataset&&(e.target.dataset.cfa
 document.addEventListener('change',e=>{if(e.target.dataset&&(e.target.dataset.cfa||e.target.dataset.rrb)){cfaCompute();rrbRead();extPanels();}});
 
 /* ---------- load simulator (training data; never real students) ---------- */
-const rnd=()=>Math.random();const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+const rnd=()=>(window.nbhSim?nbhSim.rnd():Math.random());   /* v24.39 seeded */const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
 const pois=m=>{let L=Math.exp(-m),k=0,p=1;do{k++;p*=rnd();}while(p>L);return k-1;};
 const SIMS={
  escape:{desc:'Demand condition elevated across four series; play, attention, and alone near zero. Treatment: FCT for break requests with escape extinction in an A-B-A-B withdrawal.',variant:'standard',v:{risk:'mod',prec:'no',setting:'room',rate:'high',hyp:'escape',conseq:'ok',hist:'first'},beh:'Aggression toward staff (simulated)',means:[0.3,2.4,0.2,0.4],series:4,design:'abab',iv:'FCT (break card) + escape extinction',dv:'Aggression per min',tx:[[2.3,0.6,5],[0.5,0.3,5],[2.1,0.6,5],[0.3,0.2,5]],txPh:['A1','B1','A2','B2']},
@@ -2822,6 +2822,8 @@ async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\
  /* opened through its button, so the session runner reads the new cards (it also reads them 60 ms after a press of
     Load simulation, which the question above can outlast) */
  const vb=$('#viewSeg [data-view="sessions"]');if(vb)vb.click();else setView('sessions');}
+/* v24.39 (review R-121, R-122, E-02) the simulation seeded and marked: the same example at every load, New example for another */
+{const sim0=loadSim;loadSim=async function(){if(window.nbhSim)nbhSim.begin();let r;try{r=await sim0.apply(this,arguments);}finally{try{if(window.nbhSim)nbhSim.after(loadSim);}catch(e){}}return r;};}
 $('#simBtn').addEventListener('click',loadSim);
 /* v24.20 (R-081) the simulation's dates fall on school days, its termination criteria fit the behavior, and its Decision is complete */
 function schoolDay(k){const d=new Date();d.setHours(12,0,0,0);const step=k<0?-1:1;let n=Math.abs(k);while(n>0){d.setDate(d.getDate()+step);if(d.getDay()%6)n--;}while(d.getDay()%6===0)d.setDate(d.getDate()+step);return d.toLocaleDateString();}
@@ -6182,6 +6184,11 @@ if(document.body.classList.contains('view-plan'))card();
    cell in a grid, or a line inside a bordered row), so the polish fits the
    field it is applied to instead of forcing one shape on all of them. */
 @media screen{
+  /* v24.39 (R-122) the simulated record, marked: the banner under the toolbar and a tag on every sheet */
+  .nbh-sim-banner{max-width:8.5in;margin:10px auto 2px;padding:8px 14px;box-sizing:border-box;border-left:4px solid #9a5b00;background:#fff6e5;color:#182e43;font:13.5px/1.45 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif)}
+  .nbh-sim-banner b{color:#8a4b00}
+  .nbh-sim-new{margin-left:6px;min-height:30px;padding:2px 10px;border:1px solid #d9a95c;border-radius:4px;background:#fff;color:#8a4b00;font:600 12.5px/1.3 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);cursor:pointer}
+  .nbh-sim-tag{float:right;margin:0 0 4px 8px;padding:2px 8px;border:1px solid #d9a95c;border-radius:10px;background:#fff6e5;color:#8a4b00;font:600 11px/1.4 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);letter-spacing:.02em}
   /* v24.36 (R-033, E-06) sideways scrolling, shown: the bar with the words and the arrows, the fade at the edge with more to see */
   .nbh-xs-bar{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:0 0 4px;font:12px/1.25 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);color:#54676f}
   .nbh-xs-bar[hidden]{display:none}
@@ -6348,6 +6355,12 @@ a{text-underline-offset:2px}
   html:not(.nbh-plain) .sheet label.nbh-lab-no{white-space:normal;flex-wrap:wrap}
   html:not(.nbh-plain) .sheet{overflow-wrap:break-word}
 }
+
+/* v24.39 (R-122) the simulated mark prints with the record: the banner as a framed line, the tag on each sheet */
+/* on paper the mark is the Simulated tag at the head of each sheet (the banner is a screen note: on paper it took a page of its own before the first
+   sheet); a print of one thing (a form's "-only" or "-printing" mode, a paper sheet, a blank week) carries no tag either */
+@media print{.nbh-sim-banner,.nbh-sim-new{display:none!important}.nbh-sim-tag{float:right;padding:1px 6px;border:1px solid #9a5b00;border-radius:8px;font:600 8.5pt/1.3 sans-serif;color:#8a4b00}
+  [class*="-only"] .nbh-sim-tag,[class*="-printing"] .nbh-sim-tag,html.abc-paper .nbh-sim-tag,body.dd-blank-on .nbh-sim-tag{display:none!important}}
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>

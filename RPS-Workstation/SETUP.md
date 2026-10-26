@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.39: The simulation, seeded and marked (review V14 part 1: R-121, R-122, E-02 in part)
+- **The same example at every load.** Every form's Load simulation drew fresh random numbers each time, so the worked
+  example changed under the person reading it (Form SP-1's cell counts, PA-1's hierarchies, IA-1's agreement, EA-1's
+  counts) and a test could not read it back. The forms' simulations now draw from one seeded source (seed 1 unless asked
+  otherwise), shared by the workstation's polish, so the example is the same at every load on every device; Forms ABC-1
+  and DD-1, which already drew from a seed of their own, take theirs from the same place.
+- **New example.** The banner offers it where the example can differ (SP-1, PA-1, IA-1, EA-1, RA-1, TD-1, ABC-1, DD-1):
+  another seed, the simulation loaded again, the banner naming it ("example 1504"); the standard example is seed 1.
+- **Marked as simulated, everywhere.** Only four forms kept a banner after loading. Now every form shows one under its
+  toolbar ("Simulated data loaded for training", with the example's name) and a small Simulated tag at the head of every
+  sheet; on paper the tag prints with the record (the banner is a screen note; a print of one thing, a paper sheet or a
+  blank week, carries no tag). The mark travels: a flag goes with the form into the case file and the autosave and comes back
+  with it, and into the case facts (simulated: true) the workstation reads. The mark goes when no field says SIMULATED any
+  more (the form cleared, or a student typed over it).
+- Tests: qa/sim139-test.js (each of the twelve forms loaded three times in fresh pages, the records identical but for
+  ids; New example a different, named record where the form draws; the banner, the sheet tags, the flag in the case
+  snapshot and the facts; Clear takes the mark away).
+
 ### v24.38: The sheet code found in a real photo (Forms SP-1, ABC-1, DD-1)
 (from the BCBA's own test on 10/26: a printed Scatterplot sheet, marked in pencil, photographed on an iPad, "No sheet code was found")
 

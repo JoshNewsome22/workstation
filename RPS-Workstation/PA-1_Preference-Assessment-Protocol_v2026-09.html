@@ -2699,7 +2699,7 @@ const csaCrit=()=>['80','80e50','e75p15'].includes(S.meta.csaCrit)?S.meta.csaCri
 const csaCritTxt=()=>({'80':'80% reduction vs control','80e50':'80% reduction and 50% engagement (Thomas et al., 2022, as cited)','e75p15':'75% engagement and < 15% intervals (Leif et al., 2020, as cited)'})[csaCrit()];
 const csaCond=k=>k==='fa'?S.csa:S.csa.aug[k];
 const csaOn=k=>k==='fa'||!!S.csa.run[k];
-function csaShuffle(n){const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function csaShuffle(n){const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor((window.nbhSim&&nbhSim.state.busy?nbhSim.rnd():Math.random())*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function csaReshuffle(k){S.csa.ord[k]=Array.from({length:S.csaSeries},()=>csaShuffle(S.n));}
 const csaFmtV=v=>v==null?'':(csaUnit()==='rpm'?(Math.round(v*10)/10)+'/min':Math.round(v)+'%');
 const csaFmtRed=r=>r==null?'':(r<0?'−'+Math.abs(r)+'% (increased)':r+'%');
@@ -2867,7 +2867,7 @@ function computeIOA(){S.ioa.forEach((r,k)=>{const a=+r.a||0,d=+r.d||0;const p=(a
 
 /* ================= simulator ================= */
 const LEIS=['Tablet (video)','Bubbles','Squeeze ball','Picture book','Musical toy','Blocks'],EDIB=['Goldfish crackers','Fruit snack','Pretzel','Apple juice','Cheese puff','Graham cracker'],MIXED=['Goldfish crackers','Fruit snack','Tablet (video)','Bubbles','Squeeze ball','Picture book'];
-const rnd=()=>Math.random();const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const dAgo=n=>{/* v21.21 cross-form (X1): local date, not UTC */const t=new Date();t.setDate(t.getDate()-n);return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
+const rnd=()=>(window.nbhSim?nbhSim.rnd():Math.random());   /* v24.39 seeded */const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const dAgo=n=>{/* v21.21 cross-form (X1): local date, not UTC */const t=new Date();t.setDate(t.getDate()-n);return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
 function simBase(names,types,w,opts={}){
   S=blank();S.n=names.length;ensure();
   S.meta={client:'SIMULATED \u2013 Sample Student',sid:'SIM-000',dob:'\u2014',setting:'Room 12 (simulated)',assessor:'Jordan Ellis, M.A., BCBA (simulated)',date:fmtD(dAgo(10)),purpose:opts.purpose||'Identify reinforcers for the BIP (simulated)',pool:opts.pool||'Leisure items / toys',selresp:'Touches or picks up the item within 5 s',restrict:'No allergies listed (simulated)',informant:'Classroom teacher (simulated)',pictFormat:'Tangible only',ecoDate:fmtD(dAgo(9)),ecoBy:'JN',monSince:fmtD(dAgo(28)),ssDate:fmtD(dAgo(9)),ssBy:'JN',psDate:fmtD(dAgo(8)),psBy:'JN',msDate:fmtD(dAgo(7)),msBy:'JN',foDate:fmtD(dAgo(6)),foBy:'JN',foDef:'Hands on item or oriented toward screen'};
@@ -2920,6 +2920,8 @@ const SIMS={
 /* the enhancement sprint (A2): asks first, with the question the other forms use; Cancel changes nothing */
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated assessment?\nScenario: '+$('#simScenario option:checked').textContent+'. Every sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=SIMS[key];sc.run();renderAll();$('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;setView(sc.view);}
+/* v24.39 (review R-121, R-122, E-02) the simulation seeded and marked: the same example at every load, New example for another */
+{const sim0=loadSim;loadSim=async function(){if(window.nbhSim)nbhSim.begin();let r;try{r=await sim0.apply(this,arguments);}finally{try{if(window.nbhSim)nbhSim.after(loadSim);}catch(e){}}return r;};}
 $('#simBtn').addEventListener('click',loadSim);
 
 /* ---------------- orchestration ---------------- */
@@ -6713,6 +6715,11 @@ window.addEventListener('afterprint',()=>document.body.classList.remove('pa-pr-s
    cell in a grid, or a line inside a bordered row), so the polish fits the
    field it is applied to instead of forcing one shape on all of them. */
 @media screen{
+  /* v24.39 (R-122) the simulated record, marked: the banner under the toolbar and a tag on every sheet */
+  .nbh-sim-banner{max-width:8.5in;margin:10px auto 2px;padding:8px 14px;box-sizing:border-box;border-left:4px solid #9a5b00;background:#fff6e5;color:#182e43;font:13.5px/1.45 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif)}
+  .nbh-sim-banner b{color:#8a4b00}
+  .nbh-sim-new{margin-left:6px;min-height:30px;padding:2px 10px;border:1px solid #d9a95c;border-radius:4px;background:#fff;color:#8a4b00;font:600 12.5px/1.3 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);cursor:pointer}
+  .nbh-sim-tag{float:right;margin:0 0 4px 8px;padding:2px 8px;border:1px solid #d9a95c;border-radius:10px;background:#fff6e5;color:#8a4b00;font:600 11px/1.4 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);letter-spacing:.02em}
   /* v24.36 (R-033, E-06) sideways scrolling, shown: the bar with the words and the arrows, the fade at the edge with more to see */
   .nbh-xs-bar{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:0 0 4px;font:12px/1.25 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);color:#54676f}
   .nbh-xs-bar[hidden]{display:none}
@@ -6879,6 +6886,12 @@ a{text-underline-offset:2px}
   html:not(.nbh-plain) .sheet label.nbh-lab-no{white-space:normal;flex-wrap:wrap}
   html:not(.nbh-plain) .sheet{overflow-wrap:break-word}
 }
+
+/* v24.39 (R-122) the simulated mark prints with the record: the banner as a framed line, the tag on each sheet */
+/* on paper the mark is the Simulated tag at the head of each sheet (the banner is a screen note: on paper it took a page of its own before the first
+   sheet); a print of one thing (a form's "-only" or "-printing" mode, a paper sheet, a blank week) carries no tag either */
+@media print{.nbh-sim-banner,.nbh-sim-new{display:none!important}.nbh-sim-tag{float:right;padding:1px 6px;border:1px solid #9a5b00;border-radius:8px;font:600 8.5pt/1.3 sans-serif;color:#8a4b00}
+  [class*="-only"] .nbh-sim-tag,[class*="-printing"] .nbh-sim-tag,html.abc-paper .nbh-sim-tag,body.dd-blank-on .nbh-sim-tag{display:none!important}}
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>

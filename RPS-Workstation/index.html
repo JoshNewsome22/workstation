@@ -2765,7 +2765,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.38';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.39';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3124,6 +3124,8 @@ async function gatherFacts(push){
       if(FACT_GEN.includes(id)){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
       /* v21.78 the assessments' results, one entry a form */
       if(out&&out.replies&&typeof out.replies==='object'){f.replies=Object.assign({},f.replies||{},out.replies);f.src.replies='forms';}   /* v21.86 what came back, per form */
+      /* v24.39 (review R-122) which open forms hold the simulated example: the packet check and the case file read it */
+      {const sm=Object.assign({},f.simulated||{});if(out&&out.simulated)sm[id]=true;else delete sm[id];if(Object.keys(sm).length){f.simulated=sm;f.src.simulated='forms';}else{delete f.simulated;delete f.src.simulated;}}
       if(FACT_SRC[id]==='evidence'){const ev=Object.assign({},f.evidence||{});if(out&&out.evidence)ev[id]=out.evidence;else delete ev[id];if(Object.keys(ev).length){f.evidence=ev;f.src.evidence=Object.keys(ev).join(', ');}else drop('evidence');}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */

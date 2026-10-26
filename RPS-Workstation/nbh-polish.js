@@ -599,5 +599,60 @@
   function prArm() { window.addEventListener('beforeprint', prBefore); window.addEventListener('afterprint', prAfter); }
   if (document.readyState === 'complete') prArm(); else window.addEventListener('load', prArm);
   window.nbhPrint = { before: prBefore, after: prAfter, guideOn: prGuideOn, blankOn: prBlankOn, inject: prInject, set: prSetChoice };
+
+  /* v24.39 (review R-121, R-122, E-02) the simulation, seeded and marked. nbhSim.rnd() is a seeded random source (mulberry32):
+     seed 1 unless "New example" asked for another, so a form's worked example is the same at every load and a test can read
+     it back; nbhSim.on(label) marks the record simulated: the banner, a tag on every sheet, the flag that travels in the case
+     file and the autosave (a checkbox kept off screen), and the case facts (simulated: true). */
+  var simState = { seed: 1, n: 0, on: false, label: '', pending: 0, busy: false, reload: null };
+  function simMul(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  var simRnd = simMul(1);
+  function simSeed(n) { simState.seed = n == null ? 1 : (+n || 1); simRnd = simMul(simState.seed); simState.n = 0; return simState.seed; }
+  function simFlag() {
+    var f = document.getElementById('nbhSimulated');
+    if (!f) { f = document.createElement('input'); f.type = 'checkbox'; f.id = 'nbhSimulated'; f.className = 'nbh-sim-flag noprint'; f.tabIndex = -1; f.setAttribute('aria-hidden', 'true'); f.setAttribute('aria-label', 'Simulated data'); f.style.display = 'none';
+      var tb = document.querySelector('.toolbar,.nbh-actions'); (tb && tb.parentNode ? tb.parentNode : document.body).insertBefore(f, tb || document.body.firstChild); }
+    return f;
+  }
+  function simPaint() {
+    var on = simState.on, b = document.getElementById('nbhSimBanner'), own = document.getElementById('simBanner');
+    document.documentElement.classList.toggle('nbh-simulated', on);
+    if (own) { if (on) own.hidden = false; }
+    else if (on) {
+      if (!b) { b = document.createElement('div'); b.id = 'nbhSimBanner'; b.className = 'nbh-sim-banner'; b.setAttribute('role', 'status');
+        var tb = document.querySelector('.toolbar,.nbh-actions'); var host = tb && tb.parentNode ? tb.parentNode : document.body; host.insertBefore(b, tb ? tb.nextSibling : host.firstChild); }
+      b.innerHTML = '<b>Simulated data loaded for training.</b> The student, the record and the figures on every sheet were made up by the load simulation and describe no one' + (simState.label ? ' (' + simState.label + ')' : '') + '. Clear the form before a student’s data is entered. ' + (simState.reload ? '<button type="button" class="nbh-sim-new tool">New example</button>' : '');
+      var nb = b.querySelector('.nbh-sim-new'); if (nb) nb.addEventListener('click', simAgain);
+    } else if (b) b.remove();
+    if (own && on && simState.reload && !own.querySelector('.nbh-sim-new')) { var ob = document.createElement('button'); ob.type = 'button'; ob.className = 'nbh-sim-new tool'; ob.textContent = 'New example'; ob.addEventListener('click', simAgain); own.appendChild(document.createTextNode(' ')); own.appendChild(ob); }
+    if (own && on) { var lb = own.querySelector('.nbh-sim-label'); if (!lb) { lb = document.createElement('span'); lb.className = 'nbh-sim-label'; var nb2 = own.querySelector('.nbh-sim-new'); own.insertBefore(lb, nb2 || null); } lb.textContent = ' (' + simState.label + ') '; }
+    if (own && !on) { var og = own.querySelector('.nbh-sim-new'); if (og) og.remove(); var ol = own.querySelector('.nbh-sim-label'); if (ol) ol.remove(); }
+    var sheets = document.querySelectorAll('.sheet:not(table),section[data-panel]');
+    for (var i = 0; i < sheets.length; i++) { var t = sheets[i].querySelector(':scope > .nbh-sim-tag'); if (on && !t) { t = document.createElement('span'); t.className = 'nbh-sim-tag'; t.textContent = 'Simulated'; sheets[i].insertBefore(t, sheets[i].firstChild); } else if (!on && t) t.remove(); }
+  }
+  function simOn(label) { simState.on = true; simState.label = label || (simState.seed === 1 ? 'the standard example' : 'example ' + simState.seed); try { simFlag().checked = true; } catch (e) {} simPaint(); }
+  /* the form's simulation, wrapped: begin() seeds the draws (1, or the number New example asked for), after() marks the record when a
+     field now says SIMULATED, again() asks for another example and loads it */
+  function simBegin() { simSeed(simState.pending || 1); simState.pending = 0; simState.busy = true; return simState.seed; }
+  function simHolds() { var els = document.querySelectorAll('input,textarea'); for (var i = 0; i < els.length; i++) { if (els[i].type === 'checkbox' || els[i].type === 'radio' || els[i].type === 'hidden' || els[i].type === 'file') continue; if (/simulat/i.test(els[i].value || '')) return true; } return false; }
+  function simAfter(reload, varies) { simState.busy = false; simState.reload = (varies || simState.n > 0) && reload ? reload : null; if (simHolds()) simOn(); }   /* New example only where the example can differ */
+  function simAgain() { if (!simState.reload) return; simState.pending = simNewSeed(); try { simState.reload(); } catch (e) {} }
+  function simOff() { simState.on = false; simState.label = ''; try { simFlag().checked = false; } catch (e) {} simPaint(); }
+  function simCheck() { var f = document.getElementById('nbhSimulated'); if (f && !!f.checked !== simState.on) { if (f.checked) { simState.on = true; simState.label = simState.label || 'from the file'; } else simState.on = false; simPaint(); }
+    /* the mark goes when no field says SIMULATED any more (the form cleared, or a student typed over it) */
+    if (simState.on && !simState.busy && !simHolds()) simOff(); }
+  function simNewSeed() { return Math.floor(Date.now() / 1000) % 100000 + 2; }
+  window.nbhSim = { rnd: function () { simState.n++; return simRnd(); }, seed: simSeed, on: simOn, off: simOff, check: simCheck, newSeed: simNewSeed, state: simState, begin: simBegin, after: simAfter, again: simAgain, holds: simHolds,
+    /* a seeded integer in [a, b], a seeded pick, a seeded shuffle (in place) and a gaussian, for the forms' simulations */
+    int: function (a, b) { return a + Math.floor(window.nbhSim.rnd() * (b - a + 1)); }, pick: function (arr) { return arr[Math.floor(window.nbhSim.rnd() * arr.length)]; },
+    shuffle: function (arr) { for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(window.nbhSim.rnd() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; },
+    gauss: function () { var u = 0, v = 0; while (!u) u = window.nbhSim.rnd(); while (!v) v = window.nbhSim.rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); } };
+  try { simFlag(); } catch (e) {}
+  setInterval(function () { try { simCheck(); } catch (e) {} }, 1500);
+  window.addEventListener('load', function () { setTimeout(function () { try { simCheck(); } catch (e) {} }, 1200); });
+  /* the case facts carry the flag (the workstation reads it with the rest) */
+  (function () { var prev = window.__nbhFactsOut; window.__nbhFactsOut = function () { var o = null; try { o = prev ? prev.apply(this, arguments) : null; } catch (e) { o = null; } if (simState.on) { o = o || {}; o.simulated = true; } return o; };
+    /* a form that defines its own later: keep ours wrapped around it */
+    var wrapT = setInterval(function () { if (window.__nbhFactsOut && !window.__nbhFactsOut.__sim) { var p2 = window.__nbhFactsOut; var w = function () { var o = null; try { o = p2.apply(this, arguments); } catch (e) { o = null; } if (simState.on) { o = o || {}; o.simulated = true; } return o; }; w.__sim = true; window.__nbhFactsOut = w; } }, 800); setTimeout(function () { clearInterval(wrapT); }, 20000); })();
   window.nbhPolish = { run: run, plain: plain, printHead: printHead, tscroll: tscroll, xscroll: xscroll, print: window.nbhPrint };
 })();

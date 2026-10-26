@@ -3127,7 +3127,8 @@ $('#printBtn').addEventListener('click',()=>window.print());
 async function loadSim(){
   if(!(await nbhUI.confirm('Load the simulated student?\nEvery sheet is filled with example data. Anything already entered will be replaced.',{ok:'Load'})))return;
   const D=(n)=>{const d=new Date();d.setDate(d.getDate()-n);return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();};
-  const jit=(v,p)=>Math.max(0,Math.round(v+(Math.random()*2-1)*p));
+  const SR=()=>(window.nbhSim?nbhSim.rnd():Math.random());   /* v24.39 seeded */
+  const jit=(v,p)=>Math.max(0,Math.round(v+(SR()*2-1)*p));
 
   S=blank();
   S.n=3; S.sessMin=5; S.nSess=16; S.nCoSess=10;
@@ -3181,7 +3182,7 @@ async function loadSim(){
   }
   /* praise tracks the control session of the same day, within two responses and at or below it in
      at least two of its four sessions, so its single-operant verdict is None (v21.16) */
-  const dl=[-1,0,1,2].sort(()=>Math.random()-0.5);
+  const dl=[-1,0,1,2].sort(()=>SR()-0.5);
   for(let k=3;k<S.nSess;k+=4)S.so[k].resp=String(Math.max(0,+S.so[k-3].resp+dl[((k-3)/4)%4]));
 
   /* ---- concurrent operants: tablet vs fruit chew vs control, positions counterbalanced ---- */
@@ -3196,8 +3197,8 @@ async function loadSim(){
   /* ratios completed in each condition's three sessions (v21.16): the tablet completes FR 15 or FR 17;
      the fruit chew FR 7 or FR 9, and FR 9 at least once; praise repeats the control's three sessions in
      another order, so its mean break point equals the control's */
-  const pick=(a,b)=>Math.random()<0.5?a:b;
-  const stops={'0':[pick(8,9),pick(8,9),pick(8,9)],'1':[pick(4,5),pick(4,5),5].sort(()=>Math.random()-0.5),
+  const pick=(a,b)=>SR()<0.5?a:b;
+  const stops={'0':[pick(8,9),pick(8,9),pick(8,9)],'1':[pick(4,5),pick(4,5),5].sort(()=>SR()-0.5),
                ctl:[pick(1,2),pick(1,2),pick(1,2)]};
   stops['2']=[stops.ctl[1],stops.ctl[2],stops.ctl[0]];
   const prOrder=['0','1','2','ctl','0','1','2','ctl','0','1','2','ctl'];
@@ -3253,6 +3254,8 @@ async function loadSim(){
   nbhUI.toast('Simulation loaded: simulated data on every sheet.',{kind:'ok'});
 }
 
+/* v24.39 (review R-121, R-122, E-02) the simulation seeded and marked: the same example at every load, New example for another */
+{const sim0=loadSim;loadSim=async function(){if(window.nbhSim)nbhSim.begin();let r;try{r=await sim0.apply(this,arguments);}finally{try{if(window.nbhSim)nbhSim.after(loadSim);}catch(e){}}return r;};}
 $('#simBtn').addEventListener('click',loadSim);
 $('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;S=blank();renderAll();});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
@@ -7336,6 +7339,11 @@ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.cl
    cell in a grid, or a line inside a bordered row), so the polish fits the
    field it is applied to instead of forcing one shape on all of them. */
 @media screen{
+  /* v24.39 (R-122) the simulated record, marked: the banner under the toolbar and a tag on every sheet */
+  .nbh-sim-banner{max-width:8.5in;margin:10px auto 2px;padding:8px 14px;box-sizing:border-box;border-left:4px solid #9a5b00;background:#fff6e5;color:#182e43;font:13.5px/1.45 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif)}
+  .nbh-sim-banner b{color:#8a4b00}
+  .nbh-sim-new{margin-left:6px;min-height:30px;padding:2px 10px;border:1px solid #d9a95c;border-radius:4px;background:#fff;color:#8a4b00;font:600 12.5px/1.3 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);cursor:pointer}
+  .nbh-sim-tag{float:right;margin:0 0 4px 8px;padding:2px 8px;border:1px solid #d9a95c;border-radius:10px;background:#fff6e5;color:#8a4b00;font:600 11px/1.4 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);letter-spacing:.02em}
   /* v24.36 (R-033, E-06) sideways scrolling, shown: the bar with the words and the arrows, the fade at the edge with more to see */
   .nbh-xs-bar{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:0 0 4px;font:12px/1.25 var(--nbh-sans,"Inter","Segoe UI",Arial,sans-serif);color:#54676f}
   .nbh-xs-bar[hidden]{display:none}
@@ -7502,6 +7510,12 @@ a{text-underline-offset:2px}
   html:not(.nbh-plain) .sheet label.nbh-lab-no{white-space:normal;flex-wrap:wrap}
   html:not(.nbh-plain) .sheet{overflow-wrap:break-word}
 }
+
+/* v24.39 (R-122) the simulated mark prints with the record: the banner as a framed line, the tag on each sheet */
+/* on paper the mark is the Simulated tag at the head of each sheet (the banner is a screen note: on paper it took a page of its own before the first
+   sheet); a print of one thing (a form's "-only" or "-printing" mode, a paper sheet, a blank week) carries no tag either */
+@media print{.nbh-sim-banner,.nbh-sim-new{display:none!important}.nbh-sim-tag{float:right;padding:1px 6px;border:1px solid #9a5b00;border-radius:8px;font:600 8.5pt/1.3 sans-serif;color:#8a4b00}
+  [class*="-only"] .nbh-sim-tag,[class*="-printing"] .nbh-sim-tag,html.abc-paper .nbh-sim-tag,body.dd-blank-on .nbh-sim-tag{display:none!important}}
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
