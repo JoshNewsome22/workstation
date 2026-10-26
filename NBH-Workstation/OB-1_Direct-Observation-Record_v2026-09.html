@@ -830,6 +830,18 @@ table.grid.oblog th.s{width:130px}table.grid.oblog th.k{width:52px}table.grid.ob
 table.grid.oblog td{word-wrap:break-word;vertical-align:top}
 table.grid.oblog td.act button{display:block;width:100%;margin:0 0 4px}
 @media screen{table.grid.oblog th.act,table.grid.oblog td.act{position:sticky;left:0;z-index:2;background:#fff;box-shadow:inset -1px 0 0 #e6eaf0}}   /* v24.36 (R-054) in view while the row scrolls */
+/* v24.44 (review E-30, R-055, R-052) # and Date beside the actions; the blank sheet's lines; the sample's coverage */
+@media screen{table.grid.oblog .ob-frz{position:sticky;z-index:2;background:#fff}table.grid.oblog thead .ob-frz{background:inherit}
+  table.grid.oblog .ob-frz-last{box-shadow:inset -1px 0 0 #e6eaf0}}
+tr.ob-pad{display:none}
+@media print{tr.ob-pad{display:table-row}tr.ob-pad td{height:.3in}
+  html body.ob-blank-printing #setup,html body.ob-blank-printing #obsPages,html body.ob-blank-printing #obsLog,
+  html body.ob-blank-printing #summary,html body.ob-blank-printing #guide,html body.ob-blank-printing #obRec{display:none!important}
+  .ob-blank-page:first-child{page-break-before:auto;break-before:auto}}
+@media screen{#obBlankPr{display:none}}
+.ob-blank{display:inline-flex;gap:4px;align-items:center}.ob-blank input{width:52px}
+#obrSave{position:relative}#obrSave .obr-dur{position:absolute;top:-9px;right:-6px;font:700 11px/1 var(--nbh-sans,sans-serif);font-variant-numeric:tabular-nums;padding:3px 5px;border-radius:9px;background:#fff;color:var(--nbh-navy,#182e43);border:1px solid currentColor;pointer-events:none}#obrSave .obr-dur[hidden]{display:none}   /* v24.44 (review R-056) the time on Save, laid over its corner so End moves nothing */
+.ob-cov{display:block;font-size:10.5px;line-height:1.2;color:var(--ink-soft,#54676f);font-weight:400;white-space:nowrap}
 table.grid.oblog input{width:100%;border:0;background:transparent;font:inherit;font-size:12px;padding:3px 4px;color:var(--ink)}
 table.grid.oblog input:focus{background:var(--wash);outline:none}
 table.grid.oblog td.c{text-align:center}
@@ -1254,6 +1266,7 @@ body.view-obs #obRec{display:block}
   <div class="tgroup"><span>Sheet actions</span><div class="row">
     <button id="simBtn">Load simulation</button>
     <button class="primary" id="printBtn">Print / Save as PDF</button>
+    <span class="ob-blank"><button id="obBlankBtn" title="Print blank observation sheets to fill in by hand: each on its own page, with this record's student, behavior and definition, and twelve lines for the narrative">Print blank observation sheets</button><input type="number" id="obBlankN" min="1" max="20" value="3" aria-label="How many blank observation sheets" title="How many"></span>
     <button id="saveBtn">Save data</button>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
@@ -1577,6 +1590,16 @@ body.view-obs #obRec{display:block}
       moment the interval ends. The sample covers only its own intervals, while the count covers
       the whole observation; note in the narrative the time the sample starts, so the two can be
       lined up.</li>
+    <!-- v24.44 (review R-052, E-28) -->
+    <li><b>What each rule gets wrong.</b> Powell, Martindale and Kulp (1975) scored the same behavior by each rule and
+      against a continuous record of how long it lasted. Partial interval overestimated the time the behavior took (one
+      brief occurrence marks the whole interval), and it undercounts a frequent behavior, since several occurrences in one
+      interval mark it once. Whole interval underestimated the time (a brief pause leaves the interval unmarked), and
+      momentary time sampling erred both ways, by more as the intervals grew longer. So read a % of intervals as an
+      estimate of the share of the sampled time, by its rule: for a behavior defined by how long it lasts, momentary time
+      sampling is the closer estimate, and the form chooses it when the first behavior is timed. The Summary says under each
+      figure how much of the observation the sample covered (&ldquo;5 of 45 min&rdquo;), because the count and the rate
+      per hour cover all of it.</li>
     <!-- v23.20 (review F74, I38) -->
     <li><b>More than one target behavior.</b> Up to three more of the student&rsquo;s targets from Form TB-1 can be
       observed on the same record, each under its own definition (Other Target Behaviors, on Setup). Each has its own count
@@ -1632,7 +1655,9 @@ body.view-obs #obRec{display:block}
     scatter plot analysis. <em>Journal of Applied Behavior Analysis, 31</em>(4), 593&ndash;604.
     &bull; Lerman, D. C., &amp; Iwata, B. A. (1993). Descriptive and experimental analyses of
     variables maintaining self-injurious behavior. <em>Journal of Applied Behavior Analysis,
-    26</em>(3), 293&ndash;319. &bull; Thompson, R. H., &amp; Iwata, B. A. (2007). A comparison of
+    26</em>(3), 293&ndash;319. &bull; Powell, J., Martindale, A., &amp; Kulp, S. (1975). An evaluation of
+    time-sample measures of behavior. <em>Journal of Applied Behavior Analysis, 8</em>(4), 463&ndash;469.
+    &bull; Thompson, R. H., &amp; Iwata, B. A. (2007). A comparison of
     outcomes from descriptive and functional analyses of problem behavior. <em>Journal of Applied
     Behavior Analysis, 40</em>(2), 333&ndash;338.
   </div>
@@ -1669,8 +1694,8 @@ const CONS = [
   ["item",      "An item or activity given"],
   ["access",    "Access to an item, activity, or attention (older record: not told apart)"],
   ["removal",   "Removed from the area or sent to the office"],
-  ["seclusion", "Secluded alone in a room or area (prohibited for a student with an IEP: report it)"],   /* v22.41 (review F70) apart from removal */
-  ["restraint", "Physical restraint (parent notice that school day; incident report within 24 hours)"],
+  ["seclusion", "Secluded alone in a room or area (" + ((window.nbhLaw||{}).seclusionBox || "prohibited for a student with an IEP: report it") + ")"],   /* v22.41 (review F70) apart from removal; v24.44 (review R-053) the law's words from the shared constant */
+  ["restraint", "Physical restraint (" + ((window.nbhLaw||{}).restraintBox || "parent notice that school day; incident report within 24 hours") + ")"],
   ["none",      "No observable change in what adults did"]
 ];
 const ARRANGE = ["Whole group instruction","Small group","Independent work","One to one",
@@ -1834,6 +1859,19 @@ function addNote(){
   wEl.addEventListener("focus", () => { if(!wEl.value.trim()) tEl.value = nowHM(); });
 })();
 /* the Log: one row per observation; the context fields edit in place through the same data-obs/data-field path */
+/* v24.44 (review E-30) # and Date stay in view beside Open and Remove while the Log scrolls sideways */
+function obLogFreeze(){
+  const t = document.querySelector("#logBody table.oblog"); if(!t) return;
+  const go = () => { const r0 = t.rows[0]; if(!r0 || r0.cells.length < 3) return;
+    const w0 = r0.cells[0].offsetWidth, w1 = r0.cells[1].offsetWidth;
+    [...t.rows].forEach(r => { if(r.cells[1]){ r.cells[1].classList.add("ob-frz"); r.cells[1].style.left = w0 + "px"; }
+      if(r.cells[2]){ r.cells[2].classList.add("ob-frz", "ob-frz-last"); r.cells[2].style.left = (w0 + w1) + "px"; } }); };
+  go();
+  /* measured again whenever the table's size changes: built while the Log is hidden, it has no widths until shown */
+  if(window.__obFrzRO) try{ window.__obFrzRO.disconnect(); }catch(e){}
+  if(window.ResizeObserver){ window.__obFrzRO = new ResizeObserver(() => go()); window.__obFrzRO.observe(t); }
+}
+window.addEventListener("resize", () => { try{ obLogFreeze(); }catch(e){} });
 function renderLog(){
   const host = $("#logBody"), stat = $("#logStat"); if(!host) return;
   const ivN = state.cfg.ivLen ? Math.max(0, +state.cfg.ivN||0) : 0;
@@ -1854,6 +1892,7 @@ function renderLog(){
       + '</tr>';
   });
   host.innerHTML = h + '</tbody></table>';
+  obLogFreeze();   /* v24.44 (review E-30) */
   if(stat){ const dated = state.obs.filter(o => o.date).length, lines = state.obs.reduce((a, o) => a + o.narrative.filter(r => String(r.w||"").trim()).length, 0);
     stat.textContent = state.obs.length + (state.obs.length === 1 ? ' observation' : ' observations') + ', ' + dated + ' dated, ' + lines + ' narrative ' + (lines === 1 ? 'line' : 'lines') + ' in all'; }
 }
@@ -2111,6 +2150,9 @@ function obsHTML(o, i, n){
        + 'aria-label="What happened, entry ' + (j+1) + '">' + esc(r.w) + '</textarea></td>'
        + '<td class="nx noprint"><button type="button" class="delRow" data-obs="' + i + '" data-row="' + j + '" title="Delete this line" aria-label="Delete line ' + (j+1) + '">&times;</button></td></tr>';
   });
+  /* v24.44 (review R-055) an observation with nothing written yet prints with twelve lines to write on */
+  if(!o.narrative.some(r => String(r.t||"").trim() || String(r.w||"").trim()))
+    for(let j = o.narrative.length; j < 12; j++) h += '<tr class="ob-pad" aria-hidden="true"><td></td><td></td><td class="nx noprint"></td></tr>';
   h += '</tbody></table>'
      + '<p class="method noprint"><button class="addRow" data-obs="' + i + '">Add a line</button></p>';
 
@@ -2214,7 +2256,8 @@ function render(){
     while(body.firstChild) pg.appendChild(body.firstChild);
     const bar = document.createElement("p");
     bar.className = "method noprint";
-    bar.innerHTML = '<button class="delObs" data-obs="' + i + '">Remove this observation</button>';
+    bar.innerHTML = '<button class="dupObs" data-obs="' + i + '" title="A new observation with this one\u2019s setting, activity, arrangement, adults, students, announcement and second observer; its date, times, counts and narrative left blank">Duplicate this observation\u2019s setup</button> '   /* v24.44 (review E-30) */
+      + '<button class="delObs" data-obs="' + i + '">Remove this observation</button>';
     pg.appendChild(bar);
     host.appendChild(pg);
   });
@@ -2244,7 +2287,13 @@ function renderMB(){
 document.addEventListener("input", e => { const t = e.target; if(!t || !t.dataset || t.dataset.mbk === undefined || t.type === "checkbox") return;
   const b = mbList()[+t.dataset.mbk]; if(!b) return; b[t.dataset.mbf] = t.value; renderMeta(); renderSummary(); });
 document.addEventListener("change", e => { const t = e.target; if(!t) return;
-  if(t.id === "mDur1"){ state.meta.dur1 = t.checked ? "1" : ""; render(); return; }
+  if(t.id === "mDur1"){ state.meta.dur1 = t.checked ? "1" : "";
+    /* v24.44 (review E-28) a behavior defined by how long it lasts is best sampled by momentary time sampling (Guide,
+       section 5): the method follows, unless one was chosen by hand or intervals are already marked */
+    const marked = state.obs.some(o => (o.iv||[]).some(Boolean) || (o.peerIv||[]).some(Boolean));
+    if(t.checked && !state.meta.ivHand && !marked && state.cfg.ivMethod !== "mts"){ state.cfg.ivMethod = "mts"; const m = $("#ivMethod"); if(m) m.value = "mts";
+      if(window.nbhUI && nbhUI.toast) nbhUI.toast("The interval sample is now momentary time sampling, the closer estimate of how long a behavior lasts (Guide, section 5). Change it in the toolbar if you need another.", {ms:9000}); }
+    render(); return; }
   if(!t.dataset || t.dataset.mbk === undefined) return; const b = mbList()[+t.dataset.mbk]; if(!b) return;
   if(t.type === "checkbox") b.dur = t.checked ? "1" : ""; else b[t.dataset.mbf] = t.value;
   render(); });
@@ -2394,6 +2443,10 @@ function agreeRange(list){
 /* v22.99 (review F73) the fewest marked intervals of the student's from which the pooled sample is called discrepant: a working
    convention of this form, like the ratio */
 const OB_DISC_MIN = 10;
+/* v24.44 (review R-052, E-28) the minutes a sample of n intervals covered, against the minutes observed */
+function obMin(v){ return String(Math.round(v * 10) / 10); }
+function obCov(n, mins){ const sm = n * (state.cfg.ivLen || 0) / 60; if(!sm) return "";
+  return '<span class="ob-cov">' + obMin(sm) + (mins ? ' of ' + obMin(mins) : '') + ' min</span>'; }
 function renderSummary(){
   const d = summary();
   const settings = settingList();
@@ -2429,7 +2482,7 @@ function renderSummary(){
       + '<td class="c">' + num(r.rate) + "</td>"
       + '<td class="c">' + num(r.peerRate) + "</td>";
     if(d.ivN){
-      h += '<td class="c">' + (r.k===null?"":pct(r.k,d.ivN)+"%") + "</td>"
+      h += '<td class="c">' + (r.k===null?"":pct(r.k,d.ivN)+"%" + obCov(d.ivN, r.mins)) + "</td>"   /* v24.44 (review R-052, E-28) */
         +  '<td class="c">' + (r.pk===null?"":pct(r.pk,d.ivN)+"%") + "</td>";
     }
     h += '<td class="c">' + esc(r.o.announced||"") + "</td></tr>";
@@ -2442,7 +2495,8 @@ function renderSummary(){
       + '<td class="c">' + num(d.rateAll) + "</td>"
       + '<td class="c">' + num(d.peerRateAll) + "</td>";
     if(d.ivN){
-      h += '<td class="c">' + (d.ivAll ? pct(d.ivTot,d.ivAll)+"%" : "") + "</td>"
+      const sm = d.rows.filter(r => r.k !== null), smMin = sm.reduce((a, r) => a + (r.mins || 0), 0);   /* v24.44 (review R-052) */
+      h += '<td class="c">' + (d.ivAll ? pct(d.ivTot,d.ivAll)+"%" + obCov(d.ivN * sm.length, smMin || null) : "") + "</td>"
         +  '<td class="c">' + (d.ivAll ? pct(d.ivPTot,d.ivAll)+"%" : "") + "</td>";
     }
     h += "<td></td></tr>";
@@ -2464,7 +2518,11 @@ function renderSummary(){
   if(d.ivN) key += " % of intervals: the intervals marked in each observation&rsquo;s sample of " + d.ivN
     + " &times; " + state.cfg.ivLen + " s, out of " + d.ivN + "; in " + esc(METHODS[m].toLowerCase())
     + " recording " + esc(RULES[m]) + ". On the All observations row, every marked interval over every "
-    + "interval sampled.";
+    + "interval sampled."
+    /* v24.44 (review R-052, E-28) the two time bases */
+    + " Under each figure, how much of the observation the sample covered: the sample is " + obMin(d.ivN * state.cfg.ivLen / 60)
+    + " min of each observation, while the count and the rate per hour cover all of it, so the two are not on one time base"
+    + " (Guide, section 5).";
   $("#sumNote").innerHTML = key;
   renderBeh();   /* v23.20 (review F74, I38) */
 
@@ -2508,8 +2566,9 @@ function renderSummary(){
   {const md = iso => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||"")); return m ? (+m[2]) + "/" + (+m[3]) : "an undated observation"; };
    const on = k => state.obs.filter(o => o && o.cons && o.cons[k]).map(o => md(o.date));
    const rs = on("restraint"), sc = on("seclusion");
-   if(rs.length) parts.push("A physical restraint is recorded on " + rs.join(", ") + ": the parent’s written notice before the end of that school day, the incident report within 24 hours and the report by mail within 3 school days (s. 1003.573, F.S.). Log it on Form DD-1’s incident record, where its notices and its report are tracked.");
-   if(sc.length) parts.push("A seclusion is recorded on " + sc.join(", ") + ": seclusion is prohibited for a student with an IEP (s. 1003.573, F.S.). Tell the administrator at once, and log it on Form DD-1’s incident record.");}
+   const L = window.nbhLaw || {};   /* v24.44 (review R-053) the law's words from the shared constant */
+   if(rs.length) parts.push("A physical restraint is recorded on " + rs.join(", ") + ": " + (L.restraintDue || "the parent’s written notice before the end of that school day, the incident report within 24 hours and the report by mail within 3 school days (s. 1003.573, F.S.)") + ". Log it on Form DD-1’s incident record, where its notices and its report are tracked.");
+   if(sc.length) parts.push("A seclusion is recorded on " + sc.join(", ") + ": " + (L.seclusion ? L.seclusion.charAt(0).toLowerCase() + L.seclusion.slice(1, -1) : "seclusion is prohibited for a student with an IEP (s. 1003.573, F.S.)") + ". Tell the administrator at once, and log it on Form DD-1’s incident record.");}
   if(!state.obs.length) parts.push("Add an observation to begin.");
   else{
     /* v21.17: entries the figures cannot use, named first */
@@ -2830,6 +2889,14 @@ function refreshCounts(pg, i){
   }
 }
 
+/* v24.44 (review E-30) a new observation with another's setup: the context, not its data */
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("button.dupObs"); if(!b) return;
+  const o = state.obs[+b.dataset.obs]; if(!o) return; const n = blank();
+  ["setting","activity","arrange","adults","students","announced","secondObs"].forEach(k => { n[k] = o[k] == null ? "" : o[k]; });
+  state.obs.push(n); render();
+  const pages = $$("#obsPages .obs-page"), last = pages[pages.length-1];
+  if(last) try{ last.scrollIntoView({block:"start"}); }catch(err){}
+  if(window.nbhUI && nbhUI.toast) nbhUI.toast("Observation " + state.obs.length + " added with observation " + (+b.dataset.obs + 1) + "\u2019s setup. Enter its date and times.", {ms:6000}); });
 $("#addObs").addEventListener("click", () => {
   state.obs.push(blank());
   render();
@@ -2855,6 +2922,7 @@ $("#addObs").addEventListener("click", () => {
       return;
     }
     state.cfg = next;
+    state.meta.ivHand = "1";   /* v24.44 (review E-28) a setting chosen by hand is not changed for it */
     $("#ivN").value = state.cfg.ivN;
     render();
   });
@@ -2874,6 +2942,33 @@ $("#draftBtn").addEventListener("click", async () => {
 });
 
 $("#printBtn").addEventListener("click", () => window.print());
+/* v24.44 (review R-055, E-30) n blank observation sheets, each a page of its own, and nothing else of the form; the
+   next print is the record again */
+function obBlankSheets(n){
+  obBlankDrop();
+  n = Math.max(1, Math.min(20, Math.round(+n) || 1));
+  const host = document.createElement("div"); host.id = "obBlankPr";
+  const head = $("#setup .nbh-print-head");
+  for(let k = 0; k < n; k++){
+    const pg = document.createElement("div"); pg.className = "sheet obs-page ob-blank-page";
+    if(head) pg.appendChild(head.cloneNode(true));
+    const body = document.createElement("div");
+    body.innerHTML = obsHTML(blank(), 0, 1).replace(/Direct Observation Record — Observation 1/, "Direct Observation Record — Observation ______");
+    body.querySelectorAll("[data-obs]").forEach(el => { el.removeAttribute("data-obs"); el.removeAttribute("id"); });
+    body.querySelectorAll("label[for]").forEach(el => el.removeAttribute("for"));
+    while(body.firstChild) pg.appendChild(body.firstChild);
+    host.appendChild(pg);
+  }
+  const at = $("#obsPages"); at.parentNode.insertBefore(host, at.nextSibling);
+  document.body.classList.add("ob-blank-printing");
+  return n;
+}
+function obBlankDrop(){ const h = $("#obBlankPr"); if(h) h.remove(); document.body.classList.remove("ob-blank-printing"); }
+window.__obBlankSheets = obBlankSheets; window.__obBlankDrop = obBlankDrop;
+$("#obBlankBtn").addEventListener("click", () => { obBlankSheets($("#obBlankN").value);
+  const done = () => { window.removeEventListener("afterprint", done); obBlankDrop(); };
+  window.addEventListener("afterprint", done);
+  try{ window.print(); }catch(e){ done(); } });
 
 $("#clearBtn").addEventListener("click", async () => {
   if(!(await nbhUI.confirm("Clear every observation on this form?\nThe FS-1 statement drawn from them is cleared with them. The student, observer and setup details stay.", {ok:"Clear all", danger:true})))return;
@@ -3403,7 +3498,7 @@ render();
     const t = on ? 'The Live Recorder holds an interval sample scored with this setting: save it to the record or discard it to change the setting.' : TIPS[id];
     if(s.getAttribute('title') !== t) s.setAttribute('title', t); }); }
   function planChange(){
-    if(R.state !== 'run' && R.state !== 'pause'){ paint(); return; }
+    if(R.state !== 'run' && R.state !== 'pause'){ fitSample(); paint(); return; }
     const v = planMs(), e = el(), need = S ? sampleEnd() : 0;
     let why = '';
     if(Number.isNaN(v)) why = 'The planned length has to be a number of minutes, or empty for none.';
@@ -3527,6 +3622,11 @@ render();
     const mm = /^mb:(\d+):(c|p|tot|long)$/.exec(f); if(mm){ try{ mbOf(o, +mm[1])[mm[2]] = v; }catch(e){} } else o[f] = v; }
   async function save(){
     if(R.state !== 'ended') return;
+    /* v24.44 (review R-056) an observation under a minute (test taps, Start and End by mistake) is not saved without a yes */
+    if(R.acc < 60000){
+      if(!(await nbhUI.confirm('Save an observation under one minute?\nThis one ran ' + clock(R.acc) + '. Saved, it counts among the observations, its minutes and its rate. Discard it if it was a test or a slip.', {ok:'Save it'}))) return;
+      if(R.state !== 'ended') return;
+    }
     const c = cfgNow();
     let sample = !!S;
     if(S && !sameCfg(c)){
@@ -3640,9 +3740,21 @@ render();
         if(c.__st !== st){ c.className = 'obr-cell ' + st; c.__st = st; }
         setText(c, v === '+' ? '+' : v === MINUS ? MINUS : k < p && need ? '?' : ' '); }); });
   }
+  /* v24.44 (review E-28) before Start, an untouched sample (no setting chosen by hand, no interval marked on the record)
+     takes as many intervals as the planned length holds, up to the toolbar's 60; the interval length is not changed */
+  function fitSample(){
+    const plan = planMs(); if(!plan || Number.isNaN(plan) || state.meta.ivHand || !state.cfg.ivLen) return;
+    if(state.obs.some(o => (o.iv||[]).some(Boolean) || (o.peerIv||[]).some(Boolean))) return;
+    const n = Math.max(4, Math.min(60, Math.floor(plan / 1000 / state.cfg.ivLen)));
+    if(n === +state.cfg.ivN) return;
+    state.cfg.ivN = n; const x = byId('ivN'); if(x) x.value = n; render();
+    note('The interval sample now takes ' + n + ' intervals of ' + state.cfg.ivLen + ' s, ' + clock(n * state.cfg.ivLen * 1000) + ' of the planned ' + clock(plan)
+      + (n * state.cfg.ivLen * 1000 < plan ? ' (60 intervals at most; longer intervals cover more)' : '') + '. Change it in the toolbar if you need another.');
+  }
   function paintSample(e){
     const c = cfgNow(), st = R.state, run = st === 'run', live = run || st === 'pause', ended = st === 'ended';
-    setText(E.obrIvInfo, c.n ? 'Interval sample: ' + cfgText(c) + ', set in the toolbar' + (S && !sameCfg(c) ? ' (the sample below was scored as ' + cfgText(S) + ')' : '') + '.'
+    const pl = R.state === 'ready' ? planMs() : R.plan, cov = c.n && pl > 0 ? ': it covers ' + clock(c.n * c.len * 1000) + ' of the planned ' + clock(pl) : '';   /* v24.44 (review R-052) */
+    setText(E.obrIvInfo, c.n ? 'Interval sample: ' + cfgText(c) + ', set in the toolbar' + cov + (S && !sameCfg(c) ? ' (the sample below was scored as ' + cfgText(S) + ')' : '') + '.'
       : 'Interval sample: none is set in the toolbar.');
     if(!S){
       setText(E.obrIvStat, !c.n ? 'None set: choose an interval length under Interval sample in the toolbar (More controls).'
@@ -3734,6 +3846,10 @@ render();
     paintSample(e);
     setText(E.obrStartT, run ? 'Pause' : st === 'pause' ? 'Resume' : 'Start'); hide(E.obrStartK, !live);
     dis(E.obrStart, ended); dis(E.obrEnd, !live); dis(E.obrSave, !ended); dis(E.obrDiscard, st === 'ready');
+    /* v24.44 (review R-056) the time observed on the Save button, as a badge over its corner (the label keeps its width) */
+    { let bd = E.obrSave.querySelector('.obr-dur'); if(!bd){ bd = document.createElement('span'); bd.className = 'obr-dur'; bd.hidden = true; E.obrSave.appendChild(bd); }
+      const tt = ended ? clock(R.acc) : ''; if(bd.textContent !== tt) bd.textContent = tt; if(bd.hidden !== !ended) bd.hidden = !ended;
+      const lab = ended ? 'Save to the record, ' + clock(R.acc) + ' observed' : ''; if((E.obrSave.getAttribute('aria-label') || '') !== lab){ if(lab) E.obrSave.setAttribute('aria-label', lab); else E.obrSave.removeAttribute('aria-label'); } }
     const fresh = !!R.msg && (now() - R.msgAt < 6000 || ended);
     setText(E.obrMsg, fresh ? R.msg : ' '); cls(E.obrMsg, 'obr-warn', fresh && R.warn);
     box.querySelectorAll('.obr-tog[data-obr]').forEach(b => { const k = b.dataset.obr, on = !!PR[k];

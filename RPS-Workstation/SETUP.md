@@ -9905,6 +9905,47 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.44: Form OB-1 polished (review V17: R-052, R-053, R-055, R-056; E-28, E-30)
+- **The Guide says what each interval rule gets wrong** (review R-052, E-28). Section 5 adds that Powell, Martindale and
+  Kulp (1975) scored the same behavior by each rule against a continuous record of how long it lasted. Partial interval
+  overestimated the time and undercounts a frequent behavior. Whole interval underestimated the time. Momentary time
+  sampling erred both ways, more as the intervals grew longer. The reference is in the list (Journal of Applied Behavior
+  Analysis, 8(4), 463–469).
+- **The Summary says how much of each observation the sample covered** (review R-052, E-28). Under every "% of intervals"
+  figure a small line reads "5 of 45 min", and the All observations row gives the total. The key adds that the count and
+  the rate per hour cover the whole observation, so the two figures are not on one time base.
+- **A timed behavior defaults to momentary time sampling** (E-28). Ticking "Time each episode" on Setup sets the interval
+  sample to momentary time sampling, the closer estimate of how long a behavior lasts. A method chosen by hand in the
+  toolbar is not changed, and neither is a record with intervals already marked.
+- **An untouched sample fits the planned length** (E-28). Before Start, a planned length in the Live Recorder gives the
+  sample as many intervals as the plan holds, up to the toolbar's 60. The interval length is not changed. The recorder
+  says how much of the plan the sample covers ("it covers 15:00 of the planned 45:00"). A setting chosen by hand stays.
+- **Florida's restraint and seclusion law is written once and read by every form** (review R-053). The words follow Form
+  CR-1's approved statute summary: students covered are those with an IEP, seclusion is prohibited (s. 1003.573(2)), and
+  after a restraint the parent's written notice is due before the end of that school day, the incident report within 24
+  hours and the completed report by mail within 3 school days (s. 1003.573(7)). OB-1's "What Followed the Behavior" boxes
+  and its notices, ABC-1's notice after a hold is coded, and EA-1's two seclusion checks now read them. EA-1 used to say
+  "students with disabilities"; it now says "students with an IEP", as CR-1 does. **The BCBA is to confirm this wording**
+  (the review's legal items stay as they are).
+- **A blank observation prints twelve lines to write on** (review R-055). An observation with nothing written yet still
+  shows three lines on screen, and prints twelve. It prints on two pages, as before: the record and its lines, then the
+  conditions and the conclusions.
+- **Print blank observation sheets** (review R-055, E-30), beside Print, prints the number of blank observations asked
+  for (3 by default, up to 20). Each starts on a new page with this record's student, behavior and definition, and
+  nothing else of the form prints. The next print is the record again.
+- **The Log keeps # and Date in view** beside Open and Remove while it scrolls sideways on an iPad (E-30).
+- **Duplicate this observation's setup** (E-30), beside Remove on each observation, adds an observation with the same
+  setting, activity, arrangement, adults, students, announcement and second observer. Its date, times, counts, narrative
+  and ticks are left blank.
+- **The Live Recorder asks before saving an observation under one minute** (review R-056). Test taps, or Start and End
+  pressed by mistake, used to save and count among the observations. The Save button now carries the time observed
+  ("0:04") on its corner, and says it to a screen reader.
+- Tests: qa/ob144-test.js (17: the shared law constant in CR-1, EA-1, ABC-1 and OB-1, each claim checked against CR-1's
+  statute text; the consequence boxes and the restraint and seclusion notices; the Guide's sentences and the reference;
+  the Summary's coverage lines and key; Duplicate setup; # and Date frozen on the Log at iPad width; momentary time
+  sampling for a timed behavior and a hand choice kept; the sample fitted to a 10- and a 45-minute plan; the time on Save
+  and the question before saving a two-second observation, No and Yes; the twelve printed lines; three blank sheets printed and put away).
+
 ### v24.43: Form IA-1 polished (review V16: R-044 to R-051, R-131; E-36, E-37)
 - **The toolbar's target list reads the target's name after any fill** (review R-044). After Load simulation, an opened
   file or a push from the case, the list said "(untitled target)" on every sheet until a key was pressed in the label; it

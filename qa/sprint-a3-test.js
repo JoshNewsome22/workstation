@@ -354,7 +354,7 @@ async function liveRun(br){
   await page.keyboard.type('Math worksheet given; J. pushes paper off desk');await tap('obrNoteAdd');
   await sleep(1500);await tap('obrEnd');await sleep(400);const endQ=await ui();const endOk=await uiOk();await sleep(500);
   const wall=await fr.evaluate(()=>obRecorder.wall()),elapsed=await fr.evaluate(()=>obRecorder.elapsed()),counts=await fr.evaluate(()=>obRecorder.counts());
-  await tap('obrSave');await sleep(600);const saveQ=await ui();if(saveQ)await uiOk();await sleep(900);
+  await tap('obrSave');await sleep(600);const saveQ=await ui();   /* v24.44 (review R-056): a run of seconds asks before saving, the one question allowed */if(saveQ)await uiOk();await sleep(900);
   ok(tag+': every control tapped where it was, with no scrolling',where.every(w=>!/not in view/.test(w)),where);
   ok(tag+': End asks first, as before',/^End the observation now\?/.test(endQ)&&endOk==='End now',{endQ,endOk});
   const got=await fr.evaluate(()=>{const o=state.obs[0];return {n:state.obs.length,date:o.date,start:o.start,end:o.end,mins:o.mins,count:o.count,peerCount:o.peerCount,
@@ -372,7 +372,7 @@ async function liveRun(br){
     Object.assign({},got,{elapsedMs:Math.round(elapsed),asInOb1Live:got.mins==='0.1'}));
   ok(tag+': the date and the start and end times are the run\'s own',got.date===exp.date&&got.start===exp.start&&got.end===exp.end&&got.mins===exp.mins,{got:[got.date,got.start,got.end,got.mins],exp});
   ok(tag+': the note is in the narrative at its time',got.narr.length===1&&got.narr[0][0]===noteT&&got.narr[0][1]==='Math worksheet given; J. pushes paper off desk',{narr:got.narr,noteT});
-  ok(tag+': the student came from the bar and the behavior from TB-1; the recorder is ready again',got.client==='Jordan Rivera'&&/\S/.test(got.behavior)&&got.rec==='ready'&&!saveQ,{client:got.client,behavior:got.behavior,rec:got.rec,saveQ});
+  ok(tag+': the student came from the bar and the behavior from TB-1; the recorder is ready again',got.client==='Jordan Rivera'&&/\S/.test(got.behavior)&&got.rec==='ready'&&(!saveQ||/^Save an observation under one minute\?/.test(saveQ)),{client:got.client,behavior:got.behavior,rec:got.rec,saveQ});
   ok(tag+': no browser dialog',!dlg.length,dlg);
   await ctx.close();
 }

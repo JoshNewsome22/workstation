@@ -1833,3 +1833,26 @@ window.nbhWording = Object.freeze({
 });
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
+
+/* v24.44 (review R-053) Florida's restraint and seclusion law in one place. Every form loads this file before its own
+   script, so a form's prompts, notices and checks can read window.nbhLaw while they are built. The words follow Form
+   CR-1's statute summary (s. 1003.573, F.S., the 2026 text the BCBA approved): the students covered (a child with an
+   individual education plan, kindergarten through grade 12), seclusion prohibited (subsection (2)), and after a restraint
+   the parent's written notice before the end of that school day (7)(c), the incident report within 24 hours (7)(a) and
+   the completed report by mail within 3 school days (7)(d). Change these words only with the BCBA, and Form CR-1's summary
+   with them. An element marked data-nbh-law="<key>" is given the key's words when the page is ready, so a sentence
+   written in a form's markup says the same thing. */
+window.nbhLaw = Object.freeze({
+  covered: 'students with an IEP',
+  seclusionCite: 's. 1003.573(2), F.S.',
+  restraintCite: 's. 1003.573(7), F.S.',
+  seclusion: 'Seclusion is prohibited for a student with an IEP (s. 1003.573(2), F.S.).',
+  seclusionBox: 'prohibited for a student with an IEP, s. 1003.573(2), F.S.: report it',
+  restraintDue: 'the parent’s written notice before the end of that school day, the incident report within 24 hours and the completed report by mail within 3 school days (s. 1003.573(7), F.S.)',
+  restraintBox: 'parent notice that school day; incident report within 24 hours; s. 1003.573(7), F.S.'
+});
+(function(){
+  function fill(){ try{ document.querySelectorAll('[data-nbh-law]').forEach(function(el){ var k = el.getAttribute('data-nbh-law');
+    if(Object.prototype.hasOwnProperty.call(window.nbhLaw, k) && el.textContent !== window.nbhLaw[k]) el.textContent = window.nbhLaw[k]; }); }catch(e){} }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fill); else fill();
+})();
