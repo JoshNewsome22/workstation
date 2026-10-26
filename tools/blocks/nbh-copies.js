@@ -14,7 +14,7 @@
   if (window.nbhCopies) return;
   var DBN = 'nbh-copies', ST = 'copies', DAYS = 14, KEEP = 5, LSP = 'nbh.copies.v2|', OFF = 'nbh.copies.off|';
   var PIC = /data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+\/=]{2000,}/gi;
-  var mode = null, blobsOK = true, dbP = null, gen = 0, asked = false;
+  var mode = null, blobsOK = !appleWebKit(), dbP = null, gen = 0, asked = false;
   var PEND = 'nbh.copies.pend|', HB = 'nbh.copies.hb|', held = {};
 
   function scope() {
@@ -76,6 +76,24 @@
     for (var j = 0; j < bin.length; j++) a[j] = bin.charCodeAt(j);
     return new Blob([a], { type: type });
   }
+  /* v24.53 (the BCBA, 10/26: Form RS-1's signatures were left out after a restore on an iPad, the rest of its work back)
+     a picture read back from the store keeps its type: a stored file that comes back without one would read as
+     data:application/octet-stream, which a form does not take as a picture. The type kept beside it is used, or the
+     picture's first bytes (PNG, JPEG, GIF, WebP, SVG), so a copy written before this is read back whole too */
+  function picType(u, t) {
+    var m = /^data:([^;,]*)((?:;[^;,]*)*),/.exec(typeof u === 'string' ? u : '');
+    if (!m || /^image\//i.test(m[1]) || !/;base64/i.test(m[2])) return u;
+    var body = u.slice(m[0].length), h = body.slice(0, 12);
+    var k = /^image\/[a-z0-9.+-]+$/i.test(t || '') ? t : h.indexOf('iVBORw0KGgo') === 0 ? 'image/png' : h.indexOf('/9j/') === 0 ? 'image/jpeg' :
+      h.indexOf('R0lGOD') === 0 ? 'image/gif' : h.indexOf('UklGR') === 0 ? 'image/webp' : /^(PHN2Zy|PD94bW)/.test(h) ? 'image/svg+xml' : '';
+    return k ? 'data:' + k + ';base64,' + body : u;
+  }
+  /* v24.53 Safari, which every browser on an iPad or iPhone is underneath, keeps the pictures as text, as the form's own
+     file is kept: a stored file there can come back without its type */
+  function appleWebKit() {
+    try { var u = navigator.userAgent || ''; return /iPad|iPhone|iPod/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1) ||
+      (/AppleWebKit/.test(u) && !/Chrome|Chromium|Edg|OPR|Android/.test(u)); } catch (e) { return false; }
+  }
   function readAs(b, how) {
     if (how === 'text' && b && typeof b.text === 'function') return b.text();
     return new Promise(function (res, rej) {
@@ -90,7 +108,8 @@
     var own = typeof f.own === 'string' ? f.own : '', pics = [];
     if (own) {
       own = own.replace(PIC, function (m) { pics.push(m); return 'nbh-pic:' + (pics.length - 1) + ':'; });
-      if (opt.pics) out.pics = pics.map(function (u) { if (!opt.blobs) return u; try { return toBlob(u); } catch (e) { return u; } });
+      if (opt.pics) { out.pics = pics.map(function (u) { if (!opt.blobs) return u; try { return toBlob(u); } catch (e) { return u; } });
+        out.types = pics.map(function (u) { return u.slice(5, u.indexOf(',')).split(';')[0]; }); }   /* v24.53 each picture's type, beside it */
       else out.picsLost += pics.length;
       out.own = opt.blobs ? new Blob([own], { type: 'application/json' }) : own;
     } else out.own = null;
@@ -100,7 +119,8 @@
   function unpackForm(f) {
     var own = f.own, pics = f.pics || [];
     return Promise.resolve(own && typeof own !== 'string' ? readAs(own, 'text') : own).then(function (text) {
-      return Promise.all(pics.map(function (p) { return typeof p === 'string' ? p : readAs(p, 'url').catch(function () { return null; }); }))
+      return Promise.all(pics.map(function (p, i) { var t = (f.types || [])[i];
+        return typeof p === 'string' ? picType(p, t) : readAs(p, 'url').then(function (u) { return picType(u, t); }, function () { return null; }); }))
         .then(function (urls) {
           var lost = f.picsLost || 0;
           if (text) text = text.replace(/nbh-pic:(\d+):/g, function (m, i) { var u = urls[+i]; if (u == null) { if (!(+i < pics.length)) return ''; lost++; return ''; } return u; });

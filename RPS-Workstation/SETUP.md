@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.53: Autosave gives pictures back as they were: signatures kept through a restore on an iPad (the BCBA, 10/26)
+- **What happened.** After the update, Form RS-1 came back from the Autosave copy with its days, contacts, names and
+  dates, but without the two signatures signed earlier that day. The copy keeps each picture (a signature, a photo) as a
+  stored file beside the form's text. A stored file can come back without its type, and the picture then reads as
+  "application/octet-stream" instead of a PNG. RS-1 takes only a PNG as a signature, so it left both out without saying so.
+  The test reproduces this: on the previous version the signatures are left out and the rest comes back, exactly as seen.
+- **Fixed in Autosave, for every form.** The copy now keeps each picture's type beside it. A picture that comes back
+  without its type takes the kept one, or is recognised by its first bytes (PNG, JPEG, GIF, WebP, SVG). So a copy written by
+  an earlier version also gives its pictures back. On Safari (every browser on an iPad or iPhone), pictures are now kept
+  as text, the same way the form's own file is kept, not as stored files.
+- **Form RS-1 says when a signature is missing.** If a signature was given (the record knows it was drawn or typed, and
+  when) but its picture did not come back, the sign page says so and asks for it to be signed again. The printed record
+  and the PDF show no signature and no "Signed electronically" line until it is signed again.
+- Uploading a new version does not erase anything: the work stays in the browser on the device. **Save data** in the
+  form (or **Save case**) keeps a file with the signatures in it, and the emailed PDF keeps the signed record.
+- Tests: qa/pics153-test.js (a simulated August signed in RS-1 inside the workstation: pictures that come back without
+  a type, from an older copy and from a new one, give both signatures back; on an iPad the copy keeps pictures as text and
+  Restore gives both back; a picture that cannot be read is left out, the sign page says to sign again, and signing again
+  clears the note).
+
 ### v24.52: Form RS-1 emails the record as a PDF (the BCBA, 10/26: the emailed record opened as page code in Gmail on the iPad)
 - **The record goes as a PDF.** Email this month's record, Email the year summary, Save the record as a file and Save the
   RBT's copy now give a PDF instead of a web page (.html). Gmail on the iPad showed the page's code; a PDF opens in

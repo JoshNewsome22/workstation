@@ -725,6 +725,7 @@ label.chip:focus-within{outline:2px solid var(--nbh-slate,#254657);outline-offse
 .rs-comp .verdictline.ok{background:#E3EFE0;color:#1f4d26}.rs-comp .verdictline.pending{background:#FBEEDB;color:#6d3a0e}.rs-comp .verdictline.fail{background:#F6E0E0;color:#6e1f1f}.rs-comp .verdictline.na{background:#f1f4f3;color:#54676f}.rs-comp .verdictline.entering{background:#E8EEF2;color:#2c4452}
 .rs-catchnudge{margin:8px 12px;font-size:13.5px;color:var(--ink-soft)}.rs-catchnudge .tool{display:block;margin:6px 0 0}
 #enteredChip[hidden]{display:none!important}
+.rs-siglost{margin:6px 0 0;padding:8px 12px;border-left:4px solid #b45309;background:#fff7ed;color:#7c2d12;font-size:.95em}.rs-siglost[hidden]{display:none!important}
 .rs-comp .fine{padding:8px 12px;font-size:11.5px;color:var(--ink-soft);border-top:1px solid var(--rule-2)}
 
 /* ---- the service-day rows ---- */
@@ -1287,6 +1288,7 @@ td input,td select{max-width:100%}
         </div>
         <canvas class="rs-pad" data-pad="sup_img" width="640" height="150" aria-label="Supervisor's signature: draw here"></canvas>
         <div class="tools"><button class="tool" type="button" data-padclear="sup_img">Clear the signature</button></div>
+        <p class="rs-siglost" data-siglost="sup_img" role="status" hidden></p>
         <details class="rs-typesig"><summary>Type the signature instead</summary>
           <div class="ts-in"><label for="ts_sup">The supervisor&rsquo;s full name, as signed</label><input id="ts_sup" data-tsname="sup_img" autocomplete="off" spellcheck="false">
           <div class="ts-prev" aria-hidden="true" data-tsprev="sup_img"></div>
@@ -1301,6 +1303,7 @@ td input,td select{max-width:100%}
         </div>
         <canvas class="rs-pad" data-pad="rbt_img" width="640" height="150" aria-label="RBT's signature: draw here"></canvas>
         <div class="tools"><button class="tool" type="button" data-padclear="rbt_img">Clear the signature</button></div>
+        <p class="rs-siglost" data-siglost="rbt_img" role="status" hidden></p>
         <details class="rs-typesig"><summary>Type the signature instead</summary>
           <div class="ts-in"><label for="ts_rbt">The RBT&rsquo;s full name, as signed</label><input id="ts_rbt" data-tsname="rbt_img" autocomplete="off" spellcheck="false">
           <div class="ts-prev" aria-hidden="true" data-tsprev="rbt_img"></div>
@@ -1891,7 +1894,10 @@ function renderYearOut(){const y=setupYear(),ks=yearKeys(y),tk=thruKey(),cut=tk?
 function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent='Sign the Record for '+keyLabel(curKey);
   $$('[data-sg]').forEach(el=>{el.value=sg[el.dataset.sg]||'';});
   const sp=S.sups.find(s=>s.name&&credOK(s.cred));$('#sgSup').placeholder=sp?supLabel(sp):'name, credential';$('#sgRbt').placeholder=S.setup.rbt_name?(S.setup.rbt_name+', '+(S.setup.rbt_cred||'RBT')):'name, RBT';
-  $$('canvas.rs-pad').forEach(cv=>padDraw(cv,sg[cv.dataset.pad]));}
+  $$('canvas.rs-pad').forEach(cv=>padDraw(cv,sg[cv.dataset.pad]));
+  /* v24.53 a signature given here whose picture did not come back (a restore that lost it) is said so, to be signed again */
+  $$('[data-siglost]').forEach(el=>{const k=el.dataset.siglost,w=k.replace('_img',''),lost=!!sg[w+'_how']&&!sg[k];el.hidden=!lost;
+    el.textContent=lost?'The signature '+(sg[w+'_how']==='typed'?'typed and adopted':'drawn')+' here'+(sg[w+'_at']?' on '+new Date(sg[w+'_at']).toLocaleString('en-US',{month:'numeric',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}):'')+' did not come back with the saved work. Sign again; the record shows no signature until then.':'';});}
 function renderPrint(){month(curKey);renderSign();thruPaint();renderMonthOut();renderYearOut();rdYear();rdListPaint();renderConcernOut();}
 
 /* the signature pads: a finger or a stylus draws; the drawing is kept with the month as an image, which the record prints */
