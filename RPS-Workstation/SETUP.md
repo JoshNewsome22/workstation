@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.34: Form DD-1 enters a completed daily data sheet from a photo
+(asked for on 10/26 after the Scatterplot and ABC-1 scans: "Also add a DD scan as well")
+
+- **What a photo can and cannot do here.** The daily data sheet is written in numbers (counts, minutes, percents), and no
+  reader of handwritten numbers runs on the device with the care a student's record deserves. So the photo does the part a
+  machine does well and leaves the numbers to the person: the sheet is straightened, the days on the page are found, every
+  cell is cut out and told blank from written, and each written cell's picture is shown beside a box to type it in. Entry
+  from a week's sheet becomes a minute of typing with the cell in view, not a search across the paper.
+- **On paper, the daily data sheet (the blank week and the record's own sheet) now carries** four black square rings at the
+  table's corners (two in the heading row, two in a thin foot row that follows the rows on every page), a square code in
+  the Date heading (the student number, a print id and a signature of the layout) and, in each day's date cell, a column
+  of five small marks naming the row. On screen none of this shows. The sheet's layout (the columns' places, the row
+  pitch, the dates in order) is kept with the record when the sheet prints, the newest eight prints, so a page of any
+  length prints and scans. Interval entry, and a sheet with the definitions in the column headings, carry no code.
+- **Enter a paper sheet from a photo** (the Data tab, beside Print this sheet) takes a photo with the camera or from the
+  camera roll. On the device, with no server, the form reads the code, finds the rings (the two beside the code first, the
+  two under the rows from the turn and scale those give, trying each possible count of rows on the page), straightens the
+  sheet, reads each row's day from its marks (a row whose marks cannot be read gets a date picker), cuts out every cell
+  and tells blank from written. It shows the days outlined over the photo and a grid: a row a day, a column a behavior
+  (two for a correct-of-opportunities target) and the daily notes, each cell its picture above a box; blank cells are
+  dashed and skipped. On **Enter into the record** the typed values go to those days: a day not yet in the record is
+  added, the blank week is put away, and a value the form already holds is replaced only after a further yes. The photo
+  is not kept.
+- **What it refuses, and says why:** a photo with no sheet code; another student's sheet (the student number, matched
+  without regard to case); a print whose layout the record does not hold (printed from another device, or the record not
+  kept after printing); a code of another form; a record set to interval entry; a photo in which the rings cannot be
+  found. A box with something other than a number is pointed out before anything is entered.
+- The decoder is jsQR 1.4.0 (Apache License 2.0, tools/vendor/jsqr, inlined as in Forms SP-1 and ABC-1).
+- Tests: qa/dd134-test.js (the printed blank week's rings, code, row marks and kept layout; a photo of the sheet with
+  numbers written into two cells in three, skewed and softened, read back: five days dated from their marks, every cell
+  told blank from written at 95% or better; the values typed beside their pictures and entered into five new days; the
+  replace question; the refusals).
+
 ### v24.33: Form ABC-1 reads a completed paper sheet from a photo
 (asked for on 10/26 with the Scatterplot scan: "maybe the same thing for the abc data sheet")
 
