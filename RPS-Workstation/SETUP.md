@@ -9905,6 +9905,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.23: Form DD-1 from the independent review: a day on the graph is a whole school day
+(the independent review of 10/25, DD-1 findings R-009, R-010, R-088 to R-091, R-093 to R-095, R-097, R-140 to R-142; enhancements E-07, E-20 and E-38 in part)
+
+- **A behavior's Direction follows its Type** (decrease for a reduction target, increase for a replacement or acquisition
+  target) until the analyst sets it; a row whose direction runs against its type carries a "check" chip with the reason.
+  (Retyping a row as a replacement no longer leaves "Decrease is better", where more manding reads as worse.)
+- **Before Live Recording writes a row it asks** when the date is not a school day (Weekdays only on) or the session ran under
+  half the day's observation window. Refused, nothing is written. Saved anyway, the row is a **part-day sample**: its minutes
+  cell is marked, the point is drawn hollow and left out of the level, trend, overlap and criterion figures, and the decision
+  line counts it. (A three-second session no longer plots as a Sunday's total.)
+- **A decision line under each graph**, labeled a convention: the criterion run in the current condition (days at or past the
+  aim, the date it was met, the longest run against the days needed) and, when the new **Review after (days)** column on
+  Client & behaviors is set, a flag when that many school days in the current condition have passed without the level moving
+  the right way. (The due board does not yet carry it.)
+- **Agreement**: the line says total count agreement can overstate agreement when two counts match by chance; a day's details
+  take an agreement percent from Form OB-1's interval or exact record beside the second observer's value, and it counts for
+  that day. The Graphs page's sentence links to the latest day's details; the day button reads "+ Day details".
+- **A fresh form has one unnamed behavior row** with a placeholder, not three named reduction targets; the case fill treats
+  it as a default and replaces it. (The empty form's fill marks no longer count the defaults.)
+- **The week summary and the note home call a change on the rate**: "about the same" only when the change is under 25% of
+  last week's mean and under three a day (five points for a percentage); 1.0 to 0.4 a day reads "down 60%".
+- **The blank week to print carries the Minutes observed and Assent columns** (A · R · W on the blank rows), as the screen does.
+- **Live Recording starts folded** (a one-line bar with Show) until it is shown, so the sheet comes first; the sheet's scroller
+  grows to the window's height.
+- A percent change from a baseline under one a day is not shown ("from near zero" instead of "+2600%"); the note under the
+  table defines trend stability; the autosave offer lists one copy per student and form, the newest, with the time it was saved.
+- Checks: `qa/dd123-test.js`.
+
 ### v24.22: Shared numeric validation, from the independent review: the forms read their numbers with their rules
 (the independent review of 10/25, the R-032 theme: R-005 TB-1, R-006 and B-51 DD-1, R-100 SM-1, R-119 RS-1; enhancement E-05; EA-1 (v24.20) and TD-1 (v24.21) already read their logs this way)
 

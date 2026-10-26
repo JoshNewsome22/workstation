@@ -399,7 +399,7 @@ tbody tr:hover{background:#F8FAFB}
 .sheet tbody tr:hover td,.igrid tbody tr:hover td{background:#EDF4F6}
 .sheet tbody tr.sel-day:hover td{background:#DCEAEB}
 
-.sheet-wrap{overflow:auto;max-height:66vh;border:1px solid var(--rule);border-radius:3px;background:
+.sheet-wrap{overflow:auto;max-height:calc(100vh - 170px);border:1px solid var(--rule);border-radius:3px;background:
   linear-gradient(var(--rule-soft) 1px,transparent 1px) 0 0/100% 28px}
 .sheet,.igrid{table-layout:fixed;width:auto}
 .sheet col.c-date{width:152px}
@@ -1494,6 +1494,22 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 .dd-cmp-key{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0;font-size:13px}.dd-cmp-key i{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}
 .dd-cmp-t{border-collapse:collapse;font-size:13px;margin:6px 0}.dd-cmp-t th,.dd-cmp-t td{border-bottom:1px solid #dfe5e8;padding:4px 10px;text-align:left}
 </style>
+<style id="dd123-css">
+/* v24.23 the direction chip, the part-day sample, the decision line, the blank week's minutes and assent columns */
+.dd-dirwarn{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:10px;background:#fff1f0;color:#b3261e;border:1px solid #b3261e;font-size:11px;font-weight:600;vertical-align:middle}
+.dd-dirwarn[hidden]{display:none}
+#dataTable td.dd-sample input{outline:2px dashed #9b4e15;outline-offset:-2px}
+.dd-rule{margin:6px 0 2px}
+@media print{body.dd-blank-on #dataTable .col-obs,body.dd-blank-on #dataTable .col-day,body.dd-blank-on #dataTable th.col-day{display:table-cell!important}
+  body.dd-blank-on #dataTable col.c-obs,body.dd-blank-on #dataTable col.c-day{display:table-column!important}
+  body.dd-blank-on #dataTable td.col-day .po:empty::after{content:"A · R · W";color:#777;font-size:7px;white-space:nowrap;letter-spacing:0}
+  body.dd-blank-on #dataTable td.col-day,body.dd-blank-on #dataTable th.col-day{white-space:nowrap;min-width:38px}
+  body.dd-blank-on #dataTable td.col-day .po{display:block;text-align:center}
+  body.dd-blank-on #dataTable .col-obs input{border:0;background:transparent}}
+</style>
+<script id="dd123-link">
+document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("[data-dd-ioa-open]");if(!a)return;e.preventDefault();try{showTab("data");const R=sortedRows();const r=R[R.length-1];if(r)ddTagOpen(r.id);}catch(x){}});
+</script>
 </head>
 <body>
 
@@ -1587,6 +1603,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
             <th style="width:14%">Direction</th>
             <th style="width:10%">Aim or mastery criterion</th>
             <th style="width:9%">Consecutive days</th>
+            <th style="width:9%" title="A convention: when this many school days in the current condition have passed without the level moving the right way, the graph flags the behavior for review">Review after (days)</th>
             <th style="width:16%">Pairs with</th>
           </tr>
         </thead>
@@ -1612,7 +1629,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
       <script>
 /* v22.32 Hide / Show for Live Recording, remembered on this device */
 (function(){const box=document.getElementById("ddLive"),b=document.getElementById("ddlFold");if(!box||!b)return;
-  const K="nbh.dd1.liveFold";let fold=false;try{fold=localStorage.getItem(K)==="1";}catch(e){}
+  const K="nbh.dd1.liveFold";let fold=true;try{const v=localStorage.getItem(K);fold=v===null?true:v==="1";}catch(e){}   /* v24.23 (R-097) folded until shown: the sheet first */
   const paint=()=>{const busy=!!box.dataset.s&&box.dataset.s!=="ready",f=fold&&!busy;box.classList.toggle("ddl-folded",f);
     b.textContent=f?"Show":"Hide";b.setAttribute("aria-expanded",String(!f));b.disabled=busy;
     b.title=busy?"A session is running or not saved yet, so Live Recording stays open":f?"Show Live Recording":"Hide Live Recording (it stays hidden on this device until you show it)";};
@@ -1972,9 +1989,8 @@ function blankState(){
   return {
     meta:{client:"",id:"",age:"",school:"",classroom:"",observer:"",analyst:"",baseline:"Baseline",prepared:"",notes:"",photo:"",logo:""},
     behaviors:[
-      {id:uid("b"),kind:"target",name:"Physical aggression",definition:"",obsLength:"Entire school day",measure:"count",direction:"decrease",aim:"",critDays:3,pairWith:"",color:PALETTE[0]},
-      {id:uid("b"),kind:"target",name:"Self-injury",definition:"",obsLength:"Entire school day",measure:"count",direction:"decrease",aim:"",critDays:3,pairWith:"",color:PALETTE[1]},
-      {id:uid("b"),kind:"target",name:"Property destruction",definition:"",obsLength:"Entire school day",measure:"count",direction:"decrease",aim:"",critDays:3,pairWith:"",color:PALETTE[2]}
+      /* v24.23 (dd123, R-090) one unnamed row: a one-target student gets one column and one graph, and the case fill replaces it */
+      {id:uid("b"),kind:"target",name:"",definition:"",obsLength:"Entire school day",measure:"count",direction:"decrease",aim:"",critDays:3,pairWith:"",color:PALETTE[0]}
     ],
     rows:[],
     schedule:{},
@@ -2267,13 +2283,14 @@ function trendDirection(slope,direction,tolerance,span,band){
 }
 
 function analyzeCondition(cond,beh,rows){
-  const pts=[];
+  const pts=[],samples=[];
   cond.rowIdx.forEach(i=>{
     const v=plotValue(rows[i],beh);
-    if(v!==null) pts.push({x:i,y:v,date:rows[i].date});
+    /* v24.23 (dd123, R-010) a part-day sample is drawn hollow and left out of the figures */
+    if(v!==null){ if(rows[i].sample&&(beh.measure==="count"||beh.measure==="duration")) samples.push({x:i,y:v,date:rows[i].date,min:rows[i].obsMin}); else pts.push({x:i,y:v,date:rows[i].date}); }
   });
   const vals=pts.map(p=>p.y);
-  const out={name:cond.name,pts,vals,n:pts.length,rowIdx:cond.rowIdx};
+  const out={name:cond.name,pts,vals,n:pts.length,rowIdx:cond.rowIdx,samples};
   if(!pts.length) return out;
   out.mean=mean(vals); out.median=median(vals); out.sd=sd(vals);
   out.min=Math.min(...vals); out.max=Math.max(...vals); out.range=out.max-out.min;
@@ -2714,6 +2731,8 @@ function buildChart(beh,rows,conds,analyses){
       seg.push(p); expect=p.x+1;
     });
     flush();
+    (a.samples||[]).forEach(p=>{const cx=X(p.x), cy=Y(Math.min(p.y,top));   /* v24.23 (R-010) a part-day sample: hollow, off the data path */
+      g.push(`<circle class="dd-sample-pt" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4" fill="#fff" stroke="${esc(beh.color)}" stroke-width="1.6" stroke-dasharray="2 1.5"><title>${esc(fmtDate(p.date))}: ${r1(p.y)} in a part-day sample (${esc(String(p.min||""))} min); left out of the figures<\/title><\/circle>`);});
     a.pts.forEach(p=>{
       if(p.y>top) clipped++;
       const cx=X(p.x), cy=Y(Math.min(p.y,top));
@@ -2758,7 +2777,12 @@ function renderMeta(){
   renderSheetId();
   $("#photoSlot").innerHTML = m.photo ? `<img src="${esc(m.photo)}" alt="Client photo">` : "No photo added";
 }
-function renderBehaviors(){
+/* v24.23 (dd123, R-009) a row whose direction runs against its type carries a check chip */
+function ddDirChips(){document.querySelectorAll('#behTable tr[data-b]').forEach(tr=>{const b=S.behaviors.find(x=>x.id===tr.dataset.b),sel=tr.querySelector('select[data-f="direction"]');if(!b||!sel)return;
+  let chip=tr.querySelector('.dd-dirwarn');const odd=(b.kind==="target")!==(b.direction!=="increase");
+  if(odd&&!chip){chip=document.createElement('span');chip.className='dd-dirwarn';chip.textContent='check';sel.after(chip);}
+  if(chip){chip.hidden=!odd;chip.title=b.kind==="target"?'A reduction target is usually "Decrease is better": with Increase, more of the behavior reads as improvement.':'A replacement or acquisition target is usually "Increase is better": with Decrease, more of the skill reads as worse and the criterion counts days at or below the aim.';}});}
+function renderBehaviors(){try{setTimeout(ddDirChips,0);}catch(e){}
   const tb=$("#behTable tbody");
   const ordered=orderedBehaviors();
   const targets=S.behaviors.filter(b=>(b.kind||"target")==="target");
@@ -2770,7 +2794,7 @@ function renderBehaviors(){
       lastKind=kind;
     }
     html+=`<tr data-b="${esc(b.id)}">
-      <td><input type="text" data-f="name" value="${esc(b.name)}" placeholder="Name"></td>
+      <td><input type="text" data-f="name" value="${esc(b.name)}" placeholder="${kind==="target"?"e.g., Physical aggression":kind==="replacement"?"e.g., Asks for a break":"e.g., Reads 20 sight words"}"></td>
       <td><select data-f="kind">${KIND_ORDER.map(k=>`<option value="${k}"${kind===k?" selected":""}>${KINDS[k]}</option>`).join("")}</select></td>
       <td><select data-f="measure">${Object.keys(MEASURES).map(k=>`<option value="${k}"${b.measure===k?" selected":""}>${MEASURES[k].label}</option>`).join("")}</select></td>
       <td><select data-f="direction">
@@ -2779,6 +2803,7 @@ function renderBehaviors(){
       </select></td>
       <td><input type="number" step="any" data-f="aim" value="${b.aim===null||b.aim===undefined?"":esc(b.aim)}" placeholder="optional"></td>
       <td><input type="number" step="1" min="1" data-f="critDays" value="${b.critDays===null||b.critDays===undefined?"":esc(b.critDays)}" placeholder="3" style="width:70px"></td>
+      <td><input type="number" step="1" min="2" data-f="reviewDays" value="${b.reviewDays===null||b.reviewDays===undefined?"":esc(b.reviewDays)}" placeholder="optional" style="width:70px" title="Days without the level moving the right way before the graph flags this behavior for review (a convention)"></td>
       <td><select data-f="pairWith">
         <option value="">\u2014</option>
         ${targets.filter(t=>t.id!==b.id).map(t=>`<option value="${esc(t.id)}"${b.pairWith===t.id?" selected":""}>${esc(t.name||"Untitled")}</option>`).join("")}
@@ -2939,7 +2964,7 @@ function renderData(){
   <tr class="hrow">
     <th class="col-date idcell" colspan="2" rowspan="2">${idBlock(true)}</th>
     ${bands}
-    <th class="keycell" colspan="4" rowspan="${headerRows}">${keyBlock()}</th>
+    <th class="col-obs" rowspan="${headerRows}">Obs. min</th><th class="col-day" rowspan="${headerRows}">Assent</th><th class="keycell" colspan="2" rowspan="${headerRows}">${keyBlock()}</th>
   </tr>
   <tr class="hrow">
     ${obs.map(b=>`<th class="namecell" colspan="${span(b)}" style="border-top:3px solid ${esc(b.color)}">${esc(b.name||"Untitled")}</th>`).join("")}
@@ -2970,7 +2995,7 @@ function renderData(){
     if(iv && r.id===selectedDay) cls+=" sel-day";
     return `<tr class="${cls}" data-r="${esc(r.id)}">
       <td class="col-date ${iv?"pick":""}"><input type="date" data-f="date" value="${esc(r.date)}" style="padding-left:2px;padding-right:2px"><span class="pdate">${pdateHtml(r.date)}</span>${iv?`<button class="btn ghost sm" data-act="openDay" style="margin:0 4px 5px;padding:2px 7px">Open</button>`:""}</td>
-      <td class="col-obs ${iv?"calc":""} ${iv&&!r.obsMin?"none":""}">${iv?esc(r.obsMin||"\u2014"):(()=>{
+      <td class="col-obs ${iv?"calc":""} ${iv&&!r.obsMin?"none":""}${r.sample?" dd-sample":""}"${r.sample?' title="A part-day sample from Live Recording: drawn hollow on the graph and left out of the figures. Clear the mark in the day\u2019s details."':""}>${iv?esc(r.obsMin||"\u2014"):(()=>{
         const o=num(r.obsMin), wm=windowMinutes();
         return `<input type="number" step="any" min="0" data-f="obsMin" class="${o===null?"is-default":""}" value="${o!==null?esc(r.obsMin):(wm===null?"":wm)}" title="${o===null?"From the standard observation window \u2014 type over it for a short day":"Adjusted for this day \u2014 clear the cell to use the window again"}">`;
       })()}</td>
@@ -3451,7 +3476,7 @@ function comparisonCard(A,B,beh){
   const esc2="neutral es-tile"+(S.settings.esPrint===true?"":" es-noprint");
   const tiles=[
     metric("Mean level change",`${c.meanChange>0?"+":""}${r1(c.meanChange)}`,
-      `${r1(A.mean)} \u2192 ${r1(B.mean)} ${unit}${c.meanPct!==null?` (${c.meanPct>0?"+":""}${Math.round(c.meanPct)}%)`:""}`, effectClass(c.improvesLevel)),
+      `${r1(A.mean)} \u2192 ${r1(B.mean)} ${unit}${c.meanPct!==null?(Math.abs(A.mean)>=1?` (${c.meanPct>0?"+":""}${Math.round(c.meanPct)}%)`:" (from near zero: no percent)"):""}`, effectClass(c.improvesLevel)),   /* v24.23 (R-140) */
     metric("Median level change",`${c.medianChange>0?"+":""}${r1(c.medianChange)}`,`${r1(A.median)} \u2192 ${r1(B.median)}`,"neutral"),
     metric("Absolute level change",`${c.absLevelChange>0?"+":""}${r1(c.absLevelChange)}`,`last of ${esc(A.name)} \u2192 first of ${esc(B.name)}`,"neutral"),
     metric("Relative level change",c.relLevelChange===null?"\u2014":`${c.relLevelChange>0?"+":""}${r1(c.relLevelChange)}`,
@@ -3842,7 +3867,7 @@ function renderResults(){
 
       ${(s=>s?`<div class="dd-keep">${s}<\/div>`:"")(episodeSection(beh,rows,conds))}
       <div class="dd-keep"><div class="sec-title"><h3>Within-condition analysis<\/h3><span>level, trend, variability, and stability computed separately for each condition<\/span><\/div>
-      ${ddIoaHtml(beh,rows,analyses)}
+      ${ddRuleHtml(beh,rows,analyses)}${ddIoaHtml(beh,rows,analyses)}
       ${ddObsWarn(beh)?`<p class="caution dd-obswarn">${esc(beh.name||"This behavior")} is watched for “${esc(beh.obsLength)}”, but no minutes observed are set for it, so its ${beh.measure==="rate"?"rate":"percent of time"} is computed over the day's minutes (${windowMinutes()===null?"the minutes typed":windowMinutes()+" min by default"}). Set its minutes observed on the behavior's row (Set up).<\/p>`:""}
       ${withData.length?withinTable(analyses,beh)+`<p class="caution">Envelope width is a percentage of each condition's own median, so conditions with low medians get narrow envelopes, and at a median of 0 the envelope has no width: only the points at 0 fall inside it. Near-zero count data will often fall below the stability criterion even when the level is clinically excellent; read stability alongside the range rather than on its own. A trend is called flat (zero-celerating) when the fitted line changes, across the condition, by no more than the stability envelope's half-width, or when its slope, up or down, is less than 1% of the condition's mean per day (or less than 0.01 per day, whichever is larger): conventions of this form that approximate reading the trend against the envelope (Ledford et al., 2018; Lane &amp; Gast, 2014).<\/p>`:`<div class="empty">No condition has data for this behavior.<\/div>`}${acrossNone}<\/div>
       ${cmps?`<div class="sec-title"><h3>Across-condition analysis<\/h3><span>adjacent condition comparisons<\/span><\/div>${cmps}`:""}
@@ -3902,7 +3927,7 @@ window.addEventListener("resize",()=>{ clearTimeout(ddScrollT); ddScrollT=setTim
 /* v21.16 audit: where each index on these pages comes from, with the reference list */
 function sourcesPanel(){
   return `<div class="panel dd-sources" id="ddSources"><h2>Sources for the Indices</h2>
-    <p class="hint" style="max-width:none">Level as the mean, variability as the range and standard deviation, immediacy as the last three points of one condition against the first three of the next (the default window), and overlap follow Kratochwill et al. (2010). The stability envelope (80% of points within &plusmn;25% of the median), its use around a trend line, the split-middle trend and the terms accelerating, decelerating and zero-celerating follow Ledford, Lane, and Severini (2018), who cite Lane and Gast (2014) for the envelope. PND: Scruggs, Mastropieri, and Casto (1987). PEM: Ma (2006). NAP: Parker and Vannest (2009), who count a tie as half a pair. Tau: Parker, Vannest, Davis, and Sauber (2011). The other envelope widths, the 85% and 90% criteria and the band within which a trend is called flat are conventions of this form, not taken from these sources.</p>
+    <p class="hint" style="max-width:none">Level as the mean, variability as the range and standard deviation, immediacy as the last three points of one condition against the first three of the next (the default window), and overlap follow Kratochwill et al. (2010). The stability envelope (80% of points within &plusmn;25% of the median), its use around a trend line, the split-middle trend and the terms accelerating, decelerating and zero-celerating follow Ledford, Lane, and Severini (2018), who cite Lane and Gast (2014) for the envelope. PND: Scruggs, Mastropieri, and Casto (1987). PEM: Ma (2006). NAP: Parker and Vannest (2009), who count a tie as half a pair. Tau: Parker, Vannest, Davis, and Sauber (2011). The other envelope widths, the 85% and 90% criteria and the band within which a trend is called flat are conventions of this form, not taken from these sources. Trend stability is the share of a condition's points within the envelope's half-width of the trend line.</p>
     <ul class="dd-refs"><li>Kratochwill, T. R., Hitchcock, J., Horner, R. H., Levin, J. R., Odom, S. L., Rindskopf, D. M., &amp; Shadish, W. R. (2010). <em>Single-case designs technical documentation</em> (Version 1.0, pilot). What Works Clearinghouse. https://ies.ed.gov/ncee/wwc/Docs/ReferenceResources/wwc_scd.pdf</li><li>Lane, J. D., &amp; Gast, D. L. (2014). Visual analysis in single case experimental design studies: Brief review and guidelines. <em>Neuropsychological Rehabilitation, 24</em>(3&ndash;4), 445&ndash;463.</li><li>Ledford, J. R., Lane, J. D., &amp; Severini, K. E. (2018). Systematic use of visual analysis for assessing outcomes in single case design studies. <em>Brain Impairment, 19</em>(1), 4&ndash;17.</li><li>Ma, H.-H. (2006). An alternative method for quantitative synthesis of single-subject researches: Percentage of data points exceeding the median. <em>Behavior Modification, 30</em>(5), 598&ndash;617.</li><li>Parker, R. I., &amp; Vannest, K. (2009). An improved effect size for single-case research: Nonoverlap of all pairs. <em>Behavior Therapy, 40<\/em>(4), 357&ndash;367.<\/li><li>Parker, R. I., Vannest, K. J., Davis, J. L., &amp; Sauber, S. B. (2011). Combining nonoverlap and trend for single-case research: Tau-U. <em>Behavior Therapy, 42</em>(2), 284&ndash;299.</li><li>Scruggs, T. E., Mastropieri, M. A., &amp; Casto, G. (1987). The quantitative synthesis of single-subject research: Methodology and validation. <em>Remedial and Special Education, 8</em>(2), 24&ndash;33.</li></ul></div>`;
 }
 
@@ -4027,6 +4052,9 @@ function readImage(file,cb){
 ---------------------------------------------------------------- */
 function loadExample(){
   S=blankState();
+  /* v24.23 (R-090) a fresh form has one unnamed row; the worked example names its three reduction targets */
+  while(S.behaviors.length<3)S.behaviors.push(Object.assign({},S.behaviors[0],{id:uid("b"),color:PALETTE[S.behaviors.length]}));
+  ["Physical aggression","Self-injury","Property destruction"].forEach((nm,i)=>{S.behaviors[i].name=nm;S.behaviors[i].kind="target";S.behaviors[i].direction="decrease";});
   S.meta={client:"SIMULATED \u2013 Sample Student",id:"SIM-000",age:"9 yr 4 mo",
     school:"Example ESE center school (simulated)",classroom:"Room 12 (simulated)",
     observer:"Classroom team (simulated)",analyst:"Jordan Ellis, M.A., BCBA (simulated)",baseline:"Baseline",
@@ -4225,7 +4253,11 @@ $("#behTable").addEventListener("input",e=>{
   b[f]=e.target.value;
   /* v21.21: a percentage is always graphed from 0 to 100, so its y-axis maximum is set aside while it is one */
   if(f==="measure") ddYmaxField(b);
+  /* v24.23 (dd123, R-009) the direction follows the type until the analyst sets it */
+  if(f==="direction"){ b.dirSet=true; setTimeout(ddDirChips,0); }
+  if(f==="kind"&&!b.dirSet){ b.direction=e.target.value==="target"?"decrease":"increase"; }
   if(f==="kind"||f==="pairWith"){ renderBehaviors(); }
+  if(f==="kind"||f==="direction"){ renderResults(); }
   if(f==="name"||f==="measure"||f==="color"||f==="kind"){ renderData(); renderIntervalPanel(); syncResultControls(); }
   // the definition and observation length head the data sheet's columns, so it redraws with them
   if(f==="definition"||f==="obsLength"){ renderData(); renderIntervalPanel(); }
@@ -5425,10 +5457,18 @@ function paintSummary(){
 
 /* ---------------- Save to the sheet ---------------- */
 let saving=false;
+/* v24.23 (dd123, R-010, E-20) before a row is written: is this a school day, and was the whole day observed? */
+function ddDayConcerns(iso,minutes,cells){const out=[];
+  try{const d=new Date(iso+"T12:00:00");if(S.settings.weekdays!==false&&(d.getDay()===0||d.getDay()===6))out.push(dayName(iso)+" is a "+(d.getDay()===0?"Sunday":"Saturday")+", not a school day (Weekdays only is on).");}catch(e){}
+  const wm=windowMinutes();if(wm!==null&&minutes!=null&&minutes<0.5*wm&&(cells||[]).some(c=>c.type==="cnt"||c.type==="dur"))out.push("This session ran "+r1(minutes)+" min; the day's observation window is "+wm+" min. Its counts are a sample of the day, not the day's total.");
+  return out;}
 async function save(){
   if(L.state!=="done"||saving) return;
   const p=planFor(E.date.value);
   if(!p.ok){ note(p.why,true); if(!p.dateOk) focusOn(E.date); return; }
+  const concerns=p.iv?[]:ddDayConcerns(p.iso,p.R.M,p.cells);let asSample=false;
+  if(concerns.length){saving=true;let go=true;try{go=window.nbhUI&&nbhUI.confirm?await nbhUI.confirm("Save to the sheet anyway?\n"+concerns.join("\n")+"\nThe row keeps the session's minutes and is marked as a part-day sample: drawn hollow on the graph and left out of the level, trend, overlap and criterion figures.",{ok:"Save as a sample"}):window.confirm("Save to the sheet anyway?\n"+concerns.join("\n"));}finally{saving=false;}
+    if(!go){note("Nothing was written. Pick a school day, or run the session for the day's window; the session is still here.",true);return;}asSample=concerns.some(c=>/sample of the day/.test(c));}
   const orig=JSON.parse(JSON.stringify(p.row||newRow(p.iso)));
   const conf=p.row?p.cells.filter(c=>has(orig,c)):[];
   let how=()=>"replace", ns={}, tally=null;
@@ -5439,7 +5479,7 @@ async function save(){
     how=ans.how; ns=ans.ns; tally=ans.tally;
   }
   let row=p.row; if(!row){ row=newRow(p.iso); S.rows.push(row); }
-  apply(row,p,how,ns,orig);
+  apply(row,p,how,ns,orig);if(asSample)row.sample=true;else if(row.sample&&!concerns.length)delete row.sample;   /* v24.23 (R-010) */
   const cond=condFor(p.iso), n=p.cells.filter(c=>c.b).map(c=>c.b.id).filter((x,i,a)=>a.indexOf(x)===i).length;
   const parts=tally?[tally.add?"added to "+pl(tally.add,"value"):"",tally.replace?"replaced "+pl(tally.replace,"value"):"",tally.keep?"skipped "+pl(tally.keep,"value")+" (the sheet"+RSQ+"s kept)":""].filter(Boolean):[];
   const msg="Saved to "+dayName(p.iso)+" (condition: "+cond+"): "+(p.iv?"":r1(p.R.M)+" observed minutes and ")+pl(n,"behavior")+(parts.length?"; "+parts.join(", "):"")+"."+(p.dup>1?" "+p.dup+" rows have this date; the session went into the first.":"");
@@ -5868,7 +5908,7 @@ function nbhDdToast(msg){let k=0;(function go(){if(!window.__nbhQuiet){toast(msg
 window.__nbhFactsIn=function(f){
   const behs=f.behaviors||[];
   const EX=['Physical aggression','Self-injury','Property destruction'];
-  const untouched=!S.rows.length&&S.behaviors.every(b=>!b.definition&&!b.aim)&&S.behaviors.every(b=>b.kind==='target'&&EX.indexOf(b.name)>=0);
+  const untouched=!S.rows.length&&S.behaviors.every(b=>!b.definition&&!b.aim)&&S.behaviors.every(b=>b.kind==='target'&&(!String(b.name||'').trim()||EX.indexOf(b.name)>=0));   /* v24.23 (R-090) an unnamed row is a default too */
   if(untouched){
     if(!behs.length)return {filled:0};
     S.behaviors=[];
@@ -6100,7 +6140,8 @@ function ddFour(b,mon,rows){const out=[];for(let k=3;k>=0;k--){const m=ddAddDays
 function ddFourTxt(b,v){const pc=MEASURES[b.measure].two||/%/.test(MEASURES[b.measure].unit);return v.map(x=>x===null?"—":r1(x)+(pc?"%":"")).join(" · ");}
 function ddChange(b,a,c){if(!a||!c)return {t:"—",k:""};const d=c.mean-a.mean,up=(b.direction||(b.kind==="target"?"decrease":"increase"))!=="decrease";
   if(Math.abs(d)<1e-9)return {t:"no change",k:""};const pc=MEASURES[b.measure].two||/%/.test(MEASURES[b.measure].unit);
-  if(Math.abs(d)<Math.max(0.2*Math.abs(a.mean),pc?5:1))return {t:"about the same"+(a.mean>0?` (${d<0?"down":"up"} ${Math.round(Math.abs(d)/a.mean*100)}%)`:""),k:""};const good=up?d>0:d<0;
+  /* v24.23 (dd123, R-091) a change is called on the rate: about the same only when it is under 25% of last week's mean and under three a day (five points for a percentage) */
+  const rel=a.mean>0?Math.abs(d)/a.mean:1;if(rel<0.25&&Math.abs(d)<(pc?5:3))return {t:"about the same"+(a.mean>0?` (${d<0?"down":"up"} ${Math.round(rel*100)}%)`:""),k:""};const good=up?d>0:d<0;
   const t=a.mean>0?`${d<0?"down":"up"} ${Math.round(Math.abs(d)/a.mean*100)}%`:`up from 0`;return {t,k:good?"good":"bad"};}
 /* v22.80 (review F258, F262): Form SM-1 sends the behavior beside the points (beh: the share of the teacher's ratings that were
    Yes) and the ladder phase; a teacher-only day (phase 0) has no points and stays out of the week's figures */
@@ -6605,7 +6646,7 @@ async function gsLinkGo(){const d=gsDlg(),st=gsDlgState,C=gsChosen();if(!st||!C.
   if(S.gs&&S.gs.id&&S.gs.id!==st.id)gsUndo(true);
   /* a record not yet used (no days, only the three example rows with nothing written) takes the sheet's targets in their place */
   const EX=['physical aggression','self-injury','property destruction'];
-  if(!S.rows.length&&S.behaviors.every(b=>!String(b.definition||'').trim()&&!String(b.aim||'').trim()&&EX.indexOf(gsK(b.name))>=0))S.behaviors=[];
+  if(!S.rows.length&&S.behaviors.every(b=>!String(b.definition||'').trim()&&!String(b.aim||'').trim()&&(EX.indexOf(gsK(b.name))>=0||!String(b.name||'').trim())))S.behaviors=[];   /* v24.23 (R-090) the unnamed fresh row too */
   const groups=[].concat(...C.map(p=>p.groups)),stu=C[0].student||{name:"",id:""};
   S.gs=Object.assign(S.gs&&S.gs.id===st.id?S.gs:{applied:{},madeRows:[],madeBeh:[]},{id:st.id,url:st.url,title:st.title,tabs:C.map(p=>p.tab),grid:st.grid||{},on:true,read:new Date().toISOString(),nameOk:gsSameStudent(stu.name,stu.id)?"":gsOkKey(stu),cache:{student:stu,groups}});
   if(!S.meta.id&&stu.id&&gsSameStudent(stu.name,stu.id))S.meta.id=stu.id;
@@ -6894,7 +6935,7 @@ let ddKeptMade=[];
 
 /* ---- (2-4) the day's labels on the sheet: the assent in the row, the setting, who and the probe a tap away ---- */
 function ddTagBtnTxt(r){const s=ddTagStr(r.setting),p=ddPrOk(r.probe),b=ddTagStr(r.by),ab=r.absent==="absent"?"Absent":r.absent==="noschool"?"No school":"",io=r.ioa&&Object.keys(r.ioa).length;
-  return s||b||p||ab||io?`${esc(ab||s||b||"Day")}${p?` <b class="dd-pr-k ${p}">${p==="gen"?"G":"M"}</b>`:""}${io?` <b class="dd-pr-k" title="A second observer recorded this day">2</b>`:""}`:"+ Setting, by";}
+  return s||b||p||ab||io?`${esc(ab||s||b||"Day")}${p?` <b class="dd-pr-k ${p}">${p==="gen"?"G":"M"}</b>`:""}${io?` <b class="dd-pr-k" title="A second observer recorded this day">2</b>`:""}`:"+ Day details";}
 function ddDayCell(r){const a=ddAsOk(r.assent),dis=ddBlank?` disabled tabindex="-1"`:"",day=r.date?shortDay(r.date):"this day";
   const tip=[ddTagStr(r.setting)?"Setting: "+ddTagStr(r.setting):"",ddTagStr(r.by)?"By: "+ddTagStr(r.by):"",ddPrOk(r.probe)?DD_PROBE[r.probe]+" probe":""].filter(Boolean).join(" · ")||"Add the setting, who took the data, and a probe";
   return `<td class="col-day"><div class="dd-day-w"><select data-f="assent" class="dd-as${a?" on-"+a:""}" aria-label="Assent on ${esc(day)}" title="The student's assent that day"${dis}>${Object.keys(DD_ASSENT).map(k=>`<option value="${k}"${k===a?" selected":""}>${DD_ASSENT[k]}</option>`).join("")}</select>`+
@@ -6955,32 +6996,49 @@ function ddTagDlg(){let d=document.getElementById("dlgDayTags");if(d)return d;d=
   d.querySelector("#dtPrev").addEventListener("click",()=>ddTagStep(-1));d.querySelector("#dtNext").addEventListener("click",()=>ddTagStep(1));
   /* v22.91 (review I51) absent or no school; (review F104) the second observer's values, with the agreement as it is typed */
   d.querySelector("#dtAb").addEventListener("input",e=>{if(!ddTagRow)return;const v=e.target.value;if(v==='absent'||v==='noschool')ddTagRow.absent=v;else delete ddTagRow.absent;});
-  d.querySelector("#dtIoa").addEventListener("input",e=>{const t=e.target;if(!ddTagRow||!t.dataset.ioa)return;const v=String(t.value).trim();if(!ddTagRow.ioa||typeof ddTagRow.ioa!=="object")ddTagRow.ioa={};
+  d.querySelector("#dtIoa").addEventListener("input",e=>{const t=e.target;if(!ddTagRow)return;
+    if(t.dataset.ioax){const v=String(t.value).trim();if(!ddTagRow.ioaX||typeof ddTagRow.ioaX!=="object")ddTagRow.ioaX={};if(v===""||num(v)===null)delete ddTagRow.ioaX[t.dataset.ioax];else ddTagRow.ioaX[t.dataset.ioax]=v;if(!Object.keys(ddTagRow.ioaX).length)delete ddTagRow.ioaX;
+      const b=S.behaviors.find(x=>x.id===t.dataset.ioax),p=t.parentNode.querySelector(".dt-ioa-p");if(b&&p)p.textContent=ddIoaTxt(ddIoaRow(ddTagRow,b));return;}   /* v24.23 (E-38) */
+    if(!t.dataset.ioa)return;const v=String(t.value).trim();if(!ddTagRow.ioa||typeof ddTagRow.ioa!=="object")ddTagRow.ioa={};
     if(v===""||num(v)===null)delete ddTagRow.ioa[t.dataset.ioa];else ddTagRow.ioa[t.dataset.ioa]=v;if(!Object.keys(ddTagRow.ioa).length)delete ddTagRow.ioa;
     const b=S.behaviors.find(x=>x.id===t.dataset.ioa),p=t.parentNode.querySelector(".dt-ioa-p");if(b&&p)p.textContent=ddIoaTxt(ddIoaRow(ddTagRow,b));});
   d.addEventListener("close",()=>{ddTagRow=null;renderData();renderResults();});return d;}
 /* v22.91 (review F104) agreement on a day: the smaller of the two observers' values over the larger (both 0 agree), the total-
    count or total-duration agreement for a day's value; for the measures typed as one number */
+/* v24.23 (dd123, E-07, R-088) the decision line under each graph, a convention: the criterion run in the current condition and, when
+   Review after (days) is set, a flag when that many school days have passed without the level moving the right way */
+function ddRuleHtml(beh,rows,analyses){const A=(analyses||[]).filter(a=>a&&a.n);if(!A.length)return "";const cur=A[A.length-1];const dec=(beh.direction||(beh.kind==="target"?"decrease":"increase"))==="decrease";const L=[];
+  const aim=num(beh.aim);if(aim!==null){const ci=critInfo(cur,beh);if(ci){const need=critNeed(beh);
+    if(ci.metDate)L.push(`criterion met on ${esc(fmtDate(ci.metDate))} (${need} consecutive day${need===1?"":"s"} ${dec?"at or below":"at or above"} ${r1(aim)} in ${esc(cur.name)}; ${ci.count} of ${cur.n} day${cur.n===1?"":"s"} at criterion)`);
+    else L.push(`criterion not met in ${esc(cur.name)}: ${ci.count} of ${cur.n} day${cur.n===1?"":"s"} ${dec?"at or below":"at or above"} ${r1(aim)}, longest run ${ci.run||0} of the ${need} needed`);}}
+  const rv=parseInt(beh.reviewDays,10);if(rv>=2){
+    if(cur.n>=rv){const k=Math.max(2,Math.min(5,Math.floor(cur.n/2)));const first=cur.vals.slice(0,k),last=cur.vals.slice(-k);const m=a=>a.reduce((x,y)=>x+y,0)/a.length;const d=m(last)-m(first);const better=dec?d<0:d>0;const sl=cur.slope;const slopeOk=sl===undefined||sl===null?better:(dec?sl<0:sl>0);
+      if(!(better&&slopeOk))L.push(`<b>review</b>: ${cur.n} school day${cur.n===1?"":"s"} in ${esc(cur.name)} (the rule says ${rv}) without the level moving the right way (first ${k}: ${r1(m(first))}; last ${k}: ${r1(m(last))}${sl!==undefined&&sl!==null?`; slope ${sl>0?"+":""}${r1(sl)} a day`:""}): continue, modify or stop is the team's call`);
+      else L.push(`${cur.n} day${cur.n===1?"":"s"} in ${esc(cur.name)}, the level moving the right way (first ${k}: ${r1(m(first))}; last ${k}: ${r1(m(last))}); review at ${rv} days without change`);}
+    else L.push(`${cur.n} of the ${rv} day${rv===1?"":"s"} in ${esc(cur.name)} before the review rule applies`);}
+  const sm=A.reduce((n,a)=>n+((a.samples||[]).length),0);if(sm)L.push(`${sm} part-day sample${sm===1?"":"s"} drawn hollow and left out of the figures`);
+  if(!L.length)return "";return `<p class="hint dd-rule"><b>Decision line</b> (a convention of this form, not a published rule): ${L.join("; ")}.<\/p>`;}
 function ddIoaOk(b){return !!b&&S.settings.entryMode!=="interval"&&!MEASURES[b.measure].two;}
 function ddIoaAgree(a,b){if(a===null||b===null)return null;if(a===0&&b===0)return 100;const hi=Math.max(Math.abs(a),Math.abs(b));return hi?100*Math.min(Math.abs(a),Math.abs(b))/hi:null;}
-function ddIoaRow(r,b){if(!r||!ddIoaOk(b))return null;return ddIoaAgree(num(r.values&&r.values[b.id]),num(r.ioa&&r.ioa[b.id]));}
+function ddIoaRow(r,b){if(!r||!ddIoaOk(b))return null;const ex=num(r.ioaX&&r.ioaX[b.id]);if(ex!==null&&ex>=0&&ex<=100)return ex;   /* v24.23 (E-38) an agreement percent from Form OB-1's interval or exact record */
+  return ddIoaAgree(num(r.values&&r.values[b.id]),num(r.ioa&&r.ioa[b.id]));}
 function ddIoaTxt(p){return p===null?"":"agreement "+r1(p)+"%";}
 /* agreement per condition: the days with a second observer, of the days with data, the mean and the lowest; the standard the
    form cites asks for at least 20% of the data points in each condition, at 80% agreement or more (Kratochwill et al., 2010) */
 function ddIoaConds(b,rows,analyses){return (analyses||[]).filter(a=>a&&a.n).map(a=>{const p=a.rowIdx.map(i=>ddIoaRow(rows[i],b)).filter(x=>x!==null);
     return {name:a.name,n:a.n,k:p.length,mean:p.length?p.reduce((s,x)=>s+x,0)/p.length:null,min:p.length?Math.min(...p):null};});}
-function ddIoaHtml(b,rows,analyses){if(!ddIoaOk(b))return "";const C=ddIoaConds(b,rows,analyses);if(!C.length||!C.some(c=>c.k))return C.length?`<p class="hint dd-ioa">Interobserver agreement: no day with a second observer yet. The standard this page cites asks for agreement on at least 20% of the days in each condition, at 80% or more (Kratochwill et al., 2010); enter a second observer's values in a day's details (the day button).<\/p>`:"";
+function ddIoaHtml(b,rows,analyses){if(!ddIoaOk(b))return "";const C=ddIoaConds(b,rows,analyses);if(!C.length||!C.some(c=>c.k))return C.length?`<p class="hint dd-ioa">Interobserver agreement: no day with a second observer yet. The standard this page cites asks for agreement on at least 20% of the days in each condition, at 80% or more (Kratochwill et al., 2010); enter a second observer's values in a day's details (<a href="#" data-dd-ioa-open>the “+ Day details” button on a day's row</a>).<\/p>`:"";
   const few=C.filter(c=>c.k/c.n<0.2),low=C.filter(c=>c.k&&c.mean<80);
   return `<p class="hint dd-ioa"><b>Interobserver agreement</b> (a second observer, total ${MEASURES[b.measure].two?"":"count or duration "}agreement): ${C.map(c=>`${esc(c.name)} ${c.k} of ${c.n} day${c.n===1?"":"s"}`+(c.k?` (${Math.round(100*c.k/c.n)}%), mean ${r1(c.mean)}% (lowest ${r1(c.min)}%)`:"")).join("; ")}.`+
     (few.length?` Under 20% of the days in ${few.map(c=>esc(c.name)).join(", ")}.`:"")+(low.length?` Mean under 80% in ${low.map(c=>esc(c.name)).join(", ")}: go over the definition with both observers.`:"")+
-    ` The standard this page cites asks for at least 20% of the days in each condition, at 80% or more (Kratochwill et al., 2010).<\/p>`;}
+    ` The standard this page cites asks for at least 20% of the days in each condition, at 80% or more (Kratochwill et al., 2010). Total count agreement can overstate agreement when two counts match by chance; where the two observers scored intervals, enter Form OB-1's interval or exact agreement in the day's details and it counts instead.<\/p>`;}
 function ddTagFill(){const d=ddTagDlg(),r=ddTagRow;if(!r)return;const R=sortedRows(),i=R.indexOf(r);
   d.querySelector("#dtT").textContent="Day details: "+(r.date?ddLongDay(r.date):"a day without a date");
   d.querySelector("#dtSub").textContent=`Setting and who took the data, the student’s assent, a probe. ${R.length>1?`Day ${i+1} of ${R.length} on the sheet.`:""}`;
   d.querySelector("#dtSet").value=ddTagStr(r.setting);d.querySelector("#dtBy").value=ddTagStr(r.by);d.querySelector("#dtAs").value=ddAsOk(r.assent);d.querySelector("#dtPr").value=ddPrOk(r.probe);
   d.querySelector("#dtAb").value=r.absent==="absent"||r.absent==="noschool"?r.absent:"";   /* v22.91 (review I51, F104) */
   const B=orderedBehaviors().filter(ddIoaOk);d.querySelector("#dtIoa").innerHTML=B.length?`<h3 class="dt-h" style="margin:12px 0 4px;font-size:15px">Second observer (agreement)<\/h3><p class="hint">On a day two people recorded on their own, the second observer's value for each behavior they recorded. Agreement is the smaller value over the larger; it does not change the day's numbers.<\/p><div class="dt-g">`+
-    B.map(b=>`<label class="field"><span>${esc(b.name||"Untitled")} <span class="hint">(sheet: ${num(r.values&&r.values[b.id])===null?"—":esc(r.values[b.id])})<\/span><\/span><input type="number" step="any" min="0" data-ioa="${esc(b.id)}" value="${r.ioa&&r.ioa[b.id]!=null?esc(r.ioa[b.id]):""}" placeholder="second observer"><span class="dt-ioa-p hint">${ddIoaTxt(ddIoaRow(r,b))}<\/span><\/label>`).join("")+`<\/div>`:"";
+    B.map(b=>`<label class="field"><span>${esc(b.name||"Untitled")} <span class="hint">(sheet: ${num(r.values&&r.values[b.id])===null?"—":esc(r.values[b.id])})<\/span><\/span><input type="number" step="any" min="0" data-ioa="${esc(b.id)}" value="${r.ioa&&r.ioa[b.id]!=null?esc(r.ioa[b.id]):""}" placeholder="second observer"><input type="number" step="any" min="0" max="100" data-ioax="${esc(b.id)}" value="${r.ioaX&&r.ioaX[b.id]!=null?esc(r.ioaX[b.id]):""}" placeholder="or OB-1 agreement %" title="An interval or exact agreement percent from Form OB-1's record for this day: it counts for the day instead of the total-count figure"><span class="dt-ioa-p hint">${ddIoaTxt(ddIoaRow(r,b))}<\/span><\/label>`).join("")+`<\/div>`:"";
   d.querySelector("#dtPrev").disabled=i<=0;d.querySelector("#dtNext").disabled=i<0||i>=R.length-1;}
 function ddTagStep(k){const R=sortedRows(),i=R.indexOf(ddTagRow),n=R[i+k];if(!n)return;ddTagRow=n;ddTagFill();}
 function ddTagOpen(id){const r=(S.rows||[]).find(x=>x.id===id);if(!r)return;ddTagLists();const d=ddTagDlg();ddTagRow=r;ddTagFill();try{d.showModal();}catch(e){d.setAttribute("open","");}}

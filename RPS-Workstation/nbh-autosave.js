@@ -566,11 +566,14 @@
        never restore an old copy by accident, and the form can be used while the question waits */
     var dl = D.createElement('aside'); dl.id = 'nbhAsDlg'; dl.className = 'nbh-as-ui nbh-as-dlg noprint';
     dl.setAttribute('role', 'region'); dl.setAttribute('aria-labelledby', 'nbhAsH');
-    var items = rows.map(function (r, i) {
+    /* v24.23 (dd123, R-095) one copy per student and form: the newest; the time saved beside how long ago */
+      rows = rows.slice().sort(function (a, b) { return (b.saved || 0) - (a.saved || 0); }).filter(function (r, i, arr) {
+        var k = (r.student || '') + '|' + r.kind; return arr.findIndex(function (x) { return (x.student || '') + '|' + x.kind === k; }) === i; });
+      var items = rows.map(function (r, i) {
       var n = Object.keys(r.forms).length, where = r.kind === 'form' ? 'this form on its own' : 'the workstation' + (n > 1 ? ', with ' + (n - 1) + ' other form' + (n === 2 ? '' : 's') : '');
       var note = r.fileAt ? '<small>Also saved to a file at ' + esc(C.when(r.fileAt)) + '.</small>' : '';
       var canDel = r.kind === 'form' || n === 1;
-      return '<li><span><b>' + esc(r.student || 'Student not named') + '</b> · ' + esc(ago(r.saved)) + '<small>From ' + esc(where) + '.</small>' + note +
+      return '<li><span><b>' + esc(r.student || 'Student not named') + '</b> · ' + esc(ago(r.saved)) + (C.when && r.saved ? ' (' + esc(C.when(r.saved)) + ')' : '') + '<small>From ' + esc(where) + '.</small>' + note +
         (canDel ? '' : '<small>Delete it from the Autosave box in the workstation.</small>') + '</span>' +
         '<button type="button" class="pri" data-as="r" data-i="' + i + '">Restore</button>' +
         (canDel ? '<button type="button" data-as="d" data-i="' + i + '">Delete</button>' : '') + '</li>';
