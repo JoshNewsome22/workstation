@@ -9905,6 +9905,16 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.59: Form RS-1 and the RBT Test Content Outline (3rd ed.): the tasks covered at each contact, and the year's coverage (the BCBA, 10/26)
+- **Tasks on a contact.** A supervision contact already recorded the outline's domains it covered. Under the domains
+  ticked on it, a contact now also offers that domain's tasks, by code (A.1 to F.10, 43 tasks), to tick the ones covered.
+  Unticking a domain drops its tasks. Task names are short forms; the codes are the outline's.
+- **The record and the spreadsheet** give the codes beside the domains, e.g. "Behavior acquisition (C.3, C.7)".
+- **The year summary** prints how many of the 43 tasks supervision has covered so far, by domain, and lists those not
+  covered yet: a quick way to plan the next contacts.
+- The year summary can now run to a second page; the year summary's PDF test allows one or two pages.
+- Tests: qa/tco159-test.js; qa/rspdf152-test.js follows the year summary's length.
+
 ### v24.58: Form RS-1: the BACB's two Supervision Checklists, as one list kept with each RBT (the BCBA, 10/26)
 - **The checklists.** The BACB encourages the RBT and each supervisor or Requirements Coordinator to work through its
   Supervision Checklist for RBTs (version 2/2024) and its Supervision Checklist for RBT Supervisors and RBT Requirements

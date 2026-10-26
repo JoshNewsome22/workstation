@@ -1408,6 +1408,52 @@ const uid=()=>Date.now().toString(36).slice(-5)+Math.random().toString(36).slice
    The lists below are the choices offered on the form. The numeric rules (5%, two contacts, ...) are NOT here: they are
    on the Setup page's Rules panel, with these defaults, so the form keeps working if the BACB changes them. */
 const ACTS=['Discrete-trial teaching','Natural-environment teaching','Behavior reduction / BIP implementation','Data collection','Preference assessment','Skill acquisition program','Parent or caregiver support (under supervision)','Other'];
+/* v24.59 the RBT Test Content Outline (3rd ed.): its 43 tasks by code, in short forms; d: the domain's place in TCO */
+const TCOT=[
+ {c:'A.1',d:0,t:'Continuous measurement (frequency, duration, latency, IRT)'},
+ {c:'A.2',d:0,t:'Discontinuous measurement (partial and whole interval, momentary time sampling)'},
+ {c:'A.3',d:0,t:'Permanent-product recording'},
+ {c:'A.4',d:0,t:'Entering data and updating graphs'},
+ {c:'A.5',d:0,t:'Describing behavior and the environment in observable, measurable terms'},
+ {c:'A.6',d:0,t:'Calculating and summarizing data (rate, mean duration, percentage)'},
+ {c:'A.7',d:0,t:'Trends in graphed data'},
+ {c:'A.8',d:0,t:'Risks of unreliable data and poor procedural fidelity'},
+ {c:'B.1',d:1,t:'Preference assessments'},
+ {c:'B.2',d:1,t:'Assessments of skill strengths and deficits'},
+ {c:'B.3',d:1,t:'Parts of functional assessment (descriptive assessment, functional analysis)'},
+ {c:'C.1',d:2,t:'Positive and negative reinforcement'},
+ {c:'C.2',d:2,t:'Establishing and using conditioned reinforcers'},
+ {c:'C.3',d:2,t:'Discrete-trial teaching'},
+ {c:'C.4',d:2,t:'Naturalistic teaching'},
+ {c:'C.5',d:2,t:'Chaining (forward, backward, total task)'},
+ {c:'C.6',d:2,t:'Discrimination training'},
+ {c:'C.7',d:2,t:'Prompts and prompt fading'},
+ {c:'C.8',d:2,t:'Generalization'},
+ {c:'C.9',d:2,t:'Maintenance and acquisition procedures'},
+ {c:'C.10',d:2,t:'Shaping'},
+ {c:'C.11',d:2,t:'Token economies'},
+ {c:'D.1',d:3,t:'Common functions of behavior'},
+ {c:'D.2',d:3,t:'Antecedent interventions (NCR, high-probability requests, demand fading)'},
+ {c:'D.3',d:3,t:'Differential reinforcement (DRO, DRA, DRI, DRL, FCT)'},
+ {c:'D.4',d:3,t:'Extinction'},
+ {c:'D.5',d:3,t:'Positive and negative punishment (e.g., time-out)'},
+ {c:'D.6',d:3,t:'Side effects of extinction and punishment'},
+ {c:'D.7',d:3,t:'Crisis and emergency procedures'},
+ {c:'E.1',d:4,t:'Passing the team’s concerns and suggestions to the supervisor in time'},
+ {c:'E.2',d:4,t:'Seeking clinical direction from the supervisor in time'},
+ {c:'E.3',d:4,t:'Reporting what may affect progress (illness, medication, schedule changes)'},
+ {c:'E.4',d:4,t:'Objective session notes, as the law and the workplace require'},
+ {c:'F.1',d:5,t:'Core principles of the RBT Ethics Code'},
+ {c:'F.2',d:5,t:'Services only after competence is shown'},
+ {c:'F.3',d:5,t:'Services only under qualified ongoing supervision'},
+ {c:'F.4',d:5,t:'Effective supervision practices'},
+ {c:'F.5',d:5,t:'Confidential information'},
+ {c:'F.6',d:5,t:'Public statements and social media'},
+ {c:'F.7',d:5,t:'Multiple relationships'},
+ {c:'F.8',d:5,t:'Gifts'},
+ {c:'F.9',d:5,t:'Interpersonal and professional skills'},
+ {c:'F.10',d:5,t:'Cultural humility and responsiveness'}];
+const tcoSort=L=>TCOT.map(x=>x.c).filter(k=>L.includes(k));
 const TCO=['Data collection and graphing','Behavior assessment','Behavior acquisition','Behavior reduction','Documentation and reporting','Ethics and professional conduct'];
 const BST=['Instruction','Modeling','Rehearsal','Feedback'];
 /* the supervision activities the BACB RBT Handbook lists */
@@ -1723,6 +1769,7 @@ function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Num
       '</div>'+
       '<span class="lbl">Supervision activities</span><div class="rs-chips">'+SACT.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('s'+j)+'" data-c="'+id+'" data-arr="sact" value="'+esc(t)+'"'+((c.sact||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
       '<span class="lbl">Content covered (RBT Test Content Outline, 3rd ed.)</span><div class="rs-chips">'+TCO.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('a'+j)+'" data-c="'+id+'" data-arr="acts" value="'+esc(t)+'"'+((c.acts||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
+      '<div class="rs-tcot" data-tcot="'+id+'">'+tcoTasks(c)+'</div>'+   /* v24.59 */
       '<span class="lbl">How it was taught (behavior skills training)</span><div class="rs-chips">'+BST.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('b'+j)+'" data-c="'+id+'" data-arr="bst" value="'+esc(t)+'"'+((c.bst||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
       '<div class="two"><div class="field"><label for="'+F('feedback')+'">Feedback given</label><textarea id="'+F('feedback')+'" data-c="'+id+'" data-f="feedback" rows="3" placeholder="what went well, one thing to change, and how">'+esc(c.feedback)+'</textarea></div>'+
       '<div class="field"><label for="'+F('follow')+'">The RBT&rsquo;s follow-up or goal for next time</label><textarea id="'+F('follow')+'" data-c="'+id+'" data-f="follow" rows="3" placeholder="what the RBT practises before the next contact">'+esc(c.follow)+'</textarea></div></div>'+
@@ -1869,7 +1916,7 @@ function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today
       days.map(d=>{const mi=dayMin(d);return '<tr'+(d.none?' class="none"':'')+'><td>'+wdOf(d.date)+' '+mdy(d.date)+'</td><td>'+esc(fmtHM(d.start))+'</td><td>'+esc(fmtHM(d.end))+'</td><td class="n">'+(d.none?'0':hrs(mi))+(num(d.brk)&&!d.none?'<small> (−'+num(d.brk)+' min)</small>':'')+'</td><td>'+(d.none?'No service':esc(d.act||''))+(!d.none&&d.date>today?' (planned)':'')+'</td></tr>';}).join('')+
       '<tr><td colspan="3"><b>'+s.daysServed+' day'+(s.daysServed===1?'':'s')+' of service</b></td><td class="n"><b>'+hrs(s.rbtMin)+'</b></td><td></td></tr></tbody></table>':'<p class="p-empty">No service days recorded.</p>')+
     '<h4>Supervision contacts</h4>'+(C.length?'<table class="p-t"><thead><tr><th style="width:11%">Date</th><th style="width:13%">Time</th><th style="width:6%">Min</th><th style="width:17%">Supervisor</th><th style="width:13%">Format and mode</th><th style="width:9%">Observed with client</th><th>Activities, content, method</th><th style="width:8%">Checklist</th></tr></thead><tbody>'+
-      C.map(x=>{const c=x.c,sp=supById(c.sup),mo=modeOf(c.mode),sc=c.obs==='yes'?ckScore(c):null;return '<tr><td>'+esc(mdy(c.date))+'</td><td>'+esc(fmtHM(c.start))+(c.end?'–'+esc(fmtHM(c.end)):'')+'</td><td class="n">'+(x.min==null?'—':x.min)+'</td><td>'+esc(supLabel(sp))+'</td><td>'+(c.format==='group'?'Small group'+(num(c.group)?' ('+num(c.group)+' RBTs)':''):'Individual')+'; '+esc(mo?mo[1]:'')+'</td><td>'+(c.obs==='yes'?'Yes'+(c.client?', '+esc(c.client):''):c.obs==='no'?'No':'')+'</td><td>'+esc((c.sact||[]).join('; '))+((c.sact||[]).length&&(c.acts||[]).length?'<br>':'')+esc((c.acts||[]).join('; '))+((c.bst||[]).length?'<br><i>'+esc(c.bst.join(', '))+'</i>':'')+'</td><td class="n">'+(sc?Math.round(sc.pct)+'%':'—')+'</td></tr>'+
+      C.map(x=>{const c=x.c,sp=supById(c.sup),mo=modeOf(c.mode),sc=c.obs==='yes'?ckScore(c):null;return '<tr><td>'+esc(mdy(c.date))+'</td><td>'+esc(fmtHM(c.start))+(c.end?'–'+esc(fmtHM(c.end)):'')+'</td><td class="n">'+(x.min==null?'—':x.min)+'</td><td>'+esc(supLabel(sp))+'</td><td>'+(c.format==='group'?'Small group'+(num(c.group)?' ('+num(c.group)+' RBTs)':''):'Individual')+'; '+esc(mo?mo[1]:'')+'</td><td>'+(c.obs==='yes'?'Yes'+(c.client?', '+esc(c.client):''):c.obs==='no'?'No':'')+'</td><td>'+esc((c.sact||[]).join('; '))+((c.sact||[]).length&&(c.acts||[]).length?'<br>':'')+esc((c.acts||[]).join('; '))+((c.tco||[]).length?' ('+esc(c.tco.join(', '))+')':'')+((c.bst||[]).length?'<br><i>'+esc(c.bst.join(', '))+'</i>':'')+'</td><td class="n">'+(sc?Math.round(sc.pct)+'%':'—')+'</td></tr>'+
         ((c.feedback||c.follow||!x.counts)?'<tr class="sub"><td colspan="8">'+(c.feedback?'<b>Feedback:</b> '+esc(c.feedback)+' ':'')+(c.follow?'<b>Next:</b> '+esc(c.follow)+' ':'')+(!x.counts?((x.is.length&&x.is.every(i=>i.lvl==='note'||i.lvl==='ask'))?'<b>Noted, not counted:</b> ':'<b class="p-no">Not counted:</b> ')+esc(x.is.filter(i=>i.lvl!=='ask').map(i=>i.t).join('; ')||'planned'):'')+'</td></tr>':'')+rdRow(c);}).join('')+'</tbody></table>':'<p class="p-empty">No supervision contacts recorded.</p>')+
     '<div class="p-keep"><h4>Totals and compliance</h4><div class="p-two"><table class="p-t"><tbody>'+
       '<tr><td>Days the RBT provided services</td><td class="n">'+s.daysServed+'</td></tr><tr><td>Real-time (face-to-face) contacts</td><td class="n">'+s.cnt.length+'</td></tr><tr><td>Observations with a client</td><td class="n">'+s.obs+'</td></tr>'+
@@ -1919,6 +1966,7 @@ function renderYearOut(){const y=setupYear(),ks=yearKeys(y),tk=thruKey(),cut=tk?
       ((S.effects||[]).filter(x=>x.date&&(!asOf||x.date<=asOf)&&(x.view||x.data||x.change)).sort((a,b)=>a.date.localeCompare(b.date))))+   /* v24.57 */
     '<p style="margin:4px 0 0"><b>The BACB supervision checklists:</b> '+ckSummary(asOf).map(x=>esc(x.t.toLowerCase())+' '+x.n+' of '+x.of).join('; ')+
       ((d=>d&&(!asOf||d<=asOf)?'; the codes, the handbook and the BACB website last reviewed together '+esc(mdy(d)):'')((S.ckl||{}).review6))+'.</p>'+   /* v24.58 */
+    (v=>'<p style="margin:4px 0 0"><b>RBT Test Content Outline (3rd ed.) tasks covered in supervision:</b> '+v.n+' of 43 ('+v.by.map(b=>b.L+' '+b.n+' of '+b.of).join(', ')+')'+(v.n&&v.left.length?'. Not yet: '+esc(v.left.join(', ')):'')+'.</p>')(tcoCover(ks.filter((k,i)=>i<=cut),asOf))+   /* v24.59 */
     '<div class="p-foot"><span>Keep supervision records for at least 7 years, also after the supervision ends; in an audit the BACB typically allows 14 days. Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks.</span><span>Form RS-1 · year summary'+(part?' through '+esc(keyLabel(tk)):'')+' · printed '+mdy(todayISO())+'</span></div></div>';}
 /* v24.57 The Effects of Supervision: each review's date, the RBT's view, what the data show, what changes */
 function effPaint(){const L=$('#effList');if(!L)return;const E=S.effects||[];
@@ -1998,6 +2046,17 @@ document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d|
   if(d.bck){if(el.checked)S.ckl[d.bck]=S.ckl[d.bck]||todayISO();else delete S.ckl[d.bck];}
   else{if(/^\d{4}-\d{2}-\d{2}$/.test(el.value))S.ckl[d.bckd]=el.value;else delete S.ckl[d.bckd];}
   if(!Object.keys(S.ckl).length)delete S.ckl;ckPaint();changed();});
+/* v24.59 the outline's tasks of the domains ticked on a contact */
+function tcoTasks(c){const id=esc(c.id),D=(c.acts||[]).map(a=>TCO.indexOf(a)).filter(i=>i>=0);if(!D.length)return '';
+  return '<span class="lbl">Tasks covered (optional)</span><div class="rs-chips rs-tcochips">'+TCOT.filter(x=>D.includes(x.d)).map(x=>'<label class="chip" title="'+esc(x.t)+'"><input type="checkbox" data-c="'+id+'" data-tco="'+x.c+'"'+((c.tco||[]).includes(x.c)?' checked':'')+'> <b>'+x.c+'</b> '+esc(x.t)+'</label>').join('')+'</div>';}
+function tcoContact(id){for(const k of Object.keys(S.months||{})){const c=(S.months[k].contacts||[]).find(x=>x.id===id);if(c)return c;}return null;}
+document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d||!d.c)return;
+  if(d.tco){const c=tcoContact(d.c);if(!c)return;const a=new Set(c.tco||[]);el.checked?a.add(d.tco):a.delete(d.tco);c.tco=tcoSort([...a]);if(!c.tco.length)delete c.tco;changed();return;}
+  if(d.arr==='acts')setTimeout(()=>{const c=tcoContact(d.c);if(!c)return;const D=(c.acts||[]).map(a=>TCO.indexOf(a));if(c.tco){c.tco=c.tco.filter(k=>D.includes('ABCDEF'.indexOf(k[0])));if(!c.tco.length)delete c.tco;}   /* after the form has taken the domain */
+    const box=document.querySelector('[data-tcot="'+CSS.escape(d.c)+'"]');if(box)box.innerHTML=tcoTasks(c);},0);});
+/* the outline's coverage over a set of months: tasks covered, by domain */
+function tcoCover(keys,asOf){const got=new Set();keys.forEach(k=>(peek(k).contacts||[]).forEach(c=>{if(c.date&&(!asOf||c.date<=asOf))(c.tco||[]).forEach(x=>got.add(x));}));
+  return {n:got.size,by:'ABCDEF'.split('').map(L=>({L,n:TCOT.filter(x=>x.c[0]===L&&got.has(x.c)).length,of:TCOT.filter(x=>x.c[0]===L).length})),left:TCOT.filter(x=>!got.has(x.c)).map(x=>x.c)};}
 function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent='Sign the Record for '+keyLabel(curKey);
   $$('[data-sg]').forEach(el=>{el.value=sg[el.dataset.sg]||'';});
   const sp=S.sups.find(s=>s.name&&credOK(s.cred));$('#sgSup').placeholder=sp?supLabel(sp):'name, credential';$('#sgRbt').placeholder=S.setup.rbt_name?(S.setup.rbt_name+', '+(S.setup.rbt_cred||'RBT')):'name, RBT';
@@ -2291,7 +2350,7 @@ function fromFile(d){
       contacts:arr(m.contacts).slice(0,60).map(x=>{x=obj(x);const ck={};Object.keys(obj(x.ck)).forEach(i=>{if(+i>=0&&+i<CHECK.length&&['y','n','na'].includes(x.ck[i]))ck[+i]=x.ck[i];});
         const ckItems=arr(x.ckItems).slice(0,120).map(it=>({t:str(it&&it.t).slice(0,400),crit:!!(it&&it.crit),comp:str(it&&it.comp).slice(0,40)})).filter(it=>it.t);const ckp={};Object.keys(obj(x.ckp)).forEach(i=>{if(+i>=0&&+i<ckItems.length&&['y','n','na'].includes(x.ckp[i]))ckp[+i]=x.ckp[i];});   /* v24.29 */
         return {id:str(x.id)||uid(),date:isoS(x.date),start:hm(x.start),end:hm(x.end),sup:str(x.sup),format:x.format==='group'?'group':'indiv',group:str(x.group),mode:modeOf(x.mode)?x.mode:'',obs:['yes','no'].includes(x.obs)?x.obs:'',client:str(x.client),
-          acts:TCO.filter(t=>arr(x.acts).includes(t)),sact:SACT.filter(t=>arr(x.sact).includes(t)),bst:BST.filter(t=>arr(x.bst).includes(t)),feedback:str(x.feedback),follow:str(x.follow),ck,ckp,ckItems,ckSrc:x.ckSrc==='plan'&&ckItems.length?'plan':'',ckPlanSrc:str(x.ckPlanSrc).slice(0,160)};}).map(c=>{if(!c.ckItems.length){delete c.ckItems;delete c.ckSrc;delete c.ckPlanSrc;}if(!Object.keys(c.ckp).length)delete c.ckp;return c;}),
+          acts:TCO.filter(t=>arr(x.acts).includes(t)),tco:tcoSort(arr(x.tco)),sact:SACT.filter(t=>arr(x.sact).includes(t)),bst:BST.filter(t=>arr(x.bst).includes(t)),feedback:str(x.feedback),follow:str(x.follow),ck,ckp,ckItems,ckSrc:x.ckSrc==='plan'&&ckItems.length?'plan':'',ckPlanSrc:str(x.ckPlanSrc).slice(0,160)};}).map(c=>{if(!c.tco.length)delete c.tco;if(!c.ckItems.length){delete c.ckItems;delete c.ckSrc;delete c.ckPlanSrc;}if(!Object.keys(c.ckp).length)delete c.ckp;return c;}),
       sig:{sup_name:str(sg.sup_name),sup_date:isoS(sg.sup_date),rbt_name:str(sg.rbt_name),rbt_date:isoS(sg.rbt_date),...(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(String(sg.sup_img||''))&&String(sg.sup_img).length<400000?{sup_img:sg.sup_img}:{}),...(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(String(sg.rbt_img||''))&&String(sg.rbt_img).length<400000?{rbt_img:sg.rbt_img}:{}),
         ...['sup','rbt'].reduce((o,w)=>{if(sg[w+'_how']==='typed'||sg[w+'_how']==='drawn')o[w+'_how']=sg[w+'_how'];if(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(String(sg[w+'_at']||'')))o[w+'_at']=sg[w+'_at'];return o;},{})}};   /* v24.50 how and when */
     if(!o.months[k].sig.sup_img)delete o.months[k].sig.sup_img;if(!o.months[k].sig.rbt_img)delete o.months[k].sig.rbt_img;});
@@ -2320,7 +2379,7 @@ $('#csvBtn').addEventListener('click',()=>{
   yearKeys(y).forEach(k=>{const m=peek(k),s=stats(k);
     m.days.filter(d=>d.date&&keyOf(d.date)===k).slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(d=>{const mi=dayMin(d);out.push(['Service day',keyLabel(k),d.date,d.start,d.end,d.brk,d.none?'0':(mi==null?'':(mi/60).toFixed(2)),d.none?'yes':'',d.act,'','','','','','','','','','','','','','','',st.rbt_name,st.rbt_cert]);});
     s.C.slice().sort((a,b)=>String(a.c.date).localeCompare(String(b.c.date))).forEach(x=>{const c=x.c,sp=supById(c.sup),mo=modeOf(c.mode),sc=c.obs==='yes'?ckScore(c):null;
-      out.push(['Supervision contact',keyLabel(k),c.date,c.start,c.end,'','','','',x.min==null?'':x.min,sp?sp.name:'',sp?sp.cred:'',c.format==='group'?'Small group':'Individual',c.format==='group'?c.group:'',mo?mo[1]:'',x.counts?'yes':'no'+(x.is.length?' ('+x.is.map(i=>i.t).join('; ')+')':' (planned)'),c.obs==='yes'?'yes':c.obs==='no'?'no':'',c.client,(c.sact||[]).join('; '),(c.acts||[]).join('; '),(c.bst||[]).join('; '),sc?Math.round(sc.pct):'',c.feedback,c.follow,st.rbt_name,st.rbt_cert]);});});});
+      out.push(['Supervision contact',keyLabel(k),c.date,c.start,c.end,'','','','',x.min==null?'':x.min,sp?sp.name:'',sp?sp.cred:'',c.format==='group'?'Small group':'Individual',c.format==='group'?c.group:'',mo?mo[1]:'',x.counts?'yes':'no'+(x.is.length?' ('+x.is.map(i=>i.t).join('; ')+')':' (planned)'),c.obs==='yes'?'yes':c.obs==='no'?'no':'',c.client,(c.sact||[]).join('; '),(c.acts||[]).join('; ')+((c.tco||[]).length?' ('+c.tco.join(', ')+')':''),(c.bst||[]).join('; '),sc?Math.round(sc.pct):'',c.feedback,c.follow,st.rbt_name,st.rbt_cert]);});});});
   const nm=R.length>1?'all_RBTs':String(S.setup.rbt_name||'RBT').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='RS-1_'+nm+'_'+y+'-'+(y+1)+'.csv';document.body.appendChild(a);a.click();a.remove();});
 
@@ -3656,6 +3715,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-share .hint{margin:0}
 .rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
 .rs-eff{margin:0 0 10px}
+.rs-tcot .lbl{display:block;margin-top:8px}.rs-tcochips .chip{font-size:13.5px}.rs-tcochips .chip b{font-weight:700;margin-right:2px}
 .rs-cksum{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 10px;font-size:14px;color:var(--ink-soft)}.rs-cksum .ok b{color:#2F6B37}
 .rs-ckgrp h3{font-size:16px;margin:12px 0 6px}.rs-ckgrp ul{list-style:none;margin:0;padding:0}
 .rs-ckgrp li{display:grid;grid-template-columns:28px 1fr;gap:4px 8px;align-items:start;padding:8px 6px;border-bottom:1px solid var(--nbh-rule,#d5dfe3);font-size:15px;line-height:1.45}

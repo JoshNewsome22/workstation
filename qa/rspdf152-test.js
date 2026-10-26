@@ -45,7 +45,7 @@ const readPdf=buf=>{const s=buf.toString('latin1'),o={ok:/^%PDF-1\.\d/.test(s)&&
  ok('no concerns text in the PDF, and every word is fitted to its place (width scaling within 55-125%)',!P.pages.some(s=>s.includes('(travel)'))&&P.tz.length>100&&P.tz.every(z=>z>=55&&z<=125),{tz:[Math.min(...P.tz),Math.max(...P.tz)]});
  /* the year summary */
  await fr.evaluate(()=>document.querySelector('#shYear').click());await sleep(2500);const Y=await p.evaluate(()=>window.mails.slice(-1)[0]);const ya=Y&&Y.messages[0].attachments[0];const PY=readPdf(Buffer.from(ya?ya.b64:'','base64'));
- ok('Email the year summary: a one-page PDF with the chart as a picture',!!ya&&ya.type==='application/pdf'&&/year summary/i.test(ya.name)&&PY.ok&&PY.offsets&&PY.count===1&&PY.images>=1,{name:ya&&ya.name,count:PY.count,images:PY.images});
+ ok('Email the year summary: a PDF of one or two pages (v24.58-59 added the checklists and the outline\'s coverage) with the chart as a picture',!!ya&&ya.type==='application/pdf'&&/year summary/i.test(ya.name)&&PY.ok&&PY.offsets&&PY.count>=1&&PY.count<=2&&PY.images>=1,{name:ya&&ya.name,count:PY.count,images:PY.images});
  /* save as a file, and the RBT's copy */
  const dl=async sel=>{const [d]=await Promise.all([p.waitForEvent('download',{timeout:10000}),fr.evaluate(s=>document.querySelector(s).click(),sel)]);return {name:d.suggestedFilename(),pdf:readPdf(fs.readFileSync(await d.path()))};};
  const F1=await dl('#shFile'),n1=await fr.evaluate(()=>document.querySelector('#shNote').textContent);
