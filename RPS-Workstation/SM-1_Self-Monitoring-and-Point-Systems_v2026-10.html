@@ -1790,6 +1790,17 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 td input,td select{max-width:100%}
 </style>
 <style id="sm-kit-css">/* v23.65 the staff kit: each school day's copy of the student's sheet on a page of its own */@media print{.sm-kit-day+.sm-kit-day{break-before:page;page-break-before:always}}</style>
+<style id="sm124-css">
+/* v24.24 the accent darkened where it is text or a primary button (R-104); the goal number; the Record's cells on an iPad; a partial day; the extra prints */
+.v2 .v2-box h4,.v2 .v2-store-list .sl b,.v2.look-clean .v2-title,.v2.look-clean .v2-t thead th,#wkSheet.look-bright .sm-title,#wkSheet.look-theme .sm-title{color:color-mix(in srgb,var(--acc) 72%,#000)}
+.smr-b.pri{background:color-mix(in srgb,var(--acc) 72%,#000);border-color:color-mix(in srgb,var(--acc) 72%,#000)}
+.v2 .v2-goal b{color:#a86400}
+#lTbl tr.sm-partial td{background:#fff8e6}
+@media (max-width:1200px){#lTbl input{min-width:56px}}
+.bc-tail{break-inside:avoid;page-break-inside:avoid}
+@media print{.sm-extra-only .pg{break-inside:avoid;page-break-inside:avoid}
+  body.sm-bc-only #bcOut h4{margin:10px 0 3px}body.sm-bc-only #bcOut .clause{padding:6px 12px;margin:4px 0}body.sm-bc-only #bcOut .sig{margin-top:12px}body.sm-bc-only #bcOut .sub{margin-bottom:8px}}
+</style>
 </head>
 <body class="view-setup">
 
@@ -2264,8 +2275,8 @@ td input,td select{max-width:100%}
     <div class="metrics" id="tgMetrics"></div>
     <div class="tools"><button class="tool" id="addL">Add a day</button><button class="tool" id="delL">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="lTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:9%">Date</th><th style="width:6%">Phase</th><th style="width:6%">Goal %</th><th style="width:6%">Points</th><th style="width:6%">Possible</th><th style="width:6%">%</th><th style="width:7%">Behavior %</th><th style="width:6%">Matches</th><th style="width:6%">Ratings</th><th style="width:6%">Agree %</th><th style="width:6%">On No</th><th style="width:6%">Goal met</th><th style="width:9%">Per target %</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
-    <p class="hint">Per target: the percent earned on each target that day, in target order, separated by commas (for example 80,67,100). The chart draws a thin line per target and the metrics give each target&rsquo;s mean over the last five days.</p>
+      <th style="width:4%">#</th><th style="width:9%">Date</th><th style="width:6%">Phase</th><th style="width:6%">Goal %</th><th style="width:6%">Points</th><th style="width:6%">Possible</th><th style="width:6%">%</th><th style="width:7%">Behavior %</th><th style="width:6%">Matches</th><th style="width:6%">Ratings</th><th style="width:6%">Agree %</th><th style="width:6%">On No</th><th style="width:6%">Goal met</th><th style="width:9%">Per target %<br><small style="font-weight:400">points earned</small></th><th style="width:9%">Teacher Yes per target %<br><small style="font-weight:400">the tiles’ source</small></th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <p class="hint">Per target %: the points percent earned on each target that day, in target order, separated by commas (for example 80,67,100). Teacher Yes per target %: the share of the teacher’s ratings that were Yes for each target, the figure the three tiles average over the last five rated days (the iPad fills it; a hand-entered day can carry it). The chart draws a thin line per target and the metrics give each target&rsquo;s mean over the last five days.</p>
     <h3 style="margin-top:14px">Behavior and Points by Day</h3>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Behavior and points by day"><svg id="logPlot" viewBox="0 0 900 320" aria-label="The share of the teacher&rsquo;s ratings that were Yes per day, the percent of points earned, and the goal line"></svg></div>
     <div id="logChg"></div><!-- v22.80 (review I132) -->
@@ -4898,12 +4909,13 @@ function renderFid(){
    row without points); the On No cell gives how many of the teacher's No ratings the student matched */
 function smMetCell(r,i){const p=num(r.pts),q=num(r.poss),g=num(r.goal);if(String(r.ph||'')==='0')return '<span class="hint" title="A teacher-only day earns no points">—</span>';
   {const b=smLogBad(r);if(b)return '<span class="hint" title="'+esc(b)+': this day is not counted until the entry is fixed">—</span>';}   /* v24.22 (R-100) */
+  if(r.partial)return '<span class="hint" title="A partial day ('+esc(r.partial)+'): kept out of the goal rules">—</span>';   /* v24.24 (R-011) */
   if(p!=null&&q&&g!=null)return p/q*100>=g-1e-9?'<b style="color:#2F6B37">yes</b>':'no';
   return '<input type="checkbox" data-r="log" data-i="'+i+'" data-f="met"'+(r.met?' checked':'')+' aria-label="Goal met on day '+(i+1)+'">';}
 function smOnNo(r){const t=num(r.tno),m=num(r.nom);return t!=null?(m||0)+' of '+t:'—';}
 function renderL(){
   $('#lTbl tbody').innerHTML=S.log.map((r,i)=>{const p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);
-    return `<tr><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td><td><input data-r="log" data-i="${i}" data-f="ph" value="${esc(r.ph)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="goal" value="${esc(r.goal)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="pts" value="${esc(r.pts)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="poss" value="${esc(r.poss)}" style="text-align:center"></td><td class="num">${p!=null&&q?pct(p/q*100):'—'}</td><td><input data-r="log" data-i="${i}" data-f="beh" value="${esc(r.beh||'')}" style="text-align:center" aria-label="Behavior percent on day ${i+1}"></td><td><input data-r="log" data-i="${i}" data-f="m" value="${esc(r.m)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="n" value="${esc(r.n)}" style="text-align:center"></td><td class="num">${m!=null&&n?pct(m/n*100):'—'}</td><td class="num">${smOnNo(r)}</td><td class="num">${smMetCell(r,i)}</td><td><input data-r="log" data-i="${i}" data-f="tgp" value="${esc(r.tgp||'')}" placeholder="80,67,100" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('log',i,'day')}</tr>`;}).join('');
+    return `<tr${r.partial?` class="sm-partial" title="A partial day: ${esc(r.partial)}; kept out of the goal rules"`:''}><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td><td><input data-r="log" data-i="${i}" data-f="ph" value="${esc(r.ph)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="goal" value="${esc(r.goal)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="pts" value="${esc(r.pts)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="poss" value="${esc(r.poss)}" style="text-align:center"></td><td class="num">${p!=null&&q?pct(p/q*100):'—'}</td><td><input data-r="log" data-i="${i}" data-f="beh" value="${esc(r.beh||'')}" style="text-align:center" aria-label="Behavior percent on day ${i+1}"></td><td><input data-r="log" data-i="${i}" data-f="m" value="${esc(r.m)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="n" value="${esc(r.n)}" style="text-align:center"></td><td class="num">${m!=null&&n?pct(m/n*100):'—'}</td><td class="num">${smOnNo(r)}</td><td class="num">${smMetCell(r,i)}</td><td><input data-r="log" data-i="${i}" data-f="tgp" value="${esc(r.tgp||'')}" placeholder="80,67,100" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="bgp" value="${esc(r.bgp||'')}" placeholder="80,67,100" style="text-align:center" title="The share of the teacher’s ratings that were Yes, per target, in target order; the iPad fills it, and a hand-entered day can carry it"></td><td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('log',i,'day')}</tr>`;}).join('');
 }
 function renderWk(){
   const t=$('#wkTbl');if(S.sys!=='rubric'){t.innerHTML='';return;}
@@ -5169,11 +5181,11 @@ function renderBc(){
     (/^A stated/.test(m.bc_pen||'')?'<p><b>Agreed in the BIP dated</b> '+v('bc_penbip',110)+' (Form TD-1), with the parent&rsquo;s informed consent.</p>':'')+'</div>';   /* v22.80 (review F263) */
   h+='<h4>Changing the contract</h4><div class="clause"><p>'+(m.bc_renego?esc(m.bc_renego):'Either of us may ask for a meeting to change the contract. Changes are written here and signed again; nobody changes it alone.')+' Review date: '+v('bc_review',110)+'.</p></div>';
   h+='<h4>Task record</h4><table class="ct"><tr><th style="width:14%">Date</th><th>Task done (initials)</th><th>Reward given (initials)</th><th>Date</th><th>Task done (initials)</th><th>Reward given (initials)</th></tr>'+Array.from({length:7},()=>'<tr><td style="height:22px"></td><td></td><td></td><td></td><td></td><td></td></tr>').join('')+'</table>';
-  h+='<div class="sig"><div>Student: '+esc(st)+'<br>Signature and date</div><div>Teacher: '+esc(tc)+'<br>Signature and date</div>'+(pa?'<div>Parent: '+esc(pa)+'<br>Signature and date</div>':'')+'<div>Witness<br>Signature and date</div></div>';
+  h+='<div class="bc-tail"><div class="sig"><div>Student: '+esc(st)+'<br>Signature and date</div><div>Teacher: '+esc(tc)+'<br>Signature and date</div>'+(pa?'<div>Parent: '+esc(pa)+'<br>Signature and date</div>':'')+'<div>Witness<br>Signature and date</div></div>';
   /* v22.80 (review I135, F264): the student's assent, and the family's language and interpreter on the parent's copy, when known */
   if(m.bc_assent)h+='<p class="sub" style="margin-top:8px"><b>The student&rsquo;s assent:</b> '+esc(m.bc_assent.toLowerCase())+(smCaseF&&smCaseF.student&&smCaseF.student.date?' (Form SI-1, '+esc(smMDY(smCaseF.student.date))+')':'')+'; asked again at each review date.</p>';
   const lg=smLangLine();if(pa&&lg)h+='<p class="sub">'+lg+'</p>';
-  h+='<p class="sub" style="margin-top:10px">Starts '+esc(m.bc_start||'________')+' · '+(m.bc_voice?esc(m.bc_voice)+' · ':'')+'After Homme, Csanyi, Gonzales &amp; Rechs (1970) · Form SM-1</p>';
+  h+='<p class="sub" style="margin-top:10px">Starts '+esc(m.bc_start||'________')+' · '+(m.bc_voice?esc(m.bc_voice)+' · ':'')+'After Homme, Csanyi, Gonzales &amp; Rechs (1970) · Form SM-1</p></div>';   /* v24.24 (R-103) */
   out.innerHTML=h;
 }
 
@@ -5203,7 +5215,7 @@ function smLogWhy(r){const N=window.nbhNum,w=(v,o)=>N?N.why(v,o):'';const out={}
   return out;}
 function smLogBad(r){const o=smLogWhy(r);return Object.keys(o).filter(k=>o[k]).map(k=>o[k]).join('; ');}
 function smLogMarks(){if(!window.nbhNum)return;$$('#lTbl tbody tr').forEach((tr,i)=>{const r=S.log[i];if(!r)return;const o=smLogWhy(r);tr.querySelectorAll('input[data-f]').forEach(e=>{if(e.dataset.f in o)nbhNum.mark(e,o[e.dataset.f]);});});}
-{const r0=rows;rows=function(){return r0().map(r=>{const b=smLogBad(r);return b?{...r,pc:null,ag:null,mt:null,b:null,bad:b}:r;});};}
+{const r0=rows;rows=function(){return r0().map(r=>{const b=smLogBad(r);return b||r.partial?{...r,pc:null,ag:null,mt:null,b:null,bad:b||'',partial:r.partial||''}:r;});};}   /* v24.24 a partial day stays out of the rules too */
 {const l0=renderL;renderL=function(){const r=l0.apply(this,arguments);try{smLogMarks();}catch(e){}return r;};}
 function smHasT(){return S.sys==='match'||S.sys==='interval'||S.sys==='cico'||(S.sys==='rubric'&&!!S.chk.rubmatch);}
 function smMatched(){return ['match','interval','interlock'].includes(S.sys)||(S.sys==='rubric'&&!!S.chk.rubmatch);}
@@ -5247,7 +5259,7 @@ function renderRecord(){
     <div class="metric"><b>Goal met at the current goal</b><div class="val">${last.length?met+' of '+last.length:'—'}</div><div class="sub">${RR.length?(RR.length>last.length?'the last '+last.length+' of ':'')+RR.length+' school day'+(RR.length===1?'':'s')+' at '+at+inPh+esc(since):'current goal '+at+(run.ph?' · phase '+run.ph:'')+' · no days at it yet'}</div></div>
     <div class="metric"><b>Agreement, last 5 days</b><div class="val">${agm!=null?pct(agm):'—'}</div><div class="sub">${tnoS?'on the teacher&rsquo;s Nos: '+nomS+' of '+tnoS:'student and teacher ratings'}</div></div>`;
   const TM=$('#tgMetrics');if(TM){const last5=R.filter(r=>r.ph!=='0').slice(-5);TM.innerHTML=S.tg.map((t,i)=>{const bv=last5.map(r=>r.bp[i]).filter(x=>x!=null),vals=bv.length?bv:last5.map(r=>r.tp[i]).filter(x=>x!=null);const mn=smMean(vals);
-    return '<div class="metric"><b>Target '+(i+1)+', last 5 days</b><div class="val">'+(mn!=null?pct(mn):'—')+'</div><div class="sub">'+esc(t.word||'')+(bv.length?' · teacher rated it met':vals.length?' · of the points':'')+(t.goal?' · goal '+esc(t.goal)+'%':'')+'</div></div>';}).join('');}
+    return '<div class="metric"><b>Target '+(i+1)+', last 5 days</b><div class="val">'+(mn!=null?pct(mn):'—')+'</div><div class="sub">'+esc(t.word||'')+(bv.length?' · the teacher’s Yes share per target (the Teacher Yes column), last 5 rated days':vals.length?' · of the points (the Per target column)':'')+(t.goal?' · goal '+esc(t.goal)+'%':'')+'</div></div>';}).join('');}
   if(!R.length){v.innerHTML='<div class="verdict v-mid"><b>No days yet.</b> Enter the teacher-only days as phase 0 (Behavior %: the share of the teacher&rsquo;s ratings that were Yes); the Record suggests a first goal from them.</div>';RU.innerHTML='';drawLog(R);return;}
   const rules=[];
   /* the baseline and the first goal (F262) */
@@ -5371,7 +5383,7 @@ function fromFile(d){
   const fid=arr('fid',['in','note'],FID.length);if(fid&&fid.length===FID.length)o.fid=fid;
   const fade=arr('fade',['on','note'],FADE.length);if(fade&&fade.length===FADE.length)o.fade=fade;
   const bck=arr('bck',['in','note'],BCRULES.length);if(bck&&bck.length===BCRULES.length)o.bck=bck;
-  o.log=arr('log',['date','ph','goal','pts','poss','beh','m','n','tno','nom','sno','asm','met','tgp','bgp','note','src'],400)||[];   /* v22.80 (F258) the behavior and the No counts */   /* src (v21.46): 'ipad:yyyy-mm-dd' for a row a day rated on the iPad wrote */
+  o.log=arr('log',['date','ph','goal','pts','poss','beh','m','n','tno','nom','sno','asm','met','tgp','bgp','note','src','partial'],400)||[];   /* v24.24 */   /* v22.80 (F258) the behavior and the No counts */   /* src (v21.46): 'ipad:yyyy-mm-dd' for a row a day rated on the iPad wrote */
   Object.keys(obj('wk')).forEach(k=>{if(/^d[0-4]_p\d+$/.test(k))o.wk[k]=str(s.wk[k]);});
   o.chg=(arr('chg',['date','what','why','k'],200)||[]).filter(c=>c.what);   /* v22.80 (review I132) */
   o.tg.forEach(t=>{if(!window.NBH_PICTOS||!NBH_PICTOS[t.icon])t.icon='';});o.per.forEach(p=>{if(!window.NBH_PICTOS||!NBH_PICTOS[p.icon])p.icon='';});
@@ -5986,19 +5998,19 @@ function smFit(){const out=$('#sheetOut');if(!out||!S.sys)return {k:1,h:0};const
   const sw=m.scrollWidth,sh=m.scrollHeight;m.remove();const k=Math.min(1,W/Math.max(W,sw),H/Math.max(1,sh));return {k,h:sh,w:sw,o,W,H};}
 function smRenderSheetTools(){const el=$('#smSheetTools');if(!el)return;if(!S.sys){el.innerHTML='';return;}const f=smFit(),d=smD();
   const multi=(smLook()==='discreet')||(S.sys==='perf'||S.sys==='interlock');
-  el.innerHTML=(f.h?'<div class="sm2-fit '+(f.k>=.985?'ok':'big')+'">'+(f.k>=.985?'Fits on one '+f.o+' page.':'Runs past one '+f.o+' page at full size'+(d.nofit?': it will print on two pages.':': it prints shrunk to '+Math.round(f.k*100)+'% to fit one page.')+(f.k<.8?' That is small: fewer periods or targets, or a looser look, reads better.':''))+
-      (f.k<.985?' <label class="ck" style="display:inline-flex;margin-left:8px"><input type="checkbox" data-d="nofit"'+(d.nofit?' checked':'')+'> print at full size instead</label>':'')+'</div>':'')+
+  el.innerHTML=(f.h?'<div class="sm2-fit '+(f.k>=.985?'ok':'big')+'">'+(f.k>=.985?'Fits on one '+f.o+' page.':'Runs past one '+f.o+' page at full size'+(d.nofit?': it will print on two pages.':(f.k<.8?': shrunk to '+Math.round(f.k*100)+'% it would be too small to read, so it prints at full size on two pages (the week print too). Fewer periods or targets, or a looser look, fits one page.':': it prints shrunk to '+Math.round(f.k*100)+'% to fit one page.')))+
+      (f.k<.985&&f.k>=.8?' <label class="ck" style="display:inline-flex;margin-left:8px"><input type="checkbox" data-d="nofit"'+(d.nofit?' checked':'')+'> print at full size instead</label>':'')+'</div>':'')+
     '<div class="sm2-prints"><button type="button" class="tool" id="smPrWeek">Print a week (Monday to Friday)</button>'+(multi?'':'<button type="button" class="tool" id="smPrHalf">Print two half-size copies on a page</button>')+
     '<button type="button" class="tool" id="smPrMenu"'+(smStore().length?'':' disabled title="Add rewards to the store on the Reinforcement page"')+'>Print My Reward Menu</button><button type="button" class="tool" id="smPrGuide">Print How to Run This Sheet (staff)</button><button type="button" class="tool" id="smPrPrac"'+(S.tg.some(t=>t.ex||t.nex)?'':' disabled title="Write an example and a non-example for a target on the Targets page"')+'>Print a rating practice page</button></div>';}
 /* the sheet printed alone: shrunk to one page unless the user asked for full size */
 const smPrintAlone0=printAlone;
-printAlone=function(cls,orient){if(cls==='sm-sheet-only'&&!smD().nofit){const f=smFit();if(f.k<.985){const st=document.createElement('style');st.textContent='@media print{#sheetOut{zoom:'+f.k.toFixed(3)+'}}';document.head.appendChild(st);const off=()=>{st.remove();window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);setTimeout(off,60000);}}
+printAlone=function(cls,orient){if(cls==='sm-sheet-only'&&!smD().nofit){const f=smFit();if(f.k<.985&&f.k>=.8){   /* v24.24 (R-021) under 80% it prints at full size on two pages */const st=document.createElement('style');st.textContent='@media print{#sheetOut{zoom:'+f.k.toFixed(3)+'}}';document.head.appendChild(st);const off=()=>{st.remove();window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);setTimeout(off,60000);}}
   return smPrintAlone0(cls,orient);};
 function smExtraPrint(html,orient){const x=$('#smExtraOut');x.innerHTML=html;printAlone('sm-extra-only',orient);const off=()=>{x.innerHTML='';window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);}
 function smSheetAs(day){const keep=S.meta.sh_date;S.meta.sh_date=day;renderSheet();const h=$('#sheetOut').innerHTML,c=$('#sheetOut').className;S.meta.sh_date=keep;renderSheet();return {h,c};}
 document.addEventListener('click',e=>{if(!S.sys&&e.target.closest('#smSheetTools button'))return;
-  if(e.target.closest('#smPrWeek')){const f=smFit(),z=smD().nofit?1:f.k;smExtraPrint(DAYS.map(dn=>{const r=smSheetAs(dn+' ________');return '<div class="pg"><div class="'+r.c+'" style="zoom:'+z.toFixed(3)+'">'+r.h+'</div></div>';}).join(''),sheetOrientation());}
-  if(e.target.closest('#smPrHalf')){const f=smFit(),k=Math.min(720/Math.max(1,f.w||960),470/Math.max(1,f.h||720));const c=$('#sheetOut').className,h=$('#sheetOut').innerHTML;smExtraPrint('<div class="pg"><div class="'+c+'" style="zoom:'+k.toFixed(3)+'">'+h+'</div><div style="border-top:1.5px dashed #999;margin:12px 0;font-size:10px;color:#888">✂</div><div class="'+c+'" style="zoom:'+k.toFixed(3)+'">'+h+'</div></div>','portrait');}
+  if(e.target.closest('#smPrWeek')){const f=smFit(),z=(smD().nofit||f.k<.8)?1:f.k;   /* v24.24 (R-021) */smExtraPrint(DAYS.map(dn=>{const r=smSheetAs(dn+' ________');return '<div class="pg"><div class="'+r.c+'" style="zoom:'+z.toFixed(3)+'">'+r.h+'</div></div>';}).join(''),sheetOrientation());}
+  if(e.target.closest('#smPrHalf')){const f=smFit(),k=Math.min(700/Math.max(1,f.w||960),430/Math.max(1,f.h||720));   /* v24.24 (R-021) two complete copies on the page */const c=$('#sheetOut').className,h=$('#sheetOut').innerHTML;smExtraPrint('<div class="pg"><div class="'+c+'" style="zoom:'+k.toFixed(3)+';width:'+Math.round(f.w||960)+'px">'+h+'</div><div style="border-top:1.5px dashed #999;margin:12px 0;font-size:10px;color:#888">✂</div><div class="'+c+'" style="zoom:'+k.toFixed(3)+';width:'+Math.round(f.w||960)+'px">'+h+'</div></div>','portrait');}   /* v24.24 the copy keeps the sheet's own width */
   if(e.target.closest('#smPrMenu'))smExtraPrint(smMenuPage(),'portrait');
   if(e.target.closest('#smPrGuide'))smExtraPrint(smGuidePage(),'portrait');
   if(e.target.closest('#smPrPrac'))smExtraPrint(smPracticePage(),'portrait');});
@@ -6278,7 +6290,11 @@ SMR.tick=setInterval(smRTick,1000);
 let SMR_INERT=[];
 function smRInert(on){SMR_INERT.forEach(e=>{e.inert=false;});SMR_INERT=[];if(!on)return;
   for(let n=$('#smRWrap');n&&n.parentElement&&n!==document.body;n=n.parentElement)for(const sib of n.parentElement.children)if(sib!==n&&!sib.inert&&!/^(SCRIPT|STYLE|LINK|DIALOG)$/.test(sib.tagName)&&sib.id!=='smRFx'){sib.inert=true;SMR_INERT.push(sib);}}
-function smRKid(on){SMR.kid=on;document.body.classList.toggle('smr-kid',on);SMR.mode='me';SMR.sel=-1;smRInert(on);
+function smRKid(on){
+  /* v24.24 (sm124, R-101, E-18) the Student screen needs a PIN on the teacher's part: asked once, changed under Settings */
+  if(on&&!String(smD().pin||'').trim()){const v=window.prompt('Set a PIN for the teacher’s part of the Student screen (4 to 6 digits). It is asked once and changed under Settings.','');const d=String(v||'').replace(/\D/g,'').slice(0,6);
+    if(d.length<4){try{nbhUI.toast('The Student screen opens once a PIN is set, so a student cannot open the teacher’s rating.',{kind:'warn'});}catch(e){}return;}smD().pin=d;try{smRRender();}catch(e){}}
+  SMR.kid=on;document.body.classList.toggle('smr-kid',on);SMR.mode='me';SMR.sel=-1;smRInert(on);
   try{if(on){const el=document.documentElement,f=el.requestFullscreen||el.webkitRequestFullscreen;if(f){const p=f.call(el);if(p&&p.catch)p.catch(()=>{});}}
     else if(document.fullscreenElement||document.webkitFullscreenElement){const f=document.exitFullscreen||document.webkitExitFullscreen;if(f){const p=f.call(document);if(p&&p.catch)p.catch(()=>{});}}}catch(e){}
   smRWake(on);smRRender();const w=$('#smRWrap');if(w){w.scrollTop=0;if(on)try{w.scrollIntoView({block:'start'});}catch(e){}}if(!on)setView('rate');}
@@ -6306,19 +6322,26 @@ function smRParty(T){let fx=$('#smRFx');if(!fx){fx=document.createElement('div')
    (phase 0) goes in as a baseline day with no points; at fading step 2 the unrated periods count as met */
 async function smRFinish(){const day=smRDay();if(!smRAny(day))return;const M=smRModel(day),T=smRTotals(M,day,true),B=smRBeh(M,day),ph0=smRPh0(M),met=!ph0&&T.need!=null&&T.pts>=T.need;
   const bl=B&&B.n?'the targets met in '+B.yes+' of '+B.n+' of '+M.tw.toLowerCase()+'’s ratings ('+Math.round(B.b)+'%)':'';
+  /* v24.24 (sm124, R-011, E-20) the periods with no rating, and a day that is not a school day, before the day is written */
+  const unr=ph0?[]:M.rows.map((r,ri)=>({ri,label:r.label})).filter(x=>!M.tg.some((t,ti)=>day.me[x.ri+'_'+ti]!=null||day.t[x.ri+'_'+ti]!=null));
+  const partial=!ph0&&!T.asm&&unr.length>0&&unr.length<M.rows.length;
+  if(partial){T.poss=(M.rows.length-unr.length)*M.tg.length*M.maxc;T.need=T.g!=null&&T.poss?Math.ceil(T.poss*T.g/100):null;}   /* v24.24 (R-011) possible = the rated periods */
+  const met2=!ph0&&T.need!=null&&T.pts>=T.need;
+  const wk=(()=>{try{const d=new Date(SMR.date+'T12:00:00');return d.getDay()===0?'Sunday':d.getDay()===6?'Saturday':'';}catch(e){return '';}})();
+  const ext=(wk?'\n'+wk+': not a school day. The row is marked so.':'')+(partial?'\n'+unr.length+' of '+M.rows.length+' period'+smPoss(unr.length)+' '+(unr.length===1?'has':'have')+' no rating ('+unr.map(x=>x.label).join(', ')+'): the points possible are counted from the rated periods only, and the day is marked partial and kept out of the goal rules.':'');
   if(!(await nbhUI.confirm('Finish '+smRLong(SMR.date)+'?\n'+(ph0?'A teacher-only day (phase 0): '+(bl||'no rating by '+M.tw.toLowerCase())+'. It goes into the Record as a baseline day, with no points.':
-      T.pts+' of '+T.poss+' points'+(T.need!=null?(met?': the goal is met.':': the goal ('+T.need+') is not met.'):'.')+(bl?'\nBehavior: '+bl+'.':'')+(T.asm?'\n'+T.asm+' period'+smPoss(T.asm)+' not rated count as met (fading step 2).':'')+(T.wait?'\n'+T.wait+' rating'+smPoss(T.wait)+' not matched count as the student rated.':'')+'\nThe day goes into the Record as one row'+(day.fin?' (its row is updated)':'')+'.'),{ok:'Finish the day'})))return;
+      T.pts+' of '+T.poss+' points'+(T.need!=null?(met2?': the goal is met.':': the goal ('+T.need+') is not met.'):'.')+(bl?'\nBehavior: '+bl+'.':'')+(T.asm?'\n'+T.asm+' period'+smPoss(T.asm)+' not rated count as met (fading step 2).':'')+(T.wait?'\n'+T.wait+' rating'+smPoss(T.wait)+' not matched count as the student rated.':'')+ext+'\nThe day goes into the Record as one row'+(day.fin?' (its row is updated)':'')+'.'),{ok:'Finish the day'})))return;
   const r1=v=>String(Math.round(v*10)/10);
-  const row={date:smRShort(SMR.date),ph:curPhase(),goal:ph0?'':S.meta.goal||'',pts:ph0?'':String(T.pts),poss:ph0?'':String(T.poss),beh:B&&B.b!=null?r1(B.b):'',m:M.match&&!ph0?String(T.m):'',n:M.match&&!ph0?String(T.n):'',
-    tno:B&&!ph0&&M.match?String(B.tno):'',nom:B&&!ph0&&M.match?String(B.nom):'',sno:B&&!ph0&&M.match?String(B.sno):'',asm:T.asm?String(T.asm):'',met,tgp:!ph0&&['match','contract','smiley','cico'].includes(M.sys)?T.tp.join(','):'',
+  const row={date:smRShort(SMR.date),ph:curPhase(),goal:ph0?'':S.meta.goal||'',pts:ph0?'':String(T.pts),poss:ph0?'':String(T.poss),partial:partial?unr.length+' of '+M.rows.length+' periods unrated ('+unr.map(x=>x.label).join(', ')+')':'',beh:B&&B.b!=null?r1(B.b):'',m:M.match&&!ph0?String(T.m):'',n:M.match&&!ph0?String(T.n):'',
+    tno:B&&!ph0&&M.match?String(B.tno):'',nom:B&&!ph0&&M.match?String(B.nom):'',sno:B&&!ph0&&M.match?String(B.sno):'',asm:T.asm?String(T.asm):'',met:met2,tgp:!ph0&&['match','contract','smiley','cico'].includes(M.sys)?T.tp.join(','):'',
     bgp:B&&B.n&&M.sys!=='interval'&&M.sys!=='rubric'?B.tp.join(','):'',
-    note:(day.paper?'Entered from the paper sheet':'Rated on the iPad')+(T.asm?' ('+T.asm+' period'+smPoss(T.asm)+' assumed met, fading step 2)':'')+(day.note?': '+day.note.replace(/\s+/g,' ').slice(0,200):''),src:'ipad:'+SMR.date};
+    note:(day.paper?'Entered from the paper sheet':'Rated on the iPad')+(wk?'; '+wk+', not a school day':'')+(partial?'; partial: '+unr.length+' period'+smPoss(unr.length)+' unrated ('+unr.map(x=>x.label).join(', ')+')':'')+(T.asm?' ('+T.asm+' period'+smPoss(T.asm)+' assumed met, fading step 2)':'')+(day.note?': '+day.note.replace(/\s+/g,' ').slice(0,200):''),src:'ipad:'+SMR.date};
   if(smFadeStep()===1)day.f2=true;else delete day.f2;
   let i=S.log.findIndex(r=>r.src==='ipad:'+SMR.date);
   if(i<0){const j=S.log.findIndex(r=>!r.src&&String(r.date||'').trim()===row.date);if(j>=0&&(await nbhUI.confirm('The Record already has a row for '+row.date+', entered by hand. Replace it with the day rated on the iPad?\nCancel keeps it and adds a row.',{ok:'Replace'})))i=j;}
   if(i>=0)S.log[i]=Object.assign({},S.log[i],row);else S.log.push(row);
   day.fin=new Date().toISOString();renderL();renderRecord();smRRender();
-  nbhUI.toast('The day is in the Record: '+T.pts+' of '+T.poss+' points'+(T.need!=null?(met?', goal met.':', goal not met.'):'.')+(smStore().length?' Tap the reward chosen.':''),{kind:'ok'});}
+  nbhUI.toast('The day is in the Record: '+T.pts+' of '+T.poss+' points'+(T.need!=null?(met2?', goal met.':', goal not met.'):'.')+(smStore().length?' Tap the reward chosen.':''),{kind:'ok'});}
 document.addEventListener('click',async e=>{const t=e.target;if(t.closest('#smRFxOk')){$('#smRFx').hidden=true;return;}
   if(!t.closest('#smRate'))return;smRAudio();const day0=smRDay()||smREmpty(),M=smRModel(day0);let b;
   if((b=t.closest('[data-rl]'))&&M){smRSet(+b.dataset.rt,+b.dataset.rl);return;}

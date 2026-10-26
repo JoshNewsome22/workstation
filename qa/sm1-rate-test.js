@@ -70,7 +70,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     const k2='2030-01-08';S.log.push({date:'1/8',ph:'1',goal:'80',pts:'5',poss:'36',m:'',n:'',met:false,tgp:'',note:'by hand'});const n3=S.log.length;
     window.__ok=true;SMR.date=k2;await smRFinish();const n4=S.log.length,hand=S.log.find(r=>r.date==='1/8');window.__ok=true;
     return {n0,n1,n2,n3,n4,row,row2,hand,fin:!!S.days[k].fin,rec:document.getElementById('lTbl').querySelectorAll('tbody tr').length===S.log.length};});
-  ok('Finish the day writes one row to the Record',fin.n1===fin.n0+1&&fin.row&&fin.row.date==='1/7'&&fin.row.poss==='36'&&fin.row.n==='1'&&fin.row.src==='ipad:2030-01-07'&&fin.fin&&fin.rec,fin);
+  ok('Finish the day writes one row to the Record',fin.n1===fin.n0+1&&fin.row&&fin.row.date==='1/7'&&fin.row.poss==='6'&&/5 of 6 periods unrated/.test(fin.row.partial)&&fin.row.n==='1'&&fin.row.src==='ipad:2030-01-07'&&fin.fin&&fin.rec,fin);
   ok('finishing again updates the row instead of adding one',fin.n2===fin.n1&&+fin.row2.pts>+fin.row.pts,{a:fin.row,b:fin.row2});
   ok('a hand-entered row for the same date is replaced when confirmed',fin.n4===fin.n3&&fin.hand.src==='ipad:2030-01-08'&&fin.hand.pts==='18'&&/Rated on the iPad/.test(fin.hand.note),fin.hand);
   const del=await page.evaluate(async()=>{const k='2030-01-08';const n=S.log.length;smRRender();document.querySelector('#smRate [data-rdel="'+k+'"]').click();await new Promise(r=>setTimeout(r,100));return {gone:!S.days[k],rows:S.log.length===n-1&&!S.log.some(r=>r.src==='ipad:'+k)};});
@@ -83,7 +83,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('Save data and Open data keep the days, the Settings and the Record rows’ source',io.kept&&io.pin==='4321'&&io.speak===true&&io.src,io);
   ok('a forged file is cleaned',JSON.stringify(io.days)==='["2030-01-09"]'&&JSON.stringify(io.me)==='{"0_0":1}'&&JSON.stringify(io.t)==='{}'&&JSON.stringify(io.rem)==='{"0":3}'&&io.wf===''&&io.fin===''&&io.spent==='5'&&io.pin2==='1234'&&!io.rcue,io);
   /* 6. the Student screen */
-  await page.evaluate(()=>{S.d.pin='';SMR.date=smRISO();setView('rate');document.getElementById('smRKid').click();});await sleep(300);
+  await page.evaluate(()=>{window.prompt=()=>'1234';S.d.pin='';SMR.date=smRISO();setView('rate');document.getElementById('smRKid').click();S.d.pin='';});await sleep(300);   /* v24.24: the screen asks for a PIN once; cleared again so the hold below opens without one */
   const kid=await page.evaluate(()=>{const w=document.getElementById('smRWrap').getBoundingClientRect();return {cls:document.body.classList.contains('smr-kid'),cover:w.top<=0&&w.left<=0&&w.width>=1170&&w.height>=810,
     acts:!document.getElementById('smRFin'),inert:document.querySelector('.toolbar,#viewSeg').closest('[inert]')!=null,modes:!document.querySelector('#smRate .smr-modes'),hold:!!document.getElementById('smRHold'),grid:!document.querySelector('#smRate .smr-grid'),big:document.querySelector('#smRate .smr-o').getBoundingClientRect().width>=108};});
   ok('the Student screen covers the page with the student’s part only, the page behind it inert',kid.inert&&kid.cls&&kid.cover&&kid.acts&&kid.modes&&kid.hold&&kid.grid&&kid.big,kid);

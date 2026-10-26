@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.24: Form SM-1 from the independent review: a partial day, the sheet at readable size, the Record's columns, a PIN
+(the independent review of 10/25, SM-1 findings R-011, R-021, R-099, R-101, R-103, R-104, R-143; enhancements E-18, E-19, E-20; R-105 is left for a reproduction)
+
+- **Finish the day names the periods with no rating** (how many and which), counts the points possible from the rated periods
+  only, and marks the day **partial**: its row is shaded on the Record, its goal-met cell reads "—", and it stays out of the goal
+  rules (the goal-met count, the baseline and the runs). A weekend date is named in the question. (A day finished with three of
+  six periods unrated no longer reads as 15 of 36 points at the goal.)
+- **The student sheet is never shrunk below 80%.** When one page would need less, it prints at full size on two pages and the
+  Sheet tab says so; the week print does the same; the two half-size copies keep the sheet's own width and fit one page.
+- **The Record shows the teacher's Yes share per target** (the figure the three tiles average over the last five rated days)
+  beside the points per target; the tiles say which column they read, the caption says which figure feeds which, and a
+  hand-entered day can carry it.
+- **The Student screen asks for a PIN** the first time it is opened (4 to 6 digits, changed under Settings); without one it does
+  not open, and a toast says why.
+- The contract's signature block and footer stay together on one page; the accent color used for text and for the primary
+  rating button is darkened to 4.5:1 and better on white; the goal number is darker; the Record's number cells keep 56 px on an iPad.
+- Checks: `qa/sm124-test.js`.
+
 ### v24.23: Form DD-1 from the independent review: a day on the graph is a whole school day
 (the independent review of 10/25, DD-1 findings R-009, R-010, R-088 to R-091, R-093 to R-095, R-097, R-140 to R-142; enhancements E-07, E-20 and E-38 in part)
 
