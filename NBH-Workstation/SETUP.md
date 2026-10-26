@@ -9905,6 +9905,17 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.41: Form TD-1's Build cards on the iPad (from the BCBA's screenshot of 10/26)
+- **The settings line up.** A card filled from the protocol bank lays its settings one a row (the bank's values are long), and
+  each label sat inline before its box, so the boxes started at seven different places down the card. On screen such a card
+  now keeps the labels in a column of their own, with the boxes aligned beside them; on a phone the label sits above its box.
+  The boxes keep the card's text size (14 px) and the labels sit a step smaller (12 px).
+- **One example, not two.** Run by, When and Where showed their example twice: inside the box as a placeholder and again on a
+  line under it. The example is now the one line under the box; paper does not print it, so the printed card is unchanged.
+- Tests: qa/ux141-test.js (an 1180 px iPad: a chaining card from the bank with seven settings, every box starting at the same
+  x, the label and box text sizes; the three example lines with no placeholder; a 560 px phone with the labels above the boxes;
+  a 1400 px desktop). The print policy test (pp131) passes unchanged.
+
 ### v24.40: One simulated student across the forms (review V14 part 2: R-028, R-049, R-081, R-115, R-121, E-02)
 - **One student.** The simulated student is the same wherever a form names them: SIMULATED – Sample Student, ID SIM-000, born
   4/18/2017 (9 years 6 months this school year), grade 4, Example ESE center school (simulated), Room 12; Forms DA-1, SM-1 and
