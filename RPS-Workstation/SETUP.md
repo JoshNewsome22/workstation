@@ -9905,6 +9905,29 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.38: The sheet code found in a real photo (Forms SP-1, ABC-1, DD-1)
+(from the BCBA's own test on 10/26: a printed Scatterplot sheet, marked in pencil, photographed on an iPad, "No sheet code was found")
+
+- **Why it failed.** An iPad photo is 4032 px wide and the sheet fills about half of it. The scanners read the code once,
+  on a frame of the picture shrunk to 1800 px (SP-1) or 2600 px (ABC-1, DD-1), where the code is two or three picture
+  pixels a module, and the decoder missed it.
+- **Now** the frame pass is tried first and, when it misses, the code is looked for in tiles of the full-size picture
+  (nine overlapping tiles, the lower-left first on the Scatterplot sheet where the code sits under the grid, the upper-left
+  first on the ABC and daily data sheets where it sits in the head), each at whole-number scales, and its place is mapped
+  back to the frame. The printed sheets are unchanged: every sheet already printed scans.
+- **The Scatterplot cells read as a pencil marks them.** A cell's darkness was measured against the cell's own brightest
+  pixels, so a cell shaded through read as blank; it is now measured against the paper around it. The two diagonals are
+  read as lines (the darkest of a few pixels across, so a thin pencil X counts), and every reading is measured from the
+  sheet's own blank cells, so a grey pencil on a dim photo reads as a black marker in daylight does. On a one-level sheet
+  (shaded or X, no slash) a cell with one clear line and no shading is an X, the unsure chooser offers blank, shaded and
+  X, and the reading line counts shaded cells.
+- **The grid's far corners.** When the code's own (tiny) map drifts over the sheet and a corner square is not found, a
+  second pass maps from the code's corners and the squares found, and looks for the rest more widely.
+- Tests: qa/sp138-test.js (a one-level SP-1 sheet marked in pencil grey with hand-drawn X cells, photographed into a
+  4032 x 3024 frame at an angle and read back, 19 in 20 cells right; the same at 2016 px; ABC-1's and DD-1's sheets
+  small in a 4032 px frame get past the code); the BCBA's own photo read as 13 shaded and 3 X cells (not in the tests:
+  a student's sheet).
+
 ### v24.37: Wide tables on the iPad, part 2 (review V13: R-020 with E-08, R-019 with E-35)
 - **Form DD-1, the day card.** On a screen under 900 px wide (an iPad upright, a phone) the Daily data tab offers two ways
   to enter the days: the **day card** and the **full sheet**. The card shows one day at a time, the way the paper sheet

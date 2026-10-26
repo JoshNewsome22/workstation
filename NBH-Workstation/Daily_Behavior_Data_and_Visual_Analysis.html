@@ -22397,9 +22397,17 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     if(L.hash && hash && L.hash !== hash) return {why: 'The code does not match the layout the record holds for this print.'};
     return {ok: true, L, kind: kind || L.kind, pid};
   }
-  function decode(img, W, H, cv){
+  async function decode(img, W, H, cv, bm, sc){
     let r = null; try{ r = jsQR(img.data, W, H, {inversionAttempts: 'dontInvert'}); }catch(e){}
     if(r && /^DD1;/.test(r.data)) return r;
+    /* v24.38 a real photo: in the frame the code is a few px a module, so it is looked for in tiles of the full-size picture (the upper-left first), each at whole-number scales (the decoder reads a code at 2x or 3x it misses at 1.9x), and its place mapped back to the frame; the page is given a moment between tiles */
+    if(bm && bm.width){ const bw = bm.width, bh = bm.height, tcv = document.createElement('canvas'), tcx = tcv.getContext('2d', {willReadFrequently:true}), FR = 0.45, ST = 0.275;
+      for(const [ti, tj] of [[0,0],[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],[2,2]]){ const x0 = Math.round(ti * ST * bw), y0 = Math.round(tj * ST * bh), tw = Math.round(FR * bw), th = Math.round(FR * bh), base = 1700 / Math.max(tw, th);
+        for(const ts of [1, 2, 3, 1.5].filter(v => v >= base * 0.5 && v <= base * 2.2)){ tcv.width = Math.round(tw * ts); tcv.height = Math.round(th * ts); tcx.imageSmoothingEnabled = true; tcx.drawImage(bm, x0, y0, tw, th, 0, 0, tcv.width, tcv.height);
+          let q3 = null; try{ q3 = jsQR(tcx.getImageData(0, 0, tcv.width, tcv.height).data, tcv.width, tcv.height, {inversionAttempts: 'dontInvert'}); }catch(e){}
+          if(q3 && /^DD1;/.test(q3.data)){ for(const k in q3.location){ const pt = q3.location[k]; if(pt && typeof pt.x === 'number'){ pt.x = (pt.x / ts + x0) * sc; pt.y = (pt.y / ts + y0) * sc; } } return q3; }
+          await new Promise(r => setTimeout(r, 0)); } } }
+
     const t = document.createElement('canvas'), tc = t.getContext('2d', {willReadFrequently:true});
     for(const [x0, y0, w, h] of [[0, 0, Math.ceil(W / 2), Math.ceil(H / 2)], [0, 0, W, Math.ceil(H / 2)], [0, Math.floor(H / 2), W, Math.ceil(H / 2)], [Math.floor(W / 2), 0, Math.ceil(W / 2), H]]){
       t.width = w * 2; t.height = h * 2; tc.imageSmoothingEnabled = true; tc.drawImage(cv, x0, y0, w, h, 0, 0, w * 2, h * 2);
@@ -22424,7 +22432,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const cv = d.querySelector('#ddScCanvas'), ctx = cv.getContext('2d', {willReadFrequently:true});
     const sc = Math.min(1, 2600 / Math.max(bm.width, bm.height)); cv.width = Math.round(bm.width * sc); cv.height = Math.round(bm.height * sc); ctx.drawImage(bm, 0, 0, cv.width, cv.height); cv.hidden = false;
     const W = cv.width, H = cv.height, {g, d: img} = gray(cv);
-    const qd = decode(img, W, H, cv);
+    const qd = await decode(img, W, H, cv, bm, sc);
     if(!qd || !/^DD1;/.test(qd.data)){ stat('No sheet code was found in the picture. Hold the sheet flat, get the whole sheet in the frame with the square code in the Date heading, and try again in better light.', 'bad'); return; }
     const C = check(qd.data); if(!C.ok){ stat(C.why, 'bad'); return; }
     const L = C.L, k = W0 / 10000, Wp = W0;

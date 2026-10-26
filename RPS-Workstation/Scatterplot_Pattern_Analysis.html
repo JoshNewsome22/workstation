@@ -18907,16 +18907,44 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       out.push({x: sx / n, y: sy / n, w, h, n}); }
     return out;
   }
-  function refine(g, W, H, h0, pts, side){
-    const cand = squares(g, W, H, side), out = [], used = new Set(), R = Math.max(80, side * 14);
+  /* v24.38 a plane map from pairs of points by least squares (the code's four corners and the squares found): the tiny code's own
+     projective map drifts over the sheet, so the far squares are predicted from this and looked for more widely */
+  function affineLS(src, dst){
+    const n = src.length; if(n < 3) return null; let sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0, su = 0, sv = 0, sxu = 0, syu = 0, sxv = 0, syv = 0;
+    for(let i = 0; i < n; i++){ const [x, y] = src[i], [u, v] = dst[i]; sx += x; sy += y; sxx += x * x; sxy += x * y; syy += y * y; su += u; sv += v; sxu += x * u; syu += y * u; sxv += x * v; syv += y * v; }
+    const M = [[sxx, sxy, sx], [sxy, syy, sy], [sx, sy, n]], solve = b => { const A = M.map((r, i) => r.concat([b[i]])); for(let c = 0; c < 3; c++){ let p = c; for(let r = c + 1; r < 3; r++) if(Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r; [A[c], A[p]] = [A[p], A[c]]; const d = A[c][c]; if(Math.abs(d) < 1e-9) return null; for(let k = c; k <= 3; k++) A[c][k] /= d; for(let r = 0; r < 3; r++) if(r !== c){ const f = A[r][c]; for(let k = c; k <= 3; k++) A[r][k] -= f * A[c][k]; } } return A.map(r => r[3]); };
+    const a = solve([sxu, syu, su]), b = solve([sxv, syv, sv]); if(!a || !b) return null; return [a[0], a[1], a[2], b[0], b[1], b[2], 0, 0, 1];
+  }
+  function refine(g, W, H, h0, pts, side, mult){
+    const cand = squares(g, W, H, side), out = [], used = new Set(), R = Math.max(80, side * 14) * (mult || 1), hit = [];
     for(const [x, y] of pts){ const [u, v] = map(h0, x, y); let best = null, bd = R;
       cand.forEach((c, i) => { if(used.has(i)) return; const d = Math.hypot(c.x - u, c.y - v); if(d < bd){ bd = d; best = i; } });
-      if(best != null){ used.add(best); out.push([cand[best].x, cand[best].y]); } else out.push([u, v]); }
-    out.found = used.size; return out;
+      if(best != null){ used.add(best); out.push([cand[best].x, cand[best].y]); hit.push(true); } else { out.push([u, v]); hit.push(false); } }
+    out.found = used.size; out.hit = hit; return out;
   }
 
-  /* ---- a cell's darkness: the fill, and the two diagonals ---- */
-  function readCell(g, W, H, h, x, y, w, hh){
+  /* v24.38 a cell's darkness against the paper around it (the cell's own pixels are no measure of white when it is shaded
+     through, and a pencil is grey), the two diagonals read as lines (the darkest of a few pixels across, so a thin X counts),
+     and the sheet's own blank cells as the floor every reading is measured from */
+  function sampleCell(g, W, H, h, x, y, w, hh){
+    const N = 13, pts = [];
+    for(let i = 0; i < N; i++) for(let j = 0; j < N; j++){ const fx = 0.18 + 0.64 * (i + 0.5) / N, fy = 0.18 + 0.64 * (j + 0.5) / N;
+      const [u, v] = map(h, x + fx * w, y + fy * hh); const ui = Math.round(u), vi = Math.round(v);
+      if(ui < 0 || vi < 0 || ui >= W || vi >= H) continue; pts.push([fx, fy, g[vi * W + ui]]); }
+    const ring = []; for(let k = 0; k < 24; k++){ const a = k / 24 * Math.PI * 2; const [u, v] = map(h, x + w / 2 + Math.cos(a) * w * 0.64, y + hh / 2 + Math.sin(a) * hh * 0.72); const ui = Math.round(u), vi = Math.round(v); if(ui >= 0 && vi >= 0 && ui < W && vi < H) ring.push(g[vi * W + ui]); }
+    const line = (sx, sy, ex, ey) => { const vals = []; for(let t = 0.14; t <= 0.86; t += 0.04){ const [u, v] = map(h, x + (sx + (ex - sx) * t) * w, y + (sy + (ey - sy) * t) * hh); let best = 255;
+        for(let dx = -2; dx <= 2; dx++) for(let dy = -2; dy <= 2; dy++){ if(Math.abs(dx) + Math.abs(dy) > 2) continue; const ui = Math.round(u) + dx, vi = Math.round(v) + dy; if(ui < 0 || vi < 0 || ui >= W || vi >= H) continue; best = Math.min(best, g[vi * W + ui]); }
+        vals.push(best); } vals.sort((a, b) => a - b); return vals.length ? vals[Math.floor(vals.length * 0.5)] : 255; };
+    return {pts, ring, l1: line(0, 1, 1, 0), l2: line(0, 0, 1, 1)};
+  }
+  const ringWhite = ring => { const s = ring.slice().sort((p, q) => q - p); return s.length ? s[Math.floor(s.length * 0.3)] : 200; };
+  function measure(sm, white){
+    if(!sm || sm.pts.length < 20) return null;
+    const dark = v => Math.max(0, (white - v) / white);
+    let mean = 0, fill = 0, fill2 = 0; for(const pt of sm.pts){ const d = dark(pt[2]); mean += d; if(d > 0.3) fill++; if(d > 0.15) fill2++; }
+    const n = sm.pts.length; return {fill: fill / n, fill2: fill2 / n, mean: mean / n, d1: dark(sm.l1), d2: dark(sm.l2), white};
+  }
+  function readCellOld(g, W, H, h, x, y, w, hh){
     const N = 9, pts = []; let paper = [];
     for(let i = 0; i < N; i++) for(let j = 0; j < N; j++){ const fx = 0.2 + 0.6 * (i + 0.5) / N, fy = 0.2 + 0.6 * (j + 0.5) / N;
       const [u, v] = map(h, x + fx * w, y + fy * hh); const ui = Math.round(u), vi = Math.round(v);
@@ -18931,8 +18959,20 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(Math.abs(ux - uy) < 0.2){ d2 += d; n2++; } }
     return {fill: fill / pts.length, mean: mean / pts.length, d1: n1 ? d1 / n1 : 0, d2: n2 ? d2 / n2 : 0};
   }
-  function classify(m){
+  function readCell(g, W, H, h, x, y, w, hh){ const sm = sampleCell(g, W, H, h, x, y, w, hh); return measure(sm, Math.max(80, ringWhite(sm.ring))); }
+  function classify(m, cal){
     if(!m) return {lv: 0, sure: false};
+    if(m.fill2 !== undefined){   /* v24.38 */
+      const one = oneLevel(), f0 = cal ? cal.floor : 0, sp = cal ? Math.max(0.02, cal.spread) : 0.03, sh = m.mean - f0;
+      const both = Math.min(m.d1, m.d2) - f0, slash = Math.max(m.d1, m.d2) - f0;
+      const shaded = m.fill2 >= 0.45 || sh >= 0.18, shadedSure = (m.fill2 >= 0.5 && sh >= 0.12) || sh >= 0.28;
+      const lineish = slash >= 0.35 && sh < 0.22 && m.fill2 < 0.42;   /* one line read clearly, the cell not shaded: on a one-level sheet only an X draws lines */
+      if((both >= 0.2 && !shaded && m.fill2 < 0.42) || (one && lineish)) return {lv: 'x', sure: both >= 0.3 && m.fill2 < 0.4};
+      if(shaded) return {lv: 2, sure: shadedSure};   /* a one-level sheet keeps its occurred cells as filled (2) */
+      if(!one && (slash >= 0.2 || m.fill2 >= 0.15)) return {lv: 1, sure: slash >= 0.3 && m.fill2 < 0.35};
+      if(one && (m.fill2 >= 0.2 || sh >= 0.1)) return {lv: 2, sure: false};
+      return {lv: 0, sure: sh < Math.max(0.05, 3 * sp) && slash < 0.14 && m.fill2 < 0.08};
+    }
     if(m.fill >= 0.45) return {lv: 2, sure: m.fill >= 0.55};
     const slash = Math.max(m.d1, m.d2), both = Math.min(m.d1, m.d2);
     if(both >= 0.25 && m.fill < 0.45) return {lv: 'x', sure: both >= 0.32};
@@ -18955,6 +18995,18 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     return G;
   }
 
+  async function findCode(img, W, H, bm, sc){
+    let q = null; try{ q = jsQR(img.data, W, H, {inversionAttempts: 'dontInvert'}); }catch(e){}
+    if(q && /^SP1;/.test(q.data)) return q;
+    /* v24.38 a real photo: in the frame the code is a few px a module, so it is looked for in tiles of the full-size picture (the lower-left first), each at whole-number scales (the decoder reads a code at 2x or 3x it misses at 1.9x), and its place mapped back to the frame; the page is given a moment between tiles */
+    if(bm && bm.width){ const bw = bm.width, bh = bm.height, tcv = document.createElement('canvas'), tcx = tcv.getContext('2d', {willReadFrequently:true}), FR = 0.45, ST = 0.275;
+      for(const [ti, tj] of [[0,2],[1,2],[0,1],[1,1],[2,2],[0,0],[2,1],[1,0],[2,0]]){ const x0 = Math.round(ti * ST * bw), y0 = Math.round(tj * ST * bh), tw = Math.round(FR * bw), th = Math.round(FR * bh), base = 1700 / Math.max(tw, th);
+        for(const ts of [1, 2, 3, 1.5].filter(v => v >= base * 0.5 && v <= base * 2.2)){ tcv.width = Math.round(tw * ts); tcv.height = Math.round(th * ts); tcx.imageSmoothingEnabled = true; tcx.drawImage(bm, x0, y0, tw, th, 0, 0, tcv.width, tcv.height);
+          let q3 = null; try{ q3 = jsQR(tcx.getImageData(0, 0, tcv.width, tcv.height).data, tcv.width, tcv.height, {inversionAttempts: 'dontInvert'}); }catch(e){}
+          if(q3 && /^SP1;/.test(q3.data)){ for(const k in q3.location){ const pt = q3.location[k]; if(pt && typeof pt.x === 'number'){ pt.x = (pt.x / ts + x0) * sc; pt.y = (pt.y / ts + y0) * sc; } } return q3; }
+          await new Promise(r => setTimeout(r, 0)); } } }
+    return q;
+  }
   async function scanFile(file){
     const d = ui(); d.querySelector('#scFill').disabled = true; d.querySelector('#scUnsure').innerHTML = ''; last = null;
     stat('Reading the photo…');
@@ -18963,7 +19015,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const sc = Math.min(1, 1800 / Math.max(bm.width, bm.height)); cv.width = Math.round(bm.width * sc); cv.height = Math.round(bm.height * sc);
     ctx.drawImage(bm, 0, 0, cv.width, cv.height); cv.hidden = false;
     const W = cv.width, H = cv.height, {g, d: img} = gray(cv);
-    const q = jsQR(img.data, W, H, {inversionAttempts: 'dontInvert'});
+    const q = await findCode(img, W, H, bm, sc);
     if(!q || !/^SP1;/.test(q.data)){ stat('No sheet code was found in the picture. Hold the sheet flat, get the whole sheet in the frame with the square code under the grid, and try again in better light.', 'bad'); return; }
     const G = geometry(q.data);
     if(!G){ stat('The sheet code could not be read as a Scatterplot sheet of this version (' + esc(q.data.slice(0, 40)) + ').', 'bad'); return; }
@@ -18981,7 +19033,11 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       [[L.topLeftCorner.x, L.topLeftCorner.y], [L.topRightCorner.x, L.topRightCorner.y], [L.bottomLeftCorner.x, L.bottomLeftCorner.y], [L.bottomRightCorner.x, L.bottomRightCorner.y]]);
     if(!h0){ stat('The code was found but its position could not be read.', 'bad'); return; }
     const scale = Math.hypot(L.topRightCorner.x - L.topLeftCorner.x, L.topRightCorner.y - L.topLeftCorner.y) / qs.s;   /* picture px per paper px */
-    const fid = refine(g, W, H, h0, G.fids, FID * scale);
+    let fid = refine(g, W, H, h0, G.fids, FID * scale);
+    if(fid.found < 4 && fid.found >= 1){   /* v24.38 a second pass: the map from the code's corners and the squares found, the rest looked for more widely */
+      const src = [[qs.x, qs.y], [qs.x + qs.s, qs.y], [qs.x, qs.y + qs.s], [qs.x + qs.s, qs.y + qs.s]], dst = [[L.topLeftCorner.x, L.topLeftCorner.y], [L.topRightCorner.x, L.topRightCorner.y], [L.bottomLeftCorner.x, L.bottomLeftCorner.y], [L.bottomRightCorner.x, L.bottomRightCorner.y]];
+      fid.forEach((f, i) => { if(fid.hit[i]){ src.push(G.fids[i]); dst.push(f); } });
+      const h1 = affineLS(src, dst); if(h1){ const f2 = refine(g, W, H, h1, G.fids, FID * scale, 2.5); if(f2.found > fid.found) fid = f2; } }
     if(fid.found < 4){ stat('Only ' + fid.found + ' of the grid’s four corner squares could be found in the picture. Get the whole grid in the frame, with nothing covering its corners, and try again.', 'bad'); return; }
     const h = homography(G.fids, fid);
     if(!h){ stat('The grid’s corner squares could not be placed.', 'bad'); return; }
@@ -18989,8 +19045,13 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const bi = G.bi, keep = state.cur; const cells = [], unsure = [];
     const rows = rowLabels(), cols = dayLabels();
     for(let c = G.c0; c < G.c1; c++){ if(state.meta['absent' + c] === '1') continue;
-      for(let r = 0; r < G.nR; r++){ const [x, y, w, hh] = G.cell(r, c); const m = readCell(g, W, H, h, x, y, w, hh), k = classify(m);
-        cells.push({r, c, lv: k.lv, sure: k.sure, m}); if(!k.sure) unsure.push(cells[cells.length - 1]); } }
+      for(let r = 0; r < G.nR; r++){ const [x, y, w, hh] = G.cell(r, c); cells.push({r, c, lv: 0, sure: false, sm: sampleCell(g, W, H, h, x, y, w, hh)}); } }
+    /* v24.38 the paper white near each cell (the ring around it, else the sheet's), the floor from the sheet's own blank cells */
+    const whites = cells.map(cl => ringWhite(cl.sm.ring)), gw = whites.slice().sort((a, b) => a - b)[Math.floor(whites.length / 2)] || 200;
+    cells.forEach((cl, i) => { cl.m = measure(cl.sm, Math.max(80, whites[i], gw * 0.8)); delete cl.sm; });
+    const means = cells.filter(cl => cl.m).map(cl => cl.m.mean).sort((a, b) => a - b), floor = means[Math.floor(means.length / 2)] || 0;
+    const devs = cells.filter(cl => cl.m).map(cl => Math.abs(cl.m.mean - floor)).sort((a, b) => a - b), cal = {floor, spread: devs[Math.floor(devs.length / 2)] || 0};
+    for(const cl of cells){ const k = classify(cl.m, cal); cl.lv = k.lv; cl.sure = k.sure; if(!k.sure) unsure.push(cl); }
     /* draw the reading over the photo */
     ctx.lineWidth = Math.max(2, 2 * scale / 2);
     for(const cell of cells){ if(cell.lv === 0 && cell.sure) continue; const [x, y, w, hh] = G.cell(cell.r, cell.c);
@@ -19001,12 +19062,12 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     for(const [u, v] of fid){ ctx.strokeStyle = '#b3261e'; ctx.beginPath(); ctx.arc(u, v, FID * scale, 0, Math.PI * 2); ctx.stroke(); }
     const n2 = cells.filter(c => c.lv === 2).length, n1 = cells.filter(c => c.lv === 1).length, nx = cells.filter(c => c.lv === 'x').length;
     d.querySelector('#scLegend').hidden = false;
-    stat('Read: <b>' + n2 + '</b> high, <b>' + n1 + '</b> low, <b>' + nx + '</b> not observed, ' + unsure.length + ' unsure' + (unsure.length ? ' (choose below)' : '') + ' — behavior ' + (bi + 1) + ' (' + esc(behName(bi)) + '), days ' + (G.c0 + 1) + ' to ' + G.c1 + '. Check the picture, then Fill the sheet.', unsure.length > cells.length / 4 ? 'bad' : 'ok');
+    stat('Read: ' + (oneLevel() ? '<b>' + n2 + '</b> shaded, ' : '<b>' + n2 + '</b> high, <b>' + n1 + '</b> low, ') + '<b>' + nx + '</b> not observed, ' + unsure.length + ' unsure' + (unsure.length ? ' (choose below)' : '') + ' — behavior ' + (bi + 1) + ' (' + esc(behName(bi)) + '), days ' + (G.c0 + 1) + ' to ' + G.c1 + '. Check the picture, then Fill the sheet.', unsure.length > cells.length / 4 ? 'bad' : 'ok');
     if(unsure.length > cells.length / 4) stat('More than a quarter of the cells could not be read with confidence (' + unsure.length + ' of ' + cells.length + '). Retake the photo flat, in better light, and closer; or choose each cell below.', 'bad');
     const U = d.querySelector('#scUnsure');
     if(unsure.length) U.innerHTML = '<table class="sc-unsure"><thead><tr><th>Cell</th><th>Read as</th><th>Enter as</th></tr></thead><tbody>' + unsure.map((cell, i) =>
-      '<tr><td>' + esc(rows[cell.r]) + ', ' + esc(cols[cell.c]) + '</td><td>' + (cell.lv === 2 ? 'high' : cell.lv === 1 ? 'low' : cell.lv === 'x' ? 'X' : 'blank') + '</td><td><select data-u="' + i + '" aria-label="Enter the cell as">' +
-      ['0:blank', '1:low (slash)', '2:high (filled)', 'x:X, not observed'].map(o => { const [v, t] = o.split(':'); return '<option value="' + v + '"' + (String(cell.lv) === v ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select></td></tr>').join('') + '</tbody></table>';
+      '<tr><td>' + esc(rows[cell.r]) + ', ' + esc(cols[cell.c]) + '</td><td>' + (cell.lv === 2 ? (oneLevel() ? 'shaded' : 'high') : cell.lv === 1 ? 'low' : cell.lv === 'x' ? 'X' : 'blank') + '</td><td><select data-u="' + i + '" aria-label="Enter the cell as">' +
+      (oneLevel() ? ['0:blank', '2:shaded (occurred)', 'x:X, not observed'] : ['0:blank', '1:low (slash)', '2:high (filled)', 'x:X, not observed']).map(o => { const [v, t] = o.split(':'); return '<option value="' + v + '"' + (String(cell.lv) === v ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select></td></tr>').join('') + '</tbody></table>';
     last = {G, cells, unsure, bi};
     d.querySelector('#scWhere').textContent = cells.length + ' cells read';
     d.querySelector('#scFill').disabled = false;
@@ -19032,7 +19093,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     window.__spScanFilled = {n, bi, c0: G.c0, c1: G.c1};
     d.close();
   }
-  window.__spScan = {geometry, classify, homography, readCell, scanFile};
+  window.__spScan = {geometry, classify, homography, readCell, scanFile, findCode, last: () => last};
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
