@@ -1250,9 +1250,14 @@ td input,td select{max-width:100%}
 
     <!-- v24.58 (the BCBA, 10/26) the BACB's two supervision checklists, one list for this RBT -->
     <h2 class="nbh-band" style="margin-top:18px">The BACB Supervision Checklists</h2>
-    <p class="hint">The BACB encourages the RBT and each supervisor or Requirements Coordinator to work through its Supervision Checklists (for RBTs, 2/2024; for RBT Supervisors and RBT Requirements Coordinators, 6/2026). They are one list here, in their four phases; an item on both is one item. What this form already records shows its state; tick the rest with the date. The reviews every 6 and every 3 months give their next date, also on the workstation&rsquo;s due line.</p>
+    <p class="hint">The BACB encourages the RBT and each supervisor or Requirements Coordinator to work through its Supervision Checklists (for RBTs, 2/2024; for RBT Supervisors and RBT Requirements Coordinators, 6/2026). They are one list here, in their four phases; an item on both is one item. What this form already records shows its state; tick the rest, and set the date to when it was done (a tick takes today&rsquo;s date; change it if it was done earlier): a month&rsquo;s printed record counts only what was done by the end of that month. The reviews every 6 and every 3 months give their next date, also on the workstation&rsquo;s due line.</p>
     <div id="ckSum" class="rs-cksum"></div>
     <div id="ckList"></div>
+
+    <!-- v24.63 the RBT Test Content Outline tasks covered, on screen as on the year summary -->
+    <h2 class="nbh-band" style="margin-top:18px">RBT Test Content Outline Coverage</h2>
+    <p class="hint">Which of the outline&rsquo;s 43 tasks (3rd ed.) supervision has covered this school year. The tasks are ticked on each contact on the <b>Month</b> page: under <b>Content covered</b>, tick an area, and its tasks appear below it to tick. The year summary prints the same count.</p>
+    <div id="tcoSum"></div>
 
     <h2 class="nbh-band" style="margin-top:18px">Readings This Year</h2>
      <p class="hint">Every reading discussed in a supervision contact this school year, with what was discussed and the RBT&rsquo;s follow-up. Readings are added on the Month page, on the contact.</p>
@@ -1842,7 +1847,7 @@ function renderYear(){const y=setupYear(),ks=yearKeys(y),A=ks.map(stats);
 /* the charts are drawn at the width they are shown (text stays readable on a phone); drawn again when that changes */
 let yrT=0;window.addEventListener('resize',()=>{clearTimeout(yrT);yrT=setTimeout(()=>{if(/view-year/.test(document.body.className))renderYear();},250);});
 /* % supervised by month: one series of bars against the rule's line (the table above carries the same numbers) */
-function pctChart(A,paper,cw){const W=cw||720,H=paper?190:230,L=40,R=10,T=18,B=30,P=rule('pct'),mx=Math.max(P*2,Math.ceil(Math.max(0,...A.map(a=>a.pct||0))+1)),bw=(W-L-R)/12,yv=v=>T+(H-T-B)*(1-v/mx);
+function pctChart(A,paper,cw){const W=cw||720,H=paper?165:230,L=40,R=10,T=18,B=30,P=rule('pct'),mx=Math.max(P*2,Math.ceil(Math.max(0,...A.map(a=>a.pct||0))+1)),bw=(W-L-R)/12,yv=v=>T+(H-T-B)*(1-v/mx);
   let g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Percent of service hours supervised by month, against the '+P+'% minimum">';
   const step=mx<=12?2:mx<=30?5:10;for(let v=0;v<=mx;v+=step)g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yv(v)+'" y2="'+yv(v)+'" stroke="#E3E9ED"/><text x="'+(L-6)+'" y="'+(yv(v)+4)+'" font-size="11" text-anchor="end" fill="#54676f">'+v+'%</text>';
   A.forEach((a,i)=>{const x=L+i*bw+bw*0.2,w=bw*0.6;if(a.pct!=null){const y=yv(Math.min(a.pct,mx)),h=yv(0)-y;g+='<g><title>'+keyLabel(a.k)+': '+pctTxt(a.pct)+' ('+hrs(a.supMin)+' of '+hrs(a.rbtMin)+' h)</title><path d="M'+x+','+yv(0)+'V'+(y+3)+'q0,-3 3,-3h'+(w-6)+'q3,0 3,3V'+yv(0)+'z" fill="#254657"/>'+
@@ -1868,7 +1873,7 @@ function renderRbt(){rdListPaint();
       '<div class="fieldgrid"><div><label for="'+F('set')+'">Date set</label><input type="date" id="'+F('set')+'" data-g="'+id+'" data-f="set" value="'+esc(g.set)+'"></div><div><label for="'+F('target')+'">Target date</label><input type="date" id="'+F('target')+'" data-g="'+id+'" data-f="target" value="'+esc(g.target)+'"></div>'+
       '<div><label for="'+F('status')+'">Status</label><select id="'+F('status')+'" data-g="'+id+'" data-f="status">'+opts(GSTAT,g.status||'Not started')+'</select></div></div>'+
       '<div class="field"><label for="'+F('notes')+'">Notes</label><textarea id="'+F('notes')+'" data-g="'+id+'" data-f="notes" rows="2" placeholder="progress seen at the contacts; what helped">'+esc(g.notes)+'</textarea></div></div>';}).join('')||'<p class="hint">No goals yet.</p>';
-  const met=S.goals.filter(g=>g.status==='Met').length;$('#goalCount').textContent=S.goals.length?met+' of '+S.goals.length+' met':'';effPaint();ckPaint();
+  const met=S.goals.filter(g=>g.status==='Met').length;$('#goalCount').textContent=S.goals.length?met+' of '+S.goals.length+' met':'';effPaint();ckPaint();tcoPaint();
   $$('[data-cr]').forEach(el=>{el.value=S.cred[el.dataset.cr]||'';});
   renderPdus();renderCred();renderConcerns();}
 function renderPdus(){$('#pduTbl tbody').innerHTML=S.pdus.map((p,i)=>{const id=esc(p.id),F=f=>'p_'+id+'_'+f,w=pduWarn(p);return '<tr data-pid="'+id+'"><td data-l="Date"><input type="date" id="'+F('date')+'" data-p="'+id+'" data-f="date" value="'+esc(p.date)+'" aria-label="PDU '+(i+1)+' date"></td><td data-l="Title"><input id="'+F('title')+'" data-p="'+id+'" data-f="title" value="'+esc(p.title)+'" aria-label="PDU '+(i+1)+' title"><div class="hint" id="'+F('warn')+'" style="color:#8E2A2A">'+esc(w)+'</div></td><td data-l="Type"><select id="'+F('type')+'" data-p="'+id+'" data-f="type" aria-label="PDU '+(i+1)+' type">'+opts(PTYPES.map(t=>[t[0],t[1]]),p.type,true)+'</select></td><td data-l="Provider"><input id="'+F('provider')+'" data-p="'+id+'" data-f="provider" value="'+esc(p.provider)+'" aria-label="PDU '+(i+1)+' provider"></td><td data-l="Units"><input id="'+F('units')+'" data-p="'+id+'" data-f="units" inputmode="decimal" value="'+esc(p.units)+'" aria-label="PDU '+(i+1)+' units"></td><td class="num" data-l="Ethics"><input type="checkbox" id="'+F('ethics')+'" data-p="'+id+'" data-f="ethics"'+(p.ethics?' checked':'')+' aria-label="PDU '+(i+1)+' covers ethics" style="width:24px;height:24px;min-height:0"></td>'+delCell('pdu',p.id,'PDU')+'</tr>';}).join('')||'<tr><td colspan="7" class="hint">No PDUs logged yet.</td></tr>';pduOut();}
@@ -1977,7 +1982,8 @@ function renderYearOut(){const y=setupYear(),ks=yearKeys(y),tk=thruKey(),cut=tk?
     ((E=>E.length?'<div class="p-keep"><h4>Reviews of the effects of supervision</h4><table class="p-t"><thead><tr><th style="width:12%">Reviewed</th><th>The RBT&rsquo;s view</th><th>What the data show</th><th>What changes</th></tr></thead><tbody>'+
       E.map(x=>'<tr><td>'+esc(mdy(x.date))+((x.src||[]).length?'<br><i>looked at '+esc(EFSRC.filter(c=>x.src.includes(c[0])).map(c=>c[1]).join(', '))+'</i>':'')+'</td><td>'+esc(x.view||'')+'</td><td>'+esc(x.data||'')+'</td><td>'+esc(x.change||'')+'</td></tr>').join('')+'</tbody></table></div>':'')
       ((S.effects||[]).filter(x=>x.date&&(!asOf||x.date<=asOf)&&(x.view||x.data||x.change||(x.src||[]).length)).sort((a,b)=>a.date.localeCompare(b.date))))+   /* v24.57 */
-    '<p style="margin:4px 0 0"><b>The BACB supervision checklists:</b> '+ckSummary(asOf).map(x=>esc(x.t.toLowerCase())+' '+x.n+' of '+x.of).join('; ')+
+    '<p style="margin:4px 0 0"><b>The BACB supervision checklists'+(asOf&&asOf<todayISO()?', as of '+esc(mdy(asOf)):'')+':</b> '+ckSummary(asOf).map(x=>esc(x.t.toLowerCase())+' '+ckSumTxt(x)).join('; ')+
+      (n=>n?'; '+n+' more '+(n===1?'item is':'items are')+' ticked with a later date and count from that month on':'')(ckLater(asOf))+
       ((d=>d&&(!asOf||d<=asOf)?'; the codes, the handbook and the BACB website last reviewed together '+esc(mdy(d)):'')((S.ckl||{}).review6))+'.</p>'+   /* v24.58 */
     (v=>'<p style="margin:4px 0 0"><b>RBT Test Content Outline (3rd ed.) tasks covered in supervision:</b> '+v.n+' of 43 ('+v.by.map(b=>b.L+' '+b.n+' of '+b.of).join(', ')+')'+(v.n&&v.left.length?'. Not yet: '+esc(v.left.join(', ')):'')+'.</p>')(tcoCover(ks.filter((k,i)=>i<=cut),asOf))+   /* v24.59 */
     '<div class="p-foot"><span>Keep supervision records for at least 7 years, also after the supervision ends; in an audit the BACB typically allows 14 days. Source: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks.</span><span>Form RS-1 · year summary'+(part?' through '+esc(keyLabel(tk)):'')+' · printed '+mdy(todayISO())+'</span></div></div>';}
@@ -2052,11 +2058,14 @@ function ckAuto(i){const sp=S.sups.filter(x=>x.name),rc=sp.filter(isRC);
   return {ok:false,d:''};}
 function ckOn(i){return !i.rc||S.sups.some(x=>x.name&&isRC(x));}
 function ckState(i,asOf){const d=(S.ckl||{})[i.k];if(i.auto)return ckAuto(i);const done=!!d&&(!asOf||d<=asOf);
-  if(i.every){const next=done?addMon(d,i.every):'';return {ok:done&&next>=todayISO(),done,d,next,late:done&&next<todayISO()};}
+  if(i.every){const next=done?addMon(d,i.every):'',at=asOf||todayISO();return {ok:done&&next>=at,done,d,next,late:done&&next<at};}   /* v24.63 current as of the record's date */
   return {ok:done,done,d};}
+/* v24.63 items ticked with a date after the record's: they count from their own month on */
+function ckLater(asOf){if(!asOf)return 0;const c=S.ckl||{};return CKL.flatMap(g=>g[2]).filter(i=>!i.auto&&ckOn(i)&&c[i.k]&&c[i.k]>asOf).length;}
+function ckSumTxt(x){return x.n+' of '+x.of+(x.g==='end'&&!x.n?' (when supervision ends)':'');}
 function ckSummary(asOf){return CKL.map(([g,t,L])=>{const I=L.filter(ckOn),n=I.filter(i=>ckState(i,asOf).ok).length;return {g,t,n,of:I.length};});}
 function ckPaint(){const L=$('#ckList');if(!L)return;const today=todayISO();
-  $('#ckSum').innerHTML=ckSummary().map(x=>'<span class="'+(x.n===x.of?'ok':'')+'">'+esc(x.t)+': <b>'+x.n+' of '+x.of+'</b></span>').join('');
+  $('#ckSum').innerHTML=ckSummary().map(x=>'<span class="'+(x.n===x.of?'ok':'')+'">'+esc(x.t)+': <b>'+ckSumTxt(x)+'</b></span>').join('');
   L.innerHTML=CKL.map(([g,t,I])=>'<div class="rs-ckgrp"><h3>'+esc(t)+'</h3><ul>'+I.filter(ckOn).map(i=>{const st=ckState(i),id='bck_'+i.k;
     const who='<span class="rs-ckwho">'+esc(i.who==='Both'?'RBT and supervisor':i.who)+'</span>';
     if(i.auto)return '<li class="auto '+(st.ok?'ok':'')+'" data-ckitem="'+i.k+'"><span class="rs-ckmark" aria-hidden="true">'+(st.ok?'✓':'•')+'</span><div>'+who+esc(i.t)+'<small>'+(st.ok?'':'Not yet: ')+esc(st.d)+'</small></div></li>';
@@ -2076,6 +2085,10 @@ document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d|
   if(d.arr==='acts')setTimeout(()=>{const c=tcoContact(d.c);if(!c)return;const D=(c.acts||[]).map(a=>TCO.indexOf(a));if(c.tco){c.tco=c.tco.filter(k=>D.includes('ABCDEF'.indexOf(k[0])));if(!c.tco.length)delete c.tco;}   /* after the form has taken the domain */
     const box=document.querySelector('[data-tcot="'+CSS.escape(d.c)+'"]');if(box)box.innerHTML=tcoTasks(c);},0);});
 /* the outline's coverage over a set of months: tasks covered, by domain */
+function tcoPaint(){const el=$('#tcoSum');if(!el)return;const v=tcoCover(yearKeys(setupYear()),null),got=new Set(TCOT.map(x=>x.c).filter(c=>!v.left.includes(c)));
+  el.innerHTML='<p class="rs-tcon"><b>'+v.n+' of 43</b> tasks covered</p><table class="rt rs-stack rs-tcot2"><thead><tr><th>Area</th><th>Covered</th><th>Not yet</th></tr></thead><tbody>'+
+    v.by.map((b,i)=>{const T=TCOT.filter(x=>x.d===i),c=T.filter(x=>got.has(x.c)),l=T.filter(x=>!got.has(x.c));
+      return '<tr><td data-l="Area"><b>'+b.L+'.</b> '+esc(TCO[i])+' <span class="hint">'+b.n+' of '+b.of+'</span></td><td data-l="Covered">'+(c.map(x=>'<span title="'+esc(x.t)+'">'+x.c+'</span>').join(', ')||'—')+'</td><td data-l="Not yet">'+(l.map(x=>'<span title="'+esc(x.t)+'">'+x.c+'</span>').join(', ')||'—')+'</td></tr>';}).join('')+'</tbody></table>';}
 function tcoCover(keys,asOf){const got=new Set();keys.forEach(k=>(peek(k).contacts||[]).forEach(c=>{if(c.date&&(!asOf||c.date<=asOf))(c.tco||[]).forEach(x=>got.add(x));}));
   return {n:got.size,by:'ABCDEF'.split('').map(L=>({L,n:TCOT.filter(x=>x.c[0]===L&&got.has(x.c)).length,of:TCOT.filter(x=>x.c[0]===L).length})),left:TCOT.filter(x=>!got.has(x.c)).map(x=>x.c)};}
 function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent='Sign the Record for '+keyLabel(curKey);
@@ -3739,6 +3752,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
 .rs-eff{margin:0 0 10px}
 .rs-cov{margin:8px 0}.rs-cov>summary{cursor:pointer;padding:4px 0}.rs-cov .chip{font-size:13.5px}
+.rs-tcon{margin:6px 0}.rs-tcot2 td:first-child{width:42%}
 .rs-tcot .lbl{display:block;margin-top:8px}.rs-tcochips .chip{font-size:13.5px}.rs-tcochips .chip b{font-weight:700;margin-right:2px}
 .rs-cksum{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 10px;font-size:14px;color:var(--ink-soft)}.rs-cksum .ok b{color:#2F6B37}
 .rs-ckgrp h3{font-size:16px;margin:12px 0 6px}.rs-ckgrp ul{list-style:none;margin:0;padding:0}
@@ -3835,7 +3849,8 @@ const RPDF=(()=>{const W=612,H=792,M=36,FT=18,K=0.75,CW=(W-2*M)/K,CH=(H-2*M-FT)/
           let st=a,top=null;for(let i=a;i<b;i++){rg.setStart(n,i);rg.setEnd(n,i+1);const q=rg.getBoundingClientRect().top;if(top!==null&&Math.abs(q-top)>fpx*0.5){put(st,i);st=i;}top=q;}put(st,b);}}
       /* where a page may end: not inside a row, a block kept whole, a line of text or a picture; a heading goes with what follows it */
       const total=Math.max(host.scrollHeight,1),keep=[];
-      host.querySelectorAll('tr,.p-keep,.p-cgrp,.p-sig,p,li,img,svg,.p-head,.p-title').forEach(el=>{if(el.tagName.toLowerCase()!=='svg'&&el.closest('svg'))return;const r=el.getBoundingClientRect();if(r.height)keep.push([r.top-oy,r.bottom-oy]);});
+      texts.forEach(t=>keep.push([t.top,t.y+t.s/K*0.22]));   /* v24.63 never through a line of text */
+      host.querySelectorAll('tr,.p-keep,.p-cgrp,.p-sig,.p-foot,p,li,img,svg,.p-head,.p-title').forEach(el=>{if(el.tagName.toLowerCase()!=='svg'&&el.closest('svg'))return;const r=el.getBoundingClientRect();if(r.height)keep.push([r.top-oy,r.bottom-oy]);});
       host.querySelectorAll('h4').forEach(h=>{const r=h.getBoundingClientRect(),nx=h.nextElementSibling;let b=r.bottom;if(nx){const fr=nx.matches('table')?(nx.querySelector('tbody tr')||nx):nx;b=Math.max(b,Math.min(fr.getBoundingClientRect().bottom,r.top+CH));}keep.push([r.top-oy,b-oy]);});
       const brk=[...host.querySelectorAll('.rs-pdf-break')].map(e=>e.getBoundingClientRect().top-oy).filter(t=>t>1&&t<total-1).sort((a,b)=>a-b);   /* v24.54 a page ends where the record says, too */
       const cuts=[0];let y0=0;while(y0+CH<total-1||brk.some(t=>t>y0+1)){let end=y0+CH;const f=brk.find(t=>t>y0+1&&t<=end+0.5);

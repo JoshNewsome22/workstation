@@ -40,6 +40,6 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  const F=await p.evaluate(()=>{const o=fromFile(JSON.parse(JSON.stringify(saveObj())));const bad=fromFile({form:'RS-1',S:Object.assign(JSON.parse(JSON.stringify(S)),{ckl:{expect:'2026-09-02',nonsense:'2026-01-01',reqs:'soon'}})});
    setView('print');renderPrint();return {back:JSON.stringify(o.ckl)===JSON.stringify(S.ckl),bad:bad.ckl,printed:(document.getElementById('yearOut').textContent.match(/The BACB supervision checklists:[^.]*\./)||[''])[0]};});
  ok('the ticks are kept with the RBT and come back from the file; an unknown item or a bad date is not taken',F.back&&JSON.stringify(F.bad)==='{"expect":"2026-09-02"}',F);
- ok('the year summary prints where the checklists stand, with the last joint review',/before supervision starts \d+ of \d+; during the first month \d+ of \d+; each month or quarter \d+ of \d+; at the end of supervision 0 of 3; the codes, the handbook and the BACB website last reviewed together 4\/1\/2026\./.test(F.printed),F.printed);
+ ok('the year summary prints where the checklists stand, with the last joint review',/before supervision starts \d+ of \d+; during the first month \d+ of \d+; each month or quarter \d+ of \d+; at the end of supervision 0 of 3 \(when supervision ends\); the codes, the handbook and the BACB website last reviewed together 4\/1\/2026\./.test(F.printed),F.printed);
  ok('no page errors',!errs.length,errs.slice(0,3));
  console.log('RESULT: '+(bad?bad+' failed':'all '+n+' passed'));await b.close();process.exit(bad?1:0);})();

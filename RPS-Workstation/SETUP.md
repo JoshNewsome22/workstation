@@ -9905,6 +9905,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.63: Form RS-1, from the BCBA's August record (10/26): the checklists on a past month's record say "as of", the Test Content Outline coverage on the RBT record, and no line cut between PDF pages
+- **The checklists on a past month's record.** The year summary printed with a month counts the checklist items done by
+  the end of that month, so items ticked today did not show on the August record. The line now says "as of 8/31/2026" and
+  how many more are ticked with a later date. On screen the list says to set each item's date to when it was done (a tick
+  takes today's date). A review every 3 or 6 months counts as current at the record's date.
+- **"At the end of supervision 0 of 3"** says "(when supervision ends)", on screen and on paper.
+- **The RBT Test Content Outline coverage** is on the RBT record, below the checklists: the count, and for each area the
+  tasks covered and not yet. It says where they are ticked: on each contact on the Month page, under Content covered, tick
+  an area, and its tasks appear below it.
+- **The PDF:** a page never ends inside a line of text or inside the closing note, so nothing is cut between two pages and
+  no page holds only the last line. The year chart on paper is a little shorter, so the year summary fits its page more
+  often.
+- Tests: qa/ckf163-test.js; qa/ck158-test.js expects "(when supervision ends)".
+
 ### v24.62: Form RS-1 and the BACB's Supervisor Training Curriculum Outline (2.0): each review of the effects of supervision records what was looked at (the BCBA, 10/26)
 - **The Effects of Supervision:** each review takes eight "Looked at" boxes, in the outline's terms (Supervision of
   Ongoing Services 4a.vii; Supervision of Trainees 1j and 2c to 2f): the client's data; client and caregiver
