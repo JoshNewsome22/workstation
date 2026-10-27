@@ -9905,6 +9905,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.76: Behavior Analysis in Practice, part 4 (volume 13, published online in 2019) read into the TD-1 and GB-1 banks
+(the BCBA's Part 4 zip of 10/27; 17 articles screened by title, 2 read in full)
+
+- **2 treatment protocols in TD-1** (475 in all) and **2 starting objectives in GB-1** (234 in all).
+  - Matrix training of toy-and-action phrases with progressive time delay; its objectives are saying the toy's
+    name and action, and acting out a named toy-and-action pair, including pairs never taught.
+  - A resetting DRO with a rule stated before the session and a neutral statement of reinforcer loss after
+    problem behavior, for tangible-maintained aggression, self-injury and disruption.
+- **What the notes say.**
+  - The DRO card: the statement of reinforcer loss is treated as a reprimand, so it is restrictive and needs
+    review and consent first. It is not response cost: nothing already earned is taken away. The study did not
+    test attention-maintained behavior, and other behaviors rose for two boys and should be watched.
+  - The two objectives keep the study's criterion (80% across 2 sessions) and say it is below the workstation's
+    standard.
+  - Both cards say the team decides whether food is used for this student.
+- **Not used:** 15 articles at the title screen (commentaries, surveys, staff training, measurement methods, the
+  diversity special section).
+- **Citations.** Both references were confirmed by their DOI against the publisher's record. One appeared in print
+  in 2020, 13(1), and is cited that way; the other is 2019, 12(2).
+
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.75: Save case no longer waits several seconds after a form has just been opened
 - **What happened.** The workstation asks each open form for its part of the case before it saves. A question sent in
   the moment a form was opening, while its page was still loading, was lost. The answers from a form are matched to
