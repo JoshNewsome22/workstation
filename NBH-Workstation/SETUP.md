@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.74: Behavior Analysis in Practice, Volume 12, part 3 read into the TD-1 and GB-1 banks
+(the BCBA's Part 3 zip of 10/27; 19 articles screened by title, 5 read in full)
+
+- **5 treatment protocols in TD-1** (473 in all) and **6 further sources** for GB-1 objectives already in the bank
+  (232 objectives; no new one, since each skill was already there).
+  - The cards:
+    - speech-sound blends taught by imitation, a stretched model and chaining;
+    - choosing the reward after the work, during prompt-delay teaching;
+    - peer-assisted reading lessons;
+    - two feeding cards for packing: the texture or bite size found by brief tests, and a preferred food placed on
+      the spoon with the new food and faded.
+  - The feeding cards say the routine is planned with the family, the prescribing doctor and the school nurse, and
+    not used with a student at risk of aspiration. The studies kept the spoon at the mouth until the bite was
+    accepted and guided bites in, so the escape-extinction consent block comes first.
+  - The speech card plans targets with the school speech-language pathologist; any prompt that touches the mouth is
+    planned with the family, the doctor and the nurse.
+- **Set aside for the BCBA:** the classwide peer-tutoring math card. The tutorial gave two procedures and tested
+  neither, and its own table lists no math studies with students with autism; its peer-assisted reading card is in
+  the bank.
+- **Not used:** 14 articles at the title screen (surveys, measurement and methods papers, staff training, the
+  diversity special section, a university composting study, a religious-literacy study with typically developing
+  students).
+- **Citations.** Every reference was confirmed by its DOI against the publisher's record; four appeared in print in
+  2020 (volume 13) and are cited that way.
+
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.73: Behavior Analysis in Practice, Volume 12 (the BCBA's two parts) read into the TD-1 and GB-1 banks
 (the BCBA's Part 1 and Part 2 zips of 10/27; 32 articles screened by title, 12 read in full)
 
