@@ -1500,13 +1500,13 @@ const DECIDE=['Addressed internally: corrective-action plan','Notice of Alleged 
 const GSTAT=['Not started','In progress','Met'];
 /* the observation checklist: plain items a supervisor can score while watching the RBT work with a client */
 const CHECK=['Arrives prepared: materials, reinforcers and the data sheet ready',
-  'Follows the behavior plan&rsquo;s prevention (antecedent) strategies',
+  'Follows the behavior plan\u2019s prevention (antecedent) strategies',
   'Delivers reinforcement as the plan says (what, when, how much)',
   'Responds to the target behavior as the plan says',
   'Prompts, and fades prompts, as the program is written',
   'Runs teaching trials or activities as written (clear instruction, wait time)',
   'Records data accurately and at the time',
-  'Keeps the student&rsquo;s dignity and privacy',
+  'Keeps the student\u2019s dignity and privacy',
   'Communicates professionally with the student, staff and family',
   'Stays within the RBT role and asks the supervisor when unsure'];
 const RULES0={pct:5,contacts:2,indiv:1,obs:1,grpmax:10,pdu:12,remind:45,remind2:90};
@@ -2421,7 +2421,7 @@ function fromFile(d){
     o.months[k]={filled:!!m.filled,note:str(m.note),records:str(m.records),noservice:!!m.noservice,...(m.entered?{entered:true}:{}),...keptOf(m.kept),
       days:arr(m.days).slice(0,62).map(x=>({id:str(x&&x.id)||uid(),date:isoS(x&&x.date),start:hm(x&&x.start),end:hm(x&&x.end),brk:str(x&&x.brk),act:ACTS.includes(x&&x.act)?x.act:'',none:!!(x&&x.none)})),
       contacts:arr(m.contacts).slice(0,60).map(x=>{x=obj(x);const ck={};Object.keys(obj(x.ck)).forEach(i=>{if(+i>=0&&+i<CHECK.length&&['y','n','na'].includes(x.ck[i]))ck[+i]=x.ck[i];});
-        const ckItems=arr(x.ckItems).slice(0,120).map(it=>({t:str(it&&it.t).slice(0,400),crit:!!(it&&it.crit),comp:str(it&&it.comp).slice(0,40)})).filter(it=>it.t);const ckp={};Object.keys(obj(x.ckp)).forEach(i=>{if(+i>=0&&+i<ckItems.length&&['y','n','na'].includes(x.ckp[i]))ckp[+i]=x.ckp[i];});   /* v24.29 */
+        const ckItems=arr(x.ckItems).slice(0,120).map(it=>({t:str(it&&it.t).replace(/&rsquo;/g,'\u2019').slice(0,400),crit:!!(it&&it.crit),comp:str(it&&it.comp).slice(0,40)})).filter(it=>it.t);const ckp={};Object.keys(obj(x.ckp)).forEach(i=>{if(+i>=0&&+i<ckItems.length&&['y','n','na'].includes(x.ckp[i]))ckp[+i]=x.ckp[i];});   /* v24.29 */
         return {id:str(x.id)||uid(),date:isoS(x.date),start:hm(x.start),end:hm(x.end),sup:str(x.sup),format:x.format==='group'?'group':'indiv',group:str(x.group),mode:modeOf(x.mode)?x.mode:'',obs:['yes','no'].includes(x.obs)?x.obs:'',client:str(x.client),
           acts:TCO.filter(t=>arr(x.acts).includes(t)),tco:tcoSort(arr(x.tco)),sact:SACT.filter(t=>arr(x.sact).includes(t)),bst:BST.filter(t=>arr(x.bst).includes(t)),feedback:str(x.feedback),follow:str(x.follow),ck,ckp,ckItems,ckSrc:x.ckSrc==='plan'&&ckItems.length?'plan':'',ckPlanSrc:str(x.ckPlanSrc).slice(0,160),
           readings:arr(x.readings).slice(0,20).map(r=>{r=obj(r);return {id:str(r.id)||uid(),k:str(r.k).slice(0,60),apa:str(r.apa).slice(0,1200),doi:str(r.doi).slice(0,200),sum:str(r.sum).slice(0,1200),disc:str(r.disc),next:str(r.next)};}).filter(r=>r.apa)};}).map(c=>{if(!c.readings.length)delete c.readings;if(!c.tco.length)delete c.tco;if(!c.ckItems.length){delete c.ckItems;delete c.ckSrc;delete c.ckPlanSrc;}if(!Object.keys(c.ckp).length)delete c.ckp;return c;}),
@@ -3791,6 +3791,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-eff{margin:0 0 10px}
 .rs-cov{margin:8px 0}.rs-cov>summary{cursor:pointer;padding:4px 0}.rs-cov .chip{font-size:13.5px}
 .rs-sigstat{margin:6px 0 2px;font-family:var(--sans);font-size:13.5px;color:#7a4a12}.rs-sigstat.ok{color:#2e6b3a;font-weight:600}
+.fieldgrid > [hidden],.fieldgrid > div[hidden]{display:none!important}   /* v24.69 hidden means hidden, also in a grid */
 .rs-tcon{margin:6px 0}.rs-tcohint{margin:2px 0 6px}.rs-tcot2 td:first-child{width:42%}
 /* v24.65 a contact's groups, each its own panel */
 .rs-grp{border:1px solid var(--rule-2,#d5dfdd);border-radius:8px;background:#f7faf9;padding:10px 14px 12px;margin:14px 0}

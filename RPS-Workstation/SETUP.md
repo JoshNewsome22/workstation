@@ -9905,6 +9905,14 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.69: Form RS-1: boxes the form hides stay hidden; the observation checklist reads "plan's" and "student's" (the BCBA, 10/27)
+- A layout rule outranked the browser's own hiding, so boxes the form hides showed anyway: on an individual contact,
+  "Number of RBTs in the group" and the group-meeting note; on Setup, a BCBA supervisor's "Supervised by (the BCBA's name
+  and certification number)", which is for a BCaBA. They are hidden again, and show when they apply.
+- Two observation-checklist items showed "&rsquo;" as text; they read "the behavior plan's" and "the student's", also in
+  contacts saved with the old wording.
+- Tests: qa/hid169-test.js.
+
 ### v24.68: Form RS-1, from the BCBA's screenshots of the whole form (10/27): the reference list complete, reading summaries on the RBT record, the credential line as of the record's month, the PDU cycle from the expiration date
 - **Reference list (Guide):** the BACB documents with the years they ask to be cited by (Ethics Code for Behavior
   Analysts 2020, RBT Ethics Code 2.0 2021, RBT Test Content Outline 3rd ed. 2023, Supervisor Training Curriculum Outline
