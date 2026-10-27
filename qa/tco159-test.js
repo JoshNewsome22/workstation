@@ -16,7 +16,7 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
    m.contacts=[{id:'c1',date:k+'-04',start:'09:00',end:'10:00',sup:'s1',format:'indiv',group:'',mode:'person',obs:'yes',client:'',acts:[],sact:[],bst:[],feedback:'',follow:'',ck:{},ckp:{}}];
    curKey=k;openC=new Set(['c1']);renderAll();setView('month');renderMonth();const d=document.querySelector('details.rs-contact');if(d)d.open=true;});await sleep(300);
  const E0=await p.evaluate(()=>document.querySelector('[data-tcot="c1"]').innerHTML);
- ok('before a domain is ticked, no tasks are offered',E0==='',E0);
+ ok('before a domain is ticked, no tasks are offered; it says to tick an area',!/data-tco=/.test(E0)&&/Tick an area above, and its tasks appear here/.test(E0),E0);
  await p.check('input[data-c="c1"][data-arr="acts"][value="Behavior acquisition"]');await p.check('input[data-c="c1"][data-arr="acts"][value="Behavior reduction"]');await sleep(200);
  const E1=await p.evaluate(()=>[...document.querySelectorAll('[data-tcot="c1"] input[data-tco]')].map(i=>i.dataset.tco));
  ok('ticking Behavior acquisition and Behavior reduction offers their 18 tasks (C.1 to C.11, D.1 to D.7)',E1.length===18&&E1[0]==='C.1'&&E1[17]==='D.7',E1);

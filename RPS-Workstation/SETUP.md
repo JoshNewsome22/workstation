@@ -9905,6 +9905,13 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.64: Form RS-1: a contact's task list says it holds the tasks of the areas ticked under Content covered (the BCBA, 10/26)
+- The BCBA saw the tasks stop at D and the ethics tasks missing: a contact offers the outline's tasks only for the areas
+  ticked under Content covered, and Ethics and professional conduct was not ticked. The list now says which areas' tasks
+  it holds and that ticking another area (e.g., Ethics and professional conduct) shows its tasks; with no area ticked, it
+  says to tick one.
+- Tests: qa/tch164-test.js; qa/tco159-test.js expects the line when no area is ticked.
+
 ### v24.63: Form RS-1, from the BCBA's August record (10/26): the checklists on a past month's record say "as of", the Test Content Outline coverage on the RBT record, and no line cut between PDF pages
 - **The checklists on a past month's record.** The year summary printed with a month counts the checklist items done by
   the end of that month, so items ticked today did not show on the August record. The line now says "as of 8/31/2026" and

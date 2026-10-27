@@ -2077,8 +2077,11 @@ document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d|
   else{if(/^\d{4}-\d{2}-\d{2}$/.test(el.value))S.ckl[d.bckd]=el.value;else delete S.ckl[d.bckd];}
   if(!Object.keys(S.ckl).length)delete S.ckl;ckPaint();changed();});
 /* v24.59 the outline's tasks of the domains ticked on a contact */
-function tcoTasks(c){const id=esc(c.id),D=(c.acts||[]).map(a=>TCO.indexOf(a)).filter(i=>i>=0);if(!D.length)return '';
-  return '<span class="lbl">Tasks covered (optional)</span><div class="rs-chips rs-tcochips">'+TCOT.filter(x=>D.includes(x.d)).map(x=>'<label class="chip" title="'+esc(x.t)+'"><input type="checkbox" data-c="'+id+'" data-tco="'+x.c+'"'+((c.tco||[]).includes(x.c)?' checked':'')+'> <b>'+x.c+'</b> '+esc(x.t)+'</label>').join('')+'</div>';}
+function tcoTasks(c){const id=esc(c.id),D=(c.acts||[]).map(a=>TCO.indexOf(a)).filter(i=>i>=0).sort((a,b)=>a-b);
+  if(!D.length)return '<span class="lbl">Tasks covered (optional)</span><p class="hint rs-tcohint">Tick an area above, and its tasks appear here to tick.</p>';   /* v24.64 */
+  const off=TCO.map((t,i)=>i).filter(i=>!D.includes(i));
+  return '<span class="lbl">Tasks covered (optional)</span><p class="hint rs-tcohint">The tasks of the areas ticked above: '+D.map(i=>'ABCDEF'[i]+'. '+esc(TCO[i])).join(', ')+'.'+
+    (off.length?' To choose tasks from another area (e.g., '+esc(TCO[off[off.length-1]])+'), tick it above.':'')+'</p><div class="rs-chips rs-tcochips">'+TCOT.filter(x=>D.includes(x.d)).map(x=>'<label class="chip" title="'+esc(x.t)+'"><input type="checkbox" data-c="'+id+'" data-tco="'+x.c+'"'+((c.tco||[]).includes(x.c)?' checked':'')+'> <b>'+x.c+'</b> '+esc(x.t)+'</label>').join('')+'</div>';}
 function tcoContact(id){for(const k of Object.keys(S.months||{})){const c=(S.months[k].contacts||[]).find(x=>x.id===id);if(c)return c;}return null;}
 document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d||!d.c)return;
   if(d.tco){const c=tcoContact(d.c);if(!c)return;const a=new Set(c.tco||[]);el.checked?a.add(d.tco):a.delete(d.tco);c.tco=tcoSort([...a]);if(!c.tco.length)delete c.tco;changed();return;}
@@ -3752,7 +3755,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
 .rs-eff{margin:0 0 10px}
 .rs-cov{margin:8px 0}.rs-cov>summary{cursor:pointer;padding:4px 0}.rs-cov .chip{font-size:13.5px}
-.rs-tcon{margin:6px 0}.rs-tcot2 td:first-child{width:42%}
+.rs-tcon{margin:6px 0}.rs-tcohint{margin:2px 0 6px}.rs-tcot2 td:first-child{width:42%}
 .rs-tcot .lbl{display:block;margin-top:8px}.rs-tcochips .chip{font-size:13.5px}.rs-tcochips .chip b{font-weight:700;margin-right:2px}
 .rs-cksum{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 10px;font-size:14px;color:var(--ink-soft)}.rs-cksum .ok b{color:#2F6B37}
 .rs-ckgrp h3{font-size:16px;margin:12px 0 6px}.rs-ckgrp ul{list-style:none;margin:0;padding:0}
