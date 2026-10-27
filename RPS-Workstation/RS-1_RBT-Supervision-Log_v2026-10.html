@@ -1243,14 +1243,17 @@ td input,td select{max-width:100%}
     <!-- v24.57 (Sellers, Alai-Rosales & MacDonald, 2016, 5.07) whether supervision works, reviewed and written down -->
     <h2 class="nbh-band" style="margin-top:18px">The Effects of Supervision</h2>
     <p class="hint">Check now and then that supervision is working, at three levels: the client&rsquo;s progress, the RBT&rsquo;s skills (the plan checklist scores at the contacts, the goals above) and the supervision itself (the RBT&rsquo;s view: is the feedback useful, the time enough, the expectations clear). Note each review: what the RBT says, what the data show, and what will change. Sellers, Alai-Rosales &amp; MacDonald (2016). The Ethics Code for Behavior Analysts asks the same of the supervisor: 4.10, evaluate one&rsquo;s supervision with feedback from others and the client&rsquo;s and the RBT&rsquo;s outcomes, document it and adjust in time; 4.08, document the formal feedback given. The reviews print with the year summary.</p>
+    <details class="rs-more"><summary>More: questions to ask the RBT, what to look at, and when supervision itself runs into trouble</summary>
     <p class="hint">To ask the RBT: &ldquo;What do you like best about the supervision activities?&rdquo; and &ldquo;What could we do differently together to enhance the supervisory experience?&rdquo; (Sellers, Valentino &amp; LeBlanc, 2016); at a meeting, &ldquo;Do you feel comfortable with the amount and type of feedback being provided?&rdquo; and &ldquo;Are there any additional supports I could provide?&rdquo; (Sellers, LeBlanc &amp; Valentino, 2016). Data that show the effects: the skills the RBT has mastered, the plan checklist scores, and the number and type of errors in written work such as data sheets. The BACB&rsquo;s Supervisor Training Curriculum Outline (2.0) names what to look at: the client&rsquo;s data and the client&rsquo;s and caregivers&rsquo; satisfaction; direct observation of the RBT and the RBT&rsquo;s satisfaction; fidelity of implementation; professionalism; the written conditions and goals, reviewed now and then; and the supervisor&rsquo;s own self-rating. Tick what each review looked at.</p>
     <p class="hint"><b>When supervision itself runs into trouble</b> (Sellers, LeBlanc &amp; Valentino, 2016): meetings often canceled or moved to the phone, deadlines missed, feedback argued with or not used, or the RBT saying less. Treat it as any behavior: define it, note when it happens and what follows it, then plan: model the skill, more practice, smaller steps, a job aid. When the supervisor is part of the problem: apologize, naming what was done, its effect on the RBT and on the relationship, say what will be done instead, and follow up. Note it as a review here.</p>
+    </details>
     <div id="effList"></div>
     <div class="tools"><button class="tool" type="button" id="addEff">Add a review</button><span class="hint" id="effCount"></span></div>
 
     <!-- v24.58 (the BCBA, 10/26) the BACB's two supervision checklists, one list for this RBT -->
     <h2 class="nbh-band" style="margin-top:18px">The BACB Supervision Checklists</h2>
-    <p class="hint">The BACB encourages the RBT and each supervisor or Requirements Coordinator to work through its Supervision Checklists (for RBTs, 2/2024; for RBT Supervisors and RBT Requirements Coordinators, 6/2026). They are one list here, in their four phases; an item on both is one item. What this form already records shows its state; tick the rest, and set the date to when it was done (a tick takes today&rsquo;s date; change it if it was done earlier): a month&rsquo;s printed record counts only what was done by the end of that month. The reviews every 6 and every 3 months give their next date, also on the workstation&rsquo;s due line.</p>
+    <p class="hint">The BACB encourages the RBT and each supervisor or Requirements Coordinator to work through its Supervision Checklists (for RBTs, 2/2024; for RBT Supervisors and RBT Requirements Coordinators, 6/2026). They are one list here, in their four phases. Tick an item and set its date to when it was done: a month&rsquo;s printed record counts only what was done by the end of that month.</p>
+    <details class="rs-more"><summary>More about this list</summary><p class="hint">An item on both checklists is one item. What this form already records shows its state, with no box to tick. A tick takes today&rsquo;s date; change it if it was done earlier. The reviews every 6 and every 3 months give their next date, also on the workstation&rsquo;s due line.</p></details>
     <div id="ckSum" class="rs-cksum"></div>
     <div id="ckList"></div>
 
@@ -2083,12 +2086,12 @@ function ckSumTxt(x){return x.n+' of '+x.of+(x.g==='end'&&!x.n?' (when supervisi
 function ckSummary(asOf){return CKL.map(([g,t,L])=>{const I=L.filter(ckOn),n=I.filter(i=>ckState(i,asOf).ok).length;return {g,t,n,of:I.length};});}
 function ckPaint(){const L=$('#ckList');if(!L)return;const today=todayISO();
   $('#ckSum').innerHTML=ckSummary().map(x=>'<span class="'+(x.n===x.of?'ok':'')+'">'+esc(x.t)+': <b>'+ckSumTxt(x)+'</b></span>').join('');
-  L.innerHTML=CKL.map(([g,t,I])=>'<div class="rs-ckgrp"><h3>'+esc(t)+'</h3><ul>'+I.filter(ckOn).map(i=>{const st=ckState(i),id='bck_'+i.k;
+  L.innerHTML=CKL.map(([g,t,I])=>(z=>'<details class="rs-ckgrp" data-ckg="'+g+'"'+(((window.__ckOpen||{})[g]!=null?window.__ckOpen[g]:!(z&&(z.n===z.of||(g==='end'&&!z.n))))?' open':'')+'><summary><h3>'+esc(t)+'</h3><span class="rs-ckn'+(z&&z.n===z.of?' ok':'')+'">'+(z?esc(ckSumTxt(z)):'')+'</span></summary><ul>')(ckSummary().find(x=>x.g===g))+I.filter(ckOn).map(i=>{const st=ckState(i),id='bck_'+i.k;
     const who='<span class="rs-ckwho">'+esc(i.who==='Both'?'RBT and supervisor':i.who)+'</span>';
     if(i.auto)return '<li class="auto '+(st.ok?'ok':'')+'" data-ckitem="'+i.k+'"><span class="rs-ckmark" aria-hidden="true">'+(st.ok?'✓':'•')+'</span><div>'+who+esc(i.t)+'<small>'+(st.ok?'':'Not yet: ')+esc(st.d)+'</small></div></li>';
     return '<li class="'+(st.ok?'ok':st.late?'late':'')+'" data-ckitem="'+i.k+'"><input type="checkbox" id="'+id+'" data-bck="'+i.k+'"'+(st.done?' checked':'')+'><div><label for="'+id+'">'+who+esc(i.t)+'</label>'+
       (st.done?'<span class="rs-ckd"><label for="'+id+'_d">'+(i.every||i.last?'Last done':'Done on')+'</label><input type="date" id="'+id+'_d" data-bckd="'+i.k+'" value="'+esc(st.d||'')+'">'+
-      (i.every?'<small>'+(st.late?'<b>Due again since '+esc(mdy(st.next))+'</b>':'Next by '+esc(mdy(st.next)))+'</small>':'')+'</span>':i.every?'<small>Every '+i.every+' months; tick when done</small>':'')+'</div></li>';   /* the date once ticked */}).join('')+'</ul></div>').join('');}
+      (i.every?'<small>'+(st.late?'<b>Due again since '+esc(mdy(st.next))+'</b>':'Next by '+esc(mdy(st.next)))+'</small>':'')+'</span>':i.every?'<small>Every '+i.every+' months; tick when done</small>':'')+'</div></li>';   /* the date once ticked */}).join('')+'</ul></details>').join('');}
 document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d||!(d.bck||d.bckd))return;if(!S.ckl)S.ckl={};
   if(d.bck){if(el.checked)S.ckl[d.bck]=S.ckl[d.bck]||todayISO();else delete S.ckl[d.bck];}
   else{if(/^\d{4}-\d{2}-\d{2}$/.test(el.value))S.ckl[d.bckd]=el.value;else delete S.ckl[d.bckd];}
@@ -2328,8 +2331,9 @@ function renderWho(){const k=curKey||defaultKey(),i0=R.indexOf(S);
   $('#rbtCount').textContent=R.length===1?'1 supervisee in this file':R.length+' supervisees in this file';
   $('#delRbt').disabled=R.length<2;$('#addRbt').disabled=R.length>=RMAX;
   const w=$('#rbtAll');w.hidden=R.length<2;if(R.length<2){w.innerHTML='';return;}
-  w.innerHTML='<table class="rs-who-t"><caption>Every supervisee, '+esc(keyLabel(k))+'</caption><thead><tr><th>RBT</th><th>% supervised</th><th>Contacts that count</th><th>Observed with client</th><th>This month</th><th>Still needed this month</th><th>Certification expires</th></tr></thead><tbody>'+
-    rows.map(x=>'<tr class="open'+(x.i===i0?' cur':'')+'"><td><button type="button" class="rs-who-btn" data-rbt="'+x.i+'" aria-label="Show '+esc(x.name)+'"'+(x.i===i0?' aria-current="true"':'')+'>'+esc(x.name)+'</button></td><td>'+(x.s.hasService?pctTxt(x.s.pct):'—')+'</td><td>'+cntTxt(x.s)+'</td><td>'+x.s.obs+'</td><td><span class="rs-wst rs-wst-'+x.s.status+'">'+stw(x.s)+'</span></td><td class="rs-need">'+esc(needTxt(x.s))+'</td><td>'+(x.exp?esc(mdy(x.exp))+(x.d!=null&&x.d>=0&&x.d<=rule('remind2')?' ('+x.d+' days)':x.d!=null&&x.d<0?' (expired)':''):'—')+'</td></tr>').join('')+'</tbody></table>';}
+  w.innerHTML='<details class="rs-who-d"'+(window.__whoOpen?' open':'')+'><summary><b>Every supervisee, '+esc(keyLabel(k))+'</b> <span>'+rows.map(x=>esc(x.name)+': '+esc(stw(x.s))).join(' &middot; ')+'</span></summary><table class="rs-who-t"><thead><tr><th>RBT</th><th>% supervised</th><th>Contacts that count</th><th>Observed with client</th><th>This month</th><th>Still needed this month</th><th>Certification expires</th></tr></thead><tbody>'+
+    rows.map(x=>'<tr class="open'+(x.i===i0?' cur':'')+'"><td><button type="button" class="rs-who-btn" data-rbt="'+x.i+'" aria-label="Show '+esc(x.name)+'"'+(x.i===i0?' aria-current="true"':'')+'>'+esc(x.name)+'</button></td><td>'+(x.s.hasService?pctTxt(x.s.pct):'—')+'</td><td>'+cntTxt(x.s)+'</td><td>'+x.s.obs+'</td><td><span class="rs-wst rs-wst-'+x.s.status+'">'+stw(x.s)+'</span></td><td class="rs-need">'+esc(needTxt(x.s))+'</td><td>'+(x.exp?esc(mdy(x.exp))+(x.d!=null&&x.d>=0&&x.d<=rule('remind2')?' ('+x.d+' days)':x.d!=null&&x.d<0?' (expired)':''):'—')+'</td></tr>').join('')+'</tbody></table></div></details>';}
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.matches&&d.matches('details.rs-who-d'))window.__whoOpen=d.open;if(d&&d.matches&&d.matches('details.rs-ckgrp')){window.__ckOpen=window.__ckOpen||{};window.__ckOpen[d.dataset.ckg]=d.open;}},true);   /* v24.70 */
 function pickRbt(i){if(!R[i]||R[i]===S)return;S=R[i];openC=new Set();renderAll();}
 $('#rbtSel').addEventListener('change',e=>pickRbt(+e.target.value));
 document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const tr=e.target.closest&&e.target.closest('tr[data-rbt]');if(tr)pickRbt(+tr.dataset.rbt);});
@@ -3792,6 +3796,30 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-cov{margin:8px 0}.rs-cov>summary{cursor:pointer;padding:4px 0}.rs-cov .chip{font-size:13.5px}
 .rs-sigstat{margin:6px 0 2px;font-family:var(--sans);font-size:13.5px;color:#7a4a12}.rs-sigstat.ok{color:#2e6b3a;font-weight:600}
 .fieldgrid > [hidden],.fieldgrid > div[hidden]{display:none!important}   /* v24.69 hidden means hidden, also in a grid */
+/* v24.70 layout */
+@media screen{.toolbar{max-width:none!important;margin-left:0!important;margin-right:0!important}}
+.rs-who-d{margin:6px 0 10px;border:1px solid var(--rule-2,#d5dfdd);border-radius:6px;background:#f7faf9}
+.rs-who-d>summary{cursor:pointer;padding:10px 14px;font-family:var(--sans);font-size:14px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.rs-who-d>summary span{color:var(--ink-soft,#54676f)}
+.rs-who-d[open]>summary{border-bottom:1px solid var(--rule-2,#d5dfdd)}
+.rs-who-d .rs-who-t{margin:0}
+details.rs-ckgrp{margin:10px 0;border:1px solid var(--rule-2,#d5dfdd);border-radius:6px;background:#fff}
+details.rs-ckgrp>summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:10px 14px;list-style:none}
+details.rs-ckgrp>summary::-webkit-details-marker{display:none}
+details.rs-ckgrp>summary::before{content:"\25B8";color:var(--ink-soft,#54676f);transition:transform .15s}
+details.rs-ckgrp[open]>summary::before{transform:rotate(90deg)}
+details.rs-ckgrp>summary h3{margin:0;font-size:16px}
+.rs-cksum{display:none}   /* each phase heading carries its count */
+.rs-ckn{margin-left:auto;font-family:var(--sans);font-size:13.5px;font-weight:600;color:#7a4a12;text-align:right}.rs-ckn.ok{color:#2F6B37}
+details.rs-ckgrp[open]>summary{border-bottom:1px solid var(--rule-2,#d5dfdd)}
+details.rs-ckgrp ul{padding:0 8px!important}
+.rs-ckgrp li:not(.auto)>div{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px}
+.rs-ckgrp li:not(.auto)>div>label{flex:1 1 360px;min-width:0}
+.rs-ckgrp li .rs-ckd{flex:0 0 auto;margin:0;display:inline-flex;align-items:center;gap:8px}
+.rs-ckgrp li .rs-ckd input[type=date]{width:auto;min-height:36px;padding:4px 8px}
+.rs-ckgrp li .rs-ckd small{display:inline;margin:0}
+.rs-more{margin:4px 0 10px}.rs-more>summary{cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--nbh-slate,#254657);padding:4px 0}
+.rs-more-in{display:inline;margin:0}.rs-more-in>summary{display:inline}
 .rs-tcon{margin:6px 0}.rs-tcohint{margin:2px 0 6px}.rs-tcot2 td:first-child{width:42%}
 /* v24.65 a contact's groups, each its own panel */
 .rs-grp{border:1px solid var(--rule-2,#d5dfdd);border-radius:8px;background:#f7faf9;padding:10px 14px 12px;margin:14px 0}

@@ -18,7 +18,7 @@ const words=pg=>[...pg.matchAll(/\(((?:[^()\\]|\\.)*)\) Tj/g)].map(m=>m[1].repla
    curKey=k;renderAll();return k;});
  await p.evaluate(()=>setView('rbt'));await sleep(300);
  const R=await p.evaluate(()=>{const sum=document.getElementById('ckSum').textContent,t=document.getElementById('tcoSum'),sec=t&&t.parentElement.textContent;
-   return {sum,end:/At the end of supervision: 0 of 3 \(when supervision ends\)/.test(sum),hint:/set the date to when it was done/.test(sec),tco:t&&t.textContent,where:/under Content covered, tick an area/.test(sec),vis:!!t&&!!t.offsetParent};});
+   return {sum,end:/At the end of supervision: 0 of 3 \(when supervision ends\)/.test(sum),hint:/set (the|its) date to when it was done/.test(sec),tco:t&&t.textContent,where:/under Content covered, tick an area/.test(sec),vis:!!t&&!!t.offsetParent};});
  ok('on screen: "at the end of supervision" says it is for when supervision ends; the list says to date each item when it was done',R.end&&R.hint,R);
  ok('the RBT record shows the Test Content Outline coverage: 2 of 43, A.1 and C.3 covered, and where the tasks are ticked',R.vis&&/2 of 43 tasks covered/.test(R.tco)&&/A\. Data collection and graphing 1 of 8A\.1A\.2/.test(R.tco.replace(/, /g,''))&&/C\.3/.test(R.tco)&&R.where,R.tco);
  const Y=await p.evaluate(k=>{setView('print');curKey=k;renderPrint();return document.getElementById('yearOut').textContent;},k);

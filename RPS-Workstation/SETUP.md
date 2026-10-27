@@ -9905,6 +9905,16 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.70: Form RS-1 layout, from the BCBA's screenshots of every page (10/27): the toolbar spans the page, Every supervisee on one line, the checklists fold by phase, long guidance behind "More"
+- **The pinned toolbar** spans the page column, so text no longer shows on either side of it as the page scrolls.
+- **Every supervisee** is one line (each RBT and the month's state) that opens to the table; it stays as it was left.
+- **The BACB checklists:** each phase folds, with its count beside the heading; a finished phase, and the end of
+  supervision until something in it is ticked, starts folded; a ticked item's date sits beside it instead of on a line of
+  its own. The line of counts above the phases is gone (each heading carries its own).
+- **Long guidance** under The Effects of Supervision and the checklists opens from a "More" line; the instruction to date
+  each item when it was done stays in view.
+- Tests: qa/lay170-test.js; qa/ckf163-test.js reads the reworded checklist line.
+
 ### v24.69: Form RS-1: boxes the form hides stay hidden; the observation checklist reads "plan's" and "student's" (the BCBA, 10/27)
 - A layout rule outranked the browser's own hiding, so boxes the form hides showed anyway: on an individual contact,
   "Number of RBTs in the group" and the group-meeting note; on Setup, a BCBA supervisor's "Supervised by (the BCBA's name
