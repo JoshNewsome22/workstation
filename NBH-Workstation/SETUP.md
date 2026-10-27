@@ -9905,6 +9905,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.75: Save case no longer waits several seconds after a form has just been opened
+- **What happened.** The workstation asks each open form for its part of the case before it saves. A question sent in
+  the moment a form was opening, while its page was still loading, was lost. The answers from a form are matched to
+  the questions in order, so from then on each answer went to the question before it, and the last question of a Save
+  case waited out its time: up to 7 seconds. On an iPad that can outlast the tap, so the share sheet then asked for one
+  more tap. It happened about half the time when a case was saved soon after a form was opened (since v24.49).
+- **Now** a form is asked only once its page has answered (within the same wait), so nothing is lost and Save case
+  reaches the share sheet at once.
+
+Not changed: the forms, the saved files, the printing.
+To set up: upload the whole folder as usual (`index.html` changed). Tested: `qa/frl175-test.js` (new), `qa/pwa-test.js`,
+the case open, close, save-away, autosave and history tests.
+
 ### v24.74: Behavior Analysis in Practice, Volume 12, part 3 read into the TD-1 and GB-1 banks
 (the BCBA's Part 3 zip of 10/27; 19 articles screened by title, 5 read in full)
 

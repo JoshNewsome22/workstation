@@ -1899,6 +1899,7 @@ const EMBED=(()=>{
 })();
 /* a form comes from the file beside index.html, or from inside this file */
 function loadFrame(fr,file){
+  fr.__heard=false;   /* v24.75 not asked for its data until its page has answered (grab) */
   if(!EMBED){fr.src=file;return;}
   /* set at once when the forms are unpacked: an empty frame fires a load event
      of its own, which would look like the form arriving */
@@ -2858,12 +2859,12 @@ function quietReport(id){
       'Browser '+navigator.userAgent,'Address '+location.href].concat(r.lines||[]).join('\n'))+'</pre>'+
     '<p><button type="button" id="quietAgain">Load the form again</button></p>');
   const b=$('#quietAgain');
-  if(b)b.onclick=()=>{const fr=state.frames[id];$('#dlg').close();if(!fr)return;delete QUIET[id];fr.__direct=false;
+  if(b)b.onclick=()=>{const fr=state.frames[id];$('#dlg').close();if(!fr)return;delete QUIET[id];fr.__direct=false;fr.__heard=false;
     try{fr.contentWindow.location.reload();}catch(e){loadFrame(fr,rec[2]);}
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.74';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.75';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3328,6 +3329,8 @@ $('#factsSend').addEventListener('click',async()=>{
 const pending={};
 window.addEventListener('message',ev=>{
   const d=ev.data||{}; if(!d.nbh)return;
+  /* v24.75 the form's page has answered: it can be asked for its data now */
+  if(d.id){const F=state.frames[d.id];if(F&&F.__heard===false){try{if(F.contentWindow===ev.source)F.__heard=true;}catch(e){}}}
   /* v21.80 the caseload's Form DD-1 out of sight (Read every linked sheet): its answers go only to what asked for them */
   if(window.__clRfWin&&ev.source===window.__clRfWin){if(d.id){const q=pending[d.id+'|'+d.nbh];if(q&&q.length){const i=q.findIndex(f=>f.src===ev.source);if(i>=0)q[i](d);}}return;}
   /* v21.22 relay: a form asking for another open form's data; the protocol is at relay() above. It comes
@@ -5799,6 +5802,12 @@ function caseSig(over){
 const REPLY={snapshot:'snapshot',restore:'restored',collect:'payload','facts?':'facts-out',facts:'facts-applied','csv?':'csv-out',fill:'fill-applied'};   /* v21.67 fill: Read a document into Form DM-1 */
 async function grab(id,verb,extra,ms,frame){
   const fr=frame||state.frames[id]; if(!fr)return null;
+  /* v24.75 a form whose page has not answered yet is asked once it has (within the same wait): a question sent while the
+     page loads is lost, and the answers, matched to the questions in order, would each go to the question before */
+  if(!frame&&fr.__heard===false){const t0=Date.now(),lim=ms||5000;
+    while(fr.__heard===false&&Date.now()-t0<lim)await new Promise(r=>setTimeout(r,50));
+    if(fr.__heard===false||state.frames[id]!==fr)return null;
+    ms=Math.max(500,lim-(Date.now()-t0));}
   const key=id+'|'+(REPLY[verb]||verb);
   return await new Promise(res=>{
     let done=false;
