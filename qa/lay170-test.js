@@ -22,6 +22,8 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  ok('each phase folds with its count; a finished phase and the end of supervision start folded, the rest open',C.G.length===4&&(C.full.n===C.full.of?!g('before').open:true)&&g('first').open&&g('ongoing').open&&!g('end').open&&/^0 of 3 \(when supervision ends\)$/.test(g('end').n)&&/^\d+ of \d+$/.test(g('first').n),C);
  const D=await p.evaluate(()=>{const k=CKL[1][2].find(i=>!i.auto&&ckOn(i)).k;S.ckl[k]='2026-08-12';ckPaint();const li=document.querySelector('#ckList li[data-ckitem="'+k+'"]'),lab=li.querySelector('div>label'),dt=li.querySelector('.rs-ckd');const a=lab.getBoundingClientRect(),c=dt.getBoundingClientRect();return {side:c.left>a.left+100&&c.top<a.bottom,first:document.querySelector('details[data-ckg="first"]').open};});
  ok('a ticked item\'s date sits beside it, not on a line of its own; a phase stays as the user left it after a tick',D.side&&D.first,D);
+ const H=await p.evaluate(()=>getComputedStyle(document.getElementById('ckSum')).display);
+ ok('the line of counts above the phases is hidden (each heading carries its own)',H==='none',H);
  const M=await p.evaluate(()=>[...document.querySelectorAll('details.rs-more')].map(d=>({open:d.open,s:d.querySelector('summary').textContent,has:d.textContent.length})));
  ok('long guidance (the effects of supervision, the checklists) opens from "More"',M.length>=2&&M.every(x=>!x.open&&/^More/.test(x.s)&&x.has>150),M);
  ok('no page errors',!errs.length,errs.slice(0,3));

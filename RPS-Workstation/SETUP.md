@@ -9905,6 +9905,11 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.71: Form RS-1: the line of checklist counts above the phases is hidden, as v24.70 meant
+- Each phase heading carries its own count; the line above them was meant to go in v24.70, but an older rule further down
+  the page outranked it.
+- Tests: qa/lay170-test.js checks it.
+
 ### v24.70: Form RS-1 layout, from the BCBA's screenshots of every page (10/27): the toolbar spans the page, Every supervisee on one line, the checklists fold by phase, long guidance behind "More"
 - **The pinned toolbar** spans the page column, so text no longer shows on either side of it as the page scrolls.
 - **Every supervisee** is one line (each RBT and the month's state) that opens to the table; it stays as it was left.
