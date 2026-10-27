@@ -9905,6 +9905,11 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.72: Form RS-1: the printed and PDF year summary carries the checklist average by month
+- The Year page showed two charts (percent supervised, checklist average), but the printed year summary, and so the month and
+  year PDFs, carried only the first. The checklist chart now follows it, kept whole on its page.
+- Tests: qa/ckc172-test.js checks it.
+
 ### v24.71: Form RS-1: the line of checklist counts above the phases is hidden, as v24.70 meant
 - Each phase heading carries its own count; the line above them was meant to go in v24.70, but an older rule further down
   the page outranked it.
