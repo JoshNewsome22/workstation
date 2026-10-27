@@ -88,7 +88,7 @@ const keys=fs.existsSync(SIM)?fs.readdirSync(SIM).filter(k=>fs.existsSync(path.j
   const G=await p.evaluate(async()=>{const R0=R();const q=R0.querySelector('.q');q.value='';q.dispatchEvent(new Event('input',{bubbles:true}));await new Promise(r=>setTimeout(r,300));
     const fn=document.querySelector('[name="m.fn"]').value;const ids=[...R0.querySelectorAll('.it')].slice(0,12).map(b=>b.dataset.id);const P=TD1_BANK.protocols;const top=ids.map(id=>P.find(x=>x.id===id)).filter(Boolean);
     return {fn,cnt:R0.querySelector('.cnt').textContent,first:top.slice(0,5).map(x=>(x.fn||[]).join('/')||'any'),firstFits:top.length>0&&(!top[0].fn||!top[0].fn.length||top[0].fn.includes(fn))};});
-  ok('7 with nothing searched the list puts this plan’s function first and says so',G.fn&&G.firstFits&&/this plan’s function and behavior first/.test(G.cnt),G);
+  ok('7 with nothing searched the list puts this plan’s function first and says so',G.fn&&G.firstFits&&/protocols for this plan’s function \(/.test(G.cnt)   /* v24.73: the count line's wording since v24.30 */,G);
   /* 8. save and open */
   const T=await p.evaluate(()=>{sheet('build');const cb=document.querySelector('#compWrap .card input.td-su');cb.checked=!cb.checked;cb.dispatchEvent(new Event('change',{bubbles:true}));return {k:cb.dataset.k,on:cb.checked,ov:cb.closest('.card').querySelector('input.td-suov').value};});
   const dl=p.waitForEvent('download',{timeout:60000});await p.evaluate(()=>document.querySelector('#saveBtn').click());const d=await dl;const file=path.join(require('os').tmpdir(),'td88-'+Date.now()+'.json');await d.saveAs(file);

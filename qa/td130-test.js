@@ -91,7 +91,7 @@ const brief=P=>P.map(x=>x.n+':'+x.ink+'%').join(' ');
   return {fn:fn.value,age:age.value,ageOpts:[...age.options].map(o=>o.textContent),cnt:R.querySelector('.cnt').textContent,ids:[...R.querySelectorAll('.it')].map(b=>b.dataset.id),inPlan:[...R.querySelectorAll('.it .inp')].length,
    nPlan:B.search('','','plan','').length,nPlanBand:B.search('','','plan',B.band()).length,nAll:B.search('','','','').length,band:B.band()};});
  let s1=await bk();
- ok('with no case student the bank opens on this plan\'s function (escape), any grade: the count line says so and offers Any function and Any grade',s1.fn==='plan'&&s1.age===''&&s1.ageOpts.length===7&&/^\d+ of 459 protocols for this plan’s function \(escape\)\./.test(s1.cnt)&&/Any function and Any grade show the rest/.test(s1.cnt)&&s1.ids.length===s1.nPlan&&s1.nPlan<s1.nAll&&s1.nAll===459,{fn:s1.fn,age:s1.age,cnt:s1.cnt,n:[s1.ids.length,s1.nPlan,s1.nAll]});
+ ok('with no case student the bank opens on this plan\'s function (escape), any grade: the count line says so and offers Any function and Any grade',s1.fn==='plan'&&s1.age===''&&s1.ageOpts.length===7&&/^\d+ of \d+ protocols for this plan’s function \(escape\)\./.test(s1.cnt)&&/Any function and Any grade show the rest/.test(s1.cnt)&&s1.ids.length===s1.nPlan&&s1.nPlan<s1.nAll&&+(s1.cnt.match(/ of (\d+) protocols/)||[])[1]===s1.nAll   /* v24.73: the bank's total, not a fixed count */,{fn:s1.fn,age:s1.age,cnt:s1.cnt,n:[s1.ids.length,s1.nPlan,s1.nAll]});
  await p.evaluate(()=>{window.__nbhFactsIn({student:{name:'Simulated Student',id:'SIM-1',grade:'4'}});});await sleep(300);
  s1=await bk();
  const bandBad=await p.evaluate(ids=>ids.map(id=>[id,window.__tdBank.entry(id).age]).filter(x=>x[1]&&!window.__tdBank.ageOk(x[0],'35')),s1.ids);

@@ -9905,6 +9905,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.73: Behavior Analysis in Practice, Volume 12 (the BCBA's two parts) read into the TD-1 and GB-1 banks
+(the BCBA's Part 1 and Part 2 zips of 10/27; 32 articles screened by title, 12 read in full)
+
+- **9 treatment protocols in TD-1** (468 in all) and **3 starting objectives in GB-1** (232 in all), with 7 further
+  sources for objectives already in the bank, each written from the article's full text; 10 articles are cited.
+  - Protocols:
+    - a break request (FCT) with the work requirement raised step by step (demand fading);
+    - a wh-question bingo game;
+    - teaching how a person feels in a given place;
+    - naming another person's feelings from a visible cue;
+    - Apple Watch text prompts to start talking with a peer;
+    - a written work-and-break schedule for middle-school seatwork;
+    - peer-taught soccer skills;
+    - two transition-age job-matching cards (a work-preference profile, and job videos with a tablet choice).
+  - New objectives: answering what, where and when questions; how a person feels in a place; soccer skills.
+- **What the notes say.**
+  - The FCT card's prompting through aggression is escape extinction, so its note requires TD-1's
+    escape-extinction consent block first.
+  - The bingo game's hand-over-hand help is a teaching prompt, and its note says when it would become escape
+    extinction.
+  - The two job-matching cards rest on adults (ages 20 to 41) and say so; they are meant for transition planning.
+- **Not used.** Two read articles gave nothing to bank: a tutorial for college learners, and a study using made-up
+  symbols. The virtual-reality pedestrian study is already in the bank (Dixon et al., 2020). The other 19 are the
+  diversity special section, conceptual papers and staff-training studies, dropped at the title screen.
+- **Citations.** Every reference was confirmed by its DOI against the publisher's record. Nine of the ten appeared in
+  print in 2020 (volume 13) and are cited that way; one is 2019, 12(4).
+
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.72: Form RS-1: the printed and PDF year summary carries the checklist average by month
 - The Year page showed two charts (percent supervised, checklist average), but the printed year summary, and so the month and
   year PDFs, carried only the first. The checklist chart now follows it, kept whole on its page.
