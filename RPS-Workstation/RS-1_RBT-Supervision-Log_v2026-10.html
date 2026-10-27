@@ -1785,10 +1785,10 @@ function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Num
         '<div><label for="'+F('obs')+'">Observed the RBT with a client?</label><select id="'+F('obs')+'" data-c="'+id+'" data-f="obs">'+opts([['yes','Yes'],['no','No']],c.obs,true)+'</select></div>'+
         '<div><label for="'+F('client')+'">Client code</label><input id="'+F('client')+'" data-c="'+id+'" data-f="client" list="clientCodes" value="'+esc(c.client)+'" spellcheck="false" autocomplete="off" placeholder="a code, not a name"></div>'+
       '</div>'+
-      '<span class="lbl">Supervision activities</span><div class="rs-chips">'+SACT.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('s'+j)+'" data-c="'+id+'" data-arr="sact" value="'+esc(t)+'"'+((c.sact||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
-      '<span class="lbl">Content covered (RBT Test Content Outline, 3rd ed.)</span><div class="rs-chips">'+TCO.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('a'+j)+'" data-c="'+id+'" data-arr="acts" value="'+esc(t)+'"'+((c.acts||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
-      '<div class="rs-tcot" data-tcot="'+id+'">'+tcoTasks(c)+'</div>'+   /* v24.59 */
-      '<span class="lbl">How it was taught (behavior skills training)</span> <span class="hint">describe the skill, give it in writing, show it, the RBT practices it, feedback after each practice, repeat to mastery; then check it on the job (Parsons, Rollyson &amp; Reid, 2012)</span><div class="rs-chips">'+BST.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('b'+j)+'" data-c="'+id+'" data-arr="bst" value="'+esc(t)+'"'+((c.bst||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
+      '<section class="rs-grp"><h4 class="rs-grph">Supervision activities <span class="rs-grpn" data-grpn="sact">'+grpN(c.sact)+'</span></h4><div class="rs-chips">'+SACT.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('s'+j)+'" data-c="'+id+'" data-arr="sact" value="'+esc(t)+'"'+((c.sact||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div></section>'+
+      '<section class="rs-grp"><h4 class="rs-grph">Content covered <span class="rs-grpsub">RBT Test Content Outline (3rd ed.): the areas, then their tasks</span> <span class="rs-grpn" data-grpn="acts">'+grpN(c.acts)+'</span></h4><div class="rs-chips">'+TCO.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('a'+j)+'" data-c="'+id+'" data-arr="acts" value="'+esc(t)+'"'+((c.acts||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
+      '<div class="rs-tcot" data-tcot="'+id+'">'+tcoTasks(c)+'</div></section>'+   /* v24.59 */
+      '<section class="rs-grp"><h4 class="rs-grph">How it was taught <span class="rs-grpsub">behavior skills training</span> <span class="rs-grpn" data-grpn="bst">'+grpN(c.bst)+'</span></h4><p class="hint rs-grphint">Describe the skill, give it in writing, show it, the RBT practices it, feedback after each practice, repeat to mastery; then check it on the job (Parsons, Rollyson &amp; Reid, 2012).</p><div class="rs-chips">'+BST.map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('b'+j)+'" data-c="'+id+'" data-arr="bst" value="'+esc(t)+'"'+((c.bst||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div></section>'+
       '<div class="two"><div class="field"><label for="'+F('feedback')+'">Feedback given</label><textarea id="'+F('feedback')+'" data-c="'+id+'" data-f="feedback" rows="3" placeholder="what went well, one thing to change, and how">'+esc(c.feedback)+'</textarea></div>'+
       '<div class="field"><label for="'+F('follow')+'">The RBT&rsquo;s follow-up or goal for next time</label><textarea id="'+F('follow')+'" data-c="'+id+'" data-f="follow" rows="3" placeholder="what the RBT practises before the next contact">'+esc(c.follow)+'</textarea></div></div>'+
       rdBlock(c,id)+ckBlock(c,id)+
@@ -2078,13 +2078,19 @@ document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d|
   if(!Object.keys(S.ckl).length)delete S.ckl;ckPaint();changed();});
 /* v24.59 the outline's tasks of the domains ticked on a contact */
 function tcoTasks(c){const id=esc(c.id),D=(c.acts||[]).map(a=>TCO.indexOf(a)).filter(i=>i>=0).sort((a,b)=>a-b);
-  if(!D.length)return '<span class="lbl">Tasks covered (optional)</span><p class="hint rs-tcohint">Tick an area above, and its tasks appear here to tick.</p>';   /* v24.64 */
+  if(!D.length)return '<h5 class="rs-tsub">Tasks covered <span>(optional)</span></h5><p class="hint rs-tcohint">Tick an area above, and its tasks appear here to tick.</p>';   /* v24.64 */
   const off=TCO.map((t,i)=>i).filter(i=>!D.includes(i));
-  return '<span class="lbl">Tasks covered (optional)</span><p class="hint rs-tcohint">The tasks of the areas ticked above: '+D.map(i=>'ABCDEF'[i]+'. '+esc(TCO[i])).join(', ')+'.'+
-    (off.length?' To choose tasks from another area (e.g., '+esc(TCO[off[off.length-1]])+'), tick it above.':'')+'</p><div class="rs-chips rs-tcochips">'+TCOT.filter(x=>D.includes(x.d)).map(x=>'<label class="chip" title="'+esc(x.t)+'"><input type="checkbox" data-c="'+id+'" data-tco="'+x.c+'"'+((c.tco||[]).includes(x.c)?' checked':'')+'> <b>'+x.c+'</b> '+esc(x.t)+'</label>').join('')+'</div>';}
+  return '<h5 class="rs-tsub">Tasks covered <span>(optional)</span></h5><p class="hint rs-tcohint">The tasks of the areas ticked above: '+D.map(i=>'ABCDEF'[i]+'. '+esc(TCO[i])).join(', ')+'.'+
+    (off.length?' To choose tasks from another area (e.g., '+esc(TCO[off[off.length-1]])+'), tick it above.':'')+'</p>'+D.map(i=>{const T=TCOT.filter(x=>x.d===i);return '<div class="rs-tarea"><div class="rs-tareah">'+'ABCDEF'[i]+'. '+esc(TCO[i])+' <span class="rs-grpn" data-tn="'+id+'_'+'ABCDEF'[i]+'">'+T.filter(x=>(c.tco||[]).includes(x.c)).length+' of '+T.length+'</span></div><div class="rs-tlist">'+
+    T.map(x=>'<label class="tk"><input type="checkbox" data-c="'+id+'" data-tco="'+x.c+'"'+((c.tco||[]).includes(x.c)?' checked':'')+'><b>'+x.c+'</b><span>'+esc(x.t)+'</span></label>').join('')+'</div></div>';}).join('');}
+/* v24.65 a panel's count of what is ticked */
+function grpN(a){const n=(a||[]).length;return n?n+' ticked':'';}
 function tcoContact(id){for(const k of Object.keys(S.months||{})){const c=(S.months[k].contacts||[]).find(x=>x.id===id);if(c)return c;}return null;}
 document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d||!d.c)return;
-  if(d.tco){const c=tcoContact(d.c);if(!c)return;const a=new Set(c.tco||[]);el.checked?a.add(d.tco):a.delete(d.tco);c.tco=tcoSort([...a]);if(!c.tco.length)delete c.tco;changed();return;}
+  if(d.tco){const c=tcoContact(d.c);if(!c)return;const a=new Set(c.tco||[]);el.checked?a.add(d.tco):a.delete(d.tco);c.tco=tcoSort([...a]);if(!c.tco.length)delete c.tco;
+    const L=d.tco[0],tn=document.querySelector('[data-tn="'+CSS.escape(d.c+'_'+L)+'"]');if(tn){const T=TCOT.filter(x=>x.c[0]===L);tn.textContent=T.filter(x=>(c.tco||[]).includes(x.c)).length+' of '+T.length;}   /* v24.65 */
+    changed();return;}
+  if(d.arr==='sact'||d.arr==='acts'||d.arr==='bst')setTimeout(()=>{const c=tcoContact(d.c);const g=el.closest('.rs-grp');const n=g&&g.querySelector('[data-grpn="'+d.arr+'"]');if(c&&n)n.textContent=grpN(c[d.arr]);},0);   /* v24.65 */
   if(d.arr==='acts')setTimeout(()=>{const c=tcoContact(d.c);if(!c)return;const D=(c.acts||[]).map(a=>TCO.indexOf(a));if(c.tco){c.tco=c.tco.filter(k=>D.includes('ABCDEF'.indexOf(k[0])));if(!c.tco.length)delete c.tco;}   /* after the form has taken the domain */
     const box=document.querySelector('[data-tcot="'+CSS.escape(d.c)+'"]');if(box)box.innerHTML=tcoTasks(c);},0);});
 /* the outline's coverage over a set of months: tasks covered, by domain */
@@ -3756,7 +3762,25 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-eff{margin:0 0 10px}
 .rs-cov{margin:8px 0}.rs-cov>summary{cursor:pointer;padding:4px 0}.rs-cov .chip{font-size:13.5px}
 .rs-tcon{margin:6px 0}.rs-tcohint{margin:2px 0 6px}.rs-tcot2 td:first-child{width:42%}
-.rs-tcot .lbl{display:block;margin-top:8px}.rs-tcochips .chip{font-size:13.5px}.rs-tcochips .chip b{font-weight:700;margin-right:2px}
+/* v24.65 a contact's groups, each its own panel */
+.rs-grp{border:1px solid var(--rule-2,#d5dfdd);border-radius:8px;background:#f7faf9;padding:10px 14px 12px;margin:14px 0}
+.rs-grph{margin:0 0 2px;font-family:var(--sans);font-size:15px;font-weight:700;color:var(--nbh-navy,#182e43);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.rs-grpsub{font-weight:400;font-size:13px;color:var(--ink-soft,#54676f)}
+.rs-grpn{margin-left:auto;font-weight:600;font-size:12.5px;color:var(--nbh-slate,#254657)}
+.rs-grpn:empty{display:none}
+.rs-grphint{margin:2px 0 4px}
+.rs-grp .rs-chips{margin:8px 0 0}
+.rs-tcot:not(:empty){margin-top:12px;padding-top:10px;border-top:1px dashed var(--nbh-rule2,#93aead)}
+.rs-tsub{margin:0;font-family:var(--sans);font-size:14px;font-weight:700;color:var(--nbh-navy,#182e43)}.rs-tsub span{font-weight:400;color:var(--ink-soft,#54676f)}
+.rs-tarea{margin:10px 0 0}
+.rs-tareah{display:flex;align-items:baseline;gap:10px;font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--nbh-slate,#254657);padding:0 0 4px;border-bottom:1px solid var(--rule-2,#d5dfdd);margin-bottom:6px}
+.rs-tlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:6px 10px}
+.rs-tlist .tk{display:flex;align-items:center;gap:8px;min-height:42px;padding:5px 10px;border:1px solid var(--nbh-rule2,#93aead);border-radius:6px;background:#fff;font-family:var(--sans);font-size:13.5px;line-height:1.3;cursor:pointer}
+.rs-tlist .tk input{width:18px;height:18px;margin:0;flex:0 0 auto;accent-color:var(--nbh-slate,#254657)}
+.rs-tlist .tk b{flex:0 0 2.6em;font-weight:700;color:var(--nbh-slate,#254657)}
+.rs-tlist .tk:has(input:checked){background:var(--nbh-mist,#eaf2f0);border-color:var(--nbh-teal,#76a2a3);font-weight:600}
+.rs-tlist .tk:focus-within{outline:2px solid var(--nbh-slate,#254657);outline-offset:1px}
+@media (max-width:560px){.rs-grp{padding:8px 10px 10px}.rs-tlist{grid-template-columns:1fr}}
 .rs-cksum{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 10px;font-size:14px;color:var(--ink-soft)}.rs-cksum .ok b{color:#2F6B37}
 .rs-ckgrp h3{font-size:16px;margin:12px 0 6px}.rs-ckgrp ul{list-style:none;margin:0;padding:0}
 .rs-ckgrp li{display:grid;grid-template-columns:28px 1fr;gap:4px 8px;align-items:start;padding:8px 6px;border-bottom:1px solid var(--nbh-rule,#d5dfe3);font-size:15px;line-height:1.45}

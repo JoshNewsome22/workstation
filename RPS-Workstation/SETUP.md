@@ -9905,6 +9905,13 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.65: Form RS-1: a contact's groups each in a panel of their own, and the outline's tasks under a heading for each area (the BCBA, 10/26)
+- The BCBA found the contact's sections running together. Supervision activities, Content covered (with its tasks) and
+  How it was taught are now each a panel with a heading and a count of what is ticked, with space between them.
+- The outline's tasks sit under a heading for each area ticked ("C. Behavior acquisition 2 of 11"), as a list with the
+  code first, two columns on an iPad and one on a phone. The counts follow the ticks; what is recorded does not change.
+- Tests: qa/lay165-test.js.
+
 ### v24.64: Form RS-1: a contact's task list says it holds the tasks of the areas ticked under Content covered (the BCBA, 10/26)
 - The BCBA saw the tasks stop at D and the ethics tasks missing: a contact offers the outline's tasks only for the areas
   ticked under Content covered, and Ethics and professional conduct was not ticked. The list now says which areas' tasks
