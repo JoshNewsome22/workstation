@@ -9905,6 +9905,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.66: Form RS-1: readings discussed are kept when the form is reopened; each prints its summary; a contact's tasks print beside their own area (the BCBA, 10/26)
+- **Readings were lost on reopening.** The form's file reader had no place for a contact's readings, so they were dropped
+  whenever the form was opened again from its data: Open data, the workstation's safety copy and Save case. They are now
+  kept (each reading's reference, DOI, summary, what was discussed and the follow-up). A safety copy saved before this
+  release still holds them, so they come back when it is restored.
+- **A reading's summary on the record.** Each reading discussed prints its summary from the readings, after the reference
+  and before what was discussed (a reading added without one takes the readings' own).
+- **Tasks beside their own area.** A contact's outline tasks printed after the last area, so they read as all belonging to
+  it; each area now prints with its own tasks ("Data collection and graphing (A.1, A.5); Behavior assessment (B.2)"), on
+  the record and in the spreadsheet.
+- Tests: qa/rds166-test.js.
+
 ### v24.65: Form RS-1: a contact's groups each in a panel of their own, and the outline's tasks under a heading for each area (the BCBA, 10/26)
 - The BCBA found the contact's sections running together. Supervision activities, Content covered (with its tasks) and
   How it was taught are now each a panel with a heading and a count of what is ticked, with space between them.
