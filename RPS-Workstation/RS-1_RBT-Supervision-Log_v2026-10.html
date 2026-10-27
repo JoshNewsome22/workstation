@@ -1310,6 +1310,7 @@ td input,td select{max-width:100%}
         <canvas class="rs-pad" data-pad="sup_img" width="640" height="150" aria-label="Supervisor's signature: draw here"></canvas>
         <div class="tools"><button class="tool" type="button" data-padclear="sup_img">Clear the signature</button></div>
         <p class="rs-siglost" data-siglost="sup_img" role="status" hidden></p>
+        <p class="rs-sigstat noprint" data-sigstat="sup_img" role="status"></p>
         <details class="rs-typesig"><summary>Type the signature instead</summary>
           <div class="ts-in"><label for="ts_sup">The supervisor&rsquo;s full name, as signed</label><input id="ts_sup" data-tsname="sup_img" autocomplete="off" spellcheck="false">
           <div class="ts-prev" aria-hidden="true" data-tsprev="sup_img"></div>
@@ -1325,6 +1326,7 @@ td input,td select{max-width:100%}
         <canvas class="rs-pad" data-pad="rbt_img" width="640" height="150" aria-label="RBT's signature: draw here"></canvas>
         <div class="tools"><button class="tool" type="button" data-padclear="rbt_img">Clear the signature</button></div>
         <p class="rs-siglost" data-siglost="rbt_img" role="status" hidden></p>
+        <p class="rs-sigstat noprint" data-sigstat="rbt_img" role="status"></p>
         <details class="rs-typesig"><summary>Type the signature instead</summary>
           <div class="ts-in"><label for="ts_rbt">The RBT&rsquo;s full name, as signed</label><input id="ts_rbt" data-tsname="rbt_img" autocomplete="off" spellcheck="false">
           <div class="ts-prev" aria-hidden="true" data-tsprev="rbt_img"></div>
@@ -2106,9 +2108,16 @@ function renderSign(){const m=month(curKey),sg=m.sig;$('#signTitle').textContent
   $$('[data-sg]').forEach(el=>{el.value=sg[el.dataset.sg]||'';});
   const sp=S.sups.find(s=>s.name&&credOK(s.cred));$('#sgSup').placeholder=sp?supLabel(sp):'name, credential';$('#sgRbt').placeholder=S.setup.rbt_name?(S.setup.rbt_name+', '+(S.setup.rbt_cred||'RBT')):'name, RBT';
   $$('canvas.rs-pad').forEach(cv=>padDraw(cv,sg[cv.dataset.pad]));
+  if(window.__tsKey!==curKey){window.__tsKey=curKey;$$('[data-tsok]').forEach(c=>{c.checked=false;});$$('[data-tsname]').forEach(i=>{i.value='';});$$('details.rs-typesig').forEach(d=>{d.open=false;});$$('[data-tsgo]').forEach(b=>tsState(b.dataset.tsgo));}   /* v24.67 the typed signature starts empty for each month */
+  sigStat();
   /* v24.53 a signature given here whose picture did not come back (a restore that lost it) is said so, to be signed again */
   $$('[data-siglost]').forEach(el=>{const k=el.dataset.siglost,w=k.replace('_img',''),lost=!!sg[w+'_how']&&!sg[k];el.hidden=!lost;
     el.textContent=lost?'The signature '+(sg[w+'_how']==='typed'?'typed and adopted':'drawn')+' here'+(sg[w+'_at']?' on '+new Date(sg[w+'_at']).toLocaleString('en-US',{month:'numeric',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}):'')+' did not come back with the saved work. Sign again; the record shows no signature until then.':'';});}
+/* v24.67 each signature box says whether the month on screen is signed, how and when, or not yet */
+function sigStat(){const sg=month(curKey).sig,L=keyLabel(curKey);
+  $$('[data-sigstat]').forEach(el=>{const k=el.dataset.sigstat,w=k.replace('_img',''),how=sg[w+'_how'],at=sg[w+'_at'];el.hidden=!!how&&!sg[k];el.classList.toggle('ok',!!sg[k]);
+    el.textContent=sg[k]?'✓ Signed for '+L+(how==='typed'?': typed name adopted':how==='drawn'?': drawn':'')+(at?', '+new Date(at).toLocaleString('en-US',{month:'numeric',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}):''):
+      'Not signed yet for '+L+': sign in the box, or type the name below, tick the box and press Adopt and sign.';});}
 function renderPrint(){month(curKey);renderSign();thruPaint();renderMonthOut();renderYearOut();rdYear();rdListPaint();renderConcernOut();if(typeof window.keptPaint==='function')window.keptPaint();}
 
 /* the signature pads: a finger or a stylus draws; the drawing is kept with the month as an image, which the record prints */
@@ -2137,7 +2146,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
    signature given with its name or date box empty takes the name the box shows and today's date, the day it was signed */
 function signFill(w){const sg=month(curKey).sig,nm=$(w==='sup'?'#sgSup':'#sgRbt'),dt=$(w==='sup'?'#sgSupDate':'#sgRbtDate');
   if(!sg[w+'_name']&&nm&&nm.placeholder&&!/^name/.test(nm.placeholder)){sg[w+'_name']=nm.placeholder;nm.value=nm.placeholder;}
-  if(!sg[w+'_date']){sg[w+'_date']=todayISO();if(dt)dt.value=sg[w+'_date'];}}
+  if(!sg[w+'_date']){sg[w+'_date']=todayISO();if(dt)dt.value=sg[w+'_date'];}sigStat();}
 /* a drawing lives in the saved data, not in a field: tell the workstation's autosave something changed */
 function changed(){try{document.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
 
@@ -3766,6 +3775,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .rs-cc input+input{margin-top:8px}.rs-cc input[hidden],.rs-cc .tool[hidden]{display:none!important}.rs-cc .tool{margin-top:8px;align-self:flex-start;justify-self:start;width:auto!important}
 .rs-eff{margin:0 0 10px}
 .rs-cov{margin:8px 0}.rs-cov>summary{cursor:pointer;padding:4px 0}.rs-cov .chip{font-size:13.5px}
+.rs-sigstat{margin:6px 0 2px;font-family:var(--sans);font-size:13.5px;color:#7a4a12}.rs-sigstat.ok{color:#2e6b3a;font-weight:600}
 .rs-tcon{margin:6px 0}.rs-tcohint{margin:2px 0 6px}.rs-tcot2 td:first-child{width:42%}
 /* v24.65 a contact's groups, each its own panel */
 .rs-grp{border:1px solid var(--rule-2,#d5dfdd);border-radius:8px;background:#f7faf9;padding:10px 14px 12px;margin:14px 0}

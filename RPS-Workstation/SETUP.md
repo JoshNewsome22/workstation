@@ -9905,6 +9905,15 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.67: Form RS-1: each signature box says whether the month on screen is signed; the typed signature starts empty for each month (the BCBA, 10/26)
+- The BCBA saw August's signatures in the boxes and September's boxes empty though both looked signed. The Type the
+  signature panel is not kept per month: its typed name and tick stayed from August when September showed, so September
+  looked adopted when Adopt and sign had not been pressed for it.
+- Under each signature box: "✓ Signed for August 2026: typed name adopted, 10/26/2026, 11:20 PM", or "Not signed yet for
+  September 2026: sign in the box, or type the name below, tick the box and press Adopt and sign."
+- The typed-signature panel starts empty and closed for each month.
+- Tests: qa/sgs167-test.js.
+
 ### v24.66: Form RS-1: readings discussed are kept when the form is reopened; each prints its summary; a contact's tasks print beside their own area (the BCBA, 10/26)
 - **Readings were lost on reopening.** The form's file reader had no place for a contact's readings, so they were dropped
   whenever the form was opened again from its data: Open data, the workstation's safety copy and Save case. They are now
