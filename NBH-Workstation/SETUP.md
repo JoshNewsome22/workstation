@@ -9905,6 +9905,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.68: Form RS-1, from the BCBA's screenshots of the whole form (10/27): the reference list complete, reading summaries on the RBT record, the credential line as of the record's month, the PDU cycle from the expiration date
+- **Reference list (Guide):** the BACB documents with the years they ask to be cited by (Ethics Code for Behavior
+  Analysts 2020, RBT Ethics Code 2.0 2021, RBT Test Content Outline 3rd ed. 2023, Supervisor Training Curriculum Outline
+  2.0 2018), the two Supervision Checklists, and the five 2016 supervision articles the form cites.
+- **Readings This Year** on the RBT record shows each reading's summary.
+- **Year summary through a past month:** the credential line says "As of 8/31/2026: 793 days left ...".
+- **PDU cycle:** with the two-year path and the expiration date but no cycle dates, a button fills the two years ending on
+  the expiration date; until the dates are entered every PDU counts, whatever its date (the form says so).
+- The oversight note prints without a doubled period; the Guide's behavior skills training line names the written
+  description and practice to mastery.
+- Tests: qa/rev168-test.js.
+
 ### v24.67: Form RS-1: each signature box says whether the month on screen is signed; the typed signature starts empty for each month (the BCBA, 10/26)
 - The BCBA saw August's signatures in the boxes and September's boxes empty though both looked signed. The Type the
   signature panel is not kept per month: its typed name and tick stayed from August when September showed, so September
