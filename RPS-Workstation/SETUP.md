@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.77: Behavior Analysis in Practice, part 5 (volume 13, published online in 2019) read into the TD-1 and GB-1 banks
+(the BCBA's Part 5 zip of 10/28; 13 articles screened by title, 4 read in full)
+
+- **3 treatment protocols in TD-1** (478 in all), **1 starting objective in GB-1** (235 in all) and 2 further sources
+  for objectives already in the bank.
+  - Teaching trials embedded in free play for a student who escapes table work, as a step toward seated instruction.
+  - FCT for two reinforcers: a break request first, then a request for the preferred item during the break.
+  - Grocery shopping from a picture list on a tablet, taught in the store with least-to-most prompting (the
+    study's 20-step task analysis, reworded); its objective is finding the items on a shopping list.
+- **What the notes say.**
+  - The FCT card: work continued with prompting while problem behavior was on extinction, so TD-1's
+    escape-extinction consent block comes first. The study's "excuse me" also required eye contact, which is
+    left out. The evidence is one typically developing child, so plan staffing and thinning.
+  - The embedded-trial card: its physical prompt is the last step of an ordinary prompt sequence, not guidance
+    through a refusal.
+  - The shopping card: the hands-on prompts are agreed with the student and family. The objective keeps the
+    study's criterion and says it is below the workstation's standard.
+- **Read but not banked:** blue light screen covers raised stereotypy and lowered on-task behavior for all four
+  students with autism, so there is nothing to run, though the finding is worth knowing.
+- **Not used:** 9 articles at the title screen (staff training, assessment and methods papers, a correction notice,
+  a study of adults with dementia, the special section).
+- **Citations.** All three were confirmed by their DOI against the publisher's record (2019, volume 12).
+
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.76: Behavior Analysis in Practice, part 4 (volume 13, published online in 2019) read into the TD-1 and GB-1 banks
 (the BCBA's Part 4 zip of 10/27; 17 articles screened by title, 2 read in full)
 
