@@ -9905,6 +9905,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.86: Behavioral Interventions 2026 issue 2 in both banks
+(the BCBA's Issue 2 folder, 10/28)
+
+- **BI 2026 issue 2** (15 files, 9 read in full): 16 cards and 7 objectives.
+  - The cards: computer video lessons with built-in questions to teach asking for help at work; contingent vocal
+    imitation during play; behavioral skills training for the found-medicine safety response; three ways to teach
+    category names and which kinds belong to a larger group (constant time delay, hierarchy training with "kind of" and
+    "includes" questions, class-inclusion training); a high-probability imitation sequence before each teaching trial
+    (it records orienting to the materials, never eye contact); for a young girl with MPS IIIA, most-to-least prompting
+    of new device words, backward chaining through device pages, incidental requests on the device, shaping longer
+    spoken requests and a lower-effort device layout; a high-p sequence of preferred bites before a new food; a feeding
+    package with nonremoval of the spoon (the escape-extinction consent block comes first); observational
+    conditioning-by-denial with a peer to make a new item a reinforcer; a stepped score goal with a chosen reward for
+    reading tests.
+  - The objectives: the found-medicine safety response (at 100%), choose every picture in a named group, choose the
+    pictures a new group feature applies to, answer "more of the kind or more of the whole group?", look to the task
+    materials when the adult pauses, open a device category page and select the item, show on the device what was
+    just asked for out loud. The reading-test study supports the existing passage-questions objective.
+  - Notes say where the evidence is thin: the medicine-safety study measured only the trainees (with adult actors),
+    the MPS IIIA report is a single retrospective case (planned with the family, the doctor and the school nurse), and
+    the reading-goal study is one student.
+  - Left out: staff-only data-collection training (two articles), an assessment's psychometrics, a quality-of-life
+    observation form, a speaker-metrics paper and the issue information.
+
+TD-1: 953 protocols; GB-1: 365 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.85: The Analysis of Verbal Behavior volume 12 (1994–1995) in both banks
 (the BCBA's "1995" folder, 10/28)
 
