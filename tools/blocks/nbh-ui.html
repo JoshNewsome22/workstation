@@ -1689,10 +1689,11 @@ try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function
   }
   /* 4: yes/no tap buttons */
   function ynOptions(sel){
-    var o = sel.options; if (!o || o.length < 3 || o.length > 5 || (o[0].value || '').trim() || (o[0].textContent || '').trim()) return null;
-    var out = [], yn = false;
-    for (var i = 1; i < o.length; i++) { var t = (o[i].textContent || '').trim(); if (!t || t.length > 18) return null; if (/^(y|n|yes|no)$/i.test(t)) yn = true; out.push({ v: o[i].value, t: t }); }
-    return yn ? out : null;
+    /* v24.92 a list its form marks (data-nbh-seg="1", or "wide" for long answers) becomes buttons though it is not Yes and No */
+    var mark = sel.getAttribute('data-nbh-seg') || '', o = sel.options; if (!o || o.length < 3 || o.length > 5 || (o[0].value || '').trim() || (!mark && (o[0].textContent || '').trim())) return null;
+    var out = [], yn = false, max = mark === 'wide' ? 90 : mark ? 24 : 18;
+    for (var i = 1; i < o.length; i++) { var t = (o[i].textContent || '').trim(); if (!t || t.length > max) return null; if (/^(y|n|yes|no)$/i.test(t)) yn = true; out.push({ v: o[i].value, t: t }); }
+    return yn || mark ? out : null;
   }
   function paint(sel){ var g = sel.nbhSeg; if (!g) return; var v = sel.value; var bs = g.querySelectorAll('button');
     for (var i = 0; i < bs.length; i++) { bs[i].setAttribute('aria-pressed', bs[i].getAttribute('data-v') === v && v !== '' ? 'true' : 'false'); bs[i].disabled = !!sel.disabled; } }
@@ -1701,8 +1702,9 @@ try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function
     /* the buttons need the room: in a narrow table cell the dropdown stays (a column of stacked buttons is worse) */
     var box = sel.parentNode, need = 0; opts.forEach(function(o){ need += width(o.t, sel) + 34; }); need += (opts.length - 1) * 6;
     while (box && box.nodeType === 1 && getComputedStyle(box).display.indexOf('inline') === 0 && box.tagName !== 'TD' && box.tagName !== 'TH') box = box.parentNode;
-    if (box && box.nodeType === 1 && box.clientWidth && box.clientWidth - 8 < need) return;
-    var g = D.createElement('span'); g.className = 'nbh-seg noprint'; g.setAttribute('role', 'group'); var name = labelOf(sel); if (name) g.setAttribute('aria-label', name.slice(0, 120));
+    var wide = sel.getAttribute('data-nbh-seg') === 'wide';
+    if (!wide && box && box.nodeType === 1 && box.clientWidth && box.clientWidth - 8 < need) return;
+    var g = D.createElement('span'); g.className = 'nbh-seg noprint' + (wide ? ' nbh-seg-wide' : ''); g.setAttribute('role', 'group'); var name = labelOf(sel); if (name) g.setAttribute('aria-label', name.slice(0, 120));
     opts.forEach(function(o){ var b = D.createElement('button'); b.type = 'button'; b.className = 'nbh-segb'; b.textContent = o.t; b.setAttribute('data-v', o.v); b.setAttribute('aria-pressed', 'false');
       b.addEventListener('click', function(){ if (sel.disabled) return; var nv = sel.value === o.v ? '' : o.v; sel.value = nv; ['input', 'change'].forEach(function(t){ try { sel.dispatchEvent(new Event(t, { bubbles: true })); } catch (e) {} }); paint(sel); });
       g.appendChild(b); });
@@ -1711,7 +1713,7 @@ try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function
     /* measured in place: buttons that still break onto a second line give the dropdown back */
     var bs = g.querySelectorAll('button'), top = bs[0].getBoundingClientRect().top, one = true;
     for (var k = 1; k < bs.length; k++) if (Math.abs(bs[k].getBoundingClientRect().top - top) > 2) one = false;
-    if (!one) { unseg(sel); return; }
+    if (!one && !wide) { unseg(sel); return; }
     sel.addEventListener('change', function(){ paint(sel); }); sel.addEventListener('input', function(){ paint(sel); });
   }
   /* the dropdown back as it was (its value is its own); on a resize every row of buttons is given back and made again where it fits */

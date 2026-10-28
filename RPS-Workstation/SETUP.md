@@ -9905,6 +9905,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.92: Forms DM-1, IC-1 and RR-1 on an iPad (the design review of 10/28)
+
+The layout TD-1 got in v24.89, carried to the Student Demographics, Informed Consent and Records Review forms.
+- **Easier to read.** The description under a form's title is two lines, with "Show the full introduction". Section
+  headings are in sentence case at a heading's size; summary tiles lose their capitals. Text and every box are at
+  16 px or near it, so an iPad does not zoom when a box is tapped.
+- **Labels above their boxes, examples under the label.** An example no longer sits inside the box, cut short; it is
+  written under the label as "For example, …" and the box is empty until something is typed.
+- **Tables become cards on an iPad.** Under 1000 px wide (an iPad, either way up) each row of a table of entries
+  (contacts, team, medications, diagnoses, prior FBAs, interventions, the Packet list) is a card with each box under
+  its column's name, nothing cut short. Blank rows wait behind "Add another" (or "Add a medication", "Add a prior
+  FBA") where the table has no Add button of its own. On a laptop the tables stay tables.
+- **Short choices as buttons.** On a touch screen a list of two to four short answers (Sex as in record, Lives with the
+  student, School-based, Integrity) is a row of buttons. IC-1's decision for each procedure is one large button per
+  answer ("Yes, I consent to this procedure").
+- **DM-1.** A contact with a name is one summary line ("Name, relationship; educational rights; lives with the
+  student; phone") and Change; blank contacts wait behind "Add a contact". The Packet sheet shows the forms in this
+  file, the rest behind "Show all 46 forms".
+- **RR-1.** The school calendar on the Removal-Day Ledger folds to "Show the school calendar (9 dates or ranges)" once
+  it holds dates.
+- **IC-1: Read with the parent.** A button on the Consent, Specific procedures and Assent sheets opens a larger,
+  simpler view of what the parent reads and signs, without the staff's parts (how consent was obtained, the status,
+  the record and guide sheets). "Back to staff view" returns.
+
+Not changed: what the three forms save, and what they print (checked page by page at a laptop's and an iPad's width).
+To set up: upload the whole folder as usual (nbh-ui.js, DM-1, IC-1 and RR-1 changed).
+Tested: `qa/fx2-test.js` (new: WebKit, Safari's engine, with a touch screen at an iPad's width, and Chromium at a
+laptop's), the saved fields and printouts of the three forms against v24.91, and the forms' own tests, the touch-screen
+layout, the field names and accessibility.
+
 ### v24.91: Examples beside their own boxes on an iPad (the BCBA's TD-1 screenshots, 10/28)
 
 - **A row with several boxes.** On an iPad a long example moves out of its box. Where a row holds several boxes, each
