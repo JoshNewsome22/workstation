@@ -9905,6 +9905,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.87: Behavioral Interventions 2026 issue 4 (parts 1 and 2) in both banks
+(the BCBA's Issue 4 folders, 10/28)
+
+- **BI 2026 issue 4** (25 files in two parts, 14 read in full): 22 cards and 12 objectives.
+  - The cards: step-by-step dental exam practice with breaks honored; a break request during health routines;
+    perceptual-motor sessions to lower motor stereotypy; break-card FCT without extinction and uneven rewards that
+    favor finishing work; small-group direct instruction in science; an app prompt and 10-minute limit for social
+    media; relaxation and preferred activities during graduated exposure to eating sounds; biofeedback for a
+    tongue-press swallowing exercise; choosing a learner's best prompt type, most-to-least and least-to-most prompting
+    (the 3-s wait did not work in the study, and the card says so), and forward chaining of job tasks; a timed meal goal
+    with tokens (the meal is always served); finding the preferred way to ask within FCT and teaching three ways to
+    ask; stimulus pairing and operant discrimination to make a new leisure item a reinforcer; behavioral skills
+    training for a suspected opioid overdose (naloxone follows district policy and the school nurse); base-ten block
+    subtraction with regrouping (one step that stops an error by hand is marked RESTRICTIVE); position words taught
+    with three-dimensional matrix training.
+  - The objectives: a dental exam, motor activities, choosing work over a break, "it's too loud", a science unit,
+    staying calm while others eat, a tongue-press exercise, a short job task, a meal within a target time, the
+    overdose response (at 100%), three-digit subtraction with regrouping, and full-sentence answers to "where" questions.
+  - Left out: one adult's trials that played a recorded sound to set up escape (near the never-use rule on noise),
+    the teacher-training part of the science study, a severity tool, a survey, three reviews, a curriculum-outcome
+    study, the Dravet syndrome primer, staff and caregiver training, a writing guide and the issue information.
+
+TD-1: 975 protocols; GB-1: 377 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.86: Behavioral Interventions 2026 issue 2 in both banks
 (the BCBA's Issue 2 folder, 10/28)
 
