@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.88: text at its own size on the iPad, "he or she" as one name in TD-1, "et al."
+(the BCBA's iPad screenshots of TD-1, 10/28)
+
+- **Text size on the iPad.** iPad Safari's text autosizing was enlarging the text in wide boxes (a Build card's
+  settings, Data collected, the task analysis, Setup's rows) to about one and a half times the rest of the page, so a
+  filled box showed only its first words. Every form and the workstation page now keep their own text size on screen.
+  This is Safari-only, so it is checked on the iPad: filled boxes should read at the same size as the rest of the card.
+- **"Jordan or Jordan".** In steps written for the student, a study's "he or she" (or "him or her", "his or her",
+  "he/she", "s/he") now becomes one name or pronoun: "what Jordan wants" (for a student named Jordan), "what he wants", "what they want". All 975
+  bank protocols were checked in every way of referring to the student.
+- **"et al."** Three headings on TD-1's Reinforcers and schedules sheet read "DeLeon Et Al."; now "et al.".
+
+Not changed: what any form saves or prints, the banks.
+To set up: upload the whole folder as usual (every form's screen polish, the workstation page and TD-1 changed).
+Tested: `qa/fix188-test.js` (new), `qa/td112-test.js`, `qa/ux141-test.js`, `qa/td1-bank-test.js`, `qa/td130-test.js`.
+
 ### v24.87: Behavioral Interventions 2026 issue 4 (parts 1 and 2) in both banks
 (the BCBA's Issue 4 folders, 10/28)
 

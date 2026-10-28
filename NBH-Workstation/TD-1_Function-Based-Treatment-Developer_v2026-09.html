@@ -1393,17 +1393,17 @@ td input,td select{max-width:100%}
   <div class="bar nbh-band">Reinforcer Selection and Schedules of Reinforcement</div>
   <p class="method" style="margin:0 0 8px">Two selectors. The first chooses the reinforcer and the preference-assessment method from the flowchart and recommendations of DeLeon, Graff, Frank-Crawford, Rooker, and Bullock (2014). The second chooses the schedule from the goal of the arrangement, using the schedule definitions of Catania (2007, as adapted in DeLeon, Bullock, &amp; Catania, 2013). Recommendations can be sent to the build sheet as cards.</p>
 
-  <h3 class="sub" style="margin-top:0">A. Reinforcer Selection (DeLeon Et Al., 2014, Fig. 11.3)</h3>
+  <h3 class="sub" style="margin-top:0">A. Reinforcer Selection (DeLeon et al., 2014, Fig. 11.3)</h3>
   <div id="rfModel"></div>
   <div id="rfRec"></div>
 
-  <h3 class="sub">B. Preference-Assessment Method (DeLeon Et Al., 2014, Recommendations 1–9)</h3>
+  <h3 class="sub">B. Preference-Assessment Method (DeLeon et al., 2014, Recommendations 1–9)</h3>
   <div id="paModel"></div>
   <div id="paRec"></div>
   <!-- v24.42 (review E-24) -->
   <p class="noprint" style="margin:4px 0 10px;font-size:13px"><a class="ra-quick" href="PA-1_Preference-Assessment-Protocol_v2026-09.html#quick-mswo" target="_blank" rel="noopener">Run a brief MSWO now (Form PA-1, three sessions)</a> <span style="color:var(--ink-soft,#54676f)">when the selector asks for a current preference check; the result goes to PA-1&rsquo;s Monitoring log</span></p>
 
-  <h3 class="sub">C. Reinforcement Parameters to Set (DeLeon Et Al., 2014)</h3>
+  <h3 class="sub">C. Reinforcement Parameters to Set (DeLeon et al., 2014)</h3>
   <div class="chkrow" style="display:block">
     <label><input type="checkbox" name="rp.delay"> Delay: reinforcer follows the response immediately during acquisition; delays weaken effects and discount value (Neef et al., 1993; Fisher et al., 2000)</label>
     <label><input type="checkbox" name="rp.rate"> Rate: the alternative response earns reinforcement more often than the problem behavior does (Herrnstein, 1961; Mace et al., 1994)</label>
@@ -6355,7 +6355,10 @@ function word(text,force){const m=force||mode();if(!text||!m)return text;const n
   if(m==='name'){if(!n)return text;T={s:n,o:n,p:n+'\u2019s',pp:n+'\u2019s',r:n,name:true};}
   else if(m==='student')T={s:'the student',o:'the student',p:'the student\u2019s',pp:'the student\u2019s',r:'the student'};
   else T=P[m];if(!T)return text;
-  let out=String(text).replace(/\b(the girl|the boy|girl\u2019s|girl's|boy\u2019s|boy's)\b/gi,(w)=>{const low=w.toLowerCase();return cap(/'s|\u2019s/.test(low)?T.p:(T.name?T.s:'the student'),w);});
+  /* v24.88 a pair (he or she, him or her, his or her, s/he...) is one pronoun before the swap, or it read "Jordan or Jordan" */
+  let out=String(text).replace(/\b(?:he or she|she or he|he\/she|she\/he|s\/he)\b/gi,w=>cap('he',w)).replace(/\b(?:him or her|her or him|him\/her|her\/him)\b/gi,w=>cap('him',w))
+    .replace(/\b(?:his or her|her or his|his\/her|her\/his)\b/gi,w=>cap('his',w)).replace(/\b(?:himself or herself|herself or himself|himself\/herself|herself\/himself)\b/gi,w=>cap('himself',w));
+  out=out.replace(/\b(the girl|the boy|girl\u2019s|girl's|boy\u2019s|boy's)\b/gi,(w)=>{const low=w.toLowerCase();return cap(/'s|\u2019s/.test(low)?T.p:(T.name?T.s:'the student'),w);});
   let lastEnd=-1;
   out=out.replace(/\b(she|he|her|him|his|hers|herself|himself)\b(?=([^\w\u2019']*)([\w\u2019']*))/gi,(w,_1,gap,next,off,str)=>{const low=w.toLowerCase();let r;
     const adjacent=!!T.name&&lastEnd>=0&&str.slice(lastEnd,off).trim()==='';
@@ -6605,6 +6608,9 @@ a{text-underline-offset:2px}
    sheet); a print of one thing (a form's "-only" or "-printing" mode, a paper sheet, a blank week) carries no tag either */
 @media print{.nbh-sim-banner,.nbh-sim-new{display:none!important}.nbh-sim-tag{float:right;padding:1px 6px;border:1px solid #9a5b00;border-radius:8px;font:600 8.5pt/1.3 sans-serif;color:#8a4b00}
   [class*="-only"] .nbh-sim-tag,[class*="-printing"] .nbh-sim-tag,html.abc-paper .nbh-sim-tag,body.dd-blank-on .nbh-sim-tag{display:none!important}}
+/* v24.88 iPad Safari's text autosizing enlarged the text in wide boxes (a filled field showed its first words at about one and a half
+   times the page's size): the page keeps its own text size on screen; ABC-1's paper sheet sets its own size for printing (v24.07) */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
