@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.90: Dates that come due (the 10/28 comparison with Jotable)
+(decisions of 10/28: the FBA window 60 days with extensions for good reason, removal days at 7 and 10, full names in the
+calendar)
+
+- **The FBA's completion date.** From signed consent (Form IC-1) until Form FS-1 has the function, Today and What's due
+  carry "FBA completion ... due 11/17 (in 20 days)": 60 calendar days from consent to start (before this release it showed
+  only in the last 15 days). Past the date it is Overdue, in red. The number of days is a setting on this device, under
+  Caseload, Backups, Google Drive and settings: any number from 1 to 365, in calendar days or school days (counted as
+  weekdays; the holidays are not known here). A student's card on What's due follows the setting from that student's
+  next Save case.
+- **An FBA that takes longer, for good reason.** Form IC-1's Consent record sheet has "FBA completion extended to", a
+  date, with "Reason for the extension". With its reason, the new date is the one in force: "FBA completion: extended
+  from 10/18 (the parent agreed in writing), due 11/9", never Overdue against the first date. Without a reason the
+  extension does not count: the item says so, and IC-1's Consent status names the missing reason.
+- **Removal days (Form RR-1).** Named from 7 counted days in the school year (To look at); from 10, under Needs you now
+  with a red Removals tag. The wording is unchanged (34 CFR 300.530, 300.536).
+- **Form TD-1's dates by name.** "BIP review" (Final plan, Next review date), and a date written in Setup's Review line
+  ("... or by 11/27/2026") as "Plan review (Setup)" when it is another date.
+- **Add to Calendar.** Under What's due on the start screen: a calendar file (Whats-due_<date>.ics) of the dated rows,
+  one all-day event a student and a date, the student's full name (also with Initials only on), reminders a week and a
+  day before. Made again later, the same events update rather than repeat. On an iPad the file goes to the share sheet:
+  save it to Files and open it there to add the dates to Calendar. A date over a year past is left out.
+
+Not changed: what each form saves, apart from the two new IC-1 boxes (r.fbaext and r.fbaextwhy); how What's due groups
+and counts its rows. IC-1's Consent record sheet prints the two new lines (IC-1's worked example prints 11 pages, was 10).
+To set up: upload the whole folder as usual (the workstation, IC-1 and TD-1 changed).
+Tested: `qa/due190-test.js` (new), `qa/v2178-shell-test.js` (updated: the FBA item's new wording), and the tests of the
+workstation's Today, What's due, caseload, IC-1 and TD-1.
+
 ### v24.89: TD-1's new screen layout (the 10/28 design review)
 (GOV.UK, NN/g, NHS, the U.S. Web Design System, W3C and Apple's iPad guidance; approved 10/28)
 

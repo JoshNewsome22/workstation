@@ -6624,6 +6624,16 @@ paint();
     if(added){try{renderMon();}catch(e){}try{nbhUI.toast(added+' supervision observation'+(added===1?'':'s')+' from Form RS-1 entered in the integrity log: steps correct of the items observed.',{kind:'ok'});}catch(e){}}
   }catch(e){}return r;};})();
 </script>
+<script id="td-v2490">
+/* v24.90 the dates TD-1 sends to What's due: the BIP review (Final plan, Next review date), and a date written in
+   Setup's Review line ("... or by 11/27/2026") when it is another date */
+window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';},L=[];
+  const r=g('ad.review');if(/^\d{4}-\d{2}-\d{2}$/.test(r))L.push({what:'BIP review',date:r});
+  const m=/\b(?:by|on|before)\s+(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b|\b(?:by|on|before)\s+(\d{4})-(\d{2})-(\d{2})\b/i.exec(g('m.review'));
+  if(m){let y=+(m[3]||m[4]);if(y<100)y+=2000;const mo=+(m[1]||m[5]),d=+(m[2]||m[6]);
+    if(mo>=1&&mo<=12&&d>=1&&d<=31){const iso=y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0');if(iso!==r)L.push({what:'Plan review (Setup)',date:iso});}}
+  return L;};
+</script>
 <script id="td-v2489-js">
 /* v24.89 TD-1 on screen: the layout from the 10/28 design review. It arranges what the sheets already hold; every field
    keeps its name and value, so the saved file is unchanged, and what it adds for the screen is marked noprint. What

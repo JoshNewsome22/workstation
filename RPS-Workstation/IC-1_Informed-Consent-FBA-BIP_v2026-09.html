@@ -1359,6 +1359,8 @@ ul.ic-conf li{margin:2px 0}
   <div class="ic-close">
   <div class="defs" style="margin-top:10px">
     <div class="drow"><div class="dlab">Consent expires or is reviewed at</div><div class="dval"><div class="chkrow" style="margin:2px 6px"><label><input name="r.review" type="date" class="inline" aria-label="Consent expires or is reviewed at (date)"></label><label><input name="r.reviewnote" class="inline" style="min-width:260px" placeholder="e.g., next reevaluation; end of assessment; annual IEP"></label></div></div></div>
+    <!-- v24.90 an FBA can take longer than its window for good reason: the new date counts with its reason -->
+    <div class="drow"><div class="dlab">FBA completion extended to</div><div class="dval"><div class="chkrow" style="margin:2px 6px"><label><input name="r.fbaext" type="date" class="inline" aria-label="FBA completion extended to (date)"></label></div><div style="margin:6px 6px 2px"><label for="rFbaWhy" style="display:block;font-size:13px;color:#46606b">Reason for the extension (needed for it to count)</label><textarea id="rFbaWhy" name="r.fbaextwhy" class="nbh-line" rows="1" placeholder="e.g., the parent agreed in writing; the student was absent; the student moved schools; an added assessment"></textarea></div></div></div>
     <div class="drow"><div class="dlab">Copy of signed form given to parent</div><div class="dval"><div class="chkrow" style="margin:2px 6px"><label><input type="checkbox" name="r.copy"> Yes</label><label>Date <input name="r.copydate" type="date" class="inline"></label><label>How <input name="r.copyhow" class="inline" style="min-width:160px" placeholder="handed at meeting / sent home / email"></label></div></div></div>
     <div class="drow"><div class="dlab">Notes</div><div class="dval"><textarea name="r.notes"></textarea></div></div>
   </div>
@@ -1551,6 +1553,7 @@ function status(){icLegacy();const m=val('c.method'),stv=val('c.status'),sd=val(
   {const li=icLangIssue();if(li)issues.push(li);}
   if(!val('s.st.name'))issues.push('Enter the staff member who obtained consent.');}
  if(m||stv)whoIssues(m,date).forEach(i=>issues.push(i));
+ /* v24.90 */ if(val('r.fbaext')&&!val('r.fbaextwhy'))issues.push('The FBA completion is extended to '+fmt(val('r.fbaext'))+' with no reason (Consent record sheet): the extension counts once its reason is written.');
  const decs=DECS.map(([k,l])=>({l,v:val(k+'.dec')}));const decided=decs.filter(d=>d.v).length;
  const current=state==='Current'||state==='Current, with exceptions';
  const covered=current?procs.filter(p=>(p!=='fa'||val('fa.dec')==='yes')&&(p!=='wait'||val('wt.dec')==='yes')):[];
@@ -3016,6 +3019,7 @@ window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById
     if(d&&d.value&&e&&/^Consent to implement the BIP/.test(e.value)&&d.value>bip)bip=d.value;});
   return {consent:{src:'IC-1',state:st.state,on,method:m,status:stv,pwn:g('c.pwn'),kind:m==='reeval'?'reeval':m==='initial'?'initial':'',
     obtained:on?(dist?(g('c.ddate')||c):(c||p)):'',ended,date:on?c:'',parent:on?p:'',
+    fbaExt:on&&g('r.fbaext')?{date:g('r.fbaext'),why:g('r.fbaextwhy')}:undefined,   /* v24.90 */
     exceptions:st.dec==='except'?g('c.except'):'',procs:st.procs.slice(),covered:st.covered.slice(),dec:D,bip:on?bip:'',records:g('c.records'),v:3}};   /* v23.48 v3: waiting practice (wait) is its own item */   /* v23.29 (RR-1 review I14) the records already held, for RR-1's inventory */}catch(e){return null;}};
 /* v21.78 in: the behaviors of concern from Form TB-1 (each label with its definition, one to a line) when the field is
    empty; then the shared fill this form relied on before. Wrapped, so a hook set earlier keeps working. */
