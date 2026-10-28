@@ -37,7 +37,7 @@ const F=L.forms().find(x=>x.id==='TD-1');
     const lib=c=>window.__tdLibOf(c),groups=window.__tdGroups().flatMap(g=>g[1]);
     const bad=B.protocols.filter(x=>!(lib(x.code)&&groups.includes(x.code)&&x.lab&&x.beh&&x.result&&x.steps&&x.steps.length>=2&&x.steps.every(s=>s&&s.trim())&&x.src&&x.src.length&&x.src.every(k=>REF[k]&&/\(\d{4}[a-z]?\)/.test(REF[k].apa)))).map(x=>x.id);
     const labs=B.protocols.filter(x=>lib(x.code)&&Object.keys(x.params||{}).some(k=>!lib(x.code).params.some(q=>q[0]===k))).map(x=>x.id);
-    const never=B.protocols.filter(x=>x.steps.concat([x.lab]).some(s=>/\b(shock|aversive|ammonia|lemon juice|water mist|seclu|spank|slap)/i.test(s))).map(x=>x.id);
+    const never=B.protocols.filter(x=>x.steps.concat([x.lab]).some(s=>/\b(shock|(?<!non-)aversive|ammonia|lemon juice|water mist|seclu|spank|slap)/i.test(s)   /* v24.78: "non-aversive" is not a procedure */)).map(x=>x.id);
     const cites=Object.values(REF).map(r=>r.cite),dup=cites.filter((c,i)=>cites.indexOf(c)!==i);
     const add=document.getElementById('addCompBtn'),wrap=document.getElementById('compWrap');
     return {between:!!(add.compareDocumentPosition(h)&Node.DOCUMENT_POSITION_FOLLOWING)&&!!(h.compareDocumentPosition(wrap)&Node.DOCUMENT_POSITION_FOLLOWING),

@@ -9905,6 +9905,40 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.78: Your inclusion rule (10/28) in the banks, Behavior Analysis in Practice 2020 part 1, and two journal names corrected
+(the BCBA, 10/28: "don't exclude a protocol unless it's absolutely something I wouldn't work on"; restrictive procedures
+that were part of a study go into the steps; earlier volumes are being re-read under the new rule over the coming releases)
+
+- **The new rule.** TD-1 cards and GB-1 objectives now come from every population (adults, college students,
+  typically developing learners, residential and forensic settings), from academic, fluency, sport, fitness and
+  leisure studies, and from tutorials that describe a procedure step by step. An article gives a card for each
+  distinct procedure. Each note says who was studied, what to adapt for a K–12 student, and whether a procedure was
+  tested or only described.
+- **Restrictive procedures** (time-out, response cost, overcorrection, reprimands, contingent effort, response
+  blocking, loss of privileges) that were part of a study go into its steps, each marked "RESTRICTIVE:", and the
+  note says district review and consent come first. Shock, aversive stimulation, restraint as a consequence,
+  seclusion and deprivation stay out.
+- **10 cards held back earlier are now in TD-1:**
+  - the time-out ribbon, with its time-out steps marked RESTRICTIVE, and its reinforcement-only phase;
+  - three cards from adults in a 1978 institution;
+  - the peer-tutoring math card (described in a tutorial, not tested);
+  - four reactive-strategy and competing-stimulus cards that overlap TD-1's own cards.
+  Consequence-protocol, overcorrection and competing-stimulus cards can now come from the bank; one older
+  consequence card joins them.
+- **BAP 2020 part 1** (25 articles screened, 9 read in full): 13 cards and 5 objectives.
+  - The cards: picture naming in small or larger sets with a prompt delay; Fit Lite timed reading practice
+    with points; requests taught in play with fading prompts; speech-sound prompts with timed practice and a
+    warm-up; timed term practice, charting and flash cards (college students); a fluency word bank (two
+    adolescents in a secure residential program, with team- and family-approved content); tap dance with
+    personal-best goals; learning letter names by saying or by writing; a step-count goal with self-monitoring.
+  - The objectives: blending sounds, defining terms, naming, tap dance, symbol names.
+- **Two journal names corrected** in the references: "Behavioural" and "Residental" Residential Treatment now read
+  Behavioral Residential Treatment, as the journal was named in 1986–1993.
+
+TD-1: 502 protocols; GB-1: 240 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.77: Behavior Analysis in Practice, part 5 (volume 13, published online in 2019) read into the TD-1 and GB-1 banks
 (the BCBA's Part 5 zip of 10/28; 13 articles screened by title, 4 read in full)
 
