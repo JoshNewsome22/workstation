@@ -61,7 +61,7 @@ const tabs=()=>{const seg=document.querySelector('#viewSeg');if(!seg)return {n:0
     return {hints:document.querySelectorAll('.nbh-hint,.nbh-eg').length,segs:document.querySelectorAll('.nbh-seg').length,srcs:document.querySelectorAll('select.nbh-seg-src').length,grown:document.querySelectorAll('textarea[data-nbh-mh]').length,
       ph:[...document.querySelectorAll('[data-nbh-ph]')].length,selW:cs?parseFloat(cs.width):0,selPos:cs?cs.position:'',selDisp:cs?cs.display:''};},segName);
   await p.emulateMedia({media:'screen'});await sleep(400);
-  const back=await p.evaluate(()=>({segs:document.querySelectorAll('.nbh-seg').length,hints:document.querySelectorAll('.nbh-hint,.nbh-eg').length}));
+  const back=await p.evaluate(()=>({segs:document.querySelectorAll('.nbh-seg').length,hints:document.querySelectorAll('.nbh-hint,.nbh-eg,.td9-hint').length}));   /* v24.91 TD-1 shows its own examples (v24.89) */
   ok('4 on paper nothing of this shows: the hints, the buttons, the shortened placeholders and the grown boxes are given back ('+grown+' boxes, the dropdown '+segName+' printed as before); the screen gets them again after',
     !!segName&&P.hints===0&&P.segs===0&&P.srcs===0&&P.grown===0&&P.ph===0&&P.selW>20&&P.selPos!=='absolute'&&P.selDisp!=='none'&&back.segs>0&&back.hints>0,{P,back});
   await ctx.close();

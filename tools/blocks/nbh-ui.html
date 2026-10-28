@@ -1493,6 +1493,10 @@ try { (function(){
     while (n && !out) { out = nbhOwnText(n); n = n.previousSibling; }
     if (out) return out;
     var p = el.parentElement;
+    /* v24.91 a control standing in a row's value cell is named by the row, not by the labels of the boxes beside it */
+    if (p && p.classList && p.classList.contains('dval')) { var dr = p.closest('.drow'), dl = dr && dr.querySelector(':scope > .dlab');
+      if (dl) { var dc = dl.cloneNode(true); Array.prototype.forEach.call(dc.querySelectorAll('.nbh-hint,.hint,input,select,textarea,button'), function(x){ x.remove(); });
+        out = nbhClean(dc.textContent); if (out) return out; } }
     if (p && !(p.matches && p.matches('tr,table,tbody,thead'))) { out = nbhOwnText(p); if (out) return out; }
     /* These forms wrap the control in a plain .row and put its caption on a
        sibling of that wrapper, so the label is an uncle rather than a sibling.
@@ -1644,6 +1648,9 @@ try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function
   function hint(el, text, inline){
     var h = D.createElement(inline ? 'span' : 'div'); h.className = 'nbh-hint noprint' + (inline ? ' nbh-eg' : ''); h.textContent = text; h.setAttribute('aria-hidden', 'true');
     var row = el.closest('.drow'), lab = row && row.querySelector(':scope > .dlab');
+    /* v24.91 a box with its own label in a row of several: its example under it, not under the row's name */
+    var own = row && el.parentNode && el.parentNode.tagName === 'LABEL' && txt(el.parentNode) ? el.parentNode : null;
+    if (!inline && own) { h.style.display = 'block'; h.style.fontSize = '13px'; h.style.whiteSpace = 'normal'; h.style.margin = '2px 0 8px ' + (getComputedStyle(own).marginLeft || '0'); own.parentNode.insertBefore(h, own.nextSibling); return h; }
     if (!inline && lab && row.contains(el) && !lab.contains(el)) { lab.appendChild(h); return h; }
     el.parentNode.insertBefore(h, el.nextSibling); return h;
   }
@@ -1667,7 +1674,7 @@ try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function
     if (width(ph, el) <= w) return;
     var inRow = !!el.closest('.drow'), inLabel = el.parentNode && el.parentNode.tagName === 'LABEL';
     if (!el.hasAttribute('data-nbh-ph')) el.setAttribute('data-nbh-ph', ph);
-    if (inRow || w >= 140 || inLabel) { el.setAttribute('placeholder', shorten(ph, el, w)); hint(el, ph, inLabel && !inRow); }
+    if (inRow || w >= 140 || inLabel) { el.setAttribute('placeholder', inRow && inLabel && txt(el.parentNode) ? '' : shorten(ph, el, w)); hint(el, ph, inLabel && !inRow); }   /* v24.91 the example under a labelled box in a row: once, not also cut short inside it */
     else { el.setAttribute('placeholder', shorten(ph, el, w)); if (!el.title) { el.setAttribute('data-nbh-ti', '1'); el.title = ph; } }
   }
   /* 5: a box another form fills */

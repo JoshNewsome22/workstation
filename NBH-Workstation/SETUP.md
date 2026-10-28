@@ -9905,6 +9905,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.91: Examples beside their own boxes on an iPad (the BCBA's TD-1 screenshots, 10/28)
+
+- **A row with several boxes.** On an iPad a long example moves out of its box. Where a row holds several boxes, each
+  with its own label (TD-1 Setup's "Replacement behavior already in repertoire?": a list, then "Replacement behavior
+  (defined)" and "Present level"), every example went under the row's name, stacked above the first box, while the
+  boxes kept a cut-short copy. Now each example sits under its own box, once. On every form.
+- **The list in such a row is named by the row.** A screen reader read TD-1's list as "Replacement behavior (defined)
+  Present level", the labels of the boxes beside it; it now reads "Replacement behavior already in repertoire?". The
+  same for TD-1's Component FA and Function type rows, and Form RA-1's halves row.
+- **TD-1's Baseline level row.** Its four parts are spaced apart at the form's text size, and "% intervals (if used)"
+  reads "Intervals with the behavior, % (if used)", so Session length's "e.g. 10" no longer reads as "10%".
+
+Not changed: what any form saves or prints (before printing, every box gets its example back, as before).
+To set up: upload the whole folder as usual (nbh-ui.js and TD-1 changed).
+Tested: `qa/ui191-test.js` (new: WebKit, Safari's engine, at the iPad's width; all 47 forms scanned), and the tests of
+the touch-screen layout, the field names and accessibility.
+
 ### v24.90: Dates that come due (the 10/28 comparison with Jotable)
 (decisions of 10/28: the FBA window 60 days with extensions for good reason, removal days at 7 and 10, full names in the
 calendar)
