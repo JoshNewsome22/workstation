@@ -9905,6 +9905,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.81: Behavior Analysis in Practice 2020 part 3 read into the TD-1 and GB-1 banks
+(the BCBA's Part 3 folder, 10/28; 15 files, 9 articles read in full)
+
+- **10 cards:**
+  - Cooking taught by whole-task video modeling, and by video prompting one step at a time (adolescents and young
+    adults with autism; supervision for stove, knife and microwave steps).
+  - Nonremoval of the cup to increase water drinking. It is escape extinction: the note asks for TD-1's
+    escape-extinction consent block and planning with the family, the doctor and the school nurse; staying at the
+    table is marked RESTRICTIVE.
+  - Peer tutoring with flash cards for new picture names.
+  - A structured meal of five small bites with praise and a toy, without escape extinction.
+  - Longer requests shaped from one word to four or more.
+  - Direct Instruction language lessons answered on a speech-generating device.
+  - Two ways to raise speech sounds in very young children: echo each sound back, or sing-song praise.
+  - Intraverbal webbing for answering about categories and features.
+- **4 objectives:** run a flash-card practice as a peer tutor; make speech sounds more often in face-to-face play;
+  answer category and feature questions through webbing; answer language-lesson questions on a speech-generating
+  device. Eight existing objectives gain a source.
+- **Left out:** a supervision review, an equity commentary, conference tips, a survey, and two correction notices
+  (the Jeglum et al. correction is a figure only; its card is unchanged). The arousal-suppression study with detained
+  adolescents is listed as skipped: it tested only arousal to lawful adult videos.
+
+TD-1: 659 protocols; GB-1: 296 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.80: Your 15 added BAP 2020 part 2 articles, the second re-read (Behavioral Residential Treatment and Behavioral Interventions), and seven drafts back under your inclusion rule
 (the BCBA, 10/28: the updated part 2 folder, and "re-read all of them"; this is wave 2 of the re-read, the BI journal
 1986–1994; the JABA wave follows)
