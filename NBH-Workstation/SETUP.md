@@ -9905,6 +9905,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.83: Behavior Analysis in Practice 2020 part 4, and the restrictive steps put back into their cards under your rule
+(the BCBA's Part 4 folder, 10/28; and the restrictive-steps pass promised with the 10/28 rule)
+
+- **BAP 2020 part 4** (18 files, 8 read in full): 26 cards and 9 objectives.
+  - The cards: self-checking digital lessons in Google Slides and adult-led drag-and-drop lessons; a brief group ACT
+    session; K-schedule (percentile) shaping in timed fluency practice; mindfulness routines (a S.T.O.P. check-in,
+    surfing the urge); a calm school drop-off routine for separation protest; 18 ACT routines from a practice
+    tutorial (defusion, perspective taking, present moment, values, acceptance, the ACT matrix, an action plan); and
+    a mindful action plan for older students. All are described in tutorials rather than tested, and each note says so.
+  - The objectives: complete a self-checking tablet lesson, sort or match by dragging, stop and breathe, ride out an
+    urge, a calm drop-off, name where a feeling is in the body, name one's roles, use an ACT matrix, follow an action plan.
+  - Left out: reviews, a survey, commentaries, ethics and systems papers, and a correction notice.
+- **The restrictive-steps pass.** Restrictive parts of studies set aside in earlier reviews were read again against
+  your rule. 33 of 84 are now steps on their cards (response cost, reprimands, loss of privileges, contingent effort,
+  brief response interruption, positive practice with guidance the student can pull away from, and time-out in an
+  area the student is never locked, latched or held in); 51 stay out (holds of any kind, mechanical devices, locked
+  or held-door rooms, tastes, sprays and noise, electric stimulation, negative practice). Seven time-outs that the
+  JABA re-read had left out are now steps too (the articles never said the door was locked or held), and one new
+  card is written (a desk-light delayed time-out, Ramp et al., 1971). Physical escorts are written as a spoken
+  direction and light guidance the student can pull away from; long time-outs run only to a maximum the BCBA sets.
+  91 cards now carry RESTRICTIVE steps.
+
+TD-1: 870 protocols; GB-1: 345 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.82: The JABA re-read (1968–1978) under your inclusion rule: 184 cards and 40 objectives
 (the BCBA, 10/28: "re-read all of them"; wave 3 of the re-read, 155 Journal of Applied Behavior Analysis articles from
 1968–1978 that were skipped or not cited before; the BAP, AVB and BI waves shipped in v24.79 and v24.80)
