@@ -954,6 +954,13 @@ body:not(.has-form) #printOne,body:not(.has-form) #popOut,body:not(.has-form) #c
 
 /* ---- fullscreen: the form, the bar above it, and nothing else ---- */
 body.ws-full header.top,body.ws-full .bar,body.ws-full nav.rail,body.ws-full .rail-scrim,body.ws-full #railToggle{display:none!important}
+/* v24.93 Forms in Fullscreen: the list slides in over the page; Fullscreen stays */
+#fsForms{display:none}
+body.ws-full.has-form #fsForms{display:inline-flex}
+body.ws-full.fs-forms #fsForms{background:var(--navy);color:#fff;border-color:var(--navy)}
+body.ws-full.fs-forms nav.rail{display:flex!important;position:fixed!important;top:0;bottom:0;left:0;z-index:300;width:min(340px,88vw)!important;flex:none!important;
+  transform:none!important;translate:none!important;visibility:visible!important;box-shadow:0 12px 40px rgba(24,46,67,.32)}
+body.ws-full.fs-forms .rail-scrim{display:block!important;position:fixed!important;inset:0;z-index:290;background:rgba(24,46,67,.28)}
 body.ws-full .crumb .fs-logo{display:block}
 body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
 /* v23.87 (the BCBA's iPad review) on a touch screen the bars above the form fold away while the form is scrolled down to be
@@ -1741,6 +1748,7 @@ body:not(.has-form) #focusBtn{display:none}
         <button id="pinBars" class="sm" aria-pressed="false" aria-label="Keep the bars in place while scrolling" title="Keep the bars in place while you scroll (when off, they fold away while you read a form and come back when you scroll up)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1.5h4M7 1.5v4.2L4.5 8.5h7L9 5.7V1.5M8 8.5v6"/></svg><span class="lbl">Pin bars</span></button>
         <button id="focusBtn" class="sm" aria-pressed="false" aria-label="Focus: one part of the form at a time" title="Focus: one part of the form at a time, the next part opening as you finish one"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2.5h10M3 13.5h10"/><rect x="1.5" y="5" width="13" height="6" rx="1.5"/></svg><span class="lbl">Focus</span></button>
         <button id="splitBtn" class="sm" aria-pressed="false" aria-label="Side by side: two or three forms at once" title="Side by side: show two or three open forms at once"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="5.5" height="11" rx="1"/><rect x="9" y="2.5" width="5.5" height="11" rx="1"/></svg><span class="lbl">Side by side</span></button>
+        <button id="fsForms" class="sm" aria-expanded="false" aria-controls="railNav" aria-label="Forms: the list of forms, over the page" title="The list of forms, over the page: Fullscreen stays"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg><span class="lbl">Forms</span></button>
         <button id="fullBtn" class="sm" aria-pressed="false" aria-label="Fullscreen: only the form" title="Fullscreen: only the form (Ctrl+Shift+F)"><svg class="i-on" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg><svg class="i-off" viewBox="0 0 16 16" aria-hidden="true" hidden fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5 14 2M6.5 9.5 2 14"/></svg><span class="lbl">Fullscreen</span></button>
         <button id="fillBtn" class="sm" aria-pressed="false" aria-label="Fill the whole screen" title="Use the whole screen: the browser's own bars go too"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5"/><path d="M5.5 14h5M8 11.5V14"/></svg><span class="lbl">Fill screen</span></button>
         <button id="closeForm" class="sm" aria-label="Close this form" title="Close this form"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg><span class="lbl">Close</span></button>
@@ -2020,7 +2028,7 @@ $('#railToggle').addEventListener('click',()=>{
   if(NARROW.matches)setRail(!document.body.classList.contains('rail-open'),true);
   else setRailHidden(false,true);
 });
-$('#railHide').addEventListener('click',()=>{ if(NARROW.matches)setRail(false,true); else setRailHidden(true,true); });
+$('#railHide').addEventListener('click',()=>{ if(fsFormsOn()){fsForms(false,true);return;} if(NARROW.matches)setRail(false,true); else setRailHidden(true,true); });
 $('#railFind').addEventListener('click',()=>palOpen());
 /* v21.78 the list by touch: a swipe to the left on it puts it away; the tab on the left edge (a tap, or a swipe to the right
    on it) brings it back */
@@ -2040,6 +2048,16 @@ if(!NARROW.matches)$('#railToggle').setAttribute('aria-expanded',String(!railHid
    The heading, the packet bar and the list go; the form takes the window. Escape
    brings them back, from the form as well as from this page, and so does the button. */
 function fullOn(){return document.body.classList.contains('ws-full');}
+/* v24.93 Forms in Fullscreen: the list over the page, Fullscreen kept; a form chosen, a tap beside it, Forms again or
+   Escape puts it away */
+function fsFormsOn(){return document.body.classList.contains('fs-forms');}
+function fsForms(on,focus){
+  on=!!on&&fullOn();
+  document.body.classList.toggle('fs-forms',on);
+  $('#railScrim').hidden=!on&&!document.body.classList.contains('rail-open');
+  $('#fsForms').setAttribute('aria-expanded',String(on));
+  if(focus){ try{ (on?railButton():$('#fsForms')).focus({preventScroll:true}); }catch(e){} }
+}
 /* v21.44 (A8): fullscreen is remembered on this device, the way the hidden form list is (RAILKEY): after a reload, a tab
    the iPad closed and opened again, or the next visit, the next form to open (Restore included) comes back in
    fullscreen, until Exit or Escape. Only the person's own choice is kept (auto: a form closed with nothing left to
@@ -2062,10 +2080,11 @@ function setFull(on,auto){
   b.title=on?'Leave fullscreen (Esc)':'Fullscreen: only the form (Ctrl+Shift+F)';
   $('#fillBtn').classList.toggle('avail',on&&!!document.fullscreenEnabled);
   if(!on&&document.fullscreenElement){try{document.exitFullscreen();}catch(e){}}
-  if(on)setRail(false);
+  if(on)setRail(false); else fsForms(false);
   say(on?'Fullscreen: only the form is showing. Press Escape to bring the rest back.':'Left fullscreen');
 }
 $('#fullBtn').addEventListener('click',()=>setFull(!fullOn()));
+$('#fsForms').addEventListener('click',()=>fsForms(!fsFormsOn(),true));
 /* the browser's own fullscreen on top of ours, where the browser allows it */
 $('#fillBtn').addEventListener('click',()=>{
   try{ const p=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
@@ -2098,7 +2117,7 @@ $('#barToggle').addEventListener('click',()=>{
   $('#barToggle').setAttribute('aria-expanded',String(on));
   if(on)setTimeout(()=>{try{$('#pClient').focus({preventScroll:true});}catch(e){}},50);
 });
-$('#railScrim').addEventListener('click',()=>setRail(false,true));
+$('#railScrim').addEventListener('click',()=>{ if(fsFormsOn()){fsForms(false,true);return;} setRail(false,true); });
 const onNarrow=()=>{
   if(!NARROW.matches){ setRail(false); $('#railToggle').setAttribute('aria-expanded',String(!railHidden())); }
   else if(state.cur) setRail(false); else railAtStart();
@@ -2232,6 +2251,7 @@ async function warmForm(id){
 }
 function openForm(id,keepRail){
   const rec=ALL.find(f=>f[0]===id); if(!rec)return;
+  if(fsFormsOn())fsForms(false);   /* v24.93 a form chosen from the list over a Fullscreen page */
   const prevCur=state.cur;   /* v21.32 side by side */
   state.cur=id;
   if(!keepRail) setRail(false);
@@ -2865,7 +2885,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v24.92';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v24.93';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3353,7 +3373,8 @@ window.addEventListener('message',ev=>{
   /* Escape and the fullscreen key, pressed while working inside a form */
   if(d.nbh==='key'){
     if(!relayFrom(ev.source))return;
-    if(d.key==='Escape'&&fullOn())setFull(false);
+    if(d.key==='Escape'&&fsFormsOn())fsForms(false,true);
+    else if(d.key==='Escape'&&fullOn())setFull(false);
     else if(d.key==='F'&&d.mod&&d.shift)setFull(!fullOn());
     return;
   }
@@ -7498,6 +7519,7 @@ document.addEventListener('keydown',e=>{
   }
   if(e.key==='Escape'&&$('#dlg').open){$('#dlg').close();return;}
   if(e.key==='Escape'&&document.body.classList.contains('rail-open')){setRail(false,true);return;}
+  if(e.key==='Escape'&&fsFormsOn()){fsForms(false,true);return;}
   if(e.key==='Escape'&&fullOn()){setFull(false);return;}
   if(mod&&e.shiftKey&&e.key.toLowerCase()==='f'){e.preventDefault();setFull(!fullOn());return;}
   if(mod&&e.key.toLowerCase()==='s'){e.preventDefault();$('#saveCase').click();return;}

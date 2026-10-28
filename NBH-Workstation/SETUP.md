@@ -9905,6 +9905,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.93: Forms TB-1, IA-1 and IN-1 on an iPad, and Forms in Fullscreen
+
+The layout DM-1, IC-1 and RR-1 got in v24.92, carried to Target Behavior Development, the Indirect Functional
+Assessment Protocol and the Stakeholder Interview Record.
+- **Easier to read.** The description under a form's title is two lines, with "Show the full introduction". Section
+  headings are in sentence case; text and every box at 16 px, so an iPad does not zoom when a box is tapped.
+- **Labels above their boxes, examples under the label** ("For example, …"), not inside the box, cut short. An
+  instruction for an empty answer box (IN-1's "Record what the respondent said") stays inside it.
+- **Lists as cards on an iPad.** Under 1000 px wide each entry is a card with every box under its column's name: TB-1's
+  selected targets, cluster topographies and revision log; IA-1's informants, "understood the definition", instrument
+  plan, send-outs and results by group; IN-1's respondents (the remove button in the card's corner). On a laptop they
+  stay tables. Tables of scores by item (FAST, QABF, MAS, PBQ, WEFA), TB-1's quality checklist and IN-1's
+  yes/no/sometimes questions stay tables: they read best as a grid.
+- **IN-1's side-by-side answers.** On an iPad, one card per question, each answer under the person's name and role
+  ("Simulated teacher (Teacher)"), instead of five narrow columns. The interview questions are at 16 px.
+- **Short choices as buttons** on a touch screen (Urgency 4/3/2/1, Daily contact?, Sees the student).
+- **Forms in Fullscreen** (from your iPad screenshot). Fullscreen's bar has a Forms button: the list of forms slides
+  in over the page and Fullscreen stays. Choosing a form opens it and puts the list away; a tap beside the list, Forms
+  again or Escape puts it away too. Exit still leaves Fullscreen.
+- **DM-1, IC-1 and RR-1** take the same, current layout (all six forms now share it): a card's read-only entries keep
+  their column's name above them.
+
+- **The master print.** Since v24.92, DM-1, IC-1 and RR-1 went into Build master print with their screen headings
+  (sentence case) and without the examples in their boxes; now the six forms go in as they print on their own. One of
+  the new screen rules also upset the packet's styles; it is rewritten, and a check guards the packet's styles.
+
+Not changed: what the six forms save, and what they print (checked page by page at a laptop's and an iPad's width).
+To set up: upload the whole folder as usual (the workstation page and DM-1, IC-1, RR-1, TB-1, IA-1 and IN-1 changed).
+Tested: `qa/fx3-test.js` and `qa/fsf-test.js` (new: WebKit, Safari's engine, with a touch screen at an iPad's width, and Chromium at a
+laptop's), `qa/fx2-test.js`, the saved fields and printouts of the six forms against v24.92, and the forms' own tests,
+the touch-screen layout, the field names and accessibility.
+
 ### v24.92: Forms DM-1, IC-1 and RR-1 on an iPad (the design review of 10/28)
 
 The layout TD-1 got in v24.89, carried to the Student Demographics, Informed Consent and Records Review forms.
