@@ -9905,6 +9905,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.85: The Analysis of Verbal Behavior volume 12 (1994–1995) in both banks
+(the BCBA's "1995" folder, 10/28)
+
+- **AVB volume 12** (14 files, 3 read in full): 20 cards and 3 objectives from two reviews of request teaching
+  (Brady, Saunders, & Spradlin, 1994; Shafer, 1994) and a conceptual analysis of concept teaching (Shimamune &
+  Malott, 1994). None of the three reports new data, so every card says the procedure was described, not tested,
+  and names the original study to read before use.
+  - The request cards: a general "want" response built up to want plus the item's picture; "yes" to an offer; a
+    specific symbol for an item in view (the reach is blocked, marked RESTRICTIVE, with keeping the tray out of reach
+    as the gentler option); time-delay fading of a spoken model; asking for the missing snack item; interrupted
+    routines with the needed item in view or removed beforehand; pausing a liked activity until the student asks to
+    go on (no staff body in a doorway); a request matched to the function of problem behavior (FCT; the extinction
+    and thinning boxes are left for the team); incidental teaching across the day; a preference check before each
+    session; choice making with a check that the student takes what was chosen; signing "no"; naming and asking
+    for the parts of a toy in turn.
+  - The concept-teaching cards: definition first, then examples and practice; a self-questioning chain against the
+    definition; minimally different example and nonexample pairs; related concepts taught together; the next item
+    chosen from the concept the student confused; a concept name taught across many examples.
+  - The objectives: ask to keep going when a liked activity stops; use a general "want" sign, then add the item's
+    picture; check a new item against a definition and say whether it fits.
+  - Left out: making a student thirsty with salty snacks, an adult blocking a doorway or holding a shoulder, and
+    physically stopping an activity. Also two replies on grammar, two book reviews, three basic laboratory studies
+    (one followed errors with a loud tone) and the front matter.
+
+TD-1: 937 protocols; GB-1: 358 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.84: Behavior Analysis in Practice 2020 part 5, the arousal-suppression card, and your answers on five card groups
 (the BCBA's Part 5 folder and answers, 10/28)
 
