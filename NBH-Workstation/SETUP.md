@@ -9905,6 +9905,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.94: Behavior Analysis in Practice 2022 part 1 in both banks
+(the BCBA's Part 1 folder, 10/28; 21 files, 5 articles read in full)
+
+- **10 cards:**
+  - POWER (Play, Offer, Wait, Encourage, Reinforce): caregiver- or staff-run vocal mand training in play, with a 3-s
+    wait and an echoic prompt (three preschool boys with autism at home; the note: train the adult with the model and
+    feedback, and pair the card with a function-based plan).
+  - From a middle-school comparison of contingency space analysis with intervention results: earning a 5-minute break
+    with tally marks, earning 5 minutes with a chosen peer, and teacher praise at the teacher's own rate with
+    interfering behavior ignored. Each note says to choose the card by function: peer time and praise made one
+    escape-maintained student's behavior worse.
+  - Food selectivity (one adult with autism): earning a preferred food by eating a rising number of pieces of a new
+    food; skipping a disliked chore the same way (the step that makes the chore follow refusal is marked RESTRICTIVE,
+    with review and consent); and the learner choosing between the two. Feeding goals are planned with the family, the
+    prescribing doctor and the school nurse, and the team decides whether food is used.
+  - Pre-teaching new words in matching classes before word-search practice (a preliminary translational study).
+  - Teaching notes played on pitch: a fast method that fades guide tones and visual feedback, and an ear-only method
+    (college students, one session, modest gains; for a student, a music or leisure skill).
+- **1 objective:** play named notes of a scale on pitch without a guide tone (the study's 6 of 8 is noted against the
+  workstation's 90% standard). **5 more sources** for existing objectives: ask for a preferred item, stay seated to earn
+  a break, stay on task with praise, accept bites of new foods, and match items that go together.
+- **Left out:** commentaries, reviews and a curriculum on racism and policing (nine papers), a police use-of-force
+  study with officers, guidance on implicit bias, public speaking for behavior analysts, an undergraduate course
+  method, the history of Jack Michael's work, and three correction notices (one fixed an author's name, carried into
+  the POWER reference).
+
+TD-1: 985 protocols; GB-1: 378 objectives. References checked against Crossref by DOI (title, volume 15(3), pages).
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.93: Forms TB-1, IA-1 and IN-1 on an iPad, and Forms in Fullscreen
 
 The layout DM-1, IC-1 and RR-1 got in v24.92, carried to Target Behavior Development, the Indirect Functional
