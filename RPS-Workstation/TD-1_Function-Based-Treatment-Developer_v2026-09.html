@@ -974,6 +974,209 @@ td input,td select{max-width:100%}
 #rlFinal .rl-note{font-size:12.5px;padding:0 8px;margin:4px 0}
 @media print{#rlList label:has(input:not(:checked)){display:none!important}#rlHead.rl-none,#rlSec.rl-none{display:none!important}}
 </style>
+<style id="td-v2489">
+/* v24.89 TD-1 on screen: the layout from the 10/28 design review (GOV.UK, NN/g, NHS, USWDS, W3C, Apple). Screen only;
+   the paper keeps its own layout. Everything is under html.td9, set before the page draws. */
+/* v24.89 a Build card's settings are boxes that grow to their text; everywhere outside the screen layout (paper) they
+   look as the one-line boxes did: the page's type, a rule under the text, no frame */
+.param .f textarea{font:inherit;font-size:14px;flex:1;min-width:0;box-sizing:border-box;border:0;border-bottom:1px solid var(--rule-2);
+  background:transparent;color:var(--ink);padding:1px 2px;resize:none;overflow:hidden;-webkit-appearance:none;appearance:none;border-radius:0}
+/* the progress graph's key stays on the page with its graph */
+@media print{#monFig{break-inside:avoid;page-break-inside:avoid}#monLegend{break-before:avoid;page-break-before:avoid}}
+/* the screen layout stands aside while the page measures itself for paper (html.nbh-pr-measure, nbh-polish) */
+@media screen{
+html.td9:not(.nbh-pr-measure){--td9-ink:#1F2D36;--td9-navy:#1D3A52;--td9-wash:#F2F6F5;--td9-rule:#D9E2E0;--td9-sage:#2E6B53;--td9-sage-bg:#E3F1EA;
+  --td9-amber:#7A5200;--td9-amber-bg:#FFF3D3;--td9-muted:#5A6A72;--td9-hint:#55656C;
+  --td9-sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;--td9-serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+
+/* ---------- page head: the title band quieter, the intro two lines with More ---------- */
+html.td9:not(.nbh-pr-measure) .sheet .bar.nbh-band{background:none!important;border:0!important;padding:0!important;margin:0 0 6px!important}
+html.td9:not(.nbh-pr-measure) .sheet .bar.nbh-band,html.td9:not(.nbh-pr-measure) .sheet .bar.nbh-band *{font-family:var(--td9-serif)!important;font-size:26px!important;font-weight:600!important;color:var(--td9-navy)!important;letter-spacing:0!important}
+html.td9:not(.nbh-pr-measure) .td9-intro{font:400 14px/1.55 var(--td9-sans)!important;color:var(--td9-muted)!important;max-width:68ch;margin:0 0 20px!important;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.td9:not(.nbh-pr-measure) .td9-intro.open{display:block}
+html.td9:not(.nbh-pr-measure) .td9-more{font:600 14px var(--td9-sans);color:var(--td9-navy);background:none;border:0;padding:0;margin:-12px 0 8px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+html.td9:not(.nbh-pr-measure) .sheet h3.sub{font:600 17px/1.3 var(--td9-sans)!important;color:var(--td9-ink)!important;text-transform:none!important;letter-spacing:0!important;border:0!important;margin:28px 0 10px!important;padding:0!important}
+
+/* ---------- a section: questions on the left, the recommendation margin on the right ---------- */
+html.td9:not(.nbh-pr-measure) .sheet.td9-grid{grid-template-columns:minmax(0,1fr) 300px;column-gap:24px;grid-auto-flow:row dense;align-items:start}
+/* only the sheet on show becomes a grid (the form hides the others) */
+html.td9:not(.nbh-pr-measure) body.view-select #select.td9-grid,html.td9:not(.nbh-pr-measure) body.view-antecedent #antecedent.td9-grid,html.td9:not(.nbh-pr-measure) body.view-reinf #reinf.td9-grid,html.td9:not(.nbh-pr-measure) body.view-teach #teach.td9-grid,html.td9:not(.nbh-pr-measure) body.view-skills #skills.td9-grid,html.td9:not(.nbh-pr-measure) body.view-respond #respond.td9-grid{display:grid!important}
+html.td9:not(.nbh-pr-measure) .sheet.td9-grid > *{grid-column:1/-1;min-width:0}
+html.td9:not(.nbh-pr-measure) .sheet.td9-grid > .td9-q{grid-column:1}
+html.td9:not(.nbh-pr-measure) .sheet.td9-grid > .td9-recs{grid-column:2;margin:0 0 16px}
+html.td9:not(.nbh-pr-measure) .td9-prog{display:flex;align-items:center;gap:10px;font:500 14px var(--td9-sans);color:var(--td9-muted);margin:0 0 6px}
+
+/* a question: number, question, answer on one line */
+html.td9:not(.nbh-pr-measure) .qrow{display:grid!important;grid-template-columns:26px minmax(0,1fr);gap:0 10px;align-items:center;padding:12px 0!important;margin:0!important;border-bottom:1px solid var(--td9-rule)!important}
+html.td9:not(.nbh-pr-measure) .qrow .qn{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--td9-navy);font:600 13px var(--td9-sans)!important;color:var(--td9-navy)!important}
+/* GOV.UK task list research: a done item is quiet (no colour) so the ones still to answer stand out */
+html.td9:not(.nbh-pr-measure) .qrow.td9-done .qn{background:none;border-color:var(--td9-rule);color:var(--td9-muted)!important;font-size:0!important}
+html.td9:not(.nbh-pr-measure) .qrow.td9-done .qn::after{content:"";width:9px;height:5px;border:2px solid var(--td9-muted);border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+html.td9:not(.nbh-pr-measure) .qrow .qt{display:flex!important;align-items:center;justify-content:space-between;gap:16px;font:400 16px/1.45 var(--td9-sans)!important;color:var(--td9-ink)!important}
+html.td9:not(.nbh-pr-measure) .qrow .qt br{display:none}
+html.td9:not(.nbh-pr-measure) .qrow .nbh-seg{flex:none;display:inline-flex;padding:2px;gap:2px;border-radius:10px;background:#E9EFED;border:0!important}
+html.td9:not(.nbh-pr-measure) .qrow .nbh-segb{min-width:60px!important;height:40px!important;min-height:40px!important;padding:0 14px!important;margin:0!important;border:0!important;border-radius:8px!important;
+  font:600 14px var(--td9-sans)!important;background:transparent!important;color:var(--td9-navy)!important;box-shadow:none!important}
+html.td9:not(.nbh-pr-measure) .qrow .nbh-segb[aria-pressed="true"]{background:var(--td9-navy)!important;color:#fff!important}
+html.td9:not(.nbh-pr-measure) .qrow .qt select{flex:none;width:200px!important;height:44px!important;min-height:44px!important;font:400 14px var(--td9-sans)!important;color:var(--td9-ink)!important;
+  border:1px solid #B9C7C4!important;border-radius:8px!important;background-color:#fff!important;padding:0 32px 0 12px!important}
+
+/* the margin: what the answers point to */
+html.td9:not(.nbh-pr-measure) .td9-recs{position:sticky;top:96px;background:var(--td9-wash);border-radius:12px;border-left:4px solid var(--td9-navy);padding:14px 16px 16px}
+html.td9:not(.nbh-pr-measure) .td9-rh{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 8px;margin:0 0 4px}
+html.td9:not(.nbh-pr-measure) .td9-rh b{font:600 17px var(--td9-serif);color:var(--td9-navy)}
+html.td9:not(.nbh-pr-measure) .td9-rh span{font:600 13px var(--td9-sans);white-space:nowrap;color:var(--td9-amber);background:var(--td9-amber-bg);border-radius:999px;padding:3px 9px}
+html.td9:not(.nbh-pr-measure) .td9-rh span.ok{color:var(--td9-sage);background:var(--td9-sage-bg)}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec{display:block!important;position:relative;background:none!important;border:0!important;border-top:1px solid var(--td9-rule)!important;border-radius:0!important;padding:12px 0 2px!important;margin:8px 0 0!important;box-shadow:none!important}
+/* W3C 1.4.3: a card not in the plan keeps full-contrast text; the switch and its words carry the state */
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec:not(.on) .rh b{font-weight:500!important}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec:not(.on) .rt,html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .rt{opacity:1!important}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .rh{display:flex!important;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding-right:58px}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .rh b{font:600 16px/1.3 var(--td9-sans)!important;color:var(--td9-ink)!important;flex-basis:100%;order:1}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .rh .tag{order:2;font:600 12px var(--td9-sans)!important;color:var(--td9-muted)!important;background:#fff!important;border:1px solid var(--td9-rule)!important;border-radius:6px!important;padding:1px 6px!important}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .rh .td-chip{order:3;font:600 12px var(--td9-sans)!important;text-transform:none!important;letter-spacing:0!important;border-radius:999px!important;padding:1px 8px!important;border:0!important;
+  background:#fff!important;color:var(--td9-muted)!important}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .rh .td-chip.core{background:var(--td9-navy)!important;color:#fff!important}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec p{font:400 14px/1.5 var(--td9-sans)!important;color:var(--td9-ink)!important;margin:6px 0 0!important}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec p.td9-why::before{content:"Why: ";font-weight:600}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec p:last-child{font-size:13px!important;color:var(--td9-muted)!important}
+/* "In plan" switch in the corner of each recommendation */
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .td-pk{position:absolute!important;top:12px;right:0;display:flex!important;flex-direction:column;align-items:center;gap:3px;width:auto!important;min-width:0!important;margin:0!important;padding:0!important;
+  font:600 12px var(--td9-sans)!important;color:var(--td9-muted)!important;cursor:pointer}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .td-pk span{display:none}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .td-pk::after{content:"Not in plan";white-space:nowrap}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec.on .td-pk::after{content:"In plan";color:var(--td9-sage)}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .td-pk input{appearance:none;-webkit-appearance:none;width:46px!important;height:28px!important;min-width:0!important;margin:0!important;border-radius:999px;background:#C9D3D1;position:relative;cursor:pointer;transition:background .15s}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .td-pk input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .td-pk input:checked{background:var(--td9-sage)}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .td-pk input:checked::after{transform:translateX(18px)}
+html.td9:not(.nbh-pr-measure) .td9-recs .td-rec .td-pk input:focus-visible{outline:3px solid #7FA8C9;outline-offset:2px}
+html.td9:not(.nbh-pr-measure) .td9-add{display:block;width:100%;margin:16px 0 0;height:46px;border:0;border-radius:10px;background:var(--td9-navy);color:#fff;font:600 16px var(--td9-sans);cursor:pointer}
+html.td9:not(.nbh-pr-measure) .td9-sent-src{display:none!important}
+
+/* settings under a section: label, hint, then the box (one column) */
+html.td9:not(.nbh-pr-measure) .defs{display:block!important;border:0!important;margin:20px 0 0!important}
+html.td9:not(.nbh-pr-measure) .defs .drow{display:block!important;border:0!important;padding:0!important;margin:0 0 18px!important;background:none!important}
+html.td9:not(.nbh-pr-measure) .defs .dlab{display:block!important;background:none!important;border:0!important;padding:0!important;font:600 15px/1.35 var(--td9-sans)!important;color:var(--td9-ink)!important;width:auto!important}
+html.td9:not(.nbh-pr-measure) .td9-hint{display:block;font:400 14px/1.45 var(--td9-sans);color:var(--td9-hint);margin:2px 0 6px}
+html.td9:not(.nbh-pr-measure) .defs .dval{display:block!important;border:0!important;padding:0!important;background:none!important}
+html.td9:not(.nbh-pr-measure) .defs .dval > textarea:only-child,html.td9:not(.nbh-pr-measure) .defs .dval > input:only-child:not([type=checkbox]):not([type=radio]):not([type=hidden]){width:100%!important;min-height:44px;border:1px solid #B9C7C4!important;border-radius:8px!important;background:#fff!important;
+  font:400 16px/1.45 var(--td9-sans)!important;color:var(--td9-ink)!important;padding:10px 12px!important;box-sizing:border-box}
+html.td9:not(.nbh-pr-measure) .sheet textarea:focus,html.td9:not(.nbh-pr-measure) .sheet input:focus,html.td9:not(.nbh-pr-measure) .sheet select:focus{outline:3px solid #9DBAD3!important;outline-offset:0;border-color:var(--td9-navy)!important}
+
+/* ---------- Build card ---------- */
+html.td9:not(.nbh-pr-measure) #compWrap .card{border:1px solid var(--td9-rule)!important;border-radius:12px!important;padding:18px 20px 20px!important;box-shadow:none!important;background:#fff!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:4px 14px;border:0!important;padding:0 0 4px!important;margin:0!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd .chdt{grid-column:1;grid-row:1;font:600 22px/1.25 var(--td9-serif)!important;color:var(--td9-navy)!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd .tag{grid-column:1;grid-row:2;justify-self:start;font:600 12px var(--td9-sans)!important;color:var(--td9-muted)!important;background:var(--td9-wash)!important;border:0!important;border-radius:6px!important;padding:2px 7px!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-cfold,html.td9:not(.nbh-pr-measure) #compWrap .card .chd .rm{grid-row:1/span 2;align-self:center;height:40px!important;min-height:40px!important;margin:0!important;padding:0 14px!important;border-radius:8px!important;font:600 14px var(--td9-sans)!important;box-shadow:none!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-cfold{grid-column:2;background:#fff!important;border:1px solid #B9C7C4!important;color:var(--td9-navy)!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd .rm{grid-column:3;background:none!important;border:0!important;color:#9A2B2B!important;text-decoration:underline;text-underline-offset:3px}
+
+/* Run by / When / Where: three short fields share a row */
+/* one column: real answers ("Classroom teacher; paraprofessional for breaks") are longer than three narrow boxes hold (Baymard: one column) */
+html.td9:not(.nbh-pr-measure) .td-who{display:grid!important;grid-template-columns:1fr;gap:14px!important;margin:0 0 18px!important;padding:14px!important;background:var(--td9-wash);border-radius:10px}
+html.td9:not(.nbh-pr-measure) .td-who label{display:flex!important;flex-direction:column;align-items:stretch!important;text-align:left!important;font:600 15px var(--td9-sans)!important;color:var(--td9-ink)!important;gap:0}
+html.td9:not(.nbh-pr-measure) .td-who label small.eg{order:2;font:400 14px/1.4 var(--td9-sans)!important;color:var(--td9-hint)!important;margin:2px 0 6px!important;text-align:left!important}
+html.td9:not(.nbh-pr-measure) .td-who label input{order:3;height:44px!important;min-height:44px!important;width:100%!important;border:1px solid #B9C7C4!important;border-radius:8px!important;background:#fff!important;font:400 16px var(--td9-sans)!important;padding:0 12px!important;box-sizing:border-box}
+
+/* settings: label, hint, a box that grows to its text */
+html.td9:not(.nbh-pr-measure) #compWrap .card .param{display:block!important;margin:0 0 6px!important}
+/* a folded card (Fold all, Hide steps) still shows only its title and summary line */
+html.td9:not(.nbh-pr-measure) #compWrap .card.td-fold > :not(.chd):not(.td-foldsum){display:none!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .param .f{display:block!important;margin:0 0 16px!important;padding:0!important;border:0!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .param .f > label{display:block!important;font:600 15px/1.35 var(--td9-sans)!important;color:var(--td9-ink)!important;margin:0!important;width:auto!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .param .nbh-hint{display:none!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .param .f > textarea{display:block;width:100%;min-height:44px;resize:none;overflow:hidden;box-sizing:border-box;border:1px solid #B9C7C4;border-radius:8px;background:#fff;
+  font:400 16px/1.45 var(--td9-sans);color:var(--td9-ink);padding:10px 12px}
+
+/* the student's task analysis */
+html.td9:not(.nbh-pr-measure) .td-ta{margin:8px 0 22px!important}
+html.td9:not(.nbh-pr-measure) .td-ta > label{display:block!important;font:600 15px/1.35 var(--td9-sans)!important;color:var(--td9-ink)!important;margin:0!important}
+html.td9:not(.nbh-pr-measure) .td-ta > label b{font-weight:600!important}
+html.td9:not(.nbh-pr-measure) .td-ta > label span{display:block;font:400 14px/1.45 var(--td9-sans)!important;color:var(--td9-hint)!important;margin:2px 0 6px}
+html.td9:not(.nbh-pr-measure) .td-ta textarea{border:1px solid #B9C7C4!important;border-radius:8px!important;font:400 16px/1.55 var(--td9-sans)!important;padding:10px 12px!important;color:var(--td9-ink)!important}
+
+/* implementation steps: a numbered list (staff run them in order); set-up a quiet toggle at the end */
+html.td9:not(.nbh-pr-measure) .td9-stepsh{display:block;font:600 17px/1.3 var(--td9-sans);color:var(--td9-ink);margin:4px 0 2px}
+html.td9:not(.nbh-pr-measure) .td9-stepsh + .td9-hint{margin-bottom:8px}
+html.td9:not(.nbh-pr-measure) .td9-stepsb{display:none!important}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps{counter-reset:pvs;list-style:none!important;padding:0!important;margin:0 0 18px!important;border-top:1px solid var(--td9-rule)}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li{counter-increment:pvs;display:grid!important;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:8px 0!important;margin:0!important;border-bottom:1px solid var(--td9-rule)}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li::before{content:counter(pvs);display:grid;place-items:center;width:26px;height:26px;margin-top:7px;border-radius:50%;background:var(--td9-wash);font:600 13px var(--td9-sans);color:var(--td9-navy)}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li textarea{border:1px solid transparent!important;box-shadow:none!important;outline-color:transparent;border-radius:8px!important;background:transparent!important;font:400 16px/1.5 var(--td9-sans)!important;color:var(--td9-ink)!important;padding:8px 10px!important;min-height:0!important;resize:none}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li textarea:hover{border-color:var(--td9-rule)!important}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li textarea:focus{background:#fff!important}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li label.td-su{display:inline-flex!important;align-items:center;gap:6px;margin-top:6px!important;height:40px;padding:0 14px!important;border-radius:999px;border:1px solid var(--td9-rule);
+  font:600 14px var(--td9-sans)!important;color:var(--td9-muted)!important;background:#fff;cursor:pointer;white-space:nowrap}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li label.td-su input{width:15px!important;height:15px!important;min-width:0!important;min-height:0!important;margin:0!important;accent-color:var(--td9-navy)}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li label.td-su.td9-on{background:var(--td9-wash);border-color:var(--td9-navy);color:var(--td9-navy)!important}
+
+/* the data and materials rows at the foot of a card */
+html.td9:not(.nbh-pr-measure) #compWrap .card .defs{margin-top:4px!important}
+
+
+/* narrow screens and iPad upright: the margin panel drops under the questions; the three short fields stack */
+@media (max-width:1000px){html.td9:not(.nbh-pr-measure) body.view-select #select.td9-grid,html.td9:not(.nbh-pr-measure) body.view-antecedent #antecedent.td9-grid,html.td9:not(.nbh-pr-measure) body.view-reinf #reinf.td9-grid,html.td9:not(.nbh-pr-measure) body.view-teach #teach.td9-grid,html.td9:not(.nbh-pr-measure) body.view-skills #skills.td9-grid,html.td9:not(.nbh-pr-measure) body.view-respond #respond.td9-grid{display:block!important}html.td9:not(.nbh-pr-measure) .td9-recs{position:static}}
+@media (max-width:900px){html.td9:not(.nbh-pr-measure) .td-who{grid-template-columns:1fr}}
+@media (max-width:640px){html.td9:not(.nbh-pr-measure) .td-who{grid-template-columns:1fr}html.td9:not(.nbh-pr-measure) .qrow .qt{flex-wrap:wrap}html.td9:not(.nbh-pr-measure) #compWrap .card .chd{grid-template-columns:1fr auto}}
+@media (prefers-reduced-motion:reduce){html.td9:not(.nbh-pr-measure) *{transition:none!important}}
+
+/* on screen the sheet is laid out at 1000 px (paper keeps its 8.5 in page): the page is fitted to the window at about
+   1.1 instead of 1.4, so text is a comfortable reading size and the questions and the margin have room side by side */
+@media screen and (min-width:1100px){html.td9:not(.nbh-pr-measure) .sheet:not(table){width:1000px!important;max-width:none!important}}
+
+html.td9:not(.nbh-pr-measure) #compWrap .card .param .f > textarea.td9-short{max-width:180px}
+/* the section heading keeps its size where the page folds its parts on a touch screen */
+html.td9:not(.nbh-pr-measure) .sheet h3.sub[data-nbh-fx],html.td9:not(.nbh-pr-measure)[data-nbh-fx] .sheet h3.sub{font:600 17px/1.3 var(--td9-sans)!important;background:none!important;padding:0!important}
+
+/* GOV.UK: link text says what it opens */
+html.td9:not(.nbh-pr-measure) .td9-more{margin-top:-10px}
+/* steps: what the list holds, before the list (organising line) */
+html.td9:not(.nbh-pr-measure) .td9-stepsn{display:block;font:500 14px/1.45 var(--td9-sans);color:var(--td9-ink);margin:0 0 8px}
+
+/* --- fourth pass (10/28): NHS, USWDS, W3C, Apple --- */
+/* W3C 2.4.11: a field the keyboard reaches is not hidden under the sticky toolbar (or the iPad keyboard's scroll) */
+html.td9:not(.nbh-pr-measure){scroll-padding-top:120px;scroll-padding-bottom:24px}
+/* USWDS: no greyed-out button; the action stays live and says what is missing */
+html.td9:not(.nbh-pr-measure) .td9-addnote{display:block;font:400 14px/1.45 var(--td9-sans);color:var(--td9-hint);margin:8px 2px 0}
+html.td9:not(.nbh-pr-measure) .td9-addnote.td9-flag{color:var(--td9-ink);font-weight:600}
+/* NHS warning callout: yellow is kept for what could harm the student; a restrictive step reads as a warning, words first */
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li.td9-restr{background:#FFF3D3;border-left:4px solid #B07A00;padding-left:8px!important;margin-left:-12px!important}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li.td9-restr::after{content:"Restrictive procedure: follow your district's consent and review requirements";grid-column:2/4;font:600 13px/1.4 var(--td9-sans);color:#5C3D00;margin:-2px 0 2px 2px}
+/* USWDS measure (45 to 90 characters): long text in a Build card stops at about 90 characters a line */
+html.td9:not(.nbh-pr-measure) #compWrap .card .param,html.td9:not(.nbh-pr-measure) #compWrap .card .td-ta,html.td9:not(.nbh-pr-measure) #compWrap .card ol.steps,html.td9:not(.nbh-pr-measure) #compWrap .card .td9-stepsh,html.td9:not(.nbh-pr-measure) #compWrap .card .td9-stepsh~.td9-hint{max-width:820px}
+
+/* sources under a Build card: one line that opens them (paper prints the line as before) */
+html.td9:not(.nbh-pr-measure) .td9-srcb{display:inline-flex;align-items:center;gap:4px;margin:4px 0 14px;padding:0;height:32px;border:0;background:none;font:600 14px var(--td9-sans);color:var(--td9-navy);cursor:pointer}
+html.td9:not(.nbh-pr-measure) .td9-srcb::after{content:"\25B8"}
+html.td9:not(.nbh-pr-measure) .td9-srcb[aria-expanded="true"]::after{content:"\25BE"}
+html.td9:not(.nbh-pr-measure) #compWrap .card p.method.td9-src{display:none!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card p.method.td9-src.open{display:block!important;font:400 14px/1.5 var(--td9-sans)!important;color:var(--td9-muted)!important;margin:-8px 0 14px!important;max-width:820px}
+
+/* Final plan: each part of the summary, and each component at a glance, has a Change link to the sheet that sets it */
+html.td9:not(.nbh-pr-measure) .td9-chg{float:right;margin:0 0 0 12px;padding:0 4px;min-height:32px;border:0;background:none;font:600 14px var(--td9-sans);color:var(--td9-navy);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+html.td9:not(.nbh-pr-measure) .td9-chg.td9-chgc{float:none;display:block;margin:6px 0 0;padding:0}
+html.td9:not(.nbh-pr-measure) .drow:has(> .td9-chg){position:relative!important}
+html.td9:not(.nbh-pr-measure) .drow > .td9-chg{position:absolute;top:0;right:0;float:none;margin:0}
+/* the selector's own heading inside the margin repeats what the margin says */
+html.td9:not(.nbh-pr-measure) .td9-recs h3{display:none!important}
+html.td9:not(.nbh-pr-measure) .td9-chg:focus-visible{outline:3px solid #7FA8C9;outline-offset:2px}
+@media (max-width:834px){
+ html.td9:not(.nbh-pr-measure) table.td9-glance,html.td9:not(.nbh-pr-measure) table.td9-glance tbody,html.td9:not(.nbh-pr-measure) table.td9-glance tr,html.td9:not(.nbh-pr-measure) table.td9-glance td{display:block!important;width:auto!important}
+ html.td9:not(.nbh-pr-measure) table.td9-glance thead,html.td9:not(.nbh-pr-measure) table.td9-glance tr:first-child:has(th){display:none!important}
+ html.td9:not(.nbh-pr-measure) table.td9-glance tr{border:1px solid var(--td9-rule)!important;border-radius:12px;margin:0 0 12px;padding:12px 14px}
+ html.td9:not(.nbh-pr-measure) table.td9-glance td{border:0!important;padding:4px 0!important}
+ html.td9:not(.nbh-pr-measure) table.td9-glance td[data-th]:not(:first-child)::before{content:attr(data-th);display:block;font:600 13px var(--td9-sans);color:var(--td9-muted)}
+ html.td9:not(.nbh-pr-measure) table.td9-glance td:first-child{font:600 17px/1.3 var(--td9-sans)!important}
+}
+/* Not sure sits beside Yes and No and reads as an answer */
+html.td9:not(.nbh-pr-measure) .qrow .nbh-segb[data-v="not sure"]{min-width:88px!important}
+
+}
+</style>
+<script>document.documentElement.classList.add('td9')</script>
 </head>
 
 <body class="view-setup">
@@ -2001,7 +2204,8 @@ const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 /* v21.21 escape TD-1 (E): the monitoring criteria (target rate, percent independent, consecutive sessions) are
    plain text fields; the plan's thinning table writes them through esc(). Typed there, they were parsed as
    markup. */
-const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value).trim():''};
+/* v24.89 a question answered Not sure reads as unanswered: the default recommendation stands */
+const val=n=>{const e=document.querySelector('[name="'+n+'"]');if(!e)return '';const v=String(e.value).trim();return e.tagName==='SELECT'&&v==='not sure'?'':v};
 const num=n=>{const v=parseFloat(val(n));return isNaN(v)?null:v;};
 const setv=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}};
 const COLORS=['#182e43','#76a2a3','#9b4e15','#54676f'];
@@ -2272,7 +2476,7 @@ function renderModel(){const fn=val('m.fn');const w=$('#modelWrap');if(!fn||!MOD
  const m=MODELS[fn];const cur=m.q.map((q,i)=>val(`q.${fn}.${i}`));
  const keepAuto=['play','alone','sr','series'].map(k=>val('auto.'+k));
  const lod=fn==='automatic'?`<div class="ident" style="margin-bottom:8px"><div class="f"><label>Mean rate: play (EA-1)</label><input name="auto.play" data-lod="1" placeholder="per min or % intervals"></div><div class="f"><label>Mean rate: no-interaction / alone</label><input name="auto.alone" data-lod="1"></div><div class="f"><label>Self-restraint, % of intervals (no-interaction)</label><input name="auto.sr" data-lod="1"></div><div class="f"><label>Series in the analysis</label><input name="auto.series" data-lod="1" placeholder="≥ 3 required"></div></div><div class="warn verdict" id="lodOut"><b>Level of differentiation</b>Enter the EA-1 means.</div>`:'';
- w.innerHTML=lod+`<h3 class="sub" style="margin-top:0">${esc(m.title)}</h3>`+m.q.map((q,i)=>`<div class="qrow"><div class="qn">${i+1}</div><div class="qt">${esc(q[0])}<br><select name="q.${fn}.${i}" class="inline" data-q="1"><option value=""></option>${q.slice(1).map(o=>`<option value="${esc(o)}">${esc(o.charAt(0).toUpperCase()+o.slice(1))}</option>`).join('')}</select></div></div>`).join('');
+ w.innerHTML=lod+`<h3 class="sub" style="margin-top:0">${esc(m.title)}</h3>`+m.q.map((q,i)=>`<div class="qrow"><div class="qn">${i+1}</div><div class="qt">${esc(q[0])}<br><select name="q.${fn}.${i}" class="inline" data-q="1"><option value=""></option>${(q.length===3&&q[1]==='yes'&&q[2]==='no'?['yes','no','not sure']:q.slice(1)).map(o=>`<option value="${esc(o)}">${esc(o.charAt(0).toUpperCase()+o.slice(1))}</option>`).join('')}</select></div></div>`).join('');
  cur.forEach((v,i)=>setv(`q.${fn}.${i}`,v));if(fn==='automatic'){['play','alone','sr','series'].forEach((k,i)=>setv('auto.'+k,keepAuto[i]));renderLOD();}renderRec();}
 function renderLOD(){const o=$('#lodOut');if(!o)return;const play=num('auto.play'),alone=num('auto.alone'),sr=num('auto.sr'),ser=num('auto.series');
  if(play==null||alone==null||alone<=0){o.innerHTML='<b>Level of differentiation</b>Enter the EA-1 means for play and no-interaction (rate, duration, or % intervals).';return;}
@@ -2355,7 +2559,7 @@ $('#sendBuild').addEventListener('click',()=>{const recs=window._recs||[];const 
 
 /* ---------- generic question-model renderer ---------- */
 function qModel(prefix,el,recEl,title,qs,route,intro){const cur=qs.map((q,i)=>val(`${prefix}.${i}`));
- el.innerHTML=(title?`<p class="method" style="margin:0 0 4px"><b>${esc(title)}</b>${intro?' '+intro:''}</p>`:'')+qs.map((q,i)=>`<div class="qrow"><div class="qn">${i+1}</div><div class="qt">${esc(q[0])}<br><select name="${prefix}.${i}" class="inline" data-qm="${prefix}"><option value=""></option>${q.slice(1).map(o=>`<option value="${esc(o)}">${esc(o.charAt(0).toUpperCase()+o.slice(1))}</option>`).join('')}</select></div></div>`).join('');
+ el.innerHTML=(title?`<p class="method" style="margin:0 0 4px"><b>${esc(title)}</b>${intro?' '+intro:''}</p>`:'')+qs.map((q,i)=>`<div class="qrow"><div class="qn">${i+1}</div><div class="qt">${esc(q[0])}<br><select name="${prefix}.${i}" class="inline" data-qm="${prefix}"><option value=""></option>${(q.length===3&&q[1]==='yes'&&q[2]==='no'?['yes','no','not sure']:q.slice(1)).map(o=>`<option value="${esc(o)}">${esc(o.charAt(0).toUpperCase()+o.slice(1))}</option>`).join('')}</select></div></div>`).join('');
  cur.forEach((v,i)=>setv(`${prefix}.${i}`,v));qRec(prefix,recEl,qs,route);}
 function qRec(prefix,recEl,qs,route){const a=qs.map((q,i)=>val(`${prefix}.${i}`));const raw=route(a)||[];const recs=[];raw.forEach(([c,why])=>{const ex=recs.find(r=>r[0]===c);if(ex)ex[1].push(why);else recs.push([c,[why]]);});
  recEl.innerHTML=recs.length?tdRecRows(recs,prefix):(a.some(Boolean)?'<div class="empty">Answer the next question to reach a recommendation.</div>':'');
@@ -3000,7 +3204,7 @@ function addComp(code,at,ns){const L=LIB[code];if(!L)return;
  const dayRate=val('m.ratesrc')==='DD-1',seed=dayRate?null:irt();const seedTxt=seed?`${fmtS(Math.round(seed*0.8))} (80% of mean IRT ${fmtS(seed)})`:dayRate?'':'enter baseline rate on setup';
  d.innerHTML=`<div class="chd"><span class="tag ok">${code}</span><span class="chdt">${esc(L.name)}</span><button type="button" class="tool td-cfold noprint" data-fold="1" style="margin-left:auto" aria-expanded="true">Hide steps</button><button type="button" class="rm noprint" data-rm="1">Remove</button></div>
  <p class="method" style="margin:0 0 6px">Source: ${esc(L.src)}</p><p class="method td-bank-src" style="margin:0 0 6px" hidden></p>${$$('#compWrap .card').some(k=>k.dataset.code===code)?'<p class="method td-dup">A second card of this component: keep the one that fits this student, or say in its steps why both run.</p>':''}<div class="td-who"><label>Run by <input name="cp[${i}].who"><small class="eg">e.g., classroom staff (names)</small></label><label>When <input name="cp[${i}].when"><small class="eg">e.g., every work period, from the first demand</small></label><label>Where <input name="cp[${i}].where"><small class="eg">e.g., the ESE classroom, then specials</small></label></div><input type="hidden" name="cp[${i}].bank"><input type="hidden" name="cp[${i}].bsrc">${L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:''}
- <div class="param">${L.params.map((p,k)=>`<div class="f"><label>${esc(p[0])}</label><input name="cp[${i}].p${k}" value="${esc(p[1]==='SEED_IRT'?seedTxt:'')}" placeholder="${esc(p[1]==='SEED_IRT'?(dayRate?'from a session baseline: the rate on Setup is a school-day rate (Form DD-1)':''):p[1])}"></div>`).join('')}</div>
+ <div class="param">${L.params.map((p,k)=>`<div class="f"><label>${esc(p[0])}</label><textarea name="cp[${i}].p${k}" rows="1" data-auto="1" placeholder="${esc(p[1]==='SEED_IRT'?(dayRate?'from a session baseline: the rate on Setup is a school-day rate (Form DD-1)':''):p[1])}">${esc(p[1]==='SEED_IRT'?seedTxt:'')}</textarea></div>`).join('')}</div>
  ${code==='TA_CHAIN'?`<div class="td-ta"><label for="cpta${i}"><b>Student’s task analysis</b> <span>the steps the student performs, in order, one a line (numbers optional: the plan numbers them). A protocol from the bank brings the study’s list where the article prints it; adjust it to this student. A list in parts: a name ending in a colon above each part.</span></label><textarea id="cpta${i}" name="cp[${i}].ta" rows="2" data-auto="1" placeholder="One step a line, in order"></textarea></div>`:''}
  <b style="font-family:var(--sans);font-size:11px">Implementation steps (edit to the student; each becomes an integrity item unless it is marked set-up: done once by the BCBA or the teacher)</b>
  <ol class="steps">${SS.map((s,k)=>`<li><textarea name="cp[${i}].s${k}" rows="1" data-auto="1">${esc(s)}</textarea><label class="td-su noprint"><input type="checkbox" class="td-su" data-k="${k}"${TD88_SETUP.test(String(s||'').trim())?' checked':''}> set-up</label></li>`).join('')}</ol><input type="hidden" name="cp[${i}].suov" class="td-suov">
@@ -4871,7 +5075,7 @@ window.__nbhFactsOut=function(){
       var pf = c.querySelectorAll('.param .f');
       for (var k = 0; k < pf.length; k++) {
         var lab = (pf[k].querySelector('label') || {}).textContent || '';
-        var inp = pf[k].querySelector('input');
+        var inp = pf[k].querySelector('input,textarea');
         var val = inp ? String(inp.value || '').trim() : '';
         /* v21.44 (B3): the EXT card's "Physical guidance permitted", as the plan prints it */
         if (code === 'EXT' && k === 1 && window.__td1EE) val = window.__td1EE.p1(c.dataset.i) || '';
@@ -6095,7 +6299,8 @@ const host=document.getElementById('tdBankHost');
 if(!B||!host||!host.attachShadow||typeof window.__tdAddComp!=='function'||typeof window.__tdLibOf!=='function')return;
 const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value).trim():''};
+/* v24.89 a question answered Not sure reads as unanswered: the default recommendation stands */
+const val=n=>{const e=document.querySelector('[name="'+n+'"]');if(!e)return '';const v=String(e.value).trim();return e.tagName==='SELECT'&&v==='not sure'?'':v};
 const REF=B.refs||{},byId={};B.protocols.forEach(p=>{byId[p.id]=p;});
 const FN={escape:'Escape',attention:'Attention',tangible:'Tangible',automatic:'Automatic'};
 /* the kinds of component, in the final plan's order (TD-1's groups) */
@@ -6382,7 +6587,7 @@ paint();
   const byId=id=>document.getElementById(id);
   const wrap=byId('compWrap'),nav=byId('tdCompList');if(!wrap||!nav)return;
   function sum(card){const i=card.dataset.i;const v=n=>{const e=card.querySelector('[name="cp['+i+'].'+n+'"]');return e?String(e.value||'').trim():'';};const steps=card.querySelectorAll('ol.steps li').length;
-    const params=Array.prototype.slice.call(card.querySelectorAll('.param .f')).map(f=>{const l=f.querySelector('label'),e=f.querySelector('input');return e&&e.value.trim()?l.textContent.trim()+': '+e.value.trim():'';}).filter(Boolean).slice(0,3);
+    const params=Array.prototype.slice.call(card.querySelectorAll('.param .f')).map(f=>{const l=f.querySelector('label'),e=f.querySelector('input,textarea');return e&&e.value.trim()?l.textContent.trim()+': '+e.value.trim():'';}).filter(Boolean).slice(0,3);
     return [steps+' step'+(steps===1?'':'s'),v('who')?'run by '+v('who'):'no one named yet',v('when')?'when: '+v('when'):''].filter(Boolean).join(' \u00b7 ')+(params.length?' \u2014 '+params.join(' \u00b7 '):'');}
   function fold(card,on){card.classList.toggle('td-fold',on);const b=card.querySelector('.td-cfold');if(b){b.textContent=on?'Show steps':'Hide steps';b.setAttribute('aria-expanded',on?'false':'true');}
     let s=card.querySelector(':scope > .td-foldsum');if(on){if(!s){s=document.createElement('div');s.className='td-foldsum noprint';s.title='Open this card';s.addEventListener('click',()=>fold(card,false));const h=card.querySelector('.chd');if(h)h.after(s);else card.prepend(s);}s.textContent=sum(card);}else if(s)s.remove();}
@@ -6418,6 +6623,218 @@ paint();
       put('d',mdyOf(o.date));put('sc',String(+o.y||0));put('so',String((+o.y||0)+(+o.n||0)));put('n',tag+(o.sup?' \u00b7 '+String(o.sup):'')+' \u00b7 '+(o.pct!=null?o.pct+'%':''));added++;});
     if(added){try{renderMon();}catch(e){}try{nbhUI.toast(added+' supervision observation'+(added===1?'':'s')+' from Form RS-1 entered in the integrity log: steps correct of the items observed.',{kind:'ok'});}catch(e){}}
   }catch(e){}return r;};})();
+</script>
+<script id="td-v2489-js">
+/* v24.89 TD-1 on screen: the layout from the 10/28 design review. It arranges what the sheets already hold; every field
+   keeps its name and value, so the saved file is unchanged, and what it adds for the screen is marked noprint. What
+   it changes on screen for the paper's sake (the empty answer's "Choose…", an example moved out of its box) goes
+   back while the page prints. It runs again whenever a sheet redraws. */
+(function(){
+  if (window.tdLayout) return;
+  const R = document.documentElement; R.classList.add('td9');
+  const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const setText = (e, t) => { if (e.textContent !== t) e.textContent = t; };
+  const fit = t => { if (!t.offsetParent) return; t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; };
+  const QUIET = /^(yes|no|not sure|unknown|not recorded|not tried|not yet run|not tracked)$/i;
+  const ynOnly = s => $$('option', s).every(o => !o.value || QUIET.test(o.textContent.trim()));
+  /* GOV.UK hint text: one short sentence, no full stop; "For example" rather than "e.g." */
+  const tidy = t => String(t || '').replace(/…$/, '').trim().replace(/^e\.g\.,?\s*/i, 'For example, ').replace(/\.$/, '').replace(/^[a-z]/, c => c.toUpperCase());
+  const hintOf = i => tidy(i.getAttribute('data-nbh-ph') || i.getAttribute('placeholder') || '');
+  /* an example leaves its box for the line under the label; the paper gets it back while printing */
+  const moveHint = (field, after) => {
+    if (field.dataset.td9h) return; field.dataset.td9h = '1';
+    const t = hintOf(field); if (!t) return;
+    const near = after.parentNode && after.parentNode.querySelector('small.eg,.nbh-hint,.td9-hint');
+    if (!near || tidy(near.textContent) !== t) after.after(el('span', 'td9-hint noprint', t));
+    if (field.hasAttribute('placeholder')) { field.setAttribute('data-td9-ph', field.getAttribute('placeholder')); field.removeAttribute('placeholder'); }
+  };
+
+  /* the page's opening paragraph: two lines, and a link that says what it opens */
+  function intros(){
+    $$('.sheet > .bar.nbh-band + p.method').forEach(p => {
+      if (p.classList.contains('td9-intro')) return; p.classList.add('td9-intro');
+      const m = el('button', 'td9-more noprint', 'Show the full introduction'); m.type = 'button'; m.setAttribute('aria-expanded', 'false');
+      m.addEventListener('click', () => { const o = p.classList.toggle('open'); m.textContent = o ? 'Hide the full introduction' : 'Show the full introduction'; m.setAttribute('aria-expanded', String(o)); });
+      p.after(m);
+    });
+  }
+
+  /* each selector: its questions beside what they recommend. Nothing moves: the sheet lays the question block and the
+     recommendation block side by side on screen (a grid), so the sheet's order, its printing and the form's own code
+     that finds these blocks are as before. The margin's heading and its Add button sit inside the recommendation block
+     (screen only) and come back whenever the block redraws. */
+  function splits(){
+    $$('.sheet [id$="Rec"]').forEach(rec => {
+      if (!rec.querySelector('.td-rec')) return;
+      let q = rec._td9q;
+      if (!q || !q.isConnected) {
+        q = rec.previousElementSibling; while (q && !q.querySelector('.qrow')) q = q.previousElementSibling; if (!q) return;
+        rec._td9q = q; q.classList.add('td9-q'); rec.classList.add('td9-recs'); rec.setAttribute('aria-label', 'Recommended components');
+        rec.parentNode.classList.add('td9-grid');
+        q.addEventListener('change', soon); q.addEventListener('click', () => setTimeout(soon, 30)); rec.addEventListener('change', soon);
+      }
+      let h = rec.querySelector(':scope > .td9-rh');
+      if (!h) { h = el('div', 'td9-rh noprint'); h.append(el('b', null, 'Recommended'), el('span')); rec.prepend(h); }
+      let add = rec.querySelector(':scope > .td9-add'), note = rec.querySelector(':scope > .td9-addnote');
+      if (!add) {
+        const send = $$('button', rec.closest('.sheet')).find(b => /^Send recommended cards/.test(b.textContent.trim()) && (rec.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING));
+        if (send) send.classList.add('td9-sent-src');
+        add = el('button', 'td9-add noprint'); add.type = 'button'; note = el('span', 'td9-addnote noprint');
+        /* USWDS: never greyed out; with nothing turned on it says so and goes to the first switch */
+        add.addEventListener('click', () => {
+          if (!rec.querySelector('.td-pick:checked')) { note.classList.add('td9-flag'); const f = rec.querySelector('.td-pick'); if (f) f.focus(); return; }
+          if (send) send.click();
+        });
+        rec.append(add, note);
+      }
+      const rows = $$('.qrow', q);
+      let prog = q.querySelector('.td9-prog');
+      if (rows[0] && !prog) { prog = el('div', 'td9-prog noprint'); prog.append(el('span')); rows[0].before(prog); }
+      let done = 0;
+      rows.forEach(r => { const s = r.querySelector('select'); const on = !!(s && s.value); if (on) done++; if (r.classList.contains('td9-done') !== on) r.classList.toggle('td9-done', on); });
+      if (prog) setText(prog.firstChild, done + ' of ' + rows.length + ' answered');
+      const st = h.lastChild; setText(st, done ? 'From your answers' : 'Default until you answer'); const cls = done ? 'ok' : ''; if (st.className !== cls) st.className = cls;
+      $$('.td-rec .rt > p:first-of-type', rec).forEach(p => { if (!p.classList.contains('td9-why')) p.classList.add('td9-why'); });
+      const n = $$('.td-pick:checked', rec).length;
+      setText(add, n ? 'Add ' + n + ' to the build sheet' : 'Add to the build sheet');
+      if (n) note.classList.remove('td9-flag');
+      setText(note, n ? 'They go to Build components, where you set them up for this student' : 'Turn on at least one card above');
+    });
+  }
+
+  /* an empty answer says what to do (paper keeps the blank) */
+  let printing = false;
+  function choose(){
+    if (printing) return;
+    $$('.qrow select').forEach(s => { if (ynOnly(s)) return; const o = s.options[0]; if (o && !o.value && !o.textContent.trim()) { o.textContent = 'Choose…'; o.setAttribute('data-td9-choose', ''); } });
+  }
+
+  /* settings rows: the label, the example under it, then the box */
+  function defs(){
+    $$('.sheet .defs .drow').forEach(r => {
+      const lab = r.querySelector('.dlab'); const f = r.querySelector('.dval > textarea:only-child, .dval > input:only-child');
+      if (!lab || !f || f.type === 'checkbox' || f.type === 'radio' || f.type === 'hidden') return;
+      moveHint(f, lab);
+    });
+  }
+
+  /* Build cards */
+  function cards(){
+    $$('#compWrap .card').forEach(c => {
+      if (!c.dataset.td9) {
+        c.dataset.td9 = '1';
+        /* sources behind one line that opens them */
+        const src = $$(':scope > p.method', c).find(p => /^Sources?:/.test(p.textContent.trim()));
+        if (src) {
+          const n = src.textContent.replace(/^Sources?:\s*/, '').split(';').filter(x => x.trim()).length;
+          const b = el('button', 'td9-srcb noprint', 'Studies this card is based on (' + n + ')'); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
+          src.classList.add('td9-src'); src.id = src.id || ('td9src-' + c.dataset.i); b.setAttribute('aria-controls', src.id);
+          b.addEventListener('click', () => { const o = src.classList.toggle('open'); b.setAttribute('aria-expanded', String(o)); });
+          src.before(b);
+        }
+        /* the steps: a title, a one-line hint, and what the list holds */
+        const sb = $$(':scope > b', c).find(b => /^Implementation steps/.test(b.textContent));
+        if (sb) {
+          sb.classList.add('td9-stepsb');
+          const cnt = el('span', 'td9-stepsn noprint');
+          sb.after(el('span', 'td9-stepsh noprint', 'Implementation steps'), el('span', 'td9-hint noprint', 'Edit each step for this student; a step marked Set-up is done once beforehand and is not a fidelity item'), cnt);
+          c._td9cnt = cnt;
+        }
+        c.addEventListener('change', soon); c.addEventListener('input', e => { if (e.target.matches('textarea')) { fit(e.target); restr(e.target.closest('li')); } });
+      }
+      /* Run by, When, Where: the example reads "For example" */
+      $$('.td-who small.eg', c).forEach(e => setText(e, tidy(e.textContent)));
+      /* settings: the example under the label; a count opens the number keypad */
+      $$('.param .f', c).forEach(f => {
+        const t = f.querySelector('textarea, input'); const lab = f.querySelector('label'); if (!t || !lab) return;
+        moveHint(t, lab);
+        if (!t.dataset.td9n) { t.dataset.td9n = '1'; const h = (f.querySelector('.td9-hint') || {}).textContent || '';
+          if (/^(how many|number)/i.test(h) || /^\d{1,3}$/.test(String(t.value).trim())) { t.classList.add('td9-short'); t.setAttribute('inputmode', 'numeric'); } }
+      });
+      $$('ol.steps li', c).forEach(li => {
+        restr(li);
+        const l = li.querySelector('label.td-su'); if (l && !l.dataset.td9) { l.dataset.td9 = '1'; [...l.childNodes].forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) n.textContent = ' Set-up'; }); }
+        const cb = l && l.querySelector('input'); if (cb && l.classList.contains('td9-on') !== cb.checked) l.classList.toggle('td9-on', cb.checked);
+      });
+      if (c._td9cnt) { const li = $$('ol.steps li', c).length, su = $$('ol.steps li label.td-su input:checked', c).length;
+        setText(c._td9cnt, li + ' steps' + (su ? ', ' + su + ' of them set-up (done once before teaching)' : ', all run with the student')); }
+    });
+  }
+  /* a step that starts RESTRICTIVE: reads as a warning (NHS warning callout) */
+  function restr(li){ if (!li) return; const t = li.querySelector('textarea'); const on = !!t && /^\s*RESTRICTIVE:/.test(t.value); if (li.classList.contains('td9-restr') !== on) li.classList.toggle('td9-restr', on); }
+
+  /* Final plan: a Change link on each part of the summary and each component at a glance (GOV.UK check answers,
+     NHS summary cards) */
+  const GO = [[/^Target behavior|^Replacement behavior|^Baseline|^Review/i, 'setup'], [/^Criterion/i, 'monitor']];
+  function go(view, target){
+    const b = document.querySelector('#viewSeg button[data-view="' + view + '"]'); if (b) b.click();
+    setTimeout(() => { if (target && target.isConnected) { target.scrollIntoView({ block: 'start' }); const f = target.querySelector('button,textarea,input,select'); if (f) try { f.focus({ preventScroll: true }); } catch (e) {} } else window.scrollTo(0, 0); }, 120);
+  }
+  function finals(){
+    const sh = document.querySelector('.sheet[data-view="final"]') || $$('.sheet').find(s => /Final Treatment Plan/.test((s.querySelector('.bar') || {}).textContent || ''));
+    if (!sh) return;
+    /* the plan at a glance: upright, each component reads as a card */
+    $$('table', sh).forEach(t => {
+      const hd = $$('tr:first-child th', t).map(x => x.textContent.trim());
+      if (hd[0] !== 'Component') return;
+      if (!t.classList.contains('td9-glance')) t.classList.add('td9-glance');
+      $$('tr', t).forEach(tr => $$('td', tr).forEach((td, k) => { if (hd[k] && td.getAttribute('data-th') !== hd[k]) td.setAttribute('data-th', hd[k]); }));
+    });
+    $$('table', sh).forEach(t => {
+      $$('tr', t).forEach(tr => {
+        const c = tr.children; if (c.length < 2 || tr.querySelector('.td9-chg') || [...c].every(x => x.tagName === 'TH')) return;
+        const k = c[0].textContent.trim();
+        const hit = GO.find(g => g[0].test(k));
+        let view = hit && hit[1], target = null;
+        if (!hit && t.classList.contains('td9-glance')) { const card = $$('#compWrap .card').find(x => (x.querySelector('.chdt') || {}).textContent === k); if (card) { view = 'build'; target = card; } }
+        if (!view || c[0].tagName !== 'TD' && c[0].tagName !== 'TH') return;
+        const b = el('button', 'td9-chg noprint', 'Change'); b.type = 'button'; b.setAttribute('aria-label', 'Change ' + k.toLowerCase());
+        b.addEventListener('click', () => go(view, target || (view === 'build' ? $$('#compWrap .card').find(x => (x.querySelector('.chdt') || {}).textContent === k) : null)));
+        if (view === 'build') { b.classList.add('td9-chgc'); c[0].append(b); } else c[c.length - 1].prepend(b);
+      });
+    });
+    /* the summary written as label and value rows */
+    $$('.drow', sh).forEach(r => {
+      const lab = r.querySelector('.dlab'); if (!lab || r.querySelector('.td9-chg')) return;
+      const k = lab.textContent.trim(); const hit = GO.find(g => g[0].test(k)); if (!hit) return;
+      const b = el('button', 'td9-chg noprint', 'Change'); b.type = 'button'; b.setAttribute('aria-label', 'Change ' + k.toLowerCase());
+      b.addEventListener('click', () => go(hit[1])); r.append(b);   /* beside the label, not in it: the label is the field's name to other scripts */
+    });
+  }
+
+  let timer = 0;
+  function run(){ timer = 0; [intros, splits, choose, defs, cards, finals].forEach(f => { try { f(); } catch (e) { if (window.console) console.warn('td-layout', f.name, e); } }); }
+  function soon(){ if (!timer) timer = setTimeout(run, 60); }
+
+  /* Remove on a Build card asks first when a person taps it (Apple's destructive role; NHS card actions). A card the
+     form removes itself (a recommendation turned off) goes as before. */
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('#compWrap .card [data-rm]');
+    if (!b || !e.isTrusted || b.dataset.td9ok) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    const name = ((b.closest('.card').querySelector('.chdt') || {}).textContent || 'this component').trim();
+    const q = 'Remove the ' + name + ' card?\nIts settings and steps for this student go with it.';
+    const ask = window.nbhUI && nbhUI.confirm ? nbhUI.confirm(q, { ok: 'Remove card', cancel: 'Keep it', danger: true }) : Promise.resolve(window.confirm(q));
+    Promise.resolve(ask).then(y => { if (!y || !b.isConnected) return; b.dataset.td9ok = '1'; b.click(); });
+  }, true);
+
+  /* the paper: the blank answer, and the examples inside their boxes, as before */
+  function paper(on){
+    printing = on;
+    $$('option[data-td9-choose]').forEach(o => { o.textContent = on ? '' : 'Choose…'; });
+    $$('[data-td9-ph]').forEach(f => { if (on) f.setAttribute('placeholder', f.getAttribute('data-td9-ph')); else f.removeAttribute('placeholder'); });
+    $$('#compWrap textarea').forEach(t => { if (!on) fit(t); });
+  }
+  window.addEventListener('beforeprint', () => paper(true));
+  window.addEventListener('afterprint', () => paper(false));
+  window.tdLayout = { run, paper };
+
+  run();
+  try { new MutationObserver(soon).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+  document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#viewSeg button')) setTimeout(() => { run(); $$('#compWrap textarea').forEach(fit); }, 80); });
+  try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

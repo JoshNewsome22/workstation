@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.89: TD-1's new screen layout (the 10/28 design review)
+(GOV.UK, NN/g, NHS, the U.S. Web Design System, W3C and Apple's iPad guidance; approved 10/28)
+
+- **Questions beside what they recommend.** On every selector (Select treatment, Antecedents, Reinforcers, Prompting,
+  Skills, Responding) the questions sit on the left and a "Recommended" margin on the right: each card with its reason
+  ("Why: ..."), an In plan switch, and one button, "Add N to the build sheet". Over the questions, "3 of 5 answered";
+  an answered question goes quiet so the open ones stand out. Upright, the margin drops under the questions.
+- **Not sure.** Every Yes or No question also offers Not sure. It is read exactly as a blank answer (the default
+  recommendation stands), counts as answered, and is saved and printed as "Not sure".
+- **Labels, examples and boxes.** A label sits above its box with the example under the label (it no longer sits inside
+  the box, where it read as filled in). A Build card's settings are boxes that grow to their text; a count opens the
+  number keypad. Run by, When and Where sit one a line so a full answer shows. Questions and typing are 16 px (iPad
+  Safari no longer zooms into a box).
+- **Build cards.** Sources sit behind "Studies this card is based on (N)". The steps open with what the list holds
+  ("9 steps, 2 of them set-up"), are numbered, and have a quiet Set-up toggle. A step that starts RESTRICTIVE: is marked
+  in yellow: "Restrictive procedure: follow your district's consent and review requirements".
+- **Remove asks.** Remove on a Build card asks first: the card's settings and steps for the student go with it.
+- **Final plan.** Each part of the summary and each component at a glance has a Change link to the sheet that sets it;
+  upright, the components read as cards.
+
+Not changed: what TD-1 saves (the same 967 fields in the worked example; a file from v24.88 opens and saves again
+unchanged) and what it prints (48 pages, the same words in the same order; a Build card's settings now wrap across
+their whole column). Headings keep their wording.
+To set up: upload the whole folder as usual (TD-1 changed).
+Tested: `qa/td189-test.js` (new: Chromium and WebKit, Safari's engine), `qa/ux141-test.js` (updated to the new layout),
+`qa/fix188-test.js`, `qa/td112-test.js`, `qa/td1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/td117-test.js` to
+`qa/td130-test.js`, `qa/policy-td1-test.js`, `qa/a11y-release-test.js`. Known before this release and unchanged by it:
+`qa/sprint-a1-test.js` (item 11), `qa/sprint-a4-test.js` (TB-1), `qa/sprint-a9-test.js` (a timeout).
+
 ### v24.88: text at its own size on the iPad, "he or she" as one name in TD-1, "et al."
 (the BCBA's iPad screenshots of TD-1, 10/28)
 
