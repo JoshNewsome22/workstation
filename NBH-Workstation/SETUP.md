@@ -9905,6 +9905,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.82: The JABA re-read (1968–1978) under your inclusion rule: 184 cards and 40 objectives
+(the BCBA, 10/28: "re-read all of them"; wave 3 of the re-read, 155 Journal of Applied Behavior Analysis articles from
+1968–1978 that were skipped or not cited before; the BAP, AVB and BI waves shipped in v24.79 and v24.80)
+
+- **184 cards** across token economies and level systems, self-paced and mastery-based instruction, peer tutoring and
+  peer managers, parent-run differential attention, self-care chains, toileting, job and interview skills, community
+  and leisure engagement, speech pacing and fluency, and many DRO, DRA and shaping programs. Each note says who was
+  studied (many adults, college students and institution residents), what to adapt for a K–12 student, and whether a
+  procedure was tested or only described.
+- **Restrictive steps** (reprimands, response cost and fines, loss of privileges, exclusionary time-out in an area the
+  student is never locked or held in, contingent chores, brief response interruption, positive practice only with
+  guidance the student can pull away from) are marked RESTRICTIVE, with review and consent under district rules.
+- **Left out as never used:** shock, slaps and spanking, aversive tastes and smells, locked or latched time-out rooms
+  and booths, holding a body part still or arm holds, mechanical restraint, negative practice, withholding meals or
+  meals bought with tokens, removing a wheelchair, and treatment aimed at gender roles. Eye-contact targets stay out.
+- **40 objectives and 87 extra sources.** Where several studies taught the same skill they share one objective (for
+  example, pass each unit quiz before the next unit) and the others are listed as sources.
+- **References:** every one checked against Crossref by DOI (title and authors); three 1970 articles whose printed
+  page numbers and download stamps disagree now carry the publisher's DOI and pages.
+
+TD-1: 843 protocols; GB-1: 336 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.81: Behavior Analysis in Practice 2020 part 3 read into the TD-1 and GB-1 banks
 (the BCBA's Part 3 folder, 10/28; 15 files, 9 articles read in full)
 
