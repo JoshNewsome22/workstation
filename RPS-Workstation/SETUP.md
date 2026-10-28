@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.80: Your 15 added BAP 2020 part 2 articles, the second re-read (Behavioral Residential Treatment and Behavioral Interventions), and seven drafts back under your inclusion rule
+(the BCBA, 10/28: the updated part 2 folder, and "re-read all of them"; this is wave 2 of the re-read, the BI journal
+1986–1994; the JABA wave follows)
+
+- **BAP 2020 part 2, the articles you added** (15 new, 11 read in full): 13 cards and 4 objectives.
+  - The cards: a safe-word response to lures taught with behavioral skills training and in-situ practice; tablet
+    access and a stated rule with a reprimand (marked RESTRICTIVE) for public sexual behavior; letter naming with a
+    prompt test and incremental rehearsal; treadmill interval training with heart-rate targets and a lottery;
+    instructive feedback; response interruption for vocal stereotypy (its interruption and spelling demands marked
+    RESTRICTIVE); fine-motor fluency for buttoning; feedback for hand cleaning at work; a team points game; a
+    relational training program (described, not tested).
+  - The objectives: the safe word, interval training, buttoning a shirt, cleaning hands at work.
+  - Left out: a survey, a commentary, a staff ethics process, an FA risk tool, and two articles with no learner
+    procedure (precursor analyses, jackpot reinforcers).
+- **Re-read wave 2** (52 BI articles, 38 read in full, the rest skipped as assessment-only, staff-only or
+  seclusion-based): 50 cards, 19 objectives and 18 extra sources. Token and level systems, self-care chains,
+  schedules, DRO and DRA plans, job club, conversation and self-management skills. Restrictive steps (reprimands,
+  token loss, level drops, contingent chores, brief response interruption) are marked RESTRICTIVE. Left out as never
+  used: time-out rooms and isolation (seclusion), baskethold and arm holds (restraint), a hands-over-mouth
+  overcorrection, negative practice, and covert sensitization and other sexual reconditioning.
+- **Seven drafts back:** four objectives (try an activity then join it, tell staff what you would like changed,
+  clean your room against a list, leave at the fire alarm) and three cards (fire-alarm evacuation taught by backward
+  chaining, reinforcer sampling, a daily request meeting) were set aside earlier only because the evidence was adults
+  on a ward or in an institution. Your rule now keeps them.
+
+TD-1: 649 protocols; GB-1: 292 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.79: Behavior Analysis in Practice 2020 part 2, and the first re-read of earlier articles under your inclusion rule
 (the BCBA, 10/28: "re-read all of them"; this is wave 1 of the re-read, 42 BAP and AVB articles that were skipped or not
 cited before; the BI and JABA waves follow in later releases)
