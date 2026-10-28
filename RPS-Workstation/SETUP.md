@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.84: Behavior Analysis in Practice 2020 part 5, the arousal-suppression card, and your answers on five card groups
+(the BCBA's Part 5 folder and answers, 10/28)
+
+- **BAP 2020 part 5** (18 files, 7 read in full): 51 cards and 10 objectives, all from practice tutorials and one
+  single-case study, so each note says the procedure was described rather than tested.
+  - The cards: phrasing demands as a request for help with a choice of two ways; seven caregiver strategies (regular
+    positive attention, choice of task order, first-then, an alternative when an item is not available, short
+    directions with follow-through, pivot and praise, FCT with a prompt); digital activity schedules (a 9-step task
+    analysis, a choice page, timed activities); requests for items and help, a break card, "No, thanks", "Yes" to
+    offers, a wait card, "the no game", come here, picture and surprise schedules; ACT, mindfulness and family
+    routines (present-moment check-ins, self-kindness, values, a daily pause, Beat the Timer, a family Good Behavior
+    Game, tootles, conversation starters, graduated tolerance for escape).
+  - The objectives: set and start a timer, refuse politely, accept an offer, follow a surprise card, speak kindly to
+    oneself, replay an event and choose a response, work against a timer, wait before responding, start a
+    conversation, stay in a place a little longer each time.
+  - Left out: COVID-era service, safety and reopening models, trainee fieldwork, technology, an ethics commentary, a
+    literature review, and the self-care article already sent in part 4.
+- **Arousal suppression (Brogan et al., 2020), as you asked:** a self-management card (the student rates arousal on a
+  personal 1–10 scale and counts backward when it reaches the set number, with prompts faded) and one objective. The
+  note says it belongs with a licensed clinician who treats problem sexual behavior, under district rules and with
+  written family consent, with the BCBA on the data and the reinforcement; the study's arousal videos are never used.
+- **Your answers:** the five smoking-reduction cards and the habit cut-down objective from the same study are set aside
+  for now. The two weight cards stay with added cautions (screen for disordered eating, weigh only in private, goals
+  only from the doctor, hold money or belongings only if district rules allow). The biofeedback and voice-pitch cards stay.
+
+TD-1: 917 protocols; GB-1: 355 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.83: Behavior Analysis in Practice 2020 part 4, and the restrictive steps put back into their cards under your rule
 (the BCBA's Part 4 folder, 10/28; and the restrictive-steps pass promised with the 10/28 rule)
 
