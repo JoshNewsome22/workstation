@@ -9905,6 +9905,29 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.79: Behavior Analysis in Practice 2020 part 2, and the first re-read of earlier articles under your inclusion rule
+(the BCBA, 10/28: "re-read all of them"; this is wave 1 of the re-read, 42 BAP and AVB articles that were skipped or not
+cited before; the BI and JABA waves follow in later releases)
+
+- **BAP 2020 part 2** (7 articles read in full): 4 cards, 1 objective and 3 extra sources.
+  - The cards: a chained schedule with a signaled adult-led turn and student-led turn (its added-time and blocking
+    steps are marked RESTRICTIVE); behavioral skills training with video feedback for a zigzag cutting drill; a
+    silent smartwatch vibration as a reinforcer for staying engaged; setting up matching lessons on an iPad
+    (a tutorial, described and not tested).
+  - The objective: a safe cutting drill in soccer or PE.
+- **Re-read wave 1** (42 articles read again, 14 still skipped as measurement-only, staff-only or commentary):
+  76 cards, 24 objectives and 32 extra sources. They include token economies, ACT and defusion exercises,
+  equivalence-based teaching, prompt fading, curriculum and course designs, mastery criteria, positioning, and
+  sport and leisure skills. Each note says who was studied, what to adapt for a K–12 student, and whether the
+  procedure was tested or only described. Restrictive steps (a delayed time-out, contingent sprints, brief blocking
+  and reprimands) are marked RESTRICTIVE. A facility's seclusion and use-of-force content stays out.
+- **References completed:** DOIs added for eight BAP 2008–2013 and AVB 1987 articles that do not print one, and one
+  duplicate key folded into the bank's own key for the same article.
+
+TD-1: 582 protocols; GB-1: 265 objectives. Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.78: Your inclusion rule (10/28) in the banks, Behavior Analysis in Practice 2020 part 1, and two journal names corrected
 (the BCBA, 10/28: "don't exclude a protocol unless it's absolutely something I wouldn't work on"; restrictive procedures
 that were part of a study go into the steps; earlier volumes are being re-read under the new rule over the coming releases)
