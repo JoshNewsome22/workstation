@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.05: The Analysis of Verbal Behavior volume 13 (1996) in the banks
+(the BCBA, 10/29)
+
+- **TD-1, four cards:**
+  - Pairing a new word or sound with an activity the student enjoys, with no prompts, to bring out vocal play (Sundberg
+    et al., 1996, with preschoolers with language delays; Smith et al., 1996, the same procedure with two infants, on the
+    same card). The infants' condition pairing a sound with a reprimand is not written.
+  - An if-then rule that names the task and the reward, said back by the student, for following an instruction (Reitman &
+    Gross, 1996): immediate reward first, a later reward named by a time of day the student knows.
+  - Asking for a needed item by its feature ("whole crayon, please") and naming an item by its feature, taught separately
+    because one did not bring the other (Twyman, 1996).
+- **GB-1:** two objectives (ask for an item by its feature; name an item by its feature), each noting the study's two-session
+  criterion against the workstation's three; new sources for vocal play and following instructions.
+- **Not banked:** two adult laboratory studies, two conceptual papers, the cover and the contents page.
+
+TD-1: 1077 protocols; GB-1: 420 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.04: Eye-contact caution in the older bank notes, and Behavior Analysis in Practice 2022 parts 9 and 10
 (the BCBA, 10/29)
 
