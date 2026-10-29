@@ -9905,6 +9905,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.12: Journal of Applied Behavior Analysis volume 19 (1986) in the banks
+(the BCBA, 10/29; the zips sent were 1986, so 1985 is still to come)
+
+- **TD-1, 32 cards**, among them:
+  - Communication and language: naming objects across varied examples (Salmon et al.), progressive time delay for saying
+    "I like you" (Charlop & Walsh; hugs only as the student, family and district allow, or an agreed greeting instead),
+    signs for words the student already understands (Clarke et al.), incidental teaching of sight words during play
+    (McGee et al.), and "not" sentences in both of a child's languages (Madrid & Torres).
+  - Behavior: a 2-minute chair time-out with no added delay (Mace et al., marked RESTRICTIVE; staff never hold a student
+    in the chair), whole-interval then momentary DRO (Barton et al.), praise for compliance and a short DRO, each
+    affecting the other behavior (Parrish et al.), fading self-held arm tubes to wristbands (Pace et al.), and an
+    encopresis routine planned with the family, doctor and nurse (O'Brien et al.; its correction steps marked
+    RESTRICTIVE).
+  - Social: peer initiation and teacher-prompted sharing (Odom & Strain), sibling and peer strategy training, topic
+    starters at lunch (Haring et al.), a classroom manager role (Sainato et al.), and a recess peer-monitor role (Fowler
+    et al.; its point fine marked RESTRICTIVE).
+  - School and self-management: peer math teams with roles, self-checks of attention and self-graphing of practice
+    (Harris), interspersed known items (Koegel & Koegel), say-do correspondence carried to later settings and kept up
+    (Guevremont et al.), and a self-scorecard.
+  - Daily living, health and leisure: apartment upkeep, flossing to a plaque goal, healthy snack choices with cueing,
+    CPR steps on a practice manikin (steps from current guidelines and a certified instructor), a soccer pass, gross-motor
+    skills and a social-skills board game.
+- **Set aside by default (the BCBA may restore):** inflatable arm splints faded with toy play (mechanical restraint on a
+  hospital unit) and supervision for pica with one adult living in an institution.
+- **GB-1:** 10 objectives (name new examples of objects, say "I like you" after a hug, find an item by its label, a
+  peer-team role, a self-scorecard, home appliance care, flossing, a healthy snack, CPR steps at 100%, and "not"
+  sentences) and 24 new source lines.
+- **Not banked:** nursing-home and elderly studies, adult health, smoking and drinking studies, staff and caregiver
+  training, parent programs, a descriptive mother-child study, methods papers and an editor's note. A water mist,
+  facial screening and forced arm exercise comparison is never written.
+
+TD-1: 1239 protocols; GB-1: 480 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.11: Journal of Applied Behavior Analysis volume 17 (1984) in the banks
 (the BCBA, 10/29; the four Winter 1984 articles sent on their own are included)
 
