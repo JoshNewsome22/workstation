@@ -9905,6 +9905,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.99: Behavioral Interventions 2025 issue 2 in both banks
+(the BCBA's Issue 2 folder, 10/29; 14 files, 6 articles read in full)
+
+- **5 cards:**
+  - a chemical-safety response (leave a found cleaning product alone, move away, tell an adult) taught with the "cool
+    versus not cool" procedure (students who speak in short sentences; telling an adult by a communication device is
+    suggested, not tested);
+  - toilet training without punishment that steps up from a standard package to an individualized one only when
+    needed (preschoolers; the extra fluids are planned with the family, the doctor and the school nurse, the team
+    decides whether food is used, and the study's 80% mastery level is noted against the workstation's 90%);
+  - a soccer kick taught stage by stage with demonstration and specific feedback (students aged 7 and 8);
+  - pointing to named pictures in the home language and the school language, the language order planned (the three
+    orders compared on one card, the best first);
+  - object imitation to help a student pick the object an adult names (two children; any guidance through refusal
+    needs TD-1's escape-extinction consent; touch as a reward only with the family's agreement and the student's
+    assent).
+- **3 objectives:** leave a cleaning chemical alone, move away and tell an adult (a safety skill, at 100%); ask to use
+  the bathroom on their own; point to a named picture in either of their two languages. **3 more sources** for
+  existing objectives (toileting, pointing to a named picture, a soccer skill).
+- **Left out:** a choice analysis of food stealing (an assessment, no treatment tested), an algorithm for service
+  hours, a commentary on punishment, a methods paper, staff safety monitoring, electronic versus paper recording, a
+  scoping review, an ethics-training survey and the issue information page.
+
+TD-1: 1022 protocols; GB-1: 395 objectives. References checked against Crossref by DOI (authors, volume, article
+number). Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.98: Behavior Analysis in Practice 2022 part 4 in both banks
 (the BCBA's Part 4 folder, 10/29; 15 files, 6 articles read in full)
 
