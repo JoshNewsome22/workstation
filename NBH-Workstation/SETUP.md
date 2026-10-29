@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.00: Behavior Analysis in Practice 2022 part 5 in both banks
+(the BCBA's Part 5 folder, 10/29; 15 files, 2 articles read in full)
+
+- **4 cards:**
+  - treating dangerous problem behavior within the enhanced choice model: the student chooses to practice, hang out
+    or leave; request and tolerance training; contextually appropriate behavior chained with choice trials; review
+    talks before and after each visit; then the move into the classroom with teacher training (one card: the parts
+    were tested only together; the synthesized function assessment comes first; problem behavior did not end the
+    demand, so TD-1's escape-extinction consent comes first; five fluent speakers aged 4 to 9);
+  - abduction prevention, three cards the study evaluated in turn: behavioral skills training with video models;
+    in situ training with several stranger exemplars in new places; and telling a stranger's lure from a familiar
+    adult's invitation (three verbal boys aged 4 and 5; staged approaches in stores and at a home need family and
+    district consent, a warning to site staff, and a debrief after each approach, since one neighbor stepped in and
+    two caregivers saw their child a little more scared).
+- **1 objective:** say "no," move away and tell a familiar adult when a stranger invites the student to leave, and go
+  along with a familiar adult (a safety skill, at 100%). **4 more sources** for existing objectives (asking politely,
+  accepting "no," working through a task, refusing a stranger's lure).
+- **Left out:** corrections, an editor's note, a survey, guidance on collaboration and supervision, an ethics paper on
+  feeding, a decision model for choosing a preference assessment, a historical review, a study with dogs, and two
+  staff-training studies.
+
+The enhanced-choice article is the one GB-1 already cites (Rajaraman et al., 2022); its reference is not added twice.
+TD-1: 1026 protocols; GB-1: 396 objectives. References checked against Crossref by DOI.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.99: Behavioral Interventions 2025 issue 2 in both banks
 (the BCBA's Issue 2 folder, 10/29; 14 files, 6 articles read in full)
 
