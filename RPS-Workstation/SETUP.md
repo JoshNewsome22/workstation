@@ -9905,6 +9905,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.15: Journal of Applied Behavior Analysis volume 18 (1985) in the banks
+(the BCBA, 10/29; with it, JABA runs without a gap from 1968 to 1988)
+
+- **TD-1, 20 cards**, among them:
+  - Communication: functional communication training matched to the function, "I don't understand" for hard tasks
+    or "Am I doing good work?" for attention (Carr & Durand; escape-extinction consent first, the study's brief hand
+    hold left to the district crisis plan), "I want" requests with progressive time delay (Charlop et al.; the
+    eye-contact caution is on the card), and incidental teaching of position words (McGee et al.).
+  - Independence and assessment: unpredictable adult check-ins so a student keeps working alone (Dunlap & Johnson;
+    the adult steps away but keeps the student in view; its firm "No" marked RESTRICTIVE), a scatter plot to find the
+    times and activities that set off problem behavior, then change the schedule (Touchette et al.), rotating sensory
+    rewards (Rincover & Newsom), and a microswitch movement that runs a toy (Wacker et al.).
+  - Social and school: peer initiation of play (Odom et al.), the RECESS point program and a recess monitor role
+    (Dougherty et al.; point loss and time-out marked RESTRICTIVE), play invitations and a class reward for trading
+    them (Kohler & Fowler; response cost marked RESTRICTIVE), an all-positive classroom plan (Pfiffner et al.), and a
+    self-correcting spelling routine.
+  - Community and skills: peers teaching library, store, restaurant and street-crossing chains on real trips (Blew et
+    al.; street crossing with an adult right beside the student), photo task sheets for changing job tasks (Sowers et
+    al.), a picture book for starting a computer, toy play across example toys (Haring), a study and retell routine,
+    and picture books for multi-step tasks (Wacker et al.).
+- **Set aside by default (the BCBA may restore):** shaping a potty signal in typically developing infants at home.
+- **GB-1:** 5 objectives (check out a library book, polite words in play, start and shut down a computer program, a
+  study-and-retell routine, follow a picture book for a multi-step task) and 18 new source lines.
+- **Not banked:** movement suppression time-out (holding a child still as a consequence; never written), a failed
+  self-instruction replication, a preference check with pediatric inpatients, traffic, energy and seat-belt
+  campaigns, adult laboratory and health studies, staff and parent programs, methods papers and commentaries.
+
+TD-1: 1295 protocols; GB-1: 494 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.14: Journal of Applied Behavior Analysis volume 21 (1988) in the banks
 (the BCBA, 10/29; issues 1 to 4)
 
