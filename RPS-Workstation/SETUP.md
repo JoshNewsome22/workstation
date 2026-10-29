@@ -9905,6 +9905,56 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.07: Journal of Applied Behavior Analysis volumes 12 and 13 (1979 and 1980) in the banks
+(the BCBA, 10/29)
+
+**1979 (volume 12)**
+
+- **TD-1, 16 cards**, among them:
+  - Time delay at mealtime to bring out requests, and a massed-trial version for a student who did not respond (Halle et
+    al.); the student's own tray is always handed over at the end of the wait.
+  - Sensory extinction (masking the sound, feel or sight a movement produces) and matched toy play (Rincover et al.).
+  - DRO for calm hands, and guided overcorrection with its steps marked RESTRICTIVE (Harris & Wolchik).
+  - Answering everyday questions taught across school locations (Handleman), with the eye-contact caution and no touch
+    to the face to get attention.
+  - The PASS class program (rules, a light and timer, group activity rewards), classroom rating points, sharing training,
+    peer tutors for sight words, written sentences with adjectives and adverbs, photo task sequences for job tasks,
+    mending skills, movement feedback with a reward for lower activity, and a weekly exercise contract (its deposit of
+    belongings is response cost, marked RESTRICTIVE).
+- **GB-1:** two objectives (complete the steps to mend a garment; write sentences with adjectives and adverbs) and 11 new source lines.
+- **Set aside (2):** travel training studied with adult men on a residential-facility ward (the rule on adults in an
+  institution), and a mealtime routine that pushed a child's tongue back with a spoon, which its authors called
+  punishment.
+- **Not banked:** issue 4 (a special issue on assessment and observer agreement), adult medical and habit studies, adult
+  hospital wards, a bed alarm with a loud tone, satiation therapy, reviews, methods papers and three one-page abstracts.
+
+**1980 (volume 13)**
+
+- **TD-1, 26 cards**, among them:
+  - Escape and aggression (Carr, Newsom & Binkoff): preferred items given during demands, and a hand-tap gesture that earns
+    a break; both need TD-1's escape-extinction consent first, and the study's seatbelt confinement is not written.
+  - Short intertrial intervals (Koegel), mixing known and new items or varied tasks (Neef; Dunlap), and richer reward for
+    unprompted naming than for prompted echoes (Olenick).
+  - Health and daily routines: putting on one's own hearing aid, a dental-visit prize package, video self-modeling for
+    swimming (planned with the family, the doctor and the school nurse).
+  - Requests and language: a "want out" request with the snack in view (Simic), incidental teaching in play (Hart), and
+    two naming programs (Cuvo), one with a progress-board step marked RESTRICTIVE.
+  - Classroom: a random-draw prize for attending, peer reading tutors with a home contract, self-instruction for
+    attending, spelling practice (its say-and-write overcorrection marked RESTRICTIVE), and a first-then schedule.
+  - Behavior reduction: a solitary-play contract with time-out (the locked door is not written), music on the bus while
+    seated, and contingent exercise (punishment only, marked RESTRICTIVE; pair it with a function-based plan).
+  - Transition: a picture clock card for breaks, job interview skills (two cards), and social skills in role-play and in a
+    peer group; the cards that included eye contact carry the caution.
+- **GB-1:** 11 objectives (among them dictated spelling, hearing-aid use, swimming skills, naming coins, peer reading,
+  break times at work, greeting a receptionist, speaking up when someone cuts in line) and 21 new source lines.
+- **Not banked:** community and police programs, adult drinking and health studies, a water mist for self-injury (never
+  written), medication studies, reviews and methods papers, and one choice-assessment study.
+
+TD-1: 1119 protocols; GB-1: 433 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.06: The Analysis of Verbal Behavior volume 14 (1997) checked
 (the BCBA, 10/29)
 
