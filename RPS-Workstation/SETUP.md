@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.09: Journal of Applied Behavior Analysis volume 15 (1982) in the banks
+(the BCBA, 10/29)
+
+- **TD-1, 22 cards**, among them:
+  - Self-injury: continuous protective equipment, a padded helmet and gloves (Dorsey et al.), which needs the medical and
+    district restraint review; the study's equipment put on as a consequence, with the student held, is not written.
+  - Reprimands given close by, about 1 m away (Van Houten et al.), marked RESTRICTIVE; the study's firm shoulder hold and
+    head guidance are not written.
+  - Free time with response cost for time off task (Rapport et al.), its response cost marked RESTRICTIVE; the
+    medication comparison is not written.
+  - Language and communication: loose training for "is" and "are" (Campbell & Stremel-Campbell), a 3-second response
+    delay with materials held out of reach (Dyer et al.), naming on a picture board (Hurlbut et al.), manual signing in
+    daily routines (Schepis et al.), and peer tutors for social phrases (Lancioni).
+  - Classroom: a student with behavior problems as reading tutor, personal rate goals with tokens, self-instruction and
+    beat-the-timer stickers, a group contingency on one named student's work (only with the student's and family's
+    agreement), say-do and show-do correspondence, discussion points (point loss and office referral marked RESTRICTIVE)
+    and stars for good contributions, a work contract, and social skills role-play with video (with the eye-contact caution).
+  - Daily living: two toothbrushing programs and laundry skills.
+- **GB-1:** nine objectives (among them "is" and "are" in questions, right and left, naming on a picture board, thank you
+  and that's good, say-then-do, speaking up for oneself, contributing to discussion, laundry) and 14 new source lines.
+- **Not banked:** contingent icing for tooth grinding, an antiseptic mouth swab for rumination, and visual screening
+  (aversive procedures, never written); a parent lottery; community, workplace, adult, staff-training, methods and review
+  papers; an erratum.
+
+TD-1: 1162 protocols; GB-1: 451 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.08: Journal of Applied Behavior Analysis volume 14 (1981) in the banks
 (the BCBA, 10/29)
 
