@@ -9905,6 +9905,47 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.97: Behavior Analysis in Practice 2022 part 3 and Behavioral Interventions 2025 issue 1 in both banks
+(the BCBA's Part 3 folder and Issue 1 folder, 10/29; 35 files, 14 articles read in full)
+
+- **19 cards.** From Behavior Analysis in Practice:
+  - receptive labels taught with most-to-least prompts and the picture array rotated in view;
+  - a stability ball chair (locked base) for one-to-one work time (a brief clinic report, mixed results);
+  - eating new foods by demand fading through touch-to-swallow steps, coached by video with a parent (one
+    5-year-old; the hand-over-hand step needs TD-1's escape-extinction consent, and feeding goals are planned with
+    the family, the prescribing doctor and the school nurse; the team decides whether food is used);
+  - feedback sheets for opening and closing a work conversation politely (17 to 22, simulated workplace, reading);
+  - a computer-assisted reading program run by a trained adult, with supports when a student gets stuck (one card for
+    the package, which was tested only as a whole; the program is licensed);
+  - Direct Instruction: teaching a concept with divergent examples and close-in nonexamples; lesson delivery with
+    unison answers on a signal; error correction (model, lead, test, delayed test); placement and mastery tests
+    (tutorials, described, not tested).
+
+  From Behavioral Interventions:
+  - high-p instructions before a hard one, and medium-p instructions as a stand-in when high-p ones cannot be found;
+  - better clothing and grooming through staff task clarification and a posted grooming picture (students 18 to 21 in
+    group homes; mainly a staff-training study);
+  - two competing responses for tics, one incompatible with the tic and one not (a fidget item, gum, a finger tap),
+    from habit reversal (planned with the family, the prescribing doctor and the school nurse; the children gained
+    least);
+  - blocked and mixed trials with a 0-s then 5-s prompt delay;
+  - a card-hand alternative matched to an isolated or a synthesized function, with a choice test (translational);
+  - a back-and-forth comment ("I see a ...") taught with most-to-least prompts;
+  - finding the play setting and the consequence that keep a student moving most (one card: the study compared each
+    in brief 5-minute conditions; the condition that made exercise a break from demands is left out).
+- **7 objectives:** touch the item that is NOT the one named; read silent-e words; arrive dressed and groomed to a
+  checklist; use a competing response when an urge to tic comes; do the action an adult names; name a different item
+  after a partner names one; stay active during free play in the gym. **13 more sources** for existing objectives.
+- **Left out:** perspectives and conceptual papers (collaboration, ACT, values), a Prader-Willi primer, firearm safety
+  for home visits, Direct Instruction implementation and content-analysis guides, training staff or future teachers
+  (adult behavior only), a design-selection tool, two commentaries, a college-athlete study, college instruction, a
+  reanalysis of synthesized functional analyses, an AI fidelity tool, the issue information page and a correction.
+
+TD-1: 1011 protocols; GB-1: 388 objectives. References checked against Crossref by DOI (volume, pages or article
+number, authors). Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.96: Behavior Analysis in Practice 2022 part 2 in both banks
 (the BCBA's Part 2 folder, 10/28; 17 articles, 6 read in full)
 
