@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.03: Two bank items put back, and Behavior Analysis in Practice 2022 part 8 checked
+(the BCBA, 10/29)
+
+- **Put back, as asked:**
+  - TD-1: the comparison card from the echolalia study (Kaye et al., 2025): cue-pause-point with a faded picture
+    prompt and a preferred item for correct answers. Its "shh" step after the student repeats the question stays
+    marked RESTRICTIVE (a mild reprimand: review and consent under district rules before use).
+  - GB-1: walk with the heel touching the ground on each step (Wilder et al., 2025, the vibrating-bracelet study). The
+    study set no mastery level, so the workstation's 90% stands; the routine is planned with the family, the
+    prescribing doctor and the school nurse, and the note says walking without the bracelet was never tested.
+- **Part 8 (15 files):** the two articles with a procedure, reducing the number of food portions an adolescent eats
+  (Chagolla & Penrod, 2022) and problem-solving for social conflicts (Suarez et al., 2022), are already in both banks
+  from the open-access additions of v23.89, with their cards and objectives; nothing is added twice. The other 13 are
+  perspectives, surveys, service and telehealth papers, a graphing tutorial and a commentary.
+
+TD-1: 1064 protocols; GB-1: 407 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.02: Behavioral Interventions 2025 issues 3 and 4, and Behavior Analysis in Practice 2022 part 7, in both banks
 (the BCBA's Issue 3, Issue 4 (two parts) and Part 7 folders, 10/29; 61 files, 26 articles read in full)
 
