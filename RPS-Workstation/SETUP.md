@@ -9905,6 +9905,55 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.02: Behavioral Interventions 2025 issues 3 and 4, and Behavior Analysis in Practice 2022 part 7, in both banks
+(the BCBA's Issue 3, Issue 4 (two parts) and Part 7 folders, 10/29; 61 files, 26 articles read in full)
+
+**Eye contact (the BCBA, 10/29).** Studies that teach or require eye contact are now written, and every card or
+objective that includes it ends with a caution: eye contact is not needed for attending or learning and many students
+with autism find it uncomfortable; teach it only when the student, the family and the team agree; accept other signs
+of attending; never hold back anything the student needs until eye contact occurs; and stop at any sign of distress.
+
+- **31 cards.** From Behavioral Interventions issue 3: naming how things feel with a constant time delay; a vibrating
+  bracelet to reduce toe walking (planned with the family, the doctor and the school nurse).
+  From issue 4:
+  - answering instead of repeating the question (attention-maintained echolalia), with praise;
+  - FCT for toys, then a fixed-lean multiple schedule, and a slower step-by-step thinning when that fails;
+  - three treatments for severe escape-maintained behavior compared in turn: a break for each instruction completed
+    with escape extinction (TD-1's consent first), an edible for completing instructions, and instructional fading
+    from zero;
+  - FCT with several request modes, then the preferred mode placed on extinction in turn;
+  - asking for attention with a red/green availability board (attention-maintained vomiting, one inpatient), and a
+    levels system with tokens added to it (its token loss and demotion are marked RESTRICTIVE; toileting accidents
+    never count against the student, which the study's version did);
+  - "Child's Way / Adult's Way" cards with a calm-time timer for behavior when adults lead;
+  - pairing toy play with reinforcement to build play and reduce automatic stereotypy; pairing adult interaction
+    with preferred items so it becomes rewarding;
+  - sight words in a picture book with a four-card picture-word array; listener selection by joint control;
+  - short scheduled breaks to raise engagement in long lessons (adults; a class-wide arrangement);
+  - classmates trained to play with a student at recess; street crossing taught in virtual reality, and its
+    component skills (costly equipment, children without elopement); bowling form for adults; leaving found pills
+    alone, by video self-modeling;
+  - shaping orienting toward an adult during paused play, with brief eye contact only if agreed (with the caution).
+  From Behavior Analysis in Practice part 7: scheduled talk time with planned ignoring for perseverative speech; a
+  green-card conversational voice level; two signaled programs for motor stereotypy (tablet time on a bracelet signal,
+  its removal marked RESTRICTIVE; then a self-managed timer faded to a vibrating watch); a high-p sequence with a
+  strong reinforcer refreshed each session; time delay with or without transfer trials; shared reading with a teacher
+  or peer partner.
+- **8 objectives:** name how an item feels; answer a fill-in question without repeating it; go along calmly with an
+  adult's way; stay engaged between scheduled breaks; turn toward an adult to keep a game going (eye contact not
+  required); use a conversational voice; read silently through a reading period; work out a word's meaning from the
+  sentence. **17 more sources** for existing objectives.
+- **Changed from the readers' drafts:** a comparison card that used a "shh" reprimand left out; the levels card no
+  longer demotes for toileting accidents; the toy-play card's hand-over-hand prompt points to the escape-extinction
+  consent; an objective that recast toe walking as a skill left out.
+- **Left out:** staff-training studies, reviews, surveys, methods and design papers, commentaries, a book review,
+  issue information pages, corrections, and studies with college participants.
+
+TD-1: 1063 protocols; GB-1: 406 objectives. References checked against Crossref by DOI.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.01: Behavior Analysis in Practice 2022 part 6 in both banks
 (the BCBA's Part 6 folder, 10/29; 15 files, 6 articles read in full)
 
