@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.06: The Analysis of Verbal Behavior volume 14 (1997) checked
+(the BCBA, 10/29)
+
+- **GB-1:** three new source lines from a review comparing pointing to pictures or symbols with signing (Potter & Brown,
+  1997): for asking with signs, labeling with signs, and matching relations, where the reviewed studies found signing
+  learned faster and more accurately than selecting symbols.
+- **Not added as TD-1 cards:** the review only retells other studies' procedures, and TD-1 already has sign request and
+  sign label cards from primary studies; its second-language vocabulary routine was studied with college students.
+- **Not banked:** the other nine files (two laboratory studies with adults, one with pigeons, a conceptual paper, an
+  editorial, a book review, the masthead, the cover and the contents page).
+
+TD-1: 1077 protocols; GB-1: 420 objectives (unchanged).
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (GB-1 changed). Tested: `qa/td1-bank-test.js`, `qa/gb1-bank-test.js`,
+`qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.05: The Analysis of Verbal Behavior volume 13 (1996) in the banks
 (the BCBA, 10/29)
 
