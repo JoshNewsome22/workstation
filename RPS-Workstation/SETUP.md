@@ -9905,6 +9905,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.08: Journal of Applied Behavior Analysis volume 14 (1981) in the banks
+(the BCBA, 10/29)
+
+- **TD-1, 21 cards**, among them:
+  - Task difficulty and problem behavior (Weeks & Gaylord): check how hard the task is, then fade in the wrong choice
+    errorlessly.
+  - Compliance training with food, a hug and praise for following a request within 5 s, then a token (Russo et al.).
+  - Spaced responding (DRL) for repetitive movement, with a note to decide first whether reducing harmless movement is a
+    goal for the student (Singh et al.).
+  - Teaching arrangements: a peer answers first, the reward placed where the correct response reaches it, rotating
+    reinforcers (its "no" with brief withdrawn attention marked RESTRICTIVE), a sensory-reinforcer test (check seizure
+    history before any flashing light), and Halle's pause before a meal or item with a model (never held back beyond
+    the brief pause).
+  - Classroom: the Good Behavior Game in the library, a delayed end-of-day reward, tokens with peer tutors, self-chosen
+    standards, word bingo, and noise lights with earned music on the school bus (its loss of music and principal warning
+    marked RESTRICTIVE).
+  - Community and safety: eating at a fast-food restaurant, saying no to a stranger's lure, escaping a home fire,
+    greeting a new adult (escape-extinction consent first; adults the family approves), darts as a leisure skill,
+    voice volume, and photo-object matching.
+- **GB-1:** nine objectives (among them yes/no about a picture, buckling a belt, a meal out, a home-fire escape, darts,
+  greeting a new adult) and 19 new source lines.
+- **Set aside (2):** family-style meals with young adults in a residential training center, and meals served to fullness
+  for rumination with adults in a residential center (a medical diet the authors call risky).
+- **Not banked:** energy, police and workplace studies, staff-only and parent training, methods and commentary, an
+  editorial and an erratum, adult positive practice on an institution ward, a dental fee-refund study, a diabetes
+  urine-testing program, and a self-reward study whose peer model was scripted.
+
+TD-1: 1140 protocols; GB-1: 442 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.07: Journal of Applied Behavior Analysis volumes 12 and 13 (1979 and 1980) in the banks
 (the BCBA, 10/29)
 
