@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.98: Behavior Analysis in Practice 2022 part 4 in both banks
+(the BCBA's Part 4 folder, 10/29; 15 files, 6 articles read in full)
+
+- **6 cards:**
+  - a fidget spinner with taught rules during class work (three second graders with ADHD; the spinner and the rules
+    were tested only together; the teacher judged it unacceptable because work still went unfinished);
+  - individualized ACT pull-out sessions to reduce classroom disruption (three boys aged 10 to 14 at an alternative
+    school, with a therapist trained in ACT; one brief control session set off severe self-injury, so plan it with a
+    crisis plan and the school counselor or social worker);
+  - most-to-least prompts with a progressive delay, mastered at 90 to 100% (sets mastered at 80% did not hold up);
+  - picture matching plus name-pairing to build listener responses that were not directly taught (young children;
+    the last prompt is physical: complete TD-1's escape-extinction consent before any guidance through refusal);
+  - SAFMEDS flash-card timings, with practice before the timing: 15-card decks with study time worked best (one
+    study of college students learning vocabulary, five arrangements written as one card; adapt for a K-12 student);
+  - general-case teaching of a social skill that generalizes, such as joining a game (a tutorial, described, not
+    tested).
+- **4 objectives:** use a fidget tool by its rules while staying on task; join a playground game the way that game
+  needs; say the meanings of new vocabulary words in a 1-minute timing; complete their own 1-minute flash-card timing
+  and chart the score. **2 more sources** for existing objectives.
+- **Left out:** a clicker-training study of practitioners, ethics and ACT papers, a correction, a self-care survey, an
+  ACT review, graduate practicum requirements, and a review of treatment-integrity reporting.
+
+TD-1: 1017 protocols; GB-1: 392 objectives. References checked against Crossref by DOI.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.97: Behavior Analysis in Practice 2022 part 3 and Behavioral Interventions 2025 issue 1 in both banks
 (the BCBA's Part 3 folder and Issue 1 folder, 10/29; 35 files, 14 articles read in full)
 
