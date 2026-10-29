@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.01: Behavior Analysis in Practice 2022 part 6 in both banks
+(the BCBA's Part 6 folder, 10/29; 15 files, 6 articles read in full)
+
+- **6 cards:**
+  - "Balance," a parent-run program for emerging problem behavior: child-led play earned by answering to their name,
+    asking politely, accepting "no" calmly and cooperating (one card: the parts were tested only together; four
+    preschoolers with mild behavior at home; the physical prompt and the wait-out work through a demand, so TD-1's
+    escape-extinction consent comes first; the authors were later paid by a company that trains the program);
+  - false-belief tasks with live adults: several examples, least-to-most prompts and reinforcement (three boys aged
+    4 to 9 who spoke in full sentences; the authors say a simple discrimination was taught);
+  - self-managed timed practice with an answer key for order of operations (typically achieving sixth graders);
+  - assessment-based instruction: compare teaching procedures for the student, then teach with the one that works
+    best (a tutorial, described, not tested);
+  - discrimination training arranged for stimulus disparity and salience, with a faded highlight on the telling
+    feature; and error analysis with an observing response, the spoken sample given first (both recommendations
+    from a review, described, not tested).
+- **2 objectives:** answer where a person will look for an item moved while they were away (the study's 80% noted
+  against the workstation's 90%); solve order-of-operations problems. **5 more sources** for existing objectives
+  (answering to their name, asking politely, accepting "no," cooperating, finishing a short task first).
+- **Left out:** a study of echolalia under easy and hard demands (an assessment, no treatment), graphing and research
+  design papers, a coaching guide, a review of demand assessments, a soft-skills paper, a translational study of
+  derived relations, and present-moment activities for paraprofessionals; and, from the review, a card for earning
+  edibles in clear bins (a secondhand account of another study, with response cost).
+
+TD-1: 1032 protocols; GB-1: 398 objectives. References checked against Crossref by DOI.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.00: Behavior Analysis in Practice 2022 part 5 in both banks
 (the BCBA's Part 5 folder, 10/29; 15 files, 2 articles read in full)
 
