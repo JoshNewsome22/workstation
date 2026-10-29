@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.14: Journal of Applied Behavior Analysis volume 21 (1988) in the banks
+(the BCBA, 10/29; issues 1 to 4)
+
+- **TD-1, 20 cards**, among them:
+  - Communication: saying "That's not it" when handed the wrong item (Yamamoto & Mochizuki; its blocking of grabs
+    marked RESTRICTIVE), signs taught with the spoken word (Clarke et al.), the Natural Language Paradigm run by parents
+    in play (Laski et al.), and switch-played messages for requests and for leisure (Wacker et al.; the restaurant step
+    that leaves until the student asks is marked RESTRICTIVE).
+  - Behavior: a high-probability request sequence before a hard request (Mace et al.: about 10 s apart, the hard request
+    within 5 s), escape extinction with compliance training for head banging (Repp et al.; head blocking marked
+    RESTRICTIVE, escape-extinction consent first), and brisk group lessons for stereotypy during idle time.
+  - Personal safety (as asked): say no, get away and tell an adult, taught with role play (Miltenberger &
+    Thiesse-Duffy), and refusing a lure with an interactive video and rehearsal (Poche et al.). Practice is in a safe
+    setting with an adult present; the studies' surprise lures by unfamiliar adults are not copied without family and
+    district consent.
+  - Social, school and transition: friendly gestures in group songs and games (McEvoy et al.; no-touch gestures
+    offered), peer interview practice, self-advocacy (telling when a right is denied and three complaint steps; Sievert
+    et al.), a systematic preference check before teaching (Green et al.), self-instruction, peer monitor and point
+    earner roles, cooking with constant time delay (Schuster et al.), say-do play, and saying each character before
+    entering it (Wacker et al.).
+- **Folded:** cues-pause-point is already a card from 1987 (McMorrow et al.); the 1988 study by the same group,
+  mostly with adults in an institution, is a source for the answering objective.
+- **GB-1:** 5 objectives ("That's not it", friendly-gesture games, self-advocacy, data entry, balancing a checkbook)
+  and 14 new source lines.
+- **Not banked:** punishment packages that hold a child in a chair or in a corner (never written), a rat laboratory
+  study, a descriptive classroom study, community and police seat-belt and traffic programs, adult health and
+  shopping studies, parent and staff training, a position paper, methods papers and comments.
+
+TD-1: 1275 protocols; GB-1: 489 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.13: Journal of Applied Behavior Analysis volume 20 (1987) in the banks
 (the BCBA, 10/29; issue 4 came in two parts; 1985 is still to come)
 
