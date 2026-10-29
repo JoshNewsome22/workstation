@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.10: Journal of Applied Behavior Analysis volume 16 (1983) in the banks, and community safety
+(the BCBA, 10/29)
+
+- **TD-1, 19 cards**, among them:
+  - Language and communication in autism: spontaneous signed requests (Carr & Kologinsky), expressive sign labels with
+    speech plus sign (Remington & Clarke; its shouted "No!" before a trial marked RESTRICTIVE), total communication with a
+    lengthening delay (Barrera et al.; its 15-second time-out after a wrong answer marked RESTRICTIVE), echoing the name
+    before handing over the named object (Charlop), and incidental teaching while packing lunch (McGee et al.).
+  - Behavior: compliance with "do" and "don't" requests (Neef et al.), whole-interval DRO (Repp et al.), morning jogging
+    planned with the family, doctor and nurse (Bachman & Sluyter), self-evaluation matched to an adult's rating
+    (O'Brien et al.; Rhode et al.), and positive-practice overcorrection for off-task behavior (Carey & Bucher, marked
+    RESTRICTIVE).
+  - School: organized games at recess (Murphy et al.; its bench time-out and group pause marked RESTRICTIVE) and a team Good
+    Behavior Game (Saigh & Umar; the class's former spanking and scolding are never used).
+  - Community and skills: a restaurant package for young children, siblings running short lessons at home
+    (escape-extinction consent first), street crossing taught at the curb with an adult present, swimming-stroke
+    correction with a no-touch signal, and picture prompts for assembly tasks.
+- **Community safety (as asked):** the seat-belt studies of 1982 and 1983 (Geller et al.), set aside earlier as community
+  programs, were read again. They give a seat-belt check with a token on every ride (the vehicle never moves until the
+  student is buckled as the transport plan states) and a GB-1 objective to put on and buckle the belt. The jaywalking
+  observation and a 1980 seat-belt survey had no skill to teach. From now on, personal-safety studies (pedestrian, seat
+  belt, bicycle, fire, water, stranger and poison safety) are kept.
+- **GB-1:** three objectives (hand over the named item in a routine, stop when told "stop" or "don't", put on and buckle a
+  seat belt) and 16 new source lines.
+- **Not banked:** adults on an institution ward (a card-game social skills study), staff training, elderly and nursing-home
+  studies, a comatose patient, driving and workplace safety, a staff consultation package for vandalism, a laboratory
+  praise study, reviews, comments and two errata.
+
+TD-1: 1181 protocols; GB-1: 454 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.09: Journal of Applied Behavior Analysis volume 15 (1982) in the banks
 (the BCBA, 10/29)
 
