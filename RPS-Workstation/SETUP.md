@@ -9905,6 +9905,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.95: The six forms on an iPad, refined (from your DM-1 screenshots)
+
+DM-1, IC-1, RR-1, TB-1, IA-1 and IN-1 on a 10.2-inch iPad held sideways.
+- **Rows of fields line up.** The labels in a row share one line (a label that wraps lifts its neighbors' with it), the
+  boxes sit level under them, and an example ("For example, …") sits under its box, not between the label and the box.
+- **Examples go once a box is filled.** "For example, bus 412, aide on bus" shows while Transportation is empty and
+  goes once something is typed; it comes back if the box is emptied. An explanation such as FLEID's "Florida Education
+  Identifier" stays.
+- **Boxes the form fills itself read as values.** DM-1's Age (from the date of birth), RR-1's rate and TB-1's and
+  IA-1's scores are shaded with no border, so they do not look like boxes to type in.
+- **The form's toolbar keeps to one row.** In Fullscreen with the case on it, it wrapped to three rows. Now, step by
+  step and only as far as needed, the small labels go ("The case"), Dictate and the next-sheet arrow show their icons,
+  and the case and the sheet's name are shortened (each whole in its tooltip). A laptop's toolbar is unchanged.
+- **Sheet titles in sentence case** on screen ("Parents, guardians, and authorized contacts"), as the sub-headings
+  already were. The paper keeps the words as written.
+- **Long entries read in full.** A box whose entry is longer than the box widens to two columns, or the whole row
+  ("Royal Palm School (simulated)" was cut off).
+- **Spacing around headings.** A heading now sits closer to what it names than to what came before: 40 px above a
+  section title and 16 below, 32 above a sub-heading and 12 below.
+- **DM-1: "Same as the contacts above"** under Emergency contacts. Ticked, the emergency table goes away and the
+  printout says "Same as the contacts above." under the heading. It is saved with the form; unticked, the sheet prints
+  as before.
+
+Not changed: what the six forms print (checked word for word at a laptop's and an iPad's width), and what they save
+apart from DM-1's new box. Saved DM-1 files from before load as they did.
+To set up: upload the whole folder as usual (DM-1, IC-1, RR-1, TB-1, IA-1 and IN-1 changed).
+Tested: `qa/fx5-test.js` (new: WebKit, Safari's engine, with a touch screen at 1080 px and 860 px, and Chromium at a
+laptop's width), `qa/fx3-test.js`, `qa/fx2-test.js`, the saved fields and printouts of the six forms against v24.94,
+the forms' own tests, the touch-screen layout, the field names and accessibility.
+
 ### v24.94: Behavior Analysis in Practice 2022 part 1 in both banks
 (the BCBA's Part 1 folder, 10/28; 21 files, 5 articles read in full)
 
