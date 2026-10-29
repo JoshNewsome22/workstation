@@ -9905,6 +9905,31 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.04: Eye-contact caution in the older bank notes, and Behavior Analysis in Practice 2022 parts 9 and 10
+(the BCBA, 10/29)
+
+- **Eye-contact caution, now everywhere (as asked):** 24 older notes (19 TD-1 cards, 5 GB-1 objectives) that said to leave
+  out or never target eye contact now say the team may add it only under the BCBA's 10/29 caution, and each ends with the
+  caution word for word. Three GB-1 source lines lose the old wording. Notes that already agreed (facing or orienting is
+  enough, eye contact need not be required) are unchanged.
+- **Put back under the new rule:**
+  - TD-1: shaping looking toward an adult on request (a 1969 study), which an earlier review had dropped under the old rule;
+    its 10-second pause after an error is marked RESTRICTIVE, and drinks as rewards are the team's decision.
+  - Two BAP studies that had been skipped only for eye contact (Weisberg & Jones, 2019; Fonger & Malott, 2019): four TD-1
+    cards for joint attention, social referencing and gaze-shift requests, one TD-1 shaping card, and three GB-1 objectives,
+    each with the caution and a facing or orienting alternative.
+- **Part 9 (15 files):** remote slide-deck lessons and remote life-skill chains (Belisle et al., 2021; described, not
+  tested), a competing-items assessment for face masks (Frank-Crawford et al., 2021), and eight GB-1 objectives from
+  telehealth teaching (Nohelty et al., 2022). The two face-mask cards already in TD-1 now mark their blocking steps
+  RESTRICTIVE. The other 12 files are assessment only, staff and supervision papers, ethics and perspectives.
+- **Part 10 (8 files):** its one procedure study (Cool Versus Not Cool over telehealth) is already in both banks; the
+  rest have no procedure to bank.
+
+TD-1: 1073 protocols; GB-1: 418 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.03: Two bank items put back, and Behavior Analysis in Practice 2022 part 8 checked
 (the BCBA, 10/29)
 
