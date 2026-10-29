@@ -9905,6 +9905,45 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.11: Journal of Applied Behavior Analysis volume 17 (1984) in the banks
+(the BCBA, 10/29; the four Winter 1984 articles sent on their own are included)
+
+- **TD-1, 26 cards**, among them:
+  - Communication: manual signs taught by fading guidance (Duker & Morsink; its "no" with a hand interruption marked
+    RESTRICTIVE), yes and no taught inside real classroom requests (Neef et al.; the study's unpleasant tastes for "no"
+    questions are replaced by a harmless nonpreferred object), four-word sentences in speech plus sign (Sisson & Barrett),
+    progressive prompt delay with a richer reward for unprompted answers (Touchette & Howard; its brief time-out marked
+    RESTRICTIVE), and stimulus shaping (Mosk & Bucher). The sign cards carry the eye-contact caution.
+  - Behavior and health: a padded helmet and slippers as planned, noncontingent protective equipment (Silverman et al.;
+    confirm under district rules), preferred-food bites for accepting new foods (Riordan et al.), DRO for tongue
+    protrusion (Parker et al.), and a chosen cartoon with a star chart during painful care (Kelley et al.). Feeding and
+    medical cards are planned with the family, the prescribing doctor and the school nurse.
+  - Social and school: sharing in free play (Bryant & Budd; its sit-and-watch time-out marked RESTRICTIVE), a sharing
+    routine at break, peer team captains at transitions (its loss of the outdoor activity marked RESTRICTIVE), a trained
+    peer play partner, conversation feedback and self-monitoring, self-coaching for math, a story preview before oral
+    reading, say-do training with a delayed reward (Baer et al.), and classwide peer tutoring with team points
+    (Greenwood et al.).
+  - Daily living and vocational: reaching for a toy, a dance step, general-case vending machine use, family-style meals,
+    and self-counting work with a hand counter.
+  - **Community safety:** home-alone safety routines with picture cards and role play (Peterson), and a family-run fear of
+    the dark program (Giebenhain & O'Dell). All practice is in a safe setting with an adult present; the study's checks
+    with unfamiliar callers and visitors are not copied, and any check at home needs the family's agreement.
+- **Set aside by default (the BCBA may restore):** the "(name), look at me" card (Hamlet et al.: a firm eye-contact demand
+  before each instruction, which the authors suggest may work because students found it unpleasant), guided mouth
+  opening at meals with one toddler in a hospital (choking risk), and conversation placemats for families at
+  restaurants (materials only, kept as support).
+- **GB-1:** 16 objectives (among them answer the door and the phone safely when home alone, respond to a bad cut, fix a
+  safe snack, use a vending machine, family-style meals, make a sign, invite a classmate to play) and 20 new source
+  lines. Safety objectives are set at 100%.
+- **Not banked:** adults on institution wards (a table-game social skills study and a menstrual care study), thumb
+  covering at bedtime, a parent home-hazard inventory, adult health and smoking studies, staff training, community
+  programs, methods papers, comments and an erratum.
+
+TD-1: 1207 protocols; GB-1: 470 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.10: Journal of Applied Behavior Analysis volume 16 (1983) in the banks, and community safety
 (the BCBA, 10/29)
 
