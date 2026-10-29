@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.13: Journal of Applied Behavior Analysis volume 20 (1987) in the banks
+(the BCBA, 10/29; issue 4 came in two parts; 1985 is still to come)
+
+- **TD-1, 16 cards**, among them:
+  - Communication and autism: cues-pause-point training so a student answers with a known label instead of echoing
+    (McMorrow et al.; its gentle "no" is neutral feedback, not a reprimand), "help me" requests for hard tasks that
+    replaced rocking and hand flapping (Durand & Carr; escape-extinction consent first), and starting a preferred
+    activity or topic with new adults (Koegel et al.; the eye-contact caution is on the card).
+  - School: well-liked classmates as recess partners (Sasso & Rude), a star chart with work breaks whose added
+    reprimands are marked RESTRICTIVE (Pfiffner & O'Leary), a spoken step-by-step strategy for missing-number math,
+    and two transition supports for preschoolers (ringing a bell at the next area, or a classmate buddy; Sainato et al.).
+  - Health and safety: a seat-belt package for young children with buckling practice in a parked car and a daily prize
+    drawing (Sowers-Hoag et al.), and "big helper" practice before dental visits (Allen & Stokes; its lost toy marked
+    RESTRICTIVE, escape-extinction consent first).
+  - Community and work: store purchasing taught in one setting and carried to local stores with peer videos (Haring et
+    al.), home tasks with prompts that start just below the last one that worked (Steege et al.), fading the support
+    adult out of the room (Dunlap et al.; its reprimands marked RESTRICTIVE), job initiative taught with photos
+    (McCuller et al.), and say-do training for healthy snacks with the reward thinned to none (Baer et al.).
+- **Set aside by default (the BCBA may restore):** paced eating with hand blocking and tray removal, and group teaching of
+  a paid envelope task, both from adults living in residential centers.
+- **Folded:** classwide peer tutoring is already a card from 1984 (Greenwood et al.); the 1987 field replication is a
+  source for the peer spelling objective.
+- **GB-1:** 4 objectives (start a favorite topic with a new adult, solve missing-number problems, stay on task with the
+  support adult out of the room, notice and do a job that needs doing) and 12 new source lines.
+- **Not banked:** a bad-tasting solution for thumb sucking (never written), adults on a hospital ward or in an
+  institution, workplace and clinic staff studies, a parent program for infants, a caffeine study, a laboratory study,
+  reviews, comments, methods papers and the indexes.
+
+TD-1: 1255 protocols; GB-1: 484 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.12: Journal of Applied Behavior Analysis volume 19 (1986) in the banks
 (the BCBA, 10/29; the zips sent were 1986, so 1985 is still to come)
 
