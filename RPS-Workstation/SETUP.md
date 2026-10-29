@@ -9905,6 +9905,43 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v24.96: Behavior Analysis in Practice 2022 part 2 in both banks
+(the BCBA's Part 2 folder, 10/28; 17 articles, 6 read in full)
+
+- **7 cards:**
+  - Tolerance of schedule thinning when problem behavior has more than one function (two learners): after asking for
+    an item, the student finishes a short task before getting it, the task growing step by step; and easy motor
+    demands before the harder task of sitting. Each note says to complete the escape-extinction consent if prompting
+    goes as far as physical guidance.
+  - Handwashing taught by forward chaining, run by parents after training with feedback (the children's own gains were
+    small, though the parents learned the procedure well; the study's task analysis is in its supplement only).
+  - ACT lessons (acceptance and commitment training) with a metaphor activity for each process, and the relational
+    training package given before them: eight short programs (committed action, defusion, self-as-context, values,
+    acceptance and others) taught in 10-trial blocks. Three verbally fluent girls with autism in a clinic; ACT alone
+    did not reduce problem behavior, and with the training, engagement rose for all three but behavior fell clearly
+    for one. The notes: check that the student can answer abstract spoken questions first, plan anything touching
+    painful thoughts with the family and the school counselor or psychologist, and keep it alongside function-based
+    treatment.
+  - PEAK programs run in a special education classroom on a 5-token board (five students over 3 months; a practice
+    report without a control group; the team decides whether food is used, and PEAK's eye-contact programs are not to
+    be picked as objectives).
+  - Direct Instruction concept teaching: placing examples and nonexamples side by side (a tutorial, described, not
+    tested).
+- **3 objectives:** finish a short task after asking, before getting the item back; tell how an upsetting thought of
+  their own is the same as, or different from, everyday objects; and tell how they are the same and different now, in
+  the past and in the future. **4 more sources** for existing objectives: wash hands, name what matters to them, sort
+  items into classes, and pick out examples of a concept.
+- **Left out:** a curriculum study measured only by self-report questionnaires, a preference assessment with older
+  adults with dementia (an assessment, no treatment), two studies of training programs' exam pass rates, a clinician
+  survey on animal-assisted interventions, an ethics framework, an interview with Siegfried Engelmann, two issue
+  introductions, a data-analysis software validation, and a review of women in the field.
+
+Two of these articles (the handwashing study and the Direct Instruction tutorial) appeared in the 2021 volume 14; the
+rest are 2022 volume 15. TD-1: 992 protocols; GB-1: 381 objectives. References checked against Crossref by DOI.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v24.95: The six forms on an iPad, refined (from your DM-1 screenshots)
 
 DM-1, IC-1, RR-1, TB-1, IA-1 and IN-1 on a 10.2-inch iPad held sideways.
