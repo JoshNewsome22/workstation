@@ -9905,6 +9905,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.17: The offline copy updates on an iPad behind the website's password
+(the BCBA, 10/29: Diagnostics said v25.16 while Form TD-1's protocol bank still showed 1077 protocols, and the offline
+copy said "the website could not be reached (GB-1_Goal-and-Objective-Builder_v2026-09.html)")
+
+- **What went wrong.** On an iPad, Safari can fail the offline copy's own request for a file outright instead of
+  asking for the website's password (or answering it). The copy treated that as "the website could not be reached",
+  and a look that cannot finish takes nothing, so every look stopped at the first changed file (GB-1) and the device
+  kept the forms and banks it already had. Every file on the website was correct.
+- **Now.** When that request fails, the copy asks once more and then fetches the file through the open workstation
+  page, whose requests carry the sign-in, the same way it already handles a password prompt it can see. Nothing else
+  changes: the file is checked exactly as before, a look that still cannot finish takes nothing, and the open page
+  never mixes old and new files.
+- **On the iPad after uploading this release:** open the workstation while online; it finds the new version (which
+  includes everything since v25.06), and the strip offers Reload. If it still shows the old protocol count, Reset the
+  offline copy once (Saved for offline use, then Reset the offline copy): cases, the packet and Autosave are not touched.
+
+TD-1: 1317 protocols; GB-1: 505 objectives.
+Not changed: the forms themselves, the banks, the saved files, the printing.
+To set up: upload the whole folder as usual (`sw.js` and `release.json` changed). Tested: `qa/pwa-test.js` (a new
+check: the worker's own requests dropped without an answer, the page's answered, and the copy is made through the page).
+
 ### v25.16: Journal of Applied Behavior Analysis volume 22 (1989) in the banks
 (the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1989)
 

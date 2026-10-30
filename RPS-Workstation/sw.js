@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = '57d34b752c8e';
+const VERSION = 'ec8fec31ed86';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -296,7 +296,18 @@ async function net(path, init, run) {
   if (run && run.page) { const r = await viaPage(url, init.headers, run); if (r) return r; }
   let res;
   try { res = await fetch(url, init); }
-  catch (e) { throw stop(self.navigator && self.navigator.onLine === false ? 'offline' : 'network', path); }
+  catch (e) {
+    if (self.navigator && self.navigator.onLine === false) throw stop('offline', path);
+    /* v25.17 Safari can fail this worker's own request outright, where a window's request with the sign-in is answered
+       (an iPad behind the website's password: the look stopped at the first changed file, "could not be reached"):
+       once more, then through an open workstation window, as for a 401 */
+    try { res = await fetch(url, init); }
+    catch (e2) {
+      const r = run && !run.noPage ? await viaPage(url, init.headers, run) : null;
+      if (r) { run.page = true; return r; }
+      throw stop('network', path);
+    }
+  }
   if (res.status !== 401 || !run || run.noPage) return res;
   /* the website asks for its password: the browser may not hand its sign-in to this worker; a window's own request does */
   const r = await viaPage(url, init.headers, run);

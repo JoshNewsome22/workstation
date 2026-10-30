@@ -90,7 +90,9 @@ function makeServer(mounts){
     if(!m){if(Object.keys(mounts).includes(u.pathname+'/')){done(301,{Location:u.pathname+'/'},'');return;}done(404,{'Content-Type':'text/plain'},'not found');return;}
     if(st.suspended){done(200,{'Content-Type':'text/html; charset=utf-8'},SUSP);return;}
     if(st.redirectAll){done(302,{Location:'/suspended.html'},'');return;}
-    const asks=st.authMode&&(!st.authMount||m===st.authMount)&&e.dest==='empty'&&!(st.authMode==='worker'&&/[?&]nbh-online=fetch/.test(u.search));
+    /* v25.17 'drop': the worker's own requests get no answer at all (Safari failing them outright), the page's are served */
+    if(st.authMode==='drop'&&(!st.authMount||m===st.authMount)&&e.dest==='empty'&&!/[?&]nbh-online=fetch/.test(u.search)){e.status=-1;req.socket.destroy();return;}
+    const asks=(st.authMode==='fetch'||st.authMode==='worker')&&(!st.authMount||m===st.authMount)&&e.dest==='empty'&&!(st.authMode==='worker'&&/[?&]nbh-online=fetch/.test(u.search));
     if((st.auth&&(!st.authMount||m===st.authMount)&&!req.headers.authorization)||asks){done(401,{'WWW-Authenticate':'Basic realm="workstation"','Content-Type':'text/html'},'<html><body>401 sign in</body></html>');return;}
     let rel;try{rel=decodeURIComponent(u.pathname.slice(m.length));}catch(x){done(400,{},'');return;}
     if(rel===''||rel.endsWith('/'))rel+='index.html';
@@ -883,6 +885,16 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     const odd=set?await sp2.evaluate(async([c,base,files])=>{const cache=await caches.open(c),out=[];for(const f of files){const r=await cache.match(base+f);if(!r){out.push(f+' missing');continue;}if(r.status!==200)out.push(f+' '+r.status);else if(/401 sign in/.test((await r.clone().text()).slice(0,200)))out.push(f+' 401 page');}return out;},[set,SB,FILES]):['no set'];
     check('S the worker’s own requests refused, the page’s carrying the sign-in: the copy is made through the page, and no 401 is saved',t2==='Saved for offline use'&&via>=FILES.length-2&&!odd.length,t2+' via the page: '+via+' '+odd.slice(0,4).join(', '));
     await s2.close();
+    /* v25.17 the worker's own requests fail outright (no answer, not a 401), the page's are answered: the copy is still made, through the page */
+    S.st.authMode='drop';
+    const markD=S.st.log.length;
+    const sd=await br.newContext({viewport:{width:1440,height:900}});const spd=await sd.newPage();wire(spd,errs);
+    await spd.goto(SB);
+    const td=await waitChip(spd,/^Saved for offline use$|^Not saved/,180000);
+    const viaD=S.st.log.slice(markD).filter(e=>e.path.indexOf('/workstation-s/')===0&&/nbh-online=fetch/.test(e.q)&&e.status===200).length;
+    const dropped=S.st.log.slice(markD).filter(e=>e.path.indexOf('/workstation-s/')===0&&e.status===-1).length;
+    check('S the worker’s own requests dropped without an answer, the page’s answered: the copy is made through the page',td==='Saved for offline use'&&viaD>=FILES.length-2&&dropped>0,td+' via the page: '+viaD+', dropped: '+dropped);
+    await sd.close();
     /* a page not saved here, the whole folder behind the password: the worker offers a Sign in that goes past it */
     S.st.authMode=null;
     const s3=await br.newContext({viewport:{width:1440,height:900}});const sp3=await s3.newPage();wire(sp3,errs);
