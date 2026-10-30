@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.24: Journal of Applied Behavior Analysis volume 27 (1994) in the banks
+(the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1994, volumes 1 to 27 with none missing)
+
+- **TD-1, 31 cards**, among them:
+  - Function-based treatment: extinction matched to the function the analysis found, and a padded helmet worn
+    throughout for head banging with an automatic function (Iwata et al.; the guidance and the helmet marked
+    RESTRICTIVE, with district review, consent, the school nurse and a plan to fade it; the contingent helmet time-out
+    never written), a break request by switch or sign and a switch that calls an adult or turns on music (Northup et
+    al.), a separate request for each function (Day et al.), dense attention thinned to every 5 minutes (Hagopian et
+    al.), praise, social time and a picture request in place of attention for tantrums (Repp & Karsh), a brief check
+    of which supports work (Harding et al.), demands faded back in with friendly conversation (Kennedy), preferred items
+    within reach for hand mouthing (Vollmer et al.; blocking and a hands-down hold left out), a 1-minute chair time-out
+    for refusal (Rortvedt & Miltenberger; marked RESTRICTIVE, in the same room), and the eating-from-the-plate part of a
+    pica plan (Fisher et al.; the punishers never written, pica safety and the school nurse on the card).
+  - Antecedents and curriculum: high-probability requests faded in six steps, given within 5 seconds, and before
+    play with a peer (Ducharme & Worling; Houlihan et al.; Davis et al.), assessment-based assignment changes (Kern et
+    al.), a preferred version of the same activity (Foster-Johnson et al.), and an assignment menu (G. Dunlap et al.).
+  - School: immediate sight-word correction and repeating a modeled definition (Barbetta et al.; Drevno et al.),
+    write-on response cards (R. Gardner et al.), classwide peer tutoring in reading (Kamps et al.), listening passage
+    preview (Daly & Martens), homework goals in a contract and student-run homework teams (Miller & Kelley; Olympia et
+    al.), and a choice assessment of reward features (Neef et al.).
+  - Social, play and language: cooperative games in place of competitive ones (Bay-Hinitz et al.), praise for new
+    ways of playing (Lalli et al.), signed labels taught by pointing instead of asking (Partington et al.), imitation
+    taught by type (Young et al.), and a picture book for daily living tasks with self-reward (Pierce & Schreibman).
+- **Set aside by default (the BCBA may restore):** six studies from adults in residential facilities or a hospital
+  unit: relapse re-assessment (Lerman et al.), generalized reduction across settings (Shore et al.), extinction and
+  momentum with self-injury (Zarcone et al., two studies), a delayed-cue note (Glat et al.), and a printed schedule with
+  escape extinction for two 18-year-olds admitted from group homes (Lalli et al.). Their findings stay as sources.
+- **GB-1:** 4 objectives (bringing home homework materials, eating only from the plate, following a picture book
+  through a daily task, offering a toy to start play) and 39 new source lines.
+- **Not banked:** a punishment procedure for the most severe behavior only (its main procedure), protective equipment
+  for hand mouthing in adults, a teacher-attention method of predicting function and a matching-law study (read, a
+  source), the experimental-epidemiological summary and the functional analysis section's comments, adults with
+  dementia, brain injury or in group homes, principals, office recycling and staff service, college and sports
+  studies, and the abstracts of the basic journal.
+- **References:** TD-1's entry for L. K. Koegel et al. (1992) now carries the initials GB-1's has.
+
+TD-1: 1464 protocols; GB-1: 534 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/single-check.js`,
+`qa/pwa-test.js`.
+
 ### v25.23: Journal of Applied Behavior Analysis volume 26 (1993) in the banks
 (the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1993)
 
