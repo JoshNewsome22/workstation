@@ -6393,7 +6393,7 @@ function show(id){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
   det.innerHTML=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>
-<div class="load"><div class="btns"><button type="button" class="add primary">Add to the plan</button>${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}</div><div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
+<div class="load"><div class="btns"><button type="button" class="add primary">Add to the plan</button>${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${window.__tdVideo&&window.__tdVideo.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div><div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
 <div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div>
 <div class="vh">Steps for staff</div>${tdWhoNote()}<ol class="steps">${(p.steps||[]).map(s=>'<li>'+esc(tdW(s))+'</li>').join('')}</ol>
@@ -6449,7 +6449,7 @@ d.addEventListener('toggle',()=>{if(d.open){try{ageFill();fnFill();draw();}catch
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});
 listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);
   try{($p('.load')||det).scrollIntoView({block:'nearest',behavior:'smooth'});}catch(x){}});
-det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add'))doAdd();else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);});
+det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add'))doAdd();else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);else if(b&&b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(cur,b);});
 /* the function choices follow the plan's function; the note on cards already in the plan follows the cards */
 document.addEventListener('change',ev=>{if(ev.target&&ev.target.name==='m.fn'){fnFill();draw();}});
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.student&&typeof f.student==='object')CASE.student=f.student;ageFill();fnFill();draw();}catch(x){}return r;};}
@@ -6529,6 +6529,62 @@ function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const i
 try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true,subtree:true});}catch(e){}
 document.addEventListener('change',ev=>{if(ev.target&&/\]\.bank$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
 window.__tdScenes={has:id=>!!byId[id],play,close,count:()=>Object.keys(byId).length};
+})();
+</script>
+<style id="td1-video-css" data-nbh-screen>
+/* v25.21 Watch the video: the player for a bank card's video (screen only, never printed) */
+#tdVideo{position:fixed;inset:0;z-index:9000;background:rgba(20,30,40,.6);display:flex;align-items:center;justify-content:center;padding:12px}
+#tdVideo[hidden]{display:none}
+#tdVideo .tv-box{background:#f3f6f5;border-radius:14px;width:min(100%,1040px);max-height:100%;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.35);font:16px/1.45 -apple-system,Helvetica,Arial,sans-serif;color:#1f2f3f}
+#tdVideo .tv-hd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px 8px}
+#tdVideo .tv-hd h3{margin:0;font:600 17px Georgia,serif;flex:1 1 260px;min-width:0}
+#tdVideo .tv-ai{font-size:13px;font-weight:700;color:#8a5a00;background:#fff4dc;border:1px solid #e7c27a;border-radius:999px;padding:3px 10px;white-space:nowrap}
+#tdVideo video{display:block;width:calc(100% - 24px);margin:0 12px;border-radius:10px;background:#1f2f3f;aspect-ratio:16/9}
+#tdVideo .tv-msg{margin:8px 14px;font-size:15px}
+#tdVideo .tv-msg.tv-err{color:#8e2b20}
+#tdVideo .tv-note{margin:8px 14px 14px;font-size:13px;color:#556}
+#tdVideo button{font:inherit;padding:8px 14px;border:1px solid #c9d6d4;border-radius:10px;background:#fff;color:#1f2f3f;min-height:44px}
+/* on the plan card the header is a grid (name, Hide steps, Remove): Show me and Watch the video sit on their own line under the code */
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-sc-btn,html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-vid-btn{grid-column:1;grid-row:3;justify-self:start;height:36px!important;min-height:36px!important;margin:6px 0 2px!important;padding:0 14px!important;border-radius:8px!important;font:600 14px var(--td9-sans)!important;background:#fff!important;border:1px solid #B9C7C4!important;color:var(--td9-navy)!important;box-shadow:none!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd:has(.td-sc-btn) .td-vid-btn{grid-row:4}
+@media print{#tdVideo,.td-vid-btn{display:none!important}}
+</style>
+<script id="td1-video">
+/* v25.21 Watch the video: a bank card can carry a video of its steps (the first: functional communication training, the card
+   after Tiger, Hanley & Bruzek, 2008, made with an AI video model, simulated people, captions and narration added). The video
+   is a file beside the forms, loaded only when a person taps the button, and played from the device (so it plays offline:
+   the offline copy saves the file whole). The button sits in the bank panel's detail and on the plan card built from the
+   protocol; nothing of it enters the save file. The one-file edition does not carry the file and says so. */
+(function(){
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res();s.onerror=()=>rej(new Error(src));document.head.appendChild(s);});}
+const VIDS={'fct-practical-guide-thinning':{title:'Functional communication training: the break request, step by step',load:()=>loadScript('nbh-td1-video-fct.js')}};
+let box=null,opener=null;const urls={};
+const $=id=>box.querySelector('#'+id);
+function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','tv-title');
+ box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-close">Close</button></div>'+
+  '<video id="tv-video" controls playsinline preload="metadata"></video><p class="tv-msg" id="tv-msg" aria-live="polite"></p>'+
+  '<p class="tv-note">Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.</p></div>';
+ document.body.appendChild(box);
+ $('tv-close').addEventListener('click',close);box.addEventListener('click',ev=>{if(ev.target===box)close();});
+ document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&box&&!box.hidden)close();});}
+function msg(t,err){const m=$('tv-msg');m.textContent=t||'';m.hidden=!t;m.classList.toggle('tv-err',!!err);}
+async function play(id,from){const v=VIDS[id];if(!v)return;if(!box)build();opener=from||document.activeElement;
+ const vid=$('tv-video');$('tv-title').textContent=v.title;box.hidden=false;setTimeout(()=>{try{$('tv-close').focus();}catch(e){}},30);
+ if(!urls[id]){vid.removeAttribute('src');vid.hidden=true;msg('Loading the video…');
+  try{if(!(window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[id]))await v.load();
+   const b64=window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[id];if(!b64)throw new Error('no video data');
+   const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+   urls[id]=URL.createObjectURL(new Blob([u],{type:'video/mp4'}));}
+  catch(e){msg('The video could not be loaded here. It is a file beside the forms (nbh-td1-video-fct.js): open the workstation from its folder or from the website. The one-file edition does not carry it.',true);return;}}
+ if(vid.dataset.id!==id){vid.src=urls[id];vid.dataset.id=id;}vid.hidden=false;msg('');}
+function close(){if(!box)return;const vid=$('tv-video');try{vid.pause();}catch(e){}box.hidden=true;if(opener&&opener.focus)try{opener.focus();}catch(e){}opener=null;}
+/* the plan's cards: a card built from a bank protocol with a video gets Watch the video beside Remove */
+function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=inp&&inp.value;const has=!!(id&&VIDS[id]);let b=c.querySelector('.td-vid-btn');
+ if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>play(inp.value,b));const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
+ else if(!has&&b)b.remove();});}
+try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true,subtree:true});}catch(e){}
+document.addEventListener('change',ev=>{if(ev.target&&/\]\.bank$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
+window.__tdVideo={has:id=>!!VIDS[id],play,close,count:()=>Object.keys(VIDS).length};
 })();
 </script>
 

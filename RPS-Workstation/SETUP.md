@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.21: Watch the video on TD-1's functional communication training card
+(the BCBA, 10/30)
+
+- **TD-1, Build components:** the bank card for functional communication training with extinction and signaled schedule
+  thinning (Tiger, Hanley & Bruzek, 2008) has a **Watch the video** button beside Add to the plan, and the plan card built
+  from it has the same button under its code. It opens a player with a 1 minute 49 second video of the card's ten steps
+  (the break card set up, the prompted request, every request honored, no break for problem behavior, more work before
+  the break, something during the wait, new adults and places, a fuller request), with captions, a step list and
+  narration.
+- The video was made with an AI video model and is labeled **AI-generated, simulated people** on the player and in the
+  video. It shows the sequence, not a real session; the note under it says to adapt every step to the student's plan and
+  to complete the escape-extinction consent block before using escape extinction. Close, Escape or a tap outside the
+  player closes it and stops the video.
+- The video is a new file beside the forms, `nbh-td1-video-fct.js` (about 4.9 MB). It loads only when someone taps the
+  button and plays from the device, so it also plays from the offline copy (the offline copy now saves 88 files). The
+  one-file edition does not carry it; there the button says to open the workstation from its folder or the website.
+  Nothing of the video goes into the save file or the printout.
+- Show me (the drawn walkthroughs) on a plan card now sits on its own line under the card code, as Watch the video does,
+  instead of stretching across the card header.
+
+To set up: upload the whole folder (the new file must be beside the forms). On the iPad, open the workstation once while
+online and let the offline copy update to v25.21.
+
+Checked by `qa/td1-video-test.js` (the button on that card only, the video loads and plays from the device at its full
+length, Close and Escape, the plan card's button, nothing saved, left out of print), with `qa/td93-scenes-test.js`,
+`qa/td1-bank-test.js`, `qa/single-check.js` and `qa/pwa-test.js` (the new file in the offline copy).
+
 ### v25.20: Journal of Applied Behavior Analysis volume 24 (1991) in the banks
 (the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1991)
 

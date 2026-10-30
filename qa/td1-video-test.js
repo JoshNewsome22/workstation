@@ -1,0 +1,41 @@
+/* v25.21 Watch the video on TD-1's bank cards: the FCT card (Tiger, Hanley & Bruzek, 2008) has the button in the panel's detail
+   and on the plan card built from it; the player loads the video file, plays it from the device, closes; a card without a
+   video has no button; nothing is saved. */
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+const URL=(process.env.WS_URL||'http://127.0.0.1:8561')+'/NBH-Workstation/';const ROOT=process.env.WS_ROOT||'.';
+const file=pre=>fs.readdirSync(ROOT+'/NBH-Workstation').find(f=>f.startsWith(pre));
+let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')+n+' '+t+(c?'':' '+JSON.stringify(d||'')));};
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});const p=await b.newPage({viewport:{width:1180,height:820}});const errs=[];p.on('pageerror',e=>errs.push(String(e)));
+ await p.goto(URL+file('TD-1_'));await p.waitForTimeout(1500);
+ const ID='fct-practical-guide-thinning',OTHER='dra-teacher-approval-rules';
+ const h=await p.evaluate(([a,c])=>[window.__tdVideo&&window.__tdVideo.has(a),window.__tdVideo&&window.__tdVideo.has(c),window.__tdVideo&&window.__tdVideo.count(),!!(window.__tdBank&&window.__tdBank.show)],[ID,OTHER]);
+ ok('the FCT card has a video, the DRA card none',h[0]===true&&h[1]===false&&h[2]>=1&&h[3],h);
+ ok('the video file is not loaded until asked',await p.evaluate(()=>!window.NBH_TD1_VIDEO&&![...document.scripts].some(s=>/nbh-td1-video/.test(s.src))));
+ const host='[...document.querySelectorAll("*")].find(e=>e.shadowRoot&&e.shadowRoot.querySelector(".detail"))';
+ const det=async id=>p.evaluate(([id,host])=>{window.__tdBank.show(id);const hh=eval(host);const d=hh&&hh.shadowRoot.querySelector('.detail');return {vid:!!(d&&d.querySelector('button.vid')),add:!!(d&&d.querySelector('button.add')),text:d?(d.querySelector('button.vid')||{}).textContent:''};},[id,host]);
+ const d1=await det(ID),d2=await det(OTHER);
+ ok('the panel\'s detail shows Watch the video beside Add to the plan for that card only',d1.vid&&d1.add&&d1.text==='Watch the video'&&!d2.vid&&d2.add,{d1,d2});
+ await p.evaluate(([id,host])=>{window.__tdBank.show(id);eval(host).shadowRoot.querySelector('.detail button.vid').click();},[ID,host]);
+ await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1;},null,{timeout:20000}).catch(()=>{});
+ const o=await p.evaluate(()=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {open:d&&!d.hidden,src:v?v.src.slice(0,5):'',dur:v?v.duration:0,w:v?v.videoWidth:0,title:d?d.querySelector('#tv-title').textContent:'',ai:d?d.querySelector('.tv-ai').textContent:'',note:d?/escape-extinction consent/.test(d.querySelector('.tv-note').textContent):false,err:d?d.querySelector('#tv-msg').classList.contains('tv-err'):true};});
+ ok('the player opens with the card\'s name, the AI label and the consent note',o.open&&/^Functional communication training/.test(o.title)&&/AI-generated/.test(o.ai)&&o.note,o);
+ ok('the video plays from the device (a blob address), about 109 s, 720p',o.src==='blob:'&&Math.abs(o.dur-109.3)<1.5&&o.w===1280&&!o.err,o);
+ await p.evaluate(()=>document.getElementById('tv-video').play().catch(()=>{}));await p.waitForTimeout(800);
+ await p.click('#tdVideo #tv-close');await p.waitForTimeout(300);
+ ok('Close hides the player and pauses the video',await p.evaluate(()=>document.getElementById('tdVideo').hidden&&document.getElementById('tv-video').paused));
+ await p.evaluate(([id,host])=>{window.__tdBank.show(id);eval(host).shadowRoot.querySelector('.detail button.add').click();},[ID,host]);
+ await p.waitForTimeout(900);
+ await p.evaluate(([id,host])=>{window.__tdBank.show(id);eval(host).shadowRoot.querySelector('.detail button.add').click();},[OTHER,host]);
+ await p.waitForTimeout(900);
+ const c=await p.evaluate(()=>[...document.querySelectorAll('#compWrap .card')].map(c=>({bank:(c.querySelector('[name$="].bank"]')||{}).value,btn:!!c.querySelector('.td-vid-btn')})));
+ ok('the plan card built from the FCT protocol carries Watch the video; the DRA card does not',c.length===2&&c[0].bank===ID&&c[0].btn&&c[1].bank===OTHER&&!c[1].btn,c);
+ await p.evaluate(()=>document.querySelector('#compWrap .card .td-vid-btn').click());await p.waitForTimeout(600);
+ ok('the card\'s button opens the same player, the video ready',await p.evaluate(()=>!document.getElementById('tdVideo').hidden&&document.getElementById('tv-video').src.startsWith('blob:')));
+ await p.keyboard.press('Escape');await p.waitForTimeout(200);
+ ok('Escape closes it',await p.evaluate(()=>document.getElementById('tdVideo').hidden));
+ const saved=await p.evaluate(()=>{const w=document.getElementById('compWrap');return /blob:|tdVideo|Watch the video/.test([...w.querySelectorAll('textarea,input')].map(e=>e.value||'').join(' '));});
+ ok('nothing of the video is in the form\'s fields',!saved);
+ const pr=await p.evaluate(()=>{const s=[...document.styleSheets].some(ss=>{try{return [...ss.cssRules].some(r=>r.media&&/print/.test(r.media.mediaText)&&/td-vid-btn/.test(r.cssText));}catch(e){return false;}});return s;});
+ ok('the player and the button are left out of print',pr);
+ ok('no page errors',!errs.length,errs.slice(0,3));
+ console.log('RESULT: '+(bad?bad+' failed':'all passed'));await b.close();process.exit(bad?1:0);})();
