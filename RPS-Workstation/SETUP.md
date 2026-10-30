@@ -9905,6 +9905,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.20: Journal of Applied Behavior Analysis volume 24 (1991) in the banks
+(the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1991)
+
+- **TD-1, 19 cards**, among them:
+  - Function-based treatment: a curriculum revised from tested task features, with short, mixed, interest-based work
+    and a choice menu (Dunlap et al.), functional communication for help or for attention (Durand & Carr; blocking
+    marked RESTRICTIVE), interspersed easy requests during hard instruction (Horner et al.), a brief functional
+    analysis followed by the maintaining consequence for a request (Northup et al.; escape-extinction consent first),
+    a replacement request made easier than the problem behavior (Horner & Day), and scheduled adult comments with
+    conversation teaching for attention-maintained unusual speech (Mace & Lalli).
+  - Self-management: self-recording with a beat-your-best goal (Kirby et al.), and self-rating matched with the
+    teacher's rating within a level system, carried into the hallway (Ninness et al.; the first level's limits marked
+    RESTRICTIVE, the eye-contact caution on the card).
+  - Communication and play: a computer game taught so it can be shared with a peer (Breen & Haring), conversation led
+    by a student with a speech-generating device (Dattilo & Camarata), time delay for talk about play (Ingenmey & Van
+    Houten) and for routine phrases at home (Charlop & Trasowech), and "please" on school errands (Halle & Holt).
+  - School, safety and health: spelling by computer with time delay (Stevens et al.), spelling picture names with the
+    printed word faded (Dube et al.), driver education maneuvers taught by peer tutors (Bell et al.), leaving the
+    building at the fire alarm (Bannerman et al.), and self-suctioning of a tracheostomy practiced first on a doll
+    (Derrickson et al.; planned with the family, doctor and school nurse, a trained adult always supervising).
+- **Set aside by default (the BCBA may restore):** varied gesture requests taught by not honoring the most-used ones
+  (Duker & van Lent), from residents of an institution, most of them adults; its objective is not added.
+- **GB-1:** 8 objectives (walking between classes while rating one's own conduct, a computer game shared with a peer,
+  topics and requests on a speech-generating device, talk about play, routine phrases, a driver education test,
+  spelling by picking letters, tracheostomy suctioning) and 18 new source lines.
+- **Not banked:** a punishment package that included brief restraint as a consequence (never written), a reinforcer
+  study and a preference assessment with adults in institutions (read, no procedure to write), adult traffic, parking,
+  alcohol and public-health studies, home sleep programs, staff, school-system and family programs, and the
+  commentaries on social validity, community values and technological behavior analysis.
+
+TD-1: 1362 protocols; GB-1: 517 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`,
+`qa/single-check.js`, `qa/pwa-test.js`, the bank counts (bankcheck).
+
 ### v25.19: Journal of Applied Behavior Analysis volume 23 (1990) in the banks
 (the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1990)
 
