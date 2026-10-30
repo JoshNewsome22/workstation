@@ -9905,6 +9905,53 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.22: Journal of Applied Behavior Analysis volume 25 (1992) in the banks
+(the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1992)
+
+- **TD-1, 39 cards**, among them:
+  - Function-based treatment: asking for help on hard steps, and a model given right after a hard instruction (Sprague
+    & Horner), asking "Am I doing good work?" for attention, whose gains held with new adults where time-out's did not
+    (Durand & Carr), task choice followed by a preferred activity and teacher attention for finished work (Cooper et
+    al.; one student's response cost and another's time-out left out), a break after one finished task and escape
+    extinction with a long first wait (Sasso et al.; the guidance steps marked RESTRICTIVE, escape-extinction consent
+    first), quick easy requests before hard ones from several adults (Davis et al.; touch replaced by what the student
+    welcomes), and known tasks mixed into new-skill teaching (Charlop et al.; the eye-contact task left out).
+  - Social and play: peer incidental teaching, peer initiations with prompts faded, peers who attend, comment and
+    acknowledge, peer self-evaluation, a peer support network and classwide social skills groups (McGee et al.; Odom
+    et al.; Goldstein et al.; Sainato et al.; Haring & Breen; Kamps et al.), pretend-play scripts (Goldstein & Cisar),
+    a play-group arrangement (Chandler, Fowler, et al.), video review with self-rating (Kern-Dunlap et al.; written
+    family consent for recording), self-recording on a wrist counter (Koegel et al.), self-managed play (Stahmer &
+    Schreibman), and social lessons with peer video models (Rasing & Duker).
+  - School and reinforcement: classwide peer tutoring (Greenwood et al.), quiet praise on a variable-interval schedule
+    (Martens et al.), the better-quality reward put on the wanted task (Neef et al.), points on a variable-ratio
+    schedule for exercise (De Luca & Holborn), say-do reports of exercise (Wilson et al.), a group contingency for a
+    practice warm-up (Hume & Crossman), idiom meanings (Ezell & Goldstein), community signs by flash card, video or on
+    site (Cuvo & Klatt), picture-word spelling (Stromer & Mackay), and errorless group teaching of everyday items
+    (Repp & Karsh).
+  - Daily living, health and safety: snack recipes taught to a group of three (Griffen et al.), cleaning up broken
+    glass (Winterling et al.), first aid taught by classmates (Marchand-Martella et al.), a two-item snack choice
+    (Sigafoos & Dempsey), contact lens cooperation shaped step by step (Mathews et al.; time-out and restraint left
+    out), rest breaks during dental treatment (Allen et al.; the wait for calm marked RESTRICTIVE, the clinic's
+    restraint and hand-over-mouth never written; planned with the family, dentist and school nurse), and, for
+    transition-age students, asking a supervisor for help and a hazard problem-solving card from adults in community
+    jobs (Morgan & Salzberg; Martella et al.).
+- **Set aside by default (the BCBA may restore):** written task analyses with feedback for independent-living tasks
+  (Cuvo et al.), from young adults living in a residential rehabilitation facility. Its findings stay as sources.
+- **GB-1:** 8 objectives (idiom meanings, cooperating with contact lenses, cleaning up broken glass, reading community
+  signs, pretend-play roles, spotting work hazards, waiting for a turn to speak, finding a named item among look-alikes)
+  and 52 new source lines.
+- **Not banked:** a comparison of preference assessments (no procedure to write) and a review of preschool social
+  skills studies (read, a source line), staff, supervisor and parent programs, adults with brain injuries or living in
+  a residential center, a functional analysis of self-restraint, a summary of 79 outpatient assessments, a social
+  validation study, organizational, quality-management, safety-campaign and sports papers, methods papers, the
+  education section's essays and the gentle teaching exchange.
+
+TD-1: 1401 protocols; GB-1: 525 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/single-check.js`,
+`qa/pwa-test.js`.
+
 ### v25.21: Watch the video on TD-1's functional communication training card
 (the BCBA, 10/30)
 
