@@ -9905,6 +9905,46 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.19: Journal of Applied Behavior Analysis volume 23 (1990) in the banks
+(the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1990)
+
+- **TD-1, 26 cards**, among them:
+  - Self-injury and escape: escape extinction with physical guidance during work tasks (Iwata et al.; escape-extinction
+    consent first, the blocking step marked RESTRICTIVE), calm through a medical exam with DRO (Iwata et al.; planned
+    with the family, doctor and school nurse), DRO with pennies stretched from 2 to 30 minutes (Cowdery et al.; the
+    student stays in view), a switch that asks for a short break from grooming (Steege et al.), signs that ask for an
+    item or a break (Wacker et al.; the item removal marked RESTRICTIVE), high-probability requests before a household
+    task (Mace & Belfiore; hugs and hand holding replaced by requests the student welcomes), and choice of tasks and
+    rewards (Dyer et al.).
+  - Rewards and repetitive behavior: a few seconds with a favorite repetitive object or activity as the reward for
+    correct answers (Charlop et al.; unsafe forms never used, the eye-contact caution on the card), tokens for
+    behavior-free work trials and, separately, brief removal of the leisure item (Haring & Kennedy; marked RESTRICTIVE),
+    self-recording with a watch alarm (Koegel & Koegel), and a richer reward for the task wanted more (Mace et al.).
+  - Language, social and school: please, thank you and you're welcome with time delay (Matson et al.), offering help
+    (Harris et al.), classwide peer tutoring (Kohler & Greenwood), response cards (Narayan et al.), Sit and Watch in
+    physical education (White & Bailey; the sit-out and the loss of privileges marked RESTRICTIVE), errorless number
+    discrimination (Repp et al.), say-do play promises (Ward & Stare), and word-only sight-word cards (Singh &
+    Solman; the say-it-five-times correction marked RESTRICTIVE, saying it once is the ordinary correction).
+  - Safety and transition: a seat belt play for families (Lehman & Geller), a home-hazard checklist with written steps
+    only for missed hazards (O'Reilly et al.), checking-account skills in a self-paced workbook (Zencius et al.), and
+    laundry taught across many machines (Neef et al.), plus fear of a place or routine faced in modeled steps with a
+    parent (Love et al.).
+- **Set aside by default (the BCBA may restore):** paired food choices and chosen work tasks, both from adults living
+  in a residential institution (Parsons & Reid; Parsons et al.). Their findings stay as sources for the choice
+  objectives.
+- **GB-1:** 4 objectives (calm through a medical exam, offering help, checking a room for home hazards, writing checks
+  and deposit slips) and 20 new source lines. The courtesy-words study is a source for the thank-you objective.
+- **Not banked:** SIBIS, a contingent electric shock device (never written), sensory-integrative therapy compared with
+  a functional analysis, adults with Alzheimer disease, nursing home and public health programs, staff and parent
+  programs, college baseball, methods papers, comments and tributes. A follow-up of echolalia in mostly institution
+  adults and a one-day parent-run assessment were read and not written.
+
+TD-1: 1343 protocols; GB-1: 509 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`,
+`qa/single-check.js`, the bank counts (bankcheck).
+
 ### v25.18: Form GB-1's objective bank in its own file, so the offline copy finishes on an iPad
 (the BCBA, 10/30: with v25.17 in a Safari tab the offline copy saved 85 of 86 files and stopped at GB-1, "could not be
 reached", even through the open page)
