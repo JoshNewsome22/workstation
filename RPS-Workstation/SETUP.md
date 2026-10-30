@@ -9905,6 +9905,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.18: Form GB-1's objective bank in its own file, so the offline copy finishes on an iPad
+(the BCBA, 10/30: with v25.17 in a Safari tab the offline copy saved 85 of 86 files and stopped at GB-1, "could not be
+reached", even through the open page)
+
+- **What went wrong.** GB-1 carried its whole objective bank inside the form, and with the JABA volumes the form grew
+  to 1.4 MB, the largest page of the workstation. The website did not hand that one page to the iPad's offline copy,
+  by the copy's own request or through the page; every other file came through, the bank files among them (TD-1's
+  protocol bank is a 5 MB file of its own). A look that cannot finish takes nothing, so the iPad kept its old copy.
+- **Now.** GB-1's objective bank is a file of its own beside the form, `nbh-gb1-bank.js`, the way TD-1's protocol bank
+  has been since v23.86. GB-1 itself is now 0.34 MB. The bank reads, searches and loads exactly as before. The one-file
+  editions carry the bank inside them as they do TD-1's.
+- **On the iPad after uploading this release:** open the workstation in the Safari tab while online, and Check for
+  updates (or Reset the offline copy once). It should count to 87 of 87 and say Saved for offline use, with 1317
+  protocols in TD-1's bank and 505 objectives in GB-1's.
+
+TD-1: 1317 protocols; GB-1: 505 objectives.
+Not changed: the banks' contents, the forms' fields, the saved files, the printing.
+To set up: upload the whole folder as usual (the new file `nbh-gb1-bank.js`; GB-1, `index.html`, `sw.js` and
+`release.json` changed). Tested: `qa/gb1-bank-test.js`, `qa/gb88-card-test.js`, `qa/pwa-test.js` (the list of saved
+files names the new bank file), `qa/single-check.js` (GB-1 opens in both one-file editions with its bank).
+
 ### v25.17: The offline copy updates on an iPad behind the website's password
 (the BCBA, 10/29: Diagnostics said v25.16 while Form TD-1's protocol bank still showed 1077 protocols, and the offline
 copy said "the website could not be reached (GB-1_Goal-and-Objective-Builder_v2026-09.html)")

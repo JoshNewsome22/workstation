@@ -299,7 +299,8 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   const F=forms('NBH-Workstation');
   const need=['index.html',...F.map(f=>f.file),'nbh-pictos.js','nbh-tk1-narration.js','nbh-tk1-video.js','nbh-sm1-narration.js','nbh-dd1-narration.js','nbh-tk1-bus-narration.js','nbh-ia1-narration.js','nbh-ra1-narration.js','nbh-sp1-narration.js','nbh-abc1-narration.js','nbh-pictures.js','nbh-respond.js','respond.html','respond-page.js','pdf-lib.min.js','nbh-pdf-tools.js','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png',
     'nbh-td1-bank.js' /* v23.86 TD-1's protocol bank, loaded by the form */,
-    'nbh-readings.js' /* v23.97 RS-1's readings, loaded by the form */];
+    'nbh-readings.js' /* v23.97 RS-1's readings, loaded by the form */,
+    'nbh-gb1-bank.js' /* v25.18 GB-1's objective bank, loaded by the form */];
   /* v21.67 the document readers (PDF.js, Tesseract) in their folders, named by index.html's nbh-offline meta */
   const offline=(/<meta name="nbh-offline" content="([^"]*)"/.exec(fs.readFileSync(path.join(ROOT,'NBH-Workstation','index.html'),'utf8'))||[0,''])[1].split(/\s+/).filter(Boolean);need.push(...offline);
   /* v21.84 the scripts every form loads from one file beside it (tools/blocks/shared_js.py: the writing help, the letterhead, ...) */

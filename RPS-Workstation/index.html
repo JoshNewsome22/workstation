@@ -1867,10 +1867,11 @@ const EMBED=(()=>{
   }
   /* v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1) is one block, put into a form's <script src> as it opens;
      v21.43: so is the writing help, which every form carries (build-single.py keeps one copy, not 45) */
-  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.narration=await inflate('nbh-embed-narration').catch(()=>null)||'';E.video=await inflate('nbh-embed-video').catch(()=>null)||'';E.media=await inflate('nbh-embed-media').catch(()=>null)||'';E.narration2=await inflate('nbh-embed-narration-sm1').catch(()=>null)||'';E.narration3=await inflate('nbh-embed-narration-dd1').catch(()=>null)||'';E.narration4=await inflate('nbh-embed-narration-tk1bus').catch(()=>null)||'';E.narration5=await inflate('nbh-embed-narration-ia1').catch(()=>null)||'';E.narration6=await inflate('nbh-embed-narration-ra1').catch(()=>null)||'';E.narration7=await inflate('nbh-embed-narration-sp1').catch(()=>null)||'';E.narration8=await inflate('nbh-embed-narration-abc1').catch(()=>null)||'';E.pictures=await inflate('nbh-embed-pictures').catch(()=>null)||'';E.td1bank=await inflate('nbh-embed-td1bank').catch(()=>null)||'';E.readings=await inflate('nbh-embed-readings').catch(()=>null)||'';E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
+  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.narration=await inflate('nbh-embed-narration').catch(()=>null)||'';E.video=await inflate('nbh-embed-video').catch(()=>null)||'';E.media=await inflate('nbh-embed-media').catch(()=>null)||'';E.narration2=await inflate('nbh-embed-narration-sm1').catch(()=>null)||'';E.narration3=await inflate('nbh-embed-narration-dd1').catch(()=>null)||'';E.narration4=await inflate('nbh-embed-narration-tk1bus').catch(()=>null)||'';E.narration5=await inflate('nbh-embed-narration-ia1').catch(()=>null)||'';E.narration6=await inflate('nbh-embed-narration-ra1').catch(()=>null)||'';E.narration7=await inflate('nbh-embed-narration-sp1').catch(()=>null)||'';E.narration8=await inflate('nbh-embed-narration-abc1').catch(()=>null)||'';E.pictures=await inflate('nbh-embed-pictures').catch(()=>null)||'';E.td1bank=await inflate('nbh-embed-td1bank').catch(()=>null)||'';E.gb1bank=await inflate('nbh-embed-gb1bank').catch(()=>null)||'';E.readings=await inflate('nbh-embed-readings').catch(()=>null)||'';E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
   const PICTAG=/<script src="nbh-pictos\.js"><\/script>/;
   const PICTAG2=/<script src="nbh-pictures\.js"><\/script>/;
   const TD1TAG=/<script id="td1-pbank" src="nbh-td1-bank\.js"><\/script>/;
+  const GB1TAG=/<script id="gb1-bank" src="nbh-gb1-bank\.js"><\/script>/;   /* v25.18 Form GB-1's objective bank, the same way */
   const RDTAG=/<script id="rs-readings" src="nbh-readings\.js"><\/script>/;   /* v23.97 Form RS-1's readings, the same way */   /* v23.86 Form TD-1's protocol bank, the same way */
   const MEDTAG=/<script src="nbh-media\.js"><\/script>/;   /* v22.56 the media store, the same way */   /* v21.62: My pictures (the camera library, Forms VS-1, SM-1, TK-1 and TV-1), the same way */
   const RSPTAG=/<script src="nbh-respond\.js"><\/script>/;   /* v21.39: the respondent-page library, the same way */
@@ -1888,6 +1889,7 @@ const EMBED=(()=>{
     if(PICTAG.test(h))h=h.replace(PICTAG,()=>E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
     if(RDTAG.test(h))h=h.replace(RDTAG,()=>E.readings?'<script id="rs-readings">'+E.readings.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script id="rs-readings">const NBH_READINGS=[];/* the references are not inside this file */<\/script>');
     if(TD1TAG.test(h))h=h.replace(TD1TAG,()=>E.td1bank?'<script id="td1-pbank">'+E.td1bank.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script id="td1-pbank">const TD1_BANK={note:"",protocols:[],refs:{}};/* the protocol bank is not inside this file */<\/script>');
+    if(GB1TAG.test(h))h=h.replace(GB1TAG,()=>E.gb1bank?'<script id="gb1-bank">'+E.gb1bank.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script id="gb1-bank">const GB1_BANK={note:"",about:[],entries:[],refs:{}};/* the objective bank is not inside this file */<\/script>');
     if(PICTAG2.test(h))h=h.replace(PICTAG2,()=>E.pictures?'<script>'+E.pictures.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* My pictures is not inside this file */<\/script>');
     if(MEDTAG.test(h))h=h.replace(MEDTAG,()=>E.media?'<script>'+E.media.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the media store is not inside this file */<\/script>');
     if(VIDTAG.test(h))h=h.replace(VIDTAG,()=>E.video?'<script>'+E.video.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* Save as video is not inside this file */<\/script>');
@@ -2885,7 +2887,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v25.17';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v25.18';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5927,7 +5929,7 @@ async function caseHtml(p,forms){
   const block=(bid,text)=>'<script type="text/plain" id="'+bid+'">'+text+'<\/script>\n';
   let blocks='';
   /* v21.43: the writing help, and the respondent pages' library (left out of case files before), go with the forms */
-  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-wording','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-pictures','nbh-embed-td1bank','nbh-embed-readings','nbh-embed-media','nbh-embed-respond','nbh-embed-narration','nbh-embed-video','nbh-embed-narration-sm1','nbh-embed-narration-dd1','nbh-embed-narration-tk1bus','nbh-embed-narration-ia1','nbh-embed-narration-ra1','nbh-embed-shell'].forEach(bid=>{
+  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-wording','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-pictures','nbh-embed-td1bank','nbh-embed-gb1bank','nbh-embed-readings','nbh-embed-media','nbh-embed-respond','nbh-embed-narration','nbh-embed-video','nbh-embed-narration-sm1','nbh-embed-narration-dd1','nbh-embed-narration-tk1bus','nbh-embed-narration-ia1','nbh-embed-narration-ra1','nbh-embed-shell'].forEach(bid=>{
     const el=document.getElementById(bid);if(el)blocks+=block(bid,el.textContent);});
   /* "</" inside the JSON would end the block early; \/ is the same character to JSON */
   blocks+='<script type="application/json" id="nbh-case">'+(await mediaOut(JSON.stringify(data))).replace(/<\//g,'<\\/')+'<\/script>\n';
