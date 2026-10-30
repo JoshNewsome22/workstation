@@ -9905,6 +9905,40 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.16: Journal of Applied Behavior Analysis volume 22 (1989) in the banks
+(the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1989)
+
+- **TD-1, 22 cards**, among them:
+  - Language: video modeling of short toy conversations (Charlop & Milstein), item-and-place phrases learned by
+    watching a classmate (Goldstein & Mousetis), what, how and why questions (Secan et al.), and a 10-second wait for an
+    answer with a short pause before the next trial (Valcante et al.).
+  - Behavior and health: a switch that runs a radio or fan in place of hand biting during alone routines, and a drink
+    and book for finishing sorting tasks (Steege et al.), distraction with a story during dental care (Stark et al.),
+    self-catheterization taught on a doll first (Neef et al.; planned with the family, doctor and school nurse),
+    watch prompts for wheelchair push-ups (White et al.; the study's loud alarm after a missed push-up is not written),
+    and a raised-cue book for a student who is deaf and blind (Berg & Wacker).
+  - School and self-management: flash-card practice with a quick retry (Van Houten & Rolider; its firm "No" with a
+    raised finger marked RESTRICTIVE, and the retry also works with a neutral "No"), videos of the student's own class
+    to practice asking questions (Knapczyk), a self-check list for subtraction (Dunlap & Dunlap), self-recording of
+    attention or of work finished (Lloyd et al.), and a quick daily choice of rewards before teaching (Mason et al.).
+  - Transition and work: pouring taught across many pitchers and cups (Day & Horner), classmates who teach a job task
+    (Wacker et al.), co-worker training with self-checking (Likins et al.), problem-solving rules for conversations at
+    work (Park & Gaylord-Ross), and the job-coach package (Wacker et al.).
+- **Set aside by default (the BCBA may restore):** self-instruction for solving problems at work, from two adults living
+  in a residential facility.
+- **GB-1:** 11 objectives (where an adult put an item, what/how/why questions, pouring, self-catheterization, wheelchair
+  push-ups, a raised-cue task book, flash-card facts, asking a question in class, touching a named body part, teaching a
+  classmate a job task, checking a product against a model) and 20 new source lines.
+- **Not banked:** gentle teaching compared with visual screening (visual screening is never written), a tic procedure
+  its authors describe as punishment, adults with aphasia, parent and staff programs, cost and descriptive studies of
+  supported employment, traffic and seat-belt studies, methods papers and comments. Three articles sent twice were read
+  once.
+
+TD-1: 1317 protocols; GB-1: 505 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and GB-1 changed). Tested: `qa/td1-bank-test.js`,
+`qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/td130-test.js`, the bank counts (bankcheck).
+
 ### v25.15: Journal of Applied Behavior Analysis volume 18 (1985) in the banks
 (the BCBA, 10/29; with it, JABA runs without a gap from 1968 to 1988)
 
