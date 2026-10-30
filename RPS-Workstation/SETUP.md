@@ -9905,6 +9905,51 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.23: Journal of Applied Behavior Analysis volume 26 (1993) in the banks
+(the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1993)
+
+- **TD-1, 32 cards**, among them:
+  - Function-based treatment: functional communication with a sign and a growing work requirement (Fisher et al.;
+    FCT alone was often not enough in the study; its time-out hold and contingent demands never written, the
+    continued request after problem behavior marked RESTRICTIVE, escape-extinction consent first), a gesture for the
+    teacher's attention or a photo choice at transitions, and scheduled comments with reprimands stopped (Lalli et
+    al.), instructions faded back in while self-injury stays low (Pace et al.; guidance marked RESTRICTIVE), asking for
+    a wanted item and choices embedded in shopping (Carr & Carlson; for transition-age students), a before-school
+    setting event found and removed (Kennedy & Itkonen), specific directions with an earned activity (Millard et
+    al.), and scheduled soft wrist weights for face hitting kept going by its sensory effect (Van Houten; marked
+    RESTRICTIVE, the helmet the study put on after hits never written).
+  - Communication and social: a voice-output switch to ask for a different activity (Kennedy & Haring), a script faded
+    from the end for starting conversations (Krantz & McClannahan), social phrases by time delay or a faded word card
+    (Matson et al.), following a partner's topic with a watch alarm (Koegel & Frea), role-play lessons with tokens
+    (Rasing), conversational recasts for speech sounds (Camarata; with the speech-language pathologist), regulated
+    breathing for stuttering (Wagaman et al.), and coaching teachers to prompt peer interaction (Hendrickson et al.).
+  - School: sight-word error correction by a model the student repeats, and the whole word rather than sound prompts
+    (Barbetta et al.), look-cover-write-check and themed journal writing for spelling (Gettinger), self-monitoring of
+    productivity or accuracy at random tones (Maag et al.), a choice assessment of reinforcer delay, rate and quality
+    (Neef et al.), photo activity schedules at school and home and taught with graduated guidance (Krantz et al.;
+    MacDuff et al.; the guidance marked RESTRICTIVE), and clean-up with self-rating and asking for praise (Connell et
+    al.; hugs replaced by praise the student welcomes).
+  - Health: a warm-water prompt in toilet training (Hagopian et al.), practice holding still for a medical scan with
+    a video that plays only while still (Slifer et al.; the pause marked RESTRICTIVE), a star chart for meal calorie
+    goals (Stark et al.; with the dietitian), and refused foods offered at every meal with praise for each bite (Werle
+    et al.; time-out and blocking left out), each planned with the family, the doctor and the school nurse.
+- **Set aside by default (the BCBA may restore):** five studies from adults living in residential facilities: attention
+  with extinction (Vollmer et al.), the parts of DRO (Mazaleski et al.), multiply controlled self-injury (Smith et al.),
+  and momentum and extinction with instructional fading (Zarcone et al., two studies).
+- **GB-1:** 5 objectives (pressing a switch to ask for a different activity, using the week's spelling words in
+  writing, following a partner's topic, holding still for a medical scan, eating the added foods of a meal plan) and
+  39 new source lines.
+- **Not banked:** a drug-ingestion treatment that depended on baited rooms and a work task given as a punisher (read,
+  a source line), adults with dementia or profound disabilities, the elderly, drivers, office recycling, clinic
+  appointments, infant sleep and an infant in hospital, a review of treatment integrity, methods papers, and the
+  twenty-fifth anniversary histories and recollections.
+
+TD-1: 1433 protocols; GB-1: 530 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/single-check.js`,
+`qa/pwa-test.js`.
+
 ### v25.22: Journal of Applied Behavior Analysis volume 25 (1992) in the banks
 (the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1992)
 
