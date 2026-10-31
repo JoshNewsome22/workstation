@@ -9905,6 +9905,54 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.37: Journal of Applied Behavior Analysis volume 39 (2006) in the banks, and teaching holds
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2006)
+
+- **Your rule on holds (10/31):** "holding a body part as part of a teaching procedure maybe okay". From this volume
+  on, a brief hold or guidance inside a teaching procedure (a physical prompt, the hands guided to the table after an
+  error, the hands held down briefly during a trial) is written as its own RESTRICTIVE step that needs district review
+  and written consent, stops if the student resists, and is never a consequence for problem behavior or a way to make
+  the student eat. Holding a student still, or holding a body part as a consequence, stays never written.
+- **The rules log:** tools/banks/reader-rules.md lists every reader rule, the release it started in and the banks
+  read before it, with the cards already known for the final pass (eight cards from 1985 to 2005 whose teaching holds
+  were left out, the punishment marks still to add before 1992, a name scan of every bank). It also notes that the
+  default of setting aside adults in institutions is narrower than your inclusion rule of 10/28, for you to settle.
+- **TD-1, 26 cards**, among them:
+  - Function-based treatment:
+    - Three separate treatments for one student's three functions: scheduled attention thinned to every 5 minutes, a
+      polite request with waiting built to 5 minutes, and a break for following instructions (Borrero & Vollmer).
+    - Turning off music that sets off problem behavior for calm intervals (Buckley & Newchok; keeping the music on
+      marked RESTRICTIVE), a transition rewarded with no tantrum (Wilder et al., 2006a), timed attention for talking
+      out in a day-treatment class (Rasmussen & O'Neill), and timed breaks from a dental procedure (O'Callaghan et
+      al.; dental staff holding students still is never written).
+    - Three-step prompting, tell, show and guide (Wilder et al., 2006b; the guide marked RESTRICTIVE), three quick
+      requests or preferred items on a timer before an instruction (Bullock & Normand), and signals for when adult
+      attention is available (Tiger et al., 2006b).
+  - Automatic reinforcement and health: matched sound toys checked before and after (Rapp), a chosen textured object
+    for skin picking (Lane et al.; taking it away after misuse a marked punishment step), and exposure with spoken
+    reminders for repetitive arranging (Wetterneck & Woods).
+  - Feeding, toileting and medical routines, each planned with the family, the doctor and the school nurse: a liked
+    flavor added to a refused drink and faded (Tiger & Hanley), cotton underwear with scheduled sits (Simon &
+    Thompson), and a lancet brought closer in steps for finger-stick checks (Shabani & Fisher; ending the trial for
+    10 s a marked time-out step).
+  - Teaching and communication: requests for items with no picture from describing pictures (Marckel et al.), signs
+    taught as labels then used to ask (Wallace et al.), naming actions without a question (Williams et al.), a reward
+    picked from a larger array (Tiger et al., 2006a), the top preference item for each work unit (Graff et al.), and a
+    reading fluency package (Daly et al.).
+  - Safety, fears and work: saying no, getting away and telling an adult when lured (Johnson et al.), gradual approach
+    to feared objects with leaving always allowed (Ricciardi et al.), and job-site teaching plus off-site practice for
+    supported workers (Lattimore et al.; for ages 18–22, as the article never says the workers lived on the
+    developmental center's campus).
+- Two cards offer Add without punishment and Add with punishment (consent required).
+- **Not banked:** the pairing of a milder consequence with stronger punishers (Vorndran & Lerman: the stronger ones,
+  facial screening with a hand hold and contingent walking, are never written, and the card cannot work without
+  them), a choice study with no teaching procedure (Lerman et al.), and a functional analysis with no treatment
+  (Roantree & Kennedy). Not read: errata, studies of drivers, donations, rugby, football, writers and slot machines,
+  staff and student-teacher training, college teaching, adults with dementia or in outpatient therapy, medication
+  and assessment-only papers.
+- **GB-1:** 5 objectives (asking for an item with no picture, naming actions, drinking a refused drink at meals, a
+  still hand for a finger-stick check, leaving objects uneven) and 25 new source lines.
+
 ### v25.36: Journal of Applied Behavior Analysis volume 38 (2005) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2005)
 
