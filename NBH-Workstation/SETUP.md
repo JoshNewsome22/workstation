@@ -9905,6 +9905,47 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.33: Journal of Applied Behavior Analysis volume 34 (2001) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2001)
+
+- **TD-1, 28 cards**, among them:
+  - Function-based treatment: a picture card for a preferred item without extinction (Adelinis et al.), asking to be
+    left alone or for toys with scheduled free access (Hagopian et al.), a break card with a preferred item and a
+    growing work requirement (Perry & Fisher; positive practice after destruction a marked punishment step), the
+    easiest request form so it wins over aggression (Richman et al., 2001a), a choice of a snack or a break for
+    completed tasks (DeLeon et al.), friendly attention from 2 metres when closeness sets off aggression (Oliver et al.),
+    variable-momentary DRO for rare intense aggression (Kahng et al., 2001b), time-based items during work (Roane et
+    al.), directions at the level the student can follow (Richman et al., 2001b), and DRO for breath holding (Richman et
+    al., 2001c; a close reprimand a marked punishment step; a medical safety plan first).
+  - Feeding and health: preferred items kept for accepted bites (Kahng et al., 2001a; a marked response cost step),
+    the spoon kept at the lips with a drink for each bite (Anderson & McMillan; marked RESTRICTIVE), a refused drink
+    faded into an accepted one (Patel et al.; jaw pressure never written), fewer blood glucose checks step by step (Allen
+    & Evans), pica blocked and redirected to preferred food (Hagopian & Adelinis), mittens at rest time for hair twirling
+    (Deaver et al.; marked RESTRICTIVE), a wrist awareness device for thumb sucking (Stricker et al.), and habit reversal
+    with a closed fist or a 1-minute competing response (Twohig & Woods), each planned with the family, the doctor and
+    the school nurse.
+  - School and social: conversation scripts on snack and game packages (Sarokoff et al.), social stories with cue cards
+    and video review (Thiemann & Goldstein), a classwide playground safety lesson (Heck et al.), letter-sound fluency
+    (McDowell & Keenan), a learned task kept going on time-based schedules (Dozier et al.), self-control with a task
+    while waiting and with fading delays (M. R. Dixon & Cummings; Neef et al.), and, for young adults, on-topic talk
+    answered with attention (Dixon et al., 2001b; Wilder et al.). The Wilder et al. study, of one adult with
+    schizophrenia, is banked at the BCBA's request (10/31), with a step that statements about harm or danger always
+    get the district's safety response.
+- Seven cards offer Add without punishment and Add with punishment (consent required).
+- **Set aside by default (the BCBA may restore):** functional communication schedule thinning (Hanley et al.) and two
+  studies of self-injury with transitions or noise (McCord et al.), from adults in residential settings.
+- **GB-1:** 4 objectives (asking to be left alone, a closed fist in place of skin picking, using the slide and climber
+  safely, getting a peer's attention first) and 26 new source lines.
+- **Not banked:** contingent guidance holding a hand over the mouth for aerophagia (never written), assessment-only
+  studies, arbitrary-task analyses, restraint as a consequence, driving and traffic, sports, staff training, reviews and
+  the memorial.
+
+TD-1: 1679 protocols; GB-1: 554 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td1-punish-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`,
+`qa/single-check.js`, `qa/pwa-test.js`.
+
 ### v25.32: Journal of Applied Behavior Analysis volume 33 (2000) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2000)
 
