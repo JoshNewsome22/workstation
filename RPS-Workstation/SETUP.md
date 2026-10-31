@@ -9905,6 +9905,52 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.39: Journal of Applied Behavior Analysis volume 40 (2007) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2007; the first volume read with adults in any setting
+included and with only holds marked RESTRICTIVE)
+
+- **TD-1, 48 cards**, among them:
+  - Function-based treatment:
+    - Signaled "your way" and "my way" periods to build tolerance of interruptions (Hagopian et al.; blocking rituals
+      marked RESTRICTIVE, a 30-s time-out card a marked punishment step, the hands-down and room time-outs never
+      written), coupons for ending a favorite activity (Wilder et al., 2007a), and three quick instructions or guided
+      compliance (Wilder et al., 2007b; guidance through a refused instruction marked RESTRICTIVE).
+    - DRO thinning with longer access as the interval grows (Roane et al.), signaled return of noncontingent items
+      (Gouboth et al.), 15 minutes of conversation before low-attention times (O'Reilly et al.), one-step directives
+      (Boelter et al.), and a greeting at the door (Allday & Pakurar).
+    - Classwide teaching of polite requests and of waiting in preschool (Hanley et al.; a sit-and-watch time-out a
+      marked punishment step).
+  - Automatic reinforcement: vocal stereotypy interrupted and redirected (Ahearn et al.), matched sound toys (Rapp),
+    redirection in accurate discrete-trial teaching (Dib & Sturmey), and mouthing blocked during reward time (R. S. F.
+    Tarbox, Tarbox, et al.; marked RESTRICTIVE).
+  - Health and safety: protective arm splints with toys in reach (Powers et al.; marked RESTRICTIVE, with a fade
+    plan), food re-presented with a brush (Girolami et al.; marked RESTRICTIVE), scheduled drinks after lunch for
+    rumination (Lyons et al.), gun safety coached through families (Gross et al.; real firearms never used at school),
+    and a schoolwide bicycle-helmet program (Van Houten et al.).
+  - Communication: a first request sign and a sign that replaces crying (Thompson et al.), "I don't know, please
+    tell me" (Ingvarsson et al.; a 10-s time-out a marked punishment step), picture requests checked against free
+    access (Gutierrez et al.; a brief time-out after a wrong card a marked punishment step), opposites both ways
+    (Pérez-González et al.), phrases for social cues (Jones et al.), and copying facial expressions (DeQuinzio et
+    al.).
+  - Teaching: offering help by video model (Reeve et al.), essay writing by video self-modeling (Delano), peer math
+    and reading tutoring (Mayfield & Vollmer; Petursdottir et al.), percentile shaping of work time (Athens et al.),
+    a matching picture as a prompt (Fisher et al.), look-alike words (Walpole et al.), faster answers with a rule for
+    problems that need working out (Tiger et al.), goal sheets carried into general education (Mesmer et al.), reading
+    fluency with parents (Gortmaker et al.), and new-language sounds (Wu & Miller).
+  - Adults, banked under the new rule for transition age: older adults with dementia in long-term care (Dwyer-Moore &
+    Dixon: attention for appropriate talk, scheduled attention for wandering and a break card; Moore et al.: brief
+    preferred activities checked with happiness signs), a missing-item request with a picture, then a word, at a
+    developmental training center (Rosales & Rehfeldt; taking back a wrongly asked-for item a marked punishment step),
+    opening a favorite website (Jerome et al.), and acceptance and commitment sessions for substance urges (Twohig et
+    al.; only with the school psychologist and a licensed provider).
+- Five cards offer Add without punishment and Add with punishment (consent required).
+- **Not banked:** a reinforcer-assessment study with toddlers (Bruzek & Thompson). Not read: reviews and series
+  introductions, smoking, cocaine and workplace studies, staff and parent training, a cafeteria and basketball study,
+  measurement and functional-analysis method papers, and assessment-only studies.
+- **GB-1:** 9 objectives (opening a website, a persuasive essay, wearing a bicycle helmet, phrases for social cues,
+  answering quickly when the answer is known, new-language sounds, copying a facial expression, opposites, look-alike
+  words) and 44 new source lines.
+
 ### v25.38: only holds are marked RESTRICTIVE, and adults in institutions are included
 (the BCBA, 10/31: "mark only the holds"; "include adults in institutions")
 

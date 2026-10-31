@@ -8,7 +8,7 @@ rules; the list at the end is where to start that pass.
 Banks in order of reading: Behavior Analysis in Practice and Behavioral Interventions (rp1, rr1, rr2, rr3, bi8688,
 pmc), then JABA 1968 to 1991 (v25.20 and before), then JABA 1992 on: 1992 v25.22, 1993 v25.23, 1994 v25.24,
 1995 v25.25, 1996 v25.26, 1997 v25.27, 1998 v25.28, 1999 v25.29, 2000 v25.32, 2001 v25.33, 2002 v25.34,
-2003 and 2004 v25.35, 2005 v25.36, 2006 v25.37.
+2003 and 2004 v25.35, 2005 v25.36, 2006 v25.37, 2007 v25.39.
 
 ## The rules now
 
@@ -51,7 +51,12 @@ pmc), then JABA 1968 to 1991 (v25.20 and before), then JABA 1992 on: 1992 v25.22
 12. **Words:** "the student" (not child, subject, client, patient or resident); present-day terms (intellectual
     disability) outside reference titles; never "slap", "shock" or "aversive" in a step or a card's name.
 13. **No participant names**, real or pseudonym, anywhere on a card or objective.
-14. **References:** APA 7 with every author; same-first-author articles of one year keep a/b letters in the key, and
+14. **Which articles are read** (from v25.39, JABA 2007, in line with the inclusion rule of 10/28): every study
+    with a procedure a school team could run or adapt, whatever the population, college and sport studies included.
+    Not read: reviews, comments, errata and series introductions; measurement and functional-analysis method papers;
+    assessment-only studies; staff, teacher and parent training; community-wide programs (drivers, shoppers,
+    cafeterias); substance use and gambling.
+15. **References:** APA 7 with every author; same-first-author articles of one year keep a/b letters in the key, and
     in the cite only when the cites would otherwise read alike; no year letter in the APA entry; a reference the
     banks already hold is kept as it is.
 
@@ -73,6 +78,7 @@ pmc), then JABA 1968 to 1991 (v25.20 and before), then JABA 1992 on: 1992 v25.22
 | 8 Medication note | in the briefs from v25.35 | earlier cards mostly have it, not always |
 | 13 No participant names (scan before each commit) | v25.35; in the briefs from v25.36 | earlier banks not scanned for names |
 | 14 Year letters in cites only when needed | v25.35 | earlier cites may carry letters they do not need |
+| 14 College and sport studies read when the procedure adapts | v25.39 (JABA 2007) | 1992–2006 triage skipped most college, sport and adult-community studies unread |
 
 ## Known cards for the pass
 
@@ -97,6 +103,8 @@ Other work for the pass:
 
 - Punishment elements in 1968–1991, BAP, BI, rr1–rr3 and pmc written as marked steps (rule 2);
   tools/banks/set-aside-procedures.md lists what was left out of those banks.
+- College, sport and other studies skipped unread in the 1992–2006 triage (rule 14): each release's notes name them
+  under "Not read".
 - A name scan of every bank (rule 13) and a check of protective-equipment cards before 1992 (rule 5).
 - Adults in institutions (rule 7). Studies read and set aside, 1992–2006 (by key): cuvo1992b (1992), vollmer1993
   (1993), zarcone1993a (1993), zarcone1993b (1993), mazaleski1993 (1993), smith1993 (1993), lerman1994 (1994),
