@@ -9905,6 +9905,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.36: Journal of Applied Behavior Analysis volume 38 (2005) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2005)
+
+- **TD-1, 22 cards**, among them:
+  - Function-based treatment:
+    - Functional communication for attention with a check of which approved package the student chooses (Hanley et
+      al.; the study's punishment components, a hold of the hands and a hand over the eyes, are never written).
+    - Functional communication thinned with competing items (Hagopian et al.), signaled times for attention with
+      the rule taught first (Tiger & Hanley), nondirective prompts in place of directives (Peyton et al.), and toy
+      prompts through transitions (Cote et al.; physical prompts marked RESTRICTIVE).
+  - Automatic reinforcement: preferred or matched items that compete with stereotypy (Ahearn et al.; Sidener et
+    al.), and a preferred self-protective item kept within reach (Rooker & Roscoe; marked RESTRICTIVE, staff never put
+    it on the student).
+  - Feeding, each planned with the family, the doctor, a feeding specialist and the school nurse:
+    - Food redistribution for packing (Gulotta et al.) and a lower food texture (Patel et al.), with re-presentation
+      marked RESTRICTIVE and the consent block; a hold of the hands is never written.
+    - A preferred food on the spoon behind each new bite (Buckley & Newchok; taking away the video a marked response
+      cost step, which the study found was not needed), a video during meals (Wilder et al.), and a sleep check
+      before meals with the spoon kept at the lips (Reed et al.).
+  - Teaching: varied activity choices on a lag rule (Cammilleri & Hanley), reading fluency lessons with a score to
+    beat (Daly et al.), phrase repetition for reading errors (Valleley et al.), word repetition for sight-word errors
+    for young adults (Worsdell et al.), a blocked color discrimination (Williams et al.; guiding the hand to the table
+    after errors left out), derived request cards (Murphy et al.), and a brief preference assessment with the top
+    item for time on task (Paramore & Higbee).
+  - Safety: saying no, getting away and telling an adult when lured (Johnson et al.), and gun safety by role play
+    and practice on the spot (Miltenberger et al.; real firearms never used at school; any in-situ check needs
+    family consent and district approval).
+- One card offers Add without punishment and Add with punishment (consent required).
+- **Set aside by default (the BCBA may restore), not read:** pica blocking at a developmental center (McCord et al.),
+  teaching for adults with profound multiple disabilities at a state center (Green et al.), and preference and
+  derived-requesting studies of adults (McAdam et al.; Rehfeldt & Root).
+- **Not banked:** errata, reviews, the memorial, studies of drivers, smoking, veterans, a restaurant and a college
+  course, functional-analysis method papers, two medication studies, and descriptive or laboratory analyses.
+- **GB-1:** 2 objectives (varied activity choices, matching a formula to its graph for transition age; Ninness et al.)
+  and 24 new source lines.
+
 ### v25.35: Journal of Applied Behavior Analysis volumes 36 (2003) and 37 (2004) in the banks
 (the BCBA, 10/31; issues 1 to 4 of each; JABA now runs from 1968 to 2004)
 
