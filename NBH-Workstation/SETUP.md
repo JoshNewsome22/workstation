@@ -9905,6 +9905,51 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.27: Journal of Applied Behavior Analysis volume 30 (1997) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1997)
+
+- **TD-1, 38 cards**, among them:
+  - Function-based treatment: functional communication for attention, play, items or a break, at school and at home
+    (Bowman et al., 1997a; Hanley et al., 1997b; Derby et al.; Frea & Hughes), noncontingent attention or items
+    (Hanley et al., 1997a; Lalli et al.; Hanley et al., 1997b; Piazza et al., 1997b and 1997c), a skipped delivery after
+    aggression when noncontingent items accidentally reinforce it (Vollmer et al.), breaks with a preferred item and a
+    thinned work requirement (Piazza et al., 1997a), preferred items checked against self-injury and requests after
+    10 s without it (Ringdahl et al.), task choice by object symbol (Vaughn & Horner), easy requests with a richer
+    reinforcer (Mace et al.), neutralizing routines after a bad-start event (Horner et al.), an ear-infection check
+    for episodic self-injury (O'Reilly), and walking near the adult for elopement (Piazza et al., 1997b; a safety plan
+    first).
+  - Punishment elements, written as marked steps that need approval (the rule of v25.26): response cost during
+    "play my way" (Bowman et al., 1997a), time-out from attention at home (Derby et al.), time-out with a task before
+    returning to play (Richman et al.; holding the student in the chair never written), and a lost privilege after a
+    missed asthma dose (Da Costa et al.).
+  - School and social: critical-difference spelling (Birnie-Selwyn & Guerin), echoing a name before choosing a printed
+    character (Leung & Wu), easy facts before hard problems (Belfiore et al.), a slow read-aloud preview (Skinner et
+    al.), early praise and redirection in seatwork (Martens et al.), assignment choice (Powell & Nelson), a choice of
+    reinforcer at each delivery and varied versus constant reinforcers (Fisher et al.; Bowman et al., 1997b), peer
+    support in general education (Cushing & Kennedy), several classmates using pivotal response training (Pierce &
+    Schreibman), social play generalized across adults, peers and games (Ducharme & Holborn), and a picture routine
+    ending in a reward (Vaughn et al., 1997b).
+  - Health and transition: escape extinction with feeding (Coe et al.) and with compliance (Kayser et al.; the
+    medication comparison left out), relaxation with a competing response for lip biting (Jones et al.), asthma
+    medication points (Da Costa et al.), each planned with the family, the doctor and the school nurse, and a
+    self-managed work pace for community jobs (Christian & Poling).
+- **Set aside by default (the BCBA may restore):** functional communication against automatic reinforcement (Shirley
+  et al.), noncontingent arbitrary reinforcers (Fischer et al.) and control over reinforcement (Kahng et al.), from adults
+  in residential facilities, and intermittent punishment of self-injury (Lerman et al.; adults in a residential
+  facility, its punisher a manual restraint, never written).
+- **GB-1:** 2 objectives (finishing job tasks within a timer's target, asking for a pause in conversation) and 41 new
+  source lines.
+- **Not banked:** idiosyncratic stimuli in functional analyses and a descriptive analysis of stereotypy (assessment
+  only), restraint fading, medication analyses, reinforcer and preference assessment studies, adult and community
+  programs (older adults, seat belts, an athlete), head injury, happiness indices, private verbal self-regulation, the
+  antecedent review, book reviews, comments and the memorial.
+
+TD-1: 1564 protocols; GB-1: 543 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/single-check.js`,
+`qa/pwa-test.js`.
+
 ### v25.26: Journal of Applied Behavior Analysis volume 29 (1996) in the banks; punishment elements written and marked
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1996)
 
