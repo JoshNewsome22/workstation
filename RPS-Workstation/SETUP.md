@@ -9905,6 +9905,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.38: only holds are marked RESTRICTIVE, and adults in institutions are included
+(the BCBA, 10/31: "mark only the holds"; "include adults in institutions")
+
+- **Physical prompts:** a prompt the student accepts (hand-over-hand or guided help in a prompt hierarchy) is an
+  ordinary step that stops if the student pulls away. Only an actual hold inside teaching (the hands held down or at
+  the sides, the hand held to the table after an error) is a RESTRICTIVE step needing approval; guiding a student
+  through a refused demand stays escape extinction, marked, with the consent block.
+- **The 2006 cards brought up to it:** the mark comes off five accepted prompts (the job-site hand-over-hand
+  guidance, Lattimore et al.; the PECS prompt, Marckel et al.; the guided answer, Tiger et al., 2006a; guiding the
+  hands into a sign, Wallace et al.; guiding the hand into the outline, Shabani & Fisher). Stopping an incorrect
+  movement, guidance through a refused transition, three-step prompting's guide and keeping the music on stay marked.
+- **Adults in any setting** are banked from JABA 2007 on, institutions and residential facilities included, for
+  transition age unless the procedure suits younger students, with the note saying who was studied and what to adapt.
+- **The rules log** (tools/banks/reader-rules.md) records both decisions and adds them to the final pass: the accepted
+  prompts marked before 2006 lose the mark, and the 44 studies of adults in institutions set aside from 1992 to 2006
+  (with a dozen not read for the same reason) are to be banked.
+
 ### v25.37: Journal of Applied Behavior Analysis volume 39 (2006) in the banks, and teaching holds
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2006)
 
