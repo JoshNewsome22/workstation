@@ -9905,6 +9905,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.31: the 1992 to 1995 cards' punishment elements written as marked steps
+(the BCBA, 10/31)
+
+- The cards written from JABA 1992 to 1995 under the earlier rule left a study's punishment element out of the steps and
+  named it only in the note. Each card whose note or record named one was checked again against its article (34
+  cards). Where the card's own treatment used a humane punishment element, it is now its own step marked
+  "RESTRICTIVE: Punishment (kind); needs approval before use", and the note says it needs district review and written
+  consent and that the other steps work without it. These 13 cards now offer Add without punishment and Add with
+  punishment (consent required):
+  - 1992: time-out after a warning for contact lens cooperation (Mathews et al.), stopping play or taking disputed
+    materials in pretend play (Goldstein & Cisar), removing a misused toy and a brief reprimand in self-managed play
+    (Stahmer & Schreibman), a 5-minute folding-screen time-out at the desk (Cooper et al.), and one more task after
+    aggression before the break (Sasso et al.);
+  - 1993: a reprimand and five contingent requests in FCT (Fisher et al.; the basket-hold time-out still never
+    written), a lost privilege for a missed meal goal (Stark et al.; ending meals at a time limit never written), and a
+    firm "no" and a brief time-out at meals (Werle et al.; blocking still left out);
+  - 1994: the contract's sanction for forgotten materials (Miller & Kelley; the withheld snack never written), a "no
+    hitting" reprimand with the break routine and music switched off after head hitting (Northup et al.), a 1-minute
+    facing-the-wall time-out at the top of a brief hierarchy (Harding et al.), and the chair time-out for refusal
+    (Rortvedt & Miltenberger), now marked as punishment.
+- The other 21 cards stay as they were: the element was used only in an assessment, a comparison condition or with a
+  different person, or it is on the never-written list (facial screening, holds, restraint, food deprivation). No card
+  from 1995 changed.
+- With v25.30, 23 cards from 1992 to 1999 now offer the two buttons. The volumes before 1992 come next, from the record
+  in `tools/banks/set-aside-procedures.md`.
+
+TD-1: 1622 protocols (unchanged in number). Not changed: the forms, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` changed). Tested: `qa/td1-bank-test.js`,
+`qa/td1-punish-test.js`, `qa/td88-redesign-test.js`, `qa/single-check.js`, `qa/pwa-test.js`.
+
 ### v25.30: TD-1's bank cards with a punishment element: add without punishment, or with it and consent
 (the BCBA, 10/31)
 
