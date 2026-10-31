@@ -9905,6 +9905,44 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.32: Journal of Applied Behavior Analysis volume 33 (2000) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2000)
+
+- **TD-1, 29 cards**, among them:
+  - Function-based treatment: functional communication matched to the function and taught where problem behavior
+    happens (Brown et al.; time-out a marked punishment step), one request for each function of stereotypy (Kennedy et
+    al.), a request for the exact item (Kahng et al.), a break with an adult and preferred activities rather than a quiet
+    break (Golonka et al.; ending the break early a marked punishment step), making a request pay off more than
+    aggression (DeLeon et al., 2000a), timed attention while adults talk (O'Reilly et al., 2000a), timed items on fixed or
+    varying schedules thinned with extinction (Hagopian et al.; Van Camp et al., 2000b), music with a 30-second response
+    cost (Keeney et al.; marked punishment step), peer play breaks (Jones et al.), the task feature that sets off escape
+    and a choice of task order (McComas et al.), noise reduced or earplugs for sound sensitivity (O'Reilly et al.,
+    2000b), and quick math requests before seatwork (Wehby & Hollahan).
+  - Automatic and sensory: matched-sensation items, rotating toy sets, competing items for attention seeking and
+    nonvibrating toys for hand biting (Piazza et al.; DeLeon et al., 2000b; Fisher et al., 2000b; Van Camp et al.,
+    2000a), and a glove for finger sucking, faded (Ellingson et al.; marked RESTRICTIVE).
+  - School and social: matching and building words with tiles, look-alike words letter by letter and onset-rime
+    matching (Melchiori et al.; Saunders et al.; Mueller et al.), sight words without pictures (Didden et al.), positive
+    peer reporting (Bowers et al.), waiting for a bigger reward (Binder et al.), varied game sequences (Miller &
+    Neuringer), questions about a hidden toy (Williams et al.), and warning stickers on off-limits food with a reprimand
+    a marked punishment step (Maglieri et al.; with the dietitian and the school nurse).
+  - Health: checking one's own blood glucose from a written checklist (Wong et al.; with the family, the doctor and the
+    school nurse).
+- Four cards offer Add without punishment and Add with punishment (consent required) (v25.30).
+- **Set aside by default (the BCBA may restore):** five studies from adults in a state residential facility (Zhou et al.;
+  Goh et al.; Kahng et al., 2000a; Worsdell et al.; Hanley et al.). Their findings stay as sources.
+- **GB-1:** 4 objectives (checking blood glucose from a checklist, matching words that differ only in the first letter,
+  asking three questions about a hidden item, onset-rime word matching) and 28 new source lines.
+- **Not banked:** bathroom graffiti signs, choice among less preferred reinforcers, a thumb-sucking case without a
+  treatment, preference and functional analysis method studies, establishing operation papers, matching law and
+  self-control studies with adults, medication analyses, energy saving, seat belts, reviews and comments.
+
+TD-1: 1651 protocols; GB-1: 550 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td1-punish-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`,
+`qa/single-check.js`, `qa/pwa-test.js`.
+
 ### v25.31: the 1992 to 1995 cards' punishment elements written as marked steps
 (the BCBA, 10/31)
 
