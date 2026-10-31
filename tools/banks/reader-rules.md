@@ -8,7 +8,7 @@ rules; the list at the end is where to start that pass.
 Banks in order of reading: Behavior Analysis in Practice and Behavioral Interventions (rp1, rr1, rr2, rr3, bi8688,
 pmc), then JABA 1968 to 1991 (v25.20 and before), then JABA 1992 on: 1992 v25.22, 1993 v25.23, 1994 v25.24,
 1995 v25.25, 1996 v25.26, 1997 v25.27, 1998 v25.28, 1999 v25.29, 2000 v25.32, 2001 v25.33, 2002 v25.34,
-2003 and 2004 v25.35, 2005 v25.36, 2006 v25.37, 2007 v25.39, 2008 v25.40, 2009 v25.41.
+2003 and 2004 v25.35, 2005 v25.36, 2006 v25.37, 2007 v25.39, 2008 v25.40, 2009 v25.41, 2010 v25.42.
 
 ## The rules now
 

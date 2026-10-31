@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.42: Journal of Applied Behavior Analysis volume 43 (2010) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2010)
+
+- **TD-1, 42 cards**, among them:
+  - Function-based treatment:
+    - Asking for attention only when the adult is free (Kuhn et al.; Leon et al.: the study's basket-hold time-out is
+      never written), a lanyard signal for when the adult cannot talk (Grow et al.), an "I want to talk" card for
+      aggression about favorite topics (Roscoe et al.), and a card for door play instead of running off (Falcomata et
+      al.; blocking and guiding back marked RESTRICTIVE).
+    - Closeness or a preferred video for elopement by function (Lang et al.), timed breaks with work and break notes
+      (Waller & Higbee), a preferred item for following self-care instructions (Carter), variable-time snacks and
+      praise during demands (Lomas et al.), and a peer who helps homework and ignores off-task behavior
+      (Grauvogel-MacAleese & Wallace).
+    - A request that pays off faster, longer and better than problem behavior (Athens & Vollmer; a brief reprimand a
+      marked punishment step), and handing over a preferred item, taught by reinforcement (Wilder et al., 2010b;
+      response cost a marked punishment step) or by tell, show, guide (Wilder et al., 2010a; the guide marked
+      RESTRICTIVE).
+  - Feeding and health, planned with the family, the doctor and the school nurse: a rising bite requirement for a
+    picky eater (Valdimarsdóttir et al.), spoon distance fading with escape extinction (Rivas et al.; marked
+    RESTRICTIVE), flipped-spoon placement (Sharp et al.), and vouchers for daily blood glucose checks (Raiff &
+    Dallery; keeping a day's earnings only at four checks a marked punishment step).
+  - Communication and teaching: "I don't know, please tell me" (Ingvarsson & Hollobaugh), asking where or who (Lechago
+    et al.), sound added to signed requests (Carbone et al.), matrix teaching (Axe & Sainato), a neutral "no" in
+    two-choice tasks (Leaf et al.), varied block building on a lag rule (Napolitano et al.), say-do correspondence
+    (Lima & Abreu-Rodrigues), raising a hand only when the answer is known (Charania et al.), braille by matching
+    (Toussaint & Tiger), onset-rime matching (Mahon et al.), sounding out in spelling (Mann et al.), and, for
+    secondary classes, equivalence lessons in science and statistics (Fienup et al.; Fienup & Critchfield; Critchfield
+    & Fienup; Walker et al.).
+  - Safety, PE and athletics: saying no, running and telling when a stranger lures (Gunby et al.), exergaming stations
+    in PE (Fogel et al.), and coaching football skills (Stokes et al., 2010a and 2010b). The study's tackle made first
+    contact with the face mask, which current tackling standards no longer teach, so the card keeps the head up and
+    out of contact and is checked with the athletics staff.
+  - Adults: attention for factual talk and none for delusional statements (Travis & Sturmey; harm or danger statements
+    always get the district's safety response).
+- Three cards offer Add without punishment and Add with punishment (consent required).
+- **Not banked:** a stereotypy program that depended on holding the hands down after each response (Anderson et al.: a
+  hold used as a consequence, never written), and a high-probability sequence that did not work (Normand et al.).
+  Not read: reviews and editors' pages, staff training, recycling, electricity, seat-belt, college-bar, smoking and
+  gambling studies, and assessment-only and method papers.
+- **GB-1:** 9 objectives (asking only when the adult is free, braille letters, raising a hand when sure, hypothesis
+  decisions, asking where or who, daily glucose checks, safe tackling, marking a named picture, a sound with a sign)
+  and 47 new source lines.
+
 ### v25.41: Journal of Applied Behavior Analysis volume 42 (2009) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2009)
 
