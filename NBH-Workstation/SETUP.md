@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.25: Journal of Applied Behavior Analysis volume 28 (1995) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1995)
+
+- **TD-1, 30 cards**, among them:
+  - Escape and function-based treatment: breaks on a timer, not after self-injury, slowly thinned (Vollmer et al.),
+    saying "finished" for a short break and breaks earned by following instructions (Marcus & Vollmer), a break
+    request with the task steps then doubled (Lalli et al., 1995a), saying "no" for a break taught ahead of the
+    escalation chain (Lalli et al., 1995b), breaks for each step of a hygiene routine (Roberts et al.), quick easy
+    requests or friendly comments just before a refused task (Kennedy et al.), last night's sleep checked as a setting
+    event (O'Reilly), and a picture request for play with scheduled attention for breath holding (Kern et al., 1995b;
+    a medical safety plan first). The guidance and no-break steps are marked RESTRICTIVE, with escape-extinction
+    consent first.
+  - Feeding and health: the bite kept at the lips with praise for each bite (Cooper et al.; Kerwin et al.; marked
+    RESTRICTIVE, the high-chair strap, hand blocking and jaw guidance never written), a top-choice diet food after
+    each less-liked one (Amari et al.; with the dietitian), a wearable alarm for daytime wetting (Friman & Vollmer),
+    nasogastric tube self-insertion practiced on a model first (Reimers et al.), and, for eye poking, a hand-held
+    visual game and clear safety goggles (Kennedy & Souza; the goggles marked RESTRICTIVE with a plan to fade them,
+    the game's removal after pokes left out), each planned with the family, the doctor and the school nurse.
+  - School and social: video self-evaluation of getting along, alone and classwide (Kern et al., 1995a), one correct
+    practice after an error and five separate trials per sight word (Cuvo et al.; Belfiore et al.; the harder-word
+    penalty left out), cooperative learning groups (Dugan et al.), fractions and decimals through equivalence (Lynch &
+    Cuvo), coupons for time with a chosen peer (Northup et al.; the peers' response cost left out), sportsmanship lessons
+    with a team score in PE (Sharpe et al.), peers trained in pivotal response strategies (Pierce & Schreibman), peers
+    teaching a self-talk routine for starting conversations (Hughes et al.), asking "What's that?" (B. A. Taylor &
+    Harris), advance notice before a task change (Tustin), and new device symbols by simultaneous prompting (Schlosser
+    et al.).
+- **Set aside by default (the BCBA may restore):** a voice-output aid with staff (Schepis & Reid) and establishing
+  operations for self-injury (Smith et al.), from adults in residential facilities.
+- **GB-1:** 4 objectives (the routine of a cooperative learning group, matching fractions and decimals, inserting
+  one's own nasogastric tube, encouraging teammates as a good sport) and 33 new source lines.
+- **References:** the two Lalli et al. (1995) studies are told apart as 1995a and 1995b in both banks.
+- **Not banked:** reinforcer and preference assessment comparisons, an analysis of facilitated communication, the
+  extinction burst survey, the reinforcing properties of hand mouthing and extended analyses (assessment only), parent,
+  staff and supervisor training, adult public-health and community programs (drivers, health education, condoms,
+  gambling, a senior center, a nursing home, home access), college and computer instruction, statistical process control
+  and other methods papers, the societal concerns essays and the abstracts of the basic journal.
+
+TD-1: 1494 protocols; GB-1: 538 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/single-check.js`,
+`qa/pwa-test.js`.
+
 ### v25.24: Journal of Applied Behavior Analysis volume 27 (1994) in the banks
 (the BCBA, 10/30; issues 1 to 4; JABA now runs from 1968 to 1994, volumes 1 to 27 with none missing)
 
