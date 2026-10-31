@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.46: Journal of Applied Behavior Analysis volume 46 (2013) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2013)
+
+- **TD-1, 48 cards**, among them:
+  - Function-based treatment: rapid thinning of FCT signals (Betz et al.), FCT built on teacher-run trial-based
+    analyses (Bloom et al.), FCT with added reinforcement, which beat added punishment across 58 cases (Rooker et
+    al.; the punishment holds and facial screening never written), FCT and saying "okay" after a delay or denial for
+    preschool groups (Luczynski & Hanley), asking for attention by name instead of teeth grinding (Lang et al.), a
+    social initiation for social avoidance (Harper et al.), FCT carried from cards to signs (Falcomata et al.),
+    leisure items for stereotypy and hand mouthing (Dozier et al.; Roscoe et al.; a hands-in-lap hold left out),
+    earning access to stereotypy by playing (Potter et al.; brief holds left out), food after meals for rumination
+    (Woods et al.), turn-taking on the partner's topic (Fisher et al., 2013a), a stated DRO rule (Watts et al.),
+    dense NCR, where free leisure items added little (Virues-Ortega et al.), attention on days with mood warning
+    signs (Allen et al.), and a shorter time-out for going promptly (Donaldson et al.; a marked punishment step,
+    never locked or held).
+  - Health and safety: scheduled breaks during dental care (Allen & Wallace; usual-care reprimands and holding not
+    written), smoother textures for packing (Kadey et al.), tic awareness (Wiskow & Klatt), lure safety for young
+    adults and children (Fisher et al., 2013b; Miltenberger et al.; in-situ checks only with family consent and
+    district approval), and safe tackling coached by a tone (Harrison & Pyles; head up and out of contact).
+  - Teaching: a brief error-correction assessment (McGhan & Lerman; directed rehearsal a marked punishment step),
+    category names, intraverbals and synonyms (Miguel & Kobari-Wright; Humphreys et al.; de Souza & Rehfeldt), how
+    and how-many questions (Lechago et al.), instructive feedback (Vladescu & Kodak), flash-card drills (Forbes et
+    al.), video play with substitutable loops (Dupere et al.), joint attention through special interests (Kryzak et
+    al.), peers who prompt answering a group call (Beaulieu et al.), running teaching trials as a job skill for
+    adults with autism (Lerman et al.), and a walking goal for transition students (Kurti & Dallery).
+- **Not banked:** an assessment-only report on crying (Bowman et al.), an analysis of persistence in extinction
+  (MacDonald et al.) and a brief review (Payne et al.). Not read: the functional-analysis method papers of the special
+  issue, reviews, measurement and integrity papers, staff training, and the drug-treatment workplace, smoking and fuel
+  studies.
+- **GB-1:** 5 objectives (running teaching trials, prompting a classmate to answer a call, naming one's own tic,
+  synonyms, how and how-many questions) and 49 new source lines.
+
+
 ### v25.45: Journal of Applied Behavior Analysis volume 45 (2012) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2012)
 
