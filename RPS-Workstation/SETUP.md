@@ -9905,6 +9905,74 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.35: Journal of Applied Behavior Analysis volumes 36 (2003) and 37 (2004) in the banks
+(the BCBA, 10/31; issues 1 to 4 of each; JABA now runs from 1968 to 2004)
+
+- **TD-1, 33 cards from 2003**, among them:
+  - Function-based treatment:
+    - Functional communication to ask for the wanted place or item instead of running off, and continuous attention
+      at the work table (Tarbox et al.).
+    - Timed breaks on a stretched clock schedule and breaks for calm intervals (Kodak et al.), corrections given as
+      the next prompt (Ebanks & Fisher), and 10 minutes of attention before independent work (McComas et al.).
+    - A teacher's check of hard work against attention (Moore & Edwards), tokens for engagement or on a fixed
+      schedule (Mueller et al., 2003b), and waiting for a larger reward with a task during the wait (Dixon et al.).
+    - Classroom rewards changed step by step from data (Gulley et al.; response cost and a brief time-out marked
+      punishment steps; the medication comparison is left out).
+  - Feeding, each planned with the family, the doctor and the school nurse:
+    - The bite kept at the lips (Dawson et al.; Piazza et al.), a token for each bite to end the meal (Kahng et al.),
+      and a rising bite requirement (Najdowski et al.); escape extinction marked RESTRICTIVE, jaw pressure never
+      written.
+    - A favorite food after each drink from a cup (Kelley et al.), a chosen condiment on a refused vegetable
+      (Ahearn), and training parents or staff to run a feeding protocol (Mueller et al., 2003a).
+  - Automatic reinforcement: competing activities kept available (Ahearn et al.), blocking with hanging leisure
+    items (Lerman et al.; marked RESTRICTIVE), and approved foods in a pouch for object mouthing (Roane et al.).
+  - Skills: math story problems (Neef et al.), goal setting and self-checking (Mithaug & Mithaug), habit reversal
+    for vocal tics (Woods et al.), false-belief tasks by video model (LeBlanc et al.), asking about a hidden object
+    (Williams et al.), exclusion trials for new names (Carr), speech sounds (Eikeseth & Nesset), group games as
+    leader and player (Arntzen et al.), and whole-school bus rules (Putnam et al.).
+  - For young adults: a favorite activity earned by a less-liked task, a new preference built by pairing (Hanley et
+    al.), and on-topic talk answered with attention (Rehfeldt & Chambers).
+- **TD-1, 39 cards from 2004**, among them:
+  - Function-based treatment:
+    - Functional communication started at the lean schedule (Hagopian et al.), a card request thinned by putting
+      the card out of reach (Roane et al.), and an attention card for inappropriate touching (Fyffe et al.).
+    - Competing items or attention throughout with extinction (Fisher et al.), attention during an outdoor game for
+      running off (Kodak et al.; a 30-second time-out a marked punishment step), and signaled times when the
+      teacher can answer (Tiger & Hanley).
+    - An easier or shorter task and steady praise during hard work (Call et al.), and a classwide star board earned
+      or, as a marked punishment step, lost (Conyers et al., 2004a).
+  - Automatic reinforcement: matched items and sound toys for stereotypy (Rapp et al.), a music player removed
+    briefly after each vocalization (Falcomata et al.; a marked response cost step), and padding matched to each
+    form of self-injury, removed one part at a time (Moore et al.; marked RESTRICTIVE, with a fade plan).
+  - Feeding and health: the spoon or cup kept at the lips (Reed et al.; marked RESTRICTIVE; food restriction never
+    written), new foods blended into an accepted food (Mueller et al.), toilet trips every 30 minutes in underwear
+    (Tarbox et al.), and a token for each 10 seconds without tics (Woods & Himle).
+  - Communication and teaching: spoken requests with timed prompts or by shaping (Bourret et al.), a first sign by
+    delayed prompts (Thompson et al.), a rapid skills assessment (Lerman et al.), delayed cues for word-picture
+    matching (Clark & Green), spelling by time delay for students with physical disabilities (Coleman-Martin &
+    Heller) or with letter tiles (Hanna et al.), sight words (Conley et al.), reading fluency (Bonfiglio et al.),
+    computer letter lessons (Connell & Witt), response cards (Davis & O'Neill), and a choice of token rules (Lannie
+    & Martens).
+  - Social, play and safety: a peer video model for play invitations (Nikopoulos & Keenan), pretend-play centers
+    (DiCarlo & Reid), a slide-show activity schedule (Rehfeldt et al.), dance by self-instruction (Vintere et al.),
+    gun safety (Himle et al.; Miltenberger et al.; real firearms never used at school), and a help card when lost
+    (B. A. Taylor et al.).
+  - For young adults: preferred items with lively one-to-one talk (Davis et al.; adults seen at a rehabilitation
+    facility's classroom, not living there).
+- Four cards offer Add without punishment and Add with punishment (consent required).
+- Left off as background, not treatment: the school's standing bus discipline policy (Putnam et al.). The
+  participants' names in two 2004 results (Call et al.) are replaced with letters.
+- **Set aside by default (the BCBA may restore):** bizarre speech of an adult inpatient (DeLeon et al.),
+  noncontingent reinforcement for adults in a state facility (Lindberg et al.), reading units for adults linked to a
+  state hospital (Saunders et al.), mouthing in an adult at a state residential school (Simmons et al.), and dental
+  desensitization for adults in group homes (Conyers et al., 2004b; a support line kept). Not read: studies of
+  adults with brain injury, dementia, dual diagnosis or tardive dyskinesia and an adult day-treatment program.
+- **Not banked:** assessments with no treatment (Piazza et al., 2003a; Kurtz et al.), control procedures (Thompson et
+  al.), parent training at home (Wahler et al.; O'Reilly et al.), adult martial arts (Harding et al.) and a choice
+  analysis (Neef et al.), plus reviews, method papers and community studies.
+- **GB-1:** 5 objectives (math story problems, leading a group game, picking the unfamiliar item, letter names and
+  sounds, inviting an adult to play) and 57 new source lines.
+
 ### v25.34: Journal of Applied Behavior Analysis volume 35 (2002) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2002)
 
