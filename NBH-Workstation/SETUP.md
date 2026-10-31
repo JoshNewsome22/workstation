@@ -9905,6 +9905,31 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.30: TD-1's bank cards with a punishment element: add without punishment, or with it and consent
+(the BCBA, 10/31)
+
+- **Two ways to add a card that has a punishment element.** A protocol whose steps include one marked
+  "RESTRICTIVE: Punishment (kind); needs approval before use" (response cost, a penalty, time-out, overcorrection, a
+  reprimand or removing an item as a consequence) shows two buttons in the bank panel instead of Add to the plan:
+  - **Add without punishment** (the default, first): the card gets every other step; the punishment steps are left
+    off, and the message says so.
+  - **Add with punishment (consent required)**: the card gets the punishment steps too, in their place, and its
+    source line (on the card, in the printed plan and in the BIP text) reads "..., with punishment steps (consent
+    required)". The message says they need district review and written consent before they are used.
+  A short note under the buttons explains the choice, and the punishment steps are tinted in the panel's step list.
+  Cards without a punishment element keep the one Add to the plan button. Shock, aversive sprays, tastes or smells,
+  facial screening, restraint as a consequence, seclusion and deprivation are still never written, so no card offers
+  them.
+- The cards from JABA 1996 to 1999 already carry their punishment steps marked this way, so they offer both buttons
+  now. The cards from 1992 to 1995 follow in the next release; the older volumes after that.
+- A setting box can still name the study's punishment (for example a reset rule); edit it on the card when the
+  punishment steps are left off.
+
+Not changed: the banks' contents, the saved files (the steps and the source line are ordinary fields), the printing.
+Checked by `qa/td1-punish-test.js` (the two buttons only on such a card, without leaves the steps off, with adds them
+and the label, the plain card keeps one button, no page errors), with `qa/td1-bank-test.js`, `qa/td93-scenes-test.js`,
+`qa/td1-video-test.js`, `qa/td88-redesign-test.js`, `qa/single-check.js` and `qa/pwa-test.js`.
+
 ### v25.29: Journal of Applied Behavior Analysis volume 32 (1999) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1999)
 

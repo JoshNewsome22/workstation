@@ -6249,6 +6249,8 @@ details.about>p{margin:6px 0 0;padding:8px 12px;border-left:3px solid var(--nbh-
 .dm{margin:3px 0 10px;font-size:12px;color:var(--nbh-muted,#54676f)}
 .load{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border:1px solid var(--nbh-rule,#cfdad8);border-radius:6px;background:var(--nbh-shade,#f5f8f7);scroll-margin-top:84px}
 .btns{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.punnote{flex:1 1 100%;margin:2px 0 0;font-size:13px;line-height:1.45;color:#7a3b00;background:#fff5e6;border:1px solid #e7c27a;border-radius:8px;padding:8px 10px}
+ol.steps li.pun{color:#7a3b00;background:#fff5e6;border-radius:6px;padding:2px 6px}
 .btns button{text-align:left}
 .btns .sub{display:block;max-width:16em;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:500;color:var(--nbh-muted,#54676f)}
 .st{flex:1 1 100%;font-size:12.5px}
@@ -6312,6 +6314,7 @@ const FN={escape:'Escape',attention:'Attention',tangible:'Tangible',automatic:'A
 const KIND=['Antecedent strategies','Replacement behavior and skills','Prompting and error correction','Reinforcement schedules','When problem behavior occurs'];
 const G=(window.__tdGroups?window.__tdGroups():[]),kindOf=c=>{const k=G.findIndex(g=>g[1].includes(c));return k>=0?KIND[k]||G[k][0]:'Other components';};
 const LIBOF={};B.protocols.forEach(p=>{if(!LIBOF[p.code])LIBOF[p.code]=window.__tdLibOf(p.code);});
+const PUN=/^\s*RESTRICTIVE:\s*Punishment\b/i,hasPun=p=>(p.steps||[]).some(x=>PUN.test(x));
 const ok=B.protocols.filter(p=>LIBOF[p.code]);
 const fold=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,'');
 const stem=w=>w.replace(/(ings|ing|ed|es|s)$/,'').replace(/(.)\1$/,'$1');
@@ -6393,10 +6396,10 @@ function show(id){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
   det.innerHTML=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>
-<div class="load"><div class="btns"><button type="button" class="add primary">Add to the plan</button>${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${window.__tdVideo&&window.__tdVideo.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div><div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
+<div class="load"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':'<button type="button" class="add primary">Add to the plan</button>'}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${window.__tdVideo&&window.__tdVideo.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div>${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
 <div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div>
-<div class="vh">Steps for staff</div>${tdWhoNote()}<ol class="steps">${(p.steps||[]).map(s=>'<li>'+esc(tdW(s))+'</li>').join('')}</ol>
+<div class="vh">Steps for staff</div>${tdWhoNote()}<ol class="steps">${(p.steps||[]).map(s=>'<li'+(PUN.test(s)?' class="pun"':'')+'>'+esc(tdW(s))+'</li>').join('')}</ol>
 ${p.ta&&p.ta.length?`<div class="vh">The student’s task analysis, as the study taught it</div><p class="tx hint">The study’s list, reworded: adjust it to this student. It goes on the card in its own box, apart from the steps for staff, and the plan prints it as its own list.</p>${p.ta.map(l=>`${l.name?`<div class="tan">${esc(l.name)}</div>`:''}<ol class="steps ta">${l.steps.map(s=>'<li>'+esc(s)+'</li>').join('')}</ol>`).join('')}${p.ta_note?`<p class="tx tanote">${esc(p.ta_note)}</p>`:''}`:p.code==='TA_CHAIN'?`<div class="vh">The student’s task analysis</div><p class="tx hint">The article does not print its steps (the setting above gives the count); write the list for this student in the card’s box.</p>`:''}
 <div class="rows">${row('Data collected',tdW(p.data))}${row('Materials and cues',tdW(p.mat))}</div>
 <div class="vh">What happened in the study</div><p class="tx">${esc(p.result)}</p>
@@ -6409,23 +6412,28 @@ function sameNote(){const p=byId[cur],box=$p('.same');if(!p||!box)return;const n
 /* v23.88 (screen E) a protocol for a component already in the plan: replace that card's steps and settings (its number, who/when/where,
    Data and Materials kept) or add a second card; Undo puts the replaced words back */
 function replaceInto(p,c){const L=LIBOF[p.code],i=c.dataset.i,put={},was={};const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el)return;was[n]=el.value;el.value=v==null?'':v;put[n]=el.value;fire(el);};
-  const lis=c.querySelectorAll('ol.steps li');const steps=p.steps||[];steps.forEach((s,k)=>{if(k<lis.length)set('cp['+i+'].s'+k,tdW(s));});for(let k=steps.length;k<lis.length;k++)set('cp['+i+'].s'+k,'');
-  L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});if(p.ta)set('cp['+i+'].ta',taText(p));set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',p.lab+' ('+cites(p).join('; ')+')');
+  const lis=c.querySelectorAll('ol.steps li');const steps=stepsOf(p);steps.forEach((s,k)=>{if(k<lis.length)set('cp['+i+'].s'+k,tdW(s));});for(let k=steps.length;k<lis.length;k++)set('cp['+i+'].s'+k,'');
+  L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});if(p.ta)set('cp['+i+'].ta',taText(p));set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',srcOf(p));
   {const sh=c.querySelector('input.td-suov');if(sh&&sh.value){sh.value='';sh.dispatchEvent(new Event('change',{bubbles:true}));}}try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}return {c,i,put,was,replaced:true};}
 function askSame(p,then){const box=$p('.same');if(!box)return then('add');const n=sameCards(p).length;
   box.hidden=false;box.innerHTML='';const b=document.createElement('b');b.textContent='This plan already has '+(n===1?'a':n)+' '+comp(p)+' card. Add the protocol '+p.lab+' as:';box.appendChild(b);
   const mk=(t,v,primary)=>{const x=document.createElement('button');x.type='button';x.className='lnk td-ask'+(primary?' primary':'');x.textContent=t;x.addEventListener('click',()=>{box.innerHTML='';then(v);});return x;};
   const wrap=document.createElement('div');wrap.className='td-askrow';wrap.append(mk('Replace that card’s steps and settings','replace',true),mk('Add a second '+comp(p)+' card','add'),mk('Cancel','cancel'));box.appendChild(wrap);
   const note=document.createElement('div');note.className='td-asknote';note.textContent='Replacing keeps the card’s number, its who/when/where line and anything typed in Data and Materials; Undo is offered.';box.appendChild(note);}
+/* v25.30 punishment elements (the BCBA, 10/31): a protocol whose steps include one marked "RESTRICTIVE: Punishment" is added
+   either without those steps (the default) or with them, labeled on the card and in the plan as needing consent */
+let withPun=false;
+function stepsOf(p){const st=p.steps||[];return withPun?st:st.filter(s=>!PUN.test(s));}
+function srcOf(p){return p.lab+(withPun&&hasPun(p)?', with punishment steps (consent required)':'')+' ('+cites(p).join('; ')+')';}
 /* an add: a new card of the protocol's component, with the study's steps (as many as the study has), settings, data,
    materials and the study's name; Undo removes the card unless a field it filled has been edited since */
 let undoRec=null;
-function add(p){const L=LIBOF[p.code],c=window.__tdAddComp(p.code,(p.steps||[]).length);if(!c)return null;const i=c.dataset.i,put={};
+function add(p){const L=LIBOF[p.code],steps=stepsOf(p),c=window.__tdAddComp(p.code,steps.length);if(!c)return null;const i=c.dataset.i,put={};
   const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el||v==null||v==='')return;el.value=v;put[n]=el.value;fire(el);};
-  (p.steps||[]).forEach((s,k)=>set('cp['+i+'].s'+k,tdW(s)));try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}
+  steps.forEach((s,k)=>set('cp['+i+'].s'+k,tdW(s)));try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}
   L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});
   set('cp['+i+'].data',tdW(p.data));set('cp['+i+'].mat',tdW(p.mat));set('cp['+i+'].ta',taText(p));
-  set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',p.lab+' ('+cites(p).join('; ')+')');
+  set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',srcOf(p));
   try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}
   return {c,i,put};}
 function undo(){if(!undoRec)return false;const {c,put,was,replaced}=undoRec;undoRec=null;if(!c.isConnected)return true;
@@ -6443,13 +6451,14 @@ function doAdd(){const p=byId[cur];if(!p)return;const same=sameCards(p);if(same.
   const go=document.createElement('button');go.type='button';go.className='lnk';go.textContent='Go to the card';go.addEventListener('click',()=>goTo(r.c));
   const u=document.createElement('button');u.type='button';u.className='lnk';u.textContent=r.replaced?'Undo the replace':'Undo the add';
   u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.']);});
-  say([b,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u]);}
+  const pn=hasPun(p)?(withPun?' The punishment steps are on the card, labeled: they need district review and written consent before they are used.':' The punishment steps were left off.'):'';
+  say([b,pn,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u]);}
 q.addEventListener('input',draw);kind.addEventListener('change',draw);fn.addEventListener('change',()=>{fnTouched=true;draw();});age.addEventListener('change',()=>{ageTouched=true;draw();});
 d.addEventListener('toggle',()=>{if(d.open){try{ageFill();fnFill();draw();}catch(x){}}});   /* v24.30 the filters follow the plan and the case when the bank opens */
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});
 listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);
   try{($p('.load')||det).scrollIntoView({block:'nearest',behavior:'smooth'});}catch(x){}});
-det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add'))doAdd();else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);else if(b&&b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(cur,b);});
+det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add')){withPun=b.dataset.pun==='1';doAdd();}else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);else if(b&&b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(cur,b);});
 /* the function choices follow the plan's function; the note on cards already in the plan follows the cards */
 document.addEventListener('change',ev=>{if(ev.target&&ev.target.name==='m.fn'){fnFill();draw();}});
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.student&&typeof f.student==='object')CASE.student=f.student;ageFill();fnFill();draw();}catch(x){}return r;};}
