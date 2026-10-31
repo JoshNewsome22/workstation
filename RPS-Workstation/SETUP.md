@@ -9905,6 +9905,46 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.41: Journal of Applied Behavior Analysis volume 42 (2009) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2009)
+
+- **TD-1, 47 cards**, among them:
+  - Function-based treatment:
+    - Functional communication with a plan against resurgence (Volkert et al.), two new request forms with the student
+      choosing one (Winborn-Kemmerer et al.; response cost a marked punishment step), "Is this trash?" for excessive
+      straightening (Kuhn et al.; blocking marked RESTRICTIVE), and combined escape and attention extinction at meals
+      (Bachmeyer et al.; marked RESTRICTIVE, with the consent block).
+    - Extinction plus DRO with a visual schedule for transitions (Waters et al.), tokens for quick transitions
+      (Heinicke et al.; an extra work period a marked punishment step), a choice of asking for attention or getting it
+      on a schedule (Luczynski & Hanley), warm attention during hard work (Gardner et al.), free use of a wanted item
+      before an activity (O'Reilly et al.), and session DRL with brief feedback for an adolescent (Hagopian et al.).
+  - Automatic reinforcement and health: vocal stereotypy redirected to imitations (Miguel et al., 2009a; a toy removal
+    a marked punishment step; sertraline left to the doctor), free access before toy-play teaching (Lang et al.),
+    chewing gum or a preferred flavor spray for rumination (Rhine & Tarbox; Wilder et al.), a timer DRO for skin
+    picking (Tiger et al.), and a spoken cue with a brief chin touch for teeth grinding (Barnoy et al.; marked
+    RESTRICTIVE).
+  - Communication: yes and no answers (Shillingsburg et al.), pairing sounds then reinforcing them (Esch et al.),
+    echoic sessions before request and naming training (Kodak & Clements), requests with describing cards (Ben
+    Chaabane et al.), size requests (Egan & Barnes-Holmes), more-or-less requests (Murphy & Barnes-Holmes), recorded
+    play scripts (Reagon & Higbee), and a fading object sound to teach names (Eikeseth & Hayward).
+  - Teaching: embedded and direct prompt delay (Heal et al.), the best reward for unprompted answers (Karsten & Carr),
+    empathy responses (Schrandt et al.), reciprocal pretend play by video (MacDonald et al.), letter names by video
+    self-modeling (Marcus & Wilder), six rereadings (Ardoin et al.), response cards (Munro & Stephenson), word
+    problems (Levingston et al.), a printed-word activity schedule (Miguel et al., 2009b), delayed-sample matching
+    (Doughty & Saunders), two-part echoics (Tarbox et al.), new-language words (Petursdottir & Hafliðadóttir; Ramirez
+    & Rehfeldt), and, for secondary classes, interteaching (Saville & Zinn) and trigonometric graphs (Ninness et al.).
+  - Safety and social: on-the-spot stranger-safety rehearsal (Beck & Miltenberger; in-situ checks only with family
+    consent and district approval), spotting and reporting mistreatment for young adults (Bollman & Davis), schoolwide
+    stop, walk, talk (Ross & Horner; the schools' standing office-referral system is background and left off the
+    card), video feedback for gymnastics (Boyer et al.), and inviting play areas (Hanley et al.).
+- Three cards offer Add without punishment and Add with punishment (consent required).
+- **Not read:** Hall et al. (percentile schedules to increase eye contact: eye contact is never a target), gambling,
+  smoking and workplace studies, staff and caregiver training, a captive baboon, measurement, Excel and
+  functional-analysis method papers, and descriptive and preference assessments.
+- **GB-1:** 9 objectives (picture sequences, asking whether an item is trash, multiplication and division word
+  problems, more-or-less requests, yes-no facts, a printed-word schedule, reporting mistreatment, new-language names
+  by watching a peer, stepping in as a bystander) and 53 new source lines.
+
 ### v25.40: Journal of Applied Behavior Analysis volume 41 (2008) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2008)
 
