@@ -9905,6 +9905,50 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.28: Journal of Applied Behavior Analysis volume 31 (1998) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1998)
+
+- **TD-1, 39 cards**, among them:
+  - Function-based treatment: functional communication with extinction and then demand or delay fading, across 21
+    applications (Hagopian et al.; FCT alone never worked), a picture card for attention (Thompson et al.), separate
+    requests honored only while their picture is posted, and the other picture posted when one reinforcer is not
+    available (Fisher et al., 1998a), a card for 30 more seconds of an activity (Fisher et al., 1998b), a "please" sign
+    in place of reaching or grabbing (Drasgow et al.; a brief removal a marked punishment step), timed breaks and timed
+    attention thinned on a clock (Coleman & Holmes; Vollmer et al.), attention from a seated distance (Lalli et al.),
+    escape extinction then a switch for a break (Richman et al.), picture-and-word warnings before work or sharing
+    (Mace et al.), and matched-sensation items for stereotypy, chin grinding and pica (Fisher et al., 1998c; Thompson
+    et al.; Piazza et al.; blocking marked RESTRICTIVE).
+  - Habits and health: habit reversal for hair pulling, with a wearable alert, and for outbursts in games (Rapp et al.;
+    Allen; the game's response cost a marked punishment step), wrist weights on a schedule with a fade plan (Hanley et
+    al.; marked RESTRICTIVE), coughing at meals (Watson & Sterling), easy requests before each step of a medical care
+    routine (McComas et al.; the routine continues after refusal, the student is never held still, and a step that
+    cannot wait goes back to the medical team), and food amount and texture faded step by step (Freeman & Piazza; Shore
+    et al.), each planned with the family, the doctor and the school nurse.
+  - School and social: computer writing with peer brainstorming and self-evaluation matched to the teacher (Ervin et
+    al.), self-correction of math facts (Bennett & Cavanaugh), multiplication by category strategies (Wood et al.),
+    number-line peer tutoring and classwide peer tutoring (Fueyo & Bushell; DuPaul et al.), oral reading by reward,
+    preview and practice (Noell et al.), explicit timing for fluent skills (Rhymer et al.), recruiting teacher feedback
+    (Craft et al.), social priming (Zanolli & Daggett), "Look" and "Watch me" scripts (Krantz & McClannahan), a vibrating
+    prompt to comment on play (Taylor & Levin), a voice output device at snack and play (Schepis et al.), and
+    self-control training for young adults (M. R. Dixon et al.).
+- **Set aside by default (the BCBA may restore):** four studies from adults in residential facilities or an inpatient
+  unit: noncontingent reinforcement magnitude (Carr et al.), response effort with arm restraints (Irvin et al.; the
+  restraints never written), noncontingent reinforcement against sensory extinction (Roscoe et al.), and access to a
+  restraint jacket as a reinforcer (Vollmer & Vorndran; the jacket never written).
+- **GB-1:** 2 objectives (starting talk with an adult by showing work, multiplication facts by strategy) and 38 new
+  source lines.
+- **References:** the three Fisher et al. (1998) studies are cited 1998a, 1998b and 1998c.
+- **Not banked:** reinforcer preference in functional analysis, scatter-plot and play-versus-alone analyses, brief
+  preference and work preference assessments, a review of clinical problems, matching and list studies with adults,
+  sexual abuse prevention and other adult programs, an addiction program, a sleep program at home, TENS, recycling and
+  seat belts, data and graphing methods, book reviews, comments and editorials.
+
+TD-1: 1603 protocols; GB-1: 545 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/single-check.js`,
+`qa/pwa-test.js`.
+
 ### v25.27: Journal of Applied Behavior Analysis volume 30 (1997) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1997)
 
