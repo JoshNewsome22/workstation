@@ -9905,6 +9905,41 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.34: Journal of Applied Behavior Analysis volume 35 (2002) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2002)
+
+- **TD-1, 23 cards**, among them:
+  - Function-based treatment:
+    - Functional communication training with extinction from the first day (Kelley et al.; Lerman et al.), short
+      20-second reinforcer periods for a card touch (Lerman et al.), and a break request checked against the
+      student's existing refusal (Winborn et al.).
+    - A break with a chosen activity for finished work without escape extinction (Hoch et al., 2002a; one student's
+      classroom time-out was background to the study and is left off the card).
+    - Instructions faded in from zero with breaks for compliance (Ringdahl et al.; ending a break early a marked
+      punishment step), scheduled breaks from tooth brushing (Borrero et al.), a choice of academic task (Romaniuk et
+      al.), and a peer partner who praises on-task work (Flood et al.).
+  - Feeding and health, each planned with the family, the doctor and the school nurse:
+    - Escape extinction that plans for every form of refusal (Sevin et al.), and the spoon kept at the lips with
+      reinforcement for a clean mouth (Patel et al., 2002b); both marked RESTRICTIVE, with the consent block.
+    - Smoother texture for the food that is spat out (Patel et al., 2002a; jaw pressure never written), a new food
+      on the same bite as a preferred one (Piazza et al., 2002a; food restriction never written), and safe
+      alternatives kept in hand for pica (Piazza et al., 2002b).
+    - Practice scans with prizes for lying still (Slifer et al.; the card never holds or straps the student).
+  - Communication, school and social:
+    - Picture exchange in six phases (Charlop-Christy et al.), asking-for and naming trials in alternation (Arntzen &
+      Almås), and a vibrating pager prompt for play talk with peers (Shabani et al.).
+    - A paired cue that bridges a reward delay (Grindle & Remington), longer or better play in the peer's play area
+      (Hoch et al., 2002b), and varied answers to a repeated social question on a lag rule (Lee et al.; saying "no"
+      and turning away a marked punishment step).
+    - A brief test of reading preview and repeated reading (Eckert et al.), mixed cumulative math review for
+      transition age (Mayfield & Chase), and amplified feedback in PE (Ryan et al.).
+- Two cards offer Add without punishment and Add with punishment (consent required).
+- **Set aside by default (the BCBA may restore):** noncontingent reinforcement for disruptive vocalization in two
+  older adults with dementia in a nursing home (Buchanan & Fisher). An assessment of ear covering with no treatment
+  (Tang et al.) is not banked.
+- **GB-1:** 3 objectives (playing near a peer, combined exponent rules, a different answer to a repeated question)
+  and 26 new source lines.
+
 ### v25.33: Journal of Applied Behavior Analysis volume 34 (2001) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2001)
 
