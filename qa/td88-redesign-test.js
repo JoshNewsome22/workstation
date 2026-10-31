@@ -73,7 +73,7 @@ const keys=fs.existsSync(SIM)?fs.readdirSync(SIM).filter(k=>fs.existsSync(path.j
   ok('5 the text for the BIP carries the summary statement, what is not ready, the glance, the review, who runs a card and its set-up lines',D.sum&&D.glance&&D.lr&&D.nr&&D.setup&&D.who,D);
   /* 6. replace or add */
   const E=await p.evaluate(async()=>{sheet('build');await new Promise(r=>setTimeout(r,300));const R0=R();R0.querySelector('details').open=true;const q=R0.querySelector('.q');q.value='';q.dispatchEvent(new Event('input',{bubbles:true}));await new Promise(r=>setTimeout(r,300));
-    const pr=TD1_BANK.protocols.find(x=>x.code==='FCT'&&x.steps.length>=4);const it=R0.querySelector('.it[data-id="'+pr.id+'"]');if(!it)return {noItem:pr.id};it.click();await new Promise(r=>setTimeout(r,300));
+    const pr=TD1_BANK.protocols.filter(x=>x.code==='FCT'&&x.steps.length>=4&&!x.steps.some(t=>/^RESTRICTIVE: Punishment/.test(t)))[1];const it=R0.querySelector('.it[data-id="'+pr.id+'"]');if(!it)return {noItem:pr.id};it.click();await new Promise(r=>setTimeout(r,300));
     const cards=()=>[...document.querySelectorAll('#compWrap .card')].filter(c=>c.dataset.code==='FCT');const c0=cards()[0];const i=c0.dataset.i;const before=[...c0.querySelectorAll('ol.steps textarea')].map(t=>t.value);const whoBefore=c0.querySelector('input[name$=".who"]').value;
     const n0=document.querySelectorAll('#compWrap .card').length;
     R0.querySelector('.add').click();await new Promise(r=>setTimeout(r,250));const asks=[...R0.querySelectorAll('.same .td-ask')].map(b=>b.textContent);

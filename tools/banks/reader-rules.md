@@ -8,7 +8,8 @@ rules; the list at the end is where to start that pass.
 Banks in order of reading: Behavior Analysis in Practice and Behavioral Interventions (rp1, rr1, rr2, rr3, bi8688,
 pmc), then JABA 1968 to 1991 (v25.20 and before), then JABA 1992 on: 1992 v25.22, 1993 v25.23, 1994 v25.24,
 1995 v25.25, 1996 v25.26, 1997 v25.27, 1998 v25.28, 1999 v25.29, 2000 v25.32, 2001 v25.33, 2002 v25.34,
-2003 and 2004 v25.35, 2005 v25.36, 2006 v25.37, 2007 v25.39, 2008 v25.40, 2009 v25.41, 2010 v25.42.
+2003 and 2004 v25.35, 2005 v25.36, 2006 v25.37, 2007 v25.39, 2008 v25.40, 2009 v25.41, 2010 v25.42; the final
+pass over the earlier banks v25.43.
 
 ## The rules now
 
@@ -80,7 +81,36 @@ pmc), then JABA 1968 to 1991 (v25.20 and before), then JABA 1992 on: 1992 v25.22
 | 14 Year letters in cites only when needed | v25.35 | earlier cites may carry letters they do not need |
 | 14 College and sport studies read when the procedure adapts | v25.39 (JABA 2007) | 1992–2006 triage skipped most college, sport and adult-community studies unread |
 
-## Known cards for the pass
+## The final pass (v25.43)
+
+Done in v25.43 (the BCBA, 10/31: "finish checking the previous volumes with the updated rules"):
+
+- Rule 7 and rule 14: the 44 adult-institution studies set aside from 1992 to 2006 and about 60 college, sport,
+  health and adult studies the 1992–2006 triage skipped unread were read under the current rules: 110 TD-1 cards and
+  14 GB-1 objectives. Only one was not banked (Grace et al., 1994: a seated hold after aggression).
+- Rule 2: punishment elements in 1968–1991, BAP, BI, rr1–rr3 and pmc that were left out of the steps, or marked only
+  "RESTRICTIVE:", are now "RESTRICTIVE: Punishment (kind)" steps (128 cards patched; 174 cards now offer the two Add
+  buttons). Items judged background, a separate comparison condition, never written or belonging to a sibling card
+  were left as they were.
+- Rule 4: the eight known cards below were fixed, and four accepted physical prompts lost their mark.
+- Rule 5: ten protective-equipment cards in the older banks checked and fixed.
+- Rule 13: a name scan of every bank; 15 cards fixed.
+- Rule 15: year letters recomputed across both banks (19 cites, 31 APA entries).
+
+Still open, for when the PDFs come back:
+
+- JABA 1968–1991 studies of adults in institutions, and the college and sport studies, set aside or skipped then (each
+  release's notes name them under "Set aside" and "Not banked").
+- The 226 "study skipped" items in tools/banks/set-aside-procedures.md.
+- Readers' flags for a later look: Repp's face-picking card guides the hand away with no mark; the glove card guides
+  the hand back to the lap tray; the fct-break card's escape extinction is not its own step; some plain "RESTRICTIVE:"
+  steps outside the listed checks look like punishment (r_pb-timeout-ribbon, s_so-ward-routines,
+  s_crf-encopresis-childtime, the outing-contract and wesolowski1992 cards); kolko1989's clean-up step may be
+  background.
+
+The lists the pass started from:
+
+### Known cards
 
 Holds or guidance left out of a teaching procedure (rule 4): a hold gets a RESTRICTIVE step and a new note, and an
 accepted physical prompt goes back as an ordinary step:

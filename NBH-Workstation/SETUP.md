@@ -9905,6 +9905,57 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.43: the final pass, the earlier banks brought up to the current reader rules
+(the BCBA, 10/31: "finish checking the previous volumes with the updated rules"; the rules and their start dates are
+in tools/banks/reader-rules.md)
+
+- **Adults in institutions, read again and banked (rule 7):** the 1992–2006 studies of adults in residential
+  facilities, inpatient units, day programs, nursing homes and group homes that earlier reads set aside are now
+  banked, along with the 1992–2006 college, sport and health studies the triage skipped unread (rule 14). 110 TD-1
+  cards: 1992 3, 1993 11, 1994 15, 1995 4, 1996 4, 1997 11, 1998 8, 1999 13, 2000 9, 2001 6, 2002 5, 2003 5, 2004 6,
+  2005 5, 2006 5. Among them: the high-probability sequence that worked only with escape extinction (Zarcone et al.,
+  1993a), resetting DRO and faded NCR for attention (Vollmer et al., 1993), noncontingent and contingent mitts, the
+  wearing marked RESTRICTIVE with the doctor's input and a fade plan (Mazaleski et al., 1994), arm sleeves faded by
+  removing stays (Fisher et al., 1997b), elbow sleeves and sleeves with a leisure item (Irvin et al.; Zhou et al.), a
+  matched item in hand (Shore et al., 1997b), FCT with every request honored (Worsdell et al.), NCR thinned before
+  requests grow (Goh et al., 2000), a cigarette traded for a snack (Goh et al., 1999), timed toilet checks (Adkins &
+  Mathews), a home-visit checklist for choosing where to live (Faw et al.), No-Go-Tell role-play and in-situ training
+  (Lumley et al.; Miltenberger et al., 1999), the dental desensitization ladder (Conyers et al., 2004b), a cloth
+  barrier across an unsafe doorway (Feliciano et al.), and, for secondary and athletics, guided notes, interteaching,
+  response cards in a lecture, posted goals and feedback in soccer and football, relay skating praise, foul-shot form,
+  and a pedometer step goal.
+- **Not banked:** a 3-minute seated hold after aggression (Grace et al., 1994: restraint as a consequence, never
+  written). Left out of banked cards and named in their notes: manual restraint and a soft collar brace (Lerman et
+  al., 1997a), a 15-s hands-in-lap or arms-across-chest hold (Thompson et al., 1999; Lindauer et al., 1999), hot sauce
+  and water mist (Goh et al., 1999), a water mist (Fisher et al., 1997b), time in a padded room, and snacks withheld
+  before sessions.
+- **Punishment steps in the older banks (rule 2):** JABA 1968–1991, BAP, BI, rr1–rr3 and pmc cards that left a study's
+  response cost, time-out, reprimand, overcorrection or privilege loss out of the steps now carry it as its own
+  "RESTRICTIVE: Punishment (kind); needs approval before use:" step, and plain "RESTRICTIVE:" punishment steps were
+  relabeled, so Add without punishment drops them. 128 cards patched; cards that offer the two Add buttons: 55 before,
+  174 now. Exclusionary time-out steps say the door is never locked or held and the length never goes past the maximum
+  the BCBA sets. A school's standing discipline (home fines, office referral, warning cards) stays background (rule
+  6).
+- **Accepted prompts and holds (rule 4):** four accepted physical prompts lose their RESTRICTIVE mark (photo schedule,
+  academic task, delay with activity, task vs attention check). Eight cards whose teaching holds or guidance were left
+  out now carry them: holds as RESTRICTIVE steps (hands at the sides, McGee et al., 1985; hand to the table for 3 s,
+  Williams et al., 2005; physical prompts every 10 s and hand-over-hand through the task, guidance through a demand
+  with the escape-extinction consent block), accepted guidance as ordinary steps.
+- **Protective equipment (rule 5):** ten cards from the older banks: wearing the helmet, gloves, mittens, splints or
+  weights is its own RESTRICTIVE step where the student wears it, and every note asks for the doctor's input and a
+  fade plan. The home report card's suspension and privilege loss are marked punishment steps.
+- **Names (rule 13):** 15 cards had participant names or pseudonyms; they now read Student A, B, C or "(peer's name)".
+- **References (rule 15):** year letters taken off 19 cites that no longer need them (Kazdin, 1973; Vollmer &
+  Vorndran, 1998; Kennedy & Haring, 1993; ...) and added where a second article of the year came in (Dixon et al.,
+  2003a; Fisher et al., 1997a and 2000a; Shore et al., 1997a); 31 APA entries lose a year letter.
+- **GB-1:** 14 objectives (familiar staff names, time with peers, active leisure, a testicular self-exam checklist, a
+  placement-visit checklist, vowels and consonants, when to write a list, handing over a found inedible item, choosing
+  and staying with an activity, guided notes, word-card requests, throat relaxation with biofeedback, moving to
+  position in a team sport, a slow breath into a breath-test mouthpiece) and 78 new source lines.
+- **Still to do, needs the PDFs again:** the 1968–1991 studies of adults in institutions and the college and sport
+  studies set aside or skipped then, and the 226 "study skipped" items in tools/banks/set-aside-procedures.md, were
+  never read under the current rules; the BCBA can resend those volumes for the same treatment.
+
 ### v25.42: Journal of Applied Behavior Analysis volume 43 (2010) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2010)
 
