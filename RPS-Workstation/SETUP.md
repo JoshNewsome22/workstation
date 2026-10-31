@@ -9905,6 +9905,40 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.29: Journal of Applied Behavior Analysis volume 32 (1999) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1999)
+
+- **TD-1, 19 cards**, among them:
+  - Function-based treatment: breaks for each task step and toys for reaching instead of self-injury, both holding up
+    when staff made mistakes (Vollmer et al., 1999a), a preferred item for compliance while problem behavior still
+    earns a break (Lalli et al.), instructions embedded in play (Asmus et al.), a help or feedback request matched to
+    the function of off-task behavior (Meyer), requests on a voice-output device answered by community adults (Durand),
+    a picture-card request with a timed wait for a larger amount (Vollmer et al., 1999b), and quick easy instructions
+    before class transitions, then faded (Ardoin et al.). Physical guidance and blocking are marked RESTRICTIVE.
+  - Habits and health: habit reversal with surprise check-ins (Long et al.; taking back a point a marked punishment
+    step), a thin glove for hair pulling (Rapp et al.; marked RESTRICTIVE with a plan to fade it), wearing an inhaler mask
+    built in 5-second steps (Hagopian & Thompson), clean intermittent self-catheterization practiced on a doll (McComas
+    et al.), and paced bites with more chewing for safe eating (Shore et al.), each planned with the family, the doctor
+    and the school nurse.
+  - School and social: brief tests of reading supports (Daly et al.), matching the whole sample to reduce
+    overselectivity (Dube & McIlvane), cross-age social tutoring (Gumpel & Frank), points for approach to a feared item
+    (Jones & Friman; with the family and the school counselor), random worksheet checks to keep accuracy up (Freeland &
+    Noell), and stars for math pages, then faded (McGinnis et al.).
+- **Set aside by default (the BCBA may restore):** five studies from adults in residential facilities or inpatient
+  units: cigarette pica (Goh et al.; its hot sauce and water mist never written), presession attention (O'Reilly et
+  al.), matched and mismatched extinction (Kuhn et al.), negative affect and self-injury (Lindauer et al.; the hands
+  held in the lap never written), variable-momentary DRO (Lindberg et al.), and do and don't requests (Adelinis et al.).
+- **GB-1:** 1 objective (keeping an inhaler mask on through two inhalations) and 21 new source lines.
+- **Not banked:** punishment with manual restraint (Thompson et al.; never written), response class hierarchies and
+  other analyses, functional analysis method studies, preference and choice assessments, medication analyses, adults
+  with dementia, abuse prevention for women, staff nutrition practices, book reviews and comments.
+
+TD-1: 1622 protocols; GB-1: 546 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/single-check.js`,
+`qa/pwa-test.js`.
+
 ### v25.28: Journal of Applied Behavior Analysis volume 31 (1998) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1998)
 
