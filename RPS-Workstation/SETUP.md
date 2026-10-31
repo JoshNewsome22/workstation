@@ -9905,6 +9905,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.40: Journal of Applied Behavior Analysis volume 41 (2008) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2008)
+
+- **TD-1, 28 cards**, among them:
+  - Function-based treatment:
+    - Requests taught for early warning behavior, one for attention and one for a peer's toy with a signal for when
+      asking works (Najdowski et al.; blocking aggression toward the peer marked RESTRICTIVE), a replacement request
+      picked from what the student tries during extinction (Grow et al.; guidance through the task marked
+      RESTRICTIVE), and a chosen snack before work instructions (Ingvarsson et al.).
+    - Signals for when adult attention is available: "It is your time" and "It is my time" (Tiger et al., 2008b) and
+      a classwide colored signal (Cammilleri et al.); brief teacher attention every 4 minutes (Austin & Soeda),
+      specific goal instructions (Bouxsein et al.), task choice (Tasky et al.), and waiting for a possible coupon
+      (Falcomata et al.).
+  - Automatic reinforcement and health: vocal stereotypy interrupted with easy questions as the adult fades (Athens et
+    al.; a 10-s toy removal a marked response cost step), a reprimand paired with wristbands for eye poking
+    (McKenzie et al.; a marked punishment step, eye safety planned with the doctor and the nurse), glasses wearing
+    (DeLeon et al.; a marked response cost step), pager-paced bites (Anglesea et al.), tokens for tic-free intervals
+    (Himle et al.), and a supported walking program (Roane & Kelley; a brief loss of contact a marked time-out step,
+    planned with the physical therapist).
+  - Teaching and social: shared attention, responding and starting (Taylor & Hoch; looking at the adult optional, the
+    study's head guidance kept only as an ordinary prompt that stops if the student pulls away), known items mixed
+    with new labels (Volkert et al.), a reinforced high-probability sequence (Zuluaga & Normand), category names and
+    new-language names (Petursdottir et al., 2008a and 2008b), a shared game schedule with a peer (Betz et al.), and
+    social stories with role play (Chan & O'Reilly).
+  - Safety: peer tutors teaching gun safety (Jostad et al.; real firearms never used) and on-the-spot interruption
+    when a student opens an unknown container (Dancho et al.; harmless look-alikes only).
+  - Adults, for transition age: ironing with self-instructions (Faloon & Rehfeldt), and named activities offered to
+    older adults with dementia (Brenske et al.).
+- Four cards offer Add without punishment and Add with punishment (consent required).
+- The BAP guide by Tiger, Hanley and Bruzek is now cited Tiger et al., 2008a, so it reads apart from the JABA study.
+- **Not read:** the substance-use special issue (issue 4), the Todd Risley tributes, staff and teacher training,
+  workplace and gambling studies, measurement and functional-analysis method papers, and preference and
+  progressive-ratio assessments.
+- **GB-1:** 6 objectives (naming an item's group, a shared game schedule, leaving unknown containers closed, a
+  comfortable distance from classmates, ironing, translating a word) and 30 new source lines.
+
 ### v25.39: Journal of Applied Behavior Analysis volume 40 (2007) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2007; the first volume read with adults in any setting
 included and with only holds marked RESTRICTIVE)
