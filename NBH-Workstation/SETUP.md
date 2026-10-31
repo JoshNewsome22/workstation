@@ -9905,6 +9905,44 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.44: Journal of Applied Behavior Analysis volume 44 (2011) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2011)
+
+- **TD-1, 68 cards**, among them:
+  - Function-based treatment: response interruption and redirection for vocal stereotypy, with vocal or motor
+    demands (Ahrens et al.; Cassella et al.; Schumacher & Rapp), unsignaled momentary DRO (Hammond et al.), saying
+    no with a preferred alternative or yes after a short task for an escalating response class (Mace et al.), breaks
+    with music for compliance (Bouxsein et al.), DRO for elopement, which worked only with blocking (Call et al.;
+    blocking marked RESTRICTIVE), presession access before class (Rispoli et al.), music for vocal stereotypy
+    (Lanovaz et al.), antecedent exercise on preferred equipment (Morrison et al.), noncontingent juice for
+    rumination (Kliebert & Tiger), competing items for coprophagia (Ing et al.), and a fixed 4-minute time-out
+    without a calm-down rule to leave (Donaldson & Vollmer; a marked punishment step, never locked or held).
+  - Feeding and health, planned with the family, the doctor, a feeding specialist and the school nurse: spoon-to-cup
+    fading, nonremoval and the flipped spoon (Groff et al.; Rivas et al.; LaRue et al.; Volkert et al.),
+    self-feeding one bite to avoid extra bites (Vaz et al.; the 5 extra bites a marked punishment step), liquid
+    medicine by syringe (Schiff et al.), high-probability requests before medical exam requests (Riviere et al.),
+    and NCR for wearing a prosthesis (Richling et al.).
+  - Communication and teaching: framed and polite requests (Ingvarsson; Betz et al.), function-based mands by video
+    (Plavnick & Ferreri), a first sign with a growing delay (Normand et al., 2011), instructive feedback (Reichow &
+    Wolery), word-only sight-word cards (Dittlinger & Lerman), conditional-only receptive labeling (Grow et al.),
+    incremental rehearsal (Kupzyk et al.), coin values (Keintz et al.), prepositions by direct instruction (Hicks et
+    al.), peer reading fluency (Hofstadter-Duke & Daly), forward and backward chaining (Slocum & Tiger; Bancroft et
+    al.), check-in check-out (Campbell & Anderson), teacher greetings at the door (Allday et al.), the Good
+    Behavior Game in kindergarten (Donaldson et al., 2011), DRL for help requests (Austin & Bevan), selective
+    mutism by role play and self-video (Lang et al.), and, for secondary classes, equivalence lessons,
+    interteaching, a team review game and unlocking practice quizzes.
+- **For the BCBA's decision:** two feeding cards (Wilkins et al.; Dempsey et al.) keep the study's 5-s chin support
+  after an accepted bite or drink as a RESTRICTIVE hold that stops if the student resists, because the chin support
+  was what made re-presentation work; rule 4 says a hold is never used to make the student eat, so take it off these
+  cards if you read it as that.
+- **Not banked:** a time-out that depended on moving and holding the man by backpack straps (Dozier et al.: restraint,
+  never written), a study of a chimpanzee (Martin et al.), and a brief review (Fienup et al., 2011a). Not read:
+  errata, editors' pages, reviews and commentaries, assessment-only and measurement papers, staff, teacher and
+  caregiver training, and the driver, crosswalk and seat-belt studies.
+- **GB-1:** 6 objectives (coin values, liquid medicine from a syringe, keeping help requests within a limit,
+  sight-reading music, walking a bike through a no-riding area, typing common words) and 59 new source lines.
+
+
 ### v25.43: the final pass, the earlier banks brought up to the current reader rules
 (the BCBA, 10/31: "finish checking the previous volumes with the updated rules"; the rules and their start dates are
 in tools/banks/reader-rules.md)
