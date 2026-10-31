@@ -9905,6 +9905,43 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.45: Journal of Applied Behavior Analysis volume 45 (2012) in the banks
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2012)
+
+- **TD-1, 72 cards**, among them:
+  - Free delivery and its trade-offs: differential reinforcement and NCR compared for food refusal, about equal,
+    with the family preferring NCR (Allison et al.), a dense fixed-time schedule holding down a new request until it
+    is thinned (Heinicke et al.), and NCR started thin or started dense and thinned, each with extinction (Wallace
+    et al.). These feed the compare and plan-check work coming next.
+  - Function-based treatment: random check-ins for covert self-injury (Toussaint & Tiger), DRO for tics (Capriotti
+    et al.; the tic detector and hidden observation not copied), attention for the precursor instead of self-injury
+    (Dracobly & Smith), a stated DRO rule for stereotypy (Fritz et al.), response interruption with framed tacts or
+    sound toys (Colón et al.; Love et al.; taking the toy away a marked punishment step), music for vocal stereotypy
+    (Lanovaz et al.; Saylor et al.), blocking and replacing items for arranging and ordering (Rodriguez et al.; a
+    hands-to-lap hold left out), thinning a time-out schedule (Donaldson & Vollmer, 2012; a marked punishment step,
+    never locked or held), classroom FCT after a trial-based analysis (Lambert et al.), escape extinction for
+    noncompliance (McKerchar & Abby), and guided compliance and a closer toy bin (Fischetti et al.; Wilder et al.;
+    guidance marked RESTRICTIVE).
+  - Feeding, planned with the family, the doctor, a feeding specialist and the school nurse: behavioral treatment
+    rather than sensory integration (Addison et al.), the flipped spoon and a chaser (Sharp et al.; Vaz et al.),
+    high-probability foods and a step-by-step tasting sequence (Meier et al.; Penrod et al.).
+  - Safety, communication and teaching: asking for help when lost in a store (Bergstrom et al.), name and group
+    calls (Kraus et al.; Beaulieu et al.), the teaching interaction procedure for social skills (Leaf et al.,
+    2012a), intraverbals, untrained mands and tacts, "which?" and other requests (Kodak et al.; Finn et al.;
+    O'Reilly et al.; Marion et al.; Bowen et al.), peer-directed picture requests and joint-attention scripts (Paden
+    et al.; Pollard et al.), picture-book directions (Phillips & Vollmer), coin and number skills (Hanney & Tiger;
+    Krohn et al.), easy problems before hard ones (Lee et al.), seating by the teacher's plan (Bicard et al., 2012b;
+    the class's standing reminder left off), toys during a wait for self-control (Newquist et al.), immediate
+    rewards for discrimination (Sy & Vollmer), peer monitoring of reading (Taylor et al.), and, for secondary
+    classes and PE, text-message arrival checks, equivalence quizzes and exergaming.
+- **Not banked:** a social-referencing study whose fearful-face trials used a loud startling noise (Pelaez et al.:
+  never written) and a brief review of physical activity (Van Camp & Hayes). Not read: editors' pages, reviews, a
+  tutorial, assessment-only and measurement papers, staff, observer and parent training, and the alcohol and gambling
+  studies.
+- **GB-1:** 5 objectives (asking "which?", checking a classmate's reading, following a picture book, giving a
+  compliment, answering a group call) and 72 new source lines.
+
+
 ### v25.44: Journal of Applied Behavior Analysis volume 44 (2011) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2011)
 
