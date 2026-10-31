@@ -9905,6 +9905,55 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.26: Journal of Applied Behavior Analysis volume 29 (1996) in the banks; punishment elements written and marked
+(the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1996)
+
+- **The bank's rule for punishment elements (the BCBA, 10/31):** response cost, penalties, time-out, overcorrection, a
+  reprimand or removing an item as a consequence can be part of a protocol when the study used it. It is written as its
+  own step that starts "RESTRICTIVE: Punishment (kind); needs approval before use:", so it shows in TD-1's warning
+  style, and the card's note says it needs district review and written consent before it is added to a student's plan
+  and that the other steps work without it. Shock, aversive sprays, tastes or smells, facial screening, restraint as a
+  consequence, seclusion and food deprivation are still never written. This release's cards follow it; cards from
+  earlier volumes still have these elements in their notes only.
+- **TD-1, 32 cards**, among them:
+  - Function-based treatment: continuous attention for self-injury that cannot be ignored (Derby et al.), free access
+    to toys plus toys for requests and a request answered after a lengthening wait (Marcus & Vollmer), a request given a
+    richer reinforcer than problem behavior and a choice of a little work for a short break or more for a longer one
+    (Peck et al.), breaks with favorite activities for each task (Zarcone et al.; Lalli & Casey), demand fading without
+    guidance (Piazza et al., 1996a), a break sign taught before mild escape behavior goes on extinction (Shukla &
+    Albin), guided compliance with reinforcement (Blum et al.; medication decisions stay with the family and doctor),
+    sleep, allergy, meal timing and food amount checked as setting events (Kennedy & Meyer; Wacker et al.), and the
+    preferred reinforcer put on the wanted work (Mace et al.).
+  - Self-injury and pica: eye poking blocked while toys and attention stay, and protective goggles faded to the
+    student's own glasses (Lalli et al., 1996a; the blocking and goggles marked RESTRICTIVE, the arm splints never
+    written), and cigarette pica interrupted with a carried card (Piazza et al., 1996b; the reprimand a marked
+    punishment step), with pica safety and the school nurse on the card.
+  - Feeding and health: the spoon kept at the lips with play and attention for each bite (Ahearn et al.; the removal of
+    toys after spitting a marked punishment step, jaw guidance never written), a new food presented on a preferred one
+    (Kern & Marder), drinking rebuilt by backward chaining (Hagopian et al.; ending the reward early a marked
+    punishment step), a token economy through hemodialysis (Carton & Schweitzer), and habit reversal for tics (Woods
+    et al.), each planned with the family, the doctor and the school nurse.
+  - School and social: classmates modeling classroom tasks (Werts et al.), positive peer reports for a rejected student
+    (Ervin et al.), assisted reading (Gilbert et al.), team study with a group reward (Lloyd et al.), response cards at
+    lesson closure (Cavanaugh et al.), brief tests of instructional strategies (McComas et al.), instructional-level
+    phonics (Daly et al.), reading by exclusion and word building (de Rose et al.), computer word building carried to
+    handwriting (Stromer et al.), varied peer requests before a social request (Davis & Reichle), and expression in
+    everyday social scenarios (Gena et al.; required eye gaze left out).
+- **Set aside by default (the BCBA may restore):** asking questions to choose a home (Faw et al.) and covert
+  self-injury (Grace et al.), from adults in institutions.
+- **GB-1:** 3 objectives (writing a list to fetch items, a classroom task learned by watching a classmate, reading new
+  words made from learned syllables) and 33 new source lines.
+- **Not banked:** an analysis of prior classroom conditions (assessment), the self-injury and self-restraint analyses,
+  reinforcer and preference assessment methods, reinforcement-schedule reviews, the extinction review and its comment,
+  adults (smoking, happiness indices, English names, graffiti), illegal cigarette sales, clinic intake, and editorials
+  and web notes.
+
+TD-1: 1526 protocols; GB-1: 541 objectives.
+Not changed: the forms themselves, the saved files, the printing.
+To set up: upload the whole folder as usual (`nbh-td1-bank.js` and `nbh-gb1-bank.js` changed). Tested:
+`qa/td1-bank-test.js`, `qa/gb1-bank-test.js`, `qa/td88-redesign-test.js`, `qa/gb88-card-test.js`, `qa/single-check.js`,
+`qa/pwa-test.js`.
+
 ### v25.25: Journal of Applied Behavior Analysis volume 28 (1995) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 1995)
 
