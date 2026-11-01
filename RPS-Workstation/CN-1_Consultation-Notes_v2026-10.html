@@ -2697,6 +2697,15 @@ html{touch-action:manipulation}
 }
 @media print{#nbhRail,#nbhSheets,.nbh-sheets,.nbh-arrows{display:none!important}html.nbh-rail body{padding-left:0!important}}
 
+/* v25.62 (the BCBA, 11/1, after the form design audit): on an iPad held upright, the field grids are one column, labels above, one
+   field to a row, so the eye runs straight down the form. On screen only; printing keeps its layout. A child that spans columns
+   spans the one column, so no implicit second column appears. The narrow time grids keep their columns. The :not(#nbh-one-col) gives the rule an id's weight, so a form's own two-column
+   rule (the fx2 layout in DM-1, IA-1, IC-1, IN-1, RR-1 and TB-1) does not win on an upright iPad. */
+@media screen and (max-width:900px),screen and (orientation:portrait) and (max-width:1100px){
+  html div.fieldgrid:not(#nbh-one-col),html div.ident:not(#nbh-one-col),html div.grid.g2:not(#nbh-one-col),html div.grid.g3:not(#nbh-one-col),html div.grid.g4:not(#nbh-one-col),html div.session-grid:not(#nbh-one-col),html div.qsf:not(#nbh-one-col),html div.grid2:not(#nbh-one-col),html div.bstrow:not(#nbh-one-col){grid-template-columns:minmax(0,1fr)!important}
+  html div.fieldgrid:not(#nbh-one-col) > *,html div.ident:not(#nbh-one-col) > *,html div.grid.g2:not(#nbh-one-col) > *,html div.grid.g3:not(#nbh-one-col) > *,html div.grid.g4:not(#nbh-one-col) > *,html div.session-grid:not(#nbh-one-col) > *,html div.qsf:not(#nbh-one-col) > *,html div.grid2:not(#nbh-one-col) > *,html div.bstrow:not(#nbh-one-col) > *{grid-column:1 / -1!important}
+}
+}
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 

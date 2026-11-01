@@ -2,6 +2,7 @@
    case loaded, at an iPad held upright (820 px) and the narrowest iPad held sideways (iPad mini, 1133 px). A wide table
    may scroll inside its own panel; the page itself may not. TD-1's sheets were 1000 px wide beside a 222 px menu, and a
    filled DD-1 table ran past a sideways iPad, before this check.
+   v25.62: upright (820 px) every field grid is one column, labels above, one field to a row (the BCBA, 11/1).
    usage: node qa/ipad-reflow-test.js   env ONLY=TD-1,DD-1 for some forms */
 const L=require(__dirname+'/lib.js');const {sleep}=L;
 const only=(process.env.ONLY||'').split(',').filter(Boolean);
@@ -24,6 +25,9 @@ const only=(process.env.ONLY||'').split(',').filter(Boolean);
         await p.evaluate(()=>{const b=[...document.querySelectorAll('dialog[open] button,[role=dialog] button')].find(x=>/^\s*load\s*$/i.test(x.textContent));if(b)b.click();});
         await sleep(900);
         const b=await over();if(b)bad.push({id:f.id,w,state:'loaded',...b});
+        /* v25.62: upright, the field grids are one column (the BCBA, 11/1) */
+        if(w<=900){const g=await p.evaluate(()=>[...document.querySelectorAll('div.fieldgrid,div.ident,div.grid.g2,div.grid.g3,div.grid.g4,div.session-grid,div.qsf,div.grid2,div.bstrow')].filter(e=>{const s=getComputedStyle(e);return s.display==='grid'&&e.getBoundingClientRect().width>0&&s.gridTemplateColumns.trim().split(/\s+/).length>1;}).map(e=>e.className).slice(0,2));
+          if(g.length)bad.push({id:f.id,w,state:'two-column field grid',at:g});}
         n++;
       }catch(e){bad.push({id:f.id,w,err:e.message.slice(0,120)});}
       await p.close();
@@ -32,6 +36,6 @@ const only=(process.env.ONLY||'').split(',').filter(Boolean);
   }
   await br.close();
   const pass=!bad.length&&n===F.length*2;
-  console.log((pass?'PASS':'FAIL')+' no form scrolls the page sideways at 820 or 1133 px, empty or with its case loaded ('+n+' form views)'+(pass?'':'  '+JSON.stringify(bad).slice(0,1500)));
+  console.log((pass?'PASS':'FAIL')+' no form scrolls the page sideways at 820 or 1133 px, empty or with its case loaded, and upright the field grids are one column ('+n+' form views)'+(pass?'':'  '+JSON.stringify(bad).slice(0,1500)));
   console.log(pass?'RESULT: all passed':'RESULT: 1 failed');process.exitCode=pass?0:1;
 })();

@@ -9905,6 +9905,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.62: One column on an iPad held upright
+(the BCBA, 11/1, after the form design audit in v25.55)
+
+- **Every form's field grids are one column on an iPad held upright** (up to 900 px wide, or upright up to 1100 px):
+  labels above, one field to a row, so the eye runs straight down the form. Rows with fields side by side when upright
+  fell from 136 to 41; the rest are compact data rows that belong together (DD-1's report filters, EA-1's session
+  entry, TV-1's captions beside their pictures). Held sideways, on a computer and in print nothing changes.
+- **The rule is in the shared block** (tools/blocks/nbh-ui.html), so all 47 forms take it, including the six whose own
+  layout set two columns (DM-1, IA-1, IC-1, IN-1, RR-1, TB-1).
+- **qa/ipad-reflow-test.js** now also checks that upright every field grid is one column.
+
+
 ### v25.61: Journal of Applied Behavior Analysis volume 59 (2026) in the banks
 (the BCBA, 11/1; issues 1 to 4; every volume from 1968 to 2026 is now in the banks)
 
