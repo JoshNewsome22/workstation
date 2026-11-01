@@ -54,6 +54,9 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
 13. **No participant names**, real or pseudonym, anywhere on a card or objective.
     The study's diagnoses and conditions stay on the card (for example Smith-Magenis syndrome, Moebius syndrome),
     in the description of who was studied, so the BCBA can search the bank by condition (the BCBA, 11/1, v25.57).
+    Pausing a reinforcer while the student is off the target behavior (synchronous reinforcement: music or a video that
+    plays only while the student works or wears the mask) is a "RESTRICTIVE: Punishment (removing an item)" step (the
+    BCBA, 11/1, v25.59; the mask video and music-while-working cards).
 14. **Which articles are read** (from v25.39, JABA 2007, in line with the inclusion rule of 10/28): every study
     with a procedure a school team could run or adapt, whatever the population, college and sport studies included.
     Not read: reviews, comments, errata and series introductions; measurement and functional-analysis method papers;
