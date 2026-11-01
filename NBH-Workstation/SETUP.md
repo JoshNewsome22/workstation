@@ -9905,6 +9905,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.50: Journal of Applied Behavior Analysis volume 50 (2017) in the banks
+(the BCBA, 11/1; issues 1 to 4; JABA now runs from 1968 to 2017)
+
+- **TD-1, 42 cards**, among them:
+  - Free delivery and combinations: NCR with extinction for severe behavior across all four functions (Phillips et
+    al., 2017; restraint, facial screening and contingent demands left out), extinction kept in place with NCR so
+    behavior comes back less later (Saini et al., 2017), and NCR thinned without extinction with a card request
+    added when thinning fails (Fritz et al., 2017a). These go into the compare work.
+  - Function-based treatment and health: fixed-amount DRO for tics (Capriotti et al., 2017), blocking hand-to-mouth
+    for emesis (Wunderlich et al., 2017), scheduled sits for encopresis (Call et al., 2017), a mock scanner and
+    progressive stillness for medical scans (Cox et al., 2017), a walker step sensor for first steps (Stasolla et
+    al., 2017), and trash beside the recycling (Fritz et al., 2017b).
+  - Classroom and safety: the Good Behavior Game with points only, as teams or individuals (Pennington & McComas,
+    2017; Groves & Austin, 2017), a randomized dependent group goal (Cariveau & Kodak, 2017), team step games for PE
+    and recess (Galbraith & Normand, 2017; Zerger et al., 2017), lockdown drills taught without frightening anyone
+    (Dickson & Vargo, 2017), and safe tackling (Tai & Miltenberger, 2017; head up and out of contact).
+  - Communication and teaching: asking "When?" after not now (Landa et al., 2017), trying before asking for help
+    (Rodriguez et al., 2017; removing the materials a marked punishment step), responding to hints (Najdowski et
+    al., 2017), conversation cue cards and text-message conversation (Hood et al., 2017; Grosberg & Charlop, 2017),
+    interview skills (Stocco et al., 2017), emotion metaphors and pretend labels (Dixon et al., 2017c; Dixon et al.,
+    2017b), sight words with sound prompts or word-picture matching (Richardson et al., 2017), group instructive
+    feedback (Leaf et al., 2017), braille matching by touch (Toussaint et al., 2017), observing checks and lag
+    schedules (Farber et al., 2017; Dracobly et al., 2017), new sounds by button pairing (Lepper & Petursdottir,
+    2017), and filler-word awareness for secondary students (Spieler & Miltenberger, 2017).
+- **Not banked:** a laboratory test of tolerating an infant's cry with undergraduates (Glodowski et al.). Not read:
+  reviews, preference, arousal and functional-analysis method papers, telehealth and staff training, parent training,
+  gambling, baseball pitch selection, smoking contracts and the animal study.
+- **GB-1:** 8 objectives (filler words, lockdown drills, pretend labels, group learning, braille matching, asking
+  when, emotion metaphors, responding to hints) and new source lines.
+
+
 ### v25.49: Journal of Applied Behavior Analysis volume 49 (2016) in the banks
 (the BCBA, 11/1; issues 1 to 4; JABA now runs from 1968 to 2016)
 
