@@ -30,6 +30,7 @@ and the server from `WS_URL` (default `http://127.0.0.1:8123`); both are read in
 | `node printbase.js before` then `node printbase.js after` | Prints every form on its own and the master print to PDF from the SAME data (the first run keeps each form's snapshot and a case file under `data/`), so the two runs differ only if the paper output changed. |
 | `python3 compare-print.py print/before print/after` | Compares the two runs: byte-identical PDFs pass at once; any other is rasterised and compared page by page. |
 | `node a11y.js after http://127.0.0.1:8123` | axe-core, WCAG 2.1 A and AA, on the workstation (empty, with a form open, fullscreen, Help open) and on every form. |
+| `node ipad-reflow-test.js` | v25.55: no form pushes the page sideways on an iPad, empty or with its simulated case loaded, at 820 px (upright) and 1133 px (an iPad mini sideways). A wide table may scroll inside its own panel. |
 | `node shots.js after` | Screen captures of the workstation and four forms at desktop, tablet and phone sizes. |
 | `node formshots.js after http://127.0.0.1:8123` | Every view of every form at desktop and phone sizes, for a visual review. |
 | `node shell-check.js after` | Fullscreen on and off (button, Escape, Escape from inside a form, the keyboard shortcut from both), the hidden form list and its memory, the phone packet bar. |

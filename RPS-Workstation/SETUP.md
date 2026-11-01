@@ -9905,6 +9905,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.55: Form design audit on an iPad (single column, labels above, WCAG 2.1 AA)
+(the BCBA's form-design advice, 11/1)
+
+- **WCAG 2.1 A and AA:** axe-core on 53 pages (the workstation, every form with its simulation, the family and staff
+  answer pages) finds no problem at any level, as in every release since v23.60. The federal rules (HHS Section 504,
+  DOJ Title II) name WCAG 2.1 AA, not 2.2.
+- **Measured on every form, empty and with its simulation, at an iPad upright (820 px) and sideways (1180 px):**
+  labels sit above their fields in almost every form; the side-by-side labels left are short settings rows (TD-1's
+  measurement settings, IA-1's scales, EB-1's one-page brief, IC-1's consent rows for the family), which read as
+  definition rows and print that way. No field relies on a placeholder for its name. Yes/No selectors and checkboxes
+  have full-size tap areas.
+- **Fixed:** TD-1's sheets were a fixed 1000 px beside the 222 px menu, so an iPad sideways (1133 to 1194 px) scrolled
+  the page sideways; the sheet now takes the column's width up to 1000 px. A filled DD-1 table ran past an iPad
+  sideways; it now scrolls inside its panel, as it already did upright. RA-1's "How to choose the response" fold-out
+  was a 19 px tap target; it is now about 37 px.
+- **New check:** qa/ipad-reflow-test.js, every form at 820 and 1133 px, empty and loaded: the page never scrolls
+  sideways (it failed on TD-1 and DD-1 before the fix).
+- **Left for the BCBA:** most forms set short, related header fields two to a row (Student and Student ID, Date of
+  birth and Grade) at 820 px. The advice allows short related fields on one row; making every form one column when
+  upright would roughly double the scrolling. Long and free-text fields are already full width.
+
+
 ### v25.54: Journal of Applied Behavior Analysis volume 55 (2022) in the banks
 (the BCBA, 11/1; issues 1 to 4, issue 2 with 3 articles in the set; volume 51 (2018) has not been received yet)
 
