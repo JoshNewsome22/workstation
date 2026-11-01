@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.61: Journal of Applied Behavior Analysis volume 59 (2026) in the banks
+(the BCBA, 11/1; issues 1 to 4; every volume from 1968 to 2026 is now in the banks)
+
+- **TD-1, 21 cards**, among them:
+  - Function-based treatment and its limits: four resurgence-mitigation strategies compared (Mitteer et al., 2026;
+    reinforcing problem behavior before treatment, a clinic arrangement, left out), renewal after a change of person,
+    place or task and when it starts and how long it lasts, as caution cards (Aggarwal et al., 2026; O’Brien et al.,
+    2026), competing items where self-injury comes with self-restraint (Frank-Crawford et al., 2026a; blocking and
+    weighted items marked restrictive) and a competing stimulus assessment checked against treatment (Frank-Crawford
+    et al., 2026b), arranging and ordering treated with competing items (Fergus et al., 2026), and three integrity
+    caution cards: errors after mastery, consequence errors while a skill is taught, and combined errors in DRO (Jones
+    et al., 2026; Burlison et al., 2026; O’Neill et al., 2026).
+  - Classroom and school: a kindergarten life-skills program (Torelli et al., 2026), self-monitoring with
+    reinforcement for working (Leif et al., 2026), varied against constant high-probability sequences (Lemons &
+    Wilder, 2026), and the Don't Stop! and Step it UP games with about 20-minute sessions (Buckles et al., 2026;
+    Redner et al., 2026; the demerit point a marked punishment step).
+  - Teaching: challenging false game rules (Hedroj et al., 2026), tacts in two languages (Zhao et al., 2026), linked
+    tablet schedules for shared pretend play (Campbell et al., 2026), looking at books (Loomis et al., 2026; the pause
+    in reinforcement a marked restrictive removal step), and single trials before timed practice (Bulla et al., 2026).
+  - For home teams: caregiver-run toilet training with a sit schedule, coached by video (Osos et al., 2026).
+- **Not banked or not read:** a narrative review of contingent responding to vocal behavior (Sivaraman et al.; Sun et
+  al., 2025, is already banked), re-presentation for liquid expulsion (Auten et al.: putting expelled liquid back in
+  the mouth is never written), methods, assessment, survey and review papers, staff and clinician training, worker
+  posture, college drinking and social media, forensic questioning and therapist stress.
+- **GB-1:** 1 objective (speaking up when a game partner states a false rule) and new source lines.
+
+
 ### v25.60: Journal of Applied Behavior Analysis volume 58 (2025) in the banks
 (the BCBA, 11/1; issues 1 to 4; every volume from 1968 to 2025 is now in the banks)
 
