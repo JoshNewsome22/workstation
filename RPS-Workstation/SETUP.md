@@ -9905,6 +9905,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.59: Journal of Applied Behavior Analysis volume 57 (2024) in the banks
+(the BCBA, 11/1; issues 1 to 4; every volume from 1968 to 2024 is now in the banks)
+
+- **A rule from the BCBA:** pausing a reinforcer while the student is off the target behavior (music or a video that
+  plays only while the student works or wears the mask) is a restrictive removal step that needs approval before use.
+  The music-while-working card (Hardesty et al., 2023) is marked to match the mask video card (McHugh et al., 2022),
+  and the readers follow it.
+- **TD-1, 25 cards**, among them:
+  - Function-based treatment: long-term results of practical functional assessment and skill-based treatment in
+    schools (Slaton et al., 2024), readiness skills taught before problem behavior is severe (Rahaman & Luczynski,
+    2024), a goal-length probe to set the pace of thinning (Strohmeier et al., 2024; response cost and redirection
+    marked restrictive), resurgence when the alternative pays less, as a caution card (Greer et al., 2024), renewal
+    after a change of person or place (Falligant et al., 2024; a caution card), RIRD with a low-preference task
+    (Sloman et al., 2024; RIRD and item removal marked restrictive), synchronous against delayed music for time on
+    task (Diaz de Villegas et al., 2024; the pause marked restrictive, the delayed version kept as a fallback), and
+    praise taught as a reinforcer (Sainsbury et al., 2024; it lasted only a few sessions).
+  - Classroom and school: the Good Behavior Game with tallies on the board and spoken (Chotto et al., 2024; the tally
+    a marked punishment step), a tag game at recess and a team step game (Mercado Baez et al., 2024; Seward & Redner,
+    2024), and development-matched play targets (Agana et al., 2024).
+  - Teaching: "like a ..." for things that only resemble a known item (Owen & Rodriguez, 2024), intraverbal tacts by
+    rehearsing a category's members (Aragon et al., 2024), derived relations in a game (Paranczak et al., 2024),
+    foreign vocabulary (Yamaguchi & Matsuda, 2024), signing printed words (Evans et al., 2024), first aid by video
+    prompts over telehealth (Sureshkumar & Zonneveld, 2024), earthquake drills by video modeling (Kurt et al., 2024),
+    public speaking and filler words for older students (Laske et al., 2024), and specific corrective feedback after
+    practice (Godinez et al., 2024).
+  - For home teams: the Preschool Life Skills program run by parents with telehealth coaching (Lee et al., 2024),
+    parents' early teaching routine for toddlers at risk for autism (Shingleton-Smith et al., 2024; blocking marked
+    restrictive), and continuous toys, music or talk during meals for a feeding team (Van Arsdale et al., 2024; escape
+    extinction and the chin prompt left out, and no source line to the eating objective).
+- **Not banked or not read:** a physical-guidance feeding study (Rubio et al.: the procedure guides the mouth open,
+  which staff never do), a feeding meta-analysis, reviews, memorials and commentaries, functional-analysis,
+  preference, assessment and record-review papers, staff, clinician and college training, sports coaching, tummy time
+  for infants, biofeedback after knee surgery, and undergraduate studies.
+- **GB-1:** 3 objectives ("like a ...", an earthquake drill, signing a printed word) and new source lines.
+
+
 ### v25.58: Journal of Applied Behavior Analysis volume 56 (2023) in the banks
 (the BCBA, 11/1; issues 1 to 4)
 
