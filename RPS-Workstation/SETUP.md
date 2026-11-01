@@ -9905,6 +9905,41 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.60: Journal of Applied Behavior Analysis volume 58 (2025) in the banks
+(the BCBA, 11/1; issues 1 to 4; every volume from 1968 to 2025 is now in the banks)
+
+- **TD-1, 28 cards**, among them:
+  - Function-based treatment and its limits: skill-based treatment of interfering stereotypy, with safe forms moved to
+    free periods (Slaton et al., 2025; the study's 3-s hand placement left out and replaced by a spoken or gestured
+    cue), keeping the gains of delay-and-denial tolerance (Kastner et al., 2025) and resurgence during its thinning,
+    as a caution card (Marshall et al., 2025), a red-green signal readiness check before thinning (Brown et al.,
+    2025), competing items picked by competition (Verriden et al., 2025) and look-alike items introduced step by step
+    (Breeman et al., 2025; the hands-held-down consequence left out), pica treated by blocking, redirecting and
+    discarding (Frank-Crawford et al., 2025; facial screening and the basket hold from the punishment packages never
+    written), variable-time NCR and fidelity errors, as a caution card (Jones et al., 2025), music through headphones
+    for vocal stereotypy (Happel et al., 2025), and DRO on the playground (Linton et al., 2025; time-out a marked
+    punishment step).
+  - Synchronous reinforcement, under the BCBA's rule (the pause is a marked restrictive removal step): class prizes as
+    a group contingency (Gomes et al., 2025), and hygiene routines and wearing a medical device or helmet (McHugh et
+    al., 2025; two cards).
+  - Health and safety: a nasal swab test with stimulus fading and no escape extinction (Briere et al., 2025),
+    self-protection from bullying (Fallon et al., 2025), self-checkout with a phone app (Yang et al., 2025), and
+    choosing fruit now over a snack later (McNellis et al., 2025; the student chooses).
+  - Teaching: a picture-word key for reading problems (Lewis & Cariveau, 2025b), typing an unknown word on a talking
+    tablet (K. Miller et al., 2025), real objects before toys in pretend play (Agana et al., 2025), preferred words
+    for a new language (Cortez et al., 2025), bilingual picture requests (Waits & Gilroy, 2025), matrix training of
+    position phrases (Lee et al., 2025), follow-up probes for maintenance (Mutchler & Pence, 2025), and repeating a
+    student's sounds to build vocalizing (Sun et al., 2025).
+  - For home teams: caregiver coaching for response to name (Conine et al., 2025), caregivers' rapport-building play
+    (Guinness & Feil, 2025), and graduated wearing of a positive airway pressure mask with caregivers coached by video
+    call (Walker et al., 2025; the mask is never held on).
+- **Not read:** substance use and contingency-management papers, domesticated dogs, memorials and reviews,
+  functional-analysis, preference and social-validity papers, staff, clinician and college training, deposit
+  contracts, car-seat training for caregivers, a ChatGPT comparison and a treadmill preparation.
+- **GB-1:** 3 objectives (a nasal swab tolerated, paying at a self-checkout with a phone app, a picture request in the
+  adult's language) and new source lines.
+
+
 ### v25.59: Journal of Applied Behavior Analysis volume 57 (2024) in the banks
 (the BCBA, 11/1; issues 1 to 4; every volume from 1968 to 2024 is now in the banks)
 
