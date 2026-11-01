@@ -9905,6 +9905,44 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.58: Journal of Applied Behavior Analysis volume 56 (2023) in the banks
+(the BCBA, 11/1; issues 1 to 4)
+
+- **TD-1, 27 cards**, among them:
+  - Function-based treatment and its limits: FCT run longer is no protection against resurgence (B. D. Greer et al.,
+    2023) and dense or lean histories alike (Helvey et al., 2023), both caution cards with a lapse plan; rewarding
+    both a request and task completion, without extinction (Fleck et al., 2023); early probes of the full wait in
+    thinning (Fernand et al., 2023; blocking a marked restrictive step); augmented competing items for self-injury
+    (Frank-Crawford et al., 2023; blocking and protective equipment marked restrictive); what competing stimulus
+    assessments found in 53 cases (Laureano et al., 2023); better or bigger reinforcers when extinction is not used
+    (Iannaccone & Jessel, 2023; laboratory); and fidelity errors after mastery, and errors of omission and commission
+    in tact teaching, as caution cards (Falakfarsa et al., 2023; Tamrazi & Wiskow, 2023).
+  - Classroom and school: a student-led Good Behavior Game (Peltier et al., 2023; the tallies a marked punishment
+    step, as in the other Good Behavior Game cards), function-based AAC against the usual shared boards (Gilroy et
+    al., 2023), music that plays while the student works (Hardesty et al., 2023), mixed against fixed work periods
+    (Mellott & Ardoin, 2023), and a team step game (Seward & Redner, 2023).
+  - Teaching: sight-word sets that start with different letters (Chotto et al., 2023) and mastery set per word (Kim et
+    al., 2023b), a model left in view for object imitation (Halbur et al., 2023), all three pictures from the start in
+    conditional discriminations (Yuan et al., 2023), picture cues for play talk (Mattson et al., 2023), honest reports
+    and leaving an off-limits item alone (Lehardy et al., 2023; a time-out and positive practice marked punishment
+    steps), checking food labels for an allergen (Quiroz et al., 2023), video prompting for job tasks (C. Schroeder et
+    al., 2023), interview skills over video calls (Kahng et al., 2023), and a vibration cue for face touching
+    (Virues-Ortega et al., 2023).
+  - For home and clinic feeding teams: telehealth coaching of caregivers (Patel et al., 2023; the spoon at the lips
+    and blocking marked restrictive, bites put back in left out) and ending the meal as a reinforcer for self-feeding
+    (Haney et al., 2023; caregiver feeding at the lips left out). Their source lines to the eating, drinking and
+    self-feeding objectives are not added, as for the other feeding studies; school staff never make a student eat or
+    drink.
+- **For the BCBA:** Hardesty et al. (2023) pause music while the student is off task, and the card treats the pause as
+  part of the reward; McHugh et al. (2022) pause a video while the mask is off, and that card marks the pause a
+  restrictive removal step. Say which reading to use for both.
+- **Not banked:** a review of equivalence-based instruction (Shawler et al.). Not read: reviews and commentaries,
+  functional-analysis, preference, token-value, heart-rate and measurement papers, staff and clinician training,
+  undergraduate studies of exercise incentives, work breaks and social media, tobacco on campus, infant sleep at home,
+  dance coaching, detection dogs at a border and the animal studies.
+- **GB-1:** 2 objectives (an off-limits item left alone, a food label checked for an allergen) and new source lines.
+
+
 ### v25.57: Journal of Applied Behavior Analysis volume 51 (2018) in the banks
 (the BCBA, 11/1; issues 1 to 4; the volume that was missing; every volume from 1968 to 2022 is now in the banks)
 
