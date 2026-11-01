@@ -3506,12 +3506,12 @@ function critInfo(a,beh){
   if(aim===null||!a.n) return null;
   const meets = v => beh.direction==="decrease" ? v<=aim : v>=aim;
   const need = critNeed(beh);
-  let run=0, metDate=null, count=0;
+  let run=0, longest=0, metDate=null, count=0;
   a.pts.forEach(p=>{
-    if(meets(p.y)){ count++; run++; if(run>=need && !metDate) metDate=p.date; }
+    if(meets(p.y)){ count++; run++; if(run>longest) longest=run; if(run>=need && !metDate) metDate=p.date; }
     else run=0;
   });
-  return {aim,need,count,metDate,share:100*count/a.n,currentRun:run};
+  return {aim,need,count,metDate,share:100*count/a.n,currentRun:run,longestRun:longest};   /* v25.64 longestRun: the decision line's "longest run" (it read a field that did not exist, so always 0) */
 }
 function withinTable(analyses,beh){
   const showCrit = num(beh.aim)!==null;
@@ -7159,7 +7159,7 @@ function ddTagDlg(){let d=document.getElementById("dlgDayTags");if(d)return d;d=
 function ddRuleHtml(beh,rows,analyses){const A=(analyses||[]).filter(a=>a&&a.n);if(!A.length)return "";const cur=A[A.length-1];const dec=(beh.direction||(beh.kind==="target"?"decrease":"increase"))==="decrease";const L=[];
   const aim=num(beh.aim);if(aim!==null){const ci=critInfo(cur,beh);if(ci){const need=critNeed(beh);
     if(ci.metDate)L.push(`criterion met on ${esc(fmtDate(ci.metDate))} (${need} consecutive day${need===1?"":"s"} ${dec?"at or below":"at or above"} ${r1(aim)} in ${esc(cur.name)}; ${ci.count} of ${cur.n} day${cur.n===1?"":"s"} at criterion)`);
-    else L.push(`criterion not met in ${esc(cur.name)}: ${ci.count} of ${cur.n} day${cur.n===1?"":"s"} ${dec?"at or below":"at or above"} ${r1(aim)}, longest run ${ci.run||0} of the ${need} needed`);}}
+    else L.push(`criterion not met in ${esc(cur.name)}: ${ci.count} of ${cur.n} day${cur.n===1?"":"s"} ${dec?"at or below":"at or above"} ${r1(aim)}, longest run ${ci.longestRun||0} of the ${need} needed`);}}
   const rv=parseInt(beh.reviewDays,10);if(rv>=2){
     if(cur.n>=rv){const k=Math.max(2,Math.min(5,Math.floor(cur.n/2)));const first=cur.vals.slice(0,k),last=cur.vals.slice(-k);const m=a=>a.reduce((x,y)=>x+y,0)/a.length;const d=m(last)-m(first);const better=dec?d<0:d>0;const sl=cur.slope;const slopeOk=sl===undefined||sl===null?better:(dec?sl<0:sl>0);
       if(!(better&&slopeOk))L.push(`<b>review</b>: ${cur.n} school day${cur.n===1?"":"s"} in ${esc(cur.name)} (the rule says ${rv}) without the level moving the right way (first ${k}: ${r1(m(first))}; last ${k}: ${r1(m(last))}${sl!==undefined&&sl!==null?`; slope ${sl>0?"+":""}${r1(sl)} a day`:""}): continue, modify or stop is the team's call`);
