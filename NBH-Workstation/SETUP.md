@@ -9905,6 +9905,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.48: Journal of Applied Behavior Analysis volume 48 (2015) in the banks
+(the BCBA, 11/1; issues 1 to 4; JABA now runs from 1968 to 2015)
+
+- **TD-1, 44 cards**, among them:
+  - Function-based treatment: a guided card touch for FCT (DeRosa et al., 2015a), FCT moved to a wristband signal
+    (Fisher et al., 2015), a snack for compliance compared with a break (Slocum & Vollmer, 2015), a high-quality
+    reinforcer in the high-probability sequence (Wilder et al., 2015), the other preferred item offered during a
+    wait (Austin & Tiger, 2015), DRO paired with a reinforced alternative, since DRO alone raised untargeted
+    behavior in a laboratory model (Jessel et al., 2015), one motor demand for response interruption (Saini et al.,
+    2015; removing the toys a marked punishment step), preferred food during sounds that set off aggression (Dupuis
+    et al., 2015), DNRO for wearing a medical bracelet (Cook et al., 2015b), and a check of arm-splint rigidity
+    (DeRosa et al., 2015b; wearing marked RESTRICTIVE with the doctor's input and a fade plan).
+  - Feeding: self-drinking with a toy, without the cup kept at the lips (Peterson et al., 2015).
+  - Classroom and groups: the Good Behavior Game in kindergarten (Donaldson et al., 2015), video-timed transitions
+    (Hine et al., 2015), individual step goals (Kuhl et al., 2015), and recess step goals (Hayes & Van Camp, 2015).
+  - Teaching: distributed practice (Haq & Kodak, 2015; Haq et al., 2015), conditional-only receptive teaching for
+    toddlers (Vedora & Grandelski, 2015), modeling and re-presenting until correct (Carroll et al., 2015), small
+    reinforcers in teaching trials (Paden & Kodak, 2015), praised answers and "I don't know" (DeQuinzio & Taylor,
+    2015), observational learning (MacDonald & Ahearn, 2015), script frames and peer sharing statements (Groskreutz
+    et al., 2015; Ledbetter-Cho et al., 2015), signaled social approach for Angelman syndrome (Fichtner & Tiger,
+    2015), sentence matching for students with cochlear implants (Golfeto & de Souza, 2015), braille contractions
+    (Putnam & Tiger, 2015), technician skills for adults with autism (Lerman et al., 2015), and for secondary
+    classes, PE and the arts, equivalence lessons, dance by TAGteach and yoga by self-scoring.
+- **Not banked:** facial screening for pica (Mitteer et al.: never written), a brief review (Nottingham et al.),
+  teachers trained to run preference assessments (Rosales et al.), and a laboratory switch-flipping model (Lambert et
+  al.). Not read: reviews and a meta-analysis, functional-analysis method and survey papers, measurement, integrity
+  and staff training, gambling, and the animal studies.
+- **GB-1:** 7 objectives (praised answers, sentence matching, incidental teaching as a job skill, braille
+  contractions, variability, signaled greeting touch, learning by watching) and 51 new source lines.
+
+
 ### v25.47: Journal of Applied Behavior Analysis volume 47 (2014) in the banks
 (the BCBA, 11/1; issues 1 to 4; JABA now runs from 1968 to 2014)
 
