@@ -426,7 +426,11 @@ let fails=0,oks=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL '
   console.log('\n=== TD-1: the simulations');
   /* v23.04 (review F178) escape_nce runs demand fading because the setting cannot tolerate the behavior, so it has no escape extinction and no block */
   for(const [k,pg,show] of [['escape_fct','yes',true],['sbt','no',true],['escape_nce','',false],['attention_ncr','',false]]){
-    p=await open(TD1);await sim(p,k);await view(p,'respond');B=await block(p);C=await copy(p,null);const bx=await extBox(p);
+    p=await open(TD1);await sim(p,k);await view(p,'respond');B=await block(p);
+    /* v25.56 How the parts fit asks about its own conflicts (an NCR with a request for the same reinforcer); this check is about
+       escape extinction's question, so the BCBA's answer to those is given first (td1-compare-test checks that question) */
+    await p.evaluate(()=>{if(window.__tdFit)window.__tdFit.open().forEach(f=>window.__tdFit.set(f.k,'keep'));});
+    C=await copy(p,null);const bx=await extBox(p);
     const ok=show?(B.shown&&/^In place/.test(B.note)&&await v(p,'ee.pg')===pg&&!C.D&&C.text.includes(EEHEAD)&&!/Not in place yet/.test(C.text)&&(bx===null||!/says "|calls for/.test(bx))):(!B.shown&&!C.D&&!C.text.includes(EEHEAD));
     check(ok,`15 ${k}: ${show?'worked through (guidance '+pg+'), in place, copied without a question':'no block'}`,{note:B.note,pg:await v(p,'ee.pg'),D:C.D,bx});
     if(k==='sbt')check(await cardVal(p,'EXT','s0')===S0_NO&&!/guided compliance/.test(C.text),'15 sbt: without guidance, the Extinction card\'s escape step uses gestures and models only; no guided compliance in the copy');

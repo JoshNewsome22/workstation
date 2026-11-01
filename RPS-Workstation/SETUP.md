@@ -9905,6 +9905,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.56: TD-1 compares two interventions and checks how the parts of the plan fit
+(the BCBA approved the review page's pairs and rules, 11/1)
+
+- **Compare two interventions** (Build sheet, and a Compare button on each card): two components side by side, with
+  fit to this student's function, how each works (before or after the behavior, time- or response-based, what it
+  reinforces), the advantages and limitations of each against the other, when each is the better fit, using parts of
+  both, restrictiveness, staff effort and speed, and the studies. 52 pairs are written from the component library and
+  the protocol bank; any other two are shown from general attributes and say that no study compares them directly. The
+  rule that applies if both are in the plan is shown under the table.
+- **How the parts fit** (top of the Build sheet): 21 rules flag parts of the plan that work against each other, one
+  flag per rule naming its cards, as Conflict, Caution or Note, with why, how to make them work together and the
+  sources. Each is answered (different reinforcers, changed as suggested, or kept on purpose), and the answer is saved
+  with the plan. The response-cost rule needs the plan's own words to take tokens away, and the removal rule needs
+  them to send the student out or stop the task, for escape-maintained behavior. The without-extinction cautions apply
+  while question 4 on the Responding sheet is open; "no" there is the BCBA's decision, and that sheet writes the plan
+  without extinction. On the five simulated students the box shows 1 to 5 flags.
+- **Before printing or copying:** a Conflict not yet answered is asked about once, with the Responding sheet's
+  question when both apply ("Go to Build" goes to the box); it never blocks.
+- **The BIP text** carries "How the parts fit together": each flag and how it is handled.
+- **Evidence added to the pairs** since the review page, studies only, no new wording: Lomas Mevers et al. (2014),
+  Berth et al. (2019), Jones and St. Peter (2022) and Marsteller and St. Peter (2014) for NCR and DRA; Phillips et al.
+  (2017), Saini et al. (2017) and Fritz et al. (2017a) for NCR and extinction; Newman et al. (2021) for free and
+  earned breaks; Hangen et al. (2020) and Jessel et al. (2015) for DRO; Sumter et al. (2020) for NCR and FCT; Simmons
+  et al. (2022), Miller et al. (2022), Drifke et al. (2020) and Iannaccone and Jessel (2021) for delay training;
+  Briggs et al. (2019) and Weinsztok and DeLeon (2022) for DRA without extinction; Holehan et al. (2020) for
+  synthesized and isolated FCT.
+- **New check:** qa/td1-compare-test.js (the rows, the card button, the flag raised and answered, Save and Open, the
+  question before Copy and Print, the BIP section, the single-card rules, upright on an iPad).
+
+
 ### v25.55: Form design audit on an iPad (single column, labels above, WCAG 2.1 AA)
 (the BCBA's form-design advice, 11/1)
 
