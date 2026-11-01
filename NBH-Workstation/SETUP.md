@@ -9905,6 +9905,44 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.47: Journal of Applied Behavior Analysis volume 47 (2014) in the banks
+(the BCBA, 11/1; issues 1 to 4; JABA now runs from 1968 to 2014)
+
+- **TD-1, 56 cards**, among them:
+  - Function-based treatment: a "my way" request and saying "okay" then working, from an interview-informed analysis
+    (Hanley et al., 2014a), food for each finished task compared with food on a time-based schedule during demands
+    (Lomas Mevers et al., 2014; the comparison is the lesson), time-based delivery matched to the request rate after
+    DRA (Marsteller & St. Peter, 2014), a planning card for lowering relapse after DRA (Pritchard et al., 2014), two
+    request forms with a backup (Hoffman & Falcomata, 2014), a signaled yes-or-no for adult attention (Luczynski &
+    Hanley, 2014), "I don't want that" with a timer for interrupted rituals (Rispoli et al., 2014), a stop sign for
+    disliked sounds (Groskreutz et al., 2014), a resetting DRO for elopement and dropping (Roane & DeRosa, 2014; the
+    holds left out), enrichment with brief item removal for stereotypy (Watkins & Rapp, 2014; a marked punishment
+    step), white noise during seatwork (Cook et al., 2014), token earn and token loss compared (Donaldson et al.,
+    2014b; loss a marked punishment step), clear cups that empty after an error (Fisher et al., 2014; a marked
+    punishment step), a noise meter for a group (Ring et al., 2014), and handing over kept items with attention
+    (Donaldson et al., 2014a).
+  - Feeding and health, planned with the family, the doctor, a feeding specialist and the school nurse: syringe
+    fading (Groff et al., 2014), self-feeding one bite or being fed more (Rivas et al., 2014; the least-preferred
+    food version left out), a Nuk brush or a spoon with nonremoval (Wilkins et al., 2014), a reprimand cue for teeth
+    grinding (Armstrong et al., 2014; jaw pressure left out), portion sizes by matching (Hausman et al., 2014b), and
+    step goals and running goals for transition students and athletics.
+  - Safety, communication and teaching: classwide preschool life skills in Head Start (Hanley et al., 2014b),
+    requests and waiting with new teachers (Luczynski et al., 2014), lighter and fire safety (Houvouras & Harvey,
+    2014; Vanselow & Hanley, 2014), lure safety in the community (Gunby & Rapp, 2014; Bergstrom et al., 2014;
+    in-situ checks only with family consent and district approval), who and which questions (Shillingsburg et al.,
+    2014), cover letters for transition students (Pennington et al., 2014), braille line tracking (Scheithauer &
+    Tiger, 2014), hide-and-seek by linked schedules (Brodhead et al., 2014), offering help by video (Day-Watkins et
+    al., 2014), naming before pointing (Delfs et al., 2014), a prompt assessment for chains (Seaver & Bourret,
+    2014), three-picture arrays and massed trials (Grow et al., 2014; Majdalany et al., 2014), and new-language
+    vocabulary.
+- **Not banked:** a short review of feeding studies (Seubert et al.), and two laboratory tasks with college students
+  (Jessel et al.; Castillo et al.). Not read: editors' notes, reviews, measurement and preference-assessment papers,
+  staff, volunteer and parent training, and the driver, grocery, workplace-safety and drug-treatment studies.
+- **GB-1:** 11 objectives (new-language words, complete sentences, "my turn", cover letters, running goals, handing
+  over items, lighter safety, matching by category, hide-and-seek, portion sizes, braille line tracking) and 71 new
+  source lines.
+
+
 ### v25.46: Journal of Applied Behavior Analysis volume 46 (2013) in the banks
 (the BCBA, 10/31; issues 1 to 4; JABA now runs from 1968 to 2013)
 
