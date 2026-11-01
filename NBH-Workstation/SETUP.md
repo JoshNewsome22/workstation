@@ -9905,6 +9905,40 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.49: Journal of Applied Behavior Analysis volume 49 (2016) in the banks
+(the BCBA, 11/1; issues 1 to 4; JABA now runs from 1968 to 2016)
+
+- **TD-1, 52 cards**, among them:
+  - Function-based treatment: FCT thinning with signals or a chained schedule (Greer et al., 2016b; time-out a
+    marked punishment step for the one case that used it), testing each reinforcer separately rather than together
+    (Fisher et al., 2016), contingency-based delay tolerance (Ghaemmaghami et al., 2016), a green card, a bracelet
+    or three colored signals for when requests or attention are available (Landa & Hanley, 2016; Shamlian et al.,
+    2016; Nava et al., 2016), a card request then waiting and accepting no as prevention (Fahmie et al., 2016),
+    green and red cards against resurgence (Fuhrman et al., 2016), competing items with blocking for automatic
+    behavior (Saini et al., 2016), earning time for stereotypy by finishing work (Slaton & Hanley, 2016; token loss
+    a marked punishment step), a token board for behavior kept going by adults doing what the student asks (Eluri et
+    al., 2016), a mystery activity for transitions (Jessel et al., 2016), token earn and token loss compared (Jowett
+    Hirst et al., 2016), and the integrity point-loss needs to work in a laboratory model (St. Peter et al., 2016).
+  - Feeding and health: spoon nonremoval with interaction, which beat a sensory approach (Peterson et al., 2016b),
+    underwear in toilet training (Greer et al., 2016a), and walking laps for tokens (Krentz et al., 2016).
+  - Teaching: lag schedules for request frames and category answers (Brodhead et al., 2016; Contreras & Betz, 2016),
+    immediate reinforcement (Carroll et al., 2016; Majdalany et al., 2016), two error corrections for different
+    students (Kodak et al., 2016), multiple-choice and picture prompts (Leaf et al., 2016b; Vedora & Barry, 2016),
+    speech added to device requests (Gevarter et al., 2016), matrix training (Frampton et al., 2016), sorting to
+    matching (Farber et al., 2016), perspective taking (Belisle et al., 2016), kind replies to an unwanted gift
+    (Bergstrom et al., 2016; only when the team and family agree), emergent second-language skills (May et al.,
+    2016), toys during a wait and immediate tokens (Juanico et al., 2016; Leon et al., 2016), fire-alarm exits
+    (Garcia et al., 2016), and for PE, recess and transition students, yoga, riding, team points, active play,
+    interim deadlines and running play sessions.
+- **Not banked:** food and attention for rumination whose result depended on facial screening (DeRosa et al.: never
+  written), a procedure that required eye contact (Jeffries et al.), an assessment-only report (Jessel et al., 30
+  analyses) and a brief review (Rapp et al.). Not read: reviews, publication and medication analyses, staff training,
+  preference assessments, office workers, drug treatment and the animal studies; one toilet-training article was in
+  the zip twice.
+- **GB-1:** 6 objectives (yoga poses, kind replies, pair matching, running a play session, perspective swap, items
+  fitting two features) and 60 new source lines.
+
+
 ### v25.48: Journal of Applied Behavior Analysis volume 48 (2015) in the banks
 (the BCBA, 11/1; issues 1 to 4; JABA now runs from 1968 to 2015)
 
