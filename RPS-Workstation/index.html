@@ -2887,7 +2887,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v25.62';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v25.63';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -10745,6 +10745,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 #wsNav .wn-item:focus-visible{outline:3px solid #8fd0ee;outline-offset:-3px}
 #wsNav .wn-item svg.wn-chev{width:12px;height:12px;opacity:.85}
 #wsNav #readDoc .rd-ico{display:none}
+#wsNav #readDoc .lbl{display:inline!important}
 #wsNav .wn-sep{width:1px;background:#3a5a6e;margin:14px 2px;flex:0 0 auto}
 #wsNav .wn-sp{flex:1 1 auto}
 #wsNav .wn-right{display:flex;align-items:center;gap:8px;flex:0 0 auto}
@@ -10762,6 +10763,8 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 .wn-menu .wn-narrow{display:none}
 /* the chips and the History and Staff directory buttons never sit in the heading row's old places */
 header.top .who{display:none}
+/* a form holds a student the packet does not have yet: the heading shows that name with Use these details, as before */
+@media (min-width:721px){header.top:has(#whoTake:not([hidden])) .who{display:block}}
 header.top #hxBtn,header.top #dirBtn{display:none!important}
 /* the student's strip: light, below the bar */
 html body .bar{background:#fff!important;color:#1a2933!important;border-bottom:1px solid #dfe5e8;padding:8px 20px!important}
@@ -10836,14 +10839,15 @@ nav.addEventListener('click',e=>{const b=e.target.closest('[data-wn-menu]');if(!
 M.addEventListener('click',e=>{const it=e.target.closest('[data-wn-for]');if(!it)return;const src=document.getElementById(it.dataset.wnFor);shut(false);if(src)src.click();});
 M.addEventListener('keydown',e=>{const items=[...M.querySelectorAll('button')].filter(x=>x.offsetParent!==null),i=items.indexOf(document.activeElement);
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const n=items.length;if(n)items[(i+(e.key==='ArrowDown'?1:n-1))%n].focus();}
-  else if(e.key==='Escape'){e.preventDefault();shut(true);}else if(e.key==='Tab'){shut(false);}});
+  else if(e.key==='Escape'){e.preventDefault();e.stopPropagation();shut(true);}else if(e.key==='Tab'){shut(false);}});
 document.addEventListener('click',e=>{if(!M.hidden&&!e.target.closest('#wsNavMenu'))shut(false);});
 window.addEventListener('resize',()=>shut(false));
-window.__wsNav={open:key=>{const b=nav.querySelector('[data-wn-menu="'+key+'"]');if(b){shut(false);open(b);}},shut:()=>shut(false)};
+window.__wsNav={find:id=>Object.keys(MENUS).find(k=>MENUS[k].some(x=>Array.isArray(x)&&x[0]===id))||null,open:key=>{const b=nav.querySelector('[data-wn-menu="'+key+'"]');if(b){shut(false);open(b);}},shut:()=>shut(false)};
 /* the chips sit in the heading on every screen */
 const chipsTop=()=>{const box=$('#wsChips'),host=$('header.top'),before=$('header.top .who');if(box&&host&&before&&!(box.parentNode===host&&box.nextElementSibling===before))host.insertBefore(box,before);};
+/* the earlier listener holds the old placeChips (it put the chips beside Print, which is now in this bar): it is taken off */
+try{const old=placeChips;if(CHIPTOP.removeEventListener)CHIPTOP.removeEventListener('change',old);else if(CHIPTOP.removeListener)CHIPTOP.removeListener(old);}catch(e){}
 try{placeChips=function(){chipsTop();};}catch(e){}
-/* the earlier listener holds the old placeChips: this one runs after it and puts the chips back in the heading */
 try{if(CHIPTOP.addEventListener)CHIPTOP.addEventListener('change',()=>chipsTop());else if(CHIPTOP.addListener)CHIPTOP.addListener(()=>chipsTop());}catch(e){}
 /* History and Staff directory stay in the bar's hidden row, run from the menus */
 try{hxPlace=function(){const b=$('#hxBtn'),x=$('#caseXlsx'),d=$('#dirBtn'),diag=$('#diag');

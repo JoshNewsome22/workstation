@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.63: The workstation's new top bar
+(the BCBA, 11/1: the Compact Workspace header chosen from the three mockups)
+
+- **One dark bar across the top**: Forms (shows or hides the list of forms), Case map, Documents, then three menus,
+  Packet, Case and Tools, then Help; on the right Save case, Print and Finish PDF. Held upright (900 px or less) Case
+  map, Documents and Finish PDF move into Tools, so the bar keeps to one row.
+- **The menus**: Packet has Save packet and Open packet. Case has Open case, Close case, Save case to a file (and the
+  self-opening copy, and Share for editing, when they are in use), Case as spreadsheet and History. Tools has Fill open
+  forms, Staff directory and Diagnostics. Each item runs the workstation's own button, so nothing it does has changed.
+  The arrow keys move through a menu, Escape closes it and goes back to its button.
+- **The student's details sit in a light strip under the bar**, in full until they are entered, then folded to one line
+  as before. The autosave and offline chips stay in the heading on every screen; on a phone they take a row of their
+  own under the title.
+- **A name a form holds that the packet does not** still shows in the heading with Use these details.
+- **Help** now names the Case, Packet and Tools menus and Documents where it named More, the page icon and the top bar.
+- **Tests**: `qa/lib.js` has `navTap` (a button in a menu is reached through its menu, as a person reaches it); the
+  More-menu checks (v2183), History's place (v2191), Staff directory (v2235, v2250), the chips (sprint-a8) and the
+  student journey's taps follow the new bar.
+
+
 ### v25.62: One column on an iPad held upright
 (the BCBA, 11/1, after the form design audit in v25.55)
 

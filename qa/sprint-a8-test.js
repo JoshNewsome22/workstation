@@ -497,8 +497,12 @@ async function geo(page){
     const kids=acts&&getComputedStyle(acts).display!=='none'?[...acts.children].filter(c=>getComputedStyle(c).display!=='none'&&c.getBoundingClientRect().height>0):[];
     const fr=[...document.querySelectorAll('.frames iframe')].find(f=>!f.hidden);
     const box=document.querySelector('#wsChips');
+    /* v25.63: the case buttons are in the workstation's top bar (and its menus): its rows */
+    const navRows=()=>{const n=document.getElementById('wsNav');if(!n||n.offsetParent===null)return 0;const t=n.getBoundingClientRect().top;
+      const it=[...n.querySelectorAll('.wn-item,[data-wn-menu],.wn-right button')].filter(e=>e.offsetParent&&e.getBoundingClientRect().height>0);
+      return it.length?(it.every(e=>e.getBoundingClientRect().bottom<=t+64)?1:2):0;};
     return {vw:innerWidth,coarse:matchMedia('(pointer:coarse)').matches,folded:document.body.classList.contains('bar-folded'),
-      header:r('header.top'),bar:r('.bar'),crumb:r('.crumb'),tip:r('#tipBar'),rows:[...new Set(kids.map(c=>Math.round(c.getBoundingClientRect().top)))].length,
+      header:r('header.top'),bar:r('.bar'),crumb:r('.crumb'),tip:r('#tipBar'),rows:kids.length?[...new Set(kids.map(c=>Math.round(c.getBoundingClientRect().top)))].length:navRows(),
       frameTop:fr?Math.round(fr.getBoundingClientRect().top):null,chipsIn:box?(box.closest('header.top')?'heading':box.closest('.bar')?'bar':'?'):'none',
       auto:document.querySelector('#autoChip').textContent,off:document.querySelector('#offChip').hidden?'':document.querySelector('#offChip').textContent,
       chipsH:box?Math.round(box.getBoundingClientRect().height):null};
@@ -576,17 +580,17 @@ async function bars(br){
     if(vp.width>=760){ok('bars '+tag+': the chips are in the heading and the case buttons keep to one row; the details open as a grid of three rows (v21.92; the form at '+g.frameTop+' px, at most 320)',g.chipsIn==='heading'&&g.rows===1&&g.frameTop<=320,g);
       await page.evaluate(()=>{const e=$('#pClient');e.value='Mateo Rivera';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));foldBar(true);});await sleep(300);const gf=await geo(page);
       ok('bars '+tag+': folded, the form at '+gf.frameTop+' px (at most 240)',gf.folded&&gf.frameTop<=240,gf);}
-    else ok('bars '+tag+': the chips stay in the bar (the form at '+g.frameTop+' px; the case buttons take '+g.rows+' rows here, as before)',g.chipsIn==='bar',g);
+    else ok('bars '+tag+': the chips stay in the heading, on a row of their own under the title (v25.63; the form at '+g.frameTop+' px; the top bar takes '+g.rows+' rows here)',g.chipsIn==='heading',g);
     await ctx.close();
   }
   /* turning the iPad: the chips move and come back, and still open their window */
   const ctx=await ipad(br);await ctx.addInitScript(NOTIP);const page=await shell(ctx,'bars turn');await open(page,'CN-1');
   const a=(await geo(page)).chipsIn;
-  await page.setViewportSize({width:700,height:1000});await sleep(500);const b=(await geo(page)).chipsIn;   /* v21.89 narrower than 760 px (Split View): the bar */
+  await page.setViewportSize({width:700,height:1000});await sleep(500);const b=(await geo(page)).chipsIn;   /* v25.63 narrower than 760 px (Split View): still the heading */
   await page.setViewportSize({width:1180,height:820});await sleep(500);const c=await geo(page);
   await page.tap('#autoChip');await sleep(700);
   const dlg=await page.evaluate(()=>({open:$('#dlg').open,title:$('#dlgTitle').textContent}));
-  ok('bars: a window narrower than 760 px moves the chips into the bar and back, and the Autosave chip still opens its window',a==='heading'&&b==='bar'&&c.chipsIn==='heading'&&dlg.open&&/Autosave/.test(dlg.title),{a,b,c:c.chipsIn,dlg});
+  ok('bars: a window narrower than 760 px and back: the chips stay in the heading (v25.63), and the Autosave chip still opens its window',a==='heading'&&b==='heading'&&c.chipsIn==='heading'&&dlg.open&&/Autosave/.test(dlg.title),{a,b,c:c.chipsIn,dlg});
   await ctx.close();
 }
 

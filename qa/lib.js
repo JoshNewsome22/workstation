@@ -30,4 +30,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function mailParts(raw){const dec=b=>Buffer.from(String(b||'').replace(/\r\n/g,''),'base64').toString('utf8');const head=raw.split('\r\n\r\n')[0];
   const bm=/boundary="([^"]+)"/.exec(head);if(!bm)return {head,text:dec(raw.split('\r\n\r\n').slice(1).join('\r\n\r\n')),html:''};
   const o={head,text:'',html:''};raw.split('--'+bm[1]).slice(1,-1).forEach(p=>{const i=p.indexOf('\r\n\r\n'),h=p.slice(0,i),b=p.slice(i+4);if(/text\/plain/.test(h))o.text=dec(b);if(/text\/html/.test(h))o.html=dec(b);});return o;}
-module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts};
+/* v25.63: the workstation's top menus (Packet, Case, Tools). A bar button that is not on the screen is reached the way a
+   person reaches it: open the menu that holds it and choose the item. true when it was chosen. */
+async function navTap(page,sel,touch){const id=sel.replace(/^#/,'');
+  const key=await page.evaluate(id=>window.__wsNav&&window.__wsNav.find?window.__wsNav.find(id):null,id).catch(()=>null);if(!key)return false;
+  const T=process.env.NAVTRACE?(...a)=>console.log('     navTap '+id+':',...a):()=>{};
+  const b=page.locator('#wsNav [data-wn-menu="'+key+'"]');if(!(await b.isVisible().catch(()=>false))){T('menu button not visible');return false;}
+  if(touch)await b.tap();else await b.click();await sleep(250);
+  const it=page.locator('#wsNavMenu [data-wn-for="'+id+'"]');if(!(await it.isVisible().catch(()=>false))){T('item not visible',await page.evaluate(()=>({hid:document.getElementById('wsNavMenu').hidden,html:document.getElementById('wsNavMenu').innerHTML.slice(0,300)})));return false;}
+  T('item',JSON.stringify(await it.boundingBox()));
+  if(touch)await it.tap();else await it.click();T('tapped');return true;}
+module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts,navTap};

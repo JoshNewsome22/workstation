@@ -22,7 +22,7 @@ const frameOf=(p,re)=>p.frames().find(f=>re.test(decodeURIComponent(f.url())));
   const yes=()=>p.evaluate(()=>{window.__asked=[];window.__cf=window.__cf||wsUI.confirm;wsUI.confirm=(m)=>{window.__asked.push(m);return Promise.resolve(true);};});
   const rows=()=>p.evaluate(()=>[...document.querySelectorAll('#ppBody tr')].map(tr=>Object.assign({shown:!tr.hidden,sel:tr.querySelector('.pp-sel').checked},Object.fromEntries([...tr.querySelectorAll('input[data-f]')].map(i=>[i.dataset.f,i.value])))));
   const stored=()=>p.evaluate(async()=>{const j=await pplLoad();return {list:j.list.map(x=>({id:x.id,name:x.name,role:x.role,group:x.group,note:x.note,email:x.email})),gone:Object.keys(j.gone)};});
-  await p.click('#dirBtn');await sleep(500);await yes();
+  await L.navTap(p,'#dirBtn',true);await sleep(500);await yes();   /* v25.63: in the Tools menu */
   /* ---- the window ---- */
   const head=await p.evaluate(()=>[...document.querySelectorAll('.pp-tbl thead th')].map(t=>t.textContent.trim()));
   ok('1 the table has a select box, then Name, Role, Member of, Email, Phone, School and Note',JSON.stringify(head)==='["","Name","Role","Member of","Email","Phone","School","Note","Remove"]'&&await p.isVisible('#ppAll'),head);

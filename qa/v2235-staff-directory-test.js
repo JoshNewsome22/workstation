@@ -1,5 +1,5 @@
 /* v22.35 the staff directory: the school staff the forms go to, typed once in the workstation (Staff directory, in the top
-   bar) and offered in the forms' boxes where a staff member is named. Checks: the window (paste a list in its forms, add,
+   bar's Tools menu) and offered in the forms' boxes where a staff member is named. Checks: the window (paste a list in its forms, add,
    change, find, remove, save to a CSV file and open it again); kept on the device across a reload, also when Safari refuses
    its settings store; the merge two devices' copies go through for Google Drive; a form in the workstation (IA-1's
    informants): tapping the name box lists the people, picking fills the name, role and email (and the form keeps them),
@@ -18,8 +18,8 @@ const frameOf=(p,re)=>p.frames().find(f=>re.test(decodeURIComponent(f.url())));
   const ctx=await br.newContext({viewport:{width:1180,height:820},hasTouch:true,userAgent:IPAD,serviceWorkers:'block',acceptDownloads:true});const p=await ctx.newPage();
   p.on('pageerror',e=>errs.push(e.message));await p.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(2500);
   /* ---------- the window ---------- */
-  ok('1 the top bar has Staff directory',await p.isVisible('#dirBtn'));
-  await p.click('#dirBtn');await sleep(400);
+  /* v25.63: Staff directory is in the top bar's Tools menu */
+  ok('1 the top bar has Staff directory (in Tools)',await L.navTap(p,'#dirBtn',true));await sleep(400);
   ok('2 it opens the Staff directory window, empty',await p.evaluate(()=>$('#dlg').open&&$('#dlgTitle').textContent==='Staff directory'&&!document.querySelectorAll('#ppBody tr').length));
   await p.click('#ppPasteBtn');await p.fill('#ppPasteIn',LIST);await p.click('#ppPasteGo');await sleep(700);
   const rows=()=>p.evaluate(()=>[...document.querySelectorAll('#ppBody tr')].map(tr=>Object.fromEntries([...tr.querySelectorAll('input[data-f]')].map(i=>[i.dataset.f,i.value]))));

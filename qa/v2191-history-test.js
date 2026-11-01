@@ -247,13 +247,18 @@ const dirty=page=>page.evaluate(()=>caseDirty());
   const ml=await lines(M.page);
   ok('40 the laptop’s History: its two saves (on this Mac) above the iPad’s (on the iPad · brought here by Google Drive), the iPad’s later save from Drive',ml.some(l=>/on this Mac · Save case — Form DM-1: 1 field/.test(l.t))&&ml.some(l=>/on the iPad · brought here by Google Drive — the first one kept here: 1 form/.test(l.t))&&ml.some(l=>/in Google Drive/.test(l.t)&&!/also in/.test(l.t)),ml.map(l=>l.t));
   await M.page.evaluate(()=>document.getElementById('dlg').close());
-  /* a laptop 1280 wide with Drive in use: no room on the bar's one row, so History goes up beside the student's name */
-  await M.page.setViewportSize({width:1280,height:800});await sleep(800);
-  const lt=await M.page.evaluate(()=>{const b=document.getElementById('hxBtn'),g=document.querySelector('.bar .grp.acts');const rows=new Set([...g.querySelectorAll('button')].filter(e=>e.offsetParent).map(e=>Math.round(e.getBoundingClientRect().top))).size;
-    return {top:!!b.closest('header.top'),vis:b.offsetParent!==null,rows,sf:document.getElementById('saveFile').offsetParent!==null};});
-  await M.page.evaluate(()=>document.getElementById('hxBtn').click());await hxOpenWait(M.page);const lt2=await M.page.evaluate(()=>document.querySelector('#hxView .hp-lead b').textContent);await M.page.evaluate(()=>document.getElementById('dlg').close());
-  await M.page.setViewportSize({width:1440,height:900});await sleep(800);const lt3=await M.page.evaluate(()=>!document.getElementById('hxBtn').closest('header.top')&&document.getElementById('hxBtn').offsetParent!==null);
-  ok('41 a laptop 1280 wide with Drive in use: the bar stays one row, History waits in the heading and opens the case’s history; at 1440 it is back on the bar',lt.top&&lt.vis&&lt.rows===1&&lt.sf&&lt2==='Mateo Rivera'&&lt3,{lt,lt2,lt3});
+  /* a laptop 1280 wide with Drive in use (v25.63): the workstation's top bar is one row, and History is in its Case menu, with
+     Save case to a file; History there opens the case's history. At 1440 the same. */
+  const lt=[];
+  for(const w of [1280,1440]){await M.page.setViewportSize({width:w,height:800});await sleep(800);
+    const one=await M.page.evaluate(()=>{const n=document.getElementById('wsNav'),r=n.getBoundingClientRect();const it=[...n.querySelectorAll('.wn-item,[data-wn-menu]')].filter(e=>e.offsetParent).map(e=>e.getBoundingClientRect());
+      return {rows:it.every(b=>b.top>=r.top-1&&b.bottom<=r.top+64)?1:2,h:Math.round(r.height)};});
+    await M.page.evaluate(()=>__wsNav.open('case'));await sleep(250);
+    const items=await M.page.evaluate(()=>[...document.querySelectorAll('#wsNavMenu [data-wn-for]')].filter(e=>e.offsetParent).map(e=>e.dataset.wnFor));
+    await M.page.click('#wsNavMenu [data-wn-for="hxBtn"]');await hxOpenWait(M.page);
+    const who=await M.page.evaluate(()=>document.querySelector('#hxView .hp-lead b').textContent);await M.page.evaluate(()=>document.getElementById('dlg').close());
+    lt.push({w,...one,hx:items.includes('hxBtn'),sf:items.includes('saveFile'),who});}
+  ok('41 a laptop 1280 wide with Drive in use, and 1440: the top bar stays one row; the Case menu has History and Save case to a file, and History opens the case’s history',lt.every(x=>x.rows===1&&x.h<=64&&x.hx&&x.sf&&x.who==='Mateo Rivera'),lt);
   /* signed out, then offline: local points only, said */
   const rl1=D.revList;await I.page.evaluate(()=>{sessionStorage.removeItem('nbh.google.drive@nbh');hxOpen();});await hxOpenWait(I.page);
   const so=await I.page.evaluate(()=>({src:document.getElementById('hxSrc').textContent,btn:!!document.getElementById('hxSign'),n:document.querySelectorAll('#hxList > li').length}));

@@ -16,7 +16,7 @@
           about 8 minutes; results, the case files, the PDFs and each round trip's differences in qa/out/student-journey/.
           For working on one part: ONLY=F,G (those phases), START_CASE=file (a case file opened first), CKPT=1 (a case file
           kept after each phase as qa/out/student-journey/ckpt-<phase>.json), TRACE=1 (each field and tap printed). */
-const {chromium,fs,path,ROOT,BASE,sleep}=require(__dirname+'/lib.js');
+const {chromium,fs,path,ROOT,BASE,sleep,navTap}=require(__dirname+'/lib.js');
 const {spawn}=require('child_process');
 const OUT=__dirname+'/out/student-journey/';if(!process.env.START_CASE)fs.rmSync(OUT+'dl',{recursive:true,force:true});fs.mkdirSync(OUT+'dl',{recursive:true});
 const PORT=+(process.env.BOX_PORT||18161),BOXURL='http://127.0.0.1:'+PORT+'/box.php';
@@ -57,8 +57,8 @@ async function tapShell(sel){
     if(sel==='#saveCase'){const q=page.locator('#saveQuick');if(await q.isVisible().catch(()=>false)){await q.tap();return;}}
     for(let i=0;i<2&&await shell(()=>document.body.classList.contains('ws-fold'));i++){for(const f of page.frames()){if(f!==page.mainFrame())await f.evaluate(()=>{window.scrollTo(0,0);window.dispatchEvent(new Event('scroll'));}).catch(()=>{});}await sleep(900);}
     el=page.locator(sel).first();}
-  if(!(await el.isVisible().catch(()=>false))){const more=page.locator('#moreBtn');if(await more.isVisible().catch(()=>false)){await more.tap();await sleep(250);
-    const item=page.locator('#moreMenu [data-more="'+sel.replace(/^#/,'')+'"]');if(await item.isVisible().catch(()=>false)){await item.tap();return;}}}
+  /* v25.63: the rarer buttons are in the top menus (Packet, Case, Tools) */
+  if(!(await el.isVisible().catch(()=>false))&&await navTap(page,sel,true))return;
   await el.tap({timeout:8000});
 }
 /* the workstation's own question box (#cfDlg): wait for it, note it, and tap the button named */
@@ -412,7 +412,8 @@ async function caseText(){const ids=await shell(()=>[...new Set(Object.keys(stat
   for(const id of ids){const g=await shell(id=>state.pending[id]?{snap:state.pending[id].snap}:grab(id,'snapshot',null,15000),id);t+='\n'+id+': '+JSON.stringify(g&&g.snap||{});}return {ids,t};}
 async function todayText(){await tapShell('#todayBtn');await page.waitForFunction(()=>document.getElementById('dlg').open&&/Today/.test((document.getElementById('dlgTitle')||{}).textContent||''),null,{timeout:15000});await sleep(600);
   const t=await shell(()=>document.getElementById('dlgBody').innerText);return t;}
-async function savePacketFile(tag){const dl=page.waitForEvent('download',{timeout:20000}).catch(()=>null);await tapShell('#savePacket');const d=await dl;if(!d)return null;
+async function savePacketFile(tag){await shell(()=>{if(!window.__spkOn){window.__spkOn=1;window.__spk=0;document.getElementById('savePacket').addEventListener('click',()=>window.__spk++);}}).catch(()=>{});const dl=page.waitForEvent('download',{timeout:20000}).catch(()=>null);await tapShell('#savePacket');const d=await dl;
+  if(!d){note('Save packet ('+tag+') gave no file: '+JSON.stringify(await shell(()=>({dlg:[...document.querySelectorAll('dialog[open]')].map(x=>x.id+':'+((x.querySelector('h2,#cfTitle,#dlgTitle')||{}).textContent||'')),menu:!document.getElementById('wsNavMenu').hidden,cls:document.body.className,clicks:window.__spk,client:packet().client})).catch(e=>String(e))));return null;}
   const f=OUT+'dl/'+pad(DLS.length)+'-'+tag+'-'+d.suggestedFilename();await d.saveAs(f);DLS.push(f);await answer(/./,/^OK$|It is in Files/,1500).catch(()=>{});return f;}
 const closeDlg=()=>shell(()=>{const d=document.getElementById('dlg');if(d&&d.open)d.close();});
 PH.E=async()=>{
