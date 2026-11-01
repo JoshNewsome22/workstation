@@ -9905,6 +9905,47 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.57: Journal of Applied Behavior Analysis volume 51 (2018) in the banks
+(the BCBA, 11/1; issues 1 to 4; the volume that was missing; every volume from 1968 to 2022 is now in the banks)
+
+- **TD-1, 43 cards**, among them:
+  - Function-based treatment: the interview-informed analysis and skill-based treatment carried to socially
+    significant reductions (Jessel et al., 2018; two cards), shaping a complex request (Ghaemmaghami et al., 2018),
+    several request forms with a delay (Muething et al., 2018), "Move ___, please" for rearranging things (Torres-Viso
+    et al., 2018), FCT on a lean schedule against resurgence (Fisher et al., 2018), adult play during waits (Fuhrman
+    et al., 2018), renewal when parents ran FCT at home (Saini et al., 2018; a caution card), precursor-informed FCT
+    and DNRA (Hoffmann et al., 2018), quality of reinforcement without extinction (Kunnavatana et al., 2018), signaled
+    NCR thinning (Slocum et al., 2018), a snack for each nail cut (Dowdy et al., 2018), headphones with music for
+    noisy activities and for vocal stereotypy (Kettering et al., 2018; Gibbs et al., 2018), and one question instead
+    of three in RIRD (Toper-Korkmaz et al., 2018; toy removal a marked punishment step).
+  - Classroom: student-led and team Good Behavior Games (Donaldson et al., 2018; Rubow et al., 2018; penalty tallies
+    and demerits marked punishment steps), signaled DRL for hand-raising (Becraft et al., 2018), easy requests that
+    earn a treat (Lipschultz et al., 2018), delay fading with a timer (Vessells et al., 2018), and lively praise
+    (Weyman & Sy, 2018).
+  - Teaching: class inclusion with nested boxes (Ming et al., 2018), equivalence lessons for academic facts (Stanley
+    et al., 2018), explaining how by ordering step pictures (Frampton & Shillingsburg, 2018), naming smells (Dass et
+    al., 2018), following another person's gaze (Gunby et al., 2018; eye contact never required), a partner's
+    preferences in play (Najdowski et al., 2018), joining a conversation (Stauch et al., 2018), learning by watching a
+    model (DeQuinzio et al., 2018), tacts taught serially or with extra pictures (Schnell et al., 2018), a brief test
+    to choose the error correction (Carroll et al., 2018), a tablet activity schedule (Brodhead et al., 2018), a group
+    schedule for hide-and-seek (Akers et al., 2018b), help-seeking when lost (Carlile et al., 2018), reporting a
+    suspicious package (May et al., 2018), and a pager cue for the pace of eating (Valentino et al., 2018).
+  - For home teams (the BCBA, 11/1): a reclined seat and reinforcement for liquid expulsion (Shalev et al., 2018;
+    holding the cup at the lips, putting liquid back in and the chin prompt left out; school staff never make a
+    student eat or drink), a set sleep routine with remote coaching (Lichtblau et al., 2018; melatonin is the family's
+    and the doctor's decision), and three laboratory models as caution cards: prevention by DRA or NCR (Fahmie et al.,
+    2018), resurgence when an alternative stops paying off (Kimball et al., 2018), and renewal when the setting
+    changes (Liddon et al., 2018).
+- **Not banked:** reviews and commentaries, functional-analysis, preference, measurement and visual-inspection papers,
+  staff training, a token progressive-ratio assessment, PEAK evaluations, a university piano course, handwashing at a
+  university and car-seat training for caregivers.
+- **Conditions stay searchable** (the BCBA, 11/1): a card keeps the diagnoses of the people studied, never their names,
+  so the bank's search finds a condition: Smith-Magenis syndrome (Torres-Viso et al., 2018) and Moebius syndrome with
+  Pierre Robin sequence (Falligant et al., 2021) are back on their cards.
+- **GB-1:** 5 objectives (naming smells, a suspicious package left alone and reported, joining a conversation, nail
+  cutting tolerated, a partner's preferences in play) and new source lines.
+
+
 ### v25.56: TD-1 compares two interventions and checks how the parts of the plan fit
 (the BCBA approved the review page's pairs and rules, 11/1)
 

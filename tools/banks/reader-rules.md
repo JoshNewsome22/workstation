@@ -9,7 +9,7 @@ Banks in order of reading: Behavior Analysis in Practice and Behavioral Interven
 pmc), then JABA 1968 to 1991 (v25.20 and before), then JABA 1992 on: 1992 v25.22, 1993 v25.23, 1994 v25.24,
 1995 v25.25, 1996 v25.26, 1997 v25.27, 1998 v25.28, 1999 v25.29, 2000 v25.32, 2001 v25.33, 2002 v25.34,
 2003 and 2004 v25.35, 2005 v25.36, 2006 v25.37, 2007 v25.39, 2008 v25.40, 2009 v25.41, 2010 v25.42; the final
-pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 v25.47, 2015 v25.48, 2016 v25.49, 2017 v25.50, 2019 v25.51, 2020 v25.52, 2021 v25.53, 2022 v25.54 (2018 not yet received).
+pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 v25.47, 2015 v25.48, 2016 v25.49, 2017 v25.50, 2019 v25.51, 2020 v25.52, 2021 v25.53, 2022 v25.54, 2018 v25.57 (every volume from 1968 to 2022).
 
 ## The rules now
 
@@ -52,6 +52,8 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
 12. **Words:** "the student" (not child, subject, client, patient or resident); present-day terms (intellectual
     disability) outside reference titles; never "slap", "shock" or "aversive" in a step or a card's name.
 13. **No participant names**, real or pseudonym, anywhere on a card or objective.
+    The study's diagnoses and conditions stay on the card (for example Smith-Magenis syndrome, Moebius syndrome),
+    in the description of who was studied, so the BCBA can search the bank by condition (the BCBA, 11/1, v25.57).
 14. **Which articles are read** (from v25.39, JABA 2007, in line with the inclusion rule of 10/28): every study
     with a procedure a school team could run or adapt, whatever the population, college and sport studies included.
     Not read: reviews, comments, errata and series introductions; measurement and functional-analysis method papers;
