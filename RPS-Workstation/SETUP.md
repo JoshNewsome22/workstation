@@ -9905,6 +9905,40 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.54: Journal of Applied Behavior Analysis volume 55 (2022) in the banks
+(the BCBA, 11/1; issues 1 to 4, issue 2 with 3 articles in the set; volume 51 (2018) has not been received yet)
+
+- **TD-1, 27 cards**, among them:
+  - Combinations and comparisons for the compare work: alternatives offered during a wait (another toy, attention or
+    easy work) as the only route to a long wait (Simmons et al., 2022), a competing activity while a multiple schedule
+    is started and then faded (Miller et al., 2022), response interruption inside a chained against a multiple
+    schedule (Sloman et al., 2022; token loss a marked punishment step), a richer reinforcer for the replacement so
+    the plan holds when staff miss steps (Weinsztok & DeLeon, 2022), 80% integrity holding only for DRA on every
+    response (Jones & St. Peter, 2022), timed breaks as the schedule teachers keep best in a busy room (Berdeaux et
+    al., 2022), mastery set per target with a check that the word is not picked for other words (Cordeiro et al.,
+    2022), and prompting right after problem behavior as a caution (Landa et al., 2022; the wait before prompting a
+    marked punishment step).
+  - Function-based treatment: FCT in two languages with a repair in the other language (Banerjee et al., 2022; a
+    time-out a marked punishment step), the enhanced-choice skill-based treatment in a school (Staubitz et al., 2022;
+    three cards for its parts), food earned by a simple task as a short competing activity for automatic self-injury
+    (Rooker et al., 2022; exploratory, arm splints and blocking marked restrictive), and video that plays while a mask
+    is worn (McHugh et al., 2022; the pause a marked removal step, no physical prompting).
+  - Teaching: new-language vocabulary by naming rather than pointing (Cortez et al., 2022), intraverbal tacts from
+    their component skills (Rodriguez et al., 2022), learning a third name by exclusion (Mandel et al., 2022), play
+    targets at the developmental rather than the age level (Pane et al., 2022), favorite interactions to build time
+    with an adult (Morris & Vollmer, 2022), social referencing before touching new items (Sivaraman et al., 2022;
+    blocking and hands-on stop marked restrictive), shared interests and a polite end to a conversation (Hood et al.,
+    2022), peer tutoring for fractions (Verdun et al., 2022), tokens for active play (Goldman & DeLeon, 2022),
+    corrective feedback after practice runs (Simonian & Brand, 2022), and nervous habits and public speaking for older
+    students (Ortiz et al., 2022; Laske & DiGennaro Reed, 2022).
+- **Not banked:** supervisor feedback training with no student procedure (Carroll et al.). Not read: reviews and
+  commentaries, cultural-responsiveness and ethics papers, functional-analysis, preference, relapse and measurement
+  papers, the feeding studies, staff and university training, sports coaching, cats, a sexual-partner assessment, and
+  one copy of an article in the set twice.
+- **GB-1:** 4 objectives (a request repaired in the other language, fractions and percentages matched, shared
+  interests found and a conversation ended politely) and new source lines.
+
+
 ### v25.53: Journal of Applied Behavior Analysis volume 54 (2021) in the banks
 (the BCBA, 11/1; issues 1 to 4; volume 51 (2018) has not been received yet)
 
