@@ -9905,6 +9905,47 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.53: Journal of Applied Behavior Analysis volume 54 (2021) in the banks
+(the BCBA, 11/1; issues 1 to 4; volume 51 (2018) has not been received yet)
+
+- **TD-1, 44 cards**, among them:
+  - Combinations and comparisons for the compare work: a break given on a fixed-time schedule against a snack during
+    work, both without extinction (Newman et al., 2021), function-based against nonfunction-based extinction at meals
+    (Kirkwood et al., 2021; keeping the spoon at the lips a marked restrictive step, guided feeding steps left out),
+    raising the work requirement across sessions rather than within one (Leon et al., 2021), accumulated against
+    distributed breaks and tokens (Frank-Crawford et al., 2021b), work during a delay against a plain wait (Iannaccone
+    & Jessel, 2021), and redirection only where stereotypy interferes (Steinhauser et al., 2021; guided practice a
+    marked punishment step).
+  - Function-based treatment and health: picture-exchange requests coached by video call and a chew tube for
+    self-injury (Gerow et al., 2021a), "my way" and specific requests (Ward et al., 2021), moving a request from a
+    card to speech (Randall et al., 2021), colored schedule signals that work only once the colors are known (Pizarro
+    et al., 2021), easy instructions before hard ones (Rosales et al., 2021) and preferred time before a hard
+    instruction (Hodges et al., 2021), face-mask wearing by shaping, graduated exposure and DRO (Sivaraman et al.,
+    2021; Halbur et al., 2021b; Lillie et al., 2021; no physical prompting to keep a mask on), a tracheostomy tube
+    left alone with competing toys (Falligant et al., 2021; the tube cover a marked restrictive step), a spoken cue
+    for tooth grinding (Ellement et al., 2021; the chin touch a marked restrictive step), and scheduled toilet sits
+    (Perez et al., 2021).
+  - Teaching: body-sensation words (Rajagopal et al., 2021), answering the question asked about a picture
+    (Meleshkevich et al., 2021; degli Espinosa et al., 2021), receptive picture order (Bergmann et al., 2021), sounds
+    matched to pictures (Halbur et al., 2021c), double-meaning jokes (M. L. Jackson et al., 2021), numerals by chain
+    prompts (Clements et al., 2021), tacts on speech devices by matrix training (Marya et al., 2021), learning by
+    watching (Blowers et al., 2021), pretend play from real objects (Lee et al., 2021), friendship skills (McKeown et
+    al., 2021), conversation turns for young adults (Custer et al., 2021), filler words cut by video review and a
+    group contingency (Montes et al., 2021; Perrin et al., 2021), topic talk with an interested listener (Stocco et
+    al., 2021), and for transition students a wearable schedule (Jimenez-Gomez et al., 2021), a photo schedule for
+    active play (Becerra et al., 2021), daily-living chains by video coaching (Craig et al., 2021; Gerow et al.,
+    2021b), work-problem flowcharts (Villante et al., 2021), running teaching trials as a job (Hillman et al., 2021),
+    and medicine and lure safety (Petit-Frere & Miltenberger, 2021; Abadir et al., 2021).
+- **Not banked:** an FCT literature review (Ghaemmaghami et al.), observer and staff training with no student
+  procedure (Machado et al.; Zhu et al.; Erath et al.; Whelan et al.; Romer et al. is a source line only). Not read:
+  reviews and commentaries, ethics papers, functional-analysis, preference and measurement papers, the feeding studies
+  that open the mouth or make a student eat, telehealth service and pandemic papers, smoking, sports analysis, a
+  university course, the tributes, and two copies of articles in the set twice.
+- **GB-1:** 9 objectives (among them a face mask put on and taken off, a face covering worn calmly, dressing,
+  sound-picture matching, body-sensation words, pretend-play properties, a work-problem flowchart and short
+  conversation turns) and new source lines.
+
+
 ### v25.52: Journal of Applied Behavior Analysis volume 53 (2020) in the banks
 (the BCBA, 11/1; issues 1 to 4; volume 51 (2018) has not been received yet)
 
