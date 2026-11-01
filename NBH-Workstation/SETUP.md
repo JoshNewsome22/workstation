@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.52: Journal of Applied Behavior Analysis volume 53 (2020) in the banks
+(the BCBA, 11/1; issues 1 to 4; volume 51 (2018) has not been received yet)
+
+- **TD-1, 82 cards**, among them:
+  - Combinations and comparisons for the compare work: the other functional reinforcer given freely during a
+    10-minute wait (Sumter et al., 2020), a task during waits and delay tolerance by DRA (Drifke et al., 2020),
+    isolated before synthesized contingencies (Holehan et al., 2020) and the transfer from combined to isolated
+    situations (Tsami & Lerman, 2020), DRO's built-in extinction raising other behavior, so pair it with a
+    reinforced alternative (Hangen et al., 2020), thinning from rich to lean reinforcement (Jessel et al., 2020; a
+    downgrade after errors a marked punishment step), a long break for work against a short one for problem behavior
+    (Rogalski et al., 2020), and guided compliance with a reinforcer (Wilder et al., 2020b).
+  - Function-based treatment and health: FCT for elopement at the door without extinction (Boyle et al., 2020), a
+    pool exit without extinction (Dowdy & Tincani, 2020), a "my way" request with schedule thinning (Owen et al.,
+    2020; chair time-out a marked punishment step, seclusion left out), augmented competing stimuli with blocking
+    and protective equipment (Hagopian et al., 2020), heel squeakers for toe walking (Wilder et al., 2020a), DRO and
+    DNRO for a medical device and a protective garment (Dufour & Lanovaz, 2020; Wheatley et al., 2020), toilet
+    training with underwear and a sit schedule (Perez et al., 2020), practice blood draws, haircuts and dental steps
+    (Stuesser & Roscoe, 2020; Buckley et al., 2020; McConnell et al., 2020), new foods offered beside favorites
+    (Crowley et al., 2020; guided feeding steps left out), and response to name (Conine et al., 2020a; Conine et
+    al., 2020b).
+  - Classroom and PE: teacher-run and team forms of the Good Behavior Game (Joslyn & Vollmer, 2020; Silva & Wiskow,
+    2020; penalty marks and token removal are marked punishment steps), a tiered life-skills program (Robison et
+    al., 2020), Step It UP team step games (Normand & Burji, 2020; Nieto & Wiskow, 2020), and safe soccer heading,
+    handstands, climbing and yoga for PE (Quintero et al., 2020; Vorbeck & Bördlein, 2020; Walker et al., 2020;
+    Ennett et al., 2020).
+  - Teaching: prompt-type and error-correction comparisons (Schnell et al., 2020; Cihon et al., 2020; Kay et al.,
+    2020), larger tact sets and differential reinforcement from the start (Kodak et al., 2020; Campanaro et al.,
+    2020), new-language naming (Cortez et al., 2020; Matter et al., 2020), compliments, conversation and workplace
+    phrases (Hood et al., 2020; Mann & Karsten, 2020; Yamamoto & Isawa, 2020), interview questions and professional
+    email for transition students (Edgemon et al., 2020; Pellegrino & DiGennaro Reed, 2020), a problem-solving
+    binder (Lora et al., 2020), two-step directions (Vosters & Luczynski, 2020), remembering planned tasks (Peisley
+    et al., 2020), piano notes and rhythms (Hill et al., 2020; Langton et al., 2020), and quiet play before teaching
+    rather than rich attention (Cengher & Fienup, 2020).
+- **Not banked:** a finger prompt that opens the mouth during feeding (Rubio et al.: staff never make a student eat),
+  a narrative summary of telehealth studies (Schieltz et al.), a praise-language preference assessment (Clay et al.),
+  a preference assessment (Carter et al.), a laboratory video-game study (Schenk et al.), caregiver training of
+  infants' babbling (Shea et al.) and a conceptual review (LaFrance et al.). Not read: reviews and commentaries,
+  functional-analysis, preference and measurement papers, parent, caregiver and staff training, smoking and
+  e-cigarettes, public-health and infant-sleep papers, chess and martial arts, the animal studies, a 2012 article
+  already banked, and a 1974 sex-role "treatment" paper that is never banked.
+- **GB-1:** 14 objectives and new source lines.
+
+
 ### v25.51: Journal of Applied Behavior Analysis volume 52 (2019) in the banks
 (the BCBA, 11/1; issues 1 to 4; volume 51 (2018) has not been received yet)
 
