@@ -9905,6 +9905,41 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.51: Journal of Applied Behavior Analysis volume 52 (2019) in the banks
+(the BCBA, 11/1; issues 1 to 4; volume 51 (2018) has not been received yet)
+
+- **TD-1, 52 cards**, among them:
+  - Free delivery and combinations: DRA and NCR compared during feeding (Berth et al., 2019), a longer, enriched
+    break needed for compliance when no extinction is used (Briggs et al., 2019), continuous attention with the
+    smallest reaction to aggression (Hood et al., 2019), blocking compared with redirection for motor stereotypy
+    (DeRosa et al., 2019), and redirection that still worked at 50% integrity (Colón & Ahearn, 2019; removing an
+    item a marked punishment step).
+  - Function-based treatment: requests and tolerance from interview-informed analyses (Rose & Beaulieu, 2019),
+    choosing the new item when routines change (Fisher et al., 2019c), a punisher assessment for automatic behavior
+    (Verriden & Roscoe, 2019; each punishment a marked step, hands-down holding left out), delayed time-out (Slocum
+    et al., 2019; a marked punishment step, never locked or held), and accumulated play time (Robinson & St. Peter,
+    2019).
+  - Feeding and health: a feeding package for new foods from a randomized trial (Peterson et al., 2019b), Nuk bite
+    placement for packing (Milnes et al., 2019), and practice dental exams several times a week (Szalwinski et al.,
+    2019).
+  - Classroom and safety: the Good Behavior Game in several forms (Foley et al., 2019; Groves & Austin, 2019; Wiskow
+    et al., 2019; penalty marks are marked punishment steps), group contingencies for worksheets and phone-free time
+    (Deshais et al., 2019; Jones et al., 2019), and responding to bullying (Stannis et al., 2019; in-situ checks
+    only with family consent and district approval).
+  - Teaching: peer play built on special interests (Watkins et al., 2019), script fading for peer talk
+    (Wichnick-Gillis et al., 2019), perspective taking (Welsh et al., 2019), which and who questions on a speech
+    device (Shillingsburg et al., 2019), job social skills for transition students (Grob et al., 2019), tablet
+    skills (Pachis & Zonneveld, 2019), written step lists (Phillips et al., 2019), word parts (Davidson & O'Connor,
+    2019), braille writing (Lillie & Tiger, 2019), 100% mastery criteria (Richling et al., 2019), prompt dependence
+    (Gorgan & Kodak, 2019), and for PE and athletics, forward chaining of lifts and vigorous play.
+- **Not banked:** a money-choice survey of university students (Belisle et al., 2019b) and a single assessment of
+  facilitated communication (Roane et al.). Not read: reviews, functional-analysis and preference-assessment method
+  papers, staff and parent training, measurement, citation and integrity analyses, e-cigarettes, firearm training, and
+  the animal studies.
+- **GB-1:** 8 objectives (braille writing, tablet calls and email, what others sense, word parts, phone away, sound
+  names, asking in a new language, choosing the new item) and new source lines.
+
+
 ### v25.50: Journal of Applied Behavior Analysis volume 50 (2017) in the banks
 (the BCBA, 11/1; issues 1 to 4; JABA now runs from 1968 to 2017)
 
