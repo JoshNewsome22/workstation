@@ -1121,8 +1121,13 @@ input[data-m],textarea[data-m]{font:inherit}
           <th>Prepared</th><td><input data-m="prep" style="width:100%"></td></tr>
       <tr><th>Plan type</th><td><select data-m="ptype" style="width:100%" aria-label="Plan type"><option value=""></option><option>Behavior reduction</option><option>Skill acquisition</option><option>Both (reduces a behavior and teaches a replacement)</option></select></td>
           <th>Program phase</th><td><select data-m="phase" style="width:100%" aria-label="Program phase"><option value=""></option><option>Acquisition</option><option>Maintenance</option></select></td></tr>
+      <!-- v25.64 (MEAS H1) the procedure the plan runs, and schedule thinning; (MEAS M3) the start of the plan or step -->
+      <tr><th>Main procedure <span class="ti-req">(required)</span></th><td><select data-m="proc" style="width:100%" aria-label="Main procedure"><option value=""></option><option value="dra-every">DRA, reinforcing every alternative response</option><option value="dra-int">DRA on an intermittent or interval schedule</option><option value="ncr">NCR (noncontingent reinforcement)</option><option value="dro">DRO (reinforcing the absence of the behavior)</option><option value="rc">Response cost (a punishment step: marked, never the default)</option><option value="rird">Response interruption and redirection (RIRD)</option><option value="dtt">Discrete-trial or mand teaching</option><option value="other">Other</option></select></td>
+          <th>Schedule thinning</th><td><label class="ti-inl"><input type="checkbox" id="tiThin" aria-label="Schedule thinning in progress (moving off every-response reinforcement)"> In progress (moving off every-response reinforcement)</label></td></tr>
+      <tr><th>Plan or step started on</th><td><input type="date" data-m="pstart" style="width:100%" aria-label="Plan or step started on"></td>
+          <th>A check at the mastery criterion yet?</th><td><select data-m="mcheck" style="width:100%" aria-label="Has a check at the mastery criterion happened yet?"><option value=""></option><option>Yes</option><option>No</option></select></td></tr>
     </table>
-    <p class="hint" style="margin-top:6px">Plan type sets how the Summary reads the 80&ndash;89% fidelity band; program phase is carried to the retraining list, because consequence errors matter most while a task is first being learned (Burlison et al., 2026).</p>
+    <p class="hint" style="margin-top:6px">Plan type and main procedure set how the Summary reads the 80&ndash;89% fidelity band: 80% kept DRA with every alternative response reinforced working, but not NCR, DRA on an interval schedule or DRO for some people, and not a schedule being thinned (Jones &amp; St. Peter, 2022; Hronek &amp; Kestner, 2025). Program phase is carried to the retraining list, because consequence errors matter most while a task is first being learned (Burlison et al., 2026). The start date marks a new plan or a changed step: until a check reaches the mastery criterion, errors do more harm than later (St. Peter Pipkin et al., 2010).</p>
 
     <h2 class="nbh-band" style="margin-top:18px">How to Score</h2>
     <table class="rt">
@@ -1130,7 +1135,7 @@ input[data-m],textarea[data-m]{font:inherit}
       <tr><th>Commission</th><td>Error of commission. On a <b>consequence</b> step: a consequence the plan withholds was delivered (the reinforcer after the target behavior, the demand or the delay ended early on protest, the wrong consequence). On any other step: the step was done incorrectly, or something the plan does not call for was added.</td></tr>
       <tr><th>Omission</th><td>Error of omission. On a <b>consequence</b> step: an earned consequence was not delivered. On any other step: the step was not done when it came due.</td></tr>
       <tr><th>N/A</th><td>The step did not apply during this observation, because the condition that calls for it never arose. N/A is excluded from every integrity denominator; the agreement check (IOA) compares N/A codes like any other code.</td></tr>
-      <tr><th>Component</th><td>On the Protocol Steps table, tag each step <b>Antecedent</b> (what is arranged, presented or prompted before the behavior) or <b>Consequence</b> (what follows the target behavior, the alternative behavior or a correct response, including withholding a consequence). Tagging a step Consequence marks it critical by default; untick the mark if the plan says otherwise. Consequence steps get their own figures on the Summary: delivering a reinforcer after the behavior that should be on extinction, or after a wrong response, has been linked to loss of treatment effect in several DRA, DRO and discrimination-training studies, though not in all (St. Peter Pipkin et al., 2010; Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026; Burlison et al., 2026). Antecedent errors were not tested in those studies, so the tag says where an error sits, not that it matters less.</td></tr>
+      <tr><th>Component</th><td>On the Protocol Steps table, tag each step <b>Antecedent</b> (what is arranged, presented or prompted before the behavior) or <b>Consequence</b> (what follows the target behavior, the alternative behavior or a correct response, including withholding a consequence). Tagging a step Consequence marks it critical by default; untick the mark if the plan says otherwise. Consequence steps get their own figures on the Summary: delivering a reinforcer after the behavior that should be on extinction, or after a wrong response, has been linked to loss of treatment effect in several DRA, DRO and discrimination-training studies, though not in all (St. Peter Pipkin et al., 2010; Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026; Burlison et al., 2026). Antecedent and prompting errors have been tested too: in discrete-trial teaching, repeated instructions, a missing controlling prompt, and missing reinforcement each slowed or prevented learning (Carroll et al., 2013). So the tag says where an error sits, not that it matters less. <!-- v25.64 (MEAS M5) -->For a skill-acquisition plan, or one that does both, a step tagged Antecedent whose words name a prompt or an instruction is marked critical as it is tagged; untick the mark if the plan says otherwise.</td></tr>
       <tr><th>Opportunities</th><td>A step can come due more than once in an observation. The sheet holds one code per step per observation (Commission if any time was a commission error, otherwise Omission, otherwise Correct). For consequence steps the Scoring sheet also takes the counts &mdash; correct, commission, omission &mdash; for every time the step came due, so that fidelity can be stated per opportunity and N/A when there was none, as O&rsquo;Neill et al. (2026) report it. The live runner writes the counts; by hand, count them from the session.</td></tr>
     </table>
     <p class="ti-tree" style="margin-top:8px"><b>Which code?</b> Did the step come due? No: <b>N/A</b>. Yes: was it done as written? Yes: <b>Correct</b>. No, on a consequence step: was something the plan withholds given (a reinforcer, an end to the demand or the delay)? <b>Commission</b>. Was something earned held back? <b>Omission</b>. No, on any other step: not done, <b>Omission</b>; done wrongly, or something added, <b>Commission</b>.</p>
@@ -1177,6 +1182,7 @@ input[data-m],textarea[data-m]{font:inherit}
     <h2 class="nbh-band">Integrity Summary</h2>
     <div id="verdictBox"></div>
     <div id="bandBox"></div>
+    <div id="tiPlanBox"></div><!-- v25.64 (MEAS M3) a new plan or step, and an abrupt drop between checks -->
     <div class="metrics" id="metricWrap"></div>
     <h3 style="margin-top:14px">Where the Errors Were</h3>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Where the errors were"><table class="rt" id="errTbl"></table></div>
@@ -1186,10 +1192,15 @@ input[data-m],textarea[data-m]{font:inherit}
     <h3 style="margin-top:14px">Announced Against Unannounced</h3>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Announced against unannounced"><table class="rt" id="reactTbl"></table></div>
     <p class="hint">A large drop from announced to unannounced may mean the score reflects the observer&rsquo;s presence rather than the interventionist&rsquo;s usual practice, but only when the two kinds of check were mixed across the same weeks and activities; otherwise it may be a change over time. Treat the unannounced figure as the estimate of what the student actually receives: an observer who arrives unannounced is still in the room, so it reduces reactivity rather than removing it.</p>
+    <!-- v25.64 (MEAS L2) integrity with and without distractions and competing demands -->
+    <h3 style="margin-top:14px">With and Without Distractions</h3>
+    <div class="grid-wrap" tabindex="0" role="region" aria-label="Integrity with and without distractions"><table class="rt" id="tiDisTbl"></table></div>
+    <p class="hint">Tick the conditions under each observation on the Scoring sheet: other students needing help, whole-group instruction, staff short, interruptions. In a classroom analog, integrity fell for all 5 teachers when students created distractions, most of all for delivering the reinforcer in DNRA, differential negative reinforcement of an alternative behavior (Berdeaux et al., 2022). A lower figure with distractions points to the conditions in the room (Form PD-1), not only to a skill.</p>
     <h3 style="margin-top:14px">Agreement on the Integrity Scoring Itself</h3>
     <p class="hint">Tick <b>IOA</b> on an observation column in the scoring sheet, then enter the second observer's codes below. Integrity data need their own reliability check before they are used to judge a plan.</p>
     <div class="grid-wrap"><table class="pi" id="ioaTbl"></table></div>
     <div id="ioaOut" class="metrics"></div>
+    <div id="tiIoaCov"></div><!-- v25.64 (MEAS H7) IOA coverage by observation type, by observer pairing, and observer drift -->
   </section>
 
   <!-- ============================ RETRAINING ============================ -->
@@ -1197,6 +1208,7 @@ input[data-m],textarea[data-m]{font:inherit}
     <h2 class="nbh-band">Retraining List</h2>
     <p class="hint">Generated from the scoring sheet, in priority order: first any consequence step with a commission error, then any critical step below the criterion, then any consequence step with an omission, then every other step below the criterion or with a commission error. The order follows the direction of the evidence (commission on consequence steps was the more damaging class in Burlison et al., 2026, and in the DRO and DRA work they and O&rsquo;Neill et al., 2026, review); no study tested a retraining order. Carry these step numbers into Form ST-1 as the training targets.</p>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Retraining list"><table class="rt" id="rtTbl"></table></div>
+    <div id="tiRtMore"></div><!-- v25.64 (MEAS L3, L4) a stronger reinforcer for the alternative; video self-monitoring -->
     <!-- v21.22: the retraining list as a file for Form ST-1 (screen only) -->
     <div class="ti-handoff noprint" id="tiHandoff">
       <button type="button" class="tool" id="tiRetrainBtn">Save retraining list for ST-1</button>
@@ -1212,6 +1224,14 @@ input[data-m],textarea[data-m]{font:inherit}
       <tr><th>Re-check due</th><td><input data-m="recheck" style="width:100%"></td></tr>
       <tr><th>Effect on the behavior data</th><td><textarea data-m="effect" rows="2" style="width:100%" placeholder="Whether the student's data over this period can be interpreted given the integrity obtained"></textarea></td></tr>
     </table>
+    <!-- v25.64 (MEAS H2) what feedback was given after each check, when and how, and the rule that sets the next check -->
+    <h3 style="margin-top:14px">Feedback Given After Each Check</h3>
+    <p class="hint">For each scored observation: when the feedback was given, how, and what it held. Feedback works best given within a school day, on the interventionist&rsquo;s own integrity graphed across checks, with the missed steps named and rehearsed. After consultation alone, teachers ran a plan on 50% of days; with performance feedback on their own integrity, on 93% of days (Noell et al., 2000). Written feedback on the student&rsquo;s progress alone did not keep integrity up; daily feedback on the teacher&rsquo;s own integrity, with directed rehearsal of missed steps, raised it the most (DiGennaro et al., 2007). Feedback by email with a graph worked, and by video call reached mastery faster and held better (Zhu et al., 2021).</p>
+    <div class="grid-wrap" tabindex="0" role="region" aria-label="Feedback given after each check"><table class="rt ti-fb" id="tiFbTbl"></table></div>
+    <div class="ti-fbrule" id="tiFbRule"><p><b>The fading rule (a default; the BCBA may set another).</b> Check and give feedback at least weekly until the mastery criterion is met. Then check every 2 weeks. Return to weekly after any check below the criterion, or after any commission error on a critical step. Feedback every other week kept integrity up once it was high (Codding et al., 2005; Codding et al., 2008).</p>
+      <p><label class="ti-inl"><input type="checkbox" id="tiFbCancel" aria-label="Use the meeting-cancellation option"> Use the meeting-cancellation option: a check at 100% cancels the next rehearsal meeting (DiGennaro et al., 2007).</label></p></div>
+    <h3 style="margin-top:14px">Integrity Beside the Student&rsquo;s Data</h3>
+    <div id="tiFbGraph"></div>
   </section>
 
   <!-- ============================ GUIDE ============================ -->
@@ -1227,11 +1247,17 @@ input[data-m],textarea[data-m]{font:inherit}
       <tr><th>Reactivity</th><td>Integrity pooled across the announced observations (their correct steps &divide; their scored steps) minus the same figure for the unannounced observations, in percentage points. Shown only when at least one announced check falls after an unannounced one; otherwise the difference is confounded with time.</td></tr>
       <tr><th>Trend</th><td>Least-squares slope of individual trial integrity across the scored observations, taken in date order (an observation with no scored step is skipped), in percentage points per observation.</td></tr>
       <tr><th>IOA</th><td>Point-by-point agreement on the integrity codes themselves: steps coded identically by both observers &divide; steps coded by both, &times; 100, with N/A counted as a code. Shown for each IOA observation and pooled across them.</td></tr>
+      <!-- v25.64 (MEAS M1, H7, L2, M3, H2) -->
+      <tr><th>Kappa</th><td>Cohen&rsquo;s kappa on the same pairs of codes: (observed agreement &minus; chance agreement) &divide; (1 &minus; chance agreement). Chance agreement is the sum, over the four codes (Correct, Commission, Omission, N/A), of the share of steps each observer gave that code, multiplied together. Because most steps are coded Correct, two observers agree often by chance alone, so kappa is the fairer figure. Below .60 is flagged; .60 is Hartmann&rsquo;s (1977) suggestion, not a validated cut-off. Not calculable when both observers gave every step the same one code.</td></tr>
+      <tr><th>IOA coverage and drift</th><td>For each observation type (announced, unannounced): the observations with scored steps that have IOA, out of all of them. A type below 20%, or with none, is flagged. Agreement is shown for each second observer (the observer named on the Summary&rsquo;s IOA table). <b>Possible drift</b> is flagged when the latest IOA check is 10 or more points below the first, when a later type&rsquo;s mean IOA is 10 or more points below the first type&rsquo;s, or when one second observer&rsquo;s mean is 10 or more points above the others&rsquo;. The 20% and 10-point marks are this form&rsquo;s conventions.</td></tr>
+      <tr><th>With and without distractions</th><td>Integrity pooled across the observations with any distraction ticked (correct steps &divide; scored steps), beside the same figure for the observations with none ticked.</td></tr>
+      <tr><th>Abrupt drop</th><td>Individual trial integrity on consecutive scored observations, in date order: a fall of 20 points or more from one to the next is flagged. The 20 points are this form&rsquo;s convention.</td></tr>
+      <tr><th>Feedback delay</th><td>School days (Monday to Friday) from the observation&rsquo;s date to the date the feedback was given; over 1 school day is flagged. Holidays are not known to the form, so count them out by eye.</td></tr>
       <tr><th>Opportunity fidelity (consequence steps)</th><td>For a step tagged Consequence: correct opportunities &divide; (correct + commission + omission) across the observations, from the counts on the Scoring sheet; a scored code with no counts is one opportunity; N/A when the step never came due. Flagged when fewer than 5 opportunities stand behind it (a form convention).</td></tr>
       <tr><th>Commission rate, omission rate</th><td>On consequence steps: commission opportunities &divide; all opportunities, and omission opportunities &divide; all opportunities. These are reported beside the overall figure, never in place of it.</td></tr>
       <tr><th>Weighted integrity</th><td>Correct &divide; (correct + omission + commission + commission on consequence steps), over every step&rsquo;s opportunities: a commission error on a consequence step counts twice. This is this form&rsquo;s convention; the studies tested consequence errors only, and none quantifies the weight.</td></tr>
       <tr><th>Lowest step, range</th><td>The lowest per-step percentage among scored steps, and the lowest and highest individual trial integrity across the scored observations. Fidelity varies between observations and implementers, and performance after a drop in fidelity depended on the preceding level in Burlison et al. (2026), so the spread is recorded, not only the mean.</td></tr>
-      <tr><th>Fidelity band</th><td>Pooled integrity on the observations the verdict is judged on (all scored observations when no unannounced one is scored), placed in one of four bands: 90% and above; 80&ndash;89%; 60&ndash;79%; below 60%. The bands are this form&rsquo;s working convention, informed by the parametric studies but not set by them.</td></tr>
+      <tr><th>Fidelity band</th><td>Pooled integrity on the observations the verdict is judged on (all scored observations when no unannounced one is scored), placed in one of four bands: 90% and above; 80&ndash;89%; 60&ndash;79%; below 60%. The 80&ndash;89% band is read from the main procedure, the schedule-thinning tick and the plan type (see below). The bands are this form&rsquo;s working convention, informed by the parametric studies but not set by them.</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:18px">The Live Observation Runner</h2>
     <p>On the Scoring sheet, <b>Set up an observation</b> offers the next empty column and fills in the date and start time from this device&rsquo;s calendar and clock; choose announced or unannounced. The form has no time field, so the start time and the minutes observed are written after the activity in the column&rsquo;s context. Code each step as it comes due with <b>Correct</b>, <b>Commission</b>, <b>Omission</b> or <b>N/A</b>, one step at a time or with all steps listed (keys C, M, O and N; the arrow keys move between steps, Z undoes the last code, and Space or P pauses), with this observation&rsquo;s integrity and critical-step integrity shown against the toolbar&rsquo;s percentage.</p>
@@ -1243,23 +1269,42 @@ input[data-m],textarea[data-m]{font:inherit}
     <p>A single aggregate figure also hides where the failure sits. Ninety-three percent integrity on a fourteen-step protocol is a different clinical situation depending on whether the missed step was a greeting or the reinforcement contingency, which is why critical steps are scored on their own.</p>
     <h2 class="nbh-band" style="margin-top:18px">Error Classes, Opportunities and Fidelity Bands</h2>
     <p>Score every protocol step on each opportunity. Record whether an error was an omission (a prescribed step not done) or a commission (on a consequence step, a consequence the plan withholds delivered, e.g., the reinforcer after the target behavior; on another step, the step done wrongly or something added). Mark consequence-delivery steps as critical by default. Parametric studies of DRO and of discrimination training show that reinforcing the behavior that should be on extinction has been linked to loss of treatment effect, though not in every study, that effects of combined consequence errors were comparable to full fidelity at 80% and for most participants at 60%, were degraded at 40%, and were absent at 20% (O&rsquo;Neill et al., 2026), and that acquisition of a new discrimination was blocked for 5 of 6 learners when consequences averaged about 67% fidelity (Burlison et al., 2026). These were analog studies with adult volunteers; treat the bands on this form as clinical conventions, not validated cut-offs.</p>
-    <p>The bands the Summary applies: <b>90% and above</b>, acceptable, routine monitoring. <b>80&ndash;89%</b>, acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, a caution. <b>60&ndash;79%</b>, caution: effects were degraded for some learners at these levels, so any consequence step in error is retrained. <b>Below 60%</b>, not acceptable: the student&rsquo;s data are not read as a test of the plan, and retraining comes before the plan continues. No band is an empirically validated safe threshold, and 80% is not a standard the research sets: in earlier DRO work commission errors were harmful for some participants even at 80% fidelity (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026), and at 60% three of eleven participants in O&rsquo;Neill et al. (2026) lost the treatment effect, which is why those authors call their findings tentative.</p>
+    <p>The bands the Summary applies: <b>90% and above</b>, acceptable, routine monitoring. <b>80&ndash;89%</b> depends on the procedure. With <b>schedule thinning</b> ticked, whatever the procedure: a caution, aim for near-perfect integrity until the new schedule is stable, as Jones and St. Peter (2022) recommend when moving from every-response reinforcement to an intermittent schedule. For <b>NCR, DRA on an intermittent or interval schedule, or DRO</b>: a caution, because 80% integrity did not keep NCR or interval DRA consistently effective in Jones and St. Peter (2022), who conclude that 80% &ldquo;is not a uniformly acceptable minimal level&rdquo;, and in DRO commission errors weakened the effect for 4 of 6 people (Hronek &amp; Kestner, 2025). For <b>discrete-trial or mand teaching</b>: a caution, as for any skill-acquisition program (in mand training, 70% integrity slowed acquisition and no one acquired the mand at 40%: Pence &amp; St. Peter, 2015; in discrete-trial training, 50% commission errors harmed learning as much as 100% for 2 of 3 learners: DiGennaro Reed et al., 2011). For <b>DRA with every alternative response reinforced</b>, on a behavior-reduction plan: acceptable, with a re-check scheduled, since it stayed effective at 80% (Jones &amp; St. Peter, 2022; St. Peter Pipkin et al., 2010). Otherwise, as before: acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, or one that does both, a caution. (Response cost still suppressed responding at 50% integrity but not at 20%: St. Peter et al., 2016; RIRD worked at 50% implementation or higher: Col&oacute;n &amp; Ahearn, 2019. These are small analog studies, so the form reads their band by the plan type.) <b>60&ndash;79%</b>, caution: effects were degraded for some learners at these levels, so any consequence step in error is retrained. <b>Below 60%</b>, not acceptable: the student&rsquo;s data are not read as a test of the plan, and retraining comes before the plan continues. No band is an empirically validated safe threshold, and 80% is not a standard the research sets: in earlier DRO work commission errors were harmful for some participants even at 80% fidelity (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026), and at 60% three of eleven participants in O&rsquo;Neill et al. (2026) lost the treatment effect, which is why those authors call their findings tentative.</p>
     <p>Why the split by error class: in Burlison et al. (2026) the probability of a correct response on the next trial was 0.29 (in 33% blocks) and 0.24 (in 67% blocks) after a wrong response had been reinforced, against 0.46 and 0.63 after earned reinforcement had been withheld, and the authors conclude that error reinforcement was the more detrimental type of error. Omission errors are the less damaging class, not a harmless one: the condition in which every consequence was wrong blocked learning entirely, and omission-only errors raised responding for some participants in the DRO work summarized by O&rsquo;Neill et al. (2026). The weighted figure counts a commission error twice as a convention of this form; neither study quantifies the weight. Opportunity counts follow O&rsquo;Neill et al. (2026), who report obtained fidelity separately for each error type as correct opportunities over all opportunities, with N/A when a phase offered none, and who note that with a single opportunity one outcome yields 100% or 0% regardless of the implementer&rsquo;s typical behavior.</p>
-    <p>What this form does not claim: that antecedent or prompting errors matter less (neither study tested them); that variable fidelity is worse than steady fidelity at the same mean (not compared); that these results were obtained with staff or parents implementing plans with clients (both studies used computer-delivered errors with adult volunteers, 11 and 6 of them); or that any of its bands, weights or minimum counts were derived from the studies. Once errors are corrected, learners with a history of them can still master the task (all six did in Burlison et al., 2026), so detected low fidelity is a reason to retrain, not to abandon the plan.</p>
+    <p>What this form does not claim: that antecedent or prompting errors matter less (they slowed or prevented learning in discrete-trial teaching: Carroll et al., 2013); that variable fidelity is worse than steady fidelity at the same mean (not compared); that these results were obtained with staff or parents implementing plans with clients (both studies used computer-delivered errors with adult volunteers, 11 and 6 of them); or that any of its bands, weights or minimum counts were derived from the studies. Once errors are corrected, learners with a history of them can still master the task (all six did in Burlison et al., 2026), so detected low fidelity is a reason to retrain, not to abandon the plan.</p>
     <!-- writing help (v21.43) --><p class="hint noprint nbh-wh"><b>Writing help.</b> A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print. The text here is about a staff member: add their name under <b>Also hide</b> before you send (the panel hides the student&rsquo;s name and ID by itself and points out other names it finds).</p><!-- /writing help -->
-    <p class="noprint hint"><b>About the simulation.</b> Load simulation fills every sheet with a simulated integrity check that describes no real interventionist or student: 14 steps tagged by component, 4 observations, 5 critical steps, opportunity counts on the 4 consequence steps, and IOA on two observations. Step through Scoring sheet, Summary, and Retraining. Use Clear all before entering a case.</p>
+    <p class="noprint hint"><b>About the simulation.</b> Load simulation fills every sheet with a simulated integrity check that describes no real interventionist or student: 14 steps tagged by component, 4 observations, 5 critical steps, opportunity counts on the 4 consequence steps, and IOA on two observations, each with its second observer; the plan runs DRA with every break request honored, two observations have distractions ticked, and feedback is recorded after three of them. Step through Scoring sheet, Summary, and Retraining. Use Clear all before entering a case.</p>
     <p class="hint">Sources for the procedure: Gresham (1989) on treatment integrity as a condition for interpreting outcome; Ward-Horner &amp; Sturmey (2010) on component analysis; DiGennaro Reed &amp; Codding (2011) on integrity measurement and its relation to student outcome; Parsons, Rollyson &amp; Reid (2012) on the training that follows from it; Fallon et al. (2015) on performance feedback to raise educators&rsquo; treatment fidelity. These are the sources for the method; the decision rules on this form are a working convention, not a finding.</p>
-    <p class="hint" id="tiRefs"><b>Reference list.</b>
+    <!-- v25.64 (MEAS) the sources for H1, H2, H7, M1, M3, M5, L2, L3 and L4 added --><p class="hint" id="tiRefs"><b>Reference list.</b>
+    Berdeaux, K. L., Lerman, D. C., &amp; Williams, S. D. (2022). Effects of environmental distractions on teachers&rsquo; procedural integrity with three function-based treatments. <em>Journal of Applied Behavior Analysis, 55</em>. https://doi.org/10.1002/jaba.918 &bull;
+    Brackett, L., Reid, D. H., &amp; Green, C. W. (2007). Effects of reactivity to observations on staff performance. <em>Journal of Applied Behavior Analysis, 40</em>. https://doi.org/10.1901/jaba.2007.112-05 &bull;
     Burlison, S., Brand, D., Wittman, M. R., Bensemann, J., McKeown, C. A., Miguel, C. F., &amp; Moo, H. N. (2026). A parametric analysis of varying levels of consequence-based procedural fidelity errors when learning new tasks. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70084. https://doi.org/10.1002/jaba.70084 &bull;
+    Carroll, R. A., Kodak, T., &amp; Fisher, W. W. (2013). An evaluation of programmed treatment-integrity errors during discrete-trial instruction. <em>Journal of Applied Behavior Analysis, 46</em>. https://doi.org/10.1002/jaba.49 &bull;
+    Codding, R. S., Feinberg, A. B., Dunn, E. K., &amp; Pace, G. M. (2005). Effects of immediate performance feedback on implementation of behavior support plans. <em>Journal of Applied Behavior Analysis, 38</em>. https://doi.org/10.1901/jaba.2005.98-04 &bull;
+    Codding, R. S., Livanis, A., Pace, G. M., &amp; Vaca, L. (2008). Using performance feedback to improve treatment integrity of classwide behavior plans: An investigation of observer reactivity. <em>Journal of Applied Behavior Analysis, 41</em>. https://doi.org/10.1901/jaba.2008.41-417 &bull;
+    Col&oacute;n, C. L., &amp; Ahearn, W. H. (2019). An analysis of treatment integrity of response interruption and redirection. <em>Journal of Applied Behavior Analysis, 52</em>. https://doi.org/10.1002/jaba.537 &bull;
     Cook, J. E., Subramaniam, S., Brunson, L. Y., Larson, N. A., Poe, S. G., &amp; St. Peter, C. C. (2015). Global measures of treatment integrity may mask important errors in discrete-trial training. <em>Behavior Analysis in Practice, 8</em>(1), 37&ndash;47. &bull;
+    DiGennaro, F. D., Martens, B. K., &amp; Kleinmann, A. E. (2007). A comparison of performance feedback procedures on teachers&rsquo; treatment implementation integrity and students&rsquo; inappropriate behavior in special education classrooms. <em>Journal of Applied Behavior Analysis, 40</em>. https://doi.org/10.1901/jaba.2007.40-447 &bull;
     DiGennaro Reed, F. D., &amp; Codding, R. S. (2011). Intervention integrity assessment. In J. K. Luiselli (Ed.), <em>Teaching and behavior support for children and adults with autism spectrum disorder: A practitioner&rsquo;s guide</em> (pp. 38&ndash;47). Oxford University Press. &bull;
+    DiGennaro Reed, F. D., Reed, D. D., Baez, C. N., &amp; Maguire, H. (2011). A parametric analysis of errors of commission during discrete-trial training. <em>Journal of Applied Behavior Analysis, 44</em>. https://doi.org/10.1901/jaba.2011.44-611 &bull;
     Fallon, L. M., Collier-Meek, M. A., Maggin, D. M., Sanetti, L. M. H., &amp; Johnson, A. H. (2015). Is performance feedback for educators an evidence-based practice? A systematic review and evaluation based on single-case research. <em>Exceptional Children, 81</em>(2), 227&ndash;246. &bull;
     Gresham, F. M. (1989). Assessment of treatment integrity in school consultation and prereferral intervention. <em>School Psychology Review, 18</em>(1), 37&ndash;50. &bull;
+    Hartmann, D. P. (1977). Considerations in the choice of interobserver reliability estimates. <em>Journal of Applied Behavior Analysis, 10</em>, 103&ndash;116. https://doi.org/10.1901/jaba.1977.10-103 &bull;
+    Hausman, N. L., Javed, N., Bednar, M. K., Guell, M., Schaller, E., Nevill, R. E., &amp; Kahng, S. (2022). Interobserver agreement: A preliminary investigation into how much is enough? <em>Journal of Applied Behavior Analysis, 55</em>. https://doi.org/10.1002/jaba.811 &bull;
     Hronek, L. M., &amp; Kestner, K. M. (2025). A human-operant evaluation of commission and omission errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 58</em>(2), 401&ndash;421. https://doi.org/10.1002/jaba.70003 &bull;
+    Jones, S. H., &amp; St. Peter, C. C. (2022). Nominally acceptable integrity failures negatively affect interventions involving intermittent reinforcement. <em>Journal of Applied Behavior Analysis, 55</em>. https://doi.org/10.1002/jaba.944 &bull;
+    Kazdin, A. E. (1977). Artifact, bias, and complexity of assessment: The ABCs of reliability. <em>Journal of Applied Behavior Analysis, 10</em>. https://doi.org/10.1901/jaba.1977.10-141 &bull;
+    Noell, G. H., Witt, J. C., LaFleur, L. H., Mortenson, B. P., Ranier, D. D., &amp; LeVelle, J. (2000). Increasing intervention implementation in general education following consultation: A comparison of two follow-up strategies. <em>Journal of Applied Behavior Analysis, 33</em>, 271&ndash;284. https://doi.org/10.1901/jaba.2000.33-271 &bull;
     O&rsquo;Neill, P., Rey, C. N., Eilers, T., &amp; Craig, A. R. (2026). Parametric evaluation of procedural fidelity level with combined errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70077. https://doi.org/10.1002/jaba.70077 &bull;
+    Paden, A. R., &amp; Carroll, R. A. (2025). Effectiveness of video self-monitoring for training and maintaining procedural fidelity during covert observations. <em>Journal of Applied Behavior Analysis, 58</em>. https://doi.org/10.1002/jaba.2928 &bull;
     Parsons, M. B., Rollyson, J. H., &amp; Reid, D. H. (2012). Evidence-based staff training: A guide for practitioners. <em>Behavior Analysis in Practice, 5</em>(2), 2&ndash;11. &bull;
+    Pence, S. T., &amp; St. Peter, C. C. (2015). Evaluation of treatment integrity errors on mand acquisition. <em>Journal of Applied Behavior Analysis, 48</em>. https://doi.org/10.1002/jaba.238 &bull;
+    Romanczyk, R. G., Kent, R. N., Diament, C., &amp; O&rsquo;Leary, K. D. (1973). Measuring the reliability of observational data: A reactive process. <em>Journal of Applied Behavior Analysis, 6</em>. https://doi.org/10.1901/jaba.1973.6-175 &bull;
+    St. Peter, C. C., Byrd, J. D., Pence, S. T., &amp; Foreman, A. P. (2016). Effects of treatment-integrity failures on a response-cost procedure. <em>Journal of Applied Behavior Analysis, 49</em>. https://doi.org/10.1002/jaba.291 &bull;
     St. Peter Pipkin, C., Vollmer, T. R., &amp; Sloman, K. N. (2010). Effects of treatment integrity failures during differential reinforcement of alternative behavior: A translational model. <em>Journal of Applied Behavior Analysis, 43</em>(1), 47&ndash;70. https://doi.org/10.1901/jaba.2010.43-47 &bull;
-    Ward-Horner, J., &amp; Sturmey, P. (2010). Component analyses using single-subject experimental designs: A review. <em>Journal of Applied Behavior Analysis, 43</em>(4), 685&ndash;704.</p>
+    Ward-Horner, J., &amp; Sturmey, P. (2010). Component analyses using single-subject experimental designs: A review. <em>Journal of Applied Behavior Analysis, 43</em>(4), 685&ndash;704. &bull;
+    Weinsztok, S. C., &amp; DeLeon, I. G. (2022). The mitigating effects of enhanced reinforcer magnitude and quality on treatment degradation. <em>Journal of Applied Behavior Analysis, 55</em>. https://doi.org/10.1002/jaba.910 &bull;
+    Zhu, J., Bruhn, A., Yuan, C., &amp; Wang, L. (2021). Comparing the effects of videoconference and email feedback on treatment integrity. <em>Journal of Applied Behavior Analysis, 54</em>. https://doi.org/10.1002/jaba.810</p>
   </section>
 </main>
 
@@ -1284,7 +1329,12 @@ const cmpLabel=v=>v==='con'?'Consequence':v==='ant'?'Antecedent':'';
 const cmpBadge=st=>st&&st.cmp?`<span class="ti-cmp-b${st.cmp==='con'?' ti-cmp-con':''}">${cmpLabel(st.cmp)}</span>`:'';
 function setStepField(i,f,v){const st=S.steps[i];if(!st)return;st[f]=v;
   /* a step tagged Consequence is marked critical as it is tagged (the observer may untick it afterwards) */
-  if(f==='cmp'&&v==='con'&&!st.crit)st.crit=true;}
+  if(f==='cmp'&&v==='con'&&!st.crit)st.crit=true;
+  /* v25.64 (MEAS M5) on a skill-acquisition plan, or one that does both, an antecedent step whose words name a prompt or an
+     instruction is marked critical as it is tagged too (Carroll et al., 2013) */
+  if(f==='cmp'&&v==='ant'&&!st.crit&&tiAcqPlan()&&tiPromptStep(st))st.crit=true;}
+const tiAcqPlan=()=>{const t=String((S&&S.meta&&S.meta.ptype)||'');return t==='Skill acquisition'||/^Both/.test(t);};
+const tiPromptStep=st=>/\b(prompts?|prompted|prompting|instructions?|instructs?|directions?|demands?|models?|modeled|cues?|cued|S\^?D|states the|says the|asks? the|presents? the (task|instruction|demand|question|trial))\b/i.test(String(st&&st.d||''));
 let S=blank();
 
 function ensure(){
@@ -1355,6 +1405,8 @@ $('#delStep').addEventListener('click',async()=>{if(S.steps.length<2)return;
   S.steps.pop();dropCodes(s=>s===i);renderAll();});
 
 /* ---------------- scoring grid ---------------- */
+/* v25.64 (MEAS L2) the distractions and competing demands ticked on each observation, by the key a saved file holds */
+const TI_DIS=[['help','other students needing help'],['group','whole-group instruction'],['short','staff short'],['intr','interruptions']];
 function optsFor(v){return CODES.map(([k,lab])=>`<option value="${k}"${v===k?' selected':''}>${lab}</option>`).join('');}
 function renderGrid(){
   const n=S.nObs;
@@ -1372,7 +1424,9 @@ function renderGrid(){
         ${S.obs.map((o,j)=>`<th><input data-o="${j}" data-f="ctx" value="${esc(o.ctx)}" placeholder="activity" aria-label="Observation #${j+1} context"></th>`).join('')}<th></th></tr>
     <tr class="obshead"><th></th><th style="text-align:right">IOA collected</th><th></th>
         ${S.obs.map((o,j)=>`<th><label class="ti-ck"><input type="checkbox" data-o="${j}" data-f="ioa"${o.ioa?' checked':''} aria-label="Observation #${j+1}, IOA collected"></label></th>`).join('')}<th></th></tr>
-  </tbody><tbody>`;
+    <tr class="obshead ti-dis-row"><th></th><th style="text-align:right">Distractions during the observation</th><th></th>
+        ${S.obs.map((o,j)=>`<th class="ti-dis">${TI_DIS.map(([k,l])=>`<label class="ti-dis-ck"><input type="checkbox" data-tio="dis" data-tiok="${k}" data-tioj="${j}"${o.dis&&o.dis[k]?' checked':''} aria-label="Observation #${j+1}: ${l}"> ${l}</label>`).join('')}</th>`).join('')}<th></th></tr>
+  </tbody><tbody>`;   /* v25.64 (MEAS L2) the conditions in the room, ticked for each observation (Berdeaux et al., 2022) */
   /* v21.16 audit. F11: the observation details sit in a row group of their own below the header. In the header
      they were repeated at the top of each printed page, where the browser does not draw a field's value, so the
      dates, types and IOA ticks printed blank on the grid's second page. F9: every field is named for the step,
@@ -1486,14 +1540,22 @@ const tiUsD=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));retu
 function tiMixed(){let un=false;for(const j of tiOrder()){const t=(S.obs[j]||{}).type;if(t==='Unannounced')un=true;else if(t==='Announced'&&un)return true;}return false;}
 /* (review F240) the verdict as the Summary reads it, for the case */
 let tiVerdict=null;
+/* v25.64 (MEAS H1) the procedures the Setup sheet offers, by the value a saved file holds */
+const TI_PROC={'dra-every':'DRA, reinforcing every alternative response','dra-int':'DRA on an intermittent or interval schedule','ncr':'NCR (noncontingent reinforcement)','dro':'DRO (reinforcing the absence of the behavior)','rc':'Response cost (a punishment step: marked, never the default)','rird':'Response interruption and redirection (RIRD)','dtt':'Discrete-trial or mand teaching','other':'Other'};
 /* the fidelity band: this form's working convention (see the Guide); the studies set no threshold */
 function bandOf(p,ptype){
   if(p==null)return{cls:'v-mid',name:'No band yet',txt:'No scored observation to place in a band.'};
   const acq=ptype==='Skill acquisition'||/^Both/.test(String(ptype||'')),red=ptype==='Behavior reduction';   /* v22.87 (review F241) a plan that does both is read as the stricter */
-  if(p>=90)return{cls:'v-ok',name:'90% and above',txt:'Acceptable: routine monitoring.'};
-  if(p>=80)return{cls:acq?'v-mid':'v-ok',name:'80–89%',txt:red?'Acceptable for a behavior-reduction plan in this evidence base; schedule a re-check.':
+  /* v25.64 (MEAS H1) the 80-89% band is read from the procedure the plan runs and from schedule thinning (Jones & St. Peter, 2022) */
+  const proc=String((S.meta||{}).proc||''),thin=(S.meta||{}).thin==='1';
+  if(p>=90)return{cls:'v-ok',name:'90% and above',txt:'Acceptable: routine monitoring.'+(thin?' The schedule is being thinned: aim for near-perfect integrity until the new schedule is stable (Jones & St. Peter, 2022).':'')};
+  if(p>=80&&thin)return{cls:'v-mid',name:'80–89%',txt:'Caution: the schedule is being thinned (moving off every-response reinforcement). Aim for near-perfect integrity until the new schedule is stable: 80% integrity did not keep intermittent schedules effective for some people, and the authors recommend near-perfect integrity when thinning from every response to an intermittent schedule (Jones & St. Peter, 2022). Schedule a re-check and retrain any consequence step in error.'};
+  if(p>=80&&(proc==='ncr'||proc==='dra-int'||proc==='dro'))return{cls:'v-mid',name:'80–89%',txt:'Caution: 80% integrity did not keep these procedures effective for some people. NCR and DRA on an interval schedule did not stay consistently effective at 80% (Jones & St. Peter, 2022), and in DRO commission errors weakened the effect for 4 of 6 people (Hronek & Kestner, 2025). Schedule a re-check and retrain any consequence step in error.'};
+  if(p>=80&&proc==='dtt')return{cls:'v-mid',name:'80–89%',txt:'Caution for discrete-trial or mand teaching: in mand training, 70% integrity slowed acquisition and no one acquired the mand at 40% (Pence & St. Peter, 2015); consequences delivered at about 67% fidelity on average prevented mastery for 5 of 6 learners (Burlison et al., 2026). Schedule a re-check and retrain any step in error.'};
+  if(p>=80&&proc==='dra-every'&&red)return{cls:'v-ok',name:'80–89%',txt:'Acceptable for DRA with every alternative response reinforced: it stayed effective at 80% integrity (Jones & St. Peter, 2022; St. Peter Pipkin et al., 2010); schedule a re-check.'};
+  if(p>=80)return{cls:acq?'v-mid':'v-ok',name:'80–89%',txt:(red?'Acceptable for a behavior-reduction plan in this evidence base; schedule a re-check.':
     acq?'Caution for a skill-acquisition program: consequences delivered at about 67% fidelity on average prevented mastery for 5 of 6 learners (Burlison et al., 2026); schedule a re-check and retrain any consequence step in error.':
-    'Acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, a caution. Set the plan type on the Setup sheet.'};
+    'Acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, a caution. Set the plan type on the Setup sheet.')+(proc?'':' Set the main procedure on the Setup sheet: the band depends on it.')};
   if(p>=60)return{cls:'v-mid',name:'60–79%',txt:'Caution: effects were degraded for some learners at these levels. Retrain any consequence step in error before the next observation.'};
   return{cls:'v-no',name:'Below 60%',txt:'Not acceptable: do not interpret the student’s data as a test of the plan; retrain before continuing.'};}
 
@@ -1512,6 +1574,8 @@ function renderSummary(){
          (M.ann.s&&M.unann.s)?(tiMixed()?'announced minus unannounced':'confounded with time: no announced check falls after an unannounced one'):'Needs both observation types')+
     card('Commission on consequence steps',M.byCmp.con.n?fmt(M.byCmp.con.ec,M.byCmp.con.n):'',M.byCmp.con.n?`${M.byCmp.con.ec} of ${M.byCmp.con.n} opportunities: reinforcer delivered when the plan withholds it`:(M.byCmp.con.steps?'No consequence step scored yet':'No step tagged Consequence'))+
     card('Omission on consequence steps',M.byCmp.con.n?fmt(M.byCmp.con.eo,M.byCmp.con.n):'',M.byCmp.con.n?`${M.byCmp.con.eo} of ${M.byCmp.con.n} opportunities: earned consequence withheld`:(M.byCmp.con.steps?'No consequence step scored yet':'No step tagged Consequence'))+
+    /* v25.64 (MEAS M5) the antecedent steps beside the consequence steps: prompting and instruction errors slowed learning too (Carroll et al., 2013) */
+    card('Antecedent steps',M.byCmp.ant.n?fmt(M.byCmp.ant.c,M.byCmp.ant.n):'',M.byCmp.ant.n?`${M.byCmp.ant.c} of ${M.byCmp.ant.n} opportunities correct; ${M.byCmp.ant.ec} commission, ${M.byCmp.ant.eo} omission`:(M.byCmp.ant.steps?'No antecedent step scored yet':'No step tagged Antecedent'))+
     card('Weighted integrity',fmt(M.weighted.c,M.weighted.n),M.weighted.n?'commission on consequence steps counted twice: a form convention, not an empirical weight':'No opportunity scored')+
     card('Lowest step',M.lowest?fmt(M.lowest.c,M.lowest.s):'',M.lowest?`step ${M.lowest.i+1}: ${M.lowest.c} of ${M.lowest.s} scored`:'No step scored yet')+
     card('Range across observations',M.range?(M.range.n>1?M.range.lo.toFixed(1)+'–'+M.range.hi.toFixed(1)+'%':M.range.lo.toFixed(1)+'%'):'',M.range?`individual trial integrity, ${M.range.n} scored observation${M.range.n===1?'':'s'}`:'No observation scored yet');
@@ -1570,7 +1634,10 @@ function renderSummary(){
   let flag='';
   if(con.ec)flag=`<div class="ti-flag"><b>Integrity errors fell on consequence steps</b>${con.ec} commission error${con.ec===1?'':'s'} on consequence step${con.ecSteps.length===1?'':'s'} ${con.ecSteps.map(i=>i+1).join(', ')}: a reinforcer delivered when the plan withholds it, or the wrong consequence delivered. This error class has been linked to loss of treatment effect in several DRA, DRO and discrimination-training studies, though not in all (St. Peter Pipkin et al., 2010; Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026; Burlison et al., 2026). These steps head the retraining list.</div>`;
   else if(con.eo)flag=`<div class="ti-flag ti-flag-om"><b>Omissions on consequence steps</b>${con.eo} omission${con.eo===1?'':'s'} on consequence step${con.eoSteps.length===1?'':'s'} ${con.eoSteps.map(i=>i+1).join(', ')}: an earned consequence withheld. The less damaging class in the studies, but not a harmless one (every consequence wrong blocked learning entirely in Burlison et al., 2026); listed for retraining.</div>`;
-  $('#bandBox').innerHTML=`<div class="ti-band"><div class="verdict ${B.cls}"><b>Fidelity band: ${B.name}${bs?' ('+fmt(bc,bs)+', '+bc+' of '+bs+' scored steps; '+judged+')':''} &mdash; a form convention</b>${B.txt}</div>${flag}`+
+  /* v25.64 (MEAS H1) the procedure and the thinning tick beside the band */
+  const PROC=TI_PROC,pk=String(S.meta.proc||''),procLine=`<span class="ti-proc">Main procedure: ${pk?esc(PROC[pk]||pk):'not set on the Setup sheet'} &middot; Schedule thinning: ${S.meta.thin==='1'?'in progress':'not ticked'}</span>`;
+  if(tiVerdict){tiVerdict.band.procedure=pk||null;tiVerdict.band.thinning=S.meta.thin==='1';}
+  $('#bandBox').innerHTML=`<div class="ti-band"><div class="verdict ${B.cls}"><b>Fidelity band: ${B.name}${bs?' ('+fmt(bc,bs)+', '+bc+' of '+bs+' scored steps; '+judged+')':''} &mdash; a form convention</b>${B.txt}${procLine}</div>${flag}`+
     `<p class="hint ti-ev"><b>Evidence behind the bands.</b> In a parametric test of DRO with combined commission and omission errors, treatment effects were comparable at 100, 80 and 60% fidelity, degraded at 40% (median 54.5% reduction against about 93% at 100%; a large effect size) and generally absent at 20% (median 5.5% reduction); even at 60%, 3 of 11 participants lost the treatment effect (O&rsquo;Neill et al., 2026; 11 adult volunteers, analog task). During acquisition of a matching task, consequences delivered at an average of about 67% fidelity prevented mastery for 5 of 6 learners, although all 6 mastered the task once errors were corrected (Burlison et al., 2026). Earlier DRO work found commission errors harmful for some participants even at 80% fidelity (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026). Both studies used computer-delivered errors with adult volunteers and neither sets a validated threshold: the bands are this form&rsquo;s clinical conventions, not cut-offs from the research, and no band treats omission errors as harmless.</p></div>`;
 
   /* error table */
@@ -1603,7 +1670,8 @@ function renderIOA(){
   const cols=S.obs.map((o,j)=>({o,j})).filter(x=>x.o.ioa);
   if(!cols.length){$('#ioaTbl').innerHTML='<tbody><tr><td class="hint">No observation is marked for IOA.</td></tr></tbody>';$('#ioaOut').innerHTML='';return;}
   let h=`<thead><tr><th class="stepno">Step</th><th class="desc">Description</th>${cols.map(c=>`<th colspan="2">#${c.j+1}</th>`).join('')}</tr>
-    <tr><th></th><th style="text-align:right">Observer 1 / Observer 2</th>${cols.map(()=>'<th style="font-size:10.5px">Obs 1</th><th style="font-size:10.5px">Obs 2</th>').join('')}</tr></thead><tbody>`;
+    <tr><th></th><th style="text-align:right">Observer 1 / Observer 2</th>${cols.map(()=>'<th style="font-size:10.5px">Obs 1</th><th style="font-size:10.5px">Obs 2</th>').join('')}</tr>
+    <tr class="obshead"><th></th><th style="text-align:right">Second observer (name or role)</th>${cols.map(c=>`<th colspan="2"><input data-tio="obs2" data-tioj="${c.j}" value="${esc(c.o.obs2||'')}" placeholder="e.g., school psychologist" aria-label="Observation #${c.j+1}, second observer"></th>`).join('')}</tr></thead><tbody>`;   /* v25.64 (MEAS H7) who checked, for agreement by pairing */
   S.steps.forEach((st,i)=>{
     h+=`<tr><td class="stepno">${i+1}</td><td class="desc" style="font-size:11.5px">${esc(st.d)}</td>`;
     cols.forEach(c=>{const v1=code(i,c.j),v2=S.ioa[key(i,c.j)]||'';
@@ -1612,14 +1680,23 @@ function renderIOA(){
     h+='</tr>';
   });
   $('#ioaTbl').innerHTML=h+'</tbody>';
-  let agree=0,tot=0;const per=[];
-  cols.forEach(c=>{let a=0,t=0;
+  let agree=0,tot=0;const per=[],allP=[];
+  cols.forEach(c=>{let a=0,t=0;const pr=[];
     S.steps.forEach((_,i)=>{const v1=code(i,c.j),v2=S.ioa[key(i,c.j)];
-      if(v1&&v2){t++;if(v1===v2)a++;}});
-    agree+=a;tot+=t;per.push({j:c.j,a,t});});
-  $('#ioaOut').innerHTML=per.map(p=>`<div class="metric"><b>Observation #${p.j+1}</b><div class="val">${fmt(p.a,p.t)}</div><div class="sub">${p.a} of ${p.t} steps coded alike</div></div>`).join('')+
-    `<div class="metric"><b>Overall point-by-point IOA</b><div class="val">${fmt(agree,tot)}</div><div class="sub">${agree} of ${tot} steps coded alike across ${per.length} observation${per.length===1?'':'s'}</div></div>`;
+      if(v1&&v2){t++;if(v1===v2)a++;pr.push([v1,v2]);}});
+    agree+=a;tot+=t;allP.push(...pr);per.push({j:c.j,a,t,k:tiKappa(pr)});});
+  /* v25.64 (MEAS M1) Cohen's kappa over the four codes beside each figure; below .60 is flagged as Hartmann's (1977) suggestion */
+  const kAll=tiKappa(allP),kTxt=k=>k.n?(k.kappa==null?'kappa not calculable: both observers gave every step the same code':'kappa '+k.kappa.toFixed(2)+' (chance agreement '+(100*k.pe).toFixed(1)+'%)'):'';
+  const kFlag=k=>k.kappa!=null&&k.kappa<0.6?'<span class="ti-few">kappa below .60: Hartmann&rsquo;s (1977) suggestion, not a validated cut-off</span>':'';
+  $('#ioaOut').innerHTML=per.map(p=>`<div class="metric"><b>Observation #${p.j+1}</b><div class="val">${fmt(p.a,p.t)}</div><div class="sub">${p.a} of ${p.t} steps coded alike${p.t?'; '+kTxt(p.k):''}</div>${kFlag(p.k)}</div>`).join('')+
+    `<div class="metric"><b>Overall point-by-point IOA</b><div class="val">${fmt(agree,tot)}</div><div class="sub">${agree} of ${tot} steps coded alike across ${per.length} observation${per.length===1?'':'s'}</div></div>`+
+    `<div class="metric" id="tiKappa"><b>Kappa, overall</b><div class="val">${kAll.kappa==null?'':kAll.kappa.toFixed(2)}</div><div class="sub">${kAll.n?(kAll.kappa==null?'Not calculable: both observers gave every step the same code':'Agreement beyond chance, over the four codes; chance agreement '+(100*kAll.pe).toFixed(1)+'%'):'No step coded by both observers yet'}</div>${kFlag(kAll)}</div>`;
 }
+/* v25.64 (MEAS M1) kappa = (observed - chance) / (1 - chance), chance from each observer's share of each code (C, EC, EO, NA) */
+function tiKappa(pairs){const n=pairs.length;if(!n)return{n:0,po:null,pe:null,kappa:null};const K=['C','EC','EO','NA'],a={},b={};let ag=0;
+  pairs.forEach(([x,y])=>{a[x]=(a[x]||0)+1;b[y]=(b[y]||0)+1;if(x===y)ag++;});
+  const po=ag/n,pe=K.reduce((s,k)=>s+((a[k]||0)/n)*((b[k]||0)/n),0);
+  return{n,po,pe,kappa:pe>=1-1e-12?null:(po-pe)/(1-pe)};}
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset&&el.dataset.ioa){S.ioa[key(+el.dataset.s,+el.dataset.o)]=el.value;renderIOA();}});
 
@@ -1730,7 +1807,7 @@ async function loadSim(){
     notes:'Integrity is high on most antecedent and instructional steps, with one omission each on steps 4 and 7, and breaks down on two critical steps. Step 8 is a commission error on a consequence step: the delay is ended early when the student protests, so protest is reinforced on 4 of the 10 unannounced opportunities. Step 10, an antecedent step, is omitted: the break card is not re-presented after a denied request. Step 11 came due once in four observations, so its 100% rests on one opportunity.',
     barrier:'The two consequence-step errors occur when the classroom is short one adult and the interventionist is covering two students. The plan is not complex; the conditions for running it are not reliably present.',
     action:'Scheduled a booster on step 8 first (commission on a consequence step), then step 10, using Form ST-1 with a rehearsal gate of zero commission errors on the consequence steps; added a checklist cue for steps 4 and 7; asked the team to protect one adult for the independent work block.',
-    recheck:'Unannounced re-check in 10 school days',
+    recheck:'Unannounced re-check within 1 week: weekly until the criterion is met (the fading rule on this sheet)',   /* v25.64 (MEAS H2) */
     effect:'The behavior data for this period should be read with the integrity figure attached. Overall fidelity sits in the 80–89% band, but the commission errors fall on the step that carries the escape contingency, so a flat trend cannot be read as the plan not working.'};
   S.steps=[
     {d:'Sets up the work area with the task, the break card, and the visual timer in the student\u2019s line of sight.',crit:false,cmp:'ant'},
@@ -1754,6 +1831,13 @@ async function loadSim(){
     {date:D(17),type:'Unannounced',ctx:'independent math',ioa:true},
     {date:D(3),type:'Unannounced',ctx:'independent writing',ioa:false}
   ];
+  /* v25.64 (MEAS H1, H2, H7, L2) the procedure, the second observers, the room's conditions and the feedback given after each check */
+  S.meta.proc='dra-every';
+  S.obs[0].obs2='School psychologist (simulated)';S.obs[2].obs2='Lead RBT (simulated)';
+  S.obs[1].dis={short:true,help:true};S.obs[3].dis={short:true};
+  S.obs[0].fb={date:D(48),time:'14:10',fmt:'verbal',own:true,named:true,praise:true};
+  S.obs[1].fb={date:D(32),time:'08:15',fmt:'email',own:true,stu:true,named:true};
+  S.obs[2].fb={date:D(17),time:'13:40',fmt:'graph',own:true,stu:true,named:true,reh:true,praise:true};
   /* announced observation runs clean; the two consequence steps degrade unannounced */
   const plan=[
    /* step:  #1    #2    #3    #4   */
@@ -2260,7 +2344,7 @@ async function handoffSave(){const x=retrainData(),d=x.dec,cols=d.map(r=>'#'+(r.
   const out={form:'TI-1-RETRAIN',rev:'2026-09',saved:new Date().toISOString(),
     student:{name:t(m.client),id:t(m.sid),setting:t(m.setting)},protocol:{skill:t(m.skill),source:t(m.src)},
     interventionist:{name:t(m.int),position:t(m.pos)},observer:{name:t(m.obs)},
-    criterion:{pct:S.crit,n:S.critN},plan:{type:t(m.ptype),phase:t(m.phase)},observations:x.obs,classes:x.classes,steps:x.steps};
+    criterion:{pct:S.crit,n:S.critN},plan:{type:t(m.ptype),phase:t(m.phase),procedure:t(m.proc)?(TI_PROC[t(m.proc)]||t(m.proc)):'',thinning:m.thin==='1'},observations:x.obs,classes:x.classes,steps:x.steps};
   const name='TI-1-RETRAIN_'+String(m.client||'student').replace(/[^\w-]+/g,'_')+'_'+isoDay(new Date())+'.json';
   const a=D.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:'application/json'}));a.download=name;
   D.body.appendChild(a);a.click();a.remove();
@@ -3637,6 +3721,234 @@ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.cl
  window.__tiSchedAdd=add;
  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){try{sched=(f&&f.schedule)||null;btn();}catch(e){}return was?was.apply(this,arguments):null;};
  btn();})();
+</script>
+<style id="ti1-v2564-css">
+/* v25.64 (MEAS H1, H2, H7, M3, M5, L2, L3, L4) */
+.ti-req{font-weight:400;font-size:10.5px;color:#8E2A2A}
+.ti-inl{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:12.5px}
+.ti-proc{display:block;margin-top:4px;font-size:11.5px;color:var(--ink-soft)}
+.obshead th.ti-dis{text-align:left;vertical-align:top;padding:3px 4px}
+.obshead .ti-dis-ck{display:flex;align-items:flex-start;gap:3px;font-weight:400;font-size:10px;line-height:1.25;margin:1px 0;text-align:left}
+.obshead .ti-dis-ck input{width:auto;flex:0 0 auto;margin:1px 0 0}
+.ti-more{margin:6px 0 10px;padding:8px 10px;border-left:4px solid var(--rule);background:var(--wash);font-family:var(--sans);font-size:12.5px}
+table.ti-fb td{vertical-align:top}
+table.ti-fb input:not([type=checkbox]),table.ti-fb select{width:100%;box-sizing:border-box;font:inherit;font-size:12px}
+table.ti-fb .ti-fb-ck{display:flex;align-items:flex-start;gap:5px;font-size:11.5px;line-height:1.3;margin:2px 0}
+table.ti-fb .ti-fb-ck input{flex:0 0 auto;margin:2px 0 0}
+table.ti-fb .ti-fb-calc{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+.ti-fbrule{font-family:var(--sans);font-size:12.5px;margin:8px 0}
+.ti-fbrule p{margin:4px 0}
+.ti-graph svg{width:100%;height:auto;display:block;max-width:900px}
+.ti-graph .ti-g-cap{font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);margin:2px 0 8px}
+@media print{.ti-graph svg{max-width:7.4in}table.ti-fb{font-size:10px}table.ti-fb input:not([type=checkbox]),table.ti-fb select{font-size:10px;border:0;-webkit-appearance:none;appearance:none}}
+</style>
+<script id="ti1-v2564">
+/* v25.64 (MEAS review of the JABA measurement research, the BCBA's Build list for TI-1):
+   H1 the 80-89% band read from the main procedure and the schedule-thinning tick (the band itself is in bandOf);
+   H2 the feedback given after each check, its delay, its content, the next check and the fading rule, and the integrity graph
+      with the student's graph from Form DD-1 beneath it;
+   H7 IOA coverage by observation type, agreement by second observer, and a possible-drift flag;
+   M3 a new plan or changed step labelled until a check reaches the criterion, and an abrupt drop between checks flagged;
+   M5 prompting and instruction steps offered as critical on an acquisition plan (the tag rule itself is in setStepField);
+   L2 integrity with and without distractions; L3 a stronger reinforcer for the alternative when consequence errors recur;
+   L4 video self-monitoring when the unannounced figure is below the announced one.
+   Every new value is optional: a file saved before v25.64 opens and prints as it did. */
+(function(){
+'use strict';
+const byId=id=>document.getElementById(id);
+const T=v=>String(v==null?'':v).trim();
+function setHTML(el,h){if(el&&el.__tiH!==h){el.innerHTML=h;el.__tiH=h;}}
+const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+const FMT=[['written','Written'],['verbal','Verbal'],['graph','Graph'],['video','Video'],['email','Email'],['call','Video call']];
+const TICKS=[['own','Interventionist’s own integrity, graphed across checks'],['stu','Student’s data shown beside it'],['named','Missed or wrong steps named'],['reh','Missed steps rehearsed with the observer (directed rehearsal)'],['praise','Praise for steps done correctly']];
+const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m?new Date(+m[1],+m[2]-1,+m[3],12):null;};
+const isoOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const addDays=(s,n)=>{const d=day(s);if(!d)return'';d.setDate(d.getDate()+n);return isoOf(d);};
+/* school days from a to b: the weekdays after a, up to and including b */
+function schoolDays(a,b){const x=day(a),y=day(b);if(!x||!y)return null;if(y<x)return -1;let n=0;const d=new Date(x);while(d<y){d.setDate(d.getDate()+1);const w=d.getDay();if(w&&w<6)n++;}return n;}
+const pctS=p=>(Math.round(p*10)/10).toFixed(1)+'%';
+
+/* ---- what a file holds: only the shapes this block writes are kept ---- */
+function clean(){if(!S.meta||typeof S.meta!=='object')S.meta={};const m=S.meta;
+  if(m.thin!=='1')delete m.thin;if(m.fbCancel!=='1')delete m.fbCancel;if(m.promptOk!=null&&typeof m.promptOk!=='string')delete m.promptOk;
+  (Array.isArray(S.obs)?S.obs:[]).forEach(o=>{if(!o||typeof o!=='object')return;
+    if(o.obs2!=null){o.obs2=String(o.obs2).slice(0,120);if(!T(o.obs2))delete o.obs2;}
+    if(o.dis!=null){const d={};if(typeof o.dis==='object'&&!Array.isArray(o.dis))TI_DIS.forEach(([k])=>{if(o.dis[k]===true)d[k]=true;});if(Object.keys(d).length)o.dis=d;else delete o.dis;}
+    if(o.fb!=null){const f=o.fb,x={};if(f&&typeof f==='object'&&!Array.isArray(f)){if(tiIsoD(f.date))x.date=tiIsoD(f.date);if(/^\d{2}:\d{2}$/.test(String(f.time||'')))x.time=f.time;
+      if(FMT.some(([k])=>k===f.fmt))x.fmt=f.fmt;TICKS.forEach(([k])=>{if(f[k]===true)x[k]=true;});if(tiIsoD(f.next))x.next=tiIsoD(f.next);}
+      if(Object.keys(x).length)o.fb=x;else delete o.fb;}});}
+
+/* one observation's integrity: correct steps over scored steps */
+function obsPct(j){let c=0,s=0;S.steps.forEach((_,i)=>{const v=code(i,j);if(scored(v)){s++;if(v==='C')c++;}});return s?{c,s,p:100*c/s}:null;}
+const scoredInOrder=()=>tiOrder().map(j=>({j,x:obsPct(j)})).filter(r=>r.x);
+const critEC=j=>S.steps.some((st,i)=>st.crit&&(code(i,j)==='EC'||oppOf(i,j).ec>0));
+const conErr=j=>S.steps.some((st,i)=>st.cmp==='con'&&(code(i,j)==='EC'||code(i,j)==='EO'||oppOf(i,j).ec>0||oppOf(i,j).eo>0));
+/* the IOA on one observation, as renderIOA computes it */
+function ioaOf(j){let a=0,t=0;S.steps.forEach((_,i)=>{const v1=code(i,j),v2=S.ioa[key(i,j)];if(v1&&v2){t++;if(v1===v2)a++;}});return t?{a,t,p:100*a/t}:null;}
+
+/* ---------------- M3: a new plan or step, and an abrupt drop ---------------- */
+function planRender(){const box=byId('tiPlanBox');if(!box)return;const m=S.meta,start=tiIsoD(m.pstart);let h='';
+  let isNew=false,why='';
+  if(m.mcheck==='No'){isNew=true;why='the Setup sheet says no check has reached the mastery criterion yet';}
+  else if(m.mcheck!=='Yes'&&start){const since=scoredInOrder().filter(r=>{const d=tiIsoD((S.obs[r.j]||{}).date);return d&&d>=start;});
+    if(!since.some(r=>r.x.p>=S.crit)){isNew=true;why=since.length?'no check since then has reached the '+S.crit+'% criterion':'no check has been scored since then';}}
+  if(isNew)h+='<div class="verdict v-mid ti-newplan" id="tiNewPlan"><b>New plan: errors now do more harm than later; check weekly.</b>'+(start?'The plan or step started on '+esc(tiUsD(start))+', and '+why:why.charAt(0).toUpperCase()+why.slice(1))+
+    '. Problem behavior was more likely to recur when integrity failures came straight after baseline than when the same failures came after a period of full treatment (St. Peter Pipkin et al., 2010). Observe and give feedback at least weekly until a check reaches the criterion; then answer the Setup sheet&rsquo;s question.</div>';
+  const seq=scoredInOrder(),drops=[];for(let k=1;k<seq.length;k++){const d=seq[k-1].x.p-seq[k].x.p;if(d>=20-1e-9)drops.push({a:seq[k-1],b:seq[k],d});}
+  if(drops.length)h+='<div class="ti-flag" id="tiDrop"><b>An abrupt drop between checks</b>'+drops.map((r,k)=>(k?'observation #':'Observation #')+(r.a.j+1)+' '+pctS(r.a.x.p)+' to #'+(r.b.j+1)+' '+pctS(r.b.x.p)+' (down '+r.d.toFixed(1)+' points)').join('; ')+
+    '. An abrupt drop has done more harm than a gradual one: in DRO, moving from 100% straight to 60% integrity with commission errors raised responding more often than stepping down through 80% (Hronek &amp; Kestner, 2025). Find out what changed (Form PD-1) and re-check within the week. The 20-point mark is this form&rsquo;s convention.</div>';
+  setHTML(box,h);}
+
+/* ---------------- L2: with and without distractions ---------------- */
+function disRender(){const tb=byId('tiDisTbl');if(!tb)return;const rows=scoredInOrder(),any=o=>!!(o&&o.dis&&Object.keys(o.dis).length);
+  const pool=L=>L.reduce((a,r)=>({n:a.n+1,c:a.c+r.x.c,s:a.s+r.x.s}),{n:0,c:0,s:0});
+  const w=pool(rows.filter(r=>any(S.obs[r.j]))),wo=pool(rows.filter(r=>!any(S.obs[r.j])));
+  const line=(lab,x)=>'<tr><td>'+lab+'</td><td style="text-align:center">'+(x.n||'')+'</td><td style="text-align:center">'+(x.s||'')+'</td><td style="text-align:center">'+fmt(x.c,x.s)+'</td></tr>';
+  let h='<thead><tr><th>Conditions in the room</th><th style="width:110px">Observations</th><th style="width:110px">Steps scored</th><th style="width:110px">Integrity</th></tr></thead><tbody>';
+  if(!w.n)h+='<tr><td colspan="4" class="hint">No distraction is ticked on any scored observation'+(rows.length?' (all '+rows.length+' scored without one)':'')+'.</td></tr>';
+  else{h+=line('With any distraction ticked',w)+line('With none ticked',wo);
+    TI_DIS.forEach(([k,l])=>{const x=pool(rows.filter(r=>{const o=S.obs[r.j];return o&&o.dis&&o.dis[k];}));if(x.n)h+=line('&nbsp;&nbsp;with '+l,x);});
+    if(w.s&&wo.s){const d=100*w.c/w.s-100*wo.c/wo.s;h+='<tr class="totrow"><td colspan="3" style="text-align:right">With distractions minus without</td><td style="text-align:center" id="tiDisDiff">'+(d>=0?'+':'')+d.toFixed(1)+' pts</td></tr>';}}
+  tb.innerHTML=h+'</tbody>';}
+
+/* ---------------- H7: IOA coverage, pairings and drift ---------------- */
+function covRender(){const box=byId('tiIoaCov');if(!box)return;const rows=scoredInOrder();
+  if(!rows.length){box.innerHTML='';return;}
+  const types=[['Announced','Announced'],['Unannounced','Unannounced'],['','Type not set']];
+  const flags=[];let h='<h3 style="margin-top:14px">IOA Coverage and Observer Drift</h3><div class="grid-wrap" tabindex="0" role="region" aria-label="IOA coverage by observation type"><table class="rt" id="tiCovTbl"><thead><tr><th>Observation type</th><th style="width:130px">Scored observations</th><th style="width:110px">With IOA</th><th style="width:100px">Coverage</th><th style="width:110px">Mean IOA</th></tr></thead><tbody>';
+  const typeMean={};
+  types.forEach(([t,lab])=>{const R=rows.filter(r=>String((S.obs[r.j]||{}).type||'')===t);if(!R.length)return;
+    const I=R.filter(r=>(S.obs[r.j]||{}).ioa),V=I.map(r=>ioaOf(r.j)).filter(Boolean),cov=100*I.length/R.length,mean=V.length?V.reduce((a,v)=>a+v.p,0)/V.length:null;
+    if(mean!=null)typeMean[t]=mean;
+    const low=!I.length||cov<20;if(low)flags.push(lab.toLowerCase()+(I.length?' observations have IOA on '+pctS(cov)+' of them, below 20%':' observations have no IOA'));
+    h+='<tr><td>'+lab+'</td><td style="text-align:center">'+R.length+'</td><td style="text-align:center">'+I.length+'</td><td style="text-align:center">'+pctS(cov)+(low?'<span class="ti-few">'+(I.length?'below 20%':'no IOA')+'</span>':'')+'</td><td style="text-align:center">'+(mean==null?'':pctS(mean))+'</td></tr>';});
+  const allI=rows.filter(r=>(S.obs[r.j]||{}).ioa);
+  h+='<tr class="totrow"><td>All</td><td style="text-align:center">'+rows.length+'</td><td style="text-align:center">'+allI.length+'</td><td style="text-align:center">'+pctS(100*allI.length/rows.length)+'</td><td></td></tr></tbody></table></div>';
+  /* agreement by second observer */
+  const checks=allI.map(r=>({j:r.j,v:ioaOf(r.j),who:T((S.obs[r.j]||{}).obs2)})).filter(c=>c.v);
+  const byWho={};checks.forEach(c=>{const k=c.who.toLowerCase();(byWho[k]=byWho[k]||{who:c.who,L:[]}).L.push(c);});
+  const prim=T(S.meta.obs)||'the observer';
+  if(checks.length){h+='<div class="grid-wrap" tabindex="0" role="region" aria-label="Agreement by observer pairing"><table class="rt" id="tiPairTbl"><thead><tr><th>Observer pairing</th><th style="width:110px">IOA checks</th><th style="width:110px">Mean IOA</th></tr></thead><tbody>'+
+    Object.values(byWho).map(g=>'<tr><td>'+esc(prim)+' with '+(g.who?esc(g.who):'<i>second observer not named</i>')+'</td><td style="text-align:center">'+g.L.length+'</td><td style="text-align:center">'+pctS(g.L.reduce((a,c)=>a+c.v.p,0)/g.L.length)+'</td></tr>').join('')+'</tbody></table></div>';
+    if(checks.some(c=>!c.who))flags.push('name the second observer on each IOA observation (the IOA table above), so agreement can be read by pairing');}
+  /* possible drift */
+  const drift=[];
+  if(checks.length>=2){const f=checks[0],l=checks[checks.length-1];if(f.v.p-l.v.p>=10-1e-9)drift.push('the latest IOA check (#'+(l.j+1)+', '+pctS(l.v.p)+') is '+(f.v.p-l.v.p).toFixed(1)+' points below the first (#'+(f.j+1)+', '+pctS(f.v.p)+')');}
+  const firstT=checks.length?String((S.obs[checks[0].j]||{}).type||''):null;
+  if(firstT!=null&&typeMean[firstT]!=null)Object.keys(typeMean).forEach(t=>{if(t!==firstT&&typeMean[firstT]-typeMean[t]>=10-1e-9)drift.push('mean IOA on '+(t||'untyped').toLowerCase()+' observations ('+pctS(typeMean[t])+') is '+(typeMean[firstT]-typeMean[t]).toFixed(1)+' points below the '+(firstT||'untyped').toLowerCase()+' ones ('+pctS(typeMean[firstT])+')');});
+  const G=Object.values(byWho).map(g=>({who:g.who,m:g.L.reduce((a,c)=>a+c.v.p,0)/g.L.length}));
+  if(G.length>=2)G.forEach(g=>{const o=G.filter(x=>x!==g),om=o.reduce((a,x)=>a+x.m,0)/o.length;if(g.m-om>=10-1e-9)drift.push('agreement with '+(g.who?esc(g.who):'the unnamed second observer')+' ('+pctS(g.m)+') is '+(g.m-om).toFixed(1)+' points above the other pairings ('+pctS(om)+'): observers who always work together can keep agreeing while both drift from the definitions');});
+  if(drift.length)h+='<div class="ti-flag" id="tiDrift"><b>Possible drift</b>'+cap(drift.join('; '))+'. Observers drift from the definitions over time, and a pair who always work together can keep high agreement while their accuracy falls (Kazdin, 1977). Retrain both observers against the written steps and bring in another second observer. The 10-point mark is this form&rsquo;s convention.</div>';
+  if(flags.length)h+='<div class="ti-flag ti-flag-om" id="tiCovFlag"><b>IOA coverage</b>'+cap(flags.join('; '))+'.</div>';
+  h+='<p class="hint" id="tiCovRule"><b>The default.</b> IOA on at least a quarter to a third of observations in every condition, spread across times, activities and observers. Rotate the second observer. Where possible, the primary observer does not know which observation will be checked. The usual convention is IOA on 20&ndash;33% of sessions; cutting it made no difference for highly trained clinic observers, but the authors warn that schools and homes may differ (Hausman et al., 2022). Observers shifted their scoring toward the assessor they knew was checking, and agreement was lower when checks were covert (Romanczyk et al., 1973).</p>';
+  box.innerHTML=h;}
+
+/* ---------------- L3, L4: the retraining list's further options ---------------- */
+function moreRender(){const box=byId('tiRtMore');if(!box)return;const M=metrics(),L=[];
+  const rep=scoredInOrder().filter(r=>conErr(r.j));
+  if(rep.length>=2)L.push('<p class="ti-more" id="tiRtMag"><b>Consequence errors on '+rep.length+' checks</b> (observations '+rep.map(r=>'#'+(r.j+1)).join(', ')+'). Consider a larger or better reinforcer for the alternative behavior. It made treatment more resistant to integrity errors in analog work (Weinsztok &amp; DeLeon, 2022). Change it in the plan with the BCBA, not on the spot.</p>');
+  if(M.ann.s&&M.unann.s){const a=100*M.ann.c/M.ann.s,u=100*M.unann.c/M.unann.s;
+    if(u<a)L.push('<p class="ti-more" id="tiRtVsm"><b>For maintenance: video self-monitoring.</b> The unannounced figure ('+pctS(u)+') is below the announced one ('+pctS(a)+'). Video self-monitoring, in which the interventionist scores a recording of their own session against the steps, raised fidelity and kept it high in covert observations for 4 staff (Paden &amp; Carroll, 2025). The evidence on reactivity is mixed: staff did almost none of the target steps when observed conspicuously and most of them when not in one study (Brackett et al., 2007), and there was no difference once feedback was in place in another (Codding et al., 2008)'+(tiMixed()?'':'; here the gap may also be a change over time, as no announced check falls after an unannounced one')+'.</p>');}
+  setHTML(box,L.join(''));}
+
+/* ---------------- H2: the feedback given after each check ---------------- */
+/* the criterion met by observation j: the last S.critN unannounced scored observations up to it, in date order, all at or above it,
+   with no commission error on a critical step */
+function metBy(j){const rk=tiRank(),U=scoredInOrder().filter(r=>(S.obs[r.j]||{}).type==='Unannounced'&&rk(r.j)<=rk(j));if(U.length<S.critN)return false;
+  return U.slice(-S.critN).every(r=>r.x.p>=S.crit&&!critEC(r.j));}
+function ruleFor(j){const x=obsPct(j);if(!x)return null;let r;
+  if(x.p<S.crit)r={days:7,txt:'weekly: this check was below the '+S.crit+'% criterion'};
+  else if(critEC(j))r={days:7,txt:'weekly: a commission error fell on a critical step'};
+  else if(metBy(j))r={days:14,txt:'every 2 weeks: the mastery criterion is met'};
+  else r={days:7,txt:'weekly: the mastery criterion is not yet met'};
+  if(S.meta.fbCancel==='1'&&x.c===x.s)r.txt+='; this check was at 100%, so the next rehearsal meeting is cancelled';
+  return r;}
+function fbCalc(j){const o=S.obs[j]||{},f=o.fb||{},od=tiIsoD(o.date),r=ruleFor(j),out={delay:'',dFlag:'',rule:'',nFlag:''};
+  if(f.date&&od){const n=schoolDays(od,f.date);out.delay=n<0?'before the observation’s date: check the dates':n===0?'the same day':n+' school day'+(n===1?'':'s')+' after the check';if(n>1)out.dFlag='over 1 school day: give feedback sooner';}
+  else out.delay=f.date?'the observation has no date':'not recorded yet';
+  if(r){const base=f.date||od,sug=base?addDays(base,r.days):'';out.rule='Rule: '+r.txt+(sug?'. Next check by '+tiUsD(sug):'')+'.';
+    if(f.next&&sug&&f.next>sug)out.nFlag='later than the rule sets';}
+  return out;}
+function fbPaint(j){const c=fbCalc(j),put=(id,t,cls)=>{const e=byId(id);if(e){e.textContent=t;if(cls!=null)e.className=cls;}};
+  put('tiFbDelay'+j,c.delay);put('tiFbDFlag'+j,c.dFlag,c.dFlag?'ti-few':'');put('tiFbRuleT'+j,c.rule);put('tiFbNFlag'+j,c.nFlag,c.nFlag?'ti-few':'');}
+function fbRender(){const tb=byId('tiFbTbl');if(!tb)return;const rows=scoredInOrder();
+  const cb=byId('tiFbCancel');if(cb)cb.checked=S.meta.fbCancel==='1';
+  if(!rows.length){setHTML(tb,'<tbody><tr><td class="hint">No observation is scored yet. Each scored observation gets a column here for the feedback given after it.</td></tr></tbody>');graphRender();return;}
+  const cell=(j,inner)=>'<td>'+inner+'</td>',f=j=>(S.obs[j]||{}).fb||{};
+  const inp=(j,k,type,lab)=>'<input type="'+type+'" data-fb="'+k+'" data-fbj="'+j+'" value="'+esc(f(j)[k]||'')+'" aria-label="Observation #'+(j+1)+', '+lab+'">';
+  let h='<thead><tr><th style="width:150px">After observation</th>'+rows.map(r=>{const o=S.obs[r.j]||{},d=tiIsoD(o.date);return'<th>#'+(r.j+1)+(d?' <small style="font-weight:400">'+esc(tiUsD(d))+'</small>':'')+'<br><small style="font-weight:400">'+esc(o.type||'type not set')+', '+pctS(r.x.p)+'</small></th>';}).join('')+'</tr></thead><tbody>';
+  h+='<tr><th>Date given</th>'+rows.map(r=>cell(r.j,inp(r.j,'date','date feedback given'))).join('')+'</tr>';
+  h+='<tr><th>Time given</th>'+rows.map(r=>cell(r.j,inp(r.j,'time','time feedback given'))).join('')+'</tr>';
+  h+='<tr><th>Delay since the check</th>'+rows.map(r=>cell(r.j,'<span class="ti-fb-calc" id="tiFbDelay'+r.j+'"></span><span id="tiFbDFlag'+r.j+'"></span>')).join('')+'</tr>';
+  h+='<tr><th>Format</th>'+rows.map(r=>cell(r.j,'<select data-fb="fmt" data-fbj="'+r.j+'" aria-label="Observation #'+(r.j+1)+', feedback format"><option value=""></option>'+FMT.map(([k,l])=>'<option value="'+k+'"'+(f(r.j).fmt===k?' selected':'')+'>'+l+'</option>').join('')+'</select>')).join('')+'</tr>';
+  h+='<tr><th>What it held</th>'+rows.map(r=>cell(r.j,TICKS.map(([k,l])=>'<label class="ti-fb-ck"><input type="checkbox" data-fb="'+k+'" data-fbj="'+r.j+'"'+(f(r.j)[k]?' checked':'')+' aria-label="Observation #'+(r.j+1)+': '+esc(l)+'"> '+esc(l)+'</label>').join(''))).join('')+'</tr>';
+  h+='<tr><th>Next check</th>'+rows.map(r=>cell(r.j,inp(r.j,'next','next check')+'<span class="ti-fb-calc" id="tiFbRuleT'+r.j+'"></span><span id="tiFbNFlag'+r.j+'"></span>')).join('')+'</tr>';
+  setHTML(tb,h+'</tbody>');rows.forEach(r=>fbPaint(r.j));graphRender();}
+
+/* the integrity graph, with the student's graph from Form DD-1 beneath it on the same dates */
+let tiDD=null;
+function graphRender(){const box=byId('tiFbGraph');if(!box)return;box.className='ti-graph';
+  const pts=scoredInOrder().map(r=>({d:tiIsoD((S.obs[r.j]||{}).date),p:r.x.p,j:r.j,t:(S.obs[r.j]||{}).type})).filter(x=>x.d);
+  if(!pts.length){setHTML(box,'<p class="hint">The graph shows once an observation with a date is scored.</p>');return;}
+  const dd=tiDD&&Array.isArray(tiDD.series)?tiDD:null,B=dd&&Array.isArray(dd.behaviors)?(dd.behaviors.find(b=>b&&b.kind==='target')||dd.behaviors[0]):null;
+  const lo0=addDays(pts[0].d,-28);let sp=[];
+  if(B&&B.name!=null)sp=dd.series.filter(x=>x&&tiIsoD(x.date)&&tiIsoD(x.date)>=lo0&&x.v&&typeof x.v[B.name]==='number'&&isFinite(x.v[B.name])).map(x=>({d:tiIsoD(x.date),v:x.v[B.name]}));
+  const all=pts.map(x=>x.d).concat(sp.map(x=>x.d)).sort(),lo=day(all[0]),hi=day(all[all.length-1]),span=Math.max(1,(hi-lo)/864e5);
+  const W=720,L=44,Rm=14,X=s=>L+(W-L-Rm)*((day(s)-lo)/864e5)/span;
+  const panel=(H,yOf,ticks,series,crit)=>{let g='<line x1="'+L+'" y1="'+(H-20)+'" x2="'+(W-Rm)+'" y2="'+(H-20)+'" stroke="#7E97AD"/>';
+    ticks.forEach(t=>{g+='<line x1="'+(L-4)+'" y1="'+yOf(t)+'" x2="'+L+'" y2="'+yOf(t)+'" stroke="#7E97AD"/><text x="'+(L-6)+'" y="'+(yOf(t)+3.5)+'" font-size="10" text-anchor="end" fill="#55697A">'+t+'</text>';});
+    if(crit!=null)g+='<line x1="'+L+'" y1="'+yOf(crit)+'" x2="'+(W-Rm)+'" y2="'+yOf(crit)+'" stroke="#2F6B37" stroke-dasharray="5 4"/><text x="'+(W-Rm)+'" y="'+(yOf(crit)-4)+'" font-size="10" text-anchor="end" fill="#2F6B37">criterion '+crit+'%</text>';
+    g+='<polyline fill="none" stroke="#182e43" stroke-width="1.6" points="'+series.map(s=>X(s.d).toFixed(1)+','+yOf(s.y).toFixed(1)).join(' ')+'"/>';
+    g+=series.map(s=>'<circle cx="'+X(s.d).toFixed(1)+'" cy="'+yOf(s.y).toFixed(1)+'" r="3.4" fill="'+(s.open?'#fff':'#182e43')+'" stroke="#182e43" stroke-width="1.4"/>').join('');
+    g+='<text x="'+L+'" y="'+(H-6)+'" font-size="10" fill="#55697A">'+esc(tiUsD(isoOf(lo)))+'</text><text x="'+(W-Rm)+'" y="'+(H-6)+'" font-size="10" text-anchor="end" fill="#55697A">'+esc(tiUsD(isoOf(hi)))+'</text>';
+    return'<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-hidden="true">'+g+'</svg>';};
+  const H1=170,y1=v=>10+(H1-30)*(1-v/100);
+  let h=panel(H1,y1,[0,50,100],pts.map(x=>({d:x.d,y:x.p,open:x.t!=='Unannounced'})),S.crit)+'<p class="ti-g-cap" id="tiGraphCap">Individual trial integrity on each scored observation (filled: unannounced; open: announced or not set), against the '+S.crit+'% criterion.</p>';
+  if(sp.length){const mx=Math.max(1,...sp.map(x=>x.v)),top=mx<=5?5:Math.ceil(mx/5)*5,H2=150,y2=v=>10+(H2-30)*(1-v/top);
+    h+=panel(H2,y2,[0,top/2,top].map(v=>Math.round(v*100)/100),sp.map(x=>({d:x.d,y:x.v})),null)+'<p class="ti-g-cap" id="tiGraphDD">Form DD-1: '+esc(B.name||'the target behavior')+(B.unit?' ('+esc(B.unit)+')':'')+', '+sp.length+' recorded day'+(sp.length===1?'':'s')+', on the same dates.</p>';}
+  else h+='<p class="hint" id="tiGraphDD">The student&rsquo;s graph from Form DD-1 shows beneath this one when the form is opened in the workstation with the case&rsquo;s daily data. Show both to the interventionist: feedback on their own integrity beside the student&rsquo;s progress (DiGennaro et al., 2007).</p>';
+  setHTML(box,h);}
+
+/* ---------------- M5: prompting and instruction steps on an acquisition plan ---------------- */
+function promptBanner(){const t=byId('stepTbl'),at=t&&(t.closest('.grid-wrap')||t);let b=byId('tiPromptBanner');
+  const L=tiAcqPlan()&&S.meta.promptOk!=='1'?S.steps.map((st,i)=>({st,i})).filter(x=>x.st.cmp==='ant'&&!x.st.crit&&tiPromptStep(x.st)):[];
+  if(!L.length){if(b)b.remove();return;}
+  if(!b&&at){b=document.createElement('div');b.id='tiPromptBanner';b.className='noprint';at.parentNode.insertBefore(b,at);}if(!b)return;
+  setHTML(b,'<div class="verdict v-mid"><b>Prompting and instruction steps on a skill-acquisition plan.</b>Step'+(L.length>1?'s ':' ')+L.map(x=>x.i+1).join(', ')+' '+(L.length>1?'name':'names')+' a prompt or an instruction and '+(L.length>1?'are':'is')+' not marked critical. In discrete-trial teaching, repeated instructions and a missing controlling prompt each slowed or prevented learning (Carroll et al., 2013). <button type="button" class="tool" id="tiPromptCrit">Mark them critical</button> <button type="button" class="tool" id="tiPromptOk">Leave them as they are</button></div>');}
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest('#tiPromptCrit')){S.steps.forEach(st=>{if(st.cmp==='ant'&&!st.crit&&tiPromptStep(st))st.crit=true;});renderAll();}
+  else if(t.closest('#tiPromptOk')){S.meta.promptOk='1';renderAll();}});
+
+/* ---------------- wiring ---------------- */
+document.addEventListener('change',e=>{const el=e.target;if(!el)return;
+  if(el.id==='tiThin'){if(el.checked)S.meta.thin='1';else delete S.meta.thin;renderSummary();renderRT();return;}
+  if(el.id==='tiFbCancel'){if(el.checked)S.meta.fbCancel='1';else delete S.meta.fbCancel;fbRender();return;}
+  if(el.dataset&&(el.dataset.m==='proc'||el.dataset.m==='pstart'||el.dataset.m==='mcheck')){S.meta[el.dataset.m]=el.value;renderSummary();renderRT();return;}
+  if(el.dataset&&el.dataset.m==='ptype'){promptBanner();return;}
+  if(el.dataset&&el.dataset.tio==='dis'){const j=+el.dataset.tioj,o=S.obs[j];if(!o)return;const d=Object.assign({},o.dis||{});if(el.checked)d[el.dataset.tiok]=true;else delete d[el.dataset.tiok];
+    if(Object.keys(d).length)o.dis=d;else delete o.dis;renderSummary();return;}
+  fbInput(el);});
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset)return;
+  if(el.dataset.tio==='obs2'){const o=S.obs[+el.dataset.tioj];if(!o)return;if(T(el.value))o.obs2=el.value;else delete o.obs2;covRender();return;}
+  if(el.type!=='checkbox'&&el.tagName!=='SELECT')fbInput(el);});
+function fbInput(el){if(!el.dataset||el.dataset.fb===undefined||el.dataset.fbj===undefined)return;const j=+el.dataset.fbj,o=S.obs[j];if(!o)return;
+  const f=Object.assign({},o.fb||{}),k=el.dataset.fb;
+  if(el.type==='checkbox'){if(el.checked)f[k]=true;else delete f[k];}else if(T(el.value))f[k]=el.value;else delete f[k];
+  if(Object.keys(f).length)o.fb=f;else delete o.fb;fbPaint(j);}
+
+/* the observation replaced in its column takes its own feedback and conditions with it */
+{const was=window.tiArchive;window.tiArchive=function(j){const r=was?was.apply(this,arguments):undefined;try{const o=S.obs[j];if(o){delete o.fb;delete o.dis;}}catch(e){}return r;};}
+/* the case's daily data from Form DD-1, for the graph beneath the integrity graph */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){try{tiDD=(f&&f.data)||null;}catch(e){}const r=was?was.apply(this,arguments):null;try{graphRender();}catch(e){}return r;};}
+
+const baseSum=renderSummary,baseRT=renderRT,baseIOA=renderIOA;
+renderSummary=function(){const r=baseSum.apply(this,arguments);try{planRender();disRender();covRender();}catch(e){console.error('TI-1 v25.64: '+(e&&e.message||e));}return r;};
+renderIOA=function(){const r=baseIOA.apply(this,arguments);try{covRender();}catch(e){console.error('TI-1 v25.64: '+(e&&e.message||e));}return r;};
+renderRT=function(){const r=baseRT.apply(this,arguments);try{moreRender();fbRender();}catch(e){console.error('TI-1 v25.64: '+(e&&e.message||e));}return r;};
+{const ra=renderAll;renderAll=function(){try{clean();}catch(e){}const r=ra.apply(this,arguments);try{const t=byId('tiThin');if(t)t.checked=S.meta.thin==='1';promptBanner();}catch(e){console.error('TI-1 v25.64: '+(e&&e.message||e));}return r;};}
+window.__tiV2564={schoolDays,ruleFor,metBy,kappa:tiKappa,ioaOf};
+try{planRender();disRender();covRender();moreRender();fbRender();promptBanner();}catch(e){console.error('TI-1 v25.64: '+(e&&e.message||e));}
+})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
