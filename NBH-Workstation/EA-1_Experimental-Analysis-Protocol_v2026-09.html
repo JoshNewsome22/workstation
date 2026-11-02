@@ -6373,6 +6373,115 @@ if(document.body.classList.contains('view-plan'))card();
 @media (max-width:640px){.pl-row{grid-template-columns:1fr}.pl-nums{grid-template-columns:1fr}}
 @media print{#plan{display:none!important}.ea-qrow[data-empty="1"]{display:none!important}}   /* an empty question stays off the paper */
 </style>
+<style id="v2564-css">
+/* v25.64 (EA-VI) the session tags, the new rows, the running trial counts and the acceptability table */
+#sessTbl .ea-tagc{white-space:nowrap;font-size:10.5px}
+#sessTbl .ea-tg{display:inline-flex;align-items:center;gap:1px;margin-right:3px;font-size:10px;color:var(--ink-soft,#54676f)}
+#sessTbl .ea-tg input{margin:0 1px 0 0}
+#sessTbl .ea-tgs{font-size:10px;padding:0 1px;max-width:52px}
+.ea-trrun{margin:6px 0 0;font-size:11.5px;line-height:1.45}
+.ea-trrun b{display:block}
+.ea-acct td,.ea-acct th{font-size:11.5px}
+.ea-acct select{max-width:100%}
+.ea-school{margin:6px 0 0}
+@media print{
+  .ea-new[data-empty="1"]{display:none!important}
+  #sessTbl.ea-notags .ea-tagc{display:none!important}
+  #eaSchoolRule:empty{display:none}
+}
+</style>
+<script id="v2564-eavi">
+/* v25.64 (EA-VI) the approved changes that sit outside the interpretation code: the lines the outcome adds (M1 the stop
+   indicator, H5 protective equipment, M6 social avoidance, L1 a pattern suggestive of acquisition, M3 the school option's rule,
+   M7 the antecedent-only tier, M8 a reported precursor), the condition order the runner suggests (M2), the safety-plan rows
+   the runner asks for (H6), the divided-attention card (L2), the rows that print only when filled, and opening a sheet from
+   a link (#variant, for Form VI-1). */
+(function(){"use strict";
+const q=s=>document.querySelector(s),qa=s=>Array.from(document.querySelectorAll(s));
+const V=n=>{const e=q('[name="'+n+'"]');return e?String(e.type==='checkbox'?(e.checked?'1':''):e.value||'').trim():'';};
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const AUTO=/alone|ignore|no[\s-]?interaction|\bnis\b/i;
+function set(n,v){const e=q('[name="'+n+'"]');if(!e)return;if(e.type==='checkbox')e.checked=!!v;else e.value=v;['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));}
+
+/* ---- the outcome's extra lines ---- */
+window.v2564Lines=function(o){const L=[],A=o.A||{},R=(o.results||[]).filter(r=>r.n),inv=o.inv,kr=o.kr||[],S=o.S||[];
+  /* M1 the "what if" check of Saini et al. (2018), from three sessions per condition onward */
+  if(!o.svi&&R.length&&o.exp>=3){const could=R.filter(r=>!r.met&&(r.u+1-r.l)/(r.n+1)>=0.5);
+    if(S.length&&!could.length)L.push('<b>Stop:</b> no further function can be identified with one more series. One more session in every condition, each on the side that shows an effect, would not bring another condition to the rule (the “what if” check of Saini et al., 2018, who reached accurate interpretations in 19 sessions on average, against 32 for full analyses). Stop the analysis and read the graph.');
+    else if(S.length)L.push('<b>Continue:</b> one more series could still identify '+could.map(r=>esc(r.name)).join(', ')+' (the “what if” check of Saini et al., 2018).');
+    else L.push('<b>Continue:</b> no function is identified yet. Run another series, or stop by the analysis termination criteria on Setup &amp; safety and follow the undifferentiated sequence.');}
+  /* H5 protective equipment worn and a low, undifferentiated outcome */
+  {const pe=kr.filter(r=>r.pe).length;if(pe&&!S.length&&R.length)L.push(`Protective equipment can suppress self-injury in every condition; this is not evidence of no social function. Consider a latency or precursor analysis. (The student wore protective equipment in ${pe} of the ${kr.length} sessions read; Borrero et al., 2002; Moore et al., 2004. Never take it off to get data without medical clearance and the team's and the parent's agreement.)`);}
+  /* M6 an elevated control (play) with a low alone or ignore: social avoidance. A high demand alone is the escape pattern, so
+     the flag needs the control itself elevated: at least half the highest condition's mean, with alone at half the control or less */
+  if(!inv&&A.ctrl&&R.length){const al=R.find(r=>AUTO.test(r.name)),cm=A.cs?A.cs.mean:0,top=Math.max(cm,...R.map(r=>r.mean)),dm=R.find(r=>/demand|escape|task/i.test(r.name));
+    if(al&&cm>0&&top>0&&cm>=0.5*top&&al.mean<=0.5*cm&&cm>(A.zeroFloor||0))L.push(`${esc(A.ctrl.name)}${dm&&dm.mean>=0.5*top?' and '+esc(dm.name)+' are':' is'} high and ${esc(al.name)} is low: consider escape from social interaction, and test it as its own condition, one in which problem behavior ends social interaction. Harper et al. (2013) found high rates in play or demand for 4 students and confirmed social avoidance for all 4 that way.`);}
+  /* L1 tangible or attention undifferentiated in the first half and differentiated in the second */
+  {const sec=A.second||new Set(),U=A.UCL,Lw=A.LCL;
+    const hiF=y=>inv?y<Lw:y>U,loF=y=>inv?y>U:(Lw<=1e-9?y<=1e-9:y<Lw),pct=a=>a.length?(a.filter(r=>hiF(r.y)).length-a.filter(r=>loF(r.y)).length)/a.length:0;
+    R.filter(r=>/tangible|item|attention/i.test(r.name)&&r.n>=4).forEach(r=>{const pts=kr.filter(x=>x.c===r.c).sort((x,y)=>x.i-y.i),h=Math.floor(pts.length/2),a=pts.slice(0,h),b=pts.slice(h);
+      if(a.length>=2&&b.length>=2&&pct(a)<0.5&&pct(b)>=0.5)L.push(`Possible acquisition: ${esc(r.name)} was undifferentiated in the first half of the assessment and differentiated in the second. Two readings: Roane et al. (2013) count late differentiation as differentiated (the upward-trend rule); Fernandez et al. (2024) treat it as a pattern suggestive of acquisition, a response the analysis itself may have taught (13.7% of tangible and 8.75% of attention conditions in 116 cases). The BCBA decides, and can set the function by hand.`);});}
+  /* M3 the school option: little behavior after two to three series of 5-min sessions */
+  if(V('m.school5')==='1'&&parseFloat(V('m.sessmin'))===5&&o.exp>=2&&kr.length&&!inv){const some=kr.filter(r=>r.y>0).length;if(some<kr.length/2)L.push(`Little behavior: ${kr.length-some} of the ${kr.length} sessions read had none. The school option's rule: after two to three series of 5-min sessions with little behavior, go to 10-min sessions (Session length on Setup &amp; safety; Mueller et al., 2011).`);}
+  /* M7 the antecedent-only analysis is a Tier 2 hypothesis */
+  if(V('v.chosen')==='antecedent')L.push('Antecedent-only analysis: no consequence was tested, so its result is a Tier 2 hypothesis on Form FS-1, not a function (Rahaman et al., 2024).');
+  /* M8 a precursor reported only */
+  if(V('v.chosen')==='precursor'&&V('m.precBasis')==='reported')L.push('The precursor is reported only: confirm it by observation, with conditional probabilities (Form ABC-1), before the precursor analysis is read (caregivers reported 10 of 90 assessment-identified precursors, Fritz et al., 2013; Heath &amp; Smith, 2019).');
+  return L;};
+
+/* ---- M2 the condition order the runner suggests ---- */
+const RANK=n=>AUTO.test(n)?0:/attention/i.test(n)?1:/tangible|item/i.test(n)?1.5:/play|control/i.test(n)?2:/demand|escape|task/i.test(n)?3:4;
+window.eaSuggestNext=function(){const mode=V('m.order')||'fixed';if(mode==='cards')return null;const A=window.eaAPI;if(!A)return null;
+  const cn=A.condNames();if(!cn.length)return null;
+  /* the fixed order is for a multielement analysis of the standard conditions: with a card it does not know (a yoked pair, a
+     synthesized test, a pairwise test) the runner keeps the order of the cards */
+  if(mode==='fixed'&&(cn.length<3||cn.some(c=>RANK(c.name)>=4)))return null;const rows=A.sessData(),last=rows.length?rows[rows.length-1].phase:'FA',ph=rows.filter(r=>r.phase===last);
+  const cnt=c=>ph.filter(r=>r.c===c.i).length,mn=Math.min(...cn.map(cnt)),due=cn.filter(c=>cnt(c)===mn);
+  if(mode==='random')return due[Math.floor(Math.random()*due.length)].i;
+  return due.slice().sort((a,b)=>RANK(a.name)-RANK(b.name)||a.i-b.i)[0].i;};
+
+/* ---- H6 the nurse or medical contact and the injury checks, for behavior that can injure ---- */
+window.eaNurseGap=function(){const u=parseInt(V('m.urg'),10);if(!(u>=3))return [];const m=[];if(!V('s.nurse'))m.push('the nurse or medical contact during sessions');if(!V('s.injchk'))m.push('the injury check schedule');return m;};
+function paintNurse(){const g=window.eaNurseGap(),n=q('#eaNurseFlag');if(!n)return;n.hidden=!g.length;n.innerHTML=g.length?'<b>Safety plan incomplete.</b> Behavior at TB-1 urgency level 3 or 4 can injure: write '+g.join(' and ')+' before the first session. Kahng et al. (2015) note that schools may have less access to medical care than the inpatient unit they studied.':'';}
+
+/* ---- M8 the precursor's basis ---- */
+function paintPrec(){const n=q('#eaPrecFlag');if(!n)return;const r=V('m.precBasis')==='reported';n.hidden=!r;n.innerHTML=r?'<b>Reported only.</b> Confirm the precursor by observation, with conditional probabilities (Form ABC-1), before a precursor FA. Caregivers reported 10 of 90 assessment-identified precursors (Fritz et al., 2013); direct observation and systematic manipulation are advised (Heath &amp; Smith, 2019).':'';}
+
+/* ---- M3 the school option ---- */
+function paintSchool(){const box=q('#eaSchool'),rule=q('#eaSchoolRule'),b=q('#eaSchoolBtn');if(!box)return;const on=V('m.school5')==='1',five=parseFloat(V('m.sessmin'))===5;
+  const school=V('v.setting')==='class'||/school|class|campus/i.test(V('m.setting'))||on;box.hidden=!school;
+  if(b)b.textContent=on?'Back to 10-min sessions':'Use the school option: 5-min sessions';
+  rule.textContent=on&&five?'Session length: 5 min, the school option. If there is little behavior after two to three series, go to 10 min.':'';}
+document.addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('#eaSchoolBtn'))return;const on=V('m.school5')==='1';set('m.school5',on?'':'1');set('m.sessmin',on?'10':'5');paintSchool();});
+
+/* ---- L2 the attention card's form ---- */
+const DIV={eo:'Divided attention: the therapist talks with another adult nearby (a teacher helping a peer, in a classroom); leisure items available',beh:'Therapist talks with the other adult, no eye contact or talk with the student; brief attention to the student contingent on each target, then back to the conversation'};
+function attnRows(){qa('#condWrap .card').forEach(c=>{const i=+c.dataset.cond,row=c.querySelector('.ea-attn');if(!row)return;row.hidden=!(/attention/i.test(V('c['+i+'].name'))||V('c['+i+'].attn'));});}
+function attnApply(i){const k=V('c['+i+'].attn'),std=(window.eaAPI&&eaAPI.TPL&&eaAPI.TPL.standard.conds[0])||{},note=q('#condWrap .card[data-cond="'+i+'"] .ea-attn-note');
+  const eo=V('c['+i+'].eo'),beh=V('c['+i+'].beh');let said='';
+  if(k==='divided'){if(!eo||eo===std.eo){set('c['+i+'].eo',DIV.eo);said='The card now has the divided-attention wording.';}if(!beh||beh===std.beh)set('c['+i+'].beh',DIV.beh);if(!said&&eo!==DIV.eo)said='This card has wording of its own: edit it so the therapist talks with another adult.';}
+  else if(k==='busy'){if(eo===DIV.eo){set('c['+i+'].eo',std.eo||'');said='The card has the standard wording again.';}if(beh===DIV.beh)set('c['+i+'].beh',std.beh||'');}
+  if(note)note.textContent=(k==='divided'?'Divided attention gave faster or clearer results for 2 of 9 people (Fahmie et al., 2013a); it fits a classroom, where a teacher helping a peer is the natural form. ':'')+said;}
+document.addEventListener('change',e=>{const t=e.target;if(!t)return;if(t.dataset&&t.dataset.attn!=null)attnApply(+t.dataset.attn);if(t.closest&&t.closest('#condWrap'))setTimeout(attnRows,0);});
+document.addEventListener('input',e=>{if(e.target&&e.target.closest&&e.target.closest('#condWrap')&&/\.name$/.test(e.target.name||''))attnRows();});
+
+/* ---- the rows and the column that print only when they hold something (an old file prints as it did) ---- */
+function emptyOf(el){return !Array.from(el.querySelectorAll('input,select,textarea')).some(f=>f.type==='checkbox'?f.checked:String(f.value||'').trim()!=='');}
+function paintEmpty(){qa('.ea-new').forEach(r=>r.setAttribute('data-empty',emptyOf(r)?'1':'0'));
+  const t=q('#sessTbl');if(t){const any=qa('#sessBody .ea-tagc').some(c=>!emptyOf(c));t.classList.toggle('ea-notags',!any);}}
+function paintAll(){try{paintEmpty();paintNurse();paintPrec();paintSchool();attnRows();}catch(e){}}
+let tm=0;const soon=()=>{clearTimeout(tm);tm=setTimeout(paintAll,40);};
+document.addEventListener('input',soon);document.addEventListener('change',soon);window.addEventListener('beforeprint',paintAll);
+/* a file saved before v25.64 keeps the order its runner used: the order of the cards */
+document.addEventListener('ea:restored',e=>{const d=e.detail||{},f=d.fields||{};if(Object.keys(f).length&&!('m.order' in f)){const s=q('[name="m.order"]');if(s)s.value='cards';}setTimeout(paintAll,0);});
+document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#simBtn,#clearBtn,#loadTpl,.nbh-sim-new'))setTimeout(paintAll,400);});
+
+/* ---- a link to a sheet: EA-1_...html#variant opens Select variant (Form VI-1 links to it) ---- */
+function fromHash(){const h=(location.hash||'').replace(/^#/,'');if(!/^(plan|setup|variant|conditions|sessions|analysis|design|guide|refs|walk)$/.test(h))return;const b=q('#viewSeg [data-view="'+h+'"]');if(b)b.click();else if(window.eaAPI)eaAPI.setView(h);}
+window.addEventListener('hashchange',fromHash);
+if(document.readyState==='complete')setTimeout(()=>{fromHash();paintAll();},300);else window.addEventListener('load',()=>setTimeout(()=>{fromHash();paintAll();},300));
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
@@ -6566,115 +6675,6 @@ a{text-underline-offset:2px}
    times the page's size): the page keeps its own text size on screen; ABC-1's paper sheet sets its own size for printing (v24.07) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </style>
-<style id="v2564-css">
-/* v25.64 (EA-VI) the session tags, the new rows, the running trial counts and the acceptability table */
-#sessTbl .ea-tagc{white-space:nowrap;font-size:10.5px}
-#sessTbl .ea-tg{display:inline-flex;align-items:center;gap:1px;margin-right:3px;font-size:10px;color:var(--ink-soft,#54676f)}
-#sessTbl .ea-tg input{margin:0 1px 0 0}
-#sessTbl .ea-tgs{font-size:10px;padding:0 1px;max-width:52px}
-.ea-trrun{margin:6px 0 0;font-size:11.5px;line-height:1.45}
-.ea-trrun b{display:block}
-.ea-acct td,.ea-acct th{font-size:11.5px}
-.ea-acct select{max-width:100%}
-.ea-school{margin:6px 0 0}
-@media print{
-  .ea-new[data-empty="1"]{display:none!important}
-  #sessTbl.ea-notags .ea-tagc{display:none!important}
-  #eaSchoolRule:empty{display:none}
-}
-</style>
-<script id="v2564-eavi">
-/* v25.64 (EA-VI) the approved changes that sit outside the interpretation code: the lines the outcome adds (M1 the stop
-   indicator, H5 protective equipment, M6 social avoidance, L1 a pattern suggestive of acquisition, M3 the school option's rule,
-   M7 the antecedent-only tier, M8 a reported precursor), the condition order the runner suggests (M2), the safety-plan rows
-   the runner asks for (H6), the divided-attention card (L2), the rows that print only when filled, and opening a sheet from
-   a link (#variant, for Form VI-1). */
-(function(){"use strict";
-const q=s=>document.querySelector(s),qa=s=>Array.from(document.querySelectorAll(s));
-const V=n=>{const e=q('[name="'+n+'"]');return e?String(e.type==='checkbox'?(e.checked?'1':''):e.value||'').trim():'';};
-const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-const AUTO=/alone|ignore|no[\s-]?interaction|\bnis\b/i;
-function set(n,v){const e=q('[name="'+n+'"]');if(!e)return;if(e.type==='checkbox')e.checked=!!v;else e.value=v;['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));}
-
-/* ---- the outcome's extra lines ---- */
-window.v2564Lines=function(o){const L=[],A=o.A||{},R=(o.results||[]).filter(r=>r.n),inv=o.inv,kr=o.kr||[],S=o.S||[];
-  /* M1 the "what if" check of Saini et al. (2018), from three sessions per condition onward */
-  if(!o.svi&&R.length&&o.exp>=3){const could=R.filter(r=>!r.met&&(r.u+1-r.l)/(r.n+1)>=0.5);
-    if(S.length&&!could.length)L.push('<b>Stop:</b> no further function can be identified with one more series. One more session in every condition, each on the side that shows an effect, would not bring another condition to the rule (the “what if” check of Saini et al., 2018, who reached accurate interpretations in 19 sessions on average, against 32 for full analyses). Stop the analysis and read the graph.');
-    else if(S.length)L.push('<b>Continue:</b> one more series could still identify '+could.map(r=>esc(r.name)).join(', ')+' (the “what if” check of Saini et al., 2018).');
-    else L.push('<b>Continue:</b> no function is identified yet. Run another series, or stop by the analysis termination criteria on Setup &amp; safety and follow the undifferentiated sequence.');}
-  /* H5 protective equipment worn and a low, undifferentiated outcome */
-  {const pe=kr.filter(r=>r.pe).length;if(pe&&!S.length&&R.length)L.push(`Protective equipment can suppress self-injury in every condition; this is not evidence of no social function. Consider a latency or precursor analysis. (The student wore protective equipment in ${pe} of the ${kr.length} sessions read; Borrero et al., 2002; Moore et al., 2004. Never take it off to get data without medical clearance and the team's and the parent's agreement.)`);}
-  /* M6 an elevated control (play) with a low alone or ignore: social avoidance. A high demand alone is the escape pattern, so
-     the flag needs the control itself elevated: at least half the highest condition's mean, with alone at half the control or less */
-  if(!inv&&A.ctrl&&R.length){const al=R.find(r=>AUTO.test(r.name)),cm=A.cs?A.cs.mean:0,top=Math.max(cm,...R.map(r=>r.mean)),dm=R.find(r=>/demand|escape|task/i.test(r.name));
-    if(al&&cm>0&&top>0&&cm>=0.5*top&&al.mean<=0.5*cm&&cm>(A.zeroFloor||0))L.push(`${esc(A.ctrl.name)}${dm&&dm.mean>=0.5*top?' and '+esc(dm.name)+' are':' is'} high and ${esc(al.name)} is low: consider escape from social interaction, and test it as its own condition, one in which problem behavior ends social interaction. Harper et al. (2013) found high rates in play or demand for 4 students and confirmed social avoidance for all 4 that way.`);}
-  /* L1 tangible or attention undifferentiated in the first half and differentiated in the second */
-  {const sec=A.second||new Set(),U=A.UCL,Lw=A.LCL;
-    const hiF=y=>inv?y<Lw:y>U,loF=y=>inv?y>U:(Lw<=1e-9?y<=1e-9:y<Lw),pct=a=>a.length?(a.filter(r=>hiF(r.y)).length-a.filter(r=>loF(r.y)).length)/a.length:0;
-    R.filter(r=>/tangible|item|attention/i.test(r.name)&&r.n>=4).forEach(r=>{const pts=kr.filter(x=>x.c===r.c).sort((x,y)=>x.i-y.i),h=Math.floor(pts.length/2),a=pts.slice(0,h),b=pts.slice(h);
-      if(a.length>=2&&b.length>=2&&pct(a)<0.5&&pct(b)>=0.5)L.push(`Possible acquisition: ${esc(r.name)} was undifferentiated in the first half of the assessment and differentiated in the second. Two readings: Roane et al. (2013) count late differentiation as differentiated (the upward-trend rule); Fernandez et al. (2024) treat it as a pattern suggestive of acquisition, a response the analysis itself may have taught (13.7% of tangible and 8.75% of attention conditions in 116 cases). The BCBA decides, and can set the function by hand.`);});}
-  /* M3 the school option: little behavior after two to three series of 5-min sessions */
-  if(V('m.school5')==='1'&&parseFloat(V('m.sessmin'))===5&&o.exp>=2&&kr.length&&!inv){const some=kr.filter(r=>r.y>0).length;if(some<kr.length/2)L.push(`Little behavior: ${kr.length-some} of the ${kr.length} sessions read had none. The school option's rule: after two to three series of 5-min sessions with little behavior, go to 10-min sessions (Session length on Setup &amp; safety; Mueller et al., 2011).`);}
-  /* M7 the antecedent-only analysis is a Tier 2 hypothesis */
-  if(V('v.chosen')==='antecedent')L.push('Antecedent-only analysis: no consequence was tested, so its result is a Tier 2 hypothesis on Form FS-1, not a function (Rahaman et al., 2024).');
-  /* M8 a precursor reported only */
-  if(V('v.chosen')==='precursor'&&V('m.precBasis')==='reported')L.push('The precursor is reported only: confirm it by observation, with conditional probabilities (Form ABC-1), before the precursor analysis is read (caregivers reported 10 of 90 assessment-identified precursors, Fritz et al., 2013; Heath &amp; Smith, 2019).');
-  return L;};
-
-/* ---- M2 the condition order the runner suggests ---- */
-const RANK=n=>AUTO.test(n)?0:/attention/i.test(n)?1:/tangible|item/i.test(n)?1.5:/play|control/i.test(n)?2:/demand|escape|task/i.test(n)?3:4;
-window.eaSuggestNext=function(){const mode=V('m.order')||'fixed';if(mode==='cards')return null;const A=window.eaAPI;if(!A)return null;
-  const cn=A.condNames();if(!cn.length)return null;
-  /* the fixed order is for a multielement analysis of the standard conditions: with a card it does not know (a yoked pair, a
-     synthesized test, a pairwise test) the runner keeps the order of the cards */
-  if(mode==='fixed'&&(cn.length<3||cn.some(c=>RANK(c.name)>=4)))return null;const rows=A.sessData(),last=rows.length?rows[rows.length-1].phase:'FA',ph=rows.filter(r=>r.phase===last);
-  const cnt=c=>ph.filter(r=>r.c===c.i).length,mn=Math.min(...cn.map(cnt)),due=cn.filter(c=>cnt(c)===mn);
-  if(mode==='random')return due[Math.floor(Math.random()*due.length)].i;
-  return due.slice().sort((a,b)=>RANK(a.name)-RANK(b.name)||a.i-b.i)[0].i;};
-
-/* ---- H6 the nurse or medical contact and the injury checks, for behavior that can injure ---- */
-window.eaNurseGap=function(){const u=parseInt(V('m.urg'),10);if(!(u>=3))return [];const m=[];if(!V('s.nurse'))m.push('the nurse or medical contact during sessions');if(!V('s.injchk'))m.push('the injury check schedule');return m;};
-function paintNurse(){const g=window.eaNurseGap(),n=q('#eaNurseFlag');if(!n)return;n.hidden=!g.length;n.innerHTML=g.length?'<b>Safety plan incomplete.</b> Behavior at TB-1 urgency level 3 or 4 can injure: write '+g.join(' and ')+' before the first session. Kahng et al. (2015) note that schools may have less access to medical care than the inpatient unit they studied.':'';}
-
-/* ---- M8 the precursor's basis ---- */
-function paintPrec(){const n=q('#eaPrecFlag');if(!n)return;const r=V('m.precBasis')==='reported';n.hidden=!r;n.innerHTML=r?'<b>Reported only.</b> Confirm the precursor by observation, with conditional probabilities (Form ABC-1), before a precursor FA. Caregivers reported 10 of 90 assessment-identified precursors (Fritz et al., 2013); direct observation and systematic manipulation are advised (Heath &amp; Smith, 2019).':'';}
-
-/* ---- M3 the school option ---- */
-function paintSchool(){const box=q('#eaSchool'),rule=q('#eaSchoolRule'),b=q('#eaSchoolBtn');if(!box)return;const on=V('m.school5')==='1',five=parseFloat(V('m.sessmin'))===5;
-  const school=V('v.setting')==='class'||/school|class|campus/i.test(V('m.setting'))||on;box.hidden=!school;
-  if(b)b.textContent=on?'Back to 10-min sessions':'Use the school option: 5-min sessions';
-  rule.textContent=on&&five?'Session length: 5 min, the school option. If there is little behavior after two to three series, go to 10 min.':'';}
-document.addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('#eaSchoolBtn'))return;const on=V('m.school5')==='1';set('m.school5',on?'':'1');set('m.sessmin',on?'10':'5');paintSchool();});
-
-/* ---- L2 the attention card's form ---- */
-const DIV={eo:'Divided attention: the therapist talks with another adult nearby (a teacher helping a peer, in a classroom); leisure items available',beh:'Therapist talks with the other adult, no eye contact or talk with the student; brief attention to the student contingent on each target, then back to the conversation'};
-function attnRows(){qa('#condWrap .card').forEach(c=>{const i=+c.dataset.cond,row=c.querySelector('.ea-attn');if(!row)return;row.hidden=!(/attention/i.test(V('c['+i+'].name'))||V('c['+i+'].attn'));});}
-function attnApply(i){const k=V('c['+i+'].attn'),std=(window.eaAPI&&eaAPI.TPL&&eaAPI.TPL.standard.conds[0])||{},note=q('#condWrap .card[data-cond="'+i+'"] .ea-attn-note');
-  const eo=V('c['+i+'].eo'),beh=V('c['+i+'].beh');let said='';
-  if(k==='divided'){if(!eo||eo===std.eo){set('c['+i+'].eo',DIV.eo);said='The card now has the divided-attention wording.';}if(!beh||beh===std.beh)set('c['+i+'].beh',DIV.beh);if(!said&&eo!==DIV.eo)said='This card has wording of its own: edit it so the therapist talks with another adult.';}
-  else if(k==='busy'){if(eo===DIV.eo){set('c['+i+'].eo',std.eo||'');said='The card has the standard wording again.';}if(beh===DIV.beh)set('c['+i+'].beh',std.beh||'');}
-  if(note)note.textContent=(k==='divided'?'Divided attention gave faster or clearer results for 2 of 9 people (Fahmie et al., 2013a); it fits a classroom, where a teacher helping a peer is the natural form. ':'')+said;}
-document.addEventListener('change',e=>{const t=e.target;if(!t)return;if(t.dataset&&t.dataset.attn!=null)attnApply(+t.dataset.attn);if(t.closest&&t.closest('#condWrap'))setTimeout(attnRows,0);});
-document.addEventListener('input',e=>{if(e.target&&e.target.closest&&e.target.closest('#condWrap')&&/\.name$/.test(e.target.name||''))attnRows();});
-
-/* ---- the rows and the column that print only when they hold something (an old file prints as it did) ---- */
-function emptyOf(el){return !Array.from(el.querySelectorAll('input,select,textarea')).some(f=>f.type==='checkbox'?f.checked:String(f.value||'').trim()!=='');}
-function paintEmpty(){qa('.ea-new').forEach(r=>r.setAttribute('data-empty',emptyOf(r)?'1':'0'));
-  const t=q('#sessTbl');if(t){const any=qa('#sessBody .ea-tagc').some(c=>!emptyOf(c));t.classList.toggle('ea-notags',!any);}}
-function paintAll(){try{paintEmpty();paintNurse();paintPrec();paintSchool();attnRows();}catch(e){}}
-let tm=0;const soon=()=>{clearTimeout(tm);tm=setTimeout(paintAll,40);};
-document.addEventListener('input',soon);document.addEventListener('change',soon);window.addEventListener('beforeprint',paintAll);
-/* a file saved before v25.64 keeps the order its runner used: the order of the cards */
-document.addEventListener('ea:restored',e=>{const d=e.detail||{},f=d.fields||{};if(Object.keys(f).length&&!('m.order' in f)){const s=q('[name="m.order"]');if(s)s.value='cards';}setTimeout(paintAll,0);});
-document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#simBtn,#clearBtn,#loadTpl,.nbh-sim-new'))setTimeout(paintAll,400);});
-
-/* ---- a link to a sheet: EA-1_...html#variant opens Select variant (Form VI-1 links to it) ---- */
-function fromHash(){const h=(location.hash||'').replace(/^#/,'');if(!/^(plan|setup|variant|conditions|sessions|analysis|design|guide|refs|walk)$/.test(h))return;const b=q('#viewSeg [data-view="'+h+'"]');if(b)b.click();else if(window.eaAPI)eaAPI.setView(h);}
-window.addEventListener('hashchange',fromHash);
-if(document.readyState==='complete')setTimeout(()=>{fromHash();paintAll();},300);else window.addEventListener('load',()=>setTimeout(()=>{fromHash();paintAll();},300));
-})();
-</script>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
 <!-- v24.40h one simulated student -->
