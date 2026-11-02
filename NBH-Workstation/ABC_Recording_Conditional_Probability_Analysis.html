@@ -1700,8 +1700,8 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
       <p class="note abc-probe-safe"><b>Safeguards.</b> Staff respond as they usually do. Never instruct staff to deliver the suspected reinforcer after the behavior. Each probe needs a stop rule, and Form IC-1 consent where the plan requires it.</p>
       <div class="session-grid" style="margin-top:10px">
         <label class="field">Probe<select id="pr-type"><option value="att">Attention diverted to a peer</option><option value="dem">A demand presented</option><option value="item">A preferred item put away</option></select></label>
-        <label class="field">Date<input id="pr-date" type="date"></label>
-        <label class="field">Start time<input id="pr-time" type="time"></label>
+        <label class="field">Date<input id="pr-date" type="date" data-now></label>
+        <label class="field">Start time<input id="pr-time" type="time" data-now></label>
         <label class="field">Length (minutes)<input id="pr-min" type="number" min="1" max="60" step="1" value="5"></label>
         <label class="field abc-wide">Stop rule<input id="pr-stop" type="text" placeholder="e.g. end the probe after 2 incidents, or at once after any aggression"></label>
       </div>
@@ -21486,6 +21486,7 @@ window.abcIoaWorst = function(){
 /* ======================= wiring ======================= */
 function wire(){
   renderProbes(); paintCalc(); paintCheck();
+  /* the probe's entry boxes take today and now, as the incident's do (data-now: they are not part of the saved record) */
   const pd = byId("pr-date"); if(pd && !pd.value) pd.value = todayISO();
   const pt = byId("pr-time"); if(pt && !pt.value) pt.value = nowHM();
   const add = byId("pr-add"); if(add) add.addEventListener("click", addProbe);
