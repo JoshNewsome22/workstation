@@ -2589,7 +2589,7 @@ let inShell=false;try{inShell=window.parent!==window;}catch(e){}
 const hasFb=c=>!!(T(c.feedback)||(c.fbSteps||[]).length||(c.fbForm||[]).length||c.fbWhen);
 function critMiss(c){if(c.obs!=='yes')return false;const A=ckActive(c);return ckItems(c).some((it,j)=>it.crit&&A[j]==='n');}
 function fbBlock(c){const id=esc(c.id),F=f=>'c_'+id+'_'+f,n=(c.fbSteps||[]).length;
-  return '<section class="rs-grp rs-fbrec" data-fbrec="'+id+'"><h4 class="rs-grph">Feedback given: when, how, and the steps <span class="rs-grpsub">the performance-feedback checklist (Carroll et al., 2022)</span> <span class="rs-grpn" data-fbn="'+id+'">'+n+' of 8</span></h4>'+
+  return '<section class="rs-fbrec" data-fbrec="'+id+'"><h4 class="rs-fbh">Feedback given: when, how, and the steps <span class="rs-fbsub">the performance-feedback checklist (Carroll et al., 2022)</span> <span class="rs-fbn" data-fbn="'+id+'">'+n+' of 8</span></h4>'+
     '<div class="fieldgrid"><div><label for="'+F('fbWhen')+'">When</label><select id="'+F('fbWhen')+'" data-c="'+id+'" data-f="fbWhen">'+opts(FBW,c.fbWhen,true)+'</select></div>'+
     '<div data-fblate="'+id+'"'+(c.fbWhen==='later'?'':' hidden')+'><label for="'+F('fbLate')+'">Given on</label><input type="date" id="'+F('fbLate')+'" data-c="'+id+'" data-f="fbLate" value="'+esc(c.fbLate||'')+'"></div></div>'+
     '<span class="lbl">Form</span><div class="rs-chips">'+FBF.map(([k,l])=>'<label class="chip"><input type="checkbox" id="'+F('ff_'+k)+'" data-rsfb="'+id+'" data-k="fbForm" value="'+k+'"'+((c.fbForm||[]).includes(k)?' checked':'')+'> '+esc(l)+'</label>').join('')+'</div>'+
@@ -2757,6 +2757,11 @@ try{renderAll();}catch(e){}
 .rs-annline{margin:8px 0;font-size:13px;line-height:1.45}
 .rs-fbkhint{margin:4px 0 8px}
 .rs-obsreset{margin:6px 0}
+/* the feedback record, styled as the contact's other panels (its own classes, so the three teaching panels stay three) */
+.rs-fbrec{border:1px solid var(--rule-2,#d5dfdd);border-radius:8px;background:#f7faf9;padding:10px 14px 12px;margin:14px 0}
+.rs-fbh{margin:0 0 2px;font-family:var(--sans);font-size:15px;font-weight:700;color:var(--nbh-navy,#182e43);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.rs-fbsub{font-weight:400;font-size:13px;color:var(--ink-soft,#54676f)}.rs-fbn{margin-left:auto;font-weight:600;font-size:12.5px;color:var(--nbh-slate,#254657)}
+.rs-fbrec .rs-chips{margin:8px 0 0}
 </style>
 
 <script>
