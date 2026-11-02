@@ -1017,6 +1017,8 @@ td input,td select{max-width:100%}
       <tr><td>Lean reinforcement for the alternative response</td><td>Not selected as a resurgence-mitigation procedure. If it is selected for another reason (for example, reaching the terminal schedule sooner), that reason is written under &ldquo;How it will be arranged.&rdquo;</td><td>&ldquo;Did not appreciably reduce resurgence during the extinction challenge&rdquo;; a dense-to-lean thinning arrangement &ldquo;does not appear to worsen resurgence&rdquo; (Mitteer et al., 2026).</td></tr>
       <tr><td>The combined package</td><td>Not selected as a package. If the lean baseline is chosen, it is recorded alone. The abstract calls the combined approach the most consistent and robust in reducing resurgence; this form does not select it as a package because two of its parts did little alone and the lean alternative schedule conflicts with progressing treatment. This is the form&rsquo;s judgment, not the authors&rsquo; recommendation.</td><td>&ldquo;It seems premature to suggest that clinicians ought to be packaging lengthy treatment duration and lean alternative reinforcement with lean target reinforcement&rdquo;; the lean baseline may account for the combined effect (Mitteer et al., 2026).</td></tr>
       <tr><td>Any selected procedure</td><td>The challenge log captures raw rates as well as proportion of baseline. A low proportion with a high raw rate is the case for ticking the safety-arrangements row (Phase 3, Untested; Briggs et al., 2018); the form fixes no raw-rate threshold, so the team ticks it from the Analysis sheet.</td><td>&ldquo;Researchers should generally consider raw response rates for any strategy that appears promising with transformed data&rdquo;; on proportion of baseline alone, how high rates of severe behavior run in the test condition can be obscured (Mitteer et al., 2026).</td></tr>
+      <!-- v25.65 (BC-RM-H8) -->
+      <tr><td>The first S<sup>&Delta;</sup> period</td><td>No longer than 2 minutes; and no thinning step removes more than half of the remaining reinforcement. The 2 minutes comes from the source; the half is this form&rsquo;s convention.</td><td>Resurgence occurred in all 7 multiple-schedule applications that began with an S<sup>&Delta;</sup> period longer than 2 minutes, and in 6 of 17 (35.3%) that began with 2 minutes or less (Saini et al., 2016); step size was the only variable correlated with how large resurgence was (Laureano et al., 2024).</td></tr>
       <tr><td>Multiple-schedule S<sup>&Delta;</sup> (Applied, above)</td><td>Remains the procedure this source points to.</td><td>Embedding the discriminative stimuli of a multiple schedule in FCT reduced proportion of baseline and &ldquo;often generated minimal raw response rates that would be clinically acceptable&rdquo; (Fisher et al., 2020; Fuhrman et al., 2016, as read in Mitteer et al., 2026).</td></tr>
       </tbody></table></div>
 
@@ -1030,7 +1032,8 @@ td input,td select{max-width:100%}
   <!-- ===================== LOG ===================== -->
   <section class="only-log">
     <h2 class="nbh-band">Treatment Challenge Log</h2>
-    <p class="hint">One row per challenge. Enter the rates from the last five sessions <i>before</i> the change (condition A) and the first three sessions <i>after</i> it (condition B), comma separated. Relapse is scored when any condition-B session exceeds every condition-A session &mdash; the criterion Briggs et al. (2018) adapted from Lerman and Iwata (1995). If more rates are entered, only the last five before and the first three after are scored, and the row says so; when fewer sessions were run, all of them are scored.</p>
+    <!-- v25.65 (BC-RM-H5, H6, H7, M8) the replacement response, up to ten sessions after, the second published rule, and the days away -->
+    <p class="hint">One row per challenge. Enter the rates from the last five sessions <i>before</i> the change (condition A) and the sessions <i>after</i> it (condition B), comma separated: at least the first three, and up to ten. Relapse is scored when any of the first three condition-B sessions exceeds every condition-A session &mdash; the criterion Briggs et al. (2018) adapted from Lerman and Iwata (1995), called <b>max-of-5</b>. Beside it the row shows <b>mean-of-2</b>: any of the first three condition-B sessions above the mean of the last two condition-A sessions (Podlesnik et al., 2025). Only the last five before are used; the first three after are scored, and the rest, up to ten, measure how long a relapse <b>lasted</b>: the run of condition-B sessions, from the first one that met the criterion, that stayed above every condition-A session. A relapse that lasted 3 sessions or more is flagged: review the step, and do not advance. Under each rate box, the <b>replacement response</b> (the card, word or sign, or compliance) can be entered the same way, as a rate or a percentage of opportunities used independently; it is scored <b>disrupted</b> when the lowest of the first three condition-B values falls below the lowest condition-A value, or, for a percentage, below the criterion set here. For a spontaneous-recovery row, enter the days away: the last five sessions before the break are condition A and the first sessions back are condition B.</p>
     <div class="row" style="margin:8px 0;display:flex;gap:8px;align-items:center">
       <button class="tool" id="addCh">Add challenge</button><button class="tool" id="delCh">Remove last</button>
       <span class="hint" style="margin-left:10px">Baseline mean for proportions:</span>
@@ -1038,10 +1041,18 @@ td input,td select{max-width:100%}
       <span class="hint">mean of the last five baseline sessions; the rates below are</span>
       <input data-m="unit" placeholder="per day" aria-label="The unit of the rates" style="width:120px;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:3px 6px">
     </div>
+    <!-- v25.65 (BC-RM-H5, H6) the criterion for a replacement response given as a percentage, and the watch window after each change -->
+    <div class="row" style="margin:0 0 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span class="hint">Replacement response disrupted below</span>
+      <input type="number" data-m="rrCrit" min="0" max="100" step="any" placeholder="80" aria-label="Criterion for the replacement response, percent" style="width:70px;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:3px 6px">
+      <span class="hint">% of opportunities (blank: 80%); watch window after each change:</span>
+      <input type="number" data-m="watchN" min="3" max="10" step="1" id="rmWatch" aria-label="Watch window after each change, sessions" style="width:60px;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:3px 6px">
+      <span class="hint" id="rmWatchNote">sessions</span>
+    </div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Treatment challenge log table"><table class="rt" id="chTbl"><thead><tr>
-      <th style="width:38px">#</th><th style="width:8%">Date</th><th style="width:12%">Type</th><th style="width:7%">Planned</th>
-      <th style="width:16%">What changed</th><th style="width:13%">Condition A rates</th><th style="width:11%">Condition B rates</th>
-      <th style="width:7%">Relapse</th><th style="width:7%">Prop. A</th><th style="width:7%">Prop. B</th><th>Response</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:38px">#</th><th style="width:8%">Date</th><th style="width:11%">Type</th><th style="width:7%">Planned</th>
+      <th style="width:14%">What changed</th><th style="width:12%">Condition A rates</th><th style="width:11%">Condition B rates</th>
+      <th style="width:12%">Relapse</th><th style="width:6%">Prop. A</th><th style="width:6%">Prop. B</th><th>Response</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <p class="hint" style="margin-top:8px">Proportion of baseline is the highest rate among the sessions scored in that condition divided by the baseline mean, which is the mean of the last five baseline sessions (the definition in Briggs et al., 2018, and Mitteer et al., 2026). A proportion of 1.0 means the behavior returned to its pre-treatment average. The condition-B rates are kept as raw rates as well; the Analysis sheet reads the two together.</p>
   </section>
 
@@ -1059,7 +1070,7 @@ td input,td select{max-width:100%}
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Relapse by type table"><table class="rt" id="typeTbl"></table></div>
     <h3 style="margin-top:14px">Against the Published Base Rates</h3>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Published base rates table"><table class="rt" id="baseTbl"></table></div>
-    <p class="hint" style="margin-top:6px">Each published rate is compared only with the challenges recorded as the same type. The resurgence figures come from schedule thinning during FCT (Briggs et al., 2018); the renewal figures come from context changes in an outpatient clinic (Muething et al., 2020) and an inpatient program (Falligant et al., 2021). Both were scored with the rule used on the challenge log, but on short clinic sessions run by trained therapists; this student&rsquo;s rows are in the log&rsquo;s own unit (a school day, for example), so the percentages size the risk rather than match it.</p>
+    <p class="hint" style="margin-top:6px">Each published rate is compared only with the challenges recorded as the same type. The resurgence figures come from schedule thinning during FCT (Briggs et al., 2018); the renewal figures come from context changes in an outpatient clinic (Muething et al., 2020) and an inpatient program (Falligant et al., 2021). Both were scored with the rule used on the challenge log, but on short clinic sessions run by trained therapists; this student&rsquo;s rows are in the log&rsquo;s own unit (a school day, for example), so the percentages size the risk rather than match it. The mean-of-2 rows use the second rule on the same challenges: it scored resurgence at about twice the odds of max-of-5 in a reanalysis of clinical data (odds ratio 2.1; Podlesnik et al., 2025). Neither rule has been checked against harm. With automatic function on Setup, the renewal rows show the automatic-function figures (Falligant et al., 2024; Muething et al., 2022).</p>
     <table class="rt" style="margin-top:14px">
       <tr><th style="width:24%">Did the mitigation procedures hold?</th><td><textarea data-m="held" rows="3" placeholder="Which selected procedures were in place at each challenge, and whether the challenges where they were absent went worse"></textarea></td></tr>
       <tr><th>Changes to the plan</th><td><textarea data-m="changes" rows="3"></textarea></td></tr>
@@ -1086,14 +1097,19 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band" style="margin-top:16px">Where the Detection Rule Comes From</h2>
     <p>The criterion on the challenge log is the one Briggs et al. (2018) used, adapted from the definition of an extinction burst in Lerman and Iwata (1995): relapse is scored when responding during any of the first three sessions after the change exceeds responding during every one of the last five sessions before it. Magnitude is expressed as a proportion of the mean baseline rate so that challenges and cases can be compared.</p>
     <p class="hint">Note what this criterion is relative to. It compares against the <i>previous treatment step</i>, not against baseline, which Briggs et al. (2018) give as one possible reason why relapse detected this way is far more common than an extinction burst as Lerman and Iwata defined it. A low proportion of baseline can still meet the criterion. Read the proportion columns alongside the relapse column, not instead of it.</p>
+    <!-- v25.65 (BC-RM-H7) the second published rule -->
+    <p class="hint">A second published rule gives different counts. <b>Mean-of-2</b> scores relapse when any of the first three sessions after the change is above the mean of the last two sessions before it. Reanalyzing clinical data with both rules, resurgence was scored at 29.56% of 504 thinning steps by max-of-5 and 46.83% by mean-of-2 (odds ratio 2.1), and renewal at 23.37% and 31.29% of 505 context changes (Podlesnik et al., 2025); renewal was 25.23% of 749 changes by max-of-5 and 39.79% by mean-of-2 in Aggarwal et al. (2026). The log shows both; the published-rate comparison uses max-of-5. Where the two disagree, behavior was still changing in the last treatment sessions: hold the next step until it is stable.</p>
 
     <h2 class="nbh-band" style="margin-top:16px">Published Base Rates</h2>
     <table class="rt">
       <tr><th style="width:26%">Resurgence during FCT schedule thinning</th><td>19 of 25 applications (76%) and 47 of 111 dense-to-lean transitions (42%) in Briggs et al. (2018). Across later cohorts the per-case figure has ranged from 76% to 91% (Kranak &amp; Falligant, 2021; Mitteer et al., 2022; Muething et al., 2021).</td></tr>
       <tr><th>By function, per application</th><td>Escape 8/8 (100%), attention plus tangible 1/1, attention 3/4 (75%), tangible 6/9 (67%), social control 1/3 (33%). Briggs et al. caution that the varying number of applications within each function precludes direct comparison between functions.</td></tr>
       <tr><th>Magnitude</th><td>Across the transitions with resurgence, the mean proportion of baseline was 0.13 in the step before the change and 0.66 in the step after &mdash; roughly a five-fold increase, reported by Briggs et al. as 508%. Responding reached or exceeded the baseline mean in 6 of 19 applications (32%) and 8 of 47 transitions (17%).</td></tr>
-      <tr><th>Renewal</th><td>67.2% of participants and 42.3% of context changes in an outpatient clinic (Muething et al., 2020); 59% of participants and 24% of context changes in an inpatient program (Falligant et al., 2021).</td></tr>
-      <tr><th>Course</th><td>In Briggs et al. every instance was transient: behavior resurged and then decreased, and the target schedule was reached in almost all applications. That was with trained therapists in a structured setting. The authors suggest that increases may be more sustained when routine caregivers run the thinning, because they may be less likely to hold extinction with high integrity during an episode.</td></tr>
+      <tr><th>Renewal</th><td>67.2% of participants and 42.3% of context changes in an outpatient clinic (Muething et al., 2020); 59% of participants and 24% of context changes in an inpatient program (Falligant et al., 2021). In the largest series, 25.23% of 749 context changes; task changes renewed as often as changes of person or setting (27.02%, 24.69% and 22.92%; not a significant difference), and 57.14% of the patients who had a task change showed renewal (Aggarwal et al., 2026).</td></tr>
+      <!-- v25.65 (BC-RM-M1) automatically maintained behavior -->
+      <tr><th>Renewal, automatic function</th><td>68.1% of participants and 18.8% of 985 context changes; location changes renewed more often than person changes (27.5% against 17.7%) (Falligant et al., 2024). Relapse at 36% of person changes and 26% of setting changes, and after a change of person it peaked about five sessions later (Muething et al., 2022). With &ldquo;Automatic (nonsocial)&rdquo; on Setup, the risk sheet and the Analysis sheet use these figures and the watch window is 10 sessions.</td></tr>
+      <!-- v25.65 (BC-RM-H6) usually brief, not always -->
+      <tr><th>Course</th><td>Usually brief, not always. In one large clinic series, half of renewal episodes ended within one session, a third lasted three sessions or more, and one in eight lasted five or more: 49.74%, 32.28% and 12.17% of the episodes, which began in the first session after the change 51.32% of the time, the second 24.87% and the third 23.81%; larger episodes lasted longer (O&rsquo;Brien et al., 2026). In Briggs et al. (2018), with trained therapists in a structured setting, behavior resurged and then decreased, and the target schedule was reached in almost all applications; the authors suggest that increases may be more sustained when routine caregivers run the thinning. When resurgence occurred during schedule thinning in delay-and-denial tolerance teaching, it tended to be at clinically significant magnitudes (Kastner et al., 2025). The log keeps up to ten sessions after each change and flags a relapse that lasted three or more.</td></tr>
     </table>
 
     <h2 class="nbh-band" style="margin-top:16px">What the Theories Say, and Where They Fail</h2>
@@ -1108,6 +1124,8 @@ td input,td select{max-width:100%}
     <p class="noprint hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated case loaded: exposure rated across all four relapse types, eleven mitigation procedures selected, and nine treatment challenges scored against the published detection criterion.</p>
     <p class="hint">These are the empirical and theoretical sources. The exposure indicators, risk bands, and evidence tags on this form are a working convention for organizing that literature into a plan; they are not themselves findings, and no model listed above currently accounts for the full pattern of results.</p>
     <p class="hint" id="rmRefs"><b>Selected references.</b>
+    Aggarwal, I., O&rsquo;Brien, M. J., Pauls, A. M., Jeglum, S. R., Franck, C. T., Martinez-Perez, C. N., &amp; Podlesnik, C. A. (2026). Renewal of challenging behavior in an intensive outpatient clinic: Replication and extension to task changes. <em>Journal of Applied Behavior Analysis, 59</em>(2), Article e70057. &bull;
+    Ahearn, W. H., Clark, K. M., Gardenier, N. C., Chung, B. I., &amp; Dube, W. V. (2003). Persistence of stereotypic behavior: Examining the effects of external reinforcers. <em>Journal of Applied Behavior Analysis, 36</em>(4), 439&ndash;448. &bull;
     Athens, E. S., &amp; Vollmer, T. R. (2010). An investigation of differential reinforcement of alternative behavior without extinction. <em>Journal of Applied Behavior Analysis, 43</em>(4), 569&ndash;589. &bull;
     Banerjee, I., Lambert, J. M., Copeland, B. A., Paranczak, J. L., Bailey, K. M., &amp; Standish, C. M. (2022). Extending functional communication training to multiple language contexts in bilingual learners with challenging behavior. <em>Journal of Applied Behavior Analysis, 55</em>(1), 80&ndash;100. &bull;
     Behavior Analyst Certification Board. (2022). <em>BCBA test content outline</em> (6th ed.). Author. &bull;
@@ -1128,6 +1146,7 @@ td input,td select{max-width:100%}
     DeRosa, N. M., Fisher, W. W., &amp; Steege, M. W. (2015). An evaluation of time in establishing operation on the effectiveness of functional communication training. <em>Journal of Applied Behavior Analysis, 48</em>(1), 115&ndash;130. &bull;
     Doughty, A. H., da Silva, S. P., &amp; Lattal, K. A. (2007). Differential resurgence and response elimination. <em>Behavioural Processes, 75</em>, 115&ndash;128. &bull;
     Falcomata, T. S., Muething, C. S., Silbaugh, B. C., Adami, S., Hoffman, K., Shpall, C., &amp; Ringdahl, J. E. (2018). Lag schedules and functional communication training: Persistence of mands and relapse of problem behavior. <em>Behavior Modification, 42</em>(3), 314&ndash;334. &bull;
+    Falligant, J. M., Kranak, M. P., Piersma, D. E., Benson, R., Schmidt, J. D., &amp; Frank-Crawford, M. A. (2024). Further evidence of renewal in automatically maintained behavior. <em>Journal of Applied Behavior Analysis, 57</em>(2), 490&ndash;501. &bull;
     Falligant, J. M., Kranak, M. P., McNulty, M. K., Schmidt, J. D., Hausman, N. L., &amp; Rooker, G. W. (2021). Prevalence of renewal of problem behavior: Replication and extension to an inpatient setting. <em>Journal of Applied Behavior Analysis, 54</em>(1), 367&ndash;373. &bull;
     Fisher, W. W., Fuhrman, A. M., Greer, B. D., Mitteer, D. R., &amp; Piazza, C. C. (2020). Mitigating resurgence of destructive behavior using the discriminative stimuli of a multiple schedule. <em>Journal of the Experimental Analysis of Behavior, 113</em>(1), 263&ndash;277. &bull;
     Fisher, W. W., Greer, B. D., Fuhrman, A. M., &amp; Querim, A. C. (2015). Using multiple schedules during functional communication training to promote rapid transfer of treatment effects. <em>Journal of Applied Behavior Analysis, 48</em>(4), 713&ndash;733. &bull;
@@ -1137,17 +1156,23 @@ td input,td select{max-width:100%}
     Fuhrman, A. M., Lambert, J. M., &amp; Greer, B. D. (2022). A brief review of expanded-operant treatments for mitigating resurgence. <em>The Psychological Record, 72</em>(2), 319&ndash;323. &bull;
     Fujimaki, S., Lattal, K. A., &amp; Sakagami, T. (2015). A further look at reinforcement rate and resurgence. <em>Revista Mexicana de Análisis de la Conducta, 41</em>(2), 116&ndash;136. &bull;
     Greer, B. D., Fisher, W. W., Retzlaff, B. J., &amp; Fuhrman, A. M. (2020). A preliminary evaluation of treatment duration on the resurgence of destructive behavior. <em>Journal of the Experimental Analysis of Behavior, 113</em>(1), 251&ndash;262. https://doi.org/10.1002/jeab.567 &bull;
+    Greer, B. D., Shahan, T. A., Irwin Helvey, C., Fisher, W. W., Mitteer, D. R., &amp; Fuhrman, A. M. (2024). Resurgence of destructive behavior following decreases in alternative reinforcement: A prospective analysis. <em>Journal of Applied Behavior Analysis, 57</em>(3), 599&ndash;614. &bull;
     Greer, B. D., &amp; Shahan, T. A. (2019). Resurgence as Choice: Implications for promoting durable behavior change. <em>Journal of Applied Behavior Analysis, 52</em>(3), 816&ndash;846. &bull;
     Greer, B. D., Shahan, T. A., Fisher, W. W., Mitteer, D. R., &amp; Fuhrman, A. M. (2023). Further evaluation of treatment duration on the resurgence of destructive behavior. <em>Journal of Applied Behavior Analysis, 56</em>(1), 166&ndash;180. &bull;
     Haney, S. D., Piazza, C. C., Peterson, K. M., &amp; Greer, B. D. (2021). An evaluation of a renewal-mitigation procedure for inappropriate mealtime behavior. <em>Journal of Applied Behavior Analysis, 54</em>(3), 903&ndash;927. &bull;
     Ho, T., Bai, J. Y. H., Keevy, M., &amp; Podlesnik, C. A. (2018). Resurgence when challenging alternative behavior with progressive ratios in children and pigeons. <em>Journal of the Experimental Analysis of Behavior, 110</em>(3), 474&ndash;499. &bull;
+    Hronek, L. M., &amp; Kestner, K. M. (2025). A human-operant evaluation of commission and omission errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 58</em>(2), 401&ndash;421. &bull;
     Horner, R. H., &amp; Day, H. M. (1991). The effects of response efficiency on functionally equivalent competing behaviors. <em>Journal of Applied Behavior Analysis, 24</em>(4), 719&ndash;732. &bull;
     Houchins, A. L., Williams, C. L., &amp; St. Peter, C. C. (2022). Time-out during alternative reinforcement does not reduce resurgence: An exploratory study. <em>The Psychological Record, 72</em>(2), 325&ndash;330. &bull;
     Irwin Helvey, C. M., Fisher, W. W., Greer, B. D., Fuhrman, A. M., &amp; Mitteer, D. R. (2023). Resurgence of destructive behavior following differential rates of alternative reinforcement. <em>Journal of Applied Behavior Analysis, 56</em>(4), 804&ndash;815. https://doi.org/10.1002/jaba.1010 &bull;
     Jarmolowicz, D. P., &amp; Lattal, K. A. (2014). Resurgence under delayed reinforcement. <em>The Psychological Record, 64</em>(2), 189&ndash;193. &bull;
+    Jones, S. H., Catalano, M., Jr., Abuin, S., Haliwa, I., &amp; Switzer, E. (2025). Variable-time schedules protect against effects of fidelity errors during noncontingent reinforcement. <em>Journal of Applied Behavior Analysis, 58</em>(4), 841&ndash;851. &bull;
+    Jones, S. H., &amp; St. Peter, C. C. (2022). Nominally acceptable integrity failures negatively affect interventions involving intermittent reinforcement. <em>Journal of Applied Behavior Analysis, 55</em>(4), 1109&ndash;1123. &bull;
+    Kastner, K. M., Hood, S. A., &amp; Mitteer, D. R. (2025). An evaluation of durability during and following delay-and-denial tolerance teaching. <em>Journal of Applied Behavior Analysis, 58</em>(2), 344&ndash;362. &bull;
     Kelley, M. E., Jimenez-Gomez, C., Podlesnik, C. A., &amp; Morgan, A. (2018). Evaluation of renewal mitigation of negatively reinforced socially significant operant behavior. <em>Learning and Motivation, 63</em>, 133&ndash;141. &bull;
     Kestner, K., Redner, R., Watkins, E. E., &amp; Poling, A. (2015). The effects of punishment on resurgence in laboratory rats. <em>The Psychological Record, 65</em>(2), 315&ndash;321. &bull;
     Kestner, K. M., Romano, L. M., St. Peter, C. C., &amp; Mesches, G. A. (2018). Resurgence following response cost in a human-operant procedure. <em>The Psychological Record, 68</em>(1), 81&ndash;87. &bull;
+    Kimball, R. T., Kelley, M. E., Podlesnik, C. A., Forton, A., &amp; Hinkle, B. (2018). Resurgence with and without an alternative response. <em>Journal of Applied Behavior Analysis, 51</em>(4), 854&ndash;865. &bull;
     Kimball, R. T., Greer, B. D., Fuhrman, A. M., &amp; Lambert, J. M. (2023). Relapse and its mitigation: Toward behavioral inoculation. <em>Journal of Applied Behavior Analysis, 56</em>(2), 282&ndash;301. &bull;
     Kranak, M. P., &amp; Falligant, J. M. (2021). Further investigation of resurgence following schedule thinning: Extension to an inpatient setting. <em>Behavioral Interventions, 36</em>(4), 1003&ndash;1012. &bull;
     Lambert, J. M., Bloom, S. E., Samaha, A. L., &amp; Dayton, E. (2017). Serial functional communication training: Extending serial DRA to mands and problem behavior. <em>Behavioral Interventions, 32</em>, 311&ndash;325. &bull;
@@ -1155,23 +1180,34 @@ td input,td select{max-width:100%}
     Lambert, J. M., Pericozzi, H. G., Bailey, K. M., Standish, C. M., &amp; Perry, E. C. (2020). Evaluating duration of baseline as a moderator of resurgence following serial training. <em>Behavioral Development, 25</em>(2), 52&ndash;65. &bull;
     Laureano, B., Ringdahl, J., &amp; Falligant, J. M. (2024). Examination of clinical variables affecting resurgence: A reanalysis of 46 applications. <em>Journal of Applied Behavior Analysis, 57</em>(3), 742&ndash;750. https://doi.org/10.1002/jaba.1091 &bull;
     Lattal, K. A., &amp; Miles, A. K. (2024). Resurgence and behavioral contrast, compared and contrasted. <em>Perspectives on Behavior Science, 47</em>(2), 315&ndash;334. &bull;
+    Lerman, D. C., Kelley, M. E., Van Camp, C. M., &amp; Roane, H. S. (1999). Effects of reinforcement magnitude on spontaneous recovery. <em>Journal of Applied Behavior Analysis, 32</em>(2), 197&ndash;200. &bull;
     Lerman, D. C., &amp; Iwata, B. A. (1995). Prevalence of the extinction burst and its attenuation during treatment. <em>Journal of Applied Behavior Analysis, 28</em>(1), 93&ndash;94. &bull;
+    Marshall, A. R., Mitteer, D. R., Greer, B. D., &amp; Kishel, C. B. (2025). On the prevalence and magnitude of resurgence during delay-and-denial tolerance teaching. <em>Journal of Applied Behavior Analysis, 58</em>(1), 151&ndash;163. &bull;
     Marsteller, T. M., &amp; St. Peter, C. C. (2014). Effects of fixed-time reinforcement schedules on resurgence of problem behavior. <em>Journal of Applied Behavior Analysis, 47</em>. https://doi.org/10.1002/jaba.134 &bull;
     Mitteer, D. R., Greer, B. D., Fisher, W. W., Briggs, A. M., &amp; Wacker, D. P. (2018). A laboratory model for evaluating relapse of undesirable caregiver behavior. <em>Journal of the Experimental Analysis of Behavior, 110</em>(2), 252&ndash;266. &bull;
     Mitteer, D. R., Greer, B. D., Randall, K. R., &amp; Haney, S. D. (2022). On the scope and characteristics of relapse when treating severe destructive behavior. <em>Journal of Applied Behavior Analysis, 55</em>(3), 688&ndash;703. &bull;
     Mitteer, D. R., Fisher, W. W., Greer, B. D., &amp; Helvey, C. I. (2026). Relative effects of four resurgence-mitigation strategies informed by behavioral momentum theory. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70083. https://doi.org/10.1002/jaba.70083 &bull;
     Muething, C., Call, N., Pavlov, A., Ringdahl, J., Gillespie, S., Clark, S., &amp; Mevers, J. L. (2020). Prevalence of renewal of problem behavior during context changes. <em>Journal of Applied Behavior Analysis, 53</em>(3), 1485&ndash;1493. &bull;
     Muething, C., Pavlov, A., Call, N., Ringdahl, J., &amp; Gillespie, S. (2021). Prevalence of resurgence during thinning of multiple schedules of reinforcement following functional communication training. <em>Journal of Applied Behavior Analysis, 54</em>(2), 813&ndash;823. &bull;
+    Muething, C., Call, N., Ritchey, C. M., Pavlov, A., Bernstein, A. M., &amp; Podlesnik, C. A. (2022). Prevalence of relapse of automatically maintained behavior resulting from context changes. <em>Journal of Applied Behavior Analysis, 55</em>(1), 138&ndash;153. &bull;
+    Muething, C., Ritchey, C. M., Call, N. A., Hardee, A. M., Mauzy, C. R., IV, Argueta, T., McMahon, M. X. H., &amp; Podlesnik, C. A. (2024). A retrospective analysis of the relation between resurgence and renewal of behavior targeted for reduction. <em>Journal of Applied Behavior Analysis, 57</em>(2), 455&ndash;462. &bull;
     Neely, L., Garcia, E., Bankston, B., &amp; Green, A. (2018). Generalization and maintenance of functional communication training for individuals with developmental disabilities: A systematic and quality review. <em>Research in Developmental Disabilities, 79</em>, 116&ndash;129. &bull;
     Neely, L., Graber, J., Kunnavatana, S., &amp; Cantrell, K. (2020). Impact of language on behavior treatment outcomes. <em>Journal of Applied Behavior Analysis, 53</em>(2), 796&ndash;810. &bull;
     Nevin, J. A., Mace, F. C., DeLeon, I. G., Shahan, T. A., Shamlian, K. D., Lit, K., Sheehan, T., Frank-Crawford, M. A., Trauschke, S. L., Sweeney, M. M., Tarver, D. R., &amp; Craig, A. R. (2016). Effects of signaled and unsignaled alternative reinforcement on persistence and relapse in children and pigeons. <em>Journal of the Experimental Analysis of Behavior, 106</em>(1), 34&ndash;57. &bull;
     Nieto, J., Mason, T. A., Bernal-Gamboa, R., &amp; Uengoer, M. (2020). The impacts of acquisition and extinction cues on ABC renewal of voluntary behaviors. <em>Learning &amp; Memory, 27</em>(3), 114&ndash;118. &bull;
+    O&rsquo;Brien, M. J., Pauls, A. M., Jeglum, S. R., Martinez-Perez, C. N., Franck, C. T., Aggarwal, I., &amp; Podlesnik, C. A. (2026). Latency and persistence of renewal in an intensive outpatient clinic. <em>Journal of Applied Behavior Analysis, 59</em>(3), Article e70071. &bull;
     Okouchi, H. (2015). Resurgence of two-response sequences punished by point-loss response cost in humans. <em>Revista Mexicana de An&aacute;lisis de la Conducta, 41</em>(2), 137&ndash;154. &bull;
+    O&rsquo;Neill, P., Rey, C. N., Eilers, T., &amp; Craig, A. R. (2026). Parametric evaluation of procedural fidelity level with combined errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 59</em>(4), Article e70077. &bull;
     Podlesnik, C. A., &amp; Shahan, T. A. (2009). Behavioral momentum and relapse of extinguished operant responding. <em>Learning &amp; Behavior, 37</em>(4), 357&ndash;364. &bull;
+    Podlesnik, C. A., Ritchey, C. M., Muething, C., &amp; Falligant, J. M. (2025). Different criteria affect prevalence of relapse of behavior targeted for treatment. <em>Journal of Applied Behavior Analysis, 58</em>(1), 225&ndash;231. &bull;
     Pritchard, D., Hoerger, M., &amp; Mace, F. C. (2014). Treatment relapse and behavioral momentum theory. <em>Journal of Applied Behavior Analysis, 47</em>(4), 814&ndash;833. &bull;
     Pritchard, D., Hoerger, M., Mace, F. C., Penney, H., &amp; Harris, B. (2014). Clinical translation of animal models of treatment relapse. <em>Journal of the Experimental Analysis of Behavior, 101</em>(3), 442&ndash;449. &bull;
     Pritchard, D., Hoerger, M., Mace, F. C., Penney, H., Harris, B., &amp; Eiri, L. (2016). Clinical translation of the ABA renewal model of treatment relapse. <em>European Journal of Behavior Analysis, 17</em>(2), 182&ndash;191. &bull;
+    Randall, K. R., Greer, B. D., Smith, S. W., &amp; Kimball, R. T. (2021). Sustaining behavior reduction by transitioning the topography of the functional communication response. <em>Journal of Applied Behavior Analysis, 54</em>(3), 1013&ndash;1031. &bull;
     Romano, L. M., &amp; St. Peter, C. C. (2017). Omission training results in more resurgence than alternative reinforcement. <em>The Psychological Record, 67</em>(3), 315&ndash;324. &bull;
+    Saini, V., Fisher, W. W., &amp; Pisman, M. D. (2017). Persistence during and resurgence following noncontingent reinforcement implemented with and without extinction. <em>Journal of Applied Behavior Analysis, 50</em>(2), 377&ndash;392. &bull;
+    Saini, V., Miller, S. A., &amp; Fisher, W. W. (2016). Multiple schedules in practical application: Research trends and implications for future investigation. <em>Journal of Applied Behavior Analysis, 49</em>(2), 421&ndash;444. &bull;
+    Saini, V., Sullivan, W. E., Baxter, E. L., DeRosa, N. M., &amp; Roane, H. S. (2018). Renewal during functional communication training. <em>Journal of Applied Behavior Analysis, 51</em>(3), 603&ndash;619. &bull;
     Schepers, S. T., &amp; Bouton, M. E. (2015). Effects of reinforcer distribution during response elimination on resurgence of an instrumental behavior. <em>Journal of Experimental Psychology: Animal Learning and Cognition, 41</em>(2), 179&ndash;192. &bull;
     Shahan, T. A., Browning, K. O., &amp; Nall, R. W. (2020). Resurgence as Choice in Context: Treatment duration and on/off alternative reinforcement. <em>Journal of the Experimental Analysis of Behavior, 113</em>(1), 57&ndash;76. &bull;
     Shahan, T. A., Browning, K. O., Nist, A. N., &amp; Sutton, G. M. (2020). Resurgence and downshifts in alternative reinforcement rate. <em>Journal of the Experimental Analysis of Behavior, 114</em>(2), 163&ndash;178. &bull;
@@ -1184,6 +1220,7 @@ td input,td select{max-width:100%}
     Trask, S., &amp; Bouton, M. E. (2016). Discriminative properties of the reinforcer can be used to attenuate the renewal of extinguished operant behavior. <em>Learning &amp; Behavior, 44</em>, 151&ndash;161. &bull;
     Trask, S., Keim, C. L., &amp; Bouton, M. E. (2018). Factors that encourage generalization from extinction to test reduce resurgence of an extinguished operant response. <em>Journal of the Experimental Analysis of Behavior, 110</em>, 11&ndash;23. &bull;
     Vollmer, T. R., Progar, P. R., Lalli, J. S., Van Camp, C. M., Sierp, B. J., Wright, C. S., Nastasi, J., &amp; Eisenschink, K. J. (1998). Fixed-time schedules attenuate extinction-induced phenomena in the treatment of severe aberrant behavior. <em>Journal of Applied Behavior Analysis, 31</em>(4), 529&ndash;542. &bull;
+    Walker, H. M., &amp; Buckley, N. K. (1972). Programming generalization and maintenance of treatment effects across time and across settings. <em>Journal of Applied Behavior Analysis, 5</em>(3), 209&ndash;224. &bull;
     Weinsztok, S. C., &amp; DeLeon, I. G. (2022). The mitigating effects of enhanced reinforcer magnitude and quality on treatment degradation. <em>Journal of Applied Behavior Analysis, 55</em>(2), 547&ndash;571. &bull;
     Wilson, A. N., Glassford, T. S., &amp; Koerkenmeier, S. M. (2016). Effects of response effort on resurgence. <em>Behavior Analysis in Practice, 9</em>(2), 174&ndash;178. &bull;
     Winterbauer, N. E., &amp; Bouton, M. E. (2010). Mechanisms of resurgence of an extinguished instrumental behavior. <em>Journal of Experimental Psychology: Animal Behavior Processes, 36</em>(3), 343&ndash;353. &bull;
@@ -1206,15 +1243,21 @@ const TYPES=[
    'The plan uses DRA or FCT with extinction of the target behavior',
    'Reinforcement schedule thinning is planned or under way',
    'The alternative response is currently on a dense schedule (FR 1 or close to it)',
-   'Thinning steps are abrupt rather than graded',
+   /* v25.65 (BC-RM-H8) "abrupt" made concrete; a file that ticked "abrupt rather than graded" keeps the tick on its definition */
+   'The first “not now” period or delay is longer than 2 minutes, or one step removes more than half of the remaining reinforcement (the half is this form’s convention)',
    'Extinction components will be introduced or lengthened',
    'Caregivers are likely to withhold reinforcement for the alternative response at times',
    'The alternative response is emitted at high rates or at inopportune moments',
    'Reinforcement for the target behavior in baseline was dense',
-   'No discriminative stimuli signal when reinforcement is and is not available'
+   'No discriminative stimuli signal when reinforcement is and is not available',
+   /* v25.65 (BC-RM-H8, M2) added at the end, so saved ticks keep their places */
+   'Delays end when time passes, not when the student completes a tolerance response or a piece of work',
+   'The card or device is not always in reach, or some adults do not know the replacement response'
   ]},
  {k:'ren',name:'Renewal',
-  base:'67.2% of participants and 42.3% of context changes in outpatient work (Muething et al., 2020); 59% and 24% inpatient (Falligant et al., 2021).',
+  base:'67.2% of participants and 42.3% of context changes in outpatient work (Muething et al., 2020); 59% and 24% inpatient (Falligant et al., 2021); 25.23% of 749 context changes in an intensive outpatient clinic, where task changes renewed as often as changes of person or setting (27.02%, 24.69% and 22.92%, not a significant difference; Aggarwal et al., 2026).',
+  /* v25.65 (BC-RM-M1) with automatic function (Setup), these base rates are shown in place of the social ones */
+  baseAuto:'Automatically maintained behavior: renewal in 68.1% of participants and 18.8% of 985 context changes, more often after a change of location than of person (27.5% against 17.7%; Falligant et al., 2024); relapse at 36% of person changes and 26% of setting changes, and after a change of person it peaked about five sessions later (Muething et al., 2022). Watch 10 sessions after each change, not 3.',
   ind:[
    'Treatment was developed in a context different from where the behavior occurs',
    'A change of therapist, aide, room, or school is planned',
@@ -1222,20 +1265,25 @@ const TYPES=[
    'Extinction has been arranged in only one context',
    'The student returns to the original context between treatment sessions',
    'The destination context has not yet been sampled during treatment',
-   'Schedule-correlated stimuli have not been transferred to the new people or setting'
+   'Schedule-correlated stimuli have not been transferred to the new people or setting',
+   'New tasks, curriculum, materials or demand types are planned (a new unit, a new grade)'   /* v25.65 (BC-RM-M1) */
   ]},
  {k:'rei',name:'Reinstatement',
   base:'No comparable prevalence figure has been published for applied settings; the exposure is documented rather than quantified.',
+  /* v25.65 (BC-RM-M3) the safe integrity level depends on the plan */
+  note:'Caution: 80% integrity holds up for DRA or FCT on FR 1. It may not hold for NCR, interval-based DRA or DRO (Jones &amp; St. Peter, 2022). In DRA, errors of commission did harm once integrity fell to 40% or below, and omission errors alone did not (St. Peter Pipkin et al., 2010); DRO held at 60% integrity with combined errors and failed at 40% (O’Neill et al., 2026), and commission errors sometimes pushed responding above baseline (Hronek &amp; Kestner, 2025).',
   ind:[
    'Caregivers may deliver the functional reinforcer after the target behavior (commission error)',
    'Noncontingent or fixed-time reinforcement is in use, or planned during a challenge',
    'The functional reinforcer is freely available in the environment',
    'Treatment integrity has not been measured (Form TI-1)',
    'Staff not trained on the plan have access to the student',
-   'The behavior has produced reinforcement recently from any source'
+   'The behavior has produced reinforcement recently from any source',
+   'TI-1 recorded the reinforcer given after the behavior (commission error) since the last review'   /* v25.65 (BC-RM-M3) ticked from TI-1 when it sends the figure */
   ]},
  {k:'spo',name:'Spontaneous recovery',
-  base:'The extent to which applied treatment relapse is affected by spontaneous recovery has yet to be explored (Kimball et al., 2023).',
+  /* v25.65 (BC-RM-M8) the one applied demonstration */
+  base:'The extent to which applied treatment relapse is affected by spontaneous recovery has yet to be explored (Kimball et al., 2023). One applied case: during FCT, behavior came back at the first session of each day when the reinforcer was small (10 s), and not when it was large (60 s) (Lerman et al., 1999); one case cannot settle the process. In a school, watch the first period after weekends and holidays, and log the first session back with the days away.',
   ind:[
    'Breaks in sessions are expected (weekends, holidays, school breaks)',
    'A long retention interval is planned between treatment and follow-up',
@@ -1254,14 +1302,16 @@ const PHASES=['Arranged during assessment and baseline (Phase 1)',
 const MIT=[
  {p:0,t:3,addr:'Resurgence, renewal',proc:'Limit exposure to reinforcement of the target behavior before treatment \u2014 shorter functional analysis, earlier move to treatment.',
   src:'Winterbauer et al. (2013); Todd et al. (2012); Bruzek et al. (2009) support; Lambert, Pericozzi et al. (2020) did not detect it, and Smith &amp; Greer (2022) found lower resurgence only when a shorter baseline was combined with a longer treatment phase.'},
- {p:0,t:3,k:'leanBl',addr:'Resurgence',proc:'Use a leaner schedule of reinforcement for the target behavior during baseline.',
+ /* v25.65 (the BCBA, 11/2; BC-RM-H4 not built) the lean-baseline row stays selectable for school and home teams, as a labelled option
+    that says what it does, why, for how long, and what the data must show before it ends; it is never ticked by default */
+ {p:0,t:3,k:'leanBl',addr:'Resurgence',proc:'<b>OPTION: Reinforces problem behavior on purpose:</b> Use a leaner schedule of reinforcement for the target behavior during baseline. <span class="rm-plain">What it does: during the baseline or functional analysis, the problem behavior still gets its reinforcer, but less often than it would. Why: in clinic studies, a leaner baseline was followed by less resurgence later. For how long: only during the baseline or functional analysis, before treatment starts. What the data must show before it ends: a baseline the team can read (at least three sessions, with no clear trend); it ends when treatment starts, and never runs once treatment has begun.</span>',
   src:'Podlesnik &amp; Shahan (2009); Fisher et al. (2019) \u2014 lower resurgence when it occurred, but it occurred in only 4 of 7 cases. Fisher et al. (2019), reanalyzed with new data in Mitteer et al. (2026): on proportion of baseline, the lean-baseline condition reduced resurgence for 6 of 6 children (median 67.14%); on raw rates, for 3 of 6 (median 9.84%), and for one child the raw-rate interpretation reversed (11 vs 9.80 per min). <b>Cost:</b> the lean baseline itself produced 2.40\u201311.26 responses per minute (grand mean 6.30). The authors suggest reserving this for behavior that does not pose imminent harm (disruption, vocal protest) or for precursors. <b>Caution:</b> lean baselines often produce higher and more variable problem behavior (Vollmer et al., 1998).'},
  {p:1,t:1,addr:'Resurgence',proc:'Signal when reinforcement for the alternative response is and is not available, using multiple or chained schedules with distinct S<sup>D</sup> and S<sup>\u0394</sup> stimuli.',
   src:'Betz et al. (2013); Fuhrman et al. (2016); Fisher et al. (2020), whose mean 81% reduction in resurgence came from presenting the S<sup>\u0394</sup> during the extinction challenge (Phase 3 below). Contrary basic finding: Browning &amp; Shahan (2021).'},
  {p:1,t:1,addr:'Renewal',proc:'Transfer the schedule-correlated stimuli to new implementers and settings before the transition.',
   src:'Fisher et al. (2015); Greer et al. (2019) \u2014 immediate low levels with a caregiver who had a history of reinforcing the behavior.'},
  {p:1,t:1,addr:'Renewal',proc:'Increase the similarity between the treatment setting and the setting the plan must run in \u2014 bring caregivers into sessions, bring stimuli from the destination context in.',
-  src:'Kelley et al. (2018); Haney et al. (2021). Corresponds to programming common stimuli (Stokes &amp; Baer, 1977); for how FCT studies have tested generalization and maintenance, see Neely et al. (2018). Kimball et al. (2023) report from that review that only 29% of the FCT studies used this tactic.'},
+  src:'Kelley et al. (2018); Haney et al. (2021). Corresponds to programming common stimuli (Stokes &amp; Baer, 1977); for how FCT studies have tested generalization and maintenance, see Neely et al. (2018). Kimball et al. (2023) report from that review that only 29% of the FCT studies used this tactic. In classrooms: making the regular classroom resemble the treatment classroom (equating stimulus conditions) maintained appropriate behavior better than no maintenance strategy, and teacher training alone did not (Walker &amp; Buckley, 1972); when FCT moved from the clinic to the home with caregivers, destructive behavior renewed for 3 of 4 children (Saini et al., 2018).'},   /* v25.65 (BC-RM-L6) */
  {p:1,t:2,addr:'Renewal',proc:'Conduct extinction in several distinct contexts rather than one.',
   src:'Bernal-Gamboa, Nieto &amp; Uengoer (2017); Bernal-Gamboa et al. (2020). Little clinical research; may work better for ABC than ABA renewal.'},
  {p:1,t:2,addr:'Reinstatement, renewal, spontaneous recovery',proc:'Pair an explicit extinction cue with periods of non-reinforcement during treatment, and present it again at the challenge.',
@@ -1270,8 +1320,9 @@ const MIT=[
   src:'Shahan, Browning, and Nall (2020), the basis of resurgence as choice in context; Schepers &amp; Bouton (2015); Trask et al. (2018). No clinical evaluation. <b>Caution:</b> bursts may occur on the off sessions.'},
  {p:1,t:3,k:'altLean',addr:'Resurgence',proc:'Use a leaner rate of reinforcement for the alternative response during treatment.',
   src:'Supported by Craig et al. (2016); Nevin et al. (2016); Pritchard et al. (2014, 2016). Not replicated by Fujimaki et al. (2015); Can\u00e7ado &amp; Lattal (2013); Craig &amp; Shahan (2016); Winterbauer &amp; Bouton (2010). Clinical test, Irwin Helvey et al. (2023) in Mitteer et al. (2026): reduced resurgence for 1 of 3 children (59.30%) and increased it considerably for the other two (96.95% and 154.57%); unchanged on raw rates. The authors conclude this \u201cdid not appreciably reduce resurgence,\u201d and that starting FCT dense and thinning \u201cdoes not appear to worsen resurgence.\u201d A lean starting schedule chosen for another reason (reaching the terminal schedule sooner) is a separate rationale: write it under How it will be arranged rather than as resurgence mitigation.'},
- {p:1,t:3,addr:'Resurgence',proc:'Thin the schedule in graded steps rather than abrupt ones.',
-  src:'Shahan, Browning, Nist, et al. (2020) found resurgence increases exponentially with the size of the reduction. But gradual leaning still produces resurgence eventually (Ho et al., 2018; Jarmolowicz &amp; Lattal, 2014), and an unpublished experiment found the same for behavioral contrast (Lattal, 1968, as cited in Lattal &amp; Miles, 2024).'},
+ /* v25.65 (BC-RM-H8) retagged Applied, with the step-size findings */
+ {p:1,t:1,addr:'Resurgence',proc:'Thin the schedule in graded steps rather than abrupt ones: the first “not now” period no longer than 2 minutes, and no step that removes more than half of the remaining reinforcement (the half is this form’s convention).',
+  src:'Applied: resurgence occurred in all 7 multiple-schedule FCT applications that began with an extinction (S<sup>Δ</sup>) period longer than 2 minutes, and in 6 of 17 (35.3%) that began with 2 minutes or less (Saini et al., 2016). In 46 inpatient applications, step size was the only variable correlated with how large resurgence was; phase duration, response rates and obtained reinforcement were not (Laureano et al., 2024). Larger decreases given early in treatment produced resurgence most often, and the largest (Greer et al., 2024). Basic: Shahan, Browning, Nist, et al. (2020) found resurgence increases exponentially with the size of the reduction. But gradual leaning still produces resurgence eventually (Ho et al., 2018; Jarmolowicz &amp; Lattal, 2014), and an unpublished experiment found the same for behavioral contrast (Lattal, 1968, as cited in Lattal &amp; Miles, 2024).'},
  {p:1,t:3,addr:'Resurgence',proc:'Teach more than one alternative response \u2014 lag schedules or serial training \u2014 so that one failing does not leave the target response as the only option.',
   src:'Falcomata et al. (2018); Lambert et al. (2015, 2017). Clear benefit where the alternative keeps producing reinforcement (Neely et al., 2020; Banerjee et al., 2022); otherwise mixed (Fuhrman et al., 2022).'},
  {p:1,t:3,k:'extDur',addr:'Resurgence',proc:'Extend the duration of treatment before exposing the alternative response to extinction.',
@@ -1279,27 +1330,34 @@ const MIT=[
  {p:1,t:4,addr:'Resurgence',proc:'Make the alternative response low in effort relative to the target behavior \u2014 a card touch or exchange rather than a complex vocal response.',
   src:'Wilson et al. (2016) observed minimal resurgence but did not compare against equated effort; DeRosa et al. (2015); Horner &amp; Day (1991).'},
  {p:1,t:4,addr:'Resurgence',proc:'Favor the alternative response on quality, magnitude, and immediacy even as its rate is thinned.',
-  src:'A resurgence-as-choice prediction (Greer &amp; Shahan, 2019). Athens &amp; Vollmer (2010) establishes the allocation effect; Weinsztok &amp; DeLeon (2022) applies it to treatment degradation. Not directly tested on most relapse types.'},
+  src:'A resurgence-as-choice prediction (Greer &amp; Shahan, 2019). Athens &amp; Vollmer (2010) establishes the allocation effect; Weinsztok &amp; DeLeon (2022) applies it to treatment degradation. Not directly tested on most relapse types. One applied case on spontaneous recovery: during FCT, behavior came back at the first session of each day when the reinforcer was small (10 s), and not when it was large (60 s) (Lerman et al., 1999).'},   /* v25.65 (BC-RM-M8) */
  {p:1,t:2,addr:'Resurgence',proc:'Precede the DRA contingency with a signaled DRO component rather than running DRA alone.',
   src:'Craig et al. (2018), with pigeons: a chained DRO\u2013DRA progression suppressed resurgence more than DRA alone.'},
  {p:1,t:5,addr:'Resurgence',proc:'Substitute DRO for DRA during response elimination.',
   src:'Often <b>increases</b> the magnitude and immediacy of resurgence (Doughty et al., 2007; Romano &amp; St. Peter, 2017). Listed so it is ruled out deliberately.'},
  {p:1,t:3,addr:'Resurgence',proc:'Add punishment of the target response to reduce later relapse.',
   src:'Effective in rats (Kestner et al., 2015) but <b>unreliable in humans</b> (Bol\u00edvar &amp; Dallery, 2020; Houchins et al., 2022; Kestner, Romano et al., 2018; Okouchi, 2015). Ethical review required before any use.'},
- {p:2,t:2,addr:'Resurgence',proc:'Pair extinction of the alternative response with noncontingent or fixed-time delivery of the reinforcer during the challenge.',
-  src:'Bouton &amp; Trask (2016); Marsteller &amp; St. Peter (2014). <b>Caution:</b> response-independent delivery risks adventitious reinforcement and response-dependent reinstatement (DeLeon et al., 2005).'},
+ /* v25.65 (BC-RM-M4) variable time by default, with a planned exit; retagged "Basic, with one applied study" */
+ {p:2,t:2,tn:'with one applied study (4 children)',addr:'Resurgence',proc:'Around the challenge, also give the reinforcer on a varying timer, about every N minutes, whatever the student is doing. Fade the extra deliveries over several sessions. Do not stop them all at once.',
+  src:'Bouton &amp; Trask (2016). Applied: fixed-time delivery after DRA mitigated resurgence and kept requests going for all 4 children (Marsteller &amp; St. Peter, 2014). Under reduced fidelity, variable-time schedules suppressed responding better than fixed-time schedules (p = .01; Jones et al., 2025). NCR without extinction produced more resurgence than NCR with extinction once every reinforcer was withdrawn (Saini et al., 2017), and after periods of variable-time access to preferred items, stereotypy was more resistant to disruption (Ahearn et al., 2003): the extra deliveries help while they run and can cost something when they stop, so they are faded. <b>Caution:</b> response-independent delivery risks adventitious reinforcement and response-dependent reinstatement (DeLeon et al., 2005).'},
  {p:2,t:1,addr:'Resurgence',proc:'Present the S<sup>\u0394</sup> from treatment during the extinction challenge itself.',
   src:'Fuhrman et al. (2016); Fisher et al. (2020) \u2014 presenting the S<sup>\u0394</sup> throughout the extinction challenge reduced resurgence by a mean of 81% (range 52%\u2013100%) across four participants.'},
  {p:2,t:4,addr:'All types',proc:'Arrange safety for an anticipated episode: oversight by a BCBA, a safe environment, session-termination criteria, staff trained in first aid, protective equipment.',
   src:'A practice recommendation in Briggs et al. (2018), not an experimental finding. Their cohort reached clinically unacceptable levels on many occasions.'},
- {p:3,t:4,addr:'Reinstatement, resurgence',proc:'Train and measure caregiver integrity specifically for what to do while the behavior is resurging.',
+ /* v25.65 (BC-RM-M3) the new adult runs the plan with coaching first */
+ {p:3,t:4,addr:'Reinstatement, resurgence',proc:'Train and measure caregiver integrity specifically for what to do while the behavior is resurging. A new adult first runs the plan with coaching at full integrity before running it alone.',
   src:'Briggs et al. (2018) suggest that episodes may be more sustained when routine caregivers, who may be less likely to hold extinction, run the thinning; Mitteer et al. (2018); St. Peter Pipkin et al. (2010). Named as a gap in the literature.'},
  {p:3,t:4,addr:'All types',proc:'Tell the team in advance that a temporary increase is likely at some thinning steps, so it is not read as the plan failing.',
   src:'Follows from the prevalence and transience reported in Briggs et al. (2018); not itself a tested procedure.'},
  /* Mitteer et al. (2026): the combined package is listed last so that saved files keep their row numbers; the plan
     shows it with the other Phase 1 rows. Listed so it is ruled out deliberately. */
  {p:0,t:3,k:'combined',addr:'Resurgence',proc:'Combine lean baseline reinforcement, lean alternative reinforcement, and a threefold longer treatment phase (the combined BMT package).',
-  src:'Fisher, Greer, Fuhrman, et al. (2018) with two new cases, in Mitteer et al. (2026): reduced resurgence for 6 of 6 children on proportion of baseline (median 63.88%) and 4 of 6 on raw rates (median 31.78%; two children worse, 4.49% and 47.15%). The authors call it premature to package these three, since the second and third components did little alone and holding alternative reinforcement lean for a long time conflicts with progressing treatment; the lean baseline may account for the effect. Listed so it is ruled out deliberately rather than inferred from the 6 of 6 figure to be the best option.'}
+  src:'Fisher, Greer, Fuhrman, et al. (2018) with two new cases, in Mitteer et al. (2026): reduced resurgence for 6 of 6 children on proportion of baseline (median 63.88%) and 4 of 6 on raw rates (median 31.78%; two children worse, 4.49% and 47.15%). The authors call it premature to package these three, since the second and third components did little alone and holding alternative reinforcement lean for a long time conflicts with progressing treatment; the lean baseline may account for the effect. Listed so it is ruled out deliberately rather than inferred from the 6 of 6 figure to be the best option.'},
+ /* v25.65 (BC-RM-H8, M2) added at the end, so saved files keep their row numbers; the plan shows each with its phase */
+ {p:1,t:1,tn:'review of published cases',addr:'Resurgence',proc:'Thin with a response requirement (a tolerance response, or work completed) rather than by time alone.',
+  src:'In a review of delay-and-denial tolerance teaching, time-based thinning produced resurgence for 14 of 14 participants and at 46.49% of transitions; tolerance-response teaching at 18.92% and complexity teaching at 23.16% of transitions. The alternative behavior was disrupted at 28.87% of transitions (Marshall et al., 2025).'},
+ {p:1,t:1,addr:'Resurgence',proc:'Make the replacement response go everywhere: a copy of the card in each setting, or a planned move to a vocal or portable response.',
+  src:'Resurgence was greater when the alternative response was unavailable than when it was available but not reinforced, in 4 of 5 assessments (Kimball et al., 2018). With the card removed, 6 of 8 children showed resurgence, 4 of them approaching or exceeding baseline; with a vocal response still available, 4 of 8, never near baseline; the authors then taught a move from the card to a vocal response (Randall et al., 2021).'}
 ];
 const MK=k=>MIT.findIndex(m=>m.k===k);
 const TIER=[['','' ],['Applied','e1'],['Basic','e2'],['Mixed','e3'],['Untested','e4'],['Counter','e5']];
@@ -1308,7 +1366,13 @@ const CHTYPES=['','Resurgence','Renewal','Reinstatement','Spontaneous recovery',
 function blank(){return{meta:{},ind:{},mit:{},ch:[],blMean:''};}
 let S=blank();
 function ensure(){ if(!S.ch.length)S.ch.push(newCh()); }
-function newCh(){return{date:'',type:'',planned:'',what:'',a:'',b:'',resp:''};}
+/* v25.65 (BC-RM-H5) ra, rb: the replacement response before and after, ru its measure; (BC-RM-M8) days: the days away */
+function newCh(){return{date:'',type:'',planned:'',what:'',a:'',b:'',resp:'',ra:'',rb:'',ru:'',days:''};}
+const RU=['','Rate','% of opportunities'];
+/* v25.65 (BC-RM-H6, M1) the watch window: 10 sessions when Setup's function is Automatic, else the 3 the published rule scores;
+   a number typed on the log replaces it */
+const autoFn=()=>/^Automatic/.test(S.meta.fn||'');
+function watchN(){const w=parseInt(S.meta.watchN,10);return isFinite(w)&&w>=3&&w<=10?w:(autoFn()?10:3);}
 const nums=s=>String(s||'').split(/[,;\s]+/).map(x=>parseFloat(x)).filter(x=>isFinite(x));   /* v23.27 (review F316) semicolons separate too */
 
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
@@ -1333,7 +1397,7 @@ function renderRisk(){
       <span><span class="tag ${r.cls}">${r.band}</span> <span class="hint">${r.n} of ${r.d} conditions present</span></span></h4>
       <div class="body">
         ${t.ind.map((x,i)=>`<label class="ind"><input type="checkbox" data-ind="${t.k}_${i}"${S.ind[t.k+'_'+i]?' checked':''}>${x}</label>`).join('')}
-        <div class="baserate"><b>Published base rate.</b> ${esc(t.base)}</div>
+        <div class="baserate"><b>Published base rate.</b> ${esc(t.baseAuto&&/^Automatic/.test(S.meta.fn||'')?t.baseAuto:t.base)}</div>${t.note?`<div class="baserate rm-caution">${t.note}</div>`:''}
       </div></div>`;
   }).join('');
   const rated=TYPES.map(t=>({t,r:riskOf(t)})).filter(x=>x.r.n>0);
@@ -1409,7 +1473,7 @@ function renderMit(){
     h+=`<tr class="${st.on?'picked':''}">
       <td class="c"><input type="checkbox" data-mi="${i}" data-f="on"${st.on?' checked':''}></td>
       <td class="proc">${m.proc}</td>
-      <td class="c"><span class="tag ${TIER[m.t][1]}">${TIER[m.t][0]}</span></td>
+      <td class="c"><span class="tag ${TIER[m.t][1]}">${TIER[m.t][0]}</span>${m.tn?`<div class="winnote">${esc(m.tn)}</div>`:''}</td>
       <td style="font-size:11px">${esc(m.addr)}</td>
       <td class="src">${m.src}${ruleNote(m,st)}</td>
       <td><textarea data-mi="${i}" data-f="how" rows="2">${esc(st.how)}</textarea></td>
@@ -1439,26 +1503,47 @@ function scoreCh(c){
   const meanB=B.reduce((x,y)=>x+y,0)/B.length;
   const bl=parseFloat(S.blMean);
   const rel=mB>mA;
-  return {ok:true,mA,mB,meanB,rel,nA:A0.length,nB:B0.length,
+  /* v25.65 (BC-RM-H7) mean-of-2: any of the first three B sessions above the mean of the last two A sessions (Podlesnik et al., 2025) */
+  const A2=A.slice(-2),m2=A2.reduce((x,y)=>x+y,0)/A2.length,rel2=mB>m2;
+  /* v25.65 (BC-RM-H6) up to ten B sessions are kept. Lasted: from the first of the first three B sessions that met the criterion, the
+     run of consecutive B sessions above the highest A session; "open" when the run reaches the last session entered. Late: with no
+     relapse in the first three, a session within the watch window that rose above every A session */
+  const B10=B0.slice(0,10);let lasted=0,from=-1,open=false;
+  if(rel){from=B.findIndex(x=>x>mA);for(let j=from;j<B10.length&&B10[j]>mA;j++)lasted++;open=from+lasted===B10.length;}
+  const W=watchN();let late=-1;if(!rel){for(let j=3;j<Math.min(W,B10.length);j++)if(B10[j]>mA){late=j;break;}}
+  /* v25.65 (BC-RM-H5) the replacement response: disrupted when the lowest of the first three B values is below the lowest of the
+     last five A values, or, for a percentage, below the criterion (blank: 80%) */
+  const RA=nums(c.ra).slice(-5),RB=nums(c.rb).slice(0,3),pc=c.ru===RU[2],crit=isFinite(parseFloat(S.meta.rrCrit))?+S.meta.rrCrit:80;
+  const rr=RA.length&&RB.length?{lowA:Math.min(...RA),lowB:Math.min(...RB),pc,crit}:null;
+  if(rr)rr.dis=rr.lowB<rr.lowA||(pc&&rr.lowB<crit);
+  return {ok:true,mA,mB,meanB,rel,nA:A0.length,nB:B0.length,m2,rel2,lasted,from,open,nB10:B10.length,late,W,rr,
     pA:isFinite(bl)&&bl>0?mA/bl:null, pB:isFinite(bl)&&bl>0?mB/bl:null};
 }
 function renderCh(){
   const opt=(arr,v)=>arr.map(o=>`<option${o===v?' selected':''}>${o}</option>`).join('');
   $('#chTbl tbody').innerHTML=S.ch.map((c,i)=>{
     const s=scoreCh(c);
+    const tag=y=>y?'<span class="tag e5">Yes</span>':'<span class="tag e1">No</span>';
     const relCell=!s.ok?'<span class="hint">\u2014</span>'
-      :(s.rel?'<span class="tag e5">Yes</span>':'<span class="tag e1">No</span>')+
+      /* v25.65 (BC-RM-H7) both published rules: max-of-5 / mean-of-2 */
+      :tag(s.rel)+' / '+tag(s.rel2)+'<div class="winnote">max-of-5 / mean-of-2</div>'+
        /* v21.16 audit (F2): the row says when values beyond the scored sessions were entered */
-       `<div class="winnote">Scored: ${s.nA>5?'last 5 of '+s.nA+' A':Math.min(5,s.nA)+' A'}, ${s.nB>3?'first 3 of '+s.nB+' B':Math.min(3,s.nB)+' B'}</div>`;   /* v23.27 (review F316) on every row */
+       `<div class="winnote">Scored: ${s.nA>5?'last 5 of '+s.nA+' A':Math.min(5,s.nA)+' A'}, ${s.nB>3?'first 3 of '+s.nB+' B':Math.min(3,s.nB)+' B'}</div>`+   /* v23.27 (review F316) on every row */
+       chNotes(s);
     const atBl=s.ok&&s.pB!=null&&s.pB>=1;
+    const sm='style="margin-top:4px;font-size:11px"';
     return `<tr>
       <td style="text-align:center;font-weight:600">${i+1}</td>
       <td><input data-i="${i}" data-f="date" value="${esc(c.date)}"></td>
-      <td><select data-i="${i}" data-f="type">${opt(CHTYPES,c.type)}</select></td>
+      <td><select data-i="${i}" data-f="type">${opt(CHTYPES,c.type)}</select>
+        <input data-i="${i}" data-f="days" value="${esc(c.days)}" placeholder="days away" aria-label="Days away (spontaneous recovery)" ${sm}${c.type==='Spontaneous recovery'||String(c.days||'').trim()?'':' hidden'}></td>
       <td><select data-i="${i}" data-f="planned"><option></option>${opt(['Planned','Unplanned'],c.planned)}</select></td>
       <td><textarea data-i="${i}" data-f="what" rows="2">${esc(c.what)}</textarea></td>
-      <td><input data-i="${i}" data-f="a" value="${esc(c.a)}" placeholder="0, 0, 0.2, 0.4, 0"></td>
-      <td><input data-i="${i}" data-f="b" value="${esc(c.b)}" placeholder="2.4, 0.4, 0.2"></td>
+      <td><input data-i="${i}" data-f="a" value="${esc(c.a)}" placeholder="0, 0, 0.2, 0.4, 0">
+        <input data-i="${i}" data-f="ra" value="${esc(c.ra)}" placeholder="replacement, A" aria-label="Replacement response, condition A" ${sm}></td>
+      <td><input data-i="${i}" data-f="b" value="${esc(c.b)}" placeholder="2.4, 0.4, 0.2">
+        <input data-i="${i}" data-f="rb" value="${esc(c.rb)}" placeholder="replacement, B" aria-label="Replacement response, condition B" ${sm}>
+        <select data-i="${i}" data-f="ru" aria-label="Replacement response measured as" ${sm}>${RU.map(o=>`<option${o===(c.ru||'')?' selected':''}>${o}</option>`).join('')}</select></td>
       <td style="text-align:center">${relCell}</td>
       <td style="text-align:center">${s.ok?f2(s.pA):'\u2014'}</td>
       <td style="text-align:center${atBl?';font-weight:600;color:#8E2A2A':''}">${s.ok?f2(s.pB):'\u2014'}${atBl?' \u2731':''}</td>
@@ -1466,9 +1551,19 @@ function renderCh(){
       <td class="nx noprint"><button type="button" class="rowDel noprint" data-del="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`;
   }).join('');
 }
+/* v25.65 (BC-RM-H5, H6) under the relapse column: how long it lasted, a late relapse inside the watch window, and the replacement response */
+function chNotes(s){let h='';
+  if(s.rel){const w=s.from>=0?'B window: sessions '+(s.from+1)+'–'+(s.from+s.lasted)+' of '+s.nB10:'';
+    h+=`<div class="winnote"${s.lasted>=3?' style="color:#8E2A2A;font-weight:600"':''}>Lasted: ${s.lasted}${s.open?'+':''} session${s.lasted===1?'':'s'}${s.open?' (still above at the last one entered)':''}; ${w}</div>`;
+    if(s.lasted>=3)h+='<div class="winnote" style="color:#8E2A2A;font-weight:600">Lasted ≥ 3 sessions: review the step; do not advance.</div>';}
+  else if(s.late>=0)h+=`<div class="winnote" style="color:#8E2A2A;font-weight:600">Late: B session ${s.late+1} rose above every A session (watch window ${s.W}).</div>`;
+  if(s.rr)h+=`<div class="winnote"${s.rr.dis?' style="color:#8E2A2A;font-weight:600"':''}>Replacement ${s.rr.dis?'disrupted':'held'}: lowest A ${s.rr.lowA}${s.rr.pc?'%':''}, B ${s.rr.lowB}${s.rr.pc?'% (criterion '+s.rr.crit+'%)':''}.</div>`+
+    (s.rr.dis&&!s.rel?'<div class="winnote" style="color:#8E2A2A;font-weight:600">Early warning: hold this step and check that requests are being honored.</div>':'');
+  return h;}
 ['change','input'].forEach(ev=>$('#chTbl').addEventListener(ev,e=>{const el=e.target;if(el.dataset.i===undefined)return;
   S.ch[+el.dataset.i][el.dataset.f]=el.value;
-  if(el.dataset.f==='a'||el.dataset.f==='b'||el.dataset.f==='type'){renderCh();renderAn();}}));
+  /* v25.65 (BC-RM-H5) the replacement response is scored like the rates; the measure is a menu, read on change */
+  if(['a','b','type','ra','rb','ru'].includes(el.dataset.f)&&(ev==='change'||el.tagName!=='SELECT')){renderCh();renderAn();}}));
 $('#addCh').addEventListener('click',()=>{S.ch.push(newCh());renderCh();renderAn();});
 /* v21.16 audit (F9): a challenge that holds entries is removed only after a question; the baseline mean recomputes as
    it is typed, as the rates do */
@@ -1519,17 +1614,36 @@ function renderAn(){
   else if(atBl.length){cls='v-no';txt=`Relapse met the criterion at ${rel.length} of ${n} challenges (${pct(rel.length,n)}), and reached or exceeded the baseline mean at ${atBl.length}. Episodes at or above baseline are the ones that put the student and staff at risk; check the safety arrangements and the caregiver response before the next step.`;}
   else {cls='v-mid';txt=`Relapse met the criterion at ${rel.length} of ${n} challenges (${pct(rel.length,n)}). None reached the baseline mean.`;}
   if(resC.length)txt+=` Resurgence: ${cnt(resRel.length,resC.length)} met it (${pct(resRel.length,resC.length)}), against 42% of dense-to-lean schedule-thinning transitions in Briggs et al. (2018), where resurgence occurred at least once in 76% of applications.`;
-  if(renC.length)txt+=` Renewal: ${cnt(renRel.length,renC.length)} met it (${pct(renRel.length,renC.length)}), against 42.3% of context changes in an outpatient clinic (Muething et al., 2020) and 24% in an inpatient program (Falligant et al., 2021).`;
+  if(renC.length)txt+=` Renewal: ${cnt(renRel.length,renC.length)} met it (${pct(renRel.length,renC.length)}), `+(autoFn()   /* v25.65 (BC-RM-M1) */
+    ?'against 18.8% of context changes for automatically maintained behavior (Falligant et al., 2024).'
+    :'against 42.3% of context changes in an outpatient clinic (Muething et al., 2020) and 24% in an inpatient program (Falligant et al., 2021).');
   /* v23.27 (review F312) the published figures are per clinic session; this student's are in the log's unit */
   if(resC.length||renC.length){const u=String(S.meta.unit||'').trim();txt+=` The published figures are per clinic session and this student\u2019s rows are ${u?esc(u):'in the log\u2019s own unit'}: the percentages size the risk and are not a like-for-like comparison.`+(/day/i.test(u)?' On a whole school day a single extra instance meets the rule.':'');}
+  /* v25.65 (BC-RM-H7) the second published rule */
+  const rel2=scored.filter(x=>x.s.rel2),dis2=scored.filter(x=>x.s.rel!==x.s.rel2);
+  txt+=` By mean-of-2, relapse met the criterion at ${rel2.length} of ${n} (${pct(rel2.length,n)}).`+(dis2.length?` The two rules disagree at challenge${dis2.length===1?'':'s'} ${dis2.map(x=>x.i+1).join(', ')}: behavior was still changing in the last treatment sessions. Hold the next step until it is stable.`:'');
+  /* v25.65 (BC-RM-H6) how long it lasted */
+  const long=rel.filter(x=>x.s.lasted>=3),lateL=scored.filter(x=>!x.s.rel&&x.s.late>=0);
+  if(rel.length)txt+=` Relapse lasted 3 sessions or more at ${long.length} of ${rel.length} episode${rel.length===1?'':'s'}${long.length?' (challenge'+(long.length===1?' ':'s ')+long.map(x=>x.i+1).join(', ')+'): review the step; do not advance':''}.`;
+  if(lateL.length)txt+=` A late rise inside the ${watchN()}-session watch window came at challenge${lateL.length===1?'':'s'} ${lateL.map(x=>x.i+1).join(', ')}.`;
+  if(autoFn())txt+=' With automatic function, relapse after a change of person peaked about five sessions later (Muething et al., 2022).';
+  /* v25.65 (BC-RM-H5) the replacement response */
+  const rrS=scored.filter(x=>x.s.rr),rrD=rrS.filter(x=>x.s.rr.dis),rrDR=rrD.filter(x=>x.s.rel),early=rrD.filter(x=>!x.s.rel);
+  if(rrS.length){txt+=` Replacement response disrupted at ${rrD.length} of ${rrS.length} challenge${rrS.length===1?'':'s'}; problem behavior met the criterion at ${rrDR.length} of those ${rrD.length}.`;
+    if(early.length)txt+=` Early warning at challenge${early.length===1?'':'s'} ${early.map(x=>x.i+1).join(', ')}: the replacement response fell and problem behavior has not yet met the criterion. Hold this step and check that requests are being honored.`;}
+  /* v25.65 (BC-RM-L5) later steps are not safer */
+  txt+=' Relapse did not become less likely at later steps or changes in the clinic series; keep the safeguards for every step (Mitteer et al., 2022). Passing one kind of challenge says nothing about the other: resurgence and renewal were unrelated across 34 children (Muething et al., 2024).';
   $('#anVerdict').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
 
   /* proportion and raw rate together (Mitteer et al., 2026) */
-  $('#rawTbl').innerHTML='<thead><tr><th style="width:38px">#</th><th style="width:12%">Date</th><th style="text-align:left">What changed</th><th style="width:12%">Peak rate, B</th><th style="width:14%">Mean rate, first 3 B</th><th style="width:10%">Prop. B</th><th style="width:11%">Relapse</th></tr></thead><tbody>'+
+  /* v25.65 (BC-RM-H6, H7, H5) how long it lasted, the second rule and the replacement response, beside the rates */
+  $('#rawTbl').innerHTML='<thead><tr><th style="width:38px">#</th><th style="width:10%">Date</th><th style="text-align:left">What changed</th><th style="width:10%">Peak rate, B</th><th style="width:11%">Mean rate, first 3 B</th><th style="width:8%">Prop. B</th><th style="width:11%">Relapse (max-of-5 / mean-of-2)</th><th style="width:9%">Lasted</th><th style="width:10%">Replacement response</th></tr></thead><tbody>'+
     scored.map(x=>`<tr><td style="text-align:center;font-weight:600">${x.i+1}</td><td>${esc(x.c.date)}</td><td>${esc(x.c.what)}</td>
       <td style="text-align:center">${f2(x.s.mB)}</td><td style="text-align:center">${f2(x.s.meanB)}</td>
       <td style="text-align:center${x.s.pB!=null&&x.s.pB>=1?';font-weight:600;color:#8E2A2A':''}">${x.s.pB!=null?f2(x.s.pB):'\u2014'}</td>
-      <td style="text-align:center">${x.s.rel?'<span class="tag e5">Yes</span>':'<span class="tag e1">No</span>'}</td></tr>`).join('')+'</tbody>';
+      <td style="text-align:center">${x.s.rel?'<span class="tag e5">Yes</span>':'<span class="tag e1">No</span>'} / ${x.s.rel2?'<span class="tag e5">Yes</span>':'<span class="tag e1">No</span>'}</td>
+      <td style="text-align:center${x.s.lasted>=3?';font-weight:600;color:#8E2A2A':''}">${x.s.rel?x.s.lasted+(x.s.open?'+':'')+' of '+x.s.nB10+(x.s.lasted>=3?' \u2731':''):(x.s.late>=0?'late, B'+(x.s.late+1):'\u2014')}</td>
+      <td style="text-align:center${x.s.rr&&x.s.rr.dis?';font-weight:600;color:#8E2A2A':''}">${x.s.rr?(x.s.rr.dis?'Disrupted':'Held'):'\u2014'}</td></tr>`).join('')+'</tbody>';
 
   /* by type */
   const rows=CHTYPES.filter(t=>t).map(t=>{
@@ -1553,8 +1667,14 @@ function renderAn(){
     row('Mean proportion of baseline before, resurgence episodes',f2(mean(resRel.map(x=>x.s.pA).filter(v=>v!=null))),'0.13',B18)+
     row('Mean proportion of baseline after, resurgence episodes',f2(mean(resRel.map(x=>x.s.pB).filter(v=>v!=null))),'0.66',B18)+
     row('Resurgence episodes at or above the baseline mean',hasBl?pct(resBl.length,resRel.length):'\u2014','17% of transitions with resurgence; 32% of applications with resurgence',B18)+
-    row('Renewal challenges meeting the criterion',pct(renRel.length,renC.length),'42.3% of context changes (outpatient); 24% (inpatient)',REN)+
-    row('Renewal at least once',once(renC),'67.2% of participants (outpatient); 59% (inpatient)',REN)+'</tbody>';
+    /* v25.65 (BC-RM-M1) with automatic function, the automatic-function base rates in place of the social ones */
+    (autoFn()?row('Renewal challenges meeting the criterion (automatic function)',pct(renRel.length,renC.length),'18.8% of 985 context changes; 36% of person changes and 26% of setting changes','Falligant et al. (2024); Muething et al. (2022)')+
+      row('Renewal at least once (automatic function)',once(renC),'68.1% of participants','Falligant et al. (2024)')
+     :row('Renewal challenges meeting the criterion',pct(renRel.length,renC.length),'42.3% of context changes (outpatient); 24% (inpatient)',REN)+
+      row('Renewal at least once',once(renC),'67.2% of participants (outpatient); 59% (inpatient)',REN))+
+    /* v25.65 (BC-RM-H7) the same comparisons on the mean-of-2 rule */
+    row('Resurgence challenges meeting mean-of-2',pct(resC.filter(x=>x.s.rel2).length,resC.length),'46.83% of 504 thinning steps (29.56% by max-of-5)','Podlesnik et al. (2025)')+
+    row('Renewal challenges meeting mean-of-2',pct(renC.filter(x=>x.s.rel2).length,renC.length),'31.29% of 505 context changes (23.37% by max-of-5); 39.79% of 749 (25.23% by max-of-5)','Podlesnik et al. (2025); Aggarwal et al. (2026)')+'</tbody>';
   drawRel(scored);
 }
 function drawRel(scored){
@@ -1596,8 +1716,12 @@ function drawRel(scored){
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
   el.value=S.meta[k]||'';
   if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
-    el.addEventListener(ev,()=>{S.meta[k]=el.value;if(k==='harm'||k==='precursor')renderMit();if(k==='blLevel')rmBl();if(k==='unit')renderAn();});}});}
-function renderAll(){ensure();renderRisk();renderMit();renderCh();renderAn();bindMeta();$('#blMean').value=S.blMean||'';rmBl();rmPrintSel();}
+    el.addEventListener(ev,()=>{S.meta[k]=el.value;if(k==='harm'||k==='precursor')renderMit();if(k==='blLevel')rmBl();if(k==='unit')renderAn();
+      /* v25.65 (BC-RM-M1, H5, H6) the function sets the base rates and the watch window; the criterion and the window rescore the log */
+      if(k==='fn'){renderRisk();rmWatch();}if(k==='fn'||k==='rrCrit'||k==='watchN'){renderCh();renderAn();}});}});}
+function rmWatch(){const e=document.getElementById('rmWatch'),n=document.getElementById('rmWatchNote');if(e)e.placeholder=String(autoFn()?10:3);
+  if(n)n.textContent='sessions (blank: '+(autoFn()?'10, because the function on Setup is automatic':'3, the published rule')+')';}
+function renderAll(){ensure();renderRisk();renderMit();renderCh();renderAn();bindMeta();$('#blMean').value=S.blMean||'';rmBl();rmPrintSel();rmWatch();}
 /* v23.27 (review F309) one baseline value: the number the proportions use shows on Setup and on the log, and Setup says when its level reads otherwise */
 function rmBl(){const a=$('#blMeanSetup');if(a&&document.activeElement!==a)a.value=S.blMean||'';const g=$('#blAgree');if(!g)return;const m=/(\d+(?:\.\d+)?)/.exec(String(S.meta.blLevel||'')),b=parseFloat(S.blMean);
   g.textContent=m&&isFinite(b)&&Math.abs(parseFloat(m[1])-b)>1e-9?'The level above reads '+m[1]+'; the proportions use '+b+': make them agree.':'';}
@@ -1635,10 +1759,13 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const rows=[['#','Date','Type','Planned','What changed','Condition A','Condition B','Met criterion','Prop A','Prop B','Peak rate B','Mean rate first 3 B','Response']];
+  /* v25.65 (BC-RM-H5, H6, H7, M8) the new columns go after the old ones */
+  const rows=[['#','Date','Type','Planned','What changed','Condition A','Condition B','Met criterion','Prop A','Prop B','Peak rate B','Mean rate first 3 B','Response',
+    'Met mean-of-2','Lasted (sessions)','Replacement A','Replacement B','Replacement measured as','Replacement disrupted','Days away']];
   S.ch.forEach((c,i)=>{const s=scoreCh(c);
     rows.push([i+1,c.date,c.type,c.planned,c.what,c.a,c.b,s.ok?(s.rel?'Yes':'No'):'',
-      s.ok?f2(s.pA):'',s.ok?f2(s.pB):'',s.ok?f2(s.mB):'',s.ok?f2(s.meanB):'',c.resp]);});
+      s.ok?f2(s.pA):'',s.ok?f2(s.pB):'',s.ok?f2(s.mB):'',s.ok?f2(s.meanB):'',c.resp,
+      s.ok?(s.rel2?'Yes':'No'):'',s.ok&&s.rel?s.lasted+(s.open?'+':''):'',c.ra,c.rb,c.ru,s.ok&&s.rr?(s.rr.dis?'Yes':'No'):'',c.days]);});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='RM-1_challenges.csv';document.body.appendChild(a);a.click();a.remove();});
@@ -1679,7 +1806,7 @@ async function loadSim(){
 
   /* exposure: escape function, thinning under way, context changes coming */
   const on=k=>{S.ind[k]=true;};
-  [0,1,4,5,6,7].forEach(i=>on('res_'+i));
+  [0,1,4,5,6,7,9].forEach(i=>on('res_'+i));   /* v25.65 (BC-RM-H8) the programmed delays end when time passes */
   [0,1,2,4,5].forEach(i=>on('ren_'+i));
   [0,4].forEach(i=>on('rei_'+i));
   [0,2,4].forEach(i=>on('spo_'+i));
@@ -1707,9 +1834,11 @@ async function loadSim(){
      step of the thinning plan; the "after" sessions of one challenge and the "before" sessions of the next agree */
   S.ch=[
     {date:D(95),type:'Resurgence',planned:'Planned',what:'First S\u0394 introduced, 30 s',
-     a:'0, 1, 0, 0, 1',b:'3, 2, 1',resp:'Held the step. Recovered by the third session without a step-back.'},
+     a:'0, 1, 0, 0, 1',b:'3, 2, 1, 0, 1',resp:'Held the step. Recovered by the third session without a step-back.',
+     /* v25.65 (BC-RM-H5, H6) the break card as a percentage of opportunities used independently, and sessions after the third */
+     ra:'90, 95, 100, 95, 100',rb:'70, 85, 95',ru:'% of opportunities'},
     {date:D(86),type:'Resurgence',planned:'Planned',what:'Delay 3 s to 6 s',
-     a:'1, 0, 0, 1, 0',b:'1, 0, 0',resp:'No criterion-level increase. Advanced on schedule.'},
+     a:'1, 0, 0, 1, 0',b:'1, 0, 0',resp:'No criterion-level increase. Advanced on schedule.',ra:'95, 100, 95, 100, 100',rb:'95, 100, 95',ru:'% of opportunities'},
     {date:D(78),type:'Resurgence',planned:'Planned',what:'Delay 6 s to 10 s',
      a:'0, 1, 0, 0, 0',b:'1, 0, 1',resp:'No criterion-level increase. Advanced on schedule.'},
     {date:D(69),type:'Resurgence',planned:'Planned',what:'Delay 10 s to 20 s',
@@ -1717,13 +1846,13 @@ async function loadSim(){
     {date:D(58),type:'Resurgence',planned:'Planned',what:'Delay 20 s to 45 s',
      a:'0, 0, 1, 0, 0',b:'2, 1, 0',resp:'Met criterion, transient. Repeated the step once before advancing.'},
     {date:D(40),type:'Mixed / more than one',planned:'Unplanned',what:'Substitute aide for three days; S\u0394 card not used and one break delivered after aggression',
-     a:'0, 1, 0, 0, 1',b:'6, 5, 2',resp:'Reached the baseline mean. Held the delay at 45 s with the BCBA present, re-ran the briefing, and built the substitute card. Integrity re-checked on Form TI-1.'},
+     a:'0, 1, 0, 0, 1',b:'6, 5, 2, 1, 0',ra:'95, 100, 100, 95, 100',rb:'40, 60, 85',ru:'% of opportunities',resp:'Reached the baseline mean. Held the delay at 45 s with the BCBA present, re-ran the briefing, and built the substitute card. Integrity re-checked on Form TI-1.'},
     {date:D(30),type:'Resurgence',planned:'Planned',what:'Delay 45 s to 90 s, morning block',
      a:'0, 0, 1, 0, 0',b:'1, 0, 0',resp:'No criterion-level increase. The afternoon block stays at 45 s (see Changes to the plan).'},
     {date:D(21),type:'Renewal',planned:'Planned',what:'Delay trials moved to the library table with Aide B',
      a:'1, 0, 0, 1, 0',b:'1, 0, 0',resp:'Did not meet the criterion. The multiple-context training and the transferred stimuli were both in place.'},
     {date:D(5),type:'Spontaneous recovery',planned:'Unplanned',what:'Return after a nine-school-day absence',
-     a:'0, 0, 0, 0, 0',b:'1, 0, 0',resp:'Met criterion, one session. Resumed at the previous step rather than stepping back.'}
+     a:'0, 0, 0, 0, 0',b:'1, 0, 0',days:'9 school days',resp:'Met criterion, one session. Resumed at the previous step rather than stepping back.'}
   ];
   renderAll();setView('an');
   nbhUI.toast('Simulation loaded: a simulated case with exposure rated across all four relapse types.', {kind:'ok'});
@@ -2850,8 +2979,14 @@ window.__nbhFactsOut=function(){try{
     if(x.s.pB!=null)o.pB=Math.round(x.s.pB*100)/100;return o;});
   const md=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:(d||'');},rel=list.filter(x=>x.rel),last=list[list.length-1];
   const line=rel.length+' of '+list.length+' challenge'+(list.length===1?'':'s')+' showed relapse'+(rel.length?' ('+rel.map(x=>(x.type||'type not named')+(x.date?' '+md(x.date):'')).join('; ')+')':'')
-    +(list.length>1?'; the last'+(last.date?', '+md(last.date):'')+(last.what?' ('+last.what+')':'')+': '+(last.rel?'relapse':'no relapse'):(last.what?' ('+last.what+')':''))+' (Form RM-1)';
-  const out={src:'RM-1',n:list.length,rel:rel.length,list,line};if(T(S.meta.caregiver))out.caregiverDo=T(S.meta.caregiver);if(T(S.meta.unit))out.unit=T(S.meta.unit);   /* v23.27 (review F309) */
+    +(list.length>1?'; the last'+(last.date?', '+md(last.date):'')+(last.what?' ('+last.what+')':'')+': '+(last.rel?'relapse':'no relapse'):(last.what?' ('+last.what+')':''))
+    /* v25.65 (BC-RM-H5, H6) how long relapse lasted, and the replacement response's disruption, with the relapse line for Form PR-1 */
+    +(rel.length?'; lasted 3 sessions or more at '+sc.filter(x=>x.s.rel&&x.s.lasted>=3).length+' of '+rel.length:'')
+    +(sc.some(x=>x.s.rr)?'; replacement response disrupted at '+sc.filter(x=>x.s.rr&&x.s.rr.dis).length+' of '+sc.filter(x=>x.s.rr).length:'')+' (Form RM-1)';
+  const out={src:'RM-1',n:list.length,rel:rel.length,list,line};
+  sc.forEach((x,j)=>{const o=list[j];o.rel2=!!x.s.rel2;if(x.s.rel)o.lasted=x.s.lasted;if(x.s.rr)o.rrDisrupted=!!x.s.rr.dis;});
+  out.rel2=sc.filter(x=>x.s.rel2).length;out.long=sc.filter(x=>x.s.rel&&x.s.lasted>=3).length;
+  if(sc.some(x=>x.s.rr)){out.rrScored=sc.filter(x=>x.s.rr).length;out.rrDisrupted=sc.filter(x=>x.s.rr&&x.s.rr.dis).length;}if(T(S.meta.caregiver))out.caregiverDo=T(S.meta.caregiver);if(T(S.meta.unit))out.unit=T(S.meta.unit);   /* v23.27 (review F309) */
   return {relapse:out};}catch(e){return null;}};
 /* v23.27 (review F309) the case, in, into empty fields only: the behavior and the function as the workstation's generic fill does; the
    alternative response and the treatment in place from Form TD-1's plan; the baseline mean for the proportions from Form DD-1's record
@@ -2866,6 +3001,13 @@ window.__nbhFactsIn=function(f){let n=0;const T=v=>String(v==null?'':v).trim(),n
       if(st&&st.days&&isFinite(+st.mean)){S.blMean=String(Math.round(st.mean*100)/100);n++;if(!T(S.meta.unit))S.meta.unit=x.measure==='count'?'per day':(T(x.unit)?T(x.unit):'');notes.push('the baseline mean from Form DD-1 ('+st.days+' day'+(st.days===1?'':'s')+')');}}
     const rk='rei_'+TYPES.find(t=>t.k==='rei').ind.findIndex(x=>/integrity has not been measured/i.test(x));
     if(!Object.keys(S.ind||{}).some(k=>S.ind[k])&&f.plan){if(!f.integrity){S.ind[rk]=true;n++;notes.push('no integrity record on Form TI-1 yet');}}
+    /* v25.65 (BC-RM-M3) a commission error on Form TI-1 (obs[].com, the share of consequence opportunities with the reinforcer given
+       after the behavior, when TI-1 sends it) since the date this form was prepared, or in the whole record without one, ticks the
+       reinstatement line once; a line unticked by hand afterwards stays unticked */
+    const ck='rei_'+TYPES.find(t=>t.k==='rei').ind.findIndex(x=>/commission error\) since the last review/.test(x));
+    const iso=v=>{v=T(v);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(v);return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
+    const since=iso(S.meta.date),obs=((f.integrity||{}).obs||[]).filter(o=>o&&isFinite(parseFloat(o.com))&&+o.com>0&&(!since||!iso(o.date)||iso(o.date)>=since));
+    if(obs.length&&!S.ind[ck]&&S.meta.comAuto!=='1'){S.ind[ck]=true;S.meta.comAuto='1';n++;notes.push('a commission error on Form TI-1');}
   }catch(e){}
   if(n){try{renderAll();}catch(e){}}
   return {filled:n,note:notes.join('; ')};};
