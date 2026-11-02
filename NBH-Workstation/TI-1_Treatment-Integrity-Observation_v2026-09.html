@@ -1425,7 +1425,7 @@ function renderGrid(){
     <tr class="obshead"><th></th><th style="text-align:right">IOA collected</th><th></th>
         ${S.obs.map((o,j)=>`<th><label class="ti-ck"><input type="checkbox" data-o="${j}" data-f="ioa"${o.ioa?' checked':''} aria-label="Observation #${j+1}, IOA collected"></label></th>`).join('')}<th></th></tr>
     <tr class="obshead ti-dis-row"><th></th><th style="text-align:right">Distractions during the observation</th><th></th>
-        ${S.obs.map((o,j)=>`<th class="ti-dis">${TI_DIS.map(([k,l])=>`<label class="ti-dis-ck"><input type="checkbox" data-tio="dis" data-tiok="${k}" data-tioj="${j}"${o.dis&&o.dis[k]?' checked':''} aria-label="Observation #${j+1}: ${l}"> ${l}</label>`).join('')}</th>`).join('')}<th></th></tr>
+        ${S.obs.map((o,j)=>`<th class="ti-dis">${TI_DIS.map(([k,l])=>`<label class="ti-ck ti-dis-ck"><input type="checkbox" data-tio="dis" data-tiok="${k}" data-tioj="${j}"${o.dis&&o.dis[k]?' checked':''} aria-label="Observation #${j+1}: ${l}"> ${l}</label>`).join('')}</th>`).join('')}<th></th></tr>
   </tbody><tbody>`;   /* v25.64 (MEAS L2) the conditions in the room, ticked for each observation (Berdeaux et al., 2022) */
   /* v21.16 audit. F11: the observation details sit in a row group of their own below the header. In the header
      they were repeated at the top of each printed page, where the browser does not draw a field's value, so the
@@ -3730,6 +3730,10 @@ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.cl
 .obshead th.ti-dis{text-align:left;vertical-align:top;padding:3px 4px}
 .obshead .ti-dis-ck{display:flex;align-items:flex-start;gap:3px;font-weight:400;font-size:10px;line-height:1.25;margin:1px 0;text-align:left}
 .obshead .ti-dis-ck input{width:auto;flex:0 0 auto;margin:1px 0 0}
+/* on a touch screen each distraction tick is a tappable box at least 44 px tall, 4 px from the next, as the form's other bare ticks are (v21.44 A6) */
+@media screen and (pointer:coarse){.obshead label.ti-ck.ti-dis-ck{justify-content:flex-start;align-items:center;gap:6px;padding:0 4px;margin:0 0 4px;box-sizing:border-box;width:100%}
+  .obshead label.ti-ck.ti-dis-ck:last-child{margin-bottom:0}
+  table.ti-fb .ti-fb-ck{min-height:44px;align-items:center;margin:0 0 4px}}
 .ti-more{margin:6px 0 10px;padding:8px 10px;border-left:4px solid var(--rule);background:var(--wash);font-family:var(--sans);font-size:12.5px}
 table.ti-fb td{vertical-align:top}
 table.ti-fb input:not([type=checkbox]),table.ti-fb select{width:100%;box-sizing:border-box;font:inherit;font-size:12px}
