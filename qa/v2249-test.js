@@ -1,7 +1,8 @@
 /* v22.49 Form EA-1, the experimental analysis (review F149-F157, I76-I80). The health record is shown apart from Medical
    clearance, which is never filled from a medication list, and an analysis of injurious behavior without clearance is flagged;
-   the precursor template words every card for the precursor; a near-zero condition beside a high one is "rule met, magnitude
-   low" and stays out of the outcome and the evidence; the self-injury subtype is read only after automatic maintenance; the
+   the precursor template words every card for the precursor; a near-zero condition beside a high one is flagged for visual
+   review by the form's magnitude check and scored by the published rules (v25.64, H1: it was "rule met, magnitude low" and left
+   out); the self-injury subtype is read only after automatic maintenance; the
    function handed to FS-1 is chosen, else the outcome's, and a clause that rules a function out never adds it; the treatment
    goal is chosen; the assent plan (SI-1) ends sessions and its withdrawal pauses the analysis; the trial-based analysis gets a
    reading; the treatment log can take DD-1's record, and the design verdict and the session safety record reach PR-1; a
@@ -46,19 +47,27 @@ const SEQ=play=>[0,1,2,3].flatMap(k=>[[0,[4,2,5,3][k]],[1,[86,102,83,95][k]],[2,
   /* ---- F151, F152, F153 on the worked example ---- */
   e=await open('EA-1',EA);await tpl(e,'standard');await fill(e,SEQ([0,0,0,0]));await sleep(300);
   const f151=await e.evaluate(()=>{eaAPI.setv('d.fn',true);/* v24.21: the function flows once the Decision is ticked */return {head:document.querySelector('#critVerdict .tag').textContent,verdict:document.getElementById('critVerdict').textContent,tbl:document.getElementById('critTbl').textContent,ev:__nbhFactsOut().evidence,lod:document.getElementById('lodOutEA').textContent,auto:document.getElementById('dFnAuto').textContent};});
-  ok('7 F151 with the control at zero, Attention and Alone beside Demand read "rule met, magnitude low" and the outcome is Demand alone',/^Differentiated: Demand meets the rule/.test(f151.head)&&(f151.tbl.match(/rule met, magnitude low/g)||[]).length===2&&/Check on visual review: Attention, Alone/.test(f151.verdict),{head:f151.head,verdict:f151.verdict.slice(0,500)});
-  ok('8 F151 Form FS-1 is handed escape, not "Attention and Escape and Automatic"',f151.ev&&f151.ev.fnKey==='escape'&&/Escape/.test(f151.ev.fn)&&!/Attention/.test(f151.ev.fn),f151.ev);
-  ok('9 F152 the subtype panel says it does not apply when the analysis shows a social function',/Not applicable: the analysis shows a social function \(Demand\)/.test(f151.lod)&&!/Subtype 1/.test(f151.lod),f151.lod);
-  ok('10 F153 the function for the report starts as the outcome reads',/As the outcome reads: Escape/.test(f151.auto),f151.auto);
+  /* v25.64 (H1) the published rules decide and this form's magnitude floor is a flag only: with the control at zero, Attention and
+     Alone meet the rule beside Demand, both flagged for visual review; Alone is not the highest of three, so it is not scored
+     (Roane et al., 2013, rule 2c) and the outcome is Attention and Demand */
+  ok('7 F151 with the control at zero, Attention and Alone beside Demand meet the published rule and are flagged "check on visual review" by this form\'s magnitude check; Alone is not scored (rule 2c) and the outcome is Attention and Demand',/^Multiple conditions meet the rule: Attention, Demand\./.test(f151.head)&&(f151.tbl.match(/check on visual review: mean under a quarter of the highest test condition/g)||[]).length===2&&!/magnitude low/.test(f151.tbl)&&/rule 2c/.test(f151.verdict)&&/Check on visual review: Attention, Alone/.test(f151.verdict),{head:f151.head,verdict:f151.verdict.slice(0,500)});
+  /* v25.64 (H1) the scored conditions go to FS-1: attention and escape, never automatic for an alone condition the rules leave out */
+  ok('8 F151 Form FS-1 is handed the scored conditions, Attention and Escape (multiple), not "Attention and Escape and Automatic"',f151.ev&&f151.ev.fnKey==='multiple'&&/Attention/.test(f151.ev.fn)&&/Escape/.test(f151.ev.fn)&&!/Automatic/.test(f151.ev.fn),f151.ev);
+  /* v25.64 (H1) the social functions the panel names are the scored ones */
+  ok('9 F152 the subtype panel says it does not apply when the analysis shows a social function',/Not applicable: the analysis shows a social function \(Attention, Demand\)/.test(f151.lod)&&!/Subtype 1/.test(f151.lod),f151.lod);
+  /* v25.64 (H1) */
+  ok('10 F153 the function for the report starts as the outcome reads',/As the outcome reads: Multiple control/.test(f151.auto),f151.auto);
   const f153=await e.evaluate(()=>{eaAPI.setv('d.func','Escape from demands; attention ruled out');const a=__nbhFactsOut().evidence.fnKey;const s=document.querySelector('[name="d.fnkey"]');s.value='attention';s.dispatchEvent(new Event('change',{bubbles:true}));const b=__nbhFactsOut().evidence.fnKey;return {a,b};});
-  ok('11 F153 the evidence takes the outcome over the words, and the function chosen for the report over both',f153.a==='escape'&&f153.b==='attention',f153);
+  /* v25.64 (H1) the outcome is now multiple control, still taken over the words ("escape; attention ruled out") */
+  ok('11 F153 the evidence takes the outcome over the words, and the function chosen for the report over both',f153.a==='multiple'&&f153.b==='attention',f153);
   /* I78 the blind reading on the same data */
   const b1=await e.evaluate(()=>{eaAPI.setView('analysis');document.getElementById('eaBlindGo').click();const fig=document.getElementById('eaBlindFig').textContent,blind=document.body.classList.contains('ea-blind'),hidden=getComputedStyle(document.getElementById('critVerdict')).display==='none';
     document.querySelector('#eaBlindPick [data-bl="U"]').checked=true;document.getElementById('eaBlindShow').click();const still=document.body.classList.contains('ea-blind');
     eaAPI.setv('d2.who','Dana Whitfield, BCBA (simulated)');document.getElementById('eaBlindShow').click();
     const v=n=>document.querySelector('[name="'+n+'"]').value;return {fig:/Attention|Demand|Alone|Play/.test(fig),blind,hidden,still,after:document.body.classList.contains('ea-blind'),read:v('d2.read'),agree:v('d2.agree'),outcome:v('d2.outcome'),res:document.getElementById('eaBlindRes').textContent};});
   ok('12 I78 the blind reading hides the outcome and the condition names, and needs the second analyst\'s name',b1.blind&&b1.hidden&&!b1.fig&&b1.still,b1);
-  ok('13 I78 recording the reading shows the outcome and says the two disagree',!b1.after&&b1.read==='Undifferentiated'&&b1.agree==='disagree'&&/Demand meets the rule/.test(b1.outcome)&&/disagree/.test(b1.res),b1);
+  /* v25.64 (H1) the conditions that meet the published rule on these data: Attention, Demand and Alone */
+  ok('13 I78 recording the reading shows the outcome and says the two disagree',!b1.after&&b1.read==='Undifferentiated'&&b1.agree==='disagree'&&/^Attention, Demand, Alone \/ No interaction meet the rule/.test(b1.outcome)&&/disagree/.test(b1.res),b1);
   await e.close();
   e=await open('EA-1',EA);await tpl(e,'standard');
   await fill(e,[0,1,2,3].flatMap(k=>[[0,[2,1,2,1][k]],[1,[1,2,1,1][k]],[2,[30,28,33,31][k]],[3,[3,5,2,4][k]]]));await sleep(300);
@@ -106,7 +115,9 @@ const SEQ=play=>[0,1,2,3].flatMap(k=>[[0,[4,2,5,3][k]],[1,[86,102,83,95][k]],[2,
   const f154=await e.evaluate(()=>{eaAPI.setv('d.fn',true);/* v24.21 */eaAPI.$('#nTrial').value='10';eaAPI.renderTrials(true);const hits={0:[2,3],1:[1,8],2:[0,1],3:[2,2]};
     Object.keys(hits).forEach(c=>{for(let k=0;k<10;k++){eaAPI.setv(`tr[${c}].ctl[${k}]`,k<hits[c][0]?'1':'0');eaAPI.setv(`tr[${c}].tst[${k}]`,k<hits[c][1]?'1':'0');}});
     eaAPI.renderAnalysis();return {head:document.querySelector('#critVerdict .tag').textContent,tbl:document.getElementById('critTbl').textContent,ev:(__nbhFactsOut()||{}).evidence};});
-  ok('23 F154 the trial-based analysis gets a reading: Demand is the candidate (test 80% against control 10% over 10 trials)',/^Trial-based reading: Demand \(candidate/.test(f154.head)&&/candidate/.test(f154.tbl),f154.head);
+  /* v25.64 (H3) the trial-based criteria of Standish et al. (2021): Demand has y 7 (target in the test segment, not in its control)
+     and n 3 over 10 trials, so y ≥ 3 and y ≥ n confirms it; the others continue */
+  ok('23 F154 the trial-based analysis gets a reading: Demand is confirmed (y 7, n 3 over 10 trials: y ≥ 3 and y ≥ n)',/^Trial-based reading: Demand \(confirmed: y ≥ 3 and y ≥ n within 20 trials\)/.test(f154.head)&&/Demand107/.test(f154.tbl.replace(/\s+/g,''))&&(f154.tbl.match(/confirmed/g)||[]).length===1,{head:f154.head,tbl:f154.tbl.slice(0,400)});
   ok('24 F154 the reading reaches Form FS-1: escape, moderate, with the trials counted',f154.ev&&f154.ev.fnKey==='escape'&&f154.ev.strength==='Moderate'&&f154.ev.n===40,f154.ev);
   await e.close();
   /* ---- F157 DD-1's record into the treatment log; the verdict to the case ---- */

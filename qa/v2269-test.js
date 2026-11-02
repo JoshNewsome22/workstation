@@ -34,7 +34,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('6 F167 a file saved before rows 7 and 8 opens with rows 1 to 6 in place and rows 7 and 8 taken from the register',jo[5]===j[5]&&jo[0]===j[0]&&jo[6]===j[6]&&jo[7]===j[7],jo);
   /* I85 */
   const hill=await p.evaluate(()=>({row:document.querySelector('#hillTbl tbody tr:last-child td').textContent,total:document.getElementById('hillTotal').textContent,band:document.getElementById('hillBand').textContent,box:document.getElementById('matchBox').hidden}));
-  ok('7 I85 Hill\'s analogy is replication on a second sample, on the same 0-2 scale (the example: 14, high); the allocation table is hidden',hill.row==='Replicated on a second sample'&&hill.total==='14'&&/high/i.test(hill.band)&&hill.box===true&&/His "analogy" is replaced by replication on a second sample/.test(txt),hill);
+  /* v25.64 (H7) the top band is named "Strongest descriptive support" (it was "High confidence") */
+  ok('7 I85 Hill\'s analogy is replication on a second sample, on the same 0-2 scale (the example: 14, the top band); the allocation table is hidden',hill.row==='Replicated on a second sample'&&hill.total==='14'&&hill.band==='Strongest descriptive support'&&hill.box===true&&/His "analogy" is replaced by replication on a second sample/.test(txt),hill);
   const withM=JSON.parse(JSON.stringify(d));
   await p.evaluate(()=>{const i=document.querySelectorAll('#matchTbl .mr');i[0].value='12';i[1].value='4';});
   const dl2=p.waitForEvent('download',{timeout:15000});await p.evaluate(()=>document.getElementById('btnSave').click());const d2=fs.readFileSync(await (await dl2).path(),'utf8');
