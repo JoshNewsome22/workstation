@@ -2361,6 +2361,11 @@ $('#v65AddPe').addEventListener('click',()=>{if(S.peLog.length>=200)return;S.peL
     const sm=/subtype\s*(1|2|3|one|two|three)\b/i.exec([lab,T(pb&&pb.statement)].concat(fn.statements||[]).join(' '));
     if(sm&&!T(m.fsSub)){m.fsSub={one:'1',two:'2',three:'3'}[sm[1].toLowerCase()]||sm[1];n++;got.push('the subtype from Form FS-1');v65SubPick();}
     else if(!T(m.fsSub)&&fn.key&&fn.key!=='automatic'&&fn.key!=='multiple'&&fn.key!=='unknown'){m.fsSub='social';n++;}}
+  /* v25.65 (SAFETY-M9) equipment and self-restraint the records review found (Form RR-1), into Part I's empty boxes; whether
+     self-restraint is observed now stays for staff to answer */
+  const ch=(f.records&&f.records.crisisHist)||null,no=v=>!T(v)||/^(none|no|n\/a|not)\b/i.test(T(v));
+  if(ch&&!no(ch.pe)&&!T(m.peType)){m.peType=T(ch.pe)+' (in the record, Form RR-1)';n++;got.push('protective equipment from the records review (RR-1)');}
+  if(ch&&!no(ch.sr)&&!T(m.srDesc)){m.srDesc=T(ch.sr)+' (in the record, Form RR-1)';n++;got.push('self-restraint from the records review (RR-1)');}
   if(n)renderAll();
   return {filled:((r&&r.filled)||0)+n,note:got.length?((r&&r.note)?r.note+'; ':'')+got.join('; '):(r&&r.note)};};})();
 /* ---- the case, out: equipment and self-restraint, for the plan review ---- */

@@ -2827,6 +2827,8 @@ function v65Update(){try{
   if(ans.length>=3&&hit*3>=ans.length*2)fl+='<div class="verdict v-mid"><b>Restraint in this record is often followed by escape from the task or by adult attention. The emergency procedure may be adding to the behavior. Review the FBA (Form FS-1) and the BIP (Form TD-1).</b> '+hit+' of the '+ans.length+' restraints with an answer were followed by the task removed or changed, leaving the room, going home, or one-to-one adult time. In a school, a hold used as a consequence increased the behavior it followed, by giving attention for one student and by removing the demand for another (Magee &amp; Ellis, 2001).</div>';
   else if(ans.length)fl+='<p class="hint">'+hit+' of the '+ans.length+' restraints with an answer were followed by escape from the task or by adult attention. This form flags the pattern at two thirds or more of three or more restraints.</p>';
   if(inj.length)fl+='<div class="verdict v-mid">An injury is recorded for restraint '+inj.join(', ')+'. Complete an injury check on Form IM-1 and document the injury as district policy says.</div>';
+  /* v25.65 (SAFETY-M9) the records review's count of earlier restraints and what followed them (Form RR-1) */
+  if(v65T(m.rrCrisis))fl+='<p class="hint">Records review (Form RR-1): '+esc(m.rrCrisis)+' restraints in the earlier record were followed by the task removed or the student sent home.</p>';
   set('v65LogFlag',fl);
   /* H2: the graph */
   set('v65Graph',v65Graph(used));
@@ -2932,6 +2934,10 @@ document.addEventListener('click',async e=>{const b=e.target&&e.target.closest?e
   else{const A=b.dataset.v65del==='prec'?S.prec:S.reh,i=+b.dataset.i,r=A[i];if(!r)return;
     if(crcFilled(r)&&!(await nbhUI.confirm('Delete this row?\nIts entries will be deleted.',{ok:'Delete',danger:true})))return;A.splice(i,1);ensure();}
   v65Draw();v65Update();});
+/* v25.65 (SAFETY-M9) the case, in: the records review's count of restraints followed by the task removed or the student sent home */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const c=f&&f.records&&f.records.crisisHist;if(c&&c.esc!=null&&c.of!=null&&+c.of>0){const t=c.esc+' of '+c.of;if(S.meta.rrCrisis!==t){S.meta.rrCrisis=t;v65Update();}}}catch(e){}
+  return r;};}
 v65Draw();v65LogDraw();v65Update();
 </script>
 <script>

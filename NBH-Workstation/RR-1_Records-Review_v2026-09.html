@@ -1323,6 +1323,7 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
     <thead><tr><th class="c" style="width:110px">Date</th><th style="width:150px">Conducted by</th><th style="width:190px">Methods used</th><th>Hypothesized function(s) and target behaviors</th></tr></thead>
     <tbody></tbody>
   </table></div>
+  <div class="selist" style="margin:4px 6px"><label><input type="checkbox" name="f.relapse"> The behavior came back after a period of success, after the newest FBA</label></div>
   <h3 class="sub">Documented Interventions and Plans</h3>
   <p class="method" style="margin:0 0 6px">One row per intervention or plan component the record documents, including informal ones (office time, parent calls, seat changes). Outcome is what the record's data show, not staff opinion.</p>
   <div class="gridwrap rrwrap"><table class="grid" id="intTbl">
@@ -1341,6 +1342,14 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
     <div class="f"><label for="cInj">Injuries documented</label><input id="cInj" name="c.inj" placeholder="student / staff, dates"></div>
   </div>
   <div class="defs" style="margin-top:8px"><div class="drow"><div class="dlab">Pattern in incident reports (antecedents, duration, what ended it)</div><div class="dval"><textarea name="c.pattern"></textarea></div></div></div>
+  <!-- v25.65 (SAFETY-M9) what restraints led to, and equipment and self-restraint in the record; they go to Form CR-1 and Form IM-1 -->
+  <div class="ident c3" style="margin-top:8px">
+    <div class="f"><label for="v65REsc">Restraints followed by the task removed or the student sent home</label><input id="v65REsc" name="c.rEsc" type="number" min="0" data-calc="1"></div>
+    <div class="f"><label for="v65ROf">of (restraints whose reports say what followed)</label><input id="v65ROf" name="c.rOf" type="number" min="0" data-calc="1"></div>
+    <div class="f"><label for="v65Pe">Protective equipment or prescribed devices in the record (type, dates)</label><input id="v65Pe" name="c.pe"></div>
+    <div class="f"><label for="v65Sr">Self-restraint described in the record</label><input id="v65Sr" name="c.sr" placeholder="what it looks like, source"></div>
+  </div>
+  <div class="readout" id="v65CrV"></div>
   <div class="cite">Function-match and integrity criteria after Ingram, Lewis-Palmer, and Sugai (2005), Vollmer et al. (1999), and Wilder, Atwell, and Wine (2006). Section 1003.573, Florida Statutes, requires an incident report for each restraint and requires each school district to prohibit school personnel from using seclusion; the incident reports are reviewed here for antecedent and consequence information only.</div>
 </div>
 
@@ -1366,6 +1375,8 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
     <div><b>MOST FREQUENT LOCATION</b><span id="stLoc" style="font-size:13px">&mdash;</span><em id="stLocSub"></em></div>
     <div><b>MOST FREQUENT ACTION</b><span id="stAct" style="font-size:13px">&mdash;</span><em id="stActSub"></em></div>
   </div>
+  <!-- v25.65 (SAFETY-M7) the consequence recorded most often is not the function -->
+  <p class="method v65fixed"><b>The consequence recorded most often matched the function in a minority of cases studied. Attention follows most problem behavior whatever its function.</b> When descriptive and functional analyses were compared for 12 people, the most frequent consequence was the maintaining one in only 3 (Thompson &amp; Iwata, 2007).</p>
   <div class="twoup figs">
     <div class="figure" id="figMonth"></div>
     <div class="figure" id="figTally"></div>
@@ -1435,9 +1446,10 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
   </div>
   <h3 class="sub">Medications Listed in the Record</h3>
   <div class="gridwrap rrwrap"><table class="grid" id="medTbl">
-    <thead><tr><th style="width:22%">Medication</th><th style="width:110px">Dose / time</th><th class="c" style="width:104px">Start</th><th style="width:26%">Changes (dates)</th><th>Effects noted in record</th></tr></thead>
+    <thead><tr><th style="width:18%">Medication</th><th style="width:96px">Dose / time</th><th class="c" style="width:104px">Start</th><th style="width:18%">Changes (dates)</th><th>Effects noted in record</th><th style="width:15%">Behavior data before and after the change in the record?</th><th style="width:14%">Other medications at the time</th></tr></thead>
     <tbody></tbody>
   </table></div>
+  <div class="readout" id="v65MedV"></div>
   <h3 class="sub">Developmental, Social, and Environmental History Relevant to the FBA</h3>
   <div class="defs">
     <div class="drow"><div class="dlab">School history (schools, placements, moves)</div><div class="dval"><textarea name="s.schools" placeholder="e.g., 3 schools since K; transferred Aug 2025; records requested 8/20" class="nbh-line" rows="1"></textarea></div></div>
@@ -1450,7 +1462,14 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
     <thead><tr><th class="c" style="width:110px">Date</th><th style="width:170px">Event type</th><th>Event (as recorded)</th><th>Possible relation to behavior</th></tr></thead>
     <tbody></tbody>
   </table></div>
-  <div class="cite">Setting-event literature after Kennedy and Meyer (1996), O'Reilly (1995, 1997), and Carr et al. (2003). Medication effects are tracked prospectively on Form MS-1; this sheet records the history only. The minimum-necessary convention follows BACB Ethics Code Standards 2.03 (protecting confidential information) and 2.04 (sharing only information critical to the purpose of a communication).</div>
+  <!-- v25.65 (SAFETY-H8) each event type defined, and incidents on event days against other school days -->
+  <h3 class="sub">How Each Event Is Defined</h3>
+  <p class="method" style="margin:0 0 6px">An event is useful only if everyone records it the same way. Write how each type you use is defined, for example &ldquo;slept less than 5 hours (parent report)&rdquo; or &ldquo;stayed in bed more than 5 minutes after the alarm&rdquo;.</p>
+  <div class="gridwrap rrwrap"><table class="grid" id="v65EvDef"><thead><tr><th style="width:34%">Event type</th><th>Definition</th></tr></thead><tbody></tbody></table></div>
+  <h3 class="sub">Incidents on Event Days and on Other School Days</h3>
+  <div class="ident c3"><div class="f"><label for="v65Win">An event day counts</label><select id="v65Win" name="x.evWin"><option value="">the event day and the next school day</option><option value="0">the event day only</option><option value="2">the event day and the next two school days</option></select></div></div>
+  <div id="v65EvCmp"></div>
+  <div class="cite">Setting-event literature after Kennedy and Meyer (1996), O'Reilly (1995, 1997), and Carr et al. (2003). Since v25.65: late waking and a changed route to school (Kennedy &amp; Itkonen, 1993), sleep under 5 hours (O&rsquo;Reilly, 1995), allergy symptoms (Kennedy &amp; Meyer, 1996) and ear infection (O&rsquo;Reilly, 1997). No JABA study analyzes menses directly: Kennedy and Meyer (1996) name it as a source of variability, and this form&rsquo;s source for it is Carr et al. (2003), in another journal, so its support is indirect. Record it only when the parent offers it, and only what is needed. Medication effects are tracked prospectively on Form MS-1; this sheet records the history only. The minimum-necessary convention follows BACB Ethics Code Standards 2.03 (protecting confidential information) and 2.04 (sharing only information critical to the purpose of a communication).</div>
 </div>
 
 <!-- ================================================================ SYNTHESIS -->
@@ -1472,10 +1491,11 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
   <p class="method" style="margin:0 0 6px">The record's incidents, removals, medication starts and changes, dated events and absence dates on one date axis, from the Incidents, Removals and Health sheets. Nurse visits are recorded as a count, so they are not drawn. Incidents gathering after a change suggest a setting event to ask about in the interviews and observation; the timeline does not establish one.</p>
   <div id="rrTl"></div><ol id="rrTlEv"></ol><div class="readout" id="rrTlAround"></div></div>
   <p class="hint noprint" id="rrTlHint" hidden></p>
+  <div id="v65SyMed"></div><!-- v25.65 (SAFETY-H8, M10) the comparisons, as questions -->
   <div id="behWrap"></div>
   <h3 class="sub">Review of Existing Data: Recommendation to the IEP Team</h3>
   <div class="defs">
-    <div class="drow"><div class="dlab">Are existing data sufficient?</div><div class="dval"><select name="y.suff" class="inline" style="min-width:420px"><option value=""></option><option value="no">No: additional assessment is needed to identify function (proposed below)</option><option value="partial">Partly: existing data support a hypothesis; confirmation by observation is proposed</option><option value="yes">Yes: existing data are sufficient for the team's purpose</option></select></div></div>
+    <div class="drow"><div class="dlab">Are existing data sufficient?</div><div class="dval"><select name="y.suff" class="inline" style="min-width:420px"><option value=""></option><option value="no">No: additional assessment is needed to identify function (proposed below)</option><option value="partial">Partly: existing data support a hypothesis; confirmation by observation is proposed</option><option value="yes">Yes: existing data are sufficient for the team's purpose</option></select><div id="v65Suff"></div></div></div>
     <div class="drow"><div class="dlab">Additional assessment proposed</div><div class="dval"><div class="selist" style="columns:3;margin:4px 6px">
       <label><input type="checkbox" name="y.ia"> IA-1 interviews / rating scales</label>
       <label><input type="checkbox" name="y.abc"> ABC-1 direct observation</label>
@@ -1573,12 +1593,14 @@ const OUT=['','Effective (data)','Partly effective','Ineffective (data)','Unknow
 const LOC=['','Classroom','Hallway / transition','Cafeteria','Playground / PE','Specials','Bus','Office','Other'];
 const TIME=['','Arrival','AM instruction','Lunch / recess','PM instruction','Dismissal','Unknown'];
 const ACT=['','Conference / warning','Time in office','Parent contact','Loss of privilege','In-school suspension','Out-of-school suspension','Bus suspension','Restraint','Seclusion','Crisis team / removal to another room','None recorded','Other'];
-const EVT=['','Medication start','Medication change / stop','Illness / injury','Sleep problem noted','Change at home','Schedule / staff change','Placement change','Plan change','Other'];
+const EVT=['','Medication start','Medication change / stop','Illness / injury','Sleep problem noted','Change at home','Schedule / staff change','Placement change','Plan change','Other',
+  /* v25.65 (SAFETY-H8) the setting events the research names; menstrual period only when the parent offers it */
+  'Allergy symptoms','Ear infection or pain','Menstrual period (from the parent, only if offered)','Missed dose','Late waking or a changed route to school'];
 function fixedRows(){
  $('#goalTbl tbody').innerHTML=[0,1,2].map(i=>`<tr><td><textarea class="txt nbh-cell" rows="2" name="g[${i}].goal" data-nbh-nowording></textarea></td><td><input class="txt" name="g[${i}].base"></td><td><input class="txt" name="g[${i}].latest"></td><td><select name="g[${i}].prog">${opts(PROG)}</select></td><td><input class="txt" name="g[${i}].src"></td></tr>`).join('');
- $('#fbaTbl tbody').innerHTML=[0,1,2].map(i=>`<tr><td class="c"><input type="date" class="dt" name="f[${i}].d"></td><td><input class="txt" name="f[${i}].by"></td><td><input class="txt" name="f[${i}].meth"></td><td><input class="txt" name="f[${i}].func"></td></tr>`).join('');
- $('#medTbl tbody').innerHTML=[0,1,2,3].map(i=>`<tr><td><input class="txt" name="md[${i}].n"></td><td><input class="txt" name="md[${i}].dose"></td><td class="c"><input type="date" class="dt" name="md[${i}].start"></td><td><input class="txt" name="md[${i}].chg"></td><td><input class="txt" name="md[${i}].fx"></td></tr>`).join('');
- $('#evtTbl tbody').innerHTML=[0,1,2,3,4].map(i=>`<tr><td class="c"><input type="date" class="dt" name="ev[${i}].d"></td><td><select name="ev[${i}].t">${opts(EVT)}</select></td><td><input class="txt" name="ev[${i}].e"></td><td><input class="txt" name="ev[${i}].rel"></td></tr>`).join('');}
+ $('#fbaTbl tbody').innerHTML=[0,1,2].map(i=>`<tr><td class="c"><input type="date" class="dt" name="f[${i}].d"><div class="v65age" data-v65age="${i}"></div></td><td><input class="txt" name="f[${i}].by"></td><td><input class="txt" name="f[${i}].meth"><div class="v65meth"><label><input type="checkbox" name="f[${i}].mi"> indirect (interview, rating scale)</label><label><input type="checkbox" name="f[${i}].md"> descriptive (ABC, scatter plot)</label><label><input type="checkbox" name="f[${i}].mx"> experimental (functional analysis)</label></div></td><td><input class="txt" name="f[${i}].func"></td></tr>`).join('');   /* v25.65 (SAFETY-M8) the method as ticks, the FBA's age */
+ $('#medTbl tbody').innerHTML=[0,1,2,3].map(i=>`<tr><td><input class="txt" name="md[${i}].n"></td><td><input class="txt" name="md[${i}].dose"></td><td class="c"><input type="date" class="dt" name="md[${i}].start"></td><td><input class="txt" name="md[${i}].chg"></td><td><input class="txt" name="md[${i}].fx"></td><td><select name="md[${i}].bd" aria-label="Behavior data before and after the change, medication ${i+1}"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select><input class="txt" name="md[${i}].bdsrc" placeholder="source" aria-label="Source of the behavior data, medication ${i+1}"></td><td><input class="txt" name="md[${i}].oth" aria-label="Other medications at the time, medication ${i+1}"></td></tr>`).join('');   /* v25.65 (SAFETY-M10) */
+ $('#evtTbl tbody').innerHTML=[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>`<tr><td class="c"><input type="date" class="dt" name="ev[${i}].d"></td><td><select name="ev[${i}].t">${opts(EVT)}</select></td><td><input class="txt" name="ev[${i}].e"></td><td><input class="txt" name="ev[${i}].rel"></td></tr>`).join('');}
 function keepAndRender(sel,n,rowFn){const tb=$(sel);const keep={};tb.querySelectorAll('[name]').forEach(e=>keep[e.name]=e.type==='checkbox'?e.checked:e.value);let h='';for(let i=0;i<n;i++)h+=rowFn(i);tb.innerHTML=h;Object.keys(keep).forEach(k=>setv(k,keep[k]));}
 function renderInt(){keepAndRender('#intTbl tbody',+$('#nInt').value,i=>`<tr><td><input class="txt" name="in[${i}].n"></td><td><select name="in[${i}].f">${opts(FUNC)}</select></td><td><input class="txt" name="in[${i}].d"></td><td><select name="in[${i}].i">${opts(INTEG)}</select></td><td><select name="in[${i}].o">${opts(OUT)}</select></td><td><input class="txt" name="in[${i}].e"></td></tr>`);}
 function renderInc(){keepAndRender('#incTbl tbody',+$('#nInc').value,i=>`<tr><td class="c"><input type="date" class="dt" name="ic[${i}].d"></td><td><input class="txt" name="ic[${i}].b"></td><td><select name="ic[${i}].l">${opts(LOC)}</select></td><td><select name="ic[${i}].t">${opts(TIME)}</select></td><td><input class="txt" name="ic[${i}].a"></td><td><select name="ic[${i}].c">${opts(ACT)}</select></td><td class="c rl-inc" data-i="${i}"><\/td><\/tr>`);}
@@ -1590,7 +1612,7 @@ function renderBeh(){const n=+$('#nBeh').value,w=$('#behWrap');const keep={};w.q
   <div class="drow"><div class="dlab">Consequence patterns in the record</div><div class="dval"><textarea name="b[${i}].con" placeholder="what typically followed: removal, attention, loss of activity, nothing"></textarea></div></div>
   <div class="drow"><div class="dlab">Setting events suggested</div><div class="dval"><input name="b[${i}].se" placeholder="e.g., Monday clustering; incidents rose after 9/2 medication change; absences precede"></div></div>
   <div class="drow"><div class="dlab">Functions suggested by records</div><div class="dval"><div class="selist" style="columns:2;margin:4px 6px">${FUNCS.map(([k,l])=>`<label><input type="checkbox" name="b[${i}].fn.${k}"> ${l}</label>`).join('')}</div></div></div>
-  <div class="drow"><div class="dlab">Agreement across sources</div><div class="dval"><select name="b[${i}].agree" class="inline" style="min-width:360px"><option value=""></option><option value="high">High: referrals, prior FBA, and staff notes point the same way</option><option value="mixed">Mixed: sources disagree or are incomplete</option><option value="low">Low: a single source or none</option></select></div></div>
+  <div class="drow"><div class="dlab">Agreement across sources</div><div class="dval"><select name="b[${i}].agree" class="inline" style="min-width:360px"><option value=""></option><option value="high">Consistent across records (still a hypothesis): referrals, prior FBA, and staff notes point the same way</option><option value="mixed">Mixed: sources disagree or are incomplete</option><option value="low">Low: a single source or none</option></select></div></div>
   <div class="drow"><div class="dlab">Records-based hypothesis (to be tested)</div><div class="dval"><textarea name="b[${i}].hyp" placeholder="When [antecedent], the student [behavior]; the record suggests it produces [consequence]. Setting events: [ ]. Confidence: [ ]."></textarea></div></div>
  </div></div>`).join('');
  Object.keys(keep).forEach(k=>setv(k,keep[k]));}
@@ -2378,15 +2400,98 @@ window.__nbhFactsOut=function(){try{const C=lgCompute(),E=1e-9,cy=lgSY(ymd(new D
  const T=v=>String(v==null?'':v).trim(),iv=[],hy=[];
  for(let i=0;i<(+(($('#nInt')||{}).value)||0);i++){const nm=val(`in[${i}].n`);if(!nm)continue;iv.push({name:T(nm),fn:val(`in[${i}].f`),dates:val(`in[${i}].d`),integrity:val(`in[${i}].i`),outcome:val(`in[${i}].o`),evidence:val(`in[${i}].e`)});}
  for(let i=0;i<(+(($('#nBeh')||{}).value)||0);i++){const lab=val(`b[${i}].label`);if(!lab)continue;
-  hy.push({label:T(lab),functions:FUNCS.filter(([k])=>val(`b[${i}].fn.${k}`)).map(([k])=>k),agreement:val(`b[${i}].agree`),hyp:val(`b[${i}].hyp`),ant:val(`b[${i}].ant`),con:val(`b[${i}].con`),se:val(`b[${i}].se`)});}
+  hy.push({label:T(lab),functions:FUNCS.filter(([k])=>val(`b[${i}].fn.${k}`)).map(([k])=>k),agreement:({high:'consistent across records (a records-based hypothesis, not evidence of function)',mixed:'mixed across records (a records-based hypothesis)',low:'a single source or none (a records-based hypothesis)'})[val(`b[${i}].agree`)]||'',basis:'records-based hypothesis',   /* v25.65 (SAFETY-M7) */hyp:val(`b[${i}].hyp`),ant:val(`b[${i}].ant`),con:val(`b[${i}].con`),se:val(`b[${i}].se`)});}
  if(iv.length)R.interventions=iv;if(hy.length)R.hypotheses=hy;
  const q=String(val('y.questions')||'').split(/\n+/).map(T).filter(Boolean);if(q.length)R.questions=q;
  const miss=SOURCES.filter(([k])=>/not available|n\/a|missing|requested/i.test(val(`src.${k}.n`))).map(([k,l])=>k==='other'?(val('src.other.name')||'Other'):l);if(miss.length)R.missing=miss;
  if(val('y.obtain'))R.obtain=val('y.obtain');if(val('h.start')||val('h.end'))R.reviewed={from:val('h.start'),to:val('h.end')};
  return Object.keys(R).length?{records:R}:null;}catch(e){return null;}};
+/* ---- v25.65 (inside the form's own script). SAFETY-H8: each event type defined; incidents per school day on event days (the
+   event day and the next school day, editable) against all other school days, for each type with 3 or more dated days, printed
+   as a question for IA-1 and ABC-1, with a home-school notebook line. SAFETY-M7: the agreement rating goes out as a records-based
+   hypothesis (see facts out above). SAFETY-M8: the prior FBA's method as ticks, its age, and an amber line on "Yes: sufficient".
+   SAFETY-M9: what restraints led to, equipment and self-restraint in the record, carried to Form CR-1 and Form IM-1.
+   SAFETY-M10: behavior data around each medication change, and incidents per school week before and after it. All new parts
+   are named fields: a file saved before opens with them empty, as before. ---- */
+var V65R_READY=false;
+var v65t=function(v){return String(v==null?'':v).trim();};
+var v65Iso=function(v){v=v65t(v);var m=/^(\d{4})-(\d\d)-(\d\d)/.exec(v);if(m)return m[0];m=/(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/.exec(v);return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
+var v65D=function(iso){var m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(iso||'');return m?new Date(+m[1],+m[2]-1,+m[3],12):null;};
+function v65EvDefDraw(){const tb=$('#v65EvDef tbody');if(!tb||tb.children.length)return;
+  const PH={'Sleep problem noted':'slept less than 5 hours (parent report)','Late waking or a changed route to school':'stayed in bed more than 5 minutes after the alarm; a bus route with extra stops','Allergy symptoms':'runny nose, itchy eyes or sneezing noted by the parent or nurse that morning','Ear infection or pain':'diagnosed by a doctor, or the parent reports ear pain','Missed dose':'the scheduled dose was not given (nurse or parent)','Menstrual period (from the parent, only if offered)':'the parent says so; nothing more is recorded'};
+  tb.innerHTML=EVT.slice(1).map((t,k)=>`<tr><td>${esc(t)}</td><td><input class="txt" name="evdef.${k+1}" placeholder="${esc(PH[t]?'e.g., '+PH[t]:'how it is recorded, and by whom')}" aria-label="Definition: ${esc(t)}"></td></tr>`).join('');}
+/* school days: weekdays in the period, less the no-school days on the Removal days sheet */
+function v65SchoolDays(from,to){const ns=new Set();((typeof LG!=='undefined'&&LG&&LG.ns)||[]).forEach(z=>{const a=v65D(v65Iso(z.s)),b=v65D(v65Iso(z.e))||a;if(!a)return;for(let d=new Date(a),c=0;d<=b&&c<400;d.setDate(d.getDate()+1),c++)ns.add(ymd(d));});
+  const out=[];if(!from||!to)return out;for(let d=new Date(from),c=0;d<=to&&c<1500;d.setDate(d.getDate()+1),c++){const w=d.getDay();if(w&&w<6&&!ns.has(ymd(d)))out.push(ymd(d));}return out;}
+function v65Range(extra){const inc=incidents().map(x=>v65Iso(x.d)).filter(Boolean),all=inc.concat(extra||[]).sort();
+  const a=v65D(all[0]),b=v65D(all[all.length-1]);   /* the record's period: its first and last dated entry (the review's own dates are when the review was done) */return {a,b,inc};}
+function v65Events(){const out=[];for(let i=0;i<12;i++){const d=v65Iso(val(`ev[${i}].d`)),t=val(`ev[${i}].t`);if(d&&t)out.push({d,t,i});}return out;}
+function v65Compare(){const ev=v65Events(),R=v65Range(ev.map(e=>e.d)),days=v65SchoolDays(R.a,R.b),idx=new Map(days.map((d,k)=>[d,k])),win=val('x.evWin')===''?1:+val('x.evWin');
+  const byDay=new Map();R.inc.forEach(d=>byDay.set(d,(byDay.get(d)||0)+1));const out=[];
+  [...new Set(ev.map(e=>e.t))].forEach(t=>{const dd=[...new Set(ev.filter(e=>e.t===t).map(e=>e.d))];if(dd.length<3){out.push({t,n:dd.length,few:true});return;}
+    const on=new Set();dd.forEach(d=>{let k=idx.get(d);if(k==null){const nx=days.find(x=>x>d);k=nx?idx.get(nx):null;}if(k==null)return;for(let j=0;j<=win&&k+j<days.length;j++)on.add(days[k+j]);});
+    const off=days.filter(d=>!on.has(d)),cnt=s=>[...s].reduce((a,d)=>a+(byDay.get(d)||0),0),r=(n,m)=>m?Math.round(n/m*100)/100:null;
+    out.push({t,n:dd.length,onDays:on.size,offDays:off.length,onInc:cnt(on),offInc:cnt(off),onR:r(cnt(on),on.size),offR:r(cnt(off),off.length)});});
+  return {out,days,win};}
+function v65MedCmp(){const R=v65Range([]),days=v65SchoolDays(R.a,R.b),byDay=new Map();R.inc.forEach(d=>byDay.set(d,(byDay.get(d)||0)+1));const out=[];
+  for(let i=0;i<4;i++){const n=val(`md[${i}].n`),ch=v65Iso(val(`md[${i}].chg`)),bd=val(`md[${i}].bd`);if(!n||!ch)continue;
+    if(bd!=='yes'){out.push({n,ch,bd});continue;}
+    const before=days.filter(d=>d<ch).slice(-20),after=days.filter(d=>d>=ch).slice(0,20),s=L=>L.reduce((a,d)=>a+(byDay.get(d)||0),0),wk=L=>L.length?Math.round(s(L)/L.length*5*10)/10:null;
+    out.push({n,ch,bd,src:val(`md[${i}].bdsrc`),oth:val(`md[${i}].oth`),bN:before.length,aN:after.length,bW:wk(before),aW:wk(after)});}return out;}
+function v65Update(){if(!V65R_READY)return;try{
+  const set=(id,h)=>{const e=document.getElementById(id);if(e&&e.innerHTML!==h)e.innerHTML=h;};
+  /* H8 */
+  const C=v65Compare(),rows=C.out.filter(x=>!x.few),few=C.out.filter(x=>x.few),wl=C.win===0?'the event day':C.win===1?'the event day and the next school day':'the event day and the next two school days';
+  let h='';
+  if(rows.length)h+='<table class="grid"><thead><tr><th class="lab">Event type</th><th class="c">Dated days</th><th class="c">Incidents per school day on event days</th><th class="c">On all other school days</th></tr></thead><tbody>'+rows.map(x=>`<tr><td class="lab">${esc(x.t)}</td><td class="c">${x.n}</td><td class="c">${x.onR==null?'&mdash;':x.onR} <span class="v65n">(${x.onInc} in ${x.onDays} days)</span></td><td class="c">${x.offR==null?'&mdash;':x.offR} <span class="v65n">(${x.offInc} in ${x.offDays} days)</span></td></tr>`).join('')+'</tbody></table>'+
+    '<div class="warn"><b>A question for the interviews (IA-1) and the observation (ABC-1), not a finding:</b> '+rows.map(x=>x.onR!=null&&x.offR!=null&&x.onR>x.offR?`incidents were more frequent on days with ${esc(x.t.toLowerCase())} (${x.onR} against ${x.offR} a day): is this a setting event?`:`${esc(x.t.toLowerCase())}: no higher rate on event days in the record.`).join(' ')+' Can the parent note this event each morning? A home&ndash;school notebook line lets both sides record it the same way (Kennedy &amp; Meyer, 1996). Event days are '+wl+'; school days are weekdays in the period less the no-school days on the Removal days sheet.</div>'+
+    '<div class="noprint"><button type="button" class="btn" id="v65AddQ">Add these questions to the list for IA-1 and ABC-1</button></div>';
+  if(few.length)h+='<p class="method">Fewer than 3 dated days, so no comparison yet: '+few.map(x=>esc(x.t)+' ('+x.n+')').join('; ')+'.</p>';
+  if(!C.out.length)h='<p class="method">Enter dated events above. Each type with 3 or more dated days is compared: incidents per school day on event days against all other school days.</p>';
+  set('v65EvCmp',h);
+  /* M10 */
+  const M=v65MedCmp();let mh='';
+  M.forEach(x=>{if(x.bd!=='yes'){mh+=`<p>${esc(x.n)}, change ${esc(x.ch)}: ${x.bd==='no'?'no behavior data in the record around this change, so a past &ldquo;it worked&rdquo; cannot be weighed':'say whether the record holds behavior data before and after this change'}.</p>`;return;}
+    mh+=`<p>${esc(x.n)}, change ${esc(x.ch)}${x.src?' (data: '+esc(x.src)+')':''}: incidents per school week ${x.bW==null?'&mdash;':x.bW} in the ${x.bN} school days before, ${x.aW==null?'&mdash;':x.aW} in the ${x.aN} after${x.oth?'; other medications at the time: '+esc(x.oth):''}. A question for the team, not a finding: most published comparisons were AB only, and effects were smaller when other medications were already given (Cox &amp; Virues-Ortega, 2016).</p>`;});
+  set('v65MedV',mh);
+  set('v65SyMed',(rows.length||M.some(x=>x.bd==='yes'))?'<h3 class="sub">Incidents Around the Dated Events and Medication Changes</h3>'+(rows.length?'<div class="readout">'+rows.map(x=>`${esc(x.t)}: ${x.onR==null?'&mdash;':x.onR} incidents a school day on event days, ${x.offR==null?'&mdash;':x.offR} on other days.`).join('<br>')+'</div>':'')+(M.some(x=>x.bd==='yes')?'<div class="readout">'+M.filter(x=>x.bd==='yes').map(x=>`${esc(x.n)} (${esc(x.ch)}): ${x.bW==null?'&mdash;':x.bW} incidents a school week before, ${x.aW==null?'&mdash;':x.aW} after.`).join('<br>')+'</div>':'')+'<p class="method">Questions for IA-1 and ABC-1; the record does not establish a setting event or a medication effect.</p>':'');
+  /* M8 */
+  const now=new Date();let newest=null;
+  for(let i=0;i<3;i++){const d=v65D(v65Iso(val(`f[${i}].d`))),el=document.querySelector(`[data-v65age="${i}"]`);let t='';
+    if(d){const mo=Math.max(0,Math.round((now-d)/(30.44*864e5)));t=mo<12?mo+' month'+(mo===1?'':'s')+' old':(Math.round(mo/12*10)/10)+' years old';
+      const dir=!!(document.querySelector(`[name="f[${i}].md"]`)||{}).checked||!!(document.querySelector(`[name="f[${i}].mx"]`)||{}).checked||/\b(ABC|scatter|observ|functional analysis|FA\b|analog)/i.test(val(`f[${i}].meth`));
+      if(!newest||d>newest.d)newest={d,mo,dir,i};}
+    if(el&&el.textContent!==t)el.textContent=t;}
+  const why=[];if(newest){if(newest.mo>12)why.push('the newest FBA is more than 12 months old');if(!newest.dir)why.push('it used no direct observation or functional analysis');}
+  if(document.querySelector('[name="f.relapse"]')&&document.querySelector('[name="f.relapse"]').checked)why.push('the behavior came back after a period of success');
+  set('v65Suff',val('y.suff')==='yes'&&why.length?'<div class="warn verdict"><b>Function can change over time; consider a current assessment.</b> '+esc(why.join('; '))+'. For 3 of 4 people re-referred after successful treatment, a new functional analysis showed new or added functions (Lerman et al., 1994).</div>':'');
+  /* M9 */
+  const e=num('c.rEsc'),o=num('c.rOf');let ch='';
+  if(e!=null&&o!=null&&o>0){ch=`${e} of ${o} restraints in the record were followed by the task removed or the student sent home.`+(o>=3&&e*3>=o*2?' <b>Restraint followed by removal of the demand can keep the behavior going</b> (Magee &amp; Ellis, 2001); the count goes to Form CR-1.':'');}
+  if(v65t(val('c.pe'))||v65t(val('c.sr')))ch+=(ch?' ':'')+'Equipment and self-restraint hide trauma (Iwata et al., 1990); they go to Part I of Form IM-1.';
+  set('v65CrV',ch);
+}catch(err){}}
+/* the comparison's questions join the list carried to IA-1 and ABC-1, once each */
+document.addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('#v65AddQ'))return;const q=document.querySelector('[name="y.questions"]');if(!q)return;
+  const add=v65Compare().out.filter(x=>!x.few).map(x=>`Do incidents rise on days with ${x.t.toLowerCase()}? Can the parent note this event each morning (home-school notebook)?`);
+  const have=q.value.split(/\n/).map(v65t);const nw=add.filter(x=>!have.includes(x));if(!nw.length)return;q.value=(q.value.replace(/\s+$/,'')?q.value.replace(/\s+$/,'')+'\n':'')+nw.join('\n');q.dispatchEvent(new Event('input',{bubbles:true}));});
+{const rf0=refresh;refresh=function(){const r=rf0.apply(this,arguments);try{v65Update();}catch(e){}return r;};}
+/* the page listens with the first refresh, so entries reach these readings on their own */
+let v65Tm=0;["input","change"].forEach(t=>document.addEventListener(t,()=>{clearTimeout(v65Tm);v65Tm=setTimeout(v65Update,120);}));
+/* the case, out: the crisis history's counts and what the record says of equipment and self-restraint (M9) */
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+  try{const e=num('c.rEsc'),of=num('c.rOf'),pe=v65t(val('c.pe')),sr=v65t(val('c.sr'));if((e!=null&&of!=null)||pe||sr){o=o||{};o.records=o.records||{};o.records.crisisHist={esc:e,of:of,pe:pe,sr:sr};}}catch(err){}
+  return o;};}
+v65EvDefDraw();V65R_READY=true;v65Update();
 })();
 </script>
 
+<style id="v2565-rr1-css">
+/* v25.65 (SAFETY-H8, M8, M9, M10) */
+.v65meth{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:11px;margin-top:3px}.v65meth label{white-space:nowrap}
+.v65age{font-size:11px;color:var(--ink-soft,#54676f);margin-top:2px}.v65n{font-size:11px;color:var(--ink-soft,#54676f)}
+#medTbl select,#medTbl input{max-width:100%}
+</style>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
