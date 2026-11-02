@@ -1851,11 +1851,13 @@ function crRecord(src){
   Object.keys(m).forEach(k=>{R.meta[k]=txt(m[k]);});
   Object.keys(nt).forEach(k=>{if(/^\d+$/.test(k)&&nt[k]===true)R.notify[k]=true;});
   R.team=rows(src.team,['n','r','g','p']); R.pbis=rows(src.pbis,['s','do','next','who']);
-  R.act=rows(src.act,['c','w','who','by','st']); R.log=rows(src.log,['d','dur','set','staff','rep','deb','pre'].concat(CRC_KEYS,V65_LOG_KEYS));   /* v25.65 (SAFETY-H1) */
+  R.act=rows(src.act,['c','w','who','by','st']); R.log=rows(src.log,['d','dur','set','staff','rep','deb','pre'].concat(CRC_KEYS));
   R.prec=rows(src.prec,['top','how','ptp','pt','sec']);R.reh=rows(src.reh,['who','d','by','rp']);   /* v25.65 (SAFETY-H3, H5): a file saved before has neither */
   /* v21.22: each restraint's telephone and e-mail attempts, and the no-school days. A file saved before v21.22 has
      neither and opens with them empty; everything it does hold is read exactly as before. */
-  (Array.isArray(src.log)?src.log:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).forEach((x,i)=>{R.log[i].att=rows(x.att,['d','t','m','o']);});
+  (Array.isArray(src.log)?src.log:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).forEach((x,i)=>{R.log[i].att=rows(x.att,['d','t','m','o']);
+    /* v25.65 (SAFETY-H1) what each restraint led to, after the attempts and in the file's own order, so a record saved and reopened is the same */
+    Object.keys(x).filter(k=>V65_LOG_KEYS.includes(k)).concat(V65_LOG_KEYS).forEach(k=>{if(!(k in R.log[i]))R.log[i][k]=txt(x[k]);});});
   R.closed=rows(src.closed,['a','b','w']);
   /* v23.03 (review F338) the debriefings of the other restraints, by restraint number ('u1'... for one with no restraint chosen); a
      file saved before has none */
@@ -2016,6 +2018,7 @@ function crcRow(r){
   r.att=(Array.isArray(r.att)?r.att:[]).filter(a=>a&&typeof a==='object'&&!Array.isArray(a));
   r.att.forEach(a=>{['d','t','m','o'].forEach(k=>{a[k]=crcTxt(a[k]);});});
   if(!r.att.length)r.att.push({d:'',t:'',m:'',o:''});
+  if(typeof V65_LOG_KEYS!=='undefined')V65_LOG_KEYS.forEach(k=>{r[k]=crcTxt(r[k]);});   /* v25.65 (SAFETY-H1) */
   return r;
 }
 function crcShape(){
