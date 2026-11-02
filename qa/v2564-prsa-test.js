@@ -104,6 +104,11 @@ function dd(base,plan,rep){const rows=[],d=new Date(2026,8,1,12);const iso=()=>{
     S.rows[1].t='9';renderAll();const b=document.getElementById('decSuggest').textContent;S.rows[1].t='5';renderAll();const c=document.getElementById('decSuggest').textContent;
     return {a,b,c,svg:document.getElementById('prPlot').dataset.pr64,cap:document.getElementById('prPlot').textContent,win:document.getElementById('pr64Win').textContent};});
   ok('H5 a typed table 70% below baseline, no aim: continue, fading waits for 90%',/continue unchanged; fading waits/.test(ty.a)&&/fading waits for a reduction of 90%/.test(ty.a),ty.a.slice(0,300));
+  /* v25.65 (the BCBA, 11/2) at the aim with a drop under 80%: fading is still suggested, with a caution to check the aim */
+  const aimC=await p.evaluate(()=>{const keep=prAims;prAims=()=>({n:1,met:true,names:[]});S=blank();S.meta.intPct='95';S.meta.repInd='Yes, across settings and people';
+    S.rows[0].t='5';S.rows[1].t='3';renderAll();const a=document.getElementById('decSuggest').textContent;S.rows[1].t='0.5';renderAll();const b=document.getElementById('decSuggest').textContent;prAims=keep;return {a,b};});
+  ok('v25.65 at the aim but 40% below baseline: begin fading, with the caution to check the aim against the 80% benchmark',/Suggested: begin fading/.test(aimC.a)&&/Check the aim before fading: the drop from baseline is 40%, under the 80%/.test(aimC.a),aimC.a.slice(0,500));
+  ok('v25.65 at the aim and 90% below baseline: begin fading, no caution',/Suggested: begin fading/.test(aimC.b)&&!/Check the aim before fading/.test(aimC.b),aimC.b.slice(0,400));
   ok('H4 10% below baseline: modify, short of the 25% this suggestion counts as some progress',/Suggested: modify the plan/.test(ty.b)&&/counts as some progress/.test(ty.b),ty.b.slice(0,300));
   ok('H4 50% below: continue unchanged, some progress',/Suggested: continue unchanged\./.test(ty.c)&&/some progress/.test(ty.c),ty.c.slice(0,300));
   ok('M6 a typed table: each point is a period mean, and the window says the days are not there',ty.svg==='means'&&/each point is a period mean/.test(ty.cap)&&/The suggestion uses the period mean: the days are not on this form/.test(ty.win),{svg:ty.svg,win:ty.win});
