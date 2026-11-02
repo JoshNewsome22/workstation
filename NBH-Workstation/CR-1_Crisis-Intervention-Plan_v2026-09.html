@@ -2910,7 +2910,7 @@ function v65Graph(used){
 }
 
 /* ---- the lines the BIP copy carries ---- */
-function v65BipLines(){const out=[];
+function v65BipLines(){const out=[];if(!v65T(S.meta.dbeh)&&!(S.pbis||[]).some(r=>v65T(r.do)))return out;   /* an empty plan copies as the title only */
   (S.prec||[]).filter(r=>v65T(r.top)).forEach((r,k)=>out.push(bipLine('Precursor '+(k+1),[v65T(r.top),r.how?'found by '+r.how.charAt(0).toLowerCase()+r.how.slice(1):'',v65T(r.ptp)?'p(behavior | precursor) '+v65T(r.ptp):'',v65T(r.pt)?'p(behavior) '+v65T(r.pt):'',v65T(r.sec)?'about '+v65T(r.sec)+' s to the behavior':''].filter(Boolean).join('; '))));
   if(v65T(S.meta.fnShow)||v65T(S.meta.fcrShow))out.push(bipLine('At the early precursor','prompt the communication response from the BIP and honor it at once'+(v65T(S.meta.fcrShow)?' ('+v65T(S.meta.fcrShow)+')':'')+(v65T(S.meta.fnShow)?'; function: '+v65T(S.meta.fnShow):'')));
   const safe=V65_SAFE.filter(([k])=>v65Tick(k)).map(x=>x[1].replace(/\.$/,'')).concat(v65T(S.meta.safeOther)?[v65T(S.meta.safeOther)]:[]);

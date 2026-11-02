@@ -1621,7 +1621,7 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
   <div class="stat" id="statGrid">
     <div><b>CONSENT</b><span id="stStatus">&mdash;</span><em id="stStatusSub"></em></div>
     <div><b>METHOD</b><span id="stMethod" style="font-size:13px">&mdash;</span><em id="stMethodSub"></em></div>
-    <div><b>PROCEDURES COVERED</b><span id="stProc">&mdash;</span><em id="stProcSub">of 18 listed</em></div>
+    <div><b>PROCEDURES COVERED</b><span id="stProc">&mdash;</span><em id="stProcSub">of 14 listed</em></div>
     <div><b>SPECIFIC DECISIONS</b><span id="stDec" style="font-size:13px">&mdash;</span><em id="stDecSub"></em></div>
   </div>
   <div class="warn verdict" id="recVerdict"></div>
@@ -1761,8 +1761,8 @@ $('#cStatus').addEventListener('change',()=>{methodUI();refresh();});
    specified; and nothing on who may consent. Each rule below is one the form itself states (the procedure table, the
    card texts, the Guide) or one the cited regulation states (34 CFR 300.9(b), 300.30, 300.300(d)(5); Florida Rule
    6A-6.03311(8)). */
-const PROCS=['records','indirect','abc','scatter','daily','pref','reinf','arrange','fa','demand','var','wait','bip','med','homeData','homeTrain','homeVideo','other'];   /* v25.65 (CARE-M10) the home procedures */   /* v23.48 (review F19) waiting practice (DT-1) apart from var */   /* v22.37 arrange (AD-1) and demand (DA-1) */
-const DECS=[['fa','Experimental analysis'],['ed','Food items'],['rec','Recording'],['sh','Sharing outside school'],['ij','Injury checks'],['wt','Practice with waiting'],['hv','Video or photos at home']];   /* v25.65 (CARE-M10) hv */
+const PROCS=['records','indirect','abc','scatter','daily','pref','reinf','arrange','fa','demand','var','wait','bip','med','other'];   /* v25.65 (CARE-M10): the three home procedures are recorded in part 2 but not counted among the assessment's procedures */   /* v23.48 (review F19) waiting practice (DT-1) apart from var */   /* v22.37 arrange (AD-1) and demand (DA-1) */
+const DECS=[['fa','Experimental analysis'],['ed','Food items'],['rec','Recording'],['sh','Sharing outside school'],['ij','Injury checks'],['wt','Practice with waiting']];   /* v25.65 (CARE-M10) the home video decision (hv) is checked on its own, beside its card */
 const VIA={sign:'a signature on this form',reeval:'the district reevaluation process',initial:'the district initial-evaluation process'};
 /* who may sign for an adult student: each answer to "Student is 18 or older" and the relationships that fit it */
 const ADULT={'Yes: student is the consenting party':['Adult student (18+)'],'Yes: guardian or guardian advocate appointed':['Legal guardian','Guardian advocate (adult student)'],'Yes: agent signs under student\u2019s power of attorney':['Agent (adult student\u2019s power of attorney)']};
@@ -1899,7 +1899,9 @@ function v65AsUpdate(){const due=val('a.due'),last=[val('a.date'),val('ap.date')
   else if(due&&due<ymd(new Date()))h='<b>Assent re-check overdue</b> (due '+esc(due)+'): ask again, in the way the student communicates.';
   if(val('ap.resp')==='no')h+=(h?' ':'')+'The student said no to the plan: honor it where you can, and say honestly what cannot be changed and why.';
   if(e&&e.innerHTML!==h)e.innerHTML=h;}
-function v65IcUpdate(){if(!V65I_READY)return;try{v65PpUpdate();v65AsUpdate();}catch(e){}}
+function v65HvUpdate(){const card=document.querySelector('[data-proc="homevideo"]');if(!card)return;let el=card.querySelector('.v65hvv');if(!el){el=document.createElement('div');el.className='v65hvv';card.appendChild(el);}
+  const d=val('hv.dec'),h=(d==='yes'||d==='no')&&(!val('hv.init')||!val('hv.date'))?'<div class="warn">Initial and date this decision.</div>':val('p.homeVideo')&&d!=='yes'?'<div class="warn">Home video or photos is checked in part 2 but not consented to here (H).</div>':'';if(el.innerHTML!==h)el.innerHTML=h;}
+function v65IcUpdate(){if(!V65I_READY)return;try{v65PpUpdate();v65AsUpdate();v65HvUpdate();}catch(e){}}
 document.addEventListener('input',v65IcUpdate);document.addEventListener('change',e=>{v65IcUpdate();if(e.target&&e.target.name==='pp.sigdate')v65PpSigned();
   if(e.target&&/^pp\[\d+\]\.dec$|^pp\.sh\.dec$/.test(e.target.name||'')&&val('pp.sigdate'))v65PpSigned();});
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#v65PpFill'))v65PpFill();});
