@@ -84,8 +84,9 @@ const F=L.forms().find(x=>x.id==='TD-1');
   await set('rb.3','yes');await sleep(200);const f7b=await p.evaluate(()=>window.__tdFit.flags().map(f=>f.r.id));
   ok('7a FCT with question 4 open and no extinction: the caution; extinction on question 4 clears it',f7.includes('reinforcement-without-extinction')&&!f7b.includes('reinforcement-without-extinction'),{f7,f7b});
   await p.evaluate(()=>window.__tdAddComp('SEXT'));await sleep(300);
-  const f7c=await p.evaluate(()=>window.__tdFit.flags().filter(f=>f.r.id==='function-mismatch').map(f=>f.cards[0].code));
-  ok('7b an automatic-only component (sensory extinction) in an escape plan: the function caution',f7c.includes('SEXT'),f7c);
+  /* v25.64 (H4) a mismatched extinction step is its own rule, a conflict (function-mismatch-extinction) */
+  const f7c=await p.evaluate(()=>window.__tdFit.flags().filter(f=>/^function-mismatch/.test(f.r.id)).map(f=>f.cards[0].code));
+  ok('7b an automatic-only component (sensory extinction) in an escape plan: the function flag',f7c.includes('SEXT'),f7c);
   /* 8 */
   await p.evaluate(()=>{const d=document.getElementById('bipDlg');if(d&&d.open)d.close();});
   await p.setViewportSize({width:820,height:1180});await sleep(300);

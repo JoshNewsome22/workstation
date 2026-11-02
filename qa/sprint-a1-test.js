@@ -383,6 +383,8 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
   /* an escape plan sent from the Select sheet: DF, NCE and EXT */
   p=await open(TD1);await set(p,'m.fn','escape');await view(p,'select');
   for(const [k,a] of [['q.escape.0','yes'],['q.escape.1','yes'],['q.escape.2','no']])await set(p,k,a);
+  /* v25.64 (H2) the extinction step is never ticked for you: the BCBA ticks it */
+  await p.evaluate(()=>{const c=document.querySelector('#selRec .td-pick[data-key="sel:EXT"]');if(c&&!c.checked){c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}));}});
   await click(p,'#sendBuild');await view(p,'respond');await set(p,'rb.3','no');await sleep(200);n=await note(p);
   check(/Extinction \(matched to function\) card/.test(n)&&/the DF card, step 4/.test(n),'11 DF + NCE + EXT from the Select sheet, then "no": the note names the EXT card and the DF card\'s step 4',n);
   await p.close();
