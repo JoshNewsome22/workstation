@@ -182,7 +182,7 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
   /* ---------- I48: a second observer ---------- */
   const O=await p.evaluate(async()=>{await loadSim();await new Promise(x=>setTimeout(x,300));const o={},b=state.behaviors[0];
     const paper=()=>buildPrintSet()[0].querySelectorAll('td.mark.lvl1,td.mark.lvl2').length;
-    const R=spIoa();o.sim={ioa:state.meta.ioa,days:state.meta.ioaDays,obs2:Object.keys(b.obs2||{}).length,note:document.getElementById('ioaNoteP').textContent,n:R.n,agree:R.agree,total:R.total,dis:R.dis.size};
+    const R=spIoa();o.sim={ioa:state.meta.ioa,days:state.meta.ioaDays,obs2:Object.keys(b.obs2||{}).length,note:document.getElementById('ioaNoteP').textContent,n:R.n,agree:R.agree,total:R.total,level:R.level,exact:R.exact,dis:R.dis.size};
     const line0=document.querySelector('#sumBody p.cap').textContent,ev0=window.__nbhFactsOut().evidence.statement,p0=paper();
     document.getElementById('ioaTog').click();await new Promise(x=>setTimeout(x,150));
     o.on={bar:!document.getElementById('ioaBar').hidden,pressed:document.getElementById('ioaTog').getAttribute('aria-pressed'),cells:state.cells===b.obs2,dis:document.querySelectorAll('table.scatter td.mark.sp-dis').length,
@@ -197,10 +197,13 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
     const d=JSON.parse(JSON.stringify(serialize()));o.kept=(d.behaviors[0].obs2||{})['0_3'];
     /* typed over by hand, the note goes */
     const f=document.getElementById('mIoa');f.value='85';f.dispatchEvent(new Event('input',{bubbles:true}));o.typed=document.getElementById('ioaNoteP').textContent;return o;});
-  ok('I48 the simulation has a second observer on the three Wednesdays; the IOA is the one the form computes, with a line under it',O.sim.days==='2,7,12'&&O.sim.n===48&&O.sim.ioa===String(O.sim.total)&&O.sim.dis>0&&O.sim.total<100&&
-    O.sim.note.startsWith('Interval-by-interval agreement '+O.sim.ioa+'% ('+O.sim.agree+' of 48 intervals) on 3 days (Wed ')&&/Iris Calloway \(simulated\), paraprofessional as second observer; occurrence agreement [\d.]+% \(\d+ of the \d+ intervals either one marked\); the same level in [\d.]+%\.$/.test(O.sim.note),O.sim);
+  /* v25.64 (M9) the figure carried is the same-level agreement (Kahng et al., 1998), so the note leads with it; interval-by-interval
+     agreement and kappa (M1) follow it */
+  ok('I48 the simulation has a second observer on the three Wednesdays; the IOA is the one the form computes, with a line under it',O.sim.days==='2,7,12'&&O.sim.n===48&&O.sim.ioa===String(O.sim.level)&&O.sim.dis>0&&O.sim.total<100&&
+    O.sim.note.startsWith('Same-level agreement '+O.sim.ioa+'% ('+O.sim.exact+' of 48 intervals scored none, low or high alike) on 3 days (Wed ')&&/Iris Calloway \(simulated\), paraprofessional as second observer; occurrence agreement [\d.]+% \(\d+ of the \d+ intervals either one marked\); interval-by-interval agreement [\d.]+% \(\d+ of 48\); kappa [\d.\u2212]+\.$/.test(O.sim.note),O.sim);
+  /* v25.64 (M9) the readout leads with the same-level agreement, the figure carried */
   ok('I48 Second observer: the grid shows the second observer\'s marks, the days compared, where the two differ outlined; the summary, the case and the paper stay the first observer\'s',
-    O.on.bar&&O.on.pressed==='true'&&O.on.cells&&O.on.still&&O.on.dis===O.sim.dis&&O.on.noioa===16*12&&O.on.chips==='2,7,12'&&/^Interval-by-interval agreement /.test(O.on.res)&&/outlined in red/.test(O.on.res)&&/^Second observer · Aggression/.test(O.on.read)&&/Iris Calloway/.test(O.on.obs)&&O.on.sum&&O.on.ev&&O.on.paper,O.on);
+    O.on.bar&&O.on.pressed==='true'&&O.on.cells&&O.on.still&&O.on.dis===O.sim.dis&&O.on.noioa===16*12&&O.on.chips==='2,7,12'&&/^Same-level agreement /.test(O.on.res)&&/outlined in red/.test(O.on.res)&&/^Second observer · Aggression/.test(O.on.read)&&/Iris Calloway/.test(O.on.obs)&&O.on.sum&&O.on.ev&&O.on.paper,O.on);
   ok('I48 a mark on another day adds it; "Use it" writes the agreement as the behavior\'s IOA with the days and the observer; the first observer\'s marks are untouched and the second\'s are kept with the record; a figure typed over drops the line',
     O.added==='2,3,7,12'&&O.used.ioa===String(O.used.total)&&/ on 4 days \(/.test(O.used.note)&&O.off.cells&&O.off.bar&&O.off.note===O.used.note&&O.off.first!==9&&O.kept&&O.kept.n===9&&O.typed==='',O);
   /* ---------- the printed pages: one sheet a page ---------- */
