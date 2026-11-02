@@ -663,6 +663,14 @@ table.rt td select{border:1px solid transparent}
 .behbar button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
 .stmt{background:#F4F8F9;border:1px solid var(--rule-2);border-left:3px solid var(--rule);padding:11px 13px;margin:10px 0;font-size:15px;line-height:1.6}
 .stmt em{color:var(--ink-soft);font-style:normal;font-size:12px;font-family:var(--sans);display:block;margin-bottom:4px}
+/* v25.64 (H7, M3, M4) */
+.stmt .fs-stnote{display:block;margin-top:6px;font-family:var(--sans);font-size:12.5px;color:#6b3d12}
+.fs-same{font-size:10.5px;color:var(--ink-soft);line-height:1.3;margin-top:2px}
+.fs-part{border:1px solid var(--rule-2);border-left:3px solid var(--rule);padding:6px 10px;margin:10px 0;background:#FAFCFC}
+.fs-part h4{margin:2px 0 6px;font-family:var(--sans);font-size:13px}
+.fs-offer{font-family:var(--sans);font-size:12px;margin:6px 0}
+.fs-offer button{margin:2px 6px 2px 0}
+.fs-ppart button[aria-pressed=true]{font-weight:600}
 #pathSvg{width:100%;height:auto;display:block;border:1px solid var(--rule-2);background:#fff}
 .report h3{margin:16px 0 6px;font-size:16px}
 .report p{margin:7px 0;line-height:1.62}
@@ -994,6 +1002,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Competing Behavior Pathway</h2>
     <p class="hint">Drawn from the fields on the previous sheet. The diagram is the bridge between assessment and plan: the problem pathway is what currently works for the student, and the alternative pathway has to produce the same consequence more easily than the problem behavior does.</p>
     <div class="behbar" id="pathBar"></div>
+    <div class="behbar fs-ppart noprint" id="pathPartBar" hidden></div><!-- v25.64 (H7) a pathway for each function of the target -->
     <div class="grid-wrap pathwrap" tabindex="0" role="region" aria-label="Competing behavior pathway diagram"><svg id="pathSvg" viewBox="0 0 980 470" aria-label="Competing behavior pathway"></svg></div>
     <table class="rt" style="margin-top:12px">
       <tr><th style="width:26%">Why the alternative should win</th><td><textarea data-b="rationale" rows="3" placeholder="Response effort, immediacy, schedule, and magnitude compared against the problem behavior"></textarea></td></tr>
@@ -1014,6 +1023,14 @@ td input,td select{max-width:100%}
       <tr><th style="width:26%">Limitations</th><td><textarea data-m="limits" rows="3" placeholder="Settings not sampled, observer coverage, integrity of existing procedures, anything the design cannot rule out"></textarea></td></tr>
       <tr><th>What would change this conclusion</th><td><textarea data-m="falsify" rows="3" placeholder="State the observation that would count against the hypothesis. A conclusion that nothing could disconfirm is not a finding."></textarea></td></tr>
       <tr><th>Recommended next step</th><td><textarea data-m="next" rows="2" placeholder="What the BIP should be built on (Form TD-1), and any assessment still outstanding"></textarea></td></tr>
+      <!-- v25.64 (M2) a hypothesis that goes to treatment untested (level 2, 3 or 4) carries a written test: the procedure, what counts as
+           working, and what happens if it does not work; printed under "What would change this conclusion" -->
+      <tr><th>The next step is</th><td><select data-m="nextKind" id="fsNextKind"><option></option><option>Treatment now, as a test of the hypothesis (Form TD-1)</option><option>A functional analysis first (Form EA-1)</option><option>More assessment of another kind</option></select><div class="hint" id="fsNextHint"></div></td></tr>
+      <tbody id="fsTxTest" hidden>
+      <tr><th>Treatment as a test: which function-based procedure</th><td><input data-m="txTest" placeholder="e.g., functional communication training for a break request, with demand fading (Form TD-1)"></td></tr>
+      <tr><th>What counts as working</th><td><input data-m="txWorks" placeholder="e.g., at least an 80% drop from baseline within 10 sessions, in the settings assessed"></td></tr>
+      <tr><th>If it does not work</th><td><input data-m="txFail" placeholder="A functional analysis (Form EA-1), not more indirect data"></td></tr>
+      </tbody>
       <tr><th>Review date</th><td><input data-m="review"></td></tr>
     </table>
 
@@ -1031,11 +1048,14 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">How the Level of Evidence Is Derived</h2>
     <p>The band is set by the best method tier that was actually conducted <i>and</i> that supported the stated function, then reduced if the sources disagree. It is a working convention for keeping the report's language proportionate to its design, not an empirical finding. The form applies it as follows.</p>
     <ul class="fs-rules">
-      <li><b>What counts.</b> A source counts toward a function when its method tests function (tiers 1&ndash;4 below) and it has a function and a strength. A source recorded as Unknown from a test (tier 1 or 2) assessed function but identified none: it is counted among the sources that assessed function, not as support. Unknown on a descriptive, daily-rate or indirect record is listed but not counted: such a record cannot show that no function operates. Preference assessments, reinforcer assessments and treatment integrity observations are listed with the methods but carry no tier: they do not test what maintains the behavior, and are not counted.</li>
+      <li><b>What counts.</b> A source counts toward a function when its method tests function (tiers 1&ndash;4 below) and it has a function and a strength. A source recorded as Unknown from a test (tier 1 or 2) assessed function but identified none: it is counted among the sources that assessed function, not as support. Unknown on a descriptive, daily-rate or indirect record is listed but not counted: such a record cannot show that no function operates. Preference assessments, reinforcer assessments, demand assessments (Form DA-1) and treatment integrity observations are listed with the methods but carry no tier: they do not test what maintains the behavior, and are not counted. A demand assessment names the tasks that evoke the behavior, which the antecedent should name in place of &ldquo;academic work&rdquo;.<!-- v25.64 (M4) --> Form IA-1&rsquo;s analyses by group (school, home, a named group) are shown on the table as &ldquo;same informants as row X: not counted&rdquo;: only the assessment&rsquo;s own row counts, because agreement among informants is the criterion, not the number of tallies (Smith, Smith, Dracobly &amp; Pace, 2012).<!-- v25.64 (M3) --></li>
       <li><b>Tier.</b> A function's tier is the best tier among the sources rated Strong or Moderate that support it. A Weak rating counts as support but does not set the tier, so a function supported only by Weak ratings is at level 4.</li>
+      <li><b>Multiple control and synthesized results.</b><!-- v25.64 (H7) --> Two functions shown each in its own isolated condition are <i>multiple control</i>: the target gets a part for each function, with its own antecedent, consequence, alternative, statement and pathway, and a function named as another part of the same target does not lower the other&rsquo;s level. A test that delivers the consequences together (a synthesized contingency analysis, IISCA) supports the <i>synthesized</i> result at tier 1, and a single one of its consequences at tier 2 at most, unless an isolated condition (a row of its own) confirms that one; the statement of a synthesized result says that which of the consequences is necessary has not been tested. Multiple control was found in 16.9% of 521 published cases (Beavers &amp; Iwata, 2011), and teaching a request for one function reduced the behavior only in that function&rsquo;s condition until the second was taught (Day, Horner &amp; O&rsquo;Neill, 1994). On synthesis the research is divided: isolated contingencies controlled behavior for 4 of 5 people, and none showed the interaction a synthesis assumes (Fisher, Greer, Romani, Zangrillo &amp; Owen, 2016); the IISCA was differentiated for 9 of 9 children where the standard analysis was for 4 (Slaton, Hanley &amp; Raftery, 2017). Both agree that a synthesis does not show which component matters.</li>
       <li><b>The function the level describes.</b> The best-supported function: the best tier first, then the most sources rated Strong, then the most supporting sources. A function that no source supports is never reported, however often it is contradicted.</li>
       <li><b>Reductions.</b> One level if a source at the same tier or better contradicts that function, and one level if another function has at least as many supporting sources and its own tier is the same or better. A disagreement from a lower tier is named in the report but does not lower the level: three interviews do not undo what a functional analysis demonstrated. The level does not fall below 4.</li>
       <li><b>Targets.</b> Each source names the target behavior it assessed, or every target. With more than one target, each target's level, findings and summary statement come from its own sources and those about every target.</li>
+      <li><b>Treatment as a test.</b><!-- v25.64 (M2) --> When a target&rsquo;s level is 2, 3 or 4 and the next step is treatment, the report sheet asks for the function-based procedure, what counts as working (for example, at least an 80% drop from baseline within a set number of sessions) and what follows if it does not (a functional analysis on Form EA-1, not more indirect data), and prints them under &ldquo;What would change this conclusion&rdquo;. In a randomized trial with 57 young children with autism, the indirect and descriptive result matched the functional analysis for 65.4% (17 of 26), yet functional communication training worked in both groups, 80.6% of the children without the analysis and 84.6% with it, with dropouts counted as failures (Call et al., 2024); treatment matched to a hypothesis worked better than treatment matched to a competing one (Repp, Felce &amp; Barton, 1988). A failure rule turns the hypothesis into a test.</li>
+      <li><b>Demands and attention.</b><!-- v25.64 (M4) --> When the antecedent names demands and the function is attention, the statement carries a check: demands can signal that attention is available, as for the students of Repp and Karsh (1994), whose tantrums were more frequent under demands but were maintained by attention. Confirm with the attention and demand conditions.</li>
       <li><b>Summary statements.</b> Each target's statement ends with its hypothesized function at the level of evidence for that function: &ldquo;The function is&hellip;&rdquo; only at level 1, &ldquo;The hypothesized function is&hellip;, not yet tested&rdquo; with its level at levels 2&ndash;4. The levels are named by what the design shows: 1, function demonstrated; 2, contingency described, not tested; 3, pattern observed; 4, reported.</li>
     </ul>
     <table class="rt">
@@ -1043,7 +1063,7 @@ td input,td select{max-width:100%}
       <tr><th>Tier 2</th><td><b>Structured descriptive with a contingency analysis.</b> Conditional probabilities compared against base rates, or a systematic non-experimental isolation. Licenses contingency language: the consequence <i>is differentially associated with</i> the behavior. It does not establish that manipulating it will change the behavior.</td></tr>
       <tr><th>Tier 3</th><td><b>Descriptive observation.</b> ABC narrative, scatter plot, daily rate data. Licenses correlational language only: the behavior <i>occurs more often when</i>.</td></tr>
       <tr><th>Tier 4</th><td><b>Indirect.</b> Interviews, rating scales, records. Licenses report language only: informants <i>describe</i> the behavior as.</td></tr>
-      <tr><th>No tier</th><td><b>Not a test of function.</b> Preference assessment, reinforcer assessment, treatment integrity observation. Recorded for the plan; they license no statement about what maintains the behavior.</td></tr>
+      <tr><th>No tier</th><td><b>Not a test of function.</b> Preference assessment, reinforcer assessment, demand assessment (Form DA-1), treatment integrity observation. Recorded for the plan; they license no statement about what maintains the behavior.</td></tr>
     </table>
     <p class="hint" style="margin-top:8px">Convergence across several tier-4 sources raises confidence that the informants agree. It does not raise the tier. Three interviews agreeing on escape is three reports, not a demonstration.</p>
     <p class="hint">A <b>component functional analysis</b> (Bann &amp; Morris, 2026) is listed at tier 2 as a working convention of this form: its authors state that its evocative and reinforcement probabilities should not be the sole basis for a function conclusion until the method is replicated and its cutoffs are applied prospectively, and in their nine cases the result was confirmed by an extended multielement analysis, which is entered as its own tier-1 row when it has been run. The higher-level RRB analysis of Fergus et al. (2026) is a multielement functional analysis and is entered as one.</p>
@@ -1064,18 +1084,27 @@ td input,td select{max-width:100%}
     <p class="hint">Sources for the method: O'Neill et al. (1997, 2015) for the competing behavior pathway and the summary statement format; Fergus et al. (2026) and Bann and Morris (2026) for the two analysis formats whose reporting items are listed above; Iwata et al. (1982/1994) for the analogue functional analysis; Hanley, Iwata &amp; McCord (2003) for the review of functional analysis practice; Hanley (2012) on the limits of descriptive assessment for identifying function; Thompson &amp; Iwata (2007) on comparing descriptive and experimental outcomes; Beavers, Iwata &amp; Lerman (2013) for the later review. These are the empirical sources; the tier rules and the wording conventions on this form are a working convention.</p>
     <p class="hint" id="fsRefs"><b>Reference list.</b>
     Bann, J. P., &amp; Morris, S. L. (2026). A component analysis of evocative and reinforcing variables influencing challenging behavior. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70085. https://doi.org/10.1002/jaba.70085 &bull;
+    Beavers, G. A., &amp; Iwata, B. A. (2011). Prevalence of multiply controlled problem behavior. <em>Journal of Applied Behavior Analysis, 44</em>(3), 593&ndash;597. https://doi.org/10.1901/jaba.2011.44-593 &bull;<!-- v25.64 (H7) -->
     Beavers, G. A., Iwata, B. A., &amp; Lerman, D. C. (2013). Thirty years of research on the functional analysis of problem behavior. <em>Journal of Applied Behavior Analysis, 46</em>(1), 1&ndash;21. &bull;
+    Call, N. A., Bernstein, A. M., O&rsquo;Brien, M. J., Schieltz, K. M., Tsami, L., Lerman, D. C., Berg, W. K., Lindgren, S. D., Connelly, M. A., &amp; Wacker, D. P. (2024). A comparative effectiveness trial of functional behavioral assessment methods. <em>Journal of Applied Behavior Analysis, 57</em>(1), 166&ndash;183. https://doi.org/10.1002/jaba.1045 &bull;<!-- v25.64 (M2) -->
+    Day, H. M., Horner, R. H., &amp; O&rsquo;Neill, R. E. (1994). Multiple functions of problem behaviors: Assessment and intervention. <em>Journal of Applied Behavior Analysis, 27</em>(2), 279&ndash;289. https://doi.org/10.1901/jaba.1994.27-279 &bull;<!-- v25.64 (H7) -->
     Fergus, R. A., Ahearn, W. H., Matthews, A., &amp; Pandola, O. (2026). Functional analysis and treatment of higher level restricted repetitive behavior displayed by individuals with autism. <em>Journal of Applied Behavior Analysis, 59</em>(3), e70066. https://doi.org/10.1002/jaba.70066 &bull;
+    Fisher, W. W., Greer, B. D., Romani, P. W., Zangrillo, A. N., &amp; Owen, T. M. (2016). Comparisons of synthesized and individual reinforcement contingencies during functional analysis. <em>Journal of Applied Behavior Analysis, 49</em>(3), 596&ndash;616. https://doi.org/10.1002/jaba.314 &bull;<!-- v25.64 (H7) -->
     Hagopian, L. P., Falligant, J. M., Frank-Crawford, M. A., Yenokyan, G., Piersma, D. E., &amp; Kaur, J. (2023). Simplified methods for identifying subtypes of automatically maintained self-injury. <em>Journal of Applied Behavior Analysis, 56</em>(3), 575&ndash;592. &bull;
     Hagopian, L. P., Frank-Crawford, M. A., Javed, N., Fisher, A. B., Dillon, C. M., Zarcone, J. R., &amp; Rooker, G. W. (2020). Initial outcomes of an augmented competing stimulus assessment. <em>Journal of Applied Behavior Analysis, 53</em>(4), 2172&ndash;2185. https://doi.org/10.1002/jaba.725 &bull;
     Hagopian, L. P., Rooker, G. W., &amp; Zarcone, J. R. (2015). Delineating subtypes of self-injurious behavior maintained by automatic reinforcement. <em>Journal of Applied Behavior Analysis, 48</em>(3), 523&ndash;543. &bull;
     Hanley, G. P. (2012). Functional assessment of problem behavior: Dispelling myths, overcoming implementation obstacles, and developing new lore. <em>Behavior Analysis in Practice, 5</em>(1), 54&ndash;72. &bull;
     Hanley, G. P., Iwata, B. A., &amp; McCord, B. E. (2003). Functional analysis of problem behavior: A review. <em>Journal of Applied Behavior Analysis, 36</em>(2), 147&ndash;185. &bull;
     Iwata, B. A., Dorsey, M. F., Slifer, K. J., Bauman, K. E., &amp; Richman, G. S. (1994). Toward a functional analysis of self-injury. <em>Journal of Applied Behavior Analysis, 27</em>(2), 197&ndash;209. (Reprinted from <em>Analysis and Intervention in Developmental Disabilities, 2</em>, 3&ndash;20, 1982) &bull;
+    Kern, L., Childs, K. E., Dunlap, G., Clarke, S., &amp; Falk, G. D. (1994). Using assessment-based curricular intervention to improve the classroom behavior of a student with emotional and behavioral challenges. <em>Journal of Applied Behavior Analysis, 27</em>(1), 7&ndash;19. https://doi.org/10.1901/jaba.1994.27-7 &bull;<!-- v25.64 (M7) -->
     O'Neill, R. E., Albin, R. W., Storey, K., Horner, R. H., &amp; Sprague, J. R. (2015). <em>Functional assessment and program development for problem behavior: A practical handbook</em> (3rd ed.). Cengage. &bull;
     O'Neill, R. E., Horner, R. H., Albin, R. W., Sprague, J. R., Storey, K., &amp; Newton, J. S. (1997). <em>Functional assessment and program development for problem behavior: A practical handbook</em> (2nd ed.). Brooks/Cole. &bull;
+    Repp, A. C., Felce, D., &amp; Barton, L. E. (1988). Basing the treatment of stereotypic and self-injurious behaviors on hypotheses of their causes. <em>Journal of Applied Behavior Analysis, 21</em>(3), 281&ndash;289. https://doi.org/10.1901/jaba.1988.21-281 &bull;<!-- v25.64 (M2) -->
+    Repp, A. C., &amp; Karsh, K. G. (1994). Hypothesis-based interventions for tantrum behaviors of persons with developmental disabilities in school settings. <em>Journal of Applied Behavior Analysis, 27</em>(1), 21&ndash;31. https://doi.org/10.1901/jaba.1994.27-21 &bull;<!-- v25.64 (M4) -->
     Rodriguez, N. M., Thompson, R. H., Schlichenmeyer, K., &amp; Stocco, C. S. (2012). Functional analysis and treatment of arranging and ordering by individuals with an autism spectrum disorder. <em>Journal of Applied Behavior Analysis, 45</em>(1), 1&ndash;22. https://doi.org/10.1901/jaba.2012.45-1 &bull;
     Rooker, G. W., Hagopian, L. P., Haddock, J. N., Mezhoudi, N., &amp; Arevalo, A. R. (2019). Sensitivity to changing environmental conditions across individuals with subtype 2 automatically reinforced and socially reinforced self-injury. <em>Behavioral Development, 24</em>(2), 89&ndash;99. &bull;
+    Slaton, J. D., Hanley, G. P., &amp; Raftery, K. J. (2017). Interview-informed functional analyses: A comparison of synthesized and isolated components. <em>Journal of Applied Behavior Analysis, 50</em>(2), 252&ndash;277. https://doi.org/10.1002/jaba.384 &bull;<!-- v25.64 (H7) -->
+    Smith, C. M., Smith, R. G., Dracobly, J. D., &amp; Pace, A. P. (2012). Multiple-respondent anecdotal assessments: An analysis of interrater agreement and correspondence with analogue assessment outcomes. <em>Journal of Applied Behavior Analysis, 45</em>(4), 779&ndash;795. https://doi.org/10.1901/jaba.2012.45-779 &bull;<!-- v25.64 (M3) -->
     Thompson, R. H., &amp; Iwata, B. A. (2007). A comparison of outcomes from descriptive and functional analyses of problem behavior. <em>Journal of Applied Behavior Analysis, 40</em>(2), 333&ndash;338.</p>
   </section>
 </main>
@@ -1094,7 +1123,12 @@ const SUBT=['','Subtype 1 \u2014 differentiated (LOD \u2265 62.5%)','Subtype 2 \
  'Not classifiable \u2014 fewer than three no-interaction series','Not applicable \u2014 not automatically maintained self-injury'];
 const FN=['','Attention (social positive)','Tangible / activity (social positive)','Escape / avoidance (social negative)','Automatic (nonsocial)','Unknown \u2013 record separately',
   /* v22.96 (review F168) an IISCA or other synthesized test: the consequences tested together, named in the row's contribution */
-  'Synthesized / more than one (as tested)'];
+  'Synthesized / more than one (as tested)',
+  /* v25.64 (H7) the last option split in two: more than one function shown in isolated conditions, and a synthesized result. The old
+     option (FN[6]) stays for the files and the case rows that hold it, is read as synthesized, and is offered only where it is held */
+  'Multiple: separate functions shown in isolated conditions','Synthesized: the consequences were tested together; components not isolated'];
+const FN_MULTI=FN[7],FN_SYN=FN[8],isSynFn=f=>f===FN[6]||f===FN[8];
+const fnOpts=v=>FN.filter(o=>o!==FN[6]||v===FN[6]).map(o=>`<option${o===v?' selected':''}>${o}</option>`).join('');
 const METHODS=[
   ['','',0],
   ['Functional analysis, analogue conditions','EA-1',1],
@@ -1109,8 +1143,19 @@ const METHODS=[
   ['Reinforcer assessment','RA-1',0],
   ['Indirect: structured interview or rating scale','IA-1',4],
   ['Indirect: records review','RR-1',4],
-  ['Treatment integrity observation','TI-1',0]
+  ['Treatment integrity observation','TI-1',0],
+  /* v25.64 (H7) a synthesized analysis named as such; (M4) the demand assessment, with no tier: like a preference assessment it
+     identifies antecedents (which tasks evoke the behavior) and does not test the maintaining consequence */
+  ['Functional analysis, synthesized contingencies (IISCA)','EA-1',1],
+  ['Demand assessment (identifies antecedents; does not test the consequence)','DA-1',0]
 ];
+const M_SYN=METHODS[14][0],M_DA=METHODS[15][0];
+/* v25.64 (H7) a synthesized source: the IISCA method, or the trial-based-or-IISCA method with a contribution that says IISCA or synthesized */
+const isSynSrc=r=>!!r&&(r.method===M_SYN||(r.method===METHODS[2][0]&&/iisca|synthes/i.test(String(r.contrib||''))));
+/* the tier a source lends to its function: a synthesized source supports the synthesized result at its tier (1), and a single component
+   at tier 2 at most, unless an isolated test row (tier 1, not synthesized) supports that component too (Fisher et al., 2016; Slaton et al., 2017) */
+function effTier(r,pool){const t=tierOf(r.method);if(!isSynSrc(r)||isSynFn(r.fn)||r.fn===FN_MULTI||r.fn===FN[5])return t;
+  const iso=(pool||[]).some(x=>x!==r&&!isSynSrc(x)&&tierOf(x.method)===1&&x.fn===r.fn&&['Strong','Moderate','Weak'].includes(x.str));return iso?t:Math.max(2,t);}
 /* v21.16 audit: tier 0 = recorded for the plan, not a test of what maintains the behavior (the Guide's
    tier table lists no preference, reinforcer or integrity method); such a source supports no function */
 const STR=['','Strong','Moderate','Weak','Does not support','Contradicts'];
@@ -1149,13 +1194,13 @@ function renderSrc(){
   S.src.forEach(r=>{if(r.tgt&&!tgtOk(r.tgt))r.tgt='';});
   const opt=(arr,v)=>arr.map(o=>{const t=Array.isArray(o)?o[0]:o;return `<option${t===v?' selected':''}>${t}</option>`;}).join('');
   $('#srcTbl tbody').innerHTML=S.src.map((r,i)=>`<tr>
-    <td style="text-align:center;font-family:var(--sans);font-size:11.5px">${esc(rowForm(r))||'&mdash;'}</td>
+    <td style="text-align:center;font-family:var(--sans);font-size:11.5px">${esc(rowForm(r))||'&mdash;'}${r.same?`<div class="fs-same">${esc(fsSameText(r))}</div>`:''}</td>
     <td><select data-i="${i}" data-f="method">${opt(METHODS,r.method)}</select></td>
     <td><input data-i="${i}" data-f="dates"value="${esc(r.dates)}"></td>
     <td><input data-i="${i}" data-f="who" value="${esc(r.who)}"></td>
     <td><textarea data-i="${i}" data-f="contrib" rows="2">${esc(r.contrib)}</textarea></td>
     <td><select data-i="${i}" data-f="tgt">${tgtOpts(r.tgt)}</select></td>
-    <td><select data-i="${i}" data-f="fn">${opt(FN,r.fn)}</select></td>
+    <td><select data-i="${i}" data-f="fn">${fnOpts(r.fn)}</select></td>
     <td><select data-i="${i}" data-f="str">${opt(STR,r.str)}</select></td>
     <td class="nx noprint"><button type="button" class="rowDel noprint" data-del="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
 }
@@ -1202,14 +1247,14 @@ const formsOf=a=>esc([...new Set(a.map(r=>rowForm(r)||'?'))].join(', '));
    as having assessed function only when it is a test (tier 1 or 2), an analysis that came out undifferentiated; a descriptive,
    daily-rate or indirect record cannot show that no function operates, so it is listed, not counted. */
 function convergence(tid){
-  const rec=S.src.filter(r=>r.method&&(!tid||!r.tgt||!tgtOk(r.tgt)||r.tgt===tid));
+  const rec=S.src.filter(r=>r.method&&!r.same&&(!tid||!r.tgt||!tgtOk(r.tgt)||r.tgt===tid));   /* v25.64 (M3) a row marked "same informants" is display only */
   const fa=rec.filter(r=>tierOf(r.method)>0&&r.fn&&(r.fn===UNK?tierOf(r.method)<=2:r.str));
   const used=fa.filter(r=>r.fn!==UNK);
   const rows=FN.filter(f=>f&&f!==UNK).map(f=>{
     const sup=used.filter(r=>r.fn===f&&SUP.includes(r.str));
-    const set=sup.filter(r=>SETS.includes(r.str)).map(r=>tierOf(r.method));
-    return {fn:f,n:sup.length,strong:sup.filter(r=>r.str==='Strong').length,
-      tier:set.length?Math.min(...set):null,weak:sup.length?Math.min(...sup.map(r=>tierOf(r.method))):null,
+    const set=sup.filter(r=>SETS.includes(r.str)).map(r=>effTier(r,used));   /* v25.64 (H7) */
+    return {fn:f,n:sup.length,strong:sup.filter(r=>r.str==='Strong').length,capped:sup.filter(r=>effTier(r,used)>tierOf(r.method)).map(r=>rowForm(r)||'?'),
+      tier:set.length?Math.min(...set):null,weak:sup.length?Math.min(...sup.map(r=>effTier(r,used))):null,
       con:used.filter(r=>r.fn===f&&r.str==='Contradicts').length,conTiers:used.filter(r=>r.fn===f&&r.str==='Contradicts').map(r=>tierOf(r.method)),srcs:sup.map(r=>rowForm(r)||'?')};
   }).filter(r=>r.n||r.con).sort(rankFn);
   /* v22.68 (review F162) a source with a strength but no single function is named under the table, not dropped silently */
@@ -1228,7 +1273,10 @@ function convHtml(tid,E){
   if(unkDesc&&unkDesc.length)foot+=`<p class="hint">Recorded as Unknown, but a descriptive, daily-rate or indirect record cannot show that no function operates, so listed and not counted among the sources that assessed function: ${formsOf(unkDesc)}.</p>`;
   if(noName&&noName.length)foot+=`<p class="hint">Not counted, no single function named: ${formsOf(noName)}. Choose the function in its row; when the source names more than one, give each its own row.</p>`;
   if(noFn.length)foot+=`<p class="hint">Recorded as Unknown, so not counted as support for any function: ${formsOf(noFn)}.</p>`;
-  if(notFn.length)foot+=`<p class="hint">Listed with the methods but not counted: ${formsOf(notFn)}. Preference assessments, reinforcer assessments and treatment integrity observations do not test what maintains the behavior.</p>`;
+  if(notFn.length)foot+=`<p class="hint">Listed with the methods but not counted: ${formsOf(notFn)}. Preference assessments, reinforcer assessments, demand assessments and treatment integrity observations do not test what maintains the behavior.</p>`;   /* v25.64 (M4) */
+  /* v25.64 (H7) a single component supported only by a synthesized test stands at tier 2 */
+  {const cp=rows.filter(r=>r.capped&&r.capped.length);if(cp.length)foot+=`<p class="hint">${cp.map(r=>esc(r.fn)).join('; ')}: supported by a synthesized test (${esc([...new Set([].concat(...cp.map(r=>r.capped)))].join(', '))}), so counted at tier 2 at most for the single function. A synthesized test supports the synthesized result at tier 1; which of its consequences is necessary has not been tested, unless an isolated condition (a row of its own) confirms it (Fisher et al., 2016; Slaton et al., 2017).</p>`;}
+  foot+=fsSameNote(tid);   /* v25.64 (M3) */
   if(!rows.length){const t='<tbody><tr><td class="hint">Enter at least one source with a function and a strength.</td></tr></tbody>';return {tbl:t,table:'<div class="grid-wrap"><table class="rt">'+t+'</table></div>',note:foot};}
   const tbl='<thead><tr><th style="text-align:left">Function</th><th style="width:15%">Sources supporting</th><th style="width:13%">Rated strong</th><th style="width:15%">Best method tier</th><th style="width:13%">Contradicted by</th><th style="width:22%">Forms</th></tr></thead><tbody>'+
     rows.map(r=>`<tr><td>${esc(r.fn)}</td><td style="text-align:center">${r.n}</td><td style="text-align:center">${r.strong||''}</td>
@@ -1250,6 +1298,8 @@ function renderBehBar(){
   /* v21.33 (R): on the Targets sheet each target carries its own delete control */
   $('#behBar').innerHTML=S.beh.map((b,i)=>`<span class="behitem"><button data-b="${i}" aria-pressed="${i===S.cur}">${esc(b.lab)||'Target '+(i+1)}</button><button type="button" class="rowDel noprint" data-delb="${i}" title="Delete this target" aria-label="Delete target ${i+1}">&times;</button></span>`).join('');
   $('#pathBar').innerHTML=h;
+  /* v25.64 (H7) with more than one function, a pathway for each */
+  {const P=fsParts(S.beh[S.cur]||{}),bar=$('#pathPartBar');if(bar){if(fsPart>=P.length)fsPart=0;bar.hidden=P.length<2;bar.innerHTML=P.length<2?'':'<span class="hint">Pathway for:</span> '+P.map((x,k)=>`<button type="button" data-ppart="${k}" aria-pressed="${k===fsPart}">Function ${k+1}${x.fn?': '+esc(fnWords(x.fn)):''}</button>`).join('');}}
 }
 document.addEventListener('click',e=>{const d=e.target.closest('.behbar button.rowDel');if(d){delBeh(+d.dataset.delb);return;}
   const b=e.target.closest('.behbar button');if(!b||b.dataset.b===undefined)return;S.cur=+b.dataset.b;renderAll();});
@@ -1266,7 +1316,7 @@ function renderBehForm(){
   const sel=(f,arr)=>`<select data-b="${f}">${arr.map(o=>`<option${b[f]===o?' selected':''}>${o}</option>`).join('')}</select>`;
   $('#behForm').innerHTML=`<table class="rt">
     <tr><th style="width:22%">Label</th><td><input data-b="lab" value="${esc(b.lab)}"></td>
-        <th style="width:16%">Hypothesized function</th><td>${sel('fn',FN)}</td></tr>
+        <th style="width:16%">Hypothesized function</th><td><select data-b="fn">${fnOpts(b.fn)}</select></td></tr>
     <tr><th>Subtype (automatic SIB only)</th><td>${sel('sub',SUBT)}</td>
         <th>Level of differentiation</th><td><input data-b="lod" value="${esc(b.lod)}" placeholder="LOD % from Form EA-1, or leave blank"></td></tr>
     <tr><th>Operational definition</th><td colspan="3"><textarea data-b="def" rows="3">${esc(b.def)}</textarea></td></tr>
@@ -1282,7 +1332,7 @@ function renderBehForm(){
     <tr><th>Alternative behavior</th><td><input data-b="alt" value="${esc(b.alt)}" placeholder="The replacement taught now"></td>
         <th>Its consequence</th><td><input data-b="altCons" value="${esc(b.altCons)}" placeholder="Must match the maintaining consequence"></td></tr>
     <tr><th>Notes</th><td colspan="3"><textarea data-b="notes" rows="2">${esc(b.notes)}</textarea></td></tr>
-  </table>`;
+  </table>${fsPartsHtml(b)}${fsDaOffers(b)}`;
   /* the pathway's rationale field is static markup: show the value of the target it belongs to */
   const ra=$('[data-b="rationale"]');if(ra&&ra.value!==(b.rationale||''))ra.value=b.rationale||'';
   renderStmt();
@@ -1319,14 +1369,89 @@ function stmtText(b){
     `which results in ${b.cons?lc1(b.cons):'[consequence]'}.${fnClause(b)}`;
 }
 function renderStmt(){
-  const b=S.beh[S.cur];const t=stmtText(b);
-  $('#stmtOut').innerHTML=t?`<div class="stmt"><em>Summary statement</em>${esc(t)}</div>`:
-    '<p class="hint">Fill the antecedent and the maintaining consequence to generate the summary statement.</p>';
+  const b=S.beh[S.cur];const P=fsParts(b);
+  /* v25.64 (H7) a statement for each function of the target, the synthesized line under a synthesized one; (M4) the demand check */
+  const h=P.map((x,k)=>{const t=stmtText(x);return t?`<div class="stmt"><em>Summary statement${P.length>1?' \u2014 function '+(k+1)+(x.fn?': '+esc(fnWords(x.fn)):''):''}</em>${esc(t)}${fsStmtNotes(x)}</div>`:'';}).join('');
+  $('#stmtOut').innerHTML=h||'<p class="hint">Fill the antecedent and the maintaining consequence to generate the summary statement.</p>';
 }
+
+/* ================= v25.64 (H7) more than one function per target =================
+   A target's first function is its own fields (fn, ant, cons, alt, altCons, desired, desCons), as before; each further function is
+   a part in b.more [{fn, ant, cons, alt, altCons, desired, desCons}], with its own statement, pathway and recommendation. Day,
+   Horner and O'Neill (1994): one behavior maintained by escape and by access to items; teaching a request for one reduced the
+   behavior only in that condition. A file without b.more opens as before. */
+const FS_PART_F=['fn','ant','cons','alt','altCons','desired','desCons'];
+const fsParts=b=>{if(!b)return [];const more=Array.isArray(b.more)?b.more:[];return [b].concat(more.map((m,k)=>Object.assign({},b,{fn:m.fn||'',ant:m.ant||'',cons:m.cons||'',alt:m.alt||'',altCons:m.altCons||'',desired:m.desired||'',desCons:m.desCons||'',_part:k+1})));};
+let fsPart=0;
+const fsPathPart=()=>{const P=fsParts(S.beh[S.cur]);return P[fsPart]||P[0]||S.beh[S.cur];};
+/* under a statement: the synthesized line (H7), and the check when the antecedent names demands and the function is attention (M4) */
+const FS_DEMAND_RE=/\b(demands?|tasks?|work|worksheets?|asked|instructions?|requests?|assignments?|independent work|academic)\b/i;
+function fsStmtNotes(x){const n=[];
+  if(isSynFn(x.fn))n.push('Which of these consequences is necessary has not been tested.');
+  if(/^Attention/.test(x.fn||'')&&FS_DEMAND_RE.test(x.ant||''))n.push('Check: demands may signal that attention is available. Confirm with the attention and demand conditions (Repp & Karsh, 1994).');
+  return n.map(t=>`<span class="fs-stnote">${esc(t)}</span>`).join('');}
+function fsPartsHtml(b){const more=Array.isArray(b.more)?b.more:[];
+  const inp=(k,f,ph)=>`<input data-bp="${k}" data-bf="${f}" value="${esc(more[k][f]||'')}" placeholder="${esc(ph)}">`;
+  let h='<div class="fs-parts'+(more.length?'':' noprint')+'"><h3 class="fs-parts-h" style="margin-top:14px">Another function of this target (multiple control)</h3><p class="hint">When the sources show the behavior is maintained by more than one consequence, give each further function its own antecedent, consequence and alternative behavior here: each gets its own summary statement and pathway. One request taught for one function leaves the behavior in place for the other (Day, Horner &amp; O&rsquo;Neill, 1994); multiple control was found in 16.9% of 521 published cases (Beavers &amp; Iwata, 2011).'+(b.fn===FN_MULTI&&!more.length?' <b>This target is marked Multiple: choose its first function above and add each other one here.</b>':'')+'</p>';
+  h+=more.map((m,k)=>`<div class="fs-part" data-partk="${k}"><h4>Function ${k+2}<button type="button" class="rowDel noprint" data-delpart="${k}" title="Delete this function" aria-label="Delete function ${k+2}">&times;</button></h4><table class="rt">
+    <tr><th style="width:22%">Hypothesized function</th><td colspan="3"><select data-bp="${k}" data-bf="fn">${fnOpts(m.fn||'')}</select></td></tr>
+    <tr><th>Antecedent</th><td colspan="3">${inp(k,'ant','Immediate trigger for this function')}</td></tr>
+    <tr><th>Maintaining consequence</th><td colspan="3">${inp(k,'cons','What the behavior produces here')}</td></tr>
+    <tr><th>Desired behavior</th><td>${inp(k,'desired','What the team wants instead')}</td><th style="width:16%">Its usual consequence</th><td>${inp(k,'desCons','Usually delayed or weak')}</td></tr>
+    <tr><th>Alternative behavior</th><td>${inp(k,'alt','The replacement for this function')}</td><th>Its consequence</th><td>${inp(k,'altCons','Must match this consequence')}</td></tr></table></div>`).join('');
+  h+='<button type="button" class="tool noprint" id="fsAddPart">Add another function</button></div>';
+  return h;}
+document.addEventListener('click',async e=>{
+  if(e.target.closest('#fsAddPart')){const b=S.beh[S.cur];if(!Array.isArray(b.more))b.more=[];if(b.more.length>=3)return;b.more.push({fn:'',ant:'',cons:'',alt:'',altCons:'',desired:'',desCons:''});renderAll();return;}
+  const d=e.target.closest('[data-delpart]');if(d){const b=S.beh[S.cur],k=+d.dataset.delpart,m=b.more&&b.more[k];if(!m)return;
+    if(FS_PART_F.some(f=>String(m[f]||'').trim())&&!(await nbhUI.confirm('Delete function '+(k+2)+' of this target?\nIts statement and pathway are deleted.',{ok:'Delete',danger:true})))return;b.more.splice(k,1);fsPart=0;renderAll();return;}
+  const pp=e.target.closest('[data-ppart]');if(pp){fsPart=+pp.dataset.ppart;renderBehBar();drawPath();return;}});
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(!el.dataset||el.dataset.bp===undefined)return;const b=S.beh[S.cur],k=+el.dataset.bp;
+  if(!b||!Array.isArray(b.more)||!b.more[k])return;b.more[k][el.dataset.bf]=el.value;renderStmt();renderBehBar();drawPath();if(el.dataset.bf==='fn'&&ev==='change'){renderSrc();renderConv();}renderReport();}));
+
+/* ================= v25.64 (M3) Form IA-1's group analyses counted once =================
+   A row marked same:'IA-1' (a group analysis of the same informants as the assessment's own row) shows on the table and is not
+   counted. Rows placed from the case are marked so; an older file's group rows are found by their shape and offered a button. */
+function fsMainRowNo(form){const i=S.src.findIndex(r=>!r.same&&rowForm(r)===form&&r.method);return i>=0?i+1:null;}
+const fsSameText=r=>{const n=fsMainRowNo(r.same);return 'same informants as '+(n?'row '+n:'Form '+r.same+'’s own row')+': not counted';};
+const fsGroupLike=r=>!r.same&&rowForm(r)==='IA-1'&&/^[^.(]{1,60} \([^)]*\): /.test(String(r.contrib||''));
+function fsSameNote(tid){if(tid)return '';const L=S.src.map((r,i)=>({r,i})).filter(x=>fsGroupLike(x.r));const main=S.src.some(r=>!r.same&&rowForm(r)==='IA-1'&&!fsGroupLike(r));
+  if(!L.length||!main)return '';
+  return `<p class="hint">Row${L.length===1?'':'s'} ${L.map(x=>x.i+1).join(', ')} look${L.length===1?'s':''} like Form IA-1&rsquo;s analyses by group: the same informants as its own row, counted again. Agreement among informants is the criterion, not the number of tallies (Smith et al., 2012). <button type="button" class="tool noprint" id="fsSameBtn">Count Form IA-1 once</button></p>`;}
+document.addEventListener('click',e=>{if(!e.target.closest('#fsSameBtn'))return;S.src.forEach(r=>{if(fsGroupLike(r))r.same='IA-1';});renderAll();});
+
+/* ================= v25.64 (M2) the treatment-as-test check =================
+   Shown when a target's level is 2, 3 or 4 and the next step is treatment (chosen, or, with nothing chosen, a next step that names
+   treatment, a plan, Form TD-1 or FCT). The three fields print under "What would change this conclusion" and the readiness check asks
+   for the procedure and the criterion; "If it does not work" reads "a functional analysis (Form EA-1), not more indirect data" when blank. */
+const FS_TX_RE=/\b(treatment|treat|BIP|behavior plan|behaviour plan|intervention|TD-1|FCT|functional communication)\b/i;
+function fsTxNeeded(){const m=S.meta,k=String(m.nextKind||'');const tx=/^Treatment/.test(k)||(!k&&FS_TX_RE.test(String(m.next||'')));if(!tx)return false;
+  const T=fsTargets(),bands=(T.length?T.map(b=>fsTargetE(b).band):[evidence().band]).filter(Boolean);return bands.some(x=>x>=2);}
+function fsTxText(){if(!fsTxNeeded())return '';const m=S.meta,T=x=>String(x||'').trim();
+  return `<p><b>Treatment as a test.</b> The hypothesis has not been tested by a functional analysis, so the treatment is the test. Procedure: ${T(m.txTest)?nod(m.txTest):'[which function-based procedure]'}. It counts as working when ${T(m.txWorks)?lc1(m.txWorks):'[the criterion, e.g., at least an 80% drop from baseline within N sessions]'}. If it does not work: ${T(m.txFail)?lc1(m.txFail):'a functional analysis (Form EA-1), not more indirect data'}.</p>`;}
+function fsTxVis(){const box=document.getElementById('fsTxTest'),hint=document.getElementById('fsNextHint');if(!box)return;const on=fsTxNeeded()||['txTest','txWorks','txFail'].some(k=>String(S.meta[k]||'').trim());
+  box.hidden=!on;if(hint)hint.textContent=on?'The hypothesis is not yet tested (level 2, 3 or 4): write the treatment as a test, with what counts as working and what follows if it does not (Call et al., 2024; Repp, Felce & Barton, 1988).':'';}
+{const rr=renderReport;renderReport=function(){const x=rr.apply(this,arguments);try{fsTxVis();}catch(e){}return x;};}
+
+/* ================= v25.64 (M4) Form DA-1's tasks offered into the antecedent and the desired behavior ================= */
+let fsDemands=null;
+const fsDaTasks=()=>{const d=fsDemands;if(!d||typeof d!=='object')return {ev:[],hp:[]};const nm=a=>(Array.isArray(a)?a:[]).map(o=>String(o&&o.name||'').trim()).filter(Boolean);
+  const ev=nm(d.fa).length?nm(d.fa):nm(d.paired&&d.paired.least);return {ev:ev.slice(0,3),hp:(nm(d.high).length?nm(d.high):nm(d.paired&&d.paired.most)).slice(0,3)};};
+const fsLow=t=>t.charAt(0).toLowerCase()+t.slice(1);
+function fsDaOffers(b){const D=fsDaTasks();if(!D.ev.length&&!D.hp.length)return '';
+  const ant=D.ev.length?'when asked to do '+(D.ev.length===1?fsLow(D.ev[0]):D.ev.slice(0,-1).map(fsLow).join(', ')+' or '+fsLow(D.ev[D.ev.length-1])):'',
+    des=D.hp.length?'Starts and finishes the work asked, beginning with the tasks the student already does readily ('+D.hp.map(fsLow).join(', ')+'; Form DA-1)':'';
+  let h='<div class="fs-offer noprint"><b>From Form DA-1</b> (the demand assessment names the tasks; it does not test the consequence): ';
+  if(ant&&String(b.ant||'').trim()!==ant)h+=`<button type="button" class="tool" data-daoffer="ant" data-v="${esc(ant)}">Antecedent: ${esc(ant)}</button>`;
+  if(des&&String(b.desired||'').trim()!==des)h+=`<button type="button" class="tool" data-daoffer="desired" data-v="${esc(des)}">Desired behavior: the high-probability tasks</button>`;
+  return h+'</div>';}
+document.addEventListener('click',async e=>{const x=e.target.closest('[data-daoffer]');if(!x)return;const b=S.beh[S.cur],f=x.dataset.daoffer,v=x.dataset.v;
+  if(String(b[f]||'').trim()&&!(await nbhUI.confirm('Replace the '+(f==='ant'?'antecedent':'desired behavior')+' with the words from Form DA-1?\n'+v,{ok:'Replace'})))return;b[f]=v;renderAll();});
+
 
 /* -------------------- pathway diagram -------------------- */
 function drawPath(){
-  const b=S.beh[S.cur];const svg=$('#pathSvg');
+  const b=fsPathPart();const svg=$('#pathSvg');   /* v25.64 (H7) the function chosen above the diagram */
   const W=980,H=470;
   const box=(x,y,w,h,txt,fill,stroke,bold)=>{
     const words=String(txt||'\u2014').split(/\s+/);const lines=[];let cur='';
@@ -1397,7 +1522,10 @@ function evidence(fn,tid){
   const E={band:null,nSrc:C.fa.length,nRec:C.rec.length};
   const top=fn?cand.find(r=>r.fn===fn):cand[0];
   if(!top)return E;
-  const other=cand.filter(r=>r.fn!==top.fn).sort((a,b)=>b.n-a.n)[0];
+  /* v25.64 (H7) a function the target names as another of its functions (multiple control) is reported beside it, not counted as
+     the competitor that lowers its level */
+  const tb=tid?S.beh.find(b=>b.id===tid):null,decl=tb&&Array.isArray(tb.more)&&tb.more.length?fsParts(tb).map(x=>x.fn).filter(Boolean):[];
+  const other=cand.filter(r=>r.fn!==top.fn&&!(decl.includes(top.fn)&&decl.includes(r.fn))).sort((a,b)=>b.n-a.n)[0];
   const second=other&&other.n>=top.n?other:null,tt=top.tier||4;
   const contraCounted=(top.conTiers||[]).filter(t=>t<=tt).length,secondCounts=!!(second&&(second.tier||4)<=tt);
   const downgrade=(contraCounted?1:0)+(secondCounts?1:0);
@@ -1452,7 +1580,7 @@ function renderReport(){
   /* v21.82 the background and the student, a paragraph per box with an entry */
   {const bg=FS_BG.filter(x=>String(m[x[0]]||'').trim());if(bg.length)h+=`<h3>Background and the student</h3>`+bg.map(x=>`<p><b>${x[1]}.</b> ${esc(String(m[x[0]]).trim())}</p>`).join('');}
   h+=`<h3>Methods</h3>`;
-  const used=S.src.filter(r=>r.method);
+  const used=S.src.filter(r=>r.method&&!r.same);   /* v25.64 (M3) a group row of the same informants is not listed again */
   h+= used.length?`<p>${used.map(r=>esc(r.method)+(rowForm(r)?' (Form '+esc(rowForm(r))+')':'')+(r.dates?', '+esc(r.dates):'')).join('; ')}.</p>`
     :'<p class="hint">No assessment methods recorded.</p>';
   if(m.settings)h+=`<p>Data were collected across ${nod(m.settings)}.</p>`;
@@ -1479,8 +1607,9 @@ function renderReport(){
             :'. Classified from the functional analysis per Hagopian et al. (2015, 2023); the classification bears on which treatment components are expected to work (Form TD-1) and does not describe the student in general: in a preliminary study, three individuals with Subtype 2 self-injury were sensitive to changes in reinforcement for another response (Rooker et al., 2019).')+
          (chk.length?' <b>Check:</b> '+chk.join('; ')+'.':'')+`</p>`;
     }
-    const t=stmtText(b);
-    if(t)h+=`<div class="stmt"><em>Summary statement &mdash; ${esc(b.lab)||'target'}</em>${esc(t)}</div>`;
+    /* v25.64 (H7) one statement per function of the target */
+    {const P=fsParts(b);P.forEach((x,k)=>{const t=stmtText(x);
+      if(t)h+=`<div class="stmt"><em>Summary statement &mdash; ${esc(b.lab)||'target'}${P.length>1?', function '+(k+1):''}</em>${esc(t)}${fsStmtNotes(x)}</div>`;});}
   });
   h+=`<h3>Findings</h3>`;
   const findingsAt=h.length;
@@ -1503,10 +1632,13 @@ function renderReport(){
     h+=`<p><b>${b.lab?nod(b.lab):'Target '+(i+1)}.</b> Alternative behavior to teach: ${nod(b.alt)}. `+
       `Consequence it should produce: ${nod(b.altCons||b.cons||'the same consequence as the problem behavior')}. `+
       `Antecedent to address: ${b.ant?nod(b.ant):'[antecedent]'}.${b.rationale?' '+esc(b.rationale):''}</p>`;
+    /* v25.64 (H7) each further function has its own alternative: teaching one request leaves the other function's behavior in place (Day et al., 1994) */
+    fsParts(b).slice(1).forEach((x,k)=>{if(!x.alt)return;h+=`<p><b>${b.lab?nod(b.lab):'Target '+(i+1)}, function ${k+2}${x.fn?' ('+esc(fnWords(x.fn))+')':''}.</b> Alternative behavior to teach: ${nod(x.alt)}. Consequence it should produce: ${nod(x.altCons||x.cons||'the same consequence as the problem behavior')}. Antecedent to address: ${x.ant?nod(x.ant):'[antecedent]'}.</p>`;});
   });
   if(m.next)h+=`<p>${esc(m.next)}</p>`;
   if(m.limits)h+=`<h3>Limitations</h3><p>${esc(m.limits)}</p>`;
-  if(m.falsify)h+=`<h3>What would change this conclusion</h3><p>${esc(m.falsify)}</p>`;
+  /* v25.64 (M2) the treatment-as-test check prints under "What would change this conclusion" */
+  {const tx=fsTxText();if(m.falsify||tx)h+=`<h3>What would change this conclusion</h3>${m.falsify?`<p>${esc(m.falsify)}</p>`:''}${tx}`;}
   $('#reportOut').innerHTML=h;
 }
 
@@ -1583,6 +1715,8 @@ function fsReady(){const el=document.getElementById('fsReady');if(!el)return;con
   fsTargets().forEach((b,i)=>{if(!String(b.alt||'').trim())need.push('an alternative behavior for '+(String(b.lab||'').trim()||'target '+(i+1)));});
   const C=convergence();if(C.noName.length)need.push('the function of the source'+(C.noName.length>1?'s':'')+' rated but not named ('+[...new Set(C.noName.map(r=>rowForm(r)||'?'))].join(', ')+')');
   if(C.rec.length&&!evidence().band)need.push('a source that supports a function');
+  /* v25.64 (M2) */
+  if(fsTxNeeded()){if(!String(m.txTest||'').trim())need.push('the treatment as a test: which function-based procedure');if(!String(m.txWorks||'').trim())need.push('what counts as the treatment working');}
   el.classList.toggle('ok',!need.length);
   el.textContent=need.length?'Before signing, the report still needs: '+need.join('; ')+'.':'Ready to sign: the report holds the consent, the assent, the window, the settings not assessed, the limitations, what would change the conclusion, and an alternative behavior for each target.';}
 {const rr=renderReport;renderReport=function(){const x=rr.apply(this,arguments);try{fsReady();}catch(e){}return x;};}
@@ -1628,6 +1762,9 @@ async function loadSim(){
     limits:'No functional analysis was permitted: the team could not arrange a condition that evokes aggression on purpose, and the parent declined an analogue analysis. The conclusion therefore rests on a described contingency rather than a demonstrated one. Integrity of the existing reward chart was not measured before this assessment, so its failure cannot be attributed to the procedure itself.',
     falsify:'If aggression continues at the assessment level when the same tasks are presented with an adult seated alongside and escape is not delivered, the escape hypothesis is wrong. If it falls when attention is enriched while the escape contingency is left intact, the hypothesis is also wrong.',
     next:'Build the plan on Form TD-1 around functional communication training with a break card and a programmed delay, and measure implementation on Form TI-1 from the first week. Re-run this summary if an analogue analysis later becomes possible.',
+    /* v25.64 (M2) the level is 2, and the next step is treatment: the treatment as a test */
+    nextKind:'Treatment now, as a test of the hypothesis (Form TD-1)',txTest:'Functional communication training for a break card, with a programmed delay and demand fading (Form TD-1)',
+    txWorks:'Aggression at least 80% below the assessment level within 15 school days, in Room 12 during independent work',txFail:'A functional analysis (Form EA-1) of the demand condition against play, not more indirect data',
     review:D(-90)};
   S.src=[
     {method:'Indirect: records review',dates:D(70),who:'J. Ellis',
@@ -1726,11 +1863,13 @@ renderAll();
    unticked and cannot be ticked: it reaches the report as the alternative behavior of the behaviors it replaces. */
 window.__nbhFactsOut=function(){
   const key=s=>window.nbhCase?window.nbhCase.fnKeyOf(s):'';
-  const behs=S.beh.filter(b=>b.lab||b.def).map(b=>({label:b.lab,def:b.def,fn:b.fn,fnKey:key(b.fn),dim:b.dim,base:b.base,se:b.se,ant:b.ant,cons:b.cons,
-    alt:b.alt,altCons:b.altCons,desired:b.desired,rep:b.alt,statement:stmtText(b),src:'FS-1'}));
+  const behs=S.beh.filter(b=>b.lab||b.def).map(b=>Object.assign({label:b.lab,def:b.def,fn:b.fn,fnKey:key(b.fn),dim:b.dim,base:b.base,se:b.se,ant:b.ant,cons:b.cons,
+    alt:b.alt,altCons:b.altCons,desired:b.desired,rep:b.alt,statement:stmtText(b),src:'FS-1'},
+    /* v25.64 (H7) the further functions of a target, each with its own statement */
+    Array.isArray(b.more)&&b.more.length?{more:fsParts(b).slice(1).map(x=>({fn:x.fn,fnKey:key(x.fn),ant:x.ant,cons:x.cons,alt:x.alt,altCons:x.altCons,statement:stmtText(x)}))}:{}));
   const fnTxt=S.meta.fn||(behs[0]&&behs[0].fn)||'';
   const out={};
-  if(fnTxt)out.fn={key:key(fnTxt),label:fnTxt,statements:behs.map(b=>b.statement).filter(Boolean),
+  if(fnTxt)out.fn={key:key(fnTxt),label:fnTxt,statements:[].concat(...behs.map(b=>[b.statement].concat((b.more||[]).map(x=>x.statement)))).filter(Boolean),
     perBehavior:behs.map(b=>({label:b.label,fn:b.fn,fnKey:b.fnKey,statement:b.statement,alt:b.alt,se:b.se,ant:b.ant}))};
   /* v22.98 (review I86) the FBA's limits go forward: the settings it did not sample, what would change its conclusion, and the
      hypotheses it could not rule out, for Form TD-1's generalization tactics and Form PR-1's review */
@@ -3108,7 +3247,7 @@ function fsEvMethod(id,e){const m=String(e.method||'');
   return ({'VI-1':METHODS[5][0],'SP-1':METHODS[7][0],'OB-1':METHODS[6][0],'IA-1':METHODS[11][0],'IN-1':METHODS[11][0]})[id]||'';}
 /* v22.96 (review F168) more than one function counts as a synthesized result only from a functional analysis; from any other
    source it stays uncounted and named under the table (F162) */
-function fsEvFn(e,m){const k=e.fnKey||'';if(k==='multiple')return m&&tierOf(m)===1?FN[6]:'';return ({attention:FN[1],tangible:FN[2],escape:FN[3],automatic:FN[4],unclear:FN[5]})[k]||'';}
+function fsEvFn(e,m){const k=e.fnKey||'';if(k==='multiple')return m&&tierOf(m)===1?(m===METHODS[1][0]&&!/iisca|synthes/i.test(String(e.method||''))?FN_MULTI:FN[6]):'';   /* v25.64 (H7) */return ({attention:FN[1],tangible:FN[2],escape:FN[3],automatic:FN[4],unclear:FN[5]})[k]||'';}
 const fsEvT=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
 /* v22.96 (review F169) the target a source form names, matched to this report's targets by name; otherwise every target */
 function fsEvTgt(e){const n=fsEvT(e&&(e.target||e.beh||e.behavior)).toLowerCase();if(!n)return '';
@@ -3132,7 +3271,7 @@ function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
     if(S.src.some(r=>fsEvT(r.form)==='IA-1'&&fsEvT(r.contrib).indexOf(nm+' (')===0))return;
     const inst=(g.perInst||[]).map(x=>fsEvT(x.inst)+' '+fsEvT(x.lead).toLowerCase()+' '+x.k+' of '+x.m+(x.agree!=null?', agreement '+x.agree+'%':'')).join('; ');
     const contrib=nm+' ('+(g.codes||[]).join(', ')+'): '+fsEvT(g.label)+(inst?'. '+inst:'')+'.';
-    const row={form:'IA-1',method:fsEvMethod('IA-1',E['IA-1']),dates:fsEvT(E['IA-1'].dates),who:fsEvT(E['IA-1'].by),contrib,fn:fsEvFn({fnKey:g.fnKey}),str:STR.indexOf(g.strength)>0?g.strength:''};
+    const row={form:'IA-1',method:fsEvMethod('IA-1',E['IA-1']),dates:fsEvT(E['IA-1'].dates),who:fsEvT(E['IA-1'].by),contrib,fn:fsEvFn({fnKey:g.fnKey}),str:STR.indexOf(g.strength)>0?g.strength:'',same:'IA-1'};   /* v25.64 (M3) the same informants: shown, not counted */
     const slot=S.src.find(r=>!rowHas(r));if(slot)Object.assign(slot,row);else S.src.push(row);put.push('IA-1 ('+nm+')');n++;});
   /* v22.68 while the table still had an empty row (it is not finished), a row is added when the empty ones run out, so a
      fourth source is not dropped; a table the BCBA has filled is left as it is (nothing offered) */
@@ -3234,6 +3373,41 @@ function fsBackground(f){if(!f||typeof f!=='object')return {n:0};const o=fsBgCom
     if(io&&io.text&&typeof S==='object'&&S&&S.xa&&!String(S.xa.ioa||'').trim()){S.xa.ioa='ABC-1: '+io.text;bindXa();renderReport();
       return {filled:(r.filled||0)+1,note:[r.note,'interobserver agreement (Form ABC-1)'].filter(Boolean).join('; ')};}}catch(e){}
   return r;};}
+</script>
+<script id="v2564-fs">
+"use strict";
+/* v25.64 (M4) Form DA-1 in the case (f.demands): a row of its own on the evidence table (the demand assessment, no tier), placed once,
+   and its tasks offered into a target's antecedent and desired behavior (Targets sheet). (M7) Form SI-1's hard classes and activities
+   (f.student.hard: rows {act, hard, long, boring, noisy, people}, {activity, reasons}, or strings "Math (too long, the people)"), each
+   written as a testable statement into an empty row of "Hypotheses Tested and Set Aside", the outcome left to you (Kern, Childs,
+   Dunlap, Clarke & Falk, 1994). Nothing typed is changed. */
+const FS_SAY={hard:['is too hard','easier versus usual materials'],long:['is too long','shorter versus usual length'],boring:['is boring','a choice of task, or a new version of it, versus the usual'],
+  noisy:['is noisy','a quieter place versus the usual'],people:['has the people the student named','with versus without those people, and close versus distant adult attention']};
+const FS_SAYRE={hard:/too hard|\bhard\b/,long:/too long|\blong\b/,boring:/boring/,noisy:/noisy|loud/,people:/people|peer/};
+function fsSaid(h){const out=[];(Array.isArray(h)?h:[]).forEach(x=>{let act='',why='',keys=[];
+    if(typeof x==='string'){const m=/^(.*?)\s*\(([^)]*)\)\s*$/.exec(x);act=(m?m[1]:x).trim();why=(m?m[2]:'').toLowerCase();Object.keys(FS_SAY).forEach(k=>{if(FS_SAYRE[k].test(why))keys.push(k);});}
+    else if(x&&typeof x==='object'){act=String(x.act||x.activity||x.name||x.class||'').trim();why=[].concat(x.reasons||x.why||[]).join(' ').toLowerCase();
+      Object.keys(FS_SAY).forEach(k=>{if(x[k]===true||x[k]===1||x[k]==='1'||FS_SAYRE[k].test(why))keys.push(k);});}
+    if(act&&keys.length)out.push({act,keys});});return out;}
+const fsOr=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' or '+a[a.length-1];
+{const fiB=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=(fiB?fiB.apply(this,arguments):null)||{filled:0};let n=0;const notes=[];
+  try{f=f||{};const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+   const d=f.demands&&typeof f.demands==='object'?f.demands:null,was=JSON.stringify(fsDemands||null);fsDemands=d;var dChanged=was!==JSON.stringify(d||null);
+   if(d&&!S.src.some(x=>rowForm(x)==='DA-1'||x.method===M_DA)){const nm=a=>(Array.isArray(a)?a:[]).map(o=>T(o&&o.name)).filter(Boolean);
+     const ev=nm(d.fa),hp=nm(d.high),pl=d.paired?nm(d.paired.least):[];
+     const contrib=[ev.length?'Tasks that evoke problem behavior: '+ev.join('; '):pl.length?'Least chosen in the paired-choice assessment (candidates for the demand condition): '+pl.join('; '):'',
+       hp.length?'High-probability tasks: '+hp.join('; '):'',T(d.verdict)].filter(Boolean).join('. ').replace(/\.\./g,'.');
+     const row={form:'DA-1',method:M_DA,dates:T(d.dates),who:'',contrib:contrib?contrib+(/[.]$/.test(contrib)?'':'.'):'',fn:'',str:''};
+     const slot=S.src.find(x=>!rowHas(x));if(slot)Object.assign(slot,row);else S.src.push(row);n++;notes.push('Form DA-1 on the evidence table');}
+   const st=f.student&&typeof f.student==='object'?f.student:{},H=fsSaid(st.hard||st.hardClasses);
+   if(H.length){const lab=T((S.beh.find(b=>T(b.lab))||{}).lab)||T(((f.behaviors||[])[0]||{}).label)||'problem behavior',beh=lab.charAt(0).toLowerCase()+lab.slice(1);
+     const open=S.hyp.some(x=>!rowHas(x)),slot=()=>S.hyp.find(x=>!rowHas(x))||(open?(S.hyp.push({h:'',how:'',out:'',what:''}),S.hyp[S.hyp.length-1]):null);let k=0;
+     H.slice(0,8).forEach(x=>{const line='The student’s '+beh+' is more likely when '+x.act.charAt(0).toLowerCase()+x.act.slice(1)+' '+fsOr(x.keys.map(q=>FS_SAY[q][0]))+'; test: '+x.keys.map(q=>FS_SAY[q][1]).join('; ')+' (Form SI-1)';
+       if(S.hyp.some(y=>T(y.h)===line))return;const s=slot();if(!s)return;Object.assign(s,{h:line,how:'The student’s report; confirm by a brief classroom comparison or Form DA-1',out:'',what:''});k++;});
+     if(k){n+=k;notes.push(k===1?'the student’s reason as a hypothesis to test':k+' of the student’s reasons as hypotheses to test');}}
+  }catch(e){}
+  if(n)renderAll();else if(typeof dChanged!=='undefined'&&dChanged){try{renderBehForm();}catch(e){}}
+  return n?{filled:(r.filled||0)+n,note:[r.note,notes.join('; ')].filter(Boolean).join('; ')}:r;};}
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
