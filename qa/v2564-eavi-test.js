@@ -207,6 +207,13 @@ const VI_OLD=require('fs').readFileSync(__filename,'utf8').split('/*'+'VI_OLD*/'
     await new Promise(r=>setTimeout(r,900));const val=n=>(document.querySelector('[name="'+n+'"]')||{}).value;return {name:val('s_name'),prec:val('s_precursor'),stmt:(val('h_statement')||'').slice(0,40),band:document.getElementById('hillBand').textContent,fn:val('h_fn'),stop:(val('dec_stop')||'').slice(0,20),fail:val('dec_fail'),basis:document.getElementById('sPrecBasis').value};},VI_OLD.trim());
   ok('44 a VI-1 file saved before v25.64 opens with its fields in place; the new fields are empty',vo.name==='SIMULATED – Sample Student'&&/^Vocal protest/.test(vo.prec||'')&&/^When an independent academic demand/.test(vo.stmt)&&vo.band==='Strongest descriptive support'&&vo.fn==='escape'&&/^Any aggression/.test(vo.stop)&&vo.fail===''&&vo.basis==='',vo);
   await v.close();
+    /* v25.65 (the BCBA, 11/2) the nurse contact and injury checks: required at urgency 3 or 4, optional at 1 or 2, and said so */
+    {const pn=await open('nurse',EA);const set=(n,v)=>pn.evaluate(([n,v])=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},[n,v]);
+      const st=()=>pn.evaluate(()=>{const n=document.getElementById('eaNurseFlag');return {hid:n.hidden,opt:n.classList.contains('ea-optnote'),t:n.textContent};});
+      await set('m.urg','2');await sleep(300);const a2=await st();await set('m.urg','4');await sleep(300);const a4=await st();
+      await set('s.nurse','School nurse (simulated)');await set('s.injchk','after each session');await sleep(300);const af=await st();
+      ok('v25.65 at urgency 2 the nurse and injury checks are optional and the form says why; at 4 they are asked for; filled, no note',!a2.hid&&a2.opt&&/^Optional at urgency level 2\. TB-1 does not rate this behavior as able to injure/.test(a2.t)&&!a4.hid&&!a4.opt&&/^Safety plan incomplete/.test(a4.t)&&af.hid,{a2,a4,af});
+      await pn.close();}
   }catch(err){console.log('FAIL exception '+(err&&err.stack||err));fails++;}
   ok('45 no page errors',errs.length===0,errs);
   await br.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})();
