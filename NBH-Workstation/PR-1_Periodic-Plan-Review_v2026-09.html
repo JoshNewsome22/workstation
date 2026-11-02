@@ -1011,6 +1011,24 @@ table.pr-ddprev{min-width:600px}
       <!-- v21.22 (DD-1 import): each column's unit, typed or written by Import From DD-1 -->
       <tr class="pr-unitrow"><th scope="row">Unit</th><td></td><td><textarea data-m="tUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Target behavior column"></textarea></td><td><textarea data-m="rUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Replacement column"></textarea></td><td class="pr-unitpct">percent</td><td class="pr-unitpct">percent of opportunities</td><td></td><td class="nx noprint"></td></tr></thead><tbody></tbody></table></div>
     <div class="grid-wrap pr-plotwrap" tabindex="0" role="region" aria-label="Graph of the review periods" style="margin-top:10px"><svg id="prPlot" viewBox="0 0 900 320" role="img" aria-label="Target and replacement across review periods"></svg></div>
+    <!-- v25.64 (L3) one scale across a review series: the axis top can be kept for later reviews -->
+    <div class="pr64-axis noprint"><label for="prYTop">Top of the left axis</label><input id="prYTop" type="number" step="any" min="0" data-m="yTop" placeholder="set from the data" aria-describedby="prAxisMsg"><button type="button" class="tool" id="prKeepAxis">Keep this axis for later reviews</button><button type="button" class="tool" id="prBlind" aria-pressed="false">Graph only, for the second reader</button><span class="hint" id="prAxisMsg" role="status" aria-live="polite">Blank: the top is set from the data. A kept top stays with the form, so each review&rsquo;s graph is drawn on the same scale (a top set afresh each time changes how large a change looks: Kennedy, 1989).</span></div>
+    <!-- v25.64 (H4, M1, L6) the window the suggestion reads, the structured check, the design, and the readers of the graph -->
+    <div class="pr64-read">
+    <h3 style="margin-top:12px">Reading the Graph</h3>
+    <table class="rt">
+      <tr><th style="width:26%">Design</th><td><select data-m="design" aria-label="Design"><option value="">AB: the baseline, then the plan (as the periods table runs)</option><option>Reversal (ABAB)</option><option>Multiple baseline</option><option>Changing criterion</option><option>Alternating treatments</option><option>Other (say which under Reasoning)</option></select></td></tr>
+      <tr><th>The suggestion reads</th><td><select data-m="prWin" aria-label="The window the suggestion reads"><option value="">The last 5 days of the current period, when the days were imported from Form DD-1 (else the period mean)</option><option value="mean">The period mean</option></select></td></tr>
+    </table>
+    <div id="pr64Win" class="pr64-win"></div>
+    <table class="rt pr64-readers">
+      <tr><th style="width:26%">Analyst&rsquo;s reading, baseline against the current period</th><td><select data-m="rdA" aria-label="Analyst's reading"><option></option><option>Change</option><option>No change</option><option>Unclear</option></select></td>
+          <th style="width:10%">Initials</th><td style="width:10%"><input data-m="rdAI" aria-label="Analyst's initials"></td><th style="width:8%">Date</th><td style="width:16%"><input type="date" data-m="rdAD" aria-label="Date of the analyst's reading"></td></tr>
+      <tr><th>Second reader (optional): reads the graph alone, without the structured check, the figures or the notes</th><td><select data-m="rdB" aria-label="Second reader's reading"><option></option><option>Change</option><option>No change</option><option>Unclear</option></select></td>
+          <th>Initials</th><td><input data-m="rdBI" aria-label="Second reader's initials"></td><th>Date</th><td><input type="date" data-m="rdBD" aria-label="Date of the second reader's reading"></td></tr>
+    </table>
+    <div id="pr64Agree" aria-live="polite"></div>
+    </div>
     <div class="metrics" id="dataMetrics"></div>
     <h3 style="margin-top:12px">Fidelity Beside Outcome</h3>
     <p class="hint">Each period&rsquo;s behavior figures next to the fidelity it was delivered with. A period below 80% integrity, or with reinforcers delivered after the target behavior on more than 10% of consequence-step opportunities, is read as a test of the implementation, not of the plan; a fall of 15 points or more from the period before is marked for the sequence note above. The cut-offs are this form&rsquo;s conventions.</p>
@@ -1116,7 +1134,7 @@ table.pr-ddprev{min-width:600px}
     <h3 style="margin-top:14px">Fading Sequence</h3>
     <p class="hint">Fade one support at a time and record which. Form RM-1 applies here: each fading step is a treatment challenge (Kimball et al., 2023). In a clinic series, resurgence occurred during schedule thinning in functional communication training in 19 of 25 applications (76%), and in some it rose above baseline levels (Briggs et al., 2018). An increase at a step is expected and is not by itself a failure, but check that the crisis plan (Form CR-1) is current before each step.</p>
     <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
-      <button class="tool" id="addFade">Add step</button><button class="tool" id="delFade">Remove last</button>
+      <button class="tool" id="addFade">Add step</button><button class="tool" id="delFade">Remove last</button><button class="tool" id="prFadeDef" type="button">Write the default criterion in the empty steps</button>
     </div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Fading sequence table"><table class="rt pr-grid" id="fadeTbl"><thead><tr>
       <th style="width:44px">Step</th><th style="width:26%">Support faded</th><th style="width:20%">Criterion to advance</th>
@@ -1127,6 +1145,8 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Who will notice if it stops working</th><td><textarea data-m="watch" rows="1" class="pr-line"></textarea></td></tr>
       <tr><th>Monitoring after exit</th><td><textarea data-m="post" placeholder="e.g., rate checked monthly for one term, then at the annual review" rows="1" class="pr-line"></textarea></td></tr>
       <tr><th>What brings the plan back</th><td><textarea data-m="back" rows="2" placeholder="Stated as a threshold, so re-entry does not require a crisis first"></textarea></td></tr>
+      <!-- v25.64 (M9) a re-entry rule computed from Form DD-1's final condition, stated in advance with its window -->
+      <tr><th>Re-entry rule, computed</th><td><select data-m="backRule" aria-label="Re-entry rule"><option value=""></option><option value="max5">The mean of 2 consecutive monitoring days above the highest of the last 5 days before exit</option><option value="spc">A monitoring day above the final period&rsquo;s upper control limit, or 8 days in a row above its mean</option></select><div id="pr64Back" class="pr64-back"></div></td></tr>
     </table>
     <!-- v21.80 the maintenance probes Form DD-1 holds since the exit, and whether one is due -->
     <div id="prProbes" class="pr-probes" hidden></div>
@@ -1148,10 +1168,21 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Fidelity beside outcome</th><td>The table under the graph places each period&rsquo;s integrity and consequence-step commission figure next to its behavior figures, marks a period below 80% or above 10% commission, and marks a fall of 15 points or more from the period before. The figures by implementer and observation are recorded as text, because a mean across implementers can hide one who is not running the plan.</td></tr>
       <tr><th>Sequence</th><td>With Did fidelity drop abruptly answered Yes, the verdict asks that the period after the drop be read on its own. Sequence effects are preliminary in Burlison et al. (2026) and summarized from Hronek &amp; Kestner (2025) by O&rsquo;Neill et al. (2026); they are a reason for caution, not a finding this form applies as a rule.</td></tr>
       <tr><th>Contextual fit</th><td>A mean below 4 of 6 is poor fit on Form CF-1's bands (below 3, very poor) and is noted under the integrity verdict. A figure outside 1 to 6 is not used.</td></tr>
-      <tr><th>Change from baseline</th><td>(most recent period &minus; baseline) &divide; baseline. The baseline is the BL row; the most recent period is the last row below it with a target value. The change is not computed when the baseline is blank or 0. The suggestion reads this one comparison, not the trend or the variability across periods, which the graph shows; it points out a most recent period higher than the one before it.</td></tr>
-      <tr><th>Suggested decision, plan running as written</th><td>60% or more below baseline: begin fading, or exit if the exit conditions are met. With the replacement recorded as &ldquo;Prompted only&rdquo; or &ldquo;Not yet&rdquo; under Used independently: continue, and do not begin fading. With it independent only with trained staff or in one setting: begin fading; exit waits for the exit conditions. 25% or more below, but less than 60%: continue unchanged. From less than 25% below to less than 10% above: modify the plan. 10% or more above: return to assessment.</td></tr>
-      <tr><th>Decision check</th><td>Flags an exit recorded before Exit Readiness is complete; fading or exit recorded while the replacement is not used independently; a decision to modify, reassess, fade or exit recorded while integrity is below 90%, not recorded, or the period fails the plan-run gate; and a decision that differs from the suggestion with no reasoning written.</td></tr>
+      <!-- v25.64 (H4) the window the change is read over, printed as the code reads it -->
+      <tr><th>Change from baseline</th><td>(the current figure &minus; baseline) &divide; baseline. The baseline is the BL row; the current period is the last row below it with a target value. When the table was imported from Form DD-1 with its days, the change is computed two ways: the last 5 days of the current period against the baseline mean, and the period mean against the baseline mean. Both are shown under Reading the Graph, labelled with the one the suggestion uses: the last 5 days, unless &ldquo;The suggestion reads&rdquo; is set to the period mean or the days are not there (a table typed by hand, or imported before v25.64), when it reads the period mean as before. Consecutive case series compute the reduction from the mean of the last 5 treatment points (Hagopian et al., 1998; Rooker et al., 2013), because a period mean hides a fall or a rise inside the period. The size and the choice of the window change the answer: in one reanalysis of clinic data, changing only the window (the mean of the last 2 sessions in place of the highest of the last 5) changed how many cases were counted as relapsing by 7 to 17.5 percentage points (Podlesnik et al., 2025). The change is not computed when the baseline is blank or 0. The suggestion does not read the trend or the variability, which the graph shows; it points out a most recent period higher than the one before it.</td></tr>
+      <tr><th>Too few days to judge</th><td>With the days from Form DD-1, a baseline with fewer than 3 days with data, or a current period with fewer than 5, makes the comparison provisional, and the suggestion is then never &ldquo;modify the plan&rdquo; or &ldquo;return to assessment&rdquo;: it is to continue and collect data until the phase is long enough. On real clinical data the dual-criterion checks kept false positives near or under 5% once the first phase had at least 3 points and the second at least 5 (Lanovaz et al., 2017).</td></tr>
+      <tr><th>Structured check (CDC)</th><td>With the days from Form DD-1, the conservative dual-criterion check (Fisher et al., 2003) compares the baseline with the current period. Two lines are carried from the baseline into the current period: the baseline mean and the baseline&rsquo;s least-squares trend line (x is the day&rsquo;s place on DD-1&rsquo;s sheet), both lowered by 0.25 of the baseline&rsquo;s standard deviation, toward improvement. The days of the current period below both lines are counted against the number Fisher et al. (2003, Table 1) ask for: 5 of 5, 6 of 6 or 7, 7 of 8, 8 of 9 or 10, 9 of 11 or 12, 10 of 13, 11 of 14, 12 of 15 to 17, 13 of 18 or 19, 14 of 20 or 21, 15 of 22 or 23; above 23 days, the smallest count a one-sided binomial test at .05 accepts. A current period under 5 days, or a baseline under 2, is not checked. The result reads &ldquo;change beyond what the baseline predicts&rdquo; or &ldquo;not beyond what the baseline predicts&rdquo;. It is a structured aid, read with the graph: it misses a delayed effect (a rise before a fall) and says nothing about the size of the change, and when other periods lie between the baseline and the current period its lines are carried across them. In Monte Carlo tests it kept false positives lower than the other methods tested, and brief training with its lines raised staff accuracy (Fisher et al., 2003).</td></tr>
+      <tr><th>Benchmark, for context</th><td>Treatment studies of severe behavior count an 80% or 90% reduction from baseline as success: functional communication training with extinction produced at least a 90% reduction in nearly half of its applications across 21 inpatient cases (Hagopian et al., 1998), noncontingent reinforcement at least 80% in 20 of 27 applications (Phillips et al., 2017), and a review of consecutive case series recommends reporting the share of cases that reach such a benchmark (Hagopian, 2020). These figures come from inpatient and clinic series of severe behavior; a school team may reasonably accept less for milder behavior. The benchmark is printed beside the suggestion as context; it is not this form&rsquo;s rule.</td></tr>
+      <!-- v25.64 (H5) the fading rule as the code applies it (FADE_PCT, FADE_DAYS) -->
+      <tr><th>Suggested decision, plan running as written</th><td>Begin fading when every target is at its aim (Form DD-1), or, with no aim, at a reduction of 90% or more from baseline, after at least 10 school days in the phase (counted from Form DD-1&rsquo;s days when the table was imported with them; a typed table is not checked for days). Then: with the replacement recorded as &ldquo;Prompted only&rdquo; or &ldquo;Not yet&rdquo; under Used independently, or a replacement skill below its goal on Form DD-1: continue, and do not begin fading. With it independent only with trained staff or in one setting: begin fading; exit waits for the exit conditions. Otherwise: begin fading, or exit if the exit conditions are met. Short of the fading rule: 25% or more below baseline: continue unchanged (some progress; from 60% below, the suggestion says that fading waits for the plan&rsquo;s criterion). A provisional comparison (above): continue and collect data. From less than 25% below to less than 10% above: modify the plan. 10% or more above: return to assessment. The 25%, 60% and 10% cut-offs are this form&rsquo;s conventions. The 90% figure and the step rule offered under Criterion to advance are the rules Hagopian et al. (1998) used for demand and delay fading.</td></tr>
+      <tr><th>Decision check</th><td>Flags an exit recorded before Exit Readiness is complete; fading or exit recorded while the replacement is not used independently; a decision to modify, reassess, fade or exit recorded while integrity is below 90%, not recorded, or the period fails the plan-run gate; a decision that differs from the suggestion with no reasoning written; and (v25.64) a decision to modify, fade or exit recorded with no reasoning while the reading of the graph is uncertain.</td></tr>
+      <!-- v25.64 (M1) the readers of the graph -->
+      <tr><th>Readers of the graph</th><td>The analyst records a reading of the graph, baseline against the current period: change, no change or unclear. An optional second reader reads the graph alone, without the structured check, the figures or the notes (&ldquo;Graph only, for the second reader&rdquo; hides them on the screen). The reading is uncertain when the two readers differ, or when a reader differs from the structured check (change goes with &ldquo;beyond what the baseline predicts&rdquo;, no change with &ldquo;not beyond&rdquo;; unclear agrees with neither). Agreement between analysts reading the same graph is often modest: 0.61 among journal reviewers (DeProspero &amp; Cohen, 1979), and expert pairs ranged from kappa .19 to .91 (Wolfe et al., 2018). This is why a second, blind reading is worth having before the plan is changed.</td></tr>
       <tr><th>Exit readiness</th><td>A condition that refers to an entry on the Fading and exit sheet (a criterion, the maintaining contingency, the person who will notice, the re-entry threshold) counts only with that entry written. All nine met, with the monitoring after exit recorded: the plan can stop. One or two open: close them before exit. Three or more open: not ready.</td></tr>
+      <!-- v25.64 (M9) the re-entry rule, stated in advance with its window -->
+      <tr><th>Re-entry rule</th><td>Chosen on the Fading and exit sheet and computed from the current period&rsquo;s days on Form DD-1 (the final condition before exit). The first: the plan comes back when the mean of 2 consecutive monitoring days exceeds the highest of the last 5 days before exit. The second: when a monitoring day falls above the upper control limit of the final period (its mean plus 2.66 times its mean moving range, the moving range being the difference between consecutive days), or 8 days in a row fall above its mean (Pfadt &amp; Wheeler, 1995). The rule chosen, its window and its numbers print on the exit sheet, and &ldquo;Write it into What brings the plan back&rdquo; writes it there. The definition matters: re-scoring the same clinic data under a different relapse definition changed the share counted as relapsing by 7 to 17.5 percentage points (Podlesnik et al., 2025). A fixed rule gives the team a shared signal for when to act (Pfadt &amp; Wheeler, 1995) and keeps a team from holding on to a failing course (Hantula, 1995); Hopkins (1995) warned that statistical rules can replace close contact with the data, so the rule is a signal to look, not a substitute for the graph.</td></tr>
+      <!-- v25.64 (L6) the outcome row the log keeps -->
+      <tr><th>Outcome row in the Review Log</th><td>Closing a review also saves a standard outcome row: the design, the baseline mean, the mean of the last 5 days (when the days are there), the reduction from baseline, whether 80% and 90% were reached, the structured check and the decision. Across students the BCBA can then report the share who reached a benchmark rather than an average (Hagopian, 2020).</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:16px">Reading Fidelity Before Outcome</h2>
     <p>Before judging the plan, check how it was delivered. If TI-1 shows overall fidelity below 80%, any critical consequence step below 80%, or reinforcers delivered after the target behavior, treat the period&rsquo;s outcome data as a test of the implementation, not of the plan: in parametric studies a DRO that worked for all participants at full fidelity worked in about a third of sessions at 40% fidelity and almost never at 20% (O&rsquo;Neill et al., 2026), and a teaching procedure mastered by every learner at full fidelity was mastered by one of six when consequences averaged about 67% fidelity, with all six mastering it once errors were corrected (Burlison et al., 2026). Retrain (ST-1), re-observe (TI-1), then re-review.</p>
@@ -1161,7 +1192,7 @@ table.pr-ddprev{min-width:600px}
     <h2 class="nbh-band" style="margin-top:16px">Importing From Form DD-1</h2>
     <p>Import From DD-1, above the table under What Did the Behavior Do?, fills the table from Form DD-1&rsquo;s daily data rather than having it retyped. Inside the workstation it reads the DD-1 open there; anywhere, it opens a data file DD-1 saved with Save data, or a case file saved by the workstation (a .json file, or the one-file edition&rsquo;s .case.html). A file saved by any other form is refused, and nothing on this form changes.</p>
     <p>Choose DD-1&rsquo;s reduction target and, to fill the Replacement column too, a second behavior. The periods are either DD-1&rsquo;s conditions, the first on the BL row and each later condition a review period, or date ranges you set, the first again on the BL row. In each period every day on DD-1&rsquo;s sheet with a date and a value counts, with the value DD-1 graphs for that day: the count, the rate per hour from the count and the minutes observed, the minutes, the percentage or the prompt level. The level written into the table is the mean of those days. Beside the table the form shows each period&rsquo;s days with data, level, standard deviation and range, and its trend: the least-squares line through the period&rsquo;s days, DD-1&rsquo;s default method, with its slope per day on DD-1&rsquo;s sheet, called flat (zero-celerating) when the slope is under 1% of the period&rsquo;s mean per day, or under 0.01, as DD-1 does. These are DD-1&rsquo;s own computations; its Sources for the Indices gives their sources.</p>
-    <p>Each column&rsquo;s unit is recorded in the Unit row and titles the graph&rsquo;s axis; when the two columns are in different units, the replacement is drawn against an axis of its own on the right. A column holds one unit, so figures already in it in another unit, or with no unit recorded, can only be replaced as a whole. No entry on this form is overwritten without asking: the import lists every entry that differs from DD-1&rsquo;s figures, and you keep them or replace them. Where the figures came from (the workstation or the file&rsquo;s name, DD-1&rsquo;s behavior and the date of the import) is recorded under the table and saved with the form. Integrity is not recorded on DD-1; enter it from Form TI-1. The suggested decision still reads only the change in level from the BL row to the most recent period, so read the trend and variability beside it.</p>
+    <p>Each column&rsquo;s unit is recorded in the Unit row and titles the graph&rsquo;s axis; when the two columns are in different units, the replacement is drawn against an axis of its own on the right. A column holds one unit, so figures already in it in another unit, or with no unit recorded, can only be replaced as a whole. No entry on this form is overwritten without asking: the import lists every entry that differs from DD-1&rsquo;s figures, and you keep them or replace them. Where the figures came from (the workstation or the file&rsquo;s name, DD-1&rsquo;s behavior and the date of the import) is recorded under the table and saved with the form. Integrity is not recorded on DD-1; enter it from Form TI-1. Since v25.64 the import also keeps each period&rsquo;s days, so the graph draws the days themselves, spaced by their place on DD-1&rsquo;s sheet, and the suggestion reads the last 5 days of the current period with the structured check beside it (How the Suggestion and the Checks Are Made). A table imported before v25.64 keeps its period means until it is imported again. The suggestion reads the level, not the trend or the variability, so read them beside it.</p>
     <h2 class="nbh-band" style="margin-top:16px">Exit Criteria</h2>
     <p>Writing the exit conditions at the review, rather than at the end, changes what the team is aiming at. The five criteria on the fading sheet are separable on purpose: behavior, replacement, schedule, integrity, and generalization can each be met independently, and a plan that meets four of the five is not ready. The most commonly missed is integrity under conditions that will actually obtain after exit &mdash; unannounced, with staff who have not been coached that week.</p>
     <p>The transfer question is the one that decides whether exit is possible at all. If nothing outside the plan will maintain the replacement, the plan cannot stop, and recording that is more useful than fading and waiting to see. Stokes and Baer (1977) described this as introducing the behavior to natural maintaining contingencies, including teaching the person to recruit a natural community of reinforcement, rather than training and hoping for generalization.</p>
@@ -1359,15 +1390,18 @@ function drawPlot(){
   const U=prUnits(),two=U.two,tl=prTitle(U.left),tr=two?prTitle(U.right):[],L=tl.length>1?70:58,R=two?(tr.length>1?78:66):22;
   if(rows.length<2){svg.innerHTML=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/><text x="${W/2}" y="${H/2}" font-size="13" text-anchor="middle" fill="#54676f" ${F}>Enter the baseline and at least one review period to draw the graph.<\/text>`;return;}
   const vals=rows.flatMap(r=>two?[r.t]:[r.t,r.r]).filter(v=>v!=null);
-  const step=niceStep(Math.max(0,...vals)*1.1/4),ymax=step*4,lab=v=>String(+v.toFixed(2));
+  /* v25.64 (L3) a top kept for later reviews is used while every value fits under it */
+  const keep=num(S.meta.yTop),kept=keep!=null&&keep>0&&Math.max(0,...vals)<=keep;
+  const step=kept?keep/4:niceStep(Math.max(0,...vals)*1.1/4),ymax=step*4,lab=v=>String(+v.toFixed(2));
   const rstep=two?niceStep(Math.max(0,...rows.map(r=>r.r).filter(v=>v!=null))*1.1/4):step,rmax=rstep*4;
-  const n=rows.length, px=k=>L+(k/(n-1))*(W-L-R), py=v=>T+(1-v/ymax)*(H-T-B), pyr=v=>T+(1-v/rmax)*(H-T-B);
+  /* v25.64 (L3) zero sits 8 px above the axis, so a period at 0 is seen and not hidden on the axis line (Deochand et al., 2015) */
+  const Z=8,n=rows.length, px=k=>L+(k/(n-1))*(W-L-R), py=v=>T+(1-v/ymax)*(H-T-B-Z), pyr=v=>T+(1-v/rmax)*(H-T-B-Z);
   let s=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/><rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="none" stroke="#CDD6D2"/>`;
   for(let k=0;k<=4;k++){const v=step*k,y=py(v);
     s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#EEF2F0"/><text x="${L-8}" y="${y+4}" font-size="10" text-anchor="end" fill="#5C6B6B" ${F}>${lab(v)}<\/text>`;
     if(two)s+=`<text x="${W-R+8}" y="${y+4}" font-size="10" fill="#5C6B6B" ${F}>${lab(rstep*k)}<\/text>`;}
   if(rows[0].i===0){const x=(px(0)+px(1))/2;
-    s+=`<line x1="${x}" x2="${x}" y1="${T}" y2="${H-B}" stroke="#1B2A2E" stroke-dasharray="4 3"/>
+    s+=`<line x1="${x}" x2="${x}" y1="${T}" y2="${H-B}" stroke="#1B2A2E" stroke-width="1.5"/>
         <text x="${x-4}" y="${T-8}" font-size="10" text-anchor="end" fill="#54676f" ${F}>baseline<\/text>
         <text x="${x+4}" y="${T-8}" font-size="10" fill="#54676f" ${F}>plan in place<\/text>`;}
   const line=(key,col,dash,Y)=>{let p='',prev=null;
@@ -1383,6 +1417,7 @@ function drawPlot(){
     `<g ${F} font-size="10.5" fill="#54676f">
         <line x1="${L+8}" x2="${L+30}" y1="14" y2="14" stroke="#8E2A2A" stroke-width="2"/><text x="${L+36}" y="18">target behavior${two?' (left axis)':''}<\/text>
         <line x1="${L+(two?236:190)}" x2="${L+(two?258:212)}" y1="14" y2="14" stroke="#2F6B37" stroke-width="2" stroke-dasharray="5 4"/><text x="${L+(two?264:218)}" y="18">replacement${two?' (right axis)':''}<\/text>
+        <text x="${W-R}" y="18" text-anchor="end" class="pr64-mean">each point is a period mean<\/text>
       <\/g>`;
   svg.innerHTML=s;
 }
@@ -1407,7 +1442,7 @@ function renderFade(){
   $('#fadeTbl tbody').innerHTML=S.fade.map((r,i)=>`<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
     <td><textarea data-d="${i}" data-f="s" rows="1" class="pr-line">${esc(r.s)}</textarea></td>
-    <td><textarea data-d="${i}" data-f="c" rows="1" class="pr-line">${esc(r.c)}</textarea></td>
+    <td><textarea data-d="${i}" data-f="c" rows="1" class="pr-line" placeholder="${esc(typeof pr64FadeDefault==='function'?pr64FadeDefault():'')}">${esc(r.c)}</textarea></td>
     <td><input data-d="${i}" data-f="d" value="${esc(r.d)}"></td>
     <td><select data-d="${i}" data-f="m"><option value=""></option>${opt(['Yes','No','In progress'],r.m)}</select></td>
     <td><textarea data-d="${i}" data-f="w" rows="1" class="pr-line">${esc(r.w)}</textarea></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
@@ -1521,14 +1556,24 @@ function renderVerdicts(){
   if(i==null||C.b==null||!C.last)sug='Record the integrity figure, the baseline (BL row) and at least one review period to get a suggested decision.';
   else if(!ok){cls='v-no';opts=['Continue and address implementation'];sug=`<b>Suggested: continue and address implementation.</b> ${i<INT_CRIT?'Integrity is below '+INT_CRIT+'%':(c!=null&&c<INT_CRIT)?'Critical-step integrity is below '+INT_CRIT+'%':'The period does not pass the plan-run gate ('+fails.join('; ')+')'}, so nothing about the plan itself is being tested yet. Retrain (Form ST-1), re-observe (Form TI-1), then review again: the plan is not revised on these data.`;}
   else if(C.pct==null){cls='v-mid';sug='<b>No suggestion from the change.</b> The baseline is 0, so the change cannot be expressed as a percentage of it. Read the graph, and record the decision and why.';}
-  else if(C.pct<=-60&&!(C.pct<=-FADE_PCT||AIM.met)){cls='v-ok';opts=['Continue unchanged'];sug=`<b>Suggested: continue unchanged; fading waits for the plan\u2019s criterion.</b> The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written. ${AIM.n?'Not yet at the aim: '+esc(AIM.names.join(', '))+' (Form DD-1).':'No aim is in the case; without one, fading waits for a reduction of '+FADE_PCT+'% from baseline.'}`;}
-  else if(C.pct<=-60){const lead=`The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written${AIM.met?', and every target is at its aim (Form DD-1)':''}.`;
-    if(notInd){cls='v-mid';opts=['Continue unchanged'];sug=`<b>Suggested: continue; do not begin fading yet.</b> ${lead} ${repLow.length?'The replacement skill is below its goal on Form DD-1 ('+repLow.map(r=>esc(r.name)+': '+r.cur+' of '+r.goal).join('; ')+')':'The replacement is recorded as \u201c'+esc(REP)+'\u201d under Used independently'}: fading before it is established risks returning the behavior (see the Guide).`;}
-    else if(REP==='Yes, but only with trained staff'||REP==='Yes, but only in one setting'){cls='v-ok';opts=['Begin fading'];sug=`<b>Suggested: begin fading; exit waits for generalization.</b> ${lead} The replacement is independent ${REP==='Yes, but only in one setting'?'in one setting only':'only with trained staff'}, so the exit conditions are not yet met.`;}
-    else {cls='v-ok';opts=['Begin fading','Exit the plan'];sug=`<b>Suggested: begin fading, or exit if the exit conditions are met.</b> ${lead} ${REP==='Yes, across settings and people'?'The replacement is recorded as used independently across settings and people.':REP?'Check the replacement is independent before fading anything.':'Record under section 3 whether the replacement is used independently before fading anything.'}`;}}
-  else if(C.pct<=-25){cls='v-ok';opts=['Continue unchanged'];sug=`<b>Suggested: continue unchanged.</b> The plan is running and the most recent period is ${relTxt(C.pct)} baseline. Changing it now would change what appears to be producing the improvement.`;}
-  else if(C.pct<10){cls='v-mid';opts=['Modify the plan'];sug=`<b>Suggested: modify the plan.</b> The plan is running as written, but the most recent period is ${relTxt(C.pct)} baseline, short of the 25% reduction this suggestion counts as progress. The plan is being run and is not working, which points at the plan rather than the staff.`;}
-  else {cls='v-no';opts=['Return to assessment'];sug=`<b>Suggested: return to assessment.</b> The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written. The function may have been wrong, may have changed, or a second function may be operating. Form FS-1.`;}
+  /* v25.64 (H4, H5) the change the suggestion reads is stated with its window: the last 5 days of the current condition against the
+     baseline mean when the days came from Form DD-1 (pr64Win, below), else the period mean as before; fading follows the rule the
+     Guide prints (every target at its aim, or with no aim 90% below baseline, after at least FADE_DAYS school days in the phase when
+     the days are known); and a comparison too short to judge (baseline under 3 days or the current period under 5) is not read as a
+     reason to modify the plan or return to assessment */
+  else{const W=typeof pr64Win==='function'?pr64Win():null,Pc=W&&W.pct!=null?W.pct:C.pct,dN=W?W.curN:null,daysOk=dN==null||dN>=FADE_DAYS;
+    const what=W&&W.use==='last5'?'The last 5 days of the current period are':'The most recent period is';
+    const fadeReady=(AIM.n?AIM.met:Pc<=-FADE_PCT)&&daysOk,short=dN!=null&&dN<FADE_DAYS?` The current period has ${dN} school day${dN===1?'':'s'} with data; fading waits for at least ${FADE_DAYS}.`:'';
+    if(fadeReady){const lead=`${what} ${relTxt(Pc)} baseline under a plan that is running as written${AIM.met?', and every target is at its aim (Form DD-1)':''}.`;
+      if(notInd){cls='v-mid';opts=['Continue unchanged'];sug=`<b>Suggested: continue; do not begin fading yet.</b> ${lead} ${repLow.length?'The replacement skill is below its goal on Form DD-1 ('+repLow.map(r=>esc(r.name)+': '+r.cur+' of '+r.goal).join('; ')+')':'The replacement is recorded as \u201c'+esc(REP)+'\u201d under Used independently'}: fading before it is established risks returning the behavior (see the Guide).`;}
+      else if(REP==='Yes, but only with trained staff'||REP==='Yes, but only in one setting'){cls='v-ok';opts=['Begin fading'];sug=`<b>Suggested: begin fading; exit waits for generalization.</b> ${lead} The replacement is independent ${REP==='Yes, but only in one setting'?'in one setting only':'only with trained staff'}, so the exit conditions are not yet met.`;}
+      else {cls='v-ok';opts=['Begin fading','Exit the plan'];sug=`<b>Suggested: begin fading, or exit if the exit conditions are met.</b> ${lead} ${REP==='Yes, across settings and people'?'The replacement is recorded as used independently across settings and people.':REP?'Check the replacement is independent before fading anything.':'Record under section 3 whether the replacement is used independently before fading anything.'}`;}}
+    else if(Pc<=-25){cls='v-ok';opts=['Continue unchanged'];
+      if(Pc<=-60||AIM.met)sug=`<b>Suggested: continue unchanged; fading waits for the plan\u2019s criterion.</b> ${what} ${relTxt(Pc)} baseline under a plan that is running as written. ${AIM.n?(AIM.met?'Every target is at its aim (Form DD-1).':'Not yet at the aim: '+esc(AIM.names.join(', '))+' (Form DD-1).'):'No aim is in the case; without one, fading waits for a reduction of '+FADE_PCT+'% from baseline.'}${short}`;
+      else sug=`<b>Suggested: continue unchanged.</b> The plan is running and ${what.charAt(0).toLowerCase()+what.slice(1)} ${relTxt(Pc)} baseline: some progress. Changing it now would change what appears to be producing the improvement.${short}`;}
+    else if(W&&W.prov){cls='v-mid';opts=['Continue unchanged'];sug=`<b>Suggested: continue and collect data until the phase is long enough.</b> ${what} ${relTxt(Pc)} baseline, but the comparison is provisional: ${esc(W.provWhy)}. Too few days to judge a change, so this is not yet a reason to modify the plan or return to assessment.`;}
+    else if(Pc<10){cls='v-mid';opts=['Modify the plan'];sug=`<b>Suggested: modify the plan.</b> The plan is running as written, but ${what.charAt(0).toLowerCase()+what.slice(1)} ${relTxt(Pc)} baseline, short of the 25% reduction this suggestion counts as some progress. The plan is being run and is not working, which points at the plan rather than the staff.`;}
+    else {cls='v-no';opts=['Return to assessment'];sug=`<b>Suggested: return to assessment.</b> ${what} ${relTxt(Pc)} baseline under a plan that is running as written. The function may have been wrong, may have changed, or a second function may be operating. Form FS-1.`;}}
   if(ok&&C.last&&C.prev&&C.last.t>C.prev.t)sug+=` The most recent period (${f2(C.last.t)}) is higher than the one before it (${f2(C.prev.t)}): read the trend on the graph before deciding.`;
   $('#decSuggest').innerHTML=`<div class="verdict ${cls}">${sug} <span class="hint">A suggestion from the integrity figures, the change from baseline and the replacement, by the rules in the Guide; not a decision. Record the team's decision below and say why if it differs.</span></div>`;
   /* v21.16 audit (F6): the decision recorded is checked against the rules the form states. The decision field was
@@ -1694,6 +1739,7 @@ function ddRecord(o){
 function ddStats(R,b,idx){
   const p=[];idx.forEach(i=>{const row=R.rows[i];if(!ddDated(row))return;const v=ddDay(R,row,b);if(v!==null&&isFinite(v))p.push({x:i,y:v,d:row.date});});
   const n=p.length,y=p.map(q=>q.y),o={n};if(!n)return o;
+  o.pts=p;   /* v25.64 (H4, M6) the days themselves, kept with the import */
   o.mean=ddMean(y);o.sd=ddSD(y);o.min=Math.min(...y);o.max=Math.max(...y);o.from=p[0].d;o.to=p[n-1].d;
   if(n>1){const mx=ddMean(p.map(q=>q.x));let sxy=0,sxx=0;p.forEach(q=>{sxy+=(q.x-mx)*(q.y-o.mean);sxx+=(q.x-mx)*(q.x-mx);});
     o.slope=sxx===0?0:sxy/sxx;const tol=Math.max(0.01,(o.mean||1)*0.01);
@@ -1726,7 +1772,10 @@ function ddFromFile(x){
       ['label','from','to'].forEach(k=>{q[k]=str(r[k]);});
       ['n','mean','sd','min','max','slope'].forEach(k=>{q[k]=fin(r[k]);});
       if(!(Number.isInteger(q.n)&&q.n>=0))q.n=0;
-      ['word','v','kept'].forEach(k=>{q[k]=str(r[k]);});return q;});
+      ['word','v','kept'].forEach(k=>{q[k]=str(r[k]);});
+      /* v25.64 (H4, M6) the period's days as [place on DD-1's sheet, value, date], when the import kept them; an older record has none */
+      if(Array.isArray(r.days)){const D=r.days.slice(0,400).filter(d=>Array.isArray(d)&&Number.isInteger(d[0])&&d[0]>=0&&typeof d[1]==='number'&&isFinite(d[1])).map(d=>[d[0],d[1],/^\d{4}-\d{2}-\d{2}$/.test(String(d[2]||''))?String(d[2]):'']);if(D.length)q.days=D;}
+      return q;});
     out[c]=z;});
   return out.t||out.r?out:null;}
 /* ---- the panel beside the table ---- */
@@ -1935,7 +1984,8 @@ function ddApply(){
   Object.keys(P.cols).forEach(f=>{if(skip(f))return;const C=P.cols[f];
     dd[f]={src:DD.src,file:DD.file,when,student:R.client,name:C.b.name,kind:C.b.kind,measure:C.b.measure,mlabel:DD_M[C.b.measure][0],unit:C.unit,how:DD.how==='dates'?'dates':'conditions',
       rows:P.rows.map((r,k)=>{const s=r.st[f];return {k,label:r.label,from:r.from,to:r.to,n:s.n,mean:s.n?s.mean:null,sd:s.n?s.sd:null,min:s.n?s.min:null,max:s.n?s.max:null,
-        slope:s.slope===undefined?null:s.slope,word:s.word||'',v:r[f],kept:kept[f][k]||''};})};});
+        slope:s.slope===undefined?null:s.slope,word:s.word||'',v:r[f],kept:kept[f][k]||'',
+        days:s.n&&s.pts?s.pts.map(q=>[q.x,Math.round(q.y*1e6)/1e6,q.d]):[]};})};});   /* v25.64 (H4, M6) */
   const z=ddFromFile(dd);if(z)S.dd=z;else delete S.dd;
   if(ddDlg.open)ddDlg.close();else ddClose();
   renderAll();
@@ -2204,7 +2254,8 @@ window.__nbhFactsIn=function(f){prCase=f||null;prCaseBar();const g=window.nbhCas
 prCaseBar();
 /* v21.78 the case: out. The review this form records, for the workstation's Today list and the other forms: the
    review date and the next one (ISO), the decision recorded (continue, modify, reassess, fade or exit) with its words,
-   this form's fixed decision rules (a 25% reduction from baseline is counted as progress; 60% begins fading; 10% above
+   this form's fixed decision rules (a 25% reduction from baseline is counted as some progress; fading begins at the aim, or
+   with no aim at 90% after 10 school days (v25.64 H5: this comment said 60%, which the code no longer used); 10% above
    returns to assessment; integrity 90%), and, after an exit, the monitoring: the schedule, the next check from it and
    the threshold that brings the plan back. PR-1 sets no minimum days in a period, so minDays is the workstation's 10. */
 const prIso=t=>{t=prT(t);let m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
@@ -2427,8 +2478,9 @@ renderAll();
    and the school days in the current phase (from Form DD-1, matched by name), the change from baseline, whether this
    form's decision rule is met (a reduction of review.rules.improvePct, 25%, after at least minDays, 10, school days in the
    phase), and a decision for that target (continue, modify, reassess, fade), suggested from the same cut-offs as the
-   overall suggestion (60% or more: fade; 25% or more: continue; less than a 10% rise: modify; a 10% rise or more:
-   reassess; too few days, or integrity below the criterion: continue). The overall decision in section 4 stays as it is.
+   overall suggestion (v25.64 H5: fade at the target's aim, or with no aim at 90% or more, after at least 10 days; 25% or
+   more: continue; less than a 10% rise: modify; a 10% rise or more: reassess; too few days, or integrity below the
+   criterion: continue). This comment said "60% or more: fade", which the code no longer did. The overall decision in section 4 stays as it is.
    The rows are named from TD-1's plan.targets, else TB-1's problem behaviors, else DD-1's target behaviors; the case fills
    only empty cells (the rows only while the table holds none). Kept in S.tg (saved, opened, the safety copy), printed with
    question 2. Closing a review adds a short per-target line to the log entry (targets) and clears this period's figures
@@ -4010,6 +4062,209 @@ table.pr-change{margin-top:10px}table.pr-change td.pr-chcap{font-size:12.5px;lin
   const was=window.__nbhFactsIn;
   window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f&&f.contrast);}catch(e){}return r;};
 })();
+</script>
+<style id="pr1-v2564-css">
+/* v25.64 (H4, M1, M6, M9, L3, L6) the reading of the graph, the axis, the re-entry rule */
+.pr64-axis{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 2px}
+.pr64-axis label{font-size:12.5px;font-weight:600}
+.pr64-axis input{width:9em}
+.pr64-axis .hint{flex:1 1 280px;margin:0}
+.pr64-win{margin:6px 0 4px}
+.pr64-win p{margin:4px 0;font-family:var(--sans);font-size:12.5px;line-height:1.5}
+.pr64-win .pr64-prov{color:#8A4412;font-weight:600}
+.pr64-back{margin-top:6px;font-family:var(--sans);font-size:12.5px;line-height:1.5}
+.pr64-back .tool{margin-top:4px}
+#decSuggest .pr64-sugx{display:block;margin-top:6px}
+.pr64-log{display:block}
+@media screen{body.pr64-blind .pr64-hideb{display:none!important}}
+@media print{#decSuggest .pr64-sugx{font-size:10px}}
+</style>
+<script id="pr1-v2564">
+/* v25.64 the research review of the forms' graphs and decisions (the BCBA's decisions of 11/2), Form PR-1's part:
+   - H4: the suggestion reads a stated window. When the table came from Form DD-1 with its days (kept by the import since
+     v25.64: S.dd.t.rows[].days, [place on DD-1's sheet, value, date]), the change is computed two ways (the last 5 days of the
+     current period against the baseline mean; the period mean against the baseline mean), with the one the suggestion uses
+     named (meta.prWin: blank, the last 5 days when they are there; "mean", the period mean). The conservative dual-criterion
+     check (Fisher et al., 2003) is computed here from those days, baseline against the current period, as DD-1's own figures
+     are ported into this form; a baseline under 3 days or a current period under 5 makes the comparison provisional, and the
+     suggestion is then never to modify or return to assessment (renderVerdicts). The 80% and 90% benchmark prints beside the
+     suggestion as context. A table typed by hand, or imported before v25.64, has no days: the period mean, as before.
+   - M6, L3: with the days, the graph draws them, spaced by their place on DD-1's sheet, broken at each period line; the line
+     between the baseline and the plan is solid (between review periods set by date, a thin dashed line); zero sits above the
+     axis; the left axis's top can be kept for later reviews (meta.yTop). With period means only, the graph says so.
+   - M1: the analyst's reading and an optional blind second reader (meta.rdA, rdAI, rdAD, rdB, rdBI, rdBD), their agreement
+     with each other and with the check; an uncertain reading asks for the reasoning before Modify, Begin fading or Exit.
+   - H5: the default fading criterion (two consecutive days at or below the 90% reduction level, back after two above).
+   - M9: a re-entry rule computed from the final period's days (meta.backRule), printed on the exit sheet with its window.
+   - L6: closing a review also logs a standard outcome row (design, baseline mean, last 5 days, reduction, 80% and 90%
+     reached, the check), for a caseload summary by proportions.
+   Every new field is optional: a record saved before v25.64 opens and prints as before. */
+const PR64_NEED=[5,6,6,7,8,8,9,9,10,11,12,12,12,13,13,14,14,15,15];   /* Fisher et al. (2003), Table 1: 5 to 23 points in the treatment phase */
+function pr64Need(n){if(!(n>=5))return null;if(n<=23)return PR64_NEED[n-5];
+  /* above the table: the smallest count a one-sided binomial test at .05 accepts */
+  let p=Math.pow(0.5,n);const pj=[p];for(let j=1;j<=n;j++){p=p*(n-j+1)/j;pj.push(p);}let tail=0;
+  for(let k=n;k>=0;k--){tail+=pj[k];if(tail>=0.05)return k+1;}return n;}
+const pr64Days=r=>r&&Array.isArray(r.days)?r.days.slice().sort((a,b)=>a[0]-b[0]):[];
+/* a period's figures from Form DD-1 still stand for its row only while the row holds what the import wrote */
+const pr64Live=(r,c)=>!!(r&&!r.kept&&r.v&&ddSame(ddCell(r.k,c||'t'),r.v));
+function pr64Mean(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
+function pr64Cdc(A,B){const ya=A.map(d=>d[1]),n=ya.length,m=pr64Mean(ya),sd=Math.sqrt(ya.reduce((t,v)=>t+(v-m)*(v-m),0)/(n-1));
+  const mx=pr64Mean(A.map(d=>d[0]));let sxy=0,sxx=0;A.forEach(d=>{sxy+=(d[0]-mx)*(d[1]-m);sxx+=(d[0]-mx)*(d[0]-mx);});
+  const b=sxx?sxy/sxx:0,a=m-b*mx,sh=0.25*sd,mm=m-sh;let k=0,low=true;
+  B.forEach(d=>{const t=a+b*d[0]-sh;if(t>0)low=false;if(d[1]<t&&d[1]<mm)k++;});
+  const need=pr64Need(B.length);return {n:B.length,k,need,beyond:need!=null&&k>=need,mean:m,sd,slope:b,lowTrend:low,nA:n};}
+/* the window, the two changes, the provisional flag and the check, baseline against the current period */
+function pr64Win(){const C=course(),o={use:'mean',pct:C.pct,pctMean:C.pct,pct5:null,last5:null,n5:0,baseN:null,curN:null,prov:false,provWhy:'',cdc:null,cdcWhy:'',days:false,k:C.last?C.last.n:null};
+  const D=S.dd&&S.dd.t;if(!D||!C.last||!Array.isArray(D.rows))return o;
+  const rb=D.rows.find(r=>r.k===0),rc=D.rows.find(r=>r.k===C.last.n),lb=pr64Live(rb),lc=pr64Live(rc);
+  if(lb)o.baseN=rb.n;if(lc)o.curN=rc.n;
+  const why=[];if(o.baseN!=null&&o.baseN<3)why.push('the baseline has '+o.baseN+' day'+(o.baseN===1?'':'s')+' with data, and 3 are needed');
+  if(o.curN!=null&&o.curN<5)why.push('the current period has '+o.curN+' day'+(o.curN===1?'':'s')+' with data, and 5 are needed');
+  o.prov=why.length>0;o.provWhy=why.join('; ');
+  const A=lb?pr64Days(rb):[],B=lc?pr64Days(rc):[];
+  if(B.length){const l=B.slice(-5);o.n5=l.length;o.last5=pr64Mean(l.map(d=>d[1]));o.days=true;if(C.b!=null&&C.b>0)o.pct5=(o.last5-C.b)/C.b*100;}
+  if(A.length>=2&&B.length>=5)o.cdc=pr64Cdc(A,B);
+  else if(lb&&lc&&(A.length||B.length))o.cdcWhy=B.length<5?'the current period has fewer than 5 days with data':'the baseline has fewer than 2 days with data';
+  o.use=S.meta.prWin==='mean'||o.pct5==null?'mean':'last5';o.pct=o.use==='last5'?o.pct5:C.pct;
+  return o;}
+const pr64Pc=p=>p==null?'not computed':pctTxt(p);
+function pr64CdcTxt(c){return c.k+' of '+c.n+' days below both lines ('+c.need+' needed): '+(c.beyond?'change beyond what the baseline predicts':'not beyond what the baseline predicts');}
+function pr64Bench(p){if(p==null)return '';const r=-p;return 'Here: '+(r>0?Math.round(r)+'% below baseline':'not below baseline')+' (80%: '+(r>=80?'reached':'not reached')+'; 90%: '+(r>=90?'reached':'not reached')+').';}
+function pr64Paint(){const box=document.getElementById('pr64Win');if(!box)return;const C=course(),W=pr64Win(),u=prT(S.meta.tUnit),U=u?' '+prEsc(u):'';const L=[];
+  if(C.b==null||!C.last){box.innerHTML='<p class="hint">Enter the baseline and a review period, or import them from Form DD-1, to read the change.</p>';return;}
+  const per='period '+C.last.n;
+  if(W.days){L.push('<b>Change from baseline, two ways.</b> The last 5 days of '+per+' (mean '+ddFix(W.last5)+U+' over '+W.n5+' day'+(W.n5===1?'':'s')+') against the baseline mean ('+f2(C.b)+'): <b>'+pr64Pc(W.pct5)+'</b>. The period mean ('+f2(C.last.t)+') against the baseline mean: <b>'+pr64Pc(W.pctMean)+'</b>. The suggestion uses '+(W.use==='last5'?'the last 5 days':'the period mean')+'.');}
+  else L.push('<b>Change from baseline:</b> the period mean of '+per+' ('+f2(C.last.t)+U+') against the baseline ('+f2(C.b)+'): <b>'+pr64Pc(W.pctMean)+'</b>. The suggestion uses the period mean: the days are not on this form'+(S.dd&&S.dd.t?' (imported before v25.64, or changed by hand since; import again from Form DD-1 for the last 5 days and the structured check)':' (a table typed by hand; Import From DD-1 brings the days)')+'.');
+  if(W.prov)L.push('<span class="pr64-prov">Provisional: too few days to judge a change.</span> '+prEsc(W.provWhy)+' (at least 3 baseline days and 5 in the current period: Lanovaz et al., 2017). More baseline days give a firmer comparison.');
+  if(W.cdc)L.push('<b>Structured check (CDC, Fisher et al., 2003):</b> '+pr64CdcTxt(W.cdc)+(W.prov?' (provisional)':'')+'. A structured aid; read it with the graph. It misses a delayed effect, such as a rise before a fall, and says nothing about the size of the change.'+(W.cdc.lowTrend?' The baseline&rsquo;s own downward trend, carried forward, already reaches 0 here, so no day can fall below it.':''));
+  else if(W.cdcWhy)L.push('<b>Structured check (CDC):</b> not computed: '+prEsc(W.cdcWhy)+'.');
+  L.push('<b>Benchmark, for context:</b> treatment studies of severe behavior count an 80% or 90% reduction from baseline as success (Hagopian et al., 1998; Phillips et al., 2017; Hagopian, 2020). '+pr64Bench(W.pct)+' These come from inpatient and clinic series; a school team may reasonably accept less for milder behavior, and this form&rsquo;s own 25% band counts as some progress, not success. The size and the choice of the window change the answer (Podlesnik et al., 2025).');
+  box.innerHTML=L.map(x=>'<p>'+x+'</p>').join('');}
+/* M1: the readers; a reading agrees with the check when change goes with "beyond" and no change with "not beyond" */
+function pr64Readers(){const m=S.meta,a=prT(m.rdA),b=prT(m.rdB),W=pr64Win(),c=W.cdc&&W.cdc.need!=null?W.cdc:null,why=[],L=[];
+  const withC=r=>r==='Change'?c.beyond:r==='No change'?!c.beyond:false,cw=c?(c.beyond?'beyond what the baseline predicts':'not beyond what the baseline predicts'):'';
+  if(a&&b){if(a===b)L.push('The two readers agree: '+a.toLowerCase()+'.');else{L.push('The two readers differ: '+a.toLowerCase()+' and '+b.toLowerCase()+'.');why.push('the readers differ');}}
+  if(c){[[a,'The analyst'],[b,'The second reader']].forEach(([r,who])=>{if(!r)return;if(withC(r))L.push(who+'&rsquo;s reading ('+r.toLowerCase()+') agrees with the structured check ('+cw+').');
+    else{L.push(who+'&rsquo;s reading ('+r.toLowerCase()+') differs from the structured check ('+cw+').');why.push(who.toLowerCase()+'\u2019s reading differs from the structured check');}});}
+  return {a,b,c,lines:L,uncertain:why.length>0,why};}
+function pr64AgreePaint(){const el=document.getElementById('pr64Agree');if(!el)return;const R=pr64Readers();
+  if(!R.a&&!R.b){el.innerHTML='<p class="hint" style="margin:4px 0">Record the reading of the graph before the decision: change, no change or unclear. A second reader who sees only the graph is optional; agreement between analysts is often modest (the Guide).</p>';return;}
+  el.innerHTML=R.uncertain?'<div class="verdict v-mid"><b>The reading is uncertain:</b> '+R.lines.join(' ')+' Before Modify the plan, Begin fading or Exit the plan is recorded, write the reason under Reasoning.</div>'
+    :'<p class="hint" style="margin:4px 0">'+(R.lines.length?R.lines.join(' '):'One reading recorded'+(R.c?'':'; the structured check is not computed, so it is not compared')+'.')+'</p>';}
+const PR64_ASK=['Modify the plan','Begin fading','Exit the plan'];
+function pr64Check(){const R=pr64Readers(),dec=prT(S.meta.dec),why=prT(S.meta.decWhy),ta=document.querySelector('[data-m="decWhy"]');
+  if(ta)ta.placeholder=R.uncertain?'The reading of the graph is uncertain ('+R.why.join('; ')+'): say why this decision holds':'Against the integrity figure first, then the behavior data, then the replacement';
+  if(!R.uncertain||!PR64_ASK.includes(dec)||why)return;const msg='The reading of the graph is uncertain ('+R.why.join('; ')+'): say under Reasoning why the plan is changed, faded or ended on it.';
+  const box=document.getElementById('decCheck');if(!box)return;const v=box.querySelector('.verdict');if(v)v.insertAdjacentHTML('beforeend',' '+msg);else box.innerHTML='<div class="verdict v-mid"><b>Check the decision.</b> '+msg+'</div>';}
+/* H4 beside the suggestion: its window, the check and the benchmark */
+function pr64SugPaint(){const v=document.querySelector('#decSuggest .verdict');if(!v||v.querySelector('.pr64-sugx'))return;const C=course();if(C.b==null||!C.last)return;const W=pr64Win();
+  const t=[(W.use==='last5'?'Read from the last 5 days of period '+C.last.n+' against the baseline mean ('+pr64Pc(W.pct5)+'; the period mean: '+pr64Pc(W.pctMean)+').':'Read from the period mean of period '+C.last.n+' against the baseline ('+pr64Pc(W.pctMean)+').'),
+    W.prov?'Provisional: '+prEsc(W.provWhy)+'.':'',W.cdc?'Structured check: '+pr64CdcTxt(W.cdc)+'.':'',
+    'Benchmark, for context: treatment studies of severe behavior count an 80% or 90% reduction as success. '+pr64Bench(W.pct)].filter(Boolean).join(' ');
+  v.insertAdjacentHTML('beforeend','<span class="hint pr64-sugx">'+t+'</span>');}
+{const rv=renderVerdicts;renderVerdicts=function(){const r=rv.apply(this,arguments);try{pr64Paint();pr64AgreePaint();pr64Check();pr64SugPaint();pr64BackPaint();}catch(e){}return r;};}
+/* M6, L3: the days, when the import kept them for every period in the table */
+function pr64Daily(){const D=S.dd||{},T=D.t;if(!T||!Array.isArray(T.rows))return null;
+  const ks=S.rows.map((r,k)=>({k,t:num(r.t)})).filter(x=>x.t!=null);if(ks.length<2)return null;const per=[];
+  for(const x of ks){const d=T.rows.find(r=>r.k===x.k);if(!pr64Live(d)||!Array.isArray(d.days)||!d.days.length)return null;per.push({k:x.k,days:pr64Days(d)});}
+  for(let i=1;i<per.length;i++)if(per[i].days[0][0]<=per[i-1].days[per[i-1].days.length-1][0])return null;   /* the periods follow one another on DD-1's sheet */
+  const R=D.r,rep=S.rows.map((r,k)=>({k,v:num(r.r)})).filter(x=>x.v!=null&&per.some(p=>p.k===x.k)).map(x=>{const d=R&&Array.isArray(R.rows)?R.rows.find(r=>r.k===x.k):null;
+    return {k:x.k,v:x.v,days:pr64Live(d,'r')&&Array.isArray(d.days)&&d.days.length?pr64Days(d):null};});
+  return {per,rep,dates:T.how==='dates'};}
+function pr64DrawDaily(G){const svg=$('#prPlot');const W=900,H=320,T=46,B=48,Z=8,F='font-family="Inter,Arial,sans-serif"';
+  const U=prUnits(),two=U.two,tl=prTitle(U.left),tr=two?prTitle(U.right):[],L=tl.length>1?70:58,R=two?(tr.length>1?78:66):22;
+  const span={};G.per.forEach(p=>{span[p.k]={a:p.days[0][0],z:p.days[p.days.length-1][0]};});
+  const xs=G.per.flatMap(p=>p.days.map(d=>d[0])).concat(G.rep.flatMap(r=>r.days?r.days.map(d=>d[0]):[])),x0=Math.min(...xs),x1=Math.max(...xs);
+  const px=x=>L+((x-x0+0.5)/(x1-x0+1))*(W-L-R);
+  const tv=G.per.flatMap(p=>p.days.map(d=>d[1])),rv=G.rep.flatMap(r=>r.days?r.days.map(d=>d[1]):[r.v]),vals=two?tv:tv.concat(rv);
+  const keep=num(S.meta.yTop),kept=keep!=null&&keep>0&&Math.max(0,...vals)<=keep;
+  const step=kept?keep/4:niceStep(Math.max(0,...vals)*1.1/4),ymax=step*4,lab=v=>String(+v.toFixed(2));
+  const rstep=two?niceStep(Math.max(0,...rv)*1.1/4):step,rmax=rstep*4,py=v=>T+(1-v/ymax)*(H-T-B-Z),pyr=v=>T+(1-v/rmax)*(H-T-B-Z),Yr=two?pyr:py;
+  let s=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/><rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="none" stroke="#CDD6D2"/>`;
+  for(let k=0;k<=4;k++){const y=py(step*k);s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#EEF2F0"/><text x="${L-8}" y="${y+4}" font-size="10" text-anchor="end" fill="#5C6B6B" ${F}>${lab(step*k)}<\/text>`;
+    if(two)s+=`<text x="${W-R+8}" y="${y+4}" font-size="10" fill="#5C6B6B" ${F}>${lab(rstep*k)}<\/text>`;}
+  G.per.forEach((p,i)=>{if(!i)return;const q=G.per[i-1],x=(px(span[q.k].z)+px(span[p.k].a))/2,full=i===1||!G.dates;
+    s+=`<line x1="${x}" x2="${x}" y1="${T}" y2="${H-B}" stroke="#1B2A2E"${full?' stroke-width="1.5"':' stroke-width="1" stroke-dasharray="4 3"'}/>`;
+    if(i===1)s+=`<text x="${x-4}" y="${T-8}" font-size="10" text-anchor="end" fill="#54676f" ${F}>baseline<\/text><text x="${x+4}" y="${T-8}" font-size="10" fill="#54676f" ${F}>plan in place<\/text>`;});
+  const pathOf=(days,Y)=>days.map((d,j)=>(j?'L':'M')+px(d[0]).toFixed(1)+' '+Y(d[1]).toFixed(1)).join(' ');
+  G.rep.forEach(r=>{if(r.days){s+=`<path d="${pathOf(r.days,Yr)}" fill="none" stroke="#2F6B37" stroke-width="2" stroke-dasharray="5 4"/>`+r.days.map(d=>`<circle cx="${px(d[0]).toFixed(1)}" cy="${Yr(d[1]).toFixed(1)}" r="3" fill="#fff" stroke="#2F6B37" stroke-width="1.4"/>`).join('');}
+    else{const a=px(span[r.k].a)-4,z=px(span[r.k].z)+4,y=Yr(r.v);s+=`<line x1="${a.toFixed(1)}" x2="${z.toFixed(1)}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#2F6B37" stroke-width="2" stroke-dasharray="5 4"/>`;}});
+  G.per.forEach(p=>{s+=`<path d="${pathOf(p.days,py)}" fill="none" stroke="#8E2A2A" stroke-width="2"/>`+p.days.map(d=>`<circle cx="${px(d[0]).toFixed(1)}" cy="${py(d[1]).toFixed(1)}" r="3.2" fill="#8E2A2A" stroke="#8E2A2A" stroke-width="1"/>`).join('');
+    const cx=(px(span[p.k].a)+px(span[p.k].z))/2,wd=px(span[p.k].z)-px(span[p.k].a);
+    s+=`<text x="${cx.toFixed(1)}" y="${H-B+15}" font-size="10" text-anchor="middle" fill="#5C6B6B" ${F}>${p.k===0?'BL':p.k}${wd>60&&p.days[0][2]?' · from '+esc(ddMD(p.days[0][2])):''}<\/text>`;});
+  const title=(ls,x)=>ls.map((t,j)=>`<text transform="translate(${ls.length>1?x-6.5+13*j:x},${(T+H-B)/2}) rotate(-90)" font-size="${ls.length>1?10.5:11}" text-anchor="middle" fill="#1B2A2E" ${F}>${esc(t)}<\/text>`).join('');
+  const repMean=G.rep.some(r=>!r.days);
+  s+=`<text x="${(L+W-R)/2}" y="${H-8}" font-size="11" text-anchor="middle" fill="#1B2A2E" ${F}>School days on Form DD-1&#8217;s sheet, by review period<\/text>`+title(tl,tl.length>1?18.5:16)+(two?title(tr,tr.length>1?W-20.5:W-14):'')+
+    `<g ${F} font-size="10.5" fill="#54676f"><line x1="${L+8}" x2="${L+30}" y1="14" y2="14" stroke="#8E2A2A" stroke-width="2"/><text x="${L+36}" y="18">target behavior${two?' (left axis)':''}<\/text>`+
+    (G.rep.length?`<line x1="${L+(two?236:190)}" x2="${L+(two?258:212)}" y1="14" y2="14" stroke="#2F6B37" stroke-width="2" stroke-dasharray="5 4"/><text x="${L+(two?264:218)}" y="18">replacement${two?' (right axis)':''}${repMean?', period mean':''}<\/text>`:'')+
+    `<text x="${W-R}" y="18" text-anchor="end" class="pr64-mean">each point is a day (Form DD-1)<\/text><\/g>`;
+  svg.innerHTML=s;svg.setAttribute('aria-label','Target'+(G.rep.length?' and replacement':'')+' by school day across the review periods, from Form DD-1');svg.dataset.pr64='days';}
+{const dp=drawPlot;drawPlot=function(){let G=null;try{G=pr64Daily();}catch(e){G=null;}const svg=$('#prPlot');
+  if(G){pr64DrawDaily(G);}else{const r=dp.apply(this,arguments);if(svg){svg.dataset.pr64='means';svg.setAttribute('aria-label','Target and replacement across review periods, each point a period mean');}}
+  try{pr64AxisMsg();}catch(e){}};}
+/* L3: keep the axis for later reviews */
+function pr64Top(){const vals=[];const G=pr64Daily();
+  if(G){G.per.forEach(p=>p.days.forEach(d=>vals.push(d[1])));if(!prUnits().two)G.rep.forEach(r=>(r.days?r.days.map(d=>d[1]):[r.v]).forEach(v=>vals.push(v)));}
+  else S.rows.forEach(r=>{const t=num(r.t),x=num(r.r);if(t!=null)vals.push(t);if(x!=null&&!prUnits().two)vals.push(x);});
+  return vals.length?{max:Math.max(0,...vals),top:niceStep(Math.max(0,...vals)*1.1/4)*4}:null;}
+function pr64AxisMsg(){const el=document.getElementById('prAxisMsg');if(!el)return;const k=num(S.meta.yTop),T=pr64Top();
+  if(k!=null&&k>0&&T&&T.max>k)el.textContent='A value ('+ddFix(T.max)+') is above the kept top of '+ddFix(k)+': the axis is set from the data until the kept top is raised.';
+  else if(k!=null&&k>0)el.textContent='Kept: the left axis tops at '+ddFix(k)+' on this review and the later ones. Clear the box to set it from the data again.';
+  else el.textContent='Blank: the top is set from the data. A kept top stays with the form, so each review’s graph is drawn on the same scale (a top set afresh each time changes how large a change looks: Kennedy, 1989).';}
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest('#prKeepAxis')){const T=pr64Top(),el=document.getElementById('prYTop');if(!T||!el)return;const v=String(+T.top.toFixed(4));el.value=v;S.meta.yTop=v;el.dispatchEvent(new Event('input',{bubbles:true}));renderCourse();return;}
+  if(t.closest('#prBlind')){const on=!document.body.classList.contains('pr64-blind');pr64BlindMark();document.body.classList.toggle('pr64-blind',on);const b=document.getElementById('prBlind');b.setAttribute('aria-pressed',String(on));b.textContent=on?'Show the figures again':'Graph only, for the second reader';return;}
+  if(t.closest('#prFadeDef')){pr64FadeFill();return;}
+  if(t.closest('#pr64BackWrite')){pr64BackWrite();return;}});
+document.addEventListener('input',e=>{if(e.target&&e.target.dataset&&e.target.dataset.m==='yTop')renderCourse();});
+/* the figures the second reader does not see */
+function pr64BlindMark(){['#dataMetrics','#pr83Sec','#pr64Win','#ddPanel','#fidTbl','#prContrast'].forEach(q=>{const el=document.querySelector(q);if(!el)return;(q==='#fidTbl'?el.closest('.pr-fidwrap')||el:el).classList.add('pr64-hideb');});
+  const g=document.getElementById('dataTbl');if(g&&g.closest('.grid-wrap'))g.closest('.grid-wrap').classList.add('pr64-hideb');}
+/* H5: the default criterion to advance a fading step */
+function pr64FadeDefault(){let C=null;try{C=course();}catch(e){}const u=prT(S.meta.tUnit),b=C&&C.b!=null&&C.b>0?C.b:null;
+  return 'Advance one step after 2 consecutive days at or below the 90% reduction level'+(b!=null?' ('+ddFix(b*(1-FADE_PCT/100))+(u?' '+u:'')+', 90% below the baseline of '+ddFix(b)+')':'')+'; return to the previous step after 2 consecutive days above it';}
+function pr64FadeFill(){const named=S.fade.some(r=>prT(r.s)),txt=pr64FadeDefault();let n=0;
+  S.fade.forEach(r=>{if(!prT(r.c)&&(!named||prT(r.s))){r.c=txt;n++;}});renderFade();
+  try{nbhUI.toast(n?'The default criterion is written in '+n+' step'+(n===1?'':'s')+'. Edit it where a step needs another.':'Every step already has a criterion; nothing was changed.',{kind:n?'ok':'info'});}catch(e){}}
+/* M9: the re-entry rule from the final period's days */
+function pr64Final(){const C=course(),D=S.dd&&S.dd.t;if(!D||!C.last||!Array.isArray(D.rows))return null;const rc=D.rows.find(r=>r.k===C.last.n);if(!pr64Live(rc))return null;
+  const d=pr64Days(rc);if(!d.length)return null;const y=d.map(q=>q[1]),m=pr64Mean(y),l5=y.slice(-5),mr=y.slice(1).map((v,i)=>Math.abs(v-y[i])),mrb=mr.length?pr64Mean(mr):null;
+  return {k:C.last.n,n:y.length,m,max5:Math.max(...l5),n5:l5.length,mrb,ucl:mrb!=null?m+2.66*mrb:null,unit:prT(S.meta.tUnit)||D.unit||''};}
+function pr64BackText(){const r=prT(S.meta.backRule),F=pr64Final(),u=F&&F.unit?' '+F.unit:'';if(!r)return '';
+  if(r==='max5')return F?'The plan comes back when the mean of two consecutive monitoring days is above '+ddFix(F.max5)+u+', the highest of the last five days before exit (Form DD-1, period '+F.k+').'
+    :'The plan comes back when the mean of two consecutive monitoring days is above the highest of the last five days before exit (Form DD-1).';
+  return F&&F.ucl!=null?'The plan comes back when a monitoring day is above '+ddFix(F.ucl)+u+', the upper control limit of the final period (its mean of '+ddFix(F.m)+' plus 2.66 times its mean moving range), or when eight monitoring days in a row are above that mean.'
+    :'The plan comes back when a monitoring day is above the upper control limit of the final period (its mean plus 2.66 times its mean moving range), or when eight monitoring days in a row are above its mean.';}
+function pr64BackPaint(){const el=document.getElementById('pr64Back');if(!el)return;const r=prT(S.meta.backRule),F=pr64Final(),u=F&&F.unit?' '+prEsc(F.unit):'';
+  if(!r){el.innerHTML='<span class="hint noprint">Optional: a rule computed from Form DD-1&rsquo;s final period, stated in advance with its window (the Guide).</span>';return;}
+  let h='';
+  if(!F)h='<span class="hint">The current period&rsquo;s days from Form DD-1 are not on this form, so the numbers are not computed: import them under question 2. The rule is written without them.</span> ';
+  else if(r==='max5')h='<b>Window:</b> the last '+F.n5+' day'+(F.n5===1?'':'s')+' of period '+F.k+' before exit; the highest '+ddFix(F.max5)+u+'. <b>Re-entry</b> when the mean of 2 consecutive monitoring days is above '+ddFix(F.max5)+u+'. ';
+  else h=F.ucl!=null?'<b>Window:</b> all '+F.n+' days of period '+F.k+' (the final period): mean '+ddFix(F.m)+u+', mean moving range '+ddFix(F.mrb)+'; upper control limit '+ddFix(F.m)+' + 2.66 &times; '+ddFix(F.mrb)+' = '+ddFix(F.ucl)+u+'. <b>Re-entry</b> when a monitoring day is above '+ddFix(F.ucl)+u+', or 8 days in a row are above '+ddFix(F.m)+'. ':'<span class="hint">Period '+F.k+' has one day with data, so no moving range: the limit is not computed.</span> ';
+  const cur=prT(S.meta.back),t=pr64BackText();
+  el.innerHTML=h+(cur===t?'<span class="hint">Written into What brings the plan back.</span>':'<button type="button" class="tool noprint" id="pr64BackWrite">Write it into What brings the plan back</button>');}
+async function pr64BackWrite(){const t=pr64BackText(),el=document.querySelector('[data-m="back"]');if(!t||!el)return;const cur=prT(S.meta.back);
+  if(cur&&cur!==t&&!(await nbhUI.confirm('Replace what brings the plan back?\nNow: “'+cur.slice(0,160)+'”.',{ok:'Replace'})))return;
+  el.value=t;S.meta.back=t;el.dispatchEvent(new Event('input',{bubbles:true}));pr64BackPaint();}
+document.addEventListener('change',e=>{if(e.target&&e.target.dataset&&/^(?:backRule|prWin|rdA|rdB|design)$/.test(e.target.dataset.m||''))renderVerdicts();});
+/* M1: the readings are this review's; L6: the outcome row */
+PR_CLEAR.push('rdA','rdAI','rdAD','rdB','rdBI','rdBD');
+PR_LOGF.push('design','baseMean','last5','redPct','r80','r90','cdc');
+function pr64Outcome(){const C=course(),W=pr64Win(),P=W.pct,o={};
+  o.design=prT(S.meta.design)||'AB (baseline, then the plan)';if(C.b!=null)o.baseMean=f2(C.b);
+  if(W.last5!=null)o.last5=ddFix(W.last5)+' ('+W.n5+' day'+(W.n5===1?'':'s')+')';
+  if(P!=null){o.redPct=(P<0?String(Math.round(-P*10)/10)+'% below baseline':String(Math.round(P*10)/10)+'% above baseline')+' ('+(W.use==='last5'?'last 5 days':'period mean')+')';o.r80=-P>=80?'yes':'no';o.r90=-P>=90?'yes':'no';}
+  if(W.cdc)o.cdc=(W.cdc.beyond?'beyond':'not beyond')+' ('+W.cdc.k+' of '+W.cdc.n+', '+W.cdc.need+' needed)'+(W.prov?', provisional':'');else if(W.prov)o.cdc='provisional';
+  return o;}
+{const le=prLogEntry;prLogEntry=function(){const e=le.apply(this,arguments);try{const O=pr64Outcome();Object.keys(O).forEach(k=>{if(O[k]!=null&&O[k]!=='')e[k]=String(O[k]);});}catch(x){}return e;};}
+{const lr=prLogRender;prLogRender=function(){const r=lr.apply(this,arguments);try{const L=Array.isArray(S.log)?S.log.slice().reverse():[];
+  document.querySelectorAll('#prLogTbl tbody tr').forEach((tr,i)=>{const e=L[i],c=tr.children[2];if(!e||!c||c.querySelector('.pr64-log')||!(e.design||e.redPct||e.cdc))return;
+    const t=[e.design,e.baseMean?'baseline '+e.baseMean:'',e.last5?'last 5 days '+e.last5:'',e.redPct||'',e.r80?'80%: '+e.r80+'; 90%: '+e.r90:'',e.cdc?'check: '+e.cdc:'',e.decisionText?'decision: '+e.decisionText.toLowerCase():''].filter(Boolean).join('; ');
+    c.insertAdjacentHTML('beforeend',(c.textContent?'<br>':'')+'<small class="pr64-log">Outcome: '+prEsc(t)+'.</small>');});}catch(e){}return r;};}
+{const rc=renderCourse;renderCourse=function(){const r=rc.apply(this,arguments);try{const W=pr64Win(),m=document.getElementById('dataMetrics');
+  if(m&&W.last5!=null&&!m.querySelector('.pr64-card'))m.insertAdjacentHTML('beforeend','<div class="metric pr64-card"><b>Last 5 days</b><div class="val">'+ddFix(W.last5)+'</div><div class="sub">'+(W.pct5!=null?pctTxt(W.pct5)+' against baseline; ':'')+'period '+W.k+', Form DD-1</div></div>');
+  pr64Paint();}catch(e){}return r;};}
+renderAll();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
