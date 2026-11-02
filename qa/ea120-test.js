@@ -119,7 +119,10 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  const plan=await p3.evaluate(()=>({rec:[...document.querySelectorAll('#plWrap .pl-row')].map(r=>r.textContent).find(t=>/Recommended variant/.test(t)),why:document.querySelector('#plWrap .pl-noconseq')?.textContent,urgBefore:document.querySelector('[name="m.urg"]').value}));
  await p3.evaluate(()=>document.querySelector('#plWrap .pl-set').click());await sleep(500);
  const after3=await p3.evaluate(()=>({urg:document.querySelector('[name="m.urg"]').value,chosen:document.querySelector('[name="v.chosen"]').value,cls:document.body.className}));
- ok('when the team has ruled out delivering the consequence (high risk, low rate, classroom-free), the Plan recommends the antecedent-only analysis first, says why the trial-based, latency-based and standard analyses are not offered, and Set it up writes urgency level 4',
-   /Antecedent-only/.test(plan.rec)&&/not offered first/.test(plan.why||'')&&plan.urgBefore===''&&after3.urg==='4'&&after3.chosen==='antecedent',{plan,after3});
+ /* v25.64 (M7) with no precursor confirmed by observation, the latency analysis comes first (it delivers the consequence once, at
+    the first response) and the antecedent-only analysis is offered as a Tier 2 hypothesis; the trial-based and standard analyses
+    are still not offered first */
+ ok('when the team has ruled out delivering the consequence (high risk, low rate, classroom-free, no precursor), the Plan recommends the latency-based analysis first, says why the trial-based and standard analyses are not offered, that latency delivers the consequence once and antecedent-only is a Tier 2 hypothesis, and Set it up writes urgency level 4',
+   /Latency-based/.test(plan.rec)&&/trial-based, standard, brief and pairwise analyses are not offered first/.test(plan.why||'')&&/delivers it once/.test(plan.why||'')&&/Tier 2 hypothesis/.test(plan.why||'')&&plan.urgBefore===''&&after3.urg==='4'&&after3.chosen==='latency',{plan,after3});
  ok('no page errors',!errs.length,errs.slice(0,4));
  console.log('RESULT: '+(bad?bad+' failed':'all passed'));await b.close();process.exit(bad?1:0);})();
