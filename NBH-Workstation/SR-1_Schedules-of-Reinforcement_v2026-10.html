@@ -686,7 +686,9 @@ table.rt td.num{text-align:center;font-variant-numeric:tabular-nums}
 .pat p{font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);margin:2px 0}
 /* design panels */
 .only-ds{display:none}
-.ds-dro .for-dro,.ds-drl .for-drl,.ds-vi .for-vi,.ds-ncr .for-ncr,.ds-pr .for-pr,.ds-token .for-token,.ds-thin .for-thin,.ds-interlock .for-interlock,.ds-lh .for-lh,.ds-chain .for-chain,.ds-lag .for-lag,.ds-mult .for-mult{display:block}
+/* v25.65 (FCT-SR) the shared blocks hide where they do not apply (a fieldgrid's display would otherwise win over [hidden]) */
+#srExt[hidden],#srCmp[hidden],#srStall[hidden],#srFnReqs[hidden],#srBrk[hidden]{display:none!important}
+.ds-dro .for-dro,.ds-drl .for-drl,.ds-vi .for-vi,.ds-ncr .for-ncr,.ds-pr .for-pr,.ds-token .for-token,.ds-thin .for-thin,.ds-interlock .for-interlock,.ds-lh .for-lh,.ds-chain .for-chain,.ds-lag .for-lag,.ds-mult .for-mult,.ds-nox .for-nox,.ds-wait .for-wait{display:block}
 #dsOut table.rt{margin:6px 0}
 .series{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:12.5px;background:var(--wash);padding:6px 9px;border-radius:2px;word-break:break-word}
 /* the card */
@@ -714,7 +716,7 @@ body.view-guide .only-catalog,body.view-guide .only-patterns,body.view-guide .on
 @media print{
   .only-catalog,.only-patterns,.only-choose,.only-design,.only-card,.only-guide{display:block!important}
   .only-ds{display:none!important}
-  .ds-dro .for-dro,.ds-drl .for-drl,.ds-vi .for-vi,.ds-ncr .for-ncr,.ds-pr .for-pr,.ds-token .for-token,.ds-thin .for-thin,.ds-interlock .for-interlock,.ds-lh .for-lh,.ds-chain .for-chain,.ds-lag .for-lag,.ds-mult .for-mult{display:block!important}
+  .ds-dro .for-dro,.ds-drl .for-drl,.ds-vi .for-vi,.ds-ncr .for-ncr,.ds-pr .for-pr,.ds-token .for-token,.ds-thin .for-thin,.ds-interlock .for-interlock,.ds-lh .for-lh,.ds-chain .for-chain,.ds-lag .for-lag,.ds-mult .for-mult,.ds-nox .for-nox,.ds-wait .for-wait{display:block!important}
   .cat{break-inside:auto}
   .cat>summary::before{content:""}
   .catbar{display:none}
@@ -958,6 +960,10 @@ td input,td select{max-width:100%}
       <div><label>Reinforcer (from Form PA-1 or RA-1)</label><input data-m="sr"></div>
       <div><label>Short name for the reinforcer</label><input data-m="srs" placeholder="being called on"></div>
       <div><label>Function (Form FS-1)</label><select data-m="func"><option></option><option>Attention</option><option>Escape or avoidance</option><option>Tangible</option><option>Automatic</option><option>More than one</option><option>Not applicable (skill building)</option></select></div>
+      <!-- v25.65 (FCT-SR-M3) one request for each function, when Form FS-1 lists more than one -->
+      <div style="grid-column:span 2" id="srFnReqs" hidden><label>Requests, one for each function (one per line: the function, then the request)</label><textarea data-m="fn_reqs" rows="2" placeholder="Attention: taps the talk card&#10;Escape or avoidance: hands the break card"></textarea></div>
+      <!-- v25.65 (FCT-SR-M7) for escape, what the earned break holds -->
+      <div id="srBrk" hidden><label>During the break the student gets (an item or attention from Form PA-1)</label><input data-m="brk_get" placeholder="the drawing kit and a few words with the aide"></div>
     </div>
     <h2 class="nbh-band" style="margin-top:16px">The Schedule</h2>
     <div class="fieldgrid">
@@ -970,9 +976,17 @@ td input,td select{max-width:100%}
         <option value="token">Token economy (second-order schedule)</option>
         <option value="thin">Thinning after FCT or DRA (multiple schedule)</option>
         <option value="chain">Chained schedule with demand fading</option>
+        <!-- v25.65 (FCT-SR-H2, H5) -->
+        <option value="nox">FCT or DRA without extinction (the request must win)</option>
+        <option value="wait">A wait that ends on what the student does</option>
         <option value="interlock">Interlocking schedule (session sheet)</option>
         <option value="lh">Interval schedule with a limited hold</option>
         <option value="lag">Lag schedule (variability)</option></select></div>
+    </div>
+    <!-- v25.65 (FCT-SR-H1) what follows problem behavior is a stated choice with no default, never a silent one -->
+    <div class="fieldgrid" id="srExt" hidden>
+      <div style="grid-column:span 2"><label>After problem behavior (required: there is no default)</label><select data-m="ext_step"><option value="">choose</option><option value="ext">Extinction step: problem behavior no longer gets the reinforcer (agreed by the team and parent)</option><option value="part">Extinction only partly possible</option><option value="none">No extinction</option></select></div>
+      <div><label>Extinction step agreed by the team and parent on</label><input data-m="ext_date" placeholder="e.g., 10/2/2026"></div>
     </div>
     <!-- v23.13 (review I137) Form DD-1's baseline, offered to the DRO, DRL and NCR designers -->
     <div class="hint noprint" id="srDdBase" hidden style="margin:8px 0"></div>
@@ -1023,9 +1037,16 @@ td input,td select{max-width:100%}
         <div><label>Time schedule</label><select data-m="ncr_kind"><option value="ft">Fixed time</option><option value="vt">Variable time</option></select></div>
         <div><label>Duration of each delivery (seconds)</label><input data-m="ncr_dur" placeholder="20"></div>
         <div><label>Terminal interval (minutes)</label><input data-m="ncr_term" placeholder="5"></div>
-        <div><label>Thinning</label><select data-m="ncr_thin"><option value="fixed">Fixed increments (a step each day the criterion holds)</option><option value="perf">Performance-based (a step after each session at or under criterion; back after one above)</option></select></div>
+        <!-- v25.65 (FCT-SR-M4) the two published methods as written; the form's own conventions named as such -->
+        <div><label>Thinning</label><select data-m="ncr_thin"><option value="fixed">Doubling: a step each day the criterion holds (the form&rsquo;s convention)</option><option value="kfi">Fixed increments as published: FT 10, 12, 15, 20, 30 s, then 1 to 5 min (Kahng et al., 2000)</option><option value="airt">Adjusting IRT: the mean IRT of the last three sessions (Kahng et al., 2000)</option><option value="perf">Performance-based: a step after each session at or under criterion; back after one above (the form&rsquo;s convention)</option></select></div>
         <div><label>Omission rule (seconds to wait if the behavior just occurred)</label><input data-m="ncr_omit" placeholder="10"></div>
+        <!-- v25.65 (FCT-SR-L3) the omission rule is a momentary-DRO element: delay the delivery, or cancel it as in the source -->
+        <div><label>Omission rule: what happens to the delivery</label><select data-m="ncr_omit_kind"><option value="">Delay it: wait for those seconds without the behavior, then deliver (the form&rsquo;s convention)</option><option value="cancel">Cancel it: skip the delivery if the behavior occurred in those seconds before it (Vollmer et al., 1997)</option></select></div>
         <div><label>Criterion</label><input data-m="ncr_crit" placeholder="at or under 10% of baseline rate"></div>
+        <div><label>Start from</label><select data-m="ncr_startby"><option value="">The baseline mean IRT (count and minutes from the last three baseline sessions)</option><option value="lat">The time to the first problem behavior in baseline</option></select></div>
+        <div><label>Time to the first problem behavior in baseline (seconds)</label><input data-m="ncr_lat" placeholder="30"></div>
+        <div><label>Adjusting IRT: interval in force now (seconds)</label><input data-m="ncr_now" placeholder="the starting interval"></div>
+        <div style="grid-column:span 2"><label>Adjusting IRT: the last three sessions (minutes, count; one session per line)</label><textarea data-m="ncr_last3" rows="3" placeholder="10, 4&#10;10, 2&#10;10, 0"></textarea></div>
       </div>
     </div>
     <div class="only-ds for-pr">
@@ -1057,11 +1078,24 @@ td input,td select{max-width:100%}
       <div class="fieldgrid">
         <div><label>S+ signal (reinforcement available)</label><input data-m="th_splus" placeholder="green card on the desk"></div>
         <div><label>S&minus; signal (not available)</label><input data-m="th_sminus" placeholder="red card on the desk"></div>
+        <!-- v25.65 (FCT-SR-M10) the teacher's own activity as the signal, reached through the arranged signals -->
+        <div><label>Kind of signal</label><select data-m="th_sigkind"><option value="">Arranged signals (a card, a light, an object)</option><option value="natural">Natural signal: the teacher busy or free (reached through the arranged signals)</option></select></div>
+        <!-- v25.65 (FCT-SR-H4) the signal check -->
+        <div><label>Signal check: can the student match and name the two signals?</label><select data-m="th_sigok"><option value="">not yet checked</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div><label>Signal check: how it was checked</label><input data-m="th_sighow" placeholder="matched the two cards and named each color"></div>
         <div><label>S+ duration (seconds)</label><input data-m="th_pdur" placeholder="60"></div>
         <div><label>First S&minus; duration (seconds)</label><input data-m="th_m0" placeholder="15"></div>
         <div><label>Terminal S&minus; duration (seconds)</label><input data-m="th_mT" placeholder="240"></div>
+        <!-- v25.65 (FCT-SR-M2) the terminal goal from the classroom or home, and a start from a probe -->
+        <div><label>Longest time the request must wait in this classroom or home (minutes; sets the terminal S&minus;)</label><input data-m="th_goal_min" placeholder="4"></div>
+        <div><label>That wait happens during</label><input data-m="th_goal_when" placeholder="small-group reading, while the teacher works with others"></div>
+        <div><label>Start</label><select data-m="th_start"><option value="">Gradual, from step 1</option><option value="probe">From a one-session probe at the terminal value</option></select></div>
+        <div><label>Probe: seconds into S&minus; until problem behavior rose clearly</label><input data-m="th_rise" placeholder="90"></div>
+        <!-- v25.65 (FCT-SR-H3) a second way to step: a largest drop per step -->
+        <div><label>How the steps are set</label><select data-m="th_mode"><option value="">Multiply S&minus; by a factor each step</option><option value="drop">A drop of at most a set percentage per step</option></select></div>
         <div><label>Multiply S&minus; by, each step</label><input data-m="th_mult" placeholder="2"></div>
-        <div><label>Criterion to step</label><input data-m="th_crit" placeholder="problem behavior at or under 10% of baseline and FCR under S+ on at least 80% of opportunities, 2 consecutive sessions"></div>
+        <div><label>Largest drop per step (% of the time the request works; 20&ndash;25 suggested)</label><input data-m="th_maxdrop" placeholder="20"></div>
+        <div><label>Criterion to step</label><input data-m="th_crit" placeholder="problem behavior at or under 10% of baseline and at least 80% of requests made while the S+ is up, 2 consecutive sessions"></div>
         <div><label>Step-back rule</label><input data-m="th_back" placeholder="problem behavior above 20% of baseline for 2 sessions: previous step"></div>
         <div><label>During S&minus; the student has</label><input data-m="th_comp" placeholder="a competing item from PA-1; a task at the student's level"></div>
       </div>
@@ -1106,6 +1140,75 @@ td input,td select{max-width:100%}
         <div><label>What is never paid</label><input data-m="lag_never" placeholder="off-topic or inappropriate answers, however novel"></div>
       </div>
     </div>
+    <!-- v25.65 (FCT-SR-H2, L4) FCT or DRA without extinction: the request must win; a small matching worksheet -->
+    <div class="only-ds for-nox">
+      <h3>FCT or DRA without extinction</h3>
+      <p class="hint">Without extinction, problem behavior still gets something. The request must win: more often, sooner, more, better and easier. Fill in what each gets below, from Form ABC-1 or DD-1.</p>
+      <div class="fieldgrid">
+        <div><label>If problem behavior has not fallen within this many sessions, the BCBA reviews the plan</label><input data-m="nx_review" placeholder="5"></div>
+      </div>
+      <h3 class="sub" style="margin:6px 0 0">Matching worksheet (counts from Form ABC-1 or DD-1, over the same period)</h3>
+      <div class="fieldgrid">
+        <div><label>Problem behavior: times counted</label><input data-m="mw_pb" placeholder="30"></div>
+        <div><label>Problem behavior: times it got the reinforcer</label><input data-m="mw_pbsr" placeholder="12"></div>
+        <div><label>Requests: times counted</label><input data-m="mw_rq" placeholder="10"></div>
+        <div><label>Requests: times they got the reinforcer</label><input data-m="mw_rqsr" placeholder="8"></div>
+        <div><label>Requests: times they will get it under the plan</label><input data-m="mw_rqsr2" placeholder="30"></div>
+      </div>
+    </div>
+    <!-- v25.65 (FCT-SR-H5) a wait that ends on what the student does, filled, with a time-only wait marked -->
+    <div class="only-ds for-wait">
+      <h3>A wait that ends on what the student does</h3>
+      <div class="fieldgrid">
+        <div><label>What the adult says or shows</label><input data-m="wt_sig" placeholder="&ldquo;Wait, please,&rdquo; and the wait card"></div>
+        <div><label>The wait ends</label><select data-m="wt_kind"><option value="">When the time is up and the student is doing what was asked</option><option value="time">When the timer ends, whatever the student does (time only: not recommended alone)</option></select></div>
+        <div style="grid-column:span 2"><label>What the student does during the wait</label><input data-m="wt_does" placeholder="holds the wait card and keeps working; or finishes 3 tasks"></div>
+        <div><label>Item or activity available during the wait</label><input data-m="wt_item" placeholder="a puzzle from PA-1 on the desk"></div>
+        <div><label>First wait (seconds)</label><input data-m="wt_s0" placeholder="5"></div>
+        <div><label>Longest wait (seconds; from the classroom or home)</label><input data-m="wt_sT" placeholder="300"></div>
+        <div><label>Multiply the wait by, each step</label><input data-m="wt_mult" placeholder="2"></div>
+        <div><label>Criterion to step</label><input data-m="wt_crit" placeholder="no problem behavior in any wait, 2 consecutive sessions"></div>
+      </div>
+    </div>
+    <!-- v25.65 (FCT-SR-H2, M9) what problem behavior gets now against what the request gets -->
+    <div id="srCmp" hidden>
+      <h3>What problem behavior gets now, and what the request gets</h3>
+      <p class="hint" id="srCmpHint"></p>
+      <h3 class="sub" style="margin:6px 0 0">How often (the schedule)</h3>
+      <div class="fieldgrid">
+        <div><label>How often: what problem behavior gets now</label><input data-m="nx_pb_rate" placeholder="about 1 in 3 times (Form ABC-1)"></div>
+        <div><label>How often: what the request gets</label><input data-m="nx_rq_rate" placeholder="every time (FR 1)"></div>
+        <div><label>How often: which wins</label><select data-m="nx_w_rate"><option value="">which wins?</option><option value="rq">The request</option><option value="tie">A tie</option><option value="pb">Problem behavior</option></select></div>
+      </div>
+      <h3 class="sub" style="margin:6px 0 0">How soon (seconds)</h3>
+      <div class="fieldgrid">
+        <div><label>How soon: problem behavior gets it within (seconds)</label><input data-m="nx_pb_delay" placeholder="20"></div>
+        <div><label>How soon: the request gets it within (seconds)</label><input data-m="nx_rq_delay" placeholder="5"></div>
+        <div><label>How soon: which wins</label><select data-m="nx_w_delay"><option value="">which wins?</option><option value="rq">The request</option><option value="tie">A tie</option><option value="pb">Problem behavior</option></select></div>
+      </div>
+      <h3 class="sub" style="margin:6px 0 0">How much (seconds, or the amount)</h3>
+      <div class="fieldgrid">
+        <div><label>How much: problem behavior gets (seconds, or the amount)</label><input data-m="nx_pb_amt" placeholder="10"></div>
+        <div><label>How much: the request gets (seconds, or the amount)</label><input data-m="nx_rq_amt" placeholder="60"></div>
+        <div><label>How much: which wins</label><select data-m="nx_w_amt"><option value="">which wins?</option><option value="rq">The request</option><option value="tie">A tie</option><option value="pb">Problem behavior</option></select></div>
+      </div>
+      <h3 class="sub" style="margin:6px 0 0">How good (the quality: the Form PA-1 item or its rank)</h3>
+      <div class="fieldgrid">
+        <div><label>How good: what problem behavior gets</label><input data-m="nx_pb_qual" placeholder="a reprimand"></div>
+        <div><label>How good: what the request gets</label><input data-m="nx_rq_qual" placeholder="praise and the drawing kit (PA-1 rank 1)"></div>
+        <div><label>How good: which wins</label><select data-m="nx_w_qual"><option value="">which wins?</option><option value="rq">The request</option><option value="tie">A tie</option><option value="pb">Problem behavior</option></select></div>
+      </div>
+      <h3 class="sub" style="margin:6px 0 0">How hard (the effort: steps or seconds)</h3>
+      <div class="fieldgrid">
+        <div><label>How hard: problem behavior takes</label><input data-m="nx_pb_eff" placeholder="one shout"></div>
+        <div><label>How hard: the request takes</label><input data-m="nx_rq_eff" placeholder="a card tap, the card within reach"></div>
+        <div><label>How hard: which wins</label><select data-m="nx_w_eff"><option value="">which wins?</option><option value="rq">The request</option><option value="tie">A tie</option><option value="pb">Problem behavior</option></select></div>
+      </div>
+    </div>
+    <!-- v25.65 (FCT-SR-H7) the next step, written before thinning stalls -->
+    <div class="fieldgrid" id="srStall" hidden>
+      <div style="grid-column:span 2"><label>If thinning stalls, we add</label><input data-m="stall" placeholder="competing items from PA-1 during the &ldquo;not now&rdquo; period"></div>
+    </div>
     <div id="dsOut"></div>
   </section>
 
@@ -1129,6 +1232,9 @@ td input,td select{max-width:100%}
         <div><label>Step up when the row is</label><select data-m="sd_upop"><option value="">at or below</option><option value="ge">at or above</option></select></div>
         <div><label>this value in a day</label><input data-m="sd_upv" type="number" min="0" step="any"></div>
         <div><label>on this many days with data in a row</label><input data-m="sd_upn" type="number" min="1" step="1"></div>
+        <!-- v25.65 (FCT-SR-H4) a multiple schedule steps on the discrimination too: the share of requests made in S+ -->
+        <div class="only-ds for-thin"><label>Second Form DD-1 row: % of requests made in S+</label><input data-m="sd_row2" placeholder="Requests in S+ (%)"></div>
+        <div class="only-ds for-thin"><label>and that row at or above (%), on the same days (never below 70)</label><input data-m="sd_up2v" type="number" min="70" max="100" step="any" placeholder="80"></div>
         <div><label>Step back when the row is</label><select data-m="sd_backop"><option value="">at or above</option><option value="le">at or below</option></select></div>
         <div><label>this value in a day</label><input data-m="sd_backv" type="number" min="0" step="any"></div>
         <div><label>on this many days with data in a row</label><input data-m="sd_backn" type="number" min="1" step="1"></div>
@@ -1173,8 +1279,20 @@ td input,td select{max-width:100%}
       <tr><th style="width:28%">DRO starting interval</th><td>The mean inter-response time from baseline (minutes observed &divide; occurrences), times the share chosen (75% by default): a value the student already meets most of the time (Poling &amp; Ryan, 1982; Vollmer &amp; Iwata, 1992). Steps increase the interval by the chosen percentage until the terminal value; the criterion and the step-back rule are written by the user.</td></tr>
       <tr><th>DRL limits</th><td>The first full-session limit is the baseline count scaled to the session length, rounded down to a whole number; the limits then fall in equal steps to the target share of baseline. Spaced-responding criteria start at the baseline mean IRT and lengthen by the same factor each step.</td></tr>
       <tr><th>Variable series</th><td>Fleshler and Hoffman (1962): the nth of N intervals with mean T is T[1 + ln N + (N &minus; n) ln(N &minus; n) &minus; (N &minus; n + 1) ln(N &minus; n + 1)], which keeps the probability of reinforcement nearly constant through the interval (Catania &amp; Reynolds, 1968). The arithmetic series is 2T/(N + 1), 4T/(N + 1) &hellip; 2NT/(N + 1), shuffled. Both average T. Random schedules state the probability per cycle (RI) or per response (RR) instead.</td></tr>
-      <tr><th>NCR</th><td>The first interval is the baseline mean IRT (the performance-based start of Kahng et al., 2000; Vollmer et al., 1993, began with near-continuous attention); thinning by fixed increments or by performance (Kahng et al., 2000); an omission rule guards against accidental reinforcement (Vollmer et al., 1997). The step table doubles the interval until the terminal value, which is a working convention.</td></tr>
-      <tr><th>Multiple-schedule thinning</th><td>S+ held constant while S&minus; is multiplied by the factor until the terminal value, after Hanley et al. (2001) and Greer et al. (2016); the criteria are the user&rsquo;s, with the chooser&rsquo;s defaults as working conventions.</td></tr>
+      <!-- v25.65 (FCT-SR-M4, L3, L6) -->
+      <tr><th>NCR</th><td>The first interval is the baseline mean IRT, from the last three baseline sessions (the start of Kahng et al., 2000; Vollmer et al., 1993, began with near-continuous attention), or the time to the first problem behavior in baseline (Lalli et al., 1997). Four ways to thin. Two are published (Kahng et al., 2000): fixed increments (FT 10, 12, 15, 20 and 30 s, then 1 to 5 min, a step after any session at or under the criterion) and the adjusting IRT (before each session, the mean IRT of the last three sessions, never more than double the interval in force); the adjusting IRT reached FT 5 min in 6, 11 and 15 sessions, fixed increments in 10, 15 and 25. Two are the form&rsquo;s own conventions: doubling the interval each day the criterion holds, and performance-based doubling with a step back. A session with no problem behavior counts as the session length, and the adjusting interval never falls below the one in force: both conventions. The omission rule delays a delivery (the form&rsquo;s convention) or cancels it, as in the momentary DRO of Vollmer et al. (1997). Variable time was as effective as fixed time (Van Camp et al., 2000; Carr et al., 2001) and held up better under missed deliveries in a human-operant study (Jones et al., 2025).</td></tr>
+      <!-- v25.65 (FCT-SR-H3, H4, M2, M10) -->
+      <tr><th>Multiple-schedule thinning</th><td>S+ held constant while S&minus; is multiplied by the factor until the terminal value, after Hanley et al. (2001) and Greer et al. (2016), or set so that the share of the session the request works drops by at most a set percentage per step. Each step shows that share (S+ &divide; (S+ + S&minus;)) and the drop from the step before; a drop above 33% is flagged, because the size of the drop went with how large resurgence was (Laureano et al., 2024) and steps of 20% or less made large resurgence less likely (Greer et al., 2024). The evidence is divided: a jump to the terminal value after a one-session probe gave less resurgence in a two-group comparison (Strohmeier et al., 2024), so the form shows and flags large steps and does not forbid them. The terminal S&minus; comes from the longest wait in the classroom or home when it is written (Saini et al., 2016). The default criterion asks for at least 80% of requests made while the S+ is up (Greer et al., 2016, used at least 70% correct requests with a 90% reduction); the signal check asks whether the student can match and name the two signals (Pizarro et al., 2021). A natural signal (the teacher busy or free) is reached through arranged signals, which were learned faster and generalized better for 2 of 3 participants (Shamlian et al., 2016; Kuhn et al., 2010). The criteria are the user&rsquo;s, with the chooser&rsquo;s defaults as working conventions.</td></tr>
+      <!-- v25.65 (FCT-SR-H1, H6) -->
+      <tr><th>The extinction step</th><td>For NCR, DRO, multiple-schedule thinning, chained schedules, waits and FCT or DRA without extinction, the Design page asks what follows problem behavior, with no default: an extinction step agreed by the team and parent (with the date), extinction only partly possible, or no extinction. The card prints the line under its own heading, and &ldquo;+ EXT&rdquo; in the notation only when the step is chosen. It is a real choice with costs on both sides: FCT without extinction reached a 90% reduction in none of 11 applications, and with extinction in 11 of 25 (Hagopian et al., 1998); extinction alone brought bursts in 62% and new aggression in some cases of self-injury (Lerman et al., 1999). With the step chosen the card says what to expect: bursts in about 1 in 4 treatments (Lerman &amp; Iwata, 1995; Muething et al., 2024), defined as any of the first three sessions higher than every one of the last five baseline sessions (Lerman &amp; Iwata, 1995), usually back to baseline by about the fifth session (Muething et al., 2024).</td></tr>
+      <!-- v25.65 (FCT-SR-H2, M9, L4) -->
+      <tr><th>FCT or DRA without extinction</th><td>Five rows compare what problem behavior gets now with what the request gets: how often, how soon, how much, how good and how hard. Seconds on both sides decide how soon and how much; the user says who wins the other rows. The form warns when the request loses or ties on a row and when it wins on fewer than three: without extinction, change was largest and most consistent when several dimensions favored the alternative (Athens &amp; Vollmer, 2010), and during thinning 3 of 4 participants needed a larger and a better reinforcer (Briggs et al., 2019). The same rows, filled from baseline, check that a request starts at least as good as what problem behavior got: a model prediction (Fisher et al., 2023). The matching worksheet uses strict matching (Herrnstein, 1961); in classrooms matching was partial (Mace et al., 1994).</td></tr>
+      <!-- v25.65 (FCT-SR-H5) -->
+      <tr><th>Waits</th><td>A wait ends when the time is up and the student is doing the tolerance response, the activity or the tasks; a time-only wait is marked &ldquo;not recommended alone&rdquo;. Waits that ended on what the student did gave lower problem behavior for all 4 participants (Ghaemmaghami et al., 2016), and requiring an alternative response gave the best tolerance (Drifke et al., 2020). Multiple and chained schedules come first (Hanley et al., 2001; Rooker et al., 2013). The wait multiplies by the factor each step until the longest wait, a working convention.</td></tr>
+      <!-- v25.65 (FCT-SR-H7) -->
+      <tr><th>When thinning stalls</th><td>Even with good thinning, many programs need an added component. FCT reached a 90% reduction in 59% of 58 applications, and the effect held through thinning in 11 of 23 (48%); FCT with alternative reinforcement reached it in 10 of 14 (Rooker et al., 2013). With signaled thinning, 73% held without additions (Greer et al., 2016). So the card writes the next step before it is needed: after two step-backs at the same step, add an alternative reinforcer or competing items, check the reinforcer&rsquo;s size and quality, and check integrity. Punishment is not that step: it stays a separate restrictive option that needs approval.</td></tr>
+      <!-- v25.65 (FCT-SR-L7) -->
+      <tr><th>Step rules</th><td>This form&rsquo;s placeholders step after 2 consecutive sessions and step back after 2 sessions above 20% of baseline; Form TD-1 steps after 3 consecutive sessions and back after two above criterion. Both are working conventions, not findings. Hagopian et al. (2004) stepped after two consecutive sessions at an 80% to 90% reduction; Rooker et al. (2013) thinned once a reduction of more than 80% held; Kahng et al. (2000) stepped after one session at or below 0.5 per minute; Saini et al. (2016) recommend a fallback criterion and a reduction criterion set to the case, with 100% for severe aggression toward peers. The BCBA sets the rule on each card.</td></tr>
       <tr><th>Data sheets</th><td>The card lists the data to keep; the sheets are the workstation&rsquo;s: Form DD-1 for counts, intervals and sessions (DRO intervals run and earned, DRL counts against the limit, NCR deliveries, reinforcers per session, PR breakpoints, tokens and exchanges), Form SM-1 for the interlocking session sheet, and Form MT-1 for interval samples (momentary and variable-momentary DRO checks, the S+ / S&minus; periods of a multiple schedule). The card&rsquo;s Data sheet used line names them when it is left blank.</td></tr>
       <tr><th>Token prices</th><td>Responses per back-up = tokens per back-up &times; responses per token. The designer warns when an exchange costs more than 50 responses (tokens per exchange &times; responses per token), a working convention after Bullock and Hackenberg (2006) as reported in DeLeon et al. (2013).</td></tr>
     </table>
@@ -1275,6 +1393,33 @@ const REFS={
   vollmer97:'Vollmer, T. R., Ringdahl, J. E., Roane, H. S., &amp; Marcus, B. A. (1997). Negative side effects of noncontingent reinforcement. <em>Journal of Applied Behavior Analysis, 30</em>(1), 161&ndash;164.',
   vollmer99:'Vollmer, T. R., Roane, H. S., Ringdahl, J. E., &amp; Marcus, B. A. (1999). Evaluating treatment challenges with differential reinforcement of alternative behavior. <em>Journal of Applied Behavior Analysis, 32</em>(1), 9&ndash;23.',
   wright02:'Wright, C. S., &amp; Vollmer, T. R. (2002). Evaluation of a treatment package to reduce rapid eating. <em>Journal of Applied Behavior Analysis, 35</em>(1), 89&ndash;93.',
+  /* v25.65 (FCT-SR) */
+  briggs19:'Briggs, A. M., Dozier, C. L., Lessor, A. N., Kamana, B. U., &amp; Jess, R. L. (2019). Further investigation of differential reinforcement of alternative behavior without extinction for escape-maintained destructive behavior. <em>Journal of Applied Behavior Analysis, 52</em>(4), 956&ndash;973.',
+  carr01:'Carr, J. E., Kellum, K. K., &amp; Chong, I. M. (2001). The reductive effects of noncontingent reinforcement: Fixed-time versus variable-time schedules. <em>Journal of Applied Behavior Analysis, 34</em>(4), 505&ndash;509.',
+  drifke20:'Drifke, M. A., Tiger, J. H., &amp; Lillie, M. A. (2020). DRA contingencies promote improved tolerance to delayed reinforcement during FCT compared to DRO and fixed-time schedules. <em>Journal of Applied Behavior Analysis, 53</em>(3), 1579&ndash;1592.',
+  fisher23:'Fisher, W. W., Greer, B. D., Shahan, T. A., &amp; Norris, H. M. (2023). Basic and applied research on extinction bursts. <em>Journal of Applied Behavior Analysis, 56</em>(1), 4&ndash;28.',
+  ghaemmaghami16:'Ghaemmaghami, M., Hanley, G. P., &amp; Jessel, J. (2016). Contingencies promote delay tolerance. <em>Journal of Applied Behavior Analysis, 49</em>(3), 548&ndash;575.',
+  goh00:'Goh, H.-L., Iwata, B. A., &amp; DeLeon, I. G. (2000). Competition between noncontingent and contingent reinforcement schedules during response acquisition. <em>Journal of Applied Behavior Analysis, 33</em>(2), 195&ndash;205.',
+  greer24:'Greer, B. D., Shahan, T. A., Irwin Helvey, C., Fisher, W. W., Mitteer, D. R., &amp; Fuhrman, A. M. (2024). Resurgence of destructive behavior following decreases in alternative reinforcement: A prospective analysis. <em>Journal of Applied Behavior Analysis, 57</em>(3), 599&ndash;614.',
+  hagopian04:'Hagopian, L. P., Toole, L. M., Long, E. S., Bowman, L. G., &amp; Lieving, G. A. (2004). A comparison of dense-to-lean and fixed lean schedules of alternative reinforcement and extinction. <em>Journal of Applied Behavior Analysis, 37</em>(3), 323&ndash;337.',
+  hoch02:'Hoch, H., McComas, J. J., Thompson, A. L., &amp; Paone, D. (2002). Concurrent reinforcement schedules: Behavior change and maintenance without extinction. <em>Journal of Applied Behavior Analysis, 35</em>(2), 155&ndash;169.',
+  jones25:'Jones, S. H., Catalano, M., Jr., Abuin, S., Haliwa, I., &amp; Switzer, E. (2025). Variable-time schedules protect against effects of fidelity errors during noncontingent reinforcement. <em>Journal of Applied Behavior Analysis, 58</em>(4), 841&ndash;851.',
+  kuhn10:'Kuhn, D. E., Chirighin, A. E., &amp; Zelenka, K. (2010). Discriminated functional communication: A procedural extension of functional communication training. <em>Journal of Applied Behavior Analysis, 43</em>(2), 249&ndash;264.',
+  lalli97:'Lalli, J. S., Casey, S. D., &amp; Kates, K. (1997). Noncontingent reinforcement as treatment for severe problem behavior: Some procedural variations. <em>Journal of Applied Behavior Analysis, 30</em>(1), 127&ndash;137.',
+  laureano24:'Laureano, B., Ringdahl, J., &amp; Falligant, J. M. (2024). Examination of clinical variables affecting resurgence: A reanalysis of 46 applications. <em>Journal of Applied Behavior Analysis, 57</em>(3), 742&ndash;750.',
+  mace94:'Mace, F. C., Neef, N. A., Shade, D., &amp; Mauro, B. C. (1994). Limited matching on concurrent-schedule reinforcement of academic behavior. <em>Journal of Applied Behavior Analysis, 27</em>(4), 585&ndash;596.',
+  marcus96:'Marcus, B. A., &amp; Vollmer, T. R. (1996). Combining noncontingent reinforcement and differential reinforcement schedules as treatment for aberrant behavior. <em>Journal of Applied Behavior Analysis, 29</em>(1), 43&ndash;51.',
+  muething24:'Muething, C., Cariveau, T., Bottini, S., Slocum, S., Williams, C., Gillespie, S., &amp; Scheithauer, M. (2024). Descriptive characteristics of extinction bursts: A record review. <em>Journal of Applied Behavior Analysis, 57</em>(2), 372&ndash;382.',
+  phillips17:'Phillips, C. L., Iannaccone, J. A., Rooker, G. W., &amp; Hagopian, L. P. (2017). Noncontingent reinforcement for the treatment of severe problem behavior: An analysis of 27 consecutive applications. <em>Journal of Applied Behavior Analysis, 50</em>(2), 357&ndash;376.',
+  pizarro21:'Pizarro, E. M., Vollmer, T. R., &amp; Morris, S. L. (2021). Evaluating skills correlated with discriminated responding in multiple schedule arrangements. <em>Journal of Applied Behavior Analysis, 54</em>(1), 334&ndash;345.',
+  rooker13:'Rooker, G. W., Jessel, J., Kurtz, P. F., &amp; Hagopian, L. P. (2013). Functional communication training with and without alternative reinforcement and punishment: An analysis of 58 applications. <em>Journal of Applied Behavior Analysis, 46</em>(4), 708&ndash;722.',
+  saini17:'Saini, V., Fisher, W. W., &amp; Pisman, M. D. (2017). Persistence during and resurgence following noncontingent reinforcement implemented with and without extinction. <em>Journal of Applied Behavior Analysis, 50</em>(2), 377&ndash;392.',
+  shamlian16:'Shamlian, K. D., Fisher, W. W., Steege, M. W., Cavanaugh, B. M., Samour, K., &amp; Querim, A. C. (2016). Evaluation of multiple schedules with naturally occurring and therapist-arranged discriminative stimuli following functional communication training. <em>Journal of Applied Behavior Analysis, 49</em>(2), 228&ndash;250.',
+  slocum15:'Slocum, S. K., &amp; Vollmer, T. R. (2015). A comparison of positive and negative reinforcement for compliance to treat problem behavior maintained by escape. <em>Journal of Applied Behavior Analysis, 48</em>(3), 563&ndash;574.',
+  strohmeier24:'Strohmeier, C. W., Cengher, M., Chin, M. D., &amp; Falligant, J. M. (2024). Application of a terminal schedule probe method to inform schedule thinning with multiple schedules. <em>Journal of Applied Behavior Analysis, 57</em>(3), 676&ndash;694.',
+  vancamp00:'Van Camp, C. M., Lerman, D. C., Kelley, M. E., Contrucci, S. A., &amp; Vorndran, C. M. (2000). Variable-time reinforcement schedules in the treatment of socially maintained problem behavior. <em>Journal of Applied Behavior Analysis, 33</em>(4), 545&ndash;557.',
+  wallace12:'Wallace, M. D., Iwata, B. A., Hanley, G. P., Thompson, R. H., &amp; Roscoe, E. M. (2012). Noncontingent reinforcement: A further examination of schedule effects during treatment. <em>Journal of Applied Behavior Analysis, 45</em>(4), 709&ndash;719.',
+  weber24:'Weber, J., Fahmie, T., Walker, S., Lambert, J., Copeland, B., Freetly, T., &amp; Zangrillo, A. (2024). Exploring factors that influence the efficacy of functional communication training. <em>Journal of Applied Behavior Analysis, 57</em>(3), 709&ndash;724.',
   zeiler77:'Zeiler, M. (1977). Schedules of reinforcement: The controlling variables. In W. K. Honig &amp; J. E. R. Staddon (Eds.), <em>Handbook of operant behavior</em> (pp. 201&ndash;232). Prentice-Hall.'
 };
 const FAM={basic:'Basic',time:'Time-based',dr:'Differential reinforcement',compound:'Compound and complex',applied:'Applied arrangements'};
@@ -1292,7 +1437,7 @@ const CAT=[
 {id:'ext',fam:'basic',name:'Extinction',abbr:'EXT',nota:'EXT',one:'The reinforcer that maintained the response is withheld; the response no longer pays.',
  def:'In Ferster and Skinner&rsquo;s terms, &ldquo;no responses are reinforced.&rdquo; As a treatment component it means withholding the reinforcer that the assessment identified: attention extinction, escape extinction, or sensory extinction. Iwata, Pace, Cowdery and Miltenberger (1994) showed that extinction works only when the consequence withheld is the one that maintained the behavior; planned ignoring of escape-maintained behavior is not extinction, it is a reinforcer.',
  prog:'Name the maintaining reinforcer; withhold it for every instance; keep delivering it for the alternative response (DRA) or on a time basis (NCR); write what staff do at each instance so that nobody delivers the reinforcer by accident.',
- prod:'A temporary increase in rate, magnitude or novel forms of the behavior in a minority of cases (an extinction burst), and sometimes aggression, both clearly less common when extinction is combined with reinforcement procedures than when it is used alone (Lerman &amp; Iwata, 1995; Lerman, Iwata &amp; Wallace, 1999); slower extinction after intermittent reinforcement in the basic literature (Ferster &amp; Skinner, 1957), which Lerman et al. (1996) did not find with self-injury; spontaneous recovery after a break; and resurgence of an older response when a newer one is in turn extinguished (Lieving &amp; Lattal, 2003).',
+ prod:'A temporary increase in rate, magnitude or novel forms of the behavior in about 1 in 4 cases overall (an extinction burst: 24% of 113 data sets, Lerman &amp; Iwata, 1995), but in 62% when extinction was used alone for self-injury (Lerman, Iwata &amp; Wallace, 1999), and sometimes aggression, both clearly less common when extinction is combined with reinforcement procedures than when it is used alone (Lerman &amp; Iwata, 1995; Lerman, Iwata &amp; Wallace, 1999); slower extinction after intermittent reinforcement in the basic literature (Ferster &amp; Skinner, 1957), which Lerman et al. (1996) did not find with self-injury; spontaneous recovery after a break; and resurgence of an older response when a newer one is in turn extinguished (Lieving &amp; Lattal, 2003).',
  used:'A component of nearly every function-based treatment: FCT, DRA, DRO and NCR all include it in their usual forms. Hagopian et al. (1998) found FCT with extinction far more effective than FCT without it across 21 inpatient cases.',
  pit:'A mislabelled function; inconsistent application, which turns extinction into intermittent reinforcement and makes the behavior more persistent; bursts that endanger the student or others; behaviors whose reinforcer cannot be withheld (automatic) or must not be (a safety need).',
  ex:'Calling out no longer produces a teacher response; raising a hand does, every time, within five seconds.',refs:['fs57','iwata94','lermaniwata95','lerman99','lerman96','lieving03','hagopian98']},
@@ -1386,7 +1531,7 @@ const CAT=[
  prog:'Start dense: at or below the baseline mean time between responses (the performance-based start of Kahng et al., 2000; Vollmer et al., 1993, began with near-continuous attention and thinned to FT 5 min). Thin by fixed increments or on a performance criterion; Kahng, Iwata, DeLeon and Wallace (2000) compared the two and both reached a terminal schedule with low rates. Dense schedules worked where lean ones did not (Hagopian, Fisher &amp; Legacy, 1994). Add a brief omission rule (delay the delivery a few seconds if the behavior just occurred) to avoid accidental reinforcement (Vollmer et al., 1997).',
  prod:'Rapid reduction through two mechanisms: the motivating operation is abolished and the response&ndash;reinforcer relation is broken.',
  used:'Attention-, escape- and tangible-maintained behavior; automatic reinforcement with matched stimuli delivered freely.',
- pit:'It teaches no replacement; it competes with FCT if both run at once; satiation lowers the value of the reinforcer for the alternative response; thinning too fast re-establishes the motivation.',
+ pit:'It teaches no replacement; while it is dense, requests may stay low (Goh et al., 2000), though it did not block them for 3 children (Marcus &amp; Vollmer, 1996): teach the request alongside, count it, and thin NCR before expecting it; satiation lowers the value of the reinforcer for the alternative response; thinning too fast re-establishes the motivation.',
  ex:'The teacher gives 20 seconds of attention every 2 minutes during seatwork, moving to every 5 minutes over three weeks as the data allow.',refs:['vollmer93','carr09','kahng00','hagopian94','vollmer97']},
 /* ---- differential reinforcement ---- */
 {id:'dro',fam:'dr',name:'Differential reinforcement of other behavior',abbr:'DRO',nota:'DRO 30 s (whole-interval, resetting)',one:'The reinforcer is delivered when the target behavior has not occurred for an interval, or is absent at the moment the interval ends.',
@@ -1440,11 +1585,11 @@ const CAT=[
  ex:'Holding the squeeze ball with both hands during circle earns praise every 30 seconds.',refs:['vollmeriwata92','tarpley79']},
 {id:'fct',fam:'dr',name:'Functional communication training',abbr:'FCT (DRC)',nota:'FCT: FR 1 for FCR + EXT &rarr; thinning',one:'DRA in which the alternative is a communication response that produces the functional reinforcer.',
  def:'Carr and Durand (1985) taught children to request the reinforcer their problem behavior had produced; Tiger, Hanley and Bruzek (2008) give the practical guide. The functional communication response (FCR) is reinforced continuously at first, the problem behavior is placed on extinction, and the schedule is then thinned.',
- prog:'Pick an FCR that is low effort, easy to recognize and acceptable in every setting; teach it with prompts in the situation that evokes the problem behavior; honor every instance; thin with a signaled multiple schedule, a chained schedule or delay fading (see the applied entries). Hagopian et al. (1998): FCT with extinction reduced problem behavior by 90% or more in fewer than half of the applications (11 of 25), FCT without extinction in none, and FCT with punishment in all 17; thinning cost several extinction-based cases their effect.',
+ prog:'Pick an FCR that is low effort, easy to recognize and acceptable in every setting; teach it with prompts in the situation that evokes the problem behavior; honor every instance; thin with a signaled multiple schedule or a chained schedule first; where waits cannot be predicted, a wait that ends on what the student does; a time-only wait last (see the applied entries; Ghaemmaghami et al., 2016; Drifke et al., 2020). Hagopian et al. (1998): FCT with extinction reduced problem behavior by 90% or more in fewer than half of the applications (11 of 25), FCT without extinction in none, and FCT with punishment in all 17; thinning cost several extinction-based cases their effect.',
  prod:'A new response that replaces the old one on the same reinforcer; durable when the thinning is signaled and gradual.',
  used:'The most widely replicated function-based treatment; Greer et al. (2016) analyzed 25 applications of thinning after FCT.',
  pit:'An FCR that is honored only sometimes without a signal (a mixed schedule); an FCR the student emits at a rate nobody can honor; thinning by delay alone, which often fails (Hagopian et al., 2011).',
- ex:'&ldquo;Break please&rdquo; earns a 1-minute break every time for a week; then only when the green card is up.',refs:['carr85','tiger08','hagopian98','greer16','hagopian11']},
+ ex:'&ldquo;Break please&rdquo; earns a 1-minute break with a preferred toy every time for a week; then only when the green card is up.',refs:['carr85','tiger08','hagopian98','greer16','hagopian11']},
 {id:'dnr',fam:'dr',name:'Differential negative reinforcement',abbr:'DNRA / DNRO',nota:'DNRA: a break for compliance + escape extinction',one:'Escape or avoidance delivered for the alternative (or for the absence of the target) while escape for the target is blocked.',
  def:'The negative-reinforcement forms of DRA and DRO: a break follows compliance or a request (DNRA), or follows an interval without problem behavior (DNRO), and problem behavior no longer ends the demand (Vollmer &amp; Iwata, 1992; Marcus &amp; Vollmer, 1995).',
  prog:'Keep the demand in place through problem behavior (escape extinction); deliver the break for the alternative on a dense schedule; thin by raising the work before the break.',
@@ -1497,7 +1642,7 @@ const CAT=[
  ex:'Avoid; add the signal and it becomes a chain.',refs:['fs57']},
 {id:'conc',fam:'compound',name:'Concurrent schedules',abbr:'conc',nota:'conc VI 30 s VI 120 s',one:'Two or more schedules operate at the same time for two or more responses; the learner chooses.',
  def:'&ldquo;A operates for one response; B operates for another response&rdquo; (Catania, 2007). The matching law (Herrnstein, 1961; Baum, 1974) describes the result: the share of behavior on each alternative tends to match its share of reinforcement, with bias and undermatching as the common deviations.',
- prog:'Every DRA is a concurrent schedule: the target and the alternative compete for the student&rsquo;s time. Rate, quality, delay and effort of reinforcement on each side decide the allocation (Neef, Mace, Shea &amp; Shade, 1992; Athens &amp; Vollmer, 2010), so the alternative must win on those dimensions.',
+ prog:'Every DRA is a concurrent schedule: the target and the alternative compete for the student&rsquo;s time. Rate, quality, delay and effort of reinforcement on each side decide the allocation (Neef, Mace, Shea &amp; Shade, 1992; Athens &amp; Vollmer, 2010), so the alternative must win on those dimensions. The Design page&rsquo;s &ldquo;FCT or DRA without extinction&rdquo; sets the two sides out row by row, with a small matching worksheet.',
  prod:'On concurrent interval schedules, choice proportional to relative reinforcement (matching); on concurrent ratio schedules, nearly all responding goes to the richer side (maximizing). So a concurrent VI arrangement shows how much one stimulus is preferred over another, and a concurrent ratio arrangement shows quickly which is preferred most (Fisher et al., 1992). Sensitivity to the parameters above.',
  used:'Problem behavior analyzed with the matching law (Borrero &amp; Vollmer, 2002); academic time allocation (Neef et al., 1992); concurrent-operant reinforcer assessment (DeLeon et al., 2014); reviewed by Fisher and Mazur (1997).',
  pit:'Designing one side of a concurrent schedule as if the other did not exist.',
@@ -1554,18 +1699,18 @@ const CAT=[
  ex:'See Form SM-1; this form&rsquo;s Design page writes the three schedules and the price of each back-up.',refs:['ivy17','hackenberg18','deleon13','deleon14']},
 {id:'thin',fam:'applied',name:'Schedule thinning after FCT or DRA',abbr:'thinning',nota:'mult: 60 s S+ / 0 &rarr; 60 s S+ / 240 s S&minus;',one:'Moving from continuous reinforcement of the alternative to a schedule the setting can sustain, without losing the treatment effect.',
  def:'Hagopian, Boelter and Jarmolowicz (2011) review the methods: delay fading (progressively longer waits), signaled multiple schedules (Hanley et al., 2001; Fisher et al., 2015), chained schedules with demand fading (Lalli et al., 1995), response restriction (the FCR materials removed between opportunities; Roane, Fisher, Sgro, Falcomata &amp; Pabico, 2004), and dense-to-lean DRA (Vollmer et al., 1999). Greer et al. (2016) analyzed 25 applications of multiple-schedule thinning and the additions (alternative reinforcers, punishment) needed when problem behavior re-emerged.',
- prog:'Pick the method by function and setting; write the step sequence and the criterion for each step (for example, problem behavior at or below a set percentage of baseline for two consecutive sessions, and the FCR occurring in S+ and not in S&minus;); write the step-back rule; give the student something to do during S&minus; (competing items; Hagopian, Contrucci Kuhn, Long &amp; Rush, 2005). Terminal arrangements of about one minute available to four minutes unavailable are typical of the Fisher laboratory&rsquo;s applications (Greer et al., 2016).',
+ prog:'Pick the method by function and setting; write the step sequence and the criterion for each step (for example, problem behavior at or below a set percentage of baseline for two consecutive sessions, and the FCR occurring in S+ and not in S&minus;); write the step-back rule; give the student something to do during S&minus; (competing items; Hagopian, Contrucci Kuhn, Long &amp; Rush, 2005). Terminal arrangements of about one minute available to four minutes unavailable are typical of the Fisher laboratory&rsquo;s applications (Greer et al., 2016). Show how much each step cuts the time the request works: the size of the drop went with how large resurgence was (Laureano et al., 2024), and steps of 20% or less made large resurgence less likely (Greer et al., 2024).',
  prod:'Gradual transfer to a practical schedule with the discrimination intact; problem behavior that returns at a step signals the step was too large.',
  used:'The end of every FCT and DRA program that is to leave the clinic.',
  pit:'Delay fading alone; steps on the calendar; no signal; nothing to do while waiting.',
  ex:'The Design page builds the step table from the start and terminal values.',refs:['hagopian11','hanley01','fisher15','lalli95','roane04','vollmer99','greer16','hagopian05']},
 {id:'delay',fam:'applied',name:'Delayed reinforcement and delay fading',abbr:'delay',nota:'FR 1 with a signaled 30-s delay',one:'A reinforcer that follows the response after a delay, and the procedures that stretch the delay.',
  def:'Lattal (2010) reviews the basic work: unsignaled delays weaken responding steeply; signaled delays, in which a stimulus bridges the gap, sustain far more; delayed reinforcers also strengthen the responses that preceded the reinforced one, so an error just before a paid response is paid too (DeLeon et al., 2013). Within some range, delays of about 30 seconds maintain responding in humans and nonhumans.',
- prog:'Signal the delay (&ldquo;okay, in a minute&rdquo;), give the student an activity or a token during it, and lengthen it in small steps on a criterion; teach a tolerance response for the denial (Hanley et al., 2014).',
+ prog:'Signal the wait (&ldquo;wait, please&rdquo;), give the student an activity or a token during it, and end it on what the student does: the reinforcer comes when the wait is over <i>and</i> the student is doing the tolerance response, the activity or the tasks. Lengthen it in small steps on a criterion; teach a tolerance response for the denial (Hanley et al., 2014). Waits that ended on what the student did gave lower problem behavior than waits that ended on the timer (Ghaemmaghami et al., 2016), and requiring an alternative response during the wait gave the best tolerance (Drifke et al., 2020); a time-only wait is not recommended alone. The Design page writes such a wait.',
  prod:'Behavior that survives a wait; discounting of value with delay that is shallower for tokens than for consumables.',
  used:'Delay-and-denial tolerance training; delay fading after FCT, which succeeds mainly when combined with signals, competing stimuli or chained work requirements (Hagopian et al., 2005, 2011).',
- pit:'Unsignaled delays; delays stretched before the signal has meaning; delays filled with nothing.',
- ex:'&ldquo;Not yet, when the timer rings&rdquo;: the timer runs 10 s this week, 30 s next week, 2 min in a month, and the puzzle is on the desk while it runs.',refs:['lattal10','deleon13','hanley14','hagopian05','hagopian11']},
+ pit:'Unsignaled delays; delays stretched before the signal has meaning; delays filled with nothing; waits that end on the timer whatever the student is doing.',
+ ex:'&ldquo;Wait, please&rdquo;: the student holds the wait card and keeps working, and the break comes when the wait is over and the student is working. The wait is 10 s this week, 30 s next week, 2 min in a month, and the puzzle is on the desk while it runs.',refs:['lattal10','deleon13','hanley14','hagopian05','hagopian11']},
 {id:'momentum',fam:'applied',name:'Resistance to change (behavioral momentum)',abbr:'momentum',nota:'resistance &prop; reinforcement rate in the context',one:'How hard a behavior is to disrupt depends on the rate of reinforcement in its context, not only on its own rate.',
  def:'Nevin and Grace (2000): response rate and resistance to change are separate properties; resistance grows with the total reinforcement obtained in a stimulus context, whatever response produced it. Mace et al. (1990) demonstrated it in a natural setting.',
  prog:'A design consideration rather than a schedule: dense DRA or NCR in the same context as the problem behavior raises the persistence of the problem behavior too, which shows up when the alternative is later thinned (Mace et al., 2010). Deliver alternative reinforcement in a distinct context where possible, and expect resurgence at thinning: recent clinical studies saw it in 76%&ndash;91% of cases during schedule thinning after FCT (as reviewed by Kimball et al., 2023).',
@@ -1624,7 +1769,7 @@ const PATS=[
   {k:'vr',t:'Variable ratio (VR 20)',g:genVR,p:'High and steady, with almost no pause: nothing about the count predicts the next reinforcer.'},
   {k:'fi',t:'Fixed interval (FI 60 s)',g:genFI,p:'The scallop: a pause, then acceleration into the reinforcer. The interval differentially reinforces responses that follow pauses.'},
   {k:'vi',t:'Variable interval (VI 60 s)',g:genVI,p:'Moderate and steady; reinforcers fall where they fall. The most stable of the basic patterns under changing conditions.'},
-  {k:'extcrf',t:'Extinction after continuous reinforcement',g:genEXTcrf,p:'A burst at a higher rate than before, then a decline to nothing within the session.'},
+  {k:'extcrf',t:'Extinction after continuous reinforcement',g:genEXTcrf,p:'A burst at a higher rate than before, then a decline to nothing within the session. A burst is seen in about 1 in 4 cases (Lerman &amp; Iwata, 1995; Muething et al., 2024).'},
   {k:'extvr',t:'Extinction after variable ratio',g:genEXTvr,p:'Runs at the old rate, separated by lengthening pauses; far more responding before it stops (the partial-reinforcement effect).'},
   {k:'drl',t:'Spaced-responding DRL (IRT > 10 s)',g:genDRL,p:'Single responses spaced at or beyond the criterion, most of them paid; a response too soon is simply unpaid.'},
   {k:'drh',t:'DRH (12 responses within 10 s)',g:genDRH,p:'Bursts that meet the rate, each paid, with short rests between; if the rate slips the reinforcers stop.'},
@@ -1647,6 +1792,8 @@ function renderPat(){$('#patOut').innerHTML=PATS.map((p,i)=>{const d=p.g(rng(11+
 function chooserRecs(){
   const m=S.meta,g=m.q_goal,f=m.q_func,w=m.q_who,fr=m.q_free,st=m.q_stage,ex=m.q_ext;if(!g)return null;
   const R=[];const add=(id,why,w)=>R.push({id,why,w:w||1});
+  /* v25.65 (FCT-SR-M3) more than one function: one request for each */
+  if(f==='multi'&&['red','redlow','maint','wait'].includes(g))add('fct','FCT for each function: Form FS-1 lists more than one, so teach one request for each and honor each with its own reinforcer. FCT worked in 50% of applications with more than one function, against 83% with one (Weber et al., 2024).',3);
   if(g==='acq'){add('crf','A new skill is acquired fastest when every correct response pays; thin once it is in the repertoire.',3);add('chain','A skill with steps is taught as a chain; each step&rsquo;s completion becomes the reinforcer for the step before.',2);add('pct','When the skill is a matter of degree (longer, faster, more), a percentile criterion shapes it without strain.',2);if(fr==='trial')add('vr','In trials, move from CRF to a small variable ratio of trials per reinforcer as accuracy holds.',1);}
   if(g==='inc'){add('dra','Reinforce the behavior you want on a dense schedule and let the competing behavior go unpaid: that is DRA, and it is a concurrent schedule.',3);add('vr','After CRF, a variable ratio keeps the rate high and the student unable to predict the next reinforcer.',2);add('token','If the reinforcer cannot follow at once, tokens bridge the delay and resist satiation.',2);if(w==='self')add('adj','A self-monitoring point sheet with stepped goals is an adjusting schedule; design it on Form SM-1.',2);if(w==='int')add('vi','An adult who checks in now and then should check at variable times; a VI series makes the checks unpredictable.',2);}
   if(g==='flu'){add('drh','Pay rate measured over a timed block, not single fast responses, and raise the rate in small steps.',3);add('interlock','An increasing interlocking requirement writes the price of pace minute by minute.',2);add('drp','When both too fast and too slow are problems, a paced-responding band holds the rate.',2);add('vr','Ratio schedules raise rate; interval schedules do not.',1);}
@@ -1655,12 +1802,12 @@ function chooserRecs(){
     else{add('fct','Teach a request for the functional reinforcer; honor it every time; thin with signals.',3);add('dra','A function-based alternative, reinforced more densely and sooner than the problem behavior.',3);}
     if(f==='auto'){add('ncr','For automatic reinforcement, free access to matched stimulation competes with the behavior; pair with DRA for an appropriate way to get the same stimulation.',3);add('dro','A DRO interval set from the baseline IRT, with the matched stimulus as the reinforcer.',2);add('dri','An incompatible response that occupies the hands or the mouth.',2);}
     else{add('ncr','Time-based delivery of the functional reinforcer abolishes the motivation and is easy to run; it teaches nothing, so pair it with FCT or DRA.',2);add('dro','Reinforcement for intervals without the behavior; momentary or variable-momentary once the reduction is established, if nobody can watch continuously.',2);}
-    if(ex==='no'||ex==='part')add('conc','Extinction cannot be run, so the alternative must win on the concurrent schedule: denser, better, sooner, easier than the problem behavior (Vollmer et al., 1999; Athens &amp; Vollmer, 2010).',3);
-    if(ex==='yes')add('ext','The functional reinforcer withheld for every instance, with the burst planned for.',2);
+    if(ex==='no'||ex==='part')add('conc','Extinction cannot be run, so the alternative must win on the concurrent schedule: denser, better, sooner, easier than the problem behavior (Vollmer et al., 1999; Athens &amp; Vollmer, 2010). Design it on the Design page: &ldquo;FCT or DRA without extinction&rdquo;.',3);
+    if(ex==='yes')add('ext','The functional reinforcer withheld for every instance, with the burst planned for. On the Design page it is a stated step, with the date the team and parent agreed.',2);
     if(w==='int')add('dro','With intermittent observation use momentary or variable-momentary DRO.',1);}
   if(g==='redlow'){add('drl','Full-session or interval DRL pays the behavior staying under a limit; the limit is lowered in steps.',3);add('drd','Diminishing-rate steps written in advance, evaluated as a changing criterion.',2);add('dro','If the behavior should approach zero later, switch to DRO once the DRL limit is low.',1);}
   if(g==='maint'){add('thin','Thin on a plan: signaled multiple schedule for FCT, dense-to-lean for DRA, with criteria and a step-back rule.',3);add('mult','Signals tell the student when the schedule is on; without them the schedule is mixed and the behavior persists in the off periods.',2);add('vi','Variable schedules hold behavior steadily and resist extinction; move from FR to VR, from FI to VI.',2);add('dro','Momentary or variable-momentary DRO maintains a reduction with occasional checks.',1);add('token','Tokens on a thinned production schedule keep the exchange reliable while the behavior per token rises.',1);add('momentum','Expect the problem behavior to return at thinning in the context where it was richly reinforced; teach and pay the alternative in a distinct context.',1);}
-  if(g==='wait'){add('delay','Signaled, filled, progressively longer delays; a tolerance response for the denial.',3);add('mult','An S&minus; signal that means not now, lengthened in steps, with something to do during it.',3);add('chain','Work before the request works: the number of tasks is the delay, and it is faded up.',2);add('token','A token during the wait is the signal that the reinforcer is coming.',2);}
+  if(g==='wait'){add('delay','A wait that ends on what the student does (a tolerance response, an activity or a few tasks): signaled, filled, and lengthened in steps. A wait that ends only on the timer is not recommended alone (Ghaemmaghami et al., 2016). Design it on the Design page.',3);add('mult','An S&minus; signal that means not now, lengthened in steps, with something to do during it.',3);add('chain','Work before the request works: the number of tasks is the delay, and it is faded up.',2);add('token','A token during the wait is the signal that the reinforcer is coming.',2);}
   if(g==='var'){add('lag','A lag schedule pays only responses that differ from the last n; pair it with DRA so only appropriate variants pay.',3);add('pct','A percentile criterion on a novelty measure is another route.',1);}
   if(g==='assess'){add('pr','A progressive ratio separates reinforcers that look equal at FR 1; compare breakpoints.',3);add('conc','A concurrent-operant arrangement shows which of two reinforcers the student works for when both are available.',2);add('concchain','Concurrent chains measure preference between whole arrangements, including the student&rsquo;s preference for the treatment itself.',2);}
   if(st==='gen'&&g!=='maint')add('mult','For new settings, carry the signal with you: the schedule travels on its stimulus.',1);
@@ -1686,9 +1833,28 @@ function nm(full,short,dflt){const s=(short||'').trim();if(s)return s;const f=(f
 /* v23.11 (review F268) the designs that pay a response; on them the rule's response is the one that earns */
 const SR_EARN=['vi','pr','token','lh','lag','interlock'];
 const srSame=(a,b)=>{const f=x=>String(x||'').toLowerCase().replace(/\s*\(.*?\)\s*/g,' ').replace(/[^a-z]+/g,' ').trim();return !!f(a)&&f(a)===f(b);};
+/* v25.65 (FCT-SR-H1) the designs whose card says what follows problem behavior; the chooser's own answer, quoted while the choice is open */
+const SR_EXTD=['ncr','dro','thin','chain','nox','wait'],SR_QEXT={yes:'Yes, reliably',part:'Partly',no:'No'};
+/* v25.65 (FCT-SR-M7) for escape, the earned break holds an item or attention: "a break with [item]" */
+function srBrk(r,m,sel){const g=String(m.brk_get||'').trim();return m.func==='Escape or avoidance'&&g&&SR_EXTD.includes(sel)?r+' with '+esc(g):r;}
+/* v25.65 (FCT-SR-H2, M9) what problem behavior gets now against what the request gets, row by row: how often, how soon, how much,
+   how good, how hard. Seconds on both sides decide how soon and how much; the user says who wins the other rows. */
+const SR_CMP=[['rate','How often'],['delay','How soon'],['amt','How much'],['qual','How good'],['eff','How hard']],SR_WIN={rq:'the request wins',tie:'a tie',pb:'problem behavior wins','':'who wins is not yet said'};
+function srCmp(m){const sec=v=>/^\s*\d+(\.\d+)?\s*(s|sec|secs|seconds)?\s*$/i.test(v);
+  return SR_CMP.map(([k,l])=>{const p=String(m['nx_pb_'+k]||'').trim(),q=String(m['nx_rq_'+k]||'').trim();let w=['rq','tie','pb'].includes(m['nx_w_'+k])?m['nx_w_'+k]:'',auto=false;
+    if((k==='delay'||k==='amt')&&sec(p)&&sec(q)){const a=num(p),b=num(q);auto=true;w=a===b?'tie':k==='delay'?(b<a?'rq':'pb'):(b>a?'rq':'pb');}
+    return {k,l,p,q,w,auto};});}
+function srCell(c,side){const v=c[side];return esc(v)+((c.k==='delay'||c.k==='amt')&&/^\s*\d+(\.\d+)?\s*$/.test(v)?' s':'');}
+function srLine(C,side){return C.filter(c=>c[side]).map(c=>{const v=c[side],x=esc(v),n=/^\s*\d+(\.\d+)?\s*$/.test(v);
+  return c.k==='delay'?'within '+x+(n?' s':''):c.k==='amt'?(n?'for '+x+' s':x):c.k==='eff'?'effort: '+x:x;}).join(', ');}
+/* v25.65 (FCT-SR-H1) the heading and the words of the line that says what follows problem behavior */
+function srExtHead(x){return x.k==='ext'?'Extinction step':x.k==='part'?'Extinction step: only partly possible':x.k==='none'?'No extinction step':'Extinction step: not yet chosen';}
+function srExtText(x){if(x.k==='none')return 'Problem behavior is not put on extinction. The request is made to win instead: see what each gets.';
+  const ln=x.line?x.line.charAt(0).toUpperCase()+x.line.slice(1):'';
+  return (x.k==='part'?'As far as it can be done: '+x.line:ln)+(x.k==='ext'?' Agreed by the team and parent on '+(x.date?esc(x.date):'____')+'.':x.k===''?' (Not yet agreed: choose on the Design page whether this step is part of the plan.)':'');}
 function design(){
   const m=S.meta,sel=m.ds_sel,EARN=SR_EARN.includes(sel),E=esc(nm(m.earn,m.earns,'')||nm(m.alt,m.alts,'')||'the response that earns');
-  const B=EARN?E:esc(nm(m.beh,m.behs,'the behavior')),A=esc(nm(m.alt,m.alts,'the request')),R_=esc(nm(m.sr,m.srs,'the reinforcer'));if(!sel)return null;const o={id:sel,title:'',nota:'',rule:'',params:[],steps:null,stepsHead:null,data:[],warn:[],notes:''};
+  const B=EARN?E:esc(nm(m.beh,m.behs,'the behavior')),A=esc(nm(m.alt,m.alts,'the request')),R_=srBrk(esc(nm(m.sr,m.srs,'the reinforcer')),m,sel);if(!sel)return null;const o={id:sel,title:'',nota:'',rule:'',params:[],steps:null,stepsHead:null,data:[],warn:[],notes:''};
   const base=(nk,mk)=>{const n=num(m[nk]),mn=num(m[mk]);if(n==null||mn==null||n<=0||mn<=0)return null;return{n,mn,rate:n/mn,irt:mn*60/n};};
   if(EARN){if(!String(m.earn||'').trim()&&!String(m.alt||'').trim())o.warn.push('Name the response that earns (Setup): the replacement or a skill. The behavior being reduced never earns.');
     else if(srSame(m.earn||m.alt,m.beh)||(m.behs&&srSame(m.earns||m.alts,m.behs)))o.warn.push('<b>The response that earns is the behavior being reduced.</b> Choose the replacement or a skill: this card would strengthen the behavior the plan exists to reduce.');}
@@ -1705,6 +1871,7 @@ function design(){
       if(share>1)o.warn.push('The starting interval is longer than the baseline mean IRT: most intervals will be lost at first and the reinforcer may never be contacted. Use 100% or less.');
       if(type==='whole'&&m.q_who==='int')o.warn.push('Whole-interval DRO needs continuous observation; with intermittent checks use momentary or variable-momentary DRO.');
       o.notes='Mazaleski et al. (1993) found the extinction component carried most of a DRO effect; make sure the reinforcer is also withheld for the behavior itself. Pair DRO with a reinforced alternative so the student learns what to do instead.';
+      o.extLine=B+' itself never produces '+R_+'.';   /* v25.65 (FCT-SR-H1) */
       if(m.dro_back)o.params.push(['Step back when',esc(m.dro_back)]);}
   }
   if(sel==='drl'){
@@ -1759,15 +1926,35 @@ function design(){
   }
   if(sel==='ncr'){
     const b=base('ncr_n','ncr_min'),kind=m.ncr_kind||'ft',dur=num(m.ncr_dur)??20,term=(num(m.ncr_term)??5)*60,omit=num(m.ncr_omit)??10;
+    /* v25.65 (FCT-SR-M4) four ways to thin, the two published ones as written and the form's own two named as conventions; a start
+       from the time to the first problem behavior. (FCT-SR-L3) the omission rule delays a delivery, or cancels it as in the source. */
+    const thin=['kfi','airt','perf'].includes(m.ncr_thin)?m.ncr_thin:'fixed',cancel=m.ncr_omit_kind==='cancel',lat=m.ncr_startby==='lat'?num(m.ncr_lat):null;
     o.title='NCR: noncontingent reinforcement';
-    if(!b)o.warn.push('Enter the baseline count and minutes.');
-    else{let iv=Math.max(5,Math.floor(b.irt/5)*5);o.nota=(kind==='ft'?'FT ':'VT ')+fmtS(iv)+' ('+dur+' s access) + EXT';
-      o.params.push(['Baseline mean IRT',fmtS(b.irt)],['Starting interval',fmtS(iv)+' (the baseline mean IRT, as in Kahng et al., 2000)'],['Each delivery',dur+' s of '+R_],['Omission rule','If '+B+' occurred in the last '+omit+' s, wait '+omit+' s of its absence before delivering'],['Thinning',m.ncr_thin==='perf'?'Performance-based: one step after each session at or under criterion; one step back after a session above it':'Fixed increments: one step each day the criterion holds']);
+    if(m.ncr_startby==='lat'&&!(lat>0))o.warn.push('Enter the time to the first problem behavior in baseline, or start from the baseline mean IRT.');
+    if(!b&&!(lat>0))o.warn.push('Enter the baseline count and minutes.');
+    else{let iv=Math.max(5,Math.floor((lat>0?lat:b.irt)/5)*5);o.nota=(kind==='ft'?'FT ':'VT ')+fmtS(iv)+' ('+dur+' s access)'+(m.ext_step==='ext'?' + EXT':'');
+      const TH={fixed:'Doubling: one step each day the criterion holds; the interval doubles at each step (the form&rsquo;s convention)',
+        perf:'Performance-based: one step after each session at or under criterion; one step back after a session above it; the interval doubles at each step (the form&rsquo;s convention)',
+        kfi:'Fixed increments as published: one step after any session at or under the criterion, through FT 10, 12, 15, 20 and 30 s, then 1, 2, 3, 4 and 5 min (Kahng et al., 2000, stepped after a session at or below 0.5 per minute and began at FT 10 s; here the ladder starts at the starting interval)',
+        airt:'Adjusting IRT: before each session, the interval is the mean IRT of the last three sessions (minutes &times; 60 &divide; count; a session with no '+B+' counts as the session length, the form&rsquo;s convention). It never more than doubles from one session to the next (Kahng et al., 2000) and never falls below the interval in force (the form&rsquo;s convention).'};
+      if(b)o.params.push(['Baseline mean IRT',fmtS(b.irt)]);
+      o.params.push(['Starting interval',fmtS(iv)+(lat>0?' (the time to the first problem behavior in baseline, as in Lalli et al., 1997)':' (the baseline mean IRT, as in Kahng et al., 2000, who used the last three baseline sessions)')],['Each delivery',dur+' s of '+R_],
+        ['Omission rule',(cancel?'If '+B+' occurred in the '+omit+' s before a delivery, that delivery is skipped and the next one comes on time (as in Vollmer et al., 1997)':'If '+B+' occurred in the last '+omit+' s, wait '+omit+' s of its absence before delivering (the form&rsquo;s convention)')+'. This is a momentary-DRO element: the one place where the behavior changes a delivery.'],['Thinning',TH[thin]]);
       if(kind==='vt'){const L=shuffle(fhSeries(iv,10),rng(Math.round(num(m.vi_seed)??7)*7919));o.params.push(['Intervals at the starting interval (Fleshler–Hoffman, shuffled)','<div class="series">'+L.map(fmtS).join(', ')+'</div>']);}   /* v22.60 (Bancroft & Bourret, 2008) */
-      const rows=[];let k=1,cur=iv;while(cur<term&&k<=12){rows.push([k,fmtS(cur),esc(m.ncr_crit||'')]);cur=Math.round(cur*2/5)*5;k++;}rows.push([k,fmtS(term)+' (terminal)','hold']);o.stepsHead=['Step','Interval','Criterion to step'];o.steps=rows;
-      o.rule='Set the timer to '+(kind==='vt'?'the next interval on the list ('+fmtS(iv)+' on average; at each later step, multiply every value by that step\'s interval over '+fmtS(iv)+')':fmtS(iv))+'. When it rings, deliver '+dur+' seconds of '+R_+' whatever the student is doing, unless '+B+' happened in the last '+omit+' seconds, in which case wait for '+omit+' seconds without it, then deliver. '+B+' itself never produces '+R_+'.';
-      o.data=['Rate of '+B+' per session against baseline '+r1(b.rate)+' per minute','Deliveries per session and the interval in force'];
-      o.notes='NCR teaches no replacement; run FCT or DRA alongside, and expect the free reinforcer to lower the value of the same reinforcer earned by the alternative (satiation). Dense schedules worked where lean ones did not (Hagopian et al., 1994).';}
+      const rows=[];
+      if(thin==='airt'){const L3=String(m.ncr_last3||'').split('\n').map(x=>x.split(/[,;]/).map(num)).filter(x=>x.length>=2&&x[0]>0&&x[1]!=null&&x[1]>=0).slice(-3),now=num(m.ncr_now)>0?num(m.ncr_now):iv;
+        if(L3.length){const irt=L3.map(([mn,c])=>c>0?mn*60/c:mn*60),mean=irt.reduce((a,x)=>a+x,0)/irt.length,next=Math.max(now,Math.min(2*now,mean));
+          o.params.push(['Next session&rsquo;s interval',fmtS(next)+' (the mean IRT of the last '+(L3.length===1?'session':L3.length+' sessions')+' is '+fmtS(mean)+(mean>2*now?'; held to double the interval in force, '+fmtS(now):mean<now?'; not shorter than the interval in force, '+fmtS(now):'')+')']);}
+        o.stepsTitle='Adjusting-IRT worksheet';o.stepsHead=['Session','Minutes','Count of '+B,'IRT (minutes &times; 60 &divide; count)','Mean IRT of the last three','Interval for the next session'];
+        for(let i=1;i<=8;i++)rows.push([i,'','','','','']);}
+      else if(thin==='kfi'){let k=1;rows.push([k++,fmtS(iv),esc(m.ncr_crit||'')]);[10,12,15,20,30,60,120,180,240,300].filter(v=>v>iv&&v<term).forEach(v=>rows.push([k++,fmtS(v),esc(m.ncr_crit||'')]));rows.push([k,fmtS(term)+' (terminal)','hold']);o.stepsHead=['Step','Interval','Criterion to step'];}
+      else{let k=1,cur=iv;while(cur<term&&k<=12){rows.push([k,fmtS(cur),esc(m.ncr_crit||'')]);cur=Math.round(cur*2/5)*5;k++;}rows.push([k,fmtS(term)+' (terminal)','hold']);o.stepsHead=['Step','Interval','Criterion to step'];}
+      o.steps=rows;
+      o.rule='Set the timer to '+(thin==='airt'?'the interval for this session (the adjusting-IRT worksheet; '+fmtS(iv)+' to start)'+(kind==='vt'?', varied around it as on the list':''):kind==='vt'?'the next interval on the list ('+fmtS(iv)+' on average; at each later step, multiply every value by that step\'s interval over '+fmtS(iv)+')':fmtS(iv))+'. When it rings, deliver '+dur+' seconds of '+R_+' whatever the student is doing, unless '+B+' happened in the '+(cancel?omit+' seconds before, in which case skip this delivery and wait for the next one.':'last '+omit+' seconds, in which case wait for '+omit+' seconds without it, then deliver.');
+      o.extLine=B+' itself never produces '+R_+'.';   /* v25.65 (FCT-SR-H1) under its own heading on the card */
+      o.data=['Rate of '+B+' per session against baseline '+(b?r1(b.rate)+' per minute':'(enter the baseline count and minutes)'),'Deliveries per session and the interval in force','Deliveries '+(cancel?'skipped':'delayed')+' by the omission rule, per session'];
+      /* v25.65 (FCT-SR-L6) variable time, a reason to consider it */
+      o.notes='NCR teaches no replacement; run FCT or DRA alongside, and expect the free reinforcer to lower the value of the same reinforcer earned by the alternative (satiation). Dense schedules worked where lean ones did not (Hagopian et al., 1994). Both published thinning methods worked: the adjusting IRT reached FT 5 min in 6, 11 and 15 sessions, fixed increments in 10, 15 and 25 (Kahng et al., 2000). Variable time was as effective as fixed time (Van Camp et al., 2000; Carr et al., 2001), and in a human-operant study it held up better when deliveries were missed (Jones et al., 2025): a reason to consider VT when staff often miss the timer.';}
   }
   if(sel==='pr'){
     const s0=Math.max(1,Math.round(num(m.pr_start)??1)),step=num(m.pr_step)??2,kind=m.pr_kind||'arith',brk=num(m.pr_break)??120;const items=(m.pr_items||'').split('\n').map(x=>x.trim()).filter(Boolean);
@@ -1790,23 +1977,73 @@ function design(){
     o.notes='Six parts (Ivy et al., 2017): the responses, the token, the back-ups, and the three schedules. Tokens bridge delay and resist satiation when they buy several things (DeLeon et al., 2014); token loss is a punisher (Raiff et al., 2008, in DeLeon et al., 2013).';
   }
   if(sel==='thin'){
-    const pd=num(m.th_pdur)??60,m0=num(m.th_m0)??15,mT=num(m.th_mT)??240,mult=num(m.th_mult)??2;
-    o.title='Multiple-schedule thinning after FCT';o.nota='mult FR 1 ('+esc(m.th_splus||'S+')+') EXT ('+esc(m.th_sminus||'S&minus;')+'): '+fmtS(pd)+' / '+fmtS(m0)+' &rarr; '+fmtS(pd)+' / '+fmtS(mT);
-    const rows=[[1,fmtS(pd),'0 (continuous reinforcement, signal present)',esc(m.th_crit||'')]];let cur=m0,k=2;while(cur<mT&&k<=14){rows.push([k,fmtS(pd),fmtS(cur),esc(m.th_crit||'')]);cur=cur*(mult>1?mult:2);k++;}rows.push([k,fmtS(pd),fmtS(mT)+' (terminal)','hold']);o.stepsHead=['Step','S+ (request works)','S&minus; (request does not work)','Criterion to step'];o.steps=rows;
+    /* v25.65 (FCT-SR-H3) every step shows how long the request works and the size of the drop, and big drops are flagged; a second way
+       to step, a largest drop per step. (M2) the terminal S- from the classroom, and a start from a one-session probe. (M10) a natural
+       signal reached through the arranged one. (H4) the signal check and the share of requests made in S+. (M1) the S- activity. */
+    const pd=num(m.th_pdur)??60,m0=num(m.th_m0)??15,gm=num(m.th_goal_min),mT=gm>0?Math.round(gm*60):(num(m.th_mT)??240),mult=num(m.th_mult)??2;
+    const drop=m.th_mode==='drop',md=Math.min(50,Math.max(5,num(m.th_maxdrop)??20))/100,probe=m.th_start==='probe',rise=num(m.th_rise),nat=m.th_sigkind==='natural';
+    const works=v=>pd/(pd+v),pc=x=>Math.round(x*100)+'%',crit=esc(m.th_crit||''),big=[];
+    const seq=[];if(drop){let p=1;for(let i=0;i<30;i++){p*=(1-md);const v=Math.round(pd*(1/p-1));if(v>=mT)break;seq.push(v);}}else{let cur=m0,k=2;while(cur<mT&&k<=14){seq.push(cur);cur=cur*(mult>1?mult:2);k++;}}
+    o.title='Multiple-schedule thinning after FCT';o.nota='mult FR 1 ('+esc(m.th_splus||'S+')+') EXT ('+esc(m.th_sminus||'S&minus;')+'): '+fmtS(pd)+' / '+fmtS(probe?mT:drop?(seq.length?seq[0]:mT):m0)+' &rarr; '+fmtS(pd)+' / '+fmtS(mT);
+    const rows=[];let prev=1;
+    const step=(k,txt,v,c)=>{const w=works(v),d=prev>0?(prev-w)/prev:0,dp=Math.round(d*100),fl=dp>33;if(fl)big.push(k+' ('+dp+'%)');rows.push([k,fmtS(pd),txt,pc(w),d>0.0005?dp+'%'+(fl?' <b>large step</b>':''):'&mdash;',c]);prev=w;};
+    if(probe){rows.push([1,fmtS(pd),fmtS(mT)+' (probe: one session at the terminal value)',pc(works(mT)),'&mdash;','one session, with the safety plan']);prev=works(mT);
+      if(rise>0){let v=Math.max(5,Math.floor(rise)),k=2;if(v<=mT/4){while(v<mT/2&&k<=14){step(k,fmtS(v),v,crit);v*=2;k++;}}
+        rows.push([k,fmtS(pd),fmtS(mT)+' (probe again at the terminal value)',pc(works(mT)),'&mdash;',crit]);rows.push([k+1,fmtS(pd),fmtS(mT)+' (terminal)',pc(works(mT)),'&mdash;','hold']);}
+      else rows.push([2,fmtS(pd),'the time problem behavior took to rise in the probe, then doubled each step until half the terminal value','&mdash;','&mdash;',crit],[3,fmtS(pd),fmtS(mT)+' (probe again, then terminal)',pc(works(mT)),'&mdash;','hold']);}
+    else{rows.push([1,fmtS(pd),'0 (continuous reinforcement, signal present)','100%','&mdash;',crit]);seq.forEach((v,i)=>step(i+2,fmtS(v),v,crit));step(seq.length+2,fmtS(mT)+' (terminal)',mT,'hold');}
+    o.stepsHead=['Step','S+ (request works)','S&minus; (request does not work)','Request works (% of session)','Drop from the last step (%)','Criterion to step'];o.steps=rows;
     o.params.push(['S+ signal',esc(m.th_splus||'')],['S&minus; signal',esc(m.th_sminus||'')],['During S&minus; the student has',esc(m.th_comp||'')],['Step back when',esc(m.th_back||'')]);
-    o.rule='Show the S+ signal: every '+A+' is honored at once with '+R_+'. Show the S&minus; signal: a request is answered with a brief neutral &ldquo;not now&rdquo; and nothing else; '+B+' never produces '+R_+' under either signal. Alternate the signals for the durations in the step in force, starting each session in S+.';
-    o.data=['Problem behavior per session against baseline (rate)','Requests under S+ and under S&minus; (the discrimination)','The step in force'];
-    o.notes='Signaled thinning beat unsignaled in Hanley et al. (2001); Greer et al. (2016) analyzed 25 applications and the additions needed when problem behavior returned. Give the student something to do in S&minus; (Hagopian et al., 2005). Expect resurgence in the context where the problem behavior was richly reinforced (Mace et al., 2010).';
+    o.params.push(['How the steps are set',drop?'A drop of at most '+Math.round(md*100)+'% per step in the share of the session the request works; the form computes each S&minus;':'S&minus; multiplied by '+(mult>1?mult:2)+' each step; the table shows the share of the session the request works and the drop at each step']);
+    if(gm>0)o.params.push(['Longest wait in this setting',r1(gm)+' min'+(String(m.th_goal_when||'').trim()?', during '+esc(m.th_goal_when):'')+' (sets the terminal S&minus;)']);
+    {const how=String(m.th_sighow||'').trim();o.params.push(['Signal check',(m.th_sigok==='yes'?'The student matches and names the two signals':m.th_sigok==='no'?'The student cannot yet match and name the two signals':'Not yet checked: can the student match and name the two signals?')+(how?' ('+esc(how)+')':'')]);}
+    if(nat)o.params.push(['Signal plan','Start with the arranged signals. When at least 80% of requests are made in S+, show them together with the teacher&rsquo;s own activity (free: S+; busy: S&minus;). Then fade the arranged signals. Check the share of requests made in S+ at each change (Kuhn et al., 2010; Shamlian et al., 2016).']);
+    if(probe)o.params.push(['Start','A one-session probe at the terminal value. If problem behavior stays low, keep the terminal value. If it rises clearly, S&minus; starts at the time it took to rise; once problem behavior is low again, S&minus; doubles each step until it reaches half the terminal value, and the terminal value is probed again (if S&minus; starts above a quarter of the terminal value, the probe is repeated at once). After Strohmeier et al. (2024).']);
+    o.rule='Show the S+ signal: every '+A+' is honored at once with '+R_+'. Show the S&minus; signal: a request is answered with a brief neutral &ldquo;not now&rdquo; and nothing else. Alternate the signals for the durations in the step in force, starting each session in S+.'+(probe?' The first session is the probe at the terminal value, run with the safety plan.':'')+(nat?' The arranged signals come first; the teacher&rsquo;s own activity takes over as the signal plan says.':'');
+    o.extLine=B+' never produces '+R_+' under either signal.';   /* v25.65 (FCT-SR-H1) */
+    o.data=['Problem behavior per session against baseline (rate)','Requests under S+ and under S&minus;, and the share of requests made in S+ (the discrimination)','The step in force'];
+    if(!String(m.th_comp||'').trim())o.warn.push('Name what the student has during &ldquo;not now&rdquo;: an item or activity from a competing stimulus assessment, never the reinforcer the request asks for (Hagopian et al., 2005).');
+    if(big.length)o.warn.push('Large step'+(big.length>1?'s':'')+' (a drop above 33%) at step '+big.join(', step ')+': resurgence is more likely and larger. Consider an extra step. The size of the drop was the one variable that went with how large resurgence was (Laureano et al., 2024), and steps of 20% or less made large resurgence less likely (Greer et al., 2024).');
+    if(m.th_sigok==='no')o.warn.push('The student cannot yet match and name the two signals. Use signals that differ in more than color (shape, object, place, a lanyard plus a spoken rule), and train the discrimination before the first S&minus; step. Color skills went with discriminated requests (Pizarro et al., 2021).');
+    if(probe)o.warn.push('The probe is a clinic-developed method (Strohmeier et al., 2024). Use it only with the safety plan, and never for behavior that is dangerous.');
+    if(gm>0&&num(m.th_mT)!=null&&Math.abs(num(m.th_mT)-mT)>0.5)o.warn.push('The terminal S&minus; is set from the longest wait in this setting ('+fmtS(mT)+'), not from the terminal S&minus; typed ('+fmtS(num(m.th_mT))+').');
+    {const v2=num(m.sd_up2v);if(v2!=null&&v2<70)o.warn.push('The share of requests made in S+ is never set below 70% (Greer et al., 2016); the step helper uses 70%.');}
+    o.notes='Signaled thinning beat unsignaled in Hanley et al. (2001); Greer et al. (2016) analyzed 25 applications and the additions needed when problem behavior returned; after thinning, an average of 92% of requests came in S+. Give the student something to do in S&minus; (Hagopian et al., 2005). Expect resurgence in the context where the problem behavior was richly reinforced (Mace et al., 2010). The terminal schedule should come from the setting (Saini et al., 2016). In a comparison of two groups (not randomized), resurgence followed 13 of 24 probe-started applications against 16 of 18 gradual ones, and caregivers ran 66% against 22% (Strohmeier et al., 2024).';
   }
   if(sel==='chain'){
     const s0=Math.max(0,Math.round(num(m.ch_start)??1)),sT=Math.round(num(m.ch_end)??10),st=Math.max(1,Math.round(num(m.ch_step)??1));
     o.title='Chained schedule with demand fading';o.nota='chain FR '+s0+' FR 1 &rarr; chain FR '+sT+' FR 1';
     const rows=[];let k=1;for(let v=s0;v<sT&&k<=20;v+=st,k++)rows.push([k,v+' '+(v===1?'task':'tasks')+', then '+esc(m.ch_sig||'the signal'),esc(m.ch_crit||'')]);rows.push([k,sT+' tasks (terminal)','hold']);o.stepsHead=['Step','Requirement before the request works','Criterion to step'];o.steps=rows;
     o.params.push(['A task is',esc(m.ch_task||'')],['Signal',esc(m.ch_sig||'')]);
-    o.rule='Present the work. After the number of tasks in force, show '+(m.ch_sig||'the signal')+'; now '+A+' earns '+R_+' at once. Before the signal, a request is answered &ldquo;first the work, then you can ask&rdquo; and the work continues; '+B+' never ends the work.';
+    o.rule='Present the work. After the number of tasks in force, show '+(m.ch_sig||'the signal')+'; now '+A+' earns '+R_+' at once. Before the signal, a request is answered &ldquo;first the work, then you can ask&rdquo; and the work continues.';o.extLine=B+' never ends the work.';   /* v25.65 (FCT-SR-H1) */
     o.data=['Tasks completed; requests before and after the signal; problem behavior per session'];
     o.notes='After Lalli, Casey and Kates (1995) and the chained-schedule treatments in Hanley et al. (2014). The signal is the conditioned reinforcer for the work; it must be taught before the requirement grows.';
   }
+  /* v25.65 (FCT-SR-H2, L4) FCT or DRA without extinction: the request must win on how often, how soon, how much, how good and how hard */
+  if(sel==='nox'){const C=srCmp(m),q=srLine(C,'q'),p=srLine(C,'p');
+    o.title='FCT or DRA without extinction: the request must win';
+    o.nota='conc '+(esc(C[0].q)||'FR 1')+' ('+A+') &middot; '+(esc(C[0].p)||'as now')+' ('+B+')'+(m.ext_step==='ext'?' + EXT':'');
+    o.rule=A+': '+(q||'[write what the request gets]')+'. Every adult gives the request what is written for it, every time.'+(m.ext_step==='ext'?'':' When '+B+' happens, give only what is written for it on this card (What problem behavior still gets): never more, sooner or better than the request gets.');
+    o.extLine=B+' no longer produces '+R_+'.';
+    C.forEach(c=>o.params.push([c.l,'The request: '+(srCell(c,'q')||'&mdash;')+'; problem behavior: '+(srCell(c,'p')||'&mdash;')+'; '+SR_WIN[c.w]+(c.auto?' (from the seconds)':'')]));
+    {const g=k=>num(m[k]),pb=g('mw_pb'),pbs=g('mw_pbsr'),rq=g('mw_rq'),rqs=g('mw_rqsr'),rq2=g('mw_rqsr2'),pc=x=>Math.round(x*100)+'%';
+     if(pb!=null&&rq!=null&&pbs!=null&&rqs!=null&&pb>=0&&rq>=0&&pbs>=0&&rqs>=0&&pb+rq>0&&pbs+rqs>0)o.params.push(['Matching worksheet','Problem behavior is '+pc(pb/(pb+rq))+' of the responses and gets '+pc(pbs/(pbs+rqs))+' of the reinforcement.'+(rq2!=null&&rq2>=0&&pbs+rq2>0?' If the request gets it '+rq2+' times instead of '+rqs+', strict matching predicts problem behavior at about '+pc(pbs/(pbs+rq2))+' of the responses.':'')+' The shares matched for all 4 participants with severe problem behavior (Borrero &amp; Vollmer, 2002), but only partly in classrooms (Mace et al., 1994): read it as a direction, not a forecast.']);}
+    o.notes='Without extinction, treatment worked when the alternative won on several dimensions at once (Athens &amp; Vollmer, 2010; Hoch et al., 2002; Briggs et al., 2019). FCT without extinction often failed in severe cases: none of 11 applications reached a 90% reduction (Hagopian et al., 1998). The review line on the card is the safeguard.';}
+  /* v25.65 (FCT-SR-H5) a wait that ends on what the student does, filled; a time-only wait is marked and never recommended alone */
+  if(sel==='wait'){const s0=Math.max(1,num(m.wt_s0)??5),sT=Math.max(s0,num(m.wt_sT)??300),mu=num(m.wt_mult)>1?num(m.wt_mult):2,time=m.wt_kind==='time';
+    const sig=String(m.wt_sig||'').trim()?esc(m.wt_sig):'&ldquo;wait, please&rdquo;',does=esc(String(m.wt_does||'').trim()),item=esc(String(m.wt_item||'').trim());
+    o.title='A wait that ends on what the student does';
+    o.nota='FR 1 ('+A+') with a '+(time?'time-only wait':'wait that ends on what the student does')+': '+fmtS(s0)+' &rarr; '+fmtS(sT);
+    const rows=[];let k=1,v=s0;while(v<sT&&k<=14){rows.push([k,fmtS(v),esc(m.wt_crit||'')]);v=Math.round(v*mu);k++;}rows.push([k,fmtS(sT)+' (longest)','hold']);
+    o.stepsHead=['Step','Wait','Criterion to step'];o.steps=rows;
+    o.rule='When the student uses '+A+', say '+sig+'. '+(time?'Start the timer; '+R_+' comes when it ends, whatever the student is doing.':'The student '+(does||'[does what is written for the wait]')+'. '+R_+' comes when the wait in force is over <i>and</i> the student is doing it; if the student is not, prompt it and give '+R_+' as soon as the student does.')+(item?' Available during the wait: '+item+'.':'');
+    o.extLine=B+' does not end the wait early and does not produce '+R_+'.';
+    o.params.push(['The wait ends',time?'When the timer ends, whatever the student does (time only: not recommended alone)':'When the time is up and the student is doing what was asked'],['During the wait the student',does],['Available during the wait',item]);
+    o.data=['Waits run, and waits completed without '+B+'; the wait in force','Requests and '+B+' per session'];
+    if(time)o.warn.push('A time-only wait is not recommended alone. Waits that ended on what the student did gave lower problem behavior for all 4 participants (Ghaemmaghami et al., 2016), and requiring an alternative response during the wait gave the best tolerance (Drifke et al., 2020).');
+    else if(!does)o.warn.push('Write what the student does during the wait: the tolerance response, an activity, or a number of tasks.');
+    if(!item)o.warn.push('Name the item or activity available during the wait: competing items gave faster goals and less problem behavior (Hagopian et al., 2005).');
+    o.notes='Rank the ways to thin a request: a multiple or chained schedule first (Hanley et al., 2001; Rooker et al., 2013); where waits cannot be predicted, a wait that ends on what the student does (Ghaemmaghami et al., 2016; Drifke et al., 2020); a time-only wait last. Increasing time-only delays extinguished the request (Hanley et al., 2001).';}
   if(sel==='interlock'){
     const dir=m.il_dir||'dec',init=num(m.il_init)??20,step=num(m.il_step)??2,every=Math.max(1,num(m.il_every)??2),len=Math.max(1,num(m.il_len)??16),floor=num(m.il_floor)??0,cap=num(m.il_cap)??init;
     o.title='Interlocking schedule';o.nota='interlock: '+init+' at minute 0, '+(dir==='dec'?'falling':'rising')+' by '+step+' every '+every+' min';
@@ -1822,28 +2059,66 @@ function design(){
   /* v23.13 (review I137) the card names where its baseline came from */
   if(SR_BASE[sel]&&String(m[sel+'_bsrc']||'').trim())o.params.unshift(['Baseline from',esc(m[sel+'_bsrc'])]);
   /* v23.11 (review F271) a reduction card says how the replacement is reinforced, or says it names none (Vollmer & Iwata, 1992) */
-  if(['dro','drl','ncr'].includes(sel)&&o.rule){if(String(m.alt||'').trim()){o.rule+=' <b>The replacement:</b> answer '+A+' at once with '+R_+', every time; it does not change the timer or the count.';o.data.push('Instances of '+A+' per session');}
+  if(['dro','drl','ncr'].includes(sel)&&o.rule){if(String(m.alt||'').trim()){o.rule+=sel==='ncr'?' <b>The replacement:</b> teach '+A+' alongside NCR and answer it at once with '+R_+', every time; it does not change the timer. Count requests each session. If they stay near zero while NCR is dense, thin NCR before expecting them (Goh et al., 2000; Marcus &amp; Vollmer, 1996).':' <b>The replacement:</b> answer '+A+' at once with '+R_+', every time; it does not change the timer or the count.';   /* v25.65 (FCT-SR-M6) one rule for NCR and the request */o.data.push('Instances of '+A+' per session');}
     else o.warn.push('No replacement response is named: this card is '+sel.toUpperCase()+' alone. Name the alternative from Form TB-1 or GB-1 (DRA), so the student learns what to do instead.');}
   /* v23.11 (review F277) the card promises steps on the data: say so when the step criterion or the step-back rule is blank */
-  {const C={dro:['dro_crit','dro_back'],drl:['drl_crit'],ncr:['ncr_crit'],thin:['th_crit','th_back']}[sel],W={crit:'the criterion to step up',back:'the step-back rule'};
-   const miss=C&&o.steps?C.filter(k=>!String(m[k]||'').trim()).map(k=>W[k.split('_')[1]]):[];
+  {const C={dro:['dro_crit','dro_back'],drl:['drl_crit'],ncr:['ncr_crit'],thin:['th_crit','th_back'],wait:['wt_crit']}[sel],W={crit:'the criterion to step up',back:'the step-back rule'};
+   const miss=C&&o.steps&&!(sel==='ncr'&&m.ncr_thin==='airt')?C.filter(k=>!String(m[k]||'').trim()).map(k=>W[k.split('_')[1]]):[];
    if(miss.length)o.warn.push('Write '+miss.join(' and ')+' before printing the card: the card says steps are taken on the data.');}
   /* v23.11 (review F269) a thinning, chained, NCR or DRO schedule for a social function delivers the functional reinforcer */
-  if(['thin','chain','ncr','dro'].includes(sel)&&SR_FSR[m.func]&&/\(Forms? PA-1/.test(m.sr||''))o.warn.push('This schedule should deliver the functional reinforcer ('+esc(SR_FSR[m.func].replace(/ \(the function, Form FS-1\)$/,''))+'); the PA-1 items go in \u201cDuring S\u2212 the student has\u201d.');
+  if(['thin','chain','ncr','dro'].includes(sel)&&SR_FSR[m.func]&&/\(Forms? PA-1/.test(m.sr||''))o.warn.push(sel==='ncr'
+    /* v25.65 (FCT-SR-M5) for NCR, other highly preferred items also worked */
+    ?'For NCR the functional reinforcer ('+esc(SR_FSR[m.func].replace(/ \(the function, Form FS-1\)$/,''))+') is slightly stronger. Highly preferred other items also worked, and suit times when the functional reinforcer cannot be given in class: NCR worked for socially maintained behavior in 14 of 15 applications, with the functional or other reinforcers (Phillips et al., 2017).'
+    :'This schedule should deliver the functional reinforcer ('+esc(SR_FSR[m.func].replace(/ \(the function, Form FS-1\)$/,''))+'); the PA-1 items go in \u201cDuring S\u2212 the student has\u201d.');
   if(sel==='lag'){const n=Math.max(1,Math.round(num(m.lag_n)??1));o.title='Lag schedule';o.nota='Lag '+n;
     o.params.push(['Response class',esc(m.lag_class||'')],['Different means',esc(m.lag_diff||'')],['Never paid',esc(m.lag_never||'')]);
     o.rule='Keep a running list of the last '+n+' '+(m.lag_class||'responses')+'. A response that differs from all '+n+' earns '+R_+'; a repeat of any of them earns nothing. '+(m.lag_never?'Never pay: '+m.lag_never+'.':'');
     o.data=['Responses, whether novel, whether paid; the number of distinct responses per session'];o.notes='Lee, McComas and Jawor (2002); Cammilleri and Hanley (2005). With small lags the student may cycle through n + 1 responses; raise the lag or add a DRA criterion for quality.';}
+  /* v25.65 (FCT-SR-H1) what follows problem behavior: chosen, never silent; the extinction line stands under its own heading */
+  if(SR_EXTD.includes(sel)&&o.rule){const k=['ext','part','none'].includes(m.ext_step)?m.ext_step:'',dt=String(m.ext_date||'').trim();o.ext={k,line:o.extLine||'',date:dt};
+    if(!k)o.warn.push('<b>Choose what follows problem behavior</b> (Design page, &ldquo;After problem behavior&rdquo;): an extinction step agreed by the team and parent, extinction only partly possible, or no extinction. Until then the card marks its extinction line &ldquo;not yet chosen&rdquo;.'+(SR_QEXT[m.q_ext]?' On the Choose page, &ldquo;Can the maintaining reinforcer be withheld?&rdquo; was answered: '+SR_QEXT[m.q_ext]+'.':''));
+    if(k==='ext'&&!dt)o.warn.push('Write the date the team and parent agreed to the extinction step.');
+    if(k==='part')o.warn.push('Problem behavior that is sometimes reinforced keeps going; the request must win on several dimensions. Fill in what each gets (Design page), as in the design for FCT or DRA without extinction.');
+    if(k==='none'&&sel!=='nox')o.warn.push('With no extinction step, this card follows the rule for FCT or DRA without extinction: the request must win. Fill in what each gets (Design page); the card prints the two side by side.');
+    /* v25.65 (FCT-SR-M5) NCR without extinction, as it is thinned */
+    if(k==='none'&&sel==='ncr')o.warn.push('Problem behavior often returns as NCR without extinction is thinned (Wallace et al., 2012), and resurgence was greater after NCR without extinction for all 3 participants (Saini et al., 2017). Teach and reinforce a request before thinning, and thin slowly.');}
+  /* v25.65 (FCT-SR-H2, M9) what each side gets: without extinction the request must win; otherwise it starts at least as good as baseline */
+  {const H2=sel==='nox'||(!!o.ext&&(o.ext.k==='part'||o.ext.k==='none'));
+   if(o.rule&&(H2||['thin','chain','wait'].includes(sel))){const C=srCmp(m);o.cmp=C;o.cmpH2=H2;
+    if(H2){const wins=C.filter(c=>c.w==='rq').length,lose=C.filter(c=>c.w==='tie'||c.w==='pb'),open=C.filter(c=>!c.w);
+      if(lose.length)o.warn.push('The request loses or ties on '+lose.map(c=>c.l.toLowerCase()).join(', ')+'. Without extinction it must win on every row it can.');
+      if(open.length)o.warn.push('Say who wins on '+open.map(c=>c.l.toLowerCase()).join(', ')+' (Design page).');
+      if(wins<3)o.warn.push('The request wins on '+wins+' of 5. Without extinction, change was largest and most consistent when several dimensions favored the alternative (Athens &amp; Vollmer, 2010).');
+      o.params.push(['Thinning without extinction','Thin only how often. How much and how good stay as they are while thinning: 3 of 4 participants needed both a larger and a better reinforcer to keep the effect during thinning (Briggs et al., 2019).']);
+      o.data.push('Requests and '+B+' per session, and the share of requests each session: requests &divide; (requests + '+B+')');
+      const rv=num(m.nx_review);o.data.push('If '+B+' has not fallen within '+(rv>0?rv:'____')+' sessions, the BCBA reviews the plan.');
+      if(!(rv>0))o.warn.push('Write the number of sessions after which the BCBA reviews the plan if problem behavior has not fallen.');
+      /* v25.65 (the BCBA, 11/2) a plan in which problem behavior still gets its reinforcer on purpose says so, and says what it does, why,
+         for how long and what the data must show before it ends; it is never the default (the design and the choice are the user's) */
+      if(sel==='nox'?o.ext.k!=='ext':o.ext.k==='none'){const pl=srLine(C,'p');
+        o.pbOpt='<b>OPTION: Reinforces problem behavior on purpose:</b> when '+B+' happens, it still gets '+(pl||'what it gets now (write it on the Design page)')+', and never more, sooner or better than the request gets. What it does: the request pays more than problem behavior, so the student moves to the request (Athens &amp; Vollmer, 2010). Why: there is no extinction step in this plan. For how long: while the request takes over; the BCBA reviews the plan if problem behavior has not fallen within '+(rv>0?rv:'____')+' sessions. What the data must show before it ends: the share of requests rising and problem behavior falling, session by session; then the BCBA decides with the team and parent whether what problem behavior gets is thinned or an extinction step is added.';}}
+    else{const g=k=>C.find(c=>c.k===k).w,bad=[];if(g('amt')==='pb')bad.push('shorter');if(g('delay')==='pb')bad.push('later');if(g('qual')==='pb')bad.push('of lower quality');
+      if(bad.length)o.warn.push('The request&rsquo;s reinforcer is '+bad.join(', ')+' than what problem behavior got in baseline. Start it at least as good. A model predicts fewer bursts when the rate, size, immediacy and quality of reinforcement stay the same or rise as FCT starts (Fisher et al., 2023): a model prediction, not yet tested in clinics.');}}}
+  /* v25.65 (FCT-SR-M3) one request for each function */
+  if(SR_EXTD.includes(sel)&&m.func==='More than one'){const L=String(m.fn_reqs||'').split('\n').map(x=>x.trim()).filter(Boolean);o.fnReqs=L;
+    if(L.length<2)o.warn.push('Form FS-1 lists more than one function: write one request for each function (Design page). FCT worked in 50% of applications with more than one function, against 83% with one (Weber et al., 2024).');}
+  /* v25.65 (FCT-SR-M7) for escape, the earned break holds something */
+  if(m.func==='Escape or avoidance'&&['thin','chain','nox','wait'].includes(sel)&&!String(m.brk_get||'').trim())o.warn.push('Name what the student gets during the break (Design page): an item or attention from Form PA-1. A break with preferred activities beat a plain break (Hoch et al., 2002), and a positive reinforcer for compliance worked for all 5 participants where a plain break failed for 3 of 5 (Slocum &amp; Vollmer, 2015).');
   return o;
 }
 function renderDesign(){try{srDdBox();}catch(e){}
   const o=design();const out=$('#dsOut');setDs(S.meta.ds_sel||'');
+  /* v25.65 (FCT-SR-H1, H2, H7, M3, M7, M9) the shared fields show where they apply */
+  try{const m=S.meta,sel=m.ds_sel||'',sh=(id,on)=>{const e=document.getElementById(id);if(e)e.hidden=!on;};
+    sh('srExt',SR_EXTD.includes(sel));sh('srCmp',!!(o&&o.cmp));sh('srStall',['thin','chain','ncr','wait'].includes(sel));sh('srFnReqs',m.func==='More than one');sh('srBrk',m.func==='Escape or avoidance');
+    const hn=document.getElementById('srCmpHint');if(hn)hn.innerHTML=o&&o.cmpH2?'Without extinction, problem behavior still gets something, so the request must win: more often, sooner, more, better and easier (Athens &amp; Vollmer, 2010). Write both sides and say who wins each row; the seconds decide how soon and how much.':'Optional: what problem behavior got in baseline, against what the request gets now. Start the request at least as good: as much, as soon and as good (a model prediction: Fisher et al., 2023).';}catch(e){}
   if(!o){out.innerHTML='<p class="hint">Choose a schedule to design; the parameters appear above and the plan here.</p>';return;}
   let h='<h3>'+o.title+'</h3>';if(o.nota)h+='<div class="metric" style="margin:6px 0"><b>Notation</b><div class="val" style="font-family:ui-monospace,Menlo,monospace;font-size:16px">'+o.nota+'</div></div>';
   o.warn.forEach(w=>{h+='<div class="verdict v-mid">'+w+'</div>';});
   if(o.params.length)h+='<table class="rt">'+o.params.map(p=>'<tr><th style="width:28%">'+p[0]+'</th><td>'+p[1]+'</td></tr>').join('')+'</table>';
   if(o.steps)h+=tbl(o.stepsHead,o.steps);
   if(o.rule)h+='<p><b>The rule in words.</b> '+o.rule+'</p>';
+  if(o.ext)h+='<p><b>'+srExtHead(o.ext)+'.</b> '+srExtText(o.ext)+'</p>';   /* v25.65 (FCT-SR-H1) */
   if(o.notes)h+='<p class="hint">'+o.notes+'</p>';
   out.innerHTML=h;
 }
@@ -1856,11 +2131,22 @@ function renderCard(){
   if(!o){out.innerHTML='<p class="hint">Design a schedule first; the card is written from it.</p>';return;}
   const bl='<span class="bl"></span>';
   let h='<div class="c-title">'+esc(m.cd_title||((m.client||'Student')+': '+o.title))+'</div><div class="c-nota">'+o.nota+'</div>'+
-    '<div class="c-grid"><div><b>Student:</b> '+esc(m.client||'')+'</div><div><b>Setting:</b> '+esc(m.setting||'')+'</div><div><b>Run by:</b> '+esc(m.who||'')+'</div><div><b>Date:</b> '+esc(m.date||'')+'</div>'+(SR_EARN.includes(o.id)?'<div><b>Response that earns:</b> '+esc(m.earn||m.alt||'')+'</div>':'<div><b>Behavior:</b> '+esc(m.beh||'')+'</div>')+(m.alt&&!(SR_EARN.includes(o.id)&&(!String(m.earn||'').trim()||srSame(m.earn,m.alt)))?'<div><b>Replacement:</b> '+esc(m.alt)+'</div>':'')+'<div><b>Reinforcer:</b> '+esc(m.sr||'')+'</div>'+(m.func?'<div><b>Function:</b> '+esc(m.func)+'</div>':'')+'</div>';
+    '<div class="c-grid"><div><b>Student:</b> '+esc(m.client||'')+'</div><div><b>Setting:</b> '+esc(m.setting||'')+'</div><div><b>Run by:</b> '+esc(m.who||'')+'</div><div><b>Date:</b> '+esc(m.date||'')+'</div>'+(SR_EARN.includes(o.id)?'<div><b>Response that earns:</b> '+esc(m.earn||m.alt||'')+'</div>':'<div><b>Behavior:</b> '+esc(m.beh||'')+'</div>')+(m.alt&&!(SR_EARN.includes(o.id)&&(!String(m.earn||'').trim()||srSame(m.earn,m.alt)))?'<div><b>Replacement:</b> '+esc(m.alt)+'</div>':'')+'<div><b>Reinforcer:</b> '+esc(m.sr||'')+'</div>'+(m.func==='Escape or avoidance'&&String(m.brk_get||'').trim()?'<div><b>During the break:</b> '+esc(m.brk_get)+'</div>':'')+(m.func?'<div><b>Function:</b> '+esc(m.func)+'</div>':'')+'</div>';
   h+='<h3>The rule</h3><div class="rule">'+o.rule+'</div>';
+  /* v25.65 (FCT-SR-H1, H6) the extinction line under its own heading; what to expect when the step is chosen */
+  if(o.ext){h+='<h3>'+srExtHead(o.ext)+'</h3><div class="rule">'+srExtText(o.ext)+'</div>';
+    if(o.ext.k==='ext')h+='<h3>What to expect</h3><ul><li>About 1 in 4 treatments show a burst: problem behavior rises before it falls (24% of data sets in Lerman &amp; Iwata, 1995, and in Muething et al., 2024). Bursts are more common when extinction is used alone (36% against 12%), and new aggression can come with them (Lerman et al., 1999).</li><li>Problem behavior usually returns to the baseline level by about the fifth session (Muething et al., 2024).</li><li>A burst means: any of the first three sessions higher than every one of the last five baseline sessions (Lerman &amp; Iwata, 1995).</li><li>Follow the safety plan (Form CR-1). Do not change the plan in the first three sessions without the BCBA.</li></ul>';}
+  if(o.pbOpt)h+='<h3>What problem behavior still gets</h3><div class="rule">'+o.pbOpt+'</div>';   /* v25.65 (the BCBA, 11/2) */
+  /* v25.65 (FCT-SR-H2, M9) what each side gets, side by side */
+  if(o.cmp&&(o.cmpH2||o.cmp.some(c=>c.p||c.q)))h+='<h3>'+(o.cmpH2?'What each gets: the request must win':'What each gets, against baseline')+'</h3><table class="ct"><tr><th style="width:16%"></th><th>'+esc(nm(m.alt,m.alts,'The request'))+'</th><th>'+esc(nm(m.beh,m.behs,'Problem behavior'))+(o.cmpH2?'':' (in baseline)')+'</th><th style="width:16%">Wins</th></tr>'
+    +o.cmp.map(c=>'<tr><th>'+c.l+'</th><td>'+srCell(c,'q')+'</td><td>'+srCell(c,'p')+'</td><td>'+(c.w==='rq'?'the request':c.w==='tie'?'a tie':c.w==='pb'?'problem behavior':'')+'</td></tr>').join('')+'</table>';
+  /* v25.65 (FCT-SR-M3) one request for each function */
+  if(o.fnReqs&&o.fnReqs.length)h+='<h3>Requests, one for each function</h3><ul>'+o.fnReqs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
   if(o.params.length)h+='<h3>Settings</h3><table class="ct">'+o.params.map(p=>'<tr><th style="width:30%">'+p[0]+'</th><td>'+p[1]+'</td></tr>').join('')+'</table>';
   if(o.steps){const dated=o.stepsHead[0]==='Step';/* a step table gets a Date reached column; the PR breakpoints, the token prices and the interlocking minutes do not */
-    h+='<h3>'+(o.id==='pr'?'Breakpoints':o.id==='token'?'Back-ups':o.id==='interlock'?'Requirement by minute':'Steps')+'</h3><table class="ct"><tr>'+o.stepsHead.map(x=>'<th>'+x+'</th>').join('')+(dated?'<th style="width:14%">Date reached</th>':'')+'</tr>'+o.steps.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+(dated?'<td></td>':'')+'</tr>').join('')+'</table>';}
+    h+='<h3>'+(o.stepsTitle||(o.id==='pr'?'Breakpoints':o.id==='token'?'Back-ups':o.id==='interlock'?'Requirement by minute':'Steps'))+'</h3><table class="ct"><tr>'+o.stepsHead.map(x=>'<th>'+x+'</th>').join('')+(dated?'<th style="width:14%">Date reached</th>':'')+'</tr>'+o.steps.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+(dated?'<td></td>':'')+'</tr>').join('')+'</table>';}
+  /* v25.65 (FCT-SR-H7) the next step, written before thinning stalls; punishment is not it */
+  if(['thin','chain','ncr','wait'].includes(o.id))h+='<h3>If thinning stalls</h3><ul><li>Two step-backs at the same step: before trying that step again, add an alternative reinforcer or competing items during the &ldquo;not now&rdquo; period or the wait, check the size and quality of the reinforcer, and check integrity (Form TI-1).</li><li>We add: '+(String(m.stall||'').trim()?esc(m.stall):bl)+'</li></ul>';
   h+='<h3>Data to keep</h3><ul>'+o.data.map(d=>'<li>'+d+'</li>').join('')+'<li>On: '+(m.cd_data?esc(m.cd_data):sheetFor(o))+'</li></ul>';
   h+='<h3>What never happens</h3><ul><li>'+esc(nm(m.beh,m.behs,'The behavior'))+' is never argued with, lectured about, or given the reinforcer by accident; if it happens, the rule above says exactly what to do.</li><li>The schedule is not changed by anyone during the day; steps are taken on the data, by the person named on the plan.</li><li>Nothing already earned is taken away.</li>'
     /* v23.11 (review F272) the work goes on, but no one holds the student to it: for escape, and always on a chained schedule */
@@ -1911,6 +2197,9 @@ function srCsv(){
   if(!o)rows.push(['No design is chosen yet','Choose one on the Design page. The catalogue exports from the Catalogue page.']);
   else{[['Student',m.client],['Date',m.date],['Run by',m.who],['Behavior being reduced',m.beh],['Response that earns',SR_EARN.includes(o.id)?(m.earn||m.alt):''],['Replacement',m.alt],
       ['Reinforcer',m.sr],['Function',m.func],['Design',o.title],['Notation',o.nota],['Rule',o.rule]].forEach(r=>{if(String(r[1]||'').trim())rows.push(r);});
+    if(o.ext)rows.push([srExtHead(o.ext),srExtText(o.ext)]);   /* v25.65 (FCT-SR-H1, H2) */
+    if(o.pbOpt)rows.push(['What problem behavior still gets',o.pbOpt]);
+    if(o.cmp&&(o.cmpH2||o.cmp.some(c=>c.p||c.q)))o.cmp.forEach(c=>rows.push(['What each gets: '+c.l,'The request: '+c.q+'; problem behavior: '+c.p+'; '+SR_WIN[c.w]]));
     o.params.forEach(p=>rows.push(['Setting: '+p[0],p[1]]));
     if(o.steps&&o.steps.length){rows.push([]);rows.push(o.stepsHead);o.steps.forEach(r=>rows.push(r));rows.push([]);}
     o.data.forEach(d=>rows.push(['Data to keep',d]));o.warn.forEach(w=>rows.push(['Still to settle',w]));
@@ -1922,13 +2211,16 @@ $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear
    answers, the design and the catalogue notes without asking */
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated case?\nThe student, the chooser answers, the design and the catalogue notes are filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   S=blank();Object.assign(S.meta,{client:'SIMULATED – Sample Student',sid:'000000',date:'2026-10-02',bcba:'J. Ellis, BCBA',plan:'BIP dated 8/5/26 (Form TD-1)',setting:'Resource room, independent work',who:'Ms. Lee (teacher); Mr. Ortiz (aide)',beh:'Calling out: any vocalization above conversational volume directed at the teacher without a raised hand',alt:'Raising a hand and waiting to be called on',sr:'Teacher attention: being called on within 10 s, with a comment on the answer',func:'Attention',behs:'calling out',alts:'a raised hand',srs:'being called on',
-    q_goal:'red',q_free:'free',q_func:'att',q_who:'cont',q_stage:'start',q_ext:'yes',
+    q_goal:'red',q_free:'free',q_func:'att',q_who:'cont',q_stage:'start',q_ext:'yes',ext_step:'ext',ext_date:'2026-09-30',
+    nx_pb_rate:'about 1 in 3 times (Form ABC-1)',nx_rq_rate:'every time (FR 1)',nx_w_rate:'rq',nx_pb_delay:'20',nx_rq_delay:'5',nx_pb_amt:'10',nx_rq_amt:'30',nx_pb_qual:'a reprimand',nx_rq_qual:'being called on, with a comment on the answer',nx_w_qual:'rq',nx_pb_eff:'one shout',nx_rq_eff:'a raised hand',nx_w_eff:'tie',nx_review:'5',
+    mw_pb:'30',mw_pbsr:'12',mw_rq:'10',mw_rqsr:'8',mw_rqsr2:'30',
+    wt_sig:'“Wait, please,” and the wait card',wt_does:'holds the wait card and keeps working',wt_item:'a puzzle from PA-1 on the desk',wt_s0:'5',wt_sT:'300',wt_mult:'2',wt_crit:'no calling out in any wait, 2 consecutive sessions',
     ds_sel:'dro',dro_n:'24',dro_min:'60',dro_type:'whole',dro_reset:'reset',dro_share:'75',dro_step:'33',dro_term:'15',dro_crit:'80% of intervals earned on 3 consecutive days',dro_back:'fewer than 50% earned on 2 days: return to the previous interval',
     drl_n:'30',drl_min:'50',drl_sess:'50',drl_var:'full',drl_int:'10',drl_target:'20',drl_steps:'4',drl_crit:'under the limit on 2 consecutive days',
     vi_kind:'vi',vi_mean:'180',vi_n:'10',vi_method:'fh',vi_seed:'7',ncr_n:'40',ncr_min:'60',ncr_kind:'ft',ncr_dur:'20',ncr_term:'5',ncr_thin:'fixed',ncr_omit:'10',ncr_crit:'at or under 10% of baseline rate',
     pr_start:'1',pr_step:'2',pr_kind:'arith',pr_break:'120',pr_items:'iPad, 30 s\npraise and a high five\ncracker',
     tk_prod:'FR 5',tk_what:'a laminated star on a velcro strip',tk_exch:'10',tk_when:'at 11:30 and 2:30',tk_acc:'Yes, saved for a larger back-up',tk_backs:'5 min free choice, 10\ncomputer time 10 min, 20\nlunch with a friend, 40',tk_thin:'Token production (more responses per token)',tk_loss:'tokens are never taken away',
-    th_splus:'green card on the desk',th_sminus:'red card on the desk',th_pdur:'60',th_m0:'15',th_mT:'240',th_mult:'2',th_crit:'problem behavior at or under 10% of baseline and the request under S+ on 80% of opportunities, 2 consecutive sessions',th_back:'problem behavior above 20% of baseline for 2 sessions: previous step',th_comp:'a fidget from PA-1; a task at the student’s level',
+    th_splus:'green card on the desk',th_sminus:'red card on the desk',th_pdur:'60',th_m0:'15',th_mT:'240',th_mult:'2',th_crit:'problem behavior at or under 10% of baseline and at least 80% of requests made while the S+ is up, 2 consecutive sessions',th_sigok:'yes',th_sighow:'matched the two cards and named each color (simulated)',stall:'competing items from PA-1 during the “not now” period',th_back:'problem behavior above 20% of baseline for 2 sessions: previous step',th_comp:'a fidget from PA-1; a task at the student’s level',
     ch_sig:'green card',ch_start:'1',ch_end:'10',ch_step:'1',ch_crit:'no problem behavior and the request used appropriately in 2 consecutive sessions',ch_task:'one worksheet item',
     il_dir:'dec',il_init:'20',il_step:'2',il_every:'2',il_len:'16',il_floor:'6',il_cap:'20',lh_sched:'VI 120 s',lh_hold:'10',lh_sig:'the teacher looks up and says the student’s name',lag_n:'2',lag_class:'answers to “tell me about your weekend”',lag_diff:'a different activity named',lag_never:'off-topic or inappropriate answers',
     cd_title:'Sam’s calling-out schedule (DRO)',cd_data:'Form DD-1 (intervals run and earned per session; occurrences against baseline)',cd_review:'2026-10-16'});
@@ -1969,13 +2261,15 @@ window.__nbhFactsOut=function(){try{const m=S.meta,o=m.ds_sel?design():null;if(!
   const t=h=>{const d=document.createElement('textarea');d.innerHTML=String(h==null?'':h).replace(/<[^>]+>/g,' ');return d.value.replace(/\s+/g,' ').trim();},
     put=(x,k,v)=>{v=t(v);if(v)x[k]=v;};
   const sc={src:'SR-1',id:o.id};put(sc,'title',o.title);put(sc,'nota',o.nota);put(sc,'rule',o.rule);
+  /* v25.65 (FCT-SR-H1) the rule the case carries says what follows problem behavior, labelled */
+  if(o.ext){sc.ext={choice:o.ext.k||'not chosen',date:o.ext.date||''};put(sc.ext,'line',o.ext.line);const x=t(srExtHead(o.ext)+': '+srExtText(o.ext))+(o.pbOpt?' '+t(o.pbOpt):'');sc.rule=sc.rule?sc.rule+' '+x:x;}
   put(sc,'beh',m.behs||m.beh);if(SR_EARN.includes(o.id))put(sc,'earn',m.earns||m.earn||m.alts||m.alt);put(sc,'alt',m.alts||m.alt);put(sc,'sr',m.sr);put(sc,'func',m.func);
   put(sc,'who',m.who);put(sc,'date',m.date);put(sc,'review',m.cd_review);
   if(o.params.length)sc.params=o.params.map(p=>({k:t(p[0]),v:t(p[1])})).filter(p=>p.k&&p.v);
   if(o.steps&&o.steps.length&&o.stepsHead&&o.stepsHead[0]==='Step'){const H=o.stepsHead.map(x=>t(x).replace(/\s*\(.*?\)\s*/g,'')),z=H.length-1,
-      what=r=>{const c=r.slice(1,z).map((x,k)=>({h:H[k+1],c:t(x).replace(/\s*\(terminal\)\s*/,'')})).filter(x=>x.c&&x.c!=='\u2014');return c.length===1?c[0].c:c.map(x=>x.h+' '+x.c).join('; ');};
+      what=r=>{const c=r.slice(1,z).map((x,k)=>({h:H[k+1],c:t(x).replace(/\s*\(terminal\)\s*/,'')})).filter(x=>x.c&&x.c!=='\u2014'&&!/^(Request works|Drop from)/.test(x.h));   /* v25.65 (FCT-SR-H3) the step size columns stay on the card */return c.length===1?c[0].c:c.map(x=>x.h+' '+x.c).join('; ');};
     sc.steps=o.steps.map(r=>({n:t(r[0]),what:what(r),crit:t(r[z])}));sc.start=sc.steps[0].what;sc.terminal=sc.steps[sc.steps.length-1].what;}
-  const C={dro:['dro_crit','dro_back'],drl:['drl_crit'],ncr:['ncr_crit'],thin:['th_crit','th_back']}[o.id];if(C){put(sc,'crit',m[C[0]]);if(C[1])put(sc,'back',m[C[1]]);}
+  const C={dro:['dro_crit','dro_back'],drl:['drl_crit'],ncr:['ncr_crit'],thin:['th_crit','th_back'],wait:['wt_crit']}[o.id];if(C){put(sc,'crit',m[C[0]]);if(C[1])put(sc,'back',m[C[1]]);}
   if(!sc.back&&sc.params){const b=sc.params.find(p=>/^Step back when$/i.test(p.k));if(b)sc.back=b.v;}   /* the design's own rule when the field is blank */
   if(o.warn.length)sc.open=o.warn.map(t).filter(Boolean).slice(0,6);
   return {schedule:sc};}catch(e){return null;}};
@@ -3279,7 +3573,10 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   try{const sc=r&&r.schedule;if(!sc)return r;const m=S.meta,T=v=>String(v==null?'':v).trim(),N=v=>T(v)!==''&&isFinite(+T(v))?+T(v):null;
    const R=(op,v,n,dflt)=>{const a=N(v),b=N(n);return a!==null&&b!==null&&b>0?{op:T(op)||dflt,v:a,n:Math.round(b)}:null;};
    const up=R(m.sd_upop,m.sd_upv,m.sd_upn,'le'),back=R(m.sd_backop,m.sd_backv,m.sd_backn,'ge');
-   if(up||back){const d={};if(T(m.sd_row))d.row=T(m.sd_row);if(T(m.sd_step))d.step=T(m.sd_step);if(/^\d{4}-\d\d-\d\d$/.test(T(m.sd_since)))d.since=T(m.sd_since);if(up)d.up=up;if(back)d.back=back;sc.decide=d;}}catch(e){}
+   if(up||back){const d={};if(T(m.sd_row))d.row=T(m.sd_row);if(T(m.sd_step))d.step=T(m.sd_step);if(/^\d{4}-\d\d-\d\d$/.test(T(m.sd_since)))d.since=T(m.sd_since);if(up)d.up=up;if(back)d.back=back;
+     /* v25.65 (FCT-SR-H4) a multiple schedule steps on the discrimination too: the share of requests made in S+, never below 70% */
+     if(m.ds_sel==='thin'&&N(m.sd_up2v)!==null){d.row2=T(m.sd_row2)||'Requests in S+ (%)';d.up2={op:'ge',v:Math.max(70,N(m.sd_up2v)),n:up?up.n:back.n};}
+     sc.decide=d;}}catch(e){}
   return r;};})();
 </script>
 <script id="sr1-v2349">
@@ -3309,7 +3606,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
    const cs=c?Cs+' gana '+X('sr')+' cuando ocurre por lo menos '+c[1]+' despu\u00e9s de la \u00faltima vez.':Cs+' gana '+X('sr')+' cuando ocurre no m\u00e1s de '+n+' veces en '+ps+'.';
    en='At school, '+Ce+' is learning to do '+B+' less often, not to stop it altogether. '+ce+' At home you can do the same: tell '+Ce+' the limit ahead of time, help '+Ce+' keep count, and praise staying within it.';
    sp='En la escuela, '+Cs+' est\u00e1 aprendiendo a hacer '+X('beh')+' con menos frecuencia, no a dejarlo del todo. '+cs+' En casa pueden hacer lo mismo: d\u00edganle a '+Cs+' el l\u00edmite antes de empezar, ay\u00fadenle a llevar la cuenta y felic\u00edtenle cuando se mantenga dentro del l\u00edmite.';}
-  if(id==='ncr'||id==='vt'){const t=id==='vt'?Math.round(+T(m.vi_mean)||0)+' s':cell(1);
+  if(id==='ncr'||id==='vt'){const t=id==='vt'?Math.round(+T(m.vi_mean)||0)+' s':(cell(1)||((/^(?:FT|VT) ([\d.]+ (?:s|min))/.exec(T(o.nota))||[])[1])||'');   /* v25.65 the adjusting-IRT worksheet has no interval column */
    en='At school, '+Ce+' gets '+R+' on a regular schedule, about every '+t+', whatever '+Ce+' is doing, so '+Ce+' does not need '+B+' to get it. Over time the wait between grows. At home you can do the same: during the times '+B+' usually happens, give '+R+' often and freely, before '+B+' starts.';
    sp='En la escuela, '+Cs+' recibe '+X('sr')+' con regularidad, m\u00e1s o menos cada '+t+', sin importar lo que est\u00e9 haciendo, para que no necesite '+X('beh')+' para conseguirlo. Con el tiempo, la espera entre una vez y otra se alarga. En casa pueden hacer lo mismo: en los momentos en que suele ocurrir '+X('beh')+', denle '+X('sr')+' a menudo y sin condiciones, antes de que empiece.';}
   if(id==='token'){const K=lc(T(m.tk_what))||'token',p=Math.round(+String(m.tk_prod||'').replace(/[^\d.]/g,'')||1),x=Math.round(+T(m.tk_exch)||10);
@@ -3338,7 +3635,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
  const LAB={beh:'the behavior',earn:'the response that earns',sr:'the reinforcer',alt:'the request',sig:'the waiting signal',tok:'the token',backs:'the back-ups'};
  function paint(){const box=document.getElementById('srHomeOut');if(!box)return;let h=null;try{h=home();}catch(e){h=null;}
   const es=document.getElementById('srHomeEs');
-  if(!h){box.innerHTML='<p class="hint">'+(design()?'This schedule has no home version (an assessment or a session sheet).':'Design a schedule first.')+'</p>';if(es)es.hidden=true;return;}
+  if(!h){box.innerHTML='<p class="hint">'+(design()?(['nox','wait'].includes(S.meta.ds_sel)?'This design has no family version yet; tell the family in your own words on Form HD-1.':'This schedule has no home version (an assessment or a session sheet).'):'Design a schedule first.')+'</p>';if(es)es.hidden=true;return;}
   if(es){es.hidden=false;const want=new Set(h.used.concat(h.need));[...es.children].forEach(d=>{d.hidden=!want.has(d.dataset.es);});}
   const e=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   box.innerHTML='<div class="readout" style="margin:0 0 6px"><b>English</b> '+e(h.en)+'</div>'+
