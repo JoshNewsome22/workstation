@@ -29,8 +29,8 @@ const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
     rf:[...document.querySelector('[data-m="chgRf"]').options].map(o=>o.textContent).filter(Boolean),proc:[...document.querySelectorAll('.bc-proc input[type=checkbox]')].map(e=>e.dataset.m),
     cond:!!document.querySelector('[data-m="chgCond"]')}));
   ok('1 F436 the phase choices are short ("Baseline", "After the change")',JSON.stringify(q.ph)==='["","Baseline","After the change"]',q.ph);
-  ok('2 F428 the setup sheet asks how much reinforcement the changed setting delivers, and what the plan did there as ticks; the old mixed question is gone',
-    q.rf.length===3&&/^Less/.test(q.rf[0])&&/^About the same/.test(q.rf[1])&&/^More/.test(q.rf[2])&&q.proc.join()==='pExt,pDra,pThin,pPun,pNcr'&&!q.cond,q);
+  ok('2 F428 the setup sheet asks how much reinforcement the changed setting delivers, and what the plan did there as ticks (v25.65: DRO added); the old mixed question is gone',
+    q.rf.length===3&&/^Less/.test(q.rf[0])&&/^About the same/.test(q.rf[1])&&/^More/.test(q.rf[2])&&q.proc.join()==='pExt,pDra,pThin,pPun,pNcr,pDro'&&!q.cond,q);
 
   /* the simulation */
   await p.evaluate(()=>document.getElementById('simBtn').click());await sleep(900);
