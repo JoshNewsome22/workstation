@@ -1543,11 +1543,11 @@ let tiVerdict=null;
 /* v25.64 (MEAS H1) the procedures the Setup sheet offers, by the value a saved file holds */
 const TI_PROC={'dra-every':'DRA, reinforcing every alternative response','dra-int':'DRA on an intermittent or interval schedule','ncr':'NCR (noncontingent reinforcement)','dro':'DRO (reinforcing the absence of the behavior)','rc':'Response cost (a punishment step: marked, never the default)','rird':'Response interruption and redirection (RIRD)','dtt':'Discrete-trial or mand teaching','other':'Other'};
 /* the fidelity band: this form's working convention (see the Guide); the studies set no threshold */
-function bandOf(p,ptype){
+function bandOf(p,ptype,how){   /* v25.64 (MEAS H1) how = {proc, thin}, from the Setup sheet; without it the band reads by plan type alone, as before (Form CN-1 keeps a copy of these words) */
   if(p==null)return{cls:'v-mid',name:'No band yet',txt:'No scored observation to place in a band.'};
   const acq=ptype==='Skill acquisition'||/^Both/.test(String(ptype||'')),red=ptype==='Behavior reduction';   /* v22.87 (review F241) a plan that does both is read as the stricter */
   /* v25.64 (MEAS H1) the 80-89% band is read from the procedure the plan runs and from schedule thinning (Jones & St. Peter, 2022) */
-  const proc=String((S.meta||{}).proc||''),thin=(S.meta||{}).thin==='1';
+  const proc=how?String(how.proc||''):'',thin=!!(how&&how.thin);
   if(p>=90)return{cls:'v-ok',name:'90% and above',txt:'Acceptable: routine monitoring.'+(thin?' The schedule is being thinned: aim for near-perfect integrity until the new schedule is stable (Jones & St. Peter, 2022).':'')};
   if(p>=80&&thin)return{cls:'v-mid',name:'80–89%',txt:'Caution: the schedule is being thinned (moving off every-response reinforcement). Aim for near-perfect integrity until the new schedule is stable: 80% integrity did not keep intermittent schedules effective for some people, and the authors recommend near-perfect integrity when thinning from every response to an intermittent schedule (Jones & St. Peter, 2022). Schedule a re-check and retrain any consequence step in error.'};
   if(p>=80&&(proc==='ncr'||proc==='dra-int'||proc==='dro'))return{cls:'v-mid',name:'80–89%',txt:'Caution: 80% integrity did not keep these procedures effective for some people. NCR and DRA on an interval schedule did not stay consistently effective at 80% (Jones & St. Peter, 2022), and in DRO commission errors weakened the effect for 4 of 6 people (Hronek & Kestner, 2025). Schedule a re-check and retrain any consequence step in error.'};
@@ -1555,7 +1555,7 @@ function bandOf(p,ptype){
   if(p>=80&&proc==='dra-every'&&red)return{cls:'v-ok',name:'80–89%',txt:'Acceptable for DRA with every alternative response reinforced: it stayed effective at 80% integrity (Jones & St. Peter, 2022; St. Peter Pipkin et al., 2010); schedule a re-check.'};
   if(p>=80)return{cls:acq?'v-mid':'v-ok',name:'80–89%',txt:(red?'Acceptable for a behavior-reduction plan in this evidence base; schedule a re-check.':
     acq?'Caution for a skill-acquisition program: consequences delivered at about 67% fidelity on average prevented mastery for 5 of 6 learners (Burlison et al., 2026); schedule a re-check and retrain any consequence step in error.':
-    'Acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, a caution. Set the plan type on the Setup sheet.')+(proc?'':' Set the main procedure on the Setup sheet: the band depends on it.')};
+    'Acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, a caution. Set the plan type on the Setup sheet.')+(how&&!proc?' Set the main procedure on the Setup sheet: the band depends on it.':'')};
   if(p>=60)return{cls:'v-mid',name:'60–79%',txt:'Caution: effects were degraded for some learners at these levels. Retrain any consequence step in error before the next observation.'};
   return{cls:'v-no',name:'Below 60%',txt:'Not acceptable: do not interpret the student’s data as a test of the plan; retrain before continuing.'};}
 
@@ -1619,7 +1619,7 @@ function renderSummary(){
      and the evidence sentences beside it */
   const bj=lastJ.length?lastJ:null;let bc=0,bs=0;
   (bj||M.used.map(x=>x.j)).forEach(j=>{S.steps.forEach((_,i)=>{const v=code(i,j);if(scored(v)){bs++;if(v==='C')bc++;}});});
-  const bp=bs?100*bc/bs:null,B0=bandOf(bp,S.meta.ptype||''),con=M.byCmp.con;
+  const bp=bs?100*bc/bs:null,B0=bandOf(bp,S.meta.ptype||'',{proc:S.meta.proc||'',thin:S.meta.thin==='1'}),con=M.byCmp.con;
   /* v22.87 (review F241, F238) the band is never green beside a verdict that is not, and is a caution when a consequence step was
      done as a commission error on the deciding observations, ran below 80% of its opportunities there, or the program is in
      acquisition, when consequence errors matter most */
