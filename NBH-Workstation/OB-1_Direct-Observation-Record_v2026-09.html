@@ -3323,7 +3323,6 @@ $("#csvBtn").addEventListener("click", () => {
   const BL = behList();
   if(BL[0].dur) head.push("Minutes timed", "Longest episode (min)");
   BL.slice(1).forEach(b => { const w = behShort(b, 40); head.push(w + ": count", w + ": peer count"); if(b.dur) head.push(w + ": minutes timed", w + ": longest episode (min)"); });
-  head.push("Block-by-block IOA (%)", "Interval kappa", "Observer also running the class");   /* v25.64 (H3, M1, L7) after every other column */
   const out = [head.map(q).join(",")];
   d.rows.forEach(r => {
     const more = [];
@@ -3337,7 +3336,7 @@ $("#csvBtn").addEventListener("click", () => {
       r.o.secondObs, raw(agreeOf(r.o)), r.o.notes,
       r.ioa && r.ioa.su && r.ioa.su.scored ? r.ioa.su.scored.p : "", r.ioa && r.ioa.su && r.ioa.su.unscored ? r.ioa.su.unscored.p : "",
       r.o.obs2On ? raw(r.o.count2) : "", r.o.obs2On ? raw(r.o.peerCount2) : "",
-      r.ioa && r.ioa.count ? r.ioa.count.p : "", r.ioa && r.ioa.iv ? r.ioa.iv.p : ""].concat(more, [r.ioa && r.ioa.block && r.ioa.block.p != null ? (r.ioa.block.dur ? r.ioa.block.dur.p : r.ioa.block.p) : "", r.ioa && r.ioa.kap && r.ioa.kap.k !== null ? r.ioa.kap.k.toFixed(2) : "", r.o.teach ? "Yes" : ""]).map(q).join(","));
+      r.ioa && r.ioa.count ? r.ioa.count.p : "", r.ioa && r.ioa.iv ? r.ioa.iv.p : ""].concat(more).map(q).join(","));
   });
   const blob = new Blob([out.join("\n")], {type:"text/csv"});
   const a = document.createElement("a");
