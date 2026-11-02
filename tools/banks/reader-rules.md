@@ -75,6 +75,7 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
 | 2 The "RESTRICTIVE: Punishment (kind)" label the two Add buttons look for | v25.26 (JABA 1996) | 1992–1995 brought up to it in v25.31; 1968–1991, BAP, BI, rr1–rr3 and pmc not yet |
 | 2 Add with or without punishment in TD-1 | v25.30 | works on any card whose step carries the mark |
 | 3 Other restrictive procedures marked | before v25.20 | readers sometimes left guidance through a demand out instead of marking it |
+| 3 Escape extinction at meals marked (nonremoval of the spoon or cup, putting spat-out food back, guiding the hand to the mouth, placing food in the mouth) | v25.64 pass over the whole TD-1 bank (the feeding review, 11/2): 22 steps in 18 cards had the consent note but no RESTRICTIVE mark | a bite only shown at the lips is left unmarked until the BCBA decides (FEED review) |
 | 4 Teaching holds written as RESTRICTIVE (the BCBA, 10/31) | v25.37 (JABA 2006) | everything before 2006: readers left these holds out |
 | 4 Accepted physical prompts unmarked, only holds marked (10/31) | v25.38 (JABA 2007; the 2006 cards fixed then) | before 2006 readers marked some accepted prompts RESTRICTIVE and left others out |
 | 5 Protective equipment step and fade plan | in the briefs from v25.35; added by hand when missing from v25.22 | 1968–1991 and earlier sources not checked |
