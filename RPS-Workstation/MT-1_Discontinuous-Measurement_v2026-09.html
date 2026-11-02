@@ -937,6 +937,28 @@ td input,td select{max-width:100%}
   .fieldgrid{grid-template-columns:repeat(4,1fr)!important}
 }
 </style>
+<style id="mt1-v2564-css">
+/* v25.64 (H4, M4, L7, L6, M1, H7, H5) the chooser, the observer checks, the pauses, kappa, coverage and drift, the note under the graph */
+table.mt-choose td.mt-sug{font-family:var(--sans);font-size:12px;line-height:1.4}
+table.mt-obsck thead th{text-align:left}
+table.mt-obsck tbody th{font-weight:600}
+td.mt-ticks{font-family:var(--sans);font-size:12.5px}
+label.mt-chk{display:inline-flex;align-items:center;gap:6px;margin:0 18px 0 0;cursor:pointer}
+label.mt-chk input{width:auto!important;margin:0}
+#mtChooseFlag .verdict,#mtCkNote .verdict,#pzOut .verdict{margin:4px 0}
+.metric .kap{font-family:var(--sans);font-size:11px;color:var(--ink);margin-top:3px}
+.tmr-pz{font-family:var(--sans);font-size:12px;margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.tmr-pz select{font:inherit;font-size:12px;border:1px solid var(--rule-2);border-radius:2px;padding:2px 4px;background:#fff}
+#mtIoaCov table{margin-top:10px}
+#mtIoaCov td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#sessTbl td input[data-f="obs2"]{display:block;margin-top:2px;font-size:10.5px;color:var(--ink-soft)}
+#sessTbl .pzof{display:block;font-family:var(--sans);font-size:10px;color:#8a4b00}
+.mt-plotnote{margin:4px 0 0}
+@media print{
+  body.print-blank [data-m="teach"],body.print-blank [data-m="blind"]{visibility:hidden}
+  body.print-blank #pzOut,body.print-blank #mtCkNote{display:none!important}
+}
+</style>
 <style id="mt1-touch-css">
 /* v21.44 (A6): on a touch screen every target on the live sheet is at least 44 px, with room between targets.
    Screen and a coarse pointer only: paper and the computer layout are unchanged.
@@ -1031,6 +1053,29 @@ td input,td select{max-width:100%}
             <option>Reduction target</option><option>Replacement behavior</option><option>Acquisition target</option></select></td></tr>
       <tr><th>Operational definition</th><td colspan="3"><textarea data-m="def" rows="2" placeholder="What counts as the behavior occurring at the moment you look"></textarea></td></tr>
     </table>
+    <!-- v25.64 (H4) choosing the measure from how long an episode lasts, how many there are, and what matters most -->
+    <table class="rt mt-choose" style="margin-bottom:4px">
+      <tr><th style="width:20%">Typical episode length (seconds)</th><td><input data-m="epLen" inputmode="decimal" placeholder="e.g., 8"></td>
+          <th style="width:16%">About how many episodes in the observation</th><td style="width:22%"><input data-m="epN" inputmode="numeric" placeholder="e.g., 12"></td></tr>
+      <tr><th>What matters most</th><td><select data-m="matter"><option></option><option>How often</option><option>How long</option></select></td>
+          <th>Suggested measure</th><td id="mtSuggest" class="mt-sug"></td></tr>
+    </table>
+    <div id="mtChooseFlag"></div>
+    <!-- v25.64 (M4, L7) each observer checked against a scored example; the observer also teaching; the second observer blind to the phase -->
+    <table class="rt mt-obsck" style="margin-bottom:4px">
+      <thead><tr><th style="width:20%">Checked against a scored example</th><th style="width:22%">Date checked</th><th>Example used</th><th style="width:16%">% correct</th></tr></thead>
+      <tbody>
+        <tr><th>Observer</th><td><input type="date" data-m="ck1Date" aria-label="Observer: date checked against a scored example"></td>
+          <td><select data-m="ck1Ex" aria-label="Observer: the example used"><option></option><option>A scored video</option><option>This form&rsquo;s simulation</option><option>Another scored record</option></select></td>
+          <td><input data-m="ck1Pct" inputmode="decimal" aria-label="Observer: percentage correct"></td></tr>
+        <tr><th>Second observer (IOA)</th><td><input type="date" data-m="ck2Date" aria-label="Second observer: date checked against a scored example"></td>
+          <td><select data-m="ck2Ex" aria-label="Second observer: the example used"><option></option><option>A scored video</option><option>This form&rsquo;s simulation</option><option>Another scored record</option></select></td>
+          <td><input data-m="ck2Pct" inputmode="decimal" aria-label="Second observer: percentage correct"></td></tr>
+        <tr><td colspan="4" class="mt-ticks"><label class="mt-chk"><input type="checkbox" data-m="teach"> The observer was also running the class or session</label>
+          <label class="mt-chk"><input type="checkbox" data-m="blind"> The second observer did not know the phase or what change was expected</label></td></tr>
+      </tbody>
+    </table>
+    <div id="mtCkNote"></div>
 
     <div class="setupbar noprint">
       <div><label>Method</label><select data-m="method" data-calc="1">
@@ -1078,6 +1123,7 @@ td input,td select{max-width:100%}
         <button type="button" id="tmrTest">Test alert</button>
       </div>
       <div class="tmr-help" id="tmrHelp">Keys while the timer runs: <b>+</b> plus, <b>&minus;</b> minus, <b>N</b> N/A, <b>Space</b> pause or resume. Each press fills the oldest interval still waiting.</div>
+      <div class="tmr-pz" id="tmrPz" hidden></div><!-- v25.64 (L6) each pause: when, how long, and why -->
     </div>
     <div class="tmr-flash" id="tmrFlash" aria-hidden="true"></div>
     <div class="ivgrid" id="ivWrap"></div>
@@ -1091,6 +1137,7 @@ td input,td select{max-width:100%}
 
     <div class="metrics" id="sumMetrics"></div>
     <div id="sumVerdict"></div>
+    <div id="pzOut"></div><!-- v25.64 (L6) -->
     <div id="ioaOut"></div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:20%">Condition this session</th><td><input data-m="cond" placeholder="e.g., Baseline; Plan; Plan + response blocking"></td>
@@ -1101,7 +1148,7 @@ td input,td select{max-width:100%}
     <div class="capbar noprint">
       <button class="tool" id="captureSheet">Capture this session to the log</button>
       <button class="tool" id="clearSheet">Clear sheet for the next session</button>
-      <span class="hint" id="capMsg">Capture adds one row to the session log &mdash; the date, the start time, the location, the observer, the method, the interval, the length, the intervals scored (of those on the sheet, and N/A), the percentage and, with an IOA column scored, the three agreement figures &mdash; with the condition, the change and the notes above. A sheet already logged is asked about before it is logged again. Clear sheet empties the marks, the start time, the change and the notes; the student, the behavior, the settings, the date and the log stay.</span>
+      <span class="hint" id="capMsg">Capture adds one row to the session log &mdash; the date, the start time, the location, the observer, the method, the interval, the length, the intervals scored (of those on the sheet, and N/A), the percentage and, with an IOA column scored, the three agreement figures &mdash; with the condition, the change and the notes above. A sheet already logged is asked about before it is logged again. The second observer, kappa, the timer&rsquo;s pauses and the teaching tick go with the row (v25.64). Clear sheet empties the marks, the start time, the change, the notes and the timer&rsquo;s pauses; the student, the behavior, the settings, the date and the log stay.</span>
     </div>
   </section>
 
@@ -1115,10 +1162,13 @@ td input,td select{max-width:100%}
     <div class="grid-wrap"><table class="rt" id="sessTbl"><thead><tr>
       <th style="width:34px">#</th><th style="width:8%">Date</th><th style="width:11%" title="When the session started, where, and who observed">Time, setting, observer</th><th style="width:11%">Method</th><th style="width:6%" title="The interval length; a row from before shows the paper-sheet ratio when you point at it">Interval</th>
       <th style="width:6%">Length</th><th style="width:8%" title="Intervals scored + or &minus;, of those on the sheet, and N/A">Intervals</th><th style="width:6%">% occur</th>
-      <th style="width:10%" title="Point-by-point / occurrence / non-occurrence agreement, as captured from the sheet">IOA % (pt / occ / non)</th>
+      <th style="width:10%" title="Point-by-point / occurrence / non-occurrence agreement, as captured from the sheet; under it, the second observer (v25.64)">IOA % (pt / occ / non), second observer</th>
       <th style="width:10%">Change at this session</th><th style="width:10%">Condition or change label</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Session graph" style="margin-top:12px"><svg id="mtPlot" viewBox="0 0 900 320" aria-label="Percentage of intervals across sessions"></svg></div>
+    <p class="hint mt-plotnote" id="mtPlotNote"></p><!-- v25.64 (H5, L7) under the graph: the missed-effect caution and the teaching marker -->
     <div id="mtPhases"></div><!-- v23.07 (review I60) each condition's sessions, dates, level and agreement -->
+    <div id="mtIoaCov"></div><!-- v25.64 (H7) agreement coverage in each condition, by observer pairing, and possible drift -->
+    <p class="hint">Agreement checks (this form&rsquo;s default): IOA on at least a quarter to a third of sessions in every condition, spread across times, activities and observers. Rotate the second observer. Where possible, the primary observer does not know which session will be checked. A condition below 20%, or with no IOA session, is flagged.</p><!-- v25.64 (H7) -->
   </section>
 
   <!-- ============ GUIDE ============ -->
@@ -1132,15 +1182,27 @@ td input,td select{max-width:100%}
       <tr><td>1 minute or more</td><td>Screening, or a behavior that comes in long bouts. A poor estimate of anything brief, and the longer a partial interval, the more it overestimates.</td></tr>
     </table>
     <p class="hint">The paper sheet this form was modelled on set the interval by a ratio, minutes of observation : seconds of interval (10 minutes at 1:2 is 20 seconds). The form shows that ratio when there is one; a file saved with a ratio keeps its interval.</p>
+    <!-- v25.64 (H4) -->
+    <p><b>Start from the episode.</b> How long one episode of the behavior lasts sets the error more than anything else. In a full simulation, error was smallest when the interval was no longer than an episode and grew sharply when it was longer, and the authors warn that any one-line rule for choosing the interval will mislead (Wirth et al., 2014). So the sheet asks three things: how long a typical episode lasts, about how many come in the observation, and whether how often or how long matters more. The <b>Suggested measure</b> then reads:</p>
+    <table class="rt">
+      <tr><th style="width:24%">Countable episodes, and how often matters</th><td>Episodes with a clear start and end, fewer than about 1 every 10 seconds: <b>count them</b> on Form OB-1&rsquo;s Live Recorder. Partial-interval data were a poor index of how often a behavior occurred (Powell &amp; Rockinson, 1978), and most published studies of free-operant behavior now record continuously (55% of them from 1995 to 2005; Mudford, Taylor, &amp; Martin, 2009).</td></tr>
+      <tr><th>How long matters</th><td><b>Momentary time sampling</b>, with an interval no longer than the typical episode. It estimated duration better than partial interval (Harrop &amp; Daniels, 1986).</td></tr>
+      <tr><th>Brief episodes, too many to count</th><td><b>Partial interval, 10-second intervals.</b> It estimates how often, and undercounts when episodes come several to an interval.</td></tr>
+      <tr><th>A behavior you are increasing</th><td><b>Whole interval or momentary time sampling.</b></td></tr>
+    </table>
+    <p class="hint">An interval longer than the typical episode is flagged. When the observer is also teaching, a very short momentary interval can lower agreement: with one observer watching 20 children, 30-second momentary intervals gave agreement below 80%, and 60 to 120 seconds gave above 90% with under 10% error (Hanley et al., 2007). Check with a second observer before relying on it.</p>
 
     <h2 class="nbh-band" style="margin-top:16px">Which Method, and What It Does to the Number</h2>
     <p>All three produce a percentage of intervals, and none of them produces a duration. The percentage is an estimate: partial and whole interval are biased in known directions, and momentary time sampling errs in both &mdash; which is why the method must be recorded on every sheet and held constant across a phase.</p>
     <table class="rt">
-      <tr><th style="width:22%">Momentary time sampling</th><td>Look only at the moment the interval ends and score whether the behavior is occurring then. Its errors fall in both directions about equally often and shrink as the interval gets short relative to the behavior, and it has estimated duration better than either interval method. It frees the observer between marks &mdash; which is why it suits a teacher who is also teaching. Brief behaviors are missed unless one is under way at a mark.</td></tr>
+      <tr><th style="width:22%">Momentary time sampling</th><td>Look only at the moment the interval ends and score whether the behavior is occurring then. Its errors are not biased on average, but in any one observation they can be large. It tends to read low when the behavior fills little of the time and high when it fills most of it. It is least accurate in short observations (Wirth et al., 2014). Its errors shrink as the interval gets short relative to the behavior, and it has estimated duration better than either interval method. It frees the observer between marks &mdash; which is why it suits a teacher who is also teaching. Brief behaviors are missed unless one is under way at a mark.</td></tr>
       <tr><th>Partial interval</th><td>Score the interval if the behavior occurred at <b>any</b> point during it. <b>Overestimates</b> duration, and the longer the interval the worse the overestimate. Useful when you want to be sensitive to occurrence of a behavior you are trying to reduce, and appropriate for brief, discrete behaviors that momentary sampling would miss.</td></tr>
       <tr><th>Whole interval</th><td>Score the interval only if the behavior occurred <b>throughout</b> it. <b>Underestimates</b> duration. Suits behavior you are trying to increase &mdash; engagement, on-task, sustained play &mdash; because it sets a conservative bar and will not credit a fragment.</td></tr>
     </table>
     <p class="hint" style="margin-top:8px">A practical consequence worth stating to a team: switching a reduction target from partial interval to momentary sampling will usually make the graph fall without anything about the behavior changing. Record the method on the graph, not only on the sheet.</p>
+    <!-- v25.64 (H5, M2) -->
+    <p><b>Interval measures tend to show less change than really occurred.</b> When the same treatment data were judged by structured visual criteria from continuous records and from momentary or partial-interval data, every error the interval data produced was a missed effect: a change that was there and did not show (Meany-Daboul et al., 2007). Changes in the continuous measure were larger than the changes in the interval measures (Powell et al., 1977), and partial interval, though it detects change, tends to understate how much (Harrop &amp; Daniels, 1986). As a behavior you are reducing falls, partial interval&rsquo;s overestimate grows, so the graph will understate the improvement. Every verdict and the foot of the graph say so: a small drop, or none, does not show that the plan failed. Check against a count or a timed sample before changing the plan.</p>
+    <p><b>Short observations and a behavior that fills little of the time.</b> Behavior that filled 1 to 3% of the time was poorly estimated even from 135-minute samples, and behavior filling 10 to 25% needed at least 105 minutes to come within 20% error (Mudford et al., 1990). When the behavior is scored in under 10% of intervals in an observation of 15 minutes or less, the sheet says so: add observations across the day before comparing phases.</p>
 
     <h2 class="nbh-band" style="margin-top:16px">Phase Changes on the Session Log</h2>
     <p>The session log uses the same convention as Form DD-1, so the two graphs read the same way.</p>
@@ -1158,7 +1220,7 @@ td input,td select{max-width:100%}
       <tr><th>Partial interval</th><td>Press <b>+</b> the moment the behavior occurs; that interval is settled, and its alert is skipped (unless an earlier interval is still waiting: a press fills that one first). At the beep, press <b>&minus;</b> if the behavior never occurred.</td></tr>
       <tr><th>Whole interval</th><td>Press <b>&minus;</b> the moment the behavior stops or is absent; that interval is settled (unless an earlier interval is still waiting: a press fills that one first). At the beep, press <b>+</b> only if the behavior lasted the whole interval.</td></tr>
       <tr><th>Alerts</th><td>Sound, flash and vibration can each be turned off, and <b>Alerts on</b> turns all of them off at once; the clock and the amber highlight keep running. <b>3-2-1 ticks</b> adds three soft ticks before each mark when marks are 10 seconds or more apart, so you can look up in time for a momentary sample. <b>Test alert</b> plays one alert. These settings are saved with the data file.</td></tr>
-      <tr><th>Pause and reset</th><td><b>Pause</b> stops the clock, for example when the student leaves the room. <b>Reset timer</b> returns the clock to 0:00 without touching the marks; <b>Clear sheet for the next session</b> resets both. The date and start time fill in when you press Start, if they are blank.</td></tr>
+      <tr><th>Pause and reset</th><td><b>Pause</b> stops the clock, for example when the student leaves the room. Each pause keeps when it began, how long it lasted and why (left the room, a break, a plan procedure running, other), and the sheet prints them. <!-- v25.64 (L6) -->Time paused while a plan procedure ran is flagged <b>measured outside the procedure only</b>: the sheet then says nothing about the behavior during the procedure, and leaving that time out overestimated the effect of response interruption and redirection for both children studied (Carroll &amp; Kodak, 2014). <b>Reset timer</b> returns the clock to 0:00 without touching the marks; <b>Clear sheet for the next session</b> resets both. The date and start time fill in when you press Start, if they are blank.</td></tr>
       <tr class="noprint"><th>Timing</th><td>The clock is computed from the device&rsquo;s own time rather than by counting ticks, so it does not drift. Beeps are scheduled ahead on the audio clock, so on a computer they keep time even if you switch to another tab; a phone or tablet may pause a page that is not on screen, so keep the form in front during the observation. While the timer runs, the screen is kept awake where the browser allows it.</td></tr>
       <tr><th>Agreement</th><td>With <b>Record IOA column</b> set to Yes, <b>Score into</b> chooses which column the buttons fill. Two observers collecting agreement data each run the timer on their own device and press Start together; the second observer saves the file, and <b>Open observer 2&rsquo;s file</b> puts its marks in the Obs 2 column when the method, length and interval match. A paper sheet&rsquo;s marks go in with <b>Type the marks</b>.</td></tr>
     </table>
@@ -1166,18 +1228,37 @@ td input,td select{max-width:100%}
     <p>Interval data support point-by-point agreement directly: the number of intervals both observers scored the same way, divided by the number of intervals both observers scored + or &minus;, times 100. Occurrence agreement is the intervals both scored + divided by the intervals either scored +; non-occurrence agreement is the same for &minus;. Overall agreement is hard to interpret when the behavior is scored in very few or very many intervals, so report occurrence agreement for a behavior scored in few intervals and non-occurrence agreement for one scored in most &mdash; two observers who both score mostly zeros will produce a high overall figure that says nothing about whether they agree on the behavior, and so will two who both score mostly plus marks.</p>
     <p>An interval either observer marked N/A, or that only one observer scored, is left out of all three figures: N/A means the observer could not see, so it is neither an agreement nor a disagreement. The sheet flags occurrence or non-occurrence agreement below 80% and names the figure to act on: occurrence agreement when fewer than half of the two observers' marks in the intervals compared are +, non-occurrence agreement when more than half are. The 80% cut-off is this form's convention, not a finding. Capture carries the three figures to the session log&rsquo;s IOA column, as point-by-point / occurrence / non-occurrence, and the CSV lists the log after the intervals.</p>
     <p>Under each figure is the agreement two observers would reach <b>by chance</b>, scoring independently at the rates they did (Hopkins &amp; Hermann, 1977); a figure close to its chance value says little about agreement on the behavior, whatever the 80% convention says.</p><!-- v23.07 (review I56) -->
-    <p class="hint">Sources: Cooper, Heron, &amp; Heward (2020) on discontinuous measurement and its biases; Powell, Martindale, &amp; Kulp (1975) and Powell et al. (1977) on the estimation properties of momentary, partial, and whole interval recording; Meany-Daboul et al. (2007) comparing the treatment interpretations drawn from momentary time sampling and partial-interval recording with those drawn from continuous recording; Rapp et al. (2008) on interval size and the detection of changes in behavior; Hopkins &amp; Hermann (1977) on overall, occurrence, and non-occurrence agreement for interval data. The ratio of the paper sheet the form was modelled on (shown beside the interval when there is one) was a formatting convention, not a finding.</p>
+    <!-- v25.64 (M1, H7, M4, L7) -->
+    <p>Under point-by-point agreement is <b>kappa</b>, the same comparison as one number: (observed &minus; chance) &divide; (1 &minus; chance), from the same intervals. Kappa below .60 is flagged; .60 is Hartmann&rsquo;s (1977) suggestion, not a validated cut-off. Kappa cannot be computed when both observers scored every interval compared the same way.</p>
+    <p><b>Coverage and drift.</b> Under the graph, each condition shows its sessions with IOA out of all its sessions; a condition below 20%, or with none, is flagged. The usual convention is IOA on 20 to 33% of sessions; for highly trained clinic observers 10% did as well as 30%, but the authors warn that schools and homes may differ (Hausman et al., 2022). Each IOA session keeps the second observer&rsquo;s name or role, and agreement is shown for each pairing of observers. <b>Possible drift</b> is flagged when a condition&rsquo;s mean agreement is 10 or more points below the first condition&rsquo;s, or when one pairing agrees 10 or more points above the others: observers who work together can keep agreeing with each other while both drift from the definition (Kazdin, 1977), and observers scored differently when they knew who was checking them (Romanczyk et al., 1973).</p>
+    <p><b>Observers checked against a scored example.</b> Agreement shows that two observers scored alike, not that either scored correctly. Each observer is checked against a scored example (a scored video, or this form&rsquo;s simulation) before their data count, by this form&rsquo;s default to 90% or more; video training worked as well as live training in fewer sessions (Dempsey et al., 2012). Repeat the check every 4 to 6 weeks, and after any agreement flag. Give observers feedback on accuracy against the example, not on whether the data look as hoped: brief feedback and consequences for what observers scored biased their scoring, and a clearer definition only partly protected against it (Lerman et al., 2010). Tick when the second observer did not know the phase or what change was expected.</p>
+    <p><b>An observer who is also teaching.</b> Tick when the observer was also running the class or session; the graph marks those sessions with a T. When teachers observed students, their prompts to those students rose, and those students changed more (Hay et al., 1977). An outside observer for some sessions shows whether the teaching observer&rsquo;s sessions differ.</p>
+    <p class="hint">Sources: Cooper, Heron, &amp; Heward (2020) on discontinuous measurement and its biases; Powell, Martindale, &amp; Kulp (1975) and Powell et al. (1977) on the estimation properties of momentary, partial, and whole interval recording; Meany-Daboul et al. (2007) comparing the treatment interpretations drawn from momentary time sampling and partial-interval recording with those drawn from continuous recording; Rapp et al. (2008) on interval size and the detection of changes in behavior; Hopkins &amp; Hermann (1977) on overall, occurrence, and non-occurrence agreement for interval data. v25.64: Wirth et al. (2014), Powell &amp; Rockinson (1978), Harrop &amp; Daniels (1986), Mudford, Taylor, &amp; Martin (2009) and Hanley et al. (2007) on choosing the measure; Mudford et al. (1990) on short observations; Hartmann (1977) on kappa; Hausman et al. (2022), Kazdin (1977) and Romanczyk et al. (1973) on coverage and drift; Dempsey et al. (2012) and Lerman et al. (2010) on observer training and bias; Carroll &amp; Kodak (2014) on pausing the measure during a procedure; Hay et al. (1977) on teachers as observers. The ratio of the paper sheet the form was modelled on (shown beside the interval when there is one) was a formatting convention, not a finding.</p>
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
     <h2 class="noprint nbh-band" style="margin-top:16px">About the simulation</h2>
     <p class="noprint"><b>Load simulation</b> (toolbar) fills the data sheet and the session log with simulated scores; none of it is a real student record. Simulated observation loaded: whole interval, 10 minutes in 20-second intervals &mdash; 30 intervals &mdash; with a second observer and a seven-session log.</p>
     <p class="hint" id="mtRefs"><b>Reference list.</b>
+    Carroll, R. A., &amp; Kodak, T. (2014). An evaluation of interrupted and uninterrupted measurement of vocal stereotypy on perceived treatment outcomes. <em>Journal of Applied Behavior Analysis, 47</em>(2). https://doi.org/10.1002/jaba.118 &bull;
     Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
+    Dempsey, C. M., Iwata, B. A., Fritz, J. N., &amp; Rolider, N. U. (2012). Observer training revisited: A comparison of in vivo and video instruction. <em>Journal of Applied Behavior Analysis, 45</em>(4). https://doi.org/10.1901/jaba.2012.45-827 &bull;
+    Hanley, G. P., Cammilleri, A. P., Tiger, J. H., &amp; Ingvarsson, E. T. (2007). A method for describing preschoolers&rsquo; activity preferences. <em>Journal of Applied Behavior Analysis, 40</em>(4), 603&ndash;618. &bull;
+    Harrop, A., &amp; Daniels, M. (1986). Methods of time sampling: A reappraisal of momentary time sampling and partial interval recording. <em>Journal of Applied Behavior Analysis, 19</em>(1). https://doi.org/10.1901/jaba.1986.19-73 &bull;
+    Hartmann, D. P. (1977). Considerations in the choice of interobserver reliability estimates. <em>Journal of Applied Behavior Analysis, 10</em>(1). https://doi.org/10.1901/jaba.1977.10-103 &bull;
+    Hausman, N. L., Javed, N., Bednar, M. K., Guell, M., Schaller, E., Nevill, R. E., &amp; Kahng, S. (2022). Interobserver agreement: A preliminary investigation into how much is enough? <em>Journal of Applied Behavior Analysis, 55</em>(2). https://doi.org/10.1002/jaba.811 &bull;
+    Hay, L. R., Nelson, R. O., &amp; Hay, W. M. (1977). The use of teachers as behavioral observers. <em>Journal of Applied Behavior Analysis, 10</em>(2). https://doi.org/10.1901/jaba.1977.10-345 &bull;
     Hopkins, B. L., &amp; Hermann, J. A. (1977). Evaluating interobserver reliability of interval data. <em>Journal of Applied Behavior Analysis, 10</em>(1), 121&ndash;126. &bull;
+    Kazdin, A. E. (1977). Artifact, bias, and complexity of assessment: The ABCs of reliability. <em>Journal of Applied Behavior Analysis, 10</em>(1). https://doi.org/10.1901/jaba.1977.10-141 &bull;
+    Lerman, D. C., Tetreault, A., Hovanetz, A., Bellaci, E., Miller, J., Karp, H., Mahmood, A., Strobel, M., Mullen, S., Keyl, A., &amp; Toupard, A. (2010). Applying signal-detection theory to the study of observer accuracy and bias in behavioral assessment. <em>Journal of Applied Behavior Analysis, 43</em>(2). https://doi.org/10.1901/jaba.2010.43-195 &bull;
     Meany-Daboul, M. G., Roscoe, E. M., Bourret, J. C., &amp; Ahearn, W. H. (2007). A comparison of momentary time sampling and partial-interval recording for evaluating functional relations. <em>Journal of Applied Behavior Analysis, 40</em>(3), 501&ndash;514. &bull;
+    Mudford, O. C., Beale, I. L., &amp; Singh, N. N. (1990). The representativeness of observational samples of different durations. <em>Journal of Applied Behavior Analysis, 23</em>(3). https://doi.org/10.1901/jaba.1990.23-323 &bull;
+    Mudford, O. C., Taylor, S. A., &amp; Martin, N. T. (2009). Continuous recording and interobserver agreement algorithms reported in the Journal of Applied Behavior Analysis (1995&ndash;2005). <em>Journal of Applied Behavior Analysis, 42</em>(1). https://doi.org/10.1901/jaba.2009.42-165 &bull;
     Powell, J., Martindale, A., &amp; Kulp, S. (1975). An evaluation of time-sample measures of behavior. <em>Journal of Applied Behavior Analysis, 8</em>(4), 463&ndash;469. &bull;
     Powell, J., Martindale, B., Kulp, S., Martindale, A., &amp; Bauman, R. (1977). Taking a closer look: Time sampling and measurement error. <em>Journal of Applied Behavior Analysis, 10</em>(2), 325&ndash;332. &bull;
-    Rapp, J. T., Colby-Dirksen, A. M., Michalski, D. N., Carroll, R. A., &amp; Lindenberg, A. M. (2008). Detecting changes in simulated events using partial-interval recording and momentary time sampling. <em>Behavioral Interventions, 23</em>(4), 237&ndash;269.</p>
+    Powell, J., &amp; Rockinson, R. (1978). On the inability of interval time sampling to reflect frequency of occurrence data. <em>Journal of Applied Behavior Analysis, 11</em>(4). https://doi.org/10.1901/jaba.1978.11-531 &bull;
+    Rapp, J. T., Colby-Dirksen, A. M., Michalski, D. N., Carroll, R. A., &amp; Lindenberg, A. M. (2008). Detecting changes in simulated events using partial-interval recording and momentary time sampling. <em>Behavioral Interventions, 23</em>(4), 237&ndash;269. &bull;
+    Romanczyk, R. G., Kent, R. N., Diament, C., &amp; O&rsquo;Leary, K. D. (1973). Measuring the reliability of observational data: A reactive process. <em>Journal of Applied Behavior Analysis, 6</em>(1), 175&ndash;184. &bull;
+    Wirth, O., Slaven, J., &amp; Taylor, M. A. (2014). Interval sampling methods and measurement error: A computer simulation. <em>Journal of Applied Behavior Analysis, 47</em>(1). https://doi.org/10.1002/jaba.93</p>
   </section>
 </main>
 
@@ -1316,7 +1397,11 @@ function renderSum(){
     else if(m==='Whole interval'&&t==='Reduction target')note='Whole interval underestimates duration. For a reduction target it will make the behavior look less frequent than it is; partial interval or momentary sampling is the more usual choice here.';
     else if(m==='Partial interval'&&(t==='Replacement behavior'||t==='Acquisition target'))note='Partial interval overestimates duration, so it will credit a fragment of the behavior as a whole interval. For a behavior you are increasing, whole interval sets the more honest bar.';
     else if(m==='Momentary time sampling')note='Momentary sampling estimates duration reasonably well when the interval is short relative to the behavior, and misses a brief behavior unless it is under way at a mark.';
-    v=`<div class="verdict v-ok"><b>${pct.toFixed(1)}% of scored intervals.</b> ${esc(S.meta.method)}, ${p.ivSec}-second intervals, ${p.mins} minutes. ${note}</div>`;
+    /* v25.64 (H5) partial interval on a falling behavior understates the fall; every verdict says interval data can miss a real effect */
+    if(m==='Partial interval'&&t==='Reduction target')note+=' As the behavior falls, the overestimate grows, so the graph will understate the improvement.';
+    v=`<div class="verdict v-ok"><b>${pct.toFixed(1)}% of scored intervals.</b> ${esc(S.meta.method)}, ${p.ivSec}-second intervals, ${p.mins} minutes. ${note} <span class="mt-fn">${MT_FN}</span></div>`;
+    /* v25.64 (M2) a behavior scored in under 10% of intervals in an observation of 15 minutes or less */
+    if(pct<10&&p.mins<=15)v+='<div class="verdict v-mid mt-short">A behavior that fills little of the time is poorly estimated by short observations. Add observations across the day before comparing phases.</div>';
   }
   $('#sumVerdict').innerHTML=v;
   /* IOA. v21.16 audit.
@@ -1329,14 +1414,16 @@ function renderSum(){
      names the figure to act on at this rate: occurrence agreement when fewer than half of the two observers'
      marks in the intervals compared are +, non-occurrence agreement when more than half are (Bijou et al.,
      1968, as reported by Hopkins & Hermann, 1977). Only the occurrence figure used to be checked and named. */
-  if(S.meta.ioaOn!=='Yes'){$('#ioaOut').innerHTML='';return;}
+  if(S.meta.ioaOn!=='Yes'){$('#ioaOut').innerHTML='';v2564After();return;}
   const {agree,tot,occA,occT,nonA,nonT,plusN,left,o1,o2,n1,n2}=ioaFigs(p);
   const f=(a,b)=>b?(100*a/b).toFixed(1)+'%':'\u2014';
   /* v23.07 (review I56): the agreement two observers would reach by chance, scoring independently at the rates they did
      (Hopkins & Hermann, 1977): overall (O1*O2 + N1*N2) / T^2; occurrence O1*O2 / (T^2 - N1*N2); non-occurrence N1*N2 / (T^2 - O1*O2) */
   const T2=tot*tot,ch=(a,b)=>b>0?'chance alone: '+(100*a/b).toFixed(1)+'%':'';
   const chance=[ch(o1*o2+n1*n2,T2),ch(o1*o2,T2-n1*n2),ch(n1*n2,T2-o1*o2)];
-  const c2=(l,v,s,k)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div>${tot&&chance[k]?`<div class="chance">${chance[k]}</div>`:''}</div>`;
+  /* v25.64 (M1) kappa from the same intervals, under the point-by-point figure */
+  const kap=kappaOf(p),kapT=!tot?'':kap===null?'kappa: cannot be computed (both observers scored every interval compared the same way)':'kappa '+kap.toFixed(2)+(kap<.6?', below .60':'');
+  const c2=(l,v,s,k)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div>${tot&&chance[k]?`<div class="chance">${chance[k]}</div>`:''}${k===0&&kapT?`<div class="kap">${kapT}</div>`:''}</div>`;
   const low=[occT&&occA/occT<.8?'Occurrence':'',nonT&&nonA/nonT<.8?'Non-occurrence':''].filter(Boolean);
   const share=tot?plusN/(2*tot):0;
   const act=share<.5?'The behavior was scored in fewer than half of the intervals compared. Overall agreement can look high when both observers score mostly non-occurrence; the occurrence figure is the one to act on.'
@@ -1346,8 +1433,16 @@ function renderSum(){
     c2('Point-by-point IOA',f(agree,tot),`${agree} of ${tot} intervals compared scored alike`+(left?`; ${left} left out (N/A, or one observer only)`:''),0)+
     c2('Occurrence agreement',f(occA,occT),`${occA} of ${occT}`,1)+
     c2('Non-occurrence agreement',f(nonA,nonT),`${nonA} of ${nonT}`,2)+'</div>'+
-    (low.length?`<div class="verdict v-mid">${low.length>1?'Occurrence and non-occurrence agreement are':low[0]+' agreement is'} below 80%. ${act}</div>`:'');
+    (low.length?`<div class="verdict v-mid">${low.length>1?'Occurrence and non-occurrence agreement are':low[0]+' agreement is'} below 80%. ${act}</div>`:'')+
+    (kap!==null&&kap<.6?`<div class="verdict v-mid mt-kap">Kappa is ${kap.toFixed(2)}, below .60: much of this agreement is what chance alone would give. The .60 is Hartmann&rsquo;s (1977) suggestion, not a validated cut-off.</div>`:'');
+  v2564After();
 }
+/* v25.64 (H5) the missed-effect caution, on every verdict and under the graph */
+const MT_FN='Interval measures tend to show less change than really occurred. A small drop, or none, does not show that the plan failed. Check against a count or a timed sample before changing the plan.';
+/* v25.64 (M1) Cohen's kappa over the intervals both observers scored + or -: (observed - chance) / (1 - chance), chance as above;
+   null when there is nothing to compare or chance is 1 (both scored every interval the same way) */
+function kappaOf(p){const g=ioaFigs(p);if(!g.tot)return null;const T2=g.tot*g.tot,po=g.agree/g.tot,pe=(g.o1*g.o2+g.n1*g.n2)/T2;
+  return pe>=1?null:(po-pe)/(1-pe);}
 
 /* v21.37: the three agreement figures, counted once for the sheet and for the capture to the session log */
 function ioaFigs(p){const pm=v=>v==='1'||v==='0';
@@ -1377,17 +1472,17 @@ function renderSess(){
     <td><input data-s="${i}" data-f="len" value="${esc(r.len)}"></td>
     <td><input data-s="${i}" data-f="n" value="${esc(r.n)}">${String(r.tot||'').trim()?`<span class="ivof">of ${esc(r.tot)}${+r.na?' \u00b7 '+esc(r.na)+' N/A':''}</span>`:''}</td>
     <td><input type="number" step="any" data-s="${i}" data-f="p" value="${esc(r.p)}"></td>
-    <td><input data-s="${i}" data-f="ioa" value="${esc(r.ioa||'')}" title="Point-by-point / occurrence / non-occurrence"></td>
+    <td><input data-s="${i}" data-f="ioa" value="${esc(r.ioa||'')}" title="Point-by-point / occurrence / non-occurrence"><input data-s="${i}" data-f="obs2" value="${esc(r.obs2||'')}" placeholder="second observer" aria-label="Session ${i+1}: second observer">${String(r.kap||'').trim()?`<span class="ivof">kappa ${esc(r.kap)}</span>`:''}</td>
     <td><select data-s="${i}" data-f="chg"><option value=""></option>${
       ['Full phase change','Conditional change'].map(o=>`<option${r.chg===o?' selected':''}>${o}</option>`).join('')}</select></td>
     <td><input data-s="${i}" data-f="ph" value="${esc(r.ph)}" placeholder="${i===0?'e.g., Baseline':''}"></td>
-    <td><input data-s="${i}" data-f="note" value="${esc(r.note)}"></td>
+    <td><input data-s="${i}" data-f="note" value="${esc(r.note)}">${r.teach==='1'?'<span class="pzof">Observer also teaching</span>':''}${String(r.pz||'').trim()?`<span class="pzof">Timer: ${esc(r.pz)}${r.pzProc==='1'?'; measured outside the procedure only':''}</span>`:''}</td>
     <td class="nx noprint"><button type="button" class="rowDel noprint" data-del="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
   drawPlot();
 }
 ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(el.dataset.s===undefined)return;
-  S.sess[+el.dataset.s][el.dataset.f]=el.value;if(/^(p|ph|chg|m|iv|len|d|ioa)$/.test(el.dataset.f))drawPlot();}));
-$('#addSess').addEventListener('click',()=>{S.sess.push({d:'',start:'',loc:'',obs:'',m:'',iv:'',r:'',len:'',n:'',p:'',ioa:'',chg:'',ph:'',note:''});renderSess();});
+  S.sess[+el.dataset.s][el.dataset.f]=el.value;if(/^(p|ph|chg|m|iv|len|d|ioa|obs|obs2)$/.test(el.dataset.f))drawPlot();}));
+$('#addSess').addEventListener('click',()=>{S.sess.push({d:'',start:'',loc:'',obs:'',m:'',iv:'',r:'',len:'',n:'',p:'',ioa:'',obs2:'',chg:'',ph:'',note:''});renderSess();});
 $('#delSess').addEventListener('click',()=>{if(S.sess.length>1){S.sess.pop();renderSess();}});
 /* The sheet's condition, its change marker and its notes go with the numbers:
    a session in which a procedure was used should say so on the log, where the
@@ -1410,6 +1505,7 @@ async function captureSheet(goToLog){
     const msg=$('#capMsg');if(msg){msg.textContent='Not logged again: this sheet is session '+lc.n+' on the log.';msg.classList.add('done');}if(goToLog)setView('log');return;}
   const row={d:S.meta.date||'',start:S.meta.start||'',loc:S.meta.loc||'',obs:S.meta.obs||'',m:S.meta.method,iv:p.ivSec+' s',r:p.ratio,len:p.mins+' min',
     n:String(scored),tot:String(p.total),na:String(na),p:(100*plus/scored).toFixed(1),ioa:ioaCell(p),chg:S.meta.chg||'',ph:S.meta.cond||'',note:S.meta.notes||''};   /* v21.37: the IOA figures go with the session */
+  Object.assign(row,v2564Row(p));   /* v25.64 (H7, M1, L6, L7, M4) the second observer, kappa, the pauses, the teaching tick, the blind tick */
   if(S.sess.length===1&&emptyRow(S.sess[0]))S.sess[0]=row;else S.sess.push(row);
   S.meta.lastCap={fp,n:S.sess.indexOf(row)+1};
   /* a phase change belongs to the one session it was made at */
@@ -1422,8 +1518,8 @@ async function captureSheet(goToLog){
 $('#capture').addEventListener('click',()=>captureSheet(true));
 $('#captureSheet').addEventListener('click',()=>captureSheet(false));
 $('#clearSheet').addEventListener('click',async()=>{
-  if(!(await nbhUI.confirm('Clear the sheet for the next session?\nThe marks, the start time, the change marker and the notes are cleared. The student, the behavior, the settings, the date, the condition and the session log stay.',{ok:'Clear the sheet',danger:true})))return;
-  S.marks={};S.ioa={};S.meta.start='';S.meta.notes='';S.meta.chg='';delete S.meta.lastCap;
+  if(!(await nbhUI.confirm('Clear the sheet for the next session?\nThe marks, the start time, the change marker, the notes and the timer\u2019s pauses are cleared. The student, the behavior, the settings, the date, the condition and the session log stay.',{ok:'Clear the sheet',danger:true})))return;
+  S.marks={};S.ioa={};S.meta.start='';S.meta.notes='';S.meta.chg='';delete S.meta.lastCap;delete S.meta.pauses;   /* v25.64 (L6) the pauses belong to the session */
   bindMeta();const chgSel=$('[data-m="chg"]');if(chgSel)chgSel.value='';renderGrid();renderSum();
   const msg=$('#capMsg');if(msg){msg.textContent='Sheet cleared for the next session. The session log is unchanged.';msg.classList.add('done');}
   setView('sheet');
@@ -1431,6 +1527,9 @@ $('#clearSheet').addEventListener('click',async()=>{
 function drawPlot(){
   const svg=$('#mtPlot');const W=900,H=320,L=52,R=22,T=26,B=64;
   const pts=S.sess.map((r,i)=>({i,y:parseFloat(r.p),ph:r.ph,chg:r.chg})).filter(p=>isFinite(p.y));
+  const pn=document.getElementById('mtPlotNote');   /* v25.64 (H5, L7) the note under the graph */
+  if(pn)pn.textContent=pts.length<2?'':MT_FN+(pts.some(q=>S.sess[q.i]&&S.sess[q.i].teach==='1')?' T above a point: the observer was also running the class or session.':'')
+    +(pts.some(q=>S.sess[q.i]&&S.sess[q.i].pzProc==='1')?' P above a point: measured outside a plan procedure only (the timer was paused while it ran).':'');
   if(pts.length<2){svg.innerHTML='';renderPhases();return;}
   const n=pts.length,px=k=>L+(n===1?(W-L-R)/2:(k/(n-1))*(W-L-R)),py=v=>T+(1-v/100)*(H-T-B);
   let s=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/><rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="none" stroke="#CDD6D2"/>`;
@@ -1469,6 +1568,9 @@ function drawPlot(){
       +`<text x="${W-R-4}" y="${y-4}" font-size="9.5" text-anchor="end" fill="#2F6B37" font-family="Inter,Arial,sans-serif">Goal ${gl.pct}% (Form GB-1)</text></g>`;}
   s+=`<path d="${path}" fill="none" stroke="#254657" stroke-width="2"/>`;
   pts.forEach((p,k)=>{s+=`<circle cx="${px(k)}" cy="${py(p.y)}" r="3.8" fill="#254657"/>`;});
+  /* v25.64 (L7, L6) a T above a session the observer also taught; a P above one measured outside a plan procedure only */
+  pts.forEach((p,k)=>{const r=S.sess[p.i]||{},m=[r.teach==='1'?'T':'',r.pzProc==='1'?'P':''].filter(Boolean).join(' ');
+    if(m)s+=`<text class="mt-mark" x="${px(k)}" y="${Math.max(T+9,py(p.y)-8)}" font-size="9.5" font-weight="700" text-anchor="middle" fill="#9B4E15" font-family="Inter,Arial,sans-serif">${m}</text>`;});
   pts.forEach((p,k)=>{s+=`<text x="${px(k)}" y="${H-B+15}" font-size="10" text-anchor="middle" fill="#5C6B6B" font-family="Inter,Arial,sans-serif">${p.i+1}</text>`;});
   if(pts.length&&pts[0].ph)s+=`<text x="${L+4}" y="${T+11}" font-size="9" fill="#1B2A2E" font-family="Inter,Arial,sans-serif">${esc(pts[0].ph)}</text>`;
   s+=`<g font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#54676f">
@@ -1486,7 +1588,7 @@ function drawPlot(){
 function renderPhases(){
   const box=document.getElementById('mtPhases');if(!box)return;
   const rows=S.sess.map((r,i)=>({r,i,y:parseFloat(r.p)})).filter(o=>isFinite(o.y));
-  if(rows.length<2){box.innerHTML='';return;}
+  if(rows.length<2){box.innerHTML='';renderIoaCov(null);return;}
   const ph=[];rows.forEach(o=>{if(!ph.length||o.r.chg==='Full phase change')ph.push({lab:String(o.r.ph||'').trim(),rows:[]});ph[ph.length-1].rows.push(o);});
   const f1=v=>v.toFixed(1),io1=r=>{const m=/^\s*(\d+(?:\.\d+)?)/.exec(String(r.ioa||''));return m?+m[1]:null;};
   let h='<table class="rt"><thead><tr><th style="width:22%">Condition</th><th style="width:12%">Sessions</th><th style="width:18%">Dates</th><th style="width:16%">Mean % (range)</th><th style="width:14%">First \u2192 last</th><th>Mean IOA (point-by-point)</th></tr></thead><tbody>';
@@ -1497,6 +1599,7 @@ function renderPhases(){
       +`<td class="n">${f1(mean)}${ys.length>1?' ('+f1(Math.min(...ys))+'\u2013'+f1(Math.max(...ys))+')':''}</td><td class="n">${f1(a.y)} \u2192 ${f1(z.y)}</td>`
       +`<td class="n">${io.length?f1(io.reduce((x,y)=>x+y,0)/io.length)+'% ('+io.length+' session'+(io.length===1?'':'s')+')':'\u2014'}</td></tr>`;});
   box.innerHTML=h+'</tbody></table>';
+  renderIoaCov(ph,io1);   /* v25.64 (H7) */
 }
 
 /* v21.16 audit.
@@ -1511,8 +1614,10 @@ const anyMarks=()=>[S.marks,S.ioa].some(o=>Object.values(o||{}).some(Boolean));
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
   if(el.tagName==='SELECT'){const v=S.meta[k]==null?'':String(S.meta[k]);if([...el.options].some(o=>o.value===v))el.value=v;}
   else if(el.type==='time'){S.meta[k]=toHM24(S.meta[k]);el.value=S.meta[k];}
+  else if(el.type==='checkbox')el.checked=S.meta[k]==='1';   /* v25.64 (L7, M4) a tick keeps "1" or nothing */
   else el.value=S.meta[k]||'';
-  if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
+  if(!el._b){el._b=1;const ev=el.tagName==='SELECT'||el.type==='checkbox'?'change':'input';
+    if(el.type==='checkbox'){el.addEventListener('change',()=>{S.meta[k]=el.checked?'1':'';v2564Refresh();});return;}
     el.addEventListener(ev,async()=>{
       if(RESCORE[k]&&el.value!==String(S.meta[k]==null?'':S.meta[k])&&anyMarks()){
         const p=params();
@@ -1521,7 +1626,8 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
       }
       S.meta[k]=el.value;
       if(/^(client|sid|site)$/.test(k))paintWho();
-      if(el.dataset.calc){renderSetup();bindMeta();renderGrid();renderSum();}});}});}
+      if(el.dataset.calc){renderSetup();bindMeta();renderGrid();renderSum();}
+      else if(/^(epLen|epN|matter|ck[12](Date|Ex|Pct)|date|obs|obs2)$/.test(k))v2564Refresh();});}});}   /* v25.64 (H4, M4) */
 function renderAll(){ensure();renderSetup();bindMeta();renderSetup();renderGrid();renderSum();renderSess();paintWho();}
 
 $('#printBtn').addEventListener('click',()=>{document.body.classList.remove('print-blank');window.print();});
@@ -1547,16 +1653,108 @@ $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).r
     /* v23.07 (review F115, F109): the measure first, and each session's time, setting, observer, interval and N/A */
     const lg=S.sess.filter(r=>!emptyRow(r)),chgs=[];lg.forEach((r,k)=>{if(k&&rowMeasure(r)&&rowMeasure(lg[k-1])&&rowMeasure(r)!==rowMeasure(lg[k-1]))chgs.push('session '+(S.sess.indexOf(r)+1)+': '+rowMeasure(r));});
     rows.push(['Measure',rowMeasure(lg[0])].concat(chgs.length?['Changed at '+chgs.join('; ')]:[]));
-    rows.push(['Session','Date','Start time','Setting','Observer','Method','Interval','Ratio (paper sheet)','Length','Intervals scored','Intervals on the sheet','N/A','% occur','IOA % (point-by-point / occurrence / non-occurrence)','Change at this session','Condition or change label','Note']);
-    S.sess.forEach((r,i)=>{if(!emptyRow(r))rows.push([i+1,r.d,r.start||'',r.loc||'',r.obs||'',r.m,rowIv(r),r.r||'',r.len,r.n,r.tot||'',r.na||'',r.p,r.ioa||'',r.chg,r.ph,r.note]);});}
+    rows.push(['Session','Date','Start time','Setting','Observer','Method','Interval','Ratio (paper sheet)','Length','Intervals scored','Intervals on the sheet','N/A','% occur','IOA % (point-by-point / occurrence / non-occurrence)','Change at this session','Condition or change label','Note','Second observer','Kappa','Observer also teaching','Second observer did not know the phase','Timer pauses']);   /* v25.64 (H7, M1, L7, M4, L6) after the earlier columns */
+    S.sess.forEach((r,i)=>{if(!emptyRow(r))rows.push([i+1,r.d,r.start||'',r.loc||'',r.obs||'',r.m,rowIv(r),r.r||'',r.len,r.n,r.tot||'',r.na||'',r.p,r.ioa||'',r.chg,r.ph,r.note,r.obs2||'',r.kap||'',r.teach==='1'?'Yes':'',r.blind==='1'?'Yes':'',String(r.pz||'')+(r.pzProc==='1'?' (measured outside the procedure only)':'')]);});}
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='MT-1_intervals.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form, including the session log?\nUnsaved work will be lost. To start the next session and keep the log, use "Clear sheet for the next session" on the data sheet instead.',{ok:'Clear all',danger:true})){S=blank();renderAll();resetTimer();setView('sheet');}});
 
+/* ===================== v25.64 (H4, M4, L6, L7, H7) =====================
+   H4 the chooser: from the typical episode length, about how many episodes, and whether how often or how long matters most,
+   a suggested measure, and a flag when the interval is longer than an episode (Wirth et al., 2014). M4 each observer checked
+   against a scored example (this form's default: 90% or more; again every 4 to 6 weeks and after an agreement flag). L6 each
+   pause of the timer: when, how long, why; a pause while a plan procedure ran is flagged. L7 the observer also teaching. H7
+   under the graph: each condition's IOA coverage, agreement by observer pairing, and possible drift. */
+const numOr=v=>{const t=String(v==null?'':v).trim();if(!t)return null;const n=+t;return isFinite(n)&&n>=0?n:null;};
+function renderChooser(){
+  const box=document.getElementById('mtSuggest'),fl=document.getElementById('mtChooseFlag');if(!box||!fl)return;
+  const p=params(),E=numOr(S.meta.epLen),N=numOr(S.meta.epN),mt=String(S.meta.matter||''),inc=/^(Replacement behavior|Acquisition target)$/.test(String(S.meta.ttype||''));
+  /* the longest interval offered for this observation length that is no longer than a typical episode */
+  const offered=IVS.filter(x=>(p.mins*60)%x===0&&p.mins*60/x>=4),fit=E?offered.filter(x=>x<=E).pop()||null:null;
+  const fitT=E?(fit?': with this observation length, '+fit+' seconds or shorter':': no interval offered here is as short as a '+E+'-second episode'):'';
+  let t;
+  if(inc)t='<b>Whole interval or momentary time sampling</b>, for a behavior you are increasing'+(E?', with an interval no longer than the typical episode'+fitT:'')+'.';
+  else if(mt==='How long')t=E&&!fit?'<b>Time each episode</b> on Form OB-1&rsquo;s Live Recorder: no interval offered here is as short as a '+E+'-second episode.'
+    :'<b>Momentary time sampling</b>, with an interval no longer than the typical episode'+(E?fitT:' (type the episode length)')+'.';
+  else if(mt==='How often'){const many=N!==null&&N>=p.mins*6;
+    t=many?'<b>Partial interval, 10-second intervals.</b> It estimates how often, and undercounts when episodes come several to an interval.'
+      :'<b>Count the episodes</b> on Form OB-1&rsquo;s Live Recorder, if each has a clear start and end: fewer than about 1 every 10 seconds can be counted'+(N===null?' (type about how many episodes)':' ('+N+' in '+p.mins+' minutes)')+'.';}
+  else t='<span class="hint">Give the episode length, about how many, and what matters most.</span>';
+  box.innerHTML=t;
+  const F=[];
+  if(E&&p.ivSec>E)F.push('The interval ('+p.ivSec+' seconds) is longer than a typical episode ('+E+' seconds): error grows sharply (Wirth et al., 2014).');
+  if(S.meta.teach==='1'&&S.meta.method==='Momentary time sampling'&&p.ivSec<=30)F.push('The observer is also teaching: a very short momentary interval can lower agreement. Check with a second observer before relying on it (Hanley et al., 2007).');
+  fl.innerHTML=F.map(x=>'<div class="verdict v-mid">'+x+'</div>').join('');
+}
+/* a date as the sheet holds it (M/D/YY, M/D/YYYY or YYYY-MM-DD), as a day count; null when it is not one */
+function dayOf(v){const t=String(v==null?'':v).trim();let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(t),d=null;
+  if(m)d=new Date(+m[1],+m[2]-1,+m[3]);else if((m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(t)))d=new Date(m[3].length===2?2000+ +m[3]:+m[3],+m[1]-1,+m[2]);
+  return d&&!isNaN(d)?Math.round(d.getTime()/864e5):null;}
+const CK_MIN=90;   /* this form's default: an observer's data count once the observer scores 90% or more against the example */
+function ioaFlagged(){const p=params();if(S.meta.ioaOn!=='Yes')return false;const g=ioaFigs(p);if(!g.tot)return false;const k=kappaOf(p);
+  return !!((g.occT&&g.occA/g.occT<.8)||(g.nonT&&g.nonA/g.nonT<.8)||(k!==null&&k<.6));}
+function renderCk(){
+  const box=document.getElementById('mtCkNote');if(!box)return;
+  const ref=dayOf(S.meta.date)!==null?dayOf(S.meta.date):Math.round(new Date(new Date().toDateString()).getTime()/864e5),F=[];
+  [['1','Observer',S.meta.obs,!!String(S.meta.obs||'').trim()],['2','Second observer',S.meta.obs2,S.meta.ioaOn==='Yes'||!!String(S.meta.obs2||'').trim()]].forEach(([k,who,nm,used])=>{
+    if(!used)return;const name=String(nm||'').trim(),w=who+(name?' ('+esc(name)+')':''),d=dayOf(S.meta['ck'+k+'Date']),pc=numOr(S.meta['ck'+k+'Pct']);
+    if(d===null&&pc===null){F.push(w+': no check against a scored example is recorded. By this form&rsquo;s default an observer scores '+CK_MIN+'% or more against one before their data count.');return;}
+    if(pc!==null&&pc<CK_MIN)F.push(w+': '+pc+'% correct against the example, below this form&rsquo;s '+CK_MIN+'%. Retrain, and check again before these data count.');
+    if(d!==null&&ref-d>42)F.push(w+': last checked '+Math.floor((ref-d)/7)+' weeks before this session. Repeat the check every 4 to 6 weeks.');});
+  if(ioaFlagged())F.push('An agreement figure on this sheet is flagged: check both observers against the scored example again.');
+  box.innerHTML=F.length?'<div class="verdict v-mid mt-ck">'+F.join(' ')+'</div>':'';
+}
+/* L6 the timer's pauses, held in S.meta.pauses: {at (seconds observed when it began), wall (h:mm:ss), len (seconds; null while paused), why} */
+const PZ_WHY=['Left the room','A break','A plan procedure running','Other'];
+function pzList(){return Array.isArray(S.meta.pauses)?S.meta.pauses.filter(x=>x&&typeof x==='object'):[];}
+const pzLen=x=>x.len==null?null:Math.max(0,Math.round(+x.len||0));
+function pzSum(){const L=pzList(),tot=L.reduce((a,x)=>a+(pzLen(x)||0),0),proc=L.filter(x=>x.why==='A plan procedure running').length;return {L,tot,proc};}
+function pzWords(x){return 'at '+mmss(Math.max(0,Math.round(+x.at||0)))+(x.wall?' ('+x.wall+')':'')+', '+(pzLen(x)===null?'still paused':mmss(pzLen(x))+' long')+', '+(x.why?String(x.why).toLowerCase():'no reason given');}
+function renderPz(){
+  const out=document.getElementById('pzOut'),pan=document.getElementById('tmrPz'),{L,tot,proc}=pzSum();
+  if(pan){const sig=JSON.stringify(L);if(pan.__sig!==sig){pan.__sig=sig;pan.hidden=!L.length;
+    pan.innerHTML=L.length?'<b>Pauses</b>'+L.map((x,i)=>'<div>Pause '+(i+1)+': at '+mmss(Math.max(0,Math.round(+x.at||0)))+(x.wall?' ('+esc(x.wall)+')':'')+', '+(pzLen(x)===null?'still paused':mmss(pzLen(x))+' long')
+      +' &middot; <label>why <select data-pz="'+i+'" aria-label="Why pause '+(i+1)+'"><option value=""></option>'+PZ_WHY.map(o=>'<option'+(x.why===o?' selected':'')+'>'+o+'</option>').join('')+'</select></label></div>').join(''):'';}}
+  if(out)out.innerHTML=L.length?'<div class="verdict '+(proc?'v-mid':'v-na')+' mt-pz">Timer paused '+L.length+' time'+(L.length===1?'':'s')+', '+mmss(tot)+' in all: '+esc(L.map(pzWords).join('; '))+'.'
+    +(proc?' <b>Measured outside the procedure only.</b> The timer was paused while a plan procedure ran, so this sheet says nothing about the behavior during the procedure. Leaving that time out overestimated the effect of response interruption and redirection (Carroll &amp; Kodak, 2014).':'')+'</div>':'';
+}
+document.addEventListener('change',e=>{const s=e.target.closest&&e.target.closest('select[data-pz]');if(!s)return;const x=pzList()[+s.dataset.pz];if(!x)return;x.why=s.value;renderPz();});
+function v2564After(){try{renderChooser();renderCk();renderPz();}catch(e){}}
+function v2564Refresh(){renderSum();}
+/* what a captured row keeps besides the figures */
+function v2564Row(p){const r={};
+  if(S.meta.ioaOn==='Yes'&&ioaFigs(p).tot){r.obs2=String(S.meta.obs2||'').trim();const k=kappaOf(p);if(k!==null)r.kap=k.toFixed(2);if(S.meta.blind==='1')r.blind='1';}
+  if(S.meta.teach==='1')r.teach='1';
+  const {L,tot,proc}=pzSum();if(L.length){r.pz=L.length+' pause'+(L.length===1?'':'s')+', '+mmss(tot)+(proc?', '+proc+' while a plan procedure ran':'');if(proc)r.pzProc='1';}
+  return r;}
+/* H7 coverage in each condition, agreement by pairing, possible drift */
+function renderIoaCov(ph,io1){
+  const box=document.getElementById('mtIoaCov');if(!box)return;
+  if(!ph||!ph.length){box.innerHTML='';return;}
+  const f1=v=>v.toFixed(1),mean=a=>a.reduce((x,y)=>x+y,0)/a.length,F=[],cm=[];
+  let h='<table class="rt mt-cov"><thead><tr><th style="width:22%">Condition</th><th style="width:16%">Sessions with IOA</th><th style="width:12%">Share</th><th>Agreement coverage</th></tr></thead><tbody>';
+  ph.forEach(g=>{const w=g.rows.filter(o=>io1(o.r)!==null),n=g.rows.length,sh=n?w.length/n:0;
+    const note=!w.length?'No IOA session in this condition':sh<.2?'Below 20%: add IOA sessions':'At or above 20%';
+    if(w.length)cm.push({lab:g.lab||'(no label)',m:mean(w.map(o=>io1(o.r)))});
+    h+=`<tr><td>${esc(g.lab||'(no label)')}</td><td class="n">${w.length} of ${n}</td><td class="n">${Math.round(sh*100)}%</td><td>${!w.length||sh<.2?'<b>'+note+'</b>':note}</td></tr>`;});
+  h+='</tbody></table>';
+  if(cm.length>1)cm.slice(1).forEach(c=>{if(c.m<=cm[0].m-10)F.push('Possible drift: mean agreement in '+c.lab+' ('+f1(c.m)+'%) is 10 or more points below '+cm[0].lab+' ('+f1(cm[0].m)+'%). Check both observers against a scored example.');});
+  /* by pairing: the observer and the second observer of each IOA session */
+  const all=[].concat(...ph.map(g=>g.rows)).filter(o=>io1(o.r)!==null),P=new Map();
+  all.forEach(o=>{const a=String(o.r.obs||'').trim()||'observer not recorded',b=String(o.r.obs2||'').trim()||'second observer not recorded',k=a+' with '+b;
+    if(!P.has(k))P.set(k,[]);P.get(k).push(io1(o.r));});
+  if(P.size){h+='<table class="rt mt-pair"><thead><tr><th>Observer pairing</th><th style="width:16%">IOA sessions</th><th style="width:22%">Mean point-by-point</th></tr></thead><tbody>';
+    P.forEach((v,k)=>{h+=`<tr><td>${esc(k)}</td><td class="n">${v.length}</td><td class="n">${f1(mean(v))}%</td></tr>`;});h+='</tbody></table>';
+    if(P.size>1)P.forEach((v,k)=>{const rest=[];P.forEach((w,j)=>{if(j!==k)rest.push(...w);});const a=mean(v),b=mean(rest);
+      if(a>=b+10)F.push('Possible drift: '+k+' agree 10 or more points above the other pairings ('+f1(a)+'% against '+f1(b)+'%). Observers who work together can keep agreeing while both drift from the definition (Kazdin, 1977): rotate the second observer.');});}
+  box.innerHTML=h+(F.length?'<div class="verdict v-mid mt-drift">'+esc(F.join(' '))+'</div>':'');
+}
+
 async function loadSim(){
   if(!(await nbhUI.confirm('Load the simulated observation?\nEvery sheet is filled. Anything already entered will be replaced.',{ok:'Load'})))return;
   const D=n=>{const d=new Date();d.setDate(d.getDate()-n);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
+  const ISOd=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};   /* v25.64 */
   S=blank();
   S.meta={client:'SIMULATED \u2013 Sample Student',obs:'Aide A (simulated)',date:D(2),
     loc:'Room 12, independent writing block',start:'13:30',obs2:'Jordan Ellis, M.A., BCBA (simulated)',
@@ -1565,7 +1763,9 @@ async function loadSim(){
     def:'Eyes directed at the assigned materials and at least one hand in contact with them or with the writing tool. Looking at the adult while being spoken to counts. Looking away, leaving the seat, or hands idle does not.',
     method:'Whole interval',mins:'10',iv:'20',ratio:'1:2',cols:'4',ioaOn:'Yes',
     cond:'Plan',chg:'',
-    notes:'Whole interval chosen because this is an acquisition target and a fragment of on-task should not be credited as a full interval. Second observer present for the whole session; agreement computed above.'};
+    notes:'Whole interval chosen because this is an acquisition target and a fragment of on-task should not be credited as a full interval. Second observer present for the whole session; agreement computed above.',
+    /* v25.64 (H4, M4) the chooser's answers, and both observers checked against a scored example */
+    epLen:'90',epN:'6',matter:'How long',ck1Date:ISOd(20),ck1Ex:'This form\u2019s simulation',ck1Pct:'95',ck2Date:ISOd(30),ck2Ex:'A scored video',ck2Pct:'100'};
   const p=params();
   /* on-task in roughly two-thirds of intervals, clustered rather than random */
   const pat=[1,1,0,1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,1,1,1,1,0,1,1,0,1,1,1,0];
@@ -1587,6 +1787,8 @@ async function loadSim(){
      sheet on screen is the last session, already logged */
   const W1=['13:30','Room 12, independent writing block','Aide A (simulated)'],W2=['10:15','Room 12, small-group reading','Aide B (simulated)'];
   S.sess.forEach((r,k)=>{const w=k===5?W2:W1;r.start=w[0];r.loc=w[1];r.obs=w[2];r.iv='20 s';r.tot='30';r.na='0';});
+  /* v25.64 (H7, L7) each IOA session keeps its second observer; at session 6 the aide was also running the reading group */
+  S.sess[0].obs2='Jordan Ellis, M.A., BCBA (simulated)';S.sess[3].obs2='Behavior technician (simulated)';Object.assign(S.sess[6],v2564Row(p));S.sess[5].teach='1';
   S.meta.lastCap={fp:capFP(p),n:S.sess.length};
   renderAll();resetTimer();setView('sheet');
   nbhUI.toast('Simulation loaded: ' + 'simulated whole-interval observation, 10 minutes in 20-second intervals, with a second observer.', {kind:'ok'});
@@ -1610,6 +1812,8 @@ $('#ioaFileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)re
         +(dd&&md&&dd!==md?' That file is dated '+dd+'; this sheet, '+md+'.':'')+(had?' The marks already in the Obs 2 column are replaced.':''),{ok:'Put them in'})))return;
     S.ioa={};keys.forEach(k=>{S.ioa[k]=o.marks[k];});S.meta.ioaOn='Yes';
     if(String(om.obs||'').trim()&&!String(S.meta.obs2||'').trim())S.meta.obs2=String(om.obs).trim();
+    /* v25.64 (M4) the second observer's own check against a scored example comes with their file, where this sheet has none */
+    if(!['ck2Date','ck2Ex','ck2Pct'].some(k=>String(S.meta[k]||'').trim()))['Date','Ex','Pct'].forEach(k=>{if(String(om['ck1'+k]||'').trim())S.meta['ck2'+k]=String(om['ck1'+k]).trim();});
     renderAll();nbhUI.toast('Observer 2\u2019s '+keys.length+' marks are in the Obs 2 column; the agreement figures are under the grid.',{kind:'ok'});};
   rd.readAsText(f);e.target.value='';});
 /* v23.07 (review I59): a paper sheet's marks typed in one line, in order from interval 1 */
@@ -1743,10 +1947,15 @@ renderAll();
     setField('start',String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'));}
   function lock(on){LOCK.forEach(k=>{const s=document.querySelector('[data-m="'+k+'"]');if(s){s.disabled=on;s.title=on?'Reset the timer to change this':'';}});}
   function startPause(){
-    if(T.state==='run'){T.acc=elapsed();T.state='pause';stopLoops();unsched();wakeOff();note('Paused at '+up(T.acc)+'. The clock is stopped; press Resume to go on.');paintGrid();return;}
+    if(T.state==='run'){T.acc=elapsed();T.state='pause';stopLoops();unsched();wakeOff();
+      /* v25.64 (L6) each pause keeps when it began (on the clock and the wall), how long it lasts and, chosen below the timer, why */
+      const d=new Date();T.pz0=now();if(!Array.isArray(S.meta.pauses))S.meta.pauses=[];
+      S.meta.pauses.push({at:Math.round(T.acc/1000),wall:((d.getHours()%12)||12)+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0'),len:null,why:''});T.pzRef=S.meta.pauses[S.meta.pauses.length-1];pzRender();
+      note('Paused at '+up(T.acc)+'. The clock is stopped; say why under the timer, and press Resume to go on.');paintGrid();return;}
     if(T.state==='done')return;
     ctx();
-    if(T.state==='ready'){T.acc=0;T.last=0;T.geo=G();T.msg='';stamp();}
+    if(T.state==='pause')pzClose();   /* v25.64 (L6) */
+    if(T.state==='ready'){T.acc=0;T.last=0;T.geo=G();T.msg='';stamp();delete S.meta.pauses;pzRender();}   /* v25.64 (L6) a new timing starts with no pauses */
     T.t0=now();T.state='run';lock(true);sched();
     if(T.ac&&T.ac.state!=='running')T.ac.resume().then(()=>{if(T.state==='run')sched();}).catch(()=>{});
     wakeOn();setTop();loops();paint();paintGrid();
@@ -1757,7 +1966,10 @@ renderAll();
     note('Observation complete: '+n+' of '+g.n+' intervals scored. Capture it to the session log below, then clear the sheet for the next session.');
     paintGrid();
   }
-  function hardReset(){stopLoops();unsched();wakeOff();T.state='ready';T.acc=0;T.last=0;T.geo=null;T.msg='';lock(false);paint();paintGrid();}
+  /* v25.64 (L6) the open pause ends: its length from the moment Pause was pressed */
+  function pzClose(){const L=Array.isArray(S.meta.pauses)?S.meta.pauses:[],x=T.pzRef;if(x&&L.indexOf(x)>=0&&x.len==null&&T.pz0)x.len=Math.round((now()-T.pz0)/1000);T.pz0=0;T.pzRef=null;pzRender();}
+  function pzRender(){try{renderPz();}catch(e){}}
+  function hardReset(){if(T.state==='pause')pzClose();stopLoops();unsched();wakeOff();T.state='ready';T.acc=0;T.last=0;T.geo=null;T.msg='';lock(false);paint();paintGrid();}
   async function reset(){if((T.state==='run'||T.state==='pause')&&!(await nbhUI.confirm('Reset the timer to 0:00?\nMarks already scored stay on the sheet.',{ok:'Reset'})))return;hardReset();}
 
   /* ---- screen awake while running ---- */
@@ -1877,7 +2089,7 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
         mins:parseInt(x.len,10)||null,n:parseInt(x.n,10)||null,cond:T(x.ph),chg:T(x.chg)};
       if(T(x.tot))o.tot=parseInt(x.tot,10)||null;if(T(x.na))o.na=parseInt(x.na,10)||0;
       if(io.length===3&&io.some(v=>v!==null))o.ioa={pt:io[0],occ:io[1],non:io[2]};
-      ['start','loc','obs','note'].forEach(k=>{if(T(x[k]))o[k]=T(x[k]);});return o;});
+      ['start','loc','obs','note','obs2','kap','pz'].forEach(k=>{if(T(x[k]))o[k]=T(x[k]);});if(x.teach==='1')o.teach=true;if(x.pzProc==='1')o.pzProc=true;return o;});   /* v25.64 */
     return Object.assign({},r||{},{intervals:{form:'MT-1',beh,ttype:T(S.meta.ttype),def:T(S.meta.def),measure:'percentage of intervals',sessions}});};
   const STOP=new Set(['with','from','that','this','than','behavior','behaviour','student','during','when','will','into','their','other','each']);
   const words=s=>T(s).toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>3&&!STOP.has(w));

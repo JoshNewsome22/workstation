@@ -667,6 +667,17 @@ table.rt td.ck input{width:auto}
 .ckrow{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;margin:4px 0}
 label.ck{font-family:var(--sans);font-size:12px;display:inline-flex;align-items:center;gap:5px}
 label.ck input{width:auto!important;margin:0}
+/* v25.64 (H3, H4, M7, M8, L3) */
+.fnlist .si-item{display:flex;flex-direction:column;gap:2px}
+.si-how{display:inline-flex;gap:4px;margin:0 0 4px 22px;font-family:var(--sans)}
+.si-how[hidden],.si-gate[hidden],#siTeachWrap[hidden]{display:none!important}
+.si-how button{font:inherit;font-size:11px;padding:2px 8px;border:1px solid var(--rule-2);border-radius:12px;background:#fff;color:var(--ink-soft);cursor:pointer;min-height:24px}
+.si-how button.on{background:var(--nbh-navy,#24313C);border-color:var(--nbh-navy,#24313C);color:#fff}
+@media screen{.fnlist.si-wait{display:none}}
+@media print{.si-how button:not(.on){display:none}}
+.si-draft{border:1px solid var(--rule-2);border-left:3px solid var(--rule);background:#FAFCFC;padding:8px 12px;margin:8px 0;font-family:var(--sans);font-size:12.5px}
+.si-draft ul{margin:4px 0 4px 18px;padding:0}.si-basis{margin:4px 0 0;color:var(--ink-soft);font-size:12px}
+.si-nowd{font-family:var(--sans);font-size:12.5px;margin:2px 0 8px}
 .tools{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}
 /* v21.44 (B5): who hears what the student says, read aloud before the first question */
 .conf{border:1px solid var(--rule-2);border-left:4px solid var(--nbh-navy,#24313C);background:#fff;padding:10px 14px 6px;margin:8px 0 10px;break-inside:avoid;page-break-inside:avoid}
@@ -965,6 +976,8 @@ td input,td select{max-width:100%}
     </div>
     <div class="instr">
       <p><b>Before the first question.</b> Read the box above aloud, in the version chosen. Then tell the student why you are asking, in one sentence: &ldquo;I want to understand what school is like for you, so we can make it better. There are no wrong answers. You can skip any question, and you can stop any time.&rdquo; Write what the student says, in the student&rsquo;s words. Do not correct an answer and do not suggest one; when the student is stuck, offer two or three examples and let the student pick or say something else. The younger version adds three faces to some questions: the student points, and the words under the face are read aloud. Under &ldquo;How the student responded&rdquo;, mark every way the student answered.</p>
+      <!-- v25.64 (H4) open question first, then the list; three rules for the interviewer (Sparling et al., 2011; Najafichaghabouri et al., 2024) -->
+      <p id="siRules"><b>Open question first, then the list.</b> Ask each question open-ended first, and type the student&rsquo;s own answer. Read the list of examples only after that, and mark each tick &ldquo;said unprompted&rdquo; or &ldquo;picked from the list&rdquo;. Three rules for the interviewer: give the same short, neutral thanks after every answer; do not praise or question a particular answer; do not repeat a question once it has been answered.</p>
       <p><b>Other students.</b> Students often name other students. Write the answer as the student said it, and list each name once in &ldquo;Other students the student names&rdquo; above: the summary page, the line for Form FS-1 and what goes to the case then say &ldquo;a classmate&rdquo; instead. The family reads the summary and the FBA report, and a parent may see only what is about their own child (FERPA, 34 CFR 99.12(a)).</p>
       <p>The questions follow the student-assisted and student-directed interviews in the literature (Kern, Dunlap, Clarke &amp; Childs, 1994; Reed, Thomas, Sprague &amp; Horner, 1997; O&rsquo;Neill et al., 2015): what the student likes and does well, what is hard and why, what happens before and after the behavior, what the student would rather do, what helps, and what the student wants.</p>
     </div>
@@ -977,13 +990,17 @@ td input,td select{max-width:100%}
     <div class="tools"><button class="tool" id="addH">Add a row</button><button class="tool" id="delH">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="hardTbl"><thead><tr>
       <th style="width:4%">#</th><th style="width:20%">Class, activity or time of day</th><th class="for-young" style="width:12%">How is it for you?</th><th style="width:7%">Too hard</th><th style="width:7%">Too long</th><th style="width:7%">Boring</th><th style="width:7%">Noisy</th><th style="width:7%">People</th><th>What the student said</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <!-- v25.64 (M7) each hard row with a reason becomes a statement to test, for Forms DA-1 and FS-1 (Kern, Childs, Dunlap, Clarke & Falk, 1994) -->
+    <div id="siDraft"></div>
 
     <h2 class="nbh-band">Right Before, and What Usually Happens After</h2>
     <div id="qBefore"></div>
-    <p class="hint" style="margin-top:8px">Mark what the student says happens <b>right before</b>. Each line is tagged with the function it points to; the tags are for the summary line below, not for the student.</p>
+    <p class="hint" style="margin-top:8px">Mark what the student says happens <b>right before</b>. Each line is tagged with the function it points to; the tags are for the summary line below, not for the student. <span class="si-howhint">Ask the open question first and type the answer; then read the list, and mark each tick &ldquo;said unprompted&rdquo; (the student said it before the list) or &ldquo;picked from the list&rdquo;.</span></p>
+    <div class="si-gate noprint" data-gate="before" hidden><button type="button" class="tool" data-gateopen="before">Show the list (after the student&rsquo;s own answer)</button></div>
     <div class="fnlist" id="befList"></div>
     <div id="qAfter"></div>
     <p class="hint" style="margin-top:8px">Mark what the student says <b>usually happens after</b>.</p>
+    <div class="si-gate noprint" data-gate="after" hidden><button type="button" class="tool" data-gateopen="after">Show the list (after the student&rsquo;s own answer)</button></div>
     <div class="fnlist" id="aftList"></div>
 
     <h2 class="nbh-band">What You Would Rather Do, What Helps, and Who Helps</h2>
@@ -995,6 +1012,11 @@ td input,td select{max-width:100%}
     <div id="qChange"></div>
     <div id="qGoal"></div>
     <div id="qReward"></div>
+
+    <!-- v25.64 (M8, H4) the interviewer checklist, saved with the interview -->
+    <h2 class="nbh-band">Interviewer Checklist</h2>
+    <p class="hint">Ticked by the interviewer, or by a second person who listened. The same list as the adult interviews (Form IN-1), with the three rules above.</p>
+    <div id="siCk"></div>
 
     <h2 class="nbh-band">The Student&rsquo;s Hypothesis (for Form FS-1)</h2>
     <p class="hint">This line is the student&rsquo;s report, counted from the boxes marked above. It is one source among the interviews (Form IN-1), the records (RR-1) and the observations (OB-1); it is carried into the FS-1 summary as what the student said, not as the finding.</p>
@@ -1017,13 +1039,21 @@ td input,td select{max-width:100%}
       <div><label>Applies to</label><select data-m="a_scope"><option></option><option>Assessment sessions only</option><option>Treatment sessions only</option><option>Assessment and treatment sessions</option></select></div>
       <div><label>Reviewed with the student on</label><input data-m="a_rev"></div>
       <div><label>Assent overall (for Form FS-1)</label><select data-m="a_status"><option value=""></option><option value="given">Given</option><option value="partial">Partial: some parts or some sessions</option><option value="refused">Refused</option><option value="not able">Not able to give assent (consent only)</option></select><span class="hint">Left blank, the case reads it from the log, from what the student said at the start of each session: given when every session with assent recorded had it (a withdrawal during a session is reported beside it), refused when none had it, partial when some were declined at the start. A blank cell counts as not recorded.</span></div>
+      <!-- v25.64 (H3) assent skills: can the student make a clear yes, no and stop? (Morris et al., 2024) -->
+      <div><label>Assent skills assessed (can the student make a clear yes, no and stop?)</label><select data-m="a_skill"><option value=""></option><option value="yes">Yes: a clear yes, no and stop</option><option value="partly">Partly: one or two of them</option><option value="no">No: not yet</option></select></div>
+      <div id="siTeachWrap" hidden><label>Teaching plan for a clear yes, no and stop (what is taught, how, by whom, and how each answer is honored)</label><textarea data-m="a_teach" rows="3" placeholder="Teach a stop card and the word &ldquo;stop&rdquo;; honor it at once, every time, in short practice turns before any session"></textarea></div>
     </div>
+    <div id="siSkillNote"></div>
     <h2 class="nbh-band">Assent Behaviors and Withdrawal-of-Assent Behaviors, for This Student</h2>
     <p class="hint">Observable, so that two adults would agree. Assent is what the student does that means &ldquo;yes, keep going&rdquo;; withdrawal is what the student does that means &ldquo;no, not now&rdquo;. Include the quiet forms (turning away, going still, a long pause) as well as the loud ones.</p>
+    <!-- v25.64 (H3) direct and indirect signs; no withdrawal is not assent (Morris et al., 2024) -->
+    <p class="hint" id="siTypeHint">Give each one a type. <b>Direct</b>: the student says or signs &ldquo;stop&rdquo;, hands over the stop card, walks to the break area. <b>Indirect</b>: the student looks away, goes still, smiles. A direct sign is the more reliable one: teach it where it is missing.</p>
+    <p class="si-nowd"><b>No withdrawal is not the same as assent.</b></p>
     <div class="tools"><button class="tool" id="addAB">Add assent behavior</button><button class="tool" id="delAB">Remove last</button></div>
-    <table class="rt" id="abTbl"><thead><tr><th style="width:4%">#</th><th style="width:40%">Assent behavior (observable)</th><th>Example seen with this student</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table>
+    <table class="rt" id="abTbl"><thead><tr><th style="width:4%">#</th><th style="width:40%">Assent behavior (observable)</th><th style="width:13%">Type</th><th>Example seen with this student</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table>
     <div class="tools"><button class="tool" id="addWB">Add withdrawal behavior</button><button class="tool" id="delWB">Remove last</button></div>
-    <table class="rt" id="wbTbl"><thead><tr><th style="width:4%">#</th><th style="width:40%">Withdrawal-of-assent behavior (observable)</th><th>Example seen with this student</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table>
+    <table class="rt" id="wbTbl"><thead><tr><th style="width:4%">#</th><th style="width:40%">Withdrawal-of-assent behavior (observable)</th><th style="width:13%">Type</th><th style="width:9%">Also a target behavior (TB-1)</th><th>Example seen with this student</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table>
+    <div id="siWbWarn"></div>
 
     <h2 class="nbh-band">What Staff Do When Assent Is Withdrawn</h2>
     <div class="ckrow">
@@ -1037,6 +1067,10 @@ td input,td select{max-width:100%}
     <div class="fieldgrid">
       <div><label>The steps, in order, in the words staff will use</label><textarea data-m="w_steps" rows="3" placeholder="1. &ldquo;Okay, we can stop.&rdquo; 2. Offer the two cards. 3. If neither, end and record. 4. Try again at the next scheduled time, not sooner."></textarea></div>
       <div><label>What is changed after a withdrawal (task, length, materials, person, time of day)</label><textarea data-m="w_change" rows="3"></textarea></div>
+      <!-- v25.64 (L3) the choice is fair only when the alternative is real (Morris et al., 2024) -->
+      <div><label>What the student can do instead, and whether it is as good as what they leave (not a worse task, not a loss)</label><textarea data-m="w_alt" rows="2" placeholder="a 3-minute walk with Ms. Ortiz, or drawing at the back table, then a choice of what comes next"></textarea></div>
+      <div><label>Is the alternative as good as what the student leaves?</label><select data-m="w_fair"><option value=""></option><option>As good as what the student leaves</option><option>Only the same task, later</option><option>A worse task, or a loss</option></select></div>
+      <div id="siFairOut" style="grid-column:1/-1"></div>
       <div><label>Review threshold: share of sessions with withdrawal that calls for a review (%)</label><input data-m="a_thr" placeholder="25"><span class="hint">Working convention: above 25% of sessions, or three sessions in a row, the procedure is reviewed with the student and the BCBA, and the preference page is repeated.</span></div>
     </div>
 
@@ -1100,12 +1134,17 @@ td input,td select{max-width:100%}
       <tr><th>Assent needs an observable definition and a response plan</th><td>Morris, Detrick and Peterson (2021) reviewed assent in behavior-analytic research with participants with autism and developmental disabilities and found it rarely described. They recommend individualized definitions of assent and of withdrawal of assent, repeated assent checks, and a stated procedure for what is done when assent is withdrawn. The Assent page is those three things.</td></tr>
       <tr><th>Choice and shared governance in treatment</th><td>Rajaraman, Austin, Gover, Cammilleri, Donnelly and Hanley (2022) describe trauma-informed behavior analysis with four commitments: acknowledge trauma and its effects, ensure safety and trust, promote choice and shared governance, and emphasize skill building. In the enhanced choice model (Rajaraman, Hanley, et al., 2022), students with dangerous problem behavior could at any moment choose the treatment context, a hangout area or leaving; problem behavior fell without the escalation that comes with blocked escape. The withdrawal procedure on this form (pause, offer a choice, end if needed) is the school-sized version.</td></tr>
       <tr><th>Social validity from the person served</th><td>Wolf (1978) proposed that the goals, procedures and effects of a program be judged by its consumers; Schwartz and Baer (1991) reviewed the practice and asked for the judgements to come from the people who live with the program; Hanley (2010) argued for measuring preference objectively, by choice, with the recipients of behavior change programs. The preference count and the student&rsquo;s own words on the Summary page are the form&rsquo;s social validity record; Form SV-1 carries the adult ratings.</td></tr>
+      <!-- v25.64 (H3, H4, M7, L3) -->
+      <tr><th>How the questions are asked changes the answers</th><td>Sparling, Wilder, Kondash, Boyle and Compton (2011): all 3 children gave more inaccurate answers when approval followed inaccurate answers and disapproval followed accurate ones; in a second experiment, asking a question again, suggestive questions and information from another witness produced the most errors. Najafichaghabouri, Joslyn and Preston (2024) found the effect in 2 of 5 children, and note that open-ended questions tend to produce more accurate answers than yes / no questions. The interviewer cannot tell in advance which kind of child this is, so the same rules are used with every student: the open question first, the list after, the same neutral thanks after every answer, and no question asked twice.</td></tr>
+      <tr><th>The student&rsquo;s reasons are tested, not assumed</th><td>Kern, Childs, Dunlap, Clarke and Falk (1994) wrote hypotheses from the student&rsquo;s own answers (handwriting, long single tasks), tested each one in the classroom before the plan, confirmed them, and built curricular changes that worked. The draft statements under the hard table follow that sequence: each is the student&rsquo;s report, to confirm by a brief classroom comparison or on Form DA-1.</td></tr>
+      <tr><th>When the student&rsquo;s &ldquo;no&rdquo; is the target behavior</th><td>Morris, Oliveira, Perrin, Federico and Martasian (2024) separate direct signs of assent and withdrawal from &ldquo;assent-adjacent&rdquo; behavior such as engagement or smiling, warn that disruptive behavior can occur for reasons other than upset, including reinforcement from the disruption, and quote the federal rule that &ldquo;mere failure to object should not, absent affirmative agreement, be construed as assent&rdquo;. They advise assessing and teaching assent skills and arranging fair choices. In a public special day school for students with emotional and behavioral disorders, Staubitz, Staubitz, Pollack, Haws and Hopton (2022) gave 3 children concurrent options, among them a hangout area and leaving; the children spent most of their time in treatment. A taught, honored &ldquo;no&rdquo; can work in a school. Never withhold an honored &ldquo;stop&rdquo; to protect an assessment: teach and honor a direct response instead.</td></tr>
       <tr><th>The hypothesis belongs to the whole assessment</th><td>Cooper, Heron and Heward (2020) place indirect assessment (interviews and rating scales) before descriptive and experimental analysis and warn that an interview alone does not establish function. The student&rsquo;s hypothesis on this form is used the same way: to focus the observation (OB-1) and, where warranted, the analysis (EA-1), and to be checked against them.</td></tr>
     </table>
 
     <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
     <table class="rt">
-      <tr><th style="width:28%">The student&rsquo;s hypothesis line</th><td>Most &ldquo;right before&rdquo; and &ldquo;usually after&rdquo; lines carry a tag (attention, escape, tangible, automatic). The counts per function are summed across both lists; the function or functions with the highest non-zero count are named first, the rest follow with their counts. Lines without a tag are listed but not counted: getting in trouble or losing points; a classmate bothering or teasing, which can set up escape from the classmate as well as the classmate&rsquo;s attention, so what happens after decides; and being tired, hungry or unwell, a setting event rather than a function. The line is labelled as the student&rsquo;s report: what the student marked is written in the form&rsquo;s short words, in the version the student saw, after &ldquo;the student marked&rdquo;; only typed answers and the student&rsquo;s word for the behavior are quoted.</td></tr>
+      <tr><th style="width:28%">The student&rsquo;s hypothesis line</th><td>Most &ldquo;right before&rdquo; and &ldquo;usually after&rdquo; lines carry a tag (attention, escape, tangible, automatic). The counts per function are summed across both lists; the function or functions with the highest non-zero count are named first, the rest follow with their counts. Lines without a tag are listed but not counted: getting in trouble or losing points; a classmate bothering or teasing, which can set up escape from the classmate as well as the classmate&rsquo;s attention, so what happens after decides; and being tired, hungry or unwell, a setting event rather than a function. The line is labelled as the student&rsquo;s report: what the student marked is written in the form&rsquo;s short words, in the version the student saw, after &ldquo;the student marked&rdquo;; only typed answers and the student&rsquo;s word for the behavior are quoted. <span id="siHowCalc">A tick marked &ldquo;picked from the list&rdquo; is left out of that count and reported on a second line, &ldquo;the student also picked from the list&rdquo;, with its own counts; a tick marked &ldquo;said unprompted&rdquo;, or with neither mark (as in a record saved before v25.64), is counted as before.</span></td></tr>
+      <tr><th>Draft antecedent statements</th><td>One line for each row of the hard table that has a class or activity and at least one reason: the student is more likely to show the behavior when that activity is too hard, too long, boring or noisy, or because of the people there, with the comparison that would test each reason (easier versus usual difficulty; shorter versus usual length; a new or preferred version versus the usual one; a quiet place versus the usual room; different people nearby versus the usual group). Each line is the student&rsquo;s report, to confirm by a brief classroom comparison or on Form DA-1; it goes to the case for Form DA-1&rsquo;s inventory and Form FS-1&rsquo;s hypotheses to test.</td></tr>
       <tr><th>Share of sessions with withdrawal</th><td>Sessions are rows of the assent log with a date or a session name. A withdrawal is a row with a withdrawn-at minute, or a row where assent was not obtained. Share = withdrawals divided by sessions. The last ten sessions are shown beside the total.</td></tr>
       <tr><th>Review threshold</th><td>Working convention: a share above 25% (editable), or three withdrawals in a row, calls for a review with the student and the case BCBA and a repeat of the preference page. Any withdrawal is honored on the day; the threshold decides when the procedure itself is questioned.</td></tr>
       <tr><th>Preference result</th><td>For each component: times offered (as A or B), times chosen, percent chosen. The ranking by percent chosen is compared with the student&rsquo;s stated rank; a difference is noted, since choice and report can disagree. A component chosen on two thirds or more of its offers, over at least three offers, is reported as preferred (working convention), and only once it has been offered against every other listed component: a rank built from unequal pairings is not a rank (Fisher et al., 1992). The table of pairs under the result shows which pairs are still to offer.</td></tr>
@@ -1118,6 +1157,8 @@ td input,td select{max-width:100%}
       <tr><th>Who hears the answers</th><td>Before the first question the student is told, in plain words, who will read the answers and what cannot be kept private: the box at the top of the Interview page, read aloud in the version chosen, with a tick when it was read. Promise only what you can keep. The answers go to the team and the parent or guardian. If the student says someone is hurting them, or that they might hurt themselves or someone else, the adult must pass it on to the people whose job is to keep the student safe, and suspected abuse or neglect is reported right away by the person who hears it, as your state&rsquo;s law and your agency&rsquo;s policy require. If a student tells you something like that: stay calm, listen, and do not ask for details. Do not write it in this interview, which the family may read. Write the student&rsquo;s exact words on a separate sheet for the report, report it right away, follow your agency&rsquo;s policy on who tells the family, and do not promise to keep it secret. If the student seems worried by the box, or says they do not want to go on, ask whether they still want to talk today, and note it. The family hears the same limits on Form IC-1, and the Ethics Code asks for them at the outset (BACB, 2020, Code 3.10).</td></tr>
       <tr><th>Other students</th><td>The answer is written as said, names included, and each other student named is listed once on the Interview page. The summary page, the line for Form FS-1 and the case show &ldquo;a classmate&rdquo; in place of each listed name: the parent and the district read them, and a parent may inspect only the information about their own child (FERPA, 34 CFR 99.12(a)). Words in the answers that look like names are pointed out on the Interview and Summary pages, and once more before the summary is printed.</td></tr>
       <tr><th>Wording</th><td>The student&rsquo;s word for the behavior, not the plan&rsquo;s. Short questions. Examples offered in threes, never one. The answer written as said, including &ldquo;I don&rsquo;t know&rdquo;.</td></tr>
+      <!-- v25.64 (H4) -->
+      <tr><th>Answers</th><td>The open question first and the student&rsquo;s own answer typed; the list read only after it, each tick marked &ldquo;said unprompted&rdquo; or &ldquo;picked from the list&rdquo;. The same short, neutral thanks after every answer. No praise for, and no question about, a particular answer. No question repeated once it has been answered. Ask about the last time it happened, not about &ldquo;usually&rdquo;.</td></tr>
       <tr><th>Stopping</th><td>The interview is itself a session: assent is asked for at the start, a break is offered, and the student can end it. A stopped interview is recorded as such and tried again another day, not pressed.</td></tr>
       <tr><th>What is done with it</th><td>The student is told what will change and what cannot change, and why. A preference the plan cannot honor is written on the Preference page with the reason, so the student&rsquo;s request is not silently dropped.</td></tr>
     </table>
@@ -1137,12 +1178,16 @@ td input,td select{max-width:100%}
     Hanley, G. P., Piazza, C. C., Fisher, W. W., &amp; Maglieri, K. A. (2005). On the effectiveness of and preference for punishment and extinction components of function-based interventions. <em>Journal of Applied Behavior Analysis, 38</em>(1), 51&ndash;65. &bull;
     Kern, L., Childs, K. E., Dunlap, G., Clarke, S., &amp; Falk, G. D. (1994). Using assessment-based curricular intervention to improve the classroom behavior of a student with emotional and behavioral challenges. <em>Journal of Applied Behavior Analysis, 27</em>(1), 7&ndash;19. &bull;
     Kern, L., Dunlap, G., Clarke, S., &amp; Childs, K. E. (1994). Student-assisted functional assessment interview. <em>Diagnostique, 19</em>(2&ndash;3), 29&ndash;39. &bull;
+    Morris, C., Oliveira, J. P., Perrin, J., Federico, C. A., &amp; Martasian, P. J. (2024). Toward a further understanding of assent. <em>Journal of Applied Behavior Analysis, 57</em>(2), 304&ndash;318. &bull;
+    Najafichaghabouri, M., Joslyn, P. R., &amp; Preston, E. (2024). Idiosyncratic effects of interviewer behavior on the accuracy of children&rsquo;s responses. <em>Journal of Applied Behavior Analysis, 57</em>(2), 463&ndash;472. &bull;<!-- v25.64 -->
     Morris, C., Detrick, J. J., &amp; Peterson, S. M. (2021). Participant assent in behavior analytic research: Considerations for participants with autism and developmental disabilities. <em>Journal of Applied Behavior Analysis, 54</em>(4), 1300&ndash;1316. &bull;
     O&rsquo;Neill, R. E., Albin, R. W., Storey, K., Horner, R. H., &amp; Sprague, J. R. (2015). <em>Functional assessment and program development for problem behavior: A practical handbook</em> (3rd ed.). Cengage Learning. &bull;
     Rajaraman, A., Austin, J. L., Gover, H. C., Cammilleri, A. P., Donnelly, D. R., &amp; Hanley, G. P. (2022). Toward trauma-informed applications of behavior analysis. <em>Journal of Applied Behavior Analysis, 55</em>(1), 40&ndash;61. &bull;
     Rajaraman, A., Hanley, G. P., Gover, H. C., Staubitz, J. L., Staubitz, J. E., Simcoe, K. M., &amp; Metras, R. (2022). Minimizing escalation by treating dangerous problem behavior within an enhanced choice model. <em>Behavior Analysis in Practice, 15</em>(1), 219&ndash;242. &bull;
     Reed, H., Thomas, E., Sprague, J. R., &amp; Horner, R. H. (1997). The Student Guided Functional Assessment Interview: An analysis of student and teacher agreement. <em>Journal of Behavioral Education, 7</em>(1), 33&ndash;49. &bull;
     Schwartz, I. S., &amp; Baer, D. M. (1991). Social validity assessments: Is current practice state of the art? <em>Journal of Applied Behavior Analysis, 24</em>(2), 189&ndash;204. &bull;
+    Sparling, J., Wilder, D. A., Kondash, J., Boyle, M., &amp; Compton, M. (2011). Effects of interviewer behavior on accuracy of children&rsquo;s responses. <em>Journal of Applied Behavior Analysis, 44</em>(3), 587&ndash;592. &bull;
+    Staubitz, J. L., Staubitz, J. E., Pollack, M. S., Haws, R. A., &amp; Hopton, M. (2022). Effects of an enhanced choice model of skill-based treatment for students with emotional/behavioral disorders. <em>Journal of Applied Behavior Analysis, 55</em>(4), 1306&ndash;1341. &bull;<!-- v25.64 -->
     Shogren, K. A., Faggella-Luby, M. N., Bae, S. J., &amp; Wehmeyer, M. L. (2004). The effect of choice-making as an intervention for problem behavior: A meta-analysis. <em>Journal of Positive Behavior Interventions, 6</em>(4), 228&ndash;237. &bull;
     Wolf, M. M. (1978). Social validity: The case for subjective measurement or how applied behavior analysis is finding its heart. <em>Journal of Applied Behavior Analysis, 11</em>(2), 203&ndash;214.</p>
   </section>
@@ -1174,7 +1219,7 @@ function facepick(cur,labels,attrs){return '<span class="facepick" '+attrs+'>'+[
 const ITEMS=[
   {id:'like',box:'qLike',read:'What do you like to do at school, and outside school? What are you good at?',young:'What do you like to do? What are you good at?',hint:'Start here. Everyone has an answer to this one, and it tells you what the plan can use.',fq:'How do you feel about school most days?',fl:'feel'},
   {id:'before',box:'qBefore',read:'Think about the last time it happened. What was going on right before?',young:'What happens right before?',hint:'Use the student&rsquo;s word for the behavior. Ask about the last time, not about &ldquo;usually&rdquo;.',fq:'How do you feel right before it happens?',fl:'feel'},
-  {id:'after',box:'qAfter',read:'What usually happens after? What do the adults do, and what do the other students do?',young:'What happens after?',hint:'Both the adults and the peers. Then: &ldquo;And then what?&rdquo;',fq:'How do you feel after?',fl:'feel'},
+  {id:'after',box:'qAfter',read:'What usually happens after? What do the adults do, and what do the other students do?',young:'What happens after?',hint:'Ask about the last time, not about &ldquo;usually&rdquo;. Both the adults and the peers. Then: &ldquo;And then what?&rdquo;',fq:'How do you feel after?',fl:'feel'},
   {id:'rather',box:'qRather',read:'At that moment, what would you rather be doing, or rather have?',young:'What would you rather do instead?',hint:'The answer is the first draft of the replacement behavior and the reinforcer.',fq:'If you could do that instead, how would that be?',fl:'feel'},
   {id:'upset',box:'qUpset',read:'When you are upset, what helps you calm down? What makes it worse?',young:'What helps when you feel upset?',hint:'Both halves. &ldquo;What makes it worse&rdquo; is the list of things staff will stop doing.',fq:'Does it help?',fl:'agree'},
   {id:'who',box:'qWho',read:'Who at school helps you most? Who would you go to if something was wrong?',young:'Who helps you at school?',hint:'Named people. They are who should ask for assent and run the first sessions.',fq:'Is it easy to ask them for help?',fl:'agree'},
@@ -1223,7 +1268,7 @@ const AFT=[
 ];
 
 /* ---------------- state ---------------- */
-function blank(){return{meta:{},chk:{},iv:{},hard:[],ab:[],wb:[],al:[],pc:[],pr:[]};}
+function blank(){return{meta:{},chk:{},iv:{},hard:[],ab:[],wb:[],al:[],pc:[],pr:[],how:{},ck:{}};}   /* v25.64 (H4, M8) how, ck */
 let S=blank();
 function ensure(){
   if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||typeof S.chk!=='object')S.chk={};if(!S.iv||typeof S.iv!=='object')S.iv={};
@@ -1232,6 +1277,9 @@ function ensure(){
   while(S.hard.length<3)S.hard.push(hardRow());while(S.ab.length<3)S.ab.push({beh:'',ex:''});while(S.wb.length<3)S.wb.push({beh:'',ex:''});
   while(S.al.length<3)S.al.push(alRow());while(S.pc.length<3)S.pc.push({name:'',words:'',rank:'',say:''});while(S.pr.length<3)S.pr.push(prRow());
   if(!S.meta.ver)S.meta.ver='read';
+  /* v25.64 (H3, H4, M8) a sign's type and the target-behavior tick on the assent tables; how each tick was given; the checklist */
+  S.ab.forEach(r=>{if(r&&!('k' in r))r.k='';});S.wb.forEach(r=>{if(r&&!('k' in r))r.k='';if(r&&!('tb' in r))r.tb=false;});
+  if(!S.how||typeof S.how!=='object'||Array.isArray(S.how))S.how={};if(!S.ck||typeof S.ck!=='object'||Array.isArray(S.ck))S.ck={};
 }
 const hardRow=()=>({act:'',rate:'',hard:false,long:false,boring:false,noisy:false,people:false,note:''});
 const alRow=()=>({date:'',sess:'',got:'',wmin:'',changed:'',note:''});
@@ -1294,32 +1342,41 @@ function renderHard(){
     '<td><input data-r="hard" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td>'+delCell('hard',i)+'</tr>').join('');
 }
 function renderLists(){
-  const mk=(list,box)=>{$('#'+box).innerHTML=list.map(o=>'<label class="ck"><input type="checkbox" data-c="'+o.id+'"'+(S.chk[o.id]?' checked':'')+'><span>'+esc(wordFor(o))+'<span class="tag">'+esc(o.tag||(o.f?FN[o.f]:'not counted'))+'</span>'+'</span></label>').join('');};
-  mk(BEF,'befList');mk(AFT,'aftList');
+  const mk=(list,box)=>{$('#'+box).innerHTML=list.map(o=>'<div class="si-item"><label class="ck"><input type="checkbox" data-c="'+o.id+'"'+(S.chk[o.id]?' checked':'')+'><span>'+esc(wordFor(o))+'<span class="tag">'+esc(o.tag||(o.f?FN[o.f]:'not counted'))+'</span>'+'</span></label>'+siHowCtl(o)+'</div>').join('');};
+  mk(BEF,'befList');mk(AFT,'aftList');siGate();
 }
+/* v25.64 (H4) a tick marked "picked from the list" is counted on its own line; "said unprompted", or no mark (a record saved before
+   the marks), is counted as before (Sparling et al., 2011) */
+const siPicked=o=>!!(S.how&&S.how[o.id]==='p');
 function hypothesis(){
-  const c={att:0,esc:0,tan:0,auto:0};const bef=BEF.filter(o=>S.chk[o.id]),aft=AFT.filter(o=>S.chk[o.id]);
-  bef.concat(aft).forEach(o=>{if(o.f)c[o.f]++;});
+  const c={att:0,esc:0,tan:0,auto:0},cp={att:0,esc:0,tan:0,auto:0};
+  const bef=BEF.filter(o=>S.chk[o.id]&&!siPicked(o)),aft=AFT.filter(o=>S.chk[o.id]&&!siPicked(o));
+  const pbef=BEF.filter(o=>S.chk[o.id]&&siPicked(o)),paft=AFT.filter(o=>S.chk[o.id]&&siPicked(o));
+  bef.concat(aft).forEach(o=>{if(o.f)c[o.f]++;});pbef.concat(paft).forEach(o=>{if(o.f)cp[o.f]++;});
   const order=Object.keys(c).filter(k=>c[k]>0).sort((a,b)=>c[b]-c[a]);const top=order.filter(k=>c[k]===c[order[0]]);
-  return{c,bef,aft,order,top};
+  const porder=Object.keys(cp).filter(k=>cp[k]>0).sort((a,b)=>cp[b]-cp[a]);
+  return{c,bef,aft,order,top,cp,pbef,paft,porder};
 }
 function hypLine(){
   const h=hypothesis(),v=S.iv,lab=unq(S.meta.beh);
-  if(!h.bef.length&&!h.aft.length&&!v.before.a&&!v.after.a)return '';
+  if(!h.bef.length&&!h.aft.length&&!h.pbef.length&&!h.paft.length&&!v.before.a&&!v.after.a)return '';
   /* v23.23 (review F68) what the student marked is written as marked, in the form's short words for the version the student saw;
      only typed answers and the student's own word for the behavior are quoted. (F60) A listed classmate's name is not written. */
   const mk=o=>young()?(o.ys||o.sh):o.sh,said=t=>'the student said: &ldquo;'+esc(redact(unq(t)))+'&rdquo;';
   let s='Student&rsquo;s report (SI-1'+(S.meta.date?', '+esc(S.meta.date):'')+'): ';
-  s+='before '+(lab?'&ldquo;'+esc(redact(lab))+'&rdquo;':'the behavior')+', '+(h.bef.length?'the student marked: '+h.bef.map(mk).join('; '):(v.before.a?said(v.before.a):'nothing marked'))+'. ';
-  s+='Afterwards, '+(h.aft.length?'the student marked: '+h.aft.map(mk).join('; '):(v.after.a?said(v.after.a):'nothing marked'))+'. ';
+  s+='before '+(lab?'&ldquo;'+esc(redact(lab))+'&rdquo;':'the behavior')+', '+(h.bef.length?'the student marked: '+h.bef.map(mk).join('; '):(v.before.a?said(v.before.a):h.pbef.length?'nothing said unprompted':'nothing marked'))+'. ';   /* v25.64 (H4) */
+  s+='Afterwards, '+(h.aft.length?'the student marked: '+h.aft.map(mk).join('; '):(v.after.a?said(v.after.a):h.paft.length?'nothing said unprompted':'nothing marked'))+'. ';
   if(h.order.length)s+='What the student names points to <b>'+h.top.map(k=>FN[k]).join(' and ')+'</b> ('+h.order.map(k=>FN[k]+' '+h.c[k]).join(', ')+').';
-  else s+='Nothing the student marked carries a function tag.';
+  else s+=(h.pbef.length||h.paft.length?'Nothing the student said unprompted carries a function tag.':'Nothing the student marked carries a function tag.');
+  /* v25.64 (H4) what the student picked from the read-aloud list, on a second line */
+  {const pk=h.pbef.map(o=>'before: '+mk(o)).concat(h.paft.map(o=>'after: '+mk(o)));
+   if(pk.length)s+='<br>The student also picked from the list: '+pk.join('; ')+(h.porder.length?' ('+h.porder.map(k=>FN[k]+' '+h.cp[k]).join(', ')+')':'')+'.';}
   if(v.rather.a)s+=' Would rather: &ldquo;'+esc(redact(unq(v.rather.a)))+'&rdquo;';
   return s;
 }
 function renderHyp(){
   const h=hypothesis();
-  $('#hypMetrics').innerHTML=Object.keys(FN).map(k=>'<div class="metric"><b>'+FN[k]+'</b><div class="val">'+h.c[k]+'</div><div class="sub">lines the student marked</div></div>').join('');
+  $('#hypMetrics').innerHTML=Object.keys(FN).map(k=>'<div class="metric"><b>'+FN[k]+'</b><div class="val">'+h.c[k]+'</div><div class="sub">lines the student marked'+(h.cp[k]?'; and '+h.cp[k]+' picked from the list':'')+'</div></div>').join('');   /* v25.64 (H4) */
   const line=hypLine();
   $('#hypOut').innerHTML=line?'<div class="hypline"><b>The student&rsquo;s hypothesis, as reported</b>'+line+'</div><p class="hint">Copy this line into Form FS-1 under the student interview. It is not a function; it is what the student said.</p>':'<div class="verdict v-mid">No lines marked yet. The summary line is written from the before and after boxes once the student has answered.</div>';
   siNamesPaint();
@@ -1327,8 +1384,11 @@ function renderHyp(){
 
 /* ---------------- assent ---------------- */
 function renderAB(){
-  $('#abTbl tbody').innerHTML=S.ab.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="ab" data-i="'+i+'" data-f="beh" value="'+esc(r.beh)+'" placeholder="Says yes or nods when asked; picks up the materials; walks to the table"></td><td><input data-r="ab" data-i="'+i+'" data-f="ex" value="'+esc(r.ex)+'"></td>'+delCell('ab',i)+'</tr>').join('');
-  $('#wbTbl tbody').innerHTML=S.wb.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="wb" data-i="'+i+'" data-f="beh" value="'+esc(r.beh)+'" placeholder="Says no or stop; pushes the materials away; turns away for more than 10 seconds; covers ears"></td><td><input data-r="wb" data-i="'+i+'" data-f="ex" value="'+esc(r.ex)+'"></td>'+delCell('wb',i)+'</tr>').join('');
+  /* v25.64 (H3) each sign has a type, direct or indirect; a withdrawal sign can be ticked as a target behavior too */
+  const kSel=(t,r,i)=>'<td><select data-r="'+t+'" data-i="'+i+'" data-f="k" aria-label="Type, row '+(i+1)+'"><option value=""></option><option value="direct"'+(r.k==='direct'?' selected':'')+'>Direct</option><option value="indirect"'+(r.k==='indirect'?' selected':'')+'>Indirect</option></select></td>';
+  $('#abTbl tbody').innerHTML=S.ab.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="ab" data-i="'+i+'" data-f="beh" value="'+esc(r.beh)+'" placeholder="Says yes or nods when asked; picks up the materials; walks to the table"></td>'+kSel('ab',r,i)+'<td><input data-r="ab" data-i="'+i+'" data-f="ex" value="'+esc(r.ex)+'"></td>'+delCell('ab',i)+'</tr>').join('');
+  $('#wbTbl tbody').innerHTML=S.wb.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="wb" data-i="'+i+'" data-f="beh" value="'+esc(r.beh)+'" placeholder="Says no or stop; pushes the materials away; turns away for more than 10 seconds; covers ears"></td>'+kSel('wb',r,i)+'<td class="ck"><input type="checkbox" data-r="wb" data-i="'+i+'" data-f="tb"'+(r.tb?' checked':'')+' aria-label="Also a target behavior, row '+(i+1)+'"></td><td><input data-r="wb" data-i="'+i+'" data-f="ex" value="'+esc(r.ex)+'"></td>'+delCell('wb',i)+'</tr>').join('');
+  siWbPaint();
 }
 function renderAL(){
   $('#alTbl tbody').innerHTML=S.al.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="al" data-i="'+i+'" data-f="date" value="'+esc(r.date)+'"></td><td><input data-r="al" data-i="'+i+'" data-f="sess" value="'+esc(r.sess)+'"></td>'+
@@ -1417,6 +1477,7 @@ function renderSummary(){
   s+='<p><b>Likes and does well:</b></p>'+q(v.like.a);
   const hard=S.hard.filter(r=>r.act);
   if(hard.length)s+='<p><b>Hard classes or activities:</b> '+hard.map(r=>esc(r.act)+(young()&&r.rate?' '+faceOf(r.rate):'')+(['hard','long','boring','noisy','people'].filter(f=>r[f]).length?' (too '+['hard','long'].filter(f=>r[f]).concat(['boring','noisy','people'].filter(f=>r[f]).map(f=>f==='people'?'the people':f)).join(', ').replace('too boring','boring').replace('too noisy','noisy').replace('too the people','the people')+')':'')).join('; ')+'.</p>';
+  {const d=siDrafts();if(d.length)s+='<p><b>Draft statements to test</b> (the student&rsquo;s report; confirm by a brief classroom comparison or Form DA-1):</p><ul class="si-dl">'+d.map(x=>'<li>'+esc(x.line)+'</li>').join('')+'</ul>';}   /* v25.64 (M7) */
   const line=hypLine();
   s+='<div class="hyp"><b>Student&rsquo;s hypothesis (for FS-1):</b> '+(line||'not yet written; the before and after boxes are empty')+'</div>';
   s+='<p><b>Would rather:</b></p>'+q(v.rather.a)+'<p><b>What helps when upset, and what makes it worse:</b></p>'+q(v.upset.a)+'<p><b>Who helps:</b></p>'+q(v.who.a);
@@ -1427,9 +1488,13 @@ function renderSummary(){
   {const st=assentStatus(),nt=assentNote();if(st||nt)s+='<p><b>Assent overall:</b> '+esc(st||'not recorded')+(m.a_status||!st?'':' (read from the log)')+(nt?': '+esc(nt):'')+'.</p>';}
   s+='<p><b>Asked how:</b> '+esc(m.a_ask||NONE)+' <b>By:</b> '+esc(m.a_who||NONE)+' <b>When:</b> '+esc(m.a_when||NONE)+(m.a_scope?' <b>Applies to:</b> '+esc(m.a_scope):'')+'</p>';
   const ab=S.ab.filter(r=>r.beh),wb=S.wb.filter(r=>r.beh);
-  s+='<p><b>Assent looks like:</b> '+(ab.length?ab.map(r=>esc(r.beh)).join('; '):NONE)+'</p><p><b>Withdrawal looks like:</b> '+(wb.length?wb.map(r=>esc(r.beh)).join('; '):NONE)+'</p>';
+  const kw=r=>r.k?' ('+r.k+')':'';   /* v25.64 (H3) */
+  s+='<p><b>Assent looks like:</b> '+(ab.length?ab.map(r=>esc(r.beh)+kw(r)).join('; '):NONE)+'</p><p><b>Withdrawal looks like:</b> '+(wb.length?wb.map(r=>esc(r.beh)+kw(r)).join('; '):NONE)+'</p>';
+  {const sk={yes:'yes: a clear yes, no and stop',partly:'partly',no:'not yet'}[m.a_skill];if(sk||m.a_teach)s+='<p><b>Assent skills:</b> '+esc(sk||'not assessed')+(m.a_teach?'. <b>Teaching plan:</b> '+esc(m.a_teach):'')+'</p>';
+   const tw=siWbTargets();if(tw.length)s+='<p><b>Also a target behavior:</b> '+tw.map(x=>esc(x.beh)).join('; ')+'. A direct &ldquo;stop&rdquo; is taught and honored at once, every time; the target behavior itself follows the safety and stop rules of the plan or of Form EA-1.</p>';}
   const steps=[['w_pause','pause'],['w_choice','offer a choice'],['w_end','end the session if still no'],['w_note','note it'],['w_tell','tell the BCBA'],['w_nolose','nothing is lost for saying no']].filter(x=>S.chk[x[0]]).map(x=>x[1]).join(', ');
   s+='<p><b>When withdrawn:</b> '+(steps||NONE)+(m.w_steps?'. '+esc(m.w_steps):'')+'</p>';
+  if(m.w_alt||m.w_fair)s+='<p><b>Instead, the student can:</b> '+esc(m.w_alt||NONE)+(m.w_fair?' ('+esc(m.w_fair.toLowerCase())+')':'')+'</p>';   /* v25.64 (L3) */
   s+='<p><b>Log so far:</b> '+a.n+' sessions, '+a.w+' with withdrawal ('+pct(a.share)+'; threshold '+a.thr+'%, a working convention'+(a.n&&(a.share>a.thr||a.run>=3)?'; <b>review due</b>':'')+').</p>';
   s+='<h3>Treatment preference</h3>';
   if(p.used.length){s+='<table class="st"><tr><th>Component</th><th>Offered</th><th>Chosen</th><th>%</th><th>Stated rank</th></tr>'+p.used.map(c=>'<tr><td>'+esc(c.name)+'</td><td>'+c.off+'</td><td>'+c.ch+'</td><td>'+pct(c.p)+'</td><td>'+(c.rank==null?NONE:c.rank)+'</td></tr>').join('')+'</table>';
@@ -1446,11 +1511,11 @@ function renderSummary(){
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();setVer(S.meta.ver);bindMeta();renderConf();renderItems();renderHard();renderLists();renderHyp();renderAB();renderAL();renderAssent();renderPC();renderPR();renderPref();renderSummary();}
+function renderAll(){ensure();setVer(S.meta.ver);bindMeta();renderConf();renderItems();renderHard();renderLists();renderHyp();renderAB();renderAL();renderAssent();renderPC();renderPR();renderPref();siV2564Paint();renderSummary();}
 
 /* ---------------- events ---------------- */
 document.addEventListener('input',e=>{const el=e.target;
-  if(el.dataset.ivt!==undefined){S.iv[el.dataset.ivt].a=el.value;renderHyp();renderSummary();return;}
+  if(el.dataset.ivt!==undefined){S.iv[el.dataset.ivt].a=el.value;siGate();renderHyp();renderSummary();return;}
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'&&el.tagName!=='SELECT'){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.value;
     if(el.dataset.r==='al')renderAssent();else if(el.dataset.r==='pc'){renderPref();if(el.dataset.f==='name'||el.dataset.f==='words')renderPRSoon();}else if(el.dataset.r==='pr')renderPref();
     renderSumSoon();return;}
@@ -1458,8 +1523,8 @@ document.addEventListener('input',e=>{const el=e.target;
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;
-    if(el.dataset.r==='al')renderAssent();if(el.dataset.r==='pr')renderPref();renderSummary();return;}
-  if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderHyp();renderSummary();return;}
+    if(el.dataset.r==='al')renderAssent();if(el.dataset.r==='pr')renderPref();if(el.dataset.r==='hard')siDraftPaint();if(el.dataset.r==='wb'||el.dataset.r==='ab')siWbPaint();renderSummary();return;}
+  if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;if(!el.checked&&S.how)delete S.how[el.dataset.c];siHowPaint(el.dataset.c);siGate();renderHyp();renderSummary();return;}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderSummary();}
 });
 document.addEventListener('click',e=>{const b=e.target.closest('.facepick button');if(!b)return;const g=b.parentNode,k=b.dataset.k;
@@ -1485,6 +1550,74 @@ async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
   if(!S[r].length)S[r].push({hard:hardRow,ab:()=>({beh:'',ex:''}),wb:()=>({beh:'',ex:''}),al:alRow,pc:()=>({name:'',words:'',rank:'',say:''}),pr:prRow}[r]());
   ({hard:()=>{renderHard();renderSummary();},ab:()=>{renderAB();renderSummary();},wb:()=>{renderAB();renderSummary();},al:()=>{renderAL();renderAssent();renderSummary();},pc:()=>{renderPC();renderPR();renderPref();renderSummary();},pr:()=>{renderPR();renderPref();renderSummary();}})[r]();}
 
+/* ---------------- v25.64 ---------------- */
+/* (H4) how each tick was given: said unprompted, or picked from the list read aloud; shown beside a ticked line */
+function siHowCtl(o){const v=S.how&&S.how[o.id];return '<span class="si-how" data-how="'+o.id+'"'+(S.chk[o.id]?'':' hidden')+'>'+
+  [['u','said unprompted'],['p','picked from the list']].map(x=>'<button type="button" data-howv="'+x[0]+'" aria-pressed="'+(v===x[0])+'" class="'+(v===x[0]?'on':'')+'">'+x[1]+'</button>').join('')+'</span>';}
+function siHowPaint(id){const sp=document.querySelector('.si-how[data-how="'+id+'"]');if(!sp)return;sp.hidden=!S.chk[id];const v=S.how&&S.how[id];
+  sp.querySelectorAll('button').forEach(b=>{b.classList.toggle('on',b.dataset.howv===v);b.setAttribute('aria-pressed',String(b.dataset.howv===v));});}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.si-how button[data-howv]');if(!b)return;const id=b.parentNode.dataset.how;
+  if(!S.how||typeof S.how!=='object')S.how={};if(S.how[id]===b.dataset.howv)delete S.how[id];else S.how[id]=b.dataset.howv;siHowPaint(id);renderHyp();renderSummary();});
+/* (H4) the list waits, on screen, until the student's own answer is typed or a line is ticked (the page always prints it) */
+const SI_OPEN=new Set();
+function siGate(){[['before','befList',BEF],['after','aftList',AFT]].forEach(([k,box,L])=>{const list=document.getElementById(box),g=document.querySelector('.si-gate[data-gate="'+k+'"]');if(!list||!g)return;
+  const wait=!SI_OPEN.has(k)&&!String((S.iv[k]&&S.iv[k].a)||'').trim()&&!L.some(o=>S.chk[o.id]);list.classList.toggle('si-wait',wait);g.hidden=!wait;});}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-gateopen]');if(!b)return;SI_OPEN.add(b.dataset.gateopen);siGate();});
+/* (M7) a statement to test for each hard row with an activity and a reason (Kern, Childs, Dunlap, Clarke & Falk, 1994) */
+const SI_WHY=[['hard','too hard','easier versus usual difficulty','difficulty'],['long','too long','shorter versus usual length','length'],['boring','boring','a new or preferred version versus the usual one','novelty'],
+  ['noisy','noisy','a quiet place versus the usual room','setting'],['people','because of the people there','different people nearby versus the usual group','people']];
+function siDrafts(){const beh=unq(S.meta.beh).trim(),who='the student is more likely to show the behavior'+(beh?' (the student\u2019s words: \u201c'+beh+'\u201d)':'');
+  return (S.hard||[]).filter(r=>r&&String(r.act||'').trim()).map(r=>{const W=SI_WHY.filter(w=>r[w[0]]);if(!W.length)return null;const act=String(r.act).trim();
+    const adj=W.filter(w=>w[0]!=='people').map(w=>w[1]),ppl=W.some(w=>w[0]==='people');
+    const cond=(adj.length?'when '+act+' is '+(adj.length>1?adj.slice(0,-1).join(', ')+' or '+adj[adj.length-1]:adj[0])+(ppl?', or ':''):'')+(ppl?(adj.length?'':'during '+act+', ')+'because of the people there':'');
+    const test=W.map(w=>w[2]).join('; '),da={};W.forEach(w=>{da[w[3]]=true;});
+    const line=who.charAt(0).toUpperCase()+who.slice(1)+' '+cond+'; test: '+test+'.';
+    return {act,reasons:W.map(w=>w[0]),line,test,da};}).filter(Boolean);}
+function siDraftPaint(){const el=document.getElementById('siDraft');if(!el)return;const d=siDrafts();
+  el.innerHTML=d.length?'<div class="si-draft"><b>Draft statements to test (for Forms DA-1 and FS-1)</b><ul>'+d.map(x=>'<li>'+esc(redact(x.line))+'</li>').join('')+'</ul><p class="si-basis">The student&rsquo;s report; confirm by a brief classroom comparison or Form DA-1.</p></div>':'';}
+/* (H3) a withdrawal sign that is also a target behavior: ticked, or matching a target behavior's label from the case */
+const SI_STOPW=new Set('the and with from toward towards into onto at to of or a an his her their staff adult adults peer peers student students other others people person material materials work task tasks class classroom room teacher teachers'.split(' '));
+const siStem=w=>{w=w.toLowerCase().replace(/[^a-z]/g,'');w=w.replace(/(ing|ed|es|s)$/,'');return w.replace(/([b-df-hj-np-tv-z])\1$/,'$1');};
+function siWbTargets(){const T=(window.__siTB||[]);return (S.wb||[]).map((r,i)=>({r,i})).filter(x=>x.r&&String(x.r.beh||'').trim()).map(x=>{
+    const words=new Set(String(x.r.beh).split(/[^A-Za-z]+/).filter(w=>w.length>=3&&!SI_STOPW.has(w.toLowerCase())).map(siStem));
+    const hit=T.find(l=>String(l).split(/[^A-Za-z]+/).filter(w=>w.length>=3&&!SI_STOPW.has(w.toLowerCase())).map(siStem).some(w=>w.length>=3&&words.has(w)));
+    return (x.r.tb||hit)?{i:x.i,beh:unq(x.r.beh).trim(),label:hit||''}:null;}).filter(Boolean);}
+function siWbPaint(){const el=document.getElementById('siWbWarn');if(!el)return;const L=siWbTargets();
+  el.innerHTML=L.map(x=>'<div class="verdict v-no si-wbw">Row '+(x.i+1)+' (&ldquo;'+esc(x.beh)+'&rdquo;'+(x.label?', like the target behavior &ldquo;'+esc(x.label)+'&rdquo; on Form TB-1':'')+'): this is also a target behavior. If ending the activity after it is how the behavior is maintained, ending the session reinforces it. Teach a direct &ldquo;stop&rdquo; response now. Honor that response at once, every time. For the target behavior itself, follow the safety and stop rules of the plan or of Form EA-1.</div>').join('')+
+    (L.length?'<p class="hint">Never withhold an honored &ldquo;stop&rdquo; to protect an assessment: teach and honor a direct response instead (Morris et al., 2024).</p>':'');}
+/* (H3) assent skills; "Not able to give assent" opens the teaching plan instead of ending the question */
+function siSkillPaint(){const m=S.meta,w=document.getElementById('siTeachWrap'),n=document.getElementById('siSkillNote');const open=m.a_skill==='partly'||m.a_skill==='no'||m.a_status==='not able';
+  if(w)w.hidden=!open;
+  if(n)n.innerHTML=m.a_status==='not able'?'<div class="verdict v-mid">Not able to give assent: consent alone does not end the question. Assess the student&rsquo;s yes, no and stop above, and write the plan to teach them; ask for assent again as each is learned.</div>':
+    (m.a_skill==='partly'||m.a_skill==='no')?'<div class="verdict v-mid">The student cannot yet make a clear yes, no and stop: write the teaching plan above. A sign the student does not have cannot be honored.</div>':'';}
+/* (L3) a fair choice: the alternative is as good as what the student leaves */
+function siFairPaint(){const el=document.getElementById('siFairOut');if(!el)return;const m=S.meta,t=String(m.w_alt||''),f=m.w_fair||'';
+  const later=f==='Only the same task, later'||(!f&&/\b(later|next time|tomorrow|after(wards)? (the )?break)\b/i.test(t)&&/\b(same|this|that|the)\s+(task|work|worksheet|activity|assignment)\b/i.test(t));
+  el.innerHTML=later?'<div class="verdict v-no">The only alternative is the same task later. That is a delay, not a choice: name something the student can do now that is as good as what they leave (Morris et al., 2024).</div>':
+    f==='A worse task, or a loss'?'<div class="verdict v-no">The alternative is worse than what the student leaves, so saying no costs something. Make it as good: nothing is lost for saying no (Morris et al., 2024).</div>':'';}
+/* (M8, H4) the interviewer checklist */
+const SI_CK=[['open','Opened with an open question'],['other','Asked for other problems'],['prio','Set the priority (which problem first)'],['dims','Asked about dimensions: how often, how long, how hard'],
+  ['ante','Asked about antecedents, and when the behavior does not occur'],['cons','Asked about consequences'],['goals','Asked about goals'],
+  ['thanks','Gave the same short, neutral thanks after every answer'],['nopraise','Did not praise or question a particular answer'],['norepeat','Did not repeat a question once it was answered']];
+const SI_CK_BY=['Self-check by the interviewer','Second person who listened'];
+function siCkClean(c){const o={};if(!c||typeof c!=='object'||Array.isArray(c))return o;Object.keys(c).forEach(k=>{if(SI_CK.some(x=>x[0]===k)){if(c[k])o[k]=true;}
+  else if(k==='closed'){const t=String(c[k]==null?'':c[k]).trim();if(/^\d{1,3}$/.test(t))o.closed=t;}else if(k==='by'){if(SI_CK_BY.includes(c[k]))o.by=c[k];}});return o;}
+function siCkPaint(){const el=document.getElementById('siCk');if(!el)return;const c=S.ck||{},done=SI_CK.filter(x=>c[x[0]]).length;
+  el.innerHTML='<div class="ckrow si-ck">'+SI_CK.map(x=>'<label class="ck"><input type="checkbox" data-sick="'+x[0]+'"'+(c[x[0]]?' checked':'')+'> '+esc(x[1])+'</label>').join('')+'</div>'+
+    '<div class="fieldgrid"><div><label>Closed or yes / no questions asked</label><input data-sick="closed" inputmode="numeric" value="'+esc(c.closed||'')+'"></div>'+
+    '<div><label>Checked by</label><select data-sick="by"><option value=""></option>'+SI_CK_BY.map(b=>'<option'+(c.by===b?' selected':'')+'>'+esc(b)+'</option>').join('')+'</select></div></div>'+
+    '<p class="hint si-ckn">'+done+' of '+SI_CK.length+' done</p>';}
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(!el||!el.dataset||el.dataset.sick===undefined)return;const k=el.dataset.sick;
+  if(!S.ck||typeof S.ck!=='object')S.ck={};
+  if(el.type==='checkbox'){if(el.checked)S.ck[k]=true;else delete S.ck[k];}
+  else if(k==='closed'){const t=el.value.trim();if(/^\d{1,3}$/.test(t))S.ck.closed=t;else delete S.ck.closed;}
+  else if(k==='by'){if(SI_CK_BY.includes(el.value))S.ck.by=el.value;else delete S.ck.by;}
+  const n=document.querySelector('#siCk .si-ckn');if(n)n.textContent=SI_CK.filter(x=>S.ck[x[0]]).length+' of '+SI_CK.length+' done';}));
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(!el||!el.dataset)return;
+  if(el.dataset.m==='a_skill'||el.dataset.m==='a_status')siSkillPaint();if(el.dataset.m==='w_alt'||el.dataset.m==='w_fair')siFairPaint();if(el.dataset.m==='beh')siDraftPaint();
+  if(el.dataset.r==='hard')siDraftPaint();if(el.dataset.r==='wb'&&el.dataset.f==='beh')siWbPaint();}));
+function siV2564Paint(){siDraftPaint();siWbPaint();siSkillPaint();siFairPaint();siCkPaint();siGate();}
+
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
 $('#sumPrintBtn').addEventListener('click',async()=>{await siNamesAsk();renderSummary();document.body.classList.add('si-sum-only');
@@ -1503,7 +1636,10 @@ function fromFile(d){
   const iv=obj('iv');ITEMS.forEach(it=>{const x=iv[it.id]&&typeof iv[it.id]==='object'?iv[it.id]:{};o.iv[it.id]={a:str(x.a),s:['1','2','3'].includes(str(x.s))?str(x.s):''};});
   const arr=(k,fields,n,bools)=>Array.isArray(s[k])?s[k].slice(0,n).map(x=>{const r={};fields.forEach(f=>{r[f]=(bools||[]).includes(f)?!!(x&&x[f]):str(x&&x[f]);});return r;}):[];
   o.hard=arr('hard',['act','rate','hard','long','boring','noisy','people','note'],12,['hard','long','boring','noisy','people']);o.hard.forEach(r=>{if(!['1','2','3'].includes(r.rate))r.rate='';});
-  o.ab=arr('ab',['beh','ex'],8);o.wb=arr('wb',['beh','ex'],8);
+  o.ab=arr('ab',['beh','ex','k'],8);o.wb=arr('wb',['beh','ex','k','tb'],8,['tb']);   /* v25.64 (H3) */
+  [o.ab,o.wb].forEach(L=>L.forEach(r=>{if(!['direct','indirect'].includes(r.k))r.k='';}));
+  /* v25.64 (H4, M8) kept in the order the file holds them; an unknown key or value is dropped */
+  {const h=obj('how');Object.keys(h).forEach(k=>{if(BEF.concat(AFT).some(x=>x.id===k)&&['u','p'].includes(h[k]))o.how[k]=h[k];});o.ck=siCkClean(obj('ck'));}
   o.al=arr('al',['date','sess','got','wmin','changed','note'],200);o.al.forEach(r=>{if(!['Y','N'].includes(r.got))r.got='';});
   o.pc=arr('pc',['name','words','rank','say'],8);
   o.pr=arr('pr',['date','a','b','chose','note'],60);o.pr.forEach(r=>{if(!/^\d+$/.test(r.a)||+r.a>=o.pc.length)r.a='';if(!/^\d+$/.test(r.b)||+r.b>=o.pc.length)r.b='';if(!['A','B','Neither'].includes(r.chose))r.chose='';});
@@ -1564,6 +1700,9 @@ async function loadSim(){
   S.pc=[{name:'Break card (FCT): ask for a 3-minute walk, up to 3 per class',words:'the break card',rank:'1',say:'"That is fine. Better than leaving."'},{name:'Shortened worksheet (10 problems, then choice of 5 more)',words:'the short worksheet',rank:'2',say:'"Yes. Ten is fine."'},
     {name:'Token board for staying in class, exchanged for drawing time',words:'the points thing',rank:'4',say:'"Not on the wall. Everyone sees it."'},{name:'First-then schedule on the desk',words:'the first-then card',rank:'3',say:'"I do not need it but okay."'}];
   S.pr=[[D(13),'0','2','A','Cards and a one-minute demonstration of each'],[D(13),'1','3','A','Cards'],[D(13),'0','1','A','Cards; "the card, because then I can go"'],[D(13),'2','3','B','Cards; "not the wall thing"'],[D(12),'1','2','A','After a 2-minute try of each'],[D(12),'0','3','A','After a 2-minute try'],[D(12),'3','1','B','Sides swapped'],[D(12),'2','0','B','Sides swapped; "the card"'],[D(12),'1','0','Neither','"Both are okay"']].map(r=>({date:r[0],a:r[1],b:r[2],chose:r[3],note:r[4]}));
+  /* v25.64 (H3, L3) the sign types, the assent skills and the alternative offered, in the worked example */
+  ['direct','indirect','indirect'].forEach((k,i)=>{S.ab[i].k=k;});['direct','direct','indirect','indirect'].forEach((k,i)=>{S.wb[i].k=k;S.wb[i].tb=false;});
+  S.meta.a_skill='yes';S.meta.w_alt='A 3-minute walk in the hall or drawing at the back table, then the student chooses what comes next; nothing is lost';S.meta.w_fair='As good as what the student leaves';
   renderAll();setView('interview');
   nbhUI.toast('Simulation loaded: '+'a simulated sixth-grader’s interview, an assent log of twelve sessions and nine paired choices.',{kind:'ok'});
 }
@@ -1611,6 +1750,12 @@ function assentNote(){const a=assentStats();if(!a.n)return '';const P=[],se=k=>k
     const ap={ask:unq(m.a_ask).trim(),who:unq(m.a_who).trim(),when:unq(m.a_when).trim(),scope:String(m.a_scope||''),assent:ab.join('; '),withdrawal:sg.join('; '),steps:[stp,ws].filter(Boolean).join('. '),reviewed:iso(m.a_rev)||String(m.a_rev||'').trim()};
     Object.keys(ap).forEach(k=>{if(!ap[k])delete ap[k];});const a=assentStats();if(a.n)ap.log={sessions:a.n,given:a.got,declined:a.no,withdrawn:a.wdur,notRecorded:a.blank};
     if(Object.keys(ap).length)o.assentPlan=ap;}
+   /* v25.64 (M7) the drafts, for Form DA-1's inventory and Form FS-1's hypotheses to test; (H3) the withdrawal signs that are also
+      target behaviors, the assent skills and the alternative offered */
+   {const hr=(S.hard||[]).filter(r=>r&&String(r.act||'').trim()&&SI_WHY.some(w=>r[w[0]])).map(r=>{const x={act:String(r.act).trim()};SI_WHY.forEach(w=>{if(r[w[0]])x[w[0]]=true;});return x;});if(hr.length)o.hard=hr;}   /* v25.64 (M7) the rows themselves, as Forms DA-1 and FS-1 read them (student.hard) */
+    {const dl=siDrafts();if(dl.length)o.antecedents=dl.map(x=>({activity:x.act,reasons:x.reasons,line:x.line,test:x.test,da:x.da,basis:'the student\u2019s report; confirm by a brief classroom comparison or Form DA-1'}));
+    const tw=siWbTargets();if(tw.length){o.stop=o.stop||{};o.stop.alsoTarget=tw.map(x=>x.beh).join('; ');}
+    if(o.assentPlan||m.a_skill||m.w_alt){const ap=o.assentPlan||{};if(m.a_skill)ap.skills=m.a_skill;if(unq(m.a_teach).trim())ap.teach=unq(m.a_teach).trim();if(unq(m.w_alt).trim())ap.instead=unq(m.w_alt).trim();if(m.w_fair)ap.insteadFair=m.w_fair;if(Object.keys(ap).length)o.assentPlan=ap;}}
    if(!Object.keys(o).length)return r;const d=iso(m.date);if(d)o.date=d;
    return Object.assign({},r||{},{student:siRedactObj(o)});}catch(e){return r;}};}
 
@@ -1619,6 +1764,8 @@ function assentNote(){const a=assentStats();if(!a.n)return '';const P=[],se=k=>k
    a current consent; the age from Form DM-1's date of birth. The behavior stays in the student's words. */
 {const siAge=d=>{const b=new Date(d+'T12:00:00'),t=new Date();if(isNaN(b))return null;let a=t.getFullYear()-b.getFullYear();if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--;return a>=2&&a<=25?a:null;};
  window.__nbhFactsIn=function(f){let n=0;const notes=[];
+  /* v25.64 (H3) the case's target behaviors (Form TB-1), read for the withdrawal check only */
+  try{window.__siTB=((f&&f.behaviors)||[]).map(b=>String((b&&b.label)||'').trim()).filter(Boolean);siWbPaint();}catch(e){}
   try{f=f||{};const P=f.plan;
    if(P&&typeof P==='object'&&S.pc.every(r=>!(r.name||r.words||r.rank||r.say))){const L=[],add=x=>{x=String(x||'').trim();if(x&&!L.some(y=>y.toLowerCase()===x.toLowerCase()))L.push(x);};
      if(P.rep)add('Replacement: '+P.rep);[P.teach,P.antCards,P.sched].forEach(g=>(Array.isArray(g)?g:[]).forEach(add));

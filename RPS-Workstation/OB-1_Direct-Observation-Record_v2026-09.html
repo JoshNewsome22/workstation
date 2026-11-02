@@ -1003,6 +1003,23 @@ table.grid.obs-count.two td.lab{white-space:normal}
 }
 
 </style>
+<style id="ob1-v2564-css">
+/* v25.64 (M4, L7, H3, H7) the observers' checks on Setup, the ticks on a sheet, observer 2's file, the coverage tables */
+table.obck{margin:4px 0 2px;table-layout:fixed;width:100%}
+table.obck th,table.obck td{overflow:hidden;overflow-wrap:anywhere}
+table.obck td input,table.obck td select{min-width:0;max-width:100%}
+@media screen and (max-width:600px){table.obck th,table.obck td{padding:3px 4px;font-size:11.5px}}
+table.obck td input,table.obck td select{width:100%;font:inherit;border:1px solid var(--rule-2,#c9d3d9);border-radius:2px;padding:3px 6px;background:#fff;box-sizing:border-box}
+.obticks{display:flex;flex-wrap:wrap;gap:4px 22px;margin:2px 0 8px}
+.obticks label.chk{font-size:12.5px}
+p.obs2f button{margin-right:6px}
+table.obcov,table.obpair{margin-top:6px}
+p.obdrift{color:#8a4b00}
+@media print{table.obck td input,table.obck td select{border:0;-webkit-appearance:none;appearance:none;padding:0;font-size:10.5px;height:auto;min-height:0}
+  table.obck th,table.obck td{padding:1px 6px!important;font-size:10.5px}
+  table.obcov th,table.obcov td,table.obpair th,table.obpair td{padding:2px 6px!important;font-size:10.5px}
+  #covWrap p.method,#obZero{font-size:10.5px;margin:3px 0}}
+</style>
 <style id="ob1-rec-css">
 /* ============ OB-1 Live Recorder (v21.23) ============ */
 #obRec{display:none}
@@ -1270,6 +1287,7 @@ body.view-obs #obRec{display:block}
     <button id="saveBtn">Save data</button>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
+    <input type="file" id="obs2FileIn" accept="application/json" hidden><!-- v25.64 (H3) observer 2's own file, into one observation -->
     <button id="csvBtn">Export CSV</button>
     <button id="clearBtn">Clear all</button>
   </div></div>
@@ -1295,6 +1313,20 @@ body.view-obs #obRec{display:block}
     <div class="f"><label for="mRole">Observer role</label><input id="mRole" data-meta="role" placeholder="BCBA, behavior technician"></div>
     <div class="f"><label for="mTeacher">Classroom teacher</label><input id="mTeacher" data-meta="teacher"></div>
   </div>
+
+  <!-- v25.64 (M4) each observer checked against a scored example before their data count -->
+  <table class="grid obck">
+    <thead><tr><th style="width:26%">Checked against a scored example</th><th style="width:22%">Date checked</th><th>Example used</th><th style="width:14%">% correct</th></tr></thead>
+    <tbody>
+      <tr><td class="lab">Observer</td><td><input type="date" id="mCk1Date" data-meta="ck1Date" aria-label="Observer: date checked against a scored example"></td>
+        <td><select id="mCk1Ex" data-meta="ck1Ex" aria-label="Observer: the example used"><option></option><option>A scored video</option><option>This form&rsquo;s simulation</option><option>Another scored record</option></select></td>
+        <td><input id="mCk1Pct" data-meta="ck1Pct" inputmode="decimal" aria-label="Observer: percentage correct"></td></tr>
+      <tr><td class="lab">Second observer</td><td><input type="date" id="mCk2Date" data-meta="ck2Date" aria-label="Second observer: date checked against a scored example"></td>
+        <td><select id="mCk2Ex" data-meta="ck2Ex" aria-label="Second observer: the example used"><option></option><option>A scored video</option><option>This form&rsquo;s simulation</option><option>Another scored record</option></select></td>
+        <td><input id="mCk2Pct" data-meta="ck2Pct" inputmode="decimal" aria-label="Second observer: percentage correct"></td></tr>
+    </tbody>
+  </table>
+  <p class="method noprint">By this form&rsquo;s default an observer scores 90% or more against a scored example (a scored video, or this form&rsquo;s simulation) before their data count, and is checked again every 4 to 6 weeks and after any agreement flag. Give observers feedback on accuracy against the example, not on whether the data look as hoped.</p>
 
   <div class="defs">
     <div class="drow"><div class="dlab">Target behavior observed</div>
@@ -1456,6 +1488,10 @@ body.view-obs #obRec{display:block}
   <h3 class="sub">Every Observation</h3>
   <div class="tblwrap"><table class="grid" id="sumTbl"></table></div>
   <p class="method" id="sumNote"></p>
+  <p class="method" id="obZero"></p><!-- v25.64 (M2) the chance of an observation of each length showing none, at the pooled rate -->
+  <!-- v25.64 (H7) agreement coverage by arrangement, by observer pairing, and possible drift -->
+  <h3 class="sub" id="covHead" hidden>Agreement Across the Observations</h3>
+  <div class="tblwrap" id="covWrap" hidden></div>
   <!-- v23.20 (review F74, I38) each target behavior's counts, rates and timed episodes, with more than one or a timed one -->
   <h3 class="sub" id="behHead" hidden>Each Target Behavior</h3>
   <div class="tblwrap" id="behWrap" hidden><table class="grid" id="behTbl"></table></div>
@@ -1488,7 +1524,7 @@ body.view-obs #obRec{display:block}
   less than one and a half times the peer&rsquo;s. Nothing is said between the two, or when no peer
   interval is marked, because the form cannot tell a peer at 0% from a peer who was not scored. The
   whole observations&rsquo; counts and rates are given beside it. Agreement below 80% is named for each
-  observation and each figure: total count, interval-by-interval, scored-interval and unscored-interval.</p>
+  observation and each figure: block-by-block (where both observers&rsquo; tap times are held), total count, interval-by-interval, scored-interval and unscored-interval; interval kappa below .60 is named too. An observation in which the behavior was not seen is given the chance that an observation of its length would show none at the pooled rate.</p>
 
   <h3 class="sub">Statement for the FBA Summary (Form FS-1)</h3>
   <div class="defs">
@@ -1528,7 +1564,22 @@ body.view-obs #obRec{display:block}
   which is not the same as accurate. Agreement of 80% has long been used as the minimum acceptable
   level, and low agreement can reflect an unclear definition or recording system, observers not yet
   trained to it, or observer drift (Cooper, Heron, &amp; Heward, 2020).</div>
-  <div class="warn"><b>How the form computes agreement</b>With a second observer&rsquo;s record on the sheet,
+  <!-- v25.64 (H3, M1) block-by-block agreement from the tap times; kappa for the intervals -->
+  <div class="warn"><b>How the form computes agreement</b>The Live Recorder saves the time of every tap with the
+  observation. When the second observer also used it, <b>Open observer 2&rsquo;s file</b> on the sheet puts their record in
+  and lines the two up from their Start times. The figure carried is then <b>block-by-block agreement</b>: the observation is
+  split into 10-second blocks; in each, the smaller count is divided by the larger (two zeros count as 1), and the blocks
+  are averaged. Beside it are <b>exact count-per-block agreement</b> (the share of blocks with the same count) and
+  <b>time-window agreement</b> (taps of the two observers within 2 seconds of each other, matched one to one, over all the
+  taps). For a behavior whose episodes are timed, the seconds of episode in each block are compared the same way, and that
+  figure is carried. <b>Total count agreement</b> is kept as a fourth figure, labelled as not showing that the observers
+  counted the same events: it stayed uniformly high whatever the observers did, and the authors preferred the
+  block-by-block (proportional) figure (Rolider et al., 2012). Block-by-block, exact and time-window agreement were the three
+  methods most used for continuous records in this journal from 1995 to 2005 (Mudford, Taylor, &amp; Martin, 2009). Checked
+  against criterion records, exact agreement was overly strict at high rates, block-by-block and exact agreement ran high
+  when the behavior was rare, and time-window agreement ran high when it was frequent (Mudford et al., 2009); so read the
+  figures together. A block-by-block figure below 80% is flagged. Where the tap times are not held for both observers, or
+  no longer match the counts typed, the form works as before:
   total count IOA is the smaller count divided by the larger, times 100, and interval-by-interval IOA is the
   intervals both observers scored alike (both marked or both unmarked) divided by the intervals sampled, times
   100 (Cooper, Heron, &amp; Heward, 2020). Interval-by-interval agreement is inflated when the behavior is very
@@ -1538,7 +1589,24 @@ body.view-obs #obRec{display:block}
   total count IOA, since the counts and rates rest on the count (the interval figure only where no second count
   was taken), and stays typed for an agreement computed elsewhere. The second observer&rsquo;s interval rows count
   once they hold a mark, or once the box under them says both rows were scored: an untouched row is not a record
-  of nothing seen.</div>
+  of nothing seen. Under the interval figures is <b>kappa</b>, the same comparison corrected for chance:
+  (observed &minus; chance) &divide; (1 &minus; chance). Kappa below .60 is named; .60 is Hartmann&rsquo;s (1977) suggestion, not a
+  validated cut-off.</div>
+  <!-- v25.64 (H7, M4, L7) -->
+  <div class="warn"><b>Coverage, drift and observers</b>The Summary shows, for each arrangement (or activity), the
+  observations with agreement out of all of them; one below 20%, or with none, is flagged. The usual convention is
+  agreement on 20 to 33% of sessions, and schools and homes may need more than trained clinic observers (Hausman et al.,
+  2022). Agreement is also shown for each pairing of observer and second observer. <b>Possible drift</b> is flagged when an
+  arrangement&rsquo;s mean agreement is 10 or more points below the first one&rsquo;s, or one pairing agrees 10 or more points above
+  the others: observers who work together can keep agreeing while both drift from the definition (Kazdin, 1977). This
+  form&rsquo;s default: agreement on at least a quarter to a third of observations in every arrangement, spread across
+  times, activities and observers; rotate the second observer; where possible the observer does not know which
+  observation will be checked, since observers scored differently when they knew who was checking (Romanczyk et al.,
+  1973). Each observer is checked against a scored example (Setup) before their data count, to 90% or more, again every 4
+  to 6 weeks and after any agreement flag; video training worked as well as live training in fewer sessions (Dempsey et
+  al., 2012). Tick on the sheet when the second observer did not know what the observation was expected to show, and when
+  the observer was also running the class: when teachers observed students, their prompts to those students rose and the
+  students changed more (Hay et al., 1977), so have an outside observer make at least one observation.</div>
   <div class="warn"><b>Applied guidance</b>Bring the definition from Form TB-1 and read it once
   before starting. Agree with the teacher beforehand where you will sit, that you will not respond to
   the student, and what you will do if the student approaches you. Tell the teacher you are recording
@@ -1553,6 +1621,13 @@ body.view-obs #obRec{display:block}
   day. Where the referral concerns a specific routine, observe that routine more than once. Note
   whether the observation was announced: a first announced observation is usual, and an unannounced
   one afterwards is what tells you whether the announced one was typical.</div>
+  <!-- v25.64 (M2) -->
+  <div class="warn"><b>Evidence</b>An observation in which the behavior did not occur is data, but a short one says little
+  about a behavior that is not frequent. From the rate per hour across all the observations, the Summary gives each
+  observation&rsquo;s chance of showing no occurrence at all if the behavior ran at that rate (e<sup>&minus;rate &times; hours</sup>): at
+  1 per hour, a 20-minute observation shows none about 72% of the time. The FS-1 statement qualifies each observation
+  with none in the same words. Behavior that filled little of the time was poorly estimated even from long samples
+  (Mudford et al., 1990).</div>
 
   <h3 class="sub">3. The Comparison Peer</h3>
   <div class="warn"><b>Applied guidance</b>A peer comparison answers a question the student's own
@@ -1645,21 +1720,26 @@ body.view-obs #obRec{display:block}
   <p class="noprint method"><b>Load simulation</b> (toolbar) fills the record with simulated observations; none of it is a real student record. Three simulated observations loaded, all in one classroom, across independent work and a small group, one of them unannounced, with a second target behavior (out of seat, its episodes timed) beside the first. The summary and the FS-1 statement are both filled in &mdash; use the view buttons to step through them.</p>
 
   <div class="cite">
-    Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em>
-    (3rd ed.). Pearson. &bull; Iwata, B. A., DeLeon, I. G., &amp; Roscoe, E. M. (2013). Reliability
-    and validity of the Functional Analysis Screening Tool. <em>Journal of Applied Behavior Analysis,
-    46</em>(1), 271&ndash;284. &bull; Iwata, B. A., &amp; Dozier, C. L. (2008). Clinical application of
-    functional analysis methodology. <em>Behavior Analysis in Practice, 1</em>(1), 3&ndash;9. &bull;
-    Kahng, S., Iwata, B. A., Fischer, S. M., Page, T. J., Treadwell, K. R. H.,
-    Williams, D. E., &amp; Smith, R. G. (1998). Temporal distributions of problem behavior based on
-    scatter plot analysis. <em>Journal of Applied Behavior Analysis, 31</em>(4), 593&ndash;604.
-    &bull; Lerman, D. C., &amp; Iwata, B. A. (1993). Descriptive and experimental analyses of
-    variables maintaining self-injurious behavior. <em>Journal of Applied Behavior Analysis,
-    26</em>(3), 293&ndash;319. &bull; Powell, J., Martindale, A., &amp; Kulp, S. (1975). An evaluation of
-    time-sample measures of behavior. <em>Journal of Applied Behavior Analysis, 8</em>(4), 463&ndash;469.
-    &bull; Thompson, R. H., &amp; Iwata, B. A. (2007). A comparison of
-    outcomes from descriptive and functional analyses of problem behavior. <em>Journal of Applied
-    Behavior Analysis, 40</em>(2), 333&ndash;338.
+    Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
+    Iwata, B. A., DeLeon, I. G., &amp; Roscoe, E. M. (2013). Reliability and validity of the Functional Analysis Screening Tool. <em>Journal of Applied Behavior Analysis, 46</em>(1), 271&ndash;284. &bull;
+    Iwata, B. A., &amp; Dozier, C. L. (2008). Clinical application of functional analysis methodology. <em>Behavior Analysis in Practice, 1</em>(1), 3&ndash;9. &bull;
+    Kahng, S., Iwata, B. A., Fischer, S. M., Page, T. J., Treadwell, K. R. H., Williams, D. E., &amp; Smith, R. G. (1998). Temporal distributions of problem behavior based on scatter plot analysis. <em>Journal of Applied Behavior Analysis, 31</em>(4), 593&ndash;604. &bull;
+    Lerman, D. C., &amp; Iwata, B. A. (1993). Descriptive and experimental analyses of variables maintaining self-injurious behavior. <em>Journal of Applied Behavior Analysis, 26</em>(3), 293&ndash;319. &bull;
+    Powell, J., Martindale, A., &amp; Kulp, S. (1975). An evaluation of time-sample measures of behavior. <em>Journal of Applied Behavior Analysis, 8</em>(4), 463&ndash;469. &bull;
+    Thompson, R. H., &amp; Iwata, B. A. (2007). A comparison of outcomes from descriptive and functional analyses of problem behavior. <em>Journal of Applied Behavior Analysis, 40</em>(2), 333&ndash;338.
+  </div>
+  <!-- v25.64 (H3, M1, M2, H7, M4, L7) the sources of the agreement, coverage, observer and chance-of-none text -->
+  <div class="cite cite2564">
+    Dempsey, C. M., Iwata, B. A., Fritz, J. N., &amp; Rolider, N. U. (2012). Observer training revisited: A comparison of in vivo and video instruction. <em>Journal of Applied Behavior Analysis, 45</em>(4). https://doi.org/10.1901/jaba.2012.45-827 &bull;
+    Hartmann, D. P. (1977). Considerations in the choice of interobserver reliability estimates. <em>Journal of Applied Behavior Analysis, 10</em>(1). https://doi.org/10.1901/jaba.1977.10-103 &bull;
+    Hausman, N. L., Javed, N., Bednar, M. K., Guell, M., Schaller, E., Nevill, R. E., &amp; Kahng, S. (2022). Interobserver agreement: A preliminary investigation into how much is enough? <em>Journal of Applied Behavior Analysis, 55</em>(2). https://doi.org/10.1002/jaba.811 &bull;
+    Hay, L. R., Nelson, R. O., &amp; Hay, W. M. (1977). The use of teachers as behavioral observers. <em>Journal of Applied Behavior Analysis, 10</em>(2). https://doi.org/10.1901/jaba.1977.10-345 &bull;
+    Kazdin, A. E. (1977). Artifact, bias, and complexity of assessment: The ABCs of reliability. <em>Journal of Applied Behavior Analysis, 10</em>(1). https://doi.org/10.1901/jaba.1977.10-141 &bull;
+    Mudford, O. C., Beale, I. L., &amp; Singh, N. N. (1990). The representativeness of observational samples of different durations. <em>Journal of Applied Behavior Analysis, 23</em>(3). https://doi.org/10.1901/jaba.1990.23-323 &bull;
+    Mudford, O. C., Martin, N. T., Hui, J. K. Y., &amp; Taylor, S. A. (2009). Assessing observer accuracy in continuous recording of rate and duration: Three algorithms compared. <em>Journal of Applied Behavior Analysis, 42</em>(3). https://doi.org/10.1901/jaba.2009.42-527 &bull;
+    Mudford, O. C., Taylor, S. A., &amp; Martin, N. T. (2009). Continuous recording and interobserver agreement algorithms reported in the Journal of Applied Behavior Analysis (1995&ndash;2005). <em>Journal of Applied Behavior Analysis, 42</em>(1). https://doi.org/10.1901/jaba.2009.42-165 &bull;
+    Rolider, N. U., Iwata, B. A., &amp; Bullock, C. E. (2012). Influences of response rate and distribution on the calculation of interobserver reliability scores. <em>Journal of Applied Behavior Analysis, 45</em>(4). https://doi.org/10.1901/jaba.2012.45-753 &bull;
+    Romanczyk, R. G., Kent, R. N., Diament, C., &amp; O&rsquo;Leary, K. D. (1973). Measuring the reliability of observational data: A reactive process. <em>Journal of Applied Behavior Analysis, 6</em>(1), 175&ndash;184.
   </div>
 </div>
 
@@ -1977,6 +2057,11 @@ function ioa(o){
   /* v22.99 (review F72) the agreement carried is the total count IOA: the counts and rates rest on the count, and
      interval-by-interval agreement is inflated for a rare behavior; the interval figure only where no second count was taken */
   r.agree = r.count ? r.count.p : (r.iv ? r.iv.p : null);
+  /* v25.64 (H3) with both observers' tap times held and matching their counts, block-by-block agreement is carried (for a timed
+     behavior, the seconds of episode per block); (M1) kappa for the interval rows */
+  r.block = blockIOA(o);
+  if(r.block && r.block.p != null) r.agree = r.block.dur ? r.block.dur.p : r.block.p;
+  r.kap = n && iv2Scored(o) ? kIOA(o.iv||[], o.iv2||[], n) : null; r.peerKap = n && peerIv2Scored(o) ? kIOA(o.peerIv||[], o.peerIv2||[], n) : null;
   r.su = n && iv2Scored(o) ? suIOA(o.iv||[], o.iv2||[], n) : null; r.peerSu = n && peerIv2Scored(o) ? suIOA(o.peerIv||[], o.peerIv2||[], n) : null;   /* v21.37 */
   r.ivNot = !!(n && !iv2Scored(o));   /* v22.99 (F71) */
   return r;
@@ -1985,6 +2070,8 @@ function ioa(o){
 function ioaLow(a){
   if(!a) return [];
   const L = [], f = (x, w) => { if(x && x.p < 80) L.push(w(x)); };
+  /* v25.64 (H3) the carried block-by-block figure */
+  if(a.block && a.block.p != null){ if(a.block.dur) f(a.block.dur, x => "seconds of episode per block " + x.p + "% (" + a.block.n + " blocks of 10 s)"); else f(a.block, x => "block-by-block " + x.p + "% (" + x.n + " blocks of 10 s)"); }
   f(a.count, x => "total count agreement " + x.p + "% (counts of " + x.a + " and " + x.b + ")");
   f(a.iv, x => "interval-by-interval " + x.p + "% (" + x.k + " of " + x.n + ")");
   if(a.su){ f(a.su.scored, x => "scored-interval " + x.p + "% (" + x.k + " of " + x.n + ")"); f(a.su.unscored, x => "unscored-interval " + x.p + "% (" + x.k + " of " + x.n + ")"); }
@@ -1996,6 +2083,7 @@ function ioaLow(a){
 /* v22.99 (review F72) one observation's agreement in the words of the FS-1 statement */
 function ioaWords(a){
   const P = [];
+  if(a.block && a.block.p != null) P.push((a.block.dur ? "seconds of episode per 10-s block " + a.block.dur.p : "block-by-block " + a.block.p) + "%");   /* v25.64 (H3) */
   if(a.count) P.push("total count " + a.count.p + "% (counts of " + a.count.a + " and " + a.count.b + ")");
   if(a.iv) P.push("interval-by-interval " + a.iv.p + "%");
   if(a.su && a.su.scored) P.push("scored-interval " + a.su.scored.p + "%");
@@ -2005,8 +2093,20 @@ function ioaWords(a){
 function agreeOf(o){ const a = ioa(o); return a && a.agree !== null ? String(a.agree) : String(o.agree==null?"":o.agree); }
 function ioaText(o){
   const a = ioa(o); if(!a) return "";
-  const parts = [];
-  if(a.count) parts.push("count " + a.count.p + "% (" + a.count.a + " and " + a.count.b + ")");
+  const parts = [], B = a.block;
+  /* v25.64 (H3) from the two observers' tap times: block-by-block (carried), exact count per block, time window, and for a timed
+     behavior the seconds of episode per block; the total count then says what it does not show */
+  if(B && B.p != null){
+    parts.push("block-by-block " + B.p + "% (" + B.n + " blocks of 10 s)" + (B.dur ? "" : ", carried"), "exact count per block " + B.exact.p + "% (" + B.exact.k + " of " + B.exact.n + ")",
+      "time window \u00b12 s " + B.tw.p + "% (" + B.tw.k + " of " + B.tw.n + " taps matched)");
+    if(B.dur) parts.push("seconds of episode per block " + B.dur.p + "%, carried");
+    if(B.peer) parts.push("peer block-by-block " + B.peer.p + "%");
+    if(B.out) parts.push(B.out + " tap" + (B.out === 1 ? "" : "s") + " outside the time both records cover, left out");
+    if(Math.abs(B.off) > 60) parts.push("the two Starts are " + Math.round(Math.abs(B.off)) + " s apart");
+  }
+  if(a.count) parts.push("count " + a.count.p + "% (" + a.count.a + " and " + a.count.b + (B && B.p != null ? "; total count, which does not show the observers counted the same events" : "") + ")");
+  if(B && B.stale) parts.push("the tap times no longer match the counts, so the total count is carried");
+  if(B && B.short) parts.push("the two records overlap by less than 10 s, so the total count is carried");
   if(a.iv) parts.push("intervals " + a.iv.p + "% (" + a.iv.k + " of " + a.iv.n + ")");
   if(a.peerCount) parts.push("peer count " + a.peerCount.p + "% (" + a.peerCount.a + " and " + a.peerCount.b + ")");
   if(a.peerIv) parts.push("peer intervals " + a.peerIv.p + "% (" + a.peerIv.k + " of " + a.peerIv.n + ")");
@@ -2022,6 +2122,9 @@ function ioaText2(o){
   const parts = ["scored-interval " + suFig(a.su.scored) + " (the check for a rare behavior)",
                  "unscored-interval " + suFig(a.su.unscored) + " (for a frequent one)"];
   if(a.peerSu && (a.peerSu.scored || a.peerSu.unscored)) parts.push("peer scored-interval " + suFig(a.peerSu.scored), "peer unscored-interval " + suFig(a.peerSu.unscored));
+  /* v25.64 (M1) kappa: the interval agreement corrected for chance */
+  if(a.kap) parts.push(kapFig(a.kap, "interval kappa"));
+  if(a.peerKap && a.peerSu && (a.peerSu.scored || a.peerSu.unscored)) parts.push(kapFig(a.peerKap, "peer interval kappa"));
   return "Stricter checks: " + parts.join("; ") + ".";
 }
 function ioaLine2(o){ const t = ioaText2(o); return '<p class="method ioa2' + (t ? '' : ' noprint') + '">' + esc(t) + '</p>'; }
@@ -2043,6 +2146,173 @@ function refreshIOA(pg, i){
   const a = ioa(o), auto = !!(a && a.agree !== null);
   if(auto){ ag.readOnly = true; ag.title = AGREE_TIP; ag.classList.add("calc"); ag.value = a.agree; }
   else if(ag.readOnly){ ag.readOnly = false; ag.title = ""; ag.classList.remove("calc"); ag.value = o.agree == null ? "" : o.agree; }
+}
+
+/* ---------------------------------------------------- v25.64 (H3) agreement block by block, from the tap times */
+/* The Live Recorder keeps each tap as seconds from Start, paused time left out (o.taps {s, p, ep for a timed first behavior}),
+   with the Start on the wall clock and the pauses (o.rec {t0 ms, dur s, pz [[at s, length s]]}); observer 2's file brings the
+   same as o.taps2 / o.rec2. The two records are lined up by their Starts, on the wall clock, and split into 10-s blocks; a block
+   that falls in either observer's pause is left out. Block-by-block: in each block the smaller count over the larger (two zeros
+   count as 1), averaged; exact: the share of blocks with the same count; time window: taps of the two observers within 2 s of
+   each other, matched one to one, over all the taps (Mudford, Taylor, & Martin, 2009; Mudford et al., 2009); for a timed
+   behavior, the seconds of episode in each block, compared as block-by-block. The tap times are used only while they match the
+   counts typed on the sheet. */
+const OB_BLOCK = 10, OB_WIN = 2;
+const p1d = x => Math.round(x * 1000) / 10;
+const numArr = a => (Array.isArray(a) ? a : []).map(Number).filter(v => isFinite(v) && v >= 0).sort((x, y) => x - y);
+function recOf(o, two){ const t = two ? o.taps2 : o.taps, r = two ? o.rec2 : o.rec;
+  if(!t || !r || typeof t !== "object" || typeof r !== "object" || !Array.isArray(t.s) || !(+r.t0 > 0) || !(+r.dur > 0)) return null;
+  const pz = (Array.isArray(r.pz) ? r.pz : []).filter(x => Array.isArray(x) && isFinite(+x[0]) && isFinite(+x[1]) && +x[1] >= 0).map(x => [+x[0], +x[1]]).sort((a, b) => a[0] - b[0]);
+  return { t, t0:+r.t0, dur:+r.dur, pz }; }
+/* an observed second as seconds after that observer's Start on the wall clock: the pauses begun before it added back */
+const wallOf = (x, pz) => pz.reduce((w, [at, len]) => w + (at <= x ? len : 0), x);
+const gapsOf = (pz, off) => { let add = 0; return pz.map(([at, len]) => { const a = at + add + off; add += len; return [a, a + len]; }); };
+const prop = (a, b) => { const hi = Math.max(a, b); return hi ? Math.min(a, b) / hi : 1; };
+function blockIOA(o){
+  const A = recOf(o, false), B = recOf(o, true); if(!A || !B) return null;
+  const sA = numArr(A.t.s), sB = numArr(B.t.s);
+  if(cnt(o.count) !== sA.length || cnt(o.count2) !== sB.length) return { stale:true, p:null };
+  const off = (B.t0 - A.t0) / 1000, wa = x => wallOf(x, A.pz), wb = x => wallOf(x, B.pz) + off;
+  const lo = Math.max(0, off), hi = Math.min(wa(A.dur), wb(B.dur));
+  if(hi - lo < OB_BLOCK) return { short:true, p:null, off };
+  const gaps = gapsOf(A.pz, 0).concat(gapsOf(B.pz, off)), blocks = [];
+  for(let b = lo; b < hi - 1e-9; b += OB_BLOCK){ const e = Math.min(hi, b + OB_BLOCK); if(e - b < 1) break;
+    if(!gaps.some(([x, y]) => x < e && y > b)) blocks.push([b, e]); }
+  if(!blocks.length) return { short:true, p:null, off };
+  const inB = v => blocks.some(([b, e]) => v >= b && v < e);
+  const tA = sA.map(wa).filter(inB), tB = sB.map(wb).filter(inB);
+  const per = (L, b, e) => L.filter(v => v >= b && v < e).length;
+  let pr = 0, ex = 0; blocks.forEach(([b, e]) => { const x = per(tA, b, e), y = per(tB, b, e); pr += prop(x, y); if(x === y) ex++; });
+  /* time window: each of observer 1's taps takes the nearest of observer 2's not yet taken, within 2 s */
+  const used = tB.map(() => false); let m = 0;
+  tA.forEach(a => { let best = -1, bd = Infinity; tB.forEach((v, j) => { const dd = Math.abs(a - v); if(!used[j] && dd <= OB_WIN + 1e-9 && dd < bd){ bd = dd; best = j; } }); if(best >= 0){ used[best] = true; m++; } });
+  const twN = tA.length + tB.length - m;
+  const r = { p:p1d(pr / blocks.length), n:blocks.length, exact:{ p:p1d(ex / blocks.length), k:ex, n:blocks.length }, tw:{ p:twN ? p1d(m / twN) : 100, k:m, n:twN },
+    off, out:(sA.length - tA.length) + (sB.length - tB.length), dur:null, peer:null };
+  /* a timed first behavior: the seconds of episode in each block */
+  const eps = (L, w) => (Array.isArray(L) ? L : []).filter(x => Array.isArray(x) && isFinite(+x[0]) && isFinite(+x[1]) && +x[1] >= +x[0]).map(x => [w(+x[0]), w(+x[1])]);
+  if(behList()[0].dur && Array.isArray(A.t.ep) && Array.isArray(B.t.ep)){
+    const eA = eps(A.t.ep, wa), eB = eps(B.t.ep, wb), sec = (E, b, e) => E.reduce((t, [x, y]) => t + Math.max(0, Math.min(y, e) - Math.max(x, b)), 0);
+    let dp = 0; blocks.forEach(([b, e]) => { dp += prop(sec(eA, b, e), sec(eB, b, e)); }); r.dur = { p:p1d(dp / blocks.length) }; }
+  /* the peer, where both counted the peer and the taps match those counts */
+  const pA = numArr(A.t.p), pB = numArr(B.t.p);
+  if(Array.isArray(A.t.p) && Array.isArray(B.t.p) && cnt(o.peerCount) === pA.length && cnt(o.peerCount2) === pB.length){
+    const qA = pA.map(wa).filter(inB), qB = pB.map(wb).filter(inB); let pp = 0;
+    blocks.forEach(([b, e]) => { pp += prop(per(qA, b, e), per(qB, b, e)); }); r.peer = { p:p1d(pp / blocks.length) }; }
+  return r;
+}
+/* v25.64 (M1) Cohen's kappa for two interval rows: (observed - chance) / (1 - chance); k null when chance is 1 (every interval
+   scored the same way by both) */
+function kIOA(a, b, n){ if(!n) return null; let m1 = 0, m2 = 0, ag = 0;
+  for(let j = 0; j < n; j++){ const x = !!(a && a[j]), y = !!(b && b[j]); m1 += x; m2 += y; if(x === y) ag++; }
+  const po = ag / n, q1 = m1 / n, q2 = m2 / n, pe = q1 * q2 + (1 - q1) * (1 - q2);
+  return { k: pe >= 1 - 1e-12 ? null : (po - pe) / (1 - pe) }; }
+function kapFig(x, w){ return x.k === null ? w + " cannot be computed (both observers scored every interval the same way)"
+  : w + " " + x.k.toFixed(2) + (x.k < .6 ? ", below .60 (Hartmann’s suggestion, not a validated cut-off)" : ""); }
+/* the new fields as a file holds them, made safe */
+function cleanTaps2564(o){
+  ["taps", "taps2", "rec", "rec2"].forEach(k => { if(o[k] != null && (typeof o[k] !== "object" || Array.isArray(o[k]))) delete o[k]; });
+  ["teach", "blind"].forEach(k => { if(k in o) o[k] = o[k] === true; });
+}
+/* observer 2's own OB-1 file into one observation: the observation in it recorded nearest this one's Start (else the one on this
+   date nearest its start time, else the only one) */
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("button.obs2File"); if(!b) return;
+  const inp = $("#obs2FileIn"); if(!inp) return; inp.dataset.obs = b.dataset.obs; inp.click(); });
+(function(){ const inp = $("#obs2FileIn"); if(!inp) return;
+  inp.addEventListener("change", e => { const file = e.target.files[0], i = +inp.dataset.obs; e.target.value = ""; if(!file) return;
+    const rd = new FileReader();
+    rd.onload = async () => { let d = null; try{ d = JSON.parse(rd.result); }catch(x){ d = null; }
+      const o = state.obs[i]; if(!o) return;
+      if(!d || typeof d !== "object" || !Array.isArray(d.obs)){ alert("That file could not be read as a saved observation record."); return; }
+      const C = d.obs.filter(x => x && typeof x === "object"); if(!C.length){ alert("Observer 2’s file holds no observation."); return; }
+      const t0 = o.rec && +o.rec.t0 > 0 ? +o.rec.t0 : 0, R = C.filter(x => x.rec && +x.rec.t0 > 0);
+      let pick = null;
+      if(t0 && R.length) pick = R.reduce((a, x) => Math.abs(+x.rec.t0 - t0) < Math.abs(+a.rec.t0 - t0) ? x : a);
+      else { const sd = C.filter(x => String(x.date || "") && x.date === o.date), a0 = parseHM(o.start);
+        if(sd.length) pick = a0 === null ? sd[0] : sd.reduce((a, x) => Math.abs((parseHM(x.start) ?? 9e9) - a0) < Math.abs((parseHM(a.start) ?? 9e9) - a0) ? x : a);
+        else if(C.length === 1) pick = C[0]; }
+      if(!pick){ alert("Observer 2’s file holds " + C.length + " observations and none is dated " + (fmtDate(o.date) || "as this one is") + ". Date this observation, or enter observer 2’s counts by hand."); return; }
+      const far = t0 && pick.rec ? Math.abs(+pick.rec.t0 - t0) / 1000 : null, c2 = cleanCfg(d.cfg), same = c2.ivLen === state.cfg.ivLen && c2.ivMethod === state.cfg.ivMethod && c2.ivN === state.cfg.ivN;
+      const had = obs2Any(o), taps = !!(pick.taps && pick.rec);
+      if(!(await nbhUI.confirm("Put observer 2’s record into observation " + (i + 1) + "?\n" + (String(d.meta && d.meta.observer || "").trim() ? "Recorded by " + String(d.meta.observer).trim() + ": " : "")
+          + "a count of " + (String(pick.count ?? "").trim() || "none") + (String(pick.peerCount ?? "").trim() ? ", a peer count of " + String(pick.peerCount).trim() : "")
+          + (taps ? ", with the tap times" : " (no tap times: total count agreement is carried)") + "."
+          + (same ? " Its interval marks too." : " Its interval sample was set another way, so its marks are left out.")
+          + (far !== null && far > 60 ? " Its Start is " + Math.round(far) + " seconds from this observation’s." : "")
+          + (had ? " What the observer 2 columns hold is replaced." : ""), {ok:"Put it in"}))) return;
+      o.obs2On = true; o.count2 = String(pick.count ?? ""); o.peerCount2 = String(pick.peerCount ?? "");
+      if(same){ o.iv2 = (Array.isArray(pick.iv) ? pick.iv : []).map(Boolean); o.peerIv2 = (Array.isArray(pick.peerIv) ? pick.peerIv : []).map(Boolean);
+        o.iv2On = o.iv2.some(Boolean) || o.peerIv2.some(Boolean) || (Array.isArray(pick.narrative) && pick.narrative.some(r => r && /^Interval sample began at /.test(String(r.w || "")))); }
+      if(taps){ o.taps2 = JSON.parse(JSON.stringify(pick.taps)); o.rec2 = JSON.parse(JSON.stringify(pick.rec)); } else { delete o.taps2; delete o.rec2; }
+      const nm = String(d.meta && d.meta.observer || "").trim(); if(nm && !String(o.secondObs || "").trim()) o.secondObs = nm;
+      /* (M4) the second observer's own check against a scored example, where Setup has none */
+      if(d.meta && !["ck2Date", "ck2Ex", "ck2Pct"].some(k => String(state.meta[k] || "").trim())) ["Date", "Ex", "Pct"].forEach(k => { if(String(d.meta["ck1" + k] || "").trim()) state.meta["ck2" + k] = String(d.meta["ck1" + k]).trim(); });
+      render();
+      if(window.nbhUI && nbhUI.toast) nbhUI.toast("Observer 2’s record is in observation " + (i + 1) + (taps && o.taps ? "; block-by-block agreement is under its counts." : "; the agreement is under its counts."), {kind:"ok"});
+    };
+    rd.readAsText(file); }); })();
+
+/* ---------------------------------------------------- v25.64 (M2) the chance of seeing none */
+/* At the rate per hour across the observations, an observation of h hours shows no occurrence with chance e^(-rate x h) (a
+   Poisson rate: at 1 per hour, a 20-minute observation shows none about 72% of the time). */
+function zeroPct(rate, mins){ const v = Math.exp(-rate * mins / 60) * 100; return v < 1 ? "under 1%" : v > 99 ? "over 99%" : "about " + Math.round(v) + "%"; }
+function renderZero(d){ const el = $("#obZero"); if(!el) return;
+  const R = d.rows.filter(r => r.mins);
+  if(!(d.rateAll > 0) || !R.length){ el.innerHTML = ""; el.classList.add("noprint"); return; }
+  el.classList.remove("noprint");
+  el.innerHTML = "<b>Seeing None by Chance</b>If the behavior ran at its rate across these observations (" + d.rateAll + " per hour), the chance that an observation of each length shows no occurrence at all: "
+    + R.map(r => "observation " + (r.i + 1) + " (" + r.mins + " min) " + zeroPct(d.rateAll, r.mins) + (r.c === 0 ? ", and none was seen" : "")).join("; ")
+    + ". An observation with none is weighed against that chance (Guide, section 2).";
+}
+function zeroWords(d){ if(!(d.rateAll > 0)) return [];
+  return d.rows.filter(r => r.c === 0 && r.mins).map(r => { const v = Math.exp(-d.rateAll * r.mins / 60);
+    return "The behavior was not seen in observation " + (r.i + 1) + " (" + r.mins + " minutes); at the rate across the observations (" + d.rateAll + " per hour), an observation that long would show none "
+      + zeroPct(d.rateAll, r.mins) + " of the time" + (v >= .2 ? ", so that observation alone says little about whether the behavior happens there." : "."); }); }
+
+/* ---------------------------------------------------- v25.64 (H7) agreement coverage, pairings, drift */
+/* Grouped by the arrangement (else the activity): the observations with agreement out of all of them, flagged below 20% or with
+   none; agreement for each pairing of observer and second observer; possible drift when a group's mean agreement is 10 or more
+   points below the first group's, or one pairing's 10 or more above the others'. */
+function renderCov(){
+  const hd = $("#covHead"), wr = $("#covWrap"); if(!hd || !wr) return;
+  const used = state.obs.map((o, i) => ({ o, i })).filter(x => minutesOf(x.o) || cnt(x.o.count) !== null || String(x.o.date || "").trim());
+  if(!used.length){ hd.hidden = wr.hidden = true; wr.innerHTML = ""; return; }
+  hd.hidden = wr.hidden = false;
+  const val = o => { const t = agreeOf(o).trim(); return /^\d+(\.\d+)?$/.test(t) && +t <= 100 ? +t : null; };
+  const G = new Map(), f1 = v => String(Math.round(v * 10) / 10), mean = a => a.reduce((x, y) => x + y, 0) / a.length, F = [];
+  used.forEach(x => { const k = String(x.o.arrange || "").trim() || String(x.o.activity || "").trim() || "(no arrangement or activity)"; if(!G.has(k)) G.set(k, []); G.get(k).push(x); });
+  let h = '<table class="grid obcov"><thead><tr><th>Arrangement or activity</th><th class="c" style="width:150px">With agreement</th><th class="c" style="width:70px">Share</th><th style="width:34%">Coverage</th></tr></thead><tbody>';
+  const gm = [];
+  G.forEach((L, k) => { const w = L.filter(x => val(x.o) !== null), sh = w.length / L.length;
+    const note = !w.length ? "No agreement check" : sh < .2 ? "Below 20%: add agreement checks" : "At or above 20%";
+    if(w.length) gm.push({ k, m:mean(w.map(x => val(x.o))) });
+    h += '<tr><td>' + esc(k) + '</td><td class="c">' + w.length + ' of ' + L.length + '</td><td class="c">' + Math.round(sh * 100) + '%</td><td>' + (!w.length || sh < .2 ? '<b>' + esc(note) + '</b>' : esc(note)) + '</td></tr>'; });
+  h += '</tbody></table>';
+  gm.slice(1).forEach(g => { if(g.m <= gm[0].m - 10) F.push("Possible drift: mean agreement in " + g.k + " (" + f1(g.m) + "%) is 10 or more points below " + gm[0].k + " (" + f1(gm[0].m) + "%). Check both observers against a scored example."); });
+  const P = new Map(), ob = String(state.meta.observer || "").trim() || "observer not recorded";
+  used.forEach(x => { const v = val(x.o); if(v === null) return; const k = ob + " with " + (String(x.o.secondObs || "").trim() || "second observer not recorded"); if(!P.has(k)) P.set(k, []); P.get(k).push(v); });
+  if(P.size){ h += '<table class="grid obpair"><thead><tr><th>Observer pairing</th><th class="c" style="width:150px">Observations</th><th class="c" style="width:150px">Mean agreement carried</th></tr></thead><tbody>';
+    P.forEach((v, k) => { h += '<tr><td>' + esc(k) + '</td><td class="c">' + v.length + '</td><td class="c">' + f1(mean(v)) + '%</td></tr>'; }); h += '</tbody></table>';
+    if(P.size > 1) P.forEach((v, k) => { const rest = []; P.forEach((w, j) => { if(j !== k) rest.push(...w); }); const a = mean(v), b = mean(rest);
+      if(a >= b + 10) F.push("Possible drift: " + k + " agree 10 or more points above the other pairings (" + f1(a) + "% against " + f1(b) + "%). Observers who work together can keep agreeing while both drift from the definition (Kazdin, 1977): rotate the second observer."); }); }
+  wr.innerHTML = h + (F.length ? '<p class="method obdrift">' + esc(F.join(" ")) + '</p>' : '')
+    + '<p class="method">This form&rsquo;s default: agreement on at least a quarter to a third of observations in every arrangement, spread across times, activities and observers. Rotate the second observer. Where possible, the observer does not know which observation will be checked.</p>';
+}
+
+/* ---------------------------------------------------- v25.64 (M4, L7) the observation plan: observers checked, an observer teaching */
+function obPlan2564(parts){
+  const used = state.obs.filter(o => minutesOf(o) || cnt(o.count) !== null || String(o.date || "").trim()); if(!used.length) return;
+  const days = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || "").trim()); return m ? Math.round(new Date(+m[1], +m[2] - 1, +m[3]).getTime() / 864e5) : null; };
+  const last = Math.max(...used.map(o => days(o.date)).filter(v => v !== null), -Infinity), ref = isFinite(last) ? last : Math.round(new Date(new Date().toDateString()).getTime() / 864e5);
+  const ck = (k, who) => { const d = days(state.meta["ck" + k + "Date"]), t = String(state.meta["ck" + k + "Pct"] || "").trim(), pc = /^\d+(\.\d+)?$/.test(t) ? +t : null;
+    if(d === null && pc === null){ parts.push(who + " has no check against a scored example recorded (Setup). By this form’s default an observer scores 90% or more against one before their observations count."); return; }
+    if(pc !== null && pc < 90) parts.push(who + " scored " + pc + "% against the scored example, below this form’s 90%: retrain, and check again before these observations count.");
+    if(d !== null && ref - d > 42) parts.push(who + " was last checked against a scored example " + Math.floor((ref - d) / 7) + " weeks before the latest observation: repeat the check every 4 to 6 weeks."); };
+  if(String(state.meta.observer || "").trim()) ck(1, "The observer");
+  if(state.obs.some(o => o.obs2On)) ck(2, "The second observer");
+  if(state.obs.some(o => { const a = ioa(o); return ioaLow(a).length || (a && a.kap && a.kap.k !== null && a.kap.k < .6); }))
+    parts.push("An agreement figure is flagged (Summary): check both observers against the scored example again.");
+  if(used.every(o => o.teach)) parts.push("Every observation so far was made by an observer who was also running the class. An observer who teaches prompts the student more, and the student can change with it (Hay et al., 1977): have an outside observer make at least one observation.");
 }
 
 /* ---------------------------------------------------- one observation sheet */
@@ -2077,7 +2347,10 @@ function obsHTML(o, i, n){
     /* v21.36 OB-1: ticked, the sheet shows the second observer's counts and interval rows */
     + '<div class="f obs2chk noprint"><label class="chk"><input type="checkbox" data-obs="' + i + '" data-field="obs2On"'
       + (o.obs2On ? ' checked' : '') + '> A second observer scored this observation</label></div>'
-    + '</div>';
+    + '</div>'
+    /* v25.64 (L7, M4) the observer also running the class; the second observer blind to what was expected */
+    + '<div class="obticks"><label class="chk"><input type="checkbox" data-obs="' + i + '" data-field="teach"' + (o.teach ? ' checked' : '') + '> The observer was also running the class</label>'
+    + (o.obs2On ? '<label class="chk"><input type="checkbox" data-obs="' + i + '" data-field="blind"' + (o.blind ? ' checked' : '') + '> The second observer did not know what the observation was expected to show</label>' : '') + '</div>';
 
   /* --- counts and the peer --- */
   h += '<h3 class="sub">What Was Counted</h3>';
@@ -2120,6 +2393,8 @@ function obsHTML(o, i, n){
   }
   h += '</tbody></table>';
   if(o.obs2On) h += ioaLine(o);
+  /* v25.64 (H3) observer 2's own file (from the Live Recorder on their device), lined up by its Start */
+  if(o.obs2On) h += '<p class="method noprint obs2f"><button type="button" class="obs2File" data-obs="' + i + '">Open observer 2\u2019s file</button> Their counts, interval marks and tap times go in the observer 2 columns; with tap times on both, block-by-block agreement is carried.</p>';
 
   /* --- the interval strip --- */
   if(ivN){
@@ -2354,6 +2629,7 @@ function planNote(){
       else if(ds.length) parts.push("Consent on file since " + fmtDate(cd) + " (Form IC-1); the observations are dated " + fmtDate(ds[0]) + (ds.length > 1 && ds[ds.length-1] !== ds[0] ? " to " + fmtDate(ds[ds.length-1]) : "") + ", after it.");
     }
   }
+  obPlan2564(parts);   /* v25.64 (M4, L7) */
   box.innerHTML = "<b>Observation plan</b>" + (parts.length
     ? '<ul class="rules">' + parts.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>"
     : "Three or more observations across contrasting activities, at least one unannounced. Nothing outstanding.");
@@ -2525,6 +2801,7 @@ function renderSummary(){
     + " (Guide, section 5).";
   $("#sumNote").innerHTML = key;
   renderBeh();   /* v23.20 (review F74, I38) */
+  renderZero(d); renderCov();   /* v25.64 (M2, H7) */
 
   const tally = (list, counts, denom, head) => {
     let t = '<thead><tr><th>' + head + '</th><th class="c" style="width:120px">Observations</th>'
@@ -2617,7 +2894,10 @@ function renderSummary(){
     if(okA.length) parts.push("Agreement with a second observer was recorded for " + okA.length + " of "
       + state.obs.length + " observation" + (state.obs.length===1?"":"s") + " (" + agreeRange(okA) + ").");
     /* v21.36 OB-1 */
-    if(d.computed) parts.push("Agreement was computed from a second observer\u2019s record in " + d.computed + " of "
+    const blk = d.rows.filter(r => r.ioa && r.ioa.block && r.ioa.block.p != null).length;   /* v25.64 (H3) */
+    if(d.computed && blk) parts.push("Agreement was computed from a second observer\u2019s record in " + d.computed + " of " + state.obs.length + " observation" + (state.obs.length===1?"":"s")
+      + " (block-by-block agreement from both observers\u2019 tap times in " + blk + " of them, the figure carried" + (blk < d.computed ? "; total count agreement, which does not show the observers counted the same events, in the others; interval-by-interval only where no second count was taken" : "") + ").");
+    else if(d.computed) parts.push("Agreement was computed from a second observer\u2019s record in " + d.computed + " of "
       + state.obs.length + " observation" + (state.obs.length===1?"":"s") + " (total count agreement, the measure the counts and rates rest on; interval-by-interval only where no second count was taken).");
     /* v22.99 (review F72) every figure below 80% is named, the stricter interval checks too; a typed agreement as before */
     okA.filter(a => a.v < 80 && !(d.rows[a.i].ioa && d.rows[a.i].ioa.agree !== null)).forEach(a => parts.push("Observation " + (a.i+1) + ": agreement " + a.v
@@ -2625,6 +2905,9 @@ function renderSummary(){
     d.rows.forEach(r => { const low = ioaLow(r.ioa); if(low.length) parts.push("Observation " + (r.i+1) + ": " + low.join(", ")
       + ", below the 80% long used as the minimum (Guide, section 1). Check the definition and the observers’ training before relying on this observation."); });
     d.agree.filter(a => !a.ok).forEach(a => parts.push("Observation " + (a.i+1) + ": the agreement “" + a.t + "” is not a percentage from 0 to 100."));
+    /* v25.64 (M1) interval kappa below .60, on its own line */
+    d.rows.forEach(r => { const k = r.ioa && r.ioa.kap; if(k && k.k !== null && k.k < .6) parts.push("Observation " + (r.i+1) + ": interval kappa " + k.k.toFixed(2)
+      + ", below .60 (Hartmann\u2019s suggestion, not a validated cut-off): much of the interval agreement is what chance alone would give."); });
     const lim = state.obs.filter(o => (o.notes||"").trim()).length;
     if(lim) parts.push(lim + " observation" + (lim===1?" carries":"s carry") + " a note limiting the record; keep it with any statement drawn from them.");
     /* v23.20 (review F74, I38) each target behavior's own figures, and its entries the figures cannot use */
@@ -2714,6 +2997,7 @@ function draft(){
   bits.push((BL.length > 1 ? "The first target behavior (" + behShort(BL[0], 60) + ") was observed in " : "The behavior was observed in ") + d.withAny.length + " of " + pl(n, "observation")
     + (d.totC ? ", with " + pl(d.totC, "occurrence") + " recorded" : "")
     + (d.totC && d.rateAll !== null ? " (" + d.rateAll + " per hour)" : "") + ".");
+  zeroWords(d).forEach(w => bits.push(w));   /* v25.64 (M2) */
   /* v21.17: the peer's count, where one was taken, beside the student's */
   if(d.pCounted) bits.push("A comparison peer observed over the same minutes had " + pl(d.totPC, "occurrence")
     + (d.peerRateAll !== null ? " (" + d.peerRateAll + " per hour)" : "") + ".");
@@ -2754,6 +3038,9 @@ function draft(){
       + (low.length ? " Agreement was below 80% in observation" + (low.length === 1 ? " " : "s ") + low.join(" and ") + ", so " + (low.length === 1 ? "its figures carry" : "their figures carry") + " that caution." : ""));
   }
   /* v23.20 (review F74) each other target behavior with anything entered, in sentences of its own */
+  /* v25.64 (L7) the observations made by an observer who was also running the class */
+  { const tch = state.obs.map((o, i) => o && o.teach ? i + 1 : 0).filter(Boolean);
+    if(tch.length) bits.push("The observer was also running the class during observation" + (tch.length === 1 ? " " + tch[0] : "s " + tch.slice(0, -1).join(", ") + " and " + tch[tch.length-1]) + ", which can change how the student is prompted and how the student behaves."); }
   if(XB) XB.slice(1).filter(x => x.counted || x.timed).forEach(x => bits.push(behSentence(x, n)));
   bits.push(BL.length > 1 ? "These observations describe when and where the behaviors occurred; they do not establish what maintains them."   /* v23.20 (review F74) */
     : "These observations describe when and where the behavior occurred; they do not establish what maintains it.");
@@ -2802,6 +3089,11 @@ document.addEventListener("change", e => {
     o.obs2On = !!t.checked;
     render();
     return;
+  }
+  /* v25.64 (L7, M4) the ticks */
+  if(t.dataset && (t.dataset.field === "teach" || t.dataset.field === "blind") && t.dataset.obs !== undefined){
+    const o = state.obs[+t.dataset.obs]; if(!o) return;
+    o[t.dataset.field] = !!t.checked; refreshLight(+t.dataset.obs); return;
   }
   /* v22.99 (review F71) the second observer's untouched rows count only once they are said to be scored */
   if(t.dataset && t.dataset.field === "iv2On" && t.dataset.obs !== undefined){
@@ -3007,7 +3299,7 @@ $("#fileIn").addEventListener("change", e => {
       state.obs = Array.isArray(d.obs) ? d.obs.filter(o => o && typeof o === "object").map(o => Object.assign(blank(), o)) : [];
       /* v23.20 (review F74, I38) an older file opens as one behavior; the others and their entries are read safely */
       state.meta.more = cleanMore(state.meta.more); state.meta.dur1 = state.meta.dur1 === "1" ? "1" : "";
-      state.obs.forEach(o => { o.mb = cleanMb(o.mb); ["durTot","durLong"].forEach(k => { if(o[k] == null || typeof o[k] === "object") o[k] = ""; else o[k] = String(o[k]); }); });
+      state.obs.forEach(o => { cleanTaps2564(o); o.mb = cleanMb(o.mb); ["durTot","durLong"].forEach(k => { if(o[k] == null || typeof o[k] === "object") o[k] = ""; else o[k] = String(o[k]); }); });
       $("#ivLen").value = state.cfg.ivLen;
       $("#ivMethod").value = state.cfg.ivMethod;
       $("#ivN").value = state.cfg.ivN;
@@ -3079,6 +3371,8 @@ async function loadSim(){
     question:"Does the behavior cluster in independent academic work, and is it discrepant from the class?",
     peerBy:"Classroom teacher, before the first observation",
     peerWhy:"Same grade and sex, no behavior plan, described as typical for this class",
+    /* v25.64 (M4) both observers checked against a scored example */
+    ck1Date:iso(20), ck1Ex:"This form\u2019s simulation", ck1Pct:"95", ck2Date:iso(15), ck2Ex:"A scored video", ck2Pct:"92",
     /* v23.20 (review F74, I38) a second target behavior, timed: out of seat */
     more:[{ label:"Out of seat (simulated) — leaving the assigned seat during seated work",
             def:"Both feet away from the seat area without permission. Timed from leaving the seat until seated again; a return of less than 5 s does not end the episode.", dur:"1" }]
@@ -3614,6 +3908,13 @@ render();
       putF(i, 'mb:' + k + ':c', String(m.taps.s.length)); putF(i, 'mb:' + k + ':p', R.peer ? String(m.taps.p.length) : '');
       if(m.dur){ const x = epSum(m.ep, R.acc); putF(i, 'mb:' + k + ':tot', mins(x.tot)); putF(i, 'mb:' + k + ':long', x.n ? mins(x.long) : ''); } });
     narrWrite(i, sample ? hhmm(W(S.wall)) : '', sample ? sampleLine() : '');   /* v21.32 OB-1: HH:MM for the time picker */
+    /* v25.64 (H3) every tap's time, in seconds from Start with paused time left out, the Start on the wall clock and the pauses, so
+       a second observer's record can be lined up block by block */
+    { const o = state.obs[i], sec = ms => Math.round(ms / 100) / 10;
+      if(o){ o.taps = { s: R.taps.s.map(x => sec(x.t)), p: R.peer ? R.taps.p.map(x => sec(x.t)) : [] };
+        if(R.d1) o.taps.ep = R.ep1.map(x => [sec(x.a), sec(x.b === null ? R.acc : x.b)]);
+        o.rec = { t0: R.wallStart, dur: sec(R.acc), pz: R.pauses.filter(x => x.to).map(x => [sec(x.at), sec(x.to - x.from)]) };
+        try{ refreshLight(i); }catch(e){} } }
     notesWrite(i, noteLines(sample, miss));
     return lost;
   }

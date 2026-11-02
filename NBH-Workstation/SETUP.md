@@ -9905,6 +9905,82 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.64: The forms against every JABA volume, part 1 (106 changes the BCBA marked Build)
+(the BCBA, 11/2: the review of every form against all 4,182 JABA articles, 1968 to 2026, marked on the review page)
+
+The first 106 of the 335 changes the BCBA approved, in 18 forms; the rest follow in v25.65 and v25.66.
+- **EA-1 and VI-1 (functional analysis, 21).** The published Roane et al. (2013) rules, with the form's magnitude floor
+  as a flag instead of a filter; no "Differentiated" heading and no hand-off to FS-1 under three sessions a condition;
+  the published trial-based and latency (Sunde et al., 2022) criteria; protective equipment recorded per session with a
+  warning when it may hide the function; an ongoing stop indicator; a fixed condition order; a 5-minute school session
+  with an extension rule; who runs the sessions; setting events per session; social avoidance and acquisition flags;
+  divided attention; the session language; an acceptability check. VI-1: descriptive data never stand in for an FA
+  without a check that can catch a wrong function; the FA format that answers each reason to defer; a basis for a
+  precursor.
+- **IA-1, IN-1 and SI-1 (interviews, 9).** Interviews add test conditions, never drop them (Fisher et al., 2016; Greer et
+  al., 2020); four IN-1 questions (most concerning behavior, what comes just before and in what order, what adults do to
+  calm the student, none); an interviewer checklist on both forms; SI-1's rules against suggestive questions, with
+  unprompted answers kept apart; a taught "stop" when a withdrawal sign is also a target behavior; the student's reasons
+  as testable statements for DA-1 and FS-1; IA-1 sends an escape hypothesis to DA-1 before EA-1 and offers the NRRS.
+- **DA-1, TB-1 and FS-1 (13).** DA-1 says what each consequence option does (the escape option stays, explained, the
+  BCBA, 11/2) and runs the paired-choice series as a full first step (Zangrillo et al., 2020); adult attention and peers
+  as task features; sessions long enough for latency. TB-1 records each cluster member apart during assessment, the
+  published cusp criteria and a basis for each precursor. FS-1 states multiple control and synthesized results on their
+  own, counts IA-1's group analyses once, lists DA-1 as a source and writes a check for every hypothesis that goes to
+  treatment untested.
+- **TI-1 (9).** The 80–89% band read by procedure, and near-perfect integrity while a schedule is thinned (Jones & St.
+  Peter, 2022); a feedback record with a fading rule; IOA coverage and an observer-drift check; kappa beside the code
+  percentages; the start of a plan held higher; antecedent and prompting errors; distractions; stronger reinforcement for
+  the alternative and video self-monitoring suggested when errors persist.
+- **MT-1 and OB-1 (9).** OB-1's agreement block by block from the time-stamped taps (10-second blocks), not total count;
+  MT-1 picks the method and interval from how long an episode lasts and prints that interval data can miss real effects;
+  IOA coverage and drift, kappa, a warning when observations are too short, observer training and blind second
+  observers, the reason for each timer pause, and whether the observer was also teaching.
+- **ABC-1 and SP-1 (10).** ABC-1 computes agreement from the two observers' files, prints how well descriptive data match
+  an FA (and keeps "ruled out" weaker than "ruled in"), and adds a structured descriptive mode and a later-consequence
+  tick. SP-1 corrects for testing many intervals at once (Holm), carries the right agreement figure and spreads the IOA
+  days, and suggests testing a pattern by changing the schedule.
+- **DD-1 (14).** The conservative dual-criterion check on every adjacent comparison (Fisher et al., 2003), with lines on
+  the graph when turned on; a comparison under 3 baseline or 5 treatment points marked provisional; the decision line no
+  longer asks for a review after an immediate drop that held; the analyst's own reading and a blind second reader; a
+  warning when the baseline already improves; PND demoted and a magnitude index added; consistency across repeated
+  conditions; multiple-baseline, alternating-conditions and changing-criterion layouts; control-chart flags by time
+  block; a walkthrough chapter on the dual-criterion lines.
+- **PR-1 and SA-1 (11).** PR-1's suggestion uses the last stated days against baseline with the structured check and the
+  80% and 90% benchmarks; its Guide prints the fading rule the code applies; the graph shows the days; a computed re-entry
+  rule. SA-1: a fitted trend for the no-change rule, mastery judged target by target as an option, a third baseline
+  probe when the first two differ or rise, and the mastery standard of 100% across 3 sessions (the BCBA, 11/2;
+  Richling et al., 2019: 100% kept the highest level in 11 of 12 evaluations); a saved program keeps its own level.
+- **TD-1 (15).** The consequence card no longer counts as reinforcement, so the checks for punishment or extinction
+  without reinforcement, and for an antecedent-only plan, can fire; extinction is never ticked by default; reinforcement
+  for compliance is an escape route, not a mismatch; a mismatched extinction or removal is a conflict; a model for
+  multiple control; a least-restrictive ladder in which a restrictive card is "Proposed" until a less restrictive step has
+  run at integrity and fallen short (its steps stay in the staff list, the BCBA, 11/2); the high-p rule split (it needs a
+  strong reinforcer); curriculum checked from data; the match printed for each component; DRO variants and a DRL aid; no
+  fixed 3:1 interspersal; an early integrity check of the consequence steps.
+- **GB-1 (7).** An annual reduction goal judged under the final plan, in every named setting; a replacement objective
+  says what it gets the student and that it is easier than the problem behavior; the DRL aid; the 100% mastery standard
+  with a per-target option and corrected citations; generalization and maintenance on reduction objectives; the
+  percentage change and a peer comparison; a "Replacements only" filter on the bank.
+
+Also in this release:
+- **TD-1, optional steps (the BCBA, 11/2).** Steps that reinforce problem behavior on purpose are allowed and explained.
+  The lean baselines of Fisher et al. (2018, two cards) and Mitteer et al. (2026) are back as steps marked "OPTION:",
+  left off a card unless "Include the optional step" is ticked.
+- **GC-1, the Good Behavior Game counts points by default** (the BCBA, 11/2); the fouls version is labelled response
+  cost and asks for the BCBA's sign-off and a reason.
+- **Feeding (the BCBA, 11/2).** School teams may run escape extinction at meals as a marked step with consent; 22 such
+  steps in 18 TD-1 cards had no RESTRICTIVE mark and now do. A bite only offered at the lips stays unmarked.
+- **DD-1's decision line** prints the longest run of days at the aim (it always printed 0).
+- **No participant names:** three reading summaries and one TD-1 guide paragraph named a study participant.
+
+Saved files from before open as they did; new fields are optional, and a saved level, default or answer is kept.
+To set up: upload the whole folder as usual (the 18 forms above, GC-1, nbh-td1-bank.js, nbh-gb1-bank.js,
+nbh-readings.js).
+Tested: the ten parcel tests (`qa/v2564-*-test.js`), `qa/v2564-optstep-test.js`, `qa/gc1-gbg-points-test.js`,
+`qa/dd1-run-test.js`, each form's own tests before and after, and the release set.
+
+
 ### v25.63: The workstation's new top bar
 (the BCBA, 11/1: the Compact Workspace header chosen from the three mockups)
 

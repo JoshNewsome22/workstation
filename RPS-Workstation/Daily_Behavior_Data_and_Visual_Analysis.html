@@ -1582,6 +1582,35 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
   body.dd-blank-on #dataTable td.col-day .po{display:block;text-align:center}
   body.dd-blank-on #dataTable .col-obs input{border:0;background:transparent}}
 </style>
+<style id="dd1-v2564-css">
+/* v25.64 (DATA review H1, H3, M1, M3, M4, M5, M8, L1, L2) the comparison card's aids, the readings, the design summary,
+   the stacked view and the control-chart flags */
+.metric-grid .dd-tgroup{grid-column:1/-1;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin:4px 0 -4px}
+.dd-prov{margin:8px 0 0;padding:6px 10px;border:1px solid #D9A441;border-left:4px solid #B7791F;background:#FFF8E6;font-size:13px;font-weight:600;color:#6B4A0E}
+.dd-prov-dim{opacity:.5}
+.dd-cdc{margin:8px 0 0;font-size:13px}
+.dd-cdc[data-cdc="met"] b:first-child{color:#1F6B4A}
+.dd-basetrend{color:#7A3E0E}
+.dd-read{margin-top:10px;padding:8px 10px;border:1px dashed var(--rule);border-radius:3px;font-size:13px}
+.dd-read-row{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.dd-read-row label{display:inline-flex;gap:5px;align-items:center;color:var(--ink-soft)}
+.dd-read-row input[type=text]{width:70px}
+.dd-read select{padding:2px 6px;width:auto;min-width:120px;flex:0 0 auto}
+.dd-read input[type=date]{width:auto}
+.dd-step input[type=number]{width:90px}
+.dd-read details{margin-top:6px}
+.dd-read summary{cursor:pointer;color:var(--ink-soft)}
+.dd-agree{margin:6px 0 0;font-size:12.5px}
+.dd-agree.dd-unc{color:#8a2a1a;font-weight:600}
+.dd-rd-paper{display:none}
+.dd-design table,.dd-step table{margin-top:6px}
+.dd-stack .graph{min-width:660px}
+.dd-spc{color:#B42318;font-weight:700}
+.dd-cdc-key{white-space:nowrap}
+@media print{.dd-read select,.dd-read input,.dd-read button,.dd-read summary,.dd-axkeep{display:none!important}
+  .dd-rd-paper{display:inline}.dd-read details:not([open]){display:none}
+  .dd-read{break-inside:avoid}}
+</style>
 <script id="dd123-link">
 document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("[data-dd-ioa-open]");if(!a)return;e.preventDefault();try{showTab("data");const R=sortedRows();const r=R[R.length-1];if(r)ddTagOpen(r.id);}catch(x){}});
 </script>
@@ -1678,7 +1707,7 @@ document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest
             <th style="width:14%">Direction</th>
             <th style="width:10%">Aim or mastery criterion</th>
             <th style="width:9%">Consecutive days</th>
-            <th style="width:9%" title="A convention: when this many school days in the current condition have passed without the level moving the right way, the graph flags the behavior for review">Review after (days)</th>
+            <th style="width:9%" title="A convention: when this many school days in the current condition have passed, the decision line flags review if the condition shows no change from the one before it (the CDC, or the level when there are too few days), its trend has turned the wrong way, or its last days are worse than its first; never while the behavior is at its aim">Review after (days)</th>
             <th style="width:16%">Pairs with</th>
           </tr>
         </thead>
@@ -1964,6 +1993,12 @@ document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest
         <label class="iv-only hidden"><input type="checkbox" id="c_heat" checked> Show interval heat map</label>
         <label><input type="checkbox" id="c_key" checked> Include a key for readers</label>
         <label title="PND, PEM, Tau and NAP are research-synthesis statistics; on screen always, on paper only when ticked"><input type="checkbox" id="c_es"> Effect sizes on paper</label>
+        <!-- v25.64 (DATA review H1, L1, M5, L3) -->
+        <label title="The conservative dual criterion: the earlier condition's mean and least-squares trend lines, each moved 0.25 SD toward improvement, drawn dashed in the next condition (Fisher et al., 2003)"><input type="checkbox" id="c_cdc"> Show CDC lines</label>
+        <label title="Each condition named on the days is its own data path, with no phase lines: for conditions alternated day by day"><input type="checkbox" id="c_alt"> Alternating conditions</label>
+        <label title="The behaviors one above another on one date axis, each with its own phase line (a multiple baseline)"><input type="checkbox" id="c_stack"> Stacked view</label>
+        <label title="Behaviors measured in the same unit share one vertical scale, so the size of a change reads the same on each graph"><input type="checkbox" id="c_same"> Same scale for the same unit</label>
+        <label title="The zero line sits a little above the x-axis, so days at 0 are not hidden on the axis line"><input type="checkbox" id="c_zero"> Lift zero off the axis</label>
         <label class="field" style="margin-left:auto"><span>Page</span>
           <select id="p_orient"><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select>
         </label>
@@ -2084,6 +2119,8 @@ function blankState(){
       showKey:true,colW:172,orient:"landscape",
       /* v21.21: phase shading, the reduction-target y-axis rule and the trend labels, saved with the record */
       shade:"phase",yRule:"x1.5",trendLabels:false,
+      /* v25.64 (DATA review L3) a new record lifts zero off the axis; a file saved before opens as it was saved (openFile) */
+      zeroLift:true,
       /* live recording: its planned length, alerts, keys and prompt levels, saved with the record */
       live:liveDefaults()}
   };
@@ -2460,6 +2497,70 @@ function compare(A,B,beh){
 }
 
 /* ---------------------------------------------------------------
+   v25.64 (DATA review H1, H3, M3) the conservative dual criterion (CDC), the shortest phases worth judging, and the
+   log response ratio
+---------------------------------------------------------------- */
+/* Fisher, Kelley and Lomas (2003), Table 1: for 5 to 23 points in the second condition, how many must lie beyond both
+   criterion lines. Past 23, the one-tailed binomial test at .05 the table was built from (a little stricter than the table). */
+const DD_CDC_NEED={5:5,6:6,7:6,8:7,9:8,10:8,11:9,12:9,13:10,14:11,15:12,16:12,17:12,18:13,19:13,20:14,21:14,22:15,23:15};
+function ddBinomNeed(n){const l2=n*Math.log(2);let lc=0,tail=0,need=n+1;
+  for(let k=n;k>=0;k--){if(k<n)lc+=Math.log((k+1)/(n-k));tail+=Math.exp(lc-l2);if(tail<=0.05+1e-12)need=k;else break;}return need;}
+function ddCdcNeed(n){return n<5?null:(DD_CDC_NEED[n]||ddBinomNeed(n));}
+/* (H3) too few points to judge a change: under 3 in the first condition or under 5 in the second (Lanovaz et al., 2017) */
+const DD_MIN_A=3,DD_MIN_B=5;
+function ddProvisional(A,B){return !!A&&!!B&&(A.n<DD_MIN_A||B.n<DD_MIN_B);}
+/* (H1) the CDC for A then B: A's mean line and A's least-squares trend line (least squares whatever the graph's trend
+   setting, as Fisher et al. drew them), carried into B and each moved 0.25 SD of A toward improvement; the B points beyond
+   both lines are counted and set against the table. toward "worsen" reads the other way (a return to the earlier
+   condition, for the design summary). */
+function ddCdc(A,B,beh,toward){
+  if(!A||!B||!A.n||!B.n) return null;
+  const dec=(beh.direction||"decrease")==="decrease", down=toward==="worsen"?!dec:dec;
+  const o={nA:A.n,nB:B.n,down,provisional:ddProvisional(A,B),ok:false};
+  if(A.n<2){o.why=`it needs at least 2 points in ${A.name}`;return o;}
+  const t=ols(A.pts), s=sd(A.vals)||0, sh=0.25*s*(down?-1:1);
+  o.mean=A.mean+sh; o.slope=t.slope; o.intercept=t.intercept+sh; o.sd=s; o.shift=Math.abs(sh);
+  o.line=x=>o.slope*x+o.intercept;
+  const past=p=>down?(p.y<o.mean-1e-9&&p.y<o.line(p.x)-1e-9):(p.y>o.mean+1e-9&&p.y>o.line(p.x)+1e-9);
+  o.beyond=B.pts.filter(past).length; o.need=ddCdcNeed(B.n);
+  if(o.need===null){o.why=`the table starts at 5 points in ${B.name}`;return o;}
+  o.met=o.beyond>=o.need; o.ok=true; return o;
+}
+function ddCdcHtml(c,A,B){
+  if(!c) return "";
+  const res=!c.ok?`not judged: ${esc(c.why)} (${B.n} now)`
+    :`${c.beyond} of ${c.nB} ${esc(B.name)} point${c.nB===1?"":"s"} beyond both lines (${c.need} needed${c.nB>23?"; past 23 points, the binomial test the table comes from":""}): ${c.met?`a change beyond what ${esc(A.name)} predicts`:`not beyond what ${esc(A.name)} predicts`}`;
+  return `<p class="dd-cdc${c.provisional?" dd-prov-dim":""}" data-cdc="${c.ok?(c.met?"met":"not"):"none"}"><b>CDC</b> (conservative dual criterion: ${esc(A.name)}’s mean line and least-squares trend line carried into ${esc(B.name)}, each moved 0.25 SD toward improvement): ${res}. A structured aid; read it with the graph. It misses a delayed effect, such as a rise before a fall, and it says nothing about the size of the change (Fisher et al., 2003).<\/p>`;
+}
+/* (M3) the log response ratio: ln(B mean / A mean); exp(LRR) - 1 is the percent change. For counts, rates, durations and
+   percentages, where 0 means none; not computed when a mean is 0 */
+function ddLrr(A,B,beh){const m=beh.measure;
+  if(!(m==="count"||m==="rate"||m==="duration"||DD_PCT.indexOf(m)>-1)) return {why:"not computed for this measure"};
+  if(!(A.mean>0)||!(B.mean>0)) return {why:"not computed: a mean of 0"};
+  const l=Math.log(B.mean/A.mean);return {lrr:l,pct:(Math.exp(l)-1)*100};}
+/* (L1) alternating conditions: the sheet's conditions with the same name are one data path, in the order they first appear */
+var ddAltNow=false;
+function ddAltOn(){return S.settings.alt===true;}
+function ddAltPaths(conds){const P=[];conds.forEach(c=>{const k=String(c.name||"").trim().toLowerCase();let p=P.find(x=>x.key===k);
+    if(!p){p={key:k,name:c.name,raw:c.raw,start:c.start,rowIdx:[]};P.push(p);}p.rowIdx=p.rowIdx.concat(c.rowIdx);});
+  P.forEach(p=>p.rowIdx.sort((a,b)=>a-b));return P;}
+/* (M5) a behavior's own plan start (a multiple baseline): the sheet's first full phase change is replaced, for this behavior,
+   by one on that day; later full phase changes on the sheet still apply when they come after it */
+function ddPlanDate(beh){const d=String(beh&&beh.planStart||"").trim();return /^\d{4}-\d{2}-\d{2}$/.test(d)?d:"";}
+function ddBehConds(beh,conds,rows){const d=ddPlanDate(beh);if(!d||!conds.length||!rows.length)return conds;
+  let i=rows.findIndex(r=>r.date&&r.date>=d);if(i<0)i=rows.length;   /* a plan that has not started yet: every day is baseline */
+  const second=conds[1], name=second?second.name:"Plan", raw=second?second.raw:"Plan";
+  const later=conds.slice(2).filter(c=>c.start>i);const end=later.length?later[0].start:rows.length;
+  const out=[{name:conds[0].name,raw:conds[0].raw,start:0,rowIdx:[]},{name,raw,start:i,rowIdx:[],own:true}];
+  for(let k=0;k<end;k++)out[k<i?0:1].rowIdx.push(k);
+  return out.filter(c=>c.rowIdx.length).concat(later);}
+/* (L2) a changing criterion: one aim per condition, kept by the date the condition starts on; a condition without one
+   uses the behavior's aim */
+function ddCondKey(a){const r=sortedRows()[(a.rowIdx||[])[0]];return r&&r.date?r.date:"";}
+function ddAimFor(a,beh){if(beh&&beh.stepAims===true&&beh.aims&&a&&a.rowIdx){const v=num(beh.aims[ddCondKey(a)]);if(v!==null)return v;}return num(beh&&beh.aim);}
+function ddHasAim(beh,analyses){return num(beh.aim)!==null||(beh.stepAims===true&&(analyses||[]).some(a=>a.n&&ddAimFor(a,beh)!==null));}
+
+/* ---------------------------------------------------------------
    Chart
 ---------------------------------------------------------------- */
 function niceStep(raw){
@@ -2562,6 +2663,8 @@ function ddPlotEnd(rows){
    sections between them and their shading, and the labels over them. Condition names sit in the upper band,
    centered over their conditions; event labels in the band just above the plot, centered over their sections. */
 function ddFrame(rows,conds,o){
+  /* v25.64 (DATA review L1) alternating conditions: no phase lines; one label over the plot names the conditions */
+  if(ddAltNow&&conds.length){const nm=conds.map(c=>c.name).join(" · ");conds=[{name:nm,raw:nm+" (alternating)",rowIdx:[0]}];}
   const xEnd=ddPlotEnd(rows), iw=o.W-o.l-o.r, left=o.l, right=o.l+iw;
   const X=i=>left+(xEnd<=0?iw/2:i*iw/xEnd);
   const full=[];
@@ -2589,11 +2692,12 @@ function ddFrame(rows,conds,o){
     for(let k=0;k<xs.length-1;k++) if(xs[k+1]-xs[k]>0.5) secs.push([xs[k],xs[k+1]]);
     if(secs.length>1) used=(S.settings.shade==="section"&&marks.length)?"section":"phase"; else secs=[];
   }
-  const shade=secs.map((s,k)=>k%2?"":`<rect class="dd-shade" x="${s[0].toFixed(1)}" y="${top}" width="${(s[1]-s[0]).toFixed(1)}" height="${o.ih}" fill="${DD_TINT}"/>`).join("");
+  const z=o.z||0;   /* v25.64 (DATA review L3) the x-axis drawn this far below zero */
+  const shade=secs.map((s,k)=>k%2?"":`<rect class="dd-shade" x="${s[0].toFixed(1)}" y="${top}" width="${(s[1]-s[0]).toFixed(1)}" height="${o.ih+z}" fill="${DD_TINT}"/>`).join("");
   const lineTop=L2?b2-h2-3:top-14;
-  const fullLines=full.map(x=>`<line class="dd-full" x1="${x.toFixed(1)}" y1="${lineTop.toFixed(1)}" x2="${x.toFixed(1)}" y2="${top+o.ih}" stroke="#16242E" stroke-width="1.6"/>`).join("");
-  const condLines=marks.map(m=>{ const x=X(m.x).toFixed(1); return `<line class="dd-cond" x1="${x}" y1="${top-4}" x2="${x}" y2="${top+o.ih}" stroke="#9A6208" stroke-width="1.3" stroke-dasharray="5 4"/>`; }).join("");
-  return {X,xEnd,iw,left,right,top,full,marks,shade,fullLines,condLines,labels,notes,used};
+  const fullLines=full.map(x=>`<line class="dd-full" x1="${x.toFixed(1)}" y1="${lineTop.toFixed(1)}" x2="${x.toFixed(1)}" y2="${top+o.ih+z}" stroke="#16242E" stroke-width="1.6"/>`).join("");
+  const condLines=marks.map(m=>{ const x=X(m.x).toFixed(1); return `<line class="dd-cond" x1="${x}" y1="${top-4}" x2="${x}" y2="${top+o.ih+z}" stroke="#9A6208" stroke-width="1.3" stroke-dasharray="5 4"/>`; }).join("");
+  return {X,xEnd,iw,left,right,top,full,marks,shade,fullLines,condLines,labels,notes,used,conds};
 }
 /* (Y) The top of the vertical axis and its step. Percentages run from 0 to 100. A y-axis maximum typed for the
    behavior is used as it is, with the round step that divides it where there is one. Otherwise the top is the
@@ -2646,8 +2750,15 @@ function ddAxis(beh,analyses,rows){
     T=m*1.12;
   }
   T=count?Math.max(T,5):(T>0?T:1);
-  return Object.assign(ddRound(T,count),{rule:"auto"});
+  let res=Object.assign(ddRound(T,count),{rule:"auto"});
+  /* v25.64 (DATA review L3) Same scale for the same unit: the tallest automatic axis among the behaviors with this
+     measurement, so a change of one size looks one size on every graph (Kennedy, 1989) */
+  if(S.settings.sameAxis===true&&!ddAxisIn){ddAxisIn=true;
+    try{S.behaviors.forEach(o=>{if(o===beh||o.measure!==beh.measure||(num(o.yMax)!==null&&num(o.yMax)>0))return;const r=ddAxis(o,[],rows);if(r.top>res.top+1e-9)res=Object.assign({},r);});}finally{ddAxisIn=false;}
+    res.same=true;}
+  return res;
 }
+var ddAxisIn=false;
 /* a tick's value with as many decimals as its step has */
 function ddTick(v,step){
   const d=(String(+(+step).toPrecision(6)).split(".")[1]||"").length;
@@ -2696,7 +2807,9 @@ function ddLegendExtra(d){
   return (d.crit?`<span><i style="border-color:#1F6B4A;border-top-style:dashed"><\/i>Criterion<\/span>`:"")
     +(d.full?`<span><i style="border-color:#16242E;border-top-width:3px"><\/i>Full phase change<\/span>`:"")
     +(d.cond?`<span><i style="border-color:#9A6208;border-top-style:dashed"><\/i>Conditional change<\/span>`:"")
-    +(d.shade?`<span><span class="swatch dd-tint" style="background:${DD_TINT}"><\/span>${d.shade==="section"?"Gray and white bands: the sections between changes":"Gray and white bands: the conditions"}<\/span>`:"");
+    +(d.shade?`<span><span class="swatch dd-tint" style="background:${DD_TINT}"><\/span>${d.shade==="section"?"Gray and white bands: the sections between changes":"Gray and white bands: the conditions"}<\/span>`:"")
+    /* v25.64 (DATA review H1) */
+    +(d.cdc?`<span class="dd-cdc-key"><i style="border-color:#6B3FA0;border-top-style:dashed"><\/i>CDC lines: the condition before’s mean (dashes) and trend (dots), each moved 0.25 SD<\/span>`:"");
 }
 /* (L) the labels too long for their sections, given in full under the graph */
 function ddNoteHtml(notes){
@@ -2728,7 +2841,10 @@ function buildChart(beh,rows,conds,analyses){
   ddNotes=[]; ddDrawn={};
   if(!rows.length||!rows.some(r=>plotValue(r,beh)!==null)) return "";
   const W=980, ih=306, MB=88, ML=70, MR=26;
-  const F=ddFrame(rows,conds,{W,l:ML,r:MR,ih,minTop:46});
+  /* v25.64 (DATA review L3) Lift zero off the axis: the x-axis is drawn 7 units under the zero line, so a day at 0 sits
+     above it and is not hidden on it (Deochand et al., 2015) */
+  const Z=S.settings.zeroLift===true?7:0;
+  const F=ddFrame(rows,conds,{W,l:ML,r:MR,ih,minTop:46,z:Z});
   const M={t:F.top,r:MR,b:MB,l:ML}, iw=F.iw, H=M.t+ih+MB, X=F.X, xEnd=F.xEnd;
   const ax=ddAxis(beh,analyses,rows), top=ax.top, step=ax.step;
   const Y=v=>M.t+ih-(v/top)*ih;
@@ -2740,13 +2856,24 @@ function buildChart(beh,rows,conds,analyses){
   // y gridlines + labels
   for(let k=0;k*step<=top*(1+1e-9);k++){
     const v=k*step, y=Y(v);
-    g.push(`<line x1="${M.l}" y1="${y.toFixed(1)}" x2="${M.l+iw}" y2="${y.toFixed(1)}" stroke="${k===0?"#16242E":"#DCE3E7"}" stroke-width="${k===0?1.2:1}"/>`);
+    g.push(`<line x1="${M.l}" y1="${y.toFixed(1)}" x2="${M.l+iw}" y2="${y.toFixed(1)}" stroke="${k===0&&!Z?"#16242E":"#DCE3E7"}" stroke-width="${k===0&&!Z?1.2:1}"/>`);
     g.push(`<text x="${M.l-9}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="12" fill="#4A5C68">${ddTick(v,step)}<\/text>`);
   }
+  if(Z) g.push(`<line class="dd-xaxis" x1="${M.l}" y1="${M.t+ih+Z}" x2="${M.l+iw}" y2="${M.t+ih+Z}" stroke="#16242E" stroke-width="1.2"/>`);
   // aim or mastery criterion; its label is set over the data, at the end, with a white edge
   const aimV=num(beh.aim);
   let crit=false, critTxt="";
-  if(aimV!==null && aimV<=top){
+  /* v25.64 (DATA review L2) a changing criterion: each condition's own aim, drawn as a stepped line */
+  const stepA=beh.stepAims===true&&!ddAltNow?F.conds.map(c=>ddAimFor(c,beh)):null;
+  if(stepA&&stepA.some(v=>v!==null)){
+    const cb=[M.l,...F.full,M.l+iw], P=[];
+    stepA.forEach((v,k)=>{ if(k>=cb.length-1||v===null) return; const y=Y(Math.min(v,top)); P.push([cb[k],y],[cb[k+1],y]); });
+    if(P.length){ crit=true;
+      g.push(`<polyline class="dd-stepcrit" points="${P.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}" fill="none" stroke="#1F6B4A" stroke-width="1.4" stroke-dasharray="10 5" opacity="0.85"/>`);
+      for(let k=1;k<P.length;k++) ob.segs.push([P[k-1][0],P[k-1][1],P[k][0],P[k][1]]);
+      critTxt=`<text x="${M.l+4}" y="${(P[0][1]-5).toFixed(1)}" font-size="10.5" fill="#1F6B4A" font-weight="700" ${halo}>Criterion by condition<\/text>`; }
+  }
+  else if(aimV!==null && aimV<=top){
     const y=Y(aimV); crit=true;
     g.push(`<line x1="${M.l}" y1="${y.toFixed(1)}" x2="${M.l+iw}" y2="${y.toFixed(1)}" stroke="#1F6B4A" stroke-width="1.4" stroke-dasharray="10 5" opacity="0.85"/>`);
     critTxt=`<text x="${M.l+4}" y="${(y-5).toFixed(1)}" font-size="10.5" fill="#1F6B4A" font-weight="700" ${halo}>Criterion ${r1(aimV)}<\/text>`;
@@ -2757,10 +2884,10 @@ function buildChart(beh,rows,conds,analyses){
   const everyX=Math.ceil((xEnd+1)/26);
   for(let i=0;i<=xEnd;i+=everyX){
     const x=X(i), r=rows[i]||{};
-    g.push(`<line x1="${x.toFixed(1)}" y1="${M.t+ih}" x2="${x.toFixed(1)}" y2="${M.t+ih+4}" stroke="#8C9AA4"/>`);
-    g.push(`<text x="${x.toFixed(1)}" y="${M.t+ih+8}" font-size="11" fill="#4A5C68" text-anchor="end" transform="rotate(-60 ${x.toFixed(1)} ${M.t+ih+8})">${esc(fmtDate(r.date)||("S"+(i+1)))}<\/text>`);
+    g.push(`<line x1="${x.toFixed(1)}" y1="${M.t+ih+Z}" x2="${x.toFixed(1)}" y2="${M.t+ih+Z+4}" stroke="#8C9AA4"/>`);
+    g.push(`<text x="${x.toFixed(1)}" y="${M.t+ih+Z+8}" font-size="11" fill="#4A5C68" text-anchor="end" transform="rotate(-60 ${x.toFixed(1)} ${M.t+ih+Z+8})">${esc(fmtDate(r.date)||("S"+(i+1)))}<\/text>`);
   }
-  g.push(`<line x1="${M.l}" y1="${M.t}" x2="${M.l}" y2="${M.t+ih}" stroke="#16242E" stroke-width="1.2"/>`);
+  g.push(`<line x1="${M.l}" y1="${M.t}" x2="${M.l}" y2="${M.t+ih+Z}" stroke="#16242E" stroke-width="1.2"/>`);
   g.push(`<text x="${18}" y="${M.t+ih/2}" font-size="12.5" fill="#16242E" text-anchor="middle" transform="rotate(-90 18 ${M.t+ih/2})">${esc(MEASURES[beh.measure].axis)}<\/text>`);
   g.push(`<text x="${M.l+iw/2}" y="${H-8}" font-size="12.5" fill="#16242E" text-anchor="middle">Observation days<\/text>`);
   // phase lines and the labels over the plot
@@ -2770,12 +2897,20 @@ function buildChart(beh,rows,conds,analyses){
 
   const ends=[];
   let trend=false, level=false, env=false, clipped=0;
-  analyses.forEach(a=>{
+  /* v25.64 (DATA review L1) alternating conditions: each condition is one path across the days it ran, told apart by its
+     marker and its line; the envelope, level and trend lines are left off (they would lie over one another) */
+  const alt=ddAltNow, altMk=DD_ALT_MK, altDash=DD_ALT_DASH;
+  const mark=(ai,cx,cy,fill,title)=>{const k=altMk[ai%altMk.length];
+    if(!alt||k==="circle") return `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4" fill="${fill}" stroke="#fff" stroke-width="1">${title}<\/circle>`;
+    if(k==="square") return `<rect class="dd-altpt" x="${(cx-4).toFixed(1)}" y="${(cy-4).toFixed(1)}" width="8" height="8" fill="${fill}" stroke="#fff" stroke-width="1">${title}<\/rect>`;
+    const p=k==="triangle"?[[cx,cy-5],[cx+4.6,cy+3.5],[cx-4.6,cy+3.5]]:[[cx,cy-5],[cx+5,cy],[cx,cy+5],[cx-5,cy]];
+    return `<polygon class="dd-altpt" points="${p.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join(" ")}" fill="${fill}" stroke="#fff" stroke-width="1">${title}<\/polygon>`;};
+  analyses.forEach((a,ai)=>{
     if(!a.n) return;
     const x0=X(a.pts[0].x), x1=X(a.pts[a.pts.length-1].x);
     const pad = a.pts.length>1 ? 0 : 8;
     // envelope
-    if(S.settings.showEnv){
+    if(S.settings.showEnv&&!alt){
       env=true;
       const yHi=Y(Math.min(a.envHigh,top)), yLo=Y(Math.max(a.envLow,0));
       g.push(`<rect x="${(x0-pad).toFixed(1)}" y="${yHi.toFixed(1)}" width="${(x1-x0+pad*2).toFixed(1)}" height="${Math.max(0,yLo-yHi).toFixed(1)}" fill="${esc(beh.color)}" opacity="0.08"/>`);
@@ -2783,7 +2918,7 @@ function buildChart(beh,rows,conds,analyses){
       g.push(`<line x1="${(x0-pad).toFixed(1)}" y1="${yLo.toFixed(1)}" x2="${(x1+pad).toFixed(1)}" y2="${yLo.toFixed(1)}" stroke="${esc(beh.color)}" stroke-width="1" stroke-dasharray="2 3" opacity="0.65"/>`);
     }
     // level line; its value goes at the line's right end once everything else is drawn (P1)
-    if(S.settings.showLevel && a.center!==null){
+    if(S.settings.showLevel && a.center!==null && !alt){
       level=true;
       const y=Y(Math.min(a.center,top));
       g.push(`<line x1="${(x0-pad).toFixed(1)}" y1="${y.toFixed(1)}" x2="${(x1+pad).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#16242E" stroke-width="1.3" stroke-dasharray="7 4"/>`);
@@ -2791,7 +2926,7 @@ function buildChart(beh,rows,conds,analyses){
       ends.push({kind:"level",a,y,xa:x0-pad,xb:x1+pad});
     }
     // trend line
-    if(S.settings.showTrend && a.trend && a.n>=2){
+    if(S.settings.showTrend && a.trend && a.n>=2 && !alt){
       trend=true;
       const cl=v=>Math.max(0,Math.min(top,v));
       const ya=Y(cl(a.trend.slope*a.pts[0].x+a.trend.intercept)), yb=Y(cl(a.trend.slope*a.pts[a.pts.length-1].x+a.trend.intercept));
@@ -2803,14 +2938,15 @@ function buildChart(beh,rows,conds,analyses){
     let seg=[];
     const flush=()=>{
       if(seg.length>1){
-        g.push(`<polyline points="${seg.map(p=>X(p.x).toFixed(1)+","+Y(Math.min(p.y,top)).toFixed(1)).join(" ")}" fill="none" stroke="${esc(beh.color)}" stroke-width="2"/>`);
+        const dash=alt&&altDash[ai%altDash.length]?` stroke-dasharray="${altDash[ai%altDash.length]}"`:"";
+        g.push(`<polyline points="${seg.map(p=>X(p.x).toFixed(1)+","+Y(Math.min(p.y,top)).toFixed(1)).join(" ")}" fill="none" stroke="${esc(beh.color)}" stroke-width="2"${dash}/>`);
         for(let k=1;k<seg.length;k++) ob.segs.push([X(seg[k-1].x),Y(Math.min(seg[k-1].y,top)),X(seg[k].x),Y(Math.min(seg[k].y,top))]);
       }
       seg=[];
     };
     let expect=null;
     a.pts.forEach(p=>{
-      if(expect!==null && p.x!==expect) flush();
+      if(expect!==null && p.x!==expect && !alt) flush();
       seg.push(p); expect=p.x+1;
     });
     flush();
@@ -2819,7 +2955,7 @@ function buildChart(beh,rows,conds,analyses){
     a.pts.forEach(p=>{
       if(p.y>top) clipped++;
       const cx=X(p.x), cy=Y(Math.min(p.y,top));
-      g.push(`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4" fill="${esc(beh.color)}" stroke="#fff" stroke-width="1"><title>${esc(fmtDate(p.date))}: ${r1(p.y)}<\/title><\/circle>`);
+      g.push(mark(ai,cx,cy,esc(beh.color),`<title>${alt?esc(a.name)+", ":""}${esc(fmtDate(p.date))}: ${r1(p.y)}<\/title>`));
       ob.boxes.push({x0:cx-5,y0:cy-5,x1:cx+5,y1:cy+5});
       if(S.settings.showLabels){
         g.push(`<text x="${cx.toFixed(1)}" y="${(cy-9).toFixed(1)}" font-size="10" fill="#16242E" text-anchor="middle">${r1(p.y)}<\/text>`);
@@ -2828,6 +2964,18 @@ function buildChart(beh,rows,conds,analyses){
     });
   });
 
+  /* v25.64 (DATA review H1) Show CDC lines: in each condition, the condition before it's mean line and least-squares trend
+     line, each moved 0.25 SD toward improvement, dashed; a point beyond both counts toward the CDC on the card */
+  let cdcL=false;
+  if(S.settings.showCdc===true&&!alt) for(let i=1;i<analyses.length;i++){
+    const A=analyses[i-1], B=analyses[i]; if(!A.n||!B.n) continue;
+    const c=ddCdc(A,B,beh); if(!c||c.mean===undefined) continue;
+    const xa=B.pts[0].x, xb=B.pts[B.pts.length-1].x, pd=B.pts.length>1?0:8, cl=v=>Math.max(0,Math.min(top,v));
+    const X0=X(xa)-pd, X1=X(xb)+pd, ym=Y(cl(c.mean)), ya=Y(cl(c.line(xa))), yb=Y(cl(c.line(xb)));
+    g.push(`<line class="dd-cdcl" data-cdcl="mean" x1="${X0.toFixed(1)}" y1="${ym.toFixed(1)}" x2="${X1.toFixed(1)}" y2="${ym.toFixed(1)}" stroke="#6B3FA0" stroke-width="1.4" stroke-dasharray="4 3"/>`);
+    g.push(`<line class="dd-cdcl" data-cdcl="trend" x1="${X0.toFixed(1)}" y1="${ya.toFixed(1)}" x2="${X1.toFixed(1)}" y2="${yb.toFixed(1)}" stroke="#6B3FA0" stroke-width="1.4" stroke-dasharray="1.5 2.5"/>`);
+    ob.segs.push([X0,ym,X1,ym],[X0,ya,X1,yb]); cdcL=true;
+  }
   // conditional change lines, over the data, and the criterion's label
   g.push(F.condLines,critTxt);
   // (P1) each level line's value at its right end; (P2) each trend's direction at the end of its line, when asked for
@@ -2844,7 +2992,7 @@ function buildChart(beh,rows,conds,analyses){
     g.push(`<text class="dd-trend" data-line="${e.x0.toFixed(1)} ${e.ya.toFixed(1)} ${e.x1.toFixed(1)} ${e.yb.toFixed(1)}"x="${c.x.toFixed(1)}" y="${c.y.toFixed(1)}" font-size="10.5" font-weight="700" fill="${esc(beh.color)}" text-anchor="${c.anchor}" ${halo}>${esc(t)}<\/text>`);
   });
   ddNotes=F.notes;
-  ddDrawn={trend,level,env,crit,full:F.full.length>0,cond:F.marks.length>0,shade:F.used,clipped,top,rule:ax.rule};
+  ddDrawn={trend,level,env,crit,full:F.full.length>0,cond:F.marks.length>0,shade:F.used,clipped,top,rule:ax.rule,cdc:cdcL,alt,same:!!ax.same,zero:Z>0};
   return `<svg class="graph" viewBox="0 0 ${W} ${H}" data-plot="${M.l} ${M.t} ${iw} ${ih}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Line graph of ${esc(beh.name)}">${g.join("")}<\/svg>`;
 }
 
@@ -2886,7 +3034,7 @@ function renderBehaviors(){try{setTimeout(ddDirChips,0);}catch(e){}
       </select></td>
       <td><input type="number" step="any" data-f="aim" value="${b.aim===null||b.aim===undefined?"":esc(b.aim)}" placeholder="optional"></td>
       <td><input type="number" step="1" min="1" data-f="critDays" value="${b.critDays===null||b.critDays===undefined?"":esc(b.critDays)}" placeholder="3" style="width:70px"></td>
-      <td><input type="number" step="1" min="2" data-f="reviewDays" value="${b.reviewDays===null||b.reviewDays===undefined?"":esc(b.reviewDays)}" placeholder="optional" style="width:70px" title="Days without the level moving the right way before the graph flags this behavior for review (a convention)"></td>
+      <td><input type="number" step="1" min="2" data-f="reviewDays" value="${b.reviewDays===null||b.reviewDays===undefined?"":esc(b.reviewDays)}" placeholder="optional" style="width:70px" title="School days in the current condition before the decision line reads it for review (a convention). It flags review only when the condition shows no change from the one before it (the CDC, or the level when there are too few days), its trend has turned the wrong way, or its last days are worse than its first; never while the behavior is at its aim"></td>
       <td><select data-f="pairWith">
         <option value="">\u2014</option>
         ${targets.filter(t=>t.id!==b.id).map(t=>`<option value="${esc(t.id)}"${b.pairWith===t.id?" selected":""}>${esc(t.name||"Untitled")}</option>`).join("")}
@@ -2902,6 +3050,8 @@ function renderBehaviors(){try{setTimeout(ddDirChips,0);}catch(e){}
         <p class="hint dd-obswarn" style="color:#8a4b12;margin:4px 0 0${ddObsWarn(b)?"":";display:none"}">${ddObsWarnTxt(b)}<\/p>
         <label class="dd-ymax dd-latmax"${b.measure==="latency"?"":' style="display:none"'}><span>Longest wait counted (min)<\/span><input type="number" step="any" min="0" data-f="latMax" value="${num(b.latMax)>0?esc(b.latMax):""}" placeholder="none" title="A cue with no response is counted at this many minutes in the day's mean latency. Left empty, it is left out of the mean and written in the day's notes."><\/label>
         <label class="dd-ymax"><span>Y-axis maximum<\/span><input type="number" step="any" min="0" data-f="yMax" value="${b.yMax===null||b.yMax===undefined?"":esc(b.yMax)}" ${ddYmaxAttrs(b)}><\/label>
+        <label class="dd-ymax dd-planstart"><span>Plan starts for this behavior on<\/span><input type="date" data-f="planStart" value="${esc(ddPlanDate(b))}" title="Optional, for a multiple baseline: the plan starts for this behavior on this day, in place of the sheet's first full phase change (later full phase changes on the sheet still apply). Blank: the sheet's phases."><\/label>
+        <label class="dd-ymax dd-stepaims" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-f="stepAims"${b.stepAims===true?" checked":""} title="A changing-criterion plan: each condition gets its own aim on the Graphs page, drawn as a stepped line"><span>One aim per condition (changing criterion)<\/span><\/label>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px;justify-content:space-between">
           <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-soft)">Graph color <input type="color" data-f="color" value="${esc(b.color)}" style="width:40px;height:26px;padding:1px;border:1px solid var(--rule)"></label>
           <button class="btn danger sm" data-act="delBeh">Remove this target</button>
@@ -3502,19 +3652,19 @@ function headerBlock(){
    target starts with; it had counted as 1, so one day at the aim read "Criterion met" */
 function critNeed(beh){ const n=parseInt(beh.critDays,10); return isNaN(n)?3:Math.max(1,n); }
 function critInfo(a,beh){
-  const aim=num(beh.aim);
+  const aim=ddAimFor(a,beh);   /* v25.64 (DATA review L2) the condition's own aim in a changing-criterion plan */
   if(aim===null||!a.n) return null;
   const meets = v => beh.direction==="decrease" ? v<=aim : v>=aim;
   const need = critNeed(beh);
-  let run=0, metDate=null, count=0;
+  let run=0, longest=0, metDate=null, count=0;
   a.pts.forEach(p=>{
-    if(meets(p.y)){ count++; run++; if(run>=need && !metDate) metDate=p.date; }
+    if(meets(p.y)){ count++; run++; if(run>longest) longest=run; if(run>=need && !metDate) metDate=p.date; }
     else run=0;
   });
-  return {aim,need,count,metDate,share:100*count/a.n,currentRun:run};
+  return {aim,need,count,metDate,share:100*count/a.n,currentRun:run,longestRun:longest};   /* v25.64 longestRun: the decision line's "longest run" (it read a field that did not exist, so always 0) */
 }
 function withinTable(analyses,beh){
-  const showCrit = num(beh.aim)!==null;
+  const showCrit = ddHasAim(beh,analyses);   /* v25.64 (DATA review L2) */
   /* v21.21: a count or a duration adds up, so the last column gives each condition's total */
   const sums = beh.measure==="count"||beh.measure==="duration";
   return `<table>
@@ -3538,7 +3688,7 @@ function withinTable(analyses,beh){
         <td>${a.trendStability===undefined?"\u2014":pct(a.trendStability)} ${a.trendStability===undefined?"":`<span class="chip">${a.trendStable?"stable":"variable"}</span>`}</td>
         <td>${r1(a.withinChange)} <span style="color:var(--ink-soft)">(${r1(a.first)} \u2192 ${r1(a.last)})</span></td>
         ${showCrit&&ci?`<td>${ci.count} of ${a.n} (${pct(ci.share)})</td>
-        <td>${ci.metDate?`${esc(fmtDate(ci.metDate))} <span style="color:var(--ink-soft)">(${ci.need} consecutive)</span>`:`not yet \u2014 current run ${ci.currentRun} of ${ci.need}`}</td>`:(showCrit?`<td>\u2014<\/td><td>\u2014<\/td>`:"")}${sums?`<td>${r1(a.vals.reduce((t,v)=>t+v,0))}<\/td>`:""}
+        <td>${ci.metDate?`${esc(fmtDate(ci.metDate))} <span style="color:var(--ink-soft)">(${ci.need} consecutive)</span>`:`not yet \u2014 current run ${ci.currentRun} of ${ci.need}${ci.longestRun>ci.currentRun?` (longest ${ci.longestRun})`:""}`}</td>`:(showCrit?`<td>\u2014<\/td><td>\u2014<\/td>`:"")}${sums?`<td>${r1(a.vals.reduce((t,v)=>t+v,0))}<\/td>`:""}
       <\/tr>`;
     }).join("")}</tbody></table>`;
 }
@@ -3548,37 +3698,56 @@ function metric(k,v,n,cls){
 }
 function effectClass(flag){ return flag===null?"neutral":(flag?"improve":"worsen"); }
 
-function comparisonCard(A,B,beh){
+function comparisonCard(A,B,beh,opt){
+  opt=opt||{};
   const c=compare(A,B,beh);
   const unit=MEASURES[beh.measure].unit;
   /* v21.21: counts and minutes add up, so the summary gives each condition's total */
   const sums=beh.measure==="count"||beh.measure==="duration", sumOf=a=>a.vals.reduce((t,v)=>t+v,0);
   const dirNote = beh.direction==="decrease" ? "lower is better" : "higher is better";
+  /* v25.64 (DATA review H3) a comparison with under 3 points in the first condition or under 5 in the second is marked
+     provisional, and its CDC line and its overlap and size tiles are greyed */
+  const prov=ddProvisional(A,B), dim=prov?" dd-prov-dim":"";
   /* v22.91 (review I53) PND, PEM, Tau and NAP are research-synthesis statistics: on screen always, on paper only when
      "Effect sizes on paper" is ticked; the summary says the same in plain words */
-  const esc2="neutral es-tile"+(S.settings.esPrint===true?"":" es-noprint");
+  const esc2="neutral es-tile"+(S.settings.esPrint===true?"":" es-noprint")+dim;
+  /* v25.64 (DATA review M3) the log response ratio, with the effect sizes on paper only when they are ticked */
+  const lr=ddLrr(A,B,beh), lrCls=(lr.lrr===undefined?"neutral":effectClass(beh.direction==="decrease"?lr.lrr<0:lr.lrr>0))+" dd-lrr"+(S.settings.esPrint===true?"":" es-noprint")+dim;
+  const grp=t=>`<div class="dd-tgroup">${t}<\/div>`;
+  /* v25.64 (DATA review M3) the tiles in three groups: level, trend and variability; the size of the change; overlap */
   const tiles=[
-    metric("Mean level change",`${c.meanChange>0?"+":""}${r1(c.meanChange)}`,
-      `${r1(A.mean)} \u2192 ${r1(B.mean)} ${unit}${c.meanPct!==null?(Math.abs(A.mean)>=1?` (${c.meanPct>0?"+":""}${Math.round(c.meanPct)}%)`:" (from near zero: no percent)"):""}`, effectClass(c.improvesLevel)),   /* v24.23 (R-140) */
+    grp("Level, trend and variability"),
     metric("Median level change",`${c.medianChange>0?"+":""}${r1(c.medianChange)}`,`${r1(A.median)} \u2192 ${r1(B.median)}`,"neutral"),
-    metric("Absolute level change",`${c.absLevelChange>0?"+":""}${r1(c.absLevelChange)}`,`last of ${esc(A.name)} \u2192 first of ${esc(B.name)}`,"neutral"),
-    metric("Relative level change",c.relLevelChange===null?"\u2014":`${c.relLevelChange>0?"+":""}${r1(c.relLevelChange)}`,
+    opt.alt?"":metric("Absolute level change",`${c.absLevelChange>0?"+":""}${r1(c.absLevelChange)}`,`last of ${esc(A.name)} \u2192 first of ${esc(B.name)}`,"neutral"),
+    opt.alt?"":metric("Relative level change",c.relLevelChange===null?"\u2014":`${c.relLevelChange>0?"+":""}${r1(c.relLevelChange)}`,
       c.relLevelChange===null?"needs at least 2 points in each condition":`medians: last ${c.relA} of ${esc(A.name)} \u2192 first ${c.relB} of ${esc(B.name)}`,"neutral"),
-    metric("Immediacy of change",c.immChange===null?"\u2014":`${c.immChange>0?"+":""}${r1(c.immChange)}`,
+    opt.alt?"":metric("Immediacy of change",c.immChange===null?"\u2014":`${c.immChange>0?"+":""}${r1(c.immChange)}`,
       `last ${c.immK} (${r1(c.immA)}) vs first ${c.immK} (${r1(c.immB)})`, effectClass(c.improvesImm)),
     metric("Trend change",`${esc(c.trendA)} \u2192 ${esc(c.trendB)}`,
       c.slopeChange===null?"":`slope ${r1(c.slopeA)} \u2192 ${r1(c.slopeB)} (\u0394 ${r1(c.slopeChange)}/day)`,
       B.trendWord? effectClass(B.trendWord.effect==="neutral"?null:B.trendWord.effect==="improve") : "neutral"),
     metric("Variability",`SD ${r1(c.sdA)} \u2192 ${r1(c.sdB)}`,`range ${r1(c.rangeA)} \u2192 ${r1(c.rangeB)}`,"neutral"),
-    metric("Overlap of data (POD)",pct(c.pod),`${pct(100-(c.pod||0))} of ${esc(B.name)} points outside the ${esc(A.name)} range`,"neutral"),
-    metric("PND",pct(c.pnd),`points beyond the most extreme ${esc(A.name)} value, ${dirNote}`,esc2),
+    grp("Size of change"),
+    metric("Mean level change",`${c.meanChange>0?"+":""}${r1(c.meanChange)}`,
+      `${r1(A.mean)} \u2192 ${r1(B.mean)} ${unit}${c.meanPct!==null?(Math.abs(A.mean)>=1?` (${c.meanPct>0?"+":""}${Math.round(c.meanPct)}%)`:" (from near zero: no percent)"):""}`, effectClass(c.improvesLevel)),   /* v24.23 (R-140) */
+    metric("Log response ratio (LRR)",lr.lrr===undefined?"\u2014":`${lr.lrr>0?"+":""}${(Math.round(lr.lrr*100)/100).toFixed(2)}`,
+      lr.lrr===undefined?esc(lr.why):`ln(${esc(B.name)} mean \u00f7 ${esc(A.name)} mean); the ${esc(B.name)} mean is ${Math.abs(Math.round(lr.pct))}% ${lr.pct<0?"lower":"higher"}`,lrCls),
+    grp("Overlap: how many points cross, not how far"),
+    metric("Overlap of data (POD)",pct(c.pod),`${pct(100-(c.pod||0))} of ${esc(B.name)} points outside the ${esc(A.name)} range`,"neutral"+dim),
+    metric("PND",pct(c.pnd),`points beyond the most extreme ${esc(A.name)} value, ${dirNote}; one extreme day sets it`,esc2),
     metric("PEM",pct(c.pem),`points beyond the ${esc(A.name)} median`,esc2),
     metric("Tau (uncorrected)",c.tau===undefined?"\u2014":r1(c.tau),
       c.tau===undefined?"":`${c.tauPairs} pairs, ${c.tauTies} ties; no baseline-trend correction`,esc2),
     /* v21.21: NAP beside Tau (Parker & Vannest, 2009) */
     metric("NAP",c.nap===undefined?"\u2014":pct(100*c.nap),
-      c.nap===undefined?"":`${c.tauPairs} pairs: ${c.napPos} improve, ${c.tauTies} tie${c.tauTies===1?"":"s"} counted as half`,esc2)
+      c.nap===undefined?"":`${c.tauPairs} pairs: ${c.napPos} improve, ${c.tauTies} tie${c.tauTies===1?"":"s"} counted as half; no baseline-trend correction`,esc2)
   ].join("");
+  /* v25.64 (DATA review H1, H3, M2) the CDC line, the provisional label, a variable baseline, an improving baseline */
+  const cdc=opt.alt?null:ddCdc(A,B,beh);
+  const tops=(prov?`<p class="dd-prov">Provisional: too few points to judge a change (${esc(A.name)} ${A.n} of the ${DD_MIN_A} wanted, ${esc(B.name)} ${B.n} of the ${DD_MIN_B} wanted).<\/p>`:"")
+    +(opt.alt?`<p class="dd-cdc" data-cdc="none"><b>CDC</b>: not used for alternating conditions; it is made for one condition that follows another.<\/p>`:ddCdcHtml(cdc,A,B))
+    +(A.levelStable===false?`<p class="caution dd-basevar">${esc(A.name)} is variable; more ${esc(A.name)} days give a firmer comparison.<\/p>`:"")
+    +(!opt.alt&&A.trendWord&&A.trendWord.effect==="improve"?`<p class="caution dd-basetrend">${esc(A.name)} was already improving. Part of the change may continue that trend. PND, PEM, NAP and uncorrected Tau overstate the effect here. Use the CDC result, which projects the ${esc(A.name)} trend.<\/p>`:"");
 
   const dirWord = c.meanChange>0?"increased":(c.meanChange<0?"decreased":"was unchanged");
   const immWord = c.immChange===null?"could not be evaluated":(Math.abs(c.immChange)<1e-9?"showed no separation":(c.immChange>0?"rose":"fell"));
@@ -3588,18 +3757,39 @@ function comparisonCard(A,B,beh){
     ${sums?`These data total ${r1(sumOf(A))} ${esc(unit)} over ${A.n} day${A.n===1?"":"s"} in ${esc(A.name)} and ${r1(sumOf(B))} over ${B.n} day${B.n===1?"":"s"} in ${esc(B.name)}.`:""}
     ${A.trendWord&&B.trendWord?`The trend was ${esc(A.trendWord.word)} in ${esc(A.name)} and ${esc(B.trendWord.word)} in ${esc(B.name)}.`:(A.trendWord?`The trend in ${esc(A.name)} was ${esc(A.trendWord.word)}.`:(B.trendWord?`The trend in ${esc(B.name)} was ${esc(B.trendWord.word)}.`:""))}
     Level stability was ${pct(A.levelStability)} in ${esc(A.name)} and ${pct(B.levelStability)} in ${esc(B.name)} against the ${esc(S.settings.crit)}% criterion.
-    Across the phase line, the ${c.immK}-day comparison ${immWord} by ${r1(Math.abs(c.immChange))}.
+    ${opt.alt?"":`Across the phase line, the ${c.immK}-day comparison ${immWord} by ${r1(Math.abs(c.immChange))}.`}
     ${c.pod!==undefined?`${pct(c.pod)} of ${esc(B.name)} data fell within the ${esc(A.name)} range.`:""}
-    ${c.pnd!==undefined&&B.n?(()=>{const k=Math.round(c.pnd*B.n/100);return `On ${k} of ${B.n} ${esc(B.name)} day${B.n===1?"":"s"} the value was ${beh.direction==="decrease"?"below the lowest":"above the highest"} ${esc(A.name)} day.`;})():""}
+    ${c.pnd!==undefined&&B.n?(()=>{const k=Math.round(c.pnd*B.n/100);return `On ${k} of ${B.n} ${esc(B.name)} day${B.n===1?"":"s"} the value was ${beh.direction==="decrease"?"below the lowest":"above the highest"} ${esc(A.name)} day; this rests on the single most extreme ${esc(A.name)} day.`;})():""}
     <div class="caution">These are descriptive indices computed from the entered data. They summarize the graph; they do not by themselves establish experimental control, and they carry no causal claim. Interpretation, including whether the change is socially meaningful and whether the design permits a functional-relation statement, remains the analyst's judgment.</div>
   </div>`;
 
-  return `<div class="cmp-card">
-    <h4>${esc(A.name)} \u2192 ${esc(B.name)}</h4>
+  /* v25.64 (DATA review H3) each condition's number of points beside its name */
+  const nd=a=>`<span class="dd-n">(${a.n} day${a.n===1?"":"s"})<\/span>`;
+  return `<div class="cmp-card${prov?" dd-provcard":""}"${opt.key?` data-cmp="${esc(opt.key)}"`:""}>
+    <h4>${esc(A.name)} ${nd(A)} \u2192 ${esc(B.name)} ${nd(B)}</h4>
+    ${tops}
     <div class="metric-grid">${tiles}</div>
     ${narrative}
+    ${opt.key?ddReadHtml(opt.key,cdc,A,B):""}
   </div>`;
 }
+/* v25.64 (DATA review M1) the analyst's reading of a comparison, and an optional second reader who reads the graph blind
+   (without the CDC lines, the indices or the summary); the readings are set against each other and against the CDC, and a
+   comparison where any two disagree is marked uncertain */
+const DD_RD={change:"change",nochange:"no change",unclear:"unclear"};
+function ddReadState(key,cdc){const R=(S.readings&&S.readings[key])||{};const cv=cdc&&cdc.ok?(cdc.met?"change":"nochange"):"";
+  const pairs=[];if(R.r&&R.r2)pairs.push(["the two readers",R.r===R.r2&&R.r!=="unclear"]);if(R.r&&cv)pairs.push(["the analyst and the CDC",R.r===cv]);if(R.r2&&cv)pairs.push(["the second reader and the CDC",R.r2===cv]);
+  const unc=pairs.some(p=>!p[1])||R.r==="unclear"||R.r2==="unclear";return {R,cv,pairs,unc};}
+function ddReadHtml(key,cdc,A,B){const st=ddReadState(key,cdc),R=st.R;
+  const sel=(f,lab)=>`<select data-rd="${esc(key)}" data-rdf="${f}" aria-label="${lab}"><option value="">\u2014<\/option>${Object.keys(DD_RD).map(k=>`<option value="${k}"${R[f]===k?" selected":""}>${DD_RD[k]}<\/option>`).join("")}<\/select><span class="dd-rd-paper">${R[f]?DD_RD[R[f]]||"":"________"}<\/span>`;
+  const txt=(f,lab,type)=>`<label>${lab} <input type="${type||"text"}" data-rd="${esc(key)}" data-rdf="${f}" value="${esc(R[f]||"")}"${type?"":` maxlength="12" autocomplete="off"`}><span class="dd-rd-paper">${esc(type==="date"&&R[f]?fmtDate(R[f]):R[f]||"______")}<\/span><\/label>`;
+  const row=(p,lab)=>`<div class="dd-read-row"><b>${lab}<\/b> ${sel("r"+p,lab)} ${txt("by"+p,"Initials")} ${txt("date"+p,"Date","date")}<\/div>`;
+  const agree=st.pairs.length?`<p class="dd-agree${st.unc?" dd-unc":""}">${st.pairs.map(p=>`${p[0]} ${p[1]?"agree":"disagree"}`).join("; ")}${st.cv?` (the CDC reads ${DD_RD[st.cv]})`:""}.${st.unc?" <b>Uncertain<\/b>: give the reason before a decision to modify, fade or exit the plan is recorded (Form PR-1).":""}<\/p>`
+    :(st.unc?`<p class="dd-agree dd-unc"><b>Uncertain<\/b>: the reading is unclear; give the reason before a decision to modify, fade or exit the plan is recorded (Form PR-1).<\/p>`:"");
+  return `<div class="dd-read" data-rdkey="${esc(key)}">${row("","Analyst\u2019s reading")}
+    <details${R.r2?" open":""}><summary>Second reader (optional: reads the graph blind)<\/summary>${row("2","Second reader")}
+      <p class="hint" style="margin:4px 0 0">The second reader should judge from the graph alone, before seeing the CDC, the tiles or the summary. <button type="button" class="btn ghost sm" data-rdblind="${esc(key)}">Open the graph for a blind reading<\/button><\/p><\/details>
+    ${agree}<\/div>`;}
 
 /* ---------------------------------------------------------------
    Paired graph: a replacement or acquisition target against its target behavior
@@ -3719,6 +3909,19 @@ function todData(beh,rows,conds){
     })
   }));
 }
+/* v25.64 (DATA review M8) a control chart across the time blocks of one condition, for a count, a rate or a duration:
+   the center line is the mean of the blocks, sigma is estimated from the mean moving range (mean moving range x 2.66 / 3),
+   and a block is flagged above the upper limit (3 sigma), or by the run rules on the high side: 2 of 3 beyond 2 sigma,
+   4 of 5 beyond 1 sigma, 8 in a row (or 12 of 14) above the center line (Pfadt & Wheeler, 1995; Kahng et al., 1998) */
+function ddSpcOk(beh){return beh.measure==="count"||beh.measure==="rate"||beh.measure==="duration";}
+function ddSpc(vals){const ix=[];vals.forEach((v,i)=>{if(v!==null&&v!==undefined&&isFinite(v))ix.push(i);});if(ix.length<3)return null;
+  const v=ix.map(i=>vals[i]),m=mean(v);let mr=0;for(let k=1;k<v.length;k++)mr+=Math.abs(v[k]-v[k-1]);mr/=(v.length-1);
+  const sg=mr*2.66/3,ucl=m+3*sg,F={},put=(k,w)=>{const i=ix[k];if(!F[i])F[i]=w;};
+  if(sg>0){v.forEach((x,k)=>{if(x>ucl+1e-9)put(k,"above the upper limit");});
+    const run=(n,need,lim,w)=>{for(let s=0;s+n<=v.length;s++){const w0=[];for(let k=s;k<s+n;k++)if(v[k]>lim+1e-9)w0.push(k);if(w0.length>=need)w0.forEach(k=>put(k,w));}};
+    run(3,2,m+2*sg,"2 of 3 beyond 2 sigma");run(5,4,m+sg,"4 of 5 beyond 1 sigma");run(8,8,m,"8 in a row above the center line");run(14,12,m,"12 of 14 above the center line");}
+  return {mean:m,mr,sigma:sg,ucl,flags:F};}
+function ddTodSpc(beh,data){if(!ddSpcOk(beh))return null;return data.map(d=>ddSpc(d.slots.map(s=>s.n?s.mean:null)));}
 function todChart(beh,data){
   const sl=slotList();
   const W=980,H=320,M={t:26,r:20,b:96,l:62};
@@ -3750,7 +3953,7 @@ function todChart(beh,data){
   g.push(`<text x="${M.l+iw/2}" y="${H-6}" font-size="12" fill="#16242E" text-anchor="middle">Time of day</text>`);
   return `<svg class="graph" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mean ${esc(beh.name)} by time of day and condition">${g.join("")}</svg>`;
 }
-function todHeat(beh,rows,conds){
+function todHeat(beh,rows,conds,spc){
   const sl=slotList();
   /* v21.21: the heat map runs over the same days as the line graphs */
   if(rows.length) rows=rows.slice(0,ddPlotEnd(rows)+1);
@@ -3779,7 +3982,11 @@ function todHeat(beh,rows,conds){
       g.push(`<rect x="${x}" y="${y}" width="${cw-1}" height="${rh-1}" fill="${esc(fill)}" opacity="${v===null?1:op.toFixed(2)}" stroke="#fff" stroke-width="0.5"><title>${esc(fmtDate(r.date))} ${esc(s.label)}: ${v===null?"no data":r1(v)}</title></rect>`);
     });
   });
-  conds.forEach((c,ci)=>{
+  /* v25.64 (DATA review M8) a block the control chart flags is outlined across its condition's days */
+  if(spc&&!ddAltNow) conds.forEach((c,ci)=>{ const q=spc[ci]; if(!q) return;
+    const first=c.rowIdx[0], last=Math.min(c.rowIdx[c.rowIdx.length-1],rows.length-1); if(first>last) return;
+    Object.keys(q.flags).forEach(si=>{ si=+si; g.push(`<rect class="dd-spc-mark" x="${M.l+first*cw}" y="${M.t+si*rh}" width="${(last-first+1)*cw-1}" height="${rh-1}" fill="none" stroke="#B42318" stroke-width="1.6"><title>${esc(c.name)} ${esc(sl[si].label)}: ${esc(q.flags[si])}<\/title><\/rect>`); }); });
+  if(!ddAltNow) conds.forEach((c,ci)=>{
     const first=c.rowIdx[0], last=Math.min(c.rowIdx[c.rowIdx.length-1],rows.length-1);
     if(first>last) return;
     if(ci>0){
@@ -3802,6 +4009,7 @@ function todSection(beh,rows,conds){
   const data=todData(beh,rows,conds);
   const any=data.some(d=>d.slots.some(s=>s.n>0));
   if(!any) return "";
+  const spc=ddTodSpc(beh,data);   /* v25.64 (DATA review M8) */
   const grandSum=data.reduce((t,d)=>t+d.slots.reduce((x,s)=>x+s.sum,0),0);
   /* v21.16 audit: a share of what was recorded only means something for a measure that adds up:
      occurrences, minutes or correct responses. Minutes had been called occurrences, and percentages,
@@ -3824,19 +4032,21 @@ function todSection(beh,rows,conds){
       return `<tr>
         <td><strong>${esc(s.label)}</strong></td>
         <td>${esc(S.schedule[s.key]||"\u2014")}</td>
-        ${data.map(d=>{
-          const c=d.slots[i];
-          return `<td>${c.n?r1(c.mean):"\u2014"}</td><td>${c.n?`${c.occ} of ${c.n} (${pct(100*c.occ/c.n)})`:"\u2014"}</td>`;
+        ${data.map((d,di)=>{
+          const c=d.slots[i], f=spc&&spc[di]&&spc[di].flags[i];
+          return `<td>${c.n?r1(c.mean):"\u2014"}${f?` <span class="dd-spc" data-spc="${esc(f)}" title="Control chart: ${esc(f)}">\u25b2<\/span>`:""}</td><td>${c.n?`${c.occ} of ${c.n} (${pct(100*c.occ/c.n)})`:"\u2014"}</td>`;
         }).join("")}
         ${shareOf?`<td>${share===null?"\u2014":pct(share)}</td>`:""}
       </tr>`;
     }).join("")}
     </tbody></table>
+    ${spc?`<p class="hint dd-spcnote"><b>Control chart<\/b> (for each condition, across its blocks): ${data.map((d,di)=>{const q=spc[di];if(!q)return `${esc(d.name)}: too few blocks with data`;
+      const fl=Object.keys(q.flags).map(Number).sort((a,b)=>a-b);return `${esc(d.name)}: center line ${r1(q.mean)}, upper limit ${r1(q.ucl)}${fl.length?`; flagged \u25b2 ${fl.map(i=>`${esc(sl[i].label)} (${esc(q.flags[i])})`).join(", ")}`:"; no block flagged"}`;}).join(". ")}. The center line is the mean of the blocks; the upper limit is 3 sigma above it, sigma estimated from the mean moving range between neighboring blocks (\u00d7 2.66 \u00f7 3). A block is flagged above the upper limit, or when 2 of 3 blocks lie beyond 2 sigma, 4 of 5 beyond 1 sigma, or 8 in a row (12 of 14) above the center line (Pfadt &amp; Wheeler, 1995). Looked at by eye, scatter plots seldom showed a pattern that control charts of the same data showed (Kahng et al., 1998). A flag is a lead for further assessment, not a result, and statistical rules do not replace a close look at the data (Hopkins, 1995).<\/p>`:""}
     <p class="caution">Interval means are computed only from days on which that block was recorded, so blocks with different numbers of recorded days are not directly comparable. Time-of-day patterns describe when behavior occurred; they do not identify a function. Treat a concentrated block as a lead for further assessment, not as a result.</p>`;
   if(S.settings.showHeat){
-    const h=todHeat(beh,rows,conds);
+    const h=todHeat(beh,rows,conds,spc);
     if(h) html+=`<div class="dd-keep"><h4 style="margin-top:16px">Every interval, every day</h4><div class="chartbox" style="margin-top:6px">${h}</div>
-      <p class="caution">Shading is scaled to this behavior's highest recorded interval on a square-root scale, so moderate values stay visible next to an outlier. White cells were recorded at zero; grey cells were not recorded at all.</p></div>`;
+      <p class="caution">Shading is scaled to this behavior's highest recorded interval on a square-root scale, so moderate values stay visible next to an outlier. White cells were recorded at zero; grey cells were not recorded at all.${spc&&spc.some(q=>q&&Object.keys(q.flags).length)?" A red outline marks a block the control chart flags, across its condition’s days.":""}</p></div>`;
   }
   return html;
 }
@@ -3853,14 +4063,16 @@ function graphKey(){
         ${p("Solid vertical line","a full phase change. The data path breaks at the line and each condition is analyzed on its own.")}
         ${p("Dashed vertical line","a conditional change inside a condition, such as a medication or staffing change. The condition is not split.")}
         ${sh==="phase"||sh==="section"?p("Gray and white bands",sh==="section"?"the sections: a new band at each full phase change and at each conditional change, which still does not split the condition for analysis.":"the conditions: a new band at each full phase change."):""}
-        ${p("Gap in the line","a day with no data. Days measured at zero sit on the axis; days not measured are skipped.")}
-        ${p("Green dashed line","the aim or mastery criterion for that target.")}
+        ${p("Gap in the line",`a day with no data. Days measured at zero sit on ${S.settings.zeroLift===true?"the zero line, just above the axis":"the axis"}; days not measured are skipped.`)}
+        ${p("Green dashed line","the aim or mastery criterion for that target"+(S.behaviors.some(b=>b.stepAims===true)?"; stepped where each condition has its own aim (a changing criterion).":"."))}
+        ${S.settings.showCdc===true?p("Purple dashed and dotted lines","the CDC lines: the condition before's mean (dashes) and least-squares trend (dots), carried into the next condition and moved 0.25 SD toward improvement. Count the points beyond both and look up the number needed on the comparison card."):""}
+        ${S.settings.alt===true?p("Alternating conditions","each condition is one path, told apart by its marker and line; there are no phase lines."):""}
       <\/div>
       <div>
         ${p("Black dashed horizontal line",`the ${S.settings.level==="median"?"median":"mean"} level of the condition; its value is at the line's right end, or farther left along it where the data crowd the end.`)}
         ${p("Band in the behavior's color",`the stability envelope around the condition's median. A condition counts as stable when at least ${esc(S.settings.crit)}% of its points fall inside it.`)}
         ${p("Sloped line",`the ${S.settings.trend==="split"?"split-middle":"least squares"} trend for that condition${S.settings.trendLabels===true?", labeled accelerating, decelerating or zero-celerating":""}.`)}
-        ${p("Vertical axis",`0 to 100 for percentages; for a reduction target, ${rule}, rounded up; whole numbers from 0 to at least 5 for counts. A y-axis maximum set on the first tab overrides this.`)}
+        ${p("Vertical axis",`0 to 100 for percentages; for a reduction target, ${rule}, rounded up; whole numbers from 0 to at least 5 for counts. A y-axis maximum set on the first tab overrides this.${S.settings.sameAxis===true?" Behaviors measured the same way share the tallest of their scales.":""}`)}
         <p class="hint" style="margin:6px 0"><strong>Descriptive indices<\/strong> summarize what the graph shows. They do not establish experimental control on their own.<\/p>
       <\/div>
     <\/div><\/div>`;
@@ -3900,6 +4112,9 @@ function renderResults(){
   const conds=buildConditions();
   const condMarks=conditionalMarks();
   let html=headerBlock()+graphKey();
+  /* v25.64 (DATA review L1) alternating conditions: ddAltNow is on while this page is drawn */
+  ddAltNow=ddAltOn();
+  try{
 
   let lastKind=null;
   behs.forEach(beh=>{
@@ -3916,9 +4131,12 @@ function renderResults(){
         <span>${esc(KINDS[kind]||kind)} \u00b7 ${esc(MEASURES[beh.measure].label)} \u00b7 ${beh.direction==="decrease"?"decrease":"increase"} is improvement${num(beh.aim)!==null?` \u00b7 criterion ${esc(beh.aim)} for ${critNeed(beh)} consecutive days`:""}<\/span>
       <\/div>
       ${beh.definition?`<div class="defn-block">${esc(beh.definition)}<\/div>`:""}`;
-    const analyses=conds.map(c=>analyzeCondition(c,beh,rows));
+    /* v25.64 (DATA review M5, L1) this behavior's own conditions: its own plan start (a multiple baseline), or one path per
+       condition when conditions alternate */
+    const bconds=ddAltNow?ddAltPaths(conds):ddBehConds(beh,conds,rows);
+    const analyses=bconds.map(c=>analyzeCondition(c,beh,rows));
     const withData=analyses.filter(a=>a.n);
-    const chart=buildChart(beh,rows,conds,analyses), dr=ddDrawn, notes=ddNotes;
+    const chart=buildChart(beh,rows,bconds,analyses), dr=ddDrawn, notes=ddNotes;
     /* v21.21 (R): a behavior with no data yet is a short entry, on screen and on paper: its heading, its definition
        and one line. It had printed a page of its own, with a legend for lines that were not drawn and two empty
        analysis boxes. Several such entries share a page. */
@@ -3928,11 +4146,13 @@ function renderResults(){
       return;
     }
     let cmps="";
-    for(let i=1;i<analyses.length;i++){
-      if(analyses[i-1].n && analyses[i].n) cmps+=comparisonCard(analyses[i-1],analyses[i],beh);
+    /* v25.64 (DATA review M1, L1) each card carries a key for its readings; alternating conditions compare every pair of paths */
+    if(ddAltNow){ for(let i=0;i<analyses.length;i++) for(let j=i+1;j<analyses.length;j++) if(analyses[i].n&&analyses[j].n) cmps+=comparisonCard(analyses[i],analyses[j],beh,{alt:true,key:ddCmpKey(beh,analyses[i],analyses[j],true)}); }
+    else for(let i=1;i<analyses.length;i++){
+      if(analyses[i-1].n && analyses[i].n) cmps+=comparisonCard(analyses[i-1],analyses[i],beh,{key:ddCmpKey(beh,analyses[i-1],analyses[i])});
     }
     /* each legend entry only when the graph draws it */
-    const legend=`<span><i style="border-color:${esc(beh.color)}"><\/i>Data path<\/span>`
+    const legend=(ddAltNow?ddAltLegend(beh,analyses):`<span><i style="border-color:${esc(beh.color)}"><\/i>Data path<\/span>`)
       +(dr.trend?`<span><i style="border-color:${esc(beh.color)};border-top-style:solid;opacity:.85"><\/i>Trend line (${S.settings.trend==="split"?"split-middle":"least squares"})<\/span>`:"")
       +(dr.level?`<span><i style="border-color:#16242E;border-top-style:dashed"><\/i>${S.settings.level==="median"?"Median":"Mean"} level<\/span>`:"")
       +(dr.env?`<span><span class="swatch" style="background:${esc(beh.color)};opacity:.25"><\/span>Stability envelope (${esc($("#r_env").selectedOptions[0].textContent.trim())})<\/span>`:"")
@@ -3940,24 +4160,29 @@ function renderResults(){
     /* v21.21 (R): with no comparison to show, the across-condition heading and its one line travel with the
        within-condition table, so they never make a page of their own */
     const acrossNone=cmps?"":`<div class="sec-title dd-across"><h3>Across-condition analysis<\/h3><span>adjacent condition comparisons<\/span><\/div>
-      <div class="empty dd-line">${conds.length>1?"No two adjacent conditions both have data for this behavior, so there is no comparison to show.":"Mark a full phase change on the data sheet to generate across-condition comparisons."}<\/div>`;
+      <div class="empty dd-line">${bconds.length>1?"No two adjacent conditions both have data for this behavior, so there is no comparison to show.":"Mark a full phase change on the data sheet to generate across-condition comparisons."}<\/div>`;
     html+=`<div class="panel behavior-report"><div class="dd-keep">${kindHead}${head}
       <div class="chartbox">${chart}<\/div>
-      <div class="dd-graphsave noprint no-print"><button type="button" class="btn ghost sm" data-act="saveGraph" data-b="${esc(beh.id)}" title="Download this graph as a PNG image, at twice the screen resolution">Save graph as image<\/button><\/div>
+      <div class="dd-graphsave noprint no-print"><button type="button" class="btn ghost sm" data-act="saveGraph" data-b="${esc(beh.id)}" title="Download this graph as a PNG image, at twice the screen resolution">Save graph as image<\/button>${dr.rule==="auto"?` <button type="button" class="btn ghost sm dd-axkeep" data-act="keepAxis" data-b="${esc(beh.id)}" data-top="${esc(String(dr.top))}" title="Writes this axis's top (${esc(r1(dr.top))}) into the behavior's Y-axis maximum on the first tab, so later reports keep the same scale">Keep this axis for later reports<\/button>`:""}<\/div>
       <div class="legend">${legend}<\/div>
       ${dr.cond?`<p class="hint" style="margin-top:8px">Conditional changes marked: ${condMarks.map(m=>`${esc(m.label)} (${esc(fmtDate(rows[m.x].date))})`).join("; ")}. These events are annotated inside the condition and do not split it for analysis.<\/p>`:""}
+      ${ddPlanNote(beh,bconds,rows)}${ddAltNow?ddAltNote(analyses,rows):""}${dr.same?`<p class="hint dd-samenote">The vertical axis is shared with the other behaviors measured as ${esc(MEASURES[beh.measure].label.toLowerCase())} (Same scale for the same unit).<\/p>`:""}
       ${ddNoteHtml(notes)}${ddClipHtml(dr)}<\/div>
 
-      ${(s=>s?`<div class="dd-keep">${s}<\/div>`:"")(episodeSection(beh,rows,conds))}
+      ${(s=>s?`<div class="dd-keep">${s}<\/div>`:"")(episodeSection(beh,rows,bconds))}
       <div class="dd-keep"><div class="sec-title"><h3>Within-condition analysis<\/h3><span>level, trend, variability, and stability computed separately for each condition<\/span><\/div>
-      ${ddRuleHtml(beh,rows,analyses)}${ddIoaHtml(beh,rows,analyses)}
+      ${ddRuleHtml(beh,rows,analyses)}${ddIoaHtml(beh,rows,analyses)}${ddStepHtml(beh,analyses)}
       ${ddObsWarn(beh)?`<p class="caution dd-obswarn">${esc(beh.name||"This behavior")} is watched for “${esc(beh.obsLength)}”, but no minutes observed are set for it, so its ${beh.measure==="rate"?"rate":"percent of time"} is computed over the day's minutes (${windowMinutes()===null?"the minutes typed":windowMinutes()+" min by default"}). Set its minutes observed on the behavior's row (Set up).<\/p>`:""}
       ${withData.length?withinTable(analyses,beh)+`<p class="caution">Envelope width is a percentage of each condition's own median, so conditions with low medians get narrow envelopes, and at a median of 0 the envelope has no width: only the points at 0 fall inside it. Near-zero count data will often fall below the stability criterion even when the level is clinically excellent; read stability alongside the range rather than on its own. A trend is called flat (zero-celerating) when the fitted line changes, across the condition, by no more than the stability envelope's half-width, or when its slope, up or down, is less than 1% of the condition's mean per day (or less than 0.01 per day, whichever is larger): conventions of this form that approximate reading the trend against the envelope (Ledford et al., 2018; Lane &amp; Gast, 2014).<\/p>`:`<div class="empty">No condition has data for this behavior.<\/div>`}${acrossNone}<\/div>
-      ${cmps?`<div class="sec-title"><h3>Across-condition analysis<\/h3><span>adjacent condition comparisons<\/span><\/div>${cmps}`:""}
-      ${pairSection(beh,rows,conds,analyses)}
-      ${todSection(beh,rows,conds)}
+      ${cmps?`<div class="sec-title"><h3>Across-condition analysis<\/h3><span>${ddAltNow?"each pair of alternating conditions":"adjacent condition comparisons"}<\/span><\/div>${cmps}`:""}
+      ${ddAltNow?"":ddDesignHtml(beh,analyses)}
+      ${pairSection(beh,rows,bconds,analyses)}
+      ${todSection(beh,rows,bconds)}
     <\/div>`;
   });
+  /* v25.64 (DATA review M5) the stacked view: the behaviors on one date axis */
+  if(!ddAltNow) html+=ddStackHtml(behs,rows,conds);
+  }finally{ddAltNow=false;}
   out.innerHTML=html+sourcesPanel();
   ddScrollers(out);
 }
@@ -4011,6 +4236,8 @@ window.addEventListener("resize",()=>{ clearTimeout(ddScrollT); ddScrollT=setTim
 function sourcesPanel(){
   return `<div class="panel dd-sources" id="ddSources"><h2>Sources for the Indices</h2>
     <p class="hint" style="max-width:none">Level as the mean, variability as the range and standard deviation, immediacy as the last three points of one condition against the first three of the next (the default window), and overlap follow Kratochwill et al. (2010). The stability envelope (80% of points within &plusmn;25% of the median), its use around a trend line, the split-middle trend and the terms accelerating, decelerating and zero-celerating follow Ledford, Lane, and Severini (2018), who cite Lane and Gast (2014) for the envelope. PND: Scruggs, Mastropieri, and Casto (1987). PEM: Ma (2006). NAP: Parker and Vannest (2009), who count a tie as half a pair. Tau: Parker, Vannest, Davis, and Sauber (2011). The other envelope widths, the 85% and 90% criteria and the band within which a trend is called flat are conventions of this form, not taken from these sources. Trend stability is the share of a condition's points within the envelope's half-width of the trend line.</p>
+    <p class="hint dd-src2564" style="max-width:none">The CDC (conservative dual criterion) carries the earlier condition's mean line and least-squares trend line into the next condition, each moved 0.25 standard deviations toward improvement, and counts the points beyond both against Fisher, Kelley, and Lomas (2003, Table 1); past 23 points it uses the binomial test that table came from. A comparison is marked provisional with fewer than 3 points in the first condition or fewer than 5 in the second, the lengths at which the dual-criteria methods kept false positives low on published data (Lanovaz, Huxley, &amp; Dufour, 2017). Overlap indices reach about 100% for most effective plans, and say little about how large the change is; PND rests on the single most extreme baseline day (Dowdy et al., 2021). The log response ratio (LRR) is a size-of-change index for counts, rates, durations and percentages: ln(second mean &divide; first mean), and exp(LRR) &minus; 1 is the percent change (Dowdy et al., 2021). The control-chart flags on the time-of-day table follow Pfadt and Wheeler (1995) and Kahng et al. (1998); Hopkins (1995) argued against relying on such rules alone. The changing-criterion checks follow Hartmann and Hall (1976); the stacked view follows Hall et al. (1970); the alternating-conditions mode follows Barlow and Hayes (1979). A shared vertical scale follows Kennedy (1989); zero lifted off the axis follows Deochand, Costello, and Fuqua (2015). The review rule, the band around a step's aim and the second reader's agreement are conventions of this form.</p>
+    <ul class="dd-refs"><li>Barlow, D. H., &amp; Hayes, S. C. (1979). Alternating treatments design: One strategy for comparing the effects of two treatments in a single subject. <em>Journal of Applied Behavior Analysis, 12</em>(2).</li><li>DeProspero, A., &amp; Cohen, S. (1979). Inconsistent visual analyses of intrasubject data. <em>Journal of Applied Behavior Analysis, 12</em>.</li><li>Deochand, N., Costello, M. S., &amp; Fuqua, R. W. (2015). Phase-change lines, scale breaks, and trend lines using Excel 2013. <em>Journal of Applied Behavior Analysis, 48</em>. https://doi.org/10.1002/jaba.198</li><li>Diller, J. W., Barry, R. J., &amp; Gelino, B. W. (2016). Visual analysis of data in a multielement design. <em>Journal of Applied Behavior Analysis, 49</em>. https://doi.org/10.1002/jaba.325</li><li>Dowdy, A., Tincani, M., &amp; Schneider, W. J. (2020). Evaluation of publication bias in response interruption and redirection: A meta-analysis. <em>Journal of Applied Behavior Analysis, 53</em>. https://doi.org/10.1002/jaba.724</li><li>Dowdy, A., Peltier, C., Tincani, M., Schneider, W. J., Hantula, D. A., &amp; Travers, J. C. (2021). Meta-analyses and effect sizes in applied behavior analysis: A review and discussion. <em>Journal of Applied Behavior Analysis, 54</em>. https://doi.org/10.1002/jaba.862</li><li>Fisher, W. W., Kelley, M. E., &amp; Lomas, J. E. (2003). Visual aids and structured criteria for improving visual inspection and interpretation of single-case designs. <em>Journal of Applied Behavior Analysis, 36</em>(3), 387&ndash;406.</li><li>Ford, A. L. B., Rudolph, B. N., Pennington, B., &amp; Byiers, B. J. (2020). An exploration of the interrater agreement of visual analysis with and without context. <em>Journal of Applied Behavior Analysis, 53</em>. https://doi.org/10.1002/jaba.560</li><li>Hains, A. H., &amp; Baer, D. M. (1989). Interaction effects in multielement designs: Inevitable, desirable, and ignorable. <em>Journal of Applied Behavior Analysis, 22</em>.</li><li>Hall, R. V., Cristler, C., Cranston, S. S., &amp; Tucker, B. (1970). Teachers and parents as researchers using multiple baseline designs. <em>Journal of Applied Behavior Analysis, 3</em>(4).</li><li>Hartmann, D. P., &amp; Hall, R. V. (1976). The changing criterion design. <em>Journal of Applied Behavior Analysis, 9</em>.</li><li>Hopkins, B. L. (1995). Applied behavior analysis and statistical process control? <em>Journal of Applied Behavior Analysis, 28</em>, 379&ndash;386.</li><li>Kahng, S., Iwata, B. A., Fischer, S. M., Page, T. J., Treadwell, K. R. H., Williams, D. E., &amp; Smith, R. G. (1998). Temporal distributions of problem behavior based on scatter plot analysis. <em>Journal of Applied Behavior Analysis, 31</em>(4), 593&ndash;604.</li><li>Kennedy, C. H. (1989). Selecting consistent vertical axis scales. <em>Journal of Applied Behavior Analysis, 22</em>.</li><li>Lanovaz, M. J., Huxley, S. C., &amp; Dufour, M.-M. (2017). Using the dual-criteria methods to supplement visual inspection: An analysis of nonsimulated data. <em>Journal of Applied Behavior Analysis, 50</em>. https://doi.org/10.1002/jaba.394</li><li>McGonigle, J. J., Rojahn, J., Dixon, J., &amp; Strain, P. S. (1987). Multiple treatment interference in the alternating treatments design as a function of the intercomponent interval length. <em>Journal of Applied Behavior Analysis, 20</em>(2).</li><li>Pfadt, A., &amp; Wheeler, D. J. (1995). Using statistical process control to make data-based clinical decisions. <em>Journal of Applied Behavior Analysis, 28</em>, 349&ndash;370.</li><li>Wolfe, K., Seaman, M. A., Drasgow, E., &amp; Sherlock, P. (2018). An evaluation of the agreement between the conservative dual-criterion method and expert visual analysis. <em>Journal of Applied Behavior Analysis, 51</em>. https://doi.org/10.1002/jaba.453</li></ul>
     <ul class="dd-refs"><li>Kratochwill, T. R., Hitchcock, J., Horner, R. H., Levin, J. R., Odom, S. L., Rindskopf, D. M., &amp; Shadish, W. R. (2010). <em>Single-case designs technical documentation</em> (Version 1.0, pilot). What Works Clearinghouse. https://ies.ed.gov/ncee/wwc/Docs/ReferenceResources/wwc_scd.pdf</li><li>Lane, J. D., &amp; Gast, D. L. (2014). Visual analysis in single case experimental design studies: Brief review and guidelines. <em>Neuropsychological Rehabilitation, 24</em>(3&ndash;4), 445&ndash;463.</li><li>Ledford, J. R., Lane, J. D., &amp; Severini, K. E. (2018). Systematic use of visual analysis for assessing outcomes in single case design studies. <em>Brain Impairment, 19</em>(1), 4&ndash;17.</li><li>Ma, H.-H. (2006). An alternative method for quantitative synthesis of single-subject researches: Percentage of data points exceeding the median. <em>Behavior Modification, 30</em>(5), 598&ndash;617.</li><li>Parker, R. I., &amp; Vannest, K. (2009). An improved effect size for single-case research: Nonoverlap of all pairs. <em>Behavior Therapy, 40<\/em>(4), 357&ndash;367.<\/li><li>Parker, R. I., Vannest, K. J., Davis, J. L., &amp; Sauber, S. B. (2011). Combining nonoverlap and trend for single-case research: Tau-U. <em>Behavior Therapy, 42</em>(2), 284&ndash;299.</li><li>Scruggs, T. E., Mastropieri, M. A., &amp; Casto, G. (1987). The quantitative synthesis of single-subject research: Methodology and validation. <em>Remedial and Special Education, 8</em>(2), 24&ndash;33.</li></ul></div>`;
 }
 
@@ -4089,6 +4316,8 @@ function openFile(file){
       if(!obj.behaviors||!obj.rows) throw new Error("shape");
       S=Object.assign(blankState(),obj);
       S.settings=Object.assign(blankState().settings,obj.settings||{});
+      /* v25.64 (DATA review L3) a file saved before the zero was lifted off the axis prints as it was saved */
+      if(!obj.settings||typeof obj.settings!=="object"||!("zeroLift" in obj.settings)) S.settings.zeroLift=false;
       S.schedule=obj.schedule||{};
       S.rows.forEach(r=>{ r.values=r.values||{}; r.intervals=r.intervals||{}; r.episodes=r.episodes||{};
         S.behaviors.forEach(b=>{
@@ -4147,9 +4376,12 @@ function loadExample(){
   b[0].definition="Any forceful contact toward another person with hand, foot, or object, including attempts that do not make contact.";
   b[1].definition="Contact of hand or object to own head with audible sound.";
   b[2].definition="Throwing, tearing, or striking materials or furniture with enough force to displace or damage them.";
+  /* v25.64 (DATA review H2) the review rule on two of the example's behaviors: aggression drops at once and stays low (a
+     change from baseline, no review); the mand reaches its aim (no review at the aim) */
+  b[0].reviewDays=10;
   // a replacement response paired to aggression, and an acquisition target scored correct of opportunities
   b.push({id:uid("b"),kind:"replacement",name:"Mand for break (card exchange)",measure:"count",direction:"increase",
-    aim:8,critDays:3,pairWith:b[0].id,color:PALETTE[5],obsLength:"Entire school day",
+    aim:8,critDays:3,reviewDays:10,pairWith:b[0].id,color:PALETTE[5],obsLength:"Entire school day",
     definition:"Independent exchange of the break card with an adult, with no vocal or gestural prompt in the preceding 10 seconds."});
   // a duration target logged episode by episode: fewer episodes after the plan, and shorter ones
   b.push({id:uid("b"),kind:"target",name:"Tantrum (duration)",measure:"duration",direction:"decrease",
@@ -4265,6 +4497,7 @@ function syncResultControls(){
   $("#d_defpl").value=S.settings.defPlace==="head"?"head":"below";
   $("#c_key").checked=S.settings.showKey!==false;
   $("#c_es").checked=S.settings.esPrint===true;   /* v22.91 (review I53) */
+  ddSyncV2564();   /* v25.64 (DATA review H1, L1, M5, L3) */
   $("#d_colw").value=String(S.settings.colW||172);
   $("#d_paper").value=S.settings.paperCols==="off"?"off":"all";
   $("#d_wkd").checked=S.settings.weekdays!==false;
@@ -4333,6 +4566,9 @@ $("#behTable").addEventListener("input",e=>{
   /* v21.21 escape (C): a restore that puts a measurement the list does not have into this field is ignored;
      the target keeps the one it has */
   if(f==="measure"&&!Object.prototype.hasOwnProperty.call(MEASURES,e.target.value)) return;
+  /* v25.64 (DATA review L2, M5) a tick is kept as true or false; a cleared plan start is taken off */
+  if(e.target.type==="checkbox"){ b[f]=e.target.checked; renderResults(); return; }
+  if(f==="planStart"&&!e.target.value){ delete b.planStart; renderResults(); return; }
   b[f]=e.target.value;
   /* v21.21: a percentage is always graphed from 0 to 100, so its y-axis maximum is set aside while it is one */
   if(f==="measure") ddYmaxField(b);
@@ -4920,6 +5156,132 @@ window.nbhPrintNodes=function(){
   /* the letterhead leads, as it does on every other form in the packet */
   return [document.querySelector(".nbh-print-head"),$("#tab-data"),$("#tab-results")];
 };
+
+/* ---------------------------------------------------------------
+   v25.64 (DATA review M1, M4, M5, L1, L2, L3) the Graphs page's design aids: the readings, the design summary, the
+   stacked view, alternating conditions, the changing criterion and the kept axis
+---------------------------------------------------------------- */
+const DD_ALT_MK=["circle","square","triangle","diamond","circle","square"], DD_ALT_DASH=["","6 3","2 3","9 3 2 3","4 4","1 3"];
+function ddCmpKey(beh,A,B,alt){return beh.id+"|"+ddCondKey(A)+"|"+ddCondKey(B)+(alt?"|alt":"");}
+function ddAltLegend(beh,an){const c=esc(beh.color);return an.filter(a=>a.n).map((a,k)=>{const i=an.indexOf(a),m=DD_ALT_MK[i%DD_ALT_MK.length],d=DD_ALT_DASH[i%DD_ALT_DASH.length];
+  const mk=m==="square"?`<rect x="11" y="1" width="8" height="8" fill="${c}"/>`:m==="triangle"?`<polygon points="15,0 19.6,8.5 10.4,8.5" fill="${c}"/>`:m==="diamond"?`<polygon points="15,0 20,5 15,10 10,5" fill="${c}"/>`:`<circle cx="15" cy="5" r="4" fill="${c}"/>`;
+  return `<span><svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true" style="vertical-align:middle;margin-right:5px"><line x1="0" y1="5" x2="30" y2="5" stroke="${c}" stroke-width="2"${d?` stroke-dasharray="${d}"`:""}/>${mk}<\/svg>${esc(a.name)}<\/span>`;}).join("");}
+/* (L1) the order of the alternating conditions, and keeping them apart in time */
+function ddAltNote(an,rows){const of={};an.forEach((a,k)=>a.pts.forEach(p=>{of[p.x]=k;}));const xs=Object.keys(of).map(Number).sort((a,b)=>a-b);
+  let best={n:0},cur={n:0};xs.forEach(x=>{if(cur.n&&of[x]===cur.k)cur.n++;else cur={k:of[x],n:1,x};if(cur.n>best.n)best=Object.assign({},cur);});
+  const r=best.n>2?`${esc(an[best.k].name)} ran ${best.n} days with data in a row (from ${esc(fmtDate((rows[best.x]||{}).date))}): counterbalance the order, so that no condition runs more than 2 days in a row and each comes first about as often.`
+    :"No condition ran more than 2 days with data in a row.";
+  return `<p class="hint dd-altnote"><b>Alternating conditions<\/b>: each condition named on the sheet is its own path, with no phase lines (an alternating treatments design; Barlow &amp; Hayes, 1979). ${r} Keep the conditions apart in time: where two run on one day, leave time between them (their effects showed apart only when the time between them was lengthened from 1 to 120 minutes; McGonigle et al., 1987). Conditions alternated this way can affect each other (Hains &amp; Baer, 1989). Analysts agree less on these graphs than on reversal graphs, so a second reader is worth adding (Diller et al., 2016).<\/p>`;}
+/* (M5) the behavior's own plan start, said under its graph */
+function ddPlanNote(beh,bc,rows){const d=ddPlanDate(beh);if(!d)return "";const started=rows.some(r=>r.date&&r.date>=d);
+  return `<p class="hint dd-plannote">The plan starts for ${esc(beh.name||"this behavior")} on ${esc(fmtDate(d))} (Client &amp; behaviors tab), in place of the sheet’s first full phase change${started?"":": it has not started yet, so every day so far is baseline"}.<\/p>`;}
+/* (L2) a changing criterion: an aim for each condition, the days within a band of it, and the design's requirements
+   (Hartmann & Hall, 1976) */
+function ddStepBand(aim,beh){return Math.max(Math.abs(aim)*0.1,beh.measure==="count"?1:0);}
+function ddStepHtml(beh,an){if(beh.stepAims!==true||ddAltNow)return "";const A=an.filter(a=>a.n);if(!A.length)return "";
+  const dec=beh.direction==="decrease";
+  const rowsH=A.map(a=>{const k=ddCondKey(a),own=beh.aims&&beh.aims[k]!=null&&String(beh.aims[k]).trim()!==""?beh.aims[k]:"",aim=ddAimFor(a,beh);
+    const b=aim===null?null:ddStepBand(aim,beh),inb=aim===null?null:a.vals.filter(v=>Math.abs(v-aim)<=b+1e-9).length;
+    return `<tr><td><strong>${esc(a.name)}<\/strong><\/td><td>${a.n}<\/td><td><input type="number" step="any" class="noprint no-print" data-stepaim="${esc(beh.id)}" data-ck="${esc(k)}" value="${esc(own)}" placeholder="${num(beh.aim)===null?"none":esc(beh.aim)}" style="width:90px" aria-label="Aim in ${esc(a.name)}"><span class="dd-rd-paper">${aim===null?"—":esc(r1(aim))}<\/span><\/td>
+      <td>${aim===null?"—":`${inb} of ${a.n} (${pct(100*inb/a.n)}) within ±${r1(b)}`}<\/td><\/tr>`;}).join("");
+  const steps=A.slice(1),notes=[];
+  if(steps.length>=2&&steps.every(s=>s.n===steps[0].n))notes.push(`The steps are all ${steps[0].n} days long: vary their lengths, or run a longer baseline, so that a change that follows the criterion cannot be put down to time alone.`);
+  if(A[0].trendWord&&A[0].trendWord.effect==="improve")notes.push(`${esc(A[0].name)} was already improving: the design needs a baseline that is stable or moving the other way.`);
+  for(let i=1;i<A.length;i++){const a0=ddAimFor(A[i-1],beh),a1=ddAimFor(A[i],beh);if(a0===null||a1===null||i<2)continue;const s=A[i-1].sd;
+    if(s!==null&&Math.abs(a1-a0)<s)notes.push(`The step from ${r1(a0)} to ${r1(a1)} is smaller than the spread of the days before it (SD ${r1(s)}), so the change may not show against the variability.`);}
+  return `<div class="dd-step"><h4 style="margin-top:12px">Changing criterion<\/h4>
+    <table><thead><tr><th>Condition<\/th><th>Days<\/th><th>Aim in this condition<\/th><th>Days within the band<\/th><\/tr><\/thead><tbody>${rowsH}<\/tbody><\/table>
+    <p class="caution">Control is shown by a close match between the behavior and each change in the criterion; the phases should differ in length (or the baseline be long), the baseline should be stable or moving the other way, and each step should be large enough to see against the variability (Hartmann &amp; Hall, 1976). The band is ±10% of the step’s aim${beh.measure==="count"?", at least 1":""}, a convention of this form; ${dec?"at or below":"at or above"} the aim counts toward the criterion as before. A condition without its own aim uses the behavior’s.${notes.length?" "+notes.join(" "):""}<\/p><\/div>`;}
+/* (M4) consistency across like conditions, and the phase changes where the CDC shows the predicted change */
+function ddDesignHtml(beh,an){const A=an.filter(a=>a.n);const G={};A.forEach(a=>{const k=String(a.name||"").trim().toLowerCase();(G[k]=G[k]||[]).push(a);});
+  const rep=Object.keys(G).filter(k=>G[k].length>1);if(!rep.length)return "";
+  const base=String((an[0]||{}).name||"").trim().toLowerCase();
+  const tr=rep.map(k=>G[k].map((a,i)=>{let inr="—";if(i){const p=G[k][i-1];inr=a.mean>=p.min-1e-9&&a.mean<=p.max+1e-9?"yes":`no (${a.mean>p.max?"higher":"lower"})`;}
+    return `<tr><td><strong>${esc(a.name)}<\/strong><\/td><td>${i+1}<\/td><td>${a.n}<\/td><td>${r1(a.mean)}<\/td><td>${r1(a.min)}–${r1(a.max)}<\/td><td>${inr}<\/td><\/tr>`;}).join("")).join("");
+  let shown=0,not=0,nj=0;const L=[];
+  for(let i=1;i<an.length;i++){const a=an[i-1],b=an[i];if(!a.n||!b.n)continue;const back=String(b.name||"").trim().toLowerCase()===base;const c=ddCdc(a,b,beh,back?"worsen":"improve");
+    if(!c||!c.ok){nj++;L.push(`${esc(a.name)} → ${esc(b.name)}: not judged (${esc(c?c.why:"no data")})`);continue;}
+    if(c.met)shown++;else not++;L.push(`${esc(a.name)} → ${esc(b.name)}: ${c.met?"the predicted change":"not the predicted change"} (${back?`a return toward the ${esc(an[0].name)} level`:`an improvement over ${esc(a.name)}`} expected; CDC ${c.beyond} of ${c.nB}, ${c.need} needed)`);}
+  const tot=shown+not+nj;
+  return `<div class="dd-keep dd-design"><div class="sec-title"><h3>Design summary<\/h3><span>consistency across like conditions, and demonstrations of the effect<\/span><\/div>
+    <table><thead><tr><th>Condition<\/th><th>Time<\/th><th>Days<\/th><th>Mean<\/th><th>Range<\/th><th>Mean within the earlier one’s range<\/th><\/tr><\/thead><tbody>${tr}<\/tbody><\/table>
+    <p class="hint" style="margin-top:8px"><b>Demonstrations of the effect: ${shown} of ${tot} phase change${tot===1?"":"s"}<\/b>${nj?` (${nj} not judged: too few points)`:""}. ${L.join("; ")}. Three demonstrations at three different points in time is the usual standard for a functional relation (the standard Dowdy et al., 2020, applied). A change into a condition named like the first one is read as a return, so the CDC there looks for a change the other way.<\/p>
+    <p class="caution">Consistency across similar phases is one of the six features of a graph to read (Ford et al., 2020); a pattern that repeats across phases counts for more than the size of one shift (DeProspero &amp; Cohen, 1979).<\/p><\/div>`;}
+/* (M5) the stacked view: each behavior one above another on the same days, its own phase line, joined as a step; under
+   it, whether each tier changed after its own line and whether a tier still in baseline stayed as it was */
+function ddStackWanted(behs){return S.settings.stack===true||(S.settings.stack!==false&&behs.some(b=>ddPlanDate(b)));}
+function ddStackHtml(behs,rows,conds){if(!ddStackWanted(behs))return "";
+  const T=behs.filter(b=>rows.some(r=>plotValue(r,b)!==null)).map(b=>{const bc=ddBehConds(b,conds,rows);return {b,bc,an:bc.map(c=>analyzeCondition(c,b,rows))};});
+  if(T.length<2)return `<div class="panel dd-stack"><div class="sec-title"><h3>Stacked view<\/h3><span>a multiple baseline<\/span><\/div><div class="empty dd-line">The stacked view needs two or more behaviors with data.<\/div><\/div>`;
+  const W=980,ML=70,MR=26,iw=W-ML-MR,th=104,gap=30,t0=16,MB=78,H=t0+T.length*th+(T.length-1)*gap+MB,xEnd=ddPlotEnd(rows),X=i=>ML+(xEnd<=0?iw/2:i*iw/xEnd);
+  const g=[`<rect width="${W}" height="${H}" fill="#fff"/>`],step=[];
+  T.forEach((t,k)=>{const y0=t0+k*(th+gap),yb=y0+th,ax=ddAxis(t.b,t.an,rows),top=ax.top,Y=v=>yb-(Math.min(v,top)/top)*th;
+    g.push(`<line x1="${ML}" y1="${y0}" x2="${ML}" y2="${yb}" stroke="#16242E" stroke-width="1.2"/><line x1="${ML}" y1="${yb}" x2="${ML+iw}" y2="${yb}" stroke="#16242E" stroke-width="1.2"/>`);
+    g.push(`<text x="${ML-8}" y="${yb+4}" font-size="11" fill="#4A5C68" text-anchor="end">0<\/text><text x="${ML-8}" y="${y0+8}" font-size="11" fill="#4A5C68" text-anchor="end">${ddTick(top,ax.step)}<\/text>`);
+    g.push(`<text x="${ML+6}" y="${y0+10}" font-size="12" font-weight="700" fill="${esc(t.b.color)}" font-family="${DD_SERIF}">${esc(t.b.name||"Untitled")}<\/text>`);
+    t.bc.forEach((c,ci)=>{if(!ci||c.rowIdx[0]>xEnd)return;const x=(X(c.rowIdx[0]-1)+X(c.rowIdx[0]))/2;if(ci===1)step.push({x,y0,yb});else g.push(`<line class="dd-full" x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${yb}" stroke="#16242E" stroke-width="1.6"/>`);});
+    t.an.forEach(a=>{if(!a.n)return;let seg=[],ex=null;const fl=()=>{if(seg.length>1)g.push(`<polyline points="${seg.map(p=>X(p.x).toFixed(1)+","+Y(p.y).toFixed(1)).join(" ")}" fill="none" stroke="${esc(t.b.color)}" stroke-width="1.8"/>`);seg=[];};
+      a.pts.forEach(p=>{if(ex!==null&&p.x!==ex)fl();seg.push(p);ex=p.x+1;});fl();
+      a.pts.forEach(p=>g.push(`<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="3.2" fill="${esc(t.b.color)}" stroke="#fff" stroke-width="0.8"><title>${esc(t.b.name)} ${esc(fmtDate(p.date))}: ${r1(p.y)}<\/title><\/circle>`));});
+    if(!t.bc[1]||t.bc[1].rowIdx[0]>xEnd)step.push({x:null,y0,yb});});
+  /* the stepped phase line: down each tier at its own line, across the gap to the next tier's */
+  let d="";step.forEach((s,k)=>{if(s.x===null)return;d+=`M${s.x.toFixed(1)} ${s.y0}V${s.yb}`;const n=step[k+1];if(n&&n.x!==null)d+=`V${(s.yb+gap/2).toFixed(1)}H${n.x.toFixed(1)}V${n.y0}`;});
+  if(d)g.push(`<path class="dd-step-line" d="${d}" fill="none" stroke="#16242E" stroke-width="1.6"/>`);
+  const yB=t0+T.length*th+(T.length-1)*gap,every=Math.ceil((xEnd+1)/26);
+  for(let i=0;i<=xEnd;i+=every){const x=X(i),r=rows[i]||{};g.push(`<text x="${x.toFixed(1)}" y="${yB+8}" font-size="11" fill="#4A5C68" text-anchor="end" transform="rotate(-60 ${x.toFixed(1)} ${yB+8})">${esc(fmtDate(r.date)||"")}<\/text>`);}
+  /* the checks */
+  const pi=T.map(t=>t.bc[1]&&t.bc[1].rowIdx.length?t.bc[1].rowIdx[0]:null);
+  const same=pi.every(p=>p!==null&&p===pi[0]);
+  const L=T.map((t,k)=>{const A=t.an[0],B=t.an[1];let s=`<b>${esc(t.b.name||"Untitled")}<\/b>: `;
+    if(!A||!A.n)s+="no baseline data";else if(!B||!B.n)s+="baseline only so far";else{const c=ddCdc(A,B,t.b);s+=!c||!c.ok?`not judged after its own phase line (${esc(c?c.why:"no data")})`:c.met?`changed after its own phase line (CDC ${c.beyond} of ${c.nB}, ${c.need} needed)`:`no change beyond what its baseline predicts (CDC ${c.beyond} of ${c.nB}, ${c.need} needed)`;}
+    /* a tier still in baseline while an earlier tier's plan ran: its baseline before the first earlier start against after it */
+    const own=pi[k]===null?Infinity:pi[k],ear=pi.filter((p,j)=>j!==k&&p!==null&&p<own);
+    if(ear.length&&A&&A.n){const p=Math.min(...ear),who=T.filter((u,j)=>pi[j]===p&&j!==k).map(u=>esc(u.b.name||"Untitled")).join(", ");
+      const pre=analyzeCondition({name:"its earlier baseline",rowIdx:t.bc[0].rowIdx.filter(i=>i<p)},t.b,rows),post=analyzeCondition({name:"the days after",rowIdx:t.bc[0].rowIdx.filter(i=>i>=p)},t.b,rows);
+      if(post.n){const c=ddCdc(pre,post,t.b);
+        s+=`; while the plan ran for ${who} and its own had not started (${post.n} day${post.n===1?"":"s"} from ${esc(fmtDate((rows[p]||{}).date))}): `+(!c||!c.ok?`too few days to judge (${pre.n<2?`${pre.n} earlier baseline day${pre.n===1?"":"s"}`:`${post.n} of the 5 needed`})`:c.met?`it changed too (CDC ${c.beyond} of ${c.nB}): the change may not be the plan’s`:`it stayed within what its earlier baseline predicts (CDC ${c.beyond} of ${c.nB})`);}}
+    return s+".";});
+  return `<div class="panel dd-stack dd-keep"><div class="sec-title"><h3>Stacked view<\/h3><span>the behaviors on one date axis, each with its own phase line (a multiple baseline)<\/span><\/div>
+    <div class="chartbox"><svg class="graph" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stacked graphs of ${T.length} behaviors">${g.join("")}<\/svg><\/div>
+    ${same?`<p class="caution">Every behavior’s plan starts on the same day, so this is not a multiple baseline. Set “Plan starts for this behavior on” on the Client &amp; behaviors tab to stagger the starts.<\/p>`:""}
+    <p class="hint">${L.join(" ")}<\/p>
+    <p class="caution">Each tier should change only after its own phase line, and a tier still in baseline should stay as it was while an earlier tier changes. The CDC is read tier by tier, as Wolfe et al. (2018) read published multiple baselines. Teachers and a parent ran multiple baselines across settings, students and behaviors in ordinary classrooms and at home (Hall et al., 1970): the plan starts for one behavior, or one setting, at a time, and a working plan is never withdrawn.<\/p><\/div>`;}
+/* (M1) a blind view for the second reader: the graph without the CDC lines, the tiles or the summary */
+function ddBlindOpen(key){const p=String(key).split("|"),beh=S.behaviors.find(b=>b.id===p[0]);if(!beh)return;
+  let d=document.getElementById("dlgBlind");if(!d){d=document.createElement("dialog");d.id="dlgBlind";d.className="dd-dialog";d.setAttribute("aria-labelledby","blT");document.body.appendChild(d);
+    d.addEventListener("close",()=>{renderResults();});}
+  const rows=sortedRows(),conds=buildConditions(),keep=S.settings.showCdc;let svg="",names="";ddAltNow=ddAltOn();
+  try{S.settings.showCdc=false;const bc=ddAltNow?ddAltPaths(conds):ddBehConds(beh,conds,rows),an=bc.map(c=>analyzeCondition(c,beh,rows));svg=buildChart(beh,rows,bc,an);
+    const A=an.find(a=>a.n&&ddCondKey(a)===p[1]),B=an.find(a=>a.n&&ddCondKey(a)===p[2]);names=A&&B?`${esc(A.name)} → ${esc(B.name)}`:"";}
+  finally{S.settings.showCdc=keep;ddAltNow=false;}
+  const R=(S.readings&&S.readings[key])||{};
+  d.innerHTML=`<h2 id="blT">Blind reading: ${esc(beh.name||"Untitled")}${names?", "+names:""}<\/h2>
+    <p class="hint">Read the graph alone: is there a change from the first condition to the second? The CDC, the tiles and the summary are not shown here.<\/p>
+    <div class="chartbox">${svg}<\/div>
+    <div class="dd-read" style="margin-top:10px"><div class="dd-read-row"><b>Second reader<\/b>
+      <select data-rd="${esc(key)}" data-rdf="r2" aria-label="Second reader"><option value="">—<\/option>${Object.keys(DD_RD).map(k=>`<option value="${k}"${R.r2===k?" selected":""}>${DD_RD[k]}<\/option>`).join("")}<\/select>
+      <label>Initials <input type="text" data-rd="${esc(key)}" data-rdf="by2" value="${esc(R.by2||"")}" maxlength="12" autocomplete="off"><\/label>
+      <label>Date <input type="date" data-rd="${esc(key)}" data-rdf="date2" value="${esc(R.date2||"")}"><\/label><\/div><\/div>
+    <div class="dd-actions"><span style="flex:1"><\/span><button type="button" class="btn" data-blclose>Done<\/button><\/div>`;
+  d.querySelector("[data-blclose]").addEventListener("click",()=>d.close());
+  try{d.showModal();}catch(e){d.setAttribute("open","");}}
+/* the readings, the step aims and the kept axis, as they are typed */
+function ddRdSet(t){const key=t.dataset.rd,f=t.dataset.rdf;if(!key||!/^(r|by|date)2?$/.test(f||""))return false;
+  if(!S.readings||typeof S.readings!=="object")S.readings={};const R=S.readings[key]||(S.readings[key]={});const v=String(t.value||"").trim();
+  if(v)R[f]=v;else delete R[f];if(!Object.keys(R).length)delete S.readings[key];return true;}
+document.addEventListener("input",e=>{const t=e.target;if(!t||!t.dataset)return;
+  if(t.dataset.rd!==undefined){ddRdSet(t);return;}
+  if(t.dataset.stepaim!==undefined){const b=S.behaviors.find(x=>x.id===t.dataset.stepaim);if(!b)return;if(!b.aims||typeof b.aims!=="object")b.aims={};
+    const v=String(t.value).trim();if(v===""||num(v)===null)delete b.aims[t.dataset.ck];else b.aims[t.dataset.ck]=v;}});
+document.addEventListener("change",e=>{const t=e.target;if(!t||!t.dataset)return;
+  if((t.dataset.rd!==undefined&&t.tagName==="SELECT"&&!t.closest("#dlgBlind"))||(t.dataset.stepaim!==undefined))renderResults();});
+document.addEventListener("click",e=>{const t=e.target&&e.target.closest&&e.target.closest("[data-rdblind],[data-act=\"keepAxis\"]");if(!t)return;
+  if(t.dataset.rdblind!==undefined){ddBlindOpen(t.dataset.rdblind);return;}
+  const b=S.behaviors.find(x=>x.id===t.dataset.b),top=num(t.dataset.top);if(!b||top===null)return;b.yMax=String(top);renderBehaviors();renderResults();toast(`This axis (0 to ${r1(top)}) is kept: it is now ${b.name||"this behavior"}’s Y-axis maximum on the first tab.`);});
+/* the Graphs page's ticks (H1, L1, M5, L3) */
+[["#c_cdc","showCdc"],["#c_alt","alt"],["#c_stack","stack"],["#c_same","sameAxis"],["#c_zero","zeroLift"]].forEach(([id,k])=>{const el=$(id);if(el)el.addEventListener("change",e=>{S.settings[k]=e.target.checked;renderResults();});});
+function ddSyncV2564(){const s=S.settings,set=(id,v)=>{const el=$(id);if(el)el.checked=!!v;};
+  set("#c_cdc",s.showCdc===true);set("#c_alt",s.alt===true);set("#c_stack",ddStackWanted(S.behaviors));set("#c_same",s.sameAxis===true);set("#c_zero",s.zeroLift===true);}
 
 // init
 $("#d_start").value=localISO(new Date());
@@ -7156,13 +7518,32 @@ function ddTagDlg(){let d=document.getElementById("dlgDayTags");if(d)return d;d=
    count or total-duration agreement for a day's value; for the measures typed as one number */
 /* v24.23 (dd123, E-07, R-088) the decision line under each graph, a convention: the criterion run in the current condition and, when
    Review after (days) is set, a flag when that many school days have passed without the level moving the right way */
-function ddRuleHtml(beh,rows,analyses){const A=(analyses||[]).filter(a=>a&&a.n);if(!A.length)return "";const cur=A[A.length-1];const dec=(beh.direction||(beh.kind==="target"?"decrease":"increase"))==="decrease";const L=[];
-  const aim=num(beh.aim);if(aim!==null){const ci=critInfo(cur,beh);if(ci){const need=critNeed(beh);
+function ddRuleHtml(beh,rows,analyses){const A=(analyses||[]).filter(a=>a&&a.n);if(!A.length)return "";let cur=A[A.length-1];const dec=(beh.direction||(beh.kind==="target"?"decrease":"increase"))==="decrease";const L=[];
+  /* v25.64 (DATA review L1) alternating conditions: the condition of the latest day with data */
+  if(ddAltNow){const lx=Math.max(...A.map(a=>a.pts[a.pts.length-1].x));cur=A.find(a=>a.pts[a.pts.length-1].x===lx)||cur;}
+  /* v25.64 (DATA review H2, L2) the run at the aim, the longest and the current; with a changing criterion, this condition's own aim */
+  {const ci=critInfo(cur,beh);if(ci){const need=ci.need,aim=ci.aim;
     if(ci.metDate)L.push(`criterion met on ${esc(fmtDate(ci.metDate))} (${need} consecutive day${need===1?"":"s"} ${dec?"at or below":"at or above"} ${r1(aim)} in ${esc(cur.name)}; ${ci.count} of ${cur.n} day${cur.n===1?"":"s"} at criterion)`);
-    else L.push(`criterion not met in ${esc(cur.name)}: ${ci.count} of ${cur.n} day${cur.n===1?"":"s"} ${dec?"at or below":"at or above"} ${r1(aim)}, longest run ${ci.run||0} of the ${need} needed`);}}
+    else L.push(`criterion not met in ${esc(cur.name)}: ${ci.count} of ${cur.n} day${cur.n===1?"":"s"} ${dec?"at or below":"at or above"} ${r1(aim)}, longest run ${ci.longestRun||0} of the ${need} needed, current run ${ci.currentRun||0}`);}}
   const rv=parseInt(beh.reviewDays,10);if(rv>=2){
-    if(cur.n>=rv){const k=Math.max(2,Math.min(5,Math.floor(cur.n/2)));const first=cur.vals.slice(0,k),last=cur.vals.slice(-k);const m=a=>a.reduce((x,y)=>x+y,0)/a.length;const d=m(last)-m(first);const better=dec?d<0:d>0;const sl=cur.slope;const slopeOk=sl===undefined||sl===null?better:(dec?sl<0:sl>0);
-      if(!(better&&slopeOk))L.push(`<b>review</b>: ${cur.n} school day${cur.n===1?"":"s"} in ${esc(cur.name)} (the rule says ${rv}) without the level moving the right way (first ${k}: ${r1(m(first))}; last ${k}: ${r1(m(last))}${sl!==undefined&&sl!==null?`; slope ${sl>0?"+":""}${r1(sl)} a day`:""}): continue, modify or stop is the team's call`);
+    if(ddAltNow)L.push(`the review rule is not applied to alternating conditions, where no condition follows another`);
+    else if(cur.n>=rv){const k=Math.max(2,Math.min(5,Math.floor(cur.n/2)));const first=cur.vals.slice(0,k),last=cur.vals.slice(-k);const m=a=>a.reduce((x,y)=>x+y,0)/a.length;const d=m(last)-m(first);const better=dec?d<0:d>0;const sl=cur.slope;const slopeOk=sl===undefined||sl===null?better:(dec?sl<0:sl>0);
+      const fl=`first ${k}: ${r1(m(first))}; last ${k}: ${r1(m(last))}${sl!==undefined&&sl!==null?`; slope ${sl>0?"+":""}${r1(sl)} a day`:""}`;
+      /* v25.64 (DATA review H2) the condition is judged against the one before it first: at the aim, no review; a change from
+         it (the CDC, or the level with too few days for the CDC), a trend not worsening and the last days at or better than
+         the first, no review. Review only when there is no change from it, the trend has turned the wrong way, or the
+         last days are worse than the first. A behavior that dropped at once and stayed low is not flagged. */
+      const ci=critInfo(cur,beh),atAim=!!(ci&&ci.currentRun>=ci.need);
+      const ix=analyses.indexOf(cur),prev=ix>0&&analyses[ix-1]&&analyses[ix-1].n?analyses[ix-1]:null;
+      const worse=!!(cur.trendWord&&cur.trendWord.effect==="worsen"),lastOk=dec?d<=1e-9:d>=-1e-9;
+      if(atAim)L.push(`${cur.n} day${cur.n===1?"":"s"} in ${esc(cur.name)}, at the aim (the last ${ci.currentRun} ${dec?"at or below":"at or above"} ${r1(ci.aim)}): no review; review at ${rv} days without change`);
+      else if(prev){const c=ddCdc(prev,cur,beh);let changed,how;
+        if(c&&c.ok){changed=c.met;how=`CDC ${c.beyond} of ${c.nB} beyond both lines, ${c.need} needed`;}
+        else{const lc=cur.mean-prev.mean;changed=dec?lc<0:lc>0;how=`too few days for the CDC; mean ${r1(prev.mean)} → ${r1(cur.mean)}`;}
+        if(changed&&!worse&&lastOk)L.push(`${cur.n} day${cur.n===1?"":"s"} in ${esc(cur.name)}: a change from ${esc(prev.name)} (${how}), the trend not worsening and the last ${k} at or better than the first ${k} (${fl}); review at ${rv} days without change`);
+        else{const why=[!changed?`no change from ${esc(prev.name)} (${how})`:"",worse?"the trend has turned the wrong way":"",changed&&!worse&&!lastOk?`the last ${k} days are worse than the first ${k}`:""].filter(Boolean).join("; ");
+          L.push(`<b>review</b>: ${cur.n} school day${cur.n===1?"":"s"} in ${esc(cur.name)} (the rule says ${rv}): ${why} (${fl}): continue, modify or stop is the team's call`);}}
+      else if(!(better&&slopeOk))L.push(`<b>review</b>: ${cur.n} school day${cur.n===1?"":"s"} in ${esc(cur.name)} (the rule says ${rv}) without the level moving the right way (${fl}): continue, modify or stop is the team's call`);
       else L.push(`${cur.n} day${cur.n===1?"":"s"} in ${esc(cur.name)}, the level moving the right way (first ${k}: ${r1(m(first))}; last ${k}: ${r1(m(last))}); review at ${rv} days without change`);}
     else L.push(`${cur.n} of the ${rv} day${rv===1?"":"s"} in ${esc(cur.name)} before the review rule applies`);}
   const sm=A.reduce((n,a)=>n+((a.samples||[]).length),0);if(sm)L.push(`${sm} part-day sample${sm===1?"":"s"} drawn hollow and left out of the figures`);
@@ -11329,6 +11710,9 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 <script id="dd1-walk">
 /* ===== walk-script.json: the narration's words (read when nbh-dd1-narration.js is not beside the form) ===== */
 window.DD_WALK_SCRIPT=[{"id":"intro","text":"This is the daily data sheet. Each row is one school day, and each column is one behavior the plan is tracking. A few numbers at the end of each day become the graphs the team uses to decide whether the plan is working."},{"id":"types","text":"The colored bands group the columns. Reduction targets are the behaviors the plan aims to decrease. Replacement behaviors are what the student does instead, for the same outcome, and they should rise as the targets fall. Acquisition targets are skills taught to a mastery criterion."},{"id":"defs","text":"Every column has a number. Its definition, and how it is measured, are below the sheet under the same number, so everyone who records counts the same thing."},{"id":"units","text":"The row under the names says what goes in each column: a count for the day, the total minutes for a behavior measured by duration, or the correct responses and the opportunities for a skill."},{"id":"day","text":"At the end of the day, write the date and fill in the row: one number in each column, from your tally or your timer."},{"id":"obsmin","text":"Observation minutes are how long you watched. They fill in from the school day. If the student arrived late or left early, type the minutes you actually had, so the rate stays fair."},{"id":"blankzero","text":"Leave a cell blank when you did not measure that behavior. Write a zero when you measured it and it did not happen. They mean different things, and the graph treats them differently."},{"id":"episodes","text":"For a behavior measured by duration, you can log each episode on its own: when it started and when it stopped. The form adds them up for the day."},{"id":"percent","text":"For a skill, write how many responses were correct and how many chances there were. The form works out the percent."},{"id":"phase","text":"When the plan changes, mark a full phase change on the first day of the new plan, and name the new condition. The graph starts a new section from that day."},{"id":"cond","text":"For an event inside a phase, such as a medication change, a new staff member, or an illness, mark a conditional change. It adds a dashed line to the graph without splitting the phase."},{"id":"graph","text":"Each behavior gets its own graph. Every point is a day. The solid line is the phase change, and each phase gets its own level and its own trend line."},{"id":"analysis","text":"Under each graph, the form compares the phases: how much the level changed, which way the trend is going, how much the data vary, and how far the phases overlap. The team reads the graph first, and the numbers with it."},{"id":"adults","text":"A few habits keep the data worth reading. Record the same way every day. Keep blank and zero apart. Mark changes on the day they happen. And save the file to the student's folder."},{"id":"outro","text":"One row a day, the same way every day. That is what makes the graph tell the truth."}];
+/* v25.64 (DATA review L7) the chapter on reading a comparison with the CDC lines, in the walkthrough when Show CDC lines is
+   ticked on the Graphs page; the recorded narration has no voice for it yet, so its caption is read by the device or shown */
+window.DD_WALK_SCRIPT.push({"id":"cdc","text":"With the CDC lines on, the plan days carry two dashed lines: where the days before would have gone, their mean and their trend, each moved a little toward improvement. Count the plan days beyond both lines. Then look up the number needed on the comparison card: five of five, eight of ten, fourteen of twenty. Fewer than that, and the change is not beyond what the days before predict. Read it with the graph, not instead of it."});
 /* (v21.47) Form DD-1, the Walkthrough view: a narrated walkthrough of this form's own daily data sheet and graphs, for the
    staff who record. It is built live from the form as it is (the behaviors, their definitions and measurement, the days, the
    phase changes, the first behavior's graph and analysis), laid out once per build as a timeline; renderAt(t) sets every
@@ -11344,8 +11728,8 @@ window.DD_WALK_SCRIPT=[{"id":"intro","text":"This is the daily data sheet. Each 
 /* Save as video (nbh-tk1-video.js) names the file and the dialog's words for this form */
 window.NBH_WALK_INFO={file:'Daily data sheet walkthrough',from:'from this form: its behaviors, definitions, days and graphs',what:'form'};
 const SW=1280,SH=720,PAUSE=.4;
-const CHOF={intro:'sheet',types:'sheet',defs:'sheet',units:'sheet',day:'day',obsmin:'day',blankzero:'day',episodes:'day',percent:'day',phase:'changes',cond:'changes',graph:'graph',analysis:'graph',adults:'team',outro:'team'};
-const CHAPS=[['sheet','The sheet'],['day','A day'],['changes','Changes'],['graph','The graphs'],['team','For the team']];
+const CHOF={intro:'sheet',types:'sheet',defs:'sheet',units:'sheet',day:'day',obsmin:'day',blankzero:'day',episodes:'day',percent:'day',phase:'changes',cond:'changes',graph:'graph',analysis:'graph',cdc:'cdc',adults:'team',outro:'team'};
+const CHAPS=[['sheet','The sheet'],['day','A day'],['changes','Changes'],['graph','The graphs'],['cdc','Reading a comparison'],['team','For the team']];   /* v25.64 (DATA review L7) */
 /* the narration as written in walk-script.json, used only when walk-audio.js is not beside the form (its texts always win) */
 const FB=(function(){const o={};(window.DD_WALK_SCRIPT||[]).forEach(l=>{o[l.id]=l.text;});return o;})();
 /* ---------------- small helpers ---------------- */
@@ -11363,7 +11747,7 @@ const MK={};   /* DD-1: no measured word marks; a line's words are placed by the
 const hash=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(16);};
 function onsetFn(id,text,d){const pts=[[0,.05],[text.length,Math.max(.15,d-.15)]];
   return i=>{if(i<=0)return pts[0][1];const a=pts[0],b=pts[1];return a[1]+(b[1]-a[1])*Math.min(1,i/Math.max(1,b[0]));};}
-function present(id){const L=audioLines();return L?!!L[id]:id in FB;}
+function present(id){const L=audioLines();return L?(!!L[id]||(id==='cdc'&&id in FB)):id in FB;}   /* v25.64 (L7) the new line has no recording yet */
 
 /* ---------------- keyframe tracks (as SM-1's) ---------------- */
 function Track(st){this.k=[{t:-1e9,st:Object.assign({},st)}];}
@@ -11442,9 +11826,10 @@ function compose(D){
     last.parentNode.appendChild(today);}
   const PW=Math.max(600,inner.offsetWidth+36),PH=Math.max(300,inner.offsetHeight+32);sheetP.style.width=PW+'px';
   /* the graph, drawn as the Graphs page draws it */
-  let gP=null,rep=null;
+  let gP=null,rep=null,gBeh=null;
   if(obs.length&&typeof renderResults==='function'){try{renderResults();}catch(e){}
     const r0=document.querySelector('#tab-results .behavior-report');
+    {const sb=r0&&r0.querySelector('[data-act="saveGraph"]');gBeh=sb?S.behaviors.find(b=>b.id===sb.dataset.b)||null:null;}   /* v25.64 (L7) */
     if(r0&&r0.querySelector('svg.graph')){gP=div('smw-paper ddw-paper ddw-gpaper');rep=r0.cloneNode(true);flatten(rep);gP.appendChild(rep);gP.style.top=f2(PH+260)+'px';gP.style.width='1240px';world.appendChild(gP);}}
   world.style.width=Math.max(PW,gP?1240:0)+'px';
   const GY=PH+260;
@@ -11555,6 +11940,20 @@ function compose(D){
     camTo(K.t+.1,K.t+1.3,mm?uni([mm]):tt);const ms=[...(mg?mg.querySelectorAll('.metric'):[])];const find=re=>ms.find(m=>re.test((m.querySelector('.k')||m).textContent));
     [[find(/^Mean level/i),'level changed',.18],[find(/^Trend change/i),'trend',.35],[find(/^Variability/i),'data vary',.52],[find(/Overlap/i),'overlap',.66]].forEach(([m,ph,fr])=>{if(m)glow(wrel(m),Math.max(K.t+1.4,K.at(ph,fr)-.2),2.2,3);});
     const nar=rep.querySelector('.narrative');const tn=Math.max(K.t+5,K.at('reads the graph',.85)-.3);if(nar){camTo(tn,tn+1.1,uni([wrel(nar),mm]));glow(wrel(nar),tn+1,1.8,4);}return K.d;};
+  /* v25.64 (DATA review L7) reading a comparison with the CDC lines: the two lines, the plan days beyond both counted one by
+     one, then the number needed on the card (Fisher et al., 2003: brief instruction raised accuracy from 55% to 94%) */
+  const cdcLines=gsvg?[...gsvg.querySelectorAll('line.dd-cdcl')]:[];
+  const cdcInfo=(()=>{if(!gBeh||!cdcLines.length||typeof ddCdc!=='function')return null;try{const rows=sortedRows(),bc=ddBehConds(gBeh,buildConditions(),rows),an=bc.map(c=>analyzeCondition(c,gBeh,rows));
+    for(let i=1;i<an.length;i++){const A=an[i-1],Bq=an[i];if(!A.n||!Bq.n)continue;const c=ddCdc(A,Bq,gBeh);if(!c||c.mean===undefined)continue;
+      const past=Bq.pts.filter(p=>c.down?(p.y<c.mean-1e-9&&p.y<c.line(p.x)-1e-9):(p.y>c.mean+1e-9&&p.y>c.line(p.x)+1e-9));return {c,A,B:Bq,past};}}catch(e){}return null;})();
+  SC.cdc=K=>{if(!gsvg||!cdcInfo)return K.d;const gr=wrel(gsvg.closest('.chartbox')||gsvg);camTo(K.t+.1,K.t+1.2,gr);
+    const tl=Math.max(K.t+1.2,K.at('two dashed lines',.12)-.2);cdcLines.slice(0,2).forEach((l,i)=>glow(wrel(l),tl+i*.5,2.2,6));
+    const circ=[...gsvg.querySelectorAll('circle:not(.dd-sample-pt)')];const tc=Math.max(tl+1.4,K.at('count the plan days',.35)-.1);
+    cdcInfo.past.forEach((p,i)=>{const lab=fmtDate(p.date)+':';const el=circ.find(c=>{const t=c.querySelector('title');return t&&t.textContent.indexOf(lab)===0;});if(!el)return;
+      const r=wrel(el);const d=mkFx('ddw-dot','',{x:r.x+r.w/2-11,y:r.y+r.h/2-11,w:22,h:22},null,world);d.tr.move(tc+i*.25,tc+i*.25+.2,{o:1});d.tr.move(K.t+K.d-.4,K.t+K.d,{o:0});});
+    const c=cdcInfo.c;note(gr?{x:gr.x+gr.w*.5,y:gr.y+30,w:0,h:0}:null,c.ok?`${c.beyond} of ${c.nB} beyond both lines; ${c.need} needed`:`${c.beyond} beyond both lines`,tc+cdcInfo.past.length*.25+.2,K.t+K.d-.3,'below');
+    const card=rep.querySelector('.dd-cdc');const tk=Math.max(tc+cdcInfo.past.length*.25+1,K.at('look up',.55)-.2);if(card){camTo(tk,tk+1.1,uni([wrel(card),wrel(card.closest('.cmp-card')&&card.closest('.cmp-card').querySelector('h4'))]));glow(wrel(card),tk+1,K.t+K.d-tk-1,4);}
+    return K.d;};
   /* for the team: four habits, each lit as it is read */
   SC.adults=K=>{const tips=[['Record the same way every day','the same definitions, the same window'],['Keep blank and zero apart','blank: not measured · 0: none'],['Mark changes on the day','a new plan, a medication change'],['Save the file','to the student’s folder']];
     const veil=mkFx('smw-veil','',{x:0,y:0,w:SW,h:SH});veil.el.style.zIndex='0';veil.tr.move(K.t,K.t+.5,{o:.45});veil.tr.move(K.t+K.d,K.t+K.d+.4,{o:0});
@@ -11569,7 +11968,7 @@ function compose(D){
 
   /* ---- the timeline: the lines this form's data can show ---- */
   const ids=['intro'];
-  if(obs.length&&tbl){ids.push('types','defs','units');if(body.length)ids.push('day','obsmin','blankzero');if(durB)ids.push('episodes');if(twB)ids.push('percent');if(fullTr)ids.push('phase');if(condTr)ids.push('cond');if(gsvg)ids.push('graph','analysis');ids.push('adults');}
+  if(obs.length&&tbl){ids.push('types','defs','units');if(body.length)ids.push('day','obsmin','blankzero');if(durB)ids.push('episodes');if(twB)ids.push('percent');if(fullTr)ids.push('phase');if(condTr)ids.push('cond');if(gsvg)ids.push('graph','analysis');if(gsvg&&cdcInfo&&S.settings.showCdc===true)ids.push('cdc');ids.push('adults');}
   if(!R.defs){const k=ids.indexOf('defs');if(k>=0)ids.splice(k,1);}
   ids.push('outro');
   let T=0;const cues=[];
@@ -12177,6 +12576,19 @@ window.__nbhFactsWants=(window.__nbhFactsWants||[]).concat(['ob1obs']);
   S.rows.sort((a,c)=>String(a.date).localeCompare(String(c.date)));
   if(n||made){renderAll();r.filled=(r.filled||0)+n;r.note=(r.note?r.note+'; ':'')+n+' day'+(n===1?'':'s')+' from Form OB-1 as baseline rows ('+b.name+')';}
   return r;};}
+</script>
+<script id="dd1-v2564">
+/* v25.64 (DATA review H1, H3, M1) for Form PR-1 and the case: each behavior's first condition against its current one, with
+   the CDC, the provisional mark (too few points) and whether the readings of the last comparison are uncertain. Wrapped;
+   the rest of the record is unchanged. */
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+  try{if(!o||!o.data||!Array.isArray(o.data.behaviors)||ddAltOn())return o;const rows=sortedRows(),conds=buildConditions(),B=orderedBehaviors();
+    o.data.behaviors.forEach((b,i)=>{const x=B.find(y=>(y.name||'')===b.name)||B[i];if(!x)return;
+      const an=ddBehConds(x,conds,rows).map(c=>analyzeCondition(c,x,rows)).filter(a=>a.n);if(an.length<2)return;
+      const A=an[0],C=an[an.length-1],P=an[an.length-2],c=ddCdc(A,C,x),cl=ddCdc(P,C,x);
+      const unc=ddReadState(ddCmpKey(x,P,C),cl).unc||(P!==A&&ddReadState(ddCmpKey(x,A,C),c).unc);
+      b.cmp={from:A.name,to:C.name,nFrom:A.n,nTo:C.n,provisional:ddProvisional(A,C),cdc:c&&c.ok?{beyond:c.beyond,n:c.nB,need:c.need,met:c.met}:null,uncertain:!!unc};});}catch(e){}
+  return o;};})();
 </script>
 
 <script id="nbh-jsqr">/* jsQR 1.4.0, Apache License 2.0 (tools/vendor/jsqr/LICENSE); https://github.com/cozmo/jsQR. Inlined for the paper-sheet entry from a photo (v24.34). */
