@@ -67,9 +67,10 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
     banks already hold is kept as it is.
 16. **Steps that reinforce problem behavior on purpose** (a baseline, test or comparison condition that gives escape,
     attention or an item after problem behavior; a lean baseline before treatment): allowed and explained (the BCBA, 11/2).
-    The step says plainly that it reinforces the problem behavior on purpose, why the study did it and for how long; the
-    note says when a team would use it and what the data must show before the condition ends. Before 11/2 readers left
-    these steps out (for example Fisher et al., 2018; Mitteer et al., 2026).
+    The step is its own, starting "OPTION: Reinforces problem behavior on purpose:", and says why the study did it and for how
+    long; the note says when a team would use it and what the data must show before the condition ends. TD-1 adds the card
+    without it unless "Include the optional step" is ticked (the BCBA, 11/2: "add them as an option"). Before 11/2 readers left
+    these steps out; Fisher et al. (2018, both cards) and Mitteer et al. (2026) have theirs back as options (v25.64).
 
 ## When each rule started
 

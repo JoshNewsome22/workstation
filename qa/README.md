@@ -32,6 +32,7 @@ and the server from `WS_URL` (default `http://127.0.0.1:8123`); both are read in
 | `node a11y.js after http://127.0.0.1:8123` | axe-core, WCAG 2.1 A and AA, on the workstation (empty, with a form open, fullscreen, Help open) and on every form. |
 | `node td1-compare-test.js` | v25.56: TD-1's Compare two interventions and How the parts fit: every row for NCR and DRA, a card's Compare button, the conflict raised and answered (kept through Save and Open), the question before Copy and Print, the BIP section, the single-card rules, upright on an iPad. |
 | `node gc1-gbg-points-test.js` | v25.64: GC-1's Good Behavior Game counts points by default (script, poster, plan, win rules); the fouls version is labelled response cost and asks for the BCBA's sign-off; the simulated fouls game carries one. |
+| `node v2564-optstep-test.js` | v25.64: TD-1 bank steps marked OPTION (they reinforce problem behavior on purpose) are left off a card unless "Include the optional step" is ticked; ticked, the card and its source line carry it. |
 | `node dd1-run-test.js` | v25.64: DD-1's criterion: the decision line's longest run of days at the aim (it always printed 0), the current run and the day the criterion was met. |
 | `node ipad-reflow-test.js` | v25.55: no form pushes the page sideways on an iPad, empty or with its simulated case loaded, at 820 px (upright) and 1133 px (an iPad mini sideways). A wide table may scroll inside its own panel. |
 | `node shots.js after` | Screen captures of the workstation and four forms at desktop, tablet and phone sizes. |

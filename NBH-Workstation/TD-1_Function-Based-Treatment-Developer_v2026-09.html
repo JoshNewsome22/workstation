@@ -6624,6 +6624,10 @@ details.about>p{margin:6px 0 0;padding:8px 12px;border-left:3px solid var(--nbh-
 .btns{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
 .punnote{flex:1 1 100%;margin:2px 0 0;font-size:13px;line-height:1.45;color:#7a3b00;background:#fff5e6;border:1px solid #e7c27a;border-radius:8px;padding:8px 10px}
 ol.steps li.pun{color:#7a3b00;background:#fff5e6;border-radius:6px;padding:2px 6px}
+ol.steps li.opt{color:#4a3a6b;background:#f3f0fa;border-radius:6px;padding:2px 6px}
+.optpick{flex:1 1 100%;display:flex;align-items:center;gap:8px;font-size:14px;margin:6px 0 0;min-height:44px}
+.optpick input{width:22px;height:22px}
+.optnote{flex:1 1 100%;margin:2px 0 0;font-size:13px;line-height:1.45;color:#4a3a6b;background:#f3f0fa;border:1px solid #c9bfe3;border-radius:8px;padding:8px 10px}
 .btns button{text-align:left}
 .btns .sub{display:block;max-width:16em;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:500;color:var(--nbh-muted,#54676f)}
 .st{flex:1 1 100%;font-size:12.5px}
@@ -6688,6 +6692,8 @@ const KIND=['Antecedent strategies','Replacement behavior and skills','Prompting
 const G=(window.__tdGroups?window.__tdGroups():[]),kindOf=c=>{const k=G.findIndex(g=>g[1].includes(c));return k>=0?KIND[k]||G[k][0]:'Other components';};
 const LIBOF={};B.protocols.forEach(p=>{if(!LIBOF[p.code])LIBOF[p.code]=window.__tdLibOf(p.code);});
 const PUN=/^\s*RESTRICTIVE:\s*Punishment\b/i,hasPun=p=>(p.steps||[]).some(x=>PUN.test(x));
+/* v25.64 (the BCBA, 11/2) a step marked "OPTION:" (one that reinforces problem behavior on purpose) is left off unless chosen */
+const OPT=/^\s*OPTION:/i,hasOpt=p=>(p.steps||[]).some(x=>OPT.test(x));
 const ok=B.protocols.filter(p=>LIBOF[p.code]);
 const fold=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,'');
 const stem=w=>w.replace(/(ings|ing|ed|es|s)$/,'').replace(/(.)\1$/,'$1');
@@ -6769,10 +6775,10 @@ function show(id){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
   det.innerHTML=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>
-<div class="load"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':'<button type="button" class="add primary">Add to the plan</button>'}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${window.__tdVideo&&window.__tdVideo.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div>${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
+<div class="load"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':'<button type="button" class="add primary">Add to the plan</button>'}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${window.__tdVideo&&window.__tdVideo.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div>${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}${hasOpt(p)?'<label class="optpick"><input type="checkbox" class="optck"> Include the optional step: it reinforces problem behavior on purpose</label><p class="optnote">This study reinforced the problem behavior on purpose in one step, marked OPTION below; the step says what it does, why the study did it and when it ends. It is left off the card unless you tick the box. If you use it, run it only with a safety plan for the behavior and end it as soon as its own criterion is met.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
 <div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div>
-<div class="vh">Steps for staff</div>${tdWhoNote()}<ol class="steps">${(p.steps||[]).map(s=>'<li'+(PUN.test(s)?' class="pun"':'')+'>'+esc(tdW(s))+'</li>').join('')}</ol>
+<div class="vh">Steps for staff</div>${tdWhoNote()}<ol class="steps">${(p.steps||[]).map(s=>'<li'+(PUN.test(s)?' class="pun"':OPT.test(s)?' class="opt"':'')+'>'+esc(tdW(s))+'</li>').join('')}</ol>
 ${p.ta&&p.ta.length?`<div class="vh">The student’s task analysis, as the study taught it</div><p class="tx hint">The study’s list, reworded: adjust it to this student. It goes on the card in its own box, apart from the steps for staff, and the plan prints it as its own list.</p>${p.ta.map(l=>`${l.name?`<div class="tan">${esc(l.name)}</div>`:''}<ol class="steps ta">${l.steps.map(s=>'<li>'+esc(s)+'</li>').join('')}</ol>`).join('')}${p.ta_note?`<p class="tx tanote">${esc(p.ta_note)}</p>`:''}`:p.code==='TA_CHAIN'?`<div class="vh">The student’s task analysis</div><p class="tx hint">The article does not print its steps (the setting above gives the count); write the list for this student in the card’s box.</p>`:''}
 <div class="rows">${row('Data collected',tdW(p.data))}${row('Materials and cues',tdW(p.mat))}</div>
 <div class="vh">What happened in the study</div><p class="tx">${esc(p.result)}</p>
@@ -6795,9 +6801,9 @@ function askSame(p,then){const box=$p('.same');if(!box)return then('add');const 
   const note=document.createElement('div');note.className='td-asknote';note.textContent='Replacing keeps the card’s number, its who/when/where line and anything typed in Data and Materials; Undo is offered.';box.appendChild(note);}
 /* v25.30 punishment elements (the BCBA, 10/31): a protocol whose steps include one marked "RESTRICTIVE: Punishment" is added
    either without those steps (the default) or with them, labeled on the card and in the plan as needing consent */
-let withPun=false;
-function stepsOf(p){const st=p.steps||[];return withPun?st:st.filter(s=>!PUN.test(s));}
-function srcOf(p){return p.lab+(withPun&&hasPun(p)?', with punishment steps (consent required)':'')+' ('+cites(p).join('; ')+')';}
+let withPun=false,withOpt=false;
+function stepsOf(p){const st=p.steps||[];return st.filter(s=>(withPun||!PUN.test(s))&&(withOpt||!OPT.test(s)));}
+function srcOf(p){return p.lab+(withPun&&hasPun(p)?', with punishment steps (consent required)':'')+(withOpt&&hasOpt(p)?', with the optional step that reinforces problem behavior on purpose':'')+' ('+cites(p).join('; ')+')';}
 /* an add: a new card of the protocol's component, with the study's steps (as many as the study has), settings, data,
    materials and the study's name; Undo removes the card unless a field it filled has been edited since */
 let undoRec=null;
@@ -6824,14 +6830,14 @@ function doAdd(){const p=byId[cur];if(!p)return;const same=sameCards(p);if(same.
   const go=document.createElement('button');go.type='button';go.className='lnk';go.textContent='Go to the card';go.addEventListener('click',()=>goTo(r.c));
   const u=document.createElement('button');u.type='button';u.className='lnk';u.textContent=r.replaced?'Undo the replace':'Undo the add';
   u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.']);});
-  const pn=hasPun(p)?(withPun?' The punishment steps are on the card, labeled: they need district review and written consent before they are used.':' The punishment steps were left off.'):'';
+  const pn=(hasPun(p)?(withPun?' The punishment steps are on the card, labeled: they need district review and written consent before they are used.':' The punishment steps were left off.'):'')+(hasOpt(p)?(withOpt?' The optional step that reinforces problem behavior on purpose is on the card, marked OPTION: run it only with a safety plan.':' The optional step that reinforces problem behavior on purpose was left off.'):'');
   say([b,pn,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u]);}
 q.addEventListener('input',draw);kind.addEventListener('change',draw);fn.addEventListener('change',()=>{fnTouched=true;draw();});age.addEventListener('change',()=>{ageTouched=true;draw();});
 d.addEventListener('toggle',()=>{if(d.open){try{ageFill();fnFill();draw();}catch(x){}}});   /* v24.30 the filters follow the plan and the case when the bank opens */
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});
 listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);
   try{($p('.load')||det).scrollIntoView({block:'nearest',behavior:'smooth'});}catch(x){}});
-det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add')){withPun=b.dataset.pun==='1';doAdd();}else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);else if(b&&b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(cur,b);});
+det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('add')){withPun=b.dataset.pun==='1';const ok=det.querySelector('.optck');withOpt=!!(ok&&ok.checked);doAdd();}else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);else if(b&&b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(cur,b);});
 /* the function choices follow the plan's function; the note on cards already in the plan follows the cards */
 document.addEventListener('change',ev=>{if(ev.target&&ev.target.name==='m.fn'){fnFill();draw();}});
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.student&&typeof f.student==='object')CASE.student=f.student;ageFill();fnFill();draw();}catch(x){}return r;};}
