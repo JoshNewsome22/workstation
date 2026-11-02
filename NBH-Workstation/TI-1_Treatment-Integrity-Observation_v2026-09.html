@@ -1215,6 +1215,20 @@ input[data-m],textarea[data-m]{font:inherit}
       <span class="ti-handoff-note" id="tiRetrainNote"></span>
       <span class="ti-handoff-saved" id="tiRetrainSaved" role="status" aria-live="polite"></span>
     </div>
+    <!-- v25.65 (SKILL-M9) an interventionist already signed off on Form ST-1: why did it drop? (after the Performance Diagnostic Checklist-Human Services) -->
+    <h3 style="margin-top:14px">Why Did It Drop?</h3>
+    <div class="ti-drop" id="tiDrop">
+      <p><label class="ti-inl"><input type="checkbox" id="tiDropSigned"> This interventionist was already signed off as competent on Form ST-1</label></p>
+      <div id="tiDropBody" hidden>
+        <p class="hint">Before retraining, tick what the check found. The four questions come from the Performance Diagnostic Checklist&ndash;Human Services (Form PD-1 runs the full checklist). Only the first leads to retraining on Form ST-1; for the others, change the setting or the feedback, not the training.</p>
+        <p><label class="ti-inl"><input type="checkbox" class="tiDropK" data-k="skill"> Does not know the steps: in rehearsal now, the steps are done wrongly</label></p>
+        <p><label class="ti-inl"><input type="checkbox" class="tiDropK" data-k="mat"> Lacks the materials or the time to do the steps</label></p>
+        <p><label class="ti-inl"><input type="checkbox" class="tiDropK" data-k="setup"> The task is not set up to be done (where, when, the cue to start)</label></p>
+        <p><label class="ti-inl"><input type="checkbox" class="tiDropK" data-k="notice"> No one notices when it is done (no feedback, no consequence for doing it)</label></p>
+        <div id="tiDropOut"></div>
+        <table class="rt"><tr><th style="width:22%">What was changed</th><td><textarea data-m="dropChanged" rows="2" style="width:100%" placeholder="the setting or the feedback that was changed, and when; e.g., graphed feedback after each check; the materials kept at the table"></textarea></td></tr></table>
+      </div>
+    </div>
     <h3 style="margin-top:14px">Observer Notes and Follow-up</h3>
     <table class="rt">
       <tr><th style="width:22%">What was observed</th><td><textarea data-m="notes" rows="3" style="width:100%"></textarea></td></tr>
@@ -1254,7 +1268,7 @@ input[data-m],textarea[data-m]{font:inherit}
       <tr><th>Abrupt drop</th><td>Individual trial integrity on consecutive scored observations, in date order: a fall of 20 points or more from one to the next is flagged. The 20 points are this form&rsquo;s convention.</td></tr>
       <tr><th>Feedback delay</th><td>School days (Monday to Friday) from the observation&rsquo;s date to the date the feedback was given; over 1 school day is flagged. Holidays are not known to the form, so count them out by eye.</td></tr>
       <tr><th>Opportunity fidelity (consequence steps)</th><td>For a step tagged Consequence: correct opportunities &divide; (correct + commission + omission) across the observations, from the counts on the Scoring sheet; a scored code with no counts is one opportunity; N/A when the step never came due. Flagged when fewer than 5 opportunities stand behind it (a form convention).</td></tr>
-      <tr><th>Commission rate, omission rate</th><td>On consequence steps: commission opportunities &divide; all opportunities, and omission opportunities &divide; all opportunities. These are reported beside the overall figure, never in place of it.</td></tr>
+      <tr><th>Commission rate, omission rate</th><td>On consequence steps: commission opportunities &divide; all opportunities, and omission opportunities &divide; all opportunities. These are reported beside the overall figure, never in place of it. The case is also told the commission share for each observation (the commission opportunities on its consequence steps &divide; all its consequence-step opportunities), so Forms RM-1 and BC-1 can show it beside the overall percentage (v25.65): commission errors on DRA hurt when integrity fell to 40% or below, and omission errors alone did not (St. Peter Pipkin et al., 2010).</td></tr>
       <tr><th>Weighted integrity</th><td>Correct &divide; (correct + omission + commission + commission on consequence steps), over every step&rsquo;s opportunities: a commission error on a consequence step counts twice. This is this form&rsquo;s convention; the studies tested consequence errors only, and none quantifies the weight.</td></tr>
       <tr><th>Lowest step, range</th><td>The lowest per-step percentage among scored steps, and the lowest and highest individual trial integrity across the scored observations. Fidelity varies between observations and implementers, and performance after a drop in fidelity depended on the preceding level in Burlison et al. (2026), so the spread is recorded, not only the mean.</td></tr>
       <tr><th>Fidelity band</th><td>Pooled integrity on the observations the verdict is judged on (all scored observations when no unannounced one is scored), placed in one of four bands: 90% and above; 80&ndash;89%; 60&ndash;79%; below 60%. The 80&ndash;89% band is read from the main procedure, the schedule-thinning tick and the plan type (see below). The bands are this form&rsquo;s working convention, informed by the parametric studies but not set by them.</td></tr>
@@ -1263,7 +1277,9 @@ input[data-m],textarea[data-m]{font:inherit}
     <p>On the Scoring sheet, <b>Set up an observation</b> offers the next empty column and fills in the date and start time from this device&rsquo;s calendar and clock; choose announced or unannounced. The form has no time field, so the start time and the minutes observed are written after the activity in the column&rsquo;s context. Code each step as it comes due with <b>Correct</b>, <b>Commission</b>, <b>Omission</b> or <b>N/A</b>, one step at a time or with all steps listed (keys C, M, O and N; the arrow keys move between steps, Z undoes the last code, and Space or P pauses), with this observation&rsquo;s integrity and critical-step integrity shown against the toolbar&rsquo;s percentage.</p>
     <p>A step that comes due more than once is coded each time. The sheet holds one code per step per observation, so the runner writes Commission if any of those times was a commission error, otherwise Omission if any was an omission error, otherwise Correct (N/A only for a step that never came due): a step counts as correct only when it was implemented as written every time. Like the other decision rules on this form, this is a working convention, not a finding. <b>End observation</b> lists the steps not coded and the critical steps not scored. <b>Save to observation</b> writes the column through the sheet&rsquo;s own fields, so every figure is recalculated as for hand coding, and asks before it replaces a column that holds codes; <b>Discard</b> asks first too. The runner never prints.</p>
     <h2 class="nbh-band" style="margin-top:18px">The Retraining List for Form ST-1</h2>
-    <p><b>Save retraining list for ST-1</b>, on the Retraining sheet, writes a file for Form ST-1 from the observations the verdict is judged on: every step below the criterion or with an error on them, with its codes, its commission and omission counts and its percentage correct, and each of those observations&rsquo; integrity. The Retraining sheet&rsquo;s own list pools every observation, so the file can list fewer steps, or different ones.</p>
+    <p><b>Save retraining list for ST-1</b>, on the Retraining sheet, writes a file for Form ST-1 from the observations the verdict is judged on: every step below the criterion or with an error on them, with its codes, its commission and omission counts and its percentage correct, and each of those observations&rsquo; integrity and commission share on consequence steps (v25.65). The Retraining sheet&rsquo;s own list pools every observation, so the file can list fewer steps, or different ones.</p>
+    <!-- v25.65 (SKILL-M9) -->
+    <p><b>Why did it drop?</b> For an interventionist already signed off as competent on Form ST-1, low integrity is often not a skill problem. Before retraining, the Retraining sheet asks four questions from the Performance Diagnostic Checklist&ndash;Human Services: does the person know the steps (rehearsal shows it now); have the materials and the time; is the task set up to be done; does someone notice when it is done. Only the first leads to retraining on Form ST-1; for the others the sheet says to change the setting or the feedback, not the training, with a line for what was changed. The answers go into the retraining file (as <i>why</i>) and to the case. When the checklist pointed to missing consequences, the graphed feedback it indicated raised performance and an intervention it did not indicate did not (Ditzian et al., 2015); performance feedback every other week raised teachers&rsquo; integrity on consequence steps for all 5 and on antecedent steps for 4 of 5 (Codding et al., 2005).</p>
     <h2 class="nbh-band" style="margin-top:18px">Why These Distinctions Matter</h2>
     <p>Commission and omission errors are not interchangeable. An omitted step usually means the interventionist did not know it was due, or was taken up with something else when it came due (a step whose condition never arose is N/A, not an omission); a commission error means something was done that the plan does not call for. Which remedy fits depends on why it happened (a skill not yet fluent, an unclear cue, or the conditions in the room, such as staffing or competing demands), and Form PD-1 sorts these out before retraining. Recording only a single integrity percentage discards the information that decides which.</p>
     <p>A single aggregate figure also hides where the failure sits. Ninety-three percent integrity on a fourteen-step protocol is a different clinical situation depending on whether the missed step was a greeting or the reinforcement contingency, which is why critical steps are scored on their own.</p>
@@ -1287,6 +1303,7 @@ input[data-m],textarea[data-m]{font:inherit}
     DiGennaro, F. D., Martens, B. K., &amp; Kleinmann, A. E. (2007). A comparison of performance feedback procedures on teachers&rsquo; treatment implementation integrity and students&rsquo; inappropriate behavior in special education classrooms. <em>Journal of Applied Behavior Analysis, 40</em>. https://doi.org/10.1901/jaba.2007.40-447 &bull;
     DiGennaro Reed, F. D., &amp; Codding, R. S. (2011). Intervention integrity assessment. In J. K. Luiselli (Ed.), <em>Teaching and behavior support for children and adults with autism spectrum disorder: A practitioner&rsquo;s guide</em> (pp. 38&ndash;47). Oxford University Press. &bull;
     DiGennaro Reed, F. D., Reed, D. D., Baez, C. N., &amp; Maguire, H. (2011). A parametric analysis of errors of commission during discrete-trial training. <em>Journal of Applied Behavior Analysis, 44</em>. https://doi.org/10.1901/jaba.2011.44-611 &bull;
+    Ditzian, K., Wilder, D. A., King, A., &amp; Tanz, J. (2015). An evaluation of the Performance Diagnostic Checklist&ndash;Human Services to assess an employee performance problem in a center-based autism treatment facility. <em>Journal of Applied Behavior Analysis, 48</em>(1). &bull;
     Fallon, L. M., Collier-Meek, M. A., Maggin, D. M., Sanetti, L. M. H., &amp; Johnson, A. H. (2015). Is performance feedback for educators an evidence-based practice? A systematic review and evaluation based on single-case research. <em>Exceptional Children, 81</em>(2), 227&ndash;246. &bull;
     Gresham, F. M. (1989). Assessment of treatment integrity in school consultation and prereferral intervention. <em>School Psychology Review, 18</em>(1), 37&ndash;50. &bull;
     Hartmann, D. P. (1977). Considerations in the choice of interobserver reliability estimates. <em>Journal of Applied Behavior Analysis, 10</em>, 103&ndash;116. https://doi.org/10.1901/jaba.1977.10-103 &bull;
@@ -2316,7 +2333,7 @@ function deciding(){const rows=[];S.obs.forEach((o,j)=>{if(!o||o.type!=='Unannou
   for(let i=0;i<nSteps();i++){const v=cell(i,j);if(SCD(v)){s++;if(v==='C')c++;}}if(s)rows.push({j,c,s});});const rk=tiRank();rows.sort((a,b)=>rk(a.j)-rk(b.j));return rows.slice(-S.critN);}   /* v22.87 (review F239) date order */
 function retrainData(){const dec=deciding(),crit=S.crit;
   const obs=dec.map(r=>{let cc=0,cs=0;S.steps.forEach((st,i)=>{if(st&&st.crit){const v=cell(i,r.j);if(SCD(v)){cs++;if(v==='C')cc++;}}});
-    const o=S.obs[r.j]||{};return{col:r.j+1,date:isISO(o.date)?String(o.date):null,type:String(o.type||'').toLowerCase(),integrity:r2(100*r.c/r.s),critical:cs?r2(100*cc/cs):null};});
+    const o=S.obs[r.j]||{},cm=window.tiComObs?window.tiComObs(r.j):null;return{col:r.j+1,date:isISO(o.date)?String(o.date):null,type:String(o.type||'').toLowerCase(),integrity:r2(100*r.c/r.s),critical:cs?r2(100*cc/cs):null,...(cm&&cm.n?{commissionPct:cm.pct,consequenceOpportunities:cm.n}:{})};});   /* v25.65 (BC-RM-M3) */
   const steps=[];S.steps.forEach((st,i)=>{const codes=dec.map(r=>{const v=cell(i,r.j);return VALID(v)?v:'';});let c=0,s=0,ec=0,eo=0;
     codes.forEach(v=>{if(SCD(v)){s++;if(v==='C')c++;else if(v==='EC')ec++;else eo++;}});
     if(s&&(100*c/s<crit||ec||eo)){const cmp=st&&st.cmp==='con'?'consequence':st&&st.cmp==='ant'?'antecedent':'';
@@ -2344,7 +2361,7 @@ async function handoffSave(){const x=retrainData(),d=x.dec,cols=d.map(r=>'#'+(r.
   const out={form:'TI-1-RETRAIN',rev:'2026-09',saved:new Date().toISOString(),
     student:{name:t(m.client),id:t(m.sid),setting:t(m.setting)},protocol:{skill:t(m.skill),source:t(m.src)},
     interventionist:{name:t(m.int),position:t(m.pos)},observer:{name:t(m.obs)},
-    criterion:{pct:S.crit,n:S.critN},plan:{type:t(m.ptype),phase:t(m.phase),procedure:t(m.proc)?(TI_PROC[t(m.proc)]||t(m.proc)):'',thinning:m.thin==='1'},observations:x.obs,classes:x.classes,steps:x.steps};
+    criterion:{pct:S.crit,n:S.critN},plan:{type:t(m.ptype),phase:t(m.phase),procedure:t(m.proc)?(TI_PROC[t(m.proc)]||t(m.proc)):'',thinning:m.thin==='1'},observations:x.obs,classes:x.classes,steps:x.steps,...(window.tiDropOut&&window.tiDropOut()?{why:window.tiDropOut()}:{})};   /* v25.65 (SKILL-M9) */
   const name='TI-1-RETRAIN_'+String(m.client||'student').replace(/[^\w-]+/g,'_')+'_'+isoDay(new Date())+'.json';
   const a=D.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:'application/json'}));a.download=name;
   D.body.appendChild(a);a.click();a.remove();
@@ -4147,6 +4164,40 @@ a{text-underline-offset:2px}
    times the page's size): the page keeps its own text size on screen; ABC-1's paper sheet sets its own size for printing (v24.07) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </style>
+<script id="ti1-v2565">
+/* v25.65 (BC-RM-M3) the commission share of each observation, for the case: the commission opportunities on its consequence
+   steps / all its consequence-step opportunities (Forms RM-1 and BC-1 read it beside the overall percentage).
+   v25.65 (SKILL-M9) "Why did it drop?": for an interventionist already signed off on Form ST-1, four questions from the
+   Performance Diagnostic Checklist-Human Services; only the first leads to retraining. The ticks are kept in S.meta
+   (dropSigned, dropSkill, dropMat, dropSetup, dropNotice, as '1'), go into the retraining file for ST-1 (why) and to the case. */
+(function(){
+const byId=id=>document.getElementById(id);
+window.tiComObs=function(j){let ec=0,n=0;(S.steps||[]).forEach((st,i)=>{if(!st||st.cmp!=='con')return;const x=oppOf(i,j);ec+=x.ec;n+=x.c+x.ec+x.eo;});return {ec,n,pct:n?Math.round(1000*ec/n)/10:null};};
+const K={skill:'dropSkill',mat:'dropMat',setup:'dropSetup',notice:'dropNotice'};
+window.tiDropOut=function(){const m=S.meta||{};if(m.dropSigned!=='1')return null;const o={signedOff:true,doesNotKnowSteps:m.dropSkill==='1',materialsOrTime:m.dropMat==='1',notSetUp:m.dropSetup==='1',noOneNotices:m.dropNotice==='1'};
+  o.retrain=o.doesNotKnowSteps;const ch=String(m.dropChanged||'').trim();if(ch)o.changed=ch.slice(0,400);return o;};
+function paint(){const m=S.meta||{},sg=byId('tiDropSigned'),body=byId('tiDropBody'),out=byId('tiDropOut');if(!sg||!body)return;
+  sg.checked=m.dropSigned==='1';body.hidden=!sg.checked;document.querySelectorAll('.tiDropK').forEach(c=>{c.checked=m[K[c.dataset.k]]==='1';});
+  if(!out)return;const o=window.tiDropOut();if(!o){out.innerHTML='';return;}const other=o.materialsOrTime||o.notSetUp||o.noOneNotices;
+  out.innerHTML=(o.doesNotKnowSteps?'<div class="verdict v-mid"><b>Retrain on Form ST-1.</b> The steps are not known now, so rehearsal with feedback is the fix; save the retraining list for ST-1 above.</div>':'')+
+    (other?'<div class="verdict v-no"><b>Change the setting or the feedback, not the training.</b> '+[o.materialsOrTime?'Provide the materials or the time.':'',o.notSetUp?'Set the task up to be done: where, when and the cue to start.':'',o.noOneNotices?'Arrange for someone to notice: feedback after each check (the fading rule above), graphed.':''].filter(Boolean).join(' ')+' Write what was changed below. When the checklist pointed to missing consequences, the feedback it indicated worked and an intervention it did not indicate did not (Ditzian et al., 2015).</div>':'')+
+    (!o.doesNotKnowSteps&&!other?'<p class="hint">Tick what the check found before the next round of training.</p>':'');}
+document.addEventListener('change',e=>{const el=e.target;if(!el)return;
+  if(el.id==='tiDropSigned'){if(el.checked)S.meta.dropSigned='1';else delete S.meta.dropSigned;paint();return;}
+  if(el.classList&&el.classList.contains('tiDropK')){const k=K[el.dataset.k];if(el.checked)S.meta[k]='1';else delete S.meta[k];paint();}});
+const ra=window.renderAll;window.renderAll=function(){const r=ra.apply(this,arguments);try{paint();}catch(e){console.error('TI-1 v25.65: '+(e&&e.message||e));}return r;};
+try{renderAll=window.renderAll;}catch(e){}
+paint();
+const w=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=w?w.apply(this,arguments):null;
+  try{if(r&&r.integrity&&Array.isArray(r.integrity.obs)){const M=metrics();
+    /* the observations were sent in the order of M.used, those with a date read as ISO only (as the first __nbhFactsOut reads it) */
+    const iso=v=>{v=String(v||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;const m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(v);return m?'x':'';};
+    let k=0;M.used.forEach(x=>{const o=S.obs[x.j]||{};if(!iso(o.date))return;const ob=r.integrity.obs[k++];if(!ob)return;const cm=window.tiComObs(x.j);if(cm.n){ob.com=cm.pct;ob.conN=cm.n;}});
+    const c=M.byCmp&&M.byCmp.con;if(c&&c.n)r.integrity.commission=Math.round(1000*c.ec/c.n)/10;
+    const d=window.tiDropOut();if(d)r.integrity.why=d;}}catch(e){}
+  return r;};
+})();
+</script>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
 </html>
