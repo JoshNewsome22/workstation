@@ -58,8 +58,8 @@ const OLD=path.join(__dirname,'data','sim','mateo','gb1-save.json');
     !A.blank[0]&&!A.blank[1]&&!A.blank[2]&&A.cw.every(Boolean)&&A.v64==='1'&&
     /counted only once the plan runs at its final reinforcement schedule \(TD-1’s last thinning level\), with the staff who usually run it \(not only the BCBA\) and in every setting named, as measured by/.test(A.s1)&&
     !/counted only/.test(A.s3),A);
-  ok('L1 the reduction objective has the people, settings and materials and a maintenance check (filled for a new one) in its sentence, and the A7 note until both are given',
-    /a probe 2 and 4 weeks after the final schedule is reached, then at each progress report/.test(A.maint)&&/; maintenance check: a probe 2 and 4 weeks after the final schedule/.test(A.s1)&&
+  ok('L1 the reduction objective has the people, settings and materials and a maintenance check (filled for a new one) in its sentence (no semicolon), and the A7 note until both are given',
+    /a probe 2 and 4 weeks after the final schedule is reached, then at each progress report/.test(A.maint)&&/as measured by a frequency count on Form DD-1, with a maintenance check: a probe 2 and 4 weeks after the final schedule/.test(A.s1)&&
     A.c1.some(x=>/^gb-note . A7: add the people, settings and materials the reduction must hold across/.test(x))&&/, with two adults; the classroom and the library, counted only/.test(A.s2)&&A.c2.some(x=>/^gb-ok . A7/.test(x)),A);
   ok('L2 the sentence gives the typical peer level beside the target, and the line under it how far the target lies below the current level',
     /to no more than 3 per hour \(typical peer level: 2 per hour\) in Room 12/.test(A.s1)&&/Target is 75% below the current level\./.test(A.s1),A.s1);
