@@ -1846,7 +1846,8 @@ function crRefuse(d){
 function crRecord(src){
   const txt=v=>v==null||typeof v==='object'?'':String(v);
   const rows=(a,keys)=>(Array.isArray(a)?a:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).map(x=>{const o={};keys.forEach(k=>{o[k]=txt(x[k]);});return o;});
-  const R=blank(), m=src.meta&&typeof src.meta==='object'?src.meta:{}, nt=src.notify&&typeof src.notify==='object'?src.notify:{};
+  const R=blank();delete R.meta.v2565;   /* v25.65 a file marks itself; one saved before has no mark */
+  const m=src.meta&&typeof src.meta==='object'?src.meta:{}, nt=src.notify&&typeof src.notify==='object'?src.notify:{};
   Object.keys(m).forEach(k=>{R.meta[k]=txt(m[k]);});
   Object.keys(nt).forEach(k=>{if(/^\d+$/.test(k)&&nt[k]===true)R.notify[k]=true;});
   R.team=rows(src.team,['n','r','g','p']); R.pbis=rows(src.pbis,['s','do','next','who']);
@@ -2905,7 +2906,7 @@ function v65Graph(used){
   else if(cnt[cur]<=goal)dec+='<div class="verdict v-ok"><b>On track:</b> the count this '+(month?'month':'week')+' is at or below the goal line.</div>';
   else dec+='<div class="verdict v-mid">Above the goal line this '+(month?'month':'week')+'. Watch the next '+(month?'month':'week')+'.</div>';
   return '<div class="v65-graph">'+g+'<p class="v65-cap">'+nAll+' restraint'+(nAll===1?'':'s')+' this semester'+(per10!=null?': '+per10+' per 10 school days attended ('+esc(da)+' days)':'; enter the school days attended for the count per 10 school days')+'.</p>'+dec+
-    '<p class="v65-cap">One restraint more or less is common variation. Judge the trend over several weeks, not a single week (Pfadt &amp; Wheeler, 1995). The way to reduce restraint is the BIP: in a school case series, crisis procedures stopped for all 6 children once skill-based treatment was in place (Slaton et al., 2024).</p></div>';
+    '<p class="v65-cap"><b>One restraint more or less is common variation. Judge the trend over several weeks, not a single week.</b> (Pfadt &amp; Wheeler, 1995.) The way to reduce restraint is the BIP: in a school case series, crisis procedures stopped for all 6 children once skill-based treatment was in place (Slaton et al., 2024).</p></div>';
 }
 
 /* ---- the lines the BIP copy carries ---- */
