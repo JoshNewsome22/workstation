@@ -1752,7 +1752,8 @@ function assentNote(){const a=assentStats();if(!a.n)return '';const P=[],se=k=>k
     if(Object.keys(ap).length)o.assentPlan=ap;}
    /* v25.64 (M7) the drafts, for Form DA-1's inventory and Form FS-1's hypotheses to test; (H3) the withdrawal signs that are also
       target behaviors, the assent skills and the alternative offered */
-   {const dl=siDrafts();if(dl.length)o.antecedents=dl.map(x=>({activity:x.act,reasons:x.reasons,line:x.line,test:x.test,da:x.da,basis:'the student\u2019s report; confirm by a brief classroom comparison or Form DA-1'}));
+   {const hr=(S.hard||[]).filter(r=>r&&String(r.act||'').trim()&&SI_WHY.some(w=>r[w[0]])).map(r=>{const x={act:String(r.act).trim()};SI_WHY.forEach(w=>{if(r[w[0]])x[w[0]]=true;});return x;});if(hr.length)o.hard=hr;}   /* v25.64 (M7) the rows themselves, as Forms DA-1 and FS-1 read them (student.hard) */
+    {const dl=siDrafts();if(dl.length)o.antecedents=dl.map(x=>({activity:x.act,reasons:x.reasons,line:x.line,test:x.test,da:x.da,basis:'the student\u2019s report; confirm by a brief classroom comparison or Form DA-1'}));
     const tw=siWbTargets();if(tw.length){o.stop=o.stop||{};o.stop.alsoTarget=tw.map(x=>x.beh).join('; ');}
     if(o.assentPlan||m.a_skill||m.w_alt){const ap=o.assentPlan||{};if(m.a_skill)ap.skills=m.a_skill;if(unq(m.a_teach).trim())ap.teach=unq(m.a_teach).trim();if(unq(m.w_alt).trim())ap.instead=unq(m.w_alt).trim();if(m.w_fair)ap.insteadFair=m.w_fair;if(Object.keys(ap).length)o.assentPlan=ap;}}
    if(!Object.keys(o).length)return r;const d=iso(m.date);if(d)o.date=d;
