@@ -214,6 +214,16 @@ const VI_OLD=require('fs').readFileSync(__filename,'utf8').split('/*'+'VI_OLD*/'
       await set('s.nurse','School nurse (simulated)');await set('s.injchk','after each session');await sleep(300);const af=await st();
       ok('v25.65 at urgency 2 the nurse and injury checks are optional and the form says why; at 4 they are asked for; filled, no note',!a2.hid&&a2.opt&&/^Optional at urgency level 2\. TB-1 does not rate this behavior as able to injure/.test(a2.t)&&!a4.hid&&!a4.opt&&/^Safety plan incomplete/.test(a4.t)&&af.hid,{a2,a4,af});
       await pn.close();}
+    /* v25.65 (the BCBA, 11/2) with only DA-1's paired-choice ranking (no demand sessions), the Demand card takes the least chosen
+       tasks, labelled, and the planning line says so and cites Zangrillo et al. (2020) */
+    {const pd=await open('pcdem',EA);const r=await pd.evaluate(async()=>{nbhUI.confirm=async()=>true;const A=window.eaAPI;A.setv('v.chosen','standard');await A.loadTpl(true);
+        const card=()=>{const n=[...document.querySelectorAll('[name^="c["][name$="].name"]')].find(e=>/^Demand/.test(e.value));return n?document.querySelector('[name="'+n.name.replace('.name','.mat')+'"]'):null;};
+        const d={form:'DA-1',dates:'10/1 (simulated)',rule:'paired-choice',fa:[],verdict:'Paired-choice ranking only (simulated).',paired:{least:[{name:'Writing sentences',rank:1,chosen:'1 of 8',share:13},{name:'Math worksheet',rank:2,chosen:'2 of 8',share:25}]}};
+        const res=window.__nbhFactsIn({demands:d});return {mat:card()&&card().value,line:window.eaDemandLine(),note:res&&res.note,none:(window.__nbhFactsIn({demands:{rule:'paired-choice',fa:[],paired:{least:[]}}}),window.eaDemandLine())};});
+      ok('v25.65 paired-choice only: the Demand card takes the least chosen task, labelled; the planning line names it with its count and cites Zangrillo et al. (2020); an empty ranking fills nothing',
+        r.mat==='Tasks from Form DA-1: Writing sentences (or rotate with Math worksheet, and note which was used); the least chosen in the paired-choice ranking (no demand sessions run)'&&
+        /The demand condition uses the least chosen task, Writing sentences \(chosen 1 of 8\); also Math worksheet\. In Zangrillo et al\. \(2020\) the least chosen tasks evoked escape behavior for 4 of 4 participants/.test(r.line)&&/the demand tasks \(Form DA-1\)/.test(r.note||'')&&r.none==='',r);
+      await pd.close();}
   }catch(err){console.log('FAIL exception '+(err&&err.stack||err));fails++;}
   ok('45 no page errors',errs.length===0,errs);
   await br.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})();

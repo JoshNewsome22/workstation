@@ -6236,15 +6236,22 @@ window.eaPaintConsent=function(){const g=window.__eaConsentGap(),e=s=>String(s).
    a line typed by hand is kept. Cards loaded later from a template take them too (loadTpl ends with eaMenuCards). */
 (function(){const T=v=>String(v==null?'':v).trim();
   const TPL=/^Tasks at the student(’|')s instructional level$/,MINE=/^Tasks from Form DA-1:/;
-  window.eaDemandCards=function(d){if(!d||!Array.isArray(d.fa))return false;const names=d.fa.map(o=>T(o&&o.name)).filter(Boolean);if(!names.length)return false;
-    const line='Tasks from Form DA-1: '+names[0]+(names.length>1?' (or rotate with '+names.slice(1).join(' and ')+', and note which was used)':'')+(d.rule==='latency'?'; ranked by latency':'');
+  /* v25.65 (BCBA 11/2) with no demand sessions run, Form DA-1 sends its paired-choice ranking alone: the demand condition uses the
+     least chosen task(s), labelled as such (Zangrillo et al., 2020: the least chosen tasks evoked escape behavior for 4 of 4) */
+  const eaPairedLeast=d=>(d&&d.rule==='paired-choice'&&d.paired&&Array.isArray(d.paired.least))?d.paired.least.filter(o=>o&&T(o.name)):[];
+  window.eaDemandCards=function(d){if(!d||!Array.isArray(d.fa))return false;let names=d.fa.map(o=>T(o&&o.name)).filter(Boolean),pc=false;
+    if(!names.length){names=eaPairedLeast(d).map(o=>T(o.name));pc=names.length>0;}if(!names.length)return false;
+    const line='Tasks from Form DA-1: '+names[0]+(names.length>1?' (or rotate with '+names.slice(1).join(' and ')+', and note which was used)':'')+(d.rule==='latency'?'; ranked by latency':'')+(pc?'; the least chosen in the paired-choice ranking (no demand sessions run)':'');
     let ch=false;
     document.querySelectorAll('[name^="c["][name$="].name"]').forEach(el=>{if(!/^demand\b/i.test(T(el.value)))return;const i=el.name.slice(2,el.name.indexOf(']'));
       const m=document.querySelector('[name="c['+i+'].mat"]');if(!m)return;const v=T(m.value);if(v===line||!(v===''||TPL.test(v)||MINE.test(v)))return;
       m.value=line;['input','change'].forEach(x=>m.dispatchEvent(new Event(x,{bubbles:true})));ch=true;});
     return ch;};
   /* v24.27 (R-018, E-10) Form DA-1's result where the analyst plans: the verdict and the first task with its rate and latency */
-  window.eaDemandLine=function(){const d=window.__eaDemands;if(!d||!Array.isArray(d.fa)||!d.fa.length)return '';const t=d.fa[0]||{};
+  window.eaDemandLine=function(){const d=window.__eaDemands;if(!d||!Array.isArray(d.fa))return '';
+    if(!d.fa.length){const L=eaPairedLeast(d);if(!L.length)return '';const a=L[0];   /* v25.65 the paired-choice ranking only */
+      return 'Demand assessment (Form DA-1'+(T(d.dates)?', '+T(d.dates):'')+'): '+T(d.verdict)+' The demand condition uses the least chosen task, '+T(a.name)+(T(a.chosen)?' (chosen '+T(a.chosen)+')':'')+(L.length>1?'; also '+L.slice(1).map(x=>T(x.name)).join(', '):'')+'. In Zangrillo et al. (2020) the least chosen tasks evoked escape behavior for 4 of 4 participants; change the task if the team knows a better one.';}
+    const t=d.fa[0]||{};
     const fig=[t.rate!=null?t.rate+' a min':'',t.lat!=null?'latency '+t.lat+' s':''].filter(Boolean).join(', ');
     return 'Demand assessment (Form DA-1'+(T(d.dates)?', '+T(d.dates):'')+'): '+T(d.verdict)+(d.rule==='latency'?' Ranked by latency.':'')+' The demand condition uses '+T(t.name)+(fig?' ('+fig+')':'')+(d.fa.length>1?'; also '+d.fa.slice(1).map(x=>T(x&&x.name)).filter(Boolean).join(', '):'')+'.';};
   window.eaPaintDemands=function(){const el=document.getElementById('eaDemandFlag');if(!el)return;const line=window.eaDemandLine();el.hidden=!line;el.textContent=line;};
