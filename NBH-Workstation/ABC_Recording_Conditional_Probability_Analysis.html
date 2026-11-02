@@ -1627,9 +1627,14 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
         </select></label>
         <!-- v22.51 (F80) the time observed: the Observation Timer adds each session's minutes when it ends -->
         <label class="field">Minutes observed (all sessions)<input id="h-minutes" type="number" min="0" step="1" placeholder="Added by the timer"></label>
+        <!-- v25.64 (M4) the observer checked against a scored example before the data count -->
+        <label class="field">Observer checked against a scored example on<input id="h-chkDate" type="date"></label>
+        <label class="field">Example used<select id="h-chkEx"><option value="">Not recorded</option><option value="video">A scored video</option><option value="sim">This form&rsquo;s simulation</option><option value="other">Another scored example</option></select></label>
+        <label class="field">Percentage correct<input id="h-chkPct" type="number" min="0" max="100" step="1" inputmode="decimal" placeholder="90 or more"></label>
       </div>
       <p class="note">Header fields travel with exported data and print at the top of the record. Two of them are used by the analysis: the consequence window is also the span each background check scores, and the minutes observed weight the unconditional probability (Camp et al., 2009); the Observation Timer adds each session’s minutes when it ends. The consequence window and the check interval are the ones fixed before the first observation: the Observation Timer takes the check interval as its setting whenever it is ready to start, and names the window when an incident starts.</p>
       <p class="note abc-consent" id="abcConsent" hidden></p>
+      <p class="note abc-chk" id="abcChkNote"></p><!-- v25.64 (M4) -->
     </div>
   </div>
 
@@ -1687,6 +1692,24 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
   </div>
   <div class="obs-flash" id="obsFlash" aria-hidden="true"></div>
 
+  <!-- v25.64 (M7) structured descriptive probes: one antecedent arranged at a planned time, the consequences left as they are -->
+  <div class="card noprint" id="abcProbeCard">
+    <header class="nbh-band"><h2>Structured Descriptive Probes</h2><span class="hint">Optional: one antecedent arranged at a planned time</span></header>
+    <div class="body">
+      <p class="note lead">A probe is a short planned stretch of the day in which the teacher arranges one antecedent: attention turned to a peer, a demand presented, or a preferred item put away. Everything that follows is left as it usually is, and you record incidents as always, with <b>Session</b> set to the probe. The Analysis tab shows the behavior&rsquo;s rate in each kind of probe beside the naturalistic record, and keeps the probes&rsquo; incidents out of the naturalistic figures.</p>
+      <p class="note abc-probe-safe"><b>Safeguards.</b> Staff respond as they usually do. Never instruct staff to deliver the suspected reinforcer after the behavior. Each probe needs a stop rule, and Form IC-1 consent where the plan requires it.</p>
+      <div class="session-grid" style="margin-top:10px">
+        <label class="field">Probe<select id="pr-type"><option value="att">Attention diverted to a peer</option><option value="dem">A demand presented</option><option value="item">A preferred item put away</option></select></label>
+        <label class="field">Date<input id="pr-date" type="date"></label>
+        <label class="field">Start time<input id="pr-time" type="time"></label>
+        <label class="field">Length (minutes)<input id="pr-min" type="number" min="1" max="60" step="1" value="5"></label>
+        <label class="field abc-wide">Stop rule<input id="pr-stop" type="text" placeholder="e.g. end the probe after 2 incidents, or at once after any aggression"></label>
+      </div>
+      <div class="btnrow" style="padding:8px 0 0"><button type="button" class="btn" id="pr-add">Add probe</button><span class="spacer"></span><span class="status" id="pr-status" aria-live="polite"></span></div>
+      <div id="pr-list"></div>
+    </div>
+  </div>
+
   <div class="card">
     <header class="nbh-band">
       <h2>New incident</h2>
@@ -1730,6 +1753,7 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
           </select>
         </label>
         <label class="field noprint">Sound level<input id="e-noise" type="number" min="0" max="140" step="1" inputmode="decimal" placeholder="Optional"></label>
+        <label class="field">Session<select id="e-probe"><option value="">Naturalistic (no probe)</option></select></label><!-- v25.64 (M7) -->
       </div>
     </div>
 
@@ -1740,6 +1764,17 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
     </div>
 
     <div class="abc" id="abc-grid"></div>
+
+    <!-- v25.64 (L1) the same consequence after the window: counted on its own, never pooled with the window's -->
+    <div class="body abc-later" id="later-block" style="border-top:1px solid var(--rule);padding-top:12px">
+      <h3>The Same Consequence Came Later</h3>
+      <p class="note" style="margin:0 0 8px">Tick one when it came after the consequence window, within about 1 minute of the behavior. A delayed escape or delayed attention can still be a contingency. These ticks are counted on their own and never pooled with what came within the window.</p>
+      <div id="later-opts" style="columns:3;column-gap:22px">
+        <div class="opt" data-opt="lt-attention"><input type="checkbox" id="lt-attention" value="attention"><span class="dot attention"></span><label for="lt-attention">Attention came later</label></div>
+        <div class="opt" data-opt="lt-tangible"><input type="checkbox" id="lt-tangible" value="tangible"><span class="dot tangible"></span><label for="lt-tangible">An item or activity came later</label></div>
+        <div class="opt" data-opt="lt-escape"><input type="checkbox" id="lt-escape" value="escape"><span class="dot escape"></span><label for="lt-escape">Escape came later (the demand removed or avoided)</label></div>
+      </div>
+    </div>
 
     <div id="narrative-block">
       <div class="body" style="border-top:1px solid var(--rule)">
@@ -2004,7 +2039,7 @@ html.abc-paper,html.abc-paper body,#abcPaper,.ap{-webkit-text-size-adjust:none!i
   </div>
   <div class="script">
     <div><h4>What You Say and Do</h4><ul><li>Before the session, agree on the definition, the codes, the check interval, and how close two start times must be to count as one incident.</li><li>During it, no talking and no looking at the other screen.</li><li>After it, compare the two data files incident by incident and window by window.</li></ul></div>
-    <div><h4>What Goes on the Sheet</h4><ul><li>Each observer saves a separate data file.</li><li>The occurrence units are the incidents either observer logged; the nonoccurrence units are the check windows either observer sampled.</li><li>The four counts under Interobserver agreement: Occurrence agreements, Occurrence disagreements, Nonoccurrence agreements, Nonoccurrence disagreements.</li><li>For each incident both observers logged, compare the codes too: nothing on the form corrects for a coding disagreement.</li></ul></div>
+    <div><h4>What Goes on the Sheet</h4><ul><li>Each observer saves a separate data file.</li><li>The occurrence units are the incidents either observer logged; the nonoccurrence units are the check windows either observer sampled.</li><li>The four counts under Interobserver agreement: Occurrence agreements, Occurrence disagreements, Nonoccurrence agreements, Nonoccurrence disagreements.</li><li>For each incident both observers logged, compare the codes too: Open observer 2&rsquo;s file on the Methods tab does it, section by section, with kappa beside each figure.</li></ul></div>
   </div>
   <div class="decide"><b>Decision.</b> Take a second observer for at least a third of sessions. Read occurrence agreement before overall agreement: when the behavior is rare, two observers can disagree about almost every occurrence and still post a high overall figure. If the occurrence figure is the weak one, the problem is almost always the response definition rather than the observer.</div>
 </section>
@@ -2558,12 +2593,12 @@ function renderIncidents(){
     </tr></thead><tbody>
     ${rows.map(e => `<tr>
       <td><span style="white-space:nowrap">${esc(e.date)}</span>${e.activity?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(e.activity)}</div>`:""}</td>
-      <td>${esc(e.time||"")}${window.abcNoiseLine?abcNoiseLine(e):""}${e.duration?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(e.duration)} min</div>`:""}</td>
+      <td>${esc(e.time||"")}${window.abcNoiseLine?abcNoiseLine(e):""}${window.abcProbeTag?abcProbeTag(e):""}${e.duration?`<div style="font-size:11.5px;color:var(--ink-faint)">${esc(e.duration)} min</div>`:""}</td>
       <td>${e.mode==="open" ? '<span style="color:var(--ink-faint)">narrative only</span>' : labelsFor(e.antecedents, A_BY_ID, e.antecedentOther, "auto")}</td>
       <td>${labelsFor(e.behaviors, B_BY_ID, e.behaviorOther, "b")}
           ${(e.precursors||[]).length?`<div style="margin-top:3px;font-size:11px;color:var(--ink-faint)">preceded by ${(e.precursors||[]).map(id=>esc((P_BY_ID[id]&&P_BY_ID[id].other&&e.precursorOther&&e.precursorOther[id])?e.precursorOther[id]:(P_BY_ID[id]?P_BY_ID[id].label:id))).join(", ")}</div>`:""}
           ${e.narrative?`<div class="inc-narr" style="font-family:var(--serif);font-size:12.5px;color:var(--ink-soft);margin-top:4px;max-width:46ch">${esc(e.narrative.slice(0,220))}${e.narrative.length>220?"\u2026":""}</div>`:""}</td>
-      <td>${e.mode==="open" ? "" : labelsFor(e.consequences, C_BY_ID, e.consequenceOther, "auto")}</td>
+      <td>${e.mode==="open" ? "" : labelsFor(e.consequences, C_BY_ID, e.consequenceOther, "auto")}${window.abcLaterTag?abcLaterTag(e):""}</td>
       <td style="font-size:12px;color:var(--ink-soft)">${e.immediate? esc(I_BY_ID[e.immediate]?I_BY_ID[e.immediate].label:e.immediate) : "\u2014"}
           ${(e.resolution||[]).length?`<div style="margin-top:3px">${labelsFor(e.resolution,R_BY_ID,e.resolutionOther,"")}</div>`:""}
           ${(e.settingEvents||[]).length?`<div style="margin-top:3px;font-size:11px;color:var(--ink-faint)">setting: ${(e.settingEvents||[]).map(id=>esc(SE_BY_ID[id]?SE_BY_ID[id].label:id)).join("; ")}</div>`:""}</td>
@@ -2729,7 +2764,9 @@ function exportJSON(){
     /* v23.38 the sound level meter's log, when it was used (a record without one is saved as before) */
     noise:(state.noise && state.noise.runs && state.noise.runs.length) ? state.noise : undefined,
     /* v22.51 the agreement check (F85) and the case's target behaviors used as rows (F84) */
-    ioa:state.ioa || {}, caseTargets: BEHAVIORS.filter(b => b.caseT).map(b => ({ id:b.id, label:b.label, def:b.def || "" }))
+    ioa:state.ioa || {}, caseTargets: BEHAVIORS.filter(b => b.caseT).map(b => ({ id:b.id, label:b.label, def:b.def || "" })),
+    /* v25.64 (H6, H7, M4, M7) the comparison with observer 2's file, the IOA log, the observer's check, the probes; each only when used */
+    ...(window.abcV2564Out ? abcV2564Out() : {})
   }, null, 2), "application/json");
   if(!window.__nbhQuiet) $("#data-status").textContent = "Data file downloaded. Store it with the assessment record.";
 }
@@ -2830,6 +2867,7 @@ function importJSON(file){
       if(Array.isArray(d.caseTargets) && window.abcAddTargets) abcAddTargets(d.caseTargets);
       writeHeader(d.header); sortEntries(); refreshAll();
       if(window.abcIoaSet) abcIoaSet(d.ioa || {});
+      if(window.abcV2564In) abcV2564In(d);   /* v25.64 a file without them opens as before */
       state.noise = (d.noise && Array.isArray(d.noise.runs)) ? d.noise : { runs: [] };
       $("#data-status").textContent = "Loaded " + state.entries.length + " incidents and " + state.samples.length + " background samples.";
     }catch(err){
@@ -3463,7 +3501,7 @@ function renderAnalysis(){
   const eo      = eoCorrespondence(S.coded);
   const bCounts = behaviorCounts(S.coded);
   /* v24.28 (R-025) the pool is named; the per-topography table reads the record without the behavior filter (the dates and activity kept) */
-  const topoBase = S.f.behavior ? filteredEntries(Object.assign({}, S.f, { behavior:"" })).filter(e => e.mode !== "open") : S.coded;
+  const topoBase = S.f.behavior ? filteredEntries(Object.assign({}, S.f, { behavior:"" })).filter(e => e.mode !== "open" && !(window.abcInProbe && abcInProbe(e))) : S.coded;   /* v25.64 (M7) a probe's incidents are read apart */
   const topoAll = behaviorCounts(topoBase);
   window.__abcPooledN = (!S.f.behavior && bCounts.length > 1) ? bCounts.length : 0;
   abcTopoNote(topoAll.length);
@@ -3892,6 +3930,12 @@ function summarySection(kStats, cStats, eo, N, M){
   const mostCP = ranked.slice().sort((a,b) => b.pGiven-a.pGiven)[0];
   /* v22.51 (F87) a correspondence is named only on five incidents or more */
   const topEO = eo.filter(r => r.n >= 5).sort((a,b) => (b.p??0)-(a.p??0))[0];
+  /* v25.64 (M6) a class the record does not rank, or ranks with a low Q, is "not supported by this record", never ruled out:
+     descriptive data miss a function the FA finds about 1 time in 4 to 8 (Contreras et al., 2023, negative predictive values) */
+  const NPV = { attention:[86, 7], escape:[79, 5], tangible:[76, 4] };
+  const notSup = ["attention","tangible","escape"].map(cl => { const r = kStats.find(x => x.cls === cl); const q = r && r.stats && r.stats.q;
+      return (!r || !r.n) ? { cl, why:"it followed no incident" } : (M >= 10 && q != null && q < 0.20) ? { cl, why:"Yule’s Q is " + num(q,2) } : null; })
+    .filter(x => x && !(ranked[0] && ranked[0].cls === x.cl));   /* the class taken forward first is named above, not here */
 
   return card("Reading the record as a whole", "a ranking of hypotheses, not a conclusion" + (window.__abcPooledN ? ` · pooled across ${window.__abcPooledN} topographies` : ""),
     `<div class="body">
@@ -3899,6 +3943,7 @@ function summarySection(kStats, cStats, eo, N, M){
       <ol style="margin:6px 0 0;padding-left:20px;font-size:14px">${lines}
         ${noneRow && noneRow.n ? `<li style="margin-bottom:9px"><b style="color:#67727f">No socially mediated consequence</b> was recorded after ${pct(noneRow.pGiven,0)} of incidents (${noneRow.n} of ${N}).</li>` : ""}
       </ol>
+      ${notSup.length ? `<p class="note abc-notsup">${notSup.map(x => `<b style="color:${CLASS_COLOR[x.cl]}">${esc(CLASS_LABEL[x.cl])}</b>: not supported by this record (${esc(x.why)}); descriptive data wrongly rule this function out about 1 time in ${NPV[x.cl][1]} (the functional analysis agreed with a descriptive “no” ${NPV[x.cl][0]}% of the time; Contreras et al., 2023).`).join(" ")}</p>` : ""}
       ${topEO ? `<p class="note">The tightest antecedent-to-consequence correspondence in this record is ${esc(topEO.label.toLowerCase())} conditions producing ${esc(topEO.matchLabel)}, at ${pct(topEO.p,0)} of the ${topEO.n} incidents in which that condition was in place.</p>` : (eo.length ? `<p class="note">No antecedent condition was in place at five or more incidents yet, so no antecedent-to-consequence correspondence is named.</p>` : "")}
 
       <h3 style="margin-top:20px">What follows from it</h3>
@@ -3909,6 +3954,7 @@ function summarySection(kStats, cStats, eo, N, M){
               : ` — it followed the most incidents and has the strongest separation from its base rate (Yule’s Q)`)
             : `, though ${M ? "with fewer than 10 background samples" : "without background samples"} the ranking rests on conditional probabilities alone and cannot rule out a consequence that is simply frequent`}.`
         : ""} A descriptive record of this kind is designed to narrow what you test next: which conditions to arrange in a functional analysis, which reinforcer to program in the test condition, and which contexts to sample. It does not license writing a function statement into a plan on its own.</p>
+      <p class="note abc-contreras">Across 219 published comparisons, descriptive assessments matched the FA exactly about half the time (ABC recording 50%). Adding background or unconditional probabilities did not raise the match (39%, against 37% for p(C|B) alone). Descriptive data were better at ruling a function out than in (Contreras et al., 2023).</p><!-- v25.64 (M6) -->
       <p class="note">Three things this record cannot tell you, no matter how many incidents accumulate. It cannot separate a consequence that maintains the behavior from one that merely follows it, because nothing was manipulated. It cannot detect a contingency the observers did not have a code for. And it cannot see a thin schedule: Camp et al. (2009) point out that the probability of escape following problem behavior need never exceed .2 if escape is delivered on a variable-ratio 5 schedule, and can be lower still on a thin interval schedule, while the behavior is maintained perfectly well. A low number in this record is not evidence of no relation.</p>
       <p class="note">One result here is more trustworthy than the rest. In two of the comparison studies, the descriptive outcome that most often matched the functional analysis was automatic reinforcement &mdash; three of the four matches in Camp et al. (2009), and the single match in Lerman and Iwata (1993). A record showing no correlation between the behavior and any social event is the one descriptive pattern that carries real weight, because there is nothing to be spuriously correlated with.</p>
     </div>`,
@@ -3950,12 +3996,12 @@ function renderMethods(){
       <p class="note lead">The sheet is usable two ways, and the choice is not cosmetic. <b>Coded plus narrative</b> is the default and the right setting for a school FBA: the codes carry the arithmetic, the narrative carries what the codes flatten &mdash; the exact wording of a demand, who was standing where, what the student said, and anything that did not fit a box. <b>Coded only</b> is faster in the moment and every analysis still works, but the detail is gone for good once the observation is over. Use it when a second observer is running narrative alongside you, or when the codes genuinely capture what happened.</p>
       <ol style="font-size:14px;padding-left:20px">
         <li style="margin-bottom:8px">Define the target behavior before the first observation and keep the definition fixed. A definition that drifts mid-record makes every conditional probability uninterpretable.</li>
-        <li style="margin-bottom:8px">Record the consequence you observed within a short, consistent window after the behavior &mdash; a few seconds, held constant. Several published descriptive analyses used a 10-s window (e.g., Pence et al., 2009; St. Peter et al., 2005); others examined longer lags (up to 50 s in Borrero &amp; Borrero, 2008).</li>
+        <li style="margin-bottom:8px">Record the consequence you observed within a short, consistent window after the behavior &mdash; a few seconds, held constant. Several published descriptive analyses used a 10-s window (e.g., Pence et al., 2009; St. Peter et al., 2005); others examined longer lags (up to 50 s in Borrero &amp; Borrero, 2008). When the same consequence came after the window, within about a minute, tick it under <b>The Same Consequence Came Later</b>: it is counted on its own, never pooled with the window&rsquo;s (Samaha et al., 2009; v25.64).</li>
         <li style="margin-bottom:8px">Score the antecedent from what was in place immediately before the behavior, not from what you believe the student wanted. Camp et al. (2009) used a window of the same 10-s interval or the one immediately before for antecedents, and the same or immediately following interval for consequences.</li>
         <li style="margin-bottom:8px">Record the lower-intensity responses that came just before the behavior, and record them again in the background windows. That second half is what makes a precursor analysis possible; without it you only learn that the response happens.</li>
         <li style="margin-bottom:8px">Mark whether an adult was within view, on incidents and on background samples alike. It is one extra click and it is the only route this record has to an automatic-reinforcement hypothesis.</li>
         <li style="margin-bottom:8px">Run background samples on a timer through the same observation periods: the Observation timer on the Record tab schedules the checks and alerts you at each one. This is the step teams skip, and skipping it is what reduces an ABC record to a tally of what adults do all day.</li>
-        <li style="margin-bottom:8px">Take a second observer for at least a third of sessions and compare records incident by incident. Nothing here corrects for a coding disagreement.</li>
+        <li style="margin-bottom:8px">Take a second observer for at least a third of sessions, in every condition, and compare records incident by incident: <b>Open observer 2&rsquo;s file</b> under Interobserver agreement compares the incidents, the checks and the codes (v25.64).</li>
         <li>Export the data file at the end of every session.</li>
       </ol>
     </div>`) +
@@ -3963,7 +4009,7 @@ function renderMethods(){
   card("Interobserver agreement", "compute it before you trust anything on the analysis tab",
     `<div class="body">
       <p class="note lead">Bijou, Peterson, and Ault (1968) set out the method still in use: score each interval as a match or a mismatch and divide agreements by agreements plus disagreements. They also warn that a single overall figure hides the common failure. When the behavior is rare, two observers can disagree about almost every occurrence and still post a high overall figure on the strength of the intervals where nothing happened. The fix is to compute agreement separately for occurrence and for nonoccurrence, which is what this does.</p>
-      <p class="note"><b>What counts as an interval in an ABC record.</b> The record has no fixed intervals, so use the incidents and the background checks as the units, and count each unit once. Every incident either observer logged is an occurrence unit: logged by both (start times within a minute of each other) is an occurrence agreement; logged by only one is an occurrence disagreement. Every background check window in which neither observer logged an incident is a nonoccurrence unit: recorded by both as a no-behavior window is a nonoccurrence agreement; recorded by only one (the other skipped or missed it without logging an incident) is a nonoccurrence disagreement. Both observers need the same fixed check schedule for this. Then, for the incidents both logged, compare the codes section by section (antecedent, behavior, preceded by, consequence): a code both checked is an agreement and a code only one checked is a disagreement, and agreements divided by agreements plus disagreements gives the agreement for that section.</p>
+      <p class="note"><b>What counts as an interval in an ABC record.</b> The record has no fixed intervals, so use the incidents and the background checks as the units, and count each unit once. Every incident either observer logged is an occurrence unit: logged by both (start times within the tolerance below, &plusmn;15 s unless you widen it) is an occurrence agreement; logged by only one is an occurrence disagreement. Every background check window in which neither observer logged an incident is a nonoccurrence unit: recorded by both as a no-behavior window is a nonoccurrence agreement; recorded by only one (the other skipped or missed it without logging an incident) is a nonoccurrence disagreement. Both observers need the same fixed check schedule for this. Then, for the incidents both logged, compare the codes section by section (antecedent, behavior, preceded by, consequence): a code both checked is an agreement and a code only one checked is a disagreement, and agreements divided by agreements plus disagreements gives the agreement for that section. <b>Open observer 2&rsquo;s file</b> below and the form does all of this from the two data files: it matches the incidents and the checks, counts the four units, compares the codes section by section and gives kappa beside each figure.</p>
       <div class="session-grid" style="margin-top:12px">
         <label class="field">Occurrence agreements<input id="ioa-oa" type="number" min="0" step="1" placeholder="0"></label>
         <label class="field">Occurrence disagreements<input id="ioa-od" type="number" min="0" step="1" placeholder="0"></label>
@@ -3980,6 +4026,17 @@ function renderMethods(){
         <div class="metric"><div class="v">\u2014</div><div class="k">nonoccurrence agreement</div></div>
         <div class="metric"><div class="v">\u2014</div><div class="k">overall agreement</div></div>
       </div>
+      <!-- v25.64 (H6, M1, H7, M4) computed from the two observers' files; the IOA log by condition -->
+      <h4 style="margin:16px 0 6px">From the two observers&rsquo; files</h4>
+      <div class="session-grid">
+        <label class="field">Match incidents within (&plusmn; seconds)<input id="ioa-tol" type="number" min="1" max="120" step="1" value="15"></label>
+        <label class="field">Condition of this check<select id="ioa-cond"><option value="">Naturalistic</option><option value="att">Probe: attention diverted</option><option value="dem">Probe: demand presented</option><option value="item">Probe: item put away</option></select></label>
+      </div>
+      <label class="abc-blind"><input type="checkbox" id="ioa-blind"> Second observer did not know the phase or what change was expected</label>
+      <p class="note">The tolerance is &plusmn;15 s unless you widen it for long episodes, and it prints with the figures. A wide window lets two different incidents count as one: checked against criterion records, &plusmn;2 s was supported for discrete events (Mudford, Martin, et al., 2009), and a minute is far wider than anything tested. A start time from <b>Incident starting</b> is kept to the second; one typed by hand is kept to the minute and matched on the whole minute.</p>
+      <div class="btnrow" style="padding:6px 0"><button type="button" class="btn" id="ioa-open2">Open observer 2&rsquo;s file</button><button type="button" class="btn ghost" id="ioa-log-add">Add to the IOA log</button><input type="file" id="ioa-file2" accept=".json,application/json" hidden></div>
+      <div id="ioa-calc"></div>
+      <div id="ioa-log"></div>
       <p class="note">Published descriptive analyses in this literature collect a second observer on anywhere from about a fifth to most of their sessions and report mean agreement mostly in the high 80s and the 90s. Take a second observer on at least a third of your observations, and if the occurrence figure is the weak one, the problem is almost always the response definition rather than the observer.</p>
     </div>`) +
 
@@ -4074,6 +4131,7 @@ function renderMethods(){
       <p style="font-size:14px;margin:0 0 12px"><span class="marker res">research</span>That asymmetry has a simple source: adults respond to problem behavior whatever maintains it, so attention accrues a high base rate and shows up after almost everything. Thompson and Iwata (2001) observed 27 adults across roughly 48 hours and found attention followed the behavior for 24 of them; escape followed for 8 of the 22 who were given demands, and tangible items for 8 of 27. St. Peter et al. (2005) went further, selecting three students whose functional analyses had ruled attention out, and still found the behavior highly correlated with attention in the classroom.</p>
       <p style="font-size:14px;margin:0 0 12px"><span class="marker res">research</span>Pence, Roscoe, Bourret, and Ahearn (2009) ran the ABC method, the conditional probability method, and the conditional and background probability method over the same data for six participants. The three methods agreed with each other for five of the six &mdash; and differed substantially from the functional analysis for five of the six. Agreement between descriptive methods is not evidence of accuracy.</p>
       <p style="font-size:14px;margin:0 0 12px"><span class="marker res">research</span>Camp, Iwata, Hammond, and Bloom (2009) tested whether antecedent events predict function better than consequences, on the reasoning that antecedents follow a timetable rather than the behavior. They do not: correspondence with the functional analysis was 2 of 7 for antecedents, 3 of 7 for consequences, and 4 of 7 for the two combined (the figure in their abstract; one summary sentence in their Results gives 2).</p>
+      <p style="font-size:14px;margin:0 0 12px"><span class="marker res">research</span>Across 219 published comparisons, descriptive assessments matched the FA exactly about half the time (ABC recording 50%). Adding background or unconditional probabilities did not raise the match (39%, against 37% for p(C|B) alone). Descriptive data were better at ruling a function out than in: when they showed a function, the functional analysis agreed 60%, 70%, 59% and 79% of the time (attention, escape, tangible, automatic); when they showed none, it agreed 86%, 79%, 76% and 87% of the time (Contreras et al., 2023). So a function this record does not support is &ldquo;not supported by this record&rdquo;, never ruled out: about 1 time in 4 to 8 the functional analysis finds it anyway. This does not argue against background samples, which are still the only way this record can tell a contingency from a coincidence (Vollmer et al., 2001; Martens et al., 2008); but the extra arithmetic is not extra validity.</p><!-- v25.64 (M6) -->
       <p style="font-size:14px;margin:0 0 12px"><span class="marker res">research</span>Where descriptive and experimental analyses do tend to agree is automatic reinforcement &mdash; three of the four matches in Camp et al. (2009) and the single match in Lerman and Iwata (1993). A record with no correlation to any social event is the descriptive finding that carries weight.</p>
       <p style="font-size:14px;margin:0 0 12px"><span class="marker res">research</span>Comparing a conditional probability against a response-independent base rate is how these studies separate contiguity from contingency in descriptive data, whether expressed as a direct comparison, a contingency space plot, or an association index (Vollmer et al., 2001; Martens et al., 2008; Lloyd et al., 2013).</p>
       <p style="font-size:14px;margin:0 0 12px"><span class="marker con">consensus</span>A positive contingency may be necessary for a reinforcement effect, but the conditions sufficient to produce one cannot be read off descriptive data. Descriptive assessment suggests a function; it does not confirm one.</p>
@@ -4087,11 +4145,13 @@ function renderMethods(){
   card("References", "",
     `<div class="body refs">
       <ul>
+        <li><span class="r">Anderson, C. M., &amp; Long, E. S. (2002). Use of a structured descriptive assessment methodology to identify variables affecting problem behavior. <i>Journal of Applied Behavior Analysis, 35</i>, 137&ndash;154.</span></li>
         <li><span class="r">Arnal, L. H., Flinker, A., Kleinschmidt, A., Giraud, A.-L., &amp; Poeppel, D. (2015). Human screams occupy a privileged niche in the communication soundscape. <i>Current Biology, 25</i>, 2051&ndash;2056.</span></li>
         <li><span class="r">Bijou, S. W., Peterson, R. F., &amp; Ault, M. H. (1968). A method to integrate descriptive and experimental field studies at the level of data and empirical concepts. <i>Journal of Applied Behavior Analysis, 1</i>, 175&ndash;191.</span></li>
         <li><span class="r">Borrero, C. S. W., &amp; Borrero, J. C. (2008). Descriptive and experimental analyses of potential precursors to problem behavior. <i>Journal of Applied Behavior Analysis, 41</i>, 83&ndash;96.</span></li>
         <li><span class="r">Camp, E. M., Iwata, B. A., Hammond, J. L., &amp; Bloom, S. E. (2009). Antecedent versus consequent events as predictors of problem behavior. <i>Journal of Applied Behavior Analysis, 42</i>, 469&ndash;483.</span></li>
         <li><span class="r">Carr, E. G., Taylor, J. C., &amp; Robinson, S. (1991). The effects of severe behavior problems in children on the teaching behavior of adults. <i>Journal of Applied Behavior Analysis, 24</i>, 523&ndash;535.</span></li>
+        <li><span class="r">Contreras, B. P., Tate, S. A., Morris, S. L., &amp; Kahng, S. (2023). A systematic review of the correspondence between descriptive assessment and functional analysis. <i>Journal of Applied Behavior Analysis, 56</i>, 146&ndash;165.</span></li>
         <li><span class="r">Eckert, T. L., Martens, B. K., &amp; DiGennaro, F. D. (2005). Describing antecedent&ndash;behavior&ndash;consequence relations using conditional probabilities and the general operant contingency space: A preliminary investigation. <i>School Psychology Review, 34</i>, 520&ndash;528.</span></li>
         <li><span class="r">Engelberg, J. W. M., Schwartz, J. W., &amp; Gouzoules, H. (2021). The emotional canvas of human screams: Patterns and acoustic cues in the perceptual categorization of a basic call type. <i>PeerJ, 9</i>, e10990.</span></li>
         <li><span class="r">Fahmie, T. A., Iwata, B. A., Harper, J. M., &amp; Querim, A. C. (2013). Evaluation of the divided attention condition during functional analyses. <i>Journal of Applied Behavior Analysis, 46</i>, 71&ndash;78.</span></li>
@@ -4100,11 +4160,14 @@ function renderMethods(){
         <li><span class="r">Hall, G. A., &amp; Sundberg, M. L. (1987). Teaching mands by manipulating conditioned establishing operations. <i>The Analysis of Verbal Behavior, 5</i>, 41&ndash;53.</span></li>
         <li><span class="r">Hanley, G. P., Iwata, B. A., &amp; McCord, B. E. (2003). Functional analysis of problem behavior: A review. <i>Journal of Applied Behavior Analysis, 36</i>, 147&ndash;185.</span></li>
         <li><span class="r">Hanley, G. P., Jin, C. S., Vanselow, N. R., &amp; Hanratty, L. A. (2014). Producing meaningful improvements in problem behavior of children with autism via synthesized analyses and treatments. <i>Journal of Applied Behavior Analysis, 47</i>, 16&ndash;36.</span></li>
+        <li><span class="r">Hartmann, D. P. (1977). Considerations in the choice of interobserver reliability estimates. <i>Journal of Applied Behavior Analysis, 10</i>, 103&ndash;116.</span></li>
+        <li><span class="r">Hausman, N. L., Javed, N., Bednar, M. K., Guell, M., Schaller, E., Nevill, R. E., &amp; Kahng, S. (2022). Interobserver agreement: A preliminary investigation into how much is enough? <i>Journal of Applied Behavior Analysis, 55</i>, 357&ndash;368.</span></li>
         <li><span class="r">Hillenbrand, J., Getty, L. A., Clark, M. J., &amp; Wheeler, K. (1995). Acoustic characteristics of American English vowels. <i>Journal of the Acoustical Society of America, 97</i>, 3099&ndash;3111.</span></li>
         <li><span class="r">Horner, R. H., Vaughn, B. J., Day, H. M., &amp; Ard, W. R., Jr. (1996). The relationship between setting events and problem behavior. In L. K. Koegel, R. L. Koegel, &amp; G. Dunlap (Eds.), <i>Positive behavioral support: Including people with difficult behavior in the community</i> (pp. 381&ndash;402). Paul H. Brookes.</span></li>
         <li><span class="r">International Organization for Standardization. (2003). <i>Acoustics: Normal equal-loudness-level contours</i> (ISO 226:2003).</span></li>
         <li><span class="r">Iwata, B. A., Dorsey, M. F., Slifer, K. J., Bauman, K. E., &amp; Richman, G. S. (1994). Toward a functional analysis of self-injury. <i>Journal of Applied Behavior Analysis, 27</i>, 197&ndash;209. (Reprinted from <i>Analysis and Intervention in Developmental Disabilities, 2</i>, 3&ndash;20, 1982.)</span></li>
         <li><span class="r">Jongman, A., Wayland, R., &amp; Wong, S. (2000). Acoustic characteristics of English fricatives. <i>Journal of the Acoustical Society of America, 108</i>, 1252&ndash;1263.</span></li>
+        <li><span class="r">Kazdin, A. E. (1977). Artifact, bias, and complexity of assessment: The ABCs of reliability. <i>Journal of Applied Behavior Analysis, 10</i>, 141&ndash;150.</span></li>
         <li><span class="r">Kennedy, C. H., &amp; Meyer, K. A. (1996). Sleep deprivation, allergy symptoms, and negatively reinforced problem behavior. <i>Journal of Applied Behavior Analysis, 29</i>, 133&ndash;135.</span></li>
         <li><span class="r">Lee, S., Potamianos, A., &amp; Narayanan, S. (1999). Acoustics of children&rsquo;s speech: Developmental changes of temporal and spectral parameters. <i>Journal of the Acoustical Society of America, 105</i>, 1455&ndash;1468.</span></li>
         <li><span class="r">Lerman, D. C., &amp; Iwata, B. A. (1993). Descriptive and experimental analyses of variables maintaining self-injurious behavior. <i>Journal of Applied Behavior Analysis, 26</i>, 293&ndash;319.</span></li>
@@ -4119,9 +4182,12 @@ function renderMethods(){
         <li><span class="r">Michael, J. (1982). Distinguishing between discriminative and motivational functions of stimuli. <i>Journal of the Experimental Analysis of Behavior, 37</i>, 149&ndash;155.</span></li>
         <li><span class="r">Michael, J. (1993). Establishing operations. <i>The Behavior Analyst, 16</i>, 191&ndash;206.</span></li>
         <li><span class="r">Michael, J. (2000). Implications and refinements of the establishing operation concept. <i>Journal of Applied Behavior Analysis, 33</i>, 401&ndash;410.</span></li>
+        <li><span class="r">Mudford, O. C., Martin, N. T., Hui, J. K. Y., &amp; Taylor, S. A. (2009). Assessing observer accuracy in continuous recording of rate and duration: Three algorithms compared. <i>Journal of Applied Behavior Analysis, 42</i>, 527&ndash;539.</span></li>
         <li><span class="r">Pence, S. T., Roscoe, E. M., Bourret, J. C., &amp; Ahearn, W. H. (2009). Relative contributions of three descriptive methods: Implications for behavioral assessment. <i>Journal of Applied Behavior Analysis, 42</i>, 425&ndash;446.</span></li>
         <li><span class="r">Pisanski, K., Raine, J., &amp; Reby, D. (2020). Individual differences in human voice pitch are preserved from speech to screams, roars and pain cries. <i>Royal Society Open Science, 7</i>, 191642.</span></li>
+        <li><span class="r">Romanczyk, R. G., Kent, R. N., Diament, C., &amp; O&rsquo;Leary, K. D. (1973). Measuring the reliability of observational data: A reactive process. <i>Journal of Applied Behavior Analysis, 6</i>, 175&ndash;184.</span></li>
         <li><span class="r">Rosenthal, J. A. (1996). Qualitative descriptors of strength of association and effect size. <i>Journal of Social Service Research, 21</i>, 37&ndash;59.</span></li>
+        <li><span class="r">Samaha, A. L., Vollmer, T. R., Borrero, C., Sloman, K., St. Peter Pipkin, C., &amp; Bourret, J. (2009). Analyses of response&ndash;stimulus sequences in descriptive observations. <i>Journal of Applied Behavior Analysis, 42</i>, 447&ndash;468.</span></li>
         <li><span class="r">Schmidt, J. D., Kranak, M. P., Goetzel, A. L., Kaur, J., &amp; Rooker, G. W. (2020). A clinical demonstration of correlational and experimental analyses of precursor behavior. <i>Behavior Analysis in Practice, 13</i>, 966&ndash;971.</span></li>
         <li><span class="r">Skinner, B. F. (1953). <i>Science and human behavior</i>. Macmillan.</span></li>
         <li><span class="r">Skinner, B. F. (1969). <i>Contingencies of reinforcement: A theoretical analysis</i>. Appleton-Century-Crofts.</span></li>
@@ -4180,6 +4246,7 @@ async function loadDemo(){
   $$('#bg-a-opts input, #bg-c-opts input, #bg-p-opts input, #bg-se-opts input').forEach(cb => { cb.checked = false; cb.closest(".opt").classList.remove("checked"); });
   $("#bg-date").value = todayISO(); $("#bg-time").value = nowHM(); $("#bg-window").value = String(+$("#h-window").value || 10); $("#bg-staffpresent").value = "";
   ["oa","od","na","nd"].forEach(k => { const el = $("#ioa-"+k); if(el){ el.value = ""; el.dispatchEvent(new Event("input", {bubbles:true})); } });
+  if(window.abcV2564In) abcV2564In({});   /* v25.64 the comparison, the log, the check and the probes go with the record replaced */
   const rnd = mulberry(20260913 + ((window.nbhSim && nbhSim.state.seed) || 1) - 1);   /* v24.39 another example from another seed */
   const pick = arr => arr[Math.floor(rnd()*arr.length)];
   const chance = p => rnd() < p;
@@ -4468,6 +4535,7 @@ function init(){
   $("#clear-all").addEventListener("click", async () => {
     if(await nbhUI.confirm("Clear all?\nIncidents, samples, the header fields and the function established by FA are cleared.", {ok:"Clear all", danger:true})){
       state.entries = []; state.samples = []; state.noise = { runs: [] };
+      if(window.abcV2564In) abcV2564In({});   /* v25.64 */
       writeHeader({client:"",observer:"",location:"",start:"",end:"",target:"",window:"",checks:""});
       /* v21.21 cross-form (X2): the function is saved with the record now, so it is cleared with it */
       $("#a-function").value = ""; state.faFunction = "";
@@ -6921,6 +6989,7 @@ PANEL.querySelectorAll('.story[data-story]').forEach(root=>{
         '</div></div>').join('')+'</div>';
       h+='<div class="jp-cols" style="margin-top:8px"><div><h2>'+esc(script[1].h)+'</h2><ul>'+script[1].items.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>';
       h+='<div>'+(dec?'<div class="jp-decide">'+dec.innerHTML+'</div>':'')+'</div></div>';
+      if(key==='ioa'&&window.abcIoaWorst)h+=abcIoaWorst();   /* v25.64 (H6) the codes the two observers disagreed on most */
       if(key==='calls')h+='<h2>When You See This, Check This</h2><table class="jp-guide"><thead><tr><th>In the room</th><th>On the sheet</th></tr></thead><tbody>'+
         GUIDE.map(g=>'<tr><td>'+esc(g[0])+'</td><td>'+esc(g[1])+'</td></tr>').join('')+'</tbody></table>';
       h+='<div class="jp-obs"><h2>Observer’s Fidelity Checklist</h2><div class="jp-meta"><span>Date</span><span>Recorder</span><span>Checked by</span><span>Session</span></div>';
@@ -21030,6 +21099,421 @@ window.TKWALK={build,renderAt,play,pause,seek,toggle,
 })();
 </script>
 <script src="nbh-tk1-video.js" defer></script>
+<style id="abc-v2564-css">
+/* v25.64 (H6, H7, M4, M7, L1) */
+.abc-dni{margin:0 0 14px;padding:12px 14px;border:2px solid var(--flag);border-left-width:6px;background:#fbf1f2;color:#5a1d23;font-size:13.5px;border-radius:4px}
+.abc-dni b{color:var(--flag)}
+.abc-k-low{color:var(--flag);font-weight:700}
+.abc-ioa-bad{border-left:3px solid var(--flag);padding-left:10px}
+.abc-probe-tag,.abc-later-tag{font-size:11px;color:var(--ink-faint);margin-top:3px}
+.abc-probe-tag{color:#71559d}
+.abc-blind{display:flex;gap:8px;align-items:center;font-size:13px;margin:8px 0}
+.abc-blind input{width:16px;height:16px}
+.abc-wide{grid-column:span 2}
+.abc-chk{font-size:12.5px}
+table.abc-probes,table.abc-ioa-log,table.abc-ioa-cov,table.abc-ioa-sec,table.abc-ioa-codes{font-size:12.5px;margin-top:8px}
+@media (max-width:600px){.abc-wide{grid-column:auto}#later-opts{columns:1!important}}
+</style>
+<script id="abc-v2564">
+/* v25.64 the measurement review (approved by the BCBA, 11/2), Form ABC-1's part:
+   H6  interobserver agreement computed from the two observers' files: incidents matched by start time within a tolerance
+       (15 s by default), occurrence, nonoccurrence and overall agreement, agreement on each section's codes, kappa for each
+       code ticked on 5 matched incidents or more, the codes that disagree most (carried to job aid D), and a "do not
+       interpret" banner on the Analysis tab when the consequence codes agree under 80% or a consequence code's kappa is
+       under .60;
+   M1  kappa beside the percentages (each section's, pooled over its codes), flagged under .60 as Hartmann's suggestion;
+   H7  an IOA log: sessions with IOA out of sessions observed in each condition (naturalistic, each kind of probe), flagged
+       under 20% or with none, agreement by second observer, and a drift check;
+   M4  the observer checked against a scored example (date, the example, % correct), the second observer kept blind;
+   M7  structured descriptive probes: one antecedent arranged at a planned time, consequences left as they usually are; the
+       probe's incidents are tagged and read beside the naturalistic record, not inside it;
+   L1  a consequence that came later (within about 1 minute), counted on its own.
+   Everything here is optional in a saved file: a file without it opens, analyzes and prints as before. */
+(function(){"use strict";
+const byId = id => document.getElementById(id);
+const P1 = x => x == null || isNaN(x) ? "—" : (Math.round(x * 1000) / 10) + "%";
+const K2 = k => k == null || isNaN(k) ? "—" : (k < 0 ? "−" : "") + Math.abs(k).toFixed(2).replace(/^0/, "");
+const T = s => String(s == null ? "" : s).replace(/\s+/g, " ").trim();
+const MDY = i => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(i || ""); return m ? (+m[2]) + "/" + (+m[3]) + "/" + m[1] : String(i || ""); };
+state.probes = []; state.ioaLog = []; state.obsCheck = {}; state.ioaCalc = null; state.ioaBlind = false;
+
+/* ======================= M7 structured descriptive probes ======================= */
+const PROBE = { att:"Attention diverted to a peer", dem:"A demand presented", item:"A preferred item put away" };
+const PROBE_SHORT = { att:"attention diverted", dem:"demand presented", item:"item put away" };
+const probeById = id => (state.probes || []).find(p => p && p.id === id) || null;
+window.abcInProbe = e => !!(e && e.probe && probeById(e.probe));
+window.abcProbeTag = e => { const p = e && e.probe ? probeById(e.probe) : null; return p ? `<div class="abc-probe-tag">probe: ${esc(PROBE_SHORT[p.type] || p.type)}</div>` : ""; };
+const hm2min = t => { const m = /^(\d{1,2}):(\d{2})/.exec(t || ""); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+function probeAt(date, time){
+  const t = hm2min(time); if(t == null) return null;
+  return (state.probes || []).find(p => p.date === date && hm2min(p.time) != null && t >= hm2min(p.time) && t <= hm2min(p.time) + (+p.min || 0)) || null;
+}
+function probeOptions(){
+  const sel = byId("e-probe"); if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Naturalistic (no probe)</option>' + (state.probes || []).map(p =>
+    `<option value="${esc(p.id)}">Probe: ${esc(PROBE_SHORT[p.type] || p.type)}, ${esc(MDY(p.date))} ${esc(p.time || "")}</option>`).join("");
+  if((state.probes || []).some(p => p.id === cur)) sel.value = cur;
+}
+function renderProbes(){
+  probeOptions();
+  const el = byId("pr-list"); if(!el) return;
+  const L = state.probes || [];
+  if(!L.length){ el.innerHTML = '<p class="note" style="margin:8px 0 0">No probes yet. Incidents logged with Session set to a probe are kept apart from the naturalistic record.</p>'; return; }
+  el.innerHTML = `<table class="abc-probes"><thead><tr><th>Probe</th><th>Date</th><th>Start</th><th class="num">Minutes</th><th>Stop rule</th><th class="num">Incidents</th><th class="noprint"></th></tr></thead><tbody>${
+    L.map(p => `<tr><td>${esc(PROBE[p.type] || p.type)}</td><td>${esc(MDY(p.date))}</td><td>${esc(p.time || "")}</td><td class="num">${esc(String(p.min || ""))}</td><td>${esc(p.stop || "")}</td><td class="num">${state.entries.filter(e => e.probe === p.id).length}</td>
+      <td class="noprint"><button type="button" class="btn danger" data-delprobe="${esc(p.id)}" style="padding:4px 10px;font-size:12px;min-height:28px">Delete</button></td></tr>`).join("")}</tbody></table>`;
+}
+function addProbe(){
+  const st = byId("pr-status");
+  const p = { id:uid(), type:byId("pr-type").value, date:byId("pr-date").value, time:byId("pr-time").value, min:Math.max(1, +byId("pr-min").value || 0), stop:T(byId("pr-stop").value) };
+  if(!p.date || !p.time){ flash(st, "Add the date and the start time first.", true); return; }
+  if(!(+byId("pr-min").value > 0)){ flash(st, "Add how many minutes the probe runs.", true); return; }
+  if(!p.stop){ flash(st, "Each probe needs a stop rule: write when it ends early.", true); return; }
+  state.probes.push(p); state.probes.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  byId("pr-stop").value = "";
+  flash(st, "Probe added: set Session to it on the incidents it holds.");
+  renderProbes(); refreshAll();
+}
+/* the probe's rate beside the naturalistic record's (incidents per hour of observation) */
+function probeSection(){
+  const L = state.probes || []; if(!L.length) return "";
+  const S = analysisSet(), f = S.f;
+  const inF = e => (!f.from || e.date >= f.from) && (!f.to || e.date <= f.to) && (!f.behavior || (e.behaviors || []).includes(f.behavior));
+  const tagged = state.entries.filter(e => window.abcInProbe(e) && inF(e));
+  const rows = Object.keys(PROBE).map(k => { const ps = L.filter(p => p.type === k && (!f.from || p.date >= f.from) && (!f.to || p.date <= f.to)); const ids = new Set(ps.map(p => p.id));
+    const n = tagged.filter(e => ids.has(e.probe)).length, min = ps.reduce((a, p) => a + (+p.min || 0), 0);
+    return { k, label:PROBE[k], probes:ps.length, min, n, rate: min ? n / (min / 60) : null }; }).filter(r => r.probes);
+  const allMin = +$("#h-minutes").value || 0, pMin = L.reduce((a, p) => a + (+p.min || 0), 0);
+  const natN = S.all.length, natMin = !window.__abcFiltered && allMin > pMin ? allMin - pMin : null;
+  const rate = r => r == null ? "—" : r.toFixed(1);
+  return card("Structured descriptive probes", "behavior rate by probe type, beside the naturalistic record",
+    `<div class="matrix-wrap"><table><thead><tr><th>Session</th><th class="num">Probes</th><th class="num">Minutes</th><th class="num">Incidents</th><th class="num">Per hour</th></tr></thead><tbody>
+      <tr><td><b>Naturalistic record</b></td><td class="num">—</td><td class="num">${natMin == null ? "—" : natMin}</td><td class="num">${natN}</td><td class="num">${natMin ? rate(natN / (natMin / 60)) : "—"}</td></tr>
+      ${rows.map(r => `<tr><td>${esc(r.label)}</td><td class="num">${r.probes}</td><td class="num">${r.min}</td><td class="num">${r.n}</td><td class="num">${rate(r.rate)}</td></tr>`).join("")}</tbody></table></div>` +
+    gate(`<b>What a probe is.</b> The teacher briefly arranges one antecedent at a planned time (attention diverted to a peer, a demand presented, a preferred item put away) and the consequences are left as they usually are. A rate that rises in one kind of probe, beside the naturalistic rate, points to that antecedent. The probes' incidents are left out of every other card on this tab, because their antecedent was arranged, not observed${natMin == null ? "; the naturalistic rate needs the minutes observed in the header, with no date or activity filter" : ""}.`) +
+    gate(`<b>The safeguards.</b> Staff respond as they usually do. Never instruct staff to deliver the suspected reinforcer after the behavior. Each probe needs a stop rule, and Form IC-1 consent where the plan requires it.`),
+    caveat(`Anderson and Long (2002): a structured descriptive assessment (antecedents arranged, consequences free to vary) suggested the same hypotheses as the analogue functional analysis for 3 of 4 children, and treatments based on it worked for the 3 treated. Contreras et al. (2023): structured descriptive assessments matched the functional analysis exactly in 61% of comparisons, against 50% for ABC recording; but they were only 18 of the 219 comparisons, so the advantage is uncertain. A probe still manipulates nothing after the behavior: it ranks hypotheses for a functional analysis, as the rest of this tab does.`));
+}
+
+/* ======================= L1 a consequence that came later ======================= */
+const LATER = [["attention","Attention came later"],["tangible","An item or activity came later"],["escape","Escape came later (the demand removed or avoided)"]];
+const LATER_W = { attention:"Attention", tangible:"Tangible/access", escape:"Escape/avoidance" };
+window.abcLaterTag = e => (e && Array.isArray(e.later) && e.later.length) ? `<div class="abc-later-tag">came later: ${esc(e.later.map(k => (LATER_W[k] || k).toLowerCase()).join(", "))}</div>` : "";
+function laterSection(coded, N){
+  const has = coded.filter(e => Array.isArray(e.later) && e.later.length); if(!has.length) return "";
+  const rows = LATER.map(([k]) => { const n = coded.filter(e => (e.later || []).includes(k)).length;
+    const both = coded.filter(e => (e.later || []).includes(k) && (e.consequences || []).some(id => (CLASS_C_IDS[k] || []).includes(id))).length;
+    return { k, n, both }; }).filter(r => r.n);
+  return card("Consequences that came later", "after the consequence window, within about 1 minute: counted on their own",
+    `<div class="matrix-wrap"><table><thead><tr><th>Came later</th><th class="num">Incidents</th><th class="num">Share of N</th><th class="num">Also within the window</th></tr></thead><tbody>${
+      rows.map(r => `<tr><td style="color:${CLASS_COLOR[r.k]};font-weight:600">${esc(LATER_W[r.k])}</td><td class="num">${r.n} of ${N}</td><td class="num">${pct(r.n / N, 0)}</td><td class="num">${r.both}</td></tr>`).join("")}</tbody></table></div>` +
+    gate(`These are never pooled with the consequences scored within the window, and they do not enter p(C|B), the base rates or the ranking. A delayed escape or delayed attention can still be a contingency. Samaha et al. (2009) found the reinforcers a functional analysis identified followed the behavior after a range of delays; for one person a relation that looked negative over the first 11 s after the behavior turned positive from 12 to 45 s, which a conditional probability over the first 10 s would miss.`));
+}
+
+/* ======================= the incident form: probe, later, seconds ======================= */
+let swStart = null, editSec = null;
+window.addEventListener("abc-incident-start", ev => { const at = ev && ev.detail && ev.detail.at; if(!at) return; const d = new Date(at);
+  swStart = { date: localISO(d), hm: String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"), sec: d.getSeconds() }; });
+{ const R0 = readForm; readForm = function(){ const e = R0.apply(this, arguments);
+    const pr = byId("e-probe"); if(pr && pr.value && probeById(pr.value)) e.probe = pr.value;
+    const lt = LATER.map(([k]) => k).filter(k => { const c = byId("lt-" + k); return c && c.checked; }); if(lt.length) e.later = lt;
+    if(swStart && e.date === swStart.date && e.time === swStart.hm) e.sec = swStart.sec;
+    else if(editSec && e.time === editSec.hm && editSec.sec != null) e.sec = editSec.sec;
+    return e; }; }
+{ const C0 = clearForm; clearForm = function(){ const r = C0.apply(this, arguments);
+    const pr = byId("e-probe"); if(pr) pr.value = "";
+    LATER.forEach(([k]) => { const c = byId("lt-" + k); if(c){ c.checked = false; const o = c.closest(".opt"); if(o) o.classList.remove("checked"); } });
+    editSec = null; return r; }; }
+{ const L0 = loadIntoForm; loadIntoForm = function(entry){ const r = L0.apply(this, arguments);
+    probeOptions(); const pr = byId("e-probe"); if(pr) pr.value = entry && entry.probe && probeById(entry.probe) ? entry.probe : "";
+    LATER.forEach(([k]) => { const c = byId("lt-" + k); if(c){ c.checked = !!(entry && (entry.later || []).includes(k)); const o = c.closest(".opt"); if(o) o.classList.toggle("checked", c.checked); } });
+    editSec = entry ? { hm: entry.time || "", sec: entry.sec } : null; swStart = null; return r; }; }
+
+/* ======================= the analysis: the probes' incidents read apart ======================= */
+{ const A0 = analysisSet; analysisSet = function(){ const S = A0.apply(this, arguments);
+    const out = S.all.filter(e => window.abcInProbe(e));
+    if(out.length){ S.all = S.all.filter(e => !window.abcInProbe(e)); S.coded = S.coded.filter(e => !window.abcInProbe(e)); S.narrativeOnly = S.all.length - S.coded.length; }
+    S.probed = out; return S; }; }
+/* the unconditional probability's spans leave out the minutes spent in probes, as its incidents do */
+{ const O0 = obsSpans; obsSpans = function(N){ const pMin = (state.probes || []).reduce((a, p) => a + (+p.min || 0), 0);
+    if(!pMin) return O0.apply(this, arguments);
+    if(window.__abcFiltered) return null; const w = +$("#h-window").value, mins = (+$("#h-minutes").value) - pMin; if(!(w > 0 && mins > 0)) return null; const K = mins * 60 / w; return K > N ? K : null; }; }
+
+/* ======================= H6, M1 agreement from the two files ======================= */
+const SECTIONS = [["antecedents","Antecedent"],["behaviors","Behavior"],["precursors","Preceded by"],["consequences","Consequence"]];
+const LABEL_OF = (sec, id) => { const d = sec === "antecedents" ? A_BY_ID : sec === "behaviors" ? B_BY_ID : sec === "precursors" ? P_BY_ID : C_BY_ID; return d[id] ? d[id].label : id; };
+function kappa(a, b, c, d){ const n = a + b + c + d; if(!n) return null; const po = (a + d) / n, pe = ((a + b) * (a + c) + (c + d) * (b + d)) / (n * n); return pe >= 1 ? null : (po - pe) / (1 - pe); }
+/* a start time as a span of seconds: to the second when the stopwatch gave it, else the whole minute */
+function span(x){ const m = hm2min(x.time); if(m == null) return null; const s = m * 60; return x.sec != null && isFinite(x.sec) ? [s + (+x.sec), s + (+x.sec)] : [s, s + 59]; }
+function gap(p, q){ return Math.max(0, q[0] - p[1], p[0] - q[1]); }
+function pairUp(A, B, tol){
+  const C = [];
+  A.forEach((x, i) => { const sx = span(x); if(!sx) return; B.forEach((y, j) => { if(x.date !== y.date) return; const sy = span(y); if(!sy) return; const g = gap(sx, sy);
+    if(g <= tol) C.push({ i, j, g, mid: Math.abs((sx[0] + sx[1]) - (sy[0] + sy[1])) }); }); });
+  C.sort((p, q) => p.g - q.g || p.mid - q.mid);
+  const ui = new Set(), uj = new Set(), pairs = [];
+  C.forEach(c => { if(ui.has(c.i) || uj.has(c.j)) return; ui.add(c.i); uj.add(c.j); pairs.push([A[c.i], B[c.j]]); });
+  return { pairs, onlyA: A.filter((x, i) => !ui.has(i)), onlyB: B.filter((y, j) => !uj.has(j)), minuteOnly: A.concat(B).filter(x => x.sec == null).length };
+}
+function compare(d2, tol, name){
+  const dates = new Set(), d1s = new Set();
+  state.entries.concat(state.samples).forEach(x => { if(x && x.date) d1s.add(x.date); });
+  (d2.entries || []).concat(d2.samples || []).forEach(x => { if(x && x.date && d1s.has(x.date)) dates.add(x.date); });
+  const on = x => x && dates.has(x.date);
+  const E1 = state.entries.filter(on), E2 = (d2.entries || []).filter(on), S1 = state.samples.filter(on), S2 = (d2.samples || []).filter(on);
+  const I = pairUp(E1, E2, tol), W = pairUp(S1, S2, tol);
+  /* a check one observer took where the other logged an incident is not a nonoccurrence unit: that time is an occurrence disagreement already */
+  const near = (s, list) => { const ss = span(s); return !!ss && list.some(e => e.date === s.date && span(e) && gap(ss, span(e)) <= tol + (+s.window || 10)); };
+  const wOnly = W.onlyA.filter(s => !near(s, I.onlyB)).length + W.onlyB.filter(s => !near(s, I.onlyA)).length;
+  const oa = I.pairs.length, od = I.onlyA.length + I.onlyB.length, na = W.pairs.length, nd = wOnly;
+  const coded = I.pairs.filter(([x, y]) => x.mode !== "open" && y.mode !== "open");
+  const sections = {}, codes = [];
+  SECTIONS.forEach(([sec, word]) => {
+    let A = 0, D = 0; const ids = new Set();
+    coded.forEach(([x, y]) => { const s1 = new Set(x[sec] || []), s2 = new Set(y[sec] || []); new Set([...s1, ...s2]).forEach(id => { ids.add(id); if(s1.has(id) && s2.has(id)) A++; else D++; }); });
+    let pa = 0, pb = 0, pc = 0, pd = 0;
+    ids.forEach(id => { let a = 0, b = 0, c = 0, d = 0;
+      coded.forEach(([x, y]) => { const u = (x[sec] || []).includes(id), v = (y[sec] || []).includes(id); if(u && v) a++; else if(u) b++; else if(v) c++; else d++; });
+      pa += a; pb += b; pc += c; pd += d;
+      codes.push({ sec, word, id, label: LABEL_OF(sec, id), a, b, c, d, ticked: a + b + c, k: a + b + c >= 5 ? kappa(a, b, c, d) : null }); });
+    sections[sec] = { word, A, D, p: A + D ? A / (A + D) : null, k: ids.size ? kappa(pa, pb, pc, pd) : null };
+  });
+  const worst = codes.filter(c => c.b + c.c > 0).sort((p, q) => (q.b + q.c) - (p.b + p.c) || (p.k ?? 2) - (q.k ?? 2)).slice(0, 5)
+    .map(c => ({ sec: c.sec, word: c.word, label: c.label, dis: c.b + c.c, of: c.ticked, k: c.k }));
+  const h2 = d2.header || {};
+  return { file: name || "", tol, dates: [...dates].sort(), oa, od, na, nd, matched: coded.length, minuteOnly: I.minuteOnly,
+    sections, codes: codes.filter(c => c.k != null).map(c => ({ sec: c.sec, word: c.word, label: c.label, a: c.a, b: c.b, c: c.c, d: c.d, k: c.k })), worst,
+    obs2: T(h2.observer), check2: d2.obsCheck && typeof d2.obsCheck === "object" ? d2.obsCheck : null, at: new Date().toISOString() };
+}
+/* the "do not interpret" test: the consequence codes under 80%, or a consequence code's kappa under .60 */
+function interpretBad(C){
+  if(!C) return null; const s = C.sections && C.sections.consequences, why = [];
+  if(s && s.p != null && s.p < 0.80) why.push("the consequence codes agree on " + P1(s.p));
+  const lowK = (C.codes || []).filter(c => c.sec === "consequences" && c.k != null && c.k < 0.60);
+  if(lowK.length) why.push("kappa is under .60 for " + lowK.map(c => c.label.toLowerCase() + " (" + K2(c.k) + ")").join(", "));
+  return why.length ? why : null;
+}
+window.abcIoaBad = () => interpretBad(state.ioaCalc);
+function calcHTML(C){
+  if(!C) return "";
+  const pc = (a, d) => a + d ? P1(a / (a + d)) : "—";
+  const flagK = k => k != null && k < 0.60 ? ` <span class="abc-k-low">under .60</span>` : "";
+  const bad = interpretBad(C);
+  return `<div class="abc-ioa2">
+    <p class="note"><b>Compared with ${esc(C.file || "observer 2’s file")}</b>${C.obs2 ? " (" + esc(C.obs2) + ")" : ""} on ${C.dates.length ? esc(C.dates.map(MDY).join(", ")) : "no day both files hold"}: incidents matched when their start times fall within ±${C.tol} s${C.minuteOnly ? `; ${C.minuteOnly} start time${C.minuteOnly === 1 ? " was" : "s were"} kept to the minute only (typed, not from Incident starting), so ${C.minuteOnly === 1 ? "it was" : "they were"} matched on the whole minute` : ""}. Background checks are matched the same way.</p>
+    <div class="metrics">
+      <div class="metric"><div class="v"${C.oa + C.od && C.oa / (C.oa + C.od) < 0.8 ? ' style="color:var(--flag)"' : ""}>${pc(C.oa, C.od)}</div><div class="k">occurrence agreement (${C.oa} of ${C.oa + C.od})</div></div>
+      <div class="metric"><div class="v">${pc(C.na, C.nd)}</div><div class="k">nonoccurrence agreement (${C.na} of ${C.na + C.nd})</div></div>
+      <div class="metric"><div class="v">${pc(C.oa + C.na, C.od + C.nd)}</div><div class="k">overall agreement</div></div>
+    </div>
+    <div class="matrix-wrap"><table class="abc-ioa-sec"><thead><tr><th>Codes compared on the ${C.matched} matched coded incidents</th><th class="num">Agree</th><th class="num">Disagree</th><th class="num">Agreement</th><th class="num">Kappa</th></tr></thead><tbody>${
+      SECTIONS.map(([sec, word]) => { const s = C.sections[sec] || {}; return `<tr><td>${esc(word)}</td><td class="num">${s.A || 0}</td><td class="num">${s.D || 0}</td><td class="num"${s.p != null && s.p < 0.8 ? ' style="color:var(--flag);font-weight:700"' : ""}>${P1(s.p)}</td><td class="num">${K2(s.k)}${flagK(s.k)}</td></tr>`; }).join("")}</tbody></table></div>
+    ${C.codes.length ? `<div class="matrix-wrap"><table class="abc-ioa-codes"><thead><tr><th>Code ticked on 5 matched incidents or more</th><th>Section</th><th class="num">Both</th><th class="num">Observer 1 only</th><th class="num">Observer 2 only</th><th class="num">Kappa</th></tr></thead><tbody>${
+      C.codes.map(c => `<tr><td>${esc(c.label)}</td><td>${esc(c.word)}</td><td class="num">${c.a}</td><td class="num">${c.b}</td><td class="num">${c.c}</td><td class="num">${K2(c.k)}${flagK(c.k)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="note">No code was ticked on 5 matched incidents, so no code’s kappa is computed yet.</p>`}
+    ${C.worst.length ? `<p class="note"><b>Codes that disagree most</b> (printed on job aid D, A Second Observer, for retraining): ${esc(C.worst.map(w => w.label + " (" + w.word.toLowerCase() + "), " + w.dis + " of " + w.of + " incidents").join("; "))}.</p>` : ""}
+    <p class="note">Kappa is (observed agreement − chance agreement) ÷ (1 − chance agreement), from the same table. Hartmann (1977) suggested it exceed .60; that is his suggestion, not a validated cut-off. When two observers each tick a code on few incidents, they agree on most incidents by chance alone, which the percentage does not show and kappa does.</p>
+    ${bad ? `<p class="note abc-ioa-bad"><b>Do not interpret the Analysis tab yet:</b> ${esc(bad.join("; "))}. Every figure there is a proportion of coded incidents, so a code the observers apply differently changes it directly. Retrain the codes against a scored example and compare again.</p>` : ""}
+    <div class="btnrow" style="padding:8px 0 0"><button type="button" class="btn" id="ioa-use2">Use these counts</button><button type="button" class="btn ghost" id="ioa-log-add2">Add to the IOA log</button><button type="button" class="btn quiet" id="ioa-clear2">Clear the comparison</button></div>
+  </div>`;
+}
+function paintCalc(){ const el = byId("ioa-calc"); if(el) el.innerHTML = calcHTML(state.ioaCalc); paintLog(); }
+function open2(file){
+  const fr = new FileReader();
+  fr.onload = () => {
+    let d = null; try{ d = JSON.parse(fr.result); }catch(e){ d = null; }
+    const msg = "That file could not be read as observer 2’s ABC-1 record. Nothing was changed. Choose the .json file Save data made on observer 2’s device.";
+    if(!d || abcFileProblem(d) !== ""){ if(window.nbhUI && nbhUI.toast) nbhUI.toast(msg, { kind:"warn" }); else alert(msg); return; }
+    const tol = Math.max(1, Math.min(120, +byId("ioa-tol").value || 15));
+    state.ioaCalc = compare(d, tol, file.name || "");
+    paintCalc();
+    try{ if(!$("#panel-analysis").hidden) renderAnalysis(); }catch(e){}
+    if(window.nbhUI && nbhUI.toast) nbhUI.toast("Observer 2’s file compared: " + state.ioaCalc.oa + " incidents matched on " + state.ioaCalc.dates.length + " day" + (state.ioaCalc.dates.length === 1 ? "" : "s") + ". Nothing in this record was changed.", { kind:"ok" });
+  };
+  fr.readAsText(file);
+}
+/* the counts computed go into the four fields, which the print and Form FS-1 read as before */
+function useCounts(){
+  const C = state.ioaCalc; if(!C) return;
+  const o = Object.assign({}, state.ioa || {}, { oa:String(C.oa), od:String(C.od), na:String(C.na), nd:String(C.nd) });
+  if(C.dates.length) o.date = C.dates[C.dates.length - 1];
+  if(!T(o.who) && C.obs2) o.who = C.obs2;
+  abcIoaSet(o);
+  if(window.nbhUI && nbhUI.toast) nbhUI.toast("The four counts are filled from the comparison.", { kind:"ok" });
+}
+
+/* ======================= H7 the IOA log, coverage by condition, drift ======================= */
+function condOf(v){ return v && PROBE[v] ? "Probe: " + PROBE_SHORT[v] : "Naturalistic"; }
+function addLog(){
+  const C = state.ioaCalc, cond = (byId("ioa-cond") || {}).value || "", who = T((byId("ioa-who") || {}).value) || (C && C.obs2) || "";
+  let row;
+  if(C){ const u = (a, d) => a + d ? a / (a + d) : null;
+    row = { dates: C.dates.slice(), cond, who, occ: u(C.oa, C.od), non: u(C.na, C.nd), overall: u(C.oa + C.na, C.od + C.nd), cons: C.sections.consequences ? C.sections.consequences.p : null, blind: !!state.ioaBlind }; }
+  else { const s = window.abcIoaSum && abcIoaSum(); const dt = T((byId("ioa-date") || {}).value);
+    if(!s || !dt){ if(window.nbhUI && nbhUI.toast) nbhUI.toast("Open observer 2’s file, or enter the four counts and the date of the check, before adding to the log.", { kind:"warn" }); return; }
+    row = { dates: [dt], cond, who, occ: s.occ, non: s.non, overall: s.overall, cons: null, blind: !!state.ioaBlind }; }
+  state.ioaLog.push(row); paintLog();
+}
+function sessionsBy(){
+  const nat = new Set(); state.entries.forEach(e => { if(e && e.date && !window.abcInProbe(e)) nat.add(e.date); }); state.samples.forEach(s => { if(s && s.date) nat.add(s.date); });
+  const out = { "": nat };
+  Object.keys(PROBE).forEach(k => { const s = new Set((state.probes || []).filter(p => p.type === k).map(p => p.date)); if(s.size) out[k] = s; });
+  return out;
+}
+function coverage(){
+  const by = sessionsBy(), L = state.ioaLog || [], rows = [];
+  Object.keys(by).forEach(k => { const tot = by[k].size, io = new Set(); L.filter(r => (r.cond || "") === k).forEach(r => (r.dates || []).forEach(d => io.add(d)));
+    const pc = tot ? Math.min(1, io.size / tot) : null;
+    const occ = L.filter(r => (r.cond || "") === k && r.occ != null);
+    rows.push({ k, label: condOf(k), tot, ioa: io.size, pc, flag: !io.size ? "no IOA session" : pc < 0.20 ? "under 20%" : "", mean: occ.length ? occ.reduce((a, r) => a + r.occ, 0) / occ.length : null,
+      first: [...(L.filter(r => (r.cond || "") === k).flatMap(r => r.dates || []))].sort()[0] || "" }); });
+  /* drift: a condition's mean occurrence agreement 10 points or more below the first condition's */
+  const withMean = rows.filter(r => r.mean != null && r.first).sort((a, b) => a.first.localeCompare(b.first));
+  const drift = [];
+  if(withMean.length > 1) withMean.slice(1).forEach(r => { if(r.mean <= withMean[0].mean - 0.10) drift.push(r.label + " " + P1(r.mean) + ", against " + P1(withMean[0].mean) + " in " + withMean[0].label.toLowerCase()); });
+  /* by second observer: one 10 points or more above the others */
+  const pairs = {}; L.forEach(r => { if(r.occ == null) return; const w = T(r.who) || "not named"; (pairs[w] = pairs[w] || []).push(r.occ); });
+  const pk = Object.keys(pairs), mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const pairRows = pk.map(w => { const others = pk.filter(x => x !== w).flatMap(x => pairs[x]); const m = mean(pairs[w]);
+    return { who: w, n: pairs[w].length, mean: m, high: others.length && m >= mean(others) + 0.10 }; });
+  pairRows.forEach(p => { if(p.high) drift.push("checks with " + p.who + " run " + P1(p.mean) + ", 10 points or more above the others"); });
+  return { rows, pairRows, drift };
+}
+window.abcIoaCoverage = coverage;
+function paintLog(){
+  const el = byId("ioa-log"); if(!el) return;
+  const L = state.ioaLog || [], V = coverage();
+  const s = state.ioa || {}, s2 = +s.s2 || 0, sn = +s.sn || 0;
+  const covRows = V.rows.filter(r => r.tot || r.ioa);
+  el.innerHTML = `<h4 style="margin:14px 0 6px">IOA by condition</h4>` +
+    (L.length ? `<div class="matrix-wrap"><table class="abc-ioa-log"><thead><tr><th>Days</th><th>Condition</th><th>Second observer</th><th class="num">Occurrence</th><th class="num">Overall</th><th class="num">Consequence codes</th><th>Blind</th><th class="noprint"></th></tr></thead><tbody>${
+      L.map((r, i) => `<tr><td>${esc((r.dates || []).map(MDY).join(", "))}</td><td>${esc(condOf(r.cond))}</td><td>${esc(r.who || "not named")}</td><td class="num">${P1(r.occ)}</td><td class="num">${P1(r.overall)}</td><td class="num">${P1(r.cons)}</td><td>${r.blind ? "yes" : "—"}</td><td class="noprint"><button type="button" class="btn danger" data-dellog="${i}" style="padding:4px 10px;font-size:12px;min-height:28px">Delete</button></td></tr>`).join("")}</tbody></table></div>` : `<p class="note">No check in the IOA log yet. After each check, open observer 2’s file and press <b>Add to the IOA log</b> (or enter the four counts and the date, then add them).</p>`) +
+    (covRows.length ? `<div class="matrix-wrap"><table class="abc-ioa-cov"><thead><tr><th>Condition</th><th class="num">Sessions with IOA</th><th class="num">Share</th><th class="num">Mean occurrence agreement</th><th></th></tr></thead><tbody>${
+      covRows.map(r => `<tr><td>${esc(r.label)}</td><td class="num">${r.ioa} of ${r.tot}</td><td class="num">${r.pc == null ? "—" : Math.round(r.pc * 100) + "%"}</td><td class="num">${P1(r.mean)}</td><td>${r.flag ? `<span class="abc-k-low">${esc(r.flag)}</span>` : ""}</td></tr>`).join("")}</tbody></table></div>
+      <p class="note">A session is a day observed in that condition: a day with naturalistic incidents or background checks, or a day with a probe of that kind.${!L.length && sn ? ` The fields above say a second observer on ${s2} of ${sn} sessions (${Math.round(s2 / sn * 100)}%); the table counts the checks in the log.` : ""}</p>` : "") +
+    (V.pairRows.length > 1 ? `<p class="note"><b>By second observer:</b> ${esc(V.pairRows.map(p => p.who + " " + P1(p.mean) + " over " + p.n + " check" + (p.n === 1 ? "" : "s")).join("; "))}.</p>` : "") +
+    (V.drift.length ? `<p class="note abc-ioa-bad"><b>Possible drift:</b> ${esc(V.drift.join("; "))}. Retrain both observers against a scored example and bring in a new second observer for the next checks.</p>` : "") +
+    `<p class="note"><b>The default.</b> IOA on at least a quarter to a third of sessions in every condition, spread across times, activities and observers. Rotate the second observer. Where possible, the primary observer does not know which session will be checked. The usual convention is 20–33% of sessions (Hausman et al., 2022); observers who always work together can keep agreeing while both drift from the definition (Kazdin, 1977), and agreement was substantially lower when observers did not know they were being checked (Romanczyk et al., 1973).</p>`;
+}
+
+/* ======================= M4 the observer checked against a scored example ======================= */
+const EX_W = { video:"a scored video", sim:"this form’s simulation", other:"another scored example" };
+function readCheck(){ state.obsCheck = { date: (byId("h-chkDate") || {}).value || "", ex: (byId("h-chkEx") || {}).value || "", pct: T((byId("h-chkPct") || {}).value) }; return state.obsCheck; }
+function writeCheck(o){ o = o && typeof o === "object" ? o : {}; const set = (id, v) => { const el = byId(id); if(el) el.value = v == null ? "" : String(v); };
+  set("h-chkDate", o.date); set("h-chkEx", EX_W[o.ex] ? o.ex : ""); set("h-chkPct", o.pct); state.obsCheck = { date: o.date || "", ex: EX_W[o.ex] ? o.ex : "", pct: o.pct == null ? "" : String(o.pct) }; paintCheck(); }
+function checkFlags(){
+  const o = state.obsCheck || {}, out = [];
+  if(!o.date && !o.pct) return ["not recorded: check the observer against a scored example (a video, or this form’s simulation) before the data count"];
+  if(o.pct !== "" && +o.pct < 90) out.push("under 90% correct: this observer’s data do not count until a check reaches 90% or more");
+  const last = state.entries.concat(state.samples).map(x => x && x.date).filter(Boolean).sort().slice(-1)[0] || todayISO();
+  if(o.date){ const days = (new Date(last + "T12:00") - new Date(o.date + "T12:00")) / 864e5; if(days > 42) out.push("more than 6 weeks before the last observation: repeat the check every 4 to 6 weeks"); }
+  const bad = interpretBad(state.ioaCalc), V = coverage();
+  const s = window.abcIoaSum && abcIoaSum();
+  if(bad || V.drift.length || (s && s.occ != null && s.occ < 0.80)) out.push("an agreement figure is flagged: check both observers against the example again");
+  return out;
+}
+window.abcCheckLine = function(){
+  const o = state.obsCheck || {}; if(!o.date && !o.pct && !o.ex) return "";
+  return [o.date ? MDY(o.date) : "", EX_W[o.ex] || "", o.pct !== "" && o.pct != null ? o.pct + "% correct" : ""].filter(Boolean).join(", ");
+};
+function paintCheck(){
+  const el = byId("abcChkNote"); if(!el) return;
+  const f = checkFlags();
+  el.innerHTML = `<b>Observer checked against a scored example.</b> The default is 90% or more correct before this observer’s data count; repeat the check every 4 to 6 weeks, and after any agreement flag. Supervisors: give observers feedback on their accuracy against the example, not on whether the data look as hoped.` +
+    (f.length ? ` <span class="abc-k-low">${esc(f.join("; "))}.</span>` : "");
+}
+
+/* ======================= the saved file, the print ======================= */
+window.abcV2564Out = function(){
+  readCheck(); const o = {};
+  if(state.probes && state.probes.length) o.probes = state.probes;
+  if(state.ioaLog && state.ioaLog.length) o.ioaLog = state.ioaLog;
+  if(state.obsCheck && (state.obsCheck.date || state.obsCheck.ex || state.obsCheck.pct)) o.obsCheck = state.obsCheck;
+  if(state.ioaCalc) o.ioaCalc = state.ioaCalc;
+  if(state.ioaBlind) o.ioaBlind = true;
+  return o;
+};
+window.abcV2564In = function(d){
+  d = d && typeof d === "object" ? d : {};
+  const okP = p => p && typeof p === "object" && typeof p.id === "string" && PROBE[p.type] && typeof p.date === "string";
+  state.probes = Array.isArray(d.probes) ? d.probes.filter(okP) : [];
+  state.ioaLog = Array.isArray(d.ioaLog) ? d.ioaLog.filter(r => r && typeof r === "object" && Array.isArray(r.dates)) : [];
+  state.ioaCalc = d.ioaCalc && typeof d.ioaCalc === "object" && d.ioaCalc.sections && Array.isArray(d.ioaCalc.dates) ? Object.assign({ codes:[], worst:[] }, d.ioaCalc) : null;
+  state.ioaBlind = d.ioaBlind === true;
+  const b = byId("ioa-blind"); if(b) b.checked = state.ioaBlind;
+  writeCheck(d.obsCheck);
+  renderProbes(); paintCalc();
+  try{ refreshAll(); }catch(e){}
+};
+{ const S0 = window.abcIoaSum; if(S0) window.abcIoaSum = function(){ const r = S0.apply(this, arguments); if(!r) return r;
+    const C = state.ioaCalc, add = [];
+    if(C){ const s = C.sections || {}; add.push("codes compared from the two files (±" + C.tol + " s): " + SECTIONS.map(([k, w]) => w.toLowerCase() + " " + P1((s[k] || {}).p) + ((s[k] || {}).k != null ? " (kappa " + K2(s[k].k) + ")" : "")).join(", "));
+      r.codes = SECTIONS.reduce((o, [k]) => { o[k] = { p: (s[k] || {}).p ?? null, k: (s[k] || {}).k ?? null }; return o; }, {}); }
+    if(state.ioaBlind) add.push("the second observer did not know the phase or the change expected");
+    if(add.length) r.text += "; " + add.join("; ");
+    return r; }; }
+function printRows(){
+  const dl = document.querySelector("#print-header dl"); if(!dl) return;
+  dl.querySelectorAll("[data-v2564]").forEach(x => x.remove());
+  const row = (k, v) => { if(!v) return; const div = document.createElement("div"); div.setAttribute("data-v2564", ""); div.innerHTML = `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`; dl.appendChild(div); };
+  const ck = window.abcCheckLine(), f = checkFlags();
+  row("Observer checked against a scored example", (ck || "not recorded") + (f.length && ck ? " (" + f.join("; ") + ")" : ""));
+  const V = coverage(), L = state.ioaLog || [];
+  if(L.length) row("IOA coverage", V.rows.filter(r => r.tot || r.ioa).map(r => r.label + " " + r.ioa + " of " + r.tot + (r.flag ? " (" + r.flag + ")" : "")).join("; ") + (V.drift.length ? "; possible drift: " + V.drift.join("; ") : ""));
+  if(state.probes.length) row("Structured descriptive probes", state.probes.length + " on file, read apart from the naturalistic record");
+  const bad = interpretBad(state.ioaCalc); if(bad) row("Do not interpret yet", bad.join("; "));
+}
+{ const F0 = fillPrintHeader; fillPrintHeader = function(){ const r = F0.apply(this, arguments); try{ printRows(); }catch(e){} return r; }; }
+window.addEventListener("beforeprint", () => { try{ printRows(); }catch(e){} });
+/* job aid D, A Second Observer: the codes that disagreed most on the last comparison, to retrain */
+window.abcIoaWorst = function(){
+  const C = state.ioaCalc; if(!C || !C.worst || !C.worst.length) return "";
+  return '<h2>Codes to Retrain</h2><p class="jp-lead">From the last comparison of the two observers’ files (' + esc(C.dates.map(MDY).join(", ")) + '), the codes they disagreed on most. Go over each with both observers against a scored example before the next check.</p><ul>' +
+    C.worst.map(w => '<li>' + esc(w.label) + ' (' + esc(w.word.toLowerCase()) + '): ' + w.dis + ' of ' + w.of + ' incidents' + (w.k != null ? ', kappa ' + K2(w.k) : '') + '</li>').join('') + '</ul>';
+};
+
+/* ======================= the Analysis tab: the banner, the probes, the later consequences ======================= */
+{ const RA = window.renderAnalysis; window.renderAnalysis = function(){ const r = RA.apply(this, arguments);
+    try{ const out = byId("analysis-out"); if(!out) return r;
+      const bad = interpretBad(state.ioaCalc);
+      if(bad) out.insertAdjacentHTML("afterbegin", `<div class="abc-dni" role="alert"><b>Do not interpret this analysis yet.</b> When the two observers’ files were compared, ${esc(bad.join("; "))}. Every figure below is a proportion of coded incidents, so a code that observers apply differently changes it directly. Retrain the codes (the Methods tab lists the ones that disagree most) and compare again.</div>`);
+      const pr = probeSection(); if(pr){ const first = out.querySelector(":scope > .card"); if(first) first.insertAdjacentHTML("afterend", pr); else out.insertAdjacentHTML("beforeend", pr); }
+      const S = analysisSet(); const lt = S.coded.length ? laterSection(S.coded, S.coded.length) : "";
+      if(lt){ const cls = [...out.querySelectorAll(":scope > .card")].find(c => /^By reinforcer class/.test((c.querySelector("h2") || {}).textContent || "")); if(cls) cls.insertAdjacentHTML("afterend", lt); else out.insertAdjacentHTML("beforeend", lt); }
+    }catch(e){}
+    return r; }; }
+
+/* ======================= wiring ======================= */
+function wire(){
+  renderProbes(); paintCalc(); paintCheck();
+  const pd = byId("pr-date"); if(pd && !pd.value) pd.value = todayISO();
+  const pt = byId("pr-time"); if(pt && !pt.value) pt.value = nowHM();
+  const add = byId("pr-add"); if(add) add.addEventListener("click", addProbe);
+  ["h-chkDate","h-chkEx","h-chkPct"].forEach(id => { const el = byId(id); if(el){ el.addEventListener("input", () => { readCheck(); paintCheck(); }); el.addEventListener("change", () => { readCheck(); paintCheck(); }); } });
+  /* a probe that holds the incident's date and time is offered as its session */
+  ["e-date","e-time"].forEach(id => { const el = byId(id); if(el) el.addEventListener("change", () => { const s = byId("e-probe"); if(!s || s.value) return; const p = probeAt(byId("e-date").value, byId("e-time").value); if(p) s.value = p.id; }); });
+  document.addEventListener("click", async e => {
+    const t = e.target && e.target.closest ? e.target : null; if(!t) return;
+    const dp = t.closest("[data-delprobe]");
+    if(dp){ const id = dp.dataset.delprobe, n = state.entries.filter(x => x.probe === id).length;
+      if(await nbhUI.confirm("Delete this probe?" + (n ? "\nIts " + n + " incident" + (n === 1 ? " goes" : "s go") + " back to the naturalistic record." : ""), { ok:"Delete", danger:true })){
+        state.probes = state.probes.filter(p => p.id !== id); state.entries.forEach(x => { if(x.probe === id) delete x.probe; }); renderProbes(); refreshAll(); paintLog(); } return; }
+    const dl = t.closest("[data-dellog]");
+    if(dl){ state.ioaLog.splice(+dl.dataset.dellog, 1); paintLog(); paintCheck(); return; }
+    if(t.closest("#ioa-open2")){ const f = byId("ioa-file2"); if(f) f.click(); return; }
+    if(t.closest("#ioa-use2")){ useCounts(); paintCheck(); return; }
+    if(t.closest("#ioa-log-add2") || t.closest("#ioa-log-add")){ addLog(); paintCheck(); return; }
+    if(t.closest("#ioa-clear2")){ state.ioaCalc = null; paintCalc(); paintCheck(); try{ if(!$("#panel-analysis").hidden) renderAnalysis(); }catch(x){} return; }
+  });
+  const f2 = byId("ioa-file2"); if(f2) f2.addEventListener("change", e => { const f = e.target.files && e.target.files[0]; if(f) open2(f); e.target.value = ""; });
+  const bl = byId("ioa-blind"); if(bl) bl.addEventListener("change", () => { state.ioaBlind = bl.checked; });
+  /* the incident and sample tables name the probe and a later consequence */
+  { const RI = renderIncidents; renderIncidents = function(){ const r = RI.apply(this, arguments); try{ renderProbes(); }catch(e){} return r; }; }
+}
+window.abcV2564 = { compare, kappa, coverage, interpretBad, checkFlags, probeSection, laterSection };
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
+})();
+</script>
 <script id="abc114">
 /* v24.14 (the 10/25 review): the Data file tab's tools press the toolbar's own buttons; a wide analysis table fades at its
    right edge while there is more to the right and says so, its row labels in place (the 13-column antecedent-to-consequence

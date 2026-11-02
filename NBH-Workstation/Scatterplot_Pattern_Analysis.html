@@ -1291,6 +1291,14 @@ html.nbh-compact .toolbar .sp-panel{display:none}
 /* v24.26 the short-record screen and verdict, the window picker, the greyed sample-SD note, the second observer's bar, the answer key,
    the not-observed button and settings checkboxes (R-069), Setting and the activities on paper (R-068) */
 .sp-screen{margin:4px 0 10px}.sp-screen .sp-verdict{color:var(--ink)}
+/* v25.64 (M4, M8, H7, L5) */
+.sp-chk{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-family:var(--sans);font-size:11.5px;margin:2px 0 4px}
+.sp-chk label{display:inline-flex;gap:5px;align-items:center}.sp-chk input,.sp-chk select{font:inherit}
+.sp-chk input[data-meta="chkPct"]{width:4.2em}
+.sp-flag{color:#95303a;font-weight:700}
+.sp-blind{display:inline-flex;gap:5px;align-items:center}
+.sp-possible{color:var(--ink-soft)}
+.sp-ioacov,.sp-chknote{margin:-6px 0 12px;font-size:11.5px;color:var(--ink-soft)}.sp-ioacov:empty,.sp-chknote:empty{display:none}
 .sp-winpick{margin:10px 0 4px;padding:8px 10px;border:1px solid var(--rule-2,#c9d3cf);border-radius:6px;font-family:var(--sans);font-size:12px;line-height:1.35}
 .sp-winpick label{display:inline-flex;align-items:center;gap:6px;margin:4px 12px 0 0;min-height:24px;cursor:pointer}.sp-winpick label small{color:var(--ink-soft)}
 .sp-winpick input[type=checkbox]{width:18px;height:18px;margin:0}
@@ -1491,6 +1499,7 @@ button.sp-abs::before{content:'';position:absolute;left:-3px;right:-3px;top:-5px
   <div class="sp-ioabar noprint" id="ioaBar" role="group" aria-label="Second observer" hidden>
     <span><b>Second observer&rsquo;s marks</b> for <span id="ioaBeh"></span>, entered on the grid below.</span>
     <label>Observer <input id="ioaObs" data-meta="ioaObs" placeholder="name, role"></label>
+    <label class="sp-blind"><input type="checkbox" id="ioaBlind"> Did not know the phase or what change was expected</label><!-- v25.64 (M4) -->
     <span class="sp-ioadays" id="ioaDays" role="group" aria-label="Days both observers kept the sheet"></span>
     <p id="ioaRes" aria-live="polite"></p>
     <button type="button" id="ioaUse">Use it as this behavior&rsquo;s IOA</button>
@@ -1613,6 +1622,15 @@ button.sp-abs::before{content:'';position:absolute;left:-3px;right:-3px;top:-5px
     <input id="mIoa" data-meta="ioa" inputmode="decimal">
   </div>
   <p class="cap sp-ioanote" id="ioaNoteP"></p><!-- v23.05 (review I48) how the figure was found, when the form computed it -->
+  <p class="cap sp-ioacov" id="ioaCovP"></p><!-- v25.64 (H7, M9) the days with a second observer -->
+  <!-- v25.64 (M4) the observer checked against a scored example before the marks count -->
+  <div class="sp-chk">
+    <b>Observer checked against a scored example</b>
+    <label>On <input type="date" id="mChkDate" data-meta="chkDate"></label>
+    <label>Example <select id="mChkEx" data-meta="chkEx"><option value="">Not recorded</option><option value="video">A scored video</option><option value="sim">This form&rsquo;s simulation</option><option value="other">Another scored example</option></select></label>
+    <label>Correct <input id="mChkPct" data-meta="chkPct" inputmode="decimal" size="4">%</label>
+  </div>
+  <p class="cap sp-chknote" id="chkNoteP"></p>
 
   <div id="ctlBody"></div>
 
@@ -3974,7 +3992,7 @@ const state = {
 };
 /* v23.05 (review F90): the high-rate cutoff is each behavior's own (threshold), kept with its name and definition;
    state.cfg.threshold stays as the record's default for a behavior that has none (a file from before) */
-const BKEYS = ["behavior","definition","example","nonexample","ioa","threshold","ioaObs","ioaDays","ioaNote"];   /* v23.05 (I48) the second observer's */
+const BKEYS = ["behavior","definition","example","nonexample","ioa","threshold","ioaObs","ioaDays","ioaNote","ioaOcc","ioaBlind"];   /* v25.64 (M9, M4) the occurrence figure carried, the second observer kept blind */   /* v23.05 (I48) the second observer's */
 state.behaviors[0].cells = state.cells;
 
 const $  = s => document.querySelector(s);
@@ -5586,7 +5604,7 @@ async function loadSim(){
     const on = Object.keys(o2).filter(k => o2[k].n > 0), off = Object.keys(o2).filter(k => !o2[k].n);
     if(on[0]) o2[on[0]].n = 0; if(on[3]) o2[on[3]].n = Math.max(1, o2[on[3]].n - 1); if(off[1]) o2[off[1]].n = 1;
     b.obs2 = o2; state.meta.ioaObs = "Iris Calloway (simulated), paraprofessional"; state.meta.ioaDays = days.join(",");
-    const R = spIoa(); state.meta.ioa = String(R.total); state.meta.ioaNote = spIoaText(R, true); commitBeh(); }
+    const R = spIoa(), C = spIoaCarry(R); state.meta.ioa = String(C.main); state.meta.ioaOcc = C.occ === null ? "" : String(C.occ); state.meta.ioaNote = spIoaText(R, true); commitBeh(); }   /* v25.64 (M9) as Use it carries it */
 
   syncToolbar(); renderCodes(); renderMeta(); renderBehBar(); render();
   { const seg=document.querySelector('#viewSeg button[data-view="sheet"]');   /* v24.26 (sp126, R-133) the view stays on the sheet the toast describes */
@@ -6113,21 +6131,33 @@ function spBinomTail(n, k, p){
 function spScreenData(a){
   const d = a.d, p = d.cellsObs ? d.marked / d.cellsObs : 0, rows = [];
   for(let r=0;r<d.nR;r++){ const o = d.perRow[r].obs, m = d.perRow[r].low + d.perRow[r].high; if(!o) continue;
-    const P = spBinomTail(o, m, p); rows.push({r, o, m, P, flag: m >= 2 && m/o > p && P < 0.05}); }
-  return {p, rows, flagged: rows.filter(x => x.flag)};
+    const P = spBinomTail(o, m, p); rows.push({r, o, m, P, raw: m >= 2 && m/o > p && P < 0.05}); }
+  /* v25.64 (M8) every interval observed is a test: Holm's step-down correction (the smallest p against .05 / N, the next
+     against .05 / (N - 1), and so on, stopping at the first that misses), so a day of 16 intervals does not flag one by
+     chance alone more often than not. An interval flagged before the correction and not after is kept as "possible". */
+  const N = rows.length, ord = rows.slice().sort((x, y) => x.P - y.P);
+  let stop = false;
+  ord.forEach((x, i) => { x.need = 0.05 / (N - i); if(!stop && x.P < x.need) x.holm = true; else { stop = true; x.holm = false; } });
+  rows.forEach(x => { x.flag = x.raw && x.holm; });
+  return {p, rows, tested: N, flagged: rows.filter(x => x.flag), possible: rows.filter(x => x.raw && !x.flag)};
 }
 function spScreen(a){
   const S = spScreenData(a), d = a.d, pct = v => Math.round(v*100) + "%";
   const pf = P => P < 0.001 ? "p < .001" : "p = " + P.toFixed(3).replace(/^0/, "");
   const one = x => d.rows[x.r] + " (" + x.m + " of " + x.o + " days, " + pf(x.P) + ")";
+  const N = S.tested, chance = (N * 0.05).toFixed(1).replace(/\.0$/, "");
+  /* v25.64 (M8) corrected for testing every interval at once; the verdict says "may cluster", a window to observe */
   return "<div class='sp-screen'><h3 style='font-family:var(--sans);font-size:11.5px;margin:0 0 4px'>Short-record screen</h3>"
     + "<p class='cap'>For each interval, the days it was marked against the record\u2019s base rate (" + d.marked + " of " + d.cellsObs
-    + " cells marked, " + pct(S.p) + "), by a one-sided binomial test at \u03b1 = .05: a screening convention for a record shorter than the study\u2019s, "
+    + " cells marked, " + pct(S.p) + "), by a one-sided binomial test at \u03b1 = .05, corrected for testing " + N + " interval" + (N === 1 ? "" : "s") + " at once (Holm\u2019s step-down method: the smallest p must be under .05 \u00f7 " + N + ", the next under .05 \u00f7 " + Math.max(1, N - 1) + ", and so on): a screening convention for a record shorter than the study\u2019s, "
     + "not one of the Kahng criteria. " + (S.flagged.length ? "Marked on more days than the base rate predicts: " + esc(S.flagged.map(one).join("; ")) + "."
-    : "No interval is marked on more days than the base rate predicts.") + "</p>"
+    : "No interval is marked on more days than the base rate predicts, once the correction is made.")
+    + (S.possible.length ? " <span class='sp-possible'>Possible (under .05 on its own, not after the correction): " + esc(S.possible.map(one).join("; ")) + ".</span>" : "") + "</p>"
+    + "<p class='cap sp-chance'>With " + N + " interval" + (N === 1 ? "" : "s") + " tested, about " + chance + " would be flagged by chance alone (" + N + " \u00d7 0.05) if each were tested on its own; with 16, the chance of at least one false flag is about 56%. That is why the correction is made.</p>"
     + "<p class='cap sp-verdict'><b>Pattern verdict:</b> " + (S.flagged.length
-      ? "the behavior clusters in " + S.flagged.length + " interval" + (S.flagged.length === 1 ? "" : "s") + " \u2014 " + esc(S.flagged.map(x => d.rows[x.r]).join("; "))
-        + " \u2014 whatever the run rules below say: they were built for 30-day, all-day records and cannot see a one- or two-interval pattern on a short one."
+      ? "the behavior may cluster in " + S.flagged.length + " interval" + (S.flagged.length === 1 ? "" : "s") + " \u2014 " + esc(S.flagged.map(x => d.rows[x.r]).join("; "))
+        + " \u2014; treat " + (S.flagged.length === 1 ? "it" : "them") + " as a window to observe with Form ABC-1 or Form OB-1, not as a pattern. The run rules below were built for 30-day, all-day records and cannot see a one- or two-interval pattern on a short one."
+      : S.possible.length ? "no interval stands out once the correction is made; the possible one" + (S.possible.length === 1 ? " is" : "s are") + " worth a look with Form ABC-1 or Form OB-1, not a pattern."
       : "no interval stands out from the day\u2019s base rate on this record; a quiet chart below agrees.") + "</p></div>";
 }
 function spWinCands(a){
@@ -6347,6 +6377,7 @@ function niceStep(top){
 function renderControl(){
   { const p = $("#ioaNoteP"), nt = String(state.meta.ioaNote || ""), v = String(state.meta.ioa || "").trim();   /* v23.05 (I48) */
     if(p) p.textContent = v && nt.indexOf(" " + v + "% (") >= 0 ? nt : ""; }
+  { const c = $("#ioaCovP"); if(c) c.innerHTML = spIoaCov(); const k = $("#chkNoteP"); if(k) k.innerHTML = spChkNote(); }   /* v25.64 (H7, M9, M4) */
   $("#cClient").textContent   = state.meta.client   || "";
   $("#cBehavior").textContent = state.meta.behavior || "";
   $("#cWeek").textContent     = state.meta.week     || "";
@@ -6377,6 +6408,12 @@ function renderControl(){
       + "At " + ioa + "% this record would not have entered their analysis. Fix the "
       + "measurement before reading the chart.</div>";
   }
+  /* v25.64 (M9) the occurrence figure, carried when few intervals are marked */
+  { const o = spIoaNoted() ? parseFloat(state.meta.ioaOcc) : NaN;
+    if(!isNaN(o) && o < 80) html += "<div class='warn'><b>OCCURRENCE AGREEMENT BELOW 80%</b>"
+      + "Fewer than 30% of the intervals compared were marked, so most of the agreement is on blank cells, which inflates the other figure "
+      + "(Hopkins &amp; Hermann, 1977; Hartmann, 1977). At " + o + "% the two observers agree on too few of the marked intervals: go over the "
+      + "definition with both of them before reading the chart.</div>"; }
   if(a.n < 30){
     html += "<div class='warn'><b>"+a.n+" DAYS, NOT 30</b>"
       + "Every record in the study ran a full 30 days of all-day observation. The authors "
@@ -6446,6 +6483,9 @@ function renderControl(){
       + "by these criteria at this interval length and record length." + ceilingNote(a) + "</div>";
   }
   html += spWinPick(a);   /* v24.26 (sp126, E-16) the windows, ticked, sent with the case */
+  /* v25.64 (L5) after a pattern: test it by changing what happens in the window */
+  if(a.hits.length || spScreenData(a).flagged.length || spWinCands(a).length)
+    html += "<p class='cap sp-test'><b>Testing a window.</b> If a window holds up, a simple test is to change what happens in it (the activity, the staff member, the demand) and keep the scatter plot running. If the behavior moves or stops with the change, that is evidence of control by that condition. In all three cases of Touchette et al. (1985), changing the schedule, the activities, the setting or the staff reduced or ended the behavior. Once a pattern is suspected, ABC data (Form ABC-1) or a functional analysis are more precise (Kahng et al., 1998).</p>";
 
   html += "</div>";
   body.innerHTML = html;
@@ -6505,8 +6545,13 @@ function methodNote(a){
     + "<div class='noprint'><b>ABOUT THE SIMULATION</b>"
     + "Load simulation (toolbar) fills the sheets with simulated data; none of it is a real student record. Two simulated behaviors loaded, each on its own data sheet: aggression over three school weeks (two sheets of days), and elopement over the same days. Use the behavior buttons above the sheet to step between them; every behavior prints together, each with its own summary and control chart.</div>"
     + "<b>REFERENCES</b>"
+    + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Hartmann, D. P. (1977). Considerations in the choice of interobserver reliability estimates. <em>Journal of Applied Behavior Analysis, 10</em>, 103&ndash;116.</span>"
+    + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Hausman, N. L., Javed, N., Bednar, M. K., Guell, M., Schaller, E., Nevill, R. E., &amp; Kahng, S. (2022). Interobserver agreement: A preliminary investigation into how much is enough? <em>Journal of Applied Behavior Analysis, 55</em>, 357&ndash;368.</span>"
+    + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Hopkins, B. L., &amp; Hermann, J. A. (1977). Evaluating interobserver reliability of interval data. <em>Journal of Applied Behavior Analysis, 10</em>, 121&ndash;126.</span>"
     + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Kahng, S., Iwata, B. A., Fischer, S. M., Page, T. J., Treadwell, K. R. H., Williams, D. E., &amp; Smith, R. G. (1998). Temporal distributions of problem behavior based on scatter plot analysis. <em>Journal of Applied Behavior Analysis, 31</em>(4), 593&ndash;604.</span>"
+    + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Kazdin, A. E. (1977). Artifact, bias, and complexity of assessment: The ABCs of reliability. <em>Journal of Applied Behavior Analysis, 10</em>, 141&ndash;150.</span>"
     + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Pfadt, A., &amp; Wheeler, D. J. (1995). Using statistical process control to make data-based clinical decisions. <em>Journal of Applied Behavior Analysis, 28</em>(3), 349&ndash;370.</span>"
+    + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Romanczyk, R. G., Kent, R. N., Diament, C., &amp; O&rsquo;Leary, K. D. (1973). Measuring the reliability of observational data: A reactive process. <em>Journal of Applied Behavior Analysis, 6</em>, 175&ndash;184.</span>"
     + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Touchette, P. E., MacDonald, R. F., &amp; Langer, S. N. (1985). A scatter plot for identifying stimulus control of problem behavior. <em>Journal of Applied Behavior Analysis, 18</em>(4), 343&ndash;351.</span>"
     + "<span class='sp-ref' style='display:block;padding-left:1.6em;text-indent:-1.6em;margin:0 0 3px'>Wheeler, D. J., &amp; Chambers, D. S. (1992). <em>Understanding statistical process control</em> (2nd ed.). SPC Press.</span>"
     + "</div>";
@@ -6652,29 +6697,73 @@ function spIoa(){
   const P = spIOA ? (b.cells || {}) : state.cells, Q = spIOA ? state.cells : (b.obs2 || {});
   const E = {s:0, n:null, code:""}, rows = rowLabels(), nR = rows.length;
   const days = spIoaDays().filter(c => !dayAbsent(c));
-  let n = 0, agree = 0, either = 0, both = 0, exact = 0, marked2 = 0;
+  let n = 0, agree = 0, either = 0, both = 0, exact = 0, marked2 = 0, marked1 = 0;
   const dis = new Set(), rowDis = new Array(nR).fill(0);
   days.forEach(c => { for(let r=0;r<nR;r++){
     const k = key(r,c), p = P[k] || E, q = Q[k] || E;
     if(p.x || q.x) continue;
     const a = level(p), z = level(q); n++;
-    if(z > 0) marked2++;
+    if(z > 0) marked2++; if(a > 0) marked1++;
     if((a > 0) === (z > 0)) agree++; else { dis.add(k); rowDis[r]++; }
     if(a > 0 || z > 0){ either++; if(a > 0 && z > 0) both++; }
     if(a === z) exact++; else if(a > 0 && z > 0) dis.add(k);
   } });
   const pc = (x, y) => y ? Math.round(1000 * x / y) / 10 : null, most = Math.max(0, ...rowDis);
+  /* v25.64 (M1) Cohen's kappa from the same occurrence table: (observed - chance) / (1 - chance) */
+  const pe = n ? (marked1 / n) * (marked2 / n) + (1 - marked1 / n) * (1 - marked2 / n) : 1;
+  const kappa = n && pe < 1 ? (agree / n - pe) / (1 - pe) : null;
   return {days, n, agree, total: pc(agree, n), either, both, occ: pc(both, either), exact, level: oneLevel() ? null : pc(exact, n),
-          dis, most, at: most ? rows.filter((x, r) => rowDis[r] === most) : [], marked2};
+          dis, most, at: most ? rows.filter((x, r) => rowDis[r] === most) : [], marked2, marked1, kappa, sparse: n ? either / n < 0.30 : false};
 }
+/* v25.64 (M9) the figure carried into the behavior's IOA: the same level (none, low or high), the method Kahng et al. (1998)
+   and Touchette et al. (1985) used, or interval-by-interval agreement on a sheet kept without levels; and occurrence
+   agreement as well when under 30% of the intervals compared were marked, where blank cells inflate the other figure */
+function spIoaCarry(R){ return {main: R.level === null ? R.total : R.level, occ: R.sparse && R.occ !== null ? R.occ : null}; }
+function spKapTxt(k){ return k == null ? "\u2014" : (k < 0 ? "\u2212" : "") + Math.abs(k).toFixed(2).replace(/^0/, ""); }
+/* the note under the figure is the form's own (not a figure typed over it) */
+function spIoaNoted(){ const nt = String(state.meta.ioaNote || ""), v = String(state.meta.ioa || "").trim(); return !!(v && nt.indexOf(" " + v + "% (") >= 0); }
 function spIoaText(R, withObs){
   if(!R.n) return "";
-  const nm = String(state.meta.ioaObs || "").trim();
-  return "Interval-by-interval agreement " + R.total + "% (" + R.agree + " of " + R.n + " intervals) on " + R.days.length + " day"
-    + (R.days.length === 1 ? "" : "s") + " (" + listOf(R.days.map(spIoaDayName), 6) + ")"
-    + (withObs ? (nm ? ", " + nm + " as second observer" : ", with a second observer") : "")
-    + (R.occ === null ? "; neither observer marked an interval" : "; occurrence agreement " + R.occ + "% (" + R.both + " of the " + R.either
-      + " intervals either one marked)") + (R.level === null ? "" : "; the same level in " + R.level + "%") + ".";
+  const nm = String(state.meta.ioaObs || "").trim(), C = spIoaCarry(R);
+  const days = " on " + R.days.length + " day" + (R.days.length === 1 ? "" : "s") + " (" + listOf(R.days.map(spIoaDayName), 6) + ")";
+  const who = withObs ? (nm ? ", " + nm + " as second observer" : ", with a second observer") + (state.meta.ioaBlind === "yes" ? " who did not know the phase or the change expected" : "") : "";
+  const occ = R.occ === null ? "; neither observer marked an interval"
+    : "; occurrence agreement " + R.occ + "% (" + R.both + " of the " + R.either + " intervals either one marked)" + (C.occ !== null ? ", carried as well: under 30% of the intervals compared were marked" : "");
+  const kp = R.kappa == null ? "" : "; kappa " + spKapTxt(R.kappa) + (R.kappa < 0.60 ? ", under .60 (Hartmann\u2019s suggestion, not a validated cut-off)" : "");
+  /* v25.64 (M9) the figure carried leads: the same level on a sheet kept at two levels */
+  if(R.level === null) return "Interval-by-interval agreement " + R.total + "% (" + R.agree + " of " + R.n + " intervals)" + days + who + occ + kp + ".";
+  return "Same-level agreement " + R.level + "% (" + R.exact + " of " + R.n + " intervals scored none, low or high alike)" + days + who + occ
+    + "; interval-by-interval agreement " + R.total + "% (" + R.agree + " of " + R.n + ")" + kp + ".";
+}
+/* v25.64 (H7, M9) the days with a second observer, out of the days observed; who checked; the default */
+function spIoaCov(){
+  const obs = summaryData().nObs, io = spIoaDays().filter(c => !dayAbsent(c) && c < state.cfg.days), n = io.length;
+  const out = [];
+  if(obs) out.push(n ? "Second observer on " + n + " of the " + obs + " days observed (" + Math.round(100 * n / obs) + "%)" + (n / obs < 0.20 ? ": <span class='sp-flag'>under 20% of the days</span>" : "") + "."
+    : (String(state.meta.ioa || "").trim() ? "The days with a second observer are not on this sheet." : "<span class='sp-flag'>No day observed has a second observer yet.</span>"));
+  const wd = io.map(c => dayLabels()[c]);
+  if(n >= 2 && wd.every(w => w === wd[0])) out.push("Every check fell on a " + esc(wd[0]) + ": spread them across the days of the week and the times of day.");
+  /* by second observer, across the behaviors kept with a computed figure */
+  const by = {}; (state.behaviors || []).forEach(b => { const m = (b && b.meta) || {}, v = parseFloat(m.ioa), nt = String(m.ioaNote || "");
+    if(isNaN(v) || nt.indexOf(" " + String(m.ioa).trim() + "% (") < 0) return; const w = String(m.ioaObs || "").trim() || "not named"; (by[w] = by[w] || []).push(v); });
+  const ws = Object.keys(by), mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  if(ws.length > 1){ out.push("By second observer: " + ws.map(w => esc(w) + " " + Math.round(mean(by[w]) * 10) / 10 + "%").join("; ") + ".");
+    ws.forEach(w => { const others = [].concat(...ws.filter(x => x !== w).map(x => by[x])); if(mean(by[w]) >= mean(others) + 10) out.push("<span class='sp-flag'>Possible drift: the checks with " + esc(w) + " run 10 points or more above the others.</span>"); }); }
+  out.push("The default: a second observer on a quarter to a third of the days, spread across days of the week, times of day and observers; rotate the second observer, and where possible the first observer does not know which day will be checked (Hausman et al., 2022; Kazdin, 1977; Romanczyk et al., 1973). Kahng et al. (1998) sent their reliability observers at different times and to different places.");
+  return out.join(" ");
+}
+/* v25.64 (M4) the observer checked against a scored example */
+function spChkNote(){
+  const m = state.meta, out = [];
+  if(!m.chkDate && !String(m.chkPct || "").trim()) out.push("<span class='sp-flag'>Not recorded:</span> check the observer against a scored example (a video, or this form\u2019s simulation) before the marks count.");
+  else {
+    if(String(m.chkPct || "").trim() !== "" && parseFloat(m.chkPct) < 90) out.push("<span class='sp-flag'>Under 90% correct:</span> this observer\u2019s marks do not count until a check reaches 90% or more.");
+    const ds = Object.keys(m).filter(k => /^date\d+$/.test(k) && m[k]).map(k => m[k]).sort(), last = ds[ds.length - 1] || toISO(new Date());
+    if(m.chkDate){ const g = (parseISO(last) - parseISO(m.chkDate)) / 864e5; if(g > 42) out.push("<span class='sp-flag'>More than 6 weeks before the last day on the sheet:</span> repeat the check."); }
+  }
+  const v = parseFloat(m.ioa), o = spIoaNoted() ? parseFloat(m.ioaOcc) : NaN;
+  if((!isNaN(v) && v < 80) || (!isNaN(o) && o < 80)) out.push("<span class='sp-flag'>An agreement figure is flagged:</span> check both observers against the example again.");
+  return out.join(" ") + " The default is 90% or more correct before an observer\u2019s marks count; repeat the check every 4 to 6 weeks, and after any agreement flag. Supervisors: give observers feedback on their accuracy against the example, not on whether the marks look as hoped.";
 }
 function spIoaPaint(){
   const on = spIOA, bar = $("#ioaBar"), tog = $("#ioaTog");
@@ -6698,7 +6787,9 @@ function spIoaPaint(){
   if(res) res.textContent = !R.days.length
     ? "Pick the days both observers kept the sheet, then enter the second observer\u2019s marks on the grid below (a day is added when you mark it)."
     : !R.n ? "No interval to compare on those days." : spIoaText(R, false) + (R.dis.size ? " Where the two differ is outlined in red"
-      + (R.most ? "; most often at " + listOf(R.at, 3) + " (" + R.most + ")" : "") + ": go over the definition with both observers there." : " The two agree on every interval.");
+      + (R.most ? "; most often at " + listOf(R.at, 3) + " (" + R.most + ")" : "") + ": go over the definition with both observers there." : " The two agree on every interval.")
+      + " " + spIoaCov().replace(/<[^>]+>/g, "");   /* v25.64 (H7, M9) */
+  { const bl = $("#ioaBlind"); if(bl) bl.checked = state.meta.ioaBlind === "yes"; }   /* v25.64 (M4) */
   const use = $("#ioaUse"); if(use) use.disabled = !R.n;
   $("#readout").textContent = "Second observer \u00b7 " + behName(state.cur) + " \u00b7 " + R.marked2 + " interval" + (R.marked2 === 1 ? "" : "s")
     + " marked on the days compared" + (R.n ? " \u00b7 agreement " + R.total + "%" : "");
@@ -6733,11 +6824,14 @@ $("#ioaDays").addEventListener("click", e => {
 });
 $("#ioaUse").addEventListener("click", () => {
   const R = spIoa(); if(!R.n) return;
-  state.meta.ioa = String(R.total);
+  /* v25.64 (M9) the same level, and occurrence agreement when few intervals are marked */
+  const C = spIoaCarry(R);
+  state.meta.ioa = String(C.main); state.meta.ioaOcc = C.occ === null ? "" : String(C.occ);
   state.meta.ioaNote = spIoaText(R, true);
   commitBeh(); renderMeta(); renderControl();
-  nbhUI.toast("IOA " + R.total + "% is now " + behName(state.cur) + "\u2019s; the days and the observer are named under it on the control chart.", {kind:"ok"});
+  nbhUI.toast("IOA " + C.main + "% (" + (R.level === null ? "interval by interval" : "the same level") + ")" + (C.occ !== null ? " and occurrence agreement " + C.occ + "%" : "") + " " + (C.occ !== null ? "are" : "is") + " now " + behName(state.cur) + "\u2019s; the days and the observer are named under it on the control chart.", {kind:"ok"});
 });
+$("#ioaBlind").addEventListener("change", e => { state.meta.ioaBlind = e.target.checked ? "yes" : ""; commitBeh(); });   /* v25.64 (M4) */
 
 state.cfg.chart = "bars";
 state.cfg.sigma = "mr";
