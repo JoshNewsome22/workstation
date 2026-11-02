@@ -11,10 +11,13 @@
       objective of the replacement says the replacement is honored in the probe settings; the goal sheet prints Produces.
    M5 "The goal is a lower rate, not zero" adds "while ... stays available when needed"; a target of 0 and a behavior
       that can injure get Check lines; the decision aid cites Deitz and Repp (1973).
-   M9 A4 says what Richling et al. (2019) found and no longer cites "Wong et al., 2022"; 9 of 10 trials is held to 100%;
-      a new objective's criterion is applied to each target (Wong & Fienup, 2022), printed on the sheet; a listener
-      program is reminded of overselection (Cordeiro et al., 2022); 1 session is below the standard; the Guide states the
-      standard and the reference list carries the studies.
+   M9 the standard (the BCBA, 11/2): 100% independent across 3 consecutive teaching sessions; A4 holds a new objective at
+      90% or 9 of 10 trials to it and cites Richling et al. (2019), and no longer cites "Wong et al., 2022"; an objective
+      saved before v25.64 at 90% keeps it and is told the standard; a new objective's criterion is applied to each target
+      (each target independent on every trial of it in 2 consecutive sessions in which it was presented; Wong & Fienup,
+      2022), printed on the sheet; a listener program needs a mixed-array check (Cordeiro et al., 2022); 1 session is
+      below the standard; the Guide states the standard and the reference list carries the studies; the bank's note and
+      its load say entries written to 90% are raised.
    L1 a reduction objective has the people, settings and materials and a maintenance check (filled for a new one), in
       the sentence, with the A7 note.
    L2 "Target is N% below the current level" and a typical peer level beside the target.
@@ -119,32 +122,33 @@ const OLD=path.join(__dirname,'data','sim','mateo','gb1-save.json');
     C.c3.some(x=>/^gb-ok . Replacement: easier than the behavior/.test(x)),C);
   ok('H9 the goal sheet prints what the replacement produces; a generalization objective of the replacement says it is honored in the probe settings',
     /Produces: a break from the task, when work is presented\./.test(C.sheet)&&/as measured by generalization probes on Form DD-1; in the probe settings the replacement is honored each time it is used/.test(C.gen),{sheet:C.sheet.slice(0,600),gen:C.gen.slice(0,400)});
-  ok('M9 a new acquisition objective\'s criterion is applied to each target, with the 2-session confirmation at 100% (Wong & Fienup, 2022), on the card and the goal sheet',
-    C.apply==='each target'&&/Criterion applied to each target: .*confirmed at 100% of its trials in 2 consecutive sessions.*\(Wong & Fienup, 2022\)/.test(C.s)&&/Criterion applied to each target/.test(C.sheet),{apply:C.apply,s:C.s.slice(0,600)});
+  ok('M9 a new acquisition objective\'s criterion is applied to each target, each target independent on every trial of it in 2 consecutive sessions (Wong & Fienup, 2022), on the card and the goal sheet',
+    C.apply==='each target'&&/Criterion applied to each target: .*independent on every trial of it in 2 consecutive sessions in which it was presented.*\(Wong & Fienup, 2022\)/.test(C.s)&&/Criterion applied to each target/.test(C.sheet),{apply:C.apply,s:C.s.slice(0,600)});
   const D=await p3.evaluate(()=>{const o={};const pre='acq[0].';
     set(pre+'crit','independently in at least 80% of opportunities');o.c80=CHK('acq0');
     set(pre+'crit','correctly in at least 9 of 10 trials');o.c9=CHK('acq0');
     set(pre+'crit','correctly in 10 of 10 trials');o.c10=CHK('acq0');
     set(pre+'crit','independently in at least 90% of opportunities');o.c90=CHK('acq0');
+    set(pre+'crit','independently in 100% of opportunities');o.c100=CHK('acq0');
     set(pre+'n','1');o.c1=CHK('acq0');set(pre+'n','3');
     set(pre+'beh','touch the picture an adult names');o.cL=CHK('acq0');
     o.html=document.documentElement.outerHTML;o.guide=document.querySelector('[data-pane="guide"]').textContent;o.refs=document.getElementById('gbRefs').textContent;return o;});
-  ok('M9 A4 says what Richling et al. (2019) found, holds 9 of 10 trials to 100%, passes 90% of opportunities and 10 of 10, and notes 1 session; "Wong et al., 2022" is gone',
-    D.c80.some(x=>/^gb-note . A4: mastery level 80%: the workstation’s standard is 90% across 3 consecutive sessions, and all of a session’s trials \(100%\) when a session has 10 trials or fewer.*Richling et al\. \(2019\), 80% across 3 sessions maintained in only about half of 12 comparisons; 100% across 3 sessions gave the highest maintenance a week later in 11 of 12/.test(x))&&
-    D.c9.some(x=>/^gb-note . A4: mastery level 9 of 10 \(90%\): in a session of 10 trials or fewer, the workstation’s standard is all of them \(100%\)/.test(x))&&
-    D.c10.some(x=>/^gb-ok . A4: mastery level 10 of 10 \(100%\)/.test(x))&&D.c90.some(x=>/^gb-ok . A4: mastery level 90%/.test(x))&&
-    D.c1.some(x=>/^gb-note . A4: across 1 session: below the workstation’s standard of 3 consecutive sessions/.test(x))&&!/Wong et al\., 2022/.test(D.html),{c80:D.c80,c9:D.c9,c10:D.c10,c1:D.c1});
-  ok('M9 a listener program applied to each target is reminded to check for one-cue responding (Cordeiro et al., 2022); the Guide states the standard; the reference list carries the studies',
-    D.cL.some(x=>/^gb-note . Each target: in a listener \(match-to-sample\) program, check for one-cue responding.*Cordeiro et al\., 2022/.test(x))&&/5\. The Mastery Standard/.test(D.guide)&&/all of a\s+session’s trials \(100%\) when a session has 10 trials or fewer/.test(D.guide)&&
+  ok('M9 A4 holds a new objective to the standard, 100% across 3 consecutive teaching sessions, citing Richling et al. (2019) (best maintenance in 11 of 12, about one extra session): 80%, 90% and 9 of 10 trials are noted, 100% and 10 of 10 pass, 1 session is noted; "Wong et al., 2022" is gone',
+    D.c80.some(x=>/^gb-note . A4: mastery level 80%: the workstation’s standard is 100% independent across 3 consecutive teaching sessions, with 2 instructors for the whole set.*Richling et al\. \(2019\), 100% across 3 sessions gave the best maintenance in 11 of 12 evaluations, at about one extra session/.test(x))&&
+    D.c90.some(x=>/^gb-note . A4: mastery level 90%: the workstation’s standard is 100%/.test(x))&&D.c9.some(x=>/^gb-note . A4: mastery level 9 of 10 \(90%\): the workstation’s standard is 100%/.test(x))&&
+    D.c10.some(x=>/^gb-ok . A4: mastery level 10 of 10 \(100%\)/.test(x))&&D.c100.some(x=>/^gb-ok . A4: mastery level 100%/.test(x))&&
+    D.c1.some(x=>/^gb-note . A4: across 1 session: below the workstation’s standard of 3 consecutive sessions/.test(x))&&!/Wong et al\., 2022/.test(D.html),{c80:D.c80,c90:D.c90,c9:D.c9,c10:D.c10,c1:D.c1});
+  ok('M9 a listener program applied to each target needs a mixed-array check (Cordeiro et al., 2022); the Guide states the standard; the reference list carries the studies',
+    D.cL.some(x=>/^gb-note . Each target: in a listener \(match-to-sample\) program, a target also needs a mixed-array check.*one-cue responding.*Cordeiro et al\., 2022/.test(x))&&/5\. The Mastery Standard/.test(D.guide)&&/is 100%\s+independent across 3 consecutive teaching sessions, with 2 instructors for the whole set/.test(D.guide)&&
     ['Richling, S. M.','Wong, K. K., & Fienup, D. M. (2022)','Cordeiro, M. C.','Rooker, G. W.','Horner, R. H., & Day, H. M. (1991)','Deitz, S. M., & Repp, A. C. (1973)','Walker, H. M., & Hops, H. (1976)','Stokes, T. F., & Baer, D. M. (1977)'].every(r=>D.refs.includes(r)),{cL:D.cL});
   await p3.close();
 
   /* L3: the bank */
   const p4=await open(null);
   const E=await p4.evaluate(async()=>{const R=document.getElementById('gbBankHost').shadowRoot,B=GB1_BANK.entries,o={};
-    const withGen=B.find(e=>e.gen&&e.maint&&!e.see&&e.n==='3');o.id=withGen&&withGen.id;
+    const withGen=B.find(e=>e.gen&&e.maint&&!e.see&&e.n==='3'&&/ 90% /.test(' '+e.crit+' '));o.id=withGen&&withGen.id;
     R.querySelector('details').open=true;R.querySelector('.it[data-id="'+withGen.id+'"]')||(R.querySelector('.q').value=withGen.lab,R.querySelector('.q').dispatchEvent(new Event('input')));
-    window.__gbBank.show(withGen.id);R.querySelector('.ld[data-i="0"]').click();o.gen=V('acq[0].gen');o.maint=V('acq[0].maint');o.s=OUT('acq0');
+    window.__gbBank.show(withGen.id);R.querySelector('.ld[data-i="0"]').click();o.st0=R.querySelector('.st').textContent;o.gen=V('acq[0].gen');o.maint=V('acq[0].maint');o.s=OUT('acq0');
     window.__gbBank.show('fi-negation');o.det=(R.querySelector('.chk1')||{}).textContent||'';R.querySelector('.add').click();await new Promise(r=>setTimeout(r,200));
     o.st=R.querySelector('.st').textContent;const last=Math.max(...[...document.querySelectorAll('#acqWrap .card')].map(c=>+c.querySelector('[data-out]').dataset.out.replace('acq','')));o.c1=CHK('acq'+last);
     const rep=window.__gbBank.search('','','',true);o.rep=rep.length;o.repOk=rep.every(id=>{const e=window.__gbBank.entry(id);return e.rep===true&&e.fn.length>0;});o.withFn=B.filter(e=>e.fn.length).length;
@@ -155,16 +159,18 @@ const OLD=path.join(__dirname,'data','sim','mateo','gb1-save.json');
   ok('L3 a 1-session entry is checked against the 3-session standard in the bank and after the load',
     /asks for 1 session, below the workstation’s standard of 3 consecutive sessions/.test(E.det)&&/asks for 1 session/.test(E.st)&&E.c1.some(x=>/A4: across 1 session/.test(x)),E);
   ok('L3 "Replacements only" lists the entries marked as replacements (each with the function it replaced), and unticked the whole bank again; the bank\'s note states the standard',
-    E.rep===E.withFn&&E.rep>0&&E.repOk&&E.listed===E.rep&&E.all===E.n&&/where a session has 10 trials or fewer, the standard is all of them \(100%\)/.test(E.note),{rep:E.rep,withFn:E.withFn,listed:E.listed,all:E.all,n:E.n});
+    E.rep===E.withFn&&E.rep>0&&E.repOk&&E.listed===E.rep&&E.all===E.n&&/The workstation’s standard is now 100% independent across 3 consecutive teaching sessions/.test(E.note)&&/criterion \(90%\) is below the workstation’s standard, 100% independent across 3 consecutive sessions/.test(E.st0),{rep:E.rep,withFn:E.withFn,listed:E.listed,all:E.all,n:E.n});
   await p4.close();
 
   /* a file saved before v25.64 */
   const p5=await open(OLD);
   const O=await p5.evaluate(()=>{const o={};o.v64=[...document.querySelectorAll('[name$=".v64"]')].map(e=>e.value).join('');
     o.cw=[...document.querySelectorAll('[name$=".cwFinal"]')].some(e=>e.checked);o.apply=[...document.querySelectorAll('[name$=".apply"]')].map(e=>e.value).join('');
-    o.outs=[...document.querySelectorAll('[data-out]')].map(e=>e.textContent).join(' | ');document.getElementById('buildSheet').click();o.sheet=document.getElementById('sheetOut').textContent;return o;});
+    o.outs=[...document.querySelectorAll('[data-out]')].map(e=>e.textContent).join(' | ');o.a4=[...document.querySelectorAll('[data-out^="acq"] .gb-chk')].map(e=>e.className.replace('gb-chk ','')+' '+e.textContent).filter(x=>/A4/.test(x));document.getElementById('buildSheet').click();o.sheet=document.getElementById('sheetOut').textContent;return o;});
   ok('a file saved before v25.64 opens as saved: no box ticked, no default, no new phrase, line or check on the cards or the goal sheet',
     !O.v64&&!O.cw&&!O.apply&&![O.outs,O.sheet].some(t=>/counted only|stays available|Target is \d|Criterion applied|Replacement:|Produces:|typical peer level/.test(t)),{v64:O.v64,cw:O.cw,apply:O.apply,outs:O.outs.slice(0,500)});
+  ok('M9 an objective saved before v25.64 keeps the 90% it saved: A4 passes it and tells the standard now',
+    O.a4.length>0&&O.a4.every(x=>/^gb-ok . A4: mastery level 90%.*the standard when this objective was written; the workstation’s standard is now 100% across 3 consecutive sessions/.test(x)),O.a4);
   await p5.close();
   ok('no page errors',!errs.length,errs.slice(0,5));
   }catch(e){fails++;console.log('FAIL exception',e&&e.stack||e);}
