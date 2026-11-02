@@ -122,7 +122,12 @@ const mock=()=>{window.__asked=[];nbhUI.confirm=async t=>{window.__asked.push(St
     const f2=JSON.parse(JSON.stringify(file));f2.obs[1].rec.t0=T0-2000;f2.obs[1].rec.dur=62;f2.obs[1].taps.s=f2.obs[1].taps.s.map(x=>x+2);await put(f2);o.shift=ioa(state.obs[0]).block;window.__asked.splice(0);
     /* a count typed by hand that no longer matches the taps: the total count is carried */
     state.obs[0].count='6';render();const b=ioa(state.obs[0]);o.stale={block:b.block,agree:b.agree,line:document.querySelectorAll('.obs-page')[0].querySelector('p.ioa').textContent};
-    state.obs[0].count='5';render();return o;},T0);
+    state.obs[0].count='5';render();
+    /* v25.65 (the BCBA, 11/2) 1-minute blocks for fast, bursty behavior: the same taps in one block of 60 s */
+    state.meta.blk='60';render();const m=ioa(state.obs[0]);o.min={block:m.block,line:document.querySelectorAll('.obs-page')[0].querySelector('p.ioa').textContent,sel:document.getElementById('mBlk').value};
+    state.meta.blk='';render();o.back=ioa(state.obs[0]).block;return o;},T0);
+  ok('v25.65 OB-1 1-minute blocks (chosen on Setup): the same taps make one block of 60 s, 5 against 7 is 71.4%, and the line names the block size; back to 10 s, 6 blocks again',
+    H3.min.block&&H3.min.block.size===60&&H3.min.block.n===1&&H3.min.block.p===71.4&&/block-by-block 71\.4% \(1 block of 60 s\)/.test(H3.min.line)&&H3.min.sel==='60'&&H3.back.n===6&&H3.back.size===10,H3.min);
   ok('OB-1 H3 Open observer 2\'s file picks the observation recorded at the same Start, asks first, and fills the observer 2 columns, the name and their check',H3.btn&&H3.asked.length===1&&/a count of 7, a peer count of 0, with the tap times/.test(H3.asked[0])&&H3.count2==='7'&&H3.second==='Behavior technician (simulated)'&&H3.ck2==='96',H3);
   ok('OB-1 H3 block-by-block 44.4% over 6 blocks of 10 s (2/3, 1, 0, 0, 1, 0), exact count per block 33.3% (2 of 6), time window 50% (4 of 8 taps matched)',H3.block&&H3.block.p===44.4&&H3.block.n===6&&H3.block.exact.p===33.3&&H3.block.exact.k===2&&H3.block.tw.p===50&&H3.block.tw.k===4&&H3.block.tw.n===8,H3.block);
   ok('OB-1 H3 the block-by-block figure is carried in Agreement (%), and total count (71.4%) is labelled as not showing the same events were counted',H3.agree===44.4&&H3.field==='44.4'&&H3.count.p===71.4&&/^Agreement: block-by-block 44\.4% \(6 blocks of 10 s\), carried; exact count per block 33\.3% \(2 of 6\); time window ±2 s 50% \(4 of 8 taps matched\);.* count 71\.4% \(5 and 7; total count, which does not show the observers counted the same events\)/.test(H3.line),H3.line);

@@ -1006,6 +1006,8 @@ table.grid.obs-count.two td.lab{white-space:normal}
 <style id="ob1-v2564-css">
 /* v25.64 (M4, L7, H3, H7) the observers' checks on Setup, the ticks on a sheet, observer 2's file, the coverage tables */
 table.obck{margin:4px 0 2px;table-layout:fixed;width:100%}
+.obblk{margin:8px 0 4px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.obblk label{font-weight:600}.obblk select{max-width:100%}.obblk .hint{flex:1 1 100%;font-size:12.5px}
+@media print{.obblk .hint{display:none}}
 table.obck th,table.obck td{overflow:hidden;overflow-wrap:anywhere}
 table.obck td input,table.obck td select{min-width:0;max-width:100%}
 @media screen and (max-width:600px){table.obck th,table.obck td{padding:3px 4px;font-size:11.5px}}
@@ -1326,6 +1328,7 @@ body.view-obs #obRec{display:block}
         <td><input id="mCk2Pct" data-meta="ck2Pct" inputmode="decimal" aria-label="Second observer: percentage correct"></td></tr>
     </tbody>
   </table>
+  <p class="obblk"><label for="mBlk">Agreement blocks, when both observers&rsquo; taps are timed</label> <select id="mBlk" data-meta="blk"><option value="">10 seconds (the default)</option><option value="60">1 minute, for fast, bursty behavior</option></select> <span class="hint">10-second blocks are the stricter test (Mudford et al., 2009); 1-minute blocks forgive observers a few seconds apart on rapid, repeated behavior (Rolider et al., 2012). The block size prints with every agreement figure.</span></p>
   <p class="method noprint">By this form&rsquo;s default an observer scores 90% or more against a scored example (a scored video, or this form&rsquo;s simulation) before their data count, and is checked again every 4 to 6 weeks and after any agreement flag. Give observers feedback on accuracy against the example, not on whether the data look as hoped.</p>
 
   <div class="defs">
@@ -2071,7 +2074,7 @@ function ioaLow(a){
   if(!a) return [];
   const L = [], f = (x, w) => { if(x && x.p < 80) L.push(w(x)); };
   /* v25.64 (H3) the carried block-by-block figure */
-  if(a.block && a.block.p != null){ if(a.block.dur) f(a.block.dur, x => "seconds of episode per block " + x.p + "% (" + a.block.n + " blocks of 10 s)"); else f(a.block, x => "block-by-block " + x.p + "% (" + x.n + " blocks of 10 s)"); }
+  if(a.block && a.block.p != null){ if(a.block.dur) f(a.block.dur, x => "seconds of episode per block " + x.p + "% (" + a.block.n + (a.block.n === 1 ? " block of " : " blocks of ") + (a.block.size || 10) + " s)"); else f(a.block, x => "block-by-block " + x.p + "% (" + x.n + (x.n === 1 ? " block of " : " blocks of ") + (a.block.size || 10) + " s)"); }
   f(a.count, x => "total count agreement " + x.p + "% (counts of " + x.a + " and " + x.b + ")");
   f(a.iv, x => "interval-by-interval " + x.p + "% (" + x.k + " of " + x.n + ")");
   if(a.su){ f(a.su.scored, x => "scored-interval " + x.p + "% (" + x.k + " of " + x.n + ")"); f(a.su.unscored, x => "unscored-interval " + x.p + "% (" + x.k + " of " + x.n + ")"); }
@@ -2083,7 +2086,7 @@ function ioaLow(a){
 /* v22.99 (review F72) one observation's agreement in the words of the FS-1 statement */
 function ioaWords(a){
   const P = [];
-  if(a.block && a.block.p != null) P.push((a.block.dur ? "seconds of episode per 10-s block " + a.block.dur.p : "block-by-block " + a.block.p) + "%");   /* v25.64 (H3) */
+  if(a.block && a.block.p != null) P.push((a.block.dur ? "seconds of episode per " + (a.block.size || 10) + "-s block " + a.block.dur.p : "block-by-block " + a.block.p) + "%");   /* v25.64 (H3) */
   if(a.count) P.push("total count " + a.count.p + "% (counts of " + a.count.a + " and " + a.count.b + ")");
   if(a.iv) P.push("interval-by-interval " + a.iv.p + "%");
   if(a.su && a.su.scored) P.push("scored-interval " + a.su.scored.p + "%");
@@ -2097,7 +2100,7 @@ function ioaText(o){
   /* v25.64 (H3) from the two observers' tap times: block-by-block (carried), exact count per block, time window, and for a timed
      behavior the seconds of episode per block; the total count then says what it does not show */
   if(B && B.p != null){
-    parts.push("block-by-block " + B.p + "% (" + B.n + " blocks of 10 s)" + (B.dur ? "" : ", carried"), "exact count per block " + B.exact.p + "% (" + B.exact.k + " of " + B.exact.n + ")",
+    parts.push("block-by-block " + B.p + "% (" + B.n + (B.n === 1 ? " block of " : " blocks of ") + (B.size || 10) + " s)" + (B.dur ? "" : ", carried"), "exact count per block " + B.exact.p + "% (" + B.exact.k + " of " + B.exact.n + ")",
       "time window \u00b12 s " + B.tw.p + "% (" + B.tw.k + " of " + B.tw.n + " taps matched)");
     if(B.dur) parts.push("seconds of episode per block " + B.dur.p + "%, carried");
     if(B.peer) parts.push("peer block-by-block " + B.peer.p + "%");
@@ -2106,7 +2109,7 @@ function ioaText(o){
   }
   if(a.count) parts.push("count " + a.count.p + "% (" + a.count.a + " and " + a.count.b + (B && B.p != null ? "; total count, which does not show the observers counted the same events" : "") + ")");
   if(B && B.stale) parts.push("the tap times no longer match the counts, so the total count is carried");
-  if(B && B.short) parts.push("the two records overlap by less than 10 s, so the total count is carried");
+  if(B && B.short) parts.push("the two records overlap by less than " + (B.size || 10) + " s, so the total count is carried");
   if(a.iv) parts.push("intervals " + a.iv.p + "% (" + a.iv.k + " of " + a.iv.n + ")");
   if(a.peerCount) parts.push("peer count " + a.peerCount.p + "% (" + a.peerCount.a + " and " + a.peerCount.b + ")");
   if(a.peerIv) parts.push("peer intervals " + a.peerIv.p + "% (" + a.peerIv.k + " of " + a.peerIv.n + ")");
@@ -2151,13 +2154,15 @@ function refreshIOA(pg, i){
 /* ---------------------------------------------------- v25.64 (H3) agreement block by block, from the tap times */
 /* The Live Recorder keeps each tap as seconds from Start, paused time left out (o.taps {s, p, ep for a timed first behavior}),
    with the Start on the wall clock and the pauses (o.rec {t0 ms, dur s, pz [[at s, length s]]}); observer 2's file brings the
-   same as o.taps2 / o.rec2. The two records are lined up by their Starts, on the wall clock, and split into 10-s blocks; a block
+   same as o.taps2 / o.rec2. The two records are lined up by their Starts, on the wall clock, and split into blocks of 10 s, or 1 minute when chosen on Setup; a block
    that falls in either observer's pause is left out. Block-by-block: in each block the smaller count over the larger (two zeros
    count as 1), averaged; exact: the share of blocks with the same count; time window: taps of the two observers within 2 s of
    each other, matched one to one, over all the taps (Mudford, Taylor, & Martin, 2009; Mudford et al., 2009); for a timed
    behavior, the seconds of episode in each block, compared as block-by-block. The tap times are used only while they match the
    counts typed on the sheet. */
-const OB_BLOCK = 10, OB_WIN = 2;
+const OB_WIN = 2;
+/* v25.65 (the BCBA, 11/2) the block is 10 s by default, or 1 minute for fast, bursty behavior (Rolider et al., 2012) */
+const obBlk = () => (state.meta && String(state.meta.blk) === "60") ? 60 : 10;
 const p1d = x => Math.round(x * 1000) / 10;
 const numArr = a => (Array.isArray(a) ? a : []).map(Number).filter(v => isFinite(v) && v >= 0).sort((x, y) => x - y);
 function recOf(o, two){ const t = two ? o.taps2 : o.taps, r = two ? o.rec2 : o.rec;
@@ -2169,16 +2174,16 @@ const wallOf = (x, pz) => pz.reduce((w, [at, len]) => w + (at <= x ? len : 0), x
 const gapsOf = (pz, off) => { let add = 0; return pz.map(([at, len]) => { const a = at + add + off; add += len; return [a, a + len]; }); };
 const prop = (a, b) => { const hi = Math.max(a, b); return hi ? Math.min(a, b) / hi : 1; };
 function blockIOA(o){
-  const A = recOf(o, false), B = recOf(o, true); if(!A || !B) return null;
+  const A = recOf(o, false), B = recOf(o, true), BLK = obBlk(); if(!A || !B) return null;
   const sA = numArr(A.t.s), sB = numArr(B.t.s);
   if(cnt(o.count) !== sA.length || cnt(o.count2) !== sB.length) return { stale:true, p:null };
   const off = (B.t0 - A.t0) / 1000, wa = x => wallOf(x, A.pz), wb = x => wallOf(x, B.pz) + off;
   const lo = Math.max(0, off), hi = Math.min(wa(A.dur), wb(B.dur));
-  if(hi - lo < OB_BLOCK) return { short:true, p:null, off };
+  if(hi - lo < BLK) return { short:true, p:null, off, size:BLK };
   const gaps = gapsOf(A.pz, 0).concat(gapsOf(B.pz, off)), blocks = [];
-  for(let b = lo; b < hi - 1e-9; b += OB_BLOCK){ const e = Math.min(hi, b + OB_BLOCK); if(e - b < 1) break;
+  for(let b = lo; b < hi - 1e-9; b += BLK){ const e = Math.min(hi, b + BLK); if(e - b < 1) break;
     if(!gaps.some(([x, y]) => x < e && y > b)) blocks.push([b, e]); }
-  if(!blocks.length) return { short:true, p:null, off };
+  if(!blocks.length) return { short:true, p:null, off, size:BLK };
   const inB = v => blocks.some(([b, e]) => v >= b && v < e);
   const tA = sA.map(wa).filter(inB), tB = sB.map(wb).filter(inB);
   const per = (L, b, e) => L.filter(v => v >= b && v < e).length;
@@ -2188,7 +2193,7 @@ function blockIOA(o){
   tA.forEach(a => { let best = -1, bd = Infinity; tB.forEach((v, j) => { const dd = Math.abs(a - v); if(!used[j] && dd <= OB_WIN + 1e-9 && dd < bd){ bd = dd; best = j; } }); if(best >= 0){ used[best] = true; m++; } });
   const twN = tA.length + tB.length - m;
   const r = { p:p1d(pr / blocks.length), n:blocks.length, exact:{ p:p1d(ex / blocks.length), k:ex, n:blocks.length }, tw:{ p:twN ? p1d(m / twN) : 100, k:m, n:twN },
-    off, out:(sA.length - tA.length) + (sB.length - tB.length), dur:null, peer:null };
+    off, out:(sA.length - tA.length) + (sB.length - tB.length), dur:null, peer:null, size:BLK };
   /* a timed first behavior: the seconds of episode in each block */
   const eps = (L, w) => (Array.isArray(L) ? L : []).filter(x => Array.isArray(x) && isFinite(+x[0]) && isFinite(+x[1]) && +x[1] >= +x[0]).map(x => [w(+x[0]), w(+x[1])]);
   if(behList()[0].dur && Array.isArray(A.t.ep) && Array.isArray(B.t.ep)){
@@ -3052,6 +3057,7 @@ document.addEventListener("input", e => {
   const t = e.target;
   if(t.dataset && t.dataset.meta !== undefined){
     state.meta[t.dataset.meta] = t.value;
+    if(t.dataset.meta === "blk"){ render(); return; }   /* v25.65 the block size changes every agreement figure */
     renderMeta(); renderSummary();
     return;
   }
