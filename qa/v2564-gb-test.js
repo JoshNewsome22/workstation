@@ -17,7 +17,7 @@
       (each target independent on every trial of it in 2 consecutive sessions in which it was presented; Wong & Fienup,
       2022), printed on the sheet; a listener program needs a mixed-array check (Cordeiro et al., 2022); 1 session is
       below the standard; the Guide states the standard and the reference list carries the studies; the bank's note and
-      its load say entries written to 90% are raised.
+      its load no longer asks to raise an entry (the bank's criteria are written to 100%; interval criteria keep their level).
    L1 a reduction objective has the people, settings and materials and a maintenance check (filled for a new one), in
       the sentence, with the A7 note.
    L2 "Target is N% below the current level" and a typical peer level beside the target.
@@ -146,7 +146,7 @@ const OLD=path.join(__dirname,'data','sim','mateo','gb1-save.json');
   /* L3: the bank */
   const p4=await open(null);
   const E=await p4.evaluate(async()=>{const R=document.getElementById('gbBankHost').shadowRoot,B=GB1_BANK.entries,o={};
-    const withGen=B.find(e=>e.gen&&e.maint&&!e.see&&e.n==='3'&&/ 90% /.test(' '+e.crit+' '));o.id=withGen&&withGen.id;
+    const withGen=B.find(e=>e.gen&&e.maint&&!e.see&&e.n==='3'&&/ 100% /.test(' '+e.crit+' '));   /* v25.64 the bank's criteria raised to 100% (the BCBA, 11/2) */o.id=withGen&&withGen.id;
     R.querySelector('details').open=true;R.querySelector('.it[data-id="'+withGen.id+'"]')||(R.querySelector('.q').value=withGen.lab,R.querySelector('.q').dispatchEvent(new Event('input')));
     window.__gbBank.show(withGen.id);R.querySelector('.ld[data-i="0"]').click();o.st0=R.querySelector('.st').textContent;o.gen=V('acq[0].gen');o.maint=V('acq[0].maint');o.s=OUT('acq0');
     window.__gbBank.show('fi-negation');o.det=(R.querySelector('.chk1')||{}).textContent||'';R.querySelector('.add').click();await new Promise(r=>setTimeout(r,200));
@@ -159,7 +159,7 @@ const OLD=path.join(__dirname,'data','sim','mateo','gb1-save.json');
   ok('L3 a 1-session entry is checked against the 3-session standard in the bank and after the load',
     /asks for 1 session, below the workstation’s standard of 3 consecutive sessions/.test(E.det)&&/asks for 1 session/.test(E.st)&&E.c1.some(x=>/A4: across 1 session/.test(x)),E);
   ok('L3 "Replacements only" lists the entries marked as replacements (each with the function it replaced), and unticked the whole bank again; the bank\'s note states the standard',
-    E.rep===E.withFn&&E.rep>0&&E.repOk&&E.listed===E.rep&&E.all===E.n&&/The workstation’s standard is now 100% independent across 3 consecutive teaching sessions/.test(E.note)&&/criterion \(90%\) is below the workstation’s standard, 100% independent across 3 consecutive sessions/.test(E.st0),{rep:E.rep,withFn:E.withFn,listed:E.listed,all:E.all,n:E.n});
+    E.rep===E.withFn&&E.rep>0&&E.repOk&&E.listed===E.rep&&E.all===E.n&&/The workstation’s standard is now 100% independent across 3 consecutive teaching sessions/.test(E.note)&&!/is below the workstation’s standard/.test(E.st0)   /* v25.64 the entry is written to 100% now: no note at load */,{rep:E.rep,withFn:E.withFn,listed:E.listed,all:E.all,n:E.n});
   await p4.close();
 
   /* a file saved before v25.64 */

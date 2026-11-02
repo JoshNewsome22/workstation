@@ -56,7 +56,7 @@ const F=L.forms().find(x=>x.id==='GB-1');
     const a={beh:g('beh'),note:g('note'),crit:g('crit'),st:R().querySelector('.st').textContent};
     R().querySelector('.rpl').checked=true;R().querySelector('.ld[data-i="0"]').click();a.crit2=g('crit');a.beh2=g('beh');return a;});
   ok('5 Undo puts A1 back as it was; with Replace text already typed, the typed criterion is replaced',!U.beh&&!U.note&&U.crit==='with no more than one prompt (simulated)'&&/Undone/.test(U.st)&&
-    U.crit2==='independently, before any problem behavior, in at least 90% of opportunities'&&!!U.beh2,U);
+    U.crit2==='independently, before any problem behavior, in 100% of opportunities'   /* v25.64 the bank's criteria raised to 100% (the BCBA, 11/2) */&&!!U.beh2,U);
   const G=await p.evaluate(()=>{R().querySelector('.rpl').checked=false;R().querySelector('.it[data-id="tw-wait"]').click();R().querySelector('.add').click();
     const cards=[...document.querySelectorAll('#acqWrap .card')].length,beh=(document.querySelector('[name="acq[1].beh"]')||{}).value;
     return {cards,beh,ok:beh===window.__gbBank.entry('tw-wait').beh};});await sleep(400);
