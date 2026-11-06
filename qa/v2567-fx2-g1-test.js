@@ -2,7 +2,7 @@
    (tools/blocks/fx2.html, put in by tools/blocks/patch-fx2.py), and group 1 of the rollout carries it: SI-1, OB-1,
    SP-1, MT-1, VI-1, EA-1, DA-1 and PA-1. For each of the fourteen forms, on a 13-inch iPad sideways (1376 x 1032) and
    upright (1032 x 1376), touch, with the form's simulation loaded, on every sheet:
-     1. nothing wider than the screen (also on a phone, 390 x 844);
+     1. nothing wider than the screen (also on a phone, 390 x 844, and an 11-inch iPad sideways, 1180 x 820);
      2. every box outside a table at 16 px or more, and 44 px tall (a box the layout leaves as the form drew it is
         listed as a NOTE: IN-1's student fields, as approved);
      3. no example of more than a few characters left inside a box (outside a table, or in a list shown as cards; an
@@ -137,10 +137,10 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
       const cards=T.filter(t=>t.cards),bad=cards.filter(t=>t.tr!=='grid'||!/\w/.test(t.lab)),stay=T.filter(t=>!t.cards&&t.boxes),stbad=stay.filter(t=>t.tr!=='table-row');
       ok(`8 ${id} 820x1180: ${cards.length} lists of entries are cards, each box under its column's name; ${stay.length} tables of scores, trials and checklists stay tables; nothing wider`,!bad.length&&!stbad.length&&!wide.length&&(!(CARDS[id]||[]).length||cards.length>0),{bad:bad.slice(0,5),stbad:stbad.slice(0,5),wide});
       await ctx.close();}
-    /* 1 on a phone */
-    {const ctx=await L.ipadCtx(ipad,{viewport:{width:390,height:844}});const p=await open(ctx,id,'390');const V=await views(p);const wide=[];
+    /* 1 on a phone, and on an 11-inch iPad sideways */
+    for(const [w,h,what] of [[390,844,'a phone\'s screen'],[1180,820,'an 11-inch iPad\'s screen']]){const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});const p=await open(ctx,id,String(w));const V=await views(p);const wide=[];
       for(const v of V){await view(p,v);const r=await p.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);if(r>1)wide.push(v+':'+r);}
-      ok(`1 ${id} 390x844: nothing wider than a phone's screen on any sheet`,!wide.length,wide);await ctx.close();}
+      ok(`1 ${id} ${w}x${h}: nothing wider than ${what} on any sheet`,!wide.length,wide);await ctx.close();}
     /* 11 the print, with the layout and without it, from the same data, on the iPad */
     {const strip=s=>s.replace(/<style id="fx2-v2492">[\s\S]*?<\/style>\n?/,'').replace(/<script id="fx2-v2492-js">[\s\S]*?<\/script>\n?/,'').replace(/<script id="fx2-cfg">[\s\S]*?<\/script>\n?/,'')
         .replace(/<script>document\.documentElement\.classList\.add\('fx2'\);[^<]*<\/script>\n?/,'');
