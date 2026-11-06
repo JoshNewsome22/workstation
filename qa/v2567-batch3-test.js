@@ -344,5 +344,17 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await f.close();
  });
 
+ /* ---------------- READINGS ---------------- */
+ await sec('READINGS',async()=>{
+  const src=L.fs.readFileSync(L.path.join(L.ROOT,'NBH-Workstation','nbh-readings.js'),'utf8');const R=new Function(src+';return NBH_READINGS;')();
+  const want=['briggs2019','carr2001','drifke2020','fisher2023','goh2000','greer2024','hagopian2004','hoch2002','jones2025','kuhn2010','lalli1997','laureano2024','mace1994','marcus1996','muething2024b','phillips2017','pizarro2021','rooker2013','saini2017','shamlian2016','slocum2015','strohmeier2024','vancamp2000','wallace2012','weber2024',
+    'marshall2025','kastner2025','goldman2025','leon2016','seaver2014','carroll2015','carroll2018','cariveau2019','green2005','ditzian2015',
+    'jones2022','mitteer2022','saini2018','sleiman2023','graff2012','moore2007','halbur2020','zhu2021','paden2025','putnam2003','lang2009',
+    'borrero2010','munk1994','piazza2003a','saini2019','scott2024','seubert2014','vanarsdale2025','volkert2010','ghaemmaghami2016'];
+  const by=Object.fromEntries(R.map(r=>[r.k,r])),miss=want.filter(k=>!by[k]),ks=R.map(r=>r.k);
+  ok('READ 1 the readings list carries every source the batch-2 parcels named for it',!miss.length,miss);
+  ok('READ 2 each new entry has its APA reference, the year, a DOI and a summary; the list stays in key order with no key twice',want.every(k=>by[k]&&/\(\d{4}[a-z]?\)\. .+\d+[–-]\d+\.$/.test(by[k].apa)&&by[k].y===+k.replace(/\D/g,'').slice(0,4)&&/^10\.\d+\//.test(by[k].doi)&&by[k].sum.length>100)&&ks.join()===ks.slice().sort().join()&&new Set(ks).size===ks.length,want.filter(k=>by[k]&&!(/\d+[–-]\d+\.$/.test(by[k].apa)&&by[k].doi)));
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
