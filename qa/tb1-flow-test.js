@@ -19,6 +19,8 @@ const host=t=>`#tgtWrap .card[data-tgt="${t}"] .tb1lib-host`;
   const saveFile=async()=>{await page.evaluate(()=>{window.__saved=null;const o=URL.createObjectURL;URL.createObjectURL=b=>{b.text().then(t=>{window.__saved=t;});return o(b);};document.querySelector('#saveBtn').click();});await sleep(400);return JSON.parse(await page.evaluate(()=>window.__saved));};
   const openFile=async t=>{await page.evaluate(t=>{const dt=new DataTransfer();dt.items.add(new File([t],'tb1.json',{type:'application/json'}));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));},t);await sleep(400);};
   const libN=()=>page.evaluate(()=>+(/\((\d+)\)/.exec(document.querySelector('#tb1LibPanel').shadowRoot.querySelector('.cat').options[0].textContent)||[])[1]);
+  /* v25.65 the library's own count (it grew from 207 in 2026-11); the bank's entry adds one */
+  const LIBN=await page.evaluate(()=>TB1_LIB.entries.length);
   await view('select');
   /* ---- A. a candidate row deleted ---- */
   await page.evaluate(()=>{window.confirm=()=>true;});
@@ -83,14 +85,14 @@ const host=t=>`#tgtWrap .card[data-tgt="${t}"] .tb1lib-host`;
   /* v23.17 (review F32) the bank leaves the examples out unless asked: this entry is saved with them, the box unticked */
   check('E1b the bank offers to leave the examples out, ticked by default',await page.evaluate(()=>window.__noexDefault===true));
   const saved=await page.evaluate(h=>{const r=document.querySelector(h).shadowRoot,sel=r.querySelector('.pick');const og=sel.querySelector('optgroup');return {closed:!document.querySelector('#tb1BankHost').shadowRoot.querySelector('dialog').open,first:og&&og.label,opt:og&&og.querySelector('option')&&og.querySelector('option').textContent,toast:(document.querySelector('.nbh-toast')||{}).textContent||''};},host(1));saved.n=await libN();
-  check('E2 saved: the toast says so; on another card’s picker the bank’s entry is offered first, under My definitions',saved.closed&&saved.first==='My definitions'&&saved.opt==='Hitting others (Sam)'&&saved.n===208&&/Saved to my bank: “Hitting others \(Sam\)”/.test(saved.toast),JSON.stringify(saved));
+  check('E2 saved: the toast says so; on another card’s picker the bank’s entry is offered first, under My definitions',saved.closed&&saved.first==='My definitions'&&saved.opt==='Hitting others (Sam)'&&saved.n===LIBN+1&&/Saved to my bank: “Hitting others \(Sam\)”/.test(saved.toast),JSON.stringify(saved));
   const cand=await page.evaluate(()=>{const r=document.querySelector('#tb1LibCand').shadowRoot,q=r.querySelector('.q');q.value='sam hitting';q.dispatchEvent(new Event('input'));const sel=r.querySelector('.pick');return {val:sel.value,ph:sel.options[0].textContent};});
   check('E3 the candidate picker finds it by its other name and chooses it',/^my-/.test(cand.val)&&/1 match/.test(cand.ph),JSON.stringify(cand));
   const panel=await page.evaluate(()=>{const r=document.querySelector('#tb1LibPanel').shadowRoot,cat=r.querySelector('.cat');return {first:cat.options[1].textContent,bn:r.querySelector('.bn').textContent.slice(0,30),all:cat.options[0].textContent};});
-  check('E4 the panel’s categories start with My definitions (1) and its bank line counts one',panel.first==='My definitions (1)'&&/1 definition of your own/.test(panel.bn)&&/208/.test(panel.all),JSON.stringify(panel));
+  check('E4 the panel’s categories start with My definitions (1) and its bank line counts one',panel.first==='My definitions (1)'&&/1 definition of your own/.test(panel.bn)&&new RegExp('\\b'+(LIBN+1)+'\\b').test(panel.all),JSON.stringify(panel));
   await page.reload();await sleep(1000);await page.evaluate(()=>{window.confirm=()=>true;});await view('define');
   const kept=await page.evaluate(h=>{const sel=document.querySelector(h).shadowRoot.querySelector('.pick'),og=sel.querySelector('optgroup');return {first:og&&og.label,lab:og&&og.querySelector('option').textContent};},host(0));kept.n=await libN();
-  check('E5 the bank is kept across a reload (this browser\u2019s store)',kept.n===208&&kept.first==='My definitions'&&kept.lab==='Hitting others (Sam)',JSON.stringify(kept));
+  check('E5 the bank is kept across a reload (this browser\u2019s store)',kept.n===LIBN+1&&kept.first==='My definitions'&&kept.lab==='Hitting others (Sam)',JSON.stringify(kept));
   await set('tgt[0].lab','Hitting others (Sam)');await set('tgt[0].lab','Hitting others (Sam)','change');await sleep(150);
   const offMine=await page.evaluate(h=>{const r=document.querySelector(h).shadowRoot;return {hidden:r.querySelector('.offer').hidden,text:r.querySelector('.ot').textContent};},host(0));
   check('E6 a card named as the bank’s entry is offered it ("Your bank has a starting definition")',!offMine.hidden&&/^Your bank has a starting definition for “Hitting others \(Sam\)”/.test(offMine.text),JSON.stringify(offMine));
@@ -104,10 +106,10 @@ const host=t=>`#tgtWrap .card[data-tgt="${t}"] .tb1lib-host`;
   const det=await page.evaluate(()=>{const r=document.querySelector('#tb1LibPanel').shadowRoot;return {mine:!!r.querySelector('.minep'),txt:(r.querySelector('.minep')||{}).textContent||''};});
   await page.evaluate(()=>document.querySelector('#tb1LibPanel').shadowRoot.querySelector('.bdel').click());await sleep(600);
   const gone=await page.evaluate(()=>({cat:document.querySelector('#tb1LibPanel').shadowRoot.querySelector('.cat').options[1].textContent,def:document.querySelector('[name="tgt[0].def"]').value.slice(0,20)}));gone.n=await libN();
-  check('E9 the panel shows the bank’s entry as its own and removes it; the card keeps its text',det.mine&&/In my bank, saved \d{4}-\d{2}-\d{2}/.test(det.txt)&&gone.n===207&&!/My definitions/.test(gone.cat)&&gone.def==='Contact of the hand ',JSON.stringify(det)+' '+JSON.stringify(gone));
+  check('E9 the panel shows the bank’s entry as its own and removes it; the card keeps its text',det.mine&&/In my bank, saved \d{4}-\d{2}-\d{2}/.test(det.txt)&&gone.n===LIBN&&!/My definitions/.test(gone.cat)&&gone.def==='Contact of the hand ',JSON.stringify(det)+' '+JSON.stringify(gone));
   await page.evaluate(()=>{const r=document.querySelector('#tb1LibPanel').shadowRoot,i=r.querySelector('.bin');const dt=new DataTransfer();dt.items.add(new File([window.__saved],'bank.json',{type:'application/json'}));i.files=dt.files;i.dispatchEvent(new Event('change'));});await sleep(600);
   const imp=await page.evaluate(()=>({bn:document.querySelector('#tb1LibPanel').shadowRoot.querySelector('.bn').textContent}));imp.n=await libN();
-  check('E10 Open a bank file brings the entry back',imp.n===208&&/1 definition added/.test(imp.bn),JSON.stringify(imp));
+  check('E10 Open a bank file brings the entry back',imp.n===LIBN+1&&/1 definition added/.test(imp.bn),JSON.stringify(imp));
   await page.evaluate(()=>{const r=document.querySelector('#tb1LibPanel').shadowRoot,i=r.querySelector('.bin');const dt=new DataTransfer();dt.items.add(new File(['{"form":"TB-1"}'],'x.json',{type:'application/json'}));i.files=dt.files;i.dispatchEvent(new Event('change'));});await sleep(400);
   check('E11 another file is refused',/not a bank file of Form TB-1/.test(await page.evaluate(()=>document.querySelector('#tb1LibPanel').shadowRoot.querySelector('.bn').textContent)));
   /* ---- F. the form's own file: shape unchanged; the bank is not in it ---- */
