@@ -1119,6 +1119,23 @@ td input,td select{max-width:100%}
     <div class="nbh-print-meta"><div class="nbh-print-title">RBT Supervision Log</div><div>Form RS-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
 
+  <!-- v25.68 trainee mode: begin (the BCBA, 11/6: BCBA trainees' fieldwork beside the RBT log; the RBT log stays the default) -->
+  <div class="rs-mode noprint" id="rsMode" role="group" aria-labelledby="rsModeLab">
+    <span class="rs-mode-lab" id="rsModeLab">Who you supervise</span>
+    <div class="rs-mode-seg">
+      <button type="button" class="rs-mode-b" data-rsmode="rbt" aria-pressed="true">RBTs</button>
+      <button type="button" class="rs-mode-b" data-rsmode="trainee" aria-pressed="false">BCBA trainees (fieldwork)</button>
+    </div>
+    <span class="rs-mode-n" id="rsModeNote" aria-live="polite"></span>
+  </div>
+  <div class="rs-who tr-only noprint" id="trWho">
+    <label for="trSel">Trainee</label>
+    <select id="trSel" aria-describedby="trCount"></select>
+    <span class="rs-who-n" id="trCount"></span>
+    <button type="button" class="tool" id="trAdd">Add a trainee</button>
+    <button type="button" class="tool" id="trDel">Remove this trainee</button>
+  </div>
+  <!-- v25.68 trainee mode: end -->
   <!-- the supervisee on screen: every page shows this RBT's record; the supervisors and rules are shared by all -->
   <div class="rs-who noprint" id="rsWho">
     <label for="rbtSel">Supervisee</label>
@@ -1437,6 +1454,187 @@ td input,td select{max-width:100%}
     Valentino, A. L., LeBlanc, L. A., &amp; Sellers, T. P. (2016). The benefits of group supervision and a recommended structure for implementation. <em>Behavior Analysis in Practice, 9</em>. &bull;
     Reid, D. H., Parsons, M. B., &amp; Green, C. W. (2012). <em>The supervisor training curriculum: Evidence-based ways to promote work quality and enjoyment among support staff</em>. American Association on Intellectual and Developmental Disabilities.</p>
   </section>
+  <!-- v25.68 trainee sections: begin (BCBA trainee fieldwork; the rules are the BACB's documents, named on the page) -->
+  <!-- ===================== TRAINEE: SETUP ===================== -->
+  <section class="only-setup tr-sec" id="trSetup" aria-labelledby="trSetupH">
+    <h2 class="nbh-band" id="trSetupH">The trainee</h2>
+    <p class="hint">The record of a BCBA trainee&rsquo;s supervised fieldwork, one supervision structure at a time: each session of independent hours, each supervision contact and each observation with a client, checked month by month against the BACB&rsquo;s fieldwork requirements, with the month&rsquo;s verification form to sign. Supervising more than one trainee? Use <b>Add a trainee</b> at the top. Simulated or coded clients only: the record names the trainee and the supervisors, not students.</p>
+    <p class="tr-checkdocs" role="note"><b>Check the current BACB documents before signing.</b> The BACB&rsquo;s documents decide, not this form: it adds up what is entered.</p>
+    <div class="fieldgrid">
+      <div><label for="trName">Trainee&rsquo;s name</label><input id="trName" data-trs="name" autocomplete="off" placeholder="as on the BACB account"></div>
+      <div><label for="trBacb">Trainee&rsquo;s BACB ID #</label><input id="trBacb" data-trs="bacb" autocomplete="off" spellcheck="false"></div>
+      <div><label for="trState">State where fieldwork occurred</label><input id="trState" data-trs="state" autocomplete="off" placeholder="e.g., Florida"></div>
+      <div><label for="trCountry">Country where fieldwork occurred</label><input id="trCountry" data-trs="country" autocomplete="off" placeholder="e.g., United States"></div>
+      <div><label for="trStruct">Supervision structure</label><select id="trStruct" data-trs="structure"><option value="indiv">Individual supervisor</option><option value="org">Multiple supervisors at one organization</option></select></div>
+      <div><label for="trType">Usual fieldwork type</label><select id="trType" data-trs="ftype"><option value="sup">Supervised fieldwork</option><option value="conc">Concentrated supervised fieldwork</option></select></div>
+      <div><label for="trContract">Supervision contract signed on</label><input id="trContract" type="date" data-trs="contract"></div>
+      <div><label for="trCourse">First behavior-analytic course began on</label><input id="trCourse" type="date" data-trs="course"></div>
+      <div><label for="trOrg">Organization or site</label><input id="trOrg" data-trs="org" autocomplete="off" placeholder="e.g., the district"></div>
+    </div>
+    <p class="hint">Fieldwork may not begin until the trainee has a qualified supervisor, a signed supervision contract with each supervisor and, for pathways 1 and 2, the first behavior-analytic course has begun (BCBA Handbook, updated 10/2026, p. 15). An entry dated earlier is marked on the Month page.</p>
+
+    <h2 class="nbh-band" style="margin-top:18px">The trainee&rsquo;s supervisors</h2>
+    <p class="hint">Each supervisor is an active BCBA with no current disciplinary sanctions and meets the ongoing supervision CEU requirement; one certified for less than a year also receives monthly consultation from a qualified consulting supervisor. Each completes the 8-hour supervision training before signing a supervision contract, and is not related to, subordinate to, employed by, or in a multiple relationship with the trainee (BCBA Handbook, p. 18). The form keeps what you enter here as reminders; it does not decide who is qualified.</p>
+    <div id="trSupList"></div>
+    <div class="tools"><button class="tool" type="button" id="trAddSup">Add a supervisor</button></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">The rules each month uses</h2>
+    <div id="trRules"></div>
+  </section>
+
+  <!-- ===================== TRAINEE: MONTH ===================== -->
+  <section class="only-month tr-sec" id="trMonth" aria-labelledby="trMonthTitle">
+    <div class="tr-mpick" role="group" aria-label="Month of fieldwork">
+      <button type="button" class="tool" id="trPrev">Previous month</button>
+      <label for="trMonthSel">Month</label>
+      <select id="trMonthSel"></select>
+      <button type="button" class="tool" id="trNext">Next month</button>
+    </div>
+    <div id="trNudge"></div>
+    <div class="rs-mgrid">
+      <div class="rs-main">
+        <h2 class="nbh-band" id="trMonthTitle">Fieldwork this month</h2>
+        <p class="hint">One entry for each session of independent hours (supervisor not present), each supervision contact (supervisor present, in real time, individual or group) and each observation of the trainee with a client. An observation with feedback in real time is also a supervision contact; one without it (a recording watched later, or watching without feedback) is independent time. Log each stretch of time once. An entry dated after today is planned and is not counted yet.</p>
+        <div class="fieldgrid tr-mtype">
+          <div><label for="trMType">Fieldwork type this month</label><select id="trMType" data-trm="ftype"></select></div>
+        </div>
+        <p class="tr-mrules" id="trMRules"></p>
+        <div class="tools">
+          <button class="tool" type="button" id="trAddInd">Add independent hours</button>
+          <button class="tool" type="button" id="trAddSupC">Add a supervision contact</button>
+          <button class="tool" type="button" id="trAddObs">Add an observation</button>
+          <span class="hint" id="trEntCount" aria-live="polite"></span>
+        </div>
+        <div id="trEntries"></div>
+        <h3 id="trAdjH">Hours for the verification form</h3>
+        <div id="trAdj"></div>
+        <div class="field"><label for="trMNote">Notes for the month (optional)</label><textarea id="trMNote" data-trm="note" rows="2" placeholder="e.g., the trainee started at a second school on the 14th"></textarea></div>
+      </div>
+      <aside class="rs-side" aria-label="This month&rsquo;s fieldwork check">
+        <div id="trComp"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TRAINEE: YEAR AND RUNNING TOTALS ===================== -->
+  <section class="only-year tr-sec" id="trYear" aria-labelledby="trYearH">
+    <h2 class="nbh-band" id="trYearH">Running totals</h2>
+    <div class="metrics" id="trMetrics"></div>
+    <p class="hint" id="trTotNote"></p>
+    <h2 class="nbh-band" style="margin-top:18px">Month by month</h2>
+    <div class="tools"><label class="tr-inl" for="trYearSel">Show</label><select id="trYearSel" class="tr-sel"></select></div>
+    <p class="hint">Tap a month to open it. Each month says which rules it is checked against.</p>
+    <div class="grid-wrap"><table class="rt tr-year-t" id="trYearTbl"></table></div>
+  </section>
+
+  <!-- ===================== TRAINEE: SIGN AND PRINT ===================== -->
+  <section class="only-print tr-sec" id="trPrint">
+    <div class="tr-mpick noprint" role="group" aria-label="Month to sign and print">
+      <button type="button" class="tool" id="trPPrev">Previous month</button>
+      <label for="trPMonthSel">Month</label>
+      <select id="trPMonthSel"></select>
+      <button type="button" class="tool" id="trPNext">Next month</button>
+    </div>
+    <h2 class="nbh-band noprint" id="trSignTitle">Sign the monthly verification form</h2>
+    <p class="tr-checkdocs noprint" role="note"><b>Check the current BACB documents before signing.</b> The trainee and the supervisor read the month&rsquo;s figures and its record, then sign with a finger or a stylus, or type the name and adopt it. The form must be signed by the last day of the calendar month following the month of supervision. <span id="trSignBy"></span></p>
+    <div class="fieldgrid noprint">
+      <div><label for="trFormVer">Form to print</label><select id="trFormVer" data-trm="form"></select></div>
+    </div>
+    <p class="hint noprint" id="trFormVerHint"></p>
+    <div class="rs-sign noprint">
+      <div class="rs-sigblock">
+        <div class="rs-sigh" id="trSigSupH">Supervisor</div>
+        <div class="fieldgrid">
+          <div><label for="trSgSup">Name</label><input id="trSgSup" data-trg="sup_name" autocomplete="off"></div>
+          <div><label for="trSgSupDate">Date</label><input id="trSgSupDate" type="date" data-trg="sup_date"></div>
+        </div>
+        <canvas class="tr-pad" data-trpad="sup" width="640" height="150" aria-label="Supervisor&rsquo;s signature: draw here"></canvas>
+        <div class="tools"><button class="tool" type="button" data-trpadclear="sup">Clear the signature</button></div>
+        <p class="rs-sigstat" data-trsigstat="sup" role="status"></p>
+        <details class="rs-typesig"><summary>Type the signature instead</summary>
+          <div class="ts-in"><label for="trTsSup">The supervisor&rsquo;s full name, as signed</label><input id="trTsSup" data-trtsn="sup" autocomplete="off" spellcheck="false">
+          <div class="ts-prev" aria-hidden="true" data-trtsprev="sup"></div>
+          <label class="ts-ok"><input type="checkbox" id="trTsOkSup" data-trtsok="sup"> I adopt this typed name as my electronic signature on this form, with the same intent as signing by hand.</label>
+          <button class="tool" type="button" data-trtsgo="sup" disabled>Adopt and sign</button></div></details>
+      </div>
+      <div class="rs-sigblock">
+        <div class="rs-sigh">Trainee</div>
+        <div class="fieldgrid">
+          <div><label for="trSgTr">Name</label><input id="trSgTr" data-trg="tr_name" autocomplete="off"></div>
+          <div><label for="trSgTrDate">Date</label><input id="trSgTrDate" type="date" data-trg="tr_date"></div>
+        </div>
+        <canvas class="tr-pad" data-trpad="tr" width="640" height="150" aria-label="Trainee&rsquo;s signature: draw here"></canvas>
+        <div class="tools"><button class="tool" type="button" data-trpadclear="tr">Clear the signature</button></div>
+        <p class="rs-sigstat" data-trsigstat="tr" role="status"></p>
+        <details class="rs-typesig"><summary>Type the signature instead</summary>
+          <div class="ts-in"><label for="trTsTr">The trainee&rsquo;s full name, as signed</label><input id="trTsTr" data-trtsn="tr" autocomplete="off" spellcheck="false">
+          <div class="ts-prev" aria-hidden="true" data-trtsprev="tr"></div>
+          <label class="ts-ok"><input type="checkbox" id="trTsOkTr" data-trtsok="tr"> I adopt this typed name as my electronic signature on this form, with the same intent as signing by hand.</label>
+          <button class="tool" type="button" data-trtsgo="tr" disabled>Adopt and sign</button></div></details>
+      </div>
+    </div>
+    <p class="tr-changed noprint" id="trSigChanged" role="status" hidden></p>
+    <div class="tools noprint">
+      <button class="tool" type="button" id="trPrintForm">Print the verification form</button>
+      <button class="tool" type="button" id="trPrintMonth">Print the form and the month&rsquo;s record</button>
+      <button class="tool" type="button" id="trPrintYear">Print the year summary</button>
+      <button class="tool" type="button" id="trPrintFinal">Print the final verification</button>
+    </div>
+    <h2 class="nbh-band noprint" style="margin-top:14px">The monthly verification form as it prints</h2>
+    <div class="rs-paper tr-paper" id="trFormOut"></div>
+    <h2 class="nbh-band noprint" style="margin-top:18px">The month&rsquo;s fieldwork record as it prints</h2>
+    <div class="rs-paper tr-paper" id="trLogOut"></div>
+    <h2 class="nbh-band noprint" style="margin-top:18px">The year summary as it prints</h2>
+    <div class="rs-paper tr-paper" id="trYearOut"></div>
+
+    <h2 class="nbh-band noprint" style="margin-top:18px">Final verification</h2>
+    <p class="hint noprint">At the end of the fieldwork under this supervision structure, the supervisor and the trainee use the signed monthly forms to total the hours that count; the supervisor signs the final form, which goes with the application (BCBA Handbook, p. 22). Use the form for the requirements in place when the trainee applies: the 2022 form for an application before January 1, 2027, the 2027 form from then on. The months that are short or not signed are listed under the figures.</p>
+    <div class="fieldgrid noprint">
+      <div><label for="trFinFrom">From (month)</label><select id="trFinFrom" data-trfin="from"></select></div>
+      <div><label for="trFinTo">To (month)</label><select id="trFinTo" data-trfin="to"></select></div>
+      <div><label for="trFinVer">Final form</label><select id="trFinVer" data-trfin="ver"><option value="2022">2022 requirements (applying before January 1, 2027)</option><option value="2027">2027 requirements (applying on or after January 1, 2027)</option></select></div>
+      <div><label for="trFinName">Supervisor&rsquo;s name</label><input id="trFinName" data-trfin="sup_name" autocomplete="off"></div>
+      <div><label for="trFinDate">Date</label><input id="trFinDate" type="date" data-trfin="sup_date"></div>
+    </div>
+    <canvas class="tr-pad noprint" data-trpad="fin" width="640" height="150" aria-label="Supervisor&rsquo;s signature on the final verification: draw here"></canvas>
+    <div class="tools noprint"><button class="tool" type="button" data-trpadclear="fin">Clear the signature</button></div>
+    <p class="rs-sigstat noprint" data-trsigstat="fin" role="status"></p>
+    <details class="rs-typesig noprint"><summary>Type the signature instead</summary>
+      <div class="ts-in"><label for="trTsFin">The supervisor&rsquo;s full name, as signed</label><input id="trTsFin" data-trtsn="fin" autocomplete="off" spellcheck="false">
+      <div class="ts-prev" aria-hidden="true" data-trtsprev="fin"></div>
+      <label class="ts-ok"><input type="checkbox" id="trTsOkFin" data-trtsok="fin"> I adopt this typed name as my electronic signature on this form, with the same intent as signing by hand.</label>
+      <button class="tool" type="button" data-trtsgo="fin" disabled>Adopt and sign</button></div></details>
+    <div class="rs-paper tr-paper" id="trFinalOut"></div>
+  </section>
+
+  <!-- ===================== TRAINEE: GUIDE ===================== -->
+  <section class="only-guide tr-sec" id="trGuide">
+    <h2 class="nbh-band">What the trainee record keeps</h2>
+    <p>A BCBA trainee&rsquo;s supervised fieldwork: each session of independent hours, each supervision contact and each observation with a client, with the details the BCBA Handbook lists for a documentation system (p. 21): the date, start and end times, the fieldwork type, the supervisor, individual or group supervision, restricted or unrestricted activity, a summary of each supervision contact, and for each observation the setting. Each month is checked against the BACB&rsquo;s monthly requirements; the month&rsquo;s verification form is filled from its entries and signed by the supervisor and the trainee; the year summary and the final verification total the months.</p>
+    <p class="tr-checkdocs" role="note"><b>Check the current BACB documents before signing.</b> <span id="trDocsLine"></span></p>
+    <h2 class="nbh-band" style="margin-top:16px">Which rules a month uses</h2>
+    <p>A month is checked against the rules in effect on its dates: the 2022 BCBA fieldwork requirements for a month through December 2026, the 2027 requirements from January 2027. The BACB judges fieldwork by the requirements in place when the trainee applies: &ldquo;All supervised fieldwork must meet the requirements in place at the time you submit your certification application&rdquo; (Guidance for Meeting the BCBA Requirements During the 2027 Transition, updated 01/2026, p. 2). So a month before 2027 is also checked against the 2027 rules, for a trainee who applies on or after January 1, 2027, and its 2027 form can be printed; the BACB recommends completing both forms each month when the trainee is not sure when they will apply (p. 3).</p>
+    <div id="trRules2"></div>
+    <h2 class="nbh-band" style="margin-top:16px">How the figures are calculated</h2>
+    <table class="rt">
+      <tr><th style="width:28%">An entry&rsquo;s hours</th><td>End time less start time. An entry dated after today is planned and is not counted yet. An entry with no start or end time, or no activity category, is listed as incomplete and not counted.</td></tr>
+      <tr><th>Independent and supervised hours</th><td>Independent: the supervisor was not present. Supervised: the supervisor was present and interacting in real time, individually or in a group; each such entry is one supervisor&ndash;trainee contact. Total fieldwork hours are the two added together (the forms&rsquo; &ldquo;add A &amp; B&rdquo;).</td></tr>
+      <tr><th>Percent supervised</th><td>Supervised hours divided by total fieldwork hours, each calendar month (BCBA Handbook, p. 19).</td></tr>
+      <tr><th>Observation</th><td>An entry ticked as observed with a client counts its whole length as observation, or the minutes entered for it. The 2022 rules count observations (at least one a month); the 2027 rules count minutes (60 a month for supervised fieldwork, 90 for concentrated). The form keeps both, as the BACB&rsquo;s transition guidance asks (p. 4).</td></tr>
+      <tr><th>Individual and group</th><td>Group supervision may not be more than half of the month&rsquo;s supervised hours; a group has 2 to 10 trainees (BCBA Handbook, p. 20).</td></tr>
+      <tr><th>Unrestricted activities</th><td>At least 60% of all fieldwork hours, across the whole fieldwork, not each month (BCBA Handbook, p. 17). Shown on the Year page and each month for information.</td></tr>
+      <tr><th>Totals by type</th><td>Supervised fieldwork toward 2,000 hours, concentrated toward 1,500. With both types, the concentrated hours are multiplied by 1.33 only to estimate progress toward 2,000; the forms record the actual hours (BCBA Handbook, p. 15).</td></tr>
+      <tr><th>Five years</th><td>The fieldwork is completed within five continuous years, counted by calendar month (BCBA Handbook, p. 16): from the first month with fieldwork to the end of the 60th month.</td></tr>
+      <tr><th>A month that falls short</th><td>Red after the month ends, amber while it is open. The handbook&rsquo;s table for adjusting a month&rsquo;s hours (p. 23) is shown for a supervised-fieldwork month under the 2022 rules; concentrated hours may not be prorated or adjusted (p. 23). The supervisor and the trainee decide the hours that go on the form; the record keeps every hour accrued.</td></tr>
+      <tr><th>Signed after the figures changed</th><td>A form signed for one set of figures says so when the figures change afterwards, so that it is signed again.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">Documentation and the Ethics Code</h2>
+    <p id="trCodeNote"></p>
+    <p>Keep the signed monthly forms, the final form and this record for at least seven years; the BACB may ask for them in an audit (BCBA Handbook, pp. 21&ndash;22). Outdated BACB forms or non-BACB forms are not accepted (p. 22): the form printed here follows the BACB&rsquo;s layout and carries the month&rsquo;s figures and both signatures for the record, and the figures are the ones to enter on the BACB&rsquo;s own current form.</p>
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>With BCBA trainees chosen at the top, Load simulation fills in a simulated trainee, Trainee T., supervised by a simulated BCBA (Jordan Ellis, simulated), for the months up to today: one month short on purpose so the red marks can be seen, the others met and signed. The RBT records are not changed. Nothing in it is real data.</p>
+  </section>
+  <!-- v25.68 trainee sections: end -->
   <datalist id="supNames"></datalist>
   <datalist id="clientCodes"></datalist>
 </main>
@@ -2763,6 +2961,779 @@ try{renderAll();}catch(e){}
 .rs-fbsub{font-weight:400;font-size:13px;color:var(--ink-soft,#54676f)}.rs-fbn{margin-left:auto;font-weight:600;font-size:12.5px;color:var(--nbh-slate,#254657)}
 .rs-fbrec .rs-chips{margin:8px 0 0}
 </style>
+<style id="rs1-v2568-trainee-css">
+/* v25.68 the trainee mode: the RBT log's pages and the trainee's, one at a time (the RBT log is the default) */
+.tr-sec,.tr-only{display:none}
+body.rs-trainee .tr-sec{display:block}
+body.rs-trainee .tr-only{display:flex}
+body.rs-trainee main.sheet>section:not(.tr-sec),body.rs-trainee #rsWho,body.rs-trainee #rbtAll{display:none!important}
+body.rs-trainee.view-setup .tr-sec:not(.only-setup),body.rs-trainee.view-month .tr-sec:not(.only-month),body.rs-trainee.view-year .tr-sec:not(.only-year),
+body.rs-trainee.view-print .tr-sec:not(.only-print),body.rs-trainee.view-guide .tr-sec:not(.only-guide){display:none}
+html body.rs-trainee #viewSeg > button[data-view="rbt"],html body.rs-trainee #nbhRail #viewSeg > button[data-view="rbt"]{display:none!important}
+.rs-mode{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 10px}
+.rs-mode-lab{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em}
+.rs-mode-seg{display:inline-flex;border:1px solid var(--nbh-rule2,#93aead);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.rs-mode-b{font-family:var(--sans);font-size:15px;font-weight:600;min-height:44px;padding:6px 16px;border:0;border-left:1px solid var(--nbh-rule2,#93aead);background:#fff;color:var(--nbh-navy,#182e43);cursor:pointer}
+.rs-mode-b:first-child{border-left:0}
+.rs-mode-b[aria-pressed="true"]{background:var(--nbh-navy,#182e43);color:#fff}
+.rs-mode-b:focus-visible{outline:3px solid var(--nbh-slate,#254657);outline-offset:-3px}
+.rs-mode-n{font-family:var(--sans);font-size:12.5px;color:var(--ink-soft)}
+@media print{.rs-mode,#trWho{display:none!important}}
+/* 44 px targets, also where the shared touch layer sets fields to 38 px and buttons to 40 */
+html body .tr-sec input:not([type="checkbox"]):not([type="radio"]),html body .tr-sec select,html body #trWho select,html body .tr-sec button,html body #trWho button,html body .rs-mode-b,html body .tr-sec summary{min-height:44px!important}
+.tr-checkdocs{border-left:4px solid #9B4E15;background:#FBEEDB;padding:8px 12px;margin:8px 0 12px;font-family:var(--sans);font-size:13.5px;line-height:1.45;color:#3d2408}
+.tr-mpick{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 12px}
+.tr-mpick label,.tr-inl{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em}
+.tr-mpick select,.tr-sel{font:inherit;font-size:15px;border:1px solid var(--rule-2);border-radius:3px;padding:7px 9px;background:#fff;min-height:44px;max-width:100%;flex:1 1 240px;min-width:0}
+.tr-sel{flex:0 1 320px}
+.tr-mtype{align-items:end}
+.tr-mrules{font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--ink);margin:0 0 10px}
+.tr-mrules b{color:var(--nbh-navy,#182e43)}
+.tr-badge{display:inline-block;padding:2px 9px;border-radius:11px;font-size:12px;font-weight:700;white-space:nowrap;background:#E8EEF2;color:#22384a;border:1px solid #b9c8d2}
+.tr-badge.r27{background:#EFE8F6;color:#3b2a57;border-color:#c9b9dd}
+details.tr-ent .rs-cbody textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--rule-2);border-radius:3px;padding:7px 9px;background:#fff;min-height:64px;line-height:1.45;resize:vertical}
+details.tr-ent.planned{border-left-color:#93aead;background:#fbfcfc}
+details.tr-ent .issues{font-family:var(--sans);font-size:12.5px;margin:8px 0 0;padding:0;list-style:none}
+details.tr-ent .issues li{margin:3px 0}details.tr-ent .issues li.fail{color:#8E2A2A;font-weight:600}details.tr-ent .issues li.note{color:#7a420f}
+details.tr-ent .tr-obsrow{margin:8px 0 0}
+details.tr-ent [hidden]{display:none!important}
+.tr-kindnote{font-family:var(--sans);font-size:12.5px;color:var(--ink-soft);margin:6px 0 0}
+.tr-adj{border:1px solid var(--rule-2);border-radius:4px;background:#fff;padding:8px 12px;margin:8px 0;font-family:var(--sans);font-size:13px;line-height:1.45}
+.tr-adj ul{margin:6px 0 6px 1.1em;padding:0}.tr-adj li{margin:4px 0}
+.tr-adj .fieldgrid{margin:8px 0 4px}
+.tr-changed{margin:8px 0;padding:8px 12px;border-left:4px solid #8E2A2A;background:#F6E0E0;color:#6e1f1f;font-family:var(--sans);font-size:13.5px}
+.tr-changed[hidden]{display:none!important}
+.rs-comp .tr-other{padding:8px 12px;border-top:1px solid var(--rule-2);font-size:12.5px;line-height:1.4}
+.rs-comp .tr-other b{color:var(--nbh-navy,#182e43)}
+.tr-pad{display:block;width:100%;height:auto;aspect-ratio:640/150;border:1px solid var(--rule-2);border-bottom:1.5px solid var(--ink);background:var(--nbh-shade,#f5f8f7);margin:8px 0 4px;touch-action:none;cursor:crosshair;border-radius:3px;max-width:640px}
+table.tr-year-t td,table.tr-year-t th{text-align:center;vertical-align:middle}
+table.tr-year-t td:first-child,table.tr-year-t th:first-child{text-align:left}
+table.tr-year-t td:first-child{font-weight:600}
+table.tr-year-t tr.open{cursor:pointer}
+table.tr-year-t tr.open:focus-visible td{outline:2px solid var(--nbh-slate,#254657);outline-offset:-2px}
+.tr-yrbtn{background:none;border:0;padding:6px 2px;min-height:44px;font:inherit;font-weight:700;color:var(--nbh-navy,#182e43);text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left}
+.tr-docs{font-family:var(--sans);font-size:13px;line-height:1.5}
+.tr-docs ul{margin:4px 0 8px 1.1em;padding:0}.tr-docs li{margin:3px 0}
+table.tr-rules td,table.tr-rules th{font-size:13px}
+table.tr-rules td small,table.tr-rules th small{display:block;color:var(--ink-soft);font-size:11.5px;margin-top:2px;font-weight:400}
+/* the verification form, laid out in the order of the BACB's form */
+.tr-fvf{font-family:var(--sans);color:#111}
+.tr-fvf .f-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:6px}
+.tr-fvf .f-title{font:700 17px var(--sans);letter-spacing:.01em}
+.tr-fvf .f-sub{font:600 14px var(--sans);color:#22384a;margin-top:2px}
+.tr-fvf .f-req{font:400 13px var(--sans);color:#22384a}
+.tr-fvf .f-ws{font-size:10.5px;color:#444;text-align:right;max-width:46%;line-height:1.35}
+.tr-fvf .f-ins{font-size:11px;line-height:1.4;margin:4px 0 8px}
+.tr-fvf .f-band{background:#f1f3f4;padding:6px 8px;margin:6px 0}
+.tr-fvf .f-row{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:flex-end;margin:5px 0}
+.tr-fvf .f-l{font-size:12px;font-weight:600;white-space:nowrap}
+.tr-fvf .f-l.n{font-weight:400}
+.tr-fvf .f-v{flex:1 1 auto;min-width:80px;border-bottom:1px solid #111;font-size:12.5px;padding:0 4px 1px;min-height:18px}
+.tr-fvf .f-v.s{flex:0 0 auto;min-width:46px;text-align:center}
+.tr-fvf .f-v.m{flex:0 0 auto;min-width:90px;text-align:center}
+.tr-fvf h5{font:600 15px var(--sans);color:#22384a;margin:10px 0 4px}
+.tr-fvf .f-box{display:inline-block;width:11px;height:11px;border:1.4px solid #111;vertical-align:-1px;margin-right:4px;text-align:center;font-size:10px;line-height:10px;font-weight:700}
+.tr-fvf .f-tot{background:#f1f3f4;padding:6px 10px;margin:8px 0;display:inline-block;min-width:52%}
+.tr-fvf .f-att{font-size:11.5px;line-height:1.45;margin:4px 0}
+.tr-fvf .f-att li{margin:2px 0}
+.tr-fvf ul.f-att{padding-left:18px;margin:4px 0 6px}
+.tr-fvf .f-sig{display:flex;align-items:flex-end;gap:8px;margin:10px 0 2px}
+.tr-fvf .f-sig .f-l{min-width:140px}
+.tr-fvf .f-sig .f-v{min-height:40px;display:flex;align-items:flex-end}
+.tr-fvf .f-sig .f-v img{height:38px;width:auto;max-width:90%}
+.tr-fvf .f-sig .f-d{flex:0 0 150px}
+.tr-fvf .f-how{font-size:10px;color:#444;margin:0 0 4px 148px}
+.tr-fvf .f-foot{font-size:10.5px;color:#444;margin-top:10px;line-height:1.4;border-top:1px solid #bbb;padding-top:4px}
+.tr-fvf .f-flag{border:1.5px solid #8E2A2A;color:#6e1f1f;padding:5px 8px;font-size:11.5px;margin:6px 0}
+.tr-fvf .f-cols{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:2px 10px;align-items:end;font-size:12px}
+.tr-fvf .f-cols .h{font-weight:700;font-size:11.5px}
+.tr-fvf .f-cols .c{border-bottom:1px solid #111;text-align:center;min-height:17px}
+.tr-fvf+.tr-fvf{margin-top:18px;padding-top:12px;border-top:2px dashed #999}
+@media (max-width:640px){.tr-fvf .f-ws{max-width:none;text-align:left}.tr-fvf .f-top{flex-direction:column}.tr-fvf .f-how{margin-left:0}}
+@media print{
+  body.rs-trainee .tr-sec.only-print{display:block!important}
+  body.rs-trainee .tr-sec:not(.only-print){display:none!important}
+  body:not(.rs-trainee) .tr-sec{display:none!important}
+  body.rs-trainee #trFinalOut{display:none!important}
+  body.rs-trainee.tr-print-final #trFinalOut{display:block!important}
+  body.rs-trainee.tr-print-final #trFormOut,body.rs-trainee.tr-print-final #trLogOut,body.rs-trainee.tr-print-final #trYearOut{display:none!important}
+  body.rs-trainee.tr-print-form #trLogOut,body.rs-trainee.tr-print-form #trYearOut,body.rs-trainee.tr-print-month #trYearOut{display:none!important}
+  body.rs-trainee.tr-print-year #trFormOut,body.rs-trainee.tr-print-year #trLogOut{display:none!important}
+  body.rs-trainee #trLogOut,body.rs-trainee #trYearOut{break-before:page}
+  body.rs-trainee.tr-print-year #trYearOut{break-before:auto}
+  .tr-fvf .f-title{font-size:13.5pt}.tr-fvf .f-sub{font-size:11pt}.tr-fvf .f-req{font-size:10pt}
+  .tr-fvf .f-ws,.tr-fvf .f-how,.tr-fvf .f-foot{font-size:7.5pt}
+  .tr-fvf .f-ins,.tr-fvf .f-att{font-size:8.5pt}
+  .tr-fvf .f-l,.tr-fvf .f-v,.tr-fvf .f-cols{font-size:9pt}
+  .tr-fvf .f-cols .h{font-size:8.5pt}
+  .tr-fvf h5{font-size:11pt}
+  .tr-fvf .f-flag{font-size:8.5pt}
+  .tr-fvf .f-sig .f-v{min-height:30pt}.tr-fvf .f-sig .f-v img{height:28pt}
+  .tr-fvf+.tr-fvf{break-before:page;border-top:0;margin-top:0;padding-top:0}
+  .tr-fvf .f-keep,.tr-fvf .f-band,.tr-fvf .f-tot,.tr-fvf .f-cols{break-inside:avoid}
+  .tr-fvf .f-ins{margin:2pt 0 4pt}.tr-fvf h5{margin:6pt 0 2pt}.tr-fvf .f-row{margin:3pt 0}.tr-fvf .f-sig{margin:6pt 0 1pt}.tr-fvf .f-foot{margin-top:6pt}.tr-fvf .f-tot{margin:4pt 0}
+}
+</style>
+<script id="rs1-v2568-trainee">
+/* v25.68 (the BCBA, 11/6; research #21) BCBA trainee fieldwork beside the RBT log. A choice at the top: RBTs (the log as
+   before, the default) or BCBA trainees. A trainee's record: each session of independent hours, each supervision contact
+   and each observation with a client, with what the BCBA Handbook asks a documentation system to keep (p. 21); every month
+   checked against the BACB's monthly requirements, the 2022 rules for a month through December 2026 and the 2027 rules from
+   January 2027 (a month before 2027 is also checked against the 2027 rules, for a trainee who applies after the change);
+   the month's verification form filled from its entries and signed by the supervisor and the trainee; the year summary,
+   the running totals and the final verification. The numbers are the BACB's, each with its document and page (the Guide);
+   the form adds up what is entered and decides nothing. Every value is new and optional: a file saved before opens, saves
+   and prints as before, and a file is written as before until a trainee is entered. Simulated people only. */
+(function(){
+'use strict';
+const T=v=>String(v==null?'':v).trim();
+const isoD=v=>/^\d{4}-\d{2}-\d{2}$/.test(T(v))?T(v):'';
+const hmS=v=>/^\d{2}:\d{2}$/.test(T(v))?T(v):'';
+const keyS=v=>/^\d{4}-\d{2}$/.test(T(v))?T(v):'';
+const str=(v,n)=>v==null||typeof v==='object'?'':String(v).slice(0,n||4000);
+const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:{};
+const arr=v=>Array.isArray(v)?v:[];
+const addKey=(k,n)=>{let [y,m]=k.split('-').map(Number);m+=n;while(m>12){m-=12;y++;}while(m<1){m+=12;y--;}return y+'-'+pad2(m);};
+const keyLast=k=>{const [y,m]=k.split('-').map(Number);return iso(y,m,lastDay(y,m));};
+const hm2=mi=>{mi=Math.max(0,Math.round(mi||0));return {h:Math.floor(mi/60),m:mi%60};};
+const hmTxt=mi=>{const x=hm2(mi);return x.h+' h '+pad2(x.m)+' min';};
+const pct2=v=>v==null?'0.00%':(Math.round(v*100)/100).toFixed(2)+'%';
+const dec2=mi=>((mi||0)/60).toFixed(2);
+const fmtN=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
+const at2=s=>{try{return new Date(s).toLocaleString('en-US',{month:'numeric',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});}catch(e){return '';}};
+
+/* ---------------- the BACB's requirements, by the month's dates ----------------
+   2022: BCBA Handbook (updated 10/2026) pp. 14-23. 2027: BCBA Handbook pp. 26 and 28, 2027 BCBA Requirements (updated
+   02/2026) pp. 2 and 4, BACB Newsletter March 2022 p. 4 (the contacts requirement eliminated), Guidance for Meeting the BCBA
+   Requirements During the 2027 Transition (updated 01/2026) pp. 2-4. Every source sentence is in the Guide. */
+const SWITCH='2027-01';
+const RS={
+  '2022':{id:'2022',name:'2022 BCBA fieldwork requirements',short:'2022 rules',when:'the rules in effect through December 31, 2026',
+    min:20,max:130,pct:{sup:5,conc:10},contacts:{sup:4,conc:6},obsN:1,obsMin:null,
+    src:'BCBA Handbook (updated 10/2026), pp. 14–23'},
+  '2027':{id:'2027',name:'2027 BCBA fieldwork requirements',short:'2027 rules',when:'the rules in effect from January 1, 2027',
+    min:20,max:160,pct:{sup:5,conc:7.5},contacts:null,obsN:null,obsMin:{sup:60,conc:90},
+    src:'BCBA Handbook (updated 10/2026), pp. 26 and 28; 2027 BCBA Requirements (updated 02/2026), pp. 2 and 4'}};
+const rsOf=k=>k>=SWITCH?RS['2027']:RS['2022'];
+const NEED={sup:2000,conc:1500},MULT=1.33,GRPMAX=10,UNR=60;
+const FT=[['sup','Supervised fieldwork'],['conc','Concentrated supervised fieldwork']];
+const ftName=f=>f==='conc'?'Concentrated supervised fieldwork':'Supervised fieldwork';
+const KINDS=[['ind','Independent'],['sup','Supervised (real time)']];
+const FMTS=[['indiv','Individual'],['group','Group']];
+const CATS=[['unr','Unrestricted'],['res','Restricted']];
+const OBSHOW=[['person','In person, on site'],['live','Live video'],['rec','Recorded video, watched later']];
+const QUALS=[['bcba','BCBA/BCBA-D'],['vi','Verified Instructor'],['abpp','ABPP/ABA']];
+const lab=(L,v)=>(L.find(x=>x[0]===v)||[0,''])[1];
+/* the BACB's documents, by name and date (the line on the page that says they decide) */
+const DOCS=[
+  ['BCBA Handbook','updated 10/2026','bacb.com/bcba-handbook'],
+  ['2027 BCBA Requirements','updated 02/2026','bacb.com/bcba-2027-requirements'],
+  ['Guidance for Meeting the BCBA Requirements During the 2027 Transition','updated 01/2026','bacb.com/BCBA-2027-transition-resource'],
+  ['Monthly Fieldwork Verification Forms, Individual Supervisor and Multiple Supervisors at One Organization','2022 requirements, version 08/2023; 2027 requirements, version 06/2026',''],
+  ['Final Fieldwork Verification Forms','2022 requirements, version 12/2023; 2027 requirements, Individual version 06/2026, Organization version 06/2025',''],
+  ['BACB Newsletter','March 2022 (the 2027 fieldwork changes)',''],
+  ['Documenting Fieldwork: Helpful Answers to Your FAQs (BACB blog)','updated April 2026','']];
+const docsLine=()=>'The BACB&rsquo;s documents decide, not this form: '+DOCS.map(d=>'<i>'+esc(d[0])+'</i> ('+esc(d[1])+')').join('; ')+'. Where this form and those documents differ, the documents are right.';
+/* Code 4.05, in the research report's words (S/research/NEXT.md #21): the wording is not quoted here */
+const CODE='Code 4.05 of the Ethics Code for Behavior Analysts (BACB, 2020) requires supervision documentation. <b>Check the current wording before printing.</b>';
+
+/* ---------------- the trainees (kept beside the RBTs in the same file) ---------------- */
+const newTSup=()=>({id:uid(),name:'',cert:'',qual:'bcba',since:'',trained:'',consult:'',norel:false,resp:false});
+const newTrainee=()=>({id:uid(),setup:{structure:'indiv',ftype:'sup'},sups:[newTSup()],entries:[],months:{},final:{}});
+const TR={list:[],cur:0};
+window.__rsTR=TR;
+let MODE='rbt',TK='',trOpen=new Set();
+const cur=()=>{if(!TR.list.length){TR.list.push(newTrainee());TR.cur=0;}if(!TR.list[TR.cur])TR.cur=0;return TR.list[TR.cur];};
+const isTr=()=>MODE==='trainee';
+const tName=t=>T(t&&t.setup&&t.setup.name);
+const tSup=(t,id)=>(t.sups||[]).find(s=>s.id===id)||null;
+const respSup=t=>(t.sups||[]).find(s=>s.resp&&T(s.name))||(t.sups||[]).find(s=>T(s.name))||null;
+function tMonth(k,t){t=t||cur();k=k||TK;if(!t.months[k])t.months[k]={sig:{}};const m=t.months[k];if(!m.sig||typeof m.sig!=='object')m.sig={};return m;}
+const tPeek=(k,t)=>(t||cur()).months[k]||{sig:{}};
+/* a trainee holds something worth writing to the file */
+function tHas(t){const st=t.setup||{};if(['name','bacb','state','country','contract','course','org'].some(k=>T(st[k])))return true;if(st.structure&&st.structure!=='indiv')return true;if(st.ftype&&st.ftype!=='sup')return true;
+  if((t.entries||[]).length)return true;if((t.sups||[]).some(s=>T(s.name)||T(s.cert)||T(s.since)||T(s.trained)||T(s.consult)||s.norel||s.resp||(s.qual&&s.qual!=='bcba')))return true;
+  if(Object.keys(t.months||{}).some(k=>mHas(t.months[k])))return true;return Object.keys(clean(t.final||{})).length>0;}
+const mHas=m=>!!m&&Object.keys(cleanMonth(m)).length>0;
+const trHas=()=>TR.list.some(tHas);
+function clean(o){const r={};Object.keys(o||{}).forEach(k=>{const v=o[k];if(v===''||v==null||v===false)return;if(typeof v==='object'&&!Array.isArray(v)){const c=clean(v);if(Object.keys(c).length)r[k]=c;return;}r[k]=v;});return r;}
+const cleanMonth=m=>clean(m);
+
+/* ---------------- an entry's figures ---------------- */
+function eMin(e){const a=toMin(e.start),b=toMin(e.end);return a!=null&&b!=null&&b>a?b-a:null;}
+function eObs(e){if(!e.obs)return 0;const m=eMin(e);if(m==null)return 0;const v=num(e.obsMin);return v!=null&&v>0?Math.min(v,m):m;}
+function eIssues(e,t){const L=[],st=t.setup||{},mi=eMin(e),today=todayISO();
+  if(!isoD(e.date))L.push({lvl:'fail',t:'Enter the date.'});
+  if(mi==null)L.push({lvl:'fail',t:'Enter the start and end times (the end after the start).'});
+  if(!e.cat)L.push({lvl:'fail',t:'Choose unrestricted or restricted (the handbook asks for the activity category, p. 21).'});
+  if(e.kind==='sup'&&!tSup(t,e.sup))L.push({lvl:'fail',t:'Choose the supervisor.'});
+  if(e.kind==='sup'&&e.fmt==='group'){const g=num(e.grp);if(g==null)L.push({lvl:'note',t:'Enter the number of trainees in the group (2 to 10).'});
+    else if(g>GRPMAX)L.push({lvl:'fail',t:'A group may not exceed 10 trainees (BCBA Handbook, p. 20).'});else if(g<2)L.push({lvl:'fail',t:'A group has 2 to 10 trainees; with one trainee it is individual supervision.'});}
+  if(e.kind==='sup'&&!T(e.sum))L.push({lvl:'note',t:'Add a summary of the supervision activity (the handbook lists it, p. 21).'});
+  if(e.obs&&!T(e.setting))L.push({lvl:'note',t:'Add the setting of the observation (p. 21).'});
+  if(e.obs&&mi!=null&&num(e.obsMin)!=null&&num(e.obsMin)>mi)L.push({lvl:'note',t:'The observation minutes are more than the entry’s length; the length is counted.'});
+  if(isoD(e.date)&&isoD(st.contract)&&e.date<st.contract)L.push({lvl:'fail',t:'Before the supervision contract was signed ('+mdy(st.contract)+'): fieldwork may not begin until then (BCBA Handbook, p. 15).'});
+  if(isoD(e.date)&&isoD(st.course)&&e.date<st.course)L.push({lvl:'fail',t:'Before the first behavior-analytic course began ('+mdy(st.course)+') (BCBA Handbook, p. 15).'});
+  if(isoD(e.date)&&e.date>today)L.push({lvl:'note',t:'Planned: counts once the date has passed.'});
+  if(mi!=null){const a=toMin(e.start),b=toMin(e.end),o=(t.entries||[]).find(x=>x!==e&&x.date===e.date&&eMin(x)!=null&&toMin(x.start)<b&&toMin(x.end)>a);
+    if(o)L.push({lvl:'note',t:'Overlaps the entry at '+fmtHM(o.start)+'–'+fmtHM(o.end)+': log each stretch of time once.'});}
+  return L;}
+
+/* ---------------- a month's figures, against a rule set (the month's own unless asked) ---------------- */
+function tStats(k,t,rsId,ftAs){t=t||cur();const rs=rsId?RS[rsId]:rsOf(k),today=todayISO(),last=keyLast(k),ended=last<today,first=k+'-01';
+  const m=tPeek(k,t),ft=ftAs||m.ftype||(t.setup&&t.setup.ftype)||'sup';
+  const all=(t.entries||[]).filter(e=>keyOf(e.date)===k),planned=all.filter(e=>e.date>today),E=all.filter(e=>e.date<=today);
+  let ind=0,sup=0,indiv=0,grp=0,obsMin=0,obsN=0,unr=0,res=0,contacts=0;const inc=[],big=[],early=[];
+  const st=t.setup||{};
+  E.forEach(e=>{const mi=eMin(e);if(mi==null||!e.cat){inc.push(e);return;}
+    if(e.kind==='sup'){sup+=mi;contacts++;if(e.fmt==='group'){grp+=mi;const g=num(e.grp);if(g!=null&&(g>GRPMAX||g<2))big.push(e);}else indiv+=mi;}else ind+=mi;
+    if(e.cat==='res')res+=mi;else unr+=mi;
+    if(e.obs){obsN++;obsMin+=eObs(e);}
+    if((isoD(st.contract)&&e.date<st.contract)||(isoD(st.course)&&e.date<st.course))early.push(e);
+    if(e.kind==='sup'&&!tSup(t,e.sup))inc.push(e);});
+  const tot=ind+sup,pct=tot?sup/tot*100:null,P=rs.pct[ft],open=!ended;
+  const S=(ok,can)=>ok?'ok':(open&&can!==false?'pending':'fail');
+  const checks=[];
+  checks.push({k:'hours',t:'Fieldwork hours: '+rs.min+' to '+rs.max+' in the month',d:hmTxt(tot)+(tot>rs.max*60?': more than '+rs.max:''),s:tot>rs.max*60?'fail':S(tot>=rs.min*60)});
+  checks.push({k:'pct',t:'Supervised: at least '+P+'% of the hours',d:(pct==null?'no hours yet':pct2(pct))+(pct!=null&&pct<P?'; '+supNeed(ind,sup,P)+' more supervised minutes '+(open?'needed for the hours so far':'were needed'):''),s:S(pct!=null&&pct>=P-1e-9)});
+  if(rs.contacts)checks.push({k:'contacts',t:'Supervisor–trainee contacts: at least '+rs.contacts[ft],d:contacts+' contact'+(contacts===1?'':'s'),s:S(contacts>=rs.contacts[ft])});
+  if(rs.obsN)checks.push({k:'obs',t:'Observation of the trainee with a client: at least one',d:obsN+' observation'+(obsN===1?'':'s')+(obsMin?', '+obsMin+' min':''),s:S(obsN>=rs.obsN)});
+  if(rs.obsMin)checks.push({k:'obs',t:'Observation with a client: '+rs.obsMin[ft]+' minutes (cumulative)',d:obsMin+' min in '+obsN+' observation'+(obsN===1?'':'s'),s:S(obsMin>=rs.obsMin[ft])});
+  checks.push({k:'indiv',t:'Individual supervision: at least half of the supervised hours',d:sup?'individual '+hmTxt(indiv)+', group '+hmTxt(grp):'no supervised hours yet',s:sup?(grp<=indiv?'ok':(open?'pending':'fail')):(open?'pending':'fail')});
+  if(big.length)checks.push({k:'group',t:'Groups of 2 to 10 trainees',d:big.length+' group contact'+(big.length===1?'':'s')+' outside 2 to 10',s:'fail'});
+  if(inc.length)checks.push({k:'complete',t:'Every entry complete',d:inc.length+' entr'+(inc.length===1?'y':'ies')+' not counted: times, activity or supervisor missing',s:'fail'});
+  if(early.length)checks.push({k:'early',t:'After the contract and the first course',d:early.length+' entr'+(early.length===1?'y':'ies')+' dated before',s:'fail'});
+  const any=E.length>0,status=!any?(planned.length?'pending':'none'):checks.every(c=>c.s==='ok')?'ok':checks.some(c=>c.s==='fail')?'fail':'pending';
+  const plannedMin=planned.reduce((a,e)=>a+(eMin(e)||0),0);
+  return {k,rs,ft,E,all,planned,plannedMin,ind,sup,indiv,grp,tot,pct,contacts,obsN,obsMin,unr,res,checks,status,ended,open,started:first<=today,last,big,early,inc};}
+function supNeed(ind,sup,P){/* the supervised minutes to add, with the same independent minutes: sup' / (ind + sup') >= P% */
+  const need=Math.ceil(P*ind/(100-P)-sup);return Math.max(0,need);}
+/* the verification form's signing: by the last day of the calendar month following the month (BCBA Handbook, p. 22) */
+function sigState(k,t){const g=tPeek(k,t).sig||{},by=keyLast(addKey(k,1)),today=todayISO();
+  const sup=!!(g.sup_img||(T(g.sup_name)&&isoD(g.sup_date))),tr=!!(g.tr_img||(T(g.tr_name)&&isoD(g.tr_date)));
+  const both=sup&&tr,dates=[g.sup_date,g.tr_date].filter(isoD),lastSig=dates.sort().slice(-1)[0]||'';
+  const late=both?(lastSig>by):(today>by);
+  return {sup,tr,both,by,late,lastSig,changed:both&&!!g.fp&&g.fp!==fpOf(k,t)};}
+/* the figures a signature stands for: a change afterwards is said, so the form is signed again */
+function fpOf(k,t){const s=tStats(k,t),h=formHours(k,t,s);return [s.rs.id,s.ft,h.ind,h.sup,s.obsMin,s.obsN,s.contacts,T(t&&t.setup&&t.setup.name)].join('|');}
+/* the hours on the form: as accrued, or the hours the supervisor and the trainee entered after adjusting */
+const parseH=v=>{v=T(v);if(!v)return null;const m=/^(\d{1,4}):(\d{1,2})$/.exec(v);if(m)return +m[1]*60+ +m[2];const n=num(v);return n!=null&&n>=0?Math.round(n*60):null;};
+function formHours(k,t,s){t=t||cur();s=s||tStats(k,t);const m=tPeek(k,t),ai=parseH(m.adjInd),as=parseH(m.adjSup);
+  const adj=ai!=null||as!=null;const ind=ai!=null?ai:s.ind,sup=as!=null?as:s.sup;return {ind,sup,tot:ind+sup,pct:ind+sup?sup/(ind+sup)*100:null,adj};}
+/* the handbook's table for a month whose requirements are not met (p. 23), for supervised fieldwork under the 2022 rules */
+function adjRows(s){const L=[];if(s.rs.id!=='2022'||s.ft!=='sup'||!s.ended||!s.E.length)return L;const r=s.rs;
+  if(s.obsN<1)L.push({k:'obs',req:'No observation of the trainee working with a client',adj:'No hours are eligible for the month.'});
+  if(s.tot<r.min*60)L.push({k:'min',req:'Fewer than 20 total hours',adj:'No hours are eligible for the month.'});
+  if(s.tot>r.max*60){const ind=Math.max(0,s.ind-(s.tot-r.max*60));L.push({k:'max',req:'More than 130 total hours',adj:'Remove independent hours for the month until the total equals 130 hours.',ind,sup:s.sup,res:'independent '+dec2(ind)+' h, supervised '+dec2(s.sup)+' h'});}
+  if(s.contacts<r.contacts.sup){const f=s.contacts/r.contacts.sup,base=Math.min(s.tot,r.max*60);L.push({k:'contacts',req:'Not enough supervisor-trainee contacts',adj:'Take the total hours accrued in the month (up to 130) and prorate the hours based on the percentage of contacts that met the requirement.',res:s.contacts+' of '+r.contacts.sup+' contacts ('+Math.round(f*100)+'%): '+dec2(base*f)+' of '+dec2(base)+' hours'});}
+  if(s.grp>s.indiv){const sup=s.indiv*2;L.push({k:'group',req:'Group supervision is more than individual supervision',adj:'Reduce the group supervision hours until they equal (or are less than) the individual supervision hours.',ind:s.ind,sup,res:'supervised '+dec2(sup)+' h (individual '+dec2(s.indiv)+' h, group '+dec2(s.indiv)+' h)'});}
+  if(s.pct!=null&&s.pct<r.pct.sup){const ind=Math.floor(s.sup*(100-r.pct.sup)/r.pct.sup);L.push({k:'pct',req:'% of supervision did not meet the minimum requirement',adj:'Decrease the independent hours for the month until the % of supervision meets (or exceeds) the minimum monthly requirement.',ind,sup:s.sup,res:'independent '+dec2(ind)+' h, supervised '+dec2(s.sup)+' h'});}
+  return L;}
+
+/* ---------------- the months a trainee's record spans ---------------- */
+function tKeys(t){t=t||cur();const now=keyOf(todayISO());let a=addKey(now,-2),b=addKey(now,1);
+  const see=k=>{if(!keyS(k))return;if(k<a)a=k;if(k>b)b=k;};(t.entries||[]).forEach(e=>see(keyOf(e.date)));Object.keys(t.months||{}).forEach(see);if(isoD(t.setup.contract))see(keyOf(t.setup.contract));
+  const out=[];for(let k=a;k<=b&&out.length<240;k=addKey(k,1))out.push(k);return out;}
+const usedKeys=t=>{t=t||cur();const s=new Set((t.entries||[]).map(e=>keyOf(e.date)).filter(keyS));return [...s].sort();};
+const STXT={ok:'met',pending:'in progress',fail:'short',none:'no fieldwork'};
+function stLabel(s){return s.status==='ok'&&s.open?'on track':s.status==='pending'&&!s.E.length?'planned':STXT[s.status];}
+
+/* ---------------- mode ---------------- */
+function setMode(m,quiet){MODE=m==='trainee'?'trainee':'rbt';document.body.classList.toggle('rs-trainee',isTr());
+  const rb=document.querySelector('#viewSeg button[data-view="rbt"]');if(rb)rb.hidden=isTr();
+  /* the iPad's list of sheets (nbh-ui) counts the sheets it shows */
+  const rn=document.querySelector('#nbhRail .nbh-railn');if(rn)rn.textContent=$$('#viewSeg button').filter(b=>!b.hidden).length+' sheets. Tap one to open it.';
+  const ph=document.querySelector('.nbh-print-title');if(ph){if(ph.dataset.rbt==null)ph.dataset.rbt=ph.textContent;ph.textContent=isTr()?'BCBA Trainee Fieldwork (Form RS-1)':ph.dataset.rbt;}
+  $$('[data-rsmode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rsmode===MODE)));
+  const v=(/\bview-(\S+)/.exec(document.body.className)||[])[1]||'setup';
+  if(isTr()){cur();if(!TK)TK=defKey();if(v==='rbt')setView('setup');else trRender(v);}
+  else{try{renderAll();}catch(e){}}
+  try{if(window.nbhUI&&nbhUI.remap)setTimeout(()=>nbhUI.remap(),0);}catch(e){}
+  const n=$('#rsModeNote');if(n&&!quiet)n.textContent=isTr()?'Showing the BCBA trainee record.':'Showing the RBT supervision log.'+(trHas()?' This file also holds '+TR.list.filter(tHas).length+' BCBA trainee record'+(TR.list.filter(tHas).length===1?'':'s')+'.':'');}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rsmode]');if(!b)return;if(b.dataset.rsmode!==MODE)setMode(b.dataset.rsmode);});
+function defKey(){const t=cur(),now=keyOf(todayISO()),u=usedKeys(t);return u.length&&!u.includes(now)&&u[u.length-1]<now?u[u.length-1]:now;}
+
+/* ---------------- rendering ---------------- */
+function trRender(v){if(!isTr())return;v=v||(/\bview-(\S+)/.exec(document.body.className)||[])[1]||'setup';const t=cur();if(!tKeys(t).includes(TK))TK=defKey();
+  trWho();if(v==='setup')renderTSetup();if(v==='month')renderTMonth();if(v==='year')renderTYear();if(v==='print')renderTPrint();if(v==='guide')renderTGuide();}
+function trRenderAll(){if(!isTr())return;trWho();renderTSetup();renderTMonth();renderTYear();renderTPrint();renderTGuide();}
+function trWho(){const sel=$('#trSel');if(!sel)return;const now=keyOf(todayISO());
+  sel.innerHTML=TR.list.map((t,i)=>{const s=tStats(now,t);return '<option value="'+i+'"'+(i===TR.cur?' selected':'')+'>'+esc(tName(t)||'Trainee '+(i+1)+' (no name yet)')+' — '+esc(keyLabel(now))+': '+esc(stLabel(s))+'</option>';}).join('');
+  $('#trCount').textContent=TR.list.length+' trainee'+(TR.list.length===1?'':'s')+' in this file';$('#trDel').disabled=TR.list.length<2;}
+$('#trSel').addEventListener('change',e=>{const i=+e.target.value;if(TR.list[i]){TR.cur=i;TK=defKey();trOpen=new Set();trRender();}});
+$('#trAdd').addEventListener('click',()=>{if(TR.list.length>=40)return;const n=newTrainee();const c=cur();n.setup.state=c.setup.state||'';n.setup.country=c.setup.country||'';n.setup.org=c.setup.org||'';
+  TR.list.push(n);TR.cur=TR.list.length-1;TK=keyOf(todayISO());trOpen=new Set();setView('setup');const f=$('#trName');if(f)f.focus();changed();nbhUI.toast('A new trainee record: enter the trainee on this page.',{kind:'ok'});});
+$('#trDel').addEventListener('click',async()=>{if(TR.list.length<2)return;const nm=tName(cur())||'this trainee';
+  if(!(await nbhUI.confirm('Remove '+nm+'’s record from this file?\nEvery entry, month and signature of this trainee is removed. The other records stay.',{ok:'Remove',danger:true})))return;
+  TR.list.splice(TR.cur,1);TR.cur=Math.max(0,TR.cur-1);TK=defKey();trRender();changed();});
+
+/* the trainee and the supervisors */
+function renderTSetup(){const t=cur(),st=t.setup;$$('[data-trs]').forEach(el=>{const k=el.dataset.trs;el.value=st[k]!=null?st[k]:(k==='structure'?'indiv':k==='ftype'?'sup':'');});
+  const org=st.structure==='org';
+  $('#trSupList').innerHTML=t.sups.map((s,i)=>{const id=esc(s.id),F=f=>'ts_'+id+'_'+f,is=supIssues(s,t);
+    return '<div class="rs-sup'+(is.some(x=>x.lvl==='fail')?' bad':is.length?' warn':'')+'" data-tsid="'+id+'"><div class="gh"><span>Supervisor '+(i+1)+(org&&s.resp?' (responsible supervisor)':'')+'</span>'+(t.sups.length>1?'<button type="button" class="tool" data-trsupdel="'+id+'">Remove this supervisor</button>':'')+'</div>'+
+      '<div class="fieldgrid"><div><label for="'+F('name')+'">Name</label><input id="'+F('name')+'" data-trsup="'+id+'" data-trf="name" value="'+esc(s.name)+'" autocomplete="off"></div>'+
+      '<div><label for="'+F('cert')+'">BACB certification number</label><input id="'+F('cert')+'" data-trsup="'+id+'" data-trf="cert" value="'+esc(s.cert)+'" autocomplete="off" spellcheck="false"></div>'+
+      '<div><label for="'+F('qual')+'">Qualification</label><select id="'+F('qual')+'" data-trsup="'+id+'" data-trf="qual">'+opts(QUALS,s.qual||'bcba')+'</select></div>'+
+      '<div><label for="'+F('since')+'">Certified as a BCBA on</label><input type="date" id="'+F('since')+'" data-trsup="'+id+'" data-trf="since" value="'+esc(s.since)+'"></div>'+
+      '<div><label for="'+F('trained')+'">8-hour supervision training completed on</label><input type="date" id="'+F('trained')+'" data-trsup="'+id+'" data-trf="trained" value="'+esc(s.trained)+'"></div>'+
+      '<div><label for="'+F('consult')+'">Consulting supervisor (first year as a BCBA)</label><input id="'+F('consult')+'" data-trsup="'+id+'" data-trf="consult" value="'+esc(s.consult)+'" autocomplete="off"></div></div>'+
+      '<div class="rs-chips"><label class="chip wide"><input type="checkbox" id="'+F('norel')+'" data-trsup="'+id+'" data-trf="norel"'+(s.norel?' checked':'')+'> Not related to, subordinate to, or employed by the trainee, and in no multiple relationship with them</label>'+
+      (org?'<label class="chip"><input type="radio" name="trResp" id="'+F('resp')+'" data-trsup="'+id+'" data-trf="resp"'+(s.resp?' checked':'')+'> Responsible supervisor (signs the forms)</label>':'')+'</div>'+
+      '<ul class="issues" id="'+F('issues')+'">'+supIssuesHTML(s,t)+'</ul></div>';}).join('');
+  $('#trAddSup').disabled=t.sups.length>=8;
+  $('#trRules').innerHTML=rulesHTML(false);}
+function supIssues(s,t){const L=[],st=t.setup||{};if(!T(s.name)&&!T(s.cert))return [{lvl:'note',t:'Enter the supervisor’s name and BACB certification number: the forms ask for both.'}];
+  if(!T(s.name))L.push({lvl:'fail',t:'Enter the name.'});if(!T(s.cert))L.push({lvl:'note',t:'Enter the BACB certification number (the forms ask for it).'});
+  if(!isoD(s.trained))L.push({lvl:'note',t:'Enter the date of the 8-hour supervision training (completed before the supervision contract is signed, p. 18).'});
+  else if(isoD(st.contract)&&s.trained>st.contract)L.push({lvl:'fail',t:'The 8-hour training is dated after the contract ('+mdy(st.contract)+'); the handbook asks for it before the contract is signed (p. 18).'});
+  if(!isoD(s.since))L.push({lvl:'note',t:'Enter the date certified as a BCBA, for the first-year rule.'});
+  else{const u=usedKeys(t),lastK=u[u.length-1]||keyOf(todayISO()),yr=new Date(s.since+'T00:00:00');yr.setFullYear(yr.getFullYear()+1);
+    if(isoOf(yr)>(lastK+'-01')&&!T(s.consult))L.push({lvl:'note',t:'Certified less than a year during the fieldwork: monthly consultation from a qualified consulting supervisor is required (p. 18). Enter the consulting supervisor.'});}
+  if(!s.norel)L.push({lvl:'note',t:'Confirm the relationship: not related to, subordinate to, or employed by the trainee (p. 18).'});
+  return L;}
+function supIssuesHTML(s,t){const is=supIssues(s,t);return is.length?is.map(x=>'<li class="'+x.lvl+'">'+(x.lvl==='fail'?'✕ ':'• ')+esc(x.t)+'</li>').join(''):'<li class="ok">✓ Everything this page asks about the supervisor is recorded.</li>';}
+function rulesHTML(full){const R=(a,b,c)=>'<tr><th>'+a+'</th><td>'+b+'</td><td>'+c+'</td></tr>';
+  return '<p class="hint">Each month is checked against the rules in effect on its dates (the switch is January 1, 2027). <b>Check the current BACB documents before signing.</b></p>'+
+   '<div class="grid-wrap"><table class="rt tr-rules"><thead><tr><th style="width:28%">Each calendar month</th><th>2022 rules (through December 2026)<small>BCBA Handbook, updated 10/2026</small></th><th>2027 rules (from January 2027)<small>BCBA Handbook pp. 26, 28; 2027 BCBA Requirements</small></th></tr></thead><tbody>'+
+   R('Fieldwork hours','20 to 130 <small>p. 16</small>','20 to 160 <small>Handbook pp. 26, 28</small>')+
+   R('Supervised','5% supervised fieldwork, 10% concentrated <small>p. 19</small>','5% supervised fieldwork, 7.5% concentrated')+
+   R('Supervisor–trainee contacts','4 supervised fieldwork, 6 concentrated <small>p. 20</small>','No minimum: the requirement is eliminated <small>BACB Newsletter, March 2022, p. 4</small>')+
+   R('Observation with a client','At least one observation <small>p. 20</small>','60 minutes supervised fieldwork, 90 concentrated (cumulative)')+
+   R('Individual supervision','At least half of the supervised hours; groups of 2 to 10 trainees <small>p. 20</small>','At least half of the supervised hours; the handbook&rsquo;s other fieldwork requirements still apply <small>p. 26</small>')+
+   R('Across the whole fieldwork','2,000 hours supervised fieldwork or 1,500 concentrated; at least 60% unrestricted; within five years <small>pp. 15–17</small>','The same totals and 60% unrestricted')+
+   R('Verification form','The 2022 form, signed by the last day of the month after <small>p. 22</small>','The 2027 form, signed by the last day of the month after <small>2027 M-FVF, version 06/2026</small>')+
+   '</tbody></table></div>'+
+   (full?'':'<p class="hint">The sentence behind each rule, with its page, is on the Guide page. A month before 2027 is also checked against the 2027 rules, for a trainee who applies on or after January 1, 2027: the BACB judges fieldwork by the requirements in place when the trainee applies (Guidance for Meeting the BCBA Requirements During the 2027 Transition, updated 01/2026, p. 2).</p>')+
+   '<p class="tr-docs">'+docsLine()+'</p>';}
+
+/* the month */
+function monthOpts(sel,keys){const t=cur();sel.innerHTML=keys.map(k=>{const s=tStats(k,t);return '<option value="'+k+'"'+(k===TK?' selected':'')+'>'+esc(keyLabel(k))+' — '+s.rs.short+(s.all.length?' · '+stLabel(s):'')+'</option>';}).join('');}
+function renderTMonth(){const t=cur(),keys=tKeys(t);if(!keys.includes(TK))TK=defKey();monthOpts($('#trMonthSel'),keys);
+  const i=keys.indexOf(TK);$('#trPrev').disabled=i<=0;$('#trNext').disabled=i>=keys.length-1;
+  const s=tStats(TK,t),m=tPeek(TK,t);$('#trMonthTitle').textContent='Fieldwork in '+keyLabel(TK);
+  $('#trMType').innerHTML=opts(FT,m.ftype||t.setup.ftype||'sup');
+  $('#trMRules').innerHTML=rulesLine(s);
+  $('#trNudge').innerHTML=!tName(t)||!t.sups.some(x=>T(x.name))?'<div class="instr"><b>Start with Setup.</b> Enter the trainee and the supervisor on the Setup page; the forms carry both. <button type="button" class="tool" data-go="setup">Open Setup</button></div>':'';
+  const note=$('#trMNote');if(note)note.value=m.note||'';
+  renderEntries();renderTComp();renderAdj();}
+function rulesLine(s){return '<span class="tr-badge'+(s.rs.id==='2027'?' r27':'')+'">'+esc(s.rs.short)+'</span> <b>'+esc(s.rs.name)+'</b>, '+esc(s.rs.when)+' ('+esc(s.rs.src)+').';}
+function entSummary(e,t){const mi=eMin(e),is=eIssues(e,t),sp=tSup(t,e.sup);
+  return '<b>'+esc(wdOf(e.date)+' '+md(e.date))+'</b><span class="tm">'+(e.start?esc(fmtHM(e.start)):'')+(e.end?'–'+esc(fmtHM(e.end)):'')+'</span>'+
+    '<span class="rs-pill">'+(mi==null?'—':hrs(mi)+' h')+'</span>'+
+    '<span class="rs-pill">'+(e.kind==='sup'?'Supervised, '+(e.fmt==='group'?'group'+(num(e.grp)?' of '+num(e.grp):''):'individual'):'Independent')+'</span>'+
+    (e.cat?'<span class="rs-pill">'+esc(lab(CATS,e.cat))+'</span>':'')+
+    (e.obs?'<span class="rs-pill obs">Observed '+eObs(e)+' min</span>':'')+
+    (e.kind==='sup'&&sp?'<span class="rs-pill note">'+esc(sp.name)+'</span>':'')+
+    (is.some(x=>x.lvl==='fail')?'<span class="rs-pill warn">'+esc(is.filter(x=>x.lvl==='fail').length+' to fix')+'</span>':is.some(x=>/^Planned/.test(x.t))?'<span class="rs-pill note">planned</span>':'');}
+function entCard(e,t){const id=esc(e.id),F=f=>'te_'+id+'_'+f,A=f=>'data-tre="'+id+'" data-trf="'+f+'"',sups=t.sups.filter(s=>T(s.name)),is=eIssues(e,t),sup=e.kind==='sup',grp=sup&&e.fmt==='group';
+  return '<details class="rs-contact tr-ent'+(is.some(x=>x.lvl==='fail')?' bad':'')+(e.date>todayISO()?' planned':'')+'" data-teid="'+id+'"'+(trOpen.has(e.id)?' open':'')+'><summary id="'+F('sum')+'_s">'+entSummary(e,t)+'</summary><div class="rs-cbody">'+
+    '<div class="fieldgrid"><div><label for="'+F('date')+'">Date</label><input type="date" id="'+F('date')+'" '+A('date')+' value="'+esc(e.date)+'"></div>'+
+    '<div><label for="'+F('start')+'">Start</label><input type="time" id="'+F('start')+'" '+A('start')+' value="'+esc(e.start)+'"></div>'+
+    '<div><label for="'+F('end')+'">End</label><input type="time" id="'+F('end')+'" '+A('end')+' value="'+esc(e.end)+'"></div>'+
+    '<div><label for="'+F('kind')+'">Hours type</label><select id="'+F('kind')+'" '+A('kind')+'>'+opts(KINDS,e.kind||'ind')+'</select></div>'+
+    '<div><label for="'+F('cat')+'">Activity</label><select id="'+F('cat')+'" '+A('cat')+'>'+opts(CATS,e.cat,true)+'</select></div>'+
+    '<div><label for="'+F('sup')+'">Supervisor</label><select id="'+F('sup')+'" '+A('sup')+'>'+opts(sups.map(s=>[s.id,s.name]),e.sup,true)+'</select></div>'+
+    '<div data-trshow="sup"'+(sup?'':' hidden')+'><label for="'+F('fmt')+'">Supervision</label><select id="'+F('fmt')+'" '+A('fmt')+'>'+opts(FMTS,e.fmt||'indiv')+'</select></div>'+
+    '<div data-trshow="grp"'+(grp?'':' hidden')+'><label for="'+F('grp')+'">Trainees in the group</label><input id="'+F('grp')+'" '+A('grp')+' inputmode="numeric" value="'+esc(e.grp)+'" placeholder="2 to 10"></div>'+
+    '<div><label for="'+F('client')+'">Client code (optional)</label><input id="'+F('client')+'" '+A('client')+' value="'+esc(e.client)+'" autocomplete="off" spellcheck="false" placeholder="a code, not a name"></div></div>'+
+    '<p class="tr-kindnote" id="'+F('kn')+'">'+kindNote(e)+'</p>'+
+    '<div class="rs-chips tr-obsrow"><label class="chip wide"><input type="checkbox" id="'+F('obs')+'" '+A('obs')+(e.obs?' checked':'')+'> The supervisor observed the trainee with a client</label></div>'+
+    '<div class="fieldgrid" data-trshow="obs"'+(e.obs?'':' hidden')+'><div><label for="'+F('obsMin')+'">Minutes of observation (empty: the whole entry)</label><input id="'+F('obsMin')+'" '+A('obsMin')+' inputmode="numeric" value="'+esc(e.obsMin)+'"></div>'+
+    '<div><label for="'+F('obsHow')+'">How</label><select id="'+F('obsHow')+'" '+A('obsHow')+'>'+opts(OBSHOW,e.obsHow,true)+'</select></div>'+
+    '<div><label for="'+F('setting')+'">Setting</label><input id="'+F('setting')+'" '+A('setting')+' value="'+esc(e.setting)+'" autocomplete="off" placeholder="e.g., a simulated elementary classroom"></div></div>'+
+    '<div class="field"><label for="'+F('sumx')+'">'+(sup?'Summary of the supervision activity':'What the trainee did (optional)')+'</label><textarea id="'+F('sumx')+'" '+A('sum')+' rows="2" placeholder="'+(sup?'e.g., reviewed the week’s independent hours; feedback on the preference assessment; progress toward goals':'e.g., graphed and analyzed the week’s data for SIM-0002')+'">'+esc(e.sum)+'</textarea></div>'+
+    '<ul class="issues" id="'+F('is')+'">'+issHTML(is)+'</ul>'+
+    '<div class="rs-cfoot"><span class="hint">Fieldwork type: '+esc(ftName(tPeek(keyOf(e.date),t).ftype||t.setup.ftype))+' (the month&rsquo;s)</span><button type="button" class="tool" data-trdel="'+id+'">Delete this entry</button></div></div></details>';}
+const issHTML=is=>is.map(x=>'<li class="'+x.lvl+'">'+(x.lvl==='fail'?'✕ ':'• ')+esc(x.t)+'</li>').join('');
+function kindNote(e){if(e.kind==='sup')return e.obs?'Observed with feedback in real time: counts as supervised hours, as a contact and as observation (BCBA Handbook, p. 20).':'Supervised hours and one supervisor–trainee contact: a real-time interaction, individual or in a group.';
+  return e.obs?'Observed without feedback in real time (a recording watched later, or watching without feedback): the time counts as independent hours and as observation.':'Independent hours: the supervisor was not present.';}
+function renderEntries(){const t=cur(),L=t.entries.filter(e=>keyOf(e.date)===TK).sort(eSort);
+  $('#trEntries').innerHTML=L.length?L.map(e=>entCard(e,t)).join(''):'<p class="hint">No entries for '+esc(keyLabel(TK))+' yet.</p>';
+  $('#trEntCount').textContent=L.length?L.length+' entr'+(L.length===1?'y':'ies')+' this month':'';}
+const eSort=(a,b)=>String(a.date||'9').localeCompare(String(b.date||'9'))||String(a.start||'').localeCompare(String(b.start||''));
+function refreshEntry(e){const t=cur(),card=document.querySelector('details.tr-ent[data-teid="'+CSS.escape(e.id)+'"]');if(!card)return;const is=eIssues(e,t);
+  const s=card.querySelector('summary');if(s)s.innerHTML=entSummary(e,t);const u=card.querySelector('ul.issues');if(u)u.innerHTML=issHTML(is);
+  card.classList.toggle('bad',is.some(x=>x.lvl==='fail'));card.classList.toggle('planned',e.date>todayISO());
+  const kn=card.querySelector('.tr-kindnote');if(kn)kn.textContent=kindNote(e);
+  card.querySelectorAll('[data-trshow]').forEach(el=>{const w=el.dataset.trshow;el.hidden=w==='sup'?e.kind!=='sup':w==='grp'?!(e.kind==='sup'&&e.fmt==='group'):w==='obs'?!e.obs:false;});
+  const sl=card.querySelector('label[for$="_sumx"]');if(sl)sl.textContent=e.kind==='sup'?'Summary of the supervision activity':'What the trainee did (optional)';}
+function renderTComp(){const t=cur(),s=tStats(TK,t),P=s.rs.pct[s.ft],sg=sigState(TK,t);
+  const fill=s.pct==null?0:Math.min(100,s.pct/(P*2)*100);
+  const verdict={ok:s.ended?'Every requirement is met.':'On track: every requirement is met so far.',pending:s.E.length?'In progress: '+s.checks.filter(c=>c.s==='pending').length+' not met yet.':'Planned entries only, so far.',
+    fail:s.ended?'Short: see the red marks. The supervisor and the trainee decide the hours that go on the form.':'Needs attention: see the red marks.',none:s.ended?'No fieldwork recorded this month.':'Nothing recorded yet.'}[s.status];
+  let other='';
+  if(s.rs.id==='2022'&&s.E.length){const o=tStats(TK,t,'2027');other='<div class="tr-other" id="trOther"><b>Against the 2027 rules</b> (for a trainee who applies on or after January 1, 2027): '+(o.status==='ok'?'met.':o.status==='pending'?'not met yet: ':'short: ')+esc(o.checks.filter(c=>c.s!=='ok').map(c=>c.t.replace(/:.*$/,'').toLowerCase()+' ('+c.d+')').join('; '))+'</div>';}
+  if(s.ft==='sup'&&s.E.length){const c=tStats(TK,t,null,'conc');if(c.status==='ok')other+='<div class="tr-other">This month also meets the concentrated supervised fieldwork requirements.</div>';}
+  if(s.ft==='conc'&&s.E.length&&s.status!=='ok'){const c=tStats(TK,t,null,'sup');if(c.status==='ok')other+='<div class="tr-other">Short of the concentrated requirements; it meets the supervised fieldwork requirements.</div>';}
+  const signLi='<li data-check="sign" data-s="'+(sg.both&&!sg.late&&!sg.changed?'ok':sg.late||sg.changed?'fail':'pending')+'"><span class="rs-ico '+(sg.both&&!sg.late&&!sg.changed?'ok':sg.late||sg.changed?'fail':'pending')+'" aria-hidden="true">'+(sg.both&&!sg.late&&!sg.changed?'✓':sg.late||sg.changed?'✕':'!')+'</span><span class="what">Verification form signed by both<small>'+
+    (sg.changed?'the figures changed after it was signed: sign again':sg.both?'signed '+mdy(sg.lastSig)+(sg.late?', after the deadline of '+mdy(sg.by):''):'sign by '+mdy(sg.by)+(sg.late?': the deadline has passed':''))+'</small></span><span class="tag '+(sg.both&&!sg.late&&!sg.changed?'ok':sg.late||sg.changed?'fail':'pending')+'">'+(sg.both&&!sg.late&&!sg.changed?'signed':sg.late||sg.changed?'see note':'not yet')+'</span></li>';
+  $('#trComp').innerHTML='<div class="rs-comp" id="trCompBox" data-status="'+s.status+'"><h3>'+esc(keyLabel(TK))+'</h3>'+
+    '<div class="tr-other" style="border-top:0"><span class="tr-badge'+(s.rs.id==='2027'?' r27':'')+'">'+esc(s.rs.short)+'</span> '+esc(ftName(s.ft))+'</div>'+
+    '<div class="pctwrap"><div class="pctbig">'+pctTxt(s.pct)+' <small>supervised, of '+P+'% needed</small></div>'+
+    '<div class="rs-bar'+(s.pct!=null&&s.pct>=P-1e-9?' ok':'')+'" role="img" aria-label="'+pctTxt(s.pct)+' supervised against '+P+'%"><i style="width:'+fill.toFixed(1)+'%"></i><b style="left:50%"></b></div>'+
+    '<div class="need">'+(s.tot?hmTxt(s.tot)+' of fieldwork so far'+(s.plannedMin?'; '+hmTxt(s.plannedMin)+' planned':''):'No fieldwork counted yet.')+'</div></div>'+
+    '<ul>'+s.checks.map(c=>'<li data-check="'+c.k+'" data-s="'+c.s+'"><span class="rs-ico '+c.s+'" aria-hidden="true">'+ICO[c.s]+'</span><span class="what">'+esc(c.t)+'<small>'+esc(c.d)+'</small></span><span class="tag '+c.s+'">'+(c.s==='ok'?'met':c.s==='pending'?'not yet':'not met')+'</span></li>').join('')+signLi+'</ul>'+
+    '<div class="verdictline '+(s.status==='none'?'na':s.status)+'" id="trVerdict">'+esc(verdict)+'</div>'+other+
+    '<table aria-label="The month&rsquo;s totals"><tbody>'+
+      '<tr><td>A. Independent hours</td><td class="n" id="trTInd">'+hrs(s.ind)+'</td></tr>'+
+      '<tr><td>B. Supervised hours</td><td class="n" id="trTSup">'+hrs(s.sup)+'</td></tr>'+
+      '<tr><td>&nbsp;&nbsp;individual / group</td><td class="n">'+hrs(s.indiv)+' / '+hrs(s.grp)+'</td></tr>'+
+      '<tr><td>Total fieldwork hours</td><td class="n" id="trTTot">'+hrs(s.tot)+'</td></tr>'+
+      '<tr><td>Supervisor–trainee contacts</td><td class="n" id="trTCon">'+s.contacts+'</td></tr>'+
+      '<tr><td>Observations with a client (minutes)</td><td class="n" id="trTObs">'+s.obsN+' ('+s.obsMin+')</td></tr>'+
+      '<tr><td>Unrestricted this month (60% is across the whole fieldwork)</td><td class="n">'+(s.tot?Math.round(s.unr/s.tot*100)+'%':'—')+'</td></tr>'+
+    '</tbody></table><div class="fine">Amber: not yet, the month is still open. Red: not met after the month ended. '+esc(s.rs.src)+'. <b>Check the current BACB documents before signing.</b></div></div>';}
+function renderAdj(){const t=cur(),s=tStats(TK,t),m=tPeek(TK,t),h=formHours(TK,t,s),rows=adjRows(s);let h1='';
+  if(s.E.length&&s.status==='fail'&&s.ended){
+    if(s.ft==='conc')h1='<p><b>Concentrated hours may not be prorated or adjusted</b> (BCBA Handbook, p. 23).</p>';
+    else if(s.rs.id==='2022'&&rows.length)h1='<p><b>The handbook&rsquo;s adjustments for this month</b> (BCBA Handbook, p. 23). The record keeps every hour accrued; the form takes the adjusted hours. The supervisor and the trainee decide.</p><ul>'+rows.map(r=>'<li><b>'+esc(r.req)+':</b> '+esc(r.adj)+(r.res?' <i>Here: '+esc(r.res)+'.</i>':'')+(r.ind!=null&&rows.length===1?' <button type="button" class="tool" data-tradj="'+r.k+'">Enter these hours below</button>':'')+'</li>').join('')+'</ul>'+(rows.length>1?'<p>More than one applies: work out the hours together and enter them below.</p>':'');
+    else if(s.rs.id==='2027')h1='<p>The handbook&rsquo;s adjustment table (p. 23) is written for the 2022 rules (130 hours, contacts, one observation). For a 2027 month, check the BACB&rsquo;s current documents and enter the hours you agree on below.</p>';}
+  $('#trAdj').innerHTML='<div class="tr-adj">'+h1+'<p>The form takes the month&rsquo;s hours as accrued: independent <b>'+dec2(s.ind)+'</b> h, supervised <b>'+dec2(s.sup)+'</b> h. Leave these empty unless the hours were adjusted.</p>'+
+    '<div class="fieldgrid"><div><label for="trAdjInd">Independent hours for the form</label><input id="trAdjInd" data-trm="adjInd" inputmode="decimal" value="'+esc(m.adjInd||'')+'" placeholder="'+dec2(s.ind)+'"></div>'+
+    '<div><label for="trAdjSup">Supervised hours for the form</label><input id="trAdjSup" data-trm="adjSup" inputmode="decimal" value="'+esc(m.adjSup||'')+'" placeholder="'+dec2(s.sup)+'"></div></div>'+
+    (s.rs.id==='2022'?'<div class="rs-chips"><label class="chip wide"><input type="checkbox" id="trPror" data-trm="prorated"'+(m.prorated?' checked':'')+'> This fieldwork included prorated hours for a partial month (the 2022 form&rsquo;s box)</label></div>':'')+
+    '<p class="hint" id="trAdjNow">On the form: '+hmTxt(h.ind)+' independent, '+hmTxt(h.sup)+' supervised, '+pct2(h.pct)+' supervised'+(h.adj?' (adjusted)':'')+'.</p></div>';}
+
+/* the year: running totals, month by month */
+function totals(t,upto){t=t||cur();const ks=usedKeys(t).filter(k=>!upto||k<=upto);const o={sup:{ind:0,sup:0},conc:{ind:0,sup:0},unr:0,res:0,obsMin:0,months:{ok:0,fail:0,open:0},ks,signed:0,unsigned:[],short:[]};
+  ks.forEach(k=>{const s=tStats(k,t),h=formHours(k,t,s),b=o[s.ft]||o.sup;b.ind+=s.ind;b.sup+=s.sup;o.unr+=s.unr;o.res+=s.res;o.obsMin+=s.obsMin;
+    if(s.open)o.months.open++;else if(s.status==='ok')o.months.ok++;else if(s.E.length)o.months.fail++;
+    const g=sigState(k,t);if(g.both)o.signed++;else if(s.ended&&s.E.length)o.unsigned.push(k);if(s.ended&&s.status==='fail')o.short.push(k);});
+  o.supT=o.sup.ind+o.sup.sup;o.concT=o.conc.ind+o.conc.sup;o.all=o.supT+o.concT;o.est=o.supT+o.concT*MULT;
+  o.first=ks[0]||'';o.until=o.first?addKey(o.first,59):'';o.after=o.first?ks.filter(k=>k>o.until):[];return o;}
+function renderTYear(){const t=cur(),o=totals(t),M=(lbl,val,sub,cls)=>'<div class="metric'+(cls?' '+cls:'')+'"><b>'+lbl+'</b><div class="val">'+val+'</div><div class="sub">'+sub+'</div></div>';
+  const mixed=o.supT&&o.concT,unrP=o.all?o.unr/o.all*100:null;
+  $('#trMetrics').innerHTML=M('Fieldwork hours',hrs(o.all),hmTxt(o.all)+' counted, '+o.ks.length+' month'+(o.ks.length===1?'':'s'))+
+    M('Supervised fieldwork',hrs(o.supT),'of 2,000 hours ('+Math.min(100,o.supT/60/NEED.sup*100).toFixed(1)+'%)')+
+    M('Concentrated fieldwork',hrs(o.concT),'of 1,500 hours ('+Math.min(100,o.concT/60/NEED.conc*100).toFixed(1)+'%)')+
+    (mixed?M('Combined estimate',fmtN(o.est/60),'supervised + 1.33 × concentrated, of 2,000 (an estimate only)'):'')+
+    M('Unrestricted',unrP==null?'—':Math.round(unrP)+'%','at least 60% across the whole fieldwork',unrP==null?'':unrP>=UNR?'m-ok':'m-mid')+
+    M('Supervised hours',hrs(o.sup.sup+o.conc.sup),'of '+hrs(o.all)+' fieldwork hours')+
+    M('Observation',o.obsMin+' min','with a client, all months')+
+    M('Months',o.months.ok+' met',o.months.fail+' short, '+o.months.open+' open; '+o.signed+' signed',o.months.fail?'m-no':'')+
+    M('Five years',o.first?keyLabel(o.first):'—',o.first?'complete by the end of '+keyLabel(o.until):'from the first month with fieldwork',o.after.length?'m-no':'');
+  $('#trTotNote').innerHTML='Counted hours as entered (the record keeps every hour accrued). The forms record actual hours; the 1.33 multiplier only estimates progress for mixed fieldwork (BCBA Handbook, p. 15). '+(o.unsigned.length?'<b>Not signed by both:</b> '+o.unsigned.map(keyLabel).join(', ')+'. ':'')+(o.after.length?'<b>After the five years:</b> '+o.after.map(keyLabel).join(', ')+'. ':'')+'<b>Check the current BACB documents before signing.</b>';
+  const ysel=$('#trYearSel'),yrs=yearsOf(t),v=ysel.value&&(ysel.value==='all'||yrs.includes(+ysel.value))?ysel.value:String(yrs.includes(schoolYearOf(new Date()))?schoolYearOf(new Date()):yrs[yrs.length-1]);
+  ysel.innerHTML=yrs.map(y=>'<option value="'+y+'"'+(String(y)===v?' selected':'')+'>School year '+y+'–'+String(y+1).slice(2)+'</option>').join('')+'<option value="all"'+(v==='all'?' selected':'')+'>Every month of the fieldwork</option>';
+  $('#trYearTbl').innerHTML=yearTable(t,periodKeys(t,ysel.value),false);}
+function yearsOf(t){const s=new Set([schoolYearOf(new Date())]);usedKeys(t).forEach(k=>{const [y,m]=k.split('-').map(Number);s.add(m>=8?y:y-1);});return [...s].sort((a,b)=>a-b);}
+function periodKeys(t,v){if(v==='all'){const u=usedKeys(t);return u.length?(()=>{const o=[];for(let k=u[0];k<=u[u.length-1];k=addKey(k,1))o.push(k);return o;})():[];}return yearKeys(+v||schoolYearOf(new Date()));}
+function yearTable(t,ks,paper){const rows=ks.map(k=>{const s=tStats(k,t),g=sigState(k,t),h=formHours(k,t,s),obs=s.rs.obsMin?s.obsMin+' min':s.obsN+(s.obsMin?' ('+s.obsMin+' min)':'');
+    const st=s.status==='none'?'—':(s.status==='ok'?(s.open?'on track':'met'):s.status==='fail'?'short':'in progress');
+    return '<tr'+(paper?'':' class="open" data-trmonth="'+k+'"')+'><td>'+(paper?esc(keyLabel(k)):'<button type="button" class="tr-yrbtn" data-trmonth="'+k+'">'+esc(keyLabel(k))+'</button>')+'</td><td>'+s.rs.id+'</td><td>'+(s.all.length?(s.ft==='conc'?'Concentrated':'Supervised'):'')+'</td><td class="num">'+(s.tot?hrs(s.tot):'—')+'</td><td class="num">'+(s.tot?hrs(s.sup):'—')+'</td><td class="num">'+(s.tot?pctTxt(s.pct):'—')+'</td><td class="num">'+(s.rs.contacts&&s.all.length?s.contacts:'—')+'</td><td class="num">'+(s.tot?obs:'—')+'</td><td class="num">'+(s.sup?Math.round(s.indiv/s.sup*100)+'%':'—')+'</td><td>'+st+'</td><td>'+(g.both?mdy(g.lastSig)+(g.late?' (late)':'')+(g.changed?' (changed since)':''):s.ended&&s.E.length?'not signed':'')+(h.adj?'; form: '+hrs(h.tot)+' h':'')+'</td></tr>';});
+  const now=keyOf(todayISO()),endK=ks.filter(k=>k<=now).slice(-1)[0]||ks[ks.length-1],o=totals(t,endK),sel=ks.filter(k=>usedKeys(t).includes(k)),sum=sel.reduce((a,k)=>{const s=tStats(k,t);a.tot+=s.tot;a.sup+=s.sup;a.obs+=s.obsMin;return a;},{tot:0,sup:0,obs:0});
+  return '<thead><tr><th>Month</th><th>Rules</th><th>Type</th><th>Fieldwork h</th><th>Supervised h</th><th>% supervised</th><th>Contacts</th><th>Observation</th><th>Individual</th><th>Status</th><th>Form signed</th></tr></thead><tbody>'+rows.join('')+
+    '<tr class="tot"><td>These months</td><td></td><td></td><td class="num">'+hrs(sum.tot)+'</td><td class="num">'+hrs(sum.sup)+'</td><td class="num">'+(sum.tot?pctTxt(sum.sup/sum.tot*100):'—')+'</td><td></td><td class="num">'+sum.obs+' min</td><td></td><td></td><td></td></tr>'+
+    (ks.length?'<tr class="tot"><td>Running total to '+esc(keyLabel(endK))+'</td><td></td><td></td><td class="num">'+hrs(o.all)+'</td><td class="num">'+hrs(o.sup.sup+o.conc.sup)+'</td><td class="num">'+(o.all?pctTxt((o.sup.sup+o.conc.sup)/o.all*100):'—')+'</td><td></td><td class="num">'+o.obsMin+' min</td><td></td><td colspan="2">'+(o.all?Math.round(o.unr/o.all*100)+'% unrestricted':'')+'</td></tr>':'')+'</tbody>';}
+document.addEventListener('click',e=>{if(!isTr())return;const b=e.target.closest&&e.target.closest('[data-trmonth]');if(!b)return;TK=b.dataset.trmonth;setView('month');});
+document.addEventListener('keydown',e=>{if(!isTr()||e.key!=='Enter')return;const r=e.target.closest&&e.target.closest('tr[data-trmonth]');if(r&&e.target===r){TK=r.dataset.trmonth;setView('month');}});
+$('#trYearSel').addEventListener('change',()=>{$('#trYearTbl').innerHTML=yearTable(cur(),periodKeys(cur(),$('#trYearSel').value),false);});
+
+/* ---------------- the verification form, in the order of the BACB's form ---------------- */
+const sigImg=v=>v&&/^data:image\/png;base64,/.test(v)?'<img src="'+v+'" alt="signature">':'';
+const sigHow=(g,w)=>g[w+'_img']&&g[w+'_how']?'<div class="f-how">Signed electronically: '+(g[w+'_how']==='typed'?'typed name adopted as the signature':'drawn on the screen')+(g[w+'_at']?', '+esc(at2(g[w+'_at'])):'')+'</div>':'';
+const box=on=>'<span class="f-box" aria-hidden="true">'+(on?'✕':'')+'</span>';
+function att(ver,org,final){if(final&&ver==='2027')return ['Information presented on this Final Fieldwork Verification Form and the corresponding Monthly Fieldwork Verification Forms is true and correct to the best of my knowledge.','The trainee completed the fieldwork in compliance with all relevant fieldwork requirements, including adherence to the BACB’s ethics requirements.'].concat(org?['All supervisors, including the responsible supervisor, met BACB supervision requirements during these fieldwork hours.','I am the responsible supervisor designated in the signed supervision contract with this trainee and have been qualified to supervise for the entirety of the fieldwork indicated on this Final Fieldwork Verification form.']:['I am the supervisor designated in the signed supervision contract with this trainee and have been qualified to supervise for the entirety of the fieldwork indicated on this Final Fieldwork Verification form.']);
+  if(final)return ['Information presented on this Final Fieldwork Verification Form and the corresponding Monthly Fieldwork Verification Forms is true and correct to the best of my knowledge.','The trainee completed the fieldwork '+(org?'':'under my supervision ')+'in compliance with all relevant Fieldwork Requirements (BCBA/BCaBA) including, but not limited to; the minimum number of contacts per month, required amounts of unrestricted activities, required observations each month with clients, and adherence to the BACB’s ethics requirements.'].concat(org?['All supervisors, including the responsible supervisor, met BACB supervision requirements during these experience hours.','I am the responsible supervisor designated in the signed supervision contract with this trainee.']:['I am the supervisor designated in the signed supervision contract with this trainee.','I completed the 8-hour supervision training prior to the onset of fieldwork.']);
+  if(ver==='2027')return ['The information contained in this form is true and correct to the best of our knowledge.','The trainee completed the fieldwork in compliance with all relevant fieldwork requirements, including adherence to the BACB’s ethics requirements.'];
+  return ['The information contained on this form is true and correct to the best of our knowledge;'].concat(org?['All supervisors, including the responsible supervisor, met BACB supervision requirements during this month;']:[]).concat(['The required number of supervisory contacts occurred during this month;','Observation of the trainee with a client occurred during this supervisory period with a frequency appropriate for this fieldwork type;','The trainee was supervised for the required amount of time for this supervisory period;','We have read and understand the most recent version of the Fieldwork Requirements (BCBA/BCaBA)','We are only including appropriate behavior-analytic activities in our totals listed above; and','The fieldwork hours obtained during this supervisory period are otherwise compliant with the Fieldwork Requirements (BCBA/BCaBA)']);}
+function wsLine(kind,ver,org){return 'Prepared with Form RS-1 from the record&rsquo;s entries, in the order of the BACB&rsquo;s '+kind+' Fieldwork Verification Form ('+(org?'Multiple Supervisors at One Organization':'Individual Supervisor')+', '+ver+' Fieldwork Requirements). It is not the BACB&rsquo;s form: the BACB accepts only its own current forms (BCBA Handbook, p. 22). Enter these figures on the BACB&rsquo;s form; keep this page with the record.';}
+function mfvfHTML(k,ver,t){t=t||cur();const st=t.setup,s=tStats(k,t),h=formHours(k,t,s),g=tPeek(k,t).sig||{},org=st.structure==='org',sp=respSup(t),sg=sigState(k,t),m=tPeek(k,t);
+  const H=mi=>{const x=hm2(mi);return '<span class="f-v s">'+x.h+'</span> <span class="f-l n">hh</span> <span class="f-v s">'+pad2(x.m)+'</span> <span class="f-l n">mm</span>';};
+  const flags=[];if(s.status==='fail'&&s.ended)flags.push('This month is short of the '+esc(s.rs.short)+': '+esc(s.checks.filter(c=>c.s==='fail').map(c=>c.t.replace(/:.*$/,'').toLowerCase()).join('; '))+'.'+(h.adj?' The hours below were adjusted.':' The hours below are as accrued.'));
+  if(ver!==s.rs.id)flags.push('This month falls under the '+esc(s.rs.short)+'; this is the '+ver+' form, for a trainee who applies '+(ver==='2027'?'on or after':'before')+' January 1, 2027.'+(ver==='2027'&&s.rs.id==='2022'?(()=>{const o=tStats(k,t,'2027');return o.status==='ok'?' The month meets the 2027 rules.':' Against the 2027 rules: '+o.checks.filter(c=>c.s!=='ok').map(c=>c.t.replace(/:.*$/,'').toLowerCase()).join('; ')+'.';})():''));
+  if(sg.changed)flags.push('The figures changed after this form was signed: sign it again.');
+  if(s.planned.length)flags.push(s.planned.length+' planned entr'+(s.planned.length===1?'y is':'ies are')+' not counted.');
+  return '<div class="tr-fvf" data-ver="'+ver+'"><div class="f-top"><div><div class="f-title">MONTHLY | FIELDWORK VERIFICATION FORM</div><div class="f-sub">'+(org?'MULTIPLE SUPERVISORS AT ONE ORGANIZATION':'INDIVIDUAL SUPERVISOR')+'</div><div class="f-req">'+ver+' Fieldwork Requirements</div></div><div class="f-ws">'+wsLine('Monthly',ver,org)+'</div></div>'+
+    '<p class="f-ins"><b>Instructions:</b> '+(ver==='2027'?'Please complete one form per '+(org?'organization':'supervisor')+'. Complete this form in its entirety for consideration. Incomplete documents will result in fieldwork hours from the month being lost.':'Please complete one form per '+(org?'organization':'supervisor')+', per fieldwork type. Complete this form in its entirety for consideration. Incomplete documents will not be accepted.')+' The Monthly Fieldwork Verification Form must be signed by the last day of the calendar month following the month of supervision. Both parties must retain a copy of this form for at least 7 years. Do not submit this form to the BACB unless requested.</p>'+
+    flags.map(f=>'<div class="f-flag">'+f+'</div>').join('')+
+    '<div class="f-band"><div class="f-row"><span class="f-l">Trainee Name:</span><span class="f-v">'+esc(st.name||'')+'</span></div>'+
+    '<div class="f-row"><span class="f-l">BACB ID #:</span><span class="f-v">'+esc(st.bacb||'')+'</span><span class="f-l">Month/Year:</span><span class="f-v">'+esc(k.slice(5)+'/'+k.slice(0,4))+'</span></div>'+
+    (ver==='2022'?'<div class="f-row"><span class="f-l n">Fieldwork Type (Select One):</span><span class="f-l n">'+box(s.ft==='sup')+'Supervised Fieldwork</span><span class="f-l n">'+box(s.ft==='conc')+'Concentrated Supervised Fieldwork</span></div>':'')+
+    '<div class="f-row"><span class="f-l n">State Where Fieldwork Occurred:</span><span class="f-v">'+esc(st.state||'')+'</span><span class="f-l n">Country Where Fieldwork Occurred:</span><span class="f-v">'+esc(st.country||'')+'</span></div></div>'+
+    '<div class="f-row"><span class="f-l n">'+(org?'Responsible Supervisor Name:':'Supervisor Name:')+'</span><span class="f-v">'+esc(sp?sp.name:'')+'</span></div>'+
+    '<div class="f-row"><span class="f-l n">Certification # or BACB ID #:</span><span class="f-v" style="flex:0 1 240px">'+esc(sp?sp.cert:'')+'</span></div>'+
+    '<h5>Fieldwork Hours (this month only)</h5>'+
+    (ver==='2027'?'<div class="f-row"><span class="f-l n">A. Independent Hours <i>(supervisor not present)</i>:</span>'+H(h.ind)+'</div><div class="f-row"><span class="f-l n">B. Supervised Hours <i>(supervisor present)</i>:</span>'+H(h.sup)+'</div>'+
+      '<div class="f-row"><span class="f-l n">These fieldwork hours include</span>'+H(s.obsMin)+'<span class="f-l n">of observation</span></div>'+
+      '<div class="f-tot"><div class="f-row"><span class="f-l">Total Fieldwork Hours <small>(add A &amp; B)</small>:</span>'+H(h.tot)+'</div><div class="f-row"><span class="f-l">Percentage of Hours Supervised <small>(supervised/total)</small>:</span><span class="f-v m">'+pct2(h.pct)+'</span></div></div>'
+     :'<div class="f-row"><span class="f-l n">A. Independent Hours <i>(supervisor not present)</i>:</span><span class="f-v m">'+dec2(h.ind)+'</span></div><div class="f-row"><span class="f-l n">B. Supervised Hours <i>(supervisor present)</i>:</span><span class="f-v m">'+dec2(h.sup)+'</span></div>'+
+      '<div class="f-row"><span class="f-l n">'+box(!!m.prorated)+'This fieldwork included prorated hours for a partial month.</span></div>'+
+      '<div class="f-tot"><div class="f-row"><span class="f-l">Total Fieldwork Hours <small>(add A &amp; B)</small>:</span><span class="f-v m">'+dec2(h.tot)+'</span></div><div class="f-row"><span class="f-l">Percent of Hours Supervised <small>(supervised/total)</small>:</span><span class="f-v m">'+pct2(h.pct)+'</span></div></div>')+
+    '<div class="f-keep"><h5>'+(org?'Responsible Supervisor and Trainee Attestation':'Supervisor and Trainee Attestation')+'</h5><p class="f-att">By signing below, we hereby attest that:</p><ul class="f-att">'+att(ver,org,false).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+
+    '<div class="f-sig"><span class="f-l">Supervisor Signature:</span><span class="f-v">'+sigImg(g.sup_img)+'</span><span class="f-l">Date:</span><span class="f-v f-d">'+esc(mdy(g.sup_date))+'</span></div>'+(T(g.sup_name)?'<div class="f-how">'+esc(g.sup_name)+'</div>':'')+sigHow(g,'sup')+
+    '<div class="f-sig"><span class="f-l">Trainee Signature:</span><span class="f-v">'+sigImg(g.tr_img)+'</span><span class="f-l">Date:</span><span class="f-v f-d">'+esc(mdy(g.tr_date))+'</span></div>'+(T(g.tr_name)?'<div class="f-how">'+esc(g.tr_name)+'</div>':'')+sigHow(g,'tr')+'</div>'+
+    '<div class="f-foot">The Monthly Fieldwork Verification Form must be signed by the last day of the calendar month following the month of supervision (here, by '+esc(mdy(sg.by))+'). This document must be signed in accordance with the Acceptable Signatures Policy. SUPERVISOR AND TRAINEE MUST EACH RETAIN A COPY OF THIS FORM FOR AT LEAST 7 YEARS.<br>Form RS-1 &middot; '+esc(keyLabel(k))+' &middot; '+esc(s.rs.name)+' ('+esc(s.rs.src)+'). Check the current BACB documents before signing.</div></div>';}
+function formVers(k,t){const m=tPeek(k,t),own=rsOf(k).id;if(own==='2027')return ['2027'];const v=m.form;return v==='2027'?['2027']:v==='both'?['2022','2027']:['2022'];}
+/* the month's record: what the documentation system keeps (BCBA Handbook, p. 21), with the month's check */
+function logHTML(k,t){t=t||cur();const s=tStats(k,t),st=t.setup,L=s.all.slice().sort(eSort),sg=sigState(k,t),m=tPeek(k,t);
+  return '<div class="p-inner"><div class="p-title">Fieldwork Record: '+esc(keyLabel(k))+'</div>'+
+    '<div class="p-head"><div><b>Trainee</b>'+esc(st.name||'')+'</div><div><b>BACB ID</b>'+esc(st.bacb||'')+'</div><div><b>Month</b>'+esc(keyLabel(k))+'</div>'+
+    '<div><b>Fieldwork type</b>'+esc(ftName(s.ft))+'</div><div><b>Rules</b>'+esc(s.rs.name)+'</div><div><b>Structure</b>'+(st.structure==='org'?'Multiple supervisors at one organization':'Individual supervisor')+'</div>'+
+    '<div style="grid-column:1/-1"><b>Supervisors</b>'+esc(t.sups.filter(x=>T(x.name)).map(x=>x.name+(x.cert?' ('+x.cert+')':'')+(st.structure==='org'&&x.resp?', responsible supervisor':'')+(isoD(x.trained)?', 8-hour supervision training '+mdy(x.trained):'')+(T(x.consult)?', consulting supervisor '+x.consult:'')).join('; '))+'</div>'+
+    (T(st.org)?'<div style="grid-column:1/-1"><b>Organization</b>'+esc(st.org)+'</div>':'')+'</div>'+
+    '<h4>Entries</h4>'+(L.length?'<table class="p-t"><thead><tr><th style="width:11%">Date</th><th style="width:11%">Time</th><th style="width:6%">Hours</th><th style="width:12%">Hours type</th><th style="width:10%">Activity</th><th style="width:11%">Supervisor</th><th style="width:12%">Observation</th><th>Summary</th></tr></thead><tbody>'+
+      L.map(e=>{const mi=eMin(e),sp=tSup(t,e.sup),is=eIssues(e,t).filter(x=>x.lvl==='fail');return '<tr'+(e.date>todayISO()?' class="none"':'')+'><td>'+esc(wdOf(e.date)+' '+mdy(e.date))+'</td><td>'+esc(fmtHM(e.start))+(e.end?'–'+esc(fmtHM(e.end)):'')+'</td><td class="n">'+(mi==null?'—':hrs(mi))+'</td><td>'+(e.kind==='sup'?'Supervised, '+(e.fmt==='group'?'group'+(num(e.grp)?' of '+num(e.grp):''):'individual'):'Independent')+'</td><td>'+esc(lab(CATS,e.cat))+'</td><td>'+esc(sp?sp.name:'')+'</td><td>'+(e.obs?eObs(e)+' min'+(e.obsHow?', '+esc(lab(OBSHOW,e.obsHow).toLowerCase()):'')+(T(e.setting)?'; '+esc(e.setting):''):'')+'</td><td>'+esc(e.sum||'')+(T(e.client)?' <small>('+esc(e.client)+')</small>':'')+(e.date>todayISO()?' <i>(planned, not counted)</i>':'')+(is.length?' <b class="p-no">Not counted or flagged: '+esc(is.map(x=>x.t).join(' '))+'</b>':'')+'</td></tr>';}).join('')+'</tbody></table>':'<p class="p-empty">No entries recorded.</p>')+
+    '<div class="p-keep"><h4>The month against the '+esc(s.rs.short)+'</h4><div class="p-two"><table class="p-t"><tbody>'+
+      '<tr><td>A. Independent hours</td><td class="n">'+hrs(s.ind)+'</td></tr><tr><td>B. Supervised hours (individual / group)</td><td class="n">'+hrs(s.sup)+' ('+hrs(s.indiv)+' / '+hrs(s.grp)+')</td></tr><tr><td>Total fieldwork hours</td><td class="n">'+hrs(s.tot)+'</td></tr>'+
+      '<tr><td>Percent supervised</td><td class="n">'+pctTxt(s.pct)+'</td></tr><tr><td>Supervisor–trainee contacts</td><td class="n">'+s.contacts+'</td></tr><tr><td>Observations with a client (minutes)</td><td class="n">'+s.obsN+' ('+s.obsMin+')</td></tr><tr><td>Unrestricted / restricted</td><td class="n">'+hrs(s.unr)+' / '+hrs(s.res)+'</td></tr></tbody></table>'+
+      '<table class="p-t"><tbody>'+s.checks.map(c=>'<tr><td>'+esc(c.t)+'</td><td class="n">'+(c.s==='ok'?'<span class="p-ok">✓ met</span>':c.s==='fail'?'<span class="p-no">✕ not met</span>':'<span class="p-mid">not yet</span>')+'</td></tr>').join('')+
+      '<tr><td><b>The month</b></td><td class="n"><b>'+(s.status==='ok'?'<span class="p-ok">'+(s.open?'on track':'✓ met')+'</span>':s.status==='fail'?'<span class="p-no">✕ short</span>':s.status==='pending'?'<span class="p-mid">in progress</span>':'no fieldwork')+'</b></td></tr>'+
+      '<tr><td>Verification form</td><td class="n">'+(sg.both?'signed '+esc(mdy(sg.lastSig))+(sg.late?' (after '+esc(mdy(sg.by))+')':''):'sign by '+esc(mdy(sg.by)))+'</td></tr></tbody></table></div>'+
+      (formHours(k,t,s).adj?'<p style="margin:4px 0 0"><b>Hours on the form, adjusted:</b> independent '+dec2(formHours(k,t,s).ind)+' h, supervised '+dec2(formHours(k,t,s).sup)+' h.</p>':'')+
+      (s.rs.id==='2022'&&s.E.length?(()=>{const o=tStats(k,t,'2027');return '<p style="margin:2px 0 0"><b>Against the 2027 rules:</b> '+(o.status==='ok'?'met.':esc(o.checks.filter(c=>c.s!=='ok').map(c=>c.t.replace(/:.*$/,'').toLowerCase()+' ('+c.d+')').join('; '))+'.')+'</p>';})():'')+
+      (T(m.note)?'<p style="margin:2px 0 0"><b>Notes:</b> '+esc(m.note)+'</p>':'')+'</div>'+
+    '<p class="p-att" style="margin-top:8px">'+CODE.replace(/<b>.*<\/b>/,'')+' Keep this record and the signed forms for at least seven years; the BACB may ask for them (BCBA Handbook, pp. 21&ndash;22).</p>'+
+    '<div class="p-foot"><span>'+esc(s.rs.src)+'. Check the current BACB documents before signing.</span><span>Form RS-1 &middot; trainee record &middot; '+esc(keyLabel(k))+'</span></div></div>';}
+function yearOutHTML(t,v){t=t||cur();const ks=periodKeys(t,v),st=t.setup,now=keyOf(todayISO()),endK=ks.filter(k=>k<=now).slice(-1)[0]||ks[ks.length-1],o=totals(t,endK);const unr=o.all?Math.round(o.unr/o.all*100):null;
+  return '<div class="p-inner"><div class="p-title">Fieldwork Year Summary: '+(v==='all'?'every month of the fieldwork':'school year '+esc(v)+'–'+esc(String(+v+1)))+'</div>'+
+    '<div class="p-head"><div><b>Trainee</b>'+esc(st.name||'')+'</div><div><b>BACB ID</b>'+esc(st.bacb||'')+'</div><div><b>Structure</b>'+(st.structure==='org'?'Multiple supervisors':'Individual supervisor')+'</div>'+
+    '<div style="grid-column:1/-1"><b>Supervisors</b>'+esc(t.sups.filter(x=>T(x.name)).map(x=>x.name+(x.cert?' ('+x.cert+')':'')).join('; '))+'</div></div>'+
+    '<h4>Month by month</h4><table class="p-t tr-year-t">'+yearTable(t,ks,true)+'</table>'+
+    '<div class="p-keep"><h4>Running totals'+(endK?' to '+esc(keyLabel(endK)):'')+'</h4><table class="p-t"><tbody>'+
+      '<tr><td>Supervised fieldwork hours (of 2,000)</td><td class="n">'+hrs(o.supT)+'</td><td>Concentrated supervised fieldwork hours (of 1,500)</td><td class="n">'+hrs(o.concT)+'</td></tr>'+
+      (o.supT&&o.concT?'<tr><td colspan="3">Combined estimate: supervised + 1.33 &times; concentrated, of 2,000 (an estimate; the forms record actual hours, BCBA Handbook p. 15)</td><td class="n">'+(o.est/60).toFixed(1)+'</td></tr>':'')+
+      '<tr><td>Unrestricted share of all hours (at least 60%)</td><td class="n">'+(unr==null?'—':unr+'%')+'</td><td>Observation with a client</td><td class="n">'+o.obsMin+' min</td></tr>'+
+      '<tr><td>Months met / short / open</td><td class="n">'+o.months.ok+' / '+o.months.fail+' / '+o.months.open+'</td><td>Months with both signatures</td><td class="n">'+o.signed+'</td></tr>'+
+      '<tr><td>Five years from the first month</td><td colspan="3">'+(o.first?esc(keyLabel(o.first))+' to the end of '+esc(keyLabel(o.until)):'—')+(o.after.length?' <b class="p-no">Months after: '+esc(o.after.map(keyLabel).join(', '))+'</b>':'')+'</td></tr></tbody></table></div>'+
+    '<p class="p-att">'+docsLine()+'</p><p class="p-att">'+CODE.replace(/<b>.*<\/b>/,'')+'</p>'+
+    '<div class="p-foot"><span>Check the current BACB documents before signing.</span><span>Form RS-1 &middot; trainee year summary</span></div></div>';}
+/* the final verification: the hours of the signed months in the span, by fieldwork type, as the BACB's final form asks */
+function finDefTo(u){const now=keyOf(todayISO()),e=u.filter(k=>k<now);return e[e.length-1]||u[u.length-1]||'';}
+function finalHTML(t){t=t||cur();const st=t.setup,f=t.final||{},u=usedKeys(t),a=keyS(f.from)||u[0]||'',b=keyS(f.to)||finDefTo(u),ver=f.ver==='2027'||f.ver==='2022'?f.ver:(todayISO()>='2027-01-01'?'2027':'2022'),org=st.structure==='org',sp=respSup(t),g=f.sig||{};
+  const ks=u.filter(k=>k>=a&&k<=b),by={sup:{ind:0,sup:0,n:0},conc:{ind:0,sup:0,n:0}},short=[],unsigned=[],open=[],late=[];let pror=false;
+  ks.forEach(k=>{const s=tStats(k,t),h=formHours(k,t,s),x=by[s.ft]||by.sup,g=sigState(k,t);if(s.open){open.push(k);return;}if(!g.both){unsigned.push(k);return;}if(g.late){late.push(k);return;}if(s.status!=='ok')short.push(k);x.ind+=h.ind;x.sup+=h.sup;x.n++;if(tPeek(k,t).prorated)pror=true;});
+  const col=x=>{const tot=x.ind+x.sup;return {i:x.ind,s:x.sup,t:tot,p:tot?x.sup/tot*100:null};},A=col(by.sup),C=col(by.conc);
+  const H=mi=>{const x=hm2(mi);return x.h+' hh '+pad2(x.m)+' mm';};
+  const type=by.sup.n&&by.conc.n?'mixed':by.conc.n?'conc':'sup';
+  return '<div class="tr-fvf" data-final="'+ver+'"><div class="f-top"><div><div class="f-title">FINAL | FIELDWORK VERIFICATION FORM</div><div class="f-sub">'+(org?'MULTIPLE SUPERVISORS AT ONE ORGANIZATION':'INDIVIDUAL SUPERVISOR')+'</div><div class="f-req">'+ver+' Fieldwork Requirements</div></div><div class="f-ws">'+wsLine('Final',ver,org)+'</div></div>'+
+    '<p class="f-ins"><b>Instructions:</b> Please complete one form per '+(org?'organization':'supervisor')+'. Complete this form in its entirety for consideration. Incomplete documents will not be accepted.'+(ver==='2027'?' Both parties must retain a copy of this form for at least 7 years. Do not submit this form to the BACB unless requested.':'')+'</p>'+
+    (unsigned.length?'<div class="f-flag">Not counted, no monthly form signed by both: '+esc(unsigned.map(keyLabel).join(', '))+'.</div>':'')+
+    (open.length?'<div class="f-flag">Not counted, the month is still open: '+esc(open.map(keyLabel).join(', '))+'.</div>':'')+
+    (late.length?'<div class="f-flag">Not counted, the monthly form was signed after the last day of the following month (BCBA Handbook, p. 23: no hours are eligible): '+esc(late.map(keyLabel).join(', '))+'.</div>':'')+
+    (short.length?'<div class="f-flag">Signed but short of a requirement: '+esc(short.map(keyLabel).join(', '))+'; counted with the hours on their forms.</div>':'')+
+    '<div class="f-band"><div class="f-row"><span class="f-l">Trainee Name:</span><span class="f-v">'+esc(st.name||'')+'</span></div>'+
+    '<div class="f-row"><span class="f-l">BACB ID #:</span><span class="f-v">'+esc(st.bacb||'')+'</span><span class="f-l n">Start Date (MM/YYYY):</span><span class="f-v m">'+(a?esc(a.slice(5)+'/'+a.slice(0,4)):'')+'</span><span class="f-l n">End Date (MM/YYYY):</span><span class="f-v m">'+(b?esc(b.slice(5)+'/'+b.slice(0,4)):'')+'</span></div>'+
+    (ver==='2022'?'<div class="f-row"><span class="f-l n">'+box(pror)+'This fieldwork included prorated hours for partial months.</span></div>':'')+
+    '<div class="f-row"><span class="f-l n">State Where Fieldwork Occurred:</span><span class="f-v">'+esc(st.state||'')+'</span><span class="f-l n">Country Where Fieldwork Occurred:</span><span class="f-v">'+esc(st.country||'')+'</span></div></div>'+
+    (org?'<h5>Supervisors Who Provided Supervision at the Organization</h5>'+t.sups.filter(x=>T(x.name)).map(x=>'<div class="f-row"><span class="f-l n">Supervisor Name:</span><span class="f-v">'+esc(x.name)+'</span><span class="f-l n">Certification # or BACB ID #:</span><span class="f-v">'+esc(x.cert||'')+'</span></div>').join(''):'')+
+    (ver==='2022'?'<div class="f-row"><span class="f-l n">Fieldwork Type (Select One):</span><span class="f-l n">'+box(type==='sup')+'Supervised Fieldwork</span><span class="f-l n">'+box(type==='conc')+'Concentrated Supervised Fieldwork</span><span class="f-l n">'+box(type==='mixed')+'Mixed</span></div>'+
+      '<div class="f-row"><span class="f-l n">Total Months of Supervised Fieldwork Obtained:</span><span class="f-v s">'+by.sup.n+'</span><span class="f-l n">Total Months of Concentrated Supervised Fieldwork Obtained:</span><span class="f-v s">'+by.conc.n+'</span></div>':'')+
+    '<h5>Fieldwork Hours</h5><p class="f-ins">Report actual hours completed (i.e., do not use the multiplier for concentrated supervised fieldwork).</p>'+
+    '<div class="f-cols"><span></span><span class="h">Supervised Fieldwork Hours</span><span class="h">Concentrated Supervised Fieldwork Hours'+(ver==='2027'?' (without multiplier)':'')+'</span>'+
+      '<span>'+(ver==='2027'?'Independent Hours (supervisor not present)':'A. Independent Hours (supervisor not present):')+'</span><span class="c">'+(by.sup.n?(ver==='2027'?H(A.i):dec2(A.i)):'')+'</span><span class="c">'+(by.conc.n?(ver==='2027'?H(C.i):dec2(C.i)):'')+'</span>'+
+      '<span>'+(ver==='2027'?'Supervised Hours (supervisor present)':'B. Supervised Hours (supervisor present):')+'</span><span class="c">'+(by.sup.n?(ver==='2027'?H(A.s):dec2(A.s)):'')+'</span><span class="c">'+(by.conc.n?(ver==='2027'?H(C.s):dec2(C.s)):'')+'</span>'+
+      '<span><b>Total Fieldwork Hours</b> (add A &amp; B)</span><span class="c">'+(by.sup.n?(ver==='2027'?H(A.t):dec2(A.t)):'')+'</span><span class="c">'+(by.conc.n?(ver==='2027'?H(C.t):dec2(C.t)):'')+'</span>'+
+      '<span><b>% of Hours Supervised</b></span><span class="c">'+(by.sup.n?pct2(A.p):'')+'</span><span class="c">'+(by.conc.n?pct2(C.p):'')+'</span></div>'+
+    '<div class="f-keep"><h5>'+(org?'Responsible Supervisor and Trainee Attestation':'Supervisor and Trainee Attestation')+'</h5>'+
+    '<div class="f-row"><span class="f-l n">Supervisor Name:</span><span class="f-v">'+esc(T(g.sup_name)||(sp?sp.name:''))+'</span><span class="f-l n">Certification # or BACB ID #:</span><span class="f-v">'+esc(sp?sp.cert:'')+'</span></div>'+
+    (ver==='2022'?'<div class="f-row"><span class="f-l n">Qualification:</span>'+QUALS.map(q=>'<span class="f-l n">'+box(sp&&(sp.qual||'bcba')===q[0])+esc(q[1])+'</span>').join('')+'</div>':'')+
+    '<p class="f-att">By signing below, we hereby attest that:</p><ul class="f-att">'+att(ver,org,true).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+
+    '<div class="f-sig"><span class="f-l">Supervisor Signature:</span><span class="f-v">'+sigImg(g.sup_img)+'</span><span class="f-l">Date:</span><span class="f-v f-d">'+esc(mdy(g.sup_date))+'</span></div>'+sigHow(g,'sup')+'</div>'+
+    '<div class="f-foot">This document must be signed in accordance with the Acceptable Signatures Policy. SUPERVISOR AND TRAINEE MUST EACH RETAIN A COPY OF THIS FORM FOR AT LEAST 7 YEARS.<br>Form RS-1 &middot; final verification &middot; '+(by.sup.n+by.conc.n)+' of '+ks.length+' month'+(ks.length===1?'':'s')+' with fieldwork counted (the months with a monthly form signed by both). Check the current BACB documents before signing.</div></div>';}
+
+/* ---------------- sign and print ---------------- */
+function renderTPrint(){const t=cur(),keys=tKeys(t);if(!keys.includes(TK))TK=defKey();monthOpts($('#trPMonthSel'),keys);const i=keys.indexOf(TK);$('#trPPrev').disabled=i<=0;$('#trPNext').disabled=i>=keys.length-1;
+  const m=tMonth(TK,t),g=m.sig,sg=sigState(TK,t),own=rsOf(TK).id,org=t.setup.structure==='org',sp=respSup(t);
+  $('#trSignTitle').textContent='Sign the monthly verification form for '+keyLabel(TK);
+  $('#trSignBy').textContent='For '+keyLabel(TK)+': by '+mdy(sg.by)+'.';
+  $('#trSigSupH').textContent=org?'Responsible supervisor':'Supervisor';
+  const fv=$('#trFormVer');fv.innerHTML=own==='2027'?'<option value="">The 2027 form (this month&rsquo;s rules)</option>':opts([['','The 2022 form (this month’s rules)'],['2027','The 2027 form (for an application on or after January 1, 2027)'],['both','Both forms']],m.form||'');fv.disabled=own==='2027';
+  $('#trFormVerHint').textContent=own==='2027'?'A month from January 2027 is under the 2027 rules and its 2027 form.':'If the trainee may apply on or after January 1, 2027, print the 2027 form too: the BACB recommends completing both each month (Guidance for the 2027 Transition, p. 3).';
+  $$('[data-trg]').forEach(el=>{el.value=g[el.dataset.trg]||'';});
+  $('#trSgSup').placeholder=sp?sp.name:'name';$('#trSgTr').placeholder=tName(t)||'name';
+  $$('canvas.tr-pad[data-trpad="sup"],canvas.tr-pad[data-trpad="tr"]').forEach(cv=>padDraw(cv,g[cv.dataset.trpad+'_img']));
+  const f=t.final||(t.final={}),fg=f.sig||{},u=usedKeys(t),fo=k=>'<option value="'+k+'">'+esc(keyLabel(k))+'</option>';
+  $('#trFinFrom').innerHTML=u.map(fo).join('');$('#trFinTo').innerHTML=u.map(fo).join('');$('#trFinFrom').value=keyS(f.from)&&u.includes(f.from)?f.from:(u[0]||'');$('#trFinTo').value=keyS(f.to)&&u.includes(f.to)?f.to:finDefTo(u);
+  $('#trFinVer').value=f.ver==='2027'||f.ver==='2022'?f.ver:(todayISO()>='2027-01-01'?'2027':'2022');$('#trFinName').value=fg.sup_name||'';$('#trFinName').placeholder=sp?sp.name:'name';$('#trFinDate').value=fg.sup_date||'';
+  const fc=$('canvas.tr-pad[data-trpad="fin"]');if(fc)padDraw(fc,fg.sup_img);
+  if(window.__trTsKey!==TK){window.__trTsKey=TK;$$('[data-trtsok]').forEach(c=>{c.checked=false;});$$('[data-trtsn]').forEach(i=>{i.value='';});$$('#trPrint details.rs-typesig').forEach(d=>{d.open=false;});$$('[data-trtsgo]').forEach(b=>tsState(b.dataset.trtsgo));}
+  sigStat();renderTPapers();}
+function renderTPapers(){const t=cur();$('#trFormOut').innerHTML=formVers(TK,t).map(v=>mfvfHTML(TK,v,t)).join('');$('#trLogOut').innerHTML=logHTML(TK,t);
+  const yv=$('#trYearSel')&&$('#trYearSel').value||String(schoolYearOf(new Date()));$('#trYearOut').innerHTML=yearOutHTML(t,yv);$('#trFinalOut').innerHTML=finalHTML(t);
+  const sg=sigState(TK,t),c=$('#trSigChanged');if(c){c.hidden=!sg.changed;c.textContent=sg.changed?'The month’s figures changed after both signed: clear the signatures and sign again, so the form shows what was signed.':'';}}
+function sigStat(){const t=cur(),g=tPeek(TK,t).sig||{},fg=(t.final||{}).sig||{},L=keyLabel(TK);
+  $$('[data-trsigstat]').forEach(el=>{const w=el.dataset.trsigstat,G=w==='fin'?fg:g,k=w==='fin'?'sup':w;
+    el.classList.toggle('ok',!!G[k+'_img']);el.textContent=G[k+'_img']?'✓ Signed'+(w==='fin'?' (final verification)':' for '+L)+(G[k+'_how']==='typed'?': typed name adopted':G[k+'_how']==='drawn'?': drawn':'')+(G[k+'_at']?', '+at2(G[k+'_at']):''):
+      'Not signed yet'+(w==='fin'?'':' for '+L)+': sign in the box, or type the name below, tick the box and press Adopt and sign.';});}
+function sigTarget(w){const t=cur();if(w==='fin'){if(!t.final)t.final={};if(!t.final.sig)t.final.sig={};return {g:t.final.sig,k:'sup'};}return {g:tMonth(TK,t).sig,k:w};}
+function signed(w){const t=cur(),x=sigTarget(w);if(!T(x.g[x.k+'_name'])){const nm=w==='tr'?tName(t):(respSup(t)||{}).name;if(nm)x.g[x.k+'_name']=nm;}if(!isoD(x.g[x.k+'_date']))x.g[x.k+'_date']=todayISO();
+  if(w!=='fin'){const g=x.g;if((g.sup_img||g.sup_name&&g.sup_date)&&(g.tr_img||g.tr_name&&g.tr_date))g.fp=fpOf(TK,t);}
+  renderTPrint();changed();}
+$$('canvas.tr-pad').forEach(cv=>{const x=cv.getContext&&cv.getContext('2d');if(!x)return;let on=false,last=null,drew=false;
+  const pos=e=>{const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*cv.width/r.width,y:(e.clientY-r.top)*cv.height/r.height};};
+  cv.addEventListener('pointerdown',e=>{on=true;drew=false;last=pos(e);try{cv.setPointerCapture(e.pointerId);}catch(err){}e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(!on)return;const p=pos(e);x.lineWidth=2.4;x.lineCap='round';x.lineJoin='round';x.strokeStyle='#1a2933';x.beginPath();x.moveTo(last.x,last.y);x.lineTo(p.x,p.y);x.stroke();last=p;drew=true;e.preventDefault();});
+  const end=()=>{if(!on)return;on=false;if(!drew)return;const w=cv.dataset.trpad,s=sigTarget(w);s.g[s.k+'_img']=cv.toDataURL('image/png');s.g[s.k+'_how']='drawn';s.g[s.k+'_at']=new Date().toISOString();signed(w);};
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-trpadclear]');if(!b)return;const w=b.dataset.trpadclear,s=sigTarget(w);['_img','_how','_at'].forEach(x=>delete s.g[s.k+x]);if(w!=='fin')delete s.g.fp;renderTPrint();changed();});
+function tsState(w){const go=document.querySelector('[data-trtsgo="'+w+'"]');if(!go)return;const bx=go.closest('.ts-in'),nm=bx.querySelector('[data-trtsn]').value.trim();go.disabled=!(nm&&bx.querySelector('[data-trtsok]').checked);bx.querySelector('[data-trtsprev]').textContent=nm;}
+document.addEventListener('input',e=>{const d=e.target.dataset||{};if(d.trtsn||d.trtsok)tsState(d.trtsn||d.trtsok);});
+document.addEventListener('change',e=>{const d=e.target.dataset||{};if(d.trtsok)tsState(d.trtsok);});
+document.addEventListener('focusin',e=>{const w=(e.target.dataset||{}).trtsn;if(!w||e.target.value)return;const t=cur(),v=w==='tr'?tName(t):(respSup(t)||{}).name;if(v){e.target.value=v;tsState(w);}});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-trtsgo]');if(!b||b.disabled)return;const w=b.dataset.trtsgo,bx=b.closest('.ts-in'),nm=bx.querySelector('[data-trtsn]').value.trim();if(!nm)return;
+  const cv=document.querySelector('canvas.tr-pad[data-trpad="'+w+'"]'),x=cv&&cv.getContext&&cv.getContext('2d');if(!x)return;x.clearRect(0,0,cv.width,cv.height);x.fillStyle='#1a2933';x.textBaseline='middle';
+  let fs=76;do{x.font='italic '+fs+'px '+SIGF;fs-=4;}while(x.measureText(nm).width>cv.width-60&&fs>20);x.fillText(nm,30,cv.height/2+4);
+  const s=sigTarget(w);s.g[s.k+'_img']=cv.toDataURL('image/png');s.g[s.k+'_how']='typed';s.g[s.k+'_at']=new Date().toISOString();if(!T(s.g[s.k+'_name']))s.g[s.k+'_name']=nm;
+  bx.querySelector('[data-trtsok]').checked=false;tsState(w);const d=bx.closest('details');if(d)d.open=false;signed(w);});
+function trPrint(cls){if(cls!=='tr-print-final'&&cls!=='tr-print-year'){tMonth(TK);}renderTPrint();printOnly(cls);}
+$('#trPrintForm').addEventListener('click',()=>trPrint('tr-print-form'));
+$('#trPrintMonth').addEventListener('click',()=>trPrint('tr-print-month'));
+$('#trPrintYear').addEventListener('click',()=>trPrint('tr-print-year'));
+$('#trPrintFinal').addEventListener('click',()=>trPrint('tr-print-final'));
+function renderTGuide(){$('#trDocsLine').innerHTML=docsLine();$('#trCodeNote').innerHTML=CODE;$('#trRules2').innerHTML=rulesHTML(true)+sourcesHTML();}
+function sourcesHTML(){const S=[
+  ['Fieldwork hours a month (2022)','BCBA Handbook, p. 16','Trainees must accrue no fewer than 20 and no more than 130 hours of fieldwork per calendar month.'],
+  ['One fieldwork type a month','BCBA Handbook, p. 15','Hours can only be accrued under one fieldwork type per month, per supervision structure, and all requirements of that fieldwork type must be met for the hours to count toward the fieldwork requirement.'],
+  ['Percent supervised (2022)','BCBA Handbook, p. 19','Based on the type of fieldwork hours accrued, the trainee must have 5% (Supervised Fieldwork) or 10% (Concentrated Supervised Fieldwork) of their hours supervised by a qualified supervisor each calendar month.'],
+  ['Contacts (2022)','BCBA Handbook, p. 20','There must be at least four supervisor-trainee contacts each supervisory period for supervised fieldwork and six contacts per supervisory period for concentrated supervised fieldwork.'],
+  ['Observation (2022)','BCBA Handbook, p. 20','At least one supervisor must observe the trainee working with a client in the natural environment during each supervisory period.'],
+  ['Observation counted as a contact','BCBA Handbook, p. 20','The time a supervisor spends observing a trainee may also count as a supervision contact and as fieldwork hours if feedback is provided and the interaction occurs in real time.'],
+  ['Individual and group','BCBA Handbook, p. 20','At least 50% of the supervision meeting time must be individual supervision each supervisory period. … The number of trainees in a group meeting may not exceed 10 at any time, regardless of the number of supervisors present.'],
+  ['Unrestricted activities','BCBA Handbook, p. 17','This 60% requirement does not need to be met each calendar month (i.e., the supervisory period), but must be satisfied across the total accumulated fieldwork hours.'],
+  ['Mixed fieldwork types','BCBA Handbook, p. 15','The 1.33 multiplier is only (a) applied to Concentrated Supervised Fieldwork hours and (b) used to reach the minimum combined total of mixed hours (i.e., Concentrated Supervised Fieldwork + Supervised Fieldwork).'],
+  ['Five years','BCBA Handbook, p. 16','Fieldwork must be completed within five continuous years … The five years are calculated by calendar month, not date-to-date.'],
+  ['Before fieldwork begins','BCBA Handbook, p. 15','Trainees may not begin accumulating fieldwork hours until they have: secured a qualified supervisor …; developed and signed a supervision contract with each supervisor …; AND if applying under pathway 1 or 2, started qualifying graduate-level behavior-analytic coursework.'],
+  ['Signing the monthly form','BCBA Handbook, p. 22','The M-FVF must be signed by the last date of the calendar month following the month of supervision.'],
+  ['A month short','BCBA Handbook, p. 23','If a trainee does not meet all of the monthly fieldwork requirements … the trainee will work with their supervisor to determine whether they may systematically reduce their hours to meet the requirements. … Please note that concentrated hours may not be prorated or adjusted.'],
+  ['Forms','BCBA Handbook, p. 22','Outdated BACB forms or non-BACB forms will not be accepted.'],
+  ['2027: fieldwork hours a month','BCBA Handbook, pp. 26 and 28; 2027 BCBA Requirements, pp. 2 and 4','Minimum of 20 hours—maximum of 160 hours'],
+  ['2027: supervision (supervised fieldwork, concentrated)','The same tables','5% of hours','7.5% of hours'],
+  ['2027: observation of the trainee with a client (supervised fieldwork, concentrated)','The same tables','60 minutes (cumulative)','90 minutes (cumulative)'],
+  ['2027: individual supervision','The same tables','At least 50% of supervised hours must be individual (i.e., group supervision may not exceed 50%).'],
+  ['2027: contacts','BACB Newsletter, March 2022, p. 4','The number of contacts with supervisor per supervisory period requirement will be eliminated, as it is duplicative of the supervision per supervisory period requirement but is expressed using a frequency metric (# of contacts) rather than a percentage metric (% of hours supervised).'],
+  ['2027: the rest still applies','BCBA Handbook, p. 26','… your fieldwork must also meet all requirements described in the Supervised Fieldwork Requirements section of the BCBA Handbook.'],
+  ['Which rules apply','Guidance for the 2027 Transition, p. 2','All supervised fieldwork must meet the requirements in place at the time you submit your certification application.'],
+  ['Which forms','Guidance for the 2027 Transition, p. 4','If you apply under the 2022 requirements, you must maintain documentation using the 2022 M-FVFs. If you apply under the 2027 requirements, you must use the 2027 M-FVFs.'],
+  ['Observation, both ways','Guidance for the 2027 Transition, p. 4','To ensure flexibility, your documentation system should track both the number of client observations (contacts) and the duration (in minutes) of each contact per month.'],
+  ['Which type a 2027 month qualifies as','Documenting Fieldwork FAQs (BACB blog)','On the M-FVF, the percentage of hours supervised and the duration of observations with clients determine whether the fieldwork for that month qualifies as supervised fieldwork or concentrated supervised fieldwork.']];
+  return '<h3 style="margin-top:14px">The sentence behind each rule</h3><div class="grid-wrap"><table class="rt tr-rules"><thead><tr><th style="width:24%">Rule</th><th style="width:22%">Where</th><th>The BACB&rsquo;s words</th></tr></thead><tbody>'+S.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td>'+r.slice(2).map(q=>'&ldquo;'+esc(q)+'&rdquo;').join(' and ')+'</td></tr>').join('')+'</tbody></table></div>';}
+
+/* ---------------- typing in the trainee's pages ---------------- */
+function onTr(el,ev){const d=el.dataset,t=cur(),v=el.type==='checkbox'||el.type==='radio'?el.checked:el.value;
+  if(d.trs!==undefined){t.setup[d.trs]=v;if(d.trs==='name'){trWho();}if(ev==='change'&&(d.trs==='structure'||d.trs==='contract'))renderTSetup();if(ev==='change'&&d.trs==='contract'){/* the supervisors' training date against it */}return true;}
+  if(d.trsup!==undefined){const s=tSup(t,d.trsup);if(!s)return true;if(d.trf==='resp'){t.sups.forEach(x=>{x.resp=x.id===s.id;});}else s[d.trf]=v;
+    const u=document.getElementById('ts_'+s.id+'_issues');if(u)u.innerHTML=supIssuesHTML(s,t);if(ev==='change'&&(d.trf==='resp'))renderTSetup();return true;}
+  if(d.tre!==undefined){const e=t.entries.find(x=>x.id===d.tre);if(!e)return true;e[d.trf]=d.trf==='obs'?!!v:v;
+    if(ev==='change'&&d.trf==='date'){t.entries.sort(eSort);const k=keyOf(e.date);if(keyS(k)&&k!==TK){TK=k;trOpen.add(e.id);renderTMonth();nbhUI.toast('The entry moved to '+keyLabel(k)+'.',{kind:'ok'});return true;}}
+    refreshEntry(e);renderTComp();renderAdj();return true;}
+  if(d.trm!==undefined){const m=tMonth(TK,t);m[d.trm]=d.trm==='prorated'?!!v:v;if(d.trm==='ftype'||d.trm==='form'){if(d.trm==='ftype')renderTMonth();else renderTPapers();}else if(d.trm==='adjInd'||d.trm==='adjSup'){const h=formHours(TK,t),n=$('#trAdjNow');if(n)n.textContent='On the form: '+hmTxt(h.ind)+' independent, '+hmTxt(h.sup)+' supervised, '+pct2(h.pct)+' supervised'+(h.adj?' (adjusted)':'')+'.';}return true;}
+  if(d.trg!==undefined){const m=tMonth(TK,t);m.sig[d.trg]=v;if(ev==='change'){const g=m.sig;if((g.sup_img||g.sup_name&&g.sup_date)&&(g.tr_img||g.tr_name&&g.tr_date)&&!g.fp)g.fp=fpOf(TK,t);renderTPapers();}return true;}
+  if(d.trfin!==undefined){if(!t.final)t.final={};if(d.trfin==='sup_name'||d.trfin==='sup_date'){if(!t.final.sig)t.final.sig={};t.final.sig[d.trfin]=v;}else t.final[d.trfin]=v;if(ev==='change')$('#trFinalOut').innerHTML=finalHTML(t);return true;}
+  return false;}
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset||el.tagName==='SELECT'||el.type==='checkbox'||el.type==='radio')return;if(Object.keys(el.dataset).some(k=>/^tr(s|sup|e|m|g|fin)$/.test(k)))onTr(el,'input');});
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset)return;if(Object.keys(el.dataset).some(k=>/^tr(s|sup|e|m|g|fin)$/.test(k)))onTr(el,'change');});
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.matches&&d.matches('details.tr-ent')){d.open?trOpen.add(d.dataset.teid):trOpen.delete(d.dataset.teid);}},true);
+function addEntry(kind,obs){const t=cur(),now=todayISO(),k=TK||keyOf(now),date=keyOf(now)===k?now:k+'-01';
+  const same=t.entries.filter(x=>x.kind===kind).sort(eSort),prev=same[same.length-1],sp=respSup(t);
+  const e={id:uid(),date,start:'',end:'',kind,fmt:'indiv',grp:'',cat:prev?prev.cat:'',obs:!!obs,obsMin:'',obsHow:obs?'person':'',setting:obs&&prev&&prev.setting?prev.setting:'',sup:sp?sp.id:'',client:prev&&prev.client?prev.client:'',sum:''};
+  if(obs&&!e.cat)e.cat='unr';
+  t.entries.push(e);t.entries.sort(eSort);trOpen.add(e.id);renderTMonth();const f=document.getElementById('te_'+e.id+'_start');if(f)f.focus();changed();}
+$('#trAddInd').addEventListener('click',()=>addEntry('ind',false));
+$('#trAddSupC').addEventListener('click',()=>addEntry('sup',false));
+$('#trAddObs').addEventListener('click',()=>addEntry('sup',true));
+$('#trAddSup').addEventListener('click',()=>{const t=cur();if(t.sups.length>=8)return;const n=newTSup();t.sups.push(n);renderTSetup();const f=document.getElementById('ts_'+n.id+'_name');if(f)f.focus();changed();});
+document.addEventListener('click',async e=>{if(!isTr())return;const t=cur();
+  const sd=e.target.closest&&e.target.closest('[data-trsupdel]');if(sd){const s=tSup(t,sd.dataset.trsupdel);if(!s)return;if(!(await nbhUI.confirm('Remove '+(T(s.name)||'this supervisor')+' from the trainee’s supervisors?\nEntries that name them keep the time but lose the supervisor.',{ok:'Remove',danger:true})))return;
+    t.sups=t.sups.filter(x=>x.id!==s.id);t.entries.forEach(x=>{if(x.sup===s.id)x.sup='';});renderTSetup();changed();return;}
+  const ed=e.target.closest&&e.target.closest('[data-trdel]');if(ed){const i=t.entries.findIndex(x=>x.id===ed.dataset.trdel);if(i<0)return;const x=t.entries[i];
+    if(!(await nbhUI.confirm('Delete the entry of '+(mdy(x.date)||'no date')+(x.start?' at '+fmtHM(x.start):'')+'?',{ok:'Delete',danger:true})))return;t.entries.splice(i,1);trOpen.delete(x.id);renderTMonth();changed();nbhUI.toast('Entry deleted.',{kind:'ok'});return;}
+  const aj=e.target.closest&&e.target.closest('[data-tradj]');if(aj){const s=tStats(TK,t),r=adjRows(s).find(x=>x.k===aj.dataset.tradj);if(!r||r.ind==null)return;const m=tMonth(TK,t);m.adjInd=dec2(r.ind);m.adjSup=dec2(r.sup);renderAdj();changed();nbhUI.toast('The adjusted hours are entered for the form. The record keeps every hour accrued.',{kind:'ok'});return;}});
+const step=(sel,n)=>{const keys=tKeys(cur()),i=keys.indexOf(TK);if(keys[i+n]){TK=keys[i+n];trRender();}};
+$('#trPrev').addEventListener('click',()=>step('#trMonthSel',-1));$('#trNext').addEventListener('click',()=>step('#trMonthSel',1));
+$('#trPPrev').addEventListener('click',()=>step('#trPMonthSel',-1));$('#trPNext').addEventListener('click',()=>step('#trPMonthSel',1));
+$('#trMonthSel').addEventListener('change',e=>{TK=e.target.value;trRender();});
+$('#trPMonthSel').addEventListener('change',e=>{TK=e.target.value;trRender();});
+
+/* ---------------- the toolbar in trainee mode: print, simulation, CSV and Clear all act on the trainees ---------------- */
+document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('#printBtn,#yearPrintBtn,#simBtn,#csvBtn,#clearBtn');if(!b)return;
+  if(b.id==='clearBtn'){if(!trHas())return;e.stopImmediatePropagation();e.preventDefault();
+    if(!(await nbhUI.confirm('Clear every entry on this form?\nThe RBT records (the setup, the supervisors, every month, the goals and the PDUs) and every BCBA trainee record are cleared. Unsaved work will be lost.',{ok:'Clear all',danger:true})))return;
+    resetAll();curKey='';openC=new Set();TR.list=[];TR.cur=0;TK='';trOpen=new Set();renderAll();setView('setup');return;}
+  if(!isTr()){/* the RBT simulation's question says the trainee records stay (nbhUI is read when the button is pressed) */
+    if(b.id==='simBtn'&&trHas()&&window.nbhUI&&nbhUI.confirm){const c0=nbhUI.confirm,w=function(text,o){nbhUI.confirm=c0;return c0.call(this,String(text||'')+'\nThe BCBA trainee records are kept.',o);};nbhUI.confirm=w;setTimeout(()=>{if(nbhUI.confirm===w)nbhUI.confirm=c0;},0);}
+    return;}
+  e.stopImmediatePropagation();e.preventDefault();
+  if(b.id==='printBtn')trPrint('tr-print-month');else if(b.id==='yearPrintBtn')trPrint('tr-print-year');else if(b.id==='csvBtn')trCsv();else if(b.id==='simBtn')trSim();},true);
+function trCsv(){const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
+  const head=['Trainee','BACB ID','Month','Rules','Fieldwork type','Date','Start','End','Minutes','Hours','Supervisor present','Supervision type','Trainees in group','Activity category','Observed with a client','Observation minutes','Observation format','Setting','Supervisor','Supervisor BACB number','Client code','Summary','Counted'];
+  const out=[head];TR.list.forEach(t=>{(t.entries||[]).slice().sort(eSort).forEach(e=>{const k=keyOf(e.date),s=keyS(k)?tStats(k,t):null,sp=tSup(t,e.sup),mi=eMin(e),is=eIssues(e,t).filter(x=>x.lvl==='fail'||/^Planned/.test(x.t));
+    out.push([t.setup.name,t.setup.bacb,keyS(k)?keyLabel(k):'',keyS(k)?rsOf(k).id:'',s?ftName(s.ft):'',e.date,e.start,e.end,mi==null?'':mi,mi==null?'':(mi/60).toFixed(2),e.kind==='sup'?'yes (supervised)':'no (independent)',e.kind==='sup'?lab(FMTS,e.fmt||'indiv'):'',e.kind==='sup'&&e.fmt==='group'?e.grp:'',lab(CATS,e.cat),e.obs?'yes':'',e.obs?eObs(e):'',e.obs?lab(OBSHOW,e.obsHow):'',e.setting,sp?sp.name:'',sp?sp.cert:'',e.client,e.sum,is.length?'no ('+is.map(x=>x.t).join(' ')+')':'yes']);});});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='RS-1_trainees_fieldwork_'+todayISO()+'.csv';document.body.appendChild(a);a.click();a.remove();}
+
+/* ---------------- the simulation: Trainee T., supervised by a simulated BCBA, the months up to today ---------------- */
+async function trSim(){if(!(await nbhUI.confirm('Load a simulated trainee?\nTrainee T. (simulated), supervised by a simulated BCBA, with fieldwork in the months up to today, is filled in as a worked example; one month is short on purpose. The trainee records are replaced; the RBT records are not changed.',{ok:'Load'})))return;
+  const now=todayISO(),nowK=keyOf(now),first=addKey(nowK,-5),t=newTrainee();
+  const A={id:'trsimA',name:'Jordan Ellis (simulated)',cert:'1-00-00000',qual:'bcba',since:'2019-06-15',trained:'2019-08-01',consult:'',norel:true,resp:true};
+  t.sups=[A];t.setup={name:'Trainee T. (simulated)',bacb:'000000',state:'Florida',country:'United States',structure:'indiv',ftype:'sup',contract:first+'-01',course:addKey(first,-1)+'-15',org:'Simulated School District'};
+  const SUMS=['Reviewed the week’s independent hours; feedback on the written FBA summary for SIM-0002; next: draft the replacement-behavior objective.','Observed the preference assessment with SIM-0005 and gave feedback in the session; rehearsed the instructions for the paired-stimulus format.','Group: case conceptualization of an escape-maintained behavior; each trainee presented one graph.','Reviewed the treatment-integrity data and the staff training plan; feedback on the behavioral skills training script.'];
+  const IND=['Graphed and analyzed the week’s data for SIM-0002.','Wrote and revised the behavior plan’s prevention strategies.','Trained a paraprofessional on the token system (behavioral skills training).','Implemented the plan with SIM-0005 (direct implementation).','Researched the literature on functional communication training for the current client.'];
+  const ks=[];for(let k=first;k<=nowK;k=addKey(k,1))ks.push(k);
+  ks.forEach((k,mi)=>{const [y,m]=k.split('-').map(Number),L=lastDay(y,m),day=d=>iso(y,m,Math.min(d,L)),E=[];
+    const short=mi===1;   /* the second month is left short on purpose: too few contacts and too little supervision */
+    const mon=1+((8-new Date(y,m-1,1).getDay())%7),wk=[0,7,14,21].map(n=>mon+n);   /* the month's first four Mondays */
+    wk.forEach((d,j)=>{E.push({kind:'ind',date:day(d),start:'08:00',end:j%2?'13:00':'14:00',cat:j===3?'res':'unr',sum:IND[(j+mi)%IND.length],client:j%2?'SIM-0005':'SIM-0002'});
+      E.push({kind:'ind',date:day(d+1),start:'08:00',end:'12:00',cat:'unr',sum:IND[(j+mi+2)%IND.length],client:'SIM-0002'});
+      E.push({kind:'ind',date:day(d+2),start:'09:00',end:'12:30',cat:j%2?'res':'unr',sum:IND[(j+mi+1)%IND.length],client:'SIM-0005'});});
+    const th=wk.map(d=>d+3);
+    if(short){E.push({kind:'sup',fmt:'indiv',date:day(th[1]),start:'15:00',end:'16:00',cat:'unr',sum:SUMS[0]});E.push({kind:'sup',fmt:'group',grp:'4',date:day(th[2]),start:'15:00',end:'16:30',cat:'unr',sum:SUMS[2]});}
+    else{E.push({kind:'sup',fmt:'indiv',date:day(th[0]),start:'09:00',end:'10:30',cat:'unr',obs:true,obsHow:'person',setting:'Simulated Elementary, classroom 4',client:'SIM-0005',sum:SUMS[1]});
+      E.push({kind:'sup',fmt:'indiv',date:day(th[1]),start:'15:00',end:'16:00',cat:'unr',sum:SUMS[0]});
+      E.push({kind:'sup',fmt:'group',grp:'4',date:day(th[2]),start:'15:00',end:'16:00',cat:'unr',sum:SUMS[2]});
+      E.push({kind:'sup',fmt:'indiv',date:day(th[3]),start:'15:00',end:'16:00',cat:'unr',sum:SUMS[3]});}
+    E.filter(e=>e.date<=now).forEach(e=>t.entries.push(Object.assign({id:'trsim'+k.replace('-','')+e.date.slice(8)+e.start.replace(':',''),fmt:'indiv',grp:'',obs:false,obsMin:'',obsHow:'',setting:'',sup:A.id,client:'',sum:''},e)));
+    if(k<nowK&&!short){const mo=tMonth(k,t);const sd=iso(y,m,L);mo.sig={sup_name:A.name,sup_date:sd,tr_name:t.setup.name,tr_date:sd};mo.sig.fp=fpOf(k,t);}});
+  t.entries.sort(eSort);
+  TR.list=[t];TR.cur=0;TK=nowK;trOpen=new Set();trRenderAll();trRender();changed();
+  nbhUI.toast('Simulation loaded: Trainee T. (simulated), the months up to today. The RBT records are not changed.',{kind:'ok'});}
+
+/* ---------------- the file: the trainees beside the RBTs (written only when a trainee holds something) ---------------- */
+/* every object written with its keys in one order, however it was built, so a file saved, opened and saved again is the same file */
+const pick=(o,K)=>{const r={};K.forEach(k=>{if(o&&o[k]!==undefined)r[k]=o[k];});return r;};
+const KSET=['name','bacb','state','country','structure','ftype','contract','course','org'],KSUP=['id','name','cert','qual','since','trained','consult','norel','resp'],
+  KENT=['id','date','start','end','kind','fmt','grp','cat','obs','obsMin','obsHow','setting','sup','client','sum'],KMON=['ftype','note','adjInd','adjSup','prorated','form','sig'],
+  KSIG=['sup_name','sup_date','sup_img','sup_how','sup_at','tr_name','tr_date','tr_img','tr_how','tr_at','fp'],KFIN=['from','to','ver','sig'];
+function tToFile(t){const o={id:t.id,setup:clean(pick(t.setup,KSET)),sups:t.sups.map(s=>clean(pick(s,KSUP))),entries:t.entries.map(e=>clean(pick(e,KENT)))};
+  const ms={};Object.keys(t.months||{}).sort().forEach(k=>{const m=pick(t.months[k],KMON);if(m.sig)m.sig=pick(m.sig,KSIG);const c=clean(m);if(Object.keys(c).length)ms[k]=c;});if(Object.keys(ms).length)o.months=ms;
+  const fi=pick(t.final||{},KFIN);if(fi.sig)fi.sig=pick(fi.sig,KSIG);const f=clean(fi);if(Object.keys(f).length)o.final=f;return o;}
+function tFromFile(x){x=obj(x);const t=newTrainee();t.id=str(x.id,40)||uid();const su=obj(x.setup);
+  ['name','bacb','state','country','org'].forEach(k=>{if(k in su)t.setup[k]=str(su[k],400);});['contract','course'].forEach(k=>{if(isoD(su[k]))t.setup[k]=isoD(su[k]);});
+  t.setup.structure=su.structure==='org'?'org':'indiv';t.setup.ftype=su.ftype==='conc'?'conc':'sup';
+  const sp=arr(x.sups).slice(0,8).map(s=>{s=obj(s);return {id:str(s.id,40)||uid(),name:str(s.name,200),cert:str(s.cert,60),qual:QUALS.some(q=>q[0]===s.qual)?s.qual:'bcba',since:isoD(s.since),trained:isoD(s.trained),consult:str(s.consult,200),norel:!!s.norel,resp:!!s.resp};});t.sups=sp.length?sp:[newTSup()];
+  const ids=new Set(t.sups.map(s=>s.id));
+  t.entries=arr(x.entries).slice(0,3000).map(e=>{e=obj(e);return {id:str(e.id,40)||uid(),date:isoD(e.date),start:hmS(e.start),end:hmS(e.end),kind:e.kind==='sup'?'sup':'ind',fmt:e.fmt==='group'?'group':'indiv',grp:str(e.grp,4).replace(/[^\d]/g,''),cat:e.cat==='res'||e.cat==='unr'?e.cat:'',obs:!!e.obs,obsMin:str(e.obsMin,5).replace(/[^\d]/g,''),obsHow:OBSHOW.some(o=>o[0]===e.obsHow)?e.obsHow:'',setting:str(e.setting,300),sup:ids.has(str(e.sup,40))?str(e.sup,40):'',client:str(e.client,60),sum:str(e.sum,4000)};}).sort(eSort);
+  const ms=obj(x.months);Object.keys(ms).filter(keyS).slice(0,240).forEach(k=>{const m=obj(ms[k]),g=obj(m.sig),o={sig:{}};
+    if(m.ftype==='sup'||m.ftype==='conc')o.ftype=m.ftype;if(T(m.note))o.note=str(m.note);['adjInd','adjSup'].forEach(f=>{if(parseH(m[f])!=null)o[f]=str(m[f],12);});if(m.prorated)o.prorated=true;if(m.form==='2027'||m.form==='both')o.form=m.form;
+    ['sup','tr'].forEach(w=>{if(T(g[w+'_name']))o.sig[w+'_name']=str(g[w+'_name'],200);if(isoD(g[w+'_date']))o.sig[w+'_date']=isoD(g[w+'_date']);const im=String(g[w+'_img']||'');if(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(im)&&im.length<400000)o.sig[w+'_img']=im;
+      if(g[w+'_how']==='typed'||g[w+'_how']==='drawn')o.sig[w+'_how']=g[w+'_how'];if(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(String(g[w+'_at']||'')))o.sig[w+'_at']=g[w+'_at'];});
+    if(T(g.fp))o.sig.fp=str(g.fp,400);t.months[k]=o;});
+  const f=obj(x.final),fg=obj(f.sig);if(keyS(f.from))t.final.from=f.from;if(keyS(f.to))t.final.to=f.to;if(f.ver==='2022'||f.ver==='2027')t.final.ver=f.ver;
+  const fs={};if(T(fg.sup_name))fs.sup_name=str(fg.sup_name,200);if(isoD(fg.sup_date))fs.sup_date=isoD(fg.sup_date);const fim=String(fg.sup_img||'');if(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(fim)&&fim.length<400000)fs.sup_img=fim;
+  if(fg.sup_how==='typed'||fg.sup_how==='drawn')fs.sup_how=fg.sup_how;if(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(String(fg.sup_at||'')))fs.sup_at=fg.sup_at;if(Object.keys(fs).length)t.final.sig=fs;
+  return t;}
+{const so0=saveObj;saveObj=function(){const o=so0.apply(this,arguments);try{if(trHas()){o.trainees=TR.list.filter(tHas).map(tToFile);const c=TR.list.filter(tHas).indexOf(TR.list[TR.cur]);if(c>0)o.trCur=c;}}catch(e){}return o;};}
+{const rf0=rosterFrom;rosterFrom=function(d){const r=rf0.apply(this,arguments);if(r){try{r.trainees=arr(d&&d.trainees).slice(0,40).map(tFromFile);const c=parseInt(d&&d.trCur,10);r.trCur=c>=0&&c<r.trainees.length?c:0;}catch(e){r.trainees=[];r.trCur=0;}}return r;};}
+{const ar0=applyRoster;applyRoster=function(r){ar0.apply(this,arguments);if(r&&Array.isArray(r.trainees)){TR.prev={list:TR.list,cur:TR.cur};TR.list=r.trainees;TR.cur=r.trCur||0;}else if(TR.prev){TR.list=TR.prev.list;TR.cur=TR.prev.cur;TR.prev=null;}TK='';trOpen=new Set();};}
+/* the views: a trainee page in place of the RBT page of the same name */
+{const sv0=setView;setView=function(v){if(isTr()&&v==='rbt')v='setup';sv0.call(this,v);if(isTr())trRender(v);};}
+{const ra0=renderAll;renderAll=function(){const r=ra0.apply(this,arguments);try{if(isTr()){if(!tKeys(cur()).includes(TK))TK=defKey();trRender();}else modeNote();}catch(e){}return r;};}
+/* in RBT mode, a file that also holds trainees says so beside the choice */
+function modeNote(){const n=$('#rsModeNote');if(!n||isTr())return;const c=TR.list.filter(tHas).length,t=c?'This file also holds '+c+' BCBA trainee record'+(c===1?'':'s')+'.':'';if(n.textContent!==t)n.textContent=t;}
+/* the workstation's printed packet: in trainee mode, the trainee's form, record and year summary */
+{const pn0=window.nbhPrintNodes;window.nbhPrintNodes=function(){if(!isTr())return pn0?pn0.apply(this,arguments):[];renderTPrint();return [$('#trFormOut'),$('#trLogOut'),$('#trYearOut')];};}
+window.addEventListener('beforeprint',()=>{try{if(isTr())renderTPrint();}catch(e){}});
+/* the view buttons' fill dots (nbh-ui) count the pages of the mode on screen: the RBT pages' dots read as before */
+window.__nbhViewFill=function(k){const L=[];document.querySelectorAll('section.only-'+k).forEach(sc=>{if(sc.classList.contains('tr-sec')!==isTr())return;
+  sc.querySelectorAll('input,select,textarea').forEach(e=>{if(e.type==='file'||e.type==='hidden'||e.type==='button'||e.type==='submit'||e.closest('.toolbar,#nbhCaseDlg,#nbhUiDlg,.nbh-pagenav,.obr'))return;L.push(e);});});
+  return {total:L.length,filled:L.filter(e=>e.type==='checkbox'||e.type==='radio'?e.checked:!!String(e.value||'').trim()).length};};
+/* the due line: each trainee's monthly form still to sign */
+{const due0=window.__nbhDue;window.__nbhDue=function(){const out=due0?due0.apply(this,arguments):[];try{const today=todayISO();
+  TR.list.filter(tHas).forEach(t=>usedKeys(t).forEach(k=>{const s=tStats(k,t),g=sigState(k,t);if(s.ended&&s.E.length&&!g.both&&g.by>=addDaysISO(today,-31))out.push({what:('Sign the trainee form for '+keyLabel(k)+' ('+(tName(t)||'trainee')+')').slice(0,60),date:g.by});}));}catch(e){}return out;};}
+const addDaysISO=(s,n)=>{const d=fromIso(s);d.setDate(d.getDate()+n);return isoOf(d);};
+window.__rsTrainee={TR,RS,tStats,sigState,formHours,adjRows,totals,mfvfHTML,finalHTML,setMode,isTr:()=>isTr(),key:()=>TK,setKey:k=>{TK=k;trRender();},cur,tHas,trHas};
+})();
+</script>
 
 <script>
 /* ===================== NBH student packet =====================
