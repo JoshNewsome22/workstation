@@ -7881,7 +7881,7 @@ function drvStamp(rec,old){rec.dev=drvDev();const od=old&&old.drv||null;
   {const scr=state.drvKey===rec.key;rec.drv={id:od&&od.id||'',ver:(scr?state.drvBase:(od?od.ver:null))||null,dirty:true,base:(scr?state.drvBaseText:(od?od.base:null))||null};}   /* v23.53 base: the text of that version */
   const k=drvKey(rec);if(k)drvHash(k).then(h=>{const s=drvSkip();if(h in s){delete s[h];drvSkipSet(s);}}).catch(()=>{});}
 function drvDirty(r){r.drv=Object.assign({id:'',ver:null},r.drv||{},{dirty:true});if(drvOn())drvSoon(false,1500);}
-const drvSaveMode=()=>drvOn();
+const drvSaveMode=()=>drvOn()&&!(typeof window.__wsWhere==='function'&&window.__wsWhere()==='files');   /* v25.68 (the BCBA, 11/6) her case files in Files: Save case writes the file, Drive keeps syncing the caseload */
 /* the chip: where this device stands with Drive */
 async function drvPaint(){const c=$('#drvChip'),sf=$('#saveFile');if(sf)sf.hidden=!drvOn();if(!c)return;if(!drvOn()){c.hidden=true;return;}c.hidden=false;
   let L=[];try{L=await clList()||[];}catch(e){}DRV.wait=L.filter(r=>!r.drv||r.drv.dirty).length+drvGone().length;const nc=Object.keys(DRV.conf).length,tok=drvTok();
@@ -10890,7 +10890,7 @@ function graphHtml(b,d,W,rep){const s=ddStats(b,d);if(!s)return '';const col=rep
 function graphsHtml(f,W){const m=ddMain(f);
   if(!m.main)return '<section class="ch-p ch-o3" aria-labelledby="chGM"><div class="ch-h"><h3 id="chGM">The data</h3><button type="button" class="ch-open" data-chopen="DD-1" aria-label="Open DD-1"><span class="ch-code">DD-1</span></button></div>'+
     '<p class="ch-empty">No days of data from Form DD-1 yet'+(m.d&&m.rep?' for a target to bring down':'')+'. The graph of the main target behavior, with its phases and the change since baseline, shows here once DD-1 holds them.</p><div class="ch-btns"><button type="button" data-chopen="DD-1">Open DD-1</button></div></section>'+(m.rep?graphHtml(m.rep,m.d,W,true):'');
-  return graphHtml(m.main,m.d,W,false)+(m.rep?graphHtml(m.rep,m.d,W,true):'');}
+  return graphHtml(m.main,m.d,W,false)+(typeof w1HoldHtml==='function'?w1HoldHtml(f,m):'')+(m.rep?graphHtml(m.rep,m.d,W,true):'');}   /* v25.68 what may be holding progress back, under the graph */
 /* the plan's parts (Form TD-1's cards and its response to the behavior) and where each stands: "In use" once the plan runs
    (TD-1's start date has come, or Form DD-1 has a phase after baseline), "Starts" or "Planned" before; "Check" on a part
    when a step Form TI-1's last deciding check found missed is one of that part's steps on TD-1, and a Check line of its own
@@ -11348,7 +11348,7 @@ if(!d.getElementById('ws-sr-frame-css')){const st=d.createElement('style');st.id
 w.__srFit=1;}
   /* the sheet column at 180 px: the form measures its boxes and its fit again, once it has settled */
   if(w.__srFit===1&&d.documentElement.classList.contains('nbh-rail')&&state.status[idOf(f)]&&!state.pending[idOf(f)]){w.__srFit=2;try{const F=w.nbhUI&&w.nbhUI.fields;if(F&&F.reset&&F.run){F.reset();F.run();}if(w.nbhFitScreen&&w.nbhFitScreen.fit)w.nbhFitScreen.fit();}catch(e){}}
-patchToast(f);docFrame(f);
+patchToast(f);
 const n=tabsOf(d).length,few=a&&n>0&&n<=6;if(!!w.__nbhNoSheets!==few){w.__nbhNoSheets=few;try{if(w.nbhSheets&&w.nbhSheets.run)w.nbhSheets.run();}catch(e){}}
 sheetMarks(d);focusWords(d);});
 const d=docOf(curFrame()),R=d&&d.documentElement;B.classList.toggle('sr-frail',!!R&&R.classList.contains('nbh-rail')&&!R.classList.contains('nbh-railoff'));}
@@ -11358,11 +11358,18 @@ const nx=$('#aNext');if(nx){nx.classList.remove('sr-cut');if(nx.offsetParent&&nx
 const sp=$('#aSheet');if(sp&&id&&!sp.title)sp.title='Choose a sheet';}
 const ovWide=()=>A()&&COARSE.matches&&innerWidth<1500&&!NARROW.matches&&!B.classList.contains('ws-navrail');
 let hadForm=false;
-function railOv(){const f=B.classList.contains('has-form'),on=ovWide()&&f&&!fullOn();B.classList.toggle('sr-ov',on);
+/* v25.68 (the BCBA, 11/6) the list opened by hand while a form is open is kept, beside the form, until it is closed: opening a
+   form or a sheet no longer puts it away then (kept for this session) */
+let KEEP=false,wasHid=null;try{KEEP=sessionStorage.getItem('nbh.ws.railKeep')==='1';}catch(e){}
+const srKeep=()=>KEEP&&ovWide();
+function keepSet(v){v=!!v;if(KEEP===v)return;KEEP=v;try{if(v)sessionStorage.setItem('nbh.ws.railKeep','1');else sessionStorage.removeItem('nbh.ws.railKeep');}catch(e){}}
+function railOv(){const f=B.classList.contains('has-form'),hid=B.classList.contains('rail-hidden');
+if(ovWide()&&f&&wasHid===true&&!hid&&B.classList.contains('sr-ov'))keepSet(true);else if(KEEP&&hid&&wasHid===false&&ovWide())keepSet(false);wasHid=hid;
+const on=ovWide()&&f&&!fullOn()&&!srKeep();B.classList.toggle('sr-ov',on);
 const sc=$('#railScrim');if(on&&sc){const show=!B.classList.contains('rail-hidden');if(sc.hidden===show)sc.hidden=!show;}
 if(hadForm&&!f&&ovWide()&&!railHidden()&&B.classList.contains('rail-hidden')){B.classList.remove('rail-hidden');}
 hadForm=f;}
-function railAway(){if(!ovWide())return;B.classList.add('rail-hidden');const t=$('#railToggle');if(t)t.setAttribute('aria-expanded','false');const sc=$('#railScrim');if(sc)sc.hidden=true;}
+function railAway(){if(!ovWide()||srKeep())return;B.classList.add('rail-hidden');const t=$('#railToggle');if(t)t.setAttribute('aria-expanded','false');const sc=$('#railScrim');if(sc)sc.hidden=true;}
 document.addEventListener('click',e=>{if(!B.classList.contains('sr-ov')||B.classList.contains('rail-hidden'))return;const t=e.target;
 if(t.closest&&t.closest('nav.rail,#railToggle,#railEdge,#wnForms,#chColBtn,#fsForms,dialog,.wn-menu,#chSwPop,#pal'))return;railAway();},true);
 {const of=openForm;openForm=function(id){const r=of.apply(this,arguments);try{if(ovWide()&&state.frames[id])railAway();srRow();}catch(e){}setTimeout(()=>{try{srRow();frameSync();paintTree();}catch(e){}},400);return r;};}
@@ -11485,7 +11492,7 @@ const last=L[L.length-1];if(last&&last.form===form&&last.how===how&&last.title==
 L.push({form:String(form||'packet'),title:t,at,how:how==='pdf'?'pdf':'print'});if(L.length>50)L.splice(0,L.length-50);
 setTimeout(()=>{try{__wsCH.paint();}catch(e){}},0);}
 window.__srDocNote=docNote;
-function docFrame(f){const w=cw(f);if(!w||w.__srDoc)return;w.__srDoc=1;try{w.addEventListener('beforeprint',()=>{const id=idOf(f);if(id&&!state.pending[id])docNote(id,nameOf(id),'print');});}catch(e){}}
+/* v25.68 (the BCBA, 11/6) only what the workstation makes itself is listed: a form's own print dialog is not */
 function docWatch(w,h){let doc=null,n=0;const tick=()=>{if(!w||w.closed||++n>2400)return;try{const d=w.document;if(d!==doc&&d.readyState!=='loading'&&d.body&&d.body.childNodes.length){doc=d;
 w.addEventListener('beforeprint',()=>{let t='';try{t=T(w.document.title);}catch(e){}docNote(h.form,t||h.title,'print');});}}catch(e){return;}setTimeout(tick,250);};tick();}
 {const wo=window.open;window.open=function(u){const w=wo.apply(window,arguments);try{const s=String(u==null?'':u);if(w&&DOCK.hint&&(!s||s==='about:blank'||/^blob:/i.test(s)))docWatch(w,DOCK.hint);}catch(e){}return w;};}
@@ -11511,13 +11518,21 @@ else{rows=srPapers();note='Dated in the forms';}
 if(!rows.length)return '';
 return '<section class="ch-p ch-o7" id="chDocs" aria-labelledby="chDocsH"><div class="ch-h"><h3 id="chDocsH">Documents</h3><span class="ch-sp"></span>'+(note?'<span class="ch-note">'+note+'</span>':'')+'<button type="button" class="ch-open" data-srdocs="1" style="padding:0 10px">All documents</button></div>'+
 '<ul class="ch-list">'+rows.map(r=>'<li><button type="button" class="ch-row" '+(r.open?'data-chopen="'+esc(r.open)+'"':'data-srdocs="1"')+' aria-label="'+esc(r.t+', '+r.s.replace(/<[^>]+>/g,'')+(r.open?'. Open '+r.open:'. All documents'))+'"><span class="ch-code">'+esc(r.code)+'</span><span class="ch-tx"><span class="ch-t">'+esc(r.t)+'</span><span class="ch-s">'+r.s+'</span></span></button></li>').join('')+'</ul></section>';};
+const docWhenL=x=>new Date(x.at).toLocaleString([],{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'});
 function docsOpen(){const L=(Array.isArray(state.docs)?state.docs:[]).slice().reverse(),P=srPapers();
-dialog('Documents','<p class="hp-lead">'+esc(T(packet().client)||'This case')+(L.length?': '+L.length+' paper'+(L.length===1?'':'s')+' printed or saved as PDF here, newest first.':': nothing printed or saved as PDF from the workstation yet.')+'</p>'+
-(L.length?'<ul class="sr-docl">'+L.map(x=>'<li><span class="sr-dt"><b>'+esc(docName(x))+'</b><span>'+(x.how==='pdf'?'Saved as PDF':'Print dialog opened')+' · '+esc(new Date(x.at).toLocaleString([],{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'}))+'</span></span>'+(x.form!=='packet'?'<button type="button" data-clopen-form="'+esc(x.form)+'">Open '+esc(x.form)+'</button>':'')+'</li>').join('')+'</ul>':'')+
+dialog('Documents','<p class="hp-lead">'+esc(T(packet().client)||'This case')+(L.length?': '+L.length+' paper'+(L.length===1?'':'s')+' the workstation made for this case, newest first.':': nothing made by the workstation for this case yet.')+'</p>'+
+(L.length?'<ul class="sr-docl">'+L.map(x=>'<li><span class="sr-dt"><b>'+esc(docName(x))+'</b><span>'+(x.how==='pdf'?'Saved as PDF':'Print dialog opened')+' · '+esc(docWhenL(x))+'</span></span>'+(x.form!=='packet'?'<button type="button" data-clopen-form="'+esc(x.form)+'">Open '+esc(x.form)+'</button>':'')+
+'<button type="button" class="sr-docx" data-srdocx="'+esc(x.at)+'" aria-label="'+esc('Remove '+docName(x)+', '+docWhenL(x)+', from this list')+'">Remove</button></li>').join('')+'</ul>':'')+
 (P.length?'<h3 class="cl-h">Dated in the forms</h3><ul class="sr-docl">'+P.map(x=>'<li><span class="sr-dt"><b>'+esc(x.t)+'</b><span>'+x.s+'</span></span><button type="button" data-clopen-form="'+esc(x.open)+'">Open '+esc(x.open)+'</button></li>').join('')+'</ul>':'')+
-'<p class="hint">Each line is the form or packet, its title, when and how. The paper itself is not kept. A print is listed when its print dialog opened: the browser does not say whether it was printed, saved as PDF or cancelled.</p>'+
+'<p class="hint">Listed: what the workstation makes itself, when its print dialog opens (Build packet and the other papers it writes in its own window) and the PDFs Finish PDF saves; a form’s own print is not listed. Each line is the paper, when and how; the paper itself is not kept. Remove takes only the line off this list: no file is deleted.</p>'+
 '<p class="td-more"><button type="button" id="srDocRead">Read a document</button></p>');}
-document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-srdocs],[data-clopen-form],#srDocRead');if(!t)return;
+/* v25.68 (the BCBA, 11/6) a line comes off the list: asked the first time on this device, the line only, never a file */
+async function docRemove(at){const L=Array.isArray(state.docs)?state.docs:[],i=L.findIndex(x=>x&&x.at===at);if(i<0)return;const x=L[i],K='nbh.ws.docsRemoveAsked';let asked=false;try{asked=kvGet(K)==='1';}catch(e){}
+if(!asked){if(!(await wsUI.confirm('Remove this line from the Documents list?\n'+docName(x)+' ('+(x.how==='pdf'?'saved as PDF':'print dialog opened')+', '+docWhenL(x)+'). Only the line goes: no file is deleted, and nothing printed or saved is touched. This is not asked again on this '+HERE+'.',{ok:'Remove the line'})))return;try{kvSet(K,'1');}catch(e){}}
+const j=L.findIndex(y=>y&&y.at===at);if(j>=0)L.splice(j,1);docsOpen();say0('Line removed from the Documents list');try{__wsCH.paint();}catch(e){}
+setTimeout(()=>{const n=$('#dlgBody [data-srdocx]')||$('#dlgBody .hp-lead');if(n){if(!n.matches('button'))n.tabIndex=-1;try{n.focus({preventScroll:true});}catch(e){}}},30);}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-srdocs],[data-clopen-form],#srDocRead,[data-srdocx]');if(!t)return;
+if(t.dataset.srdocx){e.stopPropagation();docRemove(t.dataset.srdocx);return;}
 if(t.dataset.srdocs){e.stopPropagation();docsOpen();return;}if(t.id==='srDocRead'){try{$('#dlg').close();}catch(x){}$('#readDoc').click();return;}
 try{$('#dlg').close();}catch(x){}openForm(t.dataset.clopenForm);},true);
 /* keeping up */
@@ -11530,7 +11545,341 @@ addEventListener('resize',soon);setInterval(tick,1000);
 try{const ps=paintSave;paintSave=function(){const r=ps.apply(this,arguments);try{paintSaveSt();}catch(e){}return r;};}catch(e){}
 try{const ph=hxBar;hxBar=function(){const r=ph.apply(this,arguments);soon();return r;};}catch(e){}
 tick();renderRail();
-window.__wsSR={tick,paint:()=>paintSaveSt(),saveState,showToast,oneLine,srChoose,docNote,docsOpen,live:()=>live().map(n=>n.id),log:()=>TL.log,railAway,foldNow:()=>{Object.keys(NT.seen).forEach(k=>{NT.seen[k]=1;});tick();},fresh:()=>{NT.seen={};NT.fold={};tick();}};
+window.__wsSR={tick,paint:()=>paintSaveSt(),saveState,showToast,oneLine,srChoose,docNote,docsOpen,live:()=>live().map(n=>n.id),log:()=>TL.log,railAway,keep:v=>{keepSet(v);railOv();},foldNow:()=>{Object.keys(NT.seen).forEach(k=>{NT.seen[k]=1;});tick();},fresh:()=>{NT.seen={};NT.fold={};tick();}};
+})();
+</script>
+<!-- v25.68 wave 1, the shell (the BCBA, 11/6): her case files live in Files or Google Drive, asked once and kept (Caseload
+     settings changes it); Caseload's Key findings and the next 90 days (from the cards' trends, What's due and calEvents);
+     what may be holding progress back on the case home (TI-1, DD-1, TD-1, SR-1, DM-1, each line naming its form; it
+     suggests, it does not decide); previews on hover, the Apple Pencil held over and press and hold (never on a tap); and the
+     shell's motion (the loading outline, the case home in reading order, menus from their button, the save tick), each under
+     0.25 s, ended by a tap, off with Reduce Motion; numbers and graphs never move. Screen only; nothing in the case file. -->
+<style id="ws-w1-css">
+@media print{.w1-kf,.w1-n90w,#w1Pv,#w1Skel,.w1-hold,#w1Tick{display:none!important}}
+/* ---- Key findings and the next 90 days (Caseload) ---- */
+.w1-kf,.w1-n90w{text-align:left;margin:14px 0 18px;font:15px/1.45 var(--sans);color:var(--ink)}
+.w1-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 8px}
+.w1-h h3{margin:0;font:600 17px/1.25 var(--sans)}
+.w1-h span{color:var(--muted);font-size:13.5px}
+.w1-kfs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.w1-k{background:#fff;border:1px solid var(--rule);border-left:6px solid #1f5f8b;border-radius:12px;padding:12px 14px 10px;min-width:0}
+.w1-k.wrong{border-left-color:#c98a1b;background:#fffaf0}
+.w1-k b{display:block;font-size:15.5px;line-height:1.3;margin:0 0 4px}
+.w1-k p{margin:0 0 6px;font-size:14px;line-height:1.45;color:#2f3f47}
+.w1-k .w1-bs{display:flex;flex-wrap:wrap;gap:4px 10px}
+.w1-k button{min-height:44px;background:none;border:0;padding:0 4px;color:#1f4f73;font:600 14.5px/1.2 var(--sans);text-decoration:underline;text-underline-offset:3px;text-align:left;cursor:pointer}
+.w1-k button:hover{color:#123a57}
+.w1-none{color:var(--muted);font-size:14px;margin:0}
+.w1-n90w{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:12px 14px 6px}
+.w1-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
+.w1-chips button{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 12px;border:1px solid var(--rule);border-radius:999px;background:#fff;color:var(--ink);font:500 14px/1.2 var(--sans);cursor:pointer}
+.w1-chips button i{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
+.w1-chips button[aria-pressed="false"]{color:#5b6b72;background:#f3f5f5;text-decoration:line-through;text-decoration-color:#9aa8ad}
+.w1-chips button[aria-pressed="false"] i{background:none;border:2px solid var(--c)}
+.w1-n90{position:relative;margin:6px 0 0;overflow:hidden}
+.w1-ax{position:absolute;left:0;right:0;bottom:22px;border-top:1px solid #b8c6c3}
+.w1-tk{position:absolute;bottom:0;font-size:12.5px;color:#4d5f68;white-space:nowrap;transform:translateX(-50%)}
+.w1-tk::before{content:"";position:absolute;left:50%;top:-8px;height:6px;border-left:1px solid #b8c6c3}
+.w1-tk.l{transform:none}.w1-tk.l::before{left:0}.w1-tk.r{transform:translateX(-100%)}.w1-tk.r::before{left:auto;right:0}
+.w1-wk{position:absolute;bottom:23px;background:#fdf1dc;border-radius:6px 6px 0 0}
+.w1-wk span{position:absolute;left:4px;top:4px;font:600 12px/1.2 var(--sans);color:#7a4a05;white-space:nowrap}
+.w1-dot{position:absolute;width:44px;height:44px;margin-left:-22px;padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.w1-dot span{width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;font:700 11px/30px var(--sans);text-align:center;box-shadow:0 0 0 2px #fff}
+.w1-dot:hover span,.w1-dot:focus-visible span{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--c)}
+.w1-more{position:absolute;min-width:44px;height:44px;margin-left:-22px;border:1px solid var(--rule);border-radius:999px;background:#fff;font:600 12.5px/1 var(--sans);color:#2f3f47;cursor:pointer}
+.w1-n90e{color:var(--muted);font-size:14px;margin:6px 0 10px}
+.w1-n90l{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+#dlgBody .w1-kf,#dlgBody .w1-n90w{margin:10px 0 14px}
+/* ---- What may be holding progress back (the case home) ---- */
+.w1-lead{margin:0 0 6px;color:#3b4d55;font-size:14px;line-height:1.45}
+.w1-hl{list-style:none;margin:0;padding:0}
+.w1-hl li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px solid #e6ecea}
+.w1-hl li:first-child{border-top:0}
+.w1-ic{flex:0 0 26px;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:700 14px/1 var(--sans);margin-top:1px}
+.w1-hl li.no .w1-ic{border:2px solid #c98a1b;color:#7a5208;background:#fff8ea}
+.w1-hl li.ok .w1-ic{border:2px solid #2f6b37;color:#2f6b37;background:#eef7f0}
+.w1-hl .ch-tx{flex:1 1 auto}
+#caseHome .w1-hl button{flex:0 0 auto;min-height:44px;padding:0 12px;border-radius:8px;font-size:14px;background:#fff;border:1px solid #b8c6c3;color:var(--ink)}
+#caseHome .w1-hl button:hover{background:var(--shade)}
+.w1-foot{margin:8px 0 2px;color:var(--muted);font-size:13px}
+.w1-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+/* ---- previews: hover, the Apple Pencil held over, press and hold ---- */
+#w1Pv{position:fixed;z-index:120;max-width:340px;min-width:220px;background:#fff;color:var(--ink);border:1px solid #cfd9d7;border-radius:12px;box-shadow:0 14px 36px rgba(20,40,50,.22);padding:12px 14px 10px;font:14px/1.42 var(--sans);pointer-events:none}
+#w1Pv[hidden]{display:none}
+#w1Pv .pv-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;margin:0 0 4px}
+#w1Pv .pv-c{display:inline-block;background:#e3eeea;color:#1e3a4f;border-radius:999px;padding:3px 9px;font:600 12px/1.1 var(--sans)}
+#w1Pv p{margin:0 0 4px}
+#w1Pv .pv-f{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #e6ecea;margin-top:8px;padding-top:6px;color:#4d5f68;font:13px/1.3 var(--serif)}
+#w1Pv .pv-bars{display:flex;gap:6px;align-items:flex-end;height:64px;position:relative;margin:8px 0 2px;border-bottom:1px solid #b8c6c3}
+#w1Pv .pv-cl{position:absolute;left:0;right:0;border-top:1.5px dashed #2f6b37;z-index:1}
+#w1Pv .pv-bars i{flex:1 1 0;background:#c98a1b;border-radius:3px 3px 0 0;display:block}
+#w1Pv .pv-bars i.ok{background:#2f7a4f}
+#w1Pv .pv-bl{display:flex;gap:6px;font-size:12px;color:#4d5f68}
+#w1Pv .pv-bl span{flex:1 1 0;text-align:center;white-space:nowrap}
+/* ---- motion: the loading outline (not motion: it shows with Reduce Motion too) ---- */
+#w1Skel{position:absolute;inset:0;z-index:3;background:var(--paper,#f4f6f6);padding:18px 22px;pointer-events:none;overflow:hidden}
+#w1Skel[hidden]{display:none}
+#w1Skel .sk-s{max-width:980px;margin:0 auto;background:#fff;border:1px solid #e3e9e8;border-radius:12px;padding:22px 28px;display:flex;flex-direction:column;gap:16px}
+#w1Skel .sk{background:#e3e9e8;border-radius:8px}
+#w1Skel .sk-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px}
+#dlgBody .sr-docl .sr-docx{background:#fff;border:1px solid #c9d3d1;color:#7c2222;padding:0 12px;border-radius:8px}
+#dlgBody .sr-docl .sr-docx:hover{background:#fbf1f1}
+#w1Tick{position:fixed;z-index:130;width:16px;height:16px;pointer-events:none}
+@media (prefers-reduced-motion:reduce){#w1Tick{display:none}}
+</style>
+<script id="ws-w1">
+/* v25.68 wave 1, the shell (the BCBA, 11/6): where the case files live, Key findings and the next 90 days on Caseload, what
+   may be holding progress back on the case home, previews, and the shell's motion */
+(()=>{
+const $=s=>document.querySelector(s),B=document.body;if(window.__wsW1)return;
+const T=v=>String(v==null?'':v).trim(),say0=t=>{try{say(t);}catch(e){}};
+const ED=typeof DRV_ED==='string'?DRV_ED:'nbh';
+const kv=(k,v)=>{try{if(v===undefined)return kvGet(k)||'';if(v===null)kvDel(k);else kvSet(k,v);}catch(e){}return '';};
+const RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
+const today=()=>tdISO(new Date()),r1=x=>Math.round(x*10)/10;
+const curKey=()=>{try{const p=packet();return T(p.client)&&!isStaffRec(p)?clKey(p):'';}catch(e){return '';}};
+const W={pass:false,goHold:'',off:new Set(),ev:[],ro:null};
+try{(JSON.parse(localStorage.getItem('nbh.ws.n90off')||'[]')||[]).forEach(x=>W.off.add(String(x)));}catch(e){}
+/* ---------- each student's facts, as at the last save (the student on screen: as the open forms give them) ---------- */
+const FC=new Map();
+function factsOf(r){if(!r)return null;if(r.key===curKey()&&state.facts)return state.facts;const k=r.key+'|'+r.saved;if(FC.has(k))return FC.get(k);
+  let f=null;try{const d=parseCase(r.text);f=d&&d.facts||null;}catch(e){f=null;}if(FC.size>80)FC.clear();FC.set(k,f);return f;}
+async function stuList(){let L=[];try{L=(await clList())||[];}catch(e){L=[];}return L.filter(r=>r&&!isStaffRec(r));}
+/* the school days (weekdays) before today, newest first; the days Form DD-1 holds data for */
+function lastSchool(n){const out=[],t=new Date();t.setHours(12,0,0,0);while(out.length<n){t.setDate(t.getDate()-1);const w=t.getDay();if(w&&w!==6)out.push(tdISO(t));}return out;}
+function dataDays(d){const s=new Set();if(!d)return s;[d.series,d.byDay,d.daily].forEach(A=>(Array.isArray(A)?A:[]).forEach(x=>{const k=x&&(x.date||x.d);if(k)s.add(String(k).slice(0,10));}));
+  (Array.isArray(d.behaviors)?d.behaviors:[]).forEach(b=>(Array.isArray(b&&b.series)?b.series:[]).forEach(p=>{if(p&&p.d)s.add(String(p.d).slice(0,10));}));return s;}
+/* of the last 10 school days since Form DD-1's first day, the ones with no data (the days it marks absent or no school left out) */
+function gaps(f){const d=f&&f.data,has=dataDays(d),from=[...has].sort()[0]||'',L=lastSchool(10).filter(x=>from&&x>=from),ab=new Set(d&&Array.isArray(d.absent)?d.absent:[]);
+  const asked=L.filter(x=>!ab.has(x));return {n:asked.length,miss:asked.filter(x=>!has.has(x)).length,ab:L.length-asked.length,any:has.size>0};}
+const fName=id=>((typeof ALL!=='undefined'&&ALL.find(x=>x[0]===id))||[])[1]||id;
+const name=r=>{try{return clName(r);}catch(e){return T(r&&r.client)||'A student';}};
+/* ================= decision 3: where the case files live ================= */
+const WK='nbh.ws.where@'+ED,where=()=>{const v=kv(WK);return v==='drive'||v==='files'?v:'';};
+window.__wsWhere=where;
+const canDrive=()=>typeof drvAvail==='function'&&drvAvail(),drvIs=()=>typeof drvOn==='function'&&drvOn();
+/* asked only where Google Drive could hold them: Drive in use here, or the Google key kept on this device */
+const askable=()=>canDrive()&&(drvIs()||!!(typeof clGid==='function'&&clGid()));
+const filesWord=()=>/iPad|iPhone/.test(HERE)?'Files on this '+HERE:'a folder on this '+HERE;
+const whereTxt=w=>w==='drive'?'your school Google Drive':w==='files'?filesWord():'';
+async function askWhere(){if(!canDrive()){kv(WK,'files');return 'files';}
+  const cur=where()||(drvIs()?'drive':'files');
+  const c=await wsUI.choose('Where do your case files live?\nOpen case and Save case use the place you choose, on this '+HERE+'. Caseload settings can change it.',
+    [{v:'files',label:'In '+filesWord(),kind:cur==='files'?'primary':''},{v:'drive',label:'In Google Drive',kind:cur==='drive'?'primary':''},{v:'',label:'Cancel'}]);
+  if(c!=='files'&&c!=='drive')return '';kv(WK,c);paintWhere();
+  if(c==='drive'&&!drvIs()&&typeof drvLink==='function'){try{await drvLink();}catch(e){}}
+  try{paintSaveSt();}catch(e){}say0('Case files: '+whereTxt(c));return c;}
+function passClick(sel){W.pass=true;try{const b=$(sel);if(b)b.click();}finally{W.pass=false;}}
+async function driveOpen(){
+  if(!drvIs()){const c=await wsUI.choose('Google Drive is not in use on this '+HERE+' yet\nUse Google Drive keeps the caseload there; or open a file this time.',[{v:'link',label:'Use Google Drive',kind:'primary'},{v:'file',label:'Open a file instead'},{v:'',label:'Cancel'}]);
+    if(c==='link'&&typeof drvLink==='function')await drvLink();else if(c==='file')passClick('#openCase');return;}
+  try{drvSoon(true,50);}catch(e){}const L=(await stuList()).sort((a,b)=>String(b.saved).localeCompare(String(a.saved)));
+  const when=s=>{try{return drvWhen(s);}catch(e){return '';}};
+  dialog('Open a case from Google Drive','<p class="hp-lead">The students in your school Google Drive'+(typeof drvAcct==='function'&&drvAcct()?' ('+esc(drvAcct())+')':'')+', as this '+esc(HERE)+' last brought them. Opening one gets its newest copy first.</p>'+
+    (L.length?'<ul class="sr-docl">'+L.map(r=>'<li><span class="sr-dt"><b>'+esc(name(r))+'</b><span>Saved '+esc(when(r.saved))+(r.dev?' on the '+esc(r.dev):'')+'</span></span><button type="button" data-w1open="'+esc(r.key)+'" aria-label="Open '+esc(name(r))+'’s case">Open</button></li>').join('')+'</ul>'
+      :'<p>No student in Google Drive yet: Save case sends each student there.</p>')+
+    '<p class="td-more"><button type="button" id="w1OpenFile">Open a file instead</button> <button type="button" id="w1WhereChg">Change where case files live</button></p>');}
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('#openCase,#blNew');if(!t||W.pass)return;
+  let w=where();
+  if(!w&&askable()){e.stopImmediatePropagation();e.preventDefault();w=await askWhere();if(!w)return;if(t.id==='blNew'||w==='files'){passClick('#'+t.id);return;}}
+  if(t.id==='openCase'&&w==='drive'&&canDrive()){e.stopImmediatePropagation();e.preventDefault();driveOpen();}},true);
+$('#dlgBody').addEventListener('click',e=>{const o=e.target.closest('[data-w1open]');if(o){try{$('#dlg').close();}catch(x){}caseloadGo(o.dataset.w1open,'');return;}
+  if(e.target.closest('#w1OpenFile')){try{$('#dlg').close();}catch(x){}passClick('#openCase');return;}
+  if(e.target.closest('#w1WhereChg')){askWhere();}});
+function whereHtml(){const w=where(),d=canDrive();
+  return '<div class="cl-drive" id="w1Where"><b>Case files</b> <span id="w1WhereT">'+(!d?'Open case and Save case use '+esc(filesWord())+' (Google Drive works when the workstation is opened from its web address).':
+    w?'Open case and Save case use <b>'+esc(whereTxt(w))+'</b>.':askable()?'Not chosen yet: Open case asks the first time.':'Open case and Save case use '+esc(filesWord())+' until Google Drive is set up here; Choose keeps them in either.')+'</span>'+(d?' <button type="button" class="sm" id="w1WhereChg">'+(w?'Change':'Choose')+'</button>':'')+'</div>';}
+function paintWhere(){const el=$('#w1Where');if(el)el.outerHTML=whereHtml();}
+/* ================= item 4: Key findings on Caseload ================= */
+const lc1=s=>String(s).charAt(0).toLowerCase()+String(s).slice(1);
+const REV=/^(Plan review|Annual IEP review|Reevaluation due|Crisis plan review|Check after exit)/;
+function findings(L){const out=[],wrong=[],thin=[],t0=today(),t30=tdAdd(t0,30);
+  L.forEach(r=>{const t=(clTrendsFor(r)||[])[0],x=t&&clLevelTrend(t);if(x&&x.good===false)wrong.push({r,t,x});});
+  if(wrong.length){const n=wrong.length;out.push({k:'wrong',t:n+' student'+(n===1?' is':'s are')+' trending the wrong way.',
+    p:wrong.slice(0,3).map(w=>esc(name(w.r))+', '+esc(String(w.t.name||'the target behavior').toLowerCase())+' '+esc(w.x.dir)+' over the last '+Math.min(10,(w.t.pts||[]).length)+' days of data').join('; ')+(n>3?'; and '+(n-3)+' more':'')+' (Form DD-1, as on the cards).',
+    b:wrong.slice(0,3).map(w=>w1HoldHtml(factsOf(w.r)||{})?'<button type="button" data-w1hold="'+esc(w.r.key)+'">See what may be holding '+esc(name(w.r))+' back ›</button>':'<button type="button" data-w1go="'+esc(w.r.key)+'" data-w1form="DD-1">Open DD-1 for '+esc(name(w.r))+' ›</button>').join('')});}
+  L.forEach(r=>{const f=factsOf(r)||{};let ev=[];try{ev=calEvents(f).filter(e=>REV.test(e.what)&&e.date>=t0&&e.date<=t30).sort((a,b)=>a.date.localeCompare(b.date));}catch(e){}if(!ev.length)return;
+    const g=gaps(f);if(!g.any||g.miss>=3)thin.push({r,e:ev[0],g});});
+  if(thin.length){const n=thin.length;out.push({k:'thin',t:n+' review'+(n===1?'':'s')+' in the next 30 days '+(n===1?'rests':'rest')+' on thin data.',
+    p:thin.slice(0,3).map(x=>esc(name(x.r))+': '+esc(lc1(x.e.what.replace(/ due$/,'')))+' '+esc(tdMd(x.e.date))+', '+(x.g.any?x.g.miss+' of the last '+(x.g.n+x.g.ab)+' school days without data'+(x.g.ab?' ('+x.g.ab+' marked absent)':''):'no data')+' on Form DD-1').join('; ')+(n>3?'; and '+(n-3)+' more':'')+'.',
+    b:thin.slice(0,3).map(x=>'<button type="button" data-w1go="'+esc(x.r.key)+'" data-w1form="DD-1">Open DD-1 for '+esc(name(x.r))+' ›</button>').join('')});}
+  return out;}
+function kfHtml(L){const F=findings(L);
+  return '<section class="w1-kf" aria-labelledby="w1KfH'+W.n+'"><div class="w1-h"><h3 id="w1KfH'+W.n+'">Key findings</h3><span>from the rules the cards and What’s due already use</span></div>'+
+    (F.length?'<div class="w1-kfs">'+F.map(x=>'<div class="w1-k '+x.k+'"><b>'+esc(x.t)+'</b><p>'+x.p+'</p><div class="w1-bs">'+x.b+'</div></div>').join('')+'</div>'
+      :'<p class="w1-none">Nothing stands out in the students kept here, as at their last save.</p>')+'</section>';}
+/* ================= item 5: the next 90 days ================= */
+const TY=[['fba','FBA due','#8a4b00',e=>e.form==='FS-1'],['rev','Plan reviews','#1f5f8b',e=>e.form==='PR-1'||/^Crisis plan review/.test(e.what)],['iep','Annual IEP','#6a3d9a',e=>/^Annual IEP/.test(e.what)],
+  ['ree','Reevaluations','#2f6b37',e=>/^Reevaluation/.test(e.what)],['cr','CR-1 notices','#a8321e',e=>/restraint or seclusion|restraint debriefing/.test(e.what)],['im','IM-1 follow-ups','#7c2d5b',e=>e.form==='IM-1'],
+  ['pa','PA-1 reassessments','#5b6b00',e=>e.form==='PA-1'],['start','Plan starts','#0e5c63',e=>/^Plan starts/.test(e.what)],['r18','Rights at 18','#4d5f68',e=>e.form==='DM-1'&&/Rights at 18/.test(e.what)],
+  ['cons','Consent renewals','#1e3a4f',e=>e.form==='IC-1']];
+const tyOf=e=>TY.find(t=>t[3](e));
+function events(L){const t0=today(),t90=tdAdd(t0,90),E=[];
+  L.forEach(r=>{const f=factsOf(r)||{};let ev=[];try{ev=calEvents(f);}catch(e){ev=[];}const ini=(()=>{try{return clIniOf(r);}catch(e){return '?';}})();
+    ev.forEach(e=>{const ty=tyOf(e);if(!ty||e.date<t0||e.date>t90)return;E.push({key:r.key,who:name(r),ini,date:e.date,what:e.what,form:e.form,ty:ty[0]});});});
+  const seen=new Set();return E.filter(e=>{const k=e.key+'|'+e.date+'|'+e.what;if(seen.has(k))return false;seen.add(k);return true;}).sort((a,b)=>a.date.localeCompare(b.date)||a.who.localeCompare(b.who));}
+function n90Html(L){W.n++;const E=events(L);W.ev=E;const tys=TY.filter(t=>E.some(e=>e.ty===t[0]));
+  return '<section class="w1-n90w" aria-labelledby="w1NH'+W.n+'"><div class="w1-h"><h3 id="w1NH'+W.n+'">Next 90 days</h3><span>'+(E.length?E.length+' date'+(E.length===1?'':'s')+' the forms hold for '+new Set(E.map(e=>e.key)).size+' student'+(new Set(E.map(e=>e.key)).size===1?'':'s'):'')+'</span></div>'+
+    (E.length?'<div class="w1-chips" role="group" aria-label="Show these dates">'+tys.map(t=>'<button type="button" data-w1ty="'+t[0]+'" aria-pressed="'+!W.off.has(t[0])+'" style="--c:'+t[2]+'"><i aria-hidden="true"></i>'+esc(t[1])+' · '+E.filter(e=>e.ty===t[0]).length+'</button>').join('')+'</div><div class="w1-n90" data-w1n90="1"></div>'
+      :'<p class="w1-n90e">No date in the next 90 days in the students kept here: the forms’ reviews, IEP dates, reevaluations, notices and the FBA timeline show here as the forms hold them.</p>')+'</section>';}
+const DAY=864e5,dIdx=iso=>{const a=new Date(today()+'T12:00:00'),b=new Date(iso+'T12:00:00');return Math.round((b-a)/DAY);};
+function n90Paint(el){if(!el||!el.isConnected)return;const Wd=el.clientWidth;if(!Wd)return;el.dataset.w=String(Wd);
+  const E=W.ev.map((e,i)=>Object.assign({i},e)).filter(e=>!W.off.has(e.ty)),pad=26,X=n=>pad+n/90*(Wd-2*pad),lv=[],LV=4,STEP=40,col=TY.reduce((o,t)=>(o[t[0]]=t[2],o),{});
+  let h='',top=0,more={};
+  E.forEach(e=>{const x=X(dIdx(e.date));let k=0;while(k<LV&&lv[k]!=null&&x-lv[k]<44)k++;if(k>=LV){const mk=Math.round(x/44);more[mk]=more[mk]||{x,n:0,L:[]};more[mk].n++;more[mk].L.push(e);return;}lv[k]=x;top=Math.max(top,k);
+    const lab=TY.find(t=>t[0]===e.ty)[1].replace(/s$/,'')+': '+e.what+', '+e.who+', '+new Date(e.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'numeric',day:'numeric'})+', '+(dIdx(e.date)===0?'today':'in '+dIdx(e.date)+' day'+(dIdx(e.date)===1?'':'s'))+'. Opens '+e.form;
+    h+='<button type="button" class="w1-dot" data-w1ev="'+e.i+'" style="left:'+x.toFixed(1)+'px;bottom:'+(26+k*STEP)+'px;--c:'+col[e.ty]+'" aria-label="'+esc(lab)+'"><span aria-hidden="true">'+esc(e.ini)+'</span></button>';});
+  Object.values(more).forEach(m=>{h+='<button type="button" class="w1-more" data-w1more="'+m.L.map(e=>e.i).join(',')+'" style="left:'+m.x.toFixed(1)+'px;bottom:'+(26+LV*STEP)+'px" aria-label="'+m.n+' more dates near '+esc(tdMd(m.L[0].date))+': show them">+'+m.n+'</button>';top=LV;});
+  /* a week with three or more dates is shaded */
+  const wk={};E.forEach(e=>{const d=new Date(e.date+'T12:00:00'),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));const k=tdISO(m);wk[k]=(wk[k]||0)+1;});
+  const H=26+(top+1)*STEP+18;let bands='';
+  Object.entries(wk).filter(x=>x[1]>=3).forEach(([k,n])=>{const a=Math.max(pad,X(dIdx(k))),b=Math.min(Wd-pad,X(dIdx(k)+7));bands+='<div class="w1-wk" style="left:'+a.toFixed(1)+'px;width:'+Math.max(30,b-a).toFixed(1)+'px;height:'+(H-23)+'px"><span>Week of '+esc(tdMd(k))+': '+n+' due</span></div>';});
+  let ax='<div class="w1-ax"></div><span class="w1-tk l" style="left:'+pad+'px">Today</span>';const d=new Date(today()+'T12:00:00');
+  for(let i=1;i<=90;i++){const t=new Date(d.getTime()+i*DAY);if(t.getDate()===1&&i>6&&i<84)ax+='<span class="w1-tk" style="left:'+X(i).toFixed(1)+'px">'+esc(t.toLocaleDateString(undefined,{month:'short'}))+'</span>';}
+  ax+='<span class="w1-tk r" style="left:'+(Wd-pad).toFixed(1)+'px">'+esc(tdMd(tdAdd(today(),90)))+'</span>';
+  el.style.height=H+'px';el.innerHTML=bands+ax+h+(E.length?'':'<p class="w1-n90e" style="position:absolute;left:0;top:0">Every kind is turned off: tap one above to show it.</p>');}
+function n90All(){document.querySelectorAll('[data-w1n90]').forEach(n90Paint);}
+function n90Watch(){if(!window.ResizeObserver)return;if(!W.ro)W.ro=new ResizeObserver(es=>es.forEach(x=>{const el=x.target;if(Math.abs((+el.dataset.w||0)-el.clientWidth)>8)n90Paint(el);}));
+  document.querySelectorAll('[data-w1n90]').forEach(el=>{if(!el.__w1){el.__w1=1;W.ro.observe(el);}});}
+W.n=0;
+async function caseloadParts(host,after){if(!host)return;const L=await stuList();host.querySelectorAll(':scope>.w1-kf,:scope>.w1-n90w').forEach(x=>x.remove());if(!L.length||!host.isConnected)return;
+  const h=kfHtml(L)+n90Html(L);if(after&&after.parentNode===host)after.insertAdjacentHTML('afterend',h);else host.insertAdjacentHTML('afterbegin',h);n90All();n90Watch();}
+{const pb=paintBlank;paintBlank=async function(){const r=await pb.apply(this,arguments);try{const x=$('#blankCl');if(x&&!x.hidden)await caseloadParts(x,x.querySelector(':scope>h2'));}catch(e){}return r;};}
+{const co=caseloadOpen;caseloadOpen=async function(){const r=await co.apply(this,arguments);try{const b=$('#dlgBody');if(b&&T($('#dlgTitle').textContent)==='Caseload'){await caseloadParts(b,b.querySelector(':scope>.hp-lead'));
+  const set=b.querySelector('#srClSet');if(set&&!set.querySelector('#w1Where'))set.insertAdjacentHTML('beforeend',whereHtml());}}catch(e){}return r;};}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-w1ty],[data-w1ev],[data-w1more],[data-w1hold],[data-w1go]');if(!t)return;
+  if(t.dataset.w1ty){const k=t.dataset.w1ty,on=W.off.has(k);if(on)W.off.delete(k);else W.off.add(k);try{localStorage.setItem('nbh.ws.n90off',JSON.stringify([...W.off]));}catch(x){}
+    document.querySelectorAll('[data-w1ty="'+k+'"]').forEach(b=>b.setAttribute('aria-pressed',String(on)));n90All();say0((on?'Showing ':'Hiding ')+t.textContent.replace(/ · \d+$/,''));return;}
+  if(t.dataset.w1more){const L=t.dataset.w1more.split(',').map(i=>W.ev[+i]).filter(Boolean);dialog('Dates near '+esc(tdMd(L[0].date)),'<ul class="sr-docl">'+L.map(e=>'<li><span class="sr-dt"><b>'+esc(e.what)+'</b><span>'+esc(e.who)+' · '+esc(tdMd(e.date))+'</span></span><button type="button" data-w1go="'+esc(e.key)+'" data-w1form="'+esc(e.form)+'">Open '+esc(e.form)+'</button></li>').join('')+'</ul>');return;}
+  const ev=t.dataset.w1ev!=null?W.ev[+t.dataset.w1ev]:null,key=ev?ev.key:t.dataset.w1hold||t.dataset.w1go,form=ev?ev.form:t.dataset.w1form||'';if(!key)return;
+  e.stopPropagation();try{$('#dlg').open&&$('#dlg').close();}catch(x){}W.goHold=t.dataset.w1hold?key:'';caseloadGo(key,form);if(W.goHold)holdFocus(0);},true);
+function holdFocus(n){if(n>40){W.goHold='';return;}const h=$('#w1Hold');if(h&&B.classList.contains('ws-home')&&curKey()===W.goHold){W.goHold='';h.scrollIntoView({block:'start',behavior:'auto'});const hd=h.querySelector('h3');if(hd){hd.tabIndex=-1;try{hd.focus({preventScroll:true});}catch(e){}}return;}
+  if(B.classList.contains('ws-home')&&curKey()===W.goHold&&n>12&&!h){W.goHold='';return;}setTimeout(()=>holdFocus(n+1),250);}
+/* ================= item 6: what may be holding progress back (the case home) ================= */
+const UP=b=>/replacement|acquisition|skill/i.test(b&&b.kind||'')||(b&&b.direction==='increase');
+window.w1HoldHtml=function(f,m0){try{const d=f&&f.data,m=m0||(window.__wsCH&&__wsCH.ddMain?__wsCH.ddMain(f):{}),b=m.main;if(!d||!b||!b.base||!b.cur||b.base.mean==null||b.cur.mean==null)return '';
+  const R=tdRules(f);if(!(b.cur.days>=R.minDays))return '';const up=UP(b),bm=+b.base.mean,cm=+b.cur.mean,chg=bm?((up?cm-bm:bm-cm)/bm*100):(up?(cm>0?100:0):(cm>0?-100:0));if(chg>=R.improvePct)return '';
+  const how='mean '+r1(cm)+' against '+r1(bm)+' in '+(b.baseName||'baseline')+(Math.abs(chg)>=1?' ('+Math.round(Math.abs(chg))+'% '+(chg<0?'worse':'better')+')':'');
+  const L=[],t0=today(),since=tdAdd(t0,-14),conds=(Array.isArray(d.conds)?d.conds:[]).filter(c=>c&&c.name&&c.from);
+  /* integrity: Form TI-1's deciding check against its criterion */
+  {const ti=f.integrity,tv=typeof tiDecisive==='function'?tiDecisive(ti):null,crit=ti&&ti.criterion||90;
+    if(!tv)L.push({ok:false,o:0,t:'No integrity check yet',s:'Form TI-1: whether the plan is run as written is not known.',open:'TI-1'});
+    else{const short=tv.status==='not met'||(tv.status!=='met'&&tv.pct!=null&&tv.pct<crit),ob=(ti.obs||[]).filter(o=>o&&o.date&&o.pct!=null).slice(-3);
+      if(short)L.push({ok:false,o:0,t:'Integrity '+(tv.pct!=null?r1(+tv.pct)+'%':'not met')+(tv.date?' on '+tdMd(tv.date):'')+', under '+crit+'%',s:'Form TI-1: the plan may not be running as written'+(ob.length>1?' (the last checks: '+ob.map(o=>r1(+o.pct)+'%').join(', ')+')':'')+'.',open:'TI-1'});
+      else L.push({ok:true,o:0,t:'Integrity '+(tv.pct!=null?r1(+tv.pct)+'%':'met')+(tv.date?' on '+tdMd(tv.date):''),s:'Form TI-1: at or above its '+crit+'%.',open:'TI-1'});}}
+  /* plan changes in the last 2 weeks: a phase on Form DD-1, the plan's start on TD-1, a schedule step on SR-1 */
+  {const ch=[];for(let i=1;i<conds.length;i++)if(conds[i].from>=since&&conds[i].from<=t0)ch.push({t:'A new phase on '+tdMd(conds[i].from)+': '+conds[i-1].name+' to '+conds[i].name,s:'Form DD-1: a change this recent may not show in the data yet.',open:'DD-1'});
+    const ad=f.plan&&f.plan.adoption;if(ad&&ad.start&&ad.start>=since&&ad.start<=t0)ch.push({t:'The plan started on '+tdMd(ad.start),s:'Form TD-1: a change this recent may not show in the data yet.',open:'TD-1'});
+    const sd=f.schedule&&f.schedule.decide;if(sd&&sd.since&&sd.since>=since&&sd.since<=t0)ch.push({t:'A schedule step on '+tdMd(sd.since)+(sd.step?': step '+sd.step:''),s:'Form SR-1: its card says when to go back a step.',open:'SR-1'});
+    if(ch.length)ch.forEach(x=>L.push(Object.assign({ok:false,o:1},x)));else L.push({ok:true,o:1,t:'No plan change in the last 2 weeks',s:'Form DD-1’s phases, TD-1’s start and SR-1’s steps.',open:'DD-1'});}
+  /* missing data: the last 10 school days */
+  {const g=gaps(f),n=g.n+g.ab,ab=g.ab?' ('+g.ab+' marked absent or no school)':'';if(g.n){if(g.miss>=3)L.push({ok:false,o:2,t:g.miss+' of the last '+n+' school days without data',s:'Form DD-1: the trend rests on fewer points'+ab+'.',open:'DD-1'});
+    else L.push({ok:true,o:2,t:'Data on '+(g.n-g.miss)+' of the last '+n+' school days',s:'Form DD-1'+ab+'.',open:'DD-1'});}
+    if(g.ab>=2)L.push({ok:false,o:4,t:'Absent or no school on '+g.ab+' of the last 10 school days',s:'Form DD-1 marks them: fewer school days in this phase.',open:'DD-1'});}
+  /* setting events: a change of medication Form DM-1 records since shortly before this phase */
+  {const hl=f.profile&&f.profile.health,cur=conds[conds.length-1],from=tdAdd(cur?cur.from:tdAdd(t0,-30),-14);
+    if(hl&&typeof hl==='object'){const mc=(Array.isArray(hl.changes)?hl.changes:[]).filter(c=>c&&c.date&&c.date>=from&&c.date<=t0).sort((a,b)=>b.date.localeCompare(a.date));
+      if(mc.length)L.push({ok:false,o:3,t:'A medication change on '+tdMd(mc[0].date)+(mc[0].med?': '+mc[0].med+(mc[0].kind?', '+String(mc[0].kind).toLowerCase():''):'')+(mc.length>1?' (and '+(mc.length-1)+' more)':''),s:'Form DM-1: a setting event to look at beside the data; Form MS-1 tracks its effects.',open:'DM-1'});
+      else if(Array.isArray(hl.meds)&&hl.meds.length)L.push({ok:true,o:3,t:'No medication change since '+tdMd(from),s:'Form DM-1’s health record.',open:'DM-1'});}}
+  /* agreement between observers on the main target: Form DD-1's 80% */
+  {const io=b.ioa;if(io&&io.mean!=null){const mn=+io.mean;if(mn<80)L.push({ok:false,o:5,t:'Observers agree on '+r1(mn)+'% ('+io.days+' day'+(io.days===1?'':'s')+'), under 80%',s:'Form DD-1: go over the definition with both observers before judging the plan.',open:'DD-1'});
+      else L.push({ok:true,o:5,t:'Observers agree: '+r1(mn)+'% on '+io.days+' day'+(io.days===1?'':'s'),s:'Form DD-1: at or above its 80%.',open:'DD-1'});}
+    else L.push({ok:false,o:5,t:'No second observer on '+b.name+' yet',s:'Form DD-1: agreement between observers is not known.',open:'DD-1'});}
+  L.sort((a,b)=>(a.ok-b.ok)||(a.o-b.o));
+  return '<section class="ch-p ch-o3 w1-hold" id="w1Hold" aria-labelledby="w1HoldH"><div class="ch-h"><h3 id="w1HoldH">What may be holding progress back</h3><span class="ch-sp"></span><span class="ch-note">from this case’s forms, most likely first</span></div>'+
+    '<p class="w1-lead">'+esc(b.name)+': '+b.cur.days+' days into '+esc(b.curName||'the plan')+', '+esc(how)+'; Form PR-1 counts a '+R.improvePct+'% improvement as progress.</p><ul class="w1-hl">'+
+    L.map(x=>'<li class="'+(x.ok?'ok':'no')+'"><span class="w1-ic" aria-hidden="true">'+(x.ok?'✓':'!')+'</span><span class="ch-tx"><span class="ch-t"><span class="w1-sr">'+(x.ok?'Checked: ':'To check: ')+'</span>'+esc(x.t)+'</span><span class="ch-s">'+esc(x.s)+'</span></span><button type="button" data-chopen="'+x.open+'">Open '+x.open+'</button></li>').join('')+
+    '</ul><p class="w1-foot">A list to check, not a verdict: each line is a rule the workstation already applies, and names the form it comes from. What to change is yours to decide.</p></section>';}catch(e){return '';}};
+/* ================= item 7: previews ================= */
+const PVSEL='#caseHome [data-chopen],#caseHome .ch-graph,.w1-dot,#rail .item[data-id]';
+const PV={el:null,tgt:null,pend:null,t:0,hold:0,sx:0,sy:0,touch:false,swallow:0,desc:null};
+function pvEl(){if(!PV.el){PV.el=document.createElement('div');PV.el.id='w1Pv';PV.el.setAttribute('role','tooltip');PV.el.hidden=true;document.body.appendChild(PV.el);}return PV.el;}
+const code=id=>'<span class="pv-c">'+esc(id)+'</span>';
+function formPv(id){const f=state.facts||{},nm=(typeof FORM_SHORT!=='undefined'&&FORM_SHORT[id])||fName(id),out=[];let foot='Tap to open '+id;
+  try{if(id==='TI-1'){const ti=f.integrity,ob=(ti&&ti.obs||[]).filter(o=>o&&o.date&&o.pct!=null).slice(-3),crit=ti&&ti.criterion||90;
+      if(ob.length){out.push('<div class="pv-bars" aria-hidden="true"><b class="pv-cl" style="bottom:'+crit+'%"></b>'+ob.map(o=>'<i class="'+(+o.pct>=crit?'ok':'')+'" style="height:'+Math.max(3,Math.min(100,+o.pct))+'%"></i>').join('')+'</div><div class="pv-bl">'+ob.map(o=>'<span>'+esc(tdMd(o.date))+' · '+r1(+o.pct)+'%</span>').join('')+'</div>');
+        const ms=(ti.missed||[]).filter(m=>m&&m.d).sort((a,b)=>(+a.pct||0)-(+b.pct||0))[0];if(ms)out.push('<p>Missed most often: <b>step '+esc(ms.n)+'</b>, '+esc(String(ms.d).slice(0,90))+(String(ms.d).length>90?'…':'')+'</p>');
+        foot+='</span><span>dashed line: '+crit+'%';return {h:'Last '+ob.length+' integrity check'+(ob.length===1?'':'s'),c:id,b:out.join(''),foot};}}
+    if(id==='DD-1'){const m=__wsCH.ddMain(f),s=m.main&&__wsCH.ddStats(m.main,m.d);if(s){out.push('<p><b>'+esc(m.main.name)+'</b>: last day of data '+esc(tdMd(s.last.d))+' ('+esc(String(s.last.v))+')</p><p>'+(s.base!=null?esc(s.baseName)+' mean '+r1(s.base)+' · ':'')+'last '+s.n5+' days '+r1(s.last5)+'</p>');}}
+    else if(id==='FS-1'&&f.fn&&(f.fn.label||f.fn.key)){const st=(f.fn.statements||[]).filter(Boolean).length;out.push('<p>Function: <b>'+esc(f.fn.label||f.fn.key)+'</b></p>'+(st?'<p>'+st+' hypothesis statement'+(st===1?'':'s')+'</p>':''));}
+    else if(id==='TD-1'&&f.plan){const p=f.plan,n=(p.antCards||[]).length+(p.teach||[]).length+(p.sched||[]).length+(p.respond&&p.respond.target?1:0),ad=p.adoption||{};out.push('<p>'+n+' plan component'+(n===1?'':'s')+(p.fn?' for '+esc(p.fn):'')+'</p>'+(ad.date?'<p>Adopted '+esc(tdMd(ad.date))+'</p>':ad.start?'<p>Starts '+esc(tdMd(ad.start))+'</p>':''));}
+    else if(id==='IC-1'){const c=csOf(f);out.push('<p>Consent '+esc(c.word)+(c.date?' ('+esc(tdMd(c.date))+')':'')+'</p>');}
+    else if(f.evidence&&f.evidence[id]){const e=f.evidence[id];out.push('<p>'+esc(String(e.fn||e.statement||'').split(/\.\s/)[0].slice(0,140))+'</p><p>'+esc([T(e.strength),T(e.method).slice(0,48),T(e.dates)].filter(Boolean).join(' · '))+'</p>');}
+    else if(id==='CR-1'&&f.crisis){const c=f.crisis,s=c.restraints&&c.restraints.semester;out.push('<p>'+(c.revNext?'Next review '+esc(tdMd(String(c.revNext).slice(0,10)))+'. ':'')+(s?s+' restraint'+(s===1?'':'s')+' this semester.':'')+'</p>');}}catch(e){}
+  if(!out.length){const w=typeof srWord==='function'?srWord(id):null;out.push('<p>'+(w?esc(w.w)+(w.n?' · '+w.n+' fields filled':''):inCase(id)?'In the case':'Not in this case yet: it opens empty')+'</p>');}
+  return {h:nm,c:id,b:out.join(''),foot};}
+function railPv(id){const row=(typeof CASE_MAP!=='undefined'?CASE_MAP:[]).map(s=>(s[2]||[]).find(x=>x[0]===id)).find(Boolean),w=typeof srWord==='function'?srWord(id):null,st=state.status[id];
+  const st2=w?w.w+(w.n?' · '+w.n+' fields filled':st&&st.filled?' · '+st.filled+' fields filled':''):state.frames[id]?'Open, nothing filled yet':'Not started';
+  return {h:fName(id),c:id,b:(row?'<p>For '+esc(row[1])+'.</p>':'')+'<p>'+esc(st2)+'</p>',foot:'Tap to open '+id};}
+function graphPv(t,ev){try{const f=state.facts||{},m=__wsCH.ddMain(f),sec=t.closest('section'),b=sec&&sec.querySelector('#chGR')?m.rep:m.main,s=b&&__wsCH.ddStats(b,m.d),svg=t.querySelector('svg');if(!s||!svg)return null;
+  const C=[...svg.querySelectorAll('circle')];if(!C.length)return null;const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal,sx=r.width/(vb&&vb.width||r.width),px=((ev?ev.clientX:r.left+r.width)-r.left)/sx;
+  let k=0,dk=1e9;C.forEach((c,i)=>{const d=Math.abs(+c.getAttribute('cx')-px);if(d<dk){dk=d;k=i;}});const p=s.P[Math.min(k,s.P.length-1)];if(!p)return null;
+  return {h:b.name,c:'DD-1',b:'<p><b>'+esc(tdMd(p.d))+'</b>: '+esc(String(r1(p.v)))+(/^%/.test(s.unit)?'%':' '+esc(s.unit||'occurrences'))+'</p>'+(p.c?'<p>'+esc(p.c)+'</p>':''),foot:'Tap to open DD-1'};}catch(e){return null;}}
+function dotPv(t){const e=W.ev[+t.dataset.w1ev];if(!e)return null;const n=dIdx(e.date);const ty=TY.find(x=>x[0]===e.ty);
+  return {h:e.what,c:e.form,b:'<p>'+esc(e.who)+' · '+esc(new Date(e.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'numeric',day:'numeric'}))+'</p><p>'+esc(ty?ty[1].replace(/s$/,''):'')+'</p>',foot:'Tap the dot to open '+e.form+'</span><span>'+(n===0?'today':n+' day'+(n===1?'':'s'))};}
+function pvFor(t,ev){if(t.matches('.ch-graph'))return graphPv(t,ev);if(t.matches('.w1-dot'))return dotPv(t);if(t.matches('#rail .item[data-id]'))return railPv(t.dataset.id);if(t.dataset.chopen)return formPv(t.dataset.chopen);return null;}
+function pvShow(t,ev){const P=pvFor(t,ev);if(!P){pvHide();return;}const el=pvEl(),was=el.hidden;
+  el.innerHTML='<div class="pv-h">'+esc(P.h)+(P.c?' '+code(P.c):'')+'</div>'+P.b+(P.foot?'<div class="pv-f"><span>'+P.foot+'</span></div>':'');el.hidden=false;
+  if(PV.tgt!==t){pvUndesc();PV.tgt=t;PV.desc=t.getAttribute('aria-describedby');t.setAttribute('aria-describedby','w1Pv');}
+  const r=t.getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight,ax=t.matches('.ch-graph')&&ev?ev.clientX:r.left+r.width/2;
+  let x=Math.max(8,Math.min(innerWidth-w-8,ax-w/2)),y=r.bottom+8;if(t.matches('.ch-graph')&&ev)y=ev.clientY+18;if(y+h>innerHeight-8)y=Math.max(8,(t.matches('.ch-graph')&&ev?ev.clientY:r.top)-h-10);
+  el.style.left=Math.round(x)+'px';el.style.top=Math.round(y)+'px';}
+function pvUndesc(){const t=PV.tgt;if(!t)return;if(PV.desc)t.setAttribute('aria-describedby',PV.desc);else t.removeAttribute('aria-describedby');PV.desc=null;}
+function pvHide(){clearTimeout(PV.t);clearTimeout(PV.hold);PV.hold=0;PV.pend=null;if(PV.el&&!PV.el.hidden)PV.el.hidden=true;pvUndesc();PV.tgt=null;PV.touch=false;}
+document.addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const t=e.target.closest&&e.target.closest(PVSEL);if(!t){return;}if(t===PV.tgt||t===PV.pend)return;
+  clearTimeout(PV.t);PV.pend=t;const ev={clientX:e.clientX,clientY:e.clientY};PV.t=setTimeout(()=>{if(PV.pend===t&&t.isConnected)pvShow(t,ev);PV.pend=null;},PV.tgt?60:350);},true);
+document.addEventListener('pointerout',e=>{if(e.pointerType==='touch')return;const t=PV.tgt||PV.pend;if(!t)return;if(e.relatedTarget&&t.contains(e.relatedTarget))return;if(!t.contains(e.target))return;pvHide();},true);
+document.addEventListener('pointermove',e=>{if(e.pointerType==='touch'){if(PV.hold&&(Math.abs(e.clientX-PV.sx)>10||Math.abs(e.clientY-PV.sy)>10)){clearTimeout(PV.hold);PV.hold=0;}
+    else if(PV.touch&&PV.tgt){const r=PV.tgt.getBoundingClientRect();if(e.clientX<r.left-24||e.clientX>r.right+24||e.clientY<r.top-24||e.clientY>r.bottom+24)pvHide();}return;}
+  if(PV.tgt&&PV.tgt.matches('.ch-graph'))pvShow(PV.tgt,e);},{capture:true,passive:true});
+document.addEventListener('pointerdown',e=>{PV.until=0;if(e.pointerType!=='touch'){pvHide();return;}
+  if(PV.touch&&PV.el&&!PV.el.hidden)pvHide();const t=e.target.closest&&e.target.closest(PVSEL);if(!t)return;PV.sx=e.clientX;PV.sy=e.clientY;clearTimeout(PV.hold);PV.held=false;
+  PV.hold=setTimeout(()=>{PV.hold=0;let u=t;if(!u.isConnected){const x=document.elementFromPoint(PV.sx,PV.sy);u=x&&x.closest&&x.closest(PVSEL);if(!u)return;}PV.touch=true;PV.held=true;pvShow(u,{clientX:PV.sx,clientY:PV.sy});},500);},true);
+['pointerup','pointercancel'].forEach(n=>document.addEventListener(n,e=>{if(e.pointerType!=='touch')return;clearTimeout(PV.hold);PV.hold=0;if(PV.held){PV.held=false;PV.until=Date.now()+450;}},true));
+/* the press that showed a preview does not also press the button: a tap always does what it says, a press and hold only shows */
+addEventListener('click',e=>{if(PV.until&&Date.now()<PV.until&&PV.tgt&&PV.tgt.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();}PV.until=0;},true);   /* on the window: before every listener on the page */
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest(PVSEL)&&(PV.hold||PV.touch))e.preventDefault();},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&PV.el&&!PV.el.hidden){e.preventDefault();e.stopPropagation();pvHide();}},true);
+addEventListener('scroll',()=>{if(PV.el&&!PV.el.hidden)pvHide();},true);
+/* ================= item 8: motion ================= */
+const EASE='cubic-bezier(.2,.7,.2,1)';
+function anim(el,kf,ms,delay){if(RM.matches||!el||!el.animate)return null;delay=delay||0;const d=Math.max(40,Math.min(ms,240-delay));try{const a=el.animate(kf,{duration:d,delay,easing:EASE,fill:'backwards'});a.id='w1';return a;}catch(e){return null;}}
+/* a tap in the middle of a movement ends it at once */
+document.addEventListener('pointerdown',()=>{try{document.getAnimations().forEach(a=>{if(a.id==='w1')a.finish();});}catch(e){}},true);
+/* menus grow from their button */
+let lastBtn=null;document.addEventListener('pointerdown',e=>{lastBtn=e.target.closest&&e.target.closest('button,[role=menuitem]');},true);document.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')lastBtn=document.activeElement;},true);
+function grow(m){if(!m||m.hidden)return;const b=lastBtn&&lastBtn.isConnected&&!m.contains(lastBtn)?lastBtn.getBoundingClientRect():null,r=m.getBoundingClientRect();if(!r.width)return;
+  const ox=b?Math.max(0,Math.min(r.width,b.left+b.width/2-r.left)):0,oy=b&&b.top>r.bottom?r.height:0;m.style.transformOrigin=Math.round(ox)+'px '+Math.round(oy)+'px';
+  anim(m,[{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'scale(1)'}],140);}
+const MW=new MutationObserver(ms=>ms.forEach(x=>{const m=x.target;if(x.attributeName==='hidden'&&x.oldValue!==null&&!m.hidden&&m.matches&&m.matches('#wsNavMenu,#wsViewMenu,#wsSheetMenu,#wsStatPanel,#chSwPop,.sr-cmp'))grow(m);}));
+function menuWatch(){['#wsNavMenu','#wsViewMenu','#wsSheetMenu','#wsStatPanel','#chSwPop'].forEach(s=>{const m=$(s);if(m&&!m.__w1){m.__w1=1;MW.observe(m,{attributes:true,attributeFilter:['hidden'],attributeOldValue:true});}});}
+MW.observe($('#dlgBody'),{attributes:true,attributeFilter:['hidden'],attributeOldValue:true,subtree:true});menuWatch();setTimeout(menuWatch,1500);
+/* the case home arrives in reading order (numbers and graphs are there at once, at their true value) */
+const MO={arrive:0,who:''};
+function arrive(){const h=$('#caseHome');if(!h||RM.matches)return;const P=[...h.querySelectorAll('.ch-alert,.ch-o2,.ch-p')].filter(x=>!x.querySelector('.ch-graph,.ch-stats,svg'));
+  P.map(x=>({x,r:x.getBoundingClientRect()})).filter(o=>o.r.height&&o.r.top<innerHeight).sort((a,b)=>Math.round(a.r.top/40)-Math.round(b.r.top/40)||a.r.left-b.r.left).forEach((o,i)=>anim(o.x,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],150,Math.min(90,i*15)));}
+new MutationObserver(ms=>{const on=B.classList.contains('ws-home'),nm=T(packet().client);if(on&&(!MO.on||nm!==MO.who))MO.arrive=Date.now();MO.on=on;MO.who=nm;}).observe(B,{attributes:true,attributeFilter:['class']});
+{const h=$('#blank');if(h)new MutationObserver(ms=>{const c=$('#caseHome');if(c&&Date.now()-MO.arrive<1500&&ms.some(m=>m.target===c||c.contains(m.target))){MO.arrive=0;arrive();}}).observe(h,{childList:true,subtree:true});}
+/* a form opening: the outline of a form holds the stage until it has loaded (not motion: it shows with Reduce Motion too) */
+const SK=document.createElement('div');SK.id='w1Skel';SK.hidden=true;SK.setAttribute('aria-hidden','true');
+SK.innerHTML='<div class="sk-s"><div class="sk" style="height:28px;width:220px"></div><div class="sk" style="height:16px;width:62%"></div><div class="sk-g">'+'<div><div class="sk" style="height:14px;width:45%;margin-bottom:8px"></div><div class="sk" style="height:44px"></div></div>'.repeat(6)+'</div><div class="sk" style="height:66px"></div></div>';
+{const fr=$('#frames');if(fr)fr.appendChild(SK);}
+let skT=0;function skWatch(id,t0){clearTimeout(skT);const fr=state.frames[id];if(state.cur!==id||!fr||B.classList.contains('ws-split')){SK.hidden=true;return;}
+  const done=!!state.status[id]&&fr.dataset.loaded==='1'&&!state.pending[id];if(done||Date.now()-t0>9000){const was=!SK.hidden;SK.hidden=true;if(was)anim(fr,[{opacity:0},{opacity:1}],180);return;}
+  SK.hidden=false;skT=setTimeout(()=>skWatch(id,t0),90);}
+{const of=openForm;openForm=function(id){const loaded=!!state.status[id]&&!!state.frames[id]&&state.frames[id].dataset.loaded==='1'&&!state.pending[id],was=state.cur;const r=of.apply(this,arguments);
+  try{if(!loaded&&state.frames[id])skWatch(id,Date.now());else{SK.hidden=true;if(was!==id&&state.frames[id])anim(state.frames[id],[{opacity:0},{opacity:1}],150);}}catch(e){}return r;};}
+new MutationObserver(()=>{if(!B.classList.contains('has-form'))SK.hidden=true;}).observe(B,{attributes:true,attributeFilter:['class']});
+/* the save tick: drawn once beside the status, with a brief glow */
+let lastSaved=state.savedAt?+state.savedAt:0,saving=0;
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#saveCase,#saveQuick,#pwaSave,[data-wn-for="saveCase"],#aSave'))saving=Date.now();},true);
+function tick(){const at=state.savedAt?+state.savedAt:0,w=$('#wsStat');if(w&&/\bk-busy\b/.test(w.className))saving=Date.now();if(!at||at===lastSaved)return;lastSaved=at;if(!saving||Date.now()-saving>120000||RM.matches)return;saving=0;
+  const b=[$('#wsStat'),$('#aStat2')].find(x=>x&&x.offsetParent&&/\bk-on\b/.test(x.className));if(!b)return;const dot=b.querySelector('.wa-dot')||b,r=dot.getBoundingClientRect();
+  const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.id='w1Tick';s.setAttribute('viewBox','0 0 16 16');s.setAttribute('aria-hidden','true');s.innerHTML='<circle cx="8" cy="8" r="8" fill="#2f7a4f"/><path d="M4.5 8.3l2.3 2.3 4.7-5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14" stroke-dashoffset="0"/>';
+  s.style.left=Math.round(r.left+r.width/2-8)+'px';s.style.top=Math.round(r.top+r.height/2-8)+'px';const old=$('#w1Tick');if(old)old.remove();document.body.appendChild(s);
+  anim(s.querySelector('path'),[{strokeDashoffset:14},{strokeDashoffset:0}],200);anim(b,[{backgroundColor:'rgba(111,207,151,.35)'},{backgroundColor:'rgba(111,207,151,0)'}],240);setTimeout(()=>s.remove(),900);}
+{const w=$('#wsStat');if(w)new MutationObserver(tick).observe(w,{attributes:true,attributeFilter:['class'],childList:true,subtree:true,characterData:true});}
+window.__wsW1={where,askWhere,findings:async()=>findings(await stuList()),events:async()=>events(await stuList()),n90All,pvShow,pvHide,pv:()=>PV,gaps,holdFocus,skel:()=>!SK.hidden};
 })();
 </script>
 </body>
