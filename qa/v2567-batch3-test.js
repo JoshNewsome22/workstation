@@ -218,5 +218,41 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await p.close();
  });
 
+ /* ---------------- STAFFA ---------------- */
+ await sec('STAFFA',async()=>{
+  const sa=await open('SA-1');
+  const s=await sa.evaluate(async()=>{const set=(k,v)=>{const e=document.querySelector('[data-m="'+k+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};
+    const a=!!document.querySelector('#hierNote .sa67-home');set('setting','home, at the kitchen table');await new Promise(r=>setTimeout(r,200));const el=document.querySelector('#hierNote .sa67-home');
+    return {a,t:el?el.textContent:'',cls:el?el.className:''};});
+  ok('STAFFA 1 SA-1: for a home team, the hierarchy shows that caregivers may prefer least-to-most, on screen only (SKILL-L6)',!s.a&&/caregivers may prefer least-to-most prompting/.test(s.t)&&/Halbur et al\., 2020/.test(s.t)&&/sa-scr/.test(s.cls),s);
+  await sa.close();
+  const ct=await open('CT-1');
+  const c=await ct.evaluate(async()=>{window.__nbhFactsIn({feeding:{lead:'menu',plan:['Mealtime structure','Simultaneous presentation'],type:'type'}});await new Promise(r=>setTimeout(r,300));
+    const b=document.getElementById('ct67Fd');const a={box:b&&!b.hidden?b.textContent:'',meal:S.meta.meal||''};document.getElementById('ct67FdGo').click();await new Promise(r=>setTimeout(r,300));
+    a.after={meal:S.meta.meal,written:S.meta.meal_written,team:S.meta.meal_team,boxHidden:document.getElementById('ctMealBox').hidden};
+    window.__nbhFactsIn({feeding:{lead:'team',plan:['Mealtime structure']}});await new Promise(r=>setTimeout(r,200));a.team=document.getElementById('ct67Fd').textContent;a.kept=S.meta.meal_team;return a;});
+  ok('STAFFA 2 CT-1: FD-1’s plan is offered, and nothing changes until "Train this routine" (FEED-M3)',/Form FD-1 holds a feeding plan: Mealtime structure; Simultaneous presentation\./.test(c.box)&&c.meal==='',c);
+  ok('STAFFA 3 the button turns the meal on and fills the written steps and who leads from FD-1',c.after.meal==='yes'&&c.after.written==='From Form FD-1’s plan: Mealtime structure; Simultaneous presentation'&&/feeding specialist, with the plan on Form FD-1/.test(c.after.team)&&c.after.boxHidden===false,c.after);
+  ok('STAFFA 4 a medical feeding team leading: CT-1 trains none of it; a filled field stays',/A medical feeding team leads it: record its training here; this form trains none of it\./.test(c.team)&&/with the plan on Form FD-1/.test(c.kept),c);
+  await ct.close();
+  const cf=await open('CF-1');
+  const f=await cf.evaluate(async()=>{window.__nbhFactsIn({caregiver:{fit:[{q:'I have time to do this in that routine',a:'Yes',w:''},{q:'I can do it on a bad day, not only a good one',a:'No',w:'a shorter version for busy mornings'}]}});await new Promise(r=>setTimeout(r,300));
+    const el=document.getElementById('cf67CtFit');const a=el&&!el.hidden?el.textContent:'';window.__nbhFactsIn({});return {a,none:document.getElementById('cf67CtFit').hidden};});
+  ok('STAFFA 5 CF-1 shows CT-1’s six home-fit answers beside the school ratings (CARE-L2)',/Home Fit from Form CT-1/.test(f.a)&&/No caregiver rated this form/.test(f.a)&&/a shorter version for busy mornings/.test(f.a)&&/1 yes, 0 partly, 1 no/.test(f.a)&&f.none,f);
+  await cf.close();
+  const q=await open('QS-1');
+  const qa=await q.evaluate(()=>{S.holders='Ms. Lee, classroom teacher (simulated): issue 2';S.meta.issueNo='2';const a=window.__qs2567Ask();const o=window.__nbhFactsOut();return {a,out:o&&o.quick&&o.quick.pdAsk};});
+  ok('STAFFA 6 QS-1 sends the request PD-1 reads with the adult and the issue (STAFF-M12)',qa.out&&qa.out.src==='QS-1'&&qa.out.who==='Ms. Lee'&&qa.out.role==='classroom teacher'&&/quick start \(issue 2\) still does not do a step/.test(qa.out.concern),qa);
+  await q.close();
+  const e=await open('EB-1');
+  const ea=await e.evaluate(()=>{const a=window.__eb2567Ask();const o=window.__nbhFactsOut();return o&&o.brief&&o.brief.pdAsk;});
+  ok('STAFFA 7 EB-1 sends the request PD-1 reads',ea&&ea.src==='EB-1'&&/essentials brief/.test(ea.concern),ea);
+  await e.close();
+  const pd=await open('PD-1');
+  const pa=await pd.evaluate(async A=>{window.__nbhFactsIn({quick:{rules:[],tiers:[],pdAsk:A}});await new Promise(r=>setTimeout(r,300));return {concern:S.meta.concern,staff:S.meta.staff,role:S.meta.role,why:S.meta.why};},qa.out);
+  ok('STAFFA 8 PD-1 takes QS-1’s request into its empty fields',/quick start \(issue 2\)/.test(pa.concern)&&pa.staff==='Ms. Lee'&&pa.role==='Teacher'&&/Asked from Form QS-1/.test(pa.why),pa);
+  await pd.close();
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

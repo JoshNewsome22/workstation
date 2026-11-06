@@ -3223,6 +3223,22 @@ picPaint();gradePaint();higNote();
 .eb-picrow{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0}
 .eb-picslot{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.eb-picslot img{width:120px;height:90px;object-fit:cover;border:1px solid #c9d4d2;border-radius:3px}
 </style>
+<script id="eb1-v2567">
+/* v25.67 (STAFF-M12, batch 3) "This adult is not doing a step: open Form PD-1" now sends the request PD-1 reads (brief.pdAsk): the
+   concern, the setting, and the roles the brief is for; PD-1 fills only its empty fields. Not saved with this form. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();let ask=null;
+ function sig(){let el=document.getElementById('eb67AskSig');if(!el){el=document.createElement('input');el.id='eb67AskSig';el.hidden=true;el.tabIndex=-1;el.setAttribute('aria-hidden','true');el.className='noprint';(document.querySelector('main')||document.body).appendChild(el);}return el;}
+ function make(){let ctx='';try{ctx=T(ebCtx());}catch(e){}const roles=T(val('e.roles'));
+  ask={src:'EB-1',who:'',role:/,|;| and /.test(roles)?'':roles,at:new Date().toISOString(),
+    concern:'An adult who holds the essentials brief'+(ctx?' for '+ctx:'')+' still does not do a step of it as written.',
+    why:'Asked from Form EB-1: the brief clarifies and prompts; find out why (training, materials, time, competing tasks, or no one noticing) before reissuing it.'};
+  const el=sig();el.value=ask.at;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}return ask;}
+ window.__eb2567Ask=make;
+ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#ebPd1'))try{make();}catch(x){}},true);
+ const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{if(ask){r=r||{};r.brief=r.brief||{};r.brief.pdAsk=ask;}}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
