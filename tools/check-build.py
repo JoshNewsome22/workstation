@@ -2,7 +2,7 @@
 
 Copies NBH-Workstation and tools/ to a scratch folder, runs every patcher that keeps the forms current (the polish and
 writing help, the shared blocks, the case flow, the bridge's csv verb, the field names, the letterhead, the TB-1
-library, the TK-1/TE-1 link and the per-form hooks), plus the --check of the ones that have one, and compares the
+library and its replacement-behavior library, the TK-1/TE-1 link and the per-form hooks), plus the --check of the ones that have one, and compares the
 result with the folder, byte for byte. A form or shared file the tools would change means something was edited by hand
 where a tool will undo it, or a tool's source was changed without running it: the release is not reproducible, and
 every device would download the file again at the next rebuild. Exit 0 when nothing would change.
@@ -34,6 +34,7 @@ try:
         ['python3', B + 'patch-names.py', *forms],
         ['python3', 'tools/dedupe-logo.py', *forms],
         ['python3', B + 'patch-tb1-library.py'],
+        ['python3', B + 'patch-tb1-rlib.py'],   # v25.67 the TB-1 replacement-behavior library
         ['python3', B + 'patch-link.py'],
         ['python3', B + 'patch-autosave.py', '--check'],
         ['python3', B + 'patch-pwa.py', '--check', 'NBH-Workstation'],
