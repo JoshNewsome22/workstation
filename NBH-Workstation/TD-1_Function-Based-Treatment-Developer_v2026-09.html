@@ -8022,6 +8022,206 @@ window.__tdQc={items:()=>items(),render};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>render());else render();
 })();
 </script>
+<style id="td1-v2568-add-css">
+/* v25.68 (research #6) the plan's addenda once it is signed */
+.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}
+.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}
+.add68-note{font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;color:#47535a;margin:8px 0}
+.add68-h{margin:16px 0 4px;font-size:15px}
+.add68-p{font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;margin:4px 0;line-height:1.45}
+.add68-list{margin:4px 0 8px 1.4em;padding:0;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;line-height:1.45}
+.add68-list > li{margin:5px 0}
+.add68-ch{margin:2px 0 4px 1.1em;padding:0;list-style:disc;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;line-height:1.45}
+.add68-open{border:1px solid #c9a46a;border-left:4px solid #9b4e15;background:#FBF3E6;padding:8px 12px;margin:8px 0;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px}
+.add68-open p{margin:2px 0}
+.add68-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.add68-form label{font-weight:600;font-size:12.5px;color:#1a2933}
+.add68-form input{flex:1 1 260px;min-height:44px;box-sizing:border-box;font:inherit;font-size:14px;padding:6px 8px;border:1px solid #93aead;border-radius:3px;background:#fff;color:#1a2933}
+.add68-form .tool,.add68-bar .tool{min-height:44px;margin:0}
+.add68-bar{position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:#182e43;color:#fff;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:13.5px;box-shadow:0 -2px 8px rgba(0,0,0,.18)}
+.add68-bar[hidden]{display:none!important}
+.add68-bar{pointer-events:none}.add68-bar .tool{pointer-events:auto}
+body.add68-on{padding-bottom:72px}
+.add68-bar .tool{background:#fff;color:#182e43;border:1px solid #fff;font-weight:600;padding:6px 14px}
+.add68-bar .tool:focus-visible{outline:3px solid #ffd27a;outline-offset:2px}
+.add68-bar .add68-bt{max-width:62ch}
+@media print{body.add68-on{padding-bottom:0}.add68-bar,.add68-note,.add68-form{display:none!important}.add68-open{background:#fff}.add68:not(.add68-has){display:none!important}.add68{break-inside:auto}.add68-list > li{break-inside:avoid;page-break-inside:avoid}}
+</style>
+<script id="td1-v2568-add">
+/* v25.68 (research #6) when an entry was recorded. Each new entry keeps "recorded at", the device clock at the moment it was
+   first written, beside when it happened; one recorded more than 24 hours after it happened prints "Late entry". A date with
+   no time counts as the end of that day, so an entry is marked late only when it surely is. An entry saved before v25.68
+   has no recorded-at and shows and prints as before. The same helper is in Forms DD-1, CR-1, IM-1 and CN-1. */
+window.nbhRec=window.nbhRec||(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const ok=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(v)&&!isNaN(Date.parse(v));
+  const now=()=>new Date().toISOString();
+  const DAYRE=/(\d{4})-(\d\d)-(\d\d)|(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/;
+  function day(v){const m=DAYRE.exec(T(v));if(!m)return null;if(m[1])return [+m[1],+m[2]-1,+m[3]];let y=+m[6];if(y<100)y+=2000;return [y,+m[4]-1,+m[5]];}
+  function hm(v){const m=/(\d{1,2}):(\d{2})\s*([AaPp])?/.exec(T(v));if(!m)return null;let h=+m[1];const mi=+m[2],ap=(m[3]||'').toLowerCase();
+    if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;return h<24&&mi<60?[h,mi]:null;}
+  /* when it happened: a date (2026-11-06, 11/6/2026, 11/6/26, "Tue 9/29/26, 1:42 PM") and a time (14:05, 2:05 PM) */
+  function when(d,t){const s=T(d),D=day(s);if(!D)return null;let H=hm(t);if(!H)H=hm(s.replace(DAYRE,''));
+    const x=H?new Date(D[0],D[1],D[2],H[0],H[1]):new Date(D[0],D[1],D[2],23,59,59);return isNaN(x)?null:x;}
+  const late=(rec,d,t)=>{if(!ok(rec))return false;const h=when(d,t);return !!h&&Date.parse(rec)-h.getTime()>864e5;};
+  const days=(rec,d,t)=>{const h=when(d,t);return ok(rec)&&h?Math.max(0,Math.floor((Date.parse(rec)-h.getTime())/864e5)):0;};
+  function txt(rec){if(!ok(rec))return '';const d=new Date(rec);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
+    return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2)+', '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;}
+  /* the words an entry carries: "Recorded 11/6/26, 2:14 PM (device clock)", and "Late entry" when it is one */
+  const line=(rec,d,t)=>ok(rec)?'Recorded '+txt(rec)+' (device clock)'+(late(rec,d,t)?'. Late entry':''):'';
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const html=(rec,d,t)=>ok(rec)?'<span class="rec68">Recorded '+E(txt(rec))+' (device clock)'+(late(rec,d,t)?' <b class="rec68-late">Late entry</b>':'')+'</span>':'';
+  const CSS='.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}'+
+    '.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}';
+  return {ok,now,when,late,days,txt,line,html,CSS};
+})();
+/* v25.68 (research #6) a signed record takes dated addenda. Once the record is signed, a change to it is not blocked: the change
+   stands, and it is kept as an addendum (the device clock's date and time, who filed it, the reason, and each entry as it stood
+   and as it is now). The printout shows the record with its addenda after the signatures, so the record as signed can be read
+   from them. A record with no change since it was signed, and every record saved before v25.68, prints as before. The same
+   helper is in Forms TD-1, IC-1 and CR-1; each form says what is signed, where the addenda are kept and where they print.
+   cfg: roots() the parts that were signed; skip(el) entries that are not part of it; signed() {on, date}; load() and save(o)
+   the kept addenda; by() who files; ident() a token that changes when another record is opened; mount the addenda's place;
+   what: 'plan' or 'consent'. */
+window.nbhAddenda=window.nbhAddenda||function(cfg){
+  const T=v=>String(v==null?'':v).trim(),N=v=>T(v).replace(/\s+/g,' ');
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const R=window.nbhRec,now=()=>new Date().toISOString(),when=a=>R&&R.ok(a)?R.txt(a):T(a);
+  const what=cfg.what||'record',id=cfg.id||'add68';
+  let mem=null,lastId,busy=false,timer=0;
+  const SKIPTYPE=/^(file|button|submit|reset|password|search|image|color|range)$/;
+  function keyOf(el){if(el.name)return 'n:'+el.name;const d=el.dataset||{},ks=Object.keys(d).filter(k=>!/^(nbh|calc|v65fnh|wh|polish)/i.test(k)).sort();
+    if(ks.length)return 'd:'+ks.map(k=>k+'='+d[k]).join('&');return el.id?'#'+el.id:'';}
+  function heading(el){let n=el;for(let up=0;n&&up<8;up++,n=n.parentElement){let p=n.previousElementSibling;
+      for(let k=0;p&&k<12;k++,p=p.previousElementSibling){if(/^H[1-4]$/.test(p.tagName)||p.classList.contains('bar')||p.classList.contains('nbh-band'))return N(p.textContent).slice(0,80);
+        const h=p.querySelector&&p.querySelector('h2,h3,.bar');if(h&&/^(DIV|SECTION)$/.test(p.tagName)&&p.children.length<3)return N(h.textContent).slice(0,80);}}
+    return '';}
+  function labelOf(el){const a=el.getAttribute('aria-label');if(a)return N(a).slice(0,160);
+    if(el.id){try{const l=document.querySelector('label[for="'+CSS.escape(el.id)+'"]');if(l&&N(l.textContent))return N(l.textContent).slice(0,160);}catch(e){}}
+    const wl=el.closest('label');if(wl&&N(wl.textContent))return N(wl.textContent).slice(0,160);
+    const td=el.closest('td');if(td){const tr=td.parentElement,th=td.previousElementSibling;
+      if(th&&th.tagName==='TH'&&N(th.textContent))return N(th.textContent).slice(0,160);
+      const tb=td.closest('table'),ix=Array.prototype.indexOf.call(tr.children,td),hr=tb&&tb.tHead&&tb.tHead.rows[0],hc=hr&&hr.cells[ix];
+      const rn=Array.prototype.indexOf.call(tr.parentElement.children,tr)+1,h=heading(tb||td);
+      if(hc&&N(hc.textContent))return (h?h+', ':'')+'row '+rn+': '+N(hc.textContent).slice(0,80);}
+    const f=el.closest('.f,.drow,.field,.fieldgrid > div');const lb=f&&f.querySelector('label,.dlab');if(lb&&!lb.contains(el)&&N(lb.textContent))return N(lb.textContent).slice(0,160);
+    return N(el.placeholder)||keyOf(el);}
+  function fields(){const out=[];(cfg.roots()||[]).filter(Boolean).forEach(r=>r.querySelectorAll('input,select,textarea').forEach(el=>{
+      if(SKIPTYPE.test(el.type||'')||el.readOnly||el.closest('[data-add68-skip],.add68-form,.add68-sign'))return;
+      if((el.type==='hidden'||el.hidden)&&!(cfg.keep&&cfg.keep(el)))return;if(cfg.skip&&cfg.skip(el))return;out.push(el);}));return out;}
+  function valOf(el){if(el.type==='checkbox')return el.checked?'ticked':'';
+    if(el.tagName==='SELECT'){const o=el.options[el.selectedIndex];return o&&T(o.value)!==''?N(o.textContent)||T(o.value):'';}
+    return cfg.pretty&&cfg.pretty(el)!=null?cfg.pretty(el):T(el.value);}
+  /* the record now: each entry that holds something, by its key, with its label */
+  function snap(){const m={};fields().forEach(el=>{const k=keyOf(el);if(!k)return;
+      if(el.type==='radio'){if(!el.checked)return;const l=el.closest('label');m[k]=[l?N(l.textContent):T(el.value),labelOf(el.closest('fieldset,.f,.drow,div')||el)];return;}
+      const v=valOf(el);if(v!=='')m[k]=[v.slice(0,4000),labelOf(el)];});return m;}
+  function diff(base,cur){const ks=new Set(Object.keys(base).concat(Object.keys(cur))),out=[];
+    ks.forEach(k=>{const b=base[k]?base[k][0]:'',c=cur[k]?cur[k][0]:'';if(N(b)!==N(c))out.push({k,l:(cur[k]||base[k])[1]||k,was:b,now:c});});return out;}
+  function load(){let o=null;try{o=cfg.load();}catch(e){o=null;}if(!o||typeof o!=='object')return null;
+    const ok=x=>x&&typeof x==='object'&&!Array.isArray(x);const st={v:1,sig:ok(o.sig)?{date:T(o.sig.date),at:T(o.sig.at)}:{date:'',at:''},base:ok(o.base)?o.base:null,
+      list:Array.isArray(o.list)?o.list.filter(ok).slice(0,200):[],log:Array.isArray(o.log)?o.log.filter(ok).slice(0,100):[],open:ok(o.open)?{since:T(o.open.since)}:null};
+    if(st.base)Object.keys(st.base).forEach(k=>{const v=st.base[k];if(!Array.isArray(v))delete st.base[k];});return st;}
+  function save(st){busy=true;try{cfg.save(st&&(st.base||st.list.length||st.log.length)?st:null);}catch(e){}busy=false;}
+  /* the base the changes are read against: the record as signed, with the addenda already filed */
+  function base(st){return st&&st.base?st.base:mem;}
+  const fmt=d=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(T(d));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(d);};
+  function ident(){const tok=cfg.ident?cfg.ident():1;if(tok!==lastId){lastId=tok;mem=null;}}
+  /* the record as it stands just before the first change after signing: taken as a finger, a key or the focus reaches it */
+  function prime(){ident();if(mem)return;const sg=cfg.signed()||{};if(!sg.on)return;const st=load();if(!(st&&st.base))mem=snap();}
+  function refresh(){ident();const sg=cfg.signed()||{};let st=load();
+    if(!sg.on){mem=null;if(st&&st.base){st.log.push({at:now(),what:'The signature'+(st.sig.date?' of '+fmt(st.sig.date):'')+' was removed'});st.base=null;st.open=null;save(st);}}
+    render(st,sg);}
+  function changed(){ident();const sg=cfg.signed()||{};if(!sg.on){refresh();return;}let st=load();const b=base(st);if(!b){mem=snap();render(st,sg,[]);return;}
+    const D=diff(b,snap());
+    if(D.length){if(!st)st={v:1,sig:{date:T(sg.date),at:now()},base:b,list:[],log:[],open:null};if(!st.base)st.base=b;if(!st.open)st.open={since:now()};save(st);mem=null;}
+    else if(st&&st.open){st.open=null;save(st);}
+    render(st,sg,D);}
+  function file(){const sg=cfg.signed()||{};let st=load();const b=base(st);if(!b)return;const cur=snap(),D=diff(b,cur);if(!D.length){render(st,sg,D);return;}
+    const box=document.getElementById(id+'Why'),why=T(box&&box.value);
+    const go=()=>{if(!st)st={v:1,sig:{date:T(sg.date),at:now()},base:b,list:[],log:[],open:null};
+      st.list.push({at:now(),by:T(cfg.by&&cfg.by()),why,ch:D.map(x=>({k:x.k,l:x.l,was:x.was,now:x.now}))});
+      const nb=Object.assign({},b);D.forEach(x=>{if(cur[x.k])nb[x.k]=cur[x.k];else delete nb[x.k];});st.base=nb;st.open=null;save(st);mem=null;
+      if(box)box.value='';render(st,sg,[]);
+      if(window.nbhUI&&nbhUI.toast)nbhUI.toast('Addendum '+st.list.length+' filed: '+D.length+' change'+(D.length===1?'':'s')+', dated '+when(st.list[st.list.length-1].at)+'.',{kind:'ok'});};
+    if(!why&&window.nbhUI&&nbhUI.confirm)nbhUI.confirm('File the addendum without a reason?\nThe change is kept either way. A reason (for example, correcting an error) tells the reader why it changed.',{ok:'File it without a reason'}).then(y=>{if(y)go();else if(box)box.focus();});
+    else go();}
+  const show=(v,o)=>v===''?(o==='ticked'?'not ticked':'empty'):'“'+v+'”';
+  function chList(ch){return '<ul class="add68-ch">'+ch.map(x=>'<li><b>'+E(x.l)+'</b>: as it stood, '+E(show(x.was,x.now))+'; now '+E(show(x.now,x.was))+'.</li>').join('')+'</ul>';}
+  function render(st,sg,D){const box=cfg.mount&&cfg.mount();if(!box)return;sg=sg||cfg.signed()||{};
+    if(D===undefined){const b=base(st);D=sg.on&&b?diff(b,snap()):[];}
+    const L=st?st.list:[],G=st?st.log:[],has=L.length||G.length||D.length;
+    box.classList.toggle('add68-has',!!has);
+    let h='';
+    if(sg.on&&!has)h='<p class="add68-note noprint">Signed'+(sg.date?' '+E(fmt(sg.date)):'')+'. From now on a change to this '+what+' is kept as a dated addendum with its reason, and the printout shows it after the signatures. Nothing is blocked: the addendum is the correction.</p>';
+    if(has){h+='<h3 class="add68-h">Changes After Signing (Addenda)</h3><p class="add68-p">'+(st&&st.sig.date||sg.date?'Signed '+E(fmt(st&&st.sig.date||sg.date))+'. ':'')+
+      'The entries above show this '+what+' as it is now. Each addendum keeps the entry as it stood before the change, so the '+what+' as signed can be read from them. Times are the device clock’s.</p>';
+      if(L.length)h+='<ol class="add68-list">'+L.map((a,i)=>'<li><b>Addendum '+(i+1)+'</b>, '+E(when(a.at))+(a.by?', '+E(a.by):'')+'. <b>Reason:</b> '+(a.why?E(a.why):'not given')+'.'+chList(Array.isArray(a.ch)?a.ch:[])+'</li>').join('')+'</ol>';
+      if(G.length)h+='<p class="add68-p">'+G.map(x=>E(x.what)+', '+E(when(x.at))+'.').join(' ')+'</p>';
+      if(D.length)h+='<div class="add68-open"><p><b>Changed after signing; not yet filed as an addendum</b>'+(st&&st.open&&st.open.since?' (since '+E(when(st.open.since))+')':'')+'.</p>'+chList(D)+
+        '<div class="add68-form noprint"><label for="'+id+'Why">Reason for the change</label><input id="'+id+'Why" list="'+id+'Reasons" maxlength="300" placeholder="for example, correcting an error" autocomplete="off">'+
+        '<datalist id="'+id+'Reasons"><option value="Correcting an error"><option value="Information learned after signing"><option value="Decided by the team at a meeting"><option value="Revision of the '+what+'"><option value="Clarifying the wording"></datalist>'+
+        '<button type="button" class="tool add68-file" id="'+id+'File">File the addendum</button></div></div>';}
+    const keep=document.activeElement&&document.activeElement.id===id+'Why'?document.activeElement.value:null;
+    if(box.innerHTML!==h)box.innerHTML=h;
+    if(keep!==null){const w=document.getElementById(id+'Why');if(w){w.value=keep;w.focus();}}
+    bar(D.length,sg);}
+  /* a bar at the foot of the screen while a change is not yet filed: it says the change is kept and leads to the reason */
+  function bar(n,sg){let b=document.getElementById(id+'Bar');
+    if(!n){if(b)b.hidden=true;document.body.classList.remove('add68-on');return;}
+    if(!b){b=document.createElement('div');b.id=id+'Bar';b.className='add68-bar noprint';b.setAttribute('role','region');b.setAttribute('aria-label','Changes after signing');
+      b.innerHTML='<span class="add68-bt" aria-live="polite"></span><button type="button" class="tool add68-go">Give the reason</button>';document.body.appendChild(b);
+      b.querySelector('.add68-go').addEventListener('click',()=>{if(cfg.reveal)cfg.reveal();const w=document.getElementById(id+'Why');if(w){try{w.scrollIntoView({block:'center'});}catch(e){}w.focus();}});}
+    b.hidden=false;document.body.classList.add('add68-on');const t='This '+what+' was signed'+(sg&&sg.date?' '+fmt(sg.date):'')+'. '+n+' change'+(n===1?'':'s')+' since then '+(n===1?'is':'are')+' kept as an addendum.';
+    const s=b.querySelector('.add68-bt');if(s.textContent!==t)s.textContent=t;}
+  const inRoots=t=>(cfg.roots()||[]).some(r=>r&&r.contains(t));
+  const onEdit=e=>{if(busy||!e.isTrusted)return;const t=e.target;if(!t||!t.closest||t.closest('.add68-form'))return;
+    if(!inRoots(t)&&!(cfg.watch&&cfg.watch(t)))return;clearTimeout(timer);timer=setTimeout(changed,350);};
+  document.addEventListener('input',onEdit,true);document.addEventListener('change',onEdit,true);
+  ['pointerdown','keydown','focusin'].forEach(t=>document.addEventListener(t,e=>{if(!busy&&e.target&&e.target.closest&&!e.target.closest('.add68-form')&&(inRoots(e.target)||(cfg.watch&&cfg.watch(e.target))))prime();},true));
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#'+id+'File')){e.preventDefault();file();}
+    else if(e.isTrusted&&e.target&&e.target.closest&&e.target.closest('button')&&inRoots(e.target)){clearTimeout(timer);timer=setTimeout(changed,450);}});
+  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id===id+'Why'){e.preventDefault();file();}});
+  return {refresh,changed,snap,state:load,file};
+};
+/* v25.68 (research #6) once the plan is signed (a signature on the iPad, or "in person, on paper" with its date, in the sign-in
+   or the parent's signature on the plan), a change to it is kept as a dated addendum with its reason: the change stands, and
+   the Final plan prints the addenda after the signatures, each entry as it stood and as it is now. The sign-in, the revision
+   rows, Integrity and progress, the Guide and the References are not part of what was signed. The addenda are kept in the
+   hidden field ad.add68 (left out of Save data while empty, so a plan saved before saves as it did). */
+(function(){
+  const T=v=>String(v==null?'':v).trim(),q=s=>document.querySelector(s),fld=n=>q('[name="'+n+'"]');
+  const fin=document.getElementById('final');if(!fin||!window.nbhAddenda)return;
+  if(!fld('ad.add68')){const sc=fin.querySelector('.sigcite');const m=document.createElement('div');m.id='td1Add68';m.className='add68';
+    const h=document.createElement('textarea');h.name='ad.add68';h.className='noprint';h.hidden=true;h.setAttribute('aria-hidden','true');h.tabIndex=-1;
+    (sc||fin.lastElementChild).insertAdjacentElement('afterend',m);m.insertAdjacentElement('afterend',h);}
+  const J=(n,d)=>{try{const v=JSON.parse(T((fld(n)||{}).value)||'null');return v==null?d:v;}catch(e){return d;}};
+  const isSig=r=>r&&typeof r==='object'&&/^\d{4}-\d\d-\d\d$/.test(T(r.signed))&&(!!r.img||r.how==='in person'||r.how==='signed on the iPad');
+  function signed(){const p=J('ad.psig',{}),L=(Array.isArray(J('ad.sigs',[]))?J('ad.sigs',[]):[]).concat([p]).filter(isSig);
+    if(!L.length)return {on:false};return {on:true,date:isSig(p)?T(p.signed):L.map(r=>T(r.signed)).sort()[0]};}
+  let tok=0,mine='';
+  const ADD=window.nbhAddenda({id:'td1Add68',what:'plan',
+    roots:()=>['setup','select','build','antecedent','reinf','teach','skills','respond','plan','final'].map(id=>document.getElementById(id)),
+    skip:el=>!!el.closest('#td85Block,#td82Block,#tdQc,.toolbar'),keep:el=>el.name==='fin.steps',
+    pretty:el=>{if(el.name!=='fin.steps')return null;let o={};try{o=JSON.parse(el.value||'{}')||{};}catch(e){return T(el.value);}
+      const a=Object.keys(o.in||{}).length,b=Object.keys(o.crit||{}).length;return a||b||o.ee?[a?a+' step'+(a===1?'':'s')+' added to or left off the list':'',b?b+' criterion'+(b===1?'':'s')+' rewritten':'',o.ee?'escape extinction shown once':''].filter(Boolean).join('; '):'';},
+    signed,load:()=>J('ad.add68',null),
+    save:o=>{const e=fld('ad.add68');if(!e)return;e.value=o?JSON.stringify(o):'';mine=e.value;try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(x){}},
+    by:()=>T((fld('m.analyst')||{}).value),ident:()=>tok,mount:()=>document.getElementById('td1Add68'),
+    watch:t=>!!(t.closest&&t.closest('#td85Block')),reveal:()=>{const b=q('#viewSeg button[data-view="final"]');if(b&&b.getAttribute('aria-pressed')!=='true')b.click();}});
+  /* the saved file carries the addenda only when there are some */
+  /* the form's own script is closed to the others. Save data writes every named field: the empty field's name is taken off
+     for the moment of the save, so a record with no addenda saves as it did. Another record opened (a file, Clear all, the
+     simulation, the workstation's restore) changes the field or the signature: the addenda are read again. */
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#saveBtn')){const h=fld('ad.add68');if(h&&!T(h.value)){h.removeAttribute('name');h.dataset.add68n='ad.add68';setTimeout(()=>{h.name='ad.add68';},0);}}},true);
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#saveBtn')){const h=q('[data-add68n]');if(h&&!h.name)h.name='ad.add68';}});
+  let lastV=null,lastS=null;
+  const watch=()=>{const h=fld('ad.add68'),v=h?h.value:'',sg=JSON.stringify(signed());if(lastV===null){lastV=v;lastS=sg;return;}
+    if(v!==lastV||sg!==lastS){if(v!==lastV&&v!==mine)tok++;lastV=v;lastS=sg;try{ADD.refresh();}catch(e){}}};
+  setInterval(watch,1200);
+  try{ADD.refresh();}catch(e){}
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
