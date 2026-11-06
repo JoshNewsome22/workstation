@@ -995,6 +995,27 @@ html.fx2:not(.nbh-pr-measure) .fx2-filled{display:none!important}
 html.fx2:not(.nbh-pr-measure) .fx2-sh input[readonly]:not([type=checkbox]):not([type=radio]):not([type=hidden]).nbh-fld,html.fx2:not(.nbh-pr-measure) .fx2-sh .ident .f > input[readonly]:not([type=checkbox]):not([type=radio]),html.fx2:not(.nbh-pr-measure) .fx2-sh table.fx2-cards > tbody > tr > td input[readonly]:not([type=checkbox]):not([type=radio]){background:var(--fx2-wash)!important;border-color:transparent!important;color:var(--fx2-ink)!important;box-shadow:none!important;cursor:default}
 html.fx2:not(.nbh-pr-measure) .fx2-sh input[readonly]:focus{outline:0!important}
 html.fx2:not(.nbh-pr-measure) .fx2-sh input:focus,html.fx2:not(.nbh-pr-measure) .fx2-sh select:not(.nbh-seg-src):focus,html.fx2:not(.nbh-pr-measure) .fx2-sh textarea:focus{outline:3px solid #9DBAD3!important;outline-offset:0;border-color:var(--fx2-navy)!important}
+/* v25.67 fx2: a form's own grids of fields (FX2_CFG.fields: div > label + box, the parts-built forms' .fieldgrid, VI-1's
+   .grid), laid out as the fields above: the label above at 15 px, the box at 44 px, the example under it, a row's boxes
+   in line, a long entry across two columns or the row */
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg{gap:14px 18px!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f{display:flex!important;flex-direction:column;gap:0;min-width:0}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f > label{display:block!important;font:600 15px/1.35 var(--fx2-sans)!important;color:var(--fx2-ink)!important;text-transform:none!important;letter-spacing:0!important;margin:0 0 4px!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f > input:not([type=checkbox]):not([type=radio]),html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f > select:not(.nbh-seg-src),html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f > textarea{min-height:44px!important;border:1px solid var(--fx2-box)!important;border-radius:8px!important;background-color:#fff!important;padding:0 12px!important;box-sizing:border-box;width:100%!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f > textarea{padding:10px 12px!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f > input[readonly]:not([type=checkbox]):not([type=radio]){background:var(--fx2-wash)!important;border-color:transparent!important;color:var(--fx2-ink)!important;box-shadow:none!important;cursor:default}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f > .hint{font:400 14px/1.45 var(--fx2-sans)!important;color:var(--fx2-hint)!important}
+@supports (grid-template-rows:subgrid){
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg.fx2-al{row-gap:0!important;align-items:stretch!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg.fx2-al > .fx2-f{display:grid!important;grid-row:span 3;grid-template-rows:subgrid;grid-template-columns:minmax(0,1fr)!important;justify-content:stretch!important;justify-items:stretch!important;row-gap:0!important;align-content:start;padding-bottom:18px;margin:0!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg.fx2-al > .fx2-f > label{grid-row:1;align-self:end;margin:0 0 6px!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg.fx2-al > .fx2-f > :is(input,select,textarea){grid-row:2;align-self:start}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg.fx2-al > .fx2-f > .nbh-seg{grid-row:2;align-self:start;justify-self:start;margin:0!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg.fx2-al > .fx2-f > :is(.fx2-hint,.nbh-hint,.hint){grid-row:3;margin:6px 0 0!important}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg.fx2-al > :not(.fx2-f){margin-bottom:18px}
+}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f.fx2-w2{grid-column:span 2}
+html.fx2:not(.nbh-pr-measure) .fx2-sh .fx2-fg > .fx2-f.fx2-wall{grid-column:1/-1}
 /* a row of definitions: the label above its box, one column */
 html.fx2:not(.nbh-pr-measure) .fx2-sh .defs{display:block!important;border:0!important;margin:16px 0 0!important;background:none!important}
 html.fx2:not(.nbh-pr-measure) .fx2-sh .defs .drow{display:block!important;border:0!important;padding:0!important;margin:0 0 18px!important;background:none!important}
@@ -3992,7 +4013,14 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
        packet   the id of DM-1's packet table: the forms in this file, the rest behind "Show all"
        calendar {edit, print}: RR-1's school calendar (its editor, its printed list), one line while it holds dates
        parent   {sheets, staff: {sheet, from, to}}: IC-1's Read with the parent
-       jump     links that jump to a card (TB-1's chips), aimed again once the sheet has settled */
+       jump     links that jump to a card (TB-1's chips), aimed again once the sheet has settled
+     v25.67 fx2, for the forms after the six (all optional too):
+       fields   grids of fields written as a box under its own label in a div (div > label + box), as the parts-built
+                forms and VI-1 write them ('.fieldgrid'): each is laid out as DM-1's fields are (label above, box at 44
+                px, the example under it, a row's boxes in line)
+       heads    more headings to put in sentence case (a selector; the bands and h3.sub always are)
+       keep     words a heading keeps as written (names: 'Hill', 'Iwata'); "Form" before a form's id always stays
+       noseg    where a list stays a list on a touch screen (a selector: a grid of intervals or trials, a ledger) */
   var C = window.FX2_CFG || {};
   /* what is typed in DM-1's contacts and packet redraws their summaries at once */
   var LIVE = [C.contacts && '#' + C.contacts.wrap, C.packet && '#' + C.packet].filter(Boolean).join(',');
@@ -4039,14 +4067,19 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
 
   /* 2. section headings in sentence case (GOV.UK); the paper keeps the words as written */
   var KEEP = /^(FBA|BIP|IEP|IEPs|ID|ESE|ELL|DSM|ICD|SIS|IDEA|FERPA|ABC|II|III|Florida|Medicaid|Department|DCF|CFR|BACB|BCBA|ESY|FAA)$/;
-  function sentence(t){ var first = true; return t.replace(/[A-Za-z][A-Za-z'’]*/g, function(w){ if (first) { first = false; return w; }
-    if (KEEP.test(w) || /^[A-Z0-9]{2,}$/.test(w) || /^[A-Z]$/.test(w) || /[a-z][A-Z]/.test(w)) return w; return w.toLowerCase(); }); }
+  var KEEP2 = {}; (C.keep || []).forEach(function(w){ KEEP2[w] = 1; });
+  /* v25.67 fx2: a heading lettered or numbered "A. ", "2b. " starts again after its mark ("A. Setting events") */
+  function sentence(t){ var lead = (/^\s*(?:\d+[a-z]?|[A-Z])\.\s+/.exec(t) || [''])[0].length, first = true;
+    return t.replace(/[A-Za-z][A-Za-z'’]*/g, function(w, at, all){ if (at < lead) return w; if (first) { first = false; return w; }
+    if (KEEP.test(w) || /^[A-Z0-9]{2,}$/.test(w) || /^[A-Z]$/.test(w) || /[a-z][A-Z]/.test(w)) return w;
+    /* v25.67 fx2: a name the form lists, and "Form" before a form's id ("for Form FS-1") */
+    if (KEEP2[w] || (/^Forms?$/.test(w) && /^\s+[A-Z]{2,3}-\d/.test(all.slice(at + w.length)))) return w; return w.toLowerCase(); }); }
   /* v24.95 the sheet's own titles too ("Parents, guardians, and authorized contacts"); a heading with a badge in it
      changes its words only. A heading the form rewrites is read again rather than put back. */
   function firstText(h){ for (var n = h.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && n.nodeValue.trim()) return n; return null; }
   function heads(){
     if (printing) return;
-    $$('.fx2-sh h3.sub, .fx2-sh .bar.nbh-band, .fx2-sh h2.nbh-band').forEach(function(h){
+    $$('.fx2-sh h3.sub, .fx2-sh .bar.nbh-band, .fx2-sh h2.nbh-band' + (C.heads ? ', ' + C.heads : '')).forEach(function(h){
       if (!h.children.length) {
         if (!h.hasAttribute('data-fx2-orig') || (h.hasAttribute('data-fx2-set') && h.textContent !== h.getAttribute('data-fx2-set'))) h.setAttribute('data-fx2-orig', h.textContent);
         var s = sentence(h.getAttribute('data-fx2-orig')); setText(h, s); attr(h, 'data-fx2-set', s); return; }
@@ -4056,7 +4089,16 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
   }
 
   /* 3. examples out of the boxes, under the labels */
+  /* v25.67 fx2: a form's grids of fields (div > label + box) take DM-1's field layout: the grid is marked fx2-fg and each
+     field in it fx2-f, and the style and the steps below treat them as an .ident and its .f */
+  function fields(){
+    if (!C.fields) return;
+    $$(C.fields).forEach(function(g){ if (!g.closest('.fx2-sh') || g.closest('table')) return; tog(g, 'fx2-fg', true);
+      Array.prototype.forEach.call(g.children, function(f){ var l = f.firstElementChild;
+        if (f.tagName === 'DIV' && l && l.tagName === 'LABEL' && Array.prototype.some.call(f.children, isBox)) tog(f, 'fx2-f', true); }); });
+  }
   function hints(){
+    $$('.fx2-sh .fx2-fg > .fx2-f').forEach(function(f){ var lab = f.querySelector(':scope > label'), x = f.querySelector(':scope > input:not([type=checkbox]):not([type=radio]):not([type=hidden]), :scope > textarea'); if (lab && x) moveHint(x, x); });
     $$('.fx2-sh .ident .f').forEach(function(f){ var lab = f.querySelector(':scope > label'), x = f.querySelector(':scope > input:not([type=checkbox]):not([type=radio]):not([type=hidden]), :scope > textarea'); if (lab && x) moveHint(x, x); });
     $$('.fx2-sh .defs .drow').forEach(function(r){ var lab = r.querySelector(':scope > .dlab'), x = r.querySelector(':scope > .dval > textarea:only-child, :scope > .dval > input:only-child:not([type=checkbox]):not([type=radio]):not([type=hidden])'); if (lab && x) moveHint(x, lab); });
     /* a two-column table of a name and its box (IN-1's Problem behavior, Synthesis): the example under the name */
@@ -4086,7 +4128,7 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
   /* 4. choices of two to four short answers become buttons on a touch screen (nbh-ui); a parent's decision on IC-1's
      procedures becomes one large button per answer */
   function segs(){
-    $$('.fx2-sh select').forEach(function(s){ if (s.hasAttribute('data-nbh-seg') || s.multiple || s.closest('.nbh-seg')) return; var o = s.options;
+    $$('.fx2-sh select').forEach(function(s){ if (s.hasAttribute('data-nbh-seg') || s.multiple || s.closest('.nbh-seg') || (C.noseg && s.closest(C.noseg))) return; var o = s.options;
       if (!o || o.length < 3 || o.length > 5 || o[0].value !== '') return;
       if (s.matches('[data-dec]')) { s.setAttribute('data-nbh-seg', 'wide'); return; }
       for (var i = 1; i < o.length; i++) { var t = (o[i].textContent || '').trim(); if (!t || t.length > 24) return; }
@@ -4234,6 +4276,18 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
           else if (!(c.classList.contains('fx2-hint') || c.classList.contains('nbh-hint') || c.classList.contains('nbh-seg'))) return false; }
         return lab === 1 && box === 1; });
       tog(g, 'fx2-al', ok); });
+    /* v25.67 fx2: the same in a form's own grids of fields; a part out of sight, or one across the whole row (a note the
+       form writes there), does not stop the row's boxes lining up, and a note of the form's own (.hint) sits with them */
+    $$('.fx2-sh .fx2-fg').forEach(function(g){
+      var ok = !!g.querySelector(':scope > .fx2-f') && Array.prototype.every.call(g.children, function(f){
+        if (!f.classList.contains('fx2-f')) { var cs = getComputedStyle(f); return f.hidden || cs.display === 'none' || cs.gridColumnStart === '1' && cs.gridColumnEnd === '-1'; }
+        var k = f.children, lab = 0, box = 0;
+        for (var i = 0; i < k.length; i++) { var c = k[i];
+          if (c.tagName === 'LABEL') { if (i || lab) return false; lab++; }
+          else if (isBox(c)) { if (box) return false; box++; }
+          else if (!(c.classList.contains('fx2-hint') || c.classList.contains('nbh-hint') || c.classList.contains('nbh-seg') || c.classList.contains('hint'))) return false; }
+        return lab === 1 && box === 1; });
+      tog(g, 'fx2-al', ok); });
   }
 
   /* 11. v24.95 an entry longer than its box: the box takes two columns, or the whole row, so it reads in full */
@@ -4243,8 +4297,8 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
     return x.measureText(t).width + (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0) + (f.tagName === 'SELECT' ? 30 : 6) + 2; }
   function cols(g){ var t = getComputedStyle(g).gridTemplateColumns.split(' ').filter(function(x){ return /px$/.test(x); }); return { n: t.length, w: parseFloat(t[0]) || 0, gap: parseFloat(getComputedStyle(g).columnGap) || 0 }; }
   function long(){
-    $$('.fx2-sh .ident.fx2-al').forEach(function(g){ var c = cols(g); if (c.n < 2 || !c.w) return;
-      Array.prototype.forEach.call(g.children, function(f){ var x = Array.prototype.filter.call(f.children, isBox)[0], w = x && x.type !== 'date' && x.type !== 'number' && x.offsetParent ? textW(x) : 0, k = 1;
+    $$('.fx2-sh .ident.fx2-al, .fx2-sh .fx2-fg.fx2-al').forEach(function(g){ var c = cols(g); if (c.n < 2 || !c.w) return;
+      Array.prototype.forEach.call(g.children, function(f){ if (g.classList.contains('fx2-fg') && !f.classList.contains('fx2-f')) return; var x = Array.prototype.filter.call(f.children, isBox)[0], w = x && x.type !== 'date' && x.type !== 'number' && x.offsetParent ? textW(x) : 0, k = 1;
         while (k < c.n && w > k * c.w + (k - 1) * c.gap) k++;
         tog(f, 'fx2-w2', k === 2 && c.n > 2); tog(f, 'fx2-wall', k > 1 && (k >= c.n)); }); });
     $$('.fx2-sh table.fx2-cards > tbody > tr').forEach(function(r){ var c = cols(r); if (c.n < 2 || !c.w) return;
@@ -4277,7 +4331,7 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
 
   /* the form's pages: a .sheet, or a section shown one at a time (IN-1's section.only-setup) */
   function mark(){ $$('.sheet, section[class*="only-"]').forEach(function(x){ if (!x.classList.contains('fx2-sh')) x.classList.add('fx2-sh'); }); }
-  function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); hints(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
+  function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); fields(); hints(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
   var timer = 0; function soon(){ clearTimeout(timer); timer = setTimeout(run, 120); }
   /* TB-1's chips jump to a target's card; a sheet just shown still grows its boxes to their text, so the jump is aimed
      again once that has settled (a smooth scroll aimed at the first position stopped short of the card) */
