@@ -4060,6 +4060,8 @@ function ipClean(){if(S.ipPlan&&!(typeof S.ipPlan==='object'&&S.ipPlan.plan&&typ
     if(Array.isArray(c.bar))o.bar=c.bar.slice(0,3).map(b=>({came:/^(Yes|No)$/.test(b&&b.came)?b.came:'',worked:/^(Yes|No|Not tried)$/.test(b&&b.worked)?b.worked:''}));
     if(t(c.note))o.note=String(c.note).slice(0,2000);}
     if(o.date||o.run||o.note||(o.bar||[]).some(b=>b.came||b.worked))S.ipc=o;else delete S.ipc;}}
+/* the nth school day (a weekday) after a date */
+function schoolAfter(s,n){const d=day(s);if(!d)return '';let k=0;while(k<n){d.setDate(d.getDate()+1);const w=d.getDay();if(w&&w<6)k++;}return isoOf(d);}
 const ipFilled=()=>!!(S.ipc&&(S.ipc.date||S.ipc.run||S.ipc.note||(S.ipc.bar||[]).some(b=>b.came||b.worked)));
 /* the first scored observation on or after the first day, and how many school days in it was */
 function ipVisit(p){const f=tiIsoD(p&&p.first);if(!f)return null;const r=scoredRows().map(x=>({j:x.j,d:tiIsoD((S.obs[x.j]||{}).date)})).filter(x=>x.d&&x.d>=f);
@@ -4067,10 +4069,10 @@ function ipVisit(p){const f=tiIsoD(p&&p.first);if(!f)return null;const r=scoredR
 function ipRender(){const box=byId('tiIpBox');if(!box)return;const x=S.ipPlan;
   if(!x){box.innerHTML='';box.className='ti-ip ti-ip-empty';return;}
   const p=x.plan,cop=(Array.isArray(p.coping)?p.coping:[]).filter(c=>c&&(t(c.barrier)||t(c.fix))),c=S.ipc||{},bar=c.bar||[];
-  const vis=ipVisit(p),a=tiIsoD(p.checkFrom),b=tiIsoD(p.checkBy);
+  const vis=ipVisit(p),f1=tiIsoD(p.first),a=f1?schoolAfter(f1,3):tiIsoD(p.checkFrom),b=f1?schoolAfter(f1,5):tiIsoD(p.checkBy);   /* the window from the first day itself */
   const sel=(id,val,opts,lab)=>'<select id="'+id+'" data-ti68="'+id+'" aria-label="'+E(lab)+'"><option value=""></option>'+opts.map(o=>'<option'+(val===o?' selected':'')+'>'+o+'</option>').join('')+'</select>';
   let h='<h3 style="margin-top:14px">Implementation Plan, Checked at the First Visit</h3><p class="hint">'+E(x.who)+'&rsquo;s plan from Form ST-1'+(tiIsoD(p.first)?': first day '+E(tiUsD(tiIsoD(p.first))):'')+(a&&b?'. The first visit falls between '+E(tiUsD(a))+' and '+E(tiUsD(b))+' (3 to 5 school days in).':'.')+
-    (vis?' The first check scored since then: observation #'+(vis.j+1)+' on '+E(tiUsD(vis.d))+(vis.n!=null&&vis.n>=0?', '+vis.n+' school day'+(vis.n===1?'':'s')+' in'+(vis.n<3||vis.n>5?' <span class="ti-few">outside 3 to 5</span>':''):'')+'.':'')+'</p>';
+    (vis?' The first check scored since then: observation #'+(vis.j+1)+' on '+E(tiUsD(vis.d))+(vis.n!=null&&vis.n>=0?', '+vis.n+' school day'+(vis.n===1?'':'s')+' in'+(vis.n<3||vis.n>5?' <b class="ti-ipwarn">(outside 3 to 5)</b>':''):'')+'.':'')+'</p>';
   h+='<table class="rt ti-ipt"><tr><th style="width:22%">Their part</th><td>'+[['Which steps',p.steps],['When',p.when],['Where',p.where],['Materials',p.materials]].filter(r=>t(r[1])).map(r=>'<b>'+r[0]+':</b> '+E(t(r[1]))).join('<br>')+'</td></tr>'+
     '<tr><th>Steps run as planned (when, where, with the materials)</th><td>'+sel('tiIpRun',c.run||'',['Yes','Partly','No'],'Steps run as planned')+'</td></tr>'+
     (cop.length?cop.map((q,i)=>'<tr><th>'+(i?'':'Coping plan')+'</th><td><b>'+E(t(q.barrier)||'Barrier '+(i+1))+'</b>'+(t(q.fix)?' &rarr; '+E(t(q.fix)):'')+'<div class="ti-ipq">Came up? '+sel('tiIpCame'+i,(bar[i]||{}).came||'',['Yes','No'],'Barrier '+(i+1)+': came up?')+' &nbsp;The fix worked? '+sel('tiIpWork'+i,(bar[i]||{}).worked||'',['Yes','No','Not tried'],'Barrier '+(i+1)+': the fix worked?')+'</div></td></tr>').join(''):'<tr><th>Coping plan</th><td class="hint">No barrier written on Form ST-1.</td></tr>')+
@@ -4202,6 +4204,7 @@ try{ipClean();ipRender();sendRender();}catch(e){console.error('TI-1 v25.68: '+(e
 <style id="ti1-v2568-css">
 /* v25.68 the first visit's plan check (printed when filled) and Send feedback (screen only; the slip prints on its own) */
 .ti-ipq{margin-top:4px;font-size:12.5px}
+.ti-ipwarn{color:#8a4b00;font-weight:600}
 .ti-ipq select{min-height:32px}
 @media print{#tiIpBox.ti-ip-empty{display:none!important}}
 .ti-sendgrid{display:grid;grid-template-columns:minmax(140px,22%) 1fr;gap:8px 12px;align-items:start;margin:8px 0}
