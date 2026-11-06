@@ -347,7 +347,9 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       ok(await isOpen(page), '3 the button opens the panel');
       ok((await editor(page)) === TXT, '3 the panel holds the field\'s text');
       const sub = await page.evaluate(() => __w.text('#pnS'));
-      ok(/Observation 1 of 3/.test(sub) && /What happened, entry 2/.test(sub), '3 the panel names the field (' + sub + ')');
+      /* v25.67 fx2: the panel names the sheet by its title on screen, which the shared layout writes in sentence case
+         ("Direct observation record — observation 1 of 3"), as it does on the six forms */
+      ok(/Observation 1 of 3/i.test(sub) && /What happened, entry 2/.test(sub), '3 the panel names the field (' + sub + ')');
       const cards = await page.evaluate(() => __w.cards());
       ok(cards.length === 5 && cards.map(c => c.mark).join('|') === 'very upset|upset|had a tantrum|a lot|was mad', '3 five findings, highlighted, in order', cards.map(c => c.mark));
       ok(!cards.some(c => /I am angry/.test(c.mark)), '3 the quoted words are not flagged');

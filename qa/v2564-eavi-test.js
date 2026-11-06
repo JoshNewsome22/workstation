@@ -91,14 +91,15 @@ const VI_OLD=require('fs').readFileSync(__filename,'utf8').split('/*'+'VI_OLD*/'
   await fill(e,series([[600,600,600,600],[500,520,530,540],[600,600,600,600],[600,600,540,600]],4),{measure:'latency'});r=await read(e);
   ok('16 H4 the two-thirds gate is a flag: latencies all below the lower line but not a third shorter are met and flagged',/^Differentiated: Demand/.test(r.head)&&/latency not at least one-third shorter/.test(row(r,'Demand')[8]),r.rows);
   await tpl(e,'standard');await sleep(150);
-  /* H5 protective equipment */
-  const h5a=await e.evaluate(()=>({log:!!document.querySelector('[name="s[0].pe"]')&&!!document.querySelector('[name="s[0].bl"]'),run:!!document.getElementById('eaPE')&&!!document.getElementById('eaBlk'),ph:document.querySelector('[name="s.pe"]').placeholder}));
+  /* H5 protective equipment. v25.67 fx2: on screen the shared layout shows a box's words under it and keeps them in
+     data-fx2-ph (back in the box on paper) */
+  const h5a=await e.evaluate(()=>({log:!!document.querySelector('[name="s[0].pe"]')&&!!document.querySelector('[name="s[0].bl"]'),run:!!document.getElementById('eaPE')&&!!document.getElementById('eaBlk'),ph:(el=>el.placeholder||el.getAttribute('data-fx2-ph')||'')(document.querySelector('[name="s.pe"]'))}));
   await fill(e,series([[1,0,1,0],[0,1,0,1],[1,1,0,0],[1,0,0,1]],4));
   await e.evaluate(()=>{for(let i=0;i<16;i++)eaAPI.setv(`s[${i}].pe`,true);eaAPI.renderAnalysis();});r=await read(e);
   ok('17 H5 Protective equipment and Blocking ticks are in each log row and in the runner; equipment worn with a low, undifferentiated outcome is flagged; the placeholder puts therapist equipment first for aggression',h5a.log&&h5a.run&&/Protective equipment can suppress self-injury in every condition; this is not evidence of no social function\. Consider a latency or precursor analysis\./.test(r.text)&&/For aggression, try equipment the therapist wears first/.test(h5a.ph),{h5a,t:r.text.slice(0,400)});
   /* H6 the safety evidence and the nurse contact */
   const h6=await e.evaluate(()=>{const g=document.getElementById('guide')||document.body;eaAPI.setv('m.urg','4');eaAPI.setv('s.nurse','');eaAPI.setv('s.injchk','');document.querySelector('[name="s.nurse"]').dispatchEvent(new Event('input',{bubbles:true}));
-    return {guide:document.body.textContent.indexOf('per hour the injury rate was significantly higher during functional analyses than outside them')>=0,term:document.querySelector('[name="s.term"]').placeholder,gap:window.eaNurseGap()};});
+    return {guide:document.body.textContent.indexOf('per hour the injury rate was significantly higher during functional analyses than outside them')>=0,term:(el=>el.placeholder||el.getAttribute('data-fx2-ph')||'')(document.querySelector('[name="s.term"]')),gap:window.eaNurseGap()};});
   await sleep(200);const h6b=await e.evaluate(()=>{const n=document.getElementById('eaNurseFlag');return {vis:!n.hidden,txt:n.textContent};});
   ok('18 H6 the guide says injuries per hour were higher during the analyses; the termination placeholder credits the assent plan (SI-1), not Kahng; the nurse contact and injury checks are asked for at urgency 3 or 4',h6.guide&&/Form SI-1/.test(h6.term)&&!/Kahng/.test(h6.term)&&h6.gap.length===2&&h6b.vis&&/injury check schedule/.test(h6b.txt),{h6,h6b});
   await e.evaluate(()=>{eaAPI.setv('m.urg','');});

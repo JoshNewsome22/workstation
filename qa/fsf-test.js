@@ -8,9 +8,9 @@
    5. no page errors.  usage: node qa/fsf-test.js */
 const L=require(__dirname+'/lib.js');const {BASE,sleep}=L;let pw;try{pw=require('playwright');}catch(e){pw=require('/opt/node22/lib/node_modules/playwright');}
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1200):''));if(!c)fails++;};
-(async()=>{const wk=await pw.webkit.launch(),cr=await pw.chromium.launch();const errs=[];
+(async()=>{const wk=await L.ipadBrowser(pw),cr=await pw.chromium.launch();   /* v25.67 fx2: Chromium as an iPad where WebKit is not installed */const errs=[];
   for(const [eng,vw,vh,touch] of [[wk,1180,820,true],[wk,820,1180,true],[cr,1440,900,false]]){
-    const tag=(touch?'iPad ':'laptop ')+vw;const ctx=await eng.newContext({viewport:{width:vw,height:vh},hasTouch:touch});const p=await ctx.newPage();
+    const tag=(touch?'iPad ':'laptop ')+vw;const ctx=await (touch?L.ipadCtx(eng,{viewport:{width:vw,height:vh}}):eng.newContext({viewport:{width:vw,height:vh},hasTouch:touch}));const p=await ctx.newPage();
     p.on('pageerror',e=>errs.push(tag+': '+e.message));p.on('dialog',d=>d.accept().catch(()=>{}));
     await p.goto(BASE+'/NBH-Workstation/index.html');await sleep(2500);
     await p.evaluate(()=>{try{localStorage.removeItem('nbh.ws.full');}catch(e){}});

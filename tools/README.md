@@ -41,6 +41,7 @@ Paths below are from the repository root. The test server the checks expect:
   `tb1-replacement-library.json` + `patch-tb1-rlib.py` (v25.67, see *The TB-1 replacement-behavior library* below).
   v21.84: `shared_js.py` (the list of the scripts every form loads from one file beside it, used by the patchers and
   the builds) and `patch-shared.py` (moves inline copies out of forms; see *The shared scripts* below).
+  v25.67: `fx2.html` + `patch-fx2.py` (the forms' screen layout on an iPad; see *The screen layout (fx2)* below).
 - `tools/relay/` — the rewrite service for the writing help: PHP for newsomebh.com, with its
   tests, its upload zip (`build-zip.sh`) and a README with the upload steps.
 - `tools/reply-box/` — the reply box for IA-1's respondent pages (v21.65): `public_html/reply/box.php`
@@ -81,6 +82,35 @@ byte. It names any file the tools would change and exits 1. Run it before a rele
 A block added to a form by hand must sit where the tools leave it: DM-1's home-contact block (`dm-v2195`) and DD-1's
 Log it now block (`dd-v2194`) sit just above the polish block, which `apply-polish.py` removes and adds again before
 `</body>`.
+
+## The screen layout (fx2, v25.67)
+
+The layout the BCBA approved for the forms on an iPad (v24.92 DM-1, IC-1 and RR-1; v24.93 TB-1, IA-1 and IN-1; v24.95
+refined) is one shared block, `tools/blocks/fx2.html`: a `<style id="fx2-v2492">` and a `<script id="fx2-v2492-js">`
+(the ids are the v24.92 ones, so earlier notes still find them). It is for the screen only: what it adds is noprint,
+and what it changes (a heading's capitals, an example moved out of its box) goes back while the page prints and while
+the workstation collects the form for the master print. TD-1 keeps its own, earlier version (v24.89).
+
+    python3 tools/blocks/patch-fx2.py SI-1 OB-1 ...             # put it in, or refresh it (ids or files)
+    python3 tools/blocks/patch-fx2.py --check NBH-Workstation/[A-Z]*.html   # exit 1 if a copy differs
+
+`patch-fx2.py` puts the style at the end of the form's `<head>` with the form's switch after it (`html.fx2` and
+`data-fx2="<ID>"`, set before the page draws), and the script just above the polish block, which stays last
+(`apply-polish.py` takes the polish out and puts it back before `</body>`; a block below it would move). A copy already in
+a form is replaced where it stands. What is particular to a form is the form's own and the tool never changes it:
+
+- `<script id="fx2-cfg">window.FX2_CFG = {...}</script>`, after the switch: the form's settings (the list is at the top
+  of the shared script): `cards` (the tables that are cards under 1000 px; without it every `.grid` table holding boxes,
+  `''` for none), `fields` (grids written `div > label + box`, as the parts-built forms and VI-1 write them), `heads`
+  (more headings in sentence case), `keep` (names a heading keeps), `noseg` (where a short list stays a list: grids of
+  intervals or trials, ledgers), `eg`, `keepin`, `addtxt`, `count`, `toolbar` (the toolbar on one row, the six only),
+  and the six's own features (`contacts`, `packet`, `calendar`, `parent`, `jump`). With no `FX2_CFG` a form still gets
+  the generic layout.
+- `<style id="fx2-own">`, right after the shared style: the form's own screen rules (IC-1's and IN-1's).
+
+`tools/check-build.py` runs `patch-fx2.py --check`. A parts-built form (SI-1, DA-1) carries its blocks in the built file:
+after rebuilding one from its parts, run `patch-fx2.py` on it and put its two own blocks back (they are in git).
+`qa/v2567-fx2-g1-test.js` checks the forms that carry it.
 
 ## Rebuild a parts form
 

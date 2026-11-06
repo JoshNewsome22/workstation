@@ -41,7 +41,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const ev=await p.evaluate(()=>{state.meta.carry='';const e=window.__nbhFactsOut().evidence;return {st:e.statement,d:draft().replace(/\s+/g,' ').trim(),fn:e.fn,key:e.fnKey};});
   ok('7 F73 with the FS-1 box empty the case gets the FS-1 statement, not the summary\'s advice',ev.st===ev.d&&!/worth testing|Carry to Form ABC-1/.test(ev.st),ev);
   /* ---- I36 ---- */
-  ok('8 I36 conditions ticked on every observation: each over the observations with it and without it',sim.condAll&&sim.head==='Conditions Present, With and Without the Behavior'&&sim.sheetHead==='Conditions Present During the Observation'
+  /* v25.67 fx2: the headings are read on screen, where the shared layout writes them in sentence case ("Conditions
+     present, with and without the behavior"); the form's choice of words is checked without regard to letter case */
+  const lc=s=>String(s||'').toLowerCase();
+  ok('8 I36 conditions ticked on every observation: each over the observations with it and without it',sim.condAll&&lc(sim.head)===lc('Conditions Present, With and Without the Behavior')&&lc(sim.sheetHead)===lc('Conditions Present During the Observation')
     &&sim.cond[0]==='Condition|With the behavior|Behavior when present|Behavior when absent'&&sim.cond.includes('Task above current skill|2 of 2|2 of 2|0 of 1')&&sim.cond.includes('Demand or task placed|2 of 2|2 of 3|never absent'),sim);
   ok('9 I36 the summary names the condition the behavior followed and the one always present',S.includes('The behavior occurred in every observation with task above current skill and in none without it (2 of 2 against 0 of 1).')
     &&S.includes('Present in every observation, with or without the behavior: demand or task placed. These observations cannot show whether it matters')&&/The behavior occurred in 2 of 2 observations with task above current skill and in 0 of 1 without it/.test(sim.draft),sim.sum);
@@ -53,8 +56,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     sheetHead:document.querySelector('.obs-page .twoup h3').textContent,acc:[...document.querySelectorAll('.obs-page')].map(pg=>!!pg.querySelector('input[data-group="cons"][data-key="access"]'))}));
   await p.evaluate(()=>{const c=document.getElementById('condAll');c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(200);
   const o2=await p.evaluate(()=>({condAll:state.cfg.condAll,cols:document.querySelectorAll('#condTbl thead th').length}));
-  ok('10 I36 an older record keeps the old count until the box says conditions were ticked on every observation',o1.condAll===false&&o1.head==='Conditions Present When the Behavior Occurred'&&!o1.box&&o1.cols===3
-    &&o1.sheetHead==='Conditions Present When the Behavior Occurred'&&o2.condAll===true&&o2.cols===4,{o1,o2});
+  ok('10 I36 an older record keeps the old count until the box says conditions were ticked on every observation',o1.condAll===false&&lc(o1.head)===lc('Conditions Present When the Behavior Occurred')&&!o1.box&&o1.cols===3
+    &&lc(o1.sheetHead)===lc('Conditions Present When the Behavior Occurred')&&o2.condAll===true&&o2.cols===4,{o1,o2});
   /* ---- I37 ---- */
   ok('11 I37 attention and an item or activity have their own boxes; the older single box shows only where it was ticked',
     sim.cons.includes('attnGiven')&&sim.cons.includes('item')&&!sim.cons.includes('access')&&JSON.stringify(o1.acc)==='[true,false,false]',{cons:sim.cons,acc:o1.acc});

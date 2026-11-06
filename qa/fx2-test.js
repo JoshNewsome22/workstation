@@ -17,8 +17,8 @@
 const L=require(__dirname+'/lib.js');const {BASE,sleep}=L;let pw;try{pw=require('playwright');}catch(e){pw=require('/opt/node22/lib/node_modules/playwright');}
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1500):''));if(!c)fails++;};
 const file=id=>L.forms().find(x=>x.id===id).file;
-(async()=>{const wk=await pw.webkit.launch(),cr=await pw.chromium.launch();const errs=[];
-  const ipad=await wk.newContext({viewport:{width:860,height:900},hasTouch:true}),lap=await cr.newContext({viewport:{width:1300,height:900}});
+(async()=>{const wk=await L.ipadBrowser(pw),cr=await pw.chromium.launch();   /* v25.67 fx2: Chromium as an iPad where WebKit is not installed */const errs=[];
+  const ipad=await L.ipadCtx(wk,{viewport:{width:860,height:900}}),lap=await cr.newContext({viewport:{width:1300,height:900}});
   const open=async(ctx,id,sim=true)=>{const p=await ctx.newPage();p.on('pageerror',e=>errs.push(id+': '+e.message));p.on('dialog',d=>d.accept().catch(()=>{}));
     await p.goto(BASE+'/NBH-Workstation/'+file(id));await sleep(1800);if(sim){await L.loadSim(p);await sleep(2200);}return p;};
   const view=async(p,v)=>{await p.evaluate(v=>document.querySelector('[data-view="'+v+'"]').click(),v);await sleep(600);};
@@ -29,7 +29,9 @@ const file=id=>L.forms().find(x=>x.id===id).file;
       const r=await p.evaluate(()=>{const sh=[...document.querySelectorAll('.sheet')].find(s=>s.offsetParent);if(!sh)return null;const vis=e=>e.offsetParent&&e.getBoundingClientRect().width>2;
         const F=[...sh.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]),select:not(.nbh-seg-src),textarea')].filter(vis);
         return {wide:document.documentElement.scrollWidth-document.documentElement.clientWidth,small:F.filter(e=>parseFloat(getComputedStyle(e).fontSize)<16).map(e=>e.name||e.id).slice(0,3),
-          ph:F.filter(e=>(e.getAttribute('placeholder')||'').trim().length>8&&!/^From Form [A-Z]{2,3}-\d/.test(e.getAttribute('placeholder'))).map(e=>(e.name||e.id)+':'+e.getAttribute('placeholder')).slice(0,3)};});
+          /* v25.67 fx2: a short example in a row of label-and-box pairs stays in its box (data-fx2-inrow; IC-1's storage
+             box beside "Delete by"), as v24.92 allows: an example between the pairs pushed the row apart */
+          ph:F.filter(e=>(e.getAttribute('placeholder')||'').trim().length>8&&!/^From Form [A-Z]{2,3}-\d/.test(e.getAttribute('placeholder'))&&!(e.hasAttribute('data-fx2-inrow')&&e.getAttribute('placeholder').trim().length<=36)).map(e=>(e.name||e.id)+':'+e.getAttribute('placeholder')).slice(0,3)};});
       if(r&&(r.wide>1||r.small.length||r.ph.length))bad.push(v+' '+JSON.stringify(r));}
     ok('1 '+id+' every sheet: nothing wider than the screen, boxes at 16 px, no example left in a box',!bad.length,bad);}
   /* 2, 3 */

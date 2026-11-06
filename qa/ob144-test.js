@@ -59,12 +59,20 @@ const W=fs.readdirSync(path.join(ROOT,'NBH-Workstation'));const file=p=>W.find(f
  const dup=await p.evaluate(()=>{const n0=state.obs.length,o=state.obs[0];document.querySelector('#obsPages .obs-page button.dupObs[data-obs="0"]').click();const x=state.obs[state.obs.length-1];
    return {n0,n1:state.obs.length,same:['setting','activity','arrange','adults','students','announced'].every(k=>String(x[k])===String(o[k])),src:o.setting+'|'+o.activity,blankData:!x.date&&!x.start&&!x.count&&!x.narrative.some(r=>r.w)&&!Object.values(x.cons||{}).some(Boolean)};});
  ok('E-30 "Duplicate this observation\'s setup" adds an observation with its setting, activity, arrangement, adults, students and announcement, and no date, times, counts, narrative or ticks',dup.n1===dup.n0+1&&dup.same&&dup.blankData&&dup.src.length>3,dup);
- /* E-30: the Log keeps # and Date beside the actions */
- await p.setViewportSize({width:820,height:1100});await p.evaluate(()=>document.querySelector('#viewSeg [data-view="log"]').click());await sleep(500);
+ /* E-30: the Log keeps # and Date beside the actions. v25.67 fx2: under 1000 px the shared screen layout shows the Log's
+    observations as cards, each holding its #, its Date, Open and Remove, with nothing to scroll (checked at 820 px below);
+    the table that scrolls sideways with its sticky columns is the 13-inch iPad's upright (1032 px), checked here */
+ await p.setViewportSize({width:1032,height:1376});await p.evaluate(()=>document.querySelector('#viewSeg [data-view="log"]').click());await sleep(500);
  const frz=await p.evaluate(()=>{const t=document.querySelector('#logBody table.oblog');const w=t.closest('.tblwrap,.nbh-scrollx')||t.parentElement;const r=t.rows[1];const cs=i=>getComputedStyle(r.cells[i]);
    const before=r.cells[2].getBoundingClientRect().left;w.scrollLeft=400;const after=r.cells[2].getBoundingClientRect().left;
    return {pos:[cs(0).position,cs(1).position,cs(2).position],left:[cs(1).left,cs(2).left],scrolled:w.scrollLeft,before,after,act:r.cells[0].getBoundingClientRect().right,date:r.cells[2].getBoundingClientRect().left};});
- ok('E-30 on the Log at iPad width, # and Date stay in view beside Open and Remove while the table scrolls sideways',frz.pos.every(x=>x==='sticky')&&parseFloat(frz.left[0])>0&&parseFloat(frz.left[1])>parseFloat(frz.left[0])&&frz.scrolled>0&&Math.abs(frz.after-frz.before)<2,frz);
+ ok('E-30 on the Log at iPad width (1032 px, upright), # and Date stay in view beside Open and Remove while the table scrolls sideways',frz.pos.every(x=>x==='sticky')&&parseFloat(frz.left[0])>0&&parseFloat(frz.left[1])>parseFloat(frz.left[0])&&frz.scrolled>0&&Math.abs(frz.after-frz.before)<2,frz);
+ await p.setViewportSize({width:820,height:1100});await sleep(800);
+ const crd=await p.evaluate(()=>{const t=document.querySelector('#logBody table.oblog');const W=document.documentElement.clientWidth;const rows=[...t.tBodies[0].rows].filter(r=>r.cells.length>2);
+   const bad=rows.filter(r=>{const R=r.getBoundingClientRect();const c=[0,1,2].map(i=>r.cells[i].getBoundingClientRect());const b=[...r.cells[0].querySelectorAll('button')].map(x=>x.textContent.trim()).join();
+     return !(b==='Open,Remove'&&c.every(x=>x.width>0&&x.left>=R.left-1&&x.right<=R.right+1)&&R.left>=0&&R.right<=W);}).length;
+   return {cards:t.classList.contains('fx2-cards'),n:rows.length,bad,W,sw:document.documentElement.scrollWidth};});
+ ok('E-30 on the Log at 820 px (an 11-inch iPad upright), each observation is a card holding its #, its Date, Open and Remove, all in view with nothing to scroll',crd.cards&&crd.n>0&&!crd.bad&&crd.sw<=crd.W,crd);
  await p.close();
 
  /* ---- E-28: momentary time sampling for a timed behavior; a method chosen by hand stays ---- */

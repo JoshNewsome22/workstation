@@ -16,12 +16,12 @@
 const L=require(__dirname+'/lib.js');const {BASE,sleep}=L;let pw;try{pw=require('playwright');}catch(e){pw=require('/opt/node22/lib/node_modules/playwright');}
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1500):''));if(!c)fails++;};
 const file=id=>L.forms().find(x=>x.id===id).file;
-(async()=>{const wk=await pw.webkit.launch(),cr=await pw.chromium.launch();const errs=[];
+(async()=>{const wk=await L.ipadBrowser(pw),cr=await pw.chromium.launch();   /* v25.67 fx2: Chromium as an iPad where WebKit is not installed */const errs=[];
   const sim=async p=>{await L.loadSim(p);await sleep(600);await p.evaluate(()=>{const b=[...document.querySelectorAll('dialog button,[role=dialog] button,[role=alertdialog] button')].find(x=>x.offsetParent&&/^(Replace|Load|OK|Yes)$/i.test(x.textContent.trim()));if(b)b.click();});await sleep(2200);};
   const open=async(ctx,id)=>{const p=await ctx.newPage();p.on('pageerror',e=>errs.push(id+': '+e.message));p.on('dialog',d=>d.accept().catch(()=>{}));
     await p.goto(BASE+'/NBH-Workstation/'+file(id));await sleep(1800);await sim(p);return p;};
   const view=async(p,v)=>{await p.evaluate(v=>{const b=document.querySelector('[data-view="'+v+'"]');if(b)b.click();},v);await sleep(700);};
-  const big=await wk.newContext({viewport:{width:1080,height:810},hasTouch:true}),mid=await wk.newContext({viewport:{width:860,height:900},hasTouch:true});
+  const big=await L.ipadCtx(wk,{viewport:{width:1080,height:810}}),mid=await L.ipadCtx(wk,{viewport:{width:860,height:900}});
   const pages={};
   /* 1 rows line up, on every sheet of the six forms, at both widths */
   for(const [ctx,w] of [[big,1080],[mid,860]]){const bad=[];let n=0;

@@ -45,4 +45,10 @@ async function navTap(page,sel,touch){const id=sel.replace(/^#/,'');
   if(touch)await it.tap();else await it.click();T('tapped');return true;}
 /* v25.65: a button that may be on the screen or in a menu (the top bar's or the form row's View): tapped where it is */
 async function tapOrMenu(page,sel,touch){const l=page.locator(sel).first();if(await l.isVisible().catch(()=>false)){if(touch)await l.tap();else await l.click();return true;}return navTap(page,sel,touch);}
-module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts,navTap,tapOrMenu};
+/* v25.67 fx2: the iPad's engine. WebKit (Safari's) when it is installed; where it is not, Chromium with an iPad's user agent,
+   touch and a mobile viewport (as sprint-a8-test does), so the touch-screen checks still run. ipadCtx adds those to a
+   context; on WebKit it adds touch only, as the tests did before. */
+const IPAD_UA='Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
+async function ipadBrowser(pw){try{const b=await pw.webkit.launch();b._nbhEngine='webkit';return b;}catch(e){const b=await pw.chromium.launch();b._nbhEngine='chromium';return b;}}
+function ipadCtx(b,o){return b.newContext(Object.assign({hasTouch:true},b._nbhEngine==='chromium'?{isMobile:true,userAgent:IPAD_UA}:{},o||{}));}
+module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts,navTap,tapOrMenu,IPAD_UA,ipadBrowser,ipadCtx};
