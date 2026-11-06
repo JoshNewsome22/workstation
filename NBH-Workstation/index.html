@@ -1996,7 +1996,7 @@ function railHTML(){   /* v25.68 (design review M5) each form's state in words (
         <input type="checkbox" data-tick="${id}" ${state.ticked[id]?'checked':''} aria-label="Include Form ${id} in the packet">
         <button type="button" class="open" data-open="${id}" tabindex="${stop?0:-1}"${cur?' aria-current="true"':''} title="${esc(name)}">
         <span class="dot ${cls}" aria-hidden="true"></span>
-        <span class="fid">${id}</span><span class="nm">${name}</span><span class="st sr-w${w?' has '+w.c:''}">${w?w.w:''}</span>${w?'<span class="sr">'+(st?', '+nf+' fields filled':pd?', in the case file; loads when opened':'')+'</span>':'<span class="sr">not opened</span>'}${odd}</button></li>`;
+        <span class="fid">${id}</span><span class="nm">${name}</span><span class="st sr-w${w?' has '+w.c:''}">${w?w.w:''}</span>${w?'<span class="sr">'+(st?', '+nf+' fields filled':pd?', '+nf+' fields filled in the case file; loads when opened':'')+'</span>':'<span class="sr">not opened</span>'}${odd}</button></li>`;
     }).join('')+'</ul>';
   }).join('');}
 /* The list is redrawn on every status reply - every few seconds for each open
@@ -11853,9 +11853,10 @@ body:not(.sr-choose) .railhead .sr-tl,body:not(.sr-choose) .railhead .rh-tools #
 .sr-sheets .sr-sw{margin-left:auto;font-size:12px;color:#4d5f68;font-weight:500;white-space:nowrap}
 .sr-sheets .sr-sw.ok{color:#2f6b37}
 body.sr-nt .alertbar.on.sr-off,body.sr-nt .pwabar.sr-off:not([hidden]){display:none!important}
-body.sr-nt.ws-full .alertbar,body.sr-nt.ws-full .pwabar,body.sr-nt.sr-focus .alertbar:not(.sr-safe),body.sr-nt.sr-focus .pwabar:not(.sr-safe),body.sr-nt.ws-fold .alertbar,body.sr-nt.ws-fold .pwabar{display:none!important}
+body.sr-nt.ws-full .alertbar,body.sr-nt.ws-full .pwabar,body.sr-nt.sr-focus .alertbar:not(.sr-safe),body.sr-nt.sr-focus .pwabar:not(.sr-safe){display:none!important}
 .sr-pg{min-height:44px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
-#srNoteChip{display:none;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:999px;border:1px solid #e0c3a4!important;background:#fbf0e6!important;color:#7a3a10!important;font:600 13.5px var(--sans);white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+body.ws-a #barSum #chWho{flex-shrink:0}body.ws-a #barSum #sumDet{flex-shrink:50}
+#srNoteChip{justify-content:flex-start;max-width:38%;display:none;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:999px;border:1px solid #e0c3a4!important;background:#fbf0e6!important;color:#7a3a10!important;font:600 13.5px var(--sans);white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
 #srNoteChip.on{display:inline-flex}
 #srNoteChip.safe{background:#fbe5e1!important;border-color:#e2b5ab!important;color:#8f2a1a!important}
 .pwabar.sr-safe{background:#fbe5e1;color:#5c1a10;border-bottom:1px solid #e2b5ab}
@@ -11924,7 +11925,6 @@ header.top .who{flex:1 1 auto;min-width:0;display:flex!important}
 #phMore.sr-dirty::after{top:6px;right:calc(50% - 18px)}
 #phCaseload{display:none!important}
 #phLog{display:flex}
-body.ws-fold .alertbar,body.ws-fold .pwabar{display:none!important}
 .sr-phst{margin:0 0 10px;font:600 15px/1.35 var(--sans);color:#1a2933}.sr-phst.warn{color:#7d5a10}}
 @container chome (max-width:599px){.ch-o7{order:7}}
 @media (prefers-reduced-motion:reduce){.sr-sheets button,#srNoteChip,.ws-toast{transition:none!important;animation:none!important}}
@@ -12030,7 +12030,7 @@ const safeBar=mk('div',{class:'pwabar sr-safe',id:'srSafety',role:'alert',hidden
 safeBar.querySelector('#srSafeGo').addEventListener('click',()=>{const id=safeBar.dataset.open;if(id)openForm(id);});
 const chip=mk('button',{type:'button',id:'srNoteChip','aria-expanded':'false'});
 chip.addEventListener('click',()=>{const L=live();if(!L.length)return;
-if(B.classList.contains('ws-full')||B.classList.contains('sr-focus')||B.classList.contains('ws-fold')){noteDlg(L);return;}
+if(B.classList.contains('ws-full')||B.classList.contains('sr-focus')){noteDlg(L);return;}
 L.forEach(n=>{NT.fold[n.sig]=false;NT.seen[n.sig]=Date.now();});NT.cur=0;paintNotes();say0(L.length+' notice'+(L.length===1?'':'s')+' open above the form');});
 function noteDlg(L){dialog('Notices',L.map((n,i)=>{const e=n.el(),tx=e.querySelector('span');return '<div class="sr-nd"><p>'+(tx?tx.innerHTML:esc(e.textContent))+'</p><p class="td-more">'+
 [...e.querySelectorAll('button')].filter(b=>!b.hidden&&!b.classList.contains('sr-pg')&&b.id).map(b=>'<button type="button" data-srnote="'+esc(b.id)+'">'+esc(T(b.textContent))+'</button>').join(' ')+'</p></div>';}).join('<hr>'));}
@@ -12040,7 +12040,7 @@ function paintSafety(){let x=null;if(A()&&caseOn()&&state.facts)try{x=(todayItem
 if(want){const t=clStrip(x.t),h='<b>Safety.</b> '+esc(t);const s=safeBar.querySelector('#srSafeText');if(s.innerHTML!==h)s.innerHTML=h;safeBar.dataset.open=x.open||'';const g=safeBar.querySelector('#srSafeGo');g.textContent=x.open?'Open '+x.open:'';g.hidden=!x.open;}
 if(safeBar.hidden===want)safeBar.hidden=!want;}
 function paintNotes(){const on=A();B.classList.toggle('sr-nt',on);B.classList.toggle('sr-focus',typeof focusOn==='function'&&focusOn()&&B.classList.contains('has-form'));
-const L=on?live():[];const now=Date.now(),chipOnly=B.classList.contains('ws-full')||B.classList.contains('sr-focus')||B.classList.contains('ws-fold');
+const L=on?live():[];const now=Date.now(),chipOnly=B.classList.contains('ws-full')||B.classList.contains('sr-focus');
 L.forEach(n=>{if(!NT.seen[n.sig])NT.seen[n.sig]=now;else if(!n.safe&&NT.fold[n.sig]===undefined&&now-NT.seen[n.sig]>15000)NT.fold[n.sig]=true;});
 const shown=L.filter(n=>n.safe||!NT.fold[n.sig]),folded=L.filter(n=>!shown.includes(n));
 if(NT.cur>=shown.length)NT.cur=0;
@@ -12082,7 +12082,9 @@ tip=d.createElement('div');tip.className='sr-tip noprint';tip.setAttribute('role
 ['touchend','touchmove','scroll'].forEach(ev=>r.addEventListener(ev,()=>{clearTimeout(tt);},{passive:true}));}}
 function frameSync(){const a=A();Object.values(state.frames||{}).forEach(f=>{const d=docOf(f),w=cw(f);if(!d||!w)return;
 if(!d.getElementById('ws-sr-frame-css')){const st=d.createElement('style');st.id='ws-sr-frame-css';st.setAttribute('data-nbh-screen','');st.textContent=FCSS2;(d.head||d.documentElement).appendChild(st);
-setTimeout(()=>{try{const F=w.nbhUI&&w.nbhUI.fields;if(F&&F.reset&&F.run){F.reset();F.run();}if(w.nbhFitScreen&&w.nbhFitScreen.fit)w.nbhFitScreen.fit();}catch(e){}},80);}
+w.__srFit=1;}
+  /* the sheet column at 180 px: the form measures its boxes and its fit again, once it has settled */
+  if(w.__srFit===1&&d.documentElement.classList.contains('nbh-rail')&&state.status[idOf(f)]&&!state.pending[idOf(f)]){w.__srFit=2;try{const F=w.nbhUI&&w.nbhUI.fields;if(F&&F.reset&&F.run){F.reset();F.run();}if(w.nbhFitScreen&&w.nbhFitScreen.fit)w.nbhFitScreen.fit();}catch(e){}}
 patchToast(f);docFrame(f);
 const n=tabsOf(d).length,few=a&&n>0&&n<=6;if(!!w.__nbhNoSheets!==few){w.__nbhNoSheets=few;try{if(w.nbhSheets&&w.nbhSheets.run)w.nbhSheets.run();}catch(e){}}
 sheetMarks(d);focusWords(d);});
