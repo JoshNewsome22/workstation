@@ -6,7 +6,12 @@
    Every tap is kept on this phone (localStorage, one record per link) as it is made, so a reload, a closed tab or no
    signal loses nothing. "Send today's data" closes what was tapped into an entry, locks it on the phone for DD-1 alone
    (NBH_RESPOND.sendBox: ECDH P-256, HKDF-SHA-256, AES-GCM-256) and posts it; an entry not acknowledged stays on the
-   phone and is sent again (on its own when the signal is back), and DD-1 takes each entry once by its id. */
+   phone and is sent again (on its own when the signal is back), and DD-1 takes each entry once by its id.
+   v25.68 (research recommendation #5) the daily self-check: a link that carries k, three to five "did I do it?" questions (the
+   plan's critical steps, from Form TI-1 or Form QS-1: [{i, n}]), asks them after each period or session, under the targets.
+   Each is answered Yes, No or Didn't come up; the answers go with the entry the next Send makes (sc: [{i, n, a}], a = y, n or x)
+   and the questions are asked again for the next period. Sending is never held for them: a send with none answered asks once,
+   and the next press sends. A link without k shows and sends exactly what it did. */
 (function(){
 "use strict";
 var D=document,root=D.getElementById('sd'),KINDS={n:1,d:1,p:1,i:1};
@@ -28,8 +33,10 @@ function linkOf(h){var m=/[#&]s=([A-Za-z0-9_-]+)/.exec(String(h||''));if(!m)retu
   if(!/^https?:\/\/[^\s]+$/i.test(String(x.u||''))||!/^[a-f0-9]{32}$/.test(String(x.b||''))||!x.k||!j(x.k.x)||!j(x.k.y)||!/^[A-Z0-9]{6,12}$/.test(String(o.c||'')))return null;
   var t=(Array.isArray(o.t)?o.t:[]).filter(function(a){return a&&typeof a.i==='string'&&a.i&&a.i.length<=60&&typeof a.n==='string'&&KINDS[a.m];}).slice(0,16).map(function(a){return {i:a.i,n:str(a.n,80)||'Target',m:a.m};});
   if(!t.length)return null;
+  /* v25.68 the self-check's questions, when the link carries them: up to five, each with its own id */
+  var seen={},k=(Array.isArray(o.k)?o.k:[]).filter(function(a){if(!a||typeof a.i!=='string'||!/^[A-Za-z0-9_-]{1,24}$/.test(a.i)||seen[a.i]||!str(a.n,120))return false;seen[a.i]=1;return true;}).slice(0,5).map(function(a){return {i:a.i,n:str(a.n,120)};});
   return {box:{u:String(x.u),b:String(x.b),k:{x:String(x.k.x),y:String(x.k.y)}},c:String(o.c),w:str(o.w,60),s:str(o.s,12),t:t,
-    st:(Array.isArray(o.st)?o.st:[]).map(function(s){return str(s,40);}).filter(Boolean).slice(0,20)};}
+    st:(Array.isArray(o.st)?o.st:[]).map(function(s){return str(s,40);}).filter(Boolean).slice(0,20),k:k};}
 var L=linkOf(location.hash);
 window.addEventListener('hashchange',function(){location.reload();});
 if(!L){root.innerHTML='<div class="empty"><b>This link does not open.</b><p>'+(/[#&]s=/.test(location.hash)?'Part of it may have been cut off when it was copied.':'It carries no recording sheet.')+' Ask the BCBA who sent it for the link again, or scan the code once more.</p></div>';return;}
@@ -39,6 +46,8 @@ var KEY='nbh.staff|'+L.box.b+'|'+L.c,canKeep=true,st=null;
 function blankT(){return {n:0,p:0,m:0,q:[],e:[],run:0,off:false};}
 function norm(o){o=o&&typeof o==='object'?o:{};var s={v:1,date:isoOk(o.date)?o.date:today(),t:{},as:/^(agreed|refused|withdrew)$/.test(o.as||'')?o.as:'',set:str(o.set,40),note:typeof o.note==='string'?o.note.slice(0,300):'',dirty:o.dirty===true,
     out:Array.isArray(o.out)?o.out.filter(function(e){return e&&e.id&&e.kind==='nbh-staff';}).slice(-200):[],sent:Array.isArray(o.sent)?o.sent.filter(function(e){return e&&e.id;}).slice(-80):[],err:str(o.err,200)};
+  /* v25.68 the self-check's answers for the period not sent yet */
+  if(L.k.length){s.sc={};var sc=o.sc&&typeof o.sc==='object'?o.sc:{};L.k.forEach(function(q){if(/^[ynx]$/.test(sc[q.i]||''))s.sc[q.i]=sc[q.i];});}
   L.t.forEach(function(t){var x=(o.t&&o.t[t.i])||{},b=blankT(),I=function(v){v=Math.round(+v);return isFinite(v)&&v>=0&&v<=9999?v:0;};
     b.n=I(x.n);b.p=I(x.p);b.m=I(x.m);b.q=Array.isArray(x.q)?x.q.filter(function(c){return c==='+'||c==='-';}).slice(-20000):[];
     b.e=Array.isArray(x.e)?x.e.filter(function(e){return e&&isFinite(e.a)&&isFinite(e.z)&&e.z>=e.a;}).slice(-200):[];b.run=isFinite(x.run)&&x.run>0?+x.run:0;b.off=x.off===true;s.t[t.i]=b;});
@@ -48,7 +57,7 @@ function keep(){try{localStorage.setItem(KEY,JSON.stringify(st));canKeep=true;}c
 st=load();
 /* a new day: a page with nothing waiting moves to today (the assent is the day's own); one holding taps keeps their date */
 function touched(){return L.t.some(function(t){var x=st.t[t.i];return x.n||x.p||x.m||x.e.length;});}
-function roll(){if(st.date!==today()&&!touched()&&!st.out.length&&!L.t.some(function(t){return st.t[t.i].run;})){st.date=today();st.as='';st.dirty=false;keep();return true;}return false;}
+function roll(){if(st.date!==today()&&!touched()&&!st.out.length&&!L.t.some(function(t){return st.t[t.i].run;})){st.date=today();st.as='';st.dirty=false;if(st.sc)st.sc={};keep();return true;}return false;}
 roll();keep();
 
 /* ---- the page ---- */
@@ -66,7 +75,7 @@ function card(t){var x=st.t[t.i],h='<section class="card t'+(x.off?' off':'')+'"
 function render(){var sets=L.st.slice(),cur=st.set;if(cur&&sets.indexOf(cur)<0)sets.push(cur);
   var nT=L.t.length;
   root.innerHTML='<div class="card head"><h1>Behavior data'+(L.s?' about '+esc(L.s):'')+'</h1><p class="who">'+(L.w?'Recording: <b>'+esc(L.w)+'</b>':'Recording on this phone')+'</p>'+
-    '<p class="lede">'+nT+' target'+(nT===1?'':'s')+' to record: tap as '+(nT===1?'it happens':'they happen')+', then send at the end of the session.</p>'+
+    '<p class="lede">'+nT+' target'+(nT===1?'':'s')+' to record: tap as '+(nT===1?'it happens':'they happen')+', then send at the end of the session.'+(L.k.length?' Before you send, answer the self-check (Did I do it?).':'')+'</p>'+
     '<p class="keep" id="sdKeep">Every tap is kept on this phone until you send it.</p></div>'+
     '<div class="old" id="old" hidden></div>'+
     '<div class="card"><label class="f" for="sdDate">Date</label><input type="date" id="sdDate" value="'+esc(st.date)+'" max="'+esc(today())+'">'+
@@ -76,15 +85,27 @@ function render(){var sets=L.st.slice(),cur=st.set;if(cur&&sets.indexOf(cur)<0)s
     '<p class="help" id="sdWatchHelp">Turn “Watching now” off when you are not with the student, so a 0 is not counted.</p>'+
     L.t.map(card).join('')+
     '<div class="card"><label class="f" for="sdNote">Note (optional; no names)</label><input type="text" id="sdNote" class="note-in" maxlength="300" autocomplete="off" value="'+esc(st.note)+'"></div>'+
+    scCard()+
     '<div class="card" id="sdSentC" hidden><h2>Sent</h2><ul class="sent" id="sdSent"></ul></div>'+
     '<div class="bar" role="region" aria-label="Send the data"><div class="in"><p class="msg" id="sdMsg" role="status" aria-live="polite"></p><button type="button" class="send" id="sdSend">Send today’s data</button></div></div>'+
     '<footer class="sd-foot"><p class="foot">Send locks the data on this phone so that only the BCBA’s own form can open it; the website keeps only the locked message. The student is named by initials only: keep names off the note.</p>'+
     '<p class="foot"><b>Need this another way?</b> Ask the BCBA for a paper data sheet, or to go through the targets with you.</p>'+
     '<p class="foot">Form DD-1 · Daily behavior data</p></footer>';
   paint();}
+/* v25.68 the self-check: one question each, Yes, No or Didn't come up; a tap on the answer given takes it back */
+var SCA=[['y','Yes'],['n','No'],['x','Didn\u2019t come up']];
+function scCard(){if(!L.k.length)return '';
+  return '<section class="card sc" id="sdSc" aria-labelledby="sdScH"><h2 id="sdScH">Did I do it?</h2><p class="sub sc-help" id="sdScHelp">Your self-check for this period or session: for each step of the plan, did you do it?</p>'+
+    L.k.map(function(q,j){return '<div class="sc-i" role="group" aria-labelledby="sdScQ'+j+'"><p class="sc-q" id="sdScQ'+j+'">'+(j+1)+'. '+esc(q.n)+'</p><div class="seg sc-seg">'+
+      SCA.map(function(a){return '<button type="button" class="sc-'+a[0]+'" data-sc="'+esc(q.i)+'" data-sa="'+a[0]+'" aria-pressed="'+(st.sc[q.i]===a[0])+'">'+a[1]+'</button>';}).join('')+'</div></div>';}).join('')+
+    '<p class="sub" id="sdScNote">The answers go with this send and are asked again for the next period. The BCBA reads them beside their own visits, to plan support for you.</p></section>';}
+function scAny(){return L.k.some(function(q){return !!st.sc[q.i];});}
+function scSum(e){if(!e||!Array.isArray(e.sc)||!e.sc.length)return '';var y=e.sc.filter(function(a){return a.a==='y';}).length,n=e.sc.filter(function(a){return a.a!=='x';}).length;
+  return 'self-check '+(n?y+' of '+n+' yes':'did not come up');}
 function sumOf(t,x){if(t.m==='n')return t.n+' '+x.n;if(t.m==='d'){var s=x.e.reduce(function(a,e){return a+(e.z-e.a)/1000;},0);return t.n+' '+x.e.length+' episode'+(x.e.length===1?'':'s')+(x.e.length?' ('+clock(s)+')':'');}
   var n=x.p+x.m;return t.n+' '+x.p+'+ '+x.m+'−'+(n?' ('+Math.round(100*x.p/n)+'%)':'');}
-function entrySum(e){return L.t.map(function(t){var p=e.d[t.i];if(!p)return '';if('n' in p)return t.n+' '+p.n;if('e' in p){var s=p.e.reduce(function(a,x){return a+x[2];},0);return t.n+' '+p.e.length+' episode'+(p.e.length===1?'':'s')+(p.e.length?' ('+clock(s)+')':'');}var n=p.p+p.m;return t.n+' '+p.p+'+ '+p.m+'−'+(n?' ('+Math.round(100*p.p/n)+'%)':'');}).filter(Boolean).join(' · ');}
+function entrySum(e){var s=entrySum0(e),c=scSum(e);return c?(s?s+' · ':'')+c:s;}
+function entrySum0(e){return L.t.map(function(t){var p=e.d[t.i];if(!p)return '';if('n' in p)return t.n+' '+p.n;if('e' in p){var s=p.e.reduce(function(a,x){return a+x[2];},0);return t.n+' '+p.e.length+' episode'+(p.e.length===1?'':'s')+(p.e.length?' ('+clock(s)+')':'');}var n=p.p+p.m;return t.n+' '+p.p+'+ '+p.m+'−'+(n?' ('+Math.round(100*p.p/n)+'%)':'');}).filter(Boolean).join(' · ');}
 var msg={k:'',t:''},armed=0;
 function say(k,t){msg={k:k,t:t};var m=D.getElementById('sdMsg');if(m){m.className='msg'+(k?' '+k:'');m.innerHTML=t;}}
 function paint(){var now=Date.now();
@@ -100,6 +121,7 @@ function paint(){var now=Date.now();
       sub.textContent=x.off?'Not watching: left blank, not sent.':x.run?'Episode running: tap Stop when it ends.':x.e.length?x.e.length+' episode'+(x.e.length===1?'':'s')+', '+clock(total)+' in all, not sent yet.':'Tap Start when an episode begins and Stop when it ends.';}
     else{var n=x.p+x.m;c.querySelector('[data-o="pm"]').textContent=x.p+' +  ·  '+x.m+' −'+(n?'  ·  '+Math.round(100*x.p/n)+'%':'');c.querySelector('[data-a="undo"]').disabled=!x.q.length;
       sub.textContent=x.off?'Not watching: left blank, not sent.':t.m==='i'?'One mark for each interval: + when it occurred, − when it did not.':'One mark for each opportunity: + when the student did it, − when not.';}});
+  if(L.k.length)root.querySelectorAll('[data-sc]').forEach(function(b){b.setAttribute('aria-pressed',String(st.sc[b.dataset.sc]===b.dataset.sa));});
   var o=D.getElementById('old'),runs=L.t.some(function(t){return st.t[t.i].run;});
   if(st.date!==today()&&(touched()||runs)){o.hidden=false;o.innerHTML='These entries are for <b>'+esc(day(st.date))+'</b>, not today. Send them, then the page moves to today.';}else o.hidden=true;
   var s=D.getElementById('sdSend');s.textContent=st.date===today()?'Send today’s data':'Send the data for '+day(st.date);s.disabled=sending;
@@ -116,6 +138,7 @@ function buzz(){try{if(navigator.vibrate)navigator.vibrate(12);}catch(e){}}
 /* ---- taps ---- */
 root.addEventListener('click',function(ev){var b=ev.target.closest&&ev.target.closest('button');if(!b||!root.contains(b))return;
   if(b.id==='sdSend'){sendNow();return;}
+  if(b.dataset.sc&&b.dataset.sa){var qi=b.dataset.sc;st.sc[qi]=st.sc[qi]===b.dataset.sa?'':b.dataset.sa;if(!st.sc[qi])delete st.sc[qi];st.dirty=true;scArmed=0;changed();return;}
   if(b.dataset.as){st.as=st.as===b.dataset.as?'':b.dataset.as;st.dirty=true;root.querySelectorAll('[data-as]').forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.as===st.as));});changed();return;}
   var c=b.closest('section.t');if(!c)return;var t=L.t.filter(function(x){return x.i===c.dataset.t;})[0],x=t&&st.t[t.i];if(!x)return;var a=b.dataset.a;
   if(a==='watch'){x.off=!x.off;if(x.off&&x.run)x.run=0;changed();return;}
@@ -137,8 +160,15 @@ var sending=false,timer=0;
 function close(){var d={};L.t.forEach(function(t){var x=st.t[t.i];if(x.off)return;
     if(t.m==='n')d[t.i]={n:x.n};else if(t.m==='d')d[t.i]={e:x.e.map(function(e){return [hms(e.a),hms(e.z),Math.round((e.z-e.a)/1000)];})};else d[t.i]={p:x.p,m:x.m};});
   var e={v:1,kind:'nbh-staff',form:'DD-1',c:L.c,w:L.w,id:rid(),date:st.date,made:new Date().toISOString(),d:d,as:st.as||'',st:st.set||'',note:str(st.note,300)};
+  if(L.k.length){var sc=L.k.filter(function(q){return !!st.sc[q.i];}).map(function(q){return {i:q.i,n:q.n,a:st.sc[q.i]};});if(sc.length)e.sc=sc;st.sc={};}
   st.out.push(e);L.t.forEach(function(t){var x=st.t[t.i];x.n=0;x.p=0;x.m=0;x.q=[];x.e=[];});st.note='';st.dirty=false;keep();return e;}
+var scArmed=0;
 function sendNow(){var first=!st.sent.concat(st.out).some(function(e){return e.date===st.date;}),runs=L.t.filter(function(t){return st.t[t.i].run;});
+  /* v25.68 the self-check is asked for once before a send that carries the period's data; the next press sends without it */
+  if(L.k.length&&!scAny()&&(touched()||st.dirty||st.note.trim())&&!(scArmed&&Date.now()-scArmed<15000)){scArmed=Date.now();
+    say('warn','The self-check (<b>Did I do it?</b>) is not answered. Answer it above, or press Send again to send without it.');
+    var c=D.getElementById('sdSc');if(c&&c.scrollIntoView){try{c.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}catch(x){c.scrollIntoView();}}return;}
+  scArmed=0;
   if(touched()||st.dirty||st.note.trim()){close();}
   else if(first&&L.t.some(function(t){return !st.t[t.i].off;})){
     if(!armed||Date.now()-armed>15000){armed=Date.now();say('warn','Nothing was tapped for '+esc(day(st.date))+'. Press Send again to send <b>0</b> for each target you watched (none seen), or set the ones you did not watch to Not watching.');return;}
