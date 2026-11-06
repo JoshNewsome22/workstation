@@ -92,5 +92,22 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await q.close();
  });
 
+ /* ---------------- PREF ---------------- */
+ await sec('PREF',async()=>{
+  const t=await open('TD-1');
+  const MENU=[{name:'Puzzle box',csa:{verdict:'HC',red:86,cond:'Free access'}},{name:'Drawing kit',csa:{verdict:'HC (prompting)',red:81,cond:'Prompted engagement'}},
+    {name:'Spinner',csa:{verdict:'HC with disruption',red:90,cond:'Response blocking',restrictive:'Response blocking (approved by the BCBA (simulated), 2026-10-02)'}},{name:'Ball',csa:{verdict:'Not competing',red:10}}];
+  const r=await t.evaluate(async M=>{const i=window.__tdAddComp('FCT').dataset.i;
+    window.__nbhFactsIn({menu:M,prefs:{csa:{mode:'wait',rotate:'Rotate item sets about every 10 min, or offer several HC items at once.',retest:'Re-test when the behavior during access rises above the validation level on 2 consecutive days; otherwise re-test at plan review.'}}});
+    await new Promise(r=>setTimeout(r,300));const n=document.getElementById('td67PaNote');const note=n&&!n.hidden?n.textContent:'';const txt=window.__bipText(),k=txt.indexOf('COMPETING ITEMS (FORM PA-1)');
+    const p9=document.querySelector('[name="cp['+i+'].p9"]').value;
+    window.__nbhFactsIn({menu:M});await new Promise(r=>setTimeout(r,200));
+    return {note,bip:k>=0?txt.slice(k,k+1200):'',p9,old:window.__bipText().indexOf('COMPETING ITEMS (FORM PA-1)')<0};},MENU);
+  ok('PREF 1 TD-1 reads PA-1’s wait-component test: the items that competed fill the FCT wait item (PREF-H2)',r.p9==='Puzzle box or Drawing kit (Form PA-1, tested in the plan’s wait)'&&/inside the plan’s wait component/.test(r.note),r);
+  ok('PREF 2 the BIP names the items, the blocking item as RESTRICTIVE with its approval (PREF-H6), the rotation and the re-test (PREF-M7)',/How the items were tested: inside the plan’s wait component/.test(r.bip)&&/Puzzle box \(86% reduction\); Drawing kit \(81% reduction, prompted engagement\)/.test(r.bip)&&/RESTRICTIVE: Spinner: competed only with response blocking \(approved by/.test(r.bip)&&/During use: Rotate item sets about every 10 min/.test(r.bip)&&/Re-test: Re-test when the behavior during access rises/.test(r.bip)&&!/Ball/.test(r.bip)&&!/Drawing kit \(81% reduction, prompted engagement\); Spinner/.test(r.bip),r);
+  ok('PREF 3 a case from PA-1 before v25.65 (no prefs.csa) adds nothing',r.old,r);
+  await t.close();
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

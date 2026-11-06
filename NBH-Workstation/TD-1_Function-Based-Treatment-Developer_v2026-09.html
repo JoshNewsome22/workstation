@@ -7539,6 +7539,38 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
    let k=B.findIndex(b=>b&&b[0]==='REINFORCEMENT SCHEDULE (FORM SR-1)');if(k<0)k=B.findIndex(b=>b&&b[0]==='REINFORCEMENT THINNING LADDER');B.splice(k<0?B.length:k+1,0,blk);}catch(e){}return res;};
 })();
 </script>
+<script id="td1-v2567-pref">
+/* v25.67 (PREF-H2, H6, M7; batch 3) what Form PA-1's competing stimulus assessment sends (prefs.csa, and the menu's csa verdicts):
+   with the sheet set to the plan's wait component (H2), the items that competed are the candidates for the "not now" period and the
+   wait, and fill the FCT card's "Item or activity available during the wait" while it is empty; an item that competed only with
+   response blocking is named as restrictive, with PA-1's approval (H6); the rotation line, when PA-1's validation shows the behavior
+   rising late in the period of use, and the re-test rule print with the plan (M7). Shown on screen beside the ladder and carried into
+   the BIP. A case from PA-1 before v25.65 (no prefs.csa) adds nothing. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let P=null,M=[];
+ const hc=()=>M.filter(m=>m&&m.csa&&/^HC/.test(String(m.csa.verdict||''))&&!/disruption/i.test(String(m.csa.verdict||''))&&!T(m.csa.restrictive)&&!m.contra&&T(m.name));   /* an item that competed only with blocking is never the default */
+ function lines(){if(!P)return [];const L=[],H=hc(),R=M.filter(m=>m&&m.csa&&T(m.csa.restrictive)&&T(m.name));
+  const it=x=>T(x.name)+(x.csa.red!=null&&isFinite(+x.csa.red)?' ('+Math.round(+x.csa.red)+'% reduction'+(x.csa.cond&&x.csa.cond!=='Free access'?', '+String(x.csa.cond).toLowerCase():'')+')':'');
+  if(P.mode==='wait')L.push(['How the items were tested','inside the plan’s wait component: the control is the wait with no item, and problem behavior gets only the plan’s response']);
+  if(H.length)L.push([P.mode==='wait'?'Items for the “not now” period and the wait':'Items that competed',H.map(it).join('; ')]);
+  R.forEach(x=>L.push(['RESTRICTIVE: '+T(x.name),'competed only with '+T(x.csa.restrictive).charAt(0).toLowerCase()+T(x.csa.restrictive).slice(1)+'; never the default']));
+  if(T(P.rotate))L.push(['During use',T(P.rotate).replace(/[.\s]+$/,'')+' (the behavior rose in the last third of the period of use on Form PA-1)']);
+  if(T(P.retest))L.push(['Re-test',T(P.retest)]);
+  return L;}
+ window.__td2567PrefLines=lines;
+ function fill(){if(!P||P.mode!=='wait')return 0;const H=hc();if(!H.length)return 0;let n=0;const v=H.map(x=>T(x.name)).join(' or ')+' (Form PA-1, tested in the plan’s wait)';
+  document.querySelectorAll('#compWrap .card[data-code="FCT"]').forEach(c=>{const e=document.querySelector('[name="cp['+c.dataset.i+'].p9"]');if(!e||T(e.value))return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));n++;});return n;}
+ function note(){let el=document.getElementById('td67PaNote');const at=document.getElementById('td67DtNote')||document.getElementById('tdSrNote');if(!el&&at){el=document.createElement('div');el.id='td67PaNote';el.className='hint noprint';at.insertAdjacentElement('afterend',el);}
+  if(!el)return;const L=lines();el.hidden=!L.length;el.innerHTML=L.length?'<b>Form PA-1’s competing items:</b> '+L.map(([k,v])=>E(k)+': '+E(String(v).replace(/[.\s]+$/,''))).join('; ')+'. The text for the BIP carries them.':'';}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=0;
+  try{P=f&&f.prefs&&f.prefs.csa&&typeof f.prefs.csa==='object'?f.prefs.csa:null;M=f&&Array.isArray(f.menu)?f.menu:[];n=fill();note();}catch(e){}
+  if(n&&r&&typeof r==='object'&&typeof r.filled==='number')r.filled+=n;return r;};
+ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#addCompBtn'))setTimeout(()=>{try{fill();}catch(x){}},20);});
+ const bip0=window.__td82Bip;window.__td82Bip=function(B,o){const res=bip0?bip0.apply(this,arguments):undefined;try{const L=lines();if(!L.length)return res;
+   const bl=(o&&o.bipLine)||((l,v)=>v?l+': '+v:'');const blk=['COMPETING ITEMS (FORM PA-1)'].concat(L.map(([k,v])=>bl(k,v)));
+   let k=-1;['DELAY AND DENIAL TOLERANCE (FORM DT-1)','REINFORCEMENT SCHEDULE (FORM SR-1)','REINFORCEMENT THINNING LADDER'].some(h=>(k=B.findIndex(b=>b&&b[0]===h))>=0);B.splice(k<0?B.length:k+1,0,blk);}catch(e){}return res;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
