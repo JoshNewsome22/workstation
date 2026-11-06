@@ -29,7 +29,7 @@ CATS = ["Aggression toward others", "Verbal aggression and threats", "Self-injur
         "Body, privacy and hygiene", "Home and sleep", "Precursors"]
 REQUIRED = ['id', 'cat', 'lab', 'type', 'style', 'dim', 'unit', 'def', 'ex', 'nex', 'on', 'off', 'border', 'excl']
 FUNC = ['fdim', 'funit', 'fon', 'foff', 'fex', 'fnex', 'fborder', 'fexcl']   # the functional version's own fields
-TEXT = REQUIRED + ['fdef', 'tops', 'note', 'tag'] + FUNC
+TEXT = REQUIRED + ['fdef', 'tops', 'note', 'tag', 'first'] + FUNC   # v25.67 first: a safety line shown above everything else
 TAGWORDS = re.compile(r'\((?:[^()]*\b(?:cluster|precursor|latency|permanent product|momentary time sample)\b[^()]*|% of opportunities)\)\s*$', re.I)
 
 raw = open(LIB, encoding='utf-8').read()
