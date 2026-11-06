@@ -1086,6 +1086,16 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <tr><th>What counts as imminent risk of serious injury for this student</th><td><textarea data-m="imminent" rows="2" placeholder="&sect; 1003.573(1)(b): the threat posed by dangerous behavior that may cause serious physical harm to self or others. State it concretely for this student."></textarea></td></tr>
       <tr><th>Earliest reliable precursor</th><td><textarea data-m="precursor" rows="2" placeholder="The point at which the interventions below should start"></textarea></td></tr>
     </table>
+    <!-- v25.65 (SAFETY-H3) the evidence behind each precursor: how it was found and how well it predicts the dangerous behavior -->
+    <h3 style="margin-top:12px">How Each Precursor Was Found</h3>
+    <p class="hint">One row for each precursor the plan relies on. p(behavior | precursor) is the share of precursors that were followed by the dangerous behavior. p(behavior) overall is the share of all observed intervals or opportunities with the behavior. A useful precursor has the first number clearly higher than the second. Form ABC-1&rsquo;s conditional probabilities give both numbers: type them here.</p>
+    <datalist id="v65PrecList"><option value="Loud or unintelligible vocalization"></option><option value="Object-directed movement (pushing, throwing or grabbing materials)"></option><option value="Self-directed movement (hand to face, rubbing)"></option><option value="Nondirected movement (rocking, pacing, flapping)"></option><option value="Vocal protest"></option><option value="Standing up or leaving the seat"></option></datalist>
+    <div class="grid-wrap"><table class="rt" id="v65PrecTbl"><thead><tr>
+      <th style="width:44px">#</th><th style="width:26%">Precursor (what it looks like)</th><th style="width:20%">How it was found</th>
+      <th style="width:13%">p(behavior | precursor)</th><th style="width:13%">p(behavior) overall</th><th>Typical seconds to the behavior</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="row noprint" style="margin:8px 0;display:flex;gap:8px"><button class="tool" id="v65AddPrec">Add precursor</button></div>
+    <p class="hint">Common precursors in published cases: for aggression, loud or unintelligible vocalization and object-directed movement; for self-injury, self-directed or nondirected movement (Fahmie &amp; Iwata, 2011). <b>Heart-rate monitors are not a reliable signal of escalation; use observable precursors</b> (McCabe &amp; Greer, 2023; Dowling et al., 2026).</p>
+    <div id="v65PrecVerdict"></div>
     <div class="row" style="margin:10px 0 6px;display:flex;gap:8px">
       <button class="tool" id="addPbis">Add intervention</button><button class="tool" id="delPbis">Remove last</button>
     </div>
@@ -1093,6 +1103,34 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <th style="width:44px">Order</th><th style="width:16%">Stage</th><th style="width:28%">What staff do</th>
       <th style="width:20%">What tells you to move on</th><th>Who</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <p class="hint rb-note">Any step that uses a hold follows the breathing rule under <b>If Restraint Nonetheless Occurs</b>: no hold may restrict breathing.</p>
+    <!-- v25.65 (SAFETY-H4) the first response at the precursor fits the function -->
+    <div class="v65-box" id="v65Early">
+      <h3>At the Early Precursor: a Way to Get What the Behavior Gets</h3>
+      <table class="rt">
+        <tr><th style="width:26%">Function of the behavior (Form FS-1)</th><td><input data-m="fnShow" data-calc="1" placeholder="From Form FS-1, for example escape from demands"></td></tr>
+        <tr><th>Communication response the BIP teaches (Form TD-1)</th><td><input data-m="fcrShow" data-calc="1" placeholder="From Form TD-1, for example handing the break card"></td></tr>
+      </table>
+      <p class="v65-rule"><b>First step at the precursor:</b> prompt the communication response from the BIP and honor it at once. Reprimands, new demands and removing materials are kept out of this stage.</p>
+      <label class="chk"><input type="checkbox" data-mc="earlyFits"> This step gives the student a way to get what the behavior gets (function: <span id="v65FnWord">not yet entered</span>).</label>
+      <div id="v65EarlyVerdict"></div>
+      <p class="hint">Precursors are usually kept going by the same reinforcer as the dangerous behavior (Fritz et al., 2013; Borrero &amp; Borrero, 2008). Treatments matched to the function and aimed at the precursor lowered it, and the dangerous behavior stayed low (Najdowski et al., 2008; Dracobly &amp; Smith, 2012; Hoffmann et al., 2018).</p>
+    </div>
+    <!-- v25.65 (SAFETY-H5) the physical safety steps that come before any restraint, and who has practiced them -->
+    <div class="v65-box" id="v65Safe">
+      <h3>Safety Steps That Are Not Restraint (Escalation and Peak Stages)</h3>
+      <p class="v65-rule"><b>Never grasp or hold a body part. Check the district&rsquo;s definition of restraint before using any contact.</b></p>
+      <label class="chk"><input type="checkbox" data-v65t="safe1"> Stand between the student and others, facing the student.</label>
+      <label class="chk"><input type="checkbox" data-v65t="safe2"> Move dangerous objects out of reach.</label>
+      <label class="chk"><input type="checkbox" data-v65t="safe3"> Step out of reach, and stand up from sitting.</label>
+      <label class="chk"><input type="checkbox" data-v65t="safe4"> Block a strike away from the head and torso, then move back.</label>
+      <table class="rt" style="margin-top:6px"><tr><th style="width:26%">Other safety steps for this student</th><td><textarea data-m="safeOther" data-calc="1" rows="2" placeholder="Steps that keep everyone safe without holding the student"></textarea></td></tr></table>
+      <h3 style="margin-top:10px">Rehearsed with Each Adult</h3>
+      <p class="hint">Each adult named under Who for the Escalation and Peak stages practices these steps in a role-play before the plan relies on them. Use the same name or role as under Who.</p>
+      <div class="grid-wrap"><table class="rt" id="v65RehTbl"><thead><tr><th style="width:44px">#</th><th style="width:30%">Adult (name or role)</th><th style="width:18%">Date rehearsed</th><th style="width:24%">By whom</th><th>Role-play</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <div class="row noprint" style="margin:8px 0;display:flex;gap:8px"><button class="tool" id="v65AddReh">Add adult</button></div>
+      <div id="v65SafeVerdict"></div>
+      <p class="hint">Behavioral skills training taught caregivers to move between the child and a bystander, block access to dangerous objects and move out of reach, in 3 to 6 hours (Metoyer et al., 2020). Direct-care staff learned to block or avoid strikes to the head and torso without restraint (Wine &amp; Newcomb, 2024).</p>
+    </div>
 
     <h2 class="nbh-band" style="margin-top:16px">2. Health Concerns Limiting the Use of Restraint</h2>
     <div class="statute"><b>&sect; 1003.573(6)(b)2.</b> The plan must include known physical and behavioral health concerns that will limit the use of restraint for this student.</div>
@@ -1156,6 +1194,20 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
         <option>Yes &mdash; date and method recorded below</option><option>Not yet</option></select>
         <input data-m="parentCopyHow" data-calc="1" placeholder="Date and how it was provided" style="margin-top:5px"></td></tr>
     </table>
+    <!-- v25.65 (SAFETY-M1) the times relapse is most likely put a review on the plan -->
+    <div class="v65-box" id="v65Trig">
+      <h3>Review Triggers</h3>
+      <p class="hint">Tick a change when it happens and enter its date. While a ticked change is newer than the last review, the plan shows a review due within 5 school days of it, and so does the workstation&rsquo;s due list.</p>
+      <table class="rt">
+        <tr><th style="width:62%"><label class="chk"><input type="checkbox" data-mc="trig1"> The BIP thins reinforcement or adds an extinction step</label></th><td><input type="date" data-m="trig1d" data-calc="1" aria-label="Date the BIP thinned reinforcement or added extinction"></td></tr>
+        <tr><th><label class="chk"><input type="checkbox" data-mc="trig2"> A new adult or a substitute works with the student</label></th><td><input type="date" data-m="trig2d" data-calc="1" aria-label="Date of the new adult or substitute"></td></tr>
+        <tr><th><label class="chk"><input type="checkbox" data-mc="trig3"> A new room, a schedule change, or a return after a break of 5 or more school days</label></th><td><input type="date" data-m="trig3d" data-calc="1" aria-label="Date of the new room, schedule change or return"></td></tr>
+        <tr><th><label class="chk"><input type="checkbox" data-mc="trig4"> A medication change (Form MS-1)</label></th><td><input type="date" data-m="trig4d" data-calc="1" aria-label="Date of the medication change"></td></tr>
+        <tr><th>Review due (a trigger is open)</th><td><input type="date" data-m="revTrigDue" readonly class="calc" tabindex="-1"></td></tr>
+      </table>
+      <div id="v65Watch"></div>
+      <p class="hint">Problem behavior came back during schedule thinning in 76% of treatments, and after a change of context in 69% (Mitteer et al., 2022). Extinction bursts happened in 24% of 108 clinical cases (Muething et al., 2024).</p>
+    </div>
     <div id="planVerdict"></div>
     <h3 style="margin-top:14px">Signatures</h3>
     <table class="rt">
@@ -1194,6 +1246,8 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <tr><th>Injuries, marks, or medical concerns</th><td><textarea data-m="dbInjury" rows="2" placeholder="For the student and for staff. Documented per district policy."></textarea></td></tr>
       <tr><th>The student&rsquo;s account</th><td><textarea data-m="dbStudent" rows="2" placeholder="Sought in whatever form the student can give it, and recorded in their words. Note if it was not possible and why."></textarea></td></tr>
       <tr><th>Staff experience</th><td><textarea data-m="dbStaff" rows="2" placeholder="Restraint affects the people who carry it out. Record what support was offered."></textarea></td></tr>
+      <!-- v25.65 (SAFETY-L5) -->
+      <tr><th>How the adults who held will rebuild positive time with the student</th><td><textarea data-m="dbRebuild" rows="2" placeholder="What, how often, until when. For example: a few minutes of a preferred activity with each adult who held, each morning for two weeks."></textarea></td></tr>
     </table>
     <!-- v21.44 (B5): the report question at every debriefing. It stays on the screen: on paper the debriefing shows only
          that it was answered, and when, and Print the report record prints the answer on a sheet of its own. Wording approved by the BCBA, October 2026. -->
@@ -1257,6 +1311,13 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <th style="width:44px">#</th><th style="width:11%">Date</th><th style="width:9%">Duration</th>
       <th style="width:16%">Setting and activity</th><th style="width:14%">Staff involved</th>
       <th style="width:11%">Report filed</th><th style="width:11%">Debrief done</th><th>Precipitating event</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <!-- v25.65 (SAFETY-H1) what each restraint led to -->
+    <h3 style="margin-top:12px">What Each Restraint Led To</h3>
+    <p class="hint">Seconds come from the times entered under Deadlines and Parent Notices when both are there (to the minute), or type them. An injury opens an injury check on Form IM-1.</p>
+    <div class="grid-wrap"><table class="rt" id="v65LogTbl"><thead><tr>
+      <th style="width:44px">#</th><th style="width:13%">Duration (seconds)</th><th style="width:18%">Type (department&rsquo;s terms)</th>
+      <th style="width:11%">Injury to the student</th><th style="width:11%">Injury to staff</th><th>After the release, the student&hellip;</th></tr></thead><tbody></tbody></table></div>
+    <div id="v65LogFlag"></div>
     <div class="metrics" id="logMetrics"></div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:26%">Reduction goal for this student</th><td><textarea data-m="goal" rows="2" placeholder="A number and a date, not an aspiration"></textarea></td></tr>
@@ -1264,6 +1325,14 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <tr><th>Is the restraint concentrated in a setting or time?</th><td><textarea data-m="pattern" rows="2" placeholder="Form SP-1 and Form BC-1 are the tools for this"></textarea></td></tr>
       <tr><th>Has the FBA or BIP been updated in response?</th><td><textarea data-m="fbaUpdate" rows="2" placeholder="Named in the statute as a reduction activity"></textarea></td></tr>
     </table>
+    <!-- v25.65 (SAFETY-H2) the count over time against the goal, with the BIP's revisions -->
+    <h3 style="margin-top:12px">Restraints Over Time</h3>
+    <table class="rt">
+      <tr><th style="width:26%">Goal as a number</th><td>No more than <input type="number" min="0" step="1" data-m="goalN" data-calc="1" style="width:5em" aria-label="Goal: no more than this many restraints"> restraint(s) per <select data-m="goalPer" data-calc="1" aria-label="Goal period"><option value="">school week</option><option value="month">month</option></select></td></tr>
+      <tr><th>School days attended this semester</th><td><input type="number" min="0" step="1" data-m="daysAtt" data-calc="1" style="width:6em" aria-label="School days attended this semester"></td></tr>
+      <tr><th>BIP revision dates (Form TD-1)</th><td><input data-m="bipRevs" data-calc="1" placeholder="Dates the BIP was adopted or revised, for example 9/8/26, 10/21/26"></td></tr>
+    </table>
+    <div id="v65Graph"></div>
     <!-- v21.22: the incident clock and the notice log, one block per restraint on the log above -->
     <div class="crc" id="crc">
     <h2 class="nbh-band" style="margin-top:16px">Deadlines and Parent Notices</h2>
@@ -1359,13 +1428,16 @@ const NOTIFY=[
  'Documentation provided electronically to the principal, the district ESE director, and the bureau chief (each month that school is in session)',
  'The date this crisis intervention plan was last reviewed, and whether changes were recommended, is recorded on the incident report'
 ];
-function blank(){return{meta:{},team:[],pbis:[],act:[],log:[],notify:{},closed:[],debs:{}};}   /* v23.03 (F338) debs: the other debriefings */
+function blank(){return{meta:{v2565:'1'},team:[],pbis:[],act:[],log:[],notify:{},closed:[],debs:{},prec:[],reh:[]};}   /* v25.65 (SAFETY-H3, H5) prec: the precursors' evidence; reh: the rehearsals. meta.v2565 marks a record begun on v25.65 (its safety steps start ticked) */   /* v23.03 (F338) debs: the other debriefings */
 let S=blank();
 function ensure(){
   while(S.team.length<4)S.team.push({n:'',r:'',g:'',p:''});
   while(S.pbis.length<5)S.pbis.push({s:'',do:'',next:'',who:''});
   while(S.act.length<3)S.act.push({c:'',w:'',who:'',by:'',st:''});
   while(S.log.length<2)S.log.push({d:'',dur:'',set:'',staff:'',rep:'',deb:'',pre:''});
+  if(!Array.isArray(S.prec))S.prec=[];if(!Array.isArray(S.reh))S.reh=[];   /* v25.65 (SAFETY-H3, H5) */
+  while(S.prec.length<1)S.prec.push({top:'',how:'',ptp:'',pt:'',sec:''});
+  while(S.reh.length<2)S.reh.push({who:'',d:'',by:'',rp:''});
   /* v21.22: every restraint carries its times and notice log, and the no-school list starts with two rows */
   crcEnsure();
 }
@@ -1414,10 +1486,10 @@ function teamVerdict(){
 function renderPbis(){
   $('#pbisTbl tbody').innerHTML=S.pbis.map((r,i)=>`<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
-    <td><select data-p="${i}" data-f="s">${opt(STAGES,r.s)}</select></td>
+    <td><select data-p="${i}" data-f="s">${opt(STAGES,r.s)}</select><div class="v65-fnh" data-v65fnh="${i}"></div></td>
     <td><textarea data-p="${i}" data-f="do" rows="2">${esc(r.do)}</textarea></td>
     <td><textarea data-p="${i}" data-f="next" rows="2">${esc(r.next)}</textarea></td>
-    <td><input data-p="${i}" data-f="who" value="${esc(r.who)}"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-rdel="pbis" data-i="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
+    <td><input data-p="${i}" data-f="who" value="${esc(r.who)}"${r.s===STAGES[5]?' placeholder="An adult who was not part of the hold"':''}></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-rdel="pbis" data-i="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
 }
 function renderAct(){
   $('#actTbl tbody').innerHTML=S.act.map((r,i)=>`<tr>
@@ -1454,6 +1526,7 @@ function renderLog(){
   /* v21.22: the clock's editor follows the rows of the log */
   crcRender();
   logMetrics();
+  if(typeof v65LogDraw==='function')v65LogDraw();   /* v25.65 (SAFETY-H1) */
   /* v23.02 (review F339) a restraint of an earlier semester stays on the log, greyed */
   /* v23.03 (review F338) a restraint with a debriefing kept is debriefed: its Debrief done follows */
   Object.keys(dDone).forEach(k=>{const e=document.querySelector('#logTbl select[data-l="'+(+k-1)+'"][data-f="deb"]');if(e){e.value='Yes';e.disabled=true;e.title='A debriefing of this restraint is on the Debriefing sheet';}});
@@ -1548,6 +1621,7 @@ function renderTrig(){
   crcUpdate();
   /* v21.44 (B1, B5) */
   crSafety();
+  if(typeof v65Update==='function')v65Update();   /* v25.65 (SAFETY-H1 to H5, M1) */
 }
 ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(!el.dataset)return;
   /* v21.16 audit (F4-F7): every entry a verdict or a card reads redraws it as it is typed. (F14) No table is redrawn
@@ -1597,13 +1671,13 @@ const RP_FIELDS=['rpNeed','rpWhy','rpWhen','rpTo','rpBy','rpTold'];
    screen and opens that restraint's own, or a blank one; what was typed before any restraint was chosen goes with the first one
    chosen that has none. A debriefing is its fields, its answers to Does This Need a Report?, the changes it led to and the readiness
    ticks. */
-const DB_KEYS=['dbDate','dbWhen','dbBy','dbReport','dbWho','dbContext','dbLead','dbRisk','dbPbis','dbFollowed','dbFollowedWhy','dbAfter','dbBreath','dbInjury','dbStudent','dbStaff'];
+const DB_KEYS=['dbDate','dbWhen','dbBy','dbReport','dbWho','dbContext','dbLead','dbRisk','dbPbis','dbFollowed','dbFollowedWhy','dbAfter','dbBreath','dbInjury','dbStudent','dbStaff','dbRebuild'];   /* v25.65 (SAFETY-L5) dbRebuild */
 const DB_RP=RP_KEYS.concat(RP_FIELDS,['rpOn','rpFor']);
 const DB_LAB={dbDate:'Incident date and time',dbWhen:'Debriefing date',dbBy:'Facilitated by',dbReport:'District incident report completed',dbWho:'Who took part',
   dbContext:'What was happening before it started',dbLead:'The behavior leading up to the decision to restrain',dbRisk:'Why there was an imminent risk of serious injury',
   dbPbis:'Which interventions from the plan were used, and in what order',dbFollowed:'Was the plan followed as written?',dbFollowedWhy:'What got in the way',
   dbAfter:'What happened immediately after the restraint ended',dbBreath:'Breathing during the hold',dbInjury:'Injuries, marks, or medical concerns',
-  dbStudent:'The student\u2019s account',dbStaff:'Staff experience'};
+  dbStudent:'The student\u2019s account',dbStaff:'Staff experience',dbRebuild:'How the adults who held will rebuild positive time with the student'};
 const crT=v=>String(v==null?'':v).trim();
 function crDebSnap(){const o={};DB_KEYS.concat(DB_RP).forEach(k=>{o[k]=crT(S.meta[k]);});o.act=(S.act||[]).filter(a=>a&&['c','w','who','by','st'].some(f=>crT(a[f])));o.notify=S.notify||{};return crDebCanon(o);}
 function crDebHas(o){return !!o&&(DB_KEYS.some(k=>k!=='dbDate'&&k!=='dbReport'&&crT(o[k]))||(o.act||[]).some(a=>a&&crT(a.c)));}
@@ -1710,7 +1784,8 @@ document.addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('#
 const CR_LOG_LAB={d:'Date',dur:'Duration',set:'Setting and activity',staff:'Staff involved',rep:'Report filed',deb:'Debrief done',pre:'Precipitating event',
   rd:'Restraint began (date)',rt:'Restraint began (time)',xd:'Released (date)',xt:'Released (time)',pd:'Incident report completed (date)',pt:'Incident report completed (time)',
   pok:'Report completed by the end of the school day on which the school reopened',wd:'Written notice to the parent (date)',wt:'Written notice to the parent (time)',
-  wok:'Written notice given before the end of the school day of the restraint',ak:'Parent’s signed acknowledgment of the notice (date)',md:'Incident report mailed (date)',mk:'Parent’s signed acknowledgment of the report (date)'};
+  wok:'Written notice given before the end of the school day of the restraint',ak:'Parent’s signed acknowledgment of the notice (date)',md:'Incident report mailed (date)',mk:'Parent’s signed acknowledgment of the report (date)',
+  durS:'Duration (seconds)',typ:'Type (department’s terms)',injS:'Injury to the student',injT:'Injury to staff',aft:'After the release, the student'};   /* v25.65 (SAFETY-H1) */
 /* v23.03 (review F338) the spreadsheet carries the other debriefings after this form's entries */
 function crCsvOthers(out){const D=crDebs();Object.keys(D).filter(k=>crDebHas(D[k])).forEach(k=>{const o=D[k],sh='Debriefing ('+(k[0]==='u'?'no restraint chosen':'restraint '+k)+')';
   DB_KEYS.filter(f=>crT(o[f])).forEach(f=>out.push([sh,DB_LAB[f],crT(o[f])]));(o.act||[]).filter(a=>crT(a.c)).forEach(a=>out.push([sh,'What changes as a result',[crT(a.c),a.w,crT(a.who),crT(a.by),a.st].filter(Boolean).join('; ')]));});return out;}
@@ -1726,6 +1801,9 @@ function crCsvRows(){const out=[['Sheet','Entry','Value']],clean=x=>String(x==nu
   rows('Crisis intervention plan','Step',S.pbis,{s:'Stage',do:'What staff do',next:'What tells you to move on',who:'Who'});
   rows('Debriefing','Change',S.act,{c:'Change',w:'Where it lands',who:'Who',by:'By when',st:'Status'});
   rows('Restraint log','Restraint',S.log,CR_LOG_LAB);
+  rows('Crisis intervention plan','Precursor',S.prec,{top:'Precursor',how:'How it was found',ptp:'p(behavior | precursor)',pt:'p(behavior) overall',sec:'Typical seconds to the behavior'});   /* v25.65 (SAFETY-H3) */
+  rows('Crisis intervention plan','Rehearsal',S.reh,{who:'Adult',d:'Date rehearsed',by:'By whom',rp:'Role-play'});   /* v25.65 (SAFETY-H5) */
+  (typeof V65_SAFE!=='undefined'?V65_SAFE:[]).forEach(([k,t])=>{if(v65Tick(k))out.push(['Crisis intervention plan','Safety step that is not restraint',t]);});
   (S.log||[]).forEach((r,i)=>(Array.isArray(r.att)?r.att:[]).forEach((a,j)=>{const v=['d','t','m','o'].map(f=>clean(a[f])).filter(Boolean).join(', ');if(v)out.push(['Restraint log','Restraint '+(i+1)+': telephone or e-mail attempt '+(j+1),v]);}));
   (S.closed||[]).forEach((z,i)=>{if(!clean(z.a)&&!clean(z.w))return;out.push(['Restraint log','No-school day '+(i+1),[clean(z.a),clean(z.b)].filter(Boolean).join(' to ')+(clean(z.w)?' ('+clean(z.w)+')':'')]);});
   Object.keys(S.notify||{}).filter(k=>S.notify[k]===true).forEach(k=>out.push(['Debriefing','Readiness check: '+(NOTIFY[+k]||'item '+(+k+1)),'yes']));
@@ -1733,7 +1811,7 @@ function crCsvRows(){const out=[['Sheet','Entry','Value']],clean=x=>String(x==nu
 $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([crCsvRows().map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='CR-1_'+(S.meta.client||'student').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
-function renderAll(){ensure();renderTeam();renderPbis();renderAct();renderLog();renderNotify();bindMeta();renderTrig();crProneW();crDebOthers();}
+function renderAll(){ensure();renderTeam();renderPbis();renderAct();renderLog();renderNotify();if(typeof v65Draw==='function')v65Draw();bindMeta();renderTrig();crProneW();crDebOthers();}
 /* v22.41 a face-down (prone) restraint: district Policy 5.181 (6c-xii) rules it out for a student with breathing or circulation
    problems, and this plan's health concerns may name one */
 function crProneW(){const el=document.getElementById('crProneW');if(!el)return;const m=S.meta||{},tx=['hPhys','hAlert','hAvoid'].map(k=>String(m[k]||'')).join(' ');
@@ -1768,14 +1846,18 @@ function crRefuse(d){
 function crRecord(src){
   const txt=v=>v==null||typeof v==='object'?'':String(v);
   const rows=(a,keys)=>(Array.isArray(a)?a:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).map(x=>{const o={};keys.forEach(k=>{o[k]=txt(x[k]);});return o;});
-  const R=blank(), m=src.meta&&typeof src.meta==='object'?src.meta:{}, nt=src.notify&&typeof src.notify==='object'?src.notify:{};
+  const R=blank();delete R.meta.v2565;   /* v25.65 a file marks itself; one saved before has no mark */
+  const m=src.meta&&typeof src.meta==='object'?src.meta:{}, nt=src.notify&&typeof src.notify==='object'?src.notify:{};
   Object.keys(m).forEach(k=>{R.meta[k]=txt(m[k]);});
   Object.keys(nt).forEach(k=>{if(/^\d+$/.test(k)&&nt[k]===true)R.notify[k]=true;});
   R.team=rows(src.team,['n','r','g','p']); R.pbis=rows(src.pbis,['s','do','next','who']);
   R.act=rows(src.act,['c','w','who','by','st']); R.log=rows(src.log,['d','dur','set','staff','rep','deb','pre'].concat(CRC_KEYS));
+  R.prec=rows(src.prec,['top','how','ptp','pt','sec']);R.reh=rows(src.reh,['who','d','by','rp']);   /* v25.65 (SAFETY-H3, H5): a file saved before has neither */
   /* v21.22: each restraint's telephone and e-mail attempts, and the no-school days. A file saved before v21.22 has
      neither and opens with them empty; everything it does hold is read exactly as before. */
-  (Array.isArray(src.log)?src.log:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).forEach((x,i)=>{R.log[i].att=rows(x.att,['d','t','m','o']);});
+  (Array.isArray(src.log)?src.log:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).forEach((x,i)=>{R.log[i].att=rows(x.att,['d','t','m','o']);
+    /* v25.65 (SAFETY-H1) what each restraint led to, after the attempts and in the file's own order, so a record saved and reopened is the same */
+    Object.keys(x).filter(k=>V65_LOG_KEYS.includes(k)).concat(V65_LOG_KEYS).forEach(k=>{if(!(k in R.log[i]))R.log[i][k]=txt(x[k]);});});
   R.closed=rows(src.closed,['a','b','w']);
   /* v23.03 (review F338) the debriefings of the other restraints, by restraint number ('u1'... for one with no restraint chosen); a
      file saved before has none */
@@ -1894,6 +1976,12 @@ async function loadSim(){
   ];
   S.closed=[{a:I(30),b:'',w:'Teacher planning day (simulated)'}];
   S.meta.dbRow='2';
+  /* v25.65 (SAFETY-H1 to H5, M1, L5): the new entries of the example. The records review notes the work removed after the first two restraints */
+  Object.assign(S.meta,{v2565:'1',fnShow:'Escape from written work (Form FS-1)',fcrShow:'Hand the break card',earlyFits:'1',goalN:'1',goalPer:'month',daysAtt:'52',bipRevs:D(86)+', '+D(12),
+    dbRebuild:'Aide B spends two minutes of drawing time with the student at the start of each morning block for two weeks; reviewed at the next plan review.',trig2:'1',trig2d:I(6)});
+  [['task removed or changed','Physical restraint, standing (district term)'],['task removed or changed','Physical restraint, standing (district term)'],['returned to the same task or demand','Physical restraint, standing (district term)']].forEach(([a,t],k)=>Object.assign(S.log[k],{aft:a,typ:t,injS:'No',injT:k===1?'Yes':'No'}));
+  S.prec=[{top:'Vocal protest',how:'ABC-1 conditional probability',ptp:'0.72',pt:'0.18',sec:'40'},{top:'Standing up or leaving the seat',how:'Interview only',ptp:'',pt:'',sec:'10'}];
+  S.reh=[{who:'Aide B',d:I(20),by:'J. Ellis (simulated)',rp:'Yes'},{who:'Classroom teacher',d:I(20),by:'J. Ellis (simulated)',rp:'Yes'}];
   /* the notice log of the debriefed restraint answers readiness items 1 to 5; the two it does not record are ticked */
   [5,6].forEach(i=>{S.notify[i]=true;});
   renderAll();setView('plan');
@@ -1930,6 +2018,7 @@ function crcRow(r){
   r.att=(Array.isArray(r.att)?r.att:[]).filter(a=>a&&typeof a==='object'&&!Array.isArray(a));
   r.att.forEach(a=>{['d','t','m','o'].forEach(k=>{a[k]=crcTxt(a[k]);});});
   if(!r.att.length)r.att.push({d:'',t:'',m:'',o:''});
+  if(typeof V65_LOG_KEYS!=='undefined')V65_LOG_KEYS.forEach(k=>{r[k]=crcTxt(r[k]);});   /* v25.65 (SAFETY-H1) */
   return r;
 }
 function crcShape(){
@@ -2473,7 +2562,8 @@ function bipText(){
   B.push(['STUDENT AND TRIGGER',bipLine('Date of birth',m.dob),bipLine('Grade / classroom',m.grade),bipLine('School or setting',m.site),bipLine('Case BCBA',m.bcba),bipLine('Semester',m.sem),
     bipLine('Restraints this semester',m.nRest),bipLine('Date of the second restraint',m.d2),bipLine('Plan first developed',m.dateFirst),bipLine('Related plans in force',m.related)]);
   B.push(['TEAM'].concat(S.team.filter(t=>bipTxt(t.n)).map(t=>'- '+bipTxt(t.n)+(bipTxt(t.r)?', '+bipTxt(t.r):'')+(t.g?' ('+t.g+')':'')+(t.p?' — present at the meeting: '+t.p:''))));
-  B.push(['POSITIVE BEHAVIOR INTERVENTIONS AND SUPPORTS',bipLine('Dangerous behavior this plan addresses',m.dbeh),bipLine('What counts as imminent risk of serious injury for this student',m.imminent),bipLine('Earliest reliable precursor',m.precursor)]);
+  B.push(['POSITIVE BEHAVIOR INTERVENTIONS AND SUPPORTS',bipLine('Dangerous behavior this plan addresses',m.dbeh),bipLine('What counts as imminent risk of serious injury for this student',m.imminent),bipLine('Earliest reliable precursor',m.precursor)]
+    .concat(typeof v65BipLines==='function'?v65BipLines():[]));   /* v25.65 (SAFETY-H3, H4, H5) */
   S.pbis.filter(r=>crcFilled(r)).forEach((r,k)=>{B.push(['STAGE '+(k+1)+(r.s?': '+r.s.toUpperCase():''),bipLine('What staff do',r.do),bipLine('What tells you to move on',r.next),bipLine('Who',r.who)]);});
   B.push(['HEALTH CONCERNS LIMITING THE USE OF RESTRAINT',bipLine('Physical health concerns',m.hPhys),bipLine('Behavioral health concerns',m.hBeh),bipLine('Positions, holds, or contact to avoid entirely',m.hAvoid),bipLine('Face-down (prone) restraint for this student',m.prone==='no'?'Not allowed':m.prone==='last'?'Allowed only as the district’s last resort':''),bipLine('Who provided this and when',m.hSource),bipLine('Medical alert to review before any restraint',m.hAlert)]);
   B.push(['IF RESTRAINT NONETHELESS OCCURS',bipLine('Trained staff authorized to restrain',m.rStaff),bipLine('Adult who watches the breathing (not part of the hold)',m.rWatch),bipLine('Discontinuation rule',m.rStop),bipLine('Medical monitoring during and after',m.rMed),bipLine('Who is called, and in what order',m.rCall)]);
@@ -2539,6 +2629,9 @@ window.__nbhFactsOut=function(){
     let hi=prob.filter(b=>+b.urg>=4);if(!hi.length)hi=prob.filter(b=>+b.urg===3);
     put('dbeh',hi.map(b=>T(b.label)+(T(b.def)?': '+T(b.def):'')).join('\n'),'the dangerous behavior (TB-1)');
     put('precursor',plan&&plan.prec,'the precursor (TD-1)');
+    /* v25.65 (SAFETY-H4, H2) the function (FS-1), the communication response the BIP teaches and the BIP's adoption and revision dates (TD-1) */
+    put('fnShow',f.fn&&f.fn.label,'the function (FS-1)');put('fcrShow',plan&&plan.rep,'the communication response (TD-1)');
+    put('bipRevs',plan&&Array.isArray(plan.versions)?plan.versions.map(v=>mdy(v&&v.date)).filter(Boolean).join(', '):'','the BIP revision dates (TD-1)');
     /* the stages, only when none is written */
     if(plan&&!S.pbis.some(p=>T(p.s)||T(p.do))){
       const ant=(plan.antCards||[]).length?plan.antCards.join('; '):(plan.ant||[]).map(T).filter(Boolean).join('; ');
@@ -2645,6 +2738,212 @@ window.__nbhFactsOut=function(){
 })();
 </script>
 
+<style id="v2565-cr1-css">
+/* v25.65 (SAFETY-H1 to H5, M1, L5) */
+.v65-box{border:1px solid var(--rule-2,#c9d3d6);border-left:3px solid var(--rule,#254657);padding:8px 12px;margin:12px 0;background:#FAFCFC}
+.v65-box h3{margin:2px 0 6px}
+.v65-rule{font-family:var(--sans,sans-serif);font-size:13px;margin:6px 0}
+.v65-fnh{font-family:var(--sans,sans-serif);font-size:11px;color:var(--ink-soft,#47535a);margin-top:3px}
+.v65-fnh:empty{display:none}
+.v65-amber{background:#FBEEDB!important}
+.v65-graph svg{width:100%;max-width:640px;height:auto;display:block}
+.v65-graph .v65-cap{font-family:var(--sans,sans-serif);font-size:12px;color:var(--ink-soft,#47535a);margin:4px 0}
+.v65-graph table.rt td,.v65-graph table.rt th{font-size:12px}
+@media print{.v65-box,.v65-graph,#v65LogFlag{break-inside:avoid;page-break-inside:avoid}}
+</style>
+<script id="v2565-cr1">
+/* v25.65 (SAFETY-H1 to H5, M1, L5). What each restraint led to, and a flag when the record shows restraint often followed
+   by escape or adult attention (H1); the count over time against the goal, with the BIP's revisions (H2); the evidence behind
+   each precursor (H3); the first step at the precursor matched to the function (H4); the safety steps that are not restraint
+   and their rehearsal (H5); review triggers (M1); who leads recovery and how trust is rebuilt (L5). The record's new parts:
+   meta keys fnShow, fcrShow, earlyFits, safe1..4, safeOther, trig1..4 and their dates, revTrigDue, goalN, goalPer, daysAtt,
+   bipRevs, dbRebuild; log row keys durS, typ, injS, injT, aft; S.prec and S.reh. A file saved before has none of them and
+   opens and prints as before: its safety steps are not ticked (meta.v2565 marks a record begun on v25.65, where they start
+   ticked). */
+const V65_LOG_KEYS=['durS','typ','injS','injT','aft'];
+const V65_AFTER=['returned to the same task or demand','task removed or changed','left the room or area','was sent home or picked up','got one-to-one adult time','other'];
+const V65_ESC=['task removed or changed','left the room or area','was sent home or picked up','got one-to-one adult time'];
+const V65_SAFE=[['safe1','Stand between the student and others, facing the student.'],['safe2','Move dangerous objects out of reach.'],
+  ['safe3','Step out of reach, and stand up from sitting.'],['safe4','Block a strike away from the head and torso, then move back.']];
+const V65_HOW=['','ABC-1 conditional probability','Fritz checklist on video','Interview only'];
+const v65T=v=>String(v==null?'':v).trim();
+/* a tick that starts on: '1' ticked, '0' not; empty follows the record (on for a record begun on v25.65) */
+function v65Tick(k){const v=v65T(S.meta[k]);return v==='1'||(v===''&&S.meta.v2565==='1');}
+/* the seconds of a restraint: from both times when entered; the times are to the minute, so seconds typed (or read from the
+   Duration column, "35 s", "2 min") that agree with them within a minute are the more exact figure and are used */
+function v65DurOld(t){t=v65T(t).toLowerCase();let m=/^(\d+(?:\.\d+)?)\s*(s|sec|secs|second|seconds)?$/.exec(t);if(m)return Math.round(+m[1]);
+  m=/^(\d+(?:\.\d+)?)\s*(m|min|mins|minute|minutes)$/.exec(t);if(m)return Math.round(+m[1]*60);
+  m=/^(\d+)\s*(?:m|min|mins|minutes?)\s*(\d+)\s*(?:s|sec|secs|seconds?)?$/.exec(t);if(m)return +m[1]*60+(+m[2]);return null;}
+function v65Sec(s){const r=s.r||{},t=v65T(r.durS),o=v65DurOld(r.dur),ex=/^\d+$/.test(t)?{v:+t,src:'typed'}:o!=null?{v:o,src:'dur'}:null;
+  const tm=s.began&&s.rel&&s.rel>=s.began?Math.round((s.rel-s.began)/1000):null;
+  if(tm!=null&&(!ex||Math.abs(ex.v-tm)>=60))return{v:tm,src:'times',ex};
+  return ex||{v:null,src:''};}
+function v65Day(s){return s.bDay||crcYMD(crcMDY(s.ld||''));}
+function v65Dates(txt){return v65T(txt).split(/[,;]|\band\b/).map(x=>{x=v65T(x);const iso=/^\d{4}-\d\d-\d\d$/.test(x)?x:crcMDY(x);return iso?crcYMD(iso):null;}).filter(Boolean).sort((a,b)=>crcCmp(a,b));}
+function v65Prob(v){v=v65T(v).replace(/,/g,'.');const pc=/%$/.test(v),n=parseFloat(v);if(!isFinite(n))return null;const x=pc||n>1?n/100:n;return x>=0&&x<=1?x:null;}
+
+/* ---- drawing the tables (on render, never on a keystroke) ---- */
+function v65Draw(){
+  const pt=document.querySelector('#v65PrecTbl tbody');
+  if(pt)pt.innerHTML=S.prec.map((r,i)=>`<tr>
+    <td style="text-align:center;font-weight:600">${i+1}</td>
+    <td><input data-v65p="${i}" data-f="top" list="v65PrecList" value="${esc(r.top)}" aria-label="Precursor ${i+1}"></td>
+    <td><select data-v65p="${i}" data-f="how" aria-label="Precursor ${i+1}: how it was found">${V65_HOW.map(o=>`<option${o===r.how?' selected':''}>${o}</option>`).join('')}</select></td>
+    <td><input data-v65p="${i}" data-f="ptp" value="${esc(r.ptp)}" placeholder="e.g. 0.70" aria-label="Precursor ${i+1}: p(behavior | precursor)"></td>
+    <td><input data-v65p="${i}" data-f="pt" value="${esc(r.pt)}" placeholder="e.g. 0.20" aria-label="Precursor ${i+1}: p(behavior) overall"></td>
+    <td><input data-v65p="${i}" data-f="sec" value="${esc(r.sec)}" aria-label="Precursor ${i+1}: typical seconds to the behavior"></td>
+    <td class="nx noprint"><button type="button" class="rowDel noprint" data-v65del="prec" data-i="${i}" title="Delete this row" aria-label="Delete precursor ${i+1}">&times;</button></td></tr>`).join('');
+  const rt=document.querySelector('#v65RehTbl tbody');
+  if(rt)rt.innerHTML=S.reh.map((r,i)=>`<tr>
+    <td style="text-align:center;font-weight:600">${i+1}</td>
+    <td><input data-v65r="${i}" data-f="who" value="${esc(r.who)}" aria-label="Rehearsal ${i+1}: adult"></td>
+    <td><input type="date" data-v65r="${i}" data-f="d" value="${esc(r.d)}" aria-label="Rehearsal ${i+1}: date"></td>
+    <td><input data-v65r="${i}" data-f="by" value="${esc(r.by)}" aria-label="Rehearsal ${i+1}: by whom"></td>
+    <td><select data-v65r="${i}" data-f="rp" aria-label="Rehearsal ${i+1}: role-play"><option value=""></option>${['Yes','No'].map(o=>`<option${o===r.rp?' selected':''}>${o}</option>`).join('')}</select></td>
+    <td class="nx noprint"><button type="button" class="rowDel noprint" data-v65del="reh" data-i="${i}" title="Delete this row" aria-label="Delete rehearsal ${i+1}">&times;</button></td></tr>`).join('');
+  document.querySelectorAll('[data-v65t]').forEach(el=>{el.checked=v65Tick(el.dataset.v65t);});
+}
+function v65LogDraw(){
+  const tb=document.querySelector('#v65LogTbl tbody');if(!tb)return;const st=crcStates();
+  tb.innerHTML=S.log.map((r,i)=>{const s=st[i]||{r},d=v65Sec(s);
+    return `<tr><td style="text-align:center;font-weight:600">${i+1}</td>
+    <td><input type="number" min="0" step="1" data-l="${i}" data-f="durS" value="${esc(r.durS)}" placeholder="${d.src==='times'||d.src==='dur'?esc(String(d.v)):''}" aria-label="Restraint ${i+1}: duration in seconds"><div class="v65-fnh" data-v65src="${i}"></div></td>
+    <td><input data-l="${i}" data-f="typ" value="${esc(r.typ)}" placeholder="As the incident report names it" aria-label="Restraint ${i+1}: type"></td>
+    <td><select data-l="${i}" data-f="injS" aria-label="Restraint ${i+1}: injury to the student"><option value=""></option>${opt(['No','Yes'],r.injS)}</select></td>
+    <td><select data-l="${i}" data-f="injT" aria-label="Restraint ${i+1}: injury to staff"><option value=""></option>${opt(['No','Yes'],r.injT)}</select></td>
+    <td><select data-l="${i}" data-f="aft" aria-label="Restraint ${i+1}: after the release, the student"><option value=""></option>${opt(V65_AFTER,r.aft)}</select></td></tr>`;}).join('');
+}
+
+/* ---- the readings, on every entry ---- */
+function v65Update(){try{
+  const st=crcStates(),m=S.meta,set=(id,h)=>{const e=document.getElementById(id);if(e&&e.innerHTML!==h)e.innerHTML=h;};
+  /* H1: the seconds' source, and the pattern after release */
+  st.forEach((s,i)=>{const d=v65Sec(s),e=document.querySelector('[data-v65src="'+i+'"]');if(!e)return;
+    const typed=v65T(s.r.durS);let t='';
+    if(d.src==='times')t=d.ex?'The times give '+d.v+' s, but the '+(d.ex.src==='typed'?'seconds typed say':'Duration column says')+' '+d.ex.v+' s: check them.':'From the times: '+d.v+' s';
+    else if(d.src==='dur'&&!typed)t='From the Duration column: '+d.v+' s';
+    if(e.textContent!==t)e.textContent=t;});
+  const used=st.filter(s=>s.dated&&!s.secl).map(s=>({s,day:v65Day(s)})).sort((a,b)=>a.day&&b.day?crcCmp(a.day,b.day):0);
+  const ans=used.filter(x=>v65T(x.s.r.aft));
+  const hit=ans.filter(x=>V65_ESC.includes(x.s.r.aft)).length;
+  const inj=used.filter(x=>x.s.r.injS==='Yes'||x.s.r.injT==='Yes').map(x=>x.s.i+1);
+  let fl='';
+  if(ans.length>=3&&hit*3>=ans.length*2)fl+='<div class="verdict v-mid"><b>Restraint in this record is often followed by escape from the task or by adult attention. The emergency procedure may be adding to the behavior. Review the FBA (Form FS-1) and the BIP (Form TD-1).</b> '+hit+' of the '+ans.length+' restraints with an answer were followed by the task removed or changed, leaving the room, going home, or one-to-one adult time. In a school, a hold used as a consequence increased the behavior it followed, by giving attention for one student and by removing the demand for another (Magee &amp; Ellis, 2001).</div>';
+  else if(ans.length)fl+='<p class="hint">'+hit+' of the '+ans.length+' restraints with an answer were followed by escape from the task or by adult attention. This form flags the pattern at two thirds or more of three or more restraints.</p>';
+  if(inj.length)fl+='<div class="verdict v-mid">An injury is recorded for restraint '+inj.join(', ')+'. Complete an injury check on Form IM-1 and document the injury as district policy says.</div>';
+  /* v25.65 (SAFETY-M9) the records review's count of earlier restraints and what followed them (Form RR-1) */
+  if(v65T(m.rrCrisis))fl+='<p class="hint">Records review (Form RR-1): '+esc(m.rrCrisis)+' restraints in the earlier record were followed by the task removed or the student sent home.</p>';
+  set('v65LogFlag',fl);
+  /* H2: the graph */
+  set('v65Graph',v65Graph(used));
+  /* H3: the precursors */
+  const P=(S.prec||[]).filter(r=>v65T(r.top)),pv=[];
+  P.forEach((r,k)=>{const n=S.prec.indexOf(r)+1,a=v65Prob(r.ptp),b=v65Prob(r.pt);
+    if(r.how==='Interview only')pv.push('<div class="verdict v-mid"><b>Precursor '+n+' was found by interview only.</b> Caregivers may miss precursors or name the wrong ones. Confirm with ABC-1 before the plan relies on it.</div>');
+    else if(!r.how)pv.push('<div class="verdict v-mid">Precursor '+n+': say how it was found.</div>');
+    if(a!=null&&b!=null&&a<=b)pv.push('<div class="verdict v-mid">Precursor '+n+': the behavior is no more likely after it ('+Math.round(a*100)+'%) than overall ('+Math.round(b*100)+'%). It does not predict the behavior.</div>');});
+  document.querySelectorAll('#v65PrecTbl select[data-f="how"]').forEach(e=>e.classList.toggle('v65-amber',e.value==='Interview only'));
+  set('v65PrecVerdict',pv.join(''));
+  /* H4: the function in the heading of each Early precursor row, the tick, and what stays out of the stage */
+  const fn=v65T(m.fnShow),fcr=v65T(m.fcrShow);
+  const w=document.getElementById('v65FnWord');if(w){const t=fn||'not yet entered';if(w.textContent!==t)w.textContent=t;}
+  document.querySelectorAll('[data-v65fnh]').forEach(e=>{const r=S.pbis[+e.dataset.v65fnh],t=r&&r.s===STAGES[2]?'Function: '+(fn||'not entered')+'. Teach: '+(fcr||'not entered')+'.':'';if(e.textContent!==t)e.textContent=t;});
+  const early=(S.pbis||[]).filter(r=>r.s===STAGES[2]),ev=[];
+  if(early.length&&m.earlyFits!=='1')ev.push('<div class="verdict v-mid">The Early precursor step is not yet marked as giving the student a way to get what the behavior gets. Prompt the communication response from the BIP at the precursor, and honor it at once.</div>');
+  const bad=early.filter(r=>/reprimand|scold|warn(ing)?\b|new demand|another demand|more work|remov\w* (the |their )?materials|take (away )?(the |their )?materials/i.test(String(r.do||'').replace(/\b(no|not|never|without|don['’]t|do not)\b[^.;:]*/gi,'')));
+  if(bad.length)ev.push('<div class="verdict v-mid">The Early precursor step names a reprimand, a new demand or removing materials. Keep these out of this stage: at the precursor, staff prompt the communication response.</div>');
+  if(early.length&&!early.some(r=>v65T(r.do)))ev.push('<p class="hint">Suggested first step: &ldquo;At the precursor, prompt the communication response from the BIP and honor it at once.&rdquo;</p>');
+  set('v65EarlyVerdict',ev.join(''));
+  /* H5: every adult named for the Escalation and Peak stages has a rehearsal date */
+  const names=[];(S.pbis||[]).filter(r=>r.s===STAGES[3]||r.s===STAGES[4]).forEach(r=>String(r.who||'').split(/[,;]|\band\b|\//).map(v65T).filter(Boolean).forEach(x=>{if(!names.some(y=>y.toLowerCase()===x.toLowerCase()))names.push(x);}));
+  const done=(S.reh||[]).filter(r=>v65T(r.who)&&crcYMD(r.d)).map(r=>v65T(r.who).toLowerCase());
+  const miss=names.filter(x=>{const l=x.toLowerCase();return !done.some(d=>l.includes(d)||d.includes(l));});
+  const sv=[];
+  if(miss.length)sv.push('<div class="verdict v-mid">No rehearsal date is recorded for: '+esc(miss.join('; '))+'. Each adult named under Who for the Escalation and Peak stages rehearses the safety steps in a role-play. Name each one in the table, as under Who.</div>');
+  if(!V65_SAFE.some(([k])=>v65Tick(k))&&!v65T(m.safeOther))sv.push('<div class="verdict v-mid">No safety step that is not restraint is on the plan. Tick the steps that apply, or write this student&rsquo;s own.</div>');
+  set('v65SafeVerdict',sv.join(''));
+  document.querySelectorAll('[data-v65t]').forEach(el=>{const v=v65Tick(el.dataset.v65t);if(el.checked!==v)el.checked=v;});
+  /* M1: an open trigger puts a review due within 5 school days of it */
+  const last=crcYMD(m.revLast)||crcYMD(crcMDY(m.revLast||'')),cal=crcCal(),open=[];
+  [1,2,3,4].forEach(k=>{if(m['trig'+k]!=='1')return;const d=crcYMD(m['trig'+k+'d']);if(last&&d&&crcCmp(d,last)<=0)return;open.push({k,d});});
+  const dues=open.filter(o=>o.d).map(o=>cal.add(o.d,5)).filter(Boolean).sort((a,b)=>crcCmp(a,b));
+  const due=dues.length?crcDateStr(dues[0]):'';
+  if(v65T(m.revTrigDue)!==due){m.revTrigDue=due;}const de=document.querySelector('[data-m="revTrigDue"]');if(de&&de.value!==due)de.value=due;
+  const WHAT={1:'the BIP thins reinforcement or adds extinction',2:'a new adult or a substitute',3:'a new room, a schedule change or a return after a break',4:'a medication change'};
+  set('v65Watch',open.length?'<div class="verdict v-mid"><b>Heightened watch: precursors may return; the early stages apply in full.</b> Open: '+open.map(o=>WHAT[o.k]+(o.d?' ('+crcD(o.d)+')':' (enter the date)')).join('; ')+'.'+(due?' Review due by '+crcD(dues[0])+'.':'')+'</div>':'');
+}catch(e){}}
+
+/* ---- H2: restraints per school week (or month), with the total seconds beneath, the goal line, the BIP's revisions ---- */
+function v65Graph(used){
+  const m=S.meta,today=crcDay(new Date()),win=crSemWin();
+  const ev=used.filter(x=>x.day&&x.s.inSem);
+  if(!ev.length)return '<p class="hint">The graph appears once a restraint with a date is on the log.</p>';
+  const month=m.goalPer==='month',mon=d=>crcAdd(d,-((d.getDay()+6)%7)),first=d=>new Date(d.getFullYear(),d.getMonth(),1,12);
+  const key=d=>month?first(d):mon(d);
+  let a=key(win?win.a:ev[0].day),z=key(win&&crcCmp(win.b,today)<0?win.b:today);if(crcCmp(z,key(ev[ev.length-1].day))<0)z=key(ev[ev.length-1].day);
+  const P=[];for(let d=a,c=0;crcCmp(d,z)<=0&&c<60;c++){P.push(d);d=month?new Date(d.getFullYear(),d.getMonth()+1,1,12):crcAdd(d,7);}
+  if(P.length>=60)return '<p class="hint">The period from the semester&rsquo;s first day to today is too long to draw by week; choose month for the goal.</p>';
+  const idx=d=>{const k=key(d);return P.findIndex(p=>crcCmp(p,k)===0);};
+  const cnt=P.map(()=>0),sec=P.map(()=>0),secN=P.map(()=>0);
+  ev.forEach(x=>{const j=idx(x.day);if(j<0)return;cnt[j]++;const d=v65Sec(x.s);if(d.v!=null){sec[j]+=d.v;secN[j]++;}});
+  const gRaw=v65T(m.goalN),goal=/^\d+$/.test(gRaw)?+gRaw:null,revs=v65Dates(m.bipRevs);
+  const W=Math.max(320,Math.min(720,60+P.length*34)),H=190,L=36,B=150,top=18,mx=Math.max(2,goal||0,...cnt),y=v=>B-(B-top)*v/mx,bw=Math.min(26,(W-L-10)/P.length-6),cx=j=>L+10+j*((W-L-10)/P.length)+((W-L-10)/P.length)/2;
+  const lab=d=>(d.getMonth()+1)+'/'+d.getDate();
+  let g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Restraints per '+(month?'month':'school week')+'" font-family="sans-serif" font-size="10">';
+  for(let v=0;v<=mx;v++)g+='<line x1="'+L+'" x2="'+W+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="#e3e8ea"/><text x="'+(L-6)+'" y="'+(y(v)+3)+'" text-anchor="end" fill="#47535a">'+v+'</text>';
+  P.forEach((p,j)=>{if(cnt[j])g+='<rect x="'+(cx(j)-bw/2)+'" y="'+y(cnt[j])+'" width="'+bw+'" height="'+(B-y(cnt[j]))+'" fill="#254657"/>';
+    g+='<text x="'+cx(j)+'" y="'+(B+12)+'" text-anchor="middle" fill="#47535a">'+(month?CRC_MON[p.getMonth()].slice(0,3):lab(p))+'</text>';
+    if(cnt[j])g+='<text x="'+cx(j)+'" y="'+(B+24)+'" text-anchor="middle" fill="#47535a">'+(secN[j]?sec[j]+' s':'?')+'</text>';});
+  if(goal!=null)g+='<line x1="'+L+'" x2="'+W+'" y1="'+y(goal)+'" y2="'+y(goal)+'" stroke="#9B4E15" stroke-width="1.5" stroke-dasharray="6 4"/><text x="'+(W-4)+'" y="'+(y(goal)-4)+'" text-anchor="end" fill="#9B4E15">goal '+goal+'</text>';
+  revs.forEach(r=>{const j=idx(r);if(j<0)return;const x=cx(j)-((W-L-10)/P.length)/2;g+='<line x1="'+x+'" x2="'+x+'" y1="'+top+'" y2="'+B+'" stroke="#2F6B37" stroke-width="1.5"/><text x="'+(x+3)+'" y="'+(top+8)+'" fill="#2F6B37">BIP '+lab(r)+'</text>';});
+  g+='<text x="'+L+'" y="'+(H-2)+'" fill="#47535a">Bars: restraints per '+(month?'month':'school week')+'. Beneath: total seconds held. Dashed: the goal. Green: BIP adopted or revised.</text></svg>';
+  /* the decision line */
+  const nAll=ev.length,da=v65T(m.daysAtt),per10=/^\d+$/.test(da)&&+da>0?Math.round(nAll/(+da)*100)/10:null;
+  const second=ev[1]?ev[1].day:null,lastRev=revs.length?revs[revs.length-1]:null;
+  let dec='';
+  const cur=P.length-1;
+  if(second&&lastRev&&crcCmp(lastRev,second)<0)dec='<div class="verdict v-mid"><b>BIP not revised since the second restraint</b> ('+crcD(second)+'; the latest BIP date is '+crcD(lastRev)+').</div>';
+  else if(second&&!revs.length)dec='<div class="verdict v-mid">No BIP adoption or revision date is entered: enter them (Form TD-1) to check that the BIP was revised after the second restraint.</div>';
+  if(goal==null)dec+='<p class="hint">Enter the goal as a number per '+(month?'month':'school week')+' to draw the goal line.</p>';
+  else if(cur>=1&&cnt[cur]>goal&&cnt[cur-1]>goal)dec+='<div class="verdict v-mid"><b>Above goal: review the BIP.</b> Above the goal line for two '+(month?'months':'weeks')+' running.</div>';
+  else if(cnt[cur]<=goal)dec+='<div class="verdict v-ok"><b>On track:</b> the count this '+(month?'month':'week')+' is at or below the goal line.</div>';
+  else dec+='<div class="verdict v-mid">Above the goal line this '+(month?'month':'week')+'. Watch the next '+(month?'month':'week')+'.</div>';
+  return '<div class="v65-graph">'+g+'<p class="v65-cap">'+nAll+' restraint'+(nAll===1?'':'s')+' this semester'+(per10!=null?': '+per10+' per 10 school days attended ('+esc(da)+' days)':'; enter the school days attended for the count per 10 school days')+'.</p>'+dec+
+    '<p class="v65-cap"><b>One restraint more or less is common variation. Judge the trend over several weeks, not a single week.</b> (Pfadt &amp; Wheeler, 1995.) The way to reduce restraint is the BIP: in a school case series, crisis procedures stopped for all 6 children once skill-based treatment was in place (Slaton et al., 2024).</p></div>';
+}
+
+/* ---- the lines the BIP copy carries ---- */
+function v65BipLines(){const out=[];if(!v65T(S.meta.dbeh)&&!(S.pbis||[]).some(r=>v65T(r.do)))return out;   /* an empty plan copies as the title only */
+  (S.prec||[]).filter(r=>v65T(r.top)).forEach((r,k)=>out.push(bipLine('Precursor '+(k+1),[v65T(r.top),r.how?'found by '+r.how.charAt(0).toLowerCase()+r.how.slice(1):'',v65T(r.ptp)?'p(behavior | precursor) '+v65T(r.ptp):'',v65T(r.pt)?'p(behavior) '+v65T(r.pt):'',v65T(r.sec)?'about '+v65T(r.sec)+' s to the behavior':''].filter(Boolean).join('; '))));
+  if(v65T(S.meta.fnShow)||v65T(S.meta.fcrShow))out.push(bipLine('At the early precursor','prompt the communication response from the BIP and honor it at once'+(v65T(S.meta.fcrShow)?' ('+v65T(S.meta.fcrShow)+')':'')+(v65T(S.meta.fnShow)?'; function: '+v65T(S.meta.fnShow):'')));
+  const safe=V65_SAFE.filter(([k])=>v65Tick(k)).map(x=>x[1].replace(/\.$/,'')).concat(v65T(S.meta.safeOther)?[v65T(S.meta.safeOther)]:[]);
+  if(safe.length)out.push(bipLine('Safety steps that are not restraint',safe.join('; ')+'. Never grasp or hold a body part.'));
+  return out.filter(Boolean);}
+
+/* ---- entries ---- */
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(!el||!el.dataset)return;
+  if(el.dataset.v65p!==undefined){const r=S.prec[+el.dataset.v65p];if(r){r[el.dataset.f]=el.value;v65Update();}}
+  else if(el.dataset.v65r!==undefined){const r=S.reh[+el.dataset.v65r];if(r){r[el.dataset.f]=el.value;v65Update();}}
+  else if(el.dataset.v65t!==undefined&&ev==='change'){S.meta[el.dataset.v65t]=el.checked?'1':'0';v65Update();}
+  else if(el.dataset.mc&&/^(earlyFits|trig\d)$/.test(el.dataset.mc)&&ev==='change')setTimeout(v65Update,0);
+  /* L5: choosing Recovery for a stage with no one named fills in who leads it */
+  else if(ev==='change'&&el.dataset.p!==undefined&&el.dataset.f==='s'){const i=+el.dataset.p,r=S.pbis[i],w=document.querySelector('input[data-p="'+i+'"][data-f="who"]');
+    if(w)w.placeholder=r&&r.s===STAGES[5]?'An adult who was not part of the hold':'';
+    if(r&&r.s===STAGES[5]&&!v65T(r.who)){r.who='An adult who was not part of the hold';if(w)w.value=r.who;}
+    v65Update();}
+}));
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest?e.target.closest('#v65AddPrec,#v65AddReh,[data-v65del]'):null;if(!b)return;
+  if(b.id==='v65AddPrec')S.prec.push({top:'',how:'',ptp:'',pt:'',sec:''});
+  else if(b.id==='v65AddReh')S.reh.push({who:'',d:'',by:'',rp:''});
+  else{const A=b.dataset.v65del==='prec'?S.prec:S.reh,i=+b.dataset.i,r=A[i];if(!r)return;
+    if(crcFilled(r)&&!(await nbhUI.confirm('Delete this row?\nIts entries will be deleted.',{ok:'Delete',danger:true})))return;A.splice(i,1);ensure();}
+  v65Draw();v65Update();});
+/* v25.65 (SAFETY-M9) the case, in: the records review's count of restraints followed by the task removed or the student sent home */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const c=f&&f.records&&f.records.crisisHist;if(c&&c.esc!=null&&c.of!=null&&+c.of>0){const t=c.esc+' of '+c.of;if(S.meta.rrCrisis!==t){S.meta.rrCrisis=t;v65Update();}}}catch(e){}
+  return r;};}
+v65Draw();v65LogDraw();v65Update();
+</script>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same

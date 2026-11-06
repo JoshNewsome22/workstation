@@ -979,6 +979,9 @@ td input,td select{max-width:100%}
       <label class="ck"><input type="checkbox" data-c="check"> Routine checklist (yes or no per step, per routine, per day)</label>
       <label class="ck"><input type="checkbox" data-c="abc"> ABC note sheet (tick boxes for before and after, one free line)</label>
       <label class="ck"><input type="checkbox" data-c="sleep"> Sleep and arousal log (bedtime, time asleep, night wakings, wake time)</label>
+      <!-- v25.65 (FEED-M2, CARE-M5) -->
+      <label class="ck"><input type="checkbox" data-c="meal"> Meal log (minutes, the target food, bites tried, gagging or choking, what the adult did after refusal)</label>
+      <label class="ck"><input type="checkbox" data-c="toilet"> Toileting log (sits, voids, accidents, asking to go)</label>
       <label class="ck"><input type="checkbox" data-c="sched"> The school&rsquo;s plan, at home (one page from Form SR-1&rsquo;s schedule card, in Spanish too when that is the family&rsquo;s language)</label>
     </div>
     <!-- v22.53 (review F374) baseline sheets: no plan yet, so the sheets carry no plan lines -->
@@ -1066,6 +1069,28 @@ td input,td select{max-width:100%}
     <p class="hint">Each row is a night and the morning after it (&ldquo;Sun night &rarr; Mon&rdquo; is filled in on Monday morning). Hours asleep: from falling asleep to waking for the day, less the time awake in the night. Beside it, the next morning&rsquo;s marks from the morning routine.</p>
     <div class="grid-wrap"><table class="rt wide" id="slTbl"></table></div>
     <div id="slSum"></div>
+    <!-- v25.65 (CARE-M6) the measures the sleep studies used -->
+    <div id="v65SlX">
+    <h3 style="margin-top:10px">Bedtime and the Night</h3>
+    <p class="hint">Minutes to fall asleep are worked out from lights out and fell asleep. Calls or trips out after lights out, where the child fell asleep and whether an adult stayed, where the child was at wake time, what the adult did at a night waking, and any sleep medicine or melatonin with its time. <b>Sleep diaries are best guesses; check one or two nights against another record if a decision rests on them.</b> Sleep video only with the parent&rsquo;s consent on Form IC-1 (Specific procedures H).</p>
+    <div class="grid-wrap"><table class="rt wide v65-tbl" id="v65SlXTbl"></table></div>
+    </div>
+    </div>
+    <!-- v25.65 (FEED-M2) the meal log, typed in -->
+    <div id="v65MlWrap" hidden>
+    <h3 style="margin-top:14px">Meal Log, This Week</h3>
+    <p class="hint">One row per meal the family wrote down. The health line on the sheet comes first: coughing, choking, a wet or gurgly voice, or vomiting at meals stops the meal and goes to the child&rsquo;s doctor.</p>
+    <div class="tools noprint"><button type="button" class="tool" id="v65AddMl">Add a meal</button></div>
+    <div class="grid-wrap"><table class="rt wide v65-tbl" id="v65MlTbl"></table></div>
+    <div id="v65MlSum"></div>
+    </div>
+    <!-- v25.65 (CARE-M5) the toileting log, typed in -->
+    <div id="v65TlWrap" hidden>
+    <h3 style="margin-top:14px">Toileting Log, This Week</h3>
+    <p class="hint">One row per entry on the family&rsquo;s sheet. Percent successful voids is voids in the toilet &divide; (voids in the toilet + accidents); accidents per hour are over the hours from the first to the last entry each day; self-initiations are the times the child asked.</p>
+    <div class="tools noprint"><button type="button" class="tool" id="v65AddTl">Add an entry</button></div>
+    <div class="grid-wrap"><table class="rt wide v65-tbl" id="v65TlTbl"></table></div>
+    <div id="v65TlSum"></div>
     </div>
 
     <!-- v22.53 (review I188) the note back to the family, written from the week typed in -->
@@ -1077,6 +1102,9 @@ td input,td select{max-width:100%}
     <h3 style="margin-top:14px">By Day, Across the Weeks Entered</h3>
     <p class="hint">One panel per behavior: the day total (count, yes-count, minutes or mean rating) on each day a value was entered, then the checklist&rsquo;s steps done and the hours asleep when they were typed in. Weeks are laid end to end in the order of their start dates; a day with no entry is a gap, not a zero. A solid line marks a change of condition (baseline, plan, plan changed); an open point is a day on which not every routine on the sheet was marked.</p>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Home data by day"><svg id="entPlot" viewBox="0 0 900 200" aria-label="Day totals per behavior across the weeks entered"></svg></div>
+    <!-- v25.65 (CARE-L4) the school's data beside the home data -->
+    <h3 style="margin-top:14px">Home and School, Week by Week</h3>
+    <div id="v65HsPlot"></div>
 
     <h3 style="margin-top:14px">Agreement Check</h3>
     <p class="hint">When a staff member (or the BCBA on a home visit) watched the same routine the family was marking, enter both values. Each person writes down their own mark before seeing the other&rsquo;s. <!-- v22.53 (review F371) -->For a count or minutes, agreement is the smaller value divided by the larger; for a 0 to 3 rating, the two agree only when they are the same number (within one point is shown as well); a Y/N pair agrees or it does not. It is reported for each behavior, and the verdict rests on the lowest one and on every behavior having a check. A check by phone hears the behavior but does not see it, so it is shown and not counted. At or above 80% is treated as acceptable, as a working convention; below it, re-teach the definitions with the family and hold that behavior&rsquo;s home data from decisions until a check reaches 80%.</p>
@@ -3455,6 +3483,160 @@ a{text-underline-offset:2px}
    times the page's size): the page keeps its own text size on screen; ABC-1's paper sheet sets its own size for printing (v24.07) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </style>
+<style id="v2565-hd1-css">
+/* v25.65 (FEED-M2, CARE-M5, M6, M7, L4) */
+.v65-tbl input,.v65-tbl select{width:100%;box-sizing:border-box;font:inherit;font-size:12.5px}
+.v65-tbl td.c{text-align:center}
+.v65-health{border:2px solid #8e2a2a;padding:6px 10px;margin:6px 0;font-weight:600}
+#v65HsPlot svg{width:100%;height:auto}
+</style>
+<script id="v2565-hd1">
+/* v25.65. FEED-M2: a meal log sheet for home (w.ml rows), with its health line. CARE-M5: a toileting log (w.tl rows), with percent
+   successful voids, accidents per hour logged and self-initiations, the privacy rule and the doctor line. CARE-M6: the sleep
+   log's bedtime and night measures (sleep entries calls, where, stay, wake, did, med, medt) and minutes to fall asleep.
+   CARE-M7: an agreement row can name a checklist step (bh "s<step>"), scored Y/N per step and reported apart; until one check
+   reaches 80% the checklist reads "family report, not yet checked". CARE-L4: the school's data (Form DD-1, kept in
+   meta.v65school) beside the home data, week by week. New record parts: chk.meal, chk.toilet, each week's ml and tl, the new
+   sleep fields, meta.v65school. A file saved before has none of them, and opens and prints as before. */
+const V65_SLX=['calls','where','stay','wake','did','med','medt'];
+V65_SLX.forEach(f=>{if(!SL_F.includes(f))SL_F.push(f);});   /* the sleep fields a file keeps */
+const V65_DID=['','Walked back to bed quietly','Stayed until asleep','Brought to the parent’s bed','Gave a drink or food','Talked or comforted','Other'];
+const V65_WHERE=['','Own bed','Parent’s bed','Couch or another room','Other'];
+const V65_MDID=[['wait','Waited calmly'],['coax','Coaxed'],['end','Ended the meal early'],['other','Gave another food']];
+const V65_ML=['d','meal','min','off','bites','all','gag','did'],V65_TL=['d','t','kind','v','acc','dry','bm','wore'];
+const v65s=v=>v==null||typeof v==='object'?'':String(v);
+const v65Row=(F,o)=>{const r={};F.forEach(f=>{r[f]=v65s(o&&o[f]).slice(0,200);});return r;};
+const v65W=w=>{if(!Array.isArray(w.ml))w.ml=[];if(!Array.isArray(w.tl))w.tl=[];return w;};
+/* the file keeps the new rows: fromFile reads only the fields it knew, so the rows are added here */
+{const ff0=fromFile;fromFile=function(d){const o=ff0.apply(this,arguments);try{if(o&&d&&d.S&&Array.isArray(d.S.wk))o.wk.forEach((w,i)=>{const x=d.S.wk[i]||{};
+  w.ml=Array.isArray(x.ml)?x.ml.slice(0,60).filter(r=>r&&typeof r==='object').map(r=>v65Row(V65_ML,r)):[];w.tl=Array.isArray(x.tl)?x.tl.slice(0,200).filter(r=>r&&typeof r==='object').map(r=>v65Row(V65_TL,r)):[];});}catch(e){}return o;};}
+
+/* ---- the printed sheets ---- */
+const v65Hs=()=>'<div class="v65-health">If your child coughs, chokes, has a wet or gurgly voice, or vomits at meals, stop the meal and call your child&rsquo;s doctor. If your child cannot breathe, cough or speak, call 911.</div>';
+function v65Sheets(){const who=S.meta.cg||'',nm=esc(kid()||'your child'),D=dayIdx();let h='';
+  if(S.chk.meal){const rows=Math.max(7,Math.min(14,D.length*2));
+    h+='<div class="hs" data-sheet="meal">'+hsHead('Meal Log, This Week',who)+v65Hs()+
+      '<div class="hs-box"><b>How to fill this in</b><ol><li>One line for each meal you write down (breakfast and dinner are enough).</li><li><b>Minutes</b>: about how long the meal lasted.</li><li><b>Target food</b>: the new or hard food on the plan. Was it offered? How many bites did '+nm+' try? Was all of it eaten?</li><li>Tick if there was any gagging, coughing or choking.</li><li>If '+nm+' refused, tick what you did next. There is no wrong answer: we want to know what usually happens.</li></ol>'+
+      '<p style="margin:4px 0 0">Refusal can rise for a few days when a new routine starts; keep the routine calm and tell us.</p></div>'+
+      '<table class="hs-t"><thead><tr><th style="width:11%">Day</th><th style="width:11%">Meal</th><th style="width:8%">Minutes</th><th style="width:9%">Target food offered? Y / N</th><th style="width:9%">Bites tried</th><th style="width:9%">All of it eaten? Y / N</th><th style="width:8%">Gag, cough or choke</th><th>After refusal, I&hellip; (tick)</th></tr></thead><tbody>'+
+      '<tr class="ex"><td class="lab">Example: Tue</td><td>Dinner</td><td>25</td><td>Y</td><td>3</td><td>N</td><td></td><td class="sub">&#10003; Waited calmly</td></tr>'+
+      Array.from({length:rows},()=>'<tr><td class="hc"></td><td class="hc"></td><td class="hc"></td><td class="hc"></td><td class="hc"></td><td class="hc"></td><td class="hc">&#9744;</td><td class="sub">'+V65_MDID.map(x=>'&#9744; '+x[1]).join(' &nbsp; ')+'</td></tr>').join('')+
+      '</tbody></table>'+hsFoot()+'</div>';}
+  if(S.chk.toilet){
+    h+='<div class="hs" data-sheet="toilet">'+hsHead('Toileting Log (Sits, Voids, Accidents, Asking to Go)',who)+
+      '<div class="hs-box"><b>How to fill this in</b><ol><li>One line each time: a sit on the toilet, an accident, or a dry check.</li><li>Write the time. Tick whether it was a <b>scheduled sit</b> or '+nm+' <b>asked</b>.</li><li>Tick what happened: pee in the toilet, an accident (wet or soiled), dry at the check, or a bowel movement in the toilet or in the clothes.</li><li>Write what '+nm+' wore: diaper, pull-up or underwear.</li></ol>'+
+      '<p style="margin:4px 0 0"><b>Toileting can have medical causes; talk with your child&rsquo;s doctor first.</b> <b>Privacy:</b> any check by video is camera off, or shoulders up, with you saying what happened. Never film in the bathroom.</p></div>'+
+      '<table class="hs-t"><thead><tr><th style="width:9%">Day</th><th style="width:9%">Time</th><th style="width:12%">Scheduled sit / Asked</th><th style="width:10%">Pee in the toilet</th><th style="width:12%">Accident: wet / soiled</th><th style="width:8%">Dry check</th><th style="width:14%">BM: toilet / accident</th><th>Wore: diaper / pull-up / underwear</th></tr></thead><tbody>'+
+      '<tr class="ex"><td class="lab">Example: Mon</td><td>4:30 pm</td><td>&#10003; Asked</td><td>&#10003;</td><td></td><td></td><td></td><td>Underwear</td></tr>'+
+      Array.from({length:16},()=>'<tr><td class="hc"></td><td class="hc"></td><td class="sub">&#9744; Sit &#9744; Asked</td><td class="hc">&#9744;</td><td class="sub">&#9744; Wet &#9744; Soiled</td><td class="hc">&#9744;</td><td class="sub">&#9744; Toilet &#9744; Accident</td><td class="hc"></td></tr>').join('')+
+      '</tbody></table>'+hsFoot()+'</div>';}
+  return h;}
+/* CARE-M6: the bedtime and night measures print on the Sleep Log itself, under its table (no sheet of their own, so the
+   count of sheets and their safety lines stay as they were) */
+function v65SleepX(){const nm=esc(kid()||'your child'),D=dayIdx();
+    return '<div class="v65-slx"><div class="hs-box"><b>Bedtime and the night</b><ol><li>One row per night, beside the row above.</li><li><b>Calls or trips out</b>: how many times '+nm+' called out or left the room after lights out.</li><li><b>Fell asleep where</b>, and whether an adult stayed until '+nm+' was asleep.</li><li><b>Where at wake time</b>: own bed or a parent&rsquo;s bed.</li><li>At a night waking, what did the adult do?</li><li>Any sleep medicine or melatonin, and the time it was given.</li></ol><p style="margin:4px 0 0">Your best guess is fine.</p></div>'+
+      '<table class="hs-t"><thead><tr><th style="width:17%">Night</th><th style="width:9%">Calls or trips out</th><th style="width:17%">Fell asleep where / adult stayed? Y N</th><th style="width:13%">At wake time: own bed / parent&rsquo;s bed</th><th>At a night waking, the adult&hellip;</th><th style="width:16%">Sleep medicine or melatonin / time</th></tr></thead><tbody>'+
+      D.map(di=>'<tr class="slr"><td class="lab night">'+nightLab(di)+'</td><td class="hc"></td><td class="hc"></td><td class="hc"></td><td class="hc"></td><td class="hc"></td></tr>').join('')+
+      '</tbody></table></div>';}
+SH_LOW.meal='the meal log';SH_LOW.toilet='the toileting log';SH_NAME.meal='Meal log';SH_NAME.toilet='Toileting log';
+{const rs1=renderSheets;renderSheets=function(){const r=rs1.apply(this,arguments);try{const out=$('#sheetOut');if(out&&S.bh.some(b=>b.name)){
+  const sl=out.querySelector('.hs[data-sheet="sleep"]'),end=sl&&sl.querySelector('.hs-end');if(end&&!sl.querySelector('.v65-slx'))end.insertAdjacentHTML('beforebegin',v65SleepX());
+  const add=v65Sheets();if(add){if(/Tick at least one sheet/.test(out.innerHTML))out.innerHTML='';out.insertAdjacentHTML('beforeend',add);}
+  if(sl||add)renderCost();}}catch(e){}return r;};}
+
+/* ---- the entry tables ---- */
+const v65Opt=(L,v)=>L.map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o];return '<option value="'+esc(val)+'"'+(String(v)===String(val)?' selected':'')+'>'+esc(lab)+'</option>';}).join('');
+function v65Ent(){const w=v65W(week()),D=wD(w),dayO=[['','']].concat(D.map(di=>[String(di),DAYS[di]]));
+  const ml=$('#v65MlWrap');if(ml){ml.hidden=!(S.chk.meal||w.ml.length);if(!ml.hidden){
+    $('#v65MlTbl').innerHTML='<thead><tr><th style="width:9%">Day</th><th style="width:11%">Meal</th><th style="width:7%">Minutes</th><th style="width:8%">Target food offered</th><th style="width:7%">Bites tried</th><th style="width:8%">All eaten</th><th style="width:8%">Gag, cough or choke</th><th>After refusal</th><th class="nx noprint"></th></tr></thead><tbody>'+
+      w.ml.map((r,i)=>{const I=(f,ph)=>'<input data-v65ml="'+i+'" data-f="'+f+'" value="'+esc(r[f])+'" placeholder="'+(ph||'')+'" aria-label="Meal '+(i+1)+': '+f+'">',Sel=(f,L)=>'<select data-v65ml="'+i+'" data-f="'+f+'" aria-label="Meal '+(i+1)+': '+f+'">'+v65Opt(L,r[f])+'</select>';
+        return '<tr><td>'+Sel('d',dayO)+'</td><td>'+Sel('meal',['','Breakfast','Lunch','Dinner','Snack'])+'</td><td>'+I('min','20')+'</td><td>'+Sel('off',['','Y','N'])+'</td><td>'+I('bites','0')+'</td><td>'+Sel('all',['','Y','N'])+'</td><td class="c"><input type="checkbox" data-v65ml="'+i+'" data-f="gag"'+(r.gag==='1'?' checked':'')+' aria-label="Meal '+(i+1)+': gag, cough or choke"></td><td>'+Sel('did',[['',''],...V65_MDID])+'</td><td class="nx noprint"><button type="button" class="rowDel noprint" data-v65del="ml" data-i="'+i+'" aria-label="Delete meal '+(i+1)+'">&times;</button></td></tr>';}).join('')+'</tbody>';}}
+  const tl=$('#v65TlWrap');if(tl){tl.hidden=!(S.chk.toilet||w.tl.length);if(!tl.hidden){
+    $('#v65TlTbl').innerHTML='<thead><tr><th style="width:9%">Day</th><th style="width:9%">Time</th><th style="width:12%">Sit or asked</th><th style="width:9%">Pee in the toilet</th><th style="width:11%">Accident</th><th style="width:7%">Dry check</th><th style="width:12%">Bowel movement</th><th>Wore</th><th class="nx noprint"></th></tr></thead><tbody>'+
+      w.tl.map((r,i)=>{const I=(f,ph)=>'<input data-v65tl="'+i+'" data-f="'+f+'" value="'+esc(r[f])+'" placeholder="'+(ph||'')+'" aria-label="Toileting '+(i+1)+': '+f+'">',Sel=(f,L)=>'<select data-v65tl="'+i+'" data-f="'+f+'" aria-label="Toileting '+(i+1)+': '+f+'">'+v65Opt(L,r[f])+'</select>';
+        return '<tr><td>'+Sel('d',dayO)+'</td><td>'+I('t','4:30 pm')+'</td><td>'+Sel('kind',[['',''],['sched','Scheduled sit'],['ask','Child asked']])+'</td><td class="c"><input type="checkbox" data-v65tl="'+i+'" data-f="v"'+(r.v==='1'?' checked':'')+' aria-label="Toileting '+(i+1)+': pee in the toilet"></td><td>'+Sel('acc',[['',''],['wet','Wet'],['soiled','Soiled']])+'</td><td class="c"><input type="checkbox" data-v65tl="'+i+'" data-f="dry"'+(r.dry==='1'?' checked':'')+' aria-label="Toileting '+(i+1)+': dry check"></td><td>'+Sel('bm',[['',''],['toilet','In the toilet'],['acc','Accident']])+'</td><td>'+Sel('wore',['','Diaper','Pull-up','Underwear'])+'</td><td class="nx noprint"><button type="button" class="rowDel noprint" data-v65del="tl" data-i="'+i+'" aria-label="Delete toileting row '+(i+1)+'">&times;</button></td></tr>';}).join('')+'</tbody>';}}
+  const sx=$('#v65SlX');if(sx){const on=!$('#slWrap')||!$('#slWrap').hidden;sx.hidden=!on;if(on){const inp=(di,f,ph,lab)=>'<input data-sd="'+di+'" data-sf="'+f+'" value="'+esc((w.sl[String(di)]||{})[f]||'')+'" placeholder="'+ph+'" aria-label="'+esc(nightLab(di)+': '+lab)+'">';
+    const sel=(di,f,L,lab)=>'<select data-sd="'+di+'" data-sf="'+f+'" aria-label="'+esc(nightLab(di)+': '+lab)+'">'+v65Opt(L,(w.sl[String(di)]||{})[f]||'')+'</select>';
+    $('#v65SlXTbl').innerHTML='<thead><tr><th style="width:12%">Night</th><th style="width:9%">Minutes to fall asleep</th><th style="width:8%">Calls or trips out</th><th style="width:13%">Fell asleep where</th><th style="width:8%">Adult stayed until asleep</th><th style="width:12%">At wake time</th><th>At a night waking, the adult</th><th style="width:12%">Sleep medicine or melatonin</th><th style="width:8%">Time given</th></tr></thead><tbody>'+
+      D.map(di=>'<tr><td class="lk">'+nightLab(di)+'</td><td class="num" id="v65lat_'+di+'"></td><td>'+inp(di,'calls','0','calls or trips out')+'</td><td>'+sel(di,'where',V65_WHERE,'fell asleep where')+'</td><td>'+sel(di,'stay',['','Y','N'],'adult stayed until asleep')+'</td><td>'+sel(di,'wake',V65_WHERE,'where at wake time')+'</td><td>'+sel(di,'did',V65_DID,'what the adult did at a night waking')+'</td><td>'+inp(di,'med','none','sleep medicine or melatonin')+'</td><td>'+inp(di,'medt','','time given')+'</td></tr>').join('')+'</tbody>';}}
+  v65Sum();}
+function v65Lat(n){if(!n)return null;const a=hm(n.lo,true),b=hm(n.fa,true);if(a==null||b==null)return null;let d=b-a;if(d<0)d+=1440;return d<720?d:null;}
+function v65Sum(){const w=v65W(week()),set=(id,h)=>{const e=document.getElementById(id);if(e&&e.innerHTML!==h)e.innerHTML=h;};
+  wD(w).forEach(di=>{const e=$('#v65lat_'+di);if(e){const v=v65Lat(w.sl[String(di)]);const t=v==null?'—':String(v);if(e.textContent!==t)e.textContent=t;}});
+  /* meals */
+  const M=S.wk.flatMap(x=>v65W(x).ml),Mw=w.ml,mi=L=>{const off=L.filter(r=>r.off==='Y'),bt=off.map(r=>parseFloat(r.bites)).filter(isFinite);return {n:L.length,off:off.length,bites:bt.length?Math.round(bt.reduce((a,b)=>a+b,0)/bt.length*10)/10:null,all:off.filter(r=>r.all==='Y').length,gag:L.filter(r=>r.gag==='1').length,end:L.filter(r=>r.did==='end').length,coax:L.filter(r=>r.did==='coax').length,other:L.filter(r=>r.did==='other').length,wait:L.filter(r=>r.did==='wait').length};};
+  if(M.length){const a=mi(Mw),b=mi(M);let h='<div class="metrics"><div class="metric"><b>Meals logged</b><div class="val">'+a.n+'</div><div class="sub">this week · '+b.n+' in all</div></div><div class="metric"><b>Target food offered</b><div class="val">'+a.off+'</div><div class="sub">bites tried per offer: '+(a.bites==null?'—':a.bites)+' · all eaten '+a.all+'</div></div><div class="metric"><b>After refusal</b><div class="val">'+(a.end+a.coax+a.other)+'</div><div class="sub">ended early '+a.end+' · coaxed '+a.coax+' · another food '+a.other+' · waited calmly '+a.wait+'</div></div></div>';
+    if(a.gag)h+='<div class="verdict v-no"><b>Gagging, coughing or choking was ticked at '+a.gag+' meal'+(a.gag===1?'':'s')+' this week.</b> Talk with the family and the school nurse; the sheet tells the family to stop the meal and call the child&rsquo;s doctor. Coughing, a wet voice or choking at meals can be a swallowing problem: refer to the child&rsquo;s doctor before any feeding plan goes further.</div>';
+    if(a.end+a.coax+a.other>0)h+='<p class="hint">Ending the meal, coaxing and giving another food are the usual home responses to refusal, and they can keep refusal going (Borrero et al., 2010; Piazza et al., 2003). Read this with the BCBA; the plan, not the log, says what to do.</p>';
+    set('v65MlSum',h);}else set('v65MlSum','');
+  /* toileting */
+  const T=w.tl,voidT=T.filter(r=>r.v==='1').length,acc=T.filter(r=>r.acc).length,ask=T.filter(r=>r.kind==='ask').length,bmT=T.filter(r=>r.bm==='toilet').length,bmA=T.filter(r=>r.bm==='acc').length;
+  let hrs=0;wD(w).forEach(di=>{const tt=T.filter(r=>String(r.d)===String(di)).map(r=>hm(r.t,false)).filter(v=>v!=null).sort((a,b)=>a-b);if(tt.length>=2)hrs+=(tt[tt.length-1]-tt[0])/60;});
+  if(T.length){const pct=voidT+acc?Math.round(voidT/(voidT+acc)*100):null;
+    set('v65TlSum','<div class="metrics"><div class="metric"><b>Successful voids</b><div class="val">'+(pct==null?'—':pct+'%')+'</div><div class="sub">'+voidT+' in the toilet &divide; ('+voidT+' + '+acc+' accidents)</div></div><div class="metric"><b>Accidents per hour logged</b><div class="val">'+(hrs>0?Math.round(acc/hrs*100)/100:'—')+'</div><div class="sub">'+(hrs>0?Math.round(hrs*10)/10+' hours from the first to the last entry each day':'two or more timed entries a day are needed')+'</div></div><div class="metric"><b>Self-initiations</b><div class="val">'+ask+'</div><div class="sub">times the child asked · BM in the toilet '+bmT+', BM accidents '+bmA+'</div></div></div>'+
+      '<p class="hint">Underwear helped some children where a dense sit schedule alone did not (Greer et al., 2016), so what the child wore is kept. Toileting can have medical causes: the family talks with the child&rsquo;s doctor first (Form MS-1 keeps the medical side).</p>');}else set('v65TlSum','');}
+
+/* ---- M7: an agreement check on a checklist step ---- */
+const v65Step=r=>/^s\d+$/.test(String(r&&r.bh||''))?S.sk[+String(r.bh).slice(1)]:null;
+{const ag0=agree;agree=function(r){const s=v65Step(r);if(!s)return ag0.apply(this,arguments);const a=String(r.staff||'').trim().toUpperCase()[0],b=String(r.home||'').trim().toUpperCase()[0];if(!/[YN]/.test(a||'')||!/[YN]/.test(b||''))return null;return a===b?100:0;};}
+{const ra0=renderAg;renderAg=function(){const r=ra0.apply(this,arguments);try{const steps=S.sk.map((s,si)=>({s,si})).filter(x=>x.s.label);if(!steps.length)return r;
+  document.querySelectorAll('#agTbl select[data-f="bh"]').forEach(sel=>{const i=+sel.dataset.i,row=S.ag[i];const g=document.createElement('optgroup');g.label='Checklist step (Y or N)';
+    steps.forEach(x=>{const o=document.createElement('option');o.value='s'+x.si;o.textContent='Step: '+x.s.label;if(row&&String(row.bh)==='s'+x.si)o.selected=true;g.appendChild(o);});sel.appendChild(g);
+    const c=sel.closest('tr')&&sel.closest('tr').querySelector('.agv');if(c&&row&&v65Step(row))c.innerHTML=agCell(row);});}catch(e){}return r;};}
+function v65CkAg(){const L=S.ag.filter(r=>v65Step(r)&&!phoneHow(r)),A=L.map(agree).filter(x=>x!=null);return {n:A.length,m:A.length?A.reduce((a,b)=>a+b,0)/A.length:null,ok:A.some(x=>x>=80)&&(A.reduce((a,b)=>a+b,0)/A.length)>=80};}
+{const rm0=renderAgM;renderAgM=function(){const r=rm0.apply(this,arguments);try{const c=v65CkAg(),has=S.sk.some(s=>s.label);if(!has)return r;
+  $('#agMetrics').insertAdjacentHTML('beforeend','<div class="metric"><b>Agreement, checklist steps</b><div class="val">'+(c.m==null?'—':pct(c.m))+'</div><div class="sub">'+c.n+' step check'+(c.n===1?'':'s')+' (in person or by video; a step check by phone is not counted)</div></div>'+
+    (c.ok?'':'<div class="verdict v-mid" style="grid-column:1/-1">The routine checklist is the <b>family&rsquo;s report, not yet checked</b>: until a staff check of its steps agrees at 80% or more, it is read that way on the graph and on Form CT-1. A video call can check the steps the camera can see.</div>'));}catch(e){}return r;};}
+/* the graph names the checklist as a report until a step check agrees at 80%; the school's line beside the home data (L4) */
+{const de0=drawEnt;drawEnt=function(){const r=de0.apply(this,arguments);try{if(!v65CkAg().ok){const svg=$('#entPlot');svg.querySelectorAll('text').forEach(t=>{if(/^Routine checklist/.test(t.textContent)&&!/not yet checked/.test(t.textContent)){const s=t.querySelector('tspan');if(s)s.textContent='(% of steps marked done; family report, not yet checked)';}});}}catch(e){}
+  try{v65School();}catch(e){}return r;};}
+function v65SchoolData(){try{const x=JSON.parse(S.meta.v65school||'null');return x&&typeof x==='object'?x:null;}catch(e){return null;}}
+function v65School(){const box=$('#v65HsPlot');if(!box)return;const X=v65SchoolData(),W=orderedWeeks().filter(o=>o.d);
+  if(!X||!W.length){box.innerHTML=X?'':'<p class="hint">When Form DD-1 holds school data for the same behavior, a school line appears here beside the home line, week by week.</p>';return;}
+  const out=[];namedB().forEach(bi=>{const b=S.bh[bi],key=Object.keys(X).find(k=>k.toLowerCase()===String(b.name).toLowerCase())||Object.keys(X).find(k=>String(b.name).toLowerCase().includes(k.toLowerCase())||k.toLowerCase().includes(String(b.name).toLowerCase()));if(!key)return;
+    const rows=W.map(o=>{const D=wD(o.w),hv=D.map(di=>dayTotal(o.w,bi,di).v).filter(v=>v!=null),a=nbhHdIso(o.d),z=nbhHdIso(addDays(o.d,6)),sv=X[key].filter(p=>p.d>=a&&p.d<=z).map(p=>p.v);
+      const m=L=>L.length?Math.round(L.reduce((s,v)=>s+v,0)/L.length*100)/100:null;return {lab:(o.d.getMonth()+1)+'/'+o.d.getDate(),h:m(hv),s:m(sv)};});
+    if(!rows.some(r=>r.s!=null))return;out.push({name:b.name,key,rows});});
+  if(!out.length){box.innerHTML='<p class="hint">Form DD-1&rsquo;s school data do not name a behavior on these sheets, or have no days in these weeks.</p>';return;}
+  let h='';out.forEach(o=>{const n=o.rows.length,Wd=600,Hh=150,L=40,R=12,T=18,B=30,mx=Math.max(1,...o.rows.flatMap(r=>[r.h,r.s]).filter(v=>v!=null)),Xx=i=>L+(n<2?0.5:i/(n-1))*(Wd-L-R),Y=v=>T+(Hh-T-B)*(1-v/mx);
+    const line=(k,c,dash)=>{let d='';o.rows.forEach((r,i)=>{if(r[k]==null){d+='|';return;}d+=(d&&!d.endsWith('|')?'L':'M')+Xx(i).toFixed(1)+' '+Y(r[k]).toFixed(1)+' ';});return d.split('|').filter(x=>x.trim()).map(seg=>'<path d="'+seg+'" fill="none" stroke="'+c+'" stroke-width="2"'+(dash?' stroke-dasharray="5 3"':'')+'/>').join('')+o.rows.map((r,i)=>r[k]==null?'':'<circle cx="'+Xx(i).toFixed(1)+'" cy="'+Y(r[k]).toFixed(1)+'" r="3.5" fill="'+c+'"/>').join('');};
+    let s='<svg viewBox="0 0 '+Wd+' '+Hh+'" role="img" aria-label="'+esc(o.name)+': home and school by week" font-family="system-ui,sans-serif" font-size="10"><text x="'+L+'" y="11" font-size="12" font-weight="600" fill="#182e43">'+esc(o.name)+'</text>';
+    [0,mx].forEach(v=>{s+='<line x1="'+L+'" x2="'+(Wd-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e8ea"/><text x="'+(L-5)+'" y="'+(Y(v)+3)+'" text-anchor="end" fill="#5B6B6B">'+(Math.round(v*10)/10)+'</text>';});
+    s+=line('h','#2f5568')+line('s','#9b4e15',true)+o.rows.map((r,i)=>'<text x="'+Xx(i).toFixed(1)+'" y="'+(Hh-14)+'" text-anchor="middle" fill="#5B6B6B">'+esc(r.lab)+'</text>').join('')+'<text x="'+L+'" y="'+(Hh-2)+'" fill="#5B6B6B">Solid: home, mean a day each week (this form). Dashed: school, mean a school day (Form DD-1, '+esc(o.key)+').</text></svg>';
+    const q=o.rows.filter(r=>r.h!=null&&r.s!=null);let note='';if(q.length>=2){const a=q[0],z=q[q.length-1],dh=z.h-a.h,ds=z.s-a.s,big=(d,v)=>Math.abs(d)>=Math.max(0.1*Math.max(v,0.1),0.2);
+      if(dh*ds<0&&big(dh,a.h)&&big(ds,a.s))note='<div class="verdict v-mid"><b>Behavior may shift between settings when the rules change in one; plan both together.</b> Home '+(dh>0?'rose':'fell')+' while school '+(ds>0?'rose':'fell')+' over these weeks (Wahler et al., 2004).</div>';}
+    h+=s+note;});
+  box.innerHTML=h;}
+
+/* ---- events ---- */
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset)return;
+  if(el.dataset.v65ml!==undefined||el.dataset.v65tl!==undefined){if(el.type==='checkbox')return;const w=v65W(week()),L=el.dataset.v65ml!==undefined?w.ml:w.tl,r=L[+(el.dataset.v65ml!==undefined?el.dataset.v65ml:el.dataset.v65tl)];if(!r)return;r[el.dataset.f]=el.value;freeze(w);v65Sum();}
+  if(el.dataset.sd!==undefined&&/^(lo|fa)$/.test(el.dataset.sf))v65Sum();});
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset)return;
+  if((el.dataset.v65ml!==undefined||el.dataset.v65tl!==undefined)&&el.type==='checkbox'){const w=v65W(week()),L=el.dataset.v65ml!==undefined?w.ml:w.tl,r=L[+(el.dataset.v65ml!==undefined?el.dataset.v65ml:el.dataset.v65tl)];if(!r)return;r[el.dataset.f]=el.checked?'1':'';freeze(w);v65Sum();}
+  if(el.dataset.c==='meal'||el.dataset.c==='toilet'||el.dataset.c==='sleep')setTimeout(()=>{v65Ent();renderSheets();},0);});
+document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('#v65AddMl,#v65AddTl,[data-v65del]');if(!b)return;const w=v65W(week());
+  if(b.id==='v65AddMl')w.ml.push(v65Row(V65_ML,{}));else if(b.id==='v65AddTl')w.tl.push(v65Row(V65_TL,{}));
+  else{const L=b.dataset.v65del==='ml'?w.ml:w.tl,i=+b.dataset.i;if(!L[i])return;if(Object.values(L[i]).some(v=>String(v).trim())&&!(await nbhUI.confirm('Delete this row?\nWhat was entered in it is deleted.',{ok:'Delete',danger:true})))return;L.splice(i,1);}
+  v65Ent();});
+{const re0=renderEnt;renderEnt=function(){const r=re0.apply(this,arguments);try{v65Ent();}catch(e){}return r;};}
+/* ---- the case: in, the school's daily data (DD-1) for L4; out, the meal and toileting logs, and whether the checklist is checked ---- */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
+  try{const D=f&&f.data,ser=D&&Array.isArray(D.series)?D.series:[];if(ser.length){const X={};ser.forEach(x=>{if(!x||!/^\d{4}-\d\d-\d\d$/.test(x.date)||!x.v)return;Object.keys(x.v).forEach(k=>{if(typeof x.v[k]==='number')(X[k]=X[k]||[]).push({d:x.date,v:x.v[k]});});});
+    const t=JSON.stringify(X);if(t!==S.meta.v65school){S.meta.v65school=t;drawEnt();}}}catch(e){}return r;};}
+{const wo=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=wo?wo.apply(this,arguments):null;}catch(e){o=null;}
+  try{if(o&&o.home){const c=v65CkAg();if(o.home.integrity)o.home.integrityChecked=c.ok;if(!c.ok&&o.home.integrity)o.home.integrityNote='family report, not yet checked';
+    const meals=[],toilet=[];orderedWeeks().forEach(x=>{const w=v65W(x.w);if(!x.d)return;w.ml.forEach(m=>{if(m.d==='')return;meals.push({date:nbhHdIso(addDays(x.d,+m.d)),meal:m.meal,min:m.min,offered:m.off,bites:m.bites,all:m.all,gag:m.gag==='1',after:m.did});});
+      w.tl.forEach(t=>{if(t.d==='')return;toilet.push({date:nbhHdIso(addDays(x.d,+t.d)),time:t.t,kind:t.kind,void:t.v==='1',accident:t.acc,dry:t.dry==='1',bm:t.bm,wore:t.wore});});});
+    if(meals.length)o.home.meals=meals;if(toilet.length)o.home.toileting=toilet;}}catch(e){}return o;};}
+/* ---- CARE-M10 (with Form IC-1): the parent's decisions on the home procedures, under Consent on file ---- */
+{const rc0=renderConsentNote;renderConsentNote=function(){const r=rc0.apply(this,arguments);try{const el=$('#hdConsentNote'),C=nbhHdFacts&&nbhHdFacts.consent,H=C&&C.home;if(!el||!H)return r;
+  const yn=v=>v?'yes':'not listed',vd=H.videoDec==='yes'?'yes'+(H.photos?' (photos of sheets)':'')+(H.calls?(H.photos?', ':' (')+'video calls'+(H.photos?')':')'):''):H.videoDec==='no'?'no':'not decided';
+  let h='<p class="hint" style="margin:4px 0 0">Form IC-1, the home procedures: home data sheets '+yn(H.data)+'; caregiver training at home or by video call '+yn(H.train)+'; video or photos at home '+vd+'.</p>';
+  if(retPhoto()&&H.videoDec!=='yes')h+='<div class="verdict v-mid" style="margin-top:6px">The sheets are to come back as photos, but Form IC-1 has no yes for photos at home (Specific procedures H). Ask the family, or send the sheets back on paper.</div>';
+  el.insertAdjacentHTML('beforeend',h);}catch(e){}return r;};}
+try{ensure();S.wk.forEach(v65W);v65Ent();renderSheets();drawEnt();}catch(e){}
+</script>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
 </html>

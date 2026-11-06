@@ -291,6 +291,7 @@
 })();
 </script>
 <script id="nbh-logo" src="nbh-logo.js"></script>
+<script src="nbh-media.js"></script>   <!-- v25.65 IM-1 photos: the media store, photos kept once on this device by reference -->
 <style>
 
 :root{
@@ -1011,7 +1012,11 @@ td input,td select{max-width:100%}
       <div><label>Definition (Form TB-1)</label><input data-m="behdef" placeholder="forceful contact of the head with a surface from 15 cm or more; closing the teeth on the hand hard enough to leave a mark"></div>
       <div><label>Crisis plan (Form CR-1, dated)</label><input data-m="plan" placeholder="CR-1 dated 9/2/26; restraint log on CR-1"></div>
       <div><label>Medical alerts and current medication (Form MS-1)</label><input data-m="medical" placeholder="risperidone since 8/26 (MS-1); no bleeding disorder; latex allergy"></div>
+      <!-- v25.65 (SAFETY-M3) the function and, for automatic self-injury, the subtype, from Form FS-1 -->
+      <div><label>Function of the self-injury (Form FS-1)</label><input data-m="fsFn" placeholder="From Form FS-1, for example automatic (nonsocial)"></div>
+      <div><label>Automatic self-injury: subtype (Form FS-1)</label><select data-m="fsSub"><option value=""></option><option value="1">Subtype 1: higher when alone or with nothing to do</option><option value="2">Subtype 2: about the same in every condition</option><option value="3">Subtype 3: with self-restraint</option><option value="social">Not automatic: kept going by a social consequence</option><option value="unknown">Not known yet</option></select></div>
     </div>
+    <div id="v65SubV"></div>
 
     <h2 class="nbh-band" style="margin-top:18px">Part I. General Description and Summary of Healed Injuries</h2>
     <p class="hint">As published (Iwata, Pace, Kissel, Nau, &amp; Farber, 1990, Figure 1). Check each type of self-injurious behavior the student exhibits. Only the first five (forceful contact, two types; scratching; biting; eye gouging) produce the surface damage that Part II scores; pica, vomiting and air swallowing produce damage that is not externally visible, and hair pulling produces negligible trauma.</p>
@@ -1028,6 +1033,23 @@ td input,td select{max-width:100%}
       <label class="ck"><input type="checkbox" data-c="t_other"> Other:</label>
     </div>
     <div class="fieldgrid"><div><label>Other (describe)</label><input data-m="t_other_text"></div></div>
+    <!-- v25.65 (SAFETY-H6) self-restraint and prescribed protective equipment: each hides trauma the behavior would otherwise produce -->
+    <h3>Self-Restraint and Protective Equipment</h3>
+    <div class="fieldgrid">
+      <div><label>Self-restraint observed (hands in sleeves, sitting on hands, wrapping in clothing)</label><select data-m="srObs"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div><label>Self-restraint: what it looks like</label><input data-m="srDesc"></div>
+      <div><label>Prescribed protective equipment (type)</label><input data-m="peType" placeholder="helmet, arm splints, padding; blank if none"></div>
+      <div><label>Prescribed by, and the date</label><input data-m="peBy"></div>
+      <div><label>Hours a day worn</label><input data-m="peHours"></div>
+      <div><label>Body site(s) the equipment covers</label><input data-m="peSite" placeholder="head; both elbows"></div>
+      <div><label>Tasks the student does while wearing it</label><input data-m="peTasks"></div>
+    </div>
+    <p class="hint v65-caution"><b>Equipment is applied and faded only as the prescriber, the team and the parent decide. Putting equipment on as a consequence for self-injury is a restrictive procedure that needs approval, and it is never the default.</b> Devices prescribed by health professionals and used for their indicated purpose are not mechanical restraint under &sect; 1003.573. Splints brought self-injury near zero for one person, and self-restraint then appeared (Powers et al., 2007); sleeves stopped one topography while another, which they did not prevent, developed (Fisher et al., 1997).</p>
+    <div id="v65PeV"></div>
+    <h3>Changes to Equipment</h3>
+    <p class="hint">Each change to the equipment (put on, fewer hours, a softer splint, taken off), so any fading is on record with what followed.</p>
+    <div class="tools"><button class="tool" id="v65AddPe">Add a change</button></div>
+    <div class="grid-wrap"><table class="rt" id="v65PeTbl" style="max-width:860px"><thead><tr><th style="width:4%">#</th><th style="width:13%">Date</th><th style="width:25%">Change</th><th style="width:17%">Decided by</th><th>Result: self-injury rate, injuries, tasks done</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3>Healed Injuries</h3>
     <p class="hint">Physical evidence of healed injuries (scars, permanent disfigurement, missing body parts) with the specific site, up to five sites as on the published scale. The paper gives two reasons to record them: a student who is restrained, medicated or closely attended shows less trauma than the behavior would otherwise produce, and a healed injury may point to a form of self-injury that no longer occurs but could return. Healed injuries are documented once, at intake, and do not enter the Part II scoring. A healed injury in a private area (genitals, buttocks, breasts) is written down only from the records or from what the parent reports: staff never examine private areas.</p>
     <div class="tools"><button class="tool" id="addHealed">Add a site</button></div>
@@ -1066,6 +1088,9 @@ td input,td select{max-width:100%}
       <div><label>Second adult&rsquo;s role</label><input data-a="secondRole"></div>
       <div><label>The student&rsquo;s assent</label><select data-a="assent"><option value=""></option><option value="yes">Asked first, and the student agreed</option><option value="stopped">The student said no or pulled away: the check stopped</option></select></div>
       <div><label>Conditions (who was present, what could not be examined and why, restraint or clothing in the way)</label><input data-a="note"></div>
+      <!-- v25.65 (SAFETY-H6) -->
+      <div><label>Equipment worn since the last check (hours a day)</label><input data-a="peWorn" placeholder="blank if none"></div>
+      <div><label>Self-restraint seen during the check</label><select data-a="srSeen"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div>
     </div>
     <div class="ckrow imPresent"><label class="ck"><input type="checkbox" data-a="present"> The second adult was present for the whole check</label></div>
     <!-- v21.44 (B4): two adults at every check, the student's assent, and no examination of private areas. Wording approved by the BCBA, October 2026. -->
@@ -1180,6 +1205,21 @@ td input,td select{max-width:100%}
     </div>
     <div class="imKey" id="imKey"></div>
     <div class="imChips noprint" id="imChips"></div>
+    <!-- v25.65 IM-1 photos: photos of each marked site, with the consent that covers them -->
+    <div class="v65ph noprint" id="v65Ph">
+      <h3>Photos of the Injuries</h3>
+      <div class="fieldgrid">
+        <div><label for="v65PhCons">Consent to photograph injuries</label><select id="v65PhCons" data-m="photoConsent"><option value=""></option><option value="ic1">Yes, on Form IC-1</option><option value="other">Yes, other written consent</option><option value="no">No</option></select></div>
+        <div><label for="v65PhBy">Taken by (initials)</label><input id="v65PhBy" data-m="photoBy" placeholder="e.g., RN" autocomplete="off"></div>
+      </div>
+      <p class="v65ph-safe"><b>Photos do not replace the nurse&rsquo;s check or a mandated report.</b> For an injury that is unexplained or suspicious, follow the school&rsquo;s or agency&rsquo;s reporting procedure, including who may take photos, before photographing.</p>
+      <div id="v65PhGate" role="status"></div>
+      <div id="v65PhList"></div>
+      <label class="ck v65ph-pr"><input type="checkbox" id="v65PhPrintOn"> Include the photos when printing</label>
+      <input type="file" accept="image/*" id="v65PhFile" multiple hidden aria-hidden="true" tabindex="-1">
+    </div>
+    <div id="v65PhPrint" class="v65ph-print"></div>
+    <dialog id="v65PhDlg" class="v65ph-dlg noprint" aria-labelledby="v65PhDlgT"><h3 id="v65PhDlgT"></h3><img id="v65PhBig" alt=""><div class="fieldgrid"><div><label for="v65PhDBy">Taken by (initials)</label><input id="v65PhDBy"></div><div><label for="v65PhDNote">Note</label><input id="v65PhDNote" placeholder="optional"></div></div><p class="hint" id="v65PhDMeta"></p><div class="tools"><button type="button" class="tool" id="v65PhDel" style="color:#8E2A2A">Delete this photo</button><button type="button" class="tool" id="v65PhClose">Close</button></div></dialog>
   </section>
 
   <!-- ===================== SCORING ===================== -->
@@ -1194,6 +1234,17 @@ td input,td select{max-width:100%}
     <datalist id="imKinds"><option value="abrasion"><option value="laceration"><option value="bite"><option value="bruise"><option value="scratch"><option value="pick mark"></datalist>
     <h3 style="margin-top:14px">Part III. Scoring Summary</h3>
     <div id="imPart3"></div>
+    <div id="v65MaskCur"></div>
+    <!-- v25.65 (SAFETY-L1) an optional size for one index wound; not part of the published scale -->
+    <h3 style="margin-top:14px">Index Wound Size (Optional)</h3>
+    <p class="hint">For one persistent wound chosen as the index wound, its length and width. Measured by the nurse with a paper ruler, or from a photograph only where Form IC-1 and district policy allow it. Never taken in a private area. Not part of the published scale: the scale dropped size because depth and swelling cannot be measured without contact (Iwata et al., 1990), but surface area from photographs was reliable and changed with the rate of self-injury (Wilson et al., 2012).</p>
+    <div class="fieldgrid">
+      <div><label>Index wound (location)</label><input data-a="wsSite" placeholder="left back of hand"></div>
+      <div><label>Length (cm)</label><input data-a="wsL" inputmode="decimal"></div>
+      <div><label>Width (cm)</label><input data-a="wsW" inputmode="decimal"></div>
+      <div><label>Measured with</label><select data-a="wsHow"><option value=""></option><option value="ruler">Paper ruler, by the nurse</option><option value="photo">Photograph (Form IC-1 and district policy allow it)</option></select></div>
+    </div>
+    <div id="v65WsV"></div>
     <!-- v23.16 (review F450): the paper's rule for a High estimate, and where to record that it was followed -->
     <div id="imHigh" class="imKeep" hidden><div id="imHighV"></div>
       <div class="fieldgrid" id="imHighF"><div><label>School nurse saw the student (who, when)</label><input data-a="nurseSaw" placeholder="e.g., School nurse, 8:20 in the health room"></div><div><label>Parent or guardian told (who, when)</label><input data-a="parentTold" placeholder="e.g., by the nurse, by phone at 9:10"></div></div></div>
@@ -1221,6 +1272,16 @@ td input,td select{max-width:100%}
     <h3 style="margin-top:14px">Number Index and Severity Index over Administrations</h3>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Number Index and Severity Index by administration"><svg id="imPlot" viewBox="0 0 900 340" aria-label="Number Index and Severity Index per administration, with the Estimate of Current Risk under the axis"></svg></div>
     <div class="tools noprint"><button class="tool" id="imPngBtn" type="button">Save graph as image</button><span class="hint">A PNG of the graph for the report.</span></div>
+    <!-- v25.65 (SAFETY-M2, L1) the behavior rate from Form DD-1, and the index wound, under each administration -->
+    <h3 style="margin-top:14px">Self-Injury Rate and Index Wound at Each Administration</h3>
+    <div class="grid-wrap plotwrap"><svg id="v65Plot2" viewBox="0 0 900 230" role="img" aria-label="Self-injury per day in the week before each administration (Form DD-1), and the index wound area"></svg></div>
+    <p class="hint v65-caution"><b>Wounds heal days after the behavior falls; a rise in self-injury can show in the wounds at once. Judge treatment by the behavior rate; use the trauma scores for follow-up.</b> (Iwata et al., 1990; Wilson et al., 2012.)</p>
+    <div id="v65RateV"></div>
+    <div id="v65MaskHist"></div>
+    <!-- v25.65 (SAFETY-M4) injury records as a rate per school day attended -->
+    <h3 style="margin-top:14px">Injury Records per 10 School Days Attended</h3>
+    <p class="hint">A raw count rises and falls with attendance. School days attended fill in from Form DD-1 (the days it has data) and can be typed. Injury records are administrations that found a new site, injury reports, and injuries noticed during care; those within two days after a restraint are counted again on their own line.</p>
+    <div class="grid-wrap"><table class="rt" id="v65AttTbl" style="max-width:860px"><thead><tr><th style="width:16%">Month</th><th style="width:18%">School days attended</th><th style="width:16%">Injury records</th><th style="width:20%">Per 10 school days</th><th>Linked to a restraint (per 10 days)</th></tr></thead><tbody></tbody></table></div>
 
     <h2 class="nbh-band" style="margin-top:18px">Nurse Checks</h2>
     <p class="hint">The nurse&rsquo;s own checks between and alongside the administrations: what was found, what was done, and any referral. This log is the form&rsquo;s convention; the paper suggests wound care on a fixed- or variable-time schedule independent of the behavior, so that care does not follow the behavior as attention or escape.</p>
@@ -1285,7 +1346,7 @@ td input,td select{max-width:100%}
       <tr><th>Externally visible damage only</th><td>The scale is insensitive to internal injury. Pica, vomiting and air swallowing produce damage that is not visible; head banging can produce skull fracture, hemorrhage or retinal damage as well as what shows. A student whose self-injury may affect internal anatomy (aerophagia, chronic vomiting or rumination, pica, forceful contact) is referred to a specialist for evaluation.</td></tr>
       <tr><th>Risk is read from the past</th><td>The estimate rests on damage from past episodes; it cannot foresee a rise in intensity or a shift in topography (face punching that moves to the eyes). The authors make this the case for continued medical involvement in severe self-injury.</td></tr>
       <tr><th>Hair pulling</th><td>Classified as self-injury in the research literature but producing negligible trauma; it is recorded in Part I and scored nowhere.</td></tr>
-      <tr><th>Function and the plan</th><td>The scale says nothing about why the behavior occurs. Self-injury maintained by automatic reinforcement is common and often needs a different plan from socially maintained self-injury (Hagopian, Rooker, &amp; Zarcone, 2015 describe its subtypes); the function stays with Form FS-1.</td></tr>
+      <tr><th>Function and the plan</th><td>The scale says nothing about why the behavior occurs. Self-injury maintained by automatic reinforcement is common and often needs a different plan from socially maintained self-injury (Hagopian, Rooker, &amp; Zarcone, 2015 describe its subtypes); the function stays with Form FS-1. Since v25.65 the Setup page shows the function and the subtype from Form FS-1: with Subtype 2, injuries tend to be more frequent and more severe (Rooker et al., 2020), and reinforcement alone worked for 0 of 7 people (Hagopian et al., 2015).</td></tr>
     </table>
 
     <h2 class="nbh-band" style="margin-top:16px">Where This Form&rsquo;s Conventions Are Its Own</h2>
@@ -1412,7 +1473,9 @@ const normName=s=>String(s||'').toLowerCase().replace(/\([^)]*\)/g,' ').replace(
 const samePerson=(a,b)=>{const x=normName(a),y=normName(b);return !!x&&!!y&&(x===y||x.startsWith(y+' ')||y.startsWith(x+' '));};
 
 /* ---------------- state ---------------- */
-const admBlank=()=>({id:'',date:'',time:'',examiner:'',second:'',secondRole:'',present:false,assent:'',note:'',ro:false,rows:[],rep:repBlank(),pc:'',nurseSaw:'',parentTold:''});   /* v23.16 (F450) nurseSaw, parentTold */
+const admBlank=()=>({id:'',date:'',time:'',examiner:'',second:'',secondRole:'',present:false,assent:'',note:'',ro:false,rows:[],rep:repBlank(),pc:'',nurseSaw:'',parentTold:'',peWorn:'',srSeen:'',wsSite:'',wsL:'',wsW:'',wsHow:''});   /* v25.65 (SAFETY-H6, L1) */
+const V65A=['peWorn','srSeen','wsSite','wsL','wsW','wsHow'];   /* v25.65 the administration's new entries; a file saved before has none */
+const v65A=a=>{const o={};V65A.forEach(k=>{o[k]=a&&a[k]!=null&&typeof a[k]!=='object'?String(a[k]):'';});return o;};   /* v23.16 (F450) nurseSaw, parentTold */
 /* v21.44 (B4): an injury noticed during required care, and the one being written (kept with the record, so a half-written
    entry is saved and comes back; its id is the entry's it corrects, or empty for a new one). Every entry is in a
    private area, so its report question always has that box ticked. alone: no second adult was there (aloneWhy says
@@ -1420,12 +1483,12 @@ const admBlank=()=>({id:'',date:'',time:'',examiner:'',second:'',secondRole:'',p
 const careBlank=()=>({id:'',date:'',time:'',area:'',task:'',seen:'',by:'',byRole:'',second:'',secondRole:'',alone:false,aloneWhy:'',nurse:'',parent:'',rep:Object.assign(repBlank(),{r3:true})});
 const CARE_KEYS=['id','date','time','area','task','seen','by','byRole','second','secondRole','aloneWhy','nurse','parent'];
 const careCopy=c=>{const o=careBlank();CARE_KEYS.forEach(k=>{o[k]=c&&c[k]!=null&&typeof c[k]!=='object'?String(c[k]):'';});if(!CAREA[o.area])o.area='';o.alone=!!(c&&c.alone===true);o.rep=repCopy(c&&c.rep);o.rep.r3=true;return o;};
-function blank(){return{meta:{},chk:{},healed:[],events:[],cur:admBlank(),hist:[],nurse:[],care:[],careDraft:careBlank()};}
+function blank(){return{meta:{},chk:{},healed:[],events:[],cur:admBlank(),hist:[],nurse:[],care:[],careDraft:careBlank(),peLog:[],ddRate:null,att:{}};}   /* v25.65 (SAFETY-H6, M2, M4) */
 let S=blank(),SEL=null,SELP=null;   /* SELP: a private area chosen on the figure; it opens Noticed During Required Care */
 const uid=()=>'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function ensure(){
   if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||typeof S.chk!=='object')S.chk={};
-  ['healed','events','hist','nurse','care'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
+  ['healed','events','hist','nurse','care','peLog'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});if(!S.att||typeof S.att!=='object'||Array.isArray(S.att))S.att={};
   if(!S.cur||typeof S.cur!=='object')S.cur=admBlank();if(!Array.isArray(S.cur.rows))S.cur.rows=[];
   if(!S.cur.rep||typeof S.cur.rep!=='object')S.cur.rep=repBlank();
   S.hist.forEach(h=>{if(!Array.isArray(h.rows))h.rows=[];if(!h.id)h.id=uid();if(!h.rep||typeof h.rep!=='object')h.rep=repBlank();});
@@ -1684,11 +1747,11 @@ function repInput(el){const sc=el.dataset.rs,rep=sc==='cur'?S.cur.rep:S.careDraf
 function renderCur(){renderMap();renderSide();renderChart();renderIdx();renderRepCur();}
 
 /* ---------------- administrations ---------------- */
-const rowsCopy=a=>(a||[]).map(r=>({loc:r.loc,n:r.n,type:r.type,sev:r.sev,kind:r.kind,note:r.note,how:r.how||'',view:r.view,x:r.x,y:r.y,heal:r.heal==='new'||r.heal==='healing'?r.heal:''}));   /* v23.16 (I228) heal */
-const admSnap=a=>JSON.stringify({nurseSaw:a.nurseSaw||'',parentTold:a.parentTold||'',date:a.date,time:a.time,examiner:a.examiner,second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:a.assent||'',note:a.note,rows:rowsCopy(a.rows),rep:repCopy(a.rep),x:REPX.map(k=>String((a.rep||{})[k]||''))});
+const rowsCopy=a=>(a||[]).map(r=>({loc:r.loc,n:r.n,type:r.type,sev:r.sev,kind:r.kind,note:r.note,how:r.how||'',view:r.view,x:r.x,y:r.y,heal:r.heal==='new'||r.heal==='healing'?r.heal:'',...(Array.isArray(r.photos)&&r.photos.length?{photos:r.photos.map(x=>({...x}))}:{})}));   /* v23.16 (I228) heal; v25.65 IM-1 photos: a row's photos travel with it (a row without photos is as before) */
+const admSnap=a=>JSON.stringify({v65:v65A(a),nurseSaw:a.nurseSaw||'',parentTold:a.parentTold||'',date:a.date,time:a.time,examiner:a.examiner,second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:a.assent||'',note:a.note,rows:rowsCopy(a.rows),rep:repCopy(a.rep),x:REPX.map(k=>String((a.rep||{})[k]||''))});
 /* one shape for a filed administration and one for the administration on the map, in the order the loader writes them */
-const histEntry=(a,id)=>({id:id||a.id||uid(),date:a.date||'',time:a.time||'',examiner:a.examiner||'',second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:ASSENTN[a.assent]?a.assent:'',note:a.note||'',rows:rowsCopy(a.rows),rep:repCopy(a.rep),pc:a.pc==='no'||a.pc==='wait'?a.pc:'',nurseSaw:a.nurseSaw||'',parentTold:a.parentTold||''});
-const curFrom=(h,ro)=>({id:h.id||'',date:h.date||'',time:h.time||'',examiner:h.examiner||'',second:h.second||'',secondRole:h.secondRole||'',present:!!h.present,assent:ASSENTN[h.assent]?h.assent:'',note:h.note||'',ro:!!ro,rows:rowsCopy(h.rows),rep:repCopy(h.rep),pc:h.pc==='no'||h.pc==='wait'?h.pc:'',nurseSaw:h.nurseSaw||'',parentTold:h.parentTold||''});
+const histEntry=(a,id)=>({id:id||a.id||uid(),date:a.date||'',time:a.time||'',examiner:a.examiner||'',second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:ASSENTN[a.assent]?a.assent:'',note:a.note||'',rows:rowsCopy(a.rows),rep:repCopy(a.rep),pc:a.pc==='no'||a.pc==='wait'?a.pc:'',nurseSaw:a.nurseSaw||'',parentTold:a.parentTold||'',...v65A(a)});
+const curFrom=(h,ro)=>({id:h.id||'',date:h.date||'',time:h.time||'',examiner:h.examiner||'',second:h.second||'',secondRole:h.secondRole||'',present:!!h.present,assent:ASSENTN[h.assent]?h.assent:'',note:h.note||'',ro:!!ro,rows:rowsCopy(h.rows),rep:repCopy(h.rep),pc:h.pc==='no'||h.pc==='wait'?h.pc:'',nurseSaw:h.nurseSaw||'',parentTold:h.parentTold||'',...v65A(h)});
 function savedSame(){const h=S.cur.id&&S.hist.find(x=>x.id===S.cur.id);return !!h&&admSnap(h)===admSnap(S.cur);}
 function bindAdm(){$$('[data-a]').forEach(el=>{const k=el.dataset.a;if(el.type==='checkbox')el.checked=!!S.cur[k];else el.value=S.cur[k]||'';el.disabled=!!S.cur.ro;});}
 async function saveAdm(){
@@ -1966,8 +2029,8 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.tagName!=='SELECT'){const r=el.dataset.r,i=+el.dataset.i,f=el.dataset.f;
     if(r==='rows'){const row=S.cur.rows[i];if(!row)return;row[f]=el.value;$$('[data-r="rows"][data-i="'+i+'"][data-f="'+f+'"]').forEach(x=>{if(x!==el)x.value=el.value;});renderIdxSoon();return;}
     if(!S[r]||!S[r][i])return;S[r][i][f]=el.value;if(r==='events')renderSchedSoon();return;}
-  if(el.dataset.a!==undefined){S.cur[el.dataset.a]=el.type==='checkbox'?!!el.checked:el.value;renderTwo();renderIdxSoon();return;}
-  if(el.dataset.m!==undefined){const k=el.dataset.m;S.meta[k]=el.value;$$('[data-m="'+k+'"]').forEach(x=>{if(x!==el)x.value=el.value;});if(k==='intake'||k==='every')renderSchedSoon();if(k==='second'||k==='secondRole')renderTwo();renderSetupSoon();}
+  if(el.dataset.a!==undefined){S.cur[el.dataset.a]=el.type==='checkbox'?!!el.checked:el.value;renderTwo();renderIdxSoon();if(typeof v65Soon==='function')v65Soon();return;}
+  if(el.dataset.m!==undefined){const k=el.dataset.m;S.meta[k]=el.value;$$('[data-m="'+k+'"]').forEach(x=>{if(x!==el)x.value=el.value;});if(k==='intake'||k==='every')renderSchedSoon();if(k==='second'||k==='secondRole')renderTwo();renderSetupSoon();if(typeof v65Soon==='function')v65Soon();}
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.rs!==undefined){repInput(el);return;}
@@ -1975,10 +2038,10 @@ document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.cd!==undefined){const k=el.dataset.cd;if(el.type==='checkbox'){S.careDraft[k]=!!el.checked;renderCareEdit();const b=$('#imCareEdit [data-cd="'+k+'"]');if(b)b.focus({preventScroll:true});}else S.careDraft[k]=el.value;renderCareVerdict();return;}
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){const r=el.dataset.r,i=+el.dataset.i,f=el.dataset.f;
     if(r==='rows'){const row=S.cur.rows[i];if(!row)return;row[f]=el.value;if(f==='type')row.sev='';renderCur();return;}
-    if(!S[r]||!S[r][i])return;S[r][i][f]=el.value;if(r==='events')renderSched();return;}
+    if(!S[r]||!S[r][i])return;S[r][i][f]=el.value;if(r==='events')renderSched();if(typeof v65Soon==='function')v65Soon();return;}
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderSetup();return;}
-  if(el.dataset.a!==undefined){S.cur[el.dataset.a]=el.type==='checkbox'?!!el.checked:el.value;renderChart();renderIdx();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderSetup();renderSched();renderTwo();}
+  if(el.dataset.a!==undefined){S.cur[el.dataset.a]=el.type==='checkbox'?!!el.checked:el.value;renderChart();renderIdx();if(typeof v65Soon==='function')v65Soon();return;}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='fsSub'&&typeof v65SubPick==='function')v65SubPick();renderSetup();renderSched();renderTwo();if(typeof v65Soon==='function')v65Soon();}
 });
 let tA=0,tB=0,tC=0;
 function renderIdxSoon(){clearTimeout(tA);tA=setTimeout(()=>{renderIdx();renderChart();},250);}
@@ -1992,14 +2055,14 @@ async function rowDel(r,i){
     if(!(await nbhUI.confirm('Delete the administration of '+(h.date||'?')+' from the History?\nIts '+sc.n+' location'+(sc.n===1?'':'s')+', indices and map go with it.'+(S.cur.id===h.id?' The copy on the map stays until a new administration is started.':''),{ok:'Delete',danger:true})))return;
     S.hist.splice(i,1);if(S.cur.id===h.id){S.cur.id='';S.cur.ro=false;}renderAll();return;}
   const row=S[r]&&S[r][i];if(!row)return;
-  const has={healed:x=>x.loc||x.ev||x.note,events:x=>x.date||x.note,nurse:x=>x.date||x.who||x.findings||x.action||x.referral,care:x=>true}[r];if(!has)return;
+  const has={healed:x=>x.loc||x.ev||x.note,events:x=>x.date||x.note,nurse:x=>x.date||x.who||x.findings||x.action||x.referral,care:x=>true,peLog:x=>x.date||x.change||x.by||x.result}[r];if(!has)return;   /* v25.65 (SAFETY-H6) peLog */
   if(has(row)&&!(await nbhUI.confirm(r==='care'?'Delete entry '+(i+1)+'?\nThe record of this injury, and of its report, is deleted.':'Delete this row?\nWhat was entered in it is deleted.',{ok:'Delete',danger:true})))return;
-  S[r].splice(i,1);({healed:renderHealed,events:()=>{renderEvents();renderSched();},nurse:renderNurse,care:()=>{if(S.careDraft.id&&!S.care.some(c=>c.id===S.careDraft.id))S.careDraft=careBlank();renderCare();renderCareEdit();}})[r]();
+  S[r].splice(i,1);({peLog:()=>v65Render(),healed:renderHealed,events:()=>{renderEvents();renderSched();},nurse:renderNurse,care:()=>{if(S.careDraft.id&&!S.care.some(c=>c.id===S.careDraft.id))S.careDraft=careBlank();renderCare();renderCareEdit();}})[r]();
 }
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();bindMeta();bindAdm();renderHealed();renderEvents();renderSched();renderSetup();renderCur();renderHist();renderNurse();renderCare();renderCareEdit();}
+function renderAll(){ensure();bindMeta();bindAdm();renderHealed();renderEvents();renderSched();renderSetup();renderCur();renderHist();renderNurse();renderCare();renderCareEdit();if(typeof v65Render==='function')v65Render();}   /* v25.65 */
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -2013,10 +2076,10 @@ function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='IM-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v),obj=k=>s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])?s[k]:{};
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
-  const rows=a=>Array.isArray(a)?a.filter(x=>x&&LOC[x.loc]).slice(0,LOCS.length).map(x=>({loc:x.loc,n:['1','2','3'].includes(str(x.n))?str(x.n):'',type:['AL','CT'].includes(x.type)?x.type:'',sev:['1','2','3'].includes(str(x.sev))&&x.type?str(x.sev):'',kind:str(x.kind),note:str(x.note),how:HOWN[str(x.how)]?str(x.how):'',view:['front','back','head'].includes(x.view)?x.view:'',x:num(x.x)==null?'':num(x.x),y:num(x.y)==null?'':num(x.y),heal:['new','healing'].includes(str(x.heal))?str(x.heal):''})):[];
+  const rows=a=>Array.isArray(a)?a.filter(x=>x&&LOC[x.loc]).slice(0,LOCS.length).map(x=>({loc:x.loc,n:['1','2','3'].includes(str(x.n))?str(x.n):'',type:['AL','CT'].includes(x.type)?x.type:'',sev:['1','2','3'].includes(str(x.sev))&&x.type?str(x.sev):'',kind:str(x.kind),note:str(x.note),how:HOWN[str(x.how)]?str(x.how):'',view:['front','back','head'].includes(x.view)?x.view:'',x:num(x.x)==null?'':num(x.x),y:num(x.y)==null?'':num(x.y),heal:['new','healing'].includes(str(x.heal))?str(x.heal):'',...(typeof v65PhCopy==='function'&&Array.isArray(x.photos)&&x.photos.length?{photos:v65PhCopy(x.photos)}:{})})):[]   /* v25.65 IM-1 photos */;
   /* v21.44: a file saved before the second adult, the student's assent, the report question and the care log opens
      with them empty (an earlier administration is filed again only once they are recorded) */
-  const adm=x=>({id:str(x&&x.id),date:str(x&&x.date),time:str(x&&x.time),examiner:str(x&&x.examiner),second:str(x&&x.second),secondRole:str(x&&x.secondRole),present:!!(x&&x.present===true),assent:ASSENTN[str(x&&x.assent)]?str(x.assent):'',note:str(x&&x.note),ro:!!(x&&x.ro),rows:rows(x&&x.rows),rep:repCopy(x&&x.rep),pc:['no','wait'].includes(str(x&&x.pc))?str(x.pc):'',nurseSaw:str(x&&x.nurseSaw),parentTold:str(x&&x.parentTold)});
+  const adm=x=>({id:str(x&&x.id),date:str(x&&x.date),time:str(x&&x.time),examiner:str(x&&x.examiner),second:str(x&&x.second),secondRole:str(x&&x.secondRole),present:!!(x&&x.present===true),assent:ASSENTN[str(x&&x.assent)]?str(x.assent):'',note:str(x&&x.note),ro:!!(x&&x.ro),rows:rows(x&&x.rows),rep:repCopy(x&&x.rep),pc:['no','wait'].includes(str(x&&x.pc))?str(x.pc):'',nurseSaw:str(x&&x.nurseSaw),parentTold:str(x&&x.parentTold),...v65A(x)});
   o.cur=adm(obj('cur'));
   o.hist=Array.isArray(s.hist)?s.hist.slice(0,200).map(x=>{const a=adm(x);delete a.ro;if(!a.id)a.id=uid();return a;}):[];
   const seen={};o.hist.forEach(h=>{if(seen[h.id])h.id=uid();seen[h.id]=1;});
@@ -2027,6 +2090,10 @@ function fromFile(d){
   const cs={};o.care.forEach(c=>{if(!c.id||cs[c.id])c.id=uid();cs[c.id]=1;});
   o.careDraft=s.careDraft&&typeof s.careDraft==='object'&&!Array.isArray(s.careDraft)?careCopy(s.careDraft):careBlank();
   if(o.careDraft.id&&!cs[o.careDraft.id])o.careDraft.id='';
+  /* v25.65 (SAFETY-H6, M2, M4): the equipment changes, the behavior rate read from Form DD-1, the school days attended */
+  o.peLog=Array.isArray(s.peLog)?s.peLog.slice(0,200).map(x=>({date:str(x&&x.date),change:str(x&&x.change),by:str(x&&x.by),result:str(x&&x.result)})):[];
+  o.ddRate=v65RateCopy(s.ddRate);
+  Object.keys(obj('att')).forEach(k=>{if(/^\d{4}-\d\d$/.test(k))o.att[k]=str(s.att[k]);});
   return o;
 }
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
@@ -2098,6 +2165,11 @@ async function loadSim(){
     by:'Classroom aide (simulated)',byRole:'Paraprofessional',second:'Classroom teacher (simulated)',secondRole:'Teacher',
     nurse:'Told at 10:35 the same morning (simulated)',parent:'Told by the principal at 2:30 the same day, as the agency\u2019s policy directs (simulated)',
     rep:Object.assign(repBlank(),{r1:true,r3:true,need:'yes',on:Y(8),when:Y(8)+', 11:05 AM',to:'State child abuse hotline (simulated), reference SIM-0000',by:'Classroom aide (simulated), the person who noticed it',told:'School nurse and the BCBA, the same morning (simulated)'})})];
+  /* v25.65 (SAFETY-H6, M2, M3, L1): the new entries of the example: the function and subtype, no self-restraint, the rate on
+     Form DD-1 over the six weeks, and the index wound on the back of the right hand */
+  Object.assign(S.meta,{fsFn:'Automatic (nonsocial) and escape from demands (Form FS-1, simulated)',fsSub:'1',srObs:'no'});
+  [['1.5','1.0'],['1.0','0.8'],['0.4','0.3']].forEach(([l,w],k)=>{if(S.hist[k])Object.assign(S.hist[k],{wsSite:'back of the right hand (bite)',wsL:l,wsW:w,wsHow:'ruler'});});
+  {const days=[];for(let k=35;k>=0;k--)days.push({d:v65Iso(step(k,-1)),v:Math.max(0,Math.round(k/5))});S.ddRate={name:'Self-injury (simulated)',unit:'count',days,dates:days.map(p=>p.d)};}
   S.cur=curFrom(S.hist[2],false);
   S.nurse=[{date:Y(30),who:nurse,findings:'Scalp swelling as scored; no change in pupils or alertness; forearm swollen, full movement',action:'Ice to the scalp and forearm; parent called; the plan reviewed with the BCBA the same day (CR-1 medical review)',referral:'Pediatrician seen '+Y(29)+': no fracture; prescriber told'},
     {date:Y(15),who:nurse,findings:'Scalp settled; forearm still swollen; bite marks superficial and clean',action:'Forearm wrapped for the day; wound care on a fixed schedule (10:00 and 13:00) rather than after each bite',referral:'None'},
@@ -2174,6 +2246,252 @@ window.__nbhFactsOut=function(){
 };
 </script>
 
+<style id="v2565-im1-css">
+/* v25.65 (SAFETY-H6, M2, M3, M4, L1) */
+.v65-caution{border-left:3px solid #9B4E15;padding-left:8px}
+#v65AttTbl input{width:6em}
+@media print{#v65Plot2{break-inside:avoid;page-break-inside:avoid}}
+</style>
+<script id="v2565-im1">
+/* v25.65. SAFETY-H6: self-restraint and prescribed protective equipment on Part I and at each administration, the changes to
+   the equipment, and a note that a Low estimate may reflect them. SAFETY-M2: the self-injury rate read from Form DD-1 under
+   each administration, with the caption and the "check on reports" flag of Iwata et al. (1990). SAFETY-M3: the function and
+   the automatic subtype from Form FS-1, with what Subtype 2 means for injury. SAFETY-M4: injury records per 10 school days
+   attended. SAFETY-L1: an optional size for one index wound. New record parts: meta fsFn, fsSub, srObs, srDesc, peType, peBy,
+   peHours, peSite, peTasks; the administration's peWorn, srSeen, wsSite, wsL, wsW, wsHow; S.peLog, S.ddRate (the rate read
+   from DD-1: {name, unit, days:[{d,v}], dates:[...]}), S.att (school days attended typed, by month). A file saved before has
+   none of them, opens and prints as before. */
+const v65t=v=>String(v==null?'':v).trim();
+function v65RateCopy(x){if(!x||typeof x!=='object'||Array.isArray(x))return null;const s=v=>v==null||typeof v==='object'?'':String(v),iso=v=>/^\d{4}-\d\d-\d\d$/.test(s(v))?s(v):'';
+  const days=(Array.isArray(x.days)?x.days:[]).map(p=>({d:iso(p&&p.d),v:num(p&&p.v)})).filter(p=>p.d&&p.v!=null).slice(-400);
+  const dates=(Array.isArray(x.dates)?x.dates:[]).map(iso).filter(Boolean).slice(-400);
+  return days.length||dates.length?{name:s(x.name),unit:s(x.unit),days,dates}:null;}
+const v65Iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const v65Pd=iso=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(iso||'');return m?new Date(+m[1],+m[2]-1,+m[3],12):null;};
+/* the mean rate over the 7 days up to and including a date */
+function v65Week(d){const R=S.ddRate;if(!R||!d)return null;const a=addDays(d,-6);a.setHours(0,0,0,0);const z=new Date(d);z.setHours(23,59,0,0);
+  const v=R.days.filter(p=>{const x=v65Pd(p.d);return x&&x>=a&&x<=z;}).map(p=>p.v);return v.length?{mean:Math.round(v.reduce((s,x)=>s+x,0)/v.length*100)/100,n:v.length}:null;}
+const v65Area=a=>{const l=num(a&&a.wsL),w=num(a&&a.wsW);return l!=null&&w!=null&&l>0&&w>0?Math.round(l*w*100)/100:null;};
+const v65Equip=a=>{const m=S.meta,pw=num(a&&a.peWorn);return !!(v65t(m.peType)||m.srObs==='yes'||(pw!=null&&pw>0)||(a&&a.srSeen==='yes'));};
+const V65_MASK='Low trauma here may reflect the equipment or self-restraint, not low risk. Read with the healed injuries in Part I and the behavior rate.';
+
+/* ---- tables: drawn on render, never on a keystroke ---- */
+function v65Draw(){
+  const tb=$('#v65PeTbl tbody');if(tb)tb.innerHTML=S.peLog.length?S.peLog.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td>'+
+    '<td><input data-r="peLog" data-i="'+i+'" data-f="date" value="'+esc(r.date)+'" placeholder="M/D/YYYY" aria-label="Equipment change '+(i+1)+' date"></td>'+
+    '<td><input data-r="peLog" data-i="'+i+'" data-f="change" value="'+esc(r.change)+'" aria-label="Equipment change '+(i+1)+'"></td>'+
+    '<td><input data-r="peLog" data-i="'+i+'" data-f="by" value="'+esc(r.by)+'" placeholder="prescriber, team, parent" aria-label="Equipment change '+(i+1)+' decided by"></td>'+
+    '<td><input data-r="peLog" data-i="'+i+'" data-f="result" value="'+esc(r.result)+'" aria-label="Equipment change '+(i+1)+' result"></td>'+delCell('peLog',i)+'</tr>').join(''):'<tr><td colspan="6" class="hint">None recorded.</td></tr>';
+  v65AttDraw();
+}
+let v65AttSig='';
+function v65Months(){const set=new Set(),add=d=>{if(d)set.add(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));};
+  v65Inj().forEach(x=>add(x.d));S.events.forEach(e=>add(pDate(e.date)));histSorted().forEach(h=>add(pDate(h.date)));
+  ((S.ddRate&&S.ddRate.dates)||[]).forEach(i=>add(v65Pd(i)));Object.keys(S.att).forEach(k=>{if(v65t(S.att[k]))set.add(k);});
+  return [...set].sort();}
+function v65AttDraw(){const tb=$('#v65AttTbl tbody');if(!tb)return;const M=v65Months();v65AttSig=M.join(',');
+  tb.innerHTML=M.length?M.map(k=>{const [y,m]=k.split('-');return '<tr data-v65m="'+k+'"><td>'+['January','February','March','April','May','June','July','August','September','October','November','December'][+m-1]+' '+y+'</td>'+
+    '<td><input data-v65att="'+k+'" value="'+esc(S.att[k]||'')+'" inputmode="numeric" aria-label="School days attended, '+k+'"></td><td class="v65c1"></td><td class="v65c2"></td><td class="v65c3"></td></tr>';}).join(''):'<tr><td colspan="5" class="hint">Nothing recorded yet.</td></tr>';}
+/* the injury records, as the workstation counts them (facts out): a new site found, an injury report, an injury noticed during care */
+function v65Inj(){const L=[];histSorted().forEach(h=>{const d=pDate(h.date);if(!d||h.assent==='stopped')return;if(newHeal(h).nw)L.push({d,what:'administration'});});
+  S.events.forEach(e=>{const d=pDate(e.date);if(d&&e.kind==='Injury report')L.push({d,what:'report'});});S.care.forEach(c=>{const d=pDate(c.date);if(d)L.push({d,what:'care'});});return L;}
+
+/* ---- the readings ---- */
+let v65T=0;function v65Soon(){clearTimeout(v65T);v65T=setTimeout(v65Update,250);}
+function v65Update(){try{
+  const m=S.meta,set=(id,h)=>{const e=document.getElementById(id);if(e&&e.innerHTML!==h)e.innerHTML=h;};
+  /* M3 */
+  const sub=m.fsSub;
+  set('v65SubV',sub==='2'?'<div class="verdict v-mid"><b>Subtype 2 (about the same in every condition). Injuries tend to be more frequent and more severe, and reinforcement alone rarely works. Plan more frequent checks and medical involvement, and consider more resources (the BCBA&rsquo;s call).</b> In 23 individuals, those with Subtype 2 had the most frequent and most severe injuries, at every body site (Rooker et al., 2020); reinforcement alone worked for 8 of 12 people with Subtype 1 and for 0 of 7 with Subtype 2 (Hagopian et al., 2015).</div>'
+    :sub==='3'?'<p class="hint">Subtype 3: self-restraint competes with the self-injury. Record it below under Self-Restraint and Protective Equipment, since it hides trauma.</p>'
+    :!v65t(m.fsFn)&&!sub?'<p class="hint">The function and the subtype come from Form FS-1 when the case is open; they can be typed.</p>':'');
+  /* H6 */
+  const pe=[];if(v65t(m.peSite))pe.push('<div class="verdict v-mid">The equipment covers '+esc(m.peSite)+': <b>check other sites for new injury.</b></div>');
+  if(v65t(m.peType)&&!v65t(m.peBy))pe.push('<div class="verdict v-mid">Record who prescribed the equipment, and when.</div>');
+  set('v65PeV',pe.join(''));
+  const sc=scoreA(S.cur),low=!sc.stopped&&sc.risk!=null&&sc.band===0;
+  set('v65MaskCur',(low&&v65Equip(S.cur)?'<div class="verdict v-mid"><b>'+V65_MASK+'</b></div>':'')+(v65t(m.peSite)?'<p class="hint">The equipment covers '+esc(m.peSite)+': check other sites for new injury.</p>':''));
+  const H=histSorted().filter(h=>h.assent!=='stopped');
+  const masked=H.filter(h=>{const s=score(h.rows);return s.risk!=null&&s.band===0&&v65Equip(h);}).map(h=>h.date);
+  set('v65MaskHist',masked.length?'<div class="verdict v-mid"><b>'+V65_MASK+'</b> Low estimate with equipment or self-restraint on record: '+esc(masked.join(', '))+'.</div>':'');
+  /* L1 */
+  const a=v65Area(S.cur);set('v65WsV',a!=null?'<p class="hint">Index wound area: '+a+' cm&sup2;.</p>':(v65t(S.cur.wsL)||v65t(S.cur.wsW))?'<p class="hint">Enter both the length and the width, in cm.</p>':'');
+  /* M2 */
+  v65Plot2(H);
+  const R=S.ddRate,fl=[];
+  if(R&&R.days.length){const mx=Math.max(...R.days.map(p=>p.v));
+    H.forEach(h=>{const d=pDate(h.date),s=score(h.rows),w=v65Week(d);if(!d||!s.n||!newHeal(h).nw||!w)return;
+      if(w.mean===0||(mx>0&&w.mean<=0.05*mx))fl.push(h.date+' (mean '+w.mean+(R.unit?' '+esc(R.unit):'')+' a day that week)');});}
+  set('v65RateV',fl.length?'<div class="verdict v-mid"><b>Injuries were found while the reported rate was near zero:</b> '+esc(fl.join('; '))+'. Check the reports directly: observe, and compare who records with when the injuries appear (Iwata et al., 1990).</div>'
+    :R&&R.days.length?'':'<p class="hint">No self-injury data from Form DD-1 yet. Open Form DD-1 in the workstation with this case and the rate fills in here.</p>');
+  /* M4 */
+  if(v65Months().join(',')!==v65AttSig)v65AttDraw();
+  const inj=v65Inj(),rs=S.events.filter(e=>e.kind==='Restraint').map(e=>pDate(e.date)).filter(Boolean),dd=new Map();
+  ((R&&R.dates)||[]).forEach(i=>{const k=i.slice(0,7);dd.set(k,(dd.get(k)||0)+1);});
+  document.querySelectorAll('#v65AttTbl tr[data-v65m]').forEach(tr=>{const k=tr.dataset.v65m,inp=tr.querySelector('input');
+    const typed=num(S.att[k]),days=typed!=null?typed:dd.get(k)||null;if(inp)inp.placeholder=dd.get(k)?String(dd.get(k))+' (DD-1)':'';
+    const inM=inj.filter(x=>v65Iso(x.d).slice(0,7)===k),lk=inM.filter(x=>rs.some(r=>x.d>=r&&x.d<=addDays(r,2)));
+    const per=n=>days?Math.round(n/days*100)/10:null,c=tr.querySelectorAll('td');
+    const t1=String(inM.length),t2=days?String(per(inM.length)):'enter the days',t3=lk.length+(days?' ('+per(lk.length)+')':'');
+    if(c[2].textContent!==t1)c[2].textContent=t1;if(c[3].textContent!==t2)c[3].textContent=t2;if(c[4].textContent!==t3)c[4].textContent=t3;});
+}catch(e){}}
+function v65Render(){v65Draw();v65Update();}
+
+/* ---- M2, L1: under each administration, the self-injury rate in the week before it and the index wound's area ---- */
+function v65Plot2(H){const svg=$('#v65Plot2');if(!svg)return;const W=900,Hh=230,L=52,Rg=52,T=20,B=58,n=Math.max(H.length,6),X=i=>L+(i+0.5)*(W-L-Rg)/n,bw=Math.min(40,(W-L-Rg)/n-14);
+  const R=S.ddRate,wk=H.map(h=>v65Week(pDate(h.date))),ar=H.map(v65Area);
+  const mx=Math.max(1,...wk.map(w=>w?w.mean:0)),ma=Math.max(1,...ar.map(a=>a||0)),Y=v=>T+(Hh-T-B)*(1-v/mx),Ya=v=>T+(Hh-T-B)*(1-v/ma),f='font-family="system-ui,sans-serif"';
+  let s='<rect x="0" y="0" width="'+W+'" height="'+Hh+'" fill="#fff"/>';
+  [0,mx/2,mx].forEach(v=>{s+='<line x1="'+L+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-Rg)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e3e8ea"/><text x="'+(L-7)+'" y="'+(Y(v)+4).toFixed(1)+'" font-size="11" text-anchor="end" fill="#5B6B6B" '+f+'>'+(Math.round(v*10)/10)+'</text>';});
+  if(ar.some(a=>a!=null))[0,ma/2,ma].forEach(v=>{s+='<text x="'+(W-Rg+7)+'" y="'+(Ya(v)+4).toFixed(1)+'" font-size="11" fill="#8E2A2A" '+f+'>'+(Math.round(v*10)/10)+'</text>';});
+  s+='<line x1="'+L+'" y1="'+Y(0)+'" x2="'+(W-Rg)+'" y2="'+Y(0)+'" stroke="#182e43"/>';
+  H.forEach((h,i)=>{const x=X(i),w=wk[i];
+    if(w)s+='<rect x="'+(x-bw/2).toFixed(1)+'" y="'+Y(w.mean).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(0)-Y(w.mean)).toFixed(1)+'" fill="#9fb6bd"/><text x="'+x.toFixed(1)+'" y="'+(Y(w.mean)-4).toFixed(1)+'" font-size="10" text-anchor="middle" fill="#2f5568" '+f+'>'+w.mean+'</text>';
+    else s+='<text x="'+x.toFixed(1)+'" y="'+(Y(0)-4)+'" font-size="10" text-anchor="middle" fill="#5B6B6B" '+f+'>no data</text>';
+    s+='<text x="'+x.toFixed(1)+'" y="'+(Y(0)+14)+'" font-size="10.5" text-anchor="middle" fill="#5B6B6B" '+f+'>'+esc(String(h.date||i+1).replace(/\/\d{4}$/,m=>'/'+m.slice(3)))+'</text>';});
+  let d='';ar.forEach((a,i)=>{if(a==null)return;d+=(d?'L':'M')+X(i).toFixed(1)+' '+Ya(a).toFixed(1)+' ';});if(d)s+='<path d="'+d+'" fill="none" stroke="#8E2A2A" stroke-width="2"/>';
+  ar.forEach((a,i)=>{if(a!=null)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Ya(a).toFixed(1)+'" r="4.5" fill="#8E2A2A" stroke="#fff" stroke-width="1.5"/>';});
+  s+='<text x="'+((L+W-Rg)/2)+'" y="'+(Hh-22)+'" font-size="11" text-anchor="middle" fill="#5B6B6B" '+f+'>Bars: '+(R&&R.name?esc(R.name):'self-injury')+(R&&R.unit?', '+esc(R.unit):'')+', mean a day over the 7 days up to each administration (Form DD-1)</text>';
+  s+='<text x="'+((L+W-Rg)/2)+'" y="'+(Hh-7)+'" font-size="11" text-anchor="middle" fill="#8E2A2A" '+f+'>'+(ar.some(a=>a!=null)?'Dark red line: index wound area, cm&sup2; (right axis)':'No index wound measured')+'</text>';
+  svg.innerHTML=s;}
+
+/* ---- M3: Subtype 2 suggests a shorter re-examination interval, which stays editable ---- */
+function v65SubPick(){if(S.meta.fsSub!=='2'||v65t(S.meta.every))return;S.meta.every='2';$$('[data-m="every"]').forEach(x=>{x.value='2';});renderSched();
+  nbhUI.toast('Subtype 2: the re-examination interval is set to every 2 weeks. Change it if the team decides otherwise.',{kind:'ok'});}
+
+/* ---- entries ---- */
+document.addEventListener('input',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.v65att!==undefined){S.att[el.dataset.v65att]=el.value;v65Soon();}});
+$('#v65AddPe').addEventListener('click',()=>{if(S.peLog.length>=200)return;S.peLog.push({date:today(),change:'',by:'',result:''});v65Render();const l=$$('#v65PeTbl input[data-f="change"]').pop();if(l)l.focus();});
+
+/* ---- the case, in: the self-injury rate and the days with data (DD-1), the function and the subtype (FS-1) ---- */
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=0;const m=S.meta,got=[],T=v65t;f=f||{};
+  const D=f.data||{},ser=Array.isArray(D.series)?D.series:[],B=Array.isArray(D.behaviors)?D.behaviors:[];
+  if(ser.length){const lb=T(m.beh).toLowerCase(),nm=B.map(b=>T(b.name)).filter(Boolean);
+    const pick=nm.find(x=>lb&&(lb.includes(x.toLowerCase())||x.toLowerCase().includes(lb.split(':')[0])))||nm.find(x=>/self.?injur|\bSIB\b|head.?(hit|bang)|bit(e|ing)|scratch|pick/i.test(x));
+    const old=S.ddRate||{days:[],dates:[]},byD=new Map(old.name===pick?old.days.map(p=>[p.d,p.v]):[]),dates=new Set(old.dates||[]);
+    ser.forEach(x=>{if(!x||!/^\d{4}-\d\d-\d\d$/.test(T(x.date)))return;dates.add(x.date);if(pick&&x.v&&typeof x.v[pick]==='number')byD.set(x.date,x.v[pick]);});
+    const b=B.find(y=>T(y.name)===pick),nx=v65RateCopy({name:pick||'',unit:b?T(b.unit):'',days:[...byD].sort().map(([d,v])=>({d,v})),dates:[...dates].sort()});
+    if(JSON.stringify(nx)!==JSON.stringify(S.ddRate)){S.ddRate=nx;n++;got.push(pick?'the self-injury rate ('+pick+') from Form DD-1':'the school days with data from Form DD-1');}}
+  const fn=f.fn||null;if(fn){const pb=(fn.perBehavior||[]).find(x=>{const l=T(x.label).toLowerCase();return l&&T(m.beh).toLowerCase().includes(l);}),lab=T(pb&&pb.fn)||T(fn.label);
+    if(lab&&!T(m.fsFn)){m.fsFn=lab+' (Form FS-1)';n++;got.push('the function from Form FS-1');}
+    const sm=/subtype\s*(1|2|3|one|two|three)\b/i.exec([lab,T(pb&&pb.statement)].concat(fn.statements||[]).join(' '));
+    if(sm&&!T(m.fsSub)){m.fsSub={one:'1',two:'2',three:'3'}[sm[1].toLowerCase()]||sm[1];n++;got.push('the subtype from Form FS-1');v65SubPick();}
+    else if(!T(m.fsSub)&&fn.key&&fn.key!=='automatic'&&fn.key!=='multiple'&&fn.key!=='unknown'){m.fsSub='social';n++;}}
+  /* v25.65 (SAFETY-M9) equipment and self-restraint the records review found (Form RR-1), into Part I's empty boxes; whether
+     self-restraint is observed now stays for staff to answer */
+  const ch=(f.records&&f.records.crisisHist)||null,no=v=>!T(v)||/^(none|no|n\/a|not)\b/i.test(T(v));
+  if(ch&&!no(ch.pe)&&!T(m.peType)){m.peType=T(ch.pe)+' (in the record, Form RR-1)';n++;got.push('protective equipment from the records review (RR-1)');}
+  if(ch&&!no(ch.sr)&&!T(m.srDesc)){m.srDesc=T(ch.sr)+' (in the record, Form RR-1)';n++;got.push('self-restraint from the records review (RR-1)');}
+  if(n)renderAll();
+  return {filled:((r&&r.filled)||0)+n,note:got.length?((r&&r.note)?r.note+'; ':'')+got.join('; '):(r&&r.note)};};})();
+/* ---- the case, out: equipment and self-restraint, for the plan review ---- */
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+  try{const m=S.meta;if(o&&o.injury&&(v65t(m.peType)||m.srObs==="yes")){o.injury.equipment={type:v65t(m.peType),hours:v65t(m.peHours),site:v65t(m.peSite),selfRestraint:m.srObs==='yes'};}}catch(e){}
+  return o;};})();
+v65Render();
+</script>
+<style id="v2565-im1-photos-css">
+/* v25.65 IM-1 photos */
+.v65ph{margin-top:12px;border-top:1px solid var(--rule-2,#ccd);padding-top:8px}
+.v65ph h3{margin:0 0 6px}
+.v65ph-safe{font-size:12.5px;border-left:3px solid #9B4E15;padding-left:8px;margin:6px 0}
+#v65PhGate:not(:empty){font-size:12.5px;background:#FFF6E5;border:1px solid #E7C98B;padding:6px 8px;margin:6px 0}
+.v65ph-site{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:5px 0;border-bottom:1px dotted var(--rule-2,#ccd)}
+.v65ph-site>b{min-width:160px}
+.v65ph-th{width:48px;height:48px;padding:0;border:1px solid var(--rule-2,#ccd);border-radius:3px;background:#fff;cursor:pointer;overflow:hidden}
+.v65ph-th img{width:100%;height:100%;object-fit:cover;display:block}
+button.tool.v65ph-add,.v65ph-dlg button.tool{min-height:44px!important;min-width:44px;height:auto;max-height:none}
+.v65ph-pr{display:flex;align-items:center;gap:6px;min-height:44px}
+.v65ph-pr input{width:22px;height:22px}
+.v65ph-print{display:none}
+.v65ph-dlg{max-width:min(92vw,760px);border:1px solid var(--rule-2,#ccd);border-radius:4px}
+.v65ph-dlg img{max-width:100%;max-height:60vh;display:block;margin:6px auto}
+
+@media print{.v65ph-print.on{display:block;break-before:page}
+  .v65ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .v65ph-grid figure{margin:0;break-inside:avoid}
+  .v65ph-grid img{width:100%;max-height:3.6in;object-fit:contain;border:1px solid #999}
+  .v65ph-grid figcaption{font-size:10pt;line-height:1.3}}
+</style>
+<script id="v2565-im1-photos">
+/* v25.65 IM-1 photos (the BCBA's request): photos of each marked injury site on the body map. Each photo is shrunk to at most
+   1600 px on its long side (JPEG, quality 0.8) and kept in the shared media store (nbh-media.js); the record holds only the
+   reference and the photo's details on the site's row: {ref, at (date and time added, from the file's date), by (initials),
+   note}. "Consent to photograph injuries" (meta.photoConsent: ic1, other, no, or blank) must be a Yes before a photo can be
+   added. The photos print only when "Include the photos when printing" is ticked (off each time the form opens), and none of
+   them goes into the case facts. A file saved before has no photos and no consent answer, and opens and prints as before. */
+const V65PH_CONS={ic1:'Yes, on Form IC-1',other:'Yes, other written consent',no:'No'};
+const V65PH_OK=v=>{v=String(v==null?'':v);return (!!window.nbhMedia&&nbhMedia.isRef(v)&&/^image\//.test((nbhMedia.parse(v)||{}).mime||''))||(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16e6);};
+function v65PhCopy(a){const s=v=>v==null||typeof v==='object'?'':String(v);
+  return (Array.isArray(a)?a:[]).filter(p=>p&&typeof p==='object'&&V65PH_OK(p.ref)).slice(0,40).map(p=>({ref:s(p.ref),at:s(p.at).slice(0,16),by:s(p.by).slice(0,20),note:s(p.note).slice(0,300)}));}
+const V65PH_URL={};let V65PH_PRINT=false,V65PH_SITE=-1,V65PH_OPEN=null,v65phWarm=false;
+const v65phSrc=ref=>window.nbhMedia&&nbhMedia.isRef(ref)?(V65PH_URL[ref]||''):String(ref||'');
+const v65phYes=()=>S.meta.photoConsent==='ic1'||S.meta.photoConsent==='other';
+const v65phAt=ms=>{const d=new Date(ms);if(isNaN(d))return '';const z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());};
+const v65phWhen=at=>{const m=/^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)$/.exec(at||'');if(!m)return at||'date not recorded';let h=+m[4];const ap=h<12?'am':'pm';h=h%12||12;return (+m[2])+'/'+(+m[3])+'/'+m[1]+' '+h+':'+m[5]+' '+ap;};
+const v65phSite=r=>r.loc==='hips'?'Hips/buttocks: the side of the hip':(LOC[r.loc]||{}).name||r.loc;
+const v65phCons=()=>'Photographed with consent: '+(V65PH_CONS[S.meta.photoConsent]||'not recorded');
+function v65phWhy(){if(S.cur.ro)return 'This administration is open read-only, so photos cannot be added or deleted here. Choose "Edit this one" on the History page to change it.';
+  if(S.meta.photoConsent==='no')return 'Photos cannot be added: the answer to "Consent to photograph injuries" is No. Describe the injury in words on its row instead.';
+  if(!v65phYes())return 'Photos cannot be added until "Consent to photograph injuries" is answered Yes (on Form IC-1, or other written consent).';return '';}
+function v65phWarmUp(){const M=window.nbhMedia;if(!M||v65phWarm)return;const refs=[];
+  [S.cur].concat(S.hist).forEach(a=>(a&&a.rows||[]).forEach(r=>(r.photos||[]).forEach(p=>{if(M.isRef(p.ref)&&!(p.ref in V65PH_URL))refs.push(p.ref);})));
+  if(!refs.length)return;v65phWarm=true;Promise.all(refs.map(r=>M.url(r).then(u=>{V65PH_URL[r]=u||'';}).catch(()=>{V65PH_URL[r]='';}))).then(()=>{v65phWarm=false;v65PhRender();});}
+function v65phImg(r,p,cls){const alt='Photo of '+v65phSite(r)+', '+v65phWhen(p.at),src=v65phSrc(p.ref);
+  return src?'<img src="'+esc(src)+'" alt="'+esc(alt)+'"'+(cls?' class="'+cls+'"':'')+'>':'<span class="hint" role="img" aria-label="'+esc(alt+': not on this device')+'">not on this device</span>';}
+function v65PhRender(){const L=$('#v65PhList'),G=$('#v65PhGate'),P=$('#v65PhPrint');if(!L||!S||!S.cur)return;
+  const c=$('#v65PhCons');if(c&&c.value!==(S.meta.photoConsent||''))c.value=S.meta.photoConsent||'';
+  const why=v65phWhy();if(G.textContent!==why)G.textContent=why;
+  const R=S.cur.rows.map((r,i)=>({r,i})).filter(x=>LOC[x.r.loc]);
+  L.innerHTML=R.length?R.map(({r,i})=>{const ph=r.photos||[];
+    if(isPrivRow(r))return '<div class="v65ph-site"><b>'+esc(v65phSite(r))+'</b><span class="hint">A private area: no photos are taken.</span></div>';
+    return '<div class="v65ph-site" data-v65phsite="'+i+'"><b>'+esc(v65phSite(r))+'</b>'+ph.map((p,k)=>'<button type="button" class="v65ph-th" data-v65phopen="'+i+':'+k+'" aria-label="Open the photo of '+esc(v65phSite(r))+', '+esc(v65phWhen(p.at))+'">'+v65phImg(r,p)+'</button>').join('')+
+      (S.cur.ro?'':'<button type="button" class="tool v65ph-add" data-v65phadd="'+i+'">Add photo</button>')+(ph.length?'<span class="hint">'+ph.length+' photo'+(ph.length===1?'':'s')+' · '+esc(v65phCons())+'</span>':'')+'</div>';}).join('')
+    :'<p class="hint">Mark an injury on the body map first; each marked site can then take photos.</p>';
+  const pr=$('#v65PhPrintOn');if(pr)pr.checked=V65PH_PRINT;
+  const all=R.filter(x=>!isPrivRow(x.r)).flatMap(({r})=>(r.photos||[]).map(p=>({r,p})));
+  P.classList.toggle('on',V65PH_PRINT&&all.length>0);
+  P.innerHTML=V65PH_PRINT&&all.length?'<h2 class="nbh-band">Photos</h2><p>'+esc(v65phCons())+'. Photos do not replace the nurse&rsquo;s check or a mandated report.</p><div class="v65ph-grid">'+all.map(({r,p})=>'<figure>'+v65phImg(r,p)+'<figcaption><b>'+esc(v65phSite(r))+'</b><br>'+esc(v65phWhen(p.at))+' · taken by '+esc(p.by||'not recorded')+(p.note?'<br>'+esc(p.note):'')+'<br>'+esc(v65phCons())+'</figcaption></figure>').join('')+'</div>':'';
+  v65phWarmUp();}
+async function v65phShrink(file){const url=URL.createObjectURL(file);
+  try{const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('not an image'));im.src=url;});
+    const w=img.naturalWidth||1,h=img.naturalHeight||1,k=Math.min(1,1600/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+    return await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('no image')),'image/jpeg',0.8));}
+  finally{URL.revokeObjectURL(url);}}
+const v65phData=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.onerror=()=>rej(r.error);r.readAsDataURL(b);});
+async function v65phAdd(files){const r=S.cur.rows[V65PH_SITE];V65PH_SITE=-1;if(!r||v65phWhy())return;let n=0,bad=0;
+  for(const f of Array.from(files||[])){if(!/^image\//.test(f.type||'')){bad++;continue;}
+    try{const b=await v65phShrink(f);const ref=window.nbhMedia?await nbhMedia.put(b,{kind:'image',mime:'image/jpeg'}):await v65phData(b);
+      if(!V65PH_OK(ref)){bad++;continue;}
+      (r.photos=r.photos||[]).push({ref,at:v65phAt(f.lastModified||Date.now()),by:String(S.meta.photoBy||'').trim().slice(0,20),note:''});n++;}catch(e){bad++;}}
+  v65PhRender();
+  if(n)nbhUI.toast(n+' photo'+(n===1?'':'s')+' added to '+v65phSite(r)+'.',{kind:'ok'});if(bad)nbhUI.toast(bad+' file'+(bad===1?' was':'s were')+' not read as a photo.',{kind:'warn'});}
+function v65phOpen(i,k){const r=S.cur.rows[i],p=r&&r.photos&&r.photos[k],D=$('#v65PhDlg');if(!p||!D)return;V65PH_OPEN={i,k};
+  $('#v65PhDlgT').textContent=v65phSite(r)+': photo '+(k+1)+' of '+r.photos.length;const im=$('#v65PhBig');im.src=v65phSrc(p.ref);im.alt='Photo of '+v65phSite(r)+', '+v65phWhen(p.at);
+  $('#v65PhDBy').value=p.by;$('#v65PhDNote').value=p.note;['#v65PhDBy','#v65PhDNote','#v65PhDel'].forEach(s=>{$(s).disabled=!!S.cur.ro;});
+  $('#v65PhDMeta').textContent='Added '+v65phWhen(p.at)+'. '+v65phCons()+'.';
+  try{D.showModal();}catch(e){D.setAttribute('open','');}}
+function v65phCloseDlg(){const D=$('#v65PhDlg');V65PH_OPEN=null;try{D.close();}catch(e){D.removeAttribute('open');}v65PhRender();}
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('[data-v65phadd],[data-v65phopen],#v65PhDel,#v65PhClose');if(!t)return;
+  if(t.dataset.v65phadd!==undefined){const why=v65phWhy();if(why){$('#v65PhGate').textContent=why;nbhUI.toast(why,{kind:'warn',ms:7000});return;}
+    if(!String(S.meta.photoBy||'').trim()){nbhUI.toast('Type the initials of who takes the photo (Taken by) first.',{kind:'warn'});$('#v65PhBy').focus();return;}
+    V65PH_SITE=+t.dataset.v65phadd;$('#v65PhFile').click();return;}
+  if(t.dataset.v65phopen!==undefined){const [i,k]=t.dataset.v65phopen.split(':').map(Number);v65phOpen(i,k);return;}
+  if(t.id==='v65PhClose'){v65phCloseDlg();return;}
+  if(t.id==='v65PhDel'&&V65PH_OPEN&&!S.cur.ro){const {i,k}=V65PH_OPEN;
+    if(!(await nbhUI.confirm('Delete this photo?\nIt is removed from this record.',{ok:'Delete',danger:true})))return;
+    const r=S.cur.rows[i];if(r&&r.photos){r.photos.splice(k,1);if(!r.photos.length)delete r.photos;}v65phCloseDlg();}});
+$('#v65PhFile').addEventListener('change',e=>{const f=e.target.files;v65phAdd(f).finally(()=>{e.target.value='';});});
+$('#v65PhPrintOn').addEventListener('change',e=>{V65PH_PRINT=!!e.target.checked;v65PhRender();});
+$('#v65PhCons').addEventListener('change',()=>v65PhRender());
+$('#v65PhDlg').addEventListener('input',e=>{if(!V65PH_OPEN||S.cur.ro)return;const r=S.cur.rows[V65PH_OPEN.i],p=r&&r.photos&&r.photos[V65PH_OPEN.k];if(!p)return;
+  if(e.target.id==='v65PhDBy')p.by=e.target.value.slice(0,20);if(e.target.id==='v65PhDNote')p.note=e.target.value.slice(0,300);});
+$('#v65PhDlg').addEventListener('close',()=>{if(V65PH_OPEN){V65PH_OPEN=null;v65PhRender();}});
+{const rm=renderMap;renderMap=function(){const r=rm.apply(this,arguments);try{v65PhRender();}catch(e){}return r;};}
+window.nbhMediaHeld=()=>{try{return JSON.stringify(S);}catch(e){return '';}};   /* the store references this page holds: the workstation's sweep keeps them */
+try{v65PhRender();}catch(e){}
+</script>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same

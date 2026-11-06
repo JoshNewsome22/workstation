@@ -543,7 +543,7 @@ table.grid.inner td{height:24px}
 
 /* ---- Form RA-1 additions ---- */
 body[class^="view-"] .sheet{display:none}
-body.view-guide #guide,body.view-consent #consent,body.view-proc #proc,body.view-assent #assent,body.view-record #record,body.view-refs #refs{display:block}
+body.view-guide #guide,body.view-consent #consent,body.view-proc #proc,body.view-assent #assent,body.view-record #record,body.view-refs #refs,body.view-planproc #planproc{display:block}   /* v25.65 planproc */
 .chkrow{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;margin:4px 0}
 .chkrow label{display:flex;gap:6px;align-items:center}
 table.grid td.c input.dt{width:74px;text-align:center;border:0;background:transparent;font:inherit;font-size:11px;padding:2px 0}
@@ -1116,6 +1116,7 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
       <div class="seg" id="viewSeg">
         <button data-view="consent" aria-pressed="true">Consent</button>
         <button data-view="proc" aria-pressed="false">Specific procedures</button>
+        <button data-view="planproc" aria-pressed="false">Plan procedures</button><!-- v25.65 (CARE-H7) -->
         <button data-view="assent" aria-pressed="false">Student assent</button>
         <button data-view="record" aria-pressed="false">Consent record</button>
         <button data-view="guide" aria-pressed="false">Guide</button>
@@ -1183,7 +1184,7 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
     <li><b>Obtained through the reevaluation process.</b> Select this on the Consent sheet, enter the district form's name, the date it was signed, where it is filed, and confirm that the FBA is a listed procedure on it. The signature block becomes optional; the procedure checklist and the Specific procedures sheet are still completed so the file shows what the parent was told.</li>
     <li><b>Obtained through the initial-evaluation process.</b> Same as above for a student not yet eligible.</li>
     <li><b>Declined or revoked.</b> Record the decision, date, and who received it; stop any assessment that is not part of the current IEP; notify the ESE contact.</li>
-    <li><b>The plan itself.</b> Consent on this form covers the assessment and the writing of the BIP (part 2, &ldquo;Behavior intervention plan development&rdquo;); it is not consent to carry the plan out. Adopting or revising the BIP is an IEP team decision made with the parent, with prior written notice when it changes the provision of FAPE (34 CFR &sect;300.503(a)), and BACB Standard 2.11 lists informed consent before initial implementation of behavior-change interventions and when making substantial changes to them. Record the parent&rsquo;s consent to implement the plan as its own event on the Consent record sheet.</li>
+    <li><b>The plan itself.</b> Consent on this form covers the assessment and the writing of the BIP (part 2, &ldquo;Behavior intervention plan development&rdquo;); it is not consent to carry the plan out. Adopting or revising the BIP is an IEP team decision made with the parent, with prior written notice when it changes the provision of FAPE (34 CFR &sect;300.503(a)), and BACB Standard 2.11 lists informed consent before initial implementation of behavior-change interventions and when making substantial changes to them. Record the parent&rsquo;s consent to implement the plan as its own event on the Consent record sheet. Since v25.65 the Plan procedures sheet holds a decision for each part of the plan, with each extinction, punishment, restrictive step, or step that reinforces problem behavior on purpose decided on its own; signing it adds the &ldquo;Consent to implement the BIP&rdquo; event.</li>
   </ul>
 
   <!-- v21.44 (B4, B5). Wording approved by the BCBA, October 2026. -->
@@ -1247,6 +1248,10 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
       <tr><td class="c"><input type="checkbox" name="p.wait" data-p="1"></td><td class="lab">Practice with waiting for a reward</td><td>Staff set up short waits before your child gets something they asked for, starting very short and growing a little at a time, so your child learns to wait. The behavior may briefly occur. A session ends if the behavior reaches the stop rule in the waiting plan (Specific procedures, F), and you are told about any session that had to stop.</td><td>DT-1</td></tr>
       <tr><td class="c"><input type="checkbox" name="p.bip" data-p="1"></td><td class="lab">Behavior intervention plan development</td><td>We use the results to define the target behaviors and write or revise the BIP, which the IEP team then reviews with you. Putting the plan into effect is a separate decision, made with you when the plan is adopted.</td><td>TB-1, TD-1</td></tr>
       <tr><td class="c"><input type="checkbox" name="p.med" data-p="1"></td><td class="lab">Observation of possible medication side effects</td><td>If your child takes medication, staff can record what they see at school (for example drowsiness or restlessness). Sharing this with the prescriber requires a separate signed release.</td><td>MS-1</td></tr>
+      <!-- v25.65 (CARE-M10) the home side of the work -->
+      <tr><td class="c"><input type="checkbox" name="p.homeData" data-p="1"></td><td class="lab">Home data sheets kept by the family</td><td>If you choose, you keep a short sheet at home (a tally, a checklist, a sleep, meal or toileting log) and send it back. Keeping it is your choice.</td><td>HD-1</td></tr>
+      <tr><td class="c"><input type="checkbox" name="p.homeTrain" data-p="1"></td><td class="lab">Caregiver training at home or by video call</td><td>Staff show you the plan&rsquo;s steps, practice them with you, and watch you try them, at home or on a video call.</td><td>CT-1</td></tr>
+      <tr><td class="c"><input type="checkbox" name="p.homeVideo" data-p="1"></td><td class="lab">Home video or photos of data sheets</td><td>You may send photos of the sheets, or staff may watch by video. This needs your separate decision on the Specific procedures sheet (H).</td><td>HD-1, CT-1</td></tr>
       <tr><td class="c"><input type="checkbox" name="p.other" data-p="1"></td><td class="lab">Other</td><td><input class="txt" name="p.othertxt" placeholder="describe"></td><td>&mdash;</td></tr>
     </tbody>
   </table>
@@ -1317,6 +1322,19 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
   <input name="c.formrev" hidden aria-hidden="true" tabindex="-1">
   <div class="warn ic-revnote" id="icRevNote" hidden></div>
 
+  <!-- v25.65 (CARE-L1) a short teach-back before the signature; never a test the parent can fail -->
+  <div class="ic-tb">
+  <h3 class="sub">Before You Sign: Say It Back</h3>
+  <p class="method" style="margin:0 0 6px">The staff member asks these in the parent&rsquo;s own words and ticks how each went. It is never a test: an answer that comes back differently is explained again, and that is all.</p>
+  <table class="grid" id="v65Tb"><thead><tr><th>Question</th><th style="width:34%">How it went</th></tr></thead><tbody>
+    <tr><td>What will happen with my child?</td><td><select name="tb.q1"><option value=""></option><option value="ok">Said back correctly</option><option value="again">Explained again</option></select></td></tr>
+    <tr><td>Which parts did I say no to?</td><td><select name="tb.q2"><option value=""></option><option value="ok">Said back correctly</option><option value="again">Explained again</option></select></td></tr>
+    <tr><td>Can I stop, and how?</td><td><select name="tb.q3"><option value=""></option><option value="ok">Said back correctly</option><option value="again">Explained again</option></select></td></tr>
+    <tr><td>Who do I call?</td><td><select name="tb.q4"><option value=""></option><option value="ok">Said back correctly</option><option value="again">Explained again</option></select></td></tr>
+  </tbody></table>
+  <div class="ident c3" style="margin-top:6px"><div class="f"><label for="v65TbLang">Language used</label><input id="v65TbLang" name="tb.lang" placeholder="e.g., English; Spanish with the interpreter"></div></div>
+  <p class="cite" style="margin-top:4px">Consent material with questions before the signature, and a reminder that withdrawal is always possible, after Grabowski et al. (1979); teach-back raised procedural integrity in training (Sleiman et al., 2023).</p>
+  </div>
   <div class="ic-sigs">
   <h3 class="sub">7. Signatures</h3>
   <p class="method" id="sigNote" style="margin:0 0 8px"><span class="ic-screen">Sign in the box with a mouse, finger, or stylus, or type your name and choose "Use typed name".</span><span class="ic-paper">The parent or guardian, or the adult student, signs and dates in the box below.</span> A signature here is required when the method above is "Signed on this form"; it is optional, and welcome, when consent was obtained on a district form.</p>
@@ -1369,6 +1387,8 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
   <div class="card" data-proc="fa">
     <div class="chd"><span class="chdt">A. Experimental (functional) analysis</span><span class="tag na">EA-1</span></div>
     <p class="method" style="margin:0 0 6px">In a functional analysis we run short sessions, usually 5 to 10 minutes each, and each session is set up as one situation: for example, attention is given only after the behavior, or a task is removed only after the behavior, or your child is left with nothing to do. This tells us directly what the behavior produces. The behavior may occur during these sessions; that is expected and is what the test measures. One study looked at the records of 99 people treated in a hospital unit for self-injury. Injury rates were relatively low during functional analysis sessions and at other times, and injuries were usually not severe. The authors suggest that a functional analysis of self-injury is relatively safe when appropriate precautions are taken (Kahng et al., 2015). The safeguards below are the precautions we take.</p>
+    <!-- v25.65 (CARE-H8) what saying no means, from the randomized evidence -->
+    <p class="method v65no" style="margin:0 0 6px"><b>If you say no,</b> we will still complete the assessment with interviews and observation. In one randomized study of 57 young children with autism, plans built with and without a functional analysis worked about equally often (about 8 in 10 children), though the two kinds of assessment often pointed to different reasons for the behavior (Call et al., 2024). The team leaves this item &ldquo;Not proposed&rdquo; unless it has judged an analysis necessary. You are not asked to run these test sessions at home; if the team ever proposes one at home, it is explained to you first and needs its own yes.</p>
     <ul class="rules">
       <li><b>Safeguards.</b> Sessions are run by staff trained in the procedure; the school nurse is informed before the first session; a session is stopped immediately if any injury occurs or if the behavior reaches the stop rule written here; protective materials are used where needed; no session is run when your child is ill or when medication has just changed.</li>
     </ul>
@@ -1468,6 +1488,27 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
     </div>
   </div>
 
+  <!-- v25.65 (CARE-M10) video and photos at home: a decision of its own -->
+  <div class="card" data-proc="homevideo">
+    <div class="chd"><span class="chdt">H. Video, photos and video calls at home</span><span class="tag na">HD-1, CT-1</span></div>
+    <p class="method" style="margin:0 0 6px">You may send photos of the home data sheets, and staff may watch a routine by video call to coach you or to check the data. This is separate from recording at school (C).</p>
+    <ul class="rules">
+      <li><b>No camera in a bathroom or during dressing.</b> For toileting or dressing, use audio only, or the camera at shoulders up, and say what is happening.</li>
+      <li><b>No recording of other children.</b> Point the camera away from brothers, sisters and visitors.</li>
+      <li><b>Video calls are not stored</b> unless you tick below.</li>
+      <li><b>Photos of sheets are deleted</b> after the numbers are typed in.</li>
+    </ul>
+    <div class="defs">
+      <div class="drow"><div class="dlab">What is allowed</div><div class="dval"><div class="chkrow" style="margin:2px 6px"><label><input type="checkbox" name="hv.photo"> Photos of data sheets</label><label><input type="checkbox" name="hv.call"> Video calls (live, not stored)</label><label><input type="checkbox" name="hv.store"> A video call may be stored</label></div></div></div>
+      <div class="drow"><div class="dlab">If stored: who may view, and deleted by</div><div class="dval"><textarea name="hv.who" class="nbh-line" rows="1" placeholder="e.g., the BCBA only; deleted after the data are checked, by (date)"></textarea></div></div>
+    </div>
+    <div class="decide">
+      <select name="hv.dec" data-dec="1"><option value="">Decision</option><option value="yes">Yes, as described above</option><option value="no">No video or photos at home</option><option value="na">Not proposed</option></select>
+      <label>Initials <input name="hv.init" class="inline" style="min-width:50px;max-width:70px"></label>
+      <label>Date <input name="hv.date" type="date" class="inline"></label>
+    </div>
+  </div>
+
   <div class="card">
     <div class="chd"><span class="chdt">G. How you would like to be kept informed</span></div>
     <div class="ident c3">
@@ -1478,6 +1519,35 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
     <div class="defs" style="margin-top:8px"><div class="drow"><div class="dlab">Anything we should know</div><div class="dval"><textarea name="up.notes" placeholder="e.g., what works at home; things that upset your child; who else should be involved"></textarea></div></div></div>
   </div>
   <div class="cite">Functional-analysis description and safeguards after Iwata et al. (1982/1994), Hanley, Iwata, and McCord (2003), and Kahng et al. (2015); risk minimization after BACB Ethics Code Standard 2.13, which applies to assessments; confidentiality of recorded sessions after Standard 2.03. Release-of-information requirement after FERPA (34 CFR &sect;99.30) and 34 CFR &sect;300.622. The rules for injury checks (two adults at every check, the student asked first, no examination of private areas) are this practice&rsquo;s own; check them against your agency&rsquo;s policy.</div>
+</div>
+
+<!-- ================================================================ PLAN PROCEDURES (v25.65, CARE-H7) -->
+<div class="sheet" id="planproc">
+  <div class="nbh-print-head">
+    <img class="nbh-print-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
+    <div class="nbh-print-meta"><div class="nbh-print-title">Informed Consent for FBA and BIP</div><div>Form IC-1 &middot; Revised October 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+  </div>
+  <div class="bar nbh-band">Consent to the Plan&rsquo;s Procedures</div>
+  <div class="sumhead"><div><b>Student</b><span class="hd-client"></span></div><div><b>Parent / guardian</b><span class="hd-parent"></span></div><div><b>BCBA</b><span class="hd-bcba"></span></div></div>
+  <p class="method" style="margin:0 0 8px">Consent on the Consent sheet covers the assessment and writing the plan. This sheet is your decision about carrying the plan out, one part at a time. Teaching and rewards, and changes to the day that prevent the behavior, share one decision. <b>Each extinction step, punishment step, restrictive step, or step that reinforces problem behavior on purpose needs its own decision, and none is ever ticked for you.</b> Saying no to one part does not stop the rest. You may change any decision later by telling us.</p>
+  <div class="noprint" style="margin:0 0 8px"><button type="button" class="tool" id="v65PpFill">Fill from the plan (Form TD-1)</button> <span class="method" id="v65PpFillMsg"></span></div>
+  <div class="icwrap"><table class="grid" id="v65Pp">
+    <thead><tr><th class="c" style="width:28px">#</th><th style="width:24%">Part of the plan, in plain words</th><th style="width:15%">Type</th><th style="width:19%">What could go wrong</th><th style="width:15%">The alternative offered</th><th style="width:15%">Your decision</th><th style="width:7%">Initials</th><th style="width:9%">Date</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <div class="decide" style="margin-top:8px"><b style="font-size:13px">Teaching, rewards and prevention (the parts typed reinforcement or antecedent):</b>
+    <select name="pp.sh.dec" aria-label="Decision: teaching, rewards and prevention"><option value="">Decision</option><option value="yes">Yes, carry these out</option><option value="no">No</option></select>
+    <label>Initials <input name="pp.sh.init" class="inline" style="min-width:50px;max-width:70px"></label>
+    <label>Date <input name="pp.sh.date" type="date" class="inline"></label>
+  </div>
+  <div id="v65PpV"></div>
+  <div class="ident c3" style="margin-top:10px">
+    <div class="f"><label for="v65PpName">Parent or guardian (printed name)</label><input id="v65PpName" name="pp.signame"></div>
+    <div class="f"><label for="v65PpDate">Date signed</label><input id="v65PpDate" name="pp.sigdate" type="date"></div>
+    <div class="f"><label for="v65PpStaff">Staff member, and how it was discussed</label><input id="v65PpStaff" name="pp.staff" placeholder="e.g. J. Ellis, BCBA, at the IEP meeting"></div>
+  </div>
+  <div class="sig"><div>Parent or guardian signature / date</div><div>BCBA signature / date</div><div>Administrator, for a restrictive step / date</div></div>
+  <div class="cite">Clients have a right to take part, themselves or by a proxy, in decisions about their treatment, and to know the advantages and disadvantages of each technique; restrictive procedures are acceptable only when necessary for safe and clinically significant change (Van Houten et al., 1988). Bursts or new aggression under extinction: Lerman et al. (1999), 16 of 41 cases showed a burst and 9 an increase in aggression, fewer when extinction was part of a package; Muething et al. (2024), bursts in 24% of 108 cases. Caregivers and children may prefer packages that include extinction or punishment (Hanley et al., 2005; Owen et al., 2021), so each such part is a separate, informed decision. Signing this sheet adds &ldquo;Consent to implement the BIP&rdquo; to the Consent record.</div>
 </div>
 
 <!-- ================================================================ STUDENT ASSENT -->
@@ -1520,6 +1590,22 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
     <div class="drow"><div class="dlab">What staff do when dissent occurs</div><div class="dval"><textarea name="d.plan" placeholder="e.g., end the trial, offer a break, re-offer once after 2 minutes; end the session on a second dissent; note it on the session sheet; two sessions ended by dissent in one day = call parent"></textarea></div></div>
     <div class="drow"><div class="dlab">Assent re-checked (dates)</div><div class="dval"><textarea name="a.recheck" placeholder="assent is re-sought at the start of each structured session; note dates of any refusal" class="nbh-line" rows="1"></textarea></div></div>
   </div>
+  <!-- v25.65 (CARE-M11) assent for the plan, home sessions, the necessary-procedure rule, the skills, and when to ask again -->
+  <h3 class="sub">Assent for the Plan</h3>
+  <p class="method" style="margin:0 0 6px">The same questions, for the plan once it is written. Sessions a caregiver runs at home use the same dissent behaviors listed above, and the same response.</p>
+  <div class="ident c3">
+    <div class="f"><label for="v65ApBy">Explained by</label><input id="v65ApBy" name="ap.by"></div>
+    <div class="f"><label for="v65ApDate">Date</label><input id="v65ApDate" name="ap.date" type="date"></div>
+    <div class="f"><label for="v65ApResp">Student&rsquo;s response</label><select id="v65ApResp" name="ap.resp"><option value=""></option><option value="yes">Indicated agreement</option><option value="no">Indicated refusal</option><option value="unable">Unable to indicate; proceeding under parental consent with dissent monitoring</option><option value="na">Not applicable</option></select></div>
+  </div>
+  <div class="defs" style="margin-top:6px">
+    <div class="drow"><div class="dlab">What the student was told about the plan</div><div class="dval"><textarea name="ap.script" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">How the student indicated it</div><div class="dval"><textarea name="ap.how" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Procedures the team considers necessary even if the student says no (for example safety steps), and how the student is told</div><div class="dval"><textarea name="a.need" placeholder="We still ask, every time, and say honestly when a no cannot be honored and why (Morris et al., 2024). For example: moving away from a peer during aggression; the student is told, &quot;I know you said no. I have to keep everyone safe. We will stop as soon as you are calm.&quot;"></textarea></div></div>
+    <div class="drow"><div class="dlab">Skills the student needs to say yes or no, and whether they are being taught</div><div class="dval"><textarea name="a.skills" class="nbh-line" rows="1" placeholder="e.g., a stop card; shaking the head; being taught on the BIP (Form TD-1)"></textarea></div></div>
+    <div class="drow"><div class="dlab">Assent re-check due</div><div class="dval"><div class="chkrow" style="margin:2px 6px"><label><input type="date" name="a.due" class="inline" aria-label="Assent re-check due"></label><span class="method">At every plan change, and at least each grading period.</span></div></div></div>
+  </div>
+  <div class="readout" id="v65AsV"></div>
   <div class="cite">Assent and dissent procedures after Morris, Detrick, and Peterson (2021) and BACB Ethics Code Standard 2.11; the choice to honor refusal follows the trauma-informed recommendations of Rajaraman et al. (2022). Transfer of rights at 18 after 34 CFR &sect;300.520 and Florida Rule 6A-6.03311(8).</div>
 </div>
 
@@ -1675,8 +1761,8 @@ $('#cStatus').addEventListener('change',()=>{methodUI();refresh();});
    specified; and nothing on who may consent. Each rule below is one the form itself states (the procedure table, the
    card texts, the Guide) or one the cited regulation states (34 CFR 300.9(b), 300.30, 300.300(d)(5); Florida Rule
    6A-6.03311(8)). */
-const PROCS=['records','indirect','abc','scatter','daily','pref','reinf','arrange','fa','demand','var','wait','bip','med','other'];   /* v23.48 (review F19) waiting practice (DT-1) apart from var */   /* v22.37 arrange (AD-1) and demand (DA-1) */
-const DECS=[['fa','Experimental analysis'],['ed','Food items'],['rec','Recording'],['sh','Sharing outside school'],['ij','Injury checks'],['wt','Practice with waiting']];
+const PROCS=['records','indirect','abc','scatter','daily','pref','reinf','arrange','fa','demand','var','wait','bip','med','other'];   /* v25.65 (CARE-M10): the three home procedures are recorded in part 2 but not counted among the assessment's procedures */   /* v23.48 (review F19) waiting practice (DT-1) apart from var */   /* v22.37 arrange (AD-1) and demand (DA-1) */
+const DECS=[['fa','Experimental analysis'],['ed','Food items'],['rec','Recording'],['sh','Sharing outside school'],['ij','Injury checks'],['wt','Practice with waiting']];   /* v25.65 (CARE-M10) the home video decision (hv) is checked on its own, beside its card */
 const VIA={sign:'a signature on this form',reeval:'the district reevaluation process',initial:'the district initial-evaluation process'};
 /* who may sign for an adult student: each answer to "Student is 18 or older" and the relationships that fit it */
 const ADULT={'Yes: student is the consenting party':['Adult student (18+)'],'Yes: guardian or guardian advocate appointed':['Legal guardian','Guardian advocate (adult student)'],'Yes: agent signs under student\u2019s power of attorney':['Agent (adult student\u2019s power of attorney)']};
@@ -1755,6 +1841,74 @@ function status(){icLegacy();const m=val('c.method'),stv=val('c.status'),sd=val(
  const current=state==='Current'||state==='Current, with exceptions';
  const covered=current?procs.filter(p=>(p!=='fa'||val('fa.dec')==='yes')&&(p!=='wait'||val('wt.dec')==='yes')):[];
  return {m,stv,dec,date,procs,covered,current,state,sub,issues,decs,decided,dist,sig};}
+/* ---- v25.65 (inside the form's own script). CARE-H7: the Plan procedures sheet: a decision for each part of the BIP (pp[0..9]),
+   filled from Form TD-1 where possible; teaching, rewards and prevention share one decision (pp.sh), and each extinction,
+   punishment, restrictive, or reinforces-on-purpose part has its own, never pre-set; signing (pp.sigdate) with a yes adds the
+   "Consent to implement the BIP" event. CARE-M11: assent for the plan and the re-check rule. CARE-M10: the home procedures and
+   the home video decision (in the markup and in PROCS and DECS). All new parts are named fields: a file saved before opens with
+   them empty, as before. ---- */
+var V65I_READY=false,V65_PPN=10;
+var V65_TYPES=[['',''],['reinforcement','Reinforcement (teaching, rewards)'],['antecedent','Antecedent (changes that prevent it)'],['extinction','EXTINCTION'],['punishment','PUNISHMENT'],['restrictive','RESTRICTIVE'],['option','OPTION: Reinforces problem behavior on purpose']];
+var v65t=function(v){return String(v==null?'':v).trim();};
+function v65PpDraw(){const tb=$('#v65Pp tbody');if(!tb||tb.children.length)return;
+  tb.innerHTML=Array.from({length:V65_PPN},(_,i)=>`<tr data-v65pp="${i}"><td class="c">${i+1}</td><td><textarea class="txt nbh-cell" rows="2" name="pp[${i}].desc" aria-label="Part ${i+1} of the plan"></textarea></td>`+
+    `<td><select name="pp[${i}].type" aria-label="Part ${i+1}: type">${V65_TYPES.map(([v,l])=>`<option value="${v}">${esc(l)}</option>`).join('')}</select><input class="txt v65bcba" name="pp[${i}].bcba" placeholder="BCBA sign-off and reason" aria-label="Part ${i+1}: BCBA sign-off and reason"></td>`+
+    `<td><textarea class="txt nbh-cell" rows="2" name="pp[${i}].risk" aria-label="Part ${i+1}: what could go wrong"></textarea></td><td><textarea class="txt nbh-cell" rows="2" name="pp[${i}].alt" aria-label="Part ${i+1}: alternative offered"></textarea></td>`+
+    `<td><select name="pp[${i}].dec" aria-label="Part ${i+1}: decision"><option value="">Decision</option><option value="yes">Yes</option><option value="no">No</option></select><span class="v65sh">covered by the shared decision below</span></td>`+
+    `<td><input class="txt" name="pp[${i}].init" aria-label="Part ${i+1}: initials"></td><td><input type="date" class="dt" name="pp[${i}].date" aria-label="Part ${i+1}: date"></td></tr>`).join('');}
+function v65PpRows(){const out=[];for(let i=0;i<V65_PPN;i++){const d=val(`pp[${i}].desc`),t=val(`pp[${i}].type`);if(!d&&!t)continue;out.push({i,d,t,risk:val(`pp[${i}].risk`),alt:val(`pp[${i}].alt`),dec:val(`pp[${i}].dec`),init:val(`pp[${i}].init`),date:val(`pp[${i}].date`),bcba:val(`pp[${i}].bcba`)});}return out;}
+var v65Own=function(t){return t==='extinction'||t==='punishment'||t==='restrictive'||t==='option';};
+function v65PpUpdate(){const P=v65PpRows(),out=[];
+  document.querySelectorAll('#v65Pp tr[data-v65pp]').forEach(tr=>{const i=+tr.dataset.v65pp,t=val(`pp[${i}].type`),own=v65Own(t);
+    tr.classList.toggle('v65own',own);tr.classList.toggle('v65shared',t==='reinforcement'||t==='antecedent');tr.classList.toggle('v65pun',t==='punishment');
+    const r=tr.querySelector('textarea[name$=".risk"]');if(r)r.placeholder=t==='extinction'?'In clinic studies, a short burst or new aggression happened in about a quarter to a half of cases, less often when extinction was one part of a package':t==='option'?'What it does, why, for how long, and what the data must show before it ends':t==='punishment'?'The behavior may rise briefly; other problem behavior may appear':'';});
+  if(P.some(p=>p.t==='extinction'))out.push('<div class="warn"><b>Extinction.</b> In clinic studies, a short burst or new aggression happened in about a quarter to a half of cases, less often when extinction was one part of a package (Lerman et al., 1999; Muething et al., 2024). <b>This plan never uses extinction alone:</b> it is always one part of a package that teaches and rewards another way to get the same thing.</div>');
+  P.filter(p=>p.t==='punishment'&&!p.bcba).forEach(p=>out.push('<div class="warn">Part '+(p.i+1)+' is a <b>punishment step</b>: it is never the default, and it needs the BCBA&rsquo;s sign-off and a reason (beside its type).</div>'));
+  P.filter(p=>p.t==='option'&&!/\bwhy|because|so that/i.test(p.d+' '+p.risk)).forEach(p=>out.push('<div class="warn">Part '+(p.i+1)+' is labelled <b>OPTION: Reinforces problem behavior on purpose:</b> say what it does, why, for how long, and what the data must show before it ends.</div>'));
+  P.filter(p=>/meal|feed|bite|spoon|food/i.test(p.d)&&(p.t==='restrictive'||/escape extinction|put.*back|guid/i.test(p.d))).forEach(p=>out.push('<div class="warn">Part '+(p.i+1)+': escape extinction at meals is a <b>RESTRICTIVE</b> step, with your written consent, planned with you, the doctor and a feeding specialist. The mouth is never forced open.</div>'));
+  P.filter(p=>v65Own(p.t)&&!p.dec).forEach(p=>out.push('<div class="warn">Part '+(p.i+1)+' ('+esc(V65_TYPES.find(x=>x[0]===p.t)[1])+') needs its own decision.</div>'));
+  P.filter(p=>v65Own(p.t)&&(p.dec==='yes'||p.dec==='no')&&(!p.init||!p.date)).forEach(p=>out.push('<div class="warn">Initial and date the decision on part '+(p.i+1)+'.</div>'));
+  if(P.some(p=>p.t==='reinforcement'||p.t==='antecedent')&&!val('pp.sh.dec'))out.push('<div class="warn">The shared decision for teaching, rewards and prevention is not made yet.</div>');
+  if(P.some(p=>!p.t))out.push('<div class="warn">Choose a type for every part.</div>');
+  const e=$('#v65PpV'),h=out.join('');if(e&&e.innerHTML!==h)e.innerHTML=h;}
+/* signing with a yes adds the event to the Consent record, once */
+function v65PpSigned(){const d=val('pp.sigdate');if(!d)return;const yes=val('pp.sh.dec')==='yes'||v65PpRows().some(p=>p.dec==='yes');if(!yes)return;
+  const EV='Consent to implement the BIP (plan adopted with the parent)',rows=$$('#logTbl tbody tr');
+  if(rows.some(tr=>{const a=tr.querySelector('input[type=date]'),s=tr.querySelector('select');return a&&s&&a.value===d&&s.value===EV;}))return;
+  let tr=rows.find(tr=>{const a=tr.querySelector('input[type=date]'),s=tr.querySelector('select'),t=tr.querySelector('input.txt');return a&&!a.value&&s&&!s.value&&t&&!t.value;});
+  if(!tr){const n=$('#nLog');if(+n.value>=+n.max)return;n.value=+n.value+1;renderLog();tr=$$('#logTbl tbody tr').pop();}
+  const ins=tr.querySelectorAll('input'),s=tr.querySelector('select');ins[0].value=d;s.value=EV;ins[1].value='Plan procedures sheet signed'+(val('pp.signame')?' by '+val('pp.signame'):'')+(val('pp.staff')?'; '+val('pp.staff'):'');
+  [ins[0],s,ins[1]].forEach(x=>{x.dispatchEvent(new Event('input',{bubbles:true}));x.dispatchEvent(new Event('change',{bubbles:true}));});
+  if(window.nbhUI&&nbhUI.toast)nbhUI.toast('“Consent to implement the BIP” is on the Consent record, dated '+d+'.',{kind:'ok'});}
+/* fill from Form TD-1: the plan's parts, typed by their names; nothing typed is replaced */
+var v65Plan=null;
+function v65Kind(n){n=String(n||'').toLowerCase();if(/(escape extinction|extinction).*(meal|bite|spoon|food).*escape extinction|restrain|time.?out|block/.test(n))return 'restrictive';if(/extinction|planned ignor/.test(n))return 'extinction';
+  if(/response cost|reprimand|overcorrect|punish|loss of/.test(n))return 'punishment';if(/reinforce the problem|\bcsa\b|competing stimulus|lean baseline/.test(n))return 'option';
+  if(/schedule|prime|choice|noncontingent|\bncr\b|high.?p|warning|visual|seat|proximity|curriculum|effort|setting|antecedent|pace|intersperse/.test(n))return 'antecedent';return 'reinforcement';}
+function v65PpFill(plan){plan=plan||v65Plan;const msg=$('#v65PpFillMsg');if(!plan){if(msg)msg.textContent='The plan from Form TD-1 is not in the case yet.';return 0;}
+  const L=[];(plan.antCards||[]).forEach(n=>L.push(n));(plan.teach||[]).forEach(n=>L.push(n));(plan.sched||[]).forEach(n=>L.push(n));
+  const r=plan.respond||{};if(v65t(r.target))L.push('When the behavior happens: '+v65t(r.target));
+  const have=v65PpRows().map(p=>p.d.toLowerCase());let n=0;
+  L.filter(x=>v65t(x)&&!have.includes(v65t(x).toLowerCase())).forEach(x=>{let i=-1;for(let k=0;k<V65_PPN;k++){if(!val(`pp[${k}].desc`)&&!val(`pp[${k}].type`)){i=k;break;}}if(i<0)return;
+    setv(`pp[${i}].desc`,v65t(x));setv(`pp[${i}].type`,v65Kind(x));n++;});
+  if(msg)msg.textContent=n?n+' part'+(n===1?'':'s')+' placed from Form TD-1; check each type and describe each in plain words.':'Nothing new to place from Form TD-1.';
+  v65PpUpdate();return n;}
+/* M11 */
+function v65AsUpdate(){const due=val('a.due'),last=[val('a.date'),val('ap.date')].filter(Boolean).sort().pop(),e=$('#v65AsV');let h='';
+  if(!due&&last)h='Set the next re-check: at every plan change, and at least each grading period.';
+  else if(due&&due<ymd(new Date()))h='<b>Assent re-check overdue</b> (due '+esc(due)+'): ask again, in the way the student communicates.';
+  if(val('ap.resp')==='no')h+=(h?' ':'')+'The student said no to the plan: honor it where you can, and say honestly what cannot be changed and why.';
+  if(e&&e.innerHTML!==h)e.innerHTML=h;}
+function v65HvUpdate(){const card=document.querySelector('[data-proc="homevideo"]');if(!card)return;let el=card.querySelector('.v65hvv');if(!el){el=document.createElement('div');el.className='v65hvv';card.appendChild(el);}
+  const d=val('hv.dec'),h=(d==='yes'||d==='no')&&(!val('hv.init')||!val('hv.date'))?'<div class="warn">Initial and date this decision.</div>':val('p.homeVideo')&&d!=='yes'?'<div class="warn">Home video or photos is checked in part 2 but not consented to here (H).</div>':'';if(el.innerHTML!==h)el.innerHTML=h;}
+function v65IcUpdate(){if(!V65I_READY)return;try{v65PpUpdate();v65AsUpdate();v65HvUpdate();}catch(e){}}
+document.addEventListener('input',v65IcUpdate);document.addEventListener('change',e=>{v65IcUpdate();if(e.target&&e.target.name==='pp.sigdate')v65PpSigned();
+  if(e.target&&/^pp\[\d+\]\.dec$|^pp\.sh\.dec$/.test(e.target.name||'')&&val('pp.sigdate'))v65PpSigned();});
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#v65PpFill'))v65PpFill();});
+window.__v65ic={fill:p=>{v65Plan=p||null;if(p&&!v65PpRows().length)return v65PpFill(p);return 0;},rows:()=>v65PpRows(),update:()=>v65IcUpdate()};
+v65PpDraw();V65I_READY=true;v65IcUpdate();
+/* ---- end of v25.65 ---- */
+{const v65rf=refresh;refresh=function(){const r=v65rf.apply(this,arguments);try{v65IcUpdate();}catch(e){}return r;};}   /* v25.65 the readings follow a restore */
 window.__ic1={status:()=>status(),val:k=>val(k)};   /* v22.37 for the case's consent record (ic1-case, below) */
 
 function refresh(){const s=status();
@@ -3290,6 +3444,28 @@ window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById
  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   let n=0;try{if(f&&f.student&&typeof f.student==='object')n=fill(f.student);}catch(e){n=0;}
   return n?{filled:(r&&r.filled||0)+n,note:[(r&&r.note)||'','the student\u2019s assent from Form SI-1'].filter(Boolean).join('; ')}:r;};})();
+</script>
+<style id="v2565-ic1-css">
+/* v25.65 (CARE-H7, M10, M11, L1) */
+#v65Pp textarea,#v65Pp input.txt,#v65Pp select{width:100%;box-sizing:border-box}
+#v65Pp .v65bcba,#v65Pp .v65sh{display:none}#v65Pp tr.v65pun .v65bcba{display:block;margin-top:3px}
+#v65Pp tr.v65shared .v65sh{display:block;font-size:11px;color:#46606b}#v65Pp tr.v65shared select[name$=".dec"]{display:none}
+#v65Pp tr.v65own td:nth-child(3) select{font-weight:600;color:#8e2a2a}
+#v65Tb select{width:100%}
+.v65no{border-left:3px solid #9B4E15;padding-left:8px}
+</style>
+<script id="v2565-ic1">
+/* v25.65 (CARE-H7, M10) the case: in, the plan's parts from Form TD-1 onto the Plan procedures sheet when it is empty; out, the home
+   procedures, the home video decision and the plan's parts with their decisions, for Form HD-1, Form CT-1 and the plan review */
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let n=0;try{if(window.__v65ic&&f&&f.plan)n=window.__v65ic.fill(f.plan)||0;}catch(e){n=0;}
+  return n?{filled:(r&&r.filled||0)+n,note:[(r&&r.note)||'','the plan\u2019s parts from Form TD-1 on the Plan procedures sheet'].filter(Boolean).join('; ')}:r;};
+ const wo=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=wo?wo.apply(this,arguments):null;}catch(e){o=null;}
+  try{const I=window.__ic1;if(!I||!o||!o.consent)return o;const v=k=>String(I.val(k)||'').trim(),c=o.consent;
+   c.home={data:!!v('p.homeData'),train:!!v('p.homeTrain'),video:!!v('p.homeVideo'),videoDec:v('hv.dec'),photos:!!v('hv.photo'),calls:!!v('hv.call'),stored:!!v('hv.store'),date:v('hv.date')};
+   if(c.dec)c.dec.hv={dec:v('hv.dec'),photo:!!v('hv.photo'),call:!!v('hv.call'),store:!!v('hv.store'),who:v('hv.who'),date:v('hv.date')};
+   const P=window.__v65ic?window.__v65ic.rows():[];if(P.length)c.planProcs={shared:v('pp.sh.dec'),signed:v('pp.sigdate'),parts:P.map(p=>({desc:p.d,type:p.t,dec:p.t==='reinforcement'||p.t==='antecedent'?v('pp.sh.dec'):p.dec}))};}catch(e){}
+  return o;};})();
 </script>
 <script id="fx2-v2492-js">
 /* v24.92 Forms DM-1, IC-1 and RR-1 on screen (the 10/28 design review); v24.95 the six forms refined from the BCBA's
