@@ -40,8 +40,9 @@ const dir=L.ROOT+'/NBH-Workstation/',file=pre=>fs.readdirSync(dir).find(f=>f.sta
   const gi=lay.hs.indexOf('Generalization and Maintenance'),ri=lay.hs.indexOf('Relapse Safeguards'),si=lay.hs.indexOf('Social Validity and Acceptability');
   ok('TD-1 the plan has Relapse Safeguards between Generalization and Maintenance and Social Validity, with item H.5 of the BCBA Test Content Outline (6th ed.)',
     gi>=0&&ri===gi+1&&si===ri+1&&/BCBA Test Content Outline \(6th ed\.\) item H\.5: plan for and attempt to mitigate possible relapse of the target behavior/.test(lay.text),{hs:lay.hs});
-  ok('TD-1 ten safeguards, each with its evidence as the review grades it, a box for the changes ahead, and the review cited',
-    lay.boxes.join()==='rl.sd,rl.common,rl.multi,rl.value,rl.more,rl.dra,rl.brief,rl.integ,rl.ncr,rl.break'&&lay.tags.length===10&&lay.tags.every(t=>/^(Clinical studies|Early studies|Mixed results|Not yet tested|Practice)$/.test(t))&&lay.note&&
+  /* v25.67 (BC-RM-M2, batch 3) an eleventh: the replacement response goes everywhere (the card in every setting), last */
+  ok('TD-1 eleven safeguards, each with its evidence as the review grades it, a box for the changes ahead, and the review cited',
+    lay.boxes.join()==='rl.sd,rl.common,rl.multi,rl.value,rl.more,rl.dra,rl.brief,rl.integ,rl.ncr,rl.break,rl.card'&&lay.tags.length===11&&lay.tags.every(t=>/^(Clinical studies|Early studies|Mixed results|Not yet tested|Practice)$/.test(t))&&lay.note&&
     /Kimball, Greer, Fuhrman, and Lambert \(2023\)/.test(lay.text)&&/a mean of 81% less/.test(lay.text)&&/only 29% of FCT studies/.test(lay.text),{boxes:lay.boxes,tags:lay.tags});
   ok('TD-1 an empty plan: the four moments with the review\'s numbers, none marked as met, no "fits this plan" chip; a link to Form RM-1 (a file of the workstation, a new tab standalone)',
     lay.moments.map(m=>m.k).join()==='resurgence,renewal,reinstatement,recovery'&&lay.moments.every(m=>!m.on)&&/76%–91%/.test(lay.moments[0].t)&&/59%–67%/.test(lay.moments[1].t)&&/24%–42%/.test(lay.moments[1].t)&&
