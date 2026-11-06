@@ -1856,6 +1856,9 @@ html.td9:not(.nbh-pr-measure) .sheet .defs .dval > label .nbh-eg{margin-left:2px
   <div class="bar nbh-band">Final Treatment Plan: Step by Step</div>
   <p class="method noprint" style="margin:0 0 8px">Compiled from every component card and selection in the form, in the order staff will use them. Edit the steps on the build sheet; this sheet re-reads them when opened or printed. Use "Print final plan only" in the toolbar to print just this sheet.</p>
   <div class="warn td-fnwarn" id="tdFnWarnFinal" hidden></div>
+  <!-- v25.68 (research #14) the quality check before sign-off: eight items read from the plan, shown before Copy, Print and
+       adoption, never blocking; screen only (td1-v2568-qc) -->
+  <section class="td-qc noprint" id="tdQc" aria-labelledby="tdQcH" hidden></section>
   <div id="finalHead"></div>
   <div id="td83Final"></div>   <!-- v21.83 (M): every target in the plan, its definition, function and the parts that address it -->
   <input type="hidden" name="fin.steps">   <!-- v22.46 (I232): the BCBA's changes to the step list (Final plan) -->
@@ -1895,6 +1898,7 @@ html.td9:not(.nbh-pr-measure) .sheet .defs .dval > label .nbh-eg{margin-left:2px
       <div class="drow"><div class="dlab">Interpreter needed</div><div class="dval" style="padding:4px 8px"><select name="cn.interp" class="inline" aria-label="Interpreter needed"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
       <div class="drow"><div class="dlab">The student&rsquo;s treatment preference</div><div class="dval"><textarea name="cn.pref" rows="2" placeholder="What the student wants from the plan, in the student's words (Form SI-1)"></textarea></div></div>
     </div>
+    <div class="td-qc-adopt noprint" id="tdQcAdopt" hidden></div>
     <div class="plan-group">Adopted by the team</div>
     <div id="td82Notice" class="warn noprint td82-notice" role="status" aria-live="polite" hidden></div>
     <div class="defs">
@@ -6846,6 +6850,55 @@ ol.steps li.opt{color:#4a3a6b;background:#f3f0fa;border-radius:6px;padding:2px 6
 .tan{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--nbh-navy,#182e43)}
 .steps.ta{margin-top:3px}
 .tanote{font-size:12px;color:var(--nbh-muted,#54676f);border-left:3px solid var(--nbh-teal,#76a2a3);padding:4px 10px;margin-top:8px}
+/* v25.68 versions from the studies: the bar (chips, filters, Side by side), What's different, the two columns */
+.vh-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.vers{margin:10px 0 12px;padding:10px 12px 8px;border:1px solid var(--nbh-rule,#cfdad8);border-radius:8px;background:var(--nbh-shade,#f5f8f7)}
+.vhd{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin:0 0 8px}
+.vt{margin:0;font-size:13.5px;font-weight:700;color:var(--nbh-navy,#182e43)}
+.vcnt{font-size:12px;color:var(--nbh-muted,#54676f)}
+.vfil{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.vf{padding:5px 12px;border-radius:999px;font-weight:500;font-size:12.5px}
+.vf[aria-pressed=true],.vf[aria-pressed=true]:hover,.vsbs[aria-pressed=true],.vsbs[aria-pressed=true]:hover{background:var(--nbh-slate,#254657);border-color:var(--nbh-slate,#254657);color:#fff}
+.vchips{display:flex;gap:8px;margin:0;padding:2px 2px 8px;list-style:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+.vchips li{flex:none;scroll-snap-align:start;margin:0}
+.vchip{display:block;min-height:44px;max-width:232px;padding:6px 11px;border-radius:8px;text-align:left;font-weight:400;font-size:12.5px;line-height:1.3}
+.vchip .vc{display:block;font-weight:600;color:var(--nbh-navy,#182e43);white-space:nowrap}
+.vchip .vbh{font-weight:400;color:var(--nbh-muted,#54676f)}
+.vchip .vs{display:block;max-width:208px;color:var(--nbh-muted,#54676f);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip[aria-current=true],.vchip[aria-current=true]:hover{background:var(--nbh-mist,#eaf2f0);border-color:var(--nbh-slate,#254657);box-shadow:inset 0 0 0 2px var(--nbh-slate,#254657)}
+.vtools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.vnote{font-size:12.5px;color:var(--nbh-muted,#54676f)}
+.vdiff{margin:0 0 12px}
+.vdiff>.vh{margin-top:4px}
+.vtw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--nbh-rule,#cfdad8);border-radius:6px;margin:6px 0 0;background:#fff}
+.vtw:focus-visible{outline:3px solid var(--nbh-focus,#2f7fa8);outline-offset:2px}
+.vtab{border-collapse:collapse;width:100%;font-size:13px;line-height:1.45}
+.vtab.v3{min-width:600px}
+.vtab th,.vtab td{padding:7px 9px;border-bottom:1px solid var(--nbh-rule,#cfdad8);text-align:left;vertical-align:top;overflow-wrap:break-word}
+.vtab tbody tr:last-child>*{border-bottom:0}
+.vtab thead th,.vtab thead td{background:var(--nbh-mist,#eaf2f0);font-size:12px;font-weight:600;color:var(--nbh-navy,#182e43)}
+.vtab tbody th{width:150px;font-weight:500;font-size:12px;color:var(--nbh-muted,#54676f)}
+.vtab tr.vd td.vcur{background:#fff5df;box-shadow:inset 3px 0 0 #c9971f}
+.vtab .vdm{color:#9a6b00}
+.vq{display:block;margin-top:3px;font-size:11.5px;font-style:italic;color:var(--nbh-muted,#54676f)}
+.vsame{margin:6px 0 0;font-size:12px;line-height:1.5;color:var(--nbh-muted,#54676f)}
+.vidln{flex:1 1 100%;margin:0;font-size:12.5px;line-height:1.45;color:var(--nbh-muted,#54676f)}
+.vsbs2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:18px;row-gap:6px;margin:4px 0 0;scroll-margin-top:84px}
+.vcolhd:focus{outline:none}.vcolhd:focus-visible{outline:3px solid var(--nbh-focus,#2f7fa8);outline-offset:2px}
+.vpane{display:grid;grid-template-rows:subgrid;min-width:0}
+.vpane>*{min-width:0}
+.vpane>.load{align-self:start}
+.vpane .vh:first-child{margin-top:6px}
+.vcolhd{margin:0;font-family:var(--nbh-serif,"Iowan Old Style",Palatino,Georgia,serif);font-size:15px;font-weight:600;color:var(--nbh-navy,#182e43)}
+.vcolsub{margin:1px 0 0;font-size:12px;color:var(--nbh-muted,#54676f)}
+.vcolt{margin:2px 0 0;font-size:12.5px;font-weight:600;color:var(--nbh-ink,#1a2933)}
+ol.vsteps{display:grid;grid-template-rows:subgrid;margin:0;padding:0;list-style:none;counter-reset:vs;font-size:13px;line-height:1.5}
+ol.vsteps li{counter-increment:vs;position:relative;margin:0;padding-left:24px}
+ol.vsteps li::before{content:counter(vs) ".";position:absolute;left:0;top:0;font-variant-numeric:tabular-nums;font-weight:600;color:var(--nbh-navy,#182e43)}
+ol.vsteps li.pun::before,ol.vsteps li.opt::before{left:6px}
+@supports not (grid-template-rows:subgrid){.vpane,ol.vsteps{display:block}ol.vsteps li{margin:0 0 6px}}
+@media (max-width:999px){.vsbs2,.vpane,ol.vsteps{display:block}ol.vsteps li{margin:0 0 6px}.vpane+.vpane{margin-top:18px;padding-top:14px;border-top:2px solid var(--nbh-rule,#cfdad8)}}
+@media (max-width:600px){.vtab tbody th{width:110px}}
 `;
 /* v23.85 (the BCBA's request) the protocol bank: treatment protocols written from published studies (the BCBA's volumes of
    Behavior Analysis in Practice and the Journal of Applied Behavior Analysis). TD1_BANK (the script element "td1-pbank")
@@ -6965,12 +7018,88 @@ function bankRule(p){
  if(B65_RAPID.includes(p.id))return `<p class="rulenote"><b>Rapid eating: try these in order.</b> First, pre-cut portions, one piece on the plate at a time, and the utensil down between bites with praise (Epstein et al., 1976). ${b65Show('dri-utensil-down-pacing','Show it')} Next, a vibrating pager or timer cue for each bite, faded by lowering the vibration strength, not by spacing the cues further apart (Anglesea et al., 2008; Valentino et al., 2018). ${b65Show('s_drl-pager-paced-bites','Show the pager cue')} ${b65Show('p_sf-pager-intensity-pacing','Show fading by strength')} The target is the time between bites (meal minutes divided by bites). Blocking an early bite is marked RESTRICTIVE: it is not one of the first steps, and it needs district review and written consent. Staff at this meal are trained in choking first aid.</p>`;
  if(B65_TEX.has(p.id))return `<p class="rulenote"><b>Texture and bite size come from the SLP or the feeding team</b> (Form FD-1, with the prescriber and the date). The plan serves only those, and a texture or bite-size step goes up only when the SLP or the feeding team writes the next step. Steps marked RESTRICTIVE (escape extinction at meals) need written consent, planned with the family, the doctor and a feeding specialist (TD-1’s escape-extinction consent block).</p>`;
  return '';}
-function show(id){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
+/* v25.68 (the BCBA, 11/6, the approved mockup) Versions from the studies. A card whose component has two or more cards in the
+   bank shows, under its title, a bar: one chip per card (its study and a short line of what is special about it), oldest
+   first; filters, each shown only when it matches a card of that component; the card opened stays marked "started here",
+   and a chip shows its card (Add to the plan then adds that one) while the bar keeps the card it started from. What's
+   different: for the high-probability request sequence, the rows each card's own steps give (cmp, written into the bank
+   with the step each value came from); for the other components the rows the bank holds (the card's settings, the study,
+   ages, function), with a note that the detailed rows are written for the high-p sequence so far. Side by side: the two
+   versions in two columns, their sections and steps lined up (one column under 1000 px), each with Add this version to
+   the plan, which adds that card exactly as Add to the plan does. Start from this version moves "started here". Nothing
+   of it is saved: the bar, the filter and the columns are the panel's own state. */
+let base='',two=false,vfilt='all';
+const PCODE={};ok.forEach(p=>{(PCODE[p.code]=PCODE[p.code]||[]).push(p);});
+const yearOf=p=>{const y=p.cmp&&+p.cmp.year;if(y)return y;const m=/\b(1[89]\d\d|20\d\d)/.exec(cites(p).join(' '));return m?+m[1]:9999;};
+const versOf=p=>(PCODE[p.code]||[]).map((x,i)=>[x,yearOf(x),i]).sort((a,b)=>a[1]-b[1]||a[2]-b[2]).map(x=>x[0]);
+const vCite=p=>(p.cmp&&p.cmp.cite)||cites(p).join('; ')||p.lab;
+const vSpecial=p=>(p.cmp&&p.cmp.special)||p.lab;
+const VF=[['all','All'],['escape','Escape-maintained'],['edible','Snack or item after each'],['praise','Praise only'],['school','School or classroom'],['food','Feeding']];
+const VTREAT=/edible|snack|item|food|treat|token|video|toy|candy|cereal|chip/;
+function vMatch(p,f){if(f==='all')return true;const c=p.cmp,t=String((c&&c.easy_reinforcer)||'').toLowerCase(),w=(c?(c.who||'')+' '+(c.special||''):(p.beh||'')).toLowerCase();
+ if(f==='escape')return c?/escape/i.test(c.fn||''):!!(p.fn&&p.fn.includes('escape'));
+ if(f==='edible')return !!c&&VTREAT.test(t)&&!/^praise only/.test(t);
+ if(f==='praise')return !!c&&/\bpraise\b/.test(t)&&!VTREAT.test(t)&&!/reinforcer/.test(t);
+ if(f==='school')return /school|class|preschool|teacher/.test(w);
+ if(f==='food')return /food|bite|feed|meal/.test(w+' '+String(p.lab||'').toLowerCase());
+ return true;}
+const CROWS=[['n_easy','Easy requests'],['spacing','Time between them'],['easy_reinforcer','After each easy one'],['to_hard','The hard request comes'],['missed_easy','If an easy one is missed'],['hard_reinforcer','After the hard one'],['extinction','Escape extinction'],['order','Order'],['fading','Fading'],['who','Studied with']];
+const vnorm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+/* the rows to compare: both cards' own comparison rows (cmp), else the rows the bank holds for every card */
+function vRows(a,b){if(a.cmp&&b.cmp)return {cmp:true,rows:CROWS.map(([k,l])=>({l,a:a.cmp[k],b:b.cmp[k],qa:a.cmp.quotes&&a.cmp.quotes[k],qb:b.cmp.quotes&&b.cmp.quotes[k]}))};
+ const L=LIBOF[a.code],ks=L.params.map(x=>x[0]).filter(k=>(a.params&&a.params[k])||(b.params&&b.params[k]));
+ const fnL=p=>fnWords(p)==='any function'?'Any function':fnWords(p).replace(/^./,c=>c.toUpperCase());
+ return {cmp:false,rows:ks.map(k=>({l:k,a:(a.params||{})[k]||'Not given',b:(b.params||{})[k]||'Not given'})).concat([{l:'The study',a:vCite(a),b:vCite(b)},{l:'In the study',a:a.beh,b:b.beh},{l:'Ages',a:a.age||'Not given',b:b.age||'Not given'},{l:'Function',a:fnL(a),b:fnL(b)}])};}
+const vDiffN=(a,b)=>a.id===b.id?0:vRows(a,b).rows.filter(r=>vnorm(r.a)!==vnorm(r.b)).length;
+function vBar(p){const V=versOf(p);if(V.length<2)return '';const b=byId[base]||p;
+ const fl=VF.filter(([k])=>k==='all'||V.some(x=>vMatch(x,k)));if(!fl.some(x=>x[0]===vfilt))vfilt='all';
+ const shown=V.filter(x=>vMatch(x,vfilt)||x.id===cur||x.id===base);
+ const chips=shown.map(x=>`<li><button type="button" class="vchip${x.id===base?' vbase':''}" data-v="${esc(x.id)}" aria-current="${x.id===cur?'true':'false'}" title="${esc(x.lab)}"><span class="vc">${esc(vCite(x))}${x.id===base?'<span class="vbh"> · started here</span>':''}</span><span class="vs">${esc(vSpecial(x))}</span></button></li>`).join('');
+ return `<section class="vers" aria-labelledby="tdVersH"><div class="vhd"><h5 class="vt" id="tdVersH">Versions from the studies</h5><span class="vcnt">${shown.length} of ${V.length} shown, oldest first</span></div>`+
+  (fl.length>1?`<div class="vfil" role="group" aria-label="Show versions">${fl.map(([k,l])=>`<button type="button" class="vf" data-vf="${k}" aria-pressed="${k===vfilt?'true':'false'}">${esc(l)}</button>`).join('')}</div>`:'')+
+  `<ul class="vchips" role="list" aria-label="Versions from the studies, oldest first">${chips}</ul>`+
+  `<div class="vtools"><button type="button" class="vsbs" aria-pressed="${two&&cur!==base?'true':'false'}"${cur===base?' disabled':''}>Side by side</button><button type="button" class="vre"${cur===base?' disabled':''}>Start from this version</button><span class="vnote">${cur===base?'Pick a study to compare.':'Comparing with '+esc(vCite(b))+'.'}</span></div></section>`;}
+function vTable(a,b){const same=a.id===b.id,R=vRows(a,b);let nd=0;
+ const cell=(v,q)=>esc(v||'Not stated')+(q?'<span class="vq">“'+esc(q.length>220?q.slice(0,217)+'…':q)+'”</span>':'');
+ const body=R.rows.map(r=>{const d=!same&&vnorm(r.a)!==vnorm(r.b);if(d)nd++;
+  return `<tr${d?' class="vd"':''}><th scope="row">${esc(r.l)}${d?'<span class="vdm" aria-hidden="true"> ●</span><span class="vh-sr"> (differs)</span>':''}</th><td>${cell(r.a,r.qa)}</td>${same?'':`<td class="vcur">${cell(r.b,r.qb)}</td>`}</tr>`;}).join('');
+ const title=same?'This version at a glance':'What’s different ('+nd+' of '+R.rows.length+' rows)';
+ const note=(same?'Tap another study above to compare it with this one.':nd?'Shaded rows differ. Unshaded rows say the same thing in both cards.':'These two versions say the same thing on every row.')+(R.cmp?'':' The detailed comparison rows are written for the high-probability request sequence so far.');
+ return `<section class="vdiff" aria-labelledby="tdVdH"><div class="vh" id="tdVdH">${esc(title)}</div><div class="vtw" role="region" aria-labelledby="tdVdH" tabindex="0"><table class="vtab${same?'':' v3'}"><thead><tr><td></td><th scope="col">${esc('Started from: '+vCite(a))}</th>${same?'':`<th scope="col">${esc('This version: '+vCite(b))}</th>`}</tr></thead><tbody>${body}</tbody></table></div><p class="vsame">${esc(note)}</p></section>`;}
+/* the buttons a card's detail carries (Add to the plan, Show me, Watch the video with its line), in the panel and in each column */
+function loadHtml(p,label){const V=window.__tdVideo,vl=V&&V.has(p.id)&&V.line?V.line(p.id):'';
+ return `<div class="load" data-id="${esc(p.id)}"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':`<button type="button" class="add primary">${esc(label||'Add to the plan')}</button>`}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${V&&V.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div>${vl?`<p class="vidln">${esc(vl)}</p>`:''}${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}${hasOpt(p)?'<label class="optpick"><input type="checkbox" class="optck"> Include the optional step: it reinforces problem behavior on purpose</label><p class="optnote">This study reinforced the problem behavior on purpose in one step, marked OPTION below; the step says what it does, why the study did it and when it ends. It is left off the card unless you tick the box. If you use it, run it only with a safety plan for the behavior and end it as soon as its own criterion is met.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>`;}
+const stepLi=s=>'<li'+(PUN.test(s)?' class="pun"':OPT.test(s)?' class="opt"':'')+'>'+esc(tdW(s))+'</li>';
+const refsHtml=p=>'<ul class="refs">'+(p.src||[]).map(k=>REF[k]).filter(Boolean).map(r=>`<li>${esc(r.apa)}${r.doi?` <a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener noreferrer">https://doi.org/${esc(r.doi)}</a>`:''}</li>`).join('')+'</ul>';
+/* one column of Side by side: rows the other column shares (heading, buttons, the study, settings, the steps heading, one row
+   per step, what happened), so on a wide screen the two line up */
+function vPane(p,label,M){const L=LIBOF[p.code],prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
+ return `<div class="vpane" role="group" aria-label="${esc(label+': '+vCite(p))}" style="grid-row:1 / span ${6+M}"><div class="vph"><p class="vcolhd">${esc(label)}</p><p class="vcolsub">${esc([vCite(p),p.cmp&&p.cmp.who?p.cmp.who:p.age].filter(Boolean).join(' · '))}</p><p class="vcolt">${esc(p.lab)}</p></div>`+
+  loadHtml(p,'Add this version to the plan')+
+  `<div><div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p></div>`+
+  `<div><div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div></div>`+
+  `<div><div class="vh">Steps for staff</div>${bankRule(p)}${tdWhoNote()}</div>`+
+  `<ol class="vsteps" role="list" style="grid-row:span ${M}">${(p.steps||[]).map(stepLi).join('')}</ol>`+
+  `<div><div class="vh">What happened in the study</div><p class="tx">${esc(p.result)}</p><div class="vh">Sources</div>${refsHtml(p)}</div></div>`;}
+/* keep and announce: a re-drawn bar keeps its chips' scroll and the focus on the control that was used */
+const vMotion=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';}catch(e){return 'auto';}};   /* no smooth scroll when reduced motion is asked for */
+const vLive=document.createElement('p');vLive.className='vh-sr';vLive.setAttribute('aria-live','polite');$p('.body').appendChild(vLive);
+function vSay(t){if(!vLive)return;vLive.textContent='';setTimeout(()=>{vLive.textContent=t;},60);}
+let vKeep=false;
+function vRender(focus){const ch=det.querySelector('.vchips'),sl=ch?ch.scrollLeft:0;vKeep=true;try{show(cur,true);}finally{vKeep=false;}const ch2=det.querySelector('.vchips');if(ch2)ch2.scrollLeft=sl;
+ const f=focus?det.querySelector(focus):null;if(f){try{f.focus({preventScroll:true});}catch(e){}try{if(f.classList.contains('vchip'))f.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){}}}
+function vPick(id){const p=byId[id],b=byId[base];if(!p)return;cur=id;vRender('.vchip[aria-current="true"]');
+ if(!b||b.id===p.id){vSay('Showing '+vCite(p)+', the version this started from.');return;}
+ vSay('Showing '+vCite(p)+': '+p.lab+'. '+vDiffN(b,p)+' of '+vRows(b,p).rows.length+' rows differ from '+vCite(b)+'.');}
+function show(id,keep){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
+  if(!cur){base='';two=false;}else if(!keep||!byId[base]||byId[base].code!==p.code){base=cur;two=false;vfilt='all';}
   listEl.querySelectorAll('.it').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===cur?'true':'false'));
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
-  det.innerHTML=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>
-<div class="load"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':'<button type="button" class="add primary">Add to the plan</button>'}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${window.__tdVideo&&window.__tdVideo.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div>${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}${hasOpt(p)?'<label class="optpick"><input type="checkbox" class="optck"> Include the optional step: it reinforces problem behavior on purpose</label><p class="optnote">This study reinforced the problem behavior on purpose in one step, marked OPTION below; the step says what it does, why the study did it and when it ends. It is left off the card unless you tick the box. If you use it, run it only with a safety plan for the behavior and end it as soon as its own criterion is met.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
+  const bar=vBar(p),bp=byId[base]||p,head=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>`+(bar?bar+vTable(bp,p):'');
+  if(!vKeep)setTimeout(()=>{const ch=det.querySelector('.vchips'),cc=ch&&ch.querySelector('.vchip[aria-current="true"]');if(ch&&cc){const d0=cc.getBoundingClientRect().left-ch.getBoundingClientRect().left;if(d0<0||d0+cc.offsetWidth>ch.clientWidth)ch.scrollLeft+=d0-8;}},0);   /* the card opened shows in the bar */
+  if(bar&&two&&bp.id!==p.id){const M=Math.max(1,(bp.steps||[]).length,(p.steps||[]).length);det.innerHTML=head+`<div class="vsbs2">${vPane(bp,'Started from',M)}${vPane(p,'This version',M)}</div>`;sameNote();return;}
+  det.innerHTML=head+loadHtml(p)+`
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
 <div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div>
 <div class="vh">Steps for staff</div>${bankRule(p)}${tdWhoNote()}<ol class="steps">${(p.steps||[]).map(s=>'<li'+(PUN.test(s)?' class="pun"':OPT.test(s)?' class="opt"':'')+'>'+esc(tdW(s))+'</li>').join('')}</ol>
@@ -6980,16 +7109,17 @@ ${p.ta&&p.ta.length?`<div class="vh">The student’s task analysis, as the study
 ${p.note?`<div class="cn"><div class="cnh">Clinical note <span>shown here only: not added, not printed</span></div><div class="ct">${esc(p.note)}</div></div>`:''}
 <div class="vh">Sources</div><ul class="refs">${refs.map(r=>`<li>${esc(r.apa)}${r.doi?` <a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener noreferrer">https://doi.org/${esc(r.doi)}</a>`:''}</li>`).join('')}</ul>`;
   sameNote();}
-window.__tdBankRedraw=()=>{if(cur)show(cur);};window.__tdBankShow=id=>{show(id);};
-function sameNote(){const p=byId[cur],box=$p('.same');if(!p||!box)return;const n=sameCards(p).length;box.hidden=!n;
-  box.textContent=n?'This plan already has '+(n===1?'a':n)+' '+comp(p)+' card'+(n===1?'':'s')+'. Add to the plan asks whether to replace that card’s steps and settings or to add a second card.':'';}
+window.__tdBankRedraw=()=>{if(cur)show(cur,true);};window.__tdBankShow=id=>{show(id);};
+/* v25.68 each .load (the detail's, or one per column in Side by side) carries its card's id, its own note and status */
+function sameNote(){det.querySelectorAll('.load').forEach(ld=>{const p=byId[ld.dataset.id],box=ld.querySelector('.same');if(!p||!box)return;const n=sameCards(p).length;box.hidden=!n;
+  box.textContent=n?'This plan already has '+(n===1?'a':n)+' '+comp(p)+' card'+(n===1?'':'s')+'. Add to the plan asks whether to replace that card’s steps and settings or to add a second card.':'';});}
 /* v23.88 (screen E) a protocol for a component already in the plan: replace that card's steps and settings (its number, who/when/where,
    Data and Materials kept) or add a second card; Undo puts the replaced words back */
 function replaceInto(p,c){const L=LIBOF[p.code],i=c.dataset.i,put={},was={};const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el)return;was[n]=el.value;el.value=v==null?'':v;put[n]=el.value;fire(el);};
   const lis=c.querySelectorAll('ol.steps li');const steps=stepsOf(p);steps.forEach((s,k)=>{if(k<lis.length)set('cp['+i+'].s'+k,tdW(s));});for(let k=steps.length;k<lis.length;k++)set('cp['+i+'].s'+k,'');
   L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});if(p.ta)set('cp['+i+'].ta',taText(p));set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',srcOf(p));
   {const sh=c.querySelector('input.td-suov');if(sh&&sh.value){sh.value='';sh.dispatchEvent(new Event('change',{bubbles:true}));}}try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}return {c,i,put,was,replaced:true};}
-function askSame(p,then){const box=$p('.same');if(!box)return then('add');const n=sameCards(p).length;
+function askSame(p,then,ld){const box=(ld||det).querySelector('.same');if(!box)return then('add');const n=sameCards(p).length;
   box.hidden=false;box.innerHTML='';const b=document.createElement('b');b.textContent='This plan already has '+(n===1?'a':n)+' '+comp(p)+' card. Add the protocol '+p.lab+' as:';box.appendChild(b);
   const mk=(t,v,primary)=>{const x=document.createElement('button');x.type='button';x.className='lnk td-ask'+(primary?' primary':'');x.textContent=t;x.addEventListener('click',()=>{box.innerHTML='';then(v);});return x;};
   const wrap=document.createElement('div');wrap.className='td-askrow';wrap.append(mk('Replace that card’s steps and settings','replace',true),mk('Add a second '+comp(p)+' card','add'),mk('Cancel','cancel'));box.appendChild(wrap);
@@ -7014,25 +7144,41 @@ function undo(){if(!undoRec)return false;const {c,put,was,replaced}=undoRec;undo
   if(replaced){if(Object.keys(put).some(n=>{const el=document.querySelector('[name="'+n+'"]');return el&&el.value!==put[n];}))return false;Object.keys(was).forEach(n=>{const el=document.querySelector('[name="'+n+'"]');if(el){el.value=was[n];fire(el);}});try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}return true;}
   if(Object.keys(put).some(n=>{const el=document.querySelector('[name="'+n+'"]');return el&&el.value!==put[n];}))return false;
   const rm=c.querySelector('[data-rm]');if(rm)rm.click();else c.remove();return true;}
-function say(node){const s=$p('.st');if(!s)return;s.hidden=false;s.textContent='';s.append(...node);}
+function say(node,ld){const s=(ld||det).querySelector('.st');if(!s)return;s.hidden=false;s.textContent='';s.append(...node);}
 function goTo(c){try{c.scrollIntoView({block:'start',behavior:'smooth'});}catch(x){c.scrollIntoView();}
   const el=c.querySelector('textarea');if(el)setTimeout(()=>{try{el.focus({preventScroll:true});}catch(x){}},350);}
-function doAdd(){const p=byId[cur];if(!p)return;const same=sameCards(p);if(same.length&&!doAdd.how){askSame(p,how=>{if(how==='cancel'){sameNote();return;}doAdd.how=how;try{doAdd();}finally{doAdd.how='';}});return;}
+/* v25.68 the card to add and the .load it was asked from (a column of Side by side adds its own card the same way) */
+function doAdd(p,ld){p=p||byId[cur];if(!p)return;const same=sameCards(p);if(same.length&&!doAdd.how){askSame(p,how=>{if(how==='cancel'){sameNote();return;}doAdd.how=how;try{doAdd(p,ld);}finally{doAdd.how='';}},ld);return;}
   const how=doAdd.how||'add';const r=how==='replace'?replaceInto(p,same[0]):add(p);
-  if(!r){say([document.createTextNode('This protocol could not be added: its component is not on this form.')]);return;}
+  if(!r){say([document.createTextNode('This protocol could not be added: its component is not on this form.')],ld);return;}
   undoRec=r;sameNote();
   const b=document.createElement('b');b.textContent=(r.replaced?'Replaced the steps and settings of the '+comp(p)+' card with: ':'Added to the plan: ')+p.lab+(r.replaced?'.':', as a '+comp(p)+' card.');
   const go=document.createElement('button');go.type='button';go.className='lnk';go.textContent='Go to the card';go.addEventListener('click',()=>goTo(r.c));
   const u=document.createElement('button');u.type='button';u.className='lnk';u.textContent=r.replaced?'Undo the replace':'Undo the add';
-  u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.']);});
+  u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.'],ld);});
   const pn=(hasPun(p)?(withPun?' The punishment steps are on the card, labeled: they need district review and written consent before they are used.':' The punishment steps were left off.'):'')+(hasOpt(p)?(withOpt?' The optional step that reinforces problem behavior on purpose is on the card, marked OPTION: run it only with a safety plan.':' The optional step that reinforces problem behavior on purpose was left off.'):'');
-  say([b,pn,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u]);}
+  say([b,pn,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u],ld);}
 q.addEventListener('input',draw);kind.addEventListener('change',draw);fn.addEventListener('change',()=>{fnTouched=true;draw();});age.addEventListener('change',()=>{ageTouched=true;draw();});
 d.addEventListener('toggle',()=>{if(d.open){try{ageFill();fnFill();draw();}catch(x){}}});   /* v24.30 the filters follow the plan and the case when the bank opens */
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});
 listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);
-  try{($p('.load')||det).scrollIntoView({block:'nearest',behavior:'smooth'});}catch(x){}});
-det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('td-bshow')){show(b.dataset.show);return;}if(b&&b.classList.contains('add')){withPun=b.dataset.pun==='1';const ok=det.querySelector('.optck');withOpt=!!(ok&&ok.checked);doAdd();}else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);else if(b&&b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(cur,b);});
+  try{(det.querySelector('.vers')?det:($p('.load')||det)).scrollIntoView({block:det.querySelector('.vers')?'start':'nearest',behavior:vMotion()});}catch(x){}});
+det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
+  /* v25.68 the versions bar: a chip shows its card; a filter narrows the chips; Side by side; Start from this version */
+  if(b.classList.contains('vchip')){vPick(b.dataset.v);return;}
+  if(b.classList.contains('vf')){vfilt=b.dataset.vf;vRender('.vf[data-vf="'+vfilt+'"]');const n=det.querySelectorAll('.vchip').length;vSay(n+' version'+(n===1?'':'s')+' shown.');return;}
+  if(b.classList.contains('vsbs')){two=!two;vRender('.vsbs');const bp=byId[base],p=byId[cur],g=det.querySelector('.vsbs2');vSay(two&&bp&&p?'Side by side: '+vCite(bp)+' and '+vCite(p)+'.':'One version shown: '+(p?vCite(p):'')+'.');
+   /* the two columns come into view, the first column's heading taking the focus */
+   if(two&&g){try{g.scrollIntoView({block:'start',behavior:vMotion()});}catch(x){g.scrollIntoView();}const h=g.querySelector('.vcolhd');if(h){h.tabIndex=-1;try{h.focus({preventScroll:true});}catch(x){}}}return;}
+  if(b.classList.contains('vre')){base=cur;two=false;vRender('.vchip[aria-current="true"]');vSay('Started from '+vCite(byId[cur])+' now.');return;}
+  if(b.classList.contains('td-bshow')){show(b.dataset.show,true);return;}   /* a card the rule names: of the same component it reads as another version */
+  const ld=b.closest('.load'),pid=(ld&&ld.dataset.id)||cur;
+  if(b.classList.contains('add')){withPun=b.dataset.pun==='1';const ok=(ld||det).querySelector('.optck');withOpt=!!(ok&&ok.checked);doAdd(byId[pid],ld);}
+  else if(b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(pid);
+  else if(b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(pid,b);});
+/* the chips: Left and Right move along them */
+det.addEventListener('keydown',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('.vchip');if(!b||(ev.key!=='ArrowRight'&&ev.key!=='ArrowLeft'))return;
+  const all=[...det.querySelectorAll('.vchip')],n=all[all.indexOf(b)+(ev.key==='ArrowRight'?1:-1)];if(n){ev.preventDefault();n.focus();try{n.scrollIntoView({block:'nearest',inline:'nearest'});}catch(x){}}});
 /* the function choices follow the plan's function; the note on cards already in the plan follows the cards */
 document.addEventListener('change',ev=>{if(ev.target&&ev.target.name==='m.fn'){fnFill();draw();}});
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.student&&typeof f.student==='object')CASE.student=f.student;ageFill();fnFill();draw();}catch(x){}return r;};}
@@ -7041,7 +7187,9 @@ try{new MutationObserver(()=>{clearTimeout(sameNote._t);sameNote._t=setTimeout((
 {const a=$('#addCompBtn');if(a&&!$('#tdBankOpen')){a.insertAdjacentHTML('afterend',' <button type="button" id="tdBankOpen" class="tool" style="margin:0">Add from the protocol bank</button>');
   $('#tdBankOpen').addEventListener('click',()=>{d.open=true;try{host.scrollIntoView({block:'start',behavior:'smooth'});}catch(x){host.scrollIntoView();}setTimeout(()=>{try{q.focus({preventScroll:true});}catch(x){}},350);});}}
 draw();
-window.__tdBank={search:(s,k,f,a)=>search(s,k||'',f||'',a||'').list.map(p=>p.id),band:()=>age.value,fnSel:()=>fn.value,student:()=>CASE.student,ageOk:(id,b)=>byId[id]?ageOk(byId[id],b):true,ageRange:a=>ageRange(a),entry:id=>byId[id]||null,show:id=>{d.open=true;show(id);},n:N,kindOf:id=>byId[id]?kindOf(byId[id].code):''};
+window.__tdBank={search:(s,k,f,a)=>search(s,k||'',f||'',a||'').list.map(p=>p.id),band:()=>age.value,fnSel:()=>fn.value,student:()=>CASE.student,ageOk:(id,b)=>byId[id]?ageOk(byId[id],b):true,ageRange:a=>ageRange(a),entry:id=>byId[id]||null,show:id=>{d.open=true;show(id);},n:N,kindOf:id=>byId[id]?kindOf(byId[id].code):'',
+  /* v25.68 the versions from the studies */
+  versions:id=>byId[id]?versOf(byId[id]).map(p=>p.id):[],pick:id=>{d.open=true;vPick(id);},state:()=>({cur,base,two:two&&cur!==base,filter:vfilt})};
 })();
 </script>
 <script id="td1-scenes">
@@ -7130,44 +7278,77 @@ window.__tdScenes={has:id=>!!byId[id],play,close,count:()=>Object.keys(byId).len
 /* on the plan card the header is a grid (name, Hide steps, Remove): Show me and Watch the video sit on their own line under the code */
 html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-sc-btn,html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-vid-btn{grid-column:1;grid-row:3;justify-self:start;height:36px!important;min-height:36px!important;margin:6px 0 2px!important;padding:0 14px!important;border-radius:8px!important;font:600 14px var(--td9-sans)!important;background:#fff!important;border:1px solid #B9C7C4!important;color:var(--td9-navy)!important;box-shadow:none!important}
 html.td9:not(.nbh-pr-measure) #compWrap .card .chd:has(.td-sc-btn) .td-vid-btn{grid-row:4}
-@media print{#tdVideo,.td-vid-btn{display:none!important}}
+/* v25.68 the line under Watch the video on a plan card: what the video shows, and how this version differs */
+#compWrap .card .td-vid-line{margin:4px 0 8px;max-width:90ch;font:13px/1.45 var(--td9-sans,var(--nbh-sans,sans-serif));color:var(--nbh-muted,#54676f)}
+html.td9:not(.nbh-pr-measure) #compWrap .card .td-vid-line{font:13px/1.45 var(--td9-sans,var(--nbh-sans,sans-serif))!important;color:var(--nbh-muted,#54676f)!important;margin:2px 0 10px!important}
+@media print{#tdVideo,.td-vid-btn,.td-vid-line{display:none!important}}
 </style>
 <script id="td1-video">
 /* v25.21 Watch the video: a bank card can carry a video of its steps (the first: functional communication training, the card
    after Tiger, Hanley & Bruzek, 2008, made with an AI video model, simulated people, captions and narration added). The video
    is a file beside the forms, loaded only when a person taps the button, and played from the device (so it plays offline:
    the offline copy saves the file whole). The button sits in the bank panel's detail and on the plan card built from the
-   protocol; nothing of it enters the save file. The one-file edition does not carry the file and says so. */
+   protocol; nothing of it enters the save file. The one-file edition does not carry the file and says so.
+   v25.68 (the BCBA, 11/6) the high-probability request sequence: one video for every A_HIGHP card (the bank panel's versions
+   from the studies and the plan's cards, from the bank or from the menu), showing TD-1's own steps for the card (3 easy
+   requests 1–3 s apart, praise and a snack after each, the hard request within 3 s, a 30-s restart after a missed one, a new
+   order each trial, then fading), in its own file (nbh-td1-video-highp.js), loaded only when asked. Under the button one
+   line says what the video shows and, for a version from a study, how that version differs (the card's comparison rows,
+   cmp: the time between the easy requests, what follows each, when the hard request comes, a missed easy one). The
+   player's note is the video's own; the FCT video, its title and its note are as they were. */
 (function(){
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res();s.onerror=()=>rej(new Error(src));document.head.appendChild(s);});}
-const VIDS={'fct-practical-guide-thinning':{title:'Functional communication training: the break request, step by step',load:()=>loadScript('nbh-td1-video-fct.js')}};
+const VIDS={'fct-practical-guide-thinning':{title:'Functional communication training: the break request, step by step',file:'nbh-td1-video-fct.js',load:()=>loadScript('nbh-td1-video-fct.js'),
+  note:'Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.'},
+ a_highp:{title:'High-probability request sequence: three easy requests, then the hard one',file:'nbh-td1-video-highp.js',load:()=>loadScript('nbh-td1-video-highp.js'),
+  note:'Made with an AI video model from TD-1’s steps for this card, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the student does not do the hard request, follow the Responding to behavior sheet for the function.',
+  shows:{n_easy:'3',spacing:'1–3 s',easy_reinforcer:'Praise and a small edible',to_hard:'Within 3 s',missed_easy:'Wait 30 s, start a new sequence',
+   summary:'3 easy requests 1–3 s apart, praise and a snack after each, the hard request within 3 s, a 30-s restart after a missed one'}}};
+/* a component's video, for every card of it (the bank's and the plan's) */
+const BYCODE={A_HIGHP:'a_highp'};
+let BID=null;
+function bank(id){if(!BID){BID={};try{if(typeof TD1_BANK!=='undefined'&&TD1_BANK&&Array.isArray(TD1_BANK.protocols))TD1_BANK.protocols.forEach(p=>{BID[p.id]=p;});}catch(e){}}return BID[id]||null;}
+const keyOf=id=>{if(!id)return '';if(VIDS[id])return id;const p=bank(id);return (p&&BYCODE[p.code])||'';};
+/* the line under the button: what the video shows, and the rows where this version differs (as the BCBA's approved mockup) */
+const LROW={spacing:'Time between them',easy_reinforcer:'After each easy one',to_hard:'The hard request comes',missed_easy:'If an easy one is missed'};
+const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+function line(id){const k=keyOf(id),v=VIDS[k];if(!v||!v.shows)return '';const S=v.shows,p=VIDS[id]?null:bank(id),c=p&&p.cmp;
+ let t='The video shows TD-1’s steps for this card: '+S.summary+'.';
+ if(c){const dd=Object.keys(LROW).filter(x=>norm(c[x])!==norm(S[x])&&!/^not stated/i.test(c[x]||'')).map(x=>LROW[x].toLowerCase()+': '+c[x]);
+  t+=' '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');}
+ return t;}
 let box=null,opener=null;const urls={};
 const $=id=>box.querySelector('#'+id);
 function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','tv-title');
  box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-close">Close</button></div>'+
   '<video id="tv-video" controls playsinline preload="metadata"></video><p class="tv-msg" id="tv-msg" aria-live="polite"></p>'+
-  '<p class="tv-note">Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.</p></div>';
+  '<p class="tv-note" id="tv-note"></p></div>';
  document.body.appendChild(box);
  $('tv-close').addEventListener('click',close);box.addEventListener('click',ev=>{if(ev.target===box)close();});
  document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&box&&!box.hidden)close();});}
 function msg(t,err){const m=$('tv-msg');m.textContent=t||'';m.hidden=!t;m.classList.toggle('tv-err',!!err);}
-async function play(id,from){const v=VIDS[id];if(!v)return;if(!box)build();opener=from||document.activeElement;
- const vid=$('tv-video');$('tv-title').textContent=v.title;box.hidden=false;setTimeout(()=>{try{$('tv-close').focus();}catch(e){}},30);
- if(!urls[id]){vid.removeAttribute('src');vid.hidden=true;msg('Loading the video…');
-  try{if(!(window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[id]))await v.load();
-   const b64=window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[id];if(!b64)throw new Error('no video data');
+async function play(id,from){const k=keyOf(id),v=VIDS[k];if(!v)return;if(!box)build();opener=from||document.activeElement;
+ const vid=$('tv-video');if(vid.dataset.id&&vid.dataset.id!==k){try{vid.pause();}catch(e){}}
+ $('tv-title').textContent=v.title;$('tv-note').textContent=v.note;box.hidden=false;setTimeout(()=>{try{$('tv-close').focus();}catch(e){}},30);
+ if(!urls[k]){vid.removeAttribute('src');delete vid.dataset.id;vid.hidden=true;msg('Loading the video…');
+  try{if(!(window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[k]))await v.load();
+   const b64=window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[k];if(!b64)throw new Error('no video data');
    const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-   urls[id]=URL.createObjectURL(new Blob([u],{type:'video/mp4'}));}
-  catch(e){msg('The video could not be loaded here. It is a file beside the forms (nbh-td1-video-fct.js): open the workstation from its folder or from the website. The one-file edition does not carry it.',true);return;}}
- if(vid.dataset.id!==id){vid.src=urls[id];vid.dataset.id=id;}vid.hidden=false;msg('');}
+   urls[k]=URL.createObjectURL(new Blob([u],{type:'video/mp4'}));}
+  catch(e){msg('The video could not be loaded here. It is a file beside the forms ('+v.file+'): open the workstation from its folder or from the website. The one-file edition does not carry it.',true);return;}}
+ if(vid.dataset.id!==k){vid.src=urls[k];vid.dataset.id=k;}vid.hidden=false;msg('');}
 function close(){if(!box)return;const vid=$('tv-video');try{vid.pause();}catch(e){}box.hidden=true;if(opener&&opener.focus)try{opener.focus();}catch(e){}opener=null;}
-/* the plan's cards: a card built from a bank protocol with a video gets Watch the video beside Remove */
-function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=inp&&inp.value;const has=!!(id&&VIDS[id]);let b=c.querySelector('.td-vid-btn');
- if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>play(inp.value,b));const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
- else if(!has&&b)b.remove();});}
+/* the plan's cards: a card built from a bank protocol with a video, or a card of a component with one (A_HIGHP), gets Watch
+   the video beside Remove, and the video's line under the card's header */
+function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=(inp&&inp.value)||'';const k=keyOf(id)||BYCODE[c.dataset.code]||'';const has=!!VIDS[k];let b=c.querySelector('.td-vid-btn'),ln=c.querySelector('.td-vid-line');
+ if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>{const i2=c.querySelector('[name$="].bank"]'),x=(i2&&i2.value)||'';play(keyOf(x)?x:(BYCODE[c.dataset.code]||''),b);});const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
+ else if(!has&&b)b.remove();
+ const t=has?line(keyOf(id)?id:k):'';
+ if(t){if(!ln){ln=document.createElement('p');ln.className='noprint td-vid-line';const h=c.querySelector('.chd');if(h)h.insertAdjacentElement('afterend',ln);else c.insertBefore(ln,c.firstChild);}if(ln.textContent!==t)ln.textContent=t;}
+ else if(ln)ln.remove();});}
 try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true,subtree:true});}catch(e){}
 document.addEventListener('change',ev=>{if(ev.target&&/\]\.bank$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
-window.__tdVideo={has:id=>!!VIDS[id],play,close,count:()=>Object.keys(VIDS).length};
+window.__tdVideo={has:id=>!!VIDS[keyOf(id)],play,close,count:()=>Object.keys(VIDS).length,key:id=>keyOf(id),line:id=>line(id)};
 })();
 </script>
 
@@ -7671,6 +7852,144 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
    const bl=(o&&o.bipLine)||((l,v)=>v?l+': '+v:'');const blk=['CONSENT TO THE PLAN’S PROCEDURES (FORM IC-1)'+(P&&T(P.signed)?', SIGNED '+md(P.signed):'')];
    if(P&&T(P.shared))blk.push(bl('Teaching, rewards and prevention',dec(P.shared)));L.forEach(([k,v])=>blk.push(bl(k,v)));
    let k=B.findIndex(b=>b&&b[0]==='CRISIS PROCEDURE (SEPARATE FROM TREATMENT)');B.splice(k<0?B.length:k,0,blk);}catch(e){}return res;};
+})();
+</script>
+<style id="td1-v2568-qc-css" data-nbh-screen>
+/* v25.68 (research #14) the quality check before sign-off, on the Final plan sheet: screen only */
+.td-qc{border:1px solid #c9d3d9;border-left:4px solid var(--nbh-slate,#254657);border-radius:3px;padding:10px 12px 12px;margin:0 0 14px;background:#fff;font-family:var(--sans,sans-serif)}
+.td-qc[hidden],.td-qc-adopt[hidden]{display:none!important}
+.td-qc-h{margin:0;font:600 16px/1.3 var(--serif,Georgia,serif);color:var(--ink,#182e43)}
+.td-qc-intro{margin:4px 0 8px;font-size:12.5px;line-height:1.5;color:var(--ink-soft,#54676f);max-width:80ch}
+.td-qc-sum{margin:0 0 4px;font-size:13.5px;font-weight:600;color:var(--ink,#182e43)}
+.td-qc-list{list-style:none;margin:0;padding:0}
+.td-qc-it{display:grid;grid-template-columns:124px minmax(0,1fr) auto;gap:2px 14px;align-items:start;border-top:1px solid #e3e8eb;padding:7px 0;margin:0}
+.td-qc-it>.td-qc-go{margin:0;max-width:230px;justify-self:end;text-align:right}
+.td-qc-st{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;line-height:20px;white-space:nowrap}
+.td-qc-ic{display:inline-flex;align-items:center;justify-content:center;flex:none;width:20px;height:20px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;line-height:1}
+.td-qc-met .td-qc-st{color:#1f6b4a}.td-qc-met .td-qc-ic{background:#1f6b4a}
+.td-qc-not .td-qc-st{color:#8a4300}.td-qc-not .td-qc-ic{background:#8a4300}
+.td-qc-na .td-qc-st{color:#54676f}.td-qc-na .td-qc-ic{background:#6b7c84}
+.td-qc-b{min-width:0;font-size:13px;line-height:1.45}
+.td-qc-t{display:block;color:var(--ink,#182e43)}
+.td-qc-why{display:block;color:#33454f;overflow-wrap:break-word}
+.td-qc-go{min-height:36px;margin:2px 0 0;padding:2px 0;border:0;background:none;color:var(--nbh-slate,#254657);font:600 12.5px var(--sans,sans-serif);text-decoration:underline;text-underline-offset:2px;cursor:pointer;text-align:left}
+.td-qc-go:hover{color:var(--ink,#182e43)}
+.td-qc-go:focus-visible{outline:3px solid var(--nbh-focus,#2f7fa8);outline-offset:2px}
+.td-qc-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 0;padding-top:10px;border-top:1px solid #e3e8eb}
+.td-qc-bar .tool{margin:0}
+.td-qc-msg{font-size:12.5px;color:var(--ink-soft,#54676f)}
+.td-qc-src{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--ink-soft,#54676f);max-width:100ch}
+.td-qc-adopt{margin:6px 0 4px;padding:8px 12px;border-left:4px solid var(--nbh-slate,#254657);background:#f5f8f7;font-family:var(--sans,sans-serif);font-size:13px;line-height:1.45}
+.td-qc-adopt .td-qc-go{margin:0 0 0 6px}
+@media (pointer:coarse){#tdQc .td-qc-go,#tdQc .td-qc-bar .tool,#tdQcAdopt .td-qc-go{min-height:44px!important}}
+@media (max-width:900px){.td-qc-it{grid-template-columns:124px minmax(0,1fr)}.td-qc-it>.td-qc-go{grid-column:2;justify-self:start;text-align:left;max-width:none}}
+@media (max-width:600px){.td-qc-it{grid-template-columns:1fr}.td-qc-it>.td-qc-go{grid-column:1}}
+@media print{.td-qc,.td-qc-adopt{display:none!important}}
+</style>
+<script id="td1-v2568-qc">
+/* v25.68 (research #14, the BCBA, 11/6) a BIP quality check before sign-off. At the top of the Final plan sheet, before Copy for
+   the BIP, Print and the adoption block: the items published reviews of behavior intervention plans score (the Behavior
+   Support Plan Quality Evaluation, BSP-QE: Browning-Wright et al., 2007; plan quality predicted student outcomes through
+   integrity under ordinary school conditions: Cook et al., 2012): the function stated; setting changes tied to it; a
+   replacement behavior that serves the same function; teaching strategies; reinforcement; reactive strategies; goals; team
+   communication. Each is read from the plan (met, not met, or not applicable) with the place to fix it; a line before
+   "Adopted by the team" repeats the count. It never blocks anything, keeps nothing in the save file, is not printed and is
+   not in Copy for the BIP. The conflicts between the parts stay with How the parts fit (Build sheet). */
+(function(){
+const box=document.getElementById('tdQc'),adopt=document.getElementById('tdQcAdopt');if(!box)return;
+const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const val=n=>{const e=document.querySelector('[name="'+n+'"]');if(!e)return '';const v=T(e.value);return e.tagName==='SELECT'&&v==='not sure'?'':v;};
+const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+const short=(s,n)=>{s=T(s);if(s.length<=n)return s;const c=s.slice(0,n-1),k=c.lastIndexOf(' ');return (k>n*0.6?c.slice(0,k):c).replace(/[,;:.]$/,'')+'…';};
+const md=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(v));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(v);};
+let ATTR={};try{ATTR=JSON.parse(document.getElementById('td1-compare').textContent).attrs||{};}catch(e){ATTR={};}
+const FNL={escape:'escape',attention:'attention',tangible:'tangible items or activities',automatic:'automatic reinforcement'};
+const FNSET={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'};
+let GOALS=null;
+const groups=()=>{try{return window.__tdGroups?window.__tdGroups():[];}catch(e){return [];}};
+const cards=()=>{try{return (window.__tdComps?window.__tdComps():[]).filter(c=>!(window.__tdIsAssess&&window.__tdIsAssess(c)));}catch(e){return [];}};
+/* the kind of a component: TD-1's own table (Compare two interventions), else its group on the final plan */
+const NOTANT=new Set(['SAFE','SOCIAL','TANG','EDIBLE','DIST','C_SR','SEXT','C_HELMET','C_MEDREF']);
+function kindOf(code){const a=ATTR[code];if(a&&a.kind)return a.kind;const G=groups(),k=G.findIndex(g=>g[1].includes(code));
+ return k===0?(NOTANT.has(code)||/^PA_/.test(code)?'other':'antecedent'):k===1?'replacement':k===2?'teaching':k===3?'schedule':k===4?'consequence':'other';}
+function fnsOf(code){const a=ATTR[code];if(a&&Array.isArray(a.fn)&&a.fn.length)return a.fn;let L=null;try{L=window.__tdLibOf(code);}catch(e){}return (L&&L.fn)||[];}
+/* the plan's functions: Setup's, or for multiple control the targets' (Targets in this plan) */
+function planFns(){const f=val('m.fn');if(FNL[f])return [f];if(f!=='multiple')return [];let r=[];try{r=JSON.parse(val('tg.rows')||'[]');}catch(e){r=[];}
+ return [...new Set((Array.isArray(r)?r:[]).map(x=>x&&x.fn).filter(x=>FNL[x]))];}
+const names=L=>{const n=[...new Set(L.map(c=>c.name))];return n.length>3?n.slice(0,3).join('; ')+' and '+(n.length-3)+' more':n.join('; ');};
+const fnAnd=F=>F.map(x=>FNL[x]).join(', ');
+const nots=P=>P.filter(Boolean).map((x,i)=>(i?'It does not ':'The plan does not ')+x+'.').join(' ');
+function items(){const fn=val('m.fn'),F=planFns(),cs=cards(),out=[];const add=(k,t,st,why,go)=>out.push({k,t,st,why,go});
+ const GO={fn:['setup','[name="m.fn"]','Setup: Function'],build:['build','#addComp','Build: Add component'],select:['select','#selRec','Select the treatment']};
+ /* 1 the function */
+ if(fn){const src=val('m.fnsrc');add('fn','The function is stated','met',(FNSET[fn]||fn)+(src==='EA-1'?', from Form EA-1':src==='FS-1'?', a hypothesis from Form FS-1':'')+
+   (fn==='multiple'?(F.length?': '+fnAnd(F)+' (Targets in this plan)':'. Targets in this plan, on Setup, names no function for each target yet'):'')+'.',GO.fn);}
+ else add('fn','The function is stated','not','No function is chosen on the Setup sheet.',GO.fn);
+ /* 2 and 3: a part of the plan written for the function */
+ const tied=(kind,k,t,none,go,more)=>{const L=cs.filter(c=>kindOf(c.code)===kind),x=more?more():'';
+  if(!fn){add(k,t,'not','The function is not stated yet, so nothing in the plan can be tied to it'+(L.length?' (the plan has '+names(L)+')':'')+'.',GO.fn);return;}
+  if(!F.length){if(L.length)add(k,t,'met',names(L)+'. Multiple control: check that each function has its own (Targets in this plan, on Setup).'+x,go);else add(k,t,'not',none+'.',go);return;}
+  const miss=F.filter(f=>!L.some(c=>fnsOf(c.code).includes(f))),hit=L.filter(c=>F.some(f=>fnsOf(c.code).includes(f)));
+  if(!miss.length)add(k,t,'met','For '+fnAnd(F)+': '+names(hit)+'.'+x,go);
+  else add(k,t,'not',none+' for '+miss.map(f=>FNL[f]).join(' or ')+(L.length?' (the plan has '+names(L)+(hit.length?'':', written for other functions')+')':'')+'.',go);};
+ tied('antecedent','ant','Setting changes tied to the function','No antecedent strategy in the plan is written',GO.build);
+ tied('replacement','rep','A replacement behavior that serves the same function','No replacement behavior in the plan serves',GO.select,()=>val('m.repdesc')?' The replacement behavior: '+short(val('m.repdesc'),120)+'.':'');
+ /* 4 teaching strategies */
+ {const tc=cs.filter(c=>kindOf(c.code)==='teaching'),hier=val('pr.hier'),rc=cs.filter(c=>kindOf(c.code)==='replacement'&&(c.steps||[]).some(s=>/\bprompt/i.test(s)));
+  const why=[tc.length&&'teaching cards: '+names(tc),hier&&'prompt hierarchy: '+short(hier,80),rc.length&&'prompting in the steps of '+names(rc)].filter(Boolean),go=['teach','[name="pr.hier"]','Prompting and error correction'];
+  if(why.length)add('teach','Teaching strategies','met',cap(why.join('; '))+'.',go);
+  else if(val('m.rep')==='yes')add('teach','Teaching strategies','na','Setup says the replacement behavior is already in the student’s repertoire (it does not happen when it is needed). If it must still be prompted, write the prompt hierarchy or add a prompting card.',go);
+  else add('teach','Teaching strategies','not','The plan does not say how the replacement behavior is taught: no teaching or prompting card, and no prompt hierarchy.',go);}
+ /* 5 reinforcement: what reinforces the replacement behavior, and when it comes */
+ {const what=val('m.reinf'),rk=cs.filter(c=>/^(SOCIAL|TANG|EDIBLE)$/.test(c.code));
+  const sch=cs.filter(c=>kindOf(c.code)==='schedule'),sc=val('sch.chosen'),rc=cs.filter(c=>kindOf(c.code)==='replacement');
+  const W=[what&&'reinforcer: '+short(what,90),rk.length&&'reinforcer cards: '+names(rk)].filter(Boolean);
+  const H=[sch.length&&'schedule cards: '+names(sch),sc&&'schedule: '+short(sc,60),!sch.length&&!sc&&rc.length&&'given for each replacement response ('+names(rc)+')'].filter(Boolean);
+  if(W.length&&H.length)add('reinf','Reinforcement','met',cap(W.concat(H).join('; '))+'.',['reinf','[name="sch.chosen"]','Reinforcement']);
+  else add('reinf','Reinforcement','not',nots([!W.length&&'name the reinforcer for the replacement behavior (Setup: Specific reinforcer and EO)',!H.length&&'say when the reinforcer is given (a schedule on the Reinforcement sheet, or a replacement card)']),
+   W.length?['reinf','[name="sch.chosen"]','Reinforcement: Schedule']:['setup','[name="m.reinf"]','Setup: Specific reinforcer']);}
+ /* 6 reactive strategies */
+ {const R=new Set(((groups()[4])||[0,[]])[1]),rc=cs.filter(c=>R.has(c.code)),t=val('rb.target'),go=['respond','[name="rb.target"]','Responding to behavior'];
+  if(t||rc.length)add('react','Reactive strategies','met',cap([t&&'on the target behavior: '+short(t,110),rc.length&&'cards: '+names(rc)].filter(Boolean).join('; '))+'.',go);
+  else add('react','Reactive strategies','not','The plan does not say what staff do when the behavior happens: “On the target behavior” on the Responding sheet is empty and no card covers it.',go);}
+ /* 7 goals: one for the problem behavior and one for the replacement behavior */
+ {const g=GOALS||{},gr=(g.red||[]).length,ga=(g.acq||[]).length,crit=val('mon.crit'),ind=val('mon.ind'),ex=val('ad.exit');
+  const red=gr?gr+' reduction goal'+(gr>1?'s':'')+' from Form GB-1':crit?'the problem behavior at or below '+crit+' per minute'+(val('mon.n')?' for '+val('mon.n')+' sessions':'')+' (Monitor sheet)':ex?'the exit criteria':'';
+  const acq=ga?ga+' skill goal'+(ga>1?'s':'')+' from Form GB-1':ind?'the replacement behavior '+ind+'% independent (Monitor sheet)':'';
+  if(red&&acq)add('goals','Goals','met',cap(red)+'; '+acq+'.',['monitor','[name="mon.crit"]','Monitor: Criterion']);
+  else add('goals','Goals','not',nots([!red&&'state a goal for the problem behavior (Form GB-1, the criterion on the Monitor sheet, or the exit criteria)',!acq&&'state a goal for the replacement behavior (Form GB-1, or “Alternative independent” on the Monitor sheet)']),['monitor',red?'[name="mon.ind"]':'[name="mon.crit"]','Monitor: Criterion']);}
+ /* 8 team communication: who collects which data, and when the team looks at it */
+ {const dt=val('ad.data'),rv=val('ad.review'),mr=val('m.review'),pv=val('p.visit');
+  const W=[rv&&'the next review on '+md(rv),!rv&&mr&&'the review: '+short(mr,80),pv&&'the coaching visits'].filter(Boolean);
+  if(dt&&W.length)add('team','Team communication','met',cap(['who collects which data'].concat(W).join('; '))+'.',['final','[name="ad.data"]','Final plan: Who collects which data']);
+  else add('team','Team communication','not',nots([!dt&&'say who collects which data (this sheet, under Data, social validity, review, and exit)',!W.length&&'say when the team reviews the plan (Next review date on this sheet, or Review on Setup)']),
+   ['final',dt?'[name="ad.review"]':'[name="ad.data"]','Final plan: '+(dt?'Next review date':'Who collects which data')]);}
+ return out;}
+const ST={met:['Met','✓'],not:['Not met','!'],na:['Not applicable','–']};
+function sumOf(L){const n={met:0,not:0,na:0};L.forEach(x=>n[x.st]++);return {n,t:n.met+' of '+L.length+' met'+(n.not?' · '+n.not+' not met':'')+(n.na?' · '+n.na+' not applicable':'')};}
+function render(){let L;try{L=items();}catch(e){return;}const S=sumOf(L);
+ const h=`<h3 class="td-qc-h" id="tdQcH">Quality check before sign-off</h3><p class="td-qc-intro">Eight things published reviews of behavior intervention plans look for, each read from this plan, with the place to fix it. It is a check for you: it never stops Copy for the BIP, Print or adoption, and it is not printed or copied.</p>`+
+  `<p class="td-qc-sum">${E(S.t)}</p><ol class="td-qc-list" role="list">`+L.map(x=>`<li class="td-qc-it td-qc-${x.st}" data-qc="${x.k}" data-st="${x.st}"><span class="td-qc-st"><span class="td-qc-ic" aria-hidden="true">${ST[x.st][1]}</span>${ST[x.st][0]}</span><div class="td-qc-b"><b class="td-qc-t">${E(x.t)}</b><span class="td-qc-why">${E(x.why)}</span></div><button type="button" class="td-qc-go" data-view="${x.go[0]}" data-to="${E(x.go[1])}">Go to ${E(x.go[2])}</button></li>`).join('')+'</ol>'+
+  `<div class="td-qc-bar"><button type="button" class="tool" data-qc-do="bip">Copy for the BIP</button><button type="button" class="tool" data-qc-do="print">Print final plan only</button><span class="td-qc-msg" aria-hidden="true"></span></div>`+
+  `<p class="td-qc-src">The items are those of the Behavior Support Plan Quality Evaluation (BSP-QE; Browning-Wright et al., 2007). Under ordinary school conditions, plan quality predicted student outcomes, through how well the plan was carried out (Cook et al., 2012).</p>`;
+ if(box.__h!==h){box.__h=h;box.innerHTML=h;}box.hidden=false;
+ if(adopt){const nm=L.filter(x=>x.st==='not').map(x=>x.t.toLowerCase());const a=`Quality check before sign-off: ${E(S.t)}.${nm.length?' Not met: '+E(nm.join('; '))+'.':''} <button type="button" class="td-qc-go" data-qc-top="1">See the quality check</button>`;
+  if(adopt.__h!==a){adopt.__h=a;adopt.innerHTML=a;}adopt.hidden=false;}}
+function go(view,sel){const b=document.querySelector('#viewSeg button[data-view="'+view+'"]');if(b&&b.getAttribute('aria-pressed')!=='true')b.click();
+ setTimeout(()=>{const t=sel?document.querySelector(sel):null;if(t&&t.isConnected){try{(t.closest('.drow')||t).scrollIntoView({block:'center'});}catch(e){t.scrollIntoView();}try{t.focus({preventScroll:true});}catch(e){}}},140);}
+function click(ev){const b=ev.target.closest('button');if(!b)return;
+ if(b.dataset.qcTop){try{box.scrollIntoView({block:'start'});}catch(e){}const f=box.querySelector('.td-qc-h');if(f){f.tabIndex=-1;try{f.focus({preventScroll:true});}catch(e){}}return;}
+ if(b.dataset.view){go(b.dataset.view,b.dataset.to);return;}
+ if(b.dataset.qcDo){const t=document.getElementById(b.dataset.qcDo==='bip'?'bipBtn':'printFinalBtn');if(t)t.click();}}
+box.addEventListener('click',click);if(adopt)adopt.addEventListener('click',click);
+/* Copy for the BIP's answer, shown beside the panel's button too (the toolbar's status is the one read aloud) */
+{const m=document.getElementById('bipMsg');if(m)try{new MutationObserver(()=>{const s=box.querySelector('.td-qc-msg');if(s)s.textContent=m.textContent;}).observe(m,{childList:true,characterData:true,subtree:true});}catch(e){}}
+let tm=0;const soon=d=>{clearTimeout(tm);tm=setTimeout(render,d||120);};
+const fb=document.getElementById('finalBody');if(fb)try{new MutationObserver(()=>soon(60)).observe(fb,{childList:true});}catch(e){}
+['input','change'].forEach(t=>document.addEventListener(t,ev=>{if(box.contains(ev.target))return;if(/\bview-final\b/.test(document.body.className))soon(400);},true));
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.goals&&typeof f.goals==='object')GOALS=f.goals;soon();}catch(e){}return r;};}
+window.__tdQc={items:()=>items(),render};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>render());else render();
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
