@@ -3275,12 +3275,15 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
  const spanish=()=>/span|espa/i.test(String(S.meta.lang||'').trim()||lang);
  function sheet(){const out=document.getElementById('sheetOut');if(!out||!S.chk.sched)return;
   const hint=out.querySelector(':scope > p.hint');if(hint)hint.remove();
-  let body='';const es=spanish();
+  let body='';const es=spanish(),ht=!es&&typeof window.hdCreole==='function'&&window.hdCreole();   /* v25.68 (research #13) Creole: a draft translation */
   if(!H||!H.en)body='<p class="noprint hint">The case holds no schedule card yet: design the schedule on Form SR-1, and its family&rsquo;s version comes here.</p>';
   else{const sp=es&&H.es?'<div class="hs-box" lang="es"><b>El plan de la escuela, en casa</b>'+e(H.es)+'</div>':'';
-   const miss=es&&!H.es?'<p class="noprint nbh-lang-flag">The family&rsquo;s language is Spanish, and Form SR-1 has no Spanish version yet: write '+e((H.need||[]).join(', ')||'the words')+' in Spanish on SR-1&rsquo;s Card page.</p>':'';
-   body=miss+sp+'<div class="hs-box" lang="en"><b>The school&rsquo;s plan, at home</b>'+e(H.en)+'</div>';}
-  out.insertAdjacentHTML('beforeend','<div class="hs" data-sheet="sched">'+hsHead(spanish()&&H&&H.es?'El plan de la escuela, en casa \u00b7 The School\u2019s Plan, at Home':'The School\u2019s Plan, at Home',S.meta.cg||'')+body+
+   const hp=ht&&H.ht?'<div class="hs-box" lang="ht"><b>Plan lek\u00f2l la, lakay</b>'+e(H.ht)+'</div>':'';
+   const miss=es&&!H.es?'<p class="noprint nbh-lang-flag">The family&rsquo;s language is Spanish, and Form SR-1 has no Spanish version yet: write '+e((H.need||[]).join(', ')||'the words')+' in Spanish on SR-1&rsquo;s Card page.</p>':
+    ht&&!H.ht?'<p class="noprint nbh-lang-flag">The family&rsquo;s language is Haitian Creole, and Form SR-1 has no Creole version yet: write '+e((H.needHt||[]).join(', ')||'the words')+' in Haitian Creole on SR-1&rsquo;s Card page (the workstation&rsquo;s draft translation, for the district translator).</p>':'';
+   body=miss+sp+hp+'<div class="hs-box" lang="en"><b>The school&rsquo;s plan, at home</b>'+e(H.en)+'</div>';}
+  out.insertAdjacentHTML('beforeend','<div class="hs" data-sheet="sched">'+hsHead(spanish()&&H&&H.es?'El plan de la escuela, en casa \u00b7 The School\u2019s Plan, at Home':ht&&H&&H.ht?'Plan lek\u00f2l la, lakay \u00b7 The School\u2019s Plan, at Home':'The School\u2019s Plan, at Home',S.meta.cg||'')+body+
+   (ht&&H&&H.ht?'<p class="hs-note" lang="ht" style="font-size:12.5px;color:#444">Sa a soti nan kat or\u00e8 a, F\u00f2m SR-1. Kesyon? Mande '+e(S.meta.bcba||'BCBA a')+'.</p>':'')+
    '<p class="hs-note" style="font-size:12.5px;color:#444">From the schedule card, Form SR-1. Questions: ask '+e(S.meta.bcba||'the BCBA')+'.</p></div>');
   try{if(typeof renderCost==='function')renderCost();}catch(x){}}
  {const r0=renderSheets;renderSheets=function(){r0.apply(this,arguments);try{sheet();}catch(x){}};}
@@ -3443,6 +3446,107 @@ document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.c
   if(retPhoto()&&H.videoDec!=='yes')h+='<div class="verdict v-mid" style="margin-top:6px">The sheets are to come back as photos, but Form IC-1 has no yes for photos at home (Specific procedures H). Ask the family, or send the sheets back on paper.</div>';
   el.insertAdjacentHTML('beforeend',h);}catch(e){}return r;};}
 try{ensure();S.wk.forEach(v65W);v65Ent();renderSheets();drawEnt();}catch(e){}
+</script>
+<style id="hd1-v2568-css">
+/* v25.68 (research #12, #13) the Creole sheets: the draft-translation mark (screen and paper), the Creole beside the English */
+#sheetOut .hs-draft{margin:0 0 6px;padding:3px 8px;border:1.5px dashed #6b4a00;font-size:12.5px;color:#3d2a00;background:#fff}
+#sheetOut .hs-ht{font-weight:400;font-size:12px;color:#333}
+#sheetOut .hs-title .hs-ht{font-size:inherit;font-weight:inherit;color:inherit}
+#sheetOut .hs-foot-ht{margin-top:8px;font-size:12.5px;color:#333}
+/* the Reading level button sits at a sheet's top right corner on screen: the mark leaves it room (paper: full width) */
+@media screen{#sheetOut .hs-draft{margin-right:160px}}
+</style>
+<script id="hd1-v2568">
+/* v25.68 (research #13) Haitian Creole on the home sheets. When the family's language is Haitian Creole (Language at home on
+   Setup, else the case's from Form DM-1), every sheet carries the workstation's DRAFT TRANSLATION beside the English: the
+   title, the "How to fill this in" box (in Creole first, the English after it), the column heads, the safety and choice lines,
+   the signature and the return line; the school's plan at home (Form SR-1's family version) in Creole first when SR-1 has it.
+   Each sheet says, on screen and on paper, "Draft translation: a district translator reviews it before it goes home." The
+   words the team typed (behaviors, routines, steps, the plan lines) print as typed: write them in Creole on Setup for a Creole
+   family. An English or Spanish family's sheets are as before.
+   (research #12) Every sheet is marked data-nbh-family (its title as data-nbh-family-title), so Check wording's Reading level
+   button reads it as it goes home. Every Creole string of this form is in this block. */
+(function(){
+ const HT_RE=/creole|krey[oò]l|haitian|ayisyen/i;
+ const creole=()=>{try{return HT_RE.test(String((nbhHdLang()||{}).home||''));}catch(e){return false;}};
+ window.hdCreole=creole;
+ const DRAFT='Draft translation: a district translator reviews it before it goes home.';
+ const T=s=>String(s==null?'':s).trim(),E=s=>esc(String(s==null?'':s)),K=()=>E(kid()||'pitit ou a');
+ const TITLE={tally:'Fèy pou konte lakay',check:'Lis pou chak woutin',abc:'Nòt ABC: sa ki te pase anvan ak apre',sleep:'Jounal dòmi',meal:'Jounal repa, semèn sa a',toilet:'Jounal twalèt (chita, pipi, aksidan, mande pou ale)',sched:'Plan lekòl la, lakay'};
+ const HOW='Kijan pou ranpli fèy sa a';
+ function htHow(b){const one=famText(b.one),st=famText(b.st),en=famText(b.en),r0=famText(b.r0),r3=famText(b.r3);
+  if(b.ms==='tally')return 'fè yon mak (|) chak fwa sa rive.'+(one?' Yon fwa se: '+E(one)+'.':'')+' Ekri 0 si sa pa t rive.';
+  if(b.ms==='yn')return 'fè yon wonn sou Y (wi) si sa te rive menm yon fwa, sou N (non) si sa pa t rive.';
+  if(b.ms==='dur')return 'ekri konbyen minit sa te dire, tout ansanm.'+(st?' Li kòmanse lè '+E(st)+(en?', epi li fini lè '+E(en):'')+'.':en?' Li fini lè '+E(en)+'.':'')+' Ekri 0 si sa pa t rive.';
+  return 'fè yon wonn sou yon sèl nimewo. '+(r0||r3?'0 vle di '+E(r0||'anyen')+'; 1 ak 2 nan mitan; 3 vle di '+E(r3||'anpil')+'.':'0 anyen, 1 yon ti kras, 2 kèk, 3 anpil.');}
+ function box(sheet){const B=S.bh.filter(b=>b.name),k=K();let L=[],x='';
+  if(sheet==='tally')L=['Nan fen chak woutin, chèche liy li ak kolòn jou a.'].concat(B.map(b=>'<b>'+E(b.name)+':</b> '+htHow(b)+(b.ex?' Sa ki konte: '+E(famText(b.ex))+'.':'')+(b.nex?' Sa ki pa konte: '+E(famText(b.nex))+'.':'')),
+    ['Si yon woutin pa t fèt jou sa a (pa t gen soti, pa t gen devwa), trase yon liy (&mdash;) nan kare li.','Si ou bliye make yon woutin, kite l vid. Yon kare vid pi bon pase yon devinèt.']);
+  if(sheet==='check')L=['Apre chak woutin, li etap ki anba l yo.','Fè yon wonn sou <b>Y</b> (wi) si etap la te fèt, sou <b>N</b> (non) si li pa t fèt. Etap &ldquo;Adult&rdquo; yo se sa ou menm ou fè; etap &ldquo;Child&rdquo; yo se sa '+k+' fè.','Si woutin nan pa t fèt jou sa a, trase yon liy (&mdash;) sou tout kare li yo.','Yon N se pa yon move nòt. Li montre nou ki etap ki difisil pou fè, pou nou ka chanje yo.'];
+  if(sheet==='abc')L=['Sèvi ak yon kare chak fwa yon konpòtman ki sou lis la rive epi ou gen yon minit apre.','Make sa ki t ap pase jis anvan, sa '+k+' te fè, ak sa ki te pase touswit apre. Make sèlman sa ou te wè; ou ka make plis pase youn si ou bezwen.','Ekri yon liy ak pwòp mo pa ou. Ou pa bezwen eksplike poukisa.'];
+  if(sheet==='sleep')L=['Chak maten, ranpli liy pou nwit ki sot pase a (lendi, &ldquo;Nwit dimanch &rarr; lendi&rdquo;). Pi bon devinèt ou a bon.','<b>Limyè etenn</b> se lè chanm nan te vin fè nwa. <b>Li dòmi</b> se apeprè lè '+k+' te dòmi.','<b>Li reveye nan nwit lan</b>: konbyen fwa, ak apeprè konbyen tan an tout. Ekri 0 si pa t genyen.','<b>Ti dòmi</b>: konbyen tan, si te gen youn jou sa a. <b>Nòt</b>: malad, manje ta, yon aswè difisil, nenpòt bagay ou remake.'];
+  if(sheet==='meal'){L=['Yon liy pou chak repa ou ekri (manje maten ak manje aswè ase).','<b>Minit</b>: apeprè konbyen tan repa a te dire.','<b>Manje sib la</b>: nouvo manje oswa manje difisil ki nan plan an. Èske yo te ofri l? Konbyen ti mòde '+k+' te eseye? Èske li te manje tout?','Make si te gen nenpòt anvi vomi, tous oswa toufe.','Si '+k+' te refize, make sa ou te fè apre. Pa gen move repons: nou vle konnen sa ki konn rive.'];x='<p style="margin:4px 0 0">Refi a ka ogmante pandan kèk jou lè yon nouvo woutin kòmanse; kenbe woutin nan kalm epi fè nou konnen.</p>';}
+  if(sheet==='toilet'){L=['Yon liy chak fwa: yon chita sou twalèt la, yon aksidan, oswa yon tchèk pou wè si li sèk.','Ekri lè a. Make si se te yon <b>chita ki te planifye</b> oswa si '+k+' te <b>mande</b>.','Make sa ki te pase: pipi nan twalèt la, yon aksidan (mouye oswa sal), sèk nan tchèk la, oswa poupou nan twalèt la oswa nan rad yo.','Ekri sa '+k+' te mete: kouchèt, pull-up oswa kilòt.'];x='<p style="margin:4px 0 0"><b>Gen pwoblèm twalèt ki gen yon kòz medikal; pale ak doktè pitit ou a anvan.</b> <b>Vi prive:</b> nenpòt tchèk pa videyo se ak kamera fèmen, oswa sèlman zèpòl ak tèt, pandan w ap di sa ki te pase. Pa janm filme nan twalèt la.</p>';}
+  return L.length?'<div class="hs-box" lang="ht"><b>'+HOW+'</b><ol>'+L.map(l=>'<li>'+l+'</li>').join('')+'</ol>'+x+'</div>':'';}
+ const SLX='<div class="hs-box" lang="ht"><b>Lè pou dòmi ak nwit lan</b><ol><li>Yon liy pou chak nwit, bò kote liy ki anwo a.</li><li><b>Rele oswa soti</b>: konbyen fwa pitit la te rele oswa soti nan chanm nan apre limyè yo etenn.</li><li><b>Ki kote li dòmi</b>, e si yon granmoun te rete jiskaske li dòmi.</li><li><b>Ki kote li ye lè l leve</b>: pwòp kabann li oswa kabann yon paran.</li><li>Lè li reveye nan nwit lan, kisa granmoun nan te fè?</li><li>Nenpòt medikaman pou dòmi oswa melatonin, ak lè yo te ba li l.</li></ol><p style="margin:4px 0 0">Pi bon devinèt ou a bon.</p></div>';
+ const HEALTH='<div class="v65-health" lang="ht">Si pitit ou a touse, toufe, gen yon vwa mouye oswa ki fè bri, oswa li vomi pandan l ap manje, sispann repa a epi rele doktè pitit ou a. Si pitit ou a pa ka respire, touse oswa pale, rele 911.</div>';
+ const SAFE='<p class="hs-safe" lang="ht"><b>Si yon moun blese oswa an danje, rele 911 oswa doktè pitit ou a.</b> Apre sa, fè nou konnen.</p>';
+ const CHOICE='<p class="hs-choice" lang="ht">Se ou ki chwazi si w ap kenbe fèy sa a. Ou ka sispann nenpòt ki lè; sa p ap chanje sèvis pitit ou a.</p>';
+ const BASE='<p class="hs-line" lang="ht"><b>Lè yon konpòtman rive:</b> Reyaji jan ou konn fè abitye; kenbe tout moun an sekirite. Make fèy la apre.</p>';
+ const TH={'Behavior':'Konpòtman','Routine':'Woutin','Total':'Total','Step':'Etap','Night':'Nwit','Lights out':'Limyè etenn','Fell asleep':'Li dòmi','Woke in the night':'Li reveye nan nwit lan (konbyen fwa / konbyen tan)','Woke up for the day':'Li leve pou jounen an','Nap':'Ti dòmi','Notes':'Nòt',
+  'Day':'Jou','Meal':'Repa','Minutes':'Minit','Target food offered? Y / N':'Yo ofri manje sib la? Y / N','Bites tried':'Ti mòde li eseye','All of it eaten? Y / N':'Li manje tout? Y / N','Gag, cough or choke':'Anvi vomi, touse oswa toufe','After refusal, I… (tick)':'Apre refi a, mwen… (make)',
+  'Time':'Lè','Scheduled sit / Asked':'Chita planifye / Li mande','Pee in the toilet':'Pipi nan twalèt la','Accident: wet / soiled':'Aksidan: mouye / sal','Dry check':'Tchèk sèk','BM: toilet / accident':'Poupou: twalèt / aksidan','Wore: diaper / pull-up / underwear':'Li te mete: kouchèt / pull-up / kilòt',
+  'Calls or trips out':'Rele oswa soti','Fell asleep where / adult stayed? Y N':'Ki kote li dòmi / granmoun te rete? Y N','At wake time: own bed / parent’s bed':'Lè l leve: kabann pa l / kabann paran','At a night waking, the adult…':'Lè l reveye nan nwit, granmoun nan…','Sleep medicine or melatonin / time':'Medikaman pou dòmi oswa melatonin / lè',
+  'Mon':'Len','Tue':'Mad','Wed':'Mèk','Thu':'Jed','Fri':'Van','Sat':'Sam','Sun':'Dim'};
+ const DAYH={Mon:'lendi',Tue:'madi',Wed:'mèkredi',Thu:'jedi',Fri:'vandredi',Sat:'samdi',Sun:'dimanch'};
+ const WORD={'Waited calmly':'Tann kalm','Coaxed':'Ankouraje l','Ended the meal early':'Fini repa a bonè','Gave another food':'Bay yon lòt manje','Sit':'Chita','Asked':'Mande','Wet':'Mouye','Soiled':'Sal','Toilet':'Twalèt','Accident':'Aksidan','Underwear':'Kilòt','Dinner':'Manje aswè','none':'pa genyen'};
+ const FREQ={'Every school day, in the folder':'chak jou lekòl, nan dosye a','Twice a week (Wednesday and Friday)':'de fwa pa semèn (mèkredi ak vandredi)','Every Friday':'chak vandredi','Every two weeks':'chak de semèn','At the review meeting':'nan reyinyon revizyon an'};
+ const RET={'In the backpack folder':'nan dosye ki nan valiz la','A photo of the sheet, texted to a district phone number':'yon foto fèy la, voye pa tèks nan yon nimewo telefòn distri a','A photo of the sheet, emailed to a district email address':'yon foto fèy la, voye pa imèl nan yon adrès imèl distri a','Handed to the teacher at pickup':'rem\u00e8t pwofesè a lè ou vin chèche pitit la','Read out over the phone at the weekly call':'li l nan telefòn pandan apèl chak semèn nan'};
+ function foot(){const m=S.meta,f=FREQ[T(m.freq)],r=RET[T(m.ret_how)];let s='';
+  if(T(m.freq))s+='Voye fèy la tounen: '+(f?E(f):E(T(m.freq).toLowerCase()))+(T(m.ret_how)?', '+(r?E(r):E(T(m.ret_how).toLowerCase()))+(retPhoto()&&T(m.ret_to)?' ('+E(famText(m.ret_to))+')':''):'')+'.';
+  if(T(m.call))s+=' Kesyon? Rele '+E(famText(m.call))+'.';
+  if(T(m.urgent))s+=' Fè nou konnen pwochen jou lekòl la si '+E(famText(m.urgent))+'.';
+  return s?'<p class="hs-foot-ht" lang="ht">'+s.trim()+'</p>':'';}
+ const both=(ht,en)=>'<span class="hs-ht" lang="ht">'+ht+'</span> · '+en;
+ function textSwap(el,map){const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);const L=[];while(w.nextNode())L.push(w.currentNode);
+  L.forEach(n=>{let t=n.nodeValue,ch=false;Object.keys(map).forEach(k=>{const re=new RegExp('(^|[^A-Za-z])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![A-Za-z])','g');if(re.test(t)){t=t.replace(re,(a,p)=>p+map[k]+' / '+k);ch=true;}});if(ch)n.nodeValue=t;});}
+ function one(hs){const id=hs.getAttribute('data-sheet');
+  if(hs.querySelector('.hs-draft'))return;
+  const title=hs.querySelector('.hs-title');
+  hs.insertAdjacentHTML('afterbegin','<p class="hs-draft" lang="en" data-nbh-family-skip><b>'+DRAFT+'</b> <span lang="ht">Tradiksyon sa a se yon bouyon: yon tradiktè distri a ap revize l anvan li ale lakay.</span></p>');
+  if(title&&TITLE[id]&&id!=='sched')title.innerHTML='<span lang="ht">'+TITLE[id]+'</span> · '+title.innerHTML;
+  const who=hs.querySelector('.hs-who');if(who)[...who.children].forEach(sp=>{const t=sp.firstChild;if(!t||t.nodeType!==3)return;const v=t.nodeValue;
+    const m={'Child: ':'Timoun / Child: ','Week of: ':'Semèn / Week of: ','Filled in by: ':'Ki moun ki ranpli l / Filled in by: '}[v];if(m)t.nodeValue=m;});
+  const en=hs.querySelector(':scope > .hs-box:not([lang])');const bx=box(id);if(en&&bx)en.insertAdjacentHTML('beforebegin',bx);
+  if(id==='meal'){const h=hs.querySelector(':scope > .v65-health');if(h)h.insertAdjacentHTML('beforebegin',HEALTH);}
+  if(id==='sleep'){const x=hs.querySelector('.v65-slx > .hs-box');if(x)x.insertAdjacentHTML('beforebegin',SLX);}
+  hs.querySelectorAll('.hs-t thead th').forEach(th=>{const t=th.firstChild&&th.firstChild.nodeType===3?th.firstChild.nodeValue.trim():'';const h=TH[t];if(h)th.insertAdjacentHTML('beforeend','<br><span class="hs-ht" lang="ht">'+h+'</span>');});
+  hs.querySelectorAll('.hs-t td.lab').forEach(td=>{const t=td.firstChild&&td.firstChild.nodeType===3?td.firstChild.nodeValue:'';
+    if(/^Example/.test(t))td.firstChild.nodeValue=t.replace(/^Example/,'Egzanp / Example');
+    if(td.classList.contains('night')){const m=/^(\w{3}) night → (\w{3})$/.exec(t.trim());if(m)td.insertAdjacentHTML('beforeend','<br><span class="hs-ht" lang="ht">Nwit '+DAYH[m[1]]+' → '+DAYH[m[2]]+'</span>');}});
+  hs.querySelectorAll('.abc .abc-cols > div > b').forEach(b=>{const t=b.textContent;const h=/^Before:/.test(t)?'Anvan: kisa ki t ap pase?':/^After:/.test(t)?'Apre: kisa ki te pase apre sa?':/^What .+ did$/.test(t)?'Sa '+K()+' te fè':'';if(h)b.insertAdjacentHTML('afterbegin','<span class="hs-ht" lang="ht">'+h+'</span><br>');});
+  hs.querySelectorAll('.abc-head > span, .abc .it, .abc-free').forEach(sp=>{const t=sp.firstChild;if(!t||t.nodeType!==3)return;const m={'Date: ':'Dat / Date: ','Time: ':'Lè / Time: ','Routine: ':'Woutin / Routine: ','In a few words: ':'An kèk mo / In a few words: ','How long or how many: ':'Konbyen tan oswa konbyen fwa / How long or how many: '}[t.nodeValue];if(m)t.nodeValue=m;});
+  if(id==='meal'||id==='toilet'||id==='sleep')hs.querySelectorAll('.hs-t tbody').forEach(tb=>textSwap(tb,WORD));
+  const end=hs.querySelector('.hs-end');
+  if(end){const sf=end.querySelector(':scope > .hs-safe');if(sf)sf.insertAdjacentHTML('beforebegin',SAFE);
+    end.querySelectorAll(':scope > .hs-line').forEach(l=>{const b=l.querySelector('b');if(!b)return;const t=b.textContent;
+      if(t==='When a behavior happens:'&&/Respond the way you usually do/.test(l.textContent))l.insertAdjacentHTML('beforebegin',BASE);
+      else if(t==='When a behavior happens:')b.insertAdjacentHTML('afterbegin','<span class="hs-ht" lang="ht">Lè yon konpòtman rive /</span> ');
+      else{const m=/^If (.+) happens:$/.exec(t);if(m)b.insertAdjacentHTML('afterbegin','<span class="hs-ht" lang="ht">Si '+E(m[1])+' rive /</span> ');}});
+    const sig=end.querySelector('.hs-sig');if(sig)[...sig.children].forEach(sp=>{const t=sp.firstChild;if(!t||t.nodeType!==3)return;const m={'Signed: ':'Siyati / Signed: ','Date: ':'Dat / Date: '}[t.nodeValue];if(m)t.nodeValue=m;});
+    const ch=end.querySelector('.hs-choice:not([lang])');if(ch)ch.insertAdjacentHTML('beforebegin',CHOICE);
+    const ft=end.querySelector('.hs-foot');const fh=foot();if(ft&&fh)ft.insertAdjacentHTML('beforebegin',fh);}}
+ /* every sheet is a family page for the reading check; a Creole family's sheets carry the Creole */
+ function run(){const out=document.getElementById('sheetOut');if(!out)return;const ht=creole();
+  out.querySelectorAll(':scope > .hs').forEach(hs=>{const t=hs.querySelector('.hs-title');hs.setAttribute('data-nbh-family','');hs.setAttribute('data-nbh-family-title',t?t.textContent.trim():'A home sheet');
+    if(ht){one(hs);const t2=hs.querySelector('.hs-title');if(t2)hs.setAttribute('data-nbh-family-title',t2.textContent.trim());}});
+  if(ht){const fl=document.getElementById('hdLangFlag');if(fl)fl.innerHTML='<b>Before these go home.</b> Home language: '+E((nbhHdLang()||{}).home)+'. Each sheet carries the workstation&rsquo;s Haitian Creole beside the English, and says so: <b>'+DRAFT+'</b> The words typed on Setup (behaviors, routines, steps, the plan lines) print as typed: write them in Creole for this family, or have the translator add them.';}
+  try{if(typeof renderCost==='function')renderCost();}catch(e){}}
+ window.__hdHt=run;
+ {const r=renderSheets;renderSheets=function(){const x=r.apply(this,arguments);try{run();}catch(e){}return x;};}
+ document.addEventListener('input',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.m==='lang')renderSheetsSoon();});
+ try{renderSheets();}catch(e){}
+})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
