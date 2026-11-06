@@ -3,6 +3,18 @@
    SR     FCT-SR-H4  PR-1 steps on SR-1's second row (the share of requests in S+): hold below it, ask for it when missing
           FCT-SR-H2/H5  SR-1's family version for the two new designs (no extinction; a wait that ends on what the student does)
           FCT-SR-H5  TD-1's FCT card takes DT-1's tolerance response and activity into its two wait fields
+   DELAY  H1, H2, M2, L1  TD-1 reads the rest of DT-1's plan (screen and BIP); M6 DT-1 hands the AUC on its own (AD-1 takes it);
+          H3, H4, M8  TE-1 and QS-1 keep AD-1's delivery window, exchange timing and token value
+   PREF   H2, H6, M7  TD-1 reads PA-1's competing stimulus test (the wait-component items, the blocking item, rotation, re-test)
+   SKILL  M7 SA-1 reads VS-1's schedule as VS-1 sends it; M9 ST-1 takes TI-1's "Why did it drop?"; BC-RM-M3 RM-1 reads TI-1
+   TDB    FEED-M5, M6, M8  FD-1 adds its texture order, latest step and pace; TD-1's meal cards read FD-1 (and TB-1's target)
+   BCRM   H3 TD-1 runs in / not yet in, to BC-1 and RM-1; M2 the card in every setting; H1, H5, H6, M5, M6 on PR-1
+   STAFFA SKILL-L6 SA-1; FEED-M3 CT-1 from FD-1; CARE-L2 CF-1 from CT-1; STAFF-M12 QS-1 and EB-1 send PD-1 the request
+   STAFFB STAFF-H4 TI-1 records feedback with RS-1's eight steps
+   FEED   FEED-H3 DM-1's diet and RR-1's diagnoses and diet reach FD-1
+   SAFETY SAFETY-H1 CR-1's restraint pattern to FS-1 and TD-1; CARE-H7, M10, M7 IC-1's and HD-1's decisions to CT-1 and TD-1
+   ASSESS ASSESS-H1.4 EA-1 reads IN-1's candidate conditions; EA-VI-M7 FS-1 reads EA-1's tier
+   READINGS  the 54 sources the parcels listed, in nbh-readings.js
    usage: WS_URL=http://127.0.0.1:8630 WS_ROOT=. node qa/v2567-batch3-test.js [section...] */
 const L=require(__dirname+'/lib.js');const {sleep}=L;
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1500):''));if(!c)fails++;};
