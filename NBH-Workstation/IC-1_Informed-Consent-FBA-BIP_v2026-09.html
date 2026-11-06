@@ -894,6 +894,230 @@ ul.ic-conf li{margin:2px 0}
   .sheet .nbh-print-head,.sheet .nbh-band{margin-bottom:8px}
 }
 </style>
+<style id="ic1-print-css">
+/* v25.68 (W1, the BCBA, 11/6) IC-1 on paper, designed as a consent document rather than a printed screen. Every rule here
+   holds only under html.ic-pr, the class the form's own Print sets for the length of a print (the ic1-print script): the
+   screen, and the master print's copy of the form (which never carries the class), stay exactly as they were. The paper
+   follows the research the BCBA asked for: a one-page key-information summary first, in boxes with bold white headings on
+   navy and an icon beside the text (Hill et al., 2025); question headings, bullets and white space (the FDA review of
+   consent studies; Paris et al.); 12 pt body text, headings 2 pt or more larger and bold, more space above a heading than
+   below, left aligned (HHS Health Literacy Online; NC DHHS; CHCS 2024). The family's copy comes first; "For the school's
+   file" starts on a page of its own. */
+#icKey,#icFile,#icFileSrc,.ic-pv,.ic-bx,.ic-opts,.ic-plist,.ic-np,.ic-sg,.ic-q,.ic-q2,.ic-signnote{display:none}
+@media print{
+  html.ic-pr{--icp-ink:#1a2933;--icp-navy:#182e43;--icp-acc:#2b6668;--icp-mute:#46575f;--icp-rule:#b3c2c7;--icp-rule2:#dde5e7;
+    --icp-sans:"Inter","Helvetica Neue",Helvetica,Arial,"Segoe UI",sans-serif;
+    --icp-serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif}
+  html.ic-pr,html.ic-pr body{background:#fff!important}
+  html.ic-pr body{font-family:var(--icp-sans);font-size:12pt;line-height:1.25;color:var(--icp-ink);text-align:left}
+  html.ic-pr *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* the pages: the family's copy, then the school's file from a page of its own */
+  html.ic-pr #icKey,html.ic-pr #consent,html.ic-pr #proc,html.ic-pr #planproc{page:icfam}
+  html.ic-pr #icFile,html.ic-pr #assent,html.ic-pr #record,html.ic-pr #icFileSrc,html.ic-pr #guide,html.ic-pr #refs{page:icfile}
+  html.ic-pr #icKey,html.ic-pr #icFile,html.ic-pr #icFileSrc{display:block}
+  html.ic-pr #icKey{break-after:page;page-break-after:always}
+  html.ic-pr #icFile{break-before:page!important;page-break-before:always!important}
+  html.ic-pr.ic-fam #icFile,html.ic-pr.ic-fam #icFileSrc,html.ic-pr.ic-fam #assent,html.ic-pr.ic-fam #record,html.ic-pr.ic-fam #guide,html.ic-pr.ic-fam #refs{display:none!important}
+  html.ic-pr .sheet{font-size:12pt!important;line-height:1.25;padding:0!important;margin:0!important;width:auto!important;max-width:none!important;box-shadow:none!important;background:#fff!important;
+    break-before:auto!important;page-break-before:auto!important}
+  /* what the screen shows and the paper does not: one masthead (page 1), the form's own boxes, grey fills */
+  /* (a class or attribute written more than once only raises the rule above the layout rules below, which also say !important) */
+  html.ic-pr .icp [hidden][hidden][hidden][hidden],html.ic-pr .icp .ic-hide.ic-hide.ic-hide.ic-hide,html.ic-pr .ic-src.ic-src.ic-src.ic-src,
+  html.ic-pr [hidden],html.ic-pr #methodNote,html.ic-pr .icp .ic-sigs > .ident.c3,html.ic-pr .ic-hide,html.ic-pr .ic-src,html.ic-pr .sheet .nbh-print-head,html.ic-pr .icp > .bar.nbh-band,html.ic-pr .nbh-pm,html.ic-pr .ic-decopts,
+  html.ic-pr canvas.sigpad,html.ic-pr img.sigimg,html.ic-pr .sigtools,html.ic-pr .readout:empty,html.ic-pr .ic-paper,html.ic-pr .ic-screen,html.ic-pr .nbh-keep:empty{display:none!important}
+  html.ic-pr .nbh-keep{display:block!important;width:auto!important}
+
+  /* ---- type: 12 pt body, question headings 14.5 pt bold, more room above a heading than below ---- */
+  html.ic-pr .icp p,html.ic-pr .icp li,html.ic-pr .icp p.method,html.ic-pr .icp .method{font-family:var(--icp-sans)!important;font-size:12pt!important;line-height:1.25!important;color:var(--icp-ink)!important;max-width:none}
+  html.ic-pr .icp p,html.ic-pr .icp li{orphans:3;widows:3}
+  html.ic-pr .icp p.method{margin:0 0 5pt!important}
+  html.ic-pr .icp .method b,html.ic-pr .icp li > b:first-child{font-family:var(--icp-sans)!important;font-size:12pt!important;font-weight:700;color:var(--icp-navy)}
+  html.ic-pr .ic-q2{display:block;font:700 18pt/1.2 var(--icp-serif);color:var(--icp-navy);margin:18pt 0 6pt;padding:0 0 5pt;border-bottom:1.5pt solid var(--icp-navy);break-after:avoid;page-break-after:avoid}
+  html.ic-pr .ic-q{display:block;font:700 14.5pt/1.25 var(--icp-sans);color:var(--icp-navy);margin:13pt 0 3.5pt;padding:0;border:0;break-after:avoid;page-break-after:avoid}
+  html.ic-pr .ic-q .ic-qn{color:var(--icp-acc)}
+  html.ic-pr .icp h3.sub{break-after:avoid;page-break-after:avoid}
+  html.ic-pr #consent > .ic-q:first-child,html.ic-pr .icp > .ic-q2:first-child{margin-top:0}
+  html.ic-pr ul.rules{margin:4pt 0 8pt!important;padding-left:17pt!important}
+  html.ic-pr ul.rules li{margin:0 0 3pt!important}
+  html.ic-pr ul.rules ul.ic-conf{margin:4pt 0 2pt 16pt!important;padding:0}
+  html.ic-pr ul.rules ul.ic-conf li{margin:0 0 3pt!important}
+  html.ic-pr .icp .tag{display:none!important}
+
+  /* ---- a field on paper: its entry as text, or a line to write on with the label under it ---- */
+  html.ic-pr .ic-pv{display:inline;white-space:pre-wrap;overflow-wrap:break-word;font-family:var(--icp-sans);font-size:12pt;color:var(--icp-ink)}
+  html.ic-pr .ic-pv.ic-line{display:inline-block;min-width:1.25in;height:1.2em;border-bottom:.75pt solid #55666e;vertical-align:-3pt}
+  html.ic-pr .ic-bx{display:inline-block;box-sizing:border-box;width:11.5pt;height:11.5pt;border:1.1pt solid var(--icp-navy);margin:0 6pt 0 0;vertical-align:-2pt;
+    font:700 9pt/9.6pt var(--icp-sans);color:var(--icp-navy);text-align:center;background:#fff;flex:0 0 auto}
+  html.ic-pr .ic-opts{display:flex;flex-wrap:wrap;gap:4pt 20pt;flex:1 1 100%}
+  html.ic-pr .ic-opt{display:inline-flex;align-items:baseline;white-space:normal}
+  html.ic-pr .ic-opt .ic-bx{align-self:center}
+  html.ic-pr .ic-opt.on{font-weight:700;color:var(--icp-navy)}
+  /* a row of fields: the entry on a line, the label under it */
+  html.ic-pr .icp .ident,html.ic-pr .icp .ident.c3{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9pt 16pt!important;margin:4pt 0 10pt!important}
+  html.ic-pr #consent > .ident{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5pt 14pt!important}
+  html.ic-pr #consent > .ident .f > .ic-pv{font-size:11pt;line-height:1.2;min-height:0}
+  html.ic-pr .icp .ident.c1{grid-template-columns:1fr!important}
+  html.ic-pr .icp .ident > .f.ic-wide{grid-column:span 2}
+  html.ic-pr .icp .f{display:flex!important;flex-direction:column-reverse!important;align-items:stretch!important;justify-content:flex-end;gap:1.5pt!important;min-width:0;break-inside:avoid}
+  html.ic-pr .icp .f > label{font:400 9.5pt/1.25 var(--icp-sans)!important;color:var(--icp-mute)!important;white-space:normal!important;letter-spacing:0;margin:0!important}
+  html.ic-pr .icp .f > .ic-pv{display:block;min-height:1.42em;padding:0 0 1pt;border-bottom:.6pt solid #7d8c93;font-size:12pt}
+  html.ic-pr .icp .f > .ic-pv.ic-line{width:auto;height:auto;border-bottom:.75pt solid #55666e}
+  /* a definition row: the label at the left, the entry beside it, light rules between rows */
+  html.ic-pr .icp .defs{border:0!important;margin:4pt 0 10pt!important;background:none!important}
+  html.ic-pr .icp .defs .drow{display:grid!important;grid-template-columns:1.75in minmax(0,1fr);gap:0 14pt;border:0!important;border-top:.5pt solid var(--icp-rule)!important;padding:3pt 0 3pt!important;break-inside:avoid;page-break-inside:avoid}
+  html.ic-pr .icp .defs .drow:last-child{border-bottom:.5pt solid var(--icp-rule)!important}
+  html.ic-pr .icp .defs .dlab{background:none!important;border:0!important;padding:1pt 0 0!important;flex:none!important;font:600 10.5pt/1.3 var(--icp-sans)!important;color:var(--icp-mute)!important}
+  html.ic-pr .icp .defs .dval{min-width:0;font-size:12pt}
+  html.ic-pr .icp .defs .dval > .ic-pv{display:block}
+  html.ic-pr .icp .defs .dval > .ic-pv.ic-line{display:block;width:100%;height:1.45em}
+  html.ic-pr .icp .defs .dval .method{margin:0 0 4pt!important}
+  html.ic-pr .icp .chkrow{display:flex!important;flex-wrap:wrap;gap:4pt 18pt;margin:0!important;font-size:12pt}
+  html.ic-pr .icp .chkrow label{display:inline-flex!important;align-items:baseline;gap:4pt;margin:0!important;font-size:12pt}
+  html.ic-pr .icp .chkrow label .ic-bx{align-self:center;margin-right:2pt}
+  html.ic-pr .icp .chkrow .ic-pv.ic-line{min-width:1.1in}
+  html.ic-pr .icp .chkrow.dec{flex-direction:column;gap:5pt}
+  /* part 5: the three choices, one to a line */
+  html.ic-pr .ic-signpart > .chkrow{flex-direction:column!important;gap:3pt!important;margin:2pt 0 6pt!important}
+  html.ic-pr .ic-signpart > .chkrow label{font-size:12pt}
+
+  /* ---- page 1: the key information ---- */
+  html.ic-pr .ic-mast{display:flex;justify-content:space-between;align-items:center;gap:14pt;padding:0 0 4pt;border-bottom:2pt solid var(--icp-navy)}
+  html.ic-pr .ic-mast img{height:.44in;width:auto;display:block}
+  html.ic-pr .ic-mastt{flex:1 1 auto;min-width:0;padding-left:12pt;border-left:1pt solid var(--icp-rule)}
+  html.ic-pr .ic-mastmeta{font:400 9pt/1.35 var(--icp-sans);color:var(--icp-mute);margin-top:2pt}
+  html.ic-pr .ic-title{font:700 15pt/1.16 var(--icp-serif);color:var(--icp-navy);margin:0}
+  html.ic-pr .ic-for{font:400 10.5pt/1.3 var(--icp-sans);color:var(--icp-ink);margin:4pt 0 2pt}
+  html.ic-pr .ic-for b{font-weight:700;color:var(--icp-navy)}
+  html.ic-pr .ic-keyh{font:700 14pt/1.2 var(--icp-sans);color:var(--icp-navy);margin:1pt 0 4pt}
+  html.ic-pr .ic-keyh span{font-weight:400;font-size:11pt;color:var(--icp-mute);margin-left:6pt}
+  html.ic-pr .ic-keygrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10pt;align-items:stretch}
+  html.ic-pr .ic-kcol{display:flex;flex-direction:column;gap:7pt;min-width:0}
+  html.ic-pr .ic-kcol > .ic-kb:last-child{flex:1 1 auto}
+  html.ic-pr .ic-kb{border:1pt solid var(--icp-navy);break-inside:avoid;page-break-inside:avoid;display:flex;flex-direction:column}
+  html.ic-pr .ic-kbh{margin:0;background:var(--icp-navy)!important;color:#fff!important;font:700 12pt/1.2 var(--icp-sans);padding:3pt 8pt}
+  html.ic-pr .ic-kbb{display:block;padding:5pt 8pt 4pt 7pt;flex:1 1 auto}
+  html.ic-pr .ic-kbb::after{content:"";display:block;clear:both}
+  html.ic-pr .ic-kbi{float:left;width:22pt;height:22pt;color:var(--icp-acc);margin:1pt 7pt 2pt 0}
+  html.ic-pr .ic-kbi svg{display:block;width:22pt;height:22pt}
+  html.ic-pr #icKey{--kfs:11pt}html.ic-pr #icKey.ic-k1{--kfs:10.5pt}html.ic-pr #icKey.ic-k2{--kfs:10pt}html.ic-pr #icKey.ic-k3{--kfs:9.5pt}
+  html.ic-pr .ic-kbt{display:block;min-width:0;font-size:var(--kfs);line-height:1.3}
+  html.ic-pr .ic-kbt p{margin:0 0 3pt;font-size:var(--kfs);line-height:1.3}
+  html.ic-pr .ic-kbt ul{margin:0 0 3pt;padding-left:12pt;list-style-position:outside}
+  html.ic-pr .ic-kbt > ul:first-child{display:flow-root}
+  html.ic-pr .ic-kbt li{margin:0 0 1.5pt;font-size:var(--kfs);line-height:1.3}
+  html.ic-pr .ic-kbt ul.ic-2c{columns:2;column-gap:14pt}
+  html.ic-pr .ic-kbt ul.ic-2c li{break-inside:avoid}
+  html.ic-pr .ic-kbt b{color:var(--icp-navy)}
+  html.ic-pr .ic-kbt .ic-pv.ic-line{min-width:1.4in}
+  html.ic-pr .ic-sim{font:400 8.5pt/1.25 var(--icp-sans);color:#7a3a10;margin:0 0 3pt;padding:2pt 0 2pt 6pt;border-left:3pt solid #9b4e15}
+  html.ic-pr .ic-sim b{color:#7a3a10}
+  html.ic-pr #icKey .sim-banner{display:block;width:auto!important;margin:0 0 6pt!important;padding:3pt 8pt!important;background:#fff!important;border:1pt solid #9b4e15!important;border-left-width:4pt!important;
+    font:400 9pt/1.35 var(--icp-sans)!important;color:var(--icp-ink)!important}
+
+  /* ---- part 2: the procedures as a list, the checked ones in full ---- */
+  html.ic-pr .ic-plist{display:block;margin:2pt 0 8pt}
+  html.ic-pr ul.ic-procs{list-style:none;margin:0;padding:0}
+  html.ic-pr ul.ic-procs li{display:flex;gap:0;align-items:flex-start;margin:0 0 3pt;break-inside:avoid;page-break-inside:avoid}
+  html.ic-pr ul.ic-procs li .ic-bx{margin:3pt 8pt 0 0}
+  html.ic-pr ul.ic-procs li b{color:var(--icp-navy)}
+  html.ic-pr p.ic-off{margin:6pt 0 0!important;padding:6pt 0 0;border-top:.5pt solid var(--icp-rule);display:block;color:var(--icp-mute)!important;font-size:11pt!important;line-height:1.38!important}
+  html.ic-pr p.ic-off > b{display:block;color:var(--icp-ink);break-after:avoid}
+  html.ic-pr p.ic-off .ic-opt{font-size:11pt;margin-right:16pt}
+
+  /* ---- the specific procedures: each a short section with its own decision ---- */
+  html.ic-pr .card{border:0!important;border-left:0!important;padding:0!important;margin:11pt 0 0!important;background:none!important;break-inside:auto!important;page-break-inside:auto!important}
+  html.ic-pr .card.ic-short{break-inside:avoid!important;page-break-inside:avoid!important}
+  html.ic-pr .card .chd + .method,html.ic-pr .card .chd + p{orphans:3}
+  html.ic-pr .card .chd{display:block!important;border:0!important;padding:0!important;margin:0 0 4pt!important;break-after:avoid;page-break-after:avoid}
+  html.ic-pr .card .chdt{font:700 14pt/1.25 var(--icp-sans)!important;color:var(--icp-navy)!important}
+  html.ic-pr .card .method.v65no{border-left:2.5pt solid var(--icp-acc)!important;padding-left:8pt!important}
+  html.ic-pr .card .defs{margin-bottom:0!important}
+  html.ic-pr .card > .defs:last-of-type .drow:last-child,html.ic-pr .card .decide{break-before:avoid;page-break-before:avoid}
+  html.ic-pr .decide{display:flex!important;flex-wrap:wrap;gap:4pt 22pt;align-items:baseline;margin:5pt 0 0!important;padding:5pt 0 0!important;border-top:1pt solid var(--icp-navy);font:400 12pt/1.4 var(--icp-sans)!important;break-inside:avoid;page-break-inside:avoid}
+  html.ic-pr .decide > b{flex:1 1 100%;font-size:12pt!important}
+  html.ic-pr .decide label{display:inline-flex!important;align-items:baseline;gap:5pt;font-size:12pt}
+  html.ic-pr .decide .ic-pv.ic-line{min-width:.9in}
+  html.ic-pr .decide label:last-child .ic-pv.ic-line{min-width:1.2in}
+  html.ic-pr .card .v65hvv{display:none!important}
+  html.ic-pr .ic-np{display:block;break-inside:avoid;page-break-inside:avoid;margin:2pt 0 0;padding:4pt 0 4pt;border-top:.5pt solid var(--icp-rule);border-bottom:.5pt solid var(--icp-rule)}
+  html.ic-pr .ic-np p{margin:0!important;font-size:11.5pt!important;color:var(--icp-mute)!important}
+  html.ic-pr .ic-np b{color:var(--icp-ink)}
+  /* the plan's parts: only the rows that hold a part */
+  html.ic-pr #v65Pp{font-size:10.5pt!important}
+  html.ic-pr #v65Pp .v65sh{display:none!important}
+  html.ic-pr #v65Pp tr.v65shared .v65sh{display:block!important;font-size:9.5pt;color:var(--icp-mute)}
+  html.ic-pr #v65Pp tr.v65shared .ic-opts{display:none!important}
+  html.ic-pr #v65PpV,html.ic-pr #v65AsV{display:none!important}
+
+  /* ---- tables: light horizontal rules only ---- */
+  html.ic-pr .icp table.grid{border-collapse:collapse;width:100%;font-family:var(--icp-sans);font-size:10.5pt!important;table-layout:auto}
+  html.ic-pr .icp table.grid th,html.ic-pr .icp table.grid td{border:0!important;border-bottom:.5pt solid var(--icp-rule)!important;background:none!important;padding:3.5pt 6pt 3.5pt 0!important;vertical-align:top!important;height:auto!important;font-size:10.5pt!important;line-height:1.35!important;color:var(--icp-ink)}
+  html.ic-pr .icp table.grid thead th{border-bottom:1pt solid var(--icp-navy)!important;font:600 9.5pt/1.3 var(--icp-sans)!important;color:var(--icp-mute)!important;text-transform:none;letter-spacing:0}
+  html.ic-pr .icp table.grid td .ic-pv{font-size:10.5pt}
+  html.ic-pr .icp table.grid td .ic-pv.ic-line{display:block;min-width:0;width:100%;border-bottom:0;height:1.25em}
+  html.ic-pr .icp table.grid tr{break-inside:avoid;page-break-inside:avoid}
+  html.ic-pr .icp table.grid thead{display:table-header-group}
+  html.ic-pr .icwrap{overflow:visible!important}
+  html.ic-pr #logTbl,html.ic-pr #attTbl{table-layout:fixed!important}
+  html.ic-pr #logTbl th:nth-child(1),html.ic-pr #attTbl th:nth-child(1){width:.95in!important;text-align:left}
+  html.ic-pr #logTbl th:nth-child(2){width:1.9in!important}html.ic-pr #attTbl th:nth-child(2){width:1.4in!important}
+  html.ic-pr #logTbl th:nth-child(4),html.ic-pr #attTbl th:nth-child(4){width:.75in!important}
+  html.ic-pr #logTbl td.c,html.ic-pr #attTbl td.c{text-align:left!important}
+
+  /* ---- 5 and 7: the decision and the signatures, on one page ---- */
+  html.ic-pr .ic-signpart{break-inside:avoid!important;page-break-inside:avoid!important;margin-top:0}
+  html.ic-pr .ic-sigs{break-inside:avoid;page-break-inside:avoid}
+  html.ic-pr .ic-sigs > .twoup.sigs,html.ic-pr .ic-sigs > .ident,html.ic-pr #sigNote{display:none!important}
+  html.ic-pr .ic-signnote{display:block;margin:0 0 1pt!important}
+  html.ic-pr .ic-sg{display:block;margin:2pt 0 0}
+  html.ic-pr .ic-sgh{font:700 11.5pt/1.3 var(--icp-sans);color:var(--icp-navy);margin:7pt 0 0}
+  html.ic-pr .ic-sgrow{display:grid;align-items:end;grid-template-columns:minmax(0,2.5fr) minmax(0,1fr) minmax(0,1.9fr) minmax(0,1.35fr);gap:0 12pt}
+  html.ic-pr .ic-sgrow.ic-3{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr)}
+  html.ic-pr .ic-sgc{min-width:0;padding-top:6pt}
+  html.ic-pr .ic-sgl{border-bottom:.9pt solid var(--icp-ink);min-height:1.45em;font-size:12pt;padding:0 0 1pt;display:flex;align-items:flex-end}
+  html.ic-pr .ic-sgc.ic-sign .ic-sgl{min-height:.42in}
+  html.ic-pr .ic-sgl img{display:block;max-height:.46in;max-width:100%;width:auto;height:auto}
+  html.ic-pr .ic-sglab{font:400 9.5pt/1.3 var(--icp-sans);color:var(--icp-mute);padding-top:2pt}
+
+  /* ---- the end of the family's copy ---- */
+  html.ic-pr .ic-close2{margin:9pt 0 0;padding:4pt 10pt;border:1pt solid var(--icp-navy);border-left-width:5pt;font:400 11pt/1.38 var(--icp-sans);color:var(--icp-ink)}
+  html.ic-pr .ic-close2 b{color:var(--icp-navy)}
+
+  /* ---- For the school's file ---- */
+  html.ic-pr #icFile h2.ic-fileh{font:700 20pt/1.2 var(--icp-serif);color:var(--icp-navy);margin:0 0 4pt;padding:0 0 6pt;border-bottom:2pt solid var(--icp-navy)}
+  html.ic-pr #icFile p.ic-filenote{font-size:11pt;color:var(--icp-mute);margin:0 0 6pt}
+  html.ic-pr #icFile,html.ic-pr #assent,html.ic-pr #record,html.ic-pr #icFileSrc{font-size:11pt}
+  html.ic-pr #icFile .ic-q,html.ic-pr #assent .ic-q,html.ic-pr #record .ic-q{font-size:13pt;margin-top:14pt}
+  html.ic-pr #icFile .ic-q2,html.ic-pr #assent .ic-q2,html.ic-pr #record .ic-q2{font-size:16pt;margin-top:20pt}
+  html.ic-pr #icFile p,html.ic-pr #icFile li,html.ic-pr #icFile .method,html.ic-pr #assent p,html.ic-pr #assent .method,html.ic-pr #assent li,html.ic-pr #record p,html.ic-pr #record .method,html.ic-pr #record li{font-size:11pt!important;line-height:1.38!important}
+  html.ic-pr #icFile .ic-pv,html.ic-pr #assent .ic-pv,html.ic-pr #record .ic-pv,html.ic-pr #icFile .defs .dval,html.ic-pr #assent .defs .dval,html.ic-pr #record .defs .dval,html.ic-pr #assent .chkrow label,html.ic-pr #record .chkrow label{font-size:11pt}
+  html.ic-pr #icFile .f > .ic-pv{font-size:11pt}
+  html.ic-pr .warn,html.ic-pr .warn.verdict{background:#fff!important;border:0!important;border-left:3pt solid var(--icp-navy)!important;padding:4pt 0 4pt 10pt!important;margin:8pt 0 10pt!important;font-size:11pt!important;line-height:1.38}
+  html.ic-pr .warn b{font-size:11pt!important;color:var(--icp-navy)}
+  html.ic-pr .warn ul.rules li{font-size:11pt!important;margin-bottom:2pt!important}
+  html.ic-pr .readout{font-size:10.5pt!important;color:var(--icp-mute)!important;margin:0 0 6pt!important}
+  html.ic-pr .sumhead{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:4pt 16pt;margin:0 0 8pt!important}
+  html.ic-pr .sumhead div{font-size:11pt}
+  html.ic-pr .sumhead b{font:400 9.5pt/1.3 var(--icp-sans)!important;color:var(--icp-mute)!important}
+  html.ic-pr .sumhead span{border-bottom:.6pt solid #7d8c93!important;font-size:11pt}
+  html.ic-pr #proc > .sumhead,html.ic-pr #planproc > .sumhead{display:none!important}
+  html.ic-pr .stat,html.ic-pr #recVerdict{break-before:avoid;page-break-before:avoid}
+  html.ic-pr .stat{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0 14pt!important;margin:2pt 0 6pt!important;border-top:1pt solid var(--icp-navy);border-bottom:.5pt solid var(--icp-rule)}
+  html.ic-pr .stat div{background:none!important;border:0!important;padding:5pt 0!important}
+  html.ic-pr .stat b{font:600 9pt/1.3 var(--icp-sans)!important;color:var(--icp-mute)!important;letter-spacing:.02em}
+  html.ic-pr .stat span{font:700 12pt/1.3 var(--icp-sans)!important;color:var(--icp-ink)}
+  html.ic-pr .stat em{font-size:9.5pt!important;color:var(--icp-mute)!important}
+  html.ic-pr .selist{columns:2!important;column-gap:20pt;margin:4pt 0 8pt!important}
+  html.ic-pr .selist label{display:flex!important;align-items:flex-start;gap:0;font-size:11pt;padding:1.5pt 0;break-inside:avoid}
+  html.ic-pr .selist label .ic-bx{margin-top:2pt}
+  html.ic-pr .icp .sig{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 18pt;margin-top:30pt!important;break-inside:avoid}
+  html.ic-pr .icp .sig div{border-top:.9pt solid var(--icp-ink)!important;padding-top:2pt!important;font:400 9.5pt/1.3 var(--icp-sans)!important;color:var(--icp-mute)!important}
+  html.ic-pr .cite{font:400 9pt/1.38 var(--icp-sans)!important;color:var(--icp-mute)!important;border-top:.5pt solid var(--icp-rule)!important;margin:10pt 0 0!important;padding-top:5pt!important}
+  html.ic-pr #icFileSrc .cite{border-top:0!important;margin:0 0 5pt!important;padding:0!important}
+  html.ic-pr #icFileSrc .ic-q{font-size:12pt;margin-top:16pt}
+  html.ic-pr #refs .cite{font-size:9pt!important}
+}
+</style>
 <style id="fx2-v2492">
 /* v24.92 the screen layout of Forms DM-1, IC-1 and RR-1 (the 10/28 design review: GOV.UK, NN/g, NHS, USWDS, W3C,
    Apple). Screen only, under html.fx2, set before the page draws; the paper keeps its own layout. v24.95 all six forms,
@@ -1197,6 +1421,7 @@ window.FX2_CFG = { toolbar: true,
     <span>Sheet actions</span>
     <div class="row">
       <button class="primary" id="printBtn">Print / Save as PDF</button>
+      <button id="printFamBtn" type="button" title="Prints the consent document the family keeps: the key information, the consent, the specific procedures and the plan’s parts, without the school’s file">Print the family&rsquo;s copy</button><!-- v25.68 (W1) -->
       <button id="saveBtn">Save data</button>
       <button id="loadBtn">Open data</button>
       <button id="clearBtn">Clear all</button>
@@ -1249,6 +1474,21 @@ window.FX2_CFG = { toolbar: true,
   <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
   <p class="method noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
   <div class="cite">Regulatory statements paraphrase 34 CFR Part 300 (2006, as amended) and Florida Administrative Code Rules 6A-6.0331, 6A-6.03311, and 6A-6.03411; policy letters are OSEP's <em>Letter to Christiansen</em> (2007), <em>Letter to Sarzynski</em> (2008), and <em>Letter to Gallo</em> (2013); federal guidance is the Department's <em>Using Functional Behavioral Assessments to Create Supportive Learning Environments</em> (2024). Ethics statements paraphrase the BACB <em>Ethics Code for Behavior Analysts</em> (2020). Full citations on the References sheet. Verify against current district procedures.</div>
+</div>
+
+<!-- ================================================================ KEY INFORMATION (paper only, v25.68 W1) -->
+<!-- The first page of the family's copy: filled as the print starts from what the form holds; never shown on screen and not a
+     sheet, so the master print's copy of the form does not carry it. -->
+<div id="icKey">
+  <div class="ic-mast">
+    <img class="ic-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
+    <div class="ic-mastt"><h1 class="ic-title">Informed consent for functional behavior assessment and behavior intervention planning</h1>
+      <div class="ic-mastmeta">Form IC-1 &middot; Revised October 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+  </div>
+  <p class="ic-for" id="icKeyFor"></p>
+  <p class="ic-sim" id="icKeySim" hidden><b>Simulated data loaded for training.</b> The student, parent, signatures, dates and log entries describe no real person.</p>
+  <h2 class="ic-keyh">Key information<span>Read this page first. The pages after it give the full details.</span></h2>
+  <div class="ic-keygrid" id="icKeyGrid"></div>
 </div>
 
 <!-- ================================================================ CONSENT -->
@@ -1581,7 +1821,7 @@ window.FX2_CFG = { toolbar: true,
 </div>
 
 <!-- ================================================================ PLAN PROCEDURES (v25.65, CARE-H7) -->
-<div class="sheet" id="planproc">
+<div class="sheet" id="planproc" data-nbh-blank="ic-plan">
   <div class="nbh-print-head">
     <img class="nbh-print-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
     <div class="nbh-print-meta"><div class="nbh-print-title">Informed Consent for FBA and BIP</div><div>Form IC-1 &middot; Revised October 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
@@ -1607,6 +1847,13 @@ window.FX2_CFG = { toolbar: true,
   </div>
   <div class="sig"><div>Parent or guardian signature / date</div><div>BCBA signature / date</div><div>Administrator, for a restrictive step / date</div></div>
   <div class="cite">Clients have a right to take part, themselves or by a proxy, in decisions about their treatment, and to know the advantages and disadvantages of each technique; restrictive procedures are acceptable only when necessary for safe and clinically significant change (Van Houten et al., 1988). Bursts or new aggression under extinction: Lerman et al. (1999), 16 of 41 cases showed a burst and 9 an increase in aggression, fewer when extinction was part of a package; Muething et al. (2024), bursts in 24% of 108 cases. Caregivers and children may prefer packages that include extinction or punishment (Hanley et al., 2005; Owen et al., 2021), so each such part is a separate, informed decision. Signing this sheet adds &ldquo;Consent to implement the BIP&rdquo; to the Consent record.</div>
+</div>
+
+<!-- ================================================================ THE SCHOOL'S FILE (paper only, v25.68 W1) -->
+<div id="icFile">
+  <h2 class="ic-fileh">For the school&rsquo;s file</h2>
+  <p class="ic-filenote">Staff use. The family&rsquo;s copy ends on the page before; these pages stay in the student&rsquo;s behavior file.</p>
+  <div id="icFileBody"></div>
 </div>
 
 <!-- ================================================================ STUDENT ASSENT -->
@@ -1710,6 +1957,8 @@ window.FX2_CFG = { toolbar: true,
   </div>
   <div class="cite">Documentation of attempts follows 34 CFR &sect;300.300(c)(2) and (d)(5), using the procedures in &sect;300.322(d). Consent obtained through the district process is valid for the procedures listed on the district form; procedures added later require a new consent event.</div>
 </div>
+
+<div id="icFileSrc"><h3 class="ic-q">Sources for the family&rsquo;s pages</h3><div id="icFileSrcBody"></div></div>   <!-- v25.68 (W1) paper only -->
 
 <!-- ================================================================ REFERENCES -->
 <div class="sheet" id="refs">
@@ -2181,6 +2430,257 @@ $$('.decide select[data-dec]').forEach(sel=>{const card=sel.closest('.card'),t=c
  Array.from(sel.options).filter(o=>o.value).forEach(o=>{const x=document.createElement('span');x.className='ic-opt';x.appendChild(document.createElement('i'));x.appendChild(document.createTextNode(o.text));sp.appendChild(x);});
  sel.insertAdjacentElement('afterend',sp);});
 restore({counts:{}});
+})();
+</script>
+<script id="ic1-print">
+/* v25.68 (W1, the BCBA, 11/6) IC-1 on paper. One print gives two copies: the consent document the family reads and signs
+   (a one-page key-information summary, then parts 1 to 5 and 7, the specific procedures and the plan's parts), and, from
+   a page of its own, "For the school's file" (how consent was obtained and its status, the say-it-back check, the
+   student's assent, the consent record and contact log, the reasonable efforts, and the sources). "Print the family's
+   copy" prints the first alone. Nothing the form saves changes, and nothing leaves the file copy: every entry still
+   prints, as text, or as a line to write on. The page is arranged as the print starts and put back as it ends; the
+   screen and the master print's copy of the form are as before (the master print never carries html.ic-pr). */
+(function(){
+  'use strict';
+  if (window.__ic1Print) return;
+  var D = document, R = D.documentElement;
+  var $ = function(s, r){ return (r || D).querySelector(s); }, $$ = function(s, r){ return Array.prototype.slice.call((r || D).querySelectorAll(s)); };
+  var T = function(v){ return String(v == null ? '' : v).replace(/\s+/g, ' ').trim(); };
+  function el(tag, cls, txt){ var e = D.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function fld(n){ return $$('[name]').filter(function(e){ return e.name === n; })[0] || null; }
+  function fv(n){ var e = fld(n); if (!e) return ''; if (e.type === 'radio') { var r = $$('[name]').filter(function(x){ return x.name === n && x.checked; })[0]; return r ? r.value : ''; }
+    if (e.type === 'checkbox') return e.checked ? '1' : ''; return T(e.value); }
+  function opt(n){ var e = fld(n); if (!e || e.tagName !== 'SELECT' || !e.value) return ''; var o = e.options[e.selectedIndex]; return o ? T(o.text) : ''; }
+  /* a date prints as the date box showed it, month/day/year */
+  function dt(v){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? m[2] + '/' + m[3] + '/' + m[1] : (v || ''); }
+
+  /* ---- what a print changes, undone as it ends ---- */
+  var undo = [], armed = false, famAt = 0;
+  function later(f){ undo.push(f); }
+  function attrs(e){ var a = { c: e.getAttribute('class'), s: e.getAttribute('style') }; later(function(){ ['class', 'style'].forEach(function(n, i){ var v = i ? a.s : a.c; if (v == null) e.removeAttribute(n); else e.setAttribute(n, v); }); }); }
+  function cls(e, c){ if (!e || e.classList.contains(c)) return; var was = e.getAttribute('class'); e.classList.add(c); later(function(){ e.classList.remove(c); if (was == null && !e.getAttribute('class')) e.removeAttribute('class'); }); }
+  function put(node, parent, before){ parent.insertBefore(node, before || null); later(function(){ if (node.parentNode) node.parentNode.removeChild(node); }); return node; }
+  function move(node, parent, before){ if (!node || !node.parentNode) return; var m = D.createComment('ic1-print'); node.parentNode.insertBefore(m, node); parent.insertBefore(node, before || null);
+    later(function(){ if (m.parentNode) { m.parentNode.insertBefore(node, m); m.parentNode.removeChild(m); } }); }
+
+  /* ---- a field on paper ---- */
+  var DECSEL = 'select[data-dec],select[name="pp.sh.dec"],select[name="ij.photo"],select[name$="].dec"]';
+  function box(on){ var b = el('span', 'ic-bx' + (on ? ' on' : '')); b.textContent = on ? 'X' : ''; return b; }
+  function choices(sel){ var w = el('span', 'ic-opts');
+    Array.prototype.forEach.call(sel.options, function(o){ if (!o.value) return; var on = sel.value === o.value, x = el('span', 'ic-opt' + (on ? ' on' : '')); x.appendChild(box(on)); x.appendChild(D.createTextNode(T(o.text))); w.appendChild(x); });
+    return w; }
+  function paper(f){
+    if (f.classList.contains('ic-src') || f.type === 'hidden' || f.type === 'file' || f.hidden || (f.closest && f.closest('.noprint,.ic-hide'))) return;
+    if (f.type === 'checkbox' || f.type === 'radio') { put(box(f.checked), f.parentNode, f); cls(f, 'ic-src'); return; }
+    if (f.tagName === 'SELECT' && f.matches(DECSEL)) { put(choices(f), f.parentNode, f.nextSibling); cls(f, 'ic-src'); return; }
+    var v = f.tagName === 'SELECT' ? (f.options[f.selectedIndex] ? T(f.options[f.selectedIndex].text) : '') :
+      f.type === 'date' ? dt(f.value) : f.tagName === 'TEXTAREA' ? String(f.value || '').replace(/^\s+|\s+$/g, '') : T(f.value);
+    var s = el('span', 'ic-pv' + (v ? '' : ' ic-line')); if (v) s.textContent = v;
+    put(s, f.parentNode, f.nextSibling); cls(f, 'ic-src'); }
+
+  /* ---- headings: in sentence case, as questions ---- */
+  var QH = [[/^1\.\s*why we are asking/i, '1.', 'Why are we asking?'], [/^2\.\s*what the assessment involves/i, '2.', 'What will the assessment involve?'],
+    [/^3\.\s*who, where, and when/i, '3.', 'Who does it, where, and when?'], [/^4\.\s*records, confidentiality/i, '4.', 'What should you know about privacy, risks, benefits and your rights?'],
+    [/^5\.\s*your decision/i, '5.', 'What do you decide?'], [/^6\.\s*how consent was obtained/i, '6.', 'How was consent obtained?'],
+    [/^before you sign/i, '', 'Before you sign: say it back'], [/^7\.\s*signatures/i, '7.', 'Signatures'],
+    [/^dissent behaviors/i, '', 'Which dissent behaviors will the team honor during sessions?'], [/^assent for the plan/i, '', 'Does the student agree to the plan?'],
+    [/^current status/i, '', 'Current status'], [/^consent events/i, '', 'Consent events'], [/^reasonable efforts/i, '', 'Reasonable efforts to obtain consent']];
+  var BANDS = { proc: 'Which procedures need your separate decision?', planproc: 'Which parts of the plan do you agree to?', assent: 'Student assent',
+    record: 'Consent record and contact log', guide: 'Guide: when consent is required and what makes it informed', refs: 'References and sources' };
+  function qh(tag, cls2, num, txt){ var h = el(tag, cls2); if (num) { h.appendChild(el('span', 'ic-qn', num)); h.appendChild(D.createTextNode(' ')); } h.appendChild(D.createTextNode(txt)); return h; }
+  function headings(){
+    $$('.sheet h3.sub, #icFile h3.sub').forEach(function(h){ if (h.closest('.noprint,.ic-hide')) return; var t = T(h.textContent), q = QH.filter(function(x){ return x[0].test(t); })[0];
+      if (!q) return; put(qh('h3', 'ic-q', q[1], q[2]), h.parentNode, h); cls(h, 'ic-hide'); });
+    Object.keys(BANDS).forEach(function(id){ var s = D.getElementById(id), b = s && $(':scope > .bar.nbh-band', s); if (!b) return; put(qh('h2', 'ic-q2', '', BANDS[id]), s, b); });
+    var c = D.getElementById('consent'), id0 = c && $(':scope > .ident', c); if (id0) put(qh('h3', 'ic-q', '', 'About your child and this request'), c, id0); }
+
+  /* ---- part 2: the checked procedures in full, the others named in one line ---- */
+  function procList(){
+    var tb = D.getElementById('procTbl'); if (!tb) return;
+    var rows = $$('tbody tr', tb).map(function(tr){ var cb = $('input[type=checkbox]', tr), td = tr.children; return { on: !!(cb && cb.checked), name: T(td[1] && td[1].textContent), desc: td[2] }; });
+    var any = rows.some(function(x){ return x.on; }), w = el('div', 'ic-plist'), ul = el('ul', 'ic-procs');
+    rows.filter(function(x){ return x.on || !any; }).forEach(function(x){ var li = el('li'), tx = el('span'); li.appendChild(box(x.on));
+      tx.appendChild(el('b', null, x.name + '.')); tx.appendChild(D.createTextNode(' '));
+      var inp = x.desc && $('input', x.desc);
+      if (inp) { var t = T(inp.value); tx.appendChild(t ? D.createTextNode(t) : el('span', 'ic-pv ic-line')); } else tx.appendChild(D.createTextNode(T(x.desc && x.desc.textContent)));
+      li.appendChild(tx); ul.appendChild(li); });
+    w.appendChild(ul);
+    var off = rows.filter(function(x){ return any && !x.on; });
+    if (off.length) { var p = el('p', 'ic-off'); p.appendChild(el('b', null, 'Not checked, so not covered by this consent:'));
+      off.forEach(function(x){ var s = el('span', 'ic-opt'); s.appendChild(box(false)); s.appendChild(D.createTextNode(x.name)); p.appendChild(s); }); w.appendChild(p); }
+    put(w, tb.parentNode, tb.nextSibling); cls(tb, 'ic-hide'); }
+
+  /* ---- the specific procedures: one not proposed, or not asked for in part 2, is named in a line instead of in full ---- */
+  var DECOF = { fa: 'fa.dec', edible: 'ed.dec', rec: 'rec.dec', share: 'sh.dec', injury: 'ij.dec', wait: 'wt.dec', homevideo: 'hv.dec' };
+  var LINK = { fa: ['fa'], edible: ['pref', 'reinf'], wait: ['wait'], homevideo: ['homeVideo'] };
+  function holds(card, dn){ return $$('input,select,textarea', card).some(function(f){ if (f.name === dn || f.type === 'hidden' || (f.closest && f.closest('.noprint'))) return false;
+    if (f.type === 'checkbox' || f.type === 'radio') return f.checked; return T(f.value) !== ''; }); }
+  function cards(){
+    var anyP = $$('#procTbl input[type=checkbox]').some(function(c){ return c.checked; }), na = [], ask = [];
+    $$('#proc .card').forEach(function(card){ var k = card.getAttribute('data-proc'), dn = DECOF[k], t = T(($('.chdt', card) || {}).textContent);
+      /* an item runs on across a page a row at a time (its heading kept with its text, its decision with its last row); G, the contact preferences, moves whole */
+      if (!k) cls(card, 'ic-short');
+      if (!dn || holds(card, dn)) return; var d = fv(dn);
+      if (d === 'na') { na.push(t); cls(card, 'ic-hide'); }
+      else if (!d && anyP && LINK[k] && !LINK[k].some(function(p){ return fv('p.' + p); })) { ask.push(t); cls(card, 'ic-hide'); } });
+    if (!na.length && !ask.length) return;
+    var w = el('div', 'ic-np'), p = el('p'); w.appendChild(p);
+    if (na.length) { p.appendChild(el('b', null, 'Not proposed: ')); p.appendChild(D.createTextNode(na.join('; ') + '. ')); }
+    if (ask.length) { p.appendChild(el('b', null, 'Not asked for, since part 2 does not check it: ')); p.appendChild(D.createTextNode(ask.join('; ') + '.')); }
+    var proc = D.getElementById('proc'), intro = $(':scope > p.method', proc); put(w, proc, intro ? intro.nextSibling : $(':scope > .card', proc)); }
+
+  /* ---- 7: the signature lines, the label under each line ---- */
+  function signatures(){
+    var host = $('#consent .ic-sigs'); if (!host) return;
+    var sg = el('div', 'ic-sg');
+    function row(three){ var r = el('div', 'ic-sgrow' + (three ? ' ic-3' : '')); sg.appendChild(r); return r; }
+    function cell(r, label, content, sign){ var c = el('div', 'ic-sgc' + (sign ? ' ic-sign' : '')), l = el('div', 'ic-sgl');
+      if (content && content.nodeType) l.appendChild(content); else if (content) l.appendChild(el('span', 'ic-pv', content));
+      c.appendChild(l); c.appendChild(el('div', 'ic-sglab', label)); r.appendChild(c); }
+    function sig(k, alt){ var v = fv('s.' + k + '.sig'); if (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(v)) return null; var i = el('img'); i.src = v; i.alt = alt; return i; }
+    sg.appendChild(el('div', 'ic-sgh', 'Parent, guardian, or adult student'));
+    var r = row(); cell(r, 'Signature', sig('par', 'Signature of the parent, guardian, or adult student'), true); cell(r, 'Date', dt(fv('s.par.date'))); cell(r, 'Printed name', fv('s.par.name')); cell(r, 'Relationship', opt('s.par.rel'));
+    var lang = fv('c.lang'), used = fv('s.int.name') || fv('s.int.lang') || fv('s.int.date') || fv('c.transllang') || (lang && !/^english\b/i.test(lang));
+    if (used) { sg.appendChild(el('div', 'ic-sgh', 'Interpreter')); r = row(true); cell(r, 'Interpreter (if used)', fv('s.int.name')); cell(r, 'Language', fv('s.int.lang')); cell(r, 'Date', dt(fv('s.int.date')));
+      if (fv('c.transllang')) cell(r, 'Translated consent form used (language)', fv('c.transllang')); }
+    sg.appendChild(el('div', 'ic-sgh', 'Staff member obtaining consent'));
+    r = row(); cell(r, 'Signature', sig('st', 'Signature of the staff member obtaining consent'), true); cell(r, 'Date', dt(fv('s.st.date'))); cell(r, 'Printed name and title', fv('s.st.name')); cell(r, 'Consent discussed', opt('s.st.how'));
+    var m = fv('c.method'), dist = m === 'reeval' || m === 'initial', signed = !!sig('par', '');
+    var h = $(':scope > h3.sub', host), at = h ? h.nextSibling : host.firstChild;
+    if (dist || !signed) { var note = el('p', 'method ic-signnote', dist ? 'Your consent was obtained on the district\u2019s form. A signature here is optional, and welcome.' : 'Sign and date on the lines below.'); put(note, host, at); at = note.nextSibling; }
+    put(sg, host, at); }
+
+  /* ---- page 1: the key information, from what the form holds ---- */
+  var ICON = {
+    ask: '<path d="M4 4.5h16v11H10.5L6 19.5v-4H4z"/><path d="M9.6 8.4a2.4 2.4 0 0 1 4.7.7c0 1.6-2.3 1.9-2.3 3.3"/><path d="M12 14.6v.2"/>',
+    list: '<rect x="5" y="3.5" width="14" height="17.5" rx="2"/><path d="M9 3.5h6v2.5H9z"/><path d="M8.3 11l1.5 1.5 2.7-2.9"/><path d="M8.3 16.4l1.5 1.5 2.7-2.9"/><path d="M14.6 11.2h1.6M14.6 16.6h1.6"/>',
+    when: '<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15.2" r="2.6"/><path d="M12 14v1.3l.9.7"/>',
+    choice: '<rect x="3" y="4" width="8" height="8" rx="1.5"/><path d="M5 8.2l1.6 1.6 2.6-3"/><rect x="13" y="12" width="8" height="8" rx="1.5"/><path d="M15.3 14.3l3.4 3.4M18.7 14.3l-3.4 3.4"/><path d="M11 16h-4.5M15.5 8H13"/>',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.4v2.6"/>',
+    phone: '<path d="M7 3.5h2.7l1.4 4-1.9 1.4a11 11 0 0 0 5.9 5.9l1.4-1.9 4 1.4V17a2.4 2.4 0 0 1-2.6 2.4A15.6 15.6 0 0 1 4.6 6.1 2.4 2.4 0 0 1 7 3.5z"/>' };
+  function icon(k){ var s = el('span', 'ic-kbi'); s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false">' + ICON[k] + '</svg>'; return s; }
+  function para(parts){ var p = el('p'); parts.forEach(function(x){ p.appendChild(typeof x === 'string' ? D.createTextNode(x) : x); }); return p; }
+  function lead(label, value){ var p = el('p'); p.appendChild(el('b', null, label + ' ')); p.appendChild(value ? D.createTextNode(value) : el('span', 'ic-pv ic-line')); return p; }
+  function bullets(list, two){ var u = el('ul', two ? 'ic-2c' : null); list.forEach(function(t){ u.appendChild(el('li', null, t)); }); return u; }
+  function kbox(k, title, parts){ var b = el('section', 'ic-kb'), body = el('div', 'ic-kbb'), tx = el('div', 'ic-kbt');
+    b.appendChild(el('h3', 'ic-kbh', title)); body.appendChild(icon(k)); parts.filter(Boolean).forEach(function(x){ tx.appendChild(x); }); body.appendChild(tx); b.appendChild(body); return b; }
+  /* the sentences of an item in part 4, as the form words them */
+  function said(lead){ var li = $$('#consent ul.rules > li').filter(function(x){ var b = x.querySelector('b'); return b && T(b.textContent).indexOf(lead) === 0; })[0];
+    if (!li) return []; var c = li.cloneNode(true), b = c.querySelector('b'); if (b) b.remove(); $$('ul', c).forEach(function(u){ u.remove(); });
+    return (T(c.textContent).match(/[^.]+\.(\s|$)/g) || []).map(T); }
+  function conf(i){ var li = $$('#icConf ul.ic-conf > li')[i]; return li ? T(li.textContent) : ''; }
+  function keyInfo(){
+    var k = D.getElementById('icKey'), g = D.getElementById('icKeyGrid'), f = D.getElementById('icKeyFor'); if (!k || !g) return;
+    g.textContent = ''; f.textContent = ''; later(function(){ g.textContent = ''; f.textContent = ''; });
+    var who = fv('c.client'), grade = fv('c.grade'), sch = fv('c.setting'), req = fv('c.reqdate');
+    f.appendChild(el('b', null, who || 'Student: ')); if (!who) f.appendChild(el('span', 'ic-pv ic-line'));
+    [grade ? 'grade ' + grade : '', sch].filter(Boolean).forEach(function(t){ f.appendChild(D.createTextNode('  \u00b7  ' + t)); });
+    /* 1 */
+    var b1 = kbox('ask', 'What are we asking, and why?', [para(['We are asking for your permission to conduct a functional behavior assessment (FBA) for your child.']),
+      lead('The behavior:', fv('c.behav')), lead('Why now:', fv('c.why'))]);
+    /* 2 the procedures checked in part 2, by name; the items with a decision of their own, by their titles */
+    var ticked = $$('#procTbl tbody tr').filter(function(tr){ var c = $('input[type=checkbox]', tr); return c && c.checked; })
+      .map(function(tr){ var n = T(tr.children[1].textContent), o = $('input.txt', tr); return n === 'Other' && o && T(o.value) ? T(o.value) : n; });
+    var own = $$('#proc .card[data-proc]').filter(function(c){ var d = fv(DECOF[c.getAttribute('data-proc')]); return d && d !== 'na'; })
+      .map(function(c){ return T(($('.chdt', c) || {}).textContent).replace(/ in preference and reinforcer assessments$| for a reward$| with providers outside the school$/, ''); });
+    var b2 = kbox('list', 'What will happen?', [para([ticked.length ? 'Proposed, each described in part 2:' : 'The procedures proposed are checked in part 2.']),
+      ticked.length ? bullets(ticked, ticked.length > 4) : null,
+      own.length ? para([el('b', null, 'Your own yes or no, initialed: '), own.join('; ') + '.']) : null]);
+    /* 3 */
+    var st = fv('c.start'), dur = fv('c.dur');
+    var b3 = kbox('when', 'Who does it, where, and for how long?', [lead('Conducted by:', fv('c.who')), lead('Settings:', fv('c.where')),
+      lead('When:', [st ? 'starts ' + dt(st) : '', dur ? 'about ' + dur + ' weeks' : ''].filter(Boolean).join(', ')), lead('Results shared with you:', fv('c.share'))]);
+    /* 4 the choices and the right to stop, in the form's own words */
+    var ch = said('Your choice.').map(function(s){ return s.replace(/ named above;.*$/, '.').replace(/ named above/, ''); });
+    var vol = ch.filter(function(s){ return /^Consent is voluntary|^You may refuse/.test(s); }).join(' '), rest = ch.filter(function(s){ return !/^Consent is voluntary|^You may refuse/.test(s); });
+    var b4 = kbox('choice', 'What are your choices?', [para(['In part 5 you choose one: ', el('b', null, 'I give consent'), '; ', el('b', null, 'I give consent with exceptions'), '; or ',
+      el('b', null, 'I do not give consent'), '.']), bullets([vol].concat(rest).filter(Boolean))]);
+    /* 5 privacy, and who sees the information */
+    var rec = said('Records.');
+    var b5 = kbox('lock', 'Who will see the information?', [bullets([(rec[1] || '').replace(/^It is kept/, 'Everything collected is kept'), conf(1), conf(2)].filter(Boolean))]);
+    /* 6 */
+    var rt = said('Your rights.'), lng = rt.filter(function(s){ return /another language/.test(s); })[0], ntc = rt.filter(function(s){ return /procedural safeguards/.test(s); })[0];
+    var b6 = kbox('phone', 'Questions? Who can you contact?', [para(['Questions can be directed to the BCBA or ESE contact:']), lead('BCBA:', fv('c.bcba')),
+      lead('ESE contact / case manager:', fv('c.ese')), lng ? para([lng]) : null]);
+    /* two columns, read down: what is asked on the left, your choices and rights on the right */
+    var L = el('div', 'ic-kcol'), Rc = el('div', 'ic-kcol'); [b1, b2, b3].forEach(function(b){ L.appendChild(b); }); [b4, b5, b6].forEach(function(b){ Rc.appendChild(b); });
+    g.appendChild(L); g.appendChild(Rc); }
+
+  /* the key information is one page: laid out at the page's width with the print's rules, its text set down a step at a time
+     (11 pt to 9.5 pt) until it fits the 9.85 inches the page has */
+  function fitKey(){
+    var k = D.getElementById('icKey'), sh = D.getElementById('ic1-print-css'), rules = []; if (!k || !sh || !sh.sheet) return;
+    Array.prototype.forEach.call(sh.sheet.cssRules, function(r){ if (r.media && /print/.test(r.media.mediaText)) { rules.push([r, r.media.mediaText]); r.media.mediaText = 'all'; } });
+    var lv = ['', 'ic-k1', 'ic-k2', 'ic-k3'], pick = 'ic-k3'; attrs(k);
+    try { k.style.width = '7.3in';
+      for (var i = 0; i < lv.length; i++) { lv.forEach(function(c){ if (c) k.classList.remove(c); }); if (lv[i]) k.classList.add(lv[i]); if (k.getBoundingClientRect().height <= 945) { pick = lv[i]; break; } } }
+    finally { k.style.removeProperty('width'); rules.forEach(function(x){ x[0].media.mediaText = x[1]; }); lv.forEach(function(c){ if (c) k.classList.remove(c); }); }
+    if (pick) k.classList.add(pick); }
+
+  /* ---- the end of the family's copy ---- */
+  function closing(){
+    var host = $('#consent .ic-sigs'); if (!host) return;
+    var bc = fv('c.bcba'), ese = fv('c.ese'), w = said('Your choice.').filter(function(s){ return /withdraw consent/.test(s); })[0];
+    var b = el('div', 'ic-close2'); b.appendChild(el('b', null, 'Keep this copy. '));
+    b.appendChild(D.createTextNode(w ? w.replace(/ named above/, '') : 'Questions can be directed to the BCBA' + (bc ? ', ' + bc : '') + ', or the ESE contact' + (ese ? ', ' + ese : '') + '.'));
+    put(b, host, $(':scope > .cite', host)); }
+
+  /* ---- the running head and the footers (Chrome and Edge print them; Safari prints no page margins) ---- */
+  function cssStr(t){ return '"' + String(t).replace(/[\\"]/g, '\\$&').replace(/[\r\n]+/g, ' ') + '"'; }
+  var MB = 'font-family:"Inter","Helvetica Neue",Arial,sans-serif;font-size:8pt;color:#46575f';
+  function pages(){
+    var nm = fv('c.client'), sid = fv('c.sid'), who = [nm, sid ? 'ID ' + sid : ''].filter(Boolean).join('  \u00b7  ');
+    var bc = fv('c.bcba'), ese = fv('c.ese'), q = 'Questions? ' + [bc ? 'BCBA: ' + bc : '', ese ? 'ESE contact: ' + ese : ''].filter(Boolean).join('  \u00b7  ');
+    if (!bc && !ese) q = 'Questions? Ask the BCBA or the ESE contact named in part 3 and on page 1.';
+    var head = '@top-left{content:"Informed consent for FBA and BIP";' + MB + ';width:2.4in}@top-center{content:' + cssStr(who) + ';' + MB + ';width:3in}' +
+      '@top-right{content:"Page " counter(page) " of " counter(pages);' + MB + '}@bottom-center{content:none}';
+    var st = el('style'); st.id = 'ic1-pages';
+    st.textContent = '@media print{@page{size:letter portrait;margin:.6in .6in .55in}' +
+      '@page icfam{margin:.6in .6in .55in;' + head + '@bottom-left{content:' + cssStr(q) + ';' + MB + ';width:5.2in}@bottom-right{content:"Keep this copy";' + MB + ';font-weight:600;color:#182e43}}' +
+      '@page icfam:first{@top-left{content:none}@top-center{content:none}@top-right{content:none}}' +
+      '@page icfile{margin:.6in .6in .55in;' + head + '@bottom-left{content:"Confidential student record. Retain in the student\u2019s behavior file.";' + MB + ';width:5.2in}@bottom-right{content:"For the school\u2019s file";' + MB + ';font-weight:600;color:#182e43}}}';
+    return st; }
+
+  /* ---- the print ---- */
+  function before(){
+    if (armed) after();
+    armed = true;
+    var fam = Date.now() - famAt < 8000; famAt = 0;
+    try {
+      R.classList.add('ic-pr', 'ic-printing'); later(function(){ R.classList.remove('ic-pr', 'ic-printing', 'ic-fam'); });
+      if (fam) R.classList.add('ic-fam');
+      var c = D.getElementById('consent'), sp = c && $('.ic-signpart', c);
+      /* the staff's parts of the Consent sheet: part 6, the status and the say-it-back check (as the screen's "Read with the parent" names them) */
+      var h6 = sp && $$(':scope > h3.sub', sp).filter(function(h){ return /^6\.\s*how consent was obtained/i.test(T(h.textContent)); })[0], staff = [];
+      for (var e = h6; e && !e.classList.contains('ic-sigs'); e = e.nextElementSibling) staff.push(e);
+      var cites = $$('#consent > .cite, #proc > .cite, #planproc > .cite');
+      if (fam) { staff.concat(cites).forEach(function(x){ cls(x, 'ic-hide'); }); }
+      else { var fb = D.getElementById('icFileBody'), fs = D.getElementById('icFileSrcBody'); staff.forEach(function(x){ move(x, fb); }); cites.forEach(function(x){ move(x, fs); }); }
+      var ban = D.getElementById('simBanner'), ks = D.getElementById('icKeySim'); if (ban && !ban.hidden && ks) { ks.hidden = false; later(function(){ ks.hidden = true; }); }
+      keyInfo(); fitKey(); headings(); procList(); cards(); signatures(); closing();
+      /* the decision and the signatures, read last: after every procedure and every separate decision, before the plan's parts */
+      var pr = D.getElementById('proc'); if (sp && pr) move(sp, pr, $(':scope > .cite', pr));
+      /* the plan's parts: the rows that hold one */
+      $$('#v65Pp tbody tr').forEach(function(tr){ if (!$$('textarea,input,select', tr).some(function(f){ return T(f.value); })) cls(tr, 'ic-hide'); });
+      /* a log or a list of attempts: its rows, or three lines to write on when it has none */
+      ['#logTbl', '#attTbl'].forEach(function(s){ var rows = $$(s + ' tbody tr'), full = rows.filter(function(tr){ return $$('input,select', tr).some(function(f){ return T(f.value); }); });
+        rows.forEach(function(tr, i){ if (full.length ? full.indexOf(tr) < 0 : i > 2) cls(tr, 'ic-hide'); }); });
+      var scope = fam ? '#consent, #proc, #planproc' : '#consent, #proc, #planproc, #icFile, #assent, #record';
+      $$(scope + (fam ? '' : ', #guide, #refs')).forEach(function(s){ cls(s, 'icp'); });
+      $$(scope).forEach(function(s){ $$('input,select,textarea', s).forEach(paper); });
+    } catch (err) { if (window.console) console.warn('IC-1 print', err); }
+  }
+  function after(){ while (undo.length) { try { undo.pop()(); } catch (e) {} } armed = false; }
+  window.addEventListener('beforeprint', before);
+  function pageStyle(){ if (!armed) return; var o = D.getElementById('ic1-pages'); if (o) o.remove(); var st = pages(); D.head.appendChild(st); later(function(){ st.remove(); }); }
+  window.addEventListener('load', function(){ window.addEventListener('beforeprint', pageStyle); });
+  window.addEventListener('afterprint', after);
+  /* a print that never reported its end: put the page back at the next touch or key */
+  ['pointerdown', 'keydown'].forEach(function(t){ D.addEventListener(t, function(){ if (armed && !(window.matchMedia && matchMedia('print').matches)) after(); }, true); });
+  var fb = D.getElementById('printFamBtn');
+  if (fb) fb.addEventListener('click', function(){ famAt = Date.now(); window.print(); });
+  window.__ic1Print = { before: before, after: after, family: function(){ famAt = Date.now(); } };
 })();
 </script>
 
