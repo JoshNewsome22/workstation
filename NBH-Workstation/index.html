@@ -1410,8 +1410,9 @@ body:not(.has-form) #focusBtn{display:none}
 /* 1. the start screen on a window 1000 to 1180 px wide (an iPad sideways): with nothing open, the list is a column beside the
    start screen rather than a drawer over it, so the caseload shows; Hide, Escape and the edge tab still put it away */
 @media (min-width:1000.02px) and (max-width:1180px){
-  body:not(.has-form):not(.ws-full).rail-open nav.rail{position:static;transform:none;visibility:visible;width:300px;flex:0 0 300px;box-shadow:none;transition:none}
-  body:not(.has-form).rail-open .rail-scrim{display:none!important}
+  /* v25.67 with a student's case home on the stage the list (the Students/Forms column) opens over it instead */
+  body:not(.has-form):not(.ws-full):not(.ws-home).rail-open nav.rail{position:static;transform:none;visibility:visible;width:300px;flex:0 0 300px;box-shadow:none;transition:none}
+  body:not(.has-form):not(.ws-home).rail-open .rail-scrim{display:none!important}
   body:not(.has-form).rail-open .railonly{display:none}
 }
 /* under 1000 px (an iPad upright, a phone) the list stays closed until asked for; the Forms button says so in words while nothing is open */
@@ -5450,7 +5451,11 @@ async function loadCase(d,how){
   renderRail();
   /* v23.57 (review I239) a case opened for one form loads that form; one the case does not hold yet opens on its own after */
   const want=caseOpenTo;caseOpenTo='';
-  const first=(want&&state.pending[want])?want:(want&&ALL.some(x=>x[0]===want))?'':(d.cur&&state.pending[d.cur])?d.cur:state.caseOrder[0];
+  /* v25.67 the forms viewed before (what Close goes back to) are kept for each student: another student's case brings back
+     its own; a student opened from the caseload with no form asked for ('~home') starts afresh at the case home, so closing a
+     form opened from it comes back to it, and no form is loaded */
+  {const k=clKey(packet()),was=state.seenKey||'';state.seenBy=state.seenBy||{};if(was!==k){if(was)state.seenBy[was]=state.seen||[];state.seen=(state.seenBy[k]||[]).slice();}state.seenKey=k;if(want==='~home')state.seen=[];}
+  const first=want==='~home'?'':(want&&state.pending[want])?want:(want&&ALL.some(x=>x[0]===want))?'':(d.cur&&state.pending[d.cur])?d.cur:state.caseOrder[0];
   if(first){openForm(first);const rep=await settled(first,12000);if(rep&&rep.notes)notes.push(...rep.notes);}
   renderRail(); say(state.caseOrder.length+' form'+(state.caseOrder.length===1?'':'s')+' in the case'+(first?'; Form '+first+' open, the others as you open them':''));
   warmStart();
@@ -6087,6 +6092,7 @@ async function clearCase(){
   Object.values(state.frames).forEach(fr=>fr.remove());
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;
   state.whoIs={};state.details={};state.split=[];
+  if(state.seenKey){(state.seenBy=state.seenBy||{})[state.seenKey]=state.seen||[];}state.seen=[];state.seenKey='';   /* v25.67 kept for this student (loadCase) */
   warmStop();state.pending={};state.caseOrder=[];   /* v21.61 */
   $('#blank').style.display='';document.body.classList.remove('has-form');
   setFull(false,true);
@@ -11317,5 +11323,419 @@ window.__wsA={on,place,setNav,mode:navMode,paint:()=>{paintRow();paintStat();syn
 })();
 </script>
 
+<!-- v25.67 the case home, the student switch and the Students/Forms column (the BCBA, 11/6: screen 1 and screen 7 of the
+     case home mockup; design review H5 and B1). With a student's case loaded and no form showing, the stage shows the case
+     home: at most one alert (the rules Today already has), what each assessment handed the case, quick actions, Form DD-1's
+     graphs, the function and the plan, each line opening its form. It reads the case (state.facts, Today's items, the
+     caseload's records) and keeps nothing: nothing on it is typed into, printed, or written to the case file or the facts.
+     The student's name on the student line is a switch (Find a student, the pinned students, the ones opened recently,
+     All students), every choice going through caseloadGo. The list of forms becomes a column with two tabs, Students and
+     Forms: the list's own nodes are moved into the Forms tab, so every id, listener and test hook keeps working, and the
+     column is the list itself (beside the stage on a wide window, over it below 1180 px, remembered as the list is). With no
+     student loaded, on a phone and on paper nothing of it shows. -->
+<style id="ws-ch-css">
+@media print{#caseHome,#chSwPop,#chColBtn,#chTabs,#chStu,#chWho .ch-chev{display:none!important}}
+#caseHome,#chStu,#chTabs,#chColBtn{display:none}
+/* ---- the case home on the stage ---- */
+body.ws-home #blank{display:block;text-align:left;padding:18px 20px 32px}
+body.ws-home #blank>.card{display:none}
+body.ws-home #caseHome{display:block}
+body.ws-a.ws-home .stagew>.crumb,body.ws-a.ws-home #paneBar,body.ws-a.ws-home .rail-edge{display:none!important}
+#caseHome{container:chome/inline-size;color:var(--ink);font:15px/1.45 var(--sans)}
+#caseHome h2.ch-sr,#caseHome .ch-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;margin:0}
+.ch-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.85fr) minmax(0,1fr);gap:18px;align-items:start;max-width:1640px;margin:0 auto}
+.ch-col{display:flex;flex-direction:column;gap:18px;min-width:0}
+@container chome (max-width:999px){.ch-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-rows:auto 1fr}
+  .ch-grid>.ch-a{grid-column:1;grid-row:1}.ch-grid>.ch-c{grid-column:1;grid-row:2}.ch-grid>.ch-b{grid-column:2;grid-row:1/3}}
+@container chome (max-width:599px){.ch-grid{display:flex;flex-direction:column;align-items:stretch;gap:14px}.ch-col{display:contents}
+  .ch-o1{order:1}.ch-o2{order:2}.ch-o3{order:3}.ch-o4{order:4}.ch-o5{order:5}.ch-o6{order:6}}
+.ch-p{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:14px 16px 12px;min-width:0}
+.ch-h{display:flex;align-items:center;gap:8px;margin:0 0 6px;min-height:44px}
+.ch-h h3{margin:0;font:600 16.5px/1.25 var(--sans);color:var(--ink)}
+.ch-h .ch-sp{flex:1 1 auto}
+.ch-h .ch-note{color:var(--muted);font-size:13px;text-align:right}
+#caseHome button{font-family:var(--sans)}
+#caseHome .ch-open{background:none;border:0;padding:0 2px;min-height:44px;min-width:44px;border-radius:8px}
+#caseHome .ch-open:hover{background:var(--shade)}
+.ch-code{display:inline-block;background:#e3eeea;color:#1e3a4f;border-radius:999px;padding:4px 10px;font:600 12.5px/1.1 var(--sans);white-space:nowrap}
+.ch-list{list-style:none;margin:0;padding:0}
+.ch-list>li+li{border-top:1px solid #e6ecea}
+#caseHome .ch-row{display:flex;gap:12px;align-items:flex-start;justify-content:flex-start;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:9px 6px;min-height:44px;color:inherit;font:inherit;white-space:normal}
+#caseHome .ch-row:hover{background:var(--shade)}
+.ch-row .ch-code{flex:0 0 auto;margin-top:1px}
+.ch-tx{display:block;min-width:0;flex:1 1 auto}
+.ch-t{display:block;font-weight:600;color:var(--ink);font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.ch-s{display:block;color:var(--muted);font-size:13.5px;line-height:1.35;margin-top:2px;overflow-wrap:anywhere}
+.ch-empty{color:var(--muted);font-size:14px;margin:2px 0 8px}
+#caseHome .ch-btns{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 2px}
+#caseHome .ch-btns button{min-height:44px;font-size:14px;padding:0 14px;border-radius:8px}
+/* the one alert, amber */
+.ch-alert{background:#fdf4e3;border:1px solid #ecd3a3;border-left:6px solid #c98a1b;border-radius:12px;padding:14px 16px 12px}
+.ch-alert h3{margin:0 0 6px;font:600 16.5px/1.3 var(--sans);color:#6b4706}
+.ch-alert .ch-at{margin:0 0 8px;color:#3a2c10;font-size:14.5px;line-height:1.45}
+#caseHome .ch-alert .ch-btns button{background:#fff;border:1px solid #d8b878;color:#4a3408}
+#caseHome .ch-alert .ch-btns button:hover{background:#fbecd0}
+/* quick actions */
+.ch-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px}
+#caseHome .ch-act{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:3px;text-align:left;min-height:96px;padding:12px 14px;border-radius:12px;border:1px solid var(--rule);background:#fff;color:var(--ink);white-space:normal}
+#caseHome .ch-act:hover{background:var(--shade);border-color:var(--rule2)}
+#caseHome .ch-act.ch-pri{background:#1f3a4d;border-color:#1f3a4d;color:#fff}
+#caseHome .ch-act.ch-pri:hover{background:#2a4b61}
+.ch-act svg{width:22px;height:22px;flex:0 0 auto;margin-bottom:4px}
+.ch-act b{font:600 16px/1.2 var(--sans)}
+.ch-act small{font-size:13px;color:var(--muted);line-height:1.3}
+.ch-act.ch-pri small{color:#cfe0e8}
+/* Form DD-1's graphs */
+#caseHome .ch-graph{display:block;width:100%;text-align:left;background:none;border:0;padding:0;border-radius:8px;color:inherit;font:inherit;white-space:normal}
+#caseHome .ch-graph:hover{background:#fbfcfc}
+.ch-graph svg{display:block;width:100%;height:auto;overflow:visible}
+.ch-stats{display:flex;flex-wrap:wrap;gap:6px 26px;margin:8px 0 2px}
+.ch-st{display:flex;flex-direction:column;min-width:0}
+.ch-st b{font:600 24px/1.1 var(--serif);color:var(--ink)}
+.ch-st span{font-size:13px;color:var(--muted)}
+.ch-st.gd b{color:#2f6b37}.ch-st.bd b{color:#a3321f}
+/* the function and the plan */
+.ch-fn{font:600 19px/1.25 var(--serif);color:var(--ink);display:block}
+.ch-pill{flex:0 0 auto;display:inline-block;border-radius:999px;padding:4px 10px;font:600 12.5px/1.1 var(--sans);background:#eef1f1;color:#3b4d55;margin-top:1px;white-space:nowrap}
+.ch-pill.run{background:#e2f1e6;color:#2f6b37}.ch-pill.chk{background:#fbecd0;color:#7a5208}.ch-pill.plan{background:#eef1f1;color:#3b4d55}
+/* the trend chip (the student switch, the Students tab) */
+.ch-chip{display:inline-block;border-radius:6px;padding:3px 8px;font:600 13px/1.2 var(--sans);white-space:nowrap;background:#eef1f1;color:#4d5f68}
+.ch-chip.gd{background:#e2f1e6;color:#2f6b37}.ch-chip.bd{background:#fbe5e1;color:#a3321f}
+/* ---- the student line: the column's button and the switch ---- */
+body.ws-a.ws-case #chColBtn{display:inline-flex}
+#chColBtn{align-items:center;justify-content:center;width:44px;height:44px;min-height:44px;padding:0;border:1px solid #b8c6c3;border-radius:8px;background:#fff;color:#1f2d36;flex:0 0 auto}
+#chColBtn svg{width:20px;height:20px}
+#chColBtn[aria-expanded=true]{background:#1f3a4d;border-color:#1f3a4d;color:#fff}
+#chWho{display:none}
+body.ws-a #chWho{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 10px 0 6px;border:1px solid #b8c6c3;border-radius:10px;background:#fff;color:#1f2d36;flex:0 1 auto;min-width:0;max-width:min(42vw,420px)}
+body.ws-a #chWho:hover{background:#f3f7f6}
+body.ws-a #chWho[aria-expanded=true]{border-color:#1f3a4d;box-shadow:0 0 0 1px #1f3a4d}
+body.ws-a #chWho #sumName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
+#chWho .ch-chev{width:14px;height:14px;flex:0 0 auto;color:#3b4d55}
+/* the switch's panel */
+#chSwPop{position:fixed;z-index:120;width:min(440px,calc(100vw - 16px));max-height:min(78vh,640px);overflow-y:auto;background:#fff;border:1px solid #c9d4d2;border-radius:14px;box-shadow:0 18px 50px rgba(24,46,67,.24);padding:12px;font:15px/1.4 var(--sans);color:var(--ink)}
+#chSwPop[hidden]{display:none}
+.ch-find{display:flex;align-items:center;gap:8px;border:1px solid #b8c6c3;border-radius:10px;padding:0 12px;min-height:46px;background:#fff}
+.ch-find svg{width:18px;height:18px;color:#4d5f68;flex:0 0 auto}
+.ch-find input{flex:1 1 auto;min-width:0;border:0;outline:0;font:16px var(--sans);background:transparent;padding:10px 0;color:var(--ink)}
+.ch-find:focus-within{border-color:var(--focus);box-shadow:0 0 0 2px rgba(47,127,168,.25)}
+.ch-gh{font:600 13px/1 var(--sans);color:#4d5f68;margin:14px 6px 6px}
+.ch-sl{list-style:none;margin:0;padding:0}
+#chSwPop .ch-si,#chStu .ch-si{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px 10px;border:0;border-radius:10px;background:none;color:inherit;font:inherit;text-align:left;justify-content:flex-start;white-space:normal}
+#chSwPop .ch-si:hover,#chSwPop .ch-si:focus-visible,#chStu .ch-si:hover{background:#f1f5f4}
+#chSwPop .ch-si[aria-current=true]{background:#eaf2ef}
+.ch-av{width:34px;height:34px;border-radius:50%;background:#c9d5d3;color:#2f3f47;display:inline-flex;align-items:center;justify-content:center;font:600 12.5px/1 var(--sans);flex:0 0 auto;overflow:hidden}
+.ch-av img{width:100%;height:100%;object-fit:cover}
+.ch-who{flex:1 1 auto;min-width:0;display:block}
+.ch-nm{display:block;font-weight:600;font-size:15.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-nm .ch-ck{color:#2f6b37;margin-left:6px}
+.ch-sub{display:block;font-size:13px;color:#4d5f68;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#chSwPop .ch-all{display:flex;width:100%;justify-content:space-between;align-items:center;min-height:48px;margin-top:10px;border:0;border-top:1px solid #e1e8e7;border-radius:0;background:none;color:#1d4f6e;font:600 15px var(--sans);padding:0 8px}
+#chSwPop .ch-none{color:#4d5f68;font-size:14px;margin:10px 8px}
+/* ---- the column: the list of forms with a Students tab (a student's case loaded, wider than a phone) ---- */
+body.ws-a.ws-case #chTabs{display:flex}
+body.ws-a.ws-case nav.rail .rh-top>b,body.ws-a.ws-case nav.rail .rh-top>.sp{display:none}
+#chTabs{flex:1 1 auto;gap:2px;background:#eef2f1;border-radius:10px;padding:3px;min-width:0}
+#chTabs button{flex:1 1 0;min-height:44px;border:0;border-radius:8px;background:transparent;color:#3b4d55;font:500 14.5px var(--sans);padding:0 8px}
+#chTabs button[aria-selected=true]{background:#fff;color:#1a2933;font-weight:600;box-shadow:0 1px 2px rgba(24,46,67,.14)}
+body.ws-a.ws-case nav.rail[data-chtab=stu] #chStu{display:block}
+body.ws-a.ws-case nav.rail[data-chtab=stu] #chForms{display:none}
+#chStu{padding:4px 12px 16px}
+#chStu .ch-find{margin:6px 0 4px}
+#chStu .ch-sc{display:flex;align-items:flex-start;gap:10px;width:100%;margin:8px 0 0;padding:10px 12px;min-height:64px;border:1px solid #d6dfe2;border-radius:12px;background:#fff;color:inherit;font:inherit;text-align:left;justify-content:flex-start;white-space:normal}
+#chStu .ch-sc:hover{background:#f6f9f8}
+#chStu .ch-sc[aria-current=true]{border:2px solid #1f3a4d;padding:9px 11px}
+#chStu .ch-scr{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+#chStu .ch-sub{white-space:normal}
+#chStu .ch-all{display:block;width:100%;margin-top:14px;min-height:44px;border-radius:10px;font-size:14px}
+@media (prefers-reduced-motion:reduce){#chSwPop,#chStu,#caseHome *{transition:none!important;animation:none!important}}
+</style>
+<script id="ws-ch">
+/* v25.67 the case home, the student switch and the Students/Forms column */
+(()=>{
+const $=s=>document.querySelector(s),B=document.body;
+const bar=$('#barSum'),nav=$('#railNav'),blank=$('#blank'),rh=nav&&nav.querySelector('.rh-top'),rhead=nav&&nav.querySelector('.railhead'),rail=$('#rail');
+if(!bar||!nav||!blank||!rh||!rhead||!rail||window.__wsCH)return;
+const CH={tab:'forms',viaStu:false,home:false,sig:'',stuSig:'',list:[],facts:new Map(),t:0,open:null};
+const mk=(tag,props,html)=>{const e=document.createElement(tag);Object.entries(props||{}).forEach(([k,v])=>{if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else e.setAttribute(k,v);});if(html)e.innerHTML=html;return e;};
+const svg=(d,vb)=>'<svg viewBox="'+(vb||'0 0 24 24')+'" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+const CHEV='<svg class="ch-chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+const FIND='<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>';
+const A=()=>B.classList.contains('ws-a');
+const T=v=>String(v==null?'':v).trim();
+const say0=t=>{try{say(t);}catch(e){}};
+/* a student's case is on screen: the bar names a student (not the staff record) */
+function caseOn(){try{const p=packet();return !!T(p.client)&&!isStaffRec(p);}catch(e){return false;}}
+const curKey=()=>{try{return caseOn()?clKey(packet()):'';}catch(e){return '';}};
+const homeNow=()=>caseOn()&&!B.classList.contains('has-form')&&blank.style.display!=='none';
+/* ---------- what the case holds, read only ---------- */
+const UP=b=>/replacement|acquisition|skill/i.test(b&&b.kind||'')||(b&&b.direction==='increase');
+/* a Form DD-1 target's days: [{d,v,c}] (its own series, else the day-by-day record), each with its condition */
+function ddPts(b,d){const cond={};(Array.isArray(d.series)?d.series:[]).forEach(x=>{if(x&&x.date)cond[x.date]=x.cond||'';});
+  let P=(Array.isArray(b.series)?b.series:[]).map(x=>({d:String(x&&x.d||''),v:x&&x.v}));
+  if(!P.length)P=(Array.isArray(d.byDay)?d.byDay:[]).map(x=>({d:String(x&&x.date||''),v:x&&x.vals?x.vals[b.name]:null}));
+  return P.filter(p=>/^\d{4}-\d\d-\d\d$/.test(p.d)&&p.v!==null&&p.v!==''&&isFinite(p.v)).map(p=>({d:p.d,v:+p.v,c:cond[p.d]||''}));}
+/* the main target behavior (the first to bring down with data, as the caseload card picks it) and the replacement behavior */
+function ddMain(f){const d=f&&f.data;if(!d||!Array.isArray(d.behaviors))return {};const Bs=d.behaviors.filter(b=>b&&typeof b.name==='string'&&b.name);
+  const main=Bs.find(b=>!UP(b)&&ddPts(b,d).length)||null,rep=Bs.find(b=>/replacement/i.test(b.kind||'')&&ddPts(b,d).length)||null;return {d,main,rep};}
+const r1=x=>Math.round(x*10)/10,mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+/* baseline mean (Form DD-1's own), the last 5 days, the change; good when it moves the target's way */
+function ddStats(b,d){const P=ddPts(b,d);if(!P.length)return null;const conds=(Array.isArray(d.conds)?d.conds:[]).filter(c=>c&&c.name);
+  const base=b.base&&b.base.mean!=null&&isFinite(b.base.mean)?+b.base.mean:null,l5=P.slice(-5).map(p=>p.v),last5=mean(l5),after=conds.length>1&&P.some(p=>p.c&&conds[0]&&p.c!==conds[0].name);
+  const pct=after&&base!==null&&base!==0?(last5-base)/base*100:null,up=UP(b);
+  return {P,n:P.length,base,baseName:b.baseName||(conds[0]&&conds[0].name)||'baseline',last5,n5:l5.length,pct,after,up,good:pct===null||Math.abs(pct)<1?null:(pct>0)===up,
+    aim:b.aim!=null&&isFinite(b.aim)?+b.aim:null,aimMet:!!b.aimMet,run:b.run,need:b.need,unit:T(b.unit),measure:T(b.measure),last:P[P.length-1]};}
+const pctTxt=p=>(p>0?'+':p<0?'−':'')+Math.abs(Math.round(p))+'%';
+/* the trend chip: the change since baseline, green when it moves the right way, red when not */
+function chipOf(f){const m=ddMain(f);const s=m.main&&ddStats(m.main,m.d);
+  if(s&&s.pct!==null)return '<span class="ch-chip '+(s.good===true?'gd':s.good===false?'bd':'')+'" title="'+esc(m.main.name+': last 5 days against '+s.baseName)+'">'+pctTxt(s.pct)+'</span>';
+  if(s)return '<span class="ch-chip" title="Form DD-1 holds '+s.n+' day'+(s.n===1?'':'s')+', no plan phase yet">baseline</span>';
+  return '<span class="ch-chip" title="No days of data from Form DD-1">no data</span>';}
+/* another student's facts, from the copy kept on this device (read once a save) */
+function factsOf(r){if(!r)return null;if(r.key===curKey())return state.facts;const k=r.key+'|'+r.saved;if(CH.facts.has(k))return CH.facts.get(k);
+  let f=null;try{const d=parseCase(r.text);f=d&&d.facts||null;}catch(e){f=null;}if(CH.facts.size>60)CH.facts.clear();CH.facts.set(k,f);return f;}
+function targetOf(f){const m=ddMain(f);if(m.main)return m.main.name;const b=((f&&f.behaviors)||[]).find(x=>x&&x.label);return b?b.label:'';}
+function topOf(r){let it=[];if(r.key===curKey()){try{it=todayItems();}catch(e){it=[];}}else it=((r.sum&&r.sum.items)||[]).slice();
+  it.sort((a,b)=>clRank(a.k)-clRank(b.k));const t=it[0];return t?t.k+(t.open?' '+t.open:''):'';}
+const avOf=r=>{const th=!clIni()&&r.thumb&&r.thumb.at===r.saved&&r.thumb.src;return '<span class="ch-av" aria-hidden="true">'+(th?'<img src="'+esc(th)+'" alt="">':esc(clIniOf(r)))+'</span>';};
+/* ---------- the case home ---------- */
+function alertOf(){let L=[];try{L=todayItems();}catch(e){L=[];}
+  const od=x=>/class="late"|\d+ days? overdue/.test(String(x.t||''));
+  const need=L.filter(x=>x&&(TD_HOT.test(x.k)||x.k==='Integrity'||od(x))).map(x=>({x,r:od(x)&&!TD_HOT.test(x.k)?0:clRank(x.k)}));
+  need.sort((a,b)=>a.r-b.r);return {top:need.length?need[0].x:null,od:need.length&&need[0].r===0&&!TD_HOT.test(need[0].x.k),rest:L.length-(need.length?1:0)};}
+const KIND={Overdue:'Overdue',Safety:'Safety',Injury:'Injury',Removals:'Removals from class',Integrity:'Treatment integrity'};
+function alertHtml(){const a=alertOf(),x=a.top;if(!x)return '';
+  const h=a.od?'Overdue':KIND[x.k]||x.k,ti=x.k==='Integrity'?(()=>{const t=(state.facts||{}).integrity,c=t&&t.criterion||90;return /under|below|not met|wrongly/i.test(x.t)?'Treatment integrity is under '+c+'%':/No integrity check/.test(x.t)?'Treatment integrity has not been checked lately':'Treatment integrity';})():h;
+  return '<section class="ch-alert ch-o1" aria-labelledby="chAlH"><h3 id="chAlH">'+esc(ti)+'</h3><p class="ch-at">'+x.t+'</p><div class="ch-btns">'+
+    (x.open?'<button type="button" data-chopen="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+
+    (a.rest>0?'<button type="button" data-chtoday="1">Today: '+a.rest+' more</button>':'')+'</div></section>';}
+const EV_ORDER=['RR-1','IA-1','IN-1','SI-1','ABC-1','OB-1','SP-1','VI-1','DA-1','EA-1'];
+const md2=(a,b)=>{const x=tdMd(a),y=tdMd(b);return a&&b&&a!==b?x+'–'+y:x||y;};
+const cut=(s,n)=>{s=T(s).replace(/\s+/g,' ');return s.length>n?s.slice(0,n-1).replace(/[\s,;:(]+\S*$/,'')+'…':s;};
+function evLine(id,e){let head=T(e.fn);
+  const g=Array.isArray(e.groups)&&(e.groups.find(x=>x&&x.main)||e.groups[0]);if(g&&T(g.label))head=T(g.label);
+  if(!head&&Array.isArray(e.windows)&&e.windows[0]){const w=e.windows[0];head='Most often '+T(w.from)+'–'+T(w.to)+(w.activity?' ('+T(w.activity)+')':'');}
+  if(!head)head=cut(String(e.statement||'').split(/\.\s/)[0],90);
+  if(id==='EA-1'||/:/.test(head)&&head.length>70)head=head.split(/:\s/)[0];
+  const sub=[T(e.strength),cut(e.method,38),e.n?e.n+(id==='EA-1'?' sessions':id==='SP-1'?' days':id==='OB-1'?' observations':id==='IA-1'||id==='IN-1'?' informants':''):'',md2(e.from,e.to)||T(e.dates)].filter(Boolean).join(' · ');
+  return {id,head:head||'A result',sub};}
+function findHtml(f){const ev=f.evidence||{},L=[];
+  Object.keys(ev).sort((a,b)=>{const i=EV_ORDER.indexOf(a),j=EV_ORDER.indexOf(b);return (i<0?99:i)-(j<0?99:j);}).forEach(id=>{const e=ev[id];if(e&&typeof e==='object')L.push(evLine(id,e));});
+  const fn=f.fn;if(fn&&(T(fn.label)||T(fn.key))){const st=Array.isArray(fn.statements)?fn.statements.filter(Boolean).length:0;
+    L.push({id:'FS-1',head:'Function: '+(T(fn.label)||T(fn.key)),sub:st?'The FBA summary: '+st+' hypothesis statement'+(st===1?'':'s'):'The FBA summary'});}
+  const body=L.length?'<ul class="ch-list">'+L.map(x=>'<li><button type="button" class="ch-row" data-chopen="'+esc(x.id)+'" aria-label="'+esc(x.id+': '+x.head+(x.sub?'. '+x.sub:'')+'. Open '+x.id)+'"><span class="ch-code">'+esc(x.id)+'</span><span class="ch-tx"><span class="ch-t">'+esc(x.head)+'</span>'+(x.sub?'<span class="ch-s">'+esc(x.sub)+'</span>':'')+'</span></button></li>').join('')+'</ul>'
+    :'<p class="ch-empty">No assessment has handed the case a result yet. Results appear here as Forms IA-1, OB-1, SP-1, EA-1 and FS-1 give them.</p><div class="ch-btns"><button type="button" data-chopen="IA-1">Open IA-1</button><button type="button" data-chopen="OB-1">Open OB-1</button></div>';
+  return '<section class="ch-p ch-o5" aria-labelledby="chFindH"><div class="ch-h"><h3 id="chFindH">What the assessments found</h3></div>'+body+'</section>';}
+const IC={log:'<path d="M12 5v14M5 12h14"/>',obs:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',home:'<path d="M4 11.5 12 5l8 6.5V20H4z"/><path d="M10 20v-5h4v5"/>',brief:'<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/>'};
+function actsHtml(f){const d=f.data,cnt=d&&Array.isArray(d.behaviors)?d.behaviors.filter(b=>b&&b.name&&/^(count|rate|trials|opps)$/.test(b.measure||'')).map(b=>b.name):[];
+  const A0=[];
+  if(inCase('DD-1'))A0.push('<button type="button" class="ch-act ch-pri" data-chday="1" aria-label="Log it now: today’s numbers into Form DD-1">'+svg(IC.log)+'<b>Log it now</b><small>'+esc(cnt.length?cnt.slice(0,2).join(' · ')+(cnt.length>2?' · +'+(cnt.length-2):''):'Today’s numbers, DD-1')+'</small></button>');
+  A0.push('<button type="button" class="ch-act" data-chopen="OB-1">'+svg(IC.obs)+'<b>Observe</b><small>OB-1</small></button>');
+  A0.push('<button type="button" class="ch-act" data-chopen="HD-1">'+svg(IC.home)+'<b>Home data</b><small>HD-1</small></button>');
+  const pl=f.plan;if(pl&&(T(pl.beh)||T(pl.rep)||(pl.antCards||[]).length||(pl.teach||[]).length)){const br=!inCase('EB-1')&&inCase('QS-1')?'QS-1':'EB-1';
+    A0.push('<button type="button" class="ch-act" data-chopen="'+br+'">'+svg(IC.brief)+'<b>Staff brief</b><small>'+(br==='EB-1'&&inCase('QS-1')?'EB-1 · QS-1 in the case':br)+'</small></button>');}
+  return '<section class="ch-o2" aria-label="Quick actions"><div class="ch-acts">'+A0.join('')+'</div></section>';}
+/* a nice top for the y axis, and its ticks */
+function niceTop(v){if(!(v>0))return 1;const e=Math.pow(10,Math.floor(Math.log10(v))),m=v/e;return ([1,1.5,2,2.5,3,4,5,6,8,10].find(x=>m<=x)||10)*e;}
+const fx=v=>String(r1(v));
+function graphSvg(s,W,col){const H=W<460?170:206,pl=34,pr=40,pt=24,pb=26,n=s.P.length,top=niceTop(Math.max(s.aim||0,...s.P.map(p=>p.v))*1.05);
+  const X=i=>pl+(n===1?(W-pl-pr)/2:i*(W-pl-pr)/(n-1)),Y=v=>pt+(1-v/top)*(H-pt-pb);let g='';
+  [0,top/2,top].forEach(t=>{g+='<line x1="'+pl+'" x2="'+(W-pr+6)+'" y1="'+Y(t).toFixed(1)+'" y2="'+Y(t).toFixed(1)+'" stroke="#e3e9e8" stroke-width="1"/><text x="'+(pl-6)+'" y="'+(Y(t)+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="#4d5f68">'+esc(fx(t))+'</text>';});
+  g+='<line x1="'+pl+'" x2="'+pl+'" y1="'+pt+'" y2="'+(H-pb)+'" stroke="#b8c6c3" stroke-width="1"/>';
+  /* the phases: a dashed line at each change of condition, the condition's name over its days; the line does not cross it */
+  const runs=[];s.P.forEach((p,i)=>{const r=runs[runs.length-1];if(r&&r.c===p.c)r.b=i;else runs.push({c:p.c,a:i,b:i});});
+  runs.forEach((r,k)=>{const x0=k?(X(r.a-1)+X(r.a))/2:pl,x1=k<runs.length-1?(X(r.b)+X(r.b+1))/2:W-pr+6,mid=(x0+x1)/2,room=Math.max(0,x1-x0-8),nm=r.c?cut(r.c,Math.max(4,Math.floor(room/6.2))):'';
+    if(k)g+='<line x1="'+x0.toFixed(1)+'" x2="'+x0.toFixed(1)+'" y1="'+(pt-6)+'" y2="'+(H-pb)+'" stroke="#3b4d55" stroke-width="1.2" stroke-dasharray="4 4"/>';
+    if(nm&&room>24)g+='<text x="'+mid.toFixed(1)+'" y="'+(pt-10)+'" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f3f47">'+esc(nm)+'</text>';
+    const seg=s.P.slice(r.a,r.b+1).map((p,j)=>X(r.a+j).toFixed(1)+','+Y(p.v).toFixed(1)).join(' ');
+    if(r.b>r.a)g+='<polyline points="'+seg+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';});
+  if(s.aim!==null&&s.aim<=top)g+='<line x1="'+pl+'" x2="'+(W-pr+6)+'" y1="'+Y(s.aim).toFixed(1)+'" y2="'+Y(s.aim).toFixed(1)+'" stroke="#2f6b37" stroke-width="1" stroke-dasharray="2 3"/><text x="'+(W-pr+8)+'" y="'+(Y(s.aim)+4).toFixed(1)+'" font-size="11" fill="#2f6b37">aim</text>';
+  s.P.forEach((p,i)=>{if(i<n-1)g+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="'+(n>40?2:3)+'" fill="'+col+'"/>';});
+  const lx=X(n-1),ly=Y(s.P[n-1].v);g+='<circle cx="'+lx.toFixed(1)+'" cy="'+ly.toFixed(1)+'" r="5" fill="#fff" stroke="'+col+'" stroke-width="2"/>';
+  g+='<text x="'+pl+'" y="'+(H-8)+'" font-size="11" fill="#4d5f68">'+esc(tdMd(s.P[0].d))+'</text><text x="'+(W-pr+6)+'" y="'+(H-8)+'" text-anchor="end" font-size="11" fill="#4d5f68">'+esc(tdMd(s.P[n-1].d))+'</text>';
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true" focusable="false">'+g+'</svg>';}
+const unitDay=s=>{const u=s.unit;if(/^%/.test(u))return u;if(s.measure==='duration'||/minute/i.test(u))return (u||'minutes')+' a day';return (u||'occurrences')+' a day';};
+function graphHtml(b,d,W,rep){const s=ddStats(b,d);if(!s)return '';const col=rep?'#2f7a4f':'#1f3a4d',pc=/^%/.test(s.unit),val=v=>fx(v)+(pc?'%':'');
+  const st=[];if(s.base!==null)st.push('<span class="ch-st"><b>'+esc(val(s.base))+'</b><span>'+esc(s.after?s.baseName.toLowerCase()+' mean':'mean so far ('+s.baseName.toLowerCase()+')')+'</span></span>');
+  st.push('<span class="ch-st"><b>'+esc(val(s.last5))+'</b><span>last '+s.n5+' day'+(s.n5===1?'':'s')+'</span></span>');
+  if(s.pct!==null)st.push('<span class="ch-st '+(s.good===true?'gd':s.good===false?'bd':'')+'"><b>'+esc(pctTxt(s.pct))+'</b><span>change</span></span>');
+  if(s.aim!==null)st.push('<span class="ch-st'+(s.aimMet?' gd':'')+'"><b>'+esc(val(s.aim))+'</b><span>aim'+(s.aimMet?', met '+(s.run||0)+' days in a row':s.need?', '+s.need+' days in a row asked':'')+'</span></span>');
+  const lab=b.name+', '+unitDay(s)+': '+s.n+' days from '+tdMd(s.P[0].d)+' to '+tdMd(s.last.d)+(s.base!==null?'; '+s.baseName+' mean '+val(s.base):'')+'; last '+s.n5+' days '+val(s.last5)+(s.pct!==null?'; change '+pctTxt(s.pct):'')+(s.aim!==null?'; aim '+val(s.aim)+(s.aimMet?', met':''):'')+'. Open DD-1';
+  return '<section class="ch-p '+(rep?'ch-o4':'ch-o3')+'" aria-labelledby="chG'+(rep?'R':'M')+'"><div class="ch-h"><h3 id="chG'+(rep?'R':'M')+'">'+esc(b.name)+', '+esc(unitDay(s))+'</h3>'+
+    '<button type="button" class="ch-open" data-chopen="DD-1" aria-label="Open DD-1"><span class="ch-code">DD-1</span></button><span class="ch-sp"></span><span class="ch-note">'+(rep?'the replacement behavior':'last day of data '+esc(tdMd(s.last.d)))+'</span></div>'+
+    '<button type="button" class="ch-graph" data-chopen="DD-1" aria-label="'+esc(lab)+'">'+graphSvg(s,W,col)+'<span class="ch-stats">'+st.join('')+'</span></button></section>';}
+function graphsHtml(f,W){const m=ddMain(f);
+  if(!m.main)return '<section class="ch-p ch-o3" aria-labelledby="chGM"><div class="ch-h"><h3 id="chGM">The data</h3><button type="button" class="ch-open" data-chopen="DD-1" aria-label="Open DD-1"><span class="ch-code">DD-1</span></button></div>'+
+    '<p class="ch-empty">No days of data from Form DD-1 yet'+(m.d&&m.rep?' for a target to bring down':'')+'. The graph of the main target behavior, with its phases and the change since baseline, shows here once DD-1 holds them.</p><div class="ch-btns"><button type="button" data-chopen="DD-1">Open DD-1</button></div></section>'+(m.rep?graphHtml(m.rep,m.d,W,true):'');
+  return graphHtml(m.main,m.d,W,false)+(m.rep?graphHtml(m.rep,m.d,W,true):'');}
+/* the plan's parts (Form TD-1's cards and its response to the behavior) and where each stands: "In use" once the plan runs
+   (TD-1's start date has come, or Form DD-1 has a phase after baseline), "Starts" or "Planned" before; "Check" on a part
+   when a step Form TI-1's last deciding check found missed is one of that part's steps on TD-1, and a Check line of its own
+   when that check is under TI-1's criterion (how many steps were missed, by TI-1's own kinds: consequence, antecedent) */
+function planHtml(f){const fn=f.fn,pl=f.plan,p=packet(),out=[];
+  if(fn&&(T(fn.label)||T(fn.key))){const carried=pl&&T(pl.fn)&&T(fn.key)&&T(pl.fn).toLowerCase()===T(fn.key).toLowerCase(),ad=pl&&pl.adoption||{};
+    const sub=['From FS-1'+(carried?', carried into TD-1':pl&&T(pl.fn)?'; TD-1’s plan names '+T(pl.fn):'')+(ad.date?' (adopted '+tdMd(ad.date)+')':''),T(p.bcba)?'BCBA: '+T(p.bcba):''].filter(Boolean).join(' · ');
+    out.push('<button type="button" class="ch-row" data-chopen="FS-1" aria-label="'+esc('Function: '+(T(fn.label)||fn.key)+'. '+sub+'. Open FS-1')+'"><span class="ch-tx"><span class="ch-fn">'+esc(T(fn.label)||T(fn.key))+'</span><span class="ch-s">'+esc(sub)+'</span></span></button>');}
+  else out.push('<p class="ch-empty">No function written yet (Form FS-1).</p><div class="ch-btns"><button type="button" data-chopen="FS-1">Open FS-1</button></div>');
+  const hasPl=pl&&(T(pl.beh)||T(pl.rep)||(pl.antCards||[]).length||(pl.teach||[]).length||(pl.sched||[]).length||T(pl.respond&&pl.respond.target));
+  if(hasPl){const ad=pl.adoption||{},d=f.data,inUse=(ad.start&&(tdLeft(ad.start)||0)<=0)||!!(d&&Array.isArray(d.conds)&&d.conds.length>1),soon=ad.start&&(tdLeft(ad.start)||0)>0;
+    const ti=f.integrity,tv=typeof tiDecisive==='function'?tiDecisive(ti):null,crit=ti&&ti.criterion||90,short=!!tv&&(tv.status==='not met'||(tv.status!=='met'&&tv.pct!=null&&tv.pct<crit));
+    const miss=short&&ti&&Array.isArray(ti.missed)?ti.missed.filter(m=>m&&T(m.d)):[],nrm=x=>T(x).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+    /* a step TI-1 found missed that is one of TD-1's own steps names its component (TD-1 lists each step with its component) */
+    const hit={};miss.forEach(m=>{const st=(Array.isArray(pl.steps)?pl.steps:[]).find(x=>x&&nrm(x.d)===nrm(m.d));if(st)[st.comp,st.grp].map(nrm).filter(Boolean).forEach(k=>{hit[k]=true;});});
+    const parts=[];(pl.antCards||[]).forEach(n=>parts.push({n,k:'Antecedent'}));(pl.teach||[]).forEach(n=>parts.push({n,k:'Teaching'}));(pl.sched||[]).forEach(n=>parts.push({n,k:'Reinforcement schedule'}));
+    {const t=T(pl.respond&&pl.respond.target);if(t)parts.push({n:t.split(/[:;]/)[0],k:'Response to the behavior'});}
+    if(!parts.length&&T(pl.rep))parts.push({n:T(pl.rep),k:'Replacement behavior'});
+    const row=x=>{const chk=inUse&&!!hit[nrm(x.n)],cls=chk?'chk':inUse?'run':'plan',w=chk?'Check':inUse?'In use':soon?'Starts '+tdMd(ad.start):'Planned',
+        why=chk?'A step of it missed on TI-1'+(tv&&tv.date?' ('+tdMd(tv.date)+')':''):x.k;
+      return '<li><button type="button" class="ch-row" data-chopen="'+(chk?'TI-1':'TD-1')+'" aria-label="'+esc(w+': '+x.n+'. '+why+'. Open '+(chk?'TI-1':'TD-1'))+'"><span class="ch-pill '+cls+'">'+esc(w)+'</span><span class="ch-tx"><span class="ch-t">'+esc(cut(x.n,80))+'</span><span class="ch-s">'+esc(why)+'</span></span></button></li>';};
+    /* the plan as run: Form TI-1's last deciding check under its criterion, the kinds of step missed */
+    if(inUse&&short){const k={ant:0,con:0,safe:0};miss.forEach(m=>{if(m.cmp in k)k[m.cmp]++;});const ks=[[k.con,'consequence'],[k.ant,'antecedent'],[k.safe,'safety']].filter(x=>x[0]).map(x=>x[0]+' '+x[1]);
+      const t='Integrity under '+crit+'%'+(tv&&tv.pct!=null?': '+r1(+tv.pct)+'%':'')+(tv&&tv.date?' on '+tdMd(tv.date):''),sub=miss.length?miss.length+' step'+(miss.length===1?'':'s')+' missed'+(ks.length?' ('+ks.join(', ')+')':'')+' on TI-1':'Form TI-1\u2019s last check';
+      parts.push({chkRow:'<li><button type="button" class="ch-row" data-chopen="TI-1" aria-label="'+esc('Check: '+t+'. '+sub+'. Open TI-1')+'"><span class="ch-pill chk">Check</span><span class="ch-tx"><span class="ch-t">'+esc(t)+'</span><span class="ch-s">'+esc(sub)+'</span></span></button></li>'});}
+    out.push('<ul class="ch-list">'+parts.map(x=>x.chkRow||row(x)).join('')+'</ul>');}
+  else out.push('<p class="ch-empty">No plan written yet (Form TD-1).</p><div class="ch-btns"><button type="button" data-chopen="TD-1">Open TD-1</button></div>');
+  return '<section class="ch-p ch-o6" aria-labelledby="chPlanH"><div class="ch-h"><h3 id="chPlanH">Function and plan</h3><button type="button" class="ch-open" data-chopen="'+(hasPl?'TD-1':'FS-1')+'" aria-label="Open '+(hasPl?'TD-1':'FS-1')+'"><span class="ch-code">'+(hasPl?'TD-1':'FS-1')+'</span></button></div>'+out.join('')+'</section>';}
+let home=null;
+function homeEl(){if(home)return home;home=mk('div',{id:'caseHome',role:'region','aria-label':'Case home'});blank.insertBefore(home,blank.firstChild);
+  home.addEventListener('click',e=>{const t=e.target.closest('button');if(!t||!home.contains(t))return;
+    if(t.dataset.chopen){openForm(t.dataset.chopen);return;}
+    if(t.dataset.chday){try{dayNumbersOpen(curKey());}catch(x){}return;}
+    if(t.dataset.chtoday){try{todayOpen();}catch(x){}return;}});
+  return home;}
+function paint(force){if(!homeNow()){return;}const el=homeEl(),f=state.facts||{};
+  const W0=Math.round(el.getBoundingClientRect().width)||Math.round(blank.clientWidth-40)||900,three=W0>=1000,two=W0>=600&&!three;
+  const gw=Math.max(260,Math.round(three?(W0-36)*1.85/3.85-34:two?(W0-18)*1.25/2.25-34:W0-34));
+  const nm=T(packet().client);
+  const h='<h2 class="ch-sr">Case home: '+esc(nm)+'</h2><div class="ch-grid">'+
+    '<div class="ch-col ch-a">'+alertHtml()+findHtml(f)+'</div>'+
+    '<div class="ch-col ch-b">'+actsHtml(f)+graphsHtml(f,gw)+'</div>'+
+    '<div class="ch-col ch-c">'+planHtml(f)+'</div></div>';
+  if(!force&&h===CH.sig)return;
+  const a=document.activeElement,keep=a&&el.contains(a)?(a.dataset.chopen||a.dataset.chday||a.dataset.chtoday||'')+'|'+[...el.querySelectorAll('button')].indexOf(a):'';
+  CH.sig=h;el.innerHTML=h;el.setAttribute('aria-label','Case home: '+nm);
+  if(keep){const i=+keep.split('|')[1],b=el.querySelectorAll('button')[i];if(b)try{b.focus({preventScroll:true});}catch(e){}}}
+const soon=()=>{clearTimeout(CH.t);CH.t=setTimeout(()=>{sync();paint(false);paintStu(false);},80);};
+/* ---------- the student line: the column's button and the switch ---------- */
+const colBtn=mk('button',{type:'button',id:'chColBtn',class:'wa','aria-controls':'railNav','aria-expanded':'false','aria-label':'Students and forms',title:'Students and forms: a column beside the case (tap again to fold it away)'},
+  svg('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9.5 4.5v15"/>'));
+const who=mk('button',{type:'button',id:'chWho','aria-haspopup':'dialog','aria-expanded':'false','aria-controls':'chSwPop'});
+const sPh=$('#sumPhoto'),sName=$('#sumName');
+bar.insertBefore(colBtn,bar.firstChild);if(sPh)bar.insertBefore(who,sPh);else bar.insertBefore(who,sName);
+const sIni=()=>document.getElementById('sumIni');
+let inWho=false;
+function placeWho(){const want=A();if(want===inWho&&(!want||who.contains(sName)))return;inWho=want;
+  const ns=[sPh,sIni(),sName].filter(Boolean);
+  if(want){ns.forEach(n=>who.appendChild(n));if(!who.querySelector('.ch-chev'))who.insertAdjacentHTML('beforeend',CHEV);else who.appendChild(who.querySelector('.ch-chev'));}
+  else ns.forEach(n=>bar.insertBefore(n,who));
+  label();}
+function label(){who.setAttribute('aria-label',T(packet().client)?'Student: '+T(packet().client)+'. Switch student':'Switch student');}
+/* the column is open: beside the stage on a wide window (not put away), over it below 1180 px (the drawer open) */
+const colOpen=()=>!fullOn()&&(NARROW.matches?B.classList.contains('rail-open'):!B.classList.contains('rail-hidden'));
+function setTab(t,focus){CH.tab=t==='stu'&&B.classList.contains('ws-case')&&A()?'stu':'forms';nav.dataset.chtab=CH.tab;
+  tS.setAttribute('aria-selected',String(CH.tab==='stu'));tF.setAttribute('aria-selected',String(CH.tab==='forms'));tS.tabIndex=CH.tab==='stu'?0:-1;tF.tabIndex=CH.tab==='forms'?0:-1;
+  if(CH.tab==='stu')paintStu(true);if(focus)try{(CH.tab==='stu'?tS:tF).focus({preventScroll:true});}catch(e){}}
+function colShow(on,tab){if(on){CH.viaStu=true;setTab(tab||'forms');if(NARROW.matches)setRail(true,false);else setRailHidden(false,false);sync();CH.viaStu=false;}
+  else{if(NARROW.matches)setRail(false,false);else setRailHidden(true,false);sync();}}
+colBtn.addEventListener('click',()=>{if(colOpen()){colShow(false);say0('Students and forms folded away');}else{colShow(true,'stu');say0('Students and forms: the Students tab');}});
+/* ---------- the column's tabs ---------- */
+const tabs=mk('div',{id:'chTabs',role:'tablist','aria-label':'Students and forms'});
+const tS=mk('button',{type:'button',id:'chTabS',role:'tab','aria-selected':'false','aria-controls':'chStu'},'Students'),tF=mk('button',{type:'button',id:'chTabF',role:'tab','aria-selected':'true','aria-controls':'chForms'},'Forms');
+tabs.appendChild(tS);tabs.appendChild(tF);rh.insertBefore(tabs,rh.firstChild);
+const stu=mk('div',{id:'chStu',role:'tabpanel','aria-labelledby':'chTabS'});
+const forms=mk('div',{id:'chForms'});
+rh.insertAdjacentElement('afterend',stu);stu.insertAdjacentElement('afterend',forms);forms.appendChild(rhead);forms.appendChild(rail);   /* the list itself, moved: every id and listener stays */
+tS.addEventListener('click',()=>setTab('stu',true));tF.addEventListener('click',()=>setTab('forms',true));
+tabs.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='Home'||e.key==='End'){e.preventDefault();setTab(e.key==='Home'?'stu':e.key==='End'?'forms':CH.tab==='stu'?'forms':'stu',true);}});
+/* the edge tab, the form row's Forms button, the dark row's Forms and Show the list open the column on its Forms tab */
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#railEdge,#railToggle,#railShow,#fsForms,#wnForms');if(!t)return;
+  if(t.id==='wnForms'&&A()&&B.classList.contains('ws-home')){e.stopImmediatePropagation();e.preventDefault();if(colOpen()&&CH.tab==='forms')colShow(false);else colShow(true,'forms');return;}
+  setTab('forms');},true);
+/* ---------- the students: the switch's panel and the Students tab ---------- */
+const RK=()=>'nbh.ws.recent@'+(typeof DRV_ED==='string'?DRV_ED:'nbh');
+function recent(){try{const a=JSON.parse(kvGet(RK())||'[]');return Array.isArray(a)?a.map(String):[];}catch(e){return [];}}
+function noteRecent(k){if(!k)return;try{const a=[k].concat(recent().filter(x=>x!==k)).slice(0,12);kvSet(RK(),JSON.stringify(a));}catch(e){}}
+async function students(){let L=[];try{L=(await clList())||[];}catch(e){L=[];}L=L.filter(r=>r&&!isStaffRec(r));CH.list=L;return L;}
+function stuItem(r,cls){const cur=r.key===curKey(),f=factsOf(r),tg=targetOf(f),top=topOf(r),nm=clName(r),sub=[tg,top].filter(Boolean).join(' · ');
+  if(cls==='sc')return '<button type="button" class="ch-sc" data-chgo="'+esc(r.key)+'"'+(cur?' aria-current="true"':'')+' aria-label="'+esc(nm+(cur?', on screen':'')+(sub?'. '+sub:''))+'">'+avOf(r)+'<span class="ch-who"><span class="ch-nm">'+esc(nm)+'</span><span class="ch-scr"><span class="ch-sub">'+esc(sub||'No target behavior yet')+'</span>'+chipOf(f)+'</span></span></button>';
+  return '<li><button type="button" class="ch-si" data-chgo="'+esc(r.key)+'"'+(cur?' aria-current="true"':'')+' aria-label="'+esc(nm+(cur?', on screen':'')+(sub?'. '+sub:''))+'">'+avOf(r)+'<span class="ch-who"><span class="ch-nm">'+esc(nm)+(cur?'<span class="ch-ck" aria-hidden="true">✓</span>':'')+'</span>'+(sub?'<span class="ch-sub">'+esc(sub)+'</span>':'')+'</span>'+chipOf(f)+'</button></li>';}
+const byUrg=(a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved));
+const match=(r,q)=>!q||(String(clName(r))+' '+String(r.client||'')+' '+String(r.sid||'')).toLowerCase().includes(q);
+/* the switch: Find a student, the pinned, the opened recently (the current one marked), All students */
+const pop=mk('div',{id:'chSwPop',role:'dialog','aria-label':'Switch student'});pop.hidden=true;document.body.appendChild(pop);
+pop.innerHTML='<div class="ch-find">'+FIND+'<input type="search" id="chSwFind" placeholder="Find a student" aria-label="Find a student" autocomplete="off" spellcheck="false"></div><div id="chSwList"></div><button type="button" class="ch-all" id="chSwAll">All students (Caseload) <span id="chSwN"></span></button>';
+const swFind=pop.querySelector('#chSwFind'),swList=pop.querySelector('#chSwList');
+function swPaint(){const L=CH.list,q=T(swFind.value).toLowerCase(),P=clPins(),ck=curKey();let h='';
+  if(q){const M=L.filter(r=>match(r,q)).sort(byUrg).slice(0,12);h=M.length?'<h4 class="ch-gh" id="chSwRh">Students</h4><ul class="ch-sl" aria-labelledby="chSwRh">'+M.map(r=>stuItem(r)).join('')+'</ul>':'<p class="ch-none" role="status">No student kept here matches “'+esc(swFind.value.trim())+'”.</p>';}
+  else{const pin=P.map(k=>L.find(r=>r.key===k)).filter(Boolean),rc=[ck].concat(recent()).filter((k,i,a)=>k&&a.indexOf(k)===i&&!P.includes(k)).map(k=>L.find(r=>r.key===k)).filter(Boolean).slice(0,5);
+    if(pin.length)h+='<h4 class="ch-gh" id="chSwPh">Pinned</h4><ul class="ch-sl" aria-labelledby="chSwPh">'+pin.map(r=>stuItem(r)).join('')+'</ul>';
+    if(rc.length)h+='<h4 class="ch-gh" id="chSwRh">Opened recently</h4><ul class="ch-sl" aria-labelledby="chSwRh">'+rc.map(r=>stuItem(r)).join('')+'</ul>';
+    if(!h)h='<p class="ch-none">No student kept on this '+esc(HERE)+' yet: each Save case keeps one. Find a student searches them all.</p>';}
+  swList.innerHTML=h;pop.querySelector('#chSwN').textContent=L.length?L.length+' ›':'›';}
+const swItems=()=>[swFind].concat([...pop.querySelectorAll('.ch-si,.ch-all')]).filter(x=>x.offsetParent!==null);
+function swPlace(){const r=who.getBoundingClientRect(),w=pop.offsetWidth;pop.style.left=Math.max(8,Math.min(innerWidth-w-8,Math.round(r.left)))+'px';pop.style.top=Math.round(r.bottom+6)+'px';pop.style.maxHeight=Math.max(240,Math.min(640,innerHeight-r.bottom-20))+'px';}
+async function swOpen(){if(!pop.hidden)return;try{window.__wsA&&__wsA.shut();window.__wsNav&&__wsNav.shut();}catch(e){}
+  swFind.value='';pop.hidden=false;who.setAttribute('aria-expanded','true');swPlace();
+  await students();if(pop.hidden)return;swPaint();swPlace();
+  const f=pop.querySelector('.ch-si[aria-current=true]')||pop.querySelector('.ch-si')||swFind;try{f.focus({preventScroll:true});}catch(e){}}
+function swShut(back){if(pop.hidden)return;pop.hidden=true;who.setAttribute('aria-expanded','false');if(back)try{who.focus({preventScroll:true});}catch(e){}}
+who.addEventListener('click',e=>{if(!A())return;e.stopPropagation();if(!pop.hidden){swShut(true);return;}swOpen();});
+swFind.addEventListener('input',()=>swPaint());
+pop.addEventListener('keydown',e=>{const its=swItems(),i=its.indexOf(document.activeElement),n=its.length;
+  if(e.key==='Escape'){e.preventDefault();e.stopPropagation();swShut(true);}
+  else if((e.key==='ArrowDown'||e.key==='ArrowUp')&&n){e.preventDefault();its[(i+(e.key==='ArrowDown'?1:n-1)+n)%n].focus();}
+  else if(e.key==='Tab'&&n){const f=its[0],l=its[n-1];if(e.shiftKey&&document.activeElement===f){e.preventDefault();l.focus();}else if(!e.shiftKey&&document.activeElement===l){e.preventDefault();f.focus();}}});
+document.addEventListener('click',e=>{if(!pop.hidden&&!pop.contains(e.target)&&!who.contains(e.target))swShut(false);},true);
+addEventListener('resize',()=>{if(!pop.hidden)swPlace();});
+pop.querySelector('#chSwAll').addEventListener('click',()=>{swShut(false);try{caseloadOpen();}catch(e){}});
+/* a choice goes through caseloadGo, which asks about unsaved work as it does from Caseload */
+async function go(k){if(!k)return;try{await caseloadGo(k,'');}catch(e){}setTimeout(()=>{if(A()&&who.isConnected&&!document.querySelector('dialog[open]'))try{who.focus({preventScroll:true});}catch(x){}},400);}
+pop.addEventListener('click',e=>{const b=e.target.closest('[data-chgo]');if(!b)return;swShut(false);go(b.dataset.chgo);});
+/* the Students tab: the caseload as compact cards, pinned first */
+stu.innerHTML='<div class="ch-find">'+FIND+'<input type="search" id="chStuFind" placeholder="Find a student" aria-label="Find a student" autocomplete="off" spellcheck="false"></div><div id="chStuList"></div><button type="button" class="ch-all" id="chStuAll">All students (Caseload)</button>';
+const stFind=stu.querySelector('#chStuFind'),stList=stu.querySelector('#chStuList');
+async function paintStu(fetch){if(!(CH.tab==='stu'&&B.classList.contains('ws-case')&&A()))return;if(fetch||!CH.list.length)await students();
+  const L=CH.list,q=T(stFind.value).toLowerCase(),P=clPins(),S=L.filter(r=>match(r,q)),pin=P.map(k=>S.find(r=>r.key===k)).filter(Boolean),rest=S.filter(r=>!P.includes(r.key)).sort(byUrg);
+  const h=(pin.length?'<h4 class="ch-gh">Pinned</h4>'+pin.map(r=>stuItem(r,'sc')).join(''):'')+(rest.length?'<h4 class="ch-gh">'+(pin.length?'Everyone else':'Students')+'</h4>'+rest.map(r=>stuItem(r,'sc')).join(''):'')+
+    (!S.length?'<p class="ch-none">'+(q?'No student kept here matches “'+esc(stFind.value.trim())+'”.':'No student kept on this '+esc(HERE)+' yet.')+'</p>':'');
+  if(h===CH.stuSig)return;CH.stuSig=h;stList.innerHTML=h;}
+stFind.addEventListener('input',()=>paintStu(false));
+stu.addEventListener('click',e=>{const b=e.target.closest('[data-chgo]');if(b){if(NARROW.matches)setRail(false,false);go(b.dataset.chgo);return;}
+  if(e.target.closest('#chStuAll')){try{caseloadOpen();}catch(x){}}});
+/* ---------- keeping up ---------- */
+let wasCase=false,wasOpen=null;
+function sync(){const on=caseOn(),a=A();B.classList.toggle('ws-case',on);B.classList.toggle('ws-home',homeNow());
+  if(on!==wasCase){wasCase=on;CH.sig='';CH.stuSig='';if(!on){setTab('forms');swShut(false);if(home)home.innerHTML='';}
+    else if(a&&NARROW.matches&&!state.cur)setRail(false,false);}   /* upright the column is over the case: put away when a student opens */
+  if(!on||!a){if(CH.tab!=='forms')setTab('forms');}
+  const o=colOpen();if(wasOpen===false&&o&&!CH.viaStu&&CH.tab!=='forms')setTab('forms');wasOpen=o;
+  colBtn.setAttribute('aria-expanded',String(on&&o));forms.setAttribute('role',on&&a?'tabpanel':'presentation');if(on&&a)forms.setAttribute('aria-labelledby','chTabF');else forms.removeAttribute('aria-labelledby');
+  placeWho();label();if(!a)swShut(false);}
+new MutationObserver(()=>{sync();if(B.classList.contains('ws-home'))soon();}).observe(B,{attributes:true,attributeFilter:['class']});
+new MutationObserver(()=>soon()).observe(blank,{attributes:true,attributeFilter:['style']});
+['paintFacts','paintSum','paintDue','renderRail'].forEach(fnm=>{try{const f0=window[fnm];if(typeof f0!=='function')return;const w=function(){const r=f0.apply(this,arguments);soon();return r;};
+  if(fnm==='paintFacts')paintFacts=w;else if(fnm==='paintSum')paintSum=w;else if(fnm==='paintDue')paintDue=w;else renderRail=w;}catch(e){}});
+/* the stage changes width (the column folds or opens, the iPad turns): the graphs are drawn again at the new width */
+{let rw=0;const ro=new ResizeObserver(()=>{const w=Math.round(blank.clientWidth);if(Math.abs(w-rw)>8){rw=w;soon();}});ro.observe(blank);}
+/* opening a student from the caseload (a card's Open, the switch, the Students tab, Find): the case home; a card's button
+   for one form still opens that form. The student already on screen: back to their case home, the forms kept open. */
+function toHome(){try{if(state.split&&state.split.length){state.split=[];layoutFrames();}
+  Object.values(state.frames).forEach(f=>hideFrame(f));state.cur=null;clearTimeout(state.watch);
+  blank.style.display='';B.classList.remove('has-form');setFull(false,true);
+  $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';$('#crumbFile').textContent='';
+  renderRail();if(typeof paintSave==='function')paintSave();}catch(e){}sync();paint(true);}
+{const cgH=caseloadGo;caseloadGo=async function(key,form){const open=Object.keys(state.frames).length||Object.keys(state.pending).length;
+  if(!form&&open&&key&&key===curKey()){try{$('#dlg').close();}catch(e){}toHome();say0('The case home');return;}
+  CH.home=!form;try{return await cgH.apply(this,arguments);}finally{CH.home=false;}};}
+{const ocH=openCaseText;openCaseText=async function(){let set=false;if(CH.home&&!caseOpenTo){caseOpenTo='~home';set=true;}
+  try{return await ocH.apply(this,arguments);}finally{if(set&&caseOpenTo==='~home')caseOpenTo='';try{noteRecent(curKey());}catch(e){}soon();}};}
+/* upright (the list over the stage), the case home keeps the column put away when the last form closes */
+{const ras=railAtStart;railAtStart=function(){if(A()&&caseOn())return setRail(false);return ras.apply(this,arguments);};}
+/* Hide in the column's heading on the case home: the focus goes to the student line's button (the form row is not shown) */
+$('#railHide').addEventListener('click',()=>{if(A()&&B.classList.contains('ws-home'))setTimeout(()=>{try{colBtn.focus({preventScroll:true});}catch(e){}},30);});
+sync();setTab('forms');soon();
+window.__wsCH={paint:()=>{sync();paint(true);},sig:()=>CH.sig,tab:()=>CH.tab,setTab,colOpen,colShow,swOpen,swShut,recent,chipOf,ddStats,ddMain,alertOf,toHome};   /* for the tests */
+})();
+</script>
 </body>
 </html>
