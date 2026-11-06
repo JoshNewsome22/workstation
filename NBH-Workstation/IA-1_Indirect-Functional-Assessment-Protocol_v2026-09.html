@@ -1472,7 +1472,7 @@ window.FX2_CFG = { toolbar: true, cards: '#outTbl, #setup table.rank, #anGrp' };
       <div class="f"><label for="rpTarget">Target behavior (from this form and the case)</label><select id="rpTarget"></select></div>
       <div class="f"><label for="rpName">The student as the items name them (initials by default, as Setup promises; type a first name only if the family has agreed; leave blank for "the student")</label><input id="rpName"></div>
       <div class="f"><label for="rpPron">Pronouns in the items</label><select id="rpPron"><option value="">as pasted (he or she)</option><option value="he">he / him / his</option><option value="she">she / her / her</option><option value="they">they / them / their</option></select></div>
-      <div class="f"><label for="rpLang">Language of the page (its instructions, buttons, messages and the email; the items as pasted)</label><select id="rpLang"><option value="">English</option><option value="es">Espa&ntilde;ol (Spanish)</option></select><div id="rpLangNote" class="rp-hint" hidden>The items appear as pasted on the Setup sheet, so paste the instrument&rsquo;s Spanish wording there. The behavior&rsquo;s name, plural phrase and definition come from the targets table below: write them in Spanish for this page.</div></div>
+      <div class="f"><label for="rpLang">Language of the page (its instructions, buttons, messages and the email; the items as pasted)</label><select id="rpLang"><option value="">English</option><option value="es">Espa&ntilde;ol (Spanish)</option><option value="ht">Krey&ograve;l ayisyen (Haitian Creole, draft translation)</option></select><div id="rpLangNote" class="rp-hint" hidden>The items appear as pasted on the Setup sheet, so paste the instrument&rsquo;s Spanish wording there. The behavior&rsquo;s name, plural phrase and definition come from the targets table below: write them in Spanish for this page.</div><div id="rpLangNoteHt" class="rp-hint" hidden><b class="ia-draft">Draft translation: a district translator reviews it before it goes home.</b> The page&rsquo;s own words in Haitian Creole (its instructions, buttons, messages, the About you questions, the scales and the email) are the workstation&rsquo;s draft, and the page says so at its top. The items appear as pasted on the Setup sheet, so paste the instrument&rsquo;s Creole wording there if one is published; the behavior&rsquo;s name, plural phrase and definition come from the targets table below: write them in Creole for this page.</div></div>
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
       <div class="f"><label for="rpVideo">Instructions video or page (a link the page shows; optional)</label><input id="rpVideo" type="url" placeholder="https://youtu.be/..."></div>
@@ -1487,7 +1487,7 @@ window.FX2_CFG = { toolbar: true, cards: '#outTbl, #setup table.rank, #anGrp' };
     <label class="gf-note" id="rpFxRow"><input type="checkbox" id="rpFx" checked> FAST only: ask the open-ended questions too (most and least likely situations, what happens before and after, current treatments)</label>
     <div class="gf-note"><b>The first items as the page will read them:</b><div id="rpPrev" class="rp-prev"></div></div>
     <div id="rpStatus" class="gf-warn" hidden></div>
-    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpQr">QR code</button><button type="button" id="rpPreview">Preview</button><span class="method" id="rpNote" style="margin:0"></span></div>
+    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpQr">QR code</button><button type="button" id="rpPreview">Preview</button><button type="button" id="rpReadLvl">Check reading level</button><span class="method" id="rpNote" style="margin:0"></span></div>
     <textarea id="rpLinkBox" class="rp-linkbox" rows="3" readonly hidden aria-label="The link to copy"></textarea>
   </div>
 </dialog>
@@ -4944,22 +4944,38 @@ const RP_ES={extras:[{id:'name',label:'Su nombre',req:true},{id:'role',label:'Su
     when:'El estudiante normalmente se escapa (nombre cada uno que aplique): en un descuido de la supervisi\u00f3n, cuando se le deja solo, justo delante de m\u00ed, durante una transici\u00f3n, otro',
     i7:'La pregunta 7 habla de un objeto: \u00bfcu\u00e1l?',i10:'La pregunta 10 habla de un objeto: \u00bfcu\u00e1l?',i12:'La pregunta 12 habla de una tarea: \u00bfcu\u00e1l?'},
   sub:(title,name)=>'Evaluaci\u00f3n funcional indirecta: '+title+', respondido por alguien que conoce a '+(name||'el estudiante')};
-function rpScaleFor(key,es){const sc=RP_INFO[key].scale;if(!es)return sc;const o=Object.assign({},sc);if(o.anchors&&RP_ES.anchors[key])o.anchors=RP_ES.anchors[key];if(o.na)o.naLabel=RP_ES.na;if(key==='wefa')o.labels=RP_ES.wefaLabels;return o;}
-function rpOpenFor(key,info,es,P){if(key==='fast')return info.open.map(([id,label])=>({id,label:P(es&&RP_ES.fastOpen[id]||label)}));
-  return info.open.map(o=>Object.assign({},o,{label:P(es&&RP_ES.wefaOpen[o.id]||o.label)},es&&o.type==='yns'?{choices:RP_ES.wefaChoices}:{}));}
+/* v25.68 (research #13) the page in Haitian Creole: as for Spanish, the form supplies in Creole what it writes into the payload.
+   DRAFT TRANSLATION: a district translator reviews it before it goes home (the page and the dialog say so). */
+const RP_HT={extras:[{id:'name',label:'Non ou',req:true},{id:'role',label:'Ki relasyon ou genyen ak el\u00e8v la (pwofes\u00e8, asistan, papa oswa manman)'},{id:'mo',label:'Depi konbyen tan ou konnen el\u00e8v la? (mwa)'},{id:'daily',label:'\u00c8ske ou w\u00e8 el\u00e8v la chak jou?',type:'yn'},{id:'set',label:'Nan ki kote oswa nan ki aktivite ou w\u00e8 el\u00e8v la?'}],
+  anchors:{qabf:['0 pa janm','1 raman','2 pafwa','3 souvan'],mas:['0 pa janm','1 pr\u00e8ske pa janm','2 raman','3 mwatye tan an','4 pi souvan','5 pr\u00e8ske toujou','6 toujou'],pbq:['0 pa janm','1 anviwon 10 % tan an','2 anviwon 25 %','3 anviwon 50 %','4 anviwon 75 %','5 anviwon 90 %','6 toujou']},
+  na:'X: sa pa aplike',wefaLabels:['Vre','Fo',null],watch:'Gade enstriksyon yo',wefaHeading:'Sou el\u00e8v la ak l\u00e8 li sove ale',wefaChoices:['Ou ka konte sou li','Ou ka konte sou li pafwa','Ou pa ka konte sou li'],
+  fastOpen:{ml:'Nan ki sitiyasyon oswa ki aktivite konp\u00f2tman an gen plis chans rive?',ll:'Nan ki sitiyasyon oswa ki aktivite li gen mwens chans rive?',before:'Kisa ki konn rive jis anvan konp\u00f2tman an?',after:'Kisa ki konn rive jis apre konp\u00f2tman an?',tx:'Tretman oswa medikaman li pran kounye a, si genyen'},
+  wefaOpen:{comm:'Kijan el\u00e8v la kominike? (ak pawòl, ak echanj imaj, ak lang siy, ak j\u00e8s, li pa kominike; nonmen chak sa ki aplike)',commrel:'\u00c8ske ou ka konte sou fason el\u00e8v la kominike?',
+    seeks:'El\u00e8v la renmen oswa li ka ch\u00e8che (nonmen chak sa ki aplike): dlo (pisin, lak, kanal), machin (oto, kamyon), tren oswa ray tren, pak oswa teren jw\u00e8t, atansyon moun (l\u00e8 yo kouri d\u00e8y\u00e8 l, l\u00e8 yo chatouye l)',
+    settings:'Ki kote el\u00e8v la sove oswa eseye sove, e konbyen fwa apeprè nan chak kote (chak \u00e8dtan, chak jou, chak sem\u00e8n, chak mwa)? Lakay, nan katye a, lek\u00f2l',
+    school:'Lek\u00f2l, nan ki moman? (tranzisyon, koridò, aktivite ki \u00f2ganize, aktivite ki pa \u00f2ganize, l\u00f2t)',
+    leaves:'L\u00e8 el\u00e8v la sove, li konn kite (nonmen chak sa ki aplike): sal klas la, batiman an, lakou lek\u00f2l la, kote li an sekirite toupre yon granmoun k ap okipe l, l\u00f2t',
+    when:'El\u00e8v la konn sove (nonmen chak sa ki aplike): l\u00e8 moun k ap siveye l pa gade, l\u00e8 yo kite l poukont li, dwat devan mwen, pandan yon tranzisyon, l\u00f2t',
+    i7:'Kesyon 7 pale de yon bagay: ki bagay?',i10:'Kesyon 10 pale de yon bagay: ki bagay?',i12:'Kesyon 12 pale de yon travay: ki travay?'},
+  sub:(title,name)=>'Kesyon sou poukisa konp\u00f2tman an rive ('+title+'), pou yon moun ki konnen '+(name||'el\u00e8v la')};
+/* the words the form writes for the page in a language: Spanish, Creole, or none (English) */
+const rpLD=l=>l==='es'?RP_ES:l==='ht'?RP_HT:null;
+function rpScaleFor(key,es){const D=es===true?RP_ES:(es||null),sc=RP_INFO[key].scale;if(!D)return sc;const o=Object.assign({},sc);if(o.anchors&&D.anchors[key])o.anchors=D.anchors[key];if(o.na)o.naLabel=D.na;if(key==='wefa')o.labels=D.wefaLabels;return o;}
+function rpOpenFor(key,info,es,P){const D=es===true?RP_ES:(es||null);if(key==='fast')return info.open.map(([id,label])=>({id,label:P(D&&D.fastOpen[id]||label)}));
+  return info.open.map(o=>Object.assign({},o,{label:P(D&&D.wefaOpen[o.id]||o.label)},D&&o.type==='yns'?{choices:D.wefaChoices}:{}));}
 /* v23.22 (review F46) the FAST's own instruction (Iwata, DeLeon & Roscoe, 2013): answer yes or no, and N/A when uncertain */
 const IA_FAST_NA='Answer each question Yes or No. If you are uncertain about an answer, choose N/A: an uncertain answer is better left out than guessed.';
-function rpPayloadFor(t,opt){const key=$('#rpInst').value,items=rpWording(key),info=RP_INFO[key],per=rpPerson(t),P=s=>NBH_RESPOND.personalize(s,per),es=per.lang==='es';
+function rpPayloadFor(t,opt){const key=$('#rpInst').value,items=rpWording(key),info=RP_INFO[key],per=rpPerson(t),P=s=>NBH_RESPOND.personalize(s,per),es=rpLD(per.lang);
   const p={v:1,form:'IA-1',inst:key,title:INST[key].title,heading:info.heading,student:$('#rpStudent').value.trim(),beh:t.label,behLabel:t.label,def:t.def,confirm:$('#rpConfirm').checked&&!!t.def,bcba:val('m.assessor')||'the BCBA',email:$('#rpEmail').value.trim(),due:$('#rpDue').value.trim(),
-    sub:es?RP_ES.sub(INST[key].title,per.name):'Indirect functional assessment: '+INST[key].title+' answered by someone who sees '+(per.name||'the student')+' and '+t.sing,items:items.map((x,i)=>({n:i+1,text:P(x)})),scale:rpScaleFor(key,es),extras:es?RP_ES.extras:RP_EXTRAS,
+    sub:es?es.sub(INST[key].title,per.name):'Indirect functional assessment: '+INST[key].title+' answered by someone who sees '+(per.name||'the student')+' and '+t.sing,items:items.map((x,i)=>({n:i+1,text:P(x)})),scale:rpScaleFor(key,es),extras:es?es.extras:RP_EXTRAS,
     subject:INST[key].title+' answers for Form IA-1 · '+t.label};
-  if(es)p.lang='es';   /* v21.67 the page's own words in Spanish */
-  const vid=$('#rpVideo').value.trim();if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:es?RP_ES.watch:'Watch the instructions'}];
+  if(es)p.lang=per.lang;   /* v21.67 the page's own words in Spanish; v25.68 or in Haitian Creole (a draft) */
+  const vid=$('#rpVideo').value.trim();if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:es?es.watch:'Watch the instructions'}];
   if(!(opt&&opt.link)&&!iaNoPhoto()){const ph=val('rp.photo');if(/^data:image\//.test(ph))p.photo=ph;}   /* v21.41b: the photo travels in the page file, never in a link; v23.22 (F40) never without permission */
   if(key==='fast'&&!es)p.instructions=IA_FAST_NA+' When you have finished, press Send'+(boxLink()?': your answers go straight to '+p.bcba+'.':': your email program opens with a message to '+p.bcba+' ready to go.');   /* v23.22 (review F46), with the page's own last sentence */
   if(key==='fast'&&info.credit)p.credit=info.credit;   /* v21.59 the authors' credit on the page */
   if(key==='fast'&&$('#rpFx').checked)p.open=rpOpenFor(key,info,es,P);
-  if(key==='wefa'){p.open=rpOpenFor(key,info,es,P);p.openFirst=true;p.openHeading=es?RP_ES.wefaHeading:info.openHeading;}   /* v21.41 */
+  if(key==='wefa'){p.open=rpOpenFor(key,info,es,P);p.openFirst=true;p.openHeading=es?es.wefaHeading:info.openHeading;}   /* v21.41 */
   if(key==='pbq')p.pbqVer=String(items.length);
   p.sig=rpSig(key);   /* v21.40 (21): the response carries it back; Collect responses compares it with this form's wording */
   const bx=boxLink();if(bx)p.box=bx;   /* v21.65 where the answers go */
@@ -4996,7 +5012,7 @@ function rpLinks(){return rpTermsFromTable().map(t=>({label:t.label,url:rpLinkUr
 $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStudent').value=rpInitials();if(!$('#rpEmail').value)$('#rpEmail').value=val('m.email');
   if(!$('#rpName').value)$('#rpName').value=val('rp.name')||rpDefaultName();if(!$('#rpPron').value&&val('rp.pron'))$('#rpPron').value=val('rp.pron');if(!$('#rpVideo').value&&val('rp.video'))$('#rpVideo').value=val('rp.video');if(!$('#rpBase').value&&val('rp.base'))$('#rpBase').value=val('rp.base');if(!$('#rpBox').value&&val('rp.box'))$('#rpBox').value=val('rp.box');if(!$('#rpLang').value&&val('rp.lang'))$('#rpLang').value=val('rp.lang');rpLangNote();rpPhotoShow();
   rpCounts();rpFillTargets();rpRenderTargets();rpStatus();boxPaint();boxEnsure();$('#rpDlg').showModal();});
-function rpLangNote(){const n=$('#rpLangNote');if(n)n.hidden=$('#rpLang').value!=='es';}
+function rpLangNote(){const n=$('#rpLangNote');if(n)n.hidden=$('#rpLang').value!=='es';const h=$('#rpLangNoteHt');if(h)h.hidden=$('#rpLang').value!=='ht';}
 $('#rpLang').addEventListener('change',()=>{rpRemember();rpLangNote();rpStatus();});
 ['rpEmail','rpStudent','rpName'].forEach(id=>$('#'+id).addEventListener('input',rpStatus));
 $('#rpInst').addEventListener('change',rpStatus);$('#rpVideo').addEventListener('input',rpStatus);$('#rpBase').addEventListener('input',()=>{rpRemember();rpStatus();});$('#rpBox').addEventListener('input',()=>{rpRemember();boxPaint();});$('#rpBox').addEventListener('change',()=>{boxEnsure();});
@@ -5025,6 +5041,11 @@ $('#rpSave').addEventListener('click',async()=>{if(rpOff())return;await boxEnsur
 $('#rpQr').addEventListener('click',async()=>{if(rpOff())return;rpRemember();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file instead.';return;}await boxEnsure();const ls=rpLinks();if(!ls.length)return;outsMade($('#rpInst').value,[ls[0].label]);qrShow(ls[0].url,INST[$('#rpInst').value].title+' about '+ls[0].label+(ls.length>1?' (the first of '+ls.length+' targets; the others from the Send-outs sheet)':''));});
 $('#rpPreview').addEventListener('click',()=>{if(rpOff())return;rpRemember();const html=NBH_RESPOND.pageHTML(rpPayload());$('#rpPrevFrame').srcdoc=html;$('#rpPrevDlg').showModal();});
 $('#rpPrevClose').addEventListener('click',()=>$('#rpPrevDlg').close());
+/* v25.68 (research #12) the reading level of what the respondent reads (the form's words on the page: its title, the lines under
+   it, the items as personalized, the open questions), by Check wording's reading check, in the page's language; it suggests only */
+function rpReadParts(p){const L=[p.heading,p.sub,p.instructions].concat((p.items||[]).map(x=>x.text),(p.open||[]).map(o=>o.label),p.def?[p.def]:[]).filter(Boolean);return [{lang:p.lang||'en',text:L.join('\n')}];}
+$('#rpReadLvl').addEventListener('click',()=>{if(!window.nbhWording||!nbhWording.reading){$('#rpNote').textContent='The reading check is in nbh-wording.js, which is not beside this form.';return;}
+  const p=rpPayload();nbhWording.reading({title:'The respondent page: '+(INST[$('#rpInst').value]||{}).title,parts:rpReadParts(p)},{back:$('#rpReadLvl')});});
 $('#rpPrevDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 /* the link is shown in a box as well as copied: the clipboard is refused on some tablets */
 /* v21.44 Email it: the link in an email of the assessor's own, to check and send (NBH_RESPOND.invite in nbh-respond.js) */
@@ -5186,11 +5207,11 @@ function outsReceived(tgt,key,slot,from,date){const code=CODES[slot]||'';let o=o
   if(!o){o=outNorm({tgt,inst:key,inf:code});OUTS.push(o);}o.inf=o.inf||code;o.recv=date||isoToday();o.from=from||o.from;o.placed=true;if(!o.sent){o.sent=o.recv;o.how=o.how||'collected';}if(document.body.classList.contains('view-outs'))outsRender();}
 /* a page or a link for a row, from the stored settings (the dialog's values, remembered with the file) */
 function rpPayloadQuiet(key,rec,opt){opt=opt||{};const items=rpWording(key),info=RP_INFO[key];if(!items.length||!info||!rec)return null;
-  const t=Object.assign({label:rec.label,def:rec.def},rpTermsOf({label:rec.label,def:rec.def}));const name=val('rp.name')||rpDefaultName();const es=val('rp.lang')==='es';const per={name,pron:val('rp.pron'),beh:t.sing,behs:t.plur,lang:val('rp.lang')};const P=x=>NBH_RESPOND.personalize(x,per);
+  const t=Object.assign({label:rec.label,def:rec.def},rpTermsOf({label:rec.label,def:rec.def}));const name=val('rp.name')||rpDefaultName();const es=rpLD(val('rp.lang'));const per={name,pron:val('rp.pron'),beh:t.sing,behs:t.plur,lang:val('rp.lang')};const P=x=>NBH_RESPOND.personalize(x,per);
   const p={v:1,form:'IA-1',inst:key,title:INST[key].title,heading:info.heading,student:rpInitials(),beh:rec.label,behLabel:rec.label,def:t.def,confirm:!!t.def,bcba:val('m.assessor')||'the BCBA',email:val('m.email'),due:opt.due?mdy(opt.due):'',
-    sub:es?RP_ES.sub(INST[key].title,name):'Indirect functional assessment: '+INST[key].title+' answered by someone who sees '+(name||'the student')+' and '+t.sing,items:items.map((x,i)=>({n:i+1,text:P(x)})),scale:rpScaleFor(key,es),extras:es?RP_ES.extras:RP_EXTRAS,subject:INST[key].title+' answers for Form IA-1 \u00b7 '+rec.label};
-  if(es)p.lang='es';
-  const vid=val('rp.video');if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:es?RP_ES.watch:'Watch the instructions'}];
+    sub:es?es.sub(INST[key].title,name):'Indirect functional assessment: '+INST[key].title+' answered by someone who sees '+(name||'the student')+' and '+t.sing,items:items.map((x,i)=>({n:i+1,text:P(x)})),scale:rpScaleFor(key,es),extras:es?es.extras:RP_EXTRAS,subject:INST[key].title+' answers for Form IA-1 \u00b7 '+rec.label};
+  if(es)p.lang=val('rp.lang');
+  const vid=val('rp.video');if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:es?es.watch:'Watch the instructions'}];
   if(!opt.link&&!iaNoPhoto()){const ph=val('rp.photo');if(/^data:image\//.test(ph))p.photo=ph;}   /* v23.22 (review F40) */
   if(key==='fast'&&!es)p.instructions=IA_FAST_NA+' When you have finished, press Send'+(boxLink()?': your answers go straight to '+p.bcba+'.':': your email program opens with a message to '+p.bcba+' ready to go.');   /* v23.22 (review F46), with the page's own last sentence */
   if(key==='fast'&&info.credit)p.credit=info.credit;if(key==='fast')p.open=rpOpenFor(key,info,es,P);
@@ -7788,7 +7809,8 @@ OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
    '</div><button type="button" class="tool" id="iaInfAdd">Add the ticked people</button><span id="iaInfMsg" class="rp-hint"></span>';}
  function langNote(){const sel=document.getElementById('rpLang');if(!sel||!sel.parentElement)return;let el=document.getElementById('iaLangCase');
   if(!el){el=document.createElement('div');el.id='iaLangCase';el.className='rp-hint';sel.parentElement.appendChild(el);}
-  const es=/span|espa/i.test(HOME);el.hidden=!es||sel.value==='es';el.textContent=es?'The family’s home language is '+HOME+' (Form DM-1): choose Español for the page the parent answers.':'';}
+  const es=/span|espa/i.test(HOME),ht=/creole|krey[oò]l|haitian|ayisyen/i.test(HOME);el.hidden=!(es||ht)||sel.value===(ht?'ht':'es');
+  el.textContent=ht?'The family’s home language is '+HOME+' (Form DM-1): choose Kreyòl ayisyen for the page the parent answers (a draft translation, for the district translator to review first).':es?'The family’s home language is '+HOME+' (Form DM-1): choose Español for the page the parent answers.':'';}
  document.addEventListener('click',async e=>{const b=e.target&&e.target.closest?e.target.closest('#iaInfAdd'):null;if(!b)return;const box=document.getElementById('iaInfCase'),L=box._L||[];
   const pick=[...box.querySelectorAll('input[data-ip]:checked')].map(c=>L[+c.dataset.ip]).filter(Boolean);const say=t=>{const m=document.getElementById('iaInfMsg');if(m)m.textContent=' '+t;};
   if(!pick.length){say('Tick the people to add first.');return;}

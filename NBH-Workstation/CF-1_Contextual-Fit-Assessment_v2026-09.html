@@ -1055,9 +1055,11 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
       <div class="f"><label for="rpStudent">Student label on the page (initials only: not the full name or the student number)</label><input id="rpStudent"></div>
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
+      <div class="f"><label for="rpLang">Language of the page</label><select id="rpLang"><option value="">English</option><option value="ht">Krey&ograve;l ayisyen (Haitian Creole, draft translation)</option></select></div>
     </div>
+    <p class="hint" id="rpLangNoteHt" hidden><b>Haitian Creole. Draft translation: a district translator reviews it before it goes home.</b> The 21 statements, the scale and the page&rsquo;s own words are the workstation&rsquo;s draft in Creole, and the page says so at its top. Have the district translator read the page (Preview) before it is sent. The plan&rsquo;s name appears as typed.</p>
     <div id="rpStatus" class="gf-warn" hidden></div>
-    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpPreview">Preview</button><span class="hint" id="rpNote"></span></div>
+    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpPreview">Preview</button><button type="button" id="rpReadLvl">Check reading level</button><span class="hint" id="rpNote"></span></div>
   </div>
 </dialog>
 <dialog id="rcDlg" class="gf noprint" aria-labelledby="rcTitle">
@@ -1612,6 +1614,45 @@ $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStuden
 $('#rpEmail').addEventListener('change',()=>{const e=$('[data-m="email"]');if(e&&!e.value){e.value=$('#rpEmail').value.trim();S.meta.email=e.value;}});
 $('#rpSave').addEventListener('click',rpFile);
 $('#rpPreview').addEventListener('click',()=>{const html=NBH_RESPOND.pageHTML(rpPayload());window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');});
+/* v25.68 (research #13) the respondent page in Haitian Creole, for an adult who runs the plan and reads Creole best: the 21
+   statements, the scale and this form's lines, the workstation's DRAFT TRANSLATION for the district translator's review (the
+   page says so at its top); the page's own words are nbh-respond.js's Creole. The answers come back as from any page. */
+const HT_ITEMS=['Mwen ka dekri sa plan sa a mande m f\u00e8, etap pa etap, san m pa gade l.',
+ 'Mwen konnen ki konp\u00f2tman plan an vle chanje ak kijan yo defini l.',
+ 'Mwen konnen sa pou m f\u00e8 nan moman konp\u00f2tman an rive a.',
+ 'Mwen konprann poukisa chak pati nan plan an la, pa s\u00e8lman sa pou m f\u00e8.',
+ 'Yo montre m kijan pou m aplike chak pati nan plan an; se pa s\u00e8lman pale yo pale av\u00e8 m sou li.',
+ 'Mwen pratike plan an, epi yo di m kijan m te f\u00e8 l.',
+ 'Mwen ka aplike plan an k\u00f2r\u00e8kteman l\u00e8 el\u00e8v la ajite, pa s\u00e8lman l\u00e8 bagay yo kalm.',
+ 'Plan an dak\u00f2 ak fason mwen kw\u00e8 yo ta dwe trete el\u00e8v sa a.',
+ 'Plan an jis pou l\u00f2t el\u00e8v ki nan sal la.',
+ 'Mwen ta santi m al\u00e8z si paran el\u00e8v sa a ta gade m pandan m ap aplike plan sa a.',
+ 'Matery\u00e8l plan an bezwen yo disponib kote ak l\u00e8 mwen bezwen yo.',
+ 'Mwen gen ase tan nan woutin nan pou m aplike plan an jan li ekri a.',
+ 'Gen ase granmoun nan sal la pandan moman plan an aplike yo.',
+ 'Plan an koresponn ak jan klas sa a mache vr\u00e8man, pa ak yon klas pafè.',
+ 'L\u00e8 m ap aplike plan sa a, sa pa rale m kite l\u00f2t el\u00e8v yo yon fason mwen pa ka jere.',
+ 'Yo ka aplike plan an pandan aktivite kote konp\u00f2tman an rive vr\u00e8man yo.',
+ 'Administrat\u00e8 mwen an atann pou yo aplike plan sa a, epi li sip\u00f2te l.',
+ 'Mwen konnen ki moun pou m al jwenn l\u00e8 plan an pa mache, epi mwen jwenn yon repons al\u00e8.',
+ 'Tan pou f\u00f2masyon ak akonpayman sou plan sa a pwoteje nan or\u00e8 a.',
+ 'Mwen atann plan sa a diminye konp\u00f2tman an si yo aplike l jan li ekri a.',
+ 'Mwen w\u00e8 plan sa a mache ase pou m kontinye aplike l, menm nan yon jou ki difisil.'];
+const HT_ROLE={teacher:'yon pwofes\u00e8 klas',para:'yon asistan (parapwofesyon\u00e8l)',rsp:'yon moun ki bay l\u00f2t s\u00e8vis bay el\u00e8v la (terapis)',other:''};
+{const base=rpPayload;rpPayload=function(){const p=base.apply(this,arguments);if(!($('#rpLang')&&$('#rpLang').value==='ht'))return p;
+  const rk=$('#rpRole').value,round=+$('#rpRound').value,plan=String(S.meta.plan||'').trim(),bcba=String(S.meta.bcba||'').trim()||'BCBA a',pre=cfPre(round);
+  return Object.assign(p,{lang:'ht',title:'\u00c8ske plan an adapte, tou '+round,heading:'\u00c8ske plan an adapte: tou '+round+(round===1?' (anvan chanjman yo)':' (apre chanjman yo)'),
+    sub:'Pou '+(HT_ROLE[rk]||'yon moun')+' k ap aplike plan an'+(plan?' ('+plan+')':'')+'. \u00c8ske ou konnen l, \u00e8ske ou ka f\u00e8 l, \u00e8ske ou kw\u00e8 nan li, e \u00e8ske ou gen tan ak sip\u00f2 pou w aplike l? Reponn poukont ou, pa nan yon reyinyon: f\u00f2m nan la pou montre kote moun pa dak\u00f2.',
+    instructions:'Bay chak fraz yon n\u00f2t dapre sa ou menm ou panse, soti 1 (mwen pa dak\u00f2 ditou) rive 6 (mwen dak\u00f2 n\u00e8t); pa gen n\u00f2t nan mitan. '+(pre?'Bay tout fraz yo yon n\u00f2t, eksepte d\u00e8nye a: li ap tann jiskaske plan an k\u00f2manse.':'Bay tout fraz yo yon n\u00f2t.')+' Yon n\u00f2t ki ba f\u00e8 nou chanje plan an oswa sip\u00f2 ou resevwa; li pa chanje sa yo atann de ou. L\u00e8 ou fini, peze Voye: pwogram im\u00e8l ou a ap louvri ak yon mesaj pou '+bcba+' ki pare pou ale.',
+    items:HT_ITEMS.map((t,i)=>({n:i+1,text:i===CF_EXP&&pre?'Kite sa a vid si plan an poko k\u00f2manse: '+t:t})),
+    scale:Object.assign({},p.scale,{anchors:['1 mwen pa dak\u00f2 ditou','2 mwen pa dak\u00f2','3 mwen pa tw\u00f2 dak\u00f2','4 mwen yon ti jan dak\u00f2','5 mwen dak\u00f2','6 mwen dak\u00f2 n\u00e8t']}),
+    extras:[{id:'name',label:'Non ou',req:true},{id:'role',label:'W\u00f2l ou (pwofes\u00e8, asistan, terapis...)'},{id:'when',label:'Ki l\u00e8 ou aplike plan an (ki pery\u00f2d)'},{id:'mo',label:'Konbyen mwa ou genyen ak el\u00e8v sa a'}],
+    itemsHeading:'Fraz yo',subject:'Repons tou '+round+' pou F\u00f2m CF-1 (\u00e8ske plan an adapte)'});};}
+$('#rpLang').addEventListener('change',()=>{$('#rpLangNoteHt').hidden=$('#rpLang').value!=='ht';rpStatus();});
+/* v25.68 (research #12) the reading level of what the respondent reads, by Check wording's reading check (suggestions only) */
+$('#rpReadLvl').addEventListener('click',()=>{if(!window.nbhWording||!nbhWording.reading){$('#rpNote').textContent='The reading check is in nbh-wording.js, which is not beside this form.';return;}
+  const p=rpPayload(),L=[p.heading,p.sub,p.instructions].concat((p.items||[]).map(x=>x.text)).filter(Boolean);
+  nbhWording.reading({title:'The respondent page: '+p.title,parts:[{lang:p.lang||'en',text:L.join('\n')}]},{back:$('#rpReadLvl')});});
 /* v21.44 Email it: the link in an email of the assessor's own, to check and send (NBH_RESPOND.invite in nbh-respond.js) */
 $('#rpMail').addEventListener('click',()=>{if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.';return;}NBH_RESPOND.invite({links:[{label:'',url:rpLinkUrl()}]});});
 $('#rpLink').addEventListener('click',async()=>{let u=rpLinkUrl();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
