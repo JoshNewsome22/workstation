@@ -1147,9 +1147,12 @@ const METHODS=[
   /* v25.64 (H7) a synthesized analysis named as such; (M4) the demand assessment, with no tier: like a preference assessment it
      identifies antecedents (which tasks evoke the behavior) and does not test the maintaining consequence */
   ['Functional analysis, synthesized contingencies (IISCA)','EA-1',1],
-  ['Demand assessment (identifies antecedents; does not test the consequence)','DA-1',0]
+  ['Demand assessment (identifies antecedents; does not test the consequence)','DA-1',0],
+  /* v25.67 (EA-VI-M7, batch 3) an analysis that tested antecedents only (Form EA-1 sends tier 2): no consequence was tested, so its
+     result is a Tier 2 hypothesis, not a demonstration of the maintaining consequence */
+  ['Functional analysis, antecedent-only (no consequence tested; a Tier 2 hypothesis)','EA-1',2]
 ];
-const M_SYN=METHODS[14][0],M_DA=METHODS[15][0];
+const M_SYN=METHODS[14][0],M_DA=METHODS[15][0],M_ANT=METHODS[16][0];
 /* v25.64 (H7) a synthesized source: the IISCA method, or the trial-based-or-IISCA method with a contribution that says IISCA or synthesized */
 const isSynSrc=r=>!!r&&(r.method===M_SYN||(r.method===METHODS[2][0]&&/iisca|synthes/i.test(String(r.contrib||''))));
 /* the tier a source lends to its function: a synthesized source supports the synthesized result at its tier (1), and a single component
@@ -3242,7 +3245,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 const fsEvOrder=['IA-1','IN-1','OB-1','SP-1','ABC-1','VI-1','EA-1'];
 const fsEvUnit={'IA-1':'informants','IN-1':'interviews','OB-1':'observations','SP-1':'days','ABC-1':'incidents','VI-1':'occurrences','EA-1':'sessions'};
 function fsEvMethod(id,e){const m=String(e.method||'');
-  if(id==='EA-1')return /trial|iisca|synthes/i.test(m)?METHODS[2][0]:/component/i.test(m)?METHODS[3][0]:METHODS[1][0];
+  if(id==='EA-1')return +e.tier===2?M_ANT:/trial|iisca|synthes/i.test(m)?METHODS[2][0]:/component/i.test(m)?METHODS[3][0]:METHODS[1][0];   /* v25.67 (EA-VI-M7) EA-1's tier */
   if(id==='ABC-1')return /conditional|background/i.test(m)?METHODS[4][0]:METHODS[6][0];
   return ({'VI-1':METHODS[5][0],'SP-1':METHODS[7][0],'OB-1':METHODS[6][0],'IA-1':METHODS[11][0],'IN-1':METHODS[11][0]})[id]||'';}
 /* v22.96 (review F168) more than one function counts as a synthesized result only from a functional analysis; from any other
@@ -3261,7 +3264,7 @@ function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
     /* v23.43 (review I22) each interview counted once: Form IA-1's interviews from Form IN-1 are counted on IN-1's row */
     const in1=id==='IA-1'&&e.interviews&&+e.interviews.in1>0?+e.interviews.in1:0;
     const paren=[e.n!=null&&e.n!==''?e.n+' '+(fsEvUnit[id]||''):'',in1?(in1===1?'its interview from Form IN-1 is counted on that form\u2019s row':'its '+in1+' interviews from Form IN-1 are counted on that form\u2019s row'):''].filter(Boolean).join('; ');
-    const contrib=[fsEvT(e.method)+(paren?' ('+paren+')':''),fsEvT(e.statement)].filter(Boolean).join('. ').replace(/\.\./g,'.');
+    const contrib=[fsEvT(e.method)+(paren?' ('+paren+')':''),fsEvT(e.statement),id==='EA-1'&&+e.tier===2?fsEvT(e.tierWhy):''].filter(Boolean).join('. ').replace(/\.\./g,'.');   /* v25.67 (EA-VI-M7) why a tier-2 row is tier 2 */
     const row={form:id,method,dates:fsEvT(e.dates),who:fsEvT(e.by),contrib,fn:fsEvFn(e,method),str:STR.indexOf(e.strength)>0?e.strength:'',tgt:fsEvTgt(e)};
     const slot=S.src.find(r=>!rowHas(r));if(slot)Object.assign(slot,row);else S.src.push(row);put.push(id);n++;});
   /* v22.36 Form IA-1's analyses by group (all informants, school, home, a named group) that were ticked "In the case": a row

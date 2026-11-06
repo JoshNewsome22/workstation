@@ -319,5 +319,30 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await ct.close();
  });
 
+ /* ---------------- ASSESS / EA-VI (IN-1 to EA-1; EA-1's tier to FS-1) ---------------- */
+ await sec('ASSESS',async()=>{
+  const e=await open('EA-1');
+  const IN1={form:'IN-1',method:'Stakeholder interviews (indirect)',fn:'Attention',fnKey:'attention',strength:'Weak',statement:'Interview hypothesis.',use:'candidates',candidates:['attention','escape','physical']};
+  const IA1={form:'IA-1',method:'Indirect',fn:'Escape',fnKey:'escape',strength:'Moderate',statement:'Escape leads.'};
+  const a=await e.evaluate(async([IN1,IA1])=>{window.__nbhFactsIn({evidence:{'IN-1':IN1,'IA-1':IA1}});await new Promise(r=>setTimeout(r,400));
+    const g=n=>{const x=document.querySelector('[name="'+n+'"]');return x?x.value:'';};const el=document.getElementById('ea67In1');
+    return {hyp:g('m.hyp'),vhyp:g('v.hyp'),note:el&&!el.hidden?el.textContent:'',cls:el?el.className:''};},[IN1,IA1]);
+  ok('ASSESS 1 EA-1 carries IN-1 in as candidate conditions to include, not as the function',/IN-1: candidate conditions to include: attention, escape from demands, pain or a medical cause \(medical review first\) \(interviews; not the function\)/.test(a.hyp)&&/IA-1: Escape \(moderate\)/.test(a.hyp),a);
+  ok('ASSESS 2 the candidates do not make the prior hypothesis conflicting (IA-1’s escape stands)',a.vhyp==='escape',a);
+  ok('ASSESS 3 a candidate with no condition in the analysis is named, with the rule and the medical line (screen only)',/conditions to include/.test(a.note)&&/Do not drop a condition because no interview named it/.test(a.note)&&/medical review comes first/.test(a.note)&&/noprint/.test(a.cls),a);
+  const b=await e.evaluate(async()=>{const n=[...document.querySelectorAll('[name^="c["][name$="].name"]')].map(x=>x.value);return {n,note:document.getElementById('ea67In1').textContent};});
+  ok('ASSESS 4 the note follows the analysis’s conditions',(b.n.some(v=>/attention/i.test(v))&&b.n.some(v=>/demand|escape/i.test(v)))?!/no condition yet/.test(b.note):/no condition yet for/.test(b.note),b);
+  await e.close();
+  const f=await open('FS-1');
+  const r=await f.evaluate(async()=>{const EV={form:'EA-1',method:'Functional analysis (antecedent, multielement)',design:'multielement',dates:'10/1/2026',n:9,fn:'Escape',fnKey:'escape',strength:'Moderate',decided:true,by:'BCBA (simulated)',
+      tier:2,tierWhy:'Antecedent-only analysis: no consequence was tested, so the result is a Tier 2 hypothesis',statement:'Demands evoked the behavior.'};
+    window.__nbhFactsIn({evidence:{'EA-1':EV}});await new Promise(r=>setTimeout(r,400));const row=S.src.find(x=>x.form==='EA-1');
+    const EV1=Object.assign({},EV);delete EV1.tier;delete EV1.tierWhy;S=blank();ensure();window.__nbhFactsIn({evidence:{'EA-1':EV1}});await new Promise(r=>setTimeout(r,300));const row1=S.src.find(x=>x.form==='EA-1');
+    return {m:row&&row.method,t:row&&tierOf(row.method),c:row&&row.contrib,m1:row1&&row1.method,t1:row1&&tierOf(row1.method)};});
+  ok('ASSESS 5 FS-1 reads EA-1’s tier: an antecedent-only analysis is a Tier 2 row, with the reason (EA-VI-M7)',r.t===2&&/antecedent-only/.test(r.m)&&/Tier 2 hypothesis/.test(r.c),r);
+  ok('ASSESS 6 an analysis without a tier is Tier 1 as before',r.t1===1&&r.m1==='Functional analysis, analogue conditions',r);
+  await f.close();
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
