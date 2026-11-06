@@ -4272,12 +4272,14 @@ function ra65ThirdPaint(){const v=S.meta.coa_third==='esc',t=$('#coaThirdTxt'),w
   if(t)t.innerHTML=v?'<b>OPTION: Reinforces problem behavior on purpose.</b> What it does: problem behavior in the evocative pairing ends the demand for a brief break. Why: the session can go on, and the data show whether escape from that pairing is what the behavior gets. For how long: only for that pairing, at most until the next one. What the data must show before it ends: the pairing redesigned with an option that has not produced problem behavior, then problem behavior at zero, or under the problem-behavior ceiling, in 3 consecutive sessions (a working convention). Time spent avoiding a choice is timed as Neither; record the problem behavior in every session (Randall &amp; Kranak, 2026, pp. 789&ndash;790). Write why below.':
     'The student can avoid both conditions without problem behavior; time on the neutral spot is timed as Neither (Refusing to choose beneath it).';
   if(w&&w.hidden===v)w.hidden=!v;}
-/* M6: Confirmed is withheld for a social stimulus tested only at FR 1 when the plan ratio is higher */
-const ra65FR1Only=(i,so,pr)=>{const a=so.stim[i]||{},p=pr.st.find(x=>x.key===String(i)),plan=planRatio();return ra65Soc(i)&&plan!=null&&plan>1&&!((a.frHi||1)>=plan&&a.verdict==='clear')&&!(p&&p.pot==='high');};
+/* M6: Confirmed is withheld for a stimulus tested only at FR 1 when the plan ratio is higher. v25.66 (the BCBA, 11/6): every
+   stimulus, not only social ones: two reinforcers equally effective at low requirements can differ as the requirement rises
+   (Roane, Lerman, & Vorndran, 2001) */
+const ra65FR1Only=(i,so,pr)=>{const a=so.stim[i]||{},p=pr.st.find(x=>x.key===String(i)),plan=planRatio();return plan!=null&&plan>1&&!((a.frHi||1)>=plan&&a.verdict==='clear')&&!(p&&p.pot==='high');};
 {const rv=raVerdict;raVerdict=function(i,so,co,pr){const v=rv.apply(this,arguments);if(/^Confirmed/.test(v)&&ra65FR1Only(i,so,pr))return 'Probable';return v;};}
 {const rs=renderSummary;renderSummary=function(){const r=rs.apply(this,arguments);
   try{const so=soStats(),pr=prStats(),plan=planRatio(),n=$('#sumNote'),add=[];
-    S.stim.forEach((s,i)=>{if(!ra65T(s.name)||!ra65Soc(i)||!ra65FR1Only(i,so,pr))return;const a=so.stim[i]||{};if(a.verdict==='clear'||a.verdict==='probable')add.push('<b>'+esc(name(i))+'</b>: a social stimulus tested only at FR '+(a.frHi||1)+'; the plan ratio is FR '+plan+'. It reads Probable, not Confirmed, until it is tested at the plan ratio or reaches High potency on the progressive ratio: attention often reinforces only on dense schedules (Harper et al., 2021).');});
+    S.stim.forEach((s,i)=>{if(!ra65T(s.name)||!ra65FR1Only(i,so,pr))return;const a=so.stim[i]||{};if(a.verdict==='clear'||a.verdict==='probable')add.push('<b>'+esc(name(i))+'</b>: '+(ra65Soc(i)?'a social stimulus':'a stimulus')+' tested only at FR '+(a.frHi||1)+'; the plan ratio is FR '+plan+'. It reads Probable, not Confirmed, until it is tested at the plan ratio or reaches High potency on the progressive ratio: '+(ra65Soc(i)?'attention often reinforces only on dense schedules (Harper et al., 2021).':'two reinforcers that work equally well at a low requirement can differ as it rises (Roane, Lerman, &amp; Vorndran, 2001).'));});
     if(n&&add.length){n.innerHTML=(n.innerHTML?n.innerHTML+' ':'')+add.join(' ');n.hidden=false;}
     ra65PmaxSum();ra65StimPaint();ra65SamePaint();}catch(e){if(window.console)console.warn('RA-1 v25.65',e);}
   return r;};}

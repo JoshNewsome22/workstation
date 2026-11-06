@@ -53,8 +53,8 @@ const RA='Reinforcer_Assessment_Protocol.html';
   /* I67 the schedule on the verdict and the plan-ratio warning */
   await pr(p,[]);await so(p,[['ctl',5],['0',40],['ctl',6],['0',42],['ctl',5],['0',41]]);await sleep(150);
   await p.evaluate(()=>{const e=document.getElementById('planRatio');e.value='5';e.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(150);a=await look(p);
-  ok('8 I67 Clear at FR 1 with the plan at FR 5 and no progressive ratio: Confirmed, and the note says no session tested it at the plan ratio',
-    a.sum.find(r=>r[0]==='Tablet (video)')[8]==='Confirmed'&&/Tablet \(video\): Confirmed at FR 1; the plan ratio is FR 5 and no session tested it there/.test(a.note),a.note);
+  ok('8 I67 Clear at FR 1 with the plan at FR 5 and no progressive ratio: Probable, not Confirmed (the BCBA, 11/6), and the note says why',
+    a.sum.find(r=>r[0]==='Tablet (video)')[8]==='Probable'&&/Tablet \(video\): a stimulus tested only at FR 1; the plan ratio is FR 5\. It reads Probable, not Confirmed/.test(a.note),a.note);
   /* F137 I69 the session record, typed: the schedule, the fidelity; and the agreement checks counted by condition */
   await p.evaluate(()=>{for(let k=0;k<6;k++){document.querySelector('[data-recadd="so"]').click();}
     const rows=[...document.querySelectorAll('#recTbl-so tbody tr')];rows.forEach((tr,k)=>{const set=(f,v)=>{const e=tr.querySelector('[data-rf="'+f+'"]');e.value=v;e.dispatchEvent(new Event(e.tagName==='SELECT'?'change':'input',{bubbles:true}));};
