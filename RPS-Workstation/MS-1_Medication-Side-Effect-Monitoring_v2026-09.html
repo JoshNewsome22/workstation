@@ -940,7 +940,7 @@ table.grid.anchors td,table.grid.anchors th{font-size:11.5px}
   <div class="warn"><b>Applied guidance</b>The library flags the red-flag items for each medication (rash, toxicity pattern, overheating, breathing or swallowing difficulty, fainting, statements of self-harm, jaundice, unusual bleeding, severe abdominal pain). Any red-flag observation, at any rating, is reported at once, whatever the reporting schedule: to the school nurse, who reaches the parent and the prescriber; an item marked emergency, or any difficulty breathing or swallowing, is a call to emergency services first. Behavioral side effects (irritability, activation, disinhibition) are recorded alongside the BIP data so the prescriber can see whether the target behavior changed in step with a dose change. A change in step with a dose change is a correlation in time, not proof that the medication caused it.</div>
 
   <h3 class="sub">4. Recording Conventions</h3>
-  <div class="warn"><b>Applied guidance</b>The tracking grid uses the scatter-plot convention (Touchette, MacDonald, &amp; Langer, 1985) adapted to severity: blank = not observed; slash = mild or questionable; light = moderate (clearly present, not interfering); dark = marked (interfering with the day or needing a response). Red-flag items shade orange at any rating. One row per watched side effect, one column per school day, each rating the highest severity seen that day with the time of the worst period written under the date, plus rows for whether the dose was given and for the BIP target behavior at the same severity scale so the two can be read together. Vitals are entered on the vitals sheet on the ADA/APA schedule; BMI is computed. The report sheet summarizes each watched item by week, lists AIMS results against the Schooler-Kane criteria, and lists every red-flag entry with its date.</div>
+  <div class="warn"><b>Applied guidance</b>The tracking grid uses the scatter-plot convention (Touchette, MacDonald, &amp; Langer, 1985) adapted to severity: blank = not observed; slash = mild or questionable; light = moderate (clearly present, not interfering); dark = marked (interfering with the day or needing a response). Red-flag items shade orange at any rating. One row per watched side effect, one column per school day, each rating the highest severity seen that day with the time of the worst period written under the date, plus rows for whether the dose was given and, optionally, for the BIP target behavior at the same severity scale. Since v25.65 the report graphs the BIP target&rsquo;s own daily count or rate from Form DD-1 by school day, with a line at each dose change entered on the plan sheet, because a 0&ndash;3 rating cannot show effects of the size medication usually has. Vitals are entered on the vitals sheet on the ADA/APA schedule; BMI is computed. The report sheet summarizes each watched item by week, lists AIMS results against the Schooler-Kane criteria, and lists every red-flag entry with its date.</div>
   <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
   <p class="method noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
   <div class="cite">Extrapyramidal descriptions and scale conventions after Guy (1976), Barnes (1989), Simpson and Angus (1970), and Schooler and Kane (1982). Metabolic schedule after the ADA/APA/AACE/NAASO consensus (2004) and the AACAP practice parameter (2011). Medication side-effect lists compiled from FDA prescribing information and the drug information of MedlinePlus and Mayo Clinic (accessed September 2026); verify against the current label. Nothing on this form is medical advice.</div>
@@ -975,6 +975,28 @@ table.grid.anchors td,table.grid.anchors th{font-size:11.5px}
   <h3 class="sub">Medications</h3>
   <p class="method" style="margin-top:0"><span class="noprint">Set the number of medications in the toolbar.</span> Choose each from the library; its documented side effects appear with the red-flag items marked. Check the items the team will observe; each becomes a grid row. Measured items (weight, height, blood pressure, pulse) go on the vitals sheet; laboratory values are listed for the nurse and prescriber. Items marked (reported) are rated from what the student or parent reports.</p>
   <div id="medWrap"></div>
+  <!-- v25.65 (SAFETY-H7, M5, M6, L3) the dose changes as rows, what the raters are told, and the rows for useful behavior -->
+  <h3 class="sub">Dose Changes</h3>
+  <p class="method" style="margin-top:0">One row for each change of dose, start or stop. Each change draws a line on the report&rsquo;s graph of the BIP target. Monitoring starts at least 5 school days before a planned change, so there is a baseline.</p>
+  <table class="grid" id="v65Dc"><thead><tr><th class="c" style="width:5%">#</th><th style="width:16%">Date</th><th style="width:31%">Medication</th><th style="width:16%">Old dose</th><th style="width:16%">New dose</th><th>School days of target data before it</th></tr></thead><tbody>
+    <tr><td class="c">1</td><td><input class="txt" name="dc[0].d" placeholder="M/D/YYYY" aria-label="Dose change 1 date"></td><td><input class="txt" name="dc[0].med" aria-label="Dose change 1 medication"></td><td><input class="txt" name="dc[0].old" aria-label="Dose change 1 old dose"></td><td><input class="txt" name="dc[0].new" aria-label="Dose change 1 new dose"></td><td class="v65base" data-dc="0"></td></tr>
+    <tr><td class="c">2</td><td><input class="txt" name="dc[1].d" placeholder="M/D/YYYY" aria-label="Dose change 2 date"></td><td><input class="txt" name="dc[1].med" aria-label="Dose change 2 medication"></td><td><input class="txt" name="dc[1].old" aria-label="Dose change 2 old dose"></td><td><input class="txt" name="dc[1].new" aria-label="Dose change 2 new dose"></td><td class="v65base" data-dc="1"></td></tr>
+    <tr><td class="c">3</td><td><input class="txt" name="dc[2].d" placeholder="M/D/YYYY" aria-label="Dose change 3 date"></td><td><input class="txt" name="dc[2].med" aria-label="Dose change 3 medication"></td><td><input class="txt" name="dc[2].old" aria-label="Dose change 3 old dose"></td><td><input class="txt" name="dc[2].new" aria-label="Dose change 3 new dose"></td><td class="v65base" data-dc="2"></td></tr>
+    <tr><td class="c">4</td><td><input class="txt" name="dc[3].d" placeholder="M/D/YYYY" aria-label="Dose change 4 date"></td><td><input class="txt" name="dc[3].med" aria-label="Dose change 4 medication"></td><td><input class="txt" name="dc[3].old" aria-label="Dose change 4 old dose"></td><td><input class="txt" name="dc[3].new" aria-label="Dose change 4 new dose"></td><td class="v65base" data-dc="3"></td></tr>
+  </tbody></table>
+  <div id="v65DcV"></div>
+  <div class="ident" style="margin-top:8px">
+    <div class="f"><label for="v65Min">Do not judge a change in less than (school days, the prescriber sets this)</label><input id="v65Min" name="x.minDays" placeholder="e.g. 10"></div>
+    <div class="f"><label for="v65Blind">Raters told the date of a dose change?</label><select id="v65Blind" name="x.blind"><option value=""></option><option value="yes">Yes</option><option value="no">No, by agreement of the prescriber and parent</option></select></div>
+    <div class="f"><label for="v65Ver">Doses given at school are verified by (nurse log)</label><input id="v65Ver" name="x.verBy" placeholder="e.g. the school nurse's medication log"></div>
+  </div>
+  <div id="v65BlindV"></div>
+  <div class="ident c3" style="margin-top:6px">
+    <div class="f"><label class="ck"><input type="checkbox" name="x.rowEng" data-v65row="1"> Add a grid row: task engagement or work completed (from DD-1 or the teacher&rsquo;s count)</label></div>
+    <div class="f"><label class="ck"><input type="checkbox" name="x.rowSoc" data-v65row="1"> Add a grid row: approaches peers or adults</label></div>
+    <div class="f"><label class="ck"><input type="checkbox" name="x.noBip" data-v65row="1"> Leave out the BIP target&rsquo;s 0&ndash;3 row (its count is graphed on the report)</label></div>
+  </div>
+  <input type="hidden" name="x.dd" id="v65Dd">
   <div class="cite">Library entries summarize FDA prescribing information and the drug information of MedlinePlus and Mayo Clinic; brand names are given for recognition only. Off-label uses are listed because they are common in this population, not as recommendations. Verify each list against the current label and the prescriber's own guidance.</div>
 </div>
 
@@ -1073,6 +1095,9 @@ table.grid.anchors td,table.grid.anchors th{font-size:11.5px}
   <div class="ms-scroll" tabindex="0" role="region" aria-label="Summary by week"><table class="grid" id="rpTbl"></table></div></div>
   <div class="figure" id="rpFig"></div>
   <div class="legendrow" id="rpLegend"></div>
+  <!-- v25.65 (SAFETY-H7, M6, L2, L3, L4) the target's own count by school day with the dose changes, the time from dose to the worst period -->
+  <div class="ms-keep"><h3 class="sub">The BIP Target&rsquo;s Own Data and the Dose Changes</h3>
+  <div id="v65Rp"></div></div>
   <div class="ms-keep"><h3 class="sub">Extrapyramidal Screen and Vitals</h3>
   <div id="rpEps"></div></div>
   <div class="defs" style="margin-top:8px">
@@ -1428,7 +1453,10 @@ function renderGrid(keep){const n=+$('#nDays').value;const rows=watchedRows();co
  let h='<thead><tr><th class="corner rowlab">Watched item</th>'+Array.from({length:n},(_,c)=>`<th${/absent/i.test(times[c])?' class="ms-off" title="Absent: not counted"':''}>D${c+1}</th>`).join('')+'<th>Days ≥1</th><th>Mean</th></tr></thead><tbody>';
  h+='<tr><td class="rowlab"><small>Date</small></td>'+Array.from({length:n},(_,c)=>`<td class="dateline"><input name="g.date.${c}" value="${esc(dates[c])}" placeholder="m/d" aria-label="Date, D${c+1}"></td>`).join('')+'<td class="tot"></td><td class="tot"></td></tr>';
  h+='<tr><td class="rowlab"><small>Time of the worst</small></td>'+Array.from({length:n},(_,c)=>`<td class="dateline"><input name="g.time.${c}" value="${esc(times[c])}" placeholder="hh:mm" title="The time of the worst period that day, or absent" aria-label="Time of the worst, D${c+1} (or absent)"></td>`).join('')+'<td class="tot"></td><td class="tot"></td></tr>';   /* v23.08 (F443) */
- const fixed=[{key:'_dose',l:'Dose given as scheduled',sub:'0 = not given / unknown, 3 = given',fixed:true},{key:'_bip',l:val('m.bip')||'BIP target behavior',sub:'same 0–3 scale from the day\'s data'}];
+ const fixed=[{key:'_dose',l:'Dose given as scheduled, verified by '+(val('x.verBy')||'___')+' (nurse log)',sub:'0 = not given / unknown, 3 = given',fixed:true}].concat(   /* v25.65 (SAFETY-M5, H7, M6) */
+   document.querySelector('[name="x.noBip"]')&&document.querySelector('[name="x.noBip"]').checked?[]:[{key:'_bip',l:val('m.bip')||'BIP target behavior',sub:'optional: same 0–3 scale from the day\'s data; its own count is graphed on the report'}],
+   document.querySelector('[name="x.rowEng"]')&&document.querySelector('[name="x.rowEng"]').checked?[{key:'_eng',l:'Task engagement or work completed',sub:'0–3: 0 as usual for the student, 3 markedly less (from DD-1 or the teacher\'s count)'}]:[],
+   document.querySelector('[name="x.rowSoc"]')&&document.querySelector('[name="x.rowSoc"]').checked?[{key:'_soc',l:'Approaches peers or adults',sub:'0–3: 0 as usual for the student, 3 markedly fewer'}]:[]);
  const all=[...rows.map(r=>({key:r.key,l:SE[r.key].l,sub:r.meds.join(', '),flag:!!SE[r.key].f})),...fixed];
  if(!rows.length)h+=`<tr><td class="rowlab" colspan="${n+3}" style="text-align:center;color:var(--ink-soft);padding:10px">Check side effects on the plan sheet to create rows.</td></tr>`;
  /* v21.16 audit (F9, F12). Each cell names its item, day, and rating for a screen reader (the rating was shown only by
@@ -1571,7 +1599,9 @@ function renderReport(show){$('#rpDoc').textContent=val('m.doc');
  const sg=$('#rpRoiSig');if(sg){sg.className=roi?'':'no';sg.textContent=roi?'Release of information on file: '+MDYs(roi)+'.':'No release of information on file: do not send this report.';}
  /* weekly summary: v23.08 (review F440, F442) the days observed, the weeks' dates, the trend over weeks with three days observed */
  const weeks=Math.ceil(n/5),W=Array.from({length:weeks},(_,w)=>{const cs=[];for(let c=w*5;c<Math.min(n,w*5+5);c++)cs.push(c);const ds=cs.map(c=>dts[c]).filter(Boolean);return {cs,oc:cs.filter(c=>obs[c]),from:ds[0]||'',to:ds[ds.length-1]||''};});
- const items=[...rows.map(r=>({key:r.key,l:SE[r.key].l,f:!!SE[r.key].f})),{key:'_bip',l:val('m.bip')||'BIP target behavior'},{key:'_dose',l:'Dose given (days present)'}];
+ const items=[...rows.map(r=>({key:r.key,l:SE[r.key].l,f:!!SE[r.key].f})),{key:'_bip',l:val('m.bip')||'BIP target behavior'},{key:'_dose',l:'Dose given (days present)'}].concat(   /* v25.65 (SAFETY-M6) */
+   document.querySelector('[name="x.rowEng"]')&&document.querySelector('[name="x.rowEng"]').checked?[{key:'_eng',l:'Task engagement or work completed (0–3, less than usual)'}]:[],
+   document.querySelector('[name="x.rowSoc"]')&&document.querySelector('[name="x.rowSoc"]').checked?[{key:'_soc',l:'Approaches peers or adults (0–3, fewer than usual)'}]:[]);
  let h='<thead><tr><th class="lab">Item</th>'+W.map((w,i)=>`<th class="c">Wk ${i+1} (${w.oc.length})<br><span style="font-weight:400">${w.from?esc(w.from)+(w.to&&w.to!==w.from?'\u2013'+esc(w.to):''):''}</span></th>`).join('')+'<th class="c">Trend</th></tr></thead><tbody>';
  const series=[],lastObs=obs.lastIndexOf(true);
  items.forEach(it=>{const wk=W.map(w=>{const vals=w.oc.map(c=>cellState[it.key+'|'+c]||0);return {p:vals.filter(v=>v>0).length,m:vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:null,o:vals.length};});
@@ -1601,7 +1631,8 @@ function renderReport(show){$('#rpDoc').textContent=val('m.doc');
  const vp=vd.filter(r=>r.pulse!=null);if(vp.length)parts.push(`Pulse: ${vp.map(r=>`${at(r)} ${r.pulse}`).join('; ')}.`);
  const vs=vd.filter(r=>r.sleep!=null);if(vs.length)parts.push(`Sleep (reported): ${vs.map(r=>`${at(r)} ${r.sleep} h`).join('; ')}.`);
  const meas=[...new Set(meds.flatMap(m=>m.watched.filter(s=>SE[s].c===MEAS)))];if(meas.length)parts.push('Checked on the plan and measured on the vitals sheet: '+meas.map(s=>SE[s].l).join('; ')+'.');
- $('#rpEps').innerHTML=parts.length?`<div class="warn"><b>Screens and measures</b>${parts.map(esc).join('<br>')}</div>`:'<div class="empty">No EPS screen or vitals entered.</div>';}
+ $('#rpEps').innerHTML=parts.length?`<div class="warn"><b>Screens and measures</b>${parts.map(esc).join('<br>')}</div>`:'<div class="empty">No EPS screen or vitals entered.</div>';
+ if(typeof v65Report==='function')v65Report();}   /* v25.65 (SAFETY-H7, M6, L2, L3, L4) */
 
 /* v23.08 (review I223): the rater brief: each watched item with what to look for, the 0-3 anchors with an example, the
    red-flag steps and who to call; printed alone (Print rater brief), never with the record */
@@ -1617,6 +1648,7 @@ function renderBrief(){const box=$('#briefBody');if(!box)return;const meds=medLi
  const meas=[...new Set(meds.flatMap(m=>m.watched.filter(s=>SE[s].c===MEAS)))];
  if(meas.length)h+=`<p class="method">Not rated on the grid: ${esc(meas.map(s=>SE[s].l).join('; '))}, measured by the nurse on the vitals sheet.</p>`;
  h+=`<div class="warn"><b>Who to call</b>School nurse: ${esc(nurse||'(not entered on the plan)')}. Prescriber: ${esc(doc||'(not entered on the plan)')}${fax?', '+esc(fax):''}, reached through the nurse or the parent. Difficulty breathing or swallowing, a seizure, or fever with severe stiffness and confusion: call emergency services first.</div>`;
+ if(typeof v65BriefHtml==='function')h+=v65BriefHtml();   /* v25.65 (SAFETY-M5) */
  box.innerHTML=h;}
 /* ---------- toolbar ---------- */
 /* v21.16 audit (F8). Lowering a count deleted the medications, grid days, or vitals rows past it, with everything entered
@@ -1724,7 +1756,7 @@ const MS_LIM={med:[1,6,2],days:[7,28,14],vit:[4,24,8]};
 function msCount(v,k){const L=MS_LIM[k],x=typeof v==='number'?v:(typeof v==='string'&&v.trim()!==''?Number(v):NaN);return Number.isInteger(x)&&x>=L[0]&&x<=L[1]?x:L[2];}
 function msCells(c,days){const out={};if(!c||typeof c!=='object'||Array.isArray(c))return out;
  Object.keys(c).forEach(k=>{const m=/^([A-Za-z_]+)\|(\d{1,2})$/.exec(k),v=c[k];
-  if(m&&(m[1]==='_dose'||m[1]==='_bip'||Object.prototype.hasOwnProperty.call(SE,m[1]))&&+m[2]<days&&Number.isInteger(v)&&v>=0&&v<=3)out[k]=v;});return out;}
+  if(m&&(m[1]==='_dose'||m[1]==='_bip'||m[1]==='_eng'||m[1]==='_soc'||Object.prototype.hasOwnProperty.call(SE,m[1]))&&+m[2]<days&&Number.isInteger(v)&&v>=0&&v<=3)out[k]=v;});return out;}
 function msFields(f){const out={};if(!f||typeof f!=='object'||Array.isArray(f))return out;
  Object.keys(f).forEach(k=>{const v=f[k];if(typeof v==='string'||typeof v==='boolean'||(typeof v==='number'&&isFinite(v)))out[k]=v;});return out;}
 /* v23.08 (review F441): the vitals sheet's appetite column (0-3) is gone, the grid rates appetite; a value in an earlier
@@ -1818,10 +1850,120 @@ window.__nbhDue=function(){const out=[],S=screenSchedule(),now=new Date();
  const n=+$('#nDays').value,flags=[];watchedRows().forEach(rw=>{if(!SE[rw.key].f)return;for(let c=0;c<n;c++){const v=cellState[rw.key+'|'+c]||0;if(v>=1)flags.push({date:val(`g.date.${c}`),item:SE[rw.key].l,rating:v});}});
  const roi=roiDate(val('m.roi'));
  return Object.assign({},r||{},{medmon:{form:'MS-1',meds,flags,report:{date:val('r.date'),sent:val('r.sent'),response:val('r.resp')},roi:isoD(roi),bip:val('m.bip')}});};}
+/* ---- v25.65 (inside the form's own script, beside the case hooks). SAFETY-H7: the BIP target's own daily count or rate from Form DD-1 (the case, kept in the hidden field x.dd), by
+   school day, a line at each dose change (the Dose Changes rows dc[0..3]), 5 school days of data before a change, the mean
+   before and after each change with 5 or more points, and the prescriber's minimum days; the 0-3 row becomes optional.
+   SAFETY-M5: what the raters are told of a dose change, and who verifies the dose. SAFETY-M6: optional rows for engagement and
+   approaches. SAFETY-L2: a reading aid. SAFETY-L3: a preference check after a dose change. SAFETY-L4: the hours from the last
+   dose to the worst period. All new parts are named fields, so a file saved before opens with them empty, as before. */
+var V65N=4,V65_READY=false;   /* var: the form calls its report and brief before this part is read */
+var v65s=v=>String(v==null?'':v).trim();
+function v65DD(){try{const x=JSON.parse(val('x.dd')||'null');if(!x||!Array.isArray(x.days))return null;return {name:v65s(x.name),unit:v65s(x.unit),days:x.days.filter(p=>p&&/^\d{4}-\d\d-\d\d$/.test(p.d)&&typeof p.v==='number').sort((a,b)=>a.d<b.d?-1:1)};}catch(e){return null;}}
+var v65P=iso=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(iso||'');return m?new Date(+m[1],+m[2]-1,+m[3],12):null;};
+var v65Day=x=>{x=v65s(x);if(!x)return null;const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(x);return m?v65P(x):gridDay(x);};
+function v65Changes(){const out=[];for(let i=0;i<V65N;i++){const d=v65Day(val(`dc[${i}].d`));if(!d&&!val(`dc[${i}].med`))continue;
+  out.push({i,d,med:val(`dc[${i}].med`),old:val(`dc[${i}].old`),nw:val(`dc[${i}].new`)});}return out.sort((a,b)=>(a.d&&b.d)?a.d-b.d:a.d?-1:1);}
+/* the phases: days before the first change, between changes, after the last */
+function v65Phases(dd,ch){const C=ch.filter(c=>c.d),P=[];for(let k=0;k<=C.length;k++){const a=k?C[k-1].d:null,b=k<C.length?C[k].d:null;
+  const pts=dd.days.filter(p=>{const x=v65P(p.d);return (!a||x>=a)&&(!b||x<b);});P.push({a,b,pts,mean:pts.length?Math.round(pts.reduce((s,p)=>s+p.v,0)/pts.length*100)/100:null,ch:k?C[k-1]:null});}return P;}
+
+/* ---- L4: the hours from the last dose to the worst period ---- */
+function v65DoseTimes(){const T=[];medList().forEach(m=>{const s=v65s(m.dose).toLowerCase();let r,re=/(\d{1,2})(?::(\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?/g;
+  const tx=s.replace(/\d+(\.\d+)?\s*(mg|mcg|ml|g|units?)\b/g,' ');
+  while((r=re.exec(tx))){if(r[2]==null&&!r[3])continue;let h=+r[1];const mi=+(r[2]||0),ap=(r[3]||'')[0];if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;if(h<24&&mi<60)T.push(h*60+mi);}});
+  return [...new Set(T)].sort((a,b)=>a-b);}
+var v65HM=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(v65s(t));return m&&+m[1]<24&&+m[2]<60?(+m[1])*60+(+m[2]):null;};
+var v65Clock=t=>((Math.floor(t/60)%12)||12)+':'+String(t%60).padStart(2,'0')+(t<720?' AM':' PM');
+function v65Worst(){const T=v65DoseTimes(),n=+$('#nDays').value,obs=msObsList(),out=[];if(!T.length)return {T,out};
+  watchedRows().forEach(r=>{const hs=[],from=[];let rated=0;for(let c=0;c<n;c++){if(!obs[c])continue;const v=cellState[r.key+'|'+c]||0;if(v<1)continue;rated++;
+    const w=v65HM(val(`g.time.${c}`));if(w==null)continue;const last=T.filter(t=>t<=w).pop();if(last==null)continue;hs.push((w-last)/60);from.push(last);}
+    if(!hs.length)return;hs.sort((a,b)=>a-b);const med=hs.length%2?hs[(hs.length-1)/2]:(hs[hs.length/2-1]+hs[hs.length/2])/2;
+    const mode=from.sort((a,b)=>from.filter(x=>x===b).length-from.filter(x=>x===a).length)[0];
+    out.push({l:SE[r.key].l,h:Math.round(med*2)/2,n:hs.length,rated,from:mode});});return {T,out};}
+
+/* ---- the plan sheet's readings ---- */
+function v65Plan(){if(!V65_READY)return;const dd=v65DD(),ch=v65Changes();
+  document.querySelectorAll('.v65base').forEach(td=>{const i=+td.dataset.dc,c=ch.find(x=>x.i===i);let t='';
+    if(c&&c.d){if(!dd)t='No target data from Form DD-1 yet';else{const prev=ch.filter(x=>x.d&&x.d<c.d).pop(),n=dd.days.filter(p=>{const x=v65P(p.d);return x<c.d&&(!prev||x>=prev.d);}).length;
+      t=n>=5?n+' school days':'<span class="v65amb">No baseline before this change</span> ('+n+' school day'+(n===1?'':'s')+'; 5 are needed)';}}
+    else if(c)t='Enter the date';
+    if(td.innerHTML!==t)td.innerHTML=t;});
+  const b=val('x.blind'),bv=$('#v65BlindV');
+  const h=b==='no'?'<div class="warn"><b>Raters are not told the dates of dose changes</b>, by agreement of the prescriber and parent. The rater brief does not show them, and dose changes are written in the table above, not in the grid&rsquo;s notes. The nurse and the BCBA always know. Red-flag rules apply in full. A school does not give placebo. Only the observer&rsquo;s knowledge of the change date is masked.</div>'
+    :'<p class="method">Observers who know a dose has changed may see what they expect. With the prescriber and parent agreeing, the raters need not be told the date of a change: choose No above. A school does not give placebo. Only the observer&rsquo;s knowledge of the change date is masked.</p>';
+  if(bv&&bv.innerHTML!==h)bv.innerHTML=h;
+  const v=$('#v65DcV');if(v){const L=ch.filter(c=>c.d&&!v65s(c.nw)).length?'<p class="method">Enter the old and the new dose for each change.</p>':'';if(v.innerHTML!==L)v.innerHTML=L;}
+  const tn=document.querySelector('[name="t.notes"]');if(tn)tn.placeholder=b==='no'?'Raters are not told dose change dates: write dose changes on the plan sheet, not here.':'';}
+
+/* ---- the report ---- */
+function v65Report(){if(!V65_READY)return;v65Plan();const box=$('#v65Rp');if(!box)return;const dd=v65DD(),ch=v65Changes(),bip=val('m.bip')||'the BIP target',min=val('x.minDays');let h='';
+  if(!dd||!dd.days.length)h+='<div class="empty">No daily data for '+esc(bip)+' from Form DD-1 yet. Open this form in the workstation with the case, with Form DD-1 holding the target&rsquo;s count, and it is graphed here by school day.</div>';
+  else{const P=v65Phases(dd,ch),D=dd.days,n=D.length,W=600,H=220,L=40,Rr=12,T=16,B=40,mx=Math.max(1,...D.map(p=>p.v)),X=i=>L+(n<2?0.5:i/(n-1))*(W-L-Rr),Y=v=>T+(H-T-B)*(1-v/mx);
+    let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(dd.name||bip)+' by school day, with the dose changes" font-family="sans-serif" font-size="10">';
+    [0,mx/2,mx].forEach(v=>{s+='<line x1="'+L+'" x2="'+(W-Rr)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e3e8ea"/><text x="'+(L-5)+'" y="'+(Y(v)+3).toFixed(1)+'" text-anchor="end" fill="#54676f">'+(Math.round(v*10)/10)+'</text>';});
+    let d='';D.forEach((p,i)=>{d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)+' ';});s+='<path d="'+d+'" fill="none" stroke="#182e43" stroke-width="1.5"/>';
+    D.forEach((p,i)=>{s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="2.6" fill="#182e43"/>';});
+    ch.filter(c=>c.d).forEach(c=>{const k=D.findIndex(p=>v65P(p.d)>=c.d);if(k<0)return;const x=k?(X(k)+X(k-1))/2:X(0);
+      s+='<line x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="'+T+'" y2="'+(H-B)+'" stroke="#9b4e15" stroke-width="1.5" stroke-dasharray="4 3"/><text x="'+(x+3).toFixed(1)+'" y="'+(T+9)+'" fill="#9b4e15">'+esc((c.med||'dose').split(/\s/)[0]+' '+(c.nw||''))+'</text>';});
+    P.forEach(ph=>{if(ph.pts.length<5||ph.mean==null)return;const i0=D.indexOf(ph.pts[0]),i1=D.indexOf(ph.pts[ph.pts.length-1]);s+='<line x1="'+X(i0).toFixed(1)+'" x2="'+X(i1).toFixed(1)+'" y1="'+Y(ph.mean).toFixed(1)+'" y2="'+Y(ph.mean).toFixed(1)+'" stroke="#76a2a3" stroke-width="2"/>';});
+    s+='<text x="'+L+'" y="'+(H-22)+'" fill="#54676f">'+esc(D[0].d)+'</text><text x="'+(W-Rr)+'" y="'+(H-22)+'" text-anchor="end" fill="#54676f">'+esc(D[n-1].d)+'</text>';
+    s+='<text x="'+((L+W-Rr)/2)+'" y="'+(H-6)+'" text-anchor="middle" fill="#54676f">'+esc(dd.name||bip)+(dd.unit?' ('+esc(dd.unit)+')':'')+' each school day, Form DD-1. Dashed: a dose change. Green: the mean of a phase with 5 or more days.</text></svg>';
+    h+='<div class="v65fig">'+s+'</div>';
+    const rows=P.map((ph,k)=>{const prev=k?P[k-1]:null,lab=k?'After '+esc((ph.ch.med||'the change')+(ph.ch.old||ph.ch.nw?' '+(ph.ch.old||'?')+' to '+(ph.ch.nw||'?'):''))+' ('+MDYs(ph.ch.d)+')':'Before any change listed';
+      const mean=ph.pts.length>=5?ph.mean:null,dif=mean!=null&&prev&&prev.pts.length>=5?Math.round((mean-prev.mean)*100)/100:null;
+      return '<tr><td class="lab">'+lab+'</td><td class="c">'+ph.pts.length+'</td><td class="c">'+(mean!=null?mean:'fewer than 5 days')+'</td><td class="c">'+(dif!=null?(dif>0?'+':'')+dif:'&mdash;')+'</td></tr>';});
+    h+='<table class="grid"><thead><tr><th class="lab">Phase</th><th class="c">School days</th><th class="c">Mean</th><th class="c">Change from the phase before</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>';
+    const nob=ch.filter(c=>c.d).filter(c=>{const prev=ch.filter(x=>x.d&&x.d<c.d).pop();return D.filter(p=>{const x=v65P(p.d);return x<c.d&&(!prev||x>=prev.d);}).length<5;});
+    if(nob.length)h+='<div class="warn"><b>No baseline before this change:</b> '+nob.map(c=>esc((c.med||'change')+' on '+MDYs(c.d))).join('; ')+'. Fewer than 5 school days of target data come before it, so a difference cannot be read.</div>';}
+  h+='<p class="method"><b>Some medication effects appear only after several weeks. Do not judge a change in less than '+(min?esc(min):'___')+' school days (the prescriber sets this).</b> In continuous functional analyses across 14 dose adjustments, two of six showed delayed effects (Cox &amp; Virues-Ortega, 2022).</p>';
+  /* M6 */
+  const eng=document.querySelector('[name="x.rowEng"]'),soc=document.querySelector('[name="x.rowSoc"]');
+  if((eng&&eng.checked)||(soc&&soc.checked))h+='<p class="method"><b>A drop in problem behavior with a drop in these rows may reflect a general slowing, not a specific effect.</b> (Engagement and approaches are rated 0 as usual for the student, 3 markedly less.) Changes after medication often looked like a broad reduction in responding (Cox &amp; Virues-Ortega, 2016).</p>';
+  /* L4 */
+  const w=v65Worst();if(w.out.length)h+='<p class="method"><b>Time from the dose to the worst period:</b> '+w.out.map(x=>esc(x.l)+' worst about '+x.h+' h after the '+v65Clock(x.from)+' dose, '+x.n+' of '+x.rated+' days rated').join('; ')+'. The time between the dose and the observation is among the guidelines for drug studies (van Haaren &amp; Weeden, 2013).</p>';
+  else if(!w.T.length&&watchedRows().length)h+='<p class="method">Write the dose times on the medication cards (for example &ldquo;0.5 mg at 8:00 and 15:00&rdquo;) to see the hours from the dose to the worst period.</p>';
+  /* L3 */
+  const recent=ch.filter(c=>c.d&&(new Date()-c.d)<=14*864e5&&c.d<=new Date());
+  if(recent.length)h+='<div class="warn"><b>For the BCBA: re-check preferred items and activities (Form PA-1) within two weeks of '+recent.map(c=>MDYs(c.d)).join(' and ')+'; medication can change what works as a reinforcer.</b> (Northup et al., 1997.)</div>';
+  /* L2 */
+  h+='<p class="method"><b>Reading these data.</b> In published functional analyses, reductions were usually small to moderate, and larger when baseline rates were higher. If the times or situations in which the behavior occurs change after a dose change, ask the BCBA to re-check the function (Form FS-1). (Cox &amp; Virues-Ortega, 2016; Dicesare et al., 2005.)</p>';
+  if(box.innerHTML!==h)box.innerHTML=h;}
+
+/* ---- the rater brief (M5) ---- */
+function v65BriefHtml(){if(!V65_READY)return '';const b=val('x.blind'),ch=v65Changes().filter(c=>c.d),ver=val('x.verBy');
+  let h='<div class="warn"><b>The dose row</b>Mark it given only when the dose is verified by '+esc(ver||'the nurse’s log')+'.</div>';
+  if(b==='no')h+='<div class="warn"><b>Dose changes</b>By agreement of the prescriber and parent, the dates of dose changes are not given to raters. The nurse and the BCBA always know. Red-flag rules apply in full. A school does not give placebo: only the date of a change is not told.</div>';
+  else if(ch.length)h+='<p class="method">Dose changes: '+ch.map(c=>esc(MDYs(c.d)+' '+(c.med||'')+(c.nw?' to '+c.nw:''))).join('; ')+'.</p>';
+  return h;}
+
+/* ---- L3: the due list carries the preference check ---- */
+{const own=window.__nbhDue;window.__nbhDue=function(){let g=[];try{g=own?own.apply(this,arguments)||[]:[];}catch(e){g=[];}
+  try{v65Changes().filter(c=>c.d&&(new Date()-c.d)<=21*864e5).forEach(c=>{g.push({what:'Re-check preferences after the dose change (PA-1)',date:MDYs(new Date(c.d.getTime()+14*864e5))});});}catch(e){}
+  return g;};}
+/* ---- the case, in: the BIP target's daily values from Form DD-1, kept in the record ---- */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const D=(f&&f.data)||{},ser=Array.isArray(D.series)?D.series:[],B=Array.isArray(D.behaviors)?D.behaviors:[];if(ser.length){
+    const t=val('m.bip').toLowerCase(),nm=B.map(b=>v65s(b.name)).filter(Boolean),pick=nm.find(x=>t&&(x.toLowerCase()===t||t.includes(x.toLowerCase())||x.toLowerCase().includes(t)))||(B.find(b=>b.kind==='target')||{}).name;
+    if(pick){const old=v65DD(),map=new Map(old&&old.name===pick?old.days.map(p=>[p.d,p.v]):[]);ser.forEach(x=>{if(x&&/^\d{4}-\d\d-\d\d$/.test(x.date)&&x.v&&typeof x.v[pick]==='number')map.set(x.date,x.v[pick]);});
+      const b=B.find(y=>v65s(y.name)===pick),nx=JSON.stringify({name:pick,unit:b?v65s(b.unit):'',days:[...map].sort().slice(-200).map(([d,v])=>({d,v}))});
+      if(nx!==val('x.dd')){setv('x.dd',nx);r=r||{filled:0};r.filled=(r.filled||0)+1;r.note=(r.note?r.note+'; ':'')+'the daily data for '+pick+' from Form DD-1';renderReport();}}}}catch(e){}
+  return r;};}
+document.addEventListener('input',e=>{const n=e.target&&e.target.name||'';if(/^dc\[|^x\.(blind|minDays|verBy)$|^m\.bip$/.test(n)){v65Plan();if(n==='x.verBy')renderGrid(true);}});
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.v65row){renderGrid(true);}if(t&&/^dc\[|^x\.blind$/.test(t.name||''))v65Plan();});
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#viewSeg button'))setTimeout(v65Plan,0);});
+V65_READY=true;v65Plan();
+/* ---- end of v25.65 ---- */
 window.__ms1={schedule:()=>screenSchedule(),nextReport:()=>nextReport()};   /* for the tests */
 })();
 </script>
 
+<style id="v2565-ms1-css">
+/* v25.65 (SAFETY-H7, M5, M6, L2, L3, L4) */
+#v65Dc input{width:100%;box-sizing:border-box}
+.v65base{font-size:12px}
+.v65fig svg{width:100%;max-width:640px;height:auto;display:block}
+.v65amb{color:#8e2a2a;font-weight:600}
+</style>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same

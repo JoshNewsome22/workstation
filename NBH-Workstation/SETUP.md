@@ -9905,6 +9905,64 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.66: The forms against JABA, part 3: feeding (Form FD-1), injury photos, safety, staff and tokens
+(the BCBA, 11/2: the rest of the second batch of the review changes marked Build; the BCBA, 11/6: photos on IM-1's body map)
+
+With this release every one of the 228 changes in the second batch is in (the 92 not started in v25.65, and the other
+forms' parts of 24 that v25.65 began; the count of 138 in v25.65's heading counted a change once per form it touched).
+- **New Form FD-1, Feeding and Mealtime (the 48th form).** A screen that records the doctor's and the swallowing
+  clearance, sorts the problem (refusal, or selectivity by type or by texture) and says who leads: with a red flag, or
+  selectivity by texture, the medical feeding team leads until its advice is recorded; then the full menu opens. A
+  described meal, bite by bite (no mealtime functional analysis is built in). The foods the student eats now, the target
+  foods chosen with the family and the preferred foods. A plan that starts from mealtime structure and a menu in which the
+  student can always decline; escape extinction stays available as the marked RESTRICTIVE step with consent (the BCBA,
+  11/2), with a review point and a referral rule. One bite-by-bite data sheet with its graph and the nurse's weights. Pica
+  goes to the existing pica targets and cards; a note on sensory-based feeding therapies.
+- **IM-1, photos of the wound on the body map (the BCBA, 11/6).** Add photo on each marked site (the iPad's camera or
+  photo library), several per site, each with the date and time, who took it and a note. Only with consent recorded in
+  the new "Consent to photograph injuries" (on Form IC-1, other written consent, or No); a line by the button says photos
+  do not replace the nurse check or a mandated report, and that an unexplained or suspicious injury follows the school's
+  reporting procedure first. Thumbnails beside each site; tap for the photo and its details, or Delete (asked first). The
+  photos are shrunk, kept on the device and in the case file, and never sent to other forms. They print only when
+  "Include the photos when printing" is ticked (off by default), two to a row with their details and the consent.
+- **CR-1, IM-1, MS-1, RR-1, IC-1 and HD-1 (32).** CR-1 logs what each restraint led to and flags a pattern, computes and
+  graphs the reduction goal, asks for the evidence behind the earliest precursor, checks that the first response matches
+  the function, names the safety steps that are not restraint (rehearsed), and adds review triggers and who leads
+  recovery. IM-1 records protective equipment and self-restraint, puts the behavior rate beside the trauma indices, shows
+  the function and the automatic subtype, gives injuries per school day and an optional wound size. MS-1 plots the real
+  behavior data against dose changes, keeps raters blind to a change, adds rows for useful behavior and a reading aid.
+  RR-1 compares incidents on days with and without each setting event, keeps the record's consequences from standing for
+  the function, and structures prior FBAs and crisis history. IC-1 adds consent to each plan procedure (extinction and
+  restrictive steps marked), what declining an experimental analysis means, home procedures with video and photos
+  consented separately, a fuller assent and a teach-back check. HD-1 adds meal and toileting logs, the sleep studies'
+  measures, a routine-checklist agreement check and school data beside home data.
+- **RS-1, PD-1, SV-1 and CF-1 (23).** PD-1 ranks by the instrument's printed rule (task clarification now leads its
+  worked example), says which feedback, plans maintenance and records whether each check was announced. RS-1 records the
+  feedback given, schedules observation by how the RBT is doing, writes goals with when and how often, ranks a missed
+  critical step over the percentage, adds a commission item (eleven generic items), and sends a falling checklist to PD-1
+  before retraining. SV-1 adds what people do to what they say, the treatment choice, provisional ratings and a social
+  comparison. CF-1 adds a caregiver role.
+- **SM-1, GC-1, TE-1, TK-1 and VS-1 (27).** TK-1 labels taking a token away as response cost, a punishment step, tied to
+  TE-1's safeguards. SM-1 corrects the Check-In, Check-Out finding and adds a fading path, fixes the matching ladder and
+  the honesty line, and makes home a contingency. TE-1 tests that tokens work as reinforcers and records accumulated or
+  distributed backups and the side effects of token loss. GC-1 names the rule with each mark or point, counts peer
+  interactions, measures what the teacher actually scores, keeps the game alive past the criterion and offers a trained
+  student leader. VS-1 says schedules alone do not reduce transition problem behavior, prints how to teach a schedule,
+  moves from pictures to words on purpose, and adds joint, linked and phone schedules.
+- **TD-1 and its bank (25).** Extinction is a stated, labelled choice on the FCT, DRA and NCR cards; every thinning step's
+  size is shown (new cards get nine smaller steps; a saved card keeps its ladder); the request must follow the signal
+  before a step; waits end on what the student does; the published burst definition; how often thinning fails; one
+  request per function; the earned break worth more. Competing items are picked by how much the behavior drops; the two
+  CSA cards for social functions keep their steps as explained options (the BCBA, 11/2); the blocking condition is
+  restrictive; high-p feeding cards are for selectivity only, with the bite in front of the student; texture and bite
+  size come from the feeding team; self-feeding without guiding the spoon to the mouth.
+
+Saved files from before open as they did; new fields are optional, and a saved level, default or answer is kept.
+To set up: upload the whole folder as usual (index.html, the new FD-1 form, and the forms above).
+Tested: the batch tests (`qa/v2565-*-test.js`, with `qa/v2565-feed-test.js` and the IM-1 photo checks in
+`qa/v2565-safety-test.js`), each form's own tests before and after, and the release set.
+
+
 ### v25.65: A slimmer top, the TB-1 library from the studies, and the forms against JABA, part 2
 (the BCBA, 11/2: the top bar chosen from the options page, with the side rail as a switch; 138 more of the approved
 review changes; the TB-1 bank grown from the study definitions)

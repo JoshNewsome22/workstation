@@ -34,8 +34,8 @@ new_fav = 'data:image/png;base64,' + base64.b64encode(open(FAVICON, 'rb').read()
 EXPECT = [
   (old_logo, new_logo, 2),     # v21.84: once in nbh-logo.js (every form loads it; until v21.83 a copy in each of the 46 forms) and once in index.html
   (old_fav, new_fav, 1),
-  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 173),   # the masthead and print-head images of the 48 forms (FD-1 added two in v25.66) (several print more than one head; IA-1 gained a WEFA sheet head in v21.41 and a Send-outs sheet head in v21.64; MS-1 a rater brief's head in v23.08) + the index + the packet cover
-  ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 48),
+  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 174),   # the masthead and print-head images of the 48 forms (FD-1 added two in v25.66) (several print more than one head; IA-1 gained a WEFA sheet head in v21.41 and a Send-outs sheet head in v21.64; MS-1 a rater brief's head in v23.08) + the index + the packet cover
+  ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 49),   # v25.66 FD-1 is the 48th form
   (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 50),   # the 48 forms, index.html and respond.html (v21.39)
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),

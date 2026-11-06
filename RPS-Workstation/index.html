@@ -1841,13 +1841,14 @@ const FORMS=[
   ['TE-1','Token Economy','TE-1_Token-Economy-Designer_v2026-09.html'],
   ['BC-1','Behavioral Contrast','BC-1_Behavioral-Contrast_v2026-09.html'],
   ['MS-1','Medication Side Effects','MS-1_Medication-Side-Effect-Monitoring_v2026-09.html'],
-  ['IM-1','Self-Injury Trauma Scale and Injury Monitoring','IM-1_Self-Injury-Trauma-and-Injury-Monitoring_v2026-10.html']]]
+  ['IM-1','Self-Injury Trauma Scale and Injury Monitoring','IM-1_Self-Injury-Trauma-and-Injury-Monitoring_v2026-10.html'],
+  ['FD-1','Feeding and Mealtime','FD-1_Feeding-and-Mealtime_v2026-11.html']]]   /* v25.66 the 48th form */
 ];
 const ALL=FORMS.flatMap(g=>g[1]);
 const state={cur:null,ticked:{},status:{},frames:{},mismatch:{},savedAt:null,lastSig:'',pending:{},caseOrder:[],lastInput:0,warm:null};   /* v21.61 pending: the case's forms not loaded yet, as the file holds them */
 
 /* ================= the one-file edition =================
-   build-single.py packs the 47 forms, the PDF tools and a copy of this page
+   build-single.py packs the 48 forms, the PDF tools and a copy of this page
    into this one file, gzip-compressed and base64-encoded in text blocks at
    the end of the body. When those blocks are present the forms are opened
    from them, and a case is kept as one HTML file: this page, the same blocks,
@@ -2888,7 +2889,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v25.65';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v25.66';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3231,6 +3232,9 @@ function factsSig(f){return f?JSON.stringify([f.student,f.behaviors,f.fn,f.goals
    condition, where TD-1's demand fading starts, the modifications by task): one block, so the lists above stay as they are */
 FACT_SRC['DA-1']='demands';FACT_GEN.push('DA-1');
 {const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.demands);};factsSig=function(f){return fsg(f)+(f&&f.demands?JSON.stringify(f.demands):'');};}
+/* v25.66 (FEED-H3..H6) Form FD-1 joins the case as 'feeding': the screen and gate, the meal observation, the plan and the data */
+FACT_SRC['FD-1']='feeding';FACT_GEN.push('FD-1');
+{const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.feeding);};factsSig=function(f){return fsg(f)+(f&&f.feeding?JSON.stringify(f.feeding):'');};}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
   factsBusy=true;
@@ -3642,7 +3646,7 @@ function staticize(html){
 const MP_GUIDE_FORMS=['AD-1','DM-1','EA-1','EB-1','GB-1','IA-1','IC-1','MS-1','OB-1','PA-1','QS-1','RR-1','RA-1','TB-1','TD-1',
   /* v22.77 (I242) the forms whose Guide is their Guide view (.only-guide), left out of the packet now unless kept here */
   'BC-1','CF-1','CN-1','CR-1','CT-1','DA-1','FS-1','GC-1','HD-1','IM-1','IN-1','MT-1','PD-1','PR-1','RM-1','SA-1','SI-1','SM-1','SR-1','ST-1','SV-1',
-  'TE-1','TI-1','TK-1','TV-1','VS-1'];
+  'TE-1','TI-1','TK-1','TV-1','VS-1','FD-1'];
 function packetOpts(){let o={};try{o=JSON.parse(localStorage.getItem('nbh.packet')||'{}')||{};}catch(e){}
   return {refs:/^(end|form|none)$/.test(o.refs)?o.refs:'end',abc:o.abc==='full'?'full':'compact',blanks:!!o.blanks,order:o.order==='list'?'list':'case',guides:Object.assign({},o.guides||{})};}
 /* v22.39 (review F466) the packet in the case's order: consent, assessment, the FBA, the plan, then the data record (DD-1 and the
@@ -4445,7 +4449,7 @@ const CASE_MAP=[
  ['Define what is being assessed','In the first days. The targets defined here carry to every other form.',
   [['TB-1','candidates to targets: definitions, examples, clusters, replacement'],['SI-1','the student’s own account, assent plan, treatment preference'],['IN-1','teacher, parent and staff interviews'],['IA-1','indirect instruments (FAST, QABF, MAS, PBQ, WEFA) scored and compared; respondent pages']]],
  ['Observe and measure','Across the first one to two weeks; DD-1 starts the baseline that runs for the rest of the case.',
-  [['OB-1','direct observation record'],['IM-1','injuries from self-injury: the SIT Scale at intake, then on its schedule'],['ABC-1','ABC recording and conditional probabilities'],['SP-1','scatter plot: when and where it happens'],['MT-1','discontinuous measurement when counting is not possible'],['DD-1','daily data and the graph: baseline, then treatment']]],
+  [['OB-1','direct observation record'],['IM-1','injuries from self-injury: the SIT Scale at intake, then on its schedule'],['FD-1','feeding and mealtime: the screen and who leads, a meal observation, food preferences, bite-by-bite data'],['ABC-1','ABC recording and conditional probabilities'],['SP-1','scatter plot: when and where it happens'],['MT-1','discontinuous measurement when counting is not possible'],['DD-1','daily data and the graph: baseline, then treatment']]],
  ['Test what you think','When the descriptive data leave the function open, or the stakes call for it; reinforcers are assessed here either way.',
   [['VI-1','isolate one variable from the descriptive record, before an analysis'],['EA-1','experimental (functional) analysis and its variants'],['DA-1','which demands, when escape is the hypothesis'],['PA-1','preference assessment: the ranked menu carries forward'],['RA-1','confirm the preferred items reinforce']]],
  ['Conclude','One report, with the hypothesis, what was ruled out, and what would change the conclusion.',
@@ -4572,7 +4576,7 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Install it</b> to open it from its own icon: on an iPad, in Safari, <b>Share</b>, then <b>Add to Home Screen</b>; on a Mac, in Safari, <b>File</b>, then <b>Add to Dock</b>; in Chrome or Edge, the install icon in the address bar. Each device keeps its own copy. Installed on an iPad, a file you save opens the share sheet: choose <b>Save to Files</b>; the master print and a respondent page\u2019s preview open inside the app, with Print and Close, and <b>Own tab</b> shows the form full-window.</p>'+
      '<p>The website only hands the workstation\u2019s files to the device; what you type is not sent back to it. Where a student\u2019s information can go is listed under <b>Where the student\u2019s data goes</b>, below.</p>'):'')+
    (EMBED?fold('The one-file edition',
-     '<p>All 47 forms are inside this file. <b>Save case</b> writes the case as a file of its own, <i>CASE_Student_date.json</i> (the same file the website edition writes, a few hundred KB); <b>Open case</b> in this file opens it again. Keep that file with the student’s records.</p>'+
+     '<p>All 48 forms are inside this file. <b>Save case</b> writes the case as a file of its own, <i>CASE_Student_date.json</i> (the same file the website edition writes, a few hundred KB); <b>Open case</b> in this file opens it again. Keep that file with the student’s records.</p>'+
      '<p>For someone who does not have the workstation, <b>Case</b>, <b>Save a case that opens on its own</b> writes <i>Student.case.html</i>: the whole workstation (about 21 MB) with the case in it, which opens when it is double-clicked. A <i>.case.html</i> saved before v22.22 opens as before, and Save case writes back into it.</p>'):'')+
    fold('The staff directory, questionnaires and the rest',   /* v23.56 (review F513) */
      '<p><b>Staff directory</b> (the top bar; also Go to): the school staff you send forms to, typed once for the whole caseload: name, role, the groups they belong to (<i>Member of</i>), email, phone, school and a note. <b>Add a person</b>, or <b>Paste a list</b> (rows copied from a spreadsheet, an email’s To line, or a group’s members page); <b>Save to a file</b> writes a CSV and <b>Open a file</b> reads one back. The forms offer it wherever a staff member is named, and in any other text box <b>@</b> and the first letters of a name or a role write the name in. With Google Drive on, the directory is kept there too, and each device’s changes are merged.</p>'+
@@ -4593,7 +4597,7 @@ $('#help').addEventListener('click',()=>{
      '<div class="sh-row"><label for="hpApiKey">API key on this '+HERE+' (shared cases)</label><input id="hpApiKey" autocomplete="off" spellcheck="false" value="'+esc(kvGet('nbh.google.apikey')||'')+'"></div>'+
      '<button type="button" class="primary" id="hpKeysSave">Keep them on this '+HERE+'</button></div>')+
    fold('Where the student\u2019s data goes',dataWhere())+
-   '<div class="note">Each of the 47 forms also works on its own, opened directly from this folder, with the shared nbh-*.js files beside it: it saves, opens and prints as it does here. A single form file sent somewhere else, away from those files, opens without its letterhead, writing help and Autosave; for one file that carries everything, use the one-file edition. Nothing the workstation does changes the form files.</div>');
+   '<div class="note">Each of the 48 forms also works on its own, opened directly from this folder, with the shared nbh-*.js files beside it: it saves, opens and prints as it does here. A single form file sent somewhere else, away from those files, opens without its letterhead, writing help and Autosave; for one file that carries everything, use the one-file edition. Nothing the workstation does changes the form files.</div>');
 });
 
 /* ================= bookmarking a saved packet =================
@@ -5847,7 +5851,7 @@ async function grab(id,verb,extra,ms,frame){
    case holds references, so Autosave, the caseload and case history stay small; anything written to a file, a hand-on copy, a
    backup or Drive carries them again, so a file opens anywhere. (v22.57) The other forms' pictures and the student photo are
    kept so by the caseload and History; those forms hold them inline while open. */
-const MEDIA_FORMS=['TV-1'];
+const MEDIA_FORMS=['TV-1','IM-1'];   /* v25.66 IM-1's wound photos are kept as references too */
 /* v22.57 every form's pictures and the student photo: the caseload copy, History's restore points and Drive's copy brought
    here keep them in the store too (each holds references), and a form other than TV-1 is handed them inline, as before, when
    the case opens or one form is restored. A picture is the same picture inline or as a reference: Drive's "same copy" test
@@ -8691,7 +8695,7 @@ $('#readDoc').addEventListener('click',drOpen);
 </script>
 <script id="nbh-pwa">
 /* ================= the offline copy and the installed app (v21.43) =================
-   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 47 forms, the
+   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 48 forms, the
    picture library, the respondent page, the PDF tools, the manifest and icons), so everything opens without the
    internet; see the comment at the top of sw.js. This part of the page registers it, on https or on this computer
    (localhost) only, never from a drive and never in the one-file edition, which needs none. The chip beside Autosave
