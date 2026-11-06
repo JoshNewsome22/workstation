@@ -9905,6 +9905,71 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.65: A slimmer top, the TB-1 library from the studies, and the forms against JABA, part 2
+(the BCBA, 11/2: the top bar chosen from the options page, with the side rail as a switch; 138 more of the approved
+review changes; the TB-1 bank grown from the study definitions)
+
+- **The top of the screen, option A.** On a 13-inch iPad held sideways the bars above a form took 330 of 1,000 points;
+  now 155, and 54 while writing. One dark row holds the logo, the places (Today and Caseload moved here), one "All saved"
+  indicator (tap it for Autosave, the offline copy and Drive) and Save case, Build master print and Finish PDF. The
+  student line is one slim row with the case summary. The form's bar and the form's own tools are one row: the form,
+  the sheet arrows ("Setup · 1 of 13"), Dictate, the fields filled, **Save form** (it was "Save data"), Print, **View**
+  (Fit or Actual size, Focus, Side by side, Fullscreen, its own tab, Keep the bars in place, the form's More menu) and
+  Close. Scrolled down into a form, only the form row stays, with the student's name; scrolling up brings the rest back.
+- **Side rail (option C), a switch.** View or Tools, Navigation: Top bar or Side rail. The places move to a narrow rail
+  down the left edge (icons only when the iPad is upright); the top keeps the student line and the form row (108
+  points). The choice is kept on the device.
+- **TB-1's behavior library: 233 definitions (26 new, 14 refined)**, each new one citing the JABA or Behavior Analysis in
+  Practice studies it is drawn from: self-restraint, touching a found firearm, handling listed hazards, covert taking,
+  false reports, correcting or lecturing others, thumb or finger sucking, motor and vocal tics, immediate echolalia,
+  delusional or bizarre statements, toe walking, handling pulled hair, breath holding, hyperventilation, tongue
+  protrusion, tobacco or vaping, disruption during dental or medical procedures, face touching, social media over the
+  limit, running away from home, bedwetting, and four precursors (hand to the scalp or eyelashes, statements about
+  hurting oneself, claiming items, pressured speech).
+- **SA-1, TI-1 and GB-1 (21).** Physical guidance only while the student allows it, with a stop rule printed with every
+  hands-on prompt; the mastery criterion and error-correction studies reported as they were run; the no-change rule
+  checks the four likely causes in order; progressive delay and a short prompt comparison instead of most-to-least by
+  default; per-target scoring with an overselection check; verbal and model prompts apart; stimulus prompts; steps past
+  the training step; problem behavior per session; video modeling; instructive feedback; who started a
+  natural-environment trial. GB-1's feeding objectives describe what the student does, with no guidance steps.
+- **BC-1 and RM-1 (23).** BC-1 records what follows the behavior in the setting that did not change, asks whether the
+  replacement works there, tells the adults in both settings first, adds DRO, more than one unchanged setting, phases
+  that extend the plan and return to baseline, and the applied evidence. RM-1 logs the replacement response at each
+  challenge and how long a relapse lasted, shows both published detection rules, names a missing card as its own risk,
+  adds task changes to renewal, reads commission errors from TI-1, and prints that later steps are not safer. The
+  lean-baseline row stays, explained (the BCBA, 11/2).
+- **SR-1 (22).** Extinction is a stated, labelled choice, never a silent default; a design for FCT or DRA without
+  extinction; the size of every thinning step with big drops flagged; the request must follow the signal before a step;
+  waits that end on what the student does; the published burst definition; how often thinning fails, with the next step
+  written first; one request per function; the two published NCR thinning methods; the earned break worth more; the
+  teacher's own activity as a signal.
+- **DT-1 and AD-1 (24).** Denial trials beside delay trials; a plan for the return of problem behavior; a default
+  response-to-token lag with a warning; tokens tested as reinforcers; equal trial time in the choice baseline; signals
+  paired with fading; where the delay falls; a school delay-discounting probe sent to AD-1; the exchange schedule; what
+  JABA shows about warnings before access ends; synchronous reinforcement for duration targets, marked restrictive.
+- **CT-1, ST-1, TV-1, QS-1 and EB-1 (28).** CT-1 plans for relapse when the setting or the adult changes, ties the
+  criterion to the kind of plan, leads with the reinforcement steps and marks extinction, programs other routines with a
+  self-monitoring card, a stepped coaching ladder, telehealth, longer follow-up, pyramidal training and a feeding module.
+  ST-1 rehearses across planned learner responses and checks why before retraining. TV-1 adds demonstration segments
+  and a hand-off to ST-1. QS-1 and EB-1 check each adult in the first week, score the reading check as teach-back, add
+  pictures and a worked example, and send repeated misses to PD-1.
+- **PA-1 and RA-1 (20).** The method chosen from the student's known function; a video format; a CSA for social functions
+  that tests items in the plan's wait component (the older method that reinforces problem behavior during the CSA stays
+  as an explained option, the BCBA, 11/2); the blocking condition marked restrictive; stability and the reassessment
+  interval by category; access matched to how the item is used; a latency-based CSA for dangerous behavior. RA-1 keeps a
+  standing third option from the first session (escape for problem behavior stays as an explained option), a demand
+  reading on the progressive-ratio sheet, attention tested at the plan's schedule, and a token test.
+- **Decided after v25.64 (the BCBA, 11/2).** GB-1's bank: 408 per-response criteria at 100% (27 interval criteria keep
+  their level). PR-1 fades at the aim and asks to check the aim when the drop from baseline is under 80%. OB-1's
+  agreement blocks are 10 seconds, or 1 minute for fast, bursty behavior. EA-1: the nurse and injury checks are required
+  at urgency 3 or 4 and optional, with a note, at 1 or 2; with only DA-1's paired-choice ranking, the Demand card takes
+  the least chosen task, labelled (Zangrillo et al., 2020).
+
+Saved files from before open as they did; new fields are optional, and a saved level, default or answer is kept.
+To set up: upload the whole folder as usual (index.html, the 20 forms above, nbh-gb1-bank.js).
+Tested: the batch tests (`qa/v2565-*-test.js`), each form's own tests before and after, and the release set.
+
+
 ### v25.64: The forms against every JABA volume, part 1 (106 changes the BCBA marked Build)
 (the BCBA, 11/2: the review of every form against all 4,182 JABA articles, 1968 to 2026, marked on the review page)
 

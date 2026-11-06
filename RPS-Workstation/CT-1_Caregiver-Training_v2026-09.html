@@ -1105,7 +1105,29 @@ td input,td select{max-width:100%}
       <tr><th>Target behavior (Form TB-1)</th><td><input data-m="beh" placeholder="The BIP behavior this training addresses; filled from the case"></td>
           <th>Function (Form FS-1)</th><td><input data-m="fn" placeholder="Filled from the case"></td></tr>   <!-- v22.72 (review F355) -->
       <tr><th>What the family was told this is for</th><td colspan="3"><textarea data-m="purpose" rows="2" placeholder="In the words used with them, not the words used at the IEP meeting"></textarea></td></tr>
+      <!-- v25.65 (CARE-H2) the kind of plan sets the default criterion; (CARE-M4) who trained this adult -->
+      <tr><th>Kind of plan</th><td colspan="3"><select data-m="planKind" id="ctPlanKind" aria-label="Kind of plan"><option value=""></option>
+        <option value="fr1">The new behavior is reinforced every time (FR 1), and every error that would reinforce the problem behavior is on a critical step</option>
+        <option value="int">Time-based or intermittent reinforcement: noncontingent reinforcement, an interval schedule, or a thinned FCT schedule</option>
+        <option value="skill">A skill to teach, with no problem behavior to reduce</option></select>
+        <div class="hint" id="ctKindNote"></div></td></tr>
+      <tr><th>Trained by</th><td colspan="3"><select data-m="trainedBy" aria-label="Who trained this adult"><option value="">The trainer</option><option value="cg">The primary caregiver, with the trainer&rsquo;s feedback</option></select>
+        <div class="ct-peer" id="ctPeer" hidden><label>The trainer&rsquo;s own probe with this adult (date) <input type="date" data-m="trainerProbe" class="ct-date" aria-label="Date of the trainer's own probe with this adult"></label>
+        <span class="hint">A caregiver who trains another adult has that adult&rsquo;s rounds and probe scored here as usual; the trainer still runs one probe with them (Kuhn et al., 2003; Neef, 1995).</span></div></td></tr>
     </table>
+    <!-- v25.65 (CARE-M2) a telehealth block, shown when training is by telehealth or mixed -->
+    <div class="ct-tele" id="ctTele" hidden>
+      <h3 style="margin-top:12px">Training by Telehealth</h3>
+      <table class="rt">
+        <tr><th style="width:26%">Device and connection</th><td><input data-m="th_dev" placeholder="e.g., the family&rsquo;s tablet on home Wi-Fi; a district hotspot"></td></tr>
+        <tr><th>Where the camera points</th><td><input data-m="th_cam" placeholder="e.g., propped on the counter, the whole kitchen table in view"></td></tr>
+        <tr><th>Who else is in the room</th><td><input data-m="th_room" placeholder="e.g., the student&rsquo;s sister, at the same table"></td></tr>
+        <tr><th>Interpreter, and where they join from</th><td><input data-m="th_interp" placeholder="e.g., district Spanish interpreter, joining the call from the office"></td></tr>
+        <tr><th>If the behavior escalates during the call</th><td><textarea data-m="th_esc" rows="2" placeholder="The safety row: the call pauses, the caregiver follows When safety comes first, and the trainer stays on the line or calls back"></textarea></td></tr>
+        <tr><th>Bathroom or dressing routines</th><td><label class="ct-chk"><input type="checkbox" data-m="th_priv"> Camera off, or shoulders up only; the caregiver says what is happening (Osos et al., 2026)</label></td></tr>
+        <tr><th>Share of each call lost to connection problems</th><td><input data-m="th_lost" placeholder="e.g., about 5 minutes of 40; one call dropped twice"></td></tr>
+      </table>
+    </div>
     <div class="ct-cgbar"><p class="hint" id="cgNote" role="status"></p><button class="tool noprint" id="cgDel" type="button">Remove this caregiver</button></div>
     <div class="note2"><b>Caregivers are not staff, and this form is not Form ST-1 with the nouns changed.</b> A caregiver has no supervisor, no colleague to tap out to, no end of shift, and a relationship with the student that continues after the procedure ends. They also hold information no one else has. Training that ignores this produces agreement in the session and nothing afterwards.</div>
   </section>
@@ -1148,20 +1170,51 @@ td input,td select{max-width:100%}
       <div class="rr-msg" id="rrMsg" role="status" aria-live="polite"></div>
     </div>
     <h2 class="nbh-band">Components Delivered</h2>
+    <!-- v25.65 (CARE-M1) each component's format, on a ladder from written steps to live coaching -->
+    <p class="hint">Record the format of each component. Start with plain written steps with pictures and a worked example, and a video of the routine where one exists; if the first rehearsal round is below the criterion, add live modeling, rehearsal and feedback. A caregiver is never cleared on written steps alone.</p>
     <div style="margin-top:8px">
-      <div class="bstrow"><div>1. Instruction</div><div><label><input type="checkbox" data-m="c_inst"> Delivered</label>&nbsp;&nbsp;<input data-m="c_inst_how" style="width:62%" placeholder="Written steps in plain language, in the family's preferred language"></div></div>
-      <div class="bstrow"><div>2. Modeling</div><div><label><input type="checkbox" data-m="c_mod"> Delivered</label>&nbsp;&nbsp;<input data-m="c_mod_how" style="width:62%" placeholder="With the actual student where possible, not with the trainer playing the child"></div></div>
-      <div class="bstrow"><div>3. Rehearsal</div><div><label><input type="checkbox" data-m="c_reh"> Delivered</label>&nbsp;&nbsp;<input data-m="c_reh_how" style="width:62%" placeholder="Caregiver runs it with the student while the trainer is present"></div></div>
-      <div class="bstrow"><div>4. Feedback</div><div><label><input type="checkbox" data-m="c_fb"> Delivered</label>&nbsp;&nbsp;<input data-m="c_fb_how" style="width:62%" placeholder="Immediate and specific; strengths first"></div></div>
-      <div class="bstrow"><div>5. In-situ training</div><div><label><input type="checkbox" data-m="c_situ"> Delivered</label>&nbsp;&nbsp;<input data-m="c_situ_how" style="width:62%" placeholder="Practice and feedback in the real routine, at the real time of day (the in-home probe is recorded on the Competency sheet)"></div></div>
+      <div class="bstrow"><div>1. Instruction</div><div><label><input type="checkbox" data-m="c_inst"> Delivered</label>&nbsp;&nbsp;<select data-m="c_inst_fmt" class="ct-fmt" aria-label="Instruction: format"><option value="">Format</option><option value="written">Written steps</option><option value="enhanced">Written steps with pictures and a worked example</option><option value="video">Video model</option><option value="computer">Interactive computer module</option><option value="live">Live, in person</option><option value="tele">Live, by telehealth</option></select>&nbsp;&nbsp;<input data-m="c_inst_how" style="width:62%" placeholder="Written steps in plain language, in the family's preferred language"></div></div>
+      <div class="bstrow"><div>2. Modeling</div><div><label><input type="checkbox" data-m="c_mod"> Delivered</label>&nbsp;&nbsp;<select data-m="c_mod_fmt" class="ct-fmt" aria-label="Modeling: format"><option value="">Format</option><option value="written">Written steps</option><option value="enhanced">Written steps with pictures and a worked example</option><option value="video">Video model</option><option value="computer">Interactive computer module</option><option value="live">Live, in person</option><option value="tele">Live, by telehealth</option></select>&nbsp;&nbsp;<input data-m="c_mod_how" style="width:62%" placeholder="With the actual student where possible, not with the trainer playing the child"></div></div>
+      <div class="bstrow"><div>3. Rehearsal</div><div><label><input type="checkbox" data-m="c_reh"> Delivered</label>&nbsp;&nbsp;<select data-m="c_reh_fmt" class="ct-fmt" aria-label="Rehearsal: format"><option value="">Format</option><option value="written">Written steps</option><option value="enhanced">Written steps with pictures and a worked example</option><option value="video">Video model</option><option value="computer">Interactive computer module</option><option value="live">Live, in person</option><option value="tele">Live, by telehealth</option></select>&nbsp;&nbsp;<input data-m="c_reh_how" style="width:62%" placeholder="Caregiver runs it with the student while the trainer is present"></div></div>
+      <div class="bstrow"><div>4. Feedback</div><div><label><input type="checkbox" data-m="c_fb"> Delivered</label>&nbsp;&nbsp;<select data-m="c_fb_fmt" class="ct-fmt" aria-label="Feedback: format"><option value="">Format</option><option value="written">Written steps</option><option value="enhanced">Written steps with pictures and a worked example</option><option value="video">Video model</option><option value="computer">Interactive computer module</option><option value="live">Live, in person</option><option value="tele">Live, by telehealth</option></select>&nbsp;&nbsp;<input data-m="c_fb_how" style="width:62%" placeholder="Immediate and specific; strengths first"></div></div>
+      <div class="bstrow"><div>5. In-situ training</div><div><label><input type="checkbox" data-m="c_situ"> Delivered</label>&nbsp;&nbsp;<select data-m="c_situ_fmt" class="ct-fmt" aria-label="In-situ training: format"><option value="">Format</option><option value="written">Written steps</option><option value="enhanced">Written steps with pictures and a worked example</option><option value="video">Video model</option><option value="computer">Interactive computer module</option><option value="live">Live, in person</option><option value="tele">Live, by telehealth</option></select>&nbsp;&nbsp;<input data-m="c_situ_how" style="width:62%" placeholder="Practice and feedback in the real routine, at the real time of day (the in-home probe is recorded on the Competency sheet)"></div></div>
     </div>
     <h2 class="nbh-band" style="margin-top:16px">Protocol Steps</h2>
-    <p class="hint">Mark a step <b>critical</b> when an error on it defeats the purpose of the protocol; every step marked critical must be scored in the rounds the competency decision is made on, and correct every time.</p>
+    <p class="hint">Mark a step <b>critical</b> when an error on it defeats the purpose of the protocol; every step marked critical must be scored in the rounds the competency decision is made on, and correct every time. <!-- v25.65 (CARE-H3) -->Tick <b>Extinction</b> on a step that withholds the reinforcer for the problem behavior: it prints with the word Extinction on the family card, and the caregiver is not cleared until consent to it is recorded. An extinction step is one part of a package, never the plan on its own, and it is never the default.</p>
     <div class="row" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addStep">Add step</button><button class="tool" id="delStep">Remove last</button>
     </div>
+    <div class="ct-fixstep noprint" id="ctFixStep" hidden></div>
     <div class="grid-wrap"><table class="rt" id="stepTbl"><thead><tr>
-      <th style="width:52px">Step</th><th style="text-align:left">What the caregiver does</th><th style="width:74px">Critical</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:52px">Step</th><th style="text-align:left">What the caregiver does</th><th style="width:74px">Critical</th><th style="width:84px">Extinction</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="ct-extcons" id="ctExtCons" hidden><b>Consent to the extinction step.</b> <label>Recorded on <input data-m="extCons" placeholder="e.g., 10/2/2026, Form IC-1 (plan procedures), parent signed" aria-label="Consent to the extinction step: date and where it is recorded"></label> <span class="hint" id="ctExtConsNote"></span></div>
+    <!-- v25.65 (FEED-M3) the mealtime routine: behavior skills training at a real meal, and a plan for the change of feeder -->
+    <h2 class="nbh-band" style="margin-top:16px">Mealtime Routine</h2>
+    <table class="rt">
+      <tr><th style="width:26%">This training includes a meal</th><td><select data-m="meal" id="ctMeal" aria-label="This training includes a meal"><option value="">No</option><option value="yes">Yes: the mealtime routine below</option></select></td></tr>
+    </table>
+    <div class="ct-meal" id="ctMealBox" hidden>
+      <p class="hint">Written steps, then the BCBA models a meal, then the caregiver runs a real meal with feedback during it. The steps below are the routine&rsquo;s structure; score them on the rehearsal grid like any other step. Training packages of written steps, instruction, modeling and rehearsal gave parents high integrity in feeding protocols at home (Mueller et al., 2003), and feedback during the meal was enough for 3 caregivers (Bachmeyer-Lee et al., 2020). The default is a routine where the student can always decline.</p>
+      <table class="rt">
+        <tr><th style="width:26%">Written steps given</th><td><input data-m="meal_written" placeholder="e.g., one card on the fridge, from the feeding plan"></td></tr>
+        <tr><th>The BCBA modeled a meal</th><td><input data-m="meal_model" placeholder="Date, and which meal"></td></tr>
+        <tr><th>The caregiver ran a real meal with feedback during it</th><td><input data-m="meal_invivo" placeholder="Date, and what was praised and corrected during the meal"></td></tr>
+        <tr><th>Who leads the feeding plan</th><td><input data-m="meal_team" placeholder="The family, the doctor and a feeding specialist; a medical feeding team&rsquo;s own protocol is recorded here and not trained on this form"></td></tr>
+      </table>
+      <div class="row noprint" style="margin:8px 0;display:flex;gap:8px;flex-wrap:wrap"><button class="tool" id="ctMealSteps" type="button">Add the mealtime structure steps</button></div>
+      <h3 style="margin-top:12px">Change of Feeder or Place</h3>
+      <table class="rt">
+        <tr><th style="width:26%">What carries over</th><td><input data-m="meal_same" placeholder="The same bowl, placemat and spoon at home as at school (or the reverse)"></td></tr>
+        <tr><th>First home meals with the trainer present</th><td><input type="date" data-m="meal_first" class="ct-date" aria-label="Date of the first home meal with the trainer present"></td></tr>
+      </table>
+      <p class="ct-warn">Refusal often comes back for a while when a new person feeds the student, or when bites are offered faster. Keep the routine the same, and tell the BCBA.</p>
+      <h3 style="margin-top:12px">Escape Extinction at Meals</h3>
+      <p class="hint"><b>RESTRICTIVE.</b> Holding the bite at the lips until it is taken, putting spat-out food back, or guiding the spoon to the mouth is escape extinction. It is never the default. It is added only with written consent, planned with the family, the doctor and a feeding specialist; stop and refer to a medical feeding team before adding it. A bite only offered at the lips is an ordinary step. The mouth is never forced open.</p>
+      <table class="rt">
+        <tr><th style="width:26%">Written consent to escape extinction at meals</th><td><input data-m="meal_eeCons" placeholder="Date, and where it is recorded (Form IC-1); blank: not consented"></td></tr>
+      </table>
+      <div class="row noprint" style="margin:8px 0;display:flex;gap:8px"><button class="tool" id="ctMealEE" type="button">Add the restrictive step (with consent)</button></div>
+    </div>
     <h2 class="nbh-band" style="margin-top:16px">Rehearsal</h2>
     <p class="hint">Same four codes as Forms TI-1 and ST-1, so a protocol scores the same way whoever is running it: Correct; Commission, an error of commission (attempted but done wrong); Omission, an error of omission (not attempted); N/A, the step did not arise in the round (left out of every percentage, as a blank is).</p>
     <div class="grid-wrap"><table class="pi" id="piTbl"></table></div>
@@ -1181,18 +1234,27 @@ td input,td select{max-width:100%}
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Steps to watch in the home probe"><table class="rt" id="weakTbl"></table></div>
 
     <h2 class="nbh-band" style="margin-top:16px">If the Behavior Comes Back</h2>
-    <div class="note2"><b>This is the part that matters most.</b> Briggs et al. (2018) found resurgence in 76% of applications when an FCT schedule was thinned; every episode was temporary, but the thinning was run by highly trained therapists in a structured setting, and the authors suggest that episodes may be more sustained when caregivers, who may be less likely to hold extinction, run it. Kimball et al. (2023) note that far fewer relapse-mitigation procedures have been evaluated for caregiver behavior than for client behavior, a gap they call vitally important. Delivering the reinforcer once the behavior is already resurging would likely sustain the episode (Briggs et al., 2018), which makes it the error this training is built to prevent.</div>
+    <div class="note2"><b>This is the part that matters most.</b> Briggs et al. (2018) found resurgence in 76% of applications when an FCT schedule was thinned; every episode was temporary, but the thinning was run by highly trained therapists in a structured setting, and the authors suggest that episodes may be more sustained when caregivers, who may be less likely to hold extinction, run it. <!-- v25.65 (CARE-H1) -->The behavior also comes back when the place or the adult changes: in 25 consecutive cases of functional communication training, renewal after a change of context came in 69% of treatments (Mitteer et al., 2022), and when a treatment that worked in the clinic was moved home with caregivers running it, destructive behavior came back for 3 of 4 children (Saini et al., 2018). Kimball et al. (2023) note that far fewer relapse-mitigation procedures have been evaluated for caregiver behavior than for client behavior, a gap they call vitally important. <!-- v25.65 (CARE-H3) -->The aim is that the new behavior is what works, every time; the extinction step is one part of a package, never the plan on its own.</div>
     <table class="rt">
-      <tr><th style="width:26%">What the caregiver does when it returns</th><td><textarea data-m="relapseDo" rows="3" placeholder="Stated as actions, in the caregiver's words, and rehearsed rather than only described"></textarea></td></tr>
+      <!-- v25.65 (CARE-H3) the relapse response in three parts, the reinforcement steps first: the alternative, the extinction step from the BIP (when there is one), then safety -->
+      <tr><th style="width:26%">1. Bring back the new behavior</th><td><textarea data-m="relapseAlt" rows="2" placeholder="Prompt the card or the words, show that the reinforcer is there to be asked for, and praise the first appropriate request"></textarea></td></tr>
+      <tr id="ctRelExtRow" hidden><th>2. The extinction step (from the BIP) <span class="ct-extb">Extinction</span></th><td><textarea data-m="relapseExt" rows="2" placeholder="Only when the BIP has one for this function: what is not given after the behavior, in the caregiver's words"></textarea>
+        <div class="hint" id="ctRelExtTag"></div></td></tr>
+      <tr><th>What the caregiver does when it returns</th><td><textarea data-m="relapseDo" rows="3" placeholder="Stated as actions, in the caregiver's words, and rehearsed rather than only described"></textarea></td></tr>
       <tr><th>Rehearsed under a hard condition?</th><td><select data-m="relapseReh"><option></option>
         <option>Yes &mdash; rehearsed with escalating protest</option><option>Described only</option><option>Not covered</option></select></td></tr>
-      <tr><th>What the family was told to expect</th><td><textarea data-m="expect" rows="2" placeholder="That a temporary increase is likely at some steps, with the figures, so it is not read as the plan failing"></textarea></td></tr>
+      <!-- v25.65 (CARE-H4) a second example of the hard moment -->
+      <tr><th>A second example of the hard moment</th><td><select data-m="relapseReh2" aria-label="A second example of the hard moment"><option></option>
+        <option>Yes &mdash; rehearsed in a second routine, or with a second kind of protest</option><option>Not yet</option></select>
+        <input data-m="relapseReh2_how" class="ct-thinwhat" placeholder="Which: e.g., homework as well as the tablet; shouting as well as grabbing" aria-label="The second example: which"></td></tr>
+      <tr><th>What the family was told to expect</th><td><textarea data-m="expect" rows="2" placeholder="That a temporary increase is likely at some steps, with the figures, so it is not read as the plan failing; and that it may come back for a while the first time the plan is used in a new place or with a new person"></textarea>
+        <div class="noprint ct-emergrow"><button type="button" class="tool" id="ctExpectBtn">Add the line about new places and new people</button></div></td></tr>
       <!-- v22.72 (review F349) when safety comes first, the emergency route, and a contact the school can keep -->
       <tr><th>When safety comes first</th><td><textarea data-m="safety" rows="3" placeholder="What it looks like when the plan stops and everyone is kept safe (someone could be hurt): how the student and any brothers or sisters are kept safe, and what the caregiver does instead. The plan can wait; safety cannot."></textarea></td></tr>
       <tr><th>In an emergency</th><td><textarea data-m="emerg" rows="2" placeholder="911 when anyone is hurt or in danger; 988 (call or text) or the county&rsquo;s mobile response team for a mental-health crisis, with its number"></textarea>
         <div class="noprint ct-emergrow"><button type="button" class="tool" id="ctEmergBtn">Write in 911 and 988</button></div></td></tr>
       <tr><th>Who they contact, when it is answered, and outside those hours</th><td><input data-m="call" placeholder="The school contact (school phone or district email), the hours it is answered, and what to do outside those hours"></td></tr>
-      <tr><th>What would make them stop running it</th><td><textarea data-m="stop" rows="2" placeholder="Asked directly. The honest answer here predicts the integrity data better than anything else on this form."></textarea></td></tr>
+      <tr><th>What would make them stop running it</th><td><textarea data-m="stop" rows="2" placeholder="Asked directly. A worrying answer is a warning to act on. What people say and what they later do do not always agree, so check one against the other (the follow-up probes below, Form TI-1)."></textarea></td></tr><!-- v25.65 (CARE-L3) -->
     </table>
     <div class="ct-crisis noprint" id="ctCrisis" role="note" hidden></div>   <!-- v22.72 (review F349) on screen only -->
     <div class="verdict v-mid noprint" id="ctSafetyNote" role="note" hidden></div>
@@ -1211,6 +1273,15 @@ td input,td select{max-width:100%}
       <tr><th>Booster rehearsal before it</th><td><input type="date" data-m="boost_date" class="ct-date" aria-label="Date of the booster rehearsal">
         <select data-m="boost_res" aria-label="The booster rehearsal"><option></option><option>Rehearsed with escalating protest; held</option><option>Rehearsed; needed a prompt</option><option>Described only</option></select>
         <div class="hint" id="ctBoostNote"></div></td></tr>
+      <!-- v25.65 (CARE-H1) the other changes that bring the behavior back: a new adult, a new place, a new routine, a holiday -->
+      <tr><th>Changes coming up</th><td><div class="hint">A new adult, a new place, a new routine, a holiday, or the first week back after a break. A booster rehearsal before each counts as one before a thinning step.</div>
+        <div class="grid-wrap"><table class="rt ct-chg" id="ctChgTbl"><thead><tr><th style="width:30%">The change</th><th style="width:18%">Date</th><th style="width:18%">Booster before it</th><th>The booster</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+        <div class="row noprint" style="margin:6px 0"><button class="tool" id="ctChgAdd" type="button">Add a change</button></div>
+        <div class="hint" id="ctChgNote"></div></td></tr>
+      <!-- v25.65 (CARE-M3) who supports the caregiver -->
+      <tr><th>Who helps you with this, and how often do you see people outside the home?</th><td><textarea data-m="support" rows="2" placeholder="In the caregiver's words"></textarea>
+        <select data-m="supportLvl" aria-label="How often the caregiver sees people outside the home"><option value=""></option><option>Often</option><option>Sometimes</option><option>Rarely</option><option>No one</option></select>
+        <div class="hint" id="ctSupportNote"></div></td></tr>
       <tr><th>I can run this on an ordinary day</th><td><select data-m="sv1"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
       <tr><th>This is worth the effort it takes</th><td><select data-m="sv2"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
       <tr><th>I would be comfortable doing this in front of other people</th><td><select data-m="sv3"><option></option><option>Strongly agree</option><option>Agree</option><option>Neutral</option><option>Disagree</option><option>Strongly disagree</option></select></td></tr>
@@ -1218,12 +1289,18 @@ td input,td select{max-width:100%}
     </table>
     <!-- v22.72 (review F351, I176) follow-up probes at home: running it independently is something the record shows -->
     <h3 style="margin-top:14px">Follow-up Probes at Home</h3>
-    <p class="hint">The same routine, scored the same way, a while after the in-home probe (in person or by video call, agreed with the family). One at or above the criterion, with every critical step scored on it correct, shows the plan is running at home; weeks 1, 3 and 6 are a working convention, not a finding.</p>
-    <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
-      <button class="tool" id="addFu" type="button">Add follow-up probe</button><button class="tool" id="delFu" type="button">Remove last</button>
+    <p class="hint">Scored the same way as the in-home probe, a while after it (in person or by video call, agreed with the family). One at or above the criterion, with every critical step scored on it correct, shows the plan is running at home. <!-- v25.65 (CARE-M3, CARE-H4) -->Weeks 1, 3 and 6, then 3 months, are this form&rsquo;s working convention, not a finding: maintenance was shown only where it was probed, at 3 months (Sanders &amp; Glynn, 1981; Mueller et al., 2003). Probe once more after school contact ends for the summer, or at a change of placement. One follow-up probe is in a second routine, one the plan applies to but that was not trained, unless the BCBA records why the plan is meant for one routine only (Sanders &amp; Glynn, 1981; Koegel et al., 1978).</p>
+    <div class="row noprint" style="margin:8px 0;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="tool" id="addFu" type="button">Add follow-up probe</button><button class="tool" id="delFu" type="button">Remove last</button><button class="tool" id="ctFuPlan" type="button">Date the probes: weeks 1, 3 and 6, and 3 months</button>
     </div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Follow-up probes at home"><table class="rt" id="fuTbl"><thead><tr>
-      <th style="width:16%">Date</th><th style="width:13%">Steps correct</th><th style="width:15%">Critical steps correct</th><th style="width:15%">The relapse moment came up</th><th style="width:14%">How</th><th style="text-align:left">What was seen</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:15%">Date</th><th style="width:11%">Steps correct</th><th style="width:13%">Critical steps correct</th><th style="width:12%">The relapse moment came up</th><th style="width:12%">How</th><th style="width:14%">Routine</th><th style="text-align:left">What was seen</th></tr></thead><tbody></tbody></table></div>
+    <table class="rt" style="margin-top:8px">
+      <tr><th style="width:26%">Probe after school contact ends</th><td><input type="date" data-m="fu_summer" class="ct-date" aria-label="Date of the probe after school contact ends for the summer, or at a change of placement"> <span class="hint">the summer break, or a change of placement</span></td></tr>
+      <tr><th>The plan is meant for one routine only, because</th><td><input data-m="oneRoutine" placeholder="Only when a probe in a second routine does not apply: the BCBA&rsquo;s reason"></td></tr>
+    </table>
+    <div class="hint" id="ctHomeRec"></div>
+    <div class="verdict v-mid" id="ctTeleNote" role="note" hidden></div>
     <h3 style="margin-top:14px">Sign-off</h3>
     <table class="rt">
       <tr><th style="width:24%">Outcome</th><td colspan="3"><select data-m="outcome" style="width:60%"><option></option>
@@ -1243,7 +1320,9 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Family Card</h2>
     <p class="hint">One page for the family to keep where the routine happens, printed from what is on this form: the steps, what to do if the behavior comes back, when safety comes first, the emergency numbers and whom to contact. It carries no name, and nothing is translated here.</p>
     <div class="row noprint ct-cardbar"><label>Headings in <select data-m="cardLang" id="cardLang"><option value="">English</option><option value="es">Espa&ntilde;ol</option></select></label>
-      <button class="primary" id="cardPrint" type="button">Print the family card</button></div>
+      <button class="primary" id="cardPrint" type="button">Print the family card</button>
+      <!-- v25.65 (CARE-H4) the steps as a self-check list the caregiver keeps -->
+      <label class="ct-chk"><input type="checkbox" data-m="cardSelf"> A self-check list of the steps on the back (Yes / No / Did not come up)</label></div>
     <div class="verdict v-mid noprint" id="cardNote" role="note" hidden></div>
     <div class="ct-card" id="ctCard"></div>
   </section>
@@ -1252,10 +1331,17 @@ td input,td select{max-width:100%}
   <section class="only-guide">
     <h2 class="nbh-band">How Caregiver Training Differs from Staff Training</h2>
     <p>The procedure is the same package &mdash; instruction, modeling, rehearsal, feedback, to a criterion &mdash; and Form ST-1 covers it for staff. What differs is everything around it. A caregiver has no supervisor to escalate to, no colleague to take over, and no point at which the day ends. The relationship continues after the procedure, so a procedure that damages it costs more than it does at school. And the caregiver knows things about the student that no assessment will surface, which is why the goals sheet comes before the training sheet on this form.</p>
-    <p>The criterion here defaults to 80% rather than the 90% used for staff. That is a working convention rather than a finding: a caregiver running a plan across a whole day under conditions nobody controls is a different performance from an aide running it for twenty minutes with a BCBA present, and a criterion that cannot be met in the real setting produces either a false record or an abandoned plan.</p>
+    <!-- v25.65 (CARE-H2) the criterion follows the kind of plan, not who is trained -->
+    <p>The criterion follows the kind of plan, not who is being trained. It defaults to 80% only when the plan reinforces the new behavior every time (FR 1) and every error that would reinforce the problem behavior is on a critical step, which is held at 100%. With time-based or intermittent reinforcement (noncontingent reinforcement, an interval schedule, or a thinned FCT schedule) it defaults to 90%. In human-operant studies, differential reinforcement with FR 1 for the new behavior still worked at 80% integrity, but noncontingent reinforcement and interval-based differential reinforcement did not work reliably at 80%: &ldquo;80% integrity is not a uniformly acceptable minimal level of integrity&rdquo; (Jones &amp; St. Peter, 2022). Errors that reinforced the problem behavior did more harm than failing to reinforce the new behavior (St. Peter Pipkin et al., 2010). Caregivers can meet the higher level: all but one parent ran functional communication training at a mean of at least 90% accuracy by telehealth, with or without an interpreter (Tsami et al., 2019), and in a randomized trial of virtual training, correct implementation rose from 35% to 99% on one measure and from 14% to 92% on the other, while the waitlist group stayed near its starting levels (Fisher et al., 2020). So 80% is not safe for every plan. The kind of plan is chosen on Setup; a record saved with its own criterion keeps it.</p>
+    <p>Every protocol that reduces a problem behavior can carry one fixed critical step: <i>the reinforcer for the problem behavior is not given after the problem behavior</i>. Breaking it is scored as a commission error. It is an extinction step, ticked as one, and like every extinction step it is one part of a package, never the plan on its own (Lerman et al., 1999, found bursts and new aggression much less often when extinction was part of a package than when it was used alone). Extinction bursts came in 24% of a clinical sample of 108, and they did not get smaller over later changes, so the family is told each time (Muething et al., 2024).</p>
     <h2 class="nbh-band" style="margin-top:16px">Why the Relapse Response Is the Centrepiece</h2>
-    <p>Across the schedule-thinning literature, resurgence is the normal case rather than the exception, and delivering the reinforcer while the behavior is occurring would likely sustain an episode rather than let it pass (Briggs et al., 2018). In the clinic data Briggs et al. analyzed, the procedure was held by highly trained therapists in a structured setting. At home it is done by a parent, at the end of a day, often alone, with the behavior escalating and an easy way to stop it available. Rehearsing that specific moment &mdash; not describing it &mdash; is the part of this training most likely to change what actually happens.</p>
-    <p>The last question under If the Behavior Comes Back asks what would make the family stop running the plan. It is there because the answer is usually concrete and usually fixable, and because a family that has never been asked will stop without saying so.</p>
+    <p>Across the schedule-thinning literature, resurgence is the normal case rather than the exception, and delivering the reinforcer while the behavior is occurring would likely sustain an episode rather than let it pass (Briggs et al., 2018; resurgence came in 19 of 25 thinning applications). In the clinic data Briggs et al. analyzed, the procedure was held by highly trained therapists in a structured setting. At home it is done by a parent, at the end of a day, often alone, with the behavior escalating and an easy way to stop it available. Rehearsing that specific moment &mdash; not describing it &mdash; is the part of this training most likely to change what actually happens.</p>
+    <!-- v25.65 (CARE-H3, CARE-H1, CARE-H4) -->
+    <p>The relapse response is written in three parts, in this order: what the caregiver does to bring back the new behavior (prompt the card or the words, show the reinforcer is there to be asked for, praise the first appropriate request); the extinction step, when the BIP has one for this function, marked as extinction and carrying its consent; and safety. The aim is that the new behavior is what works, every time; the extinction step is one part of a package, never the plan on its own.</p>
+    <p>The behavior also comes back when the setting or the adult changes, not only when the schedule is thinned. Resurgence and renewal came in 76% and 69% of 25 consecutive treatments with functional communication training, each in about a third of the individual changes (Mitteer et al., 2022); a treatment that worked in the clinic relapsed at home with the caregivers running it for 3 of 4 children (Saini et al., 2018); and parent skills trained in two rooms of the home carried over only a little to a third (Miller &amp; Sloane, 1976). So <b>Changes coming up</b> lists the new adult, the new place, the new routine and the holiday, each with a booster rehearsal before it, counted as a booster before a thinning step is; the Household line marks an adult with no in-home probe of their own as not yet probed; and the hard moment is rehearsed with at least two examples, two routines or two kinds of protest. One follow-up probe is in a second routine, and the family card can carry the steps as a Yes / No / Did not come up list the caregiver keeps: adding self-management of that kind raised parents&rsquo; accuracy in the settings they were not trained in (Sanders &amp; Glynn, 1981). A caregiver&rsquo;s own record changes what they do even when it is not accurate (Herbert &amp; Baer, 1972), so it is a prompt, not a measure: the follow-up probe is the measure.</p>
+    <p>The last question under If the Behavior Comes Back asks what would make the family stop running the plan. It is there because the answer is usually concrete and usually fixable, and because a family that has never been asked will stop without saying so. <!-- v25.65 (CARE-L3) -->A worrying answer is a warning to act on; it does not predict the integrity data. What people say and what they later do do not always agree (Auten et al., 2024; Schwartz &amp; Baer, 1991), so check one against the other: the follow-up probes here, and Form TI-1.</p>
+    <!-- v25.65 (CARE-M1, M2, M3, M4) -->
+    <p><b>Format.</b> Each component records its format, on a ladder: written steps with pictures and a worked example, and a video of the routine where there is one; if the first rehearsal round is below the criterion, live modeling, rehearsal and feedback are added. A caregiver is never cleared on written steps alone. Parents did not run graduated guidance correctly from detailed written instructions alone, and all 3 reached near-perfect fidelity after behavior skills training by video call (Boutain et al., 2020); written steps with less jargon, pictures and worked examples were enough for inexperienced staff (Graff &amp; Karsten, 2012); video-based training alone worked for some caregivers and not others (Schnell-Peskin et al., 2023); and an interactive computer module brought 3 parents to high fidelity with their own child (Gerencser et al., 2017). <b>Telehealth.</b> A review of 54 telehealth studies found the evidence supports telehealth for assessment and for building skills, and asks for more research on reducing behavior (Neely et al., 2021); when every round is by telehealth and the plan reduces a behavior, plan at least one in-person probe. <b>Who supports the caregiver.</b> Mothers who saw few people outside the home lost their gains over a year of follow-up, and days with more contact with friends had fewer problems (Wahler, 1980): with little support, the probes come closer together and a booster is offered. <b>Training by the primary caregiver.</b> Primary caregivers taught other family members to run the treatment in all three families (Kuhn et al., 2003), and training by peer parents worked as well as training by a professional (Neef, 1995); the trainer still runs one probe with each adult.</p>
     <!-- v21.24: the rehearsal runner -->
     <h2 class="nbh-band" style="margin-top:16px">The Rehearsal Runner</h2>
     <p>At the top of the Training sheet, <b>Set up a round</b> offers the next empty round, or one you choose, with its arrangement, and fills in the date from this device&rsquo;s calendar; on a phone it can be used standing in the routine. Code each step as the caregiver performs it with <b>Correct</b>, <b>Commission</b>, <b>Omission</b> or <b>N/A</b>, one step at a time or with all steps listed (keys C, M, O and N; the arrow keys move between steps, Z undoes the last code and Space pauses the round timer), with the round&rsquo;s accuracy against the criterion, and the critical steps correct, shown as you go. A step that comes due more than once in a round is coded each time and written to the grid as on Forms TI-1 and ST-1: Commission if any of those times was a commission error, otherwise Omission if any was an omission error, otherwise Correct. That is a working convention, not a finding.</p>
@@ -1266,15 +1352,15 @@ td input,td select{max-width:100%}
       <tr><th>Per-step accuracy</th><td>For each step, the percentage of the rounds in which it was scored that it was performed correctly.</td></tr>
       <tr><th>Critical steps</th><td>The same calculation restricted to steps marked critical, pooled across the decision rounds: once the criterion has been met, the latest rounds it counts (the latest two when it asks for two consecutive rounds); before that, every scored round. Every step marked critical must be scored in the decision rounds and correct every time.</td></tr>
       <tr><th>Rounds to criterion</th><td>The number of scored rounds up to and including the round in which the criterion was first met on the required number of consecutive rounds. The card and the verdict name that round as it is labelled on the grid.</td></tr>
-      <tr><th>Competency decision</th><td>Criterion met on the required consecutive rounds and still met in the latest rounds it counts, <i>and</i> every step marked critical scored in those rounds and correct every time, <i>and</i> the relapse response rehearsed under a hard condition, <i>and</i> an in-home probe recorded with the steps correct on it at or above the criterion percentage. Parsons, Rollyson &amp; Reid (2012) suggest that where the mastery criterion is a lower percentage than 100%, certain critical steps be identified that must be performed at 100%; holding the in-home probe to the rehearsal percentage is this form&rsquo;s convention, as it is on Form ST-1. When any step is marked critical, the critical steps correct on the probe must be recorded (the rehearsal runner fills them from a round set up as Home probe), or <b>No critical step came due on the probe</b> ticked, and every critical step scored on the probe must have been correct, as in the decision rounds. That, too, is this form&rsquo;s convention, as on Form ST-1. When the target behavior can put someone at risk (aggression, self-injury, property destruction), <b>When safety comes first</b> and <b>In an emergency</b> must be written before the caregiver is cleared.</td></tr>
+      <tr><th>Competency decision</th><td>Criterion met on the required consecutive rounds and still met in the latest rounds it counts, <i>and</i> every step marked critical scored in those rounds and correct every time, <i>and</i> the relapse response rehearsed under a hard condition, <i>and</i> an in-home probe recorded with the steps correct on it at or above the criterion percentage. Parsons, Rollyson &amp; Reid (2012) suggest that where the mastery criterion is a lower percentage than 100%, certain critical steps be identified that must be performed at 100%; holding the in-home probe to the rehearsal percentage is this form&rsquo;s convention, as it is on Form ST-1. When any step is marked critical, the critical steps correct on the probe must be recorded (the rehearsal runner fills them from a round set up as Home probe), or <b>No critical step came due on the probe</b> ticked, and every critical step scored on the probe must have been correct, as in the decision rounds. That, too, is this form&rsquo;s convention, as on Form ST-1. When the target behavior can put someone at risk (aggression, self-injury, property destruction), <b>When safety comes first</b> and <b>In an emergency</b> must be written before the caregiver is cleared. <!-- v25.65 (CARE-H3, M4, FEED-M3, H4) -->A step ticked <b>Extinction</b>, or an extinction step in the relapse response, needs its consent recorded before the caregiver is cleared at all; a step marked <b>Restrictive</b> (escape extinction at meals) needs the written consent recorded under Mealtime Routine. An adult trained by the primary caregiver is cleared at home only once the trainer&rsquo;s own probe with them is dated. When the second example of the hard moment is recorded as not yet, the decision says so; it does not change the level. These are this form&rsquo;s conventions.</td></tr>
       <tr><th>Several caregivers</th><td>Each adult in the home who will meet the behavior has a record of their own in this form (<b>+ Caregiver</b> in the toolbar): their rehearsal rounds, the relapse rehearsal, the in-home probe, the follow-up probes, the family&rsquo;s view and the sign-off. The family&rsquo;s goals, the fit answers, the protocol steps, the relapse response and the safety rows are shared. The <b>Household</b> line on the Competency sheet gives where each adult stands; if one adult holds out while another gives in, the behavior is on intermittent reinforcement, so every adult who will meet it is trained (Briggs et al., 2018, on resurgence). A booster rehearsal of the relapse response before each thinning step is this form&rsquo;s working convention: Briggs et al. (2018) found resurgence during thinning in 19 of 25 applications (76%), in some above baseline levels, and few relapse-mitigation procedures have been evaluated for caregivers (Kimball et al., 2023).</td></tr>
-      <tr><th>Follow-up probes</th><td>Competent on the in-home probe is one observation. <b>Running it independently at home</b> needs a follow-up probe at or above the criterion percentage, with every critical step scored on it correct; the latest follow-up probe decides, so one below the criterion reads Not holding at home. The outcome on the sign-off is checked against the decision: an outcome that claims more than the decision shows is flagged on screen and on paper.</td></tr>
+      <tr><th>Follow-up probes</th><td>Competent on the in-home probe is one observation. <b>Running it independently at home</b> needs a follow-up probe at or above the criterion percentage, with every critical step scored on it correct; the latest follow-up probe decides, so one below the criterion reads Not holding at home. The outcome on the sign-off is checked against the decision: an outcome that claims more than the decision shows is flagged on screen and on paper. <!-- v25.65 (CARE-H4) -->Holding in the trained routine only, the decision adds that one follow-up probe in a second routine (Routine: A second routine) is still due, or the BCBA&rsquo;s reason the plan is for one routine only; it does not change the level.</td></tr>
     </table>
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="hint noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print. <b>What the family said in their own words</b> has no button: it holds their words, so it is not checked or rewritten. Elsewhere, a caregiver&rsquo;s own words belong in quotation marks, which Check wording leaves alone.</p><!-- /writing help -->
     <h2 class="noprint nbh-band" style="margin-top:16px">About the simulation</h2>
     <p class="noprint hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated caregiver training loaded: the family&rsquo;s own priorities, the home fit check, four rehearsal rounds, the relapse response, and the competency decision.</p>
-    <p class="hint" style="margin-top:10px">Sources: Parsons, Rollyson &amp; Reid (2012) and Ward-Horner &amp; Sturmey (2012) on the behavior skills training package; Himle et al. (2004) and Miltenberger et al. (2005) on in-situ training and the gap between rehearsal and the natural setting (both with children learning safety skills); Briggs et al. (2018) on the prevalence and course of resurgence during schedule thinning; Kimball, Greer, Fuhrman &amp; Lambert (2023) on the prevalence of resurgence across studies and on how few relapse-mitigation procedures have been evaluated for caregiver behavior; Albin et al. (1996) on contextual fit, adapted here to the home. The criterion values and the fit questions are a working convention, not findings, apart from holding critical steps at 100% (Parsons, Rollyson &amp; Reid, 2012).</p>
+    <p class="hint" style="margin-top:10px">Sources: Parsons, Rollyson &amp; Reid (2012) and Ward-Horner &amp; Sturmey (2012) on the behavior skills training package; Himle et al. (2004) and Miltenberger et al. (2005) on in-situ training and the gap between rehearsal and the natural setting (both with children learning safety skills); Briggs et al. (2018) on the prevalence and course of resurgence during schedule thinning; Kimball, Greer, Fuhrman &amp; Lambert (2023) on the prevalence of resurgence across studies and on how few relapse-mitigation procedures have been evaluated for caregiver behavior; Albin et al. (1996) on contextual fit, adapted here to the home. <!-- v25.65 -->The criterion follows the kind of plan, after Jones &amp; St. Peter (2022) and St. Peter Pipkin et al. (2010); the follow-up schedule and the fit questions are a working convention, not findings; holding critical steps at 100% follows Parsons, Rollyson &amp; Reid (2012). The relapse, generalization, format, telehealth, support, pyramidal and mealtime lines cite the studies named beside them, listed below.</p>
     <p class="hint" id="ctRefs"><b>Reference list.</b>
     Albin, R. W., Lucyshyn, J. M., Horner, R. H., &amp; Flannery, K. B. (1996). Contextual fit for behavioral support plans: A model for &ldquo;goodness of fit.&rdquo; In L. K. Koegel, R. L. Koegel, &amp; G. Dunlap (Eds.), <em>Positive behavioral support: Including people with difficult behavior in the community</em> (pp. 81&ndash;98). Paul H. Brookes. &bull;
     Briggs, A. M., Fisher, W. W., Greer, B. D., &amp; Kimball, R. T. (2018). Prevalence of resurgence of destructive behavior when thinning reinforcement schedules during functional communication training. <em>Journal of Applied Behavior Analysis, 51</em>(3), 620&ndash;633. &bull;
@@ -1282,7 +1368,33 @@ td input,td select{max-width:100%}
     Kimball, R. T., Greer, B. D., Fuhrman, A. M., &amp; Lambert, J. M. (2023). Relapse and its mitigation: Toward behavioral inoculation. <em>Journal of Applied Behavior Analysis, 56</em>(2), 282&ndash;301. &bull;
     Miltenberger, R. G., Gatheridge, B. J., Satterlund, M., Egemo-Helm, K. R., Johnson, B. M., Jostad, C., Kelso, P., &amp; Flessner, C. A. (2005). Teaching safety skills to children to prevent gun play: An evaluation of in situ training. <em>Journal of Applied Behavior Analysis, 38</em>(3), 395&ndash;398. &bull;
     Parsons, M. B., Rollyson, J. H., &amp; Reid, D. H. (2012). Evidence-based staff training: A guide for practitioners. <em>Behavior Analysis in Practice, 5</em>(2), 2&ndash;11. &bull;
-    Ward-Horner, J., &amp; Sturmey, P. (2012). Component analysis of behavior skills training in functional analysis. <em>Behavioral Interventions, 27</em>(2), 75&ndash;92.</p>
+    Ward-Horner, J., &amp; Sturmey, P. (2012). Component analysis of behavior skills training in functional analysis. <em>Behavioral Interventions, 27</em>(2), 75&ndash;92.
+    <!-- v25.65 the sources of the v25.65 lines (CARE-H1 to L3, FEED-M3) --> &bull;
+    Auten, E. M., Van Camp, C., &amp; Ferguson, A. B. (2024). A review of the concurrent-chains arrangement to assess intervention choice: 2018&ndash;2023. <em>Journal of Applied Behavior Analysis, 57</em>(2). https://doi.org/10.1002/jaba.1059 &bull;
+    Bachmeyer-Lee, M. H., Kirkwood, C. A., Sheehan, C. M., Gibson, A. L., Shuler, N. J., &amp; Keane, J. A. (2020). Utilizing in-vivo feedback for caregiver training of pediatric feeding protocols. <em>Journal of Applied Behavior Analysis, 53</em>(3), 1622&ndash;1637. &bull;
+    Boutain, A. R., Sheldon, J. B., &amp; Sherman, J. A. (2020). Evaluation of a telehealth parent training program in teaching self-care skills to children with autism. <em>Journal of Applied Behavior Analysis, 53</em>(3), 1259&ndash;1275. &bull;
+    Fisher, W. W., Luczynski, K. C., Blowers, A. P., Vosters, M. E., Pisman, M. D., Craig, A. R., Hood, S. A., Machado, M. A., Lesser, A. D., &amp; Piazza, C. C. (2020). A randomized clinical trial of a virtual-training program for teaching applied-behavior-analysis skills to parents of children with autism spectrum disorder. <em>Journal of Applied Behavior Analysis, 53</em>(4), 1856&ndash;1875. &bull;
+    Gerencser, K. R., Higbee, T. S., Akers, J. S., &amp; Contreras, B. P. (2017). Evaluation of interactive computerized training to teach parents to implement photographic activity schedules with children with autism spectrum disorder. <em>Journal of Applied Behavior Analysis, 50</em>(3), 567&ndash;581. &bull;
+    Graff, R. B., &amp; Karsten, A. M. (2012). Evaluation of a self-instruction package for conducting stimulus preference assessments. <em>Journal of Applied Behavior Analysis, 45</em>(1), 69&ndash;82. &bull;
+    Herbert, E. W., &amp; Baer, D. M. (1972). Training parents as behavior modifiers: Self-recording of contingent attention. <em>Journal of Applied Behavior Analysis, 5</em>(2), 139&ndash;149. &bull;
+    Jones, S. H., &amp; St. Peter, C. C. (2022). Nominally acceptable integrity failures negatively affect interventions involving intermittent reinforcement. <em>Journal of Applied Behavior Analysis, 55</em>(4), 1109&ndash;1123. &bull;
+    Koegel, R. L., Glahn, T. J., &amp; Nieminen, G. S. (1978). Generalization of parent-training results. <em>Journal of Applied Behavior Analysis, 11</em>(1), 95&ndash;109. &bull;
+    Kuhn, S. A. C., Lerman, D. C., &amp; Vorndran, C. M. (2003). Pyramidal training for families of children with problem behavior. <em>Journal of Applied Behavior Analysis, 36</em>(1), 77&ndash;88. &bull;
+    Lerman, D. C., Iwata, B. A., &amp; Wallace, M. D. (1999). Side effects of extinction: Prevalence of bursting and aggression during the treatment of self-injurious behavior. <em>Journal of Applied Behavior Analysis, 32</em>(1), 1&ndash;8. &bull;
+    Miller, S. J., &amp; Sloane, H. N., Jr. (1976). The generalization effects of parent training across stimulus settings. <em>Journal of Applied Behavior Analysis, 9</em>(3), 355&ndash;370. &bull;
+    Mitteer, D. R., Greer, B. D., Randall, K. R., &amp; Haney, S. D. (2022). On the scope and characteristics of relapse when treating severe destructive behavior. <em>Journal of Applied Behavior Analysis, 55</em>(3), 688&ndash;703. &bull;
+    Mueller, M. M., Piazza, C. C., Moore, J. W., Kelley, M. E., Bethke, S. A., Pruett, A. E., Oberdorff, A. J., &amp; Layer, S. A. (2003). Training parents to implement pediatric feeding protocols. <em>Journal of Applied Behavior Analysis, 36</em>(4), 545&ndash;562. &bull;
+    Muething, C., Cariveau, T., Bottini, S., Slocum, S., Williams, C., Gillespie, S., &amp; Scheithauer, M. (2024). Descriptive characteristics of extinction bursts: A record review. <em>Journal of Applied Behavior Analysis, 57</em>(2), 372&ndash;382. &bull;
+    Neef, N. A. (1995). Pyramidal parent training by peers. <em>Journal of Applied Behavior Analysis, 28</em>(3), 333&ndash;337. &bull;
+    Neely, L., MacNaul, H., Gregori, E., &amp; Cantrell, K. (2021). Effects of telehealth-mediated behavioral assessments and interventions on client outcomes: A quality review. <em>Journal of Applied Behavior Analysis, 54</em>(2), 484&ndash;510. &bull;
+    Osos, J. A., Higbee, T. S., Mendoza, M. R., Cousins, D. J., &amp; Mecham, M. L. (2026). Caregiver-implemented standardized-to-individualized behavior-analytic toilet-training package for preschoolers with autism. <em>Journal of Applied Behavior Analysis, 59</em>(4). https://doi.org/10.1002/jaba.70092 &bull;
+    Saini, V., Sullivan, W. E., Baxter, E. L., DeRosa, N. M., &amp; Roane, H. S. (2018). Renewal during functional communication training. <em>Journal of Applied Behavior Analysis, 51</em>(3), 603&ndash;619. &bull;
+    Sanders, M. R., &amp; Glynn, T. (1981). Training parents in behavioral self-management: An analysis of generalization and maintenance. <em>Journal of Applied Behavior Analysis, 14</em>(3), 223&ndash;237. &bull;
+    Schnell-Peskin, L. K., Day-Watkins, J., Mery, J. N., &amp; Vladescu, J. C. (2023). The influence of video-based training on caregiver arrangement of infant sleeping environments. <em>Journal of Applied Behavior Analysis, 56</em>(3). https://doi.org/10.1002/jaba.997 &bull;
+    Schwartz, I. S., &amp; Baer, D. M. (1991). Social validity assessments: Is current practice state of the art? <em>Journal of Applied Behavior Analysis, 24</em>(2), 189&ndash;204. &bull;
+    St. Peter Pipkin, C., Vollmer, T. R., &amp; Sloman, K. N. (2010). Effects of treatment integrity failures during differential reinforcement of alternative behavior: A translational model. <em>Journal of Applied Behavior Analysis, 43</em>(1), 47&ndash;70. &bull;
+    Tsami, L., Lerman, D., &amp; Toper-Korkmaz, O. (2019). Effectiveness and acceptability of parent training via telehealth among families around the world. <em>Journal of Applied Behavior Analysis, 52</em>(4), 1113&ndash;1129. &bull;
+    Wahler, R. G. (1980). The insular mother: Her problems in parent-child treatment. <em>Journal of Applied Behavior Analysis, 13</em>(2), 207&ndash;219.</p>
   </section>
 </main>
 
@@ -1402,6 +1514,8 @@ function renderFu(){const tb=document.querySelector('#fuTbl tbody');if(!tb)retur
     '<td><input data-fu="'+i+'" data-f="crit" value="'+esc(r.crit)+'" placeholder="e.g., 2/2, or none" aria-label="Follow-up probe '+(i+1)+' critical steps correct"></td>'+
     '<td><select data-fu="'+i+'" data-f="rel" aria-label="Follow-up probe '+(i+1)+': the relapse moment came up">'+o(['Yes','No'],r.rel)+'</select></td>'+
     '<td><select data-fu="'+i+'" data-f="how" aria-label="Follow-up probe '+(i+1)+': how">'+o(['In person','Video call'],r.how)+'</select></td>'+
+    /* v25.65 (CARE-H4) the routine probed: the one trained, or a second routine the plan applies to */
+    '<td><select data-fu="'+i+'" data-f="rt" aria-label="Follow-up probe '+(i+1)+': routine">'+o(['The trained routine','A second routine'],r.rt)+'</select></td>'+
     '<td><textarea data-fu="'+i+'" data-f="note" rows="1" aria-label="Follow-up probe '+(i+1)+': what was seen">'+esc(r.note)+'</textarea></td></tr>').join('');}
 /* the sign-off: an outcome that claims more than the decision shows is flagged, on screen and on paper */
 function ctOutcomeCheck(){const el=document.getElementById('ctOutWarn');if(!el)return;const v=ctT((S.meta||{}).outcome),o=OUTCOMES.find(x=>x[0]===v);
@@ -1533,7 +1647,7 @@ function renderGrid(){
     <tr class="obshead"><th></th><th style="text-align:right">Date</th><th></th>
     ${S.rounds.map((r,j)=>`<th><input type="date" data-o="${j}" data-f="date" value="${esc(r.date)}" aria-label="R${j+1} date" style="width:100%;font-size:10.5px;font-family:inherit"><span class="pv">${esc(r.date)}</span></th>`).join('')}<th></th></tr>
     <tr class="obshead"><th></th><th style="text-align:right">Arrangement</th><th></th>
-    ${S.rounds.map((r,j)=>`<th><select data-o="${j}" data-f="type" aria-label="R${j+1} arrangement" style="width:100%;font-size:10.5px"><option value=""></option>${opt(['Role-play','With the student, trainer present','In the routine, trainer present','Home probe'],r.type)}</select><span class="pv">${esc(r.type)}</span></th>`).join('')}<th></th></tr></thead><tbody>`;
+    ${S.rounds.map((r,j)=>`<th><select data-o="${j}" data-f="type" aria-label="R${j+1} arrangement" style="width:100%;font-size:10.5px"><option value=""></option>${opt(['Role-play','With the student, trainer present','In the routine, trainer present','Home probe','Generalization probe'],r.type)/* v25.65 (CARE-H4) */}</select><span class="pv">${esc(r.type)}</span></th>`).join('')}<th></th></tr></thead><tbody>`;
   S.steps.forEach((st,i)=>{
     const vals=S.rounds.map((_,j)=>code(i,j));
     const c=vals.filter(v=>v==='C').length, sc=vals.filter(scored).length;
@@ -1778,12 +1892,19 @@ async function loadSim(){
     c_reh:true,c_reh_how:'One role-play, then three rounds with the student present, the last two in the routine at the real time of day',
     c_fb:true,c_fb_how:'Immediate, two strengths then one correction, and a re-run of the failed step straight away',
     c_situ:true,c_situ_how:'Two rounds in the routine at the tablet transition, at the real time of day, with feedback straight after each',
-    relapseDo:'Keep the card where he can reach it. Say the wait once. Do not give the tablet while he is screaming, even if it has already been two minutes \u2014 wait until he is quiet and hands the card, then give it. If it goes past ten minutes, stop the tablet routine, keep him and his sister safe, and let the school know the same day rather than changing the plan on your own.',
+    /* v25.65 (CARE-H3) the relapse response in three parts, the new behavior first and the extinction step marked */
+    relapseAlt:'Keep the card where he can reach it, point to it once and say: \u201cYou can ask for more time.\u201d Praise the first time he hands it.',
+    relapseExt:'Do not give the tablet while he is screaming, even if it has already been two minutes \u2014 wait until he is quiet and hands the card, then give it.',
+    extCons:'Form IC-1, consent to the plan\u2019s procedures, the extinction step included, signed '+D(20)+' (simulated)',
+    relapseDo:'Say the wait once. If it goes past ten minutes, stop the tablet routine, keep him and his sister safe, and let the school know the same day rather than changing the plan on your own.',
+    relapseReh2:'Yes \u2014 rehearsed in a second routine, or with a second kind of protest',relapseReh2_how:'Grabbing for the tablet as well as screaming',
+    planKind:'fr1',c_inst_fmt:'enhanced',c_mod_fmt:'live',c_reh_fmt:'live',c_fb_fmt:'live',c_situ_fmt:'live',
+    support:'\u201cMy sister comes on Sundays. Otherwise it is just me until 7.\u201d',supportLvl:'Sometimes',cardSelf:true,
     safety:'If he hits his sister, bangs his head or throws something heavy, the plan stops: take his sister to another room, step back out of his reach, and give him space. Nothing is given to make him stop, and the tablet stays off. Once he is calm, carry on with the evening and tell the school the same day.',
     emerg:'Call 911 if anyone is hurt or in danger. For a mental-health crisis, call or text 988, or the county\u2019s mobile response team (simulated: 555-0199).',
     beh:'Physical aggression (simulated)',fn:'Access to tangible items (the tablet)',
     relapseReh:'Yes \u2014 rehearsed with escalating protest',
-    expect:'Told that a temporary increase is likely at some steps (in one clinic series it came in about three quarters of cases, sometimes worse than before the plan began), with the figures given, so that a bad week is read as the expected course rather than as the plan failing.',
+    expect:'Told that a temporary increase is likely at some steps (in one clinic series it came in about three quarters of cases, sometimes worse than before the plan began), with the figures given, so that a bad week is read as the expected course rather than as the plan failing. The behavior may come back for a while the first time the plan is used in a new place or with a new person. That is expected and usually passes if the plan is kept.',
     call:'The school office (555-0142) or the BCBA\u2019s district email, answered 7:30 am to 3:30 pm on school days. Evenings, weekends and the summer: the plan stays as it is, and 911 for an emergency.',
     stop:'Asked directly. She said she would stop if the sister started missing her own homework because of it. That is concrete and fixable \u2014 the plan was changed so the card is used at the tablet transition first, which does not compete with the sister\u2019s homework, and homework is added later.',
     probe:D(5)+' \u2014 at the tablet transition, about 4:15 pm; the family knew a visit would come that week. 4 of 4 steps scored correct (he handed the card, so steps 5 and 6 did not arise), no prompting from the trainer',
@@ -1807,7 +1928,7 @@ async function loadSim(){
     {d:'Give the five-minute warning before the tablet goes off, the way you already do.',crit:false},
     {d:'When the time is up, put the card within his reach and say once: "You can ask for more time."',crit:false},
     {d:'If he hands you the card, say "Nice asking" and give two more minutes \u2014 straight away, not after a discussion.',crit:true},
-    {d:'When those two minutes end, take the tablet. Do not give it back while he is screaming.',crit:true},
+    {d:'When those two minutes end, take the tablet. Do not give it back while he is screaming.',crit:true,ext:true},   /* v25.65 (CARE-H3) an extinction step */
     {d:'Wait until he is quiet and hands the card again before anything else is given.',crit:true},
     {d:'Once he is settled, carry on with the evening as normal. No talking about what happened.',crit:false}
   ];
@@ -1823,6 +1944,8 @@ async function loadSim(){
   /* v22.73 (review F354) the father, home after 7pm, to be trained at the next session */
   S.house.list.push({id:'c2',own:{meta:{cg:'Simulated parent 2',rel:'Father',where:'In the home'},rounds:[],cells:{},nRounds:4,fu:[]}});
   S.meta.thin_next=Di(-12);S.meta.thin_what='The wait after the card goes from 2 to 4 minutes';
+  /* v25.65 (CARE-H1) a change coming up: the father runs it after 7 pm, with a booster before */
+  S.chg=[{what:'A new adult',note:'The father runs the tablet routine after 7 pm',date:Di(-8),bd:'',br:''}];
   renderAll();setView('sum');
   nbhUI.toast('Simulation loaded: simulated caregiver training with four rehearsal rounds.', {kind:'ok'});
 }
@@ -1947,6 +2070,208 @@ document.addEventListener('input',()=>{if(document.body.classList.contains('view
   const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
     let c=null;try{c=window.__nbhCaregiverFacts();}catch(e){c=null;}if(!c)return o;o=o||{};o.caregiver=c;return o;};}
 </script>
+<script id="ct1-v2565">
+/* ===================== v25.65 Form CT-1: the caregiver research review (CARE-H1 to H4, M1 to M4, L2, L3; FEED-M3) =====================
+   H1 the changes that bring the behavior back (a new adult, place or routine, a holiday), each with a booster counted as the one
+      before a thinning step; the line for the family; an adult with no in-home probe of their own marked not yet probed.
+   H2 the kind of plan sets the default criterion (80% for FR 1 with every reinforcing error on a critical step, 90% for time-based
+      or intermittent reinforcement); a saved criterion is kept; the fixed critical step offered for a plan that reduces a behavior.
+   H3 the relapse response in three parts, the new behavior first; an Extinction tick on each step, printed on the family card;
+      no clearance while an extinction step has no consent recorded.
+   H4 a Generalization probe round, a second routine on the follow-up probes, a second example of the hard moment, a self-check
+      list on the family card, and the steps sent to Form HD-1's routine checklist (the caregiver's own record shown, not counted).
+   M1 each component's format; M2 the telehealth block and its caution; M3 the 3-month probe, the probe after school contact ends,
+      and who supports the caregiver; M4 trained by the primary caregiver, with the trainer's own probe.
+   L2 the six home-fit answers go to the case for Form CF-1; L3 no claim that an answer predicts the integrity data.
+   FEED-M3 the mealtime routine: written steps, a modeled meal, a real meal with feedback, the structure steps, the change of feeder,
+      and escape extinction at meals as a marked RESTRICTIVE step that needs written consent.
+   A record saved before v25.65 opens and decides as before: every new rule reads only fields that it did not have. */
+(function(){
+'use strict';
+const T=v=>String(v==null?'':v).trim(),E=id=>document.getElementById(id),esc2=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* each adult's own part: the new per-caregiver lines */
+['trainedBy','trainerProbe','c_inst_fmt','c_mod_fmt','c_reh_fmt','c_fb_fmt','c_situ_fmt','th_dev','th_cam','th_room','th_interp','th_esc','th_priv','th_lost',
+ 'relapseReh2','relapseReh2_how','support','supportLvl','fu_summer'].forEach(k=>{if(!CG_OWN.includes(k))CG_OWN.push(k);});
+const FIX='The reinforcer for the problem behavior is not given after the problem behavior.';
+const FIX_RE=/reinforcer for the problem behavio(u)?r is not given/i;
+const MEAL_STEPS=['Set the meal length by the timer, the same every meal.','Give the same bite size every time.','Give the same prompt each time, once.',
+  'Praise each bite taken.','If a bite is declined, take it away calmly and go on.','No coaxing, bargaining or comments about the food.'];
+const MEAL_EE='RESTRICTIVE, with written consent: hold the spoon at the lips until the bite is taken, and put spat-out food back on the spoon. Never force the mouth open.';
+const BOOST=['Rehearsed with escalating protest; held','Rehearsed; needed a prompt','Described only'];
+const CHG=['A new adult','A new place','A new routine','A holiday, or the return from a break','Other'];
+const isoOf=t=>{t=T(t);let m=/(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=/\b(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\b/.exec(t);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}return '';};
+const addDays=(iso,n)=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);if(!m)return '';const d=new Date(+m[1],+m[2]-1,+m[3],12);d.setDate(d.getDate()+n);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const todayIso=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const extIdx=()=>(S.steps||[]).map((s,i)=>s&&s.ext&&!s.restr&&T(s.d)?i:-1).filter(i=>i>=0);
+const restrIdx=()=>(S.steps||[]).map((s,i)=>s&&s.restr&&T(s.d)?i:-1).filter(i=>i>=0);
+const stepWord=a=>(a.length>1?'steps ':'step ')+a.map(i=>i+1).join(', ');
+const reduces=()=>{const k=(S.meta||{}).planKind;return k==='fr1'||k==='int'||(!k&&!!T((S.meta||{}).beh));};
+/* the case's plan names an extinction step for this function */
+function planExt(){const f=ctCaseF||{},p=f.plan||{},r=p.respond||{};return /extinction|not given|withh(e|o)ld|no (break|attention)|does not (get|produce)/i.test([r.target,r.prec,r.after,r.not].map(T).join(' '));}
+const showExt=()=>extIdx().length>0||!!T((S.meta||{}).relapseExt)||planExt();
+
+/* ---- the record: the changes coming up, and each step's Extinction and Restrictive marks ---- */
+{const e0=ensure;ensure=function(){e0.apply(this,arguments);
+  S.chg=(Array.isArray(S.chg)?S.chg:[]).filter(r=>r&&typeof r==='object').slice(0,12).map(r=>({what:T(r.what),note:T(r.note),date:T(r.date),bd:T(r.bd),br:T(r.br)}));
+  S.steps.forEach(st=>{if('ext' in st)st.ext=!!st.ext;if('restr' in st)st.restr=!!st.restr;});};}
+
+/* ---- H3 Protocol Steps with the Extinction tick ---- */
+renderSteps=function(){
+  $('#stepTbl tbody').innerHTML=S.steps.map((st,i)=>`<tr>
+    <td style="text-align:center;font-weight:600">${i+1}</td>
+    <td><textarea data-s="${i}" data-f="d" rows="2">${esc(st.d)}</textarea>${st.restr?'<span class="ct-restrb">Restrictive</span>':''}</td>
+    <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></td>
+    <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="ext"${st.ext?' checked':''} aria-label="Step ${i+1} is an extinction step"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');};
+{const g0=renderGrid;renderGrid=function(){const r=g0.apply(this,arguments);
+  try{const rows=document.querySelectorAll('#piTbl tbody tr:not(.totrow)');S.steps.forEach((st,i)=>{const c=rows[i]&&rows[i].querySelector('td.item');if(c&&(st.ext||st.restr))c.insertAdjacentHTML('beforeend',' <span class="ct-extb">'+(st.restr?'Restrictive':'Extinction')+'</span>');});}catch(e){}
+  return r;};}
+
+/* ---- the decision: an extinction or restrictive step without consent, and the trainer's own probe of an adult the primary
+   caregiver trained, keep the caregiver from being cleared; a second example and a second routine are named when still open ---- */
+{const d0=ctDecide;ctDecide=function(){const d=d0.apply(this,arguments);try{return gate(d);}catch(e){return d;}};}
+function gate(d){const m=S.meta||{},o=Object.assign({},d);
+  if(d.lvl>=1){const ex=extIdx(),rs=restrIdx(),noCons=!T(m.extCons),noMeal=!T(m.meal_eeCons);
+    if(rs.length&&noMeal)return Object.assign(o,{cls:'v-mid',lvl:0,notHold:false,txt:'<b>Not cleared yet.</b> '+cap(stepWord(rs))+' '+(rs.length>1?'are':'is')+' a restrictive step (escape extinction at meals), and no written consent to it is recorded (Mealtime Routine). It is added only with written consent, planned with the family, the doctor and a feeding specialist. Where the training stands: '+d.txt});
+    if((ex.length||T(m.relapseExt))&&noCons)return Object.assign(o,{cls:'v-mid',lvl:0,notHold:false,txt:'<b>Not cleared yet.</b> '+(ex.length?cap(stepWord(ex))+' '+(ex.length>1?'are extinction steps':'is an extinction step'):'The relapse response has an extinction step')+', and no consent to it is recorded (Protocol Steps, Consent to the extinction step). The caregiver is not cleared to run an extinction step until consent to it is recorded (Form IC-1). Where the training stands: '+d.txt});}
+  if(d.lvl>=2&&m.trainedBy==='cg'&&!T(m.trainerProbe))return Object.assign(o,{cls:'v-mid',lvl:1,notHold:false,txt:'<b>The trainer&rsquo;s own probe is still due.</b> This adult was trained by the primary caregiver: the trainer runs one probe with them before they are cleared at home (Setup, Trained by). Where the training stands: '+d.txt});
+  return o;}
+/* what is still open, under the decision: a second example of the hard moment, a second routine (the level does not change) */
+function openNote(){const m=S.meta||{},L=[];
+  if(ctLvl>=1&&m.relapseReh2&&!/^Yes/.test(m.relapseReh2))L.push('Rehearse a second example of the hard moment too: a second routine, or a second kind of protest.');
+  if(ctLvl===3&&!(S.fu||[]).some(r=>r.rt==='A second routine'&&(()=>{const x=ctFuRead(r);return x&&!x.bad&&x.p>=S.crit&&(x.c===null||x.c>=100);})())&&!T(m.oneRoutine))
+    L.push('Shown in the trained routine: one follow-up probe in a second routine the plan applies to is still due (Routine: A second routine), or the BCBA&rsquo;s reason the plan is for one routine only.');
+  let el=E('ctOpenNote');if(!el){const v=E('verdictBox');if(!v)return;el=document.createElement('div');el.id='ctOpenNote';el.className='hint ct-open';v.insertAdjacentElement('afterend',el);}
+  el.innerHTML=L.join(' ');el.hidden=!L.length;}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+/* ---- what each part shows, after every redraw of the Competency sheet ---- */
+function paint(){const m=S.meta||{};openNote();
+  /* H2 the kind of plan and the criterion */
+  {const el=E('ctKindNote');if(el){const k=m.planKind;let t='';
+    if(k==='int')t='The default criterion for this kind of plan is 90%: noncontingent reinforcement and interval-based differential reinforcement did not work reliably at 80% integrity (Jones & St. Peter, 2022).'+(+S.crit<90?' The criterion is '+S.crit+'% (toolbar): under the 90% this kind of plan needs.':'');
+    else if(k==='fr1')t='80% only when the new behavior is reinforced every time and every error that would reinforce the problem behavior is on a step marked critical, held at 100%: check that each one is marked.';
+    el.textContent=t;el.hidden=!t;el.classList.toggle('ct-warnt',k==='int'&&+S.crit<90);}}
+  /* H2 the fixed critical step, offered for a plan that reduces a behavior */
+  {const el=E('ctFixStep');if(el){const on=reduces()&&!(S.steps||[]).some(s=>FIX_RE.test(T(s.d)));el.hidden=!on;
+    el.innerHTML=on?'<b>A plan that reduces a behavior carries one fixed critical step:</b> &ldquo;'+FIX+'&rdquo; It is scored Commission when the reinforcer is given after the behavior, and it is an extinction step. <button type="button" class="tool" id="ctFixAdd">Add the step</button>':'';}}
+  /* H3 consent to the extinction step */
+  {const ex=extIdx(),el=E('ctExtCons'),need=ex.length>0||!!T(m.relapseExt);if(el){el.hidden=!need;const n=E('ctExtConsNote');
+    if(n){const C=window.nbhCase&&nbhCase.consent?nbhCase.consent(ctCaseF||undefined):null;
+      n.textContent=T(m.extCons)?'':'Not recorded: the caregiver is not cleared while an extinction step is on the plan without consent.'+(C&&C.known&&C.bip?' Form IC-1 has consent to implement the BIP: confirm it covers the extinction step, then record it here.':'');}}}
+  {const row=E('ctRelExtRow');if(row)row.hidden=!showExt();const tg=E('ctRelExtTag');if(tg)tg.textContent=T(m.extCons)?'Extinction: consented ('+T(m.extCons)+').':'Extinction: consent not recorded yet (Protocol Steps).';}
+  /* M4 the trainer's own probe; M2 telehealth */
+  {const el=E('ctPeer');if(el)el.hidden=m.trainedBy!=='cg';}
+  {const tele=m.where==='Telehealth'||m.where==='Mixed',el=E('ctTele');if(el)el.hidden=!tele;
+    const n=E('ctTeleNote');if(n){const on=m.where==='Telehealth'&&reduces();n.hidden=!on;n.innerHTML=on?'<b>Telehealth coaching for reducing problem behavior has less research behind it than for building skills; plan at least one in-person probe</b> (Neely et al., 2021).':'';}}
+  /* M3 who supports the caregiver */
+  {const el=E('ctSupportNote');if(el){const low=m.supportLvl==='Rarely'||m.supportLvl==='No one';el.textContent=low?'Little support outside the home: bring the follow-up probes closer together (about every 2 weeks) and offer a booster rehearsal. Gains were lost over a year of follow-up where mothers saw few people outside the home (Wahler, 1980).':'';el.hidden=!low;}}
+  /* FEED-M3 the mealtime routine */
+  {const el=E('ctMealBox');if(el)el.hidden=m.meal!=='yes';}
+  /* H1 the changes coming up */
+  chgNotes();
+  /* H4 the caregiver's own record from Form HD-1 */
+  {const el=E('ctHomeRec');if(el){const h=(ctCaseF&&ctCaseF.home&&Array.isArray(ctCaseF.home.integrity))?ctCaseF.home.integrity.filter(x=>x&&isFinite(+x.pct)):[];
+    if(h.length){const L=h.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(-5),mean=L.reduce((a,x)=>a+(+x.pct),0)/L.length;
+      el.textContent='The caregiver’s own routine checklist on Form HD-1: '+(Math.round(mean*10)/10)+'% of steps ticked Yes over the last '+L.length+' day'+(L.length>1?'s':'')+' recorded. It is a prompt, not a measure: the follow-up probe decides (Herbert & Baer, 1972).';el.hidden=false;}
+    else{el.textContent='';el.hidden=true;}}}
+  /* M1 the ladder: the first round below the criterion, and no live modeling yet */
+  {let el=E('ctLadderNote');const box=E('metricWrap');if(!el&&box){el=document.createElement('p');el.id='ctLadderNote';el.className='hint';box.insertAdjacentElement('afterend',el);}
+    if(el){const M=metrics(),f=M.used[0],below=f&&100*f.c/f.s<S.crit,live=m.c_mod_fmt==='live'||m.c_mod_fmt==='tele',fm=fmtLine();
+      el.innerHTML=(fm?'<b>Formats:</b> '+esc2(fm)+(M.toCrit?'; criterion met after '+M.toCrit+' scored round'+(M.toCrit===1?'':'s')+'.':'.'):'')+(below&&!live?' <b>The first rehearsal round was below the criterion:</b> add live modeling, rehearsal and feedback; a caregiver is never cleared on written steps alone (Boutain et al., 2020).':'');el.hidden=!el.innerHTML;}}}
+const FMT={written:'written steps',enhanced:'written steps with pictures and a worked example',video:'video model',computer:'interactive computer module',live:'live, in person',tele:'live, by telehealth'};
+function fmtLine(){const m=S.meta||{},L=[['c_inst','instruction'],['c_mod','modeling'],['c_reh','rehearsal'],['c_fb','feedback'],['c_situ','in-situ training']].filter(x=>FMT[m[x[0]+'_fmt']]).map(x=>x[1]+': '+FMT[m[x[0]+'_fmt']]);return L.join('; ');}
+{const s0=renderSum;renderSum=function(){const r=s0.apply(this,arguments);try{paint();}catch(e){console.error('CT-1 v25.65: '+(e&&e.message||e));}return r;};}
+
+/* ---- H1 Changes coming up: each with its date and a booster rehearsal before it ---- */
+function chgRender(){const tb=document.querySelector('#ctChgTbl tbody');if(!tb)return;const o=(a,v)=>'<option value=""></option>'+a.map(x=>'<option'+(x===v?' selected':'')+'>'+esc2(x)+'</option>').join('');
+  tb.innerHTML=(S.chg||[]).map((r,i)=>'<tr><td><select data-chg="'+i+'" data-f="what" aria-label="Change '+(i+1)+'">'+o(CHG,r.what)+'</select><input data-chg="'+i+'" data-f="note" value="'+esc2(r.note)+'" placeholder="e.g., grandparents visit for a week" aria-label="Change '+(i+1)+': what"></td>'+
+    '<td><input type="date" data-chg="'+i+'" data-f="date" value="'+esc2(r.date)+'" aria-label="Change '+(i+1)+': date"></td><td><input type="date" data-chg="'+i+'" data-f="bd" value="'+esc2(r.bd)+'" aria-label="Change '+(i+1)+': booster date"></td>'+
+    '<td><select data-chg="'+i+'" data-f="br" aria-label="Change '+(i+1)+': the booster">'+o(BOOST,r.br)+'</select></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-chgdel="'+i+'" aria-label="Remove change '+(i+1)+'">&times;</button></td></tr>').join('')||
+    '<tr><td colspan="5" class="hint">None listed yet.</td></tr>';}
+function chgNotes(){const el=E('ctChgNote');if(!el)return;const L=[];(S.chg||[]).forEach((r,i)=>{const w=T(r.what)||T(r.note);if(!w&&!r.date)return;const nm=(T(r.note)||T(r.what)||'change '+(i+1));
+    if(r.date&&!r.bd)L.push('A booster rehearsal of the relapse response is due before '+nm.toLowerCase()+' ('+ctDay(r.date)+').');
+    else if(r.date&&r.bd&&r.bd>r.date)L.push('The booster for '+nm.toLowerCase()+' ('+ctDay(r.bd)+') falls after the change ('+ctDay(r.date)+'): rehearse before it.');
+    else if(r.bd&&r.br==='Described only')L.push(cap(nm)+': described only; rehearse it, with the protest escalating, before the change.');});
+  el.textContent=L.join(' ');el.hidden=!L.length;}
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest('#ctChgAdd')){if(!Array.isArray(S.chg))S.chg=[];if(S.chg.length<12)S.chg.push({what:'',note:'',date:'',bd:'',br:''});chgRender();chgNotes();return;}
+  const del=t.closest('[data-chgdel]');if(del){S.chg.splice(+del.dataset.chgdel,1);chgRender();chgNotes();return;}
+  if(t.closest('#ctFixAdd')){const coded=i=>Object.keys(S.cells||{}).some(k=>k.split('_')[0]===String(i)&&S.cells[k]);
+    const i=S.steps.findIndex((s,j)=>!T(s.d)&&!coded(j)),st={d:FIX,crit:true,ext:true};if(i>=0)Object.assign(S.steps[i],st);else S.steps.push(st);renderAll();
+    nbhUI.toast('Added as a critical extinction step. Record the consent to it under Protocol Steps.',{kind:'ok'});return;}
+  if(t.closest('#ctExpectBtn')){const el=document.querySelector('[data-m="expect"]');if(!el)return;const s='The behavior may come back for a while the first time the plan is used in a new place or with a new person. That is expected and usually passes if the plan is kept.';
+    if(el.value.includes('first time the plan is used in a new place'))return;el.value=(T(el.value)?T(el.value)+' ':'')+s;el.dispatchEvent(new Event('input',{bubbles:true}));return;}
+  if(t.closest('#ctFuPlan')){const base=isoOf((S.meta||{}).probe)||todayIso();while(S.fu.length<4)S.fu.push({date:'',pct:'',crit:'',rel:'',how:'',rt:'',note:''});
+    const at=[7,21,42,91];let n=0;at.forEach((d,j)=>{const r=S.fu[j];if(r&&!T(r.date)){r.date=addDays(base,d);n++;}});
+    if(!T(S.meta.fu_due)){const nx=S.fu.map(r=>r.date).filter(d=>d&&d>=todayIso()).sort()[0];if(nx)S.meta.fu_due=nx;}
+    renderFu();bindMeta();renderSum();nbhUI.toast(n?n+' follow-up probe'+(n>1?'s':'')+' dated from '+(isoOf(S.meta.probe)?'the in-home probe':'today')+': weeks 1, 3 and 6, then 3 months. Dates already written were kept.':'Every follow-up probe already has a date.',{kind:'ok'});return;}
+  if(t.closest('#ctMealSteps')){const have=new Set(S.steps.map(s=>T(s.d).toLowerCase()));let n=0;const empty=S.steps.every(s=>!T(s.d))&&!Object.keys(S.cells||{}).some(k=>S.cells[k]);
+    if(empty)S.steps=[];MEAL_STEPS.forEach(d=>{if(have.has(d.toLowerCase()))return;S.steps.push({d,crit:false});n++;});renderAll();nbhUI.toast(n?n+' mealtime structure step'+(n>1?'s':'')+' added to Protocol Steps.':'The mealtime structure steps are already on the list.',{kind:'ok'});return;}
+  if(t.closest('#ctMealEE')){if(S.steps.some(s=>s.restr)){nbhUI.toast('The restrictive step is already on the list.',{kind:'ok'});return;}
+    S.steps.push({d:MEAL_EE,crit:true,ext:true,restr:true});renderAll();nbhUI.toast('Added, marked RESTRICTIVE. The caregiver is not cleared until written consent to it is recorded (Mealtime Routine).',{kind:'warn'});return;}
+  if(t.closest('#ctHdSend')){let inShell=false;try{inShell=window.parent!==window;}catch(x){}
+    if(inShell){try{window.parent.postMessage({nbh:'open',want:'HD-1',beside:true},'*');}catch(x){}}
+    nbhUI.toast('The protocol steps go to the case for Form HD-1’s routine checklist, a Yes / No / not applicable card the caregiver keeps between visits.'+(inShell?'':' Open Form HD-1 in the workstation to take them.'),{kind:'ok'});return;}});
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.chg===undefined)return;const r=(S.chg||[])[+el.dataset.chg];if(!r)return;r[el.dataset.f]=el.value;chgNotes();},true);
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.chg===undefined)return;const r=(S.chg||[])[+el.dataset.chg];if(!r)return;r[el.dataset.f]=el.value;chgNotes();},true);
+/* the fields the paint reads: redraw after they change (the bound field has already written S.meta) */
+const WATCH=/^(planKind|trainedBy|trainerProbe|extCons|relapseExt|relapseReh2|where|supportLvl|meal|meal_eeCons|oneRoutine|cardSelf)$/;
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const k=e.target&&e.target.dataset&&e.target.dataset.m;if(!k||!WATCH.test(k))return;
+  if(k==='planKind'&&ev==='change'){const want=S.meta.planKind==='int'?90:S.meta.planKind==='fr1'?80:null;
+    /* a criterion this form set from the kind of plan follows the kind; one typed in the toolbar, or saved with the record, stays */
+    if(want!==null&&(S.critAuto||(+S.crit===80&&!S.critTyped))&&+S.crit!==want){S.crit=want;S.critAuto=true;const c=E('critPct');if(c)c.value=want;
+      nbhUI.toast('Criterion set to '+want+'% for this kind of plan (toolbar).',{kind:'ok'});}}
+  if(k==='cardSelf'){try{renderCard();}catch(x){}}
+  renderSum();}));
+{const c=E('critPct');if(c)c.addEventListener('change',()=>{S.critTyped=true;S.critAuto=false;});}
+
+/* ---- H1 the Household line: an adult with no in-home probe of their own; M4 who trained them ---- */
+{const h0=cgHousePaint;cgHousePaint=function(){const r=h0.apply(this,arguments);try{const el=E('cgHouse');const L=(S.house&&S.house.list)||[];if(!el||L.length<2){const p0=E('ctHouseProbe');if(p0)p0.hidden=true;return r;}
+  const not=[],peer=[];L.forEach(rec=>cgWith(rec,()=>{const who=cgWho(S.meta);if(!T(S.meta.probe))not.push(who);if(S.meta.trainedBy==='cg')peer.push(who);}));
+  /* a line of its own under the Household line */
+  let p=E('ctHouseProbe');if(!p){p=document.createElement('div');p.id='ctHouseProbe';p.className='ct-house ct-house2';el.insertAdjacentElement('afterend',p);}
+  p.innerHTML=(not.length?'<span class="ct-house-warn">Not yet probed at home: '+esc2(not.join(', '))+'. The behavior is likely to come back the first time '+(not.length>1?'each of them runs':'that adult runs')+' the plan (Saini et al., 2018).</span>':'')+
+    (peer.length?' Trained by the primary caregiver: '+esc2(peer.join(', '))+'.':'');p.hidden=!p.innerHTML;}catch(e){}return r;};}
+
+/* ---- the family card: the relapse response in its parts, the Extinction mark, the self-check list ---- */
+{const c0=renderCard;renderCard=function(){const r=c0.apply(this,arguments);try{const box=E('ctCard');if(!box)return r;const m=S.meta||{},es=m.cardLang==='es';
+  const steps=(S.steps||[]).filter(x=>T(x.d));const lis=box.querySelectorAll('ol li');
+  steps.forEach((st,i)=>{if(lis[i]&&(st.ext||st.restr))lis[i].insertAdjacentHTML('beforeend','<span class="ct-extw">'+(st.restr?(es?'Restrictivo':'Restrictive'):(es?'Extinción':'Extinction'))+'</span>');});
+  const alt=T(m.relapseAlt),ext=showExt()?T(m.relapseExt):'';
+  if(alt||ext){const P=t=>'<p>'+esc2(t)+'</p>',back=es?'Si el comportamiento vuelve':'If the behavior comes back';
+    const parts=(alt?P(alt):'')+(ext?'<p><span class="ct-extw">'+(es?'Extinción':'Extinction')+'</span> '+esc2(ext)+'</p>':'');
+    const h=Array.from(box.querySelectorAll('h4')).find(x=>x.textContent===back);
+    if(h)h.insertAdjacentHTML('afterend',parts);else{const at=Array.from(box.querySelectorAll('h4')).find(x=>x.textContent===(es?'Cuando la seguridad va primero':'When safety comes first'))||box.querySelector('.ct-card-foot');
+      if(at)at.insertAdjacentHTML('beforebegin','<h4>'+back+'</h4>'+parts);}
+    const n=E('cardNote');if(n&&/what the caregiver does when it returns/.test(n.innerHTML)){
+      n.innerHTML=n.innerHTML.replace(/what the caregiver does when it returns(, )?/,'').replace(/, \./,'.').replace(/<b>Not on the card yet:<\/b> \.\s*/,'');n.hidden=!T(n.textContent);}}
+  if(m.cardSelf&&steps.length){const foot=box.querySelector('.ct-card-foot');
+    const tbl='<h4>'+(es?'Revíselo usted':'Check yourself')+'</h4><table class="ct-self"><tr><th></th><th>'+(es?'Sí':'Yes')+'</th><th>No</th><th>'+(es?'No se dio':'Did not come up')+'</th></tr>'+
+      steps.map((x,i)=>'<tr><td>'+(i+1)+'. '+esc2(T(x.d))+'</td><td class="b"></td><td class="b"></td><td class="b"></td></tr>').join('')+'</table>';
+    if(foot)foot.insertAdjacentHTML('beforebegin',tbl);else box.insertAdjacentHTML('beforeend',tbl);}}catch(e){console.error('CT-1 card v25.65: '+(e&&e.message||e));}return r;};}
+
+/* ---- what is due: a booster before each change coming up, the probe after school contact ends, the first home meal ---- */
+{const d0=window.__nbhDue;window.__nbhDue=function(){const out=d0?d0.apply(this,arguments):[];try{
+  (S.chg||[]).forEach(r=>{if(r.date&&!r.bd)out.push({what:'Booster rehearsal before '+(T(r.note)||T(r.what)||'a change coming up').toLowerCase(),date:r.date});});
+  const L=S.house?S.house.list:[null];if(S.house)cgStore();
+  L.forEach(rec=>cgWith(rec,()=>{const d=T((S.meta||{}).fu_summer);if(d)out.push({what:'Follow-up probe after school contact ends'+(L.length>1?' ('+cgWho(S.meta)+')':''),date:d});}));
+  if((S.meta||{}).meal==='yes'&&T(S.meta.meal_first))out.push({what:'First home meal with the trainer present',date:S.meta.meal_first});}catch(e){}return out;};}
+
+/* ---- the case, out: the six home-fit answers for Form CF-1 (L2), the kind of plan, each step's marks ---- */
+{const f0=window.__nbhCaregiverFacts;window.__nbhCaregiverFacts=function(){const o=f0?f0.apply(this,arguments):null;if(!o)return o;try{
+  const fit=FIT.map((q,i)=>({q,a:T(S.fit[i]),w:T(S.fit['w'+i])})).filter(x=>x.a);if(fit.length)o.fit=fit;
+  if(T(S.meta.planKind))o.planKind=S.meta.planKind;
+  if(Array.isArray(o.steps)){const L=(S.steps||[]).filter(x=>T(x.d));o.steps=o.steps.map((x,i)=>Object.assign(x,L[i]&&L[i].ext?{ext:true}:{},L[i]&&L[i].restr?{restr:true}:{}));}
+  if(T(S.meta.relapseAlt))o.relapseAlt=T(S.meta.relapseAlt);}catch(e){}return o;};}
+
+/* ---- the buttons placed beside the step list ---- */
+{const at=E('delStep');if(at&&!E('ctHdSend')){at.insertAdjacentHTML('afterend','<button class="tool noprint" id="ctHdSend" type="button">Send these steps to Form HD-1&rsquo;s routine checklist</button>');}}
+{const r0=renderAll;renderAll=function(){const r=r0.apply(this,arguments);try{chgRender();paint();}catch(e){}return r;};}
+renderAll();
+})();
+</script>
 <style id="ct1-v2272-css">
 /* v22.72 (review F349, F350, F351) */
 .ct-chk{display:flex!important;align-items:center;justify-content:flex-start;gap:6px;margin-top:6px;font-family:var(--sans);font-size:12.5px;text-align:left}
@@ -1986,6 +2311,25 @@ document.addEventListener('input',()=>{if(document.body.classList.contains('view
 @media screen and (max-width:700px){.grid-wrap > #fuTbl{min-width:720px}}
 @media print{.ct-outwarn{border:1px solid #8E2A2A;background:none}.ct-chk input{-webkit-appearance:auto;appearance:auto}}
 </style>
+<style id="ct1-v2565-css">
+/* v25.65 (CARE-H1 to M4, FEED-M3) */
+.ct-fmt{max-width:220px;font-size:12px}
+.ct-extb,.ct-restrb{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid #8E2A2A;border-radius:8px;font:600 11px/1.5 var(--sans);color:#8E2A2A;vertical-align:1px}
+.ct-restrb{background:#F6E0E0}
+.ct-card .ct-extw{display:inline-block;margin-left:6px;padding:0 7px;border:1px solid #5b2a8e;border-radius:9px;font-size:12px;color:#5b2a8e;font-weight:600;vertical-align:1px}
+.ct-fixstep,.ct-extcons{margin:6px 0;padding:7px 11px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:3px;background:#fdf6e7;font-family:var(--sans);font-size:12.5px;line-height:1.5}
+.ct-extcons input{min-width:260px}
+.ct-warn{margin:8px 0;padding:6px 10px;border-left:3px solid #8E2A2A;background:#F6E0E0;font-family:var(--sans);font-size:12.5px}
+.hint.ct-warnt{color:#8E2A2A;font-weight:600}
+.ct-peer{margin-top:6px}
+#ctChgTbl input,#ctChgTbl select{width:100%;box-sizing:border-box}
+#ctChgTbl td:first-child input{margin-top:4px}
+.ct-card table.ct-self{width:100%;border-collapse:collapse;margin-top:4px;font-size:14px}
+.ct-card table.ct-self th,.ct-card table.ct-self td{border:1px solid #22343f;padding:4px 6px;text-align:left}
+.ct-card table.ct-self th{font-size:12px;text-align:center}
+.ct-card table.ct-self td.b{width:62px}
+@media print{.ct-warn{border:1px solid #8E2A2A;background:none}.ct-fixstep{display:none!important}}
+</style>
 <style id="ct1-v2182-css">
 .nbh-lang-flag{margin:8px 0 12px;padding:8px 12px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:4px;background:#fdf6e7;color:#3d2a00;font-size:13.5px;line-height:1.45}
 @media print{.nbh-lang-flag{display:none!important}}
@@ -2007,7 +2351,7 @@ document.addEventListener('input',()=>{if(document.body.classList.contains('view
 'use strict';
 const D=document,byId=id=>D.getElementById(id),q=(s,r)=>(r||D).querySelector(s),qa=(s,r)=>Array.from((r||D).querySelectorAll(s));
 const CH=n=>String.fromCharCode(n),MID=CH(183),NDASH=CH(8211),MDASH=CH(8212),RSQ=CH(8217),LDQ=CH(8220),RDQ=CH(8221);
-const CFG={form:'CT-1',view:'train',max:8,dp:1,arrLabel:'Arrangement',arr:['Role-play','With the student, trainer present','In the routine, trainer present','Home probe'],probeArr:'Home probe',means:{EC:'attempted but done wrong',EO:'not attempted',NA:'did not arise in the round'},learner:'caregiver',whoKey:'client',whoLabel:'Student',comps:[['c_inst','Instruction','1. Instruction: delivered'],['c_mod','Modeling','2. Modeling: delivered'],['c_reh','Rehearsal','3. Rehearsal: delivered'],['c_fb','Feedback','4. Feedback: delivered'],['c_situ','In-situ training','5. In-situ training: delivered']],compsTitle:'Components Delivered',locks:['#nRounds','#delStep','#simBtn','#clearBtn','#loadBtn','#cgSel','#cgAdd','#cgDel'],probeNote:'A round marked Home probe counts in the grid like any other round. Saving it also fills the in-home probe under Follow-up and the Family'+RSQ+'s View from its codes (the steps correct and the critical steps correct), the probe that clears the caregiver.',probe:{text:'probe',pct:'probe_pct',crit:'probe_crit',none:'probe_nocrit',where:'Follow-up and the Family'+RSQ+'s View'},targets:false};
+const CFG={form:'CT-1',view:'train',max:8,dp:1,arrLabel:'Arrangement',arr:['Role-play','With the student, trainer present','In the routine, trainer present','Home probe','Generalization probe'/* v25.65 (CARE-H4) */],probeArr:'Home probe',means:{EC:'attempted but done wrong',EO:'not attempted',NA:'did not arise in the round'},learner:'caregiver',whoKey:'client',whoLabel:'Student',comps:[['c_inst','Instruction','1. Instruction: delivered'],['c_mod','Modeling','2. Modeling: delivered'],['c_reh','Rehearsal','3. Rehearsal: delivered'],['c_fb','Feedback','4. Feedback: delivered'],['c_situ','In-situ training','5. In-situ training: delivered']],compsTitle:'Components Delivered',locks:['#nRounds','#delStep','#simBtn','#clearBtn','#loadBtn','#cgSel','#cgAdd','#cgDel'],probeNote:'A round marked Home probe counts in the grid like any other round. Saving it also fills the in-home probe under Follow-up and the Family'+RSQ+'s View from its codes (the steps correct and the critical steps correct), the probe that clears the caregiver.',probe:{text:'probe',pct:'probe_pct',crit:'probe_crit',none:'probe_nocrit',where:'Follow-up and the Family'+RSQ+'s View'},targets:false};
 const box=byId('rrRun'),body=byId('rrBody'),msgEl=byId('rrMsg');
 if(!box||!body||!msgEl||typeof window.renderAll!=='function'||typeof window.renderGrid!=='function')return;
 const LABEL={C:'Correct',EC:'Commission',EO:'Omission',NA:'N/A'},KEYOF={C:'C',EC:'M',EO:'O',NA:'N'},ORDER=['C','EC','EO','NA'];

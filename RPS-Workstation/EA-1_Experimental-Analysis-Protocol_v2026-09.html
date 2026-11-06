@@ -773,6 +773,7 @@ td input,td select{max-width:100%}
 .ea-alone [hidden],.ea-alone input.ea-keep{display:none!important}
 .ea-alone .ea-sub{font-size:11.5px;color:var(--ink-soft);padding:3px 0 0}
 .ea-flag{border-left:4px solid var(--nbh-flag);background:var(--nbh-flag-soft);padding:8px 12px;margin:0 0 8px;font-size:12.5px;line-height:1.5;color:var(--ink)}
+.ea-flag.ea-optnote{border-left-color:#7b98a6;background:#eef3f5;color:var(--ink)}
 .ea-flag b{color:var(--nbh-flag);font-family:var(--sans);font-size:11.5px}
 /* v22.49 (review F149, F156) the health record line, read only; the assent plan in the runner */
 .dval.ea-ro{font-size:12px;line-height:1.45;padding:5px 8px}
@@ -1387,7 +1388,7 @@ body.ea-blind #viewSeg button:not([data-view="analysis"]){display:none!important
     <div class="drow" id="eaHealthRow" hidden><div class="dlab">Health record (Form DM-1)</div><div class="dval ea-ro" id="eaHealth"></div></div>
     <div class="drow"><div class="dlab">Medical clearance</div><div class="dval"><textarea name="s.med" placeholder="Nurse or physician consulted; date; restrictions" class="nbh-line" rows="1"></textarea></div></div>
     <!-- v25.64 (H6) who gives medical care during sessions, and when the student is checked for injury: required for behavior that can injure (TB-1 urgency 3 or 4) -->
-    <div class="drow ea-new" data-empty="1"><div class="dlab">Nurse or medical contact during sessions</div><div class="dval"><textarea name="s.nurse" placeholder="Who, where, and how fast they can reach the room; required for behavior that can injure (urgency 3 or 4)" class="nbh-line" rows="1" aria-label="Nurse or medical contact during sessions: who, where, how fast"></textarea></div></div>
+    <div class="drow ea-new" data-empty="1"><div class="dlab">Nurse or medical contact during sessions</div><div class="dval"><textarea name="s.nurse" placeholder="Who, where, and how fast they can reach the room; required for behavior that can injure (urgency 3 or 4), optional at 1 or 2" class="nbh-line" rows="1" aria-label="Nurse or medical contact during sessions: who, where, how fast"></textarea></div></div>
     <div class="drow ea-new" data-empty="1"><div class="dlab">Injury check schedule</div><div class="dval"><textarea name="s.injchk" placeholder="e.g., the data collector checks the head and hands after every session; the nurse checks every fourth session, as Iwata et al. (1982/1994) did" class="nbh-line" rows="1" aria-label="Injury check schedule"></textarea></div></div>
     <div class="drow"><div class="dlab">Session termination criteria</div><div class="dval"><textarea name="s.term" placeholder="e.g., any tissue damage; 3 head hits within 10 s; any aggression producing a mark; the student says or shows stop (the assent plan, Form SI-1)"></textarea></div></div>
     <div class="drow"><div class="dlab">Protective equipment and blocking</div><div class="dval"><textarea name="s.pe" placeholder="Student: helmet, arm guards, mats. For aggression, try equipment the therapist wears first (arm guards, padding). Blocking rules; note that blocking is a consequence" class="nbh-line" rows="1"></textarea><div class="ea-sub ea-pe-note">Tick <b>Protective equipment (student)</b> and <b>Blocking used</b> for each session, in the runner or the log. Equipment the student wears can hold self-injury down in every condition, so a low, flat result may hide a function (Borrero et al., 2002; Moore et al., 2004). For aggression, equipment the therapist wears did not change the function in Oropeza et al. (2018). Never take equipment off the student to get data without medical clearance and the agreement of the team and the parent; choose a format with less exposure instead.</div></div></div>
@@ -6235,15 +6236,22 @@ window.eaPaintConsent=function(){const g=window.__eaConsentGap(),e=s=>String(s).
    a line typed by hand is kept. Cards loaded later from a template take them too (loadTpl ends with eaMenuCards). */
 (function(){const T=v=>String(v==null?'':v).trim();
   const TPL=/^Tasks at the student(’|')s instructional level$/,MINE=/^Tasks from Form DA-1:/;
-  window.eaDemandCards=function(d){if(!d||!Array.isArray(d.fa))return false;const names=d.fa.map(o=>T(o&&o.name)).filter(Boolean);if(!names.length)return false;
-    const line='Tasks from Form DA-1: '+names[0]+(names.length>1?' (or rotate with '+names.slice(1).join(' and ')+', and note which was used)':'')+(d.rule==='latency'?'; ranked by latency':'');
+  /* v25.65 (BCBA 11/2) with no demand sessions run, Form DA-1 sends its paired-choice ranking alone: the demand condition uses the
+     least chosen task(s), labelled as such (Zangrillo et al., 2020: the least chosen tasks evoked escape behavior for 4 of 4) */
+  const eaPairedLeast=d=>(d&&d.rule==='paired-choice'&&d.paired&&Array.isArray(d.paired.least))?d.paired.least.filter(o=>o&&T(o.name)):[];
+  window.eaDemandCards=function(d){if(!d||!Array.isArray(d.fa))return false;let names=d.fa.map(o=>T(o&&o.name)).filter(Boolean),pc=false;
+    if(!names.length){names=eaPairedLeast(d).map(o=>T(o.name));pc=names.length>0;}if(!names.length)return false;
+    const line='Tasks from Form DA-1: '+names[0]+(names.length>1?' (or rotate with '+names.slice(1).join(' and ')+', and note which was used)':'')+(d.rule==='latency'?'; ranked by latency':'')+(pc?'; the least chosen in the paired-choice ranking (no demand sessions run)':'');
     let ch=false;
     document.querySelectorAll('[name^="c["][name$="].name"]').forEach(el=>{if(!/^demand\b/i.test(T(el.value)))return;const i=el.name.slice(2,el.name.indexOf(']'));
       const m=document.querySelector('[name="c['+i+'].mat"]');if(!m)return;const v=T(m.value);if(v===line||!(v===''||TPL.test(v)||MINE.test(v)))return;
       m.value=line;['input','change'].forEach(x=>m.dispatchEvent(new Event(x,{bubbles:true})));ch=true;});
     return ch;};
   /* v24.27 (R-018, E-10) Form DA-1's result where the analyst plans: the verdict and the first task with its rate and latency */
-  window.eaDemandLine=function(){const d=window.__eaDemands;if(!d||!Array.isArray(d.fa)||!d.fa.length)return '';const t=d.fa[0]||{};
+  window.eaDemandLine=function(){const d=window.__eaDemands;if(!d||!Array.isArray(d.fa))return '';
+    if(!d.fa.length){const L=eaPairedLeast(d);if(!L.length)return '';const a=L[0];   /* v25.65 the paired-choice ranking only */
+      return 'Demand assessment (Form DA-1'+(T(d.dates)?', '+T(d.dates):'')+'): '+T(d.verdict)+' The demand condition uses the least chosen task, '+T(a.name)+(T(a.chosen)?' (chosen '+T(a.chosen)+')':'')+(L.length>1?'; also '+L.slice(1).map(x=>T(x.name)).join(', '):'')+'. In Zangrillo et al. (2020) the least chosen tasks evoked escape behavior for 4 of 4 participants; change the task if the team knows a better one.';}
+    const t=d.fa[0]||{};
     const fig=[t.rate!=null?t.rate+' a min':'',t.lat!=null?'latency '+t.lat+' s':''].filter(Boolean).join(', ');
     return 'Demand assessment (Form DA-1'+(T(d.dates)?', '+T(d.dates):'')+'): '+T(d.verdict)+(d.rule==='latency'?' Ranked by latency.':'')+' The demand condition uses '+T(t.name)+(fig?' ('+fig+')':'')+(d.fa.length>1?'; also '+d.fa.slice(1).map(x=>T(x&&x.name)).filter(Boolean).join(', '):'')+'.';};
   window.eaPaintDemands=function(){const el=document.getElementById('eaDemandFlag');if(!el)return;const line=window.eaDemandLine();el.hidden=!line;el.textContent=line;};
@@ -6442,7 +6450,12 @@ window.eaSuggestNext=function(){const mode=V('m.order')||'fixed';if(mode==='card
 
 /* ---- H6 the nurse or medical contact and the injury checks, for behavior that can injure ---- */
 window.eaNurseGap=function(){const u=parseInt(V('m.urg'),10);if(!(u>=3))return [];const m=[];if(!V('s.nurse'))m.push('the nurse or medical contact during sessions');if(!V('s.injchk'))m.push('the injury check schedule');return m;};
-function paintNurse(){const g=window.eaNurseGap(),n=q('#eaNurseFlag');if(!n)return;n.hidden=!g.length;n.innerHTML=g.length?'<b>Safety plan incomplete.</b> Behavior at TB-1 urgency level 3 or 4 can injure: write '+g.join(' and ')+' before the first session. Kahng et al. (2015) note that schools may have less access to medical care than the inpatient unit they studied.':'';}
+function paintNurse(){const g=window.eaNurseGap(),n=q('#eaNurseFlag');if(!n)return;
+  /* v25.65 (the BCBA, 11/2) required at urgency 3 or 4 only; at 1 or 2 the form says why they are optional, so a blank is not read as an oversight */
+  const u=parseInt(V('m.urg'),10),opt=!g.length&&(u===1||u===2)&&(!V('s.nurse')||!V('s.injchk'));
+  n.hidden=!g.length&&!opt;n.classList.toggle('ea-optnote',opt);
+  n.innerHTML=g.length?'<b>Safety plan incomplete.</b> Behavior at TB-1 urgency level 3 or 4 can injure: write '+g.join(' and ')+' before the first session. Kahng et al. (2015) note that schools may have less access to medical care than the inpatient unit they studied.'
+   :opt?'<b>Optional at urgency level '+u+'.</b> TB-1 does not rate this behavior as able to injure, so a nurse or medical contact and injury checks are not required for this analysis. Add them if the behavior could still hurt the student or someone else.':'';}
 
 /* ---- M8 the precursor's basis ---- */
 function paintPrec(){const n=q('#eaPrecFlag');if(!n)return;const r=V('m.precBasis')==='reported';n.hidden=!r;n.innerHTML=r?'<b>Reported only.</b> Confirm the precursor by observation, with conditional probabilities (Form ABC-1), before a precursor FA. Caregivers reported 10 of 90 assessment-identified precursors (Fritz et al., 2013); direct observation and systematic manipulation are advised (Heath &amp; Smith, 2019).':'';}

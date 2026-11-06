@@ -941,6 +941,8 @@ body.view-guide .pane[data-pane="guide"]{display:block}
 <div class="eb-f"><label for="f_contact">Time with the student</label><input id="f_contact" name="e.contact" placeholder="e.g. 25 minutes twice a day"></div>
 <div class="eb-f"><label for="f_date">Date issued</label><input id="f_date" type="date" name="e.date"></div>
 <div class="eb-f"><label for="f_planver">Built from the plan</label><input id="f_planver" name="e.planver" placeholder="e.g. version 2, revised 10/6/2026 (filled from Form TD-1 in the workstation)"></div>
+<!-- v25.65 (STAFF-L2) where the function was assessed -->
+<div class="eb-f"><label for="f_assessed">Was the behavior assessed in this setting?</label><select id="f_assessed" name="e.assessed"><option value=""></option><option>Yes</option><option>No</option><option>Not known</option></select></div>
 <div class="eb-f"><label for="f_photo">Student photo on the brief</label><select id="f_photo" name="e.photo"><option value="yes">Yes, when the student profile (Form DM-1) records photo permission</option><option value="no">No</option></select></div>
 
 <h3 class="sub">Plan Content Carried Over</h3>
@@ -954,6 +956,8 @@ alternative behavior&rdquo; at 6:50 in the morning.</p>
 <p class="noprint"><button id="applyPlan" class="tool">Bring the plan text in</button></p>
 <div class="noprint" id="ebPlanSug" hidden></div>
 <div class="noprint" id="ebChange" hidden></div>
+<!-- v25.65 (STAFF-M11) the estimated reading grade of the brief -->
+<div class="noprint" id="ebGrade"></div>
 </section>
 
 <!-- ============ BRIEF ============ -->
@@ -999,6 +1003,23 @@ wrong by omitting something; they go wrong by doing the one thing that makes it 
 <div class="eb-f"><label for="f_cphone">Reach them at</label><input id="f_cphone" name="e.cphone"></div>
 <div class="eb-f"><label for="f_extra">Anything specific to this setting</label><textarea id="f_extra" name="e.extra"></textarea></div>
 
+<!-- v25.65 (STAFF-M11) pictures: the request card, the earliest sign, where things are -->
+<h3 class="sub">Pictures</h3>
+<p class="method">Up to three, each with a one-line caption: &ldquo;This is the break card&rdquo;, &ldquo;This is what the earliest sign looks like&rdquo;, &ldquo;This is where the timer is&rdquo;.</p>
+<div id="ebPics"></div>
+<input type="hidden" name="e.pic1"><input type="hidden" name="e.pic2"><input type="hidden" name="e.pic3">
+<div class="eb-f"><label for="f_pcap1">Caption 1</label><input id="f_pcap1" name="e.pcap1" placeholder="This is the break card"></div>
+<div class="eb-f"><label for="f_pcap2">Caption 2</label><input id="f_pcap2" name="e.pcap2" placeholder="This is what the earliest sign looks like"></div>
+<div class="eb-f"><label for="f_pcap3">Caption 3</label><input id="f_pcap3" name="e.pcap3" placeholder="This is where the timer is"></div>
+
+<!-- v25.65 (STAFF-L1) a "how it is going" line, refreshed when the brief is reissued -->
+<h3 class="sub">How It Is Going</h3>
+<div class="eb-f"><label for="f_higsince">Since</label><input id="f_higsince" type="date" name="e.hig_since"></div>
+<div class="eb-f"><label for="f_hign">The request is used about (times a day)</label><input id="f_hign" name="e.hig_n" placeholder="e.g. 4"></div>
+<div class="eb-f"><label for="f_hig">The line on the brief</label><textarea id="f_hig" name="e.hig" placeholder="e.g. Since 10/6, the request has been used about 4 times a day; thank you for honoring it on the bus."></textarea></div>
+<input type="hidden" name="e.hig_for">
+<p class="noprint"><button id="ebHigBtn" class="tool" type="button">Write the line</button> <span class="method" id="ebHigNote"></span></p>
+
 <div id="meter" class="eb-meter"></div>
 <div id="ebWarn"></div>
 <div id="jargon"></div>
@@ -1016,6 +1037,10 @@ questioned, and what tells you who still needs it.</p>
   <select id="f_ackn" name="e.ackn"><option>2</option><option>3</option><option>4</option><option>6</option></select></div>
 <div class="eb-f"><label for="f_ackby">Reviewed with staff by</label><input id="f_ackby" name="e.ackby"></div>
 <div class="eb-f"><label for="f_acktry">Show and try</label><select id="f_acktry" name="e.acktry"><option value="yes">A line on each signature block: shown how, and tried once</option><option value="no">No such line</option></select></div>
+<!-- v25.65 (STAFF-H7) teach-back: understanding checked, not only the brief given -->
+<div class="eb-f"><label for="f_acktb">Teach-back</label><select id="f_acktb" name="e.acktb"><option value="yes">Three questions on each signature block, each asked until it is answered right, and a date to check again</option><option value="no">No questions</option></select></div>
+<p class="method">Signing shows the brief was received. The questions and the tries show it was understood. Reading written steps alone gave 30.5% integrity on a preference assessment; teach-back (questions, correction in other words, and asking again) raised it to 91.1%, and brief feedback brought every participant to 100% (Sleiman et al., 2023).</p>
+<p class="noprint"><button id="ebPd1" class="tool" type="button" title="The gap is probably training, materials, time, competing tasks or no one noticing: Form PD-1 finds which">This adult is not doing a step: open Form PD-1</button></p>
 </section>
 
 <!-- ============ OUTPUT ============ -->
@@ -1086,6 +1111,13 @@ acknowledgment page is not counted, because it stays with you rather than with t
 educational interest in working with this student, and no further. Name the setting
 and the roles on the brief so that scope is on the page, and collect the acknowledgment
 so you know who holds a copy.</p>
+<!-- v25.65 (STAFF-H7, M11, M12, L1, L2, L6) -->
+<h3 class="sub">7. Check That It Was Understood</h3>
+<p>Signing shows the brief was received. The questions and the tries show it was understood. With teach-back on, each signature block carries three questions built from the brief (what you do at the earliest sign, what you do when the student asks, when you call and whom); the reviewer asks each one, explains a wrong answer again in other words and asks again until it is right, then ticks it. A third try, prompting the request at the earliest sign, joins the two of Show and try, and a short repeat 1 to 2 weeks later can be dated. Reading the written steps alone gave 30.5% integrity on a preference assessment, teach-back raised it to 91.1%, and brief feedback brought every participant to 100% (Sleiman et al., 2023); staff given only the written methods were 34% and 46% accurate (Graff &amp; Karsten, 2012); written instructions alone gave weak and short-lived changes (Alavosius &amp; Sulzer-Azaroff, 1990); and a memo alone did nothing (Quilitch, 1975).</p>
+<p><b>A brief clarifies and prompts.</b> If an adult has it, has answered the questions, and still does not do a step, the gap is probably elsewhere: training, materials, time, competing tasks, or no one noticing. Run Form PD-1 for that step instead of reissuing the brief (<b>This adult is not doing a step</b>, on the Acknowledgment view). Posted reminders and a written prompt were the interventions the Performance Diagnostic Checklist&ndash;Human Services did not point to, and they did not work (Bowe &amp; Sellers, 2018; Ditzian et al., 2015). The other way round, when Form PD-1 finds that a substitute, a bus driver, a specials teacher or lunchroom staff needs clarification or a prompt, this brief is the one written for them; task clarification was part of the intervention the checklist pointed to, and it worked (Merritt et al., 2019).</p>
+<p><b>Pictures and plain words.</b> Up to three pictures with a caption each (the request card, the earliest sign, where the timer is) do more than another sentence: written steps with little jargon, pictures and worked examples were enough for most students and in-home technicians to run a preference assessment (Shapiro et al., 2016). Setup gives an estimated reading grade for the brief (the Flesch&ndash;Kincaid grade, from the words a sentence and the syllables a word; a heading, a list line or a box counts as a sentence, and syllables are estimated from the spelling; the acknowledgment page is left out): aim at or below the reader&rsquo;s level; a low score does not make a page right. Training manuals ran from 7th-grade to college-graduate reading level (Andrasik &amp; Murphy, 1977).</p>
+<p><b>How it is going.</b> An optional line, written again each time the brief is reissued: &ldquo;Since [date], the request has been used about [n] times a day; thank you for honoring it on the bus.&rdquo; Bus drivers trained in one session got brief progress updates now and then, and the gains held over three school years with the school running the program (Putnam et al., 2003); posted feedback raised what staff did where a memo and a workshop had not (Quilitch, 1975).</p>
+<p><b>Where the behavior was assessed.</b> When the behavior was not assessed in this setting, the brief says: if what you see here looks different, tell the contact. For one student, a functional analysis on the playground found adult attention and one in the classroom found tangible items, and the treatment matched to each setting worked better there (Lang et al., 2009). Bus and lunchroom staff are the people most likely to see a different pattern.</p>
 <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
 <p class="noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print. <b>Concise</b> keeps every fact in fewer words, which suits a brief that has to fit a page.</p><!-- /writing help -->
 <p class="method" id="ebSources"><b>Sources.</b> Volkert et al. (2009) on the return of problem
@@ -1093,12 +1125,44 @@ behavior when a communication response is placed on extinction, Fritz et al. (20
 and Vollmer (2010) on making the request pay more when the behavior cannot be put on extinction (section 3); &sect; 1003.573, Florida
 Statutes, on physical restraint and seclusion (section 2); the FERPA regulations, 34 CFR Part 99
 (&sect;&sect; 99.3 and 99.31), on education records and school officials with a legitimate educational
-interest (section 6, and the footer of the brief). The rest of this Guide is practice guidance, not
-findings.</p>
+interest (section 6, and the footer of the brief); <!-- v25.65 (STAFF-H7 to L6) -->and, in section 7, Sleiman et al. (2023), Graff and
+Karsten (2012), Alavosius and Sulzer-Azaroff (1990), Quilitch (1975), Bowe and Sellers (2018), Ditzian et al. (2015), Merritt et al.
+(2019), Shapiro et al. (2016), Andrasik and Murphy (1977), Putnam et al. (2003) and Lang et al. (2009). The rest of this Guide is
+practice guidance, not findings.</p>
 <p class="method" id="ebRefs"><b>Reference list.</b>
+<!-- v25.65 (STAFF-L3) every source the Guide cites -->
+Alavosius, M. P., &amp; Sulzer-Azaroff, B. (1990). Acquisition and maintenance of health-care routines as a function of feedback
+density. <em>Journal of Applied Behavior Analysis, 23</em>(2), 151&ndash;162. &bull;
+Andrasik, F., &amp; Murphy, W. D. (1977). Assessing the readability of thirty-nine behavior-modification training manuals and
+primers. <em>Journal of Applied Behavior Analysis, 10</em>(2), 341&ndash;344. &bull;
+Athens, E. S., &amp; Vollmer, T. R. (2010). An investigation of differential reinforcement of alternative behavior without
+extinction. <em>Journal of Applied Behavior Analysis, 43</em>(4), 569&ndash;589. &bull;
+Bowe, M., &amp; Sellers, T. P. (2018). Evaluating the Performance Diagnostic Checklist&ndash;Human Services to assess incorrect
+error-correction procedures by preschool paraprofessionals. <em>Journal of Applied Behavior Analysis, 51</em>(1), 166&ndash;176. &bull;
+Ditzian, K., Wilder, D. A., King, A., &amp; Tanz, J. (2015). An evaluation of the Performance Diagnostic Checklist&ndash;Human
+Services to assess an employee performance problem in a center-based autism treatment facility. <em>Journal of Applied Behavior
+Analysis, 48</em>(1), 199&ndash;203. &bull;
 Family Educational Rights and Privacy, 34 C.F.R. pt. 99 (2026). &bull;
+Fritz, J. N., Iwata, B. A., Hammond, J. L., &amp; Bloom, S. E. (2013). Experimental analysis of precursors to severe problem
+behavior. <em>Journal of Applied Behavior Analysis, 46</em>(1), 101&ndash;129. &bull;
+Graff, R. B., &amp; Karsten, A. M. (2012). Evaluation of a self-instruction package for conducting stimulus preference assessments.
+<em>Journal of Applied Behavior Analysis, 45</em>(1), 69&ndash;82. &bull;
+Lang, R., O&rsquo;Reilly, M., Lancioni, G., Rispoli, M., Machalicek, W., Chan, J. M., Langthorne, P., &amp; Franco, J. (2009).
+Discrepancy in functional analysis results across two settings: Implications for intervention design. <em>Journal of Applied
+Behavior Analysis, 42</em>(2), 393&ndash;397. &bull;
+Merritt, T. A., DiGennaro Reed, F. D., &amp; Martinez, C. E. (2019). Using the Performance Diagnostic Checklist&ndash;Human Services
+to identify an indicated intervention to decrease employee tardiness. <em>Journal of Applied Behavior Analysis, 52</em>(4),
+1034&ndash;1048. &bull;
+Putnam, R. F., Handler, M. W., Ramirez-Platt, C. M., &amp; Luiselli, J. K. (2003). Improving student bus-riding behavior through a
+whole-school intervention. <em>Journal of Applied Behavior Analysis, 36</em>(4), 583&ndash;590. &bull;
+Quilitch, H. R. (1975). A comparison of three staff-management procedures. <em>Journal of Applied Behavior Analysis, 8</em>(1),
+59&ndash;66. &bull;
 Seclusion and restraint of students with disabilities in public schools, Fla. Stat. &sect; 1003.573
 (2026). &bull;
+Shapiro, M., Kazemi, E., Pogosjana, M., Rios, D., &amp; Mendoza, M. (2016). Preference assessment training via self-instruction: A
+replication and extension. <em>Journal of Applied Behavior Analysis, 49</em>(4), 794&ndash;808. &bull;
+Sleiman, A. A., Gravina, N. E., &amp; Portillo, D. (2023). An evaluation of the teach-back method for training new skills.
+<em>Journal of Applied Behavior Analysis, 56</em>(1), 117&ndash;130. &bull;
 Volkert, V. M., Lerman, D. C., Call, N. A., &amp; Trosclair-Lasserre, N. (2009). An evaluation of
 resurgence during treatment with functional communication training. <em>Journal of Applied Behavior
 Analysis, 42</em>(1), 145&ndash;160.</p>
@@ -1490,6 +1554,13 @@ function handoutHTML(nm, withAck) {
     (val('e.callhow') ? '<p class="eb-p3"><b>How:</b> ' + esc(val('e.callhow')) + '</p>' : ''), 'eb-call');
   h += blk('After It Is Over', para(val('e.after')));
   h += blk('Specific to This Setting', para(val('e.extra')));
+  /* v25.65 (STAFF-L2) the behavior was not assessed in this setting: say what to do when it looks different here */
+  if (val('e.assessed') === 'No') h += blk('If It Looks Different Here', para('If what you see here looks different (for example it happens when adults are busy elsewhere), tell ' + (val('e.cname') || 'the contact below') + '.'));
+  /* v25.65 (STAFF-L1) how it is going, refreshed when the brief is reissued */
+  h += blk('How It Is Going', para(val('e.hig')), 'eb-hig');
+  /* v25.65 (STAFF-M11) up to three pictures, each with its caption */
+  { const P = [1, 2, 3].map(k => ({ img: val('e.pic' + k), cap: val('e.pcap' + k) })).filter(x => /^data:image\//.test(x.img));
+    if (P.length) h += '<div class="eb-pics">' + P.map(x => '<figure><img src="' + esc(x.img) + '" alt="' + esc(x.cap || 'A picture') + '"><figcaption>' + esc(x.cap) + '</figcaption></figure>').join('') + '</div>'; }
 
   if (val('e.cname') || val('e.cphone')) {
     h += '<div class="eb-contact">' +
@@ -1508,12 +1579,21 @@ function handoutHTML(nm, withAck) {
 
   if (withAck && val('e.useack') !== 'no') {
     const n = parseInt(val('e.ackn') || '2', 10);
+    /* v25.65 (STAFF-H7) teach-back on each signature block: three questions from the brief, each asked until it is answered
+       right, a third try (prompting the request at the earliest sign), and a short repeat 1 to 2 weeks later */
+    const tb = val('e.acktb') !== 'no', cut = (s, k) => { s = String(s || '').trim().replace(/[.;]+$/, ''); return s.length > k ? s.slice(0, k).replace(/\s+\S*$/, '') + '…' : s; };
+    const lc = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+    const TQ = ['When you see the earliest sign' + (val('e.early') ? ' (' + lc(cut(val('e.early'), 70)) + ')' : '') + ', what do you do?',
+      'When ' + firstName(nm) + ' asks for what is needed' + (val('e.ask') ? ' (' + lc(cut(val('e.ask'), 60)) + ')' : '') + ', what do you do?',
+      'When do you call, and whom?'];
     let rows = '';
     for (let i = 0; i < n; i++) {
       rows += '<div class="eb-sig"><div class="eb-sigline">' +
         '<div>Name (print)</div><div>Role</div><div>Date</div></div>' +
         '<div class="eb-sigline"><div>Signature</div></div>' +
-        (val('e.acktry') !== 'no' ? '<div class="eb-sigline eb-try"><div>Shown how, and tried once: &#9744; honoring the request &nbsp; &#9744; making the call</div></div>' : '') + '</div>';   /* v22.82 (review I195) */
+        (val('e.acktry') !== 'no' ? '<div class="eb-sigline eb-try"><div>Shown how, and tried once: &#9744; honoring the request &nbsp; &#9744; making the call' + (tb ? ' &nbsp; &#9744; prompted the request at the earliest sign' : '') + '</div></div>' : '') +   /* v22.82 (review I195) */
+        (tb ? '<div class="eb-tb">' + TQ.map(q => '<div class="eb-tbq"><span>' + esc(q) + '</span><span class="eb-tbok">&#9744; Answered correctly</span></div>').join('') +
+          '<div class="eb-sigline eb-try"><div>Checked again on (date, 1 to 2 weeks later): ______________</div></div></div>' : '') + '</div>';
     }
     h += '<div class="eb-ack"><div class="eb-top"><h2>Acknowledgment</h2><div class="eb-who">' +
       '<div class="eb-wide"><b>Student</b><span>' + esc(nm) + '</span></div>' + (ctx ? '<div class="eb-wide"><b>Setting</b><span>' + esc(ctx) + '</span></div>' : '') +
@@ -1521,7 +1601,8 @@ function handoutHTML(nm, withAck) {
       '</div></div>' +
       '<p style="font-size:12.5px;line-height:1.6">By signing below I confirm that I have been given ' +
       'this brief, that it was gone through with me, that I had the chance to ask questions, and that ' +
-      'I know who to contact if something happens that it does not cover.</p>' + rows +
+      'I know who to contact if something happens that it does not cover.</p>' +
+      (tb ? '<p style="font-size:11.5px;line-height:1.5"><b>For the reviewer:</b> ask each question. If an answer is wrong, explain it again in different words and ask again, until it is right; then tick Answered correctly. Signing shows the brief was received. The questions and the tries show it was understood.</p>' : '') + rows +
       (val('e.ackby') ? '<p style="font-size:11.5px;margin-top:10px"><b>Gone through with staff by:</b> ' +
         esc(val('e.ackby')) + '</p>' : '') +
       '<p class="eb-foot">File this page with the student&rsquo;s behavior records. It is the record of who ' +
@@ -3083,6 +3164,65 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     if(val('e.roles'))b.roles=val('e.roles');if(val('e.date'))b.date=val('e.date');if(pv)b.ver=pv;if(m)b.vn=+m[1];
     const o=r&&typeof r==='object'?r:{};o.brief=b;return o;}catch(e){return r;}};}
 </script>
+<script id="eb1-v2565">
+/* ===================== v25.65 Form EB-1: the staff-performance review (STAFF-H7, M11, M12, L1, L2, L3, L6) =====================
+   H7  teach-back on each signature block (three questions from the brief, the third try, a date to check again); a brief saved
+       before v25.65 opens with teach-back off, so it prints as it did.   M11 up to three pictures with captions; the brief's
+       estimated reading grade on Setup.   M12 "This adult is not doing a step" opens Form PD-1.   L1 the "How it is going" line, and
+       a note when the brief is reissued without it being written again.   L2 where the behavior was assessed.   L3 the reference
+       list holds every source the Guide cites.   L6 the Guide says Form PD-1 sends limited-contact staff here. */
+(function(){
+'use strict';
+const E=id=>document.getElementById(id),fld=n=>document.querySelector('[name="'+n+'"]');
+const put=(n,v)=>{const e=fld(n);if(!e)return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};
+/* ---- H7 a brief saved before keeps its acknowledgment page as it printed ---- */
+{const r0=ebRecord;ebRecord=function(d){const r=r0.apply(this,arguments);try{if(d&&d.f&&!Object.prototype.hasOwnProperty.call(d.f,'e.acktb')){const e=fld('e.acktb');if(e)e.value='no';}picPaint();}catch(e){}return r;};}
+/* ---- M11 the pictures, kept as data in the form's own fields ---- */
+function picPaint(){const el=E('ebPics');if(!el)return;const P=[1,2,3].map(k=>val('e.pic'+k));
+  el.innerHTML='<div class="eb-picrow">'+P.map((v,i)=>'<div class="eb-picslot">'+(v?'<img src="'+esc(v)+'" alt="Picture '+(i+1)+'"><button type="button" class="tool noprint" data-ebpicdel="'+(i+1)+'">Remove</button>':'<button type="button" class="tool noprint" data-ebpicadd="'+(i+1)+'">Add picture '+(i+1)+'</button>')+'</div>').join('')+'</div><input type="file" id="ebPicIn" accept="image/*" hidden>';}
+let picAt=0;
+function shrink(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=rej;fr.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{const k=Math.min(1,560/Math.max(im.width,im.height)),c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.82));};im.src=fr.result;};fr.readAsDataURL(file);});}
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+  const a=t.closest('[data-ebpicadd]');if(a){picAt=+a.dataset.ebpicadd;const i=E('ebPicIn');if(i)i.click();return;}
+  const d=t.closest('[data-ebpicdel]');if(d){put('e.pic'+d.dataset.ebpicdel,'');picPaint();changed();return;}
+  if(t.closest('#ebPd1')){let inShell=false;try{inShell=window.parent!==window;}catch(x){}
+    if(inShell){try{window.parent.postMessage({nbh:'open',want:'PD-1',beside:true},'*');}catch(x){}}
+    else nbhUI.toast('Open Form PD-1 in the workstation, for the step this adult is not doing: the gap is probably training, materials, time, competing tasks or no one noticing, and PD-1 finds which.',{kind:'ok'});return;}
+  if(t.closest('#ebHigBtn')){const s=val('e.hig_since'),n=val('e.hig_n'),ctx=ebCtx(),where=/bus/i.test(ctx)?'on the bus':/lunch|cafeteria/i.test(ctx)?'at lunch':/special|art|music|PE/i.test(ctx)?'in your class':/hall/i.test(ctx)?'in the hallways':'here';
+    if(!s||!n){nbhUI.toast('Fill Since and the times a day first.',{kind:'warn'});return;}
+    put('e.hig','Since '+fmtDate(s)+', the request has been used about '+n+' times a day; thank you for honoring it '+where+'.');put('e.hig_for',val('e.date'));higNote();changed();return;}});
+document.addEventListener('change',async e=>{const t=e.target;if(!t||t.id!=='ebPicIn'||!t.files||!t.files[0])return;
+  try{const img=await shrink(t.files[0]);if(picAt>=1&&picAt<=3){put('e.pic'+picAt,img);picPaint();changed();}}catch(x){nbhUI.toast('That picture could not be read.',{kind:'warn'});}t.value='';});
+/* ---- L1 the line, written again when the brief is reissued ---- */
+function higNote(){const el=E('ebHigNote');if(!el)return;const h=val('e.hig'),f=val('e.hig_for'),d=val('e.date');
+  el.textContent=h&&d&&f!==d?'The brief has a new issue date: write this line again for it, or clear it.':'';}
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.name==='e.hig'&&!val('e.hig_for')&&val('e.date'))put('e.hig_for',val('e.date'));if(t&&(t.name==='e.date'||t.name==='e.hig'))higNote();});
+/* ---- M11 the reading grade, estimated, of the brief as it prints ---- */
+const syl=w=>{w=w.toLowerCase().replace(/[^a-z]/g,'');if(!w)return 0;if(w.length<=3)return 1;w=w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/,'').replace(/^y/,'');const m=w.match(/[aeiouy]{1,2}/g);return Math.max(1,m?m.length:1);};
+/* a heading, a list line or a box ends a sentence, as a full stop does */
+window.ebGrade=function(){const nm=val('m.client');if(!nm)return null;const d=document.createElement('div');d.innerHTML=handoutHTML(nm,false);d.querySelectorAll('.eb-foot,.eb-who').forEach(x=>x.remove());
+  d.querySelectorAll('h1,h2,h3,h4,p,li,td,th,div,figcaption').forEach(x=>x.appendChild(document.createTextNode('\n')));
+  const segs=d.textContent.split(/(?<=[.!?])\s+|\n+/).map(x=>x.trim()).filter(x=>/[A-Za-z]/.test(x)),W=segs.join(' ').match(/[A-Za-z][A-Za-z’'-]*/g)||[];if(W.length<20)return null;
+  const sy=W.reduce((a,w)=>a+syl(w),0);return Math.round((0.39*(W.length/segs.length)+11.8*(sy/W.length)-15.59)*10)/10;};
+function gradePaint(){const el=E('ebGrade');if(!el)return;const g=window.ebGrade();
+  el.innerHTML=g==null?'':'<div class="note"><b>Reading grade, estimated (Flesch&ndash;Kincaid):</b> '+(g<1?'below 1':g.toFixed(1))+'. Aim at or below the reader&rsquo;s level; a low score does not make a page right.</div>';}
+{const v0=review;review=function(){const r=v0.apply(this,arguments);try{gradePaint();higNote();}catch(e){}return r;};}
+picPaint();gradePaint();higNote();
+})();
+</script>
+<style id="eb1-v2565-css">
+/* v25.65 (STAFF-H7, M11, L1) */
+.eb-tb{margin:4px 0 2px;font-size:11.5px;line-height:1.45}
+.eb-tbq{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border-bottom:1px dotted #9aa}
+.eb-tbok{white-space:nowrap}
+.eb-pics{display:flex;gap:10px;margin:8px 0;flex-wrap:wrap}
+.eb-pics figure{margin:0;flex:1 1 0;min-width:0;max-width:33%;text-align:center}
+.eb-pics img{max-width:100%;max-height:1.4in;object-fit:contain;border:1px solid #c9d4d2;border-radius:4px}
+.eb-pics figcaption{font-size:11px;margin-top:2px}
+.eb-picrow{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0}
+.eb-picslot{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.eb-picslot img{width:120px;height:90px;object-fit:cover;border:1px solid #c9d4d2;border-radius:3px}
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

@@ -4647,7 +4647,9 @@ function doLoad(i,add){const e=byId[cur];if(!e)return;
   if(r.left.length)parts.push(' Kept as typed: '+r.left.join(', ')+' (tick Replace text already typed to take the bank’s).');
   if(n&&ONE(e))parts.push(' '+ONETXT);
   /* v25.64 (PLAN M9; the BCBA, 11/2) the entries were written to 90%; the standard is now 100% */
-  {const m=/(\d+(?:\.\d+)?)\s*%/.exec(e.crit||'');if(n&&m&&+m[1]<100)parts.push(' The entry\u2019s criterion ('+m[1]+'%) is below the workstation\u2019s standard, 100% independent across 3 consecutive sessions: raise it, or give the reason in the Note.');}
+  /* the bank's per-response criteria are now written to 100%; an interval or time-sample criterion (on task in 90% of
+     intervals) is a level of engagement, not a mastery level, and keeps its own figure without this note */
+  {const m=/(\d+(?:\.\d+)?)\s*%/.exec(e.crit||''),tm=/\b(interval|time sampl|time-sampl|work period|school day|minute|of the time|of each|momentary)/i.test(e.crit||'');if(n&&m&&!tm&&+m[1]<100)parts.push(' The entry\u2019s criterion ('+m[1]+'%) is below the workstation\u2019s standard, 100% independent across 3 consecutive sessions: raise it, or give the reason in the Note.');}
   parts.push(' ',go);
   if(n){const u=document.createElement('button');u.type='button';u.className='lnk';u.textContent='Undo the load';
     u.addEventListener('click',()=>{const kept=undo();u.remove();say([kept&&kept.length?'Undone, except '+kept.join(', ')+', edited since the load and left as it is.':'Undone: A'+(i+1)+' is as it was before the load.']);});parts.push(' · ',u);}
