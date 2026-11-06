@@ -43,8 +43,11 @@ const host=t=>`#tgtWrap .card[data-tgt="${t}"] .tb1lib-host`;
   const fields=t=>page.evaluate(t=>{const o={};document.querySelectorAll(`[name^="tgt[${t}]."]`).forEach(el=>{o[el.name.slice(el.name.indexOf('.')+1)]=el.value;});return o;},t);
   const dlgOpen=()=>page.evaluate(()=>{const d=document.getElementById('nbhUiDlg');return !!(d&&d.open);});
   for(const id of NEW){const e=byId[id];if(!e){ok('2 '+id+' loads into a card from the picker',false,'not in the library');continue;}
-   await page.locator(host(0)+' input.q').fill('');await page.locator(host(0)+' select.pick').selectOption(id);await page.locator(host(0)+' button.go').click();await sleep(300);
-   if(await dlgOpen()){await page.click('#nbhUiDlg button[data-tb1lib="replace"]');await sleep(300);}
+   await page.locator(host(0)+' input.q').fill('');await page.locator(host(0)+' select.pick').selectOption(id);await page.locator(host(0)+' button.go').click();
+   /* the Replace question opens when the card already holds an entry; wait for it, or for the card to take the label */
+   for(let n=0;n<40;n++){if(await dlgOpen())break;if(await page.evaluate(l=>document.querySelector('[name="tgt[0].lab"]').value===l,e.lab))break;await sleep(100);}
+   if(await dlgOpen()){await page.click('#nbhUiDlg button[data-tb1lib="replace"]');for(let n=0;n<40&&await dlgOpen();n++)await sleep(100);}
+   await sleep(200);
    const f=await fields(0),want={lab:e.lab,type:e.type,style:e.style,dim:e.dim,unit:e.unit,tops:e.tops||'',def:e.def,ex:e.ex,nex:e.nex,on:e.on,off:e.off,border:e.border,excl:e.excl};
    const bad=KEYS.filter(k=>f[k]!==want[k]);
    const title=await page.evaluate(()=>document.querySelector('#tgtTtl0').textContent);
