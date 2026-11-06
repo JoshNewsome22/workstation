@@ -3971,6 +3971,40 @@ window.__tiV2564={schoolDays,ruleFor,metBy,kappa:tiKappa,ioaOf};
 try{planRender();disRender();covRender();moreRender();fbRender();promptBanner();}catch(e){console.error('TI-1 v25.64: '+(e&&e.message||e));}
 })();
 </script>
+<script id="ti1-v2565">
+/* v25.65 (BC-RM-M3) the commission share of each observation, for the case: the commission opportunities on its consequence
+   steps / all its consequence-step opportunities (Forms RM-1 and BC-1 read it beside the overall percentage).
+   v25.65 (SKILL-M9) "Why did it drop?": for an interventionist already signed off on Form ST-1, four questions from the
+   Performance Diagnostic Checklist-Human Services; only the first leads to retraining. The ticks are kept in S.meta
+   (dropSigned, dropSkill, dropMat, dropSetup, dropNotice, as '1'), go into the retraining file for ST-1 (why) and to the case. */
+(function(){
+const byId=id=>document.getElementById(id);
+window.tiComObs=function(j){let ec=0,n=0;(S.steps||[]).forEach((st,i)=>{if(!st||st.cmp!=='con')return;const x=oppOf(i,j);ec+=x.ec;n+=x.c+x.ec+x.eo;});return {ec,n,pct:n?Math.round(1000*ec/n)/10:null};};
+const K={skill:'dropSkill',mat:'dropMat',setup:'dropSetup',notice:'dropNotice'};
+window.tiDropOut=function(){const m=S.meta||{};if(m.dropSigned!=='1')return null;const o={signedOff:true,doesNotKnowSteps:m.dropSkill==='1',materialsOrTime:m.dropMat==='1',notSetUp:m.dropSetup==='1',noOneNotices:m.dropNotice==='1'};
+  o.retrain=o.doesNotKnowSteps;const ch=String(m.dropChanged||'').trim();if(ch)o.changed=ch.slice(0,400);return o;};
+function paint(){const m=S.meta||{},sg=byId('tiDropSigned'),body=byId('tiDropBody'),out=byId('tiDropOut');if(!sg||!body)return;
+  sg.checked=m.dropSigned==='1';body.hidden=!sg.checked;document.querySelectorAll('.tiDropK').forEach(c=>{c.checked=m[K[c.dataset.k]]==='1';});
+  if(!out)return;const o=window.tiDropOut();if(!o){out.innerHTML='';return;}const other=o.materialsOrTime||o.notSetUp||o.noOneNotices;
+  out.innerHTML=(o.doesNotKnowSteps?'<div class="verdict v-mid"><b>Retrain on Form ST-1.</b> The steps are not known now, so rehearsal with feedback is the fix; save the retraining list for ST-1 above.</div>':'')+
+    (other?'<div class="verdict v-no"><b>Change the setting or the feedback, not the training.</b> '+[o.materialsOrTime?'Provide the materials or the time.':'',o.notSetUp?'Set the task up to be done: where, when and the cue to start.':'',o.noOneNotices?'Arrange for someone to notice: feedback after each check (the fading rule above), graphed.':''].filter(Boolean).join(' ')+' Write what was changed below. When the checklist pointed to missing consequences, the feedback it indicated worked and an intervention it did not indicate did not (Ditzian et al., 2015).</div>':'')+
+    (!o.doesNotKnowSteps&&!other?'<p class="hint">Tick what the check found before the next round of training.</p>':'');}
+document.addEventListener('change',e=>{const el=e.target;if(!el)return;
+  if(el.id==='tiDropSigned'){if(el.checked)S.meta.dropSigned='1';else delete S.meta.dropSigned;paint();return;}
+  if(el.classList&&el.classList.contains('tiDropK')){const k=K[el.dataset.k];if(el.checked)S.meta[k]='1';else delete S.meta[k];paint();}});
+const ra=window.renderAll;window.renderAll=function(){const r=ra.apply(this,arguments);try{paint();}catch(e){console.error('TI-1 v25.65: '+(e&&e.message||e));}return r;};
+try{renderAll=window.renderAll;}catch(e){}
+paint();
+const w=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=w?w.apply(this,arguments):null;
+  try{if(r&&r.integrity&&Array.isArray(r.integrity.obs)){const M=metrics();
+    /* the observations were sent in the order of M.used, those with a date read as ISO only (as the first __nbhFactsOut reads it) */
+    const iso=v=>{v=String(v||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;const m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(v);return m?'x':'';};
+    let k=0;M.used.forEach(x=>{const o=S.obs[x.j]||{};if(!iso(o.date))return;const ob=r.integrity.obs[k++];if(!ob)return;const cm=window.tiComObs(x.j);if(cm.n){ob.com=cm.pct;ob.conN=cm.n;}});
+    const c=M.byCmp&&M.byCmp.con;if(c&&c.n)r.integrity.commission=Math.round(1000*c.ec/c.n)/10;
+    const d=window.tiDropOut();if(d)r.integrity.why=d;}}catch(e){}
+  return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
@@ -4164,40 +4198,6 @@ a{text-underline-offset:2px}
    times the page's size): the page keeps its own text size on screen; ABC-1's paper sheet sets its own size for printing (v24.07) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </style>
-<script id="ti1-v2565">
-/* v25.65 (BC-RM-M3) the commission share of each observation, for the case: the commission opportunities on its consequence
-   steps / all its consequence-step opportunities (Forms RM-1 and BC-1 read it beside the overall percentage).
-   v25.65 (SKILL-M9) "Why did it drop?": for an interventionist already signed off on Form ST-1, four questions from the
-   Performance Diagnostic Checklist-Human Services; only the first leads to retraining. The ticks are kept in S.meta
-   (dropSigned, dropSkill, dropMat, dropSetup, dropNotice, as '1'), go into the retraining file for ST-1 (why) and to the case. */
-(function(){
-const byId=id=>document.getElementById(id);
-window.tiComObs=function(j){let ec=0,n=0;(S.steps||[]).forEach((st,i)=>{if(!st||st.cmp!=='con')return;const x=oppOf(i,j);ec+=x.ec;n+=x.c+x.ec+x.eo;});return {ec,n,pct:n?Math.round(1000*ec/n)/10:null};};
-const K={skill:'dropSkill',mat:'dropMat',setup:'dropSetup',notice:'dropNotice'};
-window.tiDropOut=function(){const m=S.meta||{};if(m.dropSigned!=='1')return null;const o={signedOff:true,doesNotKnowSteps:m.dropSkill==='1',materialsOrTime:m.dropMat==='1',notSetUp:m.dropSetup==='1',noOneNotices:m.dropNotice==='1'};
-  o.retrain=o.doesNotKnowSteps;const ch=String(m.dropChanged||'').trim();if(ch)o.changed=ch.slice(0,400);return o;};
-function paint(){const m=S.meta||{},sg=byId('tiDropSigned'),body=byId('tiDropBody'),out=byId('tiDropOut');if(!sg||!body)return;
-  sg.checked=m.dropSigned==='1';body.hidden=!sg.checked;document.querySelectorAll('.tiDropK').forEach(c=>{c.checked=m[K[c.dataset.k]]==='1';});
-  if(!out)return;const o=window.tiDropOut();if(!o){out.innerHTML='';return;}const other=o.materialsOrTime||o.notSetUp||o.noOneNotices;
-  out.innerHTML=(o.doesNotKnowSteps?'<div class="verdict v-mid"><b>Retrain on Form ST-1.</b> The steps are not known now, so rehearsal with feedback is the fix; save the retraining list for ST-1 above.</div>':'')+
-    (other?'<div class="verdict v-no"><b>Change the setting or the feedback, not the training.</b> '+[o.materialsOrTime?'Provide the materials or the time.':'',o.notSetUp?'Set the task up to be done: where, when and the cue to start.':'',o.noOneNotices?'Arrange for someone to notice: feedback after each check (the fading rule above), graphed.':''].filter(Boolean).join(' ')+' Write what was changed below. When the checklist pointed to missing consequences, the feedback it indicated worked and an intervention it did not indicate did not (Ditzian et al., 2015).</div>':'')+
-    (!o.doesNotKnowSteps&&!other?'<p class="hint">Tick what the check found before the next round of training.</p>':'');}
-document.addEventListener('change',e=>{const el=e.target;if(!el)return;
-  if(el.id==='tiDropSigned'){if(el.checked)S.meta.dropSigned='1';else delete S.meta.dropSigned;paint();return;}
-  if(el.classList&&el.classList.contains('tiDropK')){const k=K[el.dataset.k];if(el.checked)S.meta[k]='1';else delete S.meta[k];paint();}});
-const ra=window.renderAll;window.renderAll=function(){const r=ra.apply(this,arguments);try{paint();}catch(e){console.error('TI-1 v25.65: '+(e&&e.message||e));}return r;};
-try{renderAll=window.renderAll;}catch(e){}
-paint();
-const w=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=w?w.apply(this,arguments):null;
-  try{if(r&&r.integrity&&Array.isArray(r.integrity.obs)){const M=metrics();
-    /* the observations were sent in the order of M.used, those with a date read as ISO only (as the first __nbhFactsOut reads it) */
-    const iso=v=>{v=String(v||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;const m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(v);return m?'x':'';};
-    let k=0;M.used.forEach(x=>{const o=S.obs[x.j]||{};if(!iso(o.date))return;const ob=r.integrity.obs[k++];if(!ob)return;const cm=window.tiComObs(x.j);if(cm.n){ob.com=cm.pct;ob.conN=cm.n;}});
-    const c=M.byCmp&&M.byCmp.con;if(c&&c.n)r.integrity.commission=Math.round(1000*c.ec/c.n)/10;
-    const d=window.tiDropOut();if(d)r.integrity.why=d;}}catch(e){}
-  return r;};
-})();
-</script>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
 </html>
