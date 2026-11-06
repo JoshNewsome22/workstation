@@ -198,7 +198,8 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     const v=await fr.evaluate(()=>{const g0=document.getElementById('viewSeg'),g=g0&&g0.closest('.tgroup'),sp=g&&g.querySelector(':scope > span');return {lbl:sp?getComputedStyle(sp).display:'none',others:[...document.querySelectorAll('.toolbar > .tgroup > span')].filter(e=>e.offsetParent).length};});
     ok('41 on a touch screen the tabs carry no "View" label (the tabs say what they are; the room goes to them)',v.lbl==='none',v);
     const fx=await fr.evaluate(async()=>{nbhUI.focus.set(true);await new Promise(r=>setTimeout(r,800));const b=document.querySelector('#nbhFxBar .nbh-fx-where b'),cs=b&&getComputedStyle(b),out=b?{tt:cs.textTransform,fs:cs.fontSize,t:b.textContent}:null;nbhUI.focus.set(false);return out;});
-    ok('42 the focus bar says "Part 1 of \u2026" in sentence case at 12 px (it was small capitals)',!!fx&&fx.tt==='none'&&fx.fs==='12px'&&/^Part 1 of \d/.test(fx.t),fx);
+    /* v25.68 (design review L3): in the workstation the bar uses the sheet's words, "Section 1 of 2 on this sheet" */
+    ok('42 the focus bar says "Section 1 of …" (on its own "Part 1 of …") in sentence case at 12 px (it was small capitals)',!!fx&&fx.tt==='none'&&fx.fs==='12px'&&/^(Part|Section) 1 of \d/.test(fx.t),fx);
     ok('43 no page errors (extras)',!errs.length,errs.slice(0,3));await ctx.close();}
   {const {ctx,page,errs}=await shell(br,{width:390,height:844},UA.iphone,true,false);
     await page.evaluate(()=>todayOpen());await sleep(800);
