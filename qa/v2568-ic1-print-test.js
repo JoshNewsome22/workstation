@@ -47,10 +47,14 @@ const K=s=>String(s||'').normalize('NFKD').replace(/[^A-Za-z0-9]+/g,' ').trim();
 
   /* ================= the signed case ================= */
   await sim('signed');
+  /* the page as it stands once it has settled (the simulation's last touches, the wording pencils placed): taken the same
+     way before and after the print, so only a change the print made shows (on a busy machine the page was read mid-settle) */
+  const settle=async()=>{let last='',same=0;for(let i=0;i<60&&same<4;i++){const h=await p.evaluate(()=>document.body.innerHTML);if(h===last)same++;else{same=0;last=h;}await sleep(250);}};
+  await settle();
   const before=await p.evaluate(()=>({html:document.body.innerHTML.replace(/ ic-nodate\b/g,'').replace(/ style="height: [0-9.]+px;"/g,''),vals:JSON.stringify([...document.querySelectorAll('[name]')].map(e=>e.type==='checkbox'||e.type==='radio'?e.checked:e.value)),
     names:[...document.querySelectorAll('[name]')].length,cls:document.documentElement.className}));
   const E=await entries();
-  const F=await read(await pdf(false));await sleep(300);
+  const F=await read(await pdf(false));await sleep(300);await settle();
   const after=await p.evaluate(()=>({html:document.body.innerHTML.replace(/ ic-nodate\b/g,'').replace(/ style="height: [0-9.]+px;"/g,''),vals:JSON.stringify([...document.querySelectorAll('[name]')].map(e=>e.type==='checkbox'||e.type==='radio'?e.checked:e.value)),cls:document.documentElement.className}));
   const G=await read(await pdf(true));await sleep(300);
   const fp=F.pages,gp=G.pages,fileAt=fp.findIndex(x=>/^For the school.s file/.test(x.body));
