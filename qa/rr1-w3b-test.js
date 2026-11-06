@@ -25,7 +25,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const r0=F.src[0]||{};
   ok('3 F24 the records review becomes FS-1\'s evidence row: its method, its dates, the function both targets share, the strength left to you',
     F.src.length===1&&r0.method==='Indirect: records review'&&/^\d{1,2}\/\d{1,2}\/\d{4} – \d{1,2}\/\d{1,2}\/\d{4}$/.test(r0.dates)&&/^Escape/.test(r0.fn)&&r0.str===''
-    &&/Aggression \(hitting, pushing\): escape \/ avoidance, agreement high\. When presented with math tasks/.test(r0.contrib)&&/Elopement from classroom: escape \/ avoidance, agreement low\./.test(r0.contrib),F.src);
+    &&/Aggression \(hitting, pushing\): escape \/ avoidance, agreement consistent across records \(a records-based hypothesis, not evidence of function\)\. When presented with math tasks/.test(r0.contrib)&&/Elopement from classroom: escape \/ avoidance, agreement a single source or none \(a records-based hypothesis\)\./.test(r0.contrib),F.src);
   const again=await fsp.evaluate(R=>{window.__nbhFactsIn({records:R});return S.src.filter(r=>r.form==='RR-1').length;},R);
   ok('4 F24 applied again, the row is not added twice',again===1,again);
   /* ---- TB-1 ---- */

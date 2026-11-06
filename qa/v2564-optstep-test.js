@@ -10,9 +10,9 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  await p.goto(URL+file('TD-1_'));await p.waitForTimeout(1500);
  const info=await p.evaluate(()=>{const P=TD1_BANK.protocols,re=/^\s*OPTION:/i;const w=P.filter(x=>x.steps.some(s=>re.test(s)));
    const a=P.find(x=>x.id==='fct-card-lean-schedule');return {ids:w.map(x=>x.id).sort(),n:a.steps.length,plain:P.find(x=>!x.steps.some(s=>re.test(s))&&!x.steps.some(s=>/^\s*RESTRICTIVE:\s*Punishment/i.test(s))).id,
-     texts:w.map(x=>x.steps.find(s=>re.test(s))),notes:w.map(x=>x.note)};});
- ok('three cards carry one optional step: the two Fisher et al. (2018) cards and the Mitteer et al. (2026) card',JSON.stringify(info.ids)===JSON.stringify(['fct-card-lean-schedule','fct-lean-long-resurgence','fct-resurgence-mitigation-comparison']),info.ids);
- ok('each optional step says it reinforces problem behavior on purpose, why, and when it ends, with a safety plan',info.texts.every(t=>/^OPTION: Reinforces problem behavior on purpose:/.test(t)&&/Why:/.test(t)&&/safety plan/.test(t)&&/end it as soon as the baseline is steady/.test(t)),info.texts);
+     texts:w.map(x=>x.steps.find(s=>re.test(s))),fct:w.filter(x=>/^fct-/.test(x.id)).map(x=>x.steps.find(s=>re.test(s))),notes:w.map(x=>x.note)};});
+ ok('five cards carry one optional step: the two Fisher et al. (2018) cards, the Mitteer et al. (2026) card, and (v25.65 PREF-H2) the two CSA cards for social functions',JSON.stringify(info.ids)===JSON.stringify(['c_csa-competing-items-plus-extinction','c_csa-select-by-reduction','fct-card-lean-schedule','fct-lean-long-resurgence','fct-resurgence-mitigation-comparison']),info.ids);
+ ok('each optional step says it reinforces problem behavior on purpose and why; the three lean baselines add the safety plan and when they end',info.texts.every(t=>/^OPTION: Reinforces problem behavior on purpose:/.test(t)&&/Why:|why/i.test(t))&&info.fct.length===3&&info.fct.every(t=>/Why:/.test(t)&&/safety plan/.test(t)&&/end it as soon as the baseline is steady/.test(t)),info.texts);
  ok('the notes call it optional and no longer say a school team does not do it',info.notes.every(t=>/optional step/.test(t)&&!/school team does not replicate|not in a school plan/.test(t)),info.notes.map(x=>x.slice(0,120)));
  const host='[...document.querySelectorAll("*")].find(e=>e.shadowRoot&&e.shadowRoot.querySelector(".detail"))';
  const det=async id=>p.evaluate(([id,host])=>{window.__tdBank.show(id);const d=eval(host).shadowRoot.querySelector('.detail');

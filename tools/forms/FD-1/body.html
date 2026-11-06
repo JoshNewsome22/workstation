@@ -1,0 +1,321 @@
+  <!-- ===================== SCREEN (v25.65 FEED-H3, FEED-L4, FEED-L5, FEED-M8) ===================== -->
+  <section class="only-screen">
+    <h2 class="nbh-band">Student and Health Record</h2>
+    <div class="fieldgrid">
+      <div><label>Student</label><input data-m="client"></div>
+      <div><label>Student ID</label><input data-m="sid"></div>
+      <div><label>Grade</label><input data-m="grade"></div>
+      <div><label>Date of birth</label><input data-m="dob" placeholder="M/D/YYYY"></div>
+      <div><label>School or setting</label><input data-m="site"></div>
+      <div><label>Case BCBA</label><input data-m="bcba"></div>
+      <div><label>Diagnoses and health conditions (Forms DM-1 and RR-1)</label><input data-m="dx" placeholder="autism spectrum disorder; reflux treated by the pediatrician"></div>
+      <div><label>Diet (Forms DM-1 and RR-1)</label><input data-m="diet" placeholder="regular diet; no pork"></div>
+      <div><label>Allergies (Form DM-1)</label><input data-m="allergy" placeholder="peanut (EpiPen with the nurse)"></div>
+    </div>
+    <p class="hint fdScr" id="fdCaseNote"></p>
+
+    <h2 class="nbh-band" style="margin-top:18px">Part 1. Screen and Gate</h2>
+    <p class="hint">Answer every line with the family and the school nurse. A <b>Yes</b> to any red flag means a doctor and a feeding team look at the student first. <b>Unknown</b> counts as not answered: ask.</p>
+    <h3>Red flags</h3>
+    <div class="grid-wrap"><table class="rt" id="fdRF"><thead><tr><th style="width:62%">Red flag</th><th>Answer</th></tr></thead><tbody></tbody></table></div>
+    <div id="fdPica"></div>
+
+    <h3>Clearance</h3>
+    <div class="fieldgrid">
+      <div><label>Doctor (the student&rsquo;s pediatrician or family doctor)</label><input data-m="mdName"></div>
+      <div><label>Doctor&rsquo;s clearance for this plan (date)</label><input data-m="mdClr" placeholder="M/D/YYYY"></div>
+      <div><label>Swallow evaluation by (speech-language pathologist or occupational therapist)</label><input data-m="swBy"></div>
+      <div><label>Swallow evaluation (date)</label><input data-m="swDate" placeholder="M/D/YYYY"></div>
+      <div><label>Texture order</label><input data-m="tex" placeholder="soft and bite-sized"></div>
+      <div><label>Liquid order</label><input data-m="liq" placeholder="thin liquids"></div>
+      <div><label>Bite size</label><input data-m="bite" placeholder="half a teaspoon; pieces no larger than 1.5 cm"></div>
+      <div><label>Texture, liquid and bite size prescribed by (name, role)</label><input data-m="presc"></div>
+      <div><label>Prescribed (date)</label><input data-m="presDate" placeholder="M/D/YYYY"></div>
+      <div><label>School nurse&rsquo;s plan (date)</label><input data-m="nursePlan" placeholder="M/D/YYYY"></div>
+      <div><label>Who feeds the student at school</label><input data-m="feeder"></div>
+      <div><label>Choking first-aid training of the staff at meals (who, date)</label><input data-m="cfa"></div>
+    </div>
+
+    <h3>Texture and bite-size steps</h3>
+    <p class="hint">The texture, the liquid and the bite size come from the speech-language pathologist (SLP) or the feeding team. A step goes up only when one of them writes the next step here. The plan prints the latest step.</p>
+    <div class="grid-wrap"><table class="rt" id="fdTex"><thead><tr><th>Date</th><th>Next step (texture, liquid or bite size)</th><th>Written by</th><th>Role</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="tools noprint"><button type="button" id="fdTexAdd">Add a step written by the SLP or feeding team</button></div>
+
+    <h3>Problem type</h3>
+    <div class="fieldgrid">
+      <div><label>The problem, as Munk and Repp (1994) sort it</label><select data-m="ptype" id="fdPtype"></select></div>
+      <div><label>Other therapies the student receives</label><input data-m="ther" placeholder="occupational therapy for handwriting"></div>
+    </div>
+    <div class="ckrow">
+      <label class="ck"><input type="checkbox" data-c="rapid"> The student eats too fast or overfills the mouth (rapid eating)</label>
+      <label class="ck"><input type="checkbox" data-c="sensory"> The team or the family lists a sensory-based feeding approach</label>
+    </div>
+    <div id="fdSensory"></div>
+
+    <h3>Medical feeding team</h3>
+    <div class="fieldgrid">
+      <div><label>Feeding team (clinic or hospital program)</label><input data-m="team"></div>
+      <div><label>The team advised the school and home plan (date)</label><input data-m="teamAdv" placeholder="M/D/YYYY"></div>
+      <div style="grid-column:1/-1"><label>What the team advises the school and home plan to include</label><textarea data-m="teamWhat" rows="2"></textarea></div>
+    </div>
+
+    <h3>Who leads</h3>
+    <div id="fdLead"></div>
+  </section>
+
+  <!-- ===================== MEAL OBSERVATION (v25.65 FEED-H4) ===================== -->
+  <section class="only-obs">
+    <h2 class="nbh-band">Part 2. Meal Observation</h2>
+    <div class="instr">
+      <p>Watch the student&rsquo;s usual meal with the usual feeder, about 10 to 20 bites. Change nothing: this is a description of the meal as it happens.</p>
+      <ul>
+        <li><b>Offered:</b> the student took the bite from the plate, or an adult offered it in front of the student.</li>
+        <li><b>Accepted:</b> the whole bite passes the lips within 5 s.</li>
+        <li><b>Mouth clean at 30 s:</b> no food the size of a pea or larger in the mouth 30 s after the bite went in. The mouth check is a request (&ldquo;Show me&rdquo;); the student opens their own mouth. Staff never open it. A check the student does not do is recorded as <b>not checked</b>.</li>
+        <li><b>Packed, expelled, refusal, gag or cough:</b> as defined on Form TB-1 (feeding targets). Refusal is any refusal response on TB-1&rsquo;s &ldquo;Feeding refusal&rdquo; target (<code>feed-refuse</code>).</li>
+        <li><b>What the adult did within 10 s:</b> coaxed or talked, reprimanded, removed the bite or ended the meal, gave a preferred food or toy, praised, or waited.</li>
+      </ul>
+    </div>
+    <div class="fieldgrid">
+      <div><label>Date</label><input data-o="date" placeholder="M/D/YYYY"></div>
+      <div><label>Usual feeder</label><input data-o="feeder"></div>
+      <div><label>Where (room, table)</label><input data-o="where"></div>
+      <div><label>Foods offered</label><input data-o="foods"></div>
+      <div><label>Meal minutes</label><input data-o="minutes" inputmode="decimal"></div>
+      <div><label>Portion eaten</label><select data-o="portion" id="fdObsPortion"></select></div>
+    </div>
+    <div class="grid-wrap"><table class="rt bites wide" id="fdObsBites"><thead><tr><th>#</th><th>Offered</th><th>Accepted within 5 s</th><th>Mouth clean at 30 s</th><th>Packed</th><th>Expelled</th><th>Refusal</th><th>Gag or cough</th><th>What the adult did within 10 s</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="tools noprint"><button type="button" id="fdObsAdd">Add a bite</button><button type="button" id="fdObsAdd10">Add 10 bites</button><span class="status" id="fdObsCount"></span></div>
+    <h3>What followed refusal and acceptance</h3>
+    <div id="fdObsSum"></div>
+    <p class="verdict v-mid" id="fdObsCaution">This observation describes what usually follows refusal; it does not test it. Form FD-1 does not build a mealtime functional analysis (one in which bites are removed, or attention is given, after refusal on purpose). Escape is the working hypothesis: refusal may be kept going because it ends or delays the bite or the meal.</p>
+  </section>
+
+  <!-- ===================== FOODS (v25.65 FEED-M1) ===================== -->
+  <section class="only-foods">
+    <h2 class="nbh-band">Food Lists</h2>
+    <p class="verdict v-mid">Family or staff opinion is a starting list, not the ranking. Eating a food after treatment does not mean the student now prefers it; keep offering preferred foods.</p>
+    <h3>Eats now</h3>
+    <p class="hint">Foods and textures the student eats now, from a three-day family record and the meal observation.</p>
+    <div class="grid-wrap"><table class="rt" id="fdNow"><thead><tr><th>Food</th><th>Texture</th><th>From</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="tools noprint"><button type="button" data-addlist="now">Add a food</button></div>
+    <h3>Target foods</h3>
+    <p class="hint">4 to 16 foods chosen with the family and, where there is one, a dietitian, grouped by food group. The data sheet offers these by name.</p>
+    <div class="grid-wrap"><table class="rt" id="fdTarget"><thead><tr><th>Food</th><th>Food group</th><th>Chosen with</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="tools noprint"><button type="button" data-addlist="target">Add a target food</button><span class="status" id="fdTargetCount"></span></div>
+    <h3>Preferred foods to use in the plan</h3>
+    <p class="hint">Chosen with the paired-stimulus or multiple-stimulus-without-replacement (MSWO) food assessment on Form PA-1, run with small portions at least an hour from a meal. Include fruits and vegetables as candidates: they are sometimes preferred over salty or sweet foods.</p>
+    <div class="grid-wrap"><table class="rt" id="fdPref"><thead><tr><th>Food</th><th>Rank</th><th>How it was chosen</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="tools noprint"><button type="button" data-addlist="pref">Add a preferred food</button><button type="button" id="fdFromPA">Add the foods ranked on Form PA-1</button><span class="status" id="fdPAStatus"></span></div>
+  </section>
+
+  <!-- ===================== PLAN (v25.65 FEED-H5, FEED-M5, FEED-M7, FEED-M8, FEED-L4, FEED-L5) ===================== -->
+  <section class="only-plan">
+    <h2 class="nbh-band">Part 3. Plan</h2>
+    <div id="fdPlanGate"></div>
+    <div id="fdPlanBody">
+      <div class="fieldgrid">
+        <div><label>Plan starts (date)</label><input data-p="start" placeholder="M/D/YYYY"></div>
+        <div><label>Review after this many meals with a target food (10 to 15)</label><input data-p="review" inputmode="numeric" placeholder="10"></div>
+      </div>
+      <div class="fdRule" id="fdRuleBox"></div>
+      <div class="fdBox" id="fdStopBox">
+        <h3>Stop rule (every feeding plan)</h3>
+        <ul>
+          <li>Stop the meal and tell the school nurse the same day if the student coughs or chokes, has a wet or gurgly voice, gags again and again, vomits, or shows signs of pain.</li>
+          <li>If the student cannot breathe, cough or speak, follow the choking procedure and call 911.</li>
+        </ul>
+        <p id="fdCfaLine"></p>
+        <p><b>Do not delay, shorten or skip meals or snacks to build hunger.</b></p>
+      </div>
+      <p class="fdRule" id="fdTexLine"></p>
+
+      <div class="fdItem" data-item="m1">
+        <h3><label class="ck"><input type="checkbox" data-c="m1"> 1. Mealtime structure (always first)</label></h3>
+        <div class="fieldgrid">
+          <div><label>Meal length (minutes)</label><input data-p="len" inputmode="numeric" placeholder="20"></div>
+          <div><label>A bite offered every (seconds)</label><input data-p="every" inputmode="numeric" placeholder="30"></div>
+          <div><label>The same short prompt each time</label><input data-p="prompt" placeholder="Take a bite."></div>
+          <div><label>Wait before calmly removing a bite not taken (6 to 10 s)</label><input data-p="wait" inputmode="numeric" placeholder="8"></div>
+          <div><label>How the bite is offered</label><select data-p="offer" id="fdOffer"></select></div>
+          <div><label>Target food at this step</label><input data-p="target" placeholder="green beans"></div>
+        </div>
+        <ol class="fdSteps" id="fdSteps1"></ol>
+        <span class="fdCard" data-cards="dra-target-food-prompts-praise a_highp-preferred-food-bites"></span>
+      </div>
+
+      <div class="fdItem" data-item="m2">
+        <h3><label class="ck"><input type="checkbox" data-c="m2"> 2. Simultaneous presentation</label></h3>
+        <div class="fieldgrid"><div><label>Preferred food or condiment the student chooses</label><input data-p="simPref" placeholder="a chip; ketchup"></div></div>
+        <ol class="fdSteps" id="fdSteps2"></ol>
+        <span class="fdCard" data-cards="p_sf-preferred-food-same-bite choice-condiment-on-vegetables p_sf-preferred-food-on-spoon"></span>
+      </div>
+
+      <div class="fdItem" data-item="m3">
+        <h3><label class="ck"><input type="checkbox" data-c="m3"> 3. Differential reinforcement</label></h3>
+        <div class="fieldgrid"><div><label>Right after each target bite</label><input data-p="drItem" placeholder="a bite of a preferred food, or 20 s with a toy"></div></div>
+        <ol class="fdSteps" id="fdSteps3"></ol>
+        <span class="fdCard" data-cards="dra-simultaneous-preferred-food dra-preferred-food-bites"></span>
+      </div>
+
+      <div class="fdItem" data-item="m4">
+        <h3><label class="ck"><input type="checkbox" data-c="m4"> 4. High-probability (high-p) sequence (selectivity only)</label></h3>
+        <div class="fieldgrid"><div><label>Preferred food for the 3 bites</label><input data-p="highpFood" placeholder="cracker"></div></div>
+        <ol class="fdSteps" id="fdSteps4"></ol>
+        <span class="fdCard" data-cards="a_highp-preferred-food-bites"></span>
+      </div>
+
+      <div class="fdItem" data-item="m5">
+        <h3><label class="ck"><input type="checkbox" data-c="m5"> 5. Progressive high-p with demand fading (selectivity only)</label></h3>
+        <div class="fieldgrid"><div><label>Current step</label><select data-p="dfStep" id="fdDfStep"></select></div></div>
+        <ol class="fdSteps" id="fdSteps5"></ol>
+        <span class="fdCard" data-cards="a_highp-food-step-sequence df-bite-steps-dra-thinning"></span>
+      </div>
+
+      <div class="fdItem" data-item="m6">
+        <h3><label class="ck"><input type="checkbox" data-c="m6"> 6. Stimulus fading</label></h3>
+        <div class="fieldgrid">
+          <div><label>What is faded</label><select data-p="fadeKind" id="fdFadeKind"></select></div>
+          <div><label>Current step</label><input data-p="fadeStep" placeholder="2 teaspoons of chocolate syrup in 8 oz of milk"></div>
+        </div>
+        <ol class="fdSteps" id="fdSteps6"></ol>
+        <span class="fdCard" data-cards="p_sf-flavor-fade-milk"></span>
+      </div>
+
+      <div class="fdItem" data-item="rapid" id="fdRapid">
+        <h3>Rapid eating: pacing, in this order</h3>
+        <div class="ckrow"><label class="ck"><input type="checkbox" data-c="r1"> 1. Pre-cut portions and utensil down</label><label class="ck"><input type="checkbox" data-c="r2"> 2. A pager or timer cue for each bite</label></div>
+        <div class="fieldgrid">
+          <div><label>Target time between bites (seconds)</label><input data-p="pace" inputmode="numeric" placeholder="15"></div>
+          <div><label>Cue (pager or timer)</label><input data-p="cue" placeholder="a vibrating pager in the pocket"></div>
+        </div>
+        <ol class="fdSteps" id="fdStepsR"></ol>
+        <span class="fdCard" data-cards="dri-utensil-down-pacing s_drl-pager-paced-bites p_sf-pager-intensity-pacing"></span>
+      </div>
+
+      <div class="fdItem restr" data-item="ee" id="fdEE">
+        <h3><label class="ck"><input type="checkbox" data-c="ee"> <span class="fdTag">RESTRICTIVE</span> Escape extinction at meals (an option, never the default)</label></h3>
+        <p class="hint fdScr">Escape extinction means a refused bite no longer ends: the adult keeps the bite at the lips until it is taken, puts spat-out food back, or guides the student&rsquo;s hand to the mouth. School teams may run it only with written consent, planned with the family, the doctor and a feeding specialist. Never force the mouth open.</p>
+        <div class="ckrow">
+          <label class="ck"><input type="checkbox" data-c="eeHold"> Keep the bite at the lips until it is taken (nonremoval)</label>
+          <label class="ck"><input type="checkbox" data-c="eeBack"> Put spat-out food back on the spoon and offer it again</label>
+          <label class="ck"><input type="checkbox" data-c="eeGuide"> Guide the student&rsquo;s hand to the mouth</label>
+        </div>
+        <div class="fieldgrid">
+          <div><label>Written consent (date; Form IC-1 or TD-1&rsquo;s Responding sheet)</label><input data-p="eeConsent" placeholder="M/D/YYYY"></div>
+          <div><label>Planned with the family (date)</label><input data-p="eeFamily" placeholder="M/D/YYYY"></div>
+          <div><label>Planned with the doctor (name, date)</label><input data-p="eeDoctor"></div>
+          <div><label>Planned with the feeding specialist (name, date)</label><input data-p="eeSpec"></div>
+          <div><label>Longest time each bite is held at the lips (seconds), set with the feeding specialist</label><input data-p="eeMax" inputmode="numeric"></div>
+          <div><label>Review the step after (meals)</label><input data-p="eeReview" inputmode="numeric" placeholder="10"></div>
+        </div>
+        <div id="fdEEText"></div>
+      </div>
+
+      <div id="fdReviewBox"></div>
+      <div id="fdPlanPica"></div>
+      <div id="fdPlanSensory"></div>
+    </div>
+    <div id="fdNoPlan" class="verdict v-no"></div>
+  </section>
+
+  <!-- ===================== DATA (v25.65 FEED-H6, FEED-M7) ===================== -->
+  <section class="only-data">
+    <h2 class="nbh-band">Part 4. Bite-by-Bite Data</h2>
+    <p class="hint">One row a meal; open a meal to enter its bites, one row a bite. The definitions are the ones on the Meal observation page.</p>
+    <div class="grid-wrap"><table class="rt wide fdMealList" id="fdMeals"><thead><tr><th>#</th><th>Date</th><th>Phase</th><th>Minutes</th><th>Bites</th><th>% accepted</th><th>% mouth clean of accepted</th><th>% packed</th><th>Expulsions per accepted bite</th><th>Refusal per presentation</th><th>Seconds per bite</th><th>Eaten</th><th>Setting events</th><th class="noprint"></th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="tools noprint"><button type="button" id="fdNewMeal2">Add a meal</button></div>
+
+    <div id="fdMealEdit" class="fdScr"></div>
+
+    <h3>Summary</h3>
+    <div class="metrics" id="fdMetrics"></div>
+    <div id="fdCrit"></div>
+    <div id="fdReviewData"></div>
+
+    <h3>Acceptance and mouth clean by meal</h3>
+    <div class="fdGraphWrap">
+      <div><svg id="fdPlot" viewBox="0 0 900 320" role="img" aria-label="Percent of bites accepted and percent mouth clean by meal"></svg>
+        <p class="hint">Solid line: % of bites accepted. Dashed line: % mouth clean of accepted bites. Dotted vertical lines: a new phase. A letter under a meal marks a setting event: S slept poorly, U unwell, A ate within the last hour.</p>
+        <div class="tools noprint"><button type="button" id="fdPngBtn">Save graph as image</button></div></div>
+      <div><h3 style="margin-top:0">Weight</h3>
+        <p class="hint">From the school nurse or the family&rsquo;s doctor, monthly.</p>
+        <div class="grid-wrap"><table class="rt" id="fdWts"><thead><tr><th>Date</th><th>Weight</th><th>Unit</th><th>From</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+        <div class="tools noprint"><button type="button" id="fdWtAdd">Add a weigh-in</button></div>
+        <div id="fdWtAlert"></div></div>
+    </div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Is For</h2>
+    <p>Feeding problems are common: estimates reach 90% in children with autism (Volkert &amp; Vaz, 2010). The same &ldquo;eats too little&rdquo; can be different problems that need different plans (Munk &amp; Repp, 1994), and some of them are medical first. This form holds, in one place, what a school or home team needs before it changes a meal: the clearance, the kind of problem, who leads, a described meal, the foods, a plan in which the student can always decline, and data that shows whether the food is swallowed as well as accepted.</p>
+
+    <h2 class="nbh-band" style="margin-top:16px">Part 1. Screen and Gate</h2>
+    <table class="rt">
+      <tr><th style="width:26%">Red flags</th><td>Weight loss or flat growth; tube feeding or nutrition drinks; coughing, choking or a wet or gurgly voice during or after meals; gagging or vomiting at meals; signs of pain (reflux, constipation, dental pain); eating only purees or one texture; meals longer than 30 minutes; drinking too little; a history of pica. Each is answered yes, no or unknown.</td></tr>
+      <tr><th>Problem type</th><td>Munk and Repp (1994) assessed food type and texture with 5 people with severe disabilities: the same limited intake broke into four problems (total refusal, selectivity by type, by texture, and by both). <b>Food refusal</b> here means eating too little to meet needs, or depending on a tube or nutrition drinks.</td></tr>
+      <tr><th>Who leads</th><td><b>A red flag answered yes, food refusal, or selectivity by texture (alone or with type):</b> &ldquo;Medical feeding team leads. The school and home plan holds mealtime structure, data and caregiver support only, until the team advises.&rdquo; When the team&rsquo;s advice is recorded (who, and the date), the plan offers the rest of the menu and the restrictive option for the team to choose from. <b>Selectivity by type, every red flag answered no, and the doctor&rsquo;s clearance on file:</b> &ldquo;School or home plan may use the non-forcing menu (Part 3).&rdquo; <b>The doctor&rsquo;s clearance missing</b> (or the swallow evaluation, when a swallowing red flag or a texture problem is recorded): the form does not print a treatment page.</td></tr>
+      <tr><th>Why</th><td>In a review of antecedent interventions in this journal from 2000 to 2012, every case in which an antecedent intervention worked alone involved food selectivity (five of six children with selectivity); they were tried alone for only eight of 20 children with food refusal, and for refusal they enhanced escape extinction (67% of participants) rather than replacing it (Seubert et al., 2014). Lowering the texture cut packing and raised grams eaten for 3 children, and all gained weight (Patel et al., 2005): texture is a medical and skill question, so the texture, the liquid and the bite size come from the SLP or the feeding team, and a step goes up only when one of them writes it here.</td></tr>
+      <tr><th>Pica</th><td>A pica history links to Form TB-1&rsquo;s pica target and the TD-1 pica cards. In a series of 33 consecutive cases, treatment reduced pica by at least 90% for 30 people, and the gains held with new implementers and settings for 26 of 29; the assessments were run by trained therapists in consultation with medical staff (Frank-Crawford et al., 2025).</td></tr>
+      <tr><th>Sensory-based approaches</th><td>In direct comparisons, consumption rose with behavioral treatment and not with a modified sequential oral sensory approach (Peterson et al., 2016) or with sensory integration therapy (Addison et al., 2012). Both behavioral treatments included escape extinction in a clinic.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">Part 2. Meal Observation</h2>
+    <table class="rt">
+      <tr><th style="width:26%">What it is</th><td>A description of the usual meal with the usual feeder, bite by bite. For each adult response the form shows how often it followed refusal and how often it followed acceptance, with the meal minutes and the portion eaten. It describes; it does not test.</td></tr>
+      <tr><th>Why escape is the working hypothesis</th><td>In parent-fed meals, attention and escape most often followed refusal (Borrero et al., 2010). Parents coaxed, reprimanded, allowed breaks and gave preferred foods or toys; when these were tested, they worsened behavior for 10 of 15 children (67%), and of the 10 with differentiated results, 90% were sensitive to escape (Piazza et al., 2003). Across a systematic review, escape alone or in part maintained inappropriate mealtime behavior in 92% of cases (Saini et al., 2019). The form notes attention when coaxing or a reprimand followed half or more of the refusals.</td></tr>
+      <tr><th>The format</th><td>Bites at set times (about every 30 s), the same bite size and prompt each time, and a mouth check: the structured mealtime assessment, which computer-based training taught to 14 undergraduate students and two registered behavior technicians (Van Arsdale et al., 2025).</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">Part 3. Plan</h2>
+    <table class="rt">
+      <tr><th style="width:26%">The menu</th><td>Mealtime structure first, then simultaneous presentation, differential reinforcement, a high-p sequence and progressive high-p with demand fading (for selectivity), and stimulus fading. Each item names its TD-1 cards, where the study and its full procedure are; the plan runs the steps printed here.</td></tr>
+      <tr><th>The evidence</th><td>Simultaneous presentation raised consumption at once for 2 of 3 children with selectivity (Piazza et al., 2002). Condiments on refused vegetables raised acceptance with no escape prevention and no reinforcement (Ahearn, 2003). At a school, simultaneous presentation reduced packing (Buckley &amp; Newchok, 2005). Simultaneous reinforcement worked faster than delayed reinforcement (Kern &amp; Marder, 1996). Three preferred-food bites before a refused food raised acceptance, and were then faded (Meier et al., 2012). The progressive high-p sequence with demand fading increased eating without escape extinction for two boys aged 9 and 10 with autism (Penrod et al., 2012). Preschool teachers faded chocolate syrup out of milk at regular meals (Tiger &amp; Hanley, 2006). Acceptance fell in an orderly way as the amount on the spoon rose from empty through dipped, quarter, half and level (Kerwin et al., 1995). Mothers trained to offer target foods regularly, with specific prompts and attention, raised their children&rsquo;s acceptance at home (Werle et al., 1993).</td></tr>
+      <tr><th>The review point</th><td>Across treated cases, interventions without escape extinction reached clinical significance in 33% of cases, in a mean of 9.5 sessions; with it, in 49%, in a mean of 13.2 sessions (Scott et al., 2024). The plan is reviewed after the number of meals set on the Plan page (10 to 15): if acceptance of a target food has not risen, or refusal, gagging or distress has risen, the form prints &ldquo;Stop and refer to a medical feeding team before adding escape extinction.&rdquo;</td></tr>
+      <tr><th>Escape extinction (RESTRICTIVE)</th><td>Keeping the bite at the lips until it is taken, putting spat-out food back, or guiding the hand to the mouth means a refused bite no longer ends. It is a restrictive step: never the default, run by a school team only with written consent and a plan made with the family, the doctor and a feeding specialist, and printed only when all four are recorded. The mouth is never forced open. For food refusal, reinforcement alone often did not raise acceptance; escape extinction added to it did (Patel et al., 2002).</td></tr>
+      <tr><th>A bite at the lips</th><td>A bite offered at the lips and removed calmly when the student does not take it within the wait is an ordinary way to offer a bite. Only keeping it there is escape extinction.</td></tr>
+      <tr><th>Rapid eating</th><td>Putting utensils down between bites controlled bite rate at school lunch (Epstein et al., 1976). A vibrating pager taught in the classroom lengthened meals for 3 teenagers with autism (Anglesea et al., 2008), and fading the pager by its strength kept a safe pace where fading by frequency did not (Valentino et al., 2018). Prompting and reinforcement lowered bite rate for an adolescent with an esophageal stricture (Shore et al., 1999). Blocking a reach is a restrictive step on TD-1&rsquo;s card and is not part of this pathway.</td></tr>
+      <tr><th>Setting events and meal timing</th><td>Acceptance was less likely to persist after disrupted sleep when escape extinction was not in place (Reed et al., 2005), so each meal row has three ticks: slept poorly, unwell, ate within the last hour, and the graph marks those meals. Meal schedule and quantity changed problem behavior (Wacker et al., 1996): meal timing is logged, never changed to build hunger.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">Part 4. Data</h2>
+    <table class="rt">
+      <tr><th style="width:26%">The measures</th><td>% of bites accepted; % mouth clean of accepted bites (bites not checked are left out and counted); % packed of accepted bites; expulsions per accepted bite; refusal per presentation; meal minutes; seconds per bite (meal minutes &times; 60 &divide; bites accepted); grams eaten when the plate is weighed before and after, with the family&rsquo;s agreement; and the number of target foods eaten at criterion.</td></tr>
+      <tr><th>Criterion</th><td>Each bite is scored accepted or not, so mastery is 100%: a target food counts as eaten at criterion when, at its last 3 meals, every bite of it offered was accepted and every accepted bite that was checked was mouth clean at 30 s.</td></tr>
+      <tr><th>Why mouth clean</th><td>Acceptance alone can mislead: mouth clean is the product measure of swallowing (Patel et al., 2002), and packing lowered intake while grams eaten tracked it (Patel et al., 2005).</td></tr>
+      <tr><th>Weight</th><td>Entered beside the graph from the nurse or the family&rsquo;s doctor. A weight lower than at the weigh-in before prints &ldquo;Tell the nurse and the family&rsquo;s doctor.&rdquo;</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated student eats enough but a narrow range of foods (selectivity by type), has every red flag answered no and the doctor&rsquo;s clearance on file, and is observed at one lunch. The plan uses mealtime structure, simultaneous presentation and differential reinforcement with two target foods; ten meals are entered, three before the plan and seven after, with three weigh-ins.</p>
+    <p class="hint" id="fdRefs" style="margin-top:10px"><b>Reference list.</b>
+    Addison, L. R., Piazza, C. C., Patel, M. R., Bachmeyer, M. H., Rivas, K. M., Milnes, S. M., &amp; Oddo, J. (2012). A comparison of sensory integrative and behavioral therapies as treatment for pediatric feeding disorders. <em>Journal of Applied Behavior Analysis, 45</em>(3), 455&ndash;471. &bull;
+    Ahearn, W. H. (2003). Using simultaneous presentation to increase vegetable consumption in a mildly selective child with autism. <em>Journal of Applied Behavior Analysis, 36</em>(3), 361&ndash;365. &bull;
+    Anglesea, M. M., Hoch, H., &amp; Taylor, B. A. (2008). Reducing rapid eating in teenagers with autism: Use of a pager prompt. <em>Journal of Applied Behavior Analysis, 41</em>(1), 107&ndash;111. &bull;
+    Borrero, C. S. W., Woods, J. N., Borrero, J. C., Masler, E. A., &amp; Lesser, A. D. (2010). Descriptive analyses of pediatric food refusal and acceptance. <em>Journal of Applied Behavior Analysis, 43</em>(1), 71&ndash;88. &bull;
+    Buckley, S. D., &amp; Newchok, D. K. (2005). An evaluation of simultaneous presentation and differential reinforcement with response cost to reduce packing. <em>Journal of Applied Behavior Analysis, 38</em>(3), 405&ndash;409. &bull;
+    Epstein, L. H., Parker, L., McCoy, J. F., &amp; McGee, G. (1976). Descriptive analysis of eating regulation in obese and nonobese children. <em>Journal of Applied Behavior Analysis, 9</em>(4), 407&ndash;415. &bull;
+    Frank-Crawford, M. A., Hagopian, L. P., Scheithauer, M., McMahon, M. X. H., Argueta, T., Call, N. A., &amp; Schmidt, J. D. (2025). Assessment and treatment of pica: A consecutive controlled case series study. <em>Journal of Applied Behavior Analysis, 58</em>(4), 771&ndash;793. &bull;
+    Kern, L., &amp; Marder, T. J. (1996). A comparison of simultaneous and delayed reinforcement as treatments for food selectivity. <em>Journal of Applied Behavior Analysis, 29</em>(2), 243&ndash;246. &bull;
+    Kerwin, M. E., Ahearn, W. H., Eicher, P. S., &amp; Burd, D. M. (1995). The costs of eating: A behavioral economic analysis of food refusal. <em>Journal of Applied Behavior Analysis, 28</em>(3), 245&ndash;260. &bull;
+    Meier, A. E., Fryling, M. J., &amp; Wallace, M. D. (2012). Using high-probability foods to increase the acceptance of low-probability foods. <em>Journal of Applied Behavior Analysis, 45</em>(1), 149&ndash;153. &bull;
+    Munk, D. D., &amp; Repp, A. C. (1994). Behavioral assessment of feeding problems of individuals with severe disabilities. <em>Journal of Applied Behavior Analysis, 27</em>(2), 241&ndash;250. &bull;
+    Patel, M. R., Piazza, C. C., Martinez, C. J., Volkert, V. M., &amp; Santana, C. M. (2002). An evaluation of two differential reinforcement procedures with escape extinction to treat food refusal. <em>Journal of Applied Behavior Analysis, 35</em>(4), 363&ndash;374. &bull;
+    Patel, M. R., Piazza, C. C., Layer, S. A., Coleman, R., &amp; Swartzwelder, D. M. (2005). A systematic evaluation of food textures to decrease packing and increase oral intake in children with pediatric feeding disorders. <em>Journal of Applied Behavior Analysis, 38</em>(1), 89&ndash;100. &bull;
+    Penrod, B., Gardella, L., &amp; Fernand, J. (2012). An evaluation of a progressive high-probability instructional sequence combined with low-probability demand fading in the treatment of food selectivity. <em>Journal of Applied Behavior Analysis, 45</em>(3), 527&ndash;537. &bull;
+    Peterson, K. M., Piazza, C. C., &amp; Volkert, V. M. (2016). A comparison of a modified sequential oral sensory approach to an applied behavior-analytic approach in the treatment of food selectivity in children with autism spectrum disorder. <em>Journal of Applied Behavior Analysis, 49</em>(3), 485&ndash;511. &bull;
+    Piazza, C. C., Fisher, W. W., Brown, K. A., Shore, B. A., Patel, M. R., Katz, R. M., Sevin, B. M., Gulotta, C. S., &amp; Blakely-Smith, A. (2003). Functional analysis of inappropriate mealtime behaviors. <em>Journal of Applied Behavior Analysis, 36</em>(2), 187&ndash;204. &bull;
+    Piazza, C. C., Patel, M. R., Santana, C. M., Goh, H.-L., Delia, M. D., &amp; Lancaster, B. M. (2002). An evaluation of simultaneous and sequential presentation of preferred and nonpreferred food to treat food selectivity. <em>Journal of Applied Behavior Analysis, 35</em>(3), 259&ndash;270. &bull;
+    Reed, G. K., Dolezal, D. N., Cooper-Brown, L. J., &amp; Wacker, D. P. (2005). The effects of sleep disruption on the treatment of a feeding disorder. <em>Journal of Applied Behavior Analysis, 38</em>(2), 243&ndash;245. &bull;
+    Saini, V., Kadey, H. J., Paszek, K. J., &amp; Roane, H. S. (2019). A systematic review of functional analysis in pediatric feeding disorders. <em>Journal of Applied Behavior Analysis, 52</em>(4), 1161&ndash;1175. &bull;
+    Scott, V., Saini, V., &amp; Totino, M. (2024). On the efficacy and efficiency of treating pediatric feeding disorder. <em>Journal of Applied Behavior Analysis, 57</em>, 859&ndash;878. &bull;
+    Seubert, C., Fryling, M. J., Wallace, M. D., Jiminez, A. R., &amp; Meier, A. E. (2014). Antecedent interventions for pediatric feeding problems. <em>Journal of Applied Behavior Analysis, 47</em>(2), 449&ndash;453. &bull;
+    Shore, B. A., LeBlanc, D., &amp; Simmons, J. (1999). Reduction of unsafe eating in a patient with esophageal stricture. <em>Journal of Applied Behavior Analysis, 32</em>(2), 225&ndash;228. &bull;
+    Tiger, J. H., &amp; Hanley, G. P. (2006). Using reinforcer pairing and fading to increase the milk consumption of a preschool child. <em>Journal of Applied Behavior Analysis, 39</em>(3), 399&ndash;403. &bull;
+    Valentino, A. L., LeBlanc, L. A., &amp; Raetz, P. B. (2018). Evaluation of stimulus intensity fading on reduction of rapid eating in a child with autism. <em>Journal of Applied Behavior Analysis, 51</em>(1), 177&ndash;182. &bull;
+    Van Arsdale, A., Perrino, N., Clark, R. J., Iba&ntilde;ez, V. F., &amp; Vollmer, T. R. (2025). Computer-based training to teach structured mealtime assessment skills. <em>Journal of Applied Behavior Analysis, 58</em>, 865&ndash;881. &bull;
+    Volkert, V. M., &amp; Vaz, P. C. M. (2010). Recent studies on feeding problems in children with autism. <em>Journal of Applied Behavior Analysis, 43</em>(1), 155&ndash;159. &bull;
+    Wacker, D. P., Harding, J., Cooper, L. J., Derby, K. M., Peck, S., Asmus, J., Berg, W. K., &amp; Brown, K. A. (1996). The effects of meal schedule and quantity on problematic behavior. <em>Journal of Applied Behavior Analysis, 29</em>(1), 79&ndash;87. &bull;
+    Werle, M. A., Murphy, T. B., &amp; Budd, K. S. (1993). Treating chronic food refusal in young children: Home-based parent training. <em>Journal of Applied Behavior Analysis, 26</em>(4), 421&ndash;433.</p>
+  </section>

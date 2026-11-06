@@ -1,4 +1,4 @@
-/* both one-file editions open with all 47 forms, and PD-1, SV-1, TD-1 and GB-1 open inside them with their page bar (pass or fail
+/* both one-file editions open with all 48 forms, and PD-1, SV-1, TD-1 and GB-1 open inside them with their page bar (pass or fail
    since v22.12, review F505); TD-1 and GB-1 open with their banks, which are files of their own beside the forms (v23.86, v25.18) */
 const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const bad=[];
@@ -13,7 +13,7 @@ const bad=[];
     const bf=page.frames().filter(f=>f!==page.mainFrame());let nb=-1;
     if(bank)for(const f of bf){const v=await f.evaluate(bank).catch(()=>-2);if(v>nb)nb=v;}
     if(bank){console.log(ed,id,'bank',nb);if(!(nb>0))bad.push(ed+' '+id+': bank '+nb);}}
-  console.log(ed,'forms',n,'title',await page.title(),'LOG',JSON.stringify(log).slice(0,300));if(n!==47)bad.push(ed+': '+n+' forms');if(log.length)bad.push(ed+': '+JSON.stringify(log).slice(0,200));await page.close();}
+  console.log(ed,'forms',n,'title',await page.title(),'LOG',JSON.stringify(log).slice(0,300));if(n!==48)bad.push(ed+': '+n+' forms');if(log.length)bad.push(ed+': '+JSON.stringify(log).slice(0,200));await page.close();}
  console.log((bad.length?'FAIL ':'PASS ')+'both one-file editions open with 47 forms; PD-1, SV-1, TD-1 and GB-1 open inside them with their page bar, TD-1 and GB-1 with their banks'+(bad.length?'  '+JSON.stringify(bad):''));
  console.log(bad.length?'RESULT: 1 failed':'RESULT: all passed');process.exitCode=bad.length?1:0;
  await br.close();})();

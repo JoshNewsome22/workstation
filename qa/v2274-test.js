@@ -53,9 +53,9 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',PR='PR-1_Periodic-Plan-Review_
   ok('12 F283 a check under 80% since then: hold; a check from before the criterion began does not count for it',/the latest fidelity check since then \([\d/]+, 60%\) is under 80%/.test(g1)&&/: move to phase 2/.test(g2)&&/but hold the criterion: no fidelity check is logged since the criterion became 2/.test(g3),[g1,g2,g3]);
   const steps=t=>p.evaluate(t=>{setType(t);renderAll();return [...document.querySelectorAll('#fidTbl tbody tr')].map(r=>r.children[1].textContent.replace(/\s+/g,' '));},t);
   const fg=await steps('gbg'),ft=await steps('tootle'),fd=await steps('dep'),fs=await steps('selfmon');await p.evaluate(()=>{setType('gbg');renderAll();});
-  ok('13 F283 eleven common steps, praise and a neutral voice as two; tootling, dependent and self-monitoring add their own',
-    fg.length===11&&/^A specific praise statement naming the team/.test(fg[4])&&/^Each foul or miss was marked in a neutral voice/.test(fg[5])&&
-    ft.length===13&&/screened for put-downs and tattling/.test(ft[11])&&/this arrangement’s own steps from here/.test(ft[11])&&fd.length===13&&/not named or blamed/.test(fd[11])&&fs.length===13&&/cue came on time/.test(fs[11]),{fg:fg.length,ft:ft.slice(10),fd:fd.length});
+  ok('13 F283 twelve common steps (v25.65 TOKEN-M6 adds the rule named with each mark), praise and a neutral voice as two; tootling, dependent and self-monitoring add their own',
+    fg.length===12&&/^A specific praise statement naming the team/.test(fg[4])&&/^Each foul or miss was marked in a neutral voice/.test(fg[5])&&
+    ft.length===14&&/screened for put-downs and tattling/.test(ft[12])&&/this arrangement’s own steps from here/.test(ft[12])&&fd.length===14&&/not named or blamed/.test(fd[12])&&fs.length===14&&/cue came on time/.test(fs[12]),{fg:fg.length,ft:ft.slice(10),fd:fd.length});
   /* a tootling day: the common team steps N/A, tootling's own No: not 100% */
   const tp=await p.evaluate(()=>{setType('tootle');renderAll();fidSteps().forEach(({s,i})=>{S.fid[i]={in:s.for?'No':'Yes',note:''};});renderFidelity();const r=[fidStats().pct,document.querySelector('#fidVerdict').textContent];setType('gbg');renderAll();return r;});
   ok('14 F283 a tootling observation with tootling’s own steps missed does not read as the game run as written',tp[0]<90&&!/ran as written/.test(tp[1]),tp);
@@ -98,7 +98,7 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',PR='PR-1_Periodic-Plan-Review_
   const ow=await p.evaluate(()=>{const o=fromFile({form:'GC-1',rev:'2026-10',S:{v:2,meta:{id_rule:'The score of the lowest student meets the criterion'},type:'interdep',fid:Array.from({length:10},(_,i)=>({in:i===4?'Yes':i===5?'No':'Yes',note:i===4?'praise seen':''}))}});S=o;renderAll();
     const r={rule:S.meta.id_rule,sel:document.querySelector('[data-m="id_rule"]').value,f4:S.fid[4],f5:S.fid[5],f6:S.fid[6],n:S.fid.length};return r;});
   ok('22 F282/F283 a file saved before: the "lowest student" option reads as the student who did least well; the ten old fidelity steps are mapped (old step 5 to both new steps 5 and 6, with a note)',
-    /^The score of the student who did least well/.test(ow.rule)&&ow.sel===ow.rule&&ow.n===22&&ow.f4.in==='Yes'&&ow.f5.in==='Yes'&&/one step before v22\.74: check\) praise seen/.test(ow.f4.note)&&ow.f6.in==='No',ow);
+    /^The score of the student who did least well/.test(ow.rule)&&ow.sel===ow.rule&&ow.n===24&&ow.f4.in==='Yes'&&ow.f5.in==='Yes'&&/one step before v22\.74: check\) praise seen/.test(ow.f4.note)&&ow.f6.in==='No',ow);
 
   /* ---------------- F284 the case ---------------- */
   await p.close();p=await open(GC);

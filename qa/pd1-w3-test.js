@@ -37,11 +37,11 @@ const iso=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+n);r
   await p.evaluate(async()=>{await loadSim();});await sleep(300);
   const sim=await p.evaluate(()=>({note:S.meta.filenote,chk:document.querySelector('#noteCheck').textContent,out:window.__nbhFactsOut(),due:window.__nbhDue(),ini:S.meta.initials,client:S.meta.client}));
   ok('5 F248 the example drafts a note for the student’s file: the plan component, how often it was delivered, the barrier found, the changes and the reassessment, and no staff name',
-    /^Plan component: BIP dated .*FCT practice trials/.test(sim.note)&&/Delivered before the change: Trials run: 4 of 10/.test(sim.note)&&/found the resources, materials, & processes domain leading/.test(sim.note)&&
+    /^Plan component: BIP dated .*FCT practice trials/.test(sim.note)&&/Delivered before the change: Trials run: 4 of 10/.test(sim.note)&&/found the task clarification & prompting domain leading/.test(sim.note)&&
     /Changes chosen: .*task clarification/i.test(sim.note)&&/Reassessment: \d+\/\d+\/\d{4}\./.test(sim.note)&&!/Paraeducator|Ms\. R/.test(sim.note)&&/No staff name found/.test(sim.chk)&&sim.ini==='S.S.'&&!sim.client,sim);
   const pf=sim.out&&sim.out.perf;
   ok('6 F248 F253 the case gets the performance diagnostic without the person: the plan component, the leading domain, the changes, the reassessment and the note',
-    pf&&pf.lead==='R'&&/Resources/.test(pf.leadName)&&pf.fixes.length>=3&&/^\d{4}-\d{2}-\d{2}$/.test(pf.reassess)&&pf.note===sim.note&&!pf.named&&pf.tNo===1&&!JSON.stringify(sim.out).includes('Paraeducator'),sim.out);
+    pf&&pf.lead==='C'&&/Task Clarification/.test(pf.leadName)&&pf.fixes.length>=3&&/^\d{4}-\d{2}-\d{2}$/.test(pf.reassess)&&pf.note===sim.note&&!pf.named&&pf.tNo===1&&!JSON.stringify(sim.out).includes('Paraeducator'),sim.out);
   ok('7 F253 the reassessment date is on the due list',sim.due.length===1&&sim.due[0].date===pf.reassess&&/PD-1 reassessment/.test(sim.due[0].what),sim.due);
   const nm=await p.evaluate(()=>{const s=document.querySelector('[data-m="staff"]');s.value='Dana Whitfield (simulated)';s.dispatchEvent(new Event('input',{bubbles:true}));
     const n=document.querySelector('[data-m="filenote"]');n.value=S.meta.filenote+' Ms. Whitfield will run the trials.';n.dispatchEvent(new Event('input',{bubbles:true}));
@@ -99,13 +99,13 @@ const iso=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+n);r
     T.three.length===1&&/^Integrity under the 90% criterion on 3 of the last 3 checks \(the last, .*, 60%\): find out why before retraining \(Form PD-1\)\|PD-1$/.test(T.three[0]),T.three);
   ok('16 F249 a single check under the criterion: check again before acting (PD-1 is for a consistent pattern)',T.one.length===1&&/\(the only check so far\): check again before acting; if it repeats, find out why before retraining \(Form PD-1\)\|TI-1$/.test(T.one[0]),T.one);
   ok('17 F249 once PD-1 holds a result, Today names its leading domain and the changes; retraining only when it found training leading',
-    /Form PD-1 \(.*\) found resources, materials, & processes leading; the changes: .*; training items answered No as well: retrain those too\|PD-1$/.test(T.r[0])&&/found training leading: retrain the steps missed \(the retraining list on Form TI-1\)\|TI-1$/.test(T.t[0]),{r:T.r,t:T.t});
+    /Form PD-1 \(.*\) found task clarification & prompting leading; the changes: .*; training items answered No as well: retrain those too\|PD-1$/.test(T.r[0])&&/found training leading: retrain the steps missed \(the retraining list on Form TI-1\)\|TI-1$/.test(T.t[0]),{r:T.r,t:T.t});
   ok('18 F253 the reassessment PD-1 set is on Today when it is near',T.due.some(x=>/^The reassessment Form PD-1 set for BIP dated .*… is in 2 days \(.*\): repeat the measure, and the checklist if nothing has changed\|PD-1$/.test(x)),T.due);
   const D=await sh.evaluate(([iso,pf])=>{const F={src:{},data:{from:iso[0],to:iso[2],days:20,behaviors:[{name:'Elopement',kind:'target',base:{days:6,mean:4},cur:{days:12,mean:3.9},curName:'Intervention'}]},
       integrity:{obs:[{date:iso[1],pct:70,n:10},{date:iso[2],pct:60,n:10}],criterion:90}};
     const tx=h=>{const d=document.createElement('div');d.innerHTML=h;return d.textContent;};const r=f=>tdDecision(f).map(x=>tx(x.t)+'|'+x.open);return {no:r(F),pd:r(Object.assign({},F,{perf:pf}))};},[[iso(-30),iso(-5),iso(-2)],pf]);
   ok('19 F249 the decision list: find out why (PD-1) before judging the plan; with PD-1’s result, judge the plan once the change has run',
-    /but integrity under the 90% criterion on 2 of the last 2 checks .*: find out why before retraining \(Form PD-1\), then judge the plan\|PD-1$/.test(D.no[0])&&/found resources, materials, & processes leading.*; judge the plan once the change has run \(retrain the training items answered No too\)\|PD-1$/.test(D.pd[0]),D);
+    /but integrity under the 90% criterion on 2 of the last 2 checks .*: find out why before retraining \(Form PD-1\), then judge the plan\|PD-1$/.test(D.no[0])&&/found task clarification & prompting leading.*; judge the plan once the change has run \(retrain the training items answered No too\)\|PD-1$/.test(D.pd[0]),D);
   /* F248 the master print: Tick the ones I've used leaves PD-1 out; ticking it asks */
   const M=await sh.evaluate(()=>{state.status['PD-1']={filled:40};state.status['TI-1']={filled:30};document.getElementById('tickUsed').click();const used={pd:!!state.ticked['PD-1'],ti:!!state.ticked['TI-1']};
     let asked='';window.confirm=m=>{asked=m;return false;};const cb=document.querySelector('[data-tick="PD-1"]');cb.click();const no=!!state.ticked['PD-1'];
@@ -128,7 +128,7 @@ const iso=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+n);r
   const r=await open(PR);
   const h=await r.evaluate(pf=>({a:prAlsoText({perf:pf}),b:prAlsoText({perf:Object.assign({},pf,{note:'',named:true})})}),pf);
   ok('23 F248 PR-1 carries PD-1’s note for the student’s file, or its result in outline when the note names staff',
-    /Performance diagnostic \(Form PD-1\): Plan component: BIP dated/.test(h.a)&&/Performance diagnostic \(Form PD-1, \d+\/\d+\) on BIP dated .*: resources, materials, & processes leading; changes chosen: .*; reassessment \d+\/\d+\./.test(h.b)&&!/Paraeducator/.test(h.a+h.b),h);
+    /Performance diagnostic \(Form PD-1\): Plan component: BIP dated/.test(h.a)&&/Performance diagnostic \(Form PD-1, \d+\/\d+\) on BIP dated .*: task clarification & prompting leading; changes chosen: .*; reassessment \d+\/\d+\./.test(h.b)&&!/Paraeducator/.test(h.a+h.b),h);
   ok('24 no page errors',errs.length===0,errs);
   }catch(e){console.error(e);fails++;}
   await br.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})();
