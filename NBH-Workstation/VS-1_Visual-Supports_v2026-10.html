@@ -1024,7 +1024,7 @@ input.vs-word{display:block;width:100%;margin-top:4px;font:inherit;border:1px so
       <div><label>Card size</label><select data-m="sc_size"><option value="1.5">1.5 inch</option><option value="2" selected>2 inch</option></select></div>
       <div><label>Title</label><input data-m="sc_title" placeholder="My Schedule"></div>
       <!-- v25.65 SKILL-L4 -->
-      <div><label>Pictures and words</label><select data-m="sc_label"><option value="below">Picture with the word below</option><option value="words">Words only: the next step when reading the word is a goal</option></select></div>
+      <div><label>Pictures and words</label><select data-m="sc_label"><option value="">Picture with the word below</option><option value="words">Words only: the next step when reading the word is a goal</option></select></div>
       <!-- v25.65 SKILL-L5 -->
       <div><label>Joint schedule</label><select data-m="sc_joint"><option value="">One student</option><option value="yes">Two students: a second strip for a partner, Together steps linked</option></select></div>
       <div><label>Partner&rsquo;s strip title (no name needed)</label><input data-m="sc_ptitle" placeholder="My Partner&rsquo;s Schedule"></div>
@@ -1475,7 +1475,7 @@ $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='VS-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v),obj=k=>s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])?s[k]:{};
-  Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
+  Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});o.chk={};/* v25.65 the ticks in the file's own order */Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
   /* (A7) a file saved before the Sheets setting (or holding a value it does not know) opens as Automatic, whatever Sheets shows now */
   if(!/^(auto|full|turn)$/.test(o.meta.sheets))o.meta.sheets='auto';
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<600000;
@@ -1484,8 +1484,7 @@ function fromFile(d){
   const arr=(k,fields,n)=>Array.isArray(s[k])?s[k].slice(0,n).map(x=>{const r={};fields.forEach(f=>{r[f]=f==='on'?!!(x&&x[f]):str(x&&x[f]);});if(!P[r.k])r.k='';if(!ids.has(r.ph))r.ph='';return r;}):null;
   const b=arr('board',['k','ph','l'],30);if(b)o.board=b;const c=arr('cards',['k','ph','l','qty'],30);if(c&&c.length)o.cards=c;
   const r=arr('rules',['on','k','ph','l','say'],24);if(r&&r.length)o.rules=r;const ft=arr('ft',['k','ph','l'],2);if(ft&&ft.length===2)o.ft=ft;
-  const sc=arr('sched',['k','ph','l','kind'],14);if(sc&&sc.length)o.sched=sc;o.sched.forEach(x=>{if(!/^(work|pref|together)$/.test(x.kind||''))delete x.kind;});   /* v25.65 SKILL-H6 */
-  o.chk.s_teach=!!(s.chk&&s.chk.s_teach);   /* v25.65 SKILL-M7: a file saved before prints as before */const ch=arr('choice',['k','ph','l'],6);if(ch&&ch.length)o.choice=ch;
+  const sc=arr('sched',['k','ph','l','kind'],14);if(sc&&sc.length)o.sched=sc;o.sched.forEach(x=>{if(!/^(work|pref|together)$/.test(x.kind||''))delete x.kind;});   /* v25.65 SKILL-H6 */   /* v25.65 SKILL-M7: o.chk starts empty, so a file saved before has no s_teach and prints as before */const ch=arr('choice',['k','ph','l'],6);if(ch&&ch.length)o.choice=ch;
   const tk=arr('tk',['k','ph','l'],2);if(tk&&tk.length===2)o.tk=tk;const fs=arr('fs',['k','ph','l','d'],5);if(fs&&fs.length===5)o.fs=fs;
   return o;
 }
@@ -1501,7 +1500,7 @@ $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).r
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('board');}});
 async function loadSim(){if(!(await nbhUI.confirm('Load a simulated set of visuals?\nEvery visual is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;S=blank();
   S.meta={client:'SIMULATED – Sample Student',b_title:'NEEDS',b_bandpos:'bottom',b_color:'#cfe3cf',b_rows:'3',b_cols:'4',b_page:'land',b_dot:'yes',b_label:'below',b_dim:'full',c_size:'2',c_label:'above',c_cut:'yes',c_round:'yes',r_size:'half',r_title:'Our Classroom Expectations',r_what:'both',ft_words:'yes',sc_dir:'v',sc_size:'2',sc_title:'Sam’s Schedule',ch_title:'I want…',ch_n:'4',tk_n:'5',tk_title:'I am working for…',w_n:'5',w_words:'Wait. It is coming.',fs_title:'How big is my feeling?'};
-  S.chk={s_ft:true,s_sched:true,s_choice:true,s_token:true,s_wait:true,s_scale:true,s_break:true};
+  S.chk={s_ft:true,s_sched:true,s_choice:true,s_token:true,s_wait:true,s_scale:true,s_break:true,s_teach:false};   /* v25.65 SKILL-M7: the simulation prints as before */
   ensure();['toilet','eat','drink','walk','phone','sleep','clothes','computer','doctor','family','home','help'].forEach((k,i)=>{S.board[i]=cello(k);});
   S.cards=[{k:'writing',ph:'',l:'Writing',qty:'40'},{k:'math',ph:'',l:'Math',qty:'20'},{k:'recess',ph:'',l:'Recess',qty:'20'}];
   renderAll();setView('board');nbhUI.toast('Simulation loaded: '+'a simulated set of visuals: a NEEDS board, three card sheets, five rule cards and every strip.',{kind:'ok'});}
