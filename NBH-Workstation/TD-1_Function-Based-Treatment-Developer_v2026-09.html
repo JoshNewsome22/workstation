@@ -7512,6 +7512,33 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#addCompBtn'))setTimeout(()=>{try{fill();}catch(x){}},0);});
 })();
 </script>
+<script id="td1-v2567-delay">
+/* v25.67 (DELAY-H1, H2, M2, L1; batch 3) the rest of Form DT-1's plan reaches TD-1, as the review's "Fit with TD-1" asks: the shares
+   of requests honored at once, delayed and denied; the denial statement and what a denial gives instead; the script for an item that
+   can never be given; the signal during the delay and asking "when?"; the problem-behavior criterion against baseline; and the plan
+   line for the return of problem behavior. Shown on screen beside the thinning ladder, and carried into the BIP after the ladder (and
+   after Form SR-1's schedule). Nothing in TD-1's own fields changes, and a case without these keys (DT-1 before v25.65) adds nothing. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let d=null;
+ function lines(){if(!d||d.src&&d.src!=='DT-1')return [];const L=[],sh=d.shares,pc=v=>v==null||!isFinite(+v)?'?':(+v)+'%';
+  if(sh&&[sh.imm,sh.del,sh.den].some(x=>x!=null))L.push(['Requests honored at once, delayed and denied',pc(sh.imm)+' at once, '+pc(sh.del)+' delayed, '+pc(sh.den)+' denied'+(+sh.den>0?'':'; denied trials begin only after the delayed trials meet the step criterion')]);
+  if(T(d.denialSay))L.push(['Denial statement (said the same way every time)',T(d.denialSay)]);
+  if(T(d.denialGives))L.push(['What a denial trial gives instead',T(d.denialGives)]);
+  if(T(d.unavailable))L.push(['An item that can never be given',T(d.unavailable)]);
+  if(T(d.signal)&&T(d.signal)!=='None')L.push(['Signal during the delay',T(d.signal)]);
+  if(d.askWhen)L.push(['Asking “when?”','The student may ask when; every delay cue has an answer the adult can give (“after two more pages”)']);
+  if(T(d.pbCrit))L.push(['Problem behavior at each longer step',T(d.pbCrit)+(d.baseline&&d.baseline.pbm!=null&&isFinite(+d.baseline.pbm)?' (baseline mean '+(Math.round(+d.baseline.pbm*100)/100)+' per minute over '+d.baseline.sessions+' session'+(+d.baseline.sessions===1?'':'s')+')':'')]);
+  if(T(d.relapsePlan))L.push(['If problem behavior comes back',T(d.relapsePlan).replace(/^Plan for problem behavior to come back\.\s*/,'')]);
+  return L;}
+ window.__td2567DelayLines=lines;
+ function note(){let el=document.getElementById('td67DtNote');const at=document.getElementById('tdSrNote');if(!el&&at){el=document.createElement('div');el.id='td67DtNote';el.className='hint noprint';at.insertAdjacentElement('afterend',el);}
+  if(!el)return;const L=lines();el.hidden=!L.length;el.innerHTML=L.length?'<b>Form DT-1 holds the delay and denial plan:</b> '+L.map(([k,v])=>E(k)+': '+E(String(v).replace(/[.\s]+$/,''))).join('; ')+'. The text for the BIP carries it after the ladder.':'';}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{d=f&&f.delay&&typeof f.delay==='object'?f.delay:null;note();}catch(e){}return r;};
+ const bip0=window.__td82Bip;window.__td82Bip=function(B,o){const res=bip0?bip0.apply(this,arguments):undefined;try{const L=lines();if(!L.length)return res;
+   const bl=(o&&o.bipLine)||((l,v)=>v?l+': '+v:'');const blk=['DELAY AND DENIAL TOLERANCE (FORM DT-1)'].concat(L.map(([k,v])=>bl(k,v)));
+   let k=B.findIndex(b=>b&&b[0]==='REINFORCEMENT SCHEDULE (FORM SR-1)');if(k<0)k=B.findIndex(b=>b&&b[0]==='REINFORCEMENT THINNING LADDER');B.splice(k<0?B.length:k+1,0,blk);}catch(e){}return res;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

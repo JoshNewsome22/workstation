@@ -1516,6 +1516,8 @@ function adReward(a){const lc=x=>x?x.charAt(0).toLowerCase()+x.slice(1):x;const 
   else if(k==='tok')t=head+'a token for each '+w+'; after '+N+', count the tokens together and trade them for '+rf+(u?' ('+u+')':'')+'.';
   else if(k==='int')t=head+'each '+w+' is marked; every '+(a.every||5)+', '+rf+' for the marked amount'+(u?' ('+u+')':'')+'.';
   else t=head+T(a.choice)+(T(a.reinforcer)?' ('+rf+')':'')+'.';
+  /* v25.67 (DELAY-H3, batch 3) Form AD-1's delivery window, where a token or a mark is given */
+  if((k==='tok'||k==='int')&&a.window!=null&&a.window!==''&&isFinite(+a.window))t=t.replace(/\.$/,'')+'; give each '+(k==='tok'?'token':'mark')+' within '+(+a.window)+' s of the '+w+'.';
   return t+(end?' When the time is up: '+lc(end).replace(/[.\s]+$/,'')+'.':'');}
 /* v22.94 (DT-1 review F402) the delay-tolerance protocol as a line for staff: the cue, the tolerance response, the activity,
    the wait now in training, and what staff do about problem behavior during the wait */

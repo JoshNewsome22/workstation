@@ -55,5 +55,42 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await t.close();
  });
 
+ /* ---------------- DELAY ---------------- */
+ await sec('DELAY',async()=>{
+  const DLY={src:'DT-1',arrange:'fct',tr:'says “okay”',ladder:[{s:5,met:'10/1/2026'},{s:15,met:''}],current:15,
+    shares:{imm:40,del:60,den:0},denialSay:'Not this time.',denialGives:'An alternative preferred activity at once (“Not now, but you can have ___”)',
+    unavailable:'The tablet is broken. You can have the puzzle or the drawing book.',signal:'A continuous signal in view for the whole delay (visual timer, countdown, hand signal held)',askWhen:true,
+    pbCrit:'At or below 0.10 of the baseline mean (a 90% reduction)',baseline:{pbm:1.234,sessions:3},relapsePlan:'Plan for problem behavior to come back. Problem behavior is likely to come back at least once while the delay is lengthened.'};
+  const t=await open('TD-1');
+  const r=await t.evaluate(async D=>{window.__tdAddComp('FCT');window.__nbhFactsIn({delay:D});await new Promise(r=>setTimeout(r,300));
+    const n=document.getElementById('td67DtNote');const note=n&&!n.hidden?n.textContent:'',noteCls=n?n.className:'';const txt=window.__bipText();const i=txt.indexOf('DELAY AND DENIAL TOLERANCE (FORM DT-1)'),j=txt.indexOf('REINFORCEMENT THINNING LADDER');
+    window.__nbhFactsIn({delay:{src:'DT-1',ladder:[{s:5}],tr:'waits'}});await new Promise(r=>setTimeout(r,200));
+    return {note,noteCls,bip:i>=0?txt.slice(i,i+1600):'',order:i>j&&j>=0,old:window.__bipText().indexOf('DELAY AND DENIAL TOLERANCE')<0,oldNote:document.getElementById('td67DtNote').hidden};},DLY);
+  ok('DELAY 1 TD-1 shows DT-1’s delay and denial plan beside the ladder (screen only)',/40% at once, 60% delayed, 0% denied; denied trials begin only after/.test(r.note)&&/Not this time; What a denial/.test(r.note)&&/noprint/.test(r.noteCls),r);
+  ok('DELAY 2 TD-1’s BIP text carries it after the ladder: shares, denial, unavailable item, signal, "when?", criterion with the baseline, return of problem behavior',r.order&&/Denial statement \(said the same way every time\): Not this time\./.test(r.bip)&&/What a denial trial gives instead: An alternative/.test(r.bip)&&/An item that can never be given: The tablet is broken/.test(r.bip)&&/Signal during the delay: A continuous signal/.test(r.bip)&&/Asking “when\?”/.test(r.bip)&&/baseline mean 1\.23 per minute over 3 sessions/.test(r.bip)&&/If problem behavior comes back: Problem behavior is likely/.test(r.bip),r);
+  ok('DELAY 3 a DT-1 protocol without the v25.65 keys adds nothing',r.old&&r.oldNote,r);
+  await t.close();
+  const dt=await open('DT-1');
+  const a=await dt.evaluate(()=>{const o=document.getElementById('outAUC');const before=window.__nbhFactsOut();o.textContent='0.27';const L=document.getElementById('outLogK');if(L)L.textContent='-1.5';const after=window.__nbhFactsOut();return {before:before&&before.delay||null,after:after&&after.delay||null};});
+  ok('DELAY 4 DT-1 hands the discounting AUC to the case on its own (DELAY-M6)',!a.before&&a.after&&a.after.discount&&a.after.discount.auc===0.27&&Array.isArray(a.after.ladder)&&!a.after.ladder.length,a);
+  await dt.close();
+  const ad=await open('AD-1');
+  const au=await ad.evaluate(async()=>{window.__nbhFactsIn({delay:{src:'DT-1',ladder:[],discount:{auc:0.21,logk:-1,date:'2026-10-01'}}});await new Promise(r=>setTimeout(r,300));const e=document.querySelector('[name="l_auc"]');return e?e.value:null;});
+  ok('DELAY 5 AD-1 takes the AUC from a case that holds only the discounting probe',au!=null&&/0\.21/.test(au),au);
+  await ad.close();
+  const te=await open('TE-1');
+  const e=await te.evaluate(async()=>{const A={src:'AD-1',choice:'Accumulated',key:'acc',window:2,exchangeWhen:'Within the session',tokenValue:{pct:45,weak:true}};
+    window.__nbhFactsIn({arrangement:A});await new Promise(r=>setTimeout(r,300));const b=document.getElementById('te67Ad');
+    const o={box:b&&!b.hidden?b.textContent:'',cls:b?b.className:'',exHow:S.meta.exHow,exWhen:S.meta.exWhen};
+    S.meta.exHow='Distributed: a short piece after each token or small set';window.__nbhFactsIn({arrangement:A});o.kept=S.meta.exHow;return o;});
+  ok('DELAY 6 TE-1 shows AD-1’s delivery window, exchange timing and token value (screen only), with the weak-token caution',/within 2 s of the response/.test(e.box)&&/within the session/.test(e.box)&&/45% of the primary item, clearly below it/.test(e.box)&&/noprint/.test(e.cls)&&/te67-weak/.test(e.cls),e);
+  ok('DELAY 7 TE-1 fills how and when the backup is given from AD-1 only while empty',/^Accumulated: all the earned time/.test(e.exHow)&&e.exWhen==='Within the session (Form AD-1)'&&/^Distributed/.test(e.kept),e);
+  await te.close();
+  const q=await open('QS-1');
+  const qq=await q.evaluate(()=>typeof adReward==='function'?[adReward({key:'tok',work:'math problem',reinforcer:'the tablet',req:5,window:2}),adReward({key:'tok',work:'math problem',reinforcer:'the tablet',req:5})]:null);
+  ok('DELAY 8 QS-1’s staff line gives AD-1’s delivery window for tokens; without one it reads as before',qq&&/give each token within 2 s of the math problem\./.test(qq[0])&&!/within/.test(qq[1]),qq);
+  await q.close();
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
