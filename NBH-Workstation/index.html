@@ -11486,9 +11486,15 @@ function ddStats(b,d){const P=ddPts(b,d);if(!P.length)return null;const conds=(A
   return {P,n:P.length,base,baseName:b.baseName||(conds[0]&&conds[0].name)||'baseline',last5,n5:l5.length,pct,after,up,good:pct===null||Math.abs(pct)<1?null:(pct>0)===up,
     aim:b.aim!=null&&isFinite(b.aim)?+b.aim:null,aimMet:!!b.aimMet,run:b.run,need:b.need,unit:T(b.unit),measure:T(b.measure),last:P[P.length-1]};}
 const pctTxt=p=>(p>0?'+':p<0?'−':'')+Math.abs(Math.round(p))+'%';
+/* v25.67 the change as a reader would state it: a percent of baseline for a count or a rate, the usual "reduced by 90%";
+   in points for a measure that is itself a percent (41% against 27% is +14 points, not +52%); and the amount itself when
+   the baseline is under 1 or the percent is over 300 (a behavior taught from almost nothing: 0.3 to 10.8 a day is +10.5
+   a day, where +3173% says nothing) */
+const chgTxt=s=>{if(!s||s.pct===null)return '';const d=s.last5-s.base,sg=d>0?'+':d<0?'\u2212':'',a=String(Math.abs(Math.round(d*10)/10));
+  if(/^%/.test(s.unit||''))return sg+a+' pts';if(Math.abs(s.base)<1||Math.abs(s.pct)>300)return sg+a+(s.measure==='duration'||/minute/i.test(s.unit||'')?' min':'')+' a day';return pctTxt(s.pct);};
 /* the trend chip: the change since baseline, green when it moves the right way, red when not */
 function chipOf(f){const m=ddMain(f);const s=m.main&&ddStats(m.main,m.d);
-  if(s&&s.pct!==null)return '<span class="ch-chip '+(s.good===true?'gd':s.good===false?'bd':'')+'" title="'+esc(m.main.name+': last 5 days against '+s.baseName)+'">'+pctTxt(s.pct)+'</span>';
+  if(s&&s.pct!==null)return '<span class="ch-chip '+(s.good===true?'gd':s.good===false?'bd':'')+'" title="'+esc(m.main.name+': last 5 days against '+s.baseName)+'">'+chgTxt(s)+'</span>';
   if(s)return '<span class="ch-chip" title="Form DD-1 holds '+s.n+' day'+(s.n===1?'':'s')+', no plan phase yet">baseline</span>';
   return '<span class="ch-chip" title="No days of data from Form DD-1">no data</span>';}
 /* another student's facts, from the copy kept on this device (read once a save) */
@@ -11558,9 +11564,9 @@ const unitDay=s=>{const u=s.unit;if(/^%/.test(u))return u;if(s.measure==='durati
 function graphHtml(b,d,W,rep){const s=ddStats(b,d);if(!s)return '';const col=rep?'#2f7a4f':'#1f3a4d',pc=/^%/.test(s.unit),val=v=>fx(v)+(pc?'%':'');
   const st=[];if(s.base!==null)st.push('<span class="ch-st"><b>'+esc(val(s.base))+'</b><span>'+esc(s.after?s.baseName.toLowerCase()+' mean':'mean so far ('+s.baseName.toLowerCase()+')')+'</span></span>');
   st.push('<span class="ch-st"><b>'+esc(val(s.last5))+'</b><span>last '+s.n5+' day'+(s.n5===1?'':'s')+'</span></span>');
-  if(s.pct!==null)st.push('<span class="ch-st '+(s.good===true?'gd':s.good===false?'bd':'')+'"><b>'+esc(pctTxt(s.pct))+'</b><span>change</span></span>');
+  if(s.pct!==null)st.push('<span class="ch-st '+(s.good===true?'gd':s.good===false?'bd':'')+'"><b>'+esc(chgTxt(s))+'</b><span>change</span></span>');
   if(s.aim!==null)st.push('<span class="ch-st'+(s.aimMet?' gd':'')+'"><b>'+esc(val(s.aim))+'</b><span>aim'+(s.aimMet?', met '+(s.run||0)+' days in a row':s.need?', '+s.need+' days in a row asked':'')+'</span></span>');
-  const lab=b.name+', '+unitDay(s)+': '+s.n+' days from '+tdMd(s.P[0].d)+' to '+tdMd(s.last.d)+(s.base!==null?'; '+s.baseName+' mean '+val(s.base):'')+'; last '+s.n5+' days '+val(s.last5)+(s.pct!==null?'; change '+pctTxt(s.pct):'')+(s.aim!==null?'; aim '+val(s.aim)+(s.aimMet?', met':''):'')+'. Open DD-1';
+  const lab=b.name+', '+unitDay(s)+': '+s.n+' days from '+tdMd(s.P[0].d)+' to '+tdMd(s.last.d)+(s.base!==null?'; '+s.baseName+' mean '+val(s.base):'')+'; last '+s.n5+' days '+val(s.last5)+(s.pct!==null?'; change '+chgTxt(s):'')+(s.aim!==null?'; aim '+val(s.aim)+(s.aimMet?', met':''):'')+'. Open DD-1';
   return '<section class="ch-p '+(rep?'ch-o4':'ch-o3')+'" aria-labelledby="chG'+(rep?'R':'M')+'"><div class="ch-h"><h3 id="chG'+(rep?'R':'M')+'">'+esc(b.name)+', '+esc(unitDay(s))+'</h3>'+
     '<button type="button" class="ch-open" data-chopen="DD-1" aria-label="Open DD-1"><span class="ch-code">DD-1</span></button><span class="ch-sp"></span><span class="ch-note">'+(rep?'the replacement behavior':'last day of data '+esc(tdMd(s.last.d)))+'</span></div>'+
     '<button type="button" class="ch-graph" data-chopen="DD-1" aria-label="'+esc(lab)+'">'+graphSvg(s,W,col)+'<span class="ch-stats">'+st.join('')+'</span></button></section>';}
