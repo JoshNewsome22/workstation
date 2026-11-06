@@ -4280,6 +4280,32 @@ function pr64Outcome(){const C=course(),W=pr64Win(),P=W.pct,o={};
   pr64Paint();}catch(e){}return r;};}
 renderAll();
 </script>
+<script id="pr1-v2567">
+/* v25.67 (BC-RM-H1, H5, H6, M5, M6, L4; batch 3) more of what Forms BC-1 and RM-1 send, under the BC-1 box of "What Did the Behavior
+   Do?": a rise that came with the behavior followed by its reinforcer more often (BC-1's "direct" verdict: not clear evidence of
+   contrast); induction in the useful direction, with the maintenance probe; the extension result and whether the return to baseline
+   replicated it; the other constant components; and from RM-1, how long relapse lasted and how often the replacement response was
+   disrupted. Shown only; not saved with this form. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ function lines(c,rl){const L=[];
+  if(c&&typeof c==='object'){const where=T(c.conName)||'the untreated setting';
+   if(c.kind==='direct')L.push('<div class="verdict v-mid"><b>Not clear evidence of contrast in '+E(where)+'.</b> The behavior there was followed by its reinforcer more (or less) often after the change than in baseline (Form BC-1): treat it as the reinforcer at work there, and look at what follows the behavior in '+E(where)+'.</div>');
+   if(c.kind==='induction'&&c.increase!==true&&c.rise===false)L.push('<p class="hint" style="margin:4px 0"><b>Improvement spread to '+E(where)+'</b> (induction, Form BC-1): probe it again in about 4 weeks; it may not last without the plan there.</p>');
+   if(c.kind==='induction'&&c.increase===true&&c.rise===true)L.push('<p class="hint" style="margin:4px 0"><b>Improvement spread to '+E(where)+'</b> (induction for a behavior to increase, Form BC-1): probe it again in about 4 weeks.</p>');
+   const x=c.extension;if(x&&typeof x==='object')L.push('<p class="hint" style="margin:4px 0"><b>After the plan was extended to '+E(T(x.to)||where)+':</b> '+E(x.fell?'it fell':x.rose?'it rose':'no clear change')+(T(x.change)?' ('+E(T(x.change))+')':'')+(x.n?', '+x.n+' session'+(x.n===1?'':'s'):'')+'.'+(c.replicated===true?' <b>Replicated:</b> the return to baseline reversed it.':c.replicated===false?' Not replicated by the return to baseline.':'')+'</p>');
+   (Array.isArray(c.more)?c.more:[]).forEach(m=>{if(m&&T(m.conName)&&T(m.headline))L.push('<p class="hint" style="margin:4px 0"><b>'+E(T(m.conName))+':</b> '+E(T(m.headline))+(T(m.change)?' ('+E(T(m.change))+')':'')+' (Form BC-1).</p>');});}
+  if(rl&&typeof rl==='object'){const P=[];
+   if(+rl.long>0)P.push('relapse lasted 3 sessions or more at '+rl.long+' of '+(rl.rel||rl.n)+' challenge'+((rl.rel||rl.n)===1?'':'s')+' with relapse: review the step; do not advance');
+   if(rl.rrScored>0)P.push('the replacement response was disrupted at '+rl.rrDisrupted+' of '+rl.rrScored+' challenge'+(rl.rrScored===1?'':'s')+' scored');
+   if(P.length)L.push('<p class="hint" style="margin:4px 0"><b>Relapse at challenges (Form RM-1):</b> '+E(P.join('; '))+'.</p>');}
+  return L;}
+ window.__pr2567Lines=lines;
+ function paint(f){const at=document.getElementById('prContrast')||document.getElementById('dataMetrics');if(!at)return;let el=document.getElementById('pr67Contrast');
+  if(!el){el=document.createElement('div');el.id='pr67Contrast';el.className='pr-contrast';at.parentNode.insertBefore(el,at.nextSibling);}
+  const L=lines(f&&f.contrast,f&&f.relapse);el.hidden=!L.length;el.innerHTML=L.join('');}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f||{});}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

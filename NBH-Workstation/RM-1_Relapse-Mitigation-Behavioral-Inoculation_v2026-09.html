@@ -3143,6 +3143,20 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="rm1-v2567">
+/* v25.67 (BC-RM-H3 fit, batch 3) the settings Form TD-1 names where the plan does not run yet (plan.settings.notYet): shown under
+   Renewal, where a move to them is the change to plan for. Nothing is ticked: the indicators stay the BCBA's. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let st=null;
+ function paint(){const w=document.getElementById('riskWrap');if(!w)return;const i=TYPES.findIndex(t=>t.k==='ren'),box=w.children[i]&&w.children[i].querySelector('.body');if(!box)return;
+  let el=box.querySelector('.rm67-td');const ny=st&&T(st.notYet);if(!ny){if(el)el.remove();return;}
+  if(!el){el=document.createElement('div');el.className='baserate rm67-td';box.appendChild(el);}
+  el.innerHTML='<b>Form TD-1:</b> the plan does not run yet in '+E(ny)+(T(st.runsIn)?' (it runs in '+E(T(st.runsIn))+')':'')+'. Moving it there is a change of setting: plan the move as a challenge, and watch the sessions after it.';}
+ window.__rm2567Td=paint;
+ const rr0=renderRisk;renderRisk=function(){const r=rr0.apply(this,arguments);try{paint();}catch(e){}return r;};
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{st=f&&f.plan&&f.plan.settings&&typeof f.plan.settings==='object'?f.plan.settings:null;paint();}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

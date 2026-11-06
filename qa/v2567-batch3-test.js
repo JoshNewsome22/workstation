@@ -185,5 +185,38 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await t.close();
  });
 
+ /* ---------------- BCRM ---------------- */
+ await sec('BCRM',async()=>{
+  const t=await open('TD-1');
+  const a=await t.evaluate(async()=>{const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;['input','change'].forEach(x=>e.dispatchEvent(new Event(x,{bubbles:true})));};
+    const before={out:(window.__nbhFactsOut()||{}).plan,lab:!!document.querySelector('[name="rl.card"]'),runsPrint:(document.querySelector('.td67-runs')||{}).className||''};
+    set('m.beh','Hitting (simulated)');set('m.allset','no');set('m.runsin','the resource room');set('m.notyet','the general classroom and the bus');
+    const cb=document.querySelector('[name="rl.card"]');cb.checked=true;cb.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,300));
+    const o=window.__nbhFactsOut(),txt=window.__bipText();const fin=document.getElementById('rlFinal');
+    return {before,settings:o&&o.plan&&o.plan.settings,relapse:o&&o.plan&&o.plan.relapse,bipLine:(txt.match(/Settings: [^\n]*/)||[''])[0],fin:fin?fin.textContent:''};});
+  ok('TDB/BCRM 1 TD-1 asks where the plan runs and where not yet, off the print (BC-RM-H3)',a.before.lab&&/noprint/.test(a.before.runsPrint),a.before);
+  ok('BCRM 2 TD-1 sends plan.settings and the BIP names them',a.settings&&a.settings.all==='no'&&a.settings.runsIn==='the resource room'&&a.settings.notYet==='the general classroom and the bus'&&/Settings: the plan runs in the resource room; not yet in the general classroom and the bus \(Form BC-1 counts the behavior there from the first day\)/.test(a.bipLine),a);
+  ok('BCRM 3 TD-1’s relapse safeguards offer "The replacement response goes everywhere", printed when ticked (BC-RM-M2 mirror)',/The replacement response goes everywhere\./.test(a.fin)&&/A copy of the card or device is in every setting/.test(a.fin),a.fin);
+  await t.close();
+  const b=await open('BC-1');
+  const bc=await b.evaluate(async()=>{window.__nbhFactsIn({plan:{src:'TD-1',settings:{all:'no',runsIn:'the resource room',notYet:'the general classroom'}}});await new Promise(r=>setTimeout(r,300));
+    const n=document.getElementById('bc67Td');const o={chg:S.meta.chgName,con:S.meta.conName,note:n?n.textContent:''};
+    S.meta.conName='Art class';const e=document.querySelector('[data-m="conName"]');if(e)e.value='Art class';window.__nbhFactsIn({plan:{src:'TD-1',settings:{runsIn:'x',notYet:'y'}}});o.kept=S.meta.conName;return o;});
+  ok('BCRM 4 BC-1 takes the changed and constant settings from TD-1 while empty, and says so',bc.chg==='the resource room'&&bc.con==='the general classroom'&&/Form TD-1: the plan runs in the resource room; not yet in the general classroom\./.test(bc.note)&&bc.kept==='Art class',bc);
+  await b.close();
+  const m=await open('RM-1');
+  const rm=await m.evaluate(async()=>{window.__nbhFactsIn({plan:{src:'TD-1',settings:{runsIn:'the resource room',notYet:'the bus'}}});await new Promise(r=>setTimeout(r,300));
+    const el=document.querySelector('#riskWrap .rm67-td');return {t:el?el.textContent:'',ticked:Object.keys(S.ind||{}).filter(k=>S.ind[k]&&/^ren_/.test(k))};});
+  ok('BCRM 5 RM-1 names, under Renewal, where the plan does not run yet; nothing is ticked',/Form TD-1: the plan does not run yet in the bus \(it runs in the resource room\)/.test(rm.t)&&!rm.ticked.length,rm);
+  await m.close();
+  const p=await open('PR-1');
+  const pr=await p.evaluate(async()=>{window.__nbhFactsIn({contrast:{src:'BC-1',kind:'direct',headline:'Not clear evidence of contrast',conName:'Art class',change:'+40%',extension:{to:'Art class',change:'-55%',fell:true,rose:false,n:4},replicated:true,more:[{conName:'Lunch',kind:'positive',headline:'Consistent with positive contrast',change:'+30%'}]},
+      relapse:{src:'RM-1',n:3,rel:2,long:1,rrScored:3,rrDisrupted:2,line:'2 of 3 challenges showed relapse (Form RM-1)'}});await new Promise(r=>setTimeout(r,300));
+    const el=document.getElementById('pr67Contrast');const a=el&&!el.hidden?el.textContent:'';window.__nbhFactsIn({});return {a,none:document.getElementById('pr67Contrast').hidden};});
+  ok('BCRM 6 PR-1 shows BC-1’s direct verdict, the extension result and its replication, and the other components (BC-RM-H1, M5, M6)',/Not clear evidence of contrast in Art class\./.test(pr.a)&&/After the plan was extended to Art class: it fell \(-55%\), 4 sessions\. Replicated:/.test(pr.a)&&/Lunch: Consistent with positive contrast \(\+30%\)/.test(pr.a),pr);
+  ok('BCRM 7 PR-1 shows how long relapse lasted and the replacement response’s disruption from RM-1 (BC-RM-H5, H6)',/relapse lasted 3 sessions or more at 1 of 2 challenges with relapse: review the step; do not advance; the replacement response was disrupted at 2 of 3 challenges scored/.test(pr.a)&&pr.none,pr);
+  await p.close();
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
