@@ -4950,6 +4950,16 @@ window.__nbhDue=function(){var out=[];document.querySelectorAll('#tbMaint tr').f
   var iv=String(c[0].value||'').trim(),due=String(c[1].value||'').trim(),done=String(c[2].value||'').trim();
   if(due&&!done)out.push({what:'Maintenance probe'+(iv?' ('+iv+')':''),date:due});});return out;};
 </script>
+<script id="dt1-v2567">
+/* v25.67 (DELAY-M6, batch 3) the discounting probe's AUC reaches the case on its own too: until now it went only with a ladder or a
+   tolerance response. Every form that reads the delay protocol (TD-1, PR-1, QS-1, TI-1, AD-1) reads a protocol with no ladder and
+   no tolerance response as nothing to place, so a case holding only the AUC changes nothing there; Form AD-1 takes the AUC. */
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{if(r&&r.delay)return r;const el=document.getElementById('outAUC'),auc=el?parseFloat(String(el.textContent||'').replace(',','.')):NaN;if(!isFinite(auc))return r;
+    const lk=document.getElementById('outLogK'),k=lk?parseFloat(String(lk.textContent||'')):NaN,dd=document.querySelector('[name="dd_date"]');
+    const delay={src:'DT-1',ladder:[],discount:{auc,logk:isFinite(k)?k:null,date:dd?String(dd.value||''):''}};
+    return Object.assign({},r||{},{delay});}catch(e){return r;}};}
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

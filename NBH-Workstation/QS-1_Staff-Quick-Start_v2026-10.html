@@ -3110,6 +3110,23 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="qs1-v2567">
+/* v25.67 (STAFF-M12, batch 3) "This adult is not doing a step: open Form PD-1" now sends the request PD-1 reads (quick.pdAsk, as
+   Form RS-1 sends supervision.pdAsk): the concern, and the adult when one person holds a copy; PD-1 fills only its empty fields.
+   The request is not saved with this form: PD-1 takes it when it opens. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();let ask=null;
+ function sig(){let el=document.getElementById('qs67AskSig');if(!el){el=document.createElement('input');el.id='qs67AskSig';el.hidden=true;el.tabIndex=-1;el.setAttribute('aria-hidden','true');el.className='noprint';(document.querySelector('main')||document.body).appendChild(el);}return el;}
+ function make(){const H=String(S.holders||'').split('\n').map(T).filter(Boolean),one=H.length===1?H[0].replace(/:.*$/,''):'',m=/^([^,]+)(?:,\s*(.+))?$/.exec(one)||[];
+  ask={src:'QS-1',who:T(m[1]),role:T(m[2]).replace(/\s*\(simulated\)\s*/i,''),at:new Date().toISOString(),
+    concern:'An adult who holds the quick start'+(T(S.meta.issueNo)?' (issue '+T(S.meta.issueNo)+')':'')+' still does not do a step of it as written.',
+    why:'Asked from Form QS-1: the quick start clarifies and prompts; find out why (training, materials, time, competing tasks, or no one noticing) before reissuing it.'};
+  const el=sig();el.value=ask.at;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}return ask;}
+ window.__qs2567Ask=make;
+ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#qsPd1'))try{make();}catch(x){}},true);
+ const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{if(ask){r=r||{};r.quick=r.quick||{rules:[],tiers:[],src:'QS-1'};r.quick.pdAsk=ask;}}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

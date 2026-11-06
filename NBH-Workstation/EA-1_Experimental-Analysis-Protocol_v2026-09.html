@@ -6319,8 +6319,14 @@ window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.
      confounds fill the two lines beside it when they are empty */
   const E=f.evidence||{},src=['IA-1','IN-1','ABC-1','OB-1','VI-1'].map(id=>E[id]&&Object.assign({id},E[id])).filter(e=>e&&T(e.fn));
   {const vi=E['VI-1'];if(vi){put('m.vicond',vi.conditions,'the conditions to compare (Form VI-1)');put('m.viconf',vi.confounds,'the confounds (Form VI-1)');}}
-  if(src.length){put('m.hyp',src.map(e=>e.id+': '+T(e.fn)+(e.strength?' ('+e.strength.toLowerCase()+')':'')).join('; '),'the hypothesis carried in');
-    const keys=[...new Set(src.map(e=>e.fnKey||K(e.fn)).filter(Boolean))],firm=src.some(e=>/Strong|Moderate/.test(e.strength||''));
+  /* v25.67 (ASSESS-H1.4, batch 3) Form IN-1's interviews arrive as candidate conditions to include, not as the function: its line
+     says so, and it does not count toward the prior hypothesis below (an interview rules a function in as a candidate; it does not
+     confirm one) */
+  const in1C=e=>e.id==='IN-1'&&e.use==='candidates'&&Array.isArray(e.candidates)&&e.candidates.length;
+  const CW={attention:'attention',tangible:'access to items or activities',escape:'escape from demands',automatic:'automatic (alone or no interaction)',physical:'pain or a medical cause (medical review first)'};
+  {const e=E['IN-1'];if(e&&!src.some(x=>x.id==='IN-1')&&in1C(Object.assign({id:'IN-1'},e)))src.push(Object.assign({id:'IN-1'},e));}   /* candidates with no function written */
+  if(src.length){put('m.hyp',src.map(e=>in1C(e)?e.id+': candidate conditions to include: '+e.candidates.map(k=>CW[k]||k).join(', ')+' (interviews; not the function)':e.id+': '+T(e.fn)+(e.strength?' ('+e.strength.toLowerCase()+')':'')).join('; '),'the hypothesis carried in');
+    const fsrc=src.filter(e=>!in1C(e)),keys=[...new Set(fsrc.map(e=>e.fnKey||K(e.fn)).filter(Boolean))],firm=fsrc.some(e=>/Strong|Moderate/.test(e.strength||''));
     const one=keys.length===1?{attention:'social',tangible:'social',escape:'escape',automatic:'auto'}[keys[0]]:'';
     put('v.hyp',one&&firm?one:(keys.length>1||(keys.length===1&&!one))?'none':'','the prior hypothesis');}
   /* v22.37 (review F148, F13) the consent line says what IC-1 records for the experimental analysis: "Parent consent obtained"
@@ -6736,6 +6742,26 @@ document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.cl
 function fromHash(){const h=(location.hash||'').replace(/^#/,'');if(!/^(plan|setup|variant|conditions|sessions|analysis|design|guide|refs|walk)$/.test(h))return;const b=q('#viewSeg [data-view="'+h+'"]');if(b)b.click();else if(window.eaAPI)eaAPI.setView(h);}
 window.addEventListener('hashchange',fromHash);
 if(document.readyState==='complete')setTimeout(()=>{fromHash();paintAll();},300);else window.addEventListener('load',()=>setTimeout(()=>{fromHash();paintAll();},300));
+})();
+</script>
+<script id="ea1-v2567">
+/* v25.67 (ASSESS-H1.4, batch 3) Form IN-1's candidate conditions beside "Hypothesis carried in": each function the interviews name is a
+   condition to include, and one the analysis has no condition for yet is named, with the rule (do not drop a condition because no
+   interview named it). Pain or a medical cause has no condition: it is a medical review first. Screen only. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const CW={attention:'attention',tangible:'access to items or activities',escape:'escape from demands',automatic:'automatic (alone or no interaction)'};
+ let C=[];
+ function have(){const S=new Set();document.querySelectorAll('[name^="c["][name$="].name"]').forEach(e=>{const k=window.eaFnFromNames?eaFnFromNames([T(e.value)],false):'';if(k&&k!=='multiple')S.add(k);if(/synth|iisca/i.test(T(e.value)))['attention','tangible','escape'].forEach(x=>S.add(x));});return S;}
+ function paint(){const at=document.querySelector('[name="m.hyp"]');const row=at&&at.closest('.drow');if(!row)return;let el=document.getElementById('ea67In1');
+  if(!el){el=document.createElement('div');el.id='ea67In1';el.className='hint noprint';el.style.margin='2px 0 6px';row.insertAdjacentElement('afterend',el);}
+  if(!C.length){el.hidden=true;el.innerHTML='';return;}const H=have(),miss=C.filter(k=>CW[k]&&!H.has(k)),med=C.includes('physical');
+  el.hidden=false;el.innerHTML='<b>Form IN-1’s interviews: conditions to include</b>, not the function: '+E(C.filter(k=>CW[k]).map(k=>CW[k]).join('; ')||'none')+'.'+
+   (miss.length?' This analysis has no condition yet for '+E(miss.map(k=>CW[k]).join(' or '))+': add one, or write why it is left out.':C.some(k=>CW[k])?' Each has a condition in this analysis.':'')+
+   (med?' Pain or a medical cause was named: a medical review comes first.':'')+' Do not drop a condition because no interview named it; interviews named attention wrongly more often than any other function (Fisher et al., 2016).';}
+ window.__ea2567In1=paint;
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{const e=f&&f.evidence&&f.evidence['IN-1'];C=e&&e.use==='candidates'&&Array.isArray(e.candidates)?e.candidates.slice():[];paint();}catch(x){}return r;};
+ document.addEventListener('input',e=>{if(C.length&&e.target&&/^c\[\d+\]\.name$/.test(e.target.name||''))try{paint();}catch(x){}});
+ document.addEventListener('click',()=>{if(C.length)setTimeout(()=>{try{paint();}catch(x){}},50);});
 })();
 </script>
 <script id="fx2-v2492-js">

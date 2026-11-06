@@ -70,7 +70,9 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
     The step is its own, starting "OPTION: Reinforces problem behavior on purpose:", and says why the study did it and for how
     long; the note says when a team would use it and what the data must show before the condition ends. TD-1 adds the card
     without it unless "Include the optional step" is ticked (the BCBA, 11/2: "add them as an option"). Before 11/2 readers left
-    these steps out; Fisher et al. (2018, both cards) and Mitteer et al. (2026) have theirs back as options (v25.64).
+    these steps out; Fisher et al. (2018, both cards) and Mitteer et al. (2026) have theirs back as options (v25.64). The two
+    competing stimulus cards for social functions, c_csa-select-by-reduction and c_csa-competing-items-plus-extinction, carry
+    theirs too (v25.65, PREF-H2), beside Form PA-1's wait-component method, the default.
 
 ## When each rule started
 

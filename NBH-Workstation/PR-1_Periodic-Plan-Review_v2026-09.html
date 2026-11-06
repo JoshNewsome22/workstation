@@ -3750,8 +3750,18 @@ td > textarea.nbh-cell:focus{background:var(--wash,#EEF3F2);outline:none}
   const head='Form SR-1\u2019s schedule'+(sch.nota?' ('+sch.nota+(D.step?', step '+D.step:'')+')':D.step?' (step '+D.step+')':'');
   const since=D.since?' since the step began on '+md(D.since):'';
   if(run(D.back,'ge'))return {how:'back',t:head+': step back. '+b.name+' was '+say(D.back,'ge')+since+'. Go back one step, as the card says, and set the step in force on Form SR-1.'};
+  /* v25.67 (FCT-SR-H4) a multiple schedule steps on the discrimination too: Form SR-1's second row (the share of requests made in
+     S+, never below 70%) on the same days; below it the step holds; with no such row on Form DD-1 the step is due on the rate, as
+     on Form TD-1, and the counts are asked for */
+  if(run(D.up,'le')&&D.up2&&isFinite(+D.up2.v)){const r2=K(D.row2||'requests in s+'),b2=data.behaviors.find(x=>K(x.name)===r2)||data.behaviors.find(x=>K(x.name)&&(r2.indexOf(K(x.name))>=0||K(x.name).indexOf(r2)>=0));
+    const n2=+D.up2.n>0?+D.up2.n:+(D.up&&D.up.n)||1,v2=Math.max(70,+D.up2.v),P2=b2&&Array.isArray(b2.series)?b2.series.filter(p=>p&&p.v!==null&&p.v!==''&&isFinite(+p.v)&&(!D.since||String(p.d)>=D.since)):[];
+    if(P2.length>=n2&&!P2.slice(-n2).every(p=>+p.v>=v2)){const last=+P2[P2.length-1].v;
+      return {how:'hold',t:head+': hold. '+b.name+' was '+say(D.up,'le')+since+', but '+(Math.round(last*10)/10)+'% of requests were made in S+ on the last day with data (the card asks at least '+v2+'% on each of the last '+n2+' day'+(n2===1?'':'s')+'). Stay at this step and keep the signals until the request follows them (Greer et al., 2016).'};}
+    if(P2.length>=n2)return {how:'up',t:head+': a step up is due. '+b.name+' was '+say(D.up,'le')+since+', and at least '+v2+'% of requests were made in S+ on each of the last '+n2+' day'+(n2===1?'':'s')+'. Take the next step on the card, write the date it was reached, and set the step in force on Form SR-1.'};
+    return {how:'up',t:head+': a step up is due on the rate. '+b.name+' was '+say(D.up,'le')+since+'. Form DD-1 has no row “'+(D.row2||'Requests in S+ (%)')+'” yet: count requests in S+ and in S−, and check that at least '+v2+'% were made in S+ before taking the next step.'};}
   if(run(D.up,'le'))return {how:'up',t:head+': a step up is due. '+b.name+' was '+say(D.up,'le')+since+'. Take the next step on the card, write the date it was reached, and set the step in force on Form SR-1.'};
   return null;}
+ window.__prSrStepDue=srStepDue;   /* v25.67 for the tests */
  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
   try{const h=document.getElementById('prSchedSrc'),x=f&&srStepDue(f.schedule,f.data);if(h&&x){h.hidden=false;h.textContent=(h.textContent?h.textContent+' ':'')+x.t;}}catch(e){}
   return r;};})();
@@ -4269,6 +4279,32 @@ function pr64Outcome(){const C=course(),W=pr64Win(),P=W.pct,o={};
   if(m&&W.last5!=null&&!m.querySelector('.pr64-card'))m.insertAdjacentHTML('beforeend','<div class="metric pr64-card"><b>Last 5 days</b><div class="val">'+ddFix(W.last5)+'</div><div class="sub">'+(W.pct5!=null?pctTxt(W.pct5)+' against baseline; ':'')+'period '+W.k+', Form DD-1</div></div>');
   pr64Paint();}catch(e){}return r;};}
 renderAll();
+</script>
+<script id="pr1-v2567">
+/* v25.67 (BC-RM-H1, H5, H6, M5, M6, L4; batch 3) more of what Forms BC-1 and RM-1 send, under the BC-1 box of "What Did the Behavior
+   Do?": a rise that came with the behavior followed by its reinforcer more often (BC-1's "direct" verdict: not clear evidence of
+   contrast); induction in the useful direction, with the maintenance probe; the extension result and whether the return to baseline
+   replicated it; the other constant components; and from RM-1, how long relapse lasted and how often the replacement response was
+   disrupted. Shown only; not saved with this form. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ function lines(c,rl){const L=[];
+  if(c&&typeof c==='object'){const where=T(c.conName)||'the untreated setting';
+   if(c.kind==='direct')L.push('<div class="verdict v-mid"><b>Not clear evidence of contrast in '+E(where)+'.</b> The behavior there was followed by its reinforcer more (or less) often after the change than in baseline (Form BC-1): treat it as the reinforcer at work there, and look at what follows the behavior in '+E(where)+'.</div>');
+   if(c.kind==='induction'&&c.increase!==true&&c.rise===false)L.push('<p class="hint" style="margin:4px 0"><b>Improvement spread to '+E(where)+'</b> (induction, Form BC-1): probe it again in about 4 weeks; it may not last without the plan there.</p>');
+   if(c.kind==='induction'&&c.increase===true&&c.rise===true)L.push('<p class="hint" style="margin:4px 0"><b>Improvement spread to '+E(where)+'</b> (induction for a behavior to increase, Form BC-1): probe it again in about 4 weeks.</p>');
+   const x=c.extension;if(x&&typeof x==='object')L.push('<p class="hint" style="margin:4px 0"><b>After the plan was extended to '+E(T(x.to)||where)+':</b> '+E(x.fell?'it fell':x.rose?'it rose':'no clear change')+(T(x.change)?' ('+E(T(x.change))+')':'')+(x.n?', '+x.n+' session'+(x.n===1?'':'s'):'')+'.'+(c.replicated===true?' <b>Replicated:</b> the return to baseline reversed it.':c.replicated===false?' Not replicated by the return to baseline.':'')+'</p>');
+   (Array.isArray(c.more)?c.more:[]).forEach(m=>{if(m&&T(m.conName)&&T(m.headline))L.push('<p class="hint" style="margin:4px 0"><b>'+E(T(m.conName))+':</b> '+E(T(m.headline))+(T(m.change)?' ('+E(T(m.change))+')':'')+' (Form BC-1).</p>');});}
+  if(rl&&typeof rl==='object'){const P=[];
+   if(+rl.long>0)P.push('relapse lasted 3 sessions or more at '+rl.long+' of '+(rl.rel||rl.n)+' challenge'+((rl.rel||rl.n)===1?'':'s')+' with relapse: review the step; do not advance');
+   if(rl.rrScored>0)P.push('the replacement response was disrupted at '+rl.rrDisrupted+' of '+rl.rrScored+' challenge'+(rl.rrScored===1?'':'s')+' scored');
+   if(P.length)L.push('<p class="hint" style="margin:4px 0"><b>Relapse at challenges (Form RM-1):</b> '+E(P.join('; '))+'.</p>');}
+  return L;}
+ window.__pr2567Lines=lines;
+ function paint(f){const at=document.getElementById('prContrast')||document.getElementById('dataMetrics');if(!at)return;let el=document.getElementById('pr67Contrast');
+  if(!el){el=document.createElement('div');el.id='pr67Contrast';el.className='pr-contrast';at.parentNode.insertBefore(el,at.nextSibling);}
+  const L=lines(f&&f.contrast,f&&f.relapse);el.hidden=!L.length;el.innerHTML=L.join('');}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f||{});}catch(e){}return r;};
+})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

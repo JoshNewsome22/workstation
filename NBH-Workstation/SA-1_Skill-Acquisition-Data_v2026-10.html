@@ -1909,7 +1909,11 @@ window.__nbhFactsIn=function(f){
   /* v23.21 (review F203) the function from Form FS-1 heads a reinforcer line the case wrote (never one typed by hand) */
   {const fl=f.fn&&String(f.fn.label||f.fn.key||'').trim();if(fl&&!rWas){m.reinforcer='The function on Form FS-1: '+fl+(m.reinforcer?'; '+m.reinforcer:'');if(!String(m.reinforcer).includes('ranked'))n++;}}
   /* v25.65 (SKILL-M7) a visual schedule on Form VS-1 offers a program for it on the Setup page (nothing is filled until it is chosen) */
-  {const v=(Array.isArray(f.visuals)?f.visuals:[]).find(x=>x&&/schedule/i.test(String(x.what||''))&&String(x.words||'').trim());VIS=v?{words:String(v.words)}:null;renderVis();}
+  /* v25.67 (SKILL-M7, batch 3) Form VS-1 sends its visuals as {items:[...]}, not a bare list: read both; its schedule's task
+     analysis (ta) names the activities when the words do not */
+  {const VL=Array.isArray(f.visuals)?f.visuals:(f.visuals&&Array.isArray(f.visuals.items)?f.visuals.items:[]);
+   const v=VL.find(x=>x&&/schedule/i.test(String(x.what||''))&&(String(x.words||'').trim()||(x.ta&&Array.isArray(x.ta.activities)&&x.ta.activities.length)));
+   VIS=v?{words:String(v.words||'').trim()||v.ta.activities.join(', '),title:v.ta&&String(v.ta.title||'').trim()||''}:null;renderVis();}
   if(n)renderAll();return {filled:n};
 };
 window.__nbhFactsPick=function(sel){
@@ -3203,6 +3207,19 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="sa1-v2567">
+/* v25.67 (SKILL-L6, batch 3) for a home team, beside the prompt hierarchy: caregivers may prefer least-to-most. Shown on screen when the
+   setting or who teaches names home or a caregiver; a consideration, never a default. */
+(function(){const HOME=/\bhome\b|parent|caregiver|mother|father|grand|guardian|family/i;
+ const rn0=renderNotes;renderNotes=function(){const r=rn0.apply(this,arguments);try{const m=S.meta||{},h=document.getElementById('hierNote');if(!h)return r;
+   let el=h.querySelector('.sa67-home');const on=HOME.test([m.setting,m.teachers].map(v=>String(v||'')).join(' '));
+   if(!on){if(el)el.remove();return r;}
+   if(!el){el=document.createElement('div');el.className='verdict v-info sa-scr sa67-home';h.appendChild(el);}
+   el.innerHTML='<b>For a home team:</b> caregivers may prefer least-to-most prompting. Parents trained to mastery in least-to-most, most-to-least and a progressive prompt delay all preferred least-to-most, and their ratings after training and practice with their child differed from their ratings before (Halbur et al., 2020). Weigh it when the hierarchy is chosen; the student’s data still decide.';}catch(e){}return r;};
+ document.addEventListener('input',e=>{const t=e.target;if(t&&t.dataset&&(t.dataset.m==='setting'||t.dataset.m==='teachers'))try{renderNotes();}catch(x){}});
+ try{renderNotes();}catch(e){}
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
