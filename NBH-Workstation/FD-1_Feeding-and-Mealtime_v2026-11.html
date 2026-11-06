@@ -1670,6 +1670,19 @@ window.__nbhFactsOut=function(){
   return {feeding:o};};
 </script>
 
+<script id="fd1-v2567">
+/* v25.67 (FEED-M5, M8; batch 3) more of the screen and the meals for Form TD-1: who prescribed the texture, liquid and bite-size order
+   and when, the latest step the SLP or the feeding team wrote, and the seconds per bite of the last meal (the target for a rapid-eater's
+   pacing). Added to what the form already sends; nothing in it changes. */
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const o=r&&r.feeding;if(!o)return r;const x=texNow();
+    if(x.by||x.date)o.texOrder={by:x.by,date:x.date};
+    if(x.last&&T(x.last.step))o.texStep={step:T(x.last.step),date:T(x.last.date),by:T(x.last.by),role:T(x.last.role)};
+    const ms=mealsSorted(),last=ms.length?ms[ms.length-1]:null,st=last?mStats(last.m):null;
+    if(o.last&&st&&st.spb!=null&&isFinite(st.spb))o.last.secPerBite=Math.round(st.spb);}catch(e){}
+  return r;};}
+</script>
+
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
@@ -2907,18 +2920,6 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
-<script id="fd1-v2567">
-/* v25.67 (FEED-M5, M8; batch 3) more of the screen and the meals for Form TD-1: who prescribed the texture, liquid and bite-size order
-   and when, the latest step the SLP or the feeding team wrote, and the seconds per bite of the last meal (the target for a rapid-eater's
-   pacing). Added to what the form already sends; nothing in it changes. */
-{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
-  try{const o=r&&r.feeding;if(!o)return r;const x=texNow();
-    if(x.by||x.date)o.texOrder={by:x.by,date:x.date};
-    if(x.last&&T(x.last.step))o.texStep={step:T(x.last.step),date:T(x.last.date),by:T(x.last.by),role:T(x.last.role)};
-    const ms=mealsSorted(),last=ms.length?ms[ms.length-1]:null,st=last?mStats(last.m):null;
-    if(o.last&&st&&st.spb!=null&&isFinite(st.spb))o.last.secPerBite=Math.round(st.spb);}catch(e){}
-  return r;};}
-</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
