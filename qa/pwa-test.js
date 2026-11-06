@@ -981,7 +981,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     check('U the master print is built inside the app (no window of its own), with Print and Close',!!o2&&/PD-1|Performance Diagnostic/.test(o2.inner)&&/Print/.test(o2.bar)&&pops===0,JSON.stringify(o2&&{title:o2.title,bar:o2.bar,inner:o2.inner.slice(0,80)})+' note: '+note.slice(0,80));
     await up.evaluate(()=>{const o=document.querySelector('[id^="nbhInApp"]');const b=o&&[...o.querySelectorAll('button')].find(x=>x.textContent==='Close');if(b)b.click();});
     /* Own tab: the form fills the window instead of a window of its own */
-    await up.click('#popOut');await sleep(600);
+    await require(__dirname+'/lib.js').tapOrMenu(up,'#popOut',false);await sleep(600);   /* v25.65: Own tab is in the form row's View menu */
     const full=await up.evaluate(()=>document.body.classList.contains('ws-full'));
     check('U Own tab, installed on an iPad: the form fills the window here instead of opening Safari',full&&pops===0,'full '+full+' pops '+pops);
     await uctx.close();

@@ -46,7 +46,7 @@
    8. no page error and no console error in the shell.
    Usage: WS_URL=http://127.0.0.1:8308 WS_ROOT=<worktree> node qa/sprint-a8-test.js [NBH-Workstation|RPS-Workstation]
           A8_ONLY=rename,swaps,different,drive,autosave,full,bars (some of the parts; all by default) */
-const {chromium,fs,path,ROOT,BASE,forms,sleep}=require(__dirname+'/lib.js');
+const {chromium,fs,path,ROOT,BASE,forms,sleep,tapOrMenu}=require(__dirname+'/lib.js');
 const ED=process.argv[2]||'NBH-Workstation';
 const OUT=__dirname+'/out/sprint-a8/';
 const ONLY=process.env.A8_ONLY?process.env.A8_ONLY.split(','):null;
@@ -424,7 +424,7 @@ async function full(br){
   if(fr)await fr.evaluate(()=>{const t=[...document.querySelectorAll('textarea')].find(e=>e.offsetParent);
     if(t){t.focus();t.value='Met with the teacher about the morning routine.';['input','change'].forEach(k=>t.dispatchEvent(new Event(k,{bubbles:true})));t.blur();}});
   await sleep(600);
-  await page.tap('#fullBtn');await sleep(400);
+  await tapOrMenu(page,'#fullBtn',true);await sleep(400);
   ok('full: on, and kept on this device',await isFull(page)&&await kept(page)==='on',{full:await isFull(page),kept:await kept(page)});
   await page.evaluate(async()=>{state.auto.last=0;await autoSave(true);});await sleep(800);
   /* a reload (an iPad reopening the tab): the restore offer, answered */
@@ -436,13 +436,13 @@ async function full(br){
   await page.screenshot({path:OUT+'full-after-restore.png'});
   ok('full: after a reload and Restore, the form is back in fullscreen',offer&&back.full&&back.cur==='CN-1'&&back.frameTop<=60,{offer,back});
   /* Exit: the bars, kept that way */
-  await page.tap('#fullBtn');await sleep(300);
+  await tapOrMenu(page,'#fullBtn',true);await sleep(300);
   ok('full: Exit brings the bars back and the setting goes',!(await isFull(page))&&await kept(page)===null,{full:await isFull(page),kept:await kept(page)});
   await page.reload({waitUntil:'load'});await sleep(2200);await closeDlg(page);
   await open(page,'TB-1');
   ok('full: after Exit and a reload, a form opens with the bars',!(await isFull(page)),{full:await isFull(page)});
   /* a form opened after a reload, with the setting on */
-  await page.tap('#fullBtn');await sleep(300);
+  await tapOrMenu(page,'#fullBtn',true);await sleep(300);
   await page.reload({waitUntil:'load'});await sleep(2200);await closeDlg(page);
   ok('full: after a reload, nothing open, the bars (nothing to fill the screen with)',!(await isFull(page)),{full:await isFull(page),kept:await kept(page)});
   await open(page,'TB-1');
@@ -465,9 +465,9 @@ async function full(br){
     const before=errs.length;
     const p=await shell(c,'full '+label);
     await open(p,'TB-1');
-    await p.click('#fullBtn');await sleep(300);const on=await isFull(p);
-    await p.click('#fullBtn');await sleep(300);const off=!(await isFull(p));
-    await p.click('#fullBtn');await sleep(300);
+    await tapOrMenu(p,'#fullBtn',false);await sleep(300);const on=await isFull(p);
+    await tapOrMenu(p,'#fullBtn',false);await sleep(300);const off=!(await isFull(p));
+    await tapOrMenu(p,'#fullBtn',false);await sleep(300);
     await p.reload({waitUntil:'load'});await sleep(1800);await closeDlg(p);
     await open(p,'TB-1');const after=await isFull(p);
     const mine=errs.slice(before);
@@ -480,7 +480,7 @@ async function full(br){
     let p=await shell(c,'full installed');
     const inApp=await p.evaluate(()=>!!(window.nbhShareSave&&window.nbhShareSave.inApp));
     await open(p,'CN-1');
-    await p.tap('#popOut');await sleep(600);
+    await tapOrMenu(p,'#popOut',true);await sleep(600);
     const own={full:await isFull(p),kept:await kept(p)};
     await p.reload({waitUntil:'load'});await sleep(1800);await closeDlg(p);
     await open(p,'TB-1');
@@ -503,7 +503,8 @@ async function geo(page){
       return it.length?(it.every(e=>e.getBoundingClientRect().bottom<=t+64)?1:2):0;};
     return {vw:innerWidth,coarse:matchMedia('(pointer:coarse)').matches,folded:document.body.classList.contains('bar-folded'),
       header:r('header.top'),bar:r('.bar'),crumb:r('.crumb'),tip:r('#tipBar'),rows:kids.length?[...new Set(kids.map(c=>Math.round(c.getBoundingClientRect().top)))].length:navRows(),
-      frameTop:fr?Math.round(fr.getBoundingClientRect().top):null,chipsIn:box?(box.closest('header.top')?'heading':box.closest('.bar')?'bar':'?'):'none',
+      frameTop:fr?Math.round(fr.getBoundingClientRect().top):null,chipsIn:box?(box.closest('#wsStatPanel')?'panel':box.closest('header.top')?'heading':box.closest('.bar')?'bar':'?'):'none',   /* v25.65: in the status indicator's panel */
+      topA:document.body.classList.contains('ws-a'),
       auto:document.querySelector('#autoChip').textContent,off:document.querySelector('#offChip').hidden?'':document.querySelector('#offChip').textContent,
       chipsH:box?Math.round(box.getBoundingClientRect().height):null};
   });
@@ -520,14 +521,15 @@ async function bars(br){
       /* the details open: no student yet (OB-1, the first form), then with the student's name and Done showing (CN-1) */
       await setChips(page,'Autosaved 12:59 PM','Saved for offline use');await sleep(150);
       const g0=await geo(page),how=id==='OB-1'?'no student yet':'the details open with a name';
-      ok('bars '+tag+' '+id+': '+how+', the chips showing: the case buttons on one row, the form at '+g0.frameTop+' px (at most 224)',g0.rows===1&&g0.frameTop<=224&&g0.chipsIn==='heading'&&!g0.folded,g0);
+      ok('bars '+tag+' '+id+': '+how+', the chips showing (v25.65: in the status indicator\'s panel): the case buttons on one row, the form at '+g0.frameTop+' px (at most 224)',g0.rows===1&&g0.frameTop<=224&&g0.chipsIn==='panel'&&!g0.folded,g0);
       /* the student entered and the details folded (Done), as the audit measured */
       if(!(await page.evaluate(()=>$('#pClient').value)))await page.fill('#pClient','Sample Student');
       await page.evaluate(()=>{const b=document.querySelector('#barFold');if(b&&!b.hidden)b.click();});await sleep(300);
       await setChips(page,'Autosaved 12:59 PM','Saved for offline use');await sleep(150);
       const g1=await geo(page);
       if(id==='CN-1'&&tag==='1180x820 touch')await page.screenshot({path:OUT+'bars-1180-folded.png'});
-      ok('bars '+tag+' '+id+': folded, "Autosaved 12:59 PM" showing: one row, the form at '+g1.frameTop+' px (at most 224)',g1.rows===1&&g1.frameTop<=224&&g1.folded&&g1.header.h===(g1.coarse?60:56),g1);
+      /* v25.65 top bar A: the heading is the 54 px dark row, the student line one 46 px row, the form row 54 px: the form at about 155 px */
+      ok('bars '+tag+' '+id+': folded, "Autosaved 12:59 PM" showing: one row, the form at '+g1.frameTop+' px (at most 165)',g1.rows===1&&g1.frameTop<=165&&g1.folded&&g1.header.h===54,g1);
       await page.evaluate(()=>{const b=document.querySelector('#barEdit');if(b&&b.offsetParent)b.click();});await sleep(200);
     }
     /* the longest texts the two chips can show, with a long school name under the student's */
@@ -535,11 +537,11 @@ async function bars(br){
     await page.evaluate(()=>{const b=document.querySelector('#barFold');if(b&&!b.hidden)b.click();});await sleep(200);
     await setChips(page,'Autosave: storage full','Not saved for offline use: no room');await sleep(150);
     const g2=await geo(page);
-    ok('bars '+tag+': the longest chip texts and a long school name: the heading keeps its '+(g2.coarse?60:56)+' px, the case buttons one row',g2.header.h===(g2.coarse?60:56)&&g2.rows===1&&g2.frameTop<=224,g2);
+    ok('bars '+tag+': the longest chip texts and a long school name: the heading keeps its 54 px (v25.65), the case buttons one row',g2.header.h===54&&g2.rows===1&&g2.frameTop<=165,g2);
     /* fullscreen */
-    await page.click('#fullBtn');await sleep(300);const g3=await geo(page);
+    await tapOrMenu(page,'#fullBtn',false);await sleep(300);const g3=await geo(page);   /* v25.65: Fullscreen is in the form row's View menu */
     ok('bars '+tag+': in fullscreen the form begins under the bar over it',g3.frameTop!==null&&g3.frameTop<=g3.crumb.h+2,g3);
-    await page.click('#fullBtn');await sleep(200);
+    await tapOrMenu(page,'#fullBtn',false);await sleep(200);
     await ctx.close();
   }
   /* v21.92 (the design review): on a touch screen the chips in the heading and the bar's buttons are 44 px targets, so the
@@ -563,12 +565,12 @@ async function bars(br){
       put('client','Christopher Montgomery-Alexander');put('site','Royal Palm Beach Elementary School');put('sid','10243');});
     await status(page,['IC-1']);await page.waitForFunction(()=>!$('#whoTake').hidden,null,{timeout:9000}).catch(()=>{});
     await setChips(page,'Autosave: storage full','Not saved for offline use: no room');await sleep(200);
-    const m=await page.evaluate(()=>{const n=$('#whoName'),hd=document.querySelector('header.top'),t=$('#whoTake'),h1=document.querySelector('header.top h1');
+    const m=await page.evaluate(()=>{const n=$('#whoName'),hd=document.querySelector('header.top'),t=$('#whoTake'),h1=document.querySelector('header.top h1');   /* v25.65: the name and Use these details are on the student line */
       return {name:n.textContent,shown:n.clientWidth,needs:n.scrollWidth,take:t.hidden?'':t.textContent,title:h1.clientWidth,titleNeeds:h1.scrollWidth,
         headerH:Math.round(hd.getBoundingClientRect().height),over:hd.scrollWidth>hd.clientWidth+1};});
     if(w===1024)await page.screenshot({path:OUT+'bars-name-1024.png',clip:{x:0,y:0,width:w,height:70}});
-    ok('bars '+w+'x'+h+': the longest chip texts and "Use these details": the long name keeps '+m.shown+' px (at least 160), the heading its 60 px',
-      m.take==='Use these details'&&m.shown>=160&&m.headerH===60&&!m.over,m);
+    ok('bars '+w+'x'+h+': the longest chip texts and "Use these details": the long name keeps '+m.shown+' px (at least 160), the heading its 54 px (v25.65)',
+      m.take==='Use these details'&&m.shown>=160&&m.headerH===54&&!m.over,m);
     await ctx.close();
   }
   /* upright (v21.89: from 760 px) the chips go up into the heading; on a phone they stay in the bar */
@@ -577,9 +579,9 @@ async function bars(br){
     const page=await shell(ctx,'bars '+tag);await open(page,'CN-1');
     await setChips(page,'Autosaved 12:59 PM','Saved for offline use');await sleep(150);
     const g=await geo(page);
-    if(vp.width>=760){ok('bars '+tag+': the chips are in the heading and the case buttons keep to one row; the details open as a grid of three rows (v21.92; the form at '+g.frameTop+' px, at most 320)',g.chipsIn==='heading'&&g.rows===1&&g.frameTop<=320,g);
+    if(vp.width>=760){ok('bars '+tag+': the chips are in the status indicator\'s panel (v25.65) and the case buttons keep to one row; the details open as a grid of three rows (v21.92; the form at '+g.frameTop+' px, at most 320)',g.chipsIn==='panel'&&g.rows===1&&g.frameTop<=320,g);
       await page.evaluate(()=>{const e=$('#pClient');e.value='Mateo Rivera';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));foldBar(true);});await sleep(300);const gf=await geo(page);
-      ok('bars '+tag+': folded, the form at '+gf.frameTop+' px (at most 240)',gf.folded&&gf.frameTop<=240,gf);}
+      ok('bars '+tag+': folded, the form at '+gf.frameTop+' px (at most 165, v25.65)',gf.folded&&gf.frameTop<=165,gf);}
     else ok('bars '+tag+': the chips stay in the heading, on a row of their own under the title (v25.63; the form at '+g.frameTop+' px; the top bar takes '+g.rows+' rows here)',g.chipsIn==='heading',g);
     await ctx.close();
   }
@@ -588,9 +590,9 @@ async function bars(br){
   const a=(await geo(page)).chipsIn;
   await page.setViewportSize({width:700,height:1000});await sleep(500);const b=(await geo(page)).chipsIn;   /* v25.63 narrower than 760 px (Split View): still the heading */
   await page.setViewportSize({width:1180,height:820});await sleep(500);const c=await geo(page);
-  await page.tap('#autoChip');await sleep(700);
+  await page.tap('#wsStat');await sleep(400);await page.tap('#autoChip');await sleep(700);   /* v25.65: the chip is in the status indicator's panel */
   const dlg=await page.evaluate(()=>({open:$('#dlg').open,title:$('#dlgTitle').textContent}));
-  ok('bars: a window narrower than 760 px and back: the chips stay in the heading (v25.63), and the Autosave chip still opens its window',a==='heading'&&b==='heading'&&c.chipsIn==='heading'&&dlg.open&&/Autosave/.test(dlg.title),{a,b,c:c.chipsIn,dlg});
+  ok('bars: a window narrower than 721 px and back: the chips go to the heading there and back to the status panel (v25.65), and the Autosave chip still opens its window',a==='panel'&&b==='heading'&&c.chipsIn==='panel'&&dlg.open&&/Autosave/.test(dlg.title),{a,b,c:c.chipsIn,dlg});
   await ctx.close();
 }
 

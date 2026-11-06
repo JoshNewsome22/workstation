@@ -349,7 +349,7 @@ S.owntab = async br => {
   const fr = await open(page, 'DM-1', true);
   const count = () => [...document.querySelectorAll('input,textarea,select')].filter(e => e.type !== 'checkbox' && e.type !== 'radio' && e.type !== 'file' && String(e.value).trim()).length;
   const inShell = await fr.evaluate(count), text = await ownText(fr);
-  const [pop] = await Promise.all([ctx.waitForEvent('page'), page.click('#popOut')]);
+  const [pop] = await Promise.all([ctx.waitForEvent('page'), L.tapOrMenu(page, '#popOut', false)]);   /* v25.65: Own tab is in the form row's View menu */
   wire(pop, log);
   await pop.waitForLoadState('load');
   await pop.waitForFunction(() => /^nbh-tab\|/.test(window.name), null, { timeout: 30000 }).catch(() => {});
