@@ -99,7 +99,13 @@ async function reveal(fr,sel){
   for(let i=0;i<sum;i++){await fr.locator('details[data-sj-open="'+i+'"] > summary').first().click().catch(()=>{});await sleep(120);}
   if(await loc.isVisible().catch(()=>false))return loc;
   const views=await fr.$$('#viewSeg button[data-view], nav.nbh-tabs [data-tab], .tabs button[data-tab], [role=tablist] [role=tab]');
-  for(const v of views){if(!(await v.isVisible().catch(()=>false)))continue;await v.click().catch(()=>{});await sleep(250);if(await loc.isVisible().catch(()=>false))return loc;
+  /* v25.68 (H2): in the workstation a form of 6 sheets or fewer shows no sheet column; its sheets are chosen from the form row's
+     sheet menu, which presses these same buttons (hidden with the toolbar): press them that way */
+  const rowMenu=await fr.evaluate(()=>!!window.__nbhNoSheets&&window.parent!==window).catch(()=>false);
+  for(const v of views){if(await v.isVisible().catch(()=>false))await v.click().catch(()=>{});
+    else if(rowMenu&&await v.evaluate(b=>!b.hidden&&getComputedStyle(b).display!=='none').catch(()=>false))await v.evaluate(b=>b.click()).catch(()=>{});
+    else continue;
+    await sleep(250);if(await loc.isVisible().catch(()=>false))return loc;
     const s2=await loc.evaluate(e=>{const d=e.closest('details');if(d&&!d.open){d.setAttribute('data-sj-open','x');return true;}return false;});
     if(s2){await fr.locator('details[data-sj-open="x"] > summary').first().click().catch(()=>{});await sleep(150);await fr.locator('details[data-sj-open="x"]').first().evaluate(d=>d.removeAttribute('data-sj-open')).catch(()=>{});if(await loc.isVisible().catch(()=>false))return loc;}}
   await loc.scrollIntoViewIfNeeded().catch(()=>{});
