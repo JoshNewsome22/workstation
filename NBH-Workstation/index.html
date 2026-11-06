@@ -2402,6 +2402,7 @@ function paintSum(){
       if(/outdated/i.test(fl.crisis||''))bits.push('crisis plan outdated'+dmAsOf(fl,'crisis',true));else if(fl.crisis==='No'&&!crHas)bits.push('no crisis plan'+dmAsOf(fl,'crisis',true));}
     {const fam=dmFamily(f,false);if(fam.length)bits.push('family: '+fam.join('; '));}}   /* v23.09 (review I3) */
   $('#sumCase').textContent=bits.length?'The case: '+bits.join(', '):'';
+  state.sumBits=bits.slice();   /* v25.65 top bar A: the student line writes the same parts as "Case: a · b · c" */
   row.hidden=!document.body.classList.contains('bar-folded');
   if(typeof paintPhoto==='function')paintPhoto();
 }
@@ -10824,7 +10825,8 @@ bar.parentNode.insertBefore(nav,bar);
 /* the menus: each item runs the bar's own button (left in the bar, out of sight), so its work and its id are unchanged */
 const MENUS={packet:[['savePacket','Save packet'],['openPacket','Open packet']],
   case:[['openCase','Open case'],['closeCase','Close case'],['saveFile','Save case to a file'],['saveWhole','Save a case that opens on its own'],['shareEdit','Share for editing'],'hr',['caseXlsx','Case as spreadsheet'],['hxBtn','History']],
-  tools:[['pushPacket','Fill open forms'],['readDoc','Read a document','wn-narrow'],['caseMap','Case map','wn-narrow'],'hr',['dirBtn','Staff directory'],['diag','Diagnostics'],['bookmarkPdf','Finish PDF','wn-narrow']]};
+  tools:[['pushPacket','Fill open forms'],['readDoc','Read a document','wn-narrow'],['caseMap','Case map','wn-narrow'],'hr',['dirBtn','Staff directory'],['diag','Diagnostics'],['bookmarkPdf','Finish PDF','wn-narrow'],
+    'hr',['aNavTop','Navigation: Top bar'],['aNavRail','Navigation: Side rail']]};   /* v25.65 top bar A: where the places sit (top bar or side rail) */
 const M=document.createElement('div');M.className='wn-menu';M.id='wsNavMenu';M.setAttribute('role','menu');M.hidden=true;document.body.appendChild(M);
 let openFor=null;
 const shut=(focusBack)=>{if(M.hidden)return;M.hidden=true;const b=nav.querySelector('[data-wn-menu="'+openFor+'"]');if(b){b.setAttribute('aria-expanded','false');if(focusBack)b.focus();}openFor=null;};
@@ -10835,6 +10837,7 @@ const open=b=>{const key=b.dataset.wnMenu;M.innerHTML='';
     const it=document.createElement('button');it.type='button';it.setAttribute('role','menuitem');it.dataset.wnFor=id;it.textContent=label;if(cls)it.className=cls;M.appendChild(it);});
   if(M.lastElementChild&&M.lastElementChild.tagName==='HR')M.lastElementChild.remove();
   M.hidden=false;const r=b.getBoundingClientRect(),w=M.offsetWidth;M.style.top=Math.round(r.bottom)+'px';M.style.left=Math.max(8,Math.min(innerWidth-w-8,Math.round(r.left)))+'px';
+  if(window.__wsNavDecorate)try{window.__wsNavDecorate(M,key,b);}catch(e){}   /* v25.65 top bar A: the navigation items, and the menus beside the side rail */
   b.setAttribute('aria-expanded','true');openFor=key;const f=[...M.querySelectorAll('button')].find(x=>x.offsetParent!==null);if(f)f.focus();};
 nav.addEventListener('click',e=>{const b=e.target.closest('[data-wn-menu]');if(!b)return;e.stopPropagation();const same=openFor===b.dataset.wnMenu;shut(false);if(!same)open(b);});
 M.addEventListener('click',e=>{const it=e.target.closest('[data-wn-for]');if(!it)return;const src=document.getElementById(it.dataset.wnFor);shut(false);if(src)src.click();});
@@ -10855,6 +10858,458 @@ try{hxPlace=function(){const b=$('#hxBtn'),x=$('#caseXlsx'),d=$('#dirBtn'),diag=
   if(b&&x&&b.previousElementSibling!==x)x.insertAdjacentElement('afterend',b);if(b)b.classList.remove('hx-top');
   if(d&&diag&&d.nextElementSibling!==diag)diag.insertAdjacentElement('beforebegin',d);if(d)d.classList.remove('hx-top');};}catch(e){}
 chipsTop();try{hxPlace();}catch(e){}
+})();
+</script>
+<!-- v25.65 top bar A (the BCBA's choice from the top bar options, 11/2): on a window wider than a phone the top is three slim
+     rows. The dark row carries the logo's mark, the places (Forms, Case map, Documents, Packet, Case, Tools, Today, Caseload,
+     Help), one status indicator for Autosave, the offline copy and Drive, and Save case, Build master print and Finish PDF;
+     the white heading row goes. The student line is the folded student strip on one line. One form row replaces the crumb's
+     buttons and the form's own toolbar: the forms list, the form's code and name, its sheets, Dictate, the fields filled,
+     Save form, Print, View and Close; the window's buttons (Fit, Focus, Side by side, Fullscreen, Own tab, Keep the bars in
+     place, the form's More) are in the View menu. While writing the dark row and the student line fold away and the form row
+     stays, naming the student. The navigation can sit in a side rail instead (option C, View or Tools: Navigation), kept on
+     the device. Nodes are moved, not copied: every id, listener and test hook keeps working; the form's own buttons do the
+     work (the shell clicks them), and a form is changed only by a style element and a class the shell puts on its page. -->
+<style id="ws-a-css">
+/* v25.65 top bar A: nothing of it on a phone (the phone layout is unchanged) or on paper */
+body:not(.ws-a) .wa{display:none!important}
+@media print{.wa,#wsViewMenu,#wsSheetMenu,#wsStatPanel{display:none!important}}
+:root{--wsr-w:86px}
+/* ---- the dark row: the heading becomes it; the workstation's name stays the page's title and a heading for screen readers ---- */
+body.ws-a header.top{background:#1f3a4d;color:#e9f0f3;padding:0;min-height:54px;gap:0;align-items:stretch;flex-wrap:nowrap}
+body.ws-a header.top>h1{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;margin:0;padding:0}
+body.ws-a header.top>.sp,body.ws-a header.top>.who{display:none!important}
+body.ws-a header.top #wsNav{flex:1 1 auto;min-width:0;min-height:54px;padding:0 12px 0 10px;background:transparent;z-index:auto}
+body.ws-a #wsNav{align-items:stretch}
+body.ws-a #wsNav .wn-item{min-height:54px;font-size:15px;padding:0 12px}
+body.ws-a #wsNav .wn-right{margin-left:2px}
+body.ws-a #wsNav .wn-right button{min-height:44px}
+.wa-ico{display:none}
+body.ws-a #wsNav #todayBtn>svg:not(.wa-ico),body.ws-a #wsNav #caseloadBtn>svg:not(.wa-ico){display:none}
+body.ws-a #wsNav #todayBtn,body.ws-a #wsNav #caseloadBtn{position:relative;min-width:0;height:auto}
+body.ws-a #wsNav #todayBtn .tbadge{top:8px;right:0}
+/* the logo's mark: the edition's own logo, cut to the picture left of its words (measured from the image, so it is the
+   school's star in the school edition and the practice's leaves here); the whole logo keeps its name for screen readers */
+.wa-mark{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;align-self:center;width:38px;height:38px;border-radius:8px;background:#fff;margin:0 8px 0 2px;position:relative;overflow:hidden}
+.wa-mark .wa-clip{position:relative;display:block;width:var(--wa-mk-w,24px);height:32px;overflow:hidden}
+body.ws-a .wa-mark #logo{position:absolute;left:var(--wa-mk-x,0px);top:0;height:32px!important;width:auto!important;max-width:none;padding:0!important;background:transparent!important;border-radius:0!important;box-sizing:content-box;display:block}
+/* the one status indicator, and its panel with each status as it reads and its own action */
+#wsStat{background:transparent;border:0;color:#dfeee7;font:500 14px var(--sans,system-ui,sans-serif);display:inline-flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;min-width:44px;align-self:center;border-radius:6px;cursor:pointer;white-space:nowrap;flex:0 0 auto}
+#wsStat:hover,#wsStat[aria-expanded=true]{background:#2a4b61}
+#wsStat:focus-visible{outline:3px solid #8fd0ee;outline-offset:-3px}
+#wsStat .wa-dot,#aStat2 .wa-dot{width:9px;height:9px;border-radius:50%;background:#58c08a;flex:0 0 auto}
+#wsStat.k-off .wa-dot,#aStat2.k-off .wa-dot{background:#e0894b}#wsStat.k-off{color:#f6d4b8}
+#wsStat.k-warn .wa-dot,#aStat2.k-warn .wa-dot{background:#e3a83a}#wsStat.k-warn{color:#f5e0a8}
+#wsStat.k-busy .wa-dot,#wsStat.k-upd .wa-dot,#aStat2.k-busy .wa-dot,#aStat2.k-upd .wa-dot{background:#5fb4e0}#wsStat.k-busy,#wsStat.k-upd{color:#cfe6f3}
+#wsStat.k-away .wa-dot,#wsStat.k-wait .wa-dot,#aStat2.k-away .wa-dot,#aStat2.k-wait .wa-dot{background:#a9b9bd}#wsStat.k-away,#wsStat.k-wait{color:#d9e3e6}
+#wsStatPanel{min-width:270px;padding:10px}
+#wsStatPanel .wa-ph{font:600 12px/1.2 var(--sans,system-ui,sans-serif);letter-spacing:.06em;text-transform:uppercase;color:#4d5f68;padding:4px 6px 8px}
+#wsStatPanel .chips{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+#wsStatPanel button.chip{display:flex;align-items:center;gap:8px;width:100%;justify-content:flex-start;font-size:13.5px;font-weight:500;padding:8px 12px;min-height:44px;border-radius:8px;
+  background:#f6f8f8;border:1px solid #d6dfe2;color:#4d5f68;white-space:normal;text-align:left}
+#wsStatPanel button.chip:hover{background:#eef3f5}
+#wsStatPanel button.chip::before{content:"";width:8px;height:8px;border-radius:50%;background:#b9c6cc;flex:0 0 auto}
+#wsStatPanel button.chip.on{color:#2f6b37;border-color:#bcd9c3}#wsStatPanel button.chip.on::before{background:#3f9a5f}
+#wsStatPanel button.chip.off{color:#8a4b1d;border-color:#e2c7ab}#wsStatPanel button.chip.off::before{background:#d08a4f}
+#wsStatPanel button.chip.warn{color:#7d5a10;border-color:#e3cf9b}#wsStatPanel button.chip.warn::before{background:#d39a26}
+#wsStatPanel button.chip.busy{color:#245f7c;border-color:#b6d3e2}#wsStatPanel button.chip.busy::before{background:#4aa3cf}
+#wsStatPanel button.chip.upd{color:#245f7c;border-color:#9cc6dd}#wsStatPanel button.chip.upd::before{background:#3d97c9}
+#wsStatPanel button.chip.away{color:#4d5f68;border-color:#d6dfe2}#wsStatPanel button.chip.away::before{background:#a9b9bd}
+#wsStatPanel .wa-pn{font-size:12.5px;color:#4d5f68;line-height:1.4;padding:8px 6px 2px;margin:0}
+/* the dark row on narrower windows: Finish PDF goes to Tools first, then the indicator keeps its dot, then the places tighten */
+@media (max-width:1300px){body.ws-a #bookmarkPdf{display:none!important}body.ws-a .wn-menu .wn-narrow[data-wn-for="bookmarkPdf"]{display:flex}}
+@media (max-width:1240px){body.ws-a #wsStat .wa-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}}
+@media (max-width:1100px){body.ws-a:not(.ws-navrail) #wsNav .wn-item{padding:0 9px;font-size:14.5px}body.ws-a:not(.ws-navrail) header.top #wsNav{padding:0 8px 0 6px}body.ws-a:not(.ws-navrail) #wsNav .wn-sep{margin:16px 0}
+  body.ws-a #wsNav .wn-right button{padding:0 12px}}
+@media (max-width:900px){body.ws-a:not(.ws-navrail) #wsNav .wn-item{padding:0 7px;font-size:14px}body.ws-a:not(.ws-navrail) #wsNav .wn-sep{display:none}body.ws-a:not(.ws-navrail) .wa-mark{margin-right:4px}
+  body.ws-a #wsNav .wn-right{gap:6px}body.ws-a #wsNav .wn-right button{padding:0 10px;font-size:13.5px}}
+/* ---- the student line: the folded strip, on one line; the case summary gives way before the name ---- */
+html body.ws-a.bar-folded .bar{padding:0 18px!important;min-height:46px;justify-content:flex-start}
+body.ws-a #barSum{gap:12px;min-height:46px;font-size:14px;align-items:center}
+html body.ws-a.bar-folded #barSum{flex:1 1 auto;max-width:none}
+body.ws-a #barSum #sumCase{display:none}
+body.ws-a #barSum #sumName{font-size:17px}
+body.ws-a #barSum #sumPhoto{width:30px;height:30px;border-color:#c9d4d2}
+body.ws-a #barSum #sumDet{flex:0 1 auto;min-width:60px}
+#sumIni,.wa-av{width:30px;height:30px;border-radius:50%;background:#c9d5d3;color:#2f3f47;display:inline-flex;align-items:center;justify-content:center;font:600 12.5px/1 var(--sans,system-ui,sans-serif);flex:0 0 auto;letter-spacing:.02em}
+.wa-vd{width:1px;height:20px;background:#d3dcdb;flex:0 0 auto}
+body.ws-a #barSum #sumCaseA{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#4d5f68}
+body.ws-a #barSum #sumCaseA:empty,body.ws-a #barSum .wa-vd:has(+#sumCaseA:empty){display:none}
+html body.ws-a .bar #barEdit{background:transparent!important;border:0!important;color:#1d4f6e!important;font:600 14px var(--sans,system-ui,sans-serif);text-decoration:underline;text-underline-offset:3px;min-height:44px;padding:0 6px;box-shadow:none}
+html body.ws-a .bar #barEdit:hover{background:#eef3f5!important}
+#aWho{gap:10px;font-size:13px;color:#4d5f68;align-items:center}
+#aWho:not(:has(#whoTake:not([hidden]))){display:none!important}
+#aWho .who{display:flex!important;gap:8px;align-items:baseline;min-width:0}
+#aWho .who b{font-size:14px;color:#1a2933;display:inline-block;max-width:40vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}#aWho .who b.who-found{font-style:italic}
+#aWho .who #whoSub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* ---- the form row: one row over the form ---- */
+body.ws-a.has-form .stagew>.crumb{min-height:54px;padding:0 14px;gap:8px;background:#f7faf9;font-size:14px;color:#4d5f68}
+body.ws-a .stagew>.crumb{overflow:hidden;min-width:0}
+/* Fullscreen: its own two buttons (the list of forms, Leave fullscreen) as icons, so the row keeps to the window */
+body.ws-a.has-form.ws-full .crumb .acts>#fullBtn .lbl,body.ws-a.has-form.ws-full .crumb .acts>#fsForms .lbl{display:none!important}
+body.ws-a.has-form.ws-full .crumb .acts>#fullBtn,body.ws-a.has-form.ws-full .crumb .acts>#fsForms{min-width:44px;min-height:44px;padding:0;justify-content:center}
+body.ws-a.has-form.ws-full .crumb #crumbStatus{display:none!important}
+body.ws-a .stagew>.crumb>*{order:2}
+body.ws-a .stagew>.crumb>#railToggle{order:0}
+body.ws-a .stagew>.crumb>#crumbWho,body.ws-a .stagew>.crumb>#crumbWho+.wa-vd,body.ws-a .stagew>.crumb>#aCode{order:1}
+body.ws-a:not(.has-form) #aView{display:none!important}
+body.ws-a .crumb #crumbFile,body.ws-a .crumb #crumbPhoto,body.ws-a .crumb .fs-logo,body.ws-a.has-form .crumb #crumbId{display:none!important}
+body.ws-a.has-form:not(.ws-full) .crumb #railToggle{display:inline-flex!important}
+body.ws-a.has-form .crumb #railToggle .lbl{display:none!important}
+body.ws-a.has-form .crumb #railToggle{min-width:44px;min-height:44px;justify-content:center}
+body.ws-a.has-form .crumb #crumbTitle{font-size:18px;flex:0 1 auto;min-width:40px}
+body.ws-a .crumb #crumbStatus{flex:0 4 auto;min-width:0}
+body.ws-a.has-form .crumb #crumbStatus:not(.quiet){display:inline!important}
+#aCode{background:#e3eeea;border-radius:999px;padding:5px 10px;font:600 13px/1 var(--sans,system-ui,sans-serif);color:#1e3a4f;flex:0 0 auto;white-space:nowrap}
+#aCode:empty{display:none!important}
+.crumb .wa-vd{margin:0 4px}
+#aStep{display:inline-flex;align-items:stretch;border:1px solid #b8c6c3;border-radius:6px;height:46px;background:#fff;flex:0 0 auto;min-width:0;max-width:340px;overflow:hidden}
+#aStep button{border:0;background:transparent;min-height:0;height:100%;border-radius:0;color:#1f2d36;margin:0}
+#aStep #aPrev,#aStep #aNextB{width:44px;padding:0;font-size:20px;line-height:1;color:#3b4d55;flex:0 0 auto;justify-content:center;display:inline-flex;align-items:center}
+#aStep #aPrev{border-right:1px solid #b8c6c3}#aStep #aNextB{border-left:1px solid #b8c6c3}
+#aStep button[disabled]{color:#a4b2b6;cursor:default}
+#aStep #aSheet{padding:0 12px;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto;display:block;text-align:left}
+#aStep #aSheet b{font-family:inherit;font-size:inherit;color:inherit;font-weight:600}
+#aStep button:hover:not([disabled]){background:#eef3f5}
+#aNext{font-size:13.5px;color:#4d5f68;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 6 auto;min-width:0}
+#aNext:empty{display:none!important}
+.crumb .wa-ob{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;min-width:44px;padding:0 12px;border:1px solid #b8c6c3;border-radius:6px;background:#fff;color:#1f2d36;font-size:14px;font-weight:500;flex:0 0 auto;white-space:nowrap;cursor:pointer}
+.crumb .wa-ob:hover{background:#eef3f5}
+.crumb .wa-ob svg{width:17px;height:17px}
+#aDict[aria-pressed=true]{background:#f3c94f;border-color:#f3c94f;color:#182e43}
+#aSave.dirty::after{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#c9742a;margin-left:2px}
+#aView .wn-chev{width:12px;height:12px}
+body.ws-a .crumb .acts{gap:8px}
+body.ws-a .crumb .acts>#saveQuick,body.ws-a .crumb .acts>#popOut,body.ws-a .crumb .acts>#pinBars,body.ws-a .crumb .acts>#focusBtn,
+body.ws-a .crumb .acts>#splitBtn,body.ws-a .crumb .acts>#fullBtn,body.ws-a .crumb .acts>#fillBtn{display:none!important}
+body.ws-a.has-form.ws-full .crumb .acts>#fullBtn{display:inline-flex!important}
+body.ws-a.has-form .crumb .acts>#printOne,body.ws-a.has-form .crumb .acts>#closeForm{min-height:44px;padding:0 12px;border-radius:6px;font-size:14px}
+body.ws-a.has-form .crumb .acts>#printOne .lbl{display:inline!important}
+body.ws-a.has-form .crumb .acts>#closeForm .lbl{display:none!important}
+body.ws-a.has-form .crumb .acts>#closeForm{min-width:44px;padding:0;justify-content:center}
+/* the student's name in the form row, while writing (the rows above are folded away) and in Fullscreen */
+#crumbWho{display:none;align-items:center;gap:8px;flex:0 0 auto;min-width:0;max-width:min(220px,22%)}
+body.ws-a.has-form.ws-fold .crumb #crumbStatus,body.ws-a.has-form.ws-ov.ws-up .crumb #crumbStatus,body.ws-a.has-form.ws-fold #aNext,body.ws-a.has-form.ws-ov.ws-up #aNext{display:none!important}
+#crumbWho img{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid #c9d4d2;flex:0 0 auto}
+#crumbWho img[hidden]{display:none}
+#crumbWho .wa-av{width:28px;height:28px;font-size:11px}
+#crumbWho b{font:600 16px/1.1 var(--serif);color:#1f2d36;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#crumbWho+.wa-vd{display:none}
+body.ws-a.has-form.ws-fold #crumbWho,body.ws-a.has-form.ws-ov.ws-up #crumbWho,body.ws-a.has-form.ws-full #crumbWho{display:inline-flex}
+body.ws-a.has-form.ws-fold #crumbWho+.wa-vd,body.ws-a.has-form.ws-ov.ws-up #crumbWho+.wa-vd,body.ws-a.has-form.ws-full #crumbWho+.wa-vd{display:block}
+body.ws-a.has-form #crumbWho:not(:has(b:not(:empty))){display:none!important}
+#aStat2{display:none;align-items:center;gap:7px;background:transparent;border:0;color:#2f6b37;font-size:13.5px;min-height:44px;padding:0 8px;flex:0 0 auto;white-space:nowrap;cursor:pointer;border-radius:6px}
+#aStat2:hover{background:#eef3f5}
+#aStat2.k-off{color:#8a4b1d}#aStat2.k-warn{color:#7d5a10}#aStat2.k-busy,#aStat2.k-upd{color:#245f7c}#aStat2.k-away,#aStat2.k-wait{color:#4d5f68}
+body.ws-a.has-form.ws-fold:not(.ws-navrail) #aStat2,body.ws-a.has-form.ws-ov.ws-up:not(.ws-navrail) #aStat2,body.ws-a.has-form.ws-full #aStat2{display:inline-flex}
+/* side by side: each pane keeps its own bar; the form row's controls for one form step aside */
+body.ws-a.ws-split .crumb .wa-one,body.ws-a:not(.has-form) .crumb .wa-one{display:none!important}
+body.ws-a .crumb .wa-one.wa-off{display:none!important}
+/* the form row on narrower stages (an iPad upright, the forms list open beside it, the side rail) */
+@container (max-width:1240px){body.ws-a #aNext{display:none!important}body.ws-a.ws-full #aStat2 .wa-t{display:none}}
+@container (max-width:1100px){body.ws-a.ws-full #crumbWho b,body.ws-a.ws-full #crumbWho+.wa-vd,body.ws-a.ws-full #aStat2,body.ws-a.ws-full .crumb #aSave .wa-t,body.ws-a.ws-full .crumb #aDict .wa-t,body.ws-a.ws-full.has-form .crumb .acts>#printOne .lbl{display:none!important}
+  body.ws-a.ws-full .crumb #aDict,body.ws-a.ws-full .crumb #aSave,body.ws-a.ws-full.has-form .crumb .acts>#printOne{padding:0 11px}}
+/* while writing on a narrower window the row keeps the student's name and the form's controls; the labels give way */
+@container (max-width:1100px){body.ws-a.ws-fold #aStat2,body.ws-a.ws-fold .crumb #aSave .wa-t,body.ws-a.ws-fold .crumb #aDict .wa-t,body.ws-a.ws-fold.has-form .crumb .acts>#printOne .lbl,body.ws-a.ws-ov.ws-up #aStat2,body.ws-a.ws-ov.ws-up .crumb #aSave .wa-t,body.ws-a.ws-ov.ws-up .crumb #aDict .wa-t,body.ws-a.ws-ov.ws-up.has-form .crumb .acts>#printOne .lbl{display:none!important}}
+@container (max-width:1120px){body.ws-a .crumb #crumbStatus:not(.quiet){display:none!important}}
+@container (max-width:1000px){body.ws-a .crumb #aDict .wa-t,body.ws-a.has-form .crumb .acts>#printOne .lbl{display:none!important}body.ws-a .crumb #aDict,body.ws-a.has-form .crumb .acts>#printOne{padding:0 11px}
+  body.ws-a.has-form .crumb #crumbTitle{font-size:16.5px}}
+@container (max-width:860px){body.ws-a .crumb #aView{padding:0 10px}body.ws-a #aStep #aSheet{padding:0 9px;font-size:14px}
+  body.ws-a.has-form .stagew>.crumb{padding:0 10px;gap:6px}}
+@container (max-width:760px){body.ws-a #aStep #aSheet .wa-of{display:none}body.ws-a .crumb #aSave .wa-t{display:none}}
+/* the View menu and the sheets list */
+.wa-pop .wa-mi{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;color:#1a2933;font:500 14.5px var(--sans,system-ui,sans-serif);padding:10px 12px;min-height:44px;border-radius:6px;cursor:pointer;justify-content:flex-start}
+.wa-pop .wa-mi:hover,.wa-pop .wa-mi:focus-visible{background:#eef3f5;outline:none}
+.wa-pop .wa-mi .wa-ck{width:18px;flex:0 0 18px;text-align:center;color:#1e3a4f;font-weight:700}
+.wa-pop .wa-mi[aria-checked=true]{background:#eef4f2}
+.wa-pop .wa-mi[aria-current=true]{background:#eef4f2;font-weight:600}
+.wa-pop .wa-mi small{margin-left:auto;color:#4d5f68;font-size:12.5px}
+.wa-pop .wa-mh{font:600 11.5px/1 var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:#4d5f68;padding:8px 12px 6px}
+#wsSheetMenu{max-height:min(70vh,560px);overflow-y:auto;min-width:260px}
+#wsViewMenu{min-width:290px}
+/* ---- while writing: the dark row folds with the student line (it is in the heading now) ---- */
+/* ---- side rail (option C): the places in a narrow navy rail down the left; the top keeps the student line and the form row ---- */
+body.ws-a.ws-navrail{padding-left:var(--wsr-w)}
+body.ws-a.ws-navrail header.top{display:none!important}
+body.ws-a.ws-navrail #wsNav{position:fixed;left:0;top:0;bottom:0;width:var(--wsr-w);flex-direction:column;align-items:center;flex-wrap:nowrap;padding:10px 0 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;min-height:0;scrollbar-width:none}
+body.ws-a.ws-navrail #wsNav::-webkit-scrollbar{display:none}
+body.ws-a.ws-navrail #wsNav .wa-mark{margin:0 0 8px}
+body.ws-a.ws-navrail #wsNav .wn-item{flex-direction:column;justify-content:center;align-items:center;width:calc(var(--wsr-w) - 10px);min-height:58px;padding:6px 2px!important;gap:5px;font-size:12px!important;line-height:1.15;border-radius:8px!important;text-align:center;white-space:normal;flex:0 0 auto}
+body.ws-a.ws-navrail #wsNav .wn-sep,body.ws-a.ws-navrail #wsNav .wn-sp,body.ws-a.ws-navrail #wsNav .wn-chev{display:none!important}
+body.ws-a.ws-navrail #wsNav .wa-ico{display:block;width:22px;height:22px;flex:0 0 auto}
+body.ws-a.ws-navrail #wsNav .wn-wide:not(.wn-sep){display:inline-flex!important}
+body.ws-a.ws-navrail #wsNav #todayBtn .tbadge{top:2px;right:8px}
+body.ws-a.ws-navrail #wsStat{margin-top:auto;flex-direction:column;gap:5px;font-size:12px;padding:8px 2px;width:calc(var(--wsr-w) - 10px);white-space:normal;text-align:center;line-height:1.15}
+body.ws-a.ws-navrail #wsStat .wa-t{position:static!important;width:auto!important;height:auto!important;clip:auto!important;clip-path:none!important;white-space:normal!important;overflow:visible!important}
+body.ws-a.ws-navrail .wn-menu .wn-narrow:not([data-wn-for="bookmarkPdf"]){display:none!important}
+body.ws-a.ws-navrail.ws-full{padding-left:0}
+/* Save case, Build master print and Finish PDF at the right of the student line */
+body.ws-a.ws-navrail .bar{padding-right:calc(var(--wa-rw,420px) + 30px)!important}
+body.ws-a.ws-navrail:not(.ws-ov) .bar{position:relative}
+body.ws-a.ws-navrail .bar>.wn-right{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:8px}
+html body.ws-a.ws-navrail .bar>.wn-right button{min-height:44px;border-radius:6px;font:600 14px var(--sans,system-ui,sans-serif);padding:0 14px;white-space:nowrap;border:1px solid #b8c6c3!important}
+html body.ws-a.ws-navrail .bar>.wn-right #masterPrint{background:#1e3a4f!important;color:#fff!important;border-color:#1e3a4f!important}
+html body.ws-a.ws-navrail .bar>.wn-right #masterPrint:hover{background:#2a4b61!important}
+html body.ws-a.ws-navrail.bar-folded .bar{min-height:54px}
+body.ws-a.ws-navrail.ws-ov .bar{left:var(--wsr-w)}
+/* upright, or under about 1100 px: the rail keeps its icons; the names stay for screen readers and in the tooltips */
+@media (max-width:1100px),(orientation:portrait){
+  body.ws-a.ws-navrail{--wsr-w:64px}
+  body.ws-a.ws-navrail #wsNav .wa-t,body.ws-a.ws-navrail #wsNav #readDoc .lbl,body.ws-a.ws-navrail #wsStat .wa-t{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+  body.ws-a.ws-navrail #wsNav .wn-item{min-height:50px}
+  body.ws-a.ws-navrail #wsNav .wa-mark{width:36px;height:36px}}
+@media (max-width:1300px){html body.ws-a.ws-navrail .bar>.wn-right button{padding:0 11px}}
+</style>
+<script id="ws-a">
+/* v25.65 top bar A */
+(()=>{
+const $=s=>document.querySelector(s),B=document.body;
+const header=$('header.top'),nav=$('#wsNav'),bar=$('#bar'),crumb=$('.stagew>.crumb'),acts=crumb&&crumb.querySelector('.acts'),logo=$('#logo');
+if(!header||!nav||!bar||!crumb||!acts||!logo||window.__wsA)return;
+const MQ=matchMedia('(min-width:721px)'),COARSE=matchMedia('(pointer:coarse)'),NAVK='nbh.ws.navmode';
+const mk=(tag,props,html)=>{const e=document.createElement(tag);Object.entries(props||{}).forEach(([k,v])=>{if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else e.setAttribute(k,v);});if(html)e.innerHTML=html;return e;};
+const ico=d=>'<svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+const ICO={forms:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  casemap:'<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="10" cy="18" r="2.5"/><path d="M8.4 6.4l7.2 1.2M16.6 10.1l-5 5.9M6.8 8.4l2.3 7.2"/>',
+  docs:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h4"/>',packet:'<path d="M4 8l8-4 8 4-8 4z"/><path d="M4 12l8 4 8-4M4 16l8 4 8-4"/>',
+  case:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3"/>',tools:'<path d="M14.5 5.5a4 4 0 0 0 5 5l-8.5 8.5a2.1 2.1 0 0 1-3-3z"/>',
+  today:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M9 15l2 2 4-4"/>',
+  caseload:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c1-3.5 3.3-5 6-5s5 1.5 6 5M15 14c3 0 5 1.5 6 4.5"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>'};
+const CHEV='<svg class="wn-chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const navMode=()=>{try{return localStorage.getItem(NAVK)==='rail'?'rail':'top';}catch(e){return 'top';}};
+const on=()=>B.classList.contains('ws-a');
+const say0=t=>{try{say(t);}catch(e){}};
+/* nodes moved to their places in A go back to where they were on a phone */
+const home=new Map();
+const park=n=>{if(n&&!home.has(n)&&n.parentNode){const c=document.createComment('v25.65 home');n.parentNode.insertBefore(c,n);home.set(n,c);}};
+const back=n=>{const c=home.get(n);if(n&&c&&c.parentNode&&n.previousSibling!==c)c.parentNode.insertBefore(n,c.nextSibling);};
+const put=(n,parent,before)=>{if(!n||!parent)return;park(n);if(n.parentNode!==parent||(before!==undefined&&n.nextSibling!==before))parent.insertBefore(n,before||null);};
+/* ---------- the dark row ---------- */
+const items={forms:[...nav.children].find(x=>x.classList.contains('wn-item')&&!x.id&&!x.dataset.wnMenu),casemap:$('#caseMap'),docs:$('#readDoc'),help:$('#help'),
+  packet:nav.querySelector('[data-wn-menu="packet"]'),case:nav.querySelector('[data-wn-menu="case"]'),tools:nav.querySelector('[data-wn-menu="tools"]')};
+if(items.forms&&!items.forms.id)items.forms.id='wnForms';
+/* each place gets an icon (shown in the side rail) and its words in a span (kept for screen readers when the rail is icons only) */
+const wrapText=b=>{if(!b)return;[...b.childNodes].forEach(n=>{if(n.nodeType===3&&n.textContent.trim()){const s=mk('span',{class:'wa-t'});s.textContent=n.textContent.trim();b.replaceChild(s,n);}});};
+Object.entries(items).forEach(([k,b])=>{if(!b)return;if(k!=='docs')wrapText(b);if(!b.querySelector('.wa-ico'))b.insertAdjacentHTML('afterbegin',ico(ICO[k]));
+  if(!b.title)b.title=(b.textContent||'').trim();});
+const today=$('#todayBtn'),caseload=$('#caseloadBtn');
+[[today,'Today','today'],[caseload,'Caseload','caseload']].forEach(([b,t,k])=>{if(!b)return;b.classList.add('wn-item');b.insertAdjacentHTML('afterbegin',ico(ICO[k]));const s=mk('span',{class:'wa-t wa'});s.textContent=t;b.insertBefore(s,b.querySelector('.tbadge'));});
+const mark=mk('span',{class:'wa-mark wa',id:'wsMark'}),clip=mk('span',{class:'wa-clip'});mark.appendChild(clip);
+const right=nav.querySelector('.wn-right');
+const stat=mk('button',{type:'button',id:'wsStat',class:'wa','aria-haspopup':'dialog','aria-expanded':'false','aria-controls':'wsStatPanel'},'<span class="wa-dot" aria-hidden="true"></span><span class="wa-t">All saved</span>');
+nav.insertBefore(stat,right||null);
+/* the logo's mark: the part of the logo left of its words, found in the picture itself */
+const markFit=()=>{const img=logo;if(!img.complete||!img.naturalWidth){img.addEventListener('load',markFit,{once:true});return;}
+  let f0=0,f1=0.3;try{const W=Math.min(400,img.naturalWidth),H=Math.max(1,Math.round(img.naturalHeight*W/img.naturalWidth)),c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.drawImage(img,0,0,W,H);
+    const d=g.getImageData(0,0,W,H).data,col=x=>{for(let y=0;y<H;y++){const i=(y*W+x)*4;if(d[i+3]>40&&(d[i]<225||d[i+1]<225||d[i+2]<225))return true;}return false;};
+    let x=0;while(x<W&&!col(x))x++;const x0=x,gap=Math.max(4,Math.round(W*0.02));let run=0;for(;x<W;x++){if(col(x))run=0;else if(++run>=gap)break;}
+    const x1=Math.min(W,x-run+1);if(x1-x0>W*0.08&&x1-x0<W*0.7){f0=x0/W;f1=x1/W;}}catch(e){}
+  const h=32,w=img.naturalWidth*h/img.naturalHeight;B.style.setProperty('--wa-mk-w',Math.round((f1-f0)*w)+'px');B.style.setProperty('--wa-mk-x',(-Math.round(f0*w))+'px');};
+/* the status panel holds the three chips themselves (moved, so their words, colours and taps are the ones they had) */
+const panel=mk('div',{id:'wsStatPanel',class:'wn-menu wa-pop',role:'dialog','aria-label':'Saving: Autosave, the offline copy and Google Drive'});panel.hidden=true;
+panel.innerHTML='<div class="wa-ph">Saving</div><p class="wa-pn">Tap one for its details or what it can do. <b>Save case</b> keeps the whole case in a file.</p>';
+document.body.appendChild(panel);
+/* ---------- the student line ---------- */
+const sum=$('#barSum'),sumName=$('#sumName'),sumDue=$('#sumDue');
+const sumIni=mk('span',{id:'sumIni',class:'wa','aria-hidden':'true'}),sumVd=mk('span',{class:'wa-vd wa','aria-hidden':'true'}),sumCaseA=mk('span',{id:'sumCaseA',class:'wa'});
+if(sum&&sumName){sum.insertBefore(sumIni,sumName);if(sumDue){sumDue.parentNode.insertBefore(sumVd,sumDue);sumDue.parentNode.insertBefore(sumCaseA,sumDue);}}
+const aWho=mk('div',{class:'grp wa',id:'aWho'});bar.insertBefore(aWho,bar.firstChild);
+/* ---------- the form row ---------- */
+const svg16=d=>'<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+const crumbWho=mk('span',{id:'crumbWho',class:'wa'},'<img alt="" hidden><span class="wa-av" aria-hidden="true"></span><b></b>');
+const whoVd=mk('span',{class:'wa-vd wa','aria-hidden':'true'});
+const aCode=mk('span',{id:'aCode',class:'wa wa-one'});
+const fsl=$('#fsLogo');crumb.insertBefore(crumbWho,fsl?fsl.nextSibling:crumb.firstChild);crumb.insertBefore(whoVd,crumbWho.nextSibling);crumb.insertBefore(aCode,whoVd.nextSibling);
+const vd1=mk('span',{class:'wa-vd wa wa-one wa-stepx','aria-hidden':'true'});
+const step=mk('span',{id:'aStep',class:'wa wa-one wa-stepx',role:'group','aria-label':'Sheets of this form'},
+  '<button type="button" id="aPrev" aria-label="Previous sheet">‹</button><button type="button" id="aSheet" aria-haspopup="menu" aria-expanded="false" aria-controls="wsSheetMenu"><b></b><span class="wa-of"></span></button><button type="button" id="aNextB" aria-label="Next sheet">›</button>');
+const nxt=mk('span',{id:'aNext',class:'wa wa-one wa-stepx'});
+const dict=mk('button',{type:'button',id:'aDict',class:'wa wa-ob wa-one','aria-pressed':'false',title:'Dictate into the text box you are in, on this device: nothing is recorded'},svg16('<rect x="5.5" y="1.5" width="5" height="8" rx="2.5"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2M5.5 14.5h5"/>')+'<span class="wa-t">Dictate</span>');
+const fileEl=$('#crumbFile'),spEl=crumb.querySelector('.sp');
+[vd1,step,nxt,dict].forEach(n=>crumb.insertBefore(n,spEl));
+const stat2=mk('button',{type:'button',id:'aStat2',class:'wa','aria-haspopup':'dialog','aria-expanded':'false','aria-controls':'wsStatPanel'},'<span class="wa-dot" aria-hidden="true"></span><span class="wa-t">All saved</span>');
+const save=mk('button',{type:'button',id:'aSave',class:'wa wa-ob wa-one',title:'Save this form’s data (the form’s own Save data)'},svg16('<path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v4h5v-4M5 13.5v-4h6v4"/>')+'<span class="wa-t">Save form</span>');
+const view=mk('button',{type:'button',id:'aView',class:'wa wa-ob','aria-haspopup':'menu','aria-expanded':'false','aria-controls':'wsViewMenu'},'<span class="wa-t">View</span>'+CHEV);
+const printOne=$('#printOne'),closeF=$('#closeForm');
+acts.insertBefore(stat2,acts.firstChild);acts.insertBefore(save,printOne||null);acts.insertBefore(view,closeF||null);
+/* the navigation switch, reached from the Tools menu too (its items run these, as every menu item runs a button) */
+const navTop=mk('button',{type:'button',id:'aNavTop',class:'wa',hidden:''},'Navigation: Top bar'),navRail=mk('button',{type:'button',id:'aNavRail',class:'wa',hidden:''},'Navigation: Side rail');
+{const ga=bar.querySelector('.grp.acts')||bar;ga.appendChild(navTop);ga.appendChild(navRail);}
+/* ---------- placing it all: A on a window wider than a phone, as it was below ---------- */
+let lastA=null,lastMode=null;
+function place(){
+  const A=MQ.matches,rail=A&&navMode()==='rail';
+  B.classList.toggle('ws-a',A);B.classList.toggle('ws-navrail',rail);
+  if(A===lastA&&rail===lastMode)return;lastA=A;lastMode=rail;
+  const a=document.activeElement;
+  if(A){
+    put(logo,clip);if(mark.parentNode!==nav||nav.firstChild!==mark)nav.insertBefore(mark,nav.firstChild);
+    if(rail)put(nav,header.parentNode,header);else put(nav,header,null);
+    if(today)put(today,nav,items.help||stat);if(caseload)put(caseload,nav,items.help||stat);
+    if(right){if(rail)put(right,bar,null);else put(right,nav,null);}
+    const chips=$('#wsChips');if(chips)put(chips,panel,panel.querySelector('.wa-pn'));
+    const who=header.querySelector('.who')||aWho.querySelector('.who'),take=$('#whoTake');if(who)put(who,aWho,null);if(take)put(take,aWho,null);
+  }else{
+    shutAll();[logo,nav,today,caseload,right,$('#wsChips'),$('.who'),$('#whoTake')].forEach(back);
+    try{placeChips();}catch(e){}
+  }
+  if(a&&a.isConnected&&document.activeElement!==a)try{a.focus({preventScroll:true});}catch(e){}
+  railRoom();paintStat();paintRow();syncFrames();
+}
+const railRoom=()=>{if(right&&B.classList.contains('ws-navrail'))B.style.setProperty('--wa-rw',Math.ceil(right.getBoundingClientRect().width||410)+'px');};
+function setNav(m,quiet){try{localStorage.setItem(NAVK,m==='rail'?'rail':'');}catch(e){}place();if(!quiet)say0(m==='rail'?'The places are in a rail down the left.':'The places are in the bar at the top.');}
+navTop.addEventListener('click',()=>setNav('top'));navRail.addEventListener('click',()=>setNav('rail'));
+/* ---------- the status indicator ---------- */
+const RANK={off:5,warn:4,upd:3,busy:2,away:1};
+function paintStat(){const cs=['autoChip','offChip','drvChip'].map(id=>document.getElementById(id)).filter(c=>c&&!c.hidden);
+  let worst=null,wr=0,wait=null;cs.forEach(c=>{const k=['off','warn','upd','busy','away','on'].find(x=>c.classList.contains(x));const r=k?RANK[k]||0:0;if(!k&&!wait)wait=c;if(r>wr){wr=r;worst={c,k};}});
+  let txt='All saved',k='on',tip='Autosave, the offline copy and Google Drive are all fine. Tap for each one.';
+  if(worst){txt=(worst.c.textContent||'').replace(/\s+/g,' ').trim();k=worst.k;tip=worst.c.title||txt;}
+  else if(wait){txt=(wait.textContent||'').replace(/\s+/g,' ').trim();k='wait';tip=wait.title||txt;}
+  [stat,stat2].forEach(b=>{b.className='wa k-'+k;b.querySelector('.wa-t').textContent=txt;b.title=tip+(worst||wait?'':'');b.setAttribute('aria-label',txt+'. Saving details');});}
+{const mo=new MutationObserver(()=>paintStat());['autoChip','offChip','drvChip'].forEach(id=>{const c=document.getElementById(id);if(c)mo.observe(c,{attributes:true,attributeFilter:['class','hidden'],childList:true,characterData:true,subtree:true});});}
+/* ---------- menus: the View menu, the sheets list and the status panel ---------- */
+const pops=[];
+function Pop(el,align){let btn=null;const P={el,align};pops.push(P);
+  P.items=()=>[...el.querySelectorAll('.wa-mi,button.chip')].filter(x=>x.offsetParent!==null&&!x.disabled);
+  P.shut=back=>{if(el.hidden)return;el.hidden=true;if(btn){btn.setAttribute('aria-expanded','false');if(back)try{btn.focus({preventScroll:true});}catch(e){}}btn=null;};
+  P.btn=()=>btn;
+  P.show=(b,build)=>{shutAll();try{window.__wsNav&&__wsNav.shut();}catch(e){}btn=b;if(build)build(el);el.hidden=false;
+    const r=b.getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight,railNow=B.classList.contains('ws-navrail')&&nav.contains(b);
+    let left=align==='right'?r.right-w:r.left,top=r.bottom+6;if(railNow){left=r.right+8;top=Math.min(r.top,innerHeight-h-8);}
+    el.style.left=Math.max(8,Math.min(innerWidth-w-8,Math.round(left)))+'px';el.style.top=Math.max(8,Math.min(Math.round(top),innerHeight-Math.min(h,innerHeight-16)-8))+'px';
+    b.setAttribute('aria-expanded','true');const f=el.querySelector('.wa-mi[aria-current=true]')||P.items()[0];if(f)try{f.focus({preventScroll:true});}catch(e){}};
+  el.addEventListener('keydown',e=>{const its=P.items(),i=its.indexOf(document.activeElement),n=its.length;
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(n)its[(i+(e.key==='ArrowDown'?1:n-1)+n)%n].focus();}
+    else if(e.key==='Home'||e.key==='End'){e.preventDefault();if(n)its[e.key==='Home'?0:n-1].focus();}
+    else if(e.key==='Escape'){e.preventDefault();e.stopPropagation();P.shut(true);}
+    else if(e.key==='Tab'&&el.getAttribute('role')==='menu'){P.shut(false);}});
+  return P;}
+function shutAll(){pops.forEach(p=>p.shut(false));}
+document.addEventListener('click',e=>{pops.forEach(p=>{if(!p.el.hidden&&!p.el.contains(e.target)&&!(p.btn()&&p.btn().contains(e.target)))p.shut(false);});},true);
+window.addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement&&document.activeElement.tagName==='IFRAME')shutAll();},0));
+addEventListener('resize',()=>shutAll());
+const statPop=Pop(panel,'right');
+const toggleStat=b=>{if(!panel.hidden&&statPop.btn()===b){statPop.shut(true);return;}statPop.show(b);};
+stat.addEventListener('click',e=>{e.stopPropagation();toggleStat(stat);});stat2.addEventListener('click',e=>{e.stopPropagation();toggleStat(stat2);});
+const viewMenu=mk('div',{id:'wsViewMenu',class:'wn-menu wa-pop',role:'menu','aria-label':'View'});viewMenu.hidden=true;document.body.appendChild(viewMenu);
+const sheetMenu=mk('div',{id:'wsSheetMenu',class:'wn-menu wa-pop',role:'menu','aria-label':'Sheets of this form'});sheetMenu.hidden=true;document.body.appendChild(sheetMenu);
+const viewPop=Pop(viewMenu,'right'),sheetPop=Pop(sheetMenu,'left');
+/* ---------- the form on screen ---------- */
+const cw=f=>{try{return f.contentWindow;}catch(e){return null;}};
+const docOf=f=>{try{const d=f&&f.contentDocument;return d&&d.documentElement?d:null;}catch(e){return null;}};
+const single=()=>!!state.cur&&!(typeof splitOn==='function'&&splitOn());
+const curFrame=()=>single()?state.frames[state.cur]:null;
+const curDoc=()=>docOf(curFrame());
+const FCSS='@media screen{'+
+  'html.ws-a .toolbar{max-width:none!important}'+
+  'html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar .nbh-sheets,html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar .nbh-arrows,html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar #nbhDictBtn,'+
+  'html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar .nbh-case-grp,html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar #nbhSaveQuick,html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar #nbhFitBtn,'+
+  'html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar #viewSeg,html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar #nbhFoldBtn,html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a .toolbar .tgroup:has(#viewSeg)>span{display:none!important}'+
+  'html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a.nbh-compact .toolbar .tg-ctl{display:none!important}'+
+  'html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a-none .toolbar,html.ws-a.ws-a.ws-a.ws-a.ws-a.ws-a.nbh-fold .toolbar{display:none!important}'+
+  '}';
+/* the toolbar stays only for what the form row does not carry (a form's own extra controls, or More's rest); with nothing
+   else in it, it goes */
+const shown=(e,tb,w)=>{if(e.hidden)return false;for(let x=e;x&&x!==tb;x=x.parentElement){if(x.hidden||w.getComputedStyle(x).display==='none')return false;}return true;};
+function tbCheck(d){const tb=d.querySelector('.toolbar'),R=d.documentElement,w=d.defaultView;if(!tb){R.classList.add('ws-a-none');return;}
+  const sig=R.className.replace(/\bws-a-none\b/,'')+'|'+tb.querySelectorAll('*').length;if(R.__waSig===sig)return;R.__waSig=sig;
+  const any=[...tb.querySelectorAll('button,input:not([type=hidden]),select,textarea,a[href]')].some(e=>shown(e,tb,w));R.classList.toggle('ws-a-none',!any);}
+const watched=new WeakSet();
+function syncFrames(){const A=on(),cur=curFrame();
+  Object.values(state.frames||{}).forEach(f=>{const d=docOf(f);if(!d)return;const R=d.documentElement,want=A&&f===cur;
+    if(want){if(!d.getElementById('ws-a-frame-css')){const st=d.createElement('style');st.id='ws-a-frame-css';st.setAttribute('data-nbh-screen','');st.textContent=FCSS;(d.head||R).appendChild(st);}
+      if(!R.classList.contains('ws-a'))R.classList.add('ws-a');tbCheck(d);
+      if(!watched.has(d)){watched.add(d);try{const mo=new MutationObserver(()=>{clearTimeout(mo.t);mo.t=setTimeout(()=>{if(curDoc()===d){paintRow();tbCheck(d);}},40);});
+        const s=d.getElementById('viewSeg');if(s)mo.observe(s,{attributes:true,subtree:true,attributeFilter:['aria-pressed','aria-selected','class']});
+        mo.observe(R,{attributes:true,attributeFilter:['class']});
+        ['nbhSaveQuick','nbhDictBtn','nbhFitBtn','nbhMoreBtn'].forEach(id=>{const b=d.getElementById(id);if(b)mo.observe(b,{attributes:true,childList:true,characterData:true,subtree:true});});}catch(e){}}}
+    else if(R.classList.contains('ws-a'))R.classList.remove('ws-a','ws-a-none');});}
+const tabsOf=d=>{const s=d&&d.getElementById('viewSeg');if(!s)return [];const w=d.defaultView;return [...s.querySelectorAll('button,[role="tab"]')].filter(b=>!b.hidden&&w.getComputedStyle(b).display!=='none');};
+const tabOn=b=>b.getAttribute('aria-pressed')==='true'||b.getAttribute('aria-selected')==='true'||b.classList.contains('active')||b.classList.contains('on');
+const tabLabel=b=>{const c=b.cloneNode(true);c.querySelectorAll('[aria-hidden="true"],.dot,.st,.mark').forEach(x=>x.remove());return (c.textContent||'').replace(/\s+/g,' ').trim();};
+const tabIdx=t=>{const i=t.findIndex(tabOn);return i<0?0:i;};
+function paintRow(){
+  const d=curDoc(),A=on();
+  const id=state.cur||'';aCode.textContent=single()&&id?id:'';aCode.setAttribute('aria-label',id?'Form '+id:'');
+  /* the student's name, for the row while the bars are folded away */
+  try{const p=packet(),nm=(p.client||'').trim(),img=crumbWho.querySelector('img'),av=crumbWho.querySelector('.wa-av');crumbWho.querySelector('b').textContent=nm;
+    const ph=state.photo||'';img.hidden=!ph;if(ph){if(img.getAttribute('src')!==ph)img.src=ph;}else img.removeAttribute('src');av.hidden=!!ph;av.style.display=ph?'none':'';av.textContent=typeof initials==='function'?initials():'';
+    sumIni.textContent=typeof initials==='function'?initials():'';sumIni.style.display=ph||!nm?'none':'';
+    const bits=state.sumBits||[];sumCaseA.textContent=bits.length?'Case: '+bits.map(x=>String(x).replace(/^function: /,'function ')).join(' · '):'';}catch(e){}
+  const t=tabsOf(d),n=t.length;
+  step.classList.toggle('wa-off',n<2);vd1.classList.toggle('wa-off',n<2);nxt.classList.toggle('wa-off',n<2);
+  if(n>=2){const i=tabIdx(t),nx=t[i+1];step.querySelector('#aSheet b').textContent=tabLabel(t[i]);step.querySelector('#aSheet .wa-of').textContent=' · '+(i+1)+' of '+n;
+    step.querySelector('#aSheet').setAttribute('aria-label','Sheet: '+tabLabel(t[i])+', '+(i+1)+' of '+n+'. Choose a sheet');
+    const pv=step.querySelector('#aPrev'),nb=step.querySelector('#aNextB');pv.disabled=i<=0;nb.disabled=!nx;nb.setAttribute('aria-label','Next sheet'+(nx?': '+tabLabel(nx):''));
+    pv.setAttribute('aria-label','Previous sheet'+(t[i-1]?': '+tabLabel(t[i-1]):''));nxt.textContent=nx?'Next: '+tabLabel(nx):'';}
+  /* Dictate: the form's own switch; a form whose sheets went to its rail before the switch was made has none, and its Dictate is run directly */
+  const db=d&&d.getElementById('nbhDictBtn'),dw=d&&d.defaultView,dui=dw&&dw.nbhDictateUI;dict.classList.toggle('wa-off',!db&&!dui);
+  {let pr=false;try{pr=db?db.getAttribute('aria-pressed')==='true':!!(dw&&dw.nbhDictate&&dw.nbhDictate.active());}catch(e){}dict.setAttribute('aria-pressed',String(pr));}
+  const sb=d&&(d.getElementById('nbhSaveQuick')||d.getElementById('saveBtn'));save.classList.toggle('wa-off',!sb);if(sb){save.classList.toggle('dirty',sb.classList.contains('dirty'));if(sb.title)save.title=sb.title.replace(/^Save data/,'Save form');}
+}
+/* the row's buttons drive the form's own controls */
+const fbtn=id=>{const d=curDoc();return d?d.getElementById(id):null;};
+function goSheet(delta,to){const d=curDoc();if(!d)return;const t=tabsOf(d);if(t.length<2)return;const i=tabIdx(t),j=to!==undefined?to:i+delta;if(j<0||j>=t.length||j===i&&to===undefined)return;
+  const arrow=to===undefined&&d.querySelector('.toolbar .nbh-arrows '+(delta<0?'.nbh-prev':'.nbh-next'));
+  if(arrow&&!arrow.disabled)arrow.click();else{t[j].click();try{cw(curFrame()).scrollTo(0,0);}catch(e){}}
+  setTimeout(()=>{paintRow();const now=tabsOf(curDoc());say0('Sheet '+(tabIdx(now)+1)+' of '+now.length+': '+tabLabel(now[tabIdx(now)]||t[j]));},60);}
+step.querySelector('#aPrev').addEventListener('click',()=>goSheet(-1));step.querySelector('#aNextB').addEventListener('click',()=>goSheet(1));
+const sheetBtn=step.querySelector('#aSheet');
+sheetBtn.addEventListener('click',e=>{e.stopPropagation();if(!sheetMenu.hidden){sheetPop.shut(true);return;}const d=curDoc(),t=tabsOf(d);if(t.length<2)return;const i=tabIdx(t);
+  sheetPop.show(sheetBtn,m=>{m.innerHTML='<div class="wa-mh" aria-hidden="true">Sheets'+(state.cur?' of Form '+esc(state.cur):'')+'</div>';
+    t.forEach((b,k)=>{const it=mk('button',{type:'button',role:'menuitem',class:'wa-mi'});if(k===i)it.setAttribute('aria-current','true');it.textContent=(k+1)+'. '+tabLabel(b);
+      it.addEventListener('click',()=>{sheetPop.shut(true);goSheet(0,k);});m.appendChild(it);});});});
+['mousedown','pointerdown'].forEach(ev=>dict.addEventListener(ev,e=>e.preventDefault()));   /* the form's text box keeps its cursor */
+dict.addEventListener('click',()=>{const b=fbtn('nbhDictBtn');if(b)b.click();else{try{const w=cw(curFrame());if(w&&w.nbhDictateUI)w.nbhDictateUI.toggle();}catch(e){}}setTimeout(paintRow,300);setTimeout(paintRow,1500);});
+save.addEventListener('click',()=>{const b=fbtn('nbhSaveQuick')||fbtn('saveBtn');if(b)b.click();setTimeout(paintRow,300);});
+/* the forms list button is a toggle on a wide window too (it only brought the list back) */
+const rt=$('#railToggle');if(rt)rt.addEventListener('click',e=>{if(!on()||NARROW.matches)return;if(!B.classList.contains('rail-hidden')){e.stopImmediatePropagation();const h=$('#railHide');if(h)h.click();}},true);
+/* ---------- the View menu ---------- */
+const VIEW=['nbhFitBtn','focusBtn','splitBtn','fullBtn','fillBtn','popOut','pinBars','nbhMoreBtn','aNavTop','aNavRail'];
+function buildView(m){m.innerHTML='';const d=curDoc(),A=(b,label,opt)=>{opt=opt||{};const it=mk('button',{type:'button',class:'wa-mi',role:opt.role||'menuitem','data-wn-for':b});
+    if(opt.role&&opt.role!=='menuitem')it.setAttribute('aria-checked',opt.checked?'true':'false');it.innerHTML='<span class="wa-ck" aria-hidden="true">'+(opt.checked?'✓':'')+'</span><span>'+esc(label)+'</span>'+(opt.note?'<small>'+esc(opt.note)+'</small>':'');
+    it.addEventListener('click',()=>{viewPop.shut(true);opt.go();setTimeout(()=>{paintRow();paintStat();},250);});m.appendChild(it);return it;};
+  const hr=()=>{if(m.lastElementChild&&m.lastElementChild.tagName!=='HR')m.appendChild(document.createElement('hr'));};
+  const sh=id=>document.getElementById(id),pr=id=>{const b=sh(id);return !!b&&b.getAttribute('aria-pressed')==='true';};
+  const fit=d&&d.getElementById('nbhFitBtn');
+  if(fit){const fon=fit.getAttribute('aria-pressed')!=='false',z=/·\s*(\d+%)/.exec(fit.textContent||'');
+    A('nbhFitBtn','Fit to screen',{role:'menuitemradio',checked:fon,note:fon&&z?z[1]:'',go:()=>{if(!fon)fit.click();}});
+    A('nbhFitBtn','Actual size',{role:'menuitemradio',checked:!fon,go:()=>{if(fon)fit.click();}}).dataset.wnFor='nbhFitBtn:actual';hr();}
+  if(state.cur)A('focusBtn','Focus: one part at a time',{role:'menuitemcheckbox',checked:pr('focusBtn'),go:()=>sh('focusBtn').click()});
+  if(state.cur)A('splitBtn','Side by side',{role:'menuitemcheckbox',checked:pr('splitBtn'),go:()=>sh('splitBtn').click()});
+  if(state.cur)A('fullBtn','Fullscreen',{role:'menuitemcheckbox',checked:pr('fullBtn'),go:()=>sh('fullBtn').click()});
+  const fill=sh('fillBtn');if(fill&&fill.classList.contains('avail'))A('fillBtn','Fill screen',{role:'menuitemcheckbox',checked:pr('fillBtn'),go:()=>fill.click()});
+  if(state.cur&&sh('popOut'))A('popOut','Open in its own tab',{go:()=>sh('popOut').click()});
+  hr();
+  if(COARSE.matches&&sh('pinBars')&&!B.classList.contains('ws-full'))A('pinBars','Keep the bars in place',{role:'menuitemcheckbox',checked:pr('pinBars'),go:()=>sh('pinBars').click()});
+  const more=d&&d.getElementById('nbhMoreBtn');if(more&&single()){const open=more.getAttribute('aria-expanded')==='true';A('nbhMoreBtn',open?'Fewer form tools':'More form tools…',{go:()=>more.click()});}
+  hr();
+  const rail=navMode()==='rail';
+  const mh=mk('div',{class:'wa-mh','aria-hidden':'true'});mh.textContent='Navigation';m.appendChild(mh);
+  A('aNavTop','Top bar',{role:'menuitemradio',checked:!rail,go:()=>setNav('top')});A('aNavRail','Side rail',{role:'menuitemradio',checked:rail,go:()=>setNav('rail')});
+  if(m.lastElementChild&&m.lastElementChild.tagName==='HR')m.lastElementChild.remove();}
+view.addEventListener('click',e=>{e.stopPropagation();if(!viewMenu.hidden){viewPop.shut(true);return;}viewPop.show(view,buildView);});
+/* Tools: the navigation's two items show which is on (and only where the side rail can be) */
+window.__wsNavDecorate=(M,key,b)=>{if(key==='tools'){const rail=navMode()==='rail';[['aNavTop',!rail],['aNavRail',rail]].forEach(([id,c])=>{const it=M.querySelector('[data-wn-for="'+id+'"]');if(!it)return;
+    if(!on()){const pv=it.previousElementSibling;it.remove();if(pv&&pv.tagName==='HR'&&!pv.nextElementSibling)pv.remove();return;}
+    it.setAttribute('role','menuitemradio');it.setAttribute('aria-checked',String(c));if(c&&!it.querySelector('.wa-ck'))it.insertAdjacentHTML('afterbegin','<span class="wa-ck" aria-hidden="true" style="width:18px;font-weight:700">✓ </span>');});
+    const last=M.lastElementChild;if(last&&last.tagName==='HR')last.remove();}
+  if(b&&B.classList.contains('ws-navrail')&&nav.contains(b)){const r=b.getBoundingClientRect();M.style.left=Math.round(r.right+8)+'px';M.style.top=Math.max(8,Math.min(Math.round(r.top),innerHeight-M.offsetHeight-8))+'px';}};
+/* ---------- keeping up ---------- */
+document.addEventListener('load',ev=>{const f=ev.target;if(f&&f.tagName==='IFRAME')setTimeout(()=>{syncFrames();paintRow();},60);},true);
+new MutationObserver(()=>{clearTimeout(place.t);place.t=setTimeout(()=>{syncFrames();paintRow();},30);}).observe(B,{attributes:true,attributeFilter:['class']});
+const onMQ=()=>place();if(MQ.addEventListener)MQ.addEventListener('change',onMQ);else if(MQ.addListener)MQ.addListener(onMQ);
+addEventListener('resize',()=>{clearTimeout(railRoom.t);railRoom.t=setTimeout(railRoom,120);});
+addEventListener('storage',e=>{if(e.key===NAVK)place();});
+setInterval(()=>{if(on()&&state.cur){syncFrames();paintRow();}},900);
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.crumb,#wsNav,#paneBar,#rail'))setTimeout(()=>{syncFrames();paintRow();},120);});
+/* the student line follows the strip it is made from */
+try{const ps=paintSum;paintSum=function(){const r=ps.apply(this,arguments);try{paintRow();}catch(e){}return r;};}catch(e){}
+markFit();place();paintStat();
+window.__wsA={on,place,setNav,mode:navMode,paint:()=>{paintRow();paintStat();syncFrames();},
+  find:id=>VIEW.includes(id.replace(/:.*/,''))?'view':null,open:()=>{if(viewMenu.hidden)viewPop.show(view,buildView);},shut:()=>shutAll()};   /* for the tests */
 })();
 </script>
 

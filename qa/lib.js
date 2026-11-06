@@ -33,11 +33,16 @@ function mailParts(raw){const dec=b=>Buffer.from(String(b||'').replace(/\r\n/g,'
 /* v25.63: the workstation's top menus (Packet, Case, Tools). A bar button that is not on the screen is reached the way a
    person reaches it: open the menu that holds it and choose the item. true when it was chosen. */
 async function navTap(page,sel,touch){const id=sel.replace(/^#/,'');
-  const key=await page.evaluate(id=>window.__wsNav&&window.__wsNav.find?window.__wsNav.find(id):null,id).catch(()=>null);if(!key)return false;
+  let key=await page.evaluate(id=>window.__wsNav&&window.__wsNav.find?window.__wsNav.find(id):null,id).catch(()=>null);
+  /* v25.65: the window's buttons over a form (Focus, Side by side, Fullscreen, Own tab, Keep the bars in place, the form's Fit and More)
+     are in the form row's View menu */
+  const view=!key&&await page.evaluate(id=>window.__wsA&&window.__wsA.find?window.__wsA.find(id):null,id).catch(()=>null);if(!key&&!view)return false;
   const T=process.env.NAVTRACE?(...a)=>console.log('     navTap '+id+':',...a):()=>{};
-  const b=page.locator('#wsNav [data-wn-menu="'+key+'"]');if(!(await b.isVisible().catch(()=>false))){T('menu button not visible');return false;}
+  const b=view?page.locator('#aView'):page.locator('#wsNav [data-wn-menu="'+key+'"]');if(!(await b.isVisible().catch(()=>false))){T('menu button not visible');return false;}
   if(touch)await b.tap();else await b.click();await sleep(250);
-  const it=page.locator('#wsNavMenu [data-wn-for="'+id+'"]');if(!(await it.isVisible().catch(()=>false))){T('item not visible',await page.evaluate(()=>({hid:document.getElementById('wsNavMenu').hidden,html:document.getElementById('wsNavMenu').innerHTML.slice(0,300)})));return false;}
+  const it=view?page.locator('#wsViewMenu [data-wn-for="'+id+'"]'):page.locator('#wsNavMenu [data-wn-for="'+id+'"]');if(!(await it.isVisible().catch(()=>false))){T('item not visible',await page.evaluate(()=>({hid:document.getElementById('wsNavMenu').hidden,html:document.getElementById('wsNavMenu').innerHTML.slice(0,300)})));return false;}
   T('item',JSON.stringify(await it.boundingBox()));
   if(touch)await it.tap();else await it.click();T('tapped');return true;}
-module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts,navTap};
+/* v25.65: a button that may be on the screen or in a menu (the top bar's or the form row's View): tapped where it is */
+async function tapOrMenu(page,sel,touch){const l=page.locator(sel).first();if(await l.isVisible().catch(()=>false)){if(touch)await l.tap();else await l.click();return true;}return navTap(page,sel,touch);}
+module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts,navTap,tapOrMenu};
