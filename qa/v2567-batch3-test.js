@@ -47,8 +47,8 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
     S.meta.wt_kind='time';out.time=window.srHome();
     S.meta.home_en='Our own words.';out.own=window.srHome();
     let f=null;try{f=window.__nbhFactsOut();}catch(e){f={err:String(e)};}out.facts=f&&f.schedule&&f.schedule.home;return out;});
-  ok('SR 5 SR-1 writes a family version for FCT or DRA without extinction (FCT-SR-H2)',h.nox&&/Asking always works better/.test(h.nox.en)&&/Sample/.test(h.nox.en)&&h.nox.fresh&&h.noxNote,h.nox);
-  ok('SR 6 SR-1 writes a family version for the wait that ends on what the student does (FCT-SR-H5)',h.wait&&/holds the wait card and keeps working/.test(h.wait.en)&&/a puzzle on the desk/.test(h.wait.en)&&/still doing it/.test(h.wait.en)&&/New wording/.test(h.box),h.wait);
+  ok('SR 5 SR-1 writes a family version for FCT or DRA without extinction (FCT-SR-H2)',h.nox&&/Asking always works better/.test(h.nox.en)&&/Sample/.test(h.nox.en)&&!h.nox.fresh&&!h.noxNote,h.nox);   /* v25.68: the wording is approved (the BCBA, 11/6), so no "New wording" mark */
+  ok('SR 6 SR-1 writes a family version for the wait that ends on what the student does (FCT-SR-H5)',h.wait&&/holds the wait card and keeps working/.test(h.wait.en)&&/a puzzle on the desk/.test(h.wait.en)&&/still doing it/.test(h.wait.en)&&!/New wording/.test(h.box),h.wait);   /* v25.68 approved: no mark */
   ok('SR 7 the Spanish version waits for the wait’s own words in Spanish',h.wait&&h.wait.es===''&&h.wait.need.includes('does')&&h.wait.need.includes('item'),h.wait);
   ok('SR 8 a time-only wait says the timer ends it',h.time&&/When the timer ends/.test(h.time.en),h.time&&h.time.en);
   ok('SR 9 the BCBA’s own words replace the draft and clear the new-wording note; the case carries the version for HD-1',h.own&&h.own.en==='Our own words.'&&!h.own.fresh&&h.facts&&h.facts.en==='Our own words.',{own:h.own,facts:h.facts});

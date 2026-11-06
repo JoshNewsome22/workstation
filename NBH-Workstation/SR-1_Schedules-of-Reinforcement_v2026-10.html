@@ -3594,7 +3594,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
  const clean=t=>T(t).replace(/\s*\((?:[^()]*\bForms?\b[^()]*)\)/g,'').trim();
  function first(){let c=T(S.meta.client).replace(/^SIMULATED\s*[\u2013-]\s*/i,'');const m=/^([^,]+),\s*(.+)$/.exec(c);c=(m?m[2]:c).split(/\s+/)[0]||'';return c;}
  function home(){const m=S.meta,o=design();if(!o)return null;let id=o.id;if(id==='vi'&&(m.vi_kind||'vi')==='vt')id='vt';
-  if(!['dro','drl','ncr','token','thin','chain','lh','lag','vi','vt','nox','wait'].includes(id))return null;   /* v25.67 (FCT-SR-H2, H5) the two new designs, in new wording */
+  if(!['dro','drl','ncr','token','thin','chain','lh','lag','vi','vt','nox','wait'].includes(id))return null;   /* v25.67 (FCT-SR-H2, H5) the two new designs; v25.68 their wording approved by the BCBA (11/6) */
   const C=first(),Ce=C||'your child',Cs=C||'su hijo o hija';
   const B=lc(clean(nm(m.beh,m.behs,'')))||'the behavior',E=lc(clean(nm(m.earn,m.earns,'')||nm(m.alt,m.alts,'')))||'the response that earns',
     R=lc(clean(nm(m.sr,m.srs,'')))||'the reward',A=lc(clean(nm(m.alt,m.alts,'')))||'the request';
@@ -3635,8 +3635,8 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   if(id==='vi'){
    en='At school, '+Ce+' earns '+R+' for '+E+'. At first it came every time; now it comes every few times, so '+Ce+' keeps going without needing it each time. At home you can do the same: praise often, and give '+R+' now and then, not every time.';
    sp='En la escuela, '+Cs+' gana '+X('sr')+' por '+X('earn')+'. Al principio lo recib\u00eda cada vez; ahora lo recibe cada pocas veces, para que siga sin necesitarlo cada vez. En casa pueden hacer lo mismo: feliciten a menudo y denle '+X('sr')+' de vez en cuando, no cada vez.';}
-  /* v25.67 (FCT-SR-H2) FCT or DRA without extinction: the request wins at home too. New wording (v25.67), shown as such until the
-     BCBA approves it */
+  /* v25.67 (FCT-SR-H2) FCT or DRA without extinction: the request wins at home too. v25.68: the wording, English and Spanish, is
+     approved as written (the BCBA, 11/6), so it no longer carries a "New wording" mark */
   if(id==='nox'){
    en='At school, '+Ce+' is learning to use '+A+' to ask for '+R+', instead of '+B+'. Asking always works better: it gets '+R+' sooner, more often and for longer than '+B+' does. At home you can do the same: answer '+Ce+'\u2019s request quickly and generously, every time it is made the way '+Ce+' was taught, and keep whatever follows '+B+' short and plain.';
    sp='En la escuela, '+Cs+' est\u00e1 aprendiendo a usar '+X('alt')+' para pedir '+X('sr')+', en lugar de '+X('beh')+'. Pedir siempre funciona mejor: consigue '+X('sr')+' antes, m\u00e1s a menudo y por m\u00e1s tiempo que '+X('beh')+'. En casa pueden hacer lo mismo: atiendan la petici\u00f3n de '+Cs+' enseguida y con generosidad, cada vez que la haga como se le ense\u00f1\u00f3, y que lo que sigue a '+X('beh')+' sea breve y sencillo.';}
@@ -3645,7 +3645,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
    en='At school, '+Ce+' is learning to wait for '+R+'. The adult says '+SG+(DO?'; while '+Ce+' waits, '+Ce+' '+DO.replace(/^the student\s+/i,''):'')+(IT?', with '+IT+' to use':'')+'. '+(time?'When the timer ends, '+Ce+' gets '+R+'.':'The wait ends when the time is up and '+Ce+' is still doing it; then '+Ce+' gets '+R+'.')+' Right now a wait is about '+t+', and it grows as '+Ce+' succeeds. At home you can do the same: use the same words, keep the first waits short, and give '+R+' as soon as a wait ends well.';
    sp='En la escuela, '+Cs+' est\u00e1 aprendiendo a esperar para recibir '+X('sr')+'. El adulto dice '+X('sig')+(DO?'; mientras espera, '+Cs+' '+X('does'):'')+(IT?', con '+X('item')+' a mano':'')+'. '+(time?'Cuando termina el tiempo, '+Cs+' recibe '+X('sr')+'.':'La espera termina cuando se acaba el tiempo y '+Cs+' sigue haci\u00e9ndolo; entonces recibe '+X('sr')+'.')+' Ahora cada espera es de unos '+t+', y se alarga a medida que '+Cs+' lo logra. En casa pueden hacer lo mismo: usen las mismas palabras, empiecen con esperas cortas y denle '+X('sr')+' en cuanto una espera salga bien.';}
   const ownEn=T(m.home_en),ownEs=T(m.home_es);
-  return {en:ownEn||en,es:ownEs||(need.size?'':sp),draftEs:sp,need:ownEs?[]:[...need],used:[...use],fresh:(id==='nox'||id==='wait')&&!ownEn};}
+  return {en:ownEn||en,es:ownEs||(need.size?'':sp),draftEs:sp,need:ownEs?[]:[...need],used:[...use]};}   /* v25.68 no "fresh" mark: approved 11/6 */
  window.srHome=home;
  const LAB={beh:'the behavior',earn:'the response that earns',sr:'the reinforcer',alt:'the request',sig:'the waiting signal',tok:'the token',backs:'the back-ups',does:'what the student does during the wait',item:'what is available during the wait'};
  function paint(){const box=document.getElementById('srHomeOut');if(!box)return;let h=null;try{h=home();}catch(e){h=null;}
@@ -3654,8 +3654,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   if(es){es.hidden=false;const want=new Set(h.used.concat(h.need));[...es.children].forEach(d=>{d.hidden=!want.has(d.dataset.es);});}
   const e=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   box.innerHTML='<div class="readout" style="margin:0 0 6px"><b>English</b> '+e(h.en)+'</div>'+
-   '<div class="readout" style="margin:0 0 6px"><b>Espa\u00f1ol</b> '+(h.es?e(h.es):'<span class="hint">Write '+h.need.map(k=>LAB[k]).join(', ')+' in Spanish below; the Spanish version goes home once it is complete.</span>')+'</div>'+
-   (h.fresh?'<p class="hint" id="srHomeNew" style="margin:0 0 6px">New wording for this design (v25.67): read it before it goes home, or write your own below.</p>':'');}   /* v25.67 */
+   '<div class="readout" style="margin:0 0 6px"><b>Espa\u00f1ol</b> '+(h.es?e(h.es):'<span class="hint">Write '+h.need.map(k=>LAB[k]).join(', ')+' in Spanish below; the Spanish version goes home once it is complete.</span>')+'</div>';}   /* v25.68 the two new designs' "New wording" note is gone: approved as written (the BCBA, 11/6) */
  window.srHomePaint=paint;
  {const rc=renderCard;renderCard=function(){rc.apply(this,arguments);try{paint();}catch(e){}};}
  const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
