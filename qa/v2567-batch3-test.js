@@ -4,7 +4,7 @@
           FCT-SR-H2/H5  SR-1's family version for the two new designs (no extinction; a wait that ends on what the student does)
           FCT-SR-H5  TD-1's FCT card takes DT-1's tolerance response and activity into its two wait fields
    DELAY  H1, H2, M2, L1  TD-1 reads the rest of DT-1's plan (screen and BIP); M6 DT-1 hands the AUC on its own (AD-1 takes it);
-          H3, H4, M8  TE-1 and QS-1 keep AD-1's delivery window, exchange timing and token value
+          H3, H4, M8  TE-1 keeps AD-1's delivery window, exchange timing and token value
    PREF   H2, H6, M7  TD-1 reads PA-1's competing stimulus test (the wait-component items, the blocking item, rotation, re-test)
    SKILL  M7 SA-1 reads VS-1's schedule as VS-1 sends it; M9 ST-1 takes TI-1's "Why did it drop?"; BC-RM-M3 RM-1 reads TI-1
    TDB    FEED-M5, M6, M8  FD-1 adds its texture order, latest step and pace; TD-1's meal cards read FD-1 (and TB-1's target)
@@ -98,10 +98,7 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   ok('DELAY 6 TE-1 shows AD-1’s delivery window, exchange timing and token value (screen only), with the weak-token caution',/within 2 s of the response/.test(e.box)&&/within the session/.test(e.box)&&/45% of the primary item, clearly below it/.test(e.box)&&/noprint/.test(e.cls)&&/te67-weak/.test(e.cls),e);
   ok('DELAY 7 TE-1 fills how and when the backup is given from AD-1 only while empty',/^Accumulated: all the earned time/.test(e.exHow)&&e.exWhen==='Within the session (Form AD-1)'&&/^Distributed/.test(e.kept),e);
   await te.close();
-  const q=await open('QS-1');
-  const qq=await q.evaluate(()=>typeof adReward==='function'?[adReward({key:'tok',work:'math problem',reinforcer:'the tablet',req:5,window:2}),adReward({key:'tok',work:'math problem',reinforcer:'the tablet',req:5})]:null);
-  ok('DELAY 8 QS-1’s staff line gives AD-1’s delivery window for tokens; without one it reads as before',qq&&/give each token within 2 s of the math problem\./.test(qq[0])&&!/within/.test(qq[1]),qq);
-  await q.close();
+  /* QS-1's staff line keeps its words: AD-1's window there would change a line Form QS-1 already prints (ad1-w3b check 8); TE-1 carries it */
  });
 
  /* ---------------- PREF ---------------- */
