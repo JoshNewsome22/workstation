@@ -12181,7 +12181,7 @@ const why=[...set.querySelectorAll('button[disabled]')].map(x=>{const r=DIS[x.id
 if(why.length)set.appendChild(mk('p',{class:'sr-why'},'Not available yet: '+esc(why.join('; '))+'.'));
 const gear=mk('button',{type:'button',id:'srClGear','aria-expanded':String(clSetOpen),'aria-controls':'srClSet'},GEAR+'<span>Caseload settings</span>');
 gear.addEventListener('click',()=>{clSetOpen=set.hidden;set.hidden=!clSetOpen;gear.setAttribute('aria-expanded',String(clSetOpen));if(clSetOpen)set.scrollIntoView({block:'nearest'});});
-b.insertBefore(gear,b.firstChild);b.appendChild(set);
+const cf=b.querySelector(':scope>.cl-find');if(cf)cf.insertAdjacentElement('afterend',gear);else b.insertBefore(gear,b.firstChild);b.appendChild(set);
 if(!b.querySelector('.cl-card')){const p=[...b.querySelectorAll(':scope>p')].find(x=>/No student kept yet/.test(x.textContent));
 if(p){p.innerHTML='No students yet. Save case keeps each student here.';p.insertAdjacentHTML('afterend','<p class="td-more"><button type="button" class="primary" id="srClOpen">Open case</button></p>');}}
 b.querySelectorAll('[data-cldel]').forEach(d=>{if(d.closest('.sr-cm'))return;const card=d.closest('.cl-card,article')||d.parentNode,nm=T((card.querySelector('.cl-nm')||{}).textContent)||'this student';
