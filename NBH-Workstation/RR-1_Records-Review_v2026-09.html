@@ -948,6 +948,13 @@ table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-wei
 html.nbh-pr-measure :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
 /* v25.67 fx2: nor while the page is plain (field care measures the boxes then: an example beside a box narrowed it) */
 html.nbh-plain :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
+/* v25.67 fx2: Focus (nbh-ui: one part of a form at a time) keeps out of sight what it folds. The layout's display rules
+   carry !important and outweigh Focus's own rule (a head's fields, a row of definitions, a field grid showed in a folded
+   part), so these carry an id's weight: #fx2-never is on no page. A folded part's line hides its controls (:enabled,
+   :disabled), not named by tag: the master print splits a rule's selectors at every comma and gives a control's name
+   standing alone to every value it prints (a list of the three names hid every value in the packet) */
+html.fx2[data-nbh-fx]:not(.nbh-plain) :is([data-nbh-fx="f"],#fx2-never){display:none!important}
+html.fx2[data-nbh-fx]:not(.nbh-plain) [data-nbh-fx="hf"] :is(:enabled,:disabled,#fx2-never){display:none!important}
 @media screen{
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)){--fx2-ink:#1F2D36;--fx2-navy:#1D3A52;--fx2-wash:#F2F6F5;--fx2-rule:#D9E2E0;--fx2-box:#B9C7C4;--fx2-muted:#5A6A72;--fx2-hint:#55656C;
   --fx2-sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;--fx2-serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
@@ -3822,9 +3829,13 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     f.setAttribute('data-fx2-ph', o ? o : f.getAttribute('placeholder')); f.removeAttribute('placeholder'); }
   /* v24.95 an example ("For example, …") is there to help fill an empty box: once the box holds an entry it goes;
      an explanation ("Florida Education Identifier") stays */
-  var hinted = [], hid = 0;
+  var hinted = [], hid = 0, egIds = [];
+  /* v25.67 fx2: a box the form draws again (EA-1's plan row, as a sheet opens) gets the id its example had, so the page
+     reads the same after (Focus off leaves nothing behind); a new box gets the next one, as before */
+  function egId(t){ for (var i = 0; i < egIds.length; i++) if (egIds[i][1] === t && !D.getElementById(egIds[i][0])) return egIds[i][0];
+    var id = 'fx2eg' + (++hid); egIds.push([id, t]); return id; }
   function egLink(field, h){ if (!/^For example\b/.test(h.textContent)) return; field._fx2eg = h; hinted.push(field); egSync(field);
-    if (!h.id) h.id = 'fx2eg' + (++hid); var d = (field.getAttribute('aria-describedby') || '').split(' ').filter(Boolean); if (d.indexOf(h.id) < 0) { d.push(h.id); field.setAttribute('aria-describedby', d.join(' ')); } }
+    if (!h.id) h.id = egId(h.textContent); var d = (field.getAttribute('aria-describedby') || '').split(' ').filter(Boolean); if (d.indexOf(h.id) < 0) { d.push(h.id); field.setAttribute('aria-describedby', d.join(' ')); } }
   function egSync(f){ if (f._fx2eg) tog(f._fx2eg, 'fx2-filled', !!String(f.value || '').trim()); }
   function egAll(){ hinted = hinted.filter(function(f){ return f.isConnected; }); hinted.forEach(egSync); }
 

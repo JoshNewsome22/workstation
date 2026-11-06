@@ -64,7 +64,9 @@ const STUB=()=>{window.confirm=()=>true;window.alert=()=>{};};
  ok('the form exposes its alone wording',!!(W&&W.std&&W.std.sup&&W.std.true&&W.scr&&W.rrb),Object.keys(W||{}));
  let st=await p.evaluate(()=>{const s=document.querySelector('[name="s.alone"]');return {v:s.value,opts:[...s.options].map(o=>[o.value,o.disabled,o.textContent]),txt:document.querySelector('#aloneTxt').textContent,
    panel:document.querySelector('#aloneTrue').hidden,btn:!document.querySelector('#aloneOpen').hidden,paras:[...document.querySelectorAll('#aloneBox .ea-nsc')].filter(e=>!e.hidden).map(e=>e.textContent),
-   staff:document.querySelector('[name="s.staff"]').placeholder,hist:document.querySelector('#aloneHist').hidden};});
+   /* v25.67 fx2: on screen the shared layout shows a box's words under it and keeps them in data-fx2-ph (they go back
+      into the box on paper) */
+   staff:(f=>f.placeholder||f.getAttribute('data-fx2-ph')||'')(document.querySelector('[name="s.staff"]')),hist:document.querySelector('#aloneHist').hidden};});
  ok('Setup & safety: Supervised is chosen on a new form; the menu has only Supervised and True alone',st.v==='sup'&&st.opts.length===2&&/^Supervised \(the default\)$/.test(st.opts[0][2])&&/^True alone \(only after the four steps below\)$/.test(st.opts[1][2]),st.opts);
  ok('true alone cannot be picked until the four steps are done',st.opts[1][0]==='true'&&st.opts[1][1]===true,st.opts);
  ok('the supervised text: door open or shared room, an adult who can see and hear the student, beside the open doorway (never in it), elopement history',
