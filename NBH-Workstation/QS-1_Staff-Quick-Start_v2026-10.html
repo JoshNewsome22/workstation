@@ -1548,7 +1548,8 @@ function planLine(plan,re){const st=plan&&Array.isArray(plan.steps)?plan.steps:[
 function stopConflict(){const f=CASE;if(!f||!f.plan||!f.student||!f.student.stop)return false;const st=Array.isArray(f.plan.steps)?f.plan.steps:[];
   const ee=st.some(x=>/escape extinction|physical guidance/i.test(T(x.grp)))||/escape extinction/i.test(JSON.stringify(f.plan.respond||{}));
   return ee&&!planLine(f.plan,/^The rule staff follow when the student/i);}
-function howOf(b){const d=str(b.dim).toLowerCase(),u=T(b.unit);if(/freq|count|rate/.test(d))return 'Count each one';if(/dur/.test(d))return 'Minutes, start to stop';if(/laten/.test(d))return 'Seconds from the direction';if(/percent|%|trial|opportun/.test(d))return 'Tally times / chances';return T(b.dim);}
+function howOf(b){if(T(b.measureText))return T(b.measureText);   /* v25.68 (the BCBA, 11/6) Form TB-1's own measure, when its card holds one */
+  const d=str(b.dim).toLowerCase(),u=T(b.unit);if(/freq|count|rate/.test(d))return 'Count each one';if(/dur/.test(d))return 'Minutes, start to stop';if(/laten/.test(d))return 'Seconds from the direction';if(/percent|%|trial|opportun/.test(d))return 'Tally times / chances';return T(b.dim);}
 const uniq=a=>a.filter((x,i)=>x&&a.indexOf(x)===i);
 window.__nbhFactsIn=function(f){ensure();PASS=new Set();const p=P();let n=0;
   const pf=f.profile||null,behs=f.behaviors||[],fn=f.fn||null,plan=f.plan||null,cr=f.crisis||null,goals={red:(f.goals&&f.goals.red)||[],acq:(f.goals&&f.goals.acq)||[]},menu=f.menu||[];
@@ -3127,6 +3128,45 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   try{if(ask){r=r||{};r.quick=r.quick||{rules:[],tiers:[],src:'QS-1'};r.quick.pdAsk=ask;}}catch(e){}return r;};
 })();
 </script>
+<script id="qs1-v2568">
+/* v25.68 (research recommendation #1, the BCBA's 11/6 list) each adult's implementation plan, written on Form ST-1 (its trainees'
+   action and coping plans, staff.people[i].plan), prints on that adult's page here: one page each, "My implementation plan", after
+   the pages the handout already has and before the reading check. Only the plans whose page is Form QS-1 (Form ST-1's "Their page";
+   the others print on Form EB-1). The plans are Form ST-1's: kept here as the case last gave them (S.ipl, saved with this form, so a
+   saved copy prints them too) and replaced each time the case brings the team; never edited here. A handout with no plan prints
+   as it did. */
+(function(){const t=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+ const iso=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(t(v));return m?m[0]:'';};
+ function list(){return Array.isArray(S.ipl)?S.ipl.filter(x=>x&&typeof x==='object'&&t(x.who)&&x.plan&&typeof x.plan==='object'):[];}
+ window.__qs2568List=list;
+ function ipPage(pn,N,x){const f=firstName(),p=x.plan,who=t(x.who)+(t(x.role)?', '+t(x.role):'');
+  const cop=(Array.isArray(p.coping)?p.coping:[]).filter(c=>c&&(t(c.barrier)||t(c.fix)));
+  let h='<div class="qs-page qs-ip" data-page="'+pn+'">'+band('My implementation plan',who,'What I do with '+esc(f)+', when and where, and what I do if something gets in the way. Written with the BCBA'+(t(S.meta.bcba)?' ('+esc(t(S.meta.bcba))+')':'')+' on Form ST-1.');
+  h+=lab('My part')+'<table class="qs-t qs-ipt"><tbody>'+
+   [['Which steps',p.steps],['When',p.when],['Where',p.where],['Materials',p.materials],['First day',iso(p.first)?fmtShort(iso(p.first)):t(p.first)]].map(([k,v])=>'<tr><td class="m">'+k+'</td><td>'+(t(v)?nl(String(v)):'<span class="wline"></span>')+'</td></tr>').join('')+'</tbody></table>';
+  h+=lab('If something gets in the way')+(cop.length?'<table class="qs-t"><thead><tr><th style="width:46%">What may get in the way</th><th class="teal">What I do</th></tr></thead><tbody>'+cop.map(c=>'<tr><td>'+esc(t(c.barrier))+'</td><td>'+esc(t(c.fix))+'</td></tr>').join('')+'</tbody></table>':'<p class="qs-note">No barrier written yet: name two or three with the BCBA, and a fix for each.</p>');
+  const a=iso(p.checkFrom),b=iso(p.checkBy);
+  h+='<p class="qs-note" style="margin-top:8px"><b>Checked together at the first observation'+(a&&b?', between '+esc(fmtShort(a))+' and '+esc(fmtShort(b)):', 3 to 5 school days after the first day')+'.</b> If a fix did not work, or something else got in the way, say so then: the plan changes, not you.</p>';
+  return h+foot(pn,N)+'</div>';}
+ {const h0=handoutHTML;handoutHTML=function(){const L=list();if(!L.length)return h0.apply(this,arguments);
+  const fl=S.flowOn!=='no',ck=S.checkOn==='yes',dc=S.dayCard==='yes'&&filled('five').length>0,N=4+(fl?1:0)+(ck?1:0)+(dc?1:0)+L.length,at=4+(fl?1:0)+(dc?1:0);
+  return page1(N)+page2(N)+page3(N)+page4(N)+(fl?flowPage(5,N):'')+(dc?dayCardPage(4+(fl?1:0)+1,N):'')+L.map((x,i)=>ipPage(at+i+1,N,x)).join('')+(ck?checkPage(N,N):'');};}
+ function note(){let el=document.getElementById('qsIpNote');const box=document.getElementById('caseState');if(!box)return;
+  if(!el){el=document.createElement('p');el.id='qsIpNote';el.className='hint noprint';el.setAttribute('role','status');box.insertAdjacentElement('afterend',el);}
+  const L=list();el.hidden=!L.length;el.textContent=L.length?'Implementation plans from Form ST-1, one page each in the handout: '+L.map(x=>t(x.who)).join('; ')+'. Change them on Form ST-1.':'';}
+ window.__qs2568Note=note;
+ {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const ppl=f&&f.staff&&Array.isArray(f.staff.people)?f.staff.people:null;
+  if(ppl){const L=ppl.filter(x=>x&&t(x.name)&&x.plan&&typeof x.plan==='object'&&x.plan.page!=='EB-1').map(x=>({who:t(x.name),role:t(x.role),plan:x.plan}));
+   if(L.length||Array.isArray(S.ipl)){if(L.length)S.ipl=L;else delete S.ipl;}}
+  const r=was?was.apply(this,arguments):null;try{note();buildSoon(0);}catch(e){}return r;};}
+ {const r0=renderEditor;renderEditor=function(){const r=r0.apply(this,arguments);try{note();}catch(e){}return r;};}
+ try{note();}catch(e){}
+})();
+</script>
+<style id="qs1-v2568-css">
+.qs-ipt td.m{width:24%}
+.qs-ip .wline{display:inline-block;min-width:60%;border-bottom:1px solid #8a9aa3;height:1em}
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
