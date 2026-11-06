@@ -90,9 +90,10 @@ const frameOf=(p,re)=>p.frames().find(f=>re.test(decodeURIComponent(f.url())));
   await fr.tap('input[name="inf[1].name"]');await sleep(200);await fr.evaluate(()=>{const b=document.getElementById('nbhPpl');if(b)b.hidden=true;});
   await fr.fill('input[name="inf[1].name"]','Ms. A (simulated)');await fr.fill('input[name="inf[1].role"]','Speech-language pathologist');
   await fr.fill('input[name="inf[1].email"]','ms.a@example.org');await fr.press('input[name="inf[1].email"]','Tab');await sleep(600);
-  const offer=await fr.evaluate(()=>{const b=[...document.querySelectorAll('.nbh-toast .pp-save')];return b.length?b[0].closest('.nbh-toast').textContent:'';});
+  /* v25.68 (design review M7): the form's toast, the form on screen, is the workstation's one toast (the offer's button on it) */
+  const offer=await p.evaluate(()=>{const b=[...document.querySelectorAll('#wsToasts .ws-toast .pp-save')];return b.length?b[0].closest('.ws-toast').textContent:'';});
   ok('20 a person typed by hand is offered to the directory',/Ms\. A \(simulated\).*not in your staff directory/.test(offer),offer);
-  await fr.click('.nbh-toast .pp-save');await sleep(600);
+  await p.click('#wsToasts .ws-toast .pp-save');await sleep(600);
   st=await p.evaluate(async()=>(await pplLoad()).list.find(x=>x.email==='ms.a@example.org')||null);
   ok('21 Save to directory keeps them, with their role',st&&st.name==='Ms. A (simulated)'&&st.role==='Speech-language pathologist',st);
   /* Edit the staff directory from the form */

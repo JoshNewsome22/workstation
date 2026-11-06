@@ -25,7 +25,7 @@ const IDS=['DM-1','TB-1','FS-1','DD-1','GB-1','TD-1','TK-1','ST-1'];
     const o=window.open;window.open=function(){const w=o.apply(this,arguments);try{const d=w.document,dw=d.write.bind(d);d.write=function(s){if(s.length>100000)window.__mpDoc=s;return dw(s);};}catch(e){}return w;};});
   const pop=p.waitForEvent('popup',{timeout:120000});
   await p.evaluate(IDS=>{IDS.forEach(id=>state.ticked[id]=true);masterRun(ALL.filter(([id])=>IDS.includes(id)),{check:false});},IDS);
-  const w=await pop;await p.waitForFunction(()=>$('#masterPrint').textContent==='Build master print',null,{timeout:180000});await sleep(2000);
+  const w=await pop;await p.waitForFunction(()=>$('#masterPrint').textContent==='Build packet',null,{timeout:180000});await sleep(2000);
   const r=await p.evaluate(IDS=>{const s=window.__mpDoc||'';const u=s.match(/data:image\/[a-z+]+;base64,[A-Za-z0-9+\/=]{4000,}/g)||[];const c={};u.forEach(x=>{c[x]=(c[x]||0)+1;});
     return {max:window.__max,len:s.length,big:u.length,twice:Object.values(c).filter(n=>n>1).length,frames:Object.keys(state.frames).length,cap:FRAME_CAP,dirty:caseDirty(),order:ALL.filter(([id])=>IDS.includes(id)).map(x=>x[0])};},IDS);
   const shown=await w.evaluate(()=>({secs:[...document.querySelectorAll('section.mp-sec')].map(x=>x.id.replace(/^sec-/,'')),imgs:document.images.length,

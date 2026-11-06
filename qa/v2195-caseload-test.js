@@ -24,7 +24,7 @@ const readTable=page=>page.evaluate(()=>({lead:$('#dlgBody .hp-lead').textConten
 (async()=>{const br=await chromium.launch();
   try{
   {const {ctx,page,errs}=await shell(br,{width:1180,height:820},false,false);
-    await page.evaluate(()=>caseloadOpen());await sleep(1000);await page.evaluate(()=>{const k=document.getElementById('clKeep');if(k)k.open=true;});await sleep(200);   /* the tools sit in the fold (v21.92) */
+    await page.evaluate(()=>caseloadOpen());await sleep(1000);await page.evaluate(()=>{const g=document.getElementById('srClGear');if(g&&g.getAttribute('aria-expanded')!=='true')g.click();});   /* v25.68 (M3) behind the settings gear */await sleep(200);   /* the tools sit in the fold (v21.92) */
     const btn=await page.evaluate(()=>{const b=document.querySelector('#dlgBody #clMonth');return b&&{disabled:b.disabled,afterRestr:b.previousElementSibling&&b.previousElementSibling.id==='clRestr'};});
     ok('1 the Caseload dialog offers Monthly summary beside the restraint report',btn&&!btn.disabled&&btn.afterRestr,btn);
     await page.click('#clMonth');await sleep(900);

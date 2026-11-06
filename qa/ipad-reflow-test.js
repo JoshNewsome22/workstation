@@ -3,13 +3,14 @@
    may scroll inside its own panel; the page itself may not. TD-1's sheets were 1000 px wide beside a 222 px menu, and a
    filled DD-1 table ran past a sideways iPad, before this check.
    v25.62: upright (820 px) every field grid is one column, labels above, one field to a row (the BCBA, 11/1).
+   v25.68 (design review H3): the BCBA's 13-inch iPad as well, upright (1032 x 1376) and sideways (1376 x 1032).
    usage: node qa/ipad-reflow-test.js   env ONLY=TD-1,DD-1 for some forms */
 const L=require(__dirname+'/lib.js');const {sleep}=L;
 const only=(process.env.ONLY||'').split(',').filter(Boolean);
 (async()=>{
   const br=await L.chromium.launch();const bad=[];let n=0;
   const F=L.forms('NBH-Workstation').filter(f=>!only.length||only.includes(f.id));
-  for(const [w,h] of [[820,1180],[1133,744]]){
+  for(const [w,h] of [[820,1180],[1133,744],[1032,1376],[1376,1032]]){
     const ctx=await br.newContext({viewport:{width:w,height:h},hasTouch:true,serviceWorkers:'block'});
     await ctx.addInitScript(()=>{window.print=function(){};});ctx.on('dialog',d=>d.accept().catch(()=>{}));
     for(const f of F){
@@ -36,6 +37,6 @@ const only=(process.env.ONLY||'').split(',').filter(Boolean);
   }
   await br.close();
   const pass=!bad.length&&n===F.length*2;
-  console.log((pass?'PASS':'FAIL')+' no form scrolls the page sideways at 820 or 1133 px, empty or with its case loaded, and upright the field grids are one column ('+n+' form views)'+(pass?'':'  '+JSON.stringify(bad).slice(0,1500)));
+  console.log((pass?'PASS':'FAIL')+' no form scrolls the page sideways at 820, 1133, 1032 or 1376 px, empty or with its case loaded, and upright the field grids are one column ('+n+' form views)'+(pass?'':'  '+JSON.stringify(bad).slice(0,1500)));
   console.log(pass?'RESULT: all passed':'RESULT: 1 failed');process.exitCode=pass?0:1;
 })();

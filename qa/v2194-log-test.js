@@ -39,7 +39,7 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(file)>=0);
     const sim=await fr.evaluate(()=>({n:(S.incidents||[]).length,b:S.behaviors.filter(b=>ddCountable(b)).map(b=>({id:b.id,name:b.name}))}));
     ok('5a Form DD-1’s simulation loaded (behaviors counted by frequency on the sheet)',sim.b.length>=1,sim);
     await page.evaluate(()=>{try{$('#dlg').close();}catch(e){}});await page.evaluate(()=>todayOpen());await sleep(1200);
-    const td=await page.evaluate(()=>({tdLog:!!$('#dlgBody #tdLog'),first:($('#dlgBody .td-more button')||{}).id}));
+    const td=await page.evaluate(()=>({tdLog:!!$('#dlgBody #tdLog'),first:($('#dlgBody .td-more button,#dlgBody .sr-tg button')||{}).id}));   /* v25.68 (design review M2) first in Today's first group, Record */
     ok('5 the Today list offers Log it now first in its row',td.tdLog&&td.first==='tdLog',td);
     await page.click('#tdLog');await sleep(700);
     const d2=await page.evaluate(()=>({who:$('#lnWho').tagName,first:($('#lnWho').options&&$('#lnWho').options[0]||{}).textContent,lead:$('#dlgBody .hp-lead').textContent,beh:[...document.querySelectorAll('#lnBehList option')].map(o=>o.value)}));

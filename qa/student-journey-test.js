@@ -99,7 +99,13 @@ async function reveal(fr,sel){
   for(let i=0;i<sum;i++){await fr.locator('details[data-sj-open="'+i+'"] > summary').first().click().catch(()=>{});await sleep(120);}
   if(await loc.isVisible().catch(()=>false))return loc;
   const views=await fr.$$('#viewSeg button[data-view], nav.nbh-tabs [data-tab], .tabs button[data-tab], [role=tablist] [role=tab]');
-  for(const v of views){if(!(await v.isVisible().catch(()=>false)))continue;await v.click().catch(()=>{});await sleep(250);if(await loc.isVisible().catch(()=>false))return loc;
+  /* v25.68 (H2): in the workstation a form of 6 sheets or fewer shows no sheet column; its sheets are chosen from the form row's
+     sheet menu, which presses these same buttons (hidden with the toolbar): press them that way */
+  const rowMenu=await fr.evaluate(()=>!!window.__nbhNoSheets&&window.parent!==window).catch(()=>false);
+  for(const v of views){if(await v.isVisible().catch(()=>false))await v.click().catch(()=>{});
+    else if(rowMenu&&await v.evaluate(b=>!b.hidden&&getComputedStyle(b).display!=='none').catch(()=>false))await v.evaluate(b=>b.click()).catch(()=>{});
+    else continue;
+    await sleep(250);if(await loc.isVisible().catch(()=>false))return loc;
     const s2=await loc.evaluate(e=>{const d=e.closest('details');if(d&&!d.open){d.setAttribute('data-sj-open','x');return true;}return false;});
     if(s2){await fr.locator('details[data-sj-open="x"] > summary').first().click().catch(()=>{});await sleep(150);await fr.locator('details[data-sj-open="x"]').first().evaluate(d=>d.removeAttribute('data-sj-open')).catch(()=>{});if(await loc.isVisible().catch(()=>false))return loc;}}
   await loc.scrollIntoViewIfNeeded().catch(()=>{});
@@ -673,13 +679,13 @@ PH.H=async()=>{
   await tapShell('#caseloadBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await sleep(800);
   const cl=await shell(()=>document.getElementById('dlgBody').innerText);
   ok('H10 Caseload lists Mateo and the second student, the most urgent first, with what needs Mateo',/Mateo Rivera/.test(cl)&&/Sample Student/.test(cl),cl.slice(0,800));
-  await shell(()=>{const k=document.getElementById('clKeep');if(k)k.open=true;});   /* v21.92 the calendar and the report sit in the folded housekeeping */
+  await shell(()=>{const g=document.getElementById('srClGear');if(g&&g.getAttribute('aria-expanded')!=='true')g.click();});   /* v25.68 (M3) behind the settings gear */   /* v21.92 the calendar and the report sit in the folded housekeeping */
   const dlc=page.waitForEvent('download',{timeout:20000});await page.locator('#clCal').tap();const dc=await dlc;const fcal=OUT+'caseload.ics';await dc.saveAs(fcal);
   const ics=fs.readFileSync(fcal,'utf8');const ev=(ics.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g)||[]);
   const sumy=ev.map(e=>(/SUMMARY:(.*)/.exec(e)||[])[1]);
   ok('H11 the calendar file: Mateo’s deadlines by initials only (the plan review, the annual IEP, the reevaluation, the restraint notices), no name or ID',ev.length>=3&&sumy.some(s=>/^M\. R\.: Plan review/.test(s))&&sumy.some(s=>/^M\. R\.: Annual IEP review/.test(s))&&!/Mateo|Rivera|4471823/.test(ics),sumy);
   if(!(await shell(()=>document.getElementById('dlg').open&&!!document.getElementById('clRestr')))){await closeDlg();await tapShell('#caseloadBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await sleep(500);}
-  await shell(()=>{const k=document.getElementById('clKeep');if(k)k.open=true;});
+  await shell(()=>{const g=document.getElementById('srClGear');if(g&&g.getAttribute('aria-expanded')!=='true')g.click();});   /* v25.68 (M3) behind the settings gear */
   await page.locator('#clRestr').tap();await sleep(800);
   const rr=await shell(()=>({t:document.getElementById('dlgBody').innerText,rows:[...document.querySelectorAll('#dlgBody .cl-tbl tr')].slice(1).map(r=>r.innerText.replace(/\s+/g,' '))}));
   ok('H12 the restraint report: Mateo’s restraint on its date, from DD-1, with CR-1’s notices, and this semester’s count',rr.rows.some(r=>/Mateo Rivera/.test(r)&&new RegExp(D.restraint).test(r)&&/restraint/.test(r)&&/of 3/.test(r))&&/This semester: Mateo Rivera 1/.test(rr.t),rr);

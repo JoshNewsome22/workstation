@@ -20,7 +20,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     if(lab)ok(f+': a checkbox label carries 7 px above and below (a 36 px tap area)',lab.pt==='7px'&&lab.pb==='7px',lab);
     await page.close();}
   const sh=await ctx.newPage();sh.on('pageerror',e=>errs.push('shell: '+e.message));await sh.goto(BASE+'/NBH-Workstation/index.html');await sleep(1500);
-  const p=await sh.evaluate(()=>{if(!document.body.classList.contains('rail-open')){}const li=document.querySelector('#rail li.item');const cb=li.querySelector('input[data-tick]'),b=li.querySelector('button.open'),r=li.getBoundingClientRect(),cr=cb.getBoundingClientRect();
+  const p=await sh.evaluate(()=>{if(window.srChoose)srChoose(true);   /* v25.68 (design review M5) the ticks show while choosing forms for the packet */const li=document.querySelector('#rail li.item');const cb=li.querySelector('input[data-tick]'),b=li.querySelector('button.open'),r=li.getBoundingClientRect(),cr=cb.getBoundingClientRect();
     return {x:Math.max(r.left+2,cr.left-6),y:r.top+r.height/2,was:cb.checked,size:Math.round(cr.width),id:li.dataset.id,vis:getComputedStyle(document.getElementById('railNav')).visibility};});
   if(p.vis==='hidden'){await sh.click('#railToggle');await sleep(300);}
   await sh.evaluate(p=>{const li=document.querySelector('#rail li.item[data-id="'+p.id+'"]');li.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:li.getBoundingClientRect().left+2,clientY:p.y}));},p);await sleep(150);

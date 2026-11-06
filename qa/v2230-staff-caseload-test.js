@@ -14,6 +14,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(1400);await quiet();
   const rsFrame=()=>page.frames().find(f=>/RS-1_/.test(f.url()));
   await page.evaluate(()=>caseloadOpen());await sleep(500);
+  await page.evaluate(()=>{const g=document.getElementById('srClGear');if(g&&g.getAttribute('aria-expanded')!=='true')g.click();});   /* v25.68 (M3) with no staff record yet, its start is behind the settings gear */
   ok('1 Caseload has Staff records with Start the RBT Supervision Log',await page.evaluate(()=>/Staff records/.test(document.getElementById('dlgBody').innerText)&&!!document.getElementById('clStaffStart')));
   await page.click('#clStaffStart');await page.waitForFunction(()=>!!state.status['RS-1'],null,{timeout:40000});await sleep(1200);
   ok('2 Start opens Form RS-1 with no student on the bar',await page.evaluate(()=>state.cur==='RS-1'&&!packet().client&&!packet().sid));

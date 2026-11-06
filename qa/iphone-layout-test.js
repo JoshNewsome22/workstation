@@ -52,7 +52,9 @@ const vis=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);if(!e)return
   await p.evaluate(()=>{try{sessionStorage.removeItem('nbh.due.ph');}catch(e){}try{$('#tipHide').click();}catch(e){}});await KEEP(p);
   /* 1 the bar */
   const bar=await p.evaluate(()=>[...document.querySelectorAll('#phoneBar button')].map(b=>{const r=b.getBoundingClientRect();return {t:b.textContent.trim(),h:Math.round(r.height),bottom:Math.round(r.bottom)};}));
-  ok('1a along the bottom: Forms, Caseload, Today, More, each with its word, a finger\'s height, at the foot of the screen',bar.map(x=>x.t.replace(/\d+$/,'')).join()==='Forms,Caseload,Today,More'&&bar.every(x=>x.h>=44&&x.bottom>=800&&x.bottom<=844),bar);
+  /* v25.68 (design review M8): Forms, Today, Log and More; Caseload is in More */
+  const barV=bar.filter(x=>x.h>0);
+  ok('1a along the bottom: Forms, Today, Log, More, each with its word, a finger\'s height, at the foot of the screen',barV.map(x=>x.t.replace(/\d+$/,'')).join()==='Forms,Today,Log,More'&&barV.every(x=>x.h>=44&&x.bottom>=800&&x.bottom<=844),bar);
   await p.tap('#phForms');await sleep(500);const f1=await p.evaluate(()=>({open:document.body.classList.contains('rail-open'),ex:$('#phForms').getAttribute('aria-expanded')}));
   await p.tap('#phForms');await sleep(500);const f2=await p.evaluate(()=>({open:document.body.classList.contains('rail-open'),ex:$('#phForms').getAttribute('aria-expanded'),foc:document.activeElement&&document.activeElement.id}));
   ok('1b Forms opens the list of forms and closes it (the bar stays in reach; the focus comes back to Forms)',f1.open&&f1.ex==='true'&&!f2.open&&f2.ex==='false'&&f2.foc==='phForms',{f1,f2});
