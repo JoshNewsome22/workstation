@@ -8,6 +8,12 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');},today:function(){return this.iso(new Date());}};
 (function(){
   var U=window.NBH_RESPOND={version:1};
+  /* v25.68 (research #13) Haitian Creole: a date in words (lendi 19 oktòb), and the mark every Creole text carries until the
+     district translator has reviewed it (in English, as the BCBA wrote it, and in Creole) */
+  var HT_M=['janvye','fevriye','mas','avril','me','jen','jiyè','out','septanm','oktòb','novanm','desanm'],HT_D=['dimanch','lendi','madi','mèkredi','jedi','vandredi','samdi'];
+  U.htDate=function(d,o){o=o||{};d=d instanceof Date?d:new Date(d);if(isNaN(d))return '';return (o.weekday?HT_D[d.getDay()]+' ':'')+d.getDate()+' '+HT_M[d.getMonth()]+(o.year?' '+d.getFullYear():'');};
+  U.DRAFT='Draft translation: a district translator reviews it before it goes home.';
+  U.DRAFT_HT='Tradiksyon sa a se yon bouyon: yon tradiktè distri a ap revize l anvan li ale lakay.';
   /* ---- the code: a JSON object as base64url, marked NBH1. ---- */
   function enc(str){return new TextEncoder().encode(str);}
   function bytes64(bytes){var s='';for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
@@ -26,6 +32,9 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     if(o.lang==='es'){if(o.name)t=t.replace(/\b(el|la|el\/la)\s+(estudiante|alumno\/a|alumno|alumna|ni\u00f1o\/a|ni\u00f1o|ni\u00f1a|cliente)\b/gi,function(m){return cap(m,o.name);});
       if(o.behs)t=t.replace(/\b(las|estas|esas)\s+conductas\s+(problem\u00e1ticas|problematicas|problema|objetivo|desafiantes|inapropiadas)\b|\b(los|estos|esos)\s+comportamientos\s+(problem\u00e1ticos|problematicos|problema|objetivo|desafiantes|inapropiados)\b/gi,function(m){return cap(m,o.behs);});
       if(o.beh)t=t.replace(/\b(la|esta|esa)\s+conducta\s+(problem\u00e1tica|problematica|problema|objetivo|desafiante|inapropiada)\b|\b(el|este|ese)\s+comportamiento\s+(problem\u00e1tico|problematico|problema|objetivo|desafiante|inapropiado)\b/gi,function(m){return cap(m,o.beh);});}
+    /* v25.68 a Creole page: "elèv la" takes the name, "konpòtman an" the behavior's term */
+    if(o.lang==='ht'){if(o.name)t=t.replace(/(^|[^A-Za-z\u00C0-\u024F])(el\u00e8v (?:la|sa a)|timoun (?:nan|sa a))(?![A-Za-z\u00C0-\u024F])/gi,function(m,a,b){return a+cap(b,o.name);});
+      if(o.beh)t=t.replace(/(^|[^A-Za-z\u00C0-\u024F])(konp\u00f2tman (?:pwobl\u00e8m )?(?:an|la|sa a))(?![A-Za-z\u00C0-\u024F])/gi,function(m,a,b){return a+cap(b,o.beh);});}
     if(o.name){t=t.replace(/\b(the|your|this|that|my)\s+(student|client|individual|person|child|pupil|learner|consumer)(['’]s)?\b/gi,function(m,a,b,pos){return cap(m,o.name+(pos?'’s':''));});}
     if(pr){t=t.replace(/\b(himself\s+or\s+herself|herself\s+or\s+himself|himself\s*\/\s*herself|herself\s*\/\s*himself|him\s*\/\s*herself|her\s*\/\s*himself|\(s\)he\s*self|them\s*\/\s*self)\b/gi,function(m){return cap(m,pr.r);})
       .replace(/\b(his\s+or\s+her|her\s+or\s+his|his\s*\/\s*hers?|her\s*\/\s*his|hers?\s*\/\s*his)\b/gi,function(m){return cap(m,pr.p);})
@@ -204,6 +213,10 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       .then(function(r){return r.json().then(function(j){if(r.ok&&j&&j.ok)return j;throw new Error((j&&j.error)||('the box answered '+r.status));},function(){throw new Error('the box answered '+r.status);});},
         function(e){throw new Error(/answered|locked/.test(String(e&&e.message))?e.message:'no connection');});};
   function NBH_RESPOND_RUNTIME(root,P){
+    /* v25.68 the Creole date and the draft mark, here as well: a page saved as a file carries only this function */
+    var HT_M=['janvye','fevriye','mas','avril','me','jen','jiy\u00e8','out','septanm','okt\u00f2b','novanm','desanm'],HT_D=['dimanch','lendi','madi','m\u00e8kredi','jedi','vandredi','samdi'];
+    var htDate=function(d,o){o=o||{};d=d instanceof Date?d:new Date(d);if(isNaN(d))return '';return (o.weekday?HT_D[d.getDay()]+' ':'')+d.getDate()+' '+HT_M[d.getMonth()]+(o.year?' '+d.getFullYear():'');};
+    var DRAFT='Draft translation: a district translator reviews it before it goes home.',DRAFT_HT='Tradiksyon sa a se yon bouyon: yon tradikt\u00e8 distri a ap revize l anvan li ale lakay.';
     var d=document;function h(tag,attrs,kids){var e=d.createElement(tag);if(attrs)for(var k in attrs){if(k==='text')e.textContent=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
       (kids||[]).forEach(function(c){if(c)e.appendChild(typeof c==='string'?d.createTextNode(c):c);});return e;}
     /* v25.67 (design review H9, B5) one design with the staff data page: who it is from and about whom, how long it takes, a
@@ -243,9 +256,9 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       '.nr .me{background:var(--mist);border-radius:8px;padding:4px 12px;margin:6px 0 4px;font-size:16px}.nr .me a{margin-left:6px}.nr input[readonly]{background:#f4f7f6}';
     if(!d.getElementById('nbhr-css')){var st=h('style',{id:'nbhr-css'});st.textContent=CSS;d.head.appendChild(st);}
     /* v21.67 the page in Spanish (P.lang 'es'): every word of the page's own, the items as the assessor pasted them */
-    var ES=P.lang==='es';
+    var ES=P.lang==='es',HT=P.lang==='ht';   /* v25.68 HT: the page in Haitian Creole (a draft translation) */
     /* v21.89 the date to send by in words (Monday, October 19), not 2026-10-19 */
-    var dueWords=function(v){var m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||''));if(!m)return v;try{return new Date(+m[1],+m[2]-1,+m[3],12).toLocaleDateString(ES?'es':'en-US',{weekday:'long',month:'long',day:'numeric'});}catch(e){return v;}};
+    var dueWords=function(v){var m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||''));if(!m)return v;try{var dd=new Date(+m[1],+m[2]-1,+m[3],12);return HT?htDate(dd,{weekday:true}):dd.toLocaleDateString(ES?'es':'en-US',{weekday:'long',month:'long',day:'numeric'});}catch(e){return v;}};
     var TXT={'the BCBA':'el BCBA','Photo of the student':'Foto del estudiante','Student:':'Estudiante:','Behavior this questionnaire is about:':'Conducta sobre la que trata este cuestionario:',
       'What counts as {b}:':'Qu\u00e9 cuenta como {b}:','the behavior':'la conducta','Do you understand this definition of {b}?':'\u00bfEntiende esta definici\u00f3n de {b}?','Do you understand the definition':'\u00bfEntiende la definici\u00f3n?',
       'Yes':'S\u00ed','No':'No','Not sure':'No estoy seguro/a','Sometimes':'A veces',
@@ -294,7 +307,56 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       'Too long for an email link: save it as a file below.':'Demasiado largo para un enlace de correo: gu\u00e1rdelo como archivo abajo.',
       'I have sent my answers':'Ya envi\u00e9 mis respuestas','When your email has gone, press this: the page then clears your answers from this device.':'Cuando su correo se haya enviado, pulse aqu\u00ed: la p\u00e1gina borrar\u00e1 sus respuestas de este dispositivo.',
       'Thank you. Your answers are cleared from this device.':'Gracias. Sus respuestas se borraron de este dispositivo.'};
-    function _(s,v){var t=ES&&TXT[s]!==undefined?TXT[s]:s;if(v)for(var k in v)t=t.split('{'+k+'}').join(v[k]);return t;}
+    /* v25.68 (research #13) the page in Haitian Creole (P.lang 'ht'): DRAFT TRANSLATION, for the district translator's review;
+       the page says so at its top, in English and in Creole. Every Creole string of the page is here. */
+    var TXT_HT={'the BCBA':'BCBA a','Photo of the student':'Foto elèv la','Student:':'Elèv:','Behavior this questionnaire is about:':'Konpòtman kesyonè sa a ap pale sou li:',
+      'What counts as {b}:':'Sa ki konte kòm {b}:','the behavior':'konpòtman an','Do you understand this definition of {b}?':'Èske ou konprann definisyon {b} sa a?','Do you understand the definition':'Èske ou konprann definisyon an',
+      'Yes':'Wi','No':'Non','Not sure':'M pa sèten','Sometimes':'Pafwa',
+      'Please ask {who} to explain the definition before you answer: the page will not send answers about a definition you do not understand. When it is clear, change your answer to Yes.':'Tanpri mande {who} pou eksplike definisyon an anvan ou reponn: paj la p ap voye repons sou yon definisyon ou pa konprann. Lè li klè pou ou, chanje repons ou an Wi.',
+      'Please ask {who} about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.':'Si ou kapab, poze {who} kesyon sou definisyon an anvan ou reponn. Si ou kontinye, reponn sèlman sou sa ou te wè ki koresponn ak definisyon ki anwo a; repons ou bay isit la ale ansanm ak lòt repons ou yo.',
+      'Instructions':'Enstriksyon','Form ':'Fòm ','Questionnaire':'Kesyonè',
+      'Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send':'Reponn chak kesyon sou elèv la ak konpòtman ki nonmen anwo a, dapre sa ou menm ou te wè. Lè ou fini, peze Voye',
+      ': your answers go straight to {who}.':': repons ou yo ale dirèkteman bay {who}.',': your email program opens with a message to {who} ready to go.':': pwogram imèl ou a ap louvri ak yon mesaj pou {who} ki pare pou ale.',
+      'Please send it by {d}.':'Tanpri voye l pa pita pase {d}.','About you':'Sou ou','The questions':'Kesyon yo','<b>{n} of {m}</b> answered':'<b>{n} sou {m}</b> reponn','Item {n}':'Kesyon {n}',
+      'In your own words':'Ak pwòp mo pa ou','Add a note if you wish':'Ajoute yon nòt si ou vle','Note for {l}':'Nòt pou {l}','Send your answers':'Voye repons ou yo','Send my answers to {who}':'Voye repons mwen yo bay {who}',
+      'Your answer code':'Kòd repons ou','Copy the code':'Kopye kòd la','Copied':'Li kopye','Save as a file':'Sere l kòm fichye','Open the email again':'Louvri imèl la ankò','Open the email':'Louvri imèl la',
+      'Your answers are locked on this device so that only {who}’s own form can open them, and go to the practice’s reply box when you press Send. Keep the student’s full name off this page.':'Repons ou yo fèmen sou aparèy sa a pou se sèlman fòm {who} ki ka louvri yo, epi yo ale nan bwat repons biwo a lè ou peze Voye. Pa ekri non konplè elèv la sou paj sa a.',
+      'Your answers travel only in the email you send; this page sends nothing on its own. Keep the student\'s full name out of the message.':'Repons ou yo pase sèlman nan imèl ou voye a; paj sa a pa voye anyen poukont li. Pa mete non konplè elèv la nan mesaj la.',
+      '{t} answers':'Repons pou {t}','Answers from the respondent page, for Form {f}. Paste this whole message into "Collect responses" on the form.':'Repons ki soti nan paj kesyonè a, pou Fòm {f}. Kole tout mesaj sa a nan “Collect responses” sou fòm nan.','From: ':'Moun ki voye l: ','Sent ':'Voye le ',
+      'whether you understand the definition':'si ou konprann definisyon an','the person who sent you this link':'moun ki voye lyen sa a ba ou a',
+      '<b>Need this another way?</b> Ask {who} for a paper copy, for the questions read aloud to you, or for large print or another language.':'<b>Ou bezwen sa a yon lòt jan?</b> Mande {who} yon kopi sou papye, pou yo li kesyon yo pou ou awotvwa, oswa pou gwo lèt oswa yon lòt lang.',
+      'You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask {who} to explain the definition; when it is clear, change your answer to Yes and press Send again.':'Ou reponn <b>Non</b> pou kesyon sou definisyon an, kidonk paj la poko ka voye repons ou yo. Tanpri mande {who} pou eksplike definisyon an; lè li klè, chanje repons ou an Wi epi peze Voye ankò.',
+      'Please fill in: ':'Tanpri ranpli: ','Unanswered item':'Kesyon ki pa reponn','Unanswered items':'Kesyon ki pa reponn yo','Sending with {n} left blank, as you chose.':'N ap voye l ak {n} ki rete vid, jan ou te chwazi a.','Answer each one':'Reponn chak grenn',' ({ns} counts)':' ({ns} konte)',
+      ' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.':' epi peze Voye ankò. Pou voye l ak kesyon sa yo vid espre, peze Voye yon lòt fwa san ou pa chanje anyen.',
+      'Sending…':'N ap voye…','Sending your answers…':'N ap voye repons ou yo…','<b>Sent.</b> Your answers went to {who}. Thank you; you can close this page.':'<b>Li ale.</b> Repons ou yo rive bay {who}. Mèsi; ou ka fèmen paj sa a.',
+      '<b>The reply box could not be reached</b> ({e}). Press <b>Open the email</b> below to send your answers by email to {who} instead, or try Send again in a moment.':'<b>Nou pa t ka jwenn bwat repons lan</b> ({e}). Peze <b>Louvri imèl la</b> anba a pou voye repons ou yo bay {who} pa imèl pito, oswa eseye Voye ankò nan yon ti moman.',
+      '<b>Your email program should open now</b> with the message to {who}. Press Send there. If nothing opened, copy the code below and paste it into an email to {to}, or save it as a file and attach it.':'<b>Pwogram imèl ou a ta dwe louvri kounye a</b> ak mesaj la pou {who}. Peze Voye ladan l. Si anyen pa louvri, kopye kòd ki anba a epi kole l nan yon imèl pou {to}, oswa sere l kòm fichye epi tache l.',
+      '<b>Your answers are longer than an email link can carry</b> ({n} characters, where about {m} fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to {to}, or <b>Copy the code</b> and paste it into the message.':'<b>Repons ou yo twò long pou yon lyen imèl</b> ({n} karaktè, kote anviwon {m} ka antre), kidonk okenn imèl pa louvri. Peze <b>Sere l kòm fichye</b> epi tache fichye a nan yon imèl pou {to}, oswa <b>Kopye kòd la</b> epi kole l nan mesaj la.',
+      'Answering as <b>{n}</b>.':'W ap reponn kòm <b>{n}</b>.','Not you? change':'Se pa ou? Chanje',
+      'Questions about {s} from {w}':'Kesyon sou {s} ki soti nan {w}','Questions for you from {w}':'Kesyon pou ou ki soti nan {w}','Questions from {w}':'Kesyon ki soti nan {w}',
+      'What the questions are about':'Sou kisa kesyon yo ye',
+      '1 yes-or-no question':'1 kesyon wi oswa non','{n} yes-or-no questions':'{n} kesyon wi oswa non','1 true-or-false question':'1 kesyon vre oswa fo','{n} true-or-false questions':'{n} kesyon vre oswa fo',
+      '1 question':'1 kesyon','{n} questions':'{n} kesyon','1 statement':'1 fraz','{n} statements':'{n} fraz',' to rate from {a} to {b}':' pou bay yon nòt soti {a} rive {b}',
+      '1 to answer in your own words':'1 pou reponn ak pwòp mo pa ou','{n} to answer in your own words':'{n} pou reponn ak pwòp mo pa ou',
+      '1 question to answer in your own words':'1 kesyon pou reponn ak pwòp mo pa ou','{n} questions to answer in your own words':'{n} kesyon pou reponn ak pwòp mo pa ou',
+      ' and ':' ak ','about 1 minute':'anviwon 1 minit','about {m} minutes':'anviwon {m} minit','Does not apply':'Sa pa aplike','Does not apply: the question does not fit this student (0 means it fits, and the behavior never happens then)':'Sa pa aplike: kesyon an pa koresponn ak elèv sa a (0 vle di li koresponn, men konpòtman an pa janm rive nan moman sa a)','Not sure: you do not know, or the question does not apply':'M pa sèten: ou pa konnen, oswa kesyon an pa aplike','Not sure also means: {t}':'M pa sèten vle di tou: {t}',
+      'Your answers are kept on this phone until you send them.':'Repons ou yo rete sou telefòn sa a jiskaske ou voye yo.',
+      'Your answers are kept on this tablet until you send them.':'Repons ou yo rete sou tablèt sa a jiskaske ou voye yo.',
+      'Your answers are kept on this computer until you send them.':'Repons ou yo rete sou òdinatè sa a jiskaske ou voye yo.',
+      'Your answers from before are back. They are kept here until you send them.':'Repons ou te bay anvan yo tounen. Yo rete isit la jiskaske ou voye yo.',
+      'This browser is not keeping your answers (private browsing, or storage turned off): send them before you close this page.':'Navigatè sa a pa kenbe repons ou yo (navigasyon prive, oswa estokaj fèmen): voye yo anvan ou fèmen paj sa a.',
+      'You sent your answers on {d}. Thank you.':'Ou te voye repons ou yo {d}. Mèsi.',
+      'Copy my answers':'Kopye repons mwen yo','Copied. Paste them into an email to {to}.':'Yo kopye. Kole yo nan yon imèl pou {to}.','Select the code below and copy it.':'Chwazi kòd ki anba a epi kopye l.',
+      'Saved as a file. Attach it to an email to {to}.':'Li sere kòm fichye. Tache l nan yon imèl pou {to}.',
+      '{n} not answered yet: {l}. Answer them, or press again to leave them blank.':'{n} poko reponn: {l}. Reponn yo, oswa peze ankò pou kite yo vid.',
+      'You answered No about the definition: please ask {who} to explain it first.':'Ou reponn Non sou definisyon an: tanpri mande {who} pou eksplike l anvan.',
+      'Sent. Thank you; you can close this page.':'Li ale. Mèsi; ou ka fèmen paj sa a.',
+      'Not sent yet: the reply box could not be reached. Your answers are kept here; see below.':'Li poko ale: nou pa t ka jwenn bwat repons lan. Repons ou yo rete isit la; gade anba a.',
+      'Your email program should open now. Press Send there.':'Pwogram imèl ou a ta dwe louvri kounye a. Peze Voye ladan l.',
+      'Too long for an email link: save it as a file below.':'Twò long pou yon lyen imèl: sere l kòm fichye anba a.',
+      'I have sent my answers':'Mwen voye repons mwen yo','When your email has gone, press this: the page then clears your answers from this device.':'Lè imèl ou a fin ale, peze bouton sa a: paj la ap efase repons ou yo sou aparèy sa a.',
+      'Thank you. Your answers are cleared from this device.':'Mèsi. Repons ou yo efase sou aparèy sa a.'};
+    function _(s,v){var t=ES&&TXT[s]!==undefined?TXT[s]:HT&&TXT_HT[s]!==undefined?TXT_HT[s]:s;if(v)for(var k in v)t=t.split('{'+k+'}').join(v[k]);return t;}
     var WHO=P.bcba||_('the BCBA');
     /* v25.67 the BCBA by name for the header and the Send button: the part before the first comma (Jordan Ellis, M.A., BCBA: Jordan Ellis) */
     var WHO1=String(P.bcba||'').split(',')[0].replace(/\s*\([^)]*\)\s*$/,'').trim()||WHO;
@@ -305,6 +367,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     var DEV=(function(){try{var c=window.matchMedia&&matchMedia('(pointer: coarse)').matches,w=Math.min(screen.width||0,screen.height||0)||innerWidth;return c?(w<600?'phone':'tablet'):'computer';}catch(e){return 'phone';}})();
     function into(el,blk){if(!el||!el.scrollIntoView)return;try{el.scrollIntoView({block:blk||'center',behavior:RM?'auto':'smooth'});}catch(e){el.scrollIntoView();}}
     if(ES)try{d.documentElement.lang='es';}catch(e){}
+    if(HT)try{d.documentElement.lang='ht';}catch(e){}
     root.innerHTML='';root.className='nr';if(!/^main$/i.test(root.tagName))root.setAttribute('role','main');
     var items=P.items||[],scale=P.scale||{kind:'yn'},extras=P.extras||[],opens=P.open||[];
     var ans=new Array(items.length).fill(''),prog=null,progT=null,progF=null,lastN=-1;
@@ -317,8 +380,8 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     function paint(){if(!prog)return;var n=answered();if(n===lastN)return;lastN=n;progT.innerHTML=_('<b>{n} of {m}</b> answered',{n:n,m:TOTAL});progF.style.width=(TOTAL?Math.round(100*n/TOTAL):0)+'%';}
     /* how long it takes, said before the person starts (about 12 s a yes or no, 15 s a rating, a minute a written answer) */
     function howLong(){var parts=[],n=items.length,o=og.length,secs=0,one=function(k1,kn,c){return c===1?_(k1):_(kn,{n:c});};
-      if(n){if(scale.kind==='num'){var st=/statement|afirmaci/i.test(P.itemsHeading||'');parts.push((st?one('1 statement','{n} statements',n):one('1 question','{n} questions',n))+_(' to rate from {a} to {b}',{a:scale.min||0,b:scale.max||6}));secs+=n*15;}
-        else{var L0=String((scale.labels||[])[0]||'Yes');parts.push(/^(yes|s\u00ed|si)$/i.test(L0)?one('1 yes-or-no question','{n} yes-or-no questions',n):/^(true|verdadero)$/i.test(L0)?one('1 true-or-false question','{n} true-or-false questions',n):one('1 question','{n} questions',n));secs+=n*12;}}
+      if(n){if(scale.kind==='num'){var st=/statement|afirmaci|fraz/i.test(P.itemsHeading||'');parts.push((st?one('1 statement','{n} statements',n):one('1 question','{n} questions',n))+_(' to rate from {a} to {b}',{a:scale.min||0,b:scale.max||6}));secs+=n*15;}
+        else{var L0=String((scale.labels||[])[0]||'Yes');parts.push(/^(yes|s\u00ed|si|wi)$/i.test(L0)?one('1 yes-or-no question','{n} yes-or-no questions',n):/^(true|verdadero|vre)$/i.test(L0)?one('1 true-or-false question','{n} true-or-false questions',n):one('1 question','{n} questions',n));secs+=n*12;}}
       if(o)parts.push(n?one('1 to answer in your own words','{n} to answer in your own words',o):one('1 question to answer in your own words','{n} questions to answer in your own words',o));
       opens.forEach(function(x){secs+=x.type==='yns'?15:60;});secs+=extras.length*10+(P.confirm?15:0);
       var m=Math.max(1,Math.round(secs/60));if(m>5)m=Math.round(m/5)*5;
@@ -350,12 +413,14 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     var title=P.inst==='student'?_('Questions for you from {w}',{w:WHO1}):STU?_('Questions about {s} from {w}',{s:STU,w:WHO1}):_('Questions from {w}',{w:WHO1});
     try{d.title=title;}catch(e){}
     var keepL=h('p',{'class':'keep',id:'nbhr-keep'}),was=h('p',{'class':'was',id:'nbhr-was'});was.hidden=true;
-    if(wasSent){var wd=new Date(wasSent);if(!isNaN(wd)){try{was.textContent=_('You sent your answers on {d}. Thank you.',{d:wd.toLocaleDateString(ES?'es':'en-US',{weekday:'long',month:'long',day:'numeric'})+' '+wd.toLocaleTimeString(ES?'es':'en-US',{hour:'numeric',minute:'2-digit'})});was.hidden=false;}catch(e){}}}
+    if(wasSent){var wd=new Date(wasSent);if(!isNaN(wd)){try{was.textContent=_('You sent your answers on {d}. Thank you.',{d:HT?htDate(wd,{weekday:true})+' a '+wd.getHours()+':'+String(wd.getMinutes()).padStart(2,'0'):wd.toLocaleDateString(ES?'es':'en-US',{weekday:'long',month:'long',day:'numeric'})+' '+wd.toLocaleTimeString(ES?'es':'en-US',{hour:'numeric',minute:'2-digit'})});was.hidden=false;}catch(e){}}}
     var head=h('div',{'class':'nr-card nr-head'},[
       P.photo&&/^data:image\//.test(P.photo)?h('img',{'class':'photo',src:P.photo,alt:_('Photo of the student')}):null,
       h('h1',{text:title}),howLong()?h('p',{'class':'lede',text:howLong()}):null,
       P.due?h('p',{'class':'sub',text:_('Please send it by {d}.',{d:dueWords(P.due)})}):null,
       keepL,linksBlock(),was]);
+    /* v25.68 a Creole page says, first, that it is a draft translation (on screen and on paper) */
+    if(HT)root.appendChild(h('p',{'class':'warn draft',id:'nbhr-draft',html:'<b lang="en">'+esc(DRAFT)+'</b><br><span lang="ht">'+esc(DRAFT_HT)+'</span>'}));
     root.appendChild(head);
     /* the progress, kept in view at the top, said politely to a screen reader */
     if(TOTAL){prog=h('div',{'class':'prog',id:'nbhr-prog'});var pb=h('div',{'class':'pbar','aria-hidden':'true'});progF=h('i');pb.appendChild(progF);
@@ -402,7 +467,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
        of information or that the question is not applicable" (Iwata, DeLeon & Roscoe, 2013, p. 272; its instruction: "If you
        are uncertain about an answer, circle N/A"), so on the FAST "Not sure" stands, and the key says it also covers a
        question that does not apply. */
-    var DNA=/^(x\b|does not apply|doesn.?t apply|not applicable|no aplica)/i.test(naWords),NAL=DNA?_('Does not apply'):NS,NALQ=DNA?(ES?'\u00ab'+NAL+'\u00bb':'\u201c'+NAL+'\u201d'):NSQ;
+    var DNA=/^(x\b|does not apply|doesn.?t apply|not applicable|no aplica|sa pa aplike)/i.test(naWords),NAL=DNA?_('Does not apply'):NS,NALQ=DNA?(ES?'\u00ab'+NAL+'\u00bb':'\u201c'+NAL+'\u201d'):NSQ;
     if(DNA)naWords='';
     if(hasNS&&items.length)instr=String(instrRaw).replace(/\bN\/A\b/g,NALQ);
     var instrP=h('p',{'class':'sub',text:instr});
@@ -484,7 +549,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
        .then(function(r){return r.json().then(function(j){cb(r.ok&&j&&j.ok?null:((j&&j.error)||('the box answered '+r.status)));},function(){cb('the box answered '+r.status);});})
        .catch(function(e){cb(String((e&&e.message)||e||'no connection'));});}catch(e){cb(String((e&&e.message)||e));}}
     function mailto(code){var subj=(P.subject||_('{t} answers',{t:P.title||P.inst}))+(P.student?' · '+P.student:'');
-      var body=_('Answers from the respondent page, for Form {f}. Paste this whole message into "Collect responses" on the form.',{f:P.form||''})+'\n\n'+code+'\n\n'+(ex.name&&ex.name.value?_('From: ')+ex.name.value+'\n':'')+_('Sent ')+new Date().toLocaleDateString(ES?'es':undefined);
+      var body=_('Answers from the respondent page, for Form {f}. Paste this whole message into "Collect responses" on the form.',{f:P.form||''})+'\n\n'+code+'\n\n'+(ex.name&&ex.name.value?_('From: ')+ex.name.value+'\n':'')+_('Sent ')+(HT?htDate(new Date(),{year:true}):new Date().toLocaleDateString(ES?'es':undefined));
       return 'mailto:'+encodeURIComponent(P.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);}
     /* before Send, Copy or Save: what is still missing (the same rules as before for all three); false stops */
     function check(){var miss=[];items.forEach(function(it,i){if(ans[i]==='')miss.push(it.n||i+1);});
@@ -563,11 +628,13 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     var P=U.payloadFromHash(ls[0].url)||{};
     var title=o.title||P.title||P.inst||'questionnaire',who=String(P.student||o.student||'').replace(/\s*\((?:ID|id)[^)]*\)\s*/,'').trim(),bcba=P.bcba||o.bcba||'',due=P.due||'';
     var defn=!!(P.confirm||P.def),boxed=!!(P.box&&P.box.u);   /* v21.65 the answers come back through the reply box */
-    var es=P.lang==='es';   /* v21.67 a Spanish page gets its email in Spanish */
+    var es=P.lang==='es',ht=P.lang==='ht';   /* v21.67 a Spanish page gets its email in Spanish; v25.68 a Creole page in Creole, marked a draft */
     var KEY='nbh-invite-to';var last='';try{last=localStorage.getItem(KEY)||'';}catch(e){}
     var subj=title+(who?' · '+who:'');
-    var urls=(ls.length===1?ls[0].url:ls.map(function(l){return (l.label||(es?'Cuestionario':'Questionnaire'))+':\n'+l.url;}).join('\n\n'));
-    var body=es?'Hola:\n\nGracias por ayudar con este cuestionario'+(who?' sobre '+who:'')+': '+title+'. Toma unos minutos en un tel\u00e9fono, una tableta o una computadora. Abra el enlace'+(ls.length>1?' de cada conducta':'')+(defn?', lea la definici\u00f3n de la conducta,':',')+' responda las preguntas y pulse Enviar al final. '+(boxed?'Sus respuestas me llegan directamente cuando pulsa Enviar.':'Sus respuestas me llegan por correo electr\u00f3nico.')+(due?' Por favor env\u00edelo antes del '+due+'.':'')+'\n\n'+
+    var urls=(ls.length===1?ls[0].url:ls.map(function(l){return (l.label||(es?'Cuestionario':ht?'Kesyon\u00e8':'Questionnaire'))+':\n'+l.url;}).join('\n\n'));
+    var body=ht?'['+U.DRAFT+']\n\nBonjou,\n\nM\u00e8si paske w ap ede ak kesyon\u00e8 sa a'+(who?' sou '+who:'')+': '+title+'. Li pran k\u00e8k minit sou yon telef\u00f2n, yon tabl\u00e8t oswa yon \u00f2dinat\u00e8. Louvri lyen an'+(ls.length>1?' pou chak konp\u00f2tman':'')+(defn?', li definisyon konp\u00f2tman an,':',')+' reponn kesyon yo, epi peze Voye nan fen an. '+(boxed?'Repons ou yo rive jwenn mwen dir\u00e8kteman l\u00e8 ou peze Voye.':'Repons ou yo rive jwenn mwen pa im\u00e8l.')+(due?' Tanpri voye l pa pita pase '+due+'.':'')+'\n\n'+
+      urls+'\n\nSi lyen an pa louvri, reponn im\u00e8l sa a epi m ap voye kesyon\u00e8 a ba ou k\u00f2m fichye.\n\nM\u00e8si,\n'+(bcba||'')
+     :es?'Hola:\n\nGracias por ayudar con este cuestionario'+(who?' sobre '+who:'')+': '+title+'. Toma unos minutos en un tel\u00e9fono, una tableta o una computadora. Abra el enlace'+(ls.length>1?' de cada conducta':'')+(defn?', lea la definici\u00f3n de la conducta,':',')+' responda las preguntas y pulse Enviar al final. '+(boxed?'Sus respuestas me llegan directamente cuando pulsa Enviar.':'Sus respuestas me llegan por correo electr\u00f3nico.')+(due?' Por favor env\u00edelo antes del '+due+'.':'')+'\n\n'+
       urls+'\n\nSi el enlace no se abre, responda a este correo y le enviar\u00e9 el cuestionario como archivo.\n\nGracias,\n'+(bcba||'')
      :'Hello,\n\nThank you for helping with this questionnaire'+(who?' about '+who:'')+': '+title+'. It takes a few minutes on a phone, tablet or computer. Open the link'+(ls.length>1?' for each behavior':'')+(defn?', read the behavior definition,':',')+' answer the questions, and press Send at the end. '+(boxed?'Your answers come straight back to me when you press Send.':'Your answers come back to me by email.')+(due?' Please send it by '+due+'.':'')+'\n\n'+
       urls+'\n\nIf the link does not open, reply to this email and I will send the questionnaire as a file.\n\nThank you,\n'+(bcba||'');
@@ -640,7 +707,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     last=last.replace(/[^A-Za-zÀ-ɏ]/g,'');return first+(last?' '+last.charAt(0).toUpperCase()+'.':'');};
   /* one person's email: a plain greeting, each questionnaire with its own link, the please-send-by date, and how the answers come back.
      o: {to, name, items:[{title, label, url, due, boxed}], student, bcba, remind, lang} -> {to, name, subject, text} */
-  U.personMail=function(o){o=o||{};var es=o.lang==='es',items=(o.items||[]).filter(function(x){return x&&x.url;}),n=items.length,stu=String(o.student||'').trim();
+  U.personMail=function(o){o=o||{};if(o.lang==='ht')return htMail(o);var es=o.lang==='es',items=(o.items||[]).filter(function(x){return x&&x.url;}),n=items.length,stu=String(o.student||'').trim();
     var dot=stu&&/[.!?]$/.test(stu)?'':'.',boxed=items.some(function(x){return !!x.boxed;}),dues=items.map(function(x){return String(x.due||'').trim();}),one=dues.every(function(x){return x===dues[0];}),due=one?dues[0]:'';
     var subj=(o.remind?(es?'Recordatorio: ':'Reminder: '):'')+(n===1?(items[0].title||(es?'Cuestionario':'Questionnaire')):(es?n+' cuestionarios':n+' questionnaires'))+(stu?(es?' sobre ':' about ')+stu:'');
     var L=[(es?'Hola':'Hello')+(o.name?' '+o.name:'')+',',''];
@@ -666,6 +733,26 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     H.push('<p style="margin:0">'+eh(es?'Gracias,':'Thank you,')+(o.bcba?'<br>'+eh(o.bcba):'')+'</p>');
     var html='<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1b2430;max-width:560px">'+H.join('')+'</div>';
     return {to:String(o.to||'').trim(),name:String(o.name||'').trim(),subject:subj,text:L.join('\n'),html:html};};
+  /* v25.68 one person's email in Haitian Creole (a draft translation, marked so at its top): as U.personMail */
+  function htMail(o){var items=(o.items||[]).filter(function(x){return x&&x.url;}),n=items.length,stu=String(o.student||'').trim();
+    var dot=stu&&/[.!?]$/.test(stu)?'':'.',boxed=items.some(function(x){return !!x.boxed;}),dues=items.map(function(x){return String(x.due||'').trim();}),one=dues.every(function(x){return x===dues[0];}),due=one?dues[0]:'';
+    var subj=(o.remind?'Rap\u00e8l: ':'')+(n===1?(items[0].title||'Kesyon\u00e8'):n+' kesyon\u00e8')+(stu?' sou '+stu:'');
+    var by=function(x){return 'Tanpri voye '+(n===1?'l':'yo')+' pa pita pase '+x+'.';},lab=function(x,i){return (n>1?(i+1)+'. ':'')+(x.label||x.title||'Kesyon\u00e8')+(!one&&x.due?' (tanpri voye l pa pita pase '+x.due+')':'');};
+    var intro=(o.remind?'Yon ti rap\u00e8l: mwen poko resevwa repons ou yo. ':'')+'M\u00e8si paske w ap ede ak '+(n===1?'kesyon\u00e8 sa a':n+' kesyon\u00e8 sa yo')+(stu?' sou '+stu+dot:'.')+' '+(n===1?'Li pran':'Chak pran')+' k\u00e8k minit sou yon telef\u00f2n, yon tabl\u00e8t oswa yon \u00f2dinat\u00e8: louvri '+(n===1?'lyen an':'chak lyen')+', reponn kesyon yo, epi peze Voye nan fen an. '+(boxed?'Repons ou yo rive jwenn mwen dir\u00e8kteman l\u00e8 ou peze Voye.':'Repons ou yo rive jwenn mwen pa im\u00e8l.');
+    var mine1='Lyen sa a se pou ou s\u00e8lman: tanpri pa voye l bay l\u00f2t moun. Si yon l\u00f2t moun ta dwe reponn, reponn im\u00e8l sa a epi m ap voye pa l ba li.',file='Si yon lyen pa louvri, reponn im\u00e8l sa a epi m ap voye kesyon\u00e8 a ba ou k\u00f2m fichye.';
+    var L=['['+U.DRAFT+']','','Bonjou'+(o.name?' '+o.name:'')+',','',intro,''];
+    items.forEach(function(x,i){L.push(lab(x,i)+':');L.push(x.url);L.push('');});
+    if(due){L.push(by(due));L.push('');}
+    if(o.name){L.push(mine1);L.push('');}
+    L.push(file);L.push('');L.push('M\u00e8si,');if(o.bcba)L.push(String(o.bcba));
+    var eh=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});},Hp=function(t){return '<p style="margin:0 0 14px">'+eh(t)+'</p>';};
+    var H=['<p lang="en" style="margin:0 0 14px;padding:6px 10px;border-left:4px solid #9A6208;background:#fdf6e7;color:#3d2a00"><b>'+eh(U.DRAFT)+'</b></p>',Hp(L[2]),Hp(intro)];
+    items.forEach(function(x,i){H.push('<p style="margin:0 0 8px"><b>'+eh(lab(x,i))+'</b></p><p style="margin:0 0 6px"><a href="'+eh(x.url)+'" style="display:inline-block;background:#1d4a77;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:8px">Louvri kesyon\u00e8 a</a></p>'+
+      '<p style="margin:0 0 18px;font-size:12px;color:#5b6670">Oswa louvri lyen sa a: <a href="'+eh(x.url)+'" style="color:#1d4a77">'+eh(x.url)+'</a></p>');});
+    if(due)H.push(Hp(by(due)));if(o.name)H.push(Hp(mine1));H.push(Hp(file));
+    H.push('<p style="margin:0">M\u00e8si,'+(o.bcba?'<br>'+eh(o.bcba):'')+'</p>');
+    var html='<div lang="ht" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1b2430;max-width:560px">'+H.join('')+'</div>';
+    return {to:String(o.to||'').trim(),name:String(o.name||'').trim(),subject:subj,text:L.join('\n'),html:html};}
   U.mailFlow=function(o){o=o||{};var d=document,msgs=(o.messages||[]).slice(0,60),N=msgs.length,onSent=o.onSent||function(){},up=o.onUpdate||function(){};
     var out={via:'',from:'',sent:[],failed:[],skipped:[],why:'',declined:false,done:false};
     var name=function(k){var m=msgs[k]||{};return m.name||m.to||('person '+(k+1));};
@@ -965,7 +1052,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     inject();setTimeout(K.opened,1500);return K;};
   /* ---- the generated page: everything inline, nothing to fetch ---- */
   U.pageHTML=function(payload){var json=JSON.stringify(payload).replace(/<\//g,'<\\/');var t=(payload.title||payload.inst||'Questionnaire')+(payload.student?' · '+payload.student:'');
-    return '<!DOCTYPE html>\n<html lang="'+(payload&&payload.lang==='es'?'es':'en')+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>'+t.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];})+'</title></head>\n<body><div id="nbhr"></div>\n'+
+    return '<!DOCTYPE html>\n<html lang="'+(payload&&payload.lang==='es'?'es':payload&&payload.lang==='ht'?'ht':'en')+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>'+t.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];})+'</title></head>\n<body><div id="nbhr"></div>\n'+
       '<script type="application/json" id="nbhr-payload">'+json+'<\/script>\n<script>\n'+NBH_RESPOND_RUNTIME.toString()+'\nNBH_RESPOND_RUNTIME(document.getElementById("nbhr"),JSON.parse(document.getElementById("nbhr-payload").textContent));\n<\/script></body></html>\n';};
   /* ---- the short links' dictionaries: tools/respond-dict/v1.json, made by tools/respond-dict/make.js from the forms' own
      wording (IA-1's pasted item wording is not in it). FROZEN: a link made with version 1 opens with exactly these bytes, so
