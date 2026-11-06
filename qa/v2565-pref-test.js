@@ -202,8 +202,8 @@ const PASRC=fs.readFileSync(path.join(L.ROOT,'NBH-Workstation',PA),'utf8'),RASRC
   /* M6, L2 */
   r=await p.evaluate(()=>{const t=document.querySelector('#stimTbl select[data-f="type"][data-i="1"]');t.value='Social / attention';t.dispatchEvent(new Event('input',{bubbles:true}));
     const n=document.getElementById('raSocNote');return {n:n.hidden?'':n.textContent,v:[...document.querySelectorAll('#sumTbl tbody tr')].map(x=>x.lastElementChild.textContent),note:document.getElementById('sumNote').textContent,out:(window.__nbhFactsOut()||{}).reinf.items.map(x=>x.verdict)};});
-  ok('M6 a social stimulus at a plan ratio of FR 5 shows the dense-schedule note; tested only at FR 1, it reads Probable, not Confirmed, on the Summary and in the case',
-    /Attention often reinforces only on dense schedules\. Run the progressive-ratio sheet, or test at the plan ratio, before attention carries a thin schedule alone/.test(r.n)&&r.v[0]==='Confirmed'&&r.v[1]==='Probable'&&r.out[1]==='Probable'&&/a social stimulus tested only at FR 1; the plan ratio is FR 5/.test(r.note),r);
+  ok('M6 a social stimulus at a plan ratio of FR 5 shows the dense-schedule note; tested only at FR 1, it reads Probable, not Confirmed, on the Summary and in the case (the BCBA, 11/6: any stimulus tested only at FR 1, with Roane et al., 2001)',
+    /Attention often reinforces only on dense schedules\. Run the progressive-ratio sheet, or test at the plan ratio, before attention carries a thin schedule alone/.test(r.n)&&r.v[0]==='Probable'&&/a stimulus tested only at FR 1; the plan ratio is FR 5\. .*Roane, Lerman, &? ?(&amp; )?Vorndran, 2001/.test(r.note)&&r.v[1]==='Probable'&&r.out[1]==='Probable'&&/a social stimulus tested only at FR 1; the plan ratio is FR 5/.test(r.note),r);
   r=await p.evaluate(()=>{const t=document.querySelector('#stimTbl select[data-f="type"][data-i="2"]');t.value='Token';t.dispatchEvent(new Event('input',{bubbles:true}));return document.getElementById('raTokNote').hidden?'':document.getElementById('raTokNote').textContent;});
   ok('L2 a token under test: test it on the progressive-ratio sheet against the backup items alone, and record pre-session access to the backup items',
     /Test the token on the progressive-ratio sheet against the backup items alone/.test(r)&&/Record any pre-session access to the backup items, because it can lower an edible.s break point/.test(r),r);
@@ -216,7 +216,7 @@ const PASRC=fs.readFileSync(path.join(L.ROOT,'NBH-Workstation',PA),'utf8'),RASRC
   /* a file saved before v25.65 */
   await p.close();p=await open(RA);await sim(p);const rs=await save(p);(rs.rec||[]).forEach(x=>delete x.preMin);delete rs.meta.coa_third;rs.prRep=2;
   await load(p,rs);r=await p.evaluate(()=>({rep:document.getElementById('prRep').value,v:[...document.querySelectorAll('#sumTbl tbody tr')].map(x=>x.lastElementChild.textContent),th:document.querySelector('[data-meta="coa_third"]').value}));
-  ok('saved files: an RA-1 file from before v25.65 (each ratio twice, no third option recorded) opens as saved',r.rep==='2'&&r.v.join()==='Confirmed,Confirmed,Not supported'&&r.th==='',r);
+  ok('saved files: an RA-1 file from before v25.65 (each ratio twice, no third option recorded) opens as saved; its verdicts are read by the current rules (11/6: a stimulus tested only at FR 1 below the plan ratio reads Probable)',r.rep==='2'&&r.v.join()==='Confirmed,Probable,Not supported'&&r.th==='',r);
   await p.close();
  }catch(e){console.log('FAIL exception '+(e&&e.stack||e));fails++;}
  ok('no page errors',!errs.length,errs);

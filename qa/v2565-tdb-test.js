@@ -73,6 +73,16 @@ const F=L.forms().find(x=>x.id==='TD-1');
   const old=await p.evaluate(()=>{const d=window.__tdCollect();delete d.fields['cp['+document.querySelector('#compWrap .card[data-code="FCT"]').dataset.i+'].thin'];return d;});
   await p.evaluate(d=>window.__tdRestore(d),old);await sleep(300);T=await thin(p,'FCT');
   ok('H3e a file saved before v25.65 keeps its five FCT levels; the 37.5% and 60% drops are flagged "Large step"',T.length===5&&/^S\+ 50% \/ S− 50%/.test(T[2].t)&&T[2].big&&T[3].big&&/a drop of 38%.*Large step: resurgence is more likely and larger\. Consider an extra step\./.test(T[2].pct)&&!T[1].big,T);
+  /* the BCBA, 11/6: an older card offers "Switch to the 9-level ladder"; the switch maps the level by its share and notes it on the plan */
+  const sw=await p.evaluate(async()=>{nbhUI.confirm=async()=>true;const card=document.querySelector('#compWrap .card[data-code="FCT"]'),i=card.dataset.i;
+    const lv=document.querySelector('[name="mo[0].lv"]');if(lv){lv.value='3';lv.dispatchEvent(new Event('input',{bubbles:true}));}
+    window.__td2565.renderPlan();const btn=document.querySelector('[data-thinsw="'+i+'"]');const had=!!btn&&btn.closest('p').classList.contains('noprint');
+    if(btn)btn.click();await new Promise(r=>setTimeout(r,300));
+    const f=window.__tdCollect().fields;return {had,thin:f['cp['+i+'].thin'],note:f['cp['+i+'].thinsw']||'',box:document.getElementById('tdThinSw').textContent,
+      rows:[...document.querySelectorAll('#thinTbl tbody tr')].filter(tr=>/^FCT /.test(tr.children[0].textContent)).length,btnAfter:!!document.querySelector('[data-thinsw="'+i+'"]')};});
+  ok('11/6 an older FCT card offers the switch (screen only); switched at level 3 of 5 it becomes level 4 of 9, the ladder has 9 levels, and the plan notes the change',
+    sw.had&&sw.thin==='9'&&/FCT ladder changed on \d+\/\d+\/\d{4}: level 3 of 5 became level 4 of 9\. Levels logged before .* are on the 5-level ladder\./.test(sw.note)&&sw.box.indexOf(sw.note)>=0&&sw.rows===9&&!sw.btnAfter,sw);
+  await p.evaluate(()=>{const lv=document.querySelector('[name="mo[0].lv"]');if(lv){lv.value='';lv.dispatchEvent(new Event('input',{bubbles:true}));}});
   const thinCite=await p.evaluate(()=>document.querySelector('#thinTbl').nextElementSibling.nextElementSibling.nextElementSibling.textContent);
   ok('L7 the step rules print as conventions of this form, beside SR-1\'s and the studies\' own (Hagopian 2004, Rooker 2013, Kahng 2000, Saini 2016)',/conventions of this form/.test(thinCite)&&/Form SR-1 steps after 2 consecutive sessions/.test(thinCite)&&/Hagopian et al\. \(2004\)/.test(thinCite)&&/Kahng et al\. \(2000\)/.test(thinCite)&&/Saini et al\. \(2016\)/.test(thinCite),thinCite);
 

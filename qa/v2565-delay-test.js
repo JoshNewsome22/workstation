@@ -173,6 +173,13 @@ const NAMES=/\b(David|Chris|Alex|Jack|Evan|Alice|Jillian|Hugh|Kevin|Lyle|Willis|
   const ao=await a2.evaluate(()=>({w:document.querySelector('[name=d_window]').value,n:document.getElementById('tbSess').rows.length,dec:document.getElementById('decSummary').textContent,dw:document.getElementById('dwWarn').hidden,syn:document.querySelector('[name=c_syn]').checked}));
   const strip=x=>String(x).replace(/\s+/g,'').replace(/Tokenvalue\(Tab2C\)\.[^]*?(?=Disagreement|Agreement|$)/,'');
   ok('47 an AD-1 record saved before v25.65 opens as written: no delivery window is put in, no warning, its sessions and decision as before',ao.w===''&&ao.dw===true&&ao.n===aold.tables.tbSess.length&&!ao.syn&&strip(ao.dec)===strip(dec0),{ao,dec0});
+  /* the BCBA, 11/6: the delay-and-denial baseline is an explained option, never ticked by default */
+  {const d3=await open(DT);const o=await d3.evaluate(()=>{const c=document.querySelector('[name="opt_ddbase"]');const l=c&&document.querySelector('label[for="'+c.id+'"]');
+     document.querySelector('[data-add="tbFct"]').click();const sel=[...document.querySelectorAll('#tbFct select')].pop();
+     return {has:!!c,on:c&&c.checked,txt:l?l.textContent:'',opt:sel?[...sel.options].map(x=>x.textContent):[]};});
+   ok('11/6 DT-1 offers the delay-and-denial baseline as a labelled option, off by default, with what, why, how long and a safety plan; a session can be recorded under it',
+     o.has&&!o.on&&/^OPTION: Reinforces problem behavior on purpose: a delay-and-denial baseline\./.test(o.txt)&&/What it does:/.test(o.txt)&&/Why:/.test(o.txt)&&/For how long:/.test(o.txt)&&/safety plan/.test(o.txt)&&o.opt.includes('Delay and denial baseline (option)'),o);
+   await d3.close();}
   ok('48 no page errors',errs.length===0,errs);
   }catch(e){fails++;console.log('FAIL exception',e&&e.stack||e);}
   await br.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})();

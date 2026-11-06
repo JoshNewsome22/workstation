@@ -930,6 +930,9 @@ td.te-cls label input{margin-right:4px;vertical-align:-2px}
           <th>Sessions of each, and dates</th><td><input data-m="tt_n" placeholder="e.g., 4 of each, 10/6 to 10/9"></td></tr>
       <tr><th>B: the same tokens, no exchange</th><td><input type="number" step="any" data-m="tt_b"></td>
           <th>C: the backup given directly</th><td><input type="number" step="any" data-m="tt_c"></td></tr>
+      <!-- v25.66 (the BCBA, 11/6) each session in order, so the check can ask whether A was above B in every pair -->
+      <tr><th>A, each session in order</th><td><input data-m="tt_as" placeholder="e.g., 11, 13, 12, 14"></td>
+          <th>B, each session in order</th><td><input data-m="tt_bs" placeholder="e.g., 5, 4, 6, 3"></td></tr>
     </table>
     <div id="ttVerdict"></div>
     <!-- v22.54 (review I214) the student's voice: assent to the system, and how the student says no -->
@@ -1975,13 +1978,22 @@ function renderLoss(){const on=lossOn(),g=lossGaps(),t=$('#lossTbl');if(t)t.clas
    convention) reads as a reinforcer; then C clearly above A reads as weaker than the backup; otherwise it works */
 const TT_TXT={works:['token works','Responding with the exchange (A) is clearly above the same tokens buying nothing (B), and not clearly below the backup given directly (C). The token functions as a reinforcer for this student.'],
   weak:['token weaker than the backup','A is above B but below C: the token works, but less than the backup itself. Use the backup directly for new or hard skills, and the token for maintenance (Hangen et al., 2023).'],
-  not:['not yet a reinforcer','A is not clearly above B: the tokens do about as well when they buy nothing. Go back to the establishing plan (pair the token with the backups), then run the check again.']};
+  not:['not yet a reinforcer','A is not clearly above B: the tokens do about as well when they buy nothing. Go back to the establishing plan (pair the token with the backups), then run the check again.'],
+  unclear:['unclear: run more sessions','The means and the session pairs disagree (A is clearly above B on average but not in every pair, or above in every pair but not clearly on average). Run more alternating sessions of A and B, then read it again; the audit point stays open until then.']};   /* v25.66 */
 const ttAbove=(x,y)=>x>y&&(y<=0?x>0:x>=1.2*y);
-function ttOut(){const a=num(S.meta.tt_a),b=num(S.meta.tt_b),c=num(S.meta.tt_c);if(a==null||b==null)return null;if(!ttAbove(a,b))return 'not';if(c!=null&&ttAbove(c,a))return 'weak';return 'works';}
-function ttSync(){const o=ttOut();if(o!=null)S.aud[1]=o!=='not';}
+/* v25.66 (the BCBA, 11/6) with the sessions entered (alternating sessions), A must also be above B in every pair; when the means
+   and the pairs disagree the check reads "unclear: run more sessions". The means come from the sessions when A or B is blank. */
+const ttList=v=>String(v||'').split(/[,;\s]+/).map(x=>x.trim()).filter(Boolean).map(Number).filter(x=>isFinite(x));
+const ttMean=l=>l.length?l.reduce((s,x)=>s+x,0)/l.length:null;
+function ttPairs(){const as=ttList(S.meta.tt_as),bs=ttList(S.meta.tt_bs);if(/^Break/.test(S.meta.tt_meth||'')||as.length<2||as.length!==bs.length)return null;return {n:as.length,above:as.filter((x,i)=>x>bs[i]).length,as,bs};}
+function ttOut(){const P=ttPairs(),as=ttList(S.meta.tt_as),bs=ttList(S.meta.tt_bs);
+  let a=num(S.meta.tt_a),b=num(S.meta.tt_b);const c=num(S.meta.tt_c);if(a==null&&as.length)a=ttMean(as);if(b==null&&bs.length)b=ttMean(bs);if(a==null||b==null)return null;
+  const mean=ttAbove(a,b),all=P?P.above===P.n:null;
+  if(P&&mean!==all)return 'unclear';if(!mean)return 'not';if(c!=null&&ttAbove(c,a))return 'weak';return 'works';}
+function ttSync(){const o=ttOut();if(o!=null)S.aud[1]=o==='works'||o==='weak';}
 function renderTT(){const el=$('#ttVerdict');if(!el)return;ttSync();const o=ttOut(),m=S.meta,u=/^Break/.test(m.tt_meth||'')?'break point':'responses per minute';
-  el.innerHTML=o?`<div class="verdict ${o==='works'?'v-ok':o==='weak'?'v-mid':'v-no'}"><b>${esc(TT_TXT[o][0].charAt(0).toUpperCase()+TT_TXT[o][0].slice(1))}</b> (${u}: A ${esc(m.tt_a)}, B ${esc(m.tt_b)}${T(m.tt_c)?', C '+esc(m.tt_c):''}). ${TT_TXT[o][1]} Clearly above means at least a fifth higher (a working convention of this form).</div>`
-    :(T(m.tt_a)||T(m.tt_b)||T(m.tt_c))?'<div class="verdict v-mid">Enter A and B (C too, if the backup was tested directly); the check reads them.</div>'
+  el.innerHTML=o?`<div class="verdict ${o==='works'?'v-ok':o==='weak'||o==='unclear'?'v-mid':'v-no'}"><b>${esc(TT_TXT[o][0].charAt(0).toUpperCase()+TT_TXT[o][0].slice(1))}</b> (${u}: A ${esc(m.tt_a)}, B ${esc(m.tt_b)}${T(m.tt_c)?', C '+esc(m.tt_c):''}). ${TT_TXT[o][1]} Clearly above means at least a fifth higher on average and, when the sessions are entered, above in every pair of sessions (a working convention of this form)${ttPairs()?`: A was above B in ${ttPairs().above} of ${ttPairs().n} pairs`:''}.</div>`
+    :(T(m.tt_a)||T(m.tt_b)||T(m.tt_c)||T(m.tt_as)||T(m.tt_bs))?'<div class="verdict v-mid">Enter A and B (C too, if the backup was tested directly); the check reads them.</div>'
     :/^Assumed/.test(m.tokEstab||'')?'<div class="verdict v-mid"><b>The token is assumed to work, with no evidence.</b> Run the token check before the system is judged.</div>':'';}
 /* v25.65 TOKEN-M1: how the backup is given and each token's worth */
 function renderExHow(){const el=$('#exHowNote');if(!el)return;const m=S.meta,w=num(m.tokWorthN),e=num(m.epN),u=T(m.tokWorthU)||'units',acc=/^Accumulated/.test(m.exHow||''),dis=/^Distributed/.test(m.exHow||'');
@@ -2022,7 +2034,7 @@ function audState(){
   const dbl=thinCheck().some(o=>o.double),counted=i=>!!S.aud[i]&&!(i===8&&dbl),n=AUDIT.filter((_,i)=>counted(i)).length,d=AUDIT.length,gates=[];
   const hits=accHits().filter(x=>!/\bIEP\b/.test(String(x.b.note||'')));
   ttSync();   /* v25.65 TOKEN-H5 */
-  if(!S.aud[1])gates.push({i:1,t:ttOut()==='not'?'the token check found the token is not yet a reinforcer (A not clearly above B): go back to the establishing plan':'the token has not been tested as a reinforcer, so there is no token economy to judge yet (a board the student ignores is not one)'});
+  if(!S.aud[1])gates.push({i:1,t:ttOut()==='not'?'the token check found the token is not yet a reinforcer (A not clearly above B): go back to the establishing plan':ttOut()==='unclear'?'the token check is unclear (the means and the session pairs disagree): run more sessions':'the token has not been tested as a reinforcer, so there is no token economy to judge yet (a board the student ignores is not one)'});
   if(!S.aud[11])gates.push({i:11,t:'it is not confirmed that nothing the student is entitled to has been made earnable'});
   else if(hits.length)gates.push({i:11,t:teList(hits.map(x=>'“'+T(x.b.n)+'”'))+' '+(hits.length===1?'matches':'match')+' an IEP accommodation (see the backups)'});
   if(lossOn()){const g=lossGaps();if(g.length)gates.push({i:12,t:'token loss is in use, and the plan does not record '+teList(g)});

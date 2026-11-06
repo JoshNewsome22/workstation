@@ -156,6 +156,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   /* the names of participants in the studies read for this change, kept encoded so that they are not written here */
   const NM=['SnVsaWE=','TmFuY3k=','U2hlbGJ5','QnJhaWRlbg=='].map(b=>Buffer.from(b,'base64').toString());
   ok('no research participant names in the form',!NM.some(n=>new RegExp('\\b'+n+'\\b').test(src)),'names');
+  /* the BCBA, 11/6: a new form thins NCR by the published fixed increments; a file saved without a choice keeps doubling */
+  const dflt=await p.evaluate(()=>{S=fresh();renderAll();const a=S.meta.ncr_thin,sel=document.querySelector('[data-m="ncr_thin"]').value;
+    const o=fromFile({form:'SR-1',S:{meta:{client:'SIMULATED – Old Case',ds_sel:'ncr'},notes:{}}});return {a,sel,old:o&&o.meta.ncr_thin||''};});
+  ok('11/6 a new form defaults to the published fixed increments; an old file without a choice is unchanged (reads as doubling)',dflt.a==='kfi'&&dflt.sel==='kfi'&&dflt.old==='',dflt);
   ok('no page errors',errs.length===0,errs);
   }catch(e){fails++;console.log('FAIL exception',e&&e.stack||e);}
   await br.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})();

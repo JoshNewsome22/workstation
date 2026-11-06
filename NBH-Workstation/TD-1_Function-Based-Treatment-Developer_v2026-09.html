@@ -1795,6 +1795,7 @@ html.td9:not(.nbh-pr-measure) .sheet .defs .dval > label .nbh-eg{margin-left:2px
 
   <h3 class="sub">Reinforcement Thinning Plan</h3>
   <div class="hint noprint" id="tdSrNote" hidden></div><!-- v23.12 (review I136) Form SR-1's schedule, named beside the ladder -->
+  <div id="tdThinSw" class="td-thinsw"></div><!-- v25.66 (the BCBA, 11/6) an older card can move to the 9-level ladder -->
   <table class="rank cmp" id="thinTbl"><thead><tr><th class="n" style="width:6%">Level</th><th>Schedule or requirement</th><th style="width:26%">Advance when</th><th style="width:22%">Step back when</th></tr></thead><tbody></tbody></table>
   <!-- v25.65 (FCT-SR-H7) the next step written before thinning stalls -->
   <p class="hint td-stallrule">Two step-backs at the same level: before that level is tried again, add an alternative reinforcer or competing items during the “not now” period or the wait, check the reinforcer’s size and quality, and check integrity. Even with good thinning, many programs need an added component: in 58 applications the 90% effect held under thinning in 11 of 23, and FCT with alternative reinforcement reached it in 10 of 14 (Rooker et al., 2013); with signaled thinning, 6 of 25 needed alternative reinforcement (Greer et al., 2016). Punishment is not the next step here: it stays a separate restrictive option that needs approval.</p>
@@ -3490,7 +3491,7 @@ function addComp(code,at,ns){const L=LIB[code];if(!L)return;
  /* v23.04 (review F184) a rate from DD-1's school day is not a session interresponse time (Vollmer et al., 1993): no seed from it */
  const dayRate=val('m.ratesrc')==='DD-1',seed=dayRate?null:irt();const seedTxt=seed?`${fmtS(Math.round(seed*0.8))} (80% of mean IRT ${fmtS(seed)})`:dayRate?'':'enter baseline rate on setup';
  d.innerHTML=`<div class="chd"><span class="tag ok">${code}</span><span class="chdt">${esc(L.name)}</span>${TDC.attrs[code]?`<button type="button" class="tool td-cmpbtn noprint" data-cmp="${code}" style="margin-left:auto" title="Compare this component with another">Compare</button>`:''}<button type="button" class="tool td-cfold noprint" data-fold="1" style="margin-left:${TDC.attrs[code]?'0':'auto'}" aria-expanded="true">Hide steps</button><button type="button" class="rm noprint" data-rm="1">Remove</button></div>
- <p class="method" style="margin:0 0 6px">Source: ${esc(L.src)}</p><p class="method td-bank-src" style="margin:0 0 6px" hidden></p>${$$('#compWrap .card').some(k=>k.dataset.code===code)?'<p class="method td-dup">A second card of this component: keep the one that fits this student, or say in its steps why both run.</p>':''}<div class="td-who"><label>Run by <input name="cp[${i}].who"><small class="eg">e.g., classroom staff (names)</small></label><label>When <input name="cp[${i}].when"><small class="eg">e.g., every work period, from the first demand</small></label><label>Where <input name="cp[${i}].where"><small class="eg">e.g., the ESE classroom, then specials</small></label></div><input type="hidden" name="cp[${i}].bank"><input type="hidden" name="cp[${i}].bsrc">${code==='FCT'||code==='DRA'?`<input type="hidden" name="cp[${i}].thin" value="9">`:''}${L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:''}
+ <p class="method" style="margin:0 0 6px">Source: ${esc(L.src)}</p><p class="method td-bank-src" style="margin:0 0 6px" hidden></p>${$$('#compWrap .card').some(k=>k.dataset.code===code)?'<p class="method td-dup">A second card of this component: keep the one that fits this student, or say in its steps why both run.</p>':''}<div class="td-who"><label>Run by <input name="cp[${i}].who"><small class="eg">e.g., classroom staff (names)</small></label><label>When <input name="cp[${i}].when"><small class="eg">e.g., every work period, from the first demand</small></label><label>Where <input name="cp[${i}].where"><small class="eg">e.g., the ESE classroom, then specials</small></label></div><input type="hidden" name="cp[${i}].bank"><input type="hidden" name="cp[${i}].bsrc">${code==='FCT'||code==='DRA'?`<input type="hidden" name="cp[${i}].thin" value="9"><input type="hidden" name="cp[${i}].thinsw">`:''}${L.caution?`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`:''}
  <div class="param">${L.params.map((p,k)=>`<div class="f"><label>${esc(p[0])}</label><textarea name="cp[${i}].p${k}" rows="1" data-auto="1" placeholder="${esc(p[1]==='SEED_IRT'?(dayRate?'from a session baseline: the rate on Setup is a school-day rate (Form DD-1)':''):p[1])}">${esc(p[1]==='SEED_IRT'?seedTxt:'')}</textarea></div>`).join('')}</div>
  ${code==='TA_CHAIN'?`<div class="td-ta"><label for="cpta${i}"><b>Student’s task analysis</b> <span>the steps the student performs, in order, one a line (numbers optional: the plan numbers them). A protocol from the bank brings the study’s list where the article prints it; adjust it to this student. A list in parts: a name ending in a colon above each part.</span></label><textarea id="cpta${i}" name="cp[${i}].ta" rows="2" data-auto="1" placeholder="One step a line, in order"></textarea></div>`:''}
  <b style="font-family:var(--sans);font-size:11px">Implementation steps (edit to the student; each becomes an integrity item unless it is marked set-up: done once by the BCBA or the teacher)</b>
@@ -4428,7 +4429,26 @@ document.addEventListener('input',e=>{const t=e.target,n=t&&t.name||'';if(/^cp\[
 document.addEventListener('change',e=>{const t=e.target,n=t&&t.name||'';if(/^cp\[\d+\]\.(bls|bli|rqq|p2)$/.test(n)){const c=t.closest('.card');if(c&&c.dataset.code==='FCT')try{tdM9(c);}catch(x){}}});
 document.addEventListener('nbh:restored',()=>setTimeout(td2565Soon,0));
 {const rp2=renderPlan;renderPlan=function(){const r=rp2.apply(this,arguments);try{td2565Sync();}catch(e){}return r;};}
-window.__td2565={thinRows:c=>tdThinRows(c),burst:tdBurstLines,cover:()=>tdFctCover(),sync:()=>td2565Sync(),extPending:c=>tdExtPending(c),breakText:(c,s)=>tdBreakText(c,s),fsFns:()=>tdFsFns.slice(),setFs:a=>{tdFsFns=Array.isArray(a)?a.slice():[];td2565Sync();},renderPlan:()=>renderPlan(),renderMon:()=>renderMon()};
+/* v25.66 (the BCBA, 11/6) a card saved before v25.65 keeps its 5-level ladder; "Switch to the 9-level ladder" moves it to the
+   step with the same share of the session (100, 80, 50, 20% and the natural schedule become levels 1, 2, 4, 8 and 9) and writes
+   the change on the plan, so levels logged before it still read on the old ladder */
+const TD_5TO9=[1,2,4,8,9];
+function tdLastLevel(){let lv=null;$$('#monBody tr').forEach((tr,i)=>{const v=num(`mo[${i}].lv`);if(v!=null)lv=v;});return lv;}
+function tdThinSwPaint(){const box=$('#tdThinSw');if(!box)return;const cs=$$('#compWrap .card').filter(k=>k.dataset.code==='FCT'||k.dataset.code==='DRA');
+  box.innerHTML=cs.map(k=>{const i=k.dataset.i,code=k.dataset.code,sw=val(`cp[${i}].thinsw`);
+    if(sw)return `<p class="hint td-thinsw-done">${esc(sw)}</p>`;
+    if(val(`cp[${i}].thin`)==='9')return '';
+    return `<p class="hint noprint">${code} uses the earlier 5-level ladder, kept so the levels already logged keep their meaning. The 9-level ladder has smaller steps (no drop above 25%). <button type="button" class="tool" data-thinsw="${i}">Switch ${code} to the 9-level ladder</button></p>`;}).join('');}
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-thinsw]');if(!b)return;const i=b.dataset.thinsw,card=document.querySelector(`#compWrap .card[data-i="${i}"]`);if(!card)return;
+  const code=card.dataset.code,from=Math.max(1,Math.min(5,Math.round(tdLastLevel()||1))),to=TD_5TO9[from-1];
+  const q=`Switch ${code} to the 9-level ladder?\nThe student is at level ${from} of 5; that is level ${to} of 9 (the same share of the session). Levels logged from now on use the new ladder, and the plan notes the change.`;
+  const go=window.nbhUI?await nbhUI.confirm(q,{ok:'Switch'}):false;if(!go)return;
+  const d=new Date(),ds=(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+  const put=(n,v)=>{const el=document.querySelector(`[name="${n}"]`);if(el){el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));}};
+  put(`cp[${i}].thin`,'9');put(`cp[${i}].thinsw`,`${code} ladder changed on ${ds}: level ${from} of 5 became level ${to} of 9. Levels logged before ${ds} are on the 5-level ladder.`);
+  try{renderPlan();}catch(x){}tdThinSwPaint();});
+{const rp=renderPlan;renderPlan=function(){const r=rp.apply(this,arguments);try{tdThinSwPaint();}catch(e){}return r;};}
+window.__td2565={thinSw:()=>tdThinSwPaint(),thinRows:c=>tdThinRows(c),burst:tdBurstLines,cover:()=>tdFctCover(),sync:()=>td2565Sync(),extPending:c=>tdExtPending(c),breakText:(c,s)=>tdBreakText(c,s),fsFns:()=>tdFsFns.slice(),setFs:a=>{tdFsFns=Array.isArray(a)?a.slice():[];td2565Sync();},renderPlan:()=>renderPlan(),renderMon:()=>renderMon()};
 restore({counts:{}});
 })();
 

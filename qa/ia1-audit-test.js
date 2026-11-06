@@ -109,7 +109,7 @@ const QABF=Array.from({length:25},(_,i)=>(i+1)+'. Simulated QABF item '+(i+1)+' 
  ok('21: the payload carries the wording signature (40 characters, lower case)',pay.sig==='simulated qabf item 1 about the student '&&pay.sig.length===40,pay.sig);
  const rp=await ctx.newPage();const rlog=[];wire(rp,rlog);await rp.setContent(await page.evaluate(p=>NBH_RESPOND.pageHTML(p),pay),{waitUntil:'load'});await sleep(200);
  const x=await rp.evaluate(()=>{const li=document.querySelector('li.it');const inp=li.querySelector('input[value="NA"]');return {has:!!inp,label:inp?inp.closest('label').textContent.trim():''};});
- ok('12: the respondent page offers X: does not apply on each item',x.has&&/X: does not apply/.test(x.label),x);
+ ok('12: the respondent page offers the QABF\'s X on each item, worded "Does not apply" (v25.67), not "Not sure"',x.has&&/^(X: )?does not apply$/i.test(x.label),x);
  const ans=Array.from({length:25},(_,i)=>i===2?'NA':String(i%4));
  const codes=await page.evaluate(({ans,sig})=>[NBH_RESPOND.encode({v:1,form:'IA-1',inst:'qabf',student:'S',beh:'Self-injury',n:25,ans,date:'2026-09-15',name:'Ms. Rivera',role:'Teacher',confirmed:'yes',sig}),NBH_RESPOND.encode({v:1,form:'IA-1',inst:'qabf',student:'S',beh:'Self-injury',n:25,ans,date:'2026-09-16',name:'Mr. Okafor',role:'Para',confirmed:'yes',sig:'a different first item of another copy of'})],{ans,sig:pay.sig});
  await page.evaluate(()=>document.querySelector('#rcBtn').click());await sleep(150);

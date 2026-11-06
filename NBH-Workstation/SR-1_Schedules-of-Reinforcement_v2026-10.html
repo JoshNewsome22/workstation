@@ -1038,7 +1038,7 @@ td input,td select{max-width:100%}
         <div><label>Duration of each delivery (seconds)</label><input data-m="ncr_dur" placeholder="20"></div>
         <div><label>Terminal interval (minutes)</label><input data-m="ncr_term" placeholder="5"></div>
         <!-- v25.65 (FCT-SR-M4) the two published methods as written; the form's own conventions named as such -->
-        <div><label>Thinning</label><select data-m="ncr_thin"><option value="fixed">Doubling: a step each day the criterion holds (the form&rsquo;s convention)</option><option value="kfi">Fixed increments as published: FT 10, 12, 15, 20, 30 s, then 1 to 5 min (Kahng et al., 2000)</option><option value="airt">Adjusting IRT: the mean IRT of the last three sessions (Kahng et al., 2000)</option><option value="perf">Performance-based: a step after each session at or under criterion; back after one above (the form&rsquo;s convention)</option></select></div>
+        <div><label>Thinning</label><select data-m="ncr_thin"><option value="kfi">Fixed increments as published: FT 10, 12, 15, 20, 30 s, then 1 to 5 min (Kahng et al., 2000)</option><option value="fixed">Doubling: a step each day the criterion holds (the form&rsquo;s convention)</option><option value="airt">Adjusting IRT: the mean IRT of the last three sessions (Kahng et al., 2000)</option><option value="perf">Performance-based: a step after each session at or under criterion; back after one above (the form&rsquo;s convention)</option></select></div>
         <div><label>Omission rule (seconds to wait if the behavior just occurred)</label><input data-m="ncr_omit" placeholder="10"></div>
         <!-- v25.65 (FCT-SR-L3) the omission rule is a momentary-DRO element: delay the delivery, or cancel it as in the source -->
         <div><label>Omission rule: what happens to the delivery</label><select data-m="ncr_omit_kind"><option value="">Delay it: wait for those seconds without the behavior, then deliver (the form&rsquo;s convention)</option><option value="cancel">Cancel it: skip the delivery if the behavior occurred in those seconds before it (Vollmer et al., 1997)</option></select></div>
@@ -1722,7 +1722,10 @@ const CAT=[
 
 /* ---------------- state ---------------- */
 function blank(){return{meta:{},notes:{}};}
-let S=blank();
+/* v25.66 (the BCBA, 11/6) a new form thins NCR by the published fixed increments (Kahng et al., 2000); a saved file opens through
+   blank() and keeps its own method (one saved without a choice reads as doubling, as before) */
+function fresh(){const o=blank();o.meta.ncr_thin='kfi';return o;}
+let S=fresh();
 function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
@@ -2206,7 +2209,7 @@ function srCsv(){
     if(String(m.cd_review||'').trim())rows.push(['Card review',m.cd_review]);}
   dl(rows,'SR-1_schedule-design.csv');}
 $('#csvBtn').addEventListener('click',srCsv);$('#catCsvBtn').addEventListener('click',srCsv);
-$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nThe student, the chooser answers, the design and the catalogue notes are all cleared.',{ok:'Clear all',danger:true})){S=blank();renderAll();}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nThe student, the chooser answers, the design and the catalogue notes are all cleared.',{ok:'Clear all',danger:true})){S=fresh();renderAll();}});
 /* v21.44 (A1): the simulation asks first, with the question the other forms ask; it replaced the student, the chooser
    answers, the design and the catalogue notes without asking */
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated case?\nThe student, the chooser answers, the design and the catalogue notes are filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;

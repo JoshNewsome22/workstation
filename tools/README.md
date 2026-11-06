@@ -37,7 +37,8 @@ Paths below are from the repository root. The test server the checks expect:
   `patch-hook.py` + `hooks/<ID>.js` (per-form case hooks placed inside the form's own script),
   `nbh-wording.js` + `nbh-wording-rules.json` + `nbh-wording-config.json` + `patch-wording.py`
   (the writing help: the Improve wording button and panel; see below), `nbh-link.js` +
-  `patch-link.py` (the TK-1/TE-1 link), `tb1-behavior-library.json` + `patch-tb1-library.py`.
+  `patch-link.py` (the TK-1/TE-1 link), `tb1-behavior-library.json` + `patch-tb1-library.py`,
+  `tb1-replacement-library.json` + `patch-tb1-rlib.py` (v25.67, see *The TB-1 replacement-behavior library* below).
   v21.84: `shared_js.py` (the list of the scripts every form loads from one file beside it, used by the patchers and
   the builds) and `patch-shared.py` (moves inline copies out of forms; see *The shared scripts* below).
   v25.67: `fx2.html` + `patch-fx2.py` (the forms' screen layout on an iPad; see *The screen layout (fx2)* below).
@@ -75,8 +76,8 @@ Paths below are from the repository root. The test server the checks expect:
     python3 tools/check-build.py
 
 It copies `NBH-Workstation` and `tools/` to a scratch folder, runs every patcher that keeps the forms current (the
-polish and writing help, the shared blocks, the case flow, the csv verb, the field names, the letterhead, the TB-1 library,
-the TK-1/TE-1 link, the per-form hooks) and the `--check` of the rest, and compares the result with the folder byte for
+polish and writing help, the shared blocks, the case flow, the csv verb, the field names, the letterhead, the TB-1 library
+and its replacement-behavior library, the TK-1/TE-1 link, the per-form hooks) and the `--check` of the rest, and compares the result with the folder byte for
 byte. It names any file the tools would change and exits 1. Run it before a release; `qa/v2212-build-test.js` runs it.
 A block added to a form by hand must sit where the tools leave it: DM-1's home-contact block (`dm-v2195`) and DD-1's
 Log it now block (`dd-v2194`) sit just above the polish block, which `apply-polish.py` removes and adds again before
@@ -127,6 +128,44 @@ made in every form (by its patcher) and reaches the rebuilt forms through CF-1.
 The glob `[A-Z]*.html` is every form, without `index.html`. Each patcher prints
 `patched` or `already` per form. The case block's refresh is a replacement of the text
 between `<style id="nbh-case-css">` and `<style id="nbh-guard-css">` (see `patch-case.py`).
+
+## The TB-1 replacement-behavior library (v25.67)
+
+    python3 tools/blocks/patch-tb1-rlib.py            # write (or refresh) the copy in Form TB-1
+    python3 tools/blocks/patch-tb1-rlib.py --check    # change nothing; exit 1 when the copy is missing, doubled or stale
+
+`tools/blocks/tb1-replacement-library.json` (`{version, note, entries}`) holds the replacement behaviors that TB-1's
+**Choose from the library** button, beside each target card's Paired replacement behavior field, offers. The tool writes
+it into the form as `<script id="tb1-rlib">const TB1_RLIB=…</script>` just before the form's main script, with the same
+safeguards as `patch-tb1-library.py`: the JSON is checked before anything is written, every `<` is escaped, and the form
+ends with exactly one copy. Never edit the copy in the form by hand. Each entry has `id` (`r-…`), `cat`, `lab`, `aka`
+(other names the search reads), `fn` (escape, attention, tangible, automatic, or `any` alone), `pairs` (ids of entries
+in `tb1-behavior-library.json`, checked to exist), `def`, `ex` and `nex` (three or more lines each), `measure`, `teach`
+(it must say there is no physical guidance beyond what the student allows), `crit` (100% for a per-response measure,
+the workstation's standard; an interval, time-sample or duration measure keeps its level) and `note` ("Definition after
+…", the studies the entry was written from). No text may write an adult holding a part of the student's body. The
+categories (`cat`) are:
+
+- Communication: requests and answers that do what the problem behavior did (a break, help, attention, an item, "all
+  done", "stop", "no, thank you", "I don't know", asking to go somewhere).
+- Tolerance and waiting: waiting, accepting "no" or "not now", ending a preferred activity, moving on at a signal,
+  handing an item over.
+- Safety skills: do not touch, leave and tell (a found firearm, medicine, poison or a lighter), asking before eating
+  anything found, handing over an inedible item, answering a stranger's lure, staying within reach or with the group,
+  stopping at the curb.
+- Social and classroom: hand raising, on-topic comments, statements that fit the setting, honest reports, asking to
+  join or for a turn, greetings, asking before touching, working on the task, following an instruction.
+- Self-management and coping: asking for the calm space, slow breaths as taught, a fidget used as planned, the habit
+  reversal competing response, self-monitoring.
+- Daily living and feeding: accepting a bite, mouth clean, heel-to-toe walking, using the toilet, the bedtime pass,
+  calm cooperation with dental or medical care.
+- Matched and leisure alternatives (for automatic reinforcement): matched-stimulation items, the planned oral item, toy
+  play.
+
+The picker lists first the entries whose `pairs` include the card's problem behavior (its label read as a behavior
+library entry's), then those whose `fn` suits the card's hypothesized function, then the rest. Choosing writes
+"label — definition" into the field only when it is empty or still holds an earlier library choice; the other forms
+take it under its label. `qa/v2567-tb1-rlib-test.js` checks it.
 
 ## The shared scripts: one file beside the forms (v21.84)
 

@@ -56,7 +56,8 @@ const answer=async(rp,who,pick)=>rp.evaluate(([who,pick])=>{const inp=document.q
  await page.evaluate(()=>{document.querySelector('#rpBtn').click();rpRole.value='para';rpRole.dispatchEvent(new Event('change'));});
  const link2=await page.evaluate(()=>__rp.link());await page.evaluate(()=>document.querySelector('#rpDlg').close());
  await rp.goto(link2);await sleep(500);
- const r2=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,band:document.querySelector('.band').textContent,sub:document.querySelector('.sub').textContent}));
+ /* v25.67 (design review H9): the form code is in the page's footer, the form's own line about the page among its .sub lines */
+ const r2=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,band:document.querySelector('.nr-foot').textContent,sub:[...document.querySelectorAll('.sub')].map(e=>e.textContent).join(' | ')}));
  ok('respond.html renders the paraprofessional round 1 page from the link',r2.items===21&&/Form CF-1/.test(r2.band)&&/a paraprofessional who will run the plan/.test(r2.sub),r2);
  await answer(rp,['Aide B','','Afternoon writing','3'],i=>i===11?'':String(2+(i%2)));await sleep(300);
  ok('one item left blank: the first Send stops and names it; the second press sends on purpose',await rp.evaluate(()=>!document.querySelector('.warn').hidden&&/Unanswered item: <span class="miss">12<\/span>/.test(document.querySelector('.warn').innerHTML)&&/press Send once more/.test(document.querySelector('.warn').textContent)&&document.querySelector('.code').hidden));
@@ -73,7 +74,7 @@ const answer=async(rp,who,pick)=>rp.evaluate(([who,pick])=>{const inp=document.q
  await page.evaluate(()=>{document.querySelector('#rpBtn').click();rpRole.value='teacher';rpRound.value='2';rpRound.dispatchEvent(new Event('change'));});
  const link3=await page.evaluate(()=>__rp.link());await page.evaluate(()=>document.querySelector('#rpDlg').close());
  await rp.goto('about:blank');await rp.goto(link3);await sleep(500);
- ok('round 2 page says so',/Round 2 \(after enhancement\)/.test(await rp.evaluate(()=>document.querySelector('h1').textContent)));
+ ok('round 2 page says so',/Round 2 \(after enhancement\)/.test(await rp.evaluate(()=>document.querySelector('.nr-foot').textContent)));   /* v25.67: the questionnaire's name is in the footer, the head says about whom and from whom */
  await answer(rp,['MS. RIVERA','Teacher','',''],()=>'6');await sleep(300);
  const code3=await rp.evaluate(()=>document.querySelector('.code').value);
  await page.evaluate(()=>document.querySelector('#rcBtn').click());await sleep(100);await page.evaluate(c=>{rcText.value=c;__rp.read([c]);},code3);await sleep(100);

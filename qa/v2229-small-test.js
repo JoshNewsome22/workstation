@@ -48,7 +48,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const h=await q.evaluate(()=>{const p={v:1,form:'IA-1',title:'Simulated questionnaire',bcba:'Simulated BCBA',items:[{id:'q1',text:'Does the behavior happen when the student is alone?',type:'yn'}]};
     const pe=JSON.parse(JSON.stringify(p));pe.lang='es';return {en:NBH_RESPOND.payloadToHash(p),es:NBH_RESPOND.payloadToHash(pe)};});
   const said={};for(const k of ['en','es']){await q.goto(L.BASE+'/NBH-Workstation/respond.html'+h[k]);await sleep(700);said[k]=await q.evaluate(()=>{const e=document.getElementById('nbhr-alt');return e?e.textContent:'';});}
-  ok('4 the questionnaire page offers another format, and in Spanish on a Spanish page',/large print, read aloud, on paper or in another language\? Tell Simulated BCBA/.test(said.en)&&/letra grande, leído en voz alta, en papel o en otro idioma\? Dígaselo a Simulated BCBA/.test(said.es),said);
+  /* v25.67 (design review B5): "Need this another way?" says what the BCBA can do: a paper copy, the questions read aloud, large print, another language */
+  ok('4 the questionnaire page offers another format, and in Spanish on a Spanish page',/^Need this another way\? Ask Simulated BCBA for a paper copy, for the questions read aloud to you, or for large print or another language\.$/.test(said.en)&&/^¿Necesita esto de otra forma\? Pida a Simulated BCBA una copia en papel, que le lean las preguntas en voz alta, o letra grande u otro idioma\.$/.test(said.es),said);
   ok('5 no page errors',!errs.length,errs.slice(0,4));
   }catch(e){ok('crashed',false,String(e.stack||e));}
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
