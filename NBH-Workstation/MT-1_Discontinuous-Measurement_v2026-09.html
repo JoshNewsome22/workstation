@@ -3618,8 +3618,12 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     var t = tidy(field.getAttribute('data-nbh-ph') || field.getAttribute('placeholder') || ''); if (!t) return;
     var near = after.parentNode && after.parentNode.querySelector('.nbh-hint,.fx2-hint');
     if (!near || tidy(near.textContent) !== t) { var h = el('span', 'fx2-hint noprint', t); after.after(h); egLink(field, h); }
-    if (field.hasAttribute('placeholder')) { field.setAttribute('data-fx2-ph', field.getAttribute('placeholder')); field.removeAttribute('placeholder'); }
+    stash(field);
   }
+  /* the example leaves the box and the paper gets it back. v25.67 fx2: as the form wrote it, where nbh-ui had already cut
+     it short in the box ("too lo…", the whole kept in data-nbh-ph): DA-1's demand inventory printed the cut copy */
+  function stash(f){ if (!f.hasAttribute('placeholder')) return; var o = f.getAttribute('data-nbh-ph');
+    f.setAttribute('data-fx2-ph', o ? o : f.getAttribute('placeholder')); f.removeAttribute('placeholder'); }
   /* v24.95 an example ("For example, …") is there to help fill an empty box: once the box holds an entry it goes;
      an explanation ("Florida Education Identifier") stays */
   var hinted = [], hid = 0;
@@ -3657,7 +3661,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
         var s = sentence(h.getAttribute('data-fx2-orig')); setText(h, s); attr(h, 'data-fx2-set', s); return; }
       var tn = firstText(h); if (!tn) return;
       if (tn._fx2o == null || tn.nodeValue !== tn._fx2s) tn._fx2o = tn.nodeValue;
-      var s2 = sentence(tn._fx2o); if (tn.nodeValue !== s2) tn.nodeValue = s2; tn._fx2s = s2; attr(h, 'data-fx2-origt', '1'); });
+      var s2 = sentence(tn._fx2o); if (tn.nodeValue !== s2) tn.nodeValue = s2; tn._fx2s = s2; attr(h, 'data-fx2-origt', tn._fx2o); });
   }
 
   /* 3. examples out of the boxes, under the labels */
@@ -3694,7 +3698,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     if (field.dataset.fx2h) return; field.dataset.fx2h = '1'; if (keep(field)) return;
     var t = tidy(field.getAttribute('data-nbh-ph') || field.getAttribute('placeholder') || ''); if (!t) return;
     var nx = after.nextElementSibling; if (!(nx && nx.classList.contains('fx2-hint') && tidy(nx.textContent) === t) && !(nx && nx.classList.contains('nbh-hint'))) { var h = el('span', 'fx2-hint fx2-hintb noprint', t); after.after(h); egLink(field, h); }
-    if (field.hasAttribute('placeholder')) { field.setAttribute('data-fx2-ph', field.getAttribute('placeholder')); field.removeAttribute('placeholder'); }
+    stash(field);
   }
 
   /* 4. choices of two to four short answers become buttons on a touch screen (nbh-ui); a parent's decision on IC-1's
@@ -3745,7 +3749,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
           attr(c, 'data-fx2k', k);
           /* an example in a box of the table: on the card it stands under the column's name */
           if (f && !f.dataset.fx2h) { var ph = tidy(f.getAttribute('data-nbh-ph') || f.getAttribute('placeholder') || ''); f.dataset.fx2h = '1';
-            if (ph && !/^\d+([.,]\d+)?$/.test(ph) && !keep(f)) { ph = tidy(ph); var ch = el('span', 'fx2-cellhint noprint', ph); f.before(ch); egLink(f, ch); if (f.hasAttribute('placeholder')) { f.setAttribute('data-fx2-ph', f.getAttribute('placeholder')); f.removeAttribute('placeholder'); } } } }); }); });
+            if (ph && !/^\d+([.,]\d+)?$/.test(ph) && !keep(f)) { ph = tidy(ph); var ch = el('span', 'fx2-cellhint noprint', ph); f.before(ch); egLink(f, ch); stash(f); } } }); }); });
       /* blank rows: the first stays, the rest wait (a list of fixed entries keeps every row) */
       var wrap = t.parentElement && /wrap/.test(t.parentElement.className) ? t.parentElement : t;
       var own = false, n = wrap.nextElementSibling; for (var j = 0; j < 2 && n; j++, n = n.nextElementSibling) if ($$('button', n).concat(n.tagName === 'BUTTON' ? [n] : []).some(function(b){ return !b.classList.contains('fx2-addrow') && OWN_ADD.test(b.textContent.trim()); })) own = true;
@@ -3914,7 +3918,10 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   function paper(on){
     printing = on;
     $$('[data-fx2-orig]').forEach(function(h){ if (h.children.length) return; var s = on ? h.getAttribute('data-fx2-orig') : sentence(h.getAttribute('data-fx2-orig')); setText(h, s); if (!on) attr(h, 'data-fx2-set', s); });
-    $$('[data-fx2-origt]').forEach(function(h){ var tn = firstText(h); if (tn && tn._fx2o != null) { tn.nodeValue = on ? tn._fx2o : sentence(tn._fx2o); tn._fx2s = tn.nodeValue; } });
+    /* v25.67 fx2: a heading with a badge keeps its words in data-fx2-origt too, so a copy the form makes of a sheet for
+       paper gets them back (SP-1 copies its sheets for the print set as the print media starts, which can come first) */
+    $$('[data-fx2-origt]').forEach(function(h){ var tn = firstText(h), o = tn ? (tn._fx2o != null ? tn._fx2o : h.getAttribute('data-fx2-origt')) : null;
+      if (o != null && o !== '1') { tn.nodeValue = on ? o : sentence(o); tn._fx2s = tn.nodeValue; tn._fx2o = o; } });
     $$('[data-fx2-ph]').forEach(function(f){ if (on) f.setAttribute('placeholder', f.getAttribute('data-fx2-ph')); else f.removeAttribute('placeholder'); });
   }
   window.addEventListener('beforeprint', function(){ paper(true); });
