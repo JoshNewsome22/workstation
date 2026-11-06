@@ -1856,6 +1856,9 @@ html.td9:not(.nbh-pr-measure) .sheet .defs .dval > label .nbh-eg{margin-left:2px
   <div class="bar nbh-band">Final Treatment Plan: Step by Step</div>
   <p class="method noprint" style="margin:0 0 8px">Compiled from every component card and selection in the form, in the order staff will use them. Edit the steps on the build sheet; this sheet re-reads them when opened or printed. Use "Print final plan only" in the toolbar to print just this sheet.</p>
   <div class="warn td-fnwarn" id="tdFnWarnFinal" hidden></div>
+  <!-- v25.68 (research #14) the quality check before sign-off: eight items read from the plan, shown before Copy, Print and
+       adoption, never blocking; screen only (td1-v2568-qc) -->
+  <section class="td-qc noprint" id="tdQc" aria-labelledby="tdQcH" hidden></section>
   <div id="finalHead"></div>
   <div id="td83Final"></div>   <!-- v21.83 (M): every target in the plan, its definition, function and the parts that address it -->
   <input type="hidden" name="fin.steps">   <!-- v22.46 (I232): the BCBA's changes to the step list (Final plan) -->
@@ -1895,6 +1898,7 @@ html.td9:not(.nbh-pr-measure) .sheet .defs .dval > label .nbh-eg{margin-left:2px
       <div class="drow"><div class="dlab">Interpreter needed</div><div class="dval" style="padding:4px 8px"><select name="cn.interp" class="inline" aria-label="Interpreter needed"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
       <div class="drow"><div class="dlab">The student&rsquo;s treatment preference</div><div class="dval"><textarea name="cn.pref" rows="2" placeholder="What the student wants from the plan, in the student's words (Form SI-1)"></textarea></div></div>
     </div>
+    <div class="td-qc-adopt noprint" id="tdQcAdopt" hidden></div>
     <div class="plan-group">Adopted by the team</div>
     <div id="td82Notice" class="warn noprint td82-notice" role="status" aria-live="polite" hidden></div>
     <div class="defs">
@@ -7847,6 +7851,144 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
    const bl=(o&&o.bipLine)||((l,v)=>v?l+': '+v:'');const blk=['CONSENT TO THE PLAN’S PROCEDURES (FORM IC-1)'+(P&&T(P.signed)?', SIGNED '+md(P.signed):'')];
    if(P&&T(P.shared))blk.push(bl('Teaching, rewards and prevention',dec(P.shared)));L.forEach(([k,v])=>blk.push(bl(k,v)));
    let k=B.findIndex(b=>b&&b[0]==='CRISIS PROCEDURE (SEPARATE FROM TREATMENT)');B.splice(k<0?B.length:k,0,blk);}catch(e){}return res;};
+})();
+</script>
+<style id="td1-v2568-qc-css" data-nbh-screen>
+/* v25.68 (research #14) the quality check before sign-off, on the Final plan sheet: screen only */
+.td-qc{border:1px solid #c9d3d9;border-left:4px solid var(--nbh-slate,#254657);border-radius:3px;padding:10px 12px 12px;margin:0 0 14px;background:#fff;font-family:var(--sans,sans-serif)}
+.td-qc[hidden],.td-qc-adopt[hidden]{display:none!important}
+.td-qc-h{margin:0;font:600 16px/1.3 var(--serif,Georgia,serif);color:var(--ink,#182e43)}
+.td-qc-intro{margin:4px 0 8px;font-size:12.5px;line-height:1.5;color:var(--ink-soft,#54676f);max-width:80ch}
+.td-qc-sum{margin:0 0 4px;font-size:13.5px;font-weight:600;color:var(--ink,#182e43)}
+.td-qc-list{list-style:none;margin:0;padding:0}
+.td-qc-it{display:grid;grid-template-columns:124px minmax(0,1fr) auto;gap:2px 14px;align-items:start;border-top:1px solid #e3e8eb;padding:7px 0;margin:0}
+.td-qc-it>.td-qc-go{margin:0;max-width:230px;justify-self:end;text-align:right}
+.td-qc-st{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;line-height:20px;white-space:nowrap}
+.td-qc-ic{display:inline-flex;align-items:center;justify-content:center;flex:none;width:20px;height:20px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;line-height:1}
+.td-qc-met .td-qc-st{color:#1f6b4a}.td-qc-met .td-qc-ic{background:#1f6b4a}
+.td-qc-not .td-qc-st{color:#8a4300}.td-qc-not .td-qc-ic{background:#8a4300}
+.td-qc-na .td-qc-st{color:#54676f}.td-qc-na .td-qc-ic{background:#6b7c84}
+.td-qc-b{min-width:0;font-size:13px;line-height:1.45}
+.td-qc-t{display:block;color:var(--ink,#182e43)}
+.td-qc-why{display:block;color:#33454f;overflow-wrap:break-word}
+.td-qc-go{min-height:36px;margin:2px 0 0;padding:2px 0;border:0;background:none;color:var(--nbh-slate,#254657);font:600 12.5px var(--sans,sans-serif);text-decoration:underline;text-underline-offset:2px;cursor:pointer;text-align:left}
+.td-qc-go:hover{color:var(--ink,#182e43)}
+.td-qc-go:focus-visible{outline:3px solid var(--nbh-focus,#2f7fa8);outline-offset:2px}
+.td-qc-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 0;padding-top:10px;border-top:1px solid #e3e8eb}
+.td-qc-bar .tool{margin:0}
+.td-qc-msg{font-size:12.5px;color:var(--ink-soft,#54676f)}
+.td-qc-src{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--ink-soft,#54676f);max-width:100ch}
+.td-qc-adopt{margin:6px 0 4px;padding:8px 12px;border-left:4px solid var(--nbh-slate,#254657);background:#f5f8f7;font-family:var(--sans,sans-serif);font-size:13px;line-height:1.45}
+.td-qc-adopt .td-qc-go{margin:0 0 0 6px}
+@media (pointer:coarse){#tdQc .td-qc-go,#tdQc .td-qc-bar .tool,#tdQcAdopt .td-qc-go{min-height:44px!important}}
+@media (max-width:900px){.td-qc-it{grid-template-columns:124px minmax(0,1fr)}.td-qc-it>.td-qc-go{grid-column:2;justify-self:start;text-align:left;max-width:none}}
+@media (max-width:600px){.td-qc-it{grid-template-columns:1fr}.td-qc-it>.td-qc-go{grid-column:1}}
+@media print{.td-qc,.td-qc-adopt{display:none!important}}
+</style>
+<script id="td1-v2568-qc">
+/* v25.68 (research #14, the BCBA, 11/6) a BIP quality check before sign-off. At the top of the Final plan sheet, before Copy for
+   the BIP, Print and the adoption block: the items published reviews of behavior intervention plans score (the Behavior
+   Support Plan Quality Evaluation, BSP-QE: Browning-Wright et al., 2007; plan quality predicted student outcomes through
+   integrity under ordinary school conditions: Cook et al., 2012): the function stated; setting changes tied to it; a
+   replacement behavior that serves the same function; teaching strategies; reinforcement; reactive strategies; goals; team
+   communication. Each is read from the plan (met, not met, or not applicable) with the place to fix it; a line before
+   "Adopted by the team" repeats the count. It never blocks anything, keeps nothing in the save file, is not printed and is
+   not in Copy for the BIP. The conflicts between the parts stay with How the parts fit (Build sheet). */
+(function(){
+const box=document.getElementById('tdQc'),adopt=document.getElementById('tdQcAdopt');if(!box)return;
+const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const val=n=>{const e=document.querySelector('[name="'+n+'"]');if(!e)return '';const v=T(e.value);return e.tagName==='SELECT'&&v==='not sure'?'':v;};
+const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+const short=(s,n)=>{s=T(s);if(s.length<=n)return s;const c=s.slice(0,n-1),k=c.lastIndexOf(' ');return (k>n*0.6?c.slice(0,k):c).replace(/[,;:.]$/,'')+'…';};
+const md=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(v));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(v);};
+let ATTR={};try{ATTR=JSON.parse(document.getElementById('td1-compare').textContent).attrs||{};}catch(e){ATTR={};}
+const FNL={escape:'escape',attention:'attention',tangible:'tangible items or activities',automatic:'automatic reinforcement'};
+const FNSET={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'};
+let GOALS=null;
+const groups=()=>{try{return window.__tdGroups?window.__tdGroups():[];}catch(e){return [];}};
+const cards=()=>{try{return (window.__tdComps?window.__tdComps():[]).filter(c=>!(window.__tdIsAssess&&window.__tdIsAssess(c)));}catch(e){return [];}};
+/* the kind of a component: TD-1's own table (Compare two interventions), else its group on the final plan */
+const NOTANT=new Set(['SAFE','SOCIAL','TANG','EDIBLE','DIST','C_SR','SEXT','C_HELMET','C_MEDREF']);
+function kindOf(code){const a=ATTR[code];if(a&&a.kind)return a.kind;const G=groups(),k=G.findIndex(g=>g[1].includes(code));
+ return k===0?(NOTANT.has(code)||/^PA_/.test(code)?'other':'antecedent'):k===1?'replacement':k===2?'teaching':k===3?'schedule':k===4?'consequence':'other';}
+function fnsOf(code){const a=ATTR[code];if(a&&Array.isArray(a.fn)&&a.fn.length)return a.fn;let L=null;try{L=window.__tdLibOf(code);}catch(e){}return (L&&L.fn)||[];}
+/* the plan's functions: Setup's, or for multiple control the targets' (Targets in this plan) */
+function planFns(){const f=val('m.fn');if(FNL[f])return [f];if(f!=='multiple')return [];let r=[];try{r=JSON.parse(val('tg.rows')||'[]');}catch(e){r=[];}
+ return [...new Set((Array.isArray(r)?r:[]).map(x=>x&&x.fn).filter(x=>FNL[x]))];}
+const names=L=>{const n=[...new Set(L.map(c=>c.name))];return n.length>3?n.slice(0,3).join('; ')+' and '+(n.length-3)+' more':n.join('; ');};
+const fnAnd=F=>F.map(x=>FNL[x]).join(', ');
+const nots=P=>P.filter(Boolean).map((x,i)=>(i?'It does not ':'The plan does not ')+x+'.').join(' ');
+function items(){const fn=val('m.fn'),F=planFns(),cs=cards(),out=[];const add=(k,t,st,why,go)=>out.push({k,t,st,why,go});
+ const GO={fn:['setup','[name="m.fn"]','Setup: Function'],build:['build','#addComp','Build: Add component'],select:['select','#selRec','Select the treatment']};
+ /* 1 the function */
+ if(fn){const src=val('m.fnsrc');add('fn','The function is stated','met',(FNSET[fn]||fn)+(src==='EA-1'?', from Form EA-1':src==='FS-1'?', a hypothesis from Form FS-1':'')+
+   (fn==='multiple'?(F.length?': '+fnAnd(F)+' (Targets in this plan)':'. Targets in this plan, on Setup, names no function for each target yet'):'')+'.',GO.fn);}
+ else add('fn','The function is stated','not','No function is chosen on the Setup sheet.',GO.fn);
+ /* 2 and 3: a part of the plan written for the function */
+ const tied=(kind,k,t,none,go,more)=>{const L=cs.filter(c=>kindOf(c.code)===kind),x=more?more():'';
+  if(!fn){add(k,t,'not','The function is not stated yet, so nothing in the plan can be tied to it'+(L.length?' (the plan has '+names(L)+')':'')+'.',GO.fn);return;}
+  if(!F.length){if(L.length)add(k,t,'met',names(L)+'. Multiple control: check that each function has its own (Targets in this plan, on Setup).'+x,go);else add(k,t,'not',none+'.',go);return;}
+  const miss=F.filter(f=>!L.some(c=>fnsOf(c.code).includes(f))),hit=L.filter(c=>F.some(f=>fnsOf(c.code).includes(f)));
+  if(!miss.length)add(k,t,'met','For '+fnAnd(F)+': '+names(hit)+'.'+x,go);
+  else add(k,t,'not',none+' for '+miss.map(f=>FNL[f]).join(' or ')+(L.length?' (the plan has '+names(L)+(hit.length?'':', written for other functions')+')':'')+'.',go);};
+ tied('antecedent','ant','Setting changes tied to the function','No antecedent strategy in the plan is written',GO.build);
+ tied('replacement','rep','A replacement behavior that serves the same function','No replacement behavior in the plan serves',GO.select,()=>val('m.repdesc')?' The replacement behavior: '+short(val('m.repdesc'),120)+'.':'');
+ /* 4 teaching strategies */
+ {const tc=cs.filter(c=>kindOf(c.code)==='teaching'),hier=val('pr.hier'),rc=cs.filter(c=>kindOf(c.code)==='replacement'&&(c.steps||[]).some(s=>/\bprompt/i.test(s)));
+  const why=[tc.length&&'teaching cards: '+names(tc),hier&&'prompt hierarchy: '+short(hier,80),rc.length&&'prompting in the steps of '+names(rc)].filter(Boolean),go=['teach','[name="pr.hier"]','Prompting and error correction'];
+  if(why.length)add('teach','Teaching strategies','met',cap(why.join('; '))+'.',go);
+  else if(val('m.rep')==='yes')add('teach','Teaching strategies','na','Setup says the replacement behavior is already in the student’s repertoire (it does not happen when it is needed). If it must still be prompted, write the prompt hierarchy or add a prompting card.',go);
+  else add('teach','Teaching strategies','not','The plan does not say how the replacement behavior is taught: no teaching or prompting card, and no prompt hierarchy.',go);}
+ /* 5 reinforcement: what reinforces the replacement behavior, and when it comes */
+ {const what=val('m.reinf'),rk=cs.filter(c=>/^(SOCIAL|TANG|EDIBLE)$/.test(c.code));
+  const sch=cs.filter(c=>kindOf(c.code)==='schedule'),sc=val('sch.chosen'),rc=cs.filter(c=>kindOf(c.code)==='replacement');
+  const W=[what&&'reinforcer: '+short(what,90),rk.length&&'reinforcer cards: '+names(rk)].filter(Boolean);
+  const H=[sch.length&&'schedule cards: '+names(sch),sc&&'schedule: '+short(sc,60),!sch.length&&!sc&&rc.length&&'given for each replacement response ('+names(rc)+')'].filter(Boolean);
+  if(W.length&&H.length)add('reinf','Reinforcement','met',cap(W.concat(H).join('; '))+'.',['reinf','[name="sch.chosen"]','Reinforcement']);
+  else add('reinf','Reinforcement','not',nots([!W.length&&'name the reinforcer for the replacement behavior (Setup: Specific reinforcer and EO)',!H.length&&'say when the reinforcer is given (a schedule on the Reinforcement sheet, or a replacement card)']),
+   W.length?['reinf','[name="sch.chosen"]','Reinforcement: Schedule']:['setup','[name="m.reinf"]','Setup: Specific reinforcer']);}
+ /* 6 reactive strategies */
+ {const R=new Set(((groups()[4])||[0,[]])[1]),rc=cs.filter(c=>R.has(c.code)),t=val('rb.target'),go=['respond','[name="rb.target"]','Responding to behavior'];
+  if(t||rc.length)add('react','Reactive strategies','met',cap([t&&'on the target behavior: '+short(t,110),rc.length&&'cards: '+names(rc)].filter(Boolean).join('; '))+'.',go);
+  else add('react','Reactive strategies','not','The plan does not say what staff do when the behavior happens: “On the target behavior” on the Responding sheet is empty and no card covers it.',go);}
+ /* 7 goals: one for the problem behavior and one for the replacement behavior */
+ {const g=GOALS||{},gr=(g.red||[]).length,ga=(g.acq||[]).length,crit=val('mon.crit'),ind=val('mon.ind'),ex=val('ad.exit');
+  const red=gr?gr+' reduction goal'+(gr>1?'s':'')+' from Form GB-1':crit?'the problem behavior at or below '+crit+' per minute'+(val('mon.n')?' for '+val('mon.n')+' sessions':'')+' (Monitor sheet)':ex?'the exit criteria':'';
+  const acq=ga?ga+' skill goal'+(ga>1?'s':'')+' from Form GB-1':ind?'the replacement behavior '+ind+'% independent (Monitor sheet)':'';
+  if(red&&acq)add('goals','Goals','met',cap(red)+'; '+acq+'.',['monitor','[name="mon.crit"]','Monitor: Criterion']);
+  else add('goals','Goals','not',nots([!red&&'state a goal for the problem behavior (Form GB-1, the criterion on the Monitor sheet, or the exit criteria)',!acq&&'state a goal for the replacement behavior (Form GB-1, or “Alternative independent” on the Monitor sheet)']),['monitor',red?'[name="mon.ind"]':'[name="mon.crit"]','Monitor: Criterion']);}
+ /* 8 team communication: who collects which data, and when the team looks at it */
+ {const dt=val('ad.data'),rv=val('ad.review'),mr=val('m.review'),pv=val('p.visit');
+  const W=[rv&&'the next review on '+md(rv),!rv&&mr&&'the review: '+short(mr,80),pv&&'the coaching visits'].filter(Boolean);
+  if(dt&&W.length)add('team','Team communication','met',cap(['who collects which data'].concat(W).join('; '))+'.',['final','[name="ad.data"]','Final plan: Who collects which data']);
+  else add('team','Team communication','not',nots([!dt&&'say who collects which data (this sheet, under Data, social validity, review, and exit)',!W.length&&'say when the team reviews the plan (Next review date on this sheet, or Review on Setup)']),
+   ['final',dt?'[name="ad.review"]':'[name="ad.data"]','Final plan: '+(dt?'Next review date':'Who collects which data')]);}
+ return out;}
+const ST={met:['Met','✓'],not:['Not met','!'],na:['Not applicable','–']};
+function sumOf(L){const n={met:0,not:0,na:0};L.forEach(x=>n[x.st]++);return {n,t:n.met+' of '+L.length+' met'+(n.not?' · '+n.not+' not met':'')+(n.na?' · '+n.na+' not applicable':'')};}
+function render(){let L;try{L=items();}catch(e){return;}const S=sumOf(L);
+ const h=`<h3 class="td-qc-h" id="tdQcH">Quality check before sign-off</h3><p class="td-qc-intro">Eight things published reviews of behavior intervention plans look for, each read from this plan, with the place to fix it. It is a check for you: it never stops Copy for the BIP, Print or adoption, and it is not printed or copied.</p>`+
+  `<p class="td-qc-sum">${E(S.t)}</p><ol class="td-qc-list">`+L.map(x=>`<li class="td-qc-it td-qc-${x.st}" data-qc="${x.k}" data-st="${x.st}"><span class="td-qc-st"><span class="td-qc-ic" aria-hidden="true">${ST[x.st][1]}</span>${ST[x.st][0]}</span><div class="td-qc-b"><b class="td-qc-t">${E(x.t)}</b><span class="td-qc-why">${E(x.why)}</span></div><button type="button" class="td-qc-go" data-view="${x.go[0]}" data-to="${E(x.go[1])}">Go to ${E(x.go[2])}</button></li>`).join('')+'</ol>'+
+  `<div class="td-qc-bar"><button type="button" class="tool" data-qc-do="bip">Copy for the BIP</button><button type="button" class="tool" data-qc-do="print">Print final plan only</button><span class="td-qc-msg" aria-hidden="true"></span></div>`+
+  `<p class="td-qc-src">The items are those of the Behavior Support Plan Quality Evaluation (BSP-QE; Browning-Wright et al., 2007). Under ordinary school conditions, plan quality predicted student outcomes, through how well the plan was carried out (Cook et al., 2012).</p>`;
+ if(box.__h!==h){box.__h=h;box.innerHTML=h;}box.hidden=false;
+ if(adopt){const nm=L.filter(x=>x.st==='not').map(x=>x.t.toLowerCase());const a=`Quality check before sign-off: ${E(S.t)}.${nm.length?' Not met: '+E(nm.join('; '))+'.':''} <button type="button" class="td-qc-go" data-qc-top="1">See the quality check</button>`;
+  if(adopt.__h!==a){adopt.__h=a;adopt.innerHTML=a;}adopt.hidden=false;}}
+function go(view,sel){const b=document.querySelector('#viewSeg button[data-view="'+view+'"]');if(b&&b.getAttribute('aria-pressed')!=='true')b.click();
+ setTimeout(()=>{const t=sel?document.querySelector(sel):null;if(t&&t.isConnected){try{(t.closest('.drow')||t).scrollIntoView({block:'center'});}catch(e){t.scrollIntoView();}try{t.focus({preventScroll:true});}catch(e){}}},140);}
+function click(ev){const b=ev.target.closest('button');if(!b)return;
+ if(b.dataset.qcTop){try{box.scrollIntoView({block:'start'});}catch(e){}const f=box.querySelector('.td-qc-h');if(f){f.tabIndex=-1;try{f.focus({preventScroll:true});}catch(e){}}return;}
+ if(b.dataset.view){go(b.dataset.view,b.dataset.to);return;}
+ if(b.dataset.qcDo){const t=document.getElementById(b.dataset.qcDo==='bip'?'bipBtn':'printFinalBtn');if(t)t.click();}}
+box.addEventListener('click',click);if(adopt)adopt.addEventListener('click',click);
+/* Copy for the BIP's answer, shown beside the panel's button too (the toolbar's status is the one read aloud) */
+{const m=document.getElementById('bipMsg');if(m)try{new MutationObserver(()=>{const s=box.querySelector('.td-qc-msg');if(s)s.textContent=m.textContent;}).observe(m,{childList:true,characterData:true,subtree:true});}catch(e){}}
+let tm=0;const soon=d=>{clearTimeout(tm);tm=setTimeout(render,d||120);};
+const fb=document.getElementById('finalBody');if(fb)try{new MutationObserver(()=>soon(60)).observe(fb,{childList:true});}catch(e){}
+['input','change'].forEach(t=>document.addEventListener(t,ev=>{if(box.contains(ev.target))return;if(/\bview-final\b/.test(document.body.className))soon(400);},true));
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.goals&&typeof f.goals==='object')GOALS=f.goals;soon();}catch(e){}return r;};}
+window.__tdQc={items:()=>items(),render};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>render());else render();
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
