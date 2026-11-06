@@ -19,7 +19,7 @@ const L=require(__dirname+'/lib.js');const {sleep,fs,path}=L;
 const OUT=__dirname+'/out/v2568-rs1-bacbpdf/';fs.mkdirSync(OUT,{recursive:true});
 const FILE='NBH-Workstation/RS-1_RBT-Supervision-Log_v2026-10.html';
 const URL=L.BASE+'/'+FILE;
-const P=require(path.join(L.ROOT,'NBH-Workstation','pdf-lib.min.js'));
+const P=require(path.resolve(L.ROOT,'NBH-Workstation','pdf-lib.min.js'));
 let PW;try{PW=require('playwright');}catch(e){PW=require('/opt/node22/lib/node_modules/playwright');}
 const pagesOf=async b=>(await P.PDFDocument.load(b)).getPageCount();
 const NOW=new Date('2027-03-15T10:00:00');
