@@ -23,7 +23,7 @@ const md=d=>(d.getMonth()+1)+'/'+d.getDate();
   const s0=await sig();
   const mon=new Date();mon.setHours(12,0,0,0);while(mon.getDay()!==1)mon.setDate(mon.getDate()+1);const fri=new Date(mon);fri.setDate(fri.getDate()+4);
   const pop=p.waitForEvent('popup',{timeout:120000});await p.evaluate(()=>staffKit());const w=await pop;
-  await p.waitForFunction(()=>$('#masterPrint').textContent==='Build master print',null,{timeout:180000});await sleep(2500);
+  await p.waitForFunction(()=>$('#masterPrint').textContent==='Build packet',null,{timeout:180000});await sleep(2500);
   const k=await w.evaluate(()=>{const sec=id=>document.getElementById('sec-'+id);const tx=id=>(sec(id)||{innerText:''}).innerText;
     const dd=sec('DD-1'),sm=sec('SM-1');
     return {secs:[...document.querySelectorAll('section.mp-sec')].map(s=>s.id.replace('sec-','')),title:(document.querySelector('.mp-cover h1')||{}).textContent||'',
@@ -38,7 +38,7 @@ const md=d=>(d.getMonth()+1)+'/'+d.getDate();
   const s1=await sig();
   ok('4a the forms on screen are as they were',s0===s1,{s0,s1});
   const pop2=p.waitForEvent('popup',{timeout:120000});await p.evaluate(()=>masterRun(ALL.filter(([id])=>id==='SM-1'),{check:false}));const w2=await pop2;
-  await p.waitForFunction(()=>$('#masterPrint').textContent==='Build master print',null,{timeout:180000});await sleep(1500);
+  await p.waitForFunction(()=>$('#masterPrint').textContent==='Build packet',null,{timeout:180000});await sleep(1500);
   const whole=await w2.evaluate(()=>({days:document.querySelectorAll('.sm-kit-day').length,len:document.body.innerText.length}));
   ok('4b the master print still prints SM-1 whole (no kit pages)',whole.days===0&&whole.len>k.smText.length,whole);
   await p.evaluate(()=>todayOpen());await sleep(1200);

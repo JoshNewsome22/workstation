@@ -35,7 +35,7 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
   const s=await ctx.newPage();s.on('pageerror',e=>errs.push('shell: '+e.message));await s.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(900);
   await s.evaluate(async own=>{openForm('QS-1');const t0=performance.now();while(!state.status['QS-1']&&performance.now()-t0<20000)await new Promise(r=>setTimeout(r,60));await state.frames['QS-1'].contentWindow.nbhBridge.ownOpen(own);await new Promise(r=>setTimeout(r,1200));},own);
   const pop=s.waitForEvent('popup',{timeout:120000});await s.evaluate(()=>masterRun(ALL.filter(([id])=>id==='QS-1'),{check:false}));const w=await pop;
-  await s.waitForFunction(()=>$('#masterPrint').textContent==='Build master print',null,{timeout:120000});await sleep(1500);await w.emulateMedia({media:'print'});
+  await s.waitForFunction(()=>$('#masterPrint').textContent==='Build packet',null,{timeout:120000});await sleep(1500);await w.emulateMedia({media:'print'});
   const mz=await w.evaluate(()=>{const pg=document.querySelector('#sec-QS-1 .qs-lp .qs-page:not(.qs-flow)');return pg?getComputedStyle(pg).zoom:'none';});
   ok('3b the master print prints the handout large',String(mz)==='1.65',{mz});
   ok('4 no page errors',!errs.length,errs.slice(0,4));

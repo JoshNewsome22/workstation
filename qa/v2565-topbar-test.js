@@ -54,8 +54,9 @@ async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sle
     mark:Math.round(document.getElementById('wsMark').getBoundingClientRect().width),h1:document.querySelector('header.top h1').textContent,chipsTop:!!document.querySelector('header.top #wsChips')}));
   ok('2 the logo is a small mark at the left of the dark row; it keeps its name, and the page keeps the workstation\'s name',brand.inRow&&brand.mark<=40&&/Workstation/.test(brand.title)&&brand.alt.length>3&&brand.h1==='FBA and BIP Workstation'&&!brand.chipsTop,brand);
   const order=await p.evaluate(()=>[...document.querySelectorAll('#wsNav > *')].filter(e=>e.getBoundingClientRect().width>0&&!e.classList.contains('wn-sep')&&!e.classList.contains('wn-sp')).map(e=>e.id==='wsMark'?'mark':e.classList.contains('wn-right')?[...e.children].filter(c=>c.getBoundingClientRect().width>0).map(c=>c.textContent.replace(/\s+/g,' ').trim()).join('+'):(e.querySelector('.wa-t')||e).textContent.replace(/\s+/g,' ').trim()));
-  ok('2 the dark row: the mark, Forms, Case map, Documents, Packet, Case, Tools, Today, Caseload, Help, the indicator, then Save case, Build master print, Finish PDF',
-    JSON.stringify(order.slice(0,10))===JSON.stringify(['mark','Forms','Case map','Documents','Packet','Case','Tools','Today','Caseload','Help'])&&/saved|Autosave|Offline|Drive/i.test(order[10]||'')&&/^Save case\+Build master print\+Finish PDF$/.test(order[11]||''),order);
+  /* v25.68 (design review H7): no Packet menu ("packet" is the printed document: Build packet); the indicator reports the case file */
+  ok('2 the dark row: the mark, Forms, Case map, Documents, Case, Tools, Today, Caseload, Help, the indicator, then Save case, Build packet, Finish PDF',
+    JSON.stringify(order.slice(0,9))===JSON.stringify(['mark','Forms','Case map','Documents','Case','Tools','Today','Caseload','Help'])&&/saved|nothing to save|no case/i.test(order[9]||'')&&/^Save case\+Build packet\+Finish PDF$/.test(order[10]||''),order);
   const formsBtns=await p.evaluate(()=>[...document.querySelectorAll('header.top button, #bar button, .crumb button')].filter(b=>b.getBoundingClientRect().width>0&&/^Forms$/.test((b.innerText||'').trim())).length);
   ok('3 one Forms button above the form (the form row has the list\'s icon only)',formsBtns===1&&(await box(p,'#railToggle')).vis&&!(await p.evaluate(()=>{const l=document.querySelector('#railToggle .lbl');return l&&l.getBoundingClientRect().width>0;})),formsBtns);
   /* the student line */
@@ -72,15 +73,19 @@ async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sle
     return {v,title:document.getElementById('crumbTitle').textContent,code:document.getElementById('aCode').textContent,sheet:document.getElementById('aSheet').textContent,next:document.getElementById('aNext').textContent,
       wrap:Math.round(c.getBoundingClientRect().height),tb:getComputedStyle(d.querySelector('.toolbar')).display,save:document.getElementById('aSave').textContent.trim(),quick:!!d.getElementById('nbhSaveQuick'),
       gone:['crumbFile','crumbPhoto','saveQuick','crumbId'].filter(id=>document.getElementById(id).getBoundingClientRect().width>0)};});
-  ok('4 the form row: the list toggle, TD-1 and the form\'s name, "‹ Setup · 1 of 13 ›" with "Next: Select treatment", Dictate, the fields filled, Save form, Print, View and Close, on one row',
-    row.code==='TD-1'&&/Function-Based Treatment Developer/.test(row.title)&&row.sheet==='Setup · 1 of 13'&&row.next==='Next: Select treatment'&&['railToggle','aCode','crumbTitle','aStep','aNext','aDict','crumbStatus','aSave','printOne','aView','closeForm'].every(x=>row.v.includes(x))&&row.wrap<=58,row);
-  ok('4 gone from the row: the file name, the second student picture, the second Save case; the form\'s own toolbar is out of sight (Save data keeps its id in the form)',row.gone.length===0&&row.tb==='none'&&row.save==='Save form'&&row.quick,row);
+  /* v25.68 (design review M1, H1): the form's short name (the full name in its tooltip); the fields filled are in the form's status
+     panel and Save form is Export this form in View, so neither is in the row */
+  ok('4 the form row: the list toggle, TD-1 and the form\'s short name, "‹ Setup · 1 of 13 ›" with "Next: Select treatment", Dictate, Print, View and Close, on one row',
+    row.code==='TD-1'&&row.title==='Treatment plan'&&row.sheet==='Setup · 1 of 13'&&row.next==='Next: Select treatment'&&['railToggle','aCode','crumbTitle','aStep','aNext','aDict','printOne','aView','closeForm'].every(x=>row.v.includes(x))&&!row.v.includes('aSave')&&row.wrap<=58,row);
+  ok('4 gone from the row: the file name, the second student picture, the second Save case; the form\'s own toolbar is out of sight (Save data keeps its id in the form)',row.gone.length===0&&row.tb==='none'&&row.quick,row);
   /* the status indicator */
   let st=await p.evaluate(()=>({t:document.getElementById('wsStat').textContent.trim(),k:document.getElementById('wsStat').className,chips:['autoChip','offChip','drvChip'].map(id=>{const c=document.getElementById(id);return c&&!c.hidden?c.className+':'+c.textContent.trim():null;}).filter(Boolean)}));
-  ok('5 one status indicator in the dark row: "All saved" with a green dot while every status is fine',st.t==='All saved'&&/k-on/.test(st.k)||st.chips.some(c=>!/\bon:/.test(c)),st);
+  /* v25.68 (design review H1): the indicator reports the case file; a status that needs attention is a mark beside it and in its name */
+  ok('5 one status indicator in the dark row, reporting the case file ("Not saved to a file …", "Case saved …", "Nothing to save yet")',/^(Not saved to a file|Case saved|Saved to|Nothing to save yet|No case open)/.test(st.t),st);
   await p.evaluate(()=>autoSet(false));await sleep(400);
   st=await p.evaluate(()=>({t:document.getElementById('wsStat').textContent.trim(),k:document.getElementById('wsStat').className,dot:getComputedStyle(document.querySelector('#wsStat .wa-dot')).backgroundColor}));
-  ok('5 a status that needs attention is named, in its own words and colour (Autosave off, an orange dot)',st.t==='Autosave off'&&/k-off/.test(st.k)&&st.dot==='rgb(224, 137, 75)',st);
+  st.lab=await p.evaluate(()=>document.getElementById('wsStat').getAttribute('aria-label'));st.x=await p.evaluate(()=>!!document.querySelector('#wsStat .wa-x'));
+  ok('5 a status that needs attention is named in the indicator\'s name, with a mark beside its dot (Autosave off)',/Also: Autosave off/.test(st.lab)&&st.x,st);
   await p.locator('#wsStat').tap();await sleep(400);
   const pan=await p.evaluate(()=>{const P=document.getElementById('wsStatPanel');return {open:!P.hidden,exp:document.getElementById('wsStat').getAttribute('aria-expanded'),chips:[...P.querySelectorAll('button.chip')].filter(b=>b.getBoundingClientRect().width>0).map(b=>b.id+': '+b.textContent.trim()),focus:document.activeElement&&document.activeElement.id};});
   ok('5 tapping it opens a small panel with each status as it reads (Autosave off, the offline copy)',pan.open&&pan.exp==='true'&&pan.chips.some(c=>/^autoChip: Autosave off/.test(c)),pan);
@@ -133,8 +138,9 @@ async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sle
   ok('9 View › More form tools shows the form\'s own More (its other tools, not boxed to the page\'s width); Fewer form tools puts them away',!mo.compact&&mo.tb!=='none'&&mo.save&&mo.maxw==='none'&&/Fewer form tools/.test(moLabel)&&mo2.compact&&mo2.tb==='none',{mo,moLabel,mo2});
   /* Save form, Print, Close */
   const sv=await p.evaluate(()=>{const d=state.frames[state.cur].contentDocument;window.__saved=0;window.__quick=0;d.getElementById('saveBtn').addEventListener('click',()=>{window.__saved++;},{capture:true});d.getElementById('nbhSaveQuick').addEventListener('click',()=>{window.__quick++;},{capture:true});return true;});
-  await p.locator('#aSave').tap();await sleep(1200);await shut(p);const saved=await p.evaluate(()=>({save:window.__saved,quick:window.__quick}));
-  ok('10 Save form presses the form\'s Save data (its quick button, once, which saves)',saved.quick===1&&saved.save>=1,saved);
+  /* v25.68 (design review H1): Save form is Export this form, in View */
+  await viewTap(p,'aSave');await sleep(1200);await shut(p);const saved=await p.evaluate(()=>({save:window.__saved,quick:window.__quick}));
+  ok('10 View › Export this form presses the form\'s Save data (its quick button, once, which saves)',saved.quick===1&&saved.save>=1,saved);
   await p.evaluate(()=>{window.__printed=0;state.frames[state.cur].contentWindow.print=()=>{window.__printed++;};});
   await p.locator('#printOne').tap();await sleep(500);ok('10 Print prints the form',await p.evaluate(()=>window.__printed)===1);
   /* while writing */
@@ -169,15 +175,15 @@ async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sle
   await student(p);await openForm(p,'TD-1');await railClosed(p);await sleep(1200);
   const rb=await box(p,'#bar'),rc=await box(p,'.stagew>.crumb'),rft=await frameTop(p),rr=await p.evaluate(()=>{const r=document.querySelector('#bar > .wn-right');return r?[...r.children].filter(c=>c.getBoundingClientRect().width>0).map(c=>c.textContent.trim()):null;});
   MEAS.railShown=rft.frame;MEAS.railCard=rft.card;
-  ok('14 the top keeps the student line (Save case, Build master print and Finish PDF at its right) and the form row: the form from '+rft.frame+' px',rb.y===0&&rb.x>=80&&rc.y===rb.h&&rft.frame<=115&&JSON.stringify(rr)===JSON.stringify(['Save case','Build master print','Finish PDF']),{rb,rc,rft,rr});
+  ok('14 the top keeps the student line (Save case, Build packet and Finish PDF at its right) and the form row: the form from '+rft.frame+' px',rb.y===0&&rb.x>=80&&rc.y===rb.h&&rft.frame<=115&&JSON.stringify(rr)===JSON.stringify(['Save case','Build packet','Finish PDF']),{rb,rc,rft,rr});
   const ritems=await p.evaluate(()=>[...document.querySelectorAll('#wsNav > *')].filter(e=>e.getBoundingClientRect().width>0).map(e=>e.id==='wsMark'?'mark':e.id==='wsStat'?'status':(e.querySelector('.wa-t')||e).textContent.replace(/\s+/g,' ').trim()));
-  ok('14 the rail: the mark at the top, Forms, Case map, Documents, Packet, Case, Tools, Today, Caseload, Help, the status at the bottom',JSON.stringify(ritems)===JSON.stringify(['mark','Forms','Case map','Documents','Packet','Case','Tools','Today','Caseload','Help','status']),ritems);
+  ok('14 the rail: the mark at the top, Forms, Case map, Documents, Case, Tools, Today, Caseload, Help, the status at the bottom (v25.68 H7: no Packet menu)',JSON.stringify(ritems)===JSON.stringify(['mark','Forms','Case map','Documents','Case','Tools','Today','Caseload','Help','status']),ritems);
   const icoOk=await p.evaluate(()=>[...document.querySelectorAll('#wsNav .wn-item')].filter(e=>e.getBoundingClientRect().width>0).every(e=>{const i=e.querySelector('svg.wa-ico'),t=e.querySelector('.wa-t,.lbl');return i&&t&&i.getBoundingClientRect().bottom<=t.getBoundingClientRect().top+1;}));
   ok('14 each rail item is an icon above a short label',icoOk);
   /* every rail item opens what its twin in the dark row opens */
   const twin=async()=>{const out={};
     for(const [k,sel] of [['Case map','#caseMap'],['Documents','#readDoc'],['Today','#todayBtn'],['Caseload','#caseloadBtn'],['Help','#help']]){await p.locator('#wsNav '+sel).tap();await sleep(1500);out[k]=await dlgTitle(p);await shut(p);await sleep(200);}
-    for(const k of ['packet','case','tools']){await p.locator('#wsNav [data-wn-menu="'+k+'"]').tap();await sleep(400);out[k]=await p.evaluate(()=>{const m=document.getElementById('wsNavMenu');const b=m.getBoundingClientRect();return m.hidden?null:{items:[...m.querySelectorAll('button')].filter(x=>x.offsetParent).map(x=>x.dataset.wnFor).join(','),x:Math.round(b.left),y:Math.round(b.top)};});
+    for(const k of ['case','tools']){await p.locator('#wsNav [data-wn-menu="'+k+'"]').tap();await sleep(400);out[k]=await p.evaluate(()=>{const m=document.getElementById('wsNavMenu');const b=m.getBoundingClientRect();return m.hidden?null:{items:[...m.querySelectorAll('button')].filter(x=>x.offsetParent).map(x=>x.dataset.wnFor).join(','),x:Math.round(b.left),y:Math.round(b.top)};});
       await p.keyboard.press('Escape');await sleep(200);}
     const f0=await p.evaluate(()=>({hid:document.body.classList.contains('rail-hidden'),open:document.body.classList.contains('rail-open')}));await p.locator('#wsNav #wnForms').tap();await sleep(600);
     const f1=await p.evaluate(()=>({hid:document.body.classList.contains('rail-hidden'),open:document.body.classList.contains('rail-open'),x:Math.round(document.getElementById('railNav').getBoundingClientRect().left),w:Math.round(document.getElementById('railNav').getBoundingClientRect().width)}));
@@ -185,9 +191,9 @@ async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sle
   const inRail=await twin();
   await viewTap(p,'aNavTop');await sleep(600);const backTop=await p.evaluate(()=>!document.body.classList.contains('ws-navrail')&&!!document.querySelector('header.top #wsNav'));
   const inTop=await twin();
-  const same=['Case map','Documents','Today','Caseload','Help'].every(k=>inRail[k]&&inRail[k]===inTop[k])&&['packet','case','tools'].every(k=>inRail[k]&&inTop[k]&&inRail[k].items.replace(/,?aNav\w+/g,'').length>0)&&inRail.forms.f1.hid!==inRail.forms.f0.hid&&inTop.forms.f1.hid!==inTop.forms.f0.hid;
-  ok('15 every rail item opens what its twin in the dark row opens (Forms the list, Case map, Documents, Packet, Case, Tools, Today, Caseload, Help)',same,{inRail,inTop});
-  ok('15 Packet, Case and Tools open their menus beside the rail; the list of forms slides out right of the rail',['packet','case','tools'].every(k=>inRail[k].x>=86)&&inRail.forms.f1.x>=86,{x:['packet','case','tools'].map(k=>inRail[k].x),forms:inRail.forms});
+  const same=['Case map','Documents','Today','Caseload','Help'].every(k=>inRail[k]&&inRail[k]===inTop[k])&&['case','tools'].every(k=>inRail[k]&&inTop[k]&&inRail[k].items.replace(/,?aNav\w+/g,'').length>0)&&inRail.forms.f1.hid!==inRail.forms.f0.hid&&inTop.forms.f1.hid!==inTop.forms.f0.hid;
+  ok('15 every rail item opens what its twin in the dark row opens (Forms the list, Case map, Documents, Case, Tools, Today, Caseload, Help)',same,{inRail,inTop});
+  ok('15 Case and Tools open their menus beside the rail; the list of forms slides out right of the rail',['case','tools'].every(k=>inRail[k].x>=86)&&inRail.forms.f1.x>=86,{x:['case','tools'].map(k=>inRail[k].x),forms:inRail.forms});
   ok('15 View › Navigation: Top bar puts the places back in the dark row',backTop);
   /* Tools › Navigation, with no form open */
   await p.evaluate(()=>{wsUI.confirm=()=>Promise.resolve(true);wsUI.choose=()=>Promise.resolve('keep');});

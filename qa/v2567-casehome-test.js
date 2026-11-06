@@ -211,7 +211,8 @@ const putRec=(p,rec)=>p.evaluate(async rec=>{const r=JSON.parse(rec);r.scope=clS
   await p.locator('#chColBtn').tap();await sleep(800);await p.locator('#chTabF').tap();await sleep(500);
   const ft=await p.evaluate(()=>({tab:document.getElementById('chTabF').getAttribute('aria-selected'),rail:document.getElementById('rail').offsetParent!==null,moved:!!document.querySelector('#railNav > #chForms > .railhead')&&!!document.querySelector('#railNav > #chForms > #rail'),
     ids:['railFind','tickUsed','tickNone','packetOpts','tickCount','railHide'].every(id=>!!document.getElementById(id)),items:document.querySelectorAll('#rail .item').length,stu:document.getElementById('chStu').offsetParent!==null}));
-  await p.locator('#rail .item[data-id="DM-1"] [data-tick]').tap();await sleep(300);const tk=await p.evaluate(()=>!!state.ticked['DM-1']);
+  /* v25.68 (design review M5) the print ticks show while choosing forms for the packet */
+  await p.evaluate(()=>{if(window.srChoose)srChoose(true);});await p.locator('#rail .item[data-id="DM-1"] [data-tick]').tap();await sleep(300);const tk=await p.evaluate(()=>!!state.ticked['DM-1']);await p.evaluate(()=>{if(window.srChoose)srChoose(false);});
   await p.locator('#rail .item[data-id="GB-1"] button.open').tap();const gb=await waitForm(p,'GB-1');
   ok('6d the Forms tab holds the list of forms itself (its nodes moved: '+ft.items+' forms, the same ids); a tick and a tap on a form work there',ft.tab==='true'&&ft.rail&&ft.moved&&ft.ids&&ft.items>=45&&!ft.stu&&tk&&gb,{ft,tk,gb});
   /* the form row's Forms button and the left edge tab open the column on its Forms tab */
