@@ -899,7 +899,7 @@ td input,td select{max-width:100%}
   <fieldset><legend>Primary arrangement</legend>
     <div class="chk"><input type="radio" name="arrange" value="srpos" id="a1"><label for="a1"><b>Positive reinforcement, concurrent choice.</b> Student chooses between a smaller/lower-quality reinforcer now and a larger/better/longer one after a delay; delay to the reinforcer is manipulated. Twenty-one of 25 experiments in Finch et al. (2024) used this.</label></div>
     <div class="chk"><input type="radio" name="arrange" value="srneg" id="a2"><label for="a2"><b>Negative reinforcement, task choice.</b> Escape is the reinforcer, so the options reverse: the immediate option is the self-control choice (smaller, easier, or less aversive task now) and the delayed option is the impulsive choice (larger, harder, or more aversive task later). Delay to the <em>task</em> varies. Use for escape-maintained referral behavior.</label></div>
-    <div class="chk"><input type="radio" name="arrange" value="fct" id="a3"><label for="a3"><b>Delay tolerance after FCT.</b> Student already has a functional communication response; the problem is waiting when the request is deferred. Use contingency-based progressive delay (Tab 4), not a choice arrangement.</label></div>
+    <div class="chk"><input type="radio" name="arrange" value="fct" id="a3"><label for="a3"><b>Delay and denial tolerance after FCT.</b> Student already has a functional communication response; the problem is waiting when the request is deferred, or hearing &ldquo;no&rdquo; when the item cannot be given this time. Use contingency-based progressive delay with delay and denial trials (Tab 4), not a choice arrangement.</label></div><!-- v25.65 (DELAY-H1) the path is named for both: delay trials and denial trials -->
     <div class="chk"><input type="radio" name="arrange" value="combo" id="a4"><label for="a4"><b>Combined appetitive and aversive outcomes.</b> Identified as a research gap by Finch et al.; document rationale.</label></div>
   </fieldset>
   <p class="small noprint" id="arrNote" aria-live="polite" hidden></p>
@@ -931,12 +931,15 @@ td input,td select{max-width:100%}
     <div style="margin-top:8px"><label class="f">Exact values (state them; do not leave to the implementer)</label><input type="text" name="dim_values" placeholder="e.g., 1 Skittle immediately vs. 4 Skittles after the delay, same size and brand"></div>
   </fieldset>
 
-  <div class="caution"><p><b>Reinforcer form changes how far delay can be pushed.</b> Leon, Borrero, and DeLeon (2016) delayed food, delayed the token, or delayed the exchange opportunity with three students with intellectual disability. Delayed <em>token delivery</em> disrupted responding fastest: a 3-s delay cut responding by 43% (David) and 66% (Chris) relative to immediate reinforcement, and a 6-s delay cut it by a further 88% and 52%. Delayed food held to 20&ndash;60 s for David and Alex; delayed exchange held to 20 s for David and 6 s for Chris. In a token classroom, a few seconds of staff lag between the response and the token is a treatment-integrity problem, not a rounding error.</p></div>
+  <!-- v25.65 (DELAY-L6) study participants are named by number, not by name -->
+  <div class="caution"><p><b>Reinforcer form changes how far delay can be pushed.</b> Leon, Borrero, and DeLeon (2016) delayed food, delayed the token, or delayed the exchange opportunity with three students with intellectual disability. Delayed <em>token delivery</em> disrupted responding fastest: a 3-s delay cut responding by 43% (Participant 1) and 66% (Participant 2) relative to immediate reinforcement, and a 6-s delay cut it by a further 88% and 52%. Delayed food held to 20&ndash;60 s for Participants 1 and 3; delayed exchange held to 20 s for Participant 1 and 6 s for Participant 2. In a token classroom, a few seconds of staff lag between the response and the token is a treatment-integrity problem, not a rounding error.</p></div>
   <div class="grid g3">
     <div><label class="f">Token system in use</label><select name="tok_use"><option value=""></option><option>None</option><option>Tokens, post-session exchange</option><option>Tokens, per-trial exchange</option><option>Generalized tokens (multiple back-ups)</option></select></div>
     <div><label class="f">Max acceptable response-to-token lag (s)</label><input type="number" name="tok_lag" min="0" step="1" value="2"></div>
     <div><label class="f">Back-up reinforcers</label><input type="text" name="tok_backup"></div>
   </div>
+  <!-- v25.65 (DELAY-H3) a lag over 2 s is warned about (Leon et al., 2016) -->
+  <div class="caution" id="dtLagWarn" hidden><p><b>Over 2 s.</b> Even a 3-s delay to the token cut responding sharply in the research. Keep the token or the mark within 2 s. If the plan needs a delay, delay the exchange, not the token.</p></div>
   <!-- v22.37 (review F401): the parent's consent for this protocol and the student's assent, in place of "Parent or guardian notified";
        the consent line fills from Form IC-1 in the case when it is empty -->
   <div class="sig"><div>BCBA signature / date</div><div>Teacher or implementer / date</div></div>
@@ -961,6 +964,15 @@ td input,td select{max-width:100%}
   <table><thead><tr><th style="width:14%">Date</th><th>Option A (smaller)</th><th>Option B (larger)</th><th class="num" style="width:9%">Trials</th><th class="num" style="width:11%">B chosen</th><th class="num" style="width:10%">% B</th></tr></thead><tbody id="tbMag"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbMag">Add row</button></div>
   <div class="chk"><input type="checkbox" name="mag_pass" id="mp"><label for="mp"><b>Criterion met:</b> &ge;80% allocation to the larger/better option across two consecutive sessions with no delay. If not met, change the reinforcer or dimension before continuing.</label> <span class="small" id="magCrit"></span></div>
+  <!-- v25.65 (DELAY-M7) which dimension competes best with immediacy (Neef et al., 2001, 2005), and medication changes -->
+  <details class="dtfold" id="advPair"><summary>Paired-dimension assessment (optional): which dimension competes best with immediacy</summary>
+  <p class="lede">Short sessions in which two dimensions compete: for example a sooner reward against a better one (immediacy against quality). Each row is one pairing; count the choices of the first dimension named. The form ranks the dimensions by the share of choices they won, and names the one that competes best against immediacy as the training dimension. Neef et al. (2001) found with a brief computer-based version that immediacy controlled the choices of all 3 students with ADHD; training then set immediacy against rate or quality. In 58 children, the choices of those with ADHD followed immediacy and quality most, and rate and effort least (Neef et al., 2005).</p>
+  <table><thead><tr><th style="width:34%">Pairing (first dimension against second)</th><th class="num" style="width:14%">Trials</th><th class="num" style="width:20%">First dimension chosen</th><th class="num" style="width:14%">% first</th><th>Notes</th></tr></thead><tbody id="tbPair"></tbody></table>
+  <div class="rowbtns"><button class="tool" data-add="tbPair">Add pairing</button><button class="tool" id="btnPairDim">Set the training dimension on Tab 1</button></div>
+  <p class="small" id="pairOut" aria-live="polite"></p>
+  </details>
+  <div><label class="f">Medication started, stopped or changed during the protocol (name, date)</label><input type="text" name="med_change" placeholder="e.g., stimulant started 10/20/2026"></div>
+  <p class="small">A medication change is a reason to run the dimension check (A) again. It is not evidence by itself: in a double-blind, placebo-controlled reversal, stimulant medication did not change sensitivity to immediacy for 4 students with ADHD (Neef et al., 2005).</p>
 
   <h3>B. Choice Baseline</h3>
   <p class="lede"><span data-arr-srneg="Self-control option = the smaller, easier or less aversive task, now. Impulsive option = the larger, harder or more aversive task, later.">Impulsive option = smaller/lower quality, immediate. Self-control option = larger/better, delayed.</span> Increase the delay across sessions until allocation shifts; that switch point is the delay training has to get past, so the starting delay in Tab 4 is set below it. Include at least one session with any challenging behavior scored.</p>
@@ -970,6 +982,12 @@ td input,td select{max-width:100%}
     <div><label class="f">Baseline delay at which allocation switched to the impulsive option (s)</label><input type="number" name="bl_switch" min="0" step="1"></div>
     <div><label class="f">Baseline pattern</label><input type="text" name="bl_summary" placeholder="e.g., exclusive SC at 0-5 s; exclusive impulsive at 10 s and above"></div>
   </div>
+  <!-- v25.65 (DELAY-M1) the trial length is held equal across the two options (Dixon et al., 2013) -->
+  <div class="grid g2">
+    <div><label class="f">Trial pacing</label><select name="pace_rule"><option value=""></option><option selected>Fixed trial length: after the immediate option, the next trial waits as long as the delay would have taken</option><option>Not fixed</option></select></div>
+    <div class="small" style="align-self:end">If the smaller-sooner option also ends its trial sooner, choosing it brings the next reward sooner too, and it can earn more per minute. Dixon et al. (2013) found little discounting in 58 university students once a blank period after the immediate reward held the rate equal. That was adults choosing money; it is a design control for a fair baseline, not a treatment.</div>
+  </div>
+  <div class="caution" id="paceWarn" hidden><p><b>Trial length not fixed.</b> Smaller-sooner choices also speed up the session; read a shift toward them with caution.</p></div>
   </div>
 
   <div class="arr-blk" id="preFct">
@@ -995,12 +1013,18 @@ td input,td select{max-width:100%}
   <div class="arr-blk" id="preEsc">
   <p class="small noprint arr-keep" hidden></p>
   <h3>E. Aversiveness Verification (Escape Arrangements)</h3>
-  <p class="lede">Present tasks in pairs or an array; record selection order. Porter and Sy (2020) verified aversiveness for each participant before training. Mean selection rank is the average position in which a task was picked (1 = first); % selected is the number of rounds in which it was picked first divided by the number of rounds it was on offer. Both are computed from the selection rounds below once any round is entered.</p>
+  <!-- v25.65 (DELAY-M12) the selection-order method is this form's own; the break-or-task check from Perrin and Neef (2012) -->
+  <p class="lede">Present tasks in pairs or an array; record selection order. This form ranks tasks by selection order. That is a practical substitute, not the published method: Porter and Sy (2020) verified aversiveness for each participant before training, by a different method (see the note below). Mean selection rank is the average position in which a task was picked (1 = first); % selected is the number of rounds in which it was picked first divided by the number of rounds it was on offer. Both are computed from the selection rounds below once any round is entered.</p>
   <table><thead><tr><th style="width:28%">Task</th><th class="num" style="width:14%">Mean selection rank</th><th class="num" style="width:12%">% selected</th><th style="width:16%">Classification</th><th>Assigned to (impulsive / SC option)</th></tr></thead><tbody id="tbAv"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbAv">Add row</button></div>
   <p class="small">Selection rounds: one row per round, and in each cell the rank the task was picked in (1 = first). Leave a cell blank when the task was not on offer in that round.</p>
   <table id="tbAvRT"><thead id="avHead"></thead><tbody id="tbAvR"></tbody></table>
   <div class="rowbtns"><button class="tool" id="btnAvRound">Add round</button></div>
+  <h4>Break or task check (optional)</h4>
+  <p class="small">On each trial the student chooses between a break card (a short break with nothing in it) and the task. The more often the break is chosen, the stronger the sign that the task is aversive enough for an escape arrangement. Touching the break card is an appropriate choice, never problem behavior. Perrin and Neef (2012) ran this kind of baseline first (a break, a blank screen for the rest of the trial, against math problems): 3 of 4 children with autism chose high levels of task avoidance. They note that without a control condition, how strongly the task worked as a negative reinforcer could not be told.</p>
+  <table><thead><tr><th style="width:36%">Task</th><th class="num" style="width:14%">Trials</th><th class="num" style="width:16%">Break chosen</th><th class="num" style="width:14%">% break</th><th>Notes</th></tr></thead><tbody id="tbBT"></tbody></table>
+  <div class="rowbtns"><button class="tool" data-add="tbBT">Add task</button></div>
+  <div class="note"><p><b>The published method is different.</b> Porter and Sy (2020) ranked tasks by how fast escape behavior began, in 5-min sessions, and a session ended when escape behavior occurred, including self-injury for one participant. Ending the task on escape behavior gives that behavior the escape it is for. This form does not use that method. If the BCBA plans it, write it as a step labelled <b>OPTION: Reinforces problem behavior on purpose:</b> and say what it does (the task ends when the behavior occurs), why (to rank the tasks by how fast escape is sought), for how long (a set number of short sessions), and what the data must show before it ends (a stable ranking of the tasks).</p></div>
   </div>
 
   <h3>Conclusion</h3>
@@ -1016,11 +1040,11 @@ td input,td select{max-width:100%}
   <h2 class="nbh-band">Delay Discounting Probe</h2>
   <p class="wk-go-line"><a href="#" class="wk-go" data-go="dd">How the titration is run at the table &rarr; Walkthrough</a></p>
   <p class="lede">Optional. It converts "he can't wait" into a quantity you can re-measure after treatment. Enter the indifference point at each delay (the immediate amount the student treats as equal to the delayed amount) and the sheet computes area under the curve and a hyperbolic <em>k</em>.</p>
-  <div class="note"><p><b>Getting indifference points from school-age students.</b> (a) <em>Adjusting amount</em>: hold delay fixed and raise or lower the immediate amount across trials until preference switches; the switch value is the indifference point. (b) <em>Adjusting delay</em> (Mazur, 1987): hold amounts fixed and adjust the delay until choice is roughly 50/50. Both produce similar estimates. (c) <em>Fixed-block format</em> (Evenden &amp; Ryan): a set list of choices with the delay increasing across blocks; this yields percent larger-later choice, not indifference points, and belongs in Tab 2B. Use experienced outcomes. Real and hypothetical money rewards produced similar discounting in adults (no systematic difference for 5 of 6 participants in Johnson &amp; Bickel, 2002; no detectable difference among 20 college students in Madden et al., 2003, who caution that this rests on failing to detect an effect), but that has not been shown for students with intellectual disability, and Finch et al. excluded hypothetical-choice studies from the SCT literature.</p></div>
+  <div class="note"><p><b>Getting indifference points from school-age students.</b> (a) <em>Adjusting amount</em>: hold delay fixed and raise or lower the immediate amount across trials until preference switches; the switch value is the indifference point. (b) <em>Adjusting delay</em> (Mazur, 1987): hold amounts fixed and adjust the delay until choice is roughly 50/50. Both produce similar estimates. (c) <em>Fixed-block format</em> (Evenden &amp; Ryan): a set list of choices with the delay increasing across blocks; this yields percent larger-later choice, not indifference points, and belongs in Tab 2B. Use experienced outcomes. Real and hypothetical money rewards produced similar discounting in adults (no systematic difference for 5 of 6 participants in Johnson &amp; Bickel, 2002; no detectable difference among 20 college students in Madden et al., 2003, who caution that this rests on failing to detect an effect), but that has not been shown for students with intellectual disability, and Finch et al. excluded hypothetical-choice studies from the SCT literature. <!-- v25.65 (DELAY-M6) -->For verbal students in about grade 4 and up, a brief hypothetical-money task is a usable school format: Reed and Martens (2011) gave one to 46 sixth graders, and its result was reliable over a week. Choose it under Delivery rule so the probe is labelled as hypothetical money.</p></div>
   <div class="grid g4">
     <div><label class="f">Date</label><input type="date" name="dd_date"></div>
     <div><label class="f">Reward type</label><input type="text" name="dd_type" placeholder="e.g., preferred edible; iPad minutes"></div>
-    <div><label class="f">Delivery rule</label><select name="dd_rule"><option value=""></option><option>Hypothetical: no outcome delivered</option><option>Real outcome on randomly drawn trials</option><option>Real outcome on every trial</option></select></div>   <!-- v22.92 (review F407) -->
+    <div><label class="f">Delivery rule</label><select name="dd_rule"><option value=""></option><option>Hypothetical: no outcome delivered</option><option>Real outcome on randomly drawn trials</option><option>Real outcome on every trial</option><option>Hypothetical money (verbal students, about grade 4 and up)</option></select></div>   <!-- v22.92 (review F407); v25.65 (DELAY-M6) hypothetical money -->
     <div><label class="f">Delayed amount (A)</label><input type="number" id="ddA" name="dd_A" step="any" value="5"></div>
     <div><label class="f">Units</label><input type="text" name="dd_units" placeholder="items / minutes"></div>
   </div>
@@ -1050,7 +1074,9 @@ td input,td select{max-width:100%}
     <li>Mazur's hyperbola out-performs the exponential model across species and reward types, and it predicts preference reversal directly. Expect it to over-predict value at short delays and under-predict it at long ones, a systematic deviation that Odum (2011) describes. Applied implication: that pattern alone is not grounds to discard the fit.</li>
     <li><b>Magnitude effect:</b> larger delayed amounts are discounted less steeply. Re-probe with the same amount or the comparison is not interpretable.</li>
     <li>Money is discounted less steeply than consumable rewards (food, cigarettes, alcohol). If you probe with an edible and treat with tokens, do not expect the two curves to line up.</li>
+    <li><!-- v25.65 (DELAY-M6) --><b>What it predicts in a classroom.</b> In a sixth-grade token system, students with lower AUC gained more from same-day exchange than from 24-hour exchange: the AUC was related to how much on-task behavior differed between the two (r<sub>s</sub> = &minus;.50, 26 students; Reed &amp; Martens, 2011). In 30 boys, children with ADHD features made more impulsive choices on a computerized test, and those choices went with classroom gross motor activity (Hoerger &amp; Mace, 2006). These are correlations in typically developing children or children with ADHD features, not in students with intellectual disability.</li>
   </ul>
+  <div class="caution" id="ddPlan" hidden><p><b>Low AUC.</b> Plan token exchange within the session; a delayed exchange is likely to cost this student more than peers (Form AD-1).</p></div>
   <div class="caution"><p><b>What a steep function does not tell you.</b> Yeh, Myerson, and Green (2021) examined 1,206 Human Connectome Project adults. With income and education controlled, discounting correlated with only four of eleven cognitive measures, all with r &lt; .20, loaded on its own factor apart from every cognitive factor, and was uncorrelated with Neuroticism and Conscientiousness, the Big Five traits tied to psychometric impulsiveness. Delay discounting is an individual-difference characteristic in its own right, not a proxy for intelligence or a personality label. Report what the choice data show; do not write "impulsive" into an IEP on the strength of this probe.</p></div>
 
   <h4>Re-probe log</h4>
@@ -1107,6 +1133,12 @@ td input,td select{max-width:100%}
       <tr><td><input type="checkbox" name="c_pd"></td><td><b>Progressive delay</b> alone</td><td class="num">12/20 (60%)</td><td class="num">4/10 (40%)</td><td>Weakest common option. Exposure to longer delays by itself is thin.</td></tr>
       <tr><td><input type="checkbox" name="c_sd"></td><td><b>Signaled delay</b> alone</td><td class="num">1/4 (25%)</td><td class="num">0/1</td><td>Adjunct only.</td></tr>
     </tbody></table>
+  <!-- v25.65 (DELAY-M2) signals go with fading; (DELAY-M4) where the delay falls -->
+  <p class="small"><b>A signal is added to progressive delay. It is not a stand-alone treatment.</b> With delay fading, a visible timer kept larger-later choices going to 40&ndash;100 s for 4 children with language deficits, against baseline switch points of 20&ndash;40 s (Vessells et al., 2018); with no fading, a countdown timer did not increase self-control for 3 preschoolers (Newquist et al., 2012). The evidence on signals alone is mixed.</p>
+  <div class="grid g2">
+    <div><label class="f">Delay placement (choice arrangements)</label><select name="delay_place"><option value=""></option><option selected>After the work (work now, wait for the reinforcer)</option><option>Before the work (wait, then work)</option></select></div>
+    <div class="small" style="align-self:end">Waits placed before the task produced more impulsive choices for every child studied: with the same delays after the task, all 3 children with behavior disorders chose the task with the better reinforcer more often (Gadaire et al., 2014).</div>
+  </div>
   <table><caption>Negative-reinforcement (escape) arrangements. Thirteen applications across nine participants.</caption>
     <thead><tr><th style="width:6%">Use</th><th style="width:36%">Package</th><th class="num" style="width:18%">Shifted allocation</th><th>Source</th></tr></thead>
     <tbody>
@@ -1117,18 +1149,21 @@ td input,td select{max-width:100%}
       <tr><td><input type="checkbox" name="n_adboth"></td><td>Altered delay + difficulty + magnitude</td><td class="num">1/1</td><td>Used when difficulty alone failed</td></tr>
     </tbody></table>
 
-  <div class="note"><p><b>For waiting after a request: contingency-based, not time-based.</b> Ghaemmaghami, Hanley, and Jessel (2016) compared time-based progressive delay (TBPD) with contingency-based progressive delay (CBPD) in four individuals aged 21 months to 30 years. TBPD failed for all four; problem behavior resurged within the first 16 s of delay for three of them, even though immediate reinforcement was programmed on two of five trials and an alternative activity was freely available, with prompts to engage in it for three of the four. The presence of an activity was not enough; the response contingency during the delay was the active component. CBPD (delay cue &rarr; tolerance response "okay" &rarr; DRA or DRO requirement &rarr; reinforcer) produced near-zero problem and collateral behavior, optimal communication rates, and delays of several minutes (about 10 to 15 min, with roughly 50 demands completed, for one participant), within 2 to 8 hr of treatment over 4 to 24 weeks. A 2022 multilevel meta-analysis (Muharib et al.) found contingency-based delays effective for autistic individuals and most effective when the contingency included positive reinforcement; DRA-based thinning also cut the prevalence of resurgence roughly in half relative to time-based thinning (Drifke et al., 2020).</p></div>
+  <div class="note"><p><b>For waiting after a request: contingency-based, not time-based.</b> Ghaemmaghami, Hanley, and Jessel (2016) compared time-based progressive delay (TBPD) with contingency-based progressive delay (CBPD) in four individuals aged 21 months to 30 years. TBPD failed for all four; problem behavior resurged within the first 16 s of delay for three of them, even though immediate reinforcement was programmed on two of five trials and an alternative activity was freely available, with prompts to engage in it for three of the four. The presence of an activity was not enough; the response contingency during the delay was the active component. CBPD (delay cue &rarr; tolerance response "okay" &rarr; DRA or DRO requirement &rarr; reinforcer) produced near-zero problem and collateral behavior, optimal communication rates, and delays of several minutes (about 10 to 15 min, with roughly 50 demands completed, for one participant), within 2 to 8 hr of treatment over 4 to 24 weeks. A 2022 multilevel meta-analysis (Muharib et al.) found contingency-based delays effective for autistic individuals and most effective when the contingency included positive reinforcement. <!-- v25.65 (DELAY-H2) the prevalence figure is Marshall et al.'s, not Drifke et al.'s -->Across 546 steps in 23 articles, DRA-based thinning cut the prevalence of resurgence nearly in half relative to time-based thinning (Marshall et al., 2025). Drifke et al. (2020) showed, for 3 participants, that a DRA requirement during the delay kept the request going and problem behavior low better than DRO or fixed-time delays.</p></div>
 
   <fieldset><legend>Delay arrangement</legend>
     <div class="chk"><input type="radio" name="delaytype" value="cbpd" id="dt1"><label for="dt1"><b>Contingency-based progressive delay.</b> The delay ends when the student meets the response requirement. Can be written as FR 1 (FCR) &rarr; FR <em>x</em> (delay requirement).</label></div>
     <div class="chk"><input type="radio" name="delaytype" value="tbpd" id="dt2"><label for="dt2"><b>Time-based progressive delay.</b> The delay ends on a timer. Use only where the target really is clock-waiting with no available alternative behavior; monitor for resurgence.</label></div>
     <div class="chk"><input type="radio" name="delaytype" value="mult" id="dt3"><label for="dt3"><b>Multiple schedule with discriminative stimuli.</b> Signaled alternation of reinforcement and extinction components. Well supported for planned nonreinforcement periods; does not teach tolerance of unplanned denials.</label></div>
   </fieldset>
+  <!-- v25.65 (DELAY-H2) the relapse figures by delay type, shown while the time-based option is chosen -->
+  <div class="caution" id="tbpdNote" hidden><p><b>Time-based delays relapse most.</b> Delays that end on the clock had the most relapse: 46.5% of steps, at a mean of 0.53 of baseline. Delays that end on a response requirement: 25.9% of steps, 0.15 of baseline (Marshall et al., 2025).</p></div>
   <div class="grid g2">
     <div><label class="f">Delay requirement</label><select name="req_type"><option value=""></option><option>DRA: engagement in a specified alternative activity</option><option>DRA: completion of a set number of tasks (cumulative)</option><option>DRA: continuous engagement, delay resets on interruption</option><option>DRO: absence of problem and collateral behavior for the interval</option><option>Chained: complete demands, then FCR reinforced immediately</option></select></div>
     <div><label class="f">Reset rule</label><select name="reset"><option value=""></option><option>Cumulative: timer pauses, does not reset</option><option>Consecutive: delay restarts on interruption or target behavior</option></select></div>
   </div>
-  <p class="small">Iannaccone and Jessel (2021) found tolerance under both DRA- and DRO-based CBPD, with more contextually appropriate behavior under DRA. Prefer DRA when a specific skill is expected during the wait; use DRO when the natural expectation is simply "do something else" with little supervision. (In Ghaemmaghami et al., Jack's requirement combined the two: engagement in any activity, without problem behavior or collateral responses.)</p>
+  <!-- v25.65 (DELAY-L7) who was studied; (DELAY-L6) no participant names -->
+  <p class="small">Iannaccone and Jessel (2021), a translational study with college students, found tolerance under both DRA- and DRO-based CBPD, with more contextually appropriate behavior under DRA. Drifke et al. (2020) replicated the DRA advantage clinically, with 3 individuals with intellectual and developmental disabilities. Prefer DRA when a specific skill is expected during the wait; use DRO when the natural expectation is simply "do something else" with little supervision. (In Ghaemmaghami et al., one participant's requirement combined the two: engagement in any activity, without problem behavior or collateral responses.)</p>
 
   <h3>Step 2. Tolerance Response and Delay Cues</h3>
   <div class="grid g2">
@@ -1138,14 +1173,43 @@ td input,td select{max-width:100%}
   <div><label class="f">Delay cues to rotate (natural-environment wording)</label><input type="text" name="cues" placeholder='e.g., "wait," "in a minute," "not right now," "after this"'></div>
   <div class="chk"><input type="checkbox" name="cue_multi" id="cm"><label for="cm">Multiple exemplars of cues, activities, and demand materials are programmed from the start; demand items rotate every 2 to 4 sessions.</label></div>
   <div class="chk"><input type="checkbox" name="prob_rft" id="pr"><label for="pr"><b>Probabilistic immediate reinforcement.</b> A share of requests (e.g., 2 of 5) is honored immediately. This raises contingency strength and matches how the natural environment behaves.</label></div>
-  <div class="grid g2"><div><label class="f">Proportion of trials reinforced immediately</label><input type="text" name="prob_ratio" placeholder="2 of 5, randomly selected"></div><div><label class="f">Reinforcement interval by delay range</label><input type="text" name="rft_int" placeholder="30 s for delays to 32 s; 60 s for 64-128 s; 120 s for 256-600 s"></div></div>
+  <div class="grid g2"><div><label class="f">Immediate trials, as said to staff</label><input type="text" name="prob_ratio" placeholder="2 of 5, randomly selected"></div><div><label class="f">Reinforcement interval by delay range</label><input type="text" name="rft_int" placeholder="30 s for delays to 32 s; 60 s for 64-128 s; 120 s for 256-600 s"></div></div>
+  <!-- v25.65 (DELAY-H1) three shares of requests: honored at once, delayed, and denied ("not this time"), as in Hanley et al. (2014) -->
+  <fieldset class="arr-fct-only"><legend>Shares of requests (delay and denial tolerance after FCT)</legend>
+    <div class="grid g3">
+      <div><label class="f">Honored at once (%)</label><input type="number" name="share_imm" min="0" max="100" step="1" value="40"></div>
+      <div><label class="f">Delayed: the reinforcer comes after the delay requirement (%)</label><input type="number" name="share_del" min="0" max="100" step="1" value="60"></div>
+      <div><label class="f">Denied: the item is not given this time (%)</label><input type="number" name="share_den" min="0" max="100" step="1" value="0"></div>
+    </div>
+    <p class="small" id="shareOut" aria-live="polite"></p>
+    <p class="small">The three shares must add to 100%. Start at 40% honored at once and 60% delayed. Add denied trials only after delayed trials meet the session criterion (a step on the ladder below has a date met), and take them out of the delayed share. In Hanley et al. (2014), two of every five requests were honored at once and three of five were delayed or denied; the delay was raised only when the request was independent and problem behavior was at zero.</p>
+    <div class="grid g2">
+      <div><label class="f">Denial statement (said the same way every time; keep it in the cue rotation)</label><input type="text" name="den_say" placeholder='e.g., "Not this time."'></div>
+      <div><label class="f">What a denial trial gives instead</label><select name="den_alt"><option value=""></option><option>An alternative preferred activity at once (“Not now, but you can have ___”)</option><option>A stated contingency (“First ___, then ___”)</option></select></div>
+    </div>
+    <p class="small"><b>In the treatment phases of the studies, problem behavior after a denial never produced the item.</b> A denial trial here works the same way: the item is not given this time, whatever happens. For one 13-year-old with autism, &ldquo;no&rdquo; with an explanation set off an escalating chain of four problem behaviors, while &ldquo;no&rdquo; with an alternative preferred activity, and &ldquo;no&rdquo; with a contingency, both prevented it (Mace et al., 2011; one student, so a promising method, not a proven rule).</p>
+  </fieldset>
+  <!-- v25.65 (DELAY-M2) the signal used during the delay -->
+  <div class="grid g2">
+    <div><label class="f">Signal during the delay</label><select name="sig_type"><option value=""></option><option>None</option><option>A brief verbal cue only (“wait”)</option><option>A continuous signal in view for the whole delay (visual timer, countdown, hand signal held)</option></select></div>
+    <div class="small" style="align-self:end">A signal in view for the whole delay is not the same as a brief verbal cue (Greer et al., 2016). Score which one each trial had in the Signal column of the session sheet.</div>
+  </div>
+  <!-- v25.65 (DELAY-L1) asking "when?" as a second taught response (Landa et al., 2017) -->
+  <div class="chk"><input type="checkbox" name="tr_when" id="trw"><label for="trw"><b>Asks when</b> (for example &ldquo;When can I?&rdquo;), and follows the answer: an optional second response. Every delay cue then needs an answer the adult can give (&ldquo;after two more pages&rdquo;). All 3 children with autism in Landa et al. (2017) learned to ask &ldquo;when?&rdquo;, used the answer, and made fewer attempts to take restricted items.</label></div>
 
   <h3>Step 3. Intervening Activity</h3>
-  <p class="lede">Across reviewed studies, academic tasks (7 experiments) and motor tasks (7) were used equally often; toy interaction in 2 and mediating verbal behavior in 1. No difference in effectiveness across activity types was apparent, and work tasks were no less effective than preferred leisure items. Choose on contextual fit.</p>
+  <p class="lede">Across reviewed studies, academic tasks (7 experiments) and motor tasks (7) were used equally often; toy interaction in 2 and mediating verbal behavior in 1. No difference in effectiveness across activity types was apparent, and work tasks were no less effective than preferred leisure items. Choose the type on contextual fit. <!-- v25.65 (DELAY-M3) -->How preferred the activity is, and which option it goes with, are different variables: with typically developing preschoolers, toys available with every option increased self-control for 2 children, and with toys only on the larger-later side, high-preference toys (and sometimes moderate ones) did for 3, while low-preference toys did not (Juanico et al., 2016).</p>
   <div class="grid g2">
-    <div><label class="f">Activity type</label><select name="ia_type"><option value=""></option><option>Academic task</option><option>Motor task</option><option>Toy / leisure interaction</option><option>Mediating verbal behavior (student states the contingency)</option><option>Activity schedule, student-selected</option></select></div>
+    <div><label class="f">Activity type</label><select name="ia_type"><option value=""></option><option>Academic task</option><option>Motor task</option><option>Toy / leisure interaction</option><option>Mediating verbal behavior (student states the contingency)</option><option>Activity schedule, student-selected</option><option>Alternative functional reinforcer during the delay (for multiply maintained behavior: for example attention while the item is delayed, or an item while attention is delayed)</option></select></div>
     <div><label class="f">Specific activity</label><input type="text" name="ia_what"></div>
   </div>
+  <!-- v25.65 (DELAY-M3) the activity's preference level and which option it goes with -->
+  <div class="grid g2">
+    <div><label class="f">Activity preference level (Form PA-1)</label><select name="ia_pref"><option value=""></option><option>High</option><option>Moderate</option><option>Low</option><option>Not assessed</option></select></div>
+    <div><label class="f">Activity available with</label><select name="ia_with"><option value=""></option><option>The larger-later option only</option><option>Both options</option></select></div>
+  </div>
+  <div class="caution" id="iaWithWarn" hidden><p><b>Activity on the delayed side only.</b> The activity adds reinforcement to the delayed option. Choice may follow the activity, not the wait (for 2 of 3 children in Newquist et al., 2012, it may have). Plan the activity fade (Tab 8B) from the start.</p></div>
+  <p class="small">On the FCT path, an alternative functional reinforcer during the delay is one option: for one 13-year-old with intellectual disability, aggression came back at 120-s delays under delay fading, and with an alternative reinforcer during the delay he met the 5-min goal with low aggression (Austin &amp; Tiger, 2015); for 2 people with multiply controlled problem behavior, an alternative functional reinforcer during 10-min delays reduced problem behavior without any delay fading (Sumter et al., 2020).</p>
   <div class="chk"><input type="checkbox" name="ia_indep" id="ii"><label for="ii"><b>Independence plan.</b> Adult-led activities are hard to sustain in a classroom because the implementer must keep assigning tasks and setting delays. Plan from the start to move toward an activity schedule or student-selected activity.</label></div>
   <div class="chk"><input type="checkbox" name="ia_incomp" id="ic"><label for="ic">The activity is topographically incompatible with the challenging behavior.</label></div>
   <div class="chk"><input type="checkbox" name="ia_choice" id="ich"><label for="ich">Student chooses among two or more activities before the delay begins.</label></div>
@@ -1170,6 +1234,13 @@ td input,td select{max-width:100%}
       <div><label class="f">Session criterion</label><input type="text" name="step_crit" value="Delay completed (requirement met, reinforcer delivered) on at least 80% of delay trials"></div>
       <div><label class="f">Stop-and-review trigger</label><input type="text" name="stop_rule" value="Any injurious behavior, or collateral behavior on two consecutive sessions"></div>
     </div>
+    <!-- v25.65 (DELAY-H2) problem behavior judged against the student's own baseline, and the plan for its return -->
+    <div class="grid g2">
+      <div><label class="f">Problem-behavior part of the session criterion</label><select name="pb_crit"><option value=""></option><option selected>At or below 0.10 of the baseline mean (a 90% reduction)</option><option>A fixed rate, as written in the session criterion</option></select></div>
+      <div class="small" style="align-self:end">The baseline mean is the FCT baseline's problem behavior per minute in the sessions with the reinforcer delayed (Tab 2). Progress shows each session as a share of it. Kastner et al. (2025) and Greer et al. (2016) judged success by a 90% reduction from baseline.</div>
+    </div>
+    <p class="small"><b>Denial trials count in the session criterion.</b> A denial trial is met when the student accepts it: the tolerance response, then the alternative or the contingency, with the item not given. The session sheet reads delay and denial trials together.</p>
+    <div class="caution arr-fct-only" id="dtRelapsePlan"><p><b>Plan for problem behavior to come back.</b> Problem behavior is likely to come back at least once while the delay is lengthened, at about 3 steps in 10, and most often at the first step. The stop rule and the step-back rule apply. In a review of 66 participants it came back at least once for 54 (81.8%), in 28.8% of steps (Marshall et al., 2025); in Kastner et al. (2025) it came back in 80% of first steps (0 to 30 s). Progress (Tab 6) flags it at each new step.</p></div>
     <!-- v22.92 (review F398): what staff do when the student hits, sweeps or leaves during the delay, and what happens to the demand
          when a session is stopped, written here so the integrity check scores what was written -->
     <div class="grid g2">
@@ -1182,6 +1253,11 @@ td input,td select{max-width:100%}
   <h3>Step 5. Optional Components</h3>
   <div class="chk"><input type="checkbox" name="opt_rule" id="o2"><label for="o2"><b>Antecedent rule.</b> A stated rule about the contingency before the session. Record it verbatim so every implementer says the same thing.</label></div>
   <div><label class="f">Rule, verbatim</label><input type="text" name="rule_text"></div>
+  <!-- v25.65 (DELAY-M5) how the rule is given (Staubitz et al., 2020; Newquist et al., 2012) -->
+  <div class="grid g2">
+    <div><label class="f">Rule given</label><select name="rule_how"><option value=""></option><option>Once, before the choice</option><option>Repeated by the student during the delay</option><option>With a rationale (why the larger-later option is better)</option></select></div>
+    <div class="small" style="align-self:end">A rule alone is weak: a brief rule stated once did not help 3 preschoolers (Newquist et al., 2012). With 6 elementary students with emotional and behavioral disorders, progressive delay alone did not improve self-control, and a rationale and a rule for choosing the delayed reward then worked for 3 (Staubitz et al., 2020).</div>
+  </div>
   <div class="chk"><input type="checkbox" name="opt_commit" id="o3"><label for="o3"><b>Commitment response.</b> Student may commit to the self-control option in advance of the choice point, which removes the impulsive option. Effective in 3/3 applications (Perrin &amp; Neef, 2012, Exp. 2), all escape arrangements.</label></div>
   <details class="adv"><summary>Research-grade options: group arrangement, episodic future thinking</summary>
   <div class="chk"><input type="checkbox" name="opt_group" id="o5"><label for="o5"><b>Group arrangement.</b> One reviewed study (Dixon &amp; Holcomb, 2000) ran SCT with groups. Reasonable for a classroom; take individual data.</label></div>
@@ -1213,8 +1289,12 @@ td input,td select{max-width:100%}
     <div><label class="f">Session length (min)</label><input type="number" name="ss_len" min="0" step="any"></div>
     <div><label class="f">Second observer present</label><select name="ss_ioa"><option value=""></option><option>Yes</option><option>No</option></select></div>
   </div>
-  <table><caption>Trial record. <span data-arr-fct="Waited = the student waited through the delay; Did not wait = left, took the item or asked again before the delay ended;" data-arr-srneg="SC = self-control: the smaller or easier task now; IMP = impulsive: the larger or harder task after the delay;">SC = self-control (larger-later) option; IMP = impulsive (smaller-sooner) option;</span> IMM = immediate-reinforcement trial (no delay programmed). On an IMM trial, Choice, Latency, TR and Engaged are left blank: there is no delay to choose, start or wait through. Delivered = the requirement was met and the reinforcer given: a delay trial is completed when it was, whatever the clock read (under a contingency-based delay the delay ends when the requirement is met). A wait that ended in problem behavior with no reinforcer is No response, Delivered No, never an impulsive choice.</caption>
-    <thead><tr><th class="num" style="width:5%">#</th><th style="width:9%">Trial type</th><th style="width:9%" data-arr-fct="Outcome">Choice</th><th class="num" style="width:8%">Prog. delay (s)</th><th class="num" style="width:8%">Obt. delay (s)</th><th class="num" style="width:8%">Latency (s)</th><th style="width:9%">TR</th><th style="width:9%">Engaged</th><th class="num" style="width:7%">Prob. beh.</th><th class="num" style="width:7%">Collat.</th><th style="width:8%" title="The requirement was met and the reinforcer delivered: what makes a delay trial completed, whatever the clock read">Delivered</th><th>Notes</th></tr></thead>
+  <!-- v25.65 (DELAY-M1) the trial pacing this session ran under (choice arrangements) -->
+  <div class="grid g2">
+    <div><label class="f">Trial pacing (choice arrangements)</label><select name="ss_pace"><option value=""></option><option>Fixed trial length: after the immediate option, the next trial waits as long as the delay would have taken</option><option>Not fixed</option></select></div>
+  </div>
+  <table><caption>Trial record. <span data-arr-fct="Waited = the student waited through the delay; Did not wait = left, took the item or asked again before the delay ended;" data-arr-srneg="SC = self-control: the smaller or easier task now; IMP = impulsive: the larger or harder task after the delay;">SC = self-control (larger-later) option; IMP = impulsive (smaller-sooner) option;</span> IMM = immediate-reinforcement trial (no delay programmed). DEN = denial trial: the item is not given this time; Choice reads Accepted when the student made the tolerance response and took what the denial gives instead, and TR, Engaged and problem behavior are scored as on a delay trial. Signal = the signal the trial had (Tab 4, Step 2). On an IMM trial, Choice, Latency, TR and Engaged are left blank: there is no delay to choose, start or wait through. Delivered = the requirement was met and the reinforcer given: a delay trial is completed when it was, whatever the clock read (under a contingency-based delay the delay ends when the requirement is met). A wait that ended in problem behavior with no reinforcer is No response, Delivered No, never an impulsive choice.</caption>
+    <thead><tr><th class="num" style="width:5%">#</th><th style="width:9%">Trial type</th><th style="width:9%" data-arr-fct="Outcome">Choice</th><th class="num" style="width:8%">Prog. delay (s)</th><th class="num" style="width:8%">Obt. delay (s)</th><th class="num" style="width:8%">Latency (s)</th><th style="width:9%">TR</th><th style="width:9%">Engaged</th><th class="num" style="width:7%">Prob. beh.</th><th class="num" style="width:7%">Collat.</th><th style="width:8%" title="The requirement was met and the reinforcer delivered: what makes a delay trial completed, whatever the clock read">Delivered</th><th>Notes</th><th style="width:8%">Signal</th></tr></thead>
     <tbody id="tbTrials"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbTrials">Add trial</button><button class="tool" id="btnTrials10">Add 10 trials</button><button class="tool" id="btnCarry">Carry this session to Progress and Delay accuracy</button></div>
   <div class="readout">
@@ -1227,6 +1307,8 @@ td input,td select{max-width:100%}
     <div><span>Independent TR</span><strong id="oTR">&mdash;</strong></div>
     <div><span>Engaged during delay</span><strong id="oEng">&mdash;</strong></div>
     <div><span>Problem behavior (count / per min)</span><strong id="oPB">&mdash;</strong></div>
+    <div><span>Denial trials accepted</span><strong id="oDen">&mdash;</strong></div>   <!-- v25.65 (DELAY-H1) -->
+    <div><span>Delay and denial trials met (session criterion)</span><strong id="oCrit">&mdash;</strong></div>
   </div>
   <p class="small">The summary reads self-control choice, latency, the tolerance response and engagement on delay trials only, and obtained delay and the delay differential on the delay trials the student waited through (SC); problem behavior is counted across the whole session. Definitions carried from Ghaemmaghami et al. (2016): a TR is independent if no part of it was prompted within 10 s; engagement is actively manipulating, responding to, or orienting toward the assigned materials, scored with a 3-s onset/offset rule; collateral responses are the student-specific extras (excessive manding, negotiating, grabbing, crying) that are as disruptive as problem behavior and must be defined and scored separately. Latency is time from task presentation to response initiation (Leon et al., 2016); in their study it lengthened as the delay grew, for every participant. Applied implication: treat a lengthening latency as an early warning that the step is too long.</p>
   <div><label class="f">Session notes, decisions, step change</label><textarea name="ss_notes"></textarea></div>
@@ -1236,8 +1318,10 @@ td input,td select{max-width:100%}
 <section class="panel" id="p6" role="tabpanel" data-panel="p6">
   <h2 class="nbh-band">Progress Monitoring</h2>
   <p class="lede">One row per session. The chart draws <span data-arr-fct="the percent of delays waited">percent self-control choice</span> (left axis) and the delay achieved (right axis) so both dependent variables are visible together; add the phase label and the graph will mark phase changes.</p>
-  <table><thead><tr><th class="num" style="width:6%">Sess.</th><th style="width:11%">Date</th><th style="width:13%">Phase</th><th class="num" style="width:9%">Prog. delay (s)</th><th class="num" style="width:9%">Delay achieved (s)</th><th class="num" style="width:8%" data-arr-fct="% waited">% SC</th><th class="num" style="width:8%">PB / min</th><th class="num" style="width:8%">% engaged</th><th>Decision</th><th style="width:5%"></th></tr></thead><tbody id="tbProg"></tbody></table>
+  <table><thead><tr><th class="num" style="width:6%">Sess.</th><th style="width:11%">Date</th><th style="width:13%">Phase</th><th class="num" style="width:9%">Prog. delay (s)</th><th class="num" style="width:9%">Delay achieved (s)</th><th class="num" style="width:8%" data-arr-fct="% waited">% SC</th><th class="num" style="width:8%">PB / min</th><th class="num" style="width:7%" title="Problem behavior per minute as a share of the baseline mean (v25.65)">PB / baseline</th><th class="num" style="width:8%">% engaged</th><th>Decision</th><th style="width:5%"></th></tr></thead><tbody id="tbProg"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbProg">Add session</button><button class="tool" id="btnPlot">Draw graph</button></div>
+  <!-- v25.65 (DELAY-H2) each session against the student's own baseline, and the return of problem behavior at each new step -->
+  <div id="dtRelapse" class="note"><p class="small">Carry the FCT baseline (Tab 2) to see each session as a share of the baseline mean and the check at each new step.</p></div>
   <svg class="plot" id="progPlot" viewBox="0 0 640 240" aria-label="Progress graph"></svg>
   <p class="small">Solid line: <span data-arr-fct="% of delays waited">% self-control choice</span>. Dashed line: delay achieved (s). Vertical rules: phase changes. Each row carries its session sheet's figures: % SC on delay trials, the delay achieved as the mean obtained delay on the delay trials completed, problem behavior per minute, and the % of delay trials engaged<span class="noprint"> (the Carry button on Tab 5 writes them)</span>. Visual analysis per Finch et al.'s scoring rule: an application counts as successful only when there is a systematic change in the intended direction <em>and</em> the design permits confident attribution to the intervention.</p>
   <h3>Design and Attribution</h3>
@@ -1246,6 +1330,11 @@ td input,td select{max-width:100%}
     <div><label class="f">Does the design permit attribution to the intervention?</label><select name="pg_attrib"><option value=""></option><option>Yes</option><option>Partially</option><option>No, monitoring only</option></select></div>
   </div>
   <div><label class="f">Visual analysis summary (level, trend, variability, immediacy, overlap)</label><textarea name="pg_va"></textarea></div>
+  <!-- v25.65 (DELAY-M5) the rule-and-rationale step before the reinforcer is changed -->
+  <div class="grid g2">
+    <div><label class="f">Sessions of progressive delay alone before a rationale is added (choice arrangements)</label><input type="number" name="rule_after_n" min="1" step="1"></div>
+  </div>
+  <p class="small" id="ruleLine">If progressive delay alone has not shifted choice after ___ sessions, add a stated rationale and rule before changing the reinforcer. For students with emotional or behavioral disorders, expect some not to respond even then (3 of 6 did not in Staubitz et al., 2020).</p>
 </section>
 
 <!-- ===== 7 INTEGRITY & IOA ===== -->
@@ -1273,13 +1362,15 @@ td input,td select{max-width:100%}
       <tr><td>Reinforcer delivered immediately at end of delay with the stated phrase</td><td><input type="radio" name="ti10" value="y"></td><td><input type="radio" name="ti10" value="n"></td><td><input type="radio" name="ti10" value="na"></td></tr>
       <tr><td>Token delivered within the maximum lag set in Tab 1, if tokens used</td><td><input type="radio" name="ti11" value="y"></td><td><input type="radio" name="ti11" value="n"></td><td><input type="radio" name="ti11" value="na"></td></tr>
       <tr><td>Delay step advanced or stepped back only per the written rule</td><td><input type="radio" name="ti12" value="y"></td><td><input type="radio" name="ti12" value="n"></td><td><input type="radio" name="ti12" value="na"></td></tr>
+      <!-- v25.65 (DELAY-M1) the trial length, held equal across the two options -->
+      <tr><td>Trial length held as written: after an immediate choice, the next trial waited as long as the delay would have taken (choice arrangements)</td><td><input type="radio" name="ti13" value="y"></td><td><input type="radio" name="ti13" value="n"></td><td><input type="radio" name="ti13" value="na"></td></tr>
     </tbody></table>
   <div class="rowbtns"><button class="tool" id="btnTI">Score integrity</button></div>
   <div class="readout"><div><span>Steps correct</span><strong id="oTI">&mdash;</strong></div><div><span>Applicable steps</span><strong id="oTIn">&mdash;</strong></div><div><span>Integrity</span><strong id="oTIpct">&mdash;</strong></div></div>
   <p class="small">90% or better before a delay step is advanced or the student&rsquo;s data are read. Below 90%, retrain the implementer on the missed steps before the next session rather than interpreting the student&rsquo;s data. This is this protocol's rule (Form PR-1 uses 90% too). Form TI-1 reads 80&ndash;89% as a band that calls for a re-check; here it means re-check and retrain, not advance.</p>
 
   <h3>B. Delay Accuracy (Obtained vs. Programmed)</h3>
-  <p class="lede">The Carry button on Tab 5 writes the mean obtained delay from each session sheet. Leon et al. reported the mean obtained delay and the mean differential for every phase. Alex's 10-s phase in their food analysis ran at a mean of 17.2 s, a 7.2-s differential, which is the kind of drift that makes a fading step meaningless.</p>
+  <p class="lede">The Carry button on Tab 5 writes the mean obtained delay from each session sheet. Leon et al. reported the mean obtained delay and the mean differential for every phase. Participant 3&rsquo;s 10-s phase in their food analysis ran at a mean of 17.2 s, a 7.2-s differential, which is the kind of drift that makes a fading step meaningless.</p>
   <table><thead><tr><th style="width:14%">Date</th><th style="width:14%">Phase</th><th class="num" style="width:16%">Programmed (s)</th><th class="num" style="width:16%">Mean obtained (s)</th><th class="num" style="width:14%">Differential (s)</th><th>Action</th></tr></thead><tbody id="tbDA"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbDA">Add row</button></div>
 
@@ -1307,7 +1398,10 @@ td input,td select{max-width:100%}
   <p class="lede">Program at least one probe on each dimension below. Probe format should be identical to the naturalistic baseline in Tab 2D so results are comparable (the Dunkel-Jackson et al., 2016 model). Passage et al. (2012) probed with a novel intervening activity; Bloh (2010) probed with novel reinforcers in a novel setting.</p>
   <table><thead><tr><th style="width:15%">Dimension</th><th style="width:26%">Trained condition</th><th style="width:26%">Probe condition</th><th style="width:11%">Date</th><th class="num" style="width:8%" data-arr-fct="% waited">% SC</th><th class="num" style="width:8%">Delay (s)</th><th class="num" style="width:8%">PB / min</th><th style="width:8%">Stop rule met</th><th style="width:4%"></th></tr></thead><tbody id="tbGen"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbGen">Add probe</button></div>
-  <p class="small">Suggested dimensions: setting, implementer (teacher, paraprofessional, parent), reinforcer, intervening activity, delay cue wording, task materials, contingency type (positive to negative or the reverse), and an unsignaled delay with no activity offered.</p>
+  <p class="small">Suggested dimensions: setting, implementer (teacher, paraprofessional, parent), reinforcer, intervening activity, delay cue wording, task materials, contingency type (positive to negative or the reverse), and an unsignaled delay with no activity offered. <!-- v25.65 (DELAY-M2) -->The unsignaled probe with no activity is required before maintenance probes (Tab 8C). <!-- v25.65 (DELAY-H2) -->A context change (a new room, a new adult, or home) is a renewal probe: its problem behavior is checked against the last 5 sessions before it, as at a new step. In Kastner et al. (2025), renewal after a context change went past the 90% reduction criterion in about half of the tests.</p>
+  <div id="dtRenewal" class="small" aria-live="polite"></div>
+  <!-- v25.65 (DELAY-L3) a delay used as a generalization tactic (Fowler & Baer, 1981) -->
+  <div class="chk"><input type="checkbox" name="gen_late" id="gl"><label for="gl"><b>Exchange held until after the generalization setting</b> (for example at the end of the day), so the student cannot tell which setting counted. With 7 preschoolers, reinforcement at the end of the school day brought consistent generalization to a setting with no contingencies; reinforcement right after the contingent setting did not, unless the late condition had come first (Fowler &amp; Baer, 1981).</label></div>
 
   <h3>B. Activity Fading and Unassisted Waiting</h3>
   <div class="grid g2">
@@ -1316,7 +1410,8 @@ td input,td select{max-width:100%}
   </div>
 
   <h3>C. Maintenance Schedule</h3>
-  <p class="lede">Probes use the baseline choice procedure with no training components (as Passage et al., 2012 did at 41 days). Record and act on relapse: resurgence, renewal in a new setting, and reinstatement after a free reinforcer are all plausible here and none has been studied in SCT.</p>
+  <p class="lede">Probes use the baseline choice procedure with no training components (as Passage et al., 2012 did at 41 days). Record and act on relapse: resurgence, renewal in a new setting, and reinstatement after a free reinforcer are all plausible here. None has been studied in self-control training; <!-- v25.65 (DELAY-H2) -->on the FCT path, resurgence and renewal have been studied directly (Marshall et al., 2025; Kastner et al., 2025), and Tab 6 and Tab 8A check for them.</p>
+  <div class="caution" id="dtUnsigNote" hidden><p></p></div>
   <table><thead><tr><th style="width:16%">Interval</th><th style="width:14%">Due</th><th style="width:14%">Done</th><th class="num" style="width:10%" data-arr-fct="% waited">% SC</th><th class="num" style="width:12%">Delay (s)</th><th class="num" style="width:10%">PB / min</th><th>Result / action</th></tr></thead>
     <tbody id="tbMaint"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbMaint">Add probe</button></div>
@@ -1341,7 +1436,9 @@ td input,td select{max-width:100%}
     <div><label class="f">Caregiver trained (date, setting)</label><input type="text" name="ho_care"></div>
   </div>
   <div><label class="f">Plan written into the BIP (section and date)</label><input type="text" name="ho_bip"></div>
-  <p class="small">In the workstation this protocol goes to the case: Form TD-1's delay component takes the steps, the activity and the cue; Form QS-1 gives staff the waiting line; Form TI-1 adds the integrity steps on request; Form PR-1 puts the delay ladder on its fading sequence. Each fills only what is empty there.</p>   <!-- v22.94 (review F402) -->
+  <!-- v25.65 (DELAY-H1) an item that can never be given: "no" plus an alternative, or "no" plus a contingency -->
+  <div><label class="f">Unavailable item script (an item that can never be given: &ldquo;no&rdquo; plus an alternative, or &ldquo;no&rdquo; plus a contingency)</label><input type="text" name="ho_unavail" placeholder='e.g., "The tablet is broken. You can have the puzzle or the drawing book."'></div>
+  <p class="small">In the workstation this protocol goes to the case: Form TD-1's delay component takes the steps, the activity and the cue (the case also carries the shares of requests honored, delayed and denied, the denial statement, what a denial gives instead, the unavailable item script, the problem-behavior criterion and the plan for problem behavior coming back, which Form TD-1 does not yet read); Form QS-1 gives staff the waiting line; Form TI-1 adds the integrity steps on request; Form PR-1 puts the delay ladder on its fading sequence. Each fills only what is empty there.</p>   <!-- v22.94 (review F402); v25.65 (DELAY-H1, H2) -->
 </section>
 
 <!-- ===== 9 EVIDENCE GUIDE ===== -->
@@ -1352,7 +1449,7 @@ td input,td select{max-width:100%}
   <h3>Decision Path</h3>
   <div class="tree">
     <div class="q">1. Is there a functional communication response already, and is the problem waiting after a request?</div>
-    <div class="a">Yes: delay tolerance after FCT. Use contingency-based progressive delay with a tolerance response and DRA or DRO requirement. Skip the choice arrangement. Evidence: Ghaemmaghami et al. (2016); Hanley et al. (2014); Drifke et al. (2020); Iannaccone &amp; Jessel (2021); Muharib et al. (2022 meta-analysis).</div>
+    <div class="a">Yes: delay and denial tolerance after FCT. Use contingency-based progressive delay with a tolerance response and DRA or DRO requirement, and add denial trials once delayed trials meet criterion. Skip the choice arrangement. Evidence: Ghaemmaghami et al. (2016); Hanley et al. (2014); Drifke et al. (2020); Iannaccone &amp; Jessel (2021); Muharib et al. (2022 meta-analysis); Slaton et al. (2024); Marshall et al. (2025).</div>
     <div class="a">No: continue.</div>
     <div class="q">2. Is the referral behavior escape-maintained?</div>
     <div class="a">Yes: negative-reinforcement task-choice arrangement. Verify aversiveness or difficulty per student. Altered delay plus task magnitude or aversiveness worked in every application; add a commitment response if allocation does not shift. Evidence: Perrin &amp; Neef (2012); Porter &amp; Sy (2020); Lerman et al. (2006).</div>
@@ -1385,8 +1482,11 @@ td input,td select{max-width:100%}
   <ul>
     <li>Time-based delay after FCT often loses the communication response and brings problem behavior back: in Ghaemmaghami et al. (2016) it failed for all four participants, with problem behavior back within the first 16 s of delay for three, even with an alternative activity available (and prompts to it for three of the four); in Hanley et al. (2001), increasing delays extinguished the communication response of the one participant exposed to them. It is not universal: in Fisher et al. (2000), delay fading alone kept destructive behavior low for one of three participants, and punishment, or prompting and praise for work during the delay, was added for the other two.</li>
     <li>Contingency-based delay with a tolerance response produces near-zero problem behavior, near-optimal communication, and practical delays (about 10 to 15 min, and roughly 50 demands, for one participant) in a few hours of treatment, with generality shown across a small but heterogeneous group of participants, reinforcement contingencies, and contexts, including a context in which problem behavior still produced the reinforcers during the delay (Ghaemmaghami et al., 2016).</li>
-    <li>DRA-based requirements produce more contextually appropriate behavior than DRO-based ones, though both yield tolerance (Iannaccone &amp; Jessel, 2021); DRA-based thinning reduces the prevalence and magnitude of resurgence relative to time-based thinning (Drifke et al., 2020).</li>
-    <li>Signals can help a student wait: both participants in Vollmer et al. (1999) chose the larger, delayed reinforcer when the delay was signaled (with a hand gesture or a timer), and signals helped maintain the communication response during delay fading for 2 of 3 participants in Kelley et al. (2011). A student who counts aloud has turned an unsignaled delay into a signaled one (Leon et al., 2016, Alex).</li>
+    <!-- v25.65 (DELAY-H2) the prevalence figures are Marshall et al.'s; (DELAY-L7) who was studied; (DELAY-L6) no participant names -->
+    <li>DRA-based requirements produce more contextually appropriate behavior than DRO-based ones, though both yield tolerance (Iannaccone &amp; Jessel, 2021, a translational study with college students). With 3 individuals with intellectual and developmental disabilities, a DRA requirement during the delay kept the request going and problem behavior low better than DRO or fixed-time delays (Drifke et al., 2020).</li>
+    <li>Problem behavior often comes back while delays are lengthened. A review of 23 articles (66 participants, 546 steps) found resurgence at least once for 81.8% of participants and in 28.8% of steps, least often when the tolerance response was taught (18.9%), and most often with time-based delays (every participant, 46.5% of steps, at a mean of 0.53 of baseline) against DRA-based delays (25.9% of steps, 0.15 of baseline). DRA-based thinning cut its prevalence nearly in half (Marshall et al., 2025). Kastner et al. (2025), judging by a 90% reduction from baseline, saw it in 80% of first steps, and renewal after a context change went past the criterion in about half of the tests. School programs kept their gains: in a specialized school, skill-based treatment with delay and denial tolerance cut challenging behavior by 98.33% for 6 children with autism, effects were still seen a year later, and crisis procedures were no longer used for any of them (Slaton et al., 2024).</li>
+    <li>Teaching &ldquo;no&rdquo;: in Hanley et al. (2014), two of every five requests were honored at once and three of five were delayed or denied, and after 8&ndash;14 weeks no problem behavior was seen at the clinic or at home for all 3 children with autism. Taught communication and delay and denial tolerance mostly carried over to untaught situations and caregiver-run sessions (Rahaman &amp; Luczynski, 2024), and a version of the treatment was replicated in a public day school for students with emotional or behavioral disorders (Staubitz et al., 2022).</li>
+    <li>Signals can help a student wait: both participants in Vollmer et al. (1999) chose the larger, delayed reinforcer when the delay was signaled (with a hand gesture or a timer), and signals helped maintain the communication response during delay fading for 2 of 3 participants in Kelley et al. (2011). A student who counts aloud has turned an unsignaled delay into a signaled one (Leon et al., 2016, Participant 3). Signals help most with fading: a visible timer added to delay fading worked for 4 children (Vessells et al., 2018), while a countdown timer and brief rules without fading did not increase self-control for 3 preschoolers (Newquist et al., 2012).</li>
   </ul>
 
   <!-- writing help (v21.43) --><h3 class="nbh-wh">Writing help</h3>
@@ -1395,44 +1495,66 @@ td input,td select{max-width:100%}
   <p class="noprint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated case loaded across Tabs 1&ndash;8 &mdash; preassessment, discounting probes, fading ladder, session sheet, progress graph, integrity and IOA, and generalization.</p>
 
   <h3>Reference List</h3>
+  <!-- v25.65 (DELAY parcel) the JABA studies the new rules cite -->
   <ol class="refs" id="dt1-refs">
+    <li>Austin, J. E., &amp; Tiger, J. H. (2015). Providing alternative reinforcers to facilitate tolerance to delayed reinforcement following functional communication training. <em>Journal of Applied Behavior Analysis, 48</em>, 663&ndash;668.</li>
     <li>Bannerman, D. J., Sheldon, J. B., Sherman, J. A., &amp; Harchik, A. E. (1990). Balancing the right to habilitation with the right to personal liberties: The rights of people with developmental disabilities to eat too many doughnuts and take a nap. <em>Journal of Applied Behavior Analysis, 23</em>(1), 79&ndash;89.</li>
     <li>Benedick, H., &amp; Dixon, M. R. (2009). Instructional control of self-control in adults with co-morbid developmental disabilities and mental illness. <em>Journal of Developmental and Physical Disabilities, 21</em>(6), 457&ndash;471. https://doi.org/10.1007/s10882-009-9166-4</li>
     <li>Deng, W. Q., Belisario, K. L., Doggett, A., Elsayed, M., Cooper, A., &amp; MacKillop, J. (2026). The genoeconomics of impulsive intertemporal choice: A critical review. <em>Journal of the Experimental Analysis of Behavior, 126</em>(1), e70120. https://doi.org/10.1002/jeab.70120</li>
     <li>Dixon, M. R., &amp; Cummings, A. (2001). Self-control in children with autism: Response allocation during delays to reinforcement. <em>Journal of Applied Behavior Analysis, 34</em>(4), 491&ndash;495.</li>
     <li>Dixon, M. R., &amp; Holcomb, S. (2000). Teaching self-control to small groups of dually diagnosed adults. <em>Journal of Applied Behavior Analysis, 33</em>(4), 611&ndash;614.</li>
+    <li>Dixon, M. R., Lik, N. M. K., Green, L., &amp; Myerson, J. (2013). Delay discounting of hypothetical and real money: The effect of holding reinforcement rate constant. <em>Journal of Applied Behavior Analysis, 46</em>, 512&ndash;517.</li>
     <li>Dixon, M. R., &amp; Tibbetts, P. A. (2009). The effects of choice on self-control. <em>Journal of Applied Behavior Analysis, 42</em>(2), 243&ndash;252.</li>
     <li>Drifke, M. A., Tiger, J. H., &amp; Lillie, M. A. (2020). DRA contingencies promote improved tolerance to delayed reinforcement during FCT compared to DRO and fixed-time schedules. <em>Journal of Applied Behavior Analysis, 53</em>(3), 1579&ndash;1592.</li>
     <li>Dunkel-Jackson, S. M., Dixon, M. R., &amp; Szekely, S. (2016). Self-control as generalized operant behavior by adults with autism spectrum disorder. <em>Journal of Applied Behavior Analysis, 49</em>(3), 705&ndash;710.</li>
     <li>Finch, K. R., Chalm&eacute;, R. L., Kestner, K. M., &amp; Sarno, B. G. (2024). Self-control training: A scoping review. <em>Behavior Analysis in Practice, 17</em>, 137&ndash;156. https://doi.org/10.1007/s40617-023-00885-y</li>
     <li>Fisher, W. W., Thompson, R. H., Hagopian, L. P., Bowman, L. G., &amp; Krug, A. (2000). Facilitating tolerance of delayed reinforcement during functional communication training. <em>Behavior Modification, 24</em>(1), 3&ndash;29.</li>
+    <li>Fowler, S. A., &amp; Baer, D. M. (1981). &ldquo;Do I have to be good all day?&rdquo; The timing of delayed reinforcement as a factor in generalization. <em>Journal of Applied Behavior Analysis, 14</em>, 13&ndash;24.</li>
+    <li>Gadaire, D. M., Fisher, W. W., &amp; Steege, M. (2014). The effects of presenting delays before and after task completion on self-control responding in children with behavior disorders. <em>Journal of Applied Behavior Analysis, 47</em>, 192&ndash;197.</li>
     <li>Ghaemmaghami, M., Hanley, G. P., &amp; Jessel, J. (2016). Contingencies promote delay tolerance. <em>Journal of Applied Behavior Analysis, 49</em>(3), 548&ndash;575. https://doi.org/10.1002/jaba.333</li>
     <li>Gokey, K. M., Wilder, D. A., Welch, T., Collier, A., &amp; Mathisen, D. (2013). Fading a concurrent activity during self-control training for children with autism. <em>Journal of Applied Behavior Analysis, 46</em>(4), 827&ndash;831.</li>
     <li>Green, L., &amp; Myerson, J. (2004). A discounting framework for choice with delayed and probabilistic rewards. <em>Psychological Bulletin, 130</em>(5), 769&ndash;792. https://doi.org/10.1037/0033-2909.130.5.769</li>
+    <li>Greer, B. D., Fisher, W. W., Saini, V., Owen, T. M., &amp; Jones, J. K. (2016). Functional communication training during reinforcement schedule thinning: An analysis of 25 applications. <em>Journal of Applied Behavior Analysis, 49</em>, 105&ndash;121.</li>
     <li>Hanley, G. P., Iwata, B. A., &amp; Thompson, R. H. (2001). Reinforcement schedule thinning following treatment with functional communication training. <em>Journal of Applied Behavior Analysis, 34</em>(1), 17&ndash;38.</li>
     <li>Hanley, G. P., Jin, C. S., Vanselow, N. R., &amp; Hanratty, L. A. (2014). Producing meaningful improvements in problem behavior of children with autism via synthesized analyses and treatments. <em>Journal of Applied Behavior Analysis, 47</em>(1), 16&ndash;36.</li>
+    <li>Hoerger, M. L., &amp; Mace, F. C. (2006). A computerized test of self-control predicts classroom behavior. <em>Journal of Applied Behavior Analysis, 39</em>, 147&ndash;159.</li>
     <li>Iannaccone, J. A., &amp; Jessel, J. (2021). A translational comparison of contingency-based progressive delay procedures and their effects on contextually appropriate behavior. <em>Journal of Applied Behavior Analysis, 54</em>(1), 231&ndash;247.</li>
     <li>Johnson, M. W., &amp; Bickel, W. K. (2002). Within-subject comparison of real and hypothetical money rewards in delay discounting. <em>Journal of the Experimental Analysis of Behavior, 77</em>(2), 129&ndash;146.</li>
     <li>Johnson, M. W., &amp; Bickel, W. K. (2008). An algorithm for identifying nonsystematic delay-discounting data. <em>Experimental and Clinical Psychopharmacology, 16</em>(3), 264&ndash;274.</li>
+    <li>Juanico, J. F., Dozier, C. L., Payne, S. W., Ackerlund Brandt, J. A., &amp; Jowett Hirst, E. S. (2016). An evaluation of toy quality for increasing self-control in typically developing preschool children. <em>Journal of Applied Behavior Analysis, 49</em>, 460&ndash;471.</li>
+    <li>Kastner, K. M., Hood, S. A., &amp; Mitteer, D. R. (2025). An evaluation of durability during and following delay-and-denial tolerance teaching. <em>Journal of Applied Behavior Analysis, 58</em>, 344&ndash;362.</li>
     <li>Kelley, M. E., Lerman, D. C., Fisher, W. W., Roane, H. S., &amp; Zangrillo, A. N. (2011). Reinforcement delay fading during differential reinforcement of communication: The effects of signals on response maintenance. <em>Journal of the Experimental Analysis of Behavior, 96</em>(1), 107&ndash;122.</li>
+    <li>Landa, R. K., Hansen, B., &amp; Shillingsburg, M. A. (2017). Teaching mands for information using &lsquo;when&rsquo; to children with autism. <em>Journal of Applied Behavior Analysis, 50</em>, 538&ndash;551.</li>
     <li>Leon, Y., Borrero, J. C., &amp; DeLeon, I. G. (2016). Parametric analysis of delayed primary and conditioned reinforcers. <em>Journal of Applied Behavior Analysis, 49</em>(3), 639&ndash;655. https://doi.org/10.1002/jaba.311</li>
     <li>Lerman, D. C., Addison, L. R., &amp; Kodak, T. (2006). A preliminary analysis of self-control with aversive events: The effects of task magnitude and delay on the choices of children with autism. <em>Journal of Applied Behavior Analysis, 39</em>(2), 227&ndash;232.</li>
+    <li>Mace, F. C., Pratt, J. L., Prager, K. L., &amp; Pritchard, D. (2011). An evaluation of three methods of saying &ldquo;no&rdquo; to avoid an escalating response class hierarchy. <em>Journal of Applied Behavior Analysis, 44</em>, 83&ndash;94.</li>
     <li>Madden, G. J., Begotka, A. M., Raiff, B. R., &amp; Kastern, L. L. (2003). Delay discounting of real and hypothetical rewards. <em>Experimental and Clinical Psychopharmacology, 11</em>(2), 139&ndash;145.</li>
+    <li>Marshall, A. R., Mitteer, D. R., Greer, B. D., &amp; Kishel, C. B. (2025). On the prevalence and magnitude of resurgence during delay-and-denial tolerance teaching. <em>Journal of Applied Behavior Analysis, 58</em>, 151&ndash;163.</li>
     <li>Mazur, J. E. (1987). An adjusting procedure for studying delayed reinforcement. In M. L. Commons, J. E. Mazur, J. A. Nevin, &amp; H. Rachlin (Eds.), <em>Quantitative analyses of behavior: Vol. 5</em> (pp. 55&ndash;73). Erlbaum.</li>
     <li>Mudford, O. C., Martin, N. T., Hui, J. K. Y., &amp; Taylor, S. A. (2009). Assessing observer accuracy in continuous recording of rate and duration: Three algorithms compared. <em>Journal of Applied Behavior Analysis, 42</em>(3), 527&ndash;539.</li>
     <li>Muharib, R., Dowdy, A., Rajaraman, A., &amp; Jessel, J. (2022). Contingency-based delay to reinforcement following functional communication training for autistic individuals: A multilevel meta-analysis. <em>Autism, 26</em>(4), 761&ndash;781. https://doi.org/10.1177/13623613211065540</li>
     <li>Myerson, J., Green, L., &amp; Warusawitharana, M. (2001). Area under the curve as a measure of discounting. <em>Journal of the Experimental Analysis of Behavior, 76</em>(2), 235&ndash;243.</li>
     <li>Neef, N. A., Bicard, D. F., &amp; Endo, S. (2001). Assessment of impulsivity and the development of self-control in students with attention deficit hyperactivity disorder. <em>Journal of Applied Behavior Analysis, 34</em>(4), 397&ndash;408.</li>
+    <li>Neef, N. A., Bicard, D. F., Endo, S., Coury, D. L., &amp; Aman, M. G. (2005). Evaluation of pharmacological treatment of impulsivity in children with attention deficit hyperactivity disorder. <em>Journal of Applied Behavior Analysis, 38</em>, 135&ndash;146.</li>
+    <li>Neef, N. A., Marckel, J., Ferreri, S. J., Bicard, D. F., Endo, S., Aman, M. G., Miller, K. M., Jung, S., Nist, L., &amp; Armstrong, N. (2005). Behavioral assessment of impulsivity: A comparison of children with and without attention deficit hyperactivity disorder. <em>Journal of Applied Behavior Analysis, 38</em>, 23&ndash;37.</li>
+    <li>Newquist, M. H., Dozier, C. L., &amp; Neidert, P. L. (2012). A comparison of the effects of brief rules, a timer, and preferred toys on self-control. <em>Journal of Applied Behavior Analysis, 45</em>, 497&ndash;509.</li>
     <li>Odum, A. L. (2011). Delay discounting: I'm a k, you're a k. <em>Journal of the Experimental Analysis of Behavior, 96</em>(3), 427&ndash;439. https://doi.org/10.1901/jeab.2011.96-423</li>
     <li>Passage, M., Tincani, M., &amp; Hantula, D. A. (2012). Teaching self-control with qualitatively different reinforcers. <em>Journal of Applied Behavior Analysis, 45</em>(4), 853&ndash;857.</li>
     <li>Perrin, C. J., &amp; Neef, N. A. (2012). Further analysis of variables that affect self-control with aversive events. <em>Journal of Applied Behavior Analysis, 45</em>(2), 299&ndash;313.</li>
     <li>Peterson, S. M., Aljadeff-Abergel, E., Eldridge, R. R., VanderWeele, N. J., &amp; Acker, N. S. (2021). Conceptualizing self-determination from a behavioral perspective: The role of choice, self-control, and self-management. <em>Journal of Behavioral Education, 30</em>(2), 299&ndash;318.</li>
     <li>Porter, A., &amp; Sy, J. R. (2020). Assessment and treatment of self-control with aversive events. <em>Journal of Applied Behavior Analysis, 53</em>(1), 508&ndash;521.</li>
     <li>Rachlin, H., Raineri, A., &amp; Cross, D. (1991). Subjective probability and delay. <em>Journal of the Experimental Analysis of Behavior, 55</em>(2), 233&ndash;244.</li>
+    <li>Rahaman, J. A., &amp; Luczynski, K. C. (2024). Evaluating the efficacy and generality of a skill-based approach for promoting universal behavioral readiness. <em>Journal of Applied Behavior Analysis, 57</em>, 131&ndash;152.</li>
+    <li>Reed, D. D., &amp; Martens, B. K. (2011). Temporal discounting predicts student responsiveness to exchange delays in a classroom token system. <em>Journal of Applied Behavior Analysis, 44</em>, 1&ndash;18.</li>
     <li>Rodzon, K., Berry, M. S., &amp; Odum, A. L. (2011). Within-subject comparison of degree of delay discounting using titrating and fixed sequence procedures. <em>Behavioural Processes, 86</em>(1), 164&ndash;167.</li>
     <li>Rung, J. M., &amp; Madden, G. J. (2018). Experimental reductions of delay discounting and impulsive choice: A systematic review and meta-analysis. <em>Journal of Experimental Psychology: General, 147</em>(9), 1349&ndash;1381.</li>
     <li>Shevorykin, A., Bickel, W. K., Carl, E., &amp; Sheffer, C. E. (2021). Future thinking priming especially effective at modifying delay discounting rates among cigarette smokers. <em>International Journal of Environmental Research and Public Health, 18</em>(16), 8717.</li>
+    <li>Slaton, J. D., Davis, M., DePetris, D. A., Raftery, K. J., Daniele, S., &amp; Caruso, C. M. (2024). Long-term effectiveness and generality of practical functional assessment and skill-based treatment. <em>Journal of Applied Behavior Analysis, 57</em>, 635&ndash;656.</li>
     <li>Snider, S. E., LaConte, S. M., &amp; Bickel, W. K. (2016). Episodic future thinking: Expansion of the temporal window in individuals with alcohol dependence. <em>Alcoholism: Clinical and Experimental Research, 40</em>(7), 1558&ndash;1566.</li>
+    <li>Staubitz, J. L., Lloyd, B. P., &amp; Reed, D. D. (2020). Effects of self-control training for elementary students with emotional and behavioral disorders. <em>Journal of Applied Behavior Analysis, 53</em>, 857&ndash;874.</li>
+    <li>Staubitz, J. L., Staubitz, J. E., Pollack, M. S., Haws, R. A., &amp; Hopton, M. (2022). Effects of an enhanced choice model of skill-based treatment for students with emotional/behavioral disorders. <em>Journal of Applied Behavior Analysis, 55</em>, 1306&ndash;1341.</li>
+    <li>Sumter, M. E., Gifford, M. R., Tiger, J. H., Effertz, H. M., &amp; Fulton, C. J. (2020). Providing noncontingent, alternative, functional reinforcers during delays following functional communication training. <em>Journal of Applied Behavior Analysis, 53</em>, 2319&ndash;2329.</li>
+    <li>Vessells, J., Sy, J. R., Wilson, A., &amp; Green, L. (2018). Effects of delay fading and signals on self-control choices by children. <em>Journal of Applied Behavior Analysis, 51</em>, 374&ndash;381.</li>
     <li>Vollmer, T. R., Borrero, J. C., Lalli, J. S., &amp; Daniel, D. (1999). Evaluating self-control and impulsivity in children with severe behavior disorders. <em>Journal of Applied Behavior Analysis, 32</em>(4), 451&ndash;466.</li>
     <li>Yeh, Y.-H., Myerson, J., &amp; Green, L. (2021). Delay discounting, cognitive ability, and personality: What matters? <em>Psychonomic Bulletin &amp; Review, 28</em>(2), 686&ndash;694. https://doi.org/10.3758/s13423-020-01777-w</li>
   </ol>
@@ -1691,12 +1813,14 @@ const templates={
   tbPD:()=>T(n(),n(),calc(),calc(),txt(),del()),
   tbDDlog:()=>T(dt(),txt(),n(),n(),txt()),
   tbFade:()=>T(calc(),n(),calc(),dt(),txt()),
-  tbTrials:()=>T(calc(),sel(['Delay','IMM']),selv(['SC','IMP','No response']),n(),n(),n(),sel(['Indep.','Prompted','None']),sel(['Yes','Partial','No']),n(),n(),sel(['Yes','No']),txt()),   /* v22.92 (review F400) Delivered */
-  tbProg:()=>T(n('1'),dt(),txt(),n(),n(),n(),n(),n(),txt(),del()),
+  tbTrials:()=>T(calc(),sel(['Delay','IMM','DEN']),selv(['SC','IMP','No response']),n(),n(),n(),sel(['Indep.','Prompted','None']),sel(['Yes','Partial','No']),n(),n(),sel(['Yes','No']),txt(),sel(['None','Verbal cue','Continuous'])),   /* v22.92 (review F400) Delivered; v25.65 (DELAY-H1) DEN, a denial trial; (DELAY-M2) the Signal column, last so a saved trial keeps its places */
+  tbProg:()=>T(n('1'),dt(),txt(),n(),n(),n(),n(),calc(),n(),txt(),del()),   /* v25.65 (DELAY-H2) PB as a share of the baseline mean, computed (no field, so saved rows keep their places) */
+  tbPair:()=>T(sel(['Rate against immediacy','Quality against immediacy','Effort against immediacy','Rate against quality','Rate against effort','Quality against effort']),n('1'),n(),calc(),txt()),   /* v25.65 (DELAY-M7) */
+  tbBT:()=>T(txt(),n('1'),n(),calc(),txt()),   /* v25.65 (DELAY-M12) the break-or-task check */
   tbDA:()=>T(dt(),txt(),n(),n(),calc(),txt()),
   tbIOA:()=>T(calc(),n(),n(),calc(),del()),
   tbQlog:()=>T(dt(),txt(),txt(),n(),n(),txt()),
-  tbGen:()=>T(sel(['Setting','Implementer','Reinforcer','Activity','Cue wording','Materials','Contingency type','Unsignaled, no activity']),txt(),txt(),dt(),n(),n(),n(),sel(['No','Yes']),del()),   /* v22.92 (review F406) PB / min, stop rule met */
+  tbGen:()=>T(sel(['Setting','Implementer','Reinforcer','Activity','Cue wording','Materials','Contingency type','Unsignaled, no activity','Context change (new room, new adult, home)']),txt(),txt(),dt(),n(),n(),n(),sel(['No','Yes']),del()),   /* v22.92 (review F406) PB / min, stop rule met; v25.65 (DELAY-H2) the renewal probe */
   tbMaint:()=>T(txt(),dt(),dt(),n(),n(),n(),txt())
 };
 function addRow(id,vals){const tb=document.getElementById(id);const tr=document.createElement('tr');tr.innerHTML=templates[id]();tb.appendChild(tr);if(vals){const f=tr.querySelectorAll('input,select');vals.forEach((v,i)=>{if(f[i])f[i].value=v})}recalc(id);return tr}
@@ -1726,6 +1850,9 @@ function recalc(id){
   if(id==='tbTrials'){R.forEach((tr,i)=>tr.cells[0].textContent=i+1);relabelChoice();summarizeTrials();}
   if(id==='tbDA')R.forEach(tr=>{const v=vals(tr);const p=num(v[2]),o=num(v[3]);tr.cells[4].textContent=(p!=null&&o!=null)?fmt(o-p,2):'\u2014'});
   if(id==='tbIOA'){R.forEach((tr,i)=>{tr.cells[0].textContent=i+1;const v=vals(tr);const a=num(v[0]),b=num(v[1]);tr.cells[3].textContent=(a==null||b==null)?'\u2014':fmt(ioaScore(a,b),2)});computeIOA();}
+  /* v25.65 (DELAY-M7, M12) the share of choices in each pairing, and of break choices */
+  if(id==='tbPair'||id==='tbBT'){R.forEach(tr=>{const v=vals(tr);const t=num(v[1]),k=num(v[2]);tr.cells[3].textContent=(t&&k!=null)?pct(k,t):'\u2014'});if(id==='tbPair'&&window.dtPairs)window.dtPairs();}
+  if((id==='tbProg'||id==='tbFct'||id==='tbGen'||id==='tbMaint'||id==='tbFade'||id==='tbPair')&&window.dtV2565)window.dtV2565();
 }
 const mmss=s=>`${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,'0')}`;
 /* v21.37: the aversiveness verification's selection rounds. One row per round; each cell holds the rank the task was
@@ -1882,8 +2009,12 @@ function summarizeTrials(){
   const done=delayTrials.filter(isDone).length,cb=(document.querySelector('[name=delaytype]:checked')||{}).value==='cbpd';
   const obt=ran.map(v=>num(v[3])),diff=cb?[]:ran.map(v=>{const p=num(v[2]),o=num(v[3]);return p!=null?o-p:null}).filter(x=>x!=null);
   const lat=delayTrials.map(v=>num(v[4])).filter(x=>x!=null);
-  const trs=delayTrials.filter(v=>v[5]);const trI=trs.filter(v=>v[5]==='Indep.').length;
-  const eng=delayTrials.filter(v=>v[6]);const engY=eng.filter(v=>v[6]==='Yes').length;
+  /* v25.65 (DELAY-H1) a denial trial (DEN): the item is not given this time. It is met when the student accepts it (Choice: Accepted,
+     the SC value); the tolerance response and engagement are read on it as on a delay trial, and the session criterion counts delay
+     and denial trials together */
+  const denT=R.filter(v=>v[0]==='DEN'),denOk=denT.filter(v=>v[1]==='SC').length;
+  const trs=delayTrials.concat(denT).filter(v=>v[5]);const trI=trs.filter(v=>v[5]==='Indep.').length;
+  const eng=delayTrials.concat(denT).filter(v=>v[6]);const engY=eng.filter(v=>v[6]==='Yes').length;
   const pb=R.reduce((s,v)=>s+(num(v[7])||0),0);const len=num($('[name=ss_len]').value);
   const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
   $('#oSC').textContent=choiceTrials.length?`${sc}/${choiceTrials.length} (${pct(sc,choiceTrials.length)})`:'\u2014';
@@ -1891,9 +2022,11 @@ function summarizeTrials(){
   $('#oObt').textContent=fmt(mean(obt),1);$('#oDiff').textContent=cb&&ran.length?'not read (contingency-based)':fmt(mean(diff),1);$('#oLat').textContent=fmt(mean(lat),1);
   $('#oTR').textContent=trs.length?pct(trI,trs.length):'\u2014';$('#oEng').textContent=eng.length?pct(engY,eng.length):'\u2014';
   $('#oPB').textContent=R.length?`${pb}${len?' / '+fmt(pb/len,2):''}`:'\u2014';
+  {const e=$('#oDen'),c=$('#oCrit'),nn=delayTrials.length+denT.length;if(e)e.textContent=denT.length?`${denOk}/${denT.length} (${pct(denOk,denT.length)})`:'\u2014';
+   if(c)c.textContent=nn?`${done+denOk}/${nn} (${pct(done+denOk,nn)})`:'\u2014';}   /* v25.65 (DELAY-H1) */
   /* v21.37: the figures the Progress table and the Delay accuracy log carry, as the Progress note defines them */
   const completed=ran.map(v=>num(v[3]));
-  return {done,ended,trials:R.length,delay:delayTrials.length,sc:choiceTrials.length?100*sc/choiceTrials.length:null,obt:mean(obt),achieved:mean(completed),pbm:(R.length&&len)?pb/len:null,eng:eng.length?100*engY/eng.length:null};
+  return {done,ended,den:denT.length,denOk,trials:R.length,delay:delayTrials.length,sc:choiceTrials.length?100*sc/choiceTrials.length:null,obt:mean(obt),achieved:mean(completed),pbm:(R.length&&len)?pb/len:null,eng:eng.length?100*engY/eng.length:null};
 }
 $('[name=ss_len]').addEventListener('input',summarizeTrials);
 /* v21.37: one press carries the session sheet's figures to the Progress table (% SC on delay trials, the delay achieved as the
@@ -1942,7 +2075,9 @@ function drawProg(){
 
 /* ---------- integrity and IOA ---------- */
 /* v21.16 audit (F5): integrity and IOA follow every change, not only their buttons */
-function scoreTI(){let y=0,n=0;for(let i=1;i<=12;i++){const c=document.querySelector(`[name=ti${i}]:checked`);if(!c)continue;if(c.value==='y'){y++;n++}else if(c.value==='n')n++}
+/* v25.65 (DELAY-M1) the checklist has a 13th step; every step on it is scored */
+const TI_N=()=>document.querySelectorAll('#tbTI tr').length;
+function scoreTI(){let y=0,n=0;for(let i=1;i<=TI_N();i++){const c=document.querySelector(`[name=ti${i}]:checked`);if(!c)continue;if(c.value==='y'){y++;n++}else if(c.value==='n')n++}
   const any=!!document.querySelector('#tbTI input:checked');$('#oTI').textContent=any?y:'\u2014';$('#oTIn').textContent=any?n:'\u2014';$('#oTIpct').textContent=pct(y,n);}
 $('#btnTI').addEventListener('click',scoreTI);
 function ioaScore(a,b){if(a===b)return 1;if(a===0||b===0)return 0;return Math.min(a,b)/Math.max(a,b)}
@@ -1958,7 +2093,7 @@ window.addEventListener('beforeprint',()=>{$$('input[type=date]').forEach(e=>e.c
 
 /* ---------- save / load / print / clear ---------- */
 function serialize(){
-  const o={version:'DT-1 2026-09',fields:{},tables:{},fixed:{}};
+  const o={version:'DT-1 2026-09',rev:'v25.65',fields:{},tables:{},fixed:{}};   /* v25.65: rev marks a record that holds this version's fields */
   $$('input[name],select[name],textarea[name]').forEach(el=>{if(el.closest('tbody')&&templates[el.closest('tbody').id])return;if(el.type==='radio'){if(el.checked)o.fields[el.name]=el.value}else if(el.type==='checkbox')o.fields[el.name]=el.checked;else o.fields[el.name]=el.value});
   Object.keys(templates).forEach(id=>{o.tables[id]=rows(id).map(vals)});
   ['tbSV','tbTI'].forEach(id=>{o.fixed[id]=Array.from(document.getElementById(id).querySelectorAll('input')).map(i=>i.type==='radio'?i.checked:i.value)});
@@ -1983,6 +2118,11 @@ function restore(o){
   Object.keys(templates).forEach(id=>{const tb=document.getElementById(id);tb.innerHTML='';(Array.isArray(T[id])?T[id]:[]).forEach(r=>addRow(id,id==='tbTrials'&&Array.isArray(r)&&r.length===10?r.slice(0,9).concat([''],r.slice(9)):r))});   /* v22.92 (review F400) a trial saved before the Delivered column */
   ['tbSV','tbTI'].forEach(id=>{const ins=Array.from(document.getElementById(id).querySelectorAll('input'));(Array.isArray(X[id])?X[id]:[]).forEach((v,i)=>{if(!ins[i])return;if(ins[i].type==='radio')ins[i].checked=!!v;else ins[i].value=v})});
   renderAvGrid(Array.isArray(o.avr)&&o.avr.length?o.avr.map(r=>Array.isArray(r)?r.map(v=>v==null?'':String(v)):[]):[[],[],[],[],[]]);
+  /* v25.65 (DELAY-H1, H2, M1, M4) a record saved before these fields had their defaults opens with them blank, so it is read as it was
+     written: the shares of requests, the problem-behavior criterion, where the delay falls and the trial pacing (the pacing keeps its
+     default on the FCT path, where the choice block it sits in is not shown) */
+  if(!o.rev){const blank=['share_imm','share_del','share_den','pb_crit','delay_place'];if(o.fields.arrange!=='fct')blank.push('pace_rule');
+    blank.forEach(n=>{const el=document.querySelector('[name="'+n+'"]');if(el&&o.fields[n]===undefined)el.value='';});}
   recalcAll();
 }
 $('#btnSave').addEventListener('click',()=>{const name=($('[name=s_name]').value||'student').replace(/[^\w-]+/g,'_');const blob=new Blob([JSON.stringify(serialize(),null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`DT1_${name}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
@@ -2006,7 +2146,7 @@ async function loadSim(){
     while(off(d))d.setDate(d.getDate()-1);let k=Math.abs(n);const st=n>=0?-1:1;
     while(k>0){d.setDate(d.getDate()+st);if(!off(d))k--;}
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
-  const o={version:'DT-1 2026-09',fields:{},tables:{},fixed:{}};
+  const o={version:'DT-1 2026-09',rev:'v25.65',fields:{},tables:{},fixed:{}};
   const F=o.fields;
 
   /* ---------------- tab 1: student, setup, contingency ---------------- */
@@ -2031,6 +2171,12 @@ async function loadSim(){
     rft_int:'2 min of break, delivered at the desk with the stated phrase',
     prob_ratio:'2 of 5, randomly selected',
     prob_rft:true,
+    /* v25.65 (DELAY-H1, H2, M2) two of five requests honored at once and three delayed, with no denial trials run yet in the example;
+       the example's criterion names its own fixed rate (0.2 per minute), so its problem-behavior part is the fixed one; the timer is in
+       view for the whole delay */
+    share_imm:'40',share_del:'60',share_den:'0',pb_crit:'A fixed rate, as written in the session criterion',
+    sig_type:'A continuous signal in view for the whole delay (visual timer, countdown, hand signal held)',
+    den_say:'“Not this time.”',den_alt:'A stated contingency (“First ___, then ___”)',
     ia_type:'Academic task', ia_what:'Two low-effort maintenance problems already mastered',
     ia_choice:true, ia_indep:true, ia_incomp:true,
     ia_fade:'Adult prompts to start the activity fade from verbal to gestural to none by step 4',
@@ -2292,7 +2438,7 @@ ARR_CRIT.combo=ARR_CRIT.srpos;
 const ARR_LEDE={'':'Choose the arrangement on Tab 1 and this tab shows the assessments it calls for; until then every block is shown. For the two choice arrangements the choice baseline is required: it is the one measure used in every experiment reviewed, and without it there is no demonstration that impulsive choice existed before treatment.',
   srpos:'Run what the case calls for. The choice baseline is required for this arrangement: it is the one measure used in every experiment reviewed, and without it there is no demonstration that impulsive choice existed before treatment.',
   srneg:'Run what the case calls for. The choice baseline is required for this arrangement, and so is the aversiveness check (E), which decides which task goes on which side of the choice. In an escape arrangement the self-control option is the smaller or easier task now, and the impulsive option is the larger task later.',
-  fct:'Delay tolerance after FCT (Tab 1): the student already asks, and the question is waiting once the request is deferred. The FCT baseline below takes the place of the dimension check and the choice baseline; run the waiting and naturalistic baselines (C, D) when the case calls for them.',
+  fct:'Delay and denial tolerance after FCT (Tab 1): the student already asks, and the question is waiting once the request is deferred, or hearing \u201cno\u201d when the item cannot be given this time. The FCT baseline below takes the place of the dimension check and the choice baseline; run the waiting and naturalistic baselines (C, D) when the case calls for them.',
   combo:'Run what the case calls for. The choice baseline is required for this arrangement, and the aversiveness check (E) for its escape side; write the rationale for combining the two outcomes on Tab 1.'};
 const ARR_NOTE={srpos:'Tab 2 shows the dimension check and the choice baseline; the session sheet reads self-control choices.',
   srneg:'Tab 2 shows the dimension check, the choice baseline and the aversiveness check; the self-control choice is the smaller task now.',
@@ -2305,11 +2451,14 @@ function blkFilled(b){return Array.from(b.querySelectorAll('input,select,textare
   if(e.tagName==='SELECT'){const d=Array.from(e.options).find(o=>o.defaultSelected)||e.options[0];return e.value!==(d?d.value:'');}
   return String(e.value||'').trim()!==''&&e.value!==e.defaultValue;});}
 function relabelChoice(){const a=arrNow(),L=a==='fct'?{SC:'Waited',IMP:'Did not wait'}:a==='srneg'?{SC:'SC (task now)',IMP:'IMP (task later)'}:{SC:'SC',IMP:'IMP'};
-  rows('tbTrials').forEach(tr=>{const c=tr.querySelectorAll('select')[1];if(c)Array.from(c.options).forEach(o=>{if(L[o.value]&&o.textContent!==L[o.value])o.textContent=L[o.value];});});}
+  /* v25.65 (DELAY-H1) on a denial trial the choice reads Accepted or Did not accept */
+  const LD={SC:'Accepted',IMP:'Did not accept'};
+  rows('tbTrials').forEach(tr=>{const ss=tr.querySelectorAll('select'),c=ss[1],M=ss[0]&&ss[0].value==='DEN'?LD:L;if(c)Array.from(c.options).forEach(o=>{if(M[o.value]&&o.textContent!==M[o.value])o.textContent=M[o.value];});});}
 function applyArr(byPerson){const a=arrNow(),show=ARR_SHOW[a]||ARR_SHOW[''];
   ['preChoice','preEsc','preFct'].forEach(id=>{const b=document.getElementById(id);if(!b)return;const want=show.indexOf(id)>=0,keep=!want&&blkFilled(b);
     b.hidden=!want&&!keep;const k=b.querySelector('.arr-keep');if(k){k.hidden=!keep;k.textContent=keep?'The arrangement on Tab 1 does not call for this block; it stays in view because it holds entries.':'';}});
   const lede=$('#preLede');if(lede)lede.textContent=ARR_LEDE[a]||ARR_LEDE[''];
+  $$('.arr-fct-only').forEach(e=>{e.hidden=!!a&&a!=='fct';});   /* v25.65 (DELAY-H1, H2) the shares of requests and the relapse plan belong to the FCT path */
   const note=$('#arrNote');if(note){note.textContent=ARR_NOTE[a]||'';note.hidden=!ARR_NOTE[a];}
   const key=a==='fct'?'arrFct':a==='srneg'?'arrSrneg':'';
   $$('[data-arr-fct],[data-arr-srneg]').forEach(e=>{if(e.dataset.arrDef==null)e.dataset.arrDef=e.textContent;const t=(key&&e.dataset[key])||e.dataset.arrDef;if(e.textContent!==t)e.textContent=t;});
@@ -2343,7 +2492,7 @@ async function carryBaseline(fct){
   drawProg();said('Baseline carried to Progress: '+out.length+' session'+(out.length>1?'s':'')+' as phase Baseline.');}
 $('#btnFctCarry').addEventListener('click',()=>carryBaseline(true));
 $('#btnBaseCarry').addEventListener('click',()=>carryBaseline(false));
-function tiPct(){let y=0,n=0;for(let i=1;i<=12;i++){const c=document.querySelector(`[name=ti${i}]:checked`);if(!c)continue;if(c.value==='y'){y++;n++}else if(c.value==='n')n++}return n?100*y/n:null;}
+function tiPct(){let y=0,n=0;for(let i=1;i<=TI_N();i++){const c=document.querySelector(`[name=ti${i}]:checked`);if(!c)continue;if(c.value==='y'){y++;n++}else if(c.value==='n')n++}return n?100*y/n:null;}
 function ioaPct(){const R=rows('tbIOA').map(vals).map(v=>[num(v[0]),num(v[1])]).filter(v=>v[0]!=null&&v[1]!=null);return R.length?100*R.reduce((s,v)=>s+ioaScore(v[0],v[1]),0)/R.length:null;}
 $('#btnQlogAdd').addEventListener('click',async()=>{const ti=tiPct(),io=ioaPct();
   if(ti==null&&io==null){alert('Score the integrity checklist (A) or enter the agreement intervals (C) first.');return}
@@ -2456,7 +2605,7 @@ applyArr(false);openAdv(true);
 function dtV(n){const e=document.querySelector('[name="'+n+'"]');if(!e)return '';if(e.type==='radio'){const c=document.querySelector('[name="'+n+'"]:checked');return c?c.value:'';}
   if(e.type==='checkbox')return e.checked;return String(e.value||'').trim();}
 function dtTiItems(){const a=arrNow(),T=$$('#tbTI tr td:first-child').map(td=>td.textContent.trim()),cut=x=>String(x||'').replace(/[.\s]+$/,'');
-  const CMP=['ant','ant','ant','con','ant','con','ant','con','con','con','con',''],out=[];
+  const CMP=['ant','ant','ant','con','ant','con','ant','con','con','con','con','','ant'],out=[];   /* v25.65 (DELAY-M1) the trial-pacing step */
   const rule=dtV('rule_text'),tok=dtV('tok_use'),tr=dtV('tr_form'),cues=dtV('cues'),act=dtV('ia_what')||dtV('ia_type'),reset=dtV('reset'),pb=dtV('pb_during'),sd=dtV('stop_demand');
   T.forEach((t,i)=>{let d=t;
     if(i===1&&a==='fct')return;                                        /* no choice on the FCT path */
@@ -2468,30 +2617,111 @@ function dtTiItems(){const a=arrNow(),T=$$('#tbTI tr td:first-child').map(td=>td
     if(i===7&&reset)d+=' ('+cut(reset)+')';
     if(i===8&&pb)d='Problem behavior during the delay handled as written: '+cut(pb)+(sd?'; a stopped session: '+cut(sd):'');
     if(i===10&&(!tok||tok==='None'))return;
+    if(i===12&&(a==='fct'||/^Not fixed/.test(dtV('pace_rule'))))return;   /* v25.65 (DELAY-M1) only where the trial length is held */
     out.push({d,cmp:CMP[i]||'',crit:CMP[i]==='con'});});
   return out;}
 function dtProtocol(){const lad=rows('tbFade').map(tr=>{const x=vals(tr);return {s:num(x[0]),met:x[1]||'',note:x[2]||''};}).filter(x=>x.s!=null);
   const tr=dtV('tr_form');if(!lad.length&&!tr)return null;
-  const a=arrNow(),AL={srpos:'Positive reinforcement, concurrent choice',srneg:'Negative reinforcement, task choice',fct:'Delay tolerance after FCT',combo:'Combined appetitive and aversive outcomes'};
+  const a=arrNow(),AL={srpos:'Positive reinforcement, concurrent choice',srneg:'Negative reinforcement, task choice',fct:'Delay and denial tolerance after FCT',combo:'Combined appetitive and aversive outcomes'};
   const cur=lad.find(x=>!x.met)||null,done=lad.filter(x=>x.met),o={arrange:a,arrangeLabel:AL[a]||'',delaytype:dtV('delaytype'),tr,trCrit:dtV('tr_crit'),cues:dtV('cues'),
     prob:dtV('prob_rft')?dtV('prob_ratio'):'',rft:dtV('rft_int'),reset:dtV('reset'),req:dtV('req_type'),activity:dtV('ia_what')||dtV('ia_type'),crit:dtV('step_crit'),
     adv:dtV('adv_rule'),back:dtV('back_rule'),stop:dtV('stop_rule'),pbDuring:dtV('pb_during'),stopDemand:dtV('stop_demand'),ladder:lad,
     current:cur?cur.s:null,mastered:done.length?done[done.length-1].s:null,terminal:num(dtV('fd_end')),items:dtTiItems(),src:'DT-1'};
+  /* v25.65 (DELAY-H1, H2, M2, M6, L1) more of the plan for Form TD-1 and Form AD-1: the shares of requests honored at once, delayed and
+     denied; the denial statement and what a denial gives instead; the unavailable item script; the problem-behavior criterion against
+     baseline and the plan line for its return; the signal; asking "when?"; and the discounting probe's AUC */
+  const sh=['share_imm','share_del','share_den'].map(k=>num(dtV(k)));
+  if(sh.some(x=>x!=null))o.shares={imm:sh[0],del:sh[1],den:sh[2]};
+  o.denialSay=dtV('den_say');o.denialGives=dtV('den_alt');o.unavailable=dtV('ho_unavail');o.signal=dtV('sig_type');o.askWhen=!!dtV('tr_when');
+  o.pbCrit=dtV('pb_crit');if(a==='fct'||!a){const pl=$('#dtRelapsePlan');o.relapsePlan=pl?pl.textContent.replace(/\s+/g,' ').trim():'';}
+  const bm=dtBase();if(bm)o.baseline={pbm:bm.m,sessions:bm.n};
+  const auc=num($('#outAUC').textContent);if(auc!=null)o.discount={auc,logk:num($('#outLogK').textContent),date:dtV('dd_date')};
   return o;}
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   try{const d=dtProtocol();if(!d)return r;return Object.assign({},r||{},{delay:d});}catch(e){return r;}};}
 window.dtProtocol=dtProtocol;
+/* ---------- v25.65 (DELAY parcel) ----------
+   H2: problem behavior judged against the student's own baseline. The baseline mean is the FCT baseline's problem behavior per minute in
+   the sessions with the reinforcer delayed (Tab 2), or, without them, the Progress rows of phase Baseline with a delay programmed. Each
+   Progress row shows its rate as a share of that mean. At each new, longer step the first 3 sessions are set against the last 5 of the
+   step before (Marshall et al., 2025): "Problem behavior returned" when any of them is higher than all of those 5, with its size as a
+   share of baseline, "above criterion" past 0.10 when the criterion is the baseline one; the step stays listed, with its highest
+   session so far, because the return can peak later in a step. A context-change probe on Tab 8A (and a setting or implementer probe)
+   is checked the same way against the last 5 sessions before it (renewal).
+   Also: the lag warning (H3), the time-based note (H2), the shares of requests (H1), the activity on the delayed side (M3), the trial
+   pacing (M1), the low-AUC line (M6), the rule-and-rationale line (M5) and the unsignaled probe before maintenance (M2). */
+function dtBase(){const fr=rows('tbFct').map(vals).filter(v=>v[1]==='Delay on the same reinforcer').map(v=>{const m=num(v[3]),pb=num(v[7]);return (m&&pb!=null)?pb/m:null}).filter(x=>x!=null);
+  if(fr.length)return {m:fr.reduce((a,b)=>a+b,0)/fr.length,n:fr.length,src:'the FCT baseline (Tab 2), sessions with the reinforcer delayed'};
+  const pr=rows('tbProg').map(vals).filter(v=>v[2]==='Baseline'&&num(v[3])>0&&num(v[6])!=null).map(v=>num(v[6]));
+  return pr.length?{m:pr.reduce((a,b)=>a+b,0)/pr.length,n:pr.length,src:'the Baseline rows on Progress with a delay programmed'}:null;}
+const dtPbBaseCrit=()=>/^At or below 0\.10/.test(dtV('pb_crit'));
+function dtRelapse(){const box=$('#dtRelapse');const B=dtBase(),bc=dtPbBaseCrit();
+  const P=rows('tbProg').map(tr=>({tr,v:vals(tr)})).map(o=>({tr:o.tr,s:num(o.v[0]),date:o.v[1],ph:o.v[2],d:num(o.v[3]),pbm:num(o.v[6])}));
+  P.forEach(o=>{const c=o.tr.cells[7];if(!c)return;const r=(B&&B.m>0&&o.pbm!=null)?o.pbm/B.m:null;c.textContent=r==null?'—':fmt(r,2)+(bc&&o.ph!=='Baseline'&&r>0.1+1e-9?' above':'');c.title=r==null?'':'Problem behavior per minute as a share of the baseline mean'+(bc?'; the criterion is 0.10 or below':'');});
+  const T=P.filter(o=>o.s!=null&&o.ph!=='Baseline'&&o.d!=null).sort((a,b)=>a.s-b.s),runs=[];
+  T.forEach(o=>{const r=runs[runs.length-1];if(r&&r.d===o.d)r.list.push(o);else runs.push({d:o.d,list:[o]});});
+  const steps=[];for(let i=1;i<runs.length;i++){if(!(runs[i].d>runs[i-1].d))continue;const prev=runs[i-1].list.filter(o=>o.pbm!=null).slice(-5),now=runs[i].list.filter(o=>o.pbm!=null);if(!prev.length||!now.length)continue;
+    const mx=Math.max(...prev.map(o=>o.pbm)),first=now.slice(0,3),hit=first.filter(o=>o.pbm>mx+1e-9),peak=now.reduce((a,b)=>b.pbm>a.pbm?b:a);
+    steps.push({from:runs[i-1].d,to:runs[i].d,s0:runs[i].list[0].s,hit:hit.length>0,at:hit.length?hit[0].s:null,peak,prop:B&&B.m>0?peak.pbm/B.m:null,n:now.length});}
+  if(box){const fl=steps.filter(x=>x.hit),cr=B?' The criterion is '+(bc?'at or below 0.10 of it ('+fmt(0.1*B.m,3)+' per minute).':'as written in the session criterion (Tab 4).'):'';
+    const line=x=>'<li><b>Problem behavior returned</b> at '+x.to+' s (from '+x.from+' s; session '+x.at+'): highest so far '+fmt(x.peak.pbm,2)+' per minute (session '+x.peak.s+')'+(x.prop!=null?', '+fmt(x.prop,2)+' of baseline'+(bc&&x.prop>0.1+1e-9?', <b>above criterion</b>':''):'')+'.</li>';
+    box.innerHTML=(B?'<p class="small"><b>Baseline mean:</b> '+fmt(B.m,2)+' problem behavior per minute, from '+B.src+' ('+B.n+' session'+(B.n>1?'s':'')+'). The PB / baseline column shows each session as a share of it.'+cr+'</p>':'<p class="small">Enter the FCT baseline (Tab 2) to see each session as a share of the baseline mean.</p>')+
+      (steps.length?'<p class="small"><b>New steps checked</b> (first 3 sessions against the last 5 of the step before): '+steps.length+'; problem behavior returned at '+fl.length+'.</p>'+(fl.length?'<ul class="small">'+fl.map(line).join('')+'</ul>':''):'<p class="small">No new step yet to check: the check runs when the delay is raised.</p>');}
+  /* renewal: a context-change, setting or implementer probe against the last 5 sessions before it */
+  const ren=$('#dtRenewal');if(ren){const G=rows('tbGen').map(vals).filter(v=>/^(Context change|Setting|Implementer)/.test(v[0])&&v[3]&&num(v[6])!=null);
+    const L=G.map(v=>{const before=T.filter(o=>o.date&&o.date<v[3]&&o.pbm!=null).slice(-5);if(!before.length)return null;const mx=Math.max(...before.map(o=>o.pbm)),p=num(v[6]),r=B&&B.m>0?p/B.m:null;
+      return (p>mx+1e-9?'<b>Problem behavior returned</b> on the '+esc(v[0].toLowerCase().replace(/ \(.*$/,''))+' probe of '+esc(v[3]):'No return on the '+esc(v[0].toLowerCase().replace(/ \(.*$/,''))+' probe of '+esc(v[3]))+': '+fmt(p,2)+' per minute against at most '+fmt(mx,2)+' in the last '+before.length+' sessions before it'+(r!=null?' ('+fmt(r,2)+' of baseline'+(bc&&p>mx+1e-9&&r>0.1+1e-9?', above criterion':'')+')':'')+'.';}).filter(Boolean);
+    ren.innerHTML=L.length?'<p>'+L.join('<br>')+'</p>':'';}
+  return {base:B,steps};}
+window.dtRelapse=dtRelapse;
+function dtV2565(){
+  const show=(id,on)=>{const e=document.getElementById(id);if(e&&e.hidden===!!on)e.hidden=!on;};
+  show('dtLagWarn',num(dtV('tok_lag'))>2);                                                        /* H3 */
+  show('tbpdNote',dtV('delaytype')==='tbpd');                                                       /* H2 */
+  show('iaWithWarn',dtV('ia_with')==='The larger-later option only');                               /* M3 */
+  const nf=x=>/^Not fixed/.test(x);show('paceWarn',nf(dtV('pace_rule'))||nf(dtV('ss_pace')));         /* M1 */
+  {const auc=num($('#outAUC').textContent);show('ddPlan',auc!=null&&auc<0.3);}                       /* M6 */
+  {const n=num(dtV('rule_after_n')),e=$('#ruleLine');if(e)e.textContent='If progressive delay alone has not shifted choice after '+(n?n+' session'+(n===1?'':'s'):'___ sessions')+', add a stated rationale and rule before changing the reinforcer. For students with emotional or behavioral disorders, expect some not to respond even then (3 of 6 did not in Staubitz et al., 2020).';}   /* M5 */
+  {const S=['share_imm','share_del','share_den'].map(k=>num(dtV(k))),e=$('#shareOut');                 /* H1 */
+   if(e){let t='';if(S.every(x=>x!=null)){const sum=S[0]+S[1]+S[2];t=Math.abs(sum-100)<1e-9?'The shares add to 100%.':'The shares add to '+fmt(sum,0)+'%: they must add to 100%.';
+     const met=rows('tbFade').some(tr=>String(vals(tr)[1]||'').trim());if(S[2]>0&&!met)t+=' Denied trials are planned, but no delay step has been met yet: add them only after delayed trials meet criterion.';}
+     else if(S.some(x=>x!=null))t='Enter all three shares; they must add to 100%.';e.textContent=t;}}
+  {const e=$('#dtUnsigNote');if(e){const done=rows('tbMaint').map(vals).map(v=>v[2]).filter(Boolean).sort()[0],un=rows('tbGen').map(vals).filter(v=>v[0]==='Unsignaled, no activity'&&v[3]).map(v=>v[3]).sort()[0];   /* M2 */
+    const on=!!done&&(!un||un>done);if(e.hidden===on)e.hidden=!on;if(on)e.firstChild.textContent='A maintenance probe was run on '+done+(un?' before the unsignaled probe ('+un+')':' with no unsignaled probe')+': run the unsignaled probe with no activity (Tab 8A) before maintenance probes.';}}
+  {const f=document.getElementById('advPair');if(f&&!f.open&&blkFilled(f))f.open=true;}   /* M7: open when a pairing is entered */
+  dtRelapse();}
+window.dtV2565=dtV2565;
+/* M7: the paired-dimension assessment. Each dimension's share is the choices it won over the trials of every pairing it was in; the
+   one that competes best against immediacy has the highest share against it */
+const PAIR_BOX={Rate:'dim_rate',Quality:'dim_qual'};
+function dtPairs(){const e=$('#pairOut');if(!e)return null;const R=rows('tbPair').map(vals).map(v=>{const m=/^(\w+) against (\w+)$/.exec(v[0]||'');return m?{a:m[1],b:m[2].charAt(0).toUpperCase()+m[2].slice(1),t:num(v[1]),k:num(v[2])}:null}).filter(r=>r&&r.t&&r.k!=null&&r.k<=r.t);
+  if(!R.length){e.textContent='';return null}
+  const W={},N={};R.forEach(r=>{W[r.a]=(W[r.a]||0)+r.k;N[r.a]=(N[r.a]||0)+r.t;W[r.b]=(W[r.b]||0)+(r.t-r.k);N[r.b]=(N[r.b]||0)+r.t;});
+  const rank=Object.keys(N).sort((x,y)=>W[y]/N[y]-W[x]/N[x]),vi=R.filter(r=>r.b==='Immediacy').sort((x,y)=>y.k/y.t-x.k/x.t),best=vi.length?vi[0]:null;
+  e.textContent='Share of choices won: '+rank.map(d=>d+' '+fmt(100*W[d]/N[d],0)+'%').join(', ')+'.'+(best?' Competes best against immediacy: '+best.a+' ('+best.k+' of '+best.t+' choices, '+fmt(100*best.k/best.t,0)+'%).'+(PAIR_BOX[best.a]?' Set the training dimension on Tab 1 to it with the button.':' '+best.a+' has no box on Tab 1: write it in Exact values.'):' Add a pairing against immediacy to name the training dimension.');
+  return best;}
+window.dtPairs=dtPairs;
+$('#btnPairDim').addEventListener('click',()=>{const b=dtPairs();if(!b){alert('Enter a pairing against immediacy, with its trials and choices, first.');return}const k=PAIR_BOX[b.a],el=k?document.querySelector('[name="'+k+'"]'):null;
+  if(!el){alert(b.a+' has no box on Tab 1: write it in Exact values.');return}if(!el.checked){el.checked=true;el.dispatchEvent(new Event('change',{bubbles:true}));}said('Tab 1: '+b.a+' is ticked as the dimension trained against immediacy.');});
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.name&&/^(tok_lag|share_|rule_after_n)/.test(t.name))dtV2565();});
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.name&&/^(delaytype|ia_with|pace_rule|ss_pace|pb_crit|tok_lag|share_)/.test(t.name))dtV2565();});
+{const cd=computeDD;computeDD=function(){const x=cd.apply(this,arguments);try{dtV2565();}catch(e){}return x;};}
+{const ra=recalcAll;recalcAll=function(){const x=ra.apply(this,arguments);dtV2565();dtPairs();const f=$('#advPair');if(f)f.open=blkFilled(f);return x;};}
+dtV2565();
 /* v22.95 (review F403, I203) the session log: every session's sheet (its fields and every trial) is kept in the record, keyed by
    session number. Carry keeps the sheet on screen, replacing the same number; a kept session opens back into the sheet; a new
    sheet starts at the next number with the phase, the step, the implementer, the setting and the length carried over; the whole
    log downloads as one trial-by-trial CSV for Form DD-1 or a spreadsheet. The log sits in a hidden field, so the form's own file
    and the workstation's case both keep it. */
-const SS_F=['ss_num','ss_date','ss_phase','ss_delay','ss_imp','ss_setting','ss_len','ss_ioa','ss_notes'];
+const SS_F=['ss_num','ss_date','ss_phase','ss_delay','ss_imp','ss_setting','ss_len','ss_ioa','ss_notes','ss_pace'];   /* v25.65 (DELAY-M1) the trial pacing, kept with each sheet */
 const jsonList=id=>{try{const a=JSON.parse(($(id)||{}).value||'[]');return Array.isArray(a)?a.filter(e=>e&&typeof e==='object'):[];}catch(e){return [];}};
 const ssGet=()=>jsonList('#dtSessLog');
 function ssPut(L){L.sort((a,b)=>(num(a.ss_num)||0)-(num(b.ss_num)||0));const t=$('#dtSessLog');t.value=L.length?JSON.stringify(L):'';t.dispatchEvent(new Event('input',{bubbles:true}));ssPaint();}
 function ssNow(){const o={};SS_F.forEach(n=>{o[n]=String(($('[name='+n+']')||{}).value||'');});o.trials=rows('tbTrials').map(vals).filter(v=>v.some(x=>String(x).trim()));return o;}
-const ssKey=e=>JSON.stringify(SS_F.map(n=>String(e[n]==null?'':e[n])).concat([JSON.stringify(e.trials||[])]));
+/* v25.65 (DELAY-M2) a trial kept before the Signal column has 11 places; one on the sheet now has 12, the last blank when no signal
+   was scored: the two are the same trial */
+const ssTr=t=>(t||[]).map(v=>{v=Array.isArray(v)?v.map(x=>x==null?'':String(x)):[];while(v.length>11&&!String(v[v.length-1]).trim())v.pop();return v;});
+const ssKey=e=>JSON.stringify(SS_F.map(n=>String(e[n]==null?'':e[n])).concat([JSON.stringify(ssTr(e.trials))]));
 function ssKeep(){const o=ssNow(),n=num(o.ss_num);if(n==null)return false;const L=ssGet().filter(e=>num(e.ss_num)!==n);L.push(o);ssPut(L);return true;}
 function ssShow(e){SS_F.forEach(n=>{const el=$('[name='+n+']');if(el)el.value=e[n]==null?'':String(e[n]);});const tb=$('#tbTrials');tb.innerHTML='';
   (e.trials||[]).forEach(v=>addRow('tbTrials',v));for(let i=tb.rows.length;i<10;i++)addRow('tbTrials');summarizeTrials();
@@ -2507,12 +2737,14 @@ $('#btnSsOpen').addEventListener('click',async()=>{const n=num($('#ssPick').valu
   if(ssDirty()&&!(await nbhUI.confirm('Open session '+n+'?\nThe sheet on screen is not kept as it stands (Carry keeps it); opening replaces it on screen.',{ok:'Open'})))return;ssShow(e);ssPaint();});
 $('#btnSsNew').addEventListener('click',async()=>{if(ssDirty()&&!(await nbhUI.confirm('Start a new session sheet?\nThe sheet on screen is not kept as it stands (Carry keeps it).',{ok:'New sheet'})))return;
   const o=ssNow(),mx=Math.max(0,num(o.ss_num)||0,...ssGet().map(e=>num(e.ss_num)||0)),t=new Date(),iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-  ssShow({ss_num:String(mx+1),ss_date:iso,ss_phase:o.ss_phase,ss_delay:o.ss_delay,ss_imp:o.ss_imp,ss_setting:o.ss_setting,ss_len:o.ss_len,ss_ioa:'',ss_notes:'',trials:[]});ssPaint();});
+  ssShow({ss_num:String(mx+1),ss_date:iso,ss_phase:o.ss_phase,ss_delay:o.ss_delay,ss_imp:o.ss_imp,ss_setting:o.ss_setting,ss_len:o.ss_len,ss_ioa:'',ss_notes:'',ss_pace:o.ss_pace,trials:[]});ssPaint();});
 $('#btnSsDel').addEventListener('click',async()=>{const n=num($('#ssPick').value);if(n==null)return;
   if(!(await nbhUI.confirm('Remove session '+n+' from the log?\nIts trials leave the record; its Progress row stays.',{ok:'Remove',danger:true})))return;ssPut(ssGet().filter(e=>num(e.ss_num)!==n));});
 $('#btnSsCsv').addEventListener('click',()=>{const L=ssGet();if(!L.length)return;const q=v=>{v=String(v==null?'':v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
-  const R=[['Session','Date','Phase','Programmed delay (s)','Implementer','Trial','Trial type','Choice','Prog. delay (s)','Obt. delay (s)','Latency (s)','TR','Engaged','Prob. beh.','Collat.','Delivered','Notes']];
-  L.forEach(e=>(e.trials||[]).forEach((v,i)=>R.push([e.ss_num,e.ss_date,e.ss_phase,e.ss_delay,e.ss_imp,i+1].concat(v.slice(0,11)))));
+  /* v25.65 (DELAY-M2) the Signal column joins the file once any kept trial has a signal scored, so a log without one downloads as before */
+  const sg=L.some(e=>(e.trials||[]).some(v=>String(v[11]||'').trim())),W=sg?12:11;
+  const R=[['Session','Date','Phase','Programmed delay (s)','Implementer','Trial','Trial type','Choice','Prog. delay (s)','Obt. delay (s)','Latency (s)','TR','Engaged','Prob. beh.','Collat.','Delivered','Notes'].concat(sg?['Signal']:[])];
+  L.forEach(e=>(e.trials||[]).forEach((v,i)=>{const t=v.slice(0,W);if(sg)while(t.length<W)t.push('');R.push([e.ss_num,e.ss_date,e.ss_phase,e.ss_delay,e.ss_imp,i+1].concat(t));}));
   const name=($('[name=s_name]').value||'student').replace(/[^\w-]+/g,'_'),blob=new Blob([R.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DT1_trials_'+name+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);});
 
@@ -3097,10 +3329,10 @@ ssPaint();ddPaint();
 /* v22.93 (review F399, I201) the blocks of Tab 2 the arrangement does not call for; (I205) the research-grade measures folded away */
 .arr-blk[hidden],.arr-keep[hidden]{display:none!important}
 .arr-keep{color:var(--amber,#9B4E15);margin:10px 0 0}
-details.adv{margin:16px 0;border:1px solid var(--rule2,#CDD6D2);border-radius:8px;padding:0 14px}
-details.adv>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
-details.adv[open]>summary{border-bottom:1px solid var(--rule2,#CDD6D2);margin-bottom:8px}
-@media print{details.adv:not([open]){display:none!important}details.adv{border:0;padding:0}details.adv>summary{display:none}}
+details.adv,details.dtfold{margin:16px 0;border:1px solid var(--rule2,#CDD6D2);border-radius:8px;padding:0 14px}
+details.adv>summary,details.dtfold>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+details.adv[open]>summary,details.dtfold[open]>summary{border-bottom:1px solid var(--rule2,#CDD6D2);margin-bottom:8px}
+@media print{details.adv:not([open]),details.dtfold:not([open]){display:none!important}details.adv,details.dtfold{border:0;padding:0}details.adv>summary,details.dtfold>summary{display:none}}   /* v25.65 (DELAY-M7) the paired-dimension fold (dtfold) looks and prints as the others */
 </style>
 <style id="nbh-case-css">
 /* the case: the toolbar group and the picker (v21.31) */
