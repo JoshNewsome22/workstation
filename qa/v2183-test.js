@@ -11,13 +11,13 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
        Print and Finish PDF. Upright (900 px or less) Case map, Documents and Finish PDF move into Tools. The rarer buttons are
        in the menus, and each menu item runs the bar's own button. */
     const vis=await page.evaluate(()=>{const v=id=>{const e=document.getElementById(id);return !!e&&e.offsetParent!==null;};return {save:v('savePacket'),xlsx:v('caseXlsx'),diag:v('diag'),pdf:v('bookmarkPdf'),help:v('help'),map:v('caseMap'),doc:v('readDoc'),docText:(()=>{const l=document.querySelector('#readDoc .lbl');return !!l&&l.getBoundingClientRect().width>30&&/Documents/.test(l.textContent);})(),saveCase:v('saveCase'),print:v('masterPrint'),menus:[...document.querySelectorAll('#wsNav [data-wn-menu]')].filter(e=>e.offsetParent).map(e=>e.dataset.wnMenu).join(),sideways:document.documentElement.scrollWidth>innerWidth+1};});
-    const wide=w>900;
-    ok(w+'x'+h+' the rare buttons are in the menus; Help, Save case and Print on the bar'+(wide?', with Case map, Documents and Finish PDF':'')+'; no sideways scroll',!vis.save&&!vis.xlsx&&!vis.diag&&vis.help&&vis.saveCase&&vis.print&&vis.menus==='packet,case,tools'&&vis.map===wide&&vis.doc===wide&&vis.docText===wide&&vis.pdf===wide&&!vis.sideways,vis);
+    const wide=w>900,pdfOn=w>1300;   /* v25.65 top bar A: Today and Caseload joined the bar, so Finish PDF goes into Tools at 1300 px and less */
+    ok(w+'x'+h+' the rare buttons are in the menus; Help, Save case and Print on the bar'+(wide?', with Case map and Documents':'')+(pdfOn?' and Finish PDF':'')+'; no sideways scroll',!vis.save&&!vis.xlsx&&!vis.diag&&vis.help&&vis.saveCase&&vis.print&&vis.menus==='packet,case,tools'&&vis.map===wide&&vis.doc===wide&&vis.docText===wide&&vis.pdf===pdfOn&&!vis.sideways,vis);
     const items=async k=>{await page.evaluate(k=>__wsNav.open(k),k);await sleep(250);return page.evaluate(()=>{const M=document.getElementById('wsNavMenu'),r=M.getBoundingClientRect();return {open:!M.hidden,items:[...M.querySelectorAll('[data-wn-for]')].filter(e=>e.offsetParent).map(e=>e.textContent),inside:r.left>=0&&r.right<=innerWidth};});};
     const pk=await items('packet'),cs=await items('case'),tl=await items('tools');
     ok(w+'x'+h+' Packet has Save and Open packet; Case has Open, Close, Case as spreadsheet and History; Tools has Fill open forms, Staff directory and Diagnostics'+(wide?'':', with Read a document, Case map and Finish PDF')+'; inside the screen',
       pk.open&&pk.inside&&pk.items.join()==='Save packet,Open packet'&&cs.inside&&['Open case','Close case','Case as spreadsheet','History'].every(x=>cs.items.includes(x))&&tl.inside&&['Fill open forms','Staff directory','Diagnostics'].every(x=>tl.items.includes(x))
-      &&['Read a document','Case map','Finish PDF'].every(x=>tl.items.includes(x)===!wide),{pk,cs,tl});
+      &&['Read a document','Case map'].every(x=>tl.items.includes(x)===!wide)&&tl.items.includes('Finish PDF')===!pdfOn,{pk,cs,tl});
     await page.evaluate(()=>__wsNav.shut());
     const tools=page.locator('#wsNav [data-wn-menu="tools"]');if(touch)await tools.tap();else await tools.click();await sleep(250);
     const ex=await page.evaluate(()=>document.querySelector('#wsNav [data-wn-menu="tools"]').getAttribute('aria-expanded'));

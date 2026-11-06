@@ -206,7 +206,8 @@ async function sampleCase(br,W,H){
   /* v21.44 merge: since sprint-a8 keeps the chips together the bar stays one row with the Autosaved chip (the form starts
      at 212, not 260); v21.92: folded, the student line and the case buttons share one row, so the form starts at 173 on a
      touch screen; either way the controls below must be in view */
-  ok(tag+': the bar is folded with the Autosaved chip (the form starts at 173 since v21.92; 212, or 260 where the bar wraps, before)',frameTop>=165&&frameTop<=270,{frameTop});
+  /* v25.65 top bar A: the dark row, the student line and the form row, so the form starts at about 155 */
+  ok(tag+': the bar is folded with the Autosaved chip (the form starts at about 155 since v25.65; 173 since v21.92; 212, or 260 where the bar wraps, before)',frameTop>=145&&frameTop<=270,{frameTop});
   await fr.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(500);
   await fr.tap('#obrStart');await sleep(500);
   const y0=await fr.evaluate(()=>scrollY),m0=await reach(fr,MARKS);
