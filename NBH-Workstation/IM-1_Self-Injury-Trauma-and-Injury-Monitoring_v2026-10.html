@@ -291,6 +291,7 @@
 })();
 </script>
 <script id="nbh-logo" src="nbh-logo.js"></script>
+<script src="nbh-media.js"></script>   <!-- v25.65 IM-1 photos: the media store, photos kept once on this device by reference -->
 <style>
 
 :root{
@@ -1204,6 +1205,21 @@ td input,td select{max-width:100%}
     </div>
     <div class="imKey" id="imKey"></div>
     <div class="imChips noprint" id="imChips"></div>
+    <!-- v25.65 IM-1 photos: photos of each marked site, with the consent that covers them -->
+    <div class="v65ph noprint" id="v65Ph">
+      <h3>Photos of the Injuries</h3>
+      <div class="fieldgrid">
+        <div><label for="v65PhCons">Consent to photograph injuries</label><select id="v65PhCons" data-m="photoConsent"><option value=""></option><option value="ic1">Yes, on Form IC-1</option><option value="other">Yes, other written consent</option><option value="no">No</option></select></div>
+        <div><label for="v65PhBy">Taken by (initials)</label><input id="v65PhBy" data-m="photoBy" placeholder="e.g., RN" autocomplete="off"></div>
+      </div>
+      <p class="v65ph-safe"><b>Photos do not replace the nurse&rsquo;s check or a mandated report.</b> For an injury that is unexplained or suspicious, follow the school&rsquo;s or agency&rsquo;s reporting procedure, including who may take photos, before photographing.</p>
+      <div id="v65PhGate" role="status"></div>
+      <div id="v65PhList"></div>
+      <label class="ck v65ph-pr"><input type="checkbox" id="v65PhPrintOn"> Include the photos when printing</label>
+      <input type="file" accept="image/*" id="v65PhFile" multiple hidden aria-hidden="true" tabindex="-1">
+    </div>
+    <div id="v65PhPrint" class="v65ph-print"></div>
+    <dialog id="v65PhDlg" class="v65ph-dlg noprint" aria-labelledby="v65PhDlgT"><h3 id="v65PhDlgT"></h3><img id="v65PhBig" alt=""><div class="fieldgrid"><div><label for="v65PhDBy">Taken by (initials)</label><input id="v65PhDBy"></div><div><label for="v65PhDNote">Note</label><input id="v65PhDNote" placeholder="optional"></div></div><p class="hint" id="v65PhDMeta"></p><div class="tools"><button type="button" class="tool" id="v65PhDel" style="color:#8E2A2A">Delete this photo</button><button type="button" class="tool" id="v65PhClose">Close</button></div></dialog>
   </section>
 
   <!-- ===================== SCORING ===================== -->
@@ -1731,7 +1747,7 @@ function repInput(el){const sc=el.dataset.rs,rep=sc==='cur'?S.cur.rep:S.careDraf
 function renderCur(){renderMap();renderSide();renderChart();renderIdx();renderRepCur();}
 
 /* ---------------- administrations ---------------- */
-const rowsCopy=a=>(a||[]).map(r=>({loc:r.loc,n:r.n,type:r.type,sev:r.sev,kind:r.kind,note:r.note,how:r.how||'',view:r.view,x:r.x,y:r.y,heal:r.heal==='new'||r.heal==='healing'?r.heal:''}));   /* v23.16 (I228) heal */
+const rowsCopy=a=>(a||[]).map(r=>({loc:r.loc,n:r.n,type:r.type,sev:r.sev,kind:r.kind,note:r.note,how:r.how||'',view:r.view,x:r.x,y:r.y,heal:r.heal==='new'||r.heal==='healing'?r.heal:'',...(Array.isArray(r.photos)&&r.photos.length?{photos:r.photos.map(x=>({...x}))}:{})}));   /* v23.16 (I228) heal; v25.65 IM-1 photos: a row's photos travel with it (a row without photos is as before) */
 const admSnap=a=>JSON.stringify({v65:v65A(a),nurseSaw:a.nurseSaw||'',parentTold:a.parentTold||'',date:a.date,time:a.time,examiner:a.examiner,second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:a.assent||'',note:a.note,rows:rowsCopy(a.rows),rep:repCopy(a.rep),x:REPX.map(k=>String((a.rep||{})[k]||''))});
 /* one shape for a filed administration and one for the administration on the map, in the order the loader writes them */
 const histEntry=(a,id)=>({id:id||a.id||uid(),date:a.date||'',time:a.time||'',examiner:a.examiner||'',second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:ASSENTN[a.assent]?a.assent:'',note:a.note||'',rows:rowsCopy(a.rows),rep:repCopy(a.rep),pc:a.pc==='no'||a.pc==='wait'?a.pc:'',nurseSaw:a.nurseSaw||'',parentTold:a.parentTold||'',...v65A(a)});
@@ -2060,7 +2076,7 @@ function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='IM-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v),obj=k=>s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])?s[k]:{};
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
-  const rows=a=>Array.isArray(a)?a.filter(x=>x&&LOC[x.loc]).slice(0,LOCS.length).map(x=>({loc:x.loc,n:['1','2','3'].includes(str(x.n))?str(x.n):'',type:['AL','CT'].includes(x.type)?x.type:'',sev:['1','2','3'].includes(str(x.sev))&&x.type?str(x.sev):'',kind:str(x.kind),note:str(x.note),how:HOWN[str(x.how)]?str(x.how):'',view:['front','back','head'].includes(x.view)?x.view:'',x:num(x.x)==null?'':num(x.x),y:num(x.y)==null?'':num(x.y),heal:['new','healing'].includes(str(x.heal))?str(x.heal):''})):[];
+  const rows=a=>Array.isArray(a)?a.filter(x=>x&&LOC[x.loc]).slice(0,LOCS.length).map(x=>({loc:x.loc,n:['1','2','3'].includes(str(x.n))?str(x.n):'',type:['AL','CT'].includes(x.type)?x.type:'',sev:['1','2','3'].includes(str(x.sev))&&x.type?str(x.sev):'',kind:str(x.kind),note:str(x.note),how:HOWN[str(x.how)]?str(x.how):'',view:['front','back','head'].includes(x.view)?x.view:'',x:num(x.x)==null?'':num(x.x),y:num(x.y)==null?'':num(x.y),heal:['new','healing'].includes(str(x.heal))?str(x.heal):'',...(typeof v65PhCopy==='function'&&Array.isArray(x.photos)&&x.photos.length?{photos:v65PhCopy(x.photos)}:{})})):[]   /* v25.65 IM-1 photos */;
   /* v21.44: a file saved before the second adult, the student's assent, the report question and the care log opens
      with them empty (an earlier administration is filed again only once they are recorded) */
   const adm=x=>({id:str(x&&x.id),date:str(x&&x.date),time:str(x&&x.time),examiner:str(x&&x.examiner),second:str(x&&x.second),secondRole:str(x&&x.secondRole),present:!!(x&&x.present===true),assent:ASSENTN[str(x&&x.assent)]?str(x.assent):'',note:str(x&&x.note),ro:!!(x&&x.ro),rows:rows(x&&x.rows),rep:repCopy(x&&x.rep),pc:['no','wait'].includes(str(x&&x.pc))?str(x.pc):'',nurseSaw:str(x&&x.nurseSaw),parentTold:str(x&&x.parentTold),...v65A(x)});
@@ -2373,6 +2389,108 @@ $('#v65AddPe').addEventListener('click',()=>{if(S.peLog.length>=200)return;S.peL
   try{const m=S.meta;if(o&&o.injury&&(v65t(m.peType)||m.srObs==="yes")){o.injury.equipment={type:v65t(m.peType),hours:v65t(m.peHours),site:v65t(m.peSite),selfRestraint:m.srObs==='yes'};}}catch(e){}
   return o;};})();
 v65Render();
+</script>
+<style id="v2565-im1-photos-css">
+/* v25.65 IM-1 photos */
+.v65ph{margin-top:12px;border-top:1px solid var(--rule-2,#ccd);padding-top:8px}
+.v65ph h3{margin:0 0 6px}
+.v65ph-safe{font-size:12.5px;border-left:3px solid #9B4E15;padding-left:8px;margin:6px 0}
+#v65PhGate:not(:empty){font-size:12.5px;background:#FFF6E5;border:1px solid #E7C98B;padding:6px 8px;margin:6px 0}
+.v65ph-site{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:5px 0;border-bottom:1px dotted var(--rule-2,#ccd)}
+.v65ph-site>b{min-width:160px}
+.v65ph-th{width:48px;height:48px;padding:0;border:1px solid var(--rule-2,#ccd);border-radius:3px;background:#fff;cursor:pointer;overflow:hidden}
+.v65ph-th img{width:100%;height:100%;object-fit:cover;display:block}
+button.tool.v65ph-add,.v65ph-dlg button.tool{min-height:44px!important;min-width:44px;height:auto;max-height:none}
+.v65ph-pr{display:flex;align-items:center;gap:6px;min-height:44px}
+.v65ph-pr input{width:22px;height:22px}
+.v65ph-print{display:none}
+.v65ph-dlg{max-width:min(92vw,760px);border:1px solid var(--rule-2,#ccd);border-radius:4px}
+.v65ph-dlg img{max-width:100%;max-height:60vh;display:block;margin:6px auto}
+
+@media print{.v65ph-print.on{display:block;break-before:page}
+  .v65ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .v65ph-grid figure{margin:0;break-inside:avoid}
+  .v65ph-grid img{width:100%;max-height:3.6in;object-fit:contain;border:1px solid #999}
+  .v65ph-grid figcaption{font-size:10pt;line-height:1.3}}
+</style>
+<script id="v2565-im1-photos">
+/* v25.65 IM-1 photos (the BCBA's request): photos of each marked injury site on the body map. Each photo is shrunk to at most
+   1600 px on its long side (JPEG, quality 0.8) and kept in the shared media store (nbh-media.js); the record holds only the
+   reference and the photo's details on the site's row: {ref, at (date and time added, from the file's date), by (initials),
+   note}. "Consent to photograph injuries" (meta.photoConsent: ic1, other, no, or blank) must be a Yes before a photo can be
+   added. The photos print only when "Include the photos when printing" is ticked (off each time the form opens), and none of
+   them goes into the case facts. A file saved before has no photos and no consent answer, and opens and prints as before. */
+const V65PH_CONS={ic1:'Yes, on Form IC-1',other:'Yes, other written consent',no:'No'};
+const V65PH_OK=v=>{v=String(v==null?'':v);return (!!window.nbhMedia&&nbhMedia.isRef(v)&&/^image\//.test((nbhMedia.parse(v)||{}).mime||''))||(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16e6);};
+function v65PhCopy(a){const s=v=>v==null||typeof v==='object'?'':String(v);
+  return (Array.isArray(a)?a:[]).filter(p=>p&&typeof p==='object'&&V65PH_OK(p.ref)).slice(0,40).map(p=>({ref:s(p.ref),at:s(p.at).slice(0,16),by:s(p.by).slice(0,20),note:s(p.note).slice(0,300)}));}
+const V65PH_URL={};let V65PH_PRINT=false,V65PH_SITE=-1,V65PH_OPEN=null,v65phWarm=false;
+const v65phSrc=ref=>window.nbhMedia&&nbhMedia.isRef(ref)?(V65PH_URL[ref]||''):String(ref||'');
+const v65phYes=()=>S.meta.photoConsent==='ic1'||S.meta.photoConsent==='other';
+const v65phAt=ms=>{const d=new Date(ms);if(isNaN(d))return '';const z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());};
+const v65phWhen=at=>{const m=/^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)$/.exec(at||'');if(!m)return at||'date not recorded';let h=+m[4];const ap=h<12?'am':'pm';h=h%12||12;return (+m[2])+'/'+(+m[3])+'/'+m[1]+' '+h+':'+m[5]+' '+ap;};
+const v65phSite=r=>r.loc==='hips'?'Hips/buttocks: the side of the hip':(LOC[r.loc]||{}).name||r.loc;
+const v65phCons=()=>'Photographed with consent: '+(V65PH_CONS[S.meta.photoConsent]||'not recorded');
+function v65phWhy(){if(S.cur.ro)return 'This administration is open read-only, so photos cannot be added or deleted here. Choose "Edit this one" on the History page to change it.';
+  if(S.meta.photoConsent==='no')return 'Photos cannot be added: the answer to "Consent to photograph injuries" is No. Describe the injury in words on its row instead.';
+  if(!v65phYes())return 'Photos cannot be added until "Consent to photograph injuries" is answered Yes (on Form IC-1, or other written consent).';return '';}
+function v65phWarmUp(){const M=window.nbhMedia;if(!M||v65phWarm)return;const refs=[];
+  [S.cur].concat(S.hist).forEach(a=>(a&&a.rows||[]).forEach(r=>(r.photos||[]).forEach(p=>{if(M.isRef(p.ref)&&!(p.ref in V65PH_URL))refs.push(p.ref);})));
+  if(!refs.length)return;v65phWarm=true;Promise.all(refs.map(r=>M.url(r).then(u=>{V65PH_URL[r]=u||'';}).catch(()=>{V65PH_URL[r]='';}))).then(()=>{v65phWarm=false;v65PhRender();});}
+function v65phImg(r,p,cls){const alt='Photo of '+v65phSite(r)+', '+v65phWhen(p.at),src=v65phSrc(p.ref);
+  return src?'<img src="'+esc(src)+'" alt="'+esc(alt)+'"'+(cls?' class="'+cls+'"':'')+'>':'<span class="hint" role="img" aria-label="'+esc(alt+': not on this device')+'">not on this device</span>';}
+function v65PhRender(){const L=$('#v65PhList'),G=$('#v65PhGate'),P=$('#v65PhPrint');if(!L||!S||!S.cur)return;
+  const c=$('#v65PhCons');if(c&&c.value!==(S.meta.photoConsent||''))c.value=S.meta.photoConsent||'';
+  const why=v65phWhy();if(G.textContent!==why)G.textContent=why;
+  const R=S.cur.rows.map((r,i)=>({r,i})).filter(x=>LOC[x.r.loc]);
+  L.innerHTML=R.length?R.map(({r,i})=>{const ph=r.photos||[];
+    if(isPrivRow(r))return '<div class="v65ph-site"><b>'+esc(v65phSite(r))+'</b><span class="hint">A private area: no photos are taken.</span></div>';
+    return '<div class="v65ph-site" data-v65phsite="'+i+'"><b>'+esc(v65phSite(r))+'</b>'+ph.map((p,k)=>'<button type="button" class="v65ph-th" data-v65phopen="'+i+':'+k+'" aria-label="Open the photo of '+esc(v65phSite(r))+', '+esc(v65phWhen(p.at))+'">'+v65phImg(r,p)+'</button>').join('')+
+      (S.cur.ro?'':'<button type="button" class="tool v65ph-add" data-v65phadd="'+i+'">Add photo</button>')+(ph.length?'<span class="hint">'+ph.length+' photo'+(ph.length===1?'':'s')+' · '+esc(v65phCons())+'</span>':'')+'</div>';}).join('')
+    :'<p class="hint">Mark an injury on the body map first; each marked site can then take photos.</p>';
+  const pr=$('#v65PhPrintOn');if(pr)pr.checked=V65PH_PRINT;
+  const all=R.filter(x=>!isPrivRow(x.r)).flatMap(({r})=>(r.photos||[]).map(p=>({r,p})));
+  P.classList.toggle('on',V65PH_PRINT&&all.length>0);
+  P.innerHTML=V65PH_PRINT&&all.length?'<h2 class="nbh-band">Photos</h2><p>'+esc(v65phCons())+'. Photos do not replace the nurse&rsquo;s check or a mandated report.</p><div class="v65ph-grid">'+all.map(({r,p})=>'<figure>'+v65phImg(r,p)+'<figcaption><b>'+esc(v65phSite(r))+'</b><br>'+esc(v65phWhen(p.at))+' · taken by '+esc(p.by||'not recorded')+(p.note?'<br>'+esc(p.note):'')+'<br>'+esc(v65phCons())+'</figcaption></figure>').join('')+'</div>':'';
+  v65phWarmUp();}
+async function v65phShrink(file){const url=URL.createObjectURL(file);
+  try{const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('not an image'));im.src=url;});
+    const w=img.naturalWidth||1,h=img.naturalHeight||1,k=Math.min(1,1600/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+    return await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('no image')),'image/jpeg',0.8));}
+  finally{URL.revokeObjectURL(url);}}
+const v65phData=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.onerror=()=>rej(r.error);r.readAsDataURL(b);});
+async function v65phAdd(files){const r=S.cur.rows[V65PH_SITE];V65PH_SITE=-1;if(!r||v65phWhy())return;let n=0,bad=0;
+  for(const f of Array.from(files||[])){if(!/^image\//.test(f.type||'')){bad++;continue;}
+    try{const b=await v65phShrink(f);const ref=window.nbhMedia?await nbhMedia.put(b,{kind:'image',mime:'image/jpeg'}):await v65phData(b);
+      if(!V65PH_OK(ref)){bad++;continue;}
+      (r.photos=r.photos||[]).push({ref,at:v65phAt(f.lastModified||Date.now()),by:String(S.meta.photoBy||'').trim().slice(0,20),note:''});n++;}catch(e){bad++;}}
+  v65PhRender();
+  if(n)nbhUI.toast(n+' photo'+(n===1?'':'s')+' added to '+v65phSite(r)+'.',{kind:'ok'});if(bad)nbhUI.toast(bad+' file'+(bad===1?' was':'s were')+' not read as a photo.',{kind:'warn'});}
+function v65phOpen(i,k){const r=S.cur.rows[i],p=r&&r.photos&&r.photos[k],D=$('#v65PhDlg');if(!p||!D)return;V65PH_OPEN={i,k};
+  $('#v65PhDlgT').textContent=v65phSite(r)+': photo '+(k+1)+' of '+r.photos.length;const im=$('#v65PhBig');im.src=v65phSrc(p.ref);im.alt='Photo of '+v65phSite(r)+', '+v65phWhen(p.at);
+  $('#v65PhDBy').value=p.by;$('#v65PhDNote').value=p.note;['#v65PhDBy','#v65PhDNote','#v65PhDel'].forEach(s=>{$(s).disabled=!!S.cur.ro;});
+  $('#v65PhDMeta').textContent='Added '+v65phWhen(p.at)+'. '+v65phCons()+'.';
+  try{D.showModal();}catch(e){D.setAttribute('open','');}}
+function v65phCloseDlg(){const D=$('#v65PhDlg');V65PH_OPEN=null;try{D.close();}catch(e){D.removeAttribute('open');}v65PhRender();}
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('[data-v65phadd],[data-v65phopen],#v65PhDel,#v65PhClose');if(!t)return;
+  if(t.dataset.v65phadd!==undefined){const why=v65phWhy();if(why){$('#v65PhGate').textContent=why;nbhUI.toast(why,{kind:'warn',ms:7000});return;}
+    if(!String(S.meta.photoBy||'').trim()){nbhUI.toast('Type the initials of who takes the photo (Taken by) first.',{kind:'warn'});$('#v65PhBy').focus();return;}
+    V65PH_SITE=+t.dataset.v65phadd;$('#v65PhFile').click();return;}
+  if(t.dataset.v65phopen!==undefined){const [i,k]=t.dataset.v65phopen.split(':').map(Number);v65phOpen(i,k);return;}
+  if(t.id==='v65PhClose'){v65phCloseDlg();return;}
+  if(t.id==='v65PhDel'&&V65PH_OPEN&&!S.cur.ro){const {i,k}=V65PH_OPEN;
+    if(!(await nbhUI.confirm('Delete this photo?\nIt is removed from this record.',{ok:'Delete',danger:true})))return;
+    const r=S.cur.rows[i];if(r&&r.photos){r.photos.splice(k,1);if(!r.photos.length)delete r.photos;}v65phCloseDlg();}});
+$('#v65PhFile').addEventListener('change',e=>{const f=e.target.files;v65phAdd(f).finally(()=>{e.target.value='';});});
+$('#v65PhPrintOn').addEventListener('change',e=>{V65PH_PRINT=!!e.target.checked;v65PhRender();});
+$('#v65PhCons').addEventListener('change',()=>v65PhRender());
+$('#v65PhDlg').addEventListener('input',e=>{if(!V65PH_OPEN||S.cur.ro)return;const r=S.cur.rows[V65PH_OPEN.i],p=r&&r.photos&&r.photos[V65PH_OPEN.k];if(!p)return;
+  if(e.target.id==='v65PhDBy')p.by=e.target.value.slice(0,20);if(e.target.id==='v65PhDNote')p.note=e.target.value.slice(0,300);});
+$('#v65PhDlg').addEventListener('close',()=>{if(V65PH_OPEN){V65PH_OPEN=null;v65PhRender();}});
+{const rm=renderMap;renderMap=function(){const r=rm.apply(this,arguments);try{v65PhRender();}catch(e){}return r;};}
+window.nbhMediaHeld=()=>{try{return JSON.stringify(S);}catch(e){return '';}};   /* the store references this page holds: the workstation's sweep keeps them */
+try{v65PhRender();}catch(e){}
 </script>
 <script>
 /* ===================== NBH student packet =====================

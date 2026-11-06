@@ -1,6 +1,6 @@
 /* v25.65 parcel SAFETY: the approved changes of the 11/2 review against the JABA safety, caregiver and feeding research, in
    Forms CR-1, IM-1, MS-1, RR-1, IC-1 and HD-1 (SAFETY-H1 to H8, M1 to M10, L1 to L5; CARE-H7, H8, M5, M6, M7, M10, M11, L1, L4;
-   FEED-M2). One check or more for each. Files saved before v25.65 keep opening and printing as before. Simulated people only.
+   FEED-M2), and the BCBA's request for photos of the injuries on IM-1's body map (checks 13a to 13g, simulated squares only). One check or more for each. Files saved before v25.65 keep opening and printing as before. Simulated people only.
    usage: node qa/v2565-safety-test.js */
 const L=require(__dirname+'/lib.js');const {sleep}=L;
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
@@ -66,6 +66,65 @@ const F={CR:'CR-1_Crisis-Intervention-Plan_v2026-09.html',IM:'IM-1_Self-Injury-T
   t=await p.evaluate(()=>({beh:S.meta.beh,n:S.hist.length,pe:S.peLog.length,rate:S.ddRate}));
   ok('20 IM-1 a file saved before v25.65 opens with its administrations, and no equipment or rate',t.beh==='Head hitting'&&t.n===1&&t.pe===0&&t.rate===null,t);
   await p.close();
+
+  /* ================= IM-1 photos (v25.65 IM-1 photos, the BCBA's request) ================= */
+  /* a generated colored square, never a real photo */
+  const square=async(pg,color,w,h)=>Buffer.from(await pg.evaluate(([c,w,h])=>{const k=document.createElement('canvas');k.width=w;k.height=h;const x=k.getContext('2d');x.fillStyle=c;x.fillRect(0,0,w,h);x.fillStyle='#fff';x.fillRect(w/4,h/4,w/2,h/8);return k.toDataURL('image/png').split(',')[1];},[color,w,h]),'base64');
+  const addPhoto=async(pg,fr,i,buf)=>{const fc=pg.waitForEvent('filechooser',{timeout:8000});await fr.evaluate(i=>document.querySelector('[data-v65phadd="'+i+'"]').click(),i);const c=await fc;await c.setFiles({name:'square.png',mimeType:'image/png',buffer:buf});await sleep(1500);};
+  p=await open('IM-1',F.IM);await view(p,'map');
+  await p.evaluate(()=>{window.__wc=0;window.confirm=()=>{window.__wc++;return false;};addLoc('larm_L');});await sleep(300);
+  t=await p.evaluate(()=>{document.querySelector('[data-v65phadd="0"]').click();const a=document.getElementById('v65PhGate').textContent;
+    const s=document.getElementById('v65PhCons');s.value='no';s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}));document.querySelector('[data-v65phadd="0"]').click();
+    return [a,document.getElementById('v65PhGate').textContent,document.querySelectorAll('#v65PhList img').length,[...document.getElementById('v65PhCons').options].map(o=>o.text).join('|'),document.querySelector('.v65ph-safe').textContent].join('\n');});
+  ok('13a IM-1 photos: Add photo works only with a Yes to "Consent to photograph injuries", and says why; the safeguarding line is beside it',/until "Consent to photograph injuries" is answered Yes/.test(t)&&/the answer to "Consent to photograph injuries" is No/.test(t)&&/\n0\n/.test(t)&&/\|Yes, on Form IC-1\|Yes, other written consent\|No/.test(t)&&/Photos do not replace the nurse.s check or a mandated report\. For an injury that is unexplained or suspicious, follow the school.s or agency.s reporting procedure, including who may take photos, before photographing\./.test(t),t);
+  await put(p,'#v65PhCons','ic1');await put(p,'#v65PhBy','RN');
+  await addPhoto(p,p,0,await square(p,'#3a7bd5',2400,1200));
+  t=await p.evaluate(()=>{const r=S.cur.rows[0],ph=(r.photos||[])[0]||{},im=document.querySelector('#v65PhList .v65ph-th img'),b=document.querySelector('#v65PhList .v65ph-th');
+    return {n:(r.photos||[]).length,ref:nbhMedia.isRef(ph.ref),mime:(nbhMedia.parse(ph.ref)||{}).mime,by:ph.by,at:/^\d{4}-\d\d-\d\d \d\d:\d\d$/.test(ph.at),alt:im&&im.alt,w:im&&im.naturalWidth,h:im&&im.naturalHeight,box:b&&[b.offsetWidth,b.offsetHeight],add:document.querySelector('[data-v65phadd="0"]').offsetHeight,
+      facts:JSON.stringify(window.__nbhFactsOut()||{}).search(/photo|nbh-media|data:image/i)};});
+  ok('13b a photo added appears as a thumbnail named by its site and date, shrunk to 1600 px as a JPEG in the media store, with who took it; targets are 44 px; nothing goes into the case facts',t.n===1&&t.ref&&t.mime==='image/jpeg'&&t.by==='RN'&&t.at&&/^Photo of Lower arm\/wrist \(L\), \d+\/\d+\/\d{4} \d+:\d\d (am|pm)$/.test(t.alt||'')&&t.w===1600&&t.h===800&&t.box[0]>=44&&t.box[1]>=44&&t.add>=44&&t.facts<0,t);
+  /* print: off by default, then on */
+  await p.emulateMedia({media:'print'});
+  t=await p.evaluate(()=>({on:document.getElementById('v65PhPrintOn').checked,shown:getComputedStyle(document.getElementById('v65PhPrint')).display,imgs:[...document.querySelectorAll('img')].filter(i=>i.offsetParent&&/^blob:|^data:image\/jpeg/.test(i.src)).length}));
+  const pOff=t;await p.emulateMedia({media:'screen'});
+  await p.evaluate(()=>{const c=document.getElementById('v65PhPrintOn');c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}));});await p.emulateMedia({media:'print'});await sleep(200);
+  t=await p.evaluate(()=>{const P=document.getElementById('v65PhPrint');return {shown:getComputedStyle(P).display,figs:P.querySelectorAll('figure img').length,txt:P.innerText,cols:getComputedStyle(P.querySelector('.v65ph-grid')).gridTemplateColumns.split(' ').length};});
+  await p.emulateMedia({media:'screen'});
+  ok('13c print: the photos are left out by default, and with "Include the photos when printing" a Photos section prints each one with its site, date and time, who took it and the consent, two to a row',!pOff.on&&pOff.shown==='none'&&pOff.imgs===0&&t.shown==='block'&&t.figs===1&&/^Photos/.test(t.txt)&&/Lower arm\/wrist \(L\)/.test(t.txt)&&/taken by RN/.test(t.txt)&&/Photographed with consent: Yes, on Form IC-1/.test(t.txt)&&t.cols===2,{pOff,t});
+  /* the IM-1 file: saved and opened again */
+  let dl=p.waitForEvent('download',{timeout:15000});await p.evaluate(()=>document.getElementById('saveBtn').click());let ftxt=require('fs').readFileSync(await (await dl).path(),'utf8');
+  await p.evaluate(()=>{S=blank();renderAll();});await loadFile(p,JSON.parse(ftxt),'im1.json');await view(p,'map');await sleep(1200);
+  t=await p.evaluate(()=>{const im=document.querySelector('#v65PhList .v65ph-th img');return {n:(S.cur.rows[0].photos||[]).length,w:im&&im.naturalWidth,cons:S.meta.photoConsent,len:JSON.stringify(S).length};});
+  ok('13d the IM-1 file holds the reference and the details only, and opens again with the thumbnail',/"photos":\s*\[\s*\{\s*"ref":\s*"nbh-media:/.test(ftxt)&&!/data:image\/jpeg/.test(ftxt)&&t.n===1&&t.w===1600&&t.cons==='ic1',t);
+  /* delete, asked in the page */
+  await p.evaluate(()=>document.querySelector('#v65PhList .v65ph-th').click());await sleep(200);
+  t=await p.evaluate(()=>({open:document.getElementById('v65PhDlg').open,big:document.getElementById('v65PhBig').naturalWidth,meta:document.getElementById('v65PhDMeta').textContent}));
+  await p.evaluate(()=>{window.__nc=0;const c=nbhUI.confirm;nbhUI.confirm=async(...a)=>{window.__nc++;return true;};document.getElementById('v65PhDel').click();});await sleep(400);
+  const del=await p.evaluate(()=>({n:(S.cur.rows[0].photos||[]).length,thumbs:document.querySelectorAll('#v65PhList .v65ph-th').length,nc:window.__nc,wc:window.__wc,open:document.getElementById('v65PhDlg').open}));
+  ok('13e a tap on the thumbnail shows the photo large with its details; Delete asks in the page (never the browser) and removes it',t.open&&t.big===1600&&/Photographed with consent: Yes, on Form IC-1/.test(t.meta)&&del.n===0&&del.thumbs===0&&del.nc===1&&del.wc===0&&!del.open,{t,del});
+  /* an IM-1 file saved before v25.65 opens unchanged */
+  const OLD={form:'IM-1',rev:'2026-10',S:{meta:{client:'SIM old',beh:'Head hitting'},chk:{},healed:[],events:[],cur:{date:'9/1/2026',rows:[{loc:'larm_L',n:'1',type:'AL',sev:'1',kind:'bite',note:'',how:'',view:'front',x:160,y:221,heal:'new'}]},hist:[],nurse:[],care:[]}};
+  await loadFile(p,OLD,'old.json');await sleep(300);
+  t=await p.evaluate(()=>({row:JSON.stringify(S.cur.rows[0]),cons:S.meta.photoConsent,list:document.getElementById('v65PhList').innerText,print:document.getElementById('v65PhPrint').innerHTML}));
+  ok('13f an IM-1 file saved before v25.65 opens unchanged: its row as saved, no photos, no consent answer, nothing added to the print',t.row==='{"loc":"larm_L","n":"1","type":"AL","sev":"1","kind":"bite","note":"","how":"","view":"front","x":160,"y":221,"heal":"new"}'&&t.cons===undefined&&/Add photo/.test(t.list)&&t.print==='',t);
+  await p.close();
+  /* the case: a photo in IM-1 survives Save case and opening the case file */
+  {const w=await ctx.newPage();w.on('pageerror',e=>errs.push('shell: '+e.message));await w.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(1500);
+   await w.evaluate(()=>{window.confirm=()=>true;wsUI.confirm=async()=>true;wsUI.prompt=async()=>'';});
+   await w.evaluate(()=>{const c=document.getElementById('pClient');c.value='SIMULATED – Photo Student';c.dispatchEvent(new Event('input'));});
+   await w.evaluate(()=>openForm('IM-1'));await w.waitForFunction(()=>!!state.frames['IM-1'],null,{timeout:40000}).catch(()=>{});await sleep(2500);
+   const fr=()=>w.frames().find(f=>f!==w.mainFrame()&&!!f.parentFrame()&&/IM-1|srcdoc|about/.test(f.url()+f.name())&&f.url()!=='about:blank'||false)||w.frames().find(f=>f!==w.mainFrame());
+   const imf=async()=>{for(const f of w.frames()){if(f===w.mainFrame())continue;try{if(await f.evaluate(()=>!!document.getElementById('v65PhList')))return f;}catch(e){}}return null;};
+   let f1=await imf();
+   await f1.evaluate(()=>{nbhUI.confirm=async()=>true;setView('map');addLoc('hand_R');const s=document.getElementById('v65PhCons');s.value='other';s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}));
+     const b=document.getElementById('v65PhBy');b.value='TP';b.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(300);
+   await addPhoto(w,f1,0,await square(w,'#d53a7b',300,300));await sleep(5500);
+   const dP=w.waitForEvent('download',{timeout:20000}).catch(()=>null);await w.evaluate(()=>{saveCase();});const d=await dP;const ctxt=d?require('fs').readFileSync(await d.path(),'utf8'):'';
+   await w.evaluate(async t=>{await clearCase();await openCaseText(t,null,{asked:true,quiet:true});},ctxt);await sleep(2500);
+   await w.evaluate(()=>openForm('IM-1'));await sleep(3500);f1=await imf();
+   t=f1?await f1.evaluate(async()=>{setView('map');await new Promise(r=>setTimeout(r,800));const im=document.querySelector('#v65PhList .v65ph-th img');return {n:((S.cur.rows.find(r=>r.loc==='hand_R')||{}).photos||[]).length,w:im&&im.naturalWidth,by:(((S.cur.rows.find(r=>r.loc==='hand_R')||{}).photos||[])[0]||{}).by,cons:S.meta.photoConsent};}):null;
+   ok('13g the case: Save case writes the photo into the case file, and the case opened from that file shows it again',ctxt.length>0&&/data:image\/jpeg;base64,/.test(ctxt)&&t&&t.n===1&&t.w===300&&t.by==='TP'&&t.cons==='other',{len:ctxt.length,t});
+   await w.close();}
 
   /* ================= MS-1 ================= */
   p=await open('MS-1',F.MS);await sim(p);
