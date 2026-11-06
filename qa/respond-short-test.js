@@ -32,7 +32,7 @@ const FASTLIKE=['Does the behavior tend to happen when the student has been left
       document.getElementById('rpBtn').click();const e=document.getElementById('rpEmail');if(e&&!e.value){e.value='bcba@example.org';e.dispatchEvent(new Event('input',{bubbles:true}));}
       const w=document.getElementById('rpWord');if(w&&!w.value){w.value='get upset';w.dispatchEvent(new Event('input',{bubbles:true}));}},FASTLIKE);
     await sleep(300);await page.evaluate(()=>{document.getElementById('rpMail').click();const d=document.querySelector('.nbh-inv[open]');if(d)d.close();});await sleep(200);
-    const r=await page.evaluate(()=>{const x=window.__pl[window.__pl.length-1];const back=NBH_RESPOND.payloadFromHash(x.h);return {h:x.h,same:JSON.stringify(back)===JSON.stringify(x.p),old:('#p='+btoa(unescape(encodeURIComponent(JSON.stringify(x.p))))).length,title:x.p.title};});
+    const r=await page.evaluate(()=>{const x=window.__pl[window.__pl.length-1];const back=NBH_RESPOND.payloadFromHash(x.h);return {h:x.h,same:JSON.stringify(back)===JSON.stringify(x.p),old:('#p='+btoa(unescape(encodeURIComponent(JSON.stringify(x.p))))).length,title:x.p.heading||x.p.title};});   /* v25.67: the page names the questionnaire by its heading, in the footer */
     const url=BASE+'/NBH-Workstation/respond.html'+r.h;
     ok(id+': the link is short ('+url.length+' characters; '+r.old+' the old way)',/^#z=1[a-z]/.test(r.h)&&url.length<LIMIT[id],url.length);
     ok(id+': it opens to exactly the questionnaire the form built',r.same);

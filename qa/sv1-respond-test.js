@@ -57,7 +57,8 @@ const answer=async(rp,name,mode,pick,opens)=>rp.evaluate(([name,mode,pick,opens]
  await page.evaluate(()=>{document.querySelector('#rpBtn').click();rpRole.value='caregiver';rpRole.dispatchEvent(new Event('change'));});
  const link2=await page.evaluate(()=>__rp.link());await page.evaluate(()=>document.querySelector('#rpDlg').close());
  await rp.goto(link2);await sleep(500);
- const r2=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,band:document.querySelector('.band').textContent,sub:document.querySelector('.sub').textContent}));
+ /* v25.67 (design review H9): the form code is in the page's footer, the form's own line about the page among its .sub lines */
+ const r2=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,band:document.querySelector('.nr-foot').textContent,sub:[...document.querySelectorAll('.sub')].map(e=>e.textContent).join(' | ')}));
  ok('respond.html renders the caregiver pre page from the link: 11 items',r2.items===11&&/Form SV-1/.test(r2.band)&&/caregiver, pre round/.test(r2.sub),r2);
  await answer(rp,'Mother (D. S.)','interview',i=>i===2?'NA':String(3+(i%2)),['That the school stops calling me at work.','']);await sleep(300);
  const code2=await rp.evaluate(()=>document.querySelector('.code').value);

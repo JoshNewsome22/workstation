@@ -206,27 +206,41 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
   function NBH_RESPOND_RUNTIME(root,P){
     var d=document;function h(tag,attrs,kids){var e=d.createElement(tag);if(attrs)for(var k in attrs){if(k==='text')e.textContent=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
       (kids||[]).forEach(function(c){if(c)e.appendChild(typeof c==='string'?d.createTextNode(c):c);});return e;}
-    var CSS=':root{--navy:#182e43;--slate:#254657;--teal:#76a2a3;--mist:#eaf2f0;--ink:#1a2933;--muted:#54676f;--rule:#cfdad8;--red:#8e2a2a}'+
-      '*{box-sizing:border-box}body{margin:0;background:#f1f4f3;color:var(--ink);font:16px/1.5 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif}'+
-      '.nr{max-width:760px;margin:0 auto;padding:16px}.nr-card{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin:0 0 14px;box-shadow:0 1px 3px rgba(24,46,67,.06)}'+
-      '.nr h1{font:600 22px/1.25 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--navy);margin:0 0 4px}.nr .sub{color:var(--muted);font-size:14px;margin:0 0 10px}'+
-      '.nr .band{display:inline-block;background:var(--mist);color:var(--navy);border-left:4px solid var(--teal);padding:2px 10px;font-size:13px;margin:0 0 10px}'+
-      '.nr .def{background:var(--mist);border-radius:6px;padding:10px 12px;font-size:14.5px;margin:10px 0}.nr img.photo{float:right;width:112px;height:112px;object-fit:cover;border-radius:10px;border:2px solid var(--teal);margin:0 0 8px 14px}.nr .def b{color:var(--navy)}'+
-      '.nr label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 2px}.nr input[type=text],.nr textarea,.nr select{width:100%;font:inherit;font-size:16px;padding:9px 10px;border:1px solid #b7c8c5;border-radius:6px;background:#fff;color:var(--ink)}'+
-      '.nr textarea{min-height:70px;resize:vertical}.nr .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:560px){.nr .grid2{grid-template-columns:1fr}}'+
-      '.nr ol.items{list-style:none;padding:0;margin:0}.nr li.it{border-top:1px solid var(--rule);padding:14px 0}.nr li.it .q{font-size:16px;margin:0 0 8px}.nr li.it .q b{color:var(--navy);margin-right:6px}'+
-      '.nr .opts{display:flex;flex-wrap:wrap;gap:8px}.nr .opts label{flex:1 1 auto;min-width:64px;text-align:center;border:1.5px solid #b7c8c5;border-radius:8px;padding:10px 8px;cursor:pointer;font-size:15px;background:#fff;user-select:none}'+
-      '.nr .opts label.num{flex:1 1 0;min-width:0;padding-left:0;padding-right:0}.nr select{min-height:44px}.nr .opts input{position:absolute;opacity:0;width:1px;height:1px}.nr .opts label.on{background:var(--navy);color:#fff;border-color:var(--navy)}'+
-      '.nr .opts label:focus-within{outline:3px solid #2f7fa8;outline-offset:2px}.nr .key{font-size:13px;color:var(--muted);margin:0 0 6px}.nr .key span{display:inline-block;margin-right:10px}'+
-      '.nr .prog{position:sticky;top:0;background:#f1f4f3;padding:8px 0;font-size:13.5px;color:var(--muted);z-index:2}.nr .prog b{color:var(--navy)}'+
-      '.nr button{font:inherit;font-size:16px;padding:12px 18px;border-radius:8px;border:1.5px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;min-height:48px}.nr button.ghost{background:#fff;color:var(--navy)}'+
-      '.nr [hidden]{display:none!important}.nr .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}.nr .warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 12px;font-size:14px;margin:10px 0}'+
+    /* v25.67 (design review H9, B5) one design with the staff data page: who it is from and about whom, how long it takes, a
+       progress bar kept in view, the answers kept on this device until sent, one "Not sure", the Send bar kept in view with
+       Copy and Save as a file beside it, and a footer with the form, the instrument's citation and "Need this another way?".
+       What the page sends is unchanged: the same answers in the same code, the same email, the same reply. */
+    var CSS=':root{--navy:#182e43;--slate:#254657;--teal:#76a2a3;--mist:#eaf2f0;--ink:#1a2933;--muted:#54676f;--rule:#cfdad8;--red:#8e2a2a;--ok:#1f6b4a;--warn:#7a4b00}'+
+      '*{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%}body{margin:0;background:#f1f4f3;color:var(--ink);font:16px/1.5 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif}'+
+      '.nr{max-width:760px;margin:0 auto;padding:16px 16px 0;display:flex;flex-direction:column;min-height:100vh}.nr>*{flex:0 0 auto}'+
+      '.nr-card{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:18px 20px;margin:0 0 14px;box-shadow:0 1px 3px rgba(24,46,67,.06)}@media(max-width:480px){.nr-card{padding:16px 14px}}'+
+      '.nr h1{font:600 24px/1.25 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--navy);margin:0 0 8px;overflow-wrap:anywhere}.nr .lede{font-size:17px;margin:0 0 8px}.nr .sub{color:var(--muted);font-size:15px;margin:0 0 10px}'+
+      '.nr .keep{margin:0;font-size:16px}.nr .keep[data-k=warn]{color:var(--warn);font-weight:600}.nr .was{background:#e8f3ec;border-left:4px solid var(--ok);padding:8px 12px;margin:8px 0 0;font-size:15px}'+
+      '.nr .band{display:inline-block;background:var(--mist);color:var(--navy);border-left:4px solid var(--teal);padding:2px 10px;font-size:14px;margin:0 0 10px}'+
+      '.nr .def{background:var(--mist);border-radius:8px;padding:10px 12px;font-size:16px;margin:0 0 10px}.nr img.photo{float:right;width:112px;height:112px;object-fit:cover;border-radius:10px;border:2px solid var(--teal);margin:0 0 8px 14px}.nr .def b{color:var(--navy)}'+
+      '.nr label.f{display:block;font-size:15px;color:var(--muted);margin:12px 0 4px}.nr input[type=text],.nr textarea,.nr select{width:100%;font:inherit;font-size:16px;min-height:44px;padding:9px 10px;border:1px solid #7f9692;border-radius:8px;background:#fff;color:var(--ink)}'+
+      '.nr textarea{min-height:88px;resize:vertical}.nr .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:560px){.nr .grid2{grid-template-columns:1fr}}'+
+      '.nr ol.items{list-style:none;padding:0;margin:0}.nr li.it{border-top:1px solid var(--rule);padding:14px 0}.nr li.it .q{font-size:16px;margin:0 0 8px}.nr li.it .q b{color:var(--navy);margin-right:6px}.nr li.it.missing .q{color:var(--red)}'+
+      '.nr .opts{display:flex;flex-wrap:wrap;gap:8px}.nr .opts label{position:relative;flex:1 1 auto;min-width:64px;min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;border:1.5px solid #7f9692;border-radius:8px;padding:9px 8px;cursor:pointer;font-size:16px;line-height:1.25;background:#fff;user-select:none;-webkit-tap-highlight-color:transparent}'+
+      '.nr .opts label.num{flex:1 1 0;min-width:0;padding-left:0;padding-right:0}@media(max-width:560px){.nr .opts label.na{flex:1 0 100%}}.nr .opts input{position:absolute;opacity:0;width:1px;height:1px}.nr .opts label.on{background:var(--navy);color:#fff;border-color:var(--navy)}'+
+      '@media(max-width:420px){.nr .opts.many{display:grid;grid-template-columns:repeat(4,minmax(44px,1fr));gap:6px}.nr .opts.many label.na{grid-column:1/-1}}'+
+      '.nr .opts label:focus-within,.nr button:focus-visible,.nr a:focus-visible,.nr input:focus-visible,.nr textarea:focus-visible,.nr select:focus-visible{outline:3px solid #2f7fa8;outline-offset:2px}'+
+      '.nr .key{font-size:14px;color:var(--muted);margin:0 0 8px}.nr .key span{display:inline-block;margin-right:12px}'+
+      '.nr .prog{position:sticky;top:0;z-index:4;margin:0 -16px 14px;padding:10px 16px 8px;background:#f1f4f3;border-bottom:1px solid var(--rule);font-size:15px;color:var(--ink)}.nr .prog b{color:var(--navy)}'+
+      '.nr .pbar{height:8px;border-radius:4px;background:#d3dedb;overflow:hidden;margin:0 0 5px}.nr .pbar i{display:block;height:100%;width:0;background:var(--ok);border-radius:4px;transition:width .25s ease}'+
+      '.nr button{font:inherit;font-size:16px;padding:10px 18px;border-radius:10px;border:1.5px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;min-height:48px;touch-action:manipulation}.nr button.ghost{background:#fff;color:var(--navy)}'+
+      '.nr [hidden]{display:none!important}.nr .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}.nr .warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 12px;font-size:15px;margin:10px 0}'+
       '.nr .done{background:#e8f3ec;border-left:4px solid #2f6b37;padding:10px 12px;margin:10px 0}.nr .code{width:100%;font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;min-height:90px}'+
       '.nr .yns .opts{margin:0 0 6px}.nr .yns input{margin:0 0 4px}'+
-      '.nr .links{margin:10px 0 0;font-size:15px}.nr .links a{color:var(--navy);font-weight:600;text-decoration:underline}'+
-      '.nr .conf{background:#fff;border:1.5px solid var(--teal);border-radius:8px;padding:10px 12px;margin:8px 0}.nr .conf.missing{border-color:var(--red)}.nr .conf .q{margin:0 0 8px;font-size:15px}.nr .conf .req{color:var(--red)}.nr .conf .sub{margin:8px 0 0;color:var(--ink)}'+
-      '.nr .foot{font-size:12.5px;color:var(--muted);margin:14px 0 0}.nr .miss{color:var(--red);font-weight:600}@media print{.nr .prog,.nr .row,.nr button{display:none}}'+
-      '.nr .me{background:var(--mist);border-radius:6px;padding:8px 12px;margin:6px 0 4px;font-size:15px}.nr .me a{color:var(--navy);font-weight:600;margin-left:6px;text-decoration:underline}.nr input[readonly]{background:#f4f7f6}';
+      '.nr .links{margin:10px 0 0;font-size:16px}.nr .links a,.nr .me a{display:inline-flex;align-items:center;min-height:44px;color:var(--navy);font-weight:600;text-decoration:underline}'+
+      '.nr .conf{background:#fff;border:1.5px solid var(--teal);border-radius:8px;padding:10px 12px;margin:8px 0 0}.nr .conf.missing{border-color:var(--red)}.nr .conf .q{margin:0 0 8px;font-size:16px}.nr .conf .req{color:var(--red)}.nr .conf .sub{margin:8px 0 0;color:var(--ink)}'+
+      '.nr-bar{position:sticky;bottom:0;z-index:4;margin:auto -16px 14px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#f1f4f3;border-top:1px solid var(--rule);box-shadow:0 -2px 8px rgba(24,46,67,.06)}'+
+      '.nr-bar .msg{margin:0 0 8px;font-size:15px;font-weight:600}.nr-bar .msg:empty{margin:0}.nr-bar .msg[data-k=ok]{color:var(--ok)}.nr-bar .msg[data-k=warn]{color:var(--warn)}.nr-bar .msg[data-k=bad]{color:var(--red)}'+
+      '.nr .nr-bar .send{display:block;width:100%;min-height:56px;border:0;border-radius:14px;background:var(--ok);color:#fff;font-size:19px;font-weight:700;padding:8px 12px}.nr .nr-bar .send:disabled{opacity:.6}'+
+      '.nr .nr-bar .alt{display:flex;gap:8px;margin:8px 0 0}.nr .nr-bar .alt button{flex:1 1 0;min-width:0;min-height:44px;padding:8px 6px;border-radius:10px;font-size:16px;font-weight:600}'+
+      '.nr-foot{margin:0 0 24px;padding:0 4px}.nr .foot{font-size:14px;color:var(--muted);margin:10px 0 0}.nr .foot b{color:var(--ink)}.nr .miss{color:var(--red);font-weight:600}'+
+      '@media print{.nr .prog,.nr .row,.nr button,.nr-bar{display:none}}@media(prefers-reduced-motion:reduce){.nr .pbar i{transition:none}}'+
+      '.nr .me{background:var(--mist);border-radius:8px;padding:4px 12px;margin:6px 0 4px;font-size:16px}.nr .me a{margin-left:6px}.nr input[readonly]{background:#f4f7f6}';
     if(!d.getElementById('nbhr-css')){var st=h('style',{id:'nbhr-css'});st.textContent=CSS;d.head.appendChild(st);}
     /* v21.67 the page in Spanish (P.lang 'es'): every word of the page's own, the items as the assessor pasted them */
     var ES=P.lang==='es';
@@ -234,41 +248,86 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     var dueWords=function(v){var m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||''));if(!m)return v;try{return new Date(+m[1],+m[2]-1,+m[3],12).toLocaleDateString(ES?'es':'en-US',{weekday:'long',month:'long',day:'numeric'});}catch(e){return v;}};
     var TXT={'the BCBA':'el BCBA','Photo of the student':'Foto del estudiante','Student:':'Estudiante:','Behavior this questionnaire is about:':'Conducta sobre la que trata este cuestionario:',
       'What counts as {b}:':'Qu\u00e9 cuenta como {b}:','the behavior':'la conducta','Do you understand this definition of {b}?':'\u00bfEntiende esta definici\u00f3n de {b}?','Do you understand the definition':'\u00bfEntiende la definici\u00f3n?',
-      'Yes':'S\u00ed','No':'No','Unsure':'No estoy seguro/a','Sometimes':'A veces',
+      'Yes':'S\u00ed','No':'No','Not sure':'No estoy seguro/a','Sometimes':'A veces',
       'Please ask {who} to explain the definition before you answer: the page will not send answers about a definition you do not understand. When it is clear, change your answer to Yes.':'Por favor pida a {who} que le explique la definici\u00f3n antes de responder: la p\u00e1gina no enviar\u00e1 respuestas sobre una definici\u00f3n que no entiende. Cuando est\u00e9 clara, cambie su respuesta a S\u00ed.',
       'Please ask {who} about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.':'Si puede, pregunte a {who} sobre la definici\u00f3n antes de responder. Si contin\u00faa, responda solo sobre lo que ha visto que coincide con la definici\u00f3n de arriba; su respuesta aqu\u00ed viaja con sus respuestas.',
       'Instructions':'Instrucciones','Form ':'Formulario ','Questionnaire':'Cuestionario',
       'Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send':'Responda cada pregunta sobre el estudiante y la conducta indicados arriba, seg\u00fan lo que usted ha visto. Cuando termine, pulse Enviar',
       ': your answers go straight to {who}.':': sus respuestas van directamente a {who}.',': your email program opens with a message to {who} ready to go.':': se abre su programa de correo con un mensaje para {who} listo para enviar.',
-      'Please send it by {d}.':'Por favor env\u00edelo antes del {d}.','About you':'Sobre usted','The items':'Las preguntas','<b>{n} of {m}</b> answered':'<b>{n} de {m}</b> respondidas','Can\u2019t judge':'No puedo juzgar','Item {n}':'Pregunta {n}',
+      'Please send it by {d}.':'Por favor env\u00edelo antes del {d}.','About you':'Sobre usted','The questions':'Las preguntas','<b>{n} of {m}</b> answered':'<b>{n} de {m}</b> respondidas','Item {n}':'Pregunta {n}',
       'In your own words':'En sus propias palabras','Add a note if you wish':'A\u00f1ada una nota si lo desea','Note for {l}':'Nota para {l}','Send your answers':'Enviar sus respuestas','Send my answers to {who}':'Enviar mis respuestas a {who}',
       'Your answer code':'Su c\u00f3digo de respuestas','Copy the code':'Copiar el c\u00f3digo','Copied':'Copiado','Save as a file':'Guardar como archivo','Open the email again':'Abrir el correo de nuevo','Open the email':'Abrir el correo',
-      'Your answers are locked on this device so that only {who}\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. This page stores nothing. Keep the student\u2019s full name off this page.':'Sus respuestas se cifran en este dispositivo para que solo el formulario de {who} pueda abrirlas, y van al buz\u00f3n de respuestas de la pr\u00e1ctica cuando pulsa Enviar. Esta p\u00e1gina no guarda nada. No escriba el nombre completo del estudiante en esta p\u00e1gina.',
-      'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.':'Sus respuestas viajan solo en el correo que usted env\u00eda; esta p\u00e1gina no guarda nada ni env\u00eda nada por s\u00ed sola. No incluya el nombre completo del estudiante en el mensaje.',
+      'Your answers are locked on this device so that only {who}\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. Keep the student\u2019s full name off this page.':'Sus respuestas se cifran en este dispositivo para que solo el formulario de {who} pueda abrirlas, y van al buz\u00f3n de respuestas de la pr\u00e1ctica cuando pulsa Enviar. No escriba el nombre completo del estudiante en esta p\u00e1gina.',
+      'Your answers travel only in the email you send; this page sends nothing on its own. Keep the student\'s full name out of the message.':'Sus respuestas viajan solo en el correo que usted env\u00eda; esta p\u00e1gina no env\u00eda nada por s\u00ed sola. No incluya el nombre completo del estudiante en el mensaje.',
       '{t} answers':'{t}: respuestas','Answers from the respondent page, for Form {f}. Paste this whole message into "Collect responses" on the form.':'Respuestas de la p\u00e1gina del cuestionario, para el formulario {f}. Pegue este mensaje completo en \u00abCollect responses\u00bb del formulario.','From: ':'De: ','Sent ':'Enviado el ',
       'whether you understand the definition':'si entiende la definici\u00f3n','the person who sent you this link':'la persona que le envi\u00f3 este enlace',
-      'Need this another way: large print, read aloud, on paper or in another language? Tell {who}, and it will be arranged.':'\u00bfNecesita esto de otra forma: letra grande, le\u00eddo en voz alta, en papel o en otro idioma? D\u00edgaselo a {who} y se lo prepararemos.',
+      '<b>Need this another way?</b> Ask {who} for a paper copy, for the questions read aloud to you, or for large print or another language.':'<b>\u00bfNecesita esto de otra forma?</b> Pida a {who} una copia en papel, que le lean las preguntas en voz alta, o letra grande u otro idioma.',
       'You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask {who} to explain the definition; when it is clear, change your answer to Yes and press Send again.':'Respondi\u00f3 <b>No</b> a la pregunta sobre la definici\u00f3n, as\u00ed que la p\u00e1gina a\u00fan no puede enviar sus respuestas. Por favor pida a {who} que le explique la definici\u00f3n; cuando est\u00e9 clara, cambie su respuesta a S\u00ed y pulse Enviar de nuevo.',
-      'Please fill in: ':'Por favor complete: ','Unanswered item':'Pregunta sin responder','Unanswered items':'Preguntas sin responder','Sending with {n} left blank, as you chose.':'Se enviar\u00e1 con {n} sin responder, como usted eligi\u00f3.','Answer each one':'Responda cada una',' (N/A counts)':' (N/A cuenta)',
+      'Please fill in: ':'Por favor complete: ','Unanswered item':'Pregunta sin responder','Unanswered items':'Preguntas sin responder','Sending with {n} left blank, as you chose.':'Se enviar\u00e1 con {n} sin responder, como usted eligi\u00f3.','Answer each one':'Responda cada una',' ({ns} counts)':' ({ns} cuenta)',
       ' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.':' y pulse Enviar de nuevo. Para enviar dej\u00e1ndolas en blanco a prop\u00f3sito, pulse Enviar una vez m\u00e1s sin cambiar nada.',
       'Sending\u2026':'Enviando\u2026','Sending your answers\u2026':'Enviando sus respuestas\u2026','<b>Sent.</b> Your answers went to {who}. Thank you; you can close this page.':'<b>Enviado.</b> Sus respuestas llegaron a {who}. Gracias; puede cerrar esta p\u00e1gina.',
       '<b>The reply box could not be reached</b> ({e}). Press <b>Open the email</b> below to send your answers by email to {who} instead, or try Send again in a moment.':'<b>No se pudo conectar con el buz\u00f3n de respuestas</b> ({e}). Pulse <b>Abrir el correo</b> abajo para enviar sus respuestas por correo electr\u00f3nico a {who}, o intente Enviar de nuevo en un momento.',
       '<b>Your email program should open now</b> with the message to {who}. Press Send there. If nothing opened, copy the code below and paste it into an email to {to}, or save it as a file and attach it.':'<b>Su programa de correo deber\u00eda abrirse ahora</b> con el mensaje para {who}. Pulse Enviar all\u00ed. Si no se abri\u00f3 nada, copie el c\u00f3digo de abajo y p\u00e9guelo en un correo para {to}, o gu\u00e1rdelo como archivo y adj\u00fantelo.',
       '<b>Your answers are longer than an email link can carry</b> ({n} characters, where about {m} fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to {to}, or <b>Copy the code</b> and paste it into the message.':'<b>Sus respuestas son m\u00e1s largas de lo que un enlace de correo puede llevar</b> ({n} caracteres, donde caben unos {m}), as\u00ed que no se abri\u00f3 ning\u00fan correo. Pulse <b>Guardar como archivo</b> y adjunte el archivo a un correo para {to}, o <b>Copiar el c\u00f3digo</b> y p\u00e9guelo en el mensaje.',
-      'Answering as <b>{n}</b>.':'Responde como <b>{n}</b>.','Not you? change':'\u00bfNo es usted? Cambiar'};
+      'Answering as <b>{n}</b>.':'Responde como <b>{n}</b>.','Not you? change':'\u00bfNo es usted? Cambiar',
+      /* v25.67 the header, the progress, the Send bar, what is kept on this device */
+      'Questions about {s} from {w}':'Preguntas sobre {s} de parte de {w}','Questions for you from {w}':'Preguntas para usted de parte de {w}','Questions from {w}':'Preguntas de parte de {w}',
+      'What the questions are about':'De qu\u00e9 tratan las preguntas',
+      '1 yes-or-no question':'1 pregunta de s\u00ed o no','{n} yes-or-no questions':'{n} preguntas de s\u00ed o no','1 true-or-false question':'1 pregunta de verdadero o falso','{n} true-or-false questions':'{n} preguntas de verdadero o falso',
+      '1 question':'1 pregunta','{n} questions':'{n} preguntas','1 statement':'1 afirmaci\u00f3n','{n} statements':'{n} afirmaciones',' to rate from {a} to {b}':' para calificar de {a} a {b}',
+      '1 to answer in your own words':'1 para responder con sus propias palabras','{n} to answer in your own words':'{n} para responder con sus propias palabras',
+      '1 question to answer in your own words':'1 pregunta para responder con sus propias palabras','{n} questions to answer in your own words':'{n} preguntas para responder con sus propias palabras',
+      ' and ':' y ','about 1 minute':'un minuto aproximadamente','about {m} minutes':'unos {m} minutos','Not sure also means: {t}':'No estoy seguro/a tambi\u00e9n significa: {t}',
+      'Your answers are kept on this phone until you send them.':'Sus respuestas se guardan en este tel\u00e9fono hasta que las env\u00ede.',
+      'Your answers are kept on this tablet until you send them.':'Sus respuestas se guardan en esta tableta hasta que las env\u00ede.',
+      'Your answers are kept on this computer until you send them.':'Sus respuestas se guardan en esta computadora hasta que las env\u00ede.',
+      'Your answers from before are back. They are kept here until you send them.':'Sus respuestas anteriores est\u00e1n de vuelta. Se guardan aqu\u00ed hasta que las env\u00ede.',
+      'This browser is not keeping your answers (private browsing, or storage turned off): send them before you close this page.':'Este navegador no guarda sus respuestas (navegaci\u00f3n privada o almacenamiento desactivado): env\u00edelas antes de cerrar esta p\u00e1gina.',
+      'You sent your answers on {d}. Thank you.':'Envi\u00f3 sus respuestas el {d}. Gracias.',
+      'Copy my answers':'Copiar mis respuestas','Copied. Paste them into an email to {to}.':'Copiadas. P\u00e9guelas en un correo para {to}.','Select the code below and copy it.':'Seleccione el c\u00f3digo de abajo y c\u00f3pielo.',
+      'Saved as a file. Attach it to an email to {to}.':'Guardadas como archivo. Adj\u00fantelo a un correo para {to}.',
+      '{n} not answered yet: {l}. Answer them, or press again to leave them blank.':'{n} sin responder: {l}. Resp\u00f3ndalas, o pulse de nuevo para dejarlas en blanco.',
+      'You answered No about the definition: please ask {who} to explain it first.':'Respondi\u00f3 No sobre la definici\u00f3n: pida primero a {who} que se la explique.',
+      'Sent. Thank you; you can close this page.':'Enviado. Gracias; puede cerrar esta p\u00e1gina.',
+      'Not sent yet: the reply box could not be reached. Your answers are kept here; see below.':'A\u00fan no se envi\u00f3: no se pudo conectar con el buz\u00f3n. Sus respuestas se guardan aqu\u00ed; vea abajo.',
+      'Your email program should open now. Press Send there.':'Su programa de correo deber\u00eda abrirse ahora. Pulse Enviar all\u00ed.',
+      'Too long for an email link: save it as a file below.':'Demasiado largo para un enlace de correo: gu\u00e1rdelo como archivo abajo.',
+      'I have sent my answers':'Ya envi\u00e9 mis respuestas','When your email has gone, press this: the page then clears your answers from this device.':'Cuando su correo se haya enviado, pulse aqu\u00ed: la p\u00e1gina borrar\u00e1 sus respuestas de este dispositivo.',
+      'Thank you. Your answers are cleared from this device.':'Gracias. Sus respuestas se borraron de este dispositivo.'};
     function _(s,v){var t=ES&&TXT[s]!==undefined?TXT[s]:s;if(v)for(var k in v)t=t.split('{'+k+'}').join(v[k]);return t;}
     var WHO=P.bcba||_('the BCBA');
+    /* v25.67 the BCBA by name for the header and the Send button: the part before the first comma (Jordan Ellis, M.A., BCBA: Jordan Ellis) */
+    var WHO1=String(P.bcba||'').split(',')[0].replace(/\s*\([^)]*\)\s*$/,'').trim()||WHO;
+    /* the student as the page names them, without an ID the label may carry */
+    var STU=String(P.student||'').replace(/\s*\(\s*ID\b[^)]*\)\s*$/i,'').trim();
+    var NS=_('Not sure'),NSQ=ES?'\u00ab'+NS+'\u00bb':'\u201c'+NS+'\u201d';
+    var RM=false;try{RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(e){}
+    var DEV=(function(){try{var c=window.matchMedia&&matchMedia('(pointer: coarse)').matches,w=Math.min(screen.width||0,screen.height||0)||innerWidth;return c?(w<600?'phone':'tablet'):'computer';}catch(e){return 'phone';}})();
+    function into(el,blk){if(!el||!el.scrollIntoView)return;try{el.scrollIntoView({block:blk||'center',behavior:RM?'auto':'smooth'});}catch(e){el.scrollIntoView();}}
     if(ES)try{d.documentElement.lang='es';}catch(e){}
-    root.innerHTML='';root.className='nr';
+    root.innerHTML='';root.className='nr';if(!/^main$/i.test(root.tagName))root.setAttribute('role','main');
     var items=P.items||[],scale=P.scale||{kind:'yn'},extras=P.extras||[],opens=P.open||[];
-    var ans=new Array(items.length).fill(''),prog;
-    function answered(){var k=0;ans.forEach(function(a){if(a!=='')k++;});return k;}
-    function paint(){prog.innerHTML=_('<b>{n} of {m}</b> answered',{n:answered(),m:items.length});}
-    /* the definition question: Yes / No / Unsure, required when the payload asks for it */
+    var ans=new Array(items.length).fill(''),prog=null,progT=null,progF=null,lastN=-1;
+    /* the open answers counted by question: a numbered label starts a question, the parts after it (a checklist row, "Anything to add") belong to it */
+    var numbered=/^\s*\d+[.)]\s/,og=[];opens.forEach(function(o,i){if(!og.length||!numbered.test((opens[0]&&opens[0].label)||'')||numbered.test(o.label||''))og.push([i]);else og[og.length-1].push(i);});
+    var opr={};   /* each open answer, read and put back (the kept copy) */
+    function answered(){var k=0;if(items.length){ans.forEach(function(a){if(a!=='')k++;});return k;}
+      og.forEach(function(g){if(g.some(function(i){var o=opens[i],r=opr[o.id];return r&&String(r.val()||'').trim()!=='';}))k++;});return k;}
+    var TOTAL=items.length||og.length;
+    function paint(){if(!prog)return;var n=answered();if(n===lastN)return;lastN=n;progT.innerHTML=_('<b>{n} of {m}</b> answered',{n:n,m:TOTAL});progF.style.width=(TOTAL?Math.round(100*n/TOTAL):0)+'%';}
+    /* how long it takes, said before the person starts (about 12 s a yes or no, 15 s a rating, a minute a written answer) */
+    function howLong(){var parts=[],n=items.length,o=og.length,secs=0,one=function(k1,kn,c){return c===1?_(k1):_(kn,{n:c});};
+      if(n){if(scale.kind==='num'){var st=/statement|afirmaci/i.test(P.itemsHeading||'');parts.push((st?one('1 statement','{n} statements',n):one('1 question','{n} questions',n))+_(' to rate from {a} to {b}',{a:scale.min||0,b:scale.max||6}));secs+=n*15;}
+        else{var L0=String((scale.labels||[])[0]||'Yes');parts.push(/^(yes|s\u00ed|si)$/i.test(L0)?one('1 yes-or-no question','{n} yes-or-no questions',n):/^(true|verdadero)$/i.test(L0)?one('1 true-or-false question','{n} true-or-false questions',n):one('1 question','{n} questions',n));secs+=n*12;}}
+      if(o)parts.push(n?one('1 to answer in your own words','{n} to answer in your own words',o):one('1 question to answer in your own words','{n} questions to answer in your own words',o));
+      opens.forEach(function(x){secs+=x.type==='yns'?15:60;});secs+=extras.length*10+(P.confirm?15:0);
+      var m=Math.max(1,Math.round(secs/60));if(m>5)m=Math.round(m/5)*5;
+      return parts.length?parts.join(_(' and '))+', '+(m===1?_('about 1 minute'):_('about {m} minutes',{m:m}))+'.':'';}
+    /* the definition question: Yes / No / Not sure, required when the payload asks for it */
     var conf='';
-    function confBlock(){var w=h('div',{'class':'conf',id:'nbhr-conf'});w.appendChild(h('p',{'class':'q',html:'<b>'+_('Do you understand this definition of {b}?',{b:esc(P.beh||_('the behavior'))})+'</b> <span class="req">*</span>'}));
-      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':_('Do you understand the definition')}),note=h('p',{'class':'sub',id:'nbhr-conf-note'});note.hidden=true;
-      [['yes',_('Yes')],['no',_('No')],['unsure',_('Unsure')]].forEach(function(c){var lab=h('label'),r=h('input',{type:'radio',name:'nbhr-confirm',value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
+    function confBlock(){var w=h('div',{'class':'conf',id:'nbhr-conf'});w.appendChild(h('p',{'class':'q',id:'nbhr-conf-q',html:'<b>'+_('Do you understand this definition of {b}?',{b:esc(P.beh||_('the behavior'))})+'</b> <span class="req">*</span>'}));
+      var opts=h('div',{'class':'opts',role:'radiogroup','aria-labelledby':'nbhr-conf-q'}),note=h('p',{'class':'sub',id:'nbhr-conf-note'});note.hidden=true;
+      [['yes',_('Yes')],['no',_('No')],['unsure',NS]].forEach(function(c){var lab=h('label'),r=h('input',{type:'radio',name:'nbhr-confirm',value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
         r.addEventListener('change',function(){conf=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');w.classList.remove('missing');
           var who=WHO+(P.email?' ('+P.email+')':'');note.hidden=conf==='yes';note.textContent=conf==='yes'?'':conf==='no'?_('Please ask {who} to explain the definition before you answer: the page will not send answers about a definition you do not understand. When it is clear, change your answer to Yes.',{who:who}):_('Please ask {who} about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.',{who:who});});
         opts.appendChild(lab);});
@@ -276,16 +335,38 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     /* links the assessor adds: an instructions video or page (http and https only) */
     function linksBlock(){var ls=(P.links||[]).filter(function(l){return l&&/^https?:\/\//i.test(l.url||'');});if(!ls.length)return null;
       var w=h('p',{'class':'links'});ls.forEach(function(l,i){if(i)w.appendChild(d.createTextNode(' \u00b7 '));var a=h('a',{href:l.url,target:'_blank',rel:'noopener noreferrer',text:l.label||_('Instructions')});w.appendChild(a);});return w;}
-    /* head */
-    var card=h('div',{'class':'nr-card'},[h('div',{'class':'band',text:(P.form?_('Form ')+P.form+' · ':'')+(P.title||P.inst)}),h('h1',{text:P.heading||(P.title||_('Questionnaire'))}),
-      h('p',{'class':'sub',text:(P.sub||'')}),
+    /* what is kept on this device: one record per questionnaire (a digest of the questionnaire names it, not the student), the answers
+       only, never what the link filled in; it goes after a successful send and after 90 days. Every access may fail (private browsing,
+       a page opened from a file, storage turned off): the page then says so and works as before. */
+    var KEY='nbh.respond|'+String(P.form||'').replace(/[^\w-]/g,'')+'|'+(function(s){var a=2166136261,b=0x9747b28c;for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);a=Math.imul(a^c,16777619)>>>0;b=Math.imul(b^c,2246822519)>>>0;}return ('0000000'+a.toString(16)).slice(-8)+('0000000'+b.toString(16)).slice(-8);})(JSON.stringify(P,function(k,v){return k==='photo'?undefined:v;}));
+    var canKeep=false,DAY=864e5;
+    function lsGet(){var t=null;try{t=window.localStorage.getItem(KEY);window.localStorage.setItem(KEY+'#t','1');window.localStorage.removeItem(KEY+'#t');canKeep=true;}catch(e){canKeep=false;return null;}
+      try{var o=t?JSON.parse(t):null;return o&&o.v===1&&o.t>Date.now()-90*DAY?o:null;}catch(e){return null;}}
+    function lsSet(o){try{window.localStorage.setItem(KEY,JSON.stringify(o));canKeep=true;}catch(e){canKeep=false;}}
+    function lsDel(){try{window.localStorage.removeItem(KEY);}catch(e){}}
+    try{var LS=window.localStorage,now0=Date.now(),drop=[];for(var li=0;li<LS.length;li++){var lk=LS.key(li);if(lk&&lk.indexOf('nbh.respond|')===0&&lk!==KEY){var lo=null;try{lo=JSON.parse(LS.getItem(lk));}catch(e){}if(!lo||!(lo.t>now0-90*DAY))drop.push(lk);}}drop.forEach(function(k){LS.removeItem(k);});}catch(e){}
+    var rec=lsGet(),wasSent=rec&&rec.sent&&!rec.ans?rec.sent:'';
+    /* head: who it is from and about whom, how long it takes */
+    var title=P.inst==='student'?_('Questions for you from {w}',{w:WHO1}):STU?_('Questions about {s} from {w}',{s:STU,w:WHO1}):_('Questions from {w}',{w:WHO1});
+    try{d.title=title;}catch(e){}
+    var keepL=h('p',{'class':'keep',id:'nbhr-keep'}),was=h('p',{'class':'was',id:'nbhr-was'});was.hidden=true;
+    if(wasSent){var wd=new Date(wasSent);if(!isNaN(wd)){try{was.textContent=_('You sent your answers on {d}. Thank you.',{d:wd.toLocaleDateString(ES?'es':'en-US',{weekday:'long',month:'long',day:'numeric'})+' '+wd.toLocaleTimeString(ES?'es':'en-US',{hour:'numeric',minute:'2-digit'})});was.hidden=false;}catch(e){}}}
+    var head=h('div',{'class':'nr-card nr-head'},[
       P.photo&&/^data:image\//.test(P.photo)?h('img',{'class':'photo',src:P.photo,alt:_('Photo of the student')}):null,
-      h('div',{'class':'def',html:'<b>'+_('Student:')+'</b> '+esc(P.student||'')+(P.beh?'<br><b>'+_('Behavior this questionnaire is about:')+'</b> '+esc(P.beh):'')+(P.def?'<br><b>'+_('What counts as {b}:',{b:esc(P.beh||_('the behavior'))})+'</b> '+esc(P.def):'')}),
-      P.confirm?confBlock():null,
-      h('p',{'class':'sub',text:P.instructions||(_('Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send')+(P.box&&P.box.u?_(': your answers go straight to {who}.',{who:WHO}):_(': your email program opens with a message to {who} ready to go.',{who:WHO})))}),
+      h('h1',{text:title}),howLong()?h('p',{'class':'lede',text:howLong()}):null,
       P.due?h('p',{'class':'sub',text:_('Please send it by {d}.',{d:dueWords(P.due)})}):null,
-      linksBlock()]);
-    root.appendChild(card);
+      keepL,linksBlock(),was]);
+    root.appendChild(head);
+    /* the progress, kept in view at the top, said politely to a screen reader */
+    if(TOTAL){prog=h('div',{'class':'prog',id:'nbhr-prog'});var pb=h('div',{'class':'pbar','aria-hidden':'true'});progF=h('i');pb.appendChild(progF);
+      progT=h('span',{'class':'pt',role:'status','aria-live':'polite','aria-atomic':'true'});prog.appendChild(pb);prog.appendChild(progT);root.appendChild(prog);}
+    /* what the questions are about: the student, the behavior and its definition, the form's own words on what it is for */
+    var subUp=!!P.sub&&!(P.title&&String(P.sub).indexOf(P.title)>=0);   /* IA-1's "Indirect functional assessment: FAST answered by..." goes to the footer with the form */
+    var about=h('div',{'class':'nr-card'},[h('div',{'class':'band',text:_('What the questions are about')}),
+      h('div',{'class':'def',html:'<b>'+_('Student:')+'</b> '+esc(P.student||'')+(P.beh?'<br><b>'+_('Behavior this questionnaire is about:')+'</b> '+esc(P.beh):'')+(P.def?'<br><b>'+_('What counts as {b}:',{b:esc(P.beh||_('the behavior'))})+'</b> '+esc(P.def):'')}),
+      subUp?h('p',{'class':'sub',text:P.sub}):null,
+      P.confirm?confBlock():null]);
+    root.appendChild(about);
     /* respondent */
     var who=h('div',{'class':'nr-card'});who.appendChild(h('div',{'class':'band',text:_('About you')}));var g=h('div',{'class':'grid2'});
     var ex={};extras.forEach(function(x){var lab=h('label',{'class':'f',text:x.label+(x.req?' *':'')});var inp;
@@ -295,53 +376,82 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     /* v21.86 a personal link (P.who: the person it was sent to): their name and role filled in and locked, anything else the form
        knows about them (P.who.fill, by question id) filled, with "Not you? change", which empties these for whoever is answering
        instead (the reply then names that person, not the one it was sent to, and carries no send id) */
-    var me=P.who&&typeof P.who==='object'&&String(P.who.name||'').trim()?P.who:null,meRole=ex.role||ex.rel||null;
+    var me=P.who&&typeof P.who==='object'&&String(P.who.name||'').trim()?P.who:null,meRole=ex.role||ex.rel||null,notMe=null,nm=false,meFill=[];
+    function notMeNow(){me=null;nm=true;[ex.name,meRole].concat(meFill).forEach(function(x){if(x){x.readOnly=false;x.value='';}});var l=d.getElementById('nbhr-me');if(l)l.hidden=true;}
     if(me){var meLine=h('p',{'class':'me',id:'nbhr-me'});
       if(ex.name){ex.name.value=String(me.name).trim();ex.name.readOnly=true;}
       if(meRole&&String(me.role||'').trim()){meRole.value=String(me.role).trim();meRole.readOnly=true;}
-      var meFill=[];if(me.fill&&typeof me.fill==='object')Object.keys(me.fill).forEach(function(k){var x=ex[k],v=String(me.fill[k]==null?'':me.fill[k]).trim();if(!x||!v||x===ex.name||x===meRole)return;   /* what the form already knows about the person, filled (they can change it) */
+      if(me.fill&&typeof me.fill==='object')Object.keys(me.fill).forEach(function(k){var x=ex[k],v=String(me.fill[k]==null?'':me.fill[k]).trim();if(!x||!v||x===ex.name||x===meRole)return;   /* what the form already knows about the person, filled (they can change it) */
         if(x.tagName==='SELECT'){for(var i=0;i<x.options.length;i++)if(x.options[i].value===v){x.value=v;meFill.push(x);break;}}else{x.value=v;meFill.push(x);}});
       meLine.innerHTML=_('Answering as <b>{n}</b>.',{n:esc(String(me.name).trim())+(String(me.role||'').trim()?' ('+esc(String(me.role).trim())+')':'')});
-      var notMe=h('a',{href:'#',id:'nbhr-notme',text:_('Not you? change')});
-      notMe.addEventListener('click',function(e){e.preventDefault();me=null;[ex.name,meRole].concat(meFill).forEach(function(x){if(x){x.readOnly=false;x.value='';}});meLine.hidden=true;if(ex.name)ex.name.focus();});
+      notMe=h('a',{href:'#',id:'nbhr-notme',text:_('Not you? change')});
+      notMe.addEventListener('click',function(e){e.preventDefault();notMeNow();later();if(ex.name)ex.name.focus();});
       meLine.appendChild(d.createTextNode(' '));meLine.appendChild(notMe);who.appendChild(meLine);}
     who.appendChild(g);root.appendChild(who);
+    /* the instructions, with the items (or the open questions when there are no items); "N/A" in them now reads "Not sure" */
+    var hasNS=scale.kind==='num'?!!scale.na:!(scale.labels&&(scale.labels[2]===null||scale.labels[2]===''));
+    var instr=P.instructions||(_('Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send')+(P.box&&P.box.u?_(': your answers go straight to {who}.',{who:WHO}):_(': your email program opens with a message to {who} ready to go.',{who:WHO})));
+    if(hasNS&&items.length)instr=String(instr).replace(/\bN\/A\b/g,NSQ);
+    var instrP=h('p',{'class':'sub',text:instr});
+    /* what the form called its own uncertain answer, when it says more than N/A (SV-1: "I cannot judge, or have not seen it run") */
+    var naWords=String(scale.kind==='num'?(scale.naLabel||''):((scale.labels||[])[2]||'')).replace(/^\s*(N\/A|NA|X)\s*[:\-\u2013\u2014]\s*/i,'').trim();
+    if(/^(n\/a|na|x|unsure|not sure|can.t judge|no puedo juzgar)$/i.test(naWords))naWords='';
     /* items */
-    var ic=h('div',{'class':'nr-card'});ic.appendChild(h('div',{'class':'band',text:P.itemsHeading||_('The items')}));
-    prog=h('div',{'class':'prog'});ic.appendChild(prog);
-    if(scale.kind==='num'&&scale.anchors&&scale.anchors.length){var key=h('div',{'class':'key'});scale.anchors.forEach(function(a){key.appendChild(h('span',{text:a}));});ic.appendChild(key);}
+    var ic=h('div',{'class':'nr-card'});ic.appendChild(h('div',{'class':'band',text:P.itemsHeading||_('The questions')}));
+    if(items.length)ic.appendChild(instrP);
+    if((scale.kind==='num'&&scale.anchors&&scale.anchors.length)||(hasNS&&naWords)){var key=h('div',{'class':'key'});(scale.kind==='num'&&scale.anchors||[]).forEach(function(a){key.appendChild(h('span',{text:a}));});
+      if(hasNS&&naWords)key.appendChild(h('span',{text:_('Not sure also means: {t}',{t:naWords})}));ic.appendChild(key);}
     var ol=h('ol',{'class':'items'});
     items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',id:'nbhr-q'+i,html:'<b>'+esc(String(it.n==null||it.n===''?i+1:it.n).slice(0,8))+'.</b> '+esc(it.text||'')}));
       var opts=h('div',{'class':'opts',role:'radiogroup','aria-labelledby':'nbhr-q'+i});var choices;   /* v22.09 named by the question, not "Item 3" (review F485) */
-      if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(scale.na)choices.push(['NA',scale.naLabel||_('Can\u2019t judge'),'']);}
-      else{var L=scale.labels||[_('Yes'),_('No'),'N/A'];choices=[['Y',L[0]||_('Yes'),''],['N',L[1]||_('No'),'']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',L[2]||'N/A','']);}
+      if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(choices.length>6)opts.className+=' many';if(scale.na)choices.push(['NA',NS,'na']);}
+      else{var L=scale.labels||[_('Yes'),_('No'),'N/A'];choices=[['Y',L[0]||_('Yes'),''],['N',L[1]||_('No'),'']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',NS,'']);}   /* v25.67 one "Not sure", scored as N/A was */
       choices.forEach(function(c){var lab=h('label',{'class':c[2]});var r=h('input',{type:'radio',name:'it'+i,value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
         r.addEventListener('change',function(){ans[i]=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');li.classList.remove('missing');paint();});
         opts.appendChild(lab);});
       li.appendChild(opts);ol.appendChild(li);});
     ic.appendChild(ol);
     /* open-ended, after the items unless the payload asks for them first */
-    var op={},oc=null;if(opens.length){oc=h('div',{'class':'nr-card'});oc.appendChild(h('div',{'class':'band',text:P.openHeading||_('In your own words')}));
+    var op={},oc=null;if(opens.length){oc=h('div',{'class':'nr-card'});oc.appendChild(h('div',{'class':'band',text:P.openHeading||_('In your own words')}));if(!items.length)oc.appendChild(instrP);
       opens.forEach(function(o,oi){var oid='nbhr-op'+oi,lab=h('label',{'class':'f',id:oid+'-l',text:o.label});oc.appendChild(lab);   /* v22.09 every open answer has its question as its name (review F485) */
         if(o.type==='yns'){var wrap=h('div',{'class':'yns'}),pick='',opts=h('div',{'class':'opts',role:'radiogroup','aria-labelledby':oid+'-l'}),note=h('input',{type:'text',placeholder:o.notePlaceholder||_('Add a note if you wish'),'aria-label':_('Note for {l}',{l:o.label})});
           (o.choices||[_('Yes'),_('No'),_('Sometimes')]).forEach(function(c){var l=h('label'),r=h('input',{type:'radio',name:oid,value:c});l.appendChild(r);l.appendChild(d.createTextNode(c));   /* v22.09 real choices: Tab and the arrow keys reach them, VoiceOver says which is picked */
-            r.addEventListener('change',function(){pick=c;Array.prototype.forEach.call(opts.children,function(x){x.classList.remove('on');});l.classList.add('on');});opts.appendChild(l);});
-          wrap.appendChild(opts);wrap.appendChild(note);oc.appendChild(wrap);op[o.id]={get value(){return pick?pick+(note.value.trim()?'; '+note.value.trim():''):note.value.trim();}};}
-        else{var ta=h('textarea',{maxlength:String(o.max||600),id:oid});lab.htmlFor=oid;op[o.id]=ta;oc.appendChild(ta);}});}
+            r.addEventListener('change',function(){pick=c;Array.prototype.forEach.call(opts.children,function(x){x.classList.remove('on');});l.classList.add('on');paint();});opts.appendChild(l);});
+          wrap.appendChild(opts);wrap.appendChild(note);oc.appendChild(wrap);op[o.id]={get value(){return pick?pick+(note.value.trim()?'; '+note.value.trim():''):note.value.trim();}};
+          opr[o.id]={val:function(){return op[o.id].value;},get:function(){return {p:pick,n:note.value};},put:function(v){if(!v||typeof v!=='object')return;if(v.p)pickIn(opts,String(v.p));if(typeof v.n==='string')note.value=v.n.slice(0,600);}};}
+        else{var ta=h('textarea',{maxlength:String(o.max||600),id:oid});lab.htmlFor=oid;op[o.id]=ta;oc.appendChild(ta);
+          opr[o.id]={val:function(){return ta.value;},get:function(){return ta.value;},put:function(v){if(typeof v==='string')ta.value=v.slice(0,o.max||600);}};}});}
     if(oc&&P.openFirst)root.appendChild(oc);if(items.length)root.appendChild(ic);if(oc&&!P.openFirst)root.appendChild(oc);
-    /* send */
-    var sc=h('div',{'class':'nr-card'});sc.appendChild(h('div',{'class':'band',text:_('Send your answers')}));
-    var warn=h('div',{'class':'warn'});warn.hidden=true;sc.appendChild(warn);
+    /* the Send bar, kept in view at the bottom: what is happening, Send, and Copy and Save as a file for anyone whose email does not open */
     var BOX=(P.box&&P.box.u&&P.box.b&&P.box.k&&P.box.k.x&&P.box.k.y&&/^https?:\/\//i.test(P.box.u)&&window.crypto&&crypto.subtle&&window.fetch&&window.TextEncoder)?P.box:null;   /* v21.65 the reply box */
-    var row=h('div',{'class':'row'});var send=h('button',{type:'button',text:_('Send my answers to {who}',{who:WHO})});row.appendChild(send);sc.appendChild(row);
+    var bmsg=h('p',{'class':'msg',id:'nbhr-msg',role:'status','aria-live':'polite'}),send=h('button',{type:'button','class':'send',id:'nbhr-send',text:_('Send my answers to {who}',{who:WHO1})});
+    var cp2=h('button',{type:'button','class':'ghost',id:'nbhr-copy',text:_('Copy my answers')}),sv2=h('button',{type:'button','class':'ghost',id:'nbhr-save',text:_('Save as a file')}),alt=h('div',{'class':'alt'},[cp2,sv2]);
+    var bar=h('div',{'class':'nr-bar',id:'nbhr-bar',role:'region','aria-label':_('Send your answers')},[bmsg,send,alt]);root.appendChild(bar);
+    /* send: what happened, the code and the ways to send it by hand */
+    var sc=h('div',{'class':'nr-card',id:'nbhr-sendc'});sc.appendChild(h('div',{'class':'band',text:_('Send your answers')}));
+    var warn=h('div',{'class':'warn'});warn.hidden=true;sc.appendChild(warn);
     var done=h('div',{'class':'done',id:'nbhr-done'});done.hidden=true;sc.appendChild(done);
     var codeBox=h('textarea',{'class':'code',readonly:'readonly','aria-label':_('Your answer code')});codeBox.hidden=true;sc.appendChild(codeBox);
     var row2=h('div',{'class':'row'});row2.hidden=true;var cp=h('button',{type:'button','class':'ghost',text:_('Copy the code')}),sv=h('button',{type:'button','class':'ghost',text:_('Save as a file')}),ml=h('a',{href:'#',id:'nbhr-mail'});ml.appendChild(h('button',{type:'button',text:_('Open the email again')}));
     row2.appendChild(cp);row2.appendChild(sv);row2.appendChild(ml);sc.appendChild(row2);
-    sc.appendChild(h('p',{'class':'foot',text:BOX?_('Your answers are locked on this device so that only {who}\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. This page stores nothing. Keep the student\u2019s full name off this page.',{who:WHO}):_('Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.')}));
-    sc.appendChild(h('p',{'class':'foot',id:'nbhr-alt',text:_('Need this another way: large print, read aloud, on paper or in another language? Tell {who}, and it will be arranged.',{who:WHO||_('the person who sent you this link')})}));   /* v22.29 (review I248) an alternate format, offered on every questionnaire */
-    if(P.credit&&typeof P.credit==='string')sc.appendChild(h('p',{'class':'foot',text:P.credit}));   /* v21.59: the instrument's authors, when the form names them (the FAST) */
+    var fin=h('div',{'class':'fin',id:'nbhr-fin'});fin.hidden=true;var finB=h('button',{type:'button','class':'ghost',text:_('I have sent my answers')});
+    fin.appendChild(h('p',{'class':'sub',text:_('When your email has gone, press this: the page then clears your answers from this device.')}));fin.appendChild(finB);sc.appendChild(fin);
     root.appendChild(sc);
+    function upd(){sc.hidden=warn.hidden&&done.hidden&&codeBox.hidden&&row2.hidden&&fin.hidden;}
+    /* the footer: how the answers travel, another way to answer, the form and the instrument's citation */
+    var foot=h('footer',{'class':'nr-foot'});
+    foot.appendChild(h('p',{'class':'foot',text:BOX?_('Your answers are locked on this device so that only {who}\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. Keep the student\u2019s full name off this page.',{who:WHO}):_('Your answers travel only in the email you send; this page sends nothing on its own. Keep the student\'s full name out of the message.')}));
+    foot.appendChild(h('p',{'class':'foot',id:'nbhr-alt',html:_('<b>Need this another way?</b> Ask {who} for a paper copy, for the questions read aloud to you, or for large print or another language.',{who:esc(P.bcba?WHO+(P.email?' ('+P.email+')':''):_('the person who sent you this link'))})}));   /* v22.29 (review I248) an alternate format, offered on every questionnaire */
+    if(P.form||P.heading||P.title)foot.appendChild(h('p',{'class':'foot',text:(P.form?_('Form ')+P.form+' \u00b7 ':'')+(P.heading||P.title||P.inst||'')}));
+    if(P.sub&&!subUp)foot.appendChild(h('p',{'class':'foot',text:P.sub}));
+    if(P.credit&&typeof P.credit==='string')foot.appendChild(h('p',{'class':'foot',text:P.credit}));   /* v21.59: the instrument's authors, when the form names them (the FAST) */
+    root.appendChild(foot);
+    function say(k,t){bmsg.setAttribute('data-k',k||'');bmsg.innerHTML=t;}
+    var KEEPS={phone:'Your answers are kept on this phone until you send them.',tablet:'Your answers are kept on this tablet until you send them.',computer:'Your answers are kept on this computer until you send them.'};
+    function sayKeep(back){keepL.setAttribute('data-k',canKeep?'':'warn');keepL.textContent=canKeep?_(back?'Your answers from before are back. They are kept here until you send them.':KEEPS[DEV]||KEEPS.phone):_('This browser is not keeping your answers (private browsing, or storage turned off): send them before you close this page.');}
+    /* the bars at the top and the bottom never hide what a person moves to (Tab, a field the keyboard opens) */
+    function pads(){try{var s=d.documentElement.style;s.scrollPaddingTop=(prog?prog.offsetHeight+8:0)+'px';s.scrollPaddingBottom=(bar.offsetHeight+8)+'px';}catch(e){}}
+    window.addEventListener('resize',pads);try{if(window.ResizeObserver)new ResizeObserver(pads).observe(bar);}catch(e){}
     function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:(function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})(new Date())};   /* v22.00 (review F504): the respondent's own calendar day, not UTC's */
       if(P.confirm)r.confirmed=conf;if(P.sig)r.sig=String(P.sig).slice(0,60);if(me&&me.sid)r.sid=String(me.sid).slice(0,40);   /* v21.86 the send it answers */
       extras.forEach(function(x){r[x.id]=(ex[x.id].value||'').trim();});if(opens.length){r.open={};opens.forEach(function(o){r.open[o.id]=(op[o.id].value||'').trim();});}return r;}
@@ -363,32 +473,69 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     function mailto(code){var subj=(P.subject||_('{t} answers',{t:P.title||P.inst}))+(P.student?' · '+P.student:'');
       var body=_('Answers from the respondent page, for Form {f}. Paste this whole message into "Collect responses" on the form.',{f:P.form||''})+'\n\n'+code+'\n\n'+(ex.name&&ex.name.value?_('From: ')+ex.name.value+'\n':'')+_('Sent ')+new Date().toLocaleDateString(ES?'es':undefined);
       return 'mailto:'+encodeURIComponent(P.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);}
-    send.addEventListener('click',function(){var miss=[];items.forEach(function(it,i){if(ans[i]==='')miss.push(it.n||i+1);});
-      var need=extras.filter(function(x){return x.req&&!(ex[x.id].value||'').trim();}).map(function(x){return x.label;});
-      if(P.confirm&&!conf){need.push(_('whether you understand the definition'));var cw=d.getElementById('nbhr-conf');if(cw)cw.classList.add('missing');}
-      if(P.confirm&&conf==='no'){warn.hidden=false;warn.innerHTML=_('You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask {who} to explain the definition; when it is clear, change your answer to Yes and press Send again.',{who:esc(WHO)+(P.email?' ('+esc(P.email)+')':'')});var cw2=d.getElementById('nbhr-conf');if(cw2)cw2.scrollIntoView({behavior:'smooth',block:'center'});return;}
+    /* before Send, Copy or Save: what is still missing (the same rules as before for all three); false stops */
+    function check(){var miss=[];items.forEach(function(it,i){if(ans[i]==='')miss.push(it.n||i+1);});
+      var need=extras.filter(function(x){return x.req&&!(ex[x.id].value||'').trim();}).map(function(x){return x.label;}),cw=d.getElementById('nbhr-conf');
+      if(P.confirm&&!conf){need.push(_('whether you understand the definition'));if(cw)cw.classList.add('missing');}
+      if(P.confirm&&conf==='no'){warn.hidden=false;warn.innerHTML=_('You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask {who} to explain the definition; when it is clear, change your answer to Yes and press Send again.',{who:esc(WHO)+(P.email?' ('+esc(P.email)+')':'')});upd();
+        say('bad',_('You answered No about the definition: please ask {who} to explain it first.',{who:esc(WHO1)}));if(cw)into(cw);return false;}
       Array.prototype.forEach.call(ol.children,function(li,i){li.classList.toggle('missing',ans[i]==='');});
       if(need.length||miss.length){var again=!need.length&&miss.length<items.length&&warnedMiss===miss.join(',');
-        warn.hidden=false;warn.innerHTML=(need.length?_('Please fill in: ')+'<span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?(miss.length===1?_('Unanswered item'):_('Unanswered items'))+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?_('Sending with {n} left blank, as you chose.',{n:miss.length}):_('Answer each one')+((scale.kind==='yn'&&!(scale.labels&&(scale.labels[2]===null||scale.labels[2]==='')))||scale.na?_(' (N/A counts)'):'')+_(' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.')):'');
-        warnedMiss=need.length?'':miss.join(',');if(!again)return;}
-      else{warn.hidden=true;warnedMiss='';}
+        warn.hidden=false;warn.innerHTML=(need.length?_('Please fill in: ')+'<span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?(miss.length===1?_('Unanswered item'):_('Unanswered items'))+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?_('Sending with {n} left blank, as you chose.',{n:miss.length}):_('Answer each one')+(hasNS?_(' ({ns} counts)',{ns:NSQ}):'')+_(' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.')):'');
+        warnedMiss=need.length?'':miss.join(',');upd();
+        if(!again){if(need.length){say('warn',_('Please fill in: ')+esc(need.join(', '))+'.');var x0=extras.filter(function(x){return x.req&&!(ex[x.id].value||'').trim();})[0];if(x0){into(ex[x0.id]);try{ex[x0.id].focus({preventScroll:true});}catch(e){}}else if(cw)into(cw);}
+          else{say('warn',_('{n} not answered yet: {l}. Answer them, or press again to leave them blank.',{n:miss.length,l:esc(miss.join(', '))}));var i0=ans.indexOf('');if(i0>=0)into(ol.children[i0]);}
+          return false;}}
+      else{warn.hidden=true;warnedMiss='';upd();}
+      return true;}
+    function codeNow(){lastCode=encode(response());codeBox.value=lastCode;ml.href=mailto(lastCode);return lastCode;}
+    function toWhom(){return esc(P.email||WHO);}
+    function saveFile(){var blob=new Blob([lastCode+'\n'],{type:'text/plain'}),a=h('a',{href:URL.createObjectURL(blob),download:(P.form||'form')+'_'+(P.inst||'answers')+'_'+((ex.name&&ex.name.value)||'respondent').replace(/[^\w.-]+/g,'_')+'.nbhr.txt'});d.body.appendChild(a);a.click();a.remove();}
+    /* kept on this device: saved a moment after each change, and when the page goes to the back */
+    var saveT=0,dirty=false;
+    function snap(){var o={v:1,t:Date.now(),ans:ans.slice(),conf:conf,ex:{},op:{}},any=!!conf||ans.some(function(a){return a!=='';});if(nm)o.nm=1;
+      extras.forEach(function(x){if(ex[x.id].readOnly)return;var v=ex[x.id].value||'';o.ex[x.id]=v.slice(0,300);if(v.trim()&&meFill.indexOf(ex[x.id])<0)any=true;});
+      opens.forEach(function(x){var v=opr[x.id].get();o.op[x.id]=v;if(typeof v==='string'?v.trim():(v&&(v.p||String(v.n||'').trim())))any=true;});return any?o:null;}
+    function keepNow(){clearTimeout(saveT);saveT=0;if(sent||!dirty)return;dirty=false;var o=snap();if(o)lsSet(o);else lsDel();}
+    function later(){if(sent)return;dirty=true;if(!saveT)saveT=setTimeout(keepNow,300);}
+    root.addEventListener('input',function(e){if(e.target===codeBox)return;later();paint();});
+    root.addEventListener('change',function(e){if(e.target===codeBox)return;later();paint();});
+    window.addEventListener('pagehide',keepNow);d.addEventListener('visibilitychange',function(){if(d.visibilityState==='hidden')keepNow();});
+    function sentNow(){sent=true;clearTimeout(saveT);saveT=0;lsSet({v:1,t:Date.now(),sent:new Date().toISOString()});}
+    function pickIn(box,val){var r=null;Array.prototype.forEach.call(box.querySelectorAll('input[type=radio]'),function(x){if(x.value===val)r=x;});if(r&&!r.checked){r.checked=true;r.dispatchEvent(new Event('change'));}return !!r;}
+    function restore(o){if(o.nm&&me)notMeNow();
+      (o.ans||[]).forEach(function(a,i){if(i<items.length&&typeof a==='string'&&a)pickIn(ol.children[i],a);});
+      if(P.confirm&&o.conf){var cw=d.getElementById('nbhr-conf');if(cw)pickIn(cw,String(o.conf));}
+      extras.forEach(function(x){var v=o.ex&&o.ex[x.id],e=ex[x.id];if(typeof v!=='string'||e.readOnly)return;if(e.tagName==='SELECT'){for(var i=0;i<e.options.length;i++)if(e.options[i].value===v){e.value=v;break;}}else e.value=v.slice(0,300);});
+      opens.forEach(function(x){if(o.op&&x.id in o.op)opr[x.id].put(o.op[x.id]);});}
+    send.addEventListener('click',function(){if(!check())return;
       var resp=response();
-      if(BOX&&!sending){sending=true;send.disabled=true;send.textContent=_('Sending\u2026');done.hidden=false;done.className='done';done.innerHTML=_('Sending your answers\u2026');
-        sendBox(resp,function(err){sending=false;send.disabled=false;send.textContent=_('Send my answers to {who}',{who:WHO});
-          if(!err){sent=true;done.className='done';done.innerHTML=_('<b>Sent.</b> Your answers went to {who}. Thank you; you can close this page.',{who:esc(WHO)});codeBox.hidden=true;row2.hidden=true;send.hidden=true;return;}
-          lastCode=encode(resp);codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;ml.href=mailto(lastCode);ml.hidden=false;
+      if(BOX&&!sending){sending=true;send.disabled=true;send.textContent=_('Sending\u2026');done.hidden=false;done.className='done';done.innerHTML=_('Sending your answers\u2026');upd();say('',_('Sending your answers\u2026'));
+        sendBox(resp,function(err){sending=false;send.disabled=false;send.textContent=_('Send my answers to {who}',{who:WHO1});
+          if(!err){sentNow();done.className='done';done.innerHTML=_('<b>Sent.</b> Your answers went to {who}. Thank you; you can close this page.',{who:esc(WHO)});codeBox.hidden=true;row2.hidden=true;send.hidden=true;alt.hidden=true;fin.hidden=true;upd();
+            say('ok',_('Sent. Thank you; you can close this page.'));return;}
+          lastCode=encode(resp);codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;ml.href=mailto(lastCode);ml.hidden=false;fin.hidden=false;alt.hidden=true;
           done.className='warn';done.innerHTML=_('<b>The reply box could not be reached</b> ({e}). Press <b>Open the email</b> below to send your answers by email to {who} instead, or try Send again in a moment.',{e:esc(err),who:esc(P.email||WHO)});
-          ml.firstChild.textContent=_('Open the email');});return;}
-      lastCode=encode(resp);codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;
+          ml.firstChild.textContent=_('Open the email');upd();say('warn',_('Not sent yet: the reply box could not be reached. Your answers are kept here; see below.'));into(sc,'start');});return;}
+      lastCode=encode(resp);codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;fin.hidden=false;alt.hidden=true;
       done.innerHTML=_('<b>Your email program should open now</b> with the message to {who}. Press Send there. If nothing opened, copy the code below and paste it into an email to {to}, or save it as a file and attach it.',{who:esc(WHO)+(P.email?' ('+esc(P.email)+')':''),to:esc(P.email||WHO)});
-      ml.href=mailto(lastCode);
+      ml.href=mailto(lastCode);upd();
       if(ml.href.length>(P.mailMax||1800)){done.className='warn';done.innerHTML=_('<b>Your answers are longer than an email link can carry</b> ({n} characters, where about {m} fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to {to}, or <b>Copy the code</b> and paste it into the message.',{n:ml.href.length.toLocaleString(),m:(P.mailMax||1800).toLocaleString(),to:esc(P.email||WHO)});
-        row2.insertBefore(sv,cp);ml.hidden=true;sv.className='';cp.className='ghost';return;}
-      done.className='done';ml.hidden=false;window.location.href=ml.href;});
+        row2.insertBefore(sv,cp);ml.hidden=true;sv.className='';cp.className='ghost';say('warn',_('Too long for an email link: save it as a file below.'));into(sc,'start');return;}
+      done.className='done';ml.hidden=false;say('',_('Your email program should open now. Press Send there.'));into(sc,'start');window.location.href=ml.href;});
     cp.addEventListener('click',function(){codeBox.select();try{navigator.clipboard.writeText(lastCode);}catch(e){d.execCommand('copy');}cp.textContent=_('Copied');setTimeout(function(){cp.textContent=_('Copy the code');},1500);});
-    sv.addEventListener('click',function(){var blob=new Blob([lastCode+'\n'],{type:'text/plain'}),a=h('a',{href:URL.createObjectURL(blob),download:(P.form||'form')+'_'+(P.inst||'answers')+'_'+((ex.name&&ex.name.value)||'respondent').replace(/[^\w.-]+/g,'_')+'.nbhr.txt'});d.body.appendChild(a);a.click();a.remove();});
+    /* the bar's Copy: the same code Send makes, on the clipboard; where the clipboard is refused, the code shown to select by hand */
+    function copyMine(){var c=lastCode,ok=function(){say('ok',_('Copied. Paste them into an email to {to}.',{to:toWhom()}));},
+        byHand=function(){codeBox.hidden=false;row2.hidden=false;upd();var r=false;try{codeBox.focus({preventScroll:true});codeBox.select();r=d.execCommand('copy');}catch(e){}if(r)ok();else say('warn',_('Select the code below and copy it.'));into(codeBox);};
+      try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(c).then(ok,byHand);return;}}catch(e){}byHand();}
+    sv.addEventListener('click',saveFile);
+    cp2.addEventListener('click',function(){if(!check())return;codeNow();copyMine();fin.hidden=false;upd();});
+    sv2.addEventListener('click',function(){if(!check())return;codeNow();saveFile();fin.hidden=false;upd();say('ok',_('Saved as a file. Attach it to an email to {to}.',{to:toWhom()}));});
+    finB.addEventListener('click',function(){sentNow();fin.hidden=true;upd();say('ok',_('Thank you. Your answers are cleared from this device.'));});
     ml.addEventListener('click',function(e){if(!lastCode){e.preventDefault();}});
-    paint();
+    /* the kept answers come back (after a reload, a closed tab, a phone call) */
+    var back=false;if(rec&&!wasSent){restore(rec);back=true;}
+    upd();sayKeep(back);paint();pads();
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   }
   U.mount=function(root,payload){NBH_RESPOND_RUNTIME(root,payload);};
