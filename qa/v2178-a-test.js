@@ -84,7 +84,8 @@ const errs=[];
     const r=await p.evaluate(f=>window.__nbhFactsIn(f),F);
     const v=n=>p.evaluate(n=>{const e=document.querySelector('[name="'+n+'"]');return e?e.value:null;},n);
     const hyp=await v('m.hyp');
-    ok('EA-1: hypothesis carried in names each form and its function',/IA-1: Attention/.test(hyp)&&/IN-1: Multiple/.test(hyp)&&/ABC-1: Escape\/avoidance/.test(hyp)&&/OB-1: Escape/.test(hyp),hyp);
+    /* v25.67 (ASSESS-H1.4, batch 3) IN-1's interviews arrive as candidate conditions to include, not as the function */
+    ok('EA-1: hypothesis carried in names each form and its function (IN-1: its candidate conditions)',/IA-1: Attention/.test(hyp)&&/IN-1: candidate conditions to include: [^;]+ \(interviews; not the function\)/.test(hyp)&&/ABC-1: Escape\/avoidance/.test(hyp)&&/OB-1: Escape/.test(hyp),hyp);
     ok('EA-1: prior hypothesis unclear or conflicting when the forms differ',await v('v.hyp')==='none',await v('v.hyp'));
     ok('EA-1: consent from Form IC-1',/9\/1\/2026/.test(await v('s.consent')),await v('s.consent'));
     /* v22.49 (F149) the medications go to the read-only health record line, never into Medical clearance */

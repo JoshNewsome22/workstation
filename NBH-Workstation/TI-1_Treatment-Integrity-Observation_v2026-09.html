@@ -3786,6 +3786,8 @@ const TICKS=[['own','Interventionist’s own integrity, graphed across checks'],
    (Carroll et al., 2022). Four are already ticked above (praise; missed steps named; rehearsed; and the data, which a scored check
    is); these are the other four. The row prints only once one of them is ticked, so a saved record prints as before. */
 const TI67_CAR=[['reason','Gave the reason to change'],['how','Told how'],['showed','Showed how'],['questions','Asked for questions']];
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.ti67===undefined)return;const j=+el.dataset.ti67j,o=S.obs[j];if(!o)return;   /* v25.67 (STAFF-H4) */
+  const f=Object.assign({},o.fb||{});if(el.checked)f[el.dataset.ti67]=true;else delete f[el.dataset.ti67];if(Object.keys(f).length)o.fb=f;else delete o.fb;fbPaint(j);});
 function ti67Car(j){const f=(S.obs[j]||{}).fb||{};const n=1+['praise','named','reh'].filter(k=>f[k]).length+TI67_CAR.filter(([k])=>f[k]).length;return n+' of 8 steps';}
 const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m?new Date(+m[1],+m[2]-1,+m[3],12):null;};
 const isoOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -3910,7 +3912,7 @@ function fbRender(){const tb=byId('tiFbTbl');if(!tb)return;const rows=scoredInOr
   h+='<tr><th>Format</th>'+rows.map(r=>cell(r.j,'<select data-fb="fmt" data-fbj="'+r.j+'" aria-label="Observation #'+(r.j+1)+', feedback format"><option value=""></option>'+FMT.map(([k,l])=>'<option value="'+k+'"'+(f(r.j).fmt===k?' selected':'')+'>'+l+'</option>').join('')+'</select>')).join('')+'</tr>';
   h+='<tr><th>What it held</th>'+rows.map(r=>cell(r.j,TICKS.map(([k,l])=>'<label class="ti-fb-ck"><input type="checkbox" data-fb="'+k+'" data-fbj="'+r.j+'"'+(f(r.j)[k]?' checked':'')+' aria-label="Observation #'+(r.j+1)+': '+esc(l)+'"> '+esc(l)+'</label>').join(''))).join('')+'</tr>';
   {const any=rows.some(r=>TI67_CAR.some(([k])=>f(r.j)[k]));   /* v25.67 (STAFF-H4) */
-   h+='<tr class="ti67-car'+(any?'':' noprint')+'"><th>The eight feedback steps <small style="font-weight:400">(as on Form RS-1; Carroll et al., 2022)</small></th>'+rows.map(r=>cell(r.j,TI67_CAR.map(([k,l])=>'<label class="ti-fb-ck"><input type="checkbox" data-fb="'+k+'" data-fbj="'+r.j+'"'+(f(r.j)[k]?' checked':'')+' aria-label="Observation #'+(r.j+1)+': '+esc(l)+'"> '+esc(l)+'</label>').join('')+'<span class="ti-fb-calc" id="ti67Car'+r.j+'">'+esc(ti67Car(r.j))+'</span>')).join('')+'</tr>';}
+   h+='<tr class="ti67-car'+(any?'':' noprint')+'"><th>The eight feedback steps <small style="font-weight:400">(as on Form RS-1; Carroll et al., 2022)</small></th>'+rows.map(r=>cell(r.j,TI67_CAR.map(([k,l])=>'<label class="ti-fb-ck"><input type="checkbox" data-ti67="'+k+'" data-ti67j="'+r.j+'"'+(f(r.j)[k]?' checked':'')+' aria-label="Observation #'+(r.j+1)+': '+esc(l)+'"> '+esc(l)+'</label>').join('')+'<span class="ti-fb-calc" id="ti67Car'+r.j+'">'+esc(ti67Car(r.j))+'</span>')).join('')+'</tr>';}
   h+='<tr><th>Next check</th>'+rows.map(r=>cell(r.j,inp(r.j,'next','next check')+'<span class="ti-fb-calc" id="tiFbRuleT'+r.j+'"></span><span id="tiFbNFlag'+r.j+'"></span>')).join('')+'</tr>';
   setHTML(tb,h+'</tbody>');rows.forEach(r=>fbPaint(r.j));graphRender();}
 
