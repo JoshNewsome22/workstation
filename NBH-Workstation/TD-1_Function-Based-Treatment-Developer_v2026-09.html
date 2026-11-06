@@ -6959,7 +6959,7 @@ const b65Show=(id,t)=>byId[id]&&LIBOF[byId[id].code]&&id!==cur?`<button type="bu
 const B65_CSA=/competing|competition|matched/i;
 function bankRule(p){
  if(p.code==='C_CSA'||(p.code==='EE'&&B65_CSA.test([p.lab,p.kw,(p.steps||[]).join(' ')].join(' '))))return `<p class="rulenote"><b>Card rule (as on Form PA-1):</b> choose items that reduce the target behavior by at least 80% from the no-item control. Engagement is reported, not required. Do not choose an item for its engagement or its preference rank alone, and leave out an item under which the behavior rises above the control. The study’s own criterion, in its steps below, describes that study (Laureano et al., 2023).</p>`;
- if(B65_HP.has(p.id))return `<p class="rulenote"><b>For food selectivity only</b> (the student eats some foods and not others). High-p sequences alone did not raise acceptance for food refusal (Dawson et al., 2003): refer to the feeding team. Offer bites in front of the student by default; touching the bite to the lips is an ordinary choice. The default form is the step ladder: touch, smell, kiss, lick, bite, chew, swallow (Penrod et al., 2012). ${b65Show('a_highp-food-step-sequence','Show the step ladder')}</p>`;
+ /* v25.67 (FEED-M6) what Form FD-1 found comes first */ if(B65_HP.has(p.id))return (window.__td67FeedHp?window.__td67FeedHp():'')+`<p class="rulenote"><b>For food selectivity only</b> (the student eats some foods and not others). High-p sequences alone did not raise acceptance for food refusal (Dawson et al., 2003): refer to the feeding team. Offer bites in front of the student by default; touching the bite to the lips is an ordinary choice. The default form is the step ladder: touch, smell, kiss, lick, bite, chew, swallow (Penrod et al., 2012). ${b65Show('a_highp-food-step-sequence','Show the step ladder')}</p>`;
  if(B65_RAPID.includes(p.id))return `<p class="rulenote"><b>Rapid eating: try these in order.</b> First, pre-cut portions, one piece on the plate at a time, and the utensil down between bites with praise (Epstein et al., 1976). ${b65Show('dri-utensil-down-pacing','Show it')} Next, a vibrating pager or timer cue for each bite, faded by lowering the vibration strength, not by spacing the cues further apart (Anglesea et al., 2008; Valentino et al., 2018). ${b65Show('s_drl-pager-paced-bites','Show the pager cue')} ${b65Show('p_sf-pager-intensity-pacing','Show fading by strength')} The target is the time between bites (meal minutes divided by bites). Blocking an early bite is marked RESTRICTIVE: it is not one of the first steps, and it needs district review and written consent. Staff at this meal are trained in choking first aid.</p>`;
  if(B65_TEX.has(p.id))return `<p class="rulenote"><b>Texture and bite size come from the SLP or the feeding team</b> (Form FD-1, with the prescriber and the date). The plan serves only those, and a texture or bite-size step goes up only when the SLP or the feeding team writes the next step. Steps marked RESTRICTIVE (escape extinction at meals) need written consent, planned with the family, the doctor and a feeding specialist (TD-1’s escape-extinction consent block).</p>`;
  return '';}
@@ -7571,6 +7571,65 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
    let k=-1;['DELAY AND DENIAL TOLERANCE (FORM DT-1)','REINFORCEMENT SCHEDULE (FORM SR-1)','REINFORCEMENT THINNING LADDER'].some(h=>(k=B.findIndex(b=>b&&b[0]===h))>=0);B.splice(k<0?B.length:k+1,0,blk);}catch(e){}return res;};
 })();
 </script>
+<script id="td1-v2567-feed">
+/* v25.67 (FEED-M5, M6, M8; batch 3) Form FD-1 (Feeding and Mealtime) in the case reaches TD-1's meal cards:
+   (M5) when FD-1 records rapid eating, or Form TB-1 has the rapid-eating target, the Build sheet offers the pacing pathway in order
+        (pre-cut portions and the utensil down first; then a pager or timer cue faded by its strength), with FD-1's seconds per bite
+        as the target, blocking marked restrictive, and the choking first-aid line;
+   (M6) the high-p feeding cards say what FD-1 found: selectivity by type, where they fit, or food refusal or texture, where high-p
+        alone did not raise acceptance and the team refers; a card already in the plan is flagged in the second case;
+   (M8) the texture cards in the plan print FD-1's texture, liquid and bite-size order with the prescriber and the date, and the latest
+        step the SLP or the feeding team wrote; a step goes up only when they write it.
+   On screen above the protocol bank, in the bank's card rules, and in the BIP text after the components. Without FD-1 in the case,
+   nothing changes. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const HP=['a_highp-feeding-bites','a_highp-preferred-bites','a_highp-preferred-food-bites','a_highp-food-step-sequence'];
+ const TEX=['p_sf-food-texture-fading','effort-lower-food-texture','effort-smoother-texture-packing','effort-texture-bite-packing'];
+ const RAPID=[['dri-utensil-down-pacing','Show it'],['s_drl-pager-paced-bites','Show the pager cue'],['p_sf-pager-intensity-pacing','Show fading by strength']];
+ const TYPE={type:'selectivity by type',both:'selectivity by type and by texture',refusal:'food refusal',texture:'selectivity by texture'};
+ let F=null,rapidTb='';
+ const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};
+ const inPlan=L=>[...document.querySelectorAll('#compWrap .card')].filter(c=>L.includes(g('cp['+c.dataset.i+'].bank')));
+ const rapid=()=>!!(F&&F.rapid)||!!rapidTb;
+ const hpFits=()=>F&&(F.type==='type'||F.type==='both');
+ const hpNot=()=>F&&(F.type==='refusal'||F.type==='texture');
+ const md=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(v));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(v);};
+ function texLine(){if(!F)return '';const c=F.clearance||{},o=F.texOrder||{},s=F.texStep;
+  const ord=[c.texture&&'texture '+c.texture,c.liquid&&'liquid '+c.liquid,c.bite&&'bite size '+c.bite].filter(Boolean).join('; ');
+  return (ord?ord+(o.by?' (prescribed by '+o.by+(o.date?', '+md(o.date):'')+')':''):'no texture or bite-size order on Form FD-1 yet: serve nothing new until the SLP or the feeding team writes one')+
+   (s?'. Current step: '+s.step+' (written by '+[s.by,s.role].filter(Boolean).join(', ')+(s.date?', '+md(s.date):'')+')':'')+'. A step goes up only when the SLP or the feeding team writes the next one on Form FD-1';}
+ window.__td67FeedHp=function(){if(!F||!F.type)return '';
+  return hpFits()?'<p class="rulenote"><b>Form FD-1:</b> this student’s problem is sorted as '+E(TYPE[F.type])+': these cards fit.</p>':
+   hpNot()?'<p class="rulenote"><b>Form FD-1 sorts this student’s problem as '+E(TYPE[F.type])+'.</b> High-p sequences alone did not raise acceptance for food refusal (Dawson et al., 2003): refer to the feeding team rather than add this card.</p>':'';};
+ function box(){let el=document.getElementById('td67Feed');const at=document.getElementById('tdBankHost');if(!el&&at){el=document.createElement('div');el.id='td67Feed';el.className='td67-feed noprint';at.insertAdjacentElement('beforebegin',el);}return el;}
+ function paint(){const el=box();if(!el)return;const P=[];
+  if(rapid()){const spb=F&&F.last&&F.last.secPerBite;
+   P.push('<p><b>Rapid eating'+(F&&F.rapid?' (Form FD-1)':' (the target on Form TB-1'+(rapidTb?': '+E(rapidTb):'')+')')+': the pacing pathway, in this order.</b> 1. Pre-cut portions, one piece on the plate at a time, and the utensil down between bites, with praise (Epstein et al., 1976). '+
+    RAPID.slice(0,1).map(([id,t])=>'<button type="button" class="lnk td67-show" data-show="'+id+'">'+t+'</button>').join(' ')+' 2. A vibrating pager or timer cue for each bite, faded by lowering its strength, not by spacing the cues (Anglesea et al., 2008; Valentino et al., 2018). '+
+    RAPID.slice(1).map(([id,t])=>'<button type="button" class="lnk td67-show" data-show="'+id+'">'+t+'</button>').join(' ')+' The target is the time between bites'+(spb?': '+spb+' s per bite at the last meal on Form FD-1':' (meal minutes divided by bites, from Form FD-1)')+'. Blocking an early bite is RESTRICTIVE and never the default. Staff at this meal are trained in choking first aid.</p>');}
+  const hp=inPlan(HP);if(hp.length&&hpNot())P.push('<p class="td67-warn"><b>A high-p feeding card is in the plan, and Form FD-1 sorts the problem as '+E(TYPE[F.type])+'.</b> High-p sequences alone did not raise acceptance for food refusal (Dawson et al., 2003): refer to the feeding team.</p>');
+  if(inPlan(TEX).length&&F)P.push('<p><b>Textures and bite sizes (Form FD-1):</b> '+E(texLine())+'.</p>');
+  el.hidden=!P.length;const h=P.join('');if(el.__h!==h){el.__h=h;el.innerHTML=h;}}
+ function lines(){const L=[];if(rapid()){const spb=F&&F.last&&F.last.secPerBite;L.push('Rapid eating: pre-cut portions and the utensil down between bites first; then a pager or timer cue per bite, faded by its strength. Target: the time between bites'+(spb?' (last meal on Form FD-1: '+spb+' s per bite)':'')+'. Blocking an early bite is RESTRICTIVE and never the default.','Staff at this meal are trained in choking first aid.');}
+  if(F&&inPlan(TEX).length)L.push('Textures and bite sizes: '+texLine()+'.');
+  if(F&&inPlan(HP).length&&hpNot())L.push('High-p at meals: Form FD-1 sorts the problem as '+TYPE[F.type]+'; high-p alone did not raise acceptance for food refusal: refer to the feeding team.');
+  return L;}
+ window.__td2567FeedLines=lines;
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
+  try{F=f&&f.feeding&&typeof f.feeding==='object'?f.feeding:null;const B=(f&&Array.isArray(f.behaviors)?f.behaviors:[]).find(b=>b&&/rapid eating|eat(s|ing)? too (fast|quickly)|feed-rapid/i.test([b.label,b.def,b.id,b.lib].map(T).join(' ')));
+    rapidTb=B?T(B.label)||'rapid eating':'';paint();if(window.__tdBankRedraw)window.__tdBankRedraw();}catch(e){}return r;};
+ document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('.td67-show');if(b&&window.__tdBank){try{window.__tdBank.show(b.dataset.show);const h=document.getElementById('tdBankHost');if(h)h.scrollIntoView({block:'start',behavior:'smooth'});}catch(x){}}});
+ try{new MutationObserver(()=>{clearTimeout(paint._t);paint._t=setTimeout(()=>{try{paint();}catch(x){}},150);}).observe(document.getElementById('compWrap'),{childList:true,subtree:true,attributes:false});}catch(x){}
+ const bip0=window.__td82Bip;window.__td82Bip=function(B,o){const res=bip0?bip0.apply(this,arguments):undefined;try{const L=lines();if(!L.length)return res;
+   let k=B.findIndex(b=>b&&b[0]==='HOW THE PARTS FIT TOGETHER');B.splice(k<0?B.length:k,0,['MEALS (FORM FD-1)'].concat(L.map(x=>'- '+x)));}catch(e){}return res;};
+})();
+</script>
+<style id="td1-v2567-feed-css">
+.td67-feed{margin:8px 0;padding:8px 12px;border:1px solid #c9d4d2;border-left:4px solid #2f5568;background:#f7faf9;font-size:13px;line-height:1.45}
+.td67-feed p{margin:4px 0}
+.td67-feed .td67-warn{color:#8A4412}
+.td67-feed .lnk{min-height:30px;padding:2px 8px;margin:0 2px;border:1px solid #93aead;border-radius:4px;background:#fff;color:#182e43;font:inherit;font-weight:600;cursor:pointer}
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

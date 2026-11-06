@@ -154,5 +154,36 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await rm.close();
  });
 
+ /* ---------------- TDB ---------------- */
+ await sec('TDB',async()=>{
+  const fd=await open('FD-1');
+  await fd.evaluate(()=>{if(window.nbhUI){nbhUI.confirm=async()=>true;nbhUI.toast=()=>{};}});await L.loadSim(fd);await sleep(1500);
+  const fo=await fd.evaluate(async()=>{S.tex=[{date:'10/1/2026',step:'Soft solids, quarter-size bites',by:'School SLP (simulated)',role:'SLP'}];let f=null;try{f=window.__nbhFactsOut();}catch(e){f={err:String(e)};}return f&&f.feeding;});
+  ok('TDB 1 FD-1 adds who prescribed the order and when, the latest step written, and the seconds per bite (FEED-M5, M8)',fo&&fo.texOrder&&fo.texOrder.by&&fo.texStep&&fo.texStep.step==='Soft solids, quarter-size bites'&&fo.texStep.role==='SLP'&&(!fo.last||typeof fo.last.secPerBite==='number'||fo.last.secPerBite===undefined),fo&&{texOrder:fo.texOrder,texStep:fo.texStep,last:fo.last});
+  await fd.close();
+  const t=await open('TD-1');
+  const FEED={type:'refusal',typeLabel:'Food refusal',lead:'menu',rapid:true,clearance:{doctor:'2026-09-01',texture:'puree',liquid:'thin',bite:'pea-size'},texOrder:{by:'School SLP (simulated)',date:'2026-09-02'},
+    texStep:{step:'Soft solids, quarter-size bites',date:'2026-10-01',by:'School SLP (simulated)',role:'SLP'},last:{date:'2026-10-03',accepted:80,mouthClean:70,secPerBite:9}};
+  const r=await t.evaluate(async F=>{window.__nbhFactsIn({feeding:F});await new Promise(r=>setTimeout(r,400));const box=document.getElementById('td67Feed');const a={box:box&&!box.hidden?box.textContent:'',btns:box?box.querySelectorAll('.td67-show').length:0};
+    /* a high-p feeding card and a texture card from the bank */
+    const add=id=>{const c=window.__tdAddComp(window.__tdBank.entry(id).code);const e=document.querySelector('[name="cp['+c.dataset.i+'].bank"]');if(e){e.value=id;e.dispatchEvent(new Event('input',{bubbles:true}));}return c;};
+    add('a_highp-feeding-bites');add('p_sf-food-texture-fading');await new Promise(r=>setTimeout(r,500));
+    a.box2=box.textContent;a.bip=(()=>{const t=window.__bipText(),k=t.indexOf('MEALS (FORM FD-1)');return k>=0?t.slice(k,k+1500):'';})();
+    window.__tdBank.show('a_highp-feeding-bites');await new Promise(r=>setTimeout(r,300));
+    const host=document.getElementById('tdBankHost'),root=host&&(host.shadowRoot||host),rn=()=>root?[...root.querySelectorAll('.rulenote')].map(x=>x.textContent).join(' | '):'';a.bank=rn();
+    window.__nbhFactsIn({feeding:Object.assign({},F,{type:'type',rapid:false})});await new Promise(r=>setTimeout(r,400));window.__tdBank.show('a_highp-feeding-bites');await new Promise(r=>setTimeout(r,300));
+    a.bank2=rn();a.box3=box.textContent;
+    window.__nbhFactsIn({});await new Promise(r=>setTimeout(r,300));a.none=box.hidden&&window.__bipText().indexOf('MEALS (FORM FD-1)')<0;
+    window.__nbhFactsIn({behaviors:[{label:'Rapid eating',lib:'feed-rapid',def:'more than one bite in 5 s'}]});await new Promise(r=>setTimeout(r,300));a.tb=box.hidden?'':box.textContent;
+    return a;},FEED);
+  ok('TDB 2 FD-1 records rapid eating: TD-1 offers the pacing pathway in order, with FD-1’s seconds per bite, blocking restrictive, choking first aid (FEED-M5)',/Rapid eating \(Form FD-1\): the pacing pathway, in this order/.test(r.box)&&/1\. Pre-cut portions/.test(r.box)&&/2\. A vibrating pager/.test(r.box)&&/9 s per bite/.test(r.box)&&/RESTRICTIVE and never the default/.test(r.box)&&/choking first aid/.test(r.box)&&r.btns===3,r);
+  ok('TDB 3 a TB-1 rapid-eating target offers the same pathway without FD-1',/the target on Form TB-1: Rapid eating/.test(r.tb),r.tb);
+  ok('TDB 4 FD-1 sorts the problem as food refusal: the high-p card in the plan is flagged and the bank says to refer (FEED-M6)',/A high-p feeding card is in the plan, and Form FD-1 sorts the problem as food refusal/.test(r.box2)&&/Form FD-1 sorts this student’s problem as food refusal\..*refer to the feeding team rather than add this card/.test(r.bank),{box2:r.box2,bank:r.bank.slice(0,600)});
+  ok('TDB 5 selectivity by type: the bank says the high-p cards fit, and no flag',/sorted as selectivity by type: these cards fit/.test(r.bank2)&&!/A high-p feeding card is in the plan/.test(r.box3),{bank2:r.bank2.slice(0,600),box3:r.box3});
+  ok('TDB 6 a texture card prints FD-1’s order with the prescriber and the latest step written (FEED-M8)',/MEALS \(FORM FD-1\)/.test(r.bip)&&/Textures and bite sizes: texture puree; liquid thin; bite size pea-size \(prescribed by School SLP \(simulated\), 9\/2\/2026\)\. Current step: Soft solids, quarter-size bites \(written by School SLP \(simulated\), SLP, 10\/1\/2026\)\. A step goes up only when/.test(r.bip)&&/Staff at this meal are trained in choking first aid/.test(r.bip),r.bip);
+  ok('TDB 7 without FD-1 in the case nothing is added',r.none,r);
+  await t.close();
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
