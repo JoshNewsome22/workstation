@@ -3735,6 +3735,79 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<style id="im1-v2568-css">
+/* v25.68 (research #6) each entry's recorded-at, and "Late entry" */
+.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}
+.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}
+</style>
+<script id="im1-v2568">
+/* v25.68 (research #6) when an entry was recorded. Each new entry keeps "recorded at", the device clock at the moment it was
+   first written, beside when it happened; one recorded more than 24 hours after it happened prints "Late entry". A date with
+   no time counts as the end of that day, so an entry is marked late only when it surely is. An entry saved before v25.68
+   has no recorded-at and shows and prints as before. The same helper is in Forms DD-1, CR-1, IM-1 and CN-1. */
+window.nbhRec=window.nbhRec||(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const ok=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(v)&&!isNaN(Date.parse(v));
+  const now=()=>new Date().toISOString();
+  const DAYRE=/(\d{4})-(\d\d)-(\d\d)|(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/;
+  function day(v){const m=DAYRE.exec(T(v));if(!m)return null;if(m[1])return [+m[1],+m[2]-1,+m[3]];let y=+m[6];if(y<100)y+=2000;return [y,+m[4]-1,+m[5]];}
+  function hm(v){const m=/(\d{1,2}):(\d{2})\s*([AaPp])?/.exec(T(v));if(!m)return null;let h=+m[1];const mi=+m[2],ap=(m[3]||'').toLowerCase();
+    if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;return h<24&&mi<60?[h,mi]:null;}
+  /* when it happened: a date (2026-11-06, 11/6/2026, 11/6/26, "Tue 9/29/26, 1:42 PM") and a time (14:05, 2:05 PM) */
+  function when(d,t){const s=T(d),D=day(s);if(!D)return null;let H=hm(t);if(!H)H=hm(s.replace(DAYRE,''));
+    const x=H?new Date(D[0],D[1],D[2],H[0],H[1]):new Date(D[0],D[1],D[2],23,59,59);return isNaN(x)?null:x;}
+  const late=(rec,d,t)=>{if(!ok(rec))return false;const h=when(d,t);return !!h&&Date.parse(rec)-h.getTime()>864e5;};
+  const days=(rec,d,t)=>{const h=when(d,t);return ok(rec)&&h?Math.max(0,Math.floor((Date.parse(rec)-h.getTime())/864e5)):0;};
+  function txt(rec){if(!ok(rec))return '';const d=new Date(rec);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
+    return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2)+', '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;}
+  /* the words an entry carries: "Recorded 11/6/26, 2:14 PM (device clock)", and "Late entry" when it is one */
+  const line=(rec,d,t)=>ok(rec)?'Recorded '+txt(rec)+' (device clock)'+(late(rec,d,t)?'. Late entry':''):'';
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const html=(rec,d,t)=>ok(rec)?'<span class="rec68">Recorded '+E(txt(rec))+' (device clock)'+(late(rec,d,t)?' <b class="rec68-late">Late entry</b>':'')+'</span>':'';
+  const CSS='.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}'+
+    '.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}';
+  return {ok,now,when,late,days,txt,line,html,CSS};
+})();
+/* v25.68 (research #6) when each entry was recorded. An administration filed to the History, a nurse check, an event added
+   with Add and an injury noticed during required care each keep "recorded at" (the device clock when it was first filed or
+   added) beside the date and time it happened; one recorded more than 24 hours after it happened shows and prints "Late entry".
+   Correcting an entry later keeps its first recorded-at. Entries saved before v25.68, the simulation's, and the events this
+   form adds itself from Form CR-1's log have none, and show and print as before. */
+(function(){
+  const R=window.nbhRec;if(!R)return;
+  const OLD=new Set(),REC={};let saving=false;
+  /* a file keeps the recorded-at (the clean-up below keeps only the fields it knows) */
+  if(typeof fromFile==='function'){const f0=fromFile;fromFile=function(d){const o=f0.apply(this,arguments);try{if(!o||!d||!d.S)return o;const s=d.S,ok=a=>Array.isArray(a)?a:[];
+      const byId={};ok(s.hist).forEach(x=>{if(x&&x.id&&R.ok(x.rec))byId[x.id]=x.rec;});
+      o.hist.forEach(h=>{OLD.add(h.id);if(byId[h.id]){h.rec=byId[h.id];REC[h.id]=h.rec;}});
+      const cy={};ok(s.care).forEach(x=>{if(x&&x.id&&R.ok(x.rec))cy[x.id]=x.rec;});o.care.forEach(c=>{if(cy[c.id])c.rec=cy[c.id];});
+      ok(s.nurse).slice(0,300).forEach((x,i)=>{if(x&&R.ok(x.rec)&&o.nurse[i])o.nurse[i].rec=x.rec;});
+      ok(s.events).slice(0,100).forEach((x,i)=>{if(x&&R.ok(x.rec)&&o.events[i])o.events[i].rec=x.rec;});}catch(e){}return o;};}
+  /* an administration filed to the History is stamped when it is first filed; filed again after a correction, it keeps it */
+  document.addEventListener('click',e=>{if(e.isTrusted&&e.target&&e.target.closest&&e.target.closest('.imSaveAdm'))saving=true;},true);
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#simBtn,#clearBtn,#loadBtn'))saving=false;},true);
+  document.addEventListener('click',e=>{if(!e.target||!e.target.closest)return;
+    const add=e.target.closest('#addNurse')?S.nurse:e.target.closest('#addEvent')?S.events:null;
+    if(add&&e.isTrusted){const x=add[add.length-1];if(x&&!R.ok(x.rec)){x.rec=R.now();try{renderNurse();renderEvents();}catch(err){}}}});
+  function stampHist(){let hit=false;(S.hist||[]).forEach(h=>{if(!h||!h.id)return;if(R.ok(h.rec)){REC[h.id]=h.rec;OLD.add(h.id);return;}
+      if(REC[h.id]){h.rec=REC[h.id];return;}if(!OLD.has(h.id)){if(saving){h.rec=R.now();REC[h.id]=h.rec;hit=true;}OLD.add(h.id);}});if(hit)saving=false;}
+  if(typeof renderAll==='function'){const a0=renderAll;renderAll=function(){try{stampHist();}catch(e){}return a0.apply(this,arguments);};}
+  /* an injury noticed during care: stamped when it is first added; a correction keeps it */
+  if(typeof careSave==='function'){const c0=careSave;careSave=function(){const was={};(S.care||[]).forEach(c=>{if(c&&c.id)was[c.id]=R.ok(c.rec)?c.rec:'';});
+      const r=c0.apply(this,arguments);try{let n=0;(S.care||[]).forEach(c=>{if(!c||!c.id)return;if(c.id in was){if(was[c.id]&&!c.rec){c.rec=was[c.id];n++;}}else if(!R.ok(c.rec)){c.rec=R.now();n++;}});if(n)renderCare();}catch(e){}return r;};}
+  /* on the screen and on paper, under the date */
+  const put=(td,h)=>{if(!td||!h)return;const o=td.querySelector('.rec68');if(o)o.remove();td.insertAdjacentHTML('beforeend',h);};
+  if(typeof renderHist==='function'){const h0=renderHist;renderHist=function(){const r=h0.apply(this,arguments);try{const H=histSorted(),rows=document.querySelectorAll('#imHist tbody tr');
+      H.forEach((h,i)=>{if(rows[i]&&R.ok(h.rec))put(rows[i].cells[1],R.html(h.rec,h.date,h.time));});}catch(e){}return r;};}
+  const deco=(sel,L)=>{const rows=document.querySelectorAll(sel+' tbody tr');(L||[]).forEach((x,i)=>{if(rows[i]&&x&&R.ok(x.rec))put(rows[i].cells[1],R.html(x.rec,x.date,x.time||''));});};
+  if(typeof renderNurse==='function'){const n0=renderNurse;renderNurse=function(){const r=n0.apply(this,arguments);try{deco('#imNurse',S.nurse);}catch(e){}return r;};}
+  if(typeof renderEvents==='function'){const e0=renderEvents;renderEvents=function(){const r=e0.apply(this,arguments);try{deco('#eventTbl',S.events);}catch(e){}return r;};}
+  if(typeof renderCare==='function'){const k0=renderCare;renderCare=function(){const r=k0.apply(this,arguments);try{deco('#imCare',S.care);}catch(e){}return r;};}
+  /* a date typed later changes whether it is late */
+  document.addEventListener('change',e=>{const t=e.target;if(!t||!t.dataset||t.dataset.f!=='date'||!/^(nurse|events)$/.test(t.dataset.r||''))return;setTimeout(()=>{try{t.dataset.r==='nurse'?deco('#imNurse',S.nurse):deco('#eventTbl',S.events);}catch(err){}},0);});
+  try{(S.hist||[]).forEach(h=>{if(h&&h.id){OLD.add(h.id);if(R.ok(h.rec))REC[h.id]=h.rec;}});renderHist();renderNurse();renderEvents();renderCare();}catch(e){}
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

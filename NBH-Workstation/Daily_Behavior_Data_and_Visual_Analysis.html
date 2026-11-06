@@ -22940,6 +22940,74 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   try{ marks(); }catch(e){}
 })();
 </script>
+<style id="dd1-v2568-css">
+/* v25.68 (research #6) an incident's recorded-at under its date and time, and "Late entry" */
+.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}
+.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}
+.inc-tab td.w .rec68{font-weight:400}
+</style>
+<script id="dd1-v2568">
+/* v25.68 (research #6) when an entry was recorded. Each new entry keeps "recorded at", the device clock at the moment it was
+   first written, beside when it happened; one recorded more than 24 hours after it happened prints "Late entry". A date with
+   no time counts as the end of that day, so an entry is marked late only when it surely is. An entry saved before v25.68
+   has no recorded-at and shows and prints as before. The same helper is in Forms DD-1, CR-1, IM-1 and CN-1. */
+window.nbhRec=window.nbhRec||(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const ok=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(v)&&!isNaN(Date.parse(v));
+  const now=()=>new Date().toISOString();
+  const DAYRE=/(\d{4})-(\d\d)-(\d\d)|(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/;
+  function day(v){const m=DAYRE.exec(T(v));if(!m)return null;if(m[1])return [+m[1],+m[2]-1,+m[3]];let y=+m[6];if(y<100)y+=2000;return [y,+m[4]-1,+m[5]];}
+  function hm(v){const m=/(\d{1,2}):(\d{2})\s*([AaPp])?/.exec(T(v));if(!m)return null;let h=+m[1];const mi=+m[2],ap=(m[3]||'').toLowerCase();
+    if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;return h<24&&mi<60?[h,mi]:null;}
+  /* when it happened: a date (2026-11-06, 11/6/2026, 11/6/26, "Tue 9/29/26, 1:42 PM") and a time (14:05, 2:05 PM) */
+  function when(d,t){const s=T(d),D=day(s);if(!D)return null;let H=hm(t);if(!H)H=hm(s.replace(DAYRE,''));
+    const x=H?new Date(D[0],D[1],D[2],H[0],H[1]):new Date(D[0],D[1],D[2],23,59,59);return isNaN(x)?null:x;}
+  const late=(rec,d,t)=>{if(!ok(rec))return false;const h=when(d,t);return !!h&&Date.parse(rec)-h.getTime()>864e5;};
+  const days=(rec,d,t)=>{const h=when(d,t);return ok(rec)&&h?Math.max(0,Math.floor((Date.parse(rec)-h.getTime())/864e5)):0;};
+  function txt(rec){if(!ok(rec))return '';const d=new Date(rec);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
+    return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2)+', '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;}
+  /* the words an entry carries: "Recorded 11/6/26, 2:14 PM (device clock)", and "Late entry" when it is one */
+  const line=(rec,d,t)=>ok(rec)?'Recorded '+txt(rec)+' (device clock)'+(late(rec,d,t)?'. Late entry':''):'';
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const html=(rec,d,t)=>ok(rec)?'<span class="rec68">Recorded '+E(txt(rec))+' (device clock)'+(late(rec,d,t)?' <b class="rec68-late">Late entry</b>':'')+'</span>':'';
+  const CSS='.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}'+
+    '.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}';
+  return {ok,now,when,late,days,txt,line,html,CSS};
+})();
+/* v25.68 (research #2, #6). The incident log: an incident logged from now on keeps "recorded at" (the device clock when it
+   was first saved) beside its date and time, and one saved more than 24 hours after it happened shows and prints "Late
+   entry"; editing it later keeps the first recorded-at. An incident saved before has none and shows as before. For the case:
+   each incident's recorded-at and whether it is a late entry (incidentList[].rec, .late), and each behavior's range (the
+   lowest and highest day) beside the level already sent, in its first condition, its current one and the last 20 days with
+   data (base.min, base.max, cur.min, cur.max, rng), for Form CR-1's brief for the threat management team. */
+(function(){
+  const R=window.nbhRec;if(!R)return;
+  /* a file or a restore keeps each incident's recorded-at (the clean-up below keeps only the fields it knows) */
+  if(typeof ddClean==='function'){const c0=ddClean;ddClean=function(){const keep={};
+      (Array.isArray(S.incidents)?S.incidents:[]).forEach(x=>{if(x&&typeof x==='object'&&typeof x.id==='string'&&R.ok(x.rec))keep[x.id.slice(0,40)]=x.rec;});
+      const r=c0.apply(this,arguments);(S.incidents||[]).forEach(x=>{if(keep[x.id])x.rec=keep[x.id];});return r;};}
+  /* a new incident is stamped when it is first saved */
+  if(typeof ddIncSave==='function'){const s0=ddIncSave;ddIncSave=function(){const had=new Set((S.incidents||[]).map(x=>x&&x.id));
+      const r=s0.apply(this,arguments);try{(S.incidents||[]).forEach(x=>{if(x&&!had.has(x.id)&&!R.ok(x.rec)){x.rec=R.now();ddIncRender();try{ddEdited();}catch(e){}}});}catch(e){}return r;};}
+  /* the log, on the screen and on paper: the recorded-at under the date and time */
+  if(typeof ddIncRowHtml==='function'){const h0=ddIncRowHtml;ddIncRowHtml=function(i){const h=h0.apply(this,arguments);try{if(!i||!R.ok(i.rec))return h;
+      return h.replace('</td>',R.html(i.rec,i.date,i.time)+'</td>');}catch(e){return h;}};}
+  const r2=v=>v==null?null:Math.round(v*100)/100;
+  function span(b,rows){const v=rows.map(r=>plotValue(r,b)).filter(x=>x!==null);return v.length?{min:r2(Math.min(...v)),max:r2(Math.max(...v)),days:v.length}:null;}
+  const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+    try{if(!o||!o.data)return o;const d=o.data;
+      if(Array.isArray(d.incidentList))d.incidentList.forEach(x=>{const i=(S.incidents||[]).find(y=>y&&y.id===x.id);if(i&&R.ok(i.rec)){x.rec=i.rec;x.late=R.late(i.rec,i.date,i.time);}});
+      if(Array.isArray(d.behaviors)&&d.behaviors.length){const all=sortedRows(),conds=buildConditions(),B=orderedBehaviors();
+        const rowsOf=c=>(c&&c.rowIdx||[]).map(i=>all[i]).filter(r=>r&&r.date);
+        const last20=all.filter(r=>r.date&&S.behaviors.some(b=>plotValue(r,b)!==null)).slice(-20);
+        d.behaviors.forEach((x,k)=>{const b=B.find(y=>(y.name||'')===x.name)||B[k];if(!b)return;
+          const g=span(b,last20);if(g)x.rng={min:g.min,max:g.max};
+          if(x.base&&conds.length>1){const s=span(b,rowsOf(conds[0]));if(s){x.base.min=s.min;x.base.max=s.max;}}
+          if(x.cur&&conds.length){const s=span(b,rowsOf(conds[conds.length-1]));if(s){x.cur.min=s.min;x.cur.max=s.max;}}});}}catch(e){}
+    return o;};
+  try{ddIncRender();}catch(e){}
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
