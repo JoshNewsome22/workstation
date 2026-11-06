@@ -946,7 +946,13 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-hint{display:block;fo
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .rl-f > .fx2-hint{font:400 13px/1.4 var(--fx2-sans)!important;text-align:left!important;margin:0 0 4px}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .rl-f{align-items:stretch!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-hint.fx2-hintb{flex-basis:100%;margin:2px 0 8px}
-/* boxes at 16 px; a table that stays a table on a wide screen keeps its own size in its columns (TB-1's selected targets) */
+/* v25.67 fx2: in a grid of label-and-box pairs each box keeps to its own cell (one rule per kind of box: the master
+   print splits a list of them) */
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .fx2-rowg > label > input{max-width:100%;box-sizing:border-box}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .fx2-rowg > label > select{max-width:100%;box-sizing:border-box}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .fx2-rowg > label > textarea{max-width:100%;box-sizing:border-box}
+/* boxes at 16 px; a table that stays a table with a mouse on a wide screen keeps its own size in its columns (TB-1's
+   selected targets); on a touch screen its boxes are 16 px too (below) */
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]):not(td *):not(th *),html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh select:not(.nbh-seg-src):not(td *):not(th *),html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh textarea:not(td *):not(th *){font-size:16px!important;font-family:var(--fx2-sans)!important;color:var(--fx2-ink)}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident .f > input:not([type=checkbox]):not([type=radio]),html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident .f > select:not(.nbh-seg-src),html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident .f > textarea{min-height:44px!important;border:1px solid var(--fx2-box)!important;border-radius:8px!important;background-color:#fff!important;padding:0 12px!important;box-sizing:border-box;width:100%!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident .f > textarea{padding:10px 12px!important}
@@ -1026,7 +1032,7 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards td
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-addrow{display:none}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-cellhint{display:none}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table > tbody > tr.fx2-pkoff,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr.fx2-pkoff.fx2-pkoff{display:none!important}
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-btn{min-height:44px;padding:0 16px;margin:8px 0 14px;border:1px solid var(--fx2-box);border-radius:8px;background:#fff;color:var(--fx2-navy);font:600 15px var(--fx2-sans);cursor:pointer}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-btn{min-height:44px!important;padding:0 16px;margin:8px 0 14px;border:1px solid var(--fx2-box);border-radius:8px;background:#fff;color:var(--fx2-navy);font:600 15px var(--fx2-sans);cursor:pointer}
 
 /* ---------- DM-1's contacts: a summary line and Change ---------- */
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .card.con{border:1px solid var(--fx2-rule)!important;border-radius:12px!important;box-shadow:none!important;padding:14px 18px!important;margin:0 0 12px!important}
@@ -1052,11 +1058,12 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .toolbar.fx2-tb5 .nbh-shee
 /* ---------- RR-1's school calendar folds to one line ---------- */
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-nsoff{display:none!important}
 
-/* ---------- on an iPad (the form under 1000 px): two columns of fields, and each entry of a table a card ---------- */
-@media (max-width:1000px){
+/* ---------- v25.67 fx2: on a touch screen, an iPad at any width (the BCBA's v24.92 approval, "lists as cards on the iPad,
+   tables on a laptop", and design review M17), and on any screen under 1000 px: each entry of a list a card, and the
+   boxes of a table at 16 px (under 16 px Safari zooms the page when one is tapped). A mouse or trackpad above 1000 px
+   keeps the tables. ---------- */
+@media (pointer:coarse), (max-width:1000px){
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh :is(td,th) :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]),select:not(.nbh-seg-src),textarea){font-size:16px!important}
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident.c3,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident.c1{grid-template-columns:minmax(0,1fr)!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh :has(> table.fx2-cards){overflow:visible!important;-webkit-mask-image:none!important;mask-image:none!important;max-height:none!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .nbh-xs-bar:has(+ * > table.fx2-cards){display:none!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards{display:block!important;width:100%!important;min-width:0!important;border:0!important;background:none!important;table-layout:auto!important}
@@ -1086,6 +1093,12 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > 
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr.fx2-more{display:none!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-addrow{display:inline-block}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards .fx2-cellhint{display:block;font:400 14px/1.4 var(--fx2-sans);color:var(--fx2-hint)}
+}
+/* ---------- under 1000 px, touch or not: two columns of fields (the width, not the finger: a 13-inch iPad has room
+   for three) ---------- */
+@media (max-width:1000px){
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident.c3,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident.c1{grid-template-columns:minmax(0,1fr)!important}
 }
 @media (max-width:640px){html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident.c3,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .ident{grid-template-columns:minmax(0,1fr)!important}}
 
@@ -3387,9 +3400,35 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
       if (!at && x.id) at = D.querySelector('label[for="' + x.id + '"]');
       if (!at) { var r = x.closest('.drow'); if (r && r.querySelectorAll('input:not([type=hidden]),select,textarea').length === 1) at = r.querySelector(':scope > .dlab'); }
       if (!at) { var f = x.closest('.f'); if (f) at = f.querySelector(':scope > label'); }
+      /* v25.67 fx2: never an item of a row of label-and-box pairs (a grid or a flex row: the recorders' setup rows) */
+      if (rowOfPairs(at ? (at === wrap ? wrap.parentNode : at.parentNode) : x.parentNode)) { inRow(x, wrap); return; }
       if (at) { if (at === wrap) { moveHintAfter(x, wrap); } else moveHint(x, at); } else moveHintAfter(x, x);
     });
   }
+  /* v25.67 fx2: a row of label-and-box pairs, side by side in a grid or a flex row (EA-1's and PA-1's session runners,
+     OB-1's recorder), or a box beside its button. An example there would sit between the pairs as an item of its own, drawn over a label or pushing
+     the pairs along (EA-1's "End at this count", PA-1's "Setting"). A short one stays in its box, as v24.92 allows; a
+     longer one goes inside its own pair, under its label; where the pair has no wrapper of its own it stays in the box */
+  var BOXQ = 'input:not([type=hidden]):not([type=checkbox]):not([type=radio]),select,textarea';
+  function rowOfPairs(p){
+    if (!p || p.nodeType !== 1 || !p.closest('.fx2-sh')) return false; var cs = getComputedStyle(p), d = cs.display;
+    if (/flex/.test(d)) { if (/column/.test(cs.flexDirection)) return false; }
+    else if (/grid/.test(d)) { if ((cs.gridTemplateColumns || '').split(' ').filter(Boolean).length < 2) return false; }
+    else return false;
+    /* two items or more that hold a box or a button, one of them a box (PA-1's write-in box beside "Time this one") */
+    var n = 0, x = 0; for (var c = p.firstElementChild; c; c = c.nextElementSibling) { if (c.matches(BOXQ) || c.querySelector(BOXQ)) { n++; x++; } else if (c.matches('button') || c.querySelector('button')) n++; }
+    return x >= 1 && n >= 2;
+  }
+  function inRow(x, wrap){
+    x.dataset.fx2h = '1'; if (keep(x)) return;
+    var t = tidy(x.getAttribute('data-nbh-ph') || x.getAttribute('placeholder') || '');
+    if (!t || t.length <= 32 || !wrap || rowOfPairs(wrap)) { x.setAttribute('data-fx2-inrow', ''); return; }
+    var h = el('span', 'fx2-hint fx2-hintb noprint', t); x.before(h); egLink(x, h); stash(x);
+  }
+  /* the boxes of a grid of pairs keep to their cells (EA-1's Phase label ran into Consequence follows) */
+  function rows(){ var seen = [];
+    $$('.fx2-sh label').forEach(function(l){ var p = l.parentNode; if (!p || seen.indexOf(p) >= 0 || !l.querySelector(BOXQ)) return; seen.push(p);
+      if (rowOfPairs(p) && /grid/.test(getComputedStyle(p).display)) tog(p, 'fx2-rowg', true); }); }
   /* an example after a whole label (or after the box itself), on a line of its own */
   function moveHintAfter(field, after){
     if (field.dataset.fx2h) return; field.dataset.fx2h = '1'; if (keep(field)) return;
@@ -3604,7 +3643,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
   /* the form's pages: a .sheet, or a section shown one at a time (IN-1's section.only-setup) */
   function mark(){ $$('.sheet, section[class*="only-"]').forEach(function(x){ if (!x.classList.contains('fx2-sh')) x.classList.add('fx2-sh'); }); }
-  function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); fields(); hints(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
+  function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); fields(); hints(); rows(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
   var timer = 0; function soon(){ clearTimeout(timer); timer = setTimeout(run, 120); }
   /* TB-1's chips jump to a target's card; a sheet just shown still grows its boxes to their text, so the jump is aimed
      again once that has settled (a smooth scroll aimed at the first position stopped short of the card) */

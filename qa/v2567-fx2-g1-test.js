@@ -4,16 +4,17 @@
    upright (1032 x 1376), touch, with the form's simulation loaded, on every sheet:
      1. nothing wider than the screen (also on a phone, 390 x 844, and an 11-inch iPad sideways, 1180 x 820);
      2. every box outside a table at 16 px or more, and 44 px tall (a box the layout leaves as the form drew it is
-        listed as a NOTE: IN-1's student fields, as approved);
+        listed as a NOTE: IN-1's student fields, as approved); on a touch screen the boxes in tables at 16 px too;
      3. no example of more than a few characters left inside a box (outside a table, or in a list shown as cards; an
-        instruction the form keeps in its box, and "From Form ..." stay);
+        instruction the form keeps in its box, "From Form ...", and a short example in a row of label-and-box pairs
+        stay);
      4. an example goes once its box holds an entry and comes back when it is emptied;
      5. headings in sentence case on screen (the same words, only the capitals change), as written while printing;
      6. the boxes of a row of fields in line;
      7. choices of two to four short answers as buttons (where the form keeps lists, FX2_CFG.noseg, they stay lists);
-     8. lists of entries: tables on these screens (above 1000 px, as the six forms are approved), cards at 820 px
-        (an iPad upright), each box under its column's name; tables of scores, trials, intervals and checklists stay
-        tables at 820 px;
+     8. lists of entries: cards on a touch screen at any width (the BCBA's v24.92 approval, "lists as cards on the
+        iPad, tables on a laptop", and design review M17), each box under its column's name, and tables with a mouse
+        (1300 x 900); tables of scores, trials, intervals and checklists stay tables;
      9. the masthead's description two lines with "Show the full introduction";
     10. the layout's own buttons 44 px tall;
     11. the print unchanged: the form printed with its layout and printed without it (the shared blocks taken out of
@@ -23,7 +24,9 @@
         screen layout back after;
     13. no page errors;
     14. tools/blocks/patch-fx2.py --check: every form's copy is the source.
-    15. nothing the form keeps out of sight (a box its own class hides) shown by the layout, on every sheet.
+    15. nothing the form keeps out of sight (a box its own class hides) shown by the layout, on every sheet;
+    16. in the recorders and timers (RUNNERS) nothing drawn over a label's words or a box, and on every sheet no example
+        of the layout as an item of a row of label-and-box pairs, at 1376, 1180, 1032 and 390 px.
    WebKit when it is installed, otherwise Chromium as an iPad (qa/lib.js ipadBrowser). Simulated data only.
    usage: WS_URL=http://127.0.0.1:8123 node qa/v2567-fx2-g1-test.js [ID,ID...] */
 const L=require(__dirname+'/lib.js');const {BASE,sleep,ROOT}=L;let pw;try{pw=require('playwright');}catch(e){pw=require('/opt/node22/lib/node_modules/playwright');}
@@ -42,6 +45,26 @@ const STAY={'SI-1':['#hardTbl','#prTbl'],'OB-1':['table.obs-count'],'SP-1':['#gr
   'DA-1':['#sessTbl','#pcTbl'],'PA-1':['#ssTbl','#ecoMatTbl'],'TB-1':['#qcTbl'],'IA-1':['#fastGrid'],'IN-1':['table.mx']};
 /* boxes the layout leaves as the form drew them, approved as they are */
 const KNOWN44={'IN-1':/^(setup|int) /,'IA-1':/^walk walk\./};
+/* 16 the recorders and timers: EA-1's and PA-1's session runners, MT-1's timer, OB-1's live recorder (add a new group's) */
+const RUNNERS='#eaRun, .pa-run, #tmr, #obRec';
+/* the items that may not meet: every box in view, the words of every label (not the box inside it), every example; and
+   no example of the layout as an item of a row of label-and-box pairs (a grid or a flex row, or a box beside its
+   button), anywhere on a sheet */
+const overlaps=p=>p.evaluate(RUN=>{const D=document;const sheets=[...D.querySelectorAll('.fx2-sh')].filter(s=>s.getClientRects().length);
+  const vis=e=>{if(!e.getClientRects().length)return false;const cs=getComputedStyle(e);if(cs.visibility==='hidden'||+cs.opacity===0)return false;const r=e.getBoundingClientRect();return r.width>2&&r.height>2;};
+  const items=[],nm=e=>String(e.id||e.getAttribute('name')||e.getAttribute('data-m')||e.className||e.tagName).slice(0,30),txt=(e,k,n)=>{const rg=D.createRange();rg.selectNodeContents(e);[...rg.getClientRects()].forEach(r=>{if(r.width>2&&r.height>2)items.push({k,n,r,el:e.nodeType===1?e:e.parentElement.closest('label')||e.parentElement});});};
+  sheets.forEach(s=>s.querySelectorAll(RUN).forEach(run=>{
+    run.querySelectorAll('input:not([type=hidden]),select:not(.nbh-seg-src),textarea').forEach(e=>{if(vis(e))items.push({k:'box',n:nm(e),r:e.getBoundingClientRect(),el:e});});
+    run.querySelectorAll('.fx2-hint,.fx2-cellhint,.nbh-hint').forEach(e=>{if(vis(e))txt(e,'example',e.textContent.trim().slice(0,30));});
+    run.querySelectorAll('label').forEach(l=>{if(!vis(l))return;const tw=D.createTreeWalker(l,NodeFilter.SHOW_TEXT,{acceptNode:t=>!/\S/.test(t.nodeValue)||t.parentElement.closest('input,select,textarea,option,button,.fx2-hint,.nbh-hint,.fx2-cellhint,.nbh-seg')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+      let t;while((t=tw.nextNode()))if(vis(t.parentElement)){const rg=D.createRange();rg.selectNodeContents(t);[...rg.getClientRects()].forEach(r=>{if(r.width>2&&r.height>2)items.push({k:'label',n:l.textContent.trim().replace(/\s+/g,' ').slice(0,30),r,el:l});});}});}));
+  const out=[];for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){const a=items[i],b=items[j];if(a.el===b.el||(a.k==='box'&&b.k==='box'&&(a.el.contains(b.el)||b.el.contains(a.el))))continue;
+    const x=Math.min(a.r.right,b.r.right)-Math.max(a.r.left,b.r.left),y=Math.min(a.r.bottom,b.r.bottom)-Math.max(a.r.top,b.r.top);if(x>2&&y>2)out.push(a.k+' "'+a.n+'" over '+b.k+' "'+b.n+'"');}
+  const BQ='input:not([type=hidden]):not([type=checkbox]):not([type=radio]),select,textarea';
+  const row=p=>{if(!p||p.nodeType!==1)return false;const cs=getComputedStyle(p),d=cs.display;if(/flex/.test(d)){if(/column/.test(cs.flexDirection))return false;}else if(/grid/.test(d)){if((cs.gridTemplateColumns||'').split(' ').filter(Boolean).length<2)return false;}else return false;
+    let n=0,x=0;for(let c=p.firstElementChild;c;c=c.nextElementSibling){if(c.matches(BQ)||c.querySelector(BQ)){n++;x++;}else if(c.matches('button')||c.querySelector('button'))n++;}return x>=1&&n>=2;};
+  sheets.forEach(s=>s.querySelectorAll('.fx2-hint,.fx2-cellhint').forEach(e=>{if(vis(e)&&row(e.parentElement))out.push('example "'+e.textContent.trim().slice(0,30)+'" an item of the row '+String(e.parentElement.className).slice(0,24));}));
+  return [...new Set(out)];},RUNNERS);
 const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date;const P0=performance.now();const now=()=>T+Math.floor(performance.now()-P0);
   class FD extends D0{constructor(...a){if(a.length)super(...a);else super(now());}static now(){return now();}}window.Date=FD;window.print=function(){};};
 (async()=>{const ipad=await L.ipadBrowser(pw),cr=await pw.chromium.launch();const errs=[];console.log('engine for the iPad: '+ipad._nbhEngine);
@@ -67,9 +90,11 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
     const F=[...D.querySelectorAll(BOX)].filter(e=>inS(e)&&vis(e)&&!e.closest('.nbh-seg,dialog,[role=dialog]'));
     const nm=e=>(e.name||e.id||e.getAttribute('data-m')||e.getAttribute('data-x')||e.className||e.tagName).slice(0,40);
     const out=F.filter(e=>!e.closest('table')),card=F.filter(e=>e.closest('table.fx2-cards'));
-    const small=out.filter(e=>parseFloat(getComputedStyle(e).fontSize)<15.5).map(e=>nm(e)+':'+getComputedStyle(e).fontSize);
+    /* on a touch screen the boxes in tables too (under 16 px Safari zooms the page when one is tapped) */
+    const touch=matchMedia('(pointer:coarse)').matches;
+    const small=(touch?F:out).filter(e=>parseFloat(getComputedStyle(e).fontSize)<15.5).map(e=>nm(e)+':'+getComputedStyle(e).fontSize);
     const short=out.filter(e=>e.getBoundingClientRect().height<43.5).map(e=>nm(e)+':'+Math.round(e.getBoundingClientRect().height));
-    const KI=C.keepin||{};const ph=out.concat(card).filter(e=>{const t=(e.getAttribute('placeholder')||'').trim();return t.length>8&&!/^From Form\b/.test(t)&&!KI[t];}).map(e=>nm(e)+':'+e.getAttribute('placeholder').slice(0,40));
+    const KI=C.keepin||{};const ph=out.concat(card).filter(e=>{const t=(e.getAttribute('placeholder')||'').trim();return t.length>8&&!/^From Form\b/.test(t)&&!KI[t]&&!(e.hasAttribute('data-fx2-inrow')&&t.length<=36);}).map(e=>nm(e)+':'+e.getAttribute('placeholder').slice(0,40));
     /* headings */
     const HS='.fx2-sh h3.sub, .fx2-sh .bar.nbh-band, .fx2-sh h2.nbh-band'+(C.heads?', '+C.heads:'');const H=[...D.querySelectorAll(HS)].filter(vis);
     const sq=t=>String(t||'').replace(/\s+/g,' ').trim();
@@ -101,12 +126,13 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
   const res={};
   for(const id of IDS){res[id]={};
     for(const [w,h] of [[1376,1032],[1032,1376]]){const tag=w+'x'+h;const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});await ctx.addInitScript(clock);const p=await open(ctx,id,tag);
-      const V=await views(p);const agg={wide:[],small:[],short:[],ph:[],hbad:[],rbad:[],segbad:[],kept:[],tabs:[],btn:[]},spot={};let n=0,hn=0,hch=0,rows=0,segs=0,hints=0;
+      const V=await views(p);const agg={wide:[],small:[],short:[],ph:[],hbad:[],rbad:[],segbad:[],kept:[],tabs:[],btn:[],ovl:[]},spot={};let n=0,hn=0,hch=0,rows=0,segs=0,hints=0;
       for(const v of V){await view(p,v);const r=await look(p,[...(CARDS[id]||[]),...(STAY[id]||[])]);n+=r.n;hn+=r.hn;hch+=r.hchanged;rows+=r.rows;segs+=r.segs;hints+=r.hints;
+        (await overlaps(p)).forEach(x=>agg.ovl.push(v+' '+x));
         for(const q in r.sp)spot[q]=(spot[q]||false)||r.sp[q];
         if(r.wide>1)agg.wide.push(v+':'+r.wide);['small','short','ph','hbad','rbad','segbad','kept','btn'].forEach(k=>r[k].forEach(x=>agg[k].push(v+' '+x)));r.tab.forEach(t=>agg.tabs.push(Object.assign({v},t)));}
       ok(`1 ${id} ${tag}: nothing wider than the screen on any of its ${V.length} sheets`,!agg.wide.length,agg.wide);
-      ok(`2 ${id} ${tag}: every box outside a table at 16 px (${n} boxes in all)`,!agg.small.length,agg.small.slice(0,8));
+      ok(`2 ${id} ${tag}: every box at 16 px, in tables too on this touch screen (${n} boxes in all)`,!agg.small.length,agg.small.slice(0,8));
       const k44=KNOWN44[id],s44=agg.short.filter(x=>!(k44&&k44.test(x)));
       ok(`2 ${id} ${tag}: every box outside a table 44 px tall`,!s44.length,s44.slice(0,8));
       if(agg.short.length>s44.length)note(`${id} ${tag}: boxes the layout leaves as approved, under 44 px`,agg.short.filter(x=>!s44.includes(x)).slice(0,6));
@@ -114,8 +140,10 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
       ok(`5 ${id} ${tag}: ${hn} headings in sentence case on screen (${hch} changed), the words as written`,hn>0&&!agg.hbad.length,agg.hbad.slice(0,8));
       ok(`6 ${id} ${tag}: the boxes of a row of fields in line (${rows} rows)`,!agg.rbad.length,agg.rbad.slice(0,6));
       ok(`7 ${id} ${tag}: ${segs} choices of two to four short answers are buttons; the form's lists stay lists`,!agg.segbad.length&&!agg.kept.length,{segbad:agg.segbad.slice(0,6),kept:agg.kept.slice(0,6)});
-      const cardsWide=agg.tabs.filter(t=>t.cards&&t.tr!=='table-row');
-      ok(`8 ${id} ${tag}: lists of entries are tables on this screen (${agg.tabs.filter(t=>t.cards).length} lists)`,!cardsWide.length,cardsWide.slice(0,6));
+      /* v25.67 fx2: on a touch screen the lists are cards at any width (the BCBA's v24.92 approval and design review M17) */
+      const lists=agg.tabs.filter(t=>t.cards),notCard=lists.filter(t=>t.tr!=='grid'||!/\w/.test(t.lab));
+      ok(`8 ${id} ${tag}: lists of entries are cards on this touch screen, each box under its column's name (${lists.length} lists)`,!notCard.length,notCard.slice(0,6));
+      ok(`16 ${id} ${tag}: nothing drawn over a label or a box in the recorders and timers, and no example an item of a row of pairs`,!agg.ovl.length,agg.ovl.slice(0,8));
       ok(`10 ${id} ${tag}: the layout's own buttons 44 px tall`,!agg.btn.length,agg.btn.slice(0,6));
       if(w===1376){
         /* 9 the masthead */
@@ -144,16 +172,24 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
         ok(`12 ${id}: collected for the packet, its ${pl.nh} headings as written and its ${pl.nf} examples in their boxes; the screen layout after`,!pl.nopolish&&pl.on.h===pl.nh&&pl.on.f===pl.nf&&pl.off.f===0&&pl.off.h===pl.changed,pl);}
       await ctx.close();}
     /* 8 at 820 px (an iPad upright, the six's cards) */
-    {const ctx=await L.ipadCtx(ipad,{viewport:{width:820,height:1180}});const p=await open(ctx,id,'820');const V=await views(p);const T=[],wide=[];
-      for(const v of V){await view(p,v);const r=await look(p);if(r.wide>1)wide.push(v+':'+r.wide+' '+(await p.evaluate(()=>{const W=document.documentElement.clientWidth;return [...document.querySelectorAll('body *')].filter(e=>{const b=e.getBoundingClientRect();if(!(b.right>W+0.5&&b.width>0&&e.offsetParent))return false;for(let x=e.parentElement;x&&x!==document.body;x=x.parentElement)if(/auto|scroll|hidden|clip/.test(getComputedStyle(x).overflowX))return false;return true;}).slice(0,3).map(e=>e.tagName+'.'+String(e.className).slice(0,30)+'#'+e.id).join(' ');})));r.tab.forEach(t=>T.push(Object.assign({v},t)));}
+    {const ctx=await L.ipadCtx(ipad,{viewport:{width:820,height:1180}});const p=await open(ctx,id,'820');const V=await views(p);const T=[],wide=[],ovl=[];
+      for(const v of V){await view(p,v);const r=await look(p);(await overlaps(p)).forEach(x=>ovl.push(v+' '+x));if(r.wide>1)wide.push(v+':'+r.wide+' '+(await p.evaluate(()=>{const W=document.documentElement.clientWidth;return [...document.querySelectorAll('body *')].filter(e=>{const b=e.getBoundingClientRect();if(!(b.right>W+0.5&&b.width>0&&e.offsetParent))return false;for(let x=e.parentElement;x&&x!==document.body;x=x.parentElement)if(/auto|scroll|hidden|clip/.test(getComputedStyle(x).overflowX))return false;return true;}).slice(0,3).map(e=>e.tagName+'.'+String(e.className).slice(0,30)+'#'+e.id).join(' ');})));r.tab.forEach(t=>T.push(Object.assign({v},t)));}
       /* the layout's cards; a table it does not name stays as the form draws it (TB-1 lays out its own candidates) */
       const cards=T.filter(t=>t.cards),bad=cards.filter(t=>t.tr!=='grid'||!/\w/.test(t.lab)),stay=T.filter(t=>!t.cards&&t.boxes),stbad=[];
       ok(`8 ${id} 820x1180: ${cards.length} lists of entries are cards, each box under its column's name; ${stay.length} tables of scores, trials and checklists stay tables; nothing wider`,!bad.length&&!stbad.length&&!wide.length&&(!(CARDS[id]||[]).length||cards.length>0),{bad:bad.slice(0,5),stbad:stbad.slice(0,5),wide});
+      ok(`16 ${id} 820x1180: nothing drawn over a label or a box in the recorders and timers, and no example an item of a row of pairs`,!ovl.length,ovl.slice(0,8));
+      await ctx.close();}
+    /* 8 with a mouse or trackpad (1300 x 900, no touch): the lists are tables, as on a laptop */
+    {const ctx=await cr.newContext({viewport:{width:1300,height:900}});await ctx.addInitScript(clock);const p=await open(ctx,id,'mouse');const V=await views(p);const T=[],wide=[];
+      for(const v of V){await view(p,v);const r=await look(p);r.tab.forEach(t=>T.push(Object.assign({v},t)));if(r.wide>1)wide.push(v+':'+r.wide);}
+      const lists=T.filter(t=>t.cards),notTable=lists.filter(t=>t.tr!=='table-row');const fine=await p.evaluate(()=>matchMedia('(pointer:fine)').matches);
+      ok(`8 ${id} 1300x900 with a mouse: ${lists.length} lists of entries are tables, as on a laptop; nothing wider`,fine&&!notTable.length&&!wide.length,{fine,notTable:notTable.slice(0,5),wide});
       await ctx.close();}
     /* 1 on a phone, and on an 11-inch iPad sideways */
     for(const [w,h,what] of [[390,844,'a phone\'s screen'],[1180,820,'an 11-inch iPad\'s screen']]){const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});const p=await open(ctx,id,String(w));const V=await views(p);const wide=[];
-      for(const v of V){await view(p,v);const r=await p.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);if(r>1)wide.push(v+':'+r);}
-      ok(`1 ${id} ${w}x${h}: nothing wider than ${what} on any sheet`,!wide.length,wide);await ctx.close();}
+      const ovl=[];for(const v of V){await view(p,v);const r=await p.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);if(r>1)wide.push(v+':'+r);(await overlaps(p)).forEach(x=>ovl.push(v+' '+x));}
+      ok(`1 ${id} ${w}x${h}: nothing wider than ${what} on any sheet`,!wide.length,wide);
+      ok(`16 ${id} ${w}x${h}: nothing drawn over a label or a box in the recorders and timers, and no example an item of a row of pairs`,!ovl.length,ovl.slice(0,8));await ctx.close();}
     /* 11 the print, with the layout and without it, from the same data, on the iPad */
     {const strip=s=>s.replace(/<style id="fx2-v2492">[\s\S]*?<\/style>\n?/,'').replace(/<script id="fx2-v2492-js">[\s\S]*?<\/script>\n?/,'').replace(/<script id="fx2-cfg">[\s\S]*?<\/script>\n?/,'')
         .replace(/<script>document\.documentElement\.classList\.add\('fx2'\);[^<]*<\/script>\n?/,'');
