@@ -4495,7 +4495,7 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
     return '<table class="rt tm-pt"><thead><tr><th style="width:4%">#</th><th style="width:18%">Event</th><th style="width:17%">When</th><th style="width:16%">Initiated by</th><th style="width:25%">Attempts to reach the parent</th><th>What happened</th></tr></thead><tbody>'+
       L.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(TM_KIND[x.kind]+' '+kindN(x,L))+'</td><td>'+esc(evWhen(x))+R.html(x.rec,x.d,x.t)+'</td><td>'+(x.kind==='baker'?esc(x.who||'not recorded'):(x.brief?'Brief given '+esc(mdy(x.brief)):'&mdash;'))+'</td><td>'+
         (x.kind==='baker'?((x.att||[]).filter(attFilled).map((a,k)=>esc(attLine(a,k))+R.html(a.rec,a.d,a.t)).join('<br>')||'none recorded'):'&mdash;')+'</td><td>'+esc(x.note)+'</td></tr>').join('')+'</tbody></table>';}
-  function evRender(){const box=document.getElementById('tmEvents'),sec=document.getElementById('tmSec');if(!box)return;const L=evOn()?S.tm:[];
+  function evRender(){const box=document.getElementById('tmEvents'),sec=document.getElementById('tmSec');if(!box)return;const L=evOn()?S.tm:[];drawnFor=S;drawnN=L.length;
     if(sec)sec.classList.toggle('tm-has',L.length>0);
     box.innerHTML='<div class="tm-ed">'+(L.length?L.map((x,i)=>evCard(x,i,L)).join(''):'<p class="tm-none">None recorded.</p>')+'</div><div class="tm-paper" id="tmPaper">'+evPaper()+'</div>';
     briefSoon();}
@@ -4645,7 +4645,10 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
     by:()=>T(S.meta.bcba),ident:()=>S,mount:()=>document.getElementById('cr1Add68'),reveal:()=>{if(!document.body.classList.contains('view-plan'))setView('plan');}});
   document.addEventListener('input',e=>{if(e.target&&e.target.dataset&&e.target.dataset.m==='sgOn'&&ADD)setTimeout(()=>ADD.changed(),400);});
   /* ---------------- drawing ---------------- */
-  if(typeof renderAll==='function'){const a0=renderAll;renderAll=function(){const r=a0.apply(this,arguments);try{evRender();debPaint();if(ADD)ADD.refresh();}catch(e){}return r;};}
+  /* the editor is drawn again only when another record is open or the entries changed, so a field being typed in keeps its focus */
+  let drawnFor=null,drawnN=-1;
+  const evDraw=()=>{const n=evOn()?S.tm.length:0;if(drawnFor!==S||drawnN!==n){drawnFor=S;drawnN=n;evRender();}else{const p=document.getElementById('tmPaper');if(p)p.innerHTML=evPaper();(S.tm||[]).forEach((x,i)=>{const st=document.getElementById('tmSt'+i);if(st)st.innerHTML=tmStHtml(x);});briefSoon();}};
+  if(typeof renderAll==='function'){const a0=renderAll;renderAll=function(){const r=a0.apply(this,arguments);try{evDraw();debPaint();if(ADD)ADD.refresh();}catch(e){}return r;};}
   if(typeof crDebRefresh==='function'){const d0=crDebRefresh;crDebRefresh=function(){const r=d0.apply(this,arguments);debPend=null;try{debPaint();}catch(e){}return r;};}
   document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('#viewSeg button[data-view="tm"]'):null;if(b)briefSoon();});
   try{evRender();debPaint();crcPaper();crcUpdate();if(ADD)ADD.refresh();}catch(e){}
