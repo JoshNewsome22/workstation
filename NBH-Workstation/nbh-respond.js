@@ -277,7 +277,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       '1 question':'1 pregunta','{n} questions':'{n} preguntas','1 statement':'1 afirmaci\u00f3n','{n} statements':'{n} afirmaciones',' to rate from {a} to {b}':' para calificar de {a} a {b}',
       '1 to answer in your own words':'1 para responder con sus propias palabras','{n} to answer in your own words':'{n} para responder con sus propias palabras',
       '1 question to answer in your own words':'1 pregunta para responder con sus propias palabras','{n} questions to answer in your own words':'{n} preguntas para responder con sus propias palabras',
-      ' and ':' y ','about 1 minute':'un minuto aproximadamente','about {m} minutes':'unos {m} minutos','Not sure also means: {t}':'No estoy seguro/a tambi\u00e9n significa: {t}',
+      ' and ':' y ','about 1 minute':'un minuto aproximadamente','about {m} minutes':'unos {m} minutos','Does not apply':'No aplica','Does not apply: the question does not fit this student (0 means it fits, and the behavior never happens then)':'No aplica: la pregunta no corresponde a este estudiante (0 significa que s\u00ed corresponde y la conducta nunca ocurre entonces)','Not sure: you do not know, or the question does not apply':'No estoy seguro/a: no lo sabe, o la pregunta no aplica','Not sure also means: {t}':'No estoy seguro/a tambi\u00e9n significa: {t}',
       'Your answers are kept on this phone until you send them.':'Sus respuestas se guardan en este tel\u00e9fono hasta que las env\u00ede.',
       'Your answers are kept on this tablet until you send them.':'Sus respuestas se guardan en esta tableta hasta que las env\u00ede.',
       'Your answers are kept on this computer until you send them.':'Sus respuestas se guardan en esta computadora hasta que las env\u00ede.',
@@ -388,24 +388,37 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       notMe.addEventListener('click',function(e){e.preventDefault();notMeNow();later();if(ex.name)ex.name.focus();});
       meLine.appendChild(d.createTextNode(' '));meLine.appendChild(notMe);who.appendChild(meLine);}
     who.appendChild(g);root.appendChild(who);
-    /* the instructions, with the items (or the open questions when there are no items); "N/A" in them now reads "Not sure" */
+    /* the instructions, with the items (or the open questions when there are no items); "N/A" in them reads as the instrument's own answer (below) */
     var hasNS=scale.kind==='num'?!!scale.na:!(scale.labels&&(scale.labels[2]===null||scale.labels[2]===''));
     var instr=P.instructions||(_('Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send')+(P.box&&P.box.u?_(': your answers go straight to {who}.',{who:WHO}):_(': your email program opens with a message to {who} ready to go.',{who:WHO})));
-    if(hasNS&&items.length)instr=String(instr).replace(/\bN\/A\b/g,NSQ);
-    var instrP=h('p',{'class':'sub',text:instr});
+    var instrRaw=instr;
+
     /* what the form called its own uncertain answer, when it says more than N/A (SV-1: "I cannot judge, or have not seen it run") */
     var naWords=String(scale.kind==='num'?(scale.naLabel||''):((scale.labels||[])[2]||'')).replace(/^\s*(N\/A|NA|X)\s*[:\-\u2013\u2014]\s*/i,'').trim();
     if(/^(n\/a|na|x|unsure|not sure|can.t judge|no puedo juzgar)$/i.test(naWords))naWords='';
+    /* v25.67 (the BCBA, 11/6: score each choice as the instrument's authors intended) an instrument whose own answer means
+       "does not apply" (the QABF's X, Matson & Vollmer, 1995) keeps that answer in those words, not "Not sure": the two mean
+       different things there. The value sent is the same (NA), so the form scores it as before. The FAST's N/A is for "a lack
+       of information or that the question is not applicable" (Iwata, DeLeon & Roscoe, 2013, p. 272; its instruction: "If you
+       are uncertain about an answer, circle N/A"), so on the FAST "Not sure" stands, and the key says it also covers a
+       question that does not apply. */
+    var DNA=/^(x\b|does not apply|doesn.?t apply|not applicable|no aplica)/i.test(naWords),NAL=DNA?_('Does not apply'):NS,NALQ=DNA?(ES?'\u00ab'+NAL+'\u00bb':'\u201c'+NAL+'\u201d'):NSQ;
+    if(DNA)naWords='';
+    if(hasNS&&items.length)instr=String(instrRaw).replace(/\bN\/A\b/g,NALQ);
+    var instrP=h('p',{'class':'sub',text:instr});
+    var FASTNA=items.length>0&&scale.kind!=='num'&&!(scale.labels&&scale.labels[2]!=null&&scale.labels[2]!==''&&!/^n\/?a$/i.test(String(scale.labels[2])))&&hasNS;
     /* items */
     var ic=h('div',{'class':'nr-card'});ic.appendChild(h('div',{'class':'band',text:P.itemsHeading||_('The questions')}));
     if(items.length)ic.appendChild(instrP);
-    if((scale.kind==='num'&&scale.anchors&&scale.anchors.length)||(hasNS&&naWords)){var key=h('div',{'class':'key'});(scale.kind==='num'&&scale.anchors||[]).forEach(function(a){key.appendChild(h('span',{text:a}));});
-      if(hasNS&&naWords)key.appendChild(h('span',{text:_('Not sure also means: {t}',{t:naWords})}));ic.appendChild(key);}
+    if((scale.kind==='num'&&scale.anchors&&scale.anchors.length)||(hasNS&&(naWords||DNA||FASTNA))){var key=h('div',{'class':'key'});(scale.kind==='num'&&scale.anchors||[]).forEach(function(a){key.appendChild(h('span',{text:a}));});
+      if(hasNS&&naWords)key.appendChild(h('span',{text:_('Not sure also means: {t}',{t:naWords})}));
+      if(hasNS&&DNA)key.appendChild(h('span',{text:_('Does not apply: the question does not fit this student (0 means it fits, and the behavior never happens then)')}));
+      if(hasNS&&FASTNA&&!naWords)key.appendChild(h('span',{text:_('Not sure: you do not know, or the question does not apply')}));ic.appendChild(key);}
     var ol=h('ol',{'class':'items'});
     items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',id:'nbhr-q'+i,html:'<b>'+esc(String(it.n==null||it.n===''?i+1:it.n).slice(0,8))+'.</b> '+esc(it.text||'')}));
       var opts=h('div',{'class':'opts',role:'radiogroup','aria-labelledby':'nbhr-q'+i});var choices;   /* v22.09 named by the question, not "Item 3" (review F485) */
-      if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(choices.length>6)opts.className+=' many';if(scale.na)choices.push(['NA',NS,'na']);}
-      else{var L=scale.labels||[_('Yes'),_('No'),'N/A'];choices=[['Y',L[0]||_('Yes'),''],['N',L[1]||_('No'),'']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',NS,'']);}   /* v25.67 one "Not sure", scored as N/A was */
+      if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(choices.length>6)opts.className+=' many';if(scale.na)choices.push(['NA',NAL,'na']);}
+      else{var L=scale.labels||[_('Yes'),_('No'),'N/A'];choices=[['Y',L[0]||_('Yes'),''],['N',L[1]||_('No'),'']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',NAL,'']);}   /* v25.67 one "Not sure", scored as N/A was */
       choices.forEach(function(c){var lab=h('label',{'class':c[2]});var r=h('input',{type:'radio',name:'it'+i,value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
         r.addEventListener('change',function(){ans[i]=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');li.classList.remove('missing');paint();});
         opts.appendChild(lab);});

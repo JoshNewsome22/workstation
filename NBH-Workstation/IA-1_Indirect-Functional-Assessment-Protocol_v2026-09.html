@@ -4727,7 +4727,9 @@ function gfMonths(t){const s=String(t||'').trim();if(!s)return '';const m=/(\d+(
   if(/year/i.test(s))return String(Math.round(n*12));if(/month/i.test(s))return String(Math.round(n));if(/week/i.test(s))return String(Math.max(1,Math.round(n/4.3)));return s;}
 function gfValue(key,raw){ /* a cell as Google Forms exports it -> the worksheet's value; null = could not read */
   const s=String(raw==null?'':raw).trim();if(!s)return '';const l=s.toLowerCase();
-  if(key==='fast'){if(/^n\s*\/?\s*a\b|not applicable|unsure|uncertain|don.?t know/.test(l))return 'NA';if(/^y/.test(l))return 'Y';if(/^n/.test(l))return 'N';return null;}
+  /* v25.67 (the BCBA, 11/6) "Not sure" is the FAST's N/A (Iwata, DeLeon & Roscoe, 2013: "If you are uncertain about an answer,
+     circle N/A"), never a No: it was read as N by the /^n/ test below */
+  if(key==='fast'){if(/^n\s*\/?\s*a\b|not applicable|unsure|uncertain|not sure|no estoy segur|don.?t know/.test(l))return 'NA';if(/^y/.test(l))return 'Y';if(/^n/.test(l))return 'N';return null;}
   if(key==='wefa'){if(/^t|^y/.test(l))return 'Y';if(/^f|^n/.test(l))return 'N';return null;}   /* v21.41: TRUE -> Y, FALSE -> N */
   const max=INST[key].scale;const m=/^(\d)(?!\d)/.exec(l);if(m&&+m[1]<=max)return m[1];
   if(key==='qabf'){if(/^x\b|does not apply|n\/?a\b/.test(l))return '';const w=[['never',0],['rarely',1],['some',2],['often',3]];   /* 'some' also reads 'sometimes' */for(const [k,v] of w)if(l.indexOf(k)===0)return String(v);return null;}
