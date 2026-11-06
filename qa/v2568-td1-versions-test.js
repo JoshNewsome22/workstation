@@ -17,7 +17,10 @@
       applicable with the place to fix it (an empty form: none met; the simulation: all but team communication; filled in:
       all met; a replacement already in the repertoire with no teaching planned: teaching not applicable); the Go to buttons;
       a line before "Adopted by the team"; never blocking Copy for the BIP or Print; not printed, not copied, not saved;
-   E. touch targets of 44 px; no page errors.
+   E. touch targets of 44 px; no page errors;
+   F. (the BCBA, 11/6) four more versions: each high-p card shows the closest video (praise only for the 18 cards that praise
+      each easy request, the class, seatwork and peer videos for their own cards, the first video for the other 12); the
+      card a video was made from says so; each file loaded only when asked and played from the device.
    usage: WS_URL=http://127.0.0.1:8640 WS_ROOT=. node qa/v2568-td1-versions-test.js */
 const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs'),path=require('path'),crypto=require('crypto'),vm=require('vm');
 const URL=(process.env.WS_URL||'http://127.0.0.1:8561')+'/NBH-Workstation/';const ROOT=process.env.WS_ROOT||'.';
@@ -35,6 +38,22 @@ const LAB={spacing:'Time between them',easy_reinforcer:'After each easy one',to_
 const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const vline=c=>{const dd=Object.keys(LAB).filter(k=>norm(c[k])!==norm(VS[k])&&!/^not stated/i.test(c[k]||'')).map(k=>LAB[k].toLowerCase()+': '+c[k]);
  return 'The video shows TD-1’s steps for this card: '+VS.summary+'. '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');};
+/* (F) the four more versions: the card each was made from, the version named, and the cards that show it */
+const PRAISE=['a_highp-momentum-cooperation','a_highp-medium-p-substitute','a_highp-orienting-dtt','a_highp-momentum-compliance','a_highp-household','a_highp-interspersed-requests','a_highp-multiple-adults','a_highp-with-escape-extinction','a_highp-peer-social-initiations','a_highp-fade-sequence-do-requests','a_highp-short-5s-interval','a_highp-escape-extinction-instruction-pace','a_highp-four-quick-requests','a_highp-higher-quality-reinforcer','a_highp-medical-hold-still','a_highp-before-giving-up-toy','a_highp-medical-exam-requests','a_highp-varied-order-sequence'];
+const XV={a_highp_praise:{src:'a_highp-momentum-cooperation',after:'Wilder, Sheppard, et al. (2025)',file:'nbh-td1-video-highp-praise.js',dur:97.5,cards:PRAISE},
+ a_highp_class:{src:'a_highp-group-transition-fading',after:'Ardoin et al. (1999)',file:'nbh-td1-video-highp-class.js',dur:82.3,cards:['a_highp-group-transition-fading']},
+ a_highp_seatwork:{src:'a_highp-math-seatwork-start',after:'Wehby & Hollahan (2000)',file:'nbh-td1-video-highp-seatwork.js',dur:83.8,cards:['a_highp-math-seatwork-start']},
+ a_highp_peer:{src:'a_highp-variant-peer-requests',after:'Davis & Reichle (1996)',file:'nbh-td1-video-highp-peer.js',dur:76.6,cards:['a_highp-variant-peer-requests']}};
+const keyFor=id=>Object.keys(XV).find(k=>XV[k].cards.includes(id))||'a_highp';
+const xline=(p,shows)=>{const k=keyFor(p.id);if(k==='a_highp')return vline(p.cmp);const x=XV[k],S=shows[k],c=p.cmp;if(p.id===x.src)return 'The video shows this card’s steps: '+S.summary+'.';
+ const dd=Object.keys(LAB).filter(r=>norm(c[r])!==norm(S[r])&&!/^not stated/i.test(c[r]||'')).map(r=>LAB[r].toLowerCase()+': '+c[r]);
+ return 'The video shows the closest version, after '+x.after+': '+S.summary+'. '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');};
+/* what each of the four shows: the card it was made from, its own rows */
+const SHOWS={};Object.keys(XV).forEach(k=>{const c=HP.find(h=>h.id===XV[k].src).cmp;SHOWS[k]={spacing:c.spacing,easy_reinforcer:c.easy_reinforcer,to_hard:c.to_hard,missed_easy:c.missed_easy}});
+SHOWS.a_highp_praise.summary='3 easy requests 1–2 s apart, brief praise only after each, the hard request 1–2 s after the last, nothing said if it is not done, a 15-s restart from the first after a missed one';
+SHOWS.a_highp_class.summary='3 easy instructions to the whole class at most 5 s apart, the transition within 5 s, praise for named students and the class, then faded to 1';
+SHOWS.a_highp_seatwork.summary='3 math requests beside the desk, each within 10 s, praise for each, the seatwork request within 10 s of the third, another request when one is not followed';
+SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play comment after each, the social request within 5 s of the third, a new sequence about 30 s after a missed one';
 (async()=>{
  /* ---------------- A. the bank ---------------- */
  {const shape=HP.every(p=>p.cmp&&ROWK.every(k=>typeof p.cmp[k]==='string'&&p.cmp[k])&&p.cmp.cite&&+p.cmp.year>1900&&typeof p.cmp.special==='string'&&p.cmp.quotes&&typeof p.cmp.quotes==='object');
@@ -137,15 +156,17 @@ const vline=c=>{const dd=Object.keys(LAB).filter(k=>norm(c[k])!==norm(VS[k])&&!/
  /* ---------------- C. the video ---------------- */
  ({ctx,p}=await open());await view(p,'build');await sleep(300);
  {const r=await p.evaluate(()=>{const V=window.__tdVideo,P=TD1_BANK.protocols;return {hp:P.filter(x=>x.code==='A_HIGHP').every(x=>V.has(x.id)),fct:V.has('fct-practical-guide-thinning'),dra:V.has('dra-teacher-approval-rules'),n:V.count(),loaded:!!window.NBH_TD1_VIDEO||[...document.scripts].some(s=>/nbh-td1-video/.test(s.src))};});
-  ok('C every high-p card has the video, the FCT card its own, a DRA card none; no video file loaded until asked',r.hp&&r.fct&&!r.dra&&r.n===2&&!r.loaded,r);}
+  ok('C every high-p card has the video, the FCT card its own, a DRA card none; no video file loaded until asked',r.hp&&r.fct&&!r.dra&&r.n===6&&!r.loaded,r);}
  {const r=await p.evaluate(()=>{const out=[];TD1_BANK.protocols.filter(x=>x.code==='A_HIGHP').forEach(x=>{window.__tdBank.show(x.id);const d=document.getElementById('tdBankHost').shadowRoot.querySelector('.detail');
    const b=d.querySelector('.load button.vid'),l=d.querySelector('.load .vidln');out.push({id:x.id,btn:b?b.textContent:'',line:l?l.textContent:'',after:!!(b&&l&&(b.compareDocumentPosition(l)&Node.DOCUMENT_POSITION_FOLLOWING))});});return out;});
-  const wrong=r.filter(x=>{const c=HP.find(h=>h.id===x.id).cmp;return x.btn!=='Watch the video'||!x.after||x.line!==vline(c);});
+  const wrong=r.filter(x=>{const c=HP.find(h=>h.id===x.id).cmp;return x.btn!=='Watch the video'||!x.after||x.line!==xline(HP.find(h=>h.id===x.id),SHOWS);});
   ok('C Watch the video on all 33 high-p cards, and under it the line the mockup computes: what the video shows, how this version differs',r.length===33&&!wrong.length,wrong.slice(0,2));
   const m=r.find(x=>x.id==='a_highp-momentum-compliance');
-  ok('C the line for Mace et al. (1988) names its spacing, praise and the hard request’s timing',m&&m.line==='The video shows TD-1’s steps for this card: 3 easy requests 1–3 s apart, praise and a snack after each, the hard request within 3 s, a 30-s restart after a missed one. This version differs in time between them: About 10 s; after each easy one: Brief praise; the hard request comes: Within 5 s (never over 10 s).',m&&m.line);}
- await p.evaluate(()=>{window.__tdBank.show('a_highp-momentum-compliance');document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.vid').click();});
- await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1&&!v.hidden;},null,{timeout:30000}).catch(()=>{});
+  ok('C the line for Mace et al. (1988) names the praise-only version shown, and its own spacing and the hard request’s timing',m&&m.line==='The video shows the closest version, after Wilder, Sheppard, et al. (2025): 3 easy requests 1–2 s apart, brief praise only after each, the hard request 1–2 s after the last, nothing said if it is not done, a 15-s restart from the first after a missed one. This version differs in time between them: About 10 s; the hard request comes: Within 5 s (never over 10 s).',m&&m.line);
+  const l=r.find(x=>x.id==='a_highp-edible-then-direct');
+  ok('C the line for Lipschultz et al. (2018), an edible after each easy one, names the first video and how it differs',l&&l.line===vline(HP.find(h=>h.id===l.id).cmp)&&/^The video shows TD-1’s steps for this card: 3 easy requests 1–3 s apart, praise and a snack after each/.test(l.line),l&&l.line);}
+ await p.evaluate(()=>{window.__tdBank.show('a_highp-edible-then-direct');document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.vid').click();});
+ await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1&&!v.hidden&&v.dataset.id==='a_highp';},null,{timeout:30000}).catch(()=>{});
  {const o=await p.evaluate(()=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {open:d&&!d.hidden,src:v?v.src.slice(0,5):'',dur:v?v.duration:0,w:v?v.videoWidth:0,h:v?v.videoHeight:0,title:d.querySelector('#tv-title').textContent,ai:d.querySelector('.tv-ai').textContent,note:d.querySelector('.tv-note').textContent,err:d.querySelector('#tv-msg').classList.contains('tv-err'),script:[...document.scripts].some(s=>/nbh-td1-video-highp\.js$/.test(s.src))};});
   ok('C the player loads nbh-td1-video-highp.js when asked and plays from the device: about 2:38, 720p',o.open&&o.script&&o.src==='blob:'&&Math.abs(o.dur-158.5)<1.5&&o.w===1280&&o.h===720&&!o.err,o);
   ok('C the player’s note: AI-generated, simulated people, the sequence and not a real session, adapt every step, the Responding to behavior sheet if the hard request is not done',/^High-probability request sequence/.test(o.title)&&/AI-generated/.test(o.ai)&&/simulated people/.test(o.ai)&&/simulated: it shows the sequence, not a real session/.test(o.note)&&/Adapt every step to the student’s plan/.test(o.note)&&/If the student does not do the hard request, follow the Responding to behavior sheet for the function\./.test(o.note),o);}
@@ -163,7 +184,7 @@ const vline=c=>{const dd=Object.keys(LAB).filter(k=>norm(c[k])!==norm(VS[k])&&!/
  await sleep(2700);
  {const c=await p.evaluate(()=>[...document.querySelectorAll('#compWrap .card')].map(c=>({code:c.dataset.code,bank:(c.querySelector('[name$="].bank"]')||{}).value||'',btn:!!c.querySelector('.td-vid-btn'),line:(c.querySelector('.td-vid-line')||{}).textContent||''})));
   const m=HP.find(x=>x.id==='a_highp-momentum-compliance');
-  ok('C the plan card from a high-p bank card carries Watch the video and its line; a high-p card from the menu carries the button and what the video shows; the DRA card neither',c.length===3&&c[0].bank===m.id&&c[0].btn&&c[0].line===vline(m.cmp)&&c[1].code==='A_HIGHP'&&!c[1].bank&&c[1].btn&&c[1].line==='The video shows TD-1’s steps for this card: '+VS.summary+'.'&&c[2].code==='DRA'&&!c[2].btn&&!c[2].line,c);}
+  ok('C the plan card from a high-p bank card carries Watch the video and its line; a high-p card from the menu carries the button and what the video shows; the DRA card neither',c.length===3&&c[0].bank===m.id&&c[0].btn&&c[0].line===xline(m,SHOWS)&&c[1].code==='A_HIGHP'&&!c[1].bank&&c[1].btn&&c[1].line==='The video shows TD-1’s steps for this card: '+VS.summary+'.'&&c[2].code==='DRA'&&!c[2].btn&&!c[2].line,c);}
  await p.evaluate(()=>document.querySelectorAll('#compWrap .card .td-vid-btn')[1].click());
  await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&!document.getElementById('tdVideo').hidden&&v.dataset.id==='a_highp'&&v.src.startsWith('blob:');},null,{timeout:20000}).catch(()=>{});
  ok('C the menu card’s button opens the same player with the high-p video',await p.evaluate(()=>{const v=document.getElementById('tv-video');return !document.getElementById('tdVideo').hidden&&v.dataset.id==='a_highp'&&/^High-probability/.test(document.getElementById('tv-title').textContent);}));
@@ -220,6 +241,17 @@ const vline=c=>{const dd=Object.keys(LAB).filter(k=>norm(c[k])!==norm(VS[k])&&!/
  {await p.emulateMedia({media:'print'});const r=await p.evaluate(()=>({qc:getComputedStyle(document.getElementById('tdQc')).display,ad:getComputedStyle(document.getElementById('tdQcAdopt')).display}));await p.emulateMedia({media:'screen'});
   const f=await p.evaluate(()=>{const f=window.__tdCollect().fields;return Object.keys(f).filter(k=>/^(td)?qc\b|quality.?check/i.test(k)).concat(Object.values(f).some(v=>/Quality check before sign-off/.test(String(v)))?['text']:[]);});
   ok('D the check is not printed and keeps nothing in the save file',r.qc==='none'&&r.ad==='none'&&!f.length,{r,f});}
+ /* ---------------- F. four more versions (the BCBA, 11/6) ---------------- */
+ await view(p,'build');await sleep(300);
+ {const r=await p.evaluate(()=>TD1_BANK.protocols.filter(x=>x.code==='A_HIGHP').map(x=>({id:x.id,k:window.__tdVideo.key(x.id)})));
+  const wrong=r.filter(x=>x.k!==keyFor(x.id)),cnt={};r.forEach(x=>{cnt[x.k]=(cnt[x.k]||0)+1;});
+  ok('F each high-p card shows the closest video: praise only 18, the class 1, seatwork 1, peer 1, the first video 12',!wrong.length&&cnt.a_highp_praise===18&&cnt.a_highp_class===1&&cnt.a_highp_seatwork===1&&cnt.a_highp_peer===1&&cnt.a_highp===12,{wrong:wrong.slice(0,3),cnt});}
+ for(const k of Object.keys(XV)){const x=XV[k];
+  await p.evaluate(id=>{window.__tdBank.show(id);document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.vid').click();},x.src);
+  await p.waitForFunction(k=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1&&!v.hidden&&v.dataset.id===k;},k,{timeout:30000}).catch(()=>{});
+  const o=await p.evaluate(f=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {k:v.dataset.id,dur:v.duration,w:v.videoWidth,h:v.videoHeight,title:d.querySelector('#tv-title').textContent,note:d.querySelector('.tv-note').textContent,err:d.querySelector('#tv-msg').classList.contains('tv-err'),script:[...document.scripts].some(s=>s.src.endsWith('/'+f))};},x.file);
+  ok('F '+k+': its card opens it, '+x.file+' loaded when asked, played from the device (about '+x.dur+' s, 720p), the note names its study',o.k===k&&o.script&&Math.abs(o.dur-x.dur)<1.5&&o.w===1280&&o.h===720&&!o.err&&o.note.includes(x.after)&&/simulated: it shows the sequence, not a real session/.test(o.note),o);
+  await p.keyboard.press('Escape');await sleep(200);}
  /* ---------------- E. touch and errors ---------------- */
  await view(p,'build');await sleep(300);
  await p.evaluate(([a,c])=>{window.__tdBank.show(a);window.__tdBank.pick(c);document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .vsbs').click();},[BASE,PICK]);await sleep(300);

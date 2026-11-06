@@ -7295,7 +7295,12 @@ html.td9:not(.nbh-pr-measure) #compWrap .card .td-vid-line{font:13px/1.45 var(--
    order each trial, then fading), in its own file (nbh-td1-video-highp.js), loaded only when asked. Under the button one
    line says what the video shows and, for a version from a study, how that version differs (the card's comparison rows,
    cmp: the time between the easy requests, what follows each, when the hard request comes, a missed easy one). The
-   player's note is the video's own; the FCT video, its title and its note are as they were. */
+   player's note is the video's own; the FCT video, its title and its note are as they were.
+   v25.68 (the BCBA, 11/6) four more versions from the studies, each in its own file, loaded only when asked: praise only
+   (after Wilder, Sheppard, et al., 2025), the whole class before a transition (Ardoin et al., 1999), before independent
+   seatwork (Wehby & Hollahan, 2000) and a peer giving the requests (Davis & Reichle, 1996). Each high-p card shows the closest
+   (VMAP: praise only for the cards that praise each easy request, the class, seatwork and peer videos for their own cards,
+   the first video for the rest); its line names the version shown and how the card differs from it. */
 (function(){
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res();s.onerror=()=>rej(new Error(src));document.head.appendChild(s);});}
 const VIDS={'fct-practical-guide-thinning':{title:'Functional communication training: the break request, step by step',file:'nbh-td1-video-fct.js',load:()=>loadScript('nbh-td1-video-fct.js'),
@@ -7303,17 +7308,42 @@ const VIDS={'fct-practical-guide-thinning':{title:'Functional communication trai
  a_highp:{title:'High-probability request sequence: three easy requests, then the hard one',file:'nbh-td1-video-highp.js',load:()=>loadScript('nbh-td1-video-highp.js'),
   note:'Made with an AI video model from TD-1’s steps for this card, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the student does not do the hard request, follow the Responding to behavior sheet for the function.',
   shows:{n_easy:'3',spacing:'1–3 s',easy_reinforcer:'Praise and a small edible',to_hard:'Within 3 s',missed_easy:'Wait 30 s, start a new sequence',
-   summary:'3 easy requests 1–3 s apart, praise and a snack after each, the hard request within 3 s, a 30-s restart after a missed one'}}};
+   summary:'3 easy requests 1–3 s apart, praise and a snack after each, the hard request within 3 s, a 30-s restart after a missed one'}},
+ /* v25.68 (the BCBA, 11/6) four more versions from the studies, each in its own file; a card shows the closest (VMAP) */
+ a_highp_praise:{title:'High-probability request sequence: praise only',file:'nbh-td1-video-highp-praise.js',load:()=>loadScript('nbh-td1-video-highp-praise.js'),src:'a_highp-momentum-cooperation',after:'Wilder, Sheppard, et al. (2025)',
+  note:'Made with an AI video model from the steps of the card after Wilder, Sheppard, et al. (2025), with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the student does not do the hard request, follow the Responding to behavior sheet for the function.',
+  shows:{n_easy:'3',spacing:'1–2 s',easy_reinforcer:'Brief praise',to_hard:'1–2 s after the last one',missed_easy:'Stop, wait 15 s, restart from the first',
+   summary:'3 easy requests 1–2 s apart, brief praise only after each, the hard request 1–2 s after the last, nothing said if it is not done, a 15-s restart from the first after a missed one'}},
+ a_highp_class:{title:'High-probability instructions for the whole class, before a transition',file:'nbh-td1-video-highp-class.js',load:()=>loadScript('nbh-td1-video-highp-class.js'),src:'a_highp-group-transition-fading',after:'Ardoin et al. (1999)',
+  note:'Made with an AI video model from the steps of the card after Ardoin et al. (1999), with captions and narration added. The teacher, the children and the room are simulated: it shows the sequence, not a real session. Adapt every step to the class and the student’s plan. If the student does not follow the transition, follow the Responding to behavior sheet for the function.',
+  shows:{n_easy:'3, faded to 2, then 1',spacing:'No more than 5 s',easy_reinforcer:'Not stated',to_hard:'Within 5 s',missed_easy:'Not stated',
+   summary:'3 easy instructions to the whole class at most 5 s apart, the transition within 5 s, praise for named students and the class, then faded to 1'}},
+ a_highp_seatwork:{title:'High-probability requests before independent seatwork',file:'nbh-td1-video-highp-seatwork.js',load:()=>loadScript('nbh-td1-video-highp-seatwork.js'),src:'a_highp-math-seatwork-start',after:'Wehby & Hollahan (2000)',
+  note:'Made with an AI video model from the steps of the card after Wehby & Hollahan (2000), with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the work does not start within 10 s, walk away without comment, as the card says.',
+  shows:{n_easy:'3',spacing:'Within 10 s of finishing the one before',easy_reinforcer:'Praise',to_hard:'Within 10 s',missed_easy:'Give another until 3 in a row are followed',
+   summary:'3 math requests beside the desk, each within 10 s, praise for each, the seatwork request within 10 s of the third, another request when one is not followed'}},
+ a_highp_peer:{title:'High-probability requests given by a peer',file:'nbh-td1-video-highp-peer.js',load:()=>loadScript('nbh-td1-video-highp-peer.js'),src:'a_highp-variant-peer-requests',after:'Davis & Reichle (1996)',
+  note:'Made with an AI video model from the steps of the card after Davis & Reichle (1996), with captions and narration added. The children, the teacher and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and teach the peers the sequence before they use it.',
+  shows:{n_easy:'3',spacing:'Not stated',easy_reinforcer:'Peer comment that keeps the play going',to_hard:'Within 5 s of the third',missed_easy:'Peer waits about 30 s, starts a new sequence',
+   summary:'a classmate gives 3 easy play requests with a play comment after each, the social request within 5 s of the third, a new sequence about 30 s after a missed one'}}};
+/* v25.68 the closest video for each high-p card: by who gives the requests, where, and what follows each easy one (the
+   card's cmp rows); a card not named here (an edible or an item after each, or not stated, and the feeding cards) keeps the first */
+const VMAP={'a_highp-group-transition-fading':'a_highp_class','a_highp-math-seatwork-start':'a_highp_seatwork','a_highp-variant-peer-requests':'a_highp_peer'};
+['a_highp-momentum-cooperation','a_highp-medium-p-substitute','a_highp-orienting-dtt','a_highp-momentum-compliance','a_highp-household','a_highp-interspersed-requests',
+ 'a_highp-multiple-adults','a_highp-with-escape-extinction','a_highp-peer-social-initiations','a_highp-fade-sequence-do-requests','a_highp-short-5s-interval',
+ 'a_highp-escape-extinction-instruction-pace','a_highp-four-quick-requests','a_highp-higher-quality-reinforcer','a_highp-medical-hold-still','a_highp-before-giving-up-toy',
+ 'a_highp-medical-exam-requests','a_highp-varied-order-sequence'].forEach(id=>{VMAP[id]='a_highp_praise';});
 /* a component's video, for every card of it (the bank's and the plan's) */
 const BYCODE={A_HIGHP:'a_highp'};
 let BID=null;
 function bank(id){if(!BID){BID={};try{if(typeof TD1_BANK!=='undefined'&&TD1_BANK&&Array.isArray(TD1_BANK.protocols))TD1_BANK.protocols.forEach(p=>{BID[p.id]=p;});}catch(e){}}return BID[id]||null;}
-const keyOf=id=>{if(!id)return '';if(VIDS[id])return id;const p=bank(id);return (p&&BYCODE[p.code])||'';};
+const keyOf=id=>{if(!id)return '';if(VIDS[id])return id;const p=bank(id);if(!p)return '';if(p.code==='A_HIGHP'&&VMAP[id])return VMAP[id];return BYCODE[p.code]||'';};
 /* the line under the button: what the video shows, and the rows where this version differs (as the BCBA's approved mockup) */
 const LROW={spacing:'Time between them',easy_reinforcer:'After each easy one',to_hard:'The hard request comes',missed_easy:'If an easy one is missed'};
 const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 function line(id){const k=keyOf(id),v=VIDS[k];if(!v||!v.shows)return '';const S=v.shows,p=VIDS[id]?null:bank(id),c=p&&p.cmp;
- let t='The video shows TD-1’s steps for this card: '+S.summary+'.';
+ if(v.src&&p&&p.id===v.src)return 'The video shows this card’s steps: '+S.summary+'.';
+ let t=(v.after?'The video shows the closest version, after '+v.after+': ':'The video shows TD-1’s steps for this card: ')+S.summary+'.';
  if(c){const dd=Object.keys(LROW).filter(x=>norm(c[x])!==norm(S[x])&&!/^not stated/i.test(c[x]||'')).map(x=>LROW[x].toLowerCase()+': '+c[x]);
   t+=' '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');}
  return t;}
