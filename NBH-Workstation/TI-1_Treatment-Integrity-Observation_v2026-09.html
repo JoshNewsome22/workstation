@@ -4031,7 +4031,12 @@ const w=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=w?w.apply(t
       (as the questionnaires go: the workstation asks, then sends through Gmail; or the Mail app), or prints as a slip. Only the
       adult receives it; the student is named by initials only. Sending it fills that check's feedback record (the date and time
       given when empty, the format, own graph, praise and missed steps named, the next check) and logs when and how (fb.sent).
-   Every new value is optional: a file saved before opens and prints as it did. */
+   Every new value is optional: a file saved before opens and prints as it did.
+   v25.68 wave 2 (research #10): when the case holds a classroom practices check (Form OB-1's Classroom check view), Send feedback
+   shows it, and "Add the check to the message" puts its figures in the message and the slip (ticked when the check is of this
+   adult's room); "Use the check's praise" and "Use the check's step" fill the two boxes from it (what went well and the practice
+   chosen with the teacher, or its figures). Coaching for the teacher, sent to the teacher only; nothing of it is saved here.
+   The greeting keeps a title with the name it goes with ("Hello Ms. Sample," where it said "Hello Ms.,"). */
 (function(){
 'use strict';
 const byId=id=>document.getElementById(id);
@@ -4048,6 +4053,30 @@ function initials(){let c=t(S.meta.client).replace(/^SIMULATED\s*[–—-]\s*/i,
 function pctOf(j){let c=0,n=0;S.steps.forEach((_,i)=>{const v=code(i,j);if(scored(v)){n++;if(v==='C')c++;}});return n?{c,n,p:100*c/n}:null;}
 const scoredRows=()=>tiOrder().map(j=>({j,x:pctOf(j)})).filter(r=>r.x);
 const pctS=p=>(Math.round(p*10)/10).toFixed(1).replace(/\.0$/,'')+'%';
+/* v25.68 wave 2 the latest classroom practices check the case holds (Form OB-1), and whether it is of this adult's room */
+function clsCk(){const f=ipCase,c=f&&(f.classroom||(f.evidence&&f.evidence['OB-1']&&f.evidence['OB-1'].classroom));
+  const L=c&&Array.isArray(c.checks)?c.checks.filter(x=>x&&typeof x==='object'&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.date||''))).sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))):[];
+  return L.length?L[L.length-1]:null;}
+const clsMine=x=>!!(x&&same(x.teacher,S.meta.int));
+const n1=v=>String(Math.round(v*10)/10).replace(/\.0$/,'');
+const mss=s=>{s=Math.max(0,Math.round(+s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+function clsLine(x){if(!x)return '';const L=[];
+  if(x.otr&&x.otr.pm!=null)L.push(n1(x.otr.pm)+' opportunities to respond a minute');
+  if(x.ratio!=null||(x.ratioText&&!/^none/.test(x.ratioText)))L.push('praise to correction '+t(x.ratioText)+(x.spec!=null?', '+x.spec+'% of the praise specific':''));
+  if(x.eng&&x.eng.pct!=null)L.push('the class engaged at '+x.eng.pct+'% of the scans');
+  if(x.trans&&x.trans.n)L.push(x.trans.n+' transition'+(x.trans.n===1?'':'s')+', '+mss(x.trans.mean)+' on average');
+  return 'From the classroom check on '+tiUsD(x.date)+(x.mins?' ('+n1(x.mins)+' minutes)':'')+': '+(L.join('; ')||'no figures yet')+'.';}
+function clsPraise(x){if(!x)return '';if(t(x.well))return t(x.well).replace(/[.\s]+$/,'')+'.';
+  if(x.bsp&&x.bsp.n)return 'In the classroom check you gave '+x.bsp.n+' behavior-specific praise statement'+(x.bsp.n===1?'':'s')+(x.mins?' in '+n1(x.mins)+' minutes':'')+', each naming what the student did.';
+  if(x.eng&&x.eng.pct!=null&&x.eng.pct>=80)return 'In the classroom check the class was engaged at '+x.eng.pct+'% of the scans.';
+  if(x.otr&&x.otr.pm!=null&&x.otr.n)return 'In the classroom check the class had '+n1(x.otr.pm)+' chances to respond a minute.';return '';}
+function clsStep(x){if(!x)return '';if(t(x.next))return t(x.next).replace(/[.\s]+$/,'')+'.';
+  const pr=((x.bsp&&x.bsp.n)||0)+((x.gp&&x.gp.n)||0);
+  if(x.ratio!=null&&x.ratio<4)return 'Aim for 4 praise statements for each correction; in the check it was '+t(x.ratioText)+'.';
+  if(x.ratio==null&&x.rep&&x.rep.n&&!pr)return 'Add praise that names the behavior: the check counted corrections and no praise.';
+  if(x.spec!=null&&x.spec<50)return 'Name the behavior when you praise: '+x.spec+'% of the praise in the check was specific.';
+  if(x.rules&&x.rules.taught==='no')return 'Review the class rules at the start of the lesson.';
+  if(x.eng&&x.eng.pct!=null&&x.eng.pct<80)return 'More chances for the whole class to respond: the class was engaged at '+x.eng.pct+'% of the scans.';return '';}
 
 /* ===================== #1 the implementation plan, checked at the first visit ===================== */
 let ipCase=null;
@@ -4096,7 +4125,7 @@ function suggest(j){const C=[],X=[];S.steps.forEach((st,i)=>{const v=code(i,j);i
   const fix=xi!=null?'Step '+(xi+1)+': '+stepTxt(xi).replace(/[.\s]+$/,'')+(code(xi,j)==='EO'?' (left out this time)':' (done in another way this time)')+'.':'Nothing to fix this time: keep every step as it is.';
   const f=(S.obs[j]||{}).fb||{},r=V.ruleFor?V.ruleFor(j):null,od=tiIsoD((S.obs[j]||{}).date),base=f.date||od||today();
   const next=f.next||(r?addDays(base,r.days):'');
-  return {j,praise,fix,next,rule:r?r.txt:''};}
+  return {j,praise,fix,next,rule:r?r.txt:'',cls:clsMine(clsCk())};}
 function graphSVG(){const pts=scoredRows().map(r=>({d:tiIsoD((S.obs[r.j]||{}).date),p:r.x.p})).filter(x=>x.d).sort((a,b)=>a.d.localeCompare(b.d));
   if(!pts.length)return '';const W=520,H=150,L=36,R=12,top=10,bot=26,n=pts.length,X=i=>n===1?(L+W-R)/2:L+(W-L-R)*i/(n-1),Y=v=>top+(H-top-bot)*(1-v/100),cr=+S.crit||90;
   let g='<line x1="'+L+'" y1="'+(H-bot)+'" x2="'+(W-R)+'" y2="'+(H-bot)+'" stroke="#7E97AD"/>'+[0,50,100].map(v=>'<text x="'+(L-5)+'" y="'+(Y(v)+3.5)+'" font-size="10" text-anchor="end" fill="#55697A">'+v+'</text>').join('')+
@@ -4106,12 +4135,13 @@ function graphSVG(){const pts=scoredRows().map(r=>({d:tiIsoD((S.obs[r.j]||{}).da
   return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Your integrity on each check: '+E(pts.map(x=>tiUsD(x.d)+' '+pctS(x.p)).join(', '))+'">'+g+'</svg>';}
 function lineGraph(){return scoredRows().map(r=>({d:tiIsoD((S.obs[r.j]||{}).date),p:r.x.p})).filter(x=>x.d).sort((a,b)=>a.d.localeCompare(b.d)).map(x=>tiUsD(x.d)+' '+pctS(x.p)).join(' · ');}
 /* the message, the same in the email, its page version and the slip */
-function message(k){const o=S.obs[k.j]||{},od=tiIsoD(o.date),who=t(S.meta.int).replace(/,.*$/,''),first=who.split(/\s+/)[0]||'',ini=initials(),from=t(S.meta.obs)||t(S.meta.bcba);
+function message(k){const o=S.obs[k.j]||{},od=tiIsoD(o.date),who=t(S.meta.int).replace(/,.*$/,''),first=(/^(Mr|Mrs|Ms|Mx|Dr|Miss)\.?$/i.test(who.split(/\s+/)[0]||'')?who.replace(/\s*\(simulated\)\s*$/i,'').split(/\s+/).slice(0,2).join(' '):who.split(/\s+/)[0])||'',ini=initials(),from=t(S.meta.obs)||t(S.meta.bcba);
   const subject='Feedback on your check'+(od?' of '+tiUsD(od):'')+' ('+ini+')';
   const lines=[(first?'Hello '+first+',':'Hello,'),'',
     'Thank you for the check'+(od?' on '+tiUsD(od):'')+(t(S.meta.skill)?' ('+t(S.meta.skill)+')':'')+'.','',
     'What went well: '+(t(k.praise)||'(write one thing done well)'),'',
     'The one step to work on: '+(t(k.fix)||'(write the one step)'),'',
+    ...(k.cls&&clsCk()?[clsLine(clsCk()),'']:[]),
     'Your integrity on each check: '+(lineGraph()||'(no dated check yet)')+'. The goal is '+(+S.crit||90)+'%.','',
     'Next check: '+(k.next?'by '+tiUsD(k.next):'(set the date)')+'.','',
     'Ask me about any of it.',(from?from:''),'',
@@ -4120,6 +4150,7 @@ function message(k){const o=S.obs[k.j]||{},od=tiIsoD(o.date),who=t(S.meta.int).r
   const html='<div style="font:15px/1.5 -apple-system,Helvetica,Arial,sans-serif;color:#111;max-width:560px">'+
     '<p>'+E(first?'Hello '+first+',':'Hello,')+'</p><p>Thank you for the check'+(od?' on '+E(tiUsD(od)):'')+(t(S.meta.skill)?' ('+E(t(S.meta.skill))+')':'')+'.</p>'+
     '<p><b>What went well:</b> '+E(t(k.praise)||'')+'</p><p><b>The one step to work on:</b> '+E(t(k.fix)||'')+'</p>'+
+    (k.cls&&clsCk()?'<p>'+E(clsLine(clsCk()))+'</p>':'')+
     '<p><b>Your integrity on each check</b> (the goal is '+(+S.crit||90)+'%):</p>'+barTable()+
     '<p><b>Next check:</b> '+(k.next?'by '+E(tiUsD(k.next)):'')+'.</p><p>Ask me about any of it.'+(from?'<br>'+E(from):'')+'</p>'+
     '<p style="font-size:12px;color:#555">Student: '+E(ini)+' (initials only). This is coaching for you, sent to you only.</p></div>';
@@ -4141,10 +4172,16 @@ function sendRender(){const box=byId('tiSend');if(!box)return;const rows=scoredR
    '<label for="tiSendFix">The one step to fix</label><textarea id="tiSendFix" rows="2" aria-label="The one step to fix">'+E(k.fix)+'</textarea>'+
    '<label for="tiSendNext">Next check</label><span><input type="date" id="tiSendNext" value="'+E(k.next)+'" aria-label="Next check"> <span class="hint">'+E(k.rule?'The fading rule: '+k.rule+'.':'')+'</span></span>'+
    '<label for="tiSendTo">'+E(t(S.meta.int)?t(S.meta.int).replace(/,.*$/,'')+'’s email':'The adult’s email')+'</label><input type="email" id="tiSendTo" value="'+E(em)+'" autocomplete="off" aria-label="The adult’s email">'+
-   '</div>'+
+   '</div>'+clsBox(k)+
    '<details class="ti-sendprev"><summary>Read the message</summary><div class="ti-sendmsg"><p><b>'+E(M.subject)+'</b></p>'+M.html+'</div></details>'+
    '<div class="ti-sendbar"><button type="button" class="tool primary" id="tiSendMail"'+(ok?'':' disabled')+'>Send it to '+E(t(S.meta.int).replace(/,.*$/,'')||'the adult')+' by email</button><button type="button" class="tool" id="tiSendSlip">Print it as a slip</button>'+
    '<span class="hint" id="tiSendMsg" role="status" aria-live="polite">'+E(ok?sentLine(k.j):'Enter the adult’s email to send it; or print it as a slip to hand over.')+(ok?'':'')+'</span></div>';}
+/* v25.68 wave 2 the classroom check, offered beside the message */
+function clsBox(k){const x=clsCk();if(!x)return '';const mine=clsMine(x),who=t(S.meta.int).replace(/,.*$/,'');
+  return '<div class="ti-sendcls" role="group" aria-labelledby="tiSendClsH"><p id="tiSendClsH"><b>The classroom practices check</b> (Form OB-1, '+E(tiUsD(x.date))+(t(x.teacher)?', '+E(t(x.teacher))+'&rsquo;s room':'')+'): '+E(clsLine(x).replace(/^From the classroom check on [^:]*: /,''))+'</p>'+
+    (mine?'':'<p class="hint">The check is of '+E(t(x.teacher)||'another teacher')+'&rsquo;s room'+(who?', not '+E(who)+'&rsquo;s':'')+': add it only when the message goes to that teacher.</p>')+
+    '<label class="ti-inl ti-sendclsck"><input type="checkbox" id="tiSendCls"'+(k.cls?' checked':'')+'> Add the check to the message: coaching for the teacher, sent to the teacher only</label>'+
+    '<div class="ti-sendclsb"><button type="button" class="tool" id="tiSendClsPraise"'+(clsPraise(x)?'':' disabled')+'>Use the check&rsquo;s praise</button><button type="button" class="tool" id="tiSendClsFix"'+(clsStep(x)?'':' disabled')+'>Use the check&rsquo;s step</button></div></div>';}
 /* the check's feedback record takes what the message held */
 function logSent(j,how,k){const o=S.obs[j];if(!o)return;const f=Object.assign({},o.fb||{}),now=new Date();
   if(!f.date)f.date=isoOf(now);if(!f.time)f.time=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
@@ -4171,6 +4208,7 @@ function printSlip(){readPick();const k=pick;if(!k)return;const M=message(k),o=S
   let el=byId('tiSlip');if(el)el.remove();el=document.createElement('div');el.id='tiSlip';el.className='ti-slip';
   el.innerHTML='<div class="ti-slip-in"><h2>Feedback'+(od?' on your check of '+E(tiUsD(od)):'')+'</h2><p class="ti-slip-who">For '+E(t(S.meta.int)||'the interventionist')+' &middot; student '+E(ini)+(t(S.meta.obs)?' &middot; from '+E(t(S.meta.obs)):'')+'</p>'+
     '<p><b>What went well:</b> '+E(t(k.praise))+'</p><p><b>The one step to work on:</b> '+E(t(k.fix))+'</p>'+
+    (k.cls&&clsCk()?'<p>'+E(clsLine(clsCk()))+'</p>':'')+
     '<p><b>Your integrity on each check</b> (the goal is '+(+S.crit||90)+'%)</p>'+graphSVG()+
     '<p><b>Next check:</b> '+(k.next?'by '+E(tiUsD(k.next)):'______________')+'</p><p class="ti-slip-foot">Coaching for you, given to you first. Student named by initials only.</p></div>';
   (document.querySelector('main')||document.body).appendChild(el);
@@ -4178,7 +4216,7 @@ function printSlip(){readPick();const k=pick;if(!k)return;const M=message(k),o=S
   const off=()=>{h.classList.remove('ti-slip-printing');const x=byId('tiSlip');if(x)x.remove();window.removeEventListener('afterprint',off);};
   window.addEventListener('afterprint',off);logSent(k.j,'slip',k);say('Printed as a slip: hand it to '+(t(S.meta.int).replace(/,.*$/,'')||'the adult')+' first. The feedback record is filled.');
   try{window.print();}finally{setTimeout(off,1500);}}
-window.__ti2568={suggest,message,initials,logSent,ipRender,sendRender,get pick(){return pick;}};
+window.__ti2568={suggest,message,initials,logSent,ipRender,sendRender,clsCk,clsLine,clsPraise,clsStep,get pick(){return pick;}};
 
 /* ---------------- wiring ---------------- */
 document.addEventListener('change',e=>{const el=e.target;if(!el)return;
@@ -4186,12 +4224,17 @@ document.addEventListener('change',e=>{const el=e.target;if(!el)return;
   if(el.id==='tiSendObs'){pick=suggest(+el.value);sendRender();return;}
   if(el.id==='tiSendTo'){if(t(el.value))S.meta.intEmail=t(el.value);else delete S.meta.intEmail;readPick();sendRender();return;}
   if(el.id==='tiSendNext'||el.id==='tiSendPraise'||el.id==='tiSendFix'){readPick();return;}
+  if(el.id==='tiSendCls'){readPick();if(pick)pick.cls=el.checked;sendRender();const c=byId('tiSendCls');if(c)c.focus();return;}
   if(el.dataset&&el.dataset.m==='int'){try{ipMatch();ipRender();sendRender();}catch(x){}}});
 document.addEventListener('input',e=>{const el=e.target;if(!el)return;if(el.dataset&&el.dataset.ti68==='tiIpNote'){ipInput(el);return;}
   if(el.id==='tiSendPraise'||el.id==='tiSendFix'){readPick();}
   if(el.id==='tiSendTo'){const ok=/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(t(el.value)),b=byId('tiSendMail');if(b)b.disabled=!ok;if(t(el.value))S.meta.intEmail=t(el.value);else delete S.meta.intEmail;}});
-document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#tiSendMail,#tiSendSlip');if(!b)return;if(b.id==='tiSendMail')sendMail();else printSlip();});
-{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ipCase=f||null;const r=was?was.apply(this,arguments):null;try{ipMatch();ipRender();}catch(e){}return r;};}
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#tiSendMail,#tiSendSlip,#tiSendClsPraise,#tiSendClsFix');if(!b)return;
+  if(b.id==='tiSendClsPraise'||b.id==='tiSendClsFix'){readPick();const x=clsCk();if(!pick||!x)return;const w=b.id==='tiSendClsPraise'?clsPraise(x):clsStep(x);if(!w)return;
+    if(b.id==='tiSendClsPraise')pick.praise=w;else pick.fix=w;sendRender();const g=byId(b.id==='tiSendClsPraise'?'tiSendPraise':'tiSendFix');if(g)g.focus();say(b.id==='tiSendClsPraise'?'The praise is from the classroom check: edit it as you like.':'The step is from the classroom check: edit it as you like.');return;}
+  if(b.id==='tiSendMail')sendMail();else printSlip();});
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const had=JSON.stringify(clsCk());ipCase=f||null;const r=was?was.apply(this,arguments):null;try{ipMatch();ipRender();
+  if(JSON.stringify(clsCk())!==had&&!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#tiSend'))){if(pick)pick.cls=clsMine(clsCk());sendRender();}}catch(e){}return r;};}
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
   try{if(o&&o.integrity&&S.ipPlan&&ipFilled()){const c=S.ipc,cop=(S.ipPlan.plan.coping||[]).filter(q=>q&&(t(q.barrier)||t(q.fix)));
     o.integrity.ipCheck={who:t(S.ipPlan.who),date:c.date||'',run:c.run||'',barriers:cop.map((q,i)=>({barrier:t(q.barrier),came:((c.bar||[])[i]||{}).came||'',worked:((c.bar||[])[i]||{}).worked||''})),note:t(c.note)};}}catch(e){}return o;};}
@@ -4215,6 +4258,11 @@ try{ipClean();ipRender();sendRender();}catch(e){console.error('TI-1 v25.68: '+(e
 .ti-sendbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:8px 0}
 .ti-sendbar .hint{flex:1 1 220px}
 .ti-sendprev{margin:6px 0}
+.ti-sendcls{margin:8px 0;padding:8px 12px;border:1px solid #c9d4d2;border-left:4px solid #76a2a3;border-radius:6px;background:#f7f9f8;font-size:13px}
+.ti-sendcls p{margin:0 0 6px}.ti-sendclsck{display:flex;gap:8px;align-items:flex-start;min-height:44px}
+.ti-sendclsck input{width:20px;height:20px;margin:2px 0 0;flex:none}
+.ti-sendclsb{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+@media (pointer:coarse){.ti-sendclsb button{min-height:44px}}
 .ti-sendprev>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:#254657}
 .ti-sendprev>summary:focus-visible{outline:3px solid #2f7fa8;outline-offset:2px}
 .ti-sendmsg{border:1px solid #c9d4d2;border-radius:6px;padding:10px 12px;background:#fff}
