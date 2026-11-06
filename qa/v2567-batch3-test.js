@@ -267,5 +267,23 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await t.close();
  });
 
+ /* ---------------- FEED ---------------- */
+ await sec('FEED',async()=>{
+  const d=await open('DM-1');
+  const dm=await d.evaluate(()=>{const g=()=>{const o=window.__nbhFactsOut();return o&&o.profile&&o.profile.health&&o.profile.health.diet;};const a=g()||'';
+    const e=document.querySelector('[name="h.diet"]');e.value='Gluten-free (simulated)';e.dispatchEvent(new Event('input',{bubbles:true}));return {a,b:g()};});
+  ok('FEED 1 DM-1 sends the dietary restrictions with the health record (profile.health.diet)',dm.a===''&&dm.b==='Gluten-free (simulated)',dm);
+  await d.close();
+  const r=await open('RR-1');
+  const rr=await r.evaluate(()=>{const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};set('m.dx','Autism spectrum disorder (simulated record)');set('m.diet','Skips breakfast per parent (simulated)');
+    const o=window.__nbhFactsOut();return o&&o.records&&{dx:o.records.dx,diet:o.records.diet};});
+  ok('FEED 2 RR-1 sends the diagnoses and the diet notes with the records (records.dx, records.diet)',rr&&/Autism spectrum disorder/.test(rr.dx)&&/Skips breakfast/.test(rr.diet),rr);
+  await r.close();
+  const f=await open('FD-1');
+  const fd=await f.evaluate(async()=>{window.__nbhFactsIn({profile:{src:'DM-1',health:{diet:'Gluten-free (simulated)'}},records:{dx:'Autism spectrum disorder (simulated record)',diet:'Skips breakfast per parent (simulated)'}});await new Promise(r=>setTimeout(r,300));return {dx:S.meta.dx,diet:S.meta.diet};});
+  ok('FEED 3 FD-1 takes both into its empty screen fields',/Autism spectrum disorder/.test(fd.dx)&&/Gluten-free/.test(fd.diet)&&/Skips breakfast/.test(fd.diet),fd);
+  await f.close();
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
