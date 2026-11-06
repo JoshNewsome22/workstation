@@ -2507,7 +2507,9 @@ window.addEventListener('beforeprint',()=>{try{tbTplUsed();}catch(e){}const w=do
   const st=!!(w&&w.value==='staff');document.body.classList.toggle('tb-staff-only',st);if(st){try{tbStaffSheet();}catch(e){}}});   /* v24.35 */
 window.addEventListener('afterprint',()=>{document.body.classList.remove('tb-defs-only','tb-staff-only');const sh=document.getElementById('tbStaff');if(sh)sh.remove();});
 /* v24.35 (E-04, R-037) Definitions for staff: one sheet, each target's name, measure, definition, examples, non-examples, onset and
-   offset, exclusions and borderline cases as the Define sheet holds them, in a face that reads at the copier */
+   offset, exclusions and borderline cases as the Define sheet holds them, in a face that reads at the copier.
+   v25.68 (the BCBA, 11/6) the card's measure (what is counted and how) prints under the definition when it is filled; the
+   criterion stays on the card and the goal */
 function tbStaffSheet(){
   let sh=document.getElementById('tbStaff');if(sh)sh.remove();
   const n=Math.max(0,+(document.getElementById('nTgt')||{}).value||0),esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2515,7 +2517,7 @@ function tbStaffSheet(){
   const row=(l,v)=>v?'<div class="tbs-row"><b>'+esc(l)+'</b><span>'+esc(v).replace(/\n+/g,'<br>')+'</span></div>':'';
   let cards='';for(let t=0;t<n;t++){const lab=val('tgt['+t+'].lab');if(!lab)continue;
     cards+='<div class="tbs-card"><h3>'+esc(lab)+(dimName(t)?'<small>'+esc(dimName(t))+(val('tgt['+t+'].unit')?' · '+esc(val('tgt['+t+'].unit')):'')+'</small>':'')+'</h3>'
-      +row('Definition',val('tgt['+t+'].def'))+row('Counts (examples)',val('tgt['+t+'].ex'))+row('Does not count (non-examples)',val('tgt['+t+'].nex'))
+      +row('Definition',val('tgt['+t+'].def'))+row('What is counted and how',val('tgt['+t+'].measure'))+row('Counts (examples)',val('tgt['+t+'].ex'))+row('Does not count (non-examples)',val('tgt['+t+'].nex'))
       +row('Starts when',val('tgt['+t+'].on'))+row('Ends when',val('tgt['+t+'].off'))+row('Not counted',val('tgt['+t+'].excl'))+row('Borderline cases',val('tgt['+t+'].border'))+'</div>';}
   sh=document.createElement('div');sh.className='sheet';sh.id='tbStaff';
   const head=document.querySelector('#define > .nbh-print-head');
