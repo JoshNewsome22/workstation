@@ -29,7 +29,9 @@ const file=id=>L.forms().find(x=>x.id===id).file;
       const r=await p.evaluate(()=>{const sh=[...document.querySelectorAll('.sheet')].find(s=>s.offsetParent);if(!sh)return null;const vis=e=>e.offsetParent&&e.getBoundingClientRect().width>2;
         const F=[...sh.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]),select:not(.nbh-seg-src),textarea')].filter(vis);
         return {wide:document.documentElement.scrollWidth-document.documentElement.clientWidth,small:F.filter(e=>parseFloat(getComputedStyle(e).fontSize)<16).map(e=>e.name||e.id).slice(0,3),
-          ph:F.filter(e=>(e.getAttribute('placeholder')||'').trim().length>8&&!/^From Form [A-Z]{2,3}-\d/.test(e.getAttribute('placeholder'))).map(e=>(e.name||e.id)+':'+e.getAttribute('placeholder')).slice(0,3)};});
+          /* v25.67 fx2: a short example in a row of label-and-box pairs stays in its box (data-fx2-inrow; IC-1's storage
+             box beside "Delete by"), as v24.92 allows: an example between the pairs pushed the row apart */
+          ph:F.filter(e=>(e.getAttribute('placeholder')||'').trim().length>8&&!/^From Form [A-Z]{2,3}-\d/.test(e.getAttribute('placeholder'))&&!(e.hasAttribute('data-fx2-inrow')&&e.getAttribute('placeholder').trim().length<=36)).map(e=>(e.name||e.id)+':'+e.getAttribute('placeholder')).slice(0,3)};});
       if(r&&(r.wide>1||r.small.length||r.ph.length))bad.push(v+' '+JSON.stringify(r));}
     ok('1 '+id+' every sheet: nothing wider than the screen, boxes at 16 px, no example left in a box',!bad.length,bad);}
   /* 2, 3 */
