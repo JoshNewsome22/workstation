@@ -285,5 +285,39 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   await f.close();
  });
 
+ /* ---------------- SAFETY ---------------- */
+ await sec('SAFETY',async()=>{
+  const c=await open('CR-1');
+  await c.evaluate(()=>{if(window.nbhUI){nbhUI.confirm=async()=>true;nbhUI.toast=()=>{};}});await L.loadSim(c);await sleep(1500);
+  const cr=await c.evaluate(()=>{let f=null;try{f=window.__nbhFactsOut();}catch(e){f={err:String(e)};}return f&&f.crisis&&f.crisis.afterRelease;});
+  ok('SAFETY 1 CR-1 sends what the restraints were followed by, and its flag (SAFETY-H1)',cr&&typeof cr.answered==='number'&&cr.answered>=1&&typeof cr.escAtt==='number'&&typeof cr.flag==='boolean',cr);
+  await c.close();
+  const AR={answered:3,escAtt:3,flag:true};
+  const fs=await open('FS-1');
+  const f1=await fs.evaluate(async A=>{window.__nbhFactsIn({crisis:{src:'CR-1',afterRelease:A}});await new Promise(r=>setTimeout(r,300));const el=document.getElementById('fs67Cr');const a=el&&!el.hidden?el.textContent:'';
+    window.__nbhFactsIn({crisis:{src:'CR-1',afterRelease:{answered:3,escAtt:1,flag:false}}});return {a,cls:el?el.className:'',off:el.hidden};},AR);
+  ok('SAFETY 2 FS-1 shows CR-1’s review line beside the convergence of sources, on screen only',/often followed by escape from the task or by adult attention \(3 of the 3 restraints/.test(f1.a)&&/noprint/.test(f1.cls)&&f1.off,f1);
+  await fs.close();
+  const td=await open('TD-1');
+  const PP={shared:'yes',signed:'2026-10-02',parts:[{desc:'Teaching the break card',type:'reinforcement',dec:'yes'},{desc:'Escape extinction: the demand stays',type:'extinction',dec:'yes'},{desc:'Response blocking',type:'restrictive',dec:'no'},{desc:'A lean baseline',type:'option',dec:''}]};
+  const t1=await td.evaluate(async([A,P])=>{window.__nbhFactsIn({crisis:{src:'CR-1',afterRelease:A},consent:{planProcs:P}});await new Promise(r=>setTimeout(r,300));const el=document.getElementById('td67Safe');const a=el&&!el.hidden?el.textContent:'';
+    const txt=window.__bipText(),k=txt.indexOf('CONSENT TO THE PLAN’S PROCEDURES (FORM IC-1)');window.__nbhFactsIn({});await new Promise(r=>setTimeout(r,200));
+    return {a,bip:k>=0?txt.slice(k,k+700):'',none:document.getElementById('td67Safe').hidden&&window.__bipText().indexOf('CONSENT TO THE PLAN’S PROCEDURES')<0};},[AR,PP]);
+  ok('SAFETY 3 TD-1 shows CR-1’s flag under the response to the behavior (SAFETY-H1)',/Form CR-1: restraint in this record is often followed by escape/.test(t1.a)&&/check the function on Form FS-1/.test(t1.a),t1);
+  ok('SAFETY 4 TD-1 shows IC-1’s decision on each part that needs its own, and the BIP carries them (CARE-H7)',/EXTINCTION: Escape extinction: the demand stays: Yes/.test(t1.a)&&/RESTRICTIVE: Response blocking: No: not run/.test(t1.a)&&/OPTION: Reinforces problem behavior on purpose: A lean baseline: not decided yet: not run until it is/.test(t1.a)&&/SIGNED 10\/2\/2026/.test(t1.bip)&&/Teaching, rewards and prevention: Yes/.test(t1.bip),t1);
+  ok('SAFETY 5 without CR-1’s flag or IC-1’s sheet nothing is added',t1.none,t1);
+  await td.close();
+  const ct=await open('CT-1');
+  const c1=await ct.evaluate(async P=>{S.meta.where='Telehealth';const parts=P.parts.concat([{desc:'Escape extinction at meals: the bite stays at the lips',type:'restrictive',dec:'yes'}]);
+    window.__nbhFactsIn({consent:{planProcs:Object.assign({},P,{parts}),home:{data:true,train:false,video:true,videoDec:'',photos:false}},home:{integrity:[{date:'2026-10-01',pct:90}],integrityChecked:false,integrityNote:'family report, not yet checked'}});
+    await new Promise(r=>setTimeout(r,400));const h=document.getElementById('ct67Home');const rec=document.getElementById('ctHomeRec');
+    const a={ext:S.meta.extCons,meal:S.meta.meal_eeCons,home:h?h.textContent:'',rec:rec?rec.textContent:''};
+    S.meta.extCons='Typed by hand';window.__nbhFactsIn({consent:{planProcs:P}});a.kept=S.meta.extCons;return a;},PP);
+  ok('SAFETY 6 CT-1 takes IC-1’s Yes for the extinction step and for escape extinction at meals while blank; a hand answer stays (CARE-H7)',/the extinction step, Yes, signed 10\/2\/2026/.test(c1.ext)&&/escape extinction at meals, Yes/.test(c1.meal)&&c1.kept==='Typed by hand',c1);
+  ok('SAFETY 7 CT-1 shows IC-1’s home procedures, with the telehealth caution (CARE-M10)',/caregiver training at home or by video call is not ticked; video or photos at home: not decided\. Training here is by telehealth/.test(c1.home),c1.home);
+  ok('SAFETY 8 CT-1 reads HD-1’s checklist as "family report, not yet checked" (CARE-M7)',/family report, not yet checked/.test(c1.rec),c1.rec);
+  await ct.close();
+ });
+
  ok('no page errors',errs.length===0,errs);
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

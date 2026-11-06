@@ -3409,6 +3409,20 @@ const fsOr=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' or '+a[a.length-1
   if(n)renderAll();else if(typeof dChanged!=='undefined'&&dChanged){try{renderBehForm();}catch(e){}}
   return n?{filled:(r.filled||0)+n,note:[r.note,notes.join('; ')].filter(Boolean).join('; ')}:r;};}
 </script>
+<script id="fs1-v2567-safety">
+/* v25.67 (SAFETY-H1, batch 3) when Form CR-1's restraint log shows restraint often followed by escape from the task or adult
+   attention (crisis.afterRelease.flag), the convergence sheet says the review CR-1 asks for: the emergency procedure may be adding
+   to the behavior, so weigh it in the hypothesis. Screen only; nothing in the report changes. */
+(function(){const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let A=null;
+ function paint(){const at=document.getElementById('convKey');if(!at)return;let el=document.getElementById('fs67Cr');
+  if(!el){el=document.createElement('div');el.id='fs67Cr';el.className='noprint';at.insertAdjacentElement('afterend',el);}
+  if(!A||!A.flag){el.hidden=true;el.innerHTML='';return;}el.hidden=false;
+  el.innerHTML='<div class="verdict v-mid"><b>Form CR-1: restraint in this record is often followed by escape from the task or by adult attention</b> ('+E(A.escAtt)+' of the '+E(A.answered)+' restraints with an answer). The emergency procedure may be adding to the behavior: weigh it in the hypothesis and in the consequences listed for each target. In a school, a hold used as a consequence increased the behavior it followed (Magee &amp; Ellis, 2001).</div>';}
+ window.__fs2567Cr=paint;
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{A=f&&f.crisis&&f.crisis.afterRelease&&typeof f.crisis.afterRelease==='object'?f.crisis.afterRelease:null;paint();}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

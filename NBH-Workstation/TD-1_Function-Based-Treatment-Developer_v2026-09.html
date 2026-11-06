@@ -7646,6 +7646,33 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
    if(b)b.push(t);}catch(e){}return res;};
 })();
 </script>
+<script id="td1-v2567-safety">
+/* v25.67 (SAFETY-H1, CARE-H7; batch 3) two things from the case beside the plan's response to the behavior:
+   (SAFETY-H1) Form CR-1's flag that restraint is often followed by escape or adult attention, the review the log asks of the BIP;
+   (CARE-H7) Form IC-1's decisions on the plan's parts that need their own (extinction, punishment, restrictive, and the steps that
+   reinforce problem behavior on purpose): each part with its Yes or No, and the shared decision for teaching, rewards and prevention.
+   A part the parent declined is named as not run. On screen under "Responding to the precursor and the target behavior", and the IC-1
+   decisions in the BIP text. Without CR-1's flag or IC-1's sheet, nothing changes. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const LAB={extinction:'EXTINCTION',punishment:'PUNISHMENT',restrictive:'RESTRICTIVE',option:'OPTION: Reinforces problem behavior on purpose'};
+ let A=null,P=null;
+ const md=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(v));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(v);};
+ const dec=v=>v==='yes'?'Yes':v==='no'?'No: not run':'not decided yet: not run until it is';
+ function ic(){if(!P||!Array.isArray(P.parts))return [];return P.parts.filter(p=>p&&LAB[p.type]&&T(p.desc)).map(p=>[LAB[p.type]+': '+T(p.desc),dec(p.dec)]);}
+ window.__td2567Ic=ic;
+ function paint(){const at=document.querySelector('[name="rb.crisis"]');const row=at&&(at.closest('.drow')||at.parentNode);if(!row)return;let el=document.getElementById('td67Safe');
+  if(!el){el=document.createElement('div');el.id='td67Safe';el.className='hint noprint td67-safe';row.insertAdjacentElement('afterend',el);}
+  const H=[];if(A&&A.flag)H.push('<p><b>Form CR-1: restraint in this record is often followed by escape from the task or by adult attention</b> ('+E(A.escAtt)+' of '+E(A.answered)+'). The emergency procedure may be adding to the behavior: review the response to the behavior and the crisis step with the BCBA, and check the function on Form FS-1 (Magee &amp; Ellis, 2001).</p>');
+  const L=ic();if(L.length||(P&&T(P.shared)))H.push('<p><b>Form IC-1, consent to the plan’s procedures'+(P&&T(P.signed)?' (signed '+E(md(P.signed))+')':'')+':</b> '+(P&&T(P.shared)?'teaching, rewards and prevention: '+E(dec(P.shared))+'. ':'')+L.map(([k,v])=>E(k)+': '+E(v)).join('; ')+(L.length?'.':'')+'</p>');
+  el.hidden=!H.length;const h=H.join('');if(el.__h!==h){el.__h=h;el.innerHTML=h;}}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
+  try{A=f&&f.crisis&&f.crisis.afterRelease&&typeof f.crisis.afterRelease==='object'?f.crisis.afterRelease:null;P=f&&f.consent&&f.consent.planProcs&&typeof f.consent.planProcs==='object'?f.consent.planProcs:null;paint();}catch(e){}return r;};
+ const bip0=window.__td82Bip;window.__td82Bip=function(B,o){const res=bip0?bip0.apply(this,arguments):undefined;try{const L=ic();if(!L.length&&!(P&&T(P.shared)))return res;
+   const bl=(o&&o.bipLine)||((l,v)=>v?l+': '+v:'');const blk=['CONSENT TO THE PLAN’S PROCEDURES (FORM IC-1)'+(P&&T(P.signed)?', SIGNED '+md(P.signed):'')];
+   if(P&&T(P.shared))blk.push(bl('Teaching, rewards and prevention',dec(P.shared)));L.forEach(([k,v])=>blk.push(bl(k,v)));
+   let k=B.findIndex(b=>b&&b[0]==='CRISIS PROCEDURE (SEPARATE FROM TREATMENT)');B.splice(k<0?B.length:k,0,blk);}catch(e){}return res;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
