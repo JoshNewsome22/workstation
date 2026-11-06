@@ -3876,9 +3876,13 @@ window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById
     cv = cv || D.createElement('canvas'); var x = cv.getContext('2d'), cs = getComputedStyle(f); x.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
     return x.measureText(t).width + (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0) + (f.tagName === 'SELECT' ? 30 : 6) + 2; }
   function cols(g){ var t = getComputedStyle(g).gridTemplateColumns.split(' ').filter(function(x){ return /px$/.test(x); }); return { n: t.length, w: parseFloat(t[0]) || 0, gap: parseFloat(getComputedStyle(g).columnGap) || 0 }; }
+  /* v25.67 fx2: a box out of sight (in a part Focus folds) keeps what it was given: measured as nothing, it lost its
+     width and kept the loss once Focus was off (EA-1) */
   function long(){
     $$('.fx2-sh .ident.fx2-al, .fx2-sh .fx2-fg.fx2-al').forEach(function(g){ var c = cols(g); if (c.n < 2 || !c.w) return;
-      Array.prototype.forEach.call(g.children, function(f){ if (g.classList.contains('fx2-fg') && !f.classList.contains('fx2-f')) return; var x = Array.prototype.filter.call(f.children, isBox)[0], w = x && x.type !== 'date' && x.type !== 'number' && x.offsetParent ? textW(x) : 0, k = 1;
+      Array.prototype.forEach.call(g.children, function(f){ if (g.classList.contains('fx2-fg') && !f.classList.contains('fx2-f')) return; var x = Array.prototype.filter.call(f.children, isBox)[0];
+        if (x && x.type !== 'date' && x.type !== 'number' && !x.offsetParent) return;
+        var w = x && x.type !== 'date' && x.type !== 'number' ? textW(x) : 0, k = 1;
         while (k < c.n && w > k * c.w + (k - 1) * c.gap) k++;
         tog(f, 'fx2-w2', k === 2 && c.n > 2); tog(f, 'fx2-wall', k > 1 && (k >= c.n)); }); });
     $$('.fx2-sh table.fx2-cards > tbody > tr').forEach(function(r){ var c = cols(r); if (c.n < 2 || !c.w) return;
