@@ -2195,8 +2195,14 @@ window.__nbhFactsIn=function(f){const m=S.meta;let n=0;const b=f.behaviors||[];
   const k=window.nbhCase&&window.nbhCase.consent?window.nbhCase.consent(f):null;
   if(k&&k.known&&!m.consent){const ij=(k.dec&&k.dec.ij)||{},off=k.state==='Revoked'||k.state==='Declined',v=off||ij.dec==='no'?'no':ij.dec==='yes'&&k.on?'yes':'';
     if(v){m.consent=v;n++;if(!String(m.consentDate||'').trim()){const d=pDate(off?(k.ended||ij.date):ij.date);m.consentDate=(d?MDY(d)+' ':'')+'(Form IC-1, Specific procedures E'+(off?'; consent '+k.state.toLowerCase():'')+')';n++;}}}
+  /* v25.67 (the BCBA, 11/6) the decision on photos for the record (Form IC-1, Specific procedures E, dec.ij.photo), when
+     "Consent to photograph injuries" is still blank: Yes only while consent is on and injury checks are a Yes; revoked,
+     declined, or No reads No. A blank decision on IC-1 leaves the answer here for the BCBA, as before. */
+  if(k&&k.known&&!m.photoConsent){const ij=(k.dec&&k.dec.ij)||{},off=k.state==='Revoked'||k.state==='Declined',
+      v=off||ij.photo==='no'||(ij.photo==='yes'&&ij.dec==='no')?'no':ij.photo==='yes'&&ij.dec==='yes'&&k.on?'ic1':'';
+    if(v){m.photoConsent=v;const d=pDate(off?(k.ended||ij.date):ij.date);m.photoConsentFrom=(d?MDY(d):'')+(off?' (consent '+k.state.toLowerCase()+')':'');n++;}}
   if(n)renderAll();
-  return {filled:((r&&r.filled)||0)+n,note:n?'the parent’s decision on injury checks from Form IC-1':(r&&r.note)};};})();
+  return {filled:((r&&r.filled)||0)+n,note:n?'the parent’s decisions on injury checks and photos from Form IC-1':(r&&r.note)};};})();
 /* v23.16 (review F453) more of the case, into empty places only: each restraint or seclusion on Form CR-1's log (its incident
    report deadline carries the date) becomes a row of Restraints and Injury Reports, so the post-restraint check is scheduled;
    a date taken once is remembered (meta.crDone), so a row deleted by hand does not come back; the medical alerts line takes
@@ -2430,7 +2436,7 @@ const v65phYes=()=>S.meta.photoConsent==='ic1'||S.meta.photoConsent==='other';
 const v65phAt=ms=>{const d=new Date(ms);if(isNaN(d))return '';const z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());};
 const v65phWhen=at=>{const m=/^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)$/.exec(at||'');if(!m)return at||'date not recorded';let h=+m[4];const ap=h<12?'am':'pm';h=h%12||12;return (+m[2])+'/'+(+m[3])+'/'+m[1]+' '+h+':'+m[5]+' '+ap;};
 const v65phSite=r=>r.loc==='hips'?'Hips/buttocks: the side of the hip':(LOC[r.loc]||{}).name||r.loc;
-const v65phCons=()=>'Photographed with consent: '+(V65PH_CONS[S.meta.photoConsent]||'not recorded');
+const v65phCons=()=>'Photographed with consent: '+(V65PH_CONS[S.meta.photoConsent]||'not recorded')+(S.meta.photoConsent==='ic1'&&S.meta.photoConsentFrom?', '+S.meta.photoConsentFrom:'');
 function v65phWhy(){if(S.cur.ro)return 'This administration is open read-only, so photos cannot be added or deleted here. Choose "Edit this one" on the History page to change it.';
   if(S.meta.photoConsent==='no')return 'Photos cannot be added: the answer to "Consent to photograph injuries" is No. Describe the injury in words on its row instead.';
   if(!v65phYes())return 'Photos cannot be added until "Consent to photograph injuries" is answered Yes (on Form IC-1, or other written consent).';return '';}
@@ -2484,7 +2490,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.c
     const r=S.cur.rows[i];if(r&&r.photos){r.photos.splice(k,1);if(!r.photos.length)delete r.photos;}v65phCloseDlg();}});
 $('#v65PhFile').addEventListener('change',e=>{const f=e.target.files;v65phAdd(f).finally(()=>{e.target.value='';});});
 $('#v65PhPrintOn').addEventListener('change',e=>{V65PH_PRINT=!!e.target.checked;v65PhRender();});
-$('#v65PhCons').addEventListener('change',()=>v65PhRender());
+$('#v65PhCons').addEventListener('change',()=>{delete S.meta.photoConsentFrom;/* v25.67 a hand answer drops the IC-1 date */v65PhRender();});
 $('#v65PhDlg').addEventListener('input',e=>{if(!V65PH_OPEN||S.cur.ro)return;const r=S.cur.rows[V65PH_OPEN.i],p=r&&r.photos&&r.photos[V65PH_OPEN.k];if(!p)return;
   if(e.target.id==='v65PhDBy')p.by=e.target.value.slice(0,20);if(e.target.id==='v65PhDNote')p.note=e.target.value.slice(0,300);});
 $('#v65PhDlg').addEventListener('close',()=>{if(V65PH_OPEN){V65PH_OPEN=null;v65PhRender();}});

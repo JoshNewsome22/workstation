@@ -1038,7 +1038,7 @@ td input,td select{max-width:100%}
         <div><label>Duration of each delivery (seconds)</label><input data-m="ncr_dur" placeholder="20"></div>
         <div><label>Terminal interval (minutes)</label><input data-m="ncr_term" placeholder="5"></div>
         <!-- v25.65 (FCT-SR-M4) the two published methods as written; the form's own conventions named as such -->
-        <div><label>Thinning</label><select data-m="ncr_thin"><option value="fixed">Doubling: a step each day the criterion holds (the form&rsquo;s convention)</option><option value="kfi">Fixed increments as published: FT 10, 12, 15, 20, 30 s, then 1 to 5 min (Kahng et al., 2000)</option><option value="airt">Adjusting IRT: the mean IRT of the last three sessions (Kahng et al., 2000)</option><option value="perf">Performance-based: a step after each session at or under criterion; back after one above (the form&rsquo;s convention)</option></select></div>
+        <div><label>Thinning</label><select data-m="ncr_thin"><option value="kfi">Fixed increments as published: FT 10, 12, 15, 20, 30 s, then 1 to 5 min (Kahng et al., 2000)</option><option value="fixed">Doubling: a step each day the criterion holds (the form&rsquo;s convention)</option><option value="airt">Adjusting IRT: the mean IRT of the last three sessions (Kahng et al., 2000)</option><option value="perf">Performance-based: a step after each session at or under criterion; back after one above (the form&rsquo;s convention)</option></select></div>
         <div><label>Omission rule (seconds to wait if the behavior just occurred)</label><input data-m="ncr_omit" placeholder="10"></div>
         <!-- v25.65 (FCT-SR-L3) the omission rule is a momentary-DRO element: delay the delivery, or cancel it as in the source -->
         <div><label>Omission rule: what happens to the delivery</label><select data-m="ncr_omit_kind"><option value="">Delay it: wait for those seconds without the behavior, then deliver (the form&rsquo;s convention)</option><option value="cancel">Cancel it: skip the delivery if the behavior occurred in those seconds before it (Vollmer et al., 1997)</option></select></div>
@@ -1253,6 +1253,9 @@ td input,td select{max-width:100%}
         <div data-es="sig"><label>In Spanish: the waiting signal</label><input data-m="es_sig" placeholder="e.g., la tarjeta roja"></div>
         <div data-es="tok"><label>In Spanish: the token</label><input data-m="es_tok" placeholder="e.g., estrella"></div>
         <div data-es="backs"><label>In Spanish: the back-ups</label><input data-m="es_backs" placeholder="e.g., tiempo en la tableta o un juego"></div>
+        <!-- v25.67 (FCT-SR-H5) the wait's own words, for its family version -->
+        <div data-es="does"><label>In Spanish: what the student does during the wait</label><input data-m="es_does" placeholder="e.g., sostiene la tarjeta de espera y sigue trabajando"></div>
+        <div data-es="item"><label>In Spanish: what is available during the wait</label><input data-m="es_item" placeholder="e.g., un rompecabezas en el escritorio"></div>
       </div>
       <div class="fieldgrid">
         <div><label>Your own words, in English (blank: the draft)</label><textarea data-m="home_en" rows="3"></textarea></div>
@@ -1722,7 +1725,10 @@ const CAT=[
 
 /* ---------------- state ---------------- */
 function blank(){return{meta:{},notes:{}};}
-let S=blank();
+/* v25.66 (the BCBA, 11/6) a new form thins NCR by the published fixed increments (Kahng et al., 2000); a saved file opens through
+   blank() and keeps its own method (one saved without a choice reads as doubling, as before) */
+function fresh(){const o=blank();o.meta.ncr_thin='kfi';return o;}
+let S=fresh();
 function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
@@ -2206,7 +2212,7 @@ function srCsv(){
     if(String(m.cd_review||'').trim())rows.push(['Card review',m.cd_review]);}
   dl(rows,'SR-1_schedule-design.csv');}
 $('#csvBtn').addEventListener('click',srCsv);$('#catCsvBtn').addEventListener('click',srCsv);
-$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nThe student, the chooser answers, the design and the catalogue notes are all cleared.',{ok:'Clear all',danger:true})){S=blank();renderAll();}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nThe student, the chooser answers, the design and the catalogue notes are all cleared.',{ok:'Clear all',danger:true})){S=fresh();renderAll();}});
 /* v21.44 (A1): the simulation asks first, with the question the other forms ask; it replaced the student, the chooser
    answers, the design and the catalogue notes without asking */
 async function loadSim(){if(!(await nbhUI.confirm('Load the simulated case?\nThe student, the chooser answers, the design and the catalogue notes are filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
@@ -3588,11 +3594,11 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
  const clean=t=>T(t).replace(/\s*\((?:[^()]*\bForms?\b[^()]*)\)/g,'').trim();
  function first(){let c=T(S.meta.client).replace(/^SIMULATED\s*[\u2013-]\s*/i,'');const m=/^([^,]+),\s*(.+)$/.exec(c);c=(m?m[2]:c).split(/\s+/)[0]||'';return c;}
  function home(){const m=S.meta,o=design();if(!o)return null;let id=o.id;if(id==='vi'&&(m.vi_kind||'vi')==='vt')id='vt';
-  if(!['dro','drl','ncr','token','thin','chain','lh','lag','vi','vt'].includes(id))return null;
+  if(!['dro','drl','ncr','token','thin','chain','lh','lag','vi','vt','nox','wait'].includes(id))return null;   /* v25.67 (FCT-SR-H2, H5) the two new designs, in new wording */
   const C=first(),Ce=C||'your child',Cs=C||'su hijo o hija';
   const B=lc(clean(nm(m.beh,m.behs,'')))||'the behavior',E=lc(clean(nm(m.earn,m.earns,'')||nm(m.alt,m.alts,'')))||'the response that earns',
     R=lc(clean(nm(m.sr,m.srs,'')))||'the reward',A=lc(clean(nm(m.alt,m.alts,'')))||'the request';
-  const es={beh:T(m.es_beh),earn:T(m.es_earn),sr:T(m.es_sr),alt:T(m.es_alt),sig:T(m.es_sig),tok:T(m.es_tok),backs:T(m.es_backs)};
+  const es={beh:T(m.es_beh),earn:T(m.es_earn),sr:T(m.es_sr),alt:T(m.es_alt),sig:T(m.es_sig),tok:T(m.es_tok),backs:T(m.es_backs),does:T(m.es_does),item:T(m.es_item)};
   const need=new Set(),use=new Set(),X=k=>{use.add(k);if(!es[k])need.add(k);return es[k]||'['+k+']';};
   const k=Math.max(1,Math.round(+T(m.sd_step)||1)),row=o.steps&&o.steps.length?(o.steps[Math.min(k,o.steps.length)-1]||o.steps[0]):null;
   const cell=i=>row?T(row[i]).replace(/\s*\(terminal\)\s*/,''):'';
@@ -3629,17 +3635,27 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   if(id==='vi'){
    en='At school, '+Ce+' earns '+R+' for '+E+'. At first it came every time; now it comes every few times, so '+Ce+' keeps going without needing it each time. At home you can do the same: praise often, and give '+R+' now and then, not every time.';
    sp='En la escuela, '+Cs+' gana '+X('sr')+' por '+X('earn')+'. Al principio lo recib\u00eda cada vez; ahora lo recibe cada pocas veces, para que siga sin necesitarlo cada vez. En casa pueden hacer lo mismo: feliciten a menudo y denle '+X('sr')+' de vez en cuando, no cada vez.';}
+  /* v25.67 (FCT-SR-H2) FCT or DRA without extinction: the request wins at home too. New wording (v25.67), shown as such until the
+     BCBA approves it */
+  if(id==='nox'){
+   en='At school, '+Ce+' is learning to use '+A+' to ask for '+R+', instead of '+B+'. Asking always works better: it gets '+R+' sooner, more often and for longer than '+B+' does. At home you can do the same: answer '+Ce+'\u2019s request quickly and generously, every time it is made the way '+Ce+' was taught, and keep whatever follows '+B+' short and plain.';
+   sp='En la escuela, '+Cs+' est\u00e1 aprendiendo a usar '+X('alt')+' para pedir '+X('sr')+', en lugar de '+X('beh')+'. Pedir siempre funciona mejor: consigue '+X('sr')+' antes, m\u00e1s a menudo y por m\u00e1s tiempo que '+X('beh')+'. En casa pueden hacer lo mismo: atiendan la petici\u00f3n de '+Cs+' enseguida y con generosidad, cada vez que la haga como se le ense\u00f1\u00f3, y que lo que sigue a '+X('beh')+' sea breve y sencillo.';}
+  /* v25.67 (FCT-SR-H5) a wait that ends on what the student does */
+  if(id==='wait'){const t=cell(1)||(Math.max(1,Math.round(+T(m.wt_s0)||5))+' s'),time=m.wt_kind==='time',SG=T(m.wt_sig)||'\u201cwait, please\u201d',DO=lc(T(m.wt_does)),IT=lc(T(m.wt_item));
+   en='At school, '+Ce+' is learning to wait for '+R+'. The adult says '+SG+(DO?'; while '+Ce+' waits, '+Ce+' '+DO.replace(/^the student\s+/i,''):'')+(IT?', with '+IT+' to use':'')+'. '+(time?'When the timer ends, '+Ce+' gets '+R+'.':'The wait ends when the time is up and '+Ce+' is still doing it; then '+Ce+' gets '+R+'.')+' Right now a wait is about '+t+', and it grows as '+Ce+' succeeds. At home you can do the same: use the same words, keep the first waits short, and give '+R+' as soon as a wait ends well.';
+   sp='En la escuela, '+Cs+' est\u00e1 aprendiendo a esperar para recibir '+X('sr')+'. El adulto dice '+X('sig')+(DO?'; mientras espera, '+Cs+' '+X('does'):'')+(IT?', con '+X('item')+' a mano':'')+'. '+(time?'Cuando termina el tiempo, '+Cs+' recibe '+X('sr')+'.':'La espera termina cuando se acaba el tiempo y '+Cs+' sigue haci\u00e9ndolo; entonces recibe '+X('sr')+'.')+' Ahora cada espera es de unos '+t+', y se alarga a medida que '+Cs+' lo logra. En casa pueden hacer lo mismo: usen las mismas palabras, empiecen con esperas cortas y denle '+X('sr')+' en cuanto una espera salga bien.';}
   const ownEn=T(m.home_en),ownEs=T(m.home_es);
-  return {en:ownEn||en,es:ownEs||(need.size?'':sp),draftEs:sp,need:ownEs?[]:[...need],used:[...use]};}
+  return {en:ownEn||en,es:ownEs||(need.size?'':sp),draftEs:sp,need:ownEs?[]:[...need],used:[...use],fresh:(id==='nox'||id==='wait')&&!ownEn};}
  window.srHome=home;
- const LAB={beh:'the behavior',earn:'the response that earns',sr:'the reinforcer',alt:'the request',sig:'the waiting signal',tok:'the token',backs:'the back-ups'};
+ const LAB={beh:'the behavior',earn:'the response that earns',sr:'the reinforcer',alt:'the request',sig:'the waiting signal',tok:'the token',backs:'the back-ups',does:'what the student does during the wait',item:'what is available during the wait'};
  function paint(){const box=document.getElementById('srHomeOut');if(!box)return;let h=null;try{h=home();}catch(e){h=null;}
   const es=document.getElementById('srHomeEs');
   if(!h){box.innerHTML='<p class="hint">'+(design()?(['nox','wait'].includes(S.meta.ds_sel)?'This design has no family version yet; tell the family in your own words on Form HD-1.':'This schedule has no home version (an assessment or a session sheet).'):'Design a schedule first.')+'</p>';if(es)es.hidden=true;return;}
   if(es){es.hidden=false;const want=new Set(h.used.concat(h.need));[...es.children].forEach(d=>{d.hidden=!want.has(d.dataset.es);});}
   const e=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   box.innerHTML='<div class="readout" style="margin:0 0 6px"><b>English</b> '+e(h.en)+'</div>'+
-   '<div class="readout" style="margin:0 0 6px"><b>Espa\u00f1ol</b> '+(h.es?e(h.es):'<span class="hint">Write '+h.need.map(k=>LAB[k]).join(', ')+' in Spanish below; the Spanish version goes home once it is complete.</span>')+'</div>';}
+   '<div class="readout" style="margin:0 0 6px"><b>Espa\u00f1ol</b> '+(h.es?e(h.es):'<span class="hint">Write '+h.need.map(k=>LAB[k]).join(', ')+' in Spanish below; the Spanish version goes home once it is complete.</span>')+'</div>'+
+   (h.fresh?'<p class="hint" id="srHomeNew" style="margin:0 0 6px">New wording for this design (v25.67): read it before it goes home, or write your own below.</p>':'');}   /* v25.67 */
  window.srHomePaint=paint;
  {const rc=renderCard;renderCard=function(){rc.apply(this,arguments);try{paint();}catch(e){}};}
  const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}

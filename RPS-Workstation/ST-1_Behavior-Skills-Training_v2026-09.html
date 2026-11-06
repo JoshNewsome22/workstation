@@ -2478,7 +2478,12 @@ function readRetrain(d){
   /* the critical steps with an error on the latest observation, as far as the list shows them */
   const last=oList[k-1];tg.forEach(t=>{const v=t.codes[k-1];if(t.critical&&(v==='EC'||v==='EO'))last.errs.push({n:t.n,code:v});});
   const st=obj(o.student)||{},iv=obj(o.interventionist)||{},sv=typeof o.saved==='string'&&!isNaN(Date.parse(o.saved))?o.saved:'';
-  return{rec:{kind:'retrain',crit:cr.pct,critN:cr.n,found:k,steps:null,obs:oList,targets:tg,student:norm(txt(st.name)),int:norm(txt(iv.name)),skill:norm(txt((obj(o.protocol)||{}).skill)),saved:sv}};}
+  return{rec:{kind:'retrain',crit:cr.pct,critN:cr.n,found:k,steps:null,obs:oList,targets:tg,student:norm(txt(st.name)),int:norm(txt(iv.name)),skill:norm(txt((obj(o.protocol)||{}).skill)),saved:sv,why:stWhyOf(o.why)}};}
+/* v25.67 (SKILL-M9, batch 3) the answers to TI-1's "Why did it drop?" in its retraining file, kept with the import: only true/false
+   and a short line of what was changed; anything else in the field is dropped */
+function stWhyOf(w){const o=obj(w);if(!o||o.signedOff!==true)return null;const b=k=>o[k]===true;
+  const r={signedOff:true,doesNotKnowSteps:b('doesNotKnowSteps'),materialsOrTime:b('materialsOrTime'),notSetUp:b('notSetUp'),noOneNotices:b('noOneNotices')};
+  if(typeof o.changed==='string'&&o.changed.trim())r.changed=norm(o.changed).slice(0,400);return r;}
 /* which form saved a file that is not TI-1's: its form name, its version string, or its shape */
 function whoSaved(o){
   if(typeof o.form==='string'&&/^[A-Z]{2,7}(-\d+)?$/.test(o.form))return o.form;
@@ -2529,7 +2534,8 @@ function clean(ti){const o=obj(ti);if(!o)return undefined;const out={};
     const st=r.steps.slice(0,2000).map(x=>{x=obj(x)||{};const codes=(Array.isArray(x.codes)?x.codes:[]).slice(0,oList.length).map(v=>VALID(v)?v:'');while(codes.length<oList.length)codes.push('');
       return{n:Number.isInteger(x.n)&&x.n>=1&&x.n<=2000?x.n:0,text:txt(x.text,20000),critical:x.critical===true,codes,commission:cnt(x.commission)||0,omission:cnt(x.omission)||0,pct:fin(x.pct,0,100)||0,
         priority:Number.isInteger(x.priority)&&x.priority>=1&&x.priority<=4?x.priority:4,component:x.component==='consequence'||x.component==='antecedent'?x.component:''};}).filter(x=>x.n);
-    out.retrain=Object.assign(srcObj(r),{crit:fin(r.crit,50,100),critN:Number.isInteger(r.critN)&&r.critN>=1&&r.critN<=5?r.critN:null,obs:oList,steps:st,targeted:txt(r.targeted,600)});}
+    out.retrain=Object.assign(srcObj(r),{crit:fin(r.crit,50,100),critN:Number.isInteger(r.critN)&&r.critN>=1&&r.critN<=5?r.critN:null,obs:oList,steps:st,targeted:txt(r.targeted,600)});
+    {const w=typeof stWhyOf==='function'?stWhyOf(r.why):null;if(w)out.retrain.why=w;}}   /* v25.67 (SKILL-M9) */
   const p=obj(o.probe);if(p&&Number.isInteger(p.col)&&p.col>=1&&p.col<=8){const w=obj(p.written)||{};
     out.probe=Object.assign(srcObj(p),{col:p.col,crit:fin(p.crit,50,100),date:isISO(p.date)?p.date:null,integrity:fin(p.integrity,0,100),critical:fin(p.critical,0,100),
       c:cnt(p.c),s:cnt(p.s),cc:cnt(p.cc),cs:cnt(p.cs),errs:(Array.isArray(p.errs)?p.errs:[]).slice(0,2000).map(e=>{e=obj(e)||{};return{n:Number.isInteger(e.n)&&e.n>=1&&e.n<=2000?e.n:0,code:e.code==='EC'||e.code==='EO'?e.code:''};}).filter(e=>e.n&&e.code),
@@ -2749,7 +2755,11 @@ goBtn.addEventListener('click',()=>{if(!T.rec||!T.ch)return;const P=plan();if(P.
     if(el&&(P.tg.field==='fill'||(P.tg.field==='conflict'&&ch.kr.targeted==='replace'))){setField(el,P.tg.text);written=P.tg.text;}
     ti.retrain=Object.assign({},base,{crit:x.crit,critN:x.critN,obs:x.obs.map(o=>({col:o.col,date:o.date,integrity:o.integrity,critical:o.critical})),
       steps:x.targets.map(t=>({n:t.n,text:t.text,critical:t.critical,codes:t.codes.slice(),commission:t.commission,omission:t.omission,pct:t.pct,priority:t.priority||4,component:t.component||''})),targeted:written});
-    done.push('the steps to retrain ('+list(x.targets.map(t=>String(t.n)))+')');}
+    done.push('the steps to retrain ('+list(x.targets.map(t=>String(t.n)))+')');
+    /* v25.67 (SKILL-M9, batch 3) what TI-1's "Why did it drop?" found goes with the steps, and fills this form's four ticks while none
+       is ticked (a tick made here is never changed) */
+    if(x.why){ti.retrain.why=x.why;const m=S.meta;if(!m.wd_k1&&!m.wd_k2&&!m.wd_k3&&!m.wd_k4){const W=x.why;m.wd_k1=!!W.doesNotKnowSteps;m.wd_k2=!!W.materialsOrTime;m.wd_k3=!!W.notSetUp;m.wd_k4=!!W.noOneNotices;
+      if(W.changed&&!String(m.wd_changed||'').trim())m.wd_changed=W.changed+' (Form TI-1)';if(W.doesNotKnowSteps||W.materialsOrTime||W.notSetUp||W.noOneNotices)done.push('the answers to Why did it drop? from Form TI-1');}}}
   if(P.pr.take){const p=P.pr.p,w={date:'',pct:'',crit:''};
     P.pr.fields.forEach(f=>{const el=q('[data-m="'+f.k+'"]'),put=f.state==='fill'||(f.state==='conflict'&&ch.kr[f.k]==='replace');
       if(el&&put)setField(el,f.want);const key={situ_date:'date',situ_pct:'pct',situ_crit:'crit'}[f.k];w[key]=put||f.state==='same'?f.want:'';});

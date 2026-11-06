@@ -1304,7 +1304,7 @@ const MIT=[
   src:'Winterbauer et al. (2013); Todd et al. (2012); Bruzek et al. (2009) support; Lambert, Pericozzi et al. (2020) did not detect it, and Smith &amp; Greer (2022) found lower resurgence only when a shorter baseline was combined with a longer treatment phase.'},
  /* v25.65 (the BCBA, 11/2; BC-RM-H4 not built) the lean-baseline row stays selectable for school and home teams, as a labelled option
     that says what it does, why, for how long, and what the data must show before it ends; it is never ticked by default */
- {p:0,t:3,k:'leanBl',addr:'Resurgence',proc:'<b>OPTION: Reinforces problem behavior on purpose:</b> Use a leaner schedule of reinforcement for the target behavior during baseline. <span class="rm-plain">What it does: during the baseline or functional analysis, the problem behavior still gets its reinforcer, but less often than it would. Why: in clinic studies, a leaner baseline was followed by less resurgence later. For how long: only during the baseline or functional analysis, before treatment starts. What the data must show before it ends: a baseline the team can read (at least three sessions, with no clear trend); it ends when treatment starts, and never runs once treatment has begun.</span>',
+ {p:0,t:3,k:'leanBl',addr:'Resurgence',proc:'<b>OPTION: Reinforces problem behavior on purpose:</b> Use a leaner schedule of reinforcement for the target behavior during baseline. <span class="rm-plain">What it does: during the baseline or functional analysis, the problem behavior still gets its reinforcer, but less often than it would. Why: in clinic studies, a leaner baseline was followed by less resurgence later. For how long: only during the baseline or functional analysis, before treatment starts. What the data must show before it ends: at least 5 sessions, until the trend is flat or rising and the last 5 sessions vary by no more than half their mean (the studies&rsquo; stopping rule, as on TD-1&rsquo;s lean-baseline cards); end it as soon as the baseline is steady, and never once treatment has begun. Run it only with a safety plan for the behavior.</span>',
   src:'Podlesnik &amp; Shahan (2009); Fisher et al. (2019) \u2014 lower resurgence when it occurred, but it occurred in only 4 of 7 cases. Fisher et al. (2019), reanalyzed with new data in Mitteer et al. (2026): on proportion of baseline, the lean-baseline condition reduced resurgence for 6 of 6 children (median 67.14%); on raw rates, for 3 of 6 (median 9.84%), and for one child the raw-rate interpretation reversed (11 vs 9.80 per min). <b>Cost:</b> the lean baseline itself produced 2.40\u201311.26 responses per minute (grand mean 6.30). The authors suggest reserving this for behavior that does not pose imminent harm (disruption, vocal protest) or for precursors. <b>Caution:</b> lean baselines often produce higher and more variable problem behavior (Vollmer et al., 1998).'},
  {p:1,t:1,addr:'Resurgence',proc:'Signal when reinforcement for the alternative response is and is not available, using multiple or chained schedules with distinct S<sup>D</sup> and S<sup>\u0394</sup> stimuli.',
   src:'Betz et al. (2013); Fuhrman et al. (2016); Fisher et al. (2020), whose mean 81% reduction in resurgence came from presenting the S<sup>\u0394</sup> during the extinction challenge (Phase 3 below). Contrary basic finding: Browning &amp; Shahan (2021).'},
@@ -3143,6 +3143,20 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="rm1-v2567">
+/* v25.67 (BC-RM-H3 fit, batch 3) the settings Form TD-1 names where the plan does not run yet (plan.settings.notYet): shown under
+   Renewal, where a move to them is the change to plan for. Nothing is ticked: the indicators stay the BCBA's. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let st=null;
+ function paint(){const w=document.getElementById('riskWrap');if(!w)return;const i=TYPES.findIndex(t=>t.k==='ren'),box=w.children[i]&&w.children[i].querySelector('.body');if(!box)return;
+  let el=box.querySelector('.rm67-td');const ny=st&&T(st.notYet);if(!ny){if(el)el.remove();return;}
+  if(!el){el=document.createElement('div');el.className='baserate rm67-td';box.appendChild(el);}
+  el.innerHTML='<b>Form TD-1:</b> the plan does not run yet in '+E(ny)+(T(st.runsIn)?' (it runs in '+E(T(st.runsIn))+')':'')+'. Moving it there is a change of setting: plan the move as a challenge, and watch the sessions after it.';}
+ window.__rm2567Td=paint;
+ const rr0=renderRisk;renderRisk=function(){const r=rr0.apply(this,arguments);try{paint();}catch(e){}return r;};
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{st=f&&f.plan&&f.plan.settings&&typeof f.plan.settings==='object'?f.plan.settings:null;paint();}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

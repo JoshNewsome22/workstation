@@ -997,6 +997,8 @@ td input,td select{max-width:100%}
   <table><thead><tr><th style="width:12%">Date</th><th style="width:17%">Condition</th><th class="num" style="width:7%">Delay (s)</th><th class="num" style="width:7%">Minutes</th><th class="num" style="width:7%">Requests</th><th class="num" style="width:7%">Delay trials</th><th class="num" style="width:7%">Waited</th><th class="num" style="width:7%">% waited</th><th class="num" style="width:7%">Prob. beh. (count)</th><th class="num" style="width:7%">PB / min</th><th>Notes</th></tr></thead><tbody id="tbFct"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbFct">Add row</button><button class="tool" id="btnFctCarry">Carry the baseline to Progress</button></div>
   <p class="small">Waited = the delay ran to its end and the reinforcer was delivered. A wait that ended in problem behavior with no reinforcer is not counted as waited.</p>
+  <!-- v25.66 (the BCBA, 11/6) a delay-and-denial baseline as an explained option, never ticked by default -->
+  <div class="chk"><input type="checkbox" name="opt_ddbase" id="oDdb"><label for="oDdb"><b>OPTION: Reinforces problem behavior on purpose: a delay-and-denial baseline.</b> What it does: in baseline only, after a delay or a &ldquo;no&rdquo;, problem behavior produces the requested item (record these sessions as &ldquo;Delay and denial baseline (option)&rdquo;). Why: to confirm that the item is what problem behavior gets before tolerance is taught, as the clinic studies did before treatment (Hanley et al., 2014). For how long: only until the baseline is steady (a few short sessions), ended as soon as it is, and never once tolerance training has begun. Run it only with a safety plan for the behavior. Left out unless ticked.</label></div>
   <div><label class="f">Baseline pattern</label><input type="text" name="fct_summary" placeholder="e.g., no problem behavior with every request honored at once; aggression within 20 s when the same break was delayed 30 s"></div>
   </div>
 
@@ -1805,7 +1807,7 @@ const templates={
   tbPref:()=>T(txt(),n(),sel(['Paired stimulus','MSWO','Free operant','Single stimulus','Teacher nomination']),dt(),txt()),
   tbMag:()=>T(dt(),txt(),txt(),n('1'),n(),calc()),
   tbBase:()=>T(dt(),n(),n('1'),n(),calc(),n(),txt()),
-  tbFct:()=>T(dt(),sel(['Request honored at once (0 s)','Delay on the same reinforcer']),n(),n(),n(),n(),n(),calc(),n(),calc(),txt()),   /* v22.93 (review F399) */
+  tbFct:()=>T(dt(),sel(['Request honored at once (0 s)','Delay on the same reinforcer','Delay and denial baseline (option)']),n(),n(),n(),n(),n(),calc(),n(),calc(),txt()),   /* v22.93 (review F399) */
   tbWait:()=>T(dt(),txt(),n(),txt()),
   tbNat:()=>T(dt(),txt(),n(),txt()),
   tbAv:()=>T(txt(),n(),n(),sel(['High aversive','Moderate','Low aversive']),sel(['Impulsive option (delayed)','Self-control option (immediate)','Not used'])),
@@ -4947,6 +4949,16 @@ const F=(base,...over)=>Object.assign({},base,...over);
 window.__nbhDue=function(){var out=[];document.querySelectorAll('#tbMaint tr').forEach(function(tr){var c=tr.querySelectorAll('input');if(c.length<3)return;
   var iv=String(c[0].value||'').trim(),due=String(c[1].value||'').trim(),done=String(c[2].value||'').trim();
   if(due&&!done)out.push({what:'Maintenance probe'+(iv?' ('+iv+')':''),date:due});});return out;};
+</script>
+<script id="dt1-v2567">
+/* v25.67 (DELAY-M6, batch 3) the discounting probe's AUC reaches the case on its own too: until now it went only with a ladder or a
+   tolerance response. Every form that reads the delay protocol (TD-1, PR-1, QS-1, TI-1, AD-1) reads a protocol with no ladder and
+   no tolerance response as nothing to place, so a case holding only the AUC changes nothing there; Form AD-1 takes the AUC. */
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{if(r&&r.delay)return r;const el=document.getElementById('outAUC'),auc=el?parseFloat(String(el.textContent||'').replace(',','.')):NaN;if(!isFinite(auc))return r;
+    const lk=document.getElementById('outLogK'),k=lk?parseFloat(String(lk.textContent||'')):NaN,dd=document.querySelector('[name="dd_date"]');
+    const delay={src:'DT-1',ladder:[],discount:{auc,logk:isFinite(k)?k:null,date:dd?String(dd.value||''):''}};
+    return Object.assign({},r||{},{delay});}catch(e){return r;}};}
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

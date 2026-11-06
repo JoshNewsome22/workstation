@@ -9905,6 +9905,50 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.67: The case home, the design review's shell group, one screen layout for 14 forms, and batch 3
+(the BCBA, 11/6: the case home and the student switch; every item of the design review marked Build, M7 included; the
+other forms' parts of the second batch; the day's decisions on the QABF, photos, TB-1 and the study-based options)
+
+- **The case home.** A student opens to one page: status, the pinned note, the heatmap, key graphs with the change since
+  baseline as a reader would say it (a percent of baseline for counts, points for a measure that is itself a percent, the
+  amount itself when the baseline is under 1 or the percent is over 300), and Documents. A student-name drop-down switches
+  students; the Students/Forms column folds away to give the page the width.
+- **The design review's shell group (24 items).** One save status that tells the truth (H1); the form takes the width when
+  it opens on the iPad (H2) and the 13-inch iPad held upright gets the upright layout (H3); one notice at a time, out of
+  Focus (H4), and one toast at a time at the bottom left of the stage for 6 s with a 44-px close, hidden while a dialog
+  is open, its full text kept in the form's status panel (M7); search finds forms by what they do (H6); "Packet" means
+  one thing, and Build master print is now Build packet (H7); whole words in the form row (M1); Today's buttons grouped,
+  with what does not apply hidden (M2); Caseload's dashboard apart from its settings (M3); Log it now one tap away with
+  the case's targets as buttons (M4); choosing for print apart from opening, with a state in place of the number (M5);
+  the sheet list's edge tab and its status marks explained (M6); less above the form on a phone (M8); messages that say
+  what to do next (M10); Save case through the iPad's share sheet (M11); the unsaved state announced, not only drawn
+  (M18); L1, L3, L4, L6 and L8; one navigation tree for forms and sheets (B3); and the part of B4 (the case file as the
+  document) that fits the shell now. **Documents** notes each PDF or print made (form, title, date, how; the last 50, the
+  latest 4 shown; never the file itself) and falls back on the dated papers (IC-1's consent, TD-1's adoption, CR-1's plan).
+- **One screen layout for 14 forms (fx2).** The layout approved on DM-1, IC-1 and RR-1 is now one shared block
+  (tools/blocks/fx2.html, put in by tools/blocks/patch-fx2.py) on DM-1, IC-1, RR-1, TB-1, IA-1, IN-1, SI-1, OB-1, SP-1,
+  MT-1, VI-1, EA-1, DA-1 and PA-1. Lists are cards on a touch screen at any width and tables with a mouse; a short example
+  stays in its box and a longer one goes under its label, so a recorder's row keeps every box in its cell (EA-1, PA-1).
+  Paper is unchanged, except that IN-1's example now prints whole.
+- **Batch 3: the other forms' parts of the second batch (29 built, 2 in part).** Among them: EA-1 shows Form IN-1's
+  candidate conditions as conditions to include, never the function, and names one the analysis has no condition for;
+  FS-1 reads EA-1's tier when it writes the function; TD-1 reads the rest of DT-1's plan, PA-1's competing-stimulus test
+  and FD-1 for its meal cards; CR-1's restraint pattern reaches FS-1 and TD-1; IC-1's plan and home decisions reach CT-1
+  and TD-1; PR-1 shows the rest of BC-1's and RM-1's results; TI-1 records feedback with RS-1's eight steps; 54 sources
+  join the readings list.
+- **The day's decisions.** The parent and staff pages share one design ("Questions about S.S. from Jordan Ellis" in the
+  simulation). The QABF keeps "Does not apply" (its X), and IA-1 now reads a FAST "Not sure" as N/A, never No (it was
+  read as No before). IC-1 records the decision on injury photos, and IM-1 reads it; IC-1 counts the home procedures on
+  their own line. TB-1's self-harm statements entry shows the school's risk procedure first; "Stays within reach" counts
+  an offered hand the student chooses to take; a replacement-behavior library of 48 entries. ABC-1's attention color is
+  darker (5.7:1). Study-based options: TD-1's older FCT and DRA cards can switch to the 9-level ladder; TE-1's token check
+  asks for A above B in every pair of sessions; RA-1 reads a stimulus tested only at FR 1 as Probable when the plan's
+  ratio is higher; DT-1 offers the delay-and-denial baseline (off by default); SR-1 thins NCR by the published fixed
+  increments; RM-1's lean-baseline option ends by the studies' rule.
+- **Checks.** check-build reproduces all 48 forms (32 steps). New tests: v2567-casehome, v2567-change,
+  v2567-shell-review, v2567-fx2-g1, v2567-batch3, v2567-famstaff, v2567-qabf-na, v2567-photocons, v2567-tb1-rlib and
+  v2567-tb1-first.
+
 ### v25.66: The forms against JABA, part 3: feeding (Form FD-1), injury photos, safety, staff and tokens
 (the BCBA, 11/2: the rest of the second batch of the review changes marked Build; the BCBA, 11/6: photos on IM-1's body map)
 

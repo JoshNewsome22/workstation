@@ -3030,6 +3030,26 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="cf1-v2567">
+/* v25.67 (CARE-L2, batch 3) the home side from Form CT-1: the caregiver's own six home-fit answers (caregiver.fit), shown on the
+   Summary after "School Fit and Home Fit", so school and home fit sit side by side even when no caregiver rated this form. Shown
+   from the case; not saved with this form; the school verdict is unchanged. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const isHome=r=>/caregiver|parent|guardian|home|mother|father|grand/i.test(String((r||{}).role||''));
+ let fit=null;
+ function paint(){const at=document.getElementById('cfHomeCmp');if(!at)return;let el=document.getElementById('cf67CtFit');
+  if(!el){el=document.createElement('div');el.id='cf67CtFit';at.insertAdjacentElement('afterend',el);}
+  const F=(Array.isArray(fit)?fit:[]).filter(x=>x&&T(x.q)&&/^(Yes|Partly|No)$/.test(T(x.a)));if(!F.length){el.hidden=true;el.innerHTML='';return;}
+  const n=k=>F.filter(x=>T(x.a)===k).length,home=(S.raters||[]).some(isHome);
+  el.hidden=false;el.innerHTML='<h3 style="margin-top:14px">Home Fit from Form CT-1</h3><p class="hint">The caregiver&rsquo;s own answers about running the plan in the routine at home (Form CT-1). '+
+   (home?'They sit beside the caregivers who rated this form.':'No caregiver rated this form, so these answers stand for the home side, beside the school staff&rsquo;s ratings above.')+' A routine that does not fit at home is a reason to change the home part of the plan, not a reason to press the family.</p>'+
+   '<div class="grid-wrap" tabindex="0" role="region" aria-label="Home fit from Form CT-1"><table class="rt"><thead><tr><th style="text-align:left">At home</th><th style="width:14%">Answer</th><th style="text-align:left;width:38%">What would make it fit</th></tr></thead><tbody>'+
+   F.map(x=>'<tr><td>'+E(T(x.q))+'</td><td style="text-align:center">'+E(T(x.a))+'</td><td>'+E(T(x.w))+'</td></tr>').join('')+
+   '<tr style="background:#EFF3F1;font-weight:600"><td>'+F.length+' answered</td><td style="text-align:center">'+n('Yes')+' yes, '+n('Partly')+' partly, '+n('No')+' no</td><td></td></tr></tbody></table></div>';}
+ window.__cf2567Paint=paint;
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{fit=f&&f.caregiver&&Array.isArray(f.caregiver.fit)?f.caregiver.fit:null;paint();}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

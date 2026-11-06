@@ -12,51 +12,69 @@
 :root{--navy:#182e43;--slate:#254657;--teal:#76a2a3;--mist:#eaf2f0;--ink:#1a2933;--muted:#54676f;--rule:#cfdad8;--red:#8e2a2a;--ok:#1f6b4a;--warn:#7a4b00}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{margin:0;background:#f1f4f3;color:var(--ink);font:16px/1.45 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+body{margin:0;background:#f1f4f3;color:var(--ink);font:16px/1.45 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif}
 button,input,select{font:inherit;font-size:16px;color:inherit}
 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
-.sd{max-width:560px;margin:0 auto;padding:12px 16px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #2f7fa8;outline-offset:2px}
+/* v25.67 (design review M14, B5) the same design as the questionnaire page: a head that says about whom and that every tap is
+   kept on this phone, the Send bar kept in view at the end of the page (in the page, so it never covers the last target), a footer */
+.sd{max-width:560px;margin:0 auto;padding:12px 16px 0;display:flex;flex-direction:column;min-height:100vh}
+.sd>*{flex:0 0 auto}
 .card{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:14px;margin:0 0 12px;box-shadow:0 1px 3px rgba(24,46,67,.06)}
-h1{font:600 21px/1.25 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--navy);margin:0 0 2px}
+h1{font:600 24px/1.25 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--navy);margin:0 0 6px;overflow-wrap:anywhere}
 h2{font-size:17px;line-height:1.3;margin:0;color:var(--navy);overflow-wrap:anywhere}
 .who{color:var(--muted);margin:0}
 .who b{color:var(--ink)}
-.f{display:block;font-size:14px;color:var(--muted);margin:10px 0 4px}
+.lede{margin:6px 0 0;font-size:16px}
+.keep{margin:6px 0 0;font-size:16px}
+.keep.warn{color:var(--warn);font-weight:600}
+.help{margin:0 2px 12px;font-size:15px;color:var(--ink)}
+.f{display:block;font-size:15px;color:var(--muted);margin:10px 0 4px}
 .f:first-child{margin-top:0}
-input[type=date],input[type=text],select{width:100%;min-height:48px;padding:8px 12px;border:1px solid #b7c8c5;border-radius:10px;background:#fff}
+input[type=date],input[type=text],select{width:100%;min-height:48px;padding:8px 12px;border:1px solid #7f9692;border-radius:10px;background:#fff}
 .seg{display:flex;gap:8px}
-.seg button{flex:1 1 0;min-width:0;min-height:48px;border:1.5px solid #b7c8c5;border-radius:10px;background:#fff;padding:6px 4px;font-weight:600}
+.seg button{flex:1 1 0;min-width:0;min-height:48px;border:1.5px solid #7f9692;border-radius:10px;background:#fff;padding:6px 4px;font-weight:600}
 .seg button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
 .seg button.as-refused[aria-pressed=true],.seg button.as-withdrew[aria-pressed=true]{background:#7c2222;border-color:#7c2222}
 .th{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin:0 0 10px}
-.watch{flex:0 0 auto;min-height:44px;min-width:44px;border:1px solid #b7c8c5;border-radius:10px;background:#fff;padding:6px 10px;font-size:14px;font-weight:600;color:var(--slate)}
-.watch[aria-pressed=false]{background:#f6eeee;border-color:#d9a5a5;color:#7c2222}
-.t.off .ctl,.t.off .sub{opacity:.4}
+/* the Watching switch says its state: Watching now (a green dot) or Not watching */
+.watch{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;min-width:44px;border:1.5px solid var(--ok);border-radius:22px;background:#fff;padding:6px 12px;font-size:15px;font-weight:600;color:var(--ok);white-space:nowrap}
+.watch::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--ok);flex:0 0 auto}
+.watch[aria-pressed=false]{background:#f6eeee;border-color:#a33a3a;color:#7c2222}
+.watch[aria-pressed=false]::before{background:transparent;border:2px solid #a33a3a;width:6px;height:6px}
+/* a target not watched is greyed with real colors (still 4.5:1), and its line "Not watching: left blank, not sent." stays readable */
+.t.off .big{background:#e3e9e8;color:#3d4f57;border:0}
+.t.off .num,.t.off .tally{color:#54676f}
 .ctl{display:flex;align-items:center;gap:10px}
 .big{flex:1 1 auto;min-height:72px;border:0;border-radius:14px;background:var(--navy);color:#fff;font-size:26px;font-weight:700;padding:8px 12px}
 .big:active{transform:scale(.98)}
-.big.minus{background:var(--slate)}
+/* + dark green, − neutral with an outline: told apart at a glance */
+.big.plus{background:var(--ok)}
+.big.minus{background:#fff;color:var(--ink);border:2px solid #54676f}
 .big.run{background:#7c2222}
 .num{flex:0 0 auto;min-width:72px;text-align:center;font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--navy)}
-.undo{flex:0 0 auto;min-height:72px;min-width:64px;border:1.5px solid #b7c8c5;border-radius:14px;background:#fff;font-weight:600;padding:6px 10px}
+.undo{flex:0 0 auto;min-height:72px;min-width:64px;border:1.5px solid #7f9692;border-radius:14px;background:#fff;font-weight:600;padding:6px 10px}
 .undo:disabled{opacity:.4}
 .pm{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
 .pm .tally{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--navy)}
-.sub{margin:8px 0 0;font-size:14px;color:var(--muted)}
+.sub{margin:8px 0 0;font-size:15px;color:var(--muted)}
 .eps{margin:8px 0 0;padding:0 0 0 20px;font-size:15px;font-variant-numeric:tabular-nums}
 .note-in{margin-top:4px}
-.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(241,244,243,.97);border-top:1px solid var(--rule);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:5}
-.bar .in{max-width:560px;margin:0 auto}
+.bar{position:sticky;bottom:0;z-index:5;margin:auto -16px 12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#f1f4f3;border-top:1px solid var(--rule);box-shadow:0 -2px 8px rgba(24,46,67,.06)}
 .send{display:block;width:100%;min-height:56px;border:0;border-radius:14px;background:var(--ok);color:#fff;font-size:19px;font-weight:700;padding:8px 12px}
 .send:disabled{opacity:.6}
-.msg{min-height:1.4em;margin:0 0 8px;font-size:15px;font-weight:600}
+.msg{margin:0 0 8px;font-size:15px;font-weight:600}
+.msg:empty{margin:0}
 .msg.ok{color:var(--ok)}.msg.warn{color:var(--warn)}.msg.bad{color:var(--red)}
+@media(prefers-reduced-motion:reduce){.big:active{transform:none}}
 .old{background:#fdf6e7;border:1px solid #e3c98a;border-left:4px solid #9a6208;border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:15px}
 .sent{margin:0;padding:0;list-style:none;font-size:15px}
 .sent li{border-top:1px solid var(--rule);padding:8px 0}
 .sent li:first-child{border-top:0}
 .sent b{font-variant-numeric:tabular-nums}
-.foot{font-size:13.5px;color:var(--muted);margin:4px 2px 0}
+.sd-foot{margin:0 0 24px;padding:0 2px}
+.foot{font-size:14px;color:var(--muted);margin:10px 0 0}
+.foot b{color:var(--ink)}
 .empty{max-width:560px;margin:40px auto;padding:20px;background:#fff;border:1px solid var(--rule);border-radius:12px}
 </style>
 <script src="nbh-respond.js"></script>

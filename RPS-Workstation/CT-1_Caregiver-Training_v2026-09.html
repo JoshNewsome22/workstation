@@ -4064,6 +4064,61 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="ct1-v2567-meal">
+/* v25.67 (FEED-M3, batch 3) the Mealtime Routine filled from Form FD-1 (the plan it holds): when FD-1 has a feeding plan, the
+   module says so and offers "Train this routine", which sets the meal on and fills "Written steps given" from FD-1's plan items and
+   "Who leads the feeding plan" from FD-1's gate, each only while empty. When FD-1 says a medical feeding team leads, CT-1 records
+   that and trains nothing of it. Nothing is changed until the button is pressed. */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let F=null;
+ const written=()=>F&&Array.isArray(F.plan)&&F.plan.length?'From Form FD-1’s plan: '+F.plan.join('; '):'';
+ const team=()=>F&&F.lead==='team'?'A medical feeding team leads (Form FD-1): its own protocol is recorded here and not trained on this form':F&&F.lead==='menu'?'The family, the doctor and a feeding specialist, with the plan on Form FD-1':'';
+ function box(){let el=document.getElementById('ct67Fd');const at=document.getElementById('ctMeal');const tbl=at&&at.closest('table');if(!el&&tbl){el=document.createElement('div');el.id='ct67Fd';el.className='hint noprint';tbl.insertAdjacentElement('afterend',el);}return el;}
+ function paint(){const el=box();if(!el)return;const w=written(),on=(S.meta||{}).meal==='yes';
+  if(!F||(!w&&!F.lead)){el.hidden=true;el.innerHTML='';return;}el.hidden=false;
+  el.innerHTML='<b>Form FD-1 holds a feeding plan</b>'+(w?': '+E(w.replace(/^From Form FD-1’s plan: /,''))+'.':'.')+(F.lead==='team'?' A medical feeding team leads it: record its training here; this form trains none of it.':'')+
+   (on?'':' <button type="button" class="tool" id="ct67FdGo">Train this routine</button>');}
+ function go(){const m=S.meta;let n=0;const put=(k,v)=>{if(!v||T(m[k]))return;m[k]=v;const e=document.querySelector('[data-m="'+k+'"]');if(e){e.value=v;['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));}n++;};
+  put('meal','yes');put('meal_written',written());put('meal_team',team());try{renderAll();}catch(e){}paint();return n;}
+ window.__ct2567MealGo=go;
+ document.addEventListener('click',e=>{if(e.target&&e.target.id==='ct67FdGo'){e.preventDefault();go();}});
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{F=f&&f.feeding&&typeof f.feeding==='object'?f.feeding:null;paint();}catch(e){}return r;};
+ document.addEventListener('change',e=>{if(e.target&&e.target.id==='ctMeal')setTimeout(()=>{try{paint();}catch(x){}},0);});
+})();
+</script>
+<script id="ct1-v2567-safety">
+/* v25.67 (CARE-H7, M10, M7; batch 3) what Forms IC-1 and HD-1 record, read by CT-1:
+   (CARE-H7) IC-1's consent to the plan's procedures: a Yes to an extinction part fills "Consent to the extinction step", and a Yes to
+   a restrictive part at meals fills "Written consent to escape extinction at meals", each only while blank (a hand answer stays, as
+   Form IM-1 reads IC-1's photo decision);
+   (CARE-M10) IC-1's home procedures: whether caregiver training at home or by video call, and video or photos at home, are consented,
+   shown under "Consent for home programming", with a caution when the training is by telehealth without them;
+   (CARE-M7) HD-1's checklist status: until a step check reaches 80%, the caregiver's own checklist is "family report, not yet checked". */
+(function(){const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let C=null,H=null;
+ const md=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(v));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(v);};
+ const MEAL=/\bmeals?\b|\bbites?\b|\bfood\b|\bspoon\b|\bfeed|\bspat\b|\blips?\b/i;
+ function fill(){const P=C&&C.planProcs;if(!P||!Array.isArray(P.parts))return 0;let n=0;const m=S.meta,sg=T(P.signed)?', signed '+md(P.signed):'';
+  const put=(k,v)=>{if(!v||T(m[k]))return;m[k]=v;const e=document.querySelector('[data-m="'+k+'"]');if(e){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}n++;};
+  if(P.parts.some(p=>p&&p.type==='extinction'&&p.dec==='yes'))put('extCons','Form IC-1, consent to the plan’s procedures: the extinction step, Yes'+sg);
+  if(P.parts.some(p=>p&&p.type==='restrictive'&&p.dec==='yes'&&MEAL.test(T(p.desc))))put('meal_eeCons','Form IC-1, consent to the plan’s procedures: escape extinction at meals, Yes'+sg);
+  return n;}
+ function homeNote(){const at=document.querySelector('[data-m="consent"]');const row=at&&at.closest('tr');if(!row)return;let el=document.getElementById('ct67Home');
+  if(!el){const tr=document.createElement('tr');tr.className='noprint';tr.innerHTML='<td colspan="4"><p class="hint" id="ct67Home" style="margin:2px 0"></p></td>';row.insertAdjacentElement('afterend',tr);el=document.getElementById('ct67Home');}
+  const h=C&&C.home;if(!h||typeof h!=='object'){el.closest('tr').hidden=true;el.textContent='';return;}
+  const vd=T(h.videoDec),tele=/^(Telehealth|Mixed)$/.test(T((S.meta||{}).where));
+  const t='Form IC-1, home procedures: caregiver training at home or by video call '+(h.train?'is consented':'is not ticked')+'; video or photos at home: '+(vd==='yes'?'Yes':vd==='no'?'No':'not decided')+'.'+
+   (tele&&(!h.train||vd!=='yes')?' Training here is by telehealth: record the consent to home training and to video on Form IC-1 first.':'');
+  el.closest('tr').hidden=false;el.textContent=t;}
+ function hdNote(){const el=document.getElementById('ctHomeRec');if(!el||el.hidden||!H)return;let s=el.querySelector('.ct67-chk');
+  const t=H.integrityChecked===true?' Form HD-1: its step checks agree with an observer (80% or more).':H.integrityChecked===false?' Form HD-1: family report, not yet checked (no step check at 80% yet).':'';
+  if(!t){if(s)s.remove();return;}if(!s){s=document.createElement('span');s.className='ct67-chk';el.appendChild(s);}s.textContent=t;}
+ const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=0;
+  try{C=f&&f.consent&&typeof f.consent==='object'?f.consent:null;H=f&&f.home&&typeof f.home==='object'?f.home:null;n=fill();if(n)try{renderAll();}catch(e){}homeNote();hdNote();}catch(e){}
+  if(!n)return r;return {filled:((r&&r.filled)||0)+n,note:[(r&&r.note)||'','consent to the extinction or meal step from Form IC-1'].filter(Boolean).join('; ')};};
+ try{const rs0=typeof renderSum==='function'?renderSum:null;if(rs0)renderSum=function(){const r=rs0.apply(this,arguments);try{hdNote();homeNote();}catch(e){}return r;};}catch(e){}
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

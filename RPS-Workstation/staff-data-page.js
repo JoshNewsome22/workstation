@@ -54,7 +54,9 @@ roll();keep();
 /* ---- the page ---- */
 var ASSENT=[['agreed','Agreed'],['refused','Refused'],['withdrew','Withdrew']];
 function opt(v,t,sel){return '<option value="'+esc(v)+'"'+(sel?' selected':'')+'>'+esc(t)+'</option>';}
-function card(t){var x=st.t[t.i],h='<section class="card t'+(x.off?' off':'')+'" data-t="'+esc(t.i)+'" aria-label="'+esc(t.n)+'"><div class="th"><h2>'+esc(t.n)+'</h2><button type="button" class="watch" data-a="watch" aria-pressed="'+(!x.off)+'">'+(x.off?'Not watching':'Watching')+'</button></div>';
+/* v25.67 (design review M14) the Watching switch says its state, "Watching now" or "Not watching", with one line of help above the targets */
+function watchWord(x){return x.off?'Not watching':'Watching now';}
+function card(t){var x=st.t[t.i],h='<section class="card t'+(x.off?' off':'')+'" data-t="'+esc(t.i)+'" aria-label="'+esc(t.n)+'"><div class="th"><h2>'+esc(t.n)+'</h2><button type="button" class="watch" data-a="watch" aria-pressed="'+(!x.off)+'" aria-describedby="sdWatchHelp" aria-label="'+esc(watchWord(x)+': '+t.n)+'">'+watchWord(x)+'</button></div>';
   if(t.m==='n')h+='<div class="ctl"><button type="button" class="big plus" data-a="inc" aria-label="Add one: '+esc(t.n)+'">+1</button><output class="num" data-o="n" aria-live="polite">0</output><button type="button" class="undo" data-a="undo" aria-label="Take one back: '+esc(t.n)+'">&minus;1</button></div>';
   else if(t.m==='d')h+='<div class="ctl"><button type="button" class="big" data-a="dur">Start</button><output class="num" data-o="clock">0:00</output><button type="button" class="undo" data-a="undo" aria-label="Undo the last episode: '+esc(t.n)+'">Undo</button></div><ol class="eps" data-o="eps"></ol>';
   else{var P=t.m==='i'?['+ Occurred','&minus; Did not']:['+ Correct','&minus; Not'];
@@ -62,18 +64,23 @@ function card(t){var x=st.t[t.i],h='<section class="card t'+(x.off?' off':'')+'"
       '<div class="pm"><span class="tally" data-o="pm" aria-live="polite"></span><button type="button" class="undo" data-a="undo" style="min-height:48px" aria-label="Undo the last mark: '+esc(t.n)+'">Undo</button></div>';}
   return h+'<p class="sub" data-o="sub"></p></section>';}
 function render(){var sets=L.st.slice(),cur=st.set;if(cur&&sets.indexOf(cur)<0)sets.push(cur);
-  root.innerHTML='<div class="card"><h1>Behavior data'+(L.s?' · '+esc(L.s):'')+'</h1><p class="who">'+(L.w?'Recording: <b>'+esc(L.w)+'</b>':'Recording on this phone')+'</p></div>'+
+  var nT=L.t.length;
+  root.innerHTML='<div class="card head"><h1>Behavior data'+(L.s?' about '+esc(L.s):'')+'</h1><p class="who">'+(L.w?'Recording: <b>'+esc(L.w)+'</b>':'Recording on this phone')+'</p>'+
+    '<p class="lede">'+nT+' target'+(nT===1?'':'s')+' to record: tap as '+(nT===1?'it happens':'they happen')+', then send at the end of the session.</p>'+
+    '<p class="keep" id="sdKeep">Every tap is kept on this phone until you send it.</p></div>'+
     '<div class="old" id="old" hidden></div>'+
     '<div class="card"><label class="f" for="sdDate">Date</label><input type="date" id="sdDate" value="'+esc(st.date)+'" max="'+esc(today())+'">'+
     '<label class="f" for="sdSet">Setting</label><select id="sdSet">'+opt('','Choose the setting',!cur)+sets.map(function(s){return opt(s,s,s===cur);}).join('')+opt('__other','Other…',false)+'</select>'+
     '<input type="text" id="sdSetOther" placeholder="Type the setting" maxlength="40" hidden autocomplete="off">'+
     '<span class="f" id="sdAsL">Assent (the student agreed to take part)</span><div class="seg" role="group" aria-labelledby="sdAsL">'+ASSENT.map(function(a){return '<button type="button" class="as-'+a[0]+'" data-as="'+a[0]+'" aria-pressed="'+(st.as===a[0])+'">'+a[1]+'</button>';}).join('')+'</div></div>'+
+    '<p class="help" id="sdWatchHelp">Turn “Watching now” off when you are not with the student, so a 0 is not counted.</p>'+
     L.t.map(card).join('')+
     '<div class="card"><label class="f" for="sdNote">Note (optional; no names)</label><input type="text" id="sdNote" class="note-in" maxlength="300" autocomplete="off" value="'+esc(st.note)+'"></div>'+
     '<div class="card" id="sdSentC" hidden><h2>Sent</h2><ul class="sent" id="sdSent"></ul></div>'+
-    '<p class="foot">Every tap is kept on this phone until it is sent. Send locks it on this phone so that only the BCBA’s own form can open it; the website keeps only the locked message. The student is named by initials only: keep names off the note.</p>'+
-    '<p class="foot" id="sdKeep" hidden><b>This browser is not keeping the taps</b> (Private Browsing, or storage turned off): send before you close this page.</p>'+
-    '<div class="bar"><div class="in"><p class="msg" id="sdMsg" role="status" aria-live="polite"></p><button type="button" class="send" id="sdSend">Send today’s data</button></div></div>';
+    '<div class="bar" role="region" aria-label="Send the data"><div class="in"><p class="msg" id="sdMsg" role="status" aria-live="polite"></p><button type="button" class="send" id="sdSend">Send today’s data</button></div></div>'+
+    '<footer class="sd-foot"><p class="foot">Send locks the data on this phone so that only the BCBA’s own form can open it; the website keeps only the locked message. The student is named by initials only: keep names off the note.</p>'+
+    '<p class="foot"><b>Need this another way?</b> Ask the BCBA for a paper data sheet, or to go through the targets with you.</p>'+
+    '<p class="foot">Form DD-1 · Daily behavior data</p></footer>';
   paint();}
 function sumOf(t,x){if(t.m==='n')return t.n+' '+x.n;if(t.m==='d'){var s=x.e.reduce(function(a,e){return a+(e.z-e.a)/1000;},0);return t.n+' '+x.e.length+' episode'+(x.e.length===1?'':'s')+(x.e.length?' ('+clock(s)+')':'');}
   var n=x.p+x.m;return t.n+' '+x.p+'+ '+x.m+'−'+(n?' ('+Math.round(100*x.p/n)+'%)':'');}
@@ -82,7 +89,7 @@ var msg={k:'',t:''},armed=0;
 function say(k,t){msg={k:k,t:t};var m=D.getElementById('sdMsg');if(m){m.className='msg'+(k?' '+k:'');m.innerHTML=t;}}
 function paint(){var now=Date.now();
   L.t.forEach(function(t){var x=st.t[t.i],c=root.querySelector('section.t[data-t="'+CSS.escape(t.i)+'"]');if(!c)return;c.classList.toggle('off',x.off);
-    var w=c.querySelector('[data-a="watch"]');w.setAttribute('aria-pressed',String(!x.off));w.textContent=x.off?'Not watching':'Watching';
+    var w=c.querySelector('[data-a="watch"]');w.setAttribute('aria-pressed',String(!x.off));w.textContent=watchWord(x);w.setAttribute('aria-label',watchWord(x)+': '+t.n);
     var sentN=st.sent.concat(st.out).filter(function(e){return e.date===st.date;}),sub=c.querySelector('[data-o="sub"]');
     if(t.m==='n'){c.querySelector('[data-o="n"]').textContent=String(x.n);c.querySelector('[data-a="undo"]').disabled=!x.n;
       var sn=sentN.reduce(function(a,e){var p=e.d&&e.d[t.i];return a+(p&&p.n?p.n:0);},0);sub.textContent=x.off?'Not watching: left blank, not sent.':(sn?sn+' sent already for '+day(st.date)+'. ':'')+'Tap +1 each time it happens.';}
@@ -99,7 +106,7 @@ function paint(){var now=Date.now();
   var list=st.sent.filter(function(e){return e.date===st.date;}),sc=D.getElementById('sdSentC');sc.hidden=!list.length&&!st.out.length;
   D.getElementById('sdSent').innerHTML=st.out.map(function(e){return '<li><b>Waiting to send</b> · '+esc(day(e.date))+': '+esc(entrySum(e)||'the day’s marks')+'</li>';}).join('')+
     list.slice().reverse().map(function(e){return '<li><b>Sent '+esc(hm(e.atMs||Date.parse(e.at)))+'</b>: '+esc(e.sum||'the day’s marks')+'</li>';}).join('');
-  D.getElementById('sdKeep').hidden=canKeep;
+  var kp=D.getElementById('sdKeep');kp.className='keep'+(canKeep?'':' warn');kp.innerHTML=canKeep?'Every tap is kept on this phone until you send it.':'<b>This browser is not keeping the taps</b> (Private Browsing, or storage turned off): send before you close this page.';
   if(!msg.t){if(st.out.length)say('warn',st.out.length+' entr'+(st.out.length===1?'y is':'ies are')+' waiting to send'+(st.err?' ('+esc(st.err)+')':'')+'. '+(st.out.length===1?'It is':'They are')+' kept on this phone and '+(st.out.length===1?'goes':'go')+' by '+(st.out.length===1?'itself':'themselves')+' when the signal is back.');
     else if(touched()||st.dirty)say('','Kept on this phone, not sent yet.');
     else{var last=st.sent[st.sent.length-1];if(last)say('ok','<b>Sent.</b> '+esc(hm(last.atMs||Date.parse(last.at)))+(last.date!==today()?' ('+esc(day(last.date))+')':''));}}}
