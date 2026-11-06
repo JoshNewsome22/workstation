@@ -3750,8 +3750,18 @@ td > textarea.nbh-cell:focus{background:var(--wash,#EEF3F2);outline:none}
   const head='Form SR-1\u2019s schedule'+(sch.nota?' ('+sch.nota+(D.step?', step '+D.step:'')+')':D.step?' (step '+D.step+')':'');
   const since=D.since?' since the step began on '+md(D.since):'';
   if(run(D.back,'ge'))return {how:'back',t:head+': step back. '+b.name+' was '+say(D.back,'ge')+since+'. Go back one step, as the card says, and set the step in force on Form SR-1.'};
+  /* v25.67 (FCT-SR-H4) a multiple schedule steps on the discrimination too: Form SR-1's second row (the share of requests made in
+     S+, never below 70%) on the same days; below it the step holds; with no such row on Form DD-1 the step is due on the rate, as
+     on Form TD-1, and the counts are asked for */
+  if(run(D.up,'le')&&D.up2&&isFinite(+D.up2.v)){const r2=K(D.row2||'requests in s+'),b2=data.behaviors.find(x=>K(x.name)===r2)||data.behaviors.find(x=>K(x.name)&&(r2.indexOf(K(x.name))>=0||K(x.name).indexOf(r2)>=0));
+    const n2=+D.up2.n>0?+D.up2.n:+(D.up&&D.up.n)||1,v2=Math.max(70,+D.up2.v),P2=b2&&Array.isArray(b2.series)?b2.series.filter(p=>p&&p.v!==null&&p.v!==''&&isFinite(+p.v)&&(!D.since||String(p.d)>=D.since)):[];
+    if(P2.length>=n2&&!P2.slice(-n2).every(p=>+p.v>=v2)){const last=+P2[P2.length-1].v;
+      return {how:'hold',t:head+': hold. '+b.name+' was '+say(D.up,'le')+since+', but '+(Math.round(last*10)/10)+'% of requests were made in S+ on the last day with data (the card asks at least '+v2+'% on each of the last '+n2+' day'+(n2===1?'':'s')+'). Stay at this step and keep the signals until the request follows them (Greer et al., 2016).'};}
+    if(P2.length>=n2)return {how:'up',t:head+': a step up is due. '+b.name+' was '+say(D.up,'le')+since+', and at least '+v2+'% of requests were made in S+ on each of the last '+n2+' day'+(n2===1?'':'s')+'. Take the next step on the card, write the date it was reached, and set the step in force on Form SR-1.'};
+    return {how:'up',t:head+': a step up is due on the rate. '+b.name+' was '+say(D.up,'le')+since+'. Form DD-1 has no row “'+(D.row2||'Requests in S+ (%)')+'” yet: count requests in S+ and in S−, and check that at least '+v2+'% were made in S+ before taking the next step.'};}
   if(run(D.up,'le'))return {how:'up',t:head+': a step up is due. '+b.name+' was '+say(D.up,'le')+since+'. Take the next step on the card, write the date it was reached, and set the step in force on Form SR-1.'};
   return null;}
+ window.__prSrStepDue=srStepDue;   /* v25.67 for the tests */
  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
   try{const h=document.getElementById('prSchedSrc'),x=f&&srStepDue(f.schedule,f.data);if(h&&x){h.hidden=false;h.textContent=(h.textContent?h.textContent+' ':'')+x.t;}}catch(e){}
   return r;};})();
