@@ -7057,7 +7057,7 @@ function vBar(p){const V=versOf(p);if(V.length<2)return '';const b=byId[base]||p
  const chips=shown.map(x=>`<li><button type="button" class="vchip${x.id===base?' vbase':''}" data-v="${esc(x.id)}" aria-current="${x.id===cur?'true':'false'}" title="${esc(x.lab)}"><span class="vc">${esc(vCite(x))}${x.id===base?'<span class="vbh"> · started here</span>':''}</span><span class="vs">${esc(vSpecial(x))}</span></button></li>`).join('');
  return `<section class="vers" aria-labelledby="tdVersH"><div class="vhd"><h5 class="vt" id="tdVersH">Versions from the studies</h5><span class="vcnt">${shown.length} of ${V.length} shown, oldest first</span></div>`+
   (fl.length>1?`<div class="vfil" role="group" aria-label="Show versions">${fl.map(([k,l])=>`<button type="button" class="vf" data-vf="${k}" aria-pressed="${k===vfilt?'true':'false'}">${esc(l)}</button>`).join('')}</div>`:'')+
-  `<ul class="vchips" aria-label="Versions from the studies, oldest first">${chips}</ul>`+
+  `<ul class="vchips" role="list" aria-label="Versions from the studies, oldest first">${chips}</ul>`+
   `<div class="vtools"><button type="button" class="vsbs" aria-pressed="${two&&cur!==base?'true':'false'}"${cur===base?' disabled':''}>Side by side</button><button type="button" class="vre"${cur===base?' disabled':''}>Start from this version</button><span class="vnote">${cur===base?'Pick a study to compare.':'Comparing with '+esc(vCite(b))+'.'}</span></div></section>`;}
 function vTable(a,b){const same=a.id===b.id,R=vRows(a,b);let nd=0;
  const cell=(v,q)=>esc(v||'Not stated')+(q?'<span class="vq">“'+esc(q.length>220?q.slice(0,217)+'…':q)+'”</span>':'');
@@ -7085,7 +7085,8 @@ function vPane(p,label,M){const L=LIBOF[p.code],prm=L.params.map(x=>x[0]).filter
 const vMotion=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';}catch(e){return 'auto';}};   /* no smooth scroll when reduced motion is asked for */
 const vLive=document.createElement('p');vLive.className='vh-sr';vLive.setAttribute('aria-live','polite');$p('.body').appendChild(vLive);
 function vSay(t){if(!vLive)return;vLive.textContent='';setTimeout(()=>{vLive.textContent=t;},60);}
-function vRender(focus){const ch=det.querySelector('.vchips'),sl=ch?ch.scrollLeft:0;show(cur,true);const ch2=det.querySelector('.vchips');if(ch2)ch2.scrollLeft=sl;
+let vKeep=false;
+function vRender(focus){const ch=det.querySelector('.vchips'),sl=ch?ch.scrollLeft:0;vKeep=true;try{show(cur,true);}finally{vKeep=false;}const ch2=det.querySelector('.vchips');if(ch2)ch2.scrollLeft=sl;
  const f=focus?det.querySelector(focus):null;if(f){try{f.focus({preventScroll:true});}catch(e){}try{if(f.classList.contains('vchip'))f.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){}}}
 function vPick(id){const p=byId[id],b=byId[base];if(!p)return;cur=id;vRender('.vchip[aria-current="true"]');
  if(!b||b.id===p.id){vSay('Showing '+vCite(p)+', the version this started from.');return;}
@@ -7096,7 +7097,7 @@ function show(id,keep){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
   const bar=vBar(p),bp=byId[base]||p,head=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>`+(bar?bar+vTable(bp,p):'');
-  if(!keep)setTimeout(()=>{const ch=det.querySelector('.vchips'),cc=ch&&ch.querySelector('.vchip[aria-current="true"]');if(ch&&cc){const d0=cc.getBoundingClientRect().left-ch.getBoundingClientRect().left;if(d0<0||d0+cc.offsetWidth>ch.clientWidth)ch.scrollLeft+=d0-8;}},0);   /* the card opened shows in the bar */
+  if(!vKeep)setTimeout(()=>{const ch=det.querySelector('.vchips'),cc=ch&&ch.querySelector('.vchip[aria-current="true"]');if(ch&&cc){const d0=cc.getBoundingClientRect().left-ch.getBoundingClientRect().left;if(d0<0||d0+cc.offsetWidth>ch.clientWidth)ch.scrollLeft+=d0-8;}},0);   /* the card opened shows in the bar */
   if(bar&&two&&bp.id!==p.id){const M=Math.max(1,(bp.steps||[]).length,(p.steps||[]).length);det.innerHTML=head+`<div class="vsbs2">${vPane(bp,'Started from',M)}${vPane(p,'This version',M)}</div>`;sameNote();return;}
   det.innerHTML=head+loadHtml(p)+`
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
@@ -7170,7 +7171,7 @@ det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)retu
    /* the two columns come into view, the first column's heading taking the focus */
    if(two&&g){try{g.scrollIntoView({block:'start',behavior:vMotion()});}catch(x){g.scrollIntoView();}const h=g.querySelector('.vcolhd');if(h){h.tabIndex=-1;try{h.focus({preventScroll:true});}catch(x){}}}return;}
   if(b.classList.contains('vre')){base=cur;two=false;vRender('.vchip[aria-current="true"]');vSay('Started from '+vCite(byId[cur])+' now.');return;}
-  if(b.classList.contains('td-bshow')){show(b.dataset.show);return;}
+  if(b.classList.contains('td-bshow')){show(b.dataset.show,true);return;}   /* a card the rule names: of the same component it reads as another version */
   const ld=b.closest('.load'),pid=(ld&&ld.dataset.id)||cur;
   if(b.classList.contains('add')){withPun=b.dataset.pun==='1';const ok=(ld||det).querySelector('.optck');withOpt=!!(ok&&ok.checked);doAdd(byId[pid],ld);}
   else if(b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(pid);
@@ -7968,7 +7969,7 @@ const ST={met:['Met','✓'],not:['Not met','!'],na:['Not applicable','–']};
 function sumOf(L){const n={met:0,not:0,na:0};L.forEach(x=>n[x.st]++);return {n,t:n.met+' of '+L.length+' met'+(n.not?' · '+n.not+' not met':'')+(n.na?' · '+n.na+' not applicable':'')};}
 function render(){let L;try{L=items();}catch(e){return;}const S=sumOf(L);
  const h=`<h3 class="td-qc-h" id="tdQcH">Quality check before sign-off</h3><p class="td-qc-intro">Eight things published reviews of behavior intervention plans look for, each read from this plan, with the place to fix it. It is a check for you: it never stops Copy for the BIP, Print or adoption, and it is not printed or copied.</p>`+
-  `<p class="td-qc-sum">${E(S.t)}</p><ol class="td-qc-list">`+L.map(x=>`<li class="td-qc-it td-qc-${x.st}" data-qc="${x.k}" data-st="${x.st}"><span class="td-qc-st"><span class="td-qc-ic" aria-hidden="true">${ST[x.st][1]}</span>${ST[x.st][0]}</span><div class="td-qc-b"><b class="td-qc-t">${E(x.t)}</b><span class="td-qc-why">${E(x.why)}</span></div><button type="button" class="td-qc-go" data-view="${x.go[0]}" data-to="${E(x.go[1])}">Go to ${E(x.go[2])}</button></li>`).join('')+'</ol>'+
+  `<p class="td-qc-sum">${E(S.t)}</p><ol class="td-qc-list" role="list">`+L.map(x=>`<li class="td-qc-it td-qc-${x.st}" data-qc="${x.k}" data-st="${x.st}"><span class="td-qc-st"><span class="td-qc-ic" aria-hidden="true">${ST[x.st][1]}</span>${ST[x.st][0]}</span><div class="td-qc-b"><b class="td-qc-t">${E(x.t)}</b><span class="td-qc-why">${E(x.why)}</span></div><button type="button" class="td-qc-go" data-view="${x.go[0]}" data-to="${E(x.go[1])}">Go to ${E(x.go[2])}</button></li>`).join('')+'</ol>'+
   `<div class="td-qc-bar"><button type="button" class="tool" data-qc-do="bip">Copy for the BIP</button><button type="button" class="tool" data-qc-do="print">Print final plan only</button><span class="td-qc-msg" aria-hidden="true"></span></div>`+
   `<p class="td-qc-src">The items are those of the Behavior Support Plan Quality Evaluation (BSP-QE; Browning-Wright et al., 2007). Under ordinary school conditions, plan quality predicted student outcomes, through how well the plan was carried out (Cook et al., 2012).</p>`;
  if(box.__h!==h){box.__h=h;box.innerHTML=h;}box.hidden=false;
