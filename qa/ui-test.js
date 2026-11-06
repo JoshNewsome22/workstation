@@ -16,7 +16,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.close();}
  const ctx=await br.newContext({viewport:{width:1024,height:1366},hasTouch:true,isMobile:true,deviceScaleFactor:2});const p2=await ctx.newPage();wire(p2,log);
  await p2.goto(BASE+'/NBH-Workstation/OB-1_Direct-Observation-Record_v2026-09.html');await sleep(900);
- const z=await p2.evaluate(()=>({toolbarBtn:Math.round(document.querySelector('.toolbar button,#toolbar button,.nbh-toolbar button,button').getBoundingClientRect().height),coarse:matchMedia('(pointer:coarse)').matches}));
+ /* v25.67 fx2: the toolbar's own first button (the masthead above it now has a button of its own, the layout's "Show the
+    full introduction", which came first in the page's order) */
+ const z=await p2.evaluate(()=>{const b=['.toolbar button','#toolbar button','.nbh-toolbar button','button'].map(s=>document.querySelector(s)).find(Boolean);
+   return {toolbarBtn:Math.round(b.getBoundingClientRect().height),txt:b.textContent.trim().slice(0,24),coarse:matchMedia('(pointer:coarse)').matches};});
  ok('2 on a touch screen the toolbar\'s buttons are at least 44 px tall',z.coarse&&z.toolbarBtn>=44,z);
  ok('3 no page errors',!log.length,log);
  await br.close(); console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exitCode=fails?1:0;})();

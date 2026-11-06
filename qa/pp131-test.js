@@ -38,6 +38,9 @@ const GUIDE_SHEETS=['TB-1','IA-1','PA-1','RA-1','EA-1','OB-1'],GUIDE_SECTIONS=['
  const lightOf=P=>P.slice(0,-1).filter(x=>x.ink<12).map(x=>x.n+':'+x.ink+'%');   /* rows with any ink, at 36 dpi: a page of sparse table rows reads about 20%, a citation alone under 5% */
  const hasText=(P,re)=>P.findIndex(x=>re.test(x.text));
  const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ /* v25.67 fx2: the Guide's heading is read on screen, where the shared layout writes headings in sentence case, and found
+    on paper, where they print as written: the two are matched without regard to letter case */
+ const gre=gt=>new RegExp(esc(gt.slice(0,24)),'i');
  for(const F of Object.keys(FORMS)){const {p,errs,sim}=await open(F);
   const tb=await p.evaluate(()=>({opts:!!document.getElementById('nbhPrintOpts'),g:!!document.getElementById('nbhPrintGuide'),bl:!!document.getElementById('nbhPrintBlank'),own:!!document.querySelector('#printGuide[data-nbh-adopted]'),style:!!document.getElementById('nbh-print-policy'),api:!!(window.nbhPrint&&window.nbhPrint.before)}));
   const gt=await guideText(p);
@@ -46,9 +49,9 @@ const GUIDE_SHEETS=['TB-1','IA-1','PA-1','RA-1','EA-1','OB-1'],GUIDE_SECTIONS=['
   const light=lightOf(P);
   ok(F+': the whole-form printout is no longer than before ('+BEFORE[F]+' pages) and no page but the last is under 12% of its rows inked',P.length<=BEFORE[F]&&!light.length,{pages:P.length,light,ink:brief(P)});
   if(GUIDE_SHEETS.includes(F)||GUIDE_SECTIONS.includes(F)){
-   const gi=gt?hasText(P,new RegExp(esc(gt.slice(0,24)))):-1;
+   const gi=gt?hasText(P,gre(gt)):-1;
    ok(F+': the policy is on, no control was added to the toolbar, and the Guide (the choice off) is not in the printout',tb.api&&tb.style&&!tb.opts&&gi<0,{tb,gt,gi});
-   await setOpt(p,'guide',true);const G=pdfPages(await PDF(p),'pp131-'+F+'-guide.pdf');const gj=gt?hasText(G,new RegExp(esc(gt.slice(0,24)))):-1;
+   await setOpt(p,'guide',true);const G=pdfPages(await PDF(p),'pp131-'+F+'-guide.pdf');const gj=gt?hasText(G,gre(gt)):-1;
    const recEnd=G.findIndex(x=>/Guide|GUIDE/.test(x.text)&&x.n>1);
    ok(F+': ticked, the Guide prints after the record (not on page 1) and the printout grows',G.length>P.length&&gj>0&&!/Guide:|Guide\b/.test(G[0].text.slice(0,400)),{pages:[P.length,G.length],gj,p1:G[0].text.slice(0,120)});
    await setOpt(p,'guide',false);

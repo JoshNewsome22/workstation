@@ -32,12 +32,22 @@ const BARS=()=>[...document.querySelectorAll('.nbh-xs-bar')].filter(b=>!b.hidden
  ok('the right arrow scrolls the box to its far edge (the table is under two screens wide): the right arrow goes quiet and the left one wakes, the fade moves to the left edge; the left arrow brings it back',
    moved.s0===0&&moved.s1>=moved.max-2&&moved.st[0]===false&&moved.st[1]===true&&moved.st[2]===true&&moved.st[3]===false&&moved.s2===0,moved);
  await p.close();
- /* ---- OB-1: Open and Remove lead the Log's rows, sticky ---- */
+ /* ---- OB-1: Open and Remove lead the Log's rows, sticky ----
+    v25.67 fx2: at 820 px the shared screen layout shows the Log's observations as cards, each led by Open and Remove,
+    with nothing to scroll (and so no bar); the table that scrolls sideways, its first column sticky and its box with the
+    bar, is the 13-inch iPad's upright (1032 px), checked after */
  p=await open(ipad,F.ob,true);await p.evaluate(()=>{const v=document.querySelector('[data-view="log"]');if(v)v.click();});await sleep(1200);
+ r=await p.evaluate(()=>{const t=document.querySelector('table.grid.oblog');const rows=t?[...t.tBodies[0].rows].filter(x=>x.cells.length>2):[];const W=document.documentElement.clientWidth;
+   const bad=rows.filter(x=>{const R=x.getBoundingClientRect(),a=x.cells[0].getBoundingClientRect();const tops=[...x.cells].slice(1).filter(c=>c.getClientRects().length).map(c=>c.getBoundingClientRect().top);
+     return !([...x.cells[0].querySelectorAll('button')].map(b=>b.textContent.trim()).join()==='Open,Remove'&&a.top<=Math.min(...tops)+1&&R.left>=0&&R.right<=W);}).length;
+   const w=document.querySelector('#obsLog .logwrap');const bar=!!(w&&w.previousElementSibling&&w.previousElementSibling.classList.contains('nbh-xs-bar')&&!w.previousElementSibling.hidden&&w.previousElementSibling.offsetParent);
+   return {cards:!!t&&t.classList.contains('fx2-cards'),n:rows.length,bad,bar,W,sw:document.documentElement.scrollWidth};});
+ ok('OB-1 (R-054) at 820 px: each observation of the Log is a card led by Open and Remove, in view, with nothing to scroll (no bar)',r.cards&&r.n>0&&!r.bad&&!r.bar&&r.sw<=r.W,r);
+ await p.setViewportSize({width:1032,height:1376});await sleep(1200);
  r=await p.evaluate(()=>{const th=[...document.querySelectorAll('table.grid.oblog thead th')].map(t=>t.className+'|'+t.textContent.trim());const td=document.querySelector('table.grid.oblog tbody tr td');const w=document.querySelector('#obsLog .logwrap');
    const btns=td?[...td.querySelectorAll('button')].map(b=>b.textContent.trim()):[];const r0=td&&td.getBoundingClientRect().left;if(w)w.scrollLeft=300;const r1=td&&td.getBoundingClientRect().left;
    return {th:th.slice(0,3),btns,sticky:td&&getComputedStyle(td).position,r0:Math.round(r0),r1:Math.round(r1),scrolled:w&&w.scrollLeft,bar:!!(w&&w.previousElementSibling&&w.previousElementSibling.classList.contains('nbh-xs-bar')&&!w.previousElementSibling.hidden)};});
- ok('OB-1 (R-054): the Log\'s first column holds Open and Remove, sticky at the left while the row scrolls, and the log\'s box carries the bar',
+ ok('OB-1 (R-054) at 1032 px: the Log\'s first column holds Open and Remove, sticky at the left while the row scrolls, and the log\'s box carries the bar',
    /^noprint act\|$/.test(r.th[0])&&/\|#$/.test(r.th[1])&&r.btns.join()==='Open,Remove'&&r.sticky==='sticky'&&r.scrolled>0&&Math.abs(r.r1-r.r0)<=2&&r.bar,r);
  /* Open still opens that observation */
  const opened=await p.evaluate(()=>{const b=document.querySelector('table.grid.oblog tbody tr:nth-child(2) td.act .logOpen');if(!b)return null;b.click();return new Promise(res=>setTimeout(()=>res({view:document.querySelector('[data-view].on,[data-view][aria-selected="true"],[data-view].active')?.dataset.view||'',cur:(window.state&&(state.cur??state.obsIndex??state.i))}),600));});
