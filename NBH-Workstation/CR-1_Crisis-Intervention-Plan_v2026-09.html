@@ -1022,6 +1022,7 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <button data-view="plan" aria-pressed="false">Crisis intervention plan</button>
       <button data-view="deb" aria-pressed="false">Debriefing</button>
       <button data-view="log" aria-pressed="false">Restraint log</button>
+      <button data-view="tm" aria-pressed="false">Threat team brief</button><!-- v25.68 (research #2) -->
       <button data-view="guide" aria-pressed="false">Statute</button>
     </div></div></div>
   <div class="tgroup"><span>Sheet actions</span><div class="row">
@@ -1215,6 +1216,10 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <tr><th>School representative</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
       <tr><th>Case BCBA</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
     </table>
+    <!-- v25.68 (research #6) the date the plan was signed; from then on a change is a dated addendum with its reason (cr1-v2568) -->
+    <div class="add68-sign noprint" data-add68-skip><label for="crSgOn">The plan was signed on</label><input type="date" id="crSgOn" data-m="sgOn" aria-describedby="crSgHint">
+      <p class="hint" id="crSgHint">Enter the date on the signed plan once the team has signed it. From then on a change to the Setup or the plan is kept as a dated addendum with its reason, and the printout shows it after the signatures. Nothing is blocked.</p></div>
+    <div id="cr1Add68" class="add68"></div>
   </section>
 
   <!-- ====== DEBRIEF ====== -->
@@ -1358,6 +1363,22 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
     </div>
   </section>
 
+  <!-- ====== THREAT TEAM BRIEF (v25.68, research #2; cr1-v2568) ====== -->
+  <section class="only-tm" id="tmSec">
+    <h2 class="nbh-band">Baker Act and Threat Management Events</h2>
+    <div class="statute tm-law"><b>As the research for this form summarizes them.</b> CS/SB 590 (2021) requires a reasonable attempt to notify the parent before a student is removed from school for an involuntary examination, and requires districts to count those examinations. Rule 6A-1.0019 and the 2026&ndash;27 Florida manual (in effect July 1, 2026) add threat management considerations for students with disabilities and a definition of baseline behavior, and state that placement goes through the IEP or 504 process, not the threat team.<span class="tm-check noprint">Check the current wording before printing.</span></div>
+    <p class="hint">One entry for each Baker Act initiation and for each case the school threat management team opens. Roles and initials only, never names. Each entry keeps the time it was recorded on this device. Nothing here is sent anywhere; district policy decides who sees it.</p>
+    <datalist id="tmWhoList"><option value="Law enforcement officer"></option><option value="School resource officer"></option><option value="Licensed mental health professional"></option><option value="Physician"></option></datalist>
+    <div id="tmEvents"></div>
+    <div class="tm-tools noprint"><button type="button" class="tool" id="tmAddBaker">Add a Baker Act initiation</button><button type="button" class="tool" id="tmAddThreat">Add a threat team case</button></div>
+    <div class="tm-brief-wrap noprint">
+      <h2 class="nbh-band" style="margin-top:16px">Brief for the School Threat Management Team</h2>
+      <p class="hint">One page, built from the case when it is printed or copied: the situation, the baseline behavior (Form DD-1), the function (Form FS-1), what each target looks like and what it is not (Form TB-1), what to do (this plan&rsquo;s crisis steps), what to watch for, and a read-back line. It gives no rating of any kind. Open the form with the case in the workstation so the other forms&rsquo; parts are filled. Print or copy it only when district policy says the team receives it.</p>
+      <div class="tm-tools"><button type="button" class="tool" id="tmPrint">Print the brief</button><button type="button" class="tool" id="tmCopy">Copy the brief as text</button></div>
+      <div id="tmBrief" class="tm-brief" aria-label="Preview of the brief"></div>
+    </div>
+  </section>
+
   <!-- ====== GUIDE ====== -->
   <section class="only-guide">
     <h2 class="nbh-band">What the Statute Says, as It Now Stands</h2>
@@ -1403,6 +1424,7 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
 
   <!-- v21.44 (B5): the report record, filled only while Print the report record prints it -->
   <div class="crRepRec" id="crRepRec"></div>
+  <div id="tmBriefPrint"></div><!-- v25.68 (research #2) Print the brief: the brief alone, on a page of its own -->
   <!-- v21.44 (B5): the workstation's Case as a spreadsheet presses this (the csv? verb) for this form's entries by label,
        without the report record; it has no place on the toolbar -->
   <button type="button" id="csvBtn" class="noprint" hidden aria-hidden="true" tabindex="-1">CSV for the workstation's spreadsheet</button>
@@ -4193,6 +4215,441 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     if(ans.length){o=o||{};o.crisis=o.crisis||{beh:v65T((S.meta||{}).dbeh),precursor:v65T((S.meta||{}).precursor),stages:[],src:'CR-1'};
       o.crisis.afterRelease={answered:ans.length,escAtt:hit,flag:ans.length>=3&&hit*3>=ans.length*2};}}catch(e){}
   return o;};}
+</script>
+<style id="cr1-v2568-css">
+/* v25.68 (research #2, #6) the threat team brief and the Baker Act and threat team events; recorded-at; the addenda */
+.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}
+.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}
+.add68-note{font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;color:#47535a;margin:8px 0}
+.add68-h{margin:16px 0 4px;font-size:15px}
+.add68-p{font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;margin:4px 0;line-height:1.45}
+.add68-list{margin:4px 0 8px 1.4em;padding:0;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;line-height:1.45}
+.add68-list > li{margin:5px 0}
+.add68-ch{margin:2px 0 4px 1.1em;padding:0;list-style:disc;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;line-height:1.45}
+.add68-open{border:1px solid #c9a46a;border-left:4px solid #9b4e15;background:#FBF3E6;padding:8px 12px;margin:8px 0;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px}
+.add68-open p{margin:2px 0}
+.add68-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.add68-form label{font-weight:600;font-size:12.5px;color:#1a2933}
+.add68-form input{flex:1 1 260px;min-height:44px;box-sizing:border-box;font:inherit;font-size:14px;padding:6px 8px;border:1px solid #93aead;border-radius:3px;background:#fff;color:#1a2933}
+.add68-form .tool,.add68-bar .tool{min-height:44px;margin:0}
+.add68-bar{position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:#182e43;color:#fff;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:13.5px;box-shadow:0 -2px 8px rgba(0,0,0,.18)}
+.add68-bar[hidden]{display:none!important}
+.add68-bar{pointer-events:none}.add68-bar .tool{pointer-events:auto}
+body.add68-on{padding-bottom:72px}
+.add68-bar .tool{background:#fff;color:#182e43;border:1px solid #fff;font-weight:600;padding:6px 14px}
+.add68-bar .tool:focus-visible{outline:3px solid #ffd27a;outline-offset:2px}
+.add68-bar .add68-bt{max-width:62ch}
+@media print{body.add68-on{padding-bottom:0}.add68-bar,.add68-note,.add68-form{display:none!important}.add68-open{background:#fff}.add68:not(.add68-has){display:none!important}.add68{break-inside:auto}.add68-list > li{break-inside:avoid;page-break-inside:avoid}}
+body:not(.view-tm) .only-tm{display:none}
+body.view-tm .only-setup,body.view-tm .only-plan,body.view-tm .only-deb,body.view-tm .only-log,body.view-tm .only-guide{display:none}
+.tm-card{border:1px solid var(--rule-2,#c9d3d6);border-left:4px solid #254657;background:#fff;padding:8px 12px 10px;margin:10px 0}
+.tm-card h3{margin:2px 0 6px;font-size:15px}
+.tm-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 14px;margin:4px 0}
+.tm-g label,.tm-wide,.tm-ar label{display:block;font-family:var(--sans,sans-serif);font-size:11.5px;color:var(--ink-soft,#47535a)}
+.tm-g input,.tm-wide textarea,.tm-ar input,.tm-ar select{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:14px;min-height:44px;border:1px solid var(--rule-2,#93aead);border-radius:2px;padding:6px 8px;background:#fff;color:#1a2933}
+.tm-wide{margin:6px 0}
+.tm-wide textarea{min-height:60px}
+.tm-att{margin:8px 0 4px;border-top:1px dashed var(--rule-2,#c9d3d6);padding-top:6px}
+.tm-ah{font-family:var(--sans,sans-serif);font-size:12.5px;font-weight:600;margin:0 0 4px}
+.tm-ar{display:grid;grid-template-columns:30px minmax(130px,1fr) minmax(100px,.8fr) minmax(120px,1fr) minmax(160px,1.6fr) 48px;gap:6px;align-items:end;margin:4px 0}
+.tm-ar .tm-an{font-family:var(--sans,sans-serif);font-weight:600;text-align:center;padding-bottom:12px}
+.tm-st{font-family:var(--sans,sans-serif);font-size:12px;margin:6px 0 2px;color:#1a2933}
+.tm-tools{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.tm-tools .tool,.tm-card .tool,.tm-ar .tool{min-height:44px}
+.tm-x{min-width:44px}
+.tm-none{font-family:var(--sans,sans-serif);font-size:12.5px;color:var(--ink-soft,#47535a);font-style:italic}
+.tm-law{font-size:12.5px}
+.tm-check{display:inline-block;margin-left:4px;font-weight:700;color:#8E2A2A}
+.tm-paper{display:none}
+.tm-pt td,.tm-pt th{font-size:12px;vertical-align:top}
+.tm-brief{border:1px solid var(--rule-2,#c9d3d6);background:#fff;padding:14px 18px;margin:10px 0;max-width:820px}
+.tmb{font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);color:#111;font-size:12.5px;line-height:1.4}
+.tmb h1{font:700 18px var(--serif,Georgia,serif);color:#182e43;margin:0 0 2px}
+.tmb .tmb-who{font-size:12px;margin:0 0 6px;color:#333}
+.tmb .tmb-conf{border:1.5px solid #182e43;padding:5px 9px;margin:6px 0;font-size:12px}
+.tmb .tmb-place{border-left:5px solid #182e43;background:#EEF3F5;padding:6px 10px;margin:6px 0;font-weight:700;font-size:13px}
+.tmb h2{font:700 12.5px var(--sans,sans-serif);text-transform:uppercase;letter-spacing:.04em;color:#182e43;margin:9px 0 2px;border-bottom:1px solid #8aa;padding-bottom:1px}
+.tmb p{margin:2px 0}
+.tmb ul{margin:2px 0 2px 1.2em;padding:0}
+.tmb li{margin:1px 0}
+.tmb .tmb-src{color:#47535a;font-size:11px}
+.tmb .tmb-rb{border:1px solid #555;padding:6px 9px;margin-top:8px}
+.tmb .tmb-line{display:inline-block;min-width:170px;border-bottom:1px solid #111;height:14px;vertical-align:bottom}
+.tmb .tmb-none{color:#555;font-style:italic}
+#tmBriefPrint{display:none}
+.add68-sign{margin:10px 0 4px;font-family:var(--sans,sans-serif);font-size:12.5px}
+.add68-sign label{font-weight:600;margin-right:6px}
+.add68-sign input{min-height:44px;font:inherit;font-size:14px;padding:4px 8px;border:1px solid var(--rule-2,#93aead);border-radius:2px}
+@media (max-width:700px){.tm-ar{grid-template-columns:30px 1fr 1fr}.tm-ar .tm-o{grid-column:1/-1}}
+@media print{
+  .only-tm{display:none!important}
+  .only-tm.tm-has{display:block!important}
+  .only-tm .tm-ed,.only-tm .tm-brief-wrap{display:none!important}
+  .only-tm .tm-paper{display:block}
+  body.cr-brief-only > *:not(main),body.cr-brief-only main.sheet > *:not(#tmBriefPrint){display:none!important}
+  body.cr-brief-only #tmBriefPrint{display:block!important}
+  body.cr-brief-only .tmb{font-size:10.5pt;line-height:1.3}
+  body.cr-brief-only .tmb h1{font-size:15pt}
+  body.cr-brief-only .tmb h2{font-size:10pt;margin-top:6pt}
+}
+</style>
+<script id="cr1-v2568">
+/* v25.68 (research #6) when an entry was recorded. Each new entry keeps "recorded at", the device clock at the moment it was
+   first written, beside when it happened; one recorded more than 24 hours after it happened prints "Late entry". A date with
+   no time counts as the end of that day, so an entry is marked late only when it surely is. An entry saved before v25.68
+   has no recorded-at and shows and prints as before. The same helper is in Forms DD-1, CR-1, IM-1 and CN-1. */
+window.nbhRec=window.nbhRec||(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const ok=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(v)&&!isNaN(Date.parse(v));
+  const now=()=>new Date().toISOString();
+  const DAYRE=/(\d{4})-(\d\d)-(\d\d)|(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/;
+  function day(v){const m=DAYRE.exec(T(v));if(!m)return null;if(m[1])return [+m[1],+m[2]-1,+m[3]];let y=+m[6];if(y<100)y+=2000;return [y,+m[4]-1,+m[5]];}
+  function hm(v){const m=/(\d{1,2}):(\d{2})\s*([AaPp])?/.exec(T(v));if(!m)return null;let h=+m[1];const mi=+m[2],ap=(m[3]||'').toLowerCase();
+    if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;return h<24&&mi<60?[h,mi]:null;}
+  /* when it happened: a date (2026-11-06, 11/6/2026, 11/6/26, "Tue 9/29/26, 1:42 PM") and a time (14:05, 2:05 PM) */
+  function when(d,t){const s=T(d),D=day(s);if(!D)return null;let H=hm(t);if(!H)H=hm(s.replace(DAYRE,''));
+    const x=H?new Date(D[0],D[1],D[2],H[0],H[1]):new Date(D[0],D[1],D[2],23,59,59);return isNaN(x)?null:x;}
+  const late=(rec,d,t)=>{if(!ok(rec))return false;const h=when(d,t);return !!h&&Date.parse(rec)-h.getTime()>864e5;};
+  const days=(rec,d,t)=>{const h=when(d,t);return ok(rec)&&h?Math.max(0,Math.floor((Date.parse(rec)-h.getTime())/864e5)):0;};
+  function txt(rec){if(!ok(rec))return '';const d=new Date(rec);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
+    return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2)+', '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;}
+  /* the words an entry carries: "Recorded 11/6/26, 2:14 PM (device clock)", and "Late entry" when it is one */
+  const line=(rec,d,t)=>ok(rec)?'Recorded '+txt(rec)+' (device clock)'+(late(rec,d,t)?'. Late entry':''):'';
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const html=(rec,d,t)=>ok(rec)?'<span class="rec68">Recorded '+E(txt(rec))+' (device clock)'+(late(rec,d,t)?' <b class="rec68-late">Late entry</b>':'')+'</span>':'';
+  const CSS='.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}'+
+    '.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}';
+  return {ok,now,when,late,days,txt,line,html,CSS};
+})();
+/* v25.68 (research #6) a signed record takes dated addenda. Once the record is signed, a change to it is not blocked: the change
+   stands, and it is kept as an addendum (the device clock's date and time, who filed it, the reason, and each entry as it stood
+   and as it is now). The printout shows the record with its addenda after the signatures, so the record as signed can be read
+   from them. A record with no change since it was signed, and every record saved before v25.68, prints as before. The same
+   helper is in Forms TD-1, IC-1 and CR-1; each form says what is signed, where the addenda are kept and where they print.
+   cfg: roots() the parts that were signed; skip(el) entries that are not part of it; signed() {on, date}; load() and save(o)
+   the kept addenda; by() who files; ident() a token that changes when another record is opened; mount the addenda's place;
+   what: 'plan' or 'consent'. */
+window.nbhAddenda=window.nbhAddenda||function(cfg){
+  const T=v=>String(v==null?'':v).trim(),N=v=>T(v).replace(/\s+/g,' ');
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const R=window.nbhRec,now=()=>new Date().toISOString(),when=a=>R&&R.ok(a)?R.txt(a):T(a);
+  const what=cfg.what||'record',id=cfg.id||'add68';
+  let mem=null,lastId,busy=false,timer=0;
+  const SKIPTYPE=/^(file|button|submit|reset|password|search|image|color|range)$/;
+  function keyOf(el){if(el.name)return 'n:'+el.name;const d=el.dataset||{},ks=Object.keys(d).filter(k=>!/^(nbh|calc|v65fnh|wh|polish)/i.test(k)).sort();
+    if(ks.length)return 'd:'+ks.map(k=>k+'='+d[k]).join('&');return el.id?'#'+el.id:'';}
+  function heading(el){let n=el;for(let up=0;n&&up<8;up++,n=n.parentElement){let p=n.previousElementSibling;
+      for(let k=0;p&&k<12;k++,p=p.previousElementSibling){if(/^H[1-4]$/.test(p.tagName)||p.classList.contains('bar')||p.classList.contains('nbh-band'))return N(p.textContent).slice(0,80);
+        const h=p.querySelector&&p.querySelector('h2,h3,.bar');if(h&&/^(DIV|SECTION)$/.test(p.tagName)&&p.children.length<3)return N(h.textContent).slice(0,80);}}
+    return '';}
+  function labelOf(el){const a=el.getAttribute('aria-label');if(a)return N(a).slice(0,160);
+    if(el.id){try{const l=document.querySelector('label[for="'+CSS.escape(el.id)+'"]');if(l&&N(l.textContent))return N(l.textContent).slice(0,160);}catch(e){}}
+    const wl=el.closest('label');if(wl&&N(wl.textContent))return N(wl.textContent).slice(0,160);
+    const td=el.closest('td');if(td){const tr=td.parentElement,th=td.previousElementSibling;
+      if(th&&th.tagName==='TH'&&N(th.textContent))return N(th.textContent).slice(0,160);
+      const tb=td.closest('table'),ix=Array.prototype.indexOf.call(tr.children,td),hr=tb&&tb.tHead&&tb.tHead.rows[0],hc=hr&&hr.cells[ix];
+      const rn=Array.prototype.indexOf.call(tr.parentElement.children,tr)+1,h=heading(tb||td);
+      if(hc&&N(hc.textContent))return (h?h+', ':'')+'row '+rn+': '+N(hc.textContent).slice(0,80);}
+    const f=el.closest('.f,.drow,.field,.fieldgrid > div');const lb=f&&f.querySelector('label,.dlab');if(lb&&!lb.contains(el)&&N(lb.textContent))return N(lb.textContent).slice(0,160);
+    return N(el.placeholder)||keyOf(el);}
+  function fields(){const out=[];(cfg.roots()||[]).filter(Boolean).forEach(r=>r.querySelectorAll('input,select,textarea').forEach(el=>{
+      if(SKIPTYPE.test(el.type||'')||el.readOnly||el.closest('[data-add68-skip],.add68-form,.add68-sign'))return;
+      if((el.type==='hidden'||el.hidden)&&!(cfg.keep&&cfg.keep(el)))return;if(cfg.skip&&cfg.skip(el))return;out.push(el);}));return out;}
+  function valOf(el){if(el.type==='checkbox')return el.checked?'ticked':'';
+    if(el.tagName==='SELECT'){const o=el.options[el.selectedIndex];return o&&T(o.value)!==''?N(o.textContent)||T(o.value):'';}
+    return cfg.pretty&&cfg.pretty(el)!=null?cfg.pretty(el):T(el.value);}
+  /* the record now: each entry that holds something, by its key, with its label */
+  function snap(){const m={};fields().forEach(el=>{const k=keyOf(el);if(!k)return;
+      if(el.type==='radio'){if(!el.checked)return;const l=el.closest('label');m[k]=[l?N(l.textContent):T(el.value),labelOf(el.closest('fieldset,.f,.drow,div')||el)];return;}
+      const v=valOf(el);if(v!=='')m[k]=[v.slice(0,4000),labelOf(el)];});return m;}
+  function diff(base,cur){const ks=new Set(Object.keys(base).concat(Object.keys(cur))),out=[];
+    ks.forEach(k=>{const b=base[k]?base[k][0]:'',c=cur[k]?cur[k][0]:'';if(N(b)!==N(c))out.push({k,l:(cur[k]||base[k])[1]||k,was:b,now:c});});return out;}
+  function load(){let o=null;try{o=cfg.load();}catch(e){o=null;}if(!o||typeof o!=='object')return null;
+    const ok=x=>x&&typeof x==='object'&&!Array.isArray(x);const st={v:1,sig:ok(o.sig)?{date:T(o.sig.date),at:T(o.sig.at)}:{date:'',at:''},base:ok(o.base)?o.base:null,
+      list:Array.isArray(o.list)?o.list.filter(ok).slice(0,200):[],log:Array.isArray(o.log)?o.log.filter(ok).slice(0,100):[],open:ok(o.open)?{since:T(o.open.since)}:null};
+    if(st.base)Object.keys(st.base).forEach(k=>{const v=st.base[k];if(!Array.isArray(v))delete st.base[k];});return st;}
+  function save(st){busy=true;try{cfg.save(st&&(st.base||st.list.length||st.log.length)?st:null);}catch(e){}busy=false;}
+  /* the base the changes are read against: the record as signed, with the addenda already filed */
+  function base(st){return st&&st.base?st.base:mem;}
+  const fmt=d=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(T(d));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(d);};
+  function ident(){const tok=cfg.ident?cfg.ident():1;if(tok!==lastId){lastId=tok;mem=null;}}
+  /* the record as it stands just before the first change after signing: taken as a finger, a key or the focus reaches it */
+  function prime(){ident();if(mem)return;const sg=cfg.signed()||{};if(!sg.on)return;const st=load();if(!(st&&st.base))mem=snap();}
+  function refresh(){ident();const sg=cfg.signed()||{};let st=load();
+    if(!sg.on){mem=null;if(st&&st.base){st.log.push({at:now(),what:'The signature'+(st.sig.date?' of '+fmt(st.sig.date):'')+' was removed'});st.base=null;st.open=null;save(st);}}
+    render(st,sg);}
+  function changed(){ident();const sg=cfg.signed()||{};if(!sg.on){refresh();return;}let st=load();const b=base(st);if(!b){mem=snap();render(st,sg,[]);return;}
+    const D=diff(b,snap());
+    if(D.length){if(!st)st={v:1,sig:{date:T(sg.date),at:now()},base:b,list:[],log:[],open:null};if(!st.base)st.base=b;if(!st.open)st.open={since:now()};save(st);mem=null;}
+    else if(st&&st.open){st.open=null;save(st);}
+    render(st,sg,D);}
+  function file(){const sg=cfg.signed()||{};let st=load();const b=base(st);if(!b)return;const cur=snap(),D=diff(b,cur);if(!D.length){render(st,sg,D);return;}
+    const box=document.getElementById(id+'Why'),why=T(box&&box.value);
+    const go=()=>{if(!st)st={v:1,sig:{date:T(sg.date),at:now()},base:b,list:[],log:[],open:null};
+      st.list.push({at:now(),by:T(cfg.by&&cfg.by()),why,ch:D.map(x=>({k:x.k,l:x.l,was:x.was,now:x.now}))});
+      const nb=Object.assign({},b);D.forEach(x=>{if(cur[x.k])nb[x.k]=cur[x.k];else delete nb[x.k];});st.base=nb;st.open=null;save(st);mem=null;
+      if(box)box.value='';render(st,sg,[]);
+      if(window.nbhUI&&nbhUI.toast)nbhUI.toast('Addendum '+st.list.length+' filed: '+D.length+' change'+(D.length===1?'':'s')+', dated '+when(st.list[st.list.length-1].at)+'.',{kind:'ok'});};
+    if(!why&&window.nbhUI&&nbhUI.confirm)nbhUI.confirm('File the addendum without a reason?\nThe change is kept either way. A reason (for example, correcting an error) tells the reader why it changed.',{ok:'File it without a reason'}).then(y=>{if(y)go();else if(box)box.focus();});
+    else go();}
+  const show=(v,o)=>v===''?(o==='ticked'?'not ticked':'empty'):'“'+v+'”';
+  function chList(ch){return '<ul class="add68-ch">'+ch.map(x=>'<li><b>'+E(x.l)+'</b>: as it stood, '+E(show(x.was,x.now))+'; now '+E(show(x.now,x.was))+'.</li>').join('')+'</ul>';}
+  function render(st,sg,D){const box=cfg.mount&&cfg.mount();if(!box)return;sg=sg||cfg.signed()||{};
+    if(D===undefined){const b=base(st);D=sg.on&&b?diff(b,snap()):[];}
+    const L=st?st.list:[],G=st?st.log:[],has=L.length||G.length||D.length;
+    box.classList.toggle('add68-has',!!has);
+    let h='';
+    if(sg.on&&!has)h='<p class="add68-note noprint">Signed'+(sg.date?' '+E(fmt(sg.date)):'')+'. From now on a change to this '+what+' is kept as a dated addendum with its reason, and the printout shows it after the signatures. Nothing is blocked: the addendum is the correction.</p>';
+    if(has){h+='<h3 class="add68-h">Changes After Signing (Addenda)</h3><p class="add68-p">'+(st&&st.sig.date||sg.date?'Signed '+E(fmt(st&&st.sig.date||sg.date))+'. ':'')+
+      'The entries above show this '+what+' as it is now. Each addendum keeps the entry as it stood before the change, so the '+what+' as signed can be read from them. Times are the device clock’s.</p>';
+      if(L.length)h+='<ol class="add68-list">'+L.map((a,i)=>'<li><b>Addendum '+(i+1)+'</b>, '+E(when(a.at))+(a.by?', '+E(a.by):'')+'. <b>Reason:</b> '+(a.why?E(a.why):'not given')+'.'+chList(Array.isArray(a.ch)?a.ch:[])+'</li>').join('')+'</ol>';
+      if(G.length)h+='<p class="add68-p">'+G.map(x=>E(x.what)+', '+E(when(x.at))+'.').join(' ')+'</p>';
+      if(D.length)h+='<div class="add68-open"><p><b>Changed after signing; not yet filed as an addendum</b>'+(st&&st.open&&st.open.since?' (since '+E(when(st.open.since))+')':'')+'.</p>'+chList(D)+
+        '<div class="add68-form noprint"><label for="'+id+'Why">Reason for the change</label><input id="'+id+'Why" list="'+id+'Reasons" maxlength="300" placeholder="for example, correcting an error" autocomplete="off">'+
+        '<datalist id="'+id+'Reasons"><option value="Correcting an error"><option value="Information learned after signing"><option value="Decided by the team at a meeting"><option value="Revision of the '+what+'"><option value="Clarifying the wording"></datalist>'+
+        '<button type="button" class="tool add68-file" id="'+id+'File">File the addendum</button></div></div>';}
+    const keep=document.activeElement&&document.activeElement.id===id+'Why'?document.activeElement.value:null;
+    if(box.innerHTML!==h)box.innerHTML=h;
+    if(keep!==null){const w=document.getElementById(id+'Why');if(w){w.value=keep;w.focus();}}
+    bar(D.length,sg);}
+  /* a bar at the foot of the screen while a change is not yet filed: it says the change is kept and leads to the reason */
+  function bar(n,sg){let b=document.getElementById(id+'Bar');
+    if(!n){if(b)b.hidden=true;document.body.classList.remove('add68-on');return;}
+    if(!b){b=document.createElement('div');b.id=id+'Bar';b.className='add68-bar noprint';b.setAttribute('role','region');b.setAttribute('aria-label','Changes after signing');
+      b.innerHTML='<span class="add68-bt" aria-live="polite"></span><button type="button" class="tool add68-go">Give the reason</button>';document.body.appendChild(b);
+      b.querySelector('.add68-go').addEventListener('click',()=>{if(cfg.reveal)cfg.reveal();const w=document.getElementById(id+'Why');if(w){try{w.scrollIntoView({block:'center'});}catch(e){}w.focus();}});}
+    b.hidden=false;document.body.classList.add('add68-on');const t='This '+what+' was signed'+(sg&&sg.date?' '+fmt(sg.date):'')+'. '+n+' change'+(n===1?'':'s')+' since then '+(n===1?'is':'are')+' kept as an addendum.';
+    const s=b.querySelector('.add68-bt');if(s.textContent!==t)s.textContent=t;}
+  const inRoots=t=>(cfg.roots()||[]).some(r=>r&&r.contains(t));
+  const onEdit=e=>{if(busy||!e.isTrusted)return;const t=e.target;if(!t||!t.closest||t.closest('.add68-form'))return;
+    if(!inRoots(t)&&!(cfg.watch&&cfg.watch(t)))return;clearTimeout(timer);timer=setTimeout(changed,350);};
+  document.addEventListener('input',onEdit,true);document.addEventListener('change',onEdit,true);
+  ['pointerdown','keydown','focusin'].forEach(t=>document.addEventListener(t,e=>{if(!busy&&e.target&&e.target.closest&&!e.target.closest('.add68-form')&&(inRoots(e.target)||(cfg.watch&&cfg.watch(e.target))))prime();},true));
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#'+id+'File')){e.preventDefault();file();}
+    else if(e.isTrusted&&e.target&&e.target.closest&&e.target.closest('button')&&inRoots(e.target)){clearTimeout(timer);timer=setTimeout(changed,450);}});
+  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id===id+'Why'){e.preventDefault();file();}});
+  return {refresh,changed,snap,state:load,file};
+};
+/* v25.68 (research #2) a brief for the school threat management team, and the Baker Act and threat team events.
+   The Threat team brief view holds the dated events (S.tm, kept with the record: each Baker Act initiation with its date and
+   time, who initiated it by role, and each attempt to reach the parent; each threat management team case with its date and
+   the date the brief was given to the team; a note; initials only), and the one-page brief built from the case when it is
+   asked for: the situation, the baseline behavior from Form DD-1's levels and their range, the function (Form FS-1), what
+   each target looks like and what it is not (Form TB-1), what to do (this plan's crisis steps), what to watch for, the line
+   that placement decisions are made through the IEP or 504 team, and a read-back line. It gives no rating of any kind and is
+   printed or copied only when the BCBA presses the button; nothing is sent. The events go to the case as crisis.events (the
+   kind, the date and time, how many attempts and whether the parent was reached, the recorded-at; no names and no notes), for
+   Form RR-1's timeline and Form PR-1's review. A file saved before has no events and prints as before.
+   (research #6) Each restraint on the log, each telephone or e-mail attempt, each debriefing and each event keeps its
+   recorded-at; the paper prints it, with "Late entry" when it is more than 24 hours after the event. The plan takes a date
+   signed (meta.sgOn); from then on a change to the Setup or the plan sheet is kept as a dated addendum with its reason
+   (meta.add68), printed after the signatures. */
+(function(){
+  const R=window.nbhRec,T=v=>String(v==null?'':v).trim();
+  if(!R)return;
+  let crCase=null;
+  const iso=v=>{v=T(v);const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(v);return m?v:'';};
+  const hm=v=>/^\d\d:\d\d$/.test(T(v))?T(v):'';
+  const mdy=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(T(v));return m?(+m[2])+'/'+(+m[3])+'/'+m[1].slice(2):T(v);};
+  const h12=v=>{const m=/^(\d\d):(\d\d)$/.exec(T(v));if(!m)return '';let h=+m[1];const ap=h<12?'AM':'PM';h=h%12||12;return h+':'+m[2]+' '+ap;};
+  const cut=(s,n)=>{s=T(s).replace(/\s+/g,' ');return s.length>n?s.slice(0,n-1).replace(/[\s,;:]+\S*$/,'')+'\u2026':s;};
+  const obj=x=>x&&typeof x==='object'&&!Array.isArray(x);
+  /* ---------------- the events ---------------- */
+  const TM_KIND={baker:'Baker Act initiation',threat:'Threat management team case'};
+  const TM_METH=['','Telephone','E-mail','Text message','In person','Other'];
+  const reached=a=>/^(spoke|reached|talked|met)\b/i.test(T(a&&a.o));
+  const evOn=()=>Array.isArray(S.tm)&&S.tm.length>0;
+  const evL=()=>{if(!Array.isArray(S.tm))S.tm=[];return S.tm;};
+  const attNew=()=>({d:'',t:'',m:'',o:''});
+  const evNew=k=>({id:'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),kind:k,d:'',t:'',who:'',note:'',brief:'',att:k==='baker'?[attNew()]:[]});
+  function attClean(a){const o={d:iso(a.d),t:hm(a.t),m:TM_METH.includes(T(a.m))?T(a.m):'',o:T(a.o).slice(0,200)};if(R.ok(a.rec))o.rec=a.rec;return o;}
+  function evClean(L){return (Array.isArray(L)?L:[]).filter(x=>obj(x)&&TM_KIND[x.kind]).slice(0,100).map(x=>{
+    const o={id:T(x.id).slice(0,30)||('t'+Math.random().toString(36).slice(2,8)),kind:x.kind,d:iso(x.d),t:hm(x.t),who:T(x.who).slice(0,120),note:T(x.note).slice(0,2000),brief:iso(x.brief),
+      att:(Array.isArray(x.att)?x.att:[]).filter(obj).slice(0,30).map(attClean)};if(R.ok(x.rec))o.rec=x.rec;return o;});}
+  const evFilled=x=>!!(T(x.d)||T(x.t)||T(x.who)||T(x.note)||T(x.brief)||(x.att||[]).some(attFilled));
+  const attFilled=a=>!!(T(a.d)||T(a.t)||T(a.m)||T(a.o));
+  const kindN=(x,L)=>L.filter(y=>y.kind===x.kind).indexOf(x)+1;
+  const evWhen=x=>x.d?mdy(x.d)+(x.t?' at '+h12(x.t):''):'no date entered';
+  function attLine(a,k){return 'Attempt '+(k+1)+': '+[a.d?mdy(a.d)+(a.t?' at '+h12(a.t):''):'no date entered',a.m,a.o].filter(Boolean).join(', ');}
+  function evStatus(x){const L=[];if(x.kind==='baker'){const n=(x.att||[]).filter(attFilled).length,r=(x.att||[]).findIndex(reached);
+      L.push(n?n+' attempt'+(n===1?'':'s')+' to reach the parent recorded'+(r>=0?'; the parent was reached on attempt '+(r+1):'; the parent is not recorded as reached'):'No attempt to reach the parent recorded yet');}
+    else L.push(x.brief?'Brief given to the team on '+mdy(x.brief):'Brief not yet recorded as given');
+    return L.join('. ')+'.';}
+  function evCard(x,i,L){const n=kindN(x,L),lab=TM_KIND[x.kind]+' '+n,A=t=>T(lab+': '+t).replace(/"/g,'&quot;');
+    const inp=(f,type,l,ph,extra)=>'<label>'+l+'<input type="'+type+'" data-tmi="'+i+'" data-tm="'+f+'" value="'+esc(x[f])+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+(extra||'')+' aria-label="'+A(l)+'"></label>';
+    let h='<div class="tm-card" data-tmc="'+i+'"><h3>'+esc(lab)+'</h3><div class="tm-g">'+inp('d','date','Date')+inp('t','time','Time')+
+      (x.kind==='baker'?inp('who','text','Who initiated it (role)','a role, never a name',' list="tmWhoList" autocomplete="off"'):inp('brief','date','Brief given to the team on'))+'</div>'+
+      '<label class="tm-wide">What happened, in plain words (initials only)<textarea data-tmi="'+i+'" data-tm="note" rows="2" aria-label="'+A('what happened')+'">'+esc(x.note)+'</textarea></label>';
+    if(x.kind==='baker')h+='<div class="tm-att"><div class="tm-ah">Each attempt to reach the parent or guardian</div>'+(x.att||[]).map((a,k)=>{const an=lab+', attempt '+(k+1)+': ';
+        return '<div class="tm-ar"><span class="tm-an" aria-hidden="true">'+(k+1)+'</span>'+
+          '<label>Date<input type="date" data-tmi="'+i+'" data-tma="'+k+'" data-tm="d" value="'+esc(a.d)+'" aria-label="'+esc(an)+'date"></label>'+
+          '<label>Time<input type="time" data-tmi="'+i+'" data-tma="'+k+'" data-tm="t" value="'+esc(a.t)+'" aria-label="'+esc(an)+'time"></label>'+
+          '<label>How<select data-tmi="'+i+'" data-tma="'+k+'" data-tm="m" aria-label="'+esc(an)+'how">'+TM_METH.map(m=>'<option'+(m===a.m?' selected':'')+'>'+esc(m)+'</option>').join('')+'</select></label>'+
+          '<label class="tm-o">Outcome<input data-tmi="'+i+'" data-tma="'+k+'" data-tm="o" list="crcOutList" value="'+esc(a.o)+'" aria-label="'+esc(an)+'outcome" placeholder="for example, left a voicemail"></label>'+
+          '<button type="button" class="tool tm-x" data-tmattdel="'+i+'.'+k+'" aria-label="'+esc('Remove '+an.replace(/: $/,''))+'">&times;</button></div>';}).join('')+
+        '<div class="tm-tools"><button type="button" class="tool" data-tmattadd="'+i+'">Add an attempt</button></div></div>';
+    h+='<p class="tm-st" id="tmSt'+i+'">'+tmStHtml(x)+'</p><div class="tm-tools"><button type="button" class="tool" data-tmdel="'+i+'">Remove this entry</button></div></div>';
+    return h;}
+  function tmStHtml(x){return esc(evStatus(x))+(R.ok(x.rec)?R.html(x.rec,x.d,x.t):'');}
+  function evPaper(){const L=evOn()?S.tm:[];if(!L.length)return '';
+    return '<table class="rt tm-pt"><thead><tr><th style="width:4%">#</th><th style="width:18%">Event</th><th style="width:17%">When</th><th style="width:16%">Initiated by</th><th style="width:25%">Attempts to reach the parent</th><th>What happened</th></tr></thead><tbody>'+
+      L.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(TM_KIND[x.kind]+' '+kindN(x,L))+'</td><td>'+esc(evWhen(x))+R.html(x.rec,x.d,x.t)+'</td><td>'+(x.kind==='baker'?esc(x.who||'not recorded'):(x.brief?'Brief given '+esc(mdy(x.brief)):'&mdash;'))+'</td><td>'+
+        (x.kind==='baker'?((x.att||[]).filter(attFilled).map((a,k)=>esc(attLine(a,k))+R.html(a.rec,a.d,a.t)).join('<br>')||'none recorded'):'&mdash;')+'</td><td>'+esc(x.note)+'</td></tr>').join('')+'</tbody></table>';}
+  function evRender(){const box=document.getElementById('tmEvents'),sec=document.getElementById('tmSec');if(!box)return;const L=evOn()?S.tm:[];
+    if(sec)sec.classList.toggle('tm-has',L.length>0);
+    box.innerHTML='<div class="tm-ed">'+(L.length?L.map((x,i)=>evCard(x,i,L)).join(''):'<p class="tm-none">None recorded.</p>')+'</div><div class="tm-paper" id="tmPaper">'+evPaper()+'</div>';
+    briefSoon();}
+  function evPaint(i){const L=evOn()?S.tm:[],x=L[i];const st=document.getElementById('tmSt'+i);if(x&&st)st.innerHTML=tmStHtml(x);
+    const p=document.getElementById('tmPaper');if(p)p.innerHTML=evPaper();briefSoon();}
+  function poke(){try{(document.getElementById('tmEvents')||document.body).dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+  document.addEventListener('input',e=>{const t=e.target;if(!t||!t.dataset||t.dataset.tm==null||t.dataset.tmi==null)return;const x=(S.tm||[])[+t.dataset.tmi];if(!x)return;
+    const f=t.dataset.tm,v=t.value;if(t.dataset.tma!=null){const a=(x.att||[])[+t.dataset.tma];if(!a)return;a[f]=v;if(!R.ok(a.rec)&&attFilled(a))a.rec=R.now();}else x[f]=v;
+    if(!R.ok(x.rec)&&evFilled(x))x.rec=R.now();evPaint(+t.dataset.tmi);});
+  document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.tm!=null&&t.tagName==='SELECT')t.dispatchEvent(new Event('input',{bubbles:true}));});
+  document.addEventListener('click',async e=>{const t=e.target&&e.target.closest?e.target.closest('button'):null;if(!t)return;
+    if(t.id==='tmAddBaker'||t.id==='tmAddThreat'){const L=evL();L.push(evNew(t.id==='tmAddBaker'?'baker':'threat'));evRender();poke();
+      const c=document.querySelector('[data-tmc="'+(L.length-1)+'"] input');if(c){try{c.scrollIntoView({block:'center'});}catch(err){}c.focus();}return;}
+    if(t.dataset.tmattadd!=null){const x=(S.tm||[])[+t.dataset.tmattadd];if(!x)return;if((x.att||[]).length>=30)return;x.att.push(attNew());evRender();poke();return;}
+    if(t.dataset.tmattdel!=null){const [i,k]=t.dataset.tmattdel.split('.').map(Number),x=(S.tm||[])[i];if(!x||!x.att[k])return;
+      if(attFilled(x.att[k])&&!(await nbhUI.confirm('Remove attempt '+(k+1)+'?\nIts date, time and outcome are deleted.',{ok:'Remove',danger:true})))return;x.att.splice(k,1);evRender();poke();return;}
+    if(t.dataset.tmdel!=null){const i=+t.dataset.tmdel,x=(S.tm||[])[i];if(!x)return;
+      if(evFilled(x)&&!(await nbhUI.confirm('Remove this entry?\nThe '+TM_KIND[x.kind].toLowerCase()+' of '+evWhen(x)+' and its attempts are deleted.',{ok:'Remove',danger:true})))return;
+      S.tm.splice(i,1);if(!S.tm.length)delete S.tm;evRender();poke();return;}
+    if(t.id==='tmPrint'){briefPrint();return;}
+    if(t.id==='tmCopy'){briefCopy();return;}});
+  /* ---------------- the brief ---------------- */
+  const ini=n=>{n=T(n).replace(/^simulated\b[\s:\u2013\u2014-]*/i,'');if(!n)return '';if(/^([A-Z]\.\s?){1,4}$/.test(n))return n.replace(/\s/g,'');return n.split(/[\s-]+/).filter(w=>/[A-Za-z]/.test(w)).map(w=>w.replace(/[^A-Za-z]/g,'').charAt(0).toUpperCase()+'.').join('');};
+  const num=x=>{const v=Math.round(x*10)/10;return Number.isInteger(v)?String(v):v.toFixed(1);};
+  const UNIT={count:'times a day',rate:'an hour',duration:'minutes a day',pdur:'% of the time',interval:'% of intervals',mts:'% of intervals',pint:'% of intervals',wint:'% of intervals',latency:'minutes to the first response',ied:'minutes between responses'};
+  const unitOf=b=>UNIT[b.measure]||T(b.unit);
+  function baseLines(f){const d=f&&f.data;if(!d||!Array.isArray(d.behaviors))return [];
+    const B=d.behaviors.filter(b=>b&&T(b.name)&&(b.kind||'target')==='target'&&b.days>0);
+    return B.slice(0,4).map(b=>{const u=unitOf(b),one=(lab,s,nm)=>s&&s.mean!=null?lab+(nm?' ('+nm+', '+s.days+' school day'+(s.days===1?'':'s')+')':'')+', about '+num(s.mean)+' '+u+(s.min!=null&&s.max!=null?', from '+num(s.min)+' to '+num(s.max)+' on a day':''):'';
+      if(b.base&&b.cur&&b.base.mean!=null)return T(b.name)+': '+[one('before the plan',b.base,b.baseName),one('now',b.cur,b.curName)].filter(Boolean).join('; ')+'.';
+      return T(b.name)+': about '+num(b.mean)+' '+u+' over the last '+b.days+' school day'+(b.days===1?'':'s')+' with data'+(b.rng?', from '+num(b.rng.min)+' to '+num(b.rng.max)+' on a day':'')+(d.from&&d.to?' ('+mdy(d.from)+' to '+mdy(d.to)+')':'')+'.';});}
+  function targets(f){const B=((f&&f.behaviors)||[]).filter(b=>b&&T(b.label)&&!(b.isRep||/replacement|alternative/i.test(b.type||'')));
+    if(B.length)return {src:'Form TB-1',list:B.slice(0,4).map(b=>({lab:T(b.label),def:cut(b.def,300),nex:cut(String(b.nex||'').split(/\n+/).map(x=>T(x).replace(/[.;\s]+$/,'')).filter(Boolean).slice(0,3).join('; '),220),prec:/precursor/i.test(b.type||'')})),more:Math.max(0,B.length-4)};
+    const d=T(S.meta.dbeh);return d?{src:'this plan',list:[{lab:'The dangerous behavior this plan addresses',def:cut(d,400),nex:'',prec:false}],more:0}:{src:'',list:[],more:0};}
+  function restraints(){try{const st=crcStates(new Date()).filter(s=>s.dated&&!s.secl&&s.inSem),last=st.map(s=>s.bDay).filter(Boolean).sort((a,b)=>crcCmp(a,b)).pop();
+    return st.length?st.length+' this semester'+(last?', the last on '+mdy(crcDateStr(last)):''):'';}catch(e){return '';}}
+  function briefData(){const f=crCase||{},m=S.meta||{},L=evOn()?S.tm:[];
+    const bk=L.filter(x=>x.kind==='baker'&&x.d).map(x=>x.d).sort(),th=L.filter(x=>x.kind==='threat'&&x.d).map(x=>x.d).sort();
+    const fn=f.fn&&T(f.fn.label)?{t:T(f.fn.label),st:cut((f.fn.statements||[])[0],320),src:'Form FS-1'}:T(m.fnShow)?{t:T(m.fnShow),st:'',src:'this plan (from Form FS-1)'}:null;
+    const steps=(S.pbis||[]).filter(p=>p&&T(p.s)&&T(p.do)).slice(0,6).map(p=>({s:T(p.s).replace(/\s*\(.*\)$/,''),do:cut(p.do,230),who:cut(p.who,60)}));
+    const prec=[T(m.precursor)].concat((S.prec||[]).map(p=>T(p&&p.top))).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).slice(0,4).map(v=>cut(v,200));
+    const health=[T(m.hPhys),T(m.hAlert)].filter(Boolean).map(v=>cut(v,240));
+    return {who:ini(m.client),grade:T(m.grade),site:T(m.site),bcba:T(m.bcba),bk,th,fn,base:baseLines(f),tg:targets(f),steps,fcr:cut(m.fcrShow,160),prec,health,avoid:cut(m.hAvoid,200),rs:restraints(),hasData:!!(f.data&&f.data.behaviors)};}
+  const PLACE='Placement decisions are made through the IEP or 504 team.';
+  const NOTRATE='This brief describes the student\u2019s behavior and the plan in place, for the team\u2019s hand-off. It is not a threat assessment, and it gives no rating or level of any kind.';
+  function briefHTML(){const D=briefData(),today=new Date(),td=(today.getMonth()+1)+'/'+today.getDate()+'/'+today.getFullYear(),none=t=>'<p class="tmb-none">'+esc(t)+'</p>';
+    const sit=[];sit.push('Student '+(D.who||'(initials not entered)')+(D.grade||D.site?' ('+[D.grade,D.site].filter(Boolean).join('; ')+')':'')+'.');
+    if(D.th.length)sit.push('Referred to the school threat management team: '+D.th.map(mdy).join(', ')+'.');
+    if(D.bk.length)sit.push('Baker Act initiation'+(D.bk.length===1?'':'s')+' on record: '+D.bk.map(mdy).join(', ')+'.');
+    if(D.rs)sit.push('Restraints on this form\u2019s log: '+D.rs+'.');
+    let h='<div class="tmb"><h1>Brief for the School Threat Management Team</h1>'+
+      '<p class="tmb-who">'+esc([D.who?'Student: '+D.who:'',D.bcba?'Prepared by '+D.bcba:'','Prepared '+td,'Form CR-1'].filter(Boolean).join(' \u00b7 '))+'</p>'+
+      '<p class="tmb-conf"><b>Confidential student record; initials only.</b> District policy decides who receives this brief; nothing is sent from the workstation. '+esc(NOTRATE)+'</p>'+
+      '<p class="tmb-place">'+esc(PLACE)+'</p>'+
+      '<h2>1. Situation</h2><p>'+esc(sit.join(' '))+'</p>'+
+      '<p><b>What the behavior gets the student</b> '+(D.fn?esc(D.fn.t)+(D.fn.st?'. '+esc(D.fn.st.replace(/\.$/,''))+'.':'.')+' <span class="tmb-src">('+esc(D.fn.src)+')</span>':'<span class="tmb-none">No function in the case yet (Form FS-1).</span>')+'</p>'+
+      '<p><b>Baseline behavior</b> <span class="tmb-src">(Form DD-1: the level and the range of the school days with data)</span></p>'+(D.base.length?'<ul>'+D.base.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':none(D.hasData?'Form DD-1 holds no reduction target with data yet.':'No daily data in the case (Form DD-1).'))+
+      '<p><b>What each behavior looks like, and what it is not</b>'+(D.tg.src?' <span class="tmb-src">('+esc(D.tg.src)+')</span>':'')+'</p>'+
+      (D.tg.list.length?'<ul>'+D.tg.list.map(b=>'<li><b>'+esc(b.lab)+'.</b> '+esc(b.def?b.def+(/[.!?\u2026]$/.test(b.def)?'':'.'):'No definition written.')+(b.nex?' <i>Not:</i> '+esc(b.nex)+(/[.!?\u2026]$/.test(b.nex)?'':'.'):'')+(b.prec?' Recorded as a precursor on Form TB-1.':'')+'</li>').join('')+(D.tg.more?'<li>'+D.tg.more+' more on Form TB-1.</li>':'')+'</ul>':none('No target behavior defined yet (Form TB-1).'))+
+      '<h2>2. What to do</h2>'+(D.steps.length?'<ul>'+D.steps.map(p=>'<li><b>'+esc(p.s)+':</b> '+esc(p.do)+(p.who?' <span class="tmb-src">('+esc(p.who)+')</span>':'')+'</li>').join('')+'</ul>':none('No crisis steps written on this plan yet.'))+
+      (D.fcr?'<p><b>The communication response the plan teaches:</b> '+esc(D.fcr)+'. Prompt it and honor it at once.</p>':'')+
+      '<h2>3. What to watch for</h2>'+(D.prec.length?'<ul>'+D.prec.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':none('No precursor recorded on this plan yet.'))+
+      (D.health.length?'<p><b>Health concerns that limit a hold:</b> '+esc(D.health.join('; '))+'</p>':'')+(D.avoid?'<p><b>What to avoid:</b> '+esc(D.avoid)+'</p>':'')+
+      '<div class="tmb-rb"><b>4. Read-back.</b> The person receiving this brief says back, in their own words, the situation, what to do and what to watch for; the BCBA confirms or corrects it.<br>'+
+      'Read back by <span class="tmb-line"></span> (role) on <span class="tmb-line" style="min-width:90px"></span> &nbsp; Confirmed by <span class="tmb-line"></span></div></div>';
+    return h;}
+  function briefText(){const el=document.createElement('div');el.innerHTML=briefHTML();
+    el.querySelectorAll('h1,h2,p,li,.tmb-rb').forEach(n=>{n.insertAdjacentText('beforebegin','\n');});el.querySelectorAll('li').forEach(n=>n.insertAdjacentText('afterbegin','- '));
+    el.querySelectorAll('.tmb-line').forEach(n=>{n.textContent='________';});
+    return el.textContent.replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();}
+  let bt=0;function briefSoon(){clearTimeout(bt);bt=setTimeout(()=>{const b=document.getElementById('tmBrief');if(b&&!document.body.classList.contains('cr-brief-only'))b.innerHTML=briefHTML();},150);}
+  /* the brief's page: its own footer, and the student's initials in the running head (the form's head names the student) */
+  const css=t=>'"'+String(t).replace(/[\\"]/g,'\\$&')+'"';
+  const FOOT=()=>'@media print{@page{@top-center{content:'+css(briefData().who||'')+'}@bottom-left{content:"Brief for the school threat management team: confidential. District policy decides who receives it."}}}';
+  function briefPrint(){const el=document.getElementById('tmBriefPrint');if(!el)return;el.innerHTML=briefHTML();document.body.classList.add('cr-brief-only');
+    const st=document.createElement('style');st.id='tmBriefPage';st.textContent=FOOT();document.head.appendChild(st);
+    /* the polish layer writes its running head as the print starts: this one is put after it */
+    const last=()=>{document.head.appendChild(st);};window.addEventListener('beforeprint',last);
+    const off=()=>{document.body.classList.remove('cr-brief-only');el.innerHTML='';st.remove();window.removeEventListener('afterprint',off);window.removeEventListener('beforeprint',last);};
+    window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);}
+  window.__cr1BriefPage=FOOT;
+  async function briefCopy(){const t=briefText();try{await navigator.clipboard.writeText(t);nbhUI.toast('The brief is copied. Paste it only where district policy says the team receives it.',{kind:'ok'});}
+    catch(e){nbhUI.toast('Copying was not allowed here. Print the brief, or select its text on the screen and copy it.',{kind:'warn'});}}
+  window.__cr1Brief={html:briefHTML,text:briefText,data:briefData};
+  /* ---------------- the case: in, kept for the brief; out, the events ---------------- */
+  {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+    try{crCase=f||null;let n=0;((f&&f.data&&f.data.incidentList)||[]).forEach(i=>{if(!i||!R.ok(i.rec)||!T(i.id))return;const x=(S.log||[]).find(y=>T(y.ddId)===T(i.id));if(x&&!R.ok(x.rec)){x.rec=i.rec;n++;}});
+      if(n)try{crcPaper();}catch(e){}briefSoon();}catch(e){}return r;};}
+  {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+    try{const L=evOn()?S.tm.filter(x=>x.d):[];if(!L.length)return o;o=o||{};const m=S.meta||{};o.crisis=o.crisis||{beh:T(m.dbeh),precursor:T(m.precursor),stages:[],src:'CR-1'};
+      o.crisis.events=L.map(x=>{const e={kind:x.kind,date:x.d};if(x.t)e.time=x.t;if(x.kind==='baker'){const A=(x.att||[]).filter(attFilled),r=A.findIndex(reached);e.attempts=A.length;e.reached=r>=0;if(r>=0&&A[r].d)e.reachedOn=A[r].d+(A[r].t?' '+A[r].t:'');}
+        else if(x.brief)e.brief=x.brief;if(R.ok(x.rec)){e.rec=x.rec;e.late=R.late(x.rec,x.d,x.t);}return e;});}catch(e){}
+    return o;};}
+  /* ---------------- a file keeps the events and the recorded-at ---------------- */
+  if(typeof crRecord==='function'){const r0=crRecord;crRecord=function(src){const Rr=r0.apply(this,arguments);try{src=obj(src)?src:{};
+      const ev=evClean(src.tm);if(ev.length)Rr.tm=ev;
+      (Array.isArray(src.log)?src.log:[]).filter(obj).forEach((x,i)=>{const y=Rr.log[i];if(!y)return;if(R.ok(x.rec))y.rec=x.rec;
+        (Array.isArray(x.att)?x.att:[]).filter(obj).forEach((a,k)=>{if(y.att&&y.att[k]&&R.ok(a.rec))y.att[k].rec=a.rec;});});
+      const D=obj(src.debs)?src.debs:{};Object.keys(D).forEach(k=>{if(Rr.debs[k]&&obj(D[k])&&R.ok(D[k].dbRec))Rr.debs[k].dbRec=D[k].dbRec;});}catch(e){}return Rr;};}
+  /* the debriefing's recorded-at travels with it when another restraint's debriefing is opened */
+  if(typeof crDebSnap==='function'){const s0=crDebSnap;crDebSnap=function(){const o=s0.apply(this,arguments);if(o&&R.ok(S.meta.dbRec))o.dbRec=S.meta.dbRec;return o;};}
+  if(typeof crDebLoad==='function'){const l0=crDebLoad;crDebLoad=function(o){const r=l0.apply(this,arguments);if(o&&R.ok(o.dbRec))S.meta.dbRec=o.dbRec;else delete S.meta.dbRec;return r;};}
+  /* ---------------- recorded-at: the restraints, the attempts, the debriefing ---------------- */
+  const LOGF=['d','dur','set','staff','rep','deb','pre','durS','typ','injS','injT','aft'].concat(typeof CRC_KEYS!=='undefined'?CRC_KEYS:[]);
+  const rowFilled=r=>!!r&&LOGF.some(k=>T(r[k])&&!(k==='pok'||k==='wok')),debHas=()=>{try{return crDebHas(crDebSnap());}catch(e){return false;}};
+  function entryOf(t){if(!t||!t.closest||!t.dataset)return null;const d=t.dataset;
+    if(d.ca!=null&&t.closest('#crcRows')){const [i,k]=String(d.ca).split('.').map(Number),r=(S.log||[])[i],a=r&&r.att&&r.att[k];return a?{o:a,filled:()=>attFilled(a)}:null;}
+    if(d.c!=null&&t.closest('#crcRows')){const r=(S.log||[])[+d.c];return r?{o:r,filled:()=>rowFilled(r)}:null;}
+    if(d.l!=null&&t.closest('#logTbl,#v65LogTbl')){const r=(S.log||[])[+d.l];return r?{o:r,filled:()=>rowFilled(r)}:null;}
+    if(t.closest('section.only-deb')&&((d.m&&/^db/.test(d.m)&&d.m!=='dbRow')||t.closest('#actTbl')))return {deb:true,filled:debHas};
+    return null;}
+  const pend=new WeakMap();let debPend=null;
+  document.addEventListener('focusin',e=>{const x=entryOf(e.target);if(!x)return;if(x.deb){if(debPend===null)debPend=!debHas()&&!R.ok(S.meta.dbRec);return;}if(!pend.has(x.o))pend.set(x.o,!x.filled());},true);
+  const stampOn=e=>{if(!e.isTrusted)return;const x=entryOf(e.target);if(!x)return;
+    if(x.deb){if(debPend&&!R.ok(S.meta.dbRec)&&debHas()){S.meta.dbRec=R.now();debPend=false;debPaint();}return;}
+    if(pend.get(x.o)===true&&!R.ok(x.o.rec)&&x.filled()){x.o.rec=R.now();pend.set(x.o,false);try{crcPaper();crcUpdate();}catch(err){}}};
+  document.addEventListener('input',stampOn);document.addEventListener('change',stampOn);
+  /* new rows added by hand start empty */
+  document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('#addLog'):null;if(b)setTimeout(()=>{const r=(S.log||[])[S.log.length-1];if(r&&!rowFilled(r))pend.set(r,true);},0);},true);
+  function debPaint(){let el=document.getElementById('crDbRec');if(!el){const g=document.getElementById('dbRepCheck');const fg=g&&g.closest('.fieldgrid');if(!fg)return;el=document.createElement('div');el.id='crDbRec';fg.insertAdjacentElement('afterend',el);}
+    const h=R.ok(S.meta.dbRec)?'<p class="hint" style="margin:0 0 6px">Debriefing '+R.html(S.meta.dbRec,S.meta.dbWhen||S.meta.dbDate,'')+'</p>':'';if(el.innerHTML!==h)el.innerHTML=h;}
+  /* the paper and the editor show each restraint's and each attempt's recorded-at */
+  if(typeof crcPaper==='function'){const p0=crcPaper;crcPaper=function(){const r=p0.apply(this,arguments);try{
+      document.querySelectorAll('#crcPaper .crc-p-r').forEach((box,j)=>{const row=(S.log||[])[j];if(!row)return;
+        const t=box.querySelector('.crc-p-times');if(t&&R.ok(row.rec)&&!t.querySelector('.rec68'))t.insertAdjacentHTML('beforeend',R.html(row.rec,row.rd||crcMDY(row.d)||row.d,row.rd?row.rt:''));
+        box.querySelectorAll('.crc-pt-nl tbody tr').forEach(tr=>{const m=/^Telephone or e-mail attempt (\d+)/.exec(T(tr.cells[0]&&tr.cells[0].textContent));if(!m)return;const a=(row.att||[])[+m[1]-1];
+          if(a&&R.ok(a.rec)&&tr.cells[2]&&!tr.cells[2].querySelector('.rec68'))tr.cells[2].insertAdjacentHTML('beforeend',R.html(a.rec,a.d,a.t));});});}catch(e){}return r;};}
+  if(typeof crcUpdate==='function'){const u0=crcUpdate;crcUpdate=function(){const r=u0.apply(this,arguments);try{(S.log||[]).forEach((row,i)=>{const el=document.getElementById('crcRL'+i);if(!el)return;
+      let s=el.parentNode&&el.parentNode.querySelector('.rec68-slot[data-i="'+i+'"]');if(!s){s=document.createElement('div');s.className='rec68-slot';s.dataset.i=i;el.insertAdjacentElement('afterend',s);}
+      const h=R.ok(row.rec)?R.html(row.rec,row.rd||crcMDY(row.d)||row.d,row.rd?row.rt:''):'';if(s.innerHTML!==h)s.innerHTML=h;});}catch(e){}return r;};}
+  if(typeof crDebOthers==='function'){const o0=crDebOthers;crDebOthers=function(){const r=o0.apply(this,arguments);try{const D=crDebs(),keys=Object.keys(D).filter(k=>crDebHas(D[k]))
+      .sort((a,b)=>(a[0]==='u')-(b[0]==='u')||(+a.replace('u',''))-(+b.replace('u','')));
+      document.querySelectorAll('#crDebOthers .cr-deb-full').forEach((box,j)=>{const o=D[keys[j]];if(o&&R.ok(o.dbRec)){const h=box.querySelector('h3');if(h&&!box.querySelector('.rec68'))h.insertAdjacentHTML('afterend',R.html(o.dbRec,o.dbWhen||o.dbDate,''));}});}catch(e){}return r;};}
+  /* the spreadsheet carries the events */
+  if(typeof crCsvRows==='function'){const c0=crCsvRows;crCsvRows=function(){const out=c0.apply(this,arguments);try{const L=evOn()?S.tm:[];L.forEach(x=>{const n=TM_KIND[x.kind]+' '+kindN(x,L);
+      out.push(['Threat team brief',n+': date and time',evWhen(x)]);if(x.kind==='baker'&&T(x.who))out.push(['Threat team brief',n+': initiated by',T(x.who)]);
+      if(x.kind==='threat'&&x.brief)out.push(['Threat team brief',n+': brief given to the team',mdy(x.brief)]);
+      (x.att||[]).filter(attFilled).forEach((a,k)=>out.push(['Threat team brief',n+': attempt '+(k+1)+' to reach the parent',attLine(a,k).replace(/^Attempt \d+: /,'')]));
+      if(T(x.note))out.push(['Threat team brief',n+': what happened',T(x.note)]);if(R.ok(x.rec))out.push(['Threat team brief',n+': recorded',R.line(x.rec,x.d,x.t).replace(/^Recorded /,'')]);});}catch(e){}return out;};}
+  /* ---------------- the addenda once the plan is signed ---------------- */
+  const ADD=window.nbhAddenda&&window.nbhAddenda({id:'cr1Add68',what:'plan',
+    roots:()=>[document.querySelector('section.only-setup'),document.querySelector('section.only-plan')],
+    skip:el=>/^(sgOn|nRest|d2|revLast|revNext|revChanges|parentCopy|parentCopyHow|revTrigDue)$/.test(el.dataset.m||'')||!!el.closest('#v65Trig,#v65RehTbl,#crRep'),
+    signed:()=>{const d=T(S.meta.sgOn);return {on:/^\d{4}-\d\d-\d\d$/.test(d),date:d};},
+    load:()=>{try{return S.meta.add68?JSON.parse(S.meta.add68):null;}catch(e){return null;}},
+    save:o=>{if(o)S.meta.add68=JSON.stringify(o);else delete S.meta.add68;poke();},
+    by:()=>T(S.meta.bcba),ident:()=>S,mount:()=>document.getElementById('cr1Add68'),reveal:()=>{if(!document.body.classList.contains('view-plan'))setView('plan');}});
+  document.addEventListener('input',e=>{if(e.target&&e.target.dataset&&e.target.dataset.m==='sgOn'&&ADD)setTimeout(()=>ADD.changed(),400);});
+  /* ---------------- drawing ---------------- */
+  if(typeof renderAll==='function'){const a0=renderAll;renderAll=function(){const r=a0.apply(this,arguments);try{evRender();debPaint();if(ADD)ADD.refresh();}catch(e){}return r;};}
+  if(typeof crDebRefresh==='function'){const d0=crDebRefresh;crDebRefresh=function(){const r=d0.apply(this,arguments);debPend=null;try{debPaint();}catch(e){}return r;};}
+  document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('#viewSeg button[data-view="tm"]'):null;if(b)briefSoon();});
+  try{evRender();debPaint();crcPaper();crcUpdate();if(ADD)ADD.refresh();}catch(e){}
+})();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

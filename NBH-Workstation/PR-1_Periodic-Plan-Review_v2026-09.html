@@ -4495,6 +4495,25 @@ try{C=(typeof prCase!=='undefined'&&prCase)||null;ebdRender();arRender();}catch(
   html.pr-ebd-printing #prEbdSec{display:block!important}
   #prArch.pr-arch-empty{display:none!important}}
 </style>
+<script id="pr1-v2568-safety">
+/* v25.68 (research #2) the review lists Form CR-1's Baker Act initiations and threat management team cases in the period
+   (crisis.events, read from the case): each one's date, and for a Baker Act initiation how many attempts to reach the parent
+   are recorded and whether the parent was reached; an entry recorded more than 24 hours after the event says so. They join
+   Safety in the Period; with none in the period the section reads as before. */
+(function(){
+  if(typeof prSafety!=='function'||typeof prSafetyRender!=='function')return;
+  const s0=prSafety;prSafety=function(f){const X=s0.apply(this,arguments);try{const P=X.P||{},inP=x=>!!x&&(!P.from||x>=P.from)&&(!P.to||x<=P.to);
+      const E=((f&&f.crisis&&Array.isArray(f.crisis.events))?f.crisis.events:[]).filter(e=>e&&/^(baker|threat)$/.test(e.kind)&&inP(prT(e.date)));
+      X.bk=E.filter(e=>e.kind==='baker');X.th=E.filter(e=>e.kind==='threat');if(E.length)X.any=true;}catch(e){}return X;};
+  const r0=prSafetyRender;prSafetyRender=function(){const r=r0.apply(this,arguments);try{const el=document.getElementById('prSafety'),X=prSafety(prCase);
+      const ul=el&&el.querySelector('ul.pr-safe');if(!ul||!(X.bk||[]).length&&!(X.th||[]).length)return r;
+      const late=e=>e.late?' (a late entry)':'',L=[];
+      if(X.bk.length)L.push('<b>Baker Act initiations in this period</b> (Form CR-1): '+X.bk.length+' ('+X.bk.map(e=>prMd(e.date)+(e.attempts?', '+e.attempts+' attempt'+(+e.attempts===1?'':'s')+' to reach the parent'+(e.reached?', the parent reached':', the parent not recorded as reached'):', no attempt to reach the parent recorded')+late(e)).join('; ')+').');
+      if(X.th.length)L.push('<b>Threat management team cases in this period</b> (Form CR-1): '+X.th.length+' ('+X.th.map(e=>prMd(e.date)+(e.brief?', the brief given to the team '+prMd(e.brief):'')+late(e)).join('; ')+'). Placement decisions are made through the IEP or 504 team.');
+      ul.insertAdjacentHTML('beforeend',L.map(x=>'<li>'+x+'</li>').join(''));}catch(e){}return r;};
+  try{renderVerdicts();}catch(e){}
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
