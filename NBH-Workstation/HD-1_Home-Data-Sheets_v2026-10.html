@@ -3530,14 +3530,19 @@ function v65Sheets(){const who=S.meta.cg||'',nm=esc(kid()||'your child'),D=dayId
       '<tr class="ex"><td class="lab">Example: Mon</td><td>4:30 pm</td><td>&#10003; Asked</td><td>&#10003;</td><td></td><td></td><td></td><td>Underwear</td></tr>'+
       Array.from({length:16},()=>'<tr><td class="hc"></td><td class="hc"></td><td class="sub">&#9744; Sit &#9744; Asked</td><td class="hc">&#9744;</td><td class="sub">&#9744; Wet &#9744; Soiled</td><td class="hc">&#9744;</td><td class="sub">&#9744; Toilet &#9744; Accident</td><td class="hc"></td></tr>').join('')+
       '</tbody></table>'+hsFoot()+'</div>';}
-  if(S.chk.sleep){
-    h+='<div class="hs" data-sheet="sleep2">'+hsHead('Sleep Log: Bedtime and the Night',who)+
-      '<div class="hs-box"><b>How to fill this in</b><ol><li>Fill in beside the Sleep Log, one row per night.</li><li><b>Calls or trips out</b>: how many times '+nm+' called out or left the room after lights out.</li><li><b>Fell asleep where</b>, and whether an adult stayed until '+nm+' was asleep.</li><li><b>Where at wake time</b>: own bed or a parent&rsquo;s bed.</li><li>At a night waking, what did the adult do?</li><li>Any sleep medicine or melatonin, and the time it was given.</li></ol><p style="margin:4px 0 0">Your best guess is fine.</p></div>'+
+  return h;}
+/* CARE-M6: the bedtime and night measures print on the Sleep Log itself, under its table (no sheet of their own, so the
+   count of sheets and their safety lines stay as they were) */
+function v65SleepX(){const nm=esc(kid()||'your child'),D=dayIdx();
+    return '<div class="v65-slx"><div class="hs-box"><b>Bedtime and the night</b><ol><li>One row per night, beside the row above.</li><li><b>Calls or trips out</b>: how many times '+nm+' called out or left the room after lights out.</li><li><b>Fell asleep where</b>, and whether an adult stayed until '+nm+' was asleep.</li><li><b>Where at wake time</b>: own bed or a parent&rsquo;s bed.</li><li>At a night waking, what did the adult do?</li><li>Any sleep medicine or melatonin, and the time it was given.</li></ol><p style="margin:4px 0 0">Your best guess is fine.</p></div>'+
       '<table class="hs-t"><thead><tr><th style="width:17%">Night</th><th style="width:9%">Calls or trips out</th><th style="width:17%">Fell asleep where / adult stayed? Y N</th><th style="width:13%">At wake time: own bed / parent&rsquo;s bed</th><th>At a night waking, the adult&hellip;</th><th style="width:16%">Sleep medicine or melatonin / time</th></tr></thead><tbody>'+
       D.map(di=>'<tr class="slr"><td class="lab night">'+nightLab(di)+'</td><td class="hc"></td><td class="hc"></td><td class="hc"></td><td class="hc"></td><td class="hc"></td></tr>').join('')+
-      '</tbody></table>'+hsFoot()+'</div>';}
-  return h;}
-{const rs1=renderSheets;renderSheets=function(){const r=rs1.apply(this,arguments);try{const out=$('#sheetOut');if(out&&S.bh.some(b=>b.name)){const add=v65Sheets();if(add){if(/Tick at least one sheet/.test(out.innerHTML))out.innerHTML='';out.insertAdjacentHTML('beforeend',add);}}}catch(e){}return r;};}
+      '</tbody></table></div>';}
+SH_LOW.meal='the meal log';SH_LOW.toilet='the toileting log';SH_NAME.meal='Meal log';SH_NAME.toilet='Toileting log';
+{const rs1=renderSheets;renderSheets=function(){const r=rs1.apply(this,arguments);try{const out=$('#sheetOut');if(out&&S.bh.some(b=>b.name)){
+  const sl=out.querySelector('.hs[data-sheet="sleep"]'),end=sl&&sl.querySelector('.hs-end');if(end&&!sl.querySelector('.v65-slx'))end.insertAdjacentHTML('beforebegin',v65SleepX());
+  const add=v65Sheets();if(add){if(/Tick at least one sheet/.test(out.innerHTML))out.innerHTML='';out.insertAdjacentHTML('beforeend',add);}
+  if(sl||add)renderCost();}}catch(e){}return r;};}
 
 /* ---- the entry tables ---- */
 const v65Opt=(L,v)=>L.map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o];return '<option value="'+esc(val)+'"'+(String(v)===String(val)?' selected':'')+'>'+esc(lab)+'</option>';}).join('');
