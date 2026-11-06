@@ -830,6 +830,7 @@ ul.ic-conf li{margin:2px 0}
 .ic-revnote{margin:6px 0 10px}
 /* v23.09 (review F1) the family's language from Form DM-1 against this consent's: screen only */
 .warn.ic-lang{border-left-color:#9b4e15;background:#fbf1e3;margin:6px 0 10px}.warn.ic-lang[hidden]{display:none}
+#statGrid em.st-home{display:block;margin-top:2px}
 </style>
 <style id="ic1-audit-css">
 /* v21.16 audit (F10, F11). On paper: the parent's decision, how consent was obtained and the signatures stay on one
@@ -1471,6 +1472,11 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
       <label>Initials <input name="ij.init" class="inline" style="min-width:50px;max-width:70px"></label>
       <label>Date <input name="ij.date" type="date" class="inline"></label>
     </div>
+    <!-- v25.67 (the BCBA, 11/6) the photo decision lives here, and Form IM-1 reads it -->
+    <div class="defs">
+      <div class="drow"><div class="dlab">Photos for the record</div><div class="dval"><p class="method" style="margin:0 0 6px">During a check, staff may photograph an injury they can see, so the next check can be compared with it (Form IM-1). The same rules apply: two adults, your child is asked first, and private areas are never photographed. The photos stay in your child's case file, are shared outside the school only as &ldquo;Sharing outside school&rdquo; allows, and are printed only when the BCBA chooses.</p>
+      <select name="ij.photo"><option value="">Decision on photos</option><option value="yes">Yes, injuries may be photographed for the record</option><option value="no">No photos: injuries are described in words only</option></select></div></div>
+    </div>
   </div>
 
   <!-- v23.48 (review F19) Wording approved by the BCBA, October 2026. -->
@@ -1621,7 +1627,7 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
   <div class="stat" id="statGrid">
     <div><b>CONSENT</b><span id="stStatus">&mdash;</span><em id="stStatusSub"></em></div>
     <div><b>METHOD</b><span id="stMethod" style="font-size:13px">&mdash;</span><em id="stMethodSub"></em></div>
-    <div><b>PROCEDURES COVERED</b><span id="stProc">&mdash;</span><em id="stProcSub">of 14 listed</em></div>
+    <div><b>PROCEDURES COVERED</b><span id="stProc">&mdash;</span><em id="stProcSub">of 14 listed</em><em id="stProcHome" class="st-home"></em></div>
     <div><b>SPECIFIC DECISIONS</b><span id="stDec" style="font-size:13px">&mdash;</span><em id="stDecSub"></em></div>
   </div>
   <div class="warn verdict" id="recVerdict"></div>
@@ -1786,7 +1792,8 @@ function decIssues(){const out=[],miss=(ks,ls)=>ks.map((k,i)=>val(k)?'':ls[i]).f
  if(val('sh.dec')==='yes'){const x=miss(['sh.who','sh.what'],['the provider','what may be shared']);if(x.length)out.push('Sharing outside the school is approved; still to enter: '+x.join('; ')+' (Specific procedures, D).');
   if(!val('sh.roi'))out.push('Sharing outside the school is approved, but no district release is marked on file; nothing is shared until it is.');}
  /* v21.44 (B4): injury checks name who checks and the second adult */
- if(val('ij.dec')==='yes'){const x=miss(['ij.when','ij.who'],['when checks are done','who checks, and the second adult']);if(x.length)out.push('Injury checks are consented to; still to enter: '+x.join('; ')+' (Specific procedures, E).');}
+ if(val('ij.dec')==='yes'){const x=miss(['ij.when','ij.who'],['when checks are done','who checks, and the second adult']);if(x.length)out.push('Injury checks are consented to; still to enter: '+x.join('; ')+' (Specific procedures, E).');
+   if(!val('ij.photo'))out.push('Injury checks are consented to; the decision on photos for the record is not recorded yet, so Form IM-1 will not allow photos (Specific procedures, E).');}
  if(val('wt.dec')==='yes'){const x=miss(['wt.waits','wt.stop'],['how many waits and the longest wait','the stop rule from the waiting plan']);if(x.length)out.push('Practice with waiting is consented to; still to enter: '+x.join('; ')+' (Specific procedures, F).');}
  const un=DECS.filter(([k])=>{const v=val(k+'.dec');return (v==='yes'||v==='no')&&(!val(k+'.init')||!val(k+'.date'));}).map(d=>d[1]);
  if(un.length)out.push('Initial and date each decision on the Specific procedures sheet: '+un.join(', ')+'.');
@@ -1928,6 +1935,12 @@ function refresh(){const s=status();
  $('#stProc').textContent=s.covered.length;
  const none=s.state==='Not recorded'?'no consent recorded':s.state==='Pending'?'no response yet':s.state==='Decision not recorded'?'the decision is not recorded':'consent '+s.state.toLowerCase();
  $('#stProcSub').textContent=s.current?'of '+PROCS.length+' listed'+(s.procs.indexOf('fa')>=0&&s.covered.indexOf('fa')<0?'; experimental analysis awaits its own decision':''):(s.procs.length?s.procs.length+' proposed; ':'')+'none covered: '+none;
+ /* v25.67 (the BCBA, 11/6) the three home procedures are counted on a line of their own, so the school count and saved
+    records keep their "of 14": home data sheets and caregiver training are covered when ticked and consent is current;
+    home video or photos also needs its own Yes (H) */
+ {const hp=[['p.homeData',0],['p.homeTrain',0],['p.homeVideo',1]],hn=hp.filter(([k,x])=>s.current&&!!val(k)&&(!x||val('hv.dec')==='yes')).length,
+   hl=hp.filter(([k])=>!!val(k)).length,he=$('#stProcHome');
+   if(he)he.textContent=hl?'Home: '+hn+' of 3 covered'+(hn<hl?' ('+(hl-hn)+' ticked, not covered yet)':''):'Home: none of 3 ticked';}
  $('#stDec').textContent=s.decided+' of '+DECS.length;$('#stDecSub').textContent=s.decs.filter(d=>d.v==='no').map(d=>d.l+': no').join('; ')||(s.decs.filter(d=>d.v==='yes').length?'all recorded decisions are yes or not proposed':'');
  const rv=$('#recVerdict'),more=s.issues.length?' '+s.issues.length+' item(s) still incomplete on the Consent sheet.':'';
  if(!s.m&&!s.stv)rv.innerHTML='<b>Verdict</b>No consent event recorded. Assessment beyond the current IEP should not begin.';
@@ -3374,7 +3387,7 @@ window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById
     ed:{dec:g('ed.dec'),items:g('ed.items'),allergy:g('ed.allergy'),limits:g('ed.limits'),date:g('ed.date')},
     rec:{dec:g('rec.dec'),what:g('rec.what'),who:g('rec.who'),del:g('rec.del'),date:g('rec.date')},
     sh:{dec:g('sh.dec'),who:g('sh.who'),what:g('sh.what'),roi:!!val('sh.roi'),roidate:g('sh.roidate'),date:g('sh.date')},
-    ij:{dec:g('ij.dec'),when:g('ij.when'),who:g('ij.who'),date:g('ij.date')},wt:{dec:g('wt.dec'),waits:g('wt.waits'),stop:g('wt.stop'),date:g('wt.date')}};
+    ij:{dec:g('ij.dec'),when:g('ij.when'),who:g('ij.who'),date:g('ij.date'),photo:g('ij.photo')},wt:{dec:g('wt.dec'),waits:g('wt.waits'),stop:g('wt.stop'),date:g('wt.date')}};
   let bip='';document.querySelectorAll('#logTbl tbody tr').forEach(tr=>{const d=tr.querySelector('input[type=date]'),e=tr.querySelector('select');
     if(d&&d.value&&e&&/^Consent to implement the BIP/.test(e.value)&&d.value>bip)bip=d.value;});
   return {consent:{src:'IC-1',state:st.state,on,method:m,status:stv,pwn:g('c.pwn'),kind:m==='reeval'?'reeval':m==='initial'?'initial':'',
