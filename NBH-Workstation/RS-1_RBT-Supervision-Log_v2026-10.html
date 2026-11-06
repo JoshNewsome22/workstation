@@ -1178,6 +1178,16 @@ td input,td select{max-width:100%}
       <div><label for="rRemind">Competency assessment window: days before expiration</label><input id="rRemind" data-r="remind" inputmode="numeric"></div>
       <div><label for="rRemind2">Early reminder (days)</label><input id="rRemind2" data-r="remind2" inputmode="numeric"></div>
     </div>
+    <!-- v25.65 (STAFF H5) the form's practice rule for the next observation, not a BACB rule -->
+    <p class="hint" style="margin-top:10px"><b>The next observation (this form&rsquo;s practice rule, not a BACB rule).</b> Weekly until the checklist meets the criterion on two checks in a row, then every 2 weeks for a month, then monthly; back to weekly after a check below the criterion or a missed critical step. No study has set the best schedule for RBTs, so change it here.</p>
+    <div class="fieldgrid rs-rules">
+      <div><label for="rObsCrit">The RBT&rsquo;s checklist criterion (%)</label><input id="rObsCrit" data-r="obsCrit" inputmode="decimal"></div>
+      <div><label for="rObsRun">Checks in a row at the criterion before thinning</label><input id="rObsRun" data-r="obsRun" inputmode="numeric"></div>
+      <div><label for="rObsW">Weekly: days between observations</label><input id="rObsW" data-r="obsW" inputmode="numeric"></div>
+      <div><label for="rObsB">Then: days between observations</label><input id="rObsB" data-r="obsB" inputmode="numeric"></div>
+      <div><label for="rObsBFor">For how many days before monthly</label><input id="rObsBFor" data-r="obsBFor" inputmode="numeric"></div>
+      <div><label for="rObsM">Monthly: days between observations</label><input id="rObsM" data-r="obsM" inputmode="numeric"></div>
+    </div>
     <div class="tools"><button class="tool" type="button" id="rulesReset">Back to the 2026 defaults</button><span class="hint" id="rulesNote"></span></div>
 
     <h2 class="nbh-band" style="margin-top:18px">The Requirements in Brief (2026)</h2>
@@ -1211,7 +1221,11 @@ td input,td select{max-width:100%}
         <h2 class="nbh-band" style="margin-top:18px">Supervision Contacts</h2>
         <p class="hint">Each real-time contact with the supervisor: in person or by live two-way video. In person is preferred; a web camera or video conference is allowed. A phone call, an email, a recording, or video monitoring without real-time interaction and feedback can be noted here but does not count. Supervision is client-focused and is not professional development: one event cannot count as both.</p>
         <div class="tools"><button class="tool" type="button" id="addContact">Add a contact</button><button class="tool" type="button" id="addLike" title="Copies the supervisor, format, client and the boxes ticked from the latest contact">Add a contact like the last one</button><span class="hint" id="contactCount"></span></div>
+        <!-- v25.65 (STAFF H5) a new skill, client or plan restarts the weekly observations -->
+        <div class="fieldgrid rs-obsreset"><div><label for="mObsReset">New skill, new client or new plan since (restarts weekly observation)</label><input id="mObsReset" type="date" data-s="obs_reset"></div><div><label for="mObsResetWhy">What is new</label><input id="mObsResetWhy" data-s="obs_reset_why" placeholder="e.g., the new BIP for SIM-0002"></div></div>
         <div id="contactList"></div>
+        <!-- v25.65 (STAFF M5) each checklist item across the month's observed contacts -->
+        <div id="rsItemGrid"></div>
         <div class="field rs-mnote"><label for="monthNote">Notes for the month (optional)</label><textarea id="monthNote" data-mo="note" rows="2" placeholder="e.g., the RBT was out for two days; the client moved to a new classroom on the 14th"></textarea></div>
         <div class="field"><label for="monthRecords">Other records for this month, if any records disagree (optional)</label><input id="monthRecords" data-mo="records" placeholder="e.g., session notes on Form CN-1 for 9/14 to 9/18; the district time sheet"></div>
       </div>
@@ -1230,13 +1244,16 @@ td input,td select{max-width:100%}
     <h3 style="margin-top:16px">Percent of service hours supervised, by month</h3>
     <div class="rs-chart" id="yearChart"></div>
     <h3 style="margin-top:16px">Checklist average by month</h3>
+    <p class="hint">The generic list, read by a working convention: 90% and above is solid, 80% to 89% is a coaching point, below 80%: find out why (Form PD-1); retrain only when the skill itself is missing. A plan&rsquo;s integrity checklist is read against the plan&rsquo;s own criterion on Form TI-1. A monthly average can hide which step is slipping: the month&rsquo;s item grid shows it.</p>
     <div class="rs-chart" id="ckChart"></div>
+    <!-- v25.65 (STAFF M6) announced and unannounced observations -->
+    <div id="rsAnnYear"></div>
   </section>
 
   <!-- ===================== GOALS AND CREDENTIAL ===================== -->
   <section class="only-rbt">
     <h2 class="nbh-band">The RBT&rsquo;s Goals</h2>
-    <p class="hint">Performance goals set in supervision: one skill each, in words the RBT can act on, with a target date. The workstation&rsquo;s due line shows the target dates. When a performance problem arises, an improvement plan goes here as a goal, with its procedures in the notes, and is evaluated (Ethics Code for Behavior Analysts 4.08).</p>
+    <p class="hint">Performance goals set in supervision: one skill each, in words the RBT can act on, with a target date. <!-- v25.65 (STAFF M4) -->Say when or where, and how often or how well, and set it with the RBT: goal statements that named only the behavior and the conditions did not change teachers&rsquo; praise, and adding a frequency the teacher chose did, for 3 of 4 teachers (Cohrs et al., 2016). Link a goal to the checklist items it is about to see them across the contacts. The workstation&rsquo;s due line shows the target dates. When a performance problem arises, an improvement plan goes here as a goal, with its procedures in the notes, and is evaluated (Ethics Code for Behavior Analysts 4.08).</p>
     <div id="goalList"></div>
     <div class="tools"><button class="tool" type="button" id="addGoal">Add a goal</button><span class="hint" id="goalCount"></span></div>
 
@@ -1247,6 +1264,8 @@ td input,td select{max-width:100%}
     <p class="hint">To ask the RBT: &ldquo;What do you like best about the supervision activities?&rdquo; and &ldquo;What could we do differently together to enhance the supervisory experience?&rdquo; (Sellers, Valentino &amp; LeBlanc, 2016); at a meeting, &ldquo;Do you feel comfortable with the amount and type of feedback being provided?&rdquo; and &ldquo;Are there any additional supports I could provide?&rdquo; (Sellers, LeBlanc &amp; Valentino, 2016). Data that show the effects: the skills the RBT has mastered, the plan checklist scores, and the number and type of errors in written work such as data sheets. The BACB&rsquo;s Supervisor Training Curriculum Outline (2.0) names what to look at: the client&rsquo;s data and the client&rsquo;s and caregivers&rsquo; satisfaction; direct observation of the RBT and the RBT&rsquo;s satisfaction; fidelity of implementation; professionalism; the written conditions and goals, reviewed now and then; and the supervisor&rsquo;s own self-rating. Tick what each review looked at.</p>
     <p class="hint"><b>When supervision itself runs into trouble</b> (Sellers, LeBlanc &amp; Valentino, 2016): meetings often canceled or moved to the phone, deadlines missed, feedback argued with or not used, or the RBT saying less. Treat it as any behavior: define it, note when it happens and what follows it, then plan: model the skill, more practice, smaller steps, a job aid. When the supervisor is part of the problem: apologize, naming what was done, its effect on the RBT and on the relationship, say what will be done instead, and follow up. Note it as a review here.</p>
     </details>
+    <!-- v25.65 (STAFF M7) -->
+    <p class="hint"><b>Feedback preferences.</b> Ask at each review when, how often and in what form the RBT wants feedback. Prefer more frequent feedback on new or complex steps and less on steps already at criterion. Preferences shift as skills are learned, so ask again at each review. Corrective feedback is not optional: a preference for praise only is recorded, and the missed steps are still named and practised (Bacotti et al., 2021; Thibodeaux et al., 2025; Simonian &amp; Brand, 2022).</p>
     <div id="effList"></div>
     <div class="tools"><button class="tool" type="button" id="addEff">Add a review</button><span class="hint" id="effCount"></span></div>
 
@@ -1381,7 +1400,10 @@ td input,td select{max-width:100%}
       <tr><th>Percent supervised</th><td>Supervision minutes divided by RBT service minutes. &ldquo;More minutes needed&rdquo; is the rule&rsquo;s percent of the RBT minutes so far, rounded up, less the supervision minutes so far; the planned figure uses every row of the month.</td></tr>
       <tr><th>Contacts, individual, observation</th><td>Counted from the contacts that count. A contact is individual when only this RBT took part, and a small-group contact otherwise; an observation is a contact in which the supervisor watched the RBT providing services with a client.</td></tr>
       <tr><th>The month&rsquo;s status</th><td>Green: met. Amber: not yet (the month has not ended). Red: not met after the month ended, or a contact that cannot count (phone, email, recording, video monitoring alone, a group of more than 10, a supervisor without a BCBA or BCaBA credential) at any time. Grey: not applicable (no services).</td></tr>
-      <tr><th>Observation checklist</th><td>Items marked Yes divided by the items marked Yes or No; N/A is left out. The year view averages the month&rsquo;s checklists (a working convention: 90% and above is solid, 80% to 89% is a coaching point, below 80% calls for retraining with behavior skills training).</td></tr>
+      <tr><th>Observation checklist</th><td>Items marked Yes divided by the items marked Yes or No; N/A is left out. The year view averages the month&rsquo;s checklists. <!-- v25.65 (STAFF M5, M8) -->For the generic list, a working convention: 90% and above is solid, 80% to 89% is a coaching point, below 80%: find out why (Form PD-1); retrain only when the skill itself is missing. A critical item scored No marks the contact &ldquo;Critical step missed: follow up this week&rdquo;, whatever the percentage. A plan&rsquo;s integrity checklist is read as Form TI-1 reads it, against the plan&rsquo;s own criterion and procedure, not with this convention. An item missed on two contacts in a row is flagged under the month, with <b>Find out why first (PD-1)</b>.</td></tr>
+      <!-- v25.65 (STAFF H5) -->
+      <tr><th>Next observation due</th><td>The form&rsquo;s practice rule, not a BACB rule (the numbers are on the Rules panel). With a new skill, a new client or plan, or the last checklist below the criterion: observe and give feedback every week until two checks in a row meet the criterion. Then every 2 weeks for a month. Then monthly. Any check below the criterion, or a missed critical step, goes back to weekly. The BACB row still reads met on one observation a month; this row reads due on its own. No study has set the best schedule for RBTs; the school studies that kept integrity up gave feedback every other week (Codding et al., 2005) or daily (DiGennaro et al., 2007), and schedules faded to every 2 weeks or monthly held only after more frequent feedback (Green et al., 2002).</td></tr>
+      <tr><th>Feedback given</th><td>When, in what form, and which of eight steps were done: collected data on the steps; praised named steps; described each missed step; gave the reason to change; told how; showed how; had the RBT practise until correct; asked for questions (the performance-feedback checklist of Carroll et al., 2022). The month lists an observation with no feedback recorded, and feedback given later than the same day.</td></tr>
       <tr><th>The credential</th><td>Days until the expiration date on the Setup page, with an early reminder and a reminder from the opening of the competency assessment window (the days on the Rules panel). PDUs are totalled from the log against the cycle&rsquo;s target: only the three kinds that count, dated inside the cycle; an entry that does not count is marked.</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:16px">Good Practice</h2>
@@ -1389,7 +1411,8 @@ td input,td select{max-width:100%}
       <tr><th style="width:28%">Several RBTs</th><td>One file can hold every RBT you supervise. <b>Add an RBT</b> at the top of the page starts a new record (the school year and the usual days come from the RBT on screen); the <b>Supervisee</b> list and the table under it show each RBT with the month on screen, and choosing one shows that RBT&rsquo;s setup, months, goals, credential and concerns. The supervisors and the rules are entered once and shared. Each RBT&rsquo;s monthly record prints and is signed on its own; the CSV holds every RBT&rsquo;s rows.</td></tr>
       <tr><th>Write it the same day</th><td>A contact recorded the day it happened, with the feedback in the supervisor&rsquo;s own words, is a better record and a better plan for the next one.</td></tr>
       <tr><th>Behavior skills training</th><td>Instruction, a short written description, modeling, rehearsal and feedback, repeated until the skill is done correctly, then checked on the job, is the method with the strongest evidence for teaching staff (Parsons, Rollyson &amp; Reid, 2012). Tick the parts used, so the record shows how a skill was taught as well as what.</td></tr>
-      <tr><th>Feedback</th><td>Specific, prompt and tied to what was observed: what went well, one thing to change, and how (Reid, Parsons &amp; Green, 2012). The follow-up box carries it into the next contact.</td></tr>
+      <!-- v25.65 (STAFF H2) which feedback -->
+      <tr><th>Feedback</th><td>On the RBT&rsquo;s own steps, from data taken at the observation; the same day; praise for named steps done correctly, the missed steps named and how to do each one; the missed steps rehearsed until correct; when there are several checks, a graph of the RBT&rsquo;s own checklist across them (the student&rsquo;s graph can sit beside it, not in its place); in person or by live video rather than by email alone. Feedback on the teacher&rsquo;s own integrity, with rehearsal of missed steps, did more than feedback on the student&rsquo;s progress (DiGennaro et al., 2007); video-call feedback reached mastery faster than email with a graph (Zhu et al., 2021). The follow-up box carries it into the next contact.</td></tr>
       <tr><th>Codes, not names</th><td>Clients are named by a code. The record goes to the BACB in an audit and should identify the RBT and the supervisors, not the students.</td></tr>
       <tr><th>Keep it 7 years</th><td>Keep the signed monthly records (and this file) for at least 7 years, also after the supervision ends. The BACB lists what they must show: the days and times the RBT provided services; the dates and duration of supervision; its format (one-on-one or group); the dates of direct observations with a client; the names of the supervisors; proof of the supervisor&rsquo;s relationship to the client; and other records (such as session notes) where records disagree. The monthly record prints all of these. In an audit the BACB typically allows 14 days to submit them.</td></tr>
     </table>
@@ -1511,8 +1534,12 @@ const CHECK=['Arrives prepared: materials, reinforcers and the data sheet ready'
   'Records data accurately and at the time',
   'Keeps the student\u2019s dignity and privacy',
   'Communicates professionally with the student, staff and family',
-  'Stays within the RBT role and asks the supervisor when unsure'];
-const RULES0={pct:5,contacts:2,indiv:1,obs:1,grpmax:10,pdu:12,remind:45,remind2:90};
+  'Stays within the RBT role and asks the supervisor when unsure',
+  /* v25.65 (STAFF L4) a commission item: without supervision, staff added response cost and widened its use (Bassett & Blanchard, 1977) */
+  'Uses no consequence that is not in the plan (no added reprimand, removal of items or physical hold)'];
+const RULES0={pct:5,contacts:2,indiv:1,obs:1,grpmax:10,pdu:12,remind:45,remind2:90,
+  /* v25.65 (STAFF H5) the form's practice rule for the next observation (not a BACB rule): the criterion, the checks in a row, and the days between observations */
+  obsCrit:90,obsRun:2,obsW:7,obsB:14,obsBFor:28,obsM:30};
 const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -1581,8 +1608,8 @@ const ckActive=c=>c.ckSrc==='plan'?(c.ckp||{}):(c.ck||{});
 function ckItems(c){if(c.ckSrc==='plan'&&Array.isArray(c.ckItems)&&c.ckItems.length)return c.ckItems.map(x=>({t:String(x.t||''),crit:!!x.crit,comp:String(x.comp||'')}));return CHECK.map(t=>({t,crit:false,comp:''}));}
 function rsPlanFor(c){const C=window.__rsCase;if(!C||!C.plan)return null;const id=String(C.student&&C.student.id||'').trim().toLowerCase(),cc=String(c.client||'').trim().toLowerCase();return (id&&cc&&id===cc)?C.plan:null;}
 function ckBlock(c,id){const F=f=>'c_'+id+'_'+f,pl=rsPlanFor(c),onPlan=c.ckSrc==='plan',items=ckItems(c),A=ckActive(c);
-  const src=onPlan?'Integrity checklist from the plan (Form TD-1): '+items.length+' item'+(items.length===1?'':'s')+(c.ckPlanSrc?' \u00b7 '+esc(c.ckPlanSrc):''):'Observation checklist (the generic ten; not the plan\u2019s integrity)';
-  const sw=(pl||onPlan)?'<div class="rs-cksrc" role="group" aria-label="Which checklist this contact scores"><button type="button" class="tool" data-cksrc="plan" data-lc="'+id+'" aria-pressed="'+onPlan+'"'+(pl||onPlan?'':' disabled')+'>Score this plan\u2019s integrity checklist'+(pl?' ('+pl.checklist.length+' items, Form TD-1)':'')+'</button><button type="button" class="tool" data-cksrc="gen" data-lc="'+id+'" aria-pressed="'+(!onPlan)+'">The generic ten</button></div>':'';
+  const src=onPlan?'Integrity checklist from the plan (Form TD-1): '+items.length+' item'+(items.length===1?'':'s')+(c.ckPlanSrc?' \u00b7 '+esc(c.ckPlanSrc):''):'Observation checklist (the generic eleven; not the plan\u2019s integrity)';
+  const sw=(pl||onPlan)?'<div class="rs-cksrc" role="group" aria-label="Which checklist this contact scores"><button type="button" class="tool" data-cksrc="plan" data-lc="'+id+'" aria-pressed="'+onPlan+'"'+(pl||onPlan?'':' disabled')+'>Score this plan\u2019s integrity checklist'+(pl?' ('+pl.checklist.length+' items, Form TD-1)':'')+'</button><button type="button" class="tool" data-cksrc="gen" data-lc="'+id+'" aria-pressed="'+(!onPlan)+'">The generic eleven</button></div>':'';
   return '<div class="rs-ck" data-ckbox="'+id+'"'+(c.obs==='yes'?'':' hidden')+'><h4><span>'+src+'</span><span id="'+F('score')+'">'+ckText(c)+'</span></h4>'+sw+
     items.map((it,j)=>{const v=A[j]||'',nm='ck_'+id+'_'+j;return '<div class="rs-ckrow'+(it.crit?' crit':'')+'"><span class="t" id="'+nm+'_t">'+(j+1)+'. '+esc(it.t)+(it.crit?' <i class="rs-crit">critical</i>':'')+(it.comp?' <small class="rs-comp">'+esc(it.comp)+'</small>':'')+'</span><span class="yn" role="radiogroup" aria-labelledby="'+nm+'_t">'+
       [['y','Yes'],['n','No'],['na','N/A']].map(([v2,l])=>'<label class="'+v2+'"><input type="radio" name="'+nm+'" id="'+nm+'_'+v2+'" data-c="'+id+'" data-ck="'+j+'" value="'+v2+'"'+(v===v2?' checked':'')+'>'+l+'</label>').join('')+'</span></div>';}).join('')+'</div>';}
@@ -1940,7 +1967,7 @@ function renderConcernOut(){$('#concernOut').innerHTML='<div class="p-inner"><di
 function headHTML(k){const st=S.setup,sp=S.sups.filter(s=>s.name&&isSupRole(s)),rc=S.sups.filter(s=>s.name&&isRC(s));
   return '<div class="p-head"><div><b>Supervisee</b>'+esc(st.rbt_name||'')+(st.rbt_cred?', '+esc(st.rbt_cred):'')+'</div><div><b>BACB no.</b>'+esc(st.rbt_cert||'')+'</div><div><b>Expires</b>'+esc(mdy(st.rbt_exp))+'</div>'+
     '<div><b>Employer</b>'+esc(st.employer||'')+'</div><div><b>Site</b>'+esc(st.site||'')+'</div><div><b>'+(k?'Month':'School year')+'</b>'+(k?keyLabel(k):setupYear()+'–'+(setupYear()+1))+'</div>'+
-    '<div style="grid-column:1/-1"><b>RBT Supervisors</b>'+(sp.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')+(s.cert?' ('+esc(s.cert)+')':'')+(s.trained==='yes'?', supervisor training'+(s.trained_date?' '+esc(mdy(s.trained_date)):''):'')+(s.agree?', supervision conditions in writing '+esc(mdy(s.agree)):'')+((s.covers||[]).length?' (covering '+esc(CVR.filter(x=>s.covers.includes(x[0])).map(x=>x[1]).join(', '))+')':'')+(s.cred==='BCaBA'&&s.bcba?', supervised by '+esc(s.bcba):'')).join('; ')||'')+(rc.length?' &nbsp; <b>Requirements Coordinator</b>'+rc.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')).join('; '):'')+'</div>'+
+    '<div style="grid-column:1/-1"><b>RBT Supervisors</b>'+(sp.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')+(s.cert?' ('+esc(s.cert)+')':'')+(s.trained==='yes'?', supervisor training'+(s.trained_date?' '+esc(mdy(s.trained_date)):''):'')+(s.agree?', supervision conditions in writing '+esc(mdy(s.agree)):'')+((s.covers||[]).length?' (covering '+esc(CVR.filter(x=>s.covers.includes(x[0])).map(x=>x[1]).join(', '))+')':'')+(s.cred==='BCaBA'&&s.bcba?', supervised by '+esc(s.bcba):'')+(window.rsFbkPrint?rsFbkPrint(s):'')).join('; ')||'')+(rc.length?' &nbsp; <b>Requirements Coordinator</b>'+rc.map(s=>esc(s.name)+(s.cred?', '+esc(s.cred):'')).join('; '):'')+'</div>'+
     '<div style="grid-column:1/-1"><b>Client codes</b>'+esc(clientCodes().join(', '))+'</div></div>';}
 const okTxt=s=>s==='ok'?'<span class="p-ok">✓ met</span>':s==='fail'?'<span class="p-no">✕ not met</span>':s==='pending'?'<span class="p-mid">not yet</span>':'—';
 function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today=todayISO();
@@ -1955,7 +1982,7 @@ function renderMonthOut(){const k=curKey,m=peek(k),s=stats(k),sg=m.sig||{},today
       '<tr><td colspan="3"><b>'+s.daysServed+' day'+(s.daysServed===1?'':'s')+' of service</b></td><td class="n"><b>'+hrs(s.rbtMin)+'</b></td><td></td></tr></tbody></table>':'<p class="p-empty">No service days recorded.</p>')+
     '<h4>Supervision contacts</h4>'+(C.length?'<table class="p-t"><thead><tr><th style="width:11%">Date</th><th style="width:13%">Time</th><th style="width:6%">Min</th><th style="width:17%">Supervisor</th><th style="width:13%">Format and mode</th><th style="width:9%">Observed with client</th><th>Activities, content, method</th><th style="width:8%">Checklist</th></tr></thead><tbody>'+
       C.map(x=>{const c=x.c,sp=supById(c.sup),mo=modeOf(c.mode),sc=c.obs==='yes'?ckScore(c):null;return '<tr><td>'+esc(mdy(c.date))+'</td><td>'+esc(fmtHM(c.start))+(c.end?'–'+esc(fmtHM(c.end)):'')+'</td><td class="n">'+(x.min==null?'—':x.min)+'</td><td>'+esc(supLabel(sp))+'</td><td>'+(c.format==='group'?'Small group'+(num(c.group)?' ('+num(c.group)+' RBTs)':''):'Individual')+'; '+esc(mo?mo[1]:'')+'</td><td>'+(c.obs==='yes'?'Yes'+(c.client?', '+esc(c.client):''):c.obs==='no'?'No':'')+'</td><td>'+esc((c.sact||[]).join('; '))+((c.sact||[]).length&&(c.acts||[]).length?'<br>':'')+esc(actsTco(c))+((c.bst||[]).length?'<br><i>'+esc(c.bst.join(', '))+'</i>':'')+'</td><td class="n">'+(sc?Math.round(sc.pct)+'%':'—')+'</td></tr>'+
-        ((c.feedback||c.follow||!x.counts)?'<tr class="sub"><td colspan="8">'+(c.feedback?'<b>Feedback:</b> '+esc(c.feedback)+' ':'')+(c.follow?'<b>Next:</b> '+esc(c.follow)+' ':'')+(!x.counts?((x.is.length&&x.is.every(i=>i.lvl==='note'||i.lvl==='ask'))?'<b>Noted, not counted:</b> ':'<b class="p-no">Not counted:</b> ')+esc(x.is.filter(i=>i.lvl!=='ask').map(i=>i.t).join('; ')||'planned'):'')+'</td></tr>':'')+rdRow(c);}).join('')+'</tbody></table>':'<p class="p-empty">No supervision contacts recorded.</p>')+
+        ((c.feedback||c.follow||!x.counts||(window.rsFbPrint&&rsFbPrint(c)))?'<tr class="sub"><td colspan="8">'+(window.rsFbPrint?rsFbPrint(c):'')+(c.feedback?'<b>Feedback:</b> '+esc(c.feedback)+' ':'')+(c.follow?'<b>Next:</b> '+esc(c.follow)+' ':'')+(!x.counts?((x.is.length&&x.is.every(i=>i.lvl==='note'||i.lvl==='ask'))?'<b>Noted, not counted:</b> ':'<b class="p-no">Not counted:</b> ')+esc(x.is.filter(i=>i.lvl!=='ask').map(i=>i.t).join('; ')||'planned'):'')+'</td></tr>':'')+rdRow(c);}).join('')+'</tbody></table>':'<p class="p-empty">No supervision contacts recorded.</p>')+
     '<div class="p-keep"><h4>Totals and compliance</h4><div class="p-two"><table class="p-t"><tbody>'+
       '<tr><td>Days the RBT provided services</td><td class="n">'+s.daysServed+'</td></tr><tr><td>Real-time (face-to-face) contacts</td><td class="n">'+s.cnt.length+'</td></tr><tr><td>Observations with a client</td><td class="n">'+s.obs+'</td></tr>'+
       '<tr><td>Total RBT hours</td><td class="n">'+hrs(s.rbtMin)+'</td></tr><tr><td>Supervision hours</td><td class="n">'+hrs(s.supMin)+'</td></tr><tr><td><b>Percent supervised (minimum '+rule('pct')+'%)</b></td><td class="n"><b>'+pctTxt(s.pct)+'</b></td></tr></tbody></table>'+
@@ -1999,9 +2026,9 @@ function renderYearOut(){const y=setupYear(),ks=yearKeys(y),tk=thruKey(),cut=tk?
     '<div class="p-keep"><h4>Percent supervised by month</h4>'+pctChart(A,true)+'</div>'+
     '<div class="p-keep"><h4>Checklist average by month</h4>'+ckChart(A,true)+'</div>'+   /* v24.72 as on the Year page */
     '<div class="p-keep"><h4>The credential and the goals</h4><p style="margin:2px 0">'+(part&&asOf&&asOf<todayISO()?'As of '+esc(mdy(asOf))+': ':'')+esc(c.t)+(st.path==='recert'?' PDUs this cycle: '+(Math.round(t.u*10)/10)+' of '+rule('pdu')+' ('+(Math.round(t.e*10)/10)+' in ethics).':st.path==='renewal'?' Competency assessment: '+(S.cred.comp_date?mdy(S.cred.comp_date):'not recorded')+'; application: '+(S.cred.applied?mdy(S.cred.applied):'not submitted')+'.':'')+'</p>'+
-    (goals.length?'<table class="p-t"><thead><tr><th>Goal</th><th style="width:12%">Set</th><th style="width:12%">Target</th><th style="width:12%">Status</th></tr></thead><tbody>'+goals.map(g=>'<tr><td>'+esc(g.goal)+(g.notes?'<br><i>'+esc(g.notes)+'</i>':'')+'</td><td>'+esc(mdy(g.set))+'</td><td>'+esc(mdy(g.target))+'</td><td>'+esc(g.status||'')+'</td></tr>').join('')+'</tbody></table>':'<p class="p-empty">No goals recorded.</p>')+'</div>'+
+    (goals.length?'<table class="p-t"><thead><tr><th>Goal</th><th style="width:12%">Set</th><th style="width:12%">Target</th><th style="width:12%">Status</th></tr></thead><tbody>'+goals.map(g=>'<tr><td>'+esc(g.goal)+(window.rsGoalPrint?rsGoalPrint(g):'')+(g.notes?'<br><i>'+esc(g.notes)+'</i>':'')+'</td><td>'+esc(mdy(g.set))+'</td><td>'+esc(mdy(g.target))+'</td><td>'+esc(g.status||'')+'</td></tr>').join('')+'</tbody></table>':'<p class="p-empty">No goals recorded.</p>')+'</div>'+
     ((E=>E.length?'<div class="p-keep"><h4>Reviews of the effects of supervision</h4><table class="p-t"><thead><tr><th style="width:12%">Reviewed</th><th>The RBT&rsquo;s view</th><th>What the data show</th><th>What changes</th></tr></thead><tbody>'+
-      E.map(x=>'<tr><td>'+esc(mdy(x.date))+((x.src||[]).length?'<br><i>looked at '+esc(EFSRC.filter(c=>x.src.includes(c[0])).map(c=>c[1]).join(', '))+'</i>':'')+'</td><td>'+esc(x.view||'')+'</td><td>'+esc(x.data||'')+'</td><td>'+esc(x.change||'')+'</td></tr>').join('')+'</tbody></table></div>':'')
+      E.map(x=>'<tr><td>'+esc(mdy(x.date))+((x.src||[]).length?'<br><i>looked at '+esc(EFSRC.filter(c=>x.src.includes(c[0])).map(c=>c[1]).join(', '))+'</i>':'')+'</td><td>'+esc(x.view||'')+(window.rsPrefPrint?rsPrefPrint(x):'')+'</td><td>'+esc(x.data||'')+'</td><td>'+esc(x.change||'')+'</td></tr>').join('')+'</tbody></table></div>':'')
       ((S.effects||[]).filter(x=>x.date&&(!asOf||x.date<=asOf)&&(x.view||x.data||x.change||(x.src||[]).length)).sort((a,b)=>a.date.localeCompare(b.date))))+   /* v24.57 */
     '<p style="margin:4px 0 0"><b>The BACB supervision checklists'+(asOf&&asOf<todayISO()?', as of '+esc(mdy(asOf)):'')+':</b> '+ckSummary(asOf).map(x=>esc(x.t.toLowerCase())+' '+ckSumTxt(x)).join('; ')+
       (n=>n?'; '+n+' more '+(n===1?'item is':'items are')+' ticked with a later date and count from that month on':'')(ckLater(asOf))+
@@ -2530,6 +2557,212 @@ window.__nbhDue=function(){const out=[];
   (S.goals||[]).forEach(g=>{if(g.status!=='Met'&&g.target&&g.goal)out.push({what:('RBT goal'+(R.length>1&&st.rbt_name?' ('+st.rbt_name+')':'')+': '+g.goal).slice(0,60),date:g.target});});});
   return out;};
 </script>
+<script id="rs1-v2565">
+/* v25.65 RS-1 against the JABA staff-performance research (STAFF H2, H3, H4, H5, M4, M5, M6, M7, M8, L4, L5).
+   - H4 each contact's "Feedback given" is also a record: when, in what form, and which of the eight performance-feedback steps
+     (Carroll et al., 2022) were done; the month lists an observation with no feedback recorded and feedback later than the same day;
+     the monthly record prints it.
+   - H5 the next observation is due by the form's practice rule (not a BACB rule; its numbers are on the Rules panel), shown on the
+     Month page and the due line; the BACB row still reads met on one observation.
+   - M5 a critical item scored No marks the contact "Critical step missed: follow up this week" whatever the percentage; the month
+     has an item-by-contact grid and flags an item missed on two contacts in a row.
+   - M8 that flag, or a goal not met by its date, offers "Find out why first (PD-1)": Form PD-1 opens with the step as the concern and
+     the RS-1 checklist scores as its measure (through the case: supervision.pdAsk).
+   - M4 a goal says when or where and how often or how well, whether it was set with the RBT, and which checklist items it is about,
+     drawn across the contacts; H3 a goal set to Met asks for a maintenance check date, on the due line.
+   - M6 announced or unannounced, with the means of each on the Year page; M7 the RBT's feedback preferences at each review;
+     L5 each supervisor's own feedback skills, checked once a year.
+   Every new value is optional; a file saved before opens and prints as before. */
+(function(){
+const T=v=>String(v==null?'':v).trim(),isoS=v=>/^\d{4}-\d{2}-\d{2}$/.test(T(v))?T(v):'';
+const FBW=[['during','During the session'],['right','Right after'],['same','Later the same day'],['later','Later (date)']];
+const FBF=[['person','Spoken in person'],['video','Video call'],['written','Written'],['graph','Graph'],['vreview','Video review']];
+const FBS=[['data','Collected data on the steps'],['praise','Praised named steps'],['missed','Described each missed step'],['reason','Gave the reason to change'],['how','Told how'],['showed','Showed how'],['practice','Had the RBT practise until correct'],['questions','Asked for questions']];
+const ANN=[['ann','Announced'],['unann','Unannounced'],['camera','By camera without the RBT’s knowledge, where policy allows']];
+const PW=[['step','After each step'],['end','At the end of the session'],['later','Later the same day']];
+const PF=[['person','In person'],['video','Video call'],['written','Written']];
+const lab=(L,k)=>(L.find(x=>x[0]===k)||[0,''])[1];
+const addDays=(d,n)=>{const x=fromIso(d);if(!x)return '';x.setDate(x.getDate()+n);return isoOf(x);};
+const dayDiff=(a,b)=>{const x=fromIso(a),y=fromIso(b);return x&&y?Math.round((y-x)/864e5):0;};
+let inShell=false;try{inShell=window.parent!==window;}catch(e){}
+/* ---- the contact: feedback, announced, the critical step ---- */
+const hasFb=c=>!!(T(c.feedback)||(c.fbSteps||[]).length||(c.fbForm||[]).length||c.fbWhen);
+function critMiss(c){if(c.obs!=='yes')return false;const A=ckActive(c);return ckItems(c).some((it,j)=>it.crit&&A[j]==='n');}
+function fbBlock(c){const id=esc(c.id),F=f=>'c_'+id+'_'+f,n=(c.fbSteps||[]).length;
+  return '<section class="rs-fbrec" data-fbrec="'+id+'"><h4 class="rs-fbh">Feedback given: when, how, and the steps <span class="rs-fbsub">the performance-feedback checklist (Carroll et al., 2022)</span> <span class="rs-fbn" data-fbn="'+id+'">'+n+' of 8</span></h4>'+
+    '<div class="fieldgrid"><div><label for="'+F('fbWhen')+'">When</label><select id="'+F('fbWhen')+'" data-c="'+id+'" data-f="fbWhen">'+opts(FBW,c.fbWhen,true)+'</select></div>'+
+    '<div data-fblate="'+id+'"'+(c.fbWhen==='later'?'':' hidden')+'><label for="'+F('fbLate')+'">Given on</label><input type="date" id="'+F('fbLate')+'" data-c="'+id+'" data-f="fbLate" value="'+esc(c.fbLate||'')+'"></div></div>'+
+    '<span class="lbl">Form</span><div class="rs-chips">'+FBF.map(([k,l])=>'<label class="chip"><input type="checkbox" id="'+F('ff_'+k)+'" data-rsfb="'+id+'" data-k="fbForm" value="'+k+'"'+((c.fbForm||[]).includes(k)?' checked':'')+'> '+esc(l)+'</label>').join('')+'</div>'+
+    '<span class="lbl">The steps done</span><div class="rs-chips">'+FBS.map(([k,l])=>'<label class="chip"><input type="checkbox" id="'+F('fs_'+k)+'" data-rsfb="'+id+'" data-k="fbSteps" value="'+k+'"'+((c.fbSteps||[]).includes(k)?' checked':'')+'> '+esc(l)+'</label>').join('')+'</div></section>';}
+function annBox(c){const id=esc(c.id);return '<div data-annbox="'+id+'"'+(c.obs==='yes'?'':' hidden')+'><label for="c_'+id+'_ann">Announced?</label><select id="c_'+id+'_ann" data-c="'+id+'" data-f="ann">'+opts(ANN,c.ann,true)+'</select></div>';}
+const rc0=renderContacts;renderContacts=function(){const r=rc0.apply(this,arguments);try{document.querySelectorAll('#contactList details.rs-contact[data-cid]').forEach(card=>{const c=findC(card.dataset.cid);if(!c)return;
+    const ob=card.querySelector('select[data-f="obs"]');if(ob&&!card.querySelector('[data-annbox]'))ob.closest('div').insertAdjacentHTML('afterend',annBox(c));
+    const fb=card.querySelector('textarea[data-f="feedback"]');if(fb&&!card.querySelector('[data-fbrec]'))fb.closest('.two').insertAdjacentHTML('afterend',fbBlock(c));});}catch(e){}return r;};
+const rf0=refreshContact;refreshContact=function(c){const r=rf0.apply(this,arguments);try{const card=document.querySelector('details.rs-contact[data-cid="'+CSS.escape(c.id)+'"]');if(!card)return r;
+    const a=card.querySelector('[data-annbox]');if(a)a.hidden=c.obs!=='yes';const l=card.querySelector('[data-fblate]');if(l)l.hidden=c.fbWhen!=='later';
+    const n=card.querySelector('[data-fbn]');if(n)n.textContent=(c.fbSteps||[]).length+' of 8';}catch(e){}return r;};
+document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d||d.rsfb===undefined)return;const c=findC(d.rsfb);if(!c)return;const L=d.k==='fbForm'?FBF:FBS;
+  const a=new Set(c[d.k]||[]);el.checked?a.add(el.value):a.delete(el.value);c[d.k]=L.map(x=>x[0]).filter(k=>a.has(k));if(!c[d.k].length)delete c[d.k];refreshContact(c);renderComp();});
+const cs0=cSummary;cSummary=function(c,k){let h=cs0.apply(this,arguments);try{
+  if(critMiss(c))h+='<span class="rs-pill warn">Critical step missed: follow up this week</span>';
+  if(c.obs==='yes'&&!cPlanned(c)&&c.date&&!hasFb(c))h+='<span class="rs-pill ask">no feedback recorded</span>';
+  if(c.obs==='yes'&&c.ann)h+='<span class="rs-pill">'+esc(c.ann==='ann'?'announced':c.ann==='unann'?'unannounced':'by camera')+'</span>';}catch(e){}return h;};
+const ct0=ckText;ckText=function(c){let t=ct0.apply(this,arguments);try{if(critMiss(c))t+=' · Critical step missed: follow up this week';
+  const ti=window.__rsTI;if(c.ckSrc==='plan'&&ti&&isFinite(+ti.criterion))t+=' · read against the plan’s '+(+ti.criterion)+'% criterion (Form TI-1)';}catch(e){}return t;};
+window.rsFbPrint=function(c){const L=[];
+  if(c.fbWhen)L.push(lab(FBW,c.fbWhen).replace(' (date)','')+(c.fbWhen==='later'&&c.fbLate?' ('+mdy(c.fbLate)+')':''));
+  if((c.fbForm||[]).length)L.push(c.fbForm.map(k=>lab(FBF,k).toLowerCase()).join(', '));
+  if((c.fbSteps||[]).length)L.push(c.fbSteps.length+' of 8 steps: '+c.fbSteps.map(k=>lab(FBS,k).toLowerCase()).join(', '));
+  let h=L.length?'<b>Feedback given:</b> '+esc(L.join('; '))+'. ':'';
+  if(c.obs==='yes'&&c.ann)h+='<b>'+esc(lab(ANN,c.ann).split(',')[0])+'.</b> ';
+  if(critMiss(c))h+='<b class="p-no">Critical step missed: follow up this week.</b> ';
+  return h;};
+/* ---- H5 the next observation (the form's practice rule) ---- */
+function allObs(){const t=todayISO(),L=[];Object.keys(S.months||{}).forEach(k=>(S.months[k].contacts||[]).forEach(c=>{if(c.obs==='yes'&&isoS(c.date)&&c.date<=t)L.push(c);}));
+  return L.sort((a,b)=>(a.date+String(a.start||'')).localeCompare(b.date+String(b.start||'')));}
+function nextObs(){const crit=rule('obsCrit'),run=Math.max(1,Math.round(rule('obsRun'))),BF=rule('obsBFor'),reset=isoS(S.setup.obs_reset);
+  const L=allObs().filter(c=>!reset||c.date>=reset);let st='weekly',streak=0,since='',why=reset?'a new skill, client or plan since '+md(reset):'weekly until '+run+' checks in a row meet the '+crit+'% criterion';
+  L.forEach(c=>{const sc=ckScore(c),cm=critMiss(c);if(!sc&&!cm)return;
+    if(cm||sc.pct<crit){st='weekly';streak=0;why=cm?'a critical step was missed on '+md(c.date):'the check on '+md(c.date)+' was below the '+crit+'% criterion';return;}
+    streak++;if(st==='weekly'&&streak>=run){st='biweekly';since=c.date;why=run+' checks in a row met the '+crit+'% criterion (the latest '+md(c.date)+')';}
+    else if(st==='biweekly'&&dayDiff(since,c.date)>=BF){st='monthly';why='every 2 weeks for '+BF+' days, every check at the criterion';}
+    else if(st==='weekly')why=streak+' of '+run+' checks in a row at the '+crit+'% criterion so far';});
+  const last=L.length?L[L.length-1].date:'',gap=st==='weekly'?rule('obsW'):st==='biweekly'?rule('obsB'):rule('obsM');
+  return {st,why,last,gap,due:last?addDays(last,gap):(reset||todayISO()),n:L.length,crit};}
+const STN={weekly:'weekly',biweekly:'every 2 weeks',monthly:'monthly'};
+const hasService=()=>Object.values(S.months||{}).some(m=>(m.contacts||[]).length||(m.days||[]).length);
+/* ---- the month's practice checks and the item grid ---- */
+function practiceHTML(){const k=curKey,m=peek(k),t=todayISO(),C=(m.contacts||[]).filter(c=>c.date&&keyOf(c.date)===k&&c.date<=t);
+  const noFb=C.filter(c=>c.obs==='yes'&&!hasFb(c)),late=C.filter(c=>c.fbWhen==='later'),crit=C.filter(critMiss),N=nextObs(),L=[];
+  if(hasService()){const over=N.due<t;L.push('<div class="rs-pli '+(over?'fail':'')+'" data-check="nextobs"><b>Next observation with feedback '+(over?'was due ':'due ')+esc(mdy(N.due))+'</b> ('+esc(STN[N.st])+': '+esc(N.why)+').<small>This form&rsquo;s practice rule, not a BACB rule; the BACB row above reads met on one observation a month.</small></div>');}
+  if(noFb.length)L.push('<div class="rs-pli fail" data-check="nofb">Observed with a client, no feedback recorded: '+noFb.map(c=>esc(md(c.date))).join(', ')+'.</div>');
+  if(late.length)L.push('<div class="rs-pli note" data-check="latefb">Feedback given later than the same day: '+late.map(c=>esc(md(c.date))).join(', ')+'. Same-day feedback kept integrity up in school studies (Codding et al., 2005).</div>');
+  if(crit.length)L.push('<div class="rs-pli fail" data-check="crit">Critical step missed: follow up this week ('+crit.map(c=>esc(md(c.date))).join(', ')+').</div>');
+  return L.length?'<div class="rs-practice"><h4>Practice checks <small>this form&rsquo;s rules, not BACB rules</small></h4>'+L.join('')+'</div>':'';}
+function seqFor(text){return allObs().map(c=>{const j=ckItems(c).findIndex(it=>it.t===text);const v=j<0?'':(ckActive(c)[j]||'');return {c,v};}).filter(x=>x.v==='y'||x.v==='n');}
+const twiceMissed=text=>{const q=seqFor(text);return q.length>=2&&q[q.length-1].v==='n'&&q[q.length-2].v==='n'?q.slice(-2):null;};
+function gridHTML(){const k=curKey,C=(peek(k).contacts||[]).filter(c=>c.obs==='yes'&&c.date&&keyOf(c.date)===k&&ckScore(c)).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!C.length)return '<h3 class="rs-ighd">Checklist items across the month</h3><p class="hint">The grid shows once an observation&rsquo;s checklist is scored this month.</p>';
+  const items=[];C.forEach(c=>ckItems(c).forEach(it=>{if(!items.some(x=>x.t===it.t))items.push(it);}));
+  const cell=(c,t)=>{const j=ckItems(c).findIndex(it=>it.t===t),v=j<0?'':ckActive(c)[j];return v==='y'?'<td class="ig-y" aria-label="yes">✓</td>':v==='n'?'<td class="ig-n" aria-label="no">✗</td>':'<td class="ig-x" aria-label="not scored">–</td>';};
+  return '<h3 class="rs-ighd">Checklist items across the month</h3><p class="hint">Each item at each observed contact: ✓ yes, ✗ no, – not scored or N/A. An item missed on the last two contacts that scored it is flagged. Supervisors need the missed steps named to give feedback (Carroll et al., 2022).</p>'+
+    '<div class="grid-wrap"><table class="rt rs-igrid"><thead><tr><th>Item</th>'+C.map(c=>'<th>'+esc(md(c.date))+'</th>').join('')+'<th>Flag</th></tr></thead><tbody>'+
+    items.map((it,i)=>{const tw=twiceMissed(it.t);return '<tr'+(tw?' class="ig-flag"':'')+'><td>'+esc(it.t)+(it.crit?' <i class="rs-crit">critical</i>':'')+'</td>'+C.map(c=>cell(c,it.t)).join('')+'<td>'+(tw?'Missed twice in a row ('+tw.map(x=>esc(md(x.c.date))).join(', ')+') <button type="button" class="tool noprint" data-rspd="'+i+'">Find out why first (PD-1)</button>':'')+'</td></tr>';}).join('')+'</tbody></table></div>';}
+let gridItems=[];
+function paintGrid(){const box=document.getElementById('rsItemGrid');if(!box)return;box.innerHTML=gridHTML();
+  const k=curKey,C=(peek(k).contacts||[]).filter(c=>c.obs==='yes'&&c.date&&keyOf(c.date)===k&&ckScore(c));gridItems=[];C.forEach(c=>ckItems(c).forEach(it=>{if(!gridItems.some(x=>x.t===it.t))gridItems.push({t:it.t,plan:c.ckSrc==='plan'});}));}
+const rcomp0=renderComp;renderComp=function(){const r=rcomp0.apply(this,arguments);try{const p=document.getElementById('compPanel');if(p){const old=p.querySelector('.rs-practice');if(old)old.remove();const box=p.querySelector('.rs-comp');if(box)box.insertAdjacentHTML('beforeend',practiceHTML());}paintGrid();}catch(e){}return r;};
+/* ---- M8 find out why first: Form PD-1 with the step and the RS-1 checklist as its measure ---- */
+function sig(){let el=document.getElementById('rsAskSig');if(!el){el=document.createElement('input');el.id='rsAskSig';el.hidden=true;el.tabIndex=-1;el.setAttribute('aria-hidden','true');el.className='noprint';(document.querySelector('main')||document.body).appendChild(el);}return el;}
+function askPD(o){const P=allObs().map(c=>({c,sc:ckScore(c)})).filter(x=>x.sc).slice(-10);
+  const ask=Object.assign({src:'RS-1',who:rbtName(S),role:'RBT (behavior technician)',at:new Date().toISOString(),
+    measure:'Form RS-1 observation checklist at each observed contact: the percentage of items scored Yes',unit:'% of checklist items scored Yes (Form RS-1)',
+    pts:P.map(x=>({d:x.c.date,v:Math.round(x.sc.pct),vis:x.c.ann==='camera'?'no':(x.c.ann?'yes':'')}))},o);
+  S.pdAsk=ask;const el=sig();el.value=ask.at;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}changed();
+  if(inShell){try{window.parent.postMessage({nbh:'open',want:'PD-1',beside:true},'*');}catch(e){}nbhUI.toast('Form PD-1 opens with this step as the concern and the checklist scores as its measure. Run the interview before deciding on retraining.',{kind:'ok',ms:5200});}
+  else nbhUI.toast('Open Form PD-1 for this RBT. The concern: '+(ask.concern||ask.step)+' The measure: the checklist percentages on this form.',{ms:8000});}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rspd]');if(!b)return;const it=gridItems[+b.dataset.rspd];if(!it)return;const tw=twiceMissed(it.t)||[];
+  askPD({step:it.t,planstep:!!it.plan,concern:'The RBT does not do this checklist step as written: “'+it.t+'” (scored No at the last two observations that scored it'+(tw.length?', '+tw.map(x=>mdy(x.c.date)).join(' and '):'')+').',
+    baseline:'Checklist step “'+it.t.slice(0,120)+'”: No at '+(tw.map(x=>mdy(x.c.date)).join(' and ')||'the last two observations')+' (Form RS-1)',why:'Missed on two observations in a row on Form RS-1, after the RBT was trained and certified: find out why before retraining.'});});
+/* ---- M4 and H3 the goals ---- */
+const ITEMS_ALL=()=>{const L=CHECK.slice();allObs().forEach(c=>ckItems(c).forEach(it=>{if(!L.includes(it.t))L.push(it.t);}));return L;};
+function goalGraph(g){const its=g.items||[];if(!its.length)return '';
+  return its.map(t=>{const q=seqFor(t);if(!q.length)return '<p class="hint rs-gg">'+esc(t)+': not scored at a contact yet.</p>';
+    const W=320,H=56,L=6,R=6,X=i=>L+(q.length===1?(W-L-R)/2:(W-L-R)*i/(q.length-1)),Y=v=>v==='y'?12:H-14;
+    return '<div class="rs-gg"><span class="hint">'+esc(t)+' ('+q.filter(x=>x.v==='y').length+' of '+q.length+' yes)</span><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="'+esc(t)+': yes or no at each contact"><line x1="0" x2="'+W+'" y1="12" y2="12" stroke="#E3E9ED"/><line x1="0" x2="'+W+'" y1="'+(H-14)+'" y2="'+(H-14)+'" stroke="#E3E9ED"/>'+
+      (q.length>1?'<polyline fill="none" stroke="#254657" stroke-width="1.5" points="'+q.map((x,i)=>X(i)+','+Y(x.v)).join(' ')+'"/>':'')+
+      q.map((x,i)=>'<circle cx="'+X(i)+'" cy="'+Y(x.v)+'" r="4" fill="'+(x.v==='y'?'#254657':'#fff')+'" stroke="'+(x.v==='y'?'#254657':'#8E2A2A')+'" stroke-width="2"><title>'+esc(mdy(x.c.date))+': '+(x.v==='y'?'yes':'no')+'</title></circle>').join('')+'<text x="0" y="'+(H-2)+'" font-size="10" fill="#54676f">'+esc(md(q[0].c.date))+'</text><text x="'+W+'" y="'+(H-2)+'" font-size="10" text-anchor="end" fill="#54676f">'+esc(md(q[q.length-1].c.date))+'</text></svg></div>';}).join('');}
+function goalExtra(g){const id=esc(g.id),F=f=>'g_'+id+'_'+f,late=g.status!=='Met'&&g.target&&g.target<todayISO();
+  return '<div class="fieldgrid rs-g4"><div><label for="'+F('when')+'">When or where</label><input id="'+F('when')+'" data-g="'+id+'" data-f="when" value="'+esc(g.when||'')+'" placeholder="e.g., during independent work"></div>'+
+    '<div><label for="'+F('often')+'">How often or how well</label><input id="'+F('often')+'" data-g="'+id+'" data-f="often" value="'+esc(g.often||'')+'" placeholder="e.g., in 9 of 10 opportunities"></div>'+
+    '<div><label for="'+F('withRbt')+'">Set with the RBT</label><select id="'+F('withRbt')+'" data-g="'+id+'" data-f="withRbt">'+opts([['yes','Yes'],['no','No']],g.withRbt,true)+'</select></div>'+
+    (g.status==='Met'?'<div><label for="'+F('mcheck')+'">Maintenance check on (to see that it holds)</label><input type="date" id="'+F('mcheck')+'" data-g="'+id+'" data-f="mcheck" value="'+esc(g.mcheck||'')+'"></div>':'')+'</div>'+
+    (T(g.goal)&&!T(g.often)&&!/\d|\b(every|each|all|always|never)\b/i.test(g.goal)?'<p class="rs-gwarn">Not yet specific: add how often.</p>':'')   /* a goal whose own words already say how often (a number, every, each) is not flagged */+
+    (g.status==='Met'&&!g.mcheck?'<p class="rs-gwarn">Met: set a date, about 2 to 8 weeks out, to check that it holds. Staff trained to criterion drifted later (Paden &amp; Carroll, 2025).</p>':'')+
+    '<details class="rs-gitems"'+((g.items||[]).length?' open':'')+'><summary>Checklist items this goal is about <span class="hint">'+(g.items||[]).length+' linked</span></summary><div class="rs-chips">'+ITEMS_ALL().map((t,j)=>'<label class="chip"><input type="checkbox" id="'+F('it'+j)+'" data-rsgi="'+id+'" value="'+esc(t)+'"'+((g.items||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div></details>'+
+    '<div data-ggraph="'+id+'">'+goalGraph(g)+'</div>'+
+    (late&&T(g.goal)?'<p class="rs-gwarn">Not met by its target date. <button type="button" class="tool" data-rspdg="'+id+'">Find out why first (PD-1)</button> <span class="hint">retrain only when the skill itself is missing</span></p>':'');}
+const rr0=renderRbt;renderRbt=function(){const r=rr0.apply(this,arguments);try{document.querySelectorAll('#goalList .rs-goal[data-gid]').forEach(card=>{const g=S.goals.find(x=>x.id===card.dataset.gid);if(!g||card.querySelector('.rs-g4'))return;
+    const f=card.querySelector('textarea[data-f="goal"]');if(f)f.closest('.field').insertAdjacentHTML('afterend',goalExtra(g));});}catch(e){}return r;};
+document.addEventListener('change',e=>{const el=e.target,d=el&&el.dataset;if(!d||d.rsgi===undefined)return;const g=S.goals.find(x=>x.id===d.rsgi);if(!g)return;
+  const a=new Set(g.items||[]);el.checked?a.add(el.value):a.delete(el.value);g.items=ITEMS_ALL().filter(t=>a.has(t));if(!g.items.length)delete g.items;
+  const gg=document.querySelector('[data-ggraph="'+CSS.escape(g.id)+'"]');if(gg)gg.innerHTML=goalGraph(g);const n=el.closest('details')&&el.closest('details').querySelector('summary .hint');if(n)n.textContent=(g.items||[]).length+' linked';});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rspdg]');if(!b)return;const g=S.goals.find(x=>x.id===b.dataset.rspdg);if(!g)return;
+  askPD({step:T(g.goal),concern:'The RBT has not met this supervision goal by its target date ('+mdy(g.target)+'): “'+T(g.goal)+'”'+(T(g.when)?' ('+T(g.when)+')':'')+'.',
+    baseline:'Goal not met by '+mdy(g.target)+(T(g.notes)?': '+T(g.notes):'')+' (Form RS-1)',why:'A supervision goal not met by its date on Form RS-1: find out why before retraining.'});});
+window.rsGoalPrint=function(g){const L=[];if(T(g.when))L.push('when or where: '+T(g.when));if(T(g.often))L.push('how often or how well: '+T(g.often));if(g.withRbt)L.push('set with the RBT: '+(g.withRbt==='yes'?'yes':'no'));
+  if((g.items||[]).length)L.push('checklist item'+(g.items.length===1?'':'s')+': '+g.items.join('; '));if(g.status==='Met'&&g.mcheck)L.push('maintenance check '+mdy(g.mcheck));
+  return L.length?'<br><small>'+esc(L.join('; '))+'</small>':'';};
+/* ---- M6 announced and unannounced on the Year page and the year summary ---- */
+function annLine(asOf){const ks=yearKeys(setupYear()),A=[],U=[];ks.forEach(k=>(peek(k).contacts||[]).forEach(c=>{if(c.obs!=='yes'||!c.date||keyOf(c.date)!==k||(asOf&&c.date>asOf)||c.date>todayISO())return;const sc=ckScore(c);if(!sc)return;
+    if(c.ann==='ann')A.push(sc.pct);else if(c.ann==='unann'||c.ann==='camera')U.push(sc.pct);}));
+  if(!A.length||!U.length)return '';const ma=A.reduce((s,x)=>s+x,0)/A.length,mu=U.reduce((s,x)=>s+x,0)/U.length;
+  return '<p class="rs-annline"><b>Checklist mean, announced observations:</b> '+Math.round(ma)+'% ('+A.length+') &middot; <b>unannounced:</b> '+Math.round(mu)+'% ('+U.length+').'+(mu<=ma-10?' <b>Performance may depend on the supervisor&rsquo;s presence. Consider video self-monitoring or more unannounced checks.</b>':'')+'</p>';}
+const ry0=renderYear;renderYear=function(){const r=ry0.apply(this,arguments);try{const b=document.getElementById('rsAnnYear');if(b)b.innerHTML=annLine(null);}catch(e){}return r;};
+const ryo0=renderYearOut;renderYearOut=function(){const r=ryo0.apply(this,arguments);try{const el=document.getElementById('yearOut'),tk=thruKey(),line=annLine(thruAsOf(tk));
+  if(el&&line){const f=el.querySelector('.p-foot');if(f)f.insertAdjacentHTML('beforebegin',line);}}catch(e){}return r;};
+/* ---- M7 the RBT's feedback preferences at each review ---- */
+const ep0=effPaint;effPaint=function(){const r=ep0.apply(this,arguments);try{document.querySelectorAll('#effList .rs-eff').forEach(card=>{const di=card.querySelector('[data-ef][data-f="date"]');if(!di||card.querySelector('.rs-pref'))return;
+    const x=(S.effects||[]).find(y=>y.id===di.dataset.ef);if(!x)return;const id=esc(x.id),F=f=>'ef_'+id+'_'+f;
+    const v=card.querySelector('[data-f="view"]');const at=v?v.closest('.field'):null;if(!at)return;
+    at.insertAdjacentHTML('afterend','<div class="fieldgrid rs-pref"><div><label for="'+F('pWhen')+'">The RBT prefers feedback: when</label><select id="'+F('pWhen')+'" data-ef="'+id+'" data-f="pWhen">'+opts(PW,x.pWhen,true)+'</select></div>'+
+      '<div><label for="'+F('pOften')+'">How often</label><input id="'+F('pOften')+'" data-ef="'+id+'" data-f="pOften" value="'+esc(x.pOften||'')+'" placeholder="e.g., at every observation"></div>'+
+      '<div><label for="'+F('pForm')+'">In what form</label><select id="'+F('pForm')+'" data-ef="'+id+'" data-f="pForm">'+opts(PF,x.pForm,true)+'</select></div>'+
+      '<div><label for="'+F('pPos')+'">Asked for praise only, no corrections</label><select id="'+F('pPos')+'" data-ef="'+id+'" data-f="pPos">'+opts([['no','No'],['yes','Yes']],x.pPos,true)+'</select></div></div>'+
+      '<p class="hint rs-prefnote" data-prefnote="'+id+'"'+(x.pPos==='yes'?'':' hidden')+'>Recorded. Corrective feedback stays: the missed steps are still named and practised. Learners mastered a task only when corrective feedback was given, and chose it more often than praise alone (Simonian &amp; Brand, 2022).</p>');});}catch(e){}return r;};
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.f!=='pPos'||el.dataset.ef===undefined)return;const n=document.querySelector('[data-prefnote="'+CSS.escape(el.dataset.ef)+'"]');if(n)n.hidden=el.value!=='yes';});
+window.rsPrefPrint=function(x){const L=[];if(x.pWhen)L.push(lab(PW,x.pWhen).toLowerCase());if(T(x.pOften))L.push(T(x.pOften));if(x.pForm)L.push(lab(PF,x.pForm).toLowerCase());
+  let h=L.length?'<br><i>Prefers feedback: '+esc(L.join('; '))+'.</i>':'';if(x.pPos==='yes')h+='<br><i>Asked for praise only; corrective feedback stays.</i>';return h;};
+/* ---- L5 each supervisor's own feedback skills ---- */
+const rsu0=renderSups;renderSups=function(){const r=rsu0.apply(this,arguments);try{document.querySelectorAll('#supList .rs-sup[data-sid]').forEach(card=>{const s=S.sups.find(x=>x.id===card.dataset.sid);if(!s||card.querySelector('.rs-fbk'))return;const id=esc(s.id),F=f=>'sup_'+id+'_'+f;
+    const g=card.querySelector('.fieldgrid');if(!g)return;
+    g.insertAdjacentHTML('beforeend','<div class="rs-fbk"><label for="'+F('fbk_date')+'">Feedback skills checked on</label><input type="date" id="'+F('fbk_date')+'" data-sup="'+id+'" data-f="fbk_date" value="'+esc(s.fbk_date||'')+'" title="Once a year: the supervisor gives feedback while someone checks the eight steps of Feedback given"></div>'+
+      '<div class="rs-fbk"><label for="'+F('fbk_met')+'">Feedback steps met (of 8)</label><select id="'+F('fbk_met')+'" data-sup="'+id+'" data-f="fbk_met">'+opts(['0','1','2','3','4','5','6','7','8'],s.fbk_met,true)+'</select></div>');
+    g.insertAdjacentHTML('afterend','<p class="hint rs-fbkhint">Supervisors trained only in the procedure did not give good feedback until feedback itself was trained (Parsons &amp; Reid, 1995), and kept their skills while they themselves got feedback (Green et al., 2002). Check once a year against the eight steps.</p>');});}catch(e){}return r;};
+window.rsFbkPrint=function(s){return isoS(s.fbk_date)?', feedback skills checked '+esc(mdy(s.fbk_date))+(s.fbk_met!==undefined&&s.fbk_met!==''?' ('+esc(s.fbk_met)+' of 8 steps)':''):'';};
+/* ---- the due line ---- */
+const due0=window.__nbhDue;window.__nbhDue=function(){const out=due0?due0.apply(this,arguments):[];try{
+  eachRbt(()=>{const who=S.setup.rbt_name?' ('+S.setup.rbt_name+')':'';if(hasService()){const N=nextObs();out.push({what:('Next RBT observation with feedback'+who).slice(0,60),date:N.due});}
+    (S.goals||[]).forEach(g=>{if(g.status==='Met'&&isoS(g.mcheck)&&g.goal)out.push({what:('RBT goal maintenance check'+who+': '+g.goal).slice(0,60),date:g.mcheck});});});
+  (G.sups||[]).forEach(s=>{if(isoS(s.fbk_date)&&s.name)out.push({what:('Supervisor feedback skills check ('+s.name+')').slice(0,60),date:addDays(s.fbk_date,365)});});}catch(e){}return out;};
+/* ---- the case: in (TI-1's criterion for a plan checklist), out (the request to Form PD-1) ---- */
+const fi0=window.__nbhFactsIn;window.__nbhFactsIn=function(f){window.__rsTI=f&&f.integrity&&typeof f.integrity==='object'?f.integrity:null;return fi0?fi0.apply(this,arguments):null;};
+const fo0=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=fo0?fo0.apply(this,arguments):null;}catch(e){r=null;}
+  try{const asks=R.map(x=>x.pdAsk).filter(a=>a&&a.at).sort((a,b)=>String(a.at).localeCompare(String(b.at)));const a=asks[asks.length-1];
+    if(a){r=r||{};r.supervision=Object.assign({form:'RS-1'},r.supervision||{},{pdAsk:a});}}catch(e){}return r;};
+/* ---- the file: the new values, read back field by field (a request to Form PD-1 is not kept) ---- */
+const ff0=fromFile;fromFile=function(d){const o=ff0.apply(this,arguments);if(!o)return o;try{
+  const s=d.S,arr=v=>Array.isArray(v)?v:[],obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:{},str=v=>v==null||typeof v==='object'?'':String(v).slice(0,400),keys=L=>L.map(x=>x[0]);
+  const ms=obj(s.months);Object.keys(o.months).forEach(k=>{const raw=arr(obj(ms[k]).contacts).slice(0,60);(o.months[k].contacts||[]).forEach((c,i)=>{const x=obj(raw[i]);
+    if(keys(FBW).includes(x.fbWhen))c.fbWhen=x.fbWhen;if(isoS(x.fbLate))c.fbLate=x.fbLate;if(keys(ANN).includes(x.ann))c.ann=x.ann;
+    const ff=keys(FBF).filter(k=>arr(x.fbForm).includes(k)),fs=keys(FBS).filter(k=>arr(x.fbSteps).includes(k));if(ff.length)c.fbForm=ff;if(fs.length)c.fbSteps=fs;});});
+  arr(s.goals).slice(0,30).forEach((x,i)=>{const g=o.goals[i];if(!g)return;x=obj(x);['when','often'].forEach(k=>{if(T(x[k]))g[k]=str(x[k]);});
+    if(x.withRbt==='yes'||x.withRbt==='no')g.withRbt=x.withRbt;if(isoS(x.mcheck))g.mcheck=x.mcheck;const it=arr(x.items).map(t=>str(t)).filter(Boolean).slice(0,30);if(it.length)g.items=it;});
+  arr(s.sups).slice(0,12).forEach((x,i)=>{const sp=o.sups[i];if(!sp)return;x=obj(x);if(isoS(x.fbk_date))sp.fbk_date=x.fbk_date;if(/^[0-8]$/.test(String(x.fbk_met==null?'':x.fbk_met)))sp.fbk_met=String(x.fbk_met);});
+  if(Array.isArray(o.effects))arr(s.effects).slice(0,60).forEach((x,i)=>{const e=o.effects[i];if(!e)return;x=obj(x);if(keys(PW).includes(x.pWhen))e.pWhen=x.pWhen;if(T(x.pOften))e.pOften=str(x.pOften);if(keys(PF).includes(x.pForm))e.pForm=x.pForm;if(x.pPos==='yes'||x.pPos==='no')e.pPos=x.pPos;});
+}catch(e){}return o;};
+try{renderAll();}catch(e){}
+})();
+</script>
+<style id="rs1-v2565-css">
+.rs-practice{margin-top:10px;padding-top:8px;border-top:1px solid #E3E9ED}
+.rs-practice h4{margin:0 0 4px;font-size:13px}.rs-practice h4 small{font-weight:400;color:#54676f}
+.rs-practice .rs-pli{display:block;margin:4px 0;font-size:12.5px;line-height:1.45}
+.rs-practice .rs-pli small{display:block;color:#54676f}.rs-practice .rs-pli.fail{color:#8E2A2A}.rs-practice .rs-pli.note{color:#7a420f}
+.rs-igrid td.ig-y{color:#2F6B37;text-align:center}.rs-igrid td.ig-n{color:#8E2A2A;text-align:center;font-weight:700}.rs-igrid td.ig-x{color:#93a3a8;text-align:center}
+.rs-igrid tr.ig-flag td:first-child{border-left:4px solid #8E2A2A}
+.rs-ighd{margin-top:16px}
+.rs-gwarn{margin:4px 0;font-size:12.5px;color:#8E2A2A}
+.rs-gg{margin:4px 0}.rs-gg svg{display:block;max-width:100%}
+.rs-annline{margin:8px 0;font-size:13px;line-height:1.45}
+.rs-fbkhint{margin:4px 0 8px}
+.rs-obsreset{margin:6px 0}
+/* the feedback record, styled as the contact's other panels (its own classes, so the three teaching panels stay three) */
+.rs-fbrec{border:1px solid var(--rule-2,#d5dfdd);border-radius:8px;background:#f7faf9;padding:10px 14px 12px;margin:14px 0}
+.rs-fbh{margin:0 0 2px;font-family:var(--sans);font-size:15px;font-weight:700;color:var(--nbh-navy,#182e43);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.rs-fbsub{font-weight:400;font-size:13px;color:var(--ink-soft,#54676f)}.rs-fbn{margin-left:auto;font-weight:600;font-size:12.5px;color:var(--nbh-slate,#254657)}
+.rs-fbrec .rs-chips{margin:8px 0 0}
+</style>
 
 <script>
 /* ===================== NBH student packet =====================

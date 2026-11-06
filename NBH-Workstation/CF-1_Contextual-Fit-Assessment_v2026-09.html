@@ -917,6 +917,9 @@ td input,td select{max-width:100%}
     <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr>
       <th style="width:6%">#</th><th style="width:22%">Name or initials</th><th style="width:22%">Role</th>
       <th style="width:26%">When they run the plan</th><th>Months with this student</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <!-- v25.65 (CARE L2) a caregiver who runs the plan at home rates it too, with the items worded for the home -->
+    <datalist id="cfRoles"><option value="Classroom teacher"><option value="Paraprofessional"><option value="Related-service provider"><option value="Caregiver (home plan)"><option value="Other"></datalist>
+    <p class="hint">A caregiver who runs the plan at home can rate it here: give the role <b>Caregiver (home plan)</b>. The Ratings sheet then shows each Values, Resources, Routine and support item worded for the home beneath the school wording, and the Summary sets school fit and home fit side by side. A plan that works at school may not fit the home; FCT has strong evidence of efficacy but less on how well it fits home and school (Ghaemmaghami et al., 2021). Form CT-1 asks its own six home-fit questions during caregiver training.</p>
   </section>
 
   <!-- ===================== RATINGS ===================== -->
@@ -956,7 +959,7 @@ td input,td select{max-width:100%}
   <!-- ===================== ENHANCEMENT ===================== -->
   <section class="only-enh">
     <h2 class="nbh-band">Enhancement Plan</h2>
-    <p class="hint">Each item flagged in round 1 becomes a decision: change the plan, add a support, or record that the team accepts the risk. A barrier that is noted and not acted on is a prediction of where integrity will fall.</p>
+    <p class="hint">Each item flagged in round 1 becomes a decision: change the plan, add a support, or record that the team accepts the risk. <!-- v25.65 (CARE L3) -->A barrier that is noted and not acted on is a warning of where integrity may fall: check it against the integrity obtained (Summary sheet).</p>
     <div class="row" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="genEnh">Generate rows from items flagged in round 1</button>
       <button class="tool" id="addE">Add row</button><button class="tool" id="delE">Remove last</button>
@@ -976,9 +979,13 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Summary and Change After Enhancement</h2>
     <div id="sumVerdict"></div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Change after enhancement"><table class="rt" id="cmpTbl"></table></div>
+    <!-- v25.65 (CARE L2) school fit and home fit, side by side -->
+    <div id="cfHomeCmp"></div>
     <h3 style="margin-top:14px">Against Obtained Integrity</h3>
     <table class="rt">
       <tr><th style="width:26%">Integrity obtained (Form TI-1)</th><td><input data-m="ti" placeholder="%, and the date of the observation"></td></tr>
+      <!-- v25.65 (CARE L3) each failing step on TI-1 matched to the domain it falls in, recorded the same way each time -->
+      <tr><th>TI-1&rsquo;s failing steps, by domain</th><td><div id="cfStepMap"></div></td></tr>
       <tr><th>Did the low-fit domains predict the failing steps?</th><td><textarea data-m="predict" rows="3" placeholder="Compare the flagged domains against the steps that actually failed on TI-1. This is the check on whether this form is earning its place."></textarea></td></tr>
       <tr><th>Conclusion</th><td><textarea data-m="concl" rows="3"></textarea></td></tr>
     </table>
@@ -987,7 +994,7 @@ td input,td select{max-width:100%}
   <!-- ===================== GUIDE ===================== -->
   <section class="only-guide">
     <h2 class="nbh-band">What Contextual Fit Is, and What It Is Not</h2>
-    <p>Contextual fit is the extent to which a support plan matches the values, skills, and resources of the people who will run it and the settings where it will run. It is a property of the relationship between a plan and a context, not a property of the plan and not a judgment of the staff. A technically excellent plan can have poor contextual fit, and fit affects whether a plan is run as written: after a protocol designed to improve fit was introduced, implementation fidelity rose and problem behavior fell (Monzalve &amp; Horner, 2021, with four participants). Poor fit is therefore one likely reason a well-designed plan produces no change.</p>
+    <p>Contextual fit is the extent to which a support plan matches the values, skills, and resources of the people who will run it and the settings where it will run. It is a property of the relationship between a plan and a context, not a property of the plan and not a judgment of the staff. A technically excellent plan can have poor contextual fit, and fit affects whether a plan is run as written: after a protocol designed to improve fit was introduced, implementation fidelity rose and problem behavior fell (Monzalve &amp; Horner, 2021, with four participants). Poor fit is therefore one likely reason a well-designed plan produces no change. <!-- v25.65 (CARE L3) -->Low ratings are a warning to act on. Ratings and later integrity do not always agree, so check one against the other (Form TI-1, the Form CT-1 follow-up): stated acceptability Poor fit is therefore one likely reason a well-designed plan produces no change.</p>ldquo;may not necessarily predict adherencePoor fit is therefore one likely reason a well-designed plan produces no change.</p>rdquo; (Auten et al., 2024). The Summary sheet records which domain each failing step on Form TI-1 falls in, the same way each time.</p>
     <p>This form is not a satisfaction survey and not an evaluation of the implementer. It asks what would have to be true for the plan to actually run, and records where those conditions are absent. The answer to a low score is a change to the plan or to the supports around it, not pressure on the person who gave the score.</p>
     <p class="noprint hint rp-guide"><b>Respondent pages.</b> Ratings given independently are the point of this form, and <b>Respondent pages</b> in the toolbar makes that easy: a one-page questionnaire with the 21 items for one respondent and one round, as a file to attach to an email or as a link when the workstation is on a website. The respondent answers on any phone or computer and presses Send; an email to the case BCBA opens with the answers as a code, and <b>Collect responses</b> reads the codes back into that respondent&rsquo;s column and round here, with their name, role and periods. The page shows the student by initials only. With the practice&rsquo;s reply box set up, the answers are sealed on the respondent&rsquo;s device and go to the reply box when they press Send; otherwise they travel only in the email the respondent sends. The page stores nothing.</p>
     <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
@@ -1139,7 +1146,7 @@ function renderR(){
   $('#rTbl tbody').innerHTML=S.raters.map((r,i)=>`<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
     <td><input data-i="${i}" data-f="name" value="${esc(r.name)}"></td>
-    <td><input data-i="${i}" data-f="role" value="${esc(r.role)}"></td>
+    <td><input data-i="${i}" data-f="role" value="${esc(r.role)}" list="cfRoles" aria-label="Respondent ${i+1} role"></td>
     <td><input data-i="${i}" data-f="when" value="${esc(r.when)}" placeholder="which periods"></td>
     <td><input data-i="${i}" data-f="mo" value="${esc(r.mo)}"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this respondent" aria-label="Delete respondent ${i+1}">&times;</button></td></tr>`).join('');
 }
@@ -2286,6 +2293,63 @@ window.__rp.payload=rpPayload;window.__rp.kit=kit;
 .nbhc-done{font-size:12px;color:#1f6b4a;padding:0 16px 8px}
 .nbhc-empty{color:#5b6770;padding:12px 0}
 @media print{#nbhCaseDlg,.nbh-case-grp{display:none!important}}
+</style>
+<script id="cf1-v2565">
+/* v25.65 CF-1 (CARE L2, L3).
+   - L2 a respondent whose role is a caregiver (Caregiver (home plan), or parent, guardian, home) sees the Values, Resources, Routine
+     and support items worded for the home under the school wording, and the Summary sets school fit and home fit side by side.
+     The means and the verdict are computed as before, across every respondent.
+   - L3 each failing step Form TI-1 sends (integrity.missed), or one typed in, is matched to a CF-1 domain, so the comparison with
+     the integrity obtained is recorded the same way each time; the line says how many failing steps fall in a low-fit domain.
+   Everything new is kept in the record's meta; a file saved before opens as before. */
+(function(){
+const T=v=>String(v==null?'':v).trim();
+const isHome=j=>/caregiver|parent|guardian|home|mother|father|grand/i.test(String((S.raters[j]||{}).role||''));
+/* the home wording, by item index (items 8 to 19) */
+const HOME={7:'The plan is consistent with how I believe my child should be treated.',8:'The plan is fair to the other children in our home.',9:'I would be comfortable if my child’s teacher watched me run this plan.',
+  10:'The things the plan needs are at home where and when I need them.',11:'I have enough time in our day to run the plan as it is written.',12:'There are enough adults at home during the times when the plan applies.',
+  13:'The plan fits the way our home actually runs, not an ideal version of it.',14:'Running this plan does not pull me away from my other children in a way I cannot manage.',15:'The plan can be run during the routines at home where the behavior actually happens.',
+  16:'The school team expects this plan to be run at home and backs me up.',17:'I know who to go to when the plan is not working at home, and I get a timely answer.',18:'Time for someone to coach me on this plan is set aside.'};
+const rg0=renderGrid;renderGrid=function(){const r=rg0.apply(this,arguments);try{if(!S.raters.some((_,j)=>isHome(j)))return r;
+  document.querySelectorAll('#cfTbl tbody tr').forEach(tr=>{const n=tr.querySelector('td.n'),it=tr.querySelector('td.item');if(!n||!it)return;const i=+n.textContent-1;
+    if(HOME[i]&&!it.querySelector('.cf-home'))it.insertAdjacentHTML('beforeend','<div class="hint cf-home"><b>At home:</b> '+esc(HOME[i])+'</div>');});}catch(e){}return r;};
+function means(rd,home){const set=S.raters.map((_,j)=>j).filter(j=>isHome(j)===home);if(!set.length)return null;
+  const dm=DOMAINS.map(([nm,code])=>{const vs=ITEMS.map((x,i)=>x[0]===code?i:-1).filter(i=>i>=0).flatMap(i=>set.map(j=>val(i,j,rd))).filter(v=>v!=null);return {nm,code,m:vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null};});
+  const all=ITEMS.flatMap((_,i)=>set.map(j=>val(i,j,rd))).filter(v=>v!=null);return {dm,all:all.length?all.reduce((a,b)=>a+b,0)/all.length:null,n:set.length};}
+function homeCmp(){const box=document.getElementById('cfHomeCmp');if(!box)return;const R=[1,2].map(rd=>({rd,s:means(rd,false),h:means(rd,true)})).filter(x=>x.s&&x.h&&x.s.all!=null&&x.h.all!=null);
+  if(!R.length){box.innerHTML='';return;}
+  box.innerHTML='<h3 style="margin-top:14px">School Fit and Home Fit</h3><p class="hint">The same domains, rated by the school staff and by the caregivers who run the plan at home. A domain that fits at school and not at home is a reason to change the home part of the plan, not a reason to press the family.</p>'+
+    '<div class="grid-wrap" tabindex="0" role="region" aria-label="School fit and home fit"><table class="rt"><thead><tr><th style="text-align:left">Domain</th>'+R.map(x=>'<th>Round '+x.rd+': school ('+x.s.n+')</th><th>Round '+x.rd+': home ('+x.h.n+')</th>').join('')+'</tr></thead><tbody>'+
+    DOMAINS.map(([nm],di)=>'<tr><td>'+esc(nm)+'</td>'+R.map(x=>'<td style="text-align:center">'+f2(x.s.dm[di].m)+'</td><td style="text-align:center">'+f2(x.h.dm[di].m)+'</td>').join('')+'</tr>').join('')+
+    '<tr style="background:#EFF3F1;font-weight:600"><td>Overall</td>'+R.map(x=>'<td style="text-align:center">'+f2(x.s.all)+'</td><td style="text-align:center">'+f2(x.h.all)+'</td>').join('')+'</tr></tbody></table></div>';}
+/* ---- L3 the failing steps, each matched to a domain ---- */
+const DOPT=v=>'<option value=""></option>'+DOMAINS.map(([nm,c])=>'<option value="'+c+'"'+(v===c?' selected':'')+'>'+esc(nm)+'</option>').join('')+'<option value="none"'+(v==='none'?' selected':'')+'>None of these (not a fit barrier)</option>';
+function steps(){const L=[],seen=new Set();const M=Array.isArray(window.__cfMissed)?window.__cfMissed:[];
+  M.slice(0,8).forEach(m=>{const t=T(m&&m.d);if(!t)return;const k='t'+(m.n||L.length+1);if(seen.has(k))return;seen.add(k);L.push({k,t:t.slice(0,200),from:'TI-1'});});
+  Object.keys(S.meta).filter(x=>/^pm_t\d+_t$/.test(x)).forEach(x=>{const k=x.slice(3,-2);if(seen.has(k)||!T(S.meta[x]))return;seen.add(k);L.push({k,t:T(S.meta[x]),from:'TI-1, kept'});});
+  for(let i=1;i<=3;i++)L.push({k:'m'+i,t:T(S.meta['pm_m'+i+'_t']),manual:true});return L;}
+function lowDomains(){const A=analyse(1);return A.doms.filter(d=>d.mean!=null&&(d.mean<4||A.items.some(x=>x.d===d.code&&x.flag))).map(d=>d.code);}
+let mapSig='';
+function stepMap(){const box=document.getElementById('cfStepMap');if(!box)return;const L=steps(),sig=L.map(x=>x.k+':'+(x.manual?'':x.t)).join('|');
+  if(sig!==mapSig||!box.querySelector('table')){mapSig=sig;
+    box.innerHTML='<p class="hint" style="margin:0 0 4px">'+(L.some(x=>!x.manual)?'The steps Form TI-1 found missed, and up to three more typed in. ':'Type the steps that failed on Form TI-1 (in the workstation they come from Form TI-1). ')+'For each, the domain whose barrier would explain it.</p><table class="rt cf-map"><tbody>'+
+      L.map(x=>'<tr><td>'+(x.manual?'<input data-cfm="pm_'+x.k+'_t" aria-label="Failing step, typed in" placeholder="a failing step">':esc(x.t)+' <span class="hint">('+esc(x.from)+')</span>')+'</td><td style="width:38%"><select data-cfm="pm_'+x.k+'_d" aria-label="The domain for this step">'+DOPT('')+'</select></td></tr>').join('')+'</tbody></table><p class="cf-mapline"></p>';}
+  box.querySelectorAll('[data-cfm]').forEach(el=>{if(document.activeElement!==el)el.value=S.meta[el.dataset.cfm]||'';});
+  /* a step from TI-1 is kept with the record, so the comparison stands without the case */
+  L.forEach(x=>{if(!x.manual&&x.from==='TI-1')S.meta['pm_'+x.k+'_t']=x.t;});
+  const low=lowDomains(),done=L.filter(x=>(x.manual?T(S.meta['pm_'+x.k+'_t']):1)&&S.meta['pm_'+x.k+'_d']),inLow=done.filter(x=>low.includes(S.meta['pm_'+x.k+'_d']));
+  const ln=box.querySelector('.cf-mapline');if(ln)ln.innerHTML=done.length?'<b>'+inLow.length+' of '+done.length+' failing step'+(done.length===1?'':'s')+' fall in a low-fit domain</b>'+(low.length?' (round 1: '+esc(DOMAINS.filter(d=>low.includes(d[1])).map(d=>d[0]).join(', '))+')':' (no low-fit domain in round 1)')+'.':'';}
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.cfm===undefined)return;S.meta[el.dataset.cfm]=el.value;});
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.cfm===undefined)return;S.meta[el.dataset.cfm]=el.value;stepMap();});
+const rs0=renderSum;renderSum=function(){const r=rs0.apply(this,arguments);try{homeCmp();stepMap();}catch(e){}return r;};
+const fi0=window.__nbhFactsIn;window.__nbhFactsIn=function(f){window.__cfMissed=f&&f.integrity&&Array.isArray(f.integrity.missed)?f.integrity.missed:null;const r=fi0?fi0.apply(this,arguments):null;try{stepMap();}catch(e){}return r;};
+try{renderAll();}catch(e){}
+})();
+</script>
+<style id="cf1-v2565-css">
+.cf-home{margin-top:3px;color:#2f5568}
+.cf-map td{vertical-align:top}.cf-map input,.cf-map select{width:100%;box-sizing:border-box}
+.cf-mapline{margin:6px 0 0;font-size:13px}
 </style>
 <script id="nbh-case-flow" src="nbh-case-flow.js"></script>
 
