@@ -202,11 +202,15 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
     /* and the layout gives the packet no rule of its own: the workstation splits a rule's selectors at every comma and
        gives a control's name standing alone to every value it prints, so a rule of the layout that names input, select
        or textarea in a list could reach every value in the packet (a Focus rule did, before it was written otherwise).
-       Every rule scoped from the form with its layout, and not from the form without it, names the layout */
-    const st=await ws.evaluate(async files=>{const strip=s=>s.replace(/<style id="fx2-v2492">[\s\S]*?<\/style>/,'').replace(/<style id="fx2-own">[\s\S]*?<\/style>/,'');
+       Every rule the shared block adds to the packet names the layout; a form's own block (fx2-own, which may hold the
+       form's own rules for paper, as IN-1's does) adds no rule on every printed value of the form */
+    const st=await ws.evaluate(async files=>{const strip=s=>s.replace(/<style id="fx2-v2492">[\s\S]*?<\/style>/,''),strip2=s=>strip(s).replace(/<style id="fx2-own">[\s\S]*?<\/style>/,'');
       const rules=css=>{const sh=new CSSStyleSheet();sh.replaceSync(scopeCSS(css,'.mp-0'));const o=[];const walk=(L,pre)=>{for(const x of L){if(x.cssRules&&!x.selectorText)walk(x.cssRules,pre+(x.conditionText||'')+'|');else o.push({k:pre+x.cssText,s:x.selectorText||''});}};walk(sh.cssRules,'');return o;};
       const out=[];for(const f of files){const h=await (await fetch(f)).text();const css=t=>[...new DOMParser().parseFromString(t,'text/html').querySelectorAll('style:not([data-nbh-screen])')].map(x=>x.textContent).join('\n');
-        const w=rules(css(h)),n=new Set(rules(css(strip(h))).map(r=>r.k));const stray=w.filter(r=>!n.has(r.k)&&!/fx2/.test(r.s)).map(r=>r.k.slice(0,160));if(stray.length)out.push({f:f.slice(0,4),stray:stray.slice(0,3)});}return out;},IDS.map(file));
+        const w=rules(css(h)),o=rules(css(strip(h))),n=new Set(o.map(r=>r.k)),n2=new Set(rules(css(strip2(h))).map(r=>r.k));
+        const paper=r=>!/(^|\|)[^|]*\bscreen\b[^|]*\|/.test(r.k)||/print/.test(r.k.split('{')[0]);   /* a rule for the screen only never reaches the paper */
+        const stray=w.filter(r=>paper(r)&&!n.has(r.k)&&!/fx2/.test(r.s)).concat(o.filter(r=>paper(r)&&!n2.has(r.k)&&/(^|,\s*)\.mp-0 \.nbh-val/.test(r.s))).map(r=>r.k.slice(0,160));
+        if(stray.length)out.push({f:f.slice(0,4),stray:stray.slice(0,3)});}return out;},IDS.map(file));
     ok('12 the master print gets no rule from the layout that reaches past it (every rule it adds names the layout)',!st.length,st);await ctx.close();}
   /* 14 the tool */
   {const forms=fs.readdirSync(path.join(ROOT,'NBH-Workstation')).filter(f=>/^[A-Z].*\.html$/.test(f)).map(f=>path.join(ROOT,'NBH-Workstation',f));
