@@ -334,7 +334,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       '<b>Your answers are longer than an email link can carry</b> ({n} characters, where about {m} fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to {to}, or <b>Copy the code</b> and paste it into the message.':'<b>Repons ou yo twò long pou yon lyen imèl</b> ({n} karaktè, kote anviwon {m} ka antre), kidonk okenn imèl pa louvri. Peze <b>Sere l kòm fichye</b> epi tache fichye a nan yon imèl pou {to}, oswa <b>Kopye kòd la</b> epi kole l nan mesaj la.',
       'Answering as <b>{n}</b>.':'W ap reponn kòm <b>{n}</b>.','Not you? change':'Se pa ou? Chanje',
       'Questions about {s} from {w}':'Kesyon sou {s} ki soti nan {w}','Questions for you from {w}':'Kesyon pou ou ki soti nan {w}','Questions from {w}':'Kesyon ki soti nan {w}',
-      'What the questions are about':'Sou kisa kesyon yo ye',
+      'What the questions are about':'Sa kesyon yo ap pale sou li',
       '1 yes-or-no question':'1 kesyon wi oswa non','{n} yes-or-no questions':'{n} kesyon wi oswa non','1 true-or-false question':'1 kesyon vre oswa fo','{n} true-or-false questions':'{n} kesyon vre oswa fo',
       '1 question':'1 kesyon','{n} questions':'{n} kesyon','1 statement':'1 fraz','{n} statements':'{n} fraz',' to rate from {a} to {b}':' pou bay yon nòt soti {a} rive {b}',
       '1 to answer in your own words':'1 pou reponn ak pwòp mo pa ou','{n} to answer in your own words':'{n} pou reponn ak pwòp mo pa ou',
