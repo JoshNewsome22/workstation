@@ -1909,7 +1909,11 @@ window.__nbhFactsIn=function(f){
   /* v23.21 (review F203) the function from Form FS-1 heads a reinforcer line the case wrote (never one typed by hand) */
   {const fl=f.fn&&String(f.fn.label||f.fn.key||'').trim();if(fl&&!rWas){m.reinforcer='The function on Form FS-1: '+fl+(m.reinforcer?'; '+m.reinforcer:'');if(!String(m.reinforcer).includes('ranked'))n++;}}
   /* v25.65 (SKILL-M7) a visual schedule on Form VS-1 offers a program for it on the Setup page (nothing is filled until it is chosen) */
-  {const v=(Array.isArray(f.visuals)?f.visuals:[]).find(x=>x&&/schedule/i.test(String(x.what||''))&&String(x.words||'').trim());VIS=v?{words:String(v.words)}:null;renderVis();}
+  /* v25.67 (SKILL-M7, batch 3) Form VS-1 sends its visuals as {items:[...]}, not a bare list: read both; its schedule's task
+     analysis (ta) names the activities when the words do not */
+  {const VL=Array.isArray(f.visuals)?f.visuals:(f.visuals&&Array.isArray(f.visuals.items)?f.visuals.items:[]);
+   const v=VL.find(x=>x&&/schedule/i.test(String(x.what||''))&&(String(x.words||'').trim()||(x.ta&&Array.isArray(x.ta.activities)&&x.ta.activities.length)));
+   VIS=v?{words:String(v.words||'').trim()||v.ta.activities.join(', '),title:v.ta&&String(v.ta.title||'').trim()||''}:null;renderVis();}
   if(n)renderAll();return {filled:n};
 };
 window.__nbhFactsPick=function(sel){

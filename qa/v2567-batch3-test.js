@@ -9,7 +9,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
 const FILE=id=>L.forms().find(x=>x.id===id).file;
 const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
 (async()=>{const br=await L.chromium.launch();const errs=[];
- const ctx=await br.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+ const ctx=await br.newContext({viewport:{width:1280,height:900},serviceWorkers:'block',acceptDownloads:true});
  const open=async id=>{const p=await ctx.newPage();p.on('pageerror',e=>errs.push(id+': '+e.message));p.on('dialog',d=>d.accept().catch(()=>{}));
    await p.goto(L.BASE+'/NBH-Workstation/'+encodeURI(FILE(id)));await sleep(1200);return p;};
  const sec=async(k,fn)=>{if(!want(k))return;try{await fn();}catch(e){ok(k+': ran',false,String(e&&e.stack||e));}};
@@ -107,6 +107,51 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   ok('PREF 2 the BIP names the items, the blocking item as RESTRICTIVE with its approval (PREF-H6), the rotation and the re-test (PREF-M7)',/How the items were tested: inside the plan’s wait component/.test(r.bip)&&/Puzzle box \(86% reduction\); Drawing kit \(81% reduction, prompted engagement\)/.test(r.bip)&&/RESTRICTIVE: Spinner: competed only with response blocking \(approved by/.test(r.bip)&&/During use: Rotate item sets about every 10 min/.test(r.bip)&&/Re-test: Re-test when the behavior during access rises/.test(r.bip)&&!/Ball/.test(r.bip)&&!/Drawing kit \(81% reduction, prompted engagement\); Spinner/.test(r.bip),r);
   ok('PREF 3 a case from PA-1 before v25.65 (no prefs.csa) adds nothing',r.old,r);
   await t.close();
+ });
+
+ /* ---------------- SKILL ---------------- */
+ await sec('SKILL',async()=>{
+  /* SKILL-M7: Form VS-1's visuals reach SA-1 as {items:[...]} (the shape VS-1 sends): the schedule offers a program */
+  const v=await open('VS-1');
+  await L.loadSim(v);await sleep(1200);
+  const vf=await v.evaluate(async()=>{
+    S.chk.s_sched=true;try{renderAll();}catch(e){}let f=null;try{f=window.__nbhFactsOut();}catch(e){}return f;});
+  ok('SKILL 0 VS-1 sends its visuals as an object with items, the schedule with its task analysis',vf&&vf.visuals&&Array.isArray(vf.visuals.items)&&vf.visuals.items.some(x=>/schedule/i.test(x.what)&&x.ta&&x.ta.steps.length===7),vf&&vf.visuals);
+  await v.close();
+  const sa=await open('SA-1');
+  const s1=await sa.evaluate(async V=>{window.__nbhFactsIn({visuals:V});await new Promise(r=>setTimeout(r,300));const b=document.getElementById('visBox');const shown=b?b.textContent:'';
+    const btn=document.getElementById('visStart');if(btn)btn.click();await new Promise(r=>setTimeout(r,300));
+    return {shown,prog:S.meta.program,sd:S.meta.sd,steps:S.steps.map(x=>x.text)};},vf&&vf.visuals);
+  ok('SKILL 1 SA-1 reads VS-1’s visuals and offers a program for the schedule (SKILL-M7 join)',/Form VS-1 has a visual schedule/.test(s1.shown)&&/Start a program for this schedule/.test(s1.shown),s1);
+  ok('SKILL 2 the program is the schedule’s task analysis, taught total-task, with the schedule’s activities',s1.prog==='Visual schedule use (Form VS-1)'&&s1.steps.length===7&&/schedule: /.test(s1.sd),s1);
+  const s2=await sa.evaluate(async()=>{window.__nbhFactsIn({visuals:[{what:'Visual schedule',words:'arrival, reading'}]});await new Promise(r=>setTimeout(r,200));return (document.getElementById('visBox')||{}).textContent||'';});
+  ok('SKILL 3 the older list shape still reads',/arrival, reading/.test(s2),s2);
+  await sa.close();
+  /* SKILL-M9: TI-1's "Why did it drop?" answers reach ST-1 with the retraining list */
+  const t=await open('TI-1');
+  await t.evaluate(()=>{if(window.nbhUI){nbhUI.confirm=async()=>true;nbhUI.toast=()=>{};}window.alert=()=>{};});await L.loadSim(t);await sleep(1200);
+  await t.evaluate(()=>{document.getElementById('tiDropSigned').click();document.querySelector('.tiDropK[data-k="mat"]').click();document.querySelector('.tiDropK[data-k="notice"]').click();
+    const c=document.querySelector('[data-m="dropChanged"]');if(c){c.value='the timer moved to the desk';c.dispatchEvent(new Event('input',{bubbles:true}));}});await sleep(200);
+  const dl=t.waitForEvent('download',{timeout:8000}).catch(()=>null);await t.evaluate(()=>document.getElementById('tiRetrainBtn').click());const D=await dl;
+  let file=null;if(D){try{file=JSON.parse(L.fs.readFileSync(await D.path(),'utf8'));}catch(e){file=null;}}
+  await t.close();
+  ok('SKILL 4 TI-1’s retraining list carries the answers',file&&file.form==='TI-1-RETRAIN'&&file.why&&file.why.materialsOrTime&&file.why.noOneNotices,file&&file.why);
+  const st=await open('ST-1');
+  await st.evaluate(()=>{if(window.nbhUI){nbhUI.confirm=async()=>true;nbhUI.toast=()=>{};}});
+  await st.evaluate(()=>{const b=document.getElementById('stTiOpen')||[...document.querySelectorAll('button')].find(x=>/Import from Form TI-1|from Form TI-1/i.test(x.textContent||''));if(b)b.click();});await sleep(300);
+  await st.setInputFiles('#stTiFile',{name:'TI-1_retrain_sim.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(file||{}))});await sleep(800);
+  const k=await st.evaluate(async()=>{const go=document.getElementById('stTiGo');const dis=go?go.disabled:null;if(go&&!go.disabled)go.click();await new Promise(r=>setTimeout(r,500));
+    return {dis,why:S.ti&&S.ti.retrain&&S.ti.retrain.why,k:[S.meta.wd_k1,S.meta.wd_k2,S.meta.wd_k3,S.meta.wd_k4],chg:S.meta.wd_changed||'',msg:(document.getElementById('stTiMsg')||{}).textContent||''};});
+  ok('SKILL 5 ST-1 takes TI-1’s answers with the steps to retrain, and ticks the same gaps (SKILL-M9 join)',k.why&&k.why.materialsOrTime&&k.k[0]===false&&k.k[1]===true&&k.k[2]===false&&k.k[3]===true&&/timer moved to the desk \(Form TI-1\)/.test(k.chg),k);
+  const k2=await st.evaluate(()=>{const keep=JSON.parse(JSON.stringify(S.ti));S.meta.wd_k1=true;S.meta.wd_k2=false;S.meta.wd_k4=false;return {kept:!!(keep.retrain&&keep.retrain.why)};});
+  ok('SKILL 6 the answers survive the record’s own clean-up (saved with the import)',k2.kept,k2);
+  await st.close();
+  /* BC-RM-M3: TI-1's commission share reaches RM-1's reinstatement indicator and BC-1's integrity line (built in batch 2 on both sides) */
+  const rm=await open('RM-1');
+  const r1=await rm.evaluate(async()=>{S.meta.date='2026-09-01';window.__nbhFactsIn({integrity:{overall:88,obs:[{date:'2026-10-02',pct:88,com:12.5,conN:8}],commission:12.5}});await new Promise(r=>setTimeout(r,300));
+    const ck='rei_'+TYPES.find(t=>t.k==='rei').ind.findIndex(x=>/commission error\) since the last review/.test(x));return S.ind[ck]===true&&S.meta.comAuto==='1';});
+  ok('SKILL 7 RM-1 reads TI-1’s commission share (BC-RM-M3, both sides now in place)',r1===true,r1);
+  await rm.close();
  });
 
  ok('no page errors',errs.length===0,errs);
