@@ -8216,7 +8216,8 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
   document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#saveBtn')){const h=fld('ad.add68');if(h&&!T(h.value)){h.removeAttribute('name');h.dataset.add68n='ad.add68';setTimeout(()=>{h.name='ad.add68';},0);}}},true);
   document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#saveBtn')){const h=q('[data-add68n]');if(h&&!h.name)h.name='ad.add68';}});
   let lastV=null,lastS=null;
-  const watch=()=>{const h=fld('ad.add68'),v=h?h.value:'',sg=JSON.stringify(signed());if(lastV===null){lastV=v;lastS=sg;return;}
+  const raw=()=>((fld('ad.psig')||{}).value||'')+'\u0001'+((fld('ad.sigs')||{}).value||'');   /* compared as text: the signature images are not parsed on each look */
+  const watch=()=>{const h=fld('ad.add68'),v=h?h.value:'',sg=raw();if(lastV===null){lastV=v;lastS=sg;return;}
     if(v!==lastV||sg!==lastS){if(v!==lastV&&v!==mine)tok++;lastV=v;lastS=sg;try{ADD.refresh();}catch(e){}}};
   setInterval(watch,1200);
   try{ADD.refresh();}catch(e){}

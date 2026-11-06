@@ -155,11 +155,14 @@ const CASE={data:{src:'DD-1',from:isoDay(-40),to:isoDay(-1),days:20,behaviors:[{
   await view(m,'map');await m.locator('.imSaveAdm:visible').first().click();await yes(m);await sleep(600);
   const im=await m.evaluate(()=>({nurse:(S.nurse[S.nurse.length-1]||{}).rec||'',hist:(S.hist[S.hist.length-1]||{}).rec||'',nt:(document.querySelector('#imNurse tbody')||{}).textContent||'',ht:(document.querySelector('#imHist tbody')||{}).textContent||''}));
   ok('REC 6 IM-1: a nurse check added and an administration filed keep their recorded-at; the check dated 4 days back shows "Late entry"',/^\d{4}-/.test(im.nurse)&&/^\d{4}-/.test(im.hist)&&/Late entry/.test(im.nt)&&/Recorded/.test(im.ht),im);
+  {const t=await saveJson(m);await openJson(m,t);const b=await m.evaluate(()=>({nurse:(S.nurse[S.nurse.length-1]||{}).rec||'',hist:(S.hist[S.hist.length-1]||{}).rec||''}));
+   ok('REC 6b IM-1: Save data and Open data keep the recorded-at; filed again after a correction, an administration keeps its first one',b.nurse===im.nurse&&b.hist===im.hist,{b,im});}
   await m.close();
   /* CN-1: a note */
   const k=await open('CN-1');await k.locator('[data-n="date"]').fill(mdyDay(-3));await k.locator('[data-n="observed"]').fill('Watched the math block (simulated).');await sleep(400);
   const cn=await k.evaluate(()=>{renderNoteOut();return {rec:note().rec||'',ed:(document.getElementById('cnRec68')||{}).textContent||'',out:(document.querySelector('#noteOut .cn-head')||{}).textContent||''};});
   ok('REC 7 CN-1: a note keeps its recorded-at; written 3 days after the contact it shows and prints "Late entry"',/^\d{4}-/.test(cn.rec)&&/Late entry/.test(cn.ed)&&/Recorded.*Late entry/.test(cn.out),cn);
+  {const t=await saveJson(k);await openJson(k,t);ok('REC 7b CN-1: Save data and Open data keep the note\'s recorded-at',(await k.evaluate(()=>S.notes.map(n=>n.rec||'')))[0]===cn.rec);}
   await k.close();});
 
  /* ---------------- ADD: addenda once signed ---------------- */

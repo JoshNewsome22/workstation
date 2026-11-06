@@ -4224,7 +4224,7 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
   document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#saveBtn')){const h=fld('r.add68');if(h&&!T(h.value)){h.removeAttribute('name');h.dataset.add68n='r.add68';setTimeout(()=>{h.name='r.add68';},0);}}},true);
   document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#saveBtn')){const h=q('[data-add68n]');if(h&&!h.name)h.name='r.add68';}});
   let lastV=null,lastS=null;
-  const watch=()=>{const h=fld('r.add68'),v=h?h.value:'',sg=JSON.stringify(SIG());if(lastV===null){lastV=v;lastS=sg;return;}
+  const watch=()=>{const h=fld('r.add68'),v=h?h.value:'',sg=((fld('s.par.sig')||{}).value||'')+'\u0001'+((fld('s.par.date')||{}).value||'');if(lastV===null){lastV=v;lastS=sg;return;}
     if(v!==lastV||sg!==lastS){if(v!==lastV&&v!==mine)tok++;lastV=v;lastS=sg;try{ADD.refresh();}catch(e){}}};
   setInterval(watch,1200);
   try{ADD.refresh();}catch(e){}
