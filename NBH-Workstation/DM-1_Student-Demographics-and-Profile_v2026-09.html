@@ -929,7 +929,8 @@ details.dxk-look{border-top:0;background:#fff;border:1px solid #dfe6e4;border-ra
 <style id="fx2-v2492">
 /* v24.92 the screen layout of Forms DM-1, IC-1 and RR-1 (the 10/28 design review: GOV.UK, NN/g, NHS, USWDS, W3C,
    Apple). Screen only, under html.fx2, set before the page draws; the paper keeps its own layout. v24.95 all six forms,
-   refined from the BCBA's iPad screenshots. */
+   refined from the BCBA's iPad screenshots. v25.67 fx2: one copy for every form (tools/blocks/fx2.html, put in by
+   tools/blocks/patch-fx2.py); a form's own rules are in its own style element, id fx2-own, right after this one. */
 /* what this layout adds for the screen takes no room while the page measures itself for paper (nbh-polish) */
 html.nbh-pr-measure :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
 @media screen{
@@ -960,8 +961,6 @@ html.fx2:not(.nbh-pr-measure) .fx2-sh :is(.decide,.chkrow,.rl-ns,.rl-grid,.rl-ro
 html.fx2:not(.nbh-pr-measure) .fx2-sh .rl-f > span:not(.fx2-hint){font:600 14px/1.3 var(--fx2-sans)!important;color:var(--fx2-ink)!important;text-align:left!important}
 html.fx2:not(.nbh-pr-measure) .fx2-sh .rl-f :is(input,select:not(.nbh-seg-src),textarea){min-height:44px;border:1px solid var(--fx2-box)!important;border-radius:8px!important;background-color:#fff!important;padding:0 10px!important;box-sizing:border-box}
 html.fx2:not(.nbh-pr-measure) .fx2-sh .rl-f textarea{padding:10px!important}
-/* IC-1: what the parent reads about each procedure is reading text, not a note */
-html.fx2[data-fx2="IC-1"]:not(.nbh-pr-measure) :is(#consent,#proc,#assent) p.method,html.fx2[data-fx2="IC-1"]:not(.nbh-pr-measure) :is(#consent,#proc,#assent) .card p{font-size:16px!important;line-height:1.6!important;color:var(--fx2-ink)!important}
 
 /* ---------- fields: the label above, the example under it, the box at 16 px (Safari zooms into anything smaller) ---------- */
 html.fx2:not(.nbh-pr-measure) .fx2-sh .ident{gap:14px 18px!important}
@@ -1098,17 +1097,6 @@ html.fx2:not(.nbh-pr-measure) .fx2-sh select:not(.nbh-seg-src){max-width:100%}
 html.fx2:not(.nbh-pr-measure) .fx2-sh :is(p,div) > label:has(> select:not(.nbh-seg-src)){display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:100%}
 html.fx2:not(.nbh-pr-measure) .fx2-sh td > .fx2-hintb{display:block;font-weight:400}
 
-/* ---------- IN-1: its own markup (a label around its box, question cards, yes/no/sometimes grids) ---------- */
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) .fx2-sh label:has(> input:not([type=checkbox]):not([type=radio]):not([type=hidden]), > select:not(.nbh-seg-src), > textarea){display:flex!important;flex-direction:column;gap:6px;font:600 15px/1.3 var(--fx2-sans)!important;color:var(--fx2-ink)!important}
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) .fx2-sh label > :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select:not(.nbh-seg-src)){min-height:44px;font:400 16px var(--fx2-sans)!important;border:1px solid var(--fx2-box)!important;border-radius:8px!important;padding:0 10px!important;background-color:#fff!important;box-sizing:border-box}
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) .qcard .qh{font:600 16px/1.4 var(--fx2-sans)!important;color:var(--fx2-ink)!important;padding:10px 12px!important}
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) .qcard textarea{font:400 16px/1.5 var(--fx2-sans)!important}
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) table.mx{font-size:15px!important}
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) table.mx thead th{font-size:14px!important}
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) table.mx td{padding:8px 10px!important}
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) table.mx input[type=radio]{width:24px;height:24px}
-html.fx2[data-fx2="IN-1"]:not(.nbh-pr-measure) table.rt.ihead{font-size:14px!important}
-
 /* ---------- IC-1: read with the parent ---------- */
 html.fx2:not(.nbh-pr-measure) .fx2-pvbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 18px;padding:12px 16px;background:var(--fx2-wash);border-radius:12px;font:400 15px/1.45 var(--fx2-sans);color:var(--fx2-ink)}
 html.fx2:not(.nbh-pr-measure) .fx2-pvbar .fx2-btn{margin:0;background:var(--fx2-navy);color:#fff;border-color:var(--fx2-navy)}
@@ -1123,6 +1111,15 @@ html.fx2.fx2-parent:not(.nbh-pr-measure) .fx2-sh .defs .dlab{font-size:17px!impo
 }
 </style>
 <script>document.documentElement.classList.add('fx2');document.documentElement.setAttribute('data-fx2','DM-1');addEventListener('beforeprint',function(){if(window.fx2Layout)fx2Layout.paper(true)})</script>
+<script id="fx2-cfg">
+/* v25.67 fx2: DM-1's settings for the shared layout (tools/blocks/fx2.html; the list is at the top of its script) */
+window.FX2_CFG = { toolbar: true,
+  eg: { 'Royal Palm School, Rm': 'Royal Palm School, Rm 12', 'Royal Palm School': 'Royal Palm School', 'English': 'English', 'Psychologist, physician': 1, 'Report / parent report': 1,
+    'Parent, student, teacher': 1, 'Words, phrases, signs, SGD, PECS, gestures': 1, '1-step with visual; first/then': 1, 'Reads sight words; pre-reader': 1, 'District drive, folder': 1 },
+  addtxt: { teamTbl: 'Add a team member', svcTbl: 'Add a service', medTbl: 'Add a medication', dxTbl: 'Add a diagnosis', emTbl: 'Add an emergency contact', relTbl: 'Add a document', dlTbl: 'Add a disclosure' },
+  count: { teamTbl: 'nTeam', medTbl: 'nMed', dxTbl: 'nDx' },
+  contacts: { wrap: 'conWrap', count: 'nCon' }, packet: 'pkTbl' };
+</script>
 </head>
 <body class="view-student">
 
@@ -3974,11 +3971,31 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
    iPad screenshots (boxes in line across a row, an example gone once its box is filled, the toolbar on one row). It arranges what the sheets already hold:
    every field keeps its name and value, so the saved file is unchanged, and what it adds for the screen is marked
    noprint. What it changes for the screen's sake (a heading's capitals, an example moved out of its box) goes back while
-   the page prints. It runs again whenever a sheet redraws. */
+   the page prints. It runs again whenever a sheet redraws.
+   v25.67 fx2: one copy for every form, tools/blocks/fx2.html, put in by tools/blocks/patch-fx2.py. What is particular to
+   a form is in its own block, read here: the script element fx2-cfg, window.FX2_CFG = {...} (see the list below), and
+   its own screen rules in the style element fx2-own. A form without FX2_CFG gets the generic layout. */
 (function(){
   if (window.fx2Layout) return;
-  var D = document, R = D.documentElement, FORM = R.getAttribute('data-fx2') || '';
+  var D = document, R = D.documentElement;
   R.classList.add('fx2');
+  /* v25.67 fx2: the form's own settings (all optional):
+       cards    the tables that become cards on an iPad (a selector); without it every .grid table holding boxes,
+                '' for none
+       eg       an example written bare in a box -> the words after "For example, " (1: the same words, first letter
+                small)
+       keepin   an instruction that stays inside its empty box
+       addtxt   a table's id -> the words of its "Add another" button
+       count    a table's id -> the id of the number box that adds rows to it
+       toolbar  true: the form's toolbar gives up its small parts to keep to one row (v24.95)
+       contacts {wrap, count}: DM-1's contacts, a summary line each and Change
+       packet   the id of DM-1's packet table: the forms in this file, the rest behind "Show all"
+       calendar {edit, print}: RR-1's school calendar (its editor, its printed list), one line while it holds dates
+       parent   {sheets, staff: {sheet, from, to}}: IC-1's Read with the parent
+       jump     links that jump to a card (TB-1's chips), aimed again once the sheet has settled */
+  var C = window.FX2_CFG || {};
+  /* what is typed in DM-1's contacts and packet redraws their summaries at once */
+  var LIVE = [C.contacts && '#' + C.contacts.wrap, C.packet && '#' + C.packet].filter(Boolean).join(',');
   var $$ = function(s, r){ return Array.prototype.slice.call((r || D).querySelectorAll(s)); };
   function el(t, c, x){ var e = D.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
   function setText(e, t){ if (e && e.textContent !== t) e.textContent = t; }
@@ -3988,14 +4005,13 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
 
   /* GOV.UK hint text: one short sentence without a full stop, "For example" rather than "e.g." */
   /* a box's example written bare in the form ("English") reads as an example under its label, not as an instruction */
-  var EG = { 'Royal Palm School, Rm': 'Royal Palm School, Rm 12', 'Royal Palm School': 1, 'English': 1, 'Psychologist, physician': 1, 'Report / parent report': 1,
-    'Parent, student, teacher': 1, 'Words, phrases, signs, SGD, PECS, gestures': 1, '1-step with visual; first/then': 1, 'Reads sight words; pre-reader': 1, 'District drive, folder': 1 };
+  var EG = C.eg || {};
   function tidy(t){ t = String(t || '').replace(/…$/, '').trim();
-    if (EG[t]) { t = EG[t] === 1 ? t : EG[t]; return 'For example, ' + (/^(Royal|English|SGD|PECS)\b/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1)); }
+    if (EG[t]) return 'For example, ' + (EG[t] === 1 ? t.charAt(0).toLowerCase() + t.slice(1) : EG[t]);
     return t.replace(/^e\.g\.,?\s*/i, 'For example, ').replace(/\.$/, '').replace(/^[a-z]/, function(c){ return c.toUpperCase(); }); }
   /* a word or two that fits the box stays in it ("Name", "Describe", "None") */
   /* an instruction for an empty box under its question (IN-1) stays in the box */
-  var KEEPIN = { 'Record what the respondent said': 1, 'Anything the respondent added': 1 };
+  var KEEPIN = C.keepin || {};
   function keep(f){ var t = (f.getAttribute('data-nbh-ph') || f.getAttribute('placeholder') || '').trim(); return KEEPIN[t] || (!EG[t] && t.length <= 8 && !/\s/.test(t)); }
   function moveHint(field, after){
     if (field.dataset.fx2h) return; field.dataset.fx2h = '1'; if (keep(field)) return;
@@ -4080,23 +4096,21 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
   /* 5. a table of entries: on an iPad each row is a card, each box under its column's name; blank rows wait behind
      "Add another" where the table has no Add button of its own */
   var OWN_ADD = /^(Add|New)\b/;
-  var COUNT = { teamTbl: 'nTeam', medTbl: 'nMed', dxTbl: 'nDx' };
-  var CARDSEL = { 'TB-1': '#selTbl, #revTbl, #cluster table.rank', 'IA-1': '#outTbl, #setup table.rank, #anGrp', 'IN-1': '#respTbl, #convTbl' };
-  var ADDTXT = { teamTbl: 'Add a team member', svcTbl: 'Add a service', medTbl: 'Add a medication', dxTbl: 'Add a diagnosis', emTbl: 'Add an emergency contact', relTbl: 'Add a document', dlTbl: 'Add a disclosure',
-    logTbl: 'Add a consent event', attTbl: 'Add an attempt', goalTbl: 'Add a goal', fbaTbl: 'Add a prior FBA', intTbl: 'Add an intervention', incTbl: 'Add an incident', evtTbl: 'Add a dated event' };
+  var COUNT = C.count || {};
+  var ADDTXT = C.addtxt || {};
   var WIDE = /note|detail|what|involvement|purpose|description|contribut|reason|comment|result|evidence|outcome|behavior|goal|event|effect|scope|disclosed|looks like|methods|hypothes|function|activity|action|relation/i;
   /* a column's name; a heading with a line under it (IN-1: "Simulated parent", then "Parent or guardian · sees the
      student daily · …") gives its name and the first part of that line */
   function headText(c){ var sq = function(t){ return String(t || '').replace(/\s+/g, ' ').trim(); }, sub = c.querySelector(':scope > div, :scope > .hint');
     if (!sub) return sq(c.textContent);
     var own = sq(Array.prototype.filter.call(c.childNodes, function(n){ return n.nodeType === 3 || (n.nodeType === 1 && n !== sub && !/^(DIV|P)$/.test(n.tagName)); }).map(function(n){ return n.textContent; }).join(' '));
-    var first = sq(sub.textContent).split(' \u00b7 ')[0]; return own && first ? own + ' (' + first + ')' : own || first; }
+    var first = sq(sub.textContent).split(' · ')[0]; return own && first ? own + ' (' + first + ')' : own || first; }
   function blank(r){ var f = $$('input,select,textarea', r); if (!f.length) return false;
     return f.every(function(x){ return x.type === 'checkbox' || x.type === 'radio' ? !x.checked : x.tagName === 'SELECT' ? (x.selectedIndex <= 0 || !x.value) : !String(x.value || '').trim(); }); }   /* a list still on its first choice is untouched */
   function cards(){
     /* which tables are lists of entries: on DM-1, IC-1 and RR-1 every .grid table holding boxes; elsewhere the form names
        them (a table of scores by item, a checklist of criteria by target and a yes/no/sometimes grid stay tables) */
-    var named = CARDSEL[FORM];
+    var named = C.cards; if (named === '') return;
     $$(named || '.fx2-sh table.grid').forEach(function(t){
       if (!named && !t.querySelector('tbody input, tbody select, tbody textarea')) return;
       if (!t.closest('.fx2-sh')) return;
@@ -4136,7 +4150,8 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
 
   /* 6. DM-1: a contact with a name is one summary line and Change; blank contacts wait behind "Add a contact" */
   function contacts(){
-    var w = D.getElementById('conWrap'); if (!w) return; var first = true;
+    if (!C.contacts) return;
+    var w = D.getElementById(C.contacts.wrap); if (!w) return; var first = true;
     $$('.card.con', w).forEach(function(c, i){
       var v = function(n){ var e = c.querySelector('[name="c[' + i + '].' + n + '"]'); if (!e) return ''; if (e.tagName === 'SELECT') return e.value ? e.options[e.selectedIndex].textContent.trim() : ''; return String(e.value || '').trim(); };
       var name = v('name'), filled = $$('[name]', c).some(function(e){ return e.type === 'checkbox' ? e.checked : String(e.value || '').trim(); });
@@ -4157,15 +4172,15 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
     if (!add) { add = el('button', 'fx2-btn fx2-conadd noprint', 'Add a contact'); add.type = 'button';
       add.addEventListener('click', function(){ var c = $$('.card.con.fx2-hide', w)[0];
         if (c) { c.dataset.fx2open = '1'; tog(c, 'fx2-hide', false); tog(c, 'fx2-open', true); var f = c.querySelector('input'); if (f) try { f.focus(); } catch (e) {} return; }
-        var n = D.getElementById('nCon'); if (n && +n.value < +n.max) { n.value = +n.value + 1; n.dispatchEvent(new Event('change', { bubbles: true })); } });
+        var n = D.getElementById(C.contacts.count); if (n && +n.value < +n.max) { n.value = +n.value + 1; n.dispatchEvent(new Event('change', { bubbles: true })); } });
       w.after(add); }
-    var n = D.getElementById('nCon'); add.hidden = !$$('.card.con.fx2-hide', w).length && !(n && +n.value < +n.max);
+    var n = D.getElementById(C.contacts.count); add.hidden = !$$('.card.con.fx2-hide', w).length && !(n && +n.value < +n.max);
   }
 
   /* 7. DM-1's packet: the forms in this file, the rest behind "Show all" */
   var pkAll = false;
   function packet(){
-    var t = D.getElementById('pkTbl'); if (!t || !t.tBodies[0]) return; var rows = Array.prototype.slice.call(t.tBodies[0].rows);
+    var t = C.packet && D.getElementById(C.packet); if (!t || !t.tBodies[0]) return; var rows = Array.prototype.slice.call(t.tBodies[0].rows);
     var on = rows.filter(function(r){ var k = r.querySelector('input[type=checkbox]'); return k && k.checked; }).length;
     rows.forEach(function(r){ var k = r.querySelector('input[type=checkbox]'); tog(r, 'fx2-pkoff', !pkAll && on > 0 && !(k && k.checked)); });
     var wrap = t.parentElement && /wrap/.test(t.parentElement.className) ? t.parentElement : t;
@@ -4178,8 +4193,8 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
   /* 8. RR-1's school calendar: one line while it holds dates, the ledger first */
   var nsOpen = null, nsUser = false;
   function nsFold(){
-    var ed = D.getElementById('rlNsEdit'); if (!ed) return; var h = ed.previousElementSibling; while (h && !(h.tagName === 'H3')) h = h.previousElementSibling; if (!h) return;
-    var parts = []; for (var e = h.nextElementSibling; e && e.id !== 'rlNsPrint'; e = e.nextElementSibling) if (!e.classList.contains('fx2-nsbar')) parts.push(e);
+    var K = C.calendar, ed = K && D.getElementById(K.edit); if (!ed) return; var h = ed.previousElementSibling; while (h && !(h.tagName === 'H3')) h = h.previousElementSibling; if (!h) return;
+    var parts = []; for (var e = h.nextElementSibling; e && e.id !== K.print; e = e.nextElementSibling) if (!e.classList.contains('fx2-nsbar')) parts.push(e);
     var n = $$('input[type=date]', ed).filter(function(x, i){ return i % 2 === 0; }).length;
     if (!nsUser) nsOpen = n === 0;
     var bar = h.nextElementSibling && h.nextElementSibling.classList.contains('fx2-nsbar') ? h.nextElementSibling : null;
@@ -4192,11 +4207,11 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
   /* 9. IC-1: read with the parent. Larger type, one column, and the staff's parts (how consent was obtained, the
      status, the record) out of sight until "Back to staff view" */
   function parentView(){
-    if (FORM !== 'IC-1') return;
-    var c = D.getElementById('consent');
-    if (c) { var h = $$('h3.sub', c).filter(function(x){ return /How Consent Was Obtained/i.test(x.getAttribute('data-fx2-orig') || x.textContent); })[0];
-      if (h) for (var e = h; e && !e.classList.contains('ic-sigs'); e = e.nextElementSibling) tog(e, 'fx2-staff', true); }
-    ['consent', 'proc', 'assent'].forEach(function(id){ var s = D.getElementById(id); if (!s || s.querySelector('.fx2-pvbar')) return;
+    var P = C.parent; if (!P) return;
+    var st = P.staff, c = st && D.getElementById(st.sheet);
+    if (c) { var h = $$('h3.sub', c).filter(function(x){ return new RegExp(st.from, 'i').test(x.getAttribute('data-fx2-orig') || x.textContent); })[0];
+      if (h) for (var e = h; e && !e.classList.contains(st.to); e = e.nextElementSibling) tog(e, 'fx2-staff', true); }
+    P.sheets.forEach(function(id){ var s = D.getElementById(id); if (!s || s.querySelector('.fx2-pvbar')) return;
       var bar = el('div', 'fx2-pvbar noprint'), b = el('button', 'fx2-btn', 'Read with the parent'); b.type = 'button';
       bar.append(el('span', null, 'Going through this with the parent? A larger, simpler view of these pages, without the staff’s parts.'), b);
       b.addEventListener('click', function(){ tog(R, 'fx2-parent', true); window.scrollTo(0, 0); var x = D.querySelector('.fx2-pvexit'); if (x) try { x.focus(); } catch (e) {} });
@@ -4240,9 +4255,10 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
   /* 12. v24.95 the form's toolbar on one row on an iPad held sideways: while it wraps, it gives up, a step at a time, the
      small labels ("The case"), the words beside the next-sheet arrow and Dictate's icon, then shortens the case and the
      sheet's name (each whole in its tooltip). It stops at the first step that fits; a toolbar no step brings to one row
-     (a laptop's with all its views) keeps everything. */
+     (a laptop's with all its views) keeps everything. v25.67 fx2: only where the form's settings ask for it (toolbar). */
   var tbKey = '';
   function tbFit(){
+    if (!C.toolbar) return;
     var t = D.querySelector('div.toolbar'); if (!t || printing || !t.offsetParent || R.classList.contains('nbh-fold')) return;
     var cb = D.getElementById('nbhCaseBtn'), nx = t.querySelector('.nbh-next'), sm = nx && nx.querySelector('small'), dc = D.getElementById('nbhDictBtn');
     if (cb && cb.textContent.trim()) attr(cb, 'title', cb.textContent.trim());
@@ -4265,7 +4281,7 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
   var timer = 0; function soon(){ clearTimeout(timer); timer = setTimeout(run, 120); }
   /* TB-1's chips jump to a target's card; a sheet just shown still grows its boxes to their text, so the jump is aimed
      again once that has settled (a smooth scroll aimed at the first position stopped short of the card) */
-  D.addEventListener('click', function(e){ var a = e.target.closest && e.target.closest('#tgtNav a[href^="#"]'); if (!a) return; var id = a.getAttribute('href').slice(1);
+  if (C.jump) D.addEventListener('click', function(e){ var a = e.target.closest && e.target.closest(C.jump.split(',').map(function(s){ return s.trim() + ' a[href^="#"]'; }).join(', ')); if (!a) return; var id = a.getAttribute('href').slice(1);
     [350, 700].forEach(function(t){ setTimeout(function(){ var el = D.getElementById(id); if (!el) return; var top = el.getBoundingClientRect().top;
       if (top < 0 || top > innerHeight * 0.35) el.scrollIntoView({ block: 'start' }); }, t); }); });
   /* the paper: headings as written, examples back in their boxes */
@@ -4286,7 +4302,7 @@ document.addEventListener("change",function(e){if(e.target&&e.target.id==="emSam
   window.fx2Layout = { run: run, paper: paper };
   segs(); run();
   try { new MutationObserver(function(recs){ segs(); if (recs.some(function(m){ return !(m.target.closest && m.target.closest('.fx2-csum,.fx2-nsbar,.fx2-pkall,.fx2-addrow')); })) soon(); }).observe(D.body, { childList: true, subtree: true }); } catch (e) {}
-  D.addEventListener('change', soon); D.addEventListener('input', function(e){ if (e.target._fx2eg) egSync(e.target); if (e.target.closest && e.target.closest('#conWrap,#pkTbl')) soon(); });
+  D.addEventListener('change', soon); D.addEventListener('input', function(e){ if (e.target._fx2eg) egSync(e.target); if (LIVE && e.target.closest && e.target.closest(LIVE)) soon(); });
   addEventListener('resize', function(){ tbKey = ''; soon(); });
 })();
 </script>

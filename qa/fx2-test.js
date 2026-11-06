@@ -17,8 +17,8 @@
 const L=require(__dirname+'/lib.js');const {BASE,sleep}=L;let pw;try{pw=require('playwright');}catch(e){pw=require('/opt/node22/lib/node_modules/playwright');}
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1500):''));if(!c)fails++;};
 const file=id=>L.forms().find(x=>x.id===id).file;
-(async()=>{const wk=await pw.webkit.launch(),cr=await pw.chromium.launch();const errs=[];
-  const ipad=await wk.newContext({viewport:{width:860,height:900},hasTouch:true}),lap=await cr.newContext({viewport:{width:1300,height:900}});
+(async()=>{const wk=await L.ipadBrowser(pw),cr=await pw.chromium.launch();   /* v25.67 fx2: Chromium as an iPad where WebKit is not installed */const errs=[];
+  const ipad=await L.ipadCtx(wk,{viewport:{width:860,height:900}}),lap=await cr.newContext({viewport:{width:1300,height:900}});
   const open=async(ctx,id,sim=true)=>{const p=await ctx.newPage();p.on('pageerror',e=>errs.push(id+': '+e.message));p.on('dialog',d=>d.accept().catch(()=>{}));
     await p.goto(BASE+'/NBH-Workstation/'+file(id));await sleep(1800);if(sim){await L.loadSim(p);await sleep(2200);}return p;};
   const view=async(p,v)=>{await p.evaluate(v=>document.querySelector('[data-view="'+v+'"]').click(),v);await sleep(600);};
