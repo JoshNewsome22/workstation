@@ -156,7 +156,7 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
  /* ---------------- C. the video ---------------- */
  ({ctx,p}=await open());await view(p,'build');await sleep(300);
  {const r=await p.evaluate(()=>{const V=window.__tdVideo,P=TD1_BANK.protocols;return {hp:P.filter(x=>x.code==='A_HIGHP').every(x=>V.has(x.id)),fct:V.has('fct-practical-guide-thinning'),dra:V.has('dra-teacher-approval-rules'),n:V.count(),loaded:!!window.NBH_TD1_VIDEO||[...document.scripts].some(s=>/nbh-td1-video/.test(s.src))};});
-  ok('C every high-p card has the video, the FCT card its own, a DRA card none; no video file loaded until asked',r.hp&&r.fct&&!r.dra&&r.n===6&&!r.loaded,r);}
+  ok('C every high-p card has the video, the FCT card its own, a DRA card none, 17 videos in all (the eleven for DRO, NCR and RIRD: v2568-td1-procvideos-test); no video file loaded until asked',r.hp&&r.fct&&!r.dra&&r.n===17&&!r.loaded,r);}
  {const r=await p.evaluate(()=>{const out=[];TD1_BANK.protocols.filter(x=>x.code==='A_HIGHP').forEach(x=>{window.__tdBank.show(x.id);const d=document.getElementById('tdBankHost').shadowRoot.querySelector('.detail');
    const b=d.querySelector('.load button.vid'),l=d.querySelector('.load .vidln');out.push({id:x.id,btn:b?b.textContent:'',line:l?l.textContent:'',after:!!(b&&l&&(b.compareDocumentPosition(l)&Node.DOCUMENT_POSITION_FOLLOWING))});});return out;});
   const wrong=r.filter(x=>{const c=HP.find(h=>h.id===x.id).cmp;return x.btn!=='Watch the video'||!x.after||x.line!==xline(HP.find(h=>h.id===x.id),SHOWS);});
