@@ -86,7 +86,7 @@ async function open(ctx,file,errs){const p=await ctx.newPage();p.on('pageerror',
     m.dates.every(Boolean)&&dd(m.dates[0],m.dates[1])===14&&dd(m.dates[0],m.dates[2])===35&&dd(m.dates[0],m.dates[3])===84&&/closer together/.test(m.sup)&&/booster/.test(m.sup)&&m.due.some(w=>/^Follow-up probe after school contact ends/.test(w)),m);
   ok('CARE-M4 an adult trained by the primary caregiver waits for the trainer\'s own probe; with it recorded the decision is as before',/^The trainer’s own probe is still due/.test(m.p1.t)&&m.p1.lvl===1&&m.p2===2,m);
   /* CARE-L2, L3 */
-  const l=await c.evaluate(()=>{const f=window.__nbhCaregiverFacts();const ph=document.querySelector('[data-m="stop"]').placeholder,g=document.querySelector('section.only-guide').textContent;
+  const l=await c.evaluate(()=>{const f=window.__nbhCaregiverFacts();const st=document.querySelector('[data-m="stop"]'),ph=st.getAttribute('placeholder')||st.getAttribute('data-fx2-ph')||''/* v25.68 fx2: on screen the layout keeps the box's words in data-fx2-ph */,g=document.querySelector('section.only-guide').textContent;
     return {fit:f&&f.fit&&f.fit.length,q:f&&f.fit&&f.fit[0].q,ext:f&&f.steps&&f.steps.filter(s=>s.ext).length,ph,g:/it does not predict the integrity data/.test(g)};});
   ok('CARE-L2 the six home-fit answers go to the case for Form CF-1',l.fit===6&&/^I have time to do this/.test(l.q)&&l.ext===1,l);
   ok('CARE-L3 no claim that the answer predicts the integrity data; ratings and integrity are checked one against the other',!/predicts the integrity data/.test(l.ph)&&/check one against the other/.test(l.ph)&&l.g,l);

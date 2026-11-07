@@ -247,7 +247,8 @@ const ONLY=process.argv.slice(2);const want=k=>!ONLY.length||ONLY.includes(k);
   const cf=await open('CF-1');
   const f=await cf.evaluate(async()=>{window.__nbhFactsIn({caregiver:{fit:[{q:'I have time to do this in that routine',a:'Yes',w:''},{q:'I can do it on a bad day, not only a good one',a:'No',w:'a shorter version for busy mornings'}]}});await new Promise(r=>setTimeout(r,300));
     const el=document.getElementById('cf67CtFit');const a=el&&!el.hidden?el.textContent:'';window.__nbhFactsIn({});return {a,none:document.getElementById('cf67CtFit').hidden};});
-  ok('STAFFA 5 CF-1 shows CT-1’s six home-fit answers beside the school ratings (CARE-L2)',/Home Fit from Form CT-1/.test(f.a)&&/No caregiver rated this form/.test(f.a)&&/a shorter version for busy mornings/.test(f.a)&&/1 yes, 0 partly, 1 no/.test(f.a)&&f.none,f);
+  /* v25.68 fx2: the heading read on screen, in sentence case there (as written on paper) */
+  ok('STAFFA 5 CF-1 shows CT-1’s six home-fit answers beside the school ratings (CARE-L2)',/Home Fit from Form CT-1/i.test(f.a)&&/No caregiver rated this form/.test(f.a)&&/a shorter version for busy mornings/.test(f.a)&&/1 yes, 0 partly, 1 no/.test(f.a)&&f.none,f);
   await cf.close();
   const q=await open('QS-1');
   const qa=await q.evaluate(()=>{S.holders='Ms. Lee, classroom teacher (simulated): issue 2';S.meta.issueNo='2';const a=window.__qs2567Ask();const o=window.__nbhFactsOut();return {a,out:o&&o.quick&&o.quick.pdAsk};});

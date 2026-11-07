@@ -53,9 +53,11 @@ const CT='CT-1_Caregiver-Training_v2026-09.html';
   const weak=await p.evaluate(()=>({rows:[...document.querySelectorAll('#weakTbl tbody tr')].map(r=>[...r.cells].map(c=>c.textContent.trim())),note:document.getElementById('ctProbeNote').textContent}));
   ok('11 F351 Steps to Watch: a step correct in the latest round is watched for at home, not re-taught; the probe that scored 2 of the 3 critical steps says one was not seen at home',
     weak.rows.length===2&&weak.rows.every(r=>r[4]==='Correct in the latest round: watch for it at home')&&/^The in-home probe scored 2 of the 3 steps marked critical/.test(weak.note),weak);
-  /* F349 */
+  /* F349. v25.68 fx2: on screen the layout writes a box's words under the row's name (the name read without that note)
+     and keeps them in data-fx2-ph (back in the box on paper) */
   const rows=await p.evaluate(()=>({safety:!!document.querySelector('textarea[data-m="safety"]'),emerg:!!document.querySelector('textarea[data-m="emerg"]'),
-    callTh:document.querySelector('[data-m="call"]').closest('tr').querySelector('th').textContent,callPh:document.querySelector('[data-m="call"]').placeholder,
+    callTh:(()=>{const th=document.querySelector('[data-m="call"]').closest('tr').querySelector('th').cloneNode(true);th.querySelectorAll('.fx2-hint').forEach(x=>x.remove());return th.textContent;})(),
+    callPh:document.querySelector('[data-m="call"]').getAttribute('placeholder')||document.querySelector('[data-m="call"]').getAttribute('data-fx2-ph')||'',
     sim:{safety:S.meta.safety,emerg:S.meta.emerg,call:S.meta.call,relapse:S.meta.relapseDo}}));
   ok('12 F349 If the Behavior Comes Back: When safety comes first, In an emergency, and a contact the school can keep (its hours, and outside them); the worked example fills them',
     rows.safety&&rows.emerg&&rows.callTh==='Who they contact, when it is answered, and outside those hours'&&/^The school contact \(school phone or district email\), the hours it is answered, and what to do outside those hours$/.test(rows.callPh)&&

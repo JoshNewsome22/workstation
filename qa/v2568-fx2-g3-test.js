@@ -29,8 +29,11 @@
     16. in the recorders and timers (RUNNERS: DD-1's live recorder, RA-1's session runners, AD-1's session runner, CT-1's
         and ST-1's rehearsal runners) nothing drawn over a label's words or a box, and on every sheet no example of the
         layout as an item of a row of label-and-box pairs, at 1376, 1180, 1032, 820 and 390 px;
-    17. the recorders, timers and graphs as without the layout: each runner's and each graph's place in the page
-        (drawn or not) and what each graph draws, the same with the layout as without it, on the iPad sideways.
+    17. the recorders, timers and graphs as without the layout, on every sheet: each runner drawn or not, its words and
+        its controls with their state, and what each graph draws (an svg's shapes, their place and words; a canvas's
+        size), the same with the layout as without it, on the iPad sideways (the walkthrough's pictures left out: its
+        stage scales a copy of the form's pages to fit);
+    18. inside the workstation no masthead stays on screen for the layout's "Show the full introduction" alone.
    WebKit when it is installed, otherwise Chromium as an iPad (qa/lib.js ipadBrowser). Simulated data only.
    usage: WS_URL=http://127.0.0.1:8123 node qa/v2568-fx2-g3-test.js [ID,ID...] */
 const L=require(__dirname+'/lib.js');const {BASE,sleep,ROOT}=L;let pw;try{pw=require('playwright');}catch(e){pw=require('/opt/node22/lib/node_modules/playwright');}
@@ -275,6 +278,17 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
         const stray=w.filter(r=>paper(r)&&!n.has(r.k)&&!/fx2/.test(r.s)).concat(o.filter(r=>paper(r)&&!n2.has(r.k)&&/(^|,\s*)\.mp-0 \.nbh-val/.test(r.s))).map(r=>r.k.slice(0,160));
         if(stray.length)out.push({f:f.slice(0,4),stray:stray.slice(0,3)});}return out;},IDS.map(file));
     ok('12 the master print gets no rule from the layout that reaches past it (every rule it adds names the layout)',!st.length,st);await ctx.close();}
+  /* 18 inside the workstation (framed) the form drops its masthead's title and description; the masthead stays only for
+     a button of the form's own, never for the layout's "Show the full introduction" alone (DD-1, DT-1 and AD-1 showed a
+     strip 55 px tall holding only that link, which opened nothing in sight) */
+  {const ctx=await L.ipadCtx(ipad,{viewport:{width:1180,height:820},serviceWorkers:'block'});const ws=await ctx.newPage();ws.on('pageerror',e=>errs.push('workstation: '+e.message));
+    await ws.goto(BASE+'/NBH-Workstation/index.html');await sleep(1300);const bad=[];
+    for(const id of IDS){await ws.evaluate(id=>openForm(id),id);await ws.waitForFunction(id=>!!state.status[id],id,{timeout:40000});await sleep(1500);
+      const f=file(id),fr=ws.frames().find(x=>x.url().indexOf(encodeURI(f))>=0||x.url().indexOf(f)>=0);if(!fr){bad.push(id+': no frame');continue;}
+      const m=await fr.evaluate(()=>{const m=document.querySelector('.nbh-mast');if(!m||!m.getClientRects().length)return null;const own=[...m.querySelectorAll('button')].filter(b=>!b.classList.contains('fx2-more')&&b.getClientRects().length);
+        return {h:Math.round(m.getBoundingClientRect().height),own:own.length,framed:document.documentElement.classList.contains('nbh-framed')};});
+      if(m&&m.framed&&!m.own)bad.push(id+': a masthead '+m.h+' px tall with no button of its own');}
+    ok(`18 inside the workstation no masthead stays for the layout's link alone (${IDS.length} forms)`,!bad.length,bad);await ctx.close();}
   /* 14 the tool */
   {const forms=fs.readdirSync(path.join(ROOT,'NBH-Workstation')).filter(f=>/^[A-Z].*\.html$/.test(f)).map(f=>path.join(ROOT,'NBH-Workstation',f));
     const r=spawnSync('python3',[path.join(ROOT,'tools','blocks','patch-fx2.py'),'--check',...forms],{encoding:'utf8'});const cur=(r.stdout.match(/^current /mg)||[]).length;
