@@ -4263,7 +4263,10 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
                 px, the example under it, a row's boxes in line)
        heads    more headings to put in sentence case (a selector; the bands and h3.sub always are)
        keep     words a heading keeps as written (names: 'Hill', 'Iwata'); "Form" before a form's id always stays
-       noseg    where a list stays a list on a touch screen (a selector: a grid of intervals or trials, a ledger) */
+       noseg    where a list stays a list on a touch screen (a selector: a grid of intervals or trials, a ledger)
+     v25.68 fx2 (group 2):
+       sheets   more parts of the page laid out as sheets (a selector), for a form whose screen is not a .sheet or a
+                section.only-*: ABC-1's tab panels (its paper is a .sheet of its own) */
   var C = window.FX2_CFG || {};
   /* what is typed in DM-1's contacts and packet redraws their summaries at once */
   var LIVE = [C.contacts && '#' + C.contacts.wrap, C.packet && '#' + C.packet].filter(Boolean).join(',');
@@ -4611,7 +4614,7 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
     return Math.max.apply(null, top) - Math.min.apply(null, top) < 8 && Math.max.apply(null, hi) < 60; }
 
   /* the form's pages: a .sheet, or a section shown one at a time (IN-1's section.only-setup) */
-  function mark(){ $$('.sheet, section[class*="only-"]').forEach(function(x){ if (!x.classList.contains('fx2-sh')) x.classList.add('fx2-sh'); }); }
+  function mark(){ $$('.sheet, section[class*="only-"]' + (C.sheets ? ', ' + C.sheets : '')).forEach(function(x){ if (!x.classList.contains('fx2-sh')) x.classList.add('fx2-sh'); }); }
   function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); fields(); hints(); rows(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
   var timer = 0; function soon(){ clearTimeout(timer); timer = setTimeout(run, 120); }
   /* TB-1's chips jump to a target's card; a sheet just shown still grows its boxes to their text, so the jump is aimed
