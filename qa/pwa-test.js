@@ -301,7 +301,8 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     'nbh-td1-bank.js' /* v23.86 TD-1's protocol bank, loaded by the form */,
     'nbh-readings.js' /* v23.97 RS-1's readings, loaded by the form */,
     'nbh-gb1-bank.js' /* v25.18 GB-1's objective bank, loaded by the form */,
-    'nbh-td1-video-fct.js' /* v25.21 TD-1's FCT video, loaded by the form when asked */];
+    'nbh-td1-video-fct.js' /* v25.21 TD-1's FCT video, loaded by the form when asked */,
+    'nbh-shell-docread.js' /* v25.68 the workstation's Read a document, loaded by the shell (its page's size budget) */];
   /* v21.67 the document readers (PDF.js, Tesseract) in their folders, named by index.html's nbh-offline meta */
   const offline=(/<meta name="nbh-offline" content="([^"]*)"/.exec(fs.readFileSync(path.join(ROOT,'NBH-Workstation','index.html'),'utf8'))||[0,''])[1].split(/\s+/).filter(Boolean);need.push(...offline);
   /* v21.84 the scripts every form loads from one file beside it (tools/blocks/shared_js.py: the writing help, the letterhead, ...) */
