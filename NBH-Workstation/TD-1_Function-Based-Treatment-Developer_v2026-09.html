@@ -7300,9 +7300,18 @@ html.td9:not(.nbh-pr-measure) #compWrap .card .td-vid-line{font:13px/1.45 var(--
    (after Wilder, Sheppard, et al., 2025), the whole class before a transition (Ardoin et al., 1999), before independent
    seatwork (Wehby & Hollahan, 2000) and a peer giving the requests (Davis & Reichle, 1996). Each high-p card shows the closest
    (VMAP: praise only for the cards that praise each easy request, the class, seatwork and peer videos for their own cards,
-   the first video for the rest); its line names the version shown and how the card differs from it. */
+   the first video for the rest); its line names the version shown and how the card differs from it.
+   v25.68 (the BCBA, 11/7) eleven more, each in its own file, loaded only when asked: four for DRO (resetting, after Kodak et
+   al., 2003; whole-interval in class, then momentary, after Repp et al., 1983, and Barton et al., 1986; momentary, after
+   Hammond et al., 2011, and Lindberg et al., 1999; tokens, then student-run, after Tiger et al., 2009, and Tereshko et al.,
+   2021), four for NCR, NCE and A_NCA (attention in class; items on a timer; snacks and breaks during work; before and between
+   activities) and three for RIRD (vocal; motor; blocking and pica). Every card of those codes shows the closest (pvKey, the
+   rule below); the card a video was made from says "The video shows this card’s steps", the others "the closest version,
+   after ...", with one clause where a field of the card shows how it differs (pvDiff). A RIRD card none of the three fits
+   (overcorrection, the awareness device, exposure and response prevention, the chin cue) has no video. */
 (function(){
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res();s.onerror=()=>rej(new Error(src));document.head.appendChild(s);});}
+const pv=(title,file,src,after,note,shows)=>({title,file,load:()=>loadScript(file),src,after,note,shows,pv:1});
 const VIDS={'fct-practical-guide-thinning':{title:'Functional communication training: the break request, step by step',file:'nbh-td1-video-fct.js',load:()=>loadScript('nbh-td1-video-fct.js'),
   note:'Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.'},
  a_highp:{title:'High-probability request sequence: three easy requests, then the hard one',file:'nbh-td1-video-highp.js',load:()=>loadScript('nbh-td1-video-highp.js'),
@@ -7325,7 +7334,42 @@ const VIDS={'fct-practical-guide-thinning':{title:'Functional communication trai
  a_highp_peer:{title:'High-probability requests given by a peer',file:'nbh-td1-video-highp-peer.js',load:()=>loadScript('nbh-td1-video-highp-peer.js'),src:'a_highp-variant-peer-requests',after:'Davis & Reichle (1996)',
   note:'Made with an AI video model from the steps of the card after Davis & Reichle (1996), with captions and narration added. The children, the teacher and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and teach the peers the sequence before they use it.',
   shows:{n_easy:'3',spacing:'Not stated',easy_reinforcer:'Peer comment that keeps the play going',to_hard:'Within 5 s of the third',missed_easy:'Peer waits about 30 s, starts a new sequence',
-   summary:'a classmate gives 3 easy play requests with a play comment after each, the social request within 5 s of the third, a new sequence about 30 s after a missed one'}}};
+   summary:'a classmate gives 3 easy play requests with a play comment after each, the social request within 5 s of the third, a new sequence about 30 s after a missed one'}},
+ /* v25.68 (the BCBA, 11/7) DRO, NCR (with NCE and A_NCA) and RIRD: each in its own file; a card shows the closest (pvKey).
+    shows: what the video shows (summary), and for pvDiff: reset (restarts the interval), mom (momentary), fn (the function), cont (access throughout) */
+ dro_resetting:pv('DRO, resetting: a break for calm work','nbh-td1-video-dro-resetting.js',['dro-break-after-calm-interval'],'Kodak et al. (2003)',
+  'Made with an AI video model from the steps of the card after Kodak et al. (2003), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. If problem behavior is unsafe, follow the Responding to behavior sheet for the function.',
+  {reset:1,summary:'the first interval set below the baseline mean time between responses (here 10 s), a break at once after each interval with no problem behavior, the interval restarted from zero after problem behavior, then lengthened at the criterion'}),
+ dro_class:pv('DRO in class: whole-interval, then momentary','nbh-td1-video-dro-class.js',['dro-whole-interval-classroom','dro-whole-then-momentary'],'Repp et al. (1983) and Barton et al. (1986)',
+  'Made with an AI video model from the steps of the cards after Repp et al. (1983) and Barton et al. (1986), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. These studies did not restart the timer after disruption; most plans do (the resetting video).',
+  {reset:0,summary:'the rule told first, a treat and praise after each whole interval with no disruption, nothing after an interval with disruption (the timer runs on), then momentary checks once disruption is low and stable, and back to whole intervals if it rises'}),
+ dro_momentary:pv('Momentary DRO: fixed and variable checks','nbh-td1-video-dro-momentary.js',['dro-unsignaled-momentary','dro-variable-momentary'],'Hammond et al. (2011) and Lindberg et al. (1999)',
+  'Made with an AI video model from the steps of the cards after Hammond et al. (2011) and Lindberg et al. (1999), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. Give no sign that an interval is about to end.',
+  {reset:0,mom:1,summary:'the item only if problem behavior is not happening at the second the interval ends, on a silent timer set at the baseline mean time between responses or at 50–150% of it in random order, short access, no reset, then the next interval'}),
+ dro_tokens:pv('DRO with tokens, then student-run','nbh-td1-video-dro-tokens.js',['dro-self-monitored-timer','dro-selfmanage-timer-tokens'],'Tiger et al. (2009) and Tereshko et al. (2021)',
+  'Made with an AI video model from the steps of the cards after Tiger et al. (2009) and Tereshko et al. (2021), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. Before staff step back, check the student’s record against their own data.',
+  {reset:1,summary:'a ticket for each interval with no picking on a staff-run timer, the timer restarted without comment after picking, longer intervals once picking is near zero, then the student running the timer and the tickets while staff check her record against theirs'}),
+ ncr_attention:pv('NCR for attention in class: comments on a timer','nbh-td1-video-ncr-attention.js',['ncr-attention-ft1-after-school','ncr-ft-attention-classroom'],'Noel & Getch (2016) and Rasmussen & O’Neill (2006)',
+  'Made with an AI video model from the steps of the cards after Noel & Getch (2016) and Rasmussen & O’Neill (2006), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. If problem behavior is unsafe, follow the Responding to behavior sheet for the function.',
+  {fn:'attention',summary:'a brief comment by name at each buzz of a vibrating timer (here every minute), whatever the student is doing, no answer to calling out between buzzes, a quick answer to a raised hand, then the schedule thinned'}),
+ ncr_items:pv('NCR for items: a timer, a signal, then a request','nbh-td1-video-ncr-items.js',['ncr-latency-based-tangible','ncr-signaled-timer-return','ncr-thin-first-then-requests'],'Lalli et al. (1997), Gouboth et al. (2007) and Goh et al. (2000)',
+  'Made with an AI video model from the steps of the cards after Lalli et al. (1997), Gouboth et al. (2007) and Goh et al. (2000), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. If problem behavior is unsafe, follow the Responding to behavior sheet for the function.',
+  {fn:'tangible',summary:'the item for 30 s each time the timer rings, whatever the student is doing, a spoken signal and a visible timer for when it comes back, no item and no reaction after problem behavior, a taught request for it honored every time, then the interval lengthened'}),
+ ncr_work:pv('NCR during work: snacks on a timer, and timed breaks','nbh-td1-video-ncr-work.js',['ncr-vt-food-praise-demands','nce-fixed-time-breaks-notes'],'Lomas et al. (2010) and Waller & Higbee (2010)',
+  'Made with an AI video model from the steps of the cards after Lomas et al. (2010) and Waller & Higbee (2010), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. Revise tasks that are too hard or too long first, and never give a break right after problem behavior.',
+  {fn:'escape',summary:'during seatwork, a snack and a friendly comment on a variable timer averaging 15 s with the next task right away, or breaks by the clock cued by a break note and a work note, never after problem behavior, then the interval lengthened'}),
+ ncr_between:pv('NCR before and between activities: free access, then signaled breaks from it','nbh-td1-video-ncr-between.js',['ncr-presession-item-access','ncr-signaled-thinning-alternatives'],'Rispoli et al. (2011) and Slocum et al. (2018)',
+  'Made with an AI video model from the steps of the cards after Rispoli et al. (2011) and Slocum et al. (2018), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. Agree with the teacher first what counts as turning the item down.',
+  {fn:'tangible',cont:1,summary:'free access to the item just before the lesson until the student turns it down, the lesson started right away, then short periods without it signaled by a card and a count of 3, 2, 1, with attention kept going and the item back at once, the periods lengthened slowly'}),
+ rird_vocal:pv('Vocal RIRD: known questions, then back to play','nbh-td1-video-rird-vocal.js',['rird-vocal-stereotypy-demands','rird-vocal-questions','rird-one-question-vocal-stereotypy'],'Ahearn et al. (2007), Ahrens et al. (2011) and Toper-Korkmaz et al. (2018)',
+  'Made with an AI video model from the steps of the cards after Ahearn et al. (2007), Ahrens et al. (2011) and Toper-Korkmaz et al. (2018), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. Use it only for vocal stereotypy that a functional analysis shows is not socially maintained.',
+  {summary:'at vocal stereotypy, the student’s name, then questions he already answers until 3 correct in a row, praise for talking and back to play, a model when there is no answer, and the one-question version that ends at the first correct answer'}),
+ rird_motor:pv('Motor RIRD: one-step directions','nbh-td1-video-rird-motor.js',['rird-motor-directions-school','rird-one-motor-demand'],'Cassella et al. (2011) and Saini et al. (2015)',
+  'Made with an AI video model from the steps of the cards after Cassella et al. (2011) and Saini et al. (2015), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. Use it only for stereotypy that a functional analysis shows is automatically maintained.',
+  {summary:'at stereotypy, the student’s name, then one-step directions she already follows until 3 in a row with none, specific praise and back to the task, a model when there is no response within 5 s, and one direction in place of three'}),
+ rird_pica:pv('Pica: block at the first touch, then redirect','nbh-td1-video-rird-pica.js',['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)',
+  'Made with an AI video model from the steps of the cards after McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025), with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. Blocking is a restrictive step: a written pica safety plan and consent come first.',
+  {summary:'a flat open hand between the hand and the mouth at the first touch of an inedible item, the item put in the trash and a nurse-approved food offered, then throwing items away taught and praised at once, with the area swept and the food freely available'})};
 /* v25.68 the closest video for each high-p card: by who gives the requests, where, and what follows each easy one (the
    card's cmp rows); a card not named here (an edible or an item after each, or not stated, and the feeding cards) keeps the first */
 const VMAP={'a_highp-group-transition-fading':'a_highp_class','a_highp-math-seatwork-start':'a_highp_seatwork','a_highp-variant-peer-requests':'a_highp_peer'};
@@ -7334,15 +7378,63 @@ const VMAP={'a_highp-group-transition-fading':'a_highp_class','a_highp-math-seat
  'a_highp-escape-extinction-instruction-pace','a_highp-four-quick-requests','a_highp-higher-quality-reinforcer','a_highp-medical-hold-still','a_highp-before-giving-up-toy',
  'a_highp-medical-exam-requests','a_highp-varied-order-sequence'].forEach(id=>{VMAP[id]='a_highp_praise';});
 /* a component's video, for every card of it (the bank's and the plan's) */
-const BYCODE={A_HIGHP:'a_highp'};
+const BYCODE={A_HIGHP:'a_highp',DRO:'dro_resetting',NCR:'ncr_items',NCE:'ncr_work',A_NCA:'ncr_attention',RIRD:'rird_vocal'};
+/* v25.68 (the BCBA, 11/7) the closest video for each card of DRO, NCR, NCE, A_NCA and RIRD, read from its fields (lab, params,
+   fn): a card a video was made from shows that video. DRO: momentary cards, fixed or variable (lab or params: momentary, at
+   the second it ends), the momentary video; token, point, sticker, coupon or self-managed cards the tokens video (a
+   self-managed card first; a classwide card is the class one); classwide or classroom cards (lab) and cards whose reset rule
+   does not restart the interval (no reset, the next one starts on schedule, all or none) the class video; the rest
+   resetting. NCR: presession or before-activity access and signaled no-access periods, the before-and-between video; else by
+   the first function in fn: attention the attention video, escape the during-work video, items (or none named) the items
+   video. Every NCE card the during-work video, every A_NCA card the attention one. RIRD: overcorrection, the awareness
+   device, exposure and response prevention and the chin cue none; demands of motor directions the motor video; vocal demands
+   (questions, echoes, spelling, framed comments) the vocal video; redirection to the task at hand the motor video; blocking
+   with no demand (pica, and other behavior blocked or interrupted) the pica video. PVX: the cards read by hand from their
+   steps where the rule would choose wrong (a mixed or unnamed function, a routine that is not work, a word the rule misreads). */
+const PVX={'dro-injury-check-levels':'dro_class','dro-stated-rule-stereotypy':'dro_resetting','ncr-adjusting-irt-thinning':'ncr_items','ncr-yoked-ft-after-dra':'ncr_items',
+ 'ncr-thin-five-minute-start':'ncr_items','ncr-dense-to-thin-ext':'ncr_items','ncr-severe-behavior-case-series':'ncr_items','ncr-self-restraint-pillow':'ncr_items','ncr-preferred-item-substitute':'ncr_items',
+ 'ncr-pretrial-preferred-access':'ncr_between','ncr-preferred-exercise-routine':'ncr_work','ncr-toy-attention-prone':'ncr_work','ncr-ft-edible-during-work':'ncr_work','rird-positive-practice-stereotypy':'rird_motor'};
+const PSRC={};Object.keys(VIDS).forEach(k=>{if(VIDS[k].pv)VIDS[k].src.forEach(id=>{PSRC[id]=k;});});
+const prm=(p,re)=>{const o=p.params||{},k=Object.keys(o).find(x=>re.test(x));return k?String(o[k]):'';};
+const NORESET=/no reset|not reset|nonresetting|non-resetting|no full reset|no timer to reset|stood alone|forfeits only|ends? (that|the) (day|hour)'s chance|loses (that period's|the reward for that trial)|cancelled that segment|starts? fresh|ran on|all or none|wait for the next check|on schedule with n/i;
+function pvKey(p){if(PSRC[p.id])return PSRC[p.id];if(PVX[p.id])return PVX[p.id];const L=p.lab+' '+JSON.stringify(p.params||{}),f=(p.fn||[])[0]||'';
+ if(p.code==='DRO'){if(/momentar|at the (exact )?(second|moment|instant)|only the moment/i.test(L))return 'dro_momentary';
+  if(/self-(managed|run|record|monitor|timed)|timed by the student/i.test(L))return 'dro_tokens';
+  if(/classwide|whole class/i.test(L))return 'dro_class';
+  if(/token|\bpoints\b|a point\b|sticker|coupon|\bstars?\b|ticket|penn(y|ies)|chips|check mark/i.test(L))return 'dro_tokens';
+  return /\bclass(room)?\b/i.test(p.lab)||NORESET.test(prm(p,/reset/i))?'dro_class':'dro_resetting';}
+ if(p.code==='NCE')return 'ncr_work';if(p.code==='A_NCA')return 'ncr_attention';
+ if(p.code==='NCR'){if(/presession|before (an|the) activity|before class work|before times when|signaled no-access/i.test(L))return 'ncr_between';
+  return f==='attention'?'ncr_attention':f==='escape'?'ncr_work':'ncr_items';}
+ if(p.code==='RIRD'){const D=prm(p,/interruption demands/i),no=/^(none|no )/i.test(D);
+  if(/overcorrection|awareness|exposure and response prevention|\bchin\b/i.test(p.lab))return '';
+  if(!no&&/motor|direction/i.test(D))return 'rird_motor';
+  if(!no&&/vocal|question|echo|spell|imitation|framed|\bsay\b|sight-word|counting|song/i.test(D))return 'rird_vocal';
+  if(!no&&/instruction|task|activity|redirect/i.test(D)&&!/block/i.test(p.lab))return 'rird_motor';
+  return 'rird_pica';}
+ return '';}
+/* the one clause on how a card differs from the video it shows, only where a field of the card says so */
+const FNW={attention:'attention',tangible:'access to items',escape:'escape from tasks',automatic:'automatic reinforcement'};
+function pvDiff(p,k){const S=VIDS[k].shows,L=String(p.lab||''),D=prm(p,/interruption demands/i);
+ if(p.code==='DRO'){const R=prm(p,/reset/i);if(!R||S.mom)return '';const nr=NORESET.test(R);
+  if(nr&&S.reset)return 'This card does not restart the interval after the behavior.';
+  if(!nr&&!S.reset&&/restart|reset|start(s|ed)? again/i.test(R))return 'This card restarts the interval after the behavior.';return '';}
+ if(S.fn){const f=p.fn||[],I=prm(p,/interval/i);if(f.length&&f.indexOf(S.fn)<0&&FNW[f[0]])return 'This card is for behavior maintained by '+FNW[f[0]]+'.';
+  const T=prm(p,/terminal/i);if(!S.cont&&/^(continuous|no interval)/i.test(I)&&!/\bthen\b|at (the )?(first|start)|to start/i.test(I)&&(!T||/^(not|no\b|continuous)/i.test(T)))return 'This card gives the reinforcer throughout, not on a timer.';return '';}
+ if(k==='rird_pica')return /pica/i.test(L)?'':'The clip shows pica; this card is for another behavior: '+L.charAt(0).toLowerCase()+L.slice(1)+'.';
+ if(k==='rird_motor')return /direction|instruction/i.test(D)?'':'This card redirects to the task or activity at hand, not to one-step directions.';
+ if(k==='rird_vocal')return /imitat|echo/i.test(D)&&!/question/i.test(D)?'This card asks for echoes (vocal imitation), not answers to questions.':'';
+ return '';}
 let BID=null;
 function bank(id){if(!BID){BID={};try{if(typeof TD1_BANK!=='undefined'&&TD1_BANK&&Array.isArray(TD1_BANK.protocols))TD1_BANK.protocols.forEach(p=>{BID[p.id]=p;});}catch(e){}}return BID[id]||null;}
-const keyOf=id=>{if(!id)return '';if(VIDS[id])return id;const p=bank(id);if(!p)return '';if(p.code==='A_HIGHP'&&VMAP[id])return VMAP[id];return BYCODE[p.code]||'';};
+const keyOf=id=>{if(!id)return '';if(VIDS[id])return id;const p=bank(id);if(!p)return '';if(p.code==='A_HIGHP'&&VMAP[id])return VMAP[id];
+ if(/^(DRO|NCR|NCE|A_NCA|RIRD)$/.test(p.code))return pvKey(p);return BYCODE[p.code]||'';};
 /* the line under the button: what the video shows, and the rows where this version differs (as the BCBA's approved mockup) */
 const LROW={spacing:'Time between them',easy_reinforcer:'After each easy one',to_hard:'The hard request comes',missed_easy:'If an easy one is missed'};
 const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 function line(id){const k=keyOf(id),v=VIDS[k];if(!v||!v.shows)return '';const S=v.shows,p=VIDS[id]?null:bank(id),c=p&&p.cmp;
- if(v.src&&p&&p.id===v.src)return 'The video shows this card’s steps: '+S.summary+'.';
+ if(v.src&&p&&[].concat(v.src).indexOf(p.id)>=0)return 'The video shows this card’s steps: '+S.summary+'.';
+ if(v.pv){const d=p?pvDiff(p,k):'';return 'The video shows the closest version, after '+v.after+': '+S.summary+'.'+(d?' '+d:'');}
  let t=(v.after?'The video shows the closest version, after '+v.after+': ':'The video shows TD-1’s steps for this card: ')+S.summary+'.';
  if(c){const dd=Object.keys(LROW).filter(x=>norm(c[x])!==norm(S[x])&&!/^not stated/i.test(c[x]||'')).map(x=>LROW[x].toLowerCase()+': '+c[x]);
   t+=' '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');}
@@ -7370,7 +7462,7 @@ async function play(id,from){const k=keyOf(id),v=VIDS[k];if(!v)return;if(!box)bu
 function close(){if(!box)return;const vid=$('tv-video');try{vid.pause();}catch(e){}box.hidden=true;if(opener&&opener.focus)try{opener.focus();}catch(e){}opener=null;}
 /* the plan's cards: a card built from a bank protocol with a video, or a card of a component with one (A_HIGHP), gets Watch
    the video beside Remove, and the video's line under the card's header */
-function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=(inp&&inp.value)||'';const k=keyOf(id)||BYCODE[c.dataset.code]||'';const has=!!VIDS[k];let b=c.querySelector('.td-vid-btn'),ln=c.querySelector('.td-vid-line');
+function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=(inp&&inp.value)||'';const k=id&&bank(id)?keyOf(id):(keyOf(id)||BYCODE[c.dataset.code]||'');const has=!!VIDS[k];let b=c.querySelector('.td-vid-btn'),ln=c.querySelector('.td-vid-line');
  if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>{const i2=c.querySelector('[name$="].bank"]'),x=(i2&&i2.value)||'';play(keyOf(x)?x:(BYCODE[c.dataset.code]||''),b);});const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
  else if(!has&&b)b.remove();
  const t=has?line(keyOf(id)?id:k):'';
