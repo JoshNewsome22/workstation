@@ -1246,7 +1246,8 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .crc-f input:not([
    debriefing, and the restraint log and what each restraint led to (dated incidents in words, as OB-1's observation
    log). Tables: the review triggers, the deadlines and the notices; the deadline clock as it is */
 window.FX2_CFG = { fields: '.fieldgrid', cards: '#teamTbl, #v65PrecTbl, #pbisTbl, #v65RehTbl, #actTbl, #logTbl, #v65LogTbl',
-  heads: '.fx2-sh h3:not(.noprint)', keep: ['Baker', 'Act'] };
+  /* the other debriefings' copies for paper (.cr-deb-full, out of sight on screen) keep their headings as written */
+  heads: '.fx2-sh h3:not(.noprint):not(.cr-deb-full h3)', keep: ['Baker', 'Act'] };
 </script>
 </head>
 <body class="view-setup">
@@ -2065,7 +2066,7 @@ function crCsvOthers(out){const D=crDebs();Object.keys(D).filter(k=>crDebHas(D[k
   DB_KEYS.filter(f=>crT(o[f])).forEach(f=>out.push([sh,DB_LAB[f],crT(o[f])]));(o.act||[]).filter(a=>crT(a.c)).forEach(a=>out.push([sh,'What changes as a result',[crT(a.c),a.w,crT(a.who),crT(a.by),a.st].filter(Boolean).join('; ')]));});return out;}
 function crCsvRows(){const out=[['Sheet','Entry','Value']],clean=x=>String(x==null?'':x).replace(/\s+/g,' ').trim();
   const SEC={'only-setup':'Setup','only-plan':'Crisis intervention plan','only-deb':'Debriefing','only-log':'Restraint log'};
-  const labelOf=el=>{const td=el.closest('td');if(td){const th=td.previousElementSibling;if(th&&th.tagName==='TH')return clean(th.textContent);}
+  const labelOf=el=>{const td=el.closest('td');if(td){const th=td.previousElementSibling;if(th&&th.tagName==='TH')return clean([...th.childNodes].filter(n=>!(n.classList&&n.classList.contains('fx2-hint'))).map(n=>n.textContent).join(''));}   /* v25.68 fx2: the row's name without the note the screen layout puts under it */
     const d=el.closest('div'),l=d&&d.querySelector('label');if(l)return clean(l.textContent);return el.getAttribute('aria-label')||el.dataset.m;};
   const seen={};
   $$('[data-m]').forEach(el=>{const k=el.dataset.m;if(seen[k]||/^rp/.test(k)||el.closest('#crRep'))return;seen[k]=1;const v=clean(S.meta[k]);if(!v)return;
