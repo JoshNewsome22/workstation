@@ -11870,15 +11870,12 @@ let skT=0;function skWatch(id,t0){clearTimeout(skT);const fr=state.frames[id];if
 {const of=openForm;openForm=function(id){const loaded=!!state.status[id]&&!!state.frames[id]&&state.frames[id].dataset.loaded==='1'&&!state.pending[id],was=state.cur;const r=of.apply(this,arguments);
   try{if(!loaded&&state.frames[id])skWatch(id,Date.now());else{SK.hidden=true;if(was!==id&&state.frames[id])anim(state.frames[id],[{opacity:0},{opacity:1}],150);}}catch(e){}return r;};}
 new MutationObserver(()=>{if(!B.classList.contains('has-form'))SK.hidden=true;}).observe(B,{attributes:true,attributeFilter:['class']});
-/* the save tick: drawn once beside the status, with a brief glow */
-let lastSaved=state.savedAt?+state.savedAt:0,saving=0;
-document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#saveCase,#saveQuick,#pwaSave,[data-wn-for="saveCase"],#aSave'))saving=Date.now();},true);
-function tick(){const at=state.savedAt?+state.savedAt:0,w=$('#wsStat');if(w&&/\bk-busy\b/.test(w.className))saving=Date.now();if(!at||at===lastSaved)return;lastSaved=at;if(!saving||Date.now()-saving>120000||RM.matches)return;saving=0;
-  const b=[$('#wsStat'),$('#aStat2')].find(x=>x&&x.offsetParent&&/\bk-on\b/.test(x.className));if(!b)return;const dot=b.querySelector('.wa-dot')||b,r=dot.getBoundingClientRect();
+/* the save tick: drawn once beside the status, with a brief glow, when Save case has written the case */
+function tick(){if(RM.matches)return;const b=[$('#wsStat'),$('#aStat2')].find(x=>x&&x.offsetParent&&/\bk-on\b/.test(x.className));if(!b)return;const dot=b.querySelector('.wa-dot')||b,r=dot.getBoundingClientRect();
   const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.id='w1Tick';s.setAttribute('viewBox','0 0 16 16');s.setAttribute('aria-hidden','true');s.innerHTML='<circle cx="8" cy="8" r="8" fill="#2f7a4f"/><path d="M4.5 8.3l2.3 2.3 4.7-5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14" stroke-dashoffset="0"/>';
   s.style.left=Math.round(r.left+r.width/2-8)+'px';s.style.top=Math.round(r.top+r.height/2-8)+'px';const old=$('#w1Tick');if(old)old.remove();document.body.appendChild(s);
   anim(s.querySelector('path'),[{strokeDashoffset:14},{strokeDashoffset:0}],200);anim(b,[{backgroundColor:'rgba(111,207,151,.35)'},{backgroundColor:'rgba(111,207,151,0)'}],240);setTimeout(()=>s.remove(),900);}
-{const w=$('#wsStat');if(w)new MutationObserver(tick).observe(w,{attributes:true,attributeFilter:['class'],childList:true,subtree:true,characterData:true});}
+{const sc=saveCase;saveCase=async function(){const r=await sc.apply(this,arguments);try{if(r===true)setTimeout(tick,30);}catch(e){}return r;};}
 window.__wsW1={where,askWhere,findings:async()=>findings(await stuList()),events:async()=>events(await stuList()),n90All,pvShow,pvHide,pv:()=>PV,gaps,holdFocus,skel:()=>!SK.hidden};
 })();
 </script>
