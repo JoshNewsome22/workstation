@@ -7462,15 +7462,116 @@ async function play(id,from){const k=keyOf(id),v=VIDS[k];if(!v)return;if(!box)bu
 function close(){if(!box)return;const vid=$('tv-video');try{vid.pause();}catch(e){}box.hidden=true;if(opener&&opener.focus)try{opener.focus();}catch(e){}opener=null;}
 /* the plan's cards: a card built from a bank protocol with a video, or a card of a component with one (A_HIGHP), gets Watch
    the video beside Remove, and the video's line under the card's header */
-function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=(inp&&inp.value)||'';const k=id&&bank(id)?keyOf(id):(keyOf(id)||BYCODE[c.dataset.code]||'');const has=!!VIDS[k];let b=c.querySelector('.td-vid-btn'),ln=c.querySelector('.td-vid-line');
- if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>{const i2=c.querySelector('[name$="].bank"]'),x=(i2&&i2.value)||'';play(keyOf(x)?x:(BYCODE[c.dataset.code]||''),b);});const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
+/* v25.68 (11/7) a card from the menu shows its component's video; a DRO card set to "Momentary, variable times" the momentary one */
+const cardKey=c=>c.dataset.code==='DRO'&&/^momentary/i.test((c.querySelector('select[name$=".dtype"]')||{}).value||'')?'dro_momentary':(BYCODE[c.dataset.code]||'');
+function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=(inp&&inp.value)||'';const k=id&&bank(id)?keyOf(id):(keyOf(id)||cardKey(c));const has=!!VIDS[k];let b=c.querySelector('.td-vid-btn'),ln=c.querySelector('.td-vid-line');
+ if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>{const i2=c.querySelector('[name$="].bank"]'),x=(i2&&i2.value)||'';play(keyOf(x)?x:cardKey(c),b);});const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
  else if(!has&&b)b.remove();
  const t=has?line(keyOf(id)?id:k):'';
  if(t){if(!ln){ln=document.createElement('p');ln.className='noprint td-vid-line';const h=c.querySelector('.chd');if(h)h.insertAdjacentElement('afterend',ln);else c.insertBefore(ln,c.firstChild);}if(ln.textContent!==t)ln.textContent=t;}
  else if(ln)ln.remove();});}
 try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true,subtree:true});}catch(e){}
-document.addEventListener('change',ev=>{if(ev.target&&/\]\.bank$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
+document.addEventListener('change',ev=>{if(ev.target&&/\]\.(bank|dtype)$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
 window.__tdVideo={has:id=>!!VIDS[keyOf(id)],play,close,count:()=>Object.keys(VIDS).length,key:id=>keyOf(id),line:id=>line(id)};
+})();
+</script>
+<style id="td1-v2568-droiv">
+/* v25.68 (the BCBA, 11/7) Set the first interval from baseline, on each DRO plan card: screen only, never saved or printed */
+#compWrap .card .td-iv{margin:6px 0 10px;font:13px/1.45 var(--td9-sans,var(--nbh-sans,sans-serif));color:var(--nbh-ink,#182e43)}
+#compWrap .card .td-iv button{min-height:44px!important;min-width:44px;height:auto!important;padding:6px 14px!important;font:inherit!important;font-weight:600!important;border:1px solid var(--nbh-rule,#b9c6cb)!important;border-radius:8px!important;background:#fff!important;color:var(--nbh-ink,#182e43)!important;cursor:pointer}
+#compWrap .card .td-iv button:focus-visible,#compWrap .card .td-iv input:focus-visible{outline:2px solid var(--nbh-accent,#0e5c63);outline-offset:2px}
+#compWrap .card .td-iv-box{margin:8px 0 0;padding:10px 12px;border:1px solid var(--nbh-rule,#d5dde0);border-radius:8px;background:var(--nbh-wash,#f6f8f9);max-width:92ch}
+#compWrap .card .td-iv-box[hidden]{display:none}
+#compWrap .card .td-iv table{border-collapse:collapse;margin:6px 0}
+#compWrap .card .td-iv th,#compWrap .card .td-iv td{padding:3px 8px 3px 0;text-align:left;font-weight:600}
+#compWrap .card .td-iv td{font-weight:400}
+#compWrap .card .td-iv input{min-height:44px!important;height:44px!important;width:96px!important;box-sizing:border-box;padding:4px 8px!important;font:inherit!important;border:1px solid var(--nbh-rule,#b9c6cb)!important;border-radius:6px!important;background:#fff!important}
+#compWrap .card .td-iv input[aria-invalid="true"]{border-color:#a3261b!important}
+#compWrap .card .td-iv p{margin:6px 0}
+#compWrap .card .td-iv .td-iv-out{font-weight:600}
+#compWrap .card .td-iv .td-iv-src,#compWrap .card .td-iv .td-iv-note{color:var(--nbh-muted,#54676f)}
+#compWrap .card .td-iv ul{margin:4px 0 0;padding-left:18px}
+#compWrap .card .td-iv li{margin:0 0 8px}
+#compWrap .card .td-iv li button{margin:4px 8px 0 0}
+@media print{#compWrap .card .td-iv{display:none!important}}
+/* Watch the video on a plan card, now on many more cards: 44 px on the iPad */
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-vid-btn{height:44px!important;min-height:44px!important}
+</style>
+<script id="td1-v2568-droiv-js">
+/* v25.68 (the BCBA, 11/7) Set the first interval from baseline. On each DRO plan card, under its settings: up to the last 3
+   baseline sessions (the minutes each lasted and the count of the target behavior), the mean time between responses
+   (session seconds ÷ responses, for each session, averaged: the cards after Lindberg et al., 1999, and Kahng et al., 2000a,
+   work it out this way) and a first interval of 50% to 100% of that mean, the range the DRO cards use (half the mean, after
+   Azrin et al., 1988, and Iannaccone et al., 2020; just under it, after Derwas & Jones, 1993; the mean itself, after Barton
+   et al., 1986, Lindberg et al., 1999, and Hammond et al., 2011), never below 5 s (the floor in the card after Azrin et al.).
+   The BCBA types the interval into the card's own "Initial DRO interval" field; the helper never fills it. That field keeps
+   its seed as before (a card from the menu: 80% of Setup's mean interresponse time, none from Form DD-1's school-day rate);
+   the helper names Setup's mean when there is one. The rows are filled from Form DD-1's baseline when the case brings it (the
+   last 3 days of its first condition for the target behavior: a count per day, or a rate per hour as the responses in 60
+   minutes), said so, with the note that a school day is not a session. Below: the ways the DRO cards lengthen the interval,
+   each with its card. Nothing here has a name: it is not saved, not printed and not part of a signed record. */
+(function(){
+'use strict';
+const FLOOR=5;
+const T=v=>String(v==null?'':v).trim();
+const r1=x=>Math.round(x*10)/10;
+const fmt=s=>s<60?s+' s':(Math.round(s/6)/10)+' min ('+s+' s)';
+/* the arithmetic: rows [{min,n}] -> per-session seconds between responses, their mean and the suggested range */
+function calc(rows){const used=[],skipped=[];(rows||[]).forEach((r,i)=>{const m=parseFloat(r.min),n=parseFloat(r.n);if(!(m>0)||!(n>=0)||isNaN(n))return;if(n===0){skipped.push(i+1);return;}used.push({i:i+1,s:m*60/n});});
+ if(!used.length)return {n:0,skipped};const mean=used.reduce((a,u)=>a+u.s,0)/used.length;
+ return {n:used.length,per:used.map(u=>Math.round(u.s)),mean:Math.round(mean),lo:Math.max(FLOOR,Math.round(mean/2)),hi:Math.max(FLOOR,Math.round(mean)),floored:Math.round(mean/2)<FLOOR,skipped};}
+/* Form DD-1's baseline, when the case brings it: the target behavior's last 3 days in the first condition */
+let BASE=null;
+function fromFacts(f){const d=f&&f.data;if(!d||!Array.isArray(d.series)||!Array.isArray(d.conds)||!d.conds.length)return null;
+ const c0=d.conds[0];if(!(d.conds.length>1||/baseline|^bl\b|^a\d*$/i.test(T(c0.name))))return null;
+ const dd=(d.behaviors||[]).filter(b=>b&&b.kind!=='replacement'&&(b.measure==='count'||b.measure==='rate'));if(!dd.length)return null;
+ const pb=(f.behaviors||[]).find(b=>b&&T(b.label)&&!b.isRep&&!/replacement|alternative/i.test(b.type||''));
+ const b=(pb&&dd.find(x=>T(x.name).toLowerCase()===T(pb.label).toLowerCase()))||dd[0];
+ const days=d.series.filter(r=>r&&r.cond===c0.name&&r.v&&typeof r.v[b.name]==='number').slice(-3);if(!days.length)return null;
+ return {beh:T(b.name),cond:T(c0.name),measure:b.measure,rows:days.map(r=>b.measure==='rate'?{min:'60',n:String(r1(r.v[b.name]))}:{min:'',n:String(r.v[b.name])}),dates:days.map(r=>r.date)};}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r;try{r=was?was.apply(this,arguments):undefined;}catch(e){r={filled:0};}try{const b=fromFacts(f);if(b)BASE=b;}catch(e){}return r;};}
+/* each way, with the card it comes from (the button opens it in the bank panel) */
+const WAYS=[
+ ['Add 50%, rounded to the nearest 5 s, after 2 sessions in a row with problem behavior at least 80% below the baseline mean, up to 5 min (Hammond et al., 2011).',[['See the card after Hammond et al. (2011)','dro-unsignaled-momentary']]],
+ ['Before each session, set the interval to the mean time between responses over the last 3 sessions, never more than double the one before (Lindberg et al., 1999; Kahng et al., 2000a, use the same rule for NCR).',[['See the card after Lindberg et al. (1999)','dro-variable-momentary'],['See the NCR card after Kahng et al. (2000a)','ncr-adjusting-irt-thinning']]],
+ ['Double the interval after 5 reinforced intervals in a row, up to 5 min; halve it when 5 intervals’ worth of time pass with no reinforcer (Azrin et al., 1988).',[['See the card after Azrin et al. (1988)','dro-interval-doubling-sib']]],
+ ['Fixed steps once problem behavior is at or below the criterion: 10 s, 20 s, 30 s, 1 min, 1.5 min, then 2 min (Kodak et al., 2003).',[['See the card after Kodak et al. (2003)','dro-break-after-calm-interval']]]];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let seq=0;
+function field(card){return [...card.querySelectorAll('.param .f')].find(f=>/^Initial DRO interval/i.test(T((f.querySelector('label')||{}).textContent)));}
+function setupLine(){const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};const r=parseFloat(g('m.rate'));
+ if(!(r>0))return '';if(g('m.ratesrc')==='DD-1')return 'Setup’s baseline rate is Form DD-1’s school-day rate, not a session rate, so it is not used here.';
+ return 'Setup’s baseline rate, '+r+' per minute, gives a mean time between responses of '+fmt(Math.round(60/r))+'.';}
+function build(card){const f=field(card);if(!f)return null;const id='tdIv'+(++seq);const w=document.createElement('div');w.className='td-iv noprint';w.setAttribute('data-add68-skip','');
+ w.innerHTML='<button type="button" class="td-iv-tog" aria-expanded="false" aria-controls="'+id+'">Set the first interval from baseline</button>'+
+  '<div class="td-iv-box" id="'+id+'" hidden><p class="td-iv-src"></p>'+
+  '<table><thead><tr><th scope="col">Baseline session</th><th scope="col">Minutes</th><th scope="col">Responses</th></tr></thead><tbody>'+
+  [1,2,3].map(k=>'<tr><th scope="row">'+k+'</th><td><input type="text" inputmode="decimal" autocomplete="off" data-iv="min" aria-label="Baseline session '+k+', minutes"></td><td><input type="text" inputmode="decimal" autocomplete="off" data-iv="n" aria-label="Baseline session '+k+', responses of the target behavior"></td></tr>').join('')+
+  '</tbody></table><p class="td-iv-out" aria-live="polite"></p><p class="td-iv-note"></p>'+
+  '<p>Type the interval you choose into “Initial DRO interval” above; this does not fill it. <button type="button" class="td-iv-go">Go to the field</button></p>'+
+  '<p><b>Ways the DRO cards lengthen the interval</b></p><ul>'+WAYS.map(w=>'<li>'+esc(w[0])+'<br>'+w[1].map(c=>'<button type="button" data-iv-card="'+esc(c[1])+'">'+esc(c[0])+'</button>').join('')+'</li>').join('')+'</ul></div>';
+ const param=card.querySelector('.param');(param||f).insertAdjacentElement('afterend',w);
+ const box=w.querySelector('.td-iv-box'),tog=w.querySelector('.td-iv-tog'),ins=[...w.querySelectorAll('input')];
+ const rows=()=>[0,1,2].map(k=>({min:ins[k*2].value,n:ins[k*2+1].value}));
+ function paint(){ins.forEach(x=>{const v=T(x.value),n=parseFloat(v),bad=v!==''&&(isNaN(n)||n<0||(x.dataset.iv==='min'&&n===0));if(bad)x.setAttribute('aria-invalid','true');else x.removeAttribute('aria-invalid');});
+  const c=calc(rows()),o=w.querySelector('.td-iv-out'),nt=w.querySelectorAll('.td-iv-note')[0];
+  if(!c.n){o.textContent='Enter the minutes and the responses of at least one baseline session.';}
+  else o.textContent='Mean time between responses: '+fmt(c.mean)+(c.n>1?' (the mean of '+c.n+' sessions: '+c.per.map(fmt).join(', ')+')':'')+'. Suggested first interval: '+(c.lo===c.hi?fmt(c.lo):fmt(c.lo)+' to '+fmt(c.hi))+(c.hi===FLOOR&&c.mean<FLOOR?', the floor: the mean is under 5 s.':c.floored?' (the low end raised to the 5-s floor).':', 50% to 100% of the mean.');
+  nt.textContent=(c.skipped.length?'Session '+c.skipped.join(' and ')+' had no responses, so it has no time between responses and is left out. ':'')+
+   'The DRO cards start at half the mean (Azrin et al., 1988; Iannaccone et al., 2020), just under it (Derwas & Jones, 1993) or at the mean (Barton et al., 1986; Lindberg et al., 1999; Hammond et al., 2011), never below 5 s (Azrin et al., 1988). '+setupLine();}
+ function prefill(){const s=w.querySelector('.td-iv-src');if(ins.some(x=>T(x.value)))return;
+  if(BASE){BASE.rows.forEach((r,k)=>{ins[k*2].value=r.min;ins[k*2+1].value=r.n;});
+   s.textContent='From Form DD-1’s baseline: the last '+BASE.rows.length+' day'+(BASE.rows.length>1?'s':'')+' of “'+BASE.cond+'” for “'+BASE.beh+'” ('+BASE.dates.join(', ')+'), '+(BASE.measure==='rate'?'a rate per hour, entered as the responses in 60 minutes':'a count per day')+'. A school day is not a session: '+(BASE.measure==='rate'?'check these':'enter the minutes observed each day')+', or type the sessions you timed instead.';}
+  else s.textContent='Enter up to the last 3 baseline sessions: the minutes each lasted and the count of the target behavior in it.';}
+ tog.addEventListener('click',()=>{const open=box.hidden;box.hidden=!open;tog.setAttribute('aria-expanded',String(open));if(open){prefill();paint();}});
+ ins.forEach(x=>x.addEventListener('input',paint));
+ w.querySelector('.td-iv-go').addEventListener('click',()=>{const t=f.querySelector('textarea,input');if(t){try{t.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}catch(e){}t.focus();}});
+ w.addEventListener('click',ev=>{const b=ev.target.closest('[data-iv-card]');if(b&&window.__tdBank&&__tdBank.show)__tdBank.show(b.dataset.ivCard);});
+ return w;}
+function mark(){document.querySelectorAll('#compWrap .card[data-code="DRO"]').forEach(c=>{if(!c.querySelector('.td-iv'))build(c);});}
+try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true});}catch(e){}
+setInterval(mark,2500);mark();
+window.__tdDroIv={calc,base:()=>BASE,fromFacts,mark};
 })();
 </script>
 
