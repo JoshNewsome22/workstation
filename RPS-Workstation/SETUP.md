@@ -9943,6 +9943,9 @@ for a 5-second repaint).
 - **Checks.** check-build reproduces all 48 forms. New tests: v2568-td1-versions, v2568-td1-procvideos, v2568-shell,
   v2568-safety-records, v2568-family-language, v2568-class-staff, v2568-ic1-print, v2568-rs1-trainee, v2568-rs1-bacbpdf
   and v2568-forms.
+- **Offline copy.** The installed app saves all 17 of TD-1's videos for use without a connection (the 11 new ones were
+  named in a way tools/pwa-sw.py did not read; it reads them now). The release run refuses a server that serves another
+  checkout (qa/run-release.sh). Release run: 481 tests, 82 failing, each failing the same way in v25.67.
 
 ### v25.67: The case home, the design review's shell group, one screen layout for 14 forms, and batch 3
 (the BCBA, 11/6: the case home and the student switch; every item of the design review marked Build, M7 included; the

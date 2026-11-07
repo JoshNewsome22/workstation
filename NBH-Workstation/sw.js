@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = '4a5b976cceda';
+const VERSION = '361822f5454b';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -150,6 +150,17 @@ const FILES = [
   'nbh-td1-video-highp-class.js',
   'nbh-td1-video-highp-seatwork.js',
   'nbh-td1-video-highp-peer.js',
+  'nbh-td1-video-dro-resetting.js',
+  'nbh-td1-video-dro-class.js',
+  'nbh-td1-video-dro-momentary.js',
+  'nbh-td1-video-dro-tokens.js',
+  'nbh-td1-video-ncr-attention.js',
+  'nbh-td1-video-ncr-items.js',
+  'nbh-td1-video-ncr-work.js',
+  'nbh-td1-video-ncr-between.js',
+  'nbh-td1-video-rird-vocal.js',
+  'nbh-td1-video-rird-motor.js',
+  'nbh-td1-video-rird-pica.js',
   'nbh-gb1-bank.js',
   'nbh-sm1-narration.js',
   'nbh-tk1-narration.js',

@@ -69,6 +69,9 @@ def loads(text):
             out.append(m.group(2))
     out += [m.group(2) for m in re.finditer(r'url\(\s*(["\']?)([^"\')\s]+)\1\s*\)', text)]
     out += [m.group(2) for m in re.finditer(r'\b(?:fetch|loadScript)\(\s*(["\'])([^"\']+)\1', text)]
+    # v25.68: TD-1's procedure videos are named in its VIDS list (pv('title','nbh-td1-video-….js',…)) and loaded from
+    # that name, so no loadScript('…') holds them; the offline copy must still save every one
+    out += [m.group(2) for m in re.finditer(r'(["\'])(nbh-td1-video-[A-Za-z0-9-]+\.js)\1', text)]
     seen, keep = set(), []
     for x in out:
         x = x.split('?')[0].split('#')[0]
