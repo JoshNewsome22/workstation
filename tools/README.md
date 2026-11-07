@@ -104,11 +104,12 @@ a form is replaced where it stands. What is particular to a form is the form's o
   `''` for none), `fields` (grids written `div > label + box`, as the parts-built forms and VI-1 write them), `heads`
   (more headings in sentence case), `keep` (names a heading keeps), `noseg` (where a short list stays a list: grids of
   intervals or trials, ledgers), `eg`, `keepin`, `addtxt`, `count`, `toolbar` (the toolbar on one row, the six only),
-  and the six's own features (`contacts`, `packet`, `calendar`, `parent`, `jump`). With no `FX2_CFG` a form still gets
-  the generic layout.
+  the six's own features (`contacts`, `packet`, `calendar`, `parent`, `jump`), and (v25.68) `sheets` (more parts of
+  the page laid out as sheets, for a form whose screen is not a `.sheet` or a `section.only-*`: ABC-1's tab panels). With
+  no `FX2_CFG` a form still gets the generic layout.
 - `<style id="fx2-own">`, right after the shared style: the form's own screen rules (IC-1's and IN-1's).
 
-`tools/check-build.py` runs `patch-fx2.py --check`. A parts-built form (SI-1, DA-1) carries its blocks in the built file:
+`tools/check-build.py` runs `patch-fx2.py --check`. A parts-built form (SI-1, DA-1; in group 2 ABC-1, SA-1, SR-1, GC-1, VS-1) carries its blocks in the built file:
 after rebuilding one from its parts, run `patch-fx2.py` on it and put its two own blocks back (they are in git).
 `qa/v2567-fx2-g1-test.js` checks the forms that carry it.
 
