@@ -1002,6 +1002,8 @@ td input,td select{max-width:100%}
   <section class="only-design">
     <h2 class="nbh-band">The Contingency</h2>
     <p class="hint">Litow and Pumroy (1975) sorted class-wide systems by whose behavior earns the consequence: each student&rsquo;s own (independent), one student&rsquo;s or a few students&rsquo; for everyone (dependent), or the group&rsquo;s together (interdependent). The named programs below are interdependent arrangements with their own rules. Pick one; its fields open underneath and the rule is written out at the bottom.</p>
+    <!-- v25.68 (research #10) the classroom practices check from Form OB-1, beside the choice (screen only) -->
+    <div id="gcClsBox" class="gc-cls noprint" role="region" aria-labelledby="gcClsH" hidden></div>
     <div class="sysopt" id="ctOpt">
       <label data-ct="indep"><input type="radio" name="ct" value="indep"><span class="fam">Group-oriented contingency</span><b>Independent</b>The same rule for everyone, but each student earns on their own behavior alone. The lightest arrangement; nobody depends on anyone else, and nobody can pull the group down.</label>
       <label data-ct="dep"><input type="radio" name="ct" value="dep"><span class="fam">Group-oriented contingency</span><b>Dependent</b>The whole class earns when one student, or a small group, meets the criterion. Powerful where peers can support the student; needs safeguards so the student is a hero, not a target.</label>
@@ -3445,6 +3447,78 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="gc1-v2568">
+/* v25.68 (research recommendation #10, the BCBA's 11/6 list) the classroom practices check (Form OB-1's Classroom check view)
+   beside the choice of a class-wide system, on the Design sheet: the latest check's figures (opportunities to respond, praise
+   and reprimands and their ratio, the share of praise that was specific, transitions, class-wide engagement at the scans, the
+   rules), the change since the check before it, and points to weigh as the arrangement is chosen. The points are this form's
+   working conventions, not published cut-offs; the BCBA chooses the arrangement, the check never does. Screen only: the check
+   is about the classroom and the teacher, so it is never printed with this form (kept in the student's case) or its packet.
+   Read from the case (classroom, or Form OB-1's evidence while the workstation carries the checks there); nothing is saved. */
+(function(){
+'use strict';
+const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const clock=s=>{s=Math.max(0,Math.round(+s||0));const m=Math.floor(s/60),x=s%60;return m+':'+String(x).padStart(2,'0');};
+const n1=v=>String(Math.round(v*10)/10).replace(/\.0$/,'');
+let CK=null;
+function pick(f){const c=f&&(f.classroom||(f.evidence&&f.evidence['OB-1']&&f.evidence['OB-1'].classroom));
+  const L=c&&Array.isArray(c.checks)?c.checks.filter(x=>x&&typeof x==='object'&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.date||''))):[];
+  return L.length?L.slice().sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))):null;}
+const pm=x=>x&&x.pm!=null?n1(x.pm)+' a minute':'';
+function figs(x){const R=x.rules||{},rl=[R.posted==='yes'?'posted':R.posted==='no'?'not posted':'',R.taught==='yes'?'taught during the check':R.taught==='no'?'not taught during the check':''].filter(Boolean);
+  return [x.mins?n1(x.mins)+' minutes':'',T(x.room),T(x.act).toLowerCase()].filter(Boolean).join(', ')+
+    ' · opportunities to respond '+(pm(x.otr)||'not timed')+
+    ' · praise to correction '+E(T(x.ratioText)||'not counted')+(x.spec!=null?' ('+x.spec+'% specific)':'')+
+    ' · reprimands '+(pm(x.rep)||((x.rep&&x.rep.n)||0))+
+    (x.eng&&x.eng.pct!=null?' · the class engaged at '+x.eng.pct+'% of '+x.eng.scans+' scan'+(x.eng.scans===1?'':'s'):'')+
+    (x.trans&&x.trans.n?' · '+x.trans.n+' transition'+(x.trans.n===1?'':'s')+', '+clock(x.trans.mean)+' on average':'')+
+    (rl.length?' · rules '+rl.join(', '):'');}
+function since(a,b){const L=[];if(a.ratio!=null&&b.ratio!=null)L.push('praise to correction '+n1(a.ratio)+' to 1 &rarr; '+n1(b.ratio)+' to 1');
+  if(a.eng&&b.eng&&a.eng.pct!=null&&b.eng.pct!=null)L.push('engaged '+a.eng.pct+'% &rarr; '+b.eng.pct+'%');
+  if(a.otr&&b.otr&&a.otr.pm!=null&&b.otr.pm!=null)L.push('opportunities to respond '+n1(a.otr.pm)+' &rarr; '+n1(b.otr.pm)+' a minute');
+  if(a.trans&&b.trans&&a.trans.mean!=null&&b.trans.mean!=null)L.push('transitions '+clock(a.trans.mean)+' &rarr; '+clock(b.trans.mean)+' on average');
+  return L.length?'Since the check of '+MDY(a.date)+': '+L.join('; ')+'.':'';}
+/* points to weigh, each tied to a figure of the check; none chooses for the BCBA */
+function points(x){const P=[],R=x.rules||{},praise=((x.bsp&&x.bsp.n)||0)+((x.gp&&x.gp.n)||0);
+  if((x.ratio!=null&&x.ratio<4)||(x.ratio==null&&x.rep&&x.rep.n&&!praise))
+    P.push('Praise to correction was '+E(T(x.ratioText))+'. An arrangement that gives praise with every point builds praise into the routine: CW-FIT (praise with each point when the timer sounds) or the Good Behavior Game scored on rule-following (Tanol et al., 2010). A game scored on fouls adds marks against the class (response cost).');
+  if(x.eng&&x.eng.pct!=null&&x.eng.pct<80)
+    P.push('The class was engaged at '+x.eng.pct+'% of the scans. An interdependent arrangement with short game periods or a timer (the Good Behavior Game, CW-FIT) gives the whole room a reason to stay at work; take the first criterion from the baseline days.');
+  if(R.posted==='no'||R.taught==='no')
+    P.push('The rules were '+[R.posted==='no'?'not posted':'',R.taught==='no'?'not taught or reviewed during the check':''].filter(Boolean).join(' and ')+': every arrangement needs the expectations taught first (Class-Wide Expectations, on Setup), and the poster puts them where the class can see them.');
+  if(R.pos==='no'||R.pos==='partly')P.push('Some rules say what not to do: write each expectation as what students do (Setup).');
+  if(x.trans&&x.trans.mean!=null&&x.trans.mean>=120)
+    P.push('Transitions took '+clock(x.trans.mean)+' on average. A short interdependent game on the transition itself (the class beats a timer together) can target it, as a period of its own on the Record.');
+  if(x.otr&&x.otr.pm!=null&&x.otr.pm<1&&/whole group|small group|one to one/i.test(T(x.act)))
+    P.push('Few opportunities to respond ('+n1(x.otr.pm)+' a minute in '+E(T(x.act).toLowerCase())+'). No class-wide system makes up for them: more chances to respond is a teaching change, for the teacher&rsquo;s coaching (Form TI-1&rsquo;s feedback).');
+  if(!P.length)P.push('Nothing in the check points away from any arrangement: choose from the class&rsquo;s baseline, the problem the teacher named and the team&rsquo;s preference.');
+  return P;}
+function paint(){const box=document.getElementById('gcClsBox');if(!box)return;
+  if(!CK){box.hidden=true;box.innerHTML='';return;}
+  const x=CK[CK.length-1],prev=CK.length>1?CK[CK.length-2]:null,s=prev?since(prev,x):'';
+  const h='<h3 id="gcClsH">From the classroom practices check (Form OB-1, '+E(MDY(x.date))+(T(x.teacher)?', '+E(T(x.teacher))+'&rsquo;s room':'')+')</h3>'+
+    '<p class="gc-cls-figs">'+figs(x)+'.</p>'+(s?'<p class="gc-cls-figs">'+s+'</p>':'')+
+    '<p class="hint"><b>Points to weigh as you choose</b> (this form&rsquo;s working conventions, not published cut-offs). You choose the arrangement; the check does not.</p>'+
+    '<ul class="gc-cls-pts">'+points(x).map(p=>'<li>'+p+'</li>').join('')+'</ul>'+
+    '<p class="hint">On screen only: the check is about the classroom and the teacher, so it never prints with this form or goes into the student&rsquo;s packet. Classroom practices with evidence behind them: Simonsen et al. (2008).</p>';
+  if(box.__h!==h){box.innerHTML=h;box.__h=h;}box.hidden=false;}
+window.__gc2568={pick,points,paint,get checks(){return CK;}};
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){try{CK=pick(f);paint();}catch(e){}return was?was.apply(this,arguments):null;};}
+try{paint();}catch(e){}
+})();
+</script>
+<style id="gc1-v2568-css">
+/* v25.68 (research #10) the classroom check beside the choice of a class-wide system: screen only */
+.gc-cls{margin:10px 0 12px;padding:10px 14px;border:1px solid #cfdad8;border-left:4px solid #76a2a3;border-radius:6px;background:#f7f9f8;font-family:var(--sans)}
+.gc-cls[hidden]{display:none}
+.gc-cls h3{margin:0 0 4px;font-size:15px}
+.gc-cls-figs{margin:0 0 6px;font-size:13px;line-height:1.45;color:var(--ink);font-variant-numeric:tabular-nums}
+.gc-cls-pts{margin:4px 0 6px;padding-left:20px;font-size:13px;line-height:1.45}
+.gc-cls-pts li{margin:3px 0}
+@media print{.gc-cls{display:none!important}}
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

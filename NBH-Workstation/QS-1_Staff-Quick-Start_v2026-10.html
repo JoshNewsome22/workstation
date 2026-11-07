@@ -3167,6 +3167,66 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 .qs-ipt td.m{width:24%}
 .qs-ip .wline{display:inline-block;min-width:60%;border-bottom:1px solid #8a9aa3;height:1em}
 </style>
+<script id="qs1-v2568b">
+/* v25.68 wave 2 (research recommendation #5, the BCBA's 11/6 list) the daily self-check on the staff phone page: three to five of
+   the non-negotiables (their Do), the plan's critical steps, ticked on page 4's editor. After each period or session the staff
+   phone page (Form DD-1's link) asks "did I do it?" for each and sends the answers with the day's data. Form TI-1 can take the
+   same list for an adult it checks, and compares the answers with what it observes. A row still holding the plan's words
+   unreviewed is not offered (as Form TI-1 does not take it as a step). Kept in S.sck {items:[{i, d, r}]} (i: the question's id on
+   the phone, d: its words, r: the row it is); out as quick.selfCheck {items:[{i, d}], src:'QS-1'}. Screen only: the handout
+   prints as it did. Also (v25.68 wave 2) Open data now reads back S.ipl, the implementation plans the file was saved with. */
+(function(){
+'use strict';
+const t=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+const K=s=>t(s).toLowerCase();
+const rid=()=>'q'+Math.random().toString(36).slice(2,8);
+const short=d=>{d=t(d);return d.length<=120?d:d.slice(0,117).replace(/\s+\S*$/,'')+'\u2026';};
+const MAXI=5,MINI=3;
+const isDraft=i=>ROW.rules.some(fl=>isPulled('rules.'+i+'.'+fl)||T(S.changed['rules.'+i+'.'+fl]));
+function rules(){return S.rules.map((r,i)=>({i,d:t(r.do),draft:isDraft(i)})).filter(x=>x.d);}
+/* each question follows its row: a row reworded keeps its question with the new words; a row gone takes its question with it */
+function clean(){const v=S.sck;if(v==null)return;const R=S.rules,out=[],seen=new Set();
+  (v&&typeof v==='object'&&Array.isArray(v.items)?v.items:[]).slice(0,MAXI).forEach(x=>{if(!x||typeof x!=='object')return;let r=Number.isInteger(+x.r)?+x.r:-1;const d=t(x.d);
+    if(!(R[r]&&K(R[r].do)===K(d))){const j=R.findIndex(y=>K(y.do)===K(d));if(j>=0)r=j;else if(!(R[r]&&t(R[r].do)))r=-1;}
+    if(r<0||seen.has(r))return;seen.add(r);out.push({i:/^[A-Za-z0-9_-]{1,24}$/.test(String(x.i||''))?String(x.i):rid(),d:short(R[r].do),r});});
+  if(out.length)S.sck={items:out};else delete S.sck;}
+const items=()=>{clean();return (S.sck&&S.sck.items)||[];};
+function boxHTML(){const L=rules(),IT=items(),on=new Set(IT.map(x=>x.r));
+  let h='<div class="qs-sck noprint" id="qsSck"><h3 class="qs-sub">The daily self-check on the staff phone page<small>three to five of the non-negotiables; not printed on the handout</small></h3>'+
+    '<p class="hint">After each period or session the staff phone page (Form DD-1&rsquo;s link) asks each adult &ldquo;did I do it?&rdquo; for the ones ticked here, and sends the answers with the day&rsquo;s data. Form TI-1 compares them with what it observes: a self-check is a prompt for the adult, never a measure on its own (Simonsen et al., 2013). Keep it short: three to five.</p>';
+  if(!L.length)return h+'<p class="hint">Write the non-negotiables above first.</p></div>';
+  h+='<ul class="qs-sck-l">'+L.map(x=>'<li><label class="qs-sck-ck"><input type="checkbox" data-qsck="'+x.i+'"'+(on.has(x.i)?' checked':'')+(x.draft&&!on.has(x.i)?' disabled':'')+'> <span>'+esc(short(x.d))+(x.draft?' <i class="qs-sck-dr">(the plan&rsquo;s words, not reviewed yet: review the row above first)</i>':'')+'</span></label></li>').join('')+'</ul>'+
+    '<p class="hint" id="qsSckN" role="status" aria-live="polite">'+(IT.length?IT.length+' ticked'+(IT.length<MINI?': tick '+(MINI-IT.length)+' more (three to five work best).':'.'):'None ticked: the phone page asks none.')+'</p></div>';
+  return h;}
+function paint(){const host=document.getElementById('edRules');if(!host)return;let b=document.getElementById('qsSck');const h=boxHTML();
+  if(b){if(b.__h!==h){const tmp=document.createElement('div');tmp.innerHTML=h;const nb=tmp.firstChild;nb.__h=h;b.replaceWith(nb);}}
+  else{host.insertAdjacentHTML('beforeend',h);b=document.getElementById('qsSck');if(b)b.__h=h;}}
+window.__qs2568b={items,rules,paint,clean};
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.qsck==null)return;const r=+el.dataset.qsck,row=S.rules[r];if(!row)return;
+  const L=items().slice(),at=L.findIndex(x=>x.r===r);
+  if(el.checked&&at<0){if(L.length>=MAXI){el.checked=false;const n=document.getElementById('qsSckN');if(n)n.textContent='Five at most: untick one first.';return;}L.push({i:rid(),d:short(row.do),r});}
+  else if(!el.checked&&at>=0)L.splice(at,1);
+  S.sck={items:L};clean();paint();const b=document.querySelector('[data-qsck="'+r+'"]');if(b)b.focus();});
+/* the words of a row typed again: its question follows on the next drawing */
+document.addEventListener('input',e=>{const el=e.target;if(el&&el.dataset&&/^rules\.\d+\.do$/.test(String(el.dataset.k||''))){clearTimeout(paint.t);paint.t=setTimeout(()=>{try{paint();}catch(x){}},400);}});
+{const r0=renderRules;renderRules=function(){const r=r0.apply(this,arguments);try{paint();}catch(e){console.error('QS-1 v25.68b: '+(e&&e.message||e));}return r;};}
+{const f0=fromFile;fromFile=function(d){const o=f0.apply(this,arguments);if(o&&d&&d.S){const s=d.S;
+  if(s.sck&&typeof s.sck==='object'&&Array.isArray(s.sck.items))o.sck={items:s.sck.items.slice(0,MAXI)};
+  if(Array.isArray(s.ipl))o.ipl=s.ipl.filter(x=>x&&typeof x==='object').slice(0,8);}return o;};}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const IT=items().filter(x=>!isDraft(x.r));if(IT.length){r=r||{};r.quick=r.quick||{rules:[],tiers:[],src:'QS-1'};r.quick.selfCheck={items:IT.map(x=>({i:x.i,d:x.d})),src:'QS-1'};}}catch(e){}return r;};}
+try{paint();}catch(e){console.error('QS-1 v25.68b: '+(e&&e.message||e));}
+})();
+</script>
+<style id="qs1-v2568b-css">
+/* v25.68 wave 2 (research #5) the self-check's questions, ticked on page 4's editor (screen only) */
+.qs-sck{margin-top:14px}
+.qs-sck-l{list-style:none;margin:6px 0;padding:0}
+.qs-sck-l li{margin:2px 0}
+.qs-sck-ck{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:4px 0;font-size:13.5px;line-height:1.4;cursor:pointer}
+.qs-sck-ck input{width:22px;height:22px;margin:1px 0 0;flex:none}
+.qs-sck-dr{color:#8a4b00;font-style:normal;font-size:12.5px}
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

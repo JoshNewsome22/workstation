@@ -1514,6 +1514,7 @@ window.FX2_CFG = { cards: '#setup table.obck, #mbTbl, #obsLog table.oblog',
       <button data-view="obs" aria-pressed="false">Observations</button>
       <button data-view="log" aria-pressed="false">Log</button>
       <button data-view="summary" aria-pressed="false">Summary</button>
+      <button data-view="class" aria-pressed="false">Classroom check</button>
       <button data-view="guide" aria-pressed="false">Guide</button>
     </div></div></div>
 
@@ -1803,6 +1804,16 @@ window.FX2_CFG = { cards: '#setup table.obck, #mbTbl, #obsLog table.oblog',
     inconclusive rather than as evidence of no pattern, and test any pattern against ABC data (Form ABC-1) or a functional analysis
     (Form EA-1) before it reaches the behavior plan.
   </div>
+</div>
+
+<!-- ===================================================== CLASSROOM PRACTICES CHECK (v25.68, research #10) -->
+<!-- v25.68 a short timed check of the classroom, not of the student. Screen only (noprint) unless a check is put in the student's
+     record; then the letterhead goes into oclHead and the checks so marked into oclRep: they print here, after the summary, and go
+     with the packet. Until then the sheet holds nothing but the screen's own parts, so the packet takes no page for it. -->
+<div class="sheet noprint" id="clsCheck">
+  <div id="oclHead"></div>
+  <div class="ocl-ed noprint" id="oclEd" role="region" aria-labelledby="oclTitle"></div>
+  <div class="ocl-rep" id="oclRep"></div>
 </div>
 
 <!-- ===================================================== GUIDE -->
@@ -5929,6 +5940,403 @@ OUT(function(){const obs=(state.obs||[]).filter(o=>o&&(T(o.date)||T(o.count)||T(
       return Object.assign({}, r, {evidence:Object.assign({}, r.evidence, {perBehavior:per})});
     }catch(e){ return r; }
   };
+})();
+</script>
+<style id="ob1-v2568-css">
+/* v25.68 (research #10) the classroom practices check: its view, its recorder, and the paper it makes. The view's sheet is
+   screen only (noprint) unless a check is put in the student's record; the teacher's copy prints on its own. */
+body.view-setup #clsCheck,body.view-obs #clsCheck,body.view-log #clsCheck,body.view-summary #clsCheck,body.view-guide #clsCheck{display:none}
+body.view-class #setup,body.view-class #obsPages,body.view-class #obsLog,body.view-class #summary,body.view-class #guide{display:none}
+@media screen{body.view-class #oclRep,body.view-class #oclHead{display:none}#oclTeach{display:none}}
+.ocl-lede{margin:0 0 10px}
+.ocl-pick{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:0 0 12px}
+.ocl-pick label{font-weight:600;font-size:13px;color:var(--nbh-navy,#182e43)}
+.ocl-pick select{min-height:44px;font:inherit;font-size:14px;max-width:100%;border:1px solid var(--nbh-slate,#254657);border-radius:4px;padding:4px 8px;background:#fff}
+.ocl-pick button,.ocl-acts button{min-height:44px}
+.ocl-id input,.ocl-id select,.ocl-rules input,.ocl-rules select{min-height:38px}
+.ocl-run{margin:12px 0 6px;padding:12px 14px;border:1px solid var(--nbh-rule,#cfdad8);border-left:5px solid var(--nbh-teal,#76a2a3);border-radius:6px;background:#fff;
+  display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,2.1fr);grid-template-areas:"clock tiles" "trans scan";gap:12px 16px;font-family:var(--nbh-sans)}
+.ocl-run.ocl-on{border-left-color:#2F6B37}
+.ocl-clock{grid-area:clock;min-width:0}
+.ocl-cap{font-size:11.5px;font-weight:600;color:var(--nbh-muted,#54676f);letter-spacing:.03em}
+.ocl-big{font:700 44px/1.05 var(--nbh-sans);font-variant-numeric:tabular-nums;color:var(--nbh-navy,#182e43)}
+.ocl-sub{font-size:12.5px;color:var(--nbh-muted,#54676f);margin-top:4px;min-height:1.4em}
+.ocl-go{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ocl-go button{min-height:44px;font:600 13.5px/1.2 var(--nbh-sans);padding:8px 14px;border-radius:6px;border:1px solid var(--nbh-slate,#254657);background:#fff;color:var(--nbh-navy,#182e43);cursor:pointer}
+.ocl-go button.primary{background:var(--nbh-navy,#182e43);border-color:var(--nbh-navy,#182e43);color:#fff;min-width:9em}
+.ocl-tog[aria-pressed="true"]{background:#e4eef0!important;border-color:#2f7f86!important}
+.ocl-tog[aria-pressed="true"]::before{content:"\2713";margin-right:5px}
+.ocl-msg{margin:8px 0 0;font-size:12.5px;color:var(--nbh-navy,#182e43);min-height:2.8em}
+.ocl-msg.ocl-warn{color:#8a4b00;font-weight:600}
+.ocl-tiles{grid-area:tiles;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px;min-width:0}
+.ocl-tile{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ocl-tap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:104px;padding:8px 6px;border:0;border-radius:10px;color:#fff;cursor:pointer;
+  touch-action:manipulation;font-family:var(--nbh-sans);background:var(--nbh-navy,#182e43)}
+.ocl-tap.ocl-bsp{background:#1f5c3a}.ocl-tap.ocl-gp{background:#2b5f6b}.ocl-tap.ocl-rep{background:#7c2222}
+.ocl-tap:disabled{opacity:.62;cursor:default}
+.ocl-tap.ocl-hit{filter:brightness(1.3)}
+.ocl-who{font-size:13.5px;font-weight:700;line-height:1.2;text-align:center;overflow-wrap:anywhere}
+.ocl-n{font-size:36px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.ocl-rate{font-size:12px;color:#eef4f3;font-variant-numeric:tabular-nums}
+.ocl-undo,.ocl-trb,.ocl-pad button,.ocl-more button{min-height:44px;font:600 12.5px/1.2 var(--nbh-sans);padding:6px 10px;border-radius:5px;border:1px solid var(--nbh-slate,#254657);
+  background:#fff;color:var(--nbh-navy,#182e43);cursor:pointer;touch-action:manipulation}
+.ocl-undo:disabled,.ocl-trb:disabled,.ocl-pad button:disabled,.ocl-more button:disabled{opacity:.45;cursor:default}
+.ocl-trans{grid-area:trans;min-width:0}.ocl-scan{grid-area:scan;min-width:0;border-radius:6px;padding:2px 4px}
+.ocl-trans h3.sub,.ocl-scan h3.sub{margin:0 0 4px}
+.ocl-trans .method,.ocl-scan .method{margin:0 0 6px}
+.ocl-trb{font-size:14px;padding:8px 14px;margin:0 6px 6px 0}
+.ocl-trb.ocl-trun{background:#7a4b00;border-color:#7a4b00;color:#fff}
+.ocl-trs,.ocl-scs{font-size:12.5px;color:var(--nbh-navy,#182e43);font-variant-numeric:tabular-nums}
+.ocl-scs{margin:6px 0}
+.ocl-cue{font:700 15px/1.3 var(--nbh-sans);color:var(--nbh-navy,#182e43);margin:0 0 6px;font-variant-numeric:tabular-nums}
+.ocl-cue.ocl-due{color:#fff;background:#7a4b00;border-radius:5px;padding:6px 10px;display:inline-block}
+.ocl-scan.ocl-due{box-shadow:0 0 0 3px #F2C14E}
+.ocl-pad{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px}
+.ocl-pad button{font-size:18px;min-width:44px}
+.ocl-more{grid-column:span 3;display:flex;gap:6px;min-width:0}
+.ocl-more input{width:100%;min-width:0;min-height:44px;font:inherit;font-size:15px;border:1px solid var(--nbh-slate,#254657);border-radius:5px;padding:4px 8px}
+.ocl-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
+.ocl-tap:focus-visible,.ocl-undo:focus-visible,.ocl-trb:focus-visible,.ocl-pad button:focus-visible,.ocl-more button:focus-visible,.ocl-go button:focus-visible{outline:3px solid #2f7fa8;outline-offset:2px}
+table.grid.ocl-t td.c{text-align:center;font-variant-numeric:tabular-nums}
+table.grid.ocl-t .num{width:100%;min-height:36px}
+.ocl-trl{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-variant-numeric:tabular-nums}
+#oclEd .ocl-trl button.rm{min-width:44px;min-height:44px;padding:0 10px;border:1px solid #c9d4d2;border-radius:5px;background:#fff;color:#8a3a2a;font:18px/1 var(--nbh-sans);cursor:pointer}
+table.grid.ocl-co textarea{width:100%;box-sizing:border-box;font:inherit;font-size:13px;min-height:44px;border:0;background:transparent;padding:4px 6px}
+table.grid.ocl-co input[type=date]{min-height:38px}
+.ocl-share{margin:12px 0 4px;padding:10px 12px;border:1px solid var(--nbh-rule,#cfdad8);border-radius:6px;background:#f7f9f8}
+.ocl-rec{align-items:flex-start;font-size:13px;min-height:44px}
+.ocl-rec input{width:22px;height:22px;margin:1px 0 0}
+.ocl-recw{margin:4px 0;font-size:12.5px;color:#8a4b00;font-weight:600}
+.ocl-recw:empty{display:none}
+.ocl-acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.ocl-r .sp-rep{display:flex;flex-wrap:wrap;gap:4px 22px}
+.ocl-frame{color:var(--ink-soft,#54676f)}
+@media (max-width:1000px){.ocl-run{grid-template-columns:1fr;grid-template-areas:"clock" "tiles" "trans" "scan"}.ocl-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.ocl-big{font-size:36px}.ocl-tap{min-height:88px}}
+@media (prefers-reduced-motion:reduce){.ocl-tap.ocl-hit{filter:none}}
+@media print{
+  body.view-class #setup,body.view-class #obsPages,body.view-class #summary{display:block!important}
+  html:not(.nbh-pr-noguide) body.view-class #guide{display:block!important}   /* the Guide only when "Include the guide" is chosen, as from the other views */
+  body.view-setup #clsCheck:not(.noprint),body.view-obs #clsCheck:not(.noprint),body.view-log #clsCheck:not(.noprint),body.view-summary #clsCheck:not(.noprint),
+  body.view-guide #clsCheck:not(.noprint),body.view-class #clsCheck:not(.noprint){display:block!important}
+  #clsCheck{page-break-before:always;break-before:page}
+  .ocl-r{break-inside:avoid;page-break-inside:avoid;margin-bottom:10px}
+  .ocl-r + .ocl-r{page-break-before:always;break-before:page}
+  html.ocl-teaching body>*:not(#oclTeach){display:none!important}
+  html.ocl-teaching #oclTeach{display:block!important}
+  html.ocl-teaching body #clsCheck.sheet{display:none!important}
+}
+</style>
+<script id="ob1-v2568">
+/* v25.68 (research recommendation #10, the BCBA's 11/6 list) a classroom practices check: a mode of this form (the Classroom
+   check view) for a short timed observation of the classroom, not of the student. It counts what the teacher does (opportunities
+   to respond, behavior-specific and general praise, reprimands and corrections, and the praise-to-correction ratio), the rules
+   (posted, how many, stated positively, taught or reviewed), each transition's length, and class-wide engagement by momentary
+   time sampling (at each scan the observer counts the students not engaged; engaged = present minus that count, over present).
+   No student is named: counts only, and the notes say so.
+   It is coaching for the teacher, shared with the teacher first (Print the check for the teacher). It stays out of the student's
+   record: the view never prints with the form and is left out of the packet, unless "Put this check in the student's record" is
+   ticked for a check; then that check prints after the summary, and goes with the packet.
+   Kept in state.meta.cls ({list:[check], cur}), so Save data, Open data, Autosave and the case file carry it as they carry the
+   rest of the record; written only once a check holds something, so a record saved before (or one that never uses the check)
+   saves byte for byte as it did. Out to the case: classroom {checks:[...], src:'OB-1'} (the figures, no notes about students),
+   beside this form's evidence (evidence.classroom), for Form GC-1's choice of a class-wide system and Form TI-1's feedback to
+   the teacher. */
+(function(){
+'use strict';
+const D=document,byId=id=>D.getElementById(id);
+const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const isoOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const ISO=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(v));return m?m[0]:'';};
+const HM=v=>{const m=/^(\d{1,2}):(\d{2})$/.exec(T(v));return m&&+m[1]<24&&+m[2]<60?pad(+m[1])+':'+m[2]:'';};
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const clock=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+pad(m):String(m))+':'+pad(x);};
+const I=(v,max)=>{if(v===''||v==null)return null;v=Math.round(+v);return isFinite(v)&&v>=0?Math.min(v,max):null;};
+const N=(v,max)=>{v=Math.round(+v);return isFinite(v)&&v>=0?Math.min(v,max):0;};
+const rid=()=>Math.random().toString(36).slice(2,10);
+const r1=v=>Math.round(v*10)/10;
+const num=v=>String(r1(v)).replace(/\.0$/,'');
+const PLAN=[10,15,20,30],EVERY=[30,60,120];
+const reduce=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
+/* the four things counted, in the order of the tiles */
+const KINDS=[
+  ['otr','Opportunity to respond','a question, a prompt or a cue that asks the class or a student to answer or do something (to the group or to one student)'],
+  ['bsp','Specific praise','approval that names the behavior (&ldquo;Thank you for raising your hand&rdquo;)'],
+  ['gp','General praise','approval that does not name the behavior (&ldquo;Good job&rdquo;, &ldquo;Nice&rdquo;)'],
+  ['rep','Reprimand or correction','disapproval or a correction of behavior, spoken or by gesture (not feedback on an academic answer)']];
+/* this form's working conventions for coaching: not published cut-offs, and never a rating of the teacher */
+const AIM={ratio:4,eng:80,spec:50};
+
+/* ---------------- the record's part ---------------- */
+function blankCheck(){const m=(typeof state!=='undefined'&&state.meta)||{};
+  return {id:rid(),date:'',start:'',room:'',act:'',teacher:T(m.teacher),obs:T(m.observer),present:null,adults:null,plan:15,every:60,sec:0,
+    otr:0,bsp:0,gp:0,rep:0,tr:[],scans:[],miss:0,rules:{posted:'',n:null,pos:'',taught:''},well:'',next:'',shared:'',note:'',rec:false};}
+function cleanCheck(c){c=c&&typeof c==='object'&&!Array.isArray(c)?c:{};const s=(k,n)=>typeof c[k]==='string'?c[k].slice(0,n):'';
+  const ru=c.rules&&typeof c.rules==='object'?c.rules:{},one=(v,L)=>L.indexOf(v)>=0?v:'';
+  return {id:/^[a-z0-9]{4,16}$/.test(String(c.id||''))?String(c.id):rid(),date:ISO(c.date),start:HM(c.start),room:s('room',80),act:s('act',80),
+    teacher:s('teacher',80),obs:s('obs',80),present:I(c.present,99),adults:I(c.adults,20),plan:PLAN.indexOf(+c.plan)>=0?+c.plan:15,
+    every:EVERY.indexOf(+c.every)>=0?+c.every:60,sec:N(c.sec,36000),otr:N(c.otr,9999),bsp:N(c.bsp,9999),gp:N(c.gp,9999),rep:N(c.rep,9999),
+    tr:(Array.isArray(c.tr)?c.tr:[]).map(v=>N(v,7200)).filter(v=>v>0).slice(0,60),
+    scans:(Array.isArray(c.scans)?c.scans:[]).filter(x=>x&&typeof x==='object').slice(0,240).map(x=>({t:N(x.t,36000),off:N(x.off,99),n:I(x.n,99)})),
+    miss:N(c.miss,999),rules:{posted:one(ru.posted,['yes','no']),n:I(ru.n,20),pos:one(ru.pos,['yes','partly','no']),taught:one(ru.taught,['yes','no'])},
+    well:s('well',1000),next:s('next',1000),shared:ISO(c.shared),note:s('note',1000),rec:c.rec===true};}
+/* a check holds something once anything is recorded on it (the teacher and observer boxes start from Setup's, so they do not count) */
+function hasData(c){return !!(c&&(c.sec||c.otr||c.bsp||c.gp||c.rep||c.tr.length||c.scans.length||c.date||c.start||T(c.room)||T(c.act)||c.present!=null||c.adults!=null||
+  T(c.well)||T(c.next)||T(c.note)||c.shared||c.rec||c.rules.posted||c.rules.pos||c.rules.taught||c.rules.n!=null));}
+/* the checks in hand: the same objects state.meta.cls holds once one of them holds something */
+let M={list:[blankCheck()],cur:0,src:undefined};
+function fromState(){const v=state.meta.cls;
+  if(v&&typeof v==='object'&&Array.isArray(v.list)){const L=v.list.slice(0,12).map(cleanCheck);
+    if(L.some(hasData)){M={list:L,cur:Math.min(Math.max(0,Math.round(+v.cur)||0),L.length-1),src:null};commit(true);return;}}
+  if(v!==undefined)delete state.meta.cls;
+  M={list:[blankCheck()],cur:0,src:undefined};}
+function commit(quiet){if(M.list.some(hasData)){const o={list:M.list,cur:M.cur};state.meta.cls=o;M.src=o;}else{delete state.meta.cls;M.src=undefined;}
+  if(!quiet){paintRep();}}
+const cur=()=>M.list[M.cur]||M.list[0];
+
+/* ---------------- figures ---------------- */
+function figs(c){const min=c.sec/60,pm=n=>min>0?n/min:null,praise=c.bsp+c.gp;
+  const S=c.scans.map(x=>{const n=x.n!=null?x.n:c.present;return n>0?Math.max(0,100*(n-Math.min(x.off,n))/n):null;}).filter(v=>v!=null);
+  const tt=c.tr.reduce((a,v)=>a+v,0);
+  return {min,otr:pm(c.otr),bsp:pm(c.bsp),gp:pm(c.gp),rep:pm(c.rep),praise,ratio:c.rep>0?praise/c.rep:null,spec:praise?100*c.bsp/praise:null,
+    eng:S.length?S.reduce((a,v)=>a+v,0)/S.length:null,engLo:S.length?Math.min(...S):null,engHi:S.length?Math.max(...S):null,engN:S.length,
+    scansNoN:c.scans.length-S.length,trN:c.tr.length,trTot:tt,trMean:c.tr.length?tt/c.tr.length:null,trLong:c.tr.length?Math.max(...c.tr):null,
+    trShare:c.sec>0?100*tt/c.sec:null};}
+function ratioText(c,F){F=F||figs(c);if(F.ratio!=null)return num(F.ratio)+' to 1';if(F.praise)return F.praise+' praise, no reprimands';return c.rep?'no praise, '+c.rep+' reprimand'+(c.rep===1?'':'s'):'none counted';}
+const rate=v=>v==null?'&mdash;':num(v);
+const pct=v=>v==null?'&mdash;':Math.round(v)+'%';
+const yn={yes:'Yes',no:'No',partly:'Partly','':''};
+function title(c,i){return 'Check '+(i+1)+(c.date?': '+MDY(c.date):'')+(T(c.room)?', '+T(c.room):'');}
+
+/* ---------------- the timer (not saved: the minutes observed are) ---------------- */
+const R={run:false,t0:0,base:0,id:'',next:0,due:false,tr0:null,iv:0,ac:null};
+let snd=false;try{snd=localStorage.getItem('nbh.ob1.clsSound')==='1';}catch(e){}
+const el=c=>R.run&&c.id===R.id?R.base+(Date.now()-R.t0)/1000:c.sec;
+function beep(){if(!snd)return;try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;R.ac=R.ac||new A();const o=R.ac.createOscillator(),g=R.ac.createGain();
+  o.frequency.value=880;g.gain.value=0.08;o.connect(g);g.connect(R.ac.destination);o.start();o.stop(R.ac.currentTime+0.15);}catch(e){}}
+function say(t){const s=byId('oclSay');if(s){s.textContent='';setTimeout(()=>{s.textContent=t;},30);}}
+function msg(t,warn){const m=byId('oclMsg');if(m){m.textContent=t;m.className='ocl-msg'+(warn?' ocl-warn':'');}}
+function startStop(){const c=cur();
+  if(R.run){stop('Paused at '+clock(el(c))+'. Continue when you are watching again.');return;}
+  R.run=true;R.id=c.id;R.t0=Date.now();R.base=c.sec;if(!c.date)c.date=isoOf(new Date());
+  if(!c.start){const d=new Date();c.start=pad(d.getHours())+':'+pad(d.getMinutes());}
+  R.next=(Math.floor(c.sec/c.every)+1)*c.every;R.due=false;
+  try{if(snd){const A=window.AudioContext||window.webkitAudioContext;if(A&&!R.ac)R.ac=new A();if(R.ac&&R.ac.resume)R.ac.resume();}}catch(e){}
+  clearInterval(R.iv);R.iv=setInterval(tick,250);commit();draw();msg('Watching the class. Tap a tile each time it happens; scan the room when the scan comes due.');say('Started');}
+function stop(why){const c=M.list.find(x=>x.id===R.id)||cur();if(R.run){if(R.tr0!=null)endTr(c);c.sec=Math.round(el(c));}
+  R.run=false;R.due=false;clearInterval(R.iv);R.iv=0;commit();draw();if(why){msg(why);say(why);}}
+function tick(){const c=M.list.find(x=>x.id===R.id);if(!c||!R.run){clearInterval(R.iv);return;}const e=el(c);c.sec=Math.floor(e);
+  if(e>=R.next){if(R.due)c.miss++;R.due=true;R.next+=c.every;beep();try{if(navigator.vibrate)navigator.vibrate(60);}catch(x){}say('Scan now: count the students not engaged.');}
+  if(e>=c.plan*60&&c.plan){stop(c.plan+' minutes observed: the check is done. Press Continue to observe longer.');return;}
+  paintRun();}
+function endTr(c){const d=Math.round(el(c)-R.tr0);R.tr0=null;if(d>0)c.tr.push(d);}
+
+/* ---------------- the view ---------------- */
+const fld=(id,lab,inner,cls)=>'<div class="f'+(cls?' '+cls:'')+'"><label for="'+id+'">'+lab+'</label>'+inner+'</div>';
+const sel=(id,k,val,opts,lab)=>'<select id="'+id+'" data-ocl="'+k+'"'+(lab?' aria-label="'+E(lab)+'"':'')+'><option value=""></option>'+opts.map(o=>'<option value="'+E(o[0])+'"'+(String(val)===String(o[0])?' selected':'')+'>'+E(o[1])+'</option>').join('')+'</select>';
+function edHTML(){const c=cur(),F=figs(c),run=R.run&&R.id===c.id,acts=(typeof ARRANGE!=='undefined'?ARRANGE:[]).map(a=>[a,a]);
+  if(T(c.act)&&!acts.some(a=>a[0]===c.act))acts.push([c.act,c.act]);
+  let h='<div class="bar nbh-band" id="oclTitle">Classroom Practices Check</div><p class="method ocl-lede">A short timed look at the <strong>classroom, not the student</strong>: how often the class is asked to respond, praise and reprimands, the rules, transitions, and how much of the class is engaged. It is coaching for the teacher, <strong>shared with the teacher first</strong>, and stays out of the student&rsquo;s record unless you put it there. Name no student, here or in the notes.</p>';
+  h+='<div class="ocl-pick"><label for="oclWhich">Classroom check</label><select id="oclWhich" aria-label="Which classroom check">'+M.list.map((x,i)=>'<option value="'+i+'"'+(i===M.cur?' selected':'')+'>'+E(title(x,i))+'</option>').join('')+'</select>'+
+    '<button type="button" class="tool" id="oclAdd"'+(M.list.length>=12?' disabled':'')+'>Add a classroom check</button><button type="button" class="tool" id="oclDel">Remove this check</button></div>';
+  h+='<div class="ident c3 ocl-id">'+
+    fld('oclDate','Date','<input type="date" id="oclDate" data-ocl="date" value="'+E(c.date)+'">')+
+    fld('oclStart','Start time','<input type="time" id="oclStart" data-ocl="start" value="'+E(c.start)+'">')+
+    fld('oclRoom','Class or period','<input id="oclRoom" data-ocl="room" value="'+E(c.room)+'" autocomplete="off">')+
+    fld('oclAct','Activity',sel('oclAct','act',c.act,acts))+
+    fld('oclTeacher','Teacher','<input id="oclTeacher" data-ocl="teacher" value="'+E(c.teacher)+'" autocomplete="off">')+
+    fld('oclObs','Observer','<input id="oclObs" data-ocl="obs" value="'+E(c.obs)+'" autocomplete="off">')+
+    fld('oclPresent','Students present','<input type="number" id="oclPresent" data-ocl="present" min="0" max="99" inputmode="numeric" value="'+(c.present==null?'':c.present)+'">')+
+    fld('oclAdults','Adults in the room','<input type="number" id="oclAdults" data-ocl="adults" min="0" max="20" inputmode="numeric" value="'+(c.adults==null?'':c.adults)+'">')+
+    fld('oclPlan','Length of the check',sel('oclPlan','plan',c.plan,PLAN.map(m=>[m,m+' min'])))+
+    fld('oclEvery','Engagement scan every',sel('oclEvery','every',c.every,EVERY.map(s=>[s,s<60?s+' s':(s/60)+' min'])))+
+    '</div>';
+  /* the recorder: the clock, the four tiles, a transition, the engagement scan */
+  h+='<div class="ocl-run'+(run?' ocl-on':'')+'" id="oclRun">'+
+    '<div class="ocl-clock"><div class="ocl-cap">Observed</div><div class="ocl-big" id="oclClock">'+clock(el(c))+'</div><div class="ocl-sub" id="oclSub"></div>'+
+      '<div class="ocl-go"><button type="button" class="primary" id="oclGo">'+(run?'Pause':c.sec?'Continue':'Start the check')+'</button>'+
+      '<button type="button" class="ocl-tog" id="oclSnd" aria-pressed="'+snd+'">Sound at each scan</button></div>'+
+      '<p class="ocl-msg" id="oclMsg" role="status" aria-live="polite"></p></div>'+
+    '<div class="ocl-tiles">'+KINDS.map(k=>'<div class="ocl-tile"><button type="button" class="ocl-tap ocl-'+k[0]+'" data-tap="'+k[0]+'"'+(run?'':' disabled')+'><span class="ocl-who">'+k[1]+'</span><span class="ocl-n" data-n="'+k[0]+'">'+c[k[0]]+'</span><span class="ocl-rate" data-r="'+k[0]+'"></span></button>'+
+      '<button type="button" class="ocl-undo" data-undo="'+k[0]+'"'+(c[k[0]]?'':' disabled')+' aria-label="Take one back: '+k[1]+'">Undo</button></div>').join('')+'</div>'+
+    '<div class="ocl-trans"><h3 class="sub">Transitions</h3><p class="method">From the teacher&rsquo;s signal to the class at work in the next activity.</p>'+
+      '<button type="button" class="ocl-trb" id="oclTr"'+(run?'':' disabled')+'>'+(R.tr0!=null&&run?'End the transition':'A transition starts')+'</button> <span class="ocl-trs" id="oclTrS"></span> '+
+      '<button type="button" class="ocl-undo" id="oclTrUndo"'+(c.tr.length?'':' disabled')+'>Undo the last transition</button></div>'+
+    '<div class="ocl-scan" id="oclScan" role="group" aria-labelledby="oclScanH"><h3 class="sub" id="oclScanH">Engagement scan</h3>'+
+      '<p class="method">At each scan, look across the room once and tap how many students are <strong>not</strong> engaged (not doing what the activity asks): momentary time sampling of the whole class.</p>'+
+      '<div class="ocl-cue" id="oclCue"></div><div class="ocl-pad">'+[0,1,2,3,4,5,6,7,8,9].map(n=>'<button type="button" data-scan="'+n+'"'+(run?'':' disabled')+' aria-label="'+n+' not engaged">'+n+'</button>').join('')+
+      '<span class="ocl-more"><input type="number" id="oclScanN" min="0" max="99" inputmode="numeric" aria-label="Students not engaged, 10 or more" placeholder="10+"'+(run?'':' disabled')+'><button type="button" id="oclScanGo"'+(run?'':' disabled')+'>Record</button></span></div>'+
+      '<p class="ocl-scs" id="oclScS"></p><button type="button" class="ocl-undo" id="oclScUndo"'+(c.scans.length?'':' disabled')+'>Undo the last scan</button></div>'+
+    '<p class="ocl-live" id="oclSay" aria-live="polite"></p></div>';
+  /* the counts, as typed or tapped: a check made on paper is entered here */
+  h+='<h3 class="sub">Counts</h3><div class="tblwrap"><table class="grid ocl-t"><thead><tr><th style="width:30%">What was counted</th><th style="width:13%">Count</th><th style="width:13%">A minute</th><th>How it is counted</th></tr></thead><tbody>'+
+    KINDS.map(k=>'<tr><td class="lab">'+k[1]+'</td><td><input type="number" class="num" data-ocl="'+k[0]+'" min="0" max="9999" inputmode="numeric" value="'+c[k[0]]+'" aria-label="'+k[1]+': count"'+(run?' disabled':'')+'></td><td class="c" data-r2="'+k[0]+'"></td><td class="small">'+k[2]+'</td></tr>').join('')+
+    '<tr><td class="lab">Minutes observed</td><td><input type="number" class="num" id="oclMin" data-ocl="min" min="0" max="600" step="0.1" inputmode="decimal" value="'+(c.sec?num(c.sec/60):'')+'" aria-label="Minutes observed"'+(run?' disabled':'')+'></td><td></td><td class="small">the timer&rsquo;s minutes (pauses left out), or the minutes of a check made on paper</td></tr>'+
+    '<tr class="tot"><td>Praise to correction</td><td colspan="2" id="oclRatio"></td><td class="small">specific and general praise together, to reprimands and corrections</td></tr>'+
+    '<tr class="tot"><td>Praise that was specific</td><td colspan="2" id="oclSpec"></td><td class="small">specific praise, of all praise</td></tr></tbody></table></div>';
+  h+='<h3 class="sub">Transitions and engagement</h3><div class="ocl-te" id="oclTE"></div>';
+  h+='<h3 class="sub">Rules</h3><div class="ident c3 ocl-rules">'+
+    fld('oclPosted','Rules posted where the class can see them',sel('oclPosted','r.posted',c.rules.posted,[['yes','Yes'],['no','No']]))+
+    fld('oclRn','How many rules','<input type="number" id="oclRn" data-ocl="r.n" min="0" max="20" inputmode="numeric" value="'+(c.rules.n==null?'':c.rules.n)+'">')+
+    fld('oclPos','Stated as what to do',sel('oclPos','r.pos',c.rules.pos,[['yes','Yes'],['partly','Partly'],['no','No']]))+
+    fld('oclTaught','Taught or reviewed during the check',sel('oclTaught','r.taught',c.rules.taught,[['yes','Yes'],['no','No']]))+'</div>';
+  h+='<h3 class="sub">Coaching</h3><table class="grid ocl-co"><tbody>'+
+    '<tr><td class="lab" style="width:30%"><label for="oclWell">What went well</label></td><td><textarea id="oclWell" data-ocl="well" rows="2">'+E(c.well)+'</textarea></td></tr>'+
+    '<tr><td class="lab"><label for="oclNext">One practice to work on, chosen with the teacher</label></td><td><textarea id="oclNext" data-ocl="next" rows="2">'+E(c.next)+'</textarea></td></tr>'+
+    '<tr><td class="lab"><label for="oclNote">Note (no student names)</label></td><td><textarea id="oclNote" data-ocl="note" rows="2">'+E(c.note)+'</textarea></td></tr>'+
+    '<tr><td class="lab"><label for="oclShared">Shared with the teacher on</label></td><td><input type="date" id="oclShared" data-ocl="shared" value="'+E(c.shared)+'"></td></tr></tbody></table>'+
+    '<div class="ocl-aim" id="oclAim"></div>';
+  h+='<div class="ocl-share"><label class="chk ocl-rec"><input type="checkbox" id="oclRec"'+(c.rec?' checked':'')+'> <span><b>Put this check in the student&rsquo;s record</b>: it prints after the summary when this form prints, and goes with the student&rsquo;s packet. Off by default: the check is about the classroom and the teacher, not the student.</span></label>'+
+    '<p class="ocl-recw" id="oclRecW" role="status" aria-live="polite"></p>'+
+    '<div class="ocl-acts"><button type="button" class="tool primary" id="oclPrint">Print the check for the teacher</button><button type="button" class="tool" id="oclSim">Load a simulated check</button></div>'+
+    '<p class="method">The latest check goes to Form GC-1 (the choice of a class-wide system) and Form TI-1 (feedback to the teacher, when the teacher is the adult TI-1 checks), once this record holds an observation of the student.</p></div>';
+  return h;}
+function draw(){const host=byId('oclEd');if(!host)return;const a=D.activeElement,keep=a&&host.contains(a)?a.id:'';host.innerHTML=edHTML();paintRun();paintRep();
+  if(keep){const k=byId(keep);if(k&&!k.disabled)try{k.focus({preventScroll:true});}catch(e){}}}
+/* what changes as the clock runs and the tiles are tapped, without drawing the view again */
+function paintRun(){const c=cur(),F=figs(c),run=R.run&&R.id===c.id,q=s=>D.querySelector('#oclEd '+s);if(!byId('oclRun'))return;
+  const ck=byId('oclClock');if(ck)ck.textContent=clock(el(c));
+  const sub=byId('oclSub');if(sub)sub.textContent=(run?'Recording':c.sec?'Paused':'Ready')+' · '+c.plan+'-minute check'+(c.present!=null?' · '+c.present+' students':'');
+  KINDS.forEach(k=>{const n=q('[data-n="'+k[0]+'"]');if(n)n.textContent=String(c[k[0]]);const r=q('[data-r="'+k[0]+'"]');if(r)r.innerHTML=F[k[0]]==null?'&mdash; a minute':rate(F[k[0]])+' a minute';
+    const r2=q('[data-r2="'+k[0]+'"]');if(r2)r2.innerHTML=rate(F[k[0]]);const u=q('[data-undo="'+k[0]+'"]');if(u)u.disabled=!c[k[0]];
+    const inp=q('input[data-ocl="'+k[0]+'"]');if(inp&&D.activeElement!==inp&&String(inp.value)!==String(c[k[0]]))inp.value=c[k[0]];
+    const b=q('[data-tap="'+k[0]+'"]');if(b){b.disabled=!run;b.setAttribute('aria-label',k[1]+': '+c[k[0]]);}});
+  const mi=byId('oclMin');if(mi&&D.activeElement!==mi)mi.value=c.sec?num(c.sec/60):'';
+  const ra=byId('oclRatio');if(ra)ra.textContent=ratioText(c,F);const sp=byId('oclSpec');if(sp)sp.innerHTML=pct(F.spec);
+  const tr=byId('oclTr');if(tr){tr.disabled=!run;tr.textContent=R.tr0!=null&&run?'End the transition ('+clock(el(c)-R.tr0)+')':'A transition starts';tr.classList.toggle('ocl-trun',R.tr0!=null&&run);}
+  const trs=byId('oclTrS');if(trs)trs.textContent=F.trN?F.trN+' transition'+(F.trN===1?'':'s')+', '+clock(F.trMean)+' on average':'None timed yet.';
+  const tu=byId('oclTrUndo');if(tu)tu.disabled=!c.tr.length;
+  D.querySelectorAll('#oclEd [data-scan],#oclScanN,#oclScanGo').forEach(b=>{b.disabled=!run;});
+  const cue=byId('oclCue');if(cue){const left=Math.max(0,R.next-el(c));cue.textContent=!run?'Scans start with the check.':R.due?'Scan now':'Next scan in '+clock(left);cue.classList.toggle('ocl-due',run&&R.due);}
+  const sc=byId('oclScan');if(sc)sc.classList.toggle('ocl-due',run&&R.due&&!reduce());
+  const scs=byId('oclScS');if(scs)scs.textContent=c.scans.length?c.scans.length+' scan'+(c.scans.length===1?'':'s')+(F.eng!=null?': '+Math.round(F.eng)+'% of the class engaged on average':'')+(F.scansNoN?' (enter the students present to work out '+(F.engN?'the rest':'the share engaged')+')':'')+(c.miss?'; '+c.miss+' scan'+(c.miss===1?'':'s')+' missed':'')+'.':'No scan yet.';
+  const su=byId('oclScUndo');if(su)su.disabled=!c.scans.length;
+  const go=byId('oclGo');if(go)go.textContent=run?'Pause':c.sec?'Continue':'Start the check';
+  const ru=byId('oclRun');if(ru)ru.classList.toggle('ocl-on',run);
+  D.querySelectorAll('#oclEd input.num').forEach(x=>{x.disabled=run;});
+  paintTE(c,F);paintAim(c,F);
+  const w=byId('oclRecW');if(w)w.textContent=c.rec&&!c.shared?'Share it with the teacher first: the date it was shared is empty.':c.rec?'In the student’s record: it prints after the summary and goes with the packet.':'';}
+function paintTE(c,F){const b=byId('oclTE');if(!b)return;
+  const h='<table class="grid ocl-t"><tbody>'+
+    '<tr><td class="lab" style="width:30%">Transitions</td><td>'+(F.trN?F.trN+' timed: '+clock(F.trTot)+' in all, '+clock(F.trMean)+' on average, the longest '+clock(F.trLong)+(F.trShare!=null?' ('+Math.round(F.trShare)+'% of the check)':''):'none timed')+
+      (c.tr.length?'<div class="ocl-trl">'+c.tr.map((v,i)=>'<span>'+clock(v)+' <button type="button" class="rm" data-trdel="'+i+'" aria-label="Remove transition '+(i+1)+', '+clock(v)+'">&times;</button></span>').join('')+'</div>':'')+'</td></tr>'+
+    '<tr><td class="lab">Class engaged at the scans</td><td>'+(F.engN?Math.round(F.eng)+'% on average over '+F.engN+' scan'+(F.engN===1?'':'s')+' (lowest '+Math.round(F.engLo)+'%, highest '+Math.round(F.engHi)+'%), a scan every '+(c.every<60?c.every+' seconds':c.every===60?'minute':(c.every/60)+' minutes'):c.scans.length?'enter the students present':'no scan')+'</td></tr></tbody></table>';
+  if(b.__h!==h){b.innerHTML=h;b.__h=h;}}
+/* the working conventions, as points for the coaching talk: never a rating of the teacher */
+function aims(c,F){const L=[];if(!c.sec&&!c.otr&&!c.bsp&&!c.gp&&!c.rep)return L;
+  if(F.ratio!=null&&F.ratio<AIM.ratio)L.push('Praise to correction was '+num(F.ratio)+' to 1: coaching often aims for at least '+AIM.ratio+' to 1.');
+  else if(F.ratio==null&&c.rep&&!F.praise)L.push('Reprimands were counted and no praise: coaching often aims for at least '+AIM.ratio+' praise statements for each correction.');
+  if(F.spec!=null&&F.spec<AIM.spec)L.push('Most praise was general ('+Math.round(F.spec)+'% specific): naming the behavior tells the class what to do again.');
+  if(F.eng!=null&&F.eng<AIM.eng)L.push('The class was engaged at '+Math.round(F.eng)+'% of the scans on average: a working aim is '+AIM.eng+'% or more.');
+  if(c.rules.posted==='no')L.push('The rules were not posted.');if(c.rules.taught==='no')L.push('The rules were not taught or reviewed during the check.');
+  if(c.rules.pos==='no'||c.rules.pos==='partly')L.push('Some rules say what not to do: state each as what to do.');
+  return L;}
+function paintAim(c,F){const b=byId('oclAim');if(!b)return;const L=aims(c,F);
+  const h=L.length?'<p class="method"><b>Points for the coaching talk</b> (this form&rsquo;s working conventions, not published cut-offs; the check is not a rating of the teacher):</p><ul class="rules">'+L.map(x=>'<li>'+E(x)+'</li>').join('')+'</ul>':'';
+  if(b.__h!==h){b.innerHTML=h;b.__h=h;}}
+
+/* ---------------- on paper: one check, as the teacher and the record read it ---------------- */
+function repHTML(c){const F=figs(c),i=M.list.indexOf(c);
+  let h='<div class="ocl-r"><h3 class="sub">'+E('Classroom check'+(c.date?' of '+MDY(c.date):'')+(c.start?', '+c.start:'')+(c.sec?', '+num(c.sec/60)+' minutes':''))+'</h3>'+
+    '<div class="sp-rep">'+[['Class',c.room],['Activity',c.act],['Teacher',c.teacher],['Observer',c.obs],['Students present',c.present==null?'':String(c.present)],['Adults',c.adults==null?'':String(c.adults)]].filter(x=>T(x[1])).map(x=>'<span><b>'+x[0]+'</b> '+E(T(x[1]))+'</span>').join('')+'</div>'+
+    '<table class="grid ocl-t"><thead><tr><th style="width:34%">What was counted</th><th style="width:12%">Count</th><th style="width:12%">A minute</th><th>How it is counted</th></tr></thead><tbody>'+
+    KINDS.map(k=>'<tr><td class="lab">'+k[1]+'</td><td class="c">'+c[k[0]]+'</td><td class="c">'+rate(F[k[0]])+'</td><td class="small">'+k[2]+'</td></tr>').join('')+
+    '<tr class="tot"><td>Praise to correction</td><td colspan="2" class="c">'+E(ratioText(c,F))+'</td><td class="small">specific and general praise together, to reprimands and corrections</td></tr>'+
+    '<tr class="tot"><td>Praise that was specific</td><td colspan="2" class="c">'+pct(F.spec)+'</td><td class="small">specific praise, of all praise</td></tr></tbody></table>'+
+    '<table class="grid ocl-t"><tbody><tr><td class="lab" style="width:34%">Transitions</td><td>'+(F.trN?F.trN+' timed: '+clock(F.trTot)+' in all, '+clock(F.trMean)+' on average, the longest '+clock(F.trLong):'none timed')+'</td></tr>'+
+    '<tr><td class="lab">Class engaged at the scans</td><td>'+(F.engN?Math.round(F.eng)+'% on average over '+F.engN+' scans (lowest '+Math.round(F.engLo)+'%, highest '+Math.round(F.engHi)+'%)':'no scan')+'</td></tr>'+
+    '<tr><td class="lab">Rules</td><td>'+E([c.rules.posted?'posted: '+yn[c.rules.posted].toLowerCase():'',c.rules.n!=null?c.rules.n+' rule'+(c.rules.n===1?'':'s'):'',c.rules.pos?'stated as what to do: '+yn[c.rules.pos].toLowerCase():'',c.rules.taught?'taught or reviewed during the check: '+yn[c.rules.taught].toLowerCase():''].filter(Boolean).join('; ')||'not recorded')+'</td></tr>'+
+    (T(c.well)?'<tr><td class="lab">What went well</td><td>'+E(c.well)+'</td></tr>':'')+(T(c.next)?'<tr><td class="lab">One practice to work on</td><td>'+E(c.next)+'</td></tr>':'')+
+    (T(c.note)?'<tr><td class="lab">Note</td><td>'+E(c.note)+'</td></tr>':'')+'<tr><td class="lab">Shared with the teacher</td><td>'+(c.shared?MDY(c.shared):'')+'</td></tr></tbody></table>';
+  const L=aims(c,F);if(L.length)h+='<p class="method"><b>Points for the coaching talk</b> (working conventions, not published cut-offs): '+E(L.join(' '))+'</p>';
+  return h+'<p class="method ocl-frame">A check of the classroom, not of a student: made for coaching and shared with the teacher first. No student is named. Classroom practices with evidence behind them: Simonsen et al. (2008); assessment-based consultation with the teacher: the Classroom Check-Up (Reinke et al.).</p></div>';}
+/* the checks put in the student's record print here, after the summary; with none the whole sheet stays off paper and out of the packet */
+function paintRep(){const box=byId('oclRep'),sh=byId('clsCheck'),hd=byId('oclHead');if(!box||!sh)return;const L=M.list.filter(c=>c.rec&&hasData(c)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const h=L.map(repHTML).join('');if(box.__h!==h){box.innerHTML=h;box.__h=h;}sh.classList.toggle('noprint',!L.length);
+  if(hd){const ph=D.querySelector('#setup .nbh-print-head'),x=L.length?(ph?ph.outerHTML:'')+'<div class="bar nbh-band">Classroom Practices Check</div>':'';if(hd.__h!==x){hd.innerHTML=x;hd.__h=x;}}}
+function printTeacher(){const c=cur();if(!hasData(c)){msg('Record the check first: there is nothing to print yet.',true);return;}
+  let el2=byId('oclTeach');if(el2)el2.remove();el2=D.createElement('div');el2.id='oclTeach';el2.className='ocl-teach';
+  const head=D.querySelector('#setup .nbh-print-head');
+  el2.innerHTML=(head?head.outerHTML:'')+'<div class="bar nbh-band">Classroom Practices Check'+(T(c.teacher)?', for '+E(T(c.teacher)):'')+'</div>'+
+    '<p class="method ocl-frame"><strong>Coaching for you, shared with you first.</strong> A short look at the classroom, not at any student, and not an evaluation. We read it together and choose one practice to work on.</p>'+repHTML(c);
+  D.body.appendChild(el2);const H=D.documentElement;H.classList.add('ocl-teaching');
+  /* the teacher's copy names no student: its running head and foot say what it is, over the record's (put last, after the
+     running head the polish writes as the print starts) */
+  const pg=D.createElement('style');pg.id='oclTeachPage';
+  pg.textContent='@page{@top-center{content:"Classroom practices check";font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:8pt;color:#254657}@bottom-left{content:"Coaching for the teacher, shared with the teacher first. No student is named.";font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:7.5pt;color:#54676f}}';
+  const put=()=>{D.head.appendChild(pg);};put();window.addEventListener('beforeprint',put);
+  const off=()=>{H.classList.remove('ocl-teaching');const x=byId('oclTeach');if(x)x.remove();pg.remove();window.removeEventListener('beforeprint',put);window.removeEventListener('afterprint',off);};
+  window.addEventListener('afterprint',off);msg('Printed for the teacher: give it to them first.');
+  try{window.print();}finally{setTimeout(off,1500);}}
+
+/* ---------------- a simulated check (simulated data only: a room, no student) ---------------- */
+async function sim(){const c=cur();
+  if(hasData(c)&&!(await nbhUI.confirm('Replace this classroom check with a simulated one?',{ok:'Replace'})))return;
+  if(R.run)stop('');const d=new Date();let k=0;while(k<2){d.setDate(d.getDate()-1);if(d.getDay()&&d.getDay()<6)k++;}
+  Object.assign(c,cleanCheck({id:c.id,date:isoOf(d),start:'09:05',room:'Room 12 (simulated)',act:'Whole group instruction',teacher:T(state.meta.teacher)||'Ms. Sample (simulated)',
+    obs:T(state.meta.observer)||'Jordan Ellis, M.A., BCBA (simulated)',present:22,adults:2,plan:15,every:60,sec:900,otr:27,bsp:6,gp:9,rep:7,tr:[95,140,72],
+    scans:[3,2,5,4,2,6,3,2,4,7,3,2,5,4,3].map((off,i)=>({t:60*(i+1),off,n:22})),rules:{posted:'yes',n:5,pos:'partly',taught:'no'},
+    well:'Clear directions before independent work; three behavior-specific praise statements in a row after the warm-up.',
+    next:'Four praise statements for each correction during independent work, most of them naming the behavior.',note:'Simulated check: a room, no student named.'}));
+  commit();draw();msg('A simulated check is loaded: a room, no student named.');}
+
+/* ---------------- wiring ---------------- */
+function setField(c,k,v,elx){
+  if(k==='date'||k==='shared')c[k]=ISO(v);else if(k==='start')c.start=HM(v);
+  else if(k==='present')c.present=I(v,99);else if(k==='adults')c.adults=I(v,20);
+  else if(k==='plan'){c.plan=PLAN.indexOf(+v)>=0?+v:15;}else if(k==='every'){c.every=EVERY.indexOf(+v)>=0?+v:60;if(R.run&&R.id===c.id){R.next=(Math.floor(el(c)/c.every)+1)*c.every;}}
+  else if(k==='min'){c.sec=Math.round(Math.max(0,Math.min(600,+v||0))*60);}
+  else if(k==='otr'||k==='bsp'||k==='gp'||k==='rep')c[k]=N(v,9999);
+  else if(k==='r.n')c.rules.n=I(v,20);else if(/^r\./.test(k))c.rules[k.slice(2)]=v;
+  else if(['room','act','teacher','obs'].indexOf(k)>=0)c[k]=String(v).slice(0,80);else if(['well','next','note'].indexOf(k)>=0)c[k]=String(v).slice(0,1000);}
+D.addEventListener('input',e=>{const t=e.target;if(!t||!t.closest||!t.closest('#oclEd'))return;const k=t.dataset&&t.dataset.ocl;if(!k||t.tagName==='SELECT')return;
+  setField(cur(),k,t.value,t);commit();paintRun();});
+D.addEventListener('change',e=>{const t=e.target;if(!t||!t.closest||!t.closest('#oclEd'))return;const c=cur();
+  if(t.id==='oclWhich'){if(R.run)stop('Paused: another check was chosen.');M.cur=Math.max(0,Math.min(M.list.length-1,+t.value||0));commit();draw();return;}
+  if(t.id==='oclRec'){c.rec=t.checked;commit();paintRun();return;}
+  const k=t.dataset&&t.dataset.ocl;if(!k)return;setField(c,k,t.value,t);
+  if(k==='date'||k==='room'){const w=byId('oclWhich'),o=w&&w.options[M.cur];if(o)o.textContent=title(c,M.cur);}
+  commit();paintRun();});
+D.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#oclEd button');if(!b||b.disabled)return;const c=cur();
+  if(b.id==='oclGo'){startStop();return;}
+  if(b.id==='oclSnd'){snd=!snd;b.setAttribute('aria-pressed',String(snd));try{localStorage.setItem('nbh.ob1.clsSound',snd?'1':'0');}catch(x){}if(snd)beep();return;}
+  if(b.dataset.tap){const k=b.dataset.tap;c[k]=Math.min(9999,c[k]+1);commit();paintRun();b.classList.add('ocl-hit');setTimeout(()=>b.classList.remove('ocl-hit'),140);say(KINDS.find(x=>x[0]===k)[1]+': '+c[k]);return;}
+  if(b.dataset.undo){const k=b.dataset.undo;if(c[k])c[k]--;commit();paintRun();say(KINDS.find(x=>x[0]===k)[1]+': '+c[k]);return;}
+  if(b.id==='oclTr'){if(R.tr0!=null){endTr(c);say('Transition ended: '+clock(c.tr[c.tr.length-1]||0));}else{R.tr0=el(c);say('Transition started');}commit();paintRun();return;}
+  if(b.id==='oclTrUndo'){if(R.tr0!=null)R.tr0=null;else c.tr.pop();commit();paintRun();return;}
+  if(b.dataset.trdel!=null){c.tr.splice(+b.dataset.trdel,1);commit();paintRun();return;}
+  if(b.dataset.scan!=null||b.id==='oclScanGo'){let n;if(b.id==='oclScanGo'){const x=byId('oclScanN');n=I(x&&x.value,99);if(n==null){msg('Type how many students were not engaged.',true);return;}if(x)x.value='';}else n=+b.dataset.scan;
+    if(c.present!=null&&n>c.present){msg('More than the students present ('+c.present+'): check the number.',true);return;}
+    c.scans.push({t:Math.round(el(c)),off:n,n:c.present});R.due=false;commit();paintRun();say('Scan '+c.scans.length+': '+n+' not engaged');return;}
+  if(b.id==='oclScUndo'){c.scans.pop();commit();paintRun();return;}
+  if(b.id==='oclAdd'){if(R.run)stop('');M.list.push(blankCheck());M.cur=M.list.length-1;commit();draw();msg('A new classroom check: '+title(cur(),M.cur)+'.');return;}
+  if(b.id==='oclDel'){(async()=>{if(hasData(c)&&!(await nbhUI.confirm('Remove this classroom check?\n'+title(c,M.cur)+'. Its counts and notes are removed with it.',{ok:'Remove',danger:true})))return;
+    if(R.run&&R.id===c.id)stop('');M.list.splice(M.cur,1);if(!M.list.length)M.list.push(blankCheck());M.cur=Math.min(M.cur,M.list.length-1);commit();draw();msg('The check was removed.');})();return;}
+  if(b.id==='oclPrint'){printTeacher();return;}
+  if(b.id==='oclSim'){sim();return;}});
+/* a file opened, the simulation, a restore: the record's checks are read again */
+{const r0=render;render=function(){const r=r0.apply(this,arguments);try{if(state.meta.cls!==M.src){if(R.run)stop('');fromState();draw();}}catch(e){console.error('OB-1 v25.68: '+(e&&e.message||e));}return r;};}
+/* the view's button: the record's other views hide this one, and this one hides them */
+D.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#viewSeg button[data-view]');if(!b)return;if(b.dataset.view==='class')setTimeout(()=>{try{paintRun();}catch(x){}},0);});
+
+/* ---------------- out to the case ---------------- */
+function factsOne(c){const F=figs(c),o=v=>v==null?null:r1(v);
+  return {date:c.date,start:c.start,mins:o(F.min),room:T(c.room),act:T(c.act),teacher:T(c.teacher),present:c.present,
+    otr:{n:c.otr,pm:o(F.otr)},bsp:{n:c.bsp,pm:o(F.bsp)},gp:{n:c.gp,pm:o(F.gp)},rep:{n:c.rep,pm:o(F.rep)},ratio:o(F.ratio),ratioText:ratioText(c,F),spec:F.spec==null?null:Math.round(F.spec),
+    trans:{n:F.trN,mean:F.trMean==null?null:Math.round(F.trMean),total:F.trTot,long:F.trLong},eng:{scans:F.engN,pct:F.eng==null?null:Math.round(F.eng),lo:F.engLo==null?null:Math.round(F.engLo),hi:F.engHi==null?null:Math.round(F.engHi),every:c.every},
+    rules:Object.assign({},c.rules),well:T(c.well),next:T(c.next),shared:c.shared,aims:aims(c,F)};}
+function factsOut(){const L=M.list.filter(c=>hasData(c)&&c.date&&(c.sec||c.otr||c.bsp||c.gp||c.rep||c.scans.length||c.tr.length)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+  return L.length?{checks:L.map(factsOne),src:'OB-1'}:null;}
+window.__ob2568={figs,cur:()=>cur(),list:()=>M.list,factsOut,repHTML,aims,draw,commit,get R(){return R;}};   /* for the workstation's checks */
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const C=factsOut();if(!C)return r;r=Object.assign({},r||{},{classroom:C});
+    /* the workstation carries this form's evidence (not yet a part of its own): the checks ride beside it there, and only there,
+       so no other form takes a classroom check for evidence about the student */
+    if(r.evidence)r.evidence=Object.assign({},r.evidence,{classroom:C});return r;}catch(e){return r;}};}
+window.addEventListener('beforeprint',()=>{try{if(R.run){const c=M.list.find(x=>x.id===R.id);if(c)c.sec=Math.floor(el(c));}paintRep();}catch(e){}});
+try{fromState();draw();}catch(e){console.error('OB-1 v25.68: '+(e&&e.message||e));}
 })();
 </script>
 <script id="fx2-v2492-js">
