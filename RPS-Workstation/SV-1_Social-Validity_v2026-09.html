@@ -1258,15 +1258,16 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
       <div class="f"><label for="rpRound">Round</label><select id="rpRound"><option value="pre">Pre: Goals and Procedures</option><option value="post">Post: Goals, Procedures and Effects</option></select></div>
       <div class="f"><label for="rpStudent">Student label on the page (initials only: never the full name)</label><input id="rpStudent"><label style="display:flex;gap:6px;align-items:center;font-weight:400;margin-top:4px"><input type="checkbox" id="rpSid" style="width:auto"> Add the student number (pages for school staff only)</label></div>
       <div class="f"><label for="rpNick">How the items name the student (a first name at most, or &ldquo;the student&rdquo;)</label><input id="rpNick"></div>
-      <div class="f"><label for="rpLang">Language of the page</label><select id="rpLang"><option value="">English</option><option value="es">Espa&ntilde;ol (Spanish)</option></select></div>
+      <div class="f"><label for="rpLang">Language of the page</label><select id="rpLang"><option value="">English</option><option value="es">Espa&ntilde;ol (Spanish)</option><option value="ht">Krey&ograve;l ayisyen (Haitian Creole, draft translation)</option></select></div>
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
     </div>
     <div class="f"><label for="rpBeh">The behavior the plan targets, as the page states it (plain words)</label><input id="rpBeh"></div>
     <p class="hint" id="rpLangNote" hidden><b>Spanish.</b> The statements, the open items and the scale are this form&rsquo;s own, drafted in Spanish for it, and the page&rsquo;s own words are the respondent page&rsquo;s Spanish. Have the district&rsquo;s interpreter or a bilingual colleague read the page (Preview) before its first use: &ldquo;slightly agree&rdquo; and its neighbours have no single Spanish rendering. The plan, the behavior and the options appear as typed, so type them in Spanish for this page.</p>
+    <p class="hint" id="rpLangNoteHt" hidden><b>Haitian Creole. Draft translation: a district translator reviews it before it goes home.</b> The statements, the open items, the scale and the page&rsquo;s own words are the workstation&rsquo;s draft in Creole, and the page says so at its top. Have the district translator read the page (Preview) before it goes to a family. The plan, the behavior and the options appear as typed, so type them in Creole for this page.</p>
     <label class="gf-note"><input type="checkbox" id="rpOpen" checked> Ask the open items of each section too (in the respondent&rsquo;s own words)</label>
     <div id="rpStatus" class="gf-warn" hidden></div>
-    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpPreview">Preview</button><span class="hint" id="rpNote"></span></div>
+    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpPreview">Preview</button><button type="button" id="rpReadLvl">Check reading level</button><span class="hint" id="rpNote"></span></div>
   </div>
 </dialog>
 <dialog id="rcDlg" class="gf noprint" aria-labelledby="rcTitle">
@@ -1933,7 +1934,48 @@ const esWord=(x,role,nick)=>(STU(role)&&ES_ST[x.id]?ES_ST[x.id]:(ES_T[x.id]||x.t
     itemsHeading:'Las afirmaciones',openHeading:'En sus propias palabras',subject:'Respuestas de validez social (ronda '+ES_RND[round]+') para el formulario SV-1'});
   if(p.open)p.open=rpOpens(role,round).map(o=>({id:o.id,label:ES_SEC[o.s]+': '+esWord(o,role,nick)}));
   return p;};}
-$('#rpLang').addEventListener('change',()=>{$('#rpLangNote').hidden=$('#rpLang').value!=='es';rpStatus();});
+/* v25.68 (research #13) the respondent page in Haitian Creole: this form's own statements, open items and scale, the workstation's
+   DRAFT TRANSLATION for the district translator's review (the page says so at its top); the page's own words are nbh-respond.js's
+   Creole (also a draft). Every Creole string of this form is here. */
+const HT_T={G1:'Konp\u00f2tman plan sa a vle diminye a se sa ki pi enp\u00f2tan pou mwen, oswa pou [student].',
+ G2:'Nouvo konpetans plan an anseye (sa ki ranplase konp\u00f2tman an) se yon bagay [student] ap vr\u00e8man bezwen and\u00e8y\u00f2 plan sa a.',
+ G3:'Chanjman plan an vize a ta f\u00e8 yon vr\u00e8 diferans nan jounen [student].',G4:'Plan an vize bon kote yo ak bon moman yo.',
+ G5:'Pa gen anyen ki enp\u00f2tan pou mwen ki rete dey\u00f2 objektif yo.',G6:'Plan sa a se sou yon bagay mwen vle vin pi bon ladan l.',
+ P1:'Fason plan an reyaji ak konp\u00f2tman [student] jis, e li respekte l.',
+ P2:'Mwen ta santi m al\u00e8z si fanmi [student], yon l\u00f2t pwofes\u00e8, oswa direkt\u00e8 a ta w\u00e8 jan yo aplike plan an.',
+ P3:'Sa plan an mande granmoun yo f\u00e8 rezonab pou sa li gen chans bay.',P4:'Yo ka aplike plan an nan klas sa a jan li ekri a, nan yon jou n\u00f2mal.',
+ P5:'Si m konpare l ak sa yo te konn f\u00e8 anvan, mwen pi renmen plan sa a.',P6:'Rekonpans yo, ak fason pou genyen yo, akseptab pou mwen.',
+ P7a:'Granmoun yo jis av\u00e8 m l\u00e8 yo itilize plan sa a.',P7b:'Mwen konnen sa m ka genyen ak kijan pou m genyen l.',
+ P8:'Sa plan an koute nan tan anplwaye ak nan matery\u00e8l akseptab pou lek\u00f2l sa a.',
+ E1:'Konp\u00f2tman plan an vize a pi bon pase anvan plan an.',E2:'[student] itilize nouvo konpetans lan poukont li.',
+ E3:'Chanjman an gwo ase pou l konte nan jounen [student].',E4:'Gen l\u00f2t bagay ki pa t objektif plan an ki vin pi bon.',
+ E5:'Gen yon bagay ki vin pi mal depi plan an k\u00f2manse.',E6:'Pwobl\u00e8m mwen te vini av\u00e8 l la rezoud, oswa pr\u00e8ske rezoud.',
+ E7:'Mwen ta renmen yo itilize plan sa a, oswa yon plan ki sanble l, ank\u00f2.',E8a:'Bagay yo pi bon pou mwen kounye a.',E8b:'Mwen renmen jan lek\u00f2l la ap mache pou mwen kounye a.',
+ Go:'Ak pw\u00f2p mo pa ou, kisa ou ta pi renmen ki diferan pou [student] nan fen ane lek\u00f2l sa a?',
+ Po:'\u00c8ske gen yon pati nan plan an ou pa ta vle yo f\u00e8, oswa ou pa ta al\u00e8z si yon moun ta w\u00e8 l?',P7c:'Gen yon pati nan plan sa a mwen pa renmen:',
+ Eo:'Kisa ki chanje, an byen oswa an mal, depi plan an k\u00f2manse? Mete nenp\u00f2t bagay, menm si se pa youn nan objektif yo.',E8c:'Kisa ki pi bon kounye a? Kisa ki pi mal?'};
+const HT_ST={Go:'Kisa ou pi vle ki chanje pou ou lek\u00f2l ane sa a?'};
+const HT_ROLE={student:'el\u00e8v la',caregiver:'papa, manman oswa moun ki okipe el\u00e8v la',teacher:'pwofes\u00e8 ki aplike plan an',para:'asistan ki aplike plan an',admin:'administrasyon lek\u00f2l la',rsp:'moun ki bay l\u00f2t s\u00e8vis bay el\u00e8v la (terapis)',other:'yon l\u00f2t moun'};
+const HT_SEC={G:'Objektif yo',P:'Fason plan an f\u00e8t',E:'Rezilta yo'},HT_RND={pre:'anvan',post:'apre'};
+const htWord=(x,role,nick)=>(STU(role)&&HT_ST[x.id]?HT_ST[x.id]:(HT_T[x.id]||x.t)).replace(/\[student\]/g,nick&&nick!=='the student'?nick:'el\u00e8v la');
+{const base=rpPayload;rpPayload=function(){const ht=$('#rpLang')&&$('#rpLang').value==='ht';if(!ht)return base.apply(this,arguments);
+  const p=base.apply(this,arguments),opt=String(S.meta.options||'').trim();
+  const rk=$('#rpRole').value,round=$('#rpRound').value,role=RP_ROLE(rk),nick=$('#rpNick').value.trim()||'the student',secs=RP_SECS[round].map(s=>HT_SEC[s]),plan=String(S.meta.plan||'').trim(),who=String(S.meta.bcba||'').trim()||'BCBA a';
+  const and=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' ak '+a[a.length-1];
+  Object.assign(p,{lang:'ht',title:'Sa ou panse de plan an ('+HT_RND[round]+')',heading:'Sa ou panse de plan an: '+and(secs),
+    sub:'Pou '+HT_ROLE[rk]+', '+HT_RND[round]+'. \u00c8ske plan an'+(plan?' ('+plan+')':'')+' vize bon bagay la, \u00e8ske yo aplike l yon fason ki akseptab'+(round==='post'?', e \u00e8ske li mache pou ou':'')+'? Se s\u00e8lman moun plan an f\u00e8t pou yo ki ka di sa.',
+    instructions:(opt?'Anvan ou reponn: '+opt+' ':'')+'Bay chak fraz yon n\u00f2t dapre sa ou menm ou panse, soti 1 (mwen pa dak\u00f2 ditou) rive 6 (mwen dak\u00f2 n\u00e8t), oswa N/A si ou pa ka jije l. Pa gen bon ni move repons, e anyen ou di p ap chanje sa el\u00e8v la resevwa. L\u00e8 ou fini, peze Voye: pwogram im\u00e8l ou a ap louvri ak yon mesaj pou '+who+' ki pare pou ale.',
+    items:rpItems(role,round).map(x=>({n:x.id,text:htWord(x,role,nick)})),
+    scale:Object.assign({},p.scale,{naLabel:'N/A: mwen pa ka jije, oswa mwen pa w\u00e8 yo aplike l',anchors:['1 mwen pa dak\u00f2 ditou','2 mwen pa dak\u00f2','3 mwen pa tw\u00f2 dak\u00f2','4 mwen yon ti jan dak\u00f2','5 mwen dak\u00f2','6 mwen dak\u00f2 n\u00e8t']}),
+    extras:[{id:'name',label:'Non ou',req:true},{id:'mode',label:'Kijan ou reponn (poukont ou, yon moun li l pou ou awotvwa, nan yon ent\u00e8vyou)'}],
+    itemsHeading:'Fraz yo',openHeading:'Ak pw\u00f2p mo pa ou',subject:'Repons sou plan an ('+HT_RND[round]+') pou f\u00f2m SV-1'});
+  if(p.open)p.open=rpOpens(role,round).map(o=>({id:o.id,label:HT_SEC[o.s]+': '+htWord(o,role,nick)}));
+  return p;};}
+$('#rpLang').addEventListener('change',()=>{$('#rpLangNote').hidden=$('#rpLang').value!=='es';$('#rpLangNoteHt').hidden=$('#rpLang').value!=='ht';rpStatus();});
+/* v25.68 (research #12) the reading level of what the respondent reads, by Check wording's reading check (suggestions only) */
+$('#rpReadLvl').addEventListener('click',()=>{if(!window.nbhWording||!nbhWording.reading){$('#rpNote').textContent='The reading check is in nbh-wording.js, which is not beside this form.';return;}
+  const p=rpPayload(),L=[p.heading,p.sub,p.instructions].concat((p.open||[]).map(o=>o.label),(p.items||[]).map(x=>x.text)).filter(Boolean);
+  nbhWording.reading({title:'The respondent page: '+p.title,parts:[{lang:p.lang||'en',text:L.join('\n')}]},{back:$('#rpReadLvl')});});
 window.__rp={file:rpFile,link:rpLinkUrl,read:rcRead,payload:()=>rpPayload()};   /* for the checks */
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));

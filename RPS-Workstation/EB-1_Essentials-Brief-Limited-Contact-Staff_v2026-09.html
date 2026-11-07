@@ -3239,6 +3239,42 @@ picPaint();gradePaint();higNote();
   try{if(ask){r=r||{};r.brief=r.brief||{};r.brief.pdAsk=ask;}}catch(e){}return r;};
 })();
 </script>
+<script id="eb1-v2568">
+/* v25.68 (research recommendation #1, the BCBA's 11/6 list) the implementation plan of each adult whose page is this brief (Form
+   ST-1's "Their page": Form EB-1) prints after the brief, one page each, before the acknowledgment. The plans are Form ST-1's: kept
+   here as the case last gave them (saved with this form as "ipl") and replaced each time the case brings the team. A brief with no
+   plan prints as it did. */
+(function(){const t=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();let IPL=[];
+ const iso=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(t(v));return m?m[0]:'';};
+ const ok=L=>(Array.isArray(L)?L:[]).filter(x=>x&&typeof x==='object'&&t(x.who)&&x.plan&&typeof x.plan==='object');
+ window.__eb2568List=()=>IPL.slice();
+ function page(nm,x){const p=x.plan,who=t(x.who)+(t(x.role)?', '+t(x.role):''),cop=(Array.isArray(p.coping)?p.coping:[]).filter(c=>c&&(t(c.barrier)||t(c.fix)));
+  const row=(k,v)=>'<tr><th>'+k+'</th><td>'+(t(v)?esc(t(v)):'&nbsp;')+'</td></tr>';
+  const a=iso(p.checkFrom),b=iso(p.checkBy);
+  return '<div class="eb-ip"><div class="eb-top"><h2>My Implementation Plan</h2><div class="eb-who"><div class="eb-wide"><b>For</b><span>'+esc(who)+'</span></div><div class="eb-wide"><b>Student</b><span>'+esc(nm)+'</span></div></div></div>'+
+   '<h3 class="eb-ip-h">My part</h3><table class="eb-ip-t">'+row('Which steps',p.steps)+row('When',p.when)+row('Where',p.where)+row('Materials',p.materials)+row('First day',iso(p.first)?fmtDate(iso(p.first)):p.first)+'</table>'+
+   '<h3 class="eb-ip-h">If something gets in the way</h3>'+(cop.length?'<table class="eb-ip-t"><tr><th>What may get in the way</th><th>What I do</th></tr>'+cop.map(c=>'<tr><td>'+esc(t(c.barrier))+'</td><td>'+esc(t(c.fix))+'</td></tr>').join('')+'</table>':'<p class="eb-p2">No barrier written yet: name two or three with the contact on the brief, and a fix for each.</p>')+
+   '<p class="eb-p2"><b>Checked together at the first observation'+(a&&b?', between '+esc(fmtDate(a))+' and '+esc(fmtDate(b)):', 3 to 5 school days after the first day')+'.</b> If a fix did not work, or something else got in the way, say so then: the plan changes, not you.</p></div>';}
+ {const h0=handoutHTML;handoutHTML=function(nm,withAck){let h=h0.apply(this,arguments);const L=ok(IPL);if(!L.length)return h;
+  const pages=L.map(x=>page(nm,x)).join(''),i=h.indexOf('<div class="eb-ack">');return i>=0?h.slice(0,i)+pages+h.slice(i):h+pages;};}
+ {const c0=collect;collect=function(){const o=c0.apply(this,arguments);try{const L=ok(IPL);if(L.length)o.ipl=L;}catch(e){}return o;};}
+ {const r0=ebRecord;ebRecord=function(d){IPL=ok(d&&d.ipl);return r0.apply(this,arguments);};}
+ function note(){const box=document.querySelector('section.pane[data-pane="setup"]');if(!box)return;let el=document.getElementById('ebIpNote');
+  if(!el){el=document.createElement('p');el.id='ebIpNote';el.className='hint noprint';el.setAttribute('role','status');box.appendChild(el);}
+  const L=ok(IPL);el.hidden=!L.length;el.textContent=L.length?'Implementation plans from Form ST-1, one page each after the brief: '+L.map(x=>t(x.who)).join('; ')+'. Change them on Form ST-1.':'';}
+ {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const ppl=f&&f.staff&&Array.isArray(f.staff.people)?f.staff.people:null;
+  if(ppl)IPL=ok(ppl.filter(x=>x&&t(x.name)&&x.plan&&x.plan.page==='EB-1').map(x=>({who:t(x.name),role:t(x.role),plan:x.plan})));
+  const r=was?was.apply(this,arguments):null;try{note();if(val('m.client'))build(true);}catch(e){}return r;};}
+ try{note();}catch(e){}
+})();
+</script>
+<style id="eb1-v2568-css">
+.eb-ip{page-break-before:always;break-before:page}
+.eb-ip-h{font-size:13px;margin:12px 0 4px}
+.eb-ip-t{width:100%;border-collapse:collapse;font-size:12.5px}
+.eb-ip-t th,.eb-ip-t td{border:1px solid #c9d4d2;padding:5px 7px;text-align:left;vertical-align:top}
+.eb-ip-t th{width:28%;background:#f3f6f5}
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

@@ -3052,6 +3052,112 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<style id="cn1-v2568-css">
+/* v25.68 (research #6) a note's recorded-at and "Late entry"; the addendum's reason; the note as first signed */
+.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}
+.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}
+#cnRec68{margin:2px 0 8px}
+#cnRec68 .rec68{display:inline;font-size:12px}
+#addBox .cn-why{display:block;margin-top:6px}
+#addBox .cn-why input{display:block;width:100%;box-sizing:border-box;min-height:44px;font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--rule-2,#93aead);border-radius:3px;background:#fff}
+#noteOut .cn-was{margin:2px 0 6px 1.1em;padding:0;font-size:12px}
+#noteOut .cn-head .rec68{display:inline;font-size:12px;color:#111}
+</style>
+<script id="cn1-v2568">
+/* v25.68 (research #6) when an entry was recorded. Each new entry keeps "recorded at", the device clock at the moment it was
+   first written, beside when it happened; one recorded more than 24 hours after it happened prints "Late entry". A date with
+   no time counts as the end of that day, so an entry is marked late only when it surely is. An entry saved before v25.68
+   has no recorded-at and shows and prints as before. The same helper is in Forms DD-1, CR-1, IM-1 and CN-1. */
+window.nbhRec=window.nbhRec||(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const ok=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(v)&&!isNaN(Date.parse(v));
+  const now=()=>new Date().toISOString();
+  const DAYRE=/(\d{4})-(\d\d)-(\d\d)|(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/;
+  function day(v){const m=DAYRE.exec(T(v));if(!m)return null;if(m[1])return [+m[1],+m[2]-1,+m[3]];let y=+m[6];if(y<100)y+=2000;return [y,+m[4]-1,+m[5]];}
+  function hm(v){const m=/(\d{1,2}):(\d{2})\s*([AaPp])?/.exec(T(v));if(!m)return null;let h=+m[1];const mi=+m[2],ap=(m[3]||'').toLowerCase();
+    if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;return h<24&&mi<60?[h,mi]:null;}
+  /* when it happened: a date (2026-11-06, 11/6/2026, 11/6/26, "Tue 9/29/26, 1:42 PM") and a time (14:05, 2:05 PM) */
+  function when(d,t){const s=T(d),D=day(s);if(!D)return null;let H=hm(t);if(!H)H=hm(s.replace(DAYRE,''));
+    const x=H?new Date(D[0],D[1],D[2],H[0],H[1]):new Date(D[0],D[1],D[2],23,59,59);return isNaN(x)?null:x;}
+  const late=(rec,d,t)=>{if(!ok(rec))return false;const h=when(d,t);return !!h&&Date.parse(rec)-h.getTime()>864e5;};
+  const days=(rec,d,t)=>{const h=when(d,t);return ok(rec)&&h?Math.max(0,Math.floor((Date.parse(rec)-h.getTime())/864e5)):0;};
+  function txt(rec){if(!ok(rec))return '';const d=new Date(rec);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
+    return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2)+', '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;}
+  /* the words an entry carries: "Recorded 11/6/26, 2:14 PM (device clock)", and "Late entry" when it is one */
+  const line=(rec,d,t)=>ok(rec)?'Recorded '+txt(rec)+' (device clock)'+(late(rec,d,t)?'. Late entry':''):'';
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const html=(rec,d,t)=>ok(rec)?'<span class="rec68">Recorded '+E(txt(rec))+' (device clock)'+(late(rec,d,t)?' <b class="rec68-late">Late entry</b>':'')+'</span>':'';
+  const CSS='.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}'+
+    '.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}';
+  return {ok,now,when,late,days,txt,line,html,CSS};
+})();
+/* v25.68 (research #6) the note's recorded-at, the addendum's reason, and the note as first signed.
+   - A note keeps "recorded at" (n.rec: the device clock when its first words were written), beside the date and the start of
+     the contact; one written more than 24 hours after the contact shows and prints "Late entry". A note saved before has none.
+   - A signed note is locked as before, and a correction is a dated addendum: the addendum now asks for its reason (a.why),
+     which prints with it. Adding it without a reason asks once and is never refused.
+   - Withdrawing the signature to correct the note keeps the note as it was signed on that addendum (a.was), so once the note
+     is signed again the printout shows each entry that changed as it stood when first signed. */
+(function(){
+  const R=window.nbhRec;if(!R)return;
+  const T=v=>String(v==null?'':v).trim();
+  const CONTENT=['date','start','end','present','purpose','observed','training','problems','recs','changes','data_forms','safety','materials','miss_reason','svc_note'];
+  const empty=n=>!n||!CONTENT.some(f=>T(n[f]));
+  /* a file keeps the recorded-at, the reasons and the note as first signed */
+  if(typeof fromFile==='function'){const f0=fromFile;fromFile=function(d){const o=f0.apply(this,arguments);try{if(!o||!d||!d.S||!Array.isArray(d.S.notes))return o;
+      d.S.notes.slice(0,400).forEach((x,i)=>{const n=o.notes[i];if(!n||!x||typeof x!=='object')return;if(R.ok(x.rec))n.rec=x.rec;
+        (Array.isArray(x.add)?x.add:[]).slice(0,50).filter(y=>y&&typeof y==='object').forEach((y,k)=>{const a=n.add[k];if(!a)return;
+          if(T(y.why))a.why=T(y.why).slice(0,300);if(y.was&&typeof y.was==='object'&&!Array.isArray(y.was)){const w={};Object.keys(y.was).slice(0,120).forEach(f=>{if(typeof y.was[f]==='string')w[f]=y.was[f].slice(0,4000);});a.was=w;}});});}catch(e){}return o;};}
+  /* recorded-at: when the first words go into a note that was empty when it was reached */
+  let pend=null;
+  const inNote=t=>t&&t.closest&&(t.closest('.only-note [data-n]')||t.closest('#nxTbl'));
+  document.addEventListener('focusin',e=>{if(!inNote(e.target))return;const n=note();if(pend!==n)pend=!R.ok(n.rec)&&empty(n)?n:false;},true);
+  const stamp=e=>{if(!e.isTrusted||!inNote(e.target))return;const n=note();if(pend===n&&!R.ok(n.rec)&&!empty(n)){n.rec=R.now();pend=false;paint();}};
+  document.addEventListener('input',stamp);document.addEventListener('change',stamp);
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#newNote,#dupNote'))setTimeout(()=>{pend=null;},0);},true);
+  function paint(){let el=document.getElementById('cnRec68');const w=document.querySelector('.only-note [data-n="written"]'),fg=w&&w.closest('.fieldgrid');if(!el&&fg){el=document.createElement('p');el.id='cnRec68';el.className='hint';fg.insertAdjacentElement('afterend',el);}
+    if(el){const n=note(),h=R.ok(n.rec)?'The note '+R.html(n.rec,n.date,n.start)+(R.late(n.rec,n.date,n.start)?' (written more than 24 hours after the contact)':''):'';if(el.innerHTML!==h)el.innerHTML=h;}
+    try{renderNoteOut();}catch(e){}}
+  /* the reason for an addendum */
+  const box=document.getElementById('addBox'),txt=document.getElementById('addText');
+  if(box&&txt&&!document.getElementById('addWhy')){txt.insertAdjacentHTML('afterend','<label class="hint cn-why" for="addWhy">Reason for the addendum<input id="addWhy" list="addWhyList" maxlength="300" autocomplete="off" placeholder="for example, correcting an error"></label>'+
+    '<datalist id="addWhyList"><option value="Correcting an error"><option value="Information learned after the note was signed"><option value="Clarifying the wording"><option value="Late information from the team"></datalist>');}
+  let len=-1,why='',noWhyOk=false;
+  document.addEventListener('click',async e=>{const b=e.target&&e.target.closest?e.target.closest('#addSave'):null;if(!b)return;
+    const w=document.getElementById('addWhy');why=T(w&&w.value);
+    if(!why&&!noWhyOk&&T(txt&&txt.value)&&signed(note())){e.preventDefault();e.stopImmediatePropagation();
+      if(await nbhUI.confirm('Add the addendum without a reason?\nThe addendum is added either way. A reason (for example, correcting an error) tells the reader why the note changed.',{ok:'Add it without a reason'})){noWhyOk=true;b.click();}
+      else if(w)w.focus();return;}
+    noWhyOk=false;len=(note().add||[]).length;},true);
+  document.addEventListener('click',e=>{if(!e.target||!e.target.closest||!e.target.closest('#addSave')||len<0)return;const n=note(),L=n.add||[];
+    if(L.length>len){const a=L[L.length-1];if(why)a.why=why;const w=document.getElementById('addWhy');if(w)w.value='';renderComputed();}len=-1;});
+  /* withdrawing the signature keeps the note as it was signed */
+  let orig=null;
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#unsignNote')){const n=note();if(!signed(n))return;const w={};
+    NFIELDS.forEach(f=>{if(T(n[f]))w[f]=String(n[f]);});w.next=JSON.stringify((n.next||[]).filter(s=>T(s.what)).map(s=>[T(s.what),T(s.who),T(s.when)]));orig={n,len:(n.add||[]).length,w};}},true);
+  if(typeof renderNote==='function'){const r0=renderNote;renderNote=function(){const r=r0.apply(this,arguments);try{
+      if(orig&&orig.n===note()&&!signed(orig.n)&&(orig.n.add||[]).length>orig.len){const a=orig.n.add[orig.n.add.length-1];a.was=orig.w;orig=null;renderComputed();}
+      pend=null;paint();}catch(e){}return r;};}
+  /* labels for the entries of a note, as the editor names them */
+  const LAB={next:'Next steps'};
+  function labOf(f){if(LAB[f])return LAB[f];const el=document.querySelector('.only-note [data-n="'+f+'"]');if(!el)return f;const c=el.closest('div,td'),l=c&&(c.querySelector('label')||(c.previousElementSibling&&c.previousElementSibling.tagName==='TH'?c.previousElementSibling:null));
+    const t=T(l&&l.textContent).replace(/\s+/g,' ');return t||f;}
+  function wasList(n,a){if(!a||!a.was)return '';const now={};NFIELDS.forEach(f=>{if(T(n[f]))now[f]=String(n[f]);});now.next=JSON.stringify((n.next||[]).filter(s=>T(s.what)).map(s=>[T(s.what),T(s.who),T(s.when)]));
+    const ks=[...new Set(Object.keys(a.was).concat(Object.keys(now)))].filter(f=>!/^(sig|sig_date|sig_time|written)$/.test(f)&&T(a.was[f])!==T(now[f])&&!(f==='next'&&a.was[f]==='[]'&&!now[f]));
+    if(!ks.length)return '<ul class="cn-was"><li>No entry differs from the note as first signed.</li></ul>';
+    const show=(f,v)=>{if(!T(v))return 'empty';if(f==='next'){try{return JSON.parse(v).map(x=>x.filter(Boolean).join(', ')).join('; ')||'empty';}catch(e){return v;}}return '“'+v+'”';};
+    return '<ul class="cn-was">'+ks.map(f=>'<li><b>'+esc(labOf(f))+'</b>, as first signed: '+esc(show(f,a.was[f]))+'</li>').join('')+'</ul>';}
+  const whyTxt=a=>' Reason: '+(T(a.why)?T(a.why):'not given')+'.';
+  if(typeof renderSign==='function'){const s0=renderSign;renderSign=function(n){const r=s0.apply(this,arguments);try{const L=document.querySelectorAll('#addList .cn-add > div');
+      (n.add||[]).forEach((a,k)=>{const d=L[k];if(!d||d.dataset.v68)return;d.dataset.v68='1';if(T(a.why)||a.was)d.insertAdjacentText('beforeend',whyTxt(a));});}catch(e){}return r;};}
+  if(typeof renderNoteOut==='function'){const o0=renderNoteOut;renderNoteOut=function(){const r=o0.apply(this,arguments);try{const n=note(),out=document.getElementById('noteOut');if(!out)return r;
+      const hd=out.querySelector('.cn-head');if(hd&&R.ok(n.rec))hd.insertAdjacentHTML('beforeend','<div style="grid-column:1/-1"><b>Recorded</b>'+R.html(n.rec,n.date,n.start).replace(/^<span class="rec68">Recorded /,'<span class="rec68">')+'</div>');
+      const h=[...out.querySelectorAll('h4')].find(x=>/^Addenda$/.test(T(x.textContent)));
+      if(h){let p=h.nextElementSibling;(n.add||[]).forEach(a=>{if(!p||p.tagName!=='P')return;if(T(a.why)||a.was)p.insertAdjacentText('beforeend',whyTxt(a));if(a.was&&signed(n))p.insertAdjacentHTML('afterend',wasList(n,a));
+        p=p.nextElementSibling;while(p&&p.tagName==='UL')p=p.nextElementSibling;});}}catch(e){}return r;};}
+  try{paint();}catch(e){}
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

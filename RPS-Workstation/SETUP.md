@@ -9905,6 +9905,45 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.68: Procedure videos on TD-1, the shell's three decisions, safety records, family language, classroom checks and RS-1's fieldwork
+(the BCBA, 11/6 and 11/7: wave 1 and the first parts of wave 2 of the research; the procedure videos for high-p, DRO, NCR and RIRD)
+
+- **TD-1: procedure videos on the cards.** 16 AI-generated videos of simulated people, each in its own file and loaded only
+  when Watch the video is tapped: five for the high-probability request sequence (three easy requests, praise only, the
+  whole class, before seatwork, a peer), four for DRO (resetting; whole-interval in class then momentary; momentary, fixed
+  and variable; tokens, then student-run), four for NCR (attention in class; items with a timer, a signal and a request;
+  snacks and timed breaks during work; free access before, then signaled no-access) and three for RIRD (vocal questions;
+  motor directions; pica, blocked at the first touch). Every DRO, NCR, NCE, A_NCA, RIRD and high-p card shows its closest
+  video, and the line under the button says which version it is and how the card differs; six RIRD cards with nothing
+  close (overcorrection, the awareness device, exposure and response prevention, the chin cue) show none. Each video's
+  prop timer shows the same time as the timer on screen. The casts are mixed.
+- **TD-1: the DRO interval from baseline.** "Set the first interval from baseline" on every DRO card: up to three
+  baseline sessions (minutes and count), the mean time between responses, a first interval of 50% to 100% of it (the
+  cards start at half the mean, just under it or at it; never below 5 s), and the four ways the cards lengthen it (+50%
+  after 2 good sessions; the last 3 sessions' mean, never more than doubling; doubling and halving; fixed steps), each
+  opening its card. It never fills the card's field; the BCBA types the interval.
+- **TD-1: versions from the studies.** Each bank card can be compared with the other versions of the same procedure, side
+  by side, and TD-1 checks the plan's quality before sign-off.
+- **The shell: the BCBA's three decisions.** Documents lists only what the workstation makes (Build packet and the papers
+  it prints in its own window, and Finish PDF), each line removable; on the iPad held sideways, a list she opens herself
+  stays beside the form until she closes it; Open case and New case ask once where the case files live. Caseload shows
+  key findings and the next 90 days; previews and motion. Read a document is in its own file, nbh-shell-docread.js (the
+  one-file editions carry it inline).
+- **Safety records.** CR-1 records Baker Act initiations and threat team cases as dated events and prints a one-page
+  threat team brief (initials only, no rating); RR-1 and PR-1 read them. DD-1, CR-1, IM-1 and CN-1 entries carry
+  recorded-at and late entry; after signing, a change to TD-1, IC-1, CR-1 or a CN-1 note is a dated addendum with a
+  reason, printed after the signatures.
+- **Family language.** A reading-level check for what goes home, and Haitian Creole drafts of the family pages, each
+  marked for the district translator.
+- **Classroom and staff.** OB-1's classroom practices check feeds GC-1 and TI-1's feedback; the staff phone page has a
+  daily self-check compared with observed integrity.
+- **RS-1.** BCBA trainee fieldwork under the 2022 and 2027 BACB rules by each entry's date, and the BACB's own monthly and
+  final verification PDFs filled from the month's entries (signatures left for the person). IC-1's printout is redesigned
+  for the family.
+- **Checks.** check-build reproduces all 48 forms. New tests: v2568-td1-versions, v2568-td1-procvideos, v2568-shell,
+  v2568-safety-records, v2568-family-language, v2568-class-staff, v2568-ic1-print, v2568-rs1-trainee, v2568-rs1-bacbpdf
+  and v2568-forms.
+
 ### v25.67: The case home, the design review's shell group, one screen layout for 14 forms, and batch 3
 (the BCBA, 11/6: the case home and the student switch; every item of the design review marked Build, M7 included; the
 other forms' parts of the second batch; the day's decisions on the QABF, photos, TB-1 and the study-based options)

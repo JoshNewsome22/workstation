@@ -1291,7 +1291,7 @@ window.FX2_CFG = { toolbar: true,
     <div class="f"><label for="sEnroll">Enrolled at this school</label><input id="sEnroll" name="s.enroll" type="date"></div>
     <div class="f"><label for="sPrior">Prior school / district</label><input id="sPrior" name="s.prior"></div>
     <div class="f"><label for="sTrans">Transportation</label><input id="sTrans" name="s.trans" placeholder="e.g., bus 412, aide on bus; parent drop-off"></div>
-    <div class="f"><label for="sLang">Home language</label><input id="sLang" name="s.lang"></div>
+    <div class="f"><label for="sLang">Home language</label><input id="sLang" name="s.lang" list="dmLangs" autocomplete="off"><datalist id="dmLangs"><option value="English"></option><option value="Spanish"></option><option value="Haitian Creole"></option><option value="Portuguese"></option><option value="Vietnamese"></option><option value="Arabic"></option><option value="French"></option></datalist><div class="hint noprint" id="dmHtNote" role="note" hidden></div></div>
     <div class="f"><label for="sInterp">Interpreter needed for family</label><select id="sInterp" name="s.interp"><option value=""></option><option>No</option><option>Yes: spoken</option><option>Yes: sign</option><option>Yes: written translation</option></select></div>
     <div class="f"><label for="sEll">ELL status</label><select id="sEll" name="s.ell"><option value=""></option><option>Not ELL</option><option>ELL: active</option><option>ELL: monitored</option></select></div>
     <div class="f"><label for="sEth">Race / ethnicity (only if required on this document)</label><input id="sEth" name="s.eth"></div>
@@ -1574,7 +1574,7 @@ function renderCon(){const n=+$('#nCon').value,w=$('#conWrap');const keep={};w.q
    <div class="f"><label>Alternate phone</label><input name="c[${i}].phone2"></div>
    <div class="f"><label>Email</label><input name="c[${i}].email"></div>
    <div class="f"><label>Address</label><input name="c[${i}].addr"></div>
-   <div class="f"><label>Language / interpreter</label><input name="c[${i}].lang"></div>
+   <div class="f"><label>Language / interpreter</label><input name="c[${i}].lang" list="dmLangs" autocomplete="off"></div>
    <div class="f"><label>Preferred contact</label><select name="c[${i}].pref">${opts(CONTACT)}</select></div>
    <div class="f"><label>Educational rights</label><select name="c[${i}].rights">${opts(RIGHTS)}</select></div>
    <div class="f"><label>May be told about</label><select name="c[${i}].perm">${opts(PERM)}</select></div>
@@ -3890,6 +3890,21 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="dm-v2568">
+/* v25.68 (research #13) the family's language chosen here sets the language of what goes home: the Home note, Form HD-1's sheets,
+   SR-1's family version, SM-1's home note strip and the respondent pages (IA-1, SV-1, CF-1) follow it. The list beside Home
+   language offers Haitian Creole with English and Spanish (any language can still be typed). For Haitian Creole the line under
+   the field says what has a Creole version, and that every Creole text is the workstation's draft translation. On screen only;
+   nothing in the record or the profile changes. */
+(function(){const RE=/creole|krey[o\u00f2]l|haitian|ayisyen/i;
+ function note(){const el=document.getElementById('dmHtNote'),f=document.querySelector('[name="s.lang"]');if(!el||!f)return;const on=RE.test(f.value||'');el.hidden=!on;
+  el.innerHTML=on?'<b>Haitian Creole.</b> The Home note, Form HD-1&rsquo;s sheets, SR-1&rsquo;s family version, SM-1&rsquo;s home note and the respondent pages (IA-1, SV-1, CF-1) have the workstation&rsquo;s Creole beside the English. <b>Draft translation: a district translator reviews it before it goes home.</b>':'';}
+ document.addEventListener('input',e=>{if(e.target&&e.target.name==='s.lang')note();});
+ document.addEventListener('change',e=>{if(e.target&&e.target.name==='s.lang')note();});
+ window.dmHtNote=note;if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',note);else note();
+ setTimeout(note,600);setInterval(()=>{if(!document.hidden)note();},1500);   /* a case opened or a simulation loaded sets the field without an input */
+})();
+</script>
 <script id="dm-v2195">
 /* v21.95 the home: who the workstation's Home note is for (the contact who holds rights, else the parent or guardian
    listed first), their email and language, and the home language and interpreter line, as part of the profile facts.

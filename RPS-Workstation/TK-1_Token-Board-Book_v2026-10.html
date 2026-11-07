@@ -4745,9 +4745,21 @@ const TXT_PREV2={ft:Object.assign({},TXT0),rules:Object.assign({},TXT_RULES),bus
 (function(){const K=[['which keeps the tokens valuable when any one item has lost its appeal.','which keeps the tokens valuable when any one item has lost its appeal.{gen}'],
     ['The test that it has worked: the behavior that earns tokens goes up.','The test that it has worked: the behavior that earns tokens goes up. It goes up with the tokens, and stays lower when the tokens buy nothing (Form TE-1\u2019s token check).']];
   [TXT0,TXT_RULES,TXT_BUS].forEach(T=>{T.te=txtEd(T.te,K);});})();
+/* v25.68 (TOKEN-M11, the BCBA, 11/6) "When the learner chooses: when the board is full": in that mode only, the back of the Choices
+   page and Step 1 say the learner chooses at the exchange. A back still holding a default text takes the text for the mode; an edited
+   back is kept as written. The narrated walkthrough stays as it is (it shows the default, choosing before the work). */
+const TXT_FULL=(function(){const E=[['STEP 1 : YOUR LEARNER PICKS SOMETHING TO EARN','STEP 1 : YOUR LEARNER PICKS AT THE EXCHANGE'],
+    ['shows your learner pictures of items and activities before a task begins, so they can choose what they are working for.','shows your learner pictures of the items and activities the {tokens} can buy. In this book your learner chooses **when the board is full**, at the exchange, so the {tokens} keep their value when one item loses its pull.'],
+    ['1. Show the learner the choice board and let them select an item to work for.','1. When the last {token} goes on the board, show the learner the choice board and let them select the item to trade the {tokens} for.'],
+    ['3. Once the learner selects a picture, turn to the next page and place the picture in the green box under the word \u201cThen.\u201d','3. Once the learner selects a picture, give that item right away, then clear the board for the next round.'],
+    ['3. Once the learner selects a picture, turn to the next page and place the picture in the green **Earn** box.','3. Once the learner selects a picture, give that item right away, then clear the board for the next round.'],
+    ['make sure the skill holds up without choosing a picture first.','make sure the skill holds up without the choice board.']];
+  const o={};[['ft',TXT0],['rules',TXT_RULES]].forEach(([kd,T])=>{o[kd]={cb:txtEd(T.cb,E),h1:txtEd(T.h1,E)};});return o;})();
 const txtKind=()=>S.meta.kind==='bus'?'bus':S.meta.layout==='rules'?'rules':'ft';
-const txtDef=k=>({ft:TXT0,rules:TXT_RULES,bus:TXT_BUS})[txtKind()][k];
-const txtIsDef=(k,v)=>v===TXT_OLD[k]||v===TXT0[k]||v===TXT_RULES[k]||v===TXT_BUS[k]||v===TXT_PREV.ft[k]||v===TXT_PREV.rules[k]||v===TXT_PREV.bus[k]||v===TXT_PREV2.ft[k]||v===TXT_PREV2.rules[k]||v===TXT_PREV2.bus[k];   /* v24.45 (review R-106); v25.65 */
+const txtFull=k=>S.meta.ch_when==='full'&&txtKind()!=='bus'&&(k==='cb'||k==='h1');   /* v25.68 TOKEN-M11 */
+const txtDef=k=>txtFull(k)?TXT_FULL[txtKind()][k]:({ft:TXT0,rules:TXT_RULES,bus:TXT_BUS})[txtKind()][k];
+const txtIsDef=(k,v)=>v===TXT_OLD[k]||v===TXT0[k]||v===TXT_RULES[k]||v===TXT_BUS[k]||v===TXT_PREV.ft[k]||v===TXT_PREV.rules[k]||v===TXT_PREV.bus[k]||v===TXT_PREV2.ft[k]||v===TXT_PREV2.rules[k]||v===TXT_PREV2.bus[k]||
+  ((k==='cb'||k==='h1')&&(v===TXT_FULL.ft[k]||v===TXT_FULL.rules[k]));   /* v24.45 (review R-106); v25.65; v25.68 the full-board mode's two */
 const CREDIT0='To find more resources and information visit\nwww.Behavior-Charts.com';
 /* v21.44 the avatar a book starts with: the practice's own Boy picture from the library (the drawn boy where the library is
    not beside the form) */
@@ -5158,7 +5170,7 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n')return;S.meta[k]=el.value;if(k==='wm')$('#wmPct').textContent=el.value;if(k==='tokname'){recaps(false);renderTbls();}if(k==='tok_rule')renderSetup();renderOutSoon();}});
 document.addEventListener('change',e=>{const el=e.target;if(el.id==='tkState')return;
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderOut();return;}
-  if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n'){if(S.meta.n!==el.value){S.meta.n=el.value;ensure();recaps(true);renderAll();}return;}S.meta[k]=el.value;if(k==='layout'){renderAll();return;}   /* v23.25 (review F301) the backs follow the layout */
+  if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n'){if(S.meta.n!==el.value){S.meta.n=el.value;ensure();recaps(true);renderAll();}return;}S.meta[k]=el.value;if(k==='layout'||k==='ch_when'){renderAll();return;}   /* v23.25 (review F301) the backs follow the layout; v25.68 (TOKEN-M11) and the choosing mode */
   if(k==='sp_card'||k==='layout'||k==='avatar'||k==='term')renderTbls();renderOut();}});
 $('#wholeBtn').addEventListener('click',()=>{S.meta.order='all';delete S.meta.prevOrder;renderAll();});
 $('#phReset').addEventListener('click',()=>{S.meta.ph_x='50';S.meta.ph_y='35';S.meta.ph_z='100';renderAll();});

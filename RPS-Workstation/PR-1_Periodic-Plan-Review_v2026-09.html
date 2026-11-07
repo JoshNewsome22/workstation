@@ -1119,6 +1119,24 @@ table.pr-ddprev{min-width:600px}
     <div class="grid-wrap pr-logwrap" tabindex="0" role="region" aria-label="Review log"><table class="rt pr-grid pr-log" id="prLogTbl"></table></div>
   </section>
 
+
+  <!-- v25.68 (research recommendation #8, the BCBA's 11/6 list) the E/BD eligibility evidence: a task list of what Rule
+       6A-6.03016 asks the team to have, each with its status and where it comes from. It gathers; the team decides. Printed only
+       with its own button, so the form's print is as it was. -->
+  <section class="only-dec pr-ebdsec" id="prEbdSec">
+    <h2 class="nbh-band" style="margin-top:16px">Eligibility Evidence (E/BD)</h2>
+    <p class="hint">For the eligibility staffing: the evidence Florida&rsquo;s rule for emotional or behavioral disabilities (Rule 6A-6.03016, F.A.C.) asks the team to have, gathered from the case, each with its status and the form it comes from. The rule makes a functional behavioral assessment part of the evaluation, and asks for a behavior intervention plan implemented with fidelity before the team decides, except in the extraordinary circumstances its paragraph (4)(e) describes. This page says what is missing. It does not decide anything: the decision is the team&rsquo;s.</p>
+    <p class="pr-ebdcheck noprint" role="note"><b>Check the current wording before printing.</b> The rule is summarized here, not quoted; read the current rule and the district&rsquo;s procedure before the staffing.</p>
+    <div id="prEbdList" aria-live="polite"></div>
+    <table class="rt" id="prEbdTbl">
+      <tr><th style="width:30%">Date of the FBA report (Form FS-1)</th><td><input type="date" data-m="ebdFba" aria-label="Date of the FBA report"></td></tr>
+      <tr><th>Exclusions the team considered and noted</th><td><textarea data-m="ebdExcl" rows="2" style="width:100%" aria-label="Exclusions the team considered and noted" placeholder="What the team considered and ruled out, as the rule and the district&rsquo;s procedure list them, and where it is recorded"></textarea></td></tr>
+      <tr><th>Extraordinary circumstances (paragraph (4)(e)), only if the team records them</th><td><textarea data-m="ebdExtra" rows="1" class="pr-line" style="width:100%" aria-label="Extraordinary circumstances, only if the team records them"></textarea></td></tr>
+      <tr><th>Offer it to the IEP meeting packet</th><td><select data-m="ebdIep" aria-label="Offer this page to the IEP meeting packet"><option value="">No</option><option value="yes">Yes: the workstation&rsquo;s IEP meeting packet may include this page</option></select></td></tr>
+    </table>
+    <div class="row noprint" style="margin:8px 0;display:flex;gap:8px;flex-wrap:wrap"><button class="tool" id="prEbdPrint" type="button">Print the E/BD evidence page</button></div>
+  </section>
+
   <!-- EXIT -->
   <section class="only-exit">
     <h2 class="nbh-band">Fading and Exit Criteria</h2>
@@ -1153,6 +1171,25 @@ table.pr-ddprev{min-width:600px}
     <h3 style="margin-top:14px">Exit Readiness</h3>
     <div id="exitWrap"></div>
     <div id="exitVerdict"></div>
+    <!-- v25.68 (research recommendation #20, the BCBA's 11/6 list) exit and archive, with retention dates; the "remove from this
+         iPad" countdown starts only once the BCBA confirms the final file is in district storage. Printed when filled. -->
+    <div id="prArch" class="pr-arch pr-arch-empty">
+    <h3 style="margin-top:14px">Archive</h3>
+    <p class="hint">When the plan has ended and the student leaves the caseload: the final case file, how long it is kept, and the copy on this iPad removed once the file is in district storage. One index line stays, so the record can be found years later.</p>
+    <table class="rt" id="prArchTbl">
+      <tr><th style="width:30%">Case closed on</th><td><input type="date" data-m="arExit" aria-label="Case closed on"></td></tr>
+      <tr><th>1. The final case file, written on</th><td><input type="date" data-m="arFileDate" aria-label="Final case file written on"><div class="hint noprint">In the workstation, <b>Save case</b> writes every form of the case to one file. Then record it here.</div></td></tr>
+      <tr><th>The final case file&rsquo;s name</th><td><input data-m="arFile" aria-label="Final case file name" placeholder="e.g., S.S._case_2027-06-04.json"></td></tr>
+      <tr><th>2. The district&rsquo;s retention rule (GS7 item)</th><td><input data-m="arGs7" aria-label="The district's retention rule: the GS7 item" placeholder="the item and its title"><div class="hint noprint" id="prGs7Here"></div></td></tr>
+      <tr><th>Years the district keeps it after the case closes</th><td><input data-m="arGs7y" inputmode="numeric" aria-label="Years the district keeps the record after the case closes" placeholder="as the GS7 item says"></td></tr>
+      <tr><th>3. Kept until</th><td><div id="prArchKeep"></div><p class="pr-ebdcheck noprint" style="margin-top:4px"><b>Check the current wording before printing.</b> The Ethics Code&rsquo;s retention item and the district&rsquo;s GS7 item are summarized, not quoted.</p></td></tr>
+      <tr><th>4. Where the final file is</th><td><input data-m="arWhere" aria-label="Where the final file is kept" placeholder="e.g., the district records system, ESE folder"></td></tr>
+      <tr><th>Confirmed in district storage on</th><td><input type="date" data-m="arConfirm" aria-label="Date the final file was confirmed in district storage"><div class="noprint pr-arrow"><button type="button" class="tool" id="prArchConfirm">The final file is in district storage</button></div></td></tr>
+      <tr><th>5. Remove the copy from this iPad within (days of the confirmation)</th><td><input data-m="arDays" inputmode="numeric" aria-label="Days after the confirmation to remove the copy from this iPad" placeholder="30"><div id="prArchCount" role="status"></div></td></tr>
+      <tr><th>The index line</th><td><div id="prArchLine" class="pr-arline"></div><div class="noprint pr-arrow"><button type="button" class="tool" id="prArchKeepLine">Keep the index line on this iPad</button> <button type="button" class="tool" id="prArchCopy">Copy the index line</button> <span class="hint" id="prArchMsg" role="status" aria-live="polite"></span></div>
+        <details class="noprint pr-arlines"><summary>Index lines kept on this iPad <span id="prArchN"></span></summary><div id="prArchLines"></div><button type="button" class="tool" id="prArchSave">Save the index lines as a file</button></details></td></tr>
+    </table>
+    </div>
   </section>
 
   <!-- GUIDE -->
@@ -4304,6 +4341,177 @@ renderAll();
   if(!el){el=document.createElement('div');el.id='pr67Contrast';el.className='pr-contrast';at.parentNode.insertBefore(el,at.nextSibling);}
   const L=lines(f&&f.contrast,f&&f.relapse);el.hidden=!L.length;el.innerHTML=L.join('');}
  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paint(f||{});}catch(e){}return r;};
+})();
+</script>
+<script id="pr1-v2568">
+/* v25.68 (the BCBA's 11/6 list, research recommendations #8 and #20)
+   #8 Eligibility evidence (E/BD), on the Decision view: a task list of the evidence Rule 6A-6.03016 asks for (the FBA, a plan
+      implemented with fidelity, how long it ran and the response, the general-education and MTSS interventions tried, the
+      exclusions noted), each with its status and the form it comes from, read from the case (FS-1's function, TD-1's adoption,
+      TI-1's checks, DD-1's data, RR-1's documented interventions) and three entries here. It says what is missing and never decides:
+      no word of it says the student qualifies. Printed with its own button only; offered to the IEP meeting packet (review.ebd)
+      only when "Offer it" is set.
+   #20 Archive, on the Fading and exit view: the final case file (the workstation's Save case, recorded here), the district's
+      retention rule (the GS7 item and its years, typed once on this iPad and offered for the next student), the Ethics Code's
+      minimum for the BCBA's own records (7 years by the common reading), the "remove from this iPad" countdown, which starts only
+      once the BCBA confirms the file is in district storage, and one index line (initials, dates, where the file is) kept here and,
+      when asked, on this iPad. Nothing is removed or sent by this form. Every new field is optional and empty in a saved file;
+      the archive prints only when filled. */
+(function(){
+const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const byId=id=>document.getElementById(id);
+const iso=v=>{v=T(v);let m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(v);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\b/.exec(v);return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
+const us=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const dOf=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m?new Date(+m[1],+m[2]-1,+m[3],12):null;};
+const isoOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const addDays=(s,n)=>{const d=dOf(s);if(!d)return '';d.setDate(d.getDate()+n);return isoOf(d);};
+const addYears=(s,n)=>{const d=dOf(s);if(!d)return '';d.setFullYear(d.getFullYear()+n);return isoOf(d);};
+const today=()=>isoOf(new Date());
+let C=null;
+const M=()=>(S&&S.meta)||{};
+function initials(){let c=T(M().client).replace(/^SIMULATED\s*[–—-]\s*/i,'');const m=/^([^,]+),\s*(.+)$/.exec(c);if(m)c=m[2]+' '+m[1];
+  const w=c.split(/\s+/).filter(x=>/[A-Za-zÀ-ɏ]/.test(x));return w.length?w.map(x=>x.replace(/[^A-Za-zÀ-ɏ]/g,'').charAt(0).toUpperCase()+'.').join(''):'';}
+
+/* ===================== #8 the E/BD evidence ===================== */
+const ST={ok:['In the case','pr-st-ok'],part:['Partly in the case','pr-st-part'],miss:['Missing','pr-st-miss']};
+function ebdItems(){const f=C||{},m=M(),L=[];
+  /* 1 the FBA */
+  {const fn=f.fn&&(f.fn.label||f.fn.key),d=iso(m.ebdFba)||iso(f.fn&&f.fn.date);
+   L.push({k:'fba',label:'A functional behavioral assessment',from:'Form FS-1',st:fn&&d?'ok':fn?'part':'miss',
+     detail:fn?'Function summary: '+E(T(fn))+'.'+(d?' Report dated '+us(d)+'.':' The report&rsquo;s date is not recorded: enter it below.'):'No function summary from Form FS-1 in the case.',
+     miss:fn?(d?'':'the date of the FBA report'):'the FBA (Form FS-1)'});}
+  /* 2 the plan, implemented with fidelity */
+  {const ad=(f.plan&&f.plan.adoption)||{},ti=f.integrity||null,obs=ti&&Array.isArray(ti.obs)?ti.obs.filter(o=>o&&iso(o.date)).slice().sort((a,b)=>iso(a.date).localeCompare(iso(b.date))):[];
+   const start=iso(ad.start)||iso(ad.date),since=start?obs.filter(o=>iso(o.date)>=start):obs,crit=ti&&+ti.criterion||90;
+   const mean=since.length?since.reduce((a,o)=>a+(+o.pct||0),0)/since.length:null;
+   const det=[iso(ad.date)?'Plan adopted '+us(iso(ad.date))+(iso(ad.start)?', started '+us(iso(ad.start)):'')+' (Form TD-1).':'No adoption date for the plan (Form TD-1).',
+     since.length?since.length+' integrity check'+(since.length===1?'':'s')+(start?' since it started':'')+', '+us(iso(since[0].date))+(since.length>1?' to '+us(iso(since[since.length-1].date)):'')+'; mean '+(Math.round(mean*10)/10)+'% (Form TI-1&rsquo;s criterion '+E(crit)+'%).':'No integrity check'+(start?' since the plan started':'')+' in the case (Form TI-1).'];
+   L.push({k:'bip',label:'A behavior intervention plan implemented with fidelity',from:'Forms TD-1 and TI-1',st:iso(ad.date)&&since.length?'ok':iso(ad.date)||since.length?'part':'miss',detail:det.join(' '),
+     miss:[iso(ad.date)?'':'the plan&rsquo;s adoption (Form TD-1)',since.length?'':'integrity checks across the period (Form TI-1)'].filter(Boolean).join(' and ')});}
+  /* 3 how long it ran, and the response */
+  {const d=f.data||null,ad=(f.plan&&f.plan.adoption)||{},start=iso(ad.start)||iso(ad.date),B=d&&Array.isArray(d.behaviors)?d.behaviors.filter(b=>b&&b.name):[];
+   const ph=B.filter(b=>b.base&&b.base.mean!=null&&b.cur&&b.cur.mean!=null),to=iso(d&&d.to);
+   const wk=start&&to&&to>=start?Math.round((dOf(to)-dOf(start))/864e5/7*10)/10:null;
+   const lines=ph.map(b=>E(T(b.name))+': '+E(b.base.mean)+(b.unit?' '+E(T(b.unit)):'')+' in '+E(T(b.baseName||'baseline'))+(b.base.days?' ('+E(b.base.days)+' days)':'')+', '+E(b.cur.mean)+' in '+E(T(b.curName||'the current phase'))+(b.cur.days?' ('+E(b.cur.days)+' days)':''));
+   L.push({k:'resp',label:'How long the plan ran, and the response',from:'Form DD-1 (with its phase lines)',st:!d||!B.length?'miss':ph.length&&wk!=null?'ok':'part',
+     detail:(wk!=null?'The plan has run about '+wk+' weeks ('+us(start)+' to '+us(to)+'). ':'')+(lines.length?lines.join('; ')+'.':d&&B.length?'Daily data from '+us(iso(d.from))+' to '+us(to)+', without a baseline and a treatment phase marked on Form DD-1.':'No daily data in the case (Form DD-1).'),
+     miss:!d||!B.length?'daily data (Form DD-1)':[ph.length?'':'phase lines on Form DD-1 (baseline and the plan)',wk!=null?'':'the plan&rsquo;s start date (Form TD-1)'].filter(Boolean).join(' and ')});}
+  /* 4 general-education and MTSS interventions */
+  {const iv=f.records&&Array.isArray(f.records.interventions)?f.records.interventions.filter(x=>x&&T(x.name)):[];
+   L.push({k:'mtss',label:'General-education and MTSS interventions tried',from:'Form RR-1 (documented interventions)',st:iv.length?'ok':'miss',
+     detail:iv.length?iv.map(x=>E(T(x.name))+(T(x.dates)?' ('+E(T(x.dates))+')':'')+(T(x.outcome)?': '+E(T(x.outcome)):'')).join('; ')+'.':'Form RR-1 lists no documented intervention.',miss:iv.length?'':'the interventions tried (Form RR-1)'});}
+  /* 5 the exclusions */
+  {const x=T(m.ebdExcl);L.push({k:'excl',label:'Exclusions noted',from:'The team (below)',st:x?'ok':'miss',detail:x?E(x):'Not written yet.',miss:x?'':'the exclusions the team noted'});}
+  return L;}
+function ebdRender(){const box=byId('prEbdList');if(!box)return;const L=ebdItems(),miss=L.filter(x=>x.miss).map(x=>x.miss);
+  let h='<ol class="pr-ebd">'+L.map(x=>'<li><div class="pr-ebdh"><b>'+x.label+'</b><span class="pr-st '+ST[x.st][1]+'">'+ST[x.st][0]+'</span></div><div class="pr-ebdd">'+x.detail+'</div><div class="pr-ebdf">From: '+x.from+'</div></li>').join('')+'</ol>';
+  const ex=T(M().ebdExtra);if(ex)h+='<p class="pr-ebdx"><b>Extraordinary circumstances recorded by the team:</b> '+E(ex)+'</p>';
+  h+=miss.length?'<div class="pr-ebdmiss"><b>Missing for the staffing:</b> '+miss.join('; ')+'.</div>':'<div class="pr-ebdmiss pr-ebdall"><b>Every item has its evidence in the case.</b> The team reads it and decides.</div>';
+  box.innerHTML=h;}
+function ebdFacts(){const L=ebdItems(),strip=x=>String(x).replace(/<[^>]+>/g,'').replace(/&rsquo;/g,'’').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+  return {items:L.map(x=>({label:x.label,status:ST[x.st][0],detail:strip(x.detail),from:x.from})),missing:L.filter(x=>x.miss).map(x=>strip(x.miss)),
+    extra:T(M().ebdExtra),note:'Evidence gathered for the eligibility staffing (Rule 6A-6.03016, F.A.C.); the team decides. Check the current wording before printing.'};}
+function ebdPrint(){ebdRender();const h=document.documentElement;h.classList.add('pr-ebd-printing');
+  const off=()=>{h.classList.remove('pr-ebd-printing');window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);
+  try{window.print();}finally{setTimeout(off,1500);}}
+
+/* ===================== #20 the archive ===================== */
+const LS={rule:'nbh.archive.gs7',years:'nbh.archive.gs7y',index:'nbh.archive.index'};
+const lsGet=k=>{try{return localStorage.getItem(k)||'';}catch(e){return '';}};
+const lsSet=(k,v)=>{try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k);}catch(e){}};
+const AR=['arExit','arFileDate','arFile','arGs7','arGs7y','arWhere','arConfirm','arDays'];
+const arFilled=()=>AR.some(k=>T(M()[k]));
+const yrs=v=>{const n=parseInt(T(v),10);return n>0&&n<100?n:null;};
+const days=()=>{const n=parseInt(T(M().arDays),10);return n>0&&n<=365?n:30;};   /* 30 days unless the BCBA sets another */
+function keep(){const m=M(),x=iso(m.arExit);if(!x)return null;const y=yrs(m.arGs7y),code=addYears(x,7),dist=y?addYears(x,y):'';
+  return {code,dist,last:[code,dist].filter(Boolean).sort().pop()};}
+function removeBy(){const c=iso(M().arConfirm);return c?addDays(c,days()):'';}
+function indexLine(){const m=M(),k=keep(),ini=initials()||'(initials)';const st=iso((C&&C.plan&&C.plan.adoption&&(C.plan.adoption.start||C.plan.adoption.date))||'');
+  return [ini,st&&iso(m.arExit)?'plan '+us(st)+' to '+us(iso(m.arExit)):iso(m.arExit)?'closed '+us(iso(m.arExit)):st?'plan from '+us(st):'',iso(m.arFileDate)?'final file '+us(iso(m.arFileDate))+(T(m.arFile)?' ('+T(m.arFile)+')':''):'',
+    T(m.arWhere)?'in '+T(m.arWhere):'',k&&k.last?'keep until '+us(k.last):''].filter(Boolean).join(' · ');}
+function lines(){try{const L=JSON.parse(lsGet(LS.index)||'[]');return Array.isArray(L)?L.filter(x=>typeof x==='string').slice(0,500):[];}catch(e){return [];}}
+function arRender(){const box=byId('prArch');if(!box)return;const m=M(),k=keep();box.classList.toggle('pr-arch-empty',!arFilled());
+  const kp=byId('prArchKeep');if(kp)kp.innerHTML=k?'<p><b>The BCBA&rsquo;s own records:</b> until at least '+E(us(k.code))+' (BACB Ethics Code 2.05: kept for a set minimum, 7 years by the common reading, and as law requires).</p><p><b>The district&rsquo;s record:</b> '+(k.dist?'until '+E(us(k.dist))+' ('+E(T(m.arGs7)||'the GS7 item')+', '+yrs(m.arGs7y)+' years).':'enter the GS7 item&rsquo;s years above.')+'</p>':'<p class="hint">Enter the date the case closed: the dates are counted from it.</p>';
+  const here=byId('prGs7Here');if(here){const r=lsGet(LS.rule),y=lsGet(LS.years);
+    here.innerHTML=r&&!T(m.arGs7)?'Kept on this iPad from an earlier student: '+E(r)+(y?' ('+E(y)+' years)':'')+'. <button type="button" class="tool" id="prGs7Use">Use it here</button>':T(m.arGs7)?'Typed once: the next student&rsquo;s archive offers it.':'';}
+  const ct=byId('prArchCount');if(ct){const rb=removeBy();
+    if(!rb)ct.innerHTML='<p class="hint">The countdown starts once you confirm the final file is in district storage (step 4). Nothing is removed before.</p>';
+    else{const left=Math.round((dOf(rb)-dOf(today()))/864e5);ct.innerHTML='<p'+(left<=0?' class="pr-st-miss-t"':'')+'><b>Remove '+E(initials()||'this student')+' from this iPad by '+E(us(rb))+'</b> ('+(left>0?left+' day'+(left===1?'':'s')+' left':left===0?'today':'due '+(-left)+' day'+(left===-1?'':'s')+' ago')+'): Caseload, <b>Forget a student</b>. This form removes nothing; the index line stays.</p>';}}
+  const ln=byId('prArchLine');if(ln)ln.textContent=indexLine();
+  const L=lines(),n=byId('prArchN');if(n)n.textContent='('+L.length+')';const ls=byId('prArchLines');if(ls)ls.innerHTML=L.length?'<ul>'+L.map(x=>'<li>'+E(x)+'</li>').join('')+'</ul>':'<p class="hint">None yet.</p>';}
+function arSet(k,v){S.meta[k]=v;const el=document.querySelector('[data-m="'+k+'"]');if(el){el.value=v;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}}
+function say(t){const el=byId('prArchMsg');if(el)el.textContent=t;}
+
+/* ---------------- wiring ---------------- */
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset)return;const k=el.dataset.m||'';
+  if(/^ebd/.test(k))ebdRender();
+  if(AR.indexOf(k)>=0){if(k==='arGs7')lsSet(LS.rule,T(el.value));if(k==='arGs7y'&&yrs(el.value))lsSet(LS.years,String(yrs(el.value)));arRender();}});
+document.addEventListener('change',e=>{const el=e.target;if(el&&el.dataset&&/^ebd/.test(el.dataset.m||''))ebdRender();});
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#prEbdPrint,#prArchConfirm,#prArchKeepLine,#prArchCopy,#prArchSave,#prGs7Use');if(!b)return;
+  if(b.id==='prEbdPrint'){ebdPrint();return;}
+  if(b.id==='prGs7Use'){arSet('arGs7',lsGet(LS.rule));const y=lsGet(LS.years);if(y)arSet('arGs7y',y);arRender();return;}
+  if(b.id==='prArchConfirm'){if(!T(M().arWhere)){say('Write where the final file is first (step 4).');const w=document.querySelector('[data-m="arWhere"]');if(w)try{w.focus();}catch(x){}return;}
+    if(!iso(M().arConfirm))arSet('arConfirm',today());arRender();say('Confirmed: the countdown has started.');return;}
+  if(b.id==='prArchKeepLine'){const x=indexLine();if(!x){say('Nothing to keep yet.');return;}const ini=initials(),ex=iso(M().arExit),L=lines().filter(l=>!(ini&&ex&&l.indexOf(ini+' ·')===0&&l.indexOf(us(ex))>=0));L.push(x);lsSet(LS.index,JSON.stringify(L.slice(-500)));arRender();say('Kept on this iPad: it stays when the student is removed.');return;}
+  if(b.id==='prArchCopy'){const x=indexLine();try{navigator.clipboard.writeText(x).then(()=>say('Copied.'),()=>say('Select the line and copy it.'));}catch(err){say('Select the line and copy it.');}return;}
+  if(b.id==='prArchSave'){const L=lines();if(!L.length){say('No index line is kept on this iPad yet.');return;}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([L.join('\n')+'\n'],{type:'text/plain'}));a.download='archive-index_'+today()+'.txt';document.body.appendChild(a);a.click();a.remove();return;}});
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){C=f||null;const r=was?was.apply(this,arguments):null;try{ebdRender();arRender();}catch(e){}return r;};}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const m=M(),o=r&&typeof r==='object'?r:null;let out=o;
+    if(m.ebdIep==='yes'){out=out||{};out.review=out.review||{};out.review.ebd=ebdFacts();}
+    if(arFilled()){out=out||{};out.review=out.review||{};const k=keep(),a={line:indexLine()};if(iso(m.arExit))a.closed=iso(m.arExit);if(iso(m.arFileDate))a.file=iso(m.arFileDate);if(T(m.arWhere))a.where=T(m.arWhere);
+      if(k){a.keepCode=k.code;if(k.dist)a.keepDistrict=k.dist;}if(iso(m.arConfirm)){a.confirmed=iso(m.arConfirm);a.removeBy=removeBy();}out.review.archive=a;}
+    return out;}catch(e){return r;}};}
+{const d0=window.__nbhDue;window.__nbhDue=function(){const L=d0?d0.apply(this,arguments)||[]:[];try{const rb=removeBy();if(rb)L.push({what:'Remove '+(initials()||'the student')+' from this iPad: the final file is in district storage (Form PR-1)',date:rb});}catch(e){}return L;};}
+{const ra=renderAll;renderAll=function(){const r=ra.apply(this,arguments);try{ebdRender();arRender();}catch(e){console.error('PR-1 v25.68: '+(e&&e.message||e));}return r;};}
+window.addEventListener('beforeprint',()=>{try{ebdRender();arRender();}catch(e){}});
+window.__pr2568={ebdItems,ebdFacts,indexLine,keep,removeBy,initials};
+try{C=(typeof prCase!=='undefined'&&prCase)||null;ebdRender();arRender();}catch(e){console.error('PR-1 v25.68: '+(e&&e.message||e));}
+})();
+</script>
+<style id="pr1-v2568-css">
+/* v25.68 the E/BD evidence page (its own print only) and the archive (printed when filled) */
+.pr-ebd{margin:8px 0;padding-left:22px}
+.pr-ebd>li{margin:0 0 10px}
+.pr-ebdh{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.pr-st{font:600 11.5px/1.3 var(--sans,Inter,Arial,sans-serif);padding:2px 8px;border-radius:10px;border:1px solid}
+.pr-st-ok{color:#1e5b33;border-color:#7fb08f;background:#eef7f0}
+.pr-st-part{color:#6b4a00;border-color:#d1b46a;background:#fbf5e4}
+.pr-st-miss{color:#8E2A2A;border-color:#d79c9c;background:#fbeeee}
+.pr-st-miss-t{color:#8E2A2A}
+.pr-ebdd{margin:2px 0 0}
+.pr-ebdf{font-size:12px;color:#54676f}
+.pr-ebdmiss{margin:8px 0;padding:8px 12px;border-left:4px solid #8E2A2A;background:#fbeeee}
+.pr-ebdmiss.pr-ebdall{border-left-color:#2a7a4b;background:#eef7f0}
+.pr-ebdcheck{margin:6px 0;padding:6px 10px;border-left:4px solid #a86a00;background:#fbf5e4;font-size:12.5px}
+.pr-arrow{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:4px 0}
+.pr-arrow label{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;font-weight:400}
+.pr-arline{font-family:var(--sans,Inter,Arial,sans-serif);font-size:13px;padding:6px 8px;border:1px dashed #93aead;background:#fff;overflow-wrap:anywhere}
+.pr-arlines summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px}
+@media (pointer:coarse){#prEbdSec button,#prArch button,#prArch input,#prEbdSec select{min-height:44px}}
+@media print{html:not(.pr-ebd-printing) #prEbdSec{display:none!important}
+  html.pr-ebd-printing .sheet>*:not(.nbh-print-head):not(#prEbdSec){display:none!important}
+  html.pr-ebd-printing #prEbdSec{display:block!important}
+  #prArch.pr-arch-empty{display:none!important}}
+</style>
+<script id="pr1-v2568-safety">
+/* v25.68 (research #2) the review lists Form CR-1's Baker Act initiations and threat management team cases in the period
+   (crisis.events, read from the case): each one's date, and for a Baker Act initiation how many attempts to reach the parent
+   are recorded and whether the parent was reached; an entry recorded more than 24 hours after the event says so. They join
+   Safety in the Period; with none in the period the section reads as before. */
+(function(){
+  if(typeof prSafety!=='function'||typeof prSafetyRender!=='function')return;
+  const s0=prSafety;prSafety=function(f){const X=s0.apply(this,arguments);try{const P=X.P||{},inP=x=>!!x&&(!P.from||x>=P.from)&&(!P.to||x<=P.to);
+      const E=((f&&f.crisis&&Array.isArray(f.crisis.events))?f.crisis.events:[]).filter(e=>e&&/^(baker|threat)$/.test(e.kind)&&inP(prT(e.date)));
+      X.bk=E.filter(e=>e.kind==='baker');X.th=E.filter(e=>e.kind==='threat');if(E.length)X.any=true;}catch(e){}return X;};
+  const r0=prSafetyRender;prSafetyRender=function(){const r=r0.apply(this,arguments);try{const el=document.getElementById('prSafety'),X=prSafety(prCase);
+      const ul=el&&el.querySelector('ul.pr-safe');if(!ul||!(X.bk||[]).length&&!(X.th||[]).length)return r;
+      const late=e=>e.late?' (a late entry)':'',L=[];
+      if(X.bk.length)L.push('<b>Baker Act initiations in this period</b> (Form CR-1): '+X.bk.length+' ('+X.bk.map(e=>prMd(e.date)+(e.attempts?', '+e.attempts+' attempt'+(+e.attempts===1?'':'s')+' to reach the parent'+(e.reached?', the parent reached':', the parent not recorded as reached'):', no attempt to reach the parent recorded')+late(e)).join('; ')+').');
+      if(X.th.length)L.push('<b>Threat management team cases in this period</b> (Form CR-1): '+X.th.length+' ('+X.th.map(e=>prMd(e.date)+(e.brief?', the brief given to the team '+prMd(e.brief):'')+late(e)).join('; ')+'). Placement decisions are made through the IEP or 504 team.');
+      ul.insertAdjacentHTML('beforeend',L.map(x=>'<li>'+x+'</li>').join(''));}catch(e){}return r;};
+  try{renderVerdicts();}catch(e){}
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>

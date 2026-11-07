@@ -1323,6 +1323,28 @@ button.st-ti-rm:hover{background:#fbf1f1}
     </table>
     <div id="stSignChk" aria-live="polite"></div>
     <p class="hint" style="margin-top:8px">Schedule the first unannounced TI-1 observation early in independent implementation. Burlison et al. (2026) name consequence delivery, and error reinforcement in particular, as the component to monitor especially when a task is first being learned, and ask that the error be identified and corrected quickly as part of regular supervision; neither that study nor O&rsquo;Neill et al. (2026) gives an interval, and reaching criterion in rehearsal was not shown to predict fidelity in situ.</p>
+
+    <!-- v25.68 (research recommendation #1, the BCBA's 11/6 list) the adult's implementation plan: an action plan and a coping
+         plan, written once the plan is adopted on Form TD-1; it prints on the adult's page (Form QS-1 or EB-1) and is checked at
+         the first TI-1 visit. Each trainee has their own. Printed here only when filled. -->
+    <div id="stIp" class="st-ip st-ip-empty">
+    <h3 style="margin-top:16px">Implementation Plan <span id="stIpWho" class="st-ip-who"></span></h3>
+    <p class="hint" id="stIpLead">For this adult: which steps they run, when, where, with what, and from what day; then two or three things that may get in the way, each with its fix. It prints on their page (Form QS-1 or Form EB-1) and is checked at the first TI-1 visit, 3 to 5 school days in. Planning this way raised teachers&rsquo; adherence to behavior support plans over standard consultation (Sanetti et al., 2015). It takes 5 to 10 minutes per adult.</p>
+    <p class="hint noprint" id="stIpAdopt" role="status"></p>
+    <table class="rt" id="stIpTbl">
+      <tr><th style="width:24%">Which steps</th><td colspan="3"><textarea data-m="ip_steps" rows="2" style="width:100%" aria-label="Implementation plan: which steps" placeholder="e.g., steps 1 to 6 during reading group; the break card all day"></textarea></td></tr>
+      <tr><th>When</th><td><input data-m="ip_when" style="width:100%" aria-label="Implementation plan: when" placeholder="e.g., 9:00 to 10:30, every school day"></td><th style="width:16%">Where</th><td><input data-m="ip_where" style="width:100%" aria-label="Implementation plan: where" placeholder="e.g., the reading table"></td></tr>
+      <tr><th>Materials</th><td colspan="3"><input data-m="ip_mat" style="width:100%" aria-label="Implementation plan: materials" placeholder="e.g., the break card, the timer, the point sheet on the clipboard"></td></tr>
+      <tr><th>First day</th><td><input type="date" data-m="ip_first" aria-label="Implementation plan: first day"></td><th>Their page</th><td><select data-m="ip_page" aria-label="Implementation plan: the page it prints on"><option value="">Form QS-1 (the staff quick start)</option><option value="eb">Form EB-1 (the essentials brief)</option></select></td></tr>
+    </table>
+    <h4 class="st-ip-h4">Coping plan: what may get in the way, and the fix</h4>
+    <table class="rt" id="stIpCope"><thead><tr><th style="width:6%">#</th><th style="width:47%">What may get in the way</th><th>The fix</th></tr></thead><tbody>
+      <tr><td style="text-align:center">1</td><td><input data-m="ip_b1" style="width:100%" aria-label="Coping plan: what may get in the way, 1" placeholder="e.g., a substitute para on Fridays"></td><td><input data-m="ip_f1" style="width:100%" aria-label="Coping plan: the fix, 1" placeholder="e.g., the one-page card stays in the sub folder"></td></tr>
+      <tr><td style="text-align:center">2</td><td><input data-m="ip_b2" style="width:100%" aria-label="Coping plan: what may get in the way, 2"></td><td><input data-m="ip_f2" style="width:100%" aria-label="Coping plan: the fix, 2"></td></tr>
+      <tr><td style="text-align:center">3</td><td><input data-m="ip_b3" style="width:100%" aria-label="Coping plan: what may get in the way, 3"></td><td><input data-m="ip_f3" style="width:100%" aria-label="Coping plan: the fix, 3"></td></tr>
+    </tbody></table>
+    <p class="hint" id="stIpCheck"></p>
+    </div>
   </section>
 
   <!-- ============================ GUIDE ============================ -->
@@ -4274,6 +4296,63 @@ renderAll();
 .st-why-k label{display:flex;align-items:center;gap:6px}
 .st-why-chg input{width:100%;box-sizing:border-box;margin-top:4px}
 @media print{.st-why-k input{-webkit-appearance:auto;appearance:auto}}
+</style>
+<script id="st1-v2568">
+/* v25.68 (research recommendation #1, "an implementation plan for each adult on the plan", the BCBA's 11/6 list) Each trainee in
+   this record (one adult who runs steps of the plan) has an implementation plan on the Competency sheet: an action plan (which
+   steps, when, where, the materials, the first day) and a coping plan (up to three barriers, a fix for each). The fields are the
+   trainee's own (S.meta ip_*, kept per trainee like the rest of their record). Written once the plan is adopted on Form TD-1 (the
+   case's plan.adoption). Out: staff.people[i].plan for Forms QS-1 and EB-1 (the adult's page) and TI-1 (the first visit's check,
+   3 to 5 school days after the first day); the check on the Due list. Every field is optional and empty in a saved file, and the
+   section prints only when one holds something, so a record saved before prints as it did. */
+(function(){
+const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+const IPK=['ip_steps','ip_when','ip_where','ip_mat','ip_first','ip_b1','ip_f1','ip_b2','ip_f2','ip_b3','ip_f3'];
+let ipCase=null;
+const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m?new Date(+m[1],+m[2]-1,+m[3],12):null;};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* the nth school day (a weekday) after a date */
+function schoolAfter(s,n){const d=day(s);if(!d)return '';let k=0;while(k<n){d.setDate(d.getDate()+1);const w=d.getDay();if(w&&w<6)k++;}return iso(d);}
+function has(m){return IPK.some(k=>T(m&&m[k]));}
+/* the plan of one trainee, as the case carries it; null when nothing is written */
+function planOf(m){if(!has(m))return null;const first=stIsoOf(m.ip_first)||'';
+  const o={steps:T(m.ip_steps),when:T(m.ip_when),where:T(m.ip_where),materials:T(m.ip_mat),first,page:m.ip_page==='eb'?'EB-1':'QS-1',
+    coping:[1,2,3].map(i=>({barrier:T(m['ip_b'+i]),fix:T(m['ip_f'+i])})).filter(x=>x.barrier||x.fix)};
+  if(first){o.checkFrom=schoolAfter(first,3);o.checkBy=schoolAfter(first,5);}
+  return o;}
+window.__st2568Plan=planOf;
+function paint(){const box=document.getElementById('stIp');if(!box)return;const m=S.meta||{};
+  box.classList.toggle('st-ip-empty',!has(m));
+  const who=document.getElementById('stIpWho');if(who){const nm=T(m.trainee);who.textContent=nm?'· '+nm:'';}
+  const ad=ipCase&&ipCase.plan&&ipCase.plan.adoption,el=document.getElementById('stIpAdopt');
+  if(el)el.textContent=ad&&T(ad.date)?'Form TD-1: the plan was adopted on '+stUs(stIsoOf(ad.date)||T(ad.date))+(T(ad.start)?' and starts '+stUs(stIsoOf(ad.start)||T(ad.start)):'')+'.':
+    ipCase&&ipCase.plan?'Form TD-1 holds no adoption date yet: write this plan once the team adopts the plan.':'';
+  const ck=document.getElementById('stIpCheck');if(ck){const p=planOf(m);
+    let t=p&&p.first?'Checked at the first TI-1 visit, between '+stUs(p.checkFrom)+' and '+stUs(p.checkBy)+' (3 to 5 school days after the first day).':'Checked at the first TI-1 visit, 3 to 5 school days after the first day.';
+    const ic=ipCase&&ipCase.integrity&&ipCase.integrity.ipCheck;
+    if(ic&&T(ic.who)&&T(ic.who).toLowerCase()===T(m.trainee).toLowerCase()&&ic.date)t+=' Form TI-1 checked it on '+stUs(stIsoOf(ic.date)||ic.date)+(ic.run?': steps run as planned, '+ic.run.toLowerCase():'')+'.';
+    ck.textContent=t;}}
+{const ra=renderAll;renderAll=function(){const r=ra.apply(this,arguments);try{paint();}catch(e){console.error('ST-1 v25.68: '+(e&&e.message||e));}return r;};}
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.dataset&&/^ip_|^trainee$/.test(t.dataset.m||''))setTimeout(paint,0);});
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&/^ip_/.test(t.dataset.m||''))setTimeout(paint,0);});
+window.addEventListener('beforeprint',()=>{try{paint();}catch(e){}});
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ipCase=f||null;const r=was?was.apply(this,arguments):null;try{paint();}catch(e){}return r;};}
+/* out: each trainee's plan with them (staff.people[i].plan), matched by name */
+{const s0=window.__nbhStaffFacts;window.__nbhStaffFacts=function(){const o=s0?s0.apply(this,arguments):null;if(!o||!Array.isArray(o.people))return o;
+  try{stSyncCur();const used=new Set();o.people.forEach(p=>{const k=S.tr.findIndex((t,i)=>!used.has(i)&&T(t&&t.meta&&t.meta.trainee)===T(p.name));if(k<0)return;used.add(k);
+    const pl=planOf(S.tr[k].meta||{});if(pl)p.plan=pl;});}catch(e){}return o;};}
+/* the Due list: each plan's check at the first TI-1 visit */
+{const d0=window.__nbhDue;window.__nbhDue=function(){const L=d0?d0.apply(this,arguments)||[]:[];try{stSyncCur();const many=S.tr.length>1;
+  S.tr.forEach((t,k)=>{const m=t.meta||{},p=planOf(m);if(!p||!p.checkBy)return;
+    L.push({what:'Check '+(T(m.trainee)?T(m.trainee)+'’s':'the')+' implementation plan at the first TI-1 visit, 3 to 5 school days in (Form ST-1)',date:p.checkBy});});}catch(e){}return L;};}
+try{paint();}catch(e){}
+})();
+</script>
+<style id="st1-v2568-css">
+/* v25.68 the implementation plan: printed only when filled */
+.st-ip-who{font-weight:400;color:#54676f;font-size:.9em}
+.st-ip-h4{margin:10px 0 4px;font-size:13px}
+@media print{#stIp.st-ip-empty{display:none!important}#stIpAdopt{display:none!important}}
 </style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

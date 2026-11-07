@@ -1856,6 +1856,9 @@ html.td9:not(.nbh-pr-measure) .sheet .defs .dval > label .nbh-eg{margin-left:2px
   <div class="bar nbh-band">Final Treatment Plan: Step by Step</div>
   <p class="method noprint" style="margin:0 0 8px">Compiled from every component card and selection in the form, in the order staff will use them. Edit the steps on the build sheet; this sheet re-reads them when opened or printed. Use "Print final plan only" in the toolbar to print just this sheet.</p>
   <div class="warn td-fnwarn" id="tdFnWarnFinal" hidden></div>
+  <!-- v25.68 (research #14) the quality check before sign-off: eight items read from the plan, shown before Copy, Print and
+       adoption, never blocking; screen only (td1-v2568-qc) -->
+  <section class="td-qc noprint" id="tdQc" aria-labelledby="tdQcH" hidden></section>
   <div id="finalHead"></div>
   <div id="td83Final"></div>   <!-- v21.83 (M): every target in the plan, its definition, function and the parts that address it -->
   <input type="hidden" name="fin.steps">   <!-- v22.46 (I232): the BCBA's changes to the step list (Final plan) -->
@@ -1895,6 +1898,7 @@ html.td9:not(.nbh-pr-measure) .sheet .defs .dval > label .nbh-eg{margin-left:2px
       <div class="drow"><div class="dlab">Interpreter needed</div><div class="dval" style="padding:4px 8px"><select name="cn.interp" class="inline" aria-label="Interpreter needed"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
       <div class="drow"><div class="dlab">The student&rsquo;s treatment preference</div><div class="dval"><textarea name="cn.pref" rows="2" placeholder="What the student wants from the plan, in the student's words (Form SI-1)"></textarea></div></div>
     </div>
+    <div class="td-qc-adopt noprint" id="tdQcAdopt" hidden></div>
     <div class="plan-group">Adopted by the team</div>
     <div id="td82Notice" class="warn noprint td82-notice" role="status" aria-live="polite" hidden></div>
     <div class="defs">
@@ -6846,6 +6850,55 @@ ol.steps li.opt{color:#4a3a6b;background:#f3f0fa;border-radius:6px;padding:2px 6
 .tan{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--nbh-navy,#182e43)}
 .steps.ta{margin-top:3px}
 .tanote{font-size:12px;color:var(--nbh-muted,#54676f);border-left:3px solid var(--nbh-teal,#76a2a3);padding:4px 10px;margin-top:8px}
+/* v25.68 versions from the studies: the bar (chips, filters, Side by side), What's different, the two columns */
+.vh-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.vers{margin:10px 0 12px;padding:10px 12px 8px;border:1px solid var(--nbh-rule,#cfdad8);border-radius:8px;background:var(--nbh-shade,#f5f8f7)}
+.vhd{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin:0 0 8px}
+.vt{margin:0;font-size:13.5px;font-weight:700;color:var(--nbh-navy,#182e43)}
+.vcnt{font-size:12px;color:var(--nbh-muted,#54676f)}
+.vfil{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.vf{padding:5px 12px;border-radius:999px;font-weight:500;font-size:12.5px}
+.vf[aria-pressed=true],.vf[aria-pressed=true]:hover,.vsbs[aria-pressed=true],.vsbs[aria-pressed=true]:hover{background:var(--nbh-slate,#254657);border-color:var(--nbh-slate,#254657);color:#fff}
+.vchips{display:flex;gap:8px;margin:0;padding:2px 2px 8px;list-style:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+.vchips li{flex:none;scroll-snap-align:start;margin:0}
+.vchip{display:block;min-height:44px;max-width:232px;padding:6px 11px;border-radius:8px;text-align:left;font-weight:400;font-size:12.5px;line-height:1.3}
+.vchip .vc{display:block;font-weight:600;color:var(--nbh-navy,#182e43);white-space:nowrap}
+.vchip .vbh{font-weight:400;color:var(--nbh-muted,#54676f)}
+.vchip .vs{display:block;max-width:208px;color:var(--nbh-muted,#54676f);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip[aria-current=true],.vchip[aria-current=true]:hover{background:var(--nbh-mist,#eaf2f0);border-color:var(--nbh-slate,#254657);box-shadow:inset 0 0 0 2px var(--nbh-slate,#254657)}
+.vtools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.vnote{font-size:12.5px;color:var(--nbh-muted,#54676f)}
+.vdiff{margin:0 0 12px}
+.vdiff>.vh{margin-top:4px}
+.vtw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--nbh-rule,#cfdad8);border-radius:6px;margin:6px 0 0;background:#fff}
+.vtw:focus-visible{outline:3px solid var(--nbh-focus,#2f7fa8);outline-offset:2px}
+.vtab{border-collapse:collapse;width:100%;font-size:13px;line-height:1.45}
+.vtab.v3{min-width:600px}
+.vtab th,.vtab td{padding:7px 9px;border-bottom:1px solid var(--nbh-rule,#cfdad8);text-align:left;vertical-align:top;overflow-wrap:break-word}
+.vtab tbody tr:last-child>*{border-bottom:0}
+.vtab thead th,.vtab thead td{background:var(--nbh-mist,#eaf2f0);font-size:12px;font-weight:600;color:var(--nbh-navy,#182e43)}
+.vtab tbody th{width:150px;font-weight:500;font-size:12px;color:var(--nbh-muted,#54676f)}
+.vtab tr.vd td.vcur{background:#fff5df;box-shadow:inset 3px 0 0 #c9971f}
+.vtab .vdm{color:#9a6b00}
+.vq{display:block;margin-top:3px;font-size:11.5px;font-style:italic;color:var(--nbh-muted,#54676f)}
+.vsame{margin:6px 0 0;font-size:12px;line-height:1.5;color:var(--nbh-muted,#54676f)}
+.vidln{flex:1 1 100%;margin:0;font-size:12.5px;line-height:1.45;color:var(--nbh-muted,#54676f)}
+.vsbs2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:18px;row-gap:6px;margin:4px 0 0;scroll-margin-top:84px}
+.vcolhd:focus{outline:none}.vcolhd:focus-visible{outline:3px solid var(--nbh-focus,#2f7fa8);outline-offset:2px}
+.vpane{display:grid;grid-template-rows:subgrid;min-width:0}
+.vpane>*{min-width:0}
+.vpane>.load{align-self:start}
+.vpane .vh:first-child{margin-top:6px}
+.vcolhd{margin:0;font-family:var(--nbh-serif,"Iowan Old Style",Palatino,Georgia,serif);font-size:15px;font-weight:600;color:var(--nbh-navy,#182e43)}
+.vcolsub{margin:1px 0 0;font-size:12px;color:var(--nbh-muted,#54676f)}
+.vcolt{margin:2px 0 0;font-size:12.5px;font-weight:600;color:var(--nbh-ink,#1a2933)}
+ol.vsteps{display:grid;grid-template-rows:subgrid;margin:0;padding:0;list-style:none;counter-reset:vs;font-size:13px;line-height:1.5}
+ol.vsteps li{counter-increment:vs;position:relative;margin:0;padding-left:24px}
+ol.vsteps li::before{content:counter(vs) ".";position:absolute;left:0;top:0;font-variant-numeric:tabular-nums;font-weight:600;color:var(--nbh-navy,#182e43)}
+ol.vsteps li.pun::before,ol.vsteps li.opt::before{left:6px}
+@supports not (grid-template-rows:subgrid){.vpane,ol.vsteps{display:block}ol.vsteps li{margin:0 0 6px}}
+@media (max-width:999px){.vsbs2,.vpane,ol.vsteps{display:block}ol.vsteps li{margin:0 0 6px}.vpane+.vpane{margin-top:18px;padding-top:14px;border-top:2px solid var(--nbh-rule,#cfdad8)}}
+@media (max-width:600px){.vtab tbody th{width:110px}}
 `;
 /* v23.85 (the BCBA's request) the protocol bank: treatment protocols written from published studies (the BCBA's volumes of
    Behavior Analysis in Practice and the Journal of Applied Behavior Analysis). TD1_BANK (the script element "td1-pbank")
@@ -6965,12 +7018,88 @@ function bankRule(p){
  if(B65_RAPID.includes(p.id))return `<p class="rulenote"><b>Rapid eating: try these in order.</b> First, pre-cut portions, one piece on the plate at a time, and the utensil down between bites with praise (Epstein et al., 1976). ${b65Show('dri-utensil-down-pacing','Show it')} Next, a vibrating pager or timer cue for each bite, faded by lowering the vibration strength, not by spacing the cues further apart (Anglesea et al., 2008; Valentino et al., 2018). ${b65Show('s_drl-pager-paced-bites','Show the pager cue')} ${b65Show('p_sf-pager-intensity-pacing','Show fading by strength')} The target is the time between bites (meal minutes divided by bites). Blocking an early bite is marked RESTRICTIVE: it is not one of the first steps, and it needs district review and written consent. Staff at this meal are trained in choking first aid.</p>`;
  if(B65_TEX.has(p.id))return `<p class="rulenote"><b>Texture and bite size come from the SLP or the feeding team</b> (Form FD-1, with the prescriber and the date). The plan serves only those, and a texture or bite-size step goes up only when the SLP or the feeding team writes the next step. Steps marked RESTRICTIVE (escape extinction at meals) need written consent, planned with the family, the doctor and a feeding specialist (TD-1’s escape-extinction consent block).</p>`;
  return '';}
-function show(id){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
+/* v25.68 (the BCBA, 11/6, the approved mockup) Versions from the studies. A card whose component has two or more cards in the
+   bank shows, under its title, a bar: one chip per card (its study and a short line of what is special about it), oldest
+   first; filters, each shown only when it matches a card of that component; the card opened stays marked "started here",
+   and a chip shows its card (Add to the plan then adds that one) while the bar keeps the card it started from. What's
+   different: for the high-probability request sequence, the rows each card's own steps give (cmp, written into the bank
+   with the step each value came from); for the other components the rows the bank holds (the card's settings, the study,
+   ages, function), with a note that the detailed rows are written for the high-p sequence so far. Side by side: the two
+   versions in two columns, their sections and steps lined up (one column under 1000 px), each with Add this version to
+   the plan, which adds that card exactly as Add to the plan does. Start from this version moves "started here". Nothing
+   of it is saved: the bar, the filter and the columns are the panel's own state. */
+let base='',two=false,vfilt='all';
+const PCODE={};ok.forEach(p=>{(PCODE[p.code]=PCODE[p.code]||[]).push(p);});
+const yearOf=p=>{const y=p.cmp&&+p.cmp.year;if(y)return y;const m=/\b(1[89]\d\d|20\d\d)/.exec(cites(p).join(' '));return m?+m[1]:9999;};
+const versOf=p=>(PCODE[p.code]||[]).map((x,i)=>[x,yearOf(x),i]).sort((a,b)=>a[1]-b[1]||a[2]-b[2]).map(x=>x[0]);
+const vCite=p=>(p.cmp&&p.cmp.cite)||cites(p).join('; ')||p.lab;
+const vSpecial=p=>(p.cmp&&p.cmp.special)||p.lab;
+const VF=[['all','All'],['escape','Escape-maintained'],['edible','Snack or item after each'],['praise','Praise only'],['school','School or classroom'],['food','Feeding']];
+const VTREAT=/edible|snack|item|food|treat|token|video|toy|candy|cereal|chip/;
+function vMatch(p,f){if(f==='all')return true;const c=p.cmp,t=String((c&&c.easy_reinforcer)||'').toLowerCase(),w=(c?(c.who||'')+' '+(c.special||''):(p.beh||'')).toLowerCase();
+ if(f==='escape')return c?/escape/i.test(c.fn||''):!!(p.fn&&p.fn.includes('escape'));
+ if(f==='edible')return !!c&&VTREAT.test(t)&&!/^praise only/.test(t);
+ if(f==='praise')return !!c&&/\bpraise\b/.test(t)&&!VTREAT.test(t)&&!/reinforcer/.test(t);
+ if(f==='school')return /school|class|preschool|teacher/.test(w);
+ if(f==='food')return /food|bite|feed|meal/.test(w+' '+String(p.lab||'').toLowerCase());
+ return true;}
+const CROWS=[['n_easy','Easy requests'],['spacing','Time between them'],['easy_reinforcer','After each easy one'],['to_hard','The hard request comes'],['missed_easy','If an easy one is missed'],['hard_reinforcer','After the hard one'],['extinction','Escape extinction'],['order','Order'],['fading','Fading'],['who','Studied with']];
+const vnorm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+/* the rows to compare: both cards' own comparison rows (cmp), else the rows the bank holds for every card */
+function vRows(a,b){if(a.cmp&&b.cmp)return {cmp:true,rows:CROWS.map(([k,l])=>({l,a:a.cmp[k],b:b.cmp[k],qa:a.cmp.quotes&&a.cmp.quotes[k],qb:b.cmp.quotes&&b.cmp.quotes[k]}))};
+ const L=LIBOF[a.code],ks=L.params.map(x=>x[0]).filter(k=>(a.params&&a.params[k])||(b.params&&b.params[k]));
+ const fnL=p=>fnWords(p)==='any function'?'Any function':fnWords(p).replace(/^./,c=>c.toUpperCase());
+ return {cmp:false,rows:ks.map(k=>({l:k,a:(a.params||{})[k]||'Not given',b:(b.params||{})[k]||'Not given'})).concat([{l:'The study',a:vCite(a),b:vCite(b)},{l:'In the study',a:a.beh,b:b.beh},{l:'Ages',a:a.age||'Not given',b:b.age||'Not given'},{l:'Function',a:fnL(a),b:fnL(b)}])};}
+const vDiffN=(a,b)=>a.id===b.id?0:vRows(a,b).rows.filter(r=>vnorm(r.a)!==vnorm(r.b)).length;
+function vBar(p){const V=versOf(p);if(V.length<2)return '';const b=byId[base]||p;
+ const fl=VF.filter(([k])=>k==='all'||V.some(x=>vMatch(x,k)));if(!fl.some(x=>x[0]===vfilt))vfilt='all';
+ const shown=V.filter(x=>vMatch(x,vfilt)||x.id===cur||x.id===base);
+ const chips=shown.map(x=>`<li><button type="button" class="vchip${x.id===base?' vbase':''}" data-v="${esc(x.id)}" aria-current="${x.id===cur?'true':'false'}" title="${esc(x.lab)}"><span class="vc">${esc(vCite(x))}${x.id===base?'<span class="vbh"> · started here</span>':''}</span><span class="vs">${esc(vSpecial(x))}</span></button></li>`).join('');
+ return `<section class="vers" aria-labelledby="tdVersH"><div class="vhd"><h5 class="vt" id="tdVersH">Versions from the studies</h5><span class="vcnt">${shown.length} of ${V.length} shown, oldest first</span></div>`+
+  (fl.length>1?`<div class="vfil" role="group" aria-label="Show versions">${fl.map(([k,l])=>`<button type="button" class="vf" data-vf="${k}" aria-pressed="${k===vfilt?'true':'false'}">${esc(l)}</button>`).join('')}</div>`:'')+
+  `<ul class="vchips" role="list" aria-label="Versions from the studies, oldest first">${chips}</ul>`+
+  `<div class="vtools"><button type="button" class="vsbs" aria-pressed="${two&&cur!==base?'true':'false'}"${cur===base?' disabled':''}>Side by side</button><button type="button" class="vre"${cur===base?' disabled':''}>Start from this version</button><span class="vnote">${cur===base?'Pick a study to compare.':'Comparing with '+esc(vCite(b))+'.'}</span></div></section>`;}
+function vTable(a,b){const same=a.id===b.id,R=vRows(a,b);let nd=0;
+ const cell=(v,q)=>esc(v||'Not stated')+(q?'<span class="vq">“'+esc(q.length>220?q.slice(0,217)+'…':q)+'”</span>':'');
+ const body=R.rows.map(r=>{const d=!same&&vnorm(r.a)!==vnorm(r.b);if(d)nd++;
+  return `<tr${d?' class="vd"':''}><th scope="row">${esc(r.l)}${d?'<span class="vdm" aria-hidden="true"> ●</span><span class="vh-sr"> (differs)</span>':''}</th><td>${cell(r.a,r.qa)}</td>${same?'':`<td class="vcur">${cell(r.b,r.qb)}</td>`}</tr>`;}).join('');
+ const title=same?'This version at a glance':'What’s different ('+nd+' of '+R.rows.length+' rows)';
+ const note=(same?'Tap another study above to compare it with this one.':nd?'Shaded rows differ. Unshaded rows say the same thing in both cards.':'These two versions say the same thing on every row.')+(R.cmp?'':' The detailed comparison rows are written for the high-probability request sequence so far.');
+ return `<section class="vdiff" aria-labelledby="tdVdH"><div class="vh" id="tdVdH">${esc(title)}</div><div class="vtw" role="region" aria-labelledby="tdVdH" tabindex="0"><table class="vtab${same?'':' v3'}"><thead><tr><td></td><th scope="col">${esc('Started from: '+vCite(a))}</th>${same?'':`<th scope="col">${esc('This version: '+vCite(b))}</th>`}</tr></thead><tbody>${body}</tbody></table></div><p class="vsame">${esc(note)}</p></section>`;}
+/* the buttons a card's detail carries (Add to the plan, Show me, Watch the video with its line), in the panel and in each column */
+function loadHtml(p,label){const V=window.__tdVideo,vl=V&&V.has(p.id)&&V.line?V.line(p.id):'';
+ return `<div class="load" data-id="${esc(p.id)}"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':`<button type="button" class="add primary">${esc(label||'Add to the plan')}</button>`}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${V&&V.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div>${vl?`<p class="vidln">${esc(vl)}</p>`:''}${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}${hasOpt(p)?'<label class="optpick"><input type="checkbox" class="optck"> Include the optional step: it reinforces problem behavior on purpose</label><p class="optnote">This study reinforced the problem behavior on purpose in one step, marked OPTION below; the step says what it does, why the study did it and when it ends. It is left off the card unless you tick the box. If you use it, run it only with a safety plan for the behavior and end it as soon as its own criterion is met.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>`;}
+const stepLi=s=>'<li'+(PUN.test(s)?' class="pun"':OPT.test(s)?' class="opt"':'')+'>'+esc(tdW(s))+'</li>';
+const refsHtml=p=>'<ul class="refs">'+(p.src||[]).map(k=>REF[k]).filter(Boolean).map(r=>`<li>${esc(r.apa)}${r.doi?` <a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener noreferrer">https://doi.org/${esc(r.doi)}</a>`:''}</li>`).join('')+'</ul>';
+/* one column of Side by side: rows the other column shares (heading, buttons, the study, settings, the steps heading, one row
+   per step, what happened), so on a wide screen the two line up */
+function vPane(p,label,M){const L=LIBOF[p.code],prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
+ return `<div class="vpane" role="group" aria-label="${esc(label+': '+vCite(p))}" style="grid-row:1 / span ${6+M}"><div class="vph"><p class="vcolhd">${esc(label)}</p><p class="vcolsub">${esc([vCite(p),p.cmp&&p.cmp.who?p.cmp.who:p.age].filter(Boolean).join(' · '))}</p><p class="vcolt">${esc(p.lab)}</p></div>`+
+  loadHtml(p,'Add this version to the plan')+
+  `<div><div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p></div>`+
+  `<div><div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div></div>`+
+  `<div><div class="vh">Steps for staff</div>${bankRule(p)}${tdWhoNote()}</div>`+
+  `<ol class="vsteps" role="list" style="grid-row:span ${M}">${(p.steps||[]).map(stepLi).join('')}</ol>`+
+  `<div><div class="vh">What happened in the study</div><p class="tx">${esc(p.result)}</p><div class="vh">Sources</div>${refsHtml(p)}</div></div>`;}
+/* keep and announce: a re-drawn bar keeps its chips' scroll and the focus on the control that was used */
+const vMotion=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';}catch(e){return 'auto';}};   /* no smooth scroll when reduced motion is asked for */
+const vLive=document.createElement('p');vLive.className='vh-sr';vLive.setAttribute('aria-live','polite');$p('.body').appendChild(vLive);
+function vSay(t){if(!vLive)return;vLive.textContent='';setTimeout(()=>{vLive.textContent=t;},60);}
+let vKeep=false;
+function vRender(focus){const ch=det.querySelector('.vchips'),sl=ch?ch.scrollLeft:0;vKeep=true;try{show(cur,true);}finally{vKeep=false;}const ch2=det.querySelector('.vchips');if(ch2)ch2.scrollLeft=sl;
+ const f=focus?det.querySelector(focus):null;if(f){try{f.focus({preventScroll:true});}catch(e){}try{if(f.classList.contains('vchip'))f.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){}}}
+function vPick(id){const p=byId[id],b=byId[base];if(!p)return;cur=id;vRender('.vchip[aria-current="true"]');
+ if(!b||b.id===p.id){vSay('Showing '+vCite(p)+', the version this started from.');return;}
+ vSay('Showing '+vCite(p)+': '+p.lab+'. '+vDiffN(b,p)+' of '+vRows(b,p).rows.length+' rows differ from '+vCite(b)+'.');}
+function show(id,keep){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
+  if(!cur){base='';two=false;}else if(!keep||!byId[base]||byId[base].code!==p.code){base=cur;two=false;vfilt='all';}
   listEl.querySelectorAll('.it').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===cur?'true':'false'));
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
-  det.innerHTML=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>
-<div class="load"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':'<button type="button" class="add primary">Add to the plan</button>'}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${window.__tdVideo&&window.__tdVideo.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div>${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}${hasOpt(p)?'<label class="optpick"><input type="checkbox" class="optck"> Include the optional step: it reinforces problem behavior on purpose</label><p class="optnote">This study reinforced the problem behavior on purpose in one step, marked OPTION below; the step says what it does, why the study did it and when it ends. It is left off the card unless you tick the box. If you use it, run it only with a safety plan for the behavior and end it as soon as its own criterion is met.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>
+  const bar=vBar(p),bp=byId[base]||p,head=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>`+(bar?bar+vTable(bp,p):'');
+  if(!vKeep)setTimeout(()=>{const ch=det.querySelector('.vchips'),cc=ch&&ch.querySelector('.vchip[aria-current="true"]');if(ch&&cc){const d0=cc.getBoundingClientRect().left-ch.getBoundingClientRect().left;if(d0<0||d0+cc.offsetWidth>ch.clientWidth)ch.scrollLeft+=d0-8;}},0);   /* the card opened shows in the bar */
+  if(bar&&two&&bp.id!==p.id){const M=Math.max(1,(bp.steps||[]).length,(p.steps||[]).length);det.innerHTML=head+`<div class="vsbs2">${vPane(bp,'Started from',M)}${vPane(p,'This version',M)}</div>`;sameNote();return;}
+  det.innerHTML=head+loadHtml(p)+`
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
 <div class="vh">Settings (the card’s boxes)</div><div class="rows">${prm.map(k=>row(k,p.params[k])).join('')||row('Settings','The study gives none of this component’s settings; set them on the card.')}</div>
 <div class="vh">Steps for staff</div>${bankRule(p)}${tdWhoNote()}<ol class="steps">${(p.steps||[]).map(s=>'<li'+(PUN.test(s)?' class="pun"':OPT.test(s)?' class="opt"':'')+'>'+esc(tdW(s))+'</li>').join('')}</ol>
@@ -6980,16 +7109,17 @@ ${p.ta&&p.ta.length?`<div class="vh">The student’s task analysis, as the study
 ${p.note?`<div class="cn"><div class="cnh">Clinical note <span>shown here only: not added, not printed</span></div><div class="ct">${esc(p.note)}</div></div>`:''}
 <div class="vh">Sources</div><ul class="refs">${refs.map(r=>`<li>${esc(r.apa)}${r.doi?` <a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener noreferrer">https://doi.org/${esc(r.doi)}</a>`:''}</li>`).join('')}</ul>`;
   sameNote();}
-window.__tdBankRedraw=()=>{if(cur)show(cur);};window.__tdBankShow=id=>{show(id);};
-function sameNote(){const p=byId[cur],box=$p('.same');if(!p||!box)return;const n=sameCards(p).length;box.hidden=!n;
-  box.textContent=n?'This plan already has '+(n===1?'a':n)+' '+comp(p)+' card'+(n===1?'':'s')+'. Add to the plan asks whether to replace that card’s steps and settings or to add a second card.':'';}
+window.__tdBankRedraw=()=>{if(cur)show(cur,true);};window.__tdBankShow=id=>{show(id);};
+/* v25.68 each .load (the detail's, or one per column in Side by side) carries its card's id, its own note and status */
+function sameNote(){det.querySelectorAll('.load').forEach(ld=>{const p=byId[ld.dataset.id],box=ld.querySelector('.same');if(!p||!box)return;const n=sameCards(p).length;box.hidden=!n;
+  box.textContent=n?'This plan already has '+(n===1?'a':n)+' '+comp(p)+' card'+(n===1?'':'s')+'. Add to the plan asks whether to replace that card’s steps and settings or to add a second card.':'';});}
 /* v23.88 (screen E) a protocol for a component already in the plan: replace that card's steps and settings (its number, who/when/where,
    Data and Materials kept) or add a second card; Undo puts the replaced words back */
 function replaceInto(p,c){const L=LIBOF[p.code],i=c.dataset.i,put={},was={};const set=(n,v)=>{const el=document.querySelector('[name="'+n+'"]');if(!el)return;was[n]=el.value;el.value=v==null?'':v;put[n]=el.value;fire(el);};
   const lis=c.querySelectorAll('ol.steps li');const steps=stepsOf(p);steps.forEach((s,k)=>{if(k<lis.length)set('cp['+i+'].s'+k,tdW(s));});for(let k=steps.length;k<lis.length;k++)set('cp['+i+'].s'+k,'');
   L.params.forEach((x,k)=>{if(p.params&&p.params[x[0]])set('cp['+i+'].p'+k,p.params[x[0]]);});if(p.ta)set('cp['+i+'].ta',taText(p));set('cp['+i+'].bank',p.id);set('cp['+i+'].bsrc',srcOf(p));
   {const sh=c.querySelector('input.td-suov');if(sh&&sh.value){sh.value='';sh.dispatchEvent(new Event('change',{bubbles:true}));}}try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}return {c,i,put,was,replaced:true};}
-function askSame(p,then){const box=$p('.same');if(!box)return then('add');const n=sameCards(p).length;
+function askSame(p,then,ld){const box=(ld||det).querySelector('.same');if(!box)return then('add');const n=sameCards(p).length;
   box.hidden=false;box.innerHTML='';const b=document.createElement('b');b.textContent='This plan already has '+(n===1?'a':n)+' '+comp(p)+' card. Add the protocol '+p.lab+' as:';box.appendChild(b);
   const mk=(t,v,primary)=>{const x=document.createElement('button');x.type='button';x.className='lnk td-ask'+(primary?' primary':'');x.textContent=t;x.addEventListener('click',()=>{box.innerHTML='';then(v);});return x;};
   const wrap=document.createElement('div');wrap.className='td-askrow';wrap.append(mk('Replace that card’s steps and settings','replace',true),mk('Add a second '+comp(p)+' card','add'),mk('Cancel','cancel'));box.appendChild(wrap);
@@ -7014,25 +7144,41 @@ function undo(){if(!undoRec)return false;const {c,put,was,replaced}=undoRec;undo
   if(replaced){if(Object.keys(put).some(n=>{const el=document.querySelector('[name="'+n+'"]');return el&&el.value!==put[n];}))return false;Object.keys(was).forEach(n=>{const el=document.querySelector('[name="'+n+'"]');if(el){el.value=was[n];fire(el);}});try{window.__tdSetupTicks&&window.__tdSetupTicks(c);}catch(x){}try{window.__tdBankSync&&window.__tdBankSync();}catch(x){}return true;}
   if(Object.keys(put).some(n=>{const el=document.querySelector('[name="'+n+'"]');return el&&el.value!==put[n];}))return false;
   const rm=c.querySelector('[data-rm]');if(rm)rm.click();else c.remove();return true;}
-function say(node){const s=$p('.st');if(!s)return;s.hidden=false;s.textContent='';s.append(...node);}
+function say(node,ld){const s=(ld||det).querySelector('.st');if(!s)return;s.hidden=false;s.textContent='';s.append(...node);}
 function goTo(c){try{c.scrollIntoView({block:'start',behavior:'smooth'});}catch(x){c.scrollIntoView();}
   const el=c.querySelector('textarea');if(el)setTimeout(()=>{try{el.focus({preventScroll:true});}catch(x){}},350);}
-function doAdd(){const p=byId[cur];if(!p)return;const same=sameCards(p);if(same.length&&!doAdd.how){askSame(p,how=>{if(how==='cancel'){sameNote();return;}doAdd.how=how;try{doAdd();}finally{doAdd.how='';}});return;}
+/* v25.68 the card to add and the .load it was asked from (a column of Side by side adds its own card the same way) */
+function doAdd(p,ld){p=p||byId[cur];if(!p)return;const same=sameCards(p);if(same.length&&!doAdd.how){askSame(p,how=>{if(how==='cancel'){sameNote();return;}doAdd.how=how;try{doAdd(p,ld);}finally{doAdd.how='';}},ld);return;}
   const how=doAdd.how||'add';const r=how==='replace'?replaceInto(p,same[0]):add(p);
-  if(!r){say([document.createTextNode('This protocol could not be added: its component is not on this form.')]);return;}
+  if(!r){say([document.createTextNode('This protocol could not be added: its component is not on this form.')],ld);return;}
   undoRec=r;sameNote();
   const b=document.createElement('b');b.textContent=(r.replaced?'Replaced the steps and settings of the '+comp(p)+' card with: ':'Added to the plan: ')+p.lab+(r.replaced?'.':', as a '+comp(p)+' card.');
   const go=document.createElement('button');go.type='button';go.className='lnk';go.textContent='Go to the card';go.addEventListener('click',()=>goTo(r.c));
   const u=document.createElement('button');u.type='button';u.className='lnk';u.textContent=r.replaced?'Undo the replace':'Undo the add';
-  u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.']);});
+  u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.'],ld);});
   const pn=(hasPun(p)?(withPun?' The punishment steps are on the card, labeled: they need district review and written consent before they are used.':' The punishment steps were left off.'):'')+(hasOpt(p)?(withOpt?' The optional step that reinforces problem behavior on purpose is on the card, marked OPTION: run it only with a safety plan.':' The optional step that reinforces problem behavior on purpose was left off.'):'');
-  say([b,pn,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u]);}
+  say([b,pn,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u],ld);}
 q.addEventListener('input',draw);kind.addEventListener('change',draw);fn.addEventListener('change',()=>{fnTouched=true;draw();});age.addEventListener('change',()=>{ageTouched=true;draw();});
 d.addEventListener('toggle',()=>{if(d.open){try{ageFill();fnFill();draw();}catch(x){}}});   /* v24.30 the filters follow the plan and the case when the bank opens */
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});
 listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);
-  try{($p('.load')||det).scrollIntoView({block:'nearest',behavior:'smooth'});}catch(x){}});
-det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(b&&b.classList.contains('td-bshow')){show(b.dataset.show);return;}if(b&&b.classList.contains('add')){withPun=b.dataset.pun==='1';const ok=det.querySelector('.optck');withOpt=!!(ok&&ok.checked);doAdd();}else if(b&&b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(cur);else if(b&&b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(cur,b);});
+  try{(det.querySelector('.vers')?det:($p('.load')||det)).scrollIntoView({block:det.querySelector('.vers')?'start':'nearest',behavior:vMotion()});}catch(x){}});
+det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
+  /* v25.68 the versions bar: a chip shows its card; a filter narrows the chips; Side by side; Start from this version */
+  if(b.classList.contains('vchip')){vPick(b.dataset.v);return;}
+  if(b.classList.contains('vf')){vfilt=b.dataset.vf;vRender('.vf[data-vf="'+vfilt+'"]');const n=det.querySelectorAll('.vchip').length;vSay(n+' version'+(n===1?'':'s')+' shown.');return;}
+  if(b.classList.contains('vsbs')){two=!two;vRender('.vsbs');const bp=byId[base],p=byId[cur],g=det.querySelector('.vsbs2');vSay(two&&bp&&p?'Side by side: '+vCite(bp)+' and '+vCite(p)+'.':'One version shown: '+(p?vCite(p):'')+'.');
+   /* the two columns come into view, the first column's heading taking the focus */
+   if(two&&g){try{g.scrollIntoView({block:'start',behavior:vMotion()});}catch(x){g.scrollIntoView();}const h=g.querySelector('.vcolhd');if(h){h.tabIndex=-1;try{h.focus({preventScroll:true});}catch(x){}}}return;}
+  if(b.classList.contains('vre')){base=cur;two=false;vRender('.vchip[aria-current="true"]');vSay('Started from '+vCite(byId[cur])+' now.');return;}
+  if(b.classList.contains('td-bshow')){show(b.dataset.show,true);return;}   /* a card the rule names: of the same component it reads as another version */
+  const ld=b.closest('.load'),pid=(ld&&ld.dataset.id)||cur;
+  if(b.classList.contains('add')){withPun=b.dataset.pun==='1';const ok=(ld||det).querySelector('.optck');withOpt=!!(ok&&ok.checked);doAdd(byId[pid],ld);}
+  else if(b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(pid);
+  else if(b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(pid,b);});
+/* the chips: Left and Right move along them */
+det.addEventListener('keydown',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('.vchip');if(!b||(ev.key!=='ArrowRight'&&ev.key!=='ArrowLeft'))return;
+  const all=[...det.querySelectorAll('.vchip')],n=all[all.indexOf(b)+(ev.key==='ArrowRight'?1:-1)];if(n){ev.preventDefault();n.focus();try{n.scrollIntoView({block:'nearest',inline:'nearest'});}catch(x){}}});
 /* the function choices follow the plan's function; the note on cards already in the plan follows the cards */
 document.addEventListener('change',ev=>{if(ev.target&&ev.target.name==='m.fn'){fnFill();draw();}});
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.student&&typeof f.student==='object')CASE.student=f.student;ageFill();fnFill();draw();}catch(x){}return r;};}
@@ -7041,7 +7187,9 @@ try{new MutationObserver(()=>{clearTimeout(sameNote._t);sameNote._t=setTimeout((
 {const a=$('#addCompBtn');if(a&&!$('#tdBankOpen')){a.insertAdjacentHTML('afterend',' <button type="button" id="tdBankOpen" class="tool" style="margin:0">Add from the protocol bank</button>');
   $('#tdBankOpen').addEventListener('click',()=>{d.open=true;try{host.scrollIntoView({block:'start',behavior:'smooth'});}catch(x){host.scrollIntoView();}setTimeout(()=>{try{q.focus({preventScroll:true});}catch(x){}},350);});}}
 draw();
-window.__tdBank={search:(s,k,f,a)=>search(s,k||'',f||'',a||'').list.map(p=>p.id),band:()=>age.value,fnSel:()=>fn.value,student:()=>CASE.student,ageOk:(id,b)=>byId[id]?ageOk(byId[id],b):true,ageRange:a=>ageRange(a),entry:id=>byId[id]||null,show:id=>{d.open=true;show(id);},n:N,kindOf:id=>byId[id]?kindOf(byId[id].code):''};
+window.__tdBank={search:(s,k,f,a)=>search(s,k||'',f||'',a||'').list.map(p=>p.id),band:()=>age.value,fnSel:()=>fn.value,student:()=>CASE.student,ageOk:(id,b)=>byId[id]?ageOk(byId[id],b):true,ageRange:a=>ageRange(a),entry:id=>byId[id]||null,show:id=>{d.open=true;show(id);},n:N,kindOf:id=>byId[id]?kindOf(byId[id].code):'',
+  /* v25.68 the versions from the studies */
+  versions:id=>byId[id]?versOf(byId[id]).map(p=>p.id):[],pick:id=>{d.open=true;vPick(id);},state:()=>({cur,base,two:two&&cur!==base,filter:vfilt})};
 })();
 </script>
 <script id="td1-scenes">
@@ -7130,44 +7278,302 @@ window.__tdScenes={has:id=>!!byId[id],play,close,count:()=>Object.keys(byId).len
 /* on the plan card the header is a grid (name, Hide steps, Remove): Show me and Watch the video sit on their own line under the code */
 html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-sc-btn,html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-vid-btn{grid-column:1;grid-row:3;justify-self:start;height:36px!important;min-height:36px!important;margin:6px 0 2px!important;padding:0 14px!important;border-radius:8px!important;font:600 14px var(--td9-sans)!important;background:#fff!important;border:1px solid #B9C7C4!important;color:var(--td9-navy)!important;box-shadow:none!important}
 html.td9:not(.nbh-pr-measure) #compWrap .card .chd:has(.td-sc-btn) .td-vid-btn{grid-row:4}
-@media print{#tdVideo,.td-vid-btn{display:none!important}}
+/* v25.68 the line under Watch the video on a plan card: what the video shows, and how this version differs */
+#compWrap .card .td-vid-line{margin:4px 0 8px;max-width:90ch;font:13px/1.45 var(--td9-sans,var(--nbh-sans,sans-serif));color:var(--nbh-muted,#54676f)}
+html.td9:not(.nbh-pr-measure) #compWrap .card .td-vid-line{font:13px/1.45 var(--td9-sans,var(--nbh-sans,sans-serif))!important;color:var(--nbh-muted,#54676f)!important;margin:2px 0 10px!important}
+@media print{#tdVideo,.td-vid-btn,.td-vid-line{display:none!important}}
 </style>
 <script id="td1-video">
 /* v25.21 Watch the video: a bank card can carry a video of its steps (the first: functional communication training, the card
    after Tiger, Hanley & Bruzek, 2008, made with an AI video model, simulated people, captions and narration added). The video
    is a file beside the forms, loaded only when a person taps the button, and played from the device (so it plays offline:
    the offline copy saves the file whole). The button sits in the bank panel's detail and on the plan card built from the
-   protocol; nothing of it enters the save file. The one-file edition does not carry the file and says so. */
+   protocol; nothing of it enters the save file. The one-file edition does not carry the file and says so.
+   v25.68 (the BCBA, 11/6) the high-probability request sequence: one video for every A_HIGHP card (the bank panel's versions
+   from the studies and the plan's cards, from the bank or from the menu), showing TD-1's own steps for the card (3 easy
+   requests 1–3 s apart, praise and a snack after each, the hard request within 3 s, a 30-s restart after a missed one, a new
+   order each trial, then fading), in its own file (nbh-td1-video-highp.js), loaded only when asked. Under the button one
+   line says what the video shows and, for a version from a study, how that version differs (the card's comparison rows,
+   cmp: the time between the easy requests, what follows each, when the hard request comes, a missed easy one). The
+   player's note is the video's own; the FCT video, its title and its note are as they were.
+   v25.68 (the BCBA, 11/6) four more versions from the studies, each in its own file, loaded only when asked: praise only
+   (after Wilder, Sheppard, et al., 2025), the whole class before a transition (Ardoin et al., 1999), before independent
+   seatwork (Wehby & Hollahan, 2000) and a peer giving the requests (Davis & Reichle, 1996). Each high-p card shows the closest
+   (VMAP: praise only for the cards that praise each easy request, the class, seatwork and peer videos for their own cards,
+   the first video for the rest); its line names the version shown and how the card differs from it.
+   v25.68 (the BCBA, 11/7) eleven more, each in its own file, loaded only when asked: four for DRO (resetting, after Kodak et
+   al., 2003; whole-interval in class, then momentary, after Repp et al., 1983, and Barton et al., 1986; momentary, after
+   Hammond et al., 2011, and Lindberg et al., 1999; tokens, then student-run, after Tiger et al., 2009, and Tereshko et al.,
+   2021), four for NCR, NCE and A_NCA (attention in class; items on a timer; snacks and breaks during work; before and between
+   activities) and three for RIRD (vocal; motor; blocking and pica). Every card of those codes shows the closest (pvKey, the
+   rule below); the card a video was made from says "The video shows this card’s steps", the others "the closest version,
+   after ...", with one clause where a field of the card shows how it differs (pvDiff). A RIRD card none of the three fits
+   (overcorrection, the awareness device, exposure and response prevention, the chin cue) has no video. */
 (function(){
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res();s.onerror=()=>rej(new Error(src));document.head.appendChild(s);});}
-const VIDS={'fct-practical-guide-thinning':{title:'Functional communication training: the break request, step by step',load:()=>loadScript('nbh-td1-video-fct.js')}};
+/* v25.68 (11/7) a procedure video: its note says it was made with an AI video model from the card(s) it names, then its own last sentence */
+const pv=(title,file,src,after,last,shows)=>({title,file,load:()=>loadScript(file),src,after,shows,pv:1,
+ note:'Made with an AI video model from the steps of the card'+(src.length>1?'s':'')+' after '+after+', with captions and narration added. The people and the room are simulated: it shows the procedure, not a real session. Adapt every step to the student’s plan. '+last});
+const VIDS={'fct-practical-guide-thinning':{title:'Functional communication training: the break request, step by step',file:'nbh-td1-video-fct.js',load:()=>loadScript('nbh-td1-video-fct.js'),
+  note:'Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.'},
+ a_highp:{title:'High-probability request sequence: three easy requests, then the hard one',file:'nbh-td1-video-highp.js',load:()=>loadScript('nbh-td1-video-highp.js'),
+  note:'Made with an AI video model from TD-1’s steps for this card, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the student does not do the hard request, follow the Responding to behavior sheet for the function.',
+  shows:{n_easy:'3',spacing:'1–3 s',easy_reinforcer:'Praise and a small edible',to_hard:'Within 3 s',missed_easy:'Wait 30 s, start a new sequence',
+   summary:'3 easy requests 1–3 s apart, praise and a snack after each, the hard request within 3 s, a 30-s restart after a missed one'}},
+ /* v25.68 (the BCBA, 11/6) four more versions from the studies, each in its own file; a card shows the closest (VMAP) */
+ a_highp_praise:{title:'High-probability request sequence: praise only',file:'nbh-td1-video-highp-praise.js',load:()=>loadScript('nbh-td1-video-highp-praise.js'),src:'a_highp-momentum-cooperation',after:'Wilder, Sheppard, et al. (2025)',
+  note:'Made with an AI video model from the steps of the card after Wilder, Sheppard, et al. (2025), with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the student does not do the hard request, follow the Responding to behavior sheet for the function.',
+  shows:{n_easy:'3',spacing:'1–2 s',easy_reinforcer:'Brief praise',to_hard:'1–2 s after the last one',missed_easy:'Stop, wait 15 s, restart from the first',
+   summary:'3 easy requests 1–2 s apart, brief praise only after each, the hard request 1–2 s after the last, nothing said if it is not done, a 15-s restart from the first after a missed one'}},
+ a_highp_class:{title:'High-probability instructions for the whole class, before a transition',file:'nbh-td1-video-highp-class.js',load:()=>loadScript('nbh-td1-video-highp-class.js'),src:'a_highp-group-transition-fading',after:'Ardoin et al. (1999)',
+  note:'Made with an AI video model from the steps of the card after Ardoin et al. (1999), with captions and narration added. The teacher, the children and the room are simulated: it shows the sequence, not a real session. Adapt every step to the class and the student’s plan. If the student does not follow the transition, follow the Responding to behavior sheet for the function.',
+  shows:{n_easy:'3, faded to 2, then 1',spacing:'No more than 5 s',easy_reinforcer:'Not stated',to_hard:'Within 5 s',missed_easy:'Not stated',
+   summary:'3 easy instructions to the whole class at most 5 s apart, the transition within 5 s, praise for named students and the class, then faded to 1'}},
+ a_highp_seatwork:{title:'High-probability requests before independent seatwork',file:'nbh-td1-video-highp-seatwork.js',load:()=>loadScript('nbh-td1-video-highp-seatwork.js'),src:'a_highp-math-seatwork-start',after:'Wehby & Hollahan (2000)',
+  note:'Made with an AI video model from the steps of the card after Wehby & Hollahan (2000), with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the work does not start within 10 s, walk away without comment, as the card says.',
+  shows:{n_easy:'3',spacing:'Within 10 s of finishing the one before',easy_reinforcer:'Praise',to_hard:'Within 10 s',missed_easy:'Give another until 3 in a row are followed',
+   summary:'3 math requests beside the desk, each within 10 s, praise for each, the seatwork request within 10 s of the third, another request when one is not followed'}},
+ a_highp_peer:{title:'High-probability requests given by a peer',file:'nbh-td1-video-highp-peer.js',load:()=>loadScript('nbh-td1-video-highp-peer.js'),src:'a_highp-variant-peer-requests',after:'Davis & Reichle (1996)',
+  note:'Made with an AI video model from the steps of the card after Davis & Reichle (1996), with captions and narration added. The children, the teacher and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and teach the peers the sequence before they use it.',
+  shows:{n_easy:'3',spacing:'Not stated',easy_reinforcer:'Peer comment that keeps the play going',to_hard:'Within 5 s of the third',missed_easy:'Peer waits about 30 s, starts a new sequence',
+   summary:'a classmate gives 3 easy play requests with a play comment after each, the social request within 5 s of the third, a new sequence about 30 s after a missed one'}},
+ /* v25.68 (the BCBA, 11/7) DRO, NCR (with NCE and A_NCA) and RIRD: each in its own file; a card shows the closest (pvKey).
+    shows: what the video shows (summary), and for pvDiff: reset (restarts the interval), mom (momentary), fn (the function), cont (access throughout) */
+ dro_resetting:pv('DRO, resetting: a break for calm work','nbh-td1-video-dro-resetting.js',['dro-break-after-calm-interval'],'Kodak et al. (2003)',
+  'If problem behavior is unsafe, follow the Responding to behavior sheet for the function.',
+  {reset:1,summary:'the first interval set below the baseline mean time between responses (here 10 s), a break at once after each interval with no problem behavior, the interval restarted from zero after problem behavior, then lengthened at the criterion'}),
+ dro_class:pv('DRO in class: whole-interval, then momentary','nbh-td1-video-dro-class.js',['dro-whole-interval-classroom','dro-whole-then-momentary'],'Repp et al. (1983) and Barton et al. (1986)',
+  'These studies did not restart the timer after disruption; most plans do (the resetting video).',
+  {reset:0,summary:'the rule told first, a treat and praise after each whole interval with no disruption, nothing after an interval with disruption (the timer runs on), then momentary checks once disruption is low and stable, and back to whole intervals if it rises'}),
+ dro_momentary:pv('Momentary DRO: fixed and variable checks','nbh-td1-video-dro-momentary.js',['dro-unsignaled-momentary','dro-variable-momentary'],'Hammond et al. (2011) and Lindberg et al. (1999)',
+  'Give no sign that an interval is about to end.',
+  {reset:0,mom:1,summary:'the item only if problem behavior is not happening at the second the interval ends, on a silent timer set at the baseline mean time between responses or at 50–150% of it in random order, short access, no reset, then the next interval'}),
+ dro_tokens:pv('DRO with tokens, then student-run','nbh-td1-video-dro-tokens.js',['dro-self-monitored-timer','dro-selfmanage-timer-tokens'],'Tiger et al. (2009) and Tereshko et al. (2021)',
+  'Before staff step back, check the student’s record against their own data.',
+  {reset:1,summary:'a ticket for each interval with no picking on a staff-run timer, the timer restarted without comment after picking, longer intervals once picking is near zero, then the student running the timer and the tickets while staff check her record against theirs'}),
+ ncr_attention:pv('NCR for attention in class: comments on a timer','nbh-td1-video-ncr-attention.js',['ncr-attention-ft1-after-school','ncr-ft-attention-classroom'],'Noel & Getch (2016) and Rasmussen & O’Neill (2006)',
+  'If problem behavior is unsafe, follow the Responding to behavior sheet for the function.',
+  {fn:'attention',summary:'a brief comment by name at each buzz of a vibrating timer (here every minute), whatever the student is doing, no answer to calling out between buzzes, a quick answer to a raised hand, then the schedule thinned'}),
+ ncr_items:pv('NCR for items: a timer, a signal, then a request','nbh-td1-video-ncr-items.js',['ncr-latency-based-tangible','ncr-signaled-timer-return','ncr-thin-first-then-requests'],'Lalli et al. (1997), Gouboth et al. (2007) and Goh et al. (2000)',
+  'If problem behavior is unsafe, follow the Responding to behavior sheet for the function.',
+  {fn:'tangible',summary:'the item for 30 s each time the timer rings, whatever the student is doing, a spoken signal and a visible timer for when it comes back, no item and no reaction after problem behavior, a taught request for it honored every time, then the interval lengthened'}),
+ ncr_work:pv('NCR during work: snacks on a timer, and timed breaks','nbh-td1-video-ncr-work.js',['ncr-vt-food-praise-demands','nce-fixed-time-breaks-notes'],'Lomas et al. (2010) and Waller & Higbee (2010)',
+  'Revise tasks that are too hard or too long first, and never give a break right after problem behavior.',
+  {fn:'escape',summary:'during seatwork, a snack and a friendly comment on a variable timer averaging 15 s with the next task right away, or breaks by the clock cued by a break note and a work note, never after problem behavior, then the interval lengthened'}),
+ ncr_between:pv('NCR before and between activities: free access, then signaled breaks from it','nbh-td1-video-ncr-between.js',['ncr-presession-item-access','ncr-signaled-thinning-alternatives'],'Rispoli et al. (2011) and Slocum et al. (2018)',
+  'Agree with the teacher first what counts as turning the item down.',
+  {fn:'tangible',cont:1,summary:'free access to the item just before the lesson until the student turns it down, the lesson started right away, then short periods without it signaled by a card and a count of 3, 2, 1, with attention kept going and the item back at once, the periods lengthened slowly'}),
+ rird_vocal:pv('Vocal RIRD: known questions, then back to play','nbh-td1-video-rird-vocal.js',['rird-vocal-stereotypy-demands','rird-vocal-questions','rird-one-question-vocal-stereotypy'],'Ahearn et al. (2007), Ahrens et al. (2011) and Toper-Korkmaz et al. (2018)',
+  'Use it only for vocal stereotypy that a functional analysis shows is not socially maintained.',
+  {summary:'at vocal stereotypy, the student’s name, then questions he already answers until 3 correct in a row, praise for talking and back to play, a model when there is no answer, and the one-question version that ends at the first correct answer'}),
+ rird_motor:pv('Motor RIRD: one-step directions','nbh-td1-video-rird-motor.js',['rird-motor-directions-school','rird-one-motor-demand'],'Cassella et al. (2011) and Saini et al. (2015)',
+  'Use it only for stereotypy that a functional analysis shows is automatically maintained.',
+  {summary:'at stereotypy, the student’s name, then one-step directions she already follows until 3 in a row with none, specific praise and back to the task, a model when there is no response within 5 s, and one direction in place of three'}),
+ rird_pica:pv('Pica: block at the first touch, then redirect','nbh-td1-video-rird-pica.js',['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)',
+  'Blocking is a restrictive step: a written pica safety plan and consent come first.',
+  {summary:'a flat open hand between the hand and the mouth at the first touch of an inedible item, the item put in the trash and a nurse-approved food offered, then throwing items away taught and praised at once, with the area swept and the food freely available'})};
+/* v25.68 the closest video for each high-p card: by who gives the requests, where, and what follows each easy one (the
+   card's cmp rows); a card not named here (an edible or an item after each, or not stated, and the feeding cards) keeps the first */
+const VMAP={'a_highp-group-transition-fading':'a_highp_class','a_highp-math-seatwork-start':'a_highp_seatwork','a_highp-variant-peer-requests':'a_highp_peer'};
+['a_highp-momentum-cooperation','a_highp-medium-p-substitute','a_highp-orienting-dtt','a_highp-momentum-compliance','a_highp-household','a_highp-interspersed-requests',
+ 'a_highp-multiple-adults','a_highp-with-escape-extinction','a_highp-peer-social-initiations','a_highp-fade-sequence-do-requests','a_highp-short-5s-interval',
+ 'a_highp-escape-extinction-instruction-pace','a_highp-four-quick-requests','a_highp-higher-quality-reinforcer','a_highp-medical-hold-still','a_highp-before-giving-up-toy',
+ 'a_highp-medical-exam-requests','a_highp-varied-order-sequence'].forEach(id=>{VMAP[id]='a_highp_praise';});
+/* a component's video, for every card of it (the bank's and the plan's) */
+const BYCODE={A_HIGHP:'a_highp',DRO:'dro_resetting',NCR:'ncr_items',NCE:'ncr_work',A_NCA:'ncr_attention',RIRD:'rird_vocal'};
+/* v25.68 (the BCBA, 11/7) the closest video for each card of DRO, NCR, NCE, A_NCA and RIRD, read from its fields (lab, params,
+   fn): a card a video was made from shows that video. DRO: momentary cards, fixed or variable (lab or params: momentary, at
+   the second it ends), the momentary video; token, point, sticker, coupon or self-managed cards the tokens video (a
+   self-managed card first; a classwide card is the class one); classwide or classroom cards (lab) and cards whose reset rule
+   does not restart the interval (no reset, the next one starts on schedule, all or none) the class video; the rest
+   resetting. NCR: presession or before-activity access and signaled no-access periods, the before-and-between video; else by
+   the first function in fn: attention the attention video, escape the during-work video, items (or none named) the items
+   video. Every NCE card the during-work video, every A_NCA card the attention one. RIRD: overcorrection, the awareness
+   device, exposure and response prevention and the chin cue none; demands of motor directions the motor video; vocal demands
+   (questions, echoes, spelling, framed comments) the vocal video; redirection to the task at hand the motor video; blocking
+   with no demand (pica, and other behavior blocked or interrupted) the pica video. PVX: the cards read by hand from their
+   steps where the rule would choose wrong (a mixed or unnamed function, a routine that is not work, a word the rule misreads). */
+const PVX={'dro-injury-check-levels':'dro_class','dro-stated-rule-stereotypy':'dro_resetting','ncr-adjusting-irt-thinning':'ncr_items','ncr-yoked-ft-after-dra':'ncr_items',
+ 'ncr-thin-five-minute-start':'ncr_items','ncr-dense-to-thin-ext':'ncr_items','ncr-severe-behavior-case-series':'ncr_items','ncr-self-restraint-pillow':'ncr_items','ncr-preferred-item-substitute':'ncr_items',
+ 'ncr-pretrial-preferred-access':'ncr_between','ncr-preferred-exercise-routine':'ncr_work','ncr-toy-attention-prone':'ncr_work','ncr-ft-edible-during-work':'ncr_work','rird-positive-practice-stereotypy':'rird_motor'};
+const PSRC={};Object.keys(VIDS).forEach(k=>{if(VIDS[k].pv)VIDS[k].src.forEach(id=>{PSRC[id]=k;});});
+const prm=(p,re)=>{const o=p.params||{},k=Object.keys(o).find(x=>re.test(x));return k?String(o[k]):'';};
+const NORESET=/no reset|not reset|nonresetting|non-resetting|no full reset|no timer to reset|stood alone|forfeits only|ends? (that|the) (day|hour)'s chance|loses (that period's|the reward for that trial)|cancelled that segment|starts? fresh|ran on|all or none|wait for the next check|on schedule with n/i;
+function pvKey(p){if(PSRC[p.id])return PSRC[p.id];if(PVX[p.id])return PVX[p.id];const L=p.lab+' '+JSON.stringify(p.params||{}),f=(p.fn||[])[0]||'';
+ if(p.code==='DRO'){if(/momentar|at the (exact )?(second|moment|instant)|only the moment/i.test(L))return 'dro_momentary';
+  if(/self-(managed|run|record|monitor|timed)|timed by the student/i.test(L))return 'dro_tokens';
+  if(/classwide|whole class/i.test(L))return 'dro_class';
+  if(/token|\bpoints\b|a point\b|sticker|coupon|\bstars?\b|ticket|penn(y|ies)|chips|check mark/i.test(L))return 'dro_tokens';
+  return /\bclass(room)?\b/i.test(p.lab)||NORESET.test(prm(p,/reset/i))?'dro_class':'dro_resetting';}
+ if(p.code==='NCE')return 'ncr_work';if(p.code==='A_NCA')return 'ncr_attention';
+ if(p.code==='NCR'){if(/presession|before (an|the) activity|before class work|before times when|signaled no-access/i.test(L))return 'ncr_between';
+  return f==='attention'?'ncr_attention':f==='escape'?'ncr_work':'ncr_items';}
+ if(p.code==='RIRD'){const D=prm(p,/interruption demands/i),no=/^(none|no )/i.test(D);
+  if(/overcorrection|awareness|exposure and response prevention|\bchin\b/i.test(p.lab))return '';
+  if(!no&&/motor|direction/i.test(D))return 'rird_motor';
+  if(!no&&/vocal|question|echo|spell|imitation|framed|\bsay\b|sight-word|counting|song/i.test(D))return 'rird_vocal';
+  if(!no&&/instruction|task|activity|redirect/i.test(D)&&!/block/i.test(p.lab))return 'rird_motor';
+  return 'rird_pica';}
+ return '';}
+/* the one clause on how a card differs from the video it shows, only where a field of the card says so */
+const FNW={attention:'attention',tangible:'access to items',escape:'escape from tasks',automatic:'automatic reinforcement'};
+function pvDiff(p,k){const S=VIDS[k].shows,L=String(p.lab||''),D=prm(p,/interruption demands/i);
+ if(p.code==='DRO'){const R=prm(p,/reset/i);if(!R||S.mom)return '';const nr=NORESET.test(R);
+  if(nr&&S.reset)return 'This card does not restart the interval after the behavior.';
+  if(!nr&&!S.reset&&/restart|reset|start(s|ed)? again/i.test(R))return 'This card restarts the interval after the behavior.';return '';}
+ if(S.fn){const f=p.fn||[],I=prm(p,/interval/i);if(f.length&&f.indexOf(S.fn)<0&&FNW[f[0]])return 'This card is for behavior maintained by '+FNW[f[0]]+'.';
+  const T=prm(p,/terminal/i);if(!S.cont&&/^(continuous|no interval)/i.test(I)&&!/\bthen\b|at (the )?(first|start)|to start/i.test(I)&&(!T||/^(not|no\b|continuous)/i.test(T)))return 'This card gives the reinforcer throughout, not on a timer.';return '';}
+ if(k==='rird_pica')return /pica/i.test(L)?'':'The clip shows pica; this card is for another behavior: '+L.charAt(0).toLowerCase()+L.slice(1)+'.';
+ if(k==='rird_motor')return /direction|instruction/i.test(D)?'':'This card redirects to the task or activity at hand, not to one-step directions.';
+ if(k==='rird_vocal')return /imitat|echo/i.test(D)&&!/question/i.test(D)?'This card asks for echoes (vocal imitation), not answers to questions.':'';
+ return '';}
+let BID=null;
+function bank(id){if(!BID){BID={};try{if(typeof TD1_BANK!=='undefined'&&TD1_BANK&&Array.isArray(TD1_BANK.protocols))TD1_BANK.protocols.forEach(p=>{BID[p.id]=p;});}catch(e){}}return BID[id]||null;}
+const keyOf=id=>{if(!id)return '';if(VIDS[id])return id;const p=bank(id);if(!p)return '';if(p.code==='A_HIGHP'&&VMAP[id])return VMAP[id];
+ if(/^(DRO|NCR|NCE|A_NCA|RIRD)$/.test(p.code))return pvKey(p);return BYCODE[p.code]||'';};
+/* the line under the button: what the video shows, and the rows where this version differs (as the BCBA's approved mockup) */
+const LROW={spacing:'Time between them',easy_reinforcer:'After each easy one',to_hard:'The hard request comes',missed_easy:'If an easy one is missed'};
+const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+function line(id){const k=keyOf(id),v=VIDS[k];if(!v||!v.shows)return '';const S=v.shows,p=VIDS[id]?null:bank(id),c=p&&p.cmp;
+ if(v.src&&p&&[].concat(v.src).indexOf(p.id)>=0)return 'The video shows this card’s steps: '+S.summary+'.';
+ if(v.pv){const d=p?pvDiff(p,k):'';return 'The video shows the closest version, after '+v.after+': '+S.summary+'.'+(d?' '+d:'');}
+ let t=(v.after?'The video shows the closest version, after '+v.after+': ':'The video shows TD-1’s steps for this card: ')+S.summary+'.';
+ if(c){const dd=Object.keys(LROW).filter(x=>norm(c[x])!==norm(S[x])&&!/^not stated/i.test(c[x]||'')).map(x=>LROW[x].toLowerCase()+': '+c[x]);
+  t+=' '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');}
+ return t;}
 let box=null,opener=null;const urls={};
 const $=id=>box.querySelector('#'+id);
 function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','tv-title');
  box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-close">Close</button></div>'+
   '<video id="tv-video" controls playsinline preload="metadata"></video><p class="tv-msg" id="tv-msg" aria-live="polite"></p>'+
-  '<p class="tv-note">Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.</p></div>';
+  '<p class="tv-note" id="tv-note"></p></div>';
  document.body.appendChild(box);
  $('tv-close').addEventListener('click',close);box.addEventListener('click',ev=>{if(ev.target===box)close();});
  document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&box&&!box.hidden)close();});}
 function msg(t,err){const m=$('tv-msg');m.textContent=t||'';m.hidden=!t;m.classList.toggle('tv-err',!!err);}
-async function play(id,from){const v=VIDS[id];if(!v)return;if(!box)build();opener=from||document.activeElement;
- const vid=$('tv-video');$('tv-title').textContent=v.title;box.hidden=false;setTimeout(()=>{try{$('tv-close').focus();}catch(e){}},30);
- if(!urls[id]){vid.removeAttribute('src');vid.hidden=true;msg('Loading the video…');
-  try{if(!(window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[id]))await v.load();
-   const b64=window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[id];if(!b64)throw new Error('no video data');
+async function play(id,from){const k=keyOf(id),v=VIDS[k];if(!v)return;if(!box)build();opener=from||document.activeElement;
+ const vid=$('tv-video');if(vid.dataset.id&&vid.dataset.id!==k){try{vid.pause();}catch(e){}}
+ $('tv-title').textContent=v.title;$('tv-note').textContent=v.note;box.hidden=false;setTimeout(()=>{try{$('tv-close').focus();}catch(e){}},30);
+ if(!urls[k]){vid.removeAttribute('src');delete vid.dataset.id;vid.hidden=true;msg('Loading the video…');
+  try{if(!(window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[k]))await v.load();
+   const b64=window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[k];if(!b64)throw new Error('no video data');
    const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-   urls[id]=URL.createObjectURL(new Blob([u],{type:'video/mp4'}));}
-  catch(e){msg('The video could not be loaded here. It is a file beside the forms (nbh-td1-video-fct.js): open the workstation from its folder or from the website. The one-file edition does not carry it.',true);return;}}
- if(vid.dataset.id!==id){vid.src=urls[id];vid.dataset.id=id;}vid.hidden=false;msg('');}
+   urls[k]=URL.createObjectURL(new Blob([u],{type:'video/mp4'}));}
+  catch(e){msg('The video could not be loaded here. It is a file beside the forms ('+v.file+'): open the workstation from its folder or from the website. The one-file edition does not carry it.',true);return;}}
+ if(vid.dataset.id!==k){vid.src=urls[k];vid.dataset.id=k;}vid.hidden=false;msg('');}
 function close(){if(!box)return;const vid=$('tv-video');try{vid.pause();}catch(e){}box.hidden=true;if(opener&&opener.focus)try{opener.focus();}catch(e){}opener=null;}
-/* the plan's cards: a card built from a bank protocol with a video gets Watch the video beside Remove */
-function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=inp&&inp.value;const has=!!(id&&VIDS[id]);let b=c.querySelector('.td-vid-btn');
- if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>play(inp.value,b));const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
- else if(!has&&b)b.remove();});}
+/* the plan's cards: a card built from a bank protocol with a video, or a card of a component with one (A_HIGHP), gets Watch
+   the video beside Remove, and the video's line under the card's header */
+/* v25.68 (11/7) a card from the menu shows its component's video; a DRO card set to "Momentary, variable times" the momentary one */
+const cardKey=c=>c.dataset.code==='DRO'&&/^momentary/i.test((c.querySelector('select[name$=".dtype"]')||{}).value||'')?'dro_momentary':(BYCODE[c.dataset.code]||'');
+function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=(inp&&inp.value)||'';const k=id&&bank(id)?keyOf(id):(keyOf(id)||cardKey(c));const has=!!VIDS[k];let b=c.querySelector('.td-vid-btn'),ln=c.querySelector('.td-vid-line');
+ if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>{const i2=c.querySelector('[name$="].bank"]'),x=(i2&&i2.value)||'';play(keyOf(x)?x:cardKey(c),b);});const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
+ else if(!has&&b)b.remove();
+ const t=has?line(keyOf(id)?id:k):'';
+ if(t){if(!ln){ln=document.createElement('p');ln.className='noprint td-vid-line';const h=c.querySelector('.chd');if(h)h.insertAdjacentElement('afterend',ln);else c.insertBefore(ln,c.firstChild);}if(ln.textContent!==t)ln.textContent=t;}
+ else if(ln)ln.remove();});}
 try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true,subtree:true});}catch(e){}
-document.addEventListener('change',ev=>{if(ev.target&&/\]\.bank$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
-window.__tdVideo={has:id=>!!VIDS[id],play,close,count:()=>Object.keys(VIDS).length};
+document.addEventListener('change',ev=>{if(ev.target&&/\]\.(bank|dtype)$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
+window.__tdVideo={has:id=>!!VIDS[keyOf(id)],play,close,count:()=>Object.keys(VIDS).length,key:id=>keyOf(id),line:id=>line(id)};
+})();
+</script>
+<style id="td1-v2568-droiv">
+/* v25.68 (the BCBA, 11/7) Set the first interval from baseline, on each DRO plan card: screen only, never saved or printed */
+#compWrap .card .td-iv{margin:6px 0 10px;font:13px/1.45 var(--td9-sans,var(--nbh-sans,sans-serif));color:var(--nbh-ink,#182e43)}
+#compWrap .card .td-iv button{min-height:44px!important;min-width:44px;height:auto!important;padding:6px 14px!important;font:inherit!important;font-weight:600!important;border:1px solid var(--nbh-rule,#b9c6cb)!important;border-radius:8px!important;background:#fff!important;color:var(--nbh-ink,#182e43)!important;cursor:pointer}
+#compWrap .card .td-iv button:focus-visible,#compWrap .card .td-iv input:focus-visible{outline:2px solid var(--nbh-accent,#0e5c63);outline-offset:2px}
+#compWrap .card .td-iv-box{margin:8px 0 0;padding:10px 12px;border:1px solid var(--nbh-rule,#d5dde0);border-radius:8px;background:var(--nbh-wash,#f6f8f9);max-width:92ch}
+#compWrap .card .td-iv-box[hidden]{display:none}
+#compWrap .card .td-iv table{border-collapse:collapse;margin:6px 0}
+#compWrap .card .td-iv th,#compWrap .card .td-iv td{padding:3px 8px 3px 0;text-align:left;font-weight:600}
+#compWrap .card .td-iv td{font-weight:400}
+#compWrap .card .td-iv input{min-height:44px!important;height:44px!important;width:96px!important;box-sizing:border-box;padding:4px 8px!important;font:inherit!important;border:1px solid var(--nbh-rule,#b9c6cb)!important;border-radius:6px!important;background:#fff!important}
+#compWrap .card .td-iv input[aria-invalid="true"]{border-color:#a3261b!important}
+#compWrap .card .td-iv p{margin:6px 0}
+#compWrap .card .td-iv .td-iv-out{font-weight:600}
+#compWrap .card .td-iv .td-iv-src,#compWrap .card .td-iv .td-iv-note{color:var(--nbh-muted,#54676f)}
+#compWrap .card .td-iv ul{margin:4px 0 0;padding-left:18px}
+#compWrap .card .td-iv li{margin:0 0 8px}
+#compWrap .card .td-iv li button{margin:4px 8px 0 0}
+@media print{#compWrap .card .td-iv{display:none!important}}
+/* Watch the video on a plan card, now on many more cards: 44 px on the iPad */
+html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-vid-btn{height:44px!important;min-height:44px!important}
+</style>
+<script id="td1-v2568-droiv-js">
+/* v25.68 (the BCBA, 11/7) Set the first interval from baseline. On each DRO plan card, under its settings: up to the last 3
+   baseline sessions (the minutes each lasted and the count of the target behavior), the mean time between responses
+   (session seconds ÷ responses, for each session, averaged: the cards after Lindberg et al., 1999, and Kahng et al., 2000a,
+   work it out this way) and a first interval of 50% to 100% of that mean, the range the DRO cards use (half the mean, after
+   Azrin et al., 1988, and Iannaccone et al., 2020; just under it, after Derwas & Jones, 1993; the mean itself, after Barton
+   et al., 1986, Lindberg et al., 1999, and Hammond et al., 2011), never below 5 s (the floor in the card after Azrin et al.).
+   The BCBA types the interval into the card's own "Initial DRO interval" field; the helper never fills it. That field keeps
+   its seed as before (a card from the menu: 80% of Setup's mean interresponse time, none from Form DD-1's school-day rate);
+   the helper names Setup's mean when there is one. The rows are filled from Form DD-1's baseline when the case brings it (the
+   last 3 days of its first condition for the target behavior: a count per day, or a rate per hour as the responses in 60
+   minutes), said so, with the note that a school day is not a session. Below: the ways the DRO cards lengthen the interval,
+   each with its card. Nothing here has a name: it is not saved, not printed and not part of a signed record. */
+(function(){
+'use strict';
+const FLOOR=5;
+const T=v=>String(v==null?'':v).trim();
+const r1=x=>Math.round(x*10)/10;
+const fmt=s=>s<60?s+' s':Math.floor(s/60)+' min'+(s%60?' '+(s%60)+' s':'');
+/* the arithmetic: rows [{min,n}] -> per-session seconds between responses, their mean and the suggested range */
+function calc(rows){const used=[],skipped=[];(rows||[]).forEach((r,i)=>{const m=parseFloat(r.min),n=parseFloat(r.n);if(!(m>0)||!(n>=0)||isNaN(n))return;if(n===0){skipped.push(i+1);return;}used.push({i:i+1,s:m*60/n});});
+ if(!used.length)return {n:0,skipped};const mean=used.reduce((a,u)=>a+u.s,0)/used.length;
+ return {n:used.length,per:used.map(u=>Math.round(u.s)),mean:Math.round(mean),lo:Math.max(FLOOR,Math.round(mean/2)),hi:Math.max(FLOOR,Math.round(mean)),floored:Math.round(mean/2)<FLOOR,skipped};}
+/* Form DD-1's baseline, when the case brings it: the target behavior's last 3 days in the first condition */
+let BASE=null;
+function fromFacts(f){const d=f&&f.data;if(!d||!Array.isArray(d.series)||!Array.isArray(d.conds)||!d.conds.length)return null;
+ const c0=d.conds[0];if(!(d.conds.length>1||/baseline|^bl\b|^a\d*$/i.test(T(c0.name))))return null;
+ const dd=(d.behaviors||[]).filter(b=>b&&b.kind!=='replacement'&&(b.measure==='count'||b.measure==='rate'));if(!dd.length)return null;
+ const pb=(f.behaviors||[]).find(b=>b&&T(b.label)&&!b.isRep&&!/replacement|alternative/i.test(b.type||''));
+ const b=(pb&&dd.find(x=>T(x.name).toLowerCase()===T(pb.label).toLowerCase()))||dd[0];
+ const days=d.series.filter(r=>r&&r.cond===c0.name&&r.v&&typeof r.v[b.name]==='number').slice(-3);if(!days.length)return null;
+ return {beh:T(b.name),cond:T(c0.name),measure:b.measure,rows:days.map(r=>b.measure==='rate'?{min:'60',n:String(r1(r.v[b.name]))}:{min:'',n:String(r.v[b.name])}),dates:days.map(r=>r.date)};}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r;try{r=was?was.apply(this,arguments):undefined;}catch(e){r={filled:0};}try{const b=fromFacts(f);if(b)BASE=b;}catch(e){}return r;};}
+/* each way, with the card it comes from (the button opens it in the bank panel) */
+const WAYS=[
+ ['Add 50%, rounded to the nearest 5 s, after 2 sessions in a row with problem behavior at least 80% below the baseline mean, up to 5 min (Hammond et al., 2011).',[['See the card after Hammond et al. (2011)','dro-unsignaled-momentary']]],
+ ['Before each session, set the interval to the mean time between responses over the last 3 sessions, never more than double the one before (Lindberg et al., 1999; Kahng et al., 2000a, use the same rule for NCR).',[['See the card after Lindberg et al. (1999)','dro-variable-momentary'],['See the NCR card after Kahng et al. (2000a)','ncr-adjusting-irt-thinning']]],
+ ['Double the interval after 5 reinforced intervals in a row, up to 5 min; halve it when 5 intervals’ worth of time pass with no reinforcer (Azrin et al., 1988).',[['See the card after Azrin et al. (1988)','dro-interval-doubling-sib']]],
+ ['Fixed steps once problem behavior is at or below the criterion: 10 s, 20 s, 30 s, 1 min, 1.5 min, then 2 min (Kodak et al., 2003).',[['See the card after Kodak et al. (2003)','dro-break-after-calm-interval']]]];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let seq=0;
+function field(card){return [...card.querySelectorAll('.param .f')].find(f=>/^Initial DRO interval/i.test(T((f.querySelector('label')||{}).textContent)));}
+function setupLine(){const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};const r=parseFloat(g('m.rate'));
+ if(!(r>0))return '';if(g('m.ratesrc')==='DD-1')return 'Setup’s baseline rate is Form DD-1’s school-day rate, not a session rate, so it is not used here.';
+ return 'Setup’s baseline rate, '+r+' per minute, gives a mean time between responses of '+fmt(Math.round(60/r))+'.';}
+function build(card){const f=field(card);if(!f)return null;const id='tdIv'+(++seq);const w=document.createElement('div');w.className='td-iv noprint';w.setAttribute('data-add68-skip','');
+ w.innerHTML='<button type="button" class="td-iv-tog" aria-expanded="false" aria-controls="'+id+'">Set the first interval from baseline</button>'+
+  '<div class="td-iv-box" id="'+id+'" hidden><p class="td-iv-src"></p>'+
+  '<table><thead><tr><th scope="col">Baseline session</th><th scope="col">Minutes</th><th scope="col">Responses</th></tr></thead><tbody>'+
+  [1,2,3].map(k=>'<tr><th scope="row">'+k+'</th><td><input type="text" inputmode="decimal" autocomplete="off" data-iv="min" aria-label="Baseline session '+k+', minutes"></td><td><input type="text" inputmode="decimal" autocomplete="off" data-iv="n" aria-label="Baseline session '+k+', responses of the target behavior"></td></tr>').join('')+
+  '</tbody></table><p class="td-iv-out" aria-live="polite"></p><p class="td-iv-note"></p>'+
+  '<p>Type the interval you choose into “Initial DRO interval” above; this does not fill it. <button type="button" class="td-iv-go">Go to the field</button></p>'+
+  '<p><b>Ways the DRO cards lengthen the interval</b></p><ul>'+WAYS.map(w=>'<li>'+esc(w[0])+'<br>'+w[1].map(c=>'<button type="button" data-iv-card="'+esc(c[1])+'">'+esc(c[0])+'</button>').join('')+'</li>').join('')+'</ul></div>';
+ const param=card.querySelector('.param');(param||f).insertAdjacentElement('afterend',w);
+ const box=w.querySelector('.td-iv-box'),tog=w.querySelector('.td-iv-tog'),ins=[...w.querySelectorAll('input')];
+ const rows=()=>[0,1,2].map(k=>({min:ins[k*2].value,n:ins[k*2+1].value}));
+ function paint(){ins.forEach(x=>{const v=T(x.value),n=parseFloat(v),bad=v!==''&&(isNaN(n)||n<0||(x.dataset.iv==='min'&&n===0));if(bad)x.setAttribute('aria-invalid','true');else x.removeAttribute('aria-invalid');});
+  const c=calc(rows()),o=w.querySelector('.td-iv-out'),nt=w.querySelectorAll('.td-iv-note')[0];
+  if(!c.n){o.textContent='Enter the minutes and the responses of at least one baseline session.';}
+  else o.textContent='Mean time between responses: '+fmt(c.mean)+(c.n>1?' (the mean of '+c.n+' sessions: '+c.per.map(fmt).join(', ')+')':'')+'. Suggested first interval: '+(c.lo===c.hi?fmt(c.lo):fmt(c.lo)+' to '+fmt(c.hi))+(c.hi===FLOOR&&c.mean<FLOOR?', the floor: the mean is under 5 s.':c.floored?' (the low end raised to the 5-s floor).':', 50% to 100% of the mean.');
+  nt.textContent=(c.skipped.length?'Session '+c.skipped.join(' and ')+' had no responses, so it has no time between responses and is left out. ':'')+
+   'The DRO cards start at half the mean (Azrin et al., 1988; Iannaccone et al., 2020), just under it (Derwas & Jones, 1993) or at the mean (Barton et al., 1986; Lindberg et al., 1999; Hammond et al., 2011), never below 5 s (Azrin et al., 1988). '+setupLine();}
+ function prefill(){const s=w.querySelector('.td-iv-src');if(ins.some(x=>T(x.value)))return;
+  if(BASE){BASE.rows.forEach((r,k)=>{ins[k*2].value=r.min;ins[k*2+1].value=r.n;});
+   s.textContent='From Form DD-1’s baseline: the last '+BASE.rows.length+' day'+(BASE.rows.length>1?'s':'')+' of “'+BASE.cond+'” for “'+BASE.beh+'” ('+BASE.dates.join(', ')+'), '+(BASE.measure==='rate'?'a rate per hour, entered as the responses in 60 minutes':'a count per day')+'. A school day is not a session: '+(BASE.measure==='rate'?'check these':'enter the minutes observed each day')+', or type the sessions you timed instead.';}
+  else s.textContent='Enter up to the last 3 baseline sessions: the minutes each lasted and the count of the target behavior in it.';}
+ tog.addEventListener('click',()=>{const open=box.hidden;box.hidden=!open;tog.setAttribute('aria-expanded',String(open));if(open){prefill();paint();}});
+ ins.forEach(x=>x.addEventListener('input',paint));
+ w.querySelector('.td-iv-go').addEventListener('click',()=>{const t=f.querySelector('textarea,input');if(t){try{t.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}catch(e){}t.focus();}});
+ w.addEventListener('click',ev=>{const b=ev.target.closest('[data-iv-card]');if(b&&window.__tdBank&&__tdBank.show)__tdBank.show(b.dataset.ivCard);});
+ return w;}
+function mark(){document.querySelectorAll('#compWrap .card[data-code="DRO"]').forEach(c=>{if(!c.querySelector('.td-iv'))build(c);});}
+try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true});}catch(e){}
+setInterval(mark,2500);mark();
+window.__tdDroIv={calc,base:()=>BASE,fromFacts,mark};
 })();
 </script>
 
@@ -7671,6 +8077,345 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
    const bl=(o&&o.bipLine)||((l,v)=>v?l+': '+v:'');const blk=['CONSENT TO THE PLAN’S PROCEDURES (FORM IC-1)'+(P&&T(P.signed)?', SIGNED '+md(P.signed):'')];
    if(P&&T(P.shared))blk.push(bl('Teaching, rewards and prevention',dec(P.shared)));L.forEach(([k,v])=>blk.push(bl(k,v)));
    let k=B.findIndex(b=>b&&b[0]==='CRISIS PROCEDURE (SEPARATE FROM TREATMENT)');B.splice(k<0?B.length:k,0,blk);}catch(e){}return res;};
+})();
+</script>
+<style id="td1-v2568-qc-css" data-nbh-screen>
+/* v25.68 (research #14) the quality check before sign-off, on the Final plan sheet: screen only */
+.td-qc{border:1px solid #c9d3d9;border-left:4px solid var(--nbh-slate,#254657);border-radius:3px;padding:10px 12px 12px;margin:0 0 14px;background:#fff;font-family:var(--sans,sans-serif)}
+.td-qc[hidden],.td-qc-adopt[hidden]{display:none!important}
+.td-qc-h{margin:0;font:600 16px/1.3 var(--serif,Georgia,serif);color:var(--ink,#182e43)}
+.td-qc-intro{margin:4px 0 8px;font-size:12.5px;line-height:1.5;color:var(--ink-soft,#54676f);max-width:80ch}
+.td-qc-sum{margin:0 0 4px;font-size:13.5px;font-weight:600;color:var(--ink,#182e43)}
+.td-qc-list{list-style:none;margin:0;padding:0}
+.td-qc-it{display:grid;grid-template-columns:124px minmax(0,1fr) auto;gap:2px 14px;align-items:start;border-top:1px solid #e3e8eb;padding:7px 0;margin:0}
+.td-qc-it>.td-qc-go{margin:0;max-width:230px;justify-self:end;text-align:right}
+.td-qc-st{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;line-height:20px;white-space:nowrap}
+.td-qc-ic{display:inline-flex;align-items:center;justify-content:center;flex:none;width:20px;height:20px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;line-height:1}
+.td-qc-met .td-qc-st{color:#1f6b4a}.td-qc-met .td-qc-ic{background:#1f6b4a}
+.td-qc-not .td-qc-st{color:#8a4300}.td-qc-not .td-qc-ic{background:#8a4300}
+.td-qc-na .td-qc-st{color:#54676f}.td-qc-na .td-qc-ic{background:#6b7c84}
+.td-qc-b{min-width:0;font-size:13px;line-height:1.45}
+.td-qc-t{display:block;color:var(--ink,#182e43)}
+.td-qc-why{display:block;color:#33454f;overflow-wrap:break-word}
+.td-qc-go{min-height:36px;margin:2px 0 0;padding:2px 0;border:0;background:none;color:var(--nbh-slate,#254657);font:600 12.5px var(--sans,sans-serif);text-decoration:underline;text-underline-offset:2px;cursor:pointer;text-align:left}
+.td-qc-go:hover{color:var(--ink,#182e43)}
+.td-qc-go:focus-visible{outline:3px solid var(--nbh-focus,#2f7fa8);outline-offset:2px}
+.td-qc-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 0;padding-top:10px;border-top:1px solid #e3e8eb}
+.td-qc-bar .tool{margin:0}
+.td-qc-msg{font-size:12.5px;color:var(--ink-soft,#54676f)}
+.td-qc-src{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--ink-soft,#54676f);max-width:100ch}
+.td-qc-adopt{margin:6px 0 4px;padding:8px 12px;border-left:4px solid var(--nbh-slate,#254657);background:#f5f8f7;font-family:var(--sans,sans-serif);font-size:13px;line-height:1.45}
+.td-qc-adopt .td-qc-go{margin:0 0 0 6px}
+@media (pointer:coarse){#tdQc .td-qc-go,#tdQc .td-qc-bar .tool,#tdQcAdopt .td-qc-go{min-height:44px!important}}
+@media (max-width:900px){.td-qc-it{grid-template-columns:124px minmax(0,1fr)}.td-qc-it>.td-qc-go{grid-column:2;justify-self:start;text-align:left;max-width:none}}
+@media (max-width:600px){.td-qc-it{grid-template-columns:1fr}.td-qc-it>.td-qc-go{grid-column:1}}
+@media print{.td-qc,.td-qc-adopt{display:none!important}}
+</style>
+<script id="td1-v2568-qc">
+/* v25.68 (research #14, the BCBA, 11/6) a BIP quality check before sign-off. At the top of the Final plan sheet, before Copy for
+   the BIP, Print and the adoption block: the items published reviews of behavior intervention plans score (the Behavior
+   Support Plan Quality Evaluation, BSP-QE: Browning-Wright et al., 2007; plan quality predicted student outcomes through
+   integrity under ordinary school conditions: Cook et al., 2012): the function stated; setting changes tied to it; a
+   replacement behavior that serves the same function; teaching strategies; reinforcement; reactive strategies; goals; team
+   communication. Each is read from the plan (met, not met, or not applicable) with the place to fix it; a line before
+   "Adopted by the team" repeats the count. It never blocks anything, keeps nothing in the save file, is not printed and is
+   not in Copy for the BIP. The conflicts between the parts stay with How the parts fit (Build sheet). */
+(function(){
+const box=document.getElementById('tdQc'),adopt=document.getElementById('tdQcAdopt');if(!box)return;
+const T=v=>String(v==null?'':v).replace(/\s+/g,' ').trim(),E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const val=n=>{const e=document.querySelector('[name="'+n+'"]');if(!e)return '';const v=T(e.value);return e.tagName==='SELECT'&&v==='not sure'?'':v;};
+const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+const short=(s,n)=>{s=T(s);if(s.length<=n)return s;const c=s.slice(0,n-1),k=c.lastIndexOf(' ');return (k>n*0.6?c.slice(0,k):c).replace(/[,;:.]$/,'')+'…';};
+const md=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(v));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(v);};
+let ATTR={};try{ATTR=JSON.parse(document.getElementById('td1-compare').textContent).attrs||{};}catch(e){ATTR={};}
+const FNL={escape:'escape',attention:'attention',tangible:'tangible items or activities',automatic:'automatic reinforcement'};
+const FNSET={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'};
+let GOALS=null;
+const groups=()=>{try{return window.__tdGroups?window.__tdGroups():[];}catch(e){return [];}};
+const cards=()=>{try{return (window.__tdComps?window.__tdComps():[]).filter(c=>!(window.__tdIsAssess&&window.__tdIsAssess(c)));}catch(e){return [];}};
+/* the kind of a component: TD-1's own table (Compare two interventions), else its group on the final plan */
+const NOTANT=new Set(['SAFE','SOCIAL','TANG','EDIBLE','DIST','C_SR','SEXT','C_HELMET','C_MEDREF']);
+function kindOf(code){const a=ATTR[code];if(a&&a.kind)return a.kind;const G=groups(),k=G.findIndex(g=>g[1].includes(code));
+ return k===0?(NOTANT.has(code)||/^PA_/.test(code)?'other':'antecedent'):k===1?'replacement':k===2?'teaching':k===3?'schedule':k===4?'consequence':'other';}
+function fnsOf(code){const a=ATTR[code];if(a&&Array.isArray(a.fn)&&a.fn.length)return a.fn;let L=null;try{L=window.__tdLibOf(code);}catch(e){}return (L&&L.fn)||[];}
+/* the plan's functions: Setup's, or for multiple control the targets' (Targets in this plan) */
+function planFns(){const f=val('m.fn');if(FNL[f])return [f];if(f!=='multiple')return [];let r=[];try{r=JSON.parse(val('tg.rows')||'[]');}catch(e){r=[];}
+ return [...new Set((Array.isArray(r)?r:[]).map(x=>x&&x.fn).filter(x=>FNL[x]))];}
+const names=L=>{const n=[...new Set(L.map(c=>c.name))];return n.length>3?n.slice(0,3).join('; ')+' and '+(n.length-3)+' more':n.join('; ');};
+const fnAnd=F=>F.map(x=>FNL[x]).join(', ');
+const nots=P=>P.filter(Boolean).map((x,i)=>(i?'It does not ':'The plan does not ')+x+'.').join(' ');
+function items(){const fn=val('m.fn'),F=planFns(),cs=cards(),out=[];const add=(k,t,st,why,go)=>out.push({k,t,st,why,go});
+ const GO={fn:['setup','[name="m.fn"]','Setup: Function'],build:['build','#addComp','Build: Add component'],select:['select','#selRec','Select the treatment']};
+ /* 1 the function */
+ if(fn){const src=val('m.fnsrc');add('fn','The function is stated','met',(FNSET[fn]||fn)+(src==='EA-1'?', from Form EA-1':src==='FS-1'?', a hypothesis from Form FS-1':'')+
+   (fn==='multiple'?(F.length?': '+fnAnd(F)+' (Targets in this plan)':'. Targets in this plan, on Setup, names no function for each target yet'):'')+'.',GO.fn);}
+ else add('fn','The function is stated','not','No function is chosen on the Setup sheet.',GO.fn);
+ /* 2 and 3: a part of the plan written for the function */
+ const tied=(kind,k,t,none,go,more)=>{const L=cs.filter(c=>kindOf(c.code)===kind),x=more?more():'';
+  if(!fn){add(k,t,'not','The function is not stated yet, so nothing in the plan can be tied to it'+(L.length?' (the plan has '+names(L)+')':'')+'.',GO.fn);return;}
+  if(!F.length){if(L.length)add(k,t,'met',names(L)+'. Multiple control: check that each function has its own (Targets in this plan, on Setup).'+x,go);else add(k,t,'not',none+'.',go);return;}
+  const miss=F.filter(f=>!L.some(c=>fnsOf(c.code).includes(f))),hit=L.filter(c=>F.some(f=>fnsOf(c.code).includes(f)));
+  if(!miss.length)add(k,t,'met','For '+fnAnd(F)+': '+names(hit)+'.'+x,go);
+  else add(k,t,'not',none+' for '+miss.map(f=>FNL[f]).join(' or ')+(L.length?' (the plan has '+names(L)+(hit.length?'':', written for other functions')+')':'')+'.',go);};
+ tied('antecedent','ant','Setting changes tied to the function','No antecedent strategy in the plan is written',GO.build);
+ tied('replacement','rep','A replacement behavior that serves the same function','No replacement behavior in the plan serves',GO.select,()=>val('m.repdesc')?' The replacement behavior: '+short(val('m.repdesc'),120)+'.':'');
+ /* 4 teaching strategies */
+ {const tc=cs.filter(c=>kindOf(c.code)==='teaching'),hier=val('pr.hier'),rc=cs.filter(c=>kindOf(c.code)==='replacement'&&(c.steps||[]).some(s=>/\bprompt/i.test(s)));
+  const why=[tc.length&&'teaching cards: '+names(tc),hier&&'prompt hierarchy: '+short(hier,80),rc.length&&'prompting in the steps of '+names(rc)].filter(Boolean),go=['teach','[name="pr.hier"]','Prompting and error correction'];
+  if(why.length)add('teach','Teaching strategies','met',cap(why.join('; '))+'.',go);
+  else if(val('m.rep')==='yes')add('teach','Teaching strategies','na','Setup says the replacement behavior is already in the student’s repertoire (it does not happen when it is needed). If it must still be prompted, write the prompt hierarchy or add a prompting card.',go);
+  else add('teach','Teaching strategies','not','The plan does not say how the replacement behavior is taught: no teaching or prompting card, and no prompt hierarchy.',go);}
+ /* 5 reinforcement: what reinforces the replacement behavior, and when it comes */
+ {const what=val('m.reinf'),rk=cs.filter(c=>/^(SOCIAL|TANG|EDIBLE)$/.test(c.code));
+  const sch=cs.filter(c=>kindOf(c.code)==='schedule'),sc=val('sch.chosen'),rc=cs.filter(c=>kindOf(c.code)==='replacement');
+  const W=[what&&'reinforcer: '+short(what,90),rk.length&&'reinforcer cards: '+names(rk)].filter(Boolean);
+  const H=[sch.length&&'schedule cards: '+names(sch),sc&&'schedule: '+short(sc,60),!sch.length&&!sc&&rc.length&&'given for each replacement response ('+names(rc)+')'].filter(Boolean);
+  if(W.length&&H.length)add('reinf','Reinforcement','met',cap(W.concat(H).join('; '))+'.',['reinf','[name="sch.chosen"]','Reinforcement']);
+  else add('reinf','Reinforcement','not',nots([!W.length&&'name the reinforcer for the replacement behavior (Setup: Specific reinforcer and EO)',!H.length&&'say when the reinforcer is given (a schedule on the Reinforcement sheet, or a replacement card)']),
+   W.length?['reinf','[name="sch.chosen"]','Reinforcement: Schedule']:['setup','[name="m.reinf"]','Setup: Specific reinforcer']);}
+ /* 6 reactive strategies */
+ {const R=new Set(((groups()[4])||[0,[]])[1]),rc=cs.filter(c=>R.has(c.code)),t=val('rb.target'),go=['respond','[name="rb.target"]','Responding to behavior'];
+  if(t||rc.length)add('react','Reactive strategies','met',cap([t&&'on the target behavior: '+short(t,110),rc.length&&'cards: '+names(rc)].filter(Boolean).join('; '))+'.',go);
+  else add('react','Reactive strategies','not','The plan does not say what staff do when the behavior happens: “On the target behavior” on the Responding sheet is empty and no card covers it.',go);}
+ /* 7 goals: one for the problem behavior and one for the replacement behavior */
+ {const g=GOALS||{},gr=(g.red||[]).length,ga=(g.acq||[]).length,crit=val('mon.crit'),ind=val('mon.ind'),ex=val('ad.exit');
+  const red=gr?gr+' reduction goal'+(gr>1?'s':'')+' from Form GB-1':crit?'the problem behavior at or below '+crit+' per minute'+(val('mon.n')?' for '+val('mon.n')+' sessions':'')+' (Monitor sheet)':ex?'the exit criteria':'';
+  const acq=ga?ga+' skill goal'+(ga>1?'s':'')+' from Form GB-1':ind?'the replacement behavior '+ind+'% independent (Monitor sheet)':'';
+  if(red&&acq)add('goals','Goals','met',cap(red)+'; '+acq+'.',['monitor','[name="mon.crit"]','Monitor: Criterion']);
+  else add('goals','Goals','not',nots([!red&&'state a goal for the problem behavior (Form GB-1, the criterion on the Monitor sheet, or the exit criteria)',!acq&&'state a goal for the replacement behavior (Form GB-1, or “Alternative independent” on the Monitor sheet)']),['monitor',red?'[name="mon.ind"]':'[name="mon.crit"]','Monitor: Criterion']);}
+ /* 8 team communication: who collects which data, and when the team looks at it */
+ {const dt=val('ad.data'),rv=val('ad.review'),mr=val('m.review'),pv=val('p.visit');
+  const W=[rv&&'the next review on '+md(rv),!rv&&mr&&'the review: '+short(mr,80),pv&&'the coaching visits'].filter(Boolean);
+  if(dt&&W.length)add('team','Team communication','met',cap(['who collects which data'].concat(W).join('; '))+'.',['final','[name="ad.data"]','Final plan: Who collects which data']);
+  else add('team','Team communication','not',nots([!dt&&'say who collects which data (this sheet, under Data, social validity, review, and exit)',!W.length&&'say when the team reviews the plan (Next review date on this sheet, or Review on Setup)']),
+   ['final',dt?'[name="ad.review"]':'[name="ad.data"]','Final plan: '+(dt?'Next review date':'Who collects which data')]);}
+ return out;}
+const ST={met:['Met','✓'],not:['Not met','!'],na:['Not applicable','–']};
+function sumOf(L){const n={met:0,not:0,na:0};L.forEach(x=>n[x.st]++);return {n,t:n.met+' of '+L.length+' met'+(n.not?' · '+n.not+' not met':'')+(n.na?' · '+n.na+' not applicable':'')};}
+function render(){let L;try{L=items();}catch(e){return;}const S=sumOf(L);
+ const h=`<h3 class="td-qc-h" id="tdQcH">Quality check before sign-off</h3><p class="td-qc-intro">Eight things published reviews of behavior intervention plans look for, each read from this plan, with the place to fix it. It is a check for you: it never stops Copy for the BIP, Print or adoption, and it is not printed or copied.</p>`+
+  `<p class="td-qc-sum">${E(S.t)}</p><ol class="td-qc-list" role="list">`+L.map(x=>`<li class="td-qc-it td-qc-${x.st}" data-qc="${x.k}" data-st="${x.st}"><span class="td-qc-st"><span class="td-qc-ic" aria-hidden="true">${ST[x.st][1]}</span>${ST[x.st][0]}</span><div class="td-qc-b"><b class="td-qc-t">${E(x.t)}</b><span class="td-qc-why">${E(x.why)}</span></div><button type="button" class="td-qc-go" data-view="${x.go[0]}" data-to="${E(x.go[1])}">Go to ${E(x.go[2])}</button></li>`).join('')+'</ol>'+
+  `<div class="td-qc-bar"><button type="button" class="tool" data-qc-do="bip">Copy for the BIP</button><button type="button" class="tool" data-qc-do="print">Print final plan only</button><span class="td-qc-msg" aria-hidden="true"></span></div>`+
+  `<p class="td-qc-src">The items are those of the Behavior Support Plan Quality Evaluation (BSP-QE; Browning-Wright et al., 2007). Under ordinary school conditions, plan quality predicted student outcomes, through how well the plan was carried out (Cook et al., 2012).</p>`;
+ if(box.__h!==h){box.__h=h;box.innerHTML=h;}box.hidden=false;
+ if(adopt){const nm=L.filter(x=>x.st==='not').map(x=>x.t.toLowerCase());const a=`Quality check before sign-off: ${E(S.t)}.${nm.length?' Not met: '+E(nm.join('; '))+'.':''} <button type="button" class="td-qc-go" data-qc-top="1">See the quality check</button>`;
+  if(adopt.__h!==a){adopt.__h=a;adopt.innerHTML=a;}adopt.hidden=false;}}
+function go(view,sel){const b=document.querySelector('#viewSeg button[data-view="'+view+'"]');if(b&&b.getAttribute('aria-pressed')!=='true')b.click();
+ setTimeout(()=>{const t=sel?document.querySelector(sel):null;if(t&&t.isConnected){try{(t.closest('.drow')||t).scrollIntoView({block:'center'});}catch(e){t.scrollIntoView();}try{t.focus({preventScroll:true});}catch(e){}}},140);}
+function click(ev){const b=ev.target.closest('button');if(!b)return;
+ if(b.dataset.qcTop){try{box.scrollIntoView({block:'start'});}catch(e){}const f=box.querySelector('.td-qc-h');if(f){f.tabIndex=-1;try{f.focus({preventScroll:true});}catch(e){}}return;}
+ if(b.dataset.view){go(b.dataset.view,b.dataset.to);return;}
+ if(b.dataset.qcDo){const t=document.getElementById(b.dataset.qcDo==='bip'?'bipBtn':'printFinalBtn');if(t)t.click();}}
+box.addEventListener('click',click);if(adopt)adopt.addEventListener('click',click);
+/* Copy for the BIP's answer, shown beside the panel's button too (the toolbar's status is the one read aloud) */
+{const m=document.getElementById('bipMsg');if(m)try{new MutationObserver(()=>{const s=box.querySelector('.td-qc-msg');if(s)s.textContent=m.textContent;}).observe(m,{childList:true,characterData:true,subtree:true});}catch(e){}}
+let tm=0;const soon=d=>{clearTimeout(tm);tm=setTimeout(render,d||120);};
+const fb=document.getElementById('finalBody');if(fb)try{new MutationObserver(()=>soon(60)).observe(fb,{childList:true});}catch(e){}
+['input','change'].forEach(t=>document.addEventListener(t,ev=>{if(box.contains(ev.target))return;if(/\bview-final\b/.test(document.body.className))soon(400);},true));
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.goals&&typeof f.goals==='object')GOALS=f.goals;soon();}catch(e){}return r;};}
+window.__tdQc={items:()=>items(),render};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>render());else render();
+})();
+</script>
+<style id="td1-v2568-add-css">
+/* v25.68 (research #6) the plan's addenda once it is signed */
+.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}
+.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}
+.add68-note{font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;color:#47535a;margin:8px 0}
+.add68-h{margin:16px 0 4px;font-size:15px}
+.add68-p{font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;margin:4px 0;line-height:1.45}
+.add68-list{margin:4px 0 8px 1.4em;padding:0;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;line-height:1.45}
+.add68-list > li{margin:5px 0}
+.add68-ch{margin:2px 0 4px 1.1em;padding:0;list-style:disc;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px;line-height:1.45}
+.add68-open{border:1px solid #c9a46a;border-left:4px solid #9b4e15;background:#FBF3E6;padding:8px 12px;margin:8px 0;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:12px}
+.add68-open p{margin:2px 0}
+.add68-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.add68-form label{font-weight:600;font-size:12.5px;color:#1a2933}
+.add68-form input{flex:1 1 260px;min-height:44px;box-sizing:border-box;font:inherit;font-size:14px;padding:6px 8px;border:1px solid #93aead;border-radius:3px;background:#fff;color:#1a2933}
+.add68-form .tool,.add68-bar .tool{min-height:44px;margin:0}
+.add68-bar{position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:#182e43;color:#fff;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:13.5px;box-shadow:0 -2px 8px rgba(0,0,0,.18)}
+.add68-bar[hidden]{display:none!important}
+.add68-bar{pointer-events:none}.add68-bar .tool{pointer-events:auto}
+body.add68-on{padding-bottom:72px}
+.add68-bar .tool{background:#fff;color:#182e43;border:1px solid #fff;font-weight:600;padding:6px 14px}
+.add68-bar .tool:focus-visible{outline:3px solid #ffd27a;outline-offset:2px}
+.add68-bar .add68-bt{max-width:62ch}
+@media print{body.add68-on{padding-bottom:0}.add68-bar,.add68-note,.add68-form{display:none!important}.add68-open{background:#fff}.add68:not(.add68-has){display:none!important}.add68{break-inside:auto}.add68-list > li{break-inside:avoid;page-break-inside:avoid}}
+</style>
+<script id="td1-v2568-add">
+/* v25.68 (research #6) when an entry was recorded. Each new entry keeps "recorded at", the device clock at the moment it was
+   first written, beside when it happened; one recorded more than 24 hours after it happened prints "Late entry". A date with
+   no time counts as the end of that day, so an entry is marked late only when it surely is. An entry saved before v25.68
+   has no recorded-at and shows and prints as before. The same helper is in Forms DD-1, CR-1, IM-1 and CN-1. */
+window.nbhRec=window.nbhRec||(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const ok=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(v)&&!isNaN(Date.parse(v));
+  const now=()=>new Date().toISOString();
+  const DAYRE=/(\d{4})-(\d\d)-(\d\d)|(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/;
+  function day(v){const m=DAYRE.exec(T(v));if(!m)return null;if(m[1])return [+m[1],+m[2]-1,+m[3]];let y=+m[6];if(y<100)y+=2000;return [y,+m[4]-1,+m[5]];}
+  function hm(v){const m=/(\d{1,2}):(\d{2})\s*([AaPp])?/.exec(T(v));if(!m)return null;let h=+m[1];const mi=+m[2],ap=(m[3]||'').toLowerCase();
+    if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;return h<24&&mi<60?[h,mi]:null;}
+  /* when it happened: a date (2026-11-06, 11/6/2026, 11/6/26, "Tue 9/29/26, 1:42 PM") and a time (14:05, 2:05 PM) */
+  function when(d,t){const s=T(d),D=day(s);if(!D)return null;let H=hm(t);if(!H)H=hm(s.replace(DAYRE,''));
+    const x=H?new Date(D[0],D[1],D[2],H[0],H[1]):new Date(D[0],D[1],D[2],23,59,59);return isNaN(x)?null:x;}
+  const late=(rec,d,t)=>{if(!ok(rec))return false;const h=when(d,t);return !!h&&Date.parse(rec)-h.getTime()>864e5;};
+  const days=(rec,d,t)=>{const h=when(d,t);return ok(rec)&&h?Math.max(0,Math.floor((Date.parse(rec)-h.getTime())/864e5)):0;};
+  function txt(rec){if(!ok(rec))return '';const d=new Date(rec);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
+    return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2)+', '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;}
+  /* the words an entry carries: "Recorded 11/6/26, 2:14 PM (device clock)", and "Late entry" when it is one */
+  const line=(rec,d,t)=>ok(rec)?'Recorded '+txt(rec)+' (device clock)'+(late(rec,d,t)?'. Late entry':''):'';
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const html=(rec,d,t)=>ok(rec)?'<span class="rec68">Recorded '+E(txt(rec))+' (device clock)'+(late(rec,d,t)?' <b class="rec68-late">Late entry</b>':'')+'</span>':'';
+  const CSS='.rec68{display:block;font-family:var(--sans,"Inter","Segoe UI",Arial,sans-serif);font-size:11px;line-height:1.35;color:#47535a;font-weight:400;margin-top:2px}'+
+    '.rec68-late{color:#8E2A2A;font-weight:700;white-space:nowrap}';
+  return {ok,now,when,late,days,txt,line,html,CSS};
+})();
+/* v25.68 (research #6) a signed record takes dated addenda. Once the record is signed, a change to it is not blocked: the change
+   stands, and it is kept as an addendum (the device clock's date and time, who filed it, the reason, and each entry as it stood
+   and as it is now). The printout shows the record with its addenda after the signatures, so the record as signed can be read
+   from them. A record with no change since it was signed, and every record saved before v25.68, prints as before. The same
+   helper is in Forms TD-1, IC-1 and CR-1; each form says what is signed, where the addenda are kept and where they print.
+   cfg: roots() the parts that were signed; skip(el) entries that are not part of it; signed() {on, date}; load() and save(o)
+   the kept addenda; by() who files; ident() a token that changes when another record is opened; mount the addenda's place;
+   what: 'plan' or 'consent'. */
+window.nbhAddenda=window.nbhAddenda||function(cfg){
+  const T=v=>String(v==null?'':v).trim(),N=v=>T(v).replace(/\s+/g,' ');
+  const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const R=window.nbhRec,now=()=>new Date().toISOString(),when=a=>R&&R.ok(a)?R.txt(a):T(a);
+  const what=cfg.what||'record',id=cfg.id||'add68';
+  let mem=null,lastId,busy=false,timer=0;
+  const SKIPTYPE=/^(file|button|submit|reset|password|search|image|color|range)$/;
+  function keyOf(el){if(el.name)return 'n:'+el.name;const d=el.dataset||{},ks=Object.keys(d).filter(k=>!/^(nbh|calc|v65fnh|wh|polish)/i.test(k)).sort();
+    if(ks.length)return 'd:'+ks.map(k=>k+'='+d[k]).join('&');return el.id?'#'+el.id:'';}
+  function heading(el){let n=el;for(let up=0;n&&up<8;up++,n=n.parentElement){let p=n.previousElementSibling;
+      for(let k=0;p&&k<12;k++,p=p.previousElementSibling){if(/^H[1-4]$/.test(p.tagName)||p.classList.contains('bar')||p.classList.contains('nbh-band'))return N(p.textContent).slice(0,80);
+        const h=p.querySelector&&p.querySelector('h2,h3,.bar');if(h&&/^(DIV|SECTION)$/.test(p.tagName)&&p.children.length<3)return N(h.textContent).slice(0,80);}}
+    return '';}
+  function labelOf(el){const a=el.getAttribute('aria-label');if(a)return N(a).slice(0,160);
+    if(el.id){try{const l=document.querySelector('label[for="'+CSS.escape(el.id)+'"]');if(l&&N(l.textContent))return N(l.textContent).slice(0,160);}catch(e){}}
+    const wl=el.closest('label');if(wl&&N(wl.textContent))return N(wl.textContent).slice(0,160);
+    const td=el.closest('td');if(td){const tr=td.parentElement,th=td.previousElementSibling;
+      if(th&&th.tagName==='TH'&&N(th.textContent))return N(th.textContent).slice(0,160);
+      const tb=td.closest('table'),ix=Array.prototype.indexOf.call(tr.children,td),hr=tb&&tb.tHead&&tb.tHead.rows[0],hc=hr&&hr.cells[ix];
+      const rn=Array.prototype.indexOf.call(tr.parentElement.children,tr)+1,h=heading(tb||td);
+      if(hc&&N(hc.textContent))return (h?h+', ':'')+'row '+rn+': '+N(hc.textContent).slice(0,80);}
+    const f=el.closest('.f,.drow,.field,.fieldgrid > div');const lb=f&&f.querySelector('label,.dlab');if(lb&&!lb.contains(el)&&N(lb.textContent))return N(lb.textContent).slice(0,160);
+    return N(el.placeholder)||keyOf(el);}
+  function fields(){const out=[];(cfg.roots()||[]).filter(Boolean).forEach(r=>r.querySelectorAll('input,select,textarea').forEach(el=>{
+      if(SKIPTYPE.test(el.type||'')||el.readOnly||el.closest('[data-add68-skip],.add68-form,.add68-sign'))return;
+      if((el.type==='hidden'||el.hidden)&&!(cfg.keep&&cfg.keep(el)))return;if(cfg.skip&&cfg.skip(el))return;out.push(el);}));return out;}
+  function valOf(el){if(el.type==='checkbox')return el.checked?'ticked':'';
+    if(el.tagName==='SELECT'){const o=el.options[el.selectedIndex];return o&&T(o.value)!==''?N(o.textContent)||T(o.value):'';}
+    return cfg.pretty&&cfg.pretty(el)!=null?cfg.pretty(el):T(el.value);}
+  /* the record now: each entry that holds something, by its key, with its label */
+  function snap(){const m={};fields().forEach(el=>{const k=keyOf(el);if(!k)return;
+      if(el.type==='radio'){if(!el.checked)return;const l=el.closest('label');m[k]=[l?N(l.textContent):T(el.value),labelOf(el.closest('fieldset,.f,.drow,div')||el)];return;}
+      const v=valOf(el);if(v!=='')m[k]=[v.slice(0,4000),labelOf(el)];});return m;}
+  function diff(base,cur){const ks=new Set(Object.keys(base).concat(Object.keys(cur))),out=[];
+    ks.forEach(k=>{const b=base[k]?base[k][0]:'',c=cur[k]?cur[k][0]:'';if(N(b)!==N(c))out.push({k,l:(cur[k]||base[k])[1]||k,was:b,now:c});});return out;}
+  function load(){let o=null;try{o=cfg.load();}catch(e){o=null;}if(!o||typeof o!=='object')return null;
+    const ok=x=>x&&typeof x==='object'&&!Array.isArray(x);const st={v:1,sig:ok(o.sig)?{date:T(o.sig.date),at:T(o.sig.at)}:{date:'',at:''},base:ok(o.base)?o.base:null,
+      list:Array.isArray(o.list)?o.list.filter(ok).slice(0,200):[],log:Array.isArray(o.log)?o.log.filter(ok).slice(0,100):[],open:ok(o.open)?{since:T(o.open.since)}:null};
+    if(st.base)Object.keys(st.base).forEach(k=>{const v=st.base[k];if(!Array.isArray(v))delete st.base[k];});return st;}
+  function save(st){busy=true;try{cfg.save(st&&(st.base||st.list.length||st.log.length)?st:null);}catch(e){}busy=false;}
+  /* the base the changes are read against: the record as signed, with the addenda already filed */
+  function base(st){return st&&st.base?st.base:mem;}
+  const fmt=d=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(T(d));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(d);};
+  function ident(){const tok=cfg.ident?cfg.ident():1;if(tok!==lastId){lastId=tok;mem=null;}}
+  /* the record as it stands just before the first change after signing: taken as a finger, a key or the focus reaches it */
+  function prime(){ident();if(mem)return;const sg=cfg.signed()||{};if(!sg.on)return;const st=load();if(!(st&&st.base))mem=snap();}
+  function refresh(){ident();const sg=cfg.signed()||{};let st=load();
+    if(!sg.on){mem=null;if(st&&st.base){st.log.push({at:now(),what:'The signature'+(st.sig.date?' of '+fmt(st.sig.date):'')+' was removed'});st.base=null;st.open=null;save(st);}}
+    render(st,sg);}
+  function changed(){ident();const sg=cfg.signed()||{};if(!sg.on){refresh();return;}let st=load();const b=base(st);if(!b){mem=snap();render(st,sg,[]);return;}
+    const D=diff(b,snap());
+    if(D.length){if(!st)st={v:1,sig:{date:T(sg.date),at:now()},base:b,list:[],log:[],open:null};if(!st.base)st.base=b;if(!st.open)st.open={since:now()};save(st);mem=null;}
+    else if(st&&st.open){st.open=null;save(st);}
+    render(st,sg,D);}
+  function file(){const sg=cfg.signed()||{};let st=load();const b=base(st);if(!b)return;const cur=snap(),D=diff(b,cur);if(!D.length){render(st,sg,D);return;}
+    const box=document.getElementById(id+'Why'),why=T(box&&box.value);
+    const go=()=>{if(!st)st={v:1,sig:{date:T(sg.date),at:now()},base:b,list:[],log:[],open:null};
+      st.list.push({at:now(),by:T(cfg.by&&cfg.by()),why,ch:D.map(x=>({k:x.k,l:x.l,was:x.was,now:x.now}))});
+      const nb=Object.assign({},b);D.forEach(x=>{if(cur[x.k])nb[x.k]=cur[x.k];else delete nb[x.k];});st.base=nb;st.open=null;save(st);mem=null;
+      if(box)box.value='';render(st,sg,[]);
+      if(window.nbhUI&&nbhUI.toast)nbhUI.toast('Addendum '+st.list.length+' filed: '+D.length+' change'+(D.length===1?'':'s')+', dated '+when(st.list[st.list.length-1].at)+'.',{kind:'ok'});};
+    if(!why&&window.nbhUI&&nbhUI.confirm)nbhUI.confirm('File the addendum without a reason?\nThe change is kept either way. A reason (for example, correcting an error) tells the reader why it changed.',{ok:'File it without a reason'}).then(y=>{if(y)go();else if(box)box.focus();});
+    else go();}
+  const show=(v,o)=>v===''?(o==='ticked'?'not ticked':'empty'):'“'+v+'”';
+  function chList(ch){return '<ul class="add68-ch">'+ch.map(x=>'<li><b>'+E(x.l)+'</b>: as it stood, '+E(show(x.was,x.now))+'; now '+E(show(x.now,x.was))+'.</li>').join('')+'</ul>';}
+  function render(st,sg,D){const box=cfg.mount&&cfg.mount();if(!box)return;sg=sg||cfg.signed()||{};
+    if(D===undefined){const b=base(st);D=sg.on&&b?diff(b,snap()):[];}
+    const L=st?st.list:[],G=st?st.log:[],has=L.length||G.length||D.length;
+    box.classList.toggle('add68-has',!!has);
+    let h='';
+    if(sg.on&&!has)h='<p class="add68-note noprint">Signed'+(sg.date?' '+E(fmt(sg.date)):'')+'. From now on a change to this '+what+' is kept as a dated addendum with its reason, and the printout shows it after the signatures. Nothing is blocked: the addendum is the correction.</p>';
+    if(has){h+='<h3 class="add68-h">Changes After Signing (Addenda)</h3><p class="add68-p">'+(st&&st.sig.date||sg.date?'Signed '+E(fmt(st&&st.sig.date||sg.date))+'. ':'')+
+      'The entries above show this '+what+' as it is now. Each addendum keeps the entry as it stood before the change, so the '+what+' as signed can be read from them. Times are the device clock’s.</p>';
+      if(L.length)h+='<ol class="add68-list">'+L.map((a,i)=>'<li><b>Addendum '+(i+1)+'</b>, '+E(when(a.at))+(a.by?', '+E(a.by):'')+'. <b>Reason:</b> '+(a.why?E(a.why):'not given')+'.'+chList(Array.isArray(a.ch)?a.ch:[])+'</li>').join('')+'</ol>';
+      if(G.length)h+='<p class="add68-p">'+G.map(x=>E(x.what)+', '+E(when(x.at))+'.').join(' ')+'</p>';
+      if(D.length)h+='<div class="add68-open"><p><b>Changed after signing; not yet filed as an addendum</b>'+(st&&st.open&&st.open.since?' (since '+E(when(st.open.since))+')':'')+'.</p>'+chList(D)+
+        '<div class="add68-form noprint"><label for="'+id+'Why">Reason for the change</label><input id="'+id+'Why" list="'+id+'Reasons" maxlength="300" placeholder="for example, correcting an error" autocomplete="off">'+
+        '<datalist id="'+id+'Reasons"><option value="Correcting an error"><option value="Information learned after signing"><option value="Decided by the team at a meeting"><option value="Revision of the '+what+'"><option value="Clarifying the wording"></datalist>'+
+        '<button type="button" class="tool add68-file" id="'+id+'File">File the addendum</button></div></div>';}
+    const keep=document.activeElement&&document.activeElement.id===id+'Why'?document.activeElement.value:null;
+    if(box.innerHTML!==h)box.innerHTML=h;
+    if(keep!==null){const w=document.getElementById(id+'Why');if(w){w.value=keep;w.focus();}}
+    bar(D.length,sg);}
+  /* a bar at the foot of the screen while a change is not yet filed: it says the change is kept and leads to the reason */
+  function bar(n,sg){let b=document.getElementById(id+'Bar');
+    if(!n){if(b)b.hidden=true;document.body.classList.remove('add68-on');return;}
+    if(!b){b=document.createElement('div');b.id=id+'Bar';b.className='add68-bar noprint';b.setAttribute('role','region');b.setAttribute('aria-label','Changes after signing');
+      b.innerHTML='<span class="add68-bt" aria-live="polite"></span><button type="button" class="tool add68-go">Give the reason</button>';document.body.appendChild(b);
+      b.querySelector('.add68-go').addEventListener('click',()=>{if(cfg.reveal)cfg.reveal();const w=document.getElementById(id+'Why');if(w){try{w.scrollIntoView({block:'center'});}catch(e){}w.focus();}});}
+    b.hidden=false;document.body.classList.add('add68-on');const t='This '+what+' was signed'+(sg&&sg.date?' '+fmt(sg.date):'')+'. '+n+' change'+(n===1?'':'s')+' since then '+(n===1?'is':'are')+' kept as an addendum.';
+    const s=b.querySelector('.add68-bt');if(s.textContent!==t)s.textContent=t;}
+  const inRoots=t=>(cfg.roots()||[]).some(r=>r&&r.contains(t));
+  const onEdit=e=>{if(busy||!e.isTrusted)return;const t=e.target;if(!t||!t.closest||t.closest('.add68-form'))return;
+    if(!inRoots(t)&&!(cfg.watch&&cfg.watch(t)))return;clearTimeout(timer);timer=setTimeout(changed,350);};
+  document.addEventListener('input',onEdit,true);document.addEventListener('change',onEdit,true);
+  ['pointerdown','keydown','focusin'].forEach(t=>document.addEventListener(t,e=>{if(!busy&&e.target&&e.target.closest&&!e.target.closest('.add68-form')&&(inRoots(e.target)||(cfg.watch&&cfg.watch(e.target))))prime();},true));
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#'+id+'File')){e.preventDefault();file();}
+    else if(e.isTrusted&&e.target&&e.target.closest&&e.target.closest('button')&&inRoots(e.target)){clearTimeout(timer);timer=setTimeout(changed,450);}});
+  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id===id+'Why'){e.preventDefault();file();}});
+  return {refresh,changed,snap,state:load,file};
+};
+/* v25.68 (research #6) once the plan is signed (a signature on the iPad, or "in person, on paper" with its date, in the sign-in
+   or the parent's signature on the plan), a change to it is kept as a dated addendum with its reason: the change stands, and
+   the Final plan prints the addenda after the signatures, each entry as it stood and as it is now. The sign-in, the revision
+   rows, Integrity and progress, the Guide and the References are not part of what was signed. The addenda are kept in the
+   hidden field ad.add68 (left out of Save data while empty, so a plan saved before saves as it did). */
+(function(){
+  const T=v=>String(v==null?'':v).trim(),q=s=>document.querySelector(s),fld=n=>q('[name="'+n+'"]');
+  const fin=document.getElementById('final');if(!fin||!window.nbhAddenda)return;
+  if(!fld('ad.add68')){const sc=fin.querySelector('.sigcite');const m=document.createElement('div');m.id='td1Add68';m.className='add68';
+    const h=document.createElement('textarea');h.name='ad.add68';h.className='noprint';h.hidden=true;h.setAttribute('aria-hidden','true');h.tabIndex=-1;
+    (sc||fin.lastElementChild).insertAdjacentElement('afterend',m);m.insertAdjacentElement('afterend',h);}
+  const J=(n,d)=>{try{const v=JSON.parse(T((fld(n)||{}).value)||'null');return v==null?d:v;}catch(e){return d;}};
+  const isSig=r=>r&&typeof r==='object'&&/^\d{4}-\d\d-\d\d$/.test(T(r.signed))&&(!!r.img||r.how==='in person'||r.how==='signed on the iPad');
+  function signed(){const p=J('ad.psig',{}),L=(Array.isArray(J('ad.sigs',[]))?J('ad.sigs',[]):[]).concat([p]).filter(isSig);
+    if(!L.length)return {on:false};return {on:true,date:isSig(p)?T(p.signed):L.map(r=>T(r.signed)).sort()[0]};}
+  let tok=0,mine='';
+  const ADD=window.nbhAddenda({id:'td1Add68',what:'plan',
+    roots:()=>['setup','select','build','antecedent','reinf','teach','skills','respond','plan','final'].map(id=>document.getElementById(id)),
+    skip:el=>!!el.closest('#td85Block,#td82Block,#tdQc,.toolbar'),keep:el=>el.name==='fin.steps',
+    pretty:el=>{if(el.name!=='fin.steps')return null;let o={};try{o=JSON.parse(el.value||'{}')||{};}catch(e){return T(el.value);}
+      const a=Object.keys(o.in||{}).length,b=Object.keys(o.crit||{}).length;return a||b||o.ee?[a?a+' step'+(a===1?'':'s')+' added to or left off the list':'',b?b+' criterion'+(b===1?'':'s')+' rewritten':'',o.ee?'escape extinction shown once':''].filter(Boolean).join('; '):'';},
+    signed,load:()=>J('ad.add68',null),
+    save:o=>{const e=fld('ad.add68');if(!e)return;e.value=o?JSON.stringify(o):'';mine=e.value;try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(x){}},
+    by:()=>T((fld('m.analyst')||{}).value),ident:()=>tok,mount:()=>document.getElementById('td1Add68'),
+    watch:t=>!!(t.closest&&t.closest('#td85Block')),reveal:()=>{const b=q('#viewSeg button[data-view="final"]');if(b&&b.getAttribute('aria-pressed')!=='true')b.click();}});
+  /* the saved file carries the addenda only when there are some */
+  /* the form's own script is closed to the others. Save data writes every named field: the empty field's name is taken off
+     for the moment of the save, so a record with no addenda saves as it did. Another record opened (a file, Clear all, the
+     simulation, the workstation's restore) changes the field or the signature: the addenda are read again. */
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#saveBtn')){const h=fld('ad.add68');if(h&&!T(h.value)){h.removeAttribute('name');h.dataset.add68n='ad.add68';setTimeout(()=>{h.name='ad.add68';},0);}}},true);
+  document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#saveBtn')){const h=q('[data-add68n]');if(h&&!h.name)h.name='ad.add68';}});
+  let lastV=null,lastS=null;
+  const raw=()=>((fld('ad.psig')||{}).value||'')+'\u0001'+((fld('ad.sigs')||{}).value||'');   /* compared as text: the signature images are not parsed on each look */
+  const watch=()=>{const h=fld('ad.add68'),v=h?h.value:'',sg=raw();if(lastV===null){lastV=v;lastS=sg;return;}
+    if(v!==lastV||sg!==lastS){if(v!==lastV&&v!==mine)tok++;lastV=v;lastS=sg;try{ADD.refresh();}catch(e){}}};
+  setInterval(watch,1200);
+  try{ADD.refresh();}catch(e){}
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>

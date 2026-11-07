@@ -5665,7 +5665,7 @@ function smCaseRender(){
   if(box){const L=[],food=smFoodItems(),ed=/^Edibles/.test(S.meta.rf_class||'');
     if(P.all)L.push('<p><b>Allergies</b> (Form DM-1): '+esc(P.all)+'</p>');
     if(P.cult)L.push('<p><b>Cultural, religious or dietary considerations</b> (Form DM-1): '+esc(P.cult)+'</p>');
-    if(P.lang||P.interp)L.push('<p><b>Home language</b> (Form DM-1): '+esc(P.lang||'—')+(P.interp?'; an interpreter is needed'+(P.lnotes?' ('+esc(P.lnotes)+')':''):'')+'.'+(smLangLine()?' The home note and the contract print in English with the family&rsquo;s language and the interpreter on the parent&rsquo;s copy; explain them in that language.':'')+'</p>');
+    if(P.lang||P.interp)L.push('<p><b>Home language</b> (Form DM-1): '+esc(P.lang||'—')+(P.interp?'; an interpreter is needed'+(P.lnotes?' ('+esc(P.lnotes)+')':''):'')+'.'+(smLangLine()?(window.smCreole&&window.smCreole()?' The home note prints in Haitian Creole with the English beside it (the workstation&rsquo;s draft translation: a district translator reviews it before it goes home); the contract prints in English with the family&rsquo;s language on the parent&rsquo;s copy: explain it in Creole.':' The home note and the contract print in English with the family&rsquo;s language and the interpreter on the parent&rsquo;s copy; explain them in that language.'):'')+'</p>');
     let w='';if(ed||food.length)w='<div class="verdict '+(P.all?'v-no':'v-mid')+'"><b>Food as a back-up'+(food.length?' ('+esc(food.slice(0,4).join(', '))+')':'')+'.</b> '+(P.all?'Form DM-1 records allergies: '+esc(P.all)+'. Check every food item against them with the nurse, ':P.has?'Form DM-1 records no allergies: confirm with the nurse and the family, ':'Check allergies and diet with the nurse and the family (Form DM-1), ')+'and get the family&rsquo;s written agreement before any food is given.</div>';
     box.innerHTML=(L.length?'<div class="hint" style="margin:6px 0"><b>From the case</b>'+L.join('')+'</div>':'')+w;}
   if(sb){const L=[];if(P.sih){const a=SM_ASSENT[P.assent.toLowerCase()]||P.assent;if(a)L.push('Assent: '+esc(a.toLowerCase()));if(P.pref)L.push('Would want from a plan, in the student&rsquo;s words: &ldquo;'+esc(P.pref)+'&rdquo;');if(P.likes)L.push('Likes: '+esc(P.likes));}
@@ -8473,6 +8473,28 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="sm1-v2568">
+/* v25.68 (research #12, #13) the Home note strip. It is a page for the family, so it is marked data-nbh-family for Check wording's
+   reading check. When the family's language on Form DM-1 is Haitian Creole, the strip is in Creole with the English words beside
+   each line, the workstation's DRAFT TRANSLATION: it says "Draft translation: a district translator reviews it before it goes
+   home" on screen and on paper. Any other language: the strip is as before. Every Creole string of this form is in this block. */
+(function(){
+ const HT_RE=/creole|krey[o\u00f2]l|haitian|ayisyen/i;
+ const UNIT={points:'pwen',point:'pwen',checks:'mak',check:'mak',intervals:'entval',interval:'entval',sessions:'sesyon',session:'sesyon','sessions at goal':'sesyon ki rive nan objektif la',stars:'zetwal',tokens:'jeton',stickers:'etik\u00e8t'};
+ window.smCreole=()=>{try{return HT_RE.test(smProf().lang);}catch(e){return false;}};
+ const was=tearOff;
+ tearOff=function(){const h=was.apply(this,arguments);
+  if(!window.smCreole())return h.replace('<div class="tear">','<div class="tear" data-nbh-family="" data-nbh-family-title="Home note">');
+  const m=S.meta,u=String(possible().unit||''),uh=UNIT[u.toLowerCase()]||u,L=smLangLine();
+  return '<div class="tear" lang="ht" data-nbh-family="" data-nbh-family-title="Home note (N\u00f2t pou lakay)"><span class="cut" lang="en">\u2702 tear here, send home, bring back signed</span><br>'+
+   '<span class="sm-draft" lang="en" data-nbh-family-skip><b>Draft translation: a district translator reviews it before it goes home.</b></span><br>'+
+   '<b>N\u00f2t pou lakay</b> <span lang="en">(Home note)</span> &nbsp; '+esc(m.client||'')+' &nbsp; Dat <span lang="en">(Date)</span>: <span class="bl" style="min-width:90px"></span><br>'+
+   'Jodi a mwen genyen <span class="bl" style="min-width:50px"></span> sou <span class="bl" style="min-width:50px"></span> '+esc(uh)+'. Mwen <b>rive</b> / <b>pa rive</b> nan objektif mwen. Rekonpans mwen se te: <span class="bl" style="min-width:160px"></span><br>'+
+   '<span lang="en">Today I earned ___ of ___ '+esc(u)+'. I did / did not meet my goal. My reward was: ___</span><br>'+
+   'Pwofes\u00e8 <span lang="en">(Teacher)</span>: <span class="bl" style="min-width:140px"></span> &nbsp; Siyati paran <span lang="en">(Parent signature)</span>: <span class="bl" style="min-width:160px"></span> &nbsp; Yon bon bagay jodi a <span lang="en">(One good thing from today)</span>: <span class="bl" style="min-width:220px"></span>'+
+   (L?'<br><span lang="en">'+L+'</span>':'')+'</div>';};
+})();
+</script>
 <script id="sm127-feeds">/* v24.27 (R-110) From the case says which forms feed this one when the case holds nothing it takes */
 window.__nbhCaseFeeds={forms:['Form TB-1 (the targets)','Form PA-1 (the reinforcer menu)','Form TD-1 (the plan)'],has:function(f){f=f||{};return !!((f.behaviors||[]).length||(f.menu||[]).length||f.plan);}};</script>
 <style id="nbh-polish-css" data-nbh-screen>

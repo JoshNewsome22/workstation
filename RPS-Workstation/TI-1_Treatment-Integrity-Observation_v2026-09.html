@@ -1239,11 +1239,17 @@ input[data-m],textarea[data-m]{font:inherit}
       <tr><th>Effect on the behavior data</th><td><textarea data-m="effect" rows="2" style="width:100%" placeholder="Whether the student's data over this period can be interpreted given the integrity obtained"></textarea></td></tr>
     </table>
     <!-- v25.64 (MEAS H2) what feedback was given after each check, when and how, and the rule that sets the next check -->
+    <!-- v25.68 (research #1) the adult's implementation plan, checked at the first visit (Form ST-1's plan for this interventionist) -->
+    <div id="tiIpBox" class="ti-ip ti-ip-empty"></div>
     <h3 style="margin-top:14px">Feedback Given After Each Check</h3>
     <p class="hint">For each scored observation: when the feedback was given, how, and what it held. Feedback works best given within a school day, on the interventionist&rsquo;s own integrity graphed across checks, with the missed steps named and rehearsed. After consultation alone, teachers ran a plan on 50% of days; with performance feedback on their own integrity, on 93% of days (Noell et al., 2000). Written feedback on the student&rsquo;s progress alone did not keep integrity up; daily feedback on the teacher&rsquo;s own integrity, with directed rehearsal of missed steps, raised it the most (DiGennaro et al., 2007). Feedback by email with a graph worked, and by video call reached mastery faster and held better (Zhu et al., 2021).</p>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Feedback given after each check"><table class="rt ti-fb" id="tiFbTbl"></table></div>
     <div class="ti-fbrule" id="tiFbRule"><p><b>The fading rule (a default; the BCBA may set another).</b> Check and give feedback at least weekly until the mastery criterion is met. Then check every 2 weeks. Return to weekly after any check below the criterion, or after any commission error on a critical step. Feedback every other week kept integrity up once it was high (Codding et al., 2005; Codding et al., 2008).</p>
       <p><label class="ti-inl"><input type="checkbox" id="tiFbCancel" aria-label="Use the meeting-cancellation option"> Use the meeting-cancellation option: a check at 100% cancels the next rehearsal meeting (DiGennaro et al., 2007).</label></p></div>
+    <!-- v25.68 (research #4) one short message to the adult within a day: their own graph, one praise, the one step to fix, the next check -->
+    <div id="tiSend" class="ti-send noprint"></div>
+    <!-- v25.68 wave 2 (research #5) the daily self-check on the staff phone page, and how it compares with observed integrity -->
+    <div id="tiSc" class="ti-sc ti-sc-empty"></div>
     <h3 style="margin-top:14px">Integrity Beside the Student&rsquo;s Data</h3>
     <div id="tiFbGraph"></div>
   </section>
@@ -3803,7 +3809,9 @@ function clean(){if(!S.meta||typeof S.meta!=='object')S.meta={};const m=S.meta;
     if(o.obs2!=null){o.obs2=String(o.obs2).slice(0,120);if(!T(o.obs2))delete o.obs2;}
     if(o.dis!=null){const d={};if(typeof o.dis==='object'&&!Array.isArray(o.dis))TI_DIS.forEach(([k])=>{if(o.dis[k]===true)d[k]=true;});if(Object.keys(d).length)o.dis=d;else delete o.dis;}
     if(o.fb!=null){const f=o.fb,x={};if(f&&typeof f==='object'&&!Array.isArray(f)){if(tiIsoD(f.date))x.date=tiIsoD(f.date);if(/^\d{2}:\d{2}$/.test(String(f.time||'')))x.time=f.time;
-      if(FMT.some(([k])=>k===f.fmt))x.fmt=f.fmt;TICKS.forEach(([k])=>{if(f[k]===true)x[k]=true;});TI67_CAR.forEach(([k])=>{if(f[k]===true)x[k]=true;});if(tiIsoD(f.next))x.next=tiIsoD(f.next);}
+      if(FMT.some(([k])=>k===f.fmt))x.fmt=f.fmt;TICKS.forEach(([k])=>{if(f[k]===true)x[k]=true;});TI67_CAR.forEach(([k])=>{if(f[k]===true)x[k]=true;});if(tiIsoD(f.next))x.next=tiIsoD(f.next);
+        /* v25.68 (research #4) the short messages sent with "Send feedback": when and how, never what they said */
+        if(Array.isArray(f.sent)){const L=f.sent.filter(z=>z&&typeof z==='object'&&/^\d{4}-\d{2}-\d{2}T/.test(String(z.at||''))&&/^(email|mail|slip)$/.test(z.how)).slice(-10).map(z=>({at:String(z.at).slice(0,30),how:z.how}));if(L.length)x.sent=L;}}
       if(Object.keys(x).length)o.fb=x;else delete o.fb;}});}
 
 /* one observation's integrity: correct steps over scored steps */
@@ -4015,6 +4023,408 @@ const w=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=w?w.apply(t
   return r;};
 })();
 </script>
+<script id="ti1-v2568">
+/* v25.68 (the BCBA's 11/6 list, research recommendations #1 and #4)
+   #1 The adult's implementation plan (Form ST-1: staff.people[i].plan for this interventionist) is checked at the first TI-1 visit,
+      3 to 5 school days after the first day: were the steps run as planned, and for each barrier, did it come up and did the fix
+      work. Kept in S.ipc; the plan as the case gave it in S.ipPlan, so a saved copy prints with it; out as integrity.ipCheck.
+   #4 "Send feedback" makes one short message for the adult: their own integrity across checks (a graph), one specific praise, the
+      one step to fix, and the next check by the fading rule above. It goes to the adult's email from the BCBA's school account
+      (as the questionnaires go: the workstation asks, then sends through Gmail; or the Mail app), or prints as a slip. Only the
+      adult receives it; the student is named by initials only. Sending it fills that check's feedback record (the date and time
+      given when empty, the format, own graph, praise and missed steps named, the next check) and logs when and how (fb.sent).
+   Every new value is optional: a file saved before opens and prints as it did.
+   v25.68 wave 2 (research #10): when the case holds a classroom practices check (Form OB-1's Classroom check view), Send feedback
+   shows it, and "Add the check to the message" puts its figures in the message and the slip (ticked when the check is of this
+   adult's room); "Use the check's praise" and "Use the check's step" fill the two boxes from it (what went well and the practice
+   chosen with the teacher, or its figures). Coaching for the teacher, sent to the teacher only; nothing of it is saved here.
+   The greeting keeps a title with the name it goes with ("Hello Ms. Sample," where it said "Hello Ms.,"). */
+(function(){
+'use strict';
+const byId=id=>document.getElementById(id);
+const t=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const V=window.__tiV2564||{};
+const isoOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m?new Date(+m[1],+m[2]-1,+m[3],12):null;};
+const addDays=(s,n)=>{const d=day(s);if(!d)return '';d.setDate(d.getDate()+n);return isoOf(d);};
+const today=()=>isoOf(new Date());
+/* the student by initials only: "SIMULATED – Sample Student" or "Student, Sample" gives S.S. */
+function initials(){let c=t(S.meta.client).replace(/^SIMULATED\s*[–—-]\s*/i,'');const m=/^([^,]+),\s*(.+)$/.exec(c);if(m)c=m[2]+' '+m[1];
+  const w=c.split(/\s+/).filter(x=>/[A-Za-zÀ-ɏ]/.test(x));return w.length?w.map(x=>x.replace(/[^A-Za-zÀ-ɏ]/g,'').charAt(0).toUpperCase()+'.').join(''):'the student';}
+function pctOf(j){let c=0,n=0;S.steps.forEach((_,i)=>{const v=code(i,j);if(scored(v)){n++;if(v==='C')c++;}});return n?{c,n,p:100*c/n}:null;}
+const scoredRows=()=>tiOrder().map(j=>({j,x:pctOf(j)})).filter(r=>r.x);
+const pctS=p=>(Math.round(p*10)/10).toFixed(1).replace(/\.0$/,'')+'%';
+/* v25.68 wave 2 the latest classroom practices check the case holds (Form OB-1), and whether it is of this adult's room */
+function clsCk(){const f=ipCase,c=f&&(f.classroom||(f.evidence&&f.evidence['OB-1']&&f.evidence['OB-1'].classroom));
+  const L=c&&Array.isArray(c.checks)?c.checks.filter(x=>x&&typeof x==='object'&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.date||''))).sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))):[];
+  return L.length?L[L.length-1]:null;}
+const clsMine=x=>!!(x&&same(x.teacher,S.meta.int));
+const n1=v=>String(Math.round(v*10)/10).replace(/\.0$/,'');
+const mss=s=>{s=Math.max(0,Math.round(+s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+function clsLine(x){if(!x)return '';const L=[];
+  if(x.otr&&x.otr.pm!=null)L.push(n1(x.otr.pm)+' opportunities to respond a minute');
+  if(x.ratio!=null||(x.ratioText&&!/^none/.test(x.ratioText)))L.push('praise to correction '+t(x.ratioText)+(x.spec!=null?', '+x.spec+'% of the praise specific':''));
+  if(x.eng&&x.eng.pct!=null)L.push('the class engaged at '+x.eng.pct+'% of the scans');
+  if(x.trans&&x.trans.n)L.push(x.trans.n+' transition'+(x.trans.n===1?'':'s')+', '+mss(x.trans.mean)+' on average');
+  return 'From the classroom check on '+tiUsD(x.date)+(x.mins?' ('+n1(x.mins)+' minutes)':'')+': '+(L.join('; ')||'no figures yet')+'.';}
+function clsPraise(x){if(!x)return '';if(t(x.well))return t(x.well).replace(/[.\s]+$/,'')+'.';
+  if(x.bsp&&x.bsp.n)return 'In the classroom check you gave '+x.bsp.n+' behavior-specific praise statement'+(x.bsp.n===1?'':'s')+(x.mins?' in '+n1(x.mins)+' minutes':'')+', each naming what the student did.';
+  if(x.eng&&x.eng.pct!=null&&x.eng.pct>=80)return 'In the classroom check the class was engaged at '+x.eng.pct+'% of the scans.';
+  if(x.otr&&x.otr.pm!=null&&x.otr.n)return 'In the classroom check the class had '+n1(x.otr.pm)+' chances to respond a minute.';return '';}
+function clsStep(x){if(!x)return '';if(t(x.next))return t(x.next).replace(/[.\s]+$/,'')+'.';
+  const pr=((x.bsp&&x.bsp.n)||0)+((x.gp&&x.gp.n)||0);
+  if(x.ratio!=null&&x.ratio<4)return 'Aim for 4 praise statements for each correction; in the check it was '+t(x.ratioText)+'.';
+  if(x.ratio==null&&x.rep&&x.rep.n&&!pr)return 'Add praise that names the behavior: the check counted corrections and no praise.';
+  if(x.spec!=null&&x.spec<50)return 'Name the behavior when you praise: '+x.spec+'% of the praise in the check was specific.';
+  if(x.rules&&x.rules.taught==='no')return 'Review the class rules at the start of the lesson.';
+  if(x.eng&&x.eng.pct!=null&&x.eng.pct<80)return 'More chances for the whole class to respond: the class was engaged at '+x.eng.pct+'% of the scans.';return '';}
+
+/* ===================== #1 the implementation plan, checked at the first visit ===================== */
+let ipCase=null;
+const same=(a,b)=>{a=t(a).toLowerCase().replace(/,.*$/,'');b=t(b).toLowerCase().replace(/,.*$/,'');return !!a&&!!b&&(a===b||a.indexOf(b)===0||b.indexOf(a)===0);};
+function ipMatch(){const ppl=ipCase&&ipCase.staff&&Array.isArray(ipCase.staff.people)?ipCase.staff.people:null;if(!ppl)return;
+  const p=ppl.find(x=>x&&x.plan&&typeof x.plan==='object'&&same(x.name,S.meta.int));
+  if(p)S.ipPlan={who:t(p.name),role:t(p.role),plan:p.plan};else if(S.ipPlan&&!ipFilled())delete S.ipPlan;}
+function ipClean(){if(S.ipPlan&&!(typeof S.ipPlan==='object'&&S.ipPlan.plan&&typeof S.ipPlan.plan==='object'))delete S.ipPlan;
+  if(S.ipc!=null){const c=S.ipc,o={};if(c&&typeof c==='object'&&!Array.isArray(c)){if(tiIsoD(c.date))o.date=tiIsoD(c.date);if(/^(Yes|Partly|No)$/.test(c.run))o.run=c.run;
+    if(Array.isArray(c.bar))o.bar=c.bar.slice(0,3).map(b=>({came:/^(Yes|No)$/.test(b&&b.came)?b.came:'',worked:/^(Yes|No|Not tried)$/.test(b&&b.worked)?b.worked:''}));
+    if(t(c.note))o.note=String(c.note).slice(0,2000);}
+    if(o.date||o.run||o.note||(o.bar||[]).some(b=>b.came||b.worked))S.ipc=o;else delete S.ipc;}}
+/* the nth school day (a weekday) after a date */
+function schoolAfter(s,n){const d=day(s);if(!d)return '';let k=0;while(k<n){d.setDate(d.getDate()+1);const w=d.getDay();if(w&&w<6)k++;}return isoOf(d);}
+const ipFilled=()=>!!(S.ipc&&(S.ipc.date||S.ipc.run||S.ipc.note||(S.ipc.bar||[]).some(b=>b.came||b.worked)));
+/* the first scored observation on or after the first day, and how many school days in it was */
+function ipVisit(p){const f=tiIsoD(p&&p.first);if(!f)return null;const r=scoredRows().map(x=>({j:x.j,d:tiIsoD((S.obs[x.j]||{}).date)})).filter(x=>x.d&&x.d>=f);
+  if(!r.length)return null;const v=r[0],n=V.schoolDays?V.schoolDays(f,v.d):null;return {j:v.j,d:v.d,n};}
+function ipRender(){const box=byId('tiIpBox');if(!box)return;const x=S.ipPlan;
+  if(!x){box.innerHTML='';box.className='ti-ip ti-ip-empty';return;}
+  const p=x.plan,cop=(Array.isArray(p.coping)?p.coping:[]).filter(c=>c&&(t(c.barrier)||t(c.fix))),c=S.ipc||{},bar=c.bar||[];
+  const vis=ipVisit(p),f1=tiIsoD(p.first),a=f1?schoolAfter(f1,3):tiIsoD(p.checkFrom),b=f1?schoolAfter(f1,5):tiIsoD(p.checkBy);   /* the window from the first day itself */
+  const sel=(id,val,opts,lab)=>'<select id="'+id+'" data-ti68="'+id+'" aria-label="'+E(lab)+'"><option value=""></option>'+opts.map(o=>'<option'+(val===o?' selected':'')+'>'+o+'</option>').join('')+'</select>';
+  let h='<h3 style="margin-top:14px">Implementation Plan, Checked at the First Visit</h3><p class="hint">'+E(x.who)+'&rsquo;s plan from Form ST-1'+(tiIsoD(p.first)?': first day '+E(tiUsD(tiIsoD(p.first))):'')+(a&&b?'. The first visit falls between '+E(tiUsD(a))+' and '+E(tiUsD(b))+' (3 to 5 school days in).':'.')+
+    (vis?' The first check scored since then: observation #'+(vis.j+1)+' on '+E(tiUsD(vis.d))+(vis.n!=null&&vis.n>=0?', '+vis.n+' school day'+(vis.n===1?'':'s')+' in'+(vis.n<3||vis.n>5?' <b class="ti-ipwarn">(outside 3 to 5)</b>':''):'')+'.':'')+'</p>';
+  h+='<table class="rt ti-ipt"><tr><th style="width:22%">Their part</th><td>'+[['Which steps',p.steps],['When',p.when],['Where',p.where],['Materials',p.materials]].filter(r=>t(r[1])).map(r=>'<b>'+r[0]+':</b> '+E(t(r[1]))).join('<br>')+'</td></tr>'+
+    '<tr><th>Steps run as planned (when, where, with the materials)</th><td>'+sel('tiIpRun',c.run||'',['Yes','Partly','No'],'Steps run as planned')+'</td></tr>'+
+    (cop.length?cop.map((q,i)=>'<tr><th>'+(i?'':'Coping plan')+'</th><td><b>'+E(t(q.barrier)||'Barrier '+(i+1))+'</b>'+(t(q.fix)?' &rarr; '+E(t(q.fix)):'')+'<div class="ti-ipq">Came up? '+sel('tiIpCame'+i,(bar[i]||{}).came||'',['Yes','No'],'Barrier '+(i+1)+': came up?')+' &nbsp;The fix worked? '+sel('tiIpWork'+i,(bar[i]||{}).worked||'',['Yes','No','Not tried'],'Barrier '+(i+1)+': the fix worked?')+'</div></td></tr>').join(''):'<tr><th>Coping plan</th><td class="hint">No barrier written on Form ST-1.</td></tr>')+
+    '<tr><th>What changes</th><td><textarea id="tiIpNote" data-ti68="tiIpNote" rows="2" style="width:100%" aria-label="What changes in the plan" placeholder="e.g., the timer moves to the reading table; a new fix for Fridays">'+E(c.note||'')+'</textarea></td></tr>'+
+    '<tr><th>Checked on</th><td><input type="date" id="tiIpDate" data-ti68="tiIpDate" value="'+E(c.date||'')+'" aria-label="Implementation plan checked on"></td></tr></table>';
+  if(box.__h!==h){box.innerHTML=h;box.__h=h;}box.className='ti-ip'+(ipFilled()?'':' ti-ip-empty');}
+function ipInput(el){const id=el.dataset.ti68;if(!id)return false;const c=Object.assign({},S.ipc||{});c.bar=(c.bar||[]).slice();
+  const m=/^tiIp(Came|Work)(\d)$/.exec(id);
+  if(id==='tiIpRun')c.run=el.value;else if(id==='tiIpNote')c.note=el.value;else if(id==='tiIpDate')c.date=el.value;
+  else if(m){const i=+m[2];while(c.bar.length<=i)c.bar.push({came:'',worked:''});c.bar[i]=Object.assign({},c.bar[i]);c.bar[i][m[1]==='Came'?'came':'worked']=el.value;}
+  else return false;
+  S.ipc=c;ipClean();const box=byId('tiIpBox');if(box)box.className='ti-ip'+(ipFilled()?'':' ti-ip-empty');return true;}
+
+/* ===================== #4 Send feedback ===================== */
+let pick=null;   /* {j, praise, fix, next} for the check chosen, kept while the panel is used (not saved) */
+function stepTxt(i){const st=S.steps[i]||{};return t(st.d)||'Step '+(i+1);}
+function suggest(j){const C=[],X=[];S.steps.forEach((st,i)=>{const v=code(i,j);if(v==='C')C.push(i);else if(v==='EC'||v==='EO')X.push(i);});
+  const crit=i=>!!(S.steps[i]||{}).crit,pc=C.find(crit),px=X.find(crit);
+  const pi=pc!=null?pc:C[0],xi=px!=null?px:X[0];
+  const praise=pi!=null?'You did step '+(pi+1)+' as written: '+stepTxt(pi).replace(/[.\s]+$/,'')+'.':'';
+  const fix=xi!=null?'Step '+(xi+1)+': '+stepTxt(xi).replace(/[.\s]+$/,'')+(code(xi,j)==='EO'?' (left out this time)':' (done in another way this time)')+'.':'Nothing to fix this time: keep every step as it is.';
+  const f=(S.obs[j]||{}).fb||{},r=V.ruleFor?V.ruleFor(j):null,od=tiIsoD((S.obs[j]||{}).date),base=f.date||od||today();
+  const next=f.next||(r?addDays(base,r.days):'');
+  return {j,praise,fix,next,rule:r?r.txt:'',cls:clsMine(clsCk())};}
+function graphSVG(){const pts=scoredRows().map(r=>({d:tiIsoD((S.obs[r.j]||{}).date),p:r.x.p})).filter(x=>x.d).sort((a,b)=>a.d.localeCompare(b.d));
+  if(!pts.length)return '';const W=520,H=150,L=36,R=12,top=10,bot=26,n=pts.length,X=i=>n===1?(L+W-R)/2:L+(W-L-R)*i/(n-1),Y=v=>top+(H-top-bot)*(1-v/100),cr=+S.crit||90;
+  let g='<line x1="'+L+'" y1="'+(H-bot)+'" x2="'+(W-R)+'" y2="'+(H-bot)+'" stroke="#7E97AD"/>'+[0,50,100].map(v=>'<text x="'+(L-5)+'" y="'+(Y(v)+3.5)+'" font-size="10" text-anchor="end" fill="#55697A">'+v+'</text>').join('')+
+    '<line x1="'+L+'" y1="'+Y(cr)+'" x2="'+(W-R)+'" y2="'+Y(cr)+'" stroke="#2F6B37" stroke-dasharray="5 4"/><text x="'+(W-R)+'" y="'+(Y(cr)-4)+'" font-size="10" text-anchor="end" fill="#2F6B37">goal '+cr+'%</text>'+
+    '<polyline fill="none" stroke="#182e43" stroke-width="1.6" points="'+pts.map((x,i)=>X(i).toFixed(1)+','+Y(x.p).toFixed(1)).join(' ')+'"/>'+
+    pts.map((x,i)=>'<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(x.p).toFixed(1)+'" r="3.4" fill="#182e43"/><text x="'+X(i).toFixed(1)+'" y="'+(H-10)+'" font-size="9.5" text-anchor="middle" fill="#55697A">'+E(tiUsD(x.d).replace(/\/\d{4}$/,''))+'</text>').join('');
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Your integrity on each check: '+E(pts.map(x=>tiUsD(x.d)+' '+pctS(x.p)).join(', '))+'">'+g+'</svg>';}
+function lineGraph(){return scoredRows().map(r=>({d:tiIsoD((S.obs[r.j]||{}).date),p:r.x.p})).filter(x=>x.d).sort((a,b)=>a.d.localeCompare(b.d)).map(x=>tiUsD(x.d)+' '+pctS(x.p)).join(' · ');}
+/* the message, the same in the email, its page version and the slip */
+function message(k){const o=S.obs[k.j]||{},od=tiIsoD(o.date),who=t(S.meta.int).replace(/,.*$/,''),first=(/^(Mr|Mrs|Ms|Mx|Dr|Miss)\.?$/i.test(who.split(/\s+/)[0]||'')?who.replace(/\s*\(simulated\)\s*$/i,'').split(/\s+/).slice(0,2).join(' '):who.split(/\s+/)[0])||'',ini=initials(),from=t(S.meta.obs)||t(S.meta.bcba);
+  const subject='Feedback on your check'+(od?' of '+tiUsD(od):'')+' ('+ini+')';
+  const lines=[(first?'Hello '+first+',':'Hello,'),'',
+    'Thank you for the check'+(od?' on '+tiUsD(od):'')+(t(S.meta.skill)?' ('+t(S.meta.skill)+')':'')+'.','',
+    'What went well: '+(t(k.praise)||'(write one thing done well)'),'',
+    'The one step to work on: '+(t(k.fix)||'(write the one step)'),'',
+    ...(k.cls&&clsCk()?[clsLine(clsCk()),'']:[]),
+    'Your integrity on each check: '+(lineGraph()||'(no dated check yet)')+'. The goal is '+(+S.crit||90)+'%.','',
+    'Next check: '+(k.next?'by '+tiUsD(k.next):'(set the date)')+'.','',
+    'Ask me about any of it.',(from?from:''),'',
+    'Student: '+ini+' (initials only). This is coaching for you, sent to you only.'];
+  const text=lines.join('\n').replace(/\n{3,}/g,'\n\n');
+  const html='<div style="font:15px/1.5 -apple-system,Helvetica,Arial,sans-serif;color:#111;max-width:560px">'+
+    '<p>'+E(first?'Hello '+first+',':'Hello,')+'</p><p>Thank you for the check'+(od?' on '+E(tiUsD(od)):'')+(t(S.meta.skill)?' ('+E(t(S.meta.skill))+')':'')+'.</p>'+
+    '<p><b>What went well:</b> '+E(t(k.praise)||'')+'</p><p><b>The one step to work on:</b> '+E(t(k.fix)||'')+'</p>'+
+    (k.cls&&clsCk()?'<p>'+E(clsLine(clsCk()))+'</p>':'')+
+    '<p><b>Your integrity on each check</b> (the goal is '+(+S.crit||90)+'%):</p>'+barTable()+
+    '<p><b>Next check:</b> '+(k.next?'by '+E(tiUsD(k.next)):'')+'.</p><p>Ask me about any of it.'+(from?'<br>'+E(from):'')+'</p>'+
+    '<p style="font-size:12px;color:#555">Student: '+E(ini)+' (initials only). This is coaching for you, sent to you only.</p></div>';
+  return {subject,text,html};}
+/* a graph that mail apps show: a table of bars */
+function barTable(){const pts=scoredRows().map(r=>({d:tiIsoD((S.obs[r.j]||{}).date),p:r.x.p})).filter(x=>x.d).sort((a,b)=>a.d.localeCompare(b.d)),cr=+S.crit||90;
+  return '<table role="presentation" style="border-collapse:collapse;font-size:13px">'+pts.map(x=>'<tr><td style="padding:2px 8px 2px 0;white-space:nowrap">'+E(tiUsD(x.d))+'</td><td style="padding:2px 0;width:300px"><div style="background:'+(x.p>=cr?'#2F6B37':'#254657')+';height:12px;width:'+Math.max(2,Math.round(3*x.p))+'px"></div></td><td style="padding:2px 0 2px 8px">'+E(pctS(x.p))+'</td></tr>').join('')+'</table>';}
+function sentLine(j){const L=(((S.obs[j]||{}).fb||{}).sent)||[];if(!L.length)return '';const z=L[L.length-1],d=new Date(z.at);
+  return 'Sent '+(isNaN(d)?'':d.toLocaleDateString(undefined,{month:'numeric',day:'numeric'})+' at '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}))+' '+({email:'by email',mail:'in the Mail app',slip:'as a printed slip'})[z.how]+(L.length>1?' ('+L.length+' times)':'')+'.';}
+function sendRender(){const box=byId('tiSend');if(!box)return;const rows=scoredRows();
+  if(!rows.length){box.innerHTML='<h3 style="margin-top:14px">Send Feedback</h3><p class="hint">Score an observation first: the message is about one check.</p>';pick=null;return;}
+  if(!pick||!rows.some(r=>r.j===pick.j)){const last=rows[rows.length-1].j;pick=suggest(last);}
+  const k=pick,M=message(k),em=t(S.meta.intEmail),ok=/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(em);
+  box.innerHTML='<h3 style="margin-top:14px">Send Feedback</h3>'+
+   '<p class="hint">One short message to '+E(t(S.meta.int)||'the interventionist')+' within a school day: their own integrity across checks, one specific praise, the one step to fix, and the next check by the fading rule. Feedback sent by email raised teachers&rsquo; descriptive praise (Hemmeter et al., 2011). Only the adult receives it, and the student is named by initials ('+E(initials())+'). Coaching, not an evaluation.</p>'+
+   '<div class="ti-sendgrid">'+
+   '<label for="tiSendObs">The check</label><select id="tiSendObs" aria-label="The check the feedback is about">'+rows.map(r=>{const o=S.obs[r.j]||{},d=tiIsoD(o.date);return '<option value="'+r.j+'"'+(r.j===k.j?' selected':'')+'>Observation #'+(r.j+1)+(d?', '+E(tiUsD(d)):'')+', '+E(pctS(r.x.p))+'</option>';}).join('')+'</select>'+
+   '<label for="tiSendPraise">One specific praise</label><textarea id="tiSendPraise" rows="2" aria-label="One specific praise">'+E(k.praise)+'</textarea>'+
+   '<label for="tiSendFix">The one step to fix</label><textarea id="tiSendFix" rows="2" aria-label="The one step to fix">'+E(k.fix)+'</textarea>'+
+   '<label for="tiSendNext">Next check</label><span><input type="date" id="tiSendNext" value="'+E(k.next)+'" aria-label="Next check"> <span class="hint">'+E(k.rule?'The fading rule: '+k.rule+'.':'')+'</span></span>'+
+   '<label for="tiSendTo">'+E(t(S.meta.int)?t(S.meta.int).replace(/,.*$/,'')+'’s email':'The adult’s email')+'</label><input type="email" id="tiSendTo" value="'+E(em)+'" autocomplete="off" aria-label="The adult’s email">'+
+   '</div>'+clsBox(k)+
+   '<details class="ti-sendprev"><summary>Read the message</summary><div class="ti-sendmsg"><p><b>'+E(M.subject)+'</b></p>'+M.html+'</div></details>'+
+   '<div class="ti-sendbar"><button type="button" class="tool primary" id="tiSendMail"'+(ok?'':' disabled')+'>Send it to '+E(t(S.meta.int).replace(/,.*$/,'')||'the adult')+' by email</button><button type="button" class="tool" id="tiSendSlip">Print it as a slip</button>'+
+   '<span class="hint" id="tiSendMsg" role="status" aria-live="polite">'+E(ok?sentLine(k.j):'Enter the adult’s email to send it; or print it as a slip to hand over.')+(ok?'':'')+'</span></div>';}
+/* v25.68 wave 2 the classroom check, offered beside the message */
+function clsBox(k){const x=clsCk();if(!x)return '';const mine=clsMine(x),who=t(S.meta.int).replace(/,.*$/,'');
+  return '<div class="ti-sendcls" role="group" aria-labelledby="tiSendClsH"><p id="tiSendClsH"><b>The classroom practices check</b> (Form OB-1, '+E(tiUsD(x.date))+(t(x.teacher)?', '+E(t(x.teacher))+'&rsquo;s room':'')+'): '+E(clsLine(x).replace(/^From the classroom check on [^:]*: /,''))+'</p>'+
+    (mine?'':'<p class="hint">The check is of '+E(t(x.teacher)||'another teacher')+'&rsquo;s room'+(who?', not '+E(who)+'&rsquo;s':'')+': add it only when the message goes to that teacher.</p>')+
+    '<label class="ti-inl ti-sendclsck"><input type="checkbox" id="tiSendCls"'+(k.cls?' checked':'')+'> Add the check to the message: coaching for the teacher, sent to the teacher only</label>'+
+    '<div class="ti-sendclsb"><button type="button" class="tool" id="tiSendClsPraise"'+(clsPraise(x)?'':' disabled')+'>Use the check&rsquo;s praise</button><button type="button" class="tool" id="tiSendClsFix"'+(clsStep(x)?'':' disabled')+'>Use the check&rsquo;s step</button></div></div>';}
+/* the check's feedback record takes what the message held */
+function logSent(j,how,k){const o=S.obs[j];if(!o)return;const f=Object.assign({},o.fb||{}),now=new Date();
+  if(!f.date)f.date=isoOf(now);if(!f.time)f.time=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  if(!f.fmt)f.fmt=how==='slip'?'written':'email';f.own=true;if(t(k.praise))f.praise=true;if(t(k.fix)&&!/^Nothing to fix/i.test(t(k.fix)))f.named=true;
+  if(k.next&&tiIsoD(k.next)&&!f.next)f.next=tiIsoD(k.next);
+  f.sent=(Array.isArray(f.sent)?f.sent:[]).concat([{at:now.toISOString(),how}]).slice(-10);o.fb=f;
+  try{renderRT();}catch(e){}}
+function say(m,warn){const el=byId('tiSendMsg');if(el){el.textContent=m;el.className='hint'+(warn?' ti-few':'');}}
+function readPick(){if(!pick)return;const g=id=>byId(id);if(g('tiSendPraise'))pick.praise=g('tiSendPraise').value;if(g('tiSendFix'))pick.fix=g('tiSendFix').value;if(g('tiSendNext'))pick.next=g('tiSendNext').value;}
+function sendMail(){readPick();const k=pick;if(!k)return;const to=t(S.meta.intEmail);if(!/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(to)){say('Enter the adult’s email first.',true);return;}
+  const M=message(k),j=k.j,name=t(S.meta.int).replace(/,.*$/,'');
+  const mailApp=()=>{const href='mailto:'+encodeURIComponent(to).replace(/%40/g,'@')+'?subject='+encodeURIComponent(M.subject)+'&body='+encodeURIComponent(M.text);
+    const a=document.createElement('a');a.href=href;a.target='_top';a.rel='noopener';document.body.appendChild(a);try{a.click();}catch(e){}a.remove();logSent(j,'mail',k);say('Opened in the Mail app: send it there. The feedback record holds today’s date; change it if you send it later.');};
+  if(window.parent===window){mailApp();return;}
+  const req='ti68-'+Date.now().toString(36);say('Asking the workstation to send it…');let done=false;
+  const on=ev=>{const d=ev.data||{};if(d.nbh!=='mail-result'||d.req!==req)return;done=true;window.removeEventListener('message',on);
+    if(d.unavailable){if(d.declined){say('Not sent.');return;}mailApp();return;}
+    const r=(d.results||[])[0];if(r&&r.ok){logSent(j,'email',k);say('Sent to '+(name||to)+' from '+(d.from||'your school account')+'. The feedback record for observation #'+(j+1)+' is filled.');}
+    else say('Not sent: '+((r&&r.err)||'the workstation did not send it')+'.',true);};
+  window.addEventListener('message',on);
+  try{window.parent.postMessage({nbh:'mail',req,messages:[{to,name,subject:M.subject,text:M.text,html:M.html}]},'*');}catch(e){window.removeEventListener('message',on);mailApp();return;}
+  setTimeout(()=>{if(!done){window.removeEventListener('message',on);say('The workstation did not answer. Try again, or print it as a slip.',true);}},300000);}
+function printSlip(){readPick();const k=pick;if(!k)return;const M=message(k),o=S.obs[k.j]||{},od=tiIsoD(o.date),ini=initials();
+  let el=byId('tiSlip');if(el)el.remove();el=document.createElement('div');el.id='tiSlip';el.className='ti-slip';
+  el.innerHTML='<div class="ti-slip-in"><h2>Feedback'+(od?' on your check of '+E(tiUsD(od)):'')+'</h2><p class="ti-slip-who">For '+E(t(S.meta.int)||'the interventionist')+' &middot; student '+E(ini)+(t(S.meta.obs)?' &middot; from '+E(t(S.meta.obs)):'')+'</p>'+
+    '<p><b>What went well:</b> '+E(t(k.praise))+'</p><p><b>The one step to work on:</b> '+E(t(k.fix))+'</p>'+
+    (k.cls&&clsCk()?'<p>'+E(clsLine(clsCk()))+'</p>':'')+
+    '<p><b>Your integrity on each check</b> (the goal is '+(+S.crit||90)+'%)</p>'+graphSVG()+
+    '<p><b>Next check:</b> '+(k.next?'by '+E(tiUsD(k.next)):'______________')+'</p><p class="ti-slip-foot">Coaching for you, given to you first. Student named by initials only.</p></div>';
+  (document.querySelector('main')||document.body).appendChild(el);
+  const h=document.documentElement;h.classList.add('ti-slip-printing');
+  const off=()=>{h.classList.remove('ti-slip-printing');const x=byId('tiSlip');if(x)x.remove();window.removeEventListener('afterprint',off);};
+  window.addEventListener('afterprint',off);logSent(k.j,'slip',k);say('Printed as a slip: hand it to '+(t(S.meta.int).replace(/,.*$/,'')||'the adult')+' first. The feedback record is filled.');
+  try{window.print();}finally{setTimeout(off,1500);}}
+window.__ti2568={suggest,message,initials,logSent,ipRender,sendRender,clsCk,clsLine,clsPraise,clsStep,get pick(){return pick;}};
+
+/* ---------------- wiring ---------------- */
+document.addEventListener('change',e=>{const el=e.target;if(!el)return;
+  if(el.dataset&&el.dataset.ti68){if(ipInput(el))return;}
+  if(el.id==='tiSendObs'){pick=suggest(+el.value);sendRender();return;}
+  if(el.id==='tiSendTo'){if(t(el.value))S.meta.intEmail=t(el.value);else delete S.meta.intEmail;readPick();sendRender();return;}
+  if(el.id==='tiSendNext'||el.id==='tiSendPraise'||el.id==='tiSendFix'){readPick();return;}
+  if(el.id==='tiSendCls'){readPick();if(pick)pick.cls=el.checked;sendRender();const c=byId('tiSendCls');if(c)c.focus();return;}
+  if(el.dataset&&el.dataset.m==='int'){try{ipMatch();ipRender();sendRender();}catch(x){}}});
+document.addEventListener('input',e=>{const el=e.target;if(!el)return;if(el.dataset&&el.dataset.ti68==='tiIpNote'){ipInput(el);return;}
+  if(el.id==='tiSendPraise'||el.id==='tiSendFix'){readPick();}
+  if(el.id==='tiSendTo'){const ok=/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(t(el.value)),b=byId('tiSendMail');if(b)b.disabled=!ok;if(t(el.value))S.meta.intEmail=t(el.value);else delete S.meta.intEmail;}});
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#tiSendMail,#tiSendSlip,#tiSendClsPraise,#tiSendClsFix');if(!b)return;
+  if(b.id==='tiSendClsPraise'||b.id==='tiSendClsFix'){readPick();const x=clsCk();if(!pick||!x)return;const w=b.id==='tiSendClsPraise'?clsPraise(x):clsStep(x);if(!w)return;
+    if(b.id==='tiSendClsPraise')pick.praise=w;else pick.fix=w;sendRender();const g=byId(b.id==='tiSendClsPraise'?'tiSendPraise':'tiSendFix');if(g)g.focus();say(b.id==='tiSendClsPraise'?'The praise is from the classroom check: edit it as you like.':'The step is from the classroom check: edit it as you like.');return;}
+  if(b.id==='tiSendMail')sendMail();else printSlip();});
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const had=JSON.stringify(clsCk());ipCase=f||null;const r=was?was.apply(this,arguments):null;try{ipMatch();ipRender();
+  if(JSON.stringify(clsCk())!==had&&!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#tiSend'))){if(pick)pick.cls=clsMine(clsCk());sendRender();}}catch(e){}return r;};}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+  try{if(o&&o.integrity&&S.ipPlan&&ipFilled()){const c=S.ipc,cop=(S.ipPlan.plan.coping||[]).filter(q=>q&&(t(q.barrier)||t(q.fix)));
+    o.integrity.ipCheck={who:t(S.ipPlan.who),date:c.date||'',run:c.run||'',barriers:cop.map((q,i)=>({barrier:t(q.barrier),came:((c.bar||[])[i]||{}).came||'',worked:((c.bar||[])[i]||{}).worked||''})),note:t(c.note)};}}catch(e){}return o;};}
+{const rr=renderRT;renderRT=function(){const r=rr.apply(this,arguments);try{if(!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#tiSend,#tiIpBox'))){ipRender();sendRender();}}catch(e){console.error('TI-1 v25.68: '+(e&&e.message||e));}return r;};}
+{const ra=renderAll;renderAll=function(){try{ipClean();}catch(e){}const r=ra.apply(this,arguments);try{pick=null;ipRender();sendRender();}catch(e){console.error('TI-1 v25.68: '+(e&&e.message||e));}return r;};}
+window.addEventListener('beforeprint',()=>{try{ipRender();}catch(e){}});
+try{ipClean();ipRender();sendRender();}catch(e){console.error('TI-1 v25.68: '+(e&&e.message||e));}
+})();
+</script>
+<style id="ti1-v2568-css">
+/* v25.68 the first visit's plan check (printed when filled) and Send feedback (screen only; the slip prints on its own) */
+.ti-ipq{margin-top:4px;font-size:12.5px}
+.ti-ipwarn{color:#8a4b00;font-weight:600}
+.ti-ipq select{min-height:32px}
+@media print{#tiIpBox.ti-ip-empty{display:none!important}}
+.ti-sendgrid{display:grid;grid-template-columns:minmax(140px,22%) 1fr;gap:8px 12px;align-items:start;margin:8px 0}
+.ti-sendgrid label{font-weight:600;font-size:13px;padding-top:6px}
+.ti-sendgrid textarea,.ti-sendgrid input[type=email]{width:100%;box-sizing:border-box}
+.ti-sendgrid textarea,.ti-sendgrid input,.ti-sendgrid select,.ti-ipt textarea{font:inherit;font-size:14px;line-height:1.4}
+@media (max-width:640px){.ti-sendgrid{grid-template-columns:1fr}.ti-sendgrid label{padding-top:0}}
+.ti-sendbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:8px 0}
+.ti-sendbar .hint{flex:1 1 220px}
+.ti-sendprev{margin:6px 0}
+.ti-sendcls{margin:8px 0;padding:8px 12px;border:1px solid #c9d4d2;border-left:4px solid #76a2a3;border-radius:6px;background:#f7f9f8;font-size:13px}
+.ti-sendcls p{margin:0 0 6px}.ti-sendclsck{display:flex;gap:8px;align-items:flex-start;min-height:44px}
+.ti-sendclsck input{width:20px;height:20px;margin:2px 0 0;flex:none}
+.ti-sendclsb{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+@media (pointer:coarse){.ti-sendclsb button{min-height:44px}}
+.ti-sendprev>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:#254657}
+.ti-sendprev>summary:focus-visible{outline:3px solid #2f7fa8;outline-offset:2px}
+.ti-sendmsg{border:1px solid #c9d4d2;border-radius:6px;padding:10px 12px;background:#fff}
+@media (pointer:coarse){.ti-sendbar button,.ti-ipq select,#tiSend select,#tiSend input{min-height:44px}}
+.ti-slip{display:none}
+@media print{html.ti-slip-printing body>*:not(main){display:none!important}
+  html.ti-slip-printing main.sheet>*:not(#tiSlip){display:none!important}
+  html.ti-slip-printing #tiSlip{display:block!important}
+  .ti-slip-in{max-width:6.5in;font:11pt/1.45 Georgia,"Times New Roman",serif;color:#111}
+  .ti-slip-in h2{font:700 15pt Inter,Arial,sans-serif;margin:0 0 4pt}
+  .ti-slip-who,.ti-slip-foot{font:9.5pt Inter,Arial,sans-serif;color:#444}}
+</style>
+<script id="ti1-v2568b">
+/* v25.68 wave 2 (research recommendation #5, the BCBA's 11/6 list) the daily self-check on the staff phone page, and how it
+   compares with observed integrity.
+   The items: three to five "did I do it?" questions, the plan's critical steps: this record's steps marked critical (the default),
+   or Form QS-1's self-check (its non-negotiables, quick.selfCheck) when the BCBA takes those. Kept in S.sck {items:[{i, d, st}]}
+   (i: the item's id on the phone, d: the words the phone shows, st: this record's step it is, when it is one); out as
+   integrity.selfCheck {who, items:[{i, d}], src:'TI-1'}, for Form DD-1 to put in that adult's staff phone link.
+   The answers: the staff page sends them with the day's data (an entry's sc: [{i, n, a}], a = y yes, n no, x did not come up)
+   to Form DD-1, which gives them to the case as data.staff.self [{date, who, code, at, items:[{i, n, a}]}]. The ones from this
+   adult (matched by name, or the person chosen here) are kept in S.sckIn, so a saved copy prints the comparison.
+   The comparison (calibration): each day with both a self-check and a scored observation, the share of "yes" against the
+   observed share correct on the same steps (all scored steps when no item is one of this record's steps); a day 15 points or more
+   above what was observed, or self-checks above the observed average by 15 points or more over 3 days or more, is flagged as
+   running high (this form's working convention). A self-check is calibrated against the visits, never trusted on its own.
+   Every new value is optional: a file saved before opens and prints as it did. */
+(function(){
+'use strict';
+const byId=id=>document.getElementById(id);
+const t=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const K=s=>t(s).toLowerCase();
+const rid=()=>'k'+Math.random().toString(36).slice(2,8);
+const HIGH=15,MINDAYS=3,MAXI=5,MINI=3;
+const same=(a,b)=>{a=K(a).replace(/,.*$/,'');b=K(b).replace(/,.*$/,'');return !!a&&!!b&&(a===b||a.indexOf(b)===0||b.indexOf(a)===0);};
+const pctS=p=>Math.round(p)+'%';
+let CASE=null;
+/* ---------------- the record's part ---------------- */
+function clean(){const v=S.sck;if(v!=null){const o={};if(v&&typeof v==='object'&&!Array.isArray(v)){
+    const seen=new Set();o.items=(Array.isArray(v.items)?v.items:[]).filter(x=>x&&typeof x==='object'&&t(x.d)).slice(0,MAXI).map(x=>{let i=/^[A-Za-z0-9_-]{1,24}$/.test(String(x.i||''))?String(x.i):rid();while(seen.has(i))i=rid();seen.add(i);
+      const r={i,d:String(x.d).replace(/\s+/g,' ').trim().slice(0,120)};if(t(x.st))r.st=String(x.st).slice(0,400);return r;});
+    if(t(v.from))o.from=String(v.from).slice(0,80);if(v.src==='QS-1')o.src='QS-1';}
+    if((o.items||[]).length||o.from)S.sck=o;else delete S.sck;}
+  if(S.sckIn!=null){const L=(Array.isArray(S.sckIn)?S.sckIn:[]).map(norm).filter(Boolean).slice(-400);if(L.length)S.sckIn=L;else delete S.sckIn;}}
+function norm(e){if(!e||typeof e!=='object')return null;const d=tiIsoD(e.date);if(!d)return null;
+  const it=(Array.isArray(e.items)?e.items:Array.isArray(e.sc)?e.sc:[]).filter(x=>x&&typeof x==='object'&&/^[ynx]$/.test(String(x.a||''))&&/^[A-Za-z0-9_-]{1,24}$/.test(String(x.i||''))).slice(0,MAXI)
+    .map(x=>({i:String(x.i),n:t(x.n).slice(0,120),a:String(x.a)}));
+  if(!it.length)return null;return {date:d,who:t(e.who).slice(0,80),code:t(e.code||e.c).slice(0,12),at:t(e.at||e.made).slice(0,30),items:it};}
+const items=()=>(S.sck&&S.sck.items)||[];
+/* this record's steps, the critical ones first, for the picker */
+function stepList(){return S.steps.map((st,i)=>({i,d:t(st.d),crit:!!st.crit})).filter(x=>x.d);}
+const short=d=>{d=t(d);return d.length<=120?d:d.slice(0,117).replace(/\s+\S*$/,'')+'\u2026';};
+function stepOf(it){if(!it)return -1;const k=K(it.st||it.d);let j=S.steps.findIndex(st=>K(st.d)===k);if(j<0&&!it.st)j=S.steps.findIndex(st=>K(st.d)&&(K(st.d).indexOf(K(it.d).replace(/\u2026$/,''))===0));return j;}
+function qsList(){const q=(typeof tiQuick!=='undefined'&&tiQuick)||null,L=q&&q.selfCheck&&Array.isArray(q.selfCheck.items)?q.selfCheck.items:[];
+  return L.filter(x=>x&&t(x.d)).slice(0,MAXI).map(x=>({i:/^[A-Za-z0-9_-]{1,24}$/.test(String(x.i||''))?String(x.i):rid(),d:short(x.d)}));}
+function useCrit(){const C=stepList().filter(x=>x.crit).slice(0,MAXI);S.sck=Object.assign({},S.sck||{},{items:C.map(x=>({i:rid(),d:short(x.d),st:x.d}))});delete S.sck.src;clean();}
+function useQs(){const Q=qsList();if(!Q.length)return;S.sck=Object.assign({},S.sck||{},{items:Q.map(x=>{const j=S.steps.findIndex(st=>K(st.d)===K(x.d));return j>=0?{i:x.i,d:x.d,st:t(S.steps[j].d)}:{i:x.i,d:x.d};}),src:'QS-1'});clean();}
+
+/* ---------------- the answers, from the case ---------------- */
+function entriesIn(f){const s=f&&f.data&&f.data.staff,L=s&&Array.isArray(s.self)?s.self:null;return L?L.map(norm).filter(Boolean):null;}
+function whos(L){const m={};(L||[]).forEach(e=>{const w=e.who||'(no name)';m[w]=(m[w]||0)+1;});return m;}
+function take(){const L=entriesIn(CASE);if(!L)return;const from=(S.sck&&S.sck.from)||'';
+  const mine=L.filter(e=>from?K(e.who)===K(from):same(e.who,S.meta.int));
+  /* the case's answers stand for this adult's; with none from them in it, the ones kept stay, unless another person was chosen */
+  if(mine.length)S.sckIn=mine;else if(from&&!(S.sckIn||[]).some(e=>K(e.who)===K(from)))delete S.sckIn;clean();}
+
+/* ---------------- the comparison ---------------- */
+function obsRows(){const M=[];(S.obs||[]).forEach((o,j)=>{const d=tiIsoD(o&&o.date);if(!d)return;let c=0,n=0;S.steps.forEach((_,i)=>{const v=S.cells[i+'_'+j]||'';if(v==='C'||v==='EC'||v==='EO'){n++;if(v==='C')c++;}});if(n)M.push({j,d,c,n,p:100*c/n});});return M;}
+function obsOn(j,steps){let c=0,n=0;steps.forEach(i=>{const v=S.cells[i+'_'+j]||'';if(v==='C'||v==='EC'||v==='EO'){n++;if(v==='C')c++;}});return n?{c,n,p:100*c/n}:null;}
+function cal(){const IN=S.sckIn||[];if(!IN.length)return null;
+  const byDay={};IN.forEach(e=>{const x=byDay[e.date]||(byDay[e.date]={date:e.date,y:0,n:0,x:0,periods:0,items:{}});x.periods++;
+    e.items.forEach(a=>{if(a.a==='y')x.y++;else if(a.a==='n')x.n++;else x.x++;const q=x.items[a.i]||(x.items[a.i]={y:0,n:0,x:0,name:a.n});q[a.a==='y'?'y':a.a==='n'?'n':'x']++;});});
+  const days=Object.keys(byDay).sort().map(k=>byDay[k]),O=obsRows(),IT=items();
+  /* each question answered: this record's step it is (by its id among the questions here, or by its words) */
+  const kOf=(id,name)=>{const it=IT.find(x=>x.i===id);let k=it?stepOf(it):-1;if(k<0&&t(name))k=stepOf({d:name});return k;};
+  const rows=days.map(x=>{const self=x.y+x.n?100*x.y/(x.y+x.n):null,o=O.filter(r=>r.d===x.date);let obs=null,on='';
+    const stepIdx=[...new Set(Object.keys(x.items).map(id=>kOf(id,x.items[id].name)).filter(k=>k>=0))];
+    if(o.length){const same=stepIdx.length?o.map(r=>obsOn(r.j,stepIdx)).filter(Boolean):[];
+      if(same.length){const c=same.reduce((a,v)=>a+v.c,0),n=same.reduce((a,v)=>a+v.n,0);obs=100*c/n;on='steps';}
+      else{const c=o.reduce((a,v)=>a+v.c,0),n=o.reduce((a,v)=>a+v.n,0);obs=100*c/n;on='all';}}
+    /* an item said "yes" on a day it was observed not done */
+    const miss=[];if(o.length)Object.keys(x.items).forEach(id=>{const q=x.items[id],k=kOf(id,q.name);if(k<0||!q.y)return;if(o.some(r=>{const v=S.cells[k+'_'+r.j]||'';return v==='EC'||v==='EO';}))miss.push(q.name||t((S.steps[k]||{}).d));});
+    return {date:x.date,periods:x.periods,y:x.y,n:x.n,x:x.x,self,obs,on,diff:self!=null&&obs!=null?self-obs:null,high:self!=null&&obs!=null&&self-obs>=HIGH,miss};});
+  const S1=days.reduce((a,x)=>a+x.y,0),S2=days.reduce((a,x)=>a+x.y+x.n,0),self=S2?100*S1/S2:null;
+  const from=days.length?days[0].date:'',to=days.length?days[days.length-1].date:'';
+  const span=O.filter(r=>r.d>=from&&r.d<=to),obsAll=span.length?span.reduce((a,r)=>a+r.p,0)/span.length:(O.length?O.reduce((a,r)=>a+r.p,0)/O.length:null);
+  const overHigh=self!=null&&obsAll!=null&&days.length>=MINDAYS&&self-obsAll>=HIGH;
+  return {rows,days:days.length,periods:IN.length,self,obsAll,obsN:span.length||O.length,inSpan:!!span.length,overHigh,anyHigh:overHigh||rows.some(r=>r.high||r.miss.length)};}
+
+/* ---------------- the section ---------------- */
+function render(){const box=byId('tiSc');if(!box)return;const IT=items(),St=stepList(),Q=qsList(),who=t(S.meta.int).replace(/,.*$/,'')||'the interventionist',C=cal();
+  const inIt=new Map(IT.filter(x=>x.st).map(x=>[K(x.st),x]));
+  let h='<h3 style="margin-top:14px">Daily Self-Check on the Staff Phone Page</h3>'+
+    '<p class="hint">After each period or session the staff phone page (Form DD-1&rsquo;s link) asks '+E(who)+' three to five &ldquo;did I do it?&rdquo; questions, the plan&rsquo;s critical steps, and sends the answers with the day&rsquo;s data. A self-check is compared with the integrity you observe, never trusted on its own: self-monitoring raised teachers&rsquo; specific praise (Simonsen et al., 2013), and the evidence for feedback rests on observed integrity (Noell et al., 2005; Fallon et al., 2015). Short lists of critical items work best (Haynes et al., 2009; Degani &amp; Wiener, 1993).</p>';
+  h+='<div class="ti-sc-pick noprint"><p class="ti-sc-lab"><b>The questions</b> (tick three to five)'+(S.sck&&S.sck.src==='QS-1'?': from Form QS-1&rsquo;s self-check':'')+'</p>'+
+    (St.length?'<div class="grid-wrap" tabindex="0" role="region" aria-label="Steps to ask on the phone"><table class="rt ti-sct"><thead><tr><th style="width:64px">Ask</th><th style="width:34%">Step</th><th>Words on the phone</th></tr></thead><tbody>'+
+      St.map(s=>{const it=inIt.get(K(s.d));return '<tr><td class="c"><label class="ti-ck ti-sc-ck"><input type="checkbox" data-sck="'+s.i+'"'+(it?' checked':'')+' aria-label="Ask about step '+(s.i+1)+'"></label></td><td>Step '+(s.i+1)+(s.crit?' <b class="ti-sc-crit">critical</b>':'')+'<div class="ti-sc-st">'+E(short(s.d))+'</div></td>'+
+        '<td>'+(it?'<textarea data-sckw="'+E(it.i)+'" maxlength="120" rows="2" aria-label="Words on the phone for step '+(s.i+1)+'" style="width:100%">'+E(it.d)+'</textarea>':'<span class="hint">not asked</span>')+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="hint">Write the protocol&rsquo;s steps on Setup first, and mark the critical ones.</p>')+
+    IT.filter(x=>!x.st).map(x=>'<p class="ti-sc-other">From Form QS-1: <input type="text" data-sckw="'+E(x.i)+'" maxlength="120" value="'+E(x.d)+'" aria-label="Words on the phone" style="width:60%"> <button type="button" class="tool" data-sckdel="'+E(x.i)+'">Take it off</button></p>').join('')+
+    '<div class="ti-sc-bar"><button type="button" class="tool" id="tiScCrit"'+(St.some(s=>s.crit)?'':' disabled')+'>Use the critical steps</button>'+
+      (Q.length?'<button type="button" class="tool" id="tiScQs">Use Form QS-1&rsquo;s self-check ('+Q.length+')</button>':'')+
+      (IT.length?'<button type="button" class="tool" id="tiScClear">Ask nothing</button>':'')+
+      '<span class="hint" id="tiScN" role="status" aria-live="polite">'+E(IT.length?IT.length+' question'+(IT.length===1?'':'s')+(IT.length<MINI?': add '+(MINI-IT.length)+' more (three to five work best).':IT.length>MAXI?'':': ready for '+who+'\u2019s staff phone link on Form DD-1'+(obsRows().length?'.':', once this record holds a scored check (until then the link takes Form QS-1\u2019s self-check).')):'No questions yet: the phone page asks none.')+'</span></div></div>';
+  if(IT.length)h+='<p class="ti-sc-print"><b>Asked after each period or session</b> (Did I do it? Yes, No, or Didn&rsquo;t come up):</p><ol class="ti-sc-ol">'+IT.map(x=>'<li>'+E(x.d)+'</li>').join('')+'</ol>';
+  /* the comparison */
+  const L=entriesIn(CASE),W=L?whos(L):null;
+  if(W&&Object.keys(W).length)h+='<p class="noprint ti-sc-from"><label for="tiScFrom">Self-checks from</label> <select id="tiScFrom"><option value="">'+E(t(S.meta.int)?'The interventionist ('+t(S.meta.int)+')':'Choose the adult')+'</option>'+Object.keys(W).map(w=>'<option value="'+E(w)+'"'+(S.sck&&K(S.sck.from)===K(w)?' selected':'')+'>'+E(w)+' ('+W[w]+')</option>').join('')+'</select></p>';
+  if(C){h+='<div class="grid-wrap" tabindex="0" role="region" aria-label="Self-checks beside observed integrity"><table class="rt ti-scc"><thead><tr><th>Date</th><th>Self-check</th><th>Observed that day</th><th>Difference</th><th>Note</th></tr></thead><tbody>'+
+      C.rows.map(r=>'<tr'+(r.high||r.miss.length?' class="ti-sc-hi"':'')+'><td>'+E(tiUsD(r.date))+'</td><td>'+(r.self!=null?pctS(r.self)+' yes ('+r.y+' of '+(r.y+r.n)+(r.x?'; '+r.x+' did not come up':'')+', '+r.periods+' period'+(r.periods===1?'':'s')+')':'only &ldquo;did not come up&rdquo;')+'</td>'+
+        '<td>'+(r.obs!=null?pctS(r.obs)+(r.on==='steps'?' on the same steps':' on all scored steps'):'<span class="hint">no check that day</span>')+'</td><td>'+(r.diff!=null?(r.diff>0?'+':'')+Math.round(r.diff)+' points':'')+'</td>'+
+        '<td>'+[r.high?'<b>Runs high</b>':'',r.miss.length?'Said yes, observed not done: '+r.miss.map(E).join('; '):''].filter(Boolean).join('. ')+'</td></tr>').join('')+'</tbody></table></div>';
+    h+='<p class="ti-sc-sum'+(C.anyHigh?' ti-sc-flag':'')+'">'+(C.self!=null?'Across '+C.days+' day'+(C.days===1?'':'s')+' ('+C.periods+' period'+(C.periods===1?'':'s')+'): '+pctS(C.self)+' yes.':'No yes-or-no answer yet.')+
+      (C.obsAll!=null?' Observed integrity '+(C.inSpan?'over the same days':'(all checks)')+': '+pctS(C.obsAll)+' ('+C.obsN+' check'+(C.obsN===1?'':'s')+').':' No scored check yet to compare with.')+
+      (C.overHigh?' <b>The self-checks run high</b>: '+Math.round(C.self-C.obsAll)+' points above what was observed.':'')+
+      (C.anyHigh?' Talk it through at the next feedback (Send feedback, above): which step is hard to notice in the moment? The visits stay the measure; the self-check is a prompt for the adult.':'')+
+      ' A day '+HIGH+' points or more above the check that day is flagged (this form&rsquo;s working convention).</p>';}
+  else if(IT.length)h+='<p class="hint ti-sc-none">No self-check has come back yet. The answers reach this record through Form DD-1, once its staff phone link for '+E(who)+' carries these questions.</p>';
+  if(box.__h!==h){box.innerHTML=h;box.__h=h;}box.className='ti-sc'+(IT.length||C?'':' ti-sc-empty');}
+window.__ti2568b={cal,render,items,useCrit,useQs,take,norm,entriesIn};
+/* ---------------- wiring ---------------- */
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.closest||!el.closest('#tiSc'))return;
+  if(el.dataset.sck!=null){const i=+el.dataset.sck,st=S.steps[i];if(!st)return;const L=items().slice();const k=K(st.d),at=L.findIndex(x=>K(x.st)===k);
+    if(el.checked&&at<0){if(L.length>=MAXI){el.checked=false;const n=byId('tiScN');if(n)n.textContent='Five questions at most: take one off first.';return;}L.push({i:rid(),d:short(st.d),st:t(st.d)});}
+    else if(!el.checked&&at>=0)L.splice(at,1);
+    S.sck=Object.assign({},S.sck||{},{items:L});if(S.sck.src&&!L.length)delete S.sck.src;clean();render();const b=document.querySelector('#tiSc [data-sck="'+i+'"]');if(b)b.focus();return;}
+  if(el.id==='tiScFrom'){S.sck=Object.assign({},S.sck||{});if(el.value)S.sck.from=el.value;else delete S.sck.from;clean();take();render();return;}});
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset||el.dataset.sckw==null||!el.closest('#tiSc'))return;const it=items().find(x=>x.i===el.dataset.sckw);if(it){it.d=el.value.replace(/\s+/g,' ').slice(0,120);if(!t(it.d))it.d=it.st?short(it.st):it.d;}});
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('#tiSc button');if(!b||b.disabled)return;
+  if(b.id==='tiScCrit')useCrit();else if(b.id==='tiScQs')useQs();else if(b.id==='tiScClear'){if(S.sck){delete S.sck.items;delete S.sck.src;}clean();}
+  else if(b.dataset.sckdel){S.sck.items=items().filter(x=>x.i!==b.dataset.sckdel);clean();}else return;render();});
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){CASE=f||null;const r=was?was.apply(this,arguments):null;try{take();render();}catch(x){}return r;};}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(x){o=null;}
+  /* only beside a scored check: an integrity part with no check in it would read as one to the forms that take it */
+  try{const IT=items();let C=null;try{C=cal();}catch(x){C=null;}if(!o||!o.integrity||(!IT.length&&!C))return o;
+    if(IT.length)o.integrity.selfCheck={who:t(S.meta.int).slice(0,80),items:IT.map(x=>({i:x.i,d:x.d})),src:S.sck&&S.sck.src==='QS-1'?'QS-1':'TI-1'};
+    if(C&&C.self!=null)o.integrity.selfCal={days:C.days,self:Math.round(C.self),obs:C.obsAll==null?null:Math.round(C.obsAll),high:!!C.anyHigh};}catch(x){}return o;};}
+{const rr=renderRT;renderRT=function(){const r=rr.apply(this,arguments);try{if(!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#tiSc')))render();}catch(x){console.error('TI-1 v25.68b: '+(x&&x.message||x));}return r;};}
+{const ra=renderAll;renderAll=function(){try{clean();}catch(x){}const r=ra.apply(this,arguments);try{render();}catch(x){console.error('TI-1 v25.68b: '+(x&&x.message||x));}return r;};}
+window.addEventListener('beforeprint',()=>{try{render();}catch(x){}});
+try{clean();render();}catch(x){console.error('TI-1 v25.68b: '+(x&&x.message||x));}
+})();
+</script>
+<style id="ti1-v2568b-css">
+/* v25.68 wave 2 (research #5) the daily self-check: the picker on screen; the questions and the comparison print once there are any */
+.ti-sc-pick{margin:6px 0 8px}
+.ti-sc-lab{margin:4px 0}
+.ti-sct td{vertical-align:top}.ti-sct td.c{text-align:center}
+.ti-sc-st{font-size:12.5px;color:var(--ink,#24313C)}
+.ti-sc-crit{font-size:11px;color:#7c2222;text-transform:uppercase;letter-spacing:.03em}
+.ti-sct textarea,.ti-sc-other input{font:inherit;font-size:13.5px;min-height:36px;box-sizing:border-box;resize:vertical}
+.ti-sc-print{margin:8px 0 2px}.ti-sc-ol{margin:0 0 8px;padding-left:22px;font-size:13px}
+.ti-sc-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:8px 0}
+.ti-sc-bar .hint{flex:1 1 220px}
+.ti-sc-from{margin:6px 0}.ti-sc-from select{min-height:36px}
+.ti-sc-hi td{background:#fdf3e6}
+.ti-sc-sum{margin:6px 0;font-size:13px}.ti-sc-flag{border-left:4px solid #8a4b00;padding-left:8px}
+@media (pointer:coarse){.ti-sc-bar button,.ti-sc-other button,.ti-sc-from select,.ti-sct textarea,.ti-sc-other input{min-height:44px}.ti-sc-ck{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}}
+@media print{#tiSc.ti-sc-empty{display:none!important}}
+</style>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
