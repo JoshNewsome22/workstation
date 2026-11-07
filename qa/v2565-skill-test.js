@@ -85,7 +85,7 @@ const SASRC=fs.readFileSync(path.join(L.ROOT,'NBH-Workstation','SA-1_Skill-Acqui
   const dep=[['B','JE',pc(0)]].concat([0,1,2,3,4].map(()=>['T','JE','IIGGGGGGGG']));
   G=await q.evaluate(a=>__prog({},a),dep);
   ok('H4 prompt dependence (correct with prompts, not alone): the three named options',G.rules.some(r=>/^Prompt dependence: the last 5 teaching sessions average 100% correct with prompts but 20% independent\. Choose one: stronger differential reinforcement \(the best item only after independent responses\), faster fading, or a longer wait before the prompt/.test(r)),G.rules);
-  ok('H4 the Guide and the decision rules printed with the checklist',/When progress stalls: check before changing the teaching/.test(guide)&&await q.evaluate(()=>/When Progress Stalls: Check in This Order/.test(document.querySelector('section.only-graph').textContent)));
+  ok('H4 the Guide and the decision rules printed with the checklist',/When progress stalls: check before changing the teaching/.test(guide)&&await q.evaluate(()=>/When Progress Stalls: Check in This Order/i.test(document.querySelector('section.only-graph').textContent)   /* v25.68 fx2: the heading on screen in sentence case */));
 
   /* ---- H5 ---- */
   G=await q.evaluate(a=>__prog({},a),[['B','JE',pc(0)],['T','JE','GG––––––––'],['T','JE','GG––––––––'],['T','JE','GGG–––––––']]);
@@ -139,7 +139,8 @@ const SASRC=fs.readFileSync(path.join(L.ROOT,'NBH-Workstation','SA-1_Skill-Acqui
 
   /* ---- L1, L2, L3 ---- */
   const l=await q.evaluate(()=>{S=blank();P={list:[S],cur:0};S.meta.format='net';renderAll();
-    return {mix:document.querySelector('[data-m="mix"]').placeholder,ifi:!!document.querySelector('[data-m="if_info"]'),ini:!!document.querySelector('#trTbl input[data-f="ini"]')||document.getElementById('trTbl').textContent,sheet:document.getElementById('trialSheet').textContent,pt:PRTYPES.slice()};});
+    return {mix:(e=>e.placeholder||e.getAttribute('data-fx2-ph')||'')(document.querySelector('[data-m="mix"]')),   /* v25.68 fx2: on screen the layout keeps a box's words in data-fx2-ph */
+      ifi:!!document.querySelector('[data-m="if_info"]'),ini:!!document.querySelector('#trTbl input[data-f="ini"]')||document.getElementById('trTbl').textContent,sheet:document.getElementById('trialSheet').textContent,pt:PRTYPES.slice()};});
   ok('L1 interspersal: none by default, with the reason written; the Guide gives Majdalany et al. (2014) and Knutson et al. (2019)',/none by default: mixing in mastered targets slowed new learning/.test(l.mix)&&/Massed trials gave the fastest acquisition for 5 of 6 children \(Majdalany et al\., 2014\)/.test(guide)&&/most efficient ratio for all 4 children \(Knutson et al\., 2019\)/.test(guide),l.mix);
   ok('L2 an instructive-feedback line and a probe type for it (Reichow & Wolery, 2011)',l.ifi&&l.pt.includes('Instructive feedback')&&/58% to 92%/.test(guide),l);
   const l3=await q.evaluate(()=>{S.sess=[{date:'10/1/26',ph:'T',inst:'JE',tr:Array.from('IIII'),dl:'',note:'',ini:'SASA'}];renderAll();return {row:!!document.querySelector('#trTbl input[data-f="ini"]'),sheet:document.getElementById('trialSheet').textContent};});

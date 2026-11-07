@@ -19,7 +19,7 @@ const GC='GC-1_Group-Contingencies_v2026-10.html',DD='Daily_Behavior_Data_and_Vi
   let p=await open(GC);await p.evaluate(async()=>{await loadSim();});await sleep(400);
   const D=await p.evaluate(()=>S.log.map(r=>r.date));
   /* ---------------- F285 ---------------- */
-  const b=await p.evaluate(()=>{const s=baseStats();return {sug:s.sug,met:s.sugMet,n:s.n,days:s.days,trend:s.trend,sub:document.querySelectorAll('#baseMetrics .metric')[2].textContent.replace(/\s+/g,' '),crit:S.meta.crit,first:rowMet(S.log[4]),ph:document.querySelector('[data-m="crit"]').placeholder};});
+  const b=await p.evaluate(()=>{const s=baseStats();return {sug:s.sug,met:s.sugMet,n:s.n,days:s.days,trend:s.trend,sub:document.querySelectorAll('#baseMetrics .metric')[2].textContent.replace(/\s+/g,' '),crit:S.meta.crit,first:rowMet(S.log[4]),ph:(e=>e.placeholder||e.getAttribute('data-fx2-ph')||'')(document.querySelector('[data-m="crit"]'))};   /* v25.68 fx2: on screen the layout keeps a box's words in data-fx2-ph */});
   ok('1 F285 the suggestion is the level the class reached on its better baseline days: 9, met on 3 of 8 baseline team-days; the worked example starts there and wins the first game',
     b.sug===9&&b.met===3&&b.n===8&&b.days===4&&!b.trend&&/met on 3 of 8 baseline team-days: a level the class already reaches on its better days/.test(b.sub)&&b.crit==='9'&&b.first===true&&/a level the class already reaches on its better days/.test(b.ph),b);
   const w=await p.evaluate(()=>{const keep=JSON.stringify(S),o={};S.meta.crit='5';renderRule();o.low=document.querySelector('#designVerdict').textContent;S.meta.crit='12';renderRule();o.all=document.querySelector('#designVerdict').textContent;S.meta.crit='9';renderRule();o.ok=document.querySelector('#designVerdict').textContent;

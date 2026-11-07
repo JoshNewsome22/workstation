@@ -64,7 +64,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     JSON.stringify(col(t2,2))==='["0 (continuous reinforcement, signal present)","15 s","34 s","57 s","86 s","123 s","169 s","3.8 min","4 min (terminal)"]'&&!t2.warn.some(w=>/Large step/.test(w))&&/A drop of at most 20% per step/.test(P(t2,'How the steps are set')||''),{c2:col(t2,2),w:t2.warn});
 
   /* ---- H4 ---- */
-  const ph=await p.evaluate(()=>document.querySelector('[data-m="th_crit"]').placeholder);
+  const ph=await p.evaluate(()=>(e=>e.placeholder||e.getAttribute('data-fx2-ph')||'')(document.querySelector('[data-m="th_crit"]')));   /* v25.68 fx2: on screen the layout keeps a box's words in data-fx2-ph */
   const h1=await look({ds_sel:'thin',th_sigok:'no'});
   const h2=await look({ds_sel:'thin',sd_upv:'1',sd_upn:'2',sd_up2v:'80',sd_row2:'Requests in S+ (%)'}),h3=await look({ds_sel:'thin',sd_upv:'1',sd_upn:'2',sd_up2v:'60'});
   ok('H4 the criterion asks for 80% of requests in S+; the data keep that share; a signal the student cannot name is warned; the step helper sends a second row, never below 70%',

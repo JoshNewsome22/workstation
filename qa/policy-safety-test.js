@@ -44,11 +44,13 @@ async function printedText(page){await page.emulateMedia({media:'print'});const 
 /* the master print's copy of the form (the bridge's collect verb), as the workstation receives it */
 const collect=page=>page.evaluate(()=>new Promise(res=>{const h=e=>{if(e.data&&e.data.nbh==='payload'){window.removeEventListener('message',h);res(e.data.html||'');}};window.addEventListener('message',h);window.postMessage({nbh:'collect'},'*');setTimeout(()=>res(null),3000);}));
 /* press a form's own Print the report record with the print dialog stubbed; read the record while it is up */
-async function repRecord(page,btn,rec){await page.evaluate(b=>{window.__printed=0;window.print=()=>{window.__printed++;};document.querySelector(b).click();},btn);await sleep(200);
+/* v25.68 fx2: print() fires beforeprint, as a browser's does, and afterprint once the record is read: the screen layout
+   puts the record's heading back as written while the page prints (on screen it is in sentence case) */
+async function repRecord(page,btn,rec){await page.evaluate(b=>{window.__printed=0;window.print=()=>{window.__printed++;dispatchEvent(new Event('beforeprint'));};document.querySelector(b).click();},btn);await sleep(200);
   await page.emulateMedia({media:'print'});
   const r=await page.evaluate(rec=>({rec:document.querySelector(rec).innerText.replace(/\s+/g,' '),alone:[...document.querySelectorAll('main.sheet > section')].every(s=>!s.getClientRects().length),recShown:document.querySelector(rec).getClientRects().length>0,printed:window.__printed,
     foot:[...document.querySelectorAll('style')].some(s=>/Report record: confidential/.test(s.textContent))}),rec);
-  await page.emulateMedia({media:'screen'});await sleep(1700);
+  await page.evaluate(()=>dispatchEvent(new Event('afterprint')));await page.emulateMedia({media:'screen'});await sleep(1700);
   r.after=await page.evaluate(rec=>document.querySelector(rec).innerHTML===''&&!/rep-only/.test(document.body.className)&&![...document.querySelectorAll('style')].some(s=>/Report record: confidential/.test(s.textContent)),rec);
   return r;}
 const setVal=(page,sel,v)=>page.evaluate(([s,x])=>{const e=document.querySelector(s);if(!e)throw new Error('no '+s);e.value=x;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},[sel,v]);
